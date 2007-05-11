@@ -1423,7 +1423,12 @@ copy_object (bfd *ibfd, bfd *obfd)
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, obfd);
 
-  setup_bfd_headers (ibfd, obfd);
+  /* Don't copy headers when creating an ELF format debug info file.  */
+  if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
+      && strip_symbols == STRIP_NONDEBUG)
+    ;
+  else
+    setup_bfd_headers (ibfd, obfd);
 
   if (add_sections != NULL)
     {

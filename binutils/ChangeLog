@@ -1,5 +1,11 @@
 2007-05-11  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 4479
+	* objcopy.c (copy_object): Don't copy ELF program headers for
+	--only-keep-debug.
+
+2007-05-11  Alan Modra  <amodra@bigpond.net.au>
+
 	* embedspu.sh (find_prog): Prefer prog in same dir as embedspu
 	over one found on the users path.
 	(main): Generate .reloc for each R_SPU_PPU* reloc.
