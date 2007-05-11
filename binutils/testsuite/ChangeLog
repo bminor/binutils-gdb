@@ -1,3 +1,7 @@
+2007-05-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/needed-by-reloc.s: Use .long rather than .4byte.
+
 2007-05-08  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* binutils-all/strip-3.d: Strip .ARM.attributes and .reginfo

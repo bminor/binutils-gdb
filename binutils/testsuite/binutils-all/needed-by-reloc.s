@@ -1,7 +1,7 @@
         .globl foo
 
 	.data
-	.4byte	foo
+	.long	foo
         .text
 foo:
         .long 1
