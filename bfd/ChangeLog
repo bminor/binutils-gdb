@@ -1,3 +1,7 @@
+2007-05-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (elf_howto_table): Add howto for R_SPU_ADDR16X.
+
 2007-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.h (ppc_elf_select_plt_layout): Update prototype.
