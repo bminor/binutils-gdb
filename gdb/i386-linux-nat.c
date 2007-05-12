@@ -736,10 +736,15 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
 
   if (step)
     {
-      CORE_ADDR pc = read_pc_pid (pid_to_ptid (pid));
+      struct cleanup *old_chain = save_inferior_ptid ();
+      struct regcache *regcache = current_regcache;
+      ULONGEST pc;
       gdb_byte buf[LINUX_SYSCALL_LEN];
 
       request = PTRACE_SINGLESTEP;
+
+      inferior_ptid = pid_to_ptid (pid);
+      regcache_cooked_read_unsigned (regcache, PC_REGNUM, &pc);
 
       /* Returning from a signal trampoline is done by calling a
          special system call (sigreturn or rt_sigreturn, see
@@ -753,18 +758,21 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
       if (read_memory_nobpt (pc, buf, LINUX_SYSCALL_LEN) == 0
 	  && memcmp (buf, linux_syscall, LINUX_SYSCALL_LEN) == 0)
 	{
-	  int syscall = read_register_pid (LINUX_SYSCALL_REGNUM,
-	                                   pid_to_ptid (pid));
+	  ULONGEST syscall;
+	  regcache_cooked_read_unsigned (regcache,
+					 LINUX_SYSCALL_REGNUM, &syscall);
 
 	  /* Then check the system call number.  */
 	  if (syscall == SYS_sigreturn || syscall == SYS_rt_sigreturn)
 	    {
-	      CORE_ADDR sp = read_register (I386_ESP_REGNUM);
-	      CORE_ADDR addr = sp;
+	      ULONGEST sp, addr;
 	      unsigned long int eflags;
 
+	      regcache_cooked_read_unsigned (regcache, I386_ESP_REGNUM, &sp);
 	      if (syscall == SYS_rt_sigreturn)
 		addr = read_memory_integer (sp + 8, 4) + 20;
+	      else
+		addr = sp;
 
 	      /* Set the trace flag in the context that's about to be
                  restored.  */
@@ -774,6 +782,8 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
 	      write_memory (addr, (gdb_byte *) &eflags, 4);
 	    }
 	}
+
+      do_cleanups (old_chain);
     }
 
   if (ptrace (request, pid, 0, target_signal_to_host (signal)) == -1)

@@ -477,16 +477,16 @@ fill_fpregset (const struct regcache *regcache,
 #define IA64_PSR_DD (1UL << 39)
 
 static void
-enable_watchpoints_in_psr (ptid_t ptid)
+enable_watchpoints_in_psr (struct regcache *regcache)
 {
-  CORE_ADDR psr;
+  ULONGEST psr;
 
-  psr = read_register_pid (IA64_PSR_REGNUM, ptid);
+  regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr);
   if (!(psr & IA64_PSR_DB))
     {
       psr |= IA64_PSR_DB;	/* Set the db bit - this enables hardware
 			           watchpoints and breakpoints. */
-      write_register_pid (IA64_PSR_REGNUM, psr, ptid);
+      regcache_cooked_write_unsigned (regcache, IA64_PSR_REGNUM, psr);
     }
 }
 
@@ -591,7 +591,7 @@ ia64_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
     }
 
   store_debug_register_pair (ptid, idx, &dbr_addr, &dbr_mask);
-  enable_watchpoints_in_psr (ptid);
+  enable_watchpoints_in_psr (current_regcache);
 
   return 0;
 }
@@ -628,6 +628,7 @@ ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
   int tid;
   struct siginfo siginfo;
   ptid_t ptid = inferior_ptid;
+  struct regcache *regcache = current_regcache;
 
   tid = TIDGET(ptid);
   if (tid == 0)
@@ -640,10 +641,10 @@ ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
       (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return 0;
 
-  psr = read_register_pid (IA64_PSR_REGNUM, ptid);
+  regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr);
   psr |= IA64_PSR_DD;	/* Set the dd bit - this will disable the watchpoint
                            for the next instruction */
-  write_register_pid (IA64_PSR_REGNUM, psr, ptid);
+  regcache_cooked_write_unsigned (regcache, IA64_PSR_REGNUM, psr);
 
   *addr_p = (CORE_ADDR)siginfo.si_addr;
   return 1;

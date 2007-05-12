@@ -1,5 +1,17 @@
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* i386-linux-nat.c (i386_linux_resume): Use regcache functions 
+	instead of read_register and read_register_pid.
+
+	* ia64-linux-nat.c (enable_watchpoints_in_psr): Use REGCACHE 
+	argument instead of PTID.  Use regcache functions instead of
+	read_register_pid.
+	(ia64_linux_insert_watchpoint): Update call.
+	(ia64_linux_stopped_data_address): Use regcache functions
+	instead of read_register_pid and write_register_pid.
+
+2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* libunwind-frame.h (struct regcache): Add forward declaration.
 	(libunwind_get_reg_special): Add REGCACHE argument.
 	* libunwind-frame.c (libunwind_get_reg_special): Add REGCACHE
