@@ -25,6 +25,7 @@
 
 struct frame_info;
 struct frame_id;
+struct regcache;
 struct gdbarch;
 
 #ifndef LIBUNWIND_FRAME_H
@@ -62,7 +63,9 @@ int libunwind_search_unwind_table (void *as, long ip, void *di,
 unw_word_t libunwind_find_dyn_list (unw_addr_space_t, unw_dyn_info_t *,
 				    void *);
 
-int libunwind_get_reg_special (struct gdbarch *gdbarch, int regnum, void *buf);
+int libunwind_get_reg_special (struct gdbarch *gdbarch,
+			       struct regcache *regcache,
+			       int regnum, void *buf);
 
 #endif /* libunwind-frame.h */
 

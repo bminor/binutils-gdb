@@ -692,7 +692,7 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* First try and use the libunwind special reg accessor, otherwise fallback to
 	 standard logic.  */
       if (!libunwind_is_initialized ()
-	  || libunwind_get_reg_special (gdbarch, regnum, buf) != 0)
+	  || libunwind_get_reg_special (gdbarch, regcache, regnum, buf) != 0)
 #endif
 	{
 	  /* The fallback position is to assume that r32-r127 are found sequentially
@@ -2218,106 +2218,53 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
   long new_sof, old_sof;
   char buf[MAX_REGISTER_SIZE];
   
-  if (write)
-    {
-      if (regnum < 0)
-	/* ignore writes to pseudo-registers such as UNW_IA64_PROC_STARTI.  */
-	return 0;
-  
-      switch (uw_regnum)
-	{
-	case UNW_REG_IP:
-	  ia64_write_pc (*val, inferior_ptid);
-	  break;
+  /* We never call any libunwind routines that need to write registers.  */
+  gdb_assert (!write);
 
-	case UNW_IA64_AR_BSPSTORE:
-	  write_register (IA64_BSP_REGNUM, *val);
-	  break;
-	  
-	case UNW_IA64_AR_BSP:
-	case UNW_IA64_BSP:
-	  /* Account for the fact that ptrace() expects bsp to point
-	     after the current register frame.  */
-	  cfm = read_register (IA64_CFM_REGNUM);
-	  sof = (cfm & 0x7f);
-	  bsp = ia64_rse_skip_regs (*val, sof);
-	  write_register (IA64_BSP_REGNUM, bsp);
-	  break;
-	  
-	case UNW_IA64_CFM:
-	  /* If we change CFM, we need to adjust ptrace's notion of
-	     bsp accordingly, so that the real bsp remains
-	     unchanged.  */
-	  bsp = read_register (IA64_BSP_REGNUM);
-	  cfm = read_register (IA64_CFM_REGNUM);
-	  old_sof = (cfm & 0x7f);
-	  new_sof = (*val & 0x7f);
-	  if (old_sof != new_sof)
-	    {
-	      bsp = ia64_rse_skip_regs (bsp, -old_sof + new_sof);
-	      write_register (IA64_BSP_REGNUM, bsp);
-	    }
-	  write_register (IA64_CFM_REGNUM, *val);
-	  break;
-	  
-	default:
-	  write_register (regnum, *val);
-	  break;
-	}
-      if (gdbarch_debug >= 1)
-	fprintf_unfiltered (gdb_stdlog, 
-			    "  access_reg: to cache: %4s=0x%s\n",
-			    (((unsigned) regnum <= IA64_NAT127_REGNUM)
-			     ? ia64_register_names[regnum] : "r??"), 
-			    paddr_nz (*val));
+  switch (uw_regnum)
+    {
+      case UNW_REG_IP:
+	/* Libunwind expects to see the pc value which means the slot number
+	   from the psr must be merged with the ip word address.  */
+	frame_unwind_register (next_frame, IA64_IP_REGNUM, buf);
+	ip = extract_unsigned_integer (buf, 8); 
+	frame_unwind_register (next_frame, IA64_PSR_REGNUM, buf);
+	psr = extract_unsigned_integer (buf, 8); 
+	*val = ip | ((psr >> 41) & 0x3);
+	break;
+ 
+      case UNW_IA64_AR_BSP:
+	/* Libunwind expects to see the beginning of the current register
+	   frame so we must account for the fact that ptrace() will return a value
+	   for bsp that points *after* the current register frame.  */
+	frame_unwind_register (next_frame, IA64_BSP_REGNUM, buf);
+	bsp = extract_unsigned_integer (buf, 8);
+	frame_unwind_register (next_frame, IA64_CFM_REGNUM, buf);
+	cfm = extract_unsigned_integer (buf, 8); 
+	sof = (cfm & 0x7f);
+	*val = ia64_rse_skip_regs (bsp, -sof);
+	break;
+
+      case UNW_IA64_AR_BSPSTORE:
+	/* Libunwind wants bspstore to be after the current register frame.
+	   This is what ptrace() and gdb treats as the regular bsp value.  */
+	frame_unwind_register (next_frame, IA64_BSP_REGNUM, buf);
+	*val = extract_unsigned_integer (buf, 8);
+	break;
+
+      default:
+	/* For all other registers, just unwind the value directly.  */
+	frame_unwind_register (next_frame, regnum, buf);
+	*val = extract_unsigned_integer (buf, 8); 
+	break;
     }
-  else
-    {
-      switch (uw_regnum)
-	{
-	case UNW_REG_IP:
-	  /* Libunwind expects to see the pc value which means the slot number
-	     from the psr must be merged with the ip word address.  */
-	  frame_unwind_register (next_frame, IA64_IP_REGNUM, buf);
-	  ip = extract_unsigned_integer (buf, 8); 
-	  frame_unwind_register (next_frame, IA64_PSR_REGNUM, buf);
-	  psr = extract_unsigned_integer (buf, 8); 
-	  *val = ip | ((psr >> 41) & 0x3);
-	  break;
-	  
-	case UNW_IA64_AR_BSP:
-	  /* Libunwind expects to see the beginning of the current register
-	     frame so we must account for the fact that ptrace() will return a value
-	     for bsp that points *after* the current register frame.  */
-	  frame_unwind_register (next_frame, IA64_BSP_REGNUM, buf);
-	  bsp = extract_unsigned_integer (buf, 8);
-	  frame_unwind_register (next_frame, IA64_CFM_REGNUM, buf);
-	  cfm = extract_unsigned_integer (buf, 8); 
-	  sof = (cfm & 0x7f);
-	  *val = ia64_rse_skip_regs (bsp, -sof);
-	  break;
-	  
-	case UNW_IA64_AR_BSPSTORE:
-	  /* Libunwind wants bspstore to be after the current register frame.
-	     This is what ptrace() and gdb treats as the regular bsp value.  */
-	  frame_unwind_register (next_frame, IA64_BSP_REGNUM, buf);
-	  *val = extract_unsigned_integer (buf, 8);
-	  break;
-
-	default:
-	  /* For all other registers, just unwind the value directly.  */
-	  frame_unwind_register (next_frame, regnum, buf);
-	  *val = extract_unsigned_integer (buf, 8); 
-	  break;
-	}
       
-      if (gdbarch_debug >= 1)
-	fprintf_unfiltered (gdb_stdlog, 
-			    "  access_reg: from cache: %4s=0x%s\n",
-			    (((unsigned) regnum <= IA64_NAT127_REGNUM)
-			     ? ia64_register_names[regnum] : "r??"), 
-			    paddr_nz (*val));
-    }
+  if (gdbarch_debug >= 1)
+    fprintf_unfiltered (gdb_stdlog, 
+			"  access_reg: from cache: %4s=0x%s\n",
+			(((unsigned) regnum <= IA64_NAT127_REGNUM)
+			? ia64_register_names[regnum] : "r??"), 
+			paddr_nz (*val));
   return 0;
 }
 
@@ -2327,11 +2274,13 @@ ia64_access_fpreg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_fpreg_t *val
 		   int write, void *arg)
 {
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
+  struct frame_info *next_frame = arg;
   
-  if (write)
-    regcache_cooked_write (current_regcache, regnum, (char *) val);
-  else
-    regcache_cooked_read (current_regcache, regnum, (char *) val);
+  /* We never call any libunwind routines that need to write registers.  */
+  gdb_assert (!write);
+
+  frame_unwind_register (next_frame, regnum, (char *) val);
+
   return 0;
 }
 
@@ -2342,94 +2291,49 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *va
 {
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
   unw_word_t bsp, sof, sol, cfm, psr, ip;
+  struct regcache *regcache = arg;
   long new_sof, old_sof;
+  char buf[MAX_REGISTER_SIZE];
   
-  if (write)
-    {
-      if (regnum < 0)
-	/* ignore writes to pseudo-registers such as UNW_IA64_PROC_STARTI.  */
-	return 0;
-  
-      switch (uw_regnum)
-	{
-	case UNW_REG_IP:
-	  ia64_write_pc (*val, inferior_ptid);
-	  break;
+  /* We never call any libunwind routines that need to write registers.  */
+  gdb_assert (!write);
 
-	case UNW_IA64_AR_BSPSTORE:
-	  write_register (IA64_BSP_REGNUM, *val);
-	  break;
-	  
-	case UNW_IA64_AR_BSP:
-	case UNW_IA64_BSP:
-	  /* Account for the fact that ptrace() expects bsp to point
-	     after the current register frame.  */
-	  cfm = read_register (IA64_CFM_REGNUM);
-	  sof = (cfm & 0x7f);
-	  bsp = ia64_rse_skip_regs (*val, sof);
-	  write_register (IA64_BSP_REGNUM, bsp);
-	  break;
-	  
-	case UNW_IA64_CFM:
-	  /* If we change CFM, we need to adjust ptrace's notion of
-	     bsp accordingly, so that the real bsp remains
-	     unchanged.  */
-	  bsp = read_register (IA64_BSP_REGNUM);
-	  cfm = read_register (IA64_CFM_REGNUM);
-	  old_sof = (cfm & 0x7f);
-	  new_sof = (*val & 0x7f);
-	  if (old_sof != new_sof)
-	    {
-	      bsp = ia64_rse_skip_regs (bsp, -old_sof + new_sof);
-	      write_register (IA64_BSP_REGNUM, bsp);
-	    }
-	  write_register (IA64_CFM_REGNUM, *val);
-	  break;
-	  
-	default:
-	  write_register (regnum, *val);
-	  break;
-	}
-      if (gdbarch_debug >= 1)
-	fprintf_unfiltered (gdb_stdlog, 
-			    "  access_rse_reg: to cache: %4s=0x%s\n",
-			    (((unsigned) regnum <= IA64_NAT127_REGNUM)
-			     ? ia64_register_names[regnum] : "r??"), 
-			    paddr_nz (*val));
-    }
-  else
+  switch (uw_regnum)
     {
-      switch (uw_regnum)
-	{
-	case UNW_REG_IP:
-	  /* Libunwind expects to see the pc value which means the slot number
-	     from the psr must be merged with the ip word address.  */
-	  ip = read_register (IA64_IP_REGNUM); 
-	  psr = read_register (IA64_PSR_REGNUM);
-	  *val = ip | ((psr >> 41) & 0x3);
-	  break;
+      case UNW_REG_IP:
+	/* Libunwind expects to see the pc value which means the slot number
+	   from the psr must be merged with the ip word address.  */
+	regcache_cooked_read (regcache, IA64_IP_REGNUM, buf);
+	ip = extract_unsigned_integer (buf, 8); 
+	regcache_cooked_read (regcache, IA64_PSR_REGNUM, buf);
+	psr = extract_unsigned_integer (buf, 8); 
+	*val = ip | ((psr >> 41) & 0x3);
+	break;
 	  
-	case UNW_IA64_AR_BSP:
-	  /* Libunwind expects to see the beginning of the current register
-	     frame so we must account for the fact that ptrace() will return a value
-	     for bsp that points *after* the current register frame.  */
-	  bsp = read_register (IA64_BSP_REGNUM);
-	  cfm = read_register (IA64_CFM_REGNUM);
-	  sof = (cfm & 0x7f);
-	  *val = ia64_rse_skip_regs (bsp, -sof);
-	  break;
+      case UNW_IA64_AR_BSP:
+	/* Libunwind expects to see the beginning of the current register
+	   frame so we must account for the fact that ptrace() will return a value
+	   for bsp that points *after* the current register frame.  */
+	regcache_cooked_read (regcache, IA64_BSP_REGNUM, buf);
+	bsp = extract_unsigned_integer (buf, 8);
+	regcache_cooked_read (regcache, IA64_CFM_REGNUM, buf);
+	cfm = extract_unsigned_integer (buf, 8); 
+	sof = (cfm & 0x7f);
+	*val = ia64_rse_skip_regs (bsp, -sof);
+	break;
 	  
-	case UNW_IA64_AR_BSPSTORE:
-	  /* Libunwind wants bspstore to be after the current register frame.
-	     This is what ptrace() and gdb treats as the regular bsp value.  */
-	  *val = read_register (IA64_BSP_REGNUM);
-	  break;
+      case UNW_IA64_AR_BSPSTORE:
+	/* Libunwind wants bspstore to be after the current register frame.
+	   This is what ptrace() and gdb treats as the regular bsp value.  */
+	regcache_cooked_read (regcache, IA64_BSP_REGNUM, buf);
+	*val = extract_unsigned_integer (buf, 8);
+	break;
 
-	default:
-	  /* For all other registers, just read the value directly.  */
-	  *val = read_register (regnum);
-	  break;
-	}
+      default:
+        /* For all other registers, just unwind the value directly.  */
+	regcache_cooked_read (regcache, regnum, buf);
+	*val = extract_unsigned_integer (buf, 8); 
+	break;
     }
       
   if (gdbarch_debug >= 1)
@@ -2438,6 +2342,22 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *va
 			(((unsigned) regnum <= IA64_NAT127_REGNUM)
 			 ? ia64_register_names[regnum] : "r??"), 
 			paddr_nz (*val));
+
+  return 0;
+}
+
+/* Libunwind callback accessor function for top-level fp registers.  */
+static int
+ia64_access_rse_fpreg (unw_addr_space_t as, unw_regnum_t uw_regnum,
+		       unw_fpreg_t *val, int write, void *arg)
+{
+  int regnum = ia64_uw2gdb_regnum (uw_regnum);
+  struct regcache *regcache = arg;
+  
+  /* We never call any libunwind routines that need to write registers.  */
+  gdb_assert (!write);
+
+  regcache_cooked_read (regcache, regnum, (char *) val);
 
   return 0;
 }
@@ -2976,7 +2896,7 @@ static unw_accessors_t ia64_unw_rse_accessors =
   ia64_get_dyn_info_list,
   ia64_access_mem,
   ia64_access_rse_reg,
-  ia64_access_fpreg,
+  ia64_access_rse_fpreg,
   /* resume */
   /* get_proc_name */
 };

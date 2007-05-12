@@ -1,5 +1,22 @@
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* libunwind-frame.h (struct regcache): Add forward declaration.
+	(libunwind_get_reg_special): Add REGCACHE argument.
+	* libunwind-frame.c (libunwind_get_reg_special): Add REGCACHE
+	argument.  Pass it to unw_init_remote_p.
+
+	* ia64-tdep.c (ia64_pseudo_register_read): Pass regcache to
+	libunwind_get_reg_special.
+	(ia64_access_reg): Remove "write" case.
+	(ia64_access_fpreg): Likewise.  Read from next_frame passed
+	as callback argument instead of from current_regcache.
+	(ia64_access_rse_reg): Remove "write" case.  Read from regcache
+	passed as callback argument instead of from current_regcache.
+	(ia64_access_rse_fpreg): New function.
+	(ia64_unw_rse_acce): Use it instead of ia64_access_fpreg.
+
+2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* NEWS: Mention SPU overlay support.
 
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>

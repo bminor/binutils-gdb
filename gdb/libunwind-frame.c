@@ -395,7 +395,8 @@ libunwind_sigtramp_frame_sniffer (struct frame_info *next_frame)
    are usually located at BOF, this is not always true and only the libunwind
    info can decipher where they actually are.  */
 int
-libunwind_get_reg_special (struct gdbarch *gdbarch, int regnum, void *buf)
+libunwind_get_reg_special (struct gdbarch *gdbarch, struct regcache *regcache,
+			   int regnum, void *buf)
 {
   unw_cursor_t cursor;
   unw_accessors_t *acc;
@@ -415,7 +416,7 @@ libunwind_get_reg_special (struct gdbarch *gdbarch, int regnum, void *buf)
 				 ? __BIG_ENDIAN
 				 : __LITTLE_ENDIAN);
 
-  ret = unw_init_remote_p (&cursor, as, NULL);
+  ret = unw_init_remote_p (&cursor, as, regcache);
   if (ret < 0)
     return -1;
 
