@@ -31,6 +31,7 @@
 #include "dwarf2-frame.h"
 #include "value.h"
 #include "regset.h"
+#include "regcache.h"
 #include "hppa-tdep.h"
 
 #include "elf/common.h"

@@ -35,6 +35,7 @@
 #include "solib-som.h"
 #include "solib-pa64.h"
 #include "regset.h"
+#include "regcache.h"
 #include "exceptions.h"
 
 #include "gdb_string.h"

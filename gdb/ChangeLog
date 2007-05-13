@@ -1,5 +1,14 @@
 2007-05-13  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* hppa-hpux-tdep.c: Include "regcache.h".
+	* hppa-linux-tdep.c: Likewise.
+	* hppa-tdep.c: Include "gdb_stdint.h".
+	(find_unwind_entry): Cast host pointer to uintptr_t before passing
+	it to paddr_nz.
+	* Makefile.in: Update dependencies.
+
+2007-05-13  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* blockframe.c: Remove obsolete comments.
 	* alpha-nat.c (fetch_osf_core_registers): Update comment.
 	* arm-tdep.h (enum gdb_regnum): Remove obsolete part of comment.

@@ -2065,19 +2065,19 @@ hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
 	$(osabi_h) $(frame_h) $(frame_unwind_h) $(trad_frame_h) $(symtab_h) \
 	$(objfiles_h) $(inferior_h) $(infcall_h) $(observer_h) \
 	$(hppa_tdep_h) $(solib_som_h) $(solib_pa64_h) $(regset_h) \
-	$(exceptions_h) $(gdb_string_h)
+	$(regcache_h) $(exceptions_h) $(gdb_string_h)
 hppa-linux-nat.o: hppa-linux-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(gdb_string_h) $(inferior_h) $(hppa_tdep_h) $(gregset_h) \
 	$(target_h) $(linux_nat_h)
 hppa-linux-tdep.o: hppa-linux-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
 	$(target_h) $(objfiles_h) $(solib_svr4_h) $(glibc_tdep_h) \
 	$(frame_unwind_h) $(trad_frame_h) $(dwarf2_frame_h) $(value_h) \
-	$(hppa_tdep_h) $(elf_common_h) $(regset_h)
+	$(hppa_tdep_h) $(elf_common_h) $(regset_h) $(regcache_h)
 hppa-tdep.o: hppa-tdep.c $(defs_h) $(bfd_h) $(inferior_h) $(regcache_h) \
-	$(completer_h) $(osabi_h) $(gdb_assert_h) $(arch_utils_h) \
-	$(symtab_h) $(dis_asm_h) $(trad_frame_h) $(frame_unwind_h) \
-	$(frame_base_h) $(gdbcore_h) $(gdbcmd_h) $(objfiles_h) \
-	$(hppa_tdep_h) $(gdbtypes_h)
+	$(completer_h) $(osabi_h) $(gdb_assert_h) $(gdb_stdint_h) \
+	$(arch_utils_h) $(symtab_h) $(dis_asm_h) $(trad_frame_h) \
+	$(frame_unwind_h) $(frame_base_h) $(gdbcore_h) $(gdbcmd_h) \
+	$(objfiles_h) $(hppa_tdep_h) $(gdbtypes_h)
 hpux-thread.o: hpux-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(inferior_h) $(regcache_h) $(gdb_stat_h) $(gdbcore_h) \
 	$(hppa_tdep_h) $(observer_h)

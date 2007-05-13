@@ -31,6 +31,7 @@
 #include "completer.h"
 #include "osabi.h"
 #include "gdb_assert.h"
+#include "gdb_stdint.h"
 #include "arch-utils.h"
 /* For argument passing to the inferior */
 #include "symtab.h"
@@ -502,7 +503,7 @@ find_unwind_entry (CORE_ADDR pc)
       {
 	if (hppa_debug)
 	  fprintf_unfiltered (gdb_stdlog, "0x%s (cached) }\n",
-            paddr_nz ((CORE_ADDR) ui->cache));
+            paddr_nz ((uintptr_t) ui->cache));
         return ui->cache;
       }
 
@@ -520,7 +521,7 @@ find_unwind_entry (CORE_ADDR pc)
 	    ui->cache = &ui->table[middle];
 	    if (hppa_debug)
 	      fprintf_unfiltered (gdb_stdlog, "0x%s }\n",
-                paddr_nz ((CORE_ADDR) ui->cache));
+                paddr_nz ((uintptr_t) ui->cache));
 	    return &ui->table[middle];
 	  }
 
