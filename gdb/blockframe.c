@@ -28,9 +28,9 @@
 #include "objfiles.h"
 #include "frame.h"
 #include "gdbcore.h"
-#include "value.h"		/* for read_register */
-#include "target.h"		/* for target_has_stack */
-#include "inferior.h"		/* for read_pc */
+#include "value.h"
+#include "target.h"
+#include "inferior.h"
 #include "annotate.h"
 #include "regcache.h"
 #include "gdb_assert.h"

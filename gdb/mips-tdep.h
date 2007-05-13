@@ -58,12 +58,7 @@ struct mips_regnum
 };
 extern const struct mips_regnum *mips_regnum (struct gdbarch *gdbarch);
 
-/* Register numbers of various important registers.  Note that some of
-   these values are "real" register numbers, and correspond to the
-   general registers of the machine, and some are "phony" register
-   numbers which are too large to be actual register numbers as far as
-   the user is concerned but do serve to get the desired values when
-   passed to read_register.  */
+/* Register numbers of various important registers.  */
 
 enum
 {

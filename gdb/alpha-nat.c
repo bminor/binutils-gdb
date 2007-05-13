@@ -34,7 +34,7 @@
 
 
 /* Extract the register values out of the core file and store
-   them where `read_register' will find them.
+   them into REGCACHE.
 
    CORE_REG_SECT points to the register values themselves, read into memory.
    CORE_REG_SIZE is the size of that area.

@@ -1,5 +1,14 @@
 2007-05-13  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* blockframe.c: Remove obsolete comments.
+	* alpha-nat.c (fetch_osf_core_registers): Update comment.
+	* arm-tdep.h (enum gdb_regnum): Remove obsolete part of comment.
+	* hppa-tdep.h (enum hppa_regnum): Likewise.
+	* mips-tdep.h: Likewise.
+	* m68hc11-tdep.c: Likewise.
+
+2007-05-13  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* inferior.h (read_sp): Remove prototype.
 	* regcache.c (read_sp): Remove.
 	* gcore.c (derive_stack_segment): Use get_frame_sp instead of read_sp.

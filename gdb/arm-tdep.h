@@ -25,12 +25,7 @@
 struct gdbarch;
 struct regset;
 
-/* Register numbers of various important registers.  Note that some of
-   these values are "real" register numbers, and correspond to the
-   general registers of the machine, and some are "phony" register
-   numbers which are too large to be actual register numbers as far as
-   the user is concerned but do serve to get the desired values when
-   passed to read_register.  */
+/* Register numbers of various important registers.  */
 
 enum gdb_regnum {
   ARM_A1_REGNUM = 0,		/* first integer-like argument */
