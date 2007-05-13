@@ -1,3 +1,13 @@
+2007-05-13  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* inferior.h (read_sp): Remove prototype.
+	* regcache.c (read_sp): Remove.
+	* gcore.c (derive_stack_segment): Use get_frame_sp instead of read_sp.
+	* infcall.c (call_function_by_hand): Likewise.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Use regcache instead
+	of calling read_sp.
+	* rs6000-tdep.c (rs6000_push_dummy_call): Likewise.
+
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* i386-linux-nat.c (i386_linux_resume): Use regcache functions 

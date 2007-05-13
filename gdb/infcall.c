@@ -368,7 +368,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
   /* Ensure that the initial SP is correctly aligned.  */
   {
-    CORE_ADDR old_sp = read_sp ();
+    CORE_ADDR old_sp = get_frame_sp (get_current_frame ());
     if (gdbarch_frame_align_p (current_gdbarch))
       {
 	sp = gdbarch_frame_align (current_gdbarch, old_sp);

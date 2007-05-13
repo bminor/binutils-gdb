@@ -174,8 +174,6 @@ extern void write_pc_pid (CORE_ADDR, ptid_t);
 
 extern void generic_target_write_pc (CORE_ADDR, ptid_t);
 
-extern CORE_ADDR read_sp (void);
-
 extern CORE_ADDR unsigned_pointer_to_address (struct type *type,
 					      const gdb_byte *buf);
 extern void unsigned_address_to_pointer (struct type *type, gdb_byte *buf,

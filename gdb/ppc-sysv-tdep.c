@@ -51,9 +51,11 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			      int struct_return, CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  const CORE_ADDR saved_sp = read_sp ();
+  ULONGEST saved_sp;
   int argspace = 0;		/* 0 is an initial wrong guess.  */
   int write_pass;
+
+  regcache_cooked_read_unsigned (regcache, SP_REGNUM, &saved_sp);
 
   /* Go through the argument list twice.
 
@@ -578,10 +580,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   CORE_ADDR func_addr = find_function_addr (function, NULL);
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  /* By this stage in the proceedings, SP has been decremented by "red
-     zone size" + "struct return size".  Fetch the stack-pointer from
-     before this and use that as the BACK_CHAIN.  */
-  const CORE_ADDR back_chain = read_sp ();
+  ULONGEST back_chain;
   /* See for-loop comment below.  */
   int write_pass;
   /* Size of the Altivec's vector parameter region, the final value is
@@ -598,6 +597,11 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      correct without having to do a non-local analysis to figure out
      the possible values of tdep->wordsize.  */
   gdb_assert (tdep->wordsize == 8);
+
+  /* By this stage in the proceedings, SP has been decremented by "red
+     zone size" + "struct return size".  Fetch the stack-pointer from
+     before this and use that as the BACK_CHAIN.  */
+  regcache_cooked_read_unsigned (regcache, SP_REGNUM, &back_chain);
 
   /* Go through the argument list twice.
 

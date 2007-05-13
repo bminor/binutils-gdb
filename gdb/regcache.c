@@ -867,8 +867,7 @@ regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
 }
 
 
-/* read_pc, write_pc, read_sp, etc.  Special handling for registers
-   PC, SP, and FP.  */
+/* read_pc, write_pc, etc.  Special handling for register PC.  */
 
 /* NOTE: cagney/2001-02-18: The functions read_pc_pid(), read_pc() and
    read_sp(), will eventually be replaced by per-frame methods.
@@ -941,21 +940,6 @@ write_pc (CORE_ADDR pc)
   write_pc_pid (pc, inferior_ptid);
 }
 
-/* Cope with strage ways of getting to the stack and frame pointers */
-
-CORE_ADDR
-read_sp (void)
-{
-  if (TARGET_READ_SP_P ())
-    return TARGET_READ_SP ();
-  else if (gdbarch_unwind_sp_p (current_gdbarch))
-    return get_frame_sp (get_current_frame ());
-  else if (SP_REGNUM >= 0)
-    /* Try SP_REGNUM last: this makes all sorts of [wrong] assumptions
-       about the architecture so put it at the end.  */
-    return read_register (SP_REGNUM);
-  internal_error (__FILE__, __LINE__, _("read_sp: Unable to find SP"));
-}
 
 static void
 reg_flush_command (char *command, int from_tty)

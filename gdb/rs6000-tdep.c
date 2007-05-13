@@ -1591,7 +1591,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   struct value *arg = 0;
   struct type *type;
 
-  CORE_ADDR saved_sp;
+  ULONGEST saved_sp;
 
   /* The calling convention this function implements assumes the
      processor has floating-point registers.  We shouldn't be using it
@@ -1693,7 +1693,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 ran_out_of_registers_for_arguments:
 
-  saved_sp = read_sp ();
+  regcache_cooked_read_unsigned (regcache, SP_REGNUM, &saved_sp);
 
   /* Location for 8 parameters are always reserved.  */
   sp -= wordsize * 8;
