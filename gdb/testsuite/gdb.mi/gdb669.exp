@@ -183,9 +183,6 @@ if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $option
     return -1
 }
 
-mi_gdb_reinitialize_dir $srcdir/$subdir
-mi_gdb_load $binfile
-
 mi_run_to_main
 check_mi_and_console_threads "at main"
 

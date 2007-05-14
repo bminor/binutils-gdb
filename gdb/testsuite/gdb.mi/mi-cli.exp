@@ -36,8 +36,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-mi_gdb_reinitialize_dir $srcdir/$subdir
-
 mi_gdb_test "-interpreter-exec" \
   {\^error,msg="mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command"} \
   "-interpreter-exec with no arguments"
