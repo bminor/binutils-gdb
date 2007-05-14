@@ -1,3 +1,11 @@
+2007-05-14  Thiemo Seufer  <ths@mips.com>
+
+	* mips.igen (ALNV.PS, CEIL.L.fmt, CVT.L.fmt, CVT.PS.S, CVT.S.PL,
+	CVT.S.PU, FLOOR.L.fmt, LDXC1, LUXC1, LWXC1, MADD.fmt, MSUB.fmt,
+	NMADD.fmt, NMSUB.fmt, PLL.PS, PLU.PS, PREFX, PUL.PS, PUU.PS,
+	RECIP.fmt, ROUND.L.fmt, RSQRT.fmt, SWXC1, TRUNC.L.fmt): Add support
+	for mips32r2.
+
 2007-03-01  Thiemo Seufer  <ths@mips.com>
 
 	* mips.igen (MFHI, MFLO, MTHI, MTLO): Restore support for mips32

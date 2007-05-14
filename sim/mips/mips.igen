@@ -4310,6 +4310,7 @@
 010011,5.RS,5.FT,5.FS,5.FD,011,110:COP1X:64,f::ALNV.PS
 "alnv.ps f<FD>, f<FS>, f<FT>, r<RS>"
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -4429,6 +4430,7 @@
 *mipsIII:
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr4100:
@@ -4588,6 +4590,7 @@
 *mipsIII:
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr4100:
@@ -4606,6 +4609,7 @@
 010001,10,000,5.FT,5.FS,5.FD,100110:COP1:64,f::CVT.PS.S
 "cvt.ps.s f<FD>, f<FS>, f<FT>"
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -4646,6 +4650,7 @@
 010001,10,110,00000,5.FS,5.FD,101000:COP1:64,f::CVT.S.PL
 "cvt.s.pl f<FD>, f<FS>"
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -4658,6 +4663,7 @@
 010001,10,110,00000,5.FS,5.FD,100000:COP1:64,f::CVT.S.PU
 "cvt.s.pu f<FD>, f<FS>"
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -4796,6 +4802,7 @@
 *mipsIII:
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr4100:
@@ -4861,6 +4868,7 @@
 "ldxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -4874,6 +4882,7 @@
 010011,5.BASE,5.INDEX,5.0,5.FD,000101:COP1X:64,f::LUXC1
 "luxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -4913,6 +4922,7 @@
 "lwxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -4928,6 +4938,7 @@
 "madd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -5092,6 +5103,7 @@
 "msub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -5184,6 +5196,7 @@
 "nmadd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -5201,6 +5214,7 @@
 "nmsub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -5217,6 +5231,7 @@
 010001,10,110,5.FT,5.FS,5.FD,101100:COP1:64,f::PLL.PS
 "pll.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -5230,6 +5245,7 @@
 010001,10,110,5.FT,5.FS,5.FD,101101:COP1:64,f::PLU.PS
 "plu.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -5244,6 +5260,7 @@
 "prefx <HINT>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -5263,6 +5280,7 @@
 010001,10,110,5.FT,5.FS,5.FD,101110:COP1:64,f::PUL.PS
 "pul.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -5276,6 +5294,7 @@
 010001,10,110,5.FT,5.FS,5.FD,101111:COP1:64,f::PUU.PS
 "puu.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -5290,6 +5309,7 @@
 "recip.%s<FMT> f<FD>, f<FS>"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -5305,6 +5325,7 @@
 *mipsIII:
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr4100:
@@ -5343,6 +5364,7 @@
 "rsqrt.%s<FMT> f<FD>, f<FS>"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -5506,6 +5528,7 @@
 "swxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -5548,6 +5571,7 @@
 *mipsIII:
 *mipsIV:
 *mipsV:
+*mips32r2:
 *mips64:
 *mips64r2:
 *vr4100:
