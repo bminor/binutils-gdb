@@ -296,9 +296,9 @@ scale_and_align_entries ()
 
   for (sym = symtab.base; sym < symtab.limit; sym++)
     {
-      sym->hist.scaled_addr = sym->addr / sizeof (UNIT);
-
       histogram *r = find_histogram_for_pc (sym->addr);
+
+      sym->hist.scaled_addr = sym->addr / sizeof (UNIT);
 
       if (r)
 	{
