@@ -108,6 +108,7 @@ set pre_corefile_extern_array \
 
 set escapedfilename [string_to_regexp ${objdir}/${subdir}/gcore.test]
 
+set core_supported 0
 gdb_test_multiple "gcore ${objdir}/${subdir}/gcore.test" \
 	"save a corefile" \
 {
@@ -123,7 +124,6 @@ gdb_test_multiple "gcore ${objdir}/${subdir}/gcore.test" \
   }
 }
 
-global core_supported
 if {!$core_supported} {
   return -1
 }
