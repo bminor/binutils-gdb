@@ -1,3 +1,10 @@
+2007-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* hppa-hpux-tdep.c: Do not include <dl.h> or <machine/save_state.h>.
+	(offsetof): Do not define.
+	(find_stub_with_shl_get): Use numerical value 3 instead of
+	symbolic value TYPE_PROCEDURE.
+
 2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb_proc_service.h (paddr_t): Delete typedef.
