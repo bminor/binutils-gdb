@@ -1137,10 +1137,7 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *addrp = 0;
       *realnump = -1;
       if (valuep)
-	{
-	  /* Store the value.  */
-	  store_typed_address (valuep, builtin_type_void_data_ptr, cache->cfa);
-	}
+	pack_long (valuep, register_type (gdbarch, regnum), cache->cfa);
       break;
 
     case DWARF2_FRAME_REG_CFA_OFFSET:
@@ -1149,11 +1146,8 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *addrp = 0;
       *realnump = -1;
       if (valuep)
-	{
-	  /* Store the value.  */
-	  store_typed_address (valuep, builtin_type_void_data_ptr,
-			       cache->cfa + cache->reg[regnum].loc.offset);
-	}
+	pack_long (valuep, register_type (gdbarch, regnum),
+		   cache->cfa + cache->reg[regnum].loc.offset);
       break;
 
     case DWARF2_FRAME_REG_RA_OFFSET:
@@ -1167,7 +1161,7 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
           regnum = DWARF2_REG_TO_REGNUM (cache->retaddr_reg.loc.reg);
           pc += frame_unwind_register_unsigned (next_frame, regnum);
-          store_typed_address (valuep, builtin_type_void_func_ptr, pc);
+          pack_long (valuep, register_type (gdbarch, regnum), pc);
         }
       break;
 

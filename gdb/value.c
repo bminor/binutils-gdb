@@ -1505,23 +1505,18 @@ modify_field (gdb_byte *addr, LONGEST fieldval, int bitpos, int bitsize)
   store_unsigned_integer (addr, sizeof oword, oword);
 }
 
-/* Convert C numbers into newly allocated values */
+/* Pack NUM into BUF using a target format of TYPE.  */
 
-struct value *
-value_from_longest (struct type *type, LONGEST num)
+void
+pack_long (gdb_byte *buf, struct type *type, LONGEST num)
 {
-  struct value *val = allocate_value (type);
-  enum type_code code;
   int len;
-retry:
-  code = TYPE_CODE (type);
+
+  type = check_typedef (type);
   len = TYPE_LENGTH (type);
 
-  switch (code)
+  switch (TYPE_CODE (type))
     {
-    case TYPE_CODE_TYPEDEF:
-      type = check_typedef (type);
-      goto retry;
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_ENUM:
@@ -1529,17 +1524,30 @@ retry:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_MEMBERPTR:
-      store_signed_integer (value_contents_raw (val), len, num);
+      store_signed_integer (buf, len, num);
       break;
 
     case TYPE_CODE_REF:
     case TYPE_CODE_PTR:
-      store_typed_address (value_contents_raw (val), type, (CORE_ADDR) num);
+      store_typed_address (buf, type, (CORE_ADDR) num);
       break;
 
     default:
-      error (_("Unexpected type (%d) encountered for integer constant."), code);
+      error (_("Unexpected type (%d) encountered for integer constant."),
+	     TYPE_CODE (type));
     }
+}
+
+
+/* Convert C numbers into newly allocated values.  */
+
+struct value *
+value_from_longest (struct type *type, LONGEST num)
+{
+  struct value *val = allocate_value (type);
+
+  pack_long (value_contents_raw (val), type, num);
+
   return val;
 }
 

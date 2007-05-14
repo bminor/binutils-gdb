@@ -271,6 +271,8 @@ extern LONGEST unpack_field_as_long (struct type *type,
 				     const gdb_byte *valaddr,
 				     int fieldno);
 
+extern void pack_long (gdb_byte *buf, struct type *type, LONGEST num);
+
 extern struct value *value_from_longest (struct type *type, LONGEST num);
 extern struct value *value_from_pointer (struct type *type, CORE_ADDR addr);
 extern struct value *value_from_double (struct type *type, DOUBLEST num);

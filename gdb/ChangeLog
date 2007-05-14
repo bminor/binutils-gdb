@@ -1,5 +1,13 @@
 2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2-frame.c (dwarf2_frame_prev_register): Use pack_long
+	instead of store_typed_address.
+	* value.c (pack_long): New.
+	(value_from_longest): Use it.
+	* value.h (pack_long): New prototype.
+
+2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2-frame.c (read_encoded_value): Correct typo.  Use
 	DW_EH_PE_signed if appropriate.
 
