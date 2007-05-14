@@ -1,3 +1,11 @@
+2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* jv-exp.y (push_fieldnames): Use STRUCTOP_PTR instead of
+	STRUCTOP_STRUCT.
+	* jv-lang.c (evaluate_subexp_java): Handle STRUCTOP_PTR instead of
+	STRUCTOP_STRUCT.
+	* jv-typeprint.c (java_print_type): Do not crash on NULL varstring.
+
 2007-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh (read_sp): Remove.

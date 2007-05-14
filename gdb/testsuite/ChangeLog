@@ -1,3 +1,8 @@
+2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.java/jprint.java (public): Avoid invalid call to static
+	method.
+
 2007-05-14  Denis Pilat  <denis.pilat@st.com>
 
 	* gdb.mi/mi-console.exp, gdb.mi/gdb669.exp, gdb.mi/mi-cli.exp,

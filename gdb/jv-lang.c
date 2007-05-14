@@ -928,7 +928,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	goto nosideret;
       return java_value_string (&exp->elts[pc + 2].string, i);
 
-    case STRUCTOP_STRUCT:
+    case STRUCTOP_PTR:
       arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
       /* Convert object field (such as TYPE.class) to reference. */
       if (TYPE_CODE (value_type (arg1)) == TYPE_CODE_STRUCT)

@@ -338,6 +338,6 @@ java_print_type (struct type *type, char *varstring, struct ui_file *stream,
   /* For demangled function names, we have the arglist as part of the name,
      so don't print an additional pair of ()'s */
 
-  demangled_args = strchr (varstring, '(') != NULL;
+  demangled_args = varstring != NULL && strchr (varstring, '(') != NULL;
   c_type_print_varspec_suffix (type, stream, show, 0, demangled_args);
 }

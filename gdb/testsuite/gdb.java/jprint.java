@@ -54,7 +54,7 @@ public class jprint extends jvclass {
   }
   public static void main(String[] args) {
     jprint x = new jprint ();
-    x.print (44);
+    x.dothat (44);
     print (k, 33);
   }
 }

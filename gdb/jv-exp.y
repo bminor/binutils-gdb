@@ -1265,7 +1265,7 @@ push_variable (struct stoken name)
 }
 
 /* Assuming a reference expression has been pushed, emit the
-   STRUCTOP_STRUCT ops to access the field named NAME.  If NAME is a
+   STRUCTOP_PTR ops to access the field named NAME.  If NAME is a
    qualified name (has '.'), generate a field access for each part. */
 
 static void
@@ -1281,9 +1281,9 @@ push_fieldnames (name)
 	{
 	  /* token.ptr is start of current field name. */
 	  token.length = &name.ptr[i] - token.ptr;
-	  write_exp_elt_opcode (STRUCTOP_STRUCT);
+	  write_exp_elt_opcode (STRUCTOP_PTR);
 	  write_exp_string (token);
-	  write_exp_elt_opcode (STRUCTOP_STRUCT);
+	  write_exp_elt_opcode (STRUCTOP_PTR);
 	  token.ptr += token.length + 1;
 	}
       if (i >= name.length)
