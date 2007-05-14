@@ -21,13 +21,16 @@
 
 #include "defs.h"
 
-#include "gdb_proc_service.h"
-#include <sys/procfs.h>
-
+#include "gdbcore.h"
 #include "inferior.h"
 #include "symtab.h"
 #include "target.h"
 #include "regcache.h"
+
+#include "gdb_proc_service.h"
+#include "gdb_stdint.h"
+
+#include <sys/procfs.h>
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
@@ -58,6 +61,28 @@ typedef size_t gdb_ps_size_t;
 
 /* Helper functions.  */
 
+/* Convert a psaddr_t to a CORE_ADDR.  */
+
+static CORE_ADDR
+ps_addr_to_core_addr (psaddr_t addr)
+{
+  if (exec_bfd && bfd_get_sign_extend_vma (exec_bfd))
+    return (intptr_t) addr;
+  else
+    return (uintptr_t) addr;
+}
+
+/* Convert a CORE_ADDR to a psaddr_t.  */
+
+static psaddr_t
+core_addr_to_ps_addr (CORE_ADDR addr)
+{
+  if (exec_bfd && bfd_get_sign_extend_vma (exec_bfd))
+    return (psaddr_t) (intptr_t) addr;
+  else
+    return (psaddr_t) (uintptr_t) addr;
+}
+
 /* Transfer LEN bytes of memory between BUF and address ADDR in the
    process specified by PH.  If WRITE, transfer them to the process,
    else transfer them from the process.  Returns PS_OK for success,
@@ -67,18 +92,19 @@ typedef size_t gdb_ps_size_t;
    ps_ptwrite.  */
 
 static ps_err_e
-ps_xfer_memory (const struct ps_prochandle *ph, paddr_t addr,
+ps_xfer_memory (const struct ps_prochandle *ph, psaddr_t addr,
 		gdb_byte *buf, size_t len, int write)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
   int ret;
+  CORE_ADDR core_addr = ps_addr_to_core_addr (addr);
 
   inferior_ptid = pid_to_ptid (ph->pid);
 
   if (write)
-    ret = target_write_memory (addr, buf, len);
+    ret = target_write_memory (core_addr, buf, len);
   else
-    ret = target_read_memory (addr, buf, len);
+    ret = target_read_memory (core_addr, buf, len);
 
   do_cleanups (old_chain);
 
@@ -173,7 +199,7 @@ ps_plog (const char *fmt, ...)
 
 ps_err_e
 ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
-		   const char *name, paddr_t *sym_addr)
+		   const char *name, psaddr_t *sym_addr)
 {
   struct minimal_symbol *ms;
 
@@ -182,7 +208,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
   if (ms == NULL)
     return PS_NOSYM;
 
-  *sym_addr = SYMBOL_VALUE_ADDRESS (ms);
+  *sym_addr = core_addr_to_ps_addr (SYMBOL_VALUE_ADDRESS (ms));
   return PS_OK;
 }
 
@@ -190,7 +216,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
    them into BUF.  */
 
 ps_err_e
-ps_pdread (gdb_ps_prochandle_t ph, paddr_t addr,
+ps_pdread (gdb_ps_prochandle_t ph, psaddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
   return ps_xfer_memory (ph, addr, buf, size, 0);
@@ -199,7 +225,7 @@ ps_pdread (gdb_ps_prochandle_t ph, paddr_t addr,
 /* Write SIZE bytes from BUF into the target process PH at address ADDR.  */
 
 ps_err_e
-ps_pdwrite (gdb_ps_prochandle_t ph, paddr_t addr,
+ps_pdwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
   return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 1);
@@ -209,7 +235,7 @@ ps_pdwrite (gdb_ps_prochandle_t ph, paddr_t addr,
    them into BUF.  */
 
 ps_err_e
-ps_ptread (gdb_ps_prochandle_t ph, paddr_t addr,
+ps_ptread (gdb_ps_prochandle_t ph, psaddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
   return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 0);
@@ -218,7 +244,7 @@ ps_ptread (gdb_ps_prochandle_t ph, paddr_t addr,
 /* Write SIZE bytes from BUF into the target process PH at address ADDR.  */
 
 ps_err_e
-ps_ptwrite (gdb_ps_prochandle_t ph, paddr_t addr,
+ps_ptwrite (gdb_ps_prochandle_t ph, psaddr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
   return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 1);

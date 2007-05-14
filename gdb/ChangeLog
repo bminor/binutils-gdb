@@ -1,5 +1,15 @@
 2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb_proc_service.h (paddr_t): Delete typedef.
+	* proc-service.c (ps_addr_to_core_addr, core_addr_to_ps_addr): New.
+	(ps_xfer_memory): Take a psaddr_t.  Use ps_addr_to_core_addr.
+	(ps_pglobal_lookup): Take a psaddr_t *.  Use core_addr_to_ps_addr.
+	(ps_pdread, ps_pdwrite, ps_ptread, ps_ptwrite): Take a psaddr_t.
+	* sol-thread.c (gdb_ps_addr_t): Use psaddr_t instead of paddr_t.
+	* Makefile.in (proc-service.o): Update.
+
+2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (mips-tdep.o): Update.
 	* mips-tdep.c (mips_gdbarch_init): Register the dwarf2 CFI
 	unwinder.

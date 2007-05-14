@@ -910,7 +910,7 @@ typedef const struct ps_prochandle *gdb_ps_prochandle_t;
 typedef char *gdb_ps_read_buf_t;
 typedef char *gdb_ps_write_buf_t;
 typedef int gdb_ps_size_t;
-typedef paddr_t gdb_ps_addr_t;
+typedef psaddr_t gdb_ps_addr_t;
 #else
 typedef struct ps_prochandle *gdb_ps_prochandle_t;
 typedef void *gdb_ps_read_buf_t;

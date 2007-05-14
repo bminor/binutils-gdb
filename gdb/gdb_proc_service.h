@@ -48,8 +48,6 @@ typedef enum
 typedef unsigned int lwpid_t;
 #endif
 
-typedef unsigned long paddr_t;
-
 #ifndef HAVE_PSADDR_T
 typedef unsigned long psaddr_t;
 #endif
