@@ -57,6 +57,7 @@
 #include "floatformat.h"
 #include "remote.h"
 #include "target-descriptions.h"
+#include "dwarf2-frame.h"
 
 static const struct objfile_data *mips_pdr_data;
 
@@ -5171,9 +5172,11 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_init_osabi (info, gdbarch);
 
   /* Unwind the frame.  */
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, mips_stub_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, mips_insn16_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, mips_insn32_frame_sniffer);
+  frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
   frame_base_append_sniffer (gdbarch, mips_stub_frame_base_sniffer);
   frame_base_append_sniffer (gdbarch, mips_insn16_frame_base_sniffer);
   frame_base_append_sniffer (gdbarch, mips_insn32_frame_base_sniffer);

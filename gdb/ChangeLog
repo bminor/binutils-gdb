@@ -1,5 +1,11 @@
 2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (mips-tdep.o): Update.
+	* mips-tdep.c (mips_gdbarch_init): Register the dwarf2 CFI
+	unwinder.
+
+2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2-frame.c (dwarf2_frame_prev_register): Use pack_long
 	instead of store_typed_address.
 	* value.c (pack_long): New.
