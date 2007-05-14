@@ -1,3 +1,8 @@
+2007-05-14  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* buildsym.c (start_subfile): Handle absolute pathnames
+	while comparing subfile names.
+
 2007-05-13  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* hppa-hpux-tdep.c: Include "regcache.h".

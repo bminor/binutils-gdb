@@ -549,11 +549,27 @@ start_subfile (char *name, char *dirname)
 
   for (subfile = subfiles; subfile; subfile = subfile->next)
     {
-      if (FILENAME_CMP (subfile->name, name) == 0)
+      char *subfile_name;
+
+      /* If NAME is an absolute path, and this subfile is not, then
+	 attempt to create an absolute path to compare.  */
+      if (IS_ABSOLUTE_PATH (name)
+	  && !IS_ABSOLUTE_PATH (subfile->name)
+	  && subfile->dirname != NULL)
+	subfile_name = concat (subfile->dirname, SLASH_STRING,
+			       subfile->name, NULL);
+      else
+	subfile_name = subfile->name;
+
+      if (FILENAME_CMP (subfile_name, name) == 0)
 	{
 	  current_subfile = subfile;
+	  if (subfile_name != subfile->name)
+	    xfree (subfile_name);
 	  return;
 	}
+      if (subfile_name != subfile->name)
+	xfree (subfile_name);
     }
 
   /* This subfile is not known.  Add an entry for it. Make an entry
