@@ -1,3 +1,10 @@
+2007-05-14  Mei Ligang  <ligang@sunnorth.com.cn>
+
+	* config/tc-score.c (data_op2, validate_immediate): Fix bug for addri, addri.c, subi, and
+	subi.c when immediate number is hex.
+	(score_insns): Remove subis and subis.c.
+	(do_sub_rdi16): Delete.
+	
 2007-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-spu.c (md_pseudo_table): Add int, long, quad.  Call
