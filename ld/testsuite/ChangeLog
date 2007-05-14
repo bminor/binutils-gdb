@@ -1,3 +1,8 @@
+2007-05-14  Andreas Schwab  <schwab@suse.de>
+
+	* ld-elf/dl2a.list: New file.
+	* ld-elf/shared.exp: Add test using --dynamic-list=dl2a.list.
+
 2007-05-10  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-arm/vxworks1-lib.dd: Expect "push" instead of stmdb and

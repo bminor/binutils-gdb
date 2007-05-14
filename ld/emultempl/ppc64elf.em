@@ -414,17 +414,22 @@ gld${EMULATION_NAME}_new_vers_pattern (struct bfd_elf_version_expr *entry)
   unsigned int len;
   char *dot_pat;
 
-  if (!dotsyms || entry->pattern[0] == '*' || entry->pattern[0] == '.')
+  if (!dotsyms
+      || (entry->pattern != NULL
+	  && (entry->pattern[0] == '*' || entry->pattern[0] == '.')))
     return entry;
 
   dot_entry = xmalloc (sizeof *dot_entry);
   *dot_entry = *entry;
   dot_entry->next = entry;
-  len = strlen (entry->pattern) + 2;
-  dot_pat = xmalloc (len);
-  dot_pat[0] = '.';
-  memcpy (dot_pat + 1, entry->pattern, len - 1);
-  dot_entry->pattern = dot_pat;
+  if (entry->pattern != NULL)
+    {
+      len = strlen (entry->pattern) + 2;
+      dot_pat = xmalloc (len);
+      dot_pat[0] = '.';
+      memcpy (dot_pat + 1, entry->pattern, len - 1);
+      dot_entry->pattern = dot_pat;
+    }
   if (entry->symbol != NULL)
     {
       len = strlen (entry->symbol) + 2;

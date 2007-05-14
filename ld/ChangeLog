@@ -1,3 +1,8 @@
+2007-05-14  Andreas Schwab  <schwab@suse.de>
+
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_new_vers_pattern):
+	Handle null pattern.
+
 2007-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em (plt_style): New variable.

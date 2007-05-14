@@ -75,6 +75,9 @@ set build_tests {
   {"Build libdl2a.so with --dynamic-list=dl2.list"
    "-shared -Wl,--dynamic-list=dl2.list" "-fPIC"
    {dl2.c dl2xxx.c} {} "libdl2a.so"}
+  {"Build libdl2a.so with --dynamic-list=dl2a.list"
+   "-shared -Wl,--dynamic-list=dl2a.list" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2a.so"}
   {"Build libdl2a.so with --dynamic-list-data"
    "-shared -Wl,--dynamic-list-data" "-fPIC"
    {dl2.c dl2xxx.c} {} "libdl2a.so"}
