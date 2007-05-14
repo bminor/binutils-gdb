@@ -74,7 +74,7 @@ for {set i 0} {$i < 5} {incr i} {
 	-re "info threads\r\n" {
 	    exp_continue
 	}
-	-re "^. +(\[0-9\]+ Thread \[-0-9\]+) \[^\n\]*\n" {
+	-re "^. +(\[0-9\]+ Thread 0x\[0-9a-f\]+) \[^\n\]*\n" {
 	    verbose -log "found thread $expect_out(1,string)" 2
 	    lappend threads_before $expect_out(1,string)
 	    exp_continue
@@ -147,7 +147,7 @@ for {set i 0} {$i < 5} {incr i} {
 	-re "info threads\r\n" {
 	    exp_continue
 	}
-	-re "^. +(\[0-9\]+ Thread \[-0-9\]+) \[^\n\]*\n" {
+	-re "^. +(\[0-9\]+ Thread 0x\[0-9a-f\]+) \[^\n\]*\n" {
 	    set name $expect_out(1,string)
 	    for {set j 0} {$j != [llength $threads_before] } {incr j} {
 		if {$name == [lindex $threads_before $j]} {

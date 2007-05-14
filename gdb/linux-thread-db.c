@@ -1013,10 +1013,10 @@ thread_db_pid_to_str (ptid_t ptid)
 
       thread_info = find_thread_pid (ptid);
       if (thread_info == NULL)
-	snprintf (buf, sizeof (buf), "Thread %ld (LWP %ld) (Missing)",
+	snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld) (Missing)",
 		  GET_THREAD (ptid), GET_LWP (ptid));
       else
-	snprintf (buf, sizeof (buf), "Thread %ld (LWP %ld)",
+	snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
 		  GET_THREAD (ptid), GET_LWP (ptid));
 
       return buf;

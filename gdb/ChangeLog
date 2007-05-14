@@ -1,5 +1,10 @@
 2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linux-thread-db.c (thread_db_pid_to_str): Print thread IDs
+	as hexadecimal.
+
+2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* jv-exp.y (push_fieldnames): Use STRUCTOP_PTR instead of
 	STRUCTOP_STRUCT.
 	* jv-lang.c (evaluate_subexp_java): Handle STRUCTOP_PTR instead of
