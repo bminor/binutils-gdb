@@ -1,3 +1,9 @@
+2007-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (bfd_elf_string_from_elf_section): Return NULL on
+	invalid shstrndx.
+	(bfd_elf_get_str_section): Likewise.
+
 2007-05-12  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4497

@@ -252,7 +252,9 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
   bfd_size_type shstrtabsize;
 
   i_shdrp = elf_elfsections (abfd);
-  if (i_shdrp == 0 || i_shdrp[shindex] == 0)
+  if (i_shdrp == 0
+      || shindex >= elf_numsections (abfd)
+      || i_shdrp[shindex] == 0)
     return NULL;
 
   shstrtab = i_shdrp[shindex]->contents;
@@ -290,6 +292,9 @@ bfd_elf_string_from_elf_section (bfd *abfd,
 
   if (strindex == 0)
     return "";
+
+  if (elf_elfsections (abfd) == NULL || shindex >= elf_numsections (abfd))
+    return NULL;
 
   hdr = elf_elfsections (abfd)[shindex];
 
