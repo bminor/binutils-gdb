@@ -1,3 +1,10 @@
+2007-05-14  Paul Brook  <paul@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (dwarf2_debug_line_missing_file_complaint): New
+	function.
+	(dwarf_decode_lines): Check for line info without a file.
+
 2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-thread-db.c (thread_db_pid_to_str): Print thread IDs

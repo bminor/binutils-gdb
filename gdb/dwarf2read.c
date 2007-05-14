@@ -688,6 +688,13 @@ dwarf2_statement_list_fits_in_line_number_section_complaint (void)
 }
 
 static void
+dwarf2_debug_line_missing_file_complaint (void)
+{
+  complaint (&symfile_complaints,
+	     _(".debug_line section has line data without a file"));
+}
+
+static void
 dwarf2_complex_location_expr_complaint (void)
 {
   complaint (&symfile_complaints, _("location expression too complex"));
@@ -6708,19 +6715,24 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      address += (adj_opcode / lh->line_range)
 		* lh->minimum_instruction_length;
 	      line += lh->line_base + (adj_opcode % lh->line_range);
-              lh->file_names[file - 1].included_p = 1;
-              if (!decode_for_pst_p)
-                {
-		  if (last_subfile != current_subfile)
-		    {
-		      if (last_subfile)
-			record_line (last_subfile, 0, address);
-		      last_subfile = current_subfile;
+	      if (lh->num_file_names < file)
+		dwarf2_debug_line_missing_file_complaint ();
+	      else
+		{
+		  lh->file_names[file - 1].included_p = 1;
+		  if (!decode_for_pst_p)
+                    {
+                      if (last_subfile != current_subfile)
+                        {
+                          if (last_subfile)
+                            record_line (last_subfile, 0, address);
+                          last_subfile = current_subfile;
+                        }
+		      /* Append row to matrix using current values.  */
+		      record_line (current_subfile, line, 
+				   check_cu_functions (address, cu));
 		    }
-	          /* Append row to matrix using current values.  */
-	          record_line (current_subfile, line, 
-	                       check_cu_functions (address, cu));
-                }
+		}
 	      basic_block = 1;
 	    }
 	  else switch (op_code)
@@ -6734,9 +6746,15 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-                  lh->file_names[file - 1].included_p = 1;
-                  if (!decode_for_pst_p)
-		    record_line (current_subfile, 0, address);
+
+		  if (lh->num_file_names < file)
+		    dwarf2_debug_line_missing_file_complaint ();
+		  else
+		    {
+		      lh->file_names[file - 1].included_p = 1;
+		      if (!decode_for_pst_p)
+			record_line (current_subfile, 0, address);
+		    }
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (abfd, line_ptr, cu, &bytes_read);
@@ -6769,17 +6787,22 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		}
 	      break;
 	    case DW_LNS_copy:
-              lh->file_names[file - 1].included_p = 1;
-              if (!decode_for_pst_p)
+	      if (lh->num_file_names < file)
+		dwarf2_debug_line_missing_file_complaint ();
+	      else
 		{
-		  if (last_subfile != current_subfile)
-		    {
-		      if (last_subfile)
-			record_line (last_subfile, 0, address);
-		      last_subfile = current_subfile;
-		    }
-		  record_line (current_subfile, line, 
-			       check_cu_functions (address, cu));
+		  lh->file_names[file - 1].included_p = 1;
+		  if (!decode_for_pst_p)
+                    {
+                      if (last_subfile != current_subfile)
+                        {
+                          if (last_subfile)
+                            record_line (last_subfile, 0, address);
+                          last_subfile = current_subfile;
+                        }
+                      record_line (current_subfile, line, 
+                                   check_cu_functions (address, cu));
+                    }
 		}
 	      basic_block = 0;
 	      break;
@@ -6802,15 +6825,19 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 
                 file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                 line_ptr += bytes_read;
-                fe = &lh->file_names[file - 1];
-                if (fe->dir_index)
-                  dir = lh->include_dirs[fe->dir_index - 1];
-
-                if (!decode_for_pst_p)
-		  {
-		    last_subfile = current_subfile;
-		    dwarf2_start_subfile (fe->name, dir, comp_dir);
-		  }
+                if (lh->num_file_names < file)
+                  dwarf2_debug_line_missing_file_complaint ();
+                else
+                  {
+                    fe = &lh->file_names[file - 1];
+                    if (fe->dir_index)
+                      dir = lh->include_dirs[fe->dir_index - 1];
+                    if (!decode_for_pst_p)
+                      {
+                        last_subfile = current_subfile;
+                        dwarf2_start_subfile (fe->name, dir, comp_dir);
+                      }
+                  }
               }
 	      break;
 	    case DW_LNS_set_column:
