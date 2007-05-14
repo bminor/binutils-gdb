@@ -1150,7 +1150,7 @@ Interface manages several text windows on the terminal, showing
 source, assembly, registers and @value{GDBN} command outputs
 (@pxref{TUI, ,@value{GDBN} Text User Interface}).  Alternatively, the
 Text User Interface can be enabled by invoking the program
-@samp{gdbtui}.  Do not use this option if you run @value{GDBN} from
+@samp{@value{GDBTUI}}.  Do not use this option if you run @value{GDBN} from
 Emacs (@pxref{Emacs, ,Using @value{GDBN} under @sc{gnu} Emacs}).
 
 @c @item -xdb
@@ -16377,58 +16377,46 @@ interpreter-exec mi "-data-list-register-names"
 * TUI Configuration::           TUI configuration variables
 @end menu
 
-The @value{GDBN} Text User Interface, TUI in short, is a terminal
+The @value{GDBN} Text User Interface (TUI) is a terminal
 interface which uses the @code{curses} library to show the source
 file, the assembly output, the program registers and @value{GDBN}
-commands in separate text windows.
+commands in separate text windows.  The TUI mode is supported only
+on platforms where a suitable version of the @code{curses} library
+is available.
 
-The TUI is enabled by invoking @value{GDBN} using either
-@pindex gdbtui
-@samp{gdbtui} or @samp{gdb -tui}.
+@pindex @value{GDBTUI}
+The TUI mode is enabled by default when you invoke @value{GDBN} as
+either @samp{@value{GDBTUI}} or @samp{@value{GDBP} -tui}.
+You can also switch in and out of TUI mode while @value{GDBN} runs by
+using various TUI commands and key bindings, such as @kbd{C-x C-a}. 
+@xref{TUI Keys, ,TUI Key Bindings}.
 
 @node TUI Overview
 @section TUI Overview
 
-The TUI has two display modes that can be switched while
-@value{GDBN} runs:
-
-@itemize @bullet
-@item
-A curses (or TUI) mode in which it displays several text
-windows on the terminal.
-
-@item
-A standard mode which corresponds to the @value{GDBN} configured without
-the TUI.
-@end itemize
-
-In the TUI mode, @value{GDBN} can display several text window
-on the terminal:
+In TUI mode, @value{GDBN} can display several text windows:
 
 @table @emph
 @item command
 This window is the @value{GDBN} command window with the @value{GDBN}
-prompt and the @value{GDBN} outputs.  The @value{GDBN} input is still
-managed using readline but through the TUI.  The @emph{command}
-window is always visible.
+prompt and the @value{GDBN} output.  The @value{GDBN} input is still
+managed using readline.
 
 @item source
 The source window shows the source file of the program.  The current
-line as well as active breakpoints are displayed in this window.
+line and active breakpoints are displayed in this window.
 
 @item assembly
 The assembly window shows the disassembly output of the program.
 
 @item register
-This window shows the processor registers.  It detects when
-a register is changed and when this is the case, registers that have
-changed are highlighted.  
-
+This window shows the processor registers.  Registers are highlighted
+when their values change.
 @end table
 
 The source and assembly windows show the current program position
-by highlighting the current line and marking them with the @samp{>} marker.
-Breakpoints are also indicated with two markers.  A first one
+by highlighting the current line and marking it with a @samp{>} marker.
+Breakpoints are indicated with two markers.  The first marker
 indicates the breakpoint type:
 
 @table @code
@@ -16443,7 +16431,6 @@ Hardware breakpoint which was hit at least once.
 
 @item h
 Hardware breakpoint which was never hit.
-
 @end table
 
 The second marker indicates whether the breakpoint is enabled or not:
@@ -16454,61 +16441,56 @@ Breakpoint is enabled.
 
 @item -
 Breakpoint is disabled.
-
 @end table
 
-The source, assembly and register windows are attached to the thread
-and the frame position.  They are updated when the current thread
-changes, when the frame changes or when the program counter changes.
-These three windows are arranged by the TUI according to several
-layouts.  The layout defines which of these three windows are visible.
-The following layouts are available:
+The source, assembly and register windows are updated when the current
+thread changes, when the frame changes, or when the program counter
+changes.
+
+These windows are not all visible at the same time.  The command
+window is always visible.  The others can be arranged in several
+layouts:
 
 @itemize @bullet
 @item
-source
+source only,
 
 @item
-assembly
+assembly only,
 
 @item
-source and assembly
+source and assembly,
 
 @item
-source and registers
+source and registers, or
 
 @item
-assembly and registers
-
+assembly and registers.
 @end itemize
 
-On top of the command window a status line gives various information
-concerning the current process begin debugged.  The status line is
-updated when the information it shows changes.  The following fields
-are displayed:
+A status line above the command window shows the following information:
 
 @table @emph
 @item target
-Indicates the current gdb target
+Indicates the current @value{GDBN} target.
 (@pxref{Targets, ,Specifying a Debugging Target}).
 
 @item process
-Gives information about the current process or thread number.
+Gives the current process or thread number.
 When no process is being debugged, this field is set to @code{No process}.
 
 @item function
 Gives the current function name for the selected frame.
 The name is demangled if demangling is turned on (@pxref{Print Settings}).
-When there is no symbol corresponding to the current program counter
+When there is no symbol corresponding to the current program counter,
 the string @code{??} is displayed.
 
 @item line
 Indicates the current line number for the selected frame.
-When the current line number is not known the string @code{??} is displayed.
+When the current line number is not known, the string @code{??} is displayed.
 
 @item pc
 Indicates the current program counter address.
-
 @end table
 
 @node TUI Keys
@@ -16516,11 +16498,7 @@ Indicates the current program counter address.
 @cindex TUI key bindings
 
 The TUI installs several key bindings in the readline keymaps
-(@pxref{Command Line Editing}).
-They allow to leave or enter in the TUI mode or they operate
-directly on the TUI layout and windows.  The TUI also provides
-a @emph{SingleKey} keymap which binds several keys directly to
-@value{GDBN} commands.  The following key bindings
+(@pxref{Command Line Editing}).  The following key bindings
 are installed for both TUI mode and the @value{GDBN} standard mode.
 
 @table @kbd
@@ -16530,10 +16508,10 @@ are installed for both TUI mode and the @value{GDBN} standard mode.
 @itemx C-x a
 @kindex C-x A
 @itemx C-x A
-Enter or leave the TUI mode.  When the TUI mode is left,
-the curses window management is left and @value{GDBN} operates using
-its standard mode writing on the terminal directly.  When the TUI
-mode is entered, the control is given back to the curses windows.
+Enter or leave the TUI mode.  When leaving the TUI mode,
+the curses window management stops and @value{GDBN} operates using
+its standard mode, writing on the terminal directly.  When reentering
+the TUI mode, control is given back to the curses windows.
 The screen is then refreshed.
 
 @kindex C-x 1
@@ -16547,7 +16525,7 @@ Think of this key binding as the Emacs @kbd{C-x 1} binding.
 @kindex C-x 2
 @item C-x 2
 Use a TUI layout with at least two windows.  When the current
-layout shows already two windows, a next layout with two windows is used.
+layout already has two windows, the next layout with two windows is used.
 When a new layout is chosen, one window will always be common to the
 previous layout and the new one.
 
@@ -16556,64 +16534,62 @@ Think of it as the Emacs @kbd{C-x 2} binding.
 @kindex C-x o
 @item C-x o
 Change the active window.  The TUI associates several key bindings
-(like scrolling and arrow keys) to the active window. This command
+(like scrolling and arrow keys) with the active window.  This command
 gives the focus to the next TUI window.
 
 Think of it as the Emacs @kbd{C-x o} binding.
 
 @kindex C-x s
 @item C-x s
-Use the TUI @emph{SingleKey} keymap that binds single key to gdb commands
-(@pxref{TUI Single Key Mode}).
-
+Switch in and out of the TUI SingleKey mode that binds single
+keys to @value{GDBN} commands (@pxref{TUI Single Key Mode}).
 @end table
 
-The following key bindings are handled only by the TUI mode:
+The following key bindings only work in the TUI mode:
 
-@table @key
+@table @asis
 @kindex PgUp
-@item PgUp
+@item @key{PgUp}
 Scroll the active window one page up.
 
 @kindex PgDn
-@item PgDn
+@item @key{PgDn}
 Scroll the active window one page down.
 
 @kindex Up
-@item Up
+@item @key{Up}
 Scroll the active window one line up.
 
 @kindex Down
-@item Down
+@item @key{Down}
 Scroll the active window one line down.
 
 @kindex Left
-@item Left
+@item @key{Left}
 Scroll the active window one column left.
 
 @kindex Right
-@item Right
+@item @key{Right}
 Scroll the active window one column right.
 
 @kindex C-L
-@item C-L
+@item @kbd{C-L}
 Refresh the screen.
-
 @end table
 
-In the TUI mode, the arrow keys are used by the active window
-for scrolling.  This means they are available for readline when the
-active window is the command window.  When the command window
-does not have the focus, it is necessary to use other readline
-key bindings such as @kbd{C-p}, @kbd{C-n}, @kbd{C-b} and @kbd{C-f}.
+Because the arrow keys scroll the active window in the TUI mode, they
+are not available for their normal use by readline unless the command
+window has the focus.  When another window is active, you must use
+other readline key bindings such as @kbd{C-p}, @kbd{C-n}, @kbd{C-b}
+and @kbd{C-f} to control the command window.
 
 @node TUI Single Key Mode
 @section TUI Single Key Mode
 @cindex TUI single key mode
 
-The TUI provides a @emph{SingleKey} mode in which it installs a particular
-key binding in the readline keymaps to connect single keys to
-some gdb commands.
+The TUI also provides a @dfn{SingleKey} mode, which binds several
+frequently used @value{GDBN} commands to single keys.  Type @kbd{C-x s} to
+switch into this mode, where the following key bindings are used:
 
 @table @kbd
 @kindex c @r{(SingleKey TUI key)}
@@ -16634,7 +16610,7 @@ next
 
 @kindex q @r{(SingleKey TUI key)}
 @item q
-exit the @emph{SingleKey} mode.
+exit the SingleKey mode.
 
 @kindex r @r{(SingleKey TUI key)}
 @item r
@@ -16655,14 +16631,13 @@ info locals
 @kindex w @r{(SingleKey TUI key)}
 @item w
 where
-
 @end table
 
 Other keys temporarily switch to the @value{GDBN} command prompt.
 The key that was pressed is inserted in the editing buffer so that
 it is possible to type most @value{GDBN} commands without interaction
-with the TUI @emph{SingleKey} mode.  Once the command is entered the TUI
-@emph{SingleKey} mode is restored.  The only way to permanently leave
+with the TUI SingleKey mode.  Once the command is entered the TUI
+SingleKey mode is restored.  The only way to permanently leave
 this mode is by typing @kbd{q} or @kbd{C-x s}.
 
 
@@ -16671,10 +16646,9 @@ this mode is by typing @kbd{q} or @kbd{C-x s}.
 @cindex TUI commands
 
 The TUI has specific commands to control the text windows.
-These commands are always available, that is they do not depend on
-the current terminal mode in which @value{GDBN} runs.  When @value{GDBN}
-is in the standard mode, using these commands will automatically switch
-in the TUI mode.
+These commands are always available, even when @value{GDBN} is not in
+the TUI mode.  When @value{GDBN} is in the standard mode, most
+of these commands will automatically switch to the TUI mode.
 
 @table @code
 @item info win
@@ -16700,11 +16674,24 @@ Display the source and assembly window.
 @item layout regs
 Display the register window together with the source or assembly window.
 
-@item focus next | prev | src | asm | regs | split
+@item focus next
 @kindex focus
-Set the focus to the named window.
-This command allows to change the active window so that scrolling keys
-can be affected to another window.
+Make the next window active for scrolling.
+
+@item focus prev
+Make the previous window active for scrolling.
+
+@item focus src
+Make the source window active for scrolling.
+
+@item focus asm
+Make the assembly window active for scrolling.
+
+@item focus regs
+Make the register window active for scrolling.
+
+@item focus cmd
+Make the command window active for scrolling.
 
 @item refresh
 @kindex refresh
@@ -16737,18 +16724,16 @@ Change the height of the window @var{name} by @var{count}
 lines.  Positive counts increase the height, while negative counts
 decrease it.
 
-@item tabset
-@kindex tabset @var{nchars}
+@item tabset @var{nchars}
+@kindex tabset
 Set the width of tab stops to be @var{nchars} characters.
-
 @end table
 
 @node TUI Configuration
 @section TUI Configuration Variables
 @cindex TUI configuration variables
 
-The TUI has several configuration variables that control the
-appearance of windows on the terminal.
+Several configuration variables control the appearance of TUI windows.
 
 @table @code
 @item set tui border-kind @var{kind}
@@ -16760,24 +16745,19 @@ The possible values are the following:
 Use a space character to draw the border.
 
 @item ascii
-Use ascii characters + - and | to draw the border.
+Use @sc{ascii} characters @samp{+}, @samp{-} and @samp{|} to draw the border.
 
 @item acs
 Use the Alternate Character Set to draw the border.  The border is
 drawn using character line graphics if the terminal supports them.
-
 @end table
-
-@item set tui active-border-mode @var{mode}
-@kindex set tui active-border-mode
-Select the attributes to display the border of the active window.
-The possible values are @code{normal}, @code{standout}, @code{reverse},
-@code{half}, @code{half-standout}, @code{bold} and @code{bold-standout}.
 
 @item set tui border-mode @var{mode}
 @kindex set tui border-mode
-Select the attributes to display the border of other windows.
-The @var{mode} can be one of the following:
+@itemx set tui active-border-mode @var{mode}
+@kindex set tui active-border-mode
+Select the display attributes for the borders of the inactive windows
+or the active window.  The @var{mode} can be one of the following:
 @table @code
 @item normal
 Use normal attributes to display the border.
@@ -16799,9 +16779,7 @@ Use extra bright or bold mode.
 
 @item bold-standout
 Use extra bright or bold and standout mode.
-
 @end table
-
 @end table
 
 @node Emacs

@@ -1,3 +1,11 @@
+2007-05-14  Bob Wilson  <bob.wilson@acm.org>
+	
+	* all-cfg.texi (GDBTUI): New.
+	* gdb.texinfo (Mode Options): Use GDBTUI variable.
+	(TUI, TUI Overview, TUI Keys, TUI Single Key Mode, TUI Commands)
+	(TUI Configuration): Edit to improve clarity and fix problems of
+	both style and content.
+	
 2007-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* observer.texi (GDB Observers): New observer "new_objfile".
