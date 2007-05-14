@@ -1451,7 +1451,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
       base = 0;
       break;
     case DW_EH_PE_pcrel:
-      base = bfd_get_section_vma (unit->bfd, unit->dwarf_frame_section);
+      base = bfd_get_section_vma (unit->abfd, unit->dwarf_frame_section);
       base += (buf - unit->dwarf_frame_buffer);
       break;
     case DW_EH_PE_datarel:
@@ -1482,7 +1482,11 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
     }
 
   if ((encoding & 0x07) == 0x00)
-    encoding |= encoding_for_size (ptr_len);
+    {
+      encoding |= encoding_for_size (ptr_len);
+      if (bfd_get_sign_extend_vma (unit->abfd))
+	encoding |= DW_EH_PE_signed;
+    }
 
   switch (encoding & 0x0f)
     {
