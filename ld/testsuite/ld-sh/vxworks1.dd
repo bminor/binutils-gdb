@@ -4,7 +4,7 @@
 Disassembly of section \.plt:
 
 00080800 <_PROCEDURE_LINKAGE_TABLE_>:
-   80800:	d1 01       	mov\.l	80808 <_PROCEDURE_LINKAGE_TABLE_\+0x8>,r1	! 0x81408
+   80800:	d1 01       	mov\.l	80808 <_PROCEDURE_LINKAGE_TABLE_\+0x8>,r1	! 81408
    80802:	61 12       	mov\.l	@r1,r1
    80804:	41 2b       	jmp	@r1
    80806:	00 09       	nop	
@@ -13,14 +13,14 @@ Disassembly of section \.plt:
    8080a:	14 08 .*
 
 0008080c <_sglobal@plt>:
-   8080c:	d0 01       	mov\.l	80814 <_sglobal@plt\+0x8>,r0	! 0x8140c
+   8080c:	d0 01       	mov\.l	80814 <_sglobal@plt\+0x8>,r0	! 8140c
    8080e:	60 02       	mov\.l	@r0,r0
    80810:	40 2b       	jmp	@r0
    80812:	00 09       	nop	
    80814:	00 08 .*
 			80814: R_SH_DIR32	_GLOBAL_OFFSET_TABLE_\+0xc
    80816:	14 0c .*
-   80818:	d0 01       	mov\.l	80820 <_sglobal@plt\+0x14>,r0	! 0x0
+   80818:	d0 01       	mov\.l	80820 <_sglobal@plt\+0x14>,r0	! 0
    8081a:	af f1       	bra	80800 <_PROCEDURE_LINKAGE_TABLE_>
    8081c:	00 09       	nop	
    8081e:	00 09       	nop	
@@ -28,14 +28,14 @@ Disassembly of section \.plt:
 	\.\.\.
 
 00080824 <_foo@plt>:
-   80824:	d0 01       	mov\.l	8082c <_foo@plt\+0x8>,r0	! 0x81410
+   80824:	d0 01       	mov\.l	8082c <_foo@plt\+0x8>,r0	! 81410
    80826:	60 02       	mov\.l	@r0,r0
    80828:	40 2b       	jmp	@r0
    8082a:	00 09       	nop	
    8082c:	00 08 .*
 			8082c: R_SH_DIR32	_GLOBAL_OFFSET_TABLE_\+0x10
    8082e:	14 10 .*
-   80830:	d0 01       	mov\.l	80838 <_foo@plt\+0x14>,r0	! 0xc
+   80830:	d0 01       	mov\.l	80838 <_foo@plt\+0x14>,r0	! c
    80832:	af e5       	bra	80800 <_PROCEDURE_LINKAGE_TABLE_>
    80834:	00 09       	nop	
    80836:	00 09       	nop	
@@ -45,13 +45,13 @@ Disassembly of section \.text:
 
 00080c00 <__start>:
    80c00:	4f 22       	sts\.l	pr,@-r15
-   80c02:	d0 06       	mov\.l	80c1c <__start\+0x1c>,r0	! 0x80824 <_foo@plt>
+   80c02:	d0 06       	mov\.l	80c1c <__start\+0x1c>,r0	! 80824 <_foo@plt>
    80c04:	40 0b       	jsr	@r0
    80c06:	00 09       	nop	
-   80c08:	d0 05       	mov\.l	80c20 <__start\+0x20>,r0	! 0x8080c <_sglobal@plt>
+   80c08:	d0 05       	mov\.l	80c20 <__start\+0x20>,r0	! 8080c <_sglobal@plt>
    80c0a:	40 0b       	jsr	@r0
    80c0c:	00 09       	nop	
-   80c0e:	d0 05       	mov\.l	80c24 <__start\+0x24>,r0	! 0x80c28 <_sexternal>
+   80c0e:	d0 05       	mov\.l	80c24 <__start\+0x24>,r0	! 80c28 <_sexternal>
    80c10:	40 0b       	jsr	@r0
    80c12:	00 09       	nop	
    80c14:	4f 26       	lds\.l	@r15\+,pr

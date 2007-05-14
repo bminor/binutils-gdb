@@ -1,3 +1,14 @@
+2007-05-14  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-sh/vxworks1.dd: Remove hexadecimal prefixes from constant pool
+	contents.  Consistently use "!" as the comment character.
+	Consistently use _PROCEDURE_LINKAGE_TABLE_ in the first PLT entry.
+	* ld-sh/vxworks1-le.dd: Likewise.
+	* ld-sh/vxworks1-lib.dd: Likewise.
+	* ld-sh/vxworks1-lib-le.dd: Likewise.
+	* ld-sh/vxworks3.dd: Likewise.
+	* ld-sh/vxworks3-le.dd: Likewise.
+
 2007-05-14  Andreas Schwab  <schwab@suse.de>
 
 	* ld-elf/dl2a.list: New file.
