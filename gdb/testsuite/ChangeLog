@@ -1,5 +1,9 @@
 2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.threads/linux-dp.exp: Allow non-hexadecimal IDs also.
+
+2007-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.threads/linux-dp.exp: Expect hexadecimal thread IDs.
 	* gdb.threads/print-threads.exp (test_all_threads): Allow
 	negative and hexadecimal thread IDs.
