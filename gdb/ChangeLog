@@ -1,3 +1,20 @@
+2007-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (read_sp): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* frame.c (frame_sp_unwind): Do not call TARGET_READ_SP.
+
+	* avr-tdep.c (avr_read_sp): Remove.
+	(avr_unwind_sp): New function.
+	(avr_gdbarch_init): Install unwind_sp instead of read_sp callback.
+	* mips-tdep.c (mips_read_sp): Remove.
+	(mips_unwind_sp): New function.
+	(mips_gdbarch_init): Install unwind_sp instead of read_sp callback.
+	* score-tdep.c (score_read_unsigned_register): Remove.
+	(score_read_sp): Remove.
+	(score_unwind_sp): New function.
+	(score_gdbarch_init): Install unwind_sp instead of read_sp callback.
+
 2007-05-14  Maxim Grigoriev  <maxim2405@gmail.com>
 
 	* buildsym.c (start_subfile): Handle absolute pathnames

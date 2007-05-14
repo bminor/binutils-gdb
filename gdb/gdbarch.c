@@ -148,7 +148,6 @@ struct gdbarch
   int char_signed;
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
-  gdbarch_read_sp_ftype *read_sp;
   gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer;
   gdbarch_pseudo_register_read_ftype *pseudo_register_read;
   gdbarch_pseudo_register_write_ftype *pseudo_register_write;
@@ -275,7 +274,6 @@ struct gdbarch startup_gdbarch =
   1,  /* char_signed */
   0,  /* read_pc */
   0,  /* write_pc */
-  0,  /* read_sp */
   0,  /* virtual_frame_pointer */
   0,  /* pseudo_register_read */
   0,  /* pseudo_register_write */
@@ -531,7 +529,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
     current_gdbarch->char_signed = 1;
   /* Skip verify of read_pc, has predicate */
   /* Skip verify of write_pc, invalid_p == 0 */
-  /* Skip verify of read_sp, has predicate */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of pseudo_register_read, has predicate */
   /* Skip verify of pseudo_register_write, has predicate */
@@ -1332,24 +1329,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: read_pc = <0x%lx>\n",
                       (long) current_gdbarch->read_pc);
-#ifdef TARGET_READ_SP_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_READ_SP_P()",
-                      XSTRING (TARGET_READ_SP_P ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_read_sp_p() = %d\n",
-                      gdbarch_read_sp_p (current_gdbarch));
-#ifdef TARGET_READ_SP
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_READ_SP()",
-                      XSTRING (TARGET_READ_SP ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: read_sp = <0x%lx>\n",
-                      (long) current_gdbarch->read_sp);
 #ifdef REGISTER_BYTES_OK_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1907,30 +1886,6 @@ set_gdbarch_write_pc (struct gdbarch *gdbarch,
                       gdbarch_write_pc_ftype write_pc)
 {
   gdbarch->write_pc = write_pc;
-}
-
-int
-gdbarch_read_sp_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->read_sp != NULL;
-}
-
-CORE_ADDR
-gdbarch_read_sp (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->read_sp != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_read_sp called\n");
-  return gdbarch->read_sp ();
-}
-
-void
-set_gdbarch_read_sp (struct gdbarch *gdbarch,
-                     gdbarch_read_sp_ftype read_sp)
-{
-  gdbarch->read_sp = read_sp;
 }
 
 void

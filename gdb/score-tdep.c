@@ -190,24 +190,16 @@ score_register_type (struct gdbarch *gdbarch, int regnum)
   return builtin_type_uint32;
 }
 
-static LONGEST
-score_read_unsigned_register (int regnum)
-{
-  LONGEST val;
-  regcache_cooked_read_unsigned (current_regcache, regnum, &val);
-  return val;
-}
-
-static CORE_ADDR
-score_read_sp (void)
-{
-  return score_read_unsigned_register (SCORE_SP_REGNUM);
-}
-
 static CORE_ADDR
 score_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   return frame_unwind_register_unsigned (next_frame, SCORE_PC_REGNUM);
+}
+
+static CORE_ADDR
+score_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_unsigned (next_frame, SCORE_SP_REGNUM);
 }
 
 static const char *
@@ -880,8 +872,8 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, score_register_type);
   set_gdbarch_frame_align (gdbarch, score_frame_align);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_read_sp (gdbarch, score_read_sp);
   set_gdbarch_unwind_pc (gdbarch, score_unwind_pc);
+  set_gdbarch_unwind_sp (gdbarch, score_unwind_sp);
   set_gdbarch_print_insn (gdbarch, score_print_insn);
   set_gdbarch_skip_prologue (gdbarch, score_skip_prologue);
   set_gdbarch_in_function_epilogue_p (gdbarch, score_in_function_epilogue_p);

@@ -1712,10 +1712,6 @@ frame_sp_unwind (struct frame_info *next_frame)
      frame inner-most address.  */
   if (gdbarch_unwind_sp_p (current_gdbarch))
     return gdbarch_unwind_sp (current_gdbarch, next_frame);
-  /* Things are looking grim.  If it's the inner-most frame and there
-     is a TARGET_READ_SP, then that can be used.  */
-  if (next_frame->level < 0 && TARGET_READ_SP_P ())
-    return TARGET_READ_SP ();
   /* Now things are really are grim.  Hope that the value returned by
      the SP_REGNUM register is meaningful.  */
   if (SP_REGNUM >= 0)

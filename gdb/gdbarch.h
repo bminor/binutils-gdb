@@ -287,33 +287,6 @@ extern void set_gdbarch_write_pc (struct gdbarch *gdbarch, gdbarch_write_pc_ftyp
 #define TARGET_WRITE_PC(val, ptid) (gdbarch_write_pc (current_gdbarch, val, ptid))
 #endif
 
-/* UNWIND_SP is a direct replacement for TARGET_READ_SP. */
-
-#if defined (TARGET_READ_SP)
-/* Legacy for systems yet to multi-arch TARGET_READ_SP */
-#if !defined (TARGET_READ_SP_P)
-#define TARGET_READ_SP_P() (1)
-#endif
-#endif
-
-extern int gdbarch_read_sp_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (TARGET_READ_SP_P)
-#error "Non multi-arch definition of TARGET_READ_SP"
-#endif
-#if !defined (TARGET_READ_SP_P)
-#define TARGET_READ_SP_P() (gdbarch_read_sp_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_read_sp_ftype) (void);
-extern CORE_ADDR gdbarch_read_sp (struct gdbarch *gdbarch);
-extern void set_gdbarch_read_sp (struct gdbarch *gdbarch, gdbarch_read_sp_ftype *read_sp);
-#if !defined (GDB_TM_FILE) && defined (TARGET_READ_SP)
-#error "Non multi-arch definition of TARGET_READ_SP"
-#endif
-#if !defined (TARGET_READ_SP)
-#define TARGET_READ_SP() (gdbarch_read_sp (current_gdbarch))
-#endif
-
 /* Function for getting target's idea of a frame pointer.  FIXME: GDB's
    whole scheme for dealing with "frames" and "frame pointers" needs a
    serious shakedown. */

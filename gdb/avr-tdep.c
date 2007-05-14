@@ -337,15 +337,6 @@ avr_write_pc (CORE_ADDR val, ptid_t ptid)
   inferior_ptid = save_ptid;
 }
 
-static CORE_ADDR
-avr_read_sp (void)
-{
-  ULONGEST sp;
-
-  regcache_cooked_read_unsigned (current_regcache, AVR_SP_REGNUM, &sp);
-  return (avr_make_saddr (sp));
-}
-
 static int
 avr_scan_arg_moves (int vpc, unsigned char *prologue)
 {
@@ -943,6 +934,16 @@ avr_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
   return avr_make_iaddr (pc);
 }
 
+static CORE_ADDR
+avr_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  ULONGEST sp;
+
+  frame_unwind_unsigned_register (next_frame, AVR_SP_REGNUM, &sp);
+
+  return avr_make_saddr (sp);
+}
+
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct.  */
 
@@ -1274,7 +1275,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, avr_read_pc);
   set_gdbarch_write_pc (gdbarch, avr_write_pc);
-  set_gdbarch_read_sp (gdbarch, avr_read_sp);
 
   set_gdbarch_num_regs (gdbarch, AVR_NUM_REGS);
 
@@ -1303,6 +1303,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_dummy_id (gdbarch, avr_unwind_dummy_id);
 
   set_gdbarch_unwind_pc (gdbarch, avr_unwind_pc);
+  set_gdbarch_unwind_sp (gdbarch, avr_unwind_sp);
 
   return gdbarch;
 }

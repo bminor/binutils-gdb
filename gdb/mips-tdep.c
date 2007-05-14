@@ -746,13 +746,6 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
     }
 }
 
-/* TARGET_READ_SP -- Remove useless bits from the stack pointer.  */
-
-static CORE_ADDR
-mips_read_sp (void)
-{
-  return read_signed_register (MIPS_SP_REGNUM);
-}
 
 /* Should the upper word of 64-bit addresses be zeroed? */
 enum auto_boolean mask_address_var = AUTO_BOOLEAN_AUTO;
@@ -836,6 +829,12 @@ mips_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   return frame_unwind_register_signed (next_frame,
 				       NUM_REGS + mips_regnum (gdbarch)->pc);
+}
+
+static CORE_ADDR
+mips_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_signed (next_frame, NUM_REGS + MIPS_SP_REGNUM);
 }
 
 /* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
@@ -5104,7 +5103,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, mips_write_pc);
-  set_gdbarch_read_sp (gdbarch, mips_read_sp);
 
   /* Add/remove bits from an address.  The MIPS needs be careful to
      ensure that all 32 bit addresses are sign extended to 64 bits.  */
@@ -5112,6 +5110,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Unwind the frame.  */
   set_gdbarch_unwind_pc (gdbarch, mips_unwind_pc);
+  set_gdbarch_unwind_sp (gdbarch, mips_unwind_sp);
   set_gdbarch_unwind_dummy_id (gdbarch, mips_unwind_dummy_id);
 
   /* Map debug register numbers onto internal register numbers.  */

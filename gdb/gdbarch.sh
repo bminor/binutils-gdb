@@ -421,8 +421,6 @@ v:TARGET_CHAR_SIGNED:int:char_signed:::1:-1:1
 #
 F:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid
 f:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid:0:generic_target_write_pc::0
-# UNWIND_SP is a direct replacement for TARGET_READ_SP.
-F:TARGET_READ_SP:CORE_ADDR:read_sp:void
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
 # whole scheme for dealing with "frames" and "frame pointers" needs a
 # serious shakedown.
