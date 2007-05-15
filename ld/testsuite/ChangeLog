@@ -1,3 +1,14 @@
+2007-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4504
+	* ld-elf/data1.c: New file.
+	* ld-elf/data1.h: Likewise.
+	* ld-elf/dynbss1.c: Likewise.
+	* ld-elf/pass.out: Likewise.
+
+	* ld-elf/shared.exp (build_tests): Add "Build libdata1.so".
+	(run_tests): Add "Run with libdata1.so".
+
 2007-05-15  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-arm/vxworks1.ld: Swap .bss and .data.

@@ -117,6 +117,9 @@ set build_tests {
   {"Build libdl6d.so with --dynamic-list-data -Bsymbolic"
    "-shared -Wl,--dynamic-list-data,-Bsymbolic" "-fPIC"
    {dl6.c} {} "libdl6d.so"}
+  {"Build libdata1.so"
+   "-shared" "-fPIC"
+   {data1.c} {} "libdata1.so"}
 }
 
 set run_tests {
@@ -226,6 +229,9 @@ set run_tests {
     {"Run dl6d1 with --dynamic-list-data and dlopen on libdl6d.so"
      "--dynamic-list-data -ldl" ""
      {dl6dmain.c} "dl6d1" "dl6b.out"}
+    {"Run with libdata1.so"
+     "tmpdir/libdata1.so" ""
+     {dynbss1.c} "dynbss1" "pass.out"}
 }
 
 run_cc_link_tests $build_tests
