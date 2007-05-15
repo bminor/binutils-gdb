@@ -5954,7 +5954,7 @@ static const char *const Suffix3DNow[] = {
 /* A8 */	NULL,		NULL,		"pfsubr",	NULL,
 /* AC */	NULL,		NULL,		"pfacc",	NULL,
 /* B0 */	"pfcmpeq",	NULL,		NULL,		NULL,
-/* B4 */	"pfmul",	NULL,		"pfrcpit2",	"pfmulhrw",
+/* B4 */	"pfmul",	NULL,		"pfrcpit2",	"pmulhrw",
 /* B8 */	NULL,		NULL,		NULL,		"pswapd",
 /* BC */	NULL,		NULL,		NULL,		"pavgusb",
 /* C0 */	NULL,		NULL,		NULL,		NULL,

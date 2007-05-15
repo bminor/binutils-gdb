@@ -1,3 +1,8 @@
+2007-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4502
+	* i386-dis.c (Suffix3DNow): Replace "pfmulhrw" with "pmulhrw".
+
 2007-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.h (ShortForm): Redefined.

@@ -27,7 +27,7 @@ Disassembly of section .text:
   63:	0f 0f fc 9a [ 	]*pfsub  %mm4,%mm7
   67:	0f 0f c5 aa [ 	]*pfsubr %mm5,%mm0
   6b:	0f 0f ce 0d [ 	]*pi2fd  %mm6,%mm1
-  6f:	0f 0f d7 b7 [ 	]*pfmulhrw %mm7,%mm2
+  6f:	0f 0f d7 b7 [ 	]*pmulhrw %mm7,%mm2
   73:	2e 0f [ 	]*\(bad\)  
   75:	0f 54 c3 [ 	]*andps  %xmm3,%xmm0
   78:	07 [ 	]*pop    %es

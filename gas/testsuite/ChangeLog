@@ -1,3 +1,8 @@
+2007-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4502
+	* gas/i386/amd.d: Replace "pfmulhrw" with "pmulhrw".
+
 2007-05-04  Kazu Hirata  <kazu@codesourcery.com>
 
 	* gas/m68k/all.exp: Skip fmoveml on fido.
