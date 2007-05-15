@@ -2221,7 +2221,6 @@ elf_cris_adjust_dynamic_symbol (info, h)
 {
   bfd *dynobj;
   asection *s;
-  unsigned int power_of_two;
   bfd_size_type plt_entry_size;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -2429,31 +2428,7 @@ elf_cris_adjust_dynamic_symbol (info, h)
       h->needs_copy = 1;
     }
 
-  /* Historic precedent: m68k and i386 allow max 8-byte alignment for the
-     thing to copy; so do we.  */
-
-  /* We need to figure out the alignment required for this symbol.  I
-     have no idea how ELF linkers handle this.  */
-  power_of_two = bfd_log2 (h->size);
-  if (power_of_two > 3)
-    power_of_two = 3;
-
-  /* Apply the required alignment.  */
-  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
-  if (power_of_two > bfd_get_section_alignment (dynobj, s))
-    {
-      if (!bfd_set_section_alignment (dynobj, s, power_of_two))
-	return FALSE;
-    }
-
-  /* Define the symbol as being at this point in the section.  */
-  h->root.u.def.section = s;
-  h->root.u.def.value = s->size;
-
-  /* Increment the section size to make room for the symbol.  */
-  s->size += h->size;
-
-  return TRUE;
+  return _bfd_elf_adjust_dynamic_copy (h, s);
 }
 
 /* Look through the relocs for a section during the first phase.  */

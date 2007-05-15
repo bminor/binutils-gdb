@@ -1739,6 +1739,9 @@ extern bfd_boolean _bfd_elf_fix_symbol_flags
 extern bfd_boolean _bfd_elf_adjust_dynamic_symbol
   (struct elf_link_hash_entry *, void *);
 
+extern bfd_boolean _bfd_elf_adjust_dynamic_copy
+  (struct elf_link_hash_entry *, asection *);
+
 extern bfd_boolean _bfd_elf_link_sec_merge_syms
   (struct elf_link_hash_entry *, void *);
 

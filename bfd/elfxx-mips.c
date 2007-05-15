@@ -7018,7 +7018,6 @@ _bfd_mips_vxworks_adjust_dynamic_symbol (struct bfd_link_info *info,
   bfd *dynobj;
   struct mips_elf_link_hash_entry *hmips;
   struct mips_elf_link_hash_table *htab;
-  unsigned int power_of_two;
 
   htab = mips_elf_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
@@ -7141,26 +7140,7 @@ _bfd_mips_vxworks_adjust_dynamic_symbol (struct bfd_link_info *info,
       h->needs_copy = 1;
     }
 
-  /* We need to figure out the alignment required for this symbol.  */
-  power_of_two = bfd_log2 (h->size);
-  if (power_of_two > 4)
-    power_of_two = 4;
-
-  /* Apply the required alignment.  */
-  htab->sdynbss->size = BFD_ALIGN (htab->sdynbss->size,
-				   (bfd_size_type) 1 << power_of_two);
-  if (power_of_two > bfd_get_section_alignment (dynobj, htab->sdynbss)
-      && !bfd_set_section_alignment (dynobj, htab->sdynbss, power_of_two))
-    return FALSE;
-
-  /* Define the symbol as being at this point in the section.  */
-  h->root.u.def.section = htab->sdynbss;
-  h->root.u.def.value = htab->sdynbss->size;
-
-  /* Increment the section size to make room for the symbol.  */
-  htab->sdynbss->size += h->size;
-
-  return TRUE;
+  return _bfd_elf_adjust_dynamic_copy (h, htab->sdynbss);
 }
 
 /* Return the number of dynamic section symbols required by OUTPUT_BFD.

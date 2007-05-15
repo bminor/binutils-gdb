@@ -1819,7 +1819,6 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
 {
   struct elf32_hppa_link_hash_table *htab;
   asection *sec;
-  unsigned int power_of_two;
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later.  */
@@ -1929,30 +1928,9 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
       eh->needs_copy = 1;
     }
 
-  /* We need to figure out the alignment required for this symbol.  I
-     have no idea how other ELF linkers handle this.  */
-
-  power_of_two = bfd_log2 (eh->size);
-  if (power_of_two > 3)
-    power_of_two = 3;
-
-  /* Apply the required alignment.  */
   sec = htab->sdynbss;
-  sec->size = BFD_ALIGN (sec->size, (bfd_size_type) (1 << power_of_two));
-  if (power_of_two > bfd_get_section_alignment (htab->etab.dynobj, sec))
-    {
-      if (! bfd_set_section_alignment (htab->etab.dynobj, sec, power_of_two))
-	return FALSE;
-    }
 
-  /* Define the symbol as being at this point in the section.  */
-  eh->root.u.def.section = sec;
-  eh->root.u.def.value = sec->size;
-
-  /* Increment the section size to make room for the symbol.  */
-  sec->size += eh->size;
-
-  return TRUE;
+  return _bfd_elf_adjust_dynamic_copy (eh, sec);
 }
 
 /* Allocate space in the .plt for entries that won't have relocations.

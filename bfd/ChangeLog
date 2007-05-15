@@ -1,3 +1,31 @@
+2007-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/4504
+	* elf-bfd.h (_bfd_elf_adjust_dynamic_copy): New.
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): New.
+
+	* elf-m10300.c (_bfd_mn10300_elf_adjust_dynamic_symbol): Call
+	_bfd_elf_adjust_dynamic_copy to adjust for the copy in dynamic
+	bss section.
+	* elf32-arm.c (elf32_arm_adjust_dynamic_symbol): Likewise.
+	* elf32-cris.c (elf_cris_adjust_dynamic_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_adjust_dynamic_symbol): Likewise.
+	* elf32-i370.c (i370_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Likewise.
+	* elf32-m32r.c (m32r_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf32-sh.c (sh_elf_adjust_dynamic_symbol): Likewise.
+	* elf32-vax.c (elf_vax_adjust_dynamic_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_adjust_dynamic_symbol): Likewise.
+	* elf64-s390.c (elf_s390_adjust_dynamic_symbol): Likewise.
+	* elf64-sh64.c (sh64_elf64_adjust_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_adjust_dynamic_symbol): Likewise.
+	* elfxx-mips.c (_bfd_mips_vxworks_adjust_dynamic_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_adjust_dynamic_symbol): Likewise.
+
 2007-05-15  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_create_local_got_entry): Remove
