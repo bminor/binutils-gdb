@@ -1219,6 +1219,15 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  if ((symver_state != NULL) && (*symver_state == 0))
 	    goto de_fault;
 #endif
+
+#ifdef TC_ARM
+	  /* For the ARM, care is needed not to damage occurrences of \@
+	     by stripping the @ onwards.  Yuck.  */
+	  if (to > tostart && *(to - 1) == '\\')
+	    /* Do not treat the @ as a start-of-comment.  */
+	    goto de_fault;
+#endif
+
 #ifdef WARN_COMMENTS
 	  if (!found_comment)
 	    as_where (&found_comment_file, &found_comment);
