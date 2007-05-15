@@ -4,7 +4,7 @@ Relocation section '\.rela\.dyn' at offset .* contains .* entries:
 00080c0c  .*05 R_MIPS_HI16       00000000   __GOTT_BASE__ \+ 0
 00080c10  .*06 R_MIPS_LO16       00000000   __GOTT_BASE__ \+ 0
 00080c14  .*01 R_MIPS_16         00000000   __GOTT_INDEX__ \+ 0
-0008141c  .*02 R_MIPS_32         00080c00   \.text \+ 5c
+0008141c  00000002 R_MIPS_32                                    00080c5c
 00081c00  00000002 R_MIPS_32                                    00080c5c
 00081c04  00000002 R_MIPS_32                                    00081c00
 00081c08  .*02 R_MIPS_32         00081c08   dglobal \+ 0

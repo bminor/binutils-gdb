@@ -1,3 +1,8 @@
+2007-05-15  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/vxworks1-lib.rd: Expect the GOT relocation to be
+	against symbol 0.
+
 2007-05-15  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* ld-arm/arm-elf.exp: Add jump19 testcase.

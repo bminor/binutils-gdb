@@ -488,7 +488,7 @@ typedef struct runtime_pdr {
 
 static struct mips_got_entry *mips_elf_create_local_got_entry
   (bfd *, struct bfd_link_info *, bfd *, struct mips_got_info *, asection *,
-   asection *, bfd_vma, unsigned long, struct mips_elf_link_hash_entry *, int);
+   bfd_vma, unsigned long, struct mips_elf_link_hash_entry *, int);
 static bfd_boolean mips_elf_sort_hash_table_f
   (struct mips_elf_link_hash_entry *, void *);
 static bfd_vma mips_elf_high
@@ -2413,16 +2413,14 @@ mips_elf_gotplt_index (struct bfd_link_info *info,
   return got_address - got_value;
 }
 
-/* Return the GOT offset for address VALUE, which was derived from
-   a symbol belonging to INPUT_SECTION.   If there is not yet a GOT
+/* Return the GOT offset for address VALUE.   If there is not yet a GOT
    entry for this value, create one.  If R_SYMNDX refers to a TLS symbol,
    create a TLS GOT entry instead.  Return -1 if no satisfactory GOT
    offset can be found.  */
 
 static bfd_vma
 mips_elf_local_got_index (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
-			  asection *input_section, bfd_vma value,
-			  unsigned long r_symndx,
+			  bfd_vma value, unsigned long r_symndx,
 			  struct mips_elf_link_hash_entry *h, int r_type)
 {
   asection *sgot;
@@ -2432,8 +2430,7 @@ mips_elf_local_got_index (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
 
   entry = mips_elf_create_local_got_entry (abfd, info, ibfd, g, sgot,
-					   input_section, value,
-					   r_symndx, h, r_type);
+					   value, r_symndx, h, r_type);
   if (!entry)
     return MINUS_ONE;
 
@@ -2534,16 +2531,15 @@ mips_elf_global_got_index (bfd *abfd, bfd *ibfd, struct elf_link_hash_entry *h,
   return index;
 }
 
-/* Find a GOT page entry that points to within 32KB of VALUE, which was
-   calculated from a symbol belonging to INPUT_SECTION.  These entries
-   are supposed to be placed at small offsets in the GOT, i.e., within
-   32KB of GP.  Return the index of the GOT entry, or -1 if no entry
-   could be created.  If OFFSETP is nonnull, use it to return the
+/* Find a GOT page entry that points to within 32KB of VALUE.  These
+   entries are supposed to be placed at small offsets in the GOT, i.e.,
+   within 32KB of GP.  Return the index of the GOT entry, or -1 if no
+   entry could be created.  If OFFSETP is nonnull, use it to return the
    offset of the GOT entry from VALUE.  */
 
 static bfd_vma
 mips_elf_got_page (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
-		   asection *input_section, bfd_vma value, bfd_vma *offsetp)
+		   bfd_vma value, bfd_vma *offsetp)
 {
   asection *sgot;
   struct mips_got_info *g;
@@ -2554,8 +2550,7 @@ mips_elf_got_page (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
 
   page = (value + 0x8000) & ~(bfd_vma) 0xffff;
   entry = mips_elf_create_local_got_entry (abfd, info, ibfd, g, sgot,
-					   input_section, page, 0,
-					   NULL, R_MIPS_GOT_PAGE);
+					   page, 0, NULL, R_MIPS_GOT_PAGE);
 
   if (!entry)
     return MINUS_ONE;
@@ -2568,15 +2563,13 @@ mips_elf_got_page (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
   return index;
 }
 
-/* Find a local GOT entry for an R_MIPS_GOT16 relocation against VALUE,
-   which was calculated from a symbol belonging to INPUT_SECTION.
+/* Find a local GOT entry for an R_MIPS_GOT16 relocation against VALUE.
    EXTERNAL is true if the relocation was against a global symbol
    that has been forced local.  */
 
 static bfd_vma
 mips_elf_got16_entry (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
-		      asection *input_section, bfd_vma value,
-		      bfd_boolean external)
+		      bfd_vma value, bfd_boolean external)
 {
   asection *sgot;
   struct mips_got_info *g;
@@ -2592,8 +2585,7 @@ mips_elf_got16_entry (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
 
   entry = mips_elf_create_local_got_entry (abfd, info, ibfd, g, sgot,
-					   input_section, value, 0,
-					   NULL, R_MIPS_GOT16);
+					   value, 0, NULL, R_MIPS_GOT16);
   if (entry)
     return entry->gotidx;
   else
@@ -2626,8 +2618,8 @@ mips_elf_got_offset_from_index (bfd *dynobj, bfd *output_bfd,
 static struct mips_got_entry *
 mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
 				 bfd *ibfd, struct mips_got_info *gg,
-				 asection *sgot, asection *input_section,
-				 bfd_vma value, unsigned long r_symndx,
+				 asection *sgot, bfd_vma value,
+				 unsigned long r_symndx,
 				 struct mips_elf_link_hash_entry *h,
 				 int r_type)
 {
@@ -2708,30 +2700,23 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   MIPS_ELF_PUT_WORD (abfd, value,
 		     (sgot->contents + entry.gotidx));
 
-  /* These GOT entries need a dynamic relocation on VxWorks.  Because
-     the offset between segments is not fixed, the relocation must be
-     against a symbol in the same segment as the original symbol.
-     The easiest way to do this is to take INPUT_SECTION's output
-     section and emit a relocation against its section symbol.  */
+  /* These GOT entries need a dynamic relocation on VxWorks.  */
   if (htab->is_vxworks)
     {
       Elf_Internal_Rela outrel;
-      asection *s, *output_section;
+      asection *s;
       bfd_byte *loc;
       bfd_vma got_address;
-      int dynindx;
 
       s = mips_elf_rel_dyn_section (info, FALSE);
-      output_section = input_section->output_section;
-      dynindx = elf_section_data (output_section)->dynindx;
       got_address = (sgot->output_section->vma
 		     + sgot->output_offset
 		     + entry.gotidx);
 
       loc = s->contents + (s->reloc_count++ * sizeof (Elf32_External_Rela));
       outrel.r_offset = got_address;
-      outrel.r_info = ELF32_R_INFO (dynindx, R_MIPS_32);
-      outrel.r_addend = value - output_section->vma;
+      outrel.r_info = ELF32_R_INFO (STN_UNDEF, R_MIPS_32);
+      outrel.r_addend = value;
       bfd_elf32_swap_reloca_out (abfd, &outrel, loc);
     }
 
@@ -4180,7 +4165,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       if (r_type == R_MIPS_TLS_LDM)
 	{
 	  g = mips_elf_local_got_index (abfd, input_bfd, info,
-					sec, 0, 0, NULL, r_type);
+					0, 0, NULL, r_type);
 	  if (g == MINUS_ONE)
 	    return bfd_reloc_outofrange;
 	}
@@ -4226,7 +4211,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	break;
       else
 	{
-	  g = mips_elf_local_got_index (abfd, input_bfd, info, sec,
+	  g = mips_elf_local_got_index (abfd, input_bfd, info,
 					symbol + addend, r_symndx, h, r_type);
 	  if (g == MINUS_ONE)
 	    return bfd_reloc_outofrange;
@@ -4477,7 +4462,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 
 	  forced = ! mips_elf_local_relocation_p (input_bfd, relocation,
 						  local_sections, FALSE);
-	  value = mips_elf_got16_entry (abfd, input_bfd, info, sec,
+	  value = mips_elf_got16_entry (abfd, input_bfd, info,
 					symbol + addend, forced);
 	  if (value == MINUS_ONE)
 	    return bfd_reloc_outofrange;
@@ -4533,8 +4518,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 0.  */
       if (! local_p)
 	goto got_disp;
-      value = mips_elf_got_page (abfd, input_bfd, info, sec,
-				 symbol + addend, NULL);
+      value = mips_elf_got_page (abfd, input_bfd, info, symbol + addend, NULL);
       if (value == MINUS_ONE)
 	return bfd_reloc_outofrange;
       value = mips_elf_got_offset_from_index (dynobj, abfd, input_bfd, value);
@@ -4543,8 +4527,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 
     case R_MIPS_GOT_OFST:
       if (local_p)
-	mips_elf_got_page (abfd, input_bfd, info, sec,
-			   symbol + addend, &value);
+	mips_elf_got_page (abfd, input_bfd, info, symbol + addend, &value);
       else
 	value = addend;
       overflowed_p = mips_elf_overflow_p (value, 16);
