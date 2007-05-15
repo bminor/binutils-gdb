@@ -1,3 +1,7 @@
+2007-05-15  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* config/unknown.exp: Remove.
+
 2007-05-15  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdb.base/info-proc.exp: Check is_remote.
