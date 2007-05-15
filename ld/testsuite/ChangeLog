@@ -1,5 +1,36 @@
 2007-05-15  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-arm/vxworks1.ld: Swap .bss and .data.
+	* ld-arm/vxworks1-lib.rd: Update accordingly.
+	* ld-arm/vxworks1-lib.td: New test.
+	* ld-arm/arm-elf.exp: Run it.
+
+	* ld-i386/vxworks1.ld: Swap .bss and .data.
+	* ld-i386/vxworks1-lib.rd: Update accordingly.
+	* ld-i386/vxworks1-lib.td: New test.
+	* ld-i386/i386.exp: Run it.
+
+	* ld-mips-elf/vxworks1.ld: Swap .bss and .data.
+	* ld-mips-elf/vxworks1-lib.rd: Update accordingly.
+	* ld-mips-elf/vxworks1.rd: Likewise.
+
+	* ld-powerpc/vxworks1.ld: Swap .bss and .data.
+	* ld-powerpc/vxworks1-lib.rd: Update accordingly.
+	* ld-powerpc/vxworks1-lib.td: New test.
+	* ld-powerpc/powerpc.exp: Run it.
+
+	* ld-sh/vxworks1.ld: Swap .bss and .data.
+	* ld-sh/vxworks1-lib.rd: Update accordingly.
+	* ld-sh/vxworks1-lib.td: New test.
+	* ld-sh/sh-vxworks.exp: Run it.
+
+	* ld-sparc/vxworks1.ld: Swap .bss and .data.
+	* ld-sparc/vxworks1-lib.rd: Update accordingly.
+	* ld-sparc/vxworks1-lib.td: New test.
+	* ld-sparc/sparc.exp: Run it.
+
+2007-05-15  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-mips-elf/vxworks1-lib.rd: Expect the GOT relocation to be
 	against symbol 0.
 

@@ -10,7 +10,7 @@ foreach { gas_option ld_option suffix } $endians {
 	 "$gas_option" {vxworks1-lib.s}
 	 {{readelf --relocs vxworks1-lib.rd}
 	  {objdump -dr vxworks1-lib$suffix.dd}
-	  {readelf --symbols vxworks1-lib.nd}}
+	  {readelf --symbols vxworks1-lib.nd} {readelf -d vxworks1-lib.td}}
 	 "libvxworks1.so"}
 	{"VxWorks executable test 1 (dynamic)" \
 	 "tmpdir/libvxworks1.so -Tvxworks1.ld -q --force-dynamic $ld_option"
