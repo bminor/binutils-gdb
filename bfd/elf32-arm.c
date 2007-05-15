@@ -5213,9 +5213,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_boolean overflow = FALSE;
 	bfd_vma upper_insn = bfd_get_16 (input_bfd, hit_data);
 	bfd_vma lower_insn = bfd_get_16 (input_bfd, hit_data + 2);
-	bfd_signed_vma reloc_signed_max = ((1 << (howto->bitsize - 1)) - 1) >> howto->rightshift;
-	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
-	bfd_vma check;
+	bfd_signed_vma reloc_signed_max = 0xffffe;
+	bfd_signed_vma reloc_signed_min = -0x100000;
 	bfd_signed_vma signed_check;
 
 	/* Need to refetch the addend, reconstruct the top three bits,
@@ -5223,14 +5222,14 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	if (globals->use_rel)
 	  {
 	    bfd_vma S     = (upper_insn & 0x0400) >> 10;
-	    bfd_vma upper = (upper_insn & 0x001f);
+	    bfd_vma upper = (upper_insn & 0x003f);
 	    bfd_vma J1    = (lower_insn & 0x2000) >> 13;
 	    bfd_vma J2    = (lower_insn & 0x0800) >> 11;
 	    bfd_vma lower = (lower_insn & 0x07ff);
 
-	    upper |= J2 << 6;
-	    upper |= J1 << 7;
-	    upper |= ~S << 8;
+	    upper |= J1 << 6;
+	    upper |= J2 << 7;
+	    upper |= (!S) << 8;
 	    upper -= 0x0100; /* Sign extend.  */
 
 	    addend = (upper << 12) | (lower << 1);
@@ -5244,17 +5243,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	relocation -= (input_section->output_section->vma
 		       + input_section->output_offset
 		       + rel->r_offset);
+	signed_check = (bfd_signed_vma) relocation;
 
-	check = relocation >> howto->rightshift;
-
-	/* If this is a signed value, the rightshift just dropped
-	   leading 1 bits (assuming twos complement).  */
-	if ((bfd_signed_vma) relocation >= 0)
-	  signed_check = check;
-	else
-	  signed_check = check | ~((bfd_vma) -1 >> howto->rightshift);
-
-	/* Assumes two's complement.  */
 	if (signed_check > reloc_signed_max || signed_check < reloc_signed_min)
 	  overflow = TRUE;
 
@@ -5266,7 +5256,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  bfd_vma hi = (relocation & 0x0003f000) >> 12;
 	  bfd_vma lo = (relocation & 0x00000ffe) >>  1;
 
-	  upper_insn = (upper_insn & 0xfb30) | (S << 10) | hi;
+	  upper_insn = (upper_insn & 0xfbc0) | (S << 10) | hi;
 	  lower_insn = (lower_insn & 0xd000) | (J1 << 13) | (J2 << 11) | lo;
 	}
 
