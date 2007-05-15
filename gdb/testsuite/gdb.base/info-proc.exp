@@ -24,6 +24,10 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
+if { [is_remote target] } then {
+  continue
+}
+
 set prms_id 0
 set bug_id 0
 
