@@ -2744,6 +2744,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_boolean *failedptr = failedptrarg;
   Elf_Internal_Shdr *this_hdr;
+  unsigned int sh_type;
 
   if (*failedptr)
     {
@@ -2901,9 +2902,18 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
     }
 
   /* Check for processor-specific section types.  */
+  sh_type = this_hdr->sh_type;
   if (bed->elf_backend_fake_sections
       && !(*bed->elf_backend_fake_sections) (abfd, this_hdr, asect))
     *failedptr = TRUE;
+
+  if (sh_type == SHT_NOBITS
+      && elf_elfheader (abfd)->e_phnum == 0)
+    {
+      /* Don't change the header type from NOBITS if we are being
+	 called for strip/objcopy --only-keep-debug.  */
+      this_hdr->sh_type = sh_type;
+    }
 
   /* If the section has relocs, set up a section header for the
      SHT_REL[A] section.  If two relocation sections are required for

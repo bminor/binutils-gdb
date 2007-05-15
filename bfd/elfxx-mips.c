@@ -5593,11 +5593,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 bfd_boolean
 _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
 {
-  register const char *name;
-  unsigned int sh_type;
-
-  name = bfd_get_section_name (abfd, sec);
-  sh_type = hdr->sh_type;
+  const char *name = bfd_get_section_name (abfd, sec);
 
   if (strcmp (name, ".liblist") == 0)
     {
@@ -5697,12 +5693,6 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_flags |= SHF_ALLOC;
       hdr->sh_entsize = 8;
     }
-
-  /* In the unlikely event a special section is empty it has to lose its
-     special meaning.  This may happen e.g. when using `strip' with the
-     "--only-keep-debug" option.  */
-  if (sec->size > 0 && !(sec->flags & SEC_HAS_CONTENTS))
-    hdr->sh_type = sh_type;
 
   /* The generic elf_fake_sections will set up REL_HDR using the default
    kind of relocations.  We used to set up a second header for the

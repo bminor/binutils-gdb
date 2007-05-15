@@ -1,3 +1,11 @@
+2007-05-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4479
+	* elf.c (elf_fake_sections): Don't allow backend to change
+	SHT_NOBITS if called for strip/objcopy --only-keep-debug.
+	* elfxx-mips.c (_bfd_mips_elf_fake_sections): Remove similar
+	fix from here.
+
 2007-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (bfd_elf_string_from_elf_section): Return NULL on
