@@ -775,28 +775,29 @@ run_dump_test "copy-2"
 run_dump_test "copy-3"
 
 if [is_elf_format] {
-    run_dump_test "localize-hidden-1"
     run_dump_test "strip-1"
     run_dump_test "strip-2"
     run_dump_test "strip-3"
+
+    if { [istarget "i*86-*"] || [istarget "x86_64-*-*"] } {
+	# Check to make sure we don't strip a symbol named in relocations.
+	set test "objcopy keeps symbols needed by relocs"
+
+	set srcfile $srcdir/$subdir/needed-by-reloc.s
+
+	if {![binutils_assemble $srcfile tmpdir/bintest.o]} then {
+	    unresolved $test
+	} else {
+	    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS --strip-symbol=foo tmpdir/bintest.o ${copyfile}.o"]
+
+	    if [regexp "not stripping symbol `foo' because it is named in a relocation" $got] {
+		pass $test
+	    } else {
+		fail $test
+	    }
+	}
+    }
+
+    run_dump_test "localize-hidden-1"
 }
 run_dump_test "localize-hidden-2"
-
-if { [istarget "i*86-*"] || [istarget "x86_64-*-*"] } {
-    # Check to make sure we don't strip a symbol named in relocations.
-    set test "objcopy doesn't strip needed symbols"
-
-    set srcfile $srcdir/$subdir/needed-by-reloc.s
-
-    if {![binutils_assemble $srcfile tmpdir/bintest.o]} then {
-        unresolved $test
-    } else {
-        set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS --strip-symbol=foo tmpdir/bintest.o ${copyfile}.o"]
-
-        if [regexp "not stripping symbol `foo' because it is named in a relocation" $got] {
-            pass $test
-        } else {
-            fail $test
-        }
-    }
-}

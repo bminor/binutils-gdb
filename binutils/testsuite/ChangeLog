@@ -1,3 +1,7 @@
+2007-05-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/objcopy.exp: Only run needed-by-reloc test for ELF.
+
 2007-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/needed-by-reloc.s: Use .long rather than .4byte.
