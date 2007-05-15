@@ -1,4 +1,4 @@
-#name: br-isaa.d
+#name: br-isab.d
 #objdump: -d
 #as: -march=isab -pcrel
 

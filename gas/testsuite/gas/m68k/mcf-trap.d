@@ -7,9 +7,9 @@
 Disassembly of section .text:
 
 0+ <.text>:
-[ 0-9a-f]+:	51fc           	tpf
-[ 0-9a-f]+:	51fa 1234      	tpfw #4660
-[ 0-9a-f]+:	51fb 1234 5678 	tpfl #305419896
-[ 0-9a-f]+:	51fc           	tpf
-[ 0-9a-f]+:	51fa 1234      	tpfw #4660
-[ 0-9a-f]+:	51fb 1234 5678 	tpfl #305419896
+[ 0-9a-f]+:	51fc           	t[rap]*f
+[ 0-9a-f]+:	51fa 1234      	t[rap]*fw #4660
+[ 0-9a-f]+:	51fb 1234 5678 	t[rap]*fl #305419896
+[ 0-9a-f]+:	51fc           	t[rap]*f
+[ 0-9a-f]+:	51fa 1234      	t[rap]*fw #4660
+[ 0-9a-f]+:	51fb 1234 5678 	t[rap]*fl #305419896

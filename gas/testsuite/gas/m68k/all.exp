@@ -54,7 +54,9 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
     run_dump_test mcf-emac
     run_dump_test mcf-fpu
     run_dump_test mcf-trap
-    run_dump_test arch-cpu-1
+    if { [istarget *-*-elf] || [istarget *-*-linux*] } then {
+      run_dump_test arch-cpu-1
+    }
     run_dump_test cpu32
 
     run_dump_test br-isaa
@@ -63,6 +65,10 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
 
     run_dump_test ctrl-1
     run_dump_test ctrl-2
+
+    if { [istarget *-*-netbsd] } then {
+      run_dump_test p3041
+    }
 
     set testname "68000 operands"
     gas_run "operands.s" "-m68000" "2>err.out"

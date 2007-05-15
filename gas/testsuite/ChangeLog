@@ -1,3 +1,19 @@
+2007-05-15  Vincent Riviere  <vincent.riviere@freesbee.fr>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR gas/3041
+	* gas/m68k/p3041.s: New test case.
+	* gas/m68k/p3041.d: New expected disassembly.
+	* gas/m68k/all.exp: Run new test for m68k-*-netbsd toolchains.
+	Only run arch-cpu-1 test for ELF based toolchains.
+
+	Tidy ups for m68k-netbsd gas toolchain:
+	* gas/m68k/cpu32.d: Allow for extra text after expected
+	disassembly.
+	* gas/m68k/mcf-trap.d: Allow for alternative trap mnemonics.
+	* gas/m68k/br-isab.d: Fix name of test.
+	* gas/m68k/br-isac.d: Fix name of test.
+	
 2007-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4502

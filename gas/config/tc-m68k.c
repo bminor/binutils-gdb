@@ -1160,8 +1160,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	   && S_IS_WEAK (fixp->fx_addsy)
 	   && ! bfd_is_und_section (S_GET_SEGMENT (fixp->fx_addsy)))
     /* PR gas/3041 Adjust addend in order to force bfd_install_relocation()
-       to put a zero value into frags referencing a weak symbol.  */
-    reloc->addend = - S_GET_VALUE (fixp->fx_addsy);
+       to put the symbol offset into frags referencing a weak symbol.  */
+    reloc->addend = fixp->fx_addnumber
+		    - (S_GET_VALUE (fixp->fx_addsy) * 2);
   else
     reloc->addend = 0;
 #else
@@ -4702,10 +4703,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       return;
     }
 #elif defined(OBJ_AOUT)
-  /* PR gas/3041 Always put zero values into frags referencing a weak symbol.  */
+  /* PR gas/3041 Do not fix frags referencing a weak symbol.  */
   if (fixP->fx_addsy && S_IS_WEAK (fixP->fx_addsy))
     {
       memset (buf, 0, fixP->fx_size);
+      fixP->fx_addnumber = val;	/* Remember value for emit_reloc.  */
       return;
     }
 #endif

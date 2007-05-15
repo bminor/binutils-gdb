@@ -32,3 +32,4 @@ Disassembly of section .text:
 [ 0-9a-f]+:	f810 1d00      	tblsnb %a0@,%d1
 [ 0-9a-f]+:	f810 1d40      	tblsnw %a0@,%d1
 [ 0-9a-f]+:	f810 1d80      	tblsnl %a0@,%d1
+#...
