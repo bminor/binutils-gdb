@@ -182,6 +182,8 @@ struct gdbarch_tdep
 #define LOWEST_PC (gdbarch_tdep (current_gdbarch)->lowest_pc)
 #endif
 
+int arm_software_single_step (struct regcache *);
+
 /* Functions exported from armbsd-tdep.h.  */
 
 /* Return the appropriate register set for the core section identified

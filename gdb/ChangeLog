@@ -1,3 +1,31 @@
+2007-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/arm/embed.mt (DEPRECATED_TM_FILE): Set to tm-arm.h.
+	* config/arm/tm-embed.h: Delete file.
+
+	* arm-tdep.h (arm_software_single_step): Declare.
+	* arm-tdep.c (arm_software_single_step): Make global.
+	(arm_gdbarch_init): Move set_gdbarch_software_single_step call
+	from here to ...
+	* arm-linux-tdep.c (arm_linux_init_abi): ... here ...
+	* armnbsd-tdep.c (arm_netbsd_init_abi_common): ... here ...
+	* armobsd-tdep.c (armobsd_init_abi): ... here ...
+	* arm-wince-tdep.c (arm_wince_init_abi): ... and here.
+
+	* arm-tdep.c (ARM_LE_BREAKPOINT, ARM_BE_BREAKPOINT): No longer
+	allow defines to be overriden by TM file.
+	(THUMB_LE_BREAKPOINT, THUMB_BE_BREAKPOINT): Likewise.  Also,
+	change default to {0xbe,0xbe}.
+	* armobsd-tdep.c (arm_obsd_thumb_le_breakpoint,
+	arm_obsd_thumb_be_breakpoint): New global variables.
+	(armobsd_init_abi): Override tdep->thumb_breakpoint and
+	tdep->thumb_breakpoint_size.
+	* arm-wince-tdep.c (arm_wince_thumb_le_breakpoint): New variable.
+	(arm_wince_init_abi): Override tdep->thumb_breakpoint and 
+	tdep->thumb_breakpoint_size.
+
+	* arm-tdep.c (arm_gdbarch_init): Add set_gdbarch_skip_trampoline_code.
+
 2007-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention removed "set mips stack-arg-size" and "set mips

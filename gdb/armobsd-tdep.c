@@ -72,6 +72,10 @@ static const struct tramp_frame armobsd_sigframe =
 };
 
 
+/* Override default thumb breakpoints.  */
+static const char arm_obsd_thumb_le_breakpoint[] = {0xfe, 0xdf};
+static const char arm_obsd_thumb_be_breakpoint[] = {0xdf, 0xfe};
+
 static void
 armobsd_init_abi (struct gdbarch_info info,
 		  struct gdbarch *gdbarch)
@@ -96,6 +100,23 @@ armobsd_init_abi (struct gdbarch_info info,
 
   /* OpenBSD/arm uses -fpcc-struct-return by default.  */
   tdep->struct_return = pcc_struct_return;
+
+  /* Single stepping.  */
+  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
+
+  /* Breakpoints.  */
+  switch (info.byte_order)
+    {
+    case BFD_ENDIAN_BIG:
+      tdep->thumb_breakpoint = arm_obsd_thumb_be_breakpoint;
+      tdep->thumb_breakpoint_size = sizeof (arm_obsd_thumb_be_breakpoint);
+      break;
+
+    case BFD_ENDIAN_LITTLE:
+      tdep->thumb_breakpoint = arm_obsd_thumb_le_breakpoint;
+      tdep->thumb_breakpoint_size = sizeof (arm_obsd_thumb_le_breakpoint);
+      break;
+    }
 }
 
 

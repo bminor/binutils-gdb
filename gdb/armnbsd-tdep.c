@@ -68,6 +68,9 @@ arm_netbsd_init_abi_common (struct gdbarch_info info,
 
   tdep->jb_pc = ARM_NBSD_JB_PC;
   tdep->jb_elt_size = ARM_NBSD_JB_ELEMENT_SIZE;
+
+  /* Single stepping.  */
+  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
 }
   
 static void

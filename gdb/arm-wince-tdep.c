@@ -30,6 +30,7 @@
 #include "arm-tdep.h"
 
 static const char arm_wince_le_breakpoint[] = { 0x10, 0x00, 0x00, 0xe6 };
+static const char arm_wince_thumb_le_breakpoint[] = { 0xfe, 0xdf };
 
 /* Description of the longjmp buffer.  */
 #define ARM_WINCE_JB_ELEMENT_SIZE	INT_REGISTER_SIZE
@@ -42,6 +43,8 @@ arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->arm_breakpoint = arm_wince_le_breakpoint;
   tdep->arm_breakpoint_size = sizeof (arm_wince_le_breakpoint);
+  tdep->thumb_breakpoint = arm_wince_thumb_le_breakpoint;
+  tdep->thumb_breakpoint_size = sizeof (arm_wince_thumb_le_breakpoint);
   tdep->struct_return = pcc_struct_return;
 
   tdep->fp_model = ARM_FLOAT_SOFT_VFP;
@@ -57,6 +60,9 @@ arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+
+  /* Single stepping.  */
+  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
 }
 
 static enum gdb_osabi

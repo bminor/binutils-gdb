@@ -1904,7 +1904,7 @@ arm_get_next_pc (CORE_ADDR pc)
    single-step support.  We find the target of the coming instruction
    and breakpoint it.  */
 
-static int
+int
 arm_software_single_step (struct regcache *regcache)
 {
   /* NOTE: This may insert the wrong breakpoint instruction when
@@ -1989,21 +1989,10 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
    instruction to force a trap.  This can be handled by by the
    abi-specific code during establishment of the gdbarch vector.  */
 
-
-/* NOTE rearnsha 2002-02-18: for now we allow a non-multi-arch gdb to
-   override these definitions.  */
-#ifndef ARM_LE_BREAKPOINT
 #define ARM_LE_BREAKPOINT {0xFE,0xDE,0xFF,0xE7}
-#endif
-#ifndef ARM_BE_BREAKPOINT
 #define ARM_BE_BREAKPOINT {0xE7,0xFF,0xDE,0xFE}
-#endif
-#ifndef THUMB_LE_BREAKPOINT
-#define THUMB_LE_BREAKPOINT {0xfe,0xdf}
-#endif
-#ifndef THUMB_BE_BREAKPOINT
-#define THUMB_BE_BREAKPOINT {0xdf,0xfe}
-#endif
+#define THUMB_LE_BREAKPOINT {0xbe,0xbe}
+#define THUMB_BE_BREAKPOINT {0xbe,0xbe}
 
 static const char arm_default_arm_le_breakpoint[] = ARM_LE_BREAKPOINT;
 static const char arm_default_arm_be_breakpoint[] = ARM_BE_BREAKPOINT;
@@ -2939,6 +2928,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
 
+  /* Skip trampolines.  */
+  set_gdbarch_skip_trampoline_code (gdbarch, arm_skip_stub);
+
   /* The stack grows downward.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
@@ -2968,10 +2960,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Returning results.  */
   set_gdbarch_return_value (gdbarch, arm_return_value);
-
-  /* Single stepping.  */
-  /* XXX For an RDI target we should ask the target if it can single-step.  */
-  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
 
   /* Disassembly.  */
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_arm);
