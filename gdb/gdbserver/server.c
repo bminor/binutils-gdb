@@ -259,6 +259,15 @@ handle_query (char *own_buf, int *new_packet_len_p)
 {
   static struct inferior_list_entry *thread_ptr;
 
+  /* Reply the current thread id.  */
+  if (strcmp ("qC", own_buf) == 0)
+    {
+      thread_ptr = all_threads.head;
+      sprintf (own_buf, "QC%x",
+	thread_to_gdb_id ((struct thread_info *)thread_ptr));
+      return;
+    }
+
   if (strcmp ("qSymbol::", own_buf) == 0)
     {
       if (the_target->look_up_symbols != NULL)
