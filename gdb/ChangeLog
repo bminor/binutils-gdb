@@ -1,3 +1,9 @@
+2007-05-16  Richard Sandiford  <richard@codesourcery.com>
+
+	* configure.ac: Allow sysroots to be relocated under $prefix as
+	well as $exec_prefix.
+	* configure: Regenerate.
+
 2007-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* hppa-hpux-tdep.c: Do not include <dl.h> or <machine/save_state.h>.
