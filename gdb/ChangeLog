@@ -1,3 +1,8 @@
+2007-05-16  Alfred M. Szmidt  <ams@gnu.org>
+
+	* reply_mig_hack.awk: Check for `auto const mach_msg_type_t'
+	declarations as well.
+
 2007-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/arm/embed.mt (DEPRECATED_TM_FILE): Set to tm-arm.h.
