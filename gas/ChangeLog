@@ -1,3 +1,7 @@
+2007-05-16  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (v7m_psrs): Add uppercase PSR names and xpsr.
+
 2007-05-15  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* app.c (do_scrub_chars): Don't damage \@ pseudo-variables.

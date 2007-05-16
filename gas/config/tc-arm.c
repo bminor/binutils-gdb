@@ -14499,20 +14499,21 @@ static const struct asm_psr psrs[] =
 /* Table of V7M psr names.  */
 static const struct asm_psr v7m_psrs[] =
 {
-  {"apsr",	0 },
-  {"iapsr",	1 },
-  {"eapsr",	2 },
-  {"psr",	3 },
-  {"ipsr",	5 },
-  {"epsr",	6 },
-  {"iepsr",	7 },
-  {"msp",	8 },
-  {"psp",	9 },
-  {"primask",	16},
-  {"basepri",	17},
-  {"basepri_max", 18},
-  {"faultmask",	19},
-  {"control",	20}
+  {"apsr",	  0 }, {"APSR",		0 },
+  {"iapsr",	  1 }, {"IAPSR",	1 },
+  {"eapsr",	  2 }, {"EAPSR",	2 },
+  {"psr",	  3 }, {"PSR",		3 },
+  {"xpsr",	  3 }, {"XPSR",		3 }, {"xPSR",	  3 },
+  {"ipsr",	  5 }, {"IPSR",		5 },
+  {"epsr",	  6 }, {"EPSR",		6 },
+  {"iepsr",	  7 }, {"IEPSR",	7 },
+  {"msp",	  8 }, {"MSP",		8 },
+  {"psp",	  9 }, {"PSP",		9 },
+  {"primask",	  16}, {"PRIMASK",	16},
+  {"basepri",	  17}, {"BASEPRI",	17},
+  {"basepri_max", 18}, {"BASEPRI_MAX",	18},
+  {"faultmask",	  19}, {"FAULTMASK",	19},
+  {"control",	  20}, {"CONTROL",	20}
 };
 
 /* Table of all shift-in-operand names.	 */
