@@ -786,8 +786,8 @@ do_examine (struct format_data fmt, CORE_ADDR addr)
 	    value_free (last_examine_value);
 
 	  /* The value to be displayed is not fetched greedily.
-	     Instead, to avoid the posibility of a fetched value not
-	     being used, its retreval is delayed until the print code
+	     Instead, to avoid the possibility of a fetched value not
+	     being used, its retrieval is delayed until the print code
 	     uses it.  When examining an instruction stream, the
 	     disassembler will perform its own memory fetch using just
 	     the address stored in LAST_EXAMINE_VALUE.  FIXME: Should

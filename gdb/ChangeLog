@@ -1,3 +1,7 @@
+2007-05-16  Chris Dearman  <chris@mips.com>
+
+	* printcmd.c (do_examine): Fix typos in a comment.
+
 2007-05-16  Richard Sandiford  <richard@codesourcery.com>
 
 	* configure.ac: Allow sysroots to be relocated under $prefix as
