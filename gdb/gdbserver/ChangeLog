@@ -11,8 +11,7 @@
 	(input_interrupt): Expose on USE_WIN32API too.  Fix whitespace.
 	(check_remote_input_interrupt_request): New function.
 	* server.h (check_remote_input_interrupt_request): Declare.
-
-	* win32-low.(winapi_DebugBreakProcess,
+	* win32-low.c (winapi_DebugBreakProcess,
 	winapi_GenerateConsoleCtrlEvent): New typedefs.
 	(get_child_debug_event): Lower Win32 debug event polling from 1 sec
 	to 250 ms.
