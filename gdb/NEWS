@@ -168,6 +168,11 @@ Scheme support
 	GDB could work with an older version of Guile to debug
 	the interpreter and Scheme programs running in it.
 
+set mips stack-arg-size
+set mips saved-gpreg-size
+
+	Use "set mips abi" to control parameter passing for MIPS.
+
 *** Changes in GDB 6.6
 
 * New targets

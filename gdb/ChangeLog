@@ -1,5 +1,23 @@
 2007-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Mention removed "set mips stack-arg-size" and "set mips
+	saved-gpreg-size".
+
+	* mips-tdep.c (MIPS32_REGSIZE, MIPS64_REGSIZE): New constants.
+	(size_auto, size_32, size_64, size_enums, mips_abi_regsize_string)
+	(mips_stack_argsize_string, mips_stack_argsize): Delete.
+	(mips_abi_regsize): Simplify.
+	(mips_eabi_push_dummy_call, mips_n32n64_push_dummy_call)
+	(mips_n32n64_return_value, mips_o32_push_dummy_call)
+	(mips_o32_return_value, mips_o64_push_dummy_call)
+	(mips_o64_return_value): Propogate constant register sizes.  Use the
+	ABI register size instead of mips_stack_argsize.
+	(mips_dump_tdep): Don't print mips_stack_argsize.
+	(_initialize_mips_tdep): Remove saved-gpreg-size and stack-arg-size
+	settings.
+
+2007-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* config/mips/linux.mt (DEPRECATED_TM_FILE): Delete.
 	* config/mips/tm-linux.h: Delete.
 	* mips-linux-tdep.c (mips_svr4_so_ops): New.

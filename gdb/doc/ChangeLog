@@ -1,3 +1,8 @@
+2007-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (MIPS): Remove documentation for set mips saved-gpreg-size,
+	show mips saved-gpreg-size, and set mips stack-arg-size.
+
 2007-05-14  Bob Wilson  <bob.wilson@acm.org>
 	
 	* all-cfg.texi (GDBTUI): New.

@@ -15184,33 +15184,6 @@ Several MIPS-specific commands are available when debugging MIPS
 programs:
 
 @table @code
-@item set mips saved-gpreg-size @var{size}
-@kindex set mips saved-gpreg-size
-@cindex MIPS GP register size on stack
-Set the size of MIPS general-purpose registers saved on the stack.
-The argument @var{size} can be one of the following:
-
-@table @samp
-@item 32
-32-bit GP registers
-@item 64
-64-bit GP registers
-@item auto
-Use the target's default setting or autodetect the saved size from the
-information contained in the executable.  This is the default
-@end table
-
-@item show mips saved-gpreg-size
-@kindex show mips saved-gpreg-size
-Show the current size of MIPS GP registers on the stack.
-
-@item set mips stack-arg-size @var{size}
-@kindex set mips stack-arg-size
-@cindex MIPS stack space for arguments
-Set the amount of stack space reserved for arguments to functions.
-The argument can be one of @code{"32"}, @code{"64"} or @code{"auto"}
-(the default).
-
 @item set mips abi @var{arg}
 @kindex set mips abi
 @cindex set ABI for MIPS
