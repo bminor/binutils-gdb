@@ -901,7 +901,7 @@ static CORE_ADDR interp_text_sect_high;
 static CORE_ADDR interp_plt_sect_low;
 static CORE_ADDR interp_plt_sect_high;
 
-static int
+int
 svr4_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   return ((pc >= interp_text_sect_low && pc < interp_text_sect_high)
@@ -1556,7 +1556,7 @@ svr4_lp64_fetch_link_map_offsets (void)
 }
 
 
-static struct target_so_ops svr4_so_ops;
+struct target_so_ops svr4_so_ops;
 
 extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */
 

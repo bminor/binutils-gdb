@@ -67,11 +67,21 @@ solib_ops (struct gdbarch *gdbarch)
   struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
   return *ops;
 }
+
+/* Set the solib operations for GDBARCH to NEW_OPS.  */
+
+void
+set_solib_ops (struct gdbarch *gdbarch, struct target_so_ops *new_ops)
+{
+  struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
+  *ops = new_ops;
+}
 
 
 /* external data declarations */
 
-/* FIXME: gdbarch needs to control this variable */
+/* FIXME: gdbarch needs to control this variable, or else every
+   configuration needs to call set_solib_ops.  */
 struct target_so_ops *current_target_so_ops;
 
 /* local data declarations */

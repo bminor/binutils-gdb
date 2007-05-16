@@ -1,3 +1,20 @@
+2007-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/mips/linux.mt (DEPRECATED_TM_FILE): Delete.
+	* config/mips/tm-linux.h: Delete.
+	* mips-linux-tdep.c (mips_svr4_so_ops): New.
+	(mips_linux_in_dynsym_resolve_code): Make static.  Use
+	svr4_in_dynsym_resolve_code.
+	(mips_linux_init_abi): Initialize mips_svr4_so_ops.  Call
+	set_solib_ops.
+	* solib-svr4.c (svr4_in_dynsym_resolve_code, svr4_so_ops): Make
+	global.
+	* solib-svr4.h (svr4_so_ops, svr4_in_dynsym_resolve_code): Declare.
+	* Makefile.in (mips-linux-tdep.o): Update.
+	* solib.c (set_solib_ops): New.
+	(current_target_so_ops): Update comment.
+	* solib.h (set_solib_ops): New prototype.
+
 2007-05-16  Chris Dearman  <chris@mips.com>
 
 	* printcmd.c (do_examine): Fix typos in a comment.

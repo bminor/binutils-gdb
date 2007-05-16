@@ -23,6 +23,9 @@
 #define SOLIB_SVR4_H
 
 struct objfile;
+struct target_so_ops;
+
+extern struct target_so_ops svr4_so_ops;
 
 /* Critical offsets and sizes which describe struct r_debug and
    struct link_map on SVR4-like targets.  All offsets and sizes are
@@ -80,5 +83,9 @@ extern struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook) (void
    for ILP32 and LP64 SVR4 systems.  */
 extern struct link_map_offsets *svr4_ilp32_fetch_link_map_offsets (void);
 extern struct link_map_offsets *svr4_lp64_fetch_link_map_offsets (void);
+
+/* Return 1 if PC lies in the dynamic symbol resolution code of the
+   SVR4 run time loader.  */
+int svr4_in_dynsym_resolve_code (CORE_ADDR pc);
 
 #endif /* solib-svr4.h */

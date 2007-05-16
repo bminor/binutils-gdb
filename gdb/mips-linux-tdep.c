@@ -34,8 +34,12 @@
 #include "tramp-frame.h"
 #include "gdbtypes.h"
 #include "solib.h"
+#include "solib-svr4.h"
+#include "solist.h"
 #include "symtab.h"
 #include "mips-linux-tdep.h"
+
+static struct target_so_ops mips_svr4_so_ops;
 
 /* Figure out where the longjmp will land.
    We expect the first arg to be a pointer to the jmp_buf structure
@@ -617,12 +621,12 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
 /* Return non-zero iff PC belongs to the dynamic linker resolution
    code or to a stub.  */
 
-int
+static int
 mips_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   /* Check whether PC is in the dynamic linker.  This also checks
      whether it is in the .plt section, which MIPS does not use.  */
-  if (in_solib_dynsym_resolve_code (pc))
+  if (svr4_in_dynsym_resolve_code (pc))
     return 1;
 
   /* Pattern match for the stub.  It would be nice if there were a
@@ -1060,6 +1064,16 @@ mips_linux_init_abi (struct gdbarch_info info,
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  /* Initialize this lazily, to avoid an initialization order
+     dependency on solib-svr4.c's _initialize routine.  */
+  if (mips_svr4_so_ops.in_dynsym_resolve_code == NULL)
+    {
+      mips_svr4_so_ops = svr4_so_ops;
+      mips_svr4_so_ops.in_dynsym_resolve_code
+	= mips_linux_in_dynsym_resolve_code;
+    }
+  set_solib_ops (gdbarch, &mips_svr4_so_ops);
 }
 
 void

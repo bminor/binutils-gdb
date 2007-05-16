@@ -26,6 +26,7 @@
 /* Forward decl's for prototypes */
 struct so_list;
 struct target_ops;
+struct target_so_ops;
 
 /* Called when we free all symtabs, to free the shared library information
    as well. */
@@ -56,5 +57,10 @@ extern int in_solib_dynsym_resolve_code (CORE_ADDR);
 /* Discard symbols that were auto-loaded from shared libraries. */
 
 extern void no_shared_libraries (char *ignored, int from_tty);
+
+/* Set the solib operations for GDBARCH to NEW_OPS.  */
+
+extern void set_solib_ops (struct gdbarch *gdbarch,
+			   struct target_so_ops *new_ops);
 
 #endif /* SOLIB_H */
