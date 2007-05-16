@@ -80,7 +80,7 @@ parse_phase == 4 {
   print; next;
 }
 
-parse_phase == 5 && /^[ \t]*static const mach_msg_type_t/ {
+parse_phase == 5 && /^[ \t]*(auto|static) const mach_msg_type_t/ {
   # The type check structure for an argument.
   arg_check_name[num_checks] = $4;
   num_checks++;
