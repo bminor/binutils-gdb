@@ -1,3 +1,9 @@
+2007-05-16  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_adjust_dynamic_copy): Align dynamic bss
+	section to the minimum alignment.
+
 2007-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 

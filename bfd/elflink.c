@@ -2616,33 +2616,33 @@ bfd_boolean
 _bfd_elf_adjust_dynamic_copy (struct elf_link_hash_entry *h,
 			      asection *dynbss)
 {
-  unsigned int power_of_two, orig_power_of_two;
+  unsigned int power_of_two;
   bfd_vma mask;
   asection *sec = h->root.u.def.section;
 
   /* The section aligment of definition is the maximum alignment
-     requirement of symbols defined in the section.  */
-  power_of_two = bfd_get_section_alignment (dynbss->owner, dynbss);
-  orig_power_of_two = bfd_get_section_alignment (sec->owner, sec);
-
-  if (orig_power_of_two > power_of_two)
-    {
-      /* Adjust the section alignment if needed.  */
-      if (! bfd_set_section_alignment (dynbss->owner, dynbss,
-				       orig_power_of_two))
-	return FALSE;
-    }
-
-  /* We make sure that the symbol will be aligned properly.  Since we
-     don't know its alignment requirement, we start with the maximum
-     alignment and check low bits of the symbol address for the
-     minimum alignment.  */
-  mask = ((bfd_vma) 1 << orig_power_of_two) - 1;
+     requirement of symbols defined in the section.  Since we don't
+     know the symbol alignment requirement, we start with the
+     maximum alignment and check low bits of the symbol address
+     for the minimum alignment.  */
+  power_of_two = bfd_get_section_alignment (sec->owner, sec);
+  mask = ((bfd_vma) 1 << power_of_two) - 1;
   while ((h->root.u.def.value & mask) != 0)
     {
        mask >>= 1;
-       --orig_power_of_two;
+       --power_of_two;
     }
+
+  if (power_of_two > bfd_get_section_alignment (dynbss->owner,
+						dynbss))
+    {
+      /* Adjust the section alignment if needed.  */
+      if (! bfd_set_section_alignment (dynbss->owner, dynbss,
+				       power_of_two))
+	return FALSE;
+    }
+
+  /* We make sure that the symbol will be aligned properly.  */
   dynbss->size = BFD_ALIGN (dynbss->size, mask + 1);
 
   /* Define the symbol as being at this point in DYNBSS.  */
