@@ -40,8 +40,7 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-# are we on a target board?
-if ![isnative] then {
+if {[skip_shlib_tests]} {
     return 0
 }
 
@@ -75,6 +74,8 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+gdb_load_shlibs $lib1 $lib2
+
 send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
 send_gdb "set print address off\n" ; gdb_expect -re "$gdb_prompt $"
 send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"

@@ -22,9 +22,8 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-# are we on a target board
-if ![isnative] then {
-    return
+if {[skip_shlib_tests]} {
+    return 0
 }
 
 set testfile "so-impl-ld"
@@ -61,6 +60,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+gdb_load_shlibs $lib_sl
 
 # This program implicitly loads SOM shared libraries.
 #

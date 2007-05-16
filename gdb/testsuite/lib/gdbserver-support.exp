@@ -164,7 +164,7 @@ proc gdbserver_spawn { child_args } {
 	set gdbserver_host_exec $host_exec
 	set gdbserver_host_mtime [file mtime $host_exec]
 	if [is_remote target] {
-	    set gdbserver_server_exec [remote_download target $host_exec /tmp/[file tail $host_exec].[pid]]
+	    set gdbserver_server_exec [gdb_download $host_exec]
 	} else {
 	    set gdbserver_server_exec $host_exec
 	}

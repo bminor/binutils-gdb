@@ -26,8 +26,15 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-# are we on a target board?
-if ![isnative] then {
+if {[skip_shlib_tests]} {
+    return 0
+}
+
+# TODO: Use LoadLibrary on these targets instead of dlopen.
+if {([istarget arm*-*-symbianelf*]
+     || [istarget *-*-mingw*]
+     || [istarget *-*-cygwin*]
+     || [istarget *-*-pe*])} {
     return 0
 }
 
@@ -40,16 +47,15 @@ set shlibdir ${objdir}/${subdir}
 set libsrc  $srcdir/$subdir/$libfile.c
 set lib_sl  $objdir/$subdir/$libfile.sl
 
-set dl_lib_flag ""
+set lib_opts debug
+set exec_opts [list debug additional_flags=-DSHLIB_DIR\=\"${shlibdir}\"]
+
 switch -glob [istarget] {
     "hppa*-hp-hpux*" { }
-    "*-*-linux*"     { set dl_lib_flag "libs=-ldl" }
-    "*-*-solaris*"   { set dl_lib_flag "libs=-ldl" }
+    "*-*-linux*"     { lappend exec_opts "libs=-ldl" }
+    "*-*-solaris*"   { lappend exec_opts "libs=-ldl" }
     default          { }
 }
-
-set lib_opts debug
-set exec_opts [list debug $dl_lib_flag additional_flags=-DSHLIB_DIR\=\"${shlibdir}\"]
 
 if [get_compiler_info ${binfile}] {
     return -1
@@ -67,6 +73,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+gdb_load_shlibs $lib_sl
 
 if [target_info exists gdb_stub] {
     gdb_step_for_stub;

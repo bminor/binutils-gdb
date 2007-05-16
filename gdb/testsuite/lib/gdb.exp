@@ -1212,6 +1212,29 @@ proc skip_fortran_tests {} {
     return 0
 }
 
+# Return a 1 if we should skip shared library tests.
+
+proc skip_shlib_tests {} {
+    # Run the shared library tests on native systems.
+    if {[isnative]} {
+	return 0
+    }
+
+    # An abbreviated list of remote targets where we should be able to
+    # run shared library tests.
+    if {([istarget *-*-linux*]
+	 || [istarget *-*-*bsd*]
+	 || [istarget *-*-solaris2*]
+	 || [istarget arm*-*-symbianelf*]
+	 || [istarget *-*-mingw*]
+	 || [istarget *-*-cygwin*]
+	 || [istarget *-*-pe*])} {
+	return 0
+    }
+
+    return 1
+}
+
 # Run a test on the target to see if it supports vmx hardware.  Return 0 if so, 
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 
@@ -1500,9 +1523,13 @@ proc gdb_compile {source dest type options} {
      foreach opt $options {
         if [regexp {^shlib=(.*)} $opt dummy_var shlib_name] {
             if [test_compiler_info "xlc-*"] {
-               # IBM xlc compiler doesn't accept shared library named other  
-               # than .so: use "-Wl," to bypass this
-               lappend source "-Wl,$shlib_name"
+		# IBM xlc compiler doesn't accept shared library named other
+		# than .so: use "-Wl," to bypass this
+		lappend source "-Wl,$shlib_name"
+	    } elseif { ([istarget "*-*-mingw*"]
+			|| [istarget *-*-cygwin*]
+			|| [istarget *-*-pe*])} {
+		lappend source "${shlib_name}.a"
             } else {
                lappend source $shlib_name
             }
@@ -1560,8 +1587,13 @@ proc gdb_compile {source dest type options} {
     }
 
     set result [target_compile $source $dest $type $options];
+
+    # Prune uninteresting compiler (and linker) output.
+    regsub "Creating library file: \[^\r\n\]*\[\r\n\]+" $result "" result
+
     regsub "\[\r\n\]*$" "$result" "" result;
     regsub "^\[\r\n\]*" "$result" "" result;
+
     if { $result != "" && [lsearch $options quiet] == -1} {
 	clone_output "gdb compile failed, $result"
     }
@@ -1657,6 +1689,12 @@ proc gdb_compile_shlib {sources dest options} {
           lappend link_options "additional_flags=-qmkshrobj"
        } else {
           lappend link_options "additional_flags=-shared"
+
+	   if { ([istarget "*-*-mingw*"]
+		 || [istarget *-*-cygwin*]
+		 || [istarget *-*-pe*])} {
+	       lappend link_options "additional_flags=-Wl,--out-implib,${dest}.a"
+	   }
        }
        if {[gdb_compile "${objects}" "${dest}" executable $link_options] != ""} {
            return -1
@@ -1963,6 +2001,37 @@ proc gdb_load_cmd { args } {
     return -1
 }
 
+# gdb_download
+#
+# Copy a file to the remote target and return its target filename.
+# Schedule the file to be deleted at the end of this test.
+
+proc gdb_download { filename } {
+    global cleanfiles
+
+    set destname [remote_download target $filename]
+    lappend cleanfiles $destname
+    return $destname
+}
+
+# gdb_load_shlibs LIB...
+#
+# Copy the listed libraries to the target.
+
+proc gdb_load_shlibs { args } {
+    if {![is_remote target]} {
+	return
+    }
+
+    foreach file $args {
+	gdb_download $file
+    }
+
+    # Even if the target supplies full paths for shared libraries,
+    # they may not be paths for this system.
+    gdb_test "set solib-search-path [file dirname [lindex $args 0]]" "" ""
+}
+
 #
 # gdb_load -- load a file into the debugger.
 # Many files in config/*.exp override this procedure.
@@ -1991,7 +2060,10 @@ proc gdb_continue { function } {
 
 proc default_gdb_init { args } {
     global gdb_wrapper_initialized
+    global cleanfiles
     
+    set cleanfiles {}
+
     gdb_clear_suppressed;
 
     # Make sure that the wrapper is rebuilt
@@ -2023,7 +2095,15 @@ proc gdb_init { args } {
 }
 
 proc gdb_finish { } {
-    gdb_exit;
+    global cleanfiles
+
+    # Exit first, so that the files are no longer in use.
+    gdb_exit
+
+    if { [llength $cleanfiles] > 0 } {
+	eval remote_file target delete $cleanfiles
+	set cleanfiles {}
+    }
 }
 
 global debug_format

@@ -25,6 +25,10 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+if {[skip_shlib_tests]} {
+    return 0
+}
+
 set testfile gdb1555-main
 set libfile gdb1555
 set srcfile ${testfile}.c
@@ -35,12 +39,6 @@ set libobj "${objdir}/${subdir}/${libfile}.so"
 set execsrc "${srcdir}/${subdir}/${srcfile}"
 
 remote_exec build "rm -f ${binfile}"
-
-# Are we on a target board?  No support for downloading shared libraries
-# to a target yet.
-if ![isnative] then {
-    return 0
-}
 
 # get the value of gcc_compiled
 if [get_compiler_info ${binfile}] {
@@ -57,6 +55,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+gdb_load_shlibs $libobj
 
 if ![runto_main] then {
     fail "Can't run to main"

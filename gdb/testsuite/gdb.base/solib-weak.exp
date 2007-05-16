@@ -18,8 +18,15 @@
 # than one shared library, when one of the implementations is a "weak"
 # symbol.  GDB should set a breakpoint at the first copy it finds.
 
-# Don't try to run shared library test cases on a remote target for now.
-if ![isnative] then {
+if {[skip_shlib_tests]} {
+    return 0
+}
+
+# These targets have shared libraries, but weak symbols are not meaningful.
+if {([istarget arm*-*-symbianelf*]
+     || [istarget *-*-mingw*]
+     || [istarget *-*-cygwin*]
+     || [istarget *-*-pe*])} {
     return 0
 }
 
@@ -81,6 +88,7 @@ proc do_test { lib1opts lib2opts lib1first } {
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load ${binfile}
+    gdb_load_shlibs $lib1 $lib2
 
     runto_main
 
