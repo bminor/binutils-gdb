@@ -15,11 +15,13 @@ namespace gold
 {
 
 class General_options;
-class Stringpool;
 class Layout;
 class Output_section;
 class Output_file;
 class Dynobj;
+
+template<typename Stringpool_char>
+class Stringpool_template;
 
 // Data to pass from read_symbols() to add_symbols().
 
@@ -338,7 +340,7 @@ Object::sized_target(ACCEPT_SIZE_ENDIAN_ONLY)
 }
 
 // A regular object (ET_REL).  This is an abstract base class itself.
-// The implementations is the template class Sized_relobj.
+// The implementation is the template class Sized_relobj.
 
 class Relobj : public Object
 {
@@ -362,7 +364,8 @@ class Relobj : public Object
   // symbol information will be stored; add local symbol names to
   // *POOL; return the new local symbol index.
   unsigned int
-  finalize_local_symbols(unsigned int index, off_t off, Stringpool* pool)
+  finalize_local_symbols(unsigned int index, off_t off,
+			 Stringpool_template<char>* pool)
   { return this->do_finalize_local_symbols(index, off, pool); }
 
   // Relocate the input sections and write out the local symbols.
@@ -383,7 +386,7 @@ class Relobj : public Object
   // (which will be NULL if the section is not included in the link)
   // and set *POFF to the offset within that section.
   inline Output_section*
-  output_section(unsigned int shndx, off_t* poff);
+  output_section(unsigned int shndx, off_t* poff) const;
 
   // Set the offset of an input section within its output section.
   void
@@ -402,7 +405,8 @@ class Relobj : public Object
     // The output section.  This is NULL if the input section is to be
     // discarded.
     Output_section* output_section;
-    // The offset within the output section.
+    // The offset within the output section.  This is -1 if the
+    // section requires special handling.
     off_t offset;
   };
 
@@ -417,7 +421,8 @@ class Relobj : public Object
 
   // Finalize local symbols--implemented by child class.
   virtual unsigned int
-  do_finalize_local_symbols(unsigned int, off_t, Stringpool*) = 0;
+  do_finalize_local_symbols(unsigned int, off_t,
+			    Stringpool_template<char>*) = 0;
 
   // Relocate the input sections and write out the local
   // symbols--implemented by child class.
@@ -430,6 +435,10 @@ class Relobj : public Object
   map_to_output()
   { return this->map_to_output_; }
 
+  const std::vector<Map_to_output>&
+  map_to_output() const
+  { return this->map_to_output_; }
+
  private:
   // Mapping from input sections to output section.
   std::vector<Map_to_output> map_to_output_;
@@ -437,13 +446,115 @@ class Relobj : public Object
 
 // Implement Object::output_section inline for efficiency.
 inline Output_section*
-Relobj::output_section(unsigned int shndx, off_t* poff)
+Relobj::output_section(unsigned int shndx, off_t* poff) const
 {
   gold_assert(shndx < this->map_to_output_.size());
   const Map_to_output& mo(this->map_to_output_[shndx]);
   *poff = mo.offset;
   return mo.output_section;
 }
+
+// This POD class is holds the value of a symbol.  This is used for
+// local symbols, and for all symbols during relocation processing.
+// In order to process relocs we need to be able to handle SHF_MERGE
+// sections correctly.
+
+template<int size>
+class Symbol_value
+{
+ public:
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Value;
+
+  Symbol_value()
+    : output_symtab_index_(0), input_shndx_(0), needs_output_address_(false),
+      value_(0)
+  { }
+
+  // Get the value of this symbol.  OBJECT is the object in which this
+  // symbol is defined, and ADDEND is an addend to add to the value.
+  template<bool big_endian>
+  Value
+  value(const Sized_relobj<size, big_endian>* object, Value addend) const
+  {
+    if (!this->needs_output_address_)
+      return this->value_ + addend;
+    return object->local_value(this->input_shndx_, this->value_, addend);
+  }
+
+  // Set the value of this symbol in the output symbol table.
+  void
+  set_output_value(Value value)
+  {
+    this->value_ = value;
+    this->needs_output_address_ = false;
+  }
+
+  // If this symbol is mapped to an output section which requires
+  // special handling to determine the output value, we store the
+  // value of the symbol in the input file.  This is used for
+  // SHF_MERGE sections.
+  void
+  set_input_value(Value value)
+  {
+    this->value_ = value;
+    this->needs_output_address_ = true;
+  }
+
+  // Return whether this symbol should go into the output symbol
+  // table.
+  bool
+  needs_output_symtab_entry() const
+  {
+    gold_assert(this->output_symtab_index_ != 0);
+    return this->output_symtab_index_ != -1U;
+  }
+
+  // Return the index in the output symbol table.
+  unsigned int
+  output_symtab_index() const
+  {
+    gold_assert(this->output_symtab_index_ != 0);
+    return this->output_symtab_index_;
+  }
+
+  // Set the index in the output symbol table.
+  void
+  set_output_symtab_index(unsigned int i)
+  {
+    gold_assert(this->output_symtab_index_ == 0);
+    this->output_symtab_index_ = i;
+  }
+
+  // Record that this symbol should not go into the output symbol
+  // table.
+  void
+  set_no_output_symtab_entry()
+  {
+    gold_assert(this->output_symtab_index_ == 0);
+    this->output_symtab_index_ = -1U;
+  }
+
+  // Set the index of the input section in the input file.
+  void
+  set_input_shndx(unsigned int i)
+  { this->input_shndx_ = i; }
+
+ private:
+  // The index of this local symbol in the output symbol table.  This
+  // will be -1 if the symbol should not go into the symbol table.
+  unsigned int output_symtab_index_;
+  // The section index in the input file in which this symbol is
+  // defined.
+  unsigned int input_shndx_ : 31;
+  // Whether getting the value of this symbol requires calling an
+  // Output_section method.  For example, this will be true of a
+  // STT_SECTION symbol in a SHF_MERGE section.
+  bool needs_output_address_ : 1;
+  // The value of the symbol.  If !needs_output_address_, this is the
+  // value in the output file.  If needs_output_address_, this is the
+  // value in the input file.
+  Value value_;
+};
 
 // A regular object file.  This is size and endian specific.
 
@@ -452,7 +563,7 @@ class Sized_relobj : public Relobj
 {
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
-  typedef std::vector<Address> Local_values;
+  typedef std::vector<Symbol_value<size> > Local_values;
 
   Sized_relobj(const std::string& name, Input_file* input_file, off_t offset,
 	       const typename elfcpp::Ehdr<size, big_endian>&);
@@ -468,9 +579,8 @@ class Sized_relobj : public Relobj
   unsigned int
   symtab_index(unsigned int sym) const
   {
-    gold_assert(sym < this->local_indexes_.size());
-    gold_assert(this->local_indexes_[sym] != 0);
-    return this->local_indexes_[sym];
+    gold_assert(sym < this->local_values_.size());
+    return this->local_values_[sym].output_symtab_index();
   }
 
   // Read the symbols.
@@ -497,7 +607,8 @@ class Sized_relobj : public Relobj
 
   // Finalize the local symbols.
   unsigned int
-  do_finalize_local_symbols(unsigned int, off_t, Stringpool*);
+  do_finalize_local_symbols(unsigned int, off_t,
+			    Stringpool_template<char>*);
 
   // Relocate the input sections and write out the local symbols.
   void
@@ -527,6 +638,12 @@ class Sized_relobj : public Relobj
       SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
           SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
   }
+
+  // Return the value of a local symbol define in input section SHNDX,
+  // with value VALUE, adding addend ADDEND.  This handles SHF_MERGE
+  // sections.
+  Address
+  local_value(unsigned int shndx, Address value, Address addend) const;
 
  private:
   // For convenience.
@@ -574,7 +691,8 @@ class Sized_relobj : public Relobj
 
   // Write out the local symbols.
   void
-  write_local_symbols(Output_file*, const Stringpool*);
+  write_local_symbols(Output_file*,
+		      const Stringpool_template<char>*);
 
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
@@ -590,8 +708,6 @@ class Sized_relobj : public Relobj
   off_t local_symbol_offset_;
   // Values of local symbols.
   Local_values local_values_;
-  // Indexes of local symbols in the output file; -1U if not present.
-  std::vector<unsigned int> local_indexes_;
 };
 
 // A class to manage the list of all objects.

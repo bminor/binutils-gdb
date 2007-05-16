@@ -30,6 +30,7 @@ CCFILES = \
 	gold.cc \
 	gold-threads.cc \
 	layout.cc \
+	merge.cc \
 	object.cc \
 	options.cc \
 	output.cc \
@@ -52,6 +53,7 @@ HFILES = \
 	gold.h \
 	gold-threads.h \
 	layout.h \
+	merge.h \
 	object.h \
 	options.h \
 	output.h \

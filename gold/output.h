@@ -314,6 +314,26 @@ class Output_section_data : public Output_data
   void
   set_output_section(Output_section* os);
 
+  // Add an input section, for SHF_MERGE sections.  This returns true
+  // if the section was handled.
+  bool
+  add_input_section(Relobj* object, unsigned int shndx)
+  { return this->do_add_input_section(object, shndx); }
+
+  // Given an input OBJECT, an input section index SHNDX within that
+  // object, and an OFFSET relative to the start of that input
+  // section, return whether or not the output address is known.
+  // OUTPUT_SECTION_ADDRESS is the address of the output section which
+  // this is a part of.  If this function returns true, it sets
+  // *POUTPUT to the output address.
+  virtual bool
+  output_address(const Relobj* object, unsigned int shndx, off_t offset,
+		 uint64_t output_section_address, uint64_t *poutput) const
+  {
+    return this->do_output_address(object, shndx, offset,
+				   output_section_address, poutput);
+  }
+
  protected:
   // The child class must implement do_write.
 
@@ -322,6 +342,18 @@ class Output_section_data : public Output_data
   virtual void
   do_adjust_output_section(Output_section*)
   { }
+
+  // May be implemented by child class.  Return true if the section
+  // was handled.
+  virtual bool
+  do_add_input_section(Relobj*, unsigned int)
+  { gold_unreachable(); }
+
+  // The child class may implement output_address.
+  virtual bool
+  do_output_address(const Relobj*, unsigned int, off_t, uint64_t,
+		    uint64_t*) const
+  { return false; }
 
   // Return the required alignment.
   uint64_t
@@ -1114,8 +1146,7 @@ class Output_section : public Output_data
 {
  public:
   // Create an output section, giving the name, type, and flags.
-  Output_section(const char* name, elfcpp::Elf_Word, elfcpp::Elf_Xword,
-		 bool may_add_data);
+  Output_section(const char* name, elfcpp::Elf_Word, elfcpp::Elf_Xword);
   virtual ~Output_section();
 
   // Add a new input section SHNDX, named NAME, with header SHDR, from
@@ -1125,7 +1156,7 @@ class Output_section : public Output_data
   add_input_section(Relobj* object, unsigned int shndx, const char *name,
 		    const elfcpp::Shdr<size, big_endian>& shdr);
 
-  // Add generated data ODATA to this output section.
+  // Add generated data POSD to this output section.
   void
   add_output_section_data(Output_section_data* posd);
 
@@ -1284,6 +1315,12 @@ class Output_section : public Output_data
     this->dynsym_index_ = index;
   }
 
+  // Return the output virtual address of OFFSET relative to the start
+  // of input section SHNDX in object OBJECT.
+  uint64_t
+  output_address(const Relobj* object, unsigned int shndx,
+		 off_t offset) const;
+
   // Set the address of the Output_section.  For a typical
   // Output_section, there is nothing to do, but if there are any
   // Output_section_data objects we need to set the final addresses
@@ -1339,24 +1376,44 @@ class Output_section : public Output_data
   {
    public:
     Input_section()
-      : shndx_(0), p2align_(0), data_size_(0)
-    { this->u_.object = NULL; }
+      : shndx_(0), p2align_(0)
+    {
+      this->u1_.data_size = 0;
+      this->u2_.object = NULL;
+    }
 
+    // For an ordinary input section.
     Input_section(Relobj* object, unsigned int shndx, off_t data_size,
 		  uint64_t addralign)
       : shndx_(shndx),
-	p2align_(ffsll(static_cast<long long>(addralign))),
-	data_size_(data_size)
+	p2align_(ffsll(static_cast<long long>(addralign)))
     {
-      gold_assert(shndx != -1U);
-      this->u_.object = object;
+      gold_assert(shndx != OUTPUT_SECTION_CODE
+		  && shndx != MERGE_DATA_SECTION_CODE
+		  && shndx != MERGE_STRING_SECTION_CODE);
+      this->u1_.data_size = data_size;
+      this->u2_.object = object;
     }
 
+    // For a non-merge output section.
     Input_section(Output_section_data* posd)
-      : shndx_(-1U),
-	p2align_(ffsll(static_cast<long long>(posd->addralign()))),
-	data_size_(0)
-    { this->u_.posd = posd; }
+      : shndx_(OUTPUT_SECTION_CODE),
+	p2align_(ffsll(static_cast<long long>(posd->addralign())))
+    {
+      this->u1_.data_size = 0;
+      this->u2_.posd = posd;
+    }
+
+    // For a merge section.
+    Input_section(Output_section_data* posd, bool is_string, uint64_t entsize)
+      : shndx_(is_string
+	       ? MERGE_STRING_SECTION_CODE
+	       : MERGE_DATA_SECTION_CODE),
+	p2align_(ffsll(static_cast<long long>(posd->addralign())))
+    {
+      this->u1_.entsize = entsize;
+      this->u2_.posd = posd;
+    }
 
     // The required alignment.
     uint64_t
@@ -1371,40 +1428,124 @@ class Output_section : public Output_data
     off_t
     data_size() const;
 
+    // Return whether this is a merge section which matches the
+    // parameters.
+    bool
+    is_merge_section(bool is_string, uint64_t entsize) const
+    {
+      return (this->shndx_ == (is_string
+			       ? MERGE_STRING_SECTION_CODE
+			       : MERGE_DATA_SECTION_CODE)
+	      && this->u1_.entsize == entsize);
+    }
+
+    // Set the output section.
+    void
+    set_output_section(Output_section* os)
+    {
+      gold_assert(!this->is_input_section());
+      this->u2_.posd->set_output_section(os);
+    }
+
     // Set the address and file offset.  This is called during
     // Layout::finalize.  SECOFF is the file offset of the enclosing
     // section.
     void
     set_address(uint64_t addr, off_t off, off_t secoff);
 
+    // Add an input section, for SHF_MERGE sections.
+    bool
+    add_input_section(Relobj* object, unsigned int shndx)
+    {
+      gold_assert(this->shndx_ == MERGE_DATA_SECTION_CODE
+		  || this->shndx_ == MERGE_STRING_SECTION_CODE);
+      return this->u2_.posd->add_input_section(object, shndx);
+    }
+
+    // Given an input OBJECT, an input section index SHNDX within that
+    // object, and an OFFSET relative to the start of that input
+    // section, return whether or not the output address is known.
+    // OUTPUT_SECTION_ADDRESS is the address of the output section
+    // which this is a part of.  If this function returns true, it
+    // sets *POUTPUT to the output address.
+    bool
+    output_address(const Relobj* object, unsigned int shndx, off_t offset,
+		   uint64_t output_section_address, uint64_t *poutput) const;
+
     // Write out the data.  This does nothing for an input section.
     void
     write(Output_file*);
 
    private:
+    // Code values which appear in shndx_.  If the value is not one of
+    // these codes, it is the input section index in the object file.
+    enum
+    {
+      // An Output_section_data.
+      OUTPUT_SECTION_CODE = -1U,
+      // An Output_section_data for an SHF_MERGE section with
+      // SHF_STRINGS not set.
+      MERGE_DATA_SECTION_CODE = -2U,
+      // An Output_section_data for an SHF_MERGE section with
+      // SHF_STRINGS set.
+      MERGE_STRING_SECTION_CODE = -3U
+    };
+
     // Whether this is an input section.
     bool
     is_input_section() const
-    { return this->shndx_ != -1U; }
+    {
+      return (this->shndx_ != OUTPUT_SECTION_CODE
+	      && this->shndx_ != MERGE_DATA_SECTION_CODE
+	      && this->shndx_ != MERGE_STRING_SECTION_CODE);
+    }
 
-    // For an ordinary input section, this is the section index in
-    // the input file.  For an Output_section_data, this is -1U.
+    // For an ordinary input section, this is the section index in the
+    // input file.  For an Output_section_data, this is
+    // OUTPUT_SECTION_CODE or MERGE_DATA_SECTION_CODE or
+    // MERGE_STRING_SECTION_CODE.
     unsigned int shndx_;
     // The required alignment, stored as a power of 2.
     unsigned int p2align_;
-    // For an ordinary input section, the section size.
-    off_t data_size_;
     union
     {
-      // If shndx_ != -1U, this points to the object which holds the
+      // For an ordinary input section, the section size.
+      off_t data_size;
+      // For OUTPUT_SECTION_CODE, this is not used.  For
+      // MERGE_DATA_SECTION_CODE or MERGE_STRING_SECTION_CODE, the
+      // entity size.
+      uint64_t entsize;
+    } u1_;
+    union
+    {
+      // For an ordinary input section, the object which holds the
       // input section.
       Relobj* object;
-      // If shndx_ == -1U, this is the data to write out.
+      // For OUTPUT_SECTION_CODE or MERGE_DATA_SECTION_CODE or
+      // MERGE_STRING_SECTION_CODE, the data.
       Output_section_data* posd;
-    } u_;
+    } u2_;
   };
 
   typedef std::vector<Input_section> Input_section_list;
+
+  // Add a new output section by Input_section.
+  void
+  add_output_section_data(Input_section*);
+
+  // Add an SHF_MERGE input section.  Returns true if the section was
+  // handled.
+  bool
+  add_merge_input_section(Relobj* object, unsigned int shndx, uint64_t flags,
+			  uint64_t entsize, uint64_t addralign);
+
+  // Add an output SHF_MERGE section POSD to this output section.
+  // IS_STRING indicates whether it is a SHF_STRINGS section, and
+  // ENTSIZE is the entity size.  This returns the entry added to
+  // input_sections_.
+  void
+  add_output_merge_section(Output_section_data* posd, bool is_string,
+			   uint64_t entsize);
 
   // Most of these fields are only valid after layout.
 
@@ -1445,8 +1586,6 @@ class Output_section : public Output_data
   Input_section_list input_sections_;
   // The offset of the first entry in input_sections_.
   off_t first_input_offset_;
-  // Whether we permit adding data.
-  bool may_add_data_ : 1;
   // Whether this output section needs a STT_SECTION symbol in the
   // normal symbol table.  This will be true if there is a relocation
   // which needs it.

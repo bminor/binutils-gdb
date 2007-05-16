@@ -12,6 +12,7 @@
 #include "object.h"
 #include "symtab.h"
 #include "reloc.h"
+#include "merge.h"
 #include "output.h"
 
 namespace gold
@@ -790,9 +791,9 @@ off_t
 Output_section::Input_section::data_size() const
 {
   if (this->is_input_section())
-    return this->data_size_;
+    return this->u1_.data_size;
   else
-    return this->u_.posd->data_size();
+    return this->u2_.posd->data_size();
 }
 
 // Set the address and file offset.
@@ -802,9 +803,33 @@ Output_section::Input_section::set_address(uint64_t addr, off_t off,
 					   off_t secoff)
 {
   if (this->is_input_section())
-    this->u_.object->set_section_offset(this->shndx_, off - secoff);
+    this->u2_.object->set_section_offset(this->shndx_, off - secoff);
   else
-    this->u_.posd->set_address(addr, off);
+    this->u2_.posd->set_address(addr, off);
+}
+
+// Try to turn an input address into an output address.
+
+bool
+Output_section::Input_section::output_address(const Relobj* object,
+					      unsigned int shndx,
+					      off_t offset,
+					      uint64_t output_section_address,
+					      uint64_t *poutput) const
+{
+  if (!this->is_input_section())
+    return this->u2_.posd->output_address(object, shndx, offset,
+					  output_section_address, poutput);
+  else
+    {
+      if (this->u2_.object != object)
+	return false;
+      off_t output_offset;
+      Output_section* os = object->output_section(shndx, &output_offset);
+      gold_assert(os != NULL);
+      *poutput = output_section_address + output_offset + offset;
+      return true;
+    }
 }
 
 // Write out the data.  We don't have to do anything for an input
@@ -815,7 +840,7 @@ void
 Output_section::Input_section::write(Output_file* of)
 {
   if (!this->is_input_section())
-    this->u_.posd->write(of);
+    this->u2_.posd->write(of);
 }
 
 // Output_section methods.
@@ -823,7 +848,7 @@ Output_section::Input_section::write(Output_file* of)
 // Construct an Output_section.  NAME will point into a Stringpool.
 
 Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
-			       elfcpp::Elf_Xword flags, bool may_add_data)
+			       elfcpp::Elf_Xword flags)
   : name_(name),
     addralign_(0),
     entsize_(0),
@@ -838,7 +863,6 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     dynsym_index_(0),
     input_sections_(),
     first_input_offset_(0),
-    may_add_data_(may_add_data),
     needs_symtab_index_(false),
     needs_dynsym_index_(false),
     should_link_to_symtab_(false),
@@ -873,8 +897,6 @@ Output_section::add_input_section(Relobj* object, unsigned int shndx,
 				  const char* secname,
 				  const elfcpp::Shdr<size, big_endian>& shdr)
 {
-  gold_assert(this->may_add_data_);
-
   elfcpp::Elf_Xword addralign = shdr.get_sh_addralign();
   if ((addralign & (addralign - 1)) != 0)
     {
@@ -886,6 +908,20 @@ Output_section::add_input_section(Relobj* object, unsigned int shndx,
 
   if (addralign > this->addralign_)
     this->addralign_ = addralign;
+
+  // If this is a SHF_MERGE section, we pass all the input sections to
+  // a Output_data_merge.
+  if ((shdr.get_sh_flags() & elfcpp::SHF_MERGE) != 0)
+    {
+      if (this->add_merge_input_section(object, shndx, shdr.get_sh_flags(),
+					shdr.get_sh_entsize(),
+					addralign))
+	{
+	  // Tell the relocation routines that they need to call the
+	  // output_address method to determine the final address.
+	  return -1;
+	}
+    }
 
   off_t ssize = this->data_size();
   ssize = align_address(ssize, addralign);
@@ -907,18 +943,107 @@ Output_section::add_input_section(Relobj* object, unsigned int shndx,
 void
 Output_section::add_output_section_data(Output_section_data* posd)
 {
-  gold_assert(this->may_add_data_);
+  Input_section inp(posd);
+  this->add_output_section_data(&inp);
+}
 
+// Add arbitrary data to an output section by Input_section.
+
+void
+Output_section::add_output_section_data(Input_section* inp)
+{
   if (this->input_sections_.empty())
     this->first_input_offset_ = this->data_size();
 
-  this->input_sections_.push_back(Input_section(posd));
+  this->input_sections_.push_back(*inp);
 
-  uint64_t addralign = posd->addralign();
+  uint64_t addralign = inp->addralign();
   if (addralign > this->addralign_)
     this->addralign_ = addralign;
 
-  posd->set_output_section(this);
+  inp->set_output_section(this);
+}
+
+// Add a merge section to an output section.
+
+void
+Output_section::add_output_merge_section(Output_section_data* posd,
+					 bool is_string, uint64_t entsize)
+{
+  Input_section inp(posd, is_string, entsize);
+  this->add_output_section_data(&inp);
+}
+
+// Add an input section to a SHF_MERGE section.
+
+bool
+Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
+					uint64_t flags, uint64_t entsize,
+					uint64_t addralign)
+{
+  // We only merge constants if the alignment is not more than the
+  // entry size.  This could be handled, but it's unusual.
+  if (addralign > entsize)
+    return false;
+
+  bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
+  Input_section_list::iterator p;
+  for (p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    if (p->is_merge_section(is_string, entsize))
+      break;
+
+  // We handle the actual constant merging in Output_merge_data or
+  // Output_merge_string_data.
+  if (p != this->input_sections_.end())
+    p->add_input_section(object, shndx);
+  else
+    {
+      Output_section_data* posd;
+      if (!is_string)
+	posd = new Output_merge_data(entsize);
+      else if (entsize == 1)
+	posd = new Output_merge_string<char>();
+      else if (entsize == 2)
+	posd = new Output_merge_string<uint16_t>();
+      else if (entsize == 4)
+	posd = new Output_merge_string<uint32_t>();
+      else
+	return false;
+
+      this->add_output_merge_section(posd, is_string, entsize);
+      posd->add_input_section(object, shndx);
+    }
+
+  return true;
+}
+
+// Return the output virtual address of OFFSET relative to the start
+// of input section SHNDX in object OBJECT.
+
+uint64_t
+Output_section::output_address(const Relobj* object, unsigned int shndx,
+			       off_t offset) const
+{
+  uint64_t addr = this->address() + this->first_input_offset_;
+  for (Input_section_list::const_iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      addr = align_address(addr, p->addralign());
+      uint64_t output;
+      if (p->output_address(object, shndx, offset, addr, &output))
+	return output;
+      addr += p->data_size();
+    }
+
+  // If we get here, it means that we don't know the mapping for this
+  // input section.  This might happen in principle if
+  // add_input_section were called before add_output_section_data.
+  // But it should never actually happen.
+
+  gold_unreachable();
 }
 
 // Set the address of an Output_section.  This is where we handle
@@ -1189,7 +1314,8 @@ Output_segment::set_section_addresses(uint64_t addr, off_t* poff,
   return ret;
 }
 
-// Set the addresses in a list of Output_data structures.
+// Set the addresses and file offsets in a list of Output_data
+// structures.
 
 uint64_t
 Output_segment::set_section_list_addresses(Output_data_list* pdl,
@@ -1541,3 +1667,4 @@ template
 class Output_data_got<64, true>;
 
 } // End namespace gold.
+

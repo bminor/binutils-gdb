@@ -17,6 +17,8 @@ gold-threads.h
 i386.cc
 layout.cc
 layout.h
+merge.cc
+merge.h
 object.cc
 object.h
 options.cc

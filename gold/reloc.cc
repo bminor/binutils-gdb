@@ -343,6 +343,9 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
       pvs->view = NULL;
 
+      if (map_sections[i].offset == -1)
+	continue;
+
       const Output_section* os = map_sections[i].output_section;
       if (os == NULL)
 	continue;

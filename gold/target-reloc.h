@@ -137,12 +137,13 @@ relocate_section(
       unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
 
       const Sized_symbol<size>* sym;
-      typename elfcpp::Elf_types<size>::Elf_Addr value;
 
+      Symbol_value<size> symval;
+      const Symbol_value<size> *psymval;
       if (r_sym < local_count)
 	{
 	  sym = NULL;
-	  value = (*local_values)[r_sym];
+	  psymval = &(*local_values)[r_sym];
 	}
       else
 	{
@@ -152,10 +153,15 @@ relocate_section(
 	    gsym = relinfo->symtab->resolve_forwards(gsym);
 
 	  sym = static_cast<const Sized_symbol<size>*>(gsym);
-	  value = sym->value();
+	  if (sym->has_symtab_index())
+	    symval.set_output_symtab_index(sym->symtab_index());
+	  else
+	    symval.set_no_output_symtab_entry();
+	  symval.set_output_value(sym->value());
+	  psymval = &symval;
 	}
 
-      if (!relocate.relocate(relinfo, target, i, reloc, r_type, sym, value,
+      if (!relocate.relocate(relinfo, target, i, reloc, r_type, sym, psymval,
 			     view + offset, view_address + offset, view_size))
 	continue;
 

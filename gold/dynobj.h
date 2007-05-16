@@ -12,7 +12,6 @@ namespace gold
 {
 
 class General_options;
-class Stringpool;
 
 // A dynamic object (ET_DYN).  This is an abstract base class itself.
 // The implementations is the template class Sized_dynobj.

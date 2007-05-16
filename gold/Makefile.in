@@ -71,10 +71,11 @@ libgold_a_LIBADD =
 am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) defstd.$(OBJEXT) \
 	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) fileread.$(OBJEXT) \
 	gold.$(OBJEXT) gold-threads.$(OBJEXT) layout.$(OBJEXT) \
-	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
-	readsyms.$(OBJEXT) reloc.$(OBJEXT) resolve.$(OBJEXT) \
-	script.$(OBJEXT) symtab.$(OBJEXT) stringpool.$(OBJEXT) \
-	target-select.$(OBJEXT) workqueue.$(OBJEXT)
+	merge.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
+	output.$(OBJEXT) readsyms.$(OBJEXT) reloc.$(OBJEXT) \
+	resolve.$(OBJEXT) script.$(OBJEXT) symtab.$(OBJEXT) \
+	stringpool.$(OBJEXT) target-select.$(OBJEXT) \
+	workqueue.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
 am_libgold_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
@@ -256,6 +257,7 @@ CCFILES = \
 	gold.cc \
 	gold-threads.cc \
 	layout.cc \
+	merge.cc \
 	object.cc \
 	options.cc \
 	output.cc \
@@ -278,6 +280,7 @@ HFILES = \
 	gold.h \
 	gold-threads.h \
 	layout.h \
+	merge.h \
 	object.h \
 	options.h \
 	output.h \
@@ -398,6 +401,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/output.Po@am__quote@

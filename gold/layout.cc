@@ -133,7 +133,9 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
   // We should ignore some flags.
   flags &= ~ (elfcpp::SHF_INFO_LINK
 	      | elfcpp::SHF_LINK_ORDER
-	      | elfcpp::SHF_GROUP);
+	      | elfcpp::SHF_GROUP
+	      | elfcpp::SHF_MERGE
+	      | elfcpp::SHF_STRINGS);
 
   const Key key(name_key, std::make_pair(type, flags));
   const std::pair<Key, Output_section*> v(key, NULL);
@@ -224,7 +226,7 @@ Output_section*
 Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 			    elfcpp::Elf_Xword flags)
 {
-  Output_section* os = new Output_section(name, type, flags, true);
+  Output_section* os = new Output_section(name, type, flags);
   this->section_list_.push_back(os);
 
   if ((flags & elfcpp::SHF_ALLOC) == 0)
@@ -466,7 +468,6 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   off_t off = this->set_segment_offsets(target, load_seg, &shndx);
 
   // Create the symbol table sections.
-  // FIXME: We don't need to do this if we are stripping symbols.
   this->create_symtab_sections(size, input_objects, symtab, &off);
 
   // Create the .shstrtab section.
@@ -690,7 +691,9 @@ Layout::set_section_offsets(off_t off, unsigned int* pshndx)
   return off;
 }
 
-// Create the symbol table sections.
+// Create the symbol table sections.  Here we also set the final
+// values of the symbols.  At this point all the loadable sections are
+// fully laid out.
 
 void
 Layout::create_symtab_sections(int size, const Input_objects* input_objects,

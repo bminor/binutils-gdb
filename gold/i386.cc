@@ -109,7 +109,7 @@ class Target_i386 : public Sized_target<32, false>
     relocate(const Relocate_info<32, false>*, Target_i386*, size_t relnum,
 	     const elfcpp::Rel<32, false>&,
 	     unsigned int r_type, const Sized_symbol<32>*,
-	     elfcpp::Elf_types<32>::Elf_Addr,
+	     const Symbol_value<32>*,
 	     unsigned char*, elfcpp::Elf_types<32>::Elf_Addr,
 	     off_t);
 
@@ -119,7 +119,7 @@ class Target_i386 : public Sized_target<32, false>
     relocate_tls(const Relocate_info<32, false>*, size_t relnum,
 		 const elfcpp::Rel<32, false>&,
 		 unsigned int r_type, const Sized_symbol<32>*,
-		 elfcpp::Elf_types<32>::Elf_Addr,
+		 const Symbol_value<32>*,
 		 unsigned char*, elfcpp::Elf_types<32>::Elf_Addr, off_t);
 
     // Do a TLS Initial-Exec to Local-Exec transition.
@@ -1027,7 +1027,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 				const elfcpp::Rel<32, false>& rel,
 				unsigned int r_type,
 				const Sized_symbol<32>* gsym,
-				elfcpp::Elf_types<32>::Elf_Addr value,
+				const Symbol_value<32>* psymval,
 				unsigned char* view,
 				elfcpp::Elf_types<32>::Elf_Addr address,
 				off_t view_size)
@@ -1050,13 +1050,18 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
     }
 
   // Pick the value to use for symbols defined in shared objects.
+  Symbol_value<32> symval;
   if (gsym != NULL && gsym->is_from_dynobj())
     {
-      if (gsym->has_plt_offset())
-	value = target->plt_section()->address() + gsym->plt_offset();
-      else
+      if (!gsym->has_plt_offset())
 	gold_unreachable();
+
+      symval.set_output_value(target->plt_section()->address()
+			      + gsym->plt_offset());
+      psymval = &symval;
     }
+
+  const Sized_relobj<32, false>* object = relinfo->object;
 
   switch (r_type)
     {
@@ -1066,51 +1071,57 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_32:
-      Relocate_functions<32, false>::rel32(view, value);
+      Relocate_functions<32, false>::rel32(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC32:
-      Relocate_functions<32, false>::pcrel32(view, value, address);
+      Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_16:
-      Relocate_functions<32, false>::rel16(view, value);
+      Relocate_functions<32, false>::rel16(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC16:
-      Relocate_functions<32, false>::pcrel16(view, value, address);
+      Relocate_functions<32, false>::pcrel16(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_8:
-      Relocate_functions<32, false>::rel8(view, value);
+      Relocate_functions<32, false>::rel8(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC8:
-      Relocate_functions<32, false>::pcrel8(view, value, address);
+      Relocate_functions<32, false>::pcrel8(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_PLT32:
       gold_assert(gsym->has_plt_offset()
 		  || gsym->final_value_is_known(relinfo->options));
-      Relocate_functions<32, false>::pcrel32(view, value, address);
+      Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_GOT32:
       // Local GOT offsets not yet supported.
       gold_assert(gsym);
       gold_assert(gsym->has_got_offset());
-      value = gsym->got_offset();
-      Relocate_functions<32, false>::rel32(view, value);
+      Relocate_functions<32, false>::rel32(view, gsym->got_offset());
       break;
 
     case elfcpp::R_386_GOTOFF:
-      value -= target->got_section(NULL, NULL, NULL)->address();
-      Relocate_functions<32, false>::rel32(view, value);
+      {
+	elfcpp::Elf_types<32>::Elf_Addr value;
+	value = (psymval->value(object, 0)
+		 - target->got_section(NULL, NULL, NULL)->address());
+	Relocate_functions<32, false>::rel32(view, value);
+      }
       break;
 
     case elfcpp::R_386_GOTPC:
-      value = target->got_section(NULL, NULL, NULL)->address();
-      Relocate_functions<32, false>::pcrel32(view, value, address);
+      {
+	elfcpp::Elf_types<32>::Elf_Addr value;
+	value = target->got_section(NULL, NULL, NULL)->address();
+	Relocate_functions<32, false>::pcrel32(view, value, address);
+      }
       break;
 
     case elfcpp::R_386_COPY:
@@ -1139,7 +1150,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_TLS_LE_32:
     case elfcpp::R_386_TLS_GOTDESC:
     case elfcpp::R_386_TLS_DESC_CALL:
-      this->relocate_tls(relinfo, relnum, rel, r_type, gsym, value, view,
+      this->relocate_tls(relinfo, relnum, rel, r_type, gsym, psymval, view,
 			 address, view_size);
       break;
 
@@ -1173,7 +1184,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 				    const elfcpp::Rel<32, false>& rel,
 				    unsigned int r_type,
 				    const Sized_symbol<32>* gsym,
-				    elfcpp::Elf_types<32>::Elf_Addr value,
+				    const Symbol_value<32>* psymval,
 				    unsigned char* view,
 				    elfcpp::Elf_types<32>::Elf_Addr,
 				    off_t view_size)
@@ -1186,6 +1197,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str());
       gold_exit(false);
     }
+
+  elfcpp::Elf_types<32>::Elf_Addr value = psymval->value(relinfo->object, 0);
 
   const bool is_final = (gsym == NULL
 			 ? !relinfo->options->is_shared()

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-12-05 17:51-0800\n"
+"POT-Creation-Date: 2007-05-16 10:40-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,7 +101,7 @@ msgstr ""
 msgid "%s: %s: dynamic symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: dynobj.cc:368 object.cc:421
+#: dynobj.cc:368 object.cc:420
 #, c-format
 msgid "%s: %s: bad section name offset for section %u: %lu\n"
 msgstr ""
@@ -255,7 +255,7 @@ msgstr ""
 msgid "%s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:729 i386.cc:870 i386.cc:1125
+#: i386.cc:729 i386.cc:870 i386.cc:1136
 #, c-format
 msgid "%s: %s: unexpected reloc %u in object file\n"
 msgstr ""
@@ -280,29 +280,40 @@ msgstr ""
 msgid "%s: %s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:1157 i386.cc:1232 i386.cc:1243
+#: i386.cc:1168 i386.cc:1245 i386.cc:1256
 #, c-format
 msgid "%s: %s: unsupported reloc %u\n"
 msgstr ""
 
-#: i386.cc:1184
+#: i386.cc:1195
 #, c-format
 msgid "%s: %s: TLS reloc but no TLS segment\n"
 msgstr ""
 
-#: i386.cc:1217
+#: i386.cc:1230
 #, c-format
 msgid "%s: %s: unsupported reloc type %u\n"
 msgstr ""
 
-#: i386.cc:1426
+#: i386.cc:1439
 #, c-format
 msgid "%s: %s: TLS relocation out of range\n"
 msgstr ""
 
-#: i386.cc:1444
+#: i386.cc:1457
 #, c-format
 msgid "%s: %s: TLS relocation against invalid instruction\n"
+msgstr ""
+
+#: merge.cc:252
+#, c-format
+msgid ""
+"%s: %s: mergeable string section length not multiple of character size\n"
+msgstr ""
+
+#: merge.cc:269
+#, c-format
+msgid "%s: %s: entry in mergeable string section not null terminated\n"
 msgstr ""
 
 #: object.cc:30
@@ -315,32 +326,32 @@ msgstr ""
 msgid "%s: %s: section name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:229
+#: object.cc:228
 #, c-format
 msgid "%s: %s: invalid symbol table name index: %u\n"
 msgstr ""
 
-#: object.cc:237
+#: object.cc:236
 #, c-format
 msgid "%s: %s: symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:293
+#: object.cc:292
 #, c-format
 msgid "%s: %s: section group %u info %u out of range\n"
 msgstr ""
 
-#: object.cc:310
+#: object.cc:309
 #, c-format
 msgid "%s: %s: symbol %u name offset %u out of range\n"
 msgstr ""
 
-#: object.cc:344
+#: object.cc:343
 #, c-format
 msgid "%s: %s: section %u in section group %u out of range"
 msgstr ""
 
-#: object.cc:488
+#: object.cc:487
 #, c-format
 msgid "%s: %s: size of symbols is not multiple of symbol size\n"
 msgstr ""
@@ -355,47 +366,47 @@ msgstr ""
 msgid "%s: %s: local symbol %u section index %u out of range\n"
 msgstr ""
 
-#: object.cc:615
+#: object.cc:620
 #, c-format
 msgid "%s: %s: local symbol %u section name out of range: %u >= %u\n"
 msgstr ""
 
-#: object.cc:815
+#: object.cc:834
 #, c-format
 msgid "%s: %s: unsupported ELF file type %d\n"
 msgstr ""
 
-#: object.cc:834 object.cc:887 object.cc:908
+#: object.cc:853 object.cc:906 object.cc:927
 #, c-format
 msgid "%s: %s: ELF file too short\n"
 msgstr ""
 
-#: object.cc:843
+#: object.cc:862
 #, c-format
 msgid "%s: %s: invalid ELF version 0\n"
 msgstr ""
 
-#: object.cc:846
+#: object.cc:865
 #, c-format
 msgid "%s: %s: unsupported ELF version %d\n"
 msgstr ""
 
-#: object.cc:854
+#: object.cc:873
 #, c-format
 msgid "%s: %s: invalid ELF class 0\n"
 msgstr ""
 
-#: object.cc:861
+#: object.cc:880
 #, c-format
 msgid "%s: %s: unsupported ELF class %d\n"
 msgstr ""
 
-#: object.cc:869
+#: object.cc:888
 #, c-format
 msgid "%s: %s: invalid ELF data encoding\n"
 msgstr ""
 
-#: object.cc:876
+#: object.cc:895
 #, c-format
 msgid "%s: %s: unsupported ELF data encoding %d\n"
 msgstr ""
@@ -511,37 +522,37 @@ msgstr ""
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: output.cc:881
+#: output.cc:903
 #, c-format
 msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
 
-#: output.cc:1393
+#: output.cc:1519
 #, c-format
 msgid "%s: %s: open: %s\n"
 msgstr ""
 
-#: output.cc:1402
+#: output.cc:1528
 #, c-format
 msgid "%s: %s: lseek: %s\n"
 msgstr ""
 
-#: output.cc:1409
+#: output.cc:1535
 #, c-format
 msgid "%s: %s: write: %s\n"
 msgstr ""
 
-#: output.cc:1419
+#: output.cc:1545
 #, c-format
 msgid "%s: %s: mmap: %s\n"
 msgstr ""
 
-#: output.cc:1433
+#: output.cc:1559
 #, c-format
 msgid "%s: %s: munmap: %s\n"
 msgstr ""
 
-#: output.cc:1441
+#: output.cc:1567
 #, c-format
 msgid "%s: %s: close: %s\n"
 msgstr ""
@@ -562,22 +573,22 @@ msgstr ""
 msgid "%s: %s: not an object or archive\n"
 msgstr ""
 
-#: reloc.cc:169 reloc.cc:410
+#: reloc.cc:169 reloc.cc:413
 #, c-format
 msgid "%s: %s: relocation section %u has bad info %u\n"
 msgstr ""
 
-#: reloc.cc:188 reloc.cc:427
+#: reloc.cc:188 reloc.cc:430
 #, c-format
 msgid "%s: %s: relocation section %u uses unexpected symbol table %u\n"
 msgstr ""
 
-#: reloc.cc:204 reloc.cc:446
+#: reloc.cc:204 reloc.cc:449
 #, c-format
 msgid "%s: %s: unexpected entsize for reloc section %u: %lu != %u"
 msgstr ""
 
-#: reloc.cc:215 reloc.cc:457
+#: reloc.cc:215 reloc.cc:460
 #, c-format
 msgid "%s: %s: reloc section %u size %lu uneven"
 msgstr ""
@@ -632,12 +643,12 @@ msgstr ""
 msgid "%s: %s: warning: %s\n"
 msgstr ""
 
-#: target-reloc.h:164
+#: target-reloc.h:170
 #, c-format
 msgid "%s: %s: reloc has bad offset %zu\n"
 msgstr ""
 
-#: target-reloc.h:174
+#: target-reloc.h:180
 #, c-format
 msgid "%s: %s: undefined reference to '%s'\n"
 msgstr ""
