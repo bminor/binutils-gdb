@@ -1,3 +1,8 @@
+2007-05-17  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (load_debug_section): Select bias for DWARF debug
+	addresses based on the flavour of the bfd.
+
 2007-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4479

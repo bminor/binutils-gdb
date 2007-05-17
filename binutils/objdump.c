@@ -1974,7 +1974,19 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   if (sec == NULL)
     return 0;
 
-  section->address = bfd_get_section_vma (abfd, sec);
+  /* Compute a bias to be added to offsets found within the DWARF debug
+     information.  These offsets are meant to be relative to the start of
+     the dwarf section, and hence the bias should be 0.  For MACH-O however
+     a dwarf section is really just a region of a much larger section and so
+     the bias is the address of the start of that area within the larger
+     section.  This test is important for PE and COFF based targets which
+     use DWARF debug information, since unlike ELF, they do not allow the
+     dwarf sections to be placed at address 0.  */
+  if (bfd_get_flavour (abfd) == bfd_target_mach_o_flavour)
+    section->address = bfd_get_section_vma (abfd, sec);
+  else
+    section->address = 0;
+    
   section->size = bfd_get_section_size (sec);
   section->start = xmalloc (section->size);
 
