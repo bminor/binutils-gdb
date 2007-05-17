@@ -1,3 +1,11 @@
+2007-05-17  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-m68k/merge-error-1a.d: Mismatch is an error.
+	* ld-m68k/merge-error-1b.d: Likewise.
+	* ld-m68k/merge-error-1c.d: Likewise.
+	* ld-m68k/merge-error-1d.d: Likewise.
+	* ld-m68k/merge-error-1e.d: Likewise.
+
 2007-05-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4504
