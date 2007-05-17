@@ -1,5 +1,5 @@
 	.macro	makebss
-	.section .bss_\@,"aw",@nobits
+	.section .bss_\@,"aw",%nobits
 	.space	0x10000
 	.endm
 

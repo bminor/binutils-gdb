@@ -1,3 +1,7 @@
+2007-05-17  Paul Brook  <paul@codesourcery.com>
+
+	* ld-elf/multibss1.s: Use %nobits instead of @nobits.
+
 2007-05-17  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-m68k/merge-error-1a.d: Mismatch is an error.
