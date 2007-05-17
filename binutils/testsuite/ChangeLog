@@ -1,3 +1,7 @@
+2007-05-17  Joseph Myers  <joseph@codesourcery.com>
+
+	* binutils-all/strip-3.d: Strip .pdr section.
+
 2007-05-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/objcopy.exp: Only run needed-by-reloc test for ELF.

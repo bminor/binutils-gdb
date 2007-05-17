@@ -1,6 +1,6 @@
 #PROG: strip
 #source: empty.s
-#strip: -R .text -R .data -R .bss -R .ARM.attributes -R .reginfo
+#strip: -R .text -R .data -R .bss -R .ARM.attributes -R .reginfo -R .pdr
 #readelf: -S --wide
 #name: strip empty file
 #target: *-*-linux*
