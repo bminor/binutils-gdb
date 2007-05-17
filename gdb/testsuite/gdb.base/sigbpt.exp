@@ -86,6 +86,7 @@ gdb_test "break keeper"
 # of the actual SIGSEGV in segv_addr.
 
 set bowler_addrs bowler
+set segv_addr none
 gdb_test {display/i $pc}
 gdb_test "advance *bowler" "bowler.*" "advance to the bowler"
 set test "stepping to SIGSEGV"

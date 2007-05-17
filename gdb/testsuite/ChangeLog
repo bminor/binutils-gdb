@@ -1,3 +1,7 @@
+2007-05-17  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.base/sigbpt.exp: Preset segv_addr.
+
 2007-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* lib/gdb.exp (gdb_compile): Add support for Windows DLLs.
