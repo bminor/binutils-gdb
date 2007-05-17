@@ -127,6 +127,56 @@ print_insn_rs6000 (bfd_vma memaddr, struct disassemble_info *info)
   return print_insn_powerpc (memaddr, info, 1, PPC_OPCODE_POWER);
 }
 
+/* Extract the operand value from the PowerPC or POWER instruction.  */
+
+static long
+operand_value_powerpc (const struct powerpc_operand *operand,
+		       unsigned long insn, int dialect)
+{
+  long value;
+  int invalid;
+  /* Extract the value from the instruction.  */
+  if (operand->extract)
+    value = (*operand->extract) (insn, dialect, &invalid);
+  else
+    {
+      value = (insn >> operand->shift) & operand->bitm;
+      if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
+	{
+	  /* BITM is always some number of zeros followed by some
+	     number of ones, followed by some numer of zeros.  */
+	  unsigned long top = operand->bitm;
+	  /* top & -top gives the rightmost 1 bit, so this
+	     fills in any trailing zeros.  */
+	  top |= (top & -top) - 1;
+	  top &= ~(top >> 1);
+	  value = (value ^ top) - top;
+	}
+    }
+
+  return value;
+}
+
+/* Determine whether the optional operand(s) should be printed.  */
+
+static int
+skip_optional_operands (const unsigned char *opindex,
+			unsigned long insn, int dialect)
+{
+  const struct powerpc_operand *operand;
+
+  for (; *opindex != 0; opindex++)
+    {
+      operand = &powerpc_operands[*opindex];
+      if ((operand->flags & PPC_OPERAND_NEXT) != 0
+	  || ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
+	      && operand_value_powerpc (operand, insn, dialect) != 0))
+	return 0;
+    }
+
+  return 1;
+}
+
 /* Print a PowerPC or POWER instruction.  */
 
 static int
@@ -172,6 +222,7 @@ print_insn_powerpc (bfd_vma memaddr,
       int invalid;
       int need_comma;
       int need_paren;
+      int skip_optional;
 
       table_op = PPC_OP (opcode->opcode);
       if (op < table_op)
@@ -205,6 +256,7 @@ print_insn_powerpc (bfd_vma memaddr,
       /* Now extract and print the operands.  */
       need_comma = 0;
       need_paren = 0;
+      skip_optional = -1;
       for (opindex = opcode->operands; *opindex != 0; opindex++)
 	{
 	  long value;
@@ -217,31 +269,16 @@ print_insn_powerpc (bfd_vma memaddr,
 	  if ((operand->flags & PPC_OPERAND_FAKE) != 0)
 	    continue;
 
-	  /* Extract the value from the instruction.  */
-	  if (operand->extract)
-	    value = (*operand->extract) (insn, dialect, &invalid);
-	  else
-	    {
-	      value = (insn >> operand->shift) & operand->bitm;
-	      if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
-		{
-		  /* BITM is always some number of zeros followed by some
-		     number of ones, followed by some numer of zeros.  */
-		  unsigned long top = operand->bitm;
-		  /* top & -top gives the rightmost 1 bit, so this
-		     fills in any trailing zeros.  */
-		  top |= (top & -top) - 1;
-		  top &= ~(top >> 1);
-		  value = (value ^ top) - top;
-		}
-	    }
+	  /* If all of the optional operands have the value zero,
+	     then don't print any of them.  */
+	  if (skip_optional < 0
+	      && (operand->flags & PPC_OPERAND_OPTIONAL) != 0)
+	    skip_optional = skip_optional_operands (opindex, insn, dialect);
 
-	  /* If the operand is optional, and the value is zero, don't
-	     print anything.  */
-	  if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
-	      && (operand->flags & PPC_OPERAND_NEXT) == 0
-	      && value == 0)
+	  if (skip_optional > 0)
 	    continue;
+
+	  value = operand_value_powerpc (operand, insn, dialect);
 
 	  if (need_comma)
 	    {

@@ -1,3 +1,15 @@
+2007-05-16  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (operand_value_powerpc, skip_optional_operands): New.
+	(print_insn_powerpc): Use the new operand_value_powerpc and
+	skip_optional_operands functions to omit or print all optional
+	operands as a group.
+	* ppc-opc.c (BFF, W, XFL_L, XWRA_MASK): New.
+	(XFL_MASK): Delete L and W bits from the mask.
+	(mtfsfi, mtfsfi.): Replace use of BF with BFF.  Relpace use of XRA_MASK
+	with XWRA_MASK.  Use W.
+	(mtfsf, mtfsf.): Use XFL_L and W.
+
 2007-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4502

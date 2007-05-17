@@ -154,9 +154,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define CRFD BF
   { 0x7, 23, NULL, NULL, PPC_OPERAND_CR },
 
+  /* The BF field in an X or XL form instruction.  */
+#define BFF BF + 1
+  { 0x7, 23, NULL, NULL, 0 },
+
   /* An optional BF field.  This is used for comparison instructions,
      in which an omitted BF field is taken as zero.  */
-#define OBF BF + 1
+#define OBF BFF + 1
   { 0x7, 23, NULL, NULL, PPC_OPERAND_CR | PPC_OPERAND_OPTIONAL },
 
   /* The BFA field in an X or XL form instruction.  */
@@ -515,8 +519,9 @@ const struct powerpc_operand powerpc_operands[] =
 #define WS EVUIMM_8 + 1
   { 0x7, 11, NULL, NULL, 0 },
 
-  /* The L field in an mtmsrd or A form instruction.  */
+  /* The L field in an mtmsrd or A form instruction or W in an X form.  */
 #define A_L WS + 1
+#define W A_L
   { 0x1, 16, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
 #define RMC A_L + 1
@@ -541,6 +546,10 @@ const struct powerpc_operand powerpc_operands[] =
   /* The EH field in larx instruction.  */
 #define EH SH16 + 1
   { 0x1, 0, NULL, NULL, PPC_OPERAND_OPTIONAL },
+
+  /* The L field in an mtfsf or XFL form instruction.  */
+#define XFL_L EH + 1
+  { 0x1, 25, NULL, NULL, PPC_OPERAND_OPTIONAL},
 };
 
 const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
@@ -1400,6 +1409,9 @@ extract_tbr (unsigned long insn,
 /* An X_MASK with the RA field fixed.  */
 #define XRA_MASK (X_MASK | RA_MASK)
 
+/* An XRA_MASK with the W field clear.  */
+#define XWRA_MASK (XRA_MASK & ~((unsigned long) 1 << 16))
+
 /* An X_MASK with the RB field fixed.  */
 #define XRB_MASK (X_MASK | RB_MASK)
 
@@ -1454,7 +1466,7 @@ extract_tbr (unsigned long insn,
 
 /* An XFL form instruction.  */
 #define XFL(op, xop, rc) (OP (op) | ((((unsigned long)(xop)) & 0x3ff) << 1) | (((unsigned long)(rc)) & 1))
-#define XFL_MASK (XFL (0x3f, 0x3ff, 1) | (((unsigned long)1) << 25) | (((unsigned long)1) << 16))
+#define XFL_MASK XFL (0x3f, 0x3ff, 1)
 
 /* An X form isel instruction.  */
 #define XISEL(op, xop)  (OP (op) | ((((unsigned long)(xop)) & 0x1f) << 1))
@@ -4586,8 +4598,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "dcmpoq",  X(63,130),	   X_MASK,	POWER6,		{ BF,  FRA, FRB } },
 
-{ "mtfsfi",  XRC(63,134,0), XRA_MASK|(3<<21)|(1<<11), COM, { BF, U } },
-{ "mtfsfi.", XRC(63,134,1), XRA_MASK|(3<<21)|(1<<11), COM, { BF, U } },
+{ "mtfsfi",  XRC(63,134,0), XWRA_MASK|(3<<21)|(1<<11), COM, { BFF, U, W } },
+{ "mtfsfi.", XRC(63,134,1), XWRA_MASK|(3<<21)|(1<<11), COM, { BFF, U, W } },
 
 { "fnabs",   XRC(63,136,0), XRA_MASK,	COM,		{ FRT, FRB } },
 { "fnabs.",  XRC(63,136,1), XRA_MASK,	COM,		{ FRT, FRB } },
@@ -4636,8 +4648,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "dtstsfq", X(63,674),	    X_MASK,	POWER6,		{ BF,  FRA, FRB } },
 
-{ "mtfsf",   XFL(63,711,0), XFL_MASK,	COM,		{ FLM, FRB } },
-{ "mtfsf.",  XFL(63,711,1), XFL_MASK,	COM,		{ FLM, FRB } },
+{ "mtfsf",   XFL(63,711,0), XFL_MASK,	COM,		{ FLM, FRB, XFL_L, W } },
+{ "mtfsf.",  XFL(63,711,1), XFL_MASK,	COM,		{ FLM, FRB, XFL_L, W } },
 
 { "drdpq",   XRC(63,770,0), X_MASK,	POWER6,		{ FRT, FRB } },
 { "drdpq.",  XRC(63,770,1), X_MASK,	POWER6,		{ FRT, FRB } },
