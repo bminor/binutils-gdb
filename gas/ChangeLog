@@ -2,17 +2,9 @@
 
 	PR gas/4517
 	2003-06-05  Michal Ludvig  <mludvig@suse.cz>
-	* as.texinfo: Document new directives: .cfi_restore, 
+	* doc/as.texinfo: Document new directives: .cfi_restore, 
 	.cfi_undefined, .cfi_same_value, .cfi_return_column, 
 	.cfi_remember_state and .cfi_restore_state.
-
-2007-05-17  H.J. Lu  <hongjiu.lu@intel.com>
-
-	2003-06-05  Michal Ludvig  <mludvig@suse.cz>
-	* testsuite/gas/cfi/cfi-x86_64.s: Test new directives
-	and different writings of registers and numbers.
-	* testsuite/gas/cfi/cfi-x86_64.d: Updated pattern to
-	match the above change.
 
 2007-05-17  Nathan Sidwell  <nathan@codesourcery.com>
 
