@@ -3790,7 +3790,7 @@ Some machine configurations provide additional directives.
 * Byte::                        @code{.byte @var{expressions}}
 * Comm::                        @code{.comm @var{symbol} , @var{length} }
 
-* CFI directives::		@code{.cfi_startproc}, @code{.cfi_endproc}, etc.
+* CFI directives::		@code{.cfi_startproc [simple]}, @code{.cfi_endproc}, etc.
 
 * Data::                        @code{.data @var{subsection}}
 @ifset COFF
@@ -4109,14 +4109,16 @@ The syntax for @code{.comm} differs slightly on the HPPA.  The syntax is
 @end ifset
 
 @node CFI directives
-@section @code{.cfi_startproc}
+@section @code{.cfi_startproc [simple]}
 @cindex @code{cfi_startproc} directive
 @code{.cfi_startproc} is used at the beginning of each function that
 should have an entry in @code{.eh_frame}. It initializes some internal
-data structures and emits architecture dependent initial CFI instructions.
-Don't forget to close the function by 
+data structures. Don't forget to close the function by
 @code{.cfi_endproc}.
 
+Unless @code{.cfi_startproc} is used along with parameter @code{simple} 
+it also emits some architecture dependent initial CFI instructions.
+ 
 @section @code{.cfi_endproc}
 @cindex @code{cfi_endproc} directive
 @code{.cfi_endproc} is used at the end of a function where it closes its
@@ -4171,6 +4173,31 @@ the current CFA register.  This is transformed to @code{.cfi_offset}
 using the known displacement of the CFA register from the CFA.
 This is often easier to use, because the number will match the
 code it's annotating.
+
+@section @code{.cfi_register @var{register1}, @var{register2}}
+Previous value of @var{register1} is saved in register @var{register2}.
+
+@section @code{.cfi_restore @var{register}}
+@code{.cfi_restore} says that the rule for @var{register} is now the 
+same as it was at the beginning of the function, after all initial 
+instruction added by @code{.cfi_startproc} were executed.
+
+@section @code{.cfi_undefined @var{register}}
+From now on the previous value of @var{register} can't be restored anymore.
+
+@section @code{.cfi_same_value @var{register}}
+Current value of @var{register} is the same like in the previous frame, 
+i.e. no restoration needed.
+
+@section @code{.cfi_remember_state}, 
+First save all current rules for all registers by @code{.cfi_remember_state}, 
+then totally screw them up by subsequent @code{.cfi_*} directives and when 
+everything is hopelessly bad, use @code{.cfi_restore_state} to restore 
+the previous saved state.
+
+@section @code{.cfi_return_column @var{register}}
+Change return column @var{register}, i.e. the return address is either 
+directly in @var{register} or can be accessed by rules for @var{register}.
 
 @section @code{.cfi_signal_frame}
 Mark current function as signal trampoline.
