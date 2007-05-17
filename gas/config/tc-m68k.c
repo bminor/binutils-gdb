@@ -4760,7 +4760,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
   if ((addressT) val > upper_limit
       && (val > 0 || val < lower_limit))
-    as_bad_where (fixP->fx_file, fixP->fx_line, _("value out of range"));
+    as_bad_where (fixP->fx_file, fixP->fx_line,
+		  _("value %ld out of range"), (long)val);
 
   /* A one byte PC-relative reloc means a short branch.  We can't use
      a short branch with a value of 0 or -1, because those indicate
@@ -4773,7 +4774,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       && (fixP->fx_addsy == NULL
 	  || S_IS_DEFINED (fixP->fx_addsy))
       && (val == 0 || val == -1))
-    as_bad_where (fixP->fx_file, fixP->fx_line, _("invalid byte branch offset"));
+    as_bad_where (fixP->fx_file, fixP->fx_line,
+		  _("invalid byte branch offset"));
 }
 
 /* *fragP has been relaxed to its final size, and now needs to have
@@ -4784,7 +4786,7 @@ static void
 md_convert_frag_1 (fragS *fragP)
 {
   long disp;
-  fixS *fixP;
+  fixS *fixP = NULL;
 
   /* Address in object code of the displacement.  */
   register int object_address = fragP->fr_fix + fragP->fr_address;
@@ -4819,35 +4821,37 @@ md_convert_frag_1 (fragS *fragP)
     case TAB (BRABSJCOND, SHORT):
     case TAB (BRANCHBW, SHORT):
       fragP->fr_opcode[1] = 0x00;
-      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
-	       1, RELAX_RELOC_PC16);
+      fixP = fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (BRANCHBWL, LONG):
       fragP->fr_opcode[1] = (char) 0xFF;
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-	       1, RELAX_RELOC_PC32);
+      fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC32);
       fragP->fr_fix += 4;
       break;
     case TAB (BRABSJUNC, LONG):
       if (fragP->fr_opcode[0] == 0x61)		/* jbsr */
 	{
 	  if (flag_keep_pcrel)
-    	    as_fatal (_("Tried to convert PC relative BSR to absolute JSR"));
+    	    as_bad_where (fragP->fr_file, fragP->fr_line,
+			  _("Conversion of PC relative BSR to absolute JSR"));
 	  fragP->fr_opcode[0] = 0x4E;
 	  fragP->fr_opcode[1] = (char) 0xB9; /* JSR with ABSL LONG operand.  */
-	  fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-		   0, RELAX_RELOC_ABS32);
+	  fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+			  fragP->fr_offset, 0, RELAX_RELOC_ABS32);
 	  fragP->fr_fix += 4;
 	}
       else if (fragP->fr_opcode[0] == 0x60)	/* jbra */
 	{
 	  if (flag_keep_pcrel)
-	    as_fatal (_("Tried to convert PC relative branch to absolute jump"));
+	    as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("Conversion of PC relative branch to absolute jump"));
 	  fragP->fr_opcode[0] = 0x4E;
 	  fragP->fr_opcode[1] = (char) 0xF9; /* JMP with ABSL LONG operand.  */
-	  fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-		   0, RELAX_RELOC_ABS32);
+	  fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+			  fragP->fr_offset, 0, RELAX_RELOC_ABS32);
 	  fragP->fr_fix += 4;
 	}
       else
@@ -4859,7 +4863,8 @@ md_convert_frag_1 (fragS *fragP)
       break;
     case TAB (BRABSJCOND, LONG):
       if (flag_keep_pcrel)
-    	as_fatal (_("Tried to convert PC relative conditional branch to absolute jump"));
+    	as_bad_where (fragP->fr_file, fragP->fr_line,
+		  _("Conversion of PC relative conditional branch to absolute jump"));
 
       /* Only Bcc 68000 instructions can come here
 	 Change bcc into b!cc/jmp absl long.  */
@@ -4872,26 +4877,26 @@ md_convert_frag_1 (fragS *fragP)
       *buffer_address++ = 0x4e;	/* put in jmp long (0x4ef9) */
       *buffer_address++ = (char) 0xf9;
       fragP->fr_fix += 2;	/* Account for jmp instruction.  */
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 0, RELAX_RELOC_ABS32);
+      fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+		      fragP->fr_offset, 0, RELAX_RELOC_ABS32);
       fragP->fr_fix += 4;
       break;
     case TAB (FBRANCH, SHORT):
       know ((fragP->fr_opcode[1] & 0x40) == 0);
-      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
-	       1, RELAX_RELOC_PC16);
+      fixP = fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (FBRANCH, LONG):
       fragP->fr_opcode[1] |= 0x40;	/* Turn on LONG bit.  */
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-	       1, RELAX_RELOC_PC32);
+      fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC32);
       fragP->fr_fix += 4;
       break;
     case TAB (DBCCLBR, SHORT):
     case TAB (DBCCABSJ, SHORT):
-      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
-	       1, RELAX_RELOC_PC16);
+      fixP = fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (DBCCLBR, LONG):
@@ -4899,7 +4904,8 @@ md_convert_frag_1 (fragS *fragP)
 	 Change dbcc into dbcc/bral.
 	 JF: these used to be fr_opcode[2-7], but that's wrong.  */
       if (flag_keep_pcrel)
-    	as_fatal (_("Tried to convert DBcc to absolute jump"));
+    	as_bad_where (fragP->fr_file, fragP->fr_line,
+		  _("Conversion of DBcc to absolute jump"));
 
       *buffer_address++ = 0x00;	/* Branch offset = 4.  */
       *buffer_address++ = 0x04;
@@ -4909,8 +4915,8 @@ md_convert_frag_1 (fragS *fragP)
       *buffer_address++ = (char) 0xff;
 
       fragP->fr_fix += 6;	/* Account for bra/jmp instructions.  */
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset, 1,
-	       RELAX_RELOC_PC32);
+      fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC32);
       fragP->fr_fix += 4;
       break;
     case TAB (DBCCABSJ, LONG):
@@ -4918,7 +4924,8 @@ md_convert_frag_1 (fragS *fragP)
 	 Change dbcc into dbcc/jmp.
 	 JF: these used to be fr_opcode[2-7], but that's wrong.  */
       if (flag_keep_pcrel)
-    	as_fatal (_("Tried to convert PC relative conditional branch to absolute jump"));
+    	as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("Conversion of PC relative conditional branch to absolute jump"));
 
       *buffer_address++ = 0x00;		/* Branch offset = 4.  */
       *buffer_address++ = 0x04;
@@ -4928,15 +4935,15 @@ md_convert_frag_1 (fragS *fragP)
       *buffer_address++ = (char) 0xf9;
 
       fragP->fr_fix += 6;		/* Account for bra/jmp instructions.  */
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset, 0,
-	       RELAX_RELOC_ABS32);
+      fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+		      fragP->fr_offset, 0, RELAX_RELOC_ABS32);
       fragP->fr_fix += 4;
       break;
     case TAB (PCREL1632, SHORT):
       fragP->fr_opcode[1] &= ~0x3F;
       fragP->fr_opcode[1] |= 0x3A; /* 072 - mode 7.2 */
-      fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
-	       fragP->fr_offset, 1, RELAX_RELOC_PC16);
+      fixP = fix_new (fragP, (int) (fragP->fr_fix), 2, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (PCREL1632, LONG):
@@ -4976,23 +4983,28 @@ md_convert_frag_1 (fragS *fragP)
       fragP->fr_fix += 4;
       break;
     case TAB (ABSTOPCREL, SHORT):
-      fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol, fragP->fr_offset,
-	       1, RELAX_RELOC_PC16);
+      fixP = fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC16);
       fragP->fr_fix += 2;
       break;
     case TAB (ABSTOPCREL, LONG):
       if (flag_keep_pcrel)
-    	as_fatal (_("Tried to convert PC relative conditional branch to absolute jump"));
+	as_fatal (_("Conversion of PC relative displacement to absolute"));
       /* The thing to do here is force it to ABSOLUTE LONG, since
 	 ABSTOPCREL is really trying to shorten an ABSOLUTE address anyway.  */
       if ((fragP->fr_opcode[1] & 0x3F) != 0x3A)
 	abort ();
       fragP->fr_opcode[1] &= ~0x3F;
       fragP->fr_opcode[1] |= 0x39;	/* Mode 7.1 */
-      fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol, fragP->fr_offset,
-	       0, RELAX_RELOC_ABS32);
+      fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+		      fragP->fr_offset, 0, RELAX_RELOC_ABS32);
       fragP->fr_fix += 4;
       break;
+    }
+  if (fixP)
+    {
+      fixP->fx_file = fragP->fr_file;
+      fixP->fx_line = fragP->fr_line;
     }
 }
 

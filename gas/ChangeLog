@@ -1,3 +1,10 @@
+2007-05-17  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (md_apply_fix): Show value of out of range
+	fixups in error message.
+	(md_conver_frag_1): Propagate the fix source location and use
+	as_bad_where rather than fatal, for better error messages.
+
 2007-05-16  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (v7m_psrs): Add uppercase PSR names and xpsr.
