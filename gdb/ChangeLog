@@ -1,3 +1,9 @@
+2007-05-17  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (mips_n32n64_push_dummy_call): Fix and reformat a
+	comment.
+	(mips_o64_push_dummy_call): Reformat a comment.
+
 2007-05-17  Qinwei  <qinwei@sunnorth.com.cn>
 
 	* score-tdep.c (score_frame_cache->fp, score_analyze_prologue)

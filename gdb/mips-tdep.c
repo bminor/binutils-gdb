@@ -2736,10 +2736,9 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
 	  /* Note: structs whose size is not a multiple of MIPS64_REGSIZE
-	     mips_abi_regsize() are treated specially: Irix cc passes
-	     them in registers where gcc sometimes puts them on the
-	     stack.  For maximum compatibility, we will put them in
-	     both places.  */
+	     are treated specially: Irix cc passes them in registers
+	     where gcc sometimes puts them on the stack.  For maximum
+	     compatibility, we will put them in both places.  */
 	  int odd_sized_struct = (len > MIPS64_REGSIZE
 				  && len % MIPS64_REGSIZE != 0);
 	  /* Note: Floating-point values that didn't fit into an FP
@@ -3535,10 +3534,9 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
 	  /* Note: structs whose size is not a multiple of MIPS64_REGSIZE
-	     are treated specially: Irix cc passes
-	     them in registers where gcc sometimes puts them on the
-	     stack.  For maximum compatibility, we will put them in
-	     both places.  */
+	     are treated specially: Irix cc passes them in registers
+	     where gcc sometimes puts them on the stack.  For maximum
+	     compatibility, we will put them in both places.  */
 	  int odd_sized_struct = (len > MIPS64_REGSIZE
 				  && len % MIPS64_REGSIZE != 0);
 	  while (len > 0)
