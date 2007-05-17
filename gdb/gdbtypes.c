@@ -276,6 +276,7 @@ make_pointer_type (struct type *type, struct type **typeptr)
 {
   struct type *ntype;	/* New type */
   struct objfile *objfile;
+  struct type *chain;
 
   ntype = TYPE_POINTER_TYPE (type);
 
@@ -301,7 +302,9 @@ make_pointer_type (struct type *type, struct type **typeptr)
     {
       ntype = *typeptr;
       objfile = TYPE_OBJFILE (ntype);
+      chain = TYPE_CHAIN (ntype);
       smash_type (ntype);
+      TYPE_CHAIN (ntype) = chain;
       TYPE_OBJFILE (ntype) = objfile;
     }
 
@@ -320,6 +323,14 @@ make_pointer_type (struct type *type, struct type **typeptr)
 
   if (!TYPE_POINTER_TYPE (type))	/* Remember it, if don't have one.  */
     TYPE_POINTER_TYPE (type) = ntype;
+
+  /* Update the length of all the other variants of this type.  */
+  chain = TYPE_CHAIN (ntype);
+  while (chain != ntype)
+    {
+      TYPE_LENGTH (chain) = TYPE_LENGTH (ntype);
+      chain = TYPE_CHAIN (chain);
+    }
 
   return ntype;
 }

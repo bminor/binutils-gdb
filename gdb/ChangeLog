@@ -1,3 +1,8 @@
+2007-05-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (make_pointer_type): Preserve the pointer type chain
+	and set the length of all the variants of the pointer type.
+
 2007-05-17  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-tdep.c (mips_n32n64_push_dummy_call): Fix and reformat a
