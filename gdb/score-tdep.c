@@ -51,6 +51,7 @@ typedef struct{
 struct score_frame_cache
 {
   CORE_ADDR base;
+  CORE_ADDR fp;
   struct trad_frame_saved_reg *saved_regs;
 };
 
@@ -115,7 +116,8 @@ score_analyze_pdr_section (CORE_ADDR startaddr, CORE_ADDR pc,
   fci_ext = frame_obstack_zalloc (sizeof (extra_info_t));
   if ((sec = find_pc_section (pc)) == NULL)
     {
-      error ("Can't find section in file:%s, line:%d!", __FILE__, __LINE__);
+      error ("Error: Can't find section in file:%s, line:%d!",
+             __FILE__, __LINE__);
       return;
     }
 
@@ -148,7 +150,6 @@ score_analyze_pdr_section (CORE_ADDR startaddr, CORE_ADDR pc,
         int low = 0, mid, high = priv->size / 32;
         char *ptr;
         do
-
           {
             CORE_ADDR pdr_pc;
             mid = (low + high) / 2;
@@ -180,6 +181,88 @@ score_analyze_pdr_section (CORE_ADDR startaddr, CORE_ADDR pc,
           }
       }
   }
+}
+#endif
+
+#if 0
+/* Open these functions if build with simulator.  */
+
+int
+score_target_can_use_watch (int type, int cnt, int othertype)
+{
+  if (strcmp (current_target.to_shortname, "sim") == 0)
+    {      
+      return soc_gh_can_use_watch (type, cnt);
+    }
+  else
+    {
+      return (*current_target.to_can_use_hw_breakpoint) (type, cnt, othertype);
+    }
+}
+
+int
+score_stopped_by_watch (void)
+{
+  if (strcmp (current_target.to_shortname, "sim") == 0)
+    {      
+      return soc_gh_stopped_by_watch ();
+    }
+  else
+    {
+      return (*current_target.to_stopped_by_watchpoint) ();
+    }
+}
+
+int
+score_target_insert_watchpoint (CORE_ADDR addr, int len, int type)
+{
+  if (strcmp (current_target.to_shortname, "sim") == 0)
+    {      
+      return soc_gh_add_watch (addr, len, type);
+    }
+  else
+    {
+      return (*current_target.to_insert_watchpoint) (addr, len, type); 
+    }
+}
+
+int
+score_target_remove_watchpoint (CORE_ADDR addr, int len, int type)
+{
+  if (strcmp (current_target.to_shortname, "sim") == 0)
+    {      
+      return soc_gh_del_watch (addr, len, type);
+    }
+  else
+    {
+      return (*current_target.to_remove_watchpoint) (addr, len, type); 
+    }
+}
+
+int
+score_target_insert_hw_breakpoint (struct bp_target_info * bp_tgt)
+{
+  if (strcmp (current_target.to_shortname, "sim") == 0)
+    {      
+      return soc_gh_add_hardbp (bp_tgt->placed_address);
+    }
+  else
+    {
+      return (*current_target.to_insert_hw_breakpoint) (bp_tgt); 
+    }
+}
+
+int
+score_target_remove_hw_breakpoint (struct bp_target_info * bp_tgt)
+{
+  if (strcmp (current_target.to_shortname, "sim") == 0)
+    {      
+      return soc_gh_del_hardbp (bp_tgt->placed_address);
+    }
+  else
+    {
+      return (*current_target.to_remove_hw_breakpoint) (bp_tgt); 
+    }
 }
 #endif
 
@@ -248,7 +331,8 @@ score_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
   if ((ret = target_read_memory (*pcptr & ~0x3, buf, SCORE_INSTLEN)) != 0)
     {
-      memory_error (ret, *pcptr);
+      error ("Error: target_read_memory in file:%s, line:%d!",
+             __FILE__, __LINE__);
     }
   raw = extract_unsigned_integer (buf, SCORE_INSTLEN);
 
@@ -318,7 +402,8 @@ score_xfer_register (struct regcache *regcache, int regnum, int length,
       reg_offset = 0;
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("score_xfer_register error!"));
+      error ("Error: score_xfer_register in file:%s, line:%d!",
+             __FILE__, __LINE__);
     }
 
   if (readbuf != NULL)
@@ -357,7 +442,8 @@ score_return_value (struct gdbarch *gdbarch, struct type *type,
 }
 
 static struct frame_id
-score_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+score_unwind_dummy_id (struct gdbarch *gdbarch,
+                       struct frame_info *next_frame)
 {
   return frame_id_build (
            frame_unwind_register_unsigned (next_frame, SCORE_SP_REGNUM),
@@ -369,9 +455,8 @@ score_type_needs_double_align (struct type *type)
 {
   enum type_code typecode = TYPE_CODE (type);
 
-  if (typecode == TYPE_CODE_INT && TYPE_LENGTH (type) == 8)
-    return 1;
-  if (typecode == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8)
+  if ((typecode == TYPE_CODE_INT && TYPE_LENGTH (type) == 8)
+      || (typecode == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8))
     return 1;
   else if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
     {
@@ -411,8 +496,8 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   argreg = SCORE_BEGIN_ARG_REGNUM;
 
-  /* Step 3, Check if struct return then save the struct address to r4 and
-     increase the stack_offset by 4.  */
+  /* Step 3, Check if struct return then save the struct address to
+     r4 and increase the stack_offset by 4.  */
   if (struct_return)
     {
       regcache_cooked_write_unsigned (regcache, argreg++, struct_addr);
@@ -420,8 +505,8 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Step 4, Load arguments:
-     If arg length is too long (> 4 bytes),
-     then split the arg and save every parts.  */
+     If arg length is too long (> 4 bytes), then split the arg and
+     save every parts.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
       struct value *arg = args[argnum];
@@ -434,7 +519,7 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       arglen = TYPE_LENGTH (arg_type);
       odd_sized_struct_p = (arglen > SCORE_REGSIZE
-                                && arglen % SCORE_REGSIZE != 0);
+                            && arglen % SCORE_REGSIZE != 0);
 
       /* If a arg should be aligned to 8 bytes (long long or double),
          the value should be put to even register numbers.  */
@@ -502,25 +587,88 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp;
 }
 
-static inst_t *
-score_fetch_instruction (CORE_ADDR addr)
+static char *
+score_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
 {
-  static inst_t inst = { 0, 0 };
-  char buf[SCORE_INSTLEN];
-  int big;
-  int ret = target_read_memory (addr & ~0x3, buf, SCORE_INSTLEN);
-  unsigned int raw;
+  int ret;
+  char *memblock = NULL;
 
+  if (size < 0)
+    {
+      error ("Error: malloc size < 0 in file:%s, line:%d!",
+             __FILE__, __LINE__);
+      return NULL;
+    }
+  else if (size == 0)
+    return NULL;
+
+  memblock = (char *) xmalloc (size);
+  memset (memblock, 0, size);
+  ret = target_read_memory (addr & ~0x3, memblock, size);
   if (ret)
     {
-      memory_error (ret, addr);
-      return 0;
+      error ("Error: target_read_memory in file:%s, line:%d!",
+             __FILE__, __LINE__);
+      return NULL;
     }
+  return memblock;
+}
+
+static void
+score_free_memblock (char *memblock)
+{
+  xfree (memblock);
+}
+
+static void
+score_adjust_memblock_ptr (char **memblock, CORE_ADDR prev_pc,
+                           CORE_ADDR cur_pc)
+{
+  if (prev_pc == -1)
+    {
+      /* First time call this function, do nothing.  */
+    }
+  else if (cur_pc - prev_pc == 2 && (cur_pc & 0x3) == 0)
+    {
+      /* First 16-bit instruction, then 32-bit instruction.  */
+      *memblock += SCORE_INSTLEN;
+    }
+  else if (cur_pc - prev_pc == 4)
+    {
+      /* Is 32-bit instruction, increase MEMBLOCK by 4.  */
+      *memblock += SCORE_INSTLEN;
+    }
+}
+
+static inst_t *
+score_fetch_inst (CORE_ADDR addr, char *memblock)
+{
+  static inst_t inst = { 0, 0 };
+  char buf[SCORE_INSTLEN] = { 0 };
+  int big;
+  int ret;
+
+  if (target_has_execution && memblock != NULL)
+    {
+      /* Fetch instruction from local MEMBLOCK.  */
+      memcpy (buf, memblock, SCORE_INSTLEN);
+    }
+  else
+    {
+      /* Fetch instruction from target.  */
+      ret = target_read_memory (addr & ~0x3, buf, SCORE_INSTLEN);
+      if (ret)
+        {
+          error ("Error: target_read_memory in file:%s, line:%d!",
+                  __FILE__, __LINE__);
+          return 0;
+        }
+    }
+
   inst.raw = extract_unsigned_integer (buf, SCORE_INSTLEN);
   inst.is15 = !(inst.raw & 0x80008000);
   inst.v = RM_PBITS (inst.raw);
   big = (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
-
   if (inst.is15)
     {
       if (big ^ ((addr & 0x2) == 2))
@@ -538,7 +686,7 @@ score_skip_prologue (CORE_ADDR pc)
   int iscan = 32, stack_sub = 0;
   while (iscan-- > 0)
     {
-      inst_t *inst = score_fetch_instruction (cpc);
+      inst_t *inst = score_fetch_inst (cpc, NULL);
       if (!inst)
         break;
       if (!inst->is15 && !stack_sub
@@ -583,7 +731,7 @@ score_skip_prologue (CORE_ADDR pc)
 static int
 score_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR cur_pc)
 {
-  inst_t *inst = score_fetch_instruction (cur_pc);
+  inst_t *inst = score_fetch_inst (cur_pc, NULL);
 
   if (inst->v == 0x23)
     return 1;   /* mv! r0, r2 */
@@ -610,6 +758,7 @@ score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
                         struct score_frame_cache *this_cache)
 {
   CORE_ADDR sp;
+  CORE_ADDR fp;
   CORE_ADDR cur_pc = startaddr;
 
   int sp_offset = 0;
@@ -619,11 +768,34 @@ score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   int fp_offset_p = 0;
   int inst_len = 0;
 
-  sp = frame_unwind_register_unsigned (next_frame, SCORE_SP_REGNUM);
+  char *memblock = NULL;
+  char *memblock_ptr = NULL;
+  CORE_ADDR prev_pc = -1;
 
-  for (; cur_pc < pc; cur_pc += inst_len)
+  /* Allocate MEMBLOCK if PC - STARTADDR > 0.  */
+  memblock_ptr = memblock =
+    score_malloc_and_get_memblock (startaddr, pc - startaddr);
+
+  sp = frame_unwind_register_unsigned (next_frame, SCORE_SP_REGNUM);
+  fp = frame_unwind_register_unsigned (next_frame, SCORE_FP_REGNUM);
+
+  for (; cur_pc < pc; prev_pc = cur_pc, cur_pc += inst_len)
     {
-      inst_t *inst = score_fetch_instruction (cur_pc);
+      inst_t *inst = NULL;
+      if (memblock != NULL)
+        {
+          /* Reading memory block from target succefully and got all
+             the instructions(from STARTADDR to PC) needed.  */
+          score_adjust_memblock_ptr (&memblock, prev_pc, cur_pc);
+          inst = score_fetch_inst (cur_pc, memblock);
+        }
+      else
+        {
+          /* Otherwise, we fetch 4 bytes from target, and GDB also
+             work correctly.  */
+          inst = score_fetch_inst (cur_pc, NULL);
+        }
+
       if (inst->is15 == 1)
         {
           inst_len = SCORE16_INSTLEN;
@@ -723,10 +895,12 @@ score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
                 {
                   unsigned int save_v = inst->v;
                   inst_t *inst2 =
-                    score_fetch_instruction (cur_pc + SCORE_INSTLEN);
+                    score_fetch_inst (cur_pc + SCORE_INSTLEN, NULL);
                   if (inst2->v == 0x23)
-                    /* mv! r0, r2 */
-                    sp_offset -= G_FLD (save_v, 16, 1);
+                    {
+                      /* mv! r0, r2 */
+                      sp_offset -= G_FLD (save_v, 16, 1);
+                    }
                 }
             }
         }
@@ -753,9 +927,13 @@ score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
           sp + sp_offset - fp_offset;
     }
 
-  /* Save SP.  */
-  this_cache->base =
-    frame_unwind_register_unsigned (next_frame, SCORE_SP_REGNUM) + sp_offset;
+  /* Save SP and FP.  */
+  this_cache->base = sp + sp_offset;
+  this_cache->fp = fp;
+
+  /* Don't forget to free MEMBLOCK if we allocated it.  */
+  if (memblock_ptr != NULL)
+    score_free_memblock (memblock_ptr);
 }
 
 static struct score_frame_cache *
@@ -794,7 +972,7 @@ score_prologue_this_id (struct frame_info *next_frame, void **this_cache,
   struct score_frame_cache *info = score_make_prologue_cache (next_frame,
                                                               this_cache);
   (*this_id) = frame_id_build (info->base,
-			       frame_func_unwind (next_frame, NORMAL_FRAME));
+                               frame_func_unwind (next_frame, NORMAL_FRAME));
 }
 
 static void
@@ -829,7 +1007,7 @@ score_prologue_frame_base_address (struct frame_info *next_frame,
 {
   struct score_frame_cache *info =
     score_make_prologue_cache (next_frame, this_cache);
-  return info->base;
+  return info->fp;
 }
 
 static const struct frame_base score_prologue_frame_base =
@@ -877,11 +1055,17 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, score_print_insn);
   set_gdbarch_skip_prologue (gdbarch, score_skip_prologue);
   set_gdbarch_in_function_epilogue_p (gdbarch, score_in_function_epilogue_p);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+
+  /* Watchpoint hooks.  */
+  set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
+
+  /* Dummy frame hooks.  */
   set_gdbarch_return_value (gdbarch, score_return_value);
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_unwind_dummy_id (gdbarch, score_unwind_dummy_id);
   set_gdbarch_push_dummy_call (gdbarch, score_push_dummy_call);
 
+  /* Normal frame hooks.  */
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
   frame_unwind_append_sniffer (gdbarch, score_prologue_sniffer);
