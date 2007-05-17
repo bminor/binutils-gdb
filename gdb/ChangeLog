@@ -1,5 +1,10 @@
 2007-05-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbtypes.c (make_reference_type): Preserve the type chain
+	and set the length of all the variants of the pointer type.
+
+2007-05-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbtypes.c (make_pointer_type): Preserve the pointer type chain
 	and set the length of all the variants of the pointer type.
 
