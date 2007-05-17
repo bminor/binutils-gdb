@@ -1,3 +1,21 @@
+2007-05-17  Qinwei  <qinwei@sunnorth.com.cn>
+
+	* score-tdep.c (score_frame_cache->fp, score_analyze_prologue)
+	(score_prologue_frame_base_address): Return fp to keep gdb print
+	local variables correctly when debugging information is stabs.
+
+	(score_analyze_prologue): For software watchpoint, fetch all the
+	instructions from range [startaddr, pc] once and identify them locally
+	to reduce memory access.
+	(score_malloc_and_get_memblock, score_free_memblock)
+	(score_adjust_memblock_ptr): New functions.
+	(score_fetch_inst): Fetch single instruction or mutiple instructions.
+
+	(score_target_can_use_watch, score_stopped_by_watch)
+	(score_target_insert_watchpoint, score_target_remove_watchpoint)
+	(score_target_insert_hw_breakpoint, score_target_remove_hw_breakpoint):
+	New functions for remote & local hw-watchpoint and hw-breakpoint.
+
 2007-05-16  Alfred M. Szmidt  <ams@gnu.org>
 
 	* reply_mig_hack.awk: Check for `auto const mach_msg_type_t'
