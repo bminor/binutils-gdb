@@ -1,3 +1,10 @@
+2007-05-18  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (ARM2THUMB_V5_STATIC_GLUE_SIZE): Define.
+	(a2t1v5_ldr_insn, a2t1v5_ldr_insn): New.
+	(record_arm_to_thumb_glue): Add v5t non-pic glue.
+	(elf32_arm_create_thumb_stub): Ditto.
+
 2007-05-16  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 

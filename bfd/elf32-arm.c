@@ -2582,6 +2582,13 @@ find_arm_glue (struct bfd_link_info *link_info,
    __func_addr:
    .word func    @ behave as if you saw a ARM_32 reloc.  
 
+   (v5t static images)
+   .arm
+   __func_from_arm:
+   ldr pc, __func_addr
+   __func_addr:
+   .word func    @ behave as if you saw a ARM_32 reloc.  
+
    (relocatable images)
    .arm
    __func_from_arm:
@@ -2596,6 +2603,10 @@ find_arm_glue (struct bfd_link_info *link_info,
 static const insn32 a2t1_ldr_insn = 0xe59fc000;
 static const insn32 a2t2_bx_r12_insn = 0xe12fff1c;
 static const insn32 a2t3_func_addr_insn = 0x00000001;
+
+#define ARM2THUMB_V5_STATIC_GLUE_SIZE 8
+static const insn32 a2t1v5_ldr_insn = 0xe51ff004;
+static const insn32 a2t2v5_func_addr_insn = 0x00000001;
 
 #define ARM2THUMB_PIC_GLUE_SIZE 16
 static const insn32 a2t1p_ldr_insn = 0xe59fc004;
@@ -2745,6 +2756,8 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
   if (link_info->shared || globals->root.is_relocatable_executable
       || globals->pic_veneer)
     size = ARM2THUMB_PIC_GLUE_SIZE;
+  else if (globals->use_blx)
+    size = ARM2THUMB_V5_STATIC_GLUE_SIZE;
   else
     size = ARM2THUMB_STATIC_GLUE_SIZE;
 
@@ -4186,6 +4199,15 @@ elf32_arm_create_thumb_stub (struct bfd_link_info * info,
 		       | 1;
 	  bfd_put_32 (output_bfd, ret_offset,
 		      s->contents + my_offset + 12);
+	}
+      else if (globals->use_blx)
+	{
+	  put_arm_insn (globals, output_bfd, (bfd_vma) a2t1v5_ldr_insn,
+			s->contents + my_offset);
+
+	  /* It's a thumb address.  Add the low order bit.  */
+	  bfd_put_32 (output_bfd, val | a2t2v5_func_addr_insn,
+		      s->contents + my_offset + 4);
 	}
       else
 	{
