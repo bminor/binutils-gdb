@@ -1,3 +1,8 @@
+2007-05-18  Richard Sandiford  <richard@codesourcery.com>
+
+	* emulparams/elf32ebmipvxworks.sh (OTHER_READONLY_SECTIONS)
+	(OTHER_READWRITE_SECTIONS): Define.  Add .rdata sections.
+
 2007-05-16  Richard Sandiford  <richard@codesourcery.com>
 
 	* configure.in: Allow sysroots to be relocated under $prefix as
