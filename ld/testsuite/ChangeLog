@@ -1,3 +1,7 @@
+2007-05-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-elf/group.ld: Discard .reginfo.
+
 2007-05-18  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-call.d: Update expected output.
