@@ -1,3 +1,7 @@
+2007-05-18  Caroline Tice  <ctice@apple.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+	
 2007-05-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.c (make_reference_type): Preserve the type chain
