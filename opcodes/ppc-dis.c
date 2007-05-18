@@ -271,12 +271,14 @@ print_insn_powerpc (bfd_vma memaddr,
 
 	  /* If all of the optional operands have the value zero,
 	     then don't print any of them.  */
-	  if (skip_optional < 0
-	      && (operand->flags & PPC_OPERAND_OPTIONAL) != 0)
-	    skip_optional = skip_optional_operands (opindex, insn, dialect);
-
-	  if (skip_optional > 0)
-	    continue;
+	  if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
+	    {
+	      if (skip_optional < 0)
+		skip_optional = skip_optional_operands (opindex, insn,
+							dialect);
+	      if (skip_optional)
+		continue;
+	    }
 
 	  value = operand_value_powerpc (operand, insn, dialect);
 

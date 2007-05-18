@@ -1,3 +1,8 @@
+2007-05-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-dis.c (print_insn_powerpc): Don't skip all operands
+	after setting skip_optional.
+
 2007-05-16  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (operand_value_powerpc, skip_optional_operands): New.
@@ -67,10 +72,10 @@
 	support Intel mode.
 
 2007-04-30  Mark Salter  <msalter@redhat.com>
-	
+
 	* frv-desc.c: Regenerate.
 	* frv-desc.h: Regenerate.
-	
+
 2007-04-30  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4436
@@ -127,7 +132,7 @@
 
 	* arm-dis.c (arm_opcodes): Disassemble to unified syntax.
 	(thumb_opcodes): Add missing white space in adr.
-	(arm_decode_shift): New parameter, print_shift.  Only decode the 
+	(arm_decode_shift): New parameter, print_shift.  Only decode the
 	shift parameter if set.  Adjust callers.
 	(print_insn_arm): Support for operand type q with no shift decode.
 
