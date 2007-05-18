@@ -2769,10 +2769,10 @@ strip_main (int argc, char *argv[])
 	   It has already been checked in get_file_size().  */
 	stat (argv[i], &statbuf);
 
-      if (output_file != NULL)
-	tmpname = output_file;
-      else
+      if (output_file == NULL || strcmp (argv[i], output_file) == 0)
 	tmpname = make_tempname (argv[i]);
+      else
+	tmpname = output_file;
 
       if (tmpname == NULL)
 	{
@@ -2788,13 +2788,14 @@ strip_main (int argc, char *argv[])
 	{
 	  if (preserve_dates)
 	    set_times (tmpname, &statbuf);
-	  if (output_file == NULL)
-	    smart_rename (tmpname, argv[i], preserve_dates);
+	  if (output_file != tmpname)
+	    smart_rename (tmpname, output_file ? output_file : argv[i],
+			  preserve_dates);
 	  status = hold_status;
 	}
       else
 	unlink_if_ordinary (tmpname);
-      if (output_file == NULL)
+      if (output_file != tmpname)
 	free (tmpname);
     }
 
@@ -2807,6 +2808,7 @@ copy_main (int argc, char *argv[])
   char * binary_architecture = NULL;
   char *input_filename = NULL;
   char *output_filename = NULL;
+  char *tmpname;    
   char *input_target = NULL;
   char *output_target = NULL;
   bfd_boolean show_version = FALSE;
@@ -3397,32 +3399,24 @@ copy_main (int argc, char *argv[])
   /* If there is no destination file, or the source and destination files
      are the same, then create a temp and rename the result into the input.  */
   if (output_filename == NULL || strcmp (input_filename, output_filename) == 0)
+    tmpname = make_tempname (input_filename);
+  else
+    tmpname = output_filename;
+  
+  if (tmpname == NULL)
+    fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
+	   input_filename, strerror (errno));
+
+  copy_file (input_filename, tmpname, input_target, output_target);
+  if (status == 0)
     {
-      char *tmpname = make_tempname (input_filename);
-
-      if (tmpname == NULL)
-	fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
-	       input_filename, strerror (errno));
-
-      copy_file (input_filename, tmpname, input_target, output_target);
-      if (status == 0)
-	{
-	  if (preserve_dates)
-	    set_times (tmpname, &statbuf);
-	  smart_rename (tmpname, input_filename, preserve_dates);
-	}
-      else
-	unlink (tmpname);
+      if (preserve_dates)
+	set_times (tmpname, &statbuf);
+      if (tmpname != output_filename)
+	smart_rename (tmpname, input_filename, preserve_dates);
     }
   else
-    {
-      copy_file (input_filename, output_filename, input_target, output_target);
-
-      if (status == 0 && preserve_dates)
-	set_times (output_filename, &statbuf);
-      else if (status != 0)
-	unlink_if_ordinary (output_filename);
-    }
+    unlink_if_ordinary (tmpname);
 
   if (change_warn)
     {

@@ -1,3 +1,9 @@
+2007-05-18  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* objcopy.c (strip_main): Detect identical input and output file
+	names.
+	(copy_main): Refactor tempname detection and use.
+
 2007-05-17  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (load_debug_section): Select bias for DWARF debug
