@@ -1,3 +1,8 @@
+2007-05-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-mips.c (s_mipsset): Use generic s_set for directives
+	containing a comma.
+
 2007-05-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/4517

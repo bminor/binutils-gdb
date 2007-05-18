@@ -12614,6 +12614,14 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     mips_opts.sym32 = TRUE;
   else if (strcmp (name, "nosym32") == 0)
     mips_opts.sym32 = FALSE;
+  else if (strchr (name, ','))
+    {
+      /* Generic ".set" directive; use the generic handler.  */
+      *input_line_pointer = ch;
+      input_line_pointer = name;
+      s_set (0);
+      return;
+    }
   else
     {
       as_warn (_("Tried to set unrecognized symbol: %s\n"), name);
