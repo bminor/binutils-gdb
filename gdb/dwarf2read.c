@@ -8656,6 +8656,8 @@ dwarf_stack_op_name (unsigned op)
       return "DW_OP_bit_piece";
     case DW_OP_GNU_push_tls_address:
       return "DW_OP_GNU_push_tls_address";
+    case DW_OP_GNU_uninit:
+      return "DW_OP_GNU_uninit";
     /* HP extensions. */ 
     case DW_OP_HP_is_value:
       return "DW_OP_HP_is_value";
@@ -9230,6 +9232,9 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  if (i < size)
 	    dwarf2_complex_location_expr_complaint ();
           break;
+
+	case DW_OP_GNU_uninit:
+	  break;
 
 	default:
 	  complaint (&symfile_complaints, _("unsupported stack op: '%s'"),

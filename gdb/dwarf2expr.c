@@ -284,6 +284,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		  gdb_byte *op_ptr, gdb_byte *op_end)
 {
   ctx->in_reg = 0;
+  ctx->initialized = 1;  /* Default is initialized.  */
 
   while (op_ptr < op_end)
     {
@@ -410,7 +411,9 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_reg29:
 	case DW_OP_reg30:
 	case DW_OP_reg31:
-	  if (op_ptr != op_end && *op_ptr != DW_OP_piece)
+	  if (op_ptr != op_end 
+	      && *op_ptr != DW_OP_piece
+	      && *op_ptr != DW_OP_GNU_uninit)
 	    error (_("DWARF-2 expression error: DW_OP_reg operations must be "
 		   "used either alone or in conjuction with DW_OP_piece."));
 
@@ -730,6 +733,14 @@ execute_stack_op (struct dwarf_expr_context *ctx,
             ctx->in_reg = 0;
           }
           goto no_push;
+
+	case DW_OP_GNU_uninit:
+	  if (op_ptr != op_end)
+	    error (_("DWARF-2 expression error: DW_OP_GNU_unint must always "
+		   "be the very last op."));
+
+	  ctx->initialized = 0;
+	  goto no_push;
 
 	default:
 	  error (_("Unhandled dwarf expression opcode 0x%x"), op);

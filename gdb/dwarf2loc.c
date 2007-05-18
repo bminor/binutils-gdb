@@ -256,6 +256,8 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
       VALUE_ADDRESS (retval) = address;
     }
 
+  set_value_initialized (retval, ctx->initialized);
+
   free_dwarf_expr_context (ctx);
 
   return retval;

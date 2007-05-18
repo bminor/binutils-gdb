@@ -556,6 +556,9 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 	}
     }
 
+  if (!value_initialized (val))
+    fprintf_filtered (stream, " [uninitialized] ");
+
   if (objectprint && (TYPE_CODE (type) == TYPE_CODE_CLASS))
     {
       /* Attempt to determine real type of object */

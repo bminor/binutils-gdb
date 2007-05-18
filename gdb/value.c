@@ -157,6 +157,9 @@ struct value
      actually exist in the program.  */
   char optimized_out;
 
+  /* If value is a variable, is it initialized or not.  */
+  int initialized;
+
   /* Actual contents of the value.  For use of this value; setting it
      uses the stuff above.  Not valid if lazy is nonzero.  Target
      byte-order.  We force it to be aligned properly for any possible
@@ -232,6 +235,7 @@ allocate_value (struct type *type)
   val->embedded_offset = 0;
   val->pointed_to_offset = 0;
   val->modifiable = 1;
+  val->initialized = 1;  /* Default to initialized.  */
   return val;
 }
 
@@ -1697,6 +1701,22 @@ using_struct_return (struct type *value_type, int gcc_p)
   return (gdbarch_return_value (current_gdbarch, value_type,
 				NULL, NULL, NULL)
 	  != RETURN_VALUE_REGISTER_CONVENTION);
+}
+
+/* Set the initialized field in a value struct.  */
+
+void
+set_value_initialized (struct value *val, int status)
+{
+  val->initialized = status;
+}
+
+/* Return the initialized field in a value struct.  */
+
+int
+value_initialized (struct value *val)
+{
+  return val->initialized;
 }
 
 void

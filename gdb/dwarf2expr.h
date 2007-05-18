@@ -76,6 +76,10 @@ struct dwarf_expr_context
      will be on the expression stack.  */
   int in_reg;
 
+  /* Initialization status of variable: Non-zero if variable has been
+     initialized; zero otherwise.  */
+  int initialized;
+
   /* An array of pieces.  PIECES points to its first element;
      NUM_PIECES is its length.
 

@@ -1,5 +1,28 @@
 2007-05-18  Caroline Tice  <ctice@apple.com>
 
+	* c-valprint.c (c_value_print):  If the initialized field of the
+	value struct is 0, print out "[uninitialized]" before the value.
+	* dwarf2expr.c (execute_stack_op): Initialize ctx->initialized field; 
+	allow DW_OP_GNU_uninit as legal op following a DW_OP_reg op or a 
+	DW_OP_regx op; add case for DW_OP_GNU_uninit and update
+	ctx->initialized appropriately. Verify no location op follows
+	DW_OP_GNU_uninit.
+	* dwarf2expr.h (struct dwarf_expr_context): New field, initialized.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Add call to 
+	set_value_initialized.
+	* dwarf2read.c (dwarf_stack_op_name): Add case for DW_OP_GNU_uninit.
+	(decode_locdesc): Add case for DW_OP_GNU_uninit.
+	* value.c (struct value):  New field, initialized.
+	(allocate_value): Initialize new field.
+	(set_value_initialized): New function.
+	(value_initialized): New function.
+	* value.h (value_initialized): New extern declaration.
+	(set_value_initialized): Likewise.
+	* include/elf/dwarf2.h: (enum dwarf_location_atom): Add new DW_OP, 
+	DW_OP_GNU_uninit.
+	
+2007-05-18  Caroline Tice  <ctice@apple.com>
+
 	* MAINTAINERS (Write After Approval): Add self.
 	
 2007-05-17  Joel Brobecker  <brobecker@adacore.com>
