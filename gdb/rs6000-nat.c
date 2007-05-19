@@ -1016,7 +1016,9 @@ rs6000_create_inferior (char *exec_file, char *allargs, char **env, int from_tty
 
 
 /* xcoff_relocate_symtab -      hook for symbol table relocation.
-   also reads shared libraries.  */
+   
+   This is only applicable to live processes, and is a no-op when
+   debugging a core file.  */
 
 void
 xcoff_relocate_symtab (unsigned int pid)
@@ -1027,6 +1029,9 @@ xcoff_relocate_symtab (unsigned int pid)
   int arch64 = ARCH64 ();
   int ldisize = arch64 ? sizeof (ldi->l64) : sizeof (ldi->l32);
   int size;
+
+  if (ptid_equal (inferior_ptid, null_ptid))
+    return;
 
   do
     {
