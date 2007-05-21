@@ -26,11 +26,11 @@ Disassembly of section \.plt:
 Disassembly of section \.text:
 
 00080c00 <_start>:
-   80c00:	ebffff08 	bl	80428 <.*>
+   80c00:	ebffff08 	bl	80828 <.*>
 			80c00: R_ARM_PC24	\.plt\+0x20
-   80c04:	eb000000 	bl	80c14 <sexternal\+0x8>
+   80c04:	eb000000 	bl	80c0c <sexternal>
 			80c04: R_ARM_PC24	sexternal\+0xfffffff8
-   80c08:	eaffff00 	b	80408 <.*>
+   80c08:	eaffff00 	b	80810 <.*>
 			80c08: R_ARM_PC24	\.plt\+0x8
 
 00080c0c <sexternal>:

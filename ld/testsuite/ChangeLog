@@ -1,3 +1,10 @@
+2007-05-21  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-arm/emit-relocs1.d, ld-arm/emit-relocs1.s,
+	* ld-arm/emit-relocs1-vxworks.d: New tests.
+	* ld-arm/arm-elf.exp: Run them.
+	* ld-arm/vxworks1.dd: Expect proper branch targets.
+
 2007-05-18  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-elf/group.ld: Discard .reginfo.

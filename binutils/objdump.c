@@ -1377,6 +1377,8 @@ disassemble_bytes (struct disassemble_info * info,
 	      info->flags = 0;
 
 	      if (info->disassembler_needs_relocs
+		  && (bfd_get_file_flags (aux->abfd) & EXEC_P) == 0
+		  && (bfd_get_file_flags (aux->abfd) & DYNAMIC) == 0
 		  && *relppp < relppend)
 		{
 		  bfd_signed_vma distance_to_rel;

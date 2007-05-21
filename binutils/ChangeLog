@@ -1,3 +1,8 @@
+2007-05-21  Richard Sandiford  <richard@codesourcery.com>
+
+	* objdump.c (disassemble_bytes): Ignore disassembler_needs_relocs
+	for executables and shared libraries.
+
 2007-05-18  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* objcopy.c (strip_main): Detect identical input and output file

@@ -41,6 +41,7 @@ if {[istarget "arm-*-vxworks"]} {
     }
     run_ld_link_tests $armvxworkstests
     run_dump_test "vxworks1-static"
+    run_dump_test "emit-relocs1-vxworks"
 }
 
 # Exclude non-ARM-ELF targets.
@@ -175,6 +176,7 @@ run_dump_test "group-relocs-ldrs-bad"
 run_dump_test "group-relocs-ldc-bad"
 run_dump_test "thumb2-bl-as-thumb1-bad"
 run_dump_test "thumb2-bl-bad"
+run_dump_test "emit-relocs1"
 
 # Exclude non-ARM-EABI targets.
 
