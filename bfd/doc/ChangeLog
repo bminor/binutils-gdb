@@ -1,3 +1,7 @@
+2007-05-21  Nick Clifton  <nickc@redhat.com>
+
+	* bfdint.texi: Add GNU Free Documentation License notice.
+
 2007-04-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
