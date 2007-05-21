@@ -23,9 +23,6 @@
 #ifndef TM_LINUX_H
 #define TM_LINUX_H
 
-/* The following works around a problem with /usr/include/sys/procfs.h  */
-#define sys_quotactl 1
-
 /* N_FUN symbols in shared libaries have 0 for their values and need
    to be relocated. */
 #define SOFUN_ADDRESS_MAYBE_MISSING

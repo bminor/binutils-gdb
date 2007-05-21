@@ -19277,24 +19277,10 @@ _ACEOF
 
 fi
 
-# If we are configured native on GNU/Linux, work around problems with
-# sys/procfs.h
-# Also detect which type of /proc is in use, such as for Unixware or Solaris.
+# Detect which type of /proc is in use, such as for Unixware or Solaris.
 
 if test "${target}" = "${host}"; then
   case "${host}" in
-  i[3456]86-*-linux*)
-
-cat >>confdefs.h <<\_ACEOF
-#define START_INFERIOR_TRAPS_EXPECTED 2
-_ACEOF
-
-
-cat >>confdefs.h <<\_ACEOF
-#define sys_quotactl 1
-_ACEOF
-
-	;;
   *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
 
 cat >>confdefs.h <<\_ACEOF

@@ -686,18 +686,10 @@ if test $gdb_cv_have_pt_getxmmregs = yes; then
   [Define if sys/ptrace.h defines the PT_GETXMMREGS request.])
 fi
 
-# If we are configured native on GNU/Linux, work around problems with
-# sys/procfs.h
-# Also detect which type of /proc is in use, such as for Unixware or Solaris.
+# Detect which type of /proc is in use, such as for Unixware or Solaris.
 
 if test "${target}" = "${host}"; then
   case "${host}" in
-  i[[3456]]86-*-linux*)
-	AC_DEFINE(START_INFERIOR_TRAPS_EXPECTED, 2,
-        [Define on a GNU/Linux system to work around problems in sys/procfs.h.])
-	AC_DEFINE(sys_quotactl, 1,
-        [Define on a GNU/Linux system to work around problems in sys/procfs.h.])
-	;;
   *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
       AC_DEFINE(NEW_PROC_API, 1,
       [Define if you want to use new multi-fd /proc interface

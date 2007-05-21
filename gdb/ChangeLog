@@ -1,3 +1,10 @@
+2007-05-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/i386/tm-linux.h (sys_quotactl): Do not define.
+	* configure.ac (sys_quotactl, START_INFERIOR_TRAPS_EXPECTED): Do not
+	define for i[[3456]]86-*-linux* native configurations.
+	* config.in, configure: Regenerate.
+
 2007-05-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* rs6000-nat.c (xcoff_relocate_symtab): Do nothing if debugging

@@ -551,9 +551,6 @@
 	STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
 
-/* Define on a GNU/Linux system to work around problems in sys/procfs.h. */
-#undef START_INFERIOR_TRAPS_EXPECTED
-
 /* Define to 1 if the `S_IS*' macros in <sys/stat.h> do not work properly. */
 #undef STAT_MACROS_BROKEN
 
@@ -614,9 +611,6 @@
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
-
-/* Define on a GNU/Linux system to work around problems in sys/procfs.h. */
-#undef sys_quotactl
 
 /* Define as `fork' if `vfork' does not work. */
 #undef vfork
