@@ -30,8 +30,6 @@
 	(value_initialized): New function.
 	* value.h (value_initialized): New extern declaration.
 	(set_value_initialized): Likewise.
-	* include/elf/dwarf2.h: (enum dwarf_location_atom): Add new DW_OP, 
-	DW_OP_GNU_uninit.
 	
 2007-05-18  Caroline Tice  <ctice@apple.com>
 
