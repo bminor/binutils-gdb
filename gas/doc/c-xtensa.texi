@@ -241,10 +241,8 @@ density option, the same assembly code will then work without modification.
 @node Xtensa Automatic Alignment
 @subsection Automatic Instruction Alignment
 @cindex alignment of @code{LOOP} instructions
-@cindex alignment of @code{ENTRY} instructions
 @cindex alignment of branch targets
 @cindex @code{LOOP} instructions, alignment
-@cindex @code{ENTRY} instructions, alignment
 @cindex branch target alignment
 
 The Xtensa assembler will automatically align certain instructions, both
@@ -287,11 +285,9 @@ different fetch widths, the assembler conservatively assumes a 32-bit
 fetch width when aligning @code{LOOP} instructions (except if the first
 instruction in the loop is a 64-bit instruction).
 
-Similarly, the @code{ENTRY} instruction must be aligned on a 0 mod 4
-byte boundary.  The assembler satisfies this requirement by inserting
-zero bytes when required.  In addition, labels immediately preceding the
-@code{ENTRY} instruction will be moved to the newly aligned instruction
-location.
+Previous versions of the assembler automatically aligned @code{ENTRY}
+instructions to 4-byte boundaries, but that alignment is now the
+programmer's responsibility.
 
 @node Xtensa Relaxation
 @section Xtensa Relaxation

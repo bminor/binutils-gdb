@@ -1,3 +1,8 @@
+2007-05-22  Bob Wilson  <bob.wilson@acm.org>
+	
+	* doc/c-xtensa.texi (Xtensa Automatic Alignment): Remove statements
+	and index entries about automatic alignment of ENTRY instructions.
+	
 2007-05-22  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo: Use @copying around the copyright notice.
