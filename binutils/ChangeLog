@@ -1,3 +1,8 @@
+2007-05-22  Paul Brook  <paul@codesourcery.com>
+
+	* objdump.c (find_symbol_for_address): Merge section and target
+	specific filtering code.
+
 2007-05-22  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi: Use @copying around the copyright notice.

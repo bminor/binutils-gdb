@@ -687,6 +687,7 @@ find_symbol_for_address (bfd_vma vma,
   bfd *abfd;
   asection *sec;
   unsigned int opb;
+  bfd_boolean want_section;
 
   if (sorted_symcount < 1)
     return NULL;
@@ -732,15 +733,19 @@ find_symbol_for_address (bfd_vma vma,
      Note that this may be wrong for some symbol references if the
      sections have overlapping memory ranges, but in that case there's
      no way to tell what's desired without looking at the relocation
-     table.  */
-  if (sorted_syms[thisplace]->section != sec
-      && (aux->require_sec
-	  || ((abfd->flags & HAS_RELOC) != 0
-	      && vma >= bfd_get_section_vma (abfd, sec)
-	      && vma < (bfd_get_section_vma (abfd, sec)
-			+ bfd_section_size (abfd, sec) / opb))))
+     table.
+     
+     Also give the target a chance to reject symbols.  */
+  want_section = (aux->require_sec
+		  || ((abfd->flags & HAS_RELOC) != 0
+		      && vma >= bfd_get_section_vma (abfd, sec)
+		      && vma < (bfd_get_section_vma (abfd, sec)
+				+ bfd_section_size (abfd, sec) / opb)));
+  if ((sorted_syms[thisplace]->section != sec && want_section)
+      || !info->symbol_is_valid (sorted_syms[thisplace], info))
     {
       long i;
+      long newplace;
 
       for (i = thisplace + 1; i < sorted_symcount; i++)
 	{
@@ -750,27 +755,36 @@ find_symbol_for_address (bfd_vma vma,
 	}
 
       --i;
+      newplace = sorted_symcount;
 
       for (; i >= 0; i--)
 	{
-	  if (sorted_syms[i]->section == sec
-	      && (i == 0
-		  || sorted_syms[i - 1]->section != sec
-		  || (bfd_asymbol_value (sorted_syms[i])
-		      != bfd_asymbol_value (sorted_syms[i - 1]))))
+	  if ((sorted_syms[i]->section == sec || !want_section)
+	      && info->symbol_is_valid (sorted_syms[i], info))
 	    {
-	      thisplace = i;
-	      break;
+	      if (newplace == sorted_symcount)
+		newplace = i;
+
+	      if (bfd_asymbol_value (sorted_syms[i])
+		  != bfd_asymbol_value (sorted_syms[newplace]))
+		break;
+
+	      /* Remember this symbol and keep searching until we reach
+		 an earlier address.  */
+	      newplace = i;
 	    }
 	}
 
-      if (sorted_syms[thisplace]->section != sec)
+      if (newplace != sorted_symcount)
+	thisplace = newplace;
+      else
 	{
 	  /* We didn't find a good symbol with a smaller value.
 	     Look for one with a larger value.  */
 	  for (i = thisplace + 1; i < sorted_symcount; i++)
 	    {
-	      if (sorted_syms[i]->section == sec)
+	      if ((sorted_syms[i]->section == sec || !want_section)
+		  && info->symbol_is_valid (sorted_syms[i], info))
 		{
 		  thisplace = i;
 		  break;
@@ -778,22 +792,9 @@ find_symbol_for_address (bfd_vma vma,
 	    }
 	}
 
-      if (sorted_syms[thisplace]->section != sec
-	  && (aux->require_sec
-	      || ((abfd->flags & HAS_RELOC) != 0
-		  && vma >= bfd_get_section_vma (abfd, sec)
-		  && vma < (bfd_get_section_vma (abfd, sec)
-			    + bfd_section_size (abfd, sec)))))
+      if ((sorted_syms[thisplace]->section != sec && want_section)
+	  || !info->symbol_is_valid (sorted_syms[thisplace], info))
 	/* There is no suitable symbol.  */
-	return NULL;
-    }
-
-  /* Give the target a chance to reject the symbol.  */
-  while (! info->symbol_is_valid (sorted_syms [thisplace], info))
-    {
-      ++ thisplace;
-      if (thisplace >= sorted_symcount
-	  || bfd_asymbol_value (sorted_syms [thisplace]) > vma)
 	return NULL;
     }
 

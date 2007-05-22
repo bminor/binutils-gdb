@@ -1,3 +1,14 @@
+2007-05-22  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm-mixed-lib.d: Update expected output.
+	* ld-arm/arm-app.d: Ditto.
+	* ld-arm/mixed-app.d: Ditto.
+	* ld-arm/arm-lib-plt32.d: Ditto.
+	* ld-arm/arm-app-abs32.d: Ditto.
+	* ld-arm/mixed-app-v5.d: Ditto.
+	* ld-arm/armthumb-lib.d: Ditto.
+	* ld-arm/arm-lib.d: Ditto.
+
 2007-05-21  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-arm/emit-relocs1.d, ld-arm/emit-relocs1.s,

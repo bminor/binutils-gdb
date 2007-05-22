@@ -4,7 +4,7 @@
 .*:     file format .*arm.*
 
 Disassembly of section .text:
-00000000 <.text> 615c      	.short	0x615c
+00000000 <foo-0x2> 615c      	.short	0x615c
 00000002 <foo> e3a00000 	mov	r0, #0	; 0x0
 00000006 <foo\+0x4> e3a00000 	mov	r0, #0	; 0x0
 0000000a <foo\+0x8> e3a00000 	mov	r0, #0	; 0x0
