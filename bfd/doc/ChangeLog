@@ -1,3 +1,8 @@
+2007-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* bfd.texinfo: Use @copying around the copyright notice.
+	* bfdint.texi: Likewise.
+
 2007-05-21  Nick Clifton  <nickc@redhat.com>
 
 	* bfdint.texi: Add GNU Free Documentation License notice.

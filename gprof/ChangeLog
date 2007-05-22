@@ -1,3 +1,7 @@
+2007-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* gprof.texi: Use @copying around the copyright notice.
+
 2007-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* hist.c (scale_and_align_entries): Avoid C99 feature.

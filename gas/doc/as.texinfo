@@ -96,11 +96,11 @@ END-INFO-DIR-ENTRY
 @finalout
 @syncodeindex ky cp
 
-@ifinfo
+@copying
 This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
-Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
+Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
 2006, 2007 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -111,15 +111,7 @@ Back-Cover Texts.  A copy of the license is included in the
 section entitled ``GNU Free Documentation License''.
 
 @c man end
-
-@ignore
-Permission is granted to process this file through Tex and print the
-results, provided the printed document carries copying permission
-notice identical to this one except for the removal of this paragraph
-(this paragraph not being relevant to the printed manual).
-
-@end ignore
-@end ifinfo
+@end copying
 
 @titlepage
 @title Using @value{AS}

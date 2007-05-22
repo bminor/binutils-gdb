@@ -1,3 +1,7 @@
+2007-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo: Use @copying around the copyright notice.
+
 2007-05-18  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-mips.c (s_mipsset): Use generic s_set for directives

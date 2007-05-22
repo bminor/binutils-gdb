@@ -1,3 +1,7 @@
+2007-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi: Use @copying around the copyright notice.
+
 2007-05-21  Richard Sandiford  <richard@codesourcery.com>
 
 	* objdump.c (disassemble_bytes): Ignore disassembler_needs_relocs

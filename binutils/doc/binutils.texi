@@ -30,7 +30,7 @@ END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
 
-@ifinfo
+@copying
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
@@ -43,14 +43,7 @@ Back-Cover Texts.  A copy of the license is included in the
 section entitled ``GNU Free Documentation License''.
 
 @c man end
-@ignore
-Permission is granted to process this file through TeX and print the
-results, provided the printed document carries a copying permission
-notice identical to this one except for the removal of this paragraph
-(this paragraph not being relevant to the printed manual).
-
-@end ignore
-@end ifinfo
+@end copying
 
 @synindex ky cp
 @c
