@@ -2541,7 +2541,7 @@ ser-pipe.o: ser-pipe.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
 ser-tcp.o: ser-tcp.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_tcp_h) \
 	$(gdb_string_h)
 ser-unix.o: ser-unix.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
-	$(terminal_h) $(gdb_select_h) $(gdb_string_h)
+	$(terminal_h) $(gdb_select_h) $(gdb_string_h) $(gdbcmd_h)
 ser-mingw.o: ser-mingw.c $(defs_h) $(serial_h) $(ser_base_h) \
 	$(ser_tcp_h) $(gdb_assert_h) $(gdb_string_h)
 sh64-tdep.o: sh64-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \

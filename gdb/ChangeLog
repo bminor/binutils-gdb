@@ -1,3 +1,12 @@
+2007-05-22  Chris Dearman  <chris@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* ser-unix.c (show_serial_hwflow): New function.
+	(hardwire_raw): Add hardware flow control support.
+	(_initialize_ser_hardwire): Add "set/show remoteflow".
+	* Makefile.in (ser-unix.o): Depend on $(gdbcmd_h).
+	* NEWS: Document the new command.
+
 2007-05-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/i386/tm-linux.h (sys_quotactl): Do not define.

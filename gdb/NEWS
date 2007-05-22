@@ -39,6 +39,11 @@ has been rewritten to use the standard GDB remote protocol.
 
 * New commands
 
+set remoteflow
+show remoteflow
+  Enable or disable hardware flow control (RTS/CTS) on the serial port
+  when debugging using remote targets.
+
 set mem inaccessible-by-default
 show mem inaccessible-by-default
   If the target supplies a memory map, for instance via the remote

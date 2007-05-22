@@ -33,6 +33,7 @@
 
 #include "gdb_select.h"
 #include "gdb_string.h"
+#include "gdbcmd.h"
 
 #ifdef HAVE_TERMIOS
 
@@ -40,6 +41,18 @@ struct hardwire_ttystate
   {
     struct termios termios;
   };
+
+#ifdef CRTSCTS
+/* Boolean to explicitly enable or disable h/w flow control.  */
+static int serial_hwflow;
+static void
+show_serial_hwflow (struct ui_file *file, int from_tty,
+		    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Hardware flow control is %s.\n"), value);
+}
+#endif
+
 #endif /* termios */
 
 #ifdef HAVE_TERMIO
@@ -387,6 +400,19 @@ hardwire_raw (struct serial *scb)
   state.termios.c_lflag = 0;
   state.termios.c_cflag &= ~(CSIZE | PARENB);
   state.termios.c_cflag |= CLOCAL | CS8;
+#ifdef CRTSCTS
+  /* h/w flow control.  */
+  if (serial_hwflow)
+    state.termios.c_cflag |= CRTSCTS;
+  else
+    state.termios.c_cflag &= ~CRTSCTS;
+#ifdef CRTS_IFLOW
+  if (serial_hwflow)
+    state.termios.c_cflag |= CRTS_IFLOW;
+  else
+    state.termios.c_cflag &= ~CRTS_IFLOW;
+#endif
+#endif
   state.termios.c_cc[VMIN] = 0;
   state.termios.c_cc[VTIME] = 0;
 #endif
@@ -892,6 +918,20 @@ _initialize_ser_hardwire (void)
   ops->read_prim = ser_unix_read_prim;
   ops->write_prim = ser_unix_write_prim;
   serial_add_interface (ops);
+
+#ifdef HAVE_TERMIOS
+#ifdef CRTSCTS
+  add_setshow_boolean_cmd ("remoteflow", no_class,
+			   &serial_hwflow, _("\
+Set use of hardware flow control for remote serial I/O."), _("\
+Show use of hardware flow control for remote serial I/O."), _("\
+Enable or disable hardware flow control (RTS/CTS) on the serial port\n\
+when debugging using remote targets."),
+			   NULL,
+			   show_serial_hwflow,
+			   &setlist, &showlist);
+#endif
+#endif
 }
 
 int

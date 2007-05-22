@@ -12792,6 +12792,16 @@ expect to see @samp{Ctrl-C} as the interrupt signal.
 Show whether @value{GDBN} sends @code{BREAK} or @samp{Ctrl-C} to
 interrupt the remote program.
 
+@item set remoteflow on
+@itemx set remoteflow off
+@kindex set remoteflow
+Enable or disable hardware flow control (@code{RTS}/@code{CTS})
+on the serial port used to communicate to the remote target.
+
+@item show remoteflow
+@kindex show remoteflow
+Show the current setting of hardware flow control.
+
 @item set remotelogbase @var{base}
 Set the base (a.k.a.@: radix) of logging serial protocol
 communications to @var{base}.  Supported values of @var{base} are:
