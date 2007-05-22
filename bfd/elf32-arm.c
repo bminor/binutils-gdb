@@ -10045,8 +10045,8 @@ typedef struct
 {
   void *finfo;
   struct bfd_link_info *info;
-  int plt_shndx;
-  bfd_vma plt_offset;
+  asection *sec;
+  int sec_shndx;
   bfd_boolean (*func) (void *, const char *, Elf_Internal_Sym *,
 		       asection *, struct elf_link_hash_entry *);
 } output_arch_syminfo;
@@ -10071,12 +10071,14 @@ elf32_arm_ouput_plt_map_sym (output_arch_syminfo *osi,
   Elf_Internal_Sym sym;
 
   htab = elf32_arm_hash_table (osi->info);
-  sym.st_value = osi->plt_offset + offset;
+  sym.st_value = osi->sec->output_section->vma
+		 + osi->sec->output_offset
+		 + offset;
   sym.st_size = 0;
   sym.st_other = 0;
   sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_NOTYPE);
-  sym.st_shndx = osi->plt_shndx;
-  if (!osi->func (osi->finfo, names[type], &sym, htab->splt, NULL))
+  sym.st_shndx = osi->sec_shndx;
+  if (!osi->func (osi->finfo, names[type], &sym, osi->sec, NULL))
     return FALSE;
   return TRUE;
 }
@@ -10157,7 +10159,7 @@ elf32_arm_output_plt_map (struct elf_link_hash_entry *h, void *inf)
 }
 
 
-/* Output mapping symbols for the PLT.  */
+/* Output mapping symbols for linker generated sections.  */
 
 static bfd_boolean
 elf32_arm_output_arch_local_syms (bfd *output_bfd,
@@ -10169,19 +10171,63 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 {
   output_arch_syminfo osi;
   struct elf32_arm_link_hash_table *htab;
+  bfd_vma offset;
+  bfd_size_type size;
 
   htab = elf32_arm_hash_table (info);
-  if (!htab->splt || htab->splt->size == 0)
-    return TRUE;
-
   check_use_blx(htab);
+
   osi.finfo = finfo;
   osi.info = info;
   osi.func = func;
-  osi.plt_shndx = _bfd_elf_section_from_bfd_section (output_bfd,
-      htab->splt->output_section);
-  osi.plt_offset = htab->splt->output_section->vma;
+  
+  /* ARM->Thumb glue.  */
+  if (htab->arm_glue_size > 0)
+    {
+      osi.sec = bfd_get_section_by_name (htab->bfd_of_glue_owner,
+					 ARM2THUMB_GLUE_SECTION_NAME);
 
+      osi.sec_shndx = _bfd_elf_section_from_bfd_section
+	  (output_bfd, osi.sec->output_section);
+      if (info->shared || htab->root.is_relocatable_executable
+	  || htab->pic_veneer)
+	size = ARM2THUMB_PIC_GLUE_SIZE;
+      else if (htab->use_blx)
+	size = ARM2THUMB_V5_STATIC_GLUE_SIZE;
+      else
+	size = ARM2THUMB_STATIC_GLUE_SIZE;
+
+      for (offset = 0; offset < htab->arm_glue_size; offset += size)
+	{
+	  elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_ARM, offset);
+	  elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_DATA, offset + size - 4);
+	}
+    }
+
+  /* Thumb->ARM glue.  */
+  if (htab->thumb_glue_size > 0)
+    {
+      osi.sec = bfd_get_section_by_name (htab->bfd_of_glue_owner,
+					 THUMB2ARM_GLUE_SECTION_NAME);
+
+      osi.sec_shndx = _bfd_elf_section_from_bfd_section
+	  (output_bfd, osi.sec->output_section);
+      size = THUMB2ARM_GLUE_SIZE;
+
+      for (offset = 0; offset < htab->thumb_glue_size; offset += size)
+	{
+	  elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_THUMB, offset);
+	  elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_ARM, offset + 4);
+	}
+    }
+
+  /* Finally, output mapping symbols for the PLT.  */
+  if (!htab->splt || htab->splt->size == 0)
+    return TRUE;
+
+  osi.sec_shndx = _bfd_elf_section_from_bfd_section (output_bfd,
+      htab->splt->output_section);
+  osi.sec = htab->splt;
   /* Output mapping symbols for the plt header.  SymbianOS does not have a
      plt header.  */
   if (htab->vxworks_p)

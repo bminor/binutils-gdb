@@ -1,5 +1,10 @@
 2007-05-22  Paul Brook  <paul@codesourcery.com>
 
+	* ld-arm/arm-pic-veneer.d: Update expected output.
+	* ld-arm/arm-call.d: Ditto.
+
+2007-05-22  Paul Brook  <paul@codesourcery.com>
+
 	* ld-arm-mixed-lib.d: Update expected output.
 	* ld-arm/arm-app.d: Ditto.
 	* ld-arm/mixed-app.d: Ditto.

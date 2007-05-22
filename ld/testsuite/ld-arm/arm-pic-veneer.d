@@ -14,4 +14,4 @@ Disassembly of section .text:
     8008:	e59fc004 	ldr	ip, \[pc, #4\]	; 8014 <__foo_from_arm\+0xc>
     800c:	e08cc00f 	add	ip, ip, pc
     8010:	e12fff1c 	bx	ip
-    8014:	fffffff1 	undefined instruction 0xfffffff1
+    8014:	fffffff1 	.word	0xfffffff1

@@ -49,8 +49,8 @@ Disassembly of section .text:
 
 0000805c <__t1_from_arm>:
     805c:	e51ff004 	ldr	pc, \[pc, #-4\]	; 8060 <__t1_from_arm\+0x4>
-    8060:	00008041 	andeq	r8, r0, r1, asr #32
+    8060:	00008041 	.word	0x00008041
 
 00008064 <__t2_from_arm>:
     8064:	e51ff004 	ldr	pc, \[pc, #-4\]	; 8068 <__t2_from_arm\+0x4>
-    8068:	00008043 	andeq	r8, r0, r3, asr #32
+    8068:	00008043 	.word	0x00008043

@@ -1,3 +1,11 @@
+2007-05-22  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (output_arch_syminfo): Replace plt_shndx and plt_offset
+	with sec and sec_shndx.
+	(elf32_arm_ouput_plt_map_sym): Use them.
+	(elf32_arm_output_arch_local_syms): Output mapping symbols for
+	interworking glue.
+
 2007-05-18  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (ARM2THUMB_V5_STATIC_GLUE_SIZE): Define.
