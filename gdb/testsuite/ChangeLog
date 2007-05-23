@@ -1,3 +1,9 @@
+2007-05-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* lib/gdbserver-support.exp (gdbserver_spawn): Only match full_buffer.
+	(gdbserver_run): Kill any running gdbserver.
+	* lib/mi-support.exp (mi_gdb_target_load): Likewise.
+
 2007-05-17  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.base/sigbpt.exp: Preset segv_addr.

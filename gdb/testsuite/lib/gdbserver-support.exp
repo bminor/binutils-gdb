@@ -222,7 +222,7 @@ proc gdbserver_spawn { child_args } {
     # don't need to redirect output.
     expect_background {
 	-i $server_spawn_id
-	-re "." { }
+	full_buffer { }
 	eof {
 	    # The spawn ID is already closed now (but not yet waited for).
 	    wait -i $expect_out(spawn_id)
@@ -236,6 +236,21 @@ proc gdbserver_spawn { child_args } {
 # to it.  Return 0 on success, or non-zero on failure.
 
 proc gdbserver_run { child_args } {
+    # Kill anything running before we try to start gdbserver, in case
+    # we are sharing a serial connection.
+    global gdb_prompt
+    send_gdb "kill\n"
+    gdb_expect 120 {
+	-re "Kill the program being debugged. .y or n. $" {
+	    send_gdb "y\n"
+	    verbose "\t\tKilling previous program being debugged"
+	    exp_continue
+	}
+	-re "$gdb_prompt $" {
+	    # OK.
+	}
+    }
+
     set res [gdbserver_spawn $child_args]
     set protocol [lindex $res 0]
     set gdbport [lindex $res 1]

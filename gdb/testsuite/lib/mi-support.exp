@@ -454,6 +454,7 @@ proc mi_gdb_target_load { } {
     upvar timeout timeout
 
     if { [info procs gdbserver_gdb_load] != "" } {
+	mi_gdb_test "kill" ".*" ""
 	set res [gdbserver_gdb_load]
 	set protocol [lindex $res 0]
 	set gdbport [lindex $res 1]
