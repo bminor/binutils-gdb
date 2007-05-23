@@ -2178,15 +2178,6 @@ process_event_stop_test:
 	  }
 	break;
 
-      case BPSTAT_WHAT_THROUGH_SIGTRAMP:
-        if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_THROUGH_SIGTRAMP\n");
-	/* If were waiting for a trap, hitting the step_resume_break
-	   doesn't count as getting it.  */
-	if (trap_expected)
-	  ecs->another_trap = 1;
-	break;
-
       case BPSTAT_WHAT_CHECK_SHLIBS:
       case BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK:
 	{

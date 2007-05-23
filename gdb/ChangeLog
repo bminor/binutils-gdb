@@ -1,3 +1,9 @@
+2007-05-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* breakpoint.h (enum bpstat_what_main_action): Remove
+	BPSTAT_WHAT_THROUGH_SIGTRAMP.
+	* infrun.c (process_event_stop_test): Do not check for it.
+
 2007-05-22  Chris Dearman  <chris@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 

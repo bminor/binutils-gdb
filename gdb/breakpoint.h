@@ -486,10 +486,6 @@ enum bpstat_what_main_action
     /* Clear step resume breakpoint, and keep checking.  */
     BPSTAT_WHAT_STEP_RESUME,
 
-    /* Clear through_sigtramp breakpoint, muck with trap_expected, and keep
-       checking.  */
-    BPSTAT_WHAT_THROUGH_SIGTRAMP,
-
     /* Check the dynamic linker's data structures for new libraries, then
        keep checking.  */
     BPSTAT_WHAT_CHECK_SHLIBS,
