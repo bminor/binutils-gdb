@@ -1,3 +1,18 @@
+2007-05-23  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* binutils-all/windres/html.rc: New.
+	* binutils-all/windres/html.rsd: New.
+	* binutils-all/windres/html1.hm: New.
+	* binutils-all/windres/html2.hm: New.
+	* binutils-all/windres/messagetable.rc: New.
+	* binutils-all/windres/messagetable.rsd: New.
+	* binutils-all/windres/MSG00001.bin: New.
+	* binutils-all/windres/strtab2.rc: New.
+	* binutils-all/windres/strtab2.rsd: New.
+	* binutils-all/windres/version.rc: New.
+	* binutils-all/windres/version.rsd: New.
+	* binutils-all/windres/dialog.rsd: Fix expected results.
+
 2007-05-17  Joseph Myers  <joseph@codesourcery.com>
 
 	* binutils-all/strip-3.d: Strip .pdr section.

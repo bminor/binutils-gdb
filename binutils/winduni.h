@@ -1,6 +1,8 @@
 /* winduni.h -- header file for unicode support for windres program.
-   Copyright 1997, 1998, 2002 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 2002, 2007
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
+   Rewritten by Kai Tietz, Onevision.
 
    This file is part of GNU Binutils.
 
@@ -21,6 +23,9 @@
 
 #include "ansidecl.h"
 
+#ifndef WINDUNI_H
+#define WINDUNI_H
+
 /* This header file declares the types and functions we use for
    unicode support in windres.  Our unicode support is very limited at
    present.
@@ -30,31 +35,55 @@
    that would conflict with the definitions of Windows macros we
    already have in windres.h.  */
 
+/* Use bfd_size_type to ensure a sufficient number of bits.  */
+#ifndef DEFINED_RC_UINT_TYPE
+#define DEFINED_RC_UINT_TYPE
+typedef bfd_size_type rc_uint_type;
+#endif
+
 /* We use this type to hold a unicode character.  */
 
 typedef unsigned short unichar;
 
 /* Escape character translations.  */
 
-#define ESCAPE_A (007)
-#define ESCAPE_B (010)
-#define ESCAPE_F (014)
-#define ESCAPE_N (012)
-#define ESCAPE_R (015)
-#define ESCAPE_T (011)
-#define ESCAPE_V (013)
+#define ESCAPE_A  007
+#define ESCAPE_B  010
+#define ESCAPE_F  014
+#define ESCAPE_N  012
+#define ESCAPE_R  015
+#define ESCAPE_T  011
+#define ESCAPE_V  013
 
 /* Convert an ASCII string to a unicode string.  */
 
-extern void unicode_from_ascii
-  PARAMS ((int *, unichar **, const char *));
+extern void unicode_from_ascii (rc_uint_type *, unichar **, const char *);
+
+/* Convert an unicode string to an ASCII string.  */
+extern void ascii_from_unicode (rc_uint_type *, const unichar *, char **);
+
+/* Duplicate a unicode string by using res_alloc.  */
+extern unichar *unichar_dup (const unichar *);
+
+/* Duplicate a unicode string by using res_alloc and make it uppercase.  */
+extern unichar *unichar_dup_uppercase (const unichar *);
+
+/* The count of unichar elements.  */
+extern rc_uint_type unichar_len (const unichar *);
 
 /* Print a unicode string to a file.  */
+extern void unicode_print (FILE *, const unichar *, rc_uint_type);
 
-extern void unicode_print PARAMS ((FILE *, const unichar *, int));
+/* Print a ascii string to a file.  */
+extern void ascii_print (FILE *, const char *, rc_uint_type);
+
+/* Print a quoted unicode string to a file.  */
+extern void unicode_print_quoted (FILE *, const unichar *, rc_uint_type);
 
 /* Windres support routine called by unicode_from_ascii.  This is both
    here and in windres.h.  It should probably be in a separate header
    file, but it hardly seems worth it for one function.  */
 
-extern PTR res_alloc PARAMS ((size_t));
+extern void * res_alloc (rc_uint_type);
+
+#endif

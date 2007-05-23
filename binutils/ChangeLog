@@ -1,3 +1,34 @@
+2007-05-23  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* rclex.c: New file replacing rclex.l.
+	* rclex.l: Removed.
+	* windint.h: New file holding common structure and type
+	definitions.
+	* Makefile.am: Added new header windint.h and exchanged rclex.l by
+	rclex.c.
+	* Makefile.in: Regenerate.
+	* rcparse.y: Renamed some structures.
+	Use in internal representation always bfd_vma instead of long or
+	int.
+	Removed from %union unused stringtable.
+	Added to %union suni structure for unicode strings.
+	Added new tokens for ANICURSOR, ANIICON, DLGINCLUDE,
+	DLGINIT, FONTDIR, HTML, MANIFEST, PLUGPLAY, VXD,
+	TOOLBAR, BUTTON, QUOTEDUNISTRING, and SIZEDUNISTRING.
+	Added support for these new rc file tokens.
+	* resbin.c: Rewrote using bfd and binary structures, and support
+	new resource types.
+	* rescoff.c: Likewise.
+	* resres.c: Likewise.
+	* resrc.c: Likewise. Dumps as RC are now recompilable.
+	* windres.c: As above. Using bfd for res and provide target
+	specific endianess support.
+	* windres.h: Use windint.h as include. Additionally removed K&R
+	syntax.
+	* winduni.c: New printing and unichar support routines.
+	* winduni.h: Prototypes for new unichar helpers.
+	* windint.h: New file.
+
 2007-05-22  Paul Brook  <paul@codesourcery.com>
 
 	* objdump.c (find_symbol_for_address): Merge section and target
