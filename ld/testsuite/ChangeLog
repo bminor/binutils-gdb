@@ -1,3 +1,9 @@
+2007-05-24  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/assert.t: Add additional cases.
+	* ld-scripts/extern.t, ld-scripts/extern.s,
+	ld-scripts/extern.exp: New.
+
 2007-05-22  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-pic-veneer.d: Update expected output.

@@ -256,7 +256,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <EXPRESSION,BOTH,SCRIPT>"LOADADDR"	{ RTOKEN(LOADADDR);}
 <EXPRESSION,BOTH>"MAX"			{ RTOKEN(MAX_K); }
 <EXPRESSION,BOTH>"MIN"			{ RTOKEN(MIN_K); }
-<EXPRESSION,BOTH>"ASSERT"		{ RTOKEN(ASSERT_K); }
+<EXPRESSION,BOTH,SCRIPT>"ASSERT"	{ RTOKEN(ASSERT_K); }
 <BOTH,SCRIPT>"ENTRY"			{ RTOKEN(ENTRY);}
 <BOTH,SCRIPT,MRI>"EXTERN"		{ RTOKEN(EXTERN);}
 <EXPRESSION,BOTH,SCRIPT>"NEXT"		{ RTOKEN(NEXT);}
@@ -363,11 +363,19 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				}
 
 
-<BOTH,EXPRESSION>{FILENAMECHAR1}{FILENAMECHAR}*	{
+<BOTH>{FILENAMECHAR1}{FILENAMECHAR}*	{
 				 yylval.name = xstrdup (yytext);
 				  return NAME;
 				}
-<BOTH,EXPRESSION>"-l"{FILENAMECHAR}+ {
+<BOTH>"-l"{FILENAMECHAR}+ {
+				  yylval.name = xstrdup (yytext + 2);
+				  return LNAME;
+				}
+<EXPRESSION>{FILENAMECHAR1}{NOCFILENAMECHAR}*	{
+				 yylval.name = xstrdup (yytext);
+				  return NAME;
+				}
+<EXPRESSION>"-l"{NOCFILENAMECHAR}+ {
 				  yylval.name = xstrdup (yytext + 2);
 				  return LNAME;
 				}

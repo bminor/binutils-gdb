@@ -1,3 +1,12 @@
+2007-05-24  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldlex.l: ASSERT is recognized in SCRIPT env.  NAMES cannot
+	contain commas in EXP env.
+	* ldgram.y (extern_name_list): Push to EXP env, move body to ...
+	(extern_name_list_body): ... here.
+	(script_file, ifile_list): Reformat.
+	(statement): Add ASSERT.
+
 2007-05-22  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo: Use @copying around the copyright notice.
