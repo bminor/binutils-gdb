@@ -39,8 +39,9 @@ target_triplet = @target@
 subdir = doc
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/../bfd/acinclude.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/../ltoptions.m4 \
+	$(top_srcdir)/../ltsugar.m4 $(top_srcdir)/../ltversion.m4 \
+	$(top_srcdir)/acinclude.m4 $(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/nls.m4 $(top_srcdir)/../config/po.m4 \
@@ -103,6 +104,7 @@ DEFS = @DEFS@
 DEMANGLER_NAME = @DEMANGLER_NAME@
 DEPDIR = @DEPDIR@
 DLLTOOL_DEFS = @DLLTOOL_DEFS@
+DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -111,10 +113,12 @@ EMULATION = @EMULATION@
 EMULATION_VECTOR = @EMULATION_VECTOR@
 EXEEXT = @EXEEXT@
 EXEEXT_FOR_BUILD = @EXEEXT_FOR_BUILD@
+FGREP = @FGREP@
 GENCAT = @GENCAT@
 GENINSRC_NEVER_FALSE = @GENINSRC_NEVER_FALSE@
 GENINSRC_NEVER_TRUE = @GENINSRC_NEVER_TRUE@
 GMSGFMT = @GMSGFMT@
+GREP = @GREP@
 HDEFINES = @HDEFINES@
 INCINTL = @INCINTL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -122,6 +126,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTOBJEXT = @INSTOBJEXT@
+LD = @LD@
 LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
@@ -141,6 +146,7 @@ MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
 NLMCONV_DEFS = @NLMCONV_DEFS@
+NM = @NM@
 NO_WERROR = @NO_WERROR@
 OBJDUMP_DEFS = @OBJDUMP_DEFS@
 OBJEXT = @OBJEXT@
@@ -153,6 +159,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -161,7 +168,9 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = @YACC@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
@@ -193,6 +202,7 @@ install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localstatedir = @localstatedir@
+lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -264,9 +274,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  doc/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  doc/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  doc/Makefile
+	  $(AUTOMAKE) --cygnus  doc/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
