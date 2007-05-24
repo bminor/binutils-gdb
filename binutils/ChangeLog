@@ -1,3 +1,10 @@
+2007-05-24  Steve Ellcey  <sje@cup.hp.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2007-05-24  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* rcparse.y: Join strings for elements having no side-effects in

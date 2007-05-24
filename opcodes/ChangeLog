@@ -1,3 +1,9 @@
+2007-05-24  Steve Ellcey  <sje@cup.hp.com>
+
+	* Makefile.in: Regnerate.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+
 2007-05-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-dis.c (print_insn_powerpc): Don't skip all operands
