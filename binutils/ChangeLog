@@ -1,3 +1,8 @@
+2007-05-24  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* rcparse.y: Join strings for elements having no side-effects in
+	"rc"-grammar.
+
 2007-05-23  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* rclex.c: New file replacing rclex.l.

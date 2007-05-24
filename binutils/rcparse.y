@@ -159,7 +159,7 @@ static const rc_res_id res_null_text = { 1, {{0, &null_unichar}}};
 %type <il> numexpr posnumexpr cnumexpr optcnumexpr cposnumexpr
 %type <is> acc_options acc_option menuitem_flags menuitem_flag
 %type <s> file_name
-%type <uni> res_unicode_string resname
+%type <uni> res_unicode_string resname res_unicode_string_concat
 %type <ss> sizedstring
 %type <suni> sizedunistring
 %type <i> sizednumexpr sizedposnumexpr
@@ -442,7 +442,7 @@ exstyle:
 
 styles:
 	  /* empty */
-	| styles CAPTION res_unicode_string
+	| styles CAPTION res_unicode_string_concat
 	  {
 	    dialog.style |= WS_CAPTION;
 	    style |= WS_CAPTION;
@@ -461,11 +461,11 @@ styles:
 	  {
 	    dialog.exstyle = $3;
 	  }
-	| styles CLASS res_unicode_string
+	| styles CLASS res_unicode_string_concat
 	  {
 	    res_unistring_to_id (& dialog.class, $3);
 	  }
-	| styles FONT numexpr ',' res_unicode_string
+	| styles FONT numexpr ',' res_unicode_string_concat
 	  {
 	    dialog.style |= DS_SETFONT;
 	    style |= DS_SETFONT;
@@ -478,7 +478,7 @@ styles:
 		dialog.ex->charset = 1;
 	      }
 	  }
-	| styles FONT numexpr ',' res_unicode_string cnumexpr
+	| styles FONT numexpr ',' res_unicode_string_concat cnumexpr
 	  {
 	    dialog.style |= DS_SETFONT;
 	    style |= DS_SETFONT;
@@ -493,7 +493,7 @@ styles:
 		dialog.ex->charset = 1;
 	      }
 	  }
-	| styles FONT numexpr ',' res_unicode_string cnumexpr cnumexpr
+	| styles FONT numexpr ',' res_unicode_string_concat cnumexpr cnumexpr
 	  {
 	    dialog.style |= DS_SETFONT;
 	    style |= DS_SETFONT;
@@ -508,7 +508,7 @@ styles:
 		dialog.ex->charset = 1;
 	      }
 	  }
-	| styles FONT numexpr ',' res_unicode_string cnumexpr cnumexpr cnumexpr
+	| styles FONT numexpr ',' res_unicode_string_concat cnumexpr cnumexpr cnumexpr
 	  {
 	    dialog.style |= DS_SETFONT;
 	    style |= DS_SETFONT;
@@ -1032,7 +1032,7 @@ menuitems:
 	;
 
 menuitem:
-	  MENUITEM res_unicode_string cnumexpr menuitem_flags
+	  MENUITEM res_unicode_string_concat cnumexpr menuitem_flags
 	  {
 	    $$ = define_menuitem ($2, $3, $4, 0, 0, NULL);
 	  }
@@ -1040,7 +1040,7 @@ menuitem:
 	  {
 	    $$ = define_menuitem (NULL, 0, 0, 0, 0, NULL);
 	  }
-	| POPUP res_unicode_string menuitem_flags BEG menuitems END
+	| POPUP res_unicode_string_concat menuitem_flags BEG menuitems END
 	  {
 	    $$ = define_menuitem ($2, 0, $3, 0, 0, $5);
 	  }
@@ -1122,15 +1122,15 @@ menuexitems:
 	;
 
 menuexitem:
-	  MENUITEM res_unicode_string
+	  MENUITEM res_unicode_string_concat
 	  {
 	    $$ = define_menuitem ($2, 0, 0, 0, 0, NULL);
 	  }
-	| MENUITEM res_unicode_string cnumexpr
+	| MENUITEM res_unicode_string_concat cnumexpr
 	  {
 	    $$ = define_menuitem ($2, $3, 0, 0, 0, NULL);
 	  }
-	| MENUITEM res_unicode_string cnumexpr cnumexpr optcnumexpr
+	| MENUITEM res_unicode_string_concat cnumexpr cnumexpr optcnumexpr
 	  {
 	    $$ = define_menuitem ($2, $3, $4, $5, 0, NULL);
 	  }
@@ -1138,19 +1138,19 @@ menuexitem:
  	  {
  	    $$ = define_menuitem (NULL, 0, 0, 0, 0, NULL);
  	  }
-	| POPUP res_unicode_string BEG menuexitems END
+	| POPUP res_unicode_string_concat BEG menuexitems END
 	  {
 	    $$ = define_menuitem ($2, 0, 0, 0, 0, $4);
 	  }
-	| POPUP res_unicode_string cnumexpr BEG menuexitems END
+	| POPUP res_unicode_string_concat cnumexpr BEG menuexitems END
 	  {
 	    $$ = define_menuitem ($2, $3, 0, 0, 0, $5);
 	  }
-	| POPUP res_unicode_string cnumexpr cnumexpr BEG menuexitems END
+	| POPUP res_unicode_string_concat cnumexpr cnumexpr BEG menuexitems END
 	  {
 	    $$ = define_menuitem ($2, $3, $4, 0, 0, $6);
 	  }
-	| POPUP res_unicode_string cnumexpr cnumexpr cnumexpr optcnumexpr
+	| POPUP res_unicode_string_concat cnumexpr cnumexpr cnumexpr optcnumexpr
 	    BEG menuexitems END
 	  {
 	    $$ = define_menuitem ($2, $3, $4, $5, $6, $8);
@@ -1259,14 +1259,14 @@ stringtable:
 
 string_data:
 	  /* empty */
-	| string_data numexpr res_unicode_string
+	| string_data numexpr res_unicode_string_concat
 	  {
 	    define_stringtable (&sub_res_info, $2, $3);
 	    if (yychar != YYEMPTY)
 	      YYERROR;
 	    rcparse_discard_strings ();
 	  }
-	| string_data numexpr ',' res_unicode_string
+	| string_data numexpr ',' res_unicode_string_concat
 	  {
 	    define_stringtable (&sub_res_info, $2, $4);
 	    if (yychar != YYEMPTY)
@@ -1469,7 +1469,7 @@ verblocks:
 	  {
 	    $$ = append_ver_stringfileinfo ($1, $4, $6);
 	  }
-	| verblocks BLOCKVARFILEINFO BEG VALUE res_unicode_string vertrans END
+	| verblocks BLOCKVARFILEINFO BEG VALUE res_unicode_string_concat vertrans END
 	  {
 	    $$ = append_ver_varfileinfo ($1, $5, $6);
 	  }
@@ -1480,7 +1480,7 @@ vervals:
 	  {
 	    $$ = NULL;
 	  }
-	| vervals VALUE res_unicode_string ',' res_unicode_string
+	| vervals VALUE res_unicode_string_concat ',' res_unicode_string_concat
 	  {
 	    $$ = append_verval ($1, $3, $5);
 	  }
@@ -1505,7 +1505,6 @@ id:
 	    $$.named = 0;
 	    $$.u.id = $1;
 	  }
-
 	| resname
 	  {
 	    res_unistring_to_id (&$$, $1);
@@ -1663,6 +1662,27 @@ file_name:
 	| STRING
 	  {
 	    $$ = $1;
+	  }
+	;
+
+/* Concat string */
+res_unicode_string_concat:
+	  res_unicode_string
+	  {
+	    $$ = $1;
+	  }
+	|
+	  res_unicode_string_concat res_unicode_string
+	  {
+	    rc_uint_type l1 = unichar_len ($1);
+	    rc_uint_type l2 = unichar_len ($2);
+	    unichar *h = (unichar *) res_alloc ((l1 + l2 + 1) * sizeof (unichar));
+	    if (l1 != 0)
+	      memcpy (h, $1, l1 * sizeof (unichar));
+	    if (l2 != 0)
+	      memcpy (h + l1, $2, l2  * sizeof (unichar));
+	    h[l1 + l2] = 0;
+	    $$ = h;
 	  }
 	;
 

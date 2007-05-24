@@ -1,3 +1,8 @@
+2007-05-24  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* binutils-all/windres/version_cat.rc: New.
+	* binutils-all/windres/version_cat.rsd: New.
+
 2007-05-23  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* binutils-all/windres/html.rc: New.
