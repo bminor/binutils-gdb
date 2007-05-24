@@ -34,7 +34,6 @@ Back-Cover Texts.  A copy of the license is included in the
 section entitled ``GNU Free Documentation License''.
 
 @c man end
-@end ignore
 @end copying
 
 @finalout
