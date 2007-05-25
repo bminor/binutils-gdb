@@ -1,3 +1,8 @@
+2007-05-25  Eric Christopher  <echristo@apple.com>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame):
+	Check that sym_sec isn't NULL before accessing.
+
 2007-05-24  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.in: Regnerate.
@@ -270,7 +275,7 @@
 
 	* elf32-xtensa.c (xtensa_read_table_entries): Step through table
 	contents and relocs in parallel.
-	
+
 2007-04-27  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (relax_property_section): Remove extra irel increment.
@@ -416,12 +421,12 @@
 	duplicating section name comparisons.
 	(xtensa_is_littable_section): Use CONST_STRNEQ for ".gnu.linkonce.p.".
 	(xtensa_get_property_predef_flags): Use xtensa_is_insntable_section.
-	
+
 2007-04-12  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* elf32-xtensa.c (elf_xtensa_gc_mark_hook): Don't follow references
 	from Xtensa property sections.
-	
+
 2007-04-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (needs_ovl_stub): Test that spu_elf_section_data
@@ -438,7 +443,7 @@
 	(elf64_alpha_size_got_sections): Remove unused something_changed local.
 	(elf64_alpha_size_plt_section): Return void.
 	(elf64_alpha_size_rela_got_section): Likewise.
-	(elf64_alpha_relax_section): Only regenerate got+plt if the 
+	(elf64_alpha_relax_section): Only regenerate got+plt if the
 	relax_trip counter has changed.
 
 2007-04-09  Daniel Jacobowitz  <dan@codesourcery.com>
@@ -450,7 +455,7 @@
 
 2007-04-03  Matt Thomas  <matt@netbsd.org>
 
-	* elf32-vax.c (elf_vax_relocate_section): Do not emit a PCREL reloc 
+	* elf32-vax.c (elf_vax_relocate_section): Do not emit a PCREL reloc
 	in a shared object if it is not in a CODE section or if it is against
 	a section symbol.  This allows DWARF2 to use pcrel format.
 

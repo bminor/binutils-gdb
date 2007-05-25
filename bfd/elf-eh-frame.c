@@ -712,7 +712,8 @@ _bfd_elf_discard_section_eh_frame
 			      sym = &cookie->locsyms[r_symndx];
 			      sym_sec = (bfd_section_from_elf_index
 					 (abfd, sym->st_shndx));
-			      if (sym_sec->kept_section != NULL)
+			      if (sym_sec != NULL
+				  && sym_sec->kept_section != NULL)
 				sym_sec = sym_sec->kept_section;
 			      if (sym_sec != NULL
 				  && sym_sec->output_section != NULL)
@@ -1476,7 +1477,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 
   /* We don't align the section to its section alignment since the
      runtime library only expects all CIE/FDE records aligned at
-     the pointer size. _bfd_elf_discard_section_eh_frame should 
+     the pointer size. _bfd_elf_discard_section_eh_frame should
      have padded CIE/FDE records to multiple of pointer size with
      size_of_output_cie_fde.  */
   if ((sec->size % ptr_size) != 0)
