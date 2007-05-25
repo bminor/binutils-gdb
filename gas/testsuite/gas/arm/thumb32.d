@@ -3,7 +3,7 @@
 # objdump: -dr --prefix-addresses --show-raw-insn
 # The arm-aout and arm-pe ports do not support Thumb branch relocations.
 # not-target: *-*-*aout* *-*-pe
-# error-output: thumb32.l
+# stderr: thumb32.l
 
 .*: +file format .*arm.*
 
@@ -959,3 +959,7 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> e80d c010 	srsdb	sp, #16
 0[0-9a-f]+ <[^>]+> e9ad c015 	srsia	sp!, #21
 0[0-9a-f]+ <[^>]+> e9ad c00a 	srsia	sp!, #10
+0[0-9a-f]+ <[^>]+> f3de 8f00 	subs	pc, lr, #0
+0[0-9a-f]+ <[^>]+> f3de 8f00 	subs	pc, lr, #0
+0[0-9a-f]+ <[^>]+> f3de 8f04 	subs	pc, lr, #4
+0[0-9a-f]+ <[^>]+> f3de 8fff 	subs	pc, lr, #255

@@ -1,3 +1,9 @@
+2007-03-25  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.s: Add tests for subs pc, lr.
+	* gas/arm/thumb32.d: Change error-output: to stderr:.
+	Update expected output.
+
 2007-05-22  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/backslash-at.d: Update expected output.

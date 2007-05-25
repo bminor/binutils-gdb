@@ -555,6 +555,8 @@ struct asm_opcode
 #define OPCODE_MASK	0xfe1fffff
 #define V4_STR_BIT	0x00000020
 
+#define T2_SUBS_PC_LR	0xf3de8f00
+
 #define DATA_OP_SHIFT	21
 
 #define T2_OPCODE_MASK	0xfe1fffff
@@ -8439,7 +8441,21 @@ do_t_add_sub (void)
 	  if (inst.size_req == 4
 	      || (inst.size_req != 2 && !opcode))
 	    {
-	      if (Rs == REG_PC)
+	      if (Rd == REG_PC)
+		{
+		  constraint (Rs != REG_LR || inst.instruction != T_MNEM_subs,
+			     _("only SUBS PC, LR, #const allowed"));
+		  constraint (inst.reloc.exp.X_op != O_constant,
+			      _("expression too complex"));
+		  constraint (inst.reloc.exp.X_add_number < 0
+			      || inst.reloc.exp.X_add_number > 0xff,
+			     _("immediate value out of range"));
+		  inst.instruction = T2_SUBS_PC_LR
+				     | inst.reloc.exp.X_add_number;
+		  inst.reloc.type = BFD_RELOC_UNUSED;
+		  return;
+		}
+	      else if (Rs == REG_PC)
 		{
 		  /* Always use addw/subw.  */
 		  inst.instruction = add ? 0xf20f0000 : 0xf2af0000;
@@ -9485,6 +9501,16 @@ do_t_mov_cmp (void)
       if (inst.size_req == 4
 	  || inst.operands[1].shifted)
 	narrow = FALSE;
+
+      /* MOVS PC, LR is encoded as SUBS PC, LR, #0.  */
+      if (opcode == T_MNEM_movs && inst.operands[1].isreg
+	  && !inst.operands[1].shifted
+	  && inst.operands[0].reg == REG_PC
+	  && inst.operands[1].reg == REG_LR)
+	{
+	  inst.instruction = T2_SUBS_PC_LR;
+	  return;
+	}
 
       if (!inst.operands[1].isreg)
 	{

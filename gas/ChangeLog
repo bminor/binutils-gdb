@@ -1,3 +1,9 @@
+2007-03-25  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (T2_SUBS_PC_LR): Define.
+	(do_t_add_sub): Correctly encode subs pc, lr, #const.
+	(do_t_mov_cmp): Correctly encode movs pc, lr.
+
 2007-05-24  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.in: Regnerate.

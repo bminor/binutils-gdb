@@ -775,3 +775,8 @@ srs:
 	srsdb sp, #16
 	srsia sp!, #21
 	srsia sp!, #10
+
+	movs pc, lr
+	subs pc, lr, #0
+	subs pc, lr, #4
+	subs pc, lr, #255
