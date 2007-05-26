@@ -86,9 +86,6 @@ static bfd_boolean reg_names_p = TARGET_REG_NAMES_P;
 
 static bfd_boolean register_name PARAMS ((expressionS *));
 static void ppc_set_cpu PARAMS ((void));
-static unsigned long ppc_insert_operand
-  PARAMS ((unsigned long insn, const struct powerpc_operand *operand,
-	   offsetT val, char *file, unsigned int line));
 static void ppc_macro PARAMS ((char *str, const struct powerpc_macro *macro));
 static void ppc_byte PARAMS ((int));
 
@@ -1507,15 +1504,13 @@ ppc_cleanup ()
 /* Insert an operand value into an instruction.  */
 
 static unsigned long
-ppc_insert_operand (insn, operand, val, file, line)
-     unsigned long insn;
-     const struct powerpc_operand *operand;
-     offsetT val;
-     char *file;
-     unsigned int line;
+ppc_insert_operand (unsigned long insn,
+		    const struct powerpc_operand *operand,
+		    offsetT val,
+		    char *file,
+		    unsigned int line)
 {
   long min, max, right;
-  offsetT test;
 
   max = operand->bitm;
   right = max & -max;
@@ -1526,35 +1521,44 @@ ppc_insert_operand (insn, operand, val, file, line)
       if ((operand->flags & PPC_OPERAND_SIGNOPT) == 0)
 	max = (max >> 1) & -right;
       min = ~max & -right;
-
-      if (!ppc_obj64)
-	{
-	  /* Some people write 32 bit hex constants with the sign
-	     extension done by hand.  This shouldn't really be
-	     valid, but, to permit this code to assemble on a 64
-	     bit host, we sign extend the 32 bit value.  */
-	  if (val > 0
-	      && (val & (offsetT) 0x80000000) != 0
-	      && (val & (offsetT) 0xffffffff) == val)
-	    {
-	      val -= 0x80000000;
-	      val -= 0x80000000;
-	    }
-	}
     }
 
   if ((operand->flags & PPC_OPERAND_PLUS1) != 0)
     max++;
 
   if ((operand->flags & PPC_OPERAND_NEGATIVE) != 0)
-    test = - val;
-  else
-    test = val;
+    {
+      long tmp = min;
+      min = -max;
+      max = -tmp;
+    }
 
-  if ((min <= max && (test < (offsetT) min || test > (offsetT) max))
-      || (test & (right - 1)) != 0)
-    as_bad_value_out_of_range (_("operand"),
-			       test, (offsetT) min, (offsetT) max, file, line);
+  if (min <= max)
+    {
+      /* Some people write constants with the sign extension done by
+	 hand but only up to 32 bits.  This shouldn't really be valid,
+	 but, to permit this code to assemble on a 64-bit host, we
+	 sign extend the 32-bit value to 64 bits if so doing makes the
+	 value valid.  */
+      if (val > max
+	  && (offsetT) (val - 0x80000000 - 0x80000000) >= min
+	  && (offsetT) (val - 0x80000000 - 0x80000000) <= max
+	  && ((val - 0x80000000 - 0x80000000) & (right - 1)) == 0)
+	val = val - 0x80000000 - 0x80000000;
+
+      /* Similarly, people write expressions like ~(1<<15), and expect
+	 this to be OK for a 32-bit unsigned value.  */
+      else if (val < min
+	       && (offsetT) (val + 0x80000000 + 0x80000000) >= min
+	       && (offsetT) (val + 0x80000000 + 0x80000000) <= max
+	       && ((val + 0x80000000 + 0x80000000) & (right - 1)) == 0)
+	val = val + 0x80000000 + 0x80000000;
+
+      else if (val < min
+	       || val > max
+	       || (val & (right - 1)) != 0)
+	as_bad_value_out_of_range (_("operand"), val, min, max, file, line);
+    }
 
   if (operand->insert)
     {

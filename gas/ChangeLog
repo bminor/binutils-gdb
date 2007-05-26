@@ -1,3 +1,12 @@
+2007-05-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_insert_operand): Truncate sign bits in
+	top 32 bits of 64 bit value if so doing results in passing
+	range check.  Rewrite sign extension fudges similarly.  Enable
+	fudges for powerpc64 too.  Report user value if range check
+	fails rather than fudged value.  Negate PPC_OPERAND_NEGATIVE
+	range rather than value, also to report user value on failure.
+
 2007-03-25  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (T2_SUBS_PC_LR): Define.
