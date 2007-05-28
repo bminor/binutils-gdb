@@ -1,3 +1,8 @@
+2007-05-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-aix5.c: Delete.
+	* Makefile.in (solib-aix5.o): Delete rule.
+
 2007-05-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* breakpoint.h (enum bpstat_what_main_action): Remove
