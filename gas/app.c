@@ -1360,7 +1360,15 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 		     the space.  We don't have enough information to
 		     make the right choice, so here we are making the
 		     choice which is more likely to be correct.  */
-		  PUT (' ');
+		  if (to + 1 >= toend)
+		    {
+		      /* If we're near the end of the buffer, save the
+		         character for the next time round.  Otherwise
+		         we'll lose our state.  */
+		      UNGET (ch);
+		      goto tofull;
+		    }
+		  *to++ = ' ';
 		}
 
 	      state = 3;
