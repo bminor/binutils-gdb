@@ -19,32 +19,16 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#define TC_SPU
+#ifndef TC_SPU
+#define TC_SPU 1
 
 #include "opcode/spu.h"
 
-#ifdef OBJ_ELF
 #define TARGET_FORMAT "elf32-spu"
 #define TARGET_ARCH bfd_arch_spu
 #define TARGET_NAME "elf32-spu"
-#endif
 
 #define TARGET_BYTES_BIG_ENDIAN 1
-
-#ifndef TARGET_NAME
-#define TARGET_NAME "coff-spu"
-#endif
-
-#ifndef TARGET_ARCH
-#define TARGET_ARCH bfd_arch_spu
-#endif
-
-#define COFF_MAGIC SPU_MAGIC
-#define BFD_ARCH bfd_arch_spu
-
-#define NEED_FX_R_TYPE
-#define TC_KEEP_FX_OFFSET
-/* #define TC_CONS_RELOC RELOC_32 */
 
 struct tc_fix_info {
   unsigned short arg_format;
@@ -90,9 +74,7 @@ struct tc_fix_info {
 /* Don't warn on word overflow; it happens on %hi relocs.  */
 #undef WARN_SIGNED_OVERFLOW_WORD
 
-#ifdef OBJ_ELF
 #define DIFF_EXPR_OK
-#endif
 
 #define WORKING_DOT_WORD
 
@@ -112,21 +94,4 @@ extern void spu_handle_align PARAMS ((fragS *));
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (7 + 8)
 
-#ifdef SPUCOFF
-
-/* Whether a reloc should be output.  */
-#define TC_COUNT_RELOC(fixp) ((fixp)->fx_addsy != NULL || (fixp)->fx_subsy != NULL)
-
-/* Get the BFD reloc type to use for a gas fixS structure.  */
-#define TC_COFF_FIX2RTYPE(fixp) tc_coff_fix2rtype (fixp)
-
-/* No special hook needed for symbols.  */
-#define tc_coff_symbol_emit_hook(s)
-
-/* Align sections to a four byte boundary.  */
-#ifndef max
-#define max(a,b)	(((a) > (b)) ? (a) : (b))
-#endif
-#define SUB_SEGMENT_ALIGN(SEG)	max (section_alignment[(int) (SEG)], 4)
-
-#endif /* SPUCOFF */
+#endif /* TC_SPU */

@@ -1,5 +1,9 @@
 2007-05-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-spu.h: Wrap in #ifndef/#endif.  Delete coff macros.
+
+2007-05-29  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/tc-ppc.c: Convert to ISO C.
 	* config/tc-ppc.c: Likewise.
 
