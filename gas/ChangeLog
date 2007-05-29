@@ -1,3 +1,8 @@
+2007-05-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.h (EXEC_MACHINE_TYPE): Delete.
+	(string_byte_count, section_alignment): Delete.
+
 2007-05-28  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* app.c (do_scrub_chars): Cope with \ at end of buffer.

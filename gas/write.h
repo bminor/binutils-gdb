@@ -23,12 +23,6 @@
 #ifndef __write_h__
 #define __write_h__
 
-#ifndef TC_I960
-#ifdef hpux
-#define EXEC_MACHINE_TYPE HP9000S200_ID
-#endif
-#endif /* TC_I960 */
-
 /* This is the name of a fake symbol which will never appear in the
    assembler output.  S_IS_LOCAL detects it because of the \001.  */
 #ifndef FAKE_LABEL_NAME
@@ -168,8 +162,6 @@ struct reloc_list
 extern int finalize_syms;
 extern symbolS *abs_section_sym;
 extern addressT dot_value;
-extern long string_byte_count;
-extern int section_alignment[];
 extern struct reloc_list* reloc_list;
 
 extern void append (char **charPP, char *fromP, unsigned long length);
