@@ -22471,7 +22471,7 @@ machine, you might want your program to do something special if it
 recognizes a packet meant for @value{GDBN}.
 
 In the examples below, @samp{->} and @samp{<-} are used to indicate
-transmitted and received data respectfully.
+transmitted and received data, respectively.
 
 @cindex protocol, @value{GDBN} remote serial
 @cindex serial protocol, @value{GDBN} remote
