@@ -84,64 +84,57 @@ static int set_target_endian = 0;
 
 static bfd_boolean reg_names_p = TARGET_REG_NAMES_P;
 
-static bfd_boolean register_name PARAMS ((expressionS *));
-static void ppc_set_cpu PARAMS ((void));
-static void ppc_macro PARAMS ((char *str, const struct powerpc_macro *macro));
-static void ppc_byte PARAMS ((int));
+static void ppc_macro (char *, const struct powerpc_macro *);
+static void ppc_byte (int);
 
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
-static int ppc_is_toc_sym PARAMS ((symbolS *sym));
-static void ppc_tc PARAMS ((int));
-static void ppc_machine PARAMS ((int));
+static void ppc_tc (int);
+static void ppc_machine (int);
 #endif
 
 #ifdef OBJ_XCOFF
-static void ppc_comm PARAMS ((int));
-static void ppc_bb PARAMS ((int));
-static void ppc_bc PARAMS ((int));
-static void ppc_bf PARAMS ((int));
-static void ppc_biei PARAMS ((int));
-static void ppc_bs PARAMS ((int));
-static void ppc_eb PARAMS ((int));
-static void ppc_ec PARAMS ((int));
-static void ppc_ef PARAMS ((int));
-static void ppc_es PARAMS ((int));
-static void ppc_csect PARAMS ((int));
-static void ppc_change_csect PARAMS ((symbolS *, offsetT));
-static void ppc_function PARAMS ((int));
-static void ppc_extern PARAMS ((int));
-static void ppc_lglobl PARAMS ((int));
-static void ppc_section PARAMS ((int));
-static void ppc_named_section PARAMS ((int));
-static void ppc_stabx PARAMS ((int));
-static void ppc_rename PARAMS ((int));
-static void ppc_toc PARAMS ((int));
-static void ppc_xcoff_cons PARAMS ((int));
-static void ppc_vbyte PARAMS ((int));
+static void ppc_comm (int);
+static void ppc_bb (int);
+static void ppc_bc (int);
+static void ppc_bf (int);
+static void ppc_biei (int);
+static void ppc_bs (int);
+static void ppc_eb (int);
+static void ppc_ec (int);
+static void ppc_ef (int);
+static void ppc_es (int);
+static void ppc_csect (int);
+static void ppc_change_csect (symbolS *, offsetT);
+static void ppc_function (int);
+static void ppc_extern (int);
+static void ppc_lglobl (int);
+static void ppc_section (int);
+static void ppc_named_section (int);
+static void ppc_stabx (int);
+static void ppc_rename (int);
+static void ppc_toc (int);
+static void ppc_xcoff_cons (int);
+static void ppc_vbyte (int);
 #endif
 
 #ifdef OBJ_ELF
-static bfd_reloc_code_real_type ppc_elf_suffix PARAMS ((char **, expressionS *));
-static void ppc_elf_cons PARAMS ((int));
-static void ppc_elf_rdata PARAMS ((int));
-static void ppc_elf_lcomm PARAMS ((int));
-static void ppc_elf_validate_fix PARAMS ((fixS *, segT));
-static void ppc_apuinfo_section_add PARAMS ((unsigned int apu, unsigned int version));
+static void ppc_elf_cons (int);
+static void ppc_elf_rdata (int);
+static void ppc_elf_lcomm (int);
 #endif
 
 #ifdef TE_PE
-static void ppc_set_current_section PARAMS ((segT));
-static void ppc_previous PARAMS ((int));
-static void ppc_pdata PARAMS ((int));
-static void ppc_ydata PARAMS ((int));
-static void ppc_reldata PARAMS ((int));
-static void ppc_rdata PARAMS ((int));
-static void ppc_ualong PARAMS ((int));
-static void ppc_znop PARAMS ((int));
-static void ppc_pe_comm PARAMS ((int));
-static void ppc_pe_section PARAMS ((int));
-static void ppc_pe_function PARAMS ((int));
-static void ppc_pe_tocd PARAMS ((int));
+static void ppc_previous (int);
+static void ppc_pdata (int);
+static void ppc_ydata (int);
+static void ppc_reldata (int);
+static void ppc_rdata (int);
+static void ppc_ualong (int);
+static void ppc_znop (int);
+static void ppc_pe_comm (int);
+static void ppc_pe_section (int);
+static void ppc_pe_function (int);
+static void ppc_pe_tocd (int);
 #endif
 
 /* Generic assembler global variables which must be defined by all
@@ -561,14 +554,8 @@ static const struct pd_reg pre_defined_registers[] =
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
 
-static int reg_name_search
-  PARAMS ((const struct pd_reg *, int, const char * name));
-
 static int
-reg_name_search (regs, regcount, name)
-     const struct pd_reg *regs;
-     int regcount;
-     const char *name;
+reg_name_search (const struct pd_reg *regs, int regcount, const char *name)
 {
   int middle, low, high;
   int cmp;
@@ -605,8 +592,7 @@ reg_name_search (regs, regcount, name)
  */
 
 static bfd_boolean
-register_name (expressionP)
-     expressionS *expressionP;
+register_name (expressionS *expressionP)
 {
   int reg_number;
   char *name;
@@ -673,9 +659,7 @@ static const struct pd_reg cr_names[] =
    expression.  */
 
 int
-ppc_parse_name (name, expr)
-     const char *name;
-     expressionS *expr;
+ppc_parse_name (const char *name, expressionS *expr)
 {
   int val;
 
@@ -938,9 +922,7 @@ parse_cpu (const char *arg)
 }
 
 int
-md_parse_option (c, arg)
-     int c;
-     char *arg;
+md_parse_option (int c, char *arg)
 {
   switch (c)
     {
@@ -1094,8 +1076,7 @@ md_parse_option (c, arg)
 }
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   fprintf (stream, _("\
 PowerPC options:\n\
@@ -1148,7 +1129,7 @@ PowerPC options:\n\
 /* Set ppc_cpu if it is not already set.  */
 
 static void
-ppc_set_cpu ()
+ppc_set_cpu (void)
 {
   const char *default_os  = TARGET_OS;
   const char *default_cpu = TARGET_CPU;
@@ -1176,7 +1157,7 @@ ppc_set_cpu ()
    are called well before md_begin, when the output file is opened.  */
 
 enum bfd_architecture
-ppc_arch ()
+ppc_arch (void)
 {
   const char *default_cpu = TARGET_CPU;
   ppc_set_cpu ();
@@ -1198,7 +1179,7 @@ ppc_arch ()
 }
 
 unsigned long
-ppc_mach ()
+ppc_mach (void)
 {
   if (ppc_obj64)
     return bfd_mach_ppc64;
@@ -1209,7 +1190,7 @@ ppc_mach ()
 }
 
 extern char*
-ppc_target_format ()
+ppc_target_format (void)
 {
 #ifdef OBJ_COFF
 #ifdef TE_PE
@@ -1241,7 +1222,7 @@ ppc_target_format ()
 static void
 ppc_setup_opcodes (void)
 {
-  register const struct powerpc_opcode *op;
+  const struct powerpc_opcode *op;
   const struct powerpc_opcode *op_end;
   const struct powerpc_macro *macro;
   const struct powerpc_macro *macro_end;
@@ -1352,7 +1333,7 @@ ppc_setup_opcodes (void)
 	{
 	  const char *retval;
 
-	  retval = hash_insert (ppc_hash, op->name, (PTR) op);
+	  retval = hash_insert (ppc_hash, op->name, (void *) op);
 	  if (retval != NULL)
 	    {
 	      /* Ignore Power duplicates for -m601.  */
@@ -1369,7 +1350,7 @@ ppc_setup_opcodes (void)
 
   if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
     for (op = powerpc_opcodes; op < op_end; op++)
-      hash_insert (ppc_hash, op->name, (PTR) op);
+      hash_insert (ppc_hash, op->name, (void *) op);
 
   /* Insert the macros into a hash table.  */
   ppc_macro_hash = hash_new ();
@@ -1381,7 +1362,7 @@ ppc_setup_opcodes (void)
 	{
 	  const char *retval;
 
-	  retval = hash_insert (ppc_macro_hash, macro->name, (PTR) macro);
+	  retval = hash_insert (ppc_macro_hash, macro->name, (void *) macro);
 	  if (retval != (const char *) NULL)
 	    {
 	      as_bad (_("duplicate macro %s"), macro->name);
@@ -1399,7 +1380,7 @@ ppc_setup_opcodes (void)
    opened.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   ppc_set_cpu ();
 
@@ -1442,7 +1423,7 @@ md_begin ()
 }
 
 void
-ppc_cleanup ()
+ppc_cleanup (void)
 {
 #ifdef OBJ_ELF
   if (ppc_apuinfo_list == NULL)
@@ -1579,9 +1560,7 @@ ppc_insert_operand (unsigned long insn,
 #ifdef OBJ_ELF
 /* Parse @got, etc. and return the desired relocation.  */
 static bfd_reloc_code_real_type
-ppc_elf_suffix (str_p, exp_p)
-     char **str_p;
-     expressionS *exp_p;
+ppc_elf_suffix (char **str_p, expressionS *exp_p)
 {
   struct map_bfd {
     char *string;
@@ -1759,8 +1738,7 @@ ppc_elf_suffix (str_p, exp_p)
 /* Like normal .long/.short/.word, except support @got, etc.
    Clobbers input_line_pointer, checks end-of-line.  */
 static void
-ppc_elf_cons (nbytes)
-     register int nbytes;	/* 1=.byte, 2=.word, 4=.long, 8=.llong.  */
+ppc_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long, 8=.llong */)
 {
   expressionS exp;
   bfd_reloc_code_real_type reloc;
@@ -1815,8 +1793,7 @@ ppc_elf_cons (nbytes)
 
 /* Solaris pseduo op to change to the .rodata section.  */
 static void
-ppc_elf_rdata (xxx)
-     int xxx;
+ppc_elf_rdata (int xxx)
 {
   char *save_line = input_line_pointer;
   static char section[] = ".rodata\n";
@@ -1830,14 +1807,13 @@ ppc_elf_rdata (xxx)
 
 /* Pseudo op to make file scope bss items.  */
 static void
-ppc_elf_lcomm (xxx)
-     int xxx ATTRIBUTE_UNUSED;
+ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
 {
-  register char *name;
-  register char c;
-  register char *p;
+  char *name;
+  char c;
+  char *p;
   offsetT size;
-  register symbolS *symbolP;
+  symbolS *symbolP;
   offsetT align;
   segT old_sec;
   int old_subsec;
@@ -1940,9 +1916,7 @@ ppc_elf_lcomm (xxx)
    fixups for word relocations in writable segments, so we can adjust
    them at runtime.  */
 static void
-ppc_elf_validate_fix (fixp, seg)
-     fixS *fixp;
-     segT seg;
+ppc_elf_validate_fix (fixS *fixp, segT seg)
 {
   if (fixp->fx_done || fixp->fx_pcrel)
     return;
@@ -1987,7 +1961,7 @@ ppc_elf_validate_fix (fixp, seg)
    function descriptor sym if the corresponding code sym is used.  */
 
 void
-ppc_frob_file_before_adjust ()
+ppc_frob_file_before_adjust (void)
 {
   symbolS *symp;
   asection *toc;
@@ -2070,8 +2044,7 @@ enum toc_size_qualifier
 };
 
 static int
-parse_toc_entry (toc_kind)
-     enum toc_size_qualifier *toc_kind;
+parse_toc_entry (enum toc_size_qualifier *toc_kind)
 {
   char *start;
   char *toc_spec;
@@ -2135,8 +2108,7 @@ parse_toc_entry (toc_kind)
 #ifdef OBJ_ELF
 #define APUID(a,v)	((((a) & 0xffff) << 16) | ((v) & 0xffff))
 static void
-ppc_apuinfo_section_add (apu, version)
-      unsigned int apu, version;
+ppc_apuinfo_section_add (unsigned int apu, unsigned int version)
 {
   unsigned int i;
 
@@ -2182,8 +2154,7 @@ struct ppc_fixup
 /* This routine is called for each instruction to be assembled.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   char *s;
   const struct powerpc_opcode *opcode;
@@ -2807,9 +2778,7 @@ md_assemble (str)
    around operands here.  */
 
 static void
-ppc_macro (str, macro)
-     char *str;
-     const struct powerpc_macro *macro;
+ppc_macro (char *str, const struct powerpc_macro *macro)
 {
   char *operands[10];
   unsigned int count;
@@ -2885,9 +2854,7 @@ ppc_macro (str, macro)
 /* For ELF, add support for SHF_EXCLUDE and SHT_ORDERED.  */
 
 int
-ppc_section_letter (letter, ptr_msg)
-     int letter;
-     char **ptr_msg;
+ppc_section_letter (int letter, char **ptr_msg)
 {
   if (letter == 'e')
     return SHF_EXCLUDE;
@@ -2897,9 +2864,7 @@ ppc_section_letter (letter, ptr_msg)
 }
 
 int
-ppc_section_word (str, len)
-     char *str;
-     size_t len;
+ppc_section_word (char *str, size_t len)
 {
   if (len == 7 && strncmp (str, "exclude", 7) == 0)
     return SHF_EXCLUDE;
@@ -2908,9 +2873,7 @@ ppc_section_word (str, len)
 }
 
 int
-ppc_section_type (str, len)
-     char *str;
-     size_t len;
+ppc_section_type (char *str, size_t len)
 {
   if (len == 7 && strncmp (str, "ordered", 7) == 0)
     return SHT_ORDERED;
@@ -2919,10 +2882,7 @@ ppc_section_type (str, len)
 }
 
 int
-ppc_section_flags (flags, attr, type)
-     int flags;
-     int attr;
-     int type;
+ppc_section_flags (int flags, int attr, int type)
 {
   if (type == SHT_ORDERED)
     flags |= SEC_ALLOC | SEC_LOAD | SEC_SORT_ENTRIES;
@@ -2941,8 +2901,7 @@ ppc_section_flags (flags, attr, type)
    pseudo-op, but it can also take a single ASCII string.  */
 
 static void
-ppc_byte (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_byte (int ignore ATTRIBUTE_UNUSED)
 {
   if (*input_line_pointer != '\"')
     {
@@ -2986,8 +2945,7 @@ static bfd_boolean ppc_stab_symbol;
    aligns .comm and .lcomm to 4 bytes.  */
 
 static void
-ppc_comm (lcomm)
-     int lcomm;
+ppc_comm (int lcomm)
 {
   asection *current_seg = now_seg;
   subsegT current_subseg = now_subseg;
@@ -3141,8 +3099,7 @@ ppc_comm (lcomm)
    optional second argument is the alignment (the default is 2).  */
 
 static void
-ppc_csect (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_csect (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char endc;
@@ -3177,9 +3134,7 @@ ppc_csect (ignore)
 /* Change to a different csect.  */
 
 static void
-ppc_change_csect (sym, align)
-     symbolS *sym;
-     offsetT align;
+ppc_change_csect (symbolS *sym, offsetT align)
 {
   if (S_IS_DEFINED (sym))
     subseg_set (S_GET_SEGMENT (sym), symbol_get_tc (sym)->subseg);
@@ -3279,8 +3234,7 @@ ppc_change_csect (sym, align)
    convenience of people who aren't used to XCOFF.  */
 
 static void
-ppc_section (type)
-     int type;
+ppc_section (int type)
 {
   const char *name;
   symbolS *sym;
@@ -3304,8 +3258,7 @@ ppc_section (type)
    we do permit the user to name the text or data section.  */
 
 static void
-ppc_named_section (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_named_section (int ignore ATTRIBUTE_UNUSED)
 {
   char *user_name;
   const char *real_name;
@@ -3339,8 +3292,7 @@ ppc_named_section (ignore)
 /* The .extern pseudo-op.  We create an undefined symbol.  */
 
 static void
-ppc_extern (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_extern (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char endc;
@@ -3358,8 +3310,7 @@ ppc_extern (ignore)
 /* The .lglobl pseudo-op.  Keep the symbol in the symbol table.  */
 
 static void
-ppc_lglobl (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_lglobl (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char endc;
@@ -3381,8 +3332,7 @@ ppc_lglobl (ignore)
    although I don't know why it bothers.  */
 
 static void
-ppc_rename (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_rename (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char endc;
@@ -3417,8 +3367,7 @@ ppc_rename (ignore)
    always zero, and I am assuming it is the type.  */
 
 static void
-ppc_stabx (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_stabx (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   int len;
@@ -3544,8 +3493,7 @@ ppc_stabx (ignore)
    gets an aux entry like that used for a csect.  */
 
 static void
-ppc_function (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_function (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char endc;
@@ -3638,8 +3586,7 @@ ppc_function (ignore)
 static symbolS *saved_bi_sym = 0;
 
 static void
-ppc_bf (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_bf (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *sym;
 
@@ -3674,8 +3621,7 @@ ppc_bf (ignore)
    most recent ".bf" symbol.  */
 
 static void
-ppc_ef (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_ef (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *sym;
 
@@ -3699,8 +3645,7 @@ ppc_ef (ignore)
    is encountered.  */
 
 static void
-ppc_biei (ei)
-     int ei;
+ppc_biei (int ei)
 {
   static symbolS *last_biei;
 
@@ -3754,8 +3699,7 @@ ppc_biei (ei)
    .bs symbol is the index of this csect symbol.  */
 
 static void
-ppc_bs (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_bs (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char endc;
@@ -3790,8 +3734,7 @@ ppc_bs (ignore)
 /* The .es pseudo-op.  Generate a C_ESTART symbol named .es.  */
 
 static void
-ppc_es (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_es (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *sym;
 
@@ -3815,8 +3758,7 @@ ppc_es (ignore)
    line number.  */
 
 static void
-ppc_bb (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_bb (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *sym;
 
@@ -3842,8 +3784,7 @@ ppc_bb (ignore)
    line number.  */
 
 static void
-ppc_eb (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_eb (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *sym;
 
@@ -3867,8 +3808,7 @@ ppc_eb (ignore)
    specified name.  */
 
 static void
-ppc_bc (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_bc (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   int len;
@@ -3890,8 +3830,7 @@ ppc_bc (ignore)
 /* The .ec pseudo-op.  This just creates a C_ECOMM symbol.  */
 
 static void
-ppc_ec (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_ec (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *sym;
 
@@ -3910,8 +3849,7 @@ ppc_ec (ignore)
 /* The .toc pseudo-op.  Switch to the .toc subsegment.  */
 
 static void
-ppc_toc (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_toc (int ignore ATTRIBUTE_UNUSED)
 {
   if (ppc_toc_csect != (symbolS *) NULL)
     subseg_set (data_section, symbol_get_tc (ppc_toc_csect)->subseg);
@@ -3957,8 +3895,7 @@ ppc_toc (ignore)
    .short pseudo-op, and we want to be compatible.  */
 
 static void
-ppc_xcoff_cons (log_size)
-     int log_size;
+ppc_xcoff_cons (int log_size)
 {
   frag_align (log_size, 0, 0);
   record_alignment (now_seg, log_size);
@@ -3966,8 +3903,7 @@ ppc_xcoff_cons (log_size)
 }
 
 static void
-ppc_vbyte (dummy)
-     int dummy ATTRIBUTE_UNUSED;
+ppc_vbyte (int dummy ATTRIBUTE_UNUSED)
 {
   expressionS exp;
   int byte_count;
@@ -4010,8 +3946,7 @@ ppc_vbyte (dummy)
    the first argument is simply ignored.  */
 
 static void
-ppc_tc (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_tc (int ignore ATTRIBUTE_UNUSED)
 {
 #ifdef OBJ_XCOFF
 
@@ -4097,8 +4032,7 @@ ppc_tc (ignore)
 /* Pseudo-op .machine.  */
 
 static void
-ppc_machine (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_machine (int ignore ATTRIBUTE_UNUSED)
 {
   char *cpu_string;
 #define MAX_HISTORY 100
@@ -4161,8 +4095,7 @@ ppc_machine (ignore)
 /* See whether a symbol is in the TOC section.  */
 
 static int
-ppc_is_toc_sym (sym)
-     symbolS *sym;
+ppc_is_toc_sym (symbolS *sym)
 {
 #ifdef OBJ_XCOFF
   return symbol_get_tc (sym)->class == XMC_TC;
@@ -4183,8 +4116,7 @@ ppc_is_toc_sym (sym)
 
 /* Set the current section.  */
 static void
-ppc_set_current_section (new)
-     segT new;
+ppc_set_current_section (segT new)
 {
   ppc_previous_section = ppc_current_section;
   ppc_current_section = new;
@@ -4196,8 +4128,7 @@ ppc_set_current_section (new)
    warnings:  "No previous section"  */
 
 static void
-ppc_previous (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_previous (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *tmp;
 
@@ -4228,8 +4159,7 @@ ppc_previous (ignore)
    handling, debugging, etc.  */
 
 static void
-ppc_pdata (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_pdata (int ignore ATTRIBUTE_UNUSED)
 {
   if (pdata_section == 0)
     {
@@ -4263,8 +4193,7 @@ ppc_pdata (ignore)
    debugging, etc.  */
 
 static void
-ppc_ydata (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_ydata (int ignore ATTRIBUTE_UNUSED)
 {
   if (ydata_section == 0)
     {
@@ -4300,8 +4229,7 @@ ppc_ydata (ignore)
    function descriptors, etc.  */
 
 static void
-ppc_reldata (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_reldata (int ignore ATTRIBUTE_UNUSED)
 {
   if (reldata_section == 0)
     {
@@ -4331,8 +4259,7 @@ ppc_reldata (ignore)
 	      3 - double word aligned (that would be 4 byte boundary)  */
 
 static void
-ppc_rdata (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_rdata (int ignore ATTRIBUTE_UNUSED)
 {
   if (rdata_section == 0)
     {
@@ -4358,8 +4285,7 @@ ppc_rdata (ignore)
    warnings:  None  */
 
 static void
-ppc_ualong (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_ualong (int ignore ATTRIBUTE_UNUSED)
 {
   /* Try for long.  */
   cons (4);
@@ -4373,8 +4299,7 @@ ppc_ualong (ignore)
    warnings:  Missing symbol name  */
 
 static void
-ppc_znop (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_znop (int ignore ATTRIBUTE_UNUSED)
 {
   unsigned long insn;
   const struct powerpc_opcode *opcode;
@@ -4426,14 +4351,13 @@ ppc_znop (ignore)
    warnings:  */
 
 static void
-ppc_pe_comm (lcomm)
-     int lcomm;
+ppc_pe_comm (int lcomm)
 {
-  register char *name;
-  register char c;
-  register char *p;
+  char *name;
+  char c;
+  char *p;
   offsetT temp;
-  register symbolS *symbolP;
+  symbolS *symbolP;
   offsetT align;
 
   name = input_line_pointer;
@@ -4556,8 +4480,7 @@ ppc_pe_comm (lcomm)
  */
 
 void
-ppc_pe_section (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
 {
   /* Strip out the section name.  */
   char *section_name;
@@ -4719,8 +4642,7 @@ ppc_pe_section (ignore)
 }
 
 static void
-ppc_pe_function (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_pe_function (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char endc;
@@ -4742,8 +4664,7 @@ ppc_pe_function (ignore)
 }
 
 static void
-ppc_pe_tocd (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+ppc_pe_tocd (int ignore ATTRIBUTE_UNUSED)
 {
   if (tocdata_section == 0)
     {
@@ -4768,8 +4689,7 @@ ppc_pe_tocd (ignore)
 /* Don't adjust TOC relocs to use the section symbol.  */
 
 int
-ppc_pe_fix_adjustable (fix)
-     fixS *fix;
+ppc_pe_fix_adjustable (fixS *fix)
 {
   return fix->fx_r_type != BFD_RELOC_PPC_TOC16;
 }
@@ -4784,8 +4704,7 @@ ppc_pe_fix_adjustable (fix)
    any, to use square brackets, and to be in upper case.  */
 
 char *
-ppc_canonicalize_symbol_name (name)
-     char *name;
+ppc_canonicalize_symbol_name (char *name)
 {
   char *s;
 
@@ -4822,8 +4741,7 @@ ppc_canonicalize_symbol_name (name)
    called whenever a new symbol is created.  */
 
 void
-ppc_symbol_new_hook (sym)
-     symbolS *sym;
+ppc_symbol_new_hook (symbolS *sym)
 {
   struct ppc_tc_sy *tc;
   const char *s;
@@ -4911,8 +4829,7 @@ ppc_symbol_new_hook (sym)
    follows the csect symbol.  */
 
 void
-ppc_frob_label (sym)
-     symbolS *sym;
+ppc_frob_label (symbolS *sym)
 {
   if (ppc_current_csect != (symbolS *) NULL)
     {
@@ -4942,8 +4859,7 @@ static bfd_boolean ppc_saw_abs;
    symbol table.  */
 
 int
-ppc_frob_symbol (sym)
-     symbolS *sym;
+ppc_frob_symbol (symbolS *sym)
 {
   static symbolS *ppc_last_function;
   static symbolS *set_end;
@@ -5206,7 +5122,7 @@ ppc_frob_symbol (sym)
    absolute symbols.  */
 
 void
-ppc_adjust_symtab ()
+ppc_adjust_symtab (void)
 {
   symbolS *sym;
 
@@ -5252,8 +5168,7 @@ ppc_adjust_symtab ()
    turn.  */
 
 void
-ppc_frob_section (sec)
-     asection *sec;
+ppc_frob_section (asection *sec)
 {
   static bfd_vma vma = 0;
 
@@ -5270,10 +5185,7 @@ ppc_frob_section (sec)
    returned, or NULL on OK.  */
 
 char *
-md_atof (type, litp, sizep)
-     int type;
-     char *litp;
-     int *sizep;
+md_atof (int type, char *litp, int *sizep)
 {
   int prec;
   LITTLENUM_TYPE words[4];
@@ -5325,10 +5237,7 @@ md_atof (type, litp, sizep)
    endianness.  */
 
 void
-md_number_to_chars (buf, val, n)
-     char *buf;
-     valueT val;
-     int n;
+md_number_to_chars (char *buf, valueT val, int n)
 {
   if (target_big_endian)
     number_to_chars_bigendian (buf, val, n);
@@ -5353,9 +5262,8 @@ md_section_align (asection *seg ATTRIBUTE_UNUSED, valueT addr)
 /* We don't have any form of relaxing.  */
 
 int
-md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp ATTRIBUTE_UNUSED;
-     asection *seg ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (fragS *fragp ATTRIBUTE_UNUSED,
+			       asection *seg ATTRIBUTE_UNUSED)
 {
   abort ();
   return 0;
@@ -5364,10 +5272,9 @@ md_estimate_size_before_relax (fragp, seg)
 /* Convert a machine dependent frag.  We never generate these.  */
 
 void
-md_convert_frag (abfd, sec, fragp)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec ATTRIBUTE_UNUSED;
-     fragS *fragp ATTRIBUTE_UNUSED;
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
+		 asection *sec ATTRIBUTE_UNUSED,
+		 fragS *fragp ATTRIBUTE_UNUSED)
 {
   abort ();
 }
@@ -5375,8 +5282,7 @@ md_convert_frag (abfd, sec, fragp)
 /* We have no need to default values of symbols.  */
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -5387,9 +5293,7 @@ md_undefined_symbol (name)
    given a PC relative reloc.  */
 
 long
-md_pcrel_from_section (fixp, sec)
-     fixS *fixp;
-     segT sec ATTRIBUTE_UNUSED;
+md_pcrel_from_section (fixS *fixp, segT sec ATTRIBUTE_UNUSED)
 {
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
@@ -5402,8 +5306,7 @@ md_pcrel_from_section (fixp, sec)
    corresponding .tc symbol.  */
 
 int
-ppc_fix_adjustable (fix)
-     fixS *fix;
+ppc_fix_adjustable (fixS *fix)
 {
   valueT val = resolve_symbol_value (fix->fx_addsy);
   segT symseg = S_GET_SEGMENT (fix->fx_addsy);
@@ -5528,8 +5431,7 @@ ppc_fix_adjustable (fix)
    between two csects in the same section.  */
 
 int
-ppc_force_relocation (fix)
-     fixS *fix;
+ppc_force_relocation (fixS *fix)
 {
   /* At this point fix->fx_addsy should already have been converted to
      a csect symbol.  If the csect does not include the fragment, then
@@ -5554,8 +5456,7 @@ ppc_force_relocation (fix)
    will be emitted for a fixup.  */
 
 int
-ppc_force_relocation (fix)
-     fixS *fix;
+ppc_force_relocation (fixS *fix)
 {
   /* Branch prediction relocations must force a relocation, as must
      the vtable description relocs.  */
@@ -5580,8 +5481,7 @@ ppc_force_relocation (fix)
 }
 
 int
-ppc_fix_adjustable (fix)
-     fixS *fix;
+ppc_fix_adjustable (fixS *fix)
 {
   return (fix->fx_r_type != BFD_RELOC_16_GOTOFF
 	  && fix->fx_r_type != BFD_RELOC_LO16_GOTOFF
@@ -5646,10 +5546,7 @@ ppc_handle_align (struct frag *fragP)
    fixup.  */
 
 void
-md_apply_fix (fixP, valP, seg)
-     fixS *fixP;
-     valueT * valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   valueT value = * valP;
 
@@ -6173,9 +6070,7 @@ md_apply_fix (fixP, valP, seg)
 /* Generate a reloc for a fixup.  */
 
 arelent *
-tc_gen_reloc (seg, fixp)
-     asection *seg ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
 
@@ -6198,7 +6093,7 @@ tc_gen_reloc (seg, fixp)
 }
 
 void
-ppc_cfi_frame_initial_instructions ()
+ppc_cfi_frame_initial_instructions (void)
 {
   cfi_add_CFA_def_cfa (1, 0);
 }
