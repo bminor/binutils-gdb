@@ -1,3 +1,8 @@
+2007-05-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* embedspu.sh: Emit SPU ELF image to .data.rel.ro.speelf if
+	pic or pie and image needs relocs.
+
 2007-05-24  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.in: Regenerate.

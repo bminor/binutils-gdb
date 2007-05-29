@@ -1,5 +1,12 @@
 2007-05-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/spuelf.em (base_name): New function, split out from..
+	(embedded_spu_file) ..here.  Pass -fPIC or -fpie to embedspu
+	invocation if we deduce a shared lib or position independent
+	executable build by looking at ctrbegin* linker input files.
+
+2007-05-29  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/spu_ovl.S (__rv_pattern, __cg_pattern): Set symbol
 	types and sizes.
 	* emultempl/spu_ovl.o: Regenerate.

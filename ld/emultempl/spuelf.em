@@ -264,6 +264,29 @@ static void clean_tmp (void)
     unlink (tmp_file_list->name);
 }
 
+static const char *
+base_name (const char *path)
+{
+  const char *file = strrchr (path, '/');
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  {
+    char *bslash = strrchr (path, '\\');
+
+    if (file == NULL || (bslash != NULL && bslash > file))
+      file = bslash;
+    if (file == NULL
+	&& path[0] != '\0'
+	&& path[1] == ':')
+      file = path + 1;
+  }
+#endif
+  if (file == NULL)
+    file = path;
+  else
+    ++file;
+  return file;
+}
+
 /* This function is called when building a ppc32 or ppc64 executable
    to handle embedded spu images.  */
 extern bfd_boolean embedded_spu_file (lang_input_statement_type *, const char *);
@@ -282,6 +305,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   union lang_statement_union **old_stat_tail;
   union lang_statement_union **old_file_tail;
   union lang_statement_union *new_ent;
+  lang_input_statement_type *search;
 
   if (entry->the_bfd->format != bfd_object
       || strcmp (entry->the_bfd->xvec->name, "elf32-spu") != 0
@@ -290,23 +314,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
     return FALSE;
 
   /* Use the filename as the symbol marking the program handle struct.  */
-  sym = strrchr (entry->the_bfd->filename, '/');
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  {
-    char *bslash = strrchr (entry->the_bfd->filename, '\\');
-
-    if (sym == NULL || (bslash != NULL && bslash > sym))
-      sym = bslash;
-    if (sym == NULL
-	&& entry->the_bfd->filename[0] != '\0'
-	&& entry->the_bfd->filename[1] == ':')
-      sym = entry->the_bfd->filename + 1;
-  }
-#endif
-  if (sym == NULL)
-    sym = entry->the_bfd->filename;
-  else
-    ++sym;
+  sym = base_name (entry->the_bfd->filename);
 
   handle = xstrdup (sym);
   for (p = handle; *p; ++p)
@@ -332,6 +340,23 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   if (fd == -1)
     return FALSE;
   close (fd);
+
+  for (search = (lang_input_statement_type *) input_file_chain.head;
+       search != NULL;
+       search = (lang_input_statement_type *) search->next_real_file)
+    {
+      const char *infile = base_name (search->filename);
+
+      if (infile != NULL
+	  && strncmp (infile, "crtbegin", 8) == 0)
+	{
+	  if (infile[8] == 'S')
+	    flags = concat (flags, " -fPIC", NULL);
+	  else if (infile[8] == 'T')
+	    flags = concat (flags, " -fpie", NULL);
+	  break;
+	}
+    }
 
   /* Use fork() and exec() rather than system() so that we don't
      need to worry about quoting args.  */

@@ -146,11 +146,6 @@ main ()
   # 5. Write a table of _SPUEAR_ symbols.
   ${CC} ${FLAGS} -x assembler-with-cpp -nostartfiles -nostdlib \
 	-Wa,-mbig -Wl,-r -Wl,-x -o ${OUTFILE} - <<EOF
- .section .rodata.speelf,"a",@progbits
- .p2align 7
-__speelf__:
- .incbin "${INFILE}"
-
  .section .data.spetoe,"aw",@progbits
  .p2align 7
 __spetoe__:
@@ -181,6 +176,7 @@ $7 != "'${toe}'" && $7 in sec_off { \
 	print "#else"; \
 	print " .reloc __speelf__+" strtonum ("0x" $2) + sec_off[$7] + 4 ", R_PPC_ADDR32, " ($8 == "_EAR_" ? "__speelf__" : substr($8, 6)); \
 	print "#endif"; \
+	if (!donedef) { print "#define HAS_RELOCS 1"; donedef = 1; }; \
 } \
 $7 != "'${toe}'" && ! $7 in sec_off { \
 	print "#error Section not found for " $8; \
@@ -206,6 +202,7 @@ $3 ~ /R_SPU_PPU/ { \
 	print "#else"; \
 	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + (substr($3, 10) == "64" ? 4 : 0)", R_PPC_ADDR32, " $5 "+0x" $7; \
 	print "#endif"; \
+	if (!donedef) { print "#define HAS_RELOCS 1"; donedef = 1; }; \
 } \
 $3 ~ /unrecognized:/ { \
 	print "#ifdef _LP64"; \
@@ -213,8 +210,17 @@ $3 ~ /unrecognized:/ { \
 	print "#else"; \
 	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + ($4 == "f" ? 4 : 0)", R_PPC_ADDR32, " $6 "+0x" $8; \
 	print "#endif"; \
+	if (!donedef) { print "#define HAS_RELOCS 1"; donedef = 1; }; \
 } \
 '`
+#if defined (HAS_RELOCS) && (defined (__PIC__) || defined (__PIE__))
+ .section .data.rel.ro.speelf,"a",@progbits
+#else
+ .section .rodata.speelf,"a",@progbits
+#endif
+ .p2align 7
+__speelf__:
+ .incbin "${INFILE}"
 
  .section .data,"aw",@progbits
  .globl ${SYMBOL}
