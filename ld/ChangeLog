@@ -1,3 +1,9 @@
+2007-05-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spu_ovl.S (__rv_pattern, __cg_pattern): Set symbol
+	types and sizes.
+	* emultempl/spu_ovl.o: Regenerate.
+
 2007-05-24  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.in: Regnerate.

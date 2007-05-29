@@ -78,8 +78,12 @@
 
 	.text
 	.align 		4
+	.type		__rv_pattern, @object
+	.size		__rv_pattern, 16
 __rv_pattern:
 	.word		0x00010203, 0x1c1d1e1f, 0x00010203, 0x10111213
+	.type		__cg_pattern, @object
+	.size		__cg_pattern, 16
 __cg_pattern:
 	.word		0x04050607, 0x80808080, 0x80808080, 0x80808080
 
