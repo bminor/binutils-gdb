@@ -1,3 +1,18 @@
+2007-05-29  Jakub Jelinek  <jakub@redhat.com>
+
+	PR gas/4558
+	* gas/sparc/sparc.exp: Add v9branch{1,2,3,4,5} tests.
+	* gas/sparc/v9branch1.d: New test.
+	* gas/sparc/v9branch1.s: New.
+	* gas/sparc/v9branch2.d: New test.
+	* gas/sparc/v9branch2.s: New.
+	* gas/sparc/v9branch3.d: New test.
+	* gas/sparc/v9branch3.s: New.
+	* gas/sparc/v9branch4.d: New test.
+	* gas/sparc/v9branch4.s: New.
+	* gas/sparc/v9branch5.d: New test.
+	* gas/sparc/v9branch5.s: New.
+
 2007-03-25  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb32.s: Add tests for subs pc, lr.

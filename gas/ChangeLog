@@ -1,3 +1,10 @@
+2007-05-29  David S. Miller  <davem@davemloft.net>
+	    Jakub Jelinek  <jakub@redhat.com>
+
+	PR gas/4558
+	* config/tc-sparc.c (md_apply_fix): Fix relocation overflow checks
+	for BFD_RELOC_SPARC_WDISP16 and BFD_RELOC_SPARC_WDISP19.
+
 2007-05-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-spu.h: Wrap in #ifndef/#endif.  Delete coff macros.

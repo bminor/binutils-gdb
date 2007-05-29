@@ -1,6 +1,6 @@
 /* tc-sparc.c -- Assemble for the SPARC
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -3309,9 +3309,9 @@ md_apply_fix (fixP, valP, segment)
 	  break;
 
 	case BFD_RELOC_SPARC_WDISP16:
-	  /* FIXME: simplify.  */
-	  if (((val > 0) && (val & ~0x3fffc))
-	      || ((val < 0) && (~(val - 1) & ~0x3fffc)))
+	  if ((val & 3)
+	      || val >= 0x1fffc
+	      || val <= -(offsetT) 0x20008)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("relocation overflow"));
 	  /* FIXME: The +1 deserves a comment.  */
@@ -3320,9 +3320,9 @@ md_apply_fix (fixP, valP, segment)
 	  break;
 
 	case BFD_RELOC_SPARC_WDISP19:
-	  /* FIXME: simplify.  */
-	  if (((val > 0) && (val & ~0x1ffffc))
-	      || ((val < 0) && (~(val - 1) & ~0x1ffffc)))
+	  if ((val & 3)
+	      || val >= 0xffffc
+	      || val <= -(offsetT) 0x100008)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("relocation overflow"));
 	  /* FIXME: The +1 deserves a comment.  */
