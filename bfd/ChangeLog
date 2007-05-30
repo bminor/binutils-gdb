@@ -1,3 +1,10 @@
+2007-05-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_for_load_sections): Correct sh_type
+	to SHT_NOBITS earlier.  Base actions in rest of function on sh_type
+	and sh_flags instead of bfd section flags.  Delete voff and code
+	keeping nobits segments aligned.
+
 2007-05-25  Eric Christopher  <echristo@apple.com>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame):

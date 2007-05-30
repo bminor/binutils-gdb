@@ -4282,7 +4282,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   struct elf_segment_map *m;
   Elf_Internal_Phdr *phdrs;
   Elf_Internal_Phdr *p;
-  file_ptr off, voff;
+  file_ptr off;
   bfd_size_type maxpagesize;
   unsigned int alloc;
   unsigned int i, j;
@@ -4344,10 +4344,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	 number of sections with contents contributing to both p_filesz
 	 and p_memsz, followed by a number of sections with no contents
 	 that just contribute to p_memsz.  In this loop, OFF tracks next
-	 available file offset for PT_LOAD and PT_NOTE segments.  VOFF is
-	 an adjustment we use for segments that have no file contents
-	 but need zero filled memory allocation.  */
-      voff = 0;
+	 available file offset for PT_LOAD and PT_NOTE segments.  */
       p->p_type = m->p_type;
       p->p_flags = m->p_flags;
 
@@ -4410,31 +4407,34 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		align = maxpagesize;
 	    }
 
+	  for (i = 0; i < m->count; i++)
+	    if ((m->sections[i]->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+	      /* If we aren't making room for this section, then
+		 it must be SHT_NOBITS regardless of what we've
+		 set via struct bfd_elf_special_section.  */
+	      elf_section_type (m->sections[i]) = SHT_NOBITS;
+
 	  adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
-	  off += adjust;
-	  if (adjust != 0
-	      && !m->includes_filehdr
-	      && !m->includes_phdrs
-	      && (ufile_ptr) off >= align)
+	  if (adjust != 0)
 	    {
-	      /* If the first section isn't loadable, the same holds for
-		 any other sections.  Since the segment won't need file
-		 space, we can make p_offset overlap some prior segment.
-		 However, .tbss is special.  If a segment starts with
-		 .tbss, we need to look at the next section to decide
-		 whether the segment has any loadable sections.  */
+	      /* If the first section isn't loadable, the same holds
+		 for any other sections.  We don't need to align the
+		 segment on disk since the segment doesn't need file
+		 space.  */
 	      i = 0;
-	      while ((m->sections[i]->flags & SEC_LOAD) == 0
-		     && (m->sections[i]->flags & SEC_HAS_CONTENTS) == 0)
+	      while (elf_section_type (m->sections[i]) == SHT_NOBITS)
 		{
-		  if ((m->sections[i]->flags & SEC_THREAD_LOCAL) == 0
+		  /* If a segment starts with .tbss, we need to look
+		     at the next section to decide whether the segment
+		     has any loadable sections.  */
+		  if ((elf_section_flags (m->sections[i]) & SHF_TLS) == 0
 		      || ++i >= m->count)
 		    {
-		      off -= adjust;
-		      voff = adjust - align;
+		      adjust = 0;
 		      break;
 		    }
 		}
+	      off += adjust;
 	    }
 	}
       /* Make sure the .dynamic section is the first section in the
@@ -4505,7 +4505,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  || (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core))
 	{
 	  if (! m->includes_filehdr && ! m->includes_phdrs)
-	    p->p_offset = off + voff;
+	    p->p_offset = off;
 	  else
 	    {
 	      file_ptr adjust;
@@ -4524,12 +4524,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
       for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 	{
 	  asection *sec;
-	  flagword flags;
 	  bfd_size_type align;
 	  Elf_Internal_Shdr *this_hdr;
 
 	  sec = *secpp;
-	  flags = sec->flags;
+	  this_hdr = &elf_section_data (sec)->this_hdr;
 	  align = (bfd_size_type) 1 << bfd_get_section_alignment (abfd, sec);
 
 	  if (p->p_type == PT_LOAD
@@ -4537,9 +4536,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    {
 	      bfd_signed_vma adjust = sec->lma - (p->p_paddr + p->p_memsz);
 
-	      if ((flags & SEC_LOAD) != 0
-		  || ((flags & SEC_ALLOC) != 0
-		      && ((flags & SEC_THREAD_LOCAL) == 0
+	      if (this_hdr->sh_type != SHT_NOBITS
+		  || ((this_hdr->sh_flags & SHF_ALLOC) != 0
+		      && ((this_hdr->sh_flags & SHF_TLS) == 0
 			  || p->p_type == PT_TLS)))
 		{
 		  if (adjust < 0)
@@ -4551,7 +4550,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		    }
 		  p->p_memsz += adjust;
 
-		  if ((flags & SEC_LOAD) != 0)
+		  if (this_hdr->sh_type != SHT_NOBITS)
 		    {
 		      off += adjust;
 		      p->p_filesz += adjust;
@@ -4559,7 +4558,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 	    }
 
-	  this_hdr = &elf_section_data (sec)->this_hdr;
 	  if (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core)
 	    {
 	      /* The section at i == 0 is the one that actually contains
@@ -4585,46 +4583,25 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    {
 	      if (p->p_type == PT_LOAD)
 		{
-		  this_hdr->sh_offset = sec->filepos = off + voff;
-		  /* FIXME: The SEC_HAS_CONTENTS test here dates back to
-		     1997, and the exact reason for it isn't clear.  One
-		     plausible explanation is that it is to work around
-		     a problem we have with linker scripts using data
-		     statements in NOLOAD sections.  I don't think it
-		     makes a great deal of sense to have such a section
-		     assigned to a PT_LOAD segment, but apparently
-		     people do this.  The data statement results in a
-		     bfd_data_link_order being built, and these need
-		     section contents to write into.  Eventually, we get
-		     to _bfd_elf_write_object_contents which writes any
-		     section with contents to the output.  Make room
-		     here for the write, so that following segments are
-		     not trashed.  */
-		  if ((flags & SEC_LOAD) != 0
-		      || (flags & SEC_HAS_CONTENTS) != 0)
+		  this_hdr->sh_offset = sec->filepos = off;
+		  if (this_hdr->sh_type != SHT_NOBITS)
 		    off += sec->size;
-		  else
-		    /* If we aren't making room for this section, then
-		       it must be SHT_NOBITS regardless of what we've
-		       set via struct bfd_elf_special_section.  */
-		    this_hdr->sh_type = SHT_NOBITS;
 		}
 
-	      if ((flags & SEC_LOAD) != 0)
+	      if (this_hdr->sh_type != SHT_NOBITS)
 		{
 		  p->p_filesz += sec->size;
-		  /* SEC_LOAD without SEC_ALLOC is a weird combination
-		     used by note sections to signify that a PT_NOTE
-		     segment should be created.  These take file space
-		     but are not actually loaded into memory.  */
-		  if ((flags & SEC_ALLOC) != 0)
+		  /* A load section without SHF_ALLOC is something like
+		     a note section in a PT_NOTE segment.  These take
+		     file space but are not loaded into memory.  */
+		  if ((this_hdr->sh_flags & SHF_ALLOC) != 0)
 		    p->p_memsz += sec->size;
 		}
 
 	      /* .tbss is special.  It doesn't contribute to p_memsz of
 		 normal segments.  */
-	      else if ((flags & SEC_ALLOC) != 0
-		       && ((flags & SEC_THREAD_LOCAL) == 0
+	      else if ((this_hdr->sh_flags & SHF_ALLOC) != 0
+		       && ((this_hdr->sh_flags & SHF_TLS) == 0
 			   || p->p_type == PT_TLS))
 		p->p_memsz += sec->size;
 
@@ -4649,9 +4626,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  if (! m->p_flags_valid)
 	    {
 	      p->p_flags |= PF_R;
-	      if ((flags & SEC_CODE) != 0)
+	      if ((this_hdr->sh_flags & SHF_EXECINSTR) != 0)
 		p->p_flags |= PF_X;
-	      if ((flags & SEC_READONLY) == 0)
+	      if ((this_hdr->sh_flags & SHF_WRITE) != 0)
 		p->p_flags |= PF_W;
 	    }
 	}
