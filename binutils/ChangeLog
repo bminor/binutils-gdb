@@ -1,3 +1,12 @@
+2007-05-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (copy_object): Revert 2007-05-11 change.  Don't
+	avoid calling bfd_copy_private_bfd_data for ELF STRIP_NONDEBUG.
+	(setup_section): Don't modify flags, and don't avoid calling
+	bfd_copy_private_section_data for ELF STRIP_NONDEBUG.
+	* readelf.c (process_program_headers): Ignore .dynamic of type
+	SHT_NOBITS.
+
 2007-05-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* embedspu.sh: Emit SPU ELF image to .data.rel.ro.speelf if

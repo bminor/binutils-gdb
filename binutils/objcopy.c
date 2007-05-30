@@ -1423,12 +1423,7 @@ copy_object (bfd *ibfd, bfd *obfd)
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, obfd);
 
-  /* Don't copy headers when creating an ELF format debug info file.  */
-  if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
-      && strip_symbols == STRIP_NONDEBUG)
-    ;
-  else
-    setup_bfd_headers (ibfd, obfd);
+  setup_bfd_headers (ibfd, obfd);
 
   if (add_sections != NULL)
     {
@@ -1771,12 +1766,7 @@ copy_object (bfd *ibfd, bfd *obfd)
      from the input BFD to the output BFD.  This is done last to
      permit the routine to look at the filtered symbol table, which is
      important for the ECOFF code at least.  */
-  if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
-      && strip_symbols == STRIP_NONDEBUG)
-    /* Do not copy the private data when creating an ELF format
-       debug info file.  We do not want the program headers.  */
-    ;
-  else if (! bfd_copy_private_bfd_data (ibfd, obfd))
+  if (! bfd_copy_private_bfd_data (ibfd, obfd))
     {
       non_fatal (_("%s: error copying private BFD data: %s"),
 		 bfd_get_filename (obfd),
@@ -2206,7 +2196,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   if (p != NULL && p->set_flags)
     flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
-  else if (strip_symbols == STRIP_NONDEBUG && (flags & SEC_ALLOC) != 0)
+  else if (strip_symbols == STRIP_NONDEBUG
+	   && obfd->xvec->flavour != bfd_target_elf_flavour
+	   && (flags & SEC_ALLOC) != 0)
     flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
 
   osection = bfd_make_section_anyway_with_flags (obfd, name, flags);
@@ -2289,12 +2281,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   /* Allow the BFD backend to copy any private data it understands
      from the input section to the output section.  */
-  if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
-      && strip_symbols == STRIP_NONDEBUG)
-    /* Do not copy the private data when creating an ELF format
-       debug info file.  We do not want the program headers.  */
-    ;
-  else if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
+  if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
     {
       err = _("private data");
       goto loser;

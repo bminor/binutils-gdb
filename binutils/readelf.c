@@ -3516,6 +3516,9 @@ process_program_headers (FILE *file)
 		  break;
 		}
 
+	      if (sec->sh_type == SHT_NOBITS)
+		break;
+
 	      dynamic_addr = sec->sh_offset;
 	      dynamic_size = sec->sh_size;
 

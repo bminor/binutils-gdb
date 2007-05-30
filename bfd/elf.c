@@ -2907,11 +2907,10 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
       && !(*bed->elf_backend_fake_sections) (abfd, this_hdr, asect))
     *failedptr = TRUE;
 
-  if (sh_type == SHT_NOBITS
-      && elf_elfheader (abfd)->e_phnum == 0)
+  if (sh_type == SHT_NOBITS && asect->size != 0)
     {
       /* Don't change the header type from NOBITS if we are being
-	 called for strip/objcopy --only-keep-debug.  */
+	 called for objcopy --only-keep-debug.  */
       this_hdr->sh_type = sh_type;
     }
 
@@ -6039,13 +6038,9 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
      output BFD section flags have been set to something different.
      elf_fake_sections will set ELF section type based on BFD
      section flags.  */
-  if (osec->flags == isec->flags || !osec->flags)
-    {
-      BFD_ASSERT (osec->flags == isec->flags 
-		  || (!osec->flags
-		      && elf_section_type (osec) == SHT_NULL));
-      elf_section_type (osec) = elf_section_type (isec);
-    }
+  if (elf_section_type (osec) == SHT_NULL
+      && (osec->flags == isec->flags || !osec->flags))
+    elf_section_type (osec) = elf_section_type (isec);
 
   /* FIXME: Is this correct for all OS/PROC specific flags?  */
   elf_section_flags (osec) |= (elf_section_flags (isec)

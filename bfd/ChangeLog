@@ -1,5 +1,10 @@
 2007-05-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (elf_fake_sections): Adjust test for SHT_NOBITS sections
+	created by objcopy --only-keep-debug.
+	(_bfd_elf_init_private_section_data): Only change elf_section_type
+	if it is SHT_NULL.
+
 	* elf.c (assign_file_positions_for_load_sections): Correct sh_type
 	to SHT_NOBITS earlier.  Base actions in rest of function on sh_type
 	and sh_flags instead of bfd section flags.  Delete voff and code
