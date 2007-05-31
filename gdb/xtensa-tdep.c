@@ -109,7 +109,8 @@ extern int xtensa_config_byte_order (struct gdbarch_info *);
    indicates that the instruction is an ENTRY instruction.  */
 
 #define XTENSA_IS_ENTRY(op1) \
-  ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) ? ((op1) == 0x6c) : ((op1) == 0x36))
+  ((gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG) \
+   ? ((op1) == 0x6c) : ((op1) == 0x36))
 
 #define XTENSA_ENTRY_LENGTH  3
 
@@ -159,7 +160,7 @@ extract_call_winsize (CORE_ADDR pc)
   /* Lookup call insn.
      (Return the default value (4) if we can't find a valid call insn.  */
 
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
     {
       if (((insn & 0xf) == 0x5) || ((insn & 0xcf) == 0xc0))
 	winsize = (insn & 0x30) >> 2;   /* 0, 4, 8, 12  */
@@ -332,7 +333,7 @@ xtensa_register_write_masked (xtensa_register_t *reg, unsigned char *buffer)
   DEBUGTRACE ("xtensa_register_write_masked ()\n");
 
   /* Copy the masked register to host byte-order.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     for (i = 0; i < bytesize; i++)
       {
 	mem >>= 8;
@@ -452,7 +453,7 @@ xtensa_register_read_masked (xtensa_register_t *reg, unsigned char *buffer)
   ptr = value;
   mem = *ptr;
 
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     for (i = 0; i < bytesize; i++)
       {
 	if ((i & 3) == 0)
@@ -1172,7 +1173,7 @@ xtensa_extract_return_value (struct type *type,
 
   DEBUGINFO ("[xtensa_extract_return_value] areg %d len %d\n", areg, len);
 
-  if (len < 4 && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (len < 4 && gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     offset = 4 - len;
 
   for (; len > 0; len -= 4, areg++, valbuf += 4)
@@ -1211,7 +1212,7 @@ xtensa_store_return_value (struct type *type,
   DEBUGTRACE ("[xtensa_store_return_value] callsize %d wb %d\n",
               callsize, (int) wb);
 
-  if (len < 4 && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (len < 4 && gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     offset = 4 - len;
 
   areg = AREG_NUMBER (A2_REGNUM + callsize, wb);
@@ -1428,7 +1429,8 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	     word in big-endian mode and require a shift.  This only
 	     applies for structures smaller than one word.  */
 
-	  if (n < REGISTER_SIZE && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	  if (n < REGISTER_SIZE
+	      && gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	    offset += (REGISTER_SIZE - n);
 
 	  write_memory (offset, info->contents, info->length);
@@ -1446,7 +1448,8 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	     than REGISTER_SIZE; for larger odd-sized structures the excess
 	     will be left-aligned in the register on both endiannesses.  */
 
-	  if (n < REGISTER_SIZE && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	  if (n < REGISTER_SIZE
+	      && gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	    {
 	      ULONGEST v = extract_unsigned_integer (cp, REGISTER_SIZE);
 	      v = v >> ((REGISTER_SIZE - n) * TARGET_CHAR_BIT);
@@ -1511,7 +1514,7 @@ xtensa_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
   if (ISA_USE_DENSITY_INSTRUCTIONS)
     {
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	{
 	  *lenptr = sizeof (density_big_breakpoint);
 	  return density_big_breakpoint;
@@ -1524,7 +1527,7 @@ xtensa_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
     }
   else
     {
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	{
 	  *lenptr = sizeof (big_breakpoint);
 	  return big_breakpoint;

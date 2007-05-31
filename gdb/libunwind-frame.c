@@ -163,7 +163,8 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
   descr = libunwind_descr (get_frame_arch (next_frame));
   acc = descr->accessors;
   as =  unw_create_addr_space_p (acc,
-				 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+				 gdbarch_byte_order (current_gdbarch)
+				 == BFD_ENDIAN_BIG
 				 ? __BIG_ENDIAN
 				 : __LITTLE_ENDIAN);
 
@@ -215,7 +216,8 @@ libunwind_frame_sniffer (struct frame_info *next_frame)
   descr = libunwind_descr (get_frame_arch (next_frame));
   acc = descr->accessors;
   as =  unw_create_addr_space_p (acc,
-				 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+				 gdbarch_byte_order (current_gdbarch)
+				 == BFD_ENDIAN_BIG
 				 ? __BIG_ENDIAN
 				 : __LITTLE_ENDIAN);
 
@@ -372,7 +374,8 @@ libunwind_sigtramp_frame_sniffer (struct frame_info *next_frame)
   descr = libunwind_descr (get_frame_arch (next_frame));
   acc = descr->accessors;
   as =  unw_create_addr_space_p (acc,
-				 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+				 gdbarch_byte_order (current_gdbarch)
+				 == BFD_ENDIAN_BIG
 				 ? __BIG_ENDIAN
 				 : __LITTLE_ENDIAN);
 
@@ -412,7 +415,8 @@ libunwind_get_reg_special (struct gdbarch *gdbarch, struct regcache *regcache,
   descr = libunwind_descr (gdbarch);
   acc = descr->special_accessors;
   as =  unw_create_addr_space_p (acc,
-				 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+				 gdbarch_byte_order (current_gdbarch)
+				 == BFD_ENDIAN_BIG
 				 ? __BIG_ENDIAN
 				 : __LITTLE_ENDIAN);
 

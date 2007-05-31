@@ -122,7 +122,8 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
   else
     {
       arch = TARGET_ARCHITECTURE->arch_name;
-      endian = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "be" : "le";
+      endian = gdbarch_byte_order (current_gdbarch)
+	       == BFD_ENDIAN_BIG ? "be" : "le";
     }
 
   /* In case nto_root is short, add strlen(solib)
@@ -181,7 +182,8 @@ nto_init_solib_absolute_prefix (void)
   else
     {
       arch = TARGET_ARCHITECTURE->arch_name;
-      endian = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "be" : "le";
+      endian = gdbarch_byte_order (current_gdbarch)
+	       == BFD_ENDIAN_BIG ? "be" : "le";
     }
 
   sprintf (arch_path, "%s/%s%s", nto_root, arch, endian);

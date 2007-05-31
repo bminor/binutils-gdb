@@ -654,12 +654,12 @@ store_register (const struct regcache *regcache, int tid, int regno)
   memset (buf, 0, sizeof buf);
   bytes_to_transfer = align_up (register_size (current_gdbarch, regno),
                                 sizeof (long));
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
     {
       /* Little-endian values always sit at the left end of the buffer.  */
       regcache_raw_collect (regcache, regno, buf);
     }
-  else if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  else if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       /* Big-endian values sit at the right end of the buffer.  */
       size_t padding = (bytes_to_transfer

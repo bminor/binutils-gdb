@@ -395,7 +395,7 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
       static unsigned char big_remote_breakpoint[] = { 0xc3, 0x20 };
       static unsigned char little_remote_breakpoint[] = { 0x20, 0xc3 };
 
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	{
 	  *lenptr = sizeof (big_remote_breakpoint);
 	  return big_remote_breakpoint;
@@ -502,7 +502,7 @@ sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 static int
 gdb_print_insn_sh (bfd_vma memaddr, disassemble_info * info)
 {
-  info->endian = TARGET_BYTE_ORDER;
+  info->endian = gdbarch_byte_order (current_gdbarch);
   return print_insn_sh (memaddr, info);
 }
 
@@ -895,7 +895,7 @@ sh_justify_value_in_reg (struct value *val, int len)
   if (len < 4)
     {
       /* value gets right-justified in the register or stack word */
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	memcpy (valbuf + (4 - len), (char *) value_contents (val), len);
       else
 	memcpy (valbuf, (char *) value_contents (val), len);
@@ -968,7 +968,7 @@ sh_next_flt_argreg (int len)
       /* Also mark the next register as used. */
       flt_argreg_array[argreg + 1] = 1;
     }
-  else if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+  else if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
     {
       /* In little endian, gcc passes floats like this: f5, f4, f7, f6, ... */
       if (!flt_argreg_array[argreg + 1])
@@ -1106,7 +1106,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 		 register, increments the val and len values accordingly
 		 and then proceeds as normal by writing the second 32 bits
 		 into the next register. */
-	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE
+	      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE
 	          && TYPE_LENGTH (type) == 2 * reg_size)
 	        {
 		  regcache_cooked_write_unsigned (regcache, flt_argreg + 1,
@@ -1247,7 +1247,7 @@ sh_extract_return_value_fpu (struct type *type, struct regcache *regcache,
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;
       for (i = 0; i < len; i += 4)
-	if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
 	  regcache_raw_read (regcache, regnum++, (char *) valbuf + len - 4 - i);
 	else
 	  regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
@@ -1291,7 +1291,7 @@ sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;
       for (i = 0; i < len; i += 4)
-	if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
 	  regcache_raw_write (regcache, regnum++,
 			      (char *) valbuf + len - 4 - i);
 	else

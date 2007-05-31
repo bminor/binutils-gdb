@@ -573,7 +573,7 @@ mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	   register_size (gdbarch, cookednum))
     {
       if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p
-	  || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	  || gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
 	regcache_raw_read_part (regcache, rawnum, 0, 4, buf);
       else
 	regcache_raw_read_part (regcache, rawnum, 4, 4, buf);
@@ -596,7 +596,7 @@ mips_pseudo_register_write (struct gdbarch *gdbarch,
 	   register_size (gdbarch, cookednum))
     {
       if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p
-	  || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	  || gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
 	regcache_raw_write_part (regcache, rawnum, 0, 4, buf);
       else
 	regcache_raw_write_part (regcache, rawnum, 4, 4, buf);
@@ -641,7 +641,7 @@ set_mips64_transfers_32bit_regs (char *args, int from_tty,
 static int
 mips_convert_register_p (int regnum, struct type *type)
 {
-  return (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+  return (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
 	  && register_size (current_gdbarch, regnum) == 4
 	  && (regnum % gdbarch_num_regs (current_gdbarch))
 		>= mips_regnum (current_gdbarch)->fp0
@@ -2512,7 +2512,8 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     making the ABI determination.  */
 	  if (len == 8 && mips_abi (gdbarch) == MIPS_ABI_EABI32)
 	    {
-	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
+	      int low_offset = gdbarch_byte_order (current_gdbarch)
+			       == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
 
 	      /* Write the low word of the double to the even register(s).  */
@@ -2576,7 +2577,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  int longword_offset = 0;
 		  CORE_ADDR addr;
 		  stack_used_p = 1;
-		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+		  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 		    {
 		      if (regsize == 8
 			  && (typecode == TYPE_CODE_INT
@@ -2797,7 +2798,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  int longword_offset = 0;
 		  CORE_ADDR addr;
 		  stack_used_p = 1;
-		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+		  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 		    {
 		      if ((typecode == TYPE_CODE_INT
 			   || typecode == TYPE_CODE_PTR
@@ -2850,7 +2851,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     It does not seem to be necessary to do the
 		     same for integral types.  */
 
-		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+		  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
 		      && partial_len < MIPS64_REGSIZE
 		      && (typecode == TYPE_CODE_STRUCT
 			  || typecode == TYPE_CODE_UNION))
@@ -2911,11 +2912,13 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
       mips_xfer_register (regcache,
 			  gdbarch_num_regs (current_gdbarch)
 			  + mips_regnum (current_gdbarch)->fp0,
-			  8, TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+			  8, gdbarch_byte_order (current_gdbarch),
+			  readbuf, writebuf, 0);
       mips_xfer_register (regcache,
 			  gdbarch_num_regs (current_gdbarch)
 			  + mips_regnum (current_gdbarch)->fp0 + 2,
-			  8, TARGET_BYTE_ORDER, readbuf ? readbuf + 8 : readbuf,
+			  8, gdbarch_byte_order (current_gdbarch),
+			  readbuf ? readbuf + 8 : readbuf,
 			  writebuf ? writebuf + 8 : writebuf, 0);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -2930,7 +2933,8 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 			  gdbarch_num_regs (current_gdbarch)
 			  + mips_regnum (current_gdbarch)->fp0,
 			  TYPE_LENGTH (type),
-			  TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+			  gdbarch_byte_order (current_gdbarch),
+			  readbuf, writebuf, 0);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
@@ -2962,7 +2966,8 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 	  mips_xfer_register (regcache, gdbarch_num_regs (current_gdbarch)
 					+ regnum,
 			      TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
-			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
+			      gdbarch_byte_order (current_gdbarch),
+			      readbuf, writebuf, offset);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -3008,7 +3013,8 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 				offset, xfer, regnum);
 	  mips_xfer_register (regcache, gdbarch_num_regs (current_gdbarch)
 					+ regnum, xfer,
-			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
+			      gdbarch_byte_order (current_gdbarch),
+			      readbuf, writebuf, offset);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -3125,7 +3131,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  if (register_size (gdbarch, float_argreg) < 8 && len == 8)
 	    {
-	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
+	      int low_offset = gdbarch_byte_order (current_gdbarch)
+			       == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
 
 	      /* Write the low word of the double to the even register(s).  */
@@ -3276,7 +3283,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     identified as such and GDB gets tweaked
 		     accordingly.  */
 
-		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+		  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
 		      && partial_len < MIPS32_REGSIZE
 		      && (typecode == TYPE_CODE_STRUCT
 			  || typecode == TYPE_CODE_UNION))
@@ -3341,7 +3348,8 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
 			  gdbarch_num_regs (current_gdbarch)
 			    + mips_regnum (current_gdbarch)->fp0,
 			  TYPE_LENGTH (type),
-			  TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+			  gdbarch_byte_order (current_gdbarch),
+			  readbuf, writebuf, 0);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else if (TYPE_CODE (type) == TYPE_CODE_FLT
@@ -3352,27 +3360,31 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
          FP0.  */
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp1/$fp0\n");
-      switch (TARGET_BYTE_ORDER)
+      switch (gdbarch_byte_order (current_gdbarch))
 	{
 	case BFD_ENDIAN_LITTLE:
 	  mips_xfer_register (regcache,
 			      gdbarch_num_regs (current_gdbarch)
 				+ mips_regnum (current_gdbarch)->fp0 +
-			      0, 4, TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+			      0, 4, gdbarch_byte_order (current_gdbarch),
+			      readbuf, writebuf, 0);
 	  mips_xfer_register (regcache,
 			      gdbarch_num_regs (current_gdbarch)
 				+ mips_regnum (current_gdbarch)->fp0 + 1,
-			      4, TARGET_BYTE_ORDER, readbuf, writebuf, 4);
+			      4, gdbarch_byte_order (current_gdbarch),
+			      readbuf, writebuf, 4);
 	  break;
 	case BFD_ENDIAN_BIG:
 	  mips_xfer_register (regcache,
 			      gdbarch_num_regs (current_gdbarch)
 				+ mips_regnum (current_gdbarch)->fp0 + 1,
-			      4, TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+			      4, gdbarch_byte_order (current_gdbarch),
+			      readbuf, writebuf, 0);
 	  mips_xfer_register (regcache,
 			      gdbarch_num_regs (current_gdbarch)
 				+ mips_regnum (current_gdbarch)->fp0 + 0,
-			      4, TARGET_BYTE_ORDER, readbuf, writebuf, 4);
+			      4, gdbarch_byte_order (current_gdbarch),
+			      readbuf, writebuf, 4);
 	  break;
 	default:
 	  internal_error (__FILE__, __LINE__, _("bad switch"));
@@ -3410,7 +3422,8 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
 	  mips_xfer_register (regcache, gdbarch_num_regs (current_gdbarch)
 					+ regnum,
 			      TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
-			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
+			      gdbarch_byte_order (current_gdbarch),
+			      readbuf, writebuf, offset);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -3460,7 +3473,8 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
 				offset, xfer, regnum);
 	  mips_xfer_register (regcache, gdbarch_num_regs (current_gdbarch)
 					+ regnum, xfer,
-			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
+			      gdbarch_byte_order (current_gdbarch),
+			      readbuf, writebuf, offset);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -3606,7 +3620,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  int longword_offset = 0;
 		  CORE_ADDR addr;
 		  stack_used_p = 1;
-		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+		  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 		    {
 		      if ((typecode == TYPE_CODE_INT
 			   || typecode == TYPE_CODE_PTR
@@ -3658,7 +3672,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     It does not seem to be necessary to do the
 		     same for integral types. */
 
-		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+		  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
 		      && partial_len < MIPS64_REGSIZE
 		      && (typecode == TYPE_CODE_STRUCT
 			  || typecode == TYPE_CODE_UNION))
@@ -3722,7 +3736,8 @@ mips_o64_return_value (struct gdbarch *gdbarch,
 			  gdbarch_num_regs (current_gdbarch)
 			    + mips_regnum (current_gdbarch)->fp0,
 			  TYPE_LENGTH (type),
-			  TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+			  gdbarch_byte_order (current_gdbarch),
+			  readbuf, writebuf, 0);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else
@@ -3743,7 +3758,8 @@ mips_o64_return_value (struct gdbarch *gdbarch,
 				offset, xfer, regnum);
 	  mips_xfer_register (regcache, gdbarch_num_regs (current_gdbarch)
 					+ regnum, xfer,
-			      TARGET_BYTE_ORDER, readbuf, writebuf, offset);
+			      gdbarch_byte_order (current_gdbarch),
+			      readbuf, writebuf, offset);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -3809,7 +3825,7 @@ mips_read_fp_register_single (struct frame_info *frame, int regno,
          32 bits.  */
       int offset;
 
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	offset = 4;
       else
 	offset = 0;
@@ -3848,7 +3864,7 @@ mips_read_fp_register_double (struct frame_info *frame, int regno,
 
       /* mips_read_fp_register_single will find the correct 32 bits from
          each register.  */
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	{
 	  mips_read_fp_register_single (frame, regno, rare_buffer + 4);
 	  mips_read_fp_register_single (frame, regno + 1, rare_buffer);
@@ -3964,7 +3980,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
   else
     fprintf_filtered (file, ": ");
 
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     offset =
       register_size (current_gdbarch,
 		     regnum) - register_size (current_gdbarch, regnum);
@@ -4052,7 +4068,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 		   - register_size (current_gdbarch, regnum)); byte++)
 	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	for (byte =
 	     register_size (current_gdbarch,
 			    regnum) - register_size (current_gdbarch, regnum);
@@ -4351,7 +4367,7 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
     info->disassembler_options = "gpr-names=32";
 
   /* Call the appropriate disassembler based on the target endian-ness.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     return print_insn_big_mips (memaddr, info);
   else
     return print_insn_little_mips (memaddr, info);
@@ -4367,7 +4383,7 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
 static const gdb_byte *
 mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       if (mips_pc_is_mips16 (*pcptr))
 	{

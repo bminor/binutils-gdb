@@ -1559,7 +1559,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	  SYMBOL_CLASS (sym) = LOC_ARG;
 	  add_symbol_to_list (sym, &local_symbols);
 #if !defined (BELIEVE_PCC_PROMOTION)
-	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	    {
 	      /* If PCC says a parameter is a short or a char,
 	         aligned on an int boundary, realign it to the

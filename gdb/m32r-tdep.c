@@ -97,7 +97,7 @@ m32r_memory_insert_breakpoint (struct bp_target_info *bp_tgt)
   bp_tgt->placed_size = bp_tgt->shadow_len = 4;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       if ((addr & 3) == 0)
 	{
@@ -151,7 +151,7 @@ m32r_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
   buf[3] = contents_cache[3];
 
   /* Remove parallel bit.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       if ((buf[0] & 0x80) == 0 && (buf[2] & 0x80) != 0)
 	buf[2] &= 0x7f;
@@ -175,7 +175,7 @@ m32r_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   gdb_byte *bp;
 
   /* Determine appropriate breakpoint.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       if ((*pcptr & 3) == 0)
 	{

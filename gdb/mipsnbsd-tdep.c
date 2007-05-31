@@ -241,8 +241,9 @@ static LONGEST
 mipsnbsd_sigtramp_offset (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  const char *retcode = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-  	? sigtramp_retcode_mipseb : sigtramp_retcode_mipsel;
+  const char *retcode = gdbarch_byte_order (current_gdbarch)
+			== BFD_ENDIAN_BIG ? sigtramp_retcode_mipseb :
+			sigtramp_retcode_mipsel;
   unsigned char ret[RETCODE_SIZE], w[4];
   LONGEST off;
   int i;

@@ -267,7 +267,7 @@ sh64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
      which translates in big endian mode to 0x0, 0x3b
      and in little endian mode to 0x3b, 0x0*/
 
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       if (pc_is_isa32 (*pcptr))
 	{
@@ -682,7 +682,7 @@ sh64_use_struct_convention (struct type *type)
 static int
 gdb_print_insn_sh64 (bfd_vma memaddr, disassemble_info *info)
 {
-  info->endian = TARGET_BYTE_ORDER;
+  info->endian = gdbarch_byte_order (current_gdbarch);
   return print_insn_sh (memaddr, info);
 }
 
@@ -1104,7 +1104,7 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
 	  if (len < argreg_size)
 	    {
 	      /* value gets right-justified in the register or stack word */
-	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 		memcpy (valbuf + argreg_size - len,
 			(char *) value_contents (args[argnum]), len);
 	      else
@@ -1232,7 +1232,7 @@ sh64_extract_return_value (struct type *type, struct regcache *regcache,
 
 	  regcache_cooked_read (regcache, DR0_REGNUM, buf);
 	  
-	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
 	    floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword,
 				     buf, &val);
 	  else
@@ -1251,7 +1251,7 @@ sh64_extract_return_value (struct type *type, struct regcache *regcache,
 	     at the most significant end.  */
 	  regcache_raw_read (regcache, DEFAULT_RETURN_REGNUM, buf);
 
-	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	    offset = register_size (current_gdbarch, DEFAULT_RETURN_REGNUM)
 		     - len;
 	  else
@@ -1281,7 +1281,7 @@ sh64_store_return_value (struct type *type, struct regcache *regcache,
     {
       int i, regnum = FP0_REGNUM;
       for (i = 0; i < len; i += 4)
-	if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
 	  regcache_raw_write (regcache, regnum++,
 			      (char *) valbuf + len - 4 - i);
 	else
@@ -1296,7 +1296,7 @@ sh64_store_return_value (struct type *type, struct regcache *regcache,
 	{
 	  /* Pad with zeros.  */
 	  memset (buf, 0, register_size (current_gdbarch, return_register));
-	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
 	    offset = 0; /*register_size (current_gdbarch, 
 			  return_register) - len;*/
 	  else
@@ -1527,7 +1527,7 @@ static void
 sh64_register_convert_to_virtual (int regnum, struct type *type,
 				     char *from, char *to)
 {
-  if (TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
+  if (gdbarch_byte_order (current_gdbarch) != BFD_ENDIAN_LITTLE)
     {
       /* It is a no-op.  */
       memcpy (to, from, register_size (current_gdbarch, regnum));
@@ -1552,7 +1552,7 @@ static void
 sh64_register_convert_to_raw (struct type *type, int regnum,
 				 const void *from, void *to)
 {
-  if (TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
+  if (gdbarch_byte_order (current_gdbarch) != BFD_ENDIAN_LITTLE)
     {
       /* It is a no-op.  */
       memcpy (to, from, register_size (current_gdbarch, regnum));
@@ -1637,7 +1637,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* Build the value in the provided buffer.  */ 
       regcache_raw_read (regcache, base_regnum, temp_buffer);
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	offset = 4;
       memcpy (buffer, temp_buffer + offset, 4); /* get LOWER 32 bits only????*/
     }
@@ -1797,7 +1797,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       base_regnum = sh64_compact_reg_base_num (reg_nr);
       /* reg_nr is 32 bit here, and base_regnum is 64 bits.  */
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	offset = 4;
       else 
 	offset = 0;
@@ -1988,8 +1988,9 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
   fprintf_filtered (file, "\t(raw 0x");
   for (j = 0; j < register_size (gdbarch, regnum); j++)
     {
-      int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
-	: register_size (gdbarch, regnum) - 1 - j;
+      int idx = gdbarch_byte_order (current_gdbarch)
+		== BFD_ENDIAN_BIG ? j : register_size
+		(gdbarch, regnum) - 1 - j;
       fprintf_filtered (file, "%02x", raw_buffer[idx]);
     }
   fprintf_filtered (file, ")");
@@ -2336,7 +2337,7 @@ sh64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       if (valuep)
         {
 	  memset (valuep, 0, reg_size);
-	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
 	    read_memory (*addrp, valuep, size);
 	  else
 	    read_memory (*addrp, (char *) valuep + reg_size - size, size);

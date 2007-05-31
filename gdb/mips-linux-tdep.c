@@ -387,7 +387,8 @@ mips64_supply_fpregset (struct regcache *regcache,
     for (regi = 0; regi < 32; regi++)
       {
 	const gdb_byte *reg_ptr = (const gdb_byte *)(*fpregsetp + (regi & ~1));
-	if ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) != (regi & 1))
+	if ((gdbarch_byte_order (current_gdbarch)
+	    == BFD_ENDIAN_BIG) != (regi & 1))
 	  reg_ptr += 4;
 	regcache_raw_supply (regcache, FP0_REGNUM + regi, reg_ptr);
       }
@@ -425,7 +426,8 @@ mips64_fill_fpregset (const struct regcache *regcache,
 	  int regi = regno - FP0_REGNUM;
 
 	  to = (gdb_byte *) (*fpregsetp + (regi & ~1));
-	  if ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) != (regi & 1))
+	  if ((gdbarch_byte_order (current_gdbarch)
+	      == BFD_ENDIAN_BIG) != (regi & 1))
 	    to += 4;
 	  regcache_raw_collect (regcache, regno, to);
 	}
@@ -825,7 +827,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
      per-frame basis, but right now we don't; the kernel saves eight
      bytes but we only want four.  Use regs_base to access any
      64-bit fields.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     regs_base = sigcontext_base + 4;
   else
     regs_base = sigcontext_base;
@@ -852,7 +854,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
      layout, since we can't tell, and it's much more common.  Which bits are
      the "high" bits depends on endianness.  */
   for (ireg = 0; ireg < 32; ireg++)
-    if ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) != (ireg & 1))
+    if ((gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG) != (ireg & 1))
       trad_frame_set_reg_addr (this_cache,
 			       ireg + regs->fp0 +
 				 gdbarch_num_regs (current_gdbarch),

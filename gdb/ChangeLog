@@ -1,5 +1,49 @@
 2007-05-31  Markus Deuling  <deuling@de.ibm.com>
 
+	* xtensa-tdep.c (XTENSA_IS_ENTRY, extract_call_winsize)
+	(xtensa_register_write_masked, xtensa_register_read_masked)
+	(xtensa_extract_return_value, xtensa_store_return_value
+	(xtensa_push_dummy_call, xtensa_breakpoint_from_pc): Replace 
+	TARGET_BYTE_ORDER by gdbarch_byte_order.
+	* sh-tdep.c (sh_breakpoint_from_pc, gdb_print_insn_sh)
+	(sh_justify_value_in_reg, sh_next_flt_argreg, sh_push_dummy_call_fpu)
+	(sh_extract_return_value_fpu, sh_store_return_value_fpu): Likewise.
+	* sh64-tdep.c (sh64_breakpoint_from_pc, gdb_print_insn_sh64)
+	(sh64_push_dummy_call, sh64_extract_return_value)
+	(sh64_store_return_value, sh64_register_convert_to_virtual)
+	(sh64_register_convert_to_raw, sh64_pseudo_register_read)
+	(sh64_pseudo_register_write, sh64_do_fp_register)
+	(sh64_frame_prev_register): Likewise.
+	* score-tdep.c (score_print_insn, score_breakpoint_from_pc)
+	(score_return_value, score_push_dummy_call, score_fetch_inst): Likewise.
+	* rs6000-tdep.c (rs6000_breakpoint_from_pc, rs6000_push_dummy_call)
+	(e500_move_ev_register,gdb_print_insn_powerpc): Likewise.
+	* remote-m32r-sdi.c (m32r_resume, m32r_wait): Likewise.
+	* ppc-linux-nat.c (store_register): Likewise.
+	* nto-tdep.c (nto_find_and_open_solib)
+	(nto_init_solib_absolute_prefix): Likewise.
+	* mips-tdep.c (mips_pseudo_register_read, mips_pseudo_register_write)
+	(mips_convert_register_p, mips_eabi_push_dummy_call)
+	(mips_n32n64_push_dummy_call, mips_n32n64_return_value)
+	(mips_o32_push_dummy_call, mips_o32_return_value)
+	(mips_o64_push_dummy_call, mips_o64_return_value, mips_o64_return_value)
+	(mips_read_fp_register_single, mips_read_fp_register_double)
+	(mips_print_register, print_gp_register_row, gdb_print_insn_mips)
+	(mips_breakpoint_from_pc): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_sigtramp_offset): Likewise.
+	* mips-linux-tdep.c (mips64_supply_fpregset, mips64_fill_fpregset)
+	(mips_linux_o32_sigframe_init): Likewise.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint)
+	(m32r_memory_remove_breakpoint, m32r_breakpoint_from_pc): Likewise.
+	* libunwind-frame.c (libunwind_frame_cache, libunwind_frame_sniffer)
+	(libunwind_sigtramp_frame_sniffer, libunwind_get_reg_special): Likewise.
+	* iq2000-tdep.c (iq2000_breakpoint_from_pc): Likewise.
+	* coffread.c (process_coff_symbol): Likewise.
+	* arm-tdep.c (convert_from_extended, convert_to_extended)
+	(gdb_print_insn_arm): Likewise.
+
+2007-05-31  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (NUM_REGS): Replace by gdbarch_num_regs.
 	* i386-tdep.c (i386_dbx_reg_to_regnum)
 	(i386_svr4_reg_to_regnum): Likewise.

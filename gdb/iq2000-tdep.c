@@ -501,7 +501,8 @@ iq2000_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 	   (long) *pcptr);
 
   *lenptr = 4;
-  return (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) ? big_breakpoint
+  return (gdbarch_byte_order (current_gdbarch)
+	  == BFD_ENDIAN_BIG) ? big_breakpoint
 					       : little_breakpoint;
 }
 

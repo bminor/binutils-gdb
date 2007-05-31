@@ -316,7 +316,7 @@ score_register_sim_regno (int regnum)
 static int
 score_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 {
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     return print_insn_big_score (memaddr, info);
   else
     return print_insn_little_score (memaddr, info);
@@ -336,7 +336,7 @@ score_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
     }
   raw = extract_unsigned_integer (buf, SCORE_INSTLEN);
 
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       if (!(raw & 0x80008000))
         {
@@ -434,7 +434,8 @@ score_return_value (struct gdbarch *gdbarch, struct type *type,
           int xfer = SCORE_REGSIZE;
           if (offset + xfer > TYPE_LENGTH (type))
             xfer = TYPE_LENGTH (type) - offset;
-          score_xfer_register (regcache, regnum, xfer, TARGET_BYTE_ORDER,
+          score_xfer_register (regcache, regnum, xfer,
+			       gdbarch_byte_order (current_gdbarch),
                                readbuf, writebuf, offset);
         }
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -544,7 +545,7 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
          Where X is a hole.  */
 
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
           && (typecode == TYPE_CODE_STRUCT
               || typecode == TYPE_CODE_UNION)
           && argreg > SCORE_LAST_ARG_REGNUM
@@ -557,8 +558,8 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
           ULONGEST regval = extract_unsigned_integer (val, partial_len);
 
           /* The last part of a arg should shift left when
-             TARGET_BYTE_ORDER is BFD_ENDIAN_BIG.  */
-          if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+             gdbarch_byte_order is BFD_ENDIAN_BIG.  */
+          if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
               && arg_last_part_p == 1
               && (typecode == TYPE_CODE_STRUCT
                   || typecode == TYPE_CODE_UNION))
@@ -668,7 +669,7 @@ score_fetch_inst (CORE_ADDR addr, char *memblock)
   inst.raw = extract_unsigned_integer (buf, SCORE_INSTLEN);
   inst.is15 = !(inst.raw & 0x80008000);
   inst.v = RM_PBITS (inst.raw);
-  big = (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
+  big = (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG);
   if (inst.is15)
     {
       if (big ^ ((addr & 0x2) == 2))

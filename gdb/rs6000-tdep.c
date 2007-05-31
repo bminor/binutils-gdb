@@ -702,7 +702,7 @@ rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
   static unsigned char big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
   static unsigned char little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
   *bp_size = 4;
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     return big_breakpoint;
   else
     return little_breakpoint;
@@ -1683,7 +1683,8 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else
 	{
 	  /* Argument can fit in one register.  No problem.  */
-	  int adj = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? reg_size - len : 0;
+	  int adj = gdbarch_byte_order (current_gdbarch)
+		    == BFD_ENDIAN_BIG ? reg_size - len : 0;
 	  gdb_byte word[MAX_REGISTER_SIZE];
 
 	  memset (word, 0, reg_size);
@@ -2220,7 +2221,7 @@ e500_move_ev_register (void (*move) (struct regcache *regcache,
 
   reg_index = ev_reg - tdep->ppc_ev0_regnum;
 
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       move (regcache, tdep->ppc_ev0_upper_regnum + reg_index, byte_buffer);
       move (regcache, tdep->ppc_gp0_regnum + reg_index, byte_buffer + 4);
@@ -3026,7 +3027,7 @@ gdb_print_insn_powerpc (bfd_vma memaddr, disassemble_info *info)
   if (!info->disassembler_options)
     info->disassembler_options = "any";
 
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     return print_insn_big_powerpc (memaddr, info);
   else
     return print_insn_little_powerpc (memaddr, info);
