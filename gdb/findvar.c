@@ -264,7 +264,8 @@ value_of_register (int regnum, struct frame_info *frame)
 
   /* User registers lie completely outside of the range of normal
      registers.  Catch them early so that the target never sees them.  */
-  if (regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+  if (regnum >= gdbarch_num_regs (current_gdbarch)
+		+ gdbarch_num_pseudo_regs (current_gdbarch))
     return value_of_user_reg (regnum, frame);
 
   frame_register (frame, regnum, &optim, &lval, &addr, &realnum, raw_buffer);

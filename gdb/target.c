@@ -2154,7 +2154,8 @@ debug_print_register (const char * func,
 		      struct regcache *regcache, int regno)
 {
   fprintf_unfiltered (gdb_stdlog, "%s ", func);
-  if (regno >= 0 && regno < NUM_REGS + NUM_PSEUDO_REGS
+  if (regno >= 0 && regno < gdbarch_num_regs (current_gdbarch)
+			    + gdbarch_num_pseudo_regs (current_gdbarch)
       && REGISTER_NAME (regno) != NULL && REGISTER_NAME (regno)[0] != '\0')
     fprintf_unfiltered (gdb_stdlog, "(%s)", REGISTER_NAME (regno));
   else

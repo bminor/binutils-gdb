@@ -503,7 +503,7 @@ get_core_registers (struct regcache *regcache, int regno)
 			     ".reg-xfp", 3, "extended floating-point", 0);
 
   /* Supply dummy value for all registers not found in the core.  */
-  for (i = 0; i < NUM_REGS; i++)
+  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
     if (!regcache_valid_p (regcache, i))
       regcache_raw_supply (regcache, i, NULL);
 }

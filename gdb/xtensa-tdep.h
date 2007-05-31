@@ -264,7 +264,9 @@ struct gdbarch_tdep
 #define REGMAP_BYTES      (gdbarch_tdep (current_gdbarch)->regmap_bytes)
 #define A0_BASE           (gdbarch_tdep (current_gdbarch)->a0_base)
 #define AR_BASE           (gdbarch_tdep (current_gdbarch)->ar_base)
-#define FP_ALIAS	  (NUM_REGS + NUM_PSEUDO_REGS)
+#define FP_ALIAS \
+  (gdbarch_num_regs (current_gdbarch) \
+   + gdbarch_num_pseudo_regs (current_gdbarch))
 #define CALL_ABI          (gdbarch_tdep (current_gdbarch)->call_abi)
 #define NUM_CONTEXTS      (gdbarch_tdep (current_gdbarch)->num_contexts)
   

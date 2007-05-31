@@ -31,12 +31,13 @@
 /* A table of user registers.
 
    User registers have regnum's that live above of the range [0
-   .. NUM_REGS + NUM_PSEUDO_REGS) (which is controlled by the target).
+   .. gdbarch_num_regs + gdbarch_num_pseudo_regs)
+   (which is controlled by the target).
    The target should never see a user register's regnum value.
 
    Always append, never delete.  By doing this, the relative regnum
-   (offset from NUM_REGS + NUM_PSEUDO_REGS) assigned to each user
-   register never changes.  */
+   (offset from gdbarch_num_regs + gdbarch_num_pseudo_regs)
+    assigned to each user  register never changes.  */
 
 struct user_reg
 {
@@ -155,7 +156,8 @@ user_reg_map_name_to_regnum (struct gdbarch *gdbarch, const char *name,
 	if ((len < 0 && strcmp (reg->name, name))
 	    || (len == strlen (reg->name)
 		&& strncmp (reg->name, name, len) == 0))
-	  return NUM_REGS + NUM_PSEUDO_REGS + nr;
+	  return gdbarch_num_regs (current_gdbarch)
+		 + gdbarch_num_pseudo_regs (current_gdbarch) + nr;
       }
   }
 

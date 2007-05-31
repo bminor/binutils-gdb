@@ -2002,9 +2002,10 @@ sh64_do_pseudo_register (struct gdbarch *gdbarch, struct ui_file *file,
 {
   /* All the sh64-compact mode registers are pseudo registers.  */
 
-  if (regnum < NUM_REGS 
-      || regnum >= NUM_REGS + NUM_PSEUDO_REGS_SH_MEDIA
-			    + NUM_PSEUDO_REGS_SH_COMPACT)
+  if (regnum < gdbarch_num_regs (current_gdbarch)
+      || regnum >= gdbarch_num_regs (current_gdbarch)
+		   + NUM_PSEUDO_REGS_SH_MEDIA
+		   + NUM_PSEUDO_REGS_SH_COMPACT)
     internal_error (__FILE__, __LINE__,
 		    _("Invalid pseudo register number %d\n"), regnum);
 
@@ -2092,11 +2093,12 @@ static void
 sh64_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 		     struct frame_info *frame, int regnum)
 {
-  if (regnum < 0 || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+  if (regnum < 0 || regnum >= gdbarch_num_regs (current_gdbarch)
+			      + gdbarch_num_pseudo_regs (current_gdbarch))
     internal_error (__FILE__, __LINE__,
 		    _("Invalid register number %d\n"), regnum);
 
-  else if (regnum >= 0 && regnum < NUM_REGS)
+  else if (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch))
     {
       if (TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
 	sh64_do_fp_register (gdbarch, file, frame, regnum);	/* FP regs */
@@ -2104,7 +2106,8 @@ sh64_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 	sh64_do_register (gdbarch, file, frame, regnum);
     }
 
-  else if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
+  else if (regnum < gdbarch_num_regs (current_gdbarch)
+		    + gdbarch_num_pseudo_regs (current_gdbarch))
     sh64_do_pseudo_register (gdbarch, file, frame, regnum);
 }
 
@@ -2124,7 +2127,7 @@ sh64_media_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     /* do all (or most) registers */
     {
       regnum = 0;
-      while (regnum < NUM_REGS)
+      while (regnum < gdbarch_num_regs (current_gdbarch))
 	{
 	  /* If the register name is empty, it is undefined for this
 	     processor, so don't display anything.  */
@@ -2155,7 +2158,8 @@ sh64_media_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	}
 
       if (fpregs)
-	while (regnum < NUM_REGS + NUM_PSEUDO_REGS)
+	while (regnum < gdbarch_num_regs (current_gdbarch)
+			+ gdbarch_num_pseudo_regs (current_gdbarch))
 	  {
 	    sh64_do_pseudo_register (gdbarch, file, frame, regnum);
 	    regnum++;
@@ -2183,7 +2187,8 @@ sh64_compact_print_registers_info (struct gdbarch *gdbarch,
     /* do all compact registers */
     {
       regnum = R0_C_REGNUM;
-      while (regnum < NUM_REGS + NUM_PSEUDO_REGS)
+      while (regnum < gdbarch_num_regs (current_gdbarch)
+		      + gdbarch_num_pseudo_regs (current_gdbarch))
         {
           sh64_do_pseudo_register (gdbarch, file, frame, regnum);
           regnum++;

@@ -625,7 +625,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 
   /* Adjust all the saved registers so that they contain addresses and
      not offsets.  */
-  for (i = 0; i < NUM_REGS - 1; i++)
+  for (i = 0; i < gdbarch_num_regs (current_gdbarch) - 1; i++)
     if (trad_frame_addr_p (info->saved_regs, i))
       info->saved_regs[i].addr = (info->prev_sp + info->saved_regs[i].addr);
 

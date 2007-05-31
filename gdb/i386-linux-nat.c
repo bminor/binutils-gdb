@@ -209,7 +209,7 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
   for (i = 0; i < I386_NUM_GREGS; i++)
     regcache_raw_supply (regcache, i, regp + regmap[i]);
 
-  if (I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
+  if (I386_LINUX_ORIG_EAX_REGNUM < gdbarch_num_regs (current_gdbarch))
     regcache_raw_supply (regcache, I386_LINUX_ORIG_EAX_REGNUM,
 			 regp + ORIG_EAX);
 }
@@ -230,7 +230,7 @@ fill_gregset (const struct regcache *regcache,
       regcache_raw_collect (regcache, i, regp + regmap[i]);
 
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
-      && I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
+      && I386_LINUX_ORIG_EAX_REGNUM < gdbarch_num_regs (current_gdbarch))
     regcache_raw_collect (regcache, I386_LINUX_ORIG_EAX_REGNUM,
 			  regp + ORIG_EAX);
 }
@@ -457,7 +457,7 @@ i386_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
     {
       int i;
 
-      for (i = 0; i < NUM_REGS; i++)
+      for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
 	if (regno == -1 || regno == i)
 	  fetch_register (regcache, i);
 
@@ -529,7 +529,7 @@ i386_linux_store_inferior_registers (struct regcache *regcache, int regno)
     {
       int i;
 
-      for (i = 0; i < NUM_REGS; i++)
+      for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
 	if (regno == -1 || regno == i)
 	  store_register (regcache, i);
 

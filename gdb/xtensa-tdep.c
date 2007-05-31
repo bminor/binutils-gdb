@@ -181,7 +181,8 @@ static const char *
 xtensa_register_name (int regnum)
 {
   /* Return the name stored in the register map.  */
-  if (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS)
+  if (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch)
+			      + gdbarch_num_pseudo_regs (current_gdbarch))
     return REGMAP[regnum].name;
 
   /* Invalid register number.  */
@@ -211,7 +212,8 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
     return lookup_pointer_type (builtin_type_void);
 
   /* Return the stored type for all other registers.  */
-  else if (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS)
+  else if (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch)
+				   + gdbarch_num_pseudo_regs (current_gdbarch))
     {
       xtensa_register_t* reg = &REGMAP[regnum];
 
@@ -289,7 +291,10 @@ xtensa_reg_to_regnum (int regnum)
   if (regnum >= 0 && regnum < 16)
     return A0_BASE + regnum;
 
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+  for (i = 0;
+       i < gdbarch_num_regs (current_gdbarch)
+	   + gdbarch_num_pseudo_regs (current_gdbarch);
+       i++)
     if (regnum == REGMAP[i].target_number)
       return i;
 
@@ -491,11 +496,13 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
     }
 
   /* We can always read 'regular' registers.  */
-  if (regnum >= 0 && regnum < NUM_REGS)
+  if (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch))
     regcache_raw_read (regcache, regnum, buffer);
 
   /* Pseudo registers.  */
-  else if (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS)
+  else if (regnum >= 0
+	    && regnum < gdbarch_num_regs (current_gdbarch)
+			+ gdbarch_num_pseudo_regs (current_gdbarch))
     {
       xtensa_register_t *reg = &REGMAP[regnum];
       xtensa_register_type_t type = reg->type;
@@ -574,11 +581,13 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 
   /* We can always write 'core' registers.
      Note: We might have converted Ax->ARy.  */
-  if (regnum >= 0 && regnum < NUM_REGS)
+  if (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch))
     regcache_raw_write (regcache, regnum, buffer);
 
   /* Pseudo registers.  */
-  else if (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS)
+  else if (regnum >= 0
+	   && regnum < gdbarch_num_regs (current_gdbarch)
+		       + gdbarch_num_pseudo_regs (current_gdbarch))
     {
       xtensa_register_t *reg = &REGMAP[regnum];
       xtensa_register_type_t type = reg->type;
@@ -701,7 +710,7 @@ xtensa_register_reggroup_p (struct gdbarch *gdbarch,
   if (group == vector_reggroup || group == xtensa_vectra_reggroup)
     return rg & xtRegisterGroupVectra;
   if (group == save_reggroup || group == restore_reggroup)
-    return (regnum < NUM_REGS
+    return (regnum < gdbarch_num_regs (current_gdbarch)
 	    && (reg->flags & SAVE_REST_FLAGS) == SAVE_REST_VALID);
   else
     return 1;

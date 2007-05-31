@@ -717,7 +717,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
       htab_remove_elt (reg_hash, reg);
 
   /* Assign numbers to the remaining registers and add them to the
-     list of registers.  The new numbers are always above NUM_REGS.
+     list of registers.  The new numbers are always above gdbarch_num_regs.
      Iterate over the features, not the hash table, so that the order
      matches that in the target description.  */
 

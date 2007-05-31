@@ -220,7 +220,10 @@ tui_show_register_group (struct gdbarch *gdbarch, struct reggroup *group,
 
   /* See how many registers must be displayed.  */
   nr_regs = 0;
-  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+  for (regnum = 0;
+       regnum < gdbarch_num_regs (current_gdbarch)
+		+ gdbarch_num_pseudo_regs (current_gdbarch);
+       regnum++)
     {
       /* Must be in the group and have a name.  */
       if (gdbarch_register_reggroup_p (gdbarch, regnum, group)
@@ -256,7 +259,10 @@ tui_show_register_group (struct gdbarch *gdbarch, struct reggroup *group,
 
       /* Now set the register names and values */
       pos = 0;
-      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+      for (regnum = 0;
+	   regnum < gdbarch_num_regs (current_gdbarch)
+		    + gdbarch_num_pseudo_regs (current_gdbarch);
+	   regnum++)
         {
 	  struct tui_gen_win_info *data_item_win;
           struct tui_data_element *data;

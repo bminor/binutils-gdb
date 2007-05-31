@@ -74,7 +74,7 @@ enum gdb_regnum {
 #define STATUS_REGISTER_SIZE	4
 
 /* Number of machine registers.  The only define actually required 
-   is NUM_REGS.  The other definitions are used for documentation
+   is gdbarch_num_regs.  The other definitions are used for documentation
    purposes and code readability.  */
 /* For 26 bit ARM code, a fake copy of the PC is placed in register 25 (PS)
    (and called PS for processor status) so the status bits can be cleared

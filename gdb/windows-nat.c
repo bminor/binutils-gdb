@@ -396,7 +396,7 @@ do_win32_fetch_inferior_registers (struct regcache *regcache, int r)
     regcache_raw_supply (regcache, r, context_offset);
   else
     {
-      for (r = 0; r < NUM_REGS; r++)
+      for (r = 0; r < gdbarch_num_regs (current_gdbarch); r++)
 	do_win32_fetch_inferior_registers (regcache, r);
     }
 
@@ -423,7 +423,7 @@ do_win32_store_inferior_registers (const struct regcache *regcache, int r)
 			  ((char *) &current_thread->context) + mappings[r]);
   else
     {
-      for (r = 0; r < NUM_REGS; r++)
+      for (r = 0; r < gdbarch_num_regs (current_gdbarch); r++)
 	do_win32_store_inferior_registers (regcache, r);
     }
 }
@@ -2256,7 +2256,7 @@ fetch_elf_core_registers (struct regcache *regcache,
       error (_("Core file register section too small (%u bytes)."), core_reg_size);
       return;
     }
-  for (r = 0; r < NUM_REGS; r++)
+  for (r = 0; r < gdbarch_num_regs (current_gdbarch); r++)
     regcache_raw_supply (regcache, r, core_reg_sect + mappings[r]);
 }
 

@@ -910,7 +910,7 @@ m32r_fetch_registers (struct regcache *regcache)
 {
   int regno;
 
-  for (regno = 0; regno < NUM_REGS; regno++)
+  for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
     m32r_fetch_register (regcache, regno);
 }
 
@@ -959,7 +959,7 @@ m32r_store_registers (struct regcache *regcache)
 {
   int regno;
 
-  for (regno = 0; regno < NUM_REGS; regno++)
+  for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
     m32r_store_register (regcache, regno);
 
   registers_changed ();

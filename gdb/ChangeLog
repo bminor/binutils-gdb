@@ -1,5 +1,146 @@
 2007-05-31  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (NUM_REGS): Replace by gdbarch_num_regs.
+	* i386-tdep.c (i386_dbx_reg_to_regnum)
+	(i386_svr4_reg_to_regnum): Likewise.
+	* inf-ptrace.c (inf_ptrace_fetch_registers)
+	(inf_ptrace_store_registers): Likewise.
+	* corelow.c (get_core_registers): Likewise.
+	* i386-linux-nat.c (supply_gregset, fill_gregset)
+	(i386_linux_fetch_inferior_registers)
+	(i386_linux_store_inferior_registers): Likewise.
+	* remote.c (init_remote_state,packet_reg_from_regnum)
+	(packet_reg_from_pnum,process_g_packet,remote_fetch_registers)
+	(remote_prepare_to_store,store_registers_using_G)
+	(remote_store_registers,remote_arch_state): Likewise.
+	* tracepoint.c (encode_actions): Likewise.
+	* mi/mi-main.c (mi_cmd_data_list_register_names)
+	(mi_cmd_data_list_changed_registers,mi_cmd_data_list_register_values)
+	(mi_cmd_data_write_register_values): Likewise.
+	* tui/tui-regs.c (tui_show_register_group)
+	(tui_show_register_group): Likewise.
+	* xtensa-tdep.h (FP_ALIAS): Likewise.
+	* xtensa-tdep.c (xtensa_register_name,xtensa_register_type)
+	(xtensa_reg_to_regnum,xtensa_pseudo_register_read)
+	(xtensa_pseudo_register_write,xtensa_register_reggroup_p): Likewise.
+	* win32-nat.c (do_win32_fetch_inferior_registers)
+	(do_win32_store_inferior_registers,fetch_elf_core_registers
+	* user-regs.h: Likewise (comment).
+	* user-regs.c (user_reg, user_reg_map_name_to_regnum): Likewise.
+	* trad-frame.c (trad_frame_alloc_saved_regs): Likewise.
+	* target-descriptions.h: Likewise (comment).
+	* target-descriptions.c (tdesc_use_registers): Likewise (comment).
+	* target.c (debug_print_register): Likewise.
+	* stack.c (frame_info): Likewise.
+	* stabsread.c (define_symbol): Likewise.
+	* sh64-tdep.c (sh64_do_pseudo_register,sh64_print_register)
+	(sh64_media_print_registers_info)
+	(sh64_compact_print_registers_info): Likewise.
+	* rs6000-tdep.c (rs6000_register_sim_regno): Likewise.
+	* rs6000-nat.c (fetch_register,store_register): Likewise.
+	* remote-sim.c (one2one_register_sim_regno,gdbsim_fetch_register)
+	(gdbsim_fetch_register,gdbsim_store_register): Likewise.
+	* remote-mips.c (mips_fetch_registers,mips_store_registers): Likewise.
+	* remote-m32r-sdi.c (m32r_fetch_registers)
+	(m32r_store_registers): Likewise.
+	* reggroups.c (default_register_reggroup_p): Likewise.
+	* regcache.c (init_regcache_descr,register_size,regcache,regcache_save)
+	(regcache_restore,regcache_dump): Likewise.
+	* monitor.c (monitor_fetch_registers,monitor_store_registers): Likewise.
+	* mips-tdep.c (mips_xfer_register,mips_register_name)
+	(mips_register_reggroup_p,mips_pseudo_register_read)
+	(mips_pseudo_register_write,mips_convert_register_p,mips_register_type)
+	(mips_unwind_pc,mips_unwind_sp,mips_unwind_dummy_id,set_reg_offset)
+	(mips16_scan_prologue,mips_insn16_frame_cache,reset_saved_regs)
+	(mips32_scan_prologue,mips_insn32_frame_cache,read_next_frame_reg)
+	(mips_n32n64_return_value,mips_o32_return_value,mips_o64_return_value)
+	(print_gp_register_row,mips_print_registers_info)
+	(mips_stab_reg_to_regnum,mips_dwarf_dwarf2_ecoff_reg_to_regnum)
+	(mips_register_sim_regno): Likewise.
+	* mips-linux-tdep.c (mips_linux_o32_sigframe_init)
+	(mips_linux_n32n64_sigframe_init): Likewise.
+	* mips-linux-nat.c (mips_linux_register_addr)
+	(mips64_linux_register_addr): Likewise.
+	* findvar.c (value_of_register): Likewise.
+	* infcmd.c (default_print_registers_info,registers_info)
+	(print_vector_info,print_float_info): Likewise.
+	* mips64obsd-tdep.c (mips64obsd_sigframe_init): Likewise.
+	* inf-child.c (inf_child_fetch_inferior_registers): Likewise.
+	* m68k-tdep.c (m68k_dwarf_reg_to_regnum): Likewise.
+	* m68hc11-tdep.c (m68hc11_frame_unwind_cache(: Likewise.
+	* m32r-tdep.c (m32r_frame_unwind_cache): Likewise.
+	* ia64-linux-nat.c (ia64_register_addr,ia64_cannot_fetch_register)
+	(ia64_cannot_store_register,ia64_linux_fetch_registers)
+	(ia64_linux_store_registers): Likewise.
+	* hpux-thread.c (hpux_thread_fetch_registers)
+	(hpux_thread_store_registers): Likewise.
+	* h8300-tdep.c (E_PSEUDO_CCR_REGNUM,E_PSEUDO_EXR_REGNUM)
+	(h8300_init_frame_cache,h8300_frame_cache,h8300_frame_prev_register)
+	(h8300_register_type): Likewise.
+	* dwarf2-frame.c (dwarf2_frame_cache)
+	(dwarf2_frame_state_alloc_regs): Likewise.
+	* cris-tdep.c (cris_register_size,cris_cannot_fetch_register)
+	(cris_cannot_store_register,crisv32_cannot_fetch_register)
+	(crisv32_cannot_store_register,cris_register_name): Likewise.
+	* avr-tdep.c (avr_frame_unwind_cache): Likewise.
+	* arch-utils.c (legacy_register_sim_regno)
+	(legacy_virtual_frame_pointer): Likewise.
+	* arm-tdep.c (arm_make_prologue_cache,arm_register_sim_regno):Likewise.
+	* arm-tdep.h: Likewise (comment).
+	* frv-tdep.c (frv_register_sim_regno): Likewise.
+	* m68klinux-nat.c (old_fetch_inferior_registers)
+	(old_store_inferior_registers): Likewise.
+	* m32c-tdep.c (m32c_virtual_frame_pointer): Likewise.
+	* irix5-nat.c (fetch_core_registers): Likewise.
+	* hppa-tdep.c (hppa_frame_cache): Likewise.
+	* hppa-linux-nat.c (hppa_linux_register_addr)
+	(hppa_linux_fetch_inferior_registers)
+	(hppa_linux_store_inferior_registers): Likewise.
+	* hppa-hpux-nat.c (hppa_hpux_fetch_inferior_registers)
+	(hppa_hpux_store_inferior_registers): Likewise.
+	* amd64-nat.c (amd64_native_gregset_reg_offset)
+	(amd64_supply_native_gregset,amd64_collect_native_gregset): Likewise.
+	* dbug-rom.c (dbug_regname): Likewise.
+	* m68hc11-tdep.c (m68hc11_frame_unwind_cache)
+	(HARD_PAGE_REGNUM (comment)): Likewise.
+	* gdbarch.sh (NUM_PSEUDO_REGS): Replace by gdbarch_num_pseudo_regs.
+	* i386-tdep.c (i386_dbx_reg_to_regnum)
+	(i386_svr4_reg_to_regnum): Likewise.
+	* mi/mi-main.c (mi_cmd_data_list_register_names)
+	(mi_cmd_data_list_changed_registers,mi_cmd_data_list_register_values)
+	(mi_cmd_data_write_register_values): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* tui/tui-regs.c (tui_show_register_group): Likewise.
+	* xtensa-tdep.h (FP_ALIAS): Likewise.
+	* user-regs.h: Likewise (comment).
+	* user-regs.c (user_reg, user_reg_map_name_to_regnum): Likewise.
+	* trad-frame.c (trad_frame_alloc_saved_regs): Likewise.
+	* target-descriptions.h: Likewise (comment).
+	* target.c (debug_print_register): Likewise.
+	* stack.c (frame_info): Likewise.
+	* stabsread.c (define_symbol): Likewise.
+	* sh64-tdep.c (sh64_print_register,sh64_media_print_registers_info)
+	(sh64_compact_print_registers_info): Likewise.
+	* rs6000-tdep.c (rs6000_register_sim_regno): Likewise.
+	* regcache.c (init_regcache_descr,register_size,regcache,regcache_save
+	(regcache_restore,regcache_dump): Likewise.
+	* mips-tdep.c (print_gp_register_row,mips_print_registers_info)
+	(mips_dwarf_dwarf2_ecoff_reg_to_regnum)
+	(mips_stab_reg_to_regnum): Likewise.
+	* findvar.c (value_of_register): Likewise.
+	* infcmd.c (default_print_registers_info,registers_info)
+	(print_vector_info,print_float_info): Likewise.
+	* m68k-tdep.c (m68k_dwarf_reg_to_regnum): Likewise.
+	* h8300-tdep.c (h8300_register_type): Likewise.
+	* dwarf2-frame.c (dwarf2_frame_cache): Likewise.
+	* frame.h (SIZEOF_FRAME_SAVED_REGS): Likewise.
+	* xtensa-tdep.c (xtensa_register_type,xtensa_reg_to_regnum)
+	(xtensa_pseudo_register_read,xtensa_pseudo_register_write): Likewise.
+	* parse.c: Remove comment.
+	* gdbarch.c, gdbarch.h: Regenerate
+
+2007-05-31  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (CANNOT_FETCH_REGISTER): Replace by
 	gdbarch_cannot_fetch_register.
 	* alpha-nat.c (fetch_osf_core_registers): Likewise.

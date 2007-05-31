@@ -228,7 +228,7 @@ fetch_register (struct regcache *regcache, int regno)
   /* Bogus register number. */
   else if (nr < 0)
     {
-      if (regno >= NUM_REGS)
+      if (regno >= gdbarch_num_regs (current_gdbarch))
 	fprintf_unfiltered (gdb_stderr,
 			    "gdb error: register no %d not implemented.\n",
 			    regno);
@@ -288,7 +288,7 @@ store_register (const struct regcache *regcache, int regno)
   /* Bogus register number. */
   else if (nr < 0)
     {
-      if (regno >= NUM_REGS)
+      if (regno >= gdbarch_num_regs (current_gdbarch))
 	fprintf_unfiltered (gdb_stderr,
 			    "gdb error: register no %d not implemented.\n",
 			    regno);

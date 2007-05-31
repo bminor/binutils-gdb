@@ -91,23 +91,33 @@ mips64obsd_sigframe_init (const struct tramp_frame *self,
 
   /* We find the appropriate instance of `struct sigcontext' at a
      fixed offset in the signal frame.  */
-  sp = frame_unwind_register_signed (next_frame, MIPS_SP_REGNUM + NUM_REGS);
+  sp = frame_unwind_register_signed (next_frame,
+				     MIPS_SP_REGNUM
+				     + gdbarch_num_regs (current_gdbarch));
   sigcontext_addr = sp + 32;
 
   /* PC.  */
   regnum = mips_regnum (gdbarch)->pc;
-  trad_frame_set_reg_addr (cache, regnum + NUM_REGS, sigcontext_addr + 16);
+  trad_frame_set_reg_addr (cache,
+			   regnum + gdbarch_num_regs (current_gdbarch),
+			    sigcontext_addr + 16);
 
   /* GPRs.  */
   for (regnum = MIPS_AT_REGNUM, addr = sigcontext_addr + 32;
        regnum <= MIPS_RA_REGNUM; regnum++, addr += 8)
-    trad_frame_set_reg_addr (cache, regnum + NUM_REGS, addr);
+    trad_frame_set_reg_addr (cache,
+			     regnum + gdbarch_num_regs (current_gdbarch),
+			     addr);
 
   /* HI and LO.  */
   regnum = mips_regnum (gdbarch)->lo;
-  trad_frame_set_reg_addr (cache, regnum + NUM_REGS, sigcontext_addr + 280);
+  trad_frame_set_reg_addr (cache,
+			   regnum + gdbarch_num_regs (current_gdbarch),
+			   sigcontext_addr + 280);
   regnum = mips_regnum (gdbarch)->hi;
-  trad_frame_set_reg_addr (cache, regnum + NUM_REGS, sigcontext_addr + 288);
+  trad_frame_set_reg_addr (cache,
+			   regnum + gdbarch_num_regs (current_gdbarch),
+			   sigcontext_addr + 288);
 
   /* TODO: Handle the floating-point registers.  */
 

@@ -908,7 +908,7 @@ arm_make_prologue_cache (struct frame_info *next_frame)
 
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
-  for (reg = 0; reg < NUM_REGS; reg++)
+  for (reg = 0; reg < gdbarch_num_regs (current_gdbarch); reg++)
     if (trad_frame_addr_p (cache->saved_regs, reg))
       cache->saved_regs[reg].addr += cache->prev_sp;
 
@@ -1434,7 +1434,7 @@ static int
 arm_register_sim_regno (int regnum)
 {
   int reg = regnum;
-  gdb_assert (reg >= 0 && reg < NUM_REGS);
+  gdb_assert (reg >= 0 && reg < gdbarch_num_regs (current_gdbarch));
 
   if (regnum >= ARM_WR0_REGNUM && regnum <= ARM_WR15_REGNUM)
     return regnum - ARM_WR0_REGNUM + SIM_ARM_IWMMXT_COP0R0_REGNUM;

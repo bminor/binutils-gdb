@@ -1059,7 +1059,8 @@ frame_info (char *addr_exp, int from_tty)
       }
 
     count = 0;
-    numregs = NUM_REGS + NUM_PSEUDO_REGS;
+    numregs = gdbarch_num_regs (current_gdbarch)
+	      + gdbarch_num_pseudo_regs (current_gdbarch);
     for (i = 0; i < numregs; i++)
       if (i != SP_REGNUM
 	  && gdbarch_register_reggroup_p (current_gdbarch, i, all_reggroup))

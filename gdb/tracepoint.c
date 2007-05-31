@@ -1565,7 +1565,7 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
-		  for (i = 0; i < NUM_REGS; i++)
+		  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
 		    add_register (collect, i);
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}

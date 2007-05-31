@@ -269,7 +269,7 @@ struct remote_arch_state
   long sizeof_g_packet;
 
   /* Description of the remote protocol registers indexed by REGNUM
-     (making an array NUM_REGS in size).  */
+     (making an array gdbarch_num_regs in size).  */
   struct packet_reg *regs;
 
   /* This is the size (in chars) of the first response to the ``g''
@@ -336,8 +336,10 @@ init_remote_state (struct gdbarch *gdbarch)
 
   /* Use the architecture to build a regnum<->pnum table, which will be
      1:1 unless a feature set specifies otherwise.  */
-  rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS, struct packet_reg);
-  for (regnum = 0; regnum < NUM_REGS; regnum++)
+  rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch,
+				      gdbarch_num_regs (current_gdbarch),
+				      struct packet_reg);
+  for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
     {
       struct packet_reg *r = &rsa->regs[regnum];
 
@@ -354,8 +356,11 @@ init_remote_state (struct gdbarch *gdbarch)
      with a remote protocol number, in order of ascending protocol
      number.  */
 
-  remote_regs = alloca (NUM_REGS * sizeof (struct packet_reg *));
-  for (num_remote_regs = 0, regnum = 0; regnum < NUM_REGS; regnum++)
+  remote_regs = alloca (gdbarch_num_regs (current_gdbarch) 
+			* sizeof (struct packet_reg *));
+  for (num_remote_regs = 0, regnum = 0;
+       regnum < gdbarch_num_regs (current_gdbarch);
+       regnum++)
     if (rsa->regs[regnum].pnum != -1)
       remote_regs[num_remote_regs++] = &rsa->regs[regnum];
 
@@ -423,7 +428,7 @@ get_remote_packet_size (void)
 static struct packet_reg *
 packet_reg_from_regnum (struct remote_arch_state *rsa, long regnum)
 {
-  if (regnum < 0 && regnum >= NUM_REGS)
+  if (regnum < 0 && regnum >= gdbarch_num_regs (current_gdbarch))
     return NULL;
   else
     {
@@ -437,7 +442,7 @@ static struct packet_reg *
 packet_reg_from_pnum (struct remote_arch_state *rsa, LONGEST pnum)
 {
   int i;
-  for (i = 0; i < NUM_REGS; i++)
+  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
     {
       struct packet_reg *r = &rsa->regs[i];
       if (r->pnum == pnum)
@@ -3611,7 +3616,7 @@ process_g_packet (struct regcache *regcache)
     {
       rsa->sizeof_g_packet = buf_len / 2;
 
-      for (i = 0; i < NUM_REGS; i++)
+      for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
 	{
 	  if (rsa->regs[i].pnum == -1)
 	    continue;
@@ -3649,7 +3654,7 @@ process_g_packet (struct regcache *regcache)
 
   {
     int i;
-    for (i = 0; i < NUM_REGS; i++)
+    for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
       {
 	struct packet_reg *r = &rsa->regs[i];
 	if (r->in_g_packet)
@@ -3716,7 +3721,7 @@ remote_fetch_registers (struct regcache *regcache, int regnum)
 
   fetch_registers_using_g (regcache);
 
-  for (i = 0; i < NUM_REGS; i++)
+  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
     if (!rsa->regs[i].in_g_packet)
       if (!fetch_register_using_p (regcache, &rsa->regs[i]))
 	{
@@ -3742,7 +3747,7 @@ remote_prepare_to_store (struct regcache *regcache)
     case PACKET_DISABLE:
     case PACKET_SUPPORT_UNKNOWN:
       /* Make sure all the necessary registers are cached.  */
-      for (i = 0; i < NUM_REGS; i++)
+      for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
 	if (rsa->regs[i].in_g_packet)
 	  regcache_raw_read (regcache, rsa->regs[i].regnum, buf);
       break;
@@ -3807,7 +3812,7 @@ store_registers_using_G (const struct regcache *regcache)
     int i;
     regs = alloca (rsa->sizeof_g_packet);
     memset (regs, 0, rsa->sizeof_g_packet);
-    for (i = 0; i < NUM_REGS; i++)
+    for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
       {
 	struct packet_reg *r = &rsa->regs[i];
 	if (r->in_g_packet)
@@ -3862,7 +3867,7 @@ remote_store_registers (struct regcache *regcache, int regnum)
 
   store_registers_using_G (regcache);
 
-  for (i = 0; i < NUM_REGS; i++)
+  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
     if (!rsa->regs[i].in_g_packet)
       if (!store_register_using_P (regcache, &rsa->regs[i]))
 	/* See above for why we do not issue an error here.  */

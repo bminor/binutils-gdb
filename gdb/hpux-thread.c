@@ -275,7 +275,7 @@ hpux_thread_fetch_registers (struct regcache *regcache, int regno)
   if (regno == -1)
     {
       first_regno = 0;
-      last_regno = NUM_REGS - 1;
+      last_regno = gdbarch_num_regs (current_gdbarch) - 1;
     }
   else
     {
@@ -337,7 +337,7 @@ hpux_thread_store_registers (struct regcache *regcache, int regno)
   if (regno == -1)
     {
       first_regno = 0;
-      last_regno = NUM_REGS - 1;
+      last_regno = gdbarch_num_regs (current_gdbarch) - 1;
     }
   else
     {

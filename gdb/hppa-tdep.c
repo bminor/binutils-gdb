@@ -2180,7 +2180,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   {
     /* Convert all the offsets into addresses.  */
     int reg;
-    for (reg = 0; reg < NUM_REGS; reg++)
+    for (reg = 0; reg < gdbarch_num_regs (current_gdbarch); reg++)
       {
 	if (trad_frame_addr_p (cache->saved_regs, reg))
 	  cache->saved_regs[reg].addr += cache->base;

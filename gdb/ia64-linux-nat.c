@@ -308,7 +308,7 @@ ia64_register_addr (int regno)
 {
   CORE_ADDR addr;
 
-  if (regno < 0 || regno >= NUM_REGS)
+  if (regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
     error (_("Invalid register number %d."), regno);
 
   if (u_offsets[regno] == -1)
@@ -322,7 +322,9 @@ ia64_register_addr (int regno)
 static int
 ia64_cannot_fetch_register (int regno)
 {
-  return regno < 0 || regno >= NUM_REGS || u_offsets[regno] == -1;
+  return regno < 0
+	 || regno >= gdbarch_num_regs (current_gdbarch)
+	 || u_offsets[regno] == -1;
 }
 
 static int
@@ -357,7 +359,9 @@ ia64_cannot_store_register (int regno)
      were previously read from the inferior process to be written
      back.)  */
 
-  return regno < 0 || regno >= NUM_REGS || u_offsets[regno] == -1
+  return regno < 0
+	 || regno >= gdbarch_num_regs (current_gdbarch)
+	 || u_offsets[regno] == -1
          || regno == IA64_BSPSTORE_REGNUM;
 }
 
@@ -714,7 +718,7 @@ static void
 ia64_linux_fetch_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < NUM_REGS; regnum++)
+    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
       ia64_linux_fetch_register (regcache, regnum);
   else
     ia64_linux_fetch_register (regcache, regnum);
@@ -767,7 +771,7 @@ static void
 ia64_linux_store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < NUM_REGS; regnum++)
+    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
       ia64_linux_store_register (regcache, regnum);
   else
     ia64_linux_store_register (regcache, regnum);

@@ -163,7 +163,7 @@ struct dwarf2_frame_state
    which is unused in that case.  */
 #define cfa_exp_len cfa_reg
 
-/* Assert that the register set RS is large enough to store NUM_REGS
+/* Assert that the register set RS is large enough to store gdbarch_num_regs
    columns.  If necessary, enlarge the register set.  */
 
 static void
@@ -808,7 +808,8 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct cleanup *old_chain;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  const int num_regs = NUM_REGS + NUM_PSEUDO_REGS;
+  const int num_regs = gdbarch_num_regs (current_gdbarch)
+		       + gdbarch_num_pseudo_regs (current_gdbarch);
   struct dwarf2_frame_cache *cache;
   struct dwarf2_frame_state *fs;
   struct dwarf2_fde *fde;
@@ -900,7 +901,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
      correspond to a real register.  If it doesn't correspond to a
      real register, or if we shouldn't treat it as such,
      DWARF2_REG_TO_REGNUM should be defined to return a number outside
-     the range [0, NUM_REGS).  */
+     the range [0, gdbarch_num_regs).  */
   {
     int column;		/* CFI speak for "register number".  */
 

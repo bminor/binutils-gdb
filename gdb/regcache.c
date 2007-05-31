@@ -94,8 +94,11 @@ init_regcache_descr (struct gdbarch *gdbarch)
   /* Total size of the register space.  The raw registers are mapped
      directly onto the raw register cache while the pseudo's are
      either mapped onto raw-registers or memory.  */
-  descr->nr_cooked_registers = NUM_REGS + NUM_PSEUDO_REGS;
-  descr->sizeof_cooked_register_valid_p = NUM_REGS + NUM_PSEUDO_REGS;
+  descr->nr_cooked_registers = gdbarch_num_regs (current_gdbarch)
+			       + gdbarch_num_pseudo_regs (current_gdbarch);
+  descr->sizeof_cooked_register_valid_p = gdbarch_num_regs (current_gdbarch)
+					  + gdbarch_num_pseudo_regs 
+					      (current_gdbarch);
 
   /* Fill in a table of register types.  */
   descr->register_type
@@ -105,12 +108,12 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
-  descr->nr_raw_registers = NUM_REGS;
+  descr->nr_raw_registers = gdbarch_num_regs (current_gdbarch);
 
   /* FIXME: cagney/2002-08-13: Overallocate the register_valid_p
      array.  This pretects GDB from erant code that accesses elements
-     of the global register_valid_p[] array in the range [NUM_REGS
-     .. NUM_REGS + NUM_PSEUDO_REGS).  */
+     of the global register_valid_p[] array in the range 
+     [gdbarch_num_regs .. gdbarch_num_regs + gdbarch_num_pseudo_regs).  */
   descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
 
   /* Lay out the register cache.
@@ -172,7 +175,9 @@ register_size (struct gdbarch *gdbarch, int regnum)
 {
   struct regcache_descr *descr = regcache_descr (gdbarch);
   int size;
-  gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
+  gdb_assert (regnum >= 0
+	      && regnum < (gdbarch_num_regs (current_gdbarch)
+			   + gdbarch_num_pseudo_regs (current_gdbarch)));
   size = descr->sizeof_register[regnum];
   return size;
 }
@@ -183,8 +188,8 @@ struct regcache
 {
   struct regcache_descr *descr;
   /* The register buffers.  A read-only register cache can hold the
-     full [0 .. NUM_REGS + NUM_PSEUDO_REGS) while a read/write
-     register cache can only hold [0 .. NUM_REGS).  */
+     full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a read/write
+     register cache can only hold [0 .. gdbarch_num_regs).  */
   gdb_byte *registers;
   /* Register cache status:
      register_valid_p[REG] == 0 if REG value is not in the cache
@@ -270,8 +275,8 @@ regcache_save (struct regcache *dst, regcache_cooked_read_ftype *cooked_read,
   memset (dst->registers, 0, dst->descr->sizeof_cooked_registers);
   memset (dst->register_valid_p, 0, dst->descr->sizeof_cooked_register_valid_p);
   /* Copy over any registers (identified by their membership in the
-     save_reggroup) and mark them as valid.  The full [0 .. NUM_REGS +
-     NUM_PSEUDO_REGS) range is checked since some architectures need
+     save_reggroup) and mark them as valid.  The full [0 .. gdbarch_num_regs +
+     gdbarch_num_pseudo_regs) range is checked since some architectures need
      to save/restore `cooked' registers that live in memory.  */
   for (regnum = 0; regnum < dst->descr->nr_cooked_registers; regnum++)
     {
@@ -300,8 +305,8 @@ regcache_restore (struct regcache *dst,
      doesn't make much sense.  */
   gdb_assert (!dst->readonly_p);
   /* Copy over any registers, being careful to only restore those that
-     were both saved and need to be restored.  The full [0 .. NUM_REGS
-     + NUM_PSEUDO_REGS) range is checked since some architectures need
+     were both saved and need to be restored.  The full [0 .. gdbarch_num_regs
+     + gdbarch_num_pseudo_regs) range is checked since some architectures need
      to save/restore `cooked' registers that live in memory.  */
   for (regnum = 0; regnum < dst->descr->nr_cooked_registers; regnum++)
     {
@@ -1005,12 +1010,15 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 		      regcache->descr->sizeof_raw_registers);
   fprintf_unfiltered (file, "sizeof_raw_register_valid_p %ld\n",
 		      regcache->descr->sizeof_raw_register_valid_p);
-  fprintf_unfiltered (file, "NUM_REGS %d\n", NUM_REGS);
-  fprintf_unfiltered (file, "NUM_PSEUDO_REGS %d\n", NUM_PSEUDO_REGS);
+  fprintf_unfiltered (file, "gdbarch_num_regs %d\n", 
+		      gdbarch_num_regs (current_gdbarch));
+  fprintf_unfiltered (file, "gdbarch_num_pseudo_regs %d\n",
+		      gdbarch_num_pseudo_regs (current_gdbarch));
 #endif
 
   gdb_assert (regcache->descr->nr_cooked_registers
-	      == (NUM_REGS + NUM_PSEUDO_REGS));
+	      == (gdbarch_num_regs (current_gdbarch)
+		  + gdbarch_num_pseudo_regs (current_gdbarch)));
 
   for (regnum = -1; regnum < regcache->descr->nr_cooked_registers; regnum++)
     {
@@ -1036,10 +1044,11 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
       /* Relative number.  */
       if (regnum < 0)
 	fprintf_unfiltered (file, " %4s", "Rel");
-      else if (regnum < NUM_REGS)
+      else if (regnum < gdbarch_num_regs (current_gdbarch))
 	fprintf_unfiltered (file, " %4d", regnum);
       else
-	fprintf_unfiltered (file, " %4d", (regnum - NUM_REGS));
+	fprintf_unfiltered (file, " %4d",
+			    (regnum - gdbarch_num_regs (current_gdbarch)));
 
       /* Offset.  */
       if (regnum < 0)

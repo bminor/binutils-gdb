@@ -47,8 +47,7 @@
 #include "parser-defs.h"
 #include "gdbcmd.h"
 #include "symfile.h"		/* for overlay functions */
-#include "inferior.h"		/* for NUM_PSEUDO_REGS.  NOTE: replace 
-				   with "gdbarch.h" when appropriate.  */
+#include "inferior.h"
 #include "doublest.h"
 #include "gdb_assert.h"
 #include "block.h"

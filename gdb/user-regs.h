@@ -31,7 +31,8 @@
    specific registers are present when the architecture is selected.
 
    These registers are assigned register numbers outside the
-   architecture's register range [0 .. NUM_REGS + NUM_PSEUDO_REGS).
+   architecture's register range
+   [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs].
    Their values should be constructed using per-frame information.  */
 
 /* TODO: cagney/2003-06-27: Need to think more about how these

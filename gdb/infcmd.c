@@ -1599,7 +1599,8 @@ default_print_registers_info (struct gdbarch *gdbarch,
 			      int regnum, int print_all)
 {
   int i;
-  const int numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  const int numregs = gdbarch_num_regs (current_gdbarch)
+		      + gdbarch_num_pseudo_regs (current_gdbarch);
   gdb_byte buffer[MAX_REGISTER_SIZE];
 
   for (i = 0; i < numregs; i++)
@@ -1743,7 +1744,8 @@ registers_info (char *addr_exp, int fpregs)
 	int regnum = strtol (start, &endptr, 0);
 	if (endptr == end
 	    && regnum >= 0
-	    && regnum < NUM_REGS + NUM_PSEUDO_REGS)
+	    && regnum < gdbarch_num_regs (current_gdbarch)
+			+ gdbarch_num_pseudo_regs (current_gdbarch))
 	  {
 	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
 					  frame, regnum, fpregs);
@@ -1767,7 +1769,10 @@ registers_info (char *addr_exp, int fpregs)
 	if (group != NULL)
 	  {
 	    int regnum;
-	    for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+	    for (regnum = 0;
+		 regnum < gdbarch_num_regs (current_gdbarch)
+			  + gdbarch_num_pseudo_regs (current_gdbarch);
+		 regnum++)
 	      {
 		if (gdbarch_register_reggroup_p (current_gdbarch, regnum,
 						 group))
@@ -1807,7 +1812,10 @@ print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
       int regnum;
       int printed_something = 0;
 
-      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+      for (regnum = 0;
+	   regnum < gdbarch_num_regs (current_gdbarch)
+		    + gdbarch_num_pseudo_regs (current_gdbarch);
+	   regnum++)
 	{
 	  if (gdbarch_register_reggroup_p (gdbarch, regnum, vector_reggroup))
 	    {
@@ -2024,7 +2032,10 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
       int regnum;
       int printed_something = 0;
 
-      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+      for (regnum = 0;
+	   regnum < gdbarch_num_regs (current_gdbarch)
+		    + gdbarch_num_pseudo_regs (current_gdbarch);
+	   regnum++)
 	{
 	  if (gdbarch_register_reggroup_p (gdbarch, regnum, float_reggroup))
 	    {

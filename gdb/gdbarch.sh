@@ -429,12 +429,12 @@ f:TARGET_VIRTUAL_FRAME_POINTER:void:virtual_frame_pointer:CORE_ADDR pc, int *fra
 M::void:pseudo_register_read:struct regcache *regcache, int cookednum, gdb_byte *buf:regcache, cookednum, buf
 M::void:pseudo_register_write:struct regcache *regcache, int cookednum, const gdb_byte *buf:regcache, cookednum, buf
 #
-v:=:int:num_regs:::0:-1
+v::int:num_regs:::0:-1
 # This macro gives the number of pseudo-registers that live in the
 # register namespace but do not get fetched or stored on the target.
 # These pseudo-registers may be aliases for other registers,
 # combinations of other registers, or they may be computed by GDB.
-v:=:int:num_pseudo_regs:::0:0::0
+v::int:num_pseudo_regs:::0:0::0
 
 # GDB's standard (or well known) register numbers.  These can map onto
 # a real register or a pseudo (computed) register or not be defined at

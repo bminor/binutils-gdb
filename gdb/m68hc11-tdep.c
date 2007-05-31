@@ -96,7 +96,7 @@ enum insn_return_kind {
 /* 68HC12 page number register.
    Note: to keep a compatibility with gcc register naming, we must
    not have to rename FP and other soft registers.  The page register
-   is a real hard register and must therefore be counted by NUM_REGS.
+   is a real hard register and must therefore be counted by gdbarch_num_regs.
    For this it has the same number as Z register (which is not used).  */
 #define HARD_PAGE_REGNUM 8
 #define M68HC11_LAST_HARD_REG (HARD_PAGE_REGNUM)
@@ -856,7 +856,10 @@ m68hc11_frame_unwind_cache (struct frame_info *next_frame,
 
   /* Adjust all the saved registers so that they contain addresses and not
      offsets.  */
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS - 1; i++)
+  for (i = 0;
+       i < gdbarch_num_regs (current_gdbarch)
+	   + gdbarch_num_pseudo_regs (current_gdbarch) - 1;
+       i++)
     if (trad_frame_addr_p (info->saved_regs, i))
       {
         info->saved_regs[i].addr += this_base;

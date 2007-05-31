@@ -66,10 +66,10 @@ amd64_native_gregset_reg_offset (int regnum)
       num_regs = amd64_native_gregset32_num_regs;
     }
 
-  if (num_regs > NUM_REGS)
-    num_regs = NUM_REGS;
+  if (num_regs > gdbarch_num_regs (current_gdbarch))
+    num_regs = gdbarch_num_regs (current_gdbarch);
 
-  if (regnum < num_regs && regnum < NUM_REGS)
+  if (regnum < num_regs && regnum < gdbarch_num_regs (current_gdbarch))
     return reg_offset[regnum];
 
   return -1;
@@ -100,8 +100,8 @@ amd64_supply_native_gregset (struct regcache *regcache,
   if (gdbarch_ptr_bit (gdbarch) == 32)
     num_regs = amd64_native_gregset32_num_regs;
 
-  if (num_regs > NUM_REGS)
-    num_regs = NUM_REGS;
+  if (num_regs > gdbarch_num_regs (current_gdbarch))
+    num_regs = gdbarch_num_regs (current_gdbarch);
 
   for (i = 0; i < num_regs; i++)
     {
@@ -147,8 +147,8 @@ amd64_collect_native_gregset (const struct regcache *regcache,
 	}
     }
 
-  if (num_regs > NUM_REGS)
-    num_regs = NUM_REGS;
+  if (num_regs > gdbarch_num_regs (current_gdbarch))
+    num_regs = gdbarch_num_regs (current_gdbarch);
 
   for (i = 0; i < num_regs; i++)
     {

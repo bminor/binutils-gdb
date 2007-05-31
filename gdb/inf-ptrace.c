@@ -664,7 +664,7 @@ static void
 inf_ptrace_fetch_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < NUM_REGS; regnum++)
+    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
       inf_ptrace_fetch_register (regcache, regnum);
   else
     inf_ptrace_fetch_register (regcache, regnum);
@@ -717,7 +717,7 @@ void
 inf_ptrace_store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < NUM_REGS; regnum++)
+    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
       inf_ptrace_store_register (regcache, regnum);
   else
     inf_ptrace_store_register (regcache, regnum);

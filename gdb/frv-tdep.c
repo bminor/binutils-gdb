@@ -394,7 +394,7 @@ frv_register_sim_regno (int reg)
       H_SPR_FNER1,		/* fner1_regnum */
     };
 
-  gdb_assert (reg >= 0 && reg < NUM_REGS);
+  gdb_assert (reg >= 0 && reg < gdbarch_num_regs (current_gdbarch));
 
   if (first_gpr_regnum <= reg && reg <= last_gpr_regnum)
     return reg - first_gpr_regnum + SIM_FRV_GR0_REGNUM;

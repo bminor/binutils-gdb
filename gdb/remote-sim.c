@@ -274,7 +274,7 @@ int
 one2one_register_sim_regno (int regnum)
 {
   /* Only makes sense to supply raw registers.  */
-  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
+  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch));
   return regnum;
 }
 
@@ -283,7 +283,7 @@ gdbsim_fetch_register (struct regcache *regcache, int regno)
 {
   if (regno == -1)
     {
-      for (regno = 0; regno < NUM_REGS; regno++)
+      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
 	gdbsim_fetch_register (regcache, regno);
       return;
     }
@@ -308,7 +308,7 @@ gdbsim_fetch_register (struct regcache *regcache, int regno)
 	static int warn_user = 1;
 	char buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
-	gdb_assert (regno >= 0 && regno < NUM_REGS);
+	gdb_assert (regno >= 0 && regno < gdbarch_num_regs (current_gdbarch));
 	memset (buf, 0, MAX_REGISTER_SIZE);
 	nr_bytes = sim_fetch_register (gdbsim_desc,
 				       REGISTER_SIM_REGNO (regno),
@@ -345,7 +345,7 @@ gdbsim_store_register (struct regcache *regcache, int regno)
 {
   if (regno == -1)
     {
-      for (regno = 0; regno < NUM_REGS; regno++)
+      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
 	gdbsim_store_register (regcache, regno);
       return;
     }

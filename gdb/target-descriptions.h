@@ -48,7 +48,7 @@ void target_clear_description (void);
 const struct target_desc *target_current_description (void);
 
 /* Record architecture-specific functions to call for pseudo-register
-   support.  If tdesc_use_registers is called and NUM_PSEUDO_REGS
+   support.  If tdesc_use_registers is called and gdbarch_num_pseudo_regs
    is greater than zero, then these should be called as well.
    They are equivalent to the gdbarch methods with similar names,
    except that they will only be called for pseudo registers.  */
@@ -66,10 +66,10 @@ void set_tdesc_pseudo_register_reggroup_p
 /* Update GDBARCH to use the target description for registers.  Fixed
    register assignments are taken from EARLY_DATA, which is freed.
    All registers which have not been assigned fixed numbers are given
-   numbers above the current value of NUM_REGS.  NUM_REGS and various
-   register-related predicates are updated to refer to the target
-   description.  This function should only be called from the
-   architecture's gdbarch initialization routine, and only after
+   numbers above the current value of gdbarch_num_regs.
+   gdbarch_num_regs and various  register-related predicates are updated to
+   refer to the target description.  This function should only be called from
+   the architecture's gdbarch initialization routine, and only after
    successfully validating the required registers.  */
 
 void tdesc_use_registers (struct gdbarch *gdbarch,

@@ -1279,7 +1279,7 @@ monitor_fetch_registers (struct regcache *regcache, int regno)
 	  return;
 	}
 
-      for (regno = 0; regno < NUM_REGS; regno++)
+      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
 	monitor_fetch_register (regcache, regno);
     }
   else
@@ -1356,7 +1356,7 @@ monitor_store_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  for (regno = 0; regno < NUM_REGS; regno++)
+  for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
     monitor_store_register (regcache, regno);
 }
 

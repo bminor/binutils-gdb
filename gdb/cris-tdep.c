@@ -1549,7 +1549,7 @@ cris_register_size (int regno)
       /* Special register not applicable to this CRIS version.  */
       return 0;
     }
-  else if (regno >= PC_REGNUM && regno < NUM_REGS)
+  else if (regno >= PC_REGNUM && regno < gdbarch_num_regs (current_gdbarch))
     {
       /* This will apply to CRISv32 only where there are additional registers
 	 after the special registers (pseudo PC and support registers).  */
@@ -1566,7 +1566,7 @@ cris_register_size (int regno)
 static int
 cris_cannot_fetch_register (int regno)
 {
-  return ((regno < 0 || regno >= NUM_REGS) 
+  return ((regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
           || (cris_register_size (regno) == 0));
 }
 
@@ -1582,7 +1582,9 @@ cris_cannot_store_register (int regno)
      3. Those registers to which a write has no effect.
   */
 
-  if (regno < 0 || regno >= NUM_REGS || cris_register_size (regno) == 0)
+  if (regno < 0
+      || regno >= gdbarch_num_regs (current_gdbarch)
+      || cris_register_size (regno) == 0)
     /* Not implemented.  */
     return 1;
 
@@ -1606,7 +1608,7 @@ cris_cannot_store_register (int regno)
 static int
 crisv32_cannot_fetch_register (int regno)
 {
-  return ((regno < 0 || regno >= NUM_REGS) 
+  return ((regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
           || (cris_register_size (regno) == 0));
 }
 
@@ -1622,7 +1624,9 @@ crisv32_cannot_store_register (int regno)
      3. Those registers to which a write has no effect.
   */
 
-  if (regno < 0 || regno >= NUM_REGS || cris_register_size (regno) == 0)
+  if (regno < 0
+      || regno >= gdbarch_num_regs (current_gdbarch)
+      || cris_register_size (regno) == 0)
     /* Not implemented.  */
     return 1;
 
@@ -1759,7 +1763,7 @@ cris_register_name (int regno)
       /* General register.  */
       return cris_genreg_names[regno];
     }
-  else if (regno >= NUM_GENREGS && regno < NUM_REGS)
+  else if (regno >= NUM_GENREGS && regno < gdbarch_num_regs (current_gdbarch))
     {
       return cris_special_register_name (regno);
     }

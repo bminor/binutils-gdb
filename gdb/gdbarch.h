@@ -297,12 +297,6 @@ extern void set_gdbarch_pseudo_register_write (struct gdbarch *gdbarch, gdbarch_
 
 extern int gdbarch_num_regs (struct gdbarch *gdbarch);
 extern void set_gdbarch_num_regs (struct gdbarch *gdbarch, int num_regs);
-#if !defined (GDB_TM_FILE) && defined (NUM_REGS)
-#error "Non multi-arch definition of NUM_REGS"
-#endif
-#if !defined (NUM_REGS)
-#define NUM_REGS (gdbarch_num_regs (current_gdbarch))
-#endif
 
 /* This macro gives the number of pseudo-registers that live in the
    register namespace but do not get fetched or stored on the target.
@@ -311,12 +305,6 @@ extern void set_gdbarch_num_regs (struct gdbarch *gdbarch, int num_regs);
 
 extern int gdbarch_num_pseudo_regs (struct gdbarch *gdbarch);
 extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo_regs);
-#if !defined (GDB_TM_FILE) && defined (NUM_PSEUDO_REGS)
-#error "Non multi-arch definition of NUM_PSEUDO_REGS"
-#endif
-#if !defined (NUM_PSEUDO_REGS)
-#define NUM_PSEUDO_REGS (gdbarch_num_pseudo_regs (current_gdbarch))
-#endif
 
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at

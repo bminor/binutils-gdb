@@ -158,7 +158,7 @@ hppa_linux_register_addr (int regno, CORE_ADDR blockend)
 {
   CORE_ADDR addr;
 
-  if ((unsigned) regno >= NUM_REGS)
+  if ((unsigned) regno >= gdbarch_num_regs (current_gdbarch))
     error (_("Invalid register number %d."), regno);
 
   if (u_offsets[regno] == -1)
@@ -274,7 +274,7 @@ hppa_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {
-      for (regno = 0; regno < NUM_REGS; regno++)
+      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
         fetch_register (regcache, regno);
     }
   else 
@@ -292,7 +292,7 @@ hppa_linux_store_inferior_registers (struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {
-      for (regno = 0; regno < NUM_REGS; regno++)
+      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
 	store_register (regcache, regno);
     }
   else

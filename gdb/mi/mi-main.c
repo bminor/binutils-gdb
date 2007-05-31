@@ -286,12 +286,13 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
   struct cleanup *cleanup;
 
   /* Note that the test for a valid register must include checking the
-     REGISTER_NAME because NUM_REGS may be allocated for the union of
+     REGISTER_NAME because gdbarch_num_regs may be allocated for the union of
      the register sets within a family of related processors.  In this
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  numregs = gdbarch_num_regs (current_gdbarch)
+	    + gdbarch_num_pseudo_regs (current_gdbarch);
 
   cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-names");
 
@@ -347,12 +348,13 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
   cleanup = make_cleanup_regcache_xfree (prev_regs);
 
   /* Note that the test for a valid register must include checking the
-     REGISTER_NAME because NUM_REGS may be allocated for the union of
+     REGISTER_NAME because gdbarch_num_regs may be allocated for the union of
      the register sets within a family of related processors.  In this
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  numregs = gdbarch_num_regs (current_gdbarch)
+	    + gdbarch_num_pseudo_regs (current_gdbarch);
 
   make_cleanup_ui_out_list_begin_end (uiout, "changed-registers");
 
@@ -449,12 +451,13 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
   struct cleanup *list_cleanup, *tuple_cleanup;
 
   /* Note that the test for a valid register must include checking the
-     REGISTER_NAME because NUM_REGS may be allocated for the union of
+     REGISTER_NAME because gdbarch_num_regs may be allocated for the union of
      the register sets within a family of related processors.  In this
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  numregs = gdbarch_num_regs (current_gdbarch)
+	    + gdbarch_num_pseudo_regs (current_gdbarch);
 
   if (argc == 0)
     {
@@ -580,12 +583,13 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
   char format;
 
   /* Note that the test for a valid register must include checking the
-     REGISTER_NAME because NUM_REGS may be allocated for the union of
+     REGISTER_NAME because gdbarch_num_regs may be allocated for the union of
      the register sets within a family of related processors.  In this
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  numregs = gdbarch_num_regs (current_gdbarch)
+	    + gdbarch_num_pseudo_regs (current_gdbarch);
 
   if (argc == 0)
     {

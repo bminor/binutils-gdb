@@ -1021,10 +1021,12 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGPARM;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
-      if (SYMBOL_VALUE (sym) >= NUM_REGS + NUM_PSEUDO_REGS)
+      if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
+				  + gdbarch_num_pseudo_regs (current_gdbarch))
 	{
 	  reg_value_complaint (SYMBOL_VALUE (sym),
-			       NUM_REGS + NUM_PSEUDO_REGS,
+			       gdbarch_num_regs (current_gdbarch)
+				 + gdbarch_num_pseudo_regs (current_gdbarch),
 			       SYMBOL_PRINT_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
@@ -1037,10 +1039,12 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGISTER;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
-      if (SYMBOL_VALUE (sym) >= NUM_REGS + NUM_PSEUDO_REGS)
+      if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
+				+ gdbarch_num_pseudo_regs (current_gdbarch))
 	{
 	  reg_value_complaint (SYMBOL_VALUE (sym),
-			       NUM_REGS + NUM_PSEUDO_REGS,
+			       gdbarch_num_regs (current_gdbarch)
+				 + gdbarch_num_pseudo_regs (current_gdbarch),
 			       SYMBOL_PRINT_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}
@@ -1309,10 +1313,12 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
-      if (SYMBOL_VALUE (sym) >= NUM_REGS + NUM_PSEUDO_REGS)
+      if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
+				+ gdbarch_num_pseudo_regs (current_gdbarch))
 	{
 	  reg_value_complaint (SYMBOL_VALUE (sym),
-			       NUM_REGS + NUM_PSEUDO_REGS,
+			       gdbarch_num_regs (current_gdbarch)
+				 + gdbarch_num_pseudo_regs (current_gdbarch),
 			       SYMBOL_PRINT_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
 	}

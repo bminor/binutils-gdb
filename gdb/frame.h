@@ -583,7 +583,8 @@ enum print_what
 #error "SIZEOF_FRAME_SAVED_REGS can not be re-defined"
 #endif
 #define SIZEOF_FRAME_SAVED_REGS \
-        (sizeof (CORE_ADDR) * (NUM_REGS+NUM_PSEUDO_REGS))
+        (sizeof (CORE_ADDR) * (gdbarch_num_regs (current_gdbarch)\
+			       + gdbarch_num_pseudo_regs (current_gdbarch)))
 
 /* Allocate zero initialized memory from the frame cache obstack.
    Appendices to the frame info (such as the unwind cache) should

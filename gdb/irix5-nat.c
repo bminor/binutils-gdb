@@ -253,13 +253,13 @@ fetch_core_registers (struct regcache *regcache,
 
   /* If regsize is 8, this is a N32 or N64 core file.
      If regsize is 4, this is an O32 core file.  */
-  if (core_reg_size != regsize * NUM_REGS)
+  if (core_reg_size != regsize * gdbarch_num_regs (current_gdbarch))
     {
       warning (_("wrong size gregset struct in core file"));
       return;
     }
 
-  for (regno = 0; regno < NUM_REGS; regno++)
+  for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
     {
       regcache_raw_supply (regcache, regno, srcp);
       srcp += regsize;

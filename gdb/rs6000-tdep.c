@@ -289,7 +289,9 @@ rs6000_register_sim_regno (int reg)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int sim_regno;
 
-  gdb_assert (0 <= reg && reg <= NUM_REGS + NUM_PSEUDO_REGS);
+  gdb_assert (0 <= reg 
+	      && reg <= gdbarch_num_regs (current_gdbarch)
+			+ gdbarch_num_pseudo_regs (current_gdbarch));
   sim_regno = tdep->sim_regno[reg];
 
   if (sim_regno >= 0)

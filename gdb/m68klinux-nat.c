@@ -166,7 +166,7 @@ old_fetch_inferior_registers (struct regcache *regcache, int regno)
     }
   else
     {
-      for (regno = 0; regno < NUM_REGS; regno++)
+      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
 	{
 	  fetch_register (regcache, regno);
 	}
@@ -228,7 +228,7 @@ old_store_inferior_registers (const struct regcache *regcache, int regno)
     }
   else
     {
-      for (regno = 0; regno < NUM_REGS; regno++)
+      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
 	{
 	  store_register (regcache, regno);
 	}

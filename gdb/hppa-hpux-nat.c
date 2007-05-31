@@ -145,7 +145,7 @@ static void
 hppa_hpux_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < NUM_REGS; regnum++)
+    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
       hppa_hpux_fetch_register (regcache, regnum);
   else
     hppa_hpux_fetch_register (regcache, regnum);
@@ -215,7 +215,7 @@ static void
 hppa_hpux_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < NUM_REGS; regnum++)
+    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
       hppa_hpux_store_register (regcache, regnum);
   else
     hppa_hpux_store_register (regcache, regnum);

@@ -59,7 +59,7 @@ mips_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
 {
   CORE_ADDR regaddr;
 
-  if (regno < 0 || regno >= NUM_REGS)
+  if (regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
     error (_("Bogon register number %d."), regno);
 
   if (regno > MIPS_ZERO_REGNUM && regno < MIPS_ZERO_REGNUM + 32)
@@ -92,7 +92,7 @@ mips64_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
 {
   CORE_ADDR regaddr;
 
-  if (regno < 0 || regno >= NUM_REGS)
+  if (regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
     error (_("Bogon register number %d."), regno);
 
   if (regno > MIPS_ZERO_REGNUM && regno < MIPS_ZERO_REGNUM + 32)

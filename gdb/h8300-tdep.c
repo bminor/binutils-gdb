@@ -62,8 +62,8 @@ enum gdb_regnum
 
 #define H8300_MAX_NUM_REGS 18
 
-#define E_PSEUDO_CCR_REGNUM (NUM_REGS)
-#define E_PSEUDO_EXR_REGNUM (NUM_REGS+1)
+#define E_PSEUDO_CCR_REGNUM (gdbarch_num_regs (current_gdbarch))
+#define E_PSEUDO_EXR_REGNUM (gdbarch_num_regs (current_gdbarch)+1)
 
 struct h8300_frame_cache
 {
@@ -134,7 +134,7 @@ h8300_init_frame_cache (struct h8300_frame_cache *cache)
 
   /* Saved registers.  We initialize these to -1 since zero is a valid
      offset (that's where %fp is supposed to be stored).  */
-  for (i = 0; i < NUM_REGS; i++)
+  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
     cache->saved_regs[i] = -1;
 }
 
@@ -475,7 +475,7 @@ h8300_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
-  for (i = 0; i < NUM_REGS; i++)
+  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
     if (cache->saved_regs[i] != -1)
       cache->saved_regs[i] = cache->base - cache->saved_regs[i];
 
@@ -518,7 +518,8 @@ h8300_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       return;
     }
 
-  if (regnum < NUM_REGS && cache->saved_regs[regnum] != -1)
+  if (regnum < gdbarch_num_regs (current_gdbarch)
+      && cache->saved_regs[regnum] != -1)
     {
       *optimizedp = 0;
       *lvalp = lval_memory;
@@ -1122,7 +1123,8 @@ h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 static struct type *
 h8300_register_type (struct gdbarch *gdbarch, int regno)
 {
-  if (regno < 0 || regno >= NUM_REGS + NUM_PSEUDO_REGS)
+  if (regno < 0 || regno >= gdbarch_num_regs (current_gdbarch)
+			    + gdbarch_num_pseudo_regs (current_gdbarch))
     internal_error (__FILE__, __LINE__,
 		    "h8300_register_type: illegal register number %d", regno);
   else

@@ -1173,19 +1173,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: name_of_malloc = %s\n",
                       NAME_OF_MALLOC);
-#ifdef NUM_PSEUDO_REGS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NUM_PSEUDO_REGS # %s\n",
-                      XSTRING (NUM_PSEUDO_REGS));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: num_pseudo_regs = %s\n",
                       paddr_d (current_gdbarch->num_pseudo_regs));
-#ifdef NUM_REGS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NUM_REGS # %s\n",
-                      XSTRING (NUM_REGS));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: num_regs = %s\n",
                       paddr_d (current_gdbarch->num_regs));

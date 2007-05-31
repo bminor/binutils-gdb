@@ -83,7 +83,7 @@ int
 legacy_register_sim_regno (int regnum)
 {
   /* Only makes sense to supply raw registers.  */
-  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
+  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch));
   /* NOTE: cagney/2002-05-13: The old code did it this way and it is
      suspected that some GDB/SIM combinations may rely on this
      behavour.  The default should be one2one_register_sim_regno
@@ -186,9 +186,10 @@ legacy_virtual_frame_pointer (CORE_ADDR pc,
      register and an offset can determine this.  I think it should
      instead generate a byte code expression as that would work better
      with things like Dwarf2's CFI.  */
-  if (DEPRECATED_FP_REGNUM >= 0 && DEPRECATED_FP_REGNUM < NUM_REGS)
+  if (DEPRECATED_FP_REGNUM >= 0
+      && DEPRECATED_FP_REGNUM < gdbarch_num_regs (current_gdbarch))
     *frame_regnum = DEPRECATED_FP_REGNUM;
-  else if (SP_REGNUM >= 0 && SP_REGNUM < NUM_REGS)
+  else if (SP_REGNUM >= 0 && SP_REGNUM < gdbarch_num_regs (current_gdbarch))
     *frame_regnum = SP_REGNUM;
   else
     /* Should this be an internal error?  I guess so, it is reflecting

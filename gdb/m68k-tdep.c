@@ -496,7 +496,8 @@ m68k_dwarf_reg_to_regnum (int num)
     /* pc */
     return M68K_PC_REGNUM;
   else
-    return NUM_REGS + NUM_PSEUDO_REGS;
+    return gdbarch_num_regs (current_gdbarch)
+	   + gdbarch_num_pseudo_regs (current_gdbarch);
 }
 
 

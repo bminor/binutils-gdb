@@ -2557,7 +2557,7 @@ m32c_virtual_frame_pointer (CORE_ADDR pc,
       break;
     }
   /* Sanity check */
-  if (*frame_regnum > NUM_REGS)
+  if (*frame_regnum > gdbarch_num_regs (current_gdbarch))
     internal_error (__FILE__, __LINE__, _("No virtual frame pointer available"));
 }
 

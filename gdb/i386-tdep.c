@@ -201,7 +201,8 @@ i386_dbx_reg_to_regnum (int reg)
     }
 
   /* This will hopefully provoke a warning.  */
-  return NUM_REGS + NUM_PSEUDO_REGS;
+  return gdbarch_num_regs (current_gdbarch)
+	 + gdbarch_num_pseudo_regs (current_gdbarch);
 }
 
 /* Convert SVR4 register number REG to the appropriate register number
@@ -245,7 +246,8 @@ i386_svr4_reg_to_regnum (int reg)
     }
 
   /* This will hopefully provoke a warning.  */
-  return NUM_REGS + NUM_PSEUDO_REGS;
+  return gdbarch_num_regs (current_gdbarch)
+	 + gdbarch_num_pseudo_regs (current_gdbarch);
 }
 
 #undef I387_ST0_REGNUM

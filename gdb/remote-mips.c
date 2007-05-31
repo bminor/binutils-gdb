@@ -1899,7 +1899,7 @@ mips_fetch_registers (struct regcache *regcache, int regno)
 
   if (regno == -1)
     {
-      for (regno = 0; regno < NUM_REGS; regno++)
+      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
 	mips_fetch_registers (regcache, regno);
       return;
     }
@@ -1960,7 +1960,7 @@ mips_store_registers (struct regcache *regcache, int regno)
 
   if (regno == -1)
     {
-      for (regno = 0; regno < NUM_REGS; regno++)
+      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
 	mips_store_registers (regcache, regno);
       return;
     }
