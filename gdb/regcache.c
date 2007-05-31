@@ -616,7 +616,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 
   /* On the sparc, writing %g0 is a no-op, so we don't even want to
      change the registers array if something writes to this register.  */
-  if (CANNOT_STORE_REGISTER (regnum))
+  if (gdbarch_cannot_store_register (current_gdbarch, regnum))
     return;
 
   /* Make certain that the correct cache is selected.  */

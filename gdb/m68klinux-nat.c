@@ -123,7 +123,7 @@ fetch_register (struct regcache *regcache, int regno)
   char buf[MAX_REGISTER_SIZE];
   int tid;
 
-  if (CANNOT_FETCH_REGISTER (regno))
+  if (gdbarch_cannot_fetch_register (current_gdbarch, regno))
     {
       memset (buf, '\0', register_size (current_gdbarch, regno));	/* Supply zeroes */
       regcache_raw_supply (regcache, regno, buf);
@@ -185,10 +185,8 @@ store_register (const struct regcache *regcache, int regno)
   int tid;
   char buf[MAX_REGISTER_SIZE];
 
-  if (CANNOT_STORE_REGISTER (regno))
-    {
-      return;
-    }
+  if (gdbarch_cannot_store_register (current_gdbarch, regno))
+    return;
 
   /* Overload thread id onto process id */
   tid = TIDGET (inferior_ptid);

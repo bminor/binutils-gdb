@@ -1,5 +1,24 @@
 2007-05-31  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (CANNOT_FETCH_REGISTER): Replace by
+	gdbarch_cannot_fetch_register.
+	* alpha-nat.c (fetch_osf_core_registers): Likewise.
+	* hppa-linux-nat.c (fetch_register): Likewise.
+	* inf-ptrace.c (inf_ptrace_fetch_register): Likewise.
+	* m68klinux-nat.c (fetch_register): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_supply_reg, mipsnbsd_supply_fpreg):
+	Likewise.
+	* gdbarch.sh (CANNOT_STORE_REGISTER): Replace by
+	gdbarch_cannot_store_register.
+	* hppa-linux-nat.c (store_register): Likewise.
+	* inf-ptrace.c (inf_ptrace_store_register): Likewise.
+	* regcache.c (regcache_raw_write): Likewise.
+	* m68klinux-nat.c (store_register): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_fill_reg, mipsnbsd_fill_fpreg): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-05-31  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (TARGET_OSABI): Replace by gdbarch_osabi.
 	* gdbarch.c, gdbarch.h: Regenerate.
 

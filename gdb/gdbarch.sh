@@ -480,8 +480,8 @@ M::void:print_vector_info:struct ui_file *file, struct frame_info *frame, const 
 # also include/...-sim.h.
 f:=:int:register_sim_regno:int reg_nr:reg_nr::legacy_register_sim_regno::0
 F:=:int:register_bytes_ok:long nr_bytes:nr_bytes
-f:=:int:cannot_fetch_register:int regnum:regnum::cannot_register_not::0
-f:=:int:cannot_store_register:int regnum:regnum::cannot_register_not::0
+f::int:cannot_fetch_register:int regnum:regnum::cannot_register_not::0
+f::int:cannot_store_register:int regnum:regnum::cannot_register_not::0
 # setjmp/longjmp support.
 F:=:int:get_longjmp_target:CORE_ADDR *pc:pc
 #

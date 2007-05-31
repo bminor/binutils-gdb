@@ -221,7 +221,7 @@ fetch_register (struct regcache *regcache, int regno)
   int tid;
   int val;
 
-  if (CANNOT_FETCH_REGISTER (regno))
+  if (gdbarch_cannot_fetch_register (current_gdbarch, regno))
     {
       regcache_raw_supply (regcache, regno, NULL);
       return;
@@ -249,7 +249,7 @@ store_register (const struct regcache *regcache, int regno)
   int tid;
   int val;
 
-  if (CANNOT_STORE_REGISTER (regno))
+  if (gdbarch_cannot_store_register (current_gdbarch, regno))
     return;
 
   /* GNU/Linux LWP ID's are process ID's.  */

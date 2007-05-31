@@ -626,7 +626,8 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = inf_ptrace_register_u_offset (current_gdbarch, regnum, 0);
-  if (addr == (CORE_ADDR)-1 || CANNOT_FETCH_REGISTER (regnum))
+  if (addr == (CORE_ADDR)-1
+      || gdbarch_cannot_fetch_register (current_gdbarch, regnum))
     {
       regcache_raw_supply (regcache, regnum, NULL);
       return;
@@ -681,7 +682,8 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = inf_ptrace_register_u_offset (current_gdbarch, regnum, 1);
-  if (addr == (CORE_ADDR)-1 || CANNOT_STORE_REGISTER (regnum))
+  if (addr == (CORE_ADDR)-1 
+      || gdbarch_cannot_store_register (current_gdbarch, regnum))
     return;
 
   /* Cater for systems like GNU/Linux, that implement threads as

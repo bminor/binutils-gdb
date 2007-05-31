@@ -89,7 +89,7 @@ fetch_osf_core_registers (struct regcache *regcache,
 
   for (regno = 0; regno < ALPHA_NUM_REGS; regno++)
     {
-      if (CANNOT_FETCH_REGISTER (regno))
+      if (gdbarch_cannot_fetch_register (current_gdbarch, regno))
 	{
 	  regcache_raw_supply (regcache, regno, NULL);
 	  continue;

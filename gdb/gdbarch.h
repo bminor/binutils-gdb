@@ -542,22 +542,10 @@ extern void set_gdbarch_register_bytes_ok (struct gdbarch *gdbarch, gdbarch_regi
 typedef int (gdbarch_cannot_fetch_register_ftype) (int regnum);
 extern int gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int regnum);
 extern void set_gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, gdbarch_cannot_fetch_register_ftype *cannot_fetch_register);
-#if !defined (GDB_TM_FILE) && defined (CANNOT_FETCH_REGISTER)
-#error "Non multi-arch definition of CANNOT_FETCH_REGISTER"
-#endif
-#if !defined (CANNOT_FETCH_REGISTER)
-#define CANNOT_FETCH_REGISTER(regnum) (gdbarch_cannot_fetch_register (current_gdbarch, regnum))
-#endif
 
 typedef int (gdbarch_cannot_store_register_ftype) (int regnum);
 extern int gdbarch_cannot_store_register (struct gdbarch *gdbarch, int regnum);
 extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_cannot_store_register_ftype *cannot_store_register);
-#if !defined (GDB_TM_FILE) && defined (CANNOT_STORE_REGISTER)
-#error "Non multi-arch definition of CANNOT_STORE_REGISTER"
-#endif
-#if !defined (CANNOT_STORE_REGISTER)
-#define CANNOT_STORE_REGISTER(regnum) (gdbarch_cannot_store_register (current_gdbarch, regnum))
-#endif
 
 /* setjmp/longjmp support. */
 

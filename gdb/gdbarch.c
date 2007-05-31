@@ -757,12 +757,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: call_dummy_location = %s\n",
                       paddr_d (current_gdbarch->call_dummy_location));
-#ifdef CANNOT_FETCH_REGISTER
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "CANNOT_FETCH_REGISTER(regnum)",
-                      XSTRING (CANNOT_FETCH_REGISTER (regnum)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: cannot_fetch_register = <0x%lx>\n",
                       (long) current_gdbarch->cannot_fetch_register);
@@ -774,12 +768,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: cannot_step_breakpoint = %s\n",
                       paddr_d (current_gdbarch->cannot_step_breakpoint));
-#ifdef CANNOT_STORE_REGISTER
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "CANNOT_STORE_REGISTER(regnum)",
-                      XSTRING (CANNOT_STORE_REGISTER (regnum)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: cannot_store_register = <0x%lx>\n",
                       (long) current_gdbarch->cannot_store_register);
