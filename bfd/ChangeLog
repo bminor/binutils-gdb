@@ -1,3 +1,8 @@
+2007-06-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* simple.c (bfd_simple_get_relocated_section_contents): Init
+	input_bfds_tail.
+
 2007-05-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elf_fake_sections): Adjust test for SHT_NOBITS sections

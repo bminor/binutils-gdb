@@ -5435,8 +5435,6 @@ lang_for_each_file (void (*func) (lang_input_statement_type *))
 void
 ldlang_add_file (lang_input_statement_type *entry)
 {
-  bfd **pp;
-
   lang_statement_append (&file_chain,
 			 (lang_statement_union_type *) entry,
 			 &entry->next);
@@ -5445,9 +5443,9 @@ ldlang_add_file (lang_input_statement_type *entry)
      a link.  */
   ASSERT (entry->the_bfd->link_next == NULL);
   ASSERT (entry->the_bfd != output_bfd);
-  for (pp = &link_info.input_bfds; *pp != NULL; pp = &(*pp)->link_next)
-    ;
-  *pp = entry->the_bfd;
+
+  *link_info.input_bfds_tail = entry->the_bfd;
+  link_info.input_bfds_tail = &entry->the_bfd->link_next;
   entry->the_bfd->usrdata = entry;
   bfd_set_gp_size (entry->the_bfd, g_switch_value);
 

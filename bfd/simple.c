@@ -183,6 +183,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   /* Fill in the bare minimum number of fields for our purposes.  */
   memset (&link_info, 0, sizeof (link_info));
   link_info.input_bfds = abfd;
+  link_info.input_bfds_tail = &abfd->link_next;
 
   link_info.hash = _bfd_generic_link_hash_table_create (abfd);
   link_info.callbacks = &callbacks;

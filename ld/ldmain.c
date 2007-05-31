@@ -265,15 +265,16 @@ main (int argc, char **argv)
   link_info.keep_memory = TRUE;
   link_info.combreloc = TRUE;
   link_info.strip_discarded = TRUE;
-  link_info.callbacks = &link_callbacks;
   link_info.emit_hash = TRUE;
+  link_info.callbacks = &link_callbacks;
+  link_info.input_bfds_tail = &link_info.input_bfds;
   /* SVR4 linkers seem to set DT_INIT and DT_FINI based on magic _init
      and _fini symbols.  We are compatible.  */
   link_info.init_function = "_init";
   link_info.fini_function = "_fini";
+  link_info.relax_pass = 1;
   link_info.pei386_auto_import = -1;
   link_info.spare_dynamic_tags = 5;
-  link_info.relax_pass = 1;
 
   ldfile_add_arch ("");
   emulation = get_emulation (argc, argv);
