@@ -496,12 +496,6 @@ extern void set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch, int d
 
 extern int gdbarch_call_dummy_location (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_dummy_location);
-#if !defined (GDB_TM_FILE) && defined (CALL_DUMMY_LOCATION)
-#error "Non multi-arch definition of CALL_DUMMY_LOCATION"
-#endif
-#if !defined (CALL_DUMMY_LOCATION)
-#define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
-#endif
 
 extern int gdbarch_push_dummy_code_p (struct gdbarch *gdbarch);
 

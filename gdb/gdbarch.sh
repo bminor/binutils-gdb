@@ -470,7 +470,7 @@ v:=:int:deprecated_fp_regnum:::-1:-1::0
 M::CORE_ADDR:push_dummy_call:struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:function, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
 # DEPRECATED_REGISTER_SIZE can be deleted.
 v:=:int:deprecated_register_size
-v:=:int:call_dummy_location::::AT_ENTRY_POINT::0
+v::int:call_dummy_location::::AT_ENTRY_POINT::0
 M::CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr
 
 m::void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all::default_print_registers_info::0
@@ -1179,7 +1179,7 @@ cat <<EOF
 #include "arch-utils.h"
 
 #include "gdbcmd.h"
-#include "inferior.h" /* enum CALL_DUMMY_LOCATION et.al. */
+#include "inferior.h" 
 #include "symcat.h"
 
 #include "floatformat.h"

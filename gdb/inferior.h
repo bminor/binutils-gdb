@@ -402,7 +402,7 @@ extern struct regcache *stop_registers;
 
 extern int attach_flag;
 
-/* Possible values for CALL_DUMMY_LOCATION.  */
+/* Possible values for gdbarch_call_dummy_location.  */
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 #define AT_SYMBOL 5

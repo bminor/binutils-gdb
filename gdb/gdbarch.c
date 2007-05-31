@@ -39,7 +39,7 @@
 #include "arch-utils.h"
 
 #include "gdbcmd.h"
-#include "inferior.h" /* enum CALL_DUMMY_LOCATION et.al. */
+#include "inferior.h" 
 #include "symcat.h"
 
 #include "floatformat.h"
@@ -759,11 +759,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: byte_order = %s\n",
                       paddr_d (current_gdbarch->byte_order));
-#ifdef CALL_DUMMY_LOCATION
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_LOCATION # %s\n",
-                      XSTRING (CALL_DUMMY_LOCATION));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: call_dummy_location = %s\n",
                       paddr_d (current_gdbarch->call_dummy_location));

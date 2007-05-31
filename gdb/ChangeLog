@@ -1,3 +1,12 @@
+2007-05-31  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (CALL_DUMMY_LOCATION): Replace by
+	gdbarch_call_dummy_location.
+	* infcall.c (call_function_by_hand): Likewise.
+	* inferior.h: Change comment.
+	* arch-utils.c: Change comment.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
 2007-05-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib-aix5.c: Delete.

@@ -454,7 +454,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   /* The actual breakpoint (at BP_ADDR) is inserted separatly so there
      is no need to write that out.  */
 
-  switch (CALL_DUMMY_LOCATION)
+  switch (gdbarch_call_dummy_location (current_gdbarch))
     {
     case ON_STACK:
       /* "dummy_addr" is here just to keep old targets happy.  New
