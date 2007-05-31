@@ -1,5 +1,10 @@
 2007-05-31  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (TARGET_OSABI): Replace by gdbarch_osabi.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-05-31  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (TARGET_CHAR_SIGNED): Replace by gdbarch_char_signed.
 	* gdbtypes.c (build_gdbtypes, gdbtypes_post_init): Likewise.
 	* gdbarch.c, gdbarch.h: Regenerate.

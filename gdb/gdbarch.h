@@ -72,12 +72,6 @@ extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 
 extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
 /* set_gdbarch_osabi() - not applicable - pre-initialized. */
-#if !defined (GDB_TM_FILE) && defined (TARGET_OSABI)
-#error "Non multi-arch definition of TARGET_OSABI"
-#endif
-#if !defined (TARGET_OSABI)
-#define TARGET_OSABI (gdbarch_osabi (current_gdbarch))
-#endif
 
 extern const struct target_desc * gdbarch_target_desc (struct gdbarch *gdbarch);
 /* set_gdbarch_target_desc() - not applicable - pre-initialized. */

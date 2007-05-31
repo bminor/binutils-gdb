@@ -371,7 +371,7 @@ i:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_
 #
 i::int:byte_order:::BFD_ENDIAN_BIG
 #
-i:TARGET_OSABI:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
+i::enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
 #
 i::const struct target_desc *:target_desc:::::::paddr_d ((long) current_gdbarch->target_desc)
 # Number of bits in a char or unsigned char for the target machine.

@@ -1201,11 +1201,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: num_regs = %s\n",
                       paddr_d (current_gdbarch->num_regs));
-#ifdef TARGET_OSABI
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_OSABI # %s\n",
-                      XSTRING (TARGET_OSABI));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: osabi = %s\n",
                       paddr_d (current_gdbarch->osabi));
