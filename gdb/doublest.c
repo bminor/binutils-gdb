@@ -725,11 +725,11 @@ floatformat_from_length (int len)
 {
   const struct floatformat *format;
   if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
-    format = TARGET_FLOAT_FORMAT[TARGET_BYTE_ORDER];
+    format = TARGET_FLOAT_FORMAT[gdbarch_byte_order (current_gdbarch)];
   else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
-    format = TARGET_DOUBLE_FORMAT[TARGET_BYTE_ORDER];
+    format = TARGET_DOUBLE_FORMAT[gdbarch_byte_order (current_gdbarch)];
   else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
-    format = TARGET_LONG_DOUBLE_FORMAT[TARGET_BYTE_ORDER];
+    format = TARGET_LONG_DOUBLE_FORMAT[gdbarch_byte_order (current_gdbarch)];
   /* On i386 the 'long double' type takes 96 bits,
      while the real number of used bits is only 80,
      both in processor and in memory.  
@@ -737,7 +737,7 @@ floatformat_from_length (int len)
   else if ((TARGET_LONG_DOUBLE_FORMAT != NULL) 
 	   && (len * TARGET_CHAR_BIT ==
                TARGET_LONG_DOUBLE_FORMAT[0]->totalsize))
-    format = TARGET_LONG_DOUBLE_FORMAT[TARGET_BYTE_ORDER];
+    format = TARGET_LONG_DOUBLE_FORMAT[gdbarch_byte_order (current_gdbarch)];
   else
     format = NULL;
   if (format == NULL)
@@ -751,7 +751,7 @@ floatformat_from_type (const struct type *type)
 {
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
   if (TYPE_FLOATFORMAT (type) != NULL)
-    return TYPE_FLOATFORMAT (type)[TARGET_BYTE_ORDER];
+    return TYPE_FLOATFORMAT (type)[gdbarch_byte_order (current_gdbarch)];
   else
     return floatformat_from_length (TYPE_LENGTH (type));
 }
@@ -812,7 +812,8 @@ extract_typed_floating (const void *addr, const struct type *type)
        specific code? stabs?) so handle that here as a special case.  */
     return extract_floating_by_length (addr, TYPE_LENGTH (type));
 
-  floatformat_to_doublest (TYPE_FLOATFORMAT (type)[TARGET_BYTE_ORDER],
+  floatformat_to_doublest 
+	(TYPE_FLOATFORMAT (type)[gdbarch_byte_order (current_gdbarch)],
 			   addr, &retval);
   return retval;
 }
@@ -850,8 +851,9 @@ store_typed_floating (void *addr, const struct type *type, DOUBLEST val)
        specific code? stabs?) so handle that here as a special case.  */
     store_floating_by_length (addr, TYPE_LENGTH (type), val);
   else
-    floatformat_from_doublest (TYPE_FLOATFORMAT (type)[TARGET_BYTE_ORDER],
-			       &val, addr);
+    floatformat_from_doublest
+	(TYPE_FLOATFORMAT (type)[gdbarch_byte_order (current_gdbarch)],
+	&val, addr);
 }
 
 /* Convert a floating-point number of type FROM_TYPE from a

@@ -963,7 +963,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
 
-      if (TARGET_BYTE_ORDER != BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (current_gdbarch) != BFD_ENDIAN_BIG)
 	{
 	  /* On little-endian machines, this crud is never necessary,
 	     and, if the extra bytes contain garbage, is harmful.  */

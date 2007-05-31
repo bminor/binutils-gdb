@@ -1069,7 +1069,7 @@ enum { MAX_REGISTER_SIZE = 16 };
    from byte/word byte order.  */
 
 #if !defined (BITS_BIG_ENDIAN)
-#define BITS_BIG_ENDIAN (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+#define BITS_BIG_ENDIAN (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 #endif
 
 /* In findvar.c.  */

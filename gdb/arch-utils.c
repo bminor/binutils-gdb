@@ -245,7 +245,7 @@ enum bfd_endian
 selected_byte_order (void)
 {
   if (target_byte_order_user != BFD_ENDIAN_UNKNOWN)
-    return TARGET_BYTE_ORDER;
+    return gdbarch_byte_order (current_gdbarch);
   else
     return BFD_ENDIAN_UNKNOWN;
 }
@@ -257,14 +257,14 @@ show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 	     const char *value)
 {
   if (target_byte_order_user == BFD_ENDIAN_UNKNOWN)
-    if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file, _("The target endianness is set automatically "
 				  "(currently big endian)\n"));
     else
       fprintf_unfiltered (file, _("The target endianness is set automatically "
 			   "(currently little endian)\n"));
   else
-    if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file,
 			  _("The target is assumed to be big endian\n"));
     else

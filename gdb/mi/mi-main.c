@@ -552,7 +552,7 @@ get_register (int regnum, int format)
       ptr = buf + 2;
       for (j = 0; j < register_size (current_gdbarch, regnum); j++)
 	{
-	  int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
+	  int idx = gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG ? j
 	  : register_size (current_gdbarch, regnum) - 1 - j;
 	  sprintf (ptr, "%02x", (unsigned char) buffer[idx]);
 	  ptr += 2;

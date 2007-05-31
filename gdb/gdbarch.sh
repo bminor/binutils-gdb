@@ -369,7 +369,7 @@ function_list ()
   cat <<EOF
 i:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_arch_struct::::TARGET_ARCHITECTURE->printable_name
 #
-i:TARGET_BYTE_ORDER:int:byte_order:::BFD_ENDIAN_BIG
+i::int:byte_order:::BFD_ENDIAN_BIG
 #
 i:TARGET_OSABI:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
 #

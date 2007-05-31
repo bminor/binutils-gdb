@@ -525,7 +525,7 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       for (p = valaddr;
 	   p < valaddr + len;
@@ -612,7 +612,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
   carry = 0;
 
   fputs_filtered ("0", stream);
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       for (p = valaddr;
 	   p < valaddr + len;
@@ -725,11 +725,11 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 #define CARRY_LEFT( x ) ((x) % TEN)
 #define SHIFT( x )      ((x) << 4)
 #define START_P \
-        ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) ? valaddr : valaddr + len - 1)
+        ((gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG) ? valaddr : valaddr + len - 1)
 #define NOT_END_P \
-        ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) ? (p < valaddr + len) : (p >= valaddr))
+        ((gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG) ? (p < valaddr + len) : (p >= valaddr))
 #define NEXT_P \
-        ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) ? p++ : p-- )
+        ((gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG) ? p++ : p-- )
 #define LOW_NIBBLE(  x ) ( (x) & 0x00F)
 #define HIGH_NIBBLE( x ) (((x) & 0x0F0) >> 4)
 
@@ -859,7 +859,7 @@ print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
   fputs_filtered ("0x", stream);
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       for (p = valaddr;
 	   p < valaddr + len;
@@ -888,7 +888,7 @@ print_char_chars (struct ui_file *stream, const gdb_byte *valaddr,
 {
   const gdb_byte *p;
 
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       p = valaddr;
       while (p < valaddr + len - 1 && *p == 0)

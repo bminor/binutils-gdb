@@ -69,12 +69,6 @@ extern const struct bfd_arch_info * gdbarch_bfd_arch_info (struct gdbarch *gdbar
 
 extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order() - not applicable - pre-initialized. */
-#if !defined (GDB_TM_FILE) && defined (TARGET_BYTE_ORDER)
-#error "Non multi-arch definition of TARGET_BYTE_ORDER"
-#endif
-#if !defined (TARGET_BYTE_ORDER)
-#define TARGET_BYTE_ORDER (gdbarch_byte_order (current_gdbarch))
-#endif
 
 extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
 /* set_gdbarch_osabi() - not applicable - pre-initialized. */

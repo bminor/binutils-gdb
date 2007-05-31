@@ -1,5 +1,26 @@
 2007-05-31  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (TARGET_BYTE_ORDER): Replace by gdbarch_byte_order.
+	* ax-gdb.c (gen_bitfield_ref): Likewise.
+	* mi/mi-main.c (get_register): Likewise.
+	* findvar.c (default_value_from_register, extract_signed_integer)
+	(extract_unsigned_integer, extract_long_unsigned_integer)
+	(store_signed_integer, store_unsigned_integer): Likewise.
+	* regcache.c (regcache_dump): Likewise.
+	* value.c (lookup_internalvar, value_of_internalvar)
+	(set_internalvar): Likewise.
+	* defs.h: Likewise.
+	* valprint.c (print_binary_chars, print_octal_chars)
+	(print_decimal_chars, print_hex_chars, print_char_chars): Likewise.
+	* infcmd.c (default_print_registers_info): Likewise.
+	* arch-utils.c (selected_byte_order, show_endian): Likewise.
+	* stabsread.c (define_symbol): Likewise.
+	* doublest.c (floatformat_from_length, floatformat_from_type)
+	(extract_typed_floating, store_typed_floating): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-05-31  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (CALL_DUMMY_LOCATION): Replace by
 	gdbarch_call_dummy_location.
 	* infcall.c (call_function_by_hand): Likewise.

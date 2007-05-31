@@ -751,11 +751,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: breakpoint_from_pc = <0x%lx>\n",
                       (long) current_gdbarch->breakpoint_from_pc);
-#ifdef TARGET_BYTE_ORDER
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_BYTE_ORDER # %s\n",
-                      XSTRING (TARGET_BYTE_ORDER));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: byte_order = %s\n",
                       paddr_d (current_gdbarch->byte_order));

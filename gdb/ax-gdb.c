@@ -1317,7 +1317,7 @@ gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
 	     the sign/zero extension will wipe them out.
 	     - If we're in the interior of the word, then there is no garbage
 	     on either end, because the ref operators zero-extend.  */
-	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 	    gen_left_shift (ax, end - (offset + op_size));
 	  else
 	    gen_left_shift (ax, offset - start);

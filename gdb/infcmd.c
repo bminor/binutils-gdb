@@ -1653,7 +1653,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	  for (j = 0; j < register_size (current_gdbarch, i); j++)
 	    {
 	      int idx;
-	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
 		idx = j;
 	      else
 		idx = register_size (current_gdbarch, i) - 1 - j;

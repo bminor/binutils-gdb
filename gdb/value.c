@@ -758,7 +758,7 @@ lookup_internalvar (char *name)
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
   var->name = concat (name, (char *)NULL);
   var->value = allocate_value (builtin_type_void);
-  var->endian = TARGET_BYTE_ORDER;
+  var->endian = gdbarch_byte_order (current_gdbarch);
   release_value (var->value);
   var->next = internalvars;
   internalvars = var;
@@ -790,7 +790,7 @@ value_of_internalvar (struct internalvar *var)
      point types) are left alone, because they would be too complicated
      to correct.  */
 
-  if (var->endian != TARGET_BYTE_ORDER)
+  if (var->endian != gdbarch_byte_order (current_gdbarch))
     {
       gdb_byte *array = value_contents_raw (val);
       struct type *type = check_typedef (value_enclosing_type (val));
@@ -847,7 +847,7 @@ set_internalvar (struct internalvar *var, struct value *val)
      long.  */
   xfree (var->value);
   var->value = newval;
-  var->endian = TARGET_BYTE_ORDER;
+  var->endian = gdbarch_byte_order (current_gdbarch);
   release_value (newval);
   /* End code which must not call error().  */
 }

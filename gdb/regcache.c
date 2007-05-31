@@ -1113,7 +1113,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	    {
 	      regcache_raw_read (regcache, regnum, buf);
 	      fprintf_unfiltered (file, "0x");
-	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
+	      dump_endian_bytes (file,
+				 gdbarch_byte_order (current_gdbarch), buf,
 				 regcache->descr->sizeof_register[regnum]);
 	    }
 	}
@@ -1127,7 +1128,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	    {
 	      regcache_cooked_read (regcache, regnum, buf);
 	      fprintf_unfiltered (file, "0x");
-	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
+	      dump_endian_bytes (file,
+				 gdbarch_byte_order (current_gdbarch), buf,
 				 regcache->descr->sizeof_register[regnum]);
 	    }
 	}

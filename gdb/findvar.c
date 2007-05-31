@@ -63,7 +63,7 @@ That operation is not available on integers of more than %d bytes."),
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       p = startaddr;
       /* Do the sign extension once at the start.  */
@@ -98,7 +98,7 @@ That operation is not available on integers of more than %d bytes."),
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
   retval = 0;
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       for (p = startaddr; p < endaddr; ++p)
 	retval = (retval << 8) | *p;
@@ -125,7 +125,7 @@ extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
   int len;
 
   len = orig_len;
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       for (p = addr;
 	   len > (int) sizeof (LONGEST) && p < addr + orig_len;
@@ -187,7 +187,7 @@ store_signed_integer (gdb_byte *addr, int len, LONGEST val)
 
   /* Start at the least significant end of the integer, and work towards
      the most significant.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       for (p = endaddr - 1; p >= startaddr; --p)
 	{
@@ -214,7 +214,7 @@ store_unsigned_integer (gdb_byte *addr, int len, ULONGEST val)
 
   /* Start at the least significant end of the integer, and work towards
      the most significant.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
     {
       for (p = endaddr - 1; p >= startaddr; --p)
 	{
@@ -604,7 +604,7 @@ default_value_from_register (struct type *type, int regnum,
      an integral number of registers.  Otherwise, you need to do
      some fiddling with the last register copied here for little
      endian machines.  */
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
       && len < register_size (gdbarch, regnum))
     /* Big-endian, and we want less than full size.  */
     set_value_offset (value, register_size (gdbarch, regnum) - len);
