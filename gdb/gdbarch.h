@@ -239,12 +239,6 @@ extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
 
 extern int gdbarch_char_signed (struct gdbarch *gdbarch);
 extern void set_gdbarch_char_signed (struct gdbarch *gdbarch, int char_signed);
-#if !defined (GDB_TM_FILE) && defined (TARGET_CHAR_SIGNED)
-#error "Non multi-arch definition of TARGET_CHAR_SIGNED"
-#endif
-#if !defined (TARGET_CHAR_SIGNED)
-#define TARGET_CHAR_SIGNED (gdbarch_char_signed (current_gdbarch))
-#endif
 
 #if defined (TARGET_READ_PC)
 /* Legacy for systems yet to multi-arch TARGET_READ_PC */

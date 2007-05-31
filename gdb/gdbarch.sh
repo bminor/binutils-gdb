@@ -417,7 +417,7 @@ v:TARGET_ADDR_BIT:int:addr_bit:::8 * sizeof (void*):0:TARGET_PTR_BIT:
 v:TARGET_BFD_VMA_BIT:int:bfd_vma_bit:::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
 #
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
-v:TARGET_CHAR_SIGNED:int:char_signed:::1:-1:1
+v::int:char_signed:::1:-1:1
 #
 F:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid
 f:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid:0:generic_target_write_pc::0

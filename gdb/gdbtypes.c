@@ -3418,7 +3418,8 @@ build_gdbtypes (void)
   builtin_type_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       (TYPE_FLAG_NOSIGN
-                | (TARGET_CHAR_SIGNED ? 0 : TYPE_FLAG_UNSIGNED)),
+                | (gdbarch_char_signed (current_gdbarch) ?
+		   0 : TYPE_FLAG_UNSIGNED)),
 	       "char", (struct objfile *) NULL);
   builtin_type_true_char =
     init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
@@ -3612,7 +3613,8 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       (TYPE_FLAG_NOSIGN
-                | (TARGET_CHAR_SIGNED ? 0 : TYPE_FLAG_UNSIGNED)),
+                | (gdbarch_char_signed (current_gdbarch) ? 
+		   0 : TYPE_FLAG_UNSIGNED)),
 	       "char", (struct objfile *) NULL);
   builtin_type->builtin_true_char =
     init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,

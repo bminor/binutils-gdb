@@ -783,11 +783,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: cannot_store_register = <0x%lx>\n",
                       (long) current_gdbarch->cannot_store_register);
-#ifdef TARGET_CHAR_SIGNED
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_CHAR_SIGNED # %s\n",
-                      XSTRING (TARGET_CHAR_SIGNED));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: char_signed = %s\n",
                       paddr_d (current_gdbarch->char_signed));
