@@ -15045,6 +15045,7 @@ static const struct asm_opcode insns[] =
 #undef THUMB_VARIANT
 #define THUMB_VARIANT &arm_ext_v6t2
  TCE(ldrex,	1900f9f, e8500f00, 2, (RRnpc, ADDR),		  ldrex, t_ldrex),
+ TCE(strex,	1800f90, e8400000, 3, (RRnpc, RRnpc, ADDR),	   strex,  t_strex),
  TUF(mcrr2,	c400000, fc400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
  TUF(mrrc2,	c500000, fc500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
 
@@ -15133,7 +15134,6 @@ static const struct asm_opcode insns[] =
   UF(srsda,	8400500,	   2, (oRRw, I31w),		   srs),
  TUF(srsdb,	9400500, e800c000, 2, (oRRw, I31w),		   srs,  srs),
  TCE(ssat16,	6a00f30, f3200000, 3, (RRnpc, I16, RRnpc),	   ssat16, t_ssat16),
- TCE(strex,	1800f90, e8400000, 3, (RRnpc, RRnpc, ADDR),	   strex,  t_strex),
  TCE(umaal,	0400090, fbe00060, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,  t_mlal),
  TCE(usad8,	780f010, fb70f000, 3, (RRnpc, RRnpc, RRnpc),	   smul,   t_simd),
  TCE(usada8,	7800010, fb700000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla,   t_mla),
