@@ -3186,6 +3186,7 @@ mips_elf_initialize_tls_index (void **entryp, void *p)
   struct mips_got_entry *entry = (struct mips_got_entry *)*entryp;
   struct mips_got_info *g = p;
   bfd_vma next_index;
+  unsigned char tls_type;
 
   /* We're only interested in TLS symbols.  */
   if (entry->tls_type == 0)
@@ -3201,6 +3202,7 @@ mips_elf_initialize_tls_index (void **entryp, void *p)
 	return 1;
       entry->d.h->tls_type |= GOT_TLS_OFFSET_DONE;
       entry->d.h->tls_got_offset = next_index;
+      tls_type = entry->d.h->tls_type;
     }
   else
     {
@@ -3217,12 +3219,13 @@ mips_elf_initialize_tls_index (void **entryp, void *p)
 	  g->tls_ldm_offset = next_index;
 	}
       entry->gotidx = next_index;
+      tls_type = entry->tls_type;
     }
 
   /* Account for the entries we've just allocated.  */
-  if (entry->tls_type & (GOT_TLS_GD | GOT_TLS_LDM))
+  if (tls_type & (GOT_TLS_GD | GOT_TLS_LDM))
     g->tls_assigned_gotno += 2;
-  if (entry->tls_type & GOT_TLS_IE)
+  if (tls_type & GOT_TLS_IE)
     g->tls_assigned_gotno += 1;
 
   return 1;

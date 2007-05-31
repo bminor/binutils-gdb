@@ -1,3 +1,9 @@
+2007-05-31  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* elfxx-mips.c (mips_elf_initialize_tls_index): When processing a
+	type (3) single-GOT entry, read tls_type from the hash table entry
+	rather than the GOT entry.
+
 2007-06-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Init
