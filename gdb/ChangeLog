@@ -1,3 +1,7 @@
+2007-06-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-svr4.c (svr4_solib_create_inferior_hook): Remove warning.
+
 2007-06-01  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* irix5-nat.c (JB_ELEMENT_SIZE, get_longjmp_target): Remove.

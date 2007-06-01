@@ -1348,11 +1348,7 @@ svr4_solib_create_inferior_hook (void)
   svr4_relocate_main_executable ();
 
   if (!svr4_have_link_map_offsets ())
-    {
-      warning (_("no shared library support for this OS / ABI"));
-      return;
-
-    }
+    return;
 
   if (!enable_break ())
     return;
