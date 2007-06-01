@@ -1013,6 +1013,10 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Allocate stack frame header.  */
   sp -= 32;
 
+  /* Store stack back chain.  */
+  regcache_cooked_read (regcache, SPU_RAW_SP_REGNUM, buf);
+  target_write_memory (sp, buf, 16);
+
   /* Finally, update the SP register.  */
   regcache_cooked_write_unsigned (regcache, SPU_SP_REGNUM, sp);
 
