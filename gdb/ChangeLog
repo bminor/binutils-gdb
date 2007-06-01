@@ -1,3 +1,12 @@
+2007-06-01  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-linux-tdep.c (INSTR_SC, INSTR_LI_R0_0x6666, INSTR_LI_R0_0x7777,
+	INSTR_LI_R0_NR_sigreturn, INSTR_LI_R0_NR_rt_sigreturn): Remove.
+	(PPC_LINUX_SIGNAL_FRAMESIZE, PPC_LINUX_REGS_PTR_OFFSET,
+	PPC_LINUX_HANDLER_PTR_OFFSET): Remove.
+	(ppc_linux_in_sigtramp, insn_is_sigreturn,
+	ppc_linux_at_sigtramp_return_path): Remove.
+
 2007-05-31  Markus Deuling  <deuling@de.ibm.com>
 
 	* xtensa-tdep.c (XTENSA_IS_ENTRY, extract_call_winsize)
