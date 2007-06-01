@@ -43,9 +43,6 @@
 static void fetch_core_registers (struct regcache *, char *,
 				  unsigned int, int, CORE_ADDR);
 
-/* Size of elements in jmpbuf */
-
-#define JB_ELEMENT_SIZE 4
 
 /*
  * See the comment in m68k-tdep.c regarding the utility of these functions.
@@ -205,29 +202,6 @@ fill_fpregset (const struct regcache *regcache, fpregset_t *fpregsetp, int regno
     }
 }
 
-
-/* Figure out where the longjmp will land.
-   We expect the first arg to be a pointer to the jmp_buf structure from which
-   we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
-   This routine returns true on success. */
-
-int
-get_longjmp_target (CORE_ADDR *pc)
-{
-  char *buf;
-  CORE_ADDR jb_addr;
-
-  buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
-  jb_addr = read_register (MIPS_A0_REGNUM);
-
-  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
-			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
-    return 0;
-
-  *pc = extract_unsigned_integer (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
-
-  return 1;
-}
 
 /* Provide registers to GDB from a core file.
 
