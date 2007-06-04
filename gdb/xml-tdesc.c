@@ -487,7 +487,6 @@ file_read_description_xml (const char *filename)
   struct target_desc *tdesc;
   char *tdesc_str;
   struct cleanup *back_to;
-  const char *base;
   char *dirname;
 
   tdesc_str = fetch_xml_from_file (filename, NULL);
@@ -499,28 +498,9 @@ file_read_description_xml (const char *filename)
 
   back_to = make_cleanup (xfree, tdesc_str);
 
-  /* Simple, portable version of dirname that does not modify its
-     argument.  */
-  base = lbasename (filename);
-  while (base > filename && IS_DIR_SEPARATOR (base[-1]))
-    --base;
-  if (base > filename)
-    {
-      dirname = xmalloc (base - filename + 2);
-      memcpy (dirname, filename, base - filename);
-
-      /* On DOS based file systems, convert "d:foo" to "d:.", so that
-	 we create "d:./bar" later instead of the (different)
-	 "d:/bar".  */
-      if (base - filename == 2 && IS_ABSOLUTE_PATH (base)
-	  && !IS_DIR_SEPARATOR (filename[0]))
-	dirname[base++ - filename] = '.';
-
-      dirname[base - filename] = '\0';
-      make_cleanup (xfree, dirname);
-    }
-  else
-    dirname = NULL;
+  dirname = ldirname (filename);
+  if (dirname != NULL)
+    make_cleanup (xfree, dirname);
 
   tdesc = tdesc_parse_xml (tdesc_str, fetch_xml_from_file, dirname);
   do_cleanups (back_to);

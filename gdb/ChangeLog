@@ -1,3 +1,11 @@
+2007-06-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* defs.h (ldirname): New prototype.
+	* dwarf2read.c (read_file_scope): Use DW_AT_name if DW_AT_comp_dir is
+	missing.
+	* utils.c (ldirname): New function.
+	* xml-tdesc.c (file_read_description_xml): Use ldirname.
+
 2007-06-01  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_push_dummy_call): Store stack back chain.

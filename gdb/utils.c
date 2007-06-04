@@ -3195,3 +3195,31 @@ strtoulst (const char *num, const char **trailer, int base)
   else
     return result;
 }
+
+/* Simple, portable version of dirname that does not modify its
+   argument.  */
+
+char *
+ldirname (const char *filename)
+{
+  const char *base = lbasename (filename);
+  char *dirname;
+
+  while (base > filename && IS_DIR_SEPARATOR (base[-1]))
+    --base;
+
+  if (base == filename)
+    return NULL;
+
+  dirname = xmalloc (base - filename + 2);
+  memcpy (dirname, filename, base - filename);
+
+  /* On DOS based file systems, convert "d:foo" to "d:.", so that we
+     create "d:./bar" later instead of the (different) "d:/bar".  */
+  if (base - filename == 2 && IS_ABSOLUTE_PATH (base)
+      && !IS_DIR_SEPARATOR (filename[0]))
+    dirname[base++ - filename] = '.';
+
+  dirname[base - filename] = '\0';
+  return dirname;
+}

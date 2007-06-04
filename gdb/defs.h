@@ -417,6 +417,8 @@ extern unsigned long gnu_debuglink_crc32 (unsigned long crc,
 
 ULONGEST strtoulst (const char *num, const char **trailer, int base);
 
+char *ldirname (const char *filename);
+
 /* From demangle.c */
 
 extern void set_demangling_style (char *);

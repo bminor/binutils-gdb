@@ -2783,7 +2783,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   CORE_ADDR lowpc = ((CORE_ADDR) -1);
   CORE_ADDR highpc = ((CORE_ADDR) 0);
   struct attribute *attr;
-  char *name = "<unknown>";
+  char *name = NULL;
   char *comp_dir = NULL;
   struct die_info *child_die;
   bfd *abfd = objfile->obfd;
@@ -2806,20 +2806,28 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       name = DW_STRING (attr);
     }
+
   attr = dwarf2_attr (die, DW_AT_comp_dir, cu);
   if (attr)
+    comp_dir = DW_STRING (attr);
+  else if (name != NULL && IS_ABSOLUTE_PATH (name))
     {
-      comp_dir = DW_STRING (attr);
-      if (comp_dir)
-	{
-	  /* Irix 6.2 native cc prepends <machine>.: to the compilation
-	     directory, get rid of it.  */
-	  char *cp = strchr (comp_dir, ':');
-
-	  if (cp && cp != comp_dir && cp[-1] == '.' && cp[1] == '/')
-	    comp_dir = cp + 1;
-	}
+      comp_dir = ldirname (name);
+      if (comp_dir != NULL)
+	make_cleanup (xfree, comp_dir);
     }
+  if (comp_dir != NULL)
+    {
+      /* Irix 6.2 native cc prepends <machine>.: to the compilation
+	 directory, get rid of it.  */
+      char *cp = strchr (comp_dir, ':');
+
+      if (cp && cp != comp_dir && cp[-1] == '.' && cp[1] == '/')
+	comp_dir = cp + 1;
+    }
+
+  if (name == NULL)
+    name = "<unknown>";
 
   attr = dwarf2_attr (die, DW_AT_language, cu);
   if (attr)
