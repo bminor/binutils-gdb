@@ -1,3 +1,14 @@
+2007-06-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* objfiles.h (ImportEntry, ExportEntry): Remove types.
+	(struct objfile): Remove import_list, import_list_size,
+	export_list, export_list_size members.
+	(is_in_import_list): Remove prototype.
+	* objfiles.c (is_in_import_list): Remove.
+	* somread.c (init_import_symbols, init_export_symbols): Remove.
+	(som_symfile_read): Do not call init_import_symbols.  Do not
+	set objfile->export_list and objfile->export_list_size.
+
 2007-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (dwarf2_symbol_mark_computed): Fix formatting.

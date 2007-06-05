@@ -149,24 +149,6 @@ struct obj_section
     int ovly_mapped;
   };
 
-/* An import entry contains information about a symbol that
-   is used in this objfile but not defined in it, and so needs
-   to be imported from some other objfile */
-/* Currently we just store the name; no attributes. 1997-08-05 */
-typedef char *ImportEntry;
-
-
-/* An export entry contains information about a symbol that
-   is defined in this objfile and available for use in other
-   objfiles */
-typedef struct
-  {
-    char *name;			/* name of exported symbol */
-    int address;		/* offset subject to relocation */
-    /* Currently no other attributes 1997-08-05 */
-  }
-ExportEntry;
-
 
 /* The "objstats" structure provides a place for gdb to record some
    interesting information about its internal state at runtime, on a
@@ -406,18 +388,6 @@ struct objfile
     struct obj_section
      *sections, *sections_end;
 
-    /* Imported symbols */
-    /* FIXME: ezannoni 2004-02-10: This is just SOM (HP) specific (see
-       somread.c). It should not pollute generic objfiles.  */
-    ImportEntry *import_list;
-    int import_list_size;
-
-    /* Exported symbols */
-    /* FIXME: ezannoni 2004-02-10: This is just SOM (HP) specific (see
-       somread.c). It should not pollute generic objfiles.  */
-    ExportEntry *export_list;
-    int export_list_size;
-
     /* Link to objfile that contains the debug symbols for this one.
        One is loaded if this file has an debug link to an existing
        debug file with the right checksum */
@@ -557,8 +527,6 @@ extern struct obj_section *find_pc_sect_section (CORE_ADDR pc,
 						 asection * section);
 
 extern int in_plt_section (CORE_ADDR, char *);
-
-extern int is_in_import_list (char *, struct objfile *);
 
 /* Keep a registry of per-objfile data-pointers required by other GDB
    modules.  */
