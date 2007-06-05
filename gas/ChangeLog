@@ -1,3 +1,8 @@
+2007-06-05  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/4587
+	* config/tc-sparc.c (sparc_ip): Terminate tls_ops array.
+
 2007-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-spu.c (spu_cons): Use deferred_expression.  Handle

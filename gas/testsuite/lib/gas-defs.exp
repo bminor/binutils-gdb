@@ -1,5 +1,5 @@
 # Copyright (C) 1993, 1994, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-# 2004, 2005 Free Software Foundation, Inc.
+# 2004, 2005, 2007 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -887,4 +887,26 @@ if ![string length [info proc prune_warnings]] {
 	# Just delete *exactly* what we're ask to, and that's it.
 	return $text
     }
+}
+
+# run_list_test NAME OPTS (optional): TESTNAME
+#
+# Assemble the file "NAME.d" with command line options OPTS and
+# compare the assembler standard error output against thee regular
+# expressions given in the file "NAME.l".  If TESTNAME is provided,
+# it will be used as the name of the test.
+
+proc run_list_test { name opts {testname {}} } {
+    global srcdir subdir
+    if { [string length $testname] == 0 } then {
+	set testname "[file tail $subdir] $name"
+    }
+    set file $srcdir/$subdir/$name
+    gas_run ${name}.s $opts ">&dump.out"
+    if { [regexp_diff "dump.out" "${file}.l"] } then {
+	fail $testname
+	verbose "output is [file_contents "dump.out"]" 2
+	return
+    }
+    pass $testname
 }

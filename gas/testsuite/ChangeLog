@@ -1,3 +1,36 @@
+2007-06-05  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/4587
+	* gas/sparc/sparc.exp: Run pr4587 list test.
+	* gas/sparc/pr4587.s: New test case.
+	* gas/sparc/pr4587.l: Expected assembler output.
+
+2007-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* lib/gas-defs.exp (run_list_test): New proc.
+	* gas/alpha/alpha.exp: Delete proc run_list_test.
+	* gas/bfin/bfin.exp : Likewise.
+	* gas/cfi/cfi.exp : Likewise.
+	* gas/crx/allinsn.exp : Likewise.
+	* gas/d10v/d10v.exp : Likewise.
+	* gas/d30v/d30v.exp : Likewise.
+	* gas/frv/allinsn.exp : Likewise.
+	* gas/i386/i386.exp : Likewise.
+	* gas/i860.i860.exp : Likewise.
+	* gas/ia64/ia64.exp : Likewise.
+	* gas/lns/lns.exp : Likewise.
+	* gas/macros/macros.exp : Likewise.
+	* gas/maxq10/maxq10.exp : Likewise.
+	* gas/maxq20/maxq20.exp : Likewise.
+	* gas/mips/mips.exp : Likewise.
+	* gas/mmix/mmix-list.exp : Likewise.
+	* gas/mn10300/basic.exp : Likewise.
+	* gas/msp430/msp430.exp : Likewise.
+	* gas/pdp11/pdp11.exp : Likewise.
+	* gas/ppc/ppc.exp : Likewise.
+	* gas/s390/s390.exp : Likewise.
+	* gas/elf/elf.exp (proc run_list_test): Rename to run_elf_list_test.
+
 2007-05-29  Jakub Jelinek  <jakub@redhat.com>
 
 	PR gas/4558

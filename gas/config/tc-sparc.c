@@ -1860,7 +1860,8 @@ sparc_ip (str, pinsn)
 	    case '\0':		/* End of args.  */
 	      if (s[0] == ',' && s[1] == '%')
 		{
-		  static const struct tls_ops {
+		  static const struct tls_ops
+		  {
 		    /* The name as it appears in assembler.  */
 		    char *name;
 		    /* strlen (name), precomputed for speed */
@@ -1869,7 +1870,9 @@ sparc_ip (str, pinsn)
 		    int reloc;
 		    /* 1 if call.  */
 		    int call;
-		  } tls_ops[] = {
+		  }
+		  tls_ops[] =
+		  {
 		    { "tgd_add", 7, BFD_RELOC_SPARC_TLS_GD_ADD, 0 },
 		    { "tgd_call", 8, BFD_RELOC_SPARC_TLS_GD_CALL, 1 },
 		    { "tldm_add", 8, BFD_RELOC_SPARC_TLS_LDM_ADD, 0 },
@@ -1877,7 +1880,8 @@ sparc_ip (str, pinsn)
 		    { "tldo_add", 8, BFD_RELOC_SPARC_TLS_LDO_ADD, 0 },
 		    { "tie_ldx", 7, BFD_RELOC_SPARC_TLS_IE_LDX, 0 },
 		    { "tie_ld", 6, BFD_RELOC_SPARC_TLS_IE_LD, 0 },
-		    { "tie_add", 7, BFD_RELOC_SPARC_TLS_IE_ADD, 0 }
+		    { "tie_add", 7, BFD_RELOC_SPARC_TLS_IE_ADD, 0 },
+		    { NULL, 0, 0, 0 }
 		  };
 		  const struct tls_ops *o;
 		  char *s1;

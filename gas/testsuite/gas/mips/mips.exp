@@ -292,27 +292,6 @@ proc run_dump_test_arches { name arch_list } {
     }
 }
 
-# run_list_test NAME OPTS (optional): TESTNAME
-#
-# Assemble the file "NAME.d" and compare the assembler standard error
-# output against the regular expressions given in the file "NAME.l".
-# The assembler is passed the flags given in OPTS.  If TESTNAME is
-# provided, it will be used as the name of the test.
-proc run_list_test { name opts {testname {}} } {
-    global srcdir subdir
-    if { [string length $testname] == 0 } then {
-	    set testname "MIPS $name"
-    }
-    set file $srcdir/$subdir/$name
-    gas_run ${name}.s $opts ">&dump.out"
-    if { [regexp_diff "dump.out" "${file}.l"] } then {
-	fail $testname
-	verbose "output is [file_contents "dump.out"]" 2
-	return
-    }
-    pass $testname
-}
-
 # run_list_test_arch NAME OPTS ARCH
 #
 # Invoke "run_list_test" for test NAME with options OPTS, with extra

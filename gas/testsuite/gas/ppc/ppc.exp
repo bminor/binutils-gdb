@@ -2,19 +2,6 @@
 # Some PowerPC tests
 #
 
-proc run_list_test { name opts } {
-    global srcdir subdir
-    set testname "ppc $name"
-    set file $srcdir/$subdir/$name
-    gas_run ${name}.s $opts ">&dump.out"
-    if { [regexp_diff "dump.out" "${file}.l"] } then {
-	fail $testname
-	verbose "output is [file_contents "dump.out"]" 2
-	return
-    }
-    pass $testname
-}
-
 # These tests are currently ELF specific, only because nobody has
 # converted them to look for XCOFF relocations.
 
