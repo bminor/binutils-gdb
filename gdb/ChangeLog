@@ -1,3 +1,8 @@
+2007-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (dwarf2_symbol_mark_computed): Fix formatting.
+	Use the original objfile if necessary.
+
 2007-06-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* defs.h (ldirname): New prototype.

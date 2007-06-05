@@ -1046,9 +1046,9 @@ static void dwarf_decode_macros (struct line_header *, unsigned int,
 
 static int attr_form_is_block (struct attribute *);
 
-static void
-dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
-			     struct dwarf2_cu *cu);
+static void dwarf2_symbol_mark_computed (struct attribute *attr,
+					 struct symbol *sym,
+					 struct dwarf2_cu *cu);
 
 static gdb_byte *skip_one_die (gdb_byte *info_ptr, struct abbrev_info *abbrev,
                                struct dwarf2_cu *cu);
@@ -9698,6 +9698,13 @@ static void
 dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 			     struct dwarf2_cu *cu)
 {
+  struct objfile *objfile = cu->objfile;
+
+  /* Save the master objfile, so that we can report and look up the
+     correct file containing this variable.  */
+  if (objfile->separate_debug_objfile_backlink)
+    objfile = objfile->separate_debug_objfile_backlink;
+
   if ((attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
       /* ".debug_loc" may not exist at all, or the offset may be outside
 	 the section.  If so, fall through to the complaint in the
@@ -9708,7 +9715,7 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 
       baton = obstack_alloc (&cu->objfile->objfile_obstack,
 			     sizeof (struct dwarf2_loclist_baton));
-      baton->objfile = cu->objfile;
+      baton->objfile = objfile;
 
       /* We don't know how long the location list is, but make sure we
 	 don't run off the edge of the section.  */
@@ -9728,7 +9735,7 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 
       baton = obstack_alloc (&cu->objfile->objfile_obstack,
 			     sizeof (struct dwarf2_locexpr_baton));
-      baton->objfile = cu->objfile;
+      baton->objfile = objfile;
 
       if (attr_form_is_block (attr))
 	{
