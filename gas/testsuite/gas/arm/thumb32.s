@@ -780,3 +780,26 @@ srs:
 	subs pc, lr, #0
 	subs pc, lr, #4
 	subs pc, lr, #255
+
+	ldrd r2, r4, [r9, #48]!
+	ldrd r2, r4, [r9, #-48]!
+	strd r2, r4, [r9, #48]!
+	strd r2, r4, [r9, #-48]!
+	ldrd r2, r4, [r9], #48
+	ldrd r2, r4, [r9], #-48
+	strd r2, r4, [r9], #48
+	strd r2, r4, [r9], #-48
+
+	.macro ldaddr op
+	ldr\op	r1, [r5, #0x301]
+	ldr\op	r1, [r5, #0x30]!
+	ldr\op	r1, [r5, #-0x30]!
+	ldr\op	r1, [r5], #0x30
+	ldr\op	r1, [r5], #-0x30
+	ldr\op	r1, [r5, r9]
+	.endm
+	ldaddr
+	ldaddr b
+	ldaddr sb
+	ldaddr h
+	ldaddr sh

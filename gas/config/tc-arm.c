@@ -15017,8 +15017,8 @@ static const struct asm_opcode insns[] =
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v5e /*  ARM Architecture 5TE.  */
  TUF(pld,	450f000, f810f000, 1, (ADDR),		     pld,  t_pld),
- TC3(ldrd,	00000d0, e9500000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
- TC3(strd,	00000f0, e9400000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
+ TC3(ldrd,	00000d0, e8500000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
+ TC3(strd,	00000f0, e8400000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
 
  TCE(mcrr,	c400000, ec400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
  TCE(mrrc,	c500000, ec500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),

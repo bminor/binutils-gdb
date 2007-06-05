@@ -1,3 +1,7 @@
+2007-06-05  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (insns): Correct Thumb-2 ldrd/strd opcodes.
+
 2007-06-05  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/4587

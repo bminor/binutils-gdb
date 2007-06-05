@@ -1,3 +1,7 @@
+2007-06-05  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (thumb32_opcodes): Display writeback ldrd/strd addresses.
+
 2007-05-24  Steve Ellcey  <sje@cup.hp.com>
 
 	* Makefile.in: Regnerate.

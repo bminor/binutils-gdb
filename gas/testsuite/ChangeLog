@@ -1,3 +1,8 @@
+2007-06-05  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.d: Add writeback addressing mode tests.
+	* gas/arm/thumb32.s: Update expected output.
+
 2007-06-05  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/4587
