@@ -85,8 +85,18 @@ struct tc_fix_info {
 /* We don't need to do anything special for undefined symbols.  */
 #define md_undefined_symbol(s) 0
 
-/* We have no special operand handling.  */
-#define md_operand(e)
+extern symbolS *section_symbol (asection *);
+#define md_operand(e) \
+  do {								\
+    if (strncasecmp (input_line_pointer, "@ppu", 4) == 0)	\
+      {								\
+	e->X_op = O_symbol;					\
+	if (abs_section_sym == NULL)				\
+	  abs_section_sym = section_symbol (absolute_section);	\
+	e->X_add_symbol = abs_section_sym;			\
+	e->X_add_number = 0;					\
+      }								\
+  } while (0)
 
 /* Fill in rs_align_code fragments.  */
 extern void spu_handle_align PARAMS ((fragS *));

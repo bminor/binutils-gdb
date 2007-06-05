@@ -820,8 +820,9 @@ spu_cons (int nbytes)
 
   do
     {
-      expression (&exp);
-      if (exp.X_op == O_symbol
+      deferred_expression (&exp);
+      if ((exp.X_op == O_symbol
+	   || exp.X_op == O_constant)
 	  && strncasecmp (input_line_pointer, "@ppu", 4) == 0)
 	{
 	  char *p = frag_more (nbytes);
@@ -873,6 +874,8 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
     *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   else if (fixp->fx_subsy)
     *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
+  else
+    abort ();
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)
@@ -986,6 +989,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     }
 
   fixP->fx_addnumber = val;
+
+  if (fixP->fx_r_type == BFD_RELOC_SPU_PPU32
+      || fixP->fx_r_type == BFD_RELOC_SPU_PPU64)
+    return;
 
   if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
     {
