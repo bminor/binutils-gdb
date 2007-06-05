@@ -198,17 +198,17 @@ $7 != "'${toe}'" && ! $7 in sec_off { \
 } \
 $3 ~ /R_SPU_PPU/ { \
 	print "#ifdef _LP64"; \
-	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] ", R_PPC64_ADDR" substr($3, 10) ", " $5 "+0x" $7; \
+	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] ", R_PPC64_ADDR" substr($3, 10) ", " ($5 != "" ? $5 "+0x" $7 : "__speelf__ + 0x" $4); \
 	print "#else"; \
-	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + (substr($3, 10) == "64" ? 4 : 0)", R_PPC_ADDR32, " $5 "+0x" $7; \
+	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + (substr($3, 10) == "64" ? 4 : 0)", R_PPC_ADDR32, " ($5 != "" ? $5 "+0x" $7 : "__speelf__ + 0x" $4); \
 	print "#endif"; \
 	if (!donedef) { print "#define HAS_RELOCS 1"; donedef = 1; }; \
 } \
 $3 ~ /unrecognized:/ { \
 	print "#ifdef _LP64"; \
-	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] ", R_PPC64_ADDR" ($4 == "f" ? "64" : "32") ", " $6 "+0x" $8; \
+	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] ", R_PPC64_ADDR" ($4 == "f" ? "64" : "32") ", " ($6 != "" ? $6 "+0x" $8 : "__speelf__ + 0x" $5); \
 	print "#else"; \
-	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + ($4 == "f" ? 4 : 0)", R_PPC_ADDR32, " $6 "+0x" $8; \
+	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + ($4 == "f" ? 4 : 0)", R_PPC_ADDR32, " ($6 != "" ? $6 "+0x" $8 : "__speelf__ + 0x" $5); \
 	print "#endif"; \
 	if (!donedef) { print "#define HAS_RELOCS 1"; donedef = 1; }; \
 } \

@@ -1,3 +1,7 @@
+2007-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* embedspu.sh: Handle R_SPU_PPU* relocs with no symbol.
+
 2007-05-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* objcopy.c (copy_object): Revert 2007-05-11 change.  Don't
