@@ -57,15 +57,19 @@ DIST_COMMON = $(srcdir)/../config.guess $(srcdir)/../config.sub NEWS \
 	$(srcdir)/../config.guess $(srcdir)/../config.sub
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/../ltoptions.m4 \
-	$(top_srcdir)/../ltsugar.m4 $(top_srcdir)/../ltversion.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/../bfd/acinclude.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/nls.m4 $(top_srcdir)/../config/po.m4 \
 	$(top_srcdir)/../config/progtest.m4 \
 	$(top_srcdir)/../config/stdint.m4 $(top_srcdir)/../bfd/bfd.m4 \
 	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../libtool.m4 \
+	$(top_srcdir)/../config/lib-ld.m4 \
+	$(top_srcdir)/../config/lib-link.m4 \
+	$(top_srcdir)/../config/lib-prefix.m4 \
+	$(top_srcdir)/../config/iconv.m4 $(top_srcdir)/../ltsugar.m4 \
+	$(top_srcdir)/../ltoptions.m4 $(top_srcdir)/../ltversion.m4 \
 	$(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -255,12 +259,14 @@ LDFLAGS = @LDFLAGS@
 LEX = `if [ -f ../flex/flex ]; then echo ../flex/flex; else echo @LEX@; fi`
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
+LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
+LTLIBICONV = @LTLIBICONV@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
@@ -453,7 +459,7 @@ srconv_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 sysdump_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 coffdump_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 dlltool_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
-windres_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+windres_DEPENDENCIES = $(LIBINTL_DEP) $(LIBICONV) $(LIBIBERTY) $(BFDLIB)
 addr2line_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 readelf_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
 dllwrap_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
@@ -510,15 +516,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
-	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
+	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --cygnus  Makefile
+	  $(AUTOMAKE) --foreign  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

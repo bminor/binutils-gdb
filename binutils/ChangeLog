@@ -1,3 +1,28 @@
+007-06-05  Kai Tietz  <Kai.Tietz@onevision.com>
+
+        * Makefile.am: Add LIBICONV to windres.
+        * acinclude.m4: Added missing "lib-*.m4" and "lt*.m4" files.
+        * configure.in: Add AC_CHECK_HEADER for iconv.h and use AM_ICONV.
+        * config.in: Add ICONV defines.
+        * aclocal: Regenerate.
+        * confugure: Regenerate.
+        * winduni.c: (local_iconv_map codepages, wind_language_t
+	languages, unicode_is_valid_codepage, wind_find_language_by_id,
+	wind_find_language_by_codepage, wind_find_codepage_info,
+	unicode_from_codepage, codepage_from_unicode, iconv_onechar,
+	wind_iconv_cp, wind_MultiByteToWideChar wind_WideCharToMultiByte):
+        New.
+        (ascii_from_unicode): Use codepage_from_unicode.
+        (ascii_from_unicode): Use unicode_from_codepage.
+        Use for cygwin windows API for unicode transformation.
+        * winduni.h: (CP_ACP, CP_UTF7, CP_UTF8, CP_OEM, CP_UTF16): New
+	macros.
+        (wind_language_t, local_iconv_map): New types.
+        (wind_find_language_by_id, wind_find_language_by_codepage,
+        unicode_is_valid_codepage, wind_find_codepage_info,
+        unicode_from_codepage, codepage_from_unicode): New
+        prototypes.
+
 2007-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* embedspu.sh: Handle R_SPU_PPU* relocs with no symbol.

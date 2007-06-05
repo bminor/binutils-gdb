@@ -56,7 +56,6 @@ typedef unsigned short unichar;
 #define ESCAPE_V  013
 
 /* Convert an ASCII string to a unicode string.  */
-
 extern void unicode_from_ascii (rc_uint_type *, unichar **, const char *);
 
 /* Convert an unicode string to an ASCII string.  */
@@ -79,6 +78,49 @@ extern void ascii_print (FILE *, const char *, rc_uint_type);
 
 /* Print a quoted unicode string to a file.  */
 extern void unicode_print_quoted (FILE *, const unichar *, rc_uint_type);
+
+#ifndef CP_UTF8
+#define CP_UTF7	65000   /* UTF-7 translation.  */
+#define CP_UTF8	65001   /* UTF-8 translation.  */
+#endif
+
+#ifndef CP_UTF16
+#define CP_UTF16  65002	/* UTF-16 translation.  */
+#endif
+
+#ifndef CP_ACP
+#define CP_ACP	0	/* Default to ANSI code page.  */
+#endif
+
+#ifndef CP_OEM
+#define CP_OEM  1	/* Default OEM code page. */
+#endif
+
+typedef struct wind_language_t
+{
+  unsigned id;
+  unsigned doscp;
+  unsigned wincp;
+  const char *name;
+  const char *country;
+} wind_language_t;
+
+extern const wind_language_t *wind_find_language_by_id (unsigned);
+extern int unicode_is_valid_codepage (rc_uint_type);
+
+typedef struct local_iconv_map
+{
+  rc_uint_type codepage;
+  const char * iconv_name;
+} local_iconv_map;
+
+extern const local_iconv_map *wind_find_codepage_info (unsigned);
+
+/* Convert an Codepage string to a unicode string.  */
+extern void unicode_from_codepage (rc_uint_type *, unichar **, const char *, rc_uint_type);
+
+/* Convert an unicode string to an codepage string.  */
+extern void codepage_from_unicode (rc_uint_type *, const unichar *, char **, rc_uint_type);
 
 /* Windres support routine called by unicode_from_ascii.  This is both
    here and in windres.h.  It should probably be in a separate header

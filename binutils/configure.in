@@ -200,6 +200,9 @@ if test -n "$enable_targets"; then
     done
 fi
 
+AC_CHECK_HEADER(iconv.h)
+AM_ICONV
+
 all_targets=false
 BUILD_NLMCONV=
 NLMCONV_DEFS=
