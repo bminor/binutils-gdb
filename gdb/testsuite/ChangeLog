@@ -1,3 +1,9 @@
+2007-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.arch/thumb-prologue.c: Record the breakpoint address in
+	tpcs_offset.  Restore lr after the call.
+	* gdb.arch/thumb-prologue.exp: Use tpcs_offset.
+
 2007-05-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* lib/gdbserver-support.exp (gdbserver_spawn): Only match full_buffer.
