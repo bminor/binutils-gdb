@@ -1301,10 +1301,8 @@ yylex ()
   int tempbufindex;
   static char *tempbuf;
   static int tempbufsize;
-  struct symbol * sym_class = NULL;
   char * token_string = NULL;
   int class_prefix = 0;
-  int unquoted_expr;
    
  retry:
 
@@ -1320,7 +1318,6 @@ yylex ()
     }
 
   prev_lexptr = lexptr;
-  unquoted_expr = 1;
 
   tokstart = lexptr;
   /* See if it is a special token of length 3.  */
@@ -1392,7 +1389,6 @@ yylex ()
 	  if (namelen > 2)
 	    {
 	      lexptr = tokstart + namelen;
-              unquoted_expr = 0;
 	      if (lexptr[-1] != '\'')
 		error ("Unmatched single quote.");
 	      namelen -= 2;
@@ -1689,30 +1685,6 @@ yylex ()
     {
       write_dollar_variable (yylval.sval);
       return VARIABLE;
-    }
-  
-  /* Look ahead and see if we can consume more of the input
-     string to get a reasonable class/namespace spec or a
-     fully-qualified name.  This is a kludge to get around the
-     HP aCC compiler's generation of symbol names with embedded
-     colons for namespace and nested classes. */
-
-  /* NOTE: carlton/2003-09-24: I don't entirely understand the
-     HP-specific code, either here or in linespec.  Having said that,
-     I suspect that we're actually moving towards their model: we want
-     symbols whose names are fully qualified, which matches the
-     description above.  */
-  if (unquoted_expr)
-    {
-      /* Only do it if not inside single quotes */ 
-      sym_class = parse_nested_classes_for_hpacc (yylval.sval.ptr, yylval.sval.length,
-                                                  &token_string, &class_prefix, &lexptr);
-      if (sym_class)
-        {
-          /* Replace the current token with the bigger one we found */ 
-          yylval.sval.ptr = token_string;
-          yylval.sval.length = strlen (token_string);
-        }
     }
   
   /* Use token-type BLOCKNAME for symbols that happen to be defined as

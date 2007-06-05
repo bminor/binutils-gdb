@@ -1053,19 +1053,6 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 
     case TYPE_CODE_ENUM:
       c_type_print_modifier (type, stream, 0, 1);
-      /* HP C supports sized enums */
-      if (deprecated_hp_som_som_object_present)
-	switch (TYPE_LENGTH (type))
-	  {
-	  case 1:
-	    fputs_filtered ("char ", stream);
-	    break;
-	  case 2:
-	    fputs_filtered ("short ", stream);
-	    break;
-	  default:
-	    break;
-	  }
       fprintf_filtered (stream, "enum ");
       /* Print the tag name if it exists.
          The aCC compiler emits a spurious 

@@ -373,21 +373,6 @@ value_cast (struct type *type, struct value *arg2)
     {
       LONGEST longest;
 
-      /* If target compiled by HP aCC.  */
-      if (deprecated_hp_som_som_object_present
-	  && code2 == TYPE_CODE_MEMBERPTR)
-	{
-	  unsigned int *ptr;
-	  struct value *retvalp;
-
-	  /* With HP aCC, pointers to data members have a bias.  */
-	  retvalp = value_from_longest (type, value_as_long (arg2));
-	  /* force evaluation */
-	  ptr = (unsigned int *) value_contents (retvalp);
-	  *ptr &= ~0x20000000;	/* zap 29th bit to remove bias */
-	  return retvalp;
-	}
-
       /* When we cast pointers to integers, we mustn't use
          POINTER_TO_ADDRESS to find the address the pointer
          represents, as value_as_long would.  GDB should evaluate

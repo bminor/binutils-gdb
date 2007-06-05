@@ -1,5 +1,37 @@
 2007-06-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* hppa-hpux-tdep.c (args_for_find_stub, HP_ACC_EH_notify_hook,
+	HP_ACC_EH_set_hook_value, HP_ACC_EH_notify_callback, HP_ACC_EH_break,
+	HP_ACC_EH_catch_throw, HP_ACC_EH_catch_catch, __eh_notification,
+	hp_cxx_exception_support, hp_cxx_exception_support_initialized,
+	eh_notify_hook_addr, eh_notify_callback_addr, eh_break_addr,
+	eh_catch_throw_addr, break_callback_sal, setup_d_pid_in_inferior,
+	find_stub_with_shl_get, cover_find_stub_with_shl_get,
+	initialize_hp_cxx_exception_support, child_enable_exception_callback,
+	current_ex_event, child_get_current_exception_event): Remove.
+	(hppa_hpux_inferior_created): Remove.
+	(hppa_hpux_init_abi): Do not install hppa_hpux_inferior_created.
+
+	* breakpoint.h (deprecated_exception_catchpoints_are_fragile): Remove.
+	(deprecated_exception_support_initialized): Remove.
+	* breakpoint.c (deprecated_exception_catchpoints_are_fragile): Remove.
+	(deprecated_exception_support_initialized): Remove.
+	(breakpoint_init_inferior): Remove handling of non-zero
+	deprecated_exception_catchpoints_are_fragile.
+
+	* symtab.h (deprecated_hp_som_som_object_present): Remove.
+	* symtab.c (deprecated_hp_som_som_object_present): Remove.
+	* c-typeprint.c (c_type_print_base): Remove handling of non-zero
+	deprecated_hp_som_som_object_present.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* valops.c (value_cast): Likewise.
+
+	* parse.c (parse_nested_classes_for_hpacc, coloncolon): Remove.
+	* parser-defs.h (parse_nested_classes_for_hpacc): Remove.
+	* c-exp.y (yylex): Do not call parse_nested_classes_for_hpacc.
+
+2007-06-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* objfiles.h (ImportEntry, ExportEntry): Remove types.
 	(struct objfile): Remove import_list, import_list_size,
 	export_list, export_list_size members.

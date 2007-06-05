@@ -298,14 +298,6 @@ int breakpoint_count;
 /* Pointer to current exception event record */
 static struct exception_event_record *current_exception_event;
 
-/* Indicator of whether exception catchpoints should be nuked between
-   runs of a program.  */
-int deprecated_exception_catchpoints_are_fragile = 0;
-
-/* Indicator of when exception catchpoints set-up should be
-   reinitialized -- e.g. when program is re-run.  */
-int deprecated_exception_support_initialized = 0;
-
 /* This function returns a pointer to the string representation of the
    pathname of the dynamically-linked library that has just been
    loaded.
@@ -1719,7 +1711,6 @@ breakpoint_init_inferior (enum inf_context context)
 {
   struct breakpoint *b, *temp;
   struct bp_location *bpt;
-  static int warning_needed = 0;
 
   ALL_BP_LOCATIONS (bpt)
     bpt->inserted = 0;
@@ -1757,28 +1748,9 @@ breakpoint_init_inferior (enum inf_context context)
 	  }
 	break;
       default:
-	/* Likewise for exception catchpoints in dynamic-linked
-	   executables where required */
-	if (ep_is_exception_catchpoint (b)
-	    && deprecated_exception_catchpoints_are_fragile)
-	  {
-	    warning_needed = 1;
-	    delete_breakpoint (b);
-	  }
 	break;
       }
   }
-
-  if (deprecated_exception_catchpoints_are_fragile)
-    deprecated_exception_support_initialized = 0;
-
-  /* Don't issue the warning unless it's really needed... */
-  if (warning_needed && (context != inf_exited))
-    {
-      warning (_("Exception catchpoints from last run were deleted.\n"
-		 "You must reinsert them explicitly."));
-      warning_needed = 0;
-    }
 }
 
 /* breakpoint_here_p (PC) returns non-zero if an enabled breakpoint

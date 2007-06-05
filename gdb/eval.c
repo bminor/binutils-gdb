@@ -1022,14 +1022,6 @@ evaluate_subexp_standard (struct type *expect_type,
       argvec = (struct value **) alloca (sizeof (struct value *) * (nargs + 3));
       if (op == STRUCTOP_MEMBER || op == STRUCTOP_MPTR)
 	{
-	  /* 1997-08-01 Currently we do not support function invocation
-	     via pointers-to-methods with HP aCC. Pointer does not point
-	     to the function, but possibly to some thunk. */
-	  if (deprecated_hp_som_som_object_present)
-	    {
-	      error (_("Not implemented: function invocation through pointer to method with HP aCC"));
-	    }
-
 	  nargs++;
 	  /* First, evaluate the structure into arg2 */
 	  pc2 = (*pos)++;
@@ -1415,14 +1407,6 @@ evaluate_subexp_standard (struct type *expect_type,
       switch (TYPE_CODE (type))
 	{
 	case TYPE_CODE_METHODPTR:
-	  if (deprecated_hp_som_som_object_present)
-	    {
-	      /* With HP aCC, pointers to methods do not point to the
-		 function code.  */
-	      /* 1997-08-19 */
-	      error (_("Pointers to methods not supported with HP aCC"));
-	    }
-
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    return value_zero (TYPE_TARGET_TYPE (type), not_lval);
 	  else
@@ -1438,14 +1422,6 @@ evaluate_subexp_standard (struct type *expect_type,
 			     arg1);
 
 	  mem_offset = value_as_long (arg2);
-	  if (deprecated_hp_som_som_object_present)
-	    {
-	      /* HP aCC generates offsets that have bit #29 set; turn it off to get
-		 a real offset to the member. */
-	      if (!mem_offset)	/* no bias -> really null */
-		error (_("Attempted dereference of null pointer-to-member"));
-	      mem_offset &= ~0x20000000;
-	    }
 
 	  arg3 = value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 				     value_as_long (arg1) + mem_offset);
@@ -1468,24 +1444,6 @@ evaluate_subexp_standard (struct type *expect_type,
     case BINOP_ASSIGN:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-
-      /* Do special stuff for HP aCC pointers to members */
-      if (deprecated_hp_som_som_object_present)
-	{
-	  /* 1997-08-19 Can't assign HP aCC pointers to methods. No details of
-	     the implementation yet; but the pointer appears to point to a code
-	     sequence (thunk) in memory -- in any case it is *not* the address
-	     of the function as it would be in a naive implementation. */
-	  if (TYPE_CODE (value_type (arg1)) == TYPE_CODE_METHODPTR)
-	    error (_("Assignment to pointers to methods not implemented with HP aCC"));
-
-	  /* HP aCC pointers to data members require a constant bias.  */
-	  if (TYPE_CODE (value_type (arg1)) == TYPE_CODE_MEMBERPTR)
-	    {
-	      unsigned int *ptr = (unsigned int *) value_contents (arg2);	/* forces evaluation */
-	      *ptr |= 0x20000000;	/* set 29th bit */
-	    }
-	}
 
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
 	return arg1;
@@ -1978,13 +1936,6 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  struct value *retvalp = evaluate_subexp_for_address (exp, pos, noside);
-	  /* If HP aCC object, use bias for pointers to members */
-	  if (deprecated_hp_som_som_object_present
-	      && TYPE_CODE (value_type (retvalp)) == TYPE_CODE_MEMBERPTR)
-	    {
-	      unsigned int *ptr = (unsigned int *) value_contents (retvalp);	/* forces evaluation */
-	      *ptr |= 0x20000000;	/* set 29th bit */
-	    }
 	  return retvalp;
 	}
 
