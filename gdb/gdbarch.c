@@ -1074,12 +1074,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: in_solib_return_trampoline = <0x%lx>\n",
                       (long) current_gdbarch->in_solib_return_trampoline);
-#ifdef INNER_THAN
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INNER_THAN(lhs, rhs)",
-                      XSTRING (INNER_THAN (lhs, rhs)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: inner_than = <0x%lx>\n",
                       (long) current_gdbarch->inner_than);

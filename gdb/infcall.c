@@ -377,7 +377,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	   address.  AMD64 called that region the "red zone".  Skip at
 	   least the "red zone" size before allocating any space on
 	   the stack.  */
-	if (INNER_THAN (1, 2))
+	if (gdbarch_inner_than (current_gdbarch, 1, 2))
 	  sp -= gdbarch_frame_red_zone_size (current_gdbarch);
 	else
 	  sp += gdbarch_frame_red_zone_size (current_gdbarch);
@@ -405,15 +405,17 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	   to pay :-).  */
 	if (sp == old_sp)
 	  {
-	    if (INNER_THAN (1, 2))
+	    if (gdbarch_inner_than (current_gdbarch, 1, 2))
 	      /* Stack grows down.  */
 	      sp = gdbarch_frame_align (current_gdbarch, old_sp - 1);
 	    else
 	      /* Stack grows up.  */
 	      sp = gdbarch_frame_align (current_gdbarch, old_sp + 1);
 	  }
-	gdb_assert ((INNER_THAN (1, 2) && sp <= old_sp)
-		    || (INNER_THAN (2, 1) && sp >= old_sp));
+	gdb_assert ((gdbarch_inner_than (current_gdbarch, 1, 2)
+		    && sp <= old_sp)
+		    || (gdbarch_inner_than (current_gdbarch, 2, 1)
+		       && sp >= old_sp));
       }
     else
       /* FIXME: cagney/2002-09-18: Hey, you loose!
@@ -459,7 +461,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     case ON_STACK:
       /* "dummy_addr" is here just to keep old targets happy.  New
 	 targets return that same information via "sp" and "bp_addr".  */
-      if (INNER_THAN (1, 2))
+      if (gdbarch_inner_than (current_gdbarch, 1, 2))
 	{
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
 				using_gcc, args, nargs, values_type,
@@ -606,7 +608,7 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
 	      len = TYPE_LENGTH (arg_type);
 
 	      aligned_len = len;
-	      if (INNER_THAN (1, 2))
+	      if (gdbarch_inner_than (current_gdbarch, 1, 2))
 		{
 		  /* stack grows downward */
 		  sp -= aligned_len;
@@ -641,7 +643,7 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
   if (struct_return)
     {
       int len = TYPE_LENGTH (values_type);
-      if (INNER_THAN (1, 2))
+      if (gdbarch_inner_than (current_gdbarch, 1, 2))
 	{
 	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
              making space for the return value.  */

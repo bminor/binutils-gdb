@@ -382,7 +382,7 @@ frame_id_inner (struct frame_id l, struct frame_id r)
        comment in "frame.h", there is some fuzz here.  Frameless
        functions are not strictly inner than (same .stack but
        different .code and/or .special address).  */
-    inner = INNER_THAN (l.stack_addr, r.stack_addr);
+    inner = gdbarch_inner_than (current_gdbarch, l.stack_addr, r.stack_addr);
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "{ frame_id_inner (l=");

@@ -187,7 +187,7 @@ derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
   /* Save frame pointer of TOS frame.  */
   *top = get_frame_base (fi);
   /* If current stack pointer is more "inner", use that instead.  */
-  if (INNER_THAN (get_frame_sp (fi), *top))
+  if (gdbarch_inner_than (current_gdbarch, get_frame_sp (fi), *top))
     *top = get_frame_sp (fi);
 
   /* Find prev-most frame.  */

@@ -1,5 +1,15 @@
 2007-06-06  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (INNER_THAN): Replace by gdbarch_inner_than.
+	* infcall.c (call_function_by_hand): Likewise.
+	* gcore.c (derive_stack_segment): Likewise.
+	* frame.c (frame_id_inner): Likewise.
+	* arch-utils.c (core_addr_lessthan): Likewise (comment).
+	* ada-lang.c (ensure_lval): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-06  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (ADDRESS_TO_POINTER): Replace by
 	gdbarch_address_to_pointer.
 	* findvar.c (store_typed_address): Likewise.

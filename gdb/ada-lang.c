@@ -3634,7 +3634,7 @@ ensure_lval (struct value *val, CORE_ADDR *sp)
       /* The following is taken from the structure-return code in
 	 call_function_by_hand. FIXME: Therefore, some refactoring seems 
 	 indicated. */
-      if (INNER_THAN (1, 2))
+      if (gdbarch_inner_than (current_gdbarch, 1, 2))
 	{
 	  /* Stack grows downward.  Align SP and VALUE_ADDRESS (val) after
 	     reserving sufficient space. */

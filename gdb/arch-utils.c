@@ -119,7 +119,7 @@ generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-/* Helper functions for INNER_THAN */
+/* Helper functions for gdbarch_inner_than */
 
 int
 core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs)
