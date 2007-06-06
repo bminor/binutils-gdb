@@ -1816,7 +1816,7 @@ For PPC, @option{booke}, @option{booke32} and @option{booke64} select
 disassembly of BookE instructions.  @option{32} and @option{64} select
 PowerPC and PowerPC64 disassembly, respectively.  @option{e300} selects
 disassembly for the e300 family.  @option{440} selects disassembly for
-the powerPC 440.
+the PowerPC 440.
 
 For MIPS, this option controls the printing of instruction mnemonic
 names and register names in disassembled instructions.  Multiple

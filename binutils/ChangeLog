@@ -1,3 +1,7 @@
+2007-06-06  Ben Elliston  <bje@au.ibm.com>
+
+	* doc/binutils.texi (objdump): Fix capitalisation of "PowerPC".
+
 007-06-05  Kai Tietz  <Kai.Tietz@onevision.com>
 
         * Makefile.am: Add LIBICONV to windres.
