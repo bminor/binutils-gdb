@@ -1040,11 +1040,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: frame_num_args = <0x%lx>\n",
                       (long) current_gdbarch->frame_num_args);
-#ifdef FRAME_RED_ZONE_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_RED_ZONE_SIZE # %s\n",
-                      XSTRING (FRAME_RED_ZONE_SIZE));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: frame_red_zone_size = %s\n",
                       paddr_d (current_gdbarch->frame_red_zone_size));

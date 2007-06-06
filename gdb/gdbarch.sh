@@ -584,7 +584,7 @@ M::CORE_ADDR:frame_align:CORE_ADDR address:address
 # stabs_argument_has_addr.
 F:=:int:deprecated_reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type
 m::int:stabs_argument_has_addr:struct type *type:type::default_stabs_argument_has_addr::0
-v:=:int:frame_red_zone_size
+v::int:frame_red_zone_size
 #
 m::CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr, struct target_ops *targ:addr, targ::convert_from_func_ptr_addr_identity::0
 # On some machines there are bits in addresses which are not really

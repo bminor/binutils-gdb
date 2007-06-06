@@ -1,5 +1,11 @@
 2007-06-06  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (FRAME_RED_ZONE_SIZE): Replace by
+	gdbarch_frame_red_zone_size.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-06  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (INNER_THAN): Replace by gdbarch_inner_than.
 	* infcall.c (call_function_by_hand): Likewise.
 	* gcore.c (derive_stack_segment): Likewise.

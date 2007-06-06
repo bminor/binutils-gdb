@@ -926,12 +926,6 @@ extern void set_gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, gdbarc
 
 extern int gdbarch_frame_red_zone_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_frame_red_zone_size (struct gdbarch *gdbarch, int frame_red_zone_size);
-#if !defined (GDB_TM_FILE) && defined (FRAME_RED_ZONE_SIZE)
-#error "Non multi-arch definition of FRAME_RED_ZONE_SIZE"
-#endif
-#if !defined (FRAME_RED_ZONE_SIZE)
-#define FRAME_RED_ZONE_SIZE (gdbarch_frame_red_zone_size (current_gdbarch))
-#endif
 
 typedef CORE_ADDR (gdbarch_convert_from_func_ptr_addr_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, struct target_ops *targ);
 extern CORE_ADDR gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr, struct target_ops *targ);
