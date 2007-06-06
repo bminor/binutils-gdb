@@ -351,7 +351,33 @@ open_input_stream (char *cmd)
   return cpp_pipe;
 }
 
-/* look for the preprocessor program */
+/* Determine if FILENAME contains special characters that
+   can cause problems unless the entire filename is quoted.  */
+
+static int
+filename_need_quotes (const char *filename)
+{
+  if (filename == NULL || (filename[0] == '-' && filename[1] == 0))
+    return 0;
+
+  while (*filename != 0)
+    {
+      switch (*filename)
+        {
+        case '&':
+        case ' ':
+        case '<':
+        case '>':
+        case '|':
+        case '%':
+          return 1;
+        }
+      ++filename;
+    }
+  return 0;
+}
+
+/* Look for the preprocessor program.  */
 
 static FILE *
 look_for_default (char *cmd, const char *prefix, int end_prefix,
@@ -360,6 +386,7 @@ look_for_default (char *cmd, const char *prefix, int end_prefix,
   char *space;
   int found;
   struct stat s;
+  const char *fnquotes = (filename_need_quotes (filename) ? "\"" : "");
 
   strcpy (cmd, prefix);
 
@@ -390,8 +417,8 @@ look_for_default (char *cmd, const char *prefix, int end_prefix,
 
   strcpy (cmd, prefix);
 
-  sprintf (cmd + end_prefix, "%s %s %s",
-	   DEFAULT_PREPROCESSOR, preprocargs, filename);
+  sprintf (cmd + end_prefix, "%s %s %s%s%s",
+	   DEFAULT_PREPROCESSOR, preprocargs, fnquotes, filename, fnquotes);
 
   if (verbose)
     fprintf (stderr, _("Using `%s'\n"), cmd);
@@ -407,6 +434,7 @@ read_rc_file (const char *filename, const char *preprocessor,
 	      const char *preprocargs, int language, int use_temp_file)
 {
   char *cmd;
+  const char *fnquotes = (filename_need_quotes (filename) ? "\"" : "");
 
   istream_type = (use_temp_file) ? ISTREAM_FILE : ISTREAM_PIPE;
 
@@ -420,8 +448,10 @@ read_rc_file (const char *filename, const char *preprocessor,
       cmd = xmalloc (strlen (preprocessor)
 		     + strlen (preprocargs)
 		     + strlen (filename)
+		     + strlen (fnquotes) * 2
 		     + 10);
-      sprintf (cmd, "%s %s %s", preprocessor, preprocargs, filename);
+      sprintf (cmd, "%s %s %s%s%s", preprocessor, preprocargs,
+	       fnquotes, filename, fnquotes);
 
       cpp_pipe = open_input_stream (cmd);
     }
@@ -435,6 +465,7 @@ read_rc_file (const char *filename, const char *preprocessor,
 		     + strlen (preprocessor)
 		     + strlen (preprocargs)
 		     + strlen (filename)
+		     + strlen (fnquotes) * 2
 #ifdef HAVE_EXECUTABLE_SUFFIX
 		     + strlen (EXECUTABLE_SUFFIX)
 #endif

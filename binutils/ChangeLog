@@ -1,8 +1,16 @@
+2007-06-06  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	PR binutils/4356 binutils/591
+	* resrc.c (filename_need_quotes): New function.
+	(look_for_default): If filename_need_quotes is true then quote the
+	filename in the command line being created.
+	(read_rc_file): Likewise.
+
 2007-06-06  Ben Elliston  <bje@au.ibm.com>
 
 	* doc/binutils.texi (objdump): Fix capitalisation of "PowerPC".
 
-007-06-05  Kai Tietz  <Kai.Tietz@onevision.com>
+2007-06-05  Kai Tietz  <Kai.Tietz@onevision.com>
 
         * Makefile.am: Add LIBICONV to windres.
         * acinclude.m4: Added missing "lib-*.m4" and "lt*.m4" files.
@@ -10,7 +18,7 @@
         * config.in: Add ICONV defines.
         * aclocal: Regenerate.
         * confugure: Regenerate.
-        * winduni.c: (local_iconv_map codepages, wind_language_t
+        * winduni.c: (local_iconv_map codepages, wind_language_t,
 	languages, unicode_is_valid_codepage, wind_find_language_by_id,
 	wind_find_language_by_codepage, wind_find_codepage_info,
 	unicode_from_codepage, codepage_from_unicode, iconv_onechar,
