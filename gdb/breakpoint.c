@@ -7444,7 +7444,7 @@ breakpoint_re_set (void)
   set_language (save_language);
   input_radix = save_input_radix;
 
-  if (GET_LONGJMP_TARGET_P ())
+  if (gdbarch_get_longjmp_target_p (current_gdbarch))
     {
       create_longjmp_breakpoint ("longjmp");
       create_longjmp_breakpoint ("_longjmp");

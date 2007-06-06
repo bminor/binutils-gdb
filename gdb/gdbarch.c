@@ -1054,21 +1054,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: frame_red_zone_size = %s\n",
                       paddr_d (current_gdbarch->frame_red_zone_size));
-#ifdef GET_LONGJMP_TARGET_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "GET_LONGJMP_TARGET_P()",
-                      XSTRING (GET_LONGJMP_TARGET_P ()));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_get_longjmp_target_p() = %d\n",
                       gdbarch_get_longjmp_target_p (current_gdbarch));
-#ifdef GET_LONGJMP_TARGET
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "GET_LONGJMP_TARGET(pc)",
-                      XSTRING (GET_LONGJMP_TARGET (pc)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: get_longjmp_target = <0x%lx>\n",
                       (long) current_gdbarch->get_longjmp_target);

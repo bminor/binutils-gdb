@@ -537,30 +537,11 @@ extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_
 
 /* setjmp/longjmp support. */
 
-#if defined (GET_LONGJMP_TARGET)
-/* Legacy for systems yet to multi-arch GET_LONGJMP_TARGET */
-#if !defined (GET_LONGJMP_TARGET_P)
-#define GET_LONGJMP_TARGET_P() (1)
-#endif
-#endif
-
 extern int gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (GET_LONGJMP_TARGET_P)
-#error "Non multi-arch definition of GET_LONGJMP_TARGET"
-#endif
-#if !defined (GET_LONGJMP_TARGET_P)
-#define GET_LONGJMP_TARGET_P() (gdbarch_get_longjmp_target_p (current_gdbarch))
-#endif
 
 typedef int (gdbarch_get_longjmp_target_ftype) (CORE_ADDR *pc);
 extern int gdbarch_get_longjmp_target (struct gdbarch *gdbarch, CORE_ADDR *pc);
 extern void set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch, gdbarch_get_longjmp_target_ftype *get_longjmp_target);
-#if !defined (GDB_TM_FILE) && defined (GET_LONGJMP_TARGET)
-#error "Non multi-arch definition of GET_LONGJMP_TARGET"
-#endif
-#if !defined (GET_LONGJMP_TARGET)
-#define GET_LONGJMP_TARGET(pc) (gdbarch_get_longjmp_target (current_gdbarch, pc))
-#endif
 
 extern int gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch);
 extern void set_gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch, int believe_pcc_promotion);
