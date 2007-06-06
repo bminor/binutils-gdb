@@ -374,7 +374,7 @@ value_cast (struct type *type, struct value *arg2)
       LONGEST longest;
 
       /* When we cast pointers to integers, we mustn't use
-         POINTER_TO_ADDRESS to find the address the pointer
+         gdbarch_pointer_to_address to find the address the pointer
          represents, as value_as_long would.  GDB should evaluate
          expressions just as the compiler would --- and the compiler
          sees a cast as a simple reinterpretation of the pointer's

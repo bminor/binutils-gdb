@@ -1,5 +1,23 @@
 2007-06-06  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (ADDRESS_TO_POINTER): Replace by
+	gdbarch_address_to_pointer.
+	* findvar.c (store_typed_address): Likewise.
+	* gdbtypes.c (make_pointer_type): Likewise (comment).
+	* procfs.c (procfs_address_to_host_pointer): Likewise.
+	* std-regs.c (value_of_builtin_frame_reg): Likewise.
+	(value_of_builtin_frame_fp_reg): Likewise.
+	(value_of_builtin_frame_pc_reg): Likewise.
+	* utils.c (paddress): Likewise (comment).
+	* gdbarch.sh (POINTER_TO_ADDRESS): Replace by
+	gdbarch_pointer_to_address.
+	* findvar.c (extract_typed_address): Likewise.
+	* gdbtypes.c (make_pointer_type): Likewise (comment).
+	* valops.c (value_cast): Likewise (comment).
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-06  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (GET_LONGJMP_TARGET): Replace by gdbarch_get_longjmp_target.
 	* infrun.c (handle_inferior_event): Likewise.
 	* gdbarch.sh (GET_LONGJMP_TARGET_P): Replace by

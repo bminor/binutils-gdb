@@ -703,12 +703,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: address_class_type_flags_to_name = <0x%lx>\n",
                       (long) current_gdbarch->address_class_type_flags_to_name);
-#ifdef ADDRESS_TO_POINTER
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ADDRESS_TO_POINTER(type, buf, addr)",
-                      XSTRING (ADDRESS_TO_POINTER (type, buf, addr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: address_to_pointer = <0x%lx>\n",
                       (long) current_gdbarch->address_to_pointer);
@@ -1184,12 +1178,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: pc_regnum = %s\n",
                       paddr_d (current_gdbarch->pc_regnum));
-#ifdef POINTER_TO_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "POINTER_TO_ADDRESS(type, buf)",
-                      XSTRING (POINTER_TO_ADDRESS (type, buf)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: pointer_to_address = <0x%lx>\n",
                       (long) current_gdbarch->pointer_to_address);

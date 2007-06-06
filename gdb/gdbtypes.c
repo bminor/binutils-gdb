@@ -317,8 +317,8 @@ make_pointer_type (struct type *type, struct type **typeptr)
   TYPE_CODE (ntype) = TYPE_CODE_PTR;
 
   /* Mark pointers as unsigned.  The target converts between pointers
-     and addresses (CORE_ADDRs) using POINTER_TO_ADDRESS() and
-     ADDRESS_TO_POINTER(). */
+     and addresses (CORE_ADDRs) using gdbarch_pointer_to_address and
+     gdbarch_address_to_pointer. */
   TYPE_FLAGS (ntype) |= TYPE_FLAG_UNSIGNED;
 
   if (!TYPE_POINTER_TYPE (type))	/* Remember it, if don't have one.  */

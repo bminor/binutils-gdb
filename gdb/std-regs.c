@@ -64,8 +64,8 @@ value_of_builtin_frame_reg (struct frame_info *frame, const void *baton)
   memset (buf, 0, TYPE_LENGTH (value_type (val)));
   /* frame.base.  */
   if (frame != NULL)
-    ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
-			get_frame_base (frame));
+    gdbarch_address_to_pointer (current_gdbarch, builtin_type_void_data_ptr,
+				buf, get_frame_base (frame));
   buf += TYPE_LENGTH (builtin_type_void_data_ptr);
   /* frame.XXX.  */
   return val;
@@ -89,8 +89,8 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame, const void *baton)
       if (frame == NULL)
 	memset (buf, 0, TYPE_LENGTH (value_type (val)));
       else
-	ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
-			    get_frame_base_address (frame));
+	gdbarch_address_to_pointer (current_gdbarch, builtin_type_void_data_ptr,
+				    buf, get_frame_base_address (frame));
       return val;
     }
 }
@@ -107,8 +107,8 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame, const void *baton)
       if (frame == NULL)
 	memset (buf, 0, TYPE_LENGTH (value_type (val)));
       else
-	ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
-			    get_frame_pc (frame));
+	gdbarch_address_to_pointer (current_gdbarch, builtin_type_void_data_ptr,
+				     buf, get_frame_pc (frame));
       return val;
     }
 }

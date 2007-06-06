@@ -174,7 +174,7 @@ extract_typed_address (const gdb_byte *buf, struct type *type)
 		    _("extract_typed_address: "
 		    "type is not a pointer or reference"));
 
-  return POINTER_TO_ADDRESS (type, buf);
+  return gdbarch_pointer_to_address (current_gdbarch, type, buf);
 }
 
 
@@ -243,7 +243,7 @@ store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 		    _("store_typed_address: "
 		    "type is not a pointer or reference"));
 
-  ADDRESS_TO_POINTER (type, buf, addr);
+  gdbarch_address_to_pointer (current_gdbarch, type, buf, addr);
 }
 
 

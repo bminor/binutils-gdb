@@ -194,7 +194,8 @@ extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struc
    / addr_bit will be set from it.
   
    If TARGET_PTR_BIT and TARGET_ADDR_BIT are different, you'll probably
-   also need to set POINTER_TO_ADDRESS and ADDRESS_TO_POINTER as well.
+   also need to set gdbarch_pointer_to_address and gdbarch_address_to_pointer
+   as well.
   
    ptr_bit is the size of a pointer on the target */
 
@@ -594,22 +595,10 @@ extern void set_gdbarch_value_from_register (struct gdbarch *gdbarch, gdbarch_va
 typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, const gdb_byte *buf);
 extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);
-#if !defined (GDB_TM_FILE) && defined (POINTER_TO_ADDRESS)
-#error "Non multi-arch definition of POINTER_TO_ADDRESS"
-#endif
-#if !defined (POINTER_TO_ADDRESS)
-#define POINTER_TO_ADDRESS(type, buf) (gdbarch_pointer_to_address (current_gdbarch, type, buf))
-#endif
 
 typedef void (gdbarch_address_to_pointer_ftype) (struct type *type, gdb_byte *buf, CORE_ADDR addr);
 extern void gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, gdb_byte *buf, CORE_ADDR addr);
 extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_address_to_pointer_ftype *address_to_pointer);
-#if !defined (GDB_TM_FILE) && defined (ADDRESS_TO_POINTER)
-#error "Non multi-arch definition of ADDRESS_TO_POINTER"
-#endif
-#if !defined (ADDRESS_TO_POINTER)
-#define ADDRESS_TO_POINTER(type, buf, addr) (gdbarch_address_to_pointer (current_gdbarch, type, buf, addr))
-#endif
 
 extern int gdbarch_integer_to_address_p (struct gdbarch *gdbarch);
 

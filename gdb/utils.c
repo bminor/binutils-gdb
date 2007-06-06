@@ -2559,7 +2559,7 @@ paddress (CORE_ADDR addr)
      when it won't occur. */
   /* NOTE: This assumes that the significant address information is
      kept in the least significant bits of ADDR - the upper bits were
-     either zero or sign extended.  Should ADDRESS_TO_POINTER() or
+     either zero or sign extended.  Should gdbarch_address_to_pointer or
      some ADDRESS_TO_PRINTABLE() be used to do the conversion?  */
 
   int addr_bit = TARGET_ADDR_BIT;

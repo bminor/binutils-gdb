@@ -407,7 +407,8 @@ v:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat **:long_double_format:::::f
 # / addr_bit will be set from it.
 #
 # If TARGET_PTR_BIT and TARGET_ADDR_BIT are different, you'll probably
-# also need to set POINTER_TO_ADDRESS and ADDRESS_TO_POINTER as well.
+# also need to set gdbarch_pointer_to_address and gdbarch_address_to_pointer
+# as well.
 #
 # ptr_bit is the size of a pointer on the target
 v:TARGET_PTR_BIT:int:ptr_bit:::8 * sizeof (void*):TARGET_INT_BIT::0
@@ -496,8 +497,8 @@ f:=:void:value_to_register:struct frame_info *frame, int regnum, struct type *ty
 # (but not the value contents) filled in.
 f::struct value *:value_from_register:struct type *type, int regnum, struct frame_info *frame:type, regnum, frame::default_value_from_register::0
 #
-f:=:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf::unsigned_pointer_to_address::0
-f:=:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
+f::CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf::unsigned_pointer_to_address::0
+f::void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
 M::CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 
 # It has been suggested that this, well actually its predecessor,

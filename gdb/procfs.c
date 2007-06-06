@@ -2847,7 +2847,8 @@ procfs_address_to_host_pointer (CORE_ADDR addr)
   void *ptr;
 
   gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
-  ADDRESS_TO_POINTER (builtin_type_void_data_ptr, &ptr, addr);
+  gdbarch_address_to_pointer (current_gdbarch, builtin_type_void_data_ptr,
+			      &ptr, addr);
   return ptr;
 }
 
