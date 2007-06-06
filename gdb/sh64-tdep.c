@@ -206,9 +206,8 @@ sh64_register_name (int reg_nr)
    symbol that marks it as 32-bit function.  The MSB of the minimal
    symbol's "info" field is used for this purpose.
 
-   ELF_MAKE_MSYMBOL_SPECIAL
-   tests whether an ELF symbol is "special", i.e. refers
-   to a 32-bit function, and sets a "special" bit in a 
+   gdbarch_elf_make_msymbol_special tests whether an ELF symbol is "special",
+   i.e. refers to a 32-bit function, and sets a "special" bit in a
    minimal symbol to mark it as a 32-bit function
    MSYMBOL_IS_SPECIAL   tests the "special" bit in a minimal symbol  */
 

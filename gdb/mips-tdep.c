@@ -293,7 +293,7 @@ mips_abi_regsize (struct gdbarch *gdbarch)
    marks it as 16-bit function.  The MSB of the minimal symbol's
    "info" field is used for this purpose.
 
-   ELF_MAKE_MSYMBOL_SPECIAL tests whether an ELF symbol is "special",
+   gdbarch_elf_make_msymbol_special tests whether an ELF symbol is "special",
    i.e. refers to a 16-bit function, and sets a "special" bit in a
    minimal symbol to mark it as a 16-bit function
 

@@ -1,5 +1,17 @@
 2007-06-06  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (COFF_MAKE_MSYMBOL_SPECIAL): Replace by
+	gdbarch_coff_make_msymbol_special.
+	* coffread.c (coff_symtab_read): Likewise.
+	* gdbarch.sh (ELF_MAKE_MSYMBOL_SPECIAL): Replace by
+	gdbarch_elf_make_msymbol_special.
+	* elfread.c (elf_symtab_read): Likewise.
+	* mips-tdep.c (mips_elf_make_msymbol_special): Likewise (comment).
+	* sh64-tdep.c (MSYMBOL_IS_SPECIAL): Likewise (comment).
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-06  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (FRAME_RED_ZONE_SIZE): Replace by
 	gdbarch_frame_red_zone_size.
 	* gdbarch.c, gdbarch.h: Regenerate.

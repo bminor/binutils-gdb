@@ -931,7 +931,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
 	    msym = record_minimal_symbol (cs, tmpaddr, ms_type, sec, objfile);
 	    if (msym)
-	      COFF_MAKE_MSYMBOL_SPECIAL (cs->c_sclass, msym);
+	      gdbarch_coff_make_msymbol_special
+	      (current_gdbarch, cs->c_sclass, msym);
 
 	    if (SDB_TYPE (cs->c_type))
 	      {

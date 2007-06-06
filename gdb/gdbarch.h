@@ -1085,22 +1085,10 @@ extern void set_gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch, g
 typedef void (gdbarch_elf_make_msymbol_special_ftype) (asymbol *sym, struct minimal_symbol *msym);
 extern void gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, asymbol *sym, struct minimal_symbol *msym);
 extern void set_gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special);
-#if !defined (GDB_TM_FILE) && defined (ELF_MAKE_MSYMBOL_SPECIAL)
-#error "Non multi-arch definition of ELF_MAKE_MSYMBOL_SPECIAL"
-#endif
-#if !defined (ELF_MAKE_MSYMBOL_SPECIAL)
-#define ELF_MAKE_MSYMBOL_SPECIAL(sym, msym) (gdbarch_elf_make_msymbol_special (current_gdbarch, sym, msym))
-#endif
 
 typedef void (gdbarch_coff_make_msymbol_special_ftype) (int val, struct minimal_symbol *msym);
 extern void gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, int val, struct minimal_symbol *msym);
 extern void set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special);
-#if !defined (GDB_TM_FILE) && defined (COFF_MAKE_MSYMBOL_SPECIAL)
-#error "Non multi-arch definition of COFF_MAKE_MSYMBOL_SPECIAL"
-#endif
-#if !defined (COFF_MAKE_MSYMBOL_SPECIAL)
-#define COFF_MAKE_MSYMBOL_SPECIAL(val, msym) (gdbarch_coff_make_msymbol_special (current_gdbarch, val, msym))
-#endif
 
 extern const char * gdbarch_name_of_malloc (struct gdbarch *gdbarch);
 extern void set_gdbarch_name_of_malloc (struct gdbarch *gdbarch, const char * name_of_malloc);

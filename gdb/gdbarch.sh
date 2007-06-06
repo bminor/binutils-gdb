@@ -651,8 +651,8 @@ m::int:in_function_epilogue_p:CORE_ADDR addr:addr:0:generic_in_function_epilogue
 # ARGC is the number of elements in the vector.
 # ARGV is an array of strings, one per argument.
 m::char *:construct_inferior_arguments:int argc, char **argv:argc, argv::construct_inferior_arguments::0
-f:=:void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym::default_elf_make_msymbol_special::0
-f:=:void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym::default_coff_make_msymbol_special::0
+f::void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym::default_elf_make_msymbol_special::0
+f::void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym::default_coff_make_msymbol_special::0
 v:=:const char *:name_of_malloc:::"malloc":"malloc"::0:NAME_OF_MALLOC
 v:=:int:cannot_step_breakpoint:::0:0::0
 v:=:int:have_nonsteppable_watchpoint:::0:0::0

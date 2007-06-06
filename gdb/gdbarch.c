@@ -768,12 +768,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: char_signed = %s\n",
                       paddr_d (current_gdbarch->char_signed));
-#ifdef COFF_MAKE_MSYMBOL_SPECIAL
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "COFF_MAKE_MSYMBOL_SPECIAL(val, msym)",
-                      XSTRING (COFF_MAKE_MSYMBOL_SPECIAL (val, msym)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: coff_make_msymbol_special = <0x%lx>\n",
                       (long) current_gdbarch->coff_make_msymbol_special);
@@ -930,12 +924,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: ecoff_reg_to_regnum = <0x%lx>\n",
                       (long) current_gdbarch->ecoff_reg_to_regnum);
-#ifdef ELF_MAKE_MSYMBOL_SPECIAL
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ELF_MAKE_MSYMBOL_SPECIAL(sym, msym)",
-                      XSTRING (ELF_MAKE_MSYMBOL_SPECIAL (sym, msym)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: elf_make_msymbol_special = <0x%lx>\n",
                       (long) current_gdbarch->elf_make_msymbol_special);

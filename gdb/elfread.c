@@ -410,7 +410,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
 	  if (msym != NULL)
 	    msym->filename = filesymname;
 #endif
-	  ELF_MAKE_MSYMBOL_SPECIAL (sym, msym);
+	  gdbarch_elf_make_msymbol_special (current_gdbarch, sym, msym);
 	}
     }
 }
