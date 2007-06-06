@@ -1002,29 +1002,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: frame_align = <0x%lx>\n",
                       (long) current_gdbarch->frame_align);
-#ifdef FRAME_ARGS_SKIP
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FRAME_ARGS_SKIP # %s\n",
-                      XSTRING (FRAME_ARGS_SKIP));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: frame_args_skip = 0x%s\n",
                       paddr_nz (current_gdbarch->frame_args_skip));
-#ifdef FRAME_NUM_ARGS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_NUM_ARGS_P()",
-                      XSTRING (FRAME_NUM_ARGS_P ()));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_frame_num_args_p() = %d\n",
                       gdbarch_frame_num_args_p (current_gdbarch));
-#ifdef FRAME_NUM_ARGS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FRAME_NUM_ARGS(frame)",
-                      XSTRING (FRAME_NUM_ARGS (frame)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: frame_num_args = <0x%lx>\n",
                       (long) current_gdbarch->frame_num_args);

@@ -809,12 +809,6 @@ extern void set_gdbarch_fetch_tls_load_module_address (struct gdbarch *gdbarch, 
 
 extern CORE_ADDR gdbarch_frame_args_skip (struct gdbarch *gdbarch);
 extern void set_gdbarch_frame_args_skip (struct gdbarch *gdbarch, CORE_ADDR frame_args_skip);
-#if !defined (GDB_TM_FILE) && defined (FRAME_ARGS_SKIP)
-#error "Non multi-arch definition of FRAME_ARGS_SKIP"
-#endif
-#if !defined (FRAME_ARGS_SKIP)
-#define FRAME_ARGS_SKIP (gdbarch_frame_args_skip (current_gdbarch))
-#endif
 
 extern int gdbarch_unwind_pc_p (struct gdbarch *gdbarch);
 
@@ -831,30 +825,11 @@ extern void set_gdbarch_unwind_sp (struct gdbarch *gdbarch, gdbarch_unwind_sp_ft
 /* DEPRECATED_FRAME_LOCALS_ADDRESS as been replaced by the per-frame
    frame-base.  Enable frame-base before frame-unwind. */
 
-#if defined (FRAME_NUM_ARGS)
-/* Legacy for systems yet to multi-arch FRAME_NUM_ARGS */
-#if !defined (FRAME_NUM_ARGS_P)
-#define FRAME_NUM_ARGS_P() (1)
-#endif
-#endif
-
 extern int gdbarch_frame_num_args_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (FRAME_NUM_ARGS_P)
-#error "Non multi-arch definition of FRAME_NUM_ARGS"
-#endif
-#if !defined (FRAME_NUM_ARGS_P)
-#define FRAME_NUM_ARGS_P() (gdbarch_frame_num_args_p (current_gdbarch))
-#endif
 
 typedef int (gdbarch_frame_num_args_ftype) (struct frame_info *frame);
 extern int gdbarch_frame_num_args (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_frame_num_args (struct gdbarch *gdbarch, gdbarch_frame_num_args_ftype *frame_num_args);
-#if !defined (GDB_TM_FILE) && defined (FRAME_NUM_ARGS)
-#error "Non multi-arch definition of FRAME_NUM_ARGS"
-#endif
-#if !defined (FRAME_NUM_ARGS)
-#define FRAME_NUM_ARGS(frame) (gdbarch_frame_num_args (current_gdbarch, frame))
-#endif
 
 /* DEPRECATED_STACK_ALIGN has been replaced by an initial aligning call
    to frame_align and the requirement that methods such as

@@ -1,5 +1,15 @@
 2007-06-06  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (FRAME_ARGS_SKIP): Replace by gdbarch_frame_args_skip.
+	* stack.c (print_frame_args): Likewise.
+	* gdbarch.sh (FRAME_NUM_ARGS): Replace by gdbarch_frame_num_args.
+	* stack.c (print_args_stub, frame_info): Likewise.
+	* gdbarch.sh (FRAME_NUM_ARGS_P): Replace by gdbarch_frame_num_args_p.
+	* stack.c (print_args_stub, frame_info): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-06  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (COFF_MAKE_MSYMBOL_SPECIAL): Replace by
 	gdbarch_coff_make_msymbol_special.
 	* coffread.c (coff_symtab_read): Likewise.

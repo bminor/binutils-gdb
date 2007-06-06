@@ -567,12 +567,12 @@ m::int:remote_register_number:int regno:regno::default_remote_register_number::0
 # Fetch the target specific address used to represent a load module.
 F:=:CORE_ADDR:fetch_tls_load_module_address:struct objfile *objfile:objfile
 #
-v:=:CORE_ADDR:frame_args_skip:::0:::0
+v::CORE_ADDR:frame_args_skip:::0:::0
 M::CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame
 M::CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame
 # DEPRECATED_FRAME_LOCALS_ADDRESS as been replaced by the per-frame
 # frame-base.  Enable frame-base before frame-unwind.
-F:=:int:frame_num_args:struct frame_info *frame:frame
+F::int:frame_num_args:struct frame_info *frame:frame
 #
 # DEPRECATED_STACK_ALIGN has been replaced by an initial aligning call
 # to frame_align and the requirement that methods such as

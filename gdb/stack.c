@@ -339,7 +339,7 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
       long start;
 
       if (highest_offset == -1)
-	start = FRAME_ARGS_SKIP;
+	start = gdbarch_frame_args_skip (current_gdbarch);
       else
 	start = highest_offset;
 
@@ -358,9 +358,9 @@ print_args_stub (void *args)
   struct print_args_args *p = args;
   int numargs;
 
-  if (FRAME_NUM_ARGS_P ())
+  if (gdbarch_frame_num_args_p (current_gdbarch))
     {
-      numargs = FRAME_NUM_ARGS (p->frame);
+      numargs = gdbarch_frame_num_args (current_gdbarch, p->frame);
       gdb_assert (numargs >= 0);
     }
   else
@@ -971,14 +971,14 @@ frame_info (char *addr_exp, int from_tty)
 	deprecated_print_address_numeric (arg_list, 1, gdb_stdout);
 	printf_filtered (",");
 
-	if (!FRAME_NUM_ARGS_P ())
+	if (!gdbarch_frame_num_args_p (current_gdbarch))
 	  {
 	    numargs = -1;
 	    puts_filtered (" args: ");
 	  }
 	else
 	  {
-	    numargs = FRAME_NUM_ARGS (fi);
+	    numargs = gdbarch_frame_num_args (current_gdbarch, fi);
 	    gdb_assert (numargs >= 0);
 	    if (numargs == 0)
 	      puts_filtered (" no args.");
