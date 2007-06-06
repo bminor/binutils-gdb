@@ -16780,13 +16780,13 @@ executable file you want to debug as an argument.  This command starts
 created Emacs buffer.
 @c (Do not use the @code{-tui} option to run @value{GDBN} from Emacs.)
 
-Using @value{GDBN} under Emacs is just like using @value{GDBN} normally except for two
+Running @value{GDBN} under Emacs can be just like running @value{GDBN} normally except for two
 things:
 
 @itemize @bullet
 @item
-All ``terminal'' input and output goes through the Emacs buffer.
-@end itemize
+All ``terminal'' input and output goes through an Emacs buffer, called
+the GUD buffer.
 
 This applies both to @value{GDBN} commands and their output, and to the input
 and output done by the program you are debugging.
@@ -16800,10 +16800,8 @@ with your program.  In particular, you can send signals the usual
 way---for example, @kbd{C-c C-c} for an interrupt, @kbd{C-c C-z} for a
 stop.
 
-@itemize @bullet
 @item
 @value{GDBN} displays source code through Emacs.
-@end itemize
 
 Each time @value{GDBN} displays a stack frame, Emacs automatically finds the
 source file for that frame and puts an arrow (@samp{=>}) at the
@@ -16813,6 +16811,12 @@ and the source.
 
 Explicit @value{GDBN} @code{list} or search commands still produce output as
 usual, but you probably have no reason to use them from Emacs.
+@end itemize
+
+We call this @dfn{text command mode}.  Emacs 22.1, and later, also uses
+a graphical mode, enabled by default, which provides further buffers
+that can control the execution and describe the state of your program.
+@xref{GDB Graphical Interface,,, Emacs, The @sc{gnu} Emacs Manual}.
 
 If you specify an absolute file name when prompted for the @kbd{M-x
 gdb} argument, then Emacs sets your current working directory to where
@@ -16825,9 +16829,9 @@ some operating systems it might not find the source.  So, although the
 buffer does not display the current source and line of execution.
 
 The initial working directory of @value{GDBN} is printed on the top
-line of the @value{GDBN} I/O buffer and this serves as a default for
-the commands that specify files for @value{GDBN} to operate
-on.  @xref{Files, ,Commands to Specify Files}.
+line of the GUD buffer and this serves as a default for the commands
+that specify files for @value{GDBN} to operate on.  @xref{Files,
+,Commands to Specify Files}.
 
 By default, @kbd{M-x gdb} calls the program called @file{gdb}.  If you
 need to call @value{GDBN} by a different name (for example, if you
@@ -16835,12 +16839,12 @@ keep several configurations around, with different names) you can
 customize the Emacs variable @code{gud-gdb-command-name} to run the
 one you want.
 
-In the @value{GDBN} I/O buffer, you can use these special Emacs commands in
+In the GUD buffer, you can use these special Emacs commands in
 addition to the standard Shell mode commands:
 
 @table @kbd
 @item C-h m
-Describe the features of Emacs' @value{GDBN} Mode.
+Describe the features of Emacs' GUD Mode.
 
 @item C-c C-s
 Execute to another source line, like the @value{GDBN} @code{step} command; also
@@ -16876,12 +16880,13 @@ Go down the number of frames indicated by the numeric argument, like the
 In any source file, the Emacs command @kbd{C-x @key{SPC}} (@code{gud-break})
 tells @value{GDBN} to set a breakpoint on the source line point is on.
 
-If you type @kbd{M-x speedbar}, then Emacs displays a separate frame which
-shows a backtrace when the @value{GDBN} I/O buffer is current.  Move
-point to any frame in the stack and type @key{RET} to make it become the
-current frame and display the associated source in the source buffer.
-Alternatively, click @kbd{Mouse-2} to make the selected frame become the
-current one.
+In text command mode, if you type @kbd{M-x speedbar}, Emacs displays a
+separate frame which shows a backtrace when the GUD buffer is current.
+Move point to any frame in the stack and type @key{RET} to make it
+become the current frame and display the associated source in the
+source buffer.  Alternatively, click @kbd{Mouse-2} to make the
+selected frame become the current one.  In graphical mode, the
+speedbar displays watch expressions.
 
 If you accidentally delete the source-display buffer, an easy way to get
 it back is to type the command @code{f} in the @value{GDBN} buffer, to
@@ -16896,9 +16901,9 @@ communicates with Emacs in terms of line numbers.  If you add or
 delete lines from the text, the line numbers that @value{GDBN} knows cease
 to correspond properly with the code.
 
-The description given here is for GNU Emacs version 21.3 and a more
-detailed description of its interaction with @value{GDBN} is given in
-the Emacs manual (@pxref{Debuggers,,, Emacs, The @sc{gnu} Emacs Manual}).
+A more detailed description of Emacs' interaction with @value{GDBN} is
+given in the Emacs manual (@pxref{Debuggers,,, Emacs, The @sc{gnu}
+Emacs Manual}).
 
 @c The following dropped because Epoch is nonstandard.  Reactivate
 @c if/when v19 does something similar. ---doc@cygnus.com 19dec1990
