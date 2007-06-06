@@ -600,7 +600,7 @@ a command like `return' or `jump' to continue execution."));
 	  resume_ptid = inferior_ptid;
 	}
 
-      if (CANNOT_STEP_BREAKPOINT)
+      if (gdbarch_cannot_step_breakpoint (current_gdbarch))
 	{
 	  /* Most targets can step a breakpoint instruction, thus
 	     executing it normally.  But if this one cannot, just
@@ -1166,11 +1166,11 @@ adjust_pc_after_break (struct execution_control_state *ecs)
      these signals at breakpoints (the code has been in GDB since at least
      1992) so I can not guess how to handle them here.
 
-     In earlier versions of GDB, a target with HAVE_NONSTEPPABLE_WATCHPOINTS
-     would have the PC after hitting a watchpoint affected by
-     DECR_PC_AFTER_BREAK.  I haven't found any target with both of these set
-     in GDB history, and it seems unlikely to be correct, so
-     HAVE_NONSTEPPABLE_WATCHPOINTS is not checked here.  */
+     In earlier versions of GDB, a target with 
+     gdbarch_have_nonsteppable_watchpoint would have the PC after hitting a
+     watchpoint affected by DECR_PC_AFTER_BREAK.  I haven't found any target
+     with both of these set in GDB history, and it seems unlikely to be correct,
+     so gdbarch_have_nonsteppable_watchpoint is not checked here.  */
 
   if (ecs->ws.kind != TARGET_WAITKIND_STOPPED)
     return;
@@ -1761,7 +1761,8 @@ handle_inferior_event (struct execution_control_state *ecs)
   /* It is far more common to need to disable a watchpoint to step
      the inferior over it.  FIXME.  What else might a debug
      register or page protection watchpoint scheme need here?  */
-  if (HAVE_NONSTEPPABLE_WATCHPOINT && STOPPED_BY_WATCHPOINT (ecs->ws))
+  if (gdbarch_have_nonsteppable_watchpoint (current_gdbarch)
+      && STOPPED_BY_WATCHPOINT (ecs->ws))
     {
       /* At this point, we are stopped at an instruction which has
          attempted to write to a piece of memory under control of

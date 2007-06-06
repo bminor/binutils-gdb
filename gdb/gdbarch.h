@@ -1076,21 +1076,9 @@ extern void set_gdbarch_name_of_malloc (struct gdbarch *gdbarch, const char * na
 
 extern int gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch);
 extern void set_gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch, int cannot_step_breakpoint);
-#if !defined (GDB_TM_FILE) && defined (CANNOT_STEP_BREAKPOINT)
-#error "Non multi-arch definition of CANNOT_STEP_BREAKPOINT"
-#endif
-#if !defined (CANNOT_STEP_BREAKPOINT)
-#define CANNOT_STEP_BREAKPOINT (gdbarch_cannot_step_breakpoint (current_gdbarch))
-#endif
 
 extern int gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch);
 extern void set_gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch, int have_nonsteppable_watchpoint);
-#if !defined (GDB_TM_FILE) && defined (HAVE_NONSTEPPABLE_WATCHPOINT)
-#error "Non multi-arch definition of HAVE_NONSTEPPABLE_WATCHPOINT"
-#endif
-#if !defined (HAVE_NONSTEPPABLE_WATCHPOINT)
-#define HAVE_NONSTEPPABLE_WATCHPOINT (gdbarch_have_nonsteppable_watchpoint (current_gdbarch))
-#endif
 
 #if defined (ADDRESS_CLASS_TYPE_FLAGS)
 /* Legacy for systems yet to multi-arch ADDRESS_CLASS_TYPE_FLAGS */

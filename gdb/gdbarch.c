@@ -754,11 +754,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: cannot_fetch_register = <0x%lx>\n",
                       (long) current_gdbarch->cannot_fetch_register);
-#ifdef CANNOT_STEP_BREAKPOINT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CANNOT_STEP_BREAKPOINT # %s\n",
-                      XSTRING (CANNOT_STEP_BREAKPOINT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: cannot_step_breakpoint = %s\n",
                       paddr_d (current_gdbarch->cannot_step_breakpoint));
@@ -1020,11 +1015,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: get_longjmp_target = <0x%lx>\n",
                       (long) current_gdbarch->get_longjmp_target);
-#ifdef HAVE_NONSTEPPABLE_WATCHPOINT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT # %s\n",
-                      XSTRING (HAVE_NONSTEPPABLE_WATCHPOINT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
                       paddr_d (current_gdbarch->have_nonsteppable_watchpoint));
