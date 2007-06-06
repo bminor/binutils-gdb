@@ -1,3 +1,15 @@
+2007-06-06  Andreas Schwab  <schwab@suse.de>
+
+	* libunwind-frame.c (unw_destroy_addr_space_p): Define.
+	(destroy_addr_space_name): Define.
+	(libunwind_load): Get address of destroy_addr_space function.
+	(libunwind_frame_cache): Destroy unw_addr_space_t object before
+	returning unsuccessfully.
+	(libunwind_frame_sniffer): Destroy unw_addr_space_t object before
+	returning.
+	(libunwind_sigtramp_frame_sniffer): Likewise.
+	(libunwind_get_reg_special): Likewise.
+
 2007-06-06  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbarch.sh (FETCH_POINTER_ARGUMENT): Replace by
