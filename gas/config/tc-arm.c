@@ -2613,6 +2613,7 @@ static void
 s_align (int unused ATTRIBUTE_UNUSED)
 {
   int temp;
+  bfd_boolean fill_p;
   long temp_fill;
   long max_alignment = 15;
 
@@ -2629,16 +2630,25 @@ s_align (int unused ATTRIBUTE_UNUSED)
     {
       input_line_pointer++;
       temp_fill = get_absolute_expression ();
+      fill_p = TRUE;
     }
   else
-    temp_fill = 0;
+    {
+      fill_p = FALSE;
+      temp_fill = 0;
+    }
 
   if (!temp)
     temp = 2;
 
   /* Only make a frag if we HAVE to.  */
   if (temp && !need_pass_2)
-    frag_align (temp, (int) temp_fill, 0);
+    {
+      if (!fill_p && subseg_text_p (now_seg))
+	frag_align_code (temp, 0);
+      else
+	frag_align (temp, (int) temp_fill, 0);
+    }
   demand_empty_rest_of_line ();
 
   record_alignment (now_seg, temp);
