@@ -1844,7 +1844,8 @@ find_implementation (CORE_ADDR object, CORE_ADDR sel)
 }
 
 #define OBJC_FETCH_POINTER_ARGUMENT(argi) \
-  FETCH_POINTER_ARGUMENT (get_current_frame (), argi, builtin_type_void_func_ptr)
+  gdbarch_fetch_pointer_argument (current_gdbarch, get_current_frame (), \
+				  argi, builtin_type_void_func_ptr)
 
 static int
 resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)

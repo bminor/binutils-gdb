@@ -662,7 +662,7 @@ M::int:address_class_name_to_type_flags:const char *name, int *type_flags_ptr:na
 # Is a register in a group
 m::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup::default_register_reggroup_p::0
 # Fetch the pointer to the ith function argument.
-F:=:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
+F::CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
 
 # Return the appropriate register set for a core file section with
 # name SECT_NAME and size SECT_SIZE.

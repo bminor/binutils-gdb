@@ -1125,30 +1125,11 @@ extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_re
 
 /* Fetch the pointer to the ith function argument. */
 
-#if defined (FETCH_POINTER_ARGUMENT)
-/* Legacy for systems yet to multi-arch FETCH_POINTER_ARGUMENT */
-#if !defined (FETCH_POINTER_ARGUMENT_P)
-#define FETCH_POINTER_ARGUMENT_P() (1)
-#endif
-#endif
-
 extern int gdbarch_fetch_pointer_argument_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (FETCH_POINTER_ARGUMENT_P)
-#error "Non multi-arch definition of FETCH_POINTER_ARGUMENT"
-#endif
-#if !defined (FETCH_POINTER_ARGUMENT_P)
-#define FETCH_POINTER_ARGUMENT_P() (gdbarch_fetch_pointer_argument_p (current_gdbarch))
-#endif
 
 typedef CORE_ADDR (gdbarch_fetch_pointer_argument_ftype) (struct frame_info *frame, int argi, struct type *type);
 extern CORE_ADDR gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, struct frame_info *frame, int argi, struct type *type);
 extern void set_gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument);
-#if !defined (GDB_TM_FILE) && defined (FETCH_POINTER_ARGUMENT)
-#error "Non multi-arch definition of FETCH_POINTER_ARGUMENT"
-#endif
-#if !defined (FETCH_POINTER_ARGUMENT)
-#define FETCH_POINTER_ARGUMENT(frame, argi, type) (gdbarch_fetch_pointer_argument (current_gdbarch, frame, argi, type))
-#endif
 
 /* Return the appropriate register set for a core file section with
    name SECT_NAME and size SECT_SIZE. */

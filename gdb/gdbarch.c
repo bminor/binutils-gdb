@@ -931,21 +931,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: extract_return_value = <0x%lx>\n",
                       (long) current_gdbarch->extract_return_value);
-#ifdef FETCH_POINTER_ARGUMENT_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FETCH_POINTER_ARGUMENT_P()",
-                      XSTRING (FETCH_POINTER_ARGUMENT_P ()));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_fetch_pointer_argument_p() = %d\n",
                       gdbarch_fetch_pointer_argument_p (current_gdbarch));
-#ifdef FETCH_POINTER_ARGUMENT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FETCH_POINTER_ARGUMENT(frame, argi, type)",
-                      XSTRING (FETCH_POINTER_ARGUMENT (frame, argi, type)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: fetch_pointer_argument = <0x%lx>\n",
                       (long) current_gdbarch->fetch_pointer_argument);

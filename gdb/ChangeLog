@@ -1,5 +1,12 @@
 2007-06-06  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (FETCH_POINTER_ARGUMENT): Replace by
+	gdbarch_fetch_pointer_argument.
+	* objc-lang.c (OBJC_FETCH_POINTER_ARGUMENT): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-06  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (HAVE_NONSTEPPABLE_WATCHPOINT): Replace by
 	gdbarch_have_nonsteppable_watchpoint.
 	* infrun.c (handle_inferior_event, adjust_pc_after_break): Likewise.
