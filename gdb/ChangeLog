@@ -1,3 +1,13 @@
+2007-06-06  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* remote.c (process_g_packet): Don't check size.
+	* gdbarch.sh: Remove register_bytes_ok.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* m68k-tdep.c (REGISTER_BYTES_NOFP): Remove.
+	(m68k_register_bytes_ok): Remove.
+	(m68k_gdbarch_init): Don't register m68k_register_bytes_ok.
+	
 2007-06-06  Andreas Schwab  <schwab@suse.de>
 
 	* libunwind-frame.c (unw_destroy_addr_space_p): Define.

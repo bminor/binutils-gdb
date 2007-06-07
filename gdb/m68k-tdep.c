@@ -54,10 +54,6 @@
 #define P_MOVEL_SP	0x2f00
 #define P_MOVEML_SP	0x48e7
 
-
-#define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
-#define REGISTER_BYTES_NOFP (16*4 + 8)
-
 /* Offset from SP to first arg on stack at first instruction of a function */
 #define SP_ARG0 (1 * 4)
 
@@ -71,14 +67,6 @@ m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   static gdb_byte break_insn[] = {0x4e, (0x40 | BPT_VECTOR)};
   *lenptr = sizeof (break_insn);
   return break_insn;
-}
-
-
-static int
-m68k_register_bytes_ok (long numbytes)
-{
-  return ((numbytes == REGISTER_BYTES_FP)
-	  || (numbytes == REGISTER_BYTES_NOFP));
 }
 
 /* Return the GDB type object for the "standard" data type of data in
@@ -1044,7 +1032,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, m68k_register_type);
   set_gdbarch_register_name (gdbarch, m68k_register_name);
   set_gdbarch_num_regs (gdbarch, M68K_NUM_REGS);
-  set_gdbarch_register_bytes_ok (gdbarch, m68k_register_bytes_ok);
   set_gdbarch_sp_regnum (gdbarch, M68K_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, M68K_PC_REGNUM);
   set_gdbarch_ps_regnum (gdbarch, M68K_PS_REGNUM);

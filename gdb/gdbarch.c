@@ -174,7 +174,6 @@ struct gdbarch
   gdbarch_print_float_info_ftype *print_float_info;
   gdbarch_print_vector_info_ftype *print_vector_info;
   gdbarch_register_sim_regno_ftype *register_sim_regno;
-  gdbarch_register_bytes_ok_ftype *register_bytes_ok;
   gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
   gdbarch_cannot_store_register_ftype *cannot_store_register;
   gdbarch_get_longjmp_target_ftype *get_longjmp_target;
@@ -300,7 +299,6 @@ struct gdbarch startup_gdbarch =
   0,  /* print_float_info */
   0,  /* print_vector_info */
   0,  /* register_sim_regno */
-  0,  /* register_bytes_ok */
   0,  /* cannot_fetch_register */
   0,  /* cannot_store_register */
   0,  /* get_longjmp_target */
@@ -554,7 +552,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of print_float_info, has predicate */
   /* Skip verify of print_vector_info, has predicate */
   /* Skip verify of register_sim_regno, invalid_p == 0 */
-  /* Skip verify of register_bytes_ok, has predicate */
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
   /* Skip verify of cannot_store_register, invalid_p == 0 */
   /* Skip verify of get_longjmp_target, has predicate */
@@ -1201,24 +1198,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: read_pc = <0x%lx>\n",
                       (long) current_gdbarch->read_pc);
-#ifdef REGISTER_BYTES_OK_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_BYTES_OK_P()",
-                      XSTRING (REGISTER_BYTES_OK_P ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_register_bytes_ok_p() = %d\n",
-                      gdbarch_register_bytes_ok_p (current_gdbarch));
-#ifdef REGISTER_BYTES_OK
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_BYTES_OK(nr_bytes)",
-                      XSTRING (REGISTER_BYTES_OK (nr_bytes)));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: register_bytes_ok = <0x%lx>\n",
-                      (long) current_gdbarch->register_bytes_ok);
 #ifdef REGISTER_NAME
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2256,30 +2235,6 @@ set_gdbarch_register_sim_regno (struct gdbarch *gdbarch,
                                 gdbarch_register_sim_regno_ftype register_sim_regno)
 {
   gdbarch->register_sim_regno = register_sim_regno;
-}
-
-int
-gdbarch_register_bytes_ok_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->register_bytes_ok != NULL;
-}
-
-int
-gdbarch_register_bytes_ok (struct gdbarch *gdbarch, long nr_bytes)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->register_bytes_ok != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_bytes_ok called\n");
-  return gdbarch->register_bytes_ok (nr_bytes);
-}
-
-void
-set_gdbarch_register_bytes_ok (struct gdbarch *gdbarch,
-                               gdbarch_register_bytes_ok_ftype register_bytes_ok)
-{
-  gdbarch->register_bytes_ok = register_bytes_ok;
 }
 
 int

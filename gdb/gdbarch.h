@@ -503,31 +503,6 @@ extern void set_gdbarch_register_sim_regno (struct gdbarch *gdbarch, gdbarch_reg
 #define REGISTER_SIM_REGNO(reg_nr) (gdbarch_register_sim_regno (current_gdbarch, reg_nr))
 #endif
 
-#if defined (REGISTER_BYTES_OK)
-/* Legacy for systems yet to multi-arch REGISTER_BYTES_OK */
-#if !defined (REGISTER_BYTES_OK_P)
-#define REGISTER_BYTES_OK_P() (1)
-#endif
-#endif
-
-extern int gdbarch_register_bytes_ok_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (REGISTER_BYTES_OK_P)
-#error "Non multi-arch definition of REGISTER_BYTES_OK"
-#endif
-#if !defined (REGISTER_BYTES_OK_P)
-#define REGISTER_BYTES_OK_P() (gdbarch_register_bytes_ok_p (current_gdbarch))
-#endif
-
-typedef int (gdbarch_register_bytes_ok_ftype) (long nr_bytes);
-extern int gdbarch_register_bytes_ok (struct gdbarch *gdbarch, long nr_bytes);
-extern void set_gdbarch_register_bytes_ok (struct gdbarch *gdbarch, gdbarch_register_bytes_ok_ftype *register_bytes_ok);
-#if !defined (GDB_TM_FILE) && defined (REGISTER_BYTES_OK)
-#error "Non multi-arch definition of REGISTER_BYTES_OK"
-#endif
-#if !defined (REGISTER_BYTES_OK)
-#define REGISTER_BYTES_OK(nr_bytes) (gdbarch_register_bytes_ok (current_gdbarch, nr_bytes))
-#endif
-
 typedef int (gdbarch_cannot_fetch_register_ftype) (int regnum);
 extern int gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int regnum);
 extern void set_gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, gdbarch_cannot_fetch_register_ftype *cannot_fetch_register);
