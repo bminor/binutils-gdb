@@ -166,7 +166,7 @@ blocks_to_erase (VEC(memory_write_request_s) *written)
       CORE_ADDR begin, end;
 
       block_boundaries (ptr->begin, &begin, 0);
-      block_boundaries (ptr->end, 0, &end);
+      block_boundaries (ptr->end - 1, 0, &end);
 
       if (!VEC_empty (memory_write_request_s, result)
 	  && VEC_last (memory_write_request_s, result)->end >= begin)
