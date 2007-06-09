@@ -745,30 +745,11 @@ extern void set_gdbarch_remote_register_number (struct gdbarch *gdbarch, gdbarch
 
 /* Fetch the target specific address used to represent a load module. */
 
-#if defined (FETCH_TLS_LOAD_MODULE_ADDRESS)
-/* Legacy for systems yet to multi-arch FETCH_TLS_LOAD_MODULE_ADDRESS */
-#if !defined (FETCH_TLS_LOAD_MODULE_ADDRESS_P)
-#define FETCH_TLS_LOAD_MODULE_ADDRESS_P() (1)
-#endif
-#endif
-
 extern int gdbarch_fetch_tls_load_module_address_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (FETCH_TLS_LOAD_MODULE_ADDRESS_P)
-#error "Non multi-arch definition of FETCH_TLS_LOAD_MODULE_ADDRESS"
-#endif
-#if !defined (FETCH_TLS_LOAD_MODULE_ADDRESS_P)
-#define FETCH_TLS_LOAD_MODULE_ADDRESS_P() (gdbarch_fetch_tls_load_module_address_p (current_gdbarch))
-#endif
 
 typedef CORE_ADDR (gdbarch_fetch_tls_load_module_address_ftype) (struct objfile *objfile);
 extern CORE_ADDR gdbarch_fetch_tls_load_module_address (struct gdbarch *gdbarch, struct objfile *objfile);
 extern void set_gdbarch_fetch_tls_load_module_address (struct gdbarch *gdbarch, gdbarch_fetch_tls_load_module_address_ftype *fetch_tls_load_module_address);
-#if !defined (GDB_TM_FILE) && defined (FETCH_TLS_LOAD_MODULE_ADDRESS)
-#error "Non multi-arch definition of FETCH_TLS_LOAD_MODULE_ADDRESS"
-#endif
-#if !defined (FETCH_TLS_LOAD_MODULE_ADDRESS)
-#define FETCH_TLS_LOAD_MODULE_ADDRESS(objfile) (gdbarch_fetch_tls_load_module_address (current_gdbarch, objfile))
-#endif
 
 extern CORE_ADDR gdbarch_frame_args_skip (struct gdbarch *gdbarch);
 extern void set_gdbarch_frame_args_skip (struct gdbarch *gdbarch, CORE_ADDR frame_args_skip);

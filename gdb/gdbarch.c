@@ -911,21 +911,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: fetch_pointer_argument = <0x%lx>\n",
                       (long) current_gdbarch->fetch_pointer_argument);
-#ifdef FETCH_TLS_LOAD_MODULE_ADDRESS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FETCH_TLS_LOAD_MODULE_ADDRESS_P()",
-                      XSTRING (FETCH_TLS_LOAD_MODULE_ADDRESS_P ()));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_fetch_tls_load_module_address_p() = %d\n",
                       gdbarch_fetch_tls_load_module_address_p (current_gdbarch));
-#ifdef FETCH_TLS_LOAD_MODULE_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "FETCH_TLS_LOAD_MODULE_ADDRESS(objfile)",
-                      XSTRING (FETCH_TLS_LOAD_MODULE_ADDRESS (objfile)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: fetch_tls_load_module_address = <0x%lx>\n",
                       (long) current_gdbarch->fetch_tls_load_module_address);

@@ -564,7 +564,7 @@ v:=:CORE_ADDR:deprecated_function_start_offset:::0:::0
 m::int:remote_register_number:int regno:regno::default_remote_register_number::0
 
 # Fetch the target specific address used to represent a load module.
-F:=:CORE_ADDR:fetch_tls_load_module_address:struct objfile *objfile:objfile
+F::CORE_ADDR:fetch_tls_load_module_address:struct objfile *objfile:objfile
 #
 v::CORE_ADDR:frame_args_skip:::0:::0
 M::CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame
