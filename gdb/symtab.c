@@ -2521,20 +2521,21 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
     {				/* skip "first line" of function (which is actually its prologue) */
       asection *section = SYMBOL_BFD_SECTION (sym);
       /* If function is in an unmapped overlay, use its unmapped LMA
-         address, so that SKIP_PROLOGUE has something unique to work on */
+         address, so that gdbarch_skip_prologue has something unique to work
+         on */
       if (section_is_overlay (section) &&
 	  !section_is_mapped (section))
 	pc = overlay_unmapped_address (pc, section);
 
       pc += DEPRECATED_FUNCTION_START_OFFSET;
-      pc = SKIP_PROLOGUE (pc);
+      pc = gdbarch_skip_prologue (current_gdbarch, pc);
 
       /* For overlays, map pc back into its mapped VMA range */
       pc = overlay_mapped_address (pc, section);
     }
   sal = find_pc_sect_line (pc, SYMBOL_BFD_SECTION (sym), 0);
 
-  /* Check if SKIP_PROLOGUE left us in mid-line, and the next
+  /* Check if gdbarch_skip_prologue left us in mid-line, and the next
      line is still part of the same function.  */
   if (sal.pc != pc
       && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) <= sal.end
@@ -4022,7 +4023,7 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
      - The minimal symbols and partial symbols, which can usually tell
        us the starting and ending addresses of a function.
      - If we know the function's start address, we can call the
-       architecture-defined SKIP_PROLOGUE function to analyze the
+       architecture-defined gdbarch_skip_prologue function to analyze the
        instruction stream and guess where the prologue ends.
      - Our `func_start' argument; if non-zero, this is the caller's
        best guess as to the function's entry point.  At the time of
@@ -4040,7 +4041,7 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
       if (! func_start)
 	return 1;		/* We *might* be in a prologue.  */
 
-      prologue_end = SKIP_PROLOGUE (func_start);
+      prologue_end = gdbarch_skip_prologue (current_gdbarch, func_start);
 
       return func_start <= pc && pc < prologue_end;
     }
@@ -4064,7 +4065,8 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
       /* We don't have any good line number info, so use the minsym
 	 information, together with the architecture-specific prologue
 	 scanning code.  */
-      CORE_ADDR prologue_end = SKIP_PROLOGUE (func_addr);
+      CORE_ADDR prologue_end = gdbarch_skip_prologue
+			         (current_gdbarch, func_addr);
 
       return func_addr <= pc && pc < prologue_end;
     }

@@ -1220,12 +1220,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: skip_permanent_breakpoint = <0x%lx>\n",
                       (long) current_gdbarch->skip_permanent_breakpoint);
-#ifdef SKIP_PROLOGUE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SKIP_PROLOGUE(ip)",
-                      XSTRING (SKIP_PROLOGUE (ip)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: skip_prologue = <0x%lx>\n",
                       (long) current_gdbarch->skip_prologue);

@@ -2709,7 +2709,8 @@ step_into_function (struct execution_control_state *ecs)
 
   s = find_pc_symtab (stop_pc);
   if (s && s->language != language_asm)
-    ecs->stop_func_start = SKIP_PROLOGUE (ecs->stop_func_start);
+    ecs->stop_func_start = gdbarch_skip_prologue
+			     (current_gdbarch, ecs->stop_func_start);
 
   ecs->sal = find_pc_line (ecs->stop_func_start, 0);
   /* Use the step_resume_break to step until the end of the prologue,

@@ -1834,7 +1834,8 @@ minsym_found (int funfirstline, struct minimal_symbol *msymbol)
   if (funfirstline)
     {
       values.sals[0].pc += DEPRECATED_FUNCTION_START_OFFSET;
-      values.sals[0].pc = SKIP_PROLOGUE (values.sals[0].pc);
+      values.sals[0].pc = gdbarch_skip_prologue
+			    (current_gdbarch, values.sals[0].pc);
     }
   values.nelts = 1;
   return values;

@@ -541,7 +541,7 @@ f:=:int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_
 F:=:CORE_ADDR:deprecated_extract_struct_value_address:struct regcache *regcache:regcache
 
 #
-f:=:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
+f::CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 f::int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
 f:=:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
 M::CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr

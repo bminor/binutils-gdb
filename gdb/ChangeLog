@@ -1,5 +1,13 @@
 2007-06-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (SKIP_PROLOGUE): Replace by gdbarch_skip_prologue.
+	* symtab.c (find_function_start_sal, in_prologue): Likewise.
+	* linespec.c (minsym_found): Likewise.
+	* infrun.c (step_into_function): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (NAME_OF_MALLOC): Replace by gdbarch_name_of_malloc.
 	* valops.c (value_allocate_space_in_inferior): Likewise.
 	* gdbarch.c, gdbarch.h: Regenerate.

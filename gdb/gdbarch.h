@@ -669,12 +669,6 @@ extern void set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch 
 typedef CORE_ADDR (gdbarch_skip_prologue_ftype) (CORE_ADDR ip);
 extern CORE_ADDR gdbarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip);
 extern void set_gdbarch_skip_prologue (struct gdbarch *gdbarch, gdbarch_skip_prologue_ftype *skip_prologue);
-#if !defined (GDB_TM_FILE) && defined (SKIP_PROLOGUE)
-#error "Non multi-arch definition of SKIP_PROLOGUE"
-#endif
-#if !defined (SKIP_PROLOGUE)
-#define SKIP_PROLOGUE(ip) (gdbarch_skip_prologue (current_gdbarch, ip))
-#endif
 
 typedef int (gdbarch_inner_than_ftype) (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int gdbarch_inner_than (struct gdbarch *gdbarch, CORE_ADDR lhs, CORE_ADDR rhs);
