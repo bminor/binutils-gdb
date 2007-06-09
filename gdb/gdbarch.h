@@ -718,12 +718,6 @@ extern void set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, gdbar
 
 extern CORE_ADDR gdbarch_decr_pc_after_break (struct gdbarch *gdbarch);
 extern void set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch, CORE_ADDR decr_pc_after_break);
-#if !defined (GDB_TM_FILE) && defined (DECR_PC_AFTER_BREAK)
-#error "Non multi-arch definition of DECR_PC_AFTER_BREAK"
-#endif
-#if !defined (DECR_PC_AFTER_BREAK)
-#define DECR_PC_AFTER_BREAK (gdbarch_decr_pc_after_break (current_gdbarch))
-#endif
 
 /* A function can be addressed by either it's "pointer" (possibly a
    descriptor address) or "entry point" (first executable instruction).

@@ -52,7 +52,7 @@ static struct dummy_frame *dummy_frame_stack = NULL;
 /* Function: deprecated_pc_in_call_dummy (pc)
 
    Return non-zero if the PC falls in a dummy frame created by gdb for
-   an inferior call.  The code below which allows DECR_PC_AFTER_BREAK
+   an inferior call.  The code below which allows gdbarch_decr_pc_after_break
    is for infrun.c, which may give the function a PC without that
    subtracted out.
 
@@ -75,7 +75,8 @@ deprecated_pc_in_call_dummy (CORE_ADDR pc)
        dummyframe = dummyframe->next)
     {
       if ((pc >= dummyframe->id.code_addr)
-	  && (pc <= dummyframe->id.code_addr + DECR_PC_AFTER_BREAK))
+	  && (pc <= dummyframe->id.code_addr
+		    + gdbarch_decr_pc_after_break (current_gdbarch)))
 	return 1;
     }
   return 0;

@@ -777,9 +777,9 @@ sunos_solib_create_inferior_hook (void)
      the PC as necessary after a breakpoint, disable the breakpoint, and
      add any shared libraries that were mapped in. */
 
-  if (DECR_PC_AFTER_BREAK)
+  if (gdbarch_decr_pc_after_break (current_gdbarch))
     {
-      stop_pc -= DECR_PC_AFTER_BREAK;
+      stop_pc -= gdbarch_decr_pc_after_break (current_gdbarch);
       write_register (PC_REGNUM, stop_pc);
     }
 

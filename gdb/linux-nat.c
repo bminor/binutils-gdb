@@ -1767,7 +1767,8 @@ cancel_breakpoints_callback (struct lwp_info *lp, void *data)
   if (lp->status != 0
       && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP
       && breakpoint_inserted_here_p (read_pc_pid (lp->ptid) -
-				     DECR_PC_AFTER_BREAK))
+				     gdbarch_decr_pc_after_break
+				       (current_gdbarch)))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -1775,8 +1776,10 @@ cancel_breakpoints_callback (struct lwp_info *lp, void *data)
 			    target_pid_to_str (lp->ptid));
 
       /* Back up the PC if necessary.  */
-      if (DECR_PC_AFTER_BREAK)
-	write_pc_pid (read_pc_pid (lp->ptid) - DECR_PC_AFTER_BREAK, lp->ptid);
+      if (gdbarch_decr_pc_after_break (current_gdbarch))
+	write_pc_pid (read_pc_pid (lp->ptid) - gdbarch_decr_pc_after_break
+						 (current_gdbarch),
+		      lp->ptid);
 
       /* Throw away the SIGTRAP.  */
       lp->status = 0;

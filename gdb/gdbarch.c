@@ -760,11 +760,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: convert_register_p = <0x%lx>\n",
                       (long) current_gdbarch->convert_register_p);
-#ifdef DECR_PC_AFTER_BREAK
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DECR_PC_AFTER_BREAK # %s\n",
-                      XSTRING (DECR_PC_AFTER_BREAK));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: decr_pc_after_break = 0x%s\n",
                       paddr_nz (current_gdbarch->decr_pc_after_break));

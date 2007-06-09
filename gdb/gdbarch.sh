@@ -547,7 +547,7 @@ f:=:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, len
 M::CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
 f:=:int:memory_insert_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_insert_breakpoint::0
 f:=:int:memory_remove_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_remove_breakpoint::0
-v:=:CORE_ADDR:decr_pc_after_break:::0:::0
+v::CORE_ADDR:decr_pc_after_break:::0:::0
 
 # A function can be addressed by either it's "pointer" (possibly a
 # descriptor address) or "entry point" (first executable instruction).

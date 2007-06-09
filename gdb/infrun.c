@@ -1148,29 +1148,29 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 
   /* If this target does not decrement the PC after breakpoints, then
      we have nothing to do.  */
-  if (DECR_PC_AFTER_BREAK == 0)
+  if (gdbarch_decr_pc_after_break (current_gdbarch) == 0)
     return;
 
   /* If we've hit a breakpoint, we'll normally be stopped with SIGTRAP.  If
      we aren't, just return.
 
      We assume that waitkinds other than TARGET_WAITKIND_STOPPED are not
-     affected by DECR_PC_AFTER_BREAK.  Other waitkinds which are implemented
-     by software breakpoints should be handled through the normal breakpoint
-     layer.
+     affected by gdbarch_decr_pc_after_break.  Other waitkinds which are
+     implemented by software breakpoints should be handled through the normal
+     breakpoint layer.
 
      NOTE drow/2004-01-31: On some targets, breakpoints may generate
      different signals (SIGILL or SIGEMT for instance), but it is less
      clear where the PC is pointing afterwards.  It may not match
-     DECR_PC_AFTER_BREAK.  I don't know any specific target that generates
-     these signals at breakpoints (the code has been in GDB since at least
-     1992) so I can not guess how to handle them here.
+     gdbarch_decr_pc_after_break.  I don't know any specific target that
+     generates these signals at breakpoints (the code has been in GDB since at
+     least 1992) so I can not guess how to handle them here.
 
      In earlier versions of GDB, a target with 
      gdbarch_have_nonsteppable_watchpoint would have the PC after hitting a
-     watchpoint affected by DECR_PC_AFTER_BREAK.  I haven't found any target
-     with both of these set in GDB history, and it seems unlikely to be correct,
-     so gdbarch_have_nonsteppable_watchpoint is not checked here.  */
+     watchpoint affected by gdbarch_decr_pc_after_break.  I haven't found any
+     target with both of these set in GDB history, and it seems unlikely to be
+     correct, so gdbarch_have_nonsteppable_watchpoint is not checked here.  */
 
   if (ecs->ws.kind != TARGET_WAITKIND_STOPPED)
     return;
@@ -1180,7 +1180,8 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 
   /* Find the location where (if we've hit a breakpoint) the
      breakpoint would be.  */
-  breakpoint_pc = read_pc_pid (ecs->ptid) - DECR_PC_AFTER_BREAK;
+  breakpoint_pc = read_pc_pid (ecs->ptid) - gdbarch_decr_pc_after_break
+					    (current_gdbarch);
 
   if (SOFTWARE_SINGLE_STEP_P ())
     {
@@ -3083,12 +3084,12 @@ normal_stop (void)
   /* NOTE drow/2004-01-17: Is this still necessary?  */
   /* Make sure that the current_frame's pc is correct.  This
      is a correction for setting up the frame info before doing
-     DECR_PC_AFTER_BREAK */
+     gdbarch_decr_pc_after_break */
   if (target_has_execution)
     /* FIXME: cagney/2002-12-06: Has the PC changed?  Thanks to
-       DECR_PC_AFTER_BREAK, the program counter can change.  Ask the
+       gdbarch_decr_pc_after_break, the program counter can change.  Ask the
        frame code to check for this and sort out any resultant mess.
-       DECR_PC_AFTER_BREAK needs to just go away.  */
+       gdbarch_decr_pc_after_break needs to just go away.  */
     deprecated_update_frame_pc_hack (get_current_frame (), read_pc ());
 
   if (target_has_execution && breakpoints_inserted)

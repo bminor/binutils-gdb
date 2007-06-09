@@ -1013,8 +1013,9 @@ aix_thread_wait (ptid_t ptid, struct target_waitstatus *status)
 
   /* Check whether libpthdebug might be ready to be initialized.  */
   if (!pd_active && status->kind == TARGET_WAITKIND_STOPPED &&
-      status->value.sig == TARGET_SIGNAL_TRAP &&
-      read_pc_pid (ptid) - DECR_PC_AFTER_BREAK == pd_brk_addr)
+      status->value.sig == TARGET_SIGNAL_TRAP
+      && read_pc_pid (ptid)
+	 - gdbarch_decr_pc_after_break (current_gdbarch) == pd_brk_addr)
     return pd_activate (0);
 
   return pd_update (0);

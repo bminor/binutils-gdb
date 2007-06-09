@@ -2584,7 +2584,8 @@ trace_dump_command (char *args, int from_tty)
      to the tracepoint PC.  If not, then the current frame was
      collected during single-stepping.  */
 
-  stepping_frame = (t->address != (read_pc () - DECR_PC_AFTER_BREAK));
+  stepping_frame = (t->address != (read_pc () - gdbarch_decr_pc_after_break
+						  (current_gdbarch)));
 
   for (action = t->actions; action; action = action->next)
     {

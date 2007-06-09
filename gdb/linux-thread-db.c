@@ -804,7 +804,7 @@ check_event (ptid_t ptid)
   int loop = 0;
 
   /* Bail out early if we're not at a thread event breakpoint.  */
-  stop_pc = read_pc_pid (ptid) - DECR_PC_AFTER_BREAK;
+  stop_pc = read_pc_pid (ptid) - gdbarch_decr_pc_after_break (current_gdbarch);
   if (stop_pc != td_create_bp_addr && stop_pc != td_death_bp_addr)
     return;
 

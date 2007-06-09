@@ -709,7 +709,7 @@ extern struct frame_info *deprecated_safe_get_selected_frame (void);
 extern struct frame_info *create_new_frame (CORE_ADDR base, CORE_ADDR pc);
 
 /* FIXME: cagney/2002-12-06: Has the PC in the current frame changed?
-   "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change the PC after
+   "infrun.c", Thanks to gdbarch_decr_pc_after_break, can change the PC after
    the initial frame create.  This puts things back in sync.
 
    This replaced: frame->pc = ....; */
