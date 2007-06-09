@@ -670,21 +670,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: address_class_name_to_type_flags = <0x%lx>\n",
                       (long) current_gdbarch->address_class_name_to_type_flags);
-#ifdef ADDRESS_CLASS_TYPE_FLAGS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ADDRESS_CLASS_TYPE_FLAGS_P()",
-                      XSTRING (ADDRESS_CLASS_TYPE_FLAGS_P ()));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_address_class_type_flags_p() = %d\n",
                       gdbarch_address_class_type_flags_p (current_gdbarch));
-#ifdef ADDRESS_CLASS_TYPE_FLAGS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ADDRESS_CLASS_TYPE_FLAGS(byte_size, dwarf2_addr_class)",
-                      XSTRING (ADDRESS_CLASS_TYPE_FLAGS (byte_size, dwarf2_addr_class)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: address_class_type_flags = <0x%lx>\n",
                       (long) current_gdbarch->address_class_type_flags);

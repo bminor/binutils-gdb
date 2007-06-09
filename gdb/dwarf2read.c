@@ -4559,11 +4559,12 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
      length accordingly.  */
   if (TYPE_LENGTH (type) != byte_size || addr_class != DW_ADDR_none)
     {
-      if (ADDRESS_CLASS_TYPE_FLAGS_P ())
+      if (gdbarch_address_class_type_flags_p (current_gdbarch))
 	{
 	  int type_flags;
 
-	  type_flags = ADDRESS_CLASS_TYPE_FLAGS (byte_size, addr_class);
+	  type_flags = gdbarch_address_class_type_flags
+			 (current_gdbarch, byte_size, addr_class);
 	  gdb_assert ((type_flags & ~TYPE_FLAG_ADDRESS_CLASS_ALL) == 0);
 	  type = make_type_with_address_space (type, type_flags);
 	}

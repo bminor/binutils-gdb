@@ -1043,30 +1043,11 @@ extern void set_gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch, int can
 extern int gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch);
 extern void set_gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch, int have_nonsteppable_watchpoint);
 
-#if defined (ADDRESS_CLASS_TYPE_FLAGS)
-/* Legacy for systems yet to multi-arch ADDRESS_CLASS_TYPE_FLAGS */
-#if !defined (ADDRESS_CLASS_TYPE_FLAGS_P)
-#define ADDRESS_CLASS_TYPE_FLAGS_P() (1)
-#endif
-#endif
-
 extern int gdbarch_address_class_type_flags_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (ADDRESS_CLASS_TYPE_FLAGS_P)
-#error "Non multi-arch definition of ADDRESS_CLASS_TYPE_FLAGS"
-#endif
-#if !defined (ADDRESS_CLASS_TYPE_FLAGS_P)
-#define ADDRESS_CLASS_TYPE_FLAGS_P() (gdbarch_address_class_type_flags_p (current_gdbarch))
-#endif
 
 typedef int (gdbarch_address_class_type_flags_ftype) (int byte_size, int dwarf2_addr_class);
 extern int gdbarch_address_class_type_flags (struct gdbarch *gdbarch, int byte_size, int dwarf2_addr_class);
 extern void set_gdbarch_address_class_type_flags (struct gdbarch *gdbarch, gdbarch_address_class_type_flags_ftype *address_class_type_flags);
-#if !defined (GDB_TM_FILE) && defined (ADDRESS_CLASS_TYPE_FLAGS)
-#error "Non multi-arch definition of ADDRESS_CLASS_TYPE_FLAGS"
-#endif
-#if !defined (ADDRESS_CLASS_TYPE_FLAGS)
-#define ADDRESS_CLASS_TYPE_FLAGS(byte_size, dwarf2_addr_class) (gdbarch_address_class_type_flags (current_gdbarch, byte_size, dwarf2_addr_class))
-#endif
 
 extern int gdbarch_address_class_type_flags_to_name_p (struct gdbarch *gdbarch);
 

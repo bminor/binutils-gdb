@@ -1,5 +1,15 @@
 2007-06-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (ADDRESS_CLASS_TYPE_FLAGS): Replace by
+	gdbarch_address_class_type_flags.
+	* dwarf2read.c (read_tag_pointer_type): Likewise.
+	* gdbarch.sh (ADDRESS_CLASS_TYPE_FLAGS_P): Replace by
+	gdbarch_address_class_type_flags_p.
+	* dwarf2read.c (read_tag_pointer_type): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (ADDR_BITS_REMOVE): Replace by gdbarch_addr_bits_remove.
 	* value.c (value_as_address): Likewise (comment).
 	* remote-mips.c (common_breakpoint): Likewise.
