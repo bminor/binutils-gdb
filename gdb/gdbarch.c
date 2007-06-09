@@ -971,12 +971,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: in_function_epilogue_p = <0x%lx>\n",
                       (long) current_gdbarch->in_function_epilogue_p);
-#ifdef IN_SOLIB_RETURN_TRAMPOLINE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "IN_SOLIB_RETURN_TRAMPOLINE(pc, name)",
-                      XSTRING (IN_SOLIB_RETURN_TRAMPOLINE (pc, name)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: in_solib_return_trampoline = <0x%lx>\n",
                       (long) current_gdbarch->in_solib_return_trampoline);
@@ -1226,12 +1220,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: skip_solib_resolver = <0x%lx>\n",
                       (long) current_gdbarch->skip_solib_resolver);
-#ifdef SKIP_TRAMPOLINE_CODE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SKIP_TRAMPOLINE_CODE(pc)",
-                      XSTRING (SKIP_TRAMPOLINE_CODE (pc)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: skip_trampoline_code = <0x%lx>\n",
                       (long) current_gdbarch->skip_trampoline_code);

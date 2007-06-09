@@ -576,7 +576,7 @@ objc_skip_trampoline (CORE_ADDR stop_pc)
   CORE_ADDR real_stop_pc;
   CORE_ADDR method_stop_pc;
   
-  real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+  real_stop_pc = gdbarch_skip_trampoline_code (current_gdbarch, stop_pc);
 
   if (real_stop_pc != 0)
     find_objc_msgcall (real_stop_pc, &method_stop_pc);
@@ -585,7 +585,8 @@ objc_skip_trampoline (CORE_ADDR stop_pc)
 
   if (method_stop_pc)
     {
-      real_stop_pc = SKIP_TRAMPOLINE_CODE (method_stop_pc);
+      real_stop_pc = gdbarch_skip_trampoline_code
+		       (current_gdbarch, method_stop_pc);
       if (real_stop_pc == 0)
 	real_stop_pc = method_stop_pc;
     }
@@ -1647,7 +1648,7 @@ find_objc_msgsend (void)
  * The old function "pc_off_limits" used to do a lot of other things
  * in addition, such as detecting shared library jump stubs and
  * returning the address of the shlib function that would be called.
- * That functionality has been moved into the SKIP_TRAMPOLINE_CODE and
+ * That functionality has been moved into the gdbarch_skip_trampoline_code and
  * IN_SOLIB_TRAMPOLINE macros, which are resolved in the target-
  * dependent modules.  
  */

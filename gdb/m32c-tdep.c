@@ -2319,10 +2319,10 @@ m32c_return_value (struct gdbarch *gdbarch,
    their program is calling, not in some trampoline code they've never
    seen before.)
 
-   The SKIP_TRAMPOLINE_CODE gdbarch method tells GDB how to step
+   The gdbarch_skip_trampoline_code method tells GDB how to step
    through such trampoline functions transparently to the user.  When
    given the address of a trampoline function's first instruction,
-   SKIP_TRAMPOLINE_CODE should return the address of the first
+   gdbarch_skip_trampoline_code should return the address of the first
    instruction of the function really being called.  If GDB decides it
    wants to step into that function, it will set a breakpoint there
    and silently continue to it.

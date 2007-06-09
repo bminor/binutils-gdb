@@ -2456,7 +2456,7 @@ hppa_stub_unwind_sniffer (struct frame_info *next_frame)
   if (pc == 0
       || (tdep->in_solib_call_trampoline != NULL
 	  && tdep->in_solib_call_trampoline (pc, NULL))
-      || IN_SOLIB_RETURN_TRAMPOLINE (pc, NULL))
+      || gdbarch_in_solib_return_trampoline (current_gdbarch, pc, NULL))
     return &hppa_stub_frame_unwind;
   return NULL;
 }

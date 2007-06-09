@@ -621,7 +621,7 @@ M::int:single_step_through_delay:struct frame_info *frame:frame
 # FIXME: cagney/2003-08-28: Need to find a better way of selecting the
 # disassembler.  Perhaps objdump can handle it?
 f:TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, struct disassemble_info *info:vma, info::0:
-f:=:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc::generic_skip_trampoline_code::0
+f::CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc::generic_skip_trampoline_code::0
 
 
 # If IN_SOLIB_DYNSYM_RESOLVE_CODE returns true, and SKIP_SOLIB_RESOLVER
@@ -629,7 +629,7 @@ f:=:CORE_ADDR:skip_trampoline_code:CORE_ADDR pc:pc::generic_skip_trampoline_code
 # a step-resume breakpoint to get us past the dynamic linker.
 m::CORE_ADDR:skip_solib_resolver:CORE_ADDR pc:pc::generic_skip_solib_resolver::0
 # Some systems also have trampoline code for returning from shared libs.
-f:=:int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name::generic_in_solib_return_trampoline::0
+f::int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name::generic_in_solib_return_trampoline::0
 
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens

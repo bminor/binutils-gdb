@@ -923,12 +923,6 @@ extern void set_gdbarch_print_insn (struct gdbarch *gdbarch, gdbarch_print_insn_
 typedef CORE_ADDR (gdbarch_skip_trampoline_code_ftype) (CORE_ADDR pc);
 extern CORE_ADDR gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, CORE_ADDR pc);
 extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_skip_trampoline_code_ftype *skip_trampoline_code);
-#if !defined (GDB_TM_FILE) && defined (SKIP_TRAMPOLINE_CODE)
-#error "Non multi-arch definition of SKIP_TRAMPOLINE_CODE"
-#endif
-#if !defined (SKIP_TRAMPOLINE_CODE)
-#define SKIP_TRAMPOLINE_CODE(pc) (gdbarch_skip_trampoline_code (current_gdbarch, pc))
-#endif
 
 /* If IN_SOLIB_DYNSYM_RESOLVE_CODE returns true, and SKIP_SOLIB_RESOLVER
    evaluates non-zero, this is the address where the debugger will place
@@ -943,12 +937,6 @@ extern void set_gdbarch_skip_solib_resolver (struct gdbarch *gdbarch, gdbarch_sk
 typedef int (gdbarch_in_solib_return_trampoline_ftype) (CORE_ADDR pc, char *name);
 extern int gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
 extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline);
-#if !defined (GDB_TM_FILE) && defined (IN_SOLIB_RETURN_TRAMPOLINE)
-#error "Non multi-arch definition of IN_SOLIB_RETURN_TRAMPOLINE"
-#endif
-#if !defined (IN_SOLIB_RETURN_TRAMPOLINE)
-#define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) (gdbarch_in_solib_return_trampoline (current_gdbarch, pc, name))
-#endif
 
 /* A target might have problems with watchpoints as soon as the stack
    frame of the current function has been destroyed.  This mostly happens

@@ -1946,8 +1946,8 @@ rs6000_return_value (struct gdbarch *gdbarch, struct type *valtype,
    branches, meaning that the link register doesn't get set.
    Therefore, GDB's usual step_over_function () mechanism won't work.
 
-   Instead, use the IN_SOLIB_RETURN_TRAMPOLINE and
-   SKIP_TRAMPOLINE_CODE hooks in handle_inferior_event() to skip past
+   Instead, use the gdbarch_skip_trampoline_code and
+   gdbarch_skip_trampoline_code hooks in handle_inferior_event() to skip past
    @FIX code.  */
 
 int

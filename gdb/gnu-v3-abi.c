@@ -685,7 +685,7 @@ gnuv3_skip_trampoline (CORE_ADDR stop_pc)
   struct obj_section *section;
   char *thunk_name, *fn_name;
   
-  real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+  real_stop_pc = gdbarch_skip_trampoline_code (current_gdbarch, stop_pc);
   if (real_stop_pc == 0)
     real_stop_pc = stop_pc;
 
@@ -708,7 +708,8 @@ gnuv3_skip_trampoline (CORE_ADDR stop_pc)
     return 0;
 
   method_stop_pc = SYMBOL_VALUE_ADDRESS (fn_sym);
-  real_stop_pc = SKIP_TRAMPOLINE_CODE (method_stop_pc);
+  real_stop_pc = gdbarch_skip_trampoline_code
+		   (current_gdbarch, method_stop_pc);
   if (real_stop_pc == 0)
     real_stop_pc = method_stop_pc;
 
