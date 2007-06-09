@@ -708,12 +708,14 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
   switch (VALUE_LVAL (lazy_value))
     {
     case lval_register:
-      gdb_assert (REGISTER_NAME (VALUE_REGNUM (lazy_value)) != NULL
-		  && *REGISTER_NAME (VALUE_REGNUM (lazy_value)) != '\0');
+      gdb_assert (gdbarch_register_name
+		   (current_gdbarch, VALUE_REGNUM (lazy_value)) != NULL
+		  && *gdbarch_register_name
+		    (current_gdbarch, VALUE_REGNUM (lazy_value)) != '\0');
       error (_("Address requested for identifier "
 	       "\"%s\" which is in register $%s"),
             SYMBOL_PRINT_NAME (var), 
-	    REGISTER_NAME (VALUE_REGNUM (lazy_value)));
+	    gdbarch_register_name (current_gdbarch, VALUE_REGNUM (lazy_value)));
       break;
 
     default:

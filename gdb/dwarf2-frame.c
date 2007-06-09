@@ -339,7 +339,8 @@ execute_cfa_program (gdb_byte *insn_ptr, gdb_byte *insn_end,
 	    complaint (&symfile_complaints, _("\
 incomplete CFI data; DW_CFA_restore unspecified\n\
 register %s (#%d) at 0x%s"),
-		       REGISTER_NAME(DWARF2_REG_TO_REGNUM(reg)),
+		       gdbarch_register_name
+			 (current_gdbarch, DWARF2_REG_TO_REGNUM(reg)),
 		       DWARF2_REG_TO_REGNUM(reg), paddr (fs->pc));
 	}
       else

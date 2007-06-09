@@ -1628,11 +1628,13 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
       /* If the register name is empty, it is undefined for this
          processor, so don't display anything.  */
-      if (REGISTER_NAME (i) == NULL || *(REGISTER_NAME (i)) == '\0')
+      if (gdbarch_register_name (current_gdbarch, i) == NULL
+	  || *(gdbarch_register_name (current_gdbarch, i)) == '\0')
 	continue;
 
-      fputs_filtered (REGISTER_NAME (i), file);
-      print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), file);
+      fputs_filtered (gdbarch_register_name (current_gdbarch, i), file);
+      print_spaces_filtered (15 - strlen (gdbarch_register_name
+					  (current_gdbarch, i)), file);
 
       /* Get the data in raw format.  */
       if (! frame_register_read (frame, i, buffer))

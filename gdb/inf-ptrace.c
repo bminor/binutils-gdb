@@ -650,7 +650,8 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
       buf[i] = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3)(uintptr_t)addr, 0);
       if (errno != 0)
 	error (_("Couldn't read register %s (#%d): %s."),
-	       REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+	       gdbarch_register_name (current_gdbarch, regnum),
+	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
     }
@@ -704,7 +705,8 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
       ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3)(uintptr_t)addr, buf[i]);
       if (errno != 0)
 	error (_("Couldn't write register %s (#%d): %s."),
-	       REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+	       gdbarch_register_name (current_gdbarch, regnum),
+	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
     }

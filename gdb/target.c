@@ -2156,8 +2156,10 @@ debug_print_register (const char * func,
   fprintf_unfiltered (gdb_stdlog, "%s ", func);
   if (regno >= 0 && regno < gdbarch_num_regs (current_gdbarch)
 			    + gdbarch_num_pseudo_regs (current_gdbarch)
-      && REGISTER_NAME (regno) != NULL && REGISTER_NAME (regno)[0] != '\0')
-    fprintf_unfiltered (gdb_stdlog, "(%s)", REGISTER_NAME (regno));
+      && gdbarch_register_name (current_gdbarch, regno) != NULL
+      && gdbarch_register_name (current_gdbarch, regno)[0] != '\0')
+    fprintf_unfiltered (gdb_stdlog, "(%s)", gdbarch_register_name
+					      (current_gdbarch, regno));
   else
     fprintf_unfiltered (gdb_stdlog, "(%d)", regno);
   if (regno >= 0)

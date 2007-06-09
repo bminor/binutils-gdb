@@ -150,7 +150,8 @@ gnu_fetch_registers (struct regcache *regcache, int regno)
 	}
       else
 	{
-	  proc_debug (thread, "fetching register %s", REGISTER_NAME (regno));
+	  proc_debug (thread, "fetching register %s",
+		      gdbarch_register_name (current_gdbarch, regno));
 
 	  regcache_raw_supply (regcache, regno,
 			       REG_ADDR (state, regno));
@@ -248,7 +249,7 @@ gnu_store_registers (struct regcache *regcache, int regno)
 	      /* Register CHECK_REGNO has changed!  Ack!  */
 	      {
 		warning (_("Register %s changed after the thread was aborted"),
-			 REGISTER_NAME (check_regno));
+			 gdbarch_register_name (current_gdbarch, check_regno));
 		if (regno >= 0 && regno != check_regno)
 		  /* Update GDB's copy of the register.  */
 		  regcache_raw_supply (regcache, check_regno,
@@ -270,7 +271,8 @@ gnu_store_registers (struct regcache *regcache, int regno)
 	}
       else
 	{
-	  proc_debug (thread, "storing register %s", REGISTER_NAME (regno));
+	  proc_debug (thread, "storing register %s",
+		      gdbarch_register_name (current_gdbarch, regno));
 
 	  gdb_assert (regcache_valid_p (regcache, regno));
 	  regcache_raw_collect (regcache, regno, REG_ADDR (state, regno));

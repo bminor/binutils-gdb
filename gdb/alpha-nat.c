@@ -113,7 +113,8 @@ fetch_osf_core_registers (struct regcache *regcache,
     }
   if (bad_reg >= 0)
     {
-      error (_("Register %s not found in core file."), REGISTER_NAME (bad_reg));
+      error (_("Register %s not found in core file."),
+	     gdbarch_register_name (current_gdbarch, bad_reg));
     }
 }
 

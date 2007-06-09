@@ -1027,7 +1027,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	fprintf_unfiltered (file, " %-10s", "Name");
       else
 	{
-	  const char *p = REGISTER_NAME (regnum);
+	  const char *p = gdbarch_register_name (current_gdbarch, regnum);
 	  if (p == NULL)
 	    p = "";
 	  else if (p[0] == '\0')

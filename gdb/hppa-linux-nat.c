@@ -235,7 +235,8 @@ fetch_register (struct regcache *regcache, int regno)
   errno = 0;
   val = ptrace (PTRACE_PEEKUSER, tid, hppa_linux_register_addr (regno, 0), 0);
   if (errno != 0)
-    error (_("Couldn't read register %s (#%d): %s."), REGISTER_NAME (regno),
+    error (_("Couldn't read register %s (#%d): %s."), 
+	   gdbarch_register_name (current_gdbarch, regno),
 	   regno, safe_strerror (errno));
 
   regcache_raw_supply (regcache, regno, &val);
@@ -261,7 +262,8 @@ store_register (const struct regcache *regcache, int regno)
   regcache_raw_collect (regcache, regno, &val);
   ptrace (PTRACE_POKEUSER, tid, hppa_linux_register_addr (regno, 0), val);
   if (errno != 0)
-    error (_("Couldn't write register %s (#%d): %s."), REGISTER_NAME (regno),
+    error (_("Couldn't write register %s (#%d): %s."),
+	   gdbarch_register_name (current_gdbarch, regno),
 	   regno, safe_strerror (errno));
 }
 

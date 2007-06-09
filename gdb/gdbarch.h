@@ -409,12 +409,6 @@ extern void set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_d
 typedef const char * (gdbarch_register_name_ftype) (int regnr);
 extern const char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);
 extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register_name_ftype *register_name);
-#if !defined (GDB_TM_FILE) && defined (REGISTER_NAME)
-#error "Non multi-arch definition of REGISTER_NAME"
-#endif
-#if !defined (REGISTER_NAME)
-#define REGISTER_NAME(regnr) (gdbarch_register_name (current_gdbarch, regnr))
-#endif
 
 /* Return the type of a register specified by the architecture.  Only
    the register cache should call this function directly; others should

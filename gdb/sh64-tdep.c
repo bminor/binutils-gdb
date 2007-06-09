@@ -1968,14 +1968,16 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
 
   /* Get the data in raw format.  */
   if (!frame_register_read (frame, regnum, raw_buffer))
-    error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
+    error ("can't read register %d (%s)",
+	   regnum, gdbarch_register_name (current_gdbarch, regnum));
 
   /* Get the register as a number */ 
   flt = unpack_double (builtin_type_float, raw_buffer, &inv);
 
   /* Print the name and some spaces.  */
-  fputs_filtered (REGISTER_NAME (regnum), file);
-  print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), file);
+  fputs_filtered (gdbarch_register_name (current_gdbarch, regnum), file);
+  print_spaces_filtered (15 - strlen (gdbarch_register_name
+					(current_gdbarch, regnum)), file);
 
   /* Print the value.  */
   if (inv)
@@ -2074,8 +2076,9 @@ sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
 {
   unsigned char raw_buffer[MAX_REGISTER_SIZE];
 
-  fputs_filtered (REGISTER_NAME (regnum), file);
-  print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), file);
+  fputs_filtered (gdbarch_register_name (current_gdbarch, regnum), file);
+  print_spaces_filtered (15 - strlen (gdbarch_register_name
+				      (current_gdbarch, regnum)), file);
 
   /* Get the data in raw format.  */
   if (!frame_register_read (frame, regnum, raw_buffer))
@@ -2118,7 +2121,7 @@ sh64_media_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 {
   if (regnum != -1)		/* do one specified register */
     {
-      if (*(REGISTER_NAME (regnum)) == '\0')
+      if (*(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	error ("Not a valid register for the current processor type");
 
       sh64_print_register (gdbarch, file, frame, regnum);
@@ -2131,8 +2134,8 @@ sh64_media_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	{
 	  /* If the register name is empty, it is undefined for this
 	     processor, so don't display anything.  */
-	  if (REGISTER_NAME (regnum) == NULL
-	      || *(REGISTER_NAME (regnum)) == '\0')
+	  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
+	      || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	    { 
 	      regnum++;
 	      continue;
@@ -2175,7 +2178,7 @@ sh64_compact_print_registers_info (struct gdbarch *gdbarch,
 {
   if (regnum != -1)		/* do one specified register */
     {
-      if (*(REGISTER_NAME (regnum)) == '\0')
+      if (*(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	error ("Not a valid register for the current processor type");
 
       if (regnum >= 0 && regnum < R0_C_REGNUM)

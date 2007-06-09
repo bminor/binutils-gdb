@@ -1198,12 +1198,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: read_pc = <0x%lx>\n",
                       (long) current_gdbarch->read_pc);
-#ifdef REGISTER_NAME
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_NAME(regnr)",
-                      XSTRING (REGISTER_NAME (regnr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_name = <0x%lx>\n",
                       (long) current_gdbarch->register_name);

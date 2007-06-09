@@ -452,7 +452,8 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
     {
       int regno = DWARF2_REG_TO_REGNUM (dlbaton->data[0] - DW_OP_reg0);
       fprintf_filtered (stream,
-			"a variable in register %s", REGISTER_NAME (regno));
+			"a variable in register %s",
+			gdbarch_register_name (current_gdbarch, regno));
       return 1;
     }
 

@@ -1113,7 +1113,8 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_REGISTER:
-      printf_filtered (_("a variable in register %s"), REGISTER_NAME (val));
+      printf_filtered (_("a variable in register %s"),
+			 gdbarch_register_name (current_gdbarch, val));
       break;
 
     case LOC_STATIC:
@@ -1144,12 +1145,13 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_REGPARM:
-      printf_filtered (_("an argument in register %s"), REGISTER_NAME (val));
+      printf_filtered (_("an argument in register %s"),
+			 gdbarch_register_name (current_gdbarch, val));
       break;
 
     case LOC_REGPARM_ADDR:
       printf_filtered (_("address of an argument in register %s"),
-		       REGISTER_NAME (val));
+		       gdbarch_register_name (current_gdbarch, val));
       break;
 
     case LOC_ARG:
@@ -1170,12 +1172,12 @@ address_info (char *exp, int from_tty)
 
     case LOC_BASEREG:
       printf_filtered (_("a variable at offset %ld from register %s"),
-		       val, REGISTER_NAME (basereg));
+		       val, gdbarch_register_name (current_gdbarch, basereg));
       break;
 
     case LOC_BASEREG_ARG:
       printf_filtered (_("an argument at offset %ld from register %s"),
-		       val, REGISTER_NAME (basereg));
+		       val, gdbarch_register_name (current_gdbarch, basereg));
       break;
 
     case LOC_TYPEDEF:
@@ -1222,7 +1224,7 @@ address_info (char *exp, int from_tty)
     case LOC_HP_THREAD_LOCAL_STATIC:
       printf_filtered (_("\
 a thread-local variable at offset %ld from the thread base register %s"),
-		       val, REGISTER_NAME (basereg));
+		       val, gdbarch_register_name (current_gdbarch, basereg));
       break;
 
     case LOC_OPTIMIZED_OUT:

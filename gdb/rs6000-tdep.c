@@ -2092,8 +2092,8 @@ rs6000_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   int vector_p;
   int general_p;
 
-  if (REGISTER_NAME (regnum) == NULL
-      || *REGISTER_NAME (regnum) == '\0')
+  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
+      || *gdbarch_register_name (current_gdbarch, regnum) == '\0')
     return 0;
   if (group == all_reggroup)
     return 1;

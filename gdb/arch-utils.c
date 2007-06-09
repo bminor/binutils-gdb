@@ -88,8 +88,8 @@ legacy_register_sim_regno (int regnum)
      suspected that some GDB/SIM combinations may rely on this
      behavour.  The default should be one2one_register_sim_regno
      (below).  */
-  if (REGISTER_NAME (regnum) != NULL
-      && REGISTER_NAME (regnum)[0] != '\0')
+  if (gdbarch_register_name (current_gdbarch, regnum) != NULL
+      && gdbarch_register_name (current_gdbarch, regnum)[0] != '\0')
     return regnum;
   else
     return LEGACY_SIM_REGNO_IGNORE;

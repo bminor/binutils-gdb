@@ -260,7 +260,8 @@ struct packet_reg
   int in_g_packet; /* Always part of G packet.  */
   /* long size in bytes;  == register_size (current_gdbarch, regnum);
      at present.  */
-  /* char *name; == REGISTER_NAME (regnum); at present.  */
+  /* char *name; == gdbarch_register_name (current_gdbarch, regnum);
+     at present.  */
 };
 
 struct remote_arch_state

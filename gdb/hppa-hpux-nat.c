@@ -110,7 +110,8 @@ hppa_hpux_fetch_register (struct regcache *regcache, int regnum)
 
     if (ttrace (TT_LWP_RUREGS, pid, lwp, addr, size, (uintptr_t)buf) == -1)
       error (_("Couldn't read register %s (#%d): %s"),
-	     REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+	     gdbarch_register_name (current_gdbarch, regnum),
+	     regnum, safe_strerror (errno));
   }
 #else
   {
@@ -123,7 +124,8 @@ hppa_hpux_fetch_register (struct regcache *regcache, int regnum)
 	buf[i] = ptrace (PT_RUREGS, pid, (PTRACE_TYPE_ARG3) addr, 0, 0);
 	if (errno != 0)
 	  error (_("Couldn't read register %s (#%d): %s"),
-		 REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+		 gdbarch_register_name (current_gdbarch, regnum),
+		 regnum, safe_strerror (errno));
 
 	addr += sizeof (PTRACE_TYPE_RET);
       }
@@ -187,7 +189,8 @@ hppa_hpux_store_register (struct regcache *regcache, int regnum)
 
     if (ttrace (TT_LWP_WUREGS, pid, lwp, addr, size, (uintptr_t)buf) == -1)
       error (_("Couldn't write register %s (#%d): %s"),
-	     REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+	     gdbarch_register_name (current_gdbarch, regnum),
+	     regnum, safe_strerror (errno));
   }
 #else
   {
@@ -200,7 +203,8 @@ hppa_hpux_store_register (struct regcache *regcache, int regnum)
 	ptrace (PT_WUREGS, pid, (PTRACE_TYPE_ARG3) addr, buf[i], 0);
 	if (errno != 0)
 	  error (_("Couldn't write register %s (#%d): %s"),
-		 REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+		 gdbarch_register_name (current_gdbarch, regnum),
+		 regnum, safe_strerror (errno));
 
 	addr += sizeof (PTRACE_TYPE_RET);
       }

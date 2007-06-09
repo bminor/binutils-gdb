@@ -844,7 +844,7 @@ frame_info (char *addr_exp, int from_tty)
     /* OK, this is weird.  The PC_REGNUM hardware register's value can
        easily not match that of the internal value returned by
        get_frame_pc().  */
-    pc_regname = REGISTER_NAME (PC_REGNUM);
+    pc_regname = gdbarch_register_name (current_gdbarch, PC_REGNUM);
   else
     /* But then, this is weird to.  Even without PC_REGNUM, an
        architectures will often have a hardware register called "pc",
@@ -1052,7 +1052,7 @@ frame_info (char *addr_exp, int from_tty)
 	else if (!optimized && lval == lval_register)
 	  {
 	    printf_filtered (" Previous frame's sp in %s\n",
-			     REGISTER_NAME (realnum));
+			     gdbarch_register_name (current_gdbarch, realnum));
 	    need_nl = 0;
 	  }
 	/* else keep quiet.  */
@@ -1078,7 +1078,8 @@ frame_info (char *addr_exp, int from_tty)
 	      else
 		puts_filtered (",");
 	      wrap_here (" ");
-	      printf_filtered (" %s at ", REGISTER_NAME (i));
+	      printf_filtered (" %s at ",
+			       gdbarch_register_name (current_gdbarch, i));
 	      deprecated_print_address_numeric (addr, 1, gdb_stdout);
 	      count++;
 	    }

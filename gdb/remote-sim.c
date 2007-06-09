@@ -317,7 +317,7 @@ gdbsim_fetch_register (struct regcache *regcache, int regno)
 	  {
 	    fprintf_unfiltered (gdb_stderr,
 				"Size of register %s (%d/%d) incorrect (%d instead of %d))",
-				REGISTER_NAME (regno),
+				gdbarch_register_name (current_gdbarch, regno),
 				regno, REGISTER_SIM_REGNO (regno),
 				nr_bytes, register_size (current_gdbarch, regno));
 	    warn_user = 0;

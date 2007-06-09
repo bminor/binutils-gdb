@@ -537,7 +537,8 @@ mips_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   /* FIXME: cagney/2003-04-13: Can't yet use gdbarch_num_regs
      (gdbarch), as not all architectures are multi-arch.  */
   raw_p = rawnum < gdbarch_num_regs (current_gdbarch);
-  if (REGISTER_NAME (regnum) == NULL || REGISTER_NAME (regnum)[0] == '\0')
+  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
+      || gdbarch_register_name (current_gdbarch, regnum)[0] == '\0')
     return 0;
   if (reggroup == float_reggroup)
     return float_p && pseudo;
@@ -3818,7 +3819,8 @@ mips_read_fp_register_single (struct frame_info *frame, int regno,
   gdb_byte *raw_buffer = alloca (raw_size);
 
   if (!frame_register_read (frame, regno, raw_buffer))
-    error (_("can't read register %d (%s)"), regno, REGISTER_NAME (regno));
+    error (_("can't read register %d (%s)"),
+	   regno, gdbarch_register_name (current_gdbarch, regno));
   if (raw_size == 8)
     {
       /* We have a 64-bit value for this register.  Find the low-order
@@ -3853,7 +3855,8 @@ mips_read_fp_register_double (struct frame_info *frame, int regno,
       /* We have a 64-bit value for this register, and we should use
          all 64 bits.  */
       if (!frame_register_read (frame, regno, rare_buffer))
-	error (_("can't read register %d (%s)"), regno, REGISTER_NAME (regno));
+	error (_("can't read register %d (%s)"),
+	       regno, gdbarch_register_name (current_gdbarch, regno));
     }
   else
     {
@@ -3888,8 +3891,11 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
   raw_buffer = alloca (2 * register_size (current_gdbarch,
 					  mips_regnum (current_gdbarch)->fp0));
 
-  fprintf_filtered (file, "%s:", REGISTER_NAME (regnum));
-  fprintf_filtered (file, "%*s", 4 - (int) strlen (REGISTER_NAME (regnum)),
+  fprintf_filtered (file, "%s:",
+		    gdbarch_register_name (current_gdbarch, regnum));
+  fprintf_filtered (file, "%*s",
+		    4 - (int) strlen (gdbarch_register_name
+					(current_gdbarch, regnum)),
 		    "");
 
   if (register_size (current_gdbarch, regnum) == 4 || mips2_fp_compat ())
@@ -3965,11 +3971,12 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
   /* Get the data in raw format.  */
   if (!frame_register_read (frame, regnum, raw_buffer))
     {
-      fprintf_filtered (file, "%s: [Invalid]", REGISTER_NAME (regnum));
+      fprintf_filtered (file, "%s: [Invalid]",
+			gdbarch_register_name (current_gdbarch, regnum));
       return;
     }
 
-  fputs_filtered (REGISTER_NAME (regnum), file);
+  fputs_filtered (gdbarch_register_name (current_gdbarch, regnum), file);
 
   /* The problem with printing numeric register names (r26, etc.) is that
      the user can't use them on input.  Probably the best solution is to
@@ -4025,7 +4032,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 			       + gdbarch_num_pseudo_regs (current_gdbarch);
        regnum++)
     {
-      if (*REGISTER_NAME (regnum) == '\0')
+      if (*gdbarch_register_name (current_gdbarch, regnum) == '\0')
 	continue;		/* unused register */
       if (TYPE_CODE (register_type (gdbarch, regnum)) ==
 	  TYPE_CODE_FLT)
@@ -4034,7 +4041,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	fprintf_filtered (file, "     ");
       fprintf_filtered (file,
 			mips_abi_regsize (current_gdbarch) == 8 ? "%17s" : "%9s",
-			REGISTER_NAME (regnum));
+			gdbarch_register_name (current_gdbarch, regnum));
       col++;
     }
 
@@ -4054,14 +4061,15 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 			       + gdbarch_num_pseudo_regs (current_gdbarch);
        regnum++)
     {
-      if (*REGISTER_NAME (regnum) == '\0')
+      if (*gdbarch_register_name (current_gdbarch, regnum) == '\0')
 	continue;		/* unused register */
       if (TYPE_CODE (register_type (gdbarch, regnum)) ==
 	  TYPE_CODE_FLT)
 	break;			/* end row: reached FP register */
       /* OK: get the data in raw format.  */
       if (!frame_register_read (frame, regnum, raw_buffer))
-	error (_("can't read register %d (%s)"), regnum, REGISTER_NAME (regnum));
+	error (_("can't read register %d (%s)"),
+	       regnum, gdbarch_register_name (current_gdbarch, regnum));
       /* pad small registers */
       for (byte = 0;
 	   byte < (mips_abi_regsize (current_gdbarch)
@@ -4096,7 +4104,7 @@ mips_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
   if (regnum != -1)		/* do one specified register */
     {
       gdb_assert (regnum >= gdbarch_num_regs (current_gdbarch));
-      if (*(REGISTER_NAME (regnum)) == '\0')
+      if (*(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	error (_("Not a valid register for the current processor type"));
 
       mips_print_register (file, frame, regnum, 0);
@@ -4593,8 +4601,12 @@ mips_register_sim_regno (int regnum)
   /* FIXME: cagney/2002-05-13: Need to look at the pseudo register to
      decide if it is valid.  Should instead define a standard sim/gdb
      register numbering scheme.  */
-  if (REGISTER_NAME (gdbarch_num_regs (current_gdbarch) + regnum) != NULL
-      && REGISTER_NAME (gdbarch_num_regs (current_gdbarch) + regnum)[0] != '\0')
+  if (gdbarch_register_name (current_gdbarch,
+			     gdbarch_num_regs
+			       (current_gdbarch) + regnum) != NULL
+      && gdbarch_register_name (current_gdbarch,
+			        gdbarch_num_regs
+				  (current_gdbarch) + regnum)[0] != '\0')
     return regnum;
   else
     return LEGACY_SIM_REGNO_IGNORE;

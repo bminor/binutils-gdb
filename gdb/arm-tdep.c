@@ -1211,7 +1211,8 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       if (arm_debug)
 	fprintf_unfiltered (gdb_stdlog, "struct return in %s = 0x%s\n",
-			    REGISTER_NAME (argreg), paddr (struct_addr));
+			    gdbarch_register_name (current_gdbarch, argreg),
+			    paddr (struct_addr));
       regcache_cooked_write_unsigned (regcache, argreg, struct_addr);
       argreg++;
     }
@@ -1289,7 +1290,9 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      CORE_ADDR regval = extract_unsigned_integer (val, partial_len);
 	      if (arm_debug)
 		fprintf_unfiltered (gdb_stdlog, "arg %d in %s = 0x%s\n",
-				    argnum, REGISTER_NAME (argreg),
+				    argnum,
+				    gdbarch_register_name
+				      (current_gdbarch, argreg),
 				    phex (regval, DEPRECATED_REGISTER_SIZE));
 	      regcache_cooked_write_unsigned (regcache, argreg, regval);
 	      argreg++;

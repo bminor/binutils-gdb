@@ -286,10 +286,10 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
   struct cleanup *cleanup;
 
   /* Note that the test for a valid register must include checking the
-     REGISTER_NAME because gdbarch_num_regs may be allocated for the union of
-     the register sets within a family of related processors.  In this
-     case, some entries of REGISTER_NAME will change depending upon
-     the particular processor being debugged.  */
+     gdbarch_register_name because gdbarch_num_regs may be allocated for
+     the union of the register sets within a family of related processors.
+     In this case, some entries of gdbarch_register_name will change depending
+     upon the particular processor being debugged.  */
 
   numregs = gdbarch_num_regs (current_gdbarch)
 	    + gdbarch_num_pseudo_regs (current_gdbarch);
@@ -302,11 +302,13 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 	   regnum < numregs;
 	   regnum++)
 	{
-	  if (REGISTER_NAME (regnum) == NULL
-	      || *(REGISTER_NAME (regnum)) == '\0')
+	  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
+	      || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	    ui_out_field_string (uiout, NULL, "");
 	  else
-	    ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+	    ui_out_field_string (uiout, NULL,
+				 gdbarch_register_name
+				   (current_gdbarch, regnum));
 	}
     }
 
@@ -320,11 +322,12 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 	  mi_error_message = xstrprintf ("bad register number");
 	  return MI_CMD_ERROR;
 	}
-      if (REGISTER_NAME (regnum) == NULL
-	  || *(REGISTER_NAME (regnum)) == '\0')
+      if (gdbarch_register_name (current_gdbarch, regnum) == NULL
+	  || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	ui_out_field_string (uiout, NULL, "");
       else
-	ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+	ui_out_field_string (uiout, NULL,
+			     gdbarch_register_name (current_gdbarch, regnum));
     }
   do_cleanups (cleanup);
   return MI_CMD_DONE;
@@ -348,10 +351,10 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
   cleanup = make_cleanup_regcache_xfree (prev_regs);
 
   /* Note that the test for a valid register must include checking the
-     REGISTER_NAME because gdbarch_num_regs may be allocated for the union of
-     the register sets within a family of related processors.  In this
-     case, some entries of REGISTER_NAME will change depending upon
-     the particular processor being debugged.  */
+     gdbarch_register_name because gdbarch_num_regs may be allocated for
+     the union of the register sets within a family of related processors.
+     In this  case, some entries of gdbarch_register_name will change depending
+     upon the particular processor being debugged.  */
 
   numregs = gdbarch_num_regs (current_gdbarch)
 	    + gdbarch_num_pseudo_regs (current_gdbarch);
@@ -364,8 +367,8 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	   regnum < numregs;
 	   regnum++)
 	{
-	  if (REGISTER_NAME (regnum) == NULL
-	      || *(REGISTER_NAME (regnum)) == '\0')
+	  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
+	      || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	    continue;
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
@@ -386,8 +389,8 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 
       if (regnum >= 0
 	  && regnum < numregs
-	  && REGISTER_NAME (regnum) != NULL
-	  && *REGISTER_NAME (regnum) != '\000')
+	  && gdbarch_register_name (current_gdbarch, regnum) != NULL
+	  && *gdbarch_register_name (current_gdbarch, regnum) != '\000')
 	{
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
@@ -451,10 +454,10 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
   struct cleanup *list_cleanup, *tuple_cleanup;
 
   /* Note that the test for a valid register must include checking the
-     REGISTER_NAME because gdbarch_num_regs may be allocated for the union of
-     the register sets within a family of related processors.  In this
-     case, some entries of REGISTER_NAME will change depending upon
-     the particular processor being debugged.  */
+     gdbarch_register_name because gdbarch_num_regs may be allocated for
+     the union of the register sets within a family of related processors.
+     In this case, some entries of gdbarch_register_name will change depending
+     upon the particular processor being debugged.  */
 
   numregs = gdbarch_num_regs (current_gdbarch)
 	    + gdbarch_num_pseudo_regs (current_gdbarch);
@@ -475,8 +478,8 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	   regnum < numregs;
 	   regnum++)
 	{
-	  if (REGISTER_NAME (regnum) == NULL
-	      || *(REGISTER_NAME (regnum)) == '\0')
+	  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
+	      || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	    continue;
 	  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
@@ -497,8 +500,8 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 
       if (regnum >= 0
 	  && regnum < numregs
-	  && REGISTER_NAME (regnum) != NULL
-	  && *REGISTER_NAME (regnum) != '\000')
+	  && gdbarch_register_name (current_gdbarch, regnum) != NULL
+	  && *gdbarch_register_name (current_gdbarch, regnum) != '\000')
 	{
 	  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
@@ -583,10 +586,10 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
   char format;
 
   /* Note that the test for a valid register must include checking the
-     REGISTER_NAME because gdbarch_num_regs may be allocated for the union of
-     the register sets within a family of related processors.  In this
-     case, some entries of REGISTER_NAME will change depending upon
-     the particular processor being debugged.  */
+     gdbarch_register_name because gdbarch_num_regs may be allocated for
+     the union of the register sets within a family of related processors.
+     In this case, some entries of gdbarch_register_name will change depending
+     upon the particular processor being debugged.  */
 
   numregs = gdbarch_num_regs (current_gdbarch)
 	    + gdbarch_num_pseudo_regs (current_gdbarch);
@@ -622,7 +625,8 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
       int regnum = atoi (argv[i]);
 
       if (regnum >= 0 && regnum < numregs
-	  && REGISTER_NAME (regnum) && *REGISTER_NAME (regnum))
+	  && gdbarch_register_name (current_gdbarch, regnum)
+	  && *gdbarch_register_name (current_gdbarch, regnum))
 	{
 	  LONGEST value;
 

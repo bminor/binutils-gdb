@@ -661,8 +661,11 @@ mt_registers_info (struct gdbarch *gdbarch,
 
 	  frame_register_read (frame, regnum, buff);
 
-	  fputs_filtered (REGISTER_NAME (regnum), file);
-	  print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), file);
+	  fputs_filtered (gdbarch_register_name
+			  (current_gdbarch, regnum), file);
+	  print_spaces_filtered (15 - strlen (gdbarch_register_name
+					        (current_gdbarch, regnum)),
+				 file);
 	  fputs_filtered ("0x", file);
 
 	  for (i = 0; i < regsize; i++)
@@ -683,8 +686,11 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  frame_register_read (frame, MT_COPRO_REGNUM, buf);
 	  /* And print.  */
 	  regnum = MT_COPRO_PSEUDOREG_REGNUM;
-	  fputs_filtered (REGISTER_NAME (regnum), file);
-	  print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), file);
+	  fputs_filtered (gdbarch_register_name (current_gdbarch, regnum),
+			  file);
+	  print_spaces_filtered (15 - strlen (gdbarch_register_name
+					        (current_gdbarch, regnum)),
+				 file);
 	  val_print (register_type (gdbarch, regnum), buf,
 		     0, 0, file, 0, 1, 0, Val_no_prettyprint);
 	  fputs_filtered ("\n", file);
@@ -713,8 +719,11 @@ mt_registers_info (struct gdbarch *gdbarch,
 
 	  /* And print.  */
 	  regnum = MT_MAC_PSEUDOREG_REGNUM;
-	  fputs_filtered (REGISTER_NAME (regnum), file);
-	  print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), file);
+	  fputs_filtered (gdbarch_register_name (current_gdbarch, regnum),
+			  file);
+	  print_spaces_filtered (15 - strlen (gdbarch_register_name
+					      (current_gdbarch, regnum)),
+				 file);
 	  fputs_filtered ("0x", file);
 	  print_longest (file, 'x', 0, newmac);
 	  fputs_filtered ("\t", file);

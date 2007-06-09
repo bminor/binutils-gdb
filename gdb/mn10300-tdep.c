@@ -1078,7 +1078,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 static int
 mn10300_dwarf2_reg_to_regnum (int dwarf2)
 {
-  /* This table is supposed to be shaped like the REGISTER_NAMES
+  /* This table is supposed to be shaped like the gdbarch_register_name
      initializer in gcc/config/mn10300/mn10300.h.  Registers which
      appear in GCC's numbering, but have no counterpart in GDB's
      world, are marked with a -1.  */

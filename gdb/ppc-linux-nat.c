@@ -381,7 +381,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
 	{
           char message[128];
 	  sprintf (message, "reading register %s (#%d)", 
-		   REGISTER_NAME (regno), regno);
+		   gdbarch_register_name (current_gdbarch, regno), regno);
 	  perror_with_name (message);
 	}
     }
@@ -685,7 +685,7 @@ store_register (const struct regcache *regcache, int tid, int regno)
 	{
           char message[128];
 	  sprintf (message, "writing register %s (#%d)", 
-		   REGISTER_NAME (regno), regno);
+		   gdbarch_register_name (current_gdbarch, regno), regno);
 	  perror_with_name (message);
 	}
     }

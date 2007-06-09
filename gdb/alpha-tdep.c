@@ -116,7 +116,8 @@ alpha_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   /* Filter out any registers eliminated, but whose regnum is 
      reserved for backward compatibility, e.g. the vfp.  */
-  if (REGISTER_NAME (regnum) == NULL || *REGISTER_NAME (regnum) == '\0')
+  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
+      || *gdbarch_register_name (current_gdbarch, regnum) == '\0')
     return 0;
 
   if (group == all_reggroup)

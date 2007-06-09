@@ -1,3 +1,49 @@
+2007-06-09  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (REGISTER_NAME): Replace by gdbarch_register_name.
+	* tracepoint.c (scope_info): Likewise.
+	* target.c (debug_print_register): Likewise.
+	* stack.c (frame_info): Likewise.
+	* sh-tdep.c (sh_register_reggroup_p): Likewise.
+	* sh64-tdep.c (sh64_do_fp_register, sh64_do_register)
+	(sh64_media_print_registers_info)
+	(sh64_compact_print_registers_info): Likewise.
+	* rs6000-tdep.c (rs6000_register_reggroup_p): Likewise.
+	* remote-sim.c (gdbsim_fetch_register): Likewise.
+	* remote.c (packet_reg): Likewise (comment).
+	* reggroups.c (default_register_reggroup_p): Likewise.
+	* regcache.c (regcache_dump): Likewise.
+	* printcmd.c (address_info): Likewise.
+	* ppc-linux-nat.c (fetch_register, store_register): Likewise.
+	* mt-dep.c (mt_registers_info): Likewise.
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Likewise (comment).
+	* mips-tdep.c (mips_register_reggroup_p, mips_read_fp_register_single)
+	(mips_read_fp_register_double, mips_print_fp_register)
+	(mips_print_register, print_gp_register_row, mips_print_registers_info)
+	(mips_register_sim_regno): Likewise.
+	* m68klinux-nat.c (regmap, fetch_register, store_register): Likewise.
+	* inf-ptrace.c (inf_ptrace_fetch_register)
+	(inf_ptrace_store_register): Likewise.
+	* infcmd.c (default_print_registers_info): Likewise.
+	* ia64-linux-nat.c (ia64_linux_fetch_register)
+	(ia64_linux_store_register): Likewise.
+	* i386-linux-nat.c (fetch_register, store_register): Likewise.
+	* i386gnu-nat.c (gnu_fetch_registers, gnu_store_registers): Likewise.
+	* hppa-linux-nat.c (fetch_register, store_register): Likewise.
+	* hppa-hpux-nat.c (hppa_hpux_fetch_register)
+	(hppa_hpux_store_register): Likewise.
+	* findvar.c (locate_var_value): Likewise.
+	* dwarf2loc.c (locexpr_describe_location): Likewise.
+	* dwarf2-frame.c (execute_cfa_program): Likewise.
+	* arm-tdep.c (arm_push_dummy_call): Likewise.
+	* arch-utils.c (legacy_register_sim_regno): Likewise.
+	* alpha-tdep.c (alpha_register_reggroup_p): Likewise.
+	* alpha-nat.c (fetch_osf_core_registers): Likewise.
+	* mi/mi-main.c (mi_cmd_data_list_register_names)
+	(mi_cmd_data_list_changed_registers, mi_cmd_data_list_register_values)
+	(mi_cmd_data_write_register_values): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
 2007-06-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* target-memory.c (blocks_to_erase): Correct off-by-one error.

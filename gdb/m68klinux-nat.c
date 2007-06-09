@@ -55,7 +55,7 @@
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
-/* This table must line up with REGISTER_NAME in "m68k-tdep.c".  */
+/* This table must line up with gdbarch_register_name in "m68k-tdep.c".  */
 static const int regmap[] =
 {
   PT_D0, PT_D1, PT_D2, PT_D3, PT_D4, PT_D5, PT_D6, PT_D7,
@@ -146,7 +146,7 @@ fetch_register (struct regcache *regcache, int regno)
       if (errno != 0)
 	{
 	  sprintf (mess, "reading register %s (#%d)", 
-		   REGISTER_NAME (regno), regno);
+		   gdbarch_register_name (current_gdbarch, regno), regno);
 	  perror_with_name (mess);
 	}
     }
@@ -209,7 +209,7 @@ store_register (const struct regcache *regcache, int regno)
       if (errno != 0)
 	{
 	  sprintf (mess, "writing register %s (#%d)", 
-		   REGISTER_NAME (regno), regno);
+		   gdbarch_register_name (current_gdbarch, regno), regno);
 	  perror_with_name (mess);
 	}
     }
