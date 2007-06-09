@@ -1,5 +1,15 @@
 2007-06-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (MEMORY_INSERT_BREAKPOINT): Replace by
+	gdbarch_memory_insert_breakpoint.
+	* mem-break.c (memory_insert_breakpoint): Likewise.
+	* gdbarch.sh (MEMORY_REMOVE_BREAKPOINT): Replace by
+	gdbarch_memory_remove_breakpoint.
+	* mem-break.c (memory_remove_breakpoint): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (FETCH_TLS_LOAD_MODULE_ADDRESS): Replace by
 	gdbarch_fetch_tls_load_module_address.
 	* gdbarch.sh (FETCH_TLS_LOAD_MODULE_ADDRESS_P): Replace by

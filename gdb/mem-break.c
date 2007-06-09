@@ -79,11 +79,11 @@ default_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
 int
 memory_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
-  return MEMORY_INSERT_BREAKPOINT (bp_tgt);
+  return gdbarch_memory_insert_breakpoint (current_gdbarch, bp_tgt);
 }
 
 int
 memory_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
-  return MEMORY_REMOVE_BREAKPOINT (bp_tgt);
+  return gdbarch_memory_remove_breakpoint (current_gdbarch, bp_tgt);
 }

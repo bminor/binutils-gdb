@@ -1029,21 +1029,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_long_bit = %s\n",
                       paddr_d (current_gdbarch->long_long_bit));
-#ifdef MEMORY_INSERT_BREAKPOINT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "MEMORY_INSERT_BREAKPOINT(bp_tgt)",
-                      XSTRING (MEMORY_INSERT_BREAKPOINT (bp_tgt)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: memory_insert_breakpoint = <0x%lx>\n",
                       (long) current_gdbarch->memory_insert_breakpoint);
-#ifdef MEMORY_REMOVE_BREAKPOINT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "MEMORY_REMOVE_BREAKPOINT(bp_tgt)",
-                      XSTRING (MEMORY_REMOVE_BREAKPOINT (bp_tgt)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: memory_remove_breakpoint = <0x%lx>\n",
                       (long) current_gdbarch->memory_remove_breakpoint);

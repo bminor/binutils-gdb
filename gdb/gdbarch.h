@@ -699,22 +699,10 @@ extern void set_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, gdba
 typedef int (gdbarch_memory_insert_breakpoint_ftype) (struct bp_target_info *bp_tgt);
 extern int gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt);
 extern void set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint);
-#if !defined (GDB_TM_FILE) && defined (MEMORY_INSERT_BREAKPOINT)
-#error "Non multi-arch definition of MEMORY_INSERT_BREAKPOINT"
-#endif
-#if !defined (MEMORY_INSERT_BREAKPOINT)
-#define MEMORY_INSERT_BREAKPOINT(bp_tgt) (gdbarch_memory_insert_breakpoint (current_gdbarch, bp_tgt))
-#endif
 
 typedef int (gdbarch_memory_remove_breakpoint_ftype) (struct bp_target_info *bp_tgt);
 extern int gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt);
 extern void set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint);
-#if !defined (GDB_TM_FILE) && defined (MEMORY_REMOVE_BREAKPOINT)
-#error "Non multi-arch definition of MEMORY_REMOVE_BREAKPOINT"
-#endif
-#if !defined (MEMORY_REMOVE_BREAKPOINT)
-#define MEMORY_REMOVE_BREAKPOINT(bp_tgt) (gdbarch_memory_remove_breakpoint (current_gdbarch, bp_tgt))
-#endif
 
 extern CORE_ADDR gdbarch_decr_pc_after_break (struct gdbarch *gdbarch);
 extern void set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch, CORE_ADDR decr_pc_after_break);
