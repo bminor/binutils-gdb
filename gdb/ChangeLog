@@ -1,5 +1,26 @@
 2007-06-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (ADDR_BITS_REMOVE): Replace by gdbarch_addr_bits_remove.
+	* value.c (value_as_address): Likewise (comment).
+	* remote-mips.c (common_breakpoint): Likewise.
+	* regcache.c (read_pc_pid): Likewise.
+	* printcmd.c (do_one_display): Likewise.
+	* monitor.c (monitor_write_memory, monitor_read_memory)
+	(monitor_insert_breakpoint): Likewise.
+	* mips-tdep.c (heuristic_proc_start): Likewise.
+	* infrun.c (insert_step_resume_breakpoint_at_frame)
+	(insert_step_resume_breakpoint_at_caller): Likewise.
+	* buildsym.c (record_line): Likewise.
+	* arm-tdep.c (arm_scan_prologue, thumb_get_next_pc)
+	(arm_get_next_pc): Likewise.
+	* armnbsd-nat.c (arm_supply_gregset, fetch_register, store_register)
+	(store_regs): Likewise.
+	* arm-linux-tdep.c (arm_linux_supply_gregset): Likewise.
+	* arm-linux-nat.c (fetch_register, fetch_regs): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (REGISTER_NAME): Replace by gdbarch_register_name.
 	* tracepoint.c (scope_info): Likewise.
 	* target.c (debug_print_register): Likewise.

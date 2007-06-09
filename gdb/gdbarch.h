@@ -877,7 +877,7 @@ extern void set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, gdb
 
 /* On some machines there are bits in addresses which are not really
    part of the address, but are used by the kernel, the hardware, etc.
-   for special purposes.  ADDR_BITS_REMOVE takes out any such bits so
+   for special purposes.  gdbarch_addr_bits_remove takes out any such bits so
    we get a "real" address such as one would find in a symbol table.
    This is used only for addresses of instructions, and even then I'm
    not sure it's used in all contexts.  It exists to deal with there
@@ -888,15 +888,9 @@ extern void set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, gdb
 typedef CORE_ADDR (gdbarch_addr_bits_remove_ftype) (CORE_ADDR addr);
 extern CORE_ADDR gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_bits_remove_ftype *addr_bits_remove);
-#if !defined (GDB_TM_FILE) && defined (ADDR_BITS_REMOVE)
-#error "Non multi-arch definition of ADDR_BITS_REMOVE"
-#endif
-#if !defined (ADDR_BITS_REMOVE)
-#define ADDR_BITS_REMOVE(addr) (gdbarch_addr_bits_remove (current_gdbarch, addr))
-#endif
 
 /* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
-   ADDR_BITS_REMOVE. */
+   gdbarch_addr_bits_remove. */
 
 typedef CORE_ADDR (gdbarch_smash_text_address_ftype) (CORE_ADDR addr);
 extern CORE_ADDR gdbarch_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR addr);

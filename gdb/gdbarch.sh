@@ -588,16 +588,16 @@ v::int:frame_red_zone_size
 m::CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr, struct target_ops *targ:addr, targ::convert_from_func_ptr_addr_identity::0
 # On some machines there are bits in addresses which are not really
 # part of the address, but are used by the kernel, the hardware, etc.
-# for special purposes.  ADDR_BITS_REMOVE takes out any such bits so
+# for special purposes.  gdbarch_addr_bits_remove takes out any such bits so
 # we get a "real" address such as one would find in a symbol table.
 # This is used only for addresses of instructions, and even then I'm
 # not sure it's used in all contexts.  It exists to deal with there
 # being a few stray bits in the PC which would mislead us, not as some
 # sort of generic thing to handle alignment or segmentation (it's
 # possible it should be in TARGET_READ_PC instead).
-f:=:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
+f::CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
 # It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
-# ADDR_BITS_REMOVE.
+# gdbarch_addr_bits_remove.
 f:=:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
 
 # FIXME/cagney/2001-01-18: This should be split in two.  A target method that

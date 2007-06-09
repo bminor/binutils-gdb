@@ -2404,7 +2404,7 @@ common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
   int rpid, rerrflg, rresponse, rlen;
   int nfields;
 
-  addr = ADDR_BITS_REMOVE (addr);
+  addr = gdbarch_addr_bits_remove (current_gdbarch, addr);
 
   if (mips_monitor == MON_LSI)
     {

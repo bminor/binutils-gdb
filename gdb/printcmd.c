@@ -1519,7 +1519,7 @@ do_one_display (struct display *d)
       val = evaluate_expression (d->exp);
       addr = value_as_address (val);
       if (d->format.format == 'i')
-	addr = ADDR_BITS_REMOVE (addr);
+	addr = gdbarch_addr_bits_remove (current_gdbarch, addr);
 
       annotate_display_value ();
 

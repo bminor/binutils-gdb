@@ -255,7 +255,8 @@ fetch_register (struct regcache *regcache, int regno)
     
   if (ARM_PC_REGNUM == regno)
     { 
-      regs[ARM_PC_REGNUM] = ADDR_BITS_REMOVE (regs[ARM_PC_REGNUM]);
+      regs[ARM_PC_REGNUM] = gdbarch_addr_bits_remove
+			      (current_gdbarch, regs[ARM_PC_REGNUM]);
       regcache_raw_supply (regcache, ARM_PC_REGNUM,
 			   (char *) &regs[ARM_PC_REGNUM]);
     }
@@ -290,7 +291,8 @@ fetch_regs (struct regcache *regcache)
     regcache_raw_supply (regcache, ARM_PS_REGNUM,
 			 (char *) &regs[ARM_PC_REGNUM]);
 
-  regs[ARM_PC_REGNUM] = ADDR_BITS_REMOVE (regs[ARM_PC_REGNUM]);
+  regs[ARM_PC_REGNUM] = gdbarch_addr_bits_remove
+			  (current_gdbarch, regs[ARM_PC_REGNUM]);
   regcache_raw_supply (regcache, ARM_PC_REGNUM,
 		       (char *) &regs[ARM_PC_REGNUM]);
 }

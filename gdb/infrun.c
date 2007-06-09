@@ -2808,7 +2808,8 @@ insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
 
   init_sal (&sr_sal);		/* initialize to zeros */
 
-  sr_sal.pc = ADDR_BITS_REMOVE (get_frame_pc (return_frame));
+  sr_sal.pc = gdbarch_addr_bits_remove
+		(current_gdbarch, get_frame_pc (return_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
   insert_step_resume_breakpoint_at_sal (sr_sal, get_frame_id (return_frame));
@@ -2840,7 +2841,8 @@ insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
 
   init_sal (&sr_sal);		/* initialize to zeros */
 
-  sr_sal.pc = ADDR_BITS_REMOVE (frame_pc_unwind (next_frame));
+  sr_sal.pc = gdbarch_addr_bits_remove
+		(current_gdbarch, frame_pc_unwind (next_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
   insert_step_resume_breakpoint_at_sal (sr_sal, frame_unwind_id (next_frame));

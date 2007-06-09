@@ -52,7 +52,7 @@ arm_supply_gregset (struct regcache *regcache, struct reg *gregset)
   regcache_raw_supply (regcache, ARM_LR_REGNUM,
 		       (char *) &gregset->r_lr);
   /* This is ok: we're running native...  */
-  r_pc = ADDR_BITS_REMOVE (gregset->r_pc);
+  r_pc = gdbarch_addr_bits_remove (current_gdbarch, gregset->r_pc);
   regcache_raw_supply (regcache, ARM_PC_REGNUM, (char *) &r_pc);
 
   if (arm_apcs_32)
@@ -105,7 +105,8 @@ fetch_register (struct regcache *regcache, int regno)
 
     case ARM_PC_REGNUM:
       /* This is ok: we're running native... */
-      inferior_registers.r_pc = ADDR_BITS_REMOVE (inferior_registers.r_pc);
+      inferior_registers.r_pc = gdbarch_addr_bits_remove
+				  (current_gdbarch, inferior_registers.r_pc);
       regcache_raw_supply (regcache, ARM_PC_REGNUM,
 			   (char *) &inferior_registers.r_pc);
       break;
@@ -249,9 +250,10 @@ store_register (const struct regcache *regcache, int regno)
 	  regcache_raw_collect (regcache, ARM_PC_REGNUM,
 				(char *) &pc_val);
 	  
-	  pc_val = ADDR_BITS_REMOVE (pc_val);
-	  inferior_registers.r_pc
-	    ^= ADDR_BITS_REMOVE (inferior_registers.r_pc);
+	  pc_val = gdbarch_addr_bits_remove (current_gdbarch, pc_val);
+	  inferior_registers.r_pc ^= gdbarch_addr_bits_remove
+				       (current_gdbarch,
+					inferior_registers.r_pc);
 	  inferior_registers.r_pc |= pc_val;
 	}
       break;
@@ -267,8 +269,10 @@ store_register (const struct regcache *regcache, int regno)
 	  regcache_raw_collect (regcache, ARM_PS_REGNUM,
 				(char *) &psr_val);
 
-	  psr_val ^= ADDR_BITS_REMOVE (psr_val);
-	  inferior_registers.r_pc = ADDR_BITS_REMOVE (inferior_registers.r_pc);
+	  psr_val ^= gdbarch_addr_bits_remove (current_gdbarch, psr_val);
+	  inferior_registers.r_pc = gdbarch_addr_bits_remove
+				      (current_gdbarch,
+				       inferior_registers.r_pc);
 	  inferior_registers.r_pc |= psr_val;
 	}
       break;
@@ -320,8 +324,8 @@ store_regs (const struct regcache *regcache)
       regcache_raw_collect (regcache, ARM_PS_REGNUM,
 			    (char *) &psr_val);
 	  
-      pc_val = ADDR_BITS_REMOVE (pc_val);
-      psr_val ^= ADDR_BITS_REMOVE (psr_val);
+      pc_val = gdbarch_addr_bits_remove (current_gdbarch, pc_val);
+      psr_val ^= gdbarch_addr_bits_remove (current_gdbarch, psr_val);
 
       inferior_registers.r_pc = pc_val | psr_val;
     }

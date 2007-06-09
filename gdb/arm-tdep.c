@@ -724,7 +724,8 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
         return;
       else
         {
-          prologue_start = ADDR_BITS_REMOVE (return_value) - 8;
+          prologue_start = gdbarch_addr_bits_remove 
+			     (current_gdbarch, return_value) - 8;
           prologue_end = prologue_start + 64;	/* See above.  */
         }
     }
@@ -1623,7 +1624,7 @@ thumb_get_next_pc (CORE_ADDR pc)
       offset = bitcount (bits (inst1, 0, 7)) * DEPRECATED_REGISTER_SIZE;
       sp = read_register (ARM_SP_REGNUM);
       nextpc = (CORE_ADDR) read_memory_unsigned_integer (sp + offset, 4);
-      nextpc = ADDR_BITS_REMOVE (nextpc);
+      nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
       if (nextpc == pc)
 	error (_("Infinite loop detected"));
     }
@@ -1654,7 +1655,7 @@ thumb_get_next_pc (CORE_ADDR pc)
       else
 	nextpc = read_register (bits (inst1, 3, 6));
 
-      nextpc = ADDR_BITS_REMOVE (nextpc);
+      nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
       if (nextpc == pc)
 	error (_("Infinite loop detected"));
     }
@@ -1704,7 +1705,8 @@ arm_get_next_pc (CORE_ADDR pc)
 	      {
 		rn = bits (this_instr, 0, 3);
 		result = (rn == 15) ? pc_val + 8 : read_register (rn);
-		nextpc = (CORE_ADDR) ADDR_BITS_REMOVE (result);
+		nextpc = (CORE_ADDR) gdbarch_addr_bits_remove
+				       (current_gdbarch, result);
 
 		if (nextpc == pc)
 		  error (_("Infinite loop detected"));
@@ -1785,7 +1787,8 @@ arm_get_next_pc (CORE_ADDR pc)
 		result = ~operand2;
 		break;
 	      }
-	    nextpc = (CORE_ADDR) ADDR_BITS_REMOVE (result);
+	    nextpc = (CORE_ADDR) gdbarch_addr_bits_remove
+				   (current_gdbarch, result);
 
 	    if (nextpc == pc)
 	      error (_("Infinite loop detected"));
@@ -1828,7 +1831,7 @@ arm_get_next_pc (CORE_ADDR pc)
 		  nextpc = (CORE_ADDR) read_memory_integer ((CORE_ADDR) base,
 							    4);
 
-		  nextpc = ADDR_BITS_REMOVE (nextpc);
+		  nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
 
 		  if (nextpc == pc)
 		    error (_("Infinite loop detected"));
@@ -1865,7 +1868,8 @@ arm_get_next_pc (CORE_ADDR pc)
 								  + offset),
 						       4);
 		  }
-		  nextpc = ADDR_BITS_REMOVE (nextpc);
+		  nextpc = gdbarch_addr_bits_remove
+			     (current_gdbarch, nextpc);
 		  if (nextpc == pc)
 		    error (_("Infinite loop detected"));
 		}
@@ -1881,7 +1885,7 @@ arm_get_next_pc (CORE_ADDR pc)
 	    if (bits (this_instr, 28, 31) == INST_NV)
 	      nextpc |= bit (this_instr, 24) << 1;
 
-	    nextpc = ADDR_BITS_REMOVE (nextpc);
+	    nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
 	    if (nextpc == pc)
 	      error (_("Infinite loop detected"));
 	    break;

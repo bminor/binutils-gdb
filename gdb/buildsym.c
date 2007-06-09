@@ -756,7 +756,7 @@ record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 
   e = subfile->line_vector->item + subfile->line_vector->nitems++;
   e->line = line;
-  e->pc = ADDR_BITS_REMOVE(pc);
+  e->pc = gdbarch_addr_bits_remove (current_gdbarch, pc);
 }
 
 /* Needed in order to sort line tables from IBM xcoff files.  Sigh!  */

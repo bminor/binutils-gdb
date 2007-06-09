@@ -661,12 +661,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: addr_bit = %s\n",
                       paddr_d (current_gdbarch->addr_bit));
-#ifdef ADDR_BITS_REMOVE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ADDR_BITS_REMOVE(addr)",
-                      XSTRING (ADDR_BITS_REMOVE (addr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: addr_bits_remove = <0x%lx>\n",
                       (long) current_gdbarch->addr_bits_remove);

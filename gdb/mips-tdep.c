@@ -2245,7 +2245,7 @@ heuristic_proc_start (CORE_ADDR pc)
   int instlen;
   int seen_adjsp = 0;
 
-  pc = ADDR_BITS_REMOVE (pc);
+  pc = gdbarch_addr_bits_remove (current_gdbarch, pc);
   start_pc = pc;
   fence = start_pc - heuristic_fence_post;
   if (start_pc == 0)
