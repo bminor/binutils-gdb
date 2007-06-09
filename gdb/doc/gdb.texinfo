@@ -17262,7 +17262,7 @@ New fields may be added to the output of any MI command.
 
 @item
 The range of values for fields with specified values, e.g.,
-@code{in_scope} (@pxref{-var-update-fields}) may be extended.
+@code{in_scope} (@pxref{-var-update}) may be extended.
 
 @c The format of field's content e.g type prefix, may change so parse it
 @c   at your own risk.  Yes, in general?
@@ -19516,7 +19516,6 @@ subsequent @code{-var-update} list.
 
 @subheading The @code{-var-update} Command
 @findex -var-update
-@anchor{-var-update}
 
 @subsubheading Synopsis
 
@@ -19530,7 +19529,8 @@ list of variable objects whose values have changed; @var{name} must
 be a root variable object.  Here, ``changed'' means that the result of
 @code{-var-evaluate-expression} before and after the
 @code{-var-update} is different.  If @samp{*} is used as the variable
-object names, all existing variable objects are updated.  The option
+object names, all existing variable objects are updated, except
+for frozen ones (@pxref{-var-set-frozen}).  The option
 @var{print-values} determines whether both names and values, or just
 names are printed.  The possible values of this options are the same
 as for @code{-var-list-children} (@pxref{-var-list-children}).  It is
@@ -19551,7 +19551,7 @@ type_changed="false"@}]
 (gdb)
 @end smallexample
 
-@anchor{-var-update-fields}
+@anchor{-var-update}
 The field in_scope may take three values:
 
 @table @code
@@ -19576,18 +19576,19 @@ be prepared for this possibility.  @xref{GDB/MI Development and Front Ends, ,@sc
 
 @subheading The @code{-var-set-frozen} Command
 @findex -var-set-frozen
+@anchor{-var-set-frozen}
 
 @subsubheading Synopsis
 
 @smallexample
- -var-set-frozen @var{name} @samp{flag}
+ -var-set-frozen @var{name} @var{flag}
 @end smallexample
 
-Set the frozeness flag on the variable object @var{name}.  The
+Set the frozenness flag on the variable object @var{name}.  The
 @var{flag} parameter should be either @samp{1} to make the variable
-frozen or @samp{0} to make it unfozen.  If a variable object is
+frozen or @samp{0} to make it unfrozen.  If a variable object is
 frozen, then neither itself, nor any of its children, are 
-implicitly updated by @code{-var-update} (@pxref{-var-update}) of 
+implicitly updated by @code{-var-update} of 
 a parent variable or by @code{-var-update *}.  Only
 @code{-var-update} of the variable itself will update its value and
 values of its children.  After a variable object is unfrozen, it is

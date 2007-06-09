@@ -1,3 +1,8 @@
+2007-06-09  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Editorial
+	comments.
+
 2007-06-07  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (Emacs): Describe GDB under Emacs 22.1.
