@@ -1,5 +1,11 @@
 2007-06-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (NAME_OF_MALLOC): Replace by gdbarch_name_of_malloc.
+	* valops.c (value_allocate_space_in_inferior): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (MEMORY_INSERT_BREAKPOINT): Replace by
 	gdbarch_memory_insert_breakpoint.
 	* mem-break.c (memory_insert_breakpoint): Likewise.

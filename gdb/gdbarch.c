@@ -1035,14 +1035,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: memory_remove_breakpoint = <0x%lx>\n",
                       (long) current_gdbarch->memory_remove_breakpoint);
-#ifdef NAME_OF_MALLOC
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NAME_OF_MALLOC # %s\n",
-                      XSTRING (NAME_OF_MALLOC));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: name_of_malloc = %s\n",
-                      NAME_OF_MALLOC);
+                      current_gdbarch->name_of_malloc);
   fprintf_unfiltered (file,
                       "gdbarch_dump: num_pseudo_regs = %s\n",
                       paddr_d (current_gdbarch->num_pseudo_regs));

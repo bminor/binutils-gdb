@@ -993,12 +993,6 @@ extern void set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, gdba
 
 extern const char * gdbarch_name_of_malloc (struct gdbarch *gdbarch);
 extern void set_gdbarch_name_of_malloc (struct gdbarch *gdbarch, const char * name_of_malloc);
-#if !defined (GDB_TM_FILE) && defined (NAME_OF_MALLOC)
-#error "Non multi-arch definition of NAME_OF_MALLOC"
-#endif
-#if !defined (NAME_OF_MALLOC)
-#define NAME_OF_MALLOC (gdbarch_name_of_malloc (current_gdbarch))
-#endif
 
 extern int gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch);
 extern void set_gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch, int cannot_step_breakpoint);
