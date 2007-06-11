@@ -194,7 +194,7 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
   for (entry = 0; entry < entry_count; ++entry)
     {
       unsigned value;
-      unsigned flags = (XTENSA_PROP_INSN | XTENSA_PROP_INSN_NO_TRANSFORM
+      unsigned flags = (XTENSA_PROP_INSN | XTENSA_PROP_NO_TRANSFORM
 			| XTENSA_PROP_INSN_NO_REORDER);
       value = bfd_get_32 (abfd, insn_contents + entry * 8 + 0);
       bfd_put_32 (abfd, value, prop_contents + entry * 12 + 0);

@@ -1,3 +1,17 @@
+2007-06-11  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+	
+	* config/tc-xtensa.c (XTENSA_PROP_INSN_NO_TRANSFORM): Renamed to...
+	(XTENSA_PROP_NO_TRANSFORM): ...this.
+	(frag_flags_struct): Move is_no_transform out of the insn sub-struct.
+	(xtensa_mark_frags_for_org): New.
+	(xtensa_handle_align): Set RELAX_ORG frag subtype for rs_org.
+	(xtensa_post_relax_hook): Call xtensa_mark_frags_for_org.
+	(get_frag_property_flags): Adjust reference to is_no_transform flag.
+	(xtensa_frag_flags_combinable): Likewise.
+	(frag_flags_to_number): Likewise.  Use XTENSA_PROP_NO_TRANSFORM.
+	* config/tc-xtensa.h (xtensa_relax_statesE): Add RELAX_ORG.
+	
 2007-06-06  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (s_align): Pad code sections appropriately.

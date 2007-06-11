@@ -187,7 +187,9 @@ int generating_literals = 0;
 /* Instruction only properties about code.  */
 #define XTENSA_PROP_INSN_NO_DENSITY	0x00000040
 #define XTENSA_PROP_INSN_NO_REORDER	0x00000080
-#define XTENSA_PROP_INSN_NO_TRANSFORM	0x00000100
+/* Historically, NO_TRANSFORM was a property of instructions,
+   but it should apply to literals under certain circumstances.  */
+#define XTENSA_PROP_NO_TRANSFORM	0x00000100
 
 /*  Branch target alignment information.  This transmits information
     to the linker optimization about the priority of aligning a
@@ -263,6 +265,9 @@ struct frag_flags_struct
   unsigned is_data : 1;
   unsigned is_unreachable : 1;
 
+  /* is_specific_opcode implies no_transform.  */
+  unsigned is_no_transform : 1;
+
   struct
   {
     unsigned is_loop_target : 1;
@@ -271,8 +276,6 @@ struct frag_flags_struct
 
     unsigned is_no_density : 1;
     /* no_longcalls flag does not need to be placed in the object file.  */
-    /* is_specific_opcode implies no_transform.  */
-    unsigned is_no_transform : 1;
 
     unsigned is_no_reorder : 1;
 
@@ -4690,6 +4693,55 @@ relaxable_section (asection *sec)
 
 
 static void
+xtensa_mark_frags_for_org (void)
+{
+  segT *seclist;
+
+  /* Walk over each fragment of all of the current segments.  If we find
+     a .org frag in any of the segments, mark all frags prior to it as
+     "no transform", which will prevent linker optimizations from messing
+     up the .org distance.  This should be done after
+     xtensa_find_unmarked_state_frags, because we don't want to worry here
+     about that function trashing the data we save here.  */
+
+  for (seclist = &stdoutput->sections;
+       seclist && *seclist;
+       seclist = &(*seclist)->next)
+    {
+      segT sec = *seclist;
+      segment_info_type *seginfo;
+      fragS *fragP;
+      flagword flags;
+      flags = bfd_get_section_flags (stdoutput, sec);
+      if (flags & SEC_DEBUGGING)
+	continue;
+      if (!(flags & SEC_ALLOC))
+	continue;
+
+      seginfo = seg_info (sec);
+      if (seginfo && seginfo->frchainP)
+	{
+	  fragS *last_fragP = seginfo->frchainP->frch_root;
+	  for (fragP = seginfo->frchainP->frch_root; fragP;
+	       fragP = fragP->fr_next)
+	    {
+	      /* cvt_frag_to_fill has changed the fr_type of org frags to
+		 rs_fill, so use the value as cached in rs_subtype here.  */
+	      if (fragP->fr_subtype == RELAX_ORG)
+		{
+		  while (last_fragP != fragP->fr_next)
+		    {
+		      last_fragP->tc_frag_data.is_no_transform = TRUE;
+		      last_fragP = last_fragP->fr_next;
+		    }
+		}
+	    }
+	}
+    }
+}
+
+
+static void
 xtensa_find_unmarked_state_frags (void)
 {
   segT *seclist;
@@ -5298,6 +5350,9 @@ xtensa_handle_align (fragS *fragP)
 	as_bad_where (fragP->fr_file, fragP->fr_line,
 		      _("unaligned entry instruction"));
     }
+
+  if (linkrelax && fragP->fr_type == rs_org)
+    fragP->fr_subtype = RELAX_ORG;
 }
 
 
@@ -10148,6 +10203,7 @@ xtensa_post_relax_hook (void)
   xtensa_move_seg_list_to_beginning (literal_head);
 
   xtensa_find_unmarked_state_frags ();
+  xtensa_mark_frags_for_org ();
 
   xtensa_create_property_segments (get_frag_is_literal,
 				   NULL,
@@ -10608,6 +10664,9 @@ get_frag_property_flags (const fragS *fragP, frag_flags *prop_flags)
   xtensa_frag_flags_init (prop_flags);
   if (fragP->tc_frag_data.is_literal)
     prop_flags->is_literal = TRUE;
+  if (fragP->tc_frag_data.is_specific_opcode
+      || fragP->tc_frag_data.is_no_transform)
+    prop_flags->is_no_transform = TRUE;
   if (fragP->tc_frag_data.is_unreachable)
     prop_flags->is_unreachable = TRUE;
   else if (fragP->tc_frag_data.is_insn)
@@ -10617,9 +10676,6 @@ get_frag_property_flags (const fragS *fragP, frag_flags *prop_flags)
 	prop_flags->insn.is_loop_target = TRUE;
       if (fragP->tc_frag_data.is_branch_target)
 	prop_flags->insn.is_branch_target = TRUE;
-      if (fragP->tc_frag_data.is_specific_opcode
-	  || fragP->tc_frag_data.is_no_transform)
-	prop_flags->insn.is_no_transform = TRUE;
       if (fragP->tc_frag_data.is_no_density)
 	prop_flags->insn.is_no_density = TRUE;
       if (fragP->tc_frag_data.use_absolute_literals)
@@ -10657,8 +10713,8 @@ frag_flags_to_number (const frag_flags *prop_flags)
 
   if (prop_flags->insn.is_no_density)
     num |= XTENSA_PROP_INSN_NO_DENSITY;
-  if (prop_flags->insn.is_no_transform)
-    num |= XTENSA_PROP_INSN_NO_TRANSFORM;
+  if (prop_flags->is_no_transform)
+    num |= XTENSA_PROP_NO_TRANSFORM;
   if (prop_flags->insn.is_no_reorder)
     num |= XTENSA_PROP_INSN_NO_REORDER;
   if (prop_flags->insn.is_abslit)
@@ -10697,8 +10753,8 @@ xtensa_frag_flags_combinable (const frag_flags *prop_flags_1,
       if (prop_flags_1->insn.is_no_density !=
 	  prop_flags_2->insn.is_no_density)
 	return FALSE;
-      if (prop_flags_1->insn.is_no_transform !=
-	  prop_flags_2->insn.is_no_transform)
+      if (prop_flags_1->is_no_transform !=
+	  prop_flags_2->is_no_transform)
 	return FALSE;
       if (prop_flags_1->insn.is_no_reorder !=
 	  prop_flags_2->insn.is_no_reorder)

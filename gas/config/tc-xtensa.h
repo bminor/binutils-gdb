@@ -167,6 +167,13 @@ enum xtensa_relax_statesE
      branch is relaxed, then this frag will be converted to a
      RELAX_UNREACHABLE frag.  */
 
+  RELAX_ORG,
+  /* This marks the location as having previously been an rs_org frag.  
+     rs_org frags are converted to fill-zero frags immediately after
+     relaxation.  However, we need to remember where they were so we can
+     prevent the linker from changing the size of any frag between the
+     section start and the org frag.  */
+
   RELAX_NONE
 };
 

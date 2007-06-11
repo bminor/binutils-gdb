@@ -5541,7 +5541,7 @@ extend_ebb_bounds_forward (ebb_t *ebb)
 
       new_entry = &ebb->ptbl[ebb->end_ptbl_idx + 1];
       if (((new_entry->flags & XTENSA_PROP_INSN) == 0)
-	  || ((new_entry->flags & XTENSA_PROP_INSN_NO_TRANSFORM) != 0)
+	  || ((new_entry->flags & XTENSA_PROP_NO_TRANSFORM) != 0)
 	  || ((the_entry->flags & XTENSA_PROP_ALIGN) != 0))
 	break;
 
@@ -5614,7 +5614,7 @@ extend_ebb_bounds_backward (ebb_t *ebb)
 
       new_entry = &ebb->ptbl[ebb->start_ptbl_idx - 1];
       if ((new_entry->flags & XTENSA_PROP_INSN) == 0
-	  || ((new_entry->flags & XTENSA_PROP_INSN_NO_TRANSFORM) != 0)
+	  || ((new_entry->flags & XTENSA_PROP_NO_TRANSFORM) != 0)
 	  || ((new_entry->flags & XTENSA_PROP_ALIGN) != 0))
 	return TRUE;
       if (new_entry->address + new_entry->size != the_entry->address)
@@ -5822,7 +5822,8 @@ static bfd_boolean compute_removed_literals
 static Elf_Internal_Rela *get_irel_at_offset
   (asection *, Elf_Internal_Rela *, bfd_vma);
 static bfd_boolean is_removable_literal 
-  (const source_reloc *, int, const source_reloc *, int);
+  (const source_reloc *, int, const source_reloc *, int, asection *,
+   property_table_entry *, int);
 static bfd_boolean remove_dead_literal
   (bfd *, asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    Elf_Internal_Rela *, source_reloc *, property_table_entry *, int); 
@@ -6480,7 +6481,7 @@ compute_text_actions (bfd *abfd,
 	  the_entry++;
 	}
 
-      if (the_entry->flags & XTENSA_PROP_INSN_NO_TRANSFORM)
+      if (the_entry->flags & XTENSA_PROP_NO_TRANSFORM)
 	  /* NO_REORDER is OK */
 	continue;
 
@@ -6673,14 +6674,14 @@ compute_ebb_proposed_actions (ebb_constraint *ebb_table)
 	    goto decode_error;
 
 	  if ((entry->flags & XTENSA_PROP_INSN_NO_DENSITY) == 0
-	      && (entry->flags & XTENSA_PROP_INSN_NO_TRANSFORM) == 0
+	      && (entry->flags & XTENSA_PROP_NO_TRANSFORM) == 0
 	      && can_narrow_instruction (slotbuf, fmt, opcode) != 0)
 	    {
 	      /* Add an instruction narrow action.  */
 	      ebb_propose_action (ebb_table, EBB_NO_ALIGN, 0,
 				  ta_narrow_insn, offset, 0, FALSE);
 	    }
-	  else if ((entry->flags & XTENSA_PROP_INSN_NO_TRANSFORM) == 0
+	  else if ((entry->flags & XTENSA_PROP_NO_TRANSFORM) == 0
 		   && can_widen_instruction (slotbuf, fmt, opcode) != 0
 		   && ! prev_instr_is_a_loop (ebb->contents,
 					      ebb->content_length, offset))
@@ -7430,7 +7431,8 @@ compute_removed_literals (bfd *abfd,
       /* Check if the relocation was from an L32R that is being removed
 	 because a CALLX was converted to a direct CALL, and check if
 	 there are no other relocations to the literal.  */
-      if (is_removable_literal (rel, i, src_relocs, relax_info->src_count))
+      if (is_removable_literal (rel, i, src_relocs, relax_info->src_count, 
+				sec, prop_table, ptblsize))
 	{
 	  if (!remove_dead_literal (abfd, sec, link_info, internal_relocs,
 				    irel, rel, prop_table, ptblsize))
@@ -7514,12 +7516,22 @@ bfd_boolean
 is_removable_literal (const source_reloc *rel,
 		      int i,
 		      const source_reloc *src_relocs,
-		      int src_count)
+		      int src_count,
+		      asection *sec,
+		      property_table_entry *prop_table,
+		      int ptblsize)
 {
   const source_reloc *curr_rel;
+  property_table_entry *entry;
+
   if (!rel->is_null)
     return FALSE;
   
+  entry = elf_xtensa_find_property_entry (prop_table, ptblsize, 
+					  sec->vma + rel->r_rel.target_offset);
+  if (entry && (entry->flags & XTENSA_PROP_NO_TRANSFORM))
+    return FALSE;
+
   for (++i; i < src_count; ++i)
     {
       curr_rel = &src_relocs[i];
@@ -7809,7 +7821,7 @@ coalesce_shared_literal (asection *sec,
 
   entry = elf_xtensa_find_property_entry
     (prop_table, ptblsize, sec->vma + rel->r_rel.target_offset);
-  if (entry && (entry->flags & XTENSA_PROP_INSN_NO_TRANSFORM))
+  if (entry && (entry->flags & XTENSA_PROP_NO_TRANSFORM))
     return TRUE;
 
   /* Mark that the literal will be coalesced.  */
@@ -9735,12 +9747,12 @@ xtensa_get_property_predef_flags (asection *sec)
 {
   if (xtensa_is_insntable_section (sec))
     return (XTENSA_PROP_INSN
-	    | XTENSA_PROP_INSN_NO_TRANSFORM
+	    | XTENSA_PROP_NO_TRANSFORM
 	    | XTENSA_PROP_INSN_NO_REORDER);
 
   if (xtensa_is_littable_section (sec))
     return (XTENSA_PROP_LITERAL
-	    | XTENSA_PROP_INSN_NO_TRANSFORM
+	    | XTENSA_PROP_NO_TRANSFORM
 	    | XTENSA_PROP_INSN_NO_REORDER);
 
   return 0;

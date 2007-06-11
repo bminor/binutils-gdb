@@ -1,3 +1,9 @@
+2007-06-11  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+	
+	* emultempl/xtensaelf.em (replace_insn_sec_with_prop_sec): Use renamed
+	XTENSA_PROP_NO_TRANSFORM flag instead of XTENSA_PROP_INSN_NO_TRANSFORM.
+	
 2007-06-01  Noah Misch  <noah@cs.caltech.edu>
 	    Alan Modra  <amodra@bigpond.net.au>
 

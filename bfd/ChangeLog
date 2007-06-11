@@ -1,3 +1,15 @@
+2007-06-11  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+	
+	* elf32-xtensa.c (extend_ebb_bounds_forward): Use renamed
+	XTENSA_PROP_NO_TRANSFORM flag instead of XTENSA_PROP_INSN_NO_TRANSFORM.
+	(extend_ebb_bounds_backward, compute_text_actions): Likewise.
+	(compute_ebb_proposed_actions, coalesce_shared_literal): Likewise.
+	(xtensa_get_property_predef_flags): Likewise.
+	(compute_removed_literals): Pass new arguments to is_removable_literal.
+	(is_removable_literal): Add sec, prop_table and ptblsize arguments.
+	Do not remove literal if the NO_TRANSFORM property flag is set.
+	
 2007-05-31  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* elfxx-mips.c (mips_elf_initialize_tls_index): When processing a
