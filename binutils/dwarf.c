@@ -895,6 +895,9 @@ decode_location_expression (unsigned char * data,
 	case DW_OP_call_ref:
 	  printf ("DW_OP_call_ref");
 	  break;
+	case DW_OP_form_tls_address:
+	  printf ("DW_OP_form_tls_address");
+	  break;
 
 	  /* GNU extensions.  */
 	case DW_OP_GNU_push_tls_address:
