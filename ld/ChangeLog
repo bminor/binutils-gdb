@@ -1,3 +1,9 @@
+2007-06-11  Bob Wilson  <bob.wilson@acm.org>
+
+	* emulparams/elf32xtensa.sh (OTHER_READONLY_SECTIONS): Add ONLY_IF_RO
+	for .xt_except_table.
+	(OTHER_RELRO_SECTIONS): New.
+
 2007-06-11  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 	
