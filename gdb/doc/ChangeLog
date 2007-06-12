@@ -1,3 +1,9 @@
+2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Markus Deuling  <deuling@de.ibm.com>
+
+	* gdb.texinfo (Architectures): Add new SPU section to document
+	Cell Broadband Engine SPU architecture specific commands.
+
 2007-06-09  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Editorial

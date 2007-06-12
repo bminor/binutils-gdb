@@ -535,6 +535,9 @@ spu_xfer_partial (struct target_ops *ops,
 		  gdb_byte *readbuf, const gdb_byte *writebuf,
 		  ULONGEST offset, LONGEST len)
 {
+  if (object == TARGET_OBJECT_SPU)
+    return spu_proc_xfer_spu (annex, readbuf, writebuf, offset, len);
+
   if (object == TARGET_OBJECT_MEMORY)
     {
       int fd;

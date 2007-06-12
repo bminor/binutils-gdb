@@ -23,7 +23,7 @@
 
 /* Number of registers.  */
 #define SPU_NUM_REGS         130
-#define SPU_NUM_PSEUDO_REGS  1
+#define SPU_NUM_PSEUDO_REGS  6
 #define SPU_NUM_GPRS	     128
 
 /* Register numbers of various important registers.  */
@@ -41,7 +41,12 @@ enum spu_regnum
   /* Special registers.  */
   SPU_ID_REGNUM = 128,		/* SPU ID register.  */
   SPU_PC_REGNUM = 129,		/* Next program counter.  */
-  SPU_SP_REGNUM = 130		/* Stack pointer (preferred slot).  */
+  SPU_SP_REGNUM = 130,		/* Stack pointer (preferred slot).  */
+  SPU_FPSCR_REGNUM = 131,	/* Floating point status/control register.  */
+  SPU_SRR0_REGNUM = 132,	/* SRR0 register.  */
+  SPU_LSLR_REGNUM = 133,	/* Local store limit register.  */
+  SPU_DECR_REGNUM = 134,	/* Decrementer value.  */
+  SPU_DECR_STATUS_REGNUM = 135	/* Decrementer status.  */
 };
 
 /* Local store.  */

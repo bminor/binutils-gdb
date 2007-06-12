@@ -1,3 +1,9 @@
+2007-06-12  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+	    Markus Deuling  <deuling@de.ibm.com>
+
+	* gdb.arch/spu-info.exp: New testcase.
+	* gdb.arch/spu-info.c: New file.
+
 2007-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.arch/thumb-prologue.c: Record the breakpoint address in

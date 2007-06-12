@@ -1,5 +1,31 @@
 2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* target.h (enum target_object): Add TARGET_OBJECT_SPU.
+	* spu-linux-nat.c (spu_xfer_partial): Handle TARGET_OBJECT_SPU.
+
+	* spu-tdep.h (SPU_NUM_PSEUDO_REGS): Add 5 pseudo registers.
+	(enum spu_regnum): Add SPU_FPSCR_REGNUM, SPU_SRR0_REGNUM,
+	SPU_LSLR_REGNUM, SPU_DECR_REGNUM, SPU_DECR_STATUS_REGNUM.
+	* spu-tdep.c (infospucmdlist): New variable.
+	(spu_register_name): Handle additional pseudo registers.
+	(spu_register_type): Likewise.
+	(spu_pseudo_register_read): Likewise.
+	(spu_pseudo_register_write): Likewise.
+	(spu_pseudo_register_read_spu): New function.
+	(spu_pseudo_register_write_spu): Likewise.
+	(info_spu_event_command): New function.
+	(info_spu_signal_command): Likewise.
+	(info_spu_mailbox_list): Likewise.
+	(info_spu_mailbox_command): Likewise.
+	(spu_mfc_get_bitfield): Likewise.
+	(info_spu_dma_cmdlist): Likewise.
+	(info_spu_dma_command): Likewise.
+	(info_spu_proxydma_command): Likewise.
+	(info_spu_command): Likewise.
+	(_initialize_spu_tdep): Install "info spu" commands.
+
+2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-linux-nat.c (spu_proc_xfer_spu): Do not return failure when
 	accessing non-seekable spufs files.
 

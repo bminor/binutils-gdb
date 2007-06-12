@@ -49,6 +49,9 @@
 /* SPU-specific vector type.  */
 struct type *spu_builtin_type_vec128;
 
+/* The list of available "info spu " commands.  */
+static struct cmd_list_element *infospucmdlist = NULL;
+
 /* Registers.  */
 
 static const char *
@@ -72,7 +75,7 @@ spu_register_name (int reg_nr)
       "r104", "r105", "r106", "r107", "r108", "r109", "r110", "r111",
       "r112", "r113", "r114", "r115", "r116", "r117", "r118", "r119",
       "r120", "r121", "r122", "r123", "r124", "r125", "r126", "r127",
-      "id", "pc", "sp"
+      "id", "pc", "sp", "fpscr", "srr0", "lslr", "decr", "decr_status"
     };
 
   if (reg_nr < 0)
@@ -100,6 +103,21 @@ spu_register_type (struct gdbarch *gdbarch, int reg_nr)
     case SPU_SP_REGNUM:
       return builtin_type_void_data_ptr;
 
+    case SPU_FPSCR_REGNUM:
+      return builtin_type_uint128;
+
+    case SPU_SRR0_REGNUM:
+      return builtin_type_uint32;
+
+    case SPU_LSLR_REGNUM:
+      return builtin_type_uint32;
+
+    case SPU_DECR_REGNUM:
+      return builtin_type_uint32;
+
+    case SPU_DECR_STATUS_REGNUM:
+      return builtin_type_uint32;
+
     default:
       internal_error (__FILE__, __LINE__, "invalid regnum");
     }
@@ -108,10 +126,29 @@ spu_register_type (struct gdbarch *gdbarch, int reg_nr)
 /* Pseudo registers for preferred slots - stack pointer.  */
 
 static void
+spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
+			      gdb_byte *buf)
+{
+  gdb_byte reg[32];
+  char annex[32];
+  ULONGEST id;
+
+  regcache_raw_read_unsigned (regcache, SPU_ID_REGNUM, &id);
+  xsnprintf (annex, sizeof annex, "%d/%s", (int) id, regname);
+  memset (reg, 0, sizeof reg);
+  target_read (&current_target, TARGET_OBJECT_SPU, annex,
+	       reg, 0, sizeof reg);
+
+  store_unsigned_integer (buf, 4, strtoulst (reg, NULL, 16));
+}
+
+static void
 spu_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
                           int regnum, gdb_byte *buf)
 {
   gdb_byte reg[16];
+  char annex[32];
+  ULONGEST id;
 
   switch (regnum)
     {
@@ -120,9 +157,47 @@ spu_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       memcpy (buf, reg, 4);
       break;
 
+    case SPU_FPSCR_REGNUM:
+      regcache_raw_read_unsigned (regcache, SPU_ID_REGNUM, &id);
+      xsnprintf (annex, sizeof annex, "%d/fpcr", (int) id);
+      target_read (&current_target, TARGET_OBJECT_SPU, annex, buf, 0, 16);
+      break;
+
+    case SPU_SRR0_REGNUM:
+      spu_pseudo_register_read_spu (regcache, "srr0", buf);
+      break;
+
+    case SPU_LSLR_REGNUM:
+      spu_pseudo_register_read_spu (regcache, "lslr", buf);
+      break;
+
+    case SPU_DECR_REGNUM:
+      spu_pseudo_register_read_spu (regcache, "decr", buf);
+      break;
+
+    case SPU_DECR_STATUS_REGNUM:
+      spu_pseudo_register_read_spu (regcache, "decr_status", buf);
+      break;
+
     default:
       internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }
+}
+
+static void
+spu_pseudo_register_write_spu (struct regcache *regcache, const char *regname,
+			       const gdb_byte *buf)
+{
+  gdb_byte reg[32];
+  char annex[32];
+  ULONGEST id;
+
+  regcache_raw_read_unsigned (regcache, SPU_ID_REGNUM, &id);
+  xsnprintf (annex, sizeof annex, "%d/%s", (int) id, regname);
+  xsnprintf (reg, sizeof reg, "0x%s",
+	     phex_nz (extract_unsigned_integer (buf, 4), 4));
+  target_write (&current_target, TARGET_OBJECT_SPU, annex,
+		reg, 0, strlen (reg));
 }
 
 static void
@@ -130,6 +205,8 @@ spu_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
                            int regnum, const gdb_byte *buf)
 {
   gdb_byte reg[16];
+  char annex[32];
+  ULONGEST id;
 
   switch (regnum)
     {
@@ -137,6 +214,28 @@ spu_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       regcache_raw_read (regcache, SPU_RAW_SP_REGNUM, reg);
       memcpy (reg, buf, 4);
       regcache_raw_write (regcache, SPU_RAW_SP_REGNUM, reg);
+      break;
+
+    case SPU_FPSCR_REGNUM:
+      regcache_raw_read_unsigned (regcache, SPU_ID_REGNUM, &id);
+      xsnprintf (annex, sizeof annex, "%d/fpcr", (int) id);
+      target_write (&current_target, TARGET_OBJECT_SPU, annex, buf, 0, 16);
+      break;
+
+    case SPU_SRR0_REGNUM:
+      spu_pseudo_register_write_spu (regcache, "srr0", buf);
+      break;
+
+    case SPU_LSLR_REGNUM:
+      spu_pseudo_register_write_spu (regcache, "lslr", buf);
+      break;
+
+    case SPU_DECR_REGNUM:
+      spu_pseudo_register_write_spu (regcache, "decr", buf);
+      break;
+
+    case SPU_DECR_STATUS_REGNUM:
+      spu_pseudo_register_write_spu (regcache, "decr_status", buf);
       break;
 
     default:
@@ -1318,6 +1417,502 @@ spu_overlay_new_objfile (struct objfile *objfile)
 }
 
 
+/* "info spu" commands.  */
+
+static void
+info_spu_event_command (char *args, int from_tty)
+{
+  struct frame_info *frame = get_selected_frame (NULL);
+  ULONGEST event_status = 0;
+  ULONGEST event_mask = 0;
+  struct cleanup *chain;
+  gdb_byte buf[100];
+  char annex[32];
+  LONGEST len;
+  int rc, id;
+
+  id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
+
+  xsnprintf (annex, sizeof annex, "%d/event_status", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		     buf, 0, sizeof buf);
+  if (len <= 0)
+    error (_("Could not read event_status."));
+  event_status = strtoulst (buf, NULL, 16);
+ 
+  xsnprintf (annex, sizeof annex, "%d/event_mask", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		     buf, 0, sizeof buf);
+  if (len <= 0)
+    error (_("Could not read event_mask."));
+  event_mask = strtoulst (buf, NULL, 16);
+ 
+  chain = make_cleanup_ui_out_tuple_begin_end (uiout, "SPUInfoEvent");
+
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_fmt (uiout, "event_status",
+			"0x%s", phex_nz (event_status, 4));
+      ui_out_field_fmt (uiout, "event_mask",
+			"0x%s", phex_nz (event_mask, 4));
+    }
+  else
+    {
+      printf_filtered (_("Event Status 0x%s\n"), phex (event_status, 4));
+      printf_filtered (_("Event Mask   0x%s\n"), phex (event_mask, 4));
+    }
+
+  do_cleanups (chain);
+}
+
+static void
+info_spu_signal_command (char *args, int from_tty)
+{
+  struct frame_info *frame = get_selected_frame (NULL);
+  ULONGEST signal1 = 0;
+  ULONGEST signal1_type = 0;
+  int signal1_pending = 0;
+  ULONGEST signal2 = 0;
+  ULONGEST signal2_type = 0;
+  int signal2_pending = 0;
+  struct cleanup *chain;
+  char annex[32];
+  gdb_byte buf[100];
+  LONGEST len;
+  int rc, id;
+
+  id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
+
+  xsnprintf (annex, sizeof annex, "%d/signal1", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex, buf, 0, 4);
+  if (len < 0)
+    error (_("Could not read signal1."));
+  else if (len == 4)
+    {
+      signal1 = extract_unsigned_integer (buf, 4);
+      signal1_pending = 1;
+    }
+    
+  xsnprintf (annex, sizeof annex, "%d/signal1_type", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		     buf, 0, sizeof buf);
+  if (len <= 0)
+    error (_("Could not read signal1_type."));
+  signal1_type = strtoulst (buf, NULL, 16);
+
+  xsnprintf (annex, sizeof annex, "%d/signal2", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex, buf, 0, 4);
+  if (len < 0)
+    error (_("Could not read signal2."));
+  else if (len == 4)
+    {
+      signal2 = extract_unsigned_integer (buf, 4);
+      signal2_pending = 1;
+    }
+    
+  xsnprintf (annex, sizeof annex, "%d/signal2_type", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		     buf, 0, sizeof buf);
+  if (len <= 0)
+    error (_("Could not read signal2_type."));
+  signal2_type = strtoulst (buf, NULL, 16);
+
+  chain = make_cleanup_ui_out_tuple_begin_end (uiout, "SPUInfoSignal");
+
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_int (uiout, "signal1_pending", signal1_pending);
+      ui_out_field_fmt (uiout, "signal1", "0x%s", phex_nz (signal1, 4));
+      ui_out_field_int (uiout, "signal1_type", signal1_type);
+      ui_out_field_int (uiout, "signal2_pending", signal2_pending);
+      ui_out_field_fmt (uiout, "signal2", "0x%s", phex_nz (signal2, 4));
+      ui_out_field_int (uiout, "signal2_type", signal2_type);
+    }
+  else
+    {
+      if (signal1_pending)
+	printf_filtered (_("Signal 1 control word 0x%s "), phex (signal1, 4));
+      else
+	printf_filtered (_("Signal 1 not pending "));
+
+      if (signal1_type)
+	printf_filtered (_("(Type Overwrite)\n"));
+      else
+	printf_filtered (_("(Type Or)\n"));
+
+      if (signal2_pending)
+	printf_filtered (_("Signal 2 control word 0x%s "), phex (signal2, 4));
+      else
+	printf_filtered (_("Signal 2 not pending "));
+
+      if (signal2_type)
+	printf_filtered (_("(Type Overwrite)\n"));
+      else
+	printf_filtered (_("(Type Or)\n"));
+    }
+
+  do_cleanups (chain);
+}
+
+static void
+info_spu_mailbox_list (gdb_byte *buf, int nr,
+		       const char *field, const char *msg)
+{
+  struct cleanup *chain;
+  int i;
+
+  if (nr <= 0)
+    return;
+
+  chain = make_cleanup_ui_out_table_begin_end (uiout, 1, nr, "mbox");
+
+  ui_out_table_header (uiout, 32, ui_left, field, msg);
+  ui_out_table_body (uiout);
+
+  for (i = 0; i < nr; i++)
+    {
+      struct cleanup *val_chain;
+      ULONGEST val;
+      val_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "mbox");
+      val = extract_unsigned_integer (buf + 4*i, 4);
+      ui_out_field_fmt (uiout, field, "0x%s", phex (val, 4));
+      do_cleanups (val_chain);
+
+      if (!ui_out_is_mi_like_p (uiout))
+	printf_filtered ("\n");
+    }
+
+  do_cleanups (chain);
+}
+
+static void
+info_spu_mailbox_command (char *args, int from_tty)
+{
+  struct frame_info *frame = get_selected_frame (NULL);
+  struct cleanup *chain;
+  char annex[32];
+  gdb_byte buf[1024];
+  LONGEST len;
+  int i, id;
+
+  id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
+
+  chain = make_cleanup_ui_out_tuple_begin_end (uiout, "SPUInfoMailbox");
+
+  xsnprintf (annex, sizeof annex, "%d/mbox_info", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		     buf, 0, sizeof buf);
+  if (len < 0)
+    error (_("Could not read mbox_info."));
+
+  info_spu_mailbox_list (buf, len / 4, "mbox", "SPU Outbound Mailbox");
+
+  xsnprintf (annex, sizeof annex, "%d/ibox_info", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		     buf, 0, sizeof buf);
+  if (len < 0)
+    error (_("Could not read ibox_info."));
+
+  info_spu_mailbox_list (buf, len / 4, "ibox", "SPU Outbound Interrupt Mailbox");
+
+  xsnprintf (annex, sizeof annex, "%d/wbox_info", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		     buf, 0, sizeof buf);
+  if (len < 0)
+    error (_("Could not read wbox_info."));
+
+  info_spu_mailbox_list (buf, len / 4, "wbox", "SPU Inbound Mailbox");
+
+  do_cleanups (chain);
+}
+
+static ULONGEST
+spu_mfc_get_bitfield (ULONGEST word, int first, int last)
+{
+  ULONGEST mask = ~(~(ULONGEST)0 << (last - first + 1));
+  return (word >> (63 - last)) & mask;
+}
+
+static void
+info_spu_dma_cmdlist (gdb_byte *buf, int nr)
+{
+  static char *spu_mfc_opcode[256] =
+    {
+    /* 00 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 10 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 20 */ "put", "putb", "putf", NULL, "putl", "putlb", "putlf", NULL,
+             "puts", "putbs", "putfs", NULL, NULL, NULL, NULL, NULL,
+    /* 30 */ "putr", "putrb", "putrf", NULL, "putrl", "putrlb", "putrlf", NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 40 */ "get", "getb", "getf", NULL, "getl", "getlb", "getlf", NULL,
+             "gets", "getbs", "getfs", NULL, NULL, NULL, NULL, NULL,
+    /* 50 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 60 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 70 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* 80 */ "sdcrt", "sdcrtst", NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, "sdcrz", NULL, NULL, NULL, "sdcrst", NULL, "sdcrf",
+    /* 90 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* a0 */ "sndsig", "sndsigb", "sndsigf", NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* b0 */ "putlluc", NULL, NULL, NULL, "putllc", NULL, NULL, NULL,
+             "putqlluc", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* c0 */ "barrier", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             "mfceieio", NULL, NULL, NULL, "mfcsync", NULL, NULL, NULL,
+    /* d0 */ "getllar", NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* e0 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    /* f0 */ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    };
+
+  struct cleanup *chain;
+  int i;
+
+  chain = make_cleanup_ui_out_table_begin_end (uiout, 10, nr, "dma_cmd");
+
+  ui_out_table_header (uiout, 7, ui_left, "opcode", "Opcode");
+  ui_out_table_header (uiout, 3, ui_left, "tag", "Tag");
+  ui_out_table_header (uiout, 3, ui_left, "tid", "TId");
+  ui_out_table_header (uiout, 3, ui_left, "rid", "RId");
+  ui_out_table_header (uiout, 18, ui_left, "ea", "EA");
+  ui_out_table_header (uiout, 7, ui_left, "lsa", "LSA");
+  ui_out_table_header (uiout, 7, ui_left, "size", "Size");
+  ui_out_table_header (uiout, 7, ui_left, "lstaddr", "LstAddr");
+  ui_out_table_header (uiout, 7, ui_left, "lstsize", "LstSize");
+  ui_out_table_header (uiout, 1, ui_left, "error_p", "E");
+
+  ui_out_table_body (uiout);
+
+  for (i = 0; i < nr; i++)
+    {
+      struct cleanup *cmd_chain;
+      ULONGEST mfc_cq_dw0;
+      ULONGEST mfc_cq_dw1;
+      ULONGEST mfc_cq_dw2;
+      ULONGEST mfc_cq_dw3;
+      int mfc_cmd_opcode, mfc_cmd_tag, rclass_id, tclass_id;
+      int lsa, size, list_lsa, list_size, mfc_lsa, mfc_size;
+      ULONGEST mfc_ea;
+      int list_valid_p, noop_valid_p, qw_valid_p, ea_valid_p, cmd_error_p;
+
+      /* Decode contents of MFC Command Queue Context Save/Restore Registers.
+	 See "Cell Broadband Engine Registers V1.3", section 3.3.2.1.  */
+
+      mfc_cq_dw0 = extract_unsigned_integer (buf + 32*i, 8);
+      mfc_cq_dw1 = extract_unsigned_integer (buf + 32*i + 8, 8);
+      mfc_cq_dw2 = extract_unsigned_integer (buf + 32*i + 16, 8);
+      mfc_cq_dw3 = extract_unsigned_integer (buf + 32*i + 24, 8);
+
+      list_lsa = spu_mfc_get_bitfield (mfc_cq_dw0, 0, 14);
+      list_size = spu_mfc_get_bitfield (mfc_cq_dw0, 15, 26);
+      mfc_cmd_opcode = spu_mfc_get_bitfield (mfc_cq_dw0, 27, 34);
+      mfc_cmd_tag = spu_mfc_get_bitfield (mfc_cq_dw0, 35, 39);
+      list_valid_p = spu_mfc_get_bitfield (mfc_cq_dw0, 40, 40);
+      rclass_id = spu_mfc_get_bitfield (mfc_cq_dw0, 41, 43);
+      tclass_id = spu_mfc_get_bitfield (mfc_cq_dw0, 44, 46);
+
+      mfc_ea = spu_mfc_get_bitfield (mfc_cq_dw1, 0, 51) << 12
+		| spu_mfc_get_bitfield (mfc_cq_dw2, 25, 36);
+
+      mfc_lsa = spu_mfc_get_bitfield (mfc_cq_dw2, 0, 13);
+      mfc_size = spu_mfc_get_bitfield (mfc_cq_dw2, 14, 24);
+      noop_valid_p = spu_mfc_get_bitfield (mfc_cq_dw2, 37, 37);
+      qw_valid_p = spu_mfc_get_bitfield (mfc_cq_dw2, 38, 38);
+      ea_valid_p = spu_mfc_get_bitfield (mfc_cq_dw2, 39, 39);
+      cmd_error_p = spu_mfc_get_bitfield (mfc_cq_dw2, 40, 40);
+
+      cmd_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "cmd");
+
+      if (spu_mfc_opcode[mfc_cmd_opcode])
+	ui_out_field_string (uiout, "opcode", spu_mfc_opcode[mfc_cmd_opcode]);
+      else
+	ui_out_field_int (uiout, "opcode", mfc_cmd_opcode);
+
+      ui_out_field_int (uiout, "tag", mfc_cmd_tag);
+      ui_out_field_int (uiout, "tid", tclass_id);
+      ui_out_field_int (uiout, "rid", rclass_id);
+
+      if (ea_valid_p)
+	ui_out_field_fmt (uiout, "ea", "0x%s", phex (mfc_ea, 8));
+      else
+	ui_out_field_skip (uiout, "ea");
+
+      ui_out_field_fmt (uiout, "lsa", "0x%05x", mfc_lsa << 4);
+      if (qw_valid_p)
+	ui_out_field_fmt (uiout, "size", "0x%05x", mfc_size << 4);
+      else
+	ui_out_field_fmt (uiout, "size", "0x%05x", mfc_size);
+
+      if (list_valid_p)
+	{
+	  ui_out_field_fmt (uiout, "lstaddr", "0x%05x", list_lsa << 3);
+	  ui_out_field_fmt (uiout, "lstsize", "0x%05x", list_size << 3);
+	}
+      else
+	{
+	  ui_out_field_skip (uiout, "lstaddr");
+	  ui_out_field_skip (uiout, "lstsize");
+	}
+
+      if (cmd_error_p)
+	ui_out_field_string (uiout, "error_p", "*");
+      else
+	ui_out_field_skip (uiout, "error_p");
+
+      do_cleanups (cmd_chain);
+
+      if (!ui_out_is_mi_like_p (uiout))
+	printf_filtered ("\n");
+    }
+
+  do_cleanups (chain);
+}
+
+static void
+info_spu_dma_command (char *args, int from_tty)
+{
+  struct frame_info *frame = get_selected_frame (NULL);
+  ULONGEST dma_info_type;
+  ULONGEST dma_info_mask;
+  ULONGEST dma_info_status;
+  ULONGEST dma_info_stall_and_notify;
+  ULONGEST dma_info_atomic_command_status;
+  struct cleanup *chain;
+  char annex[32];
+  gdb_byte buf[1024];
+  LONGEST len;
+  int i, id;
+
+  id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
+
+  xsnprintf (annex, sizeof annex, "%d/dma_info", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		     buf, 0, 40 + 16 * 32);
+  if (len <= 0)
+    error (_("Could not read dma_info."));
+
+  dma_info_type = extract_unsigned_integer (buf, 8);
+  dma_info_mask = extract_unsigned_integer (buf + 8, 8);
+  dma_info_status = extract_unsigned_integer (buf + 16, 8);
+  dma_info_stall_and_notify = extract_unsigned_integer (buf + 24, 8);
+  dma_info_atomic_command_status = extract_unsigned_integer (buf + 32, 8);
+  
+  chain = make_cleanup_ui_out_tuple_begin_end (uiout, "SPUInfoDMA");
+
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_fmt (uiout, "dma_info_type", "0x%s",
+			phex_nz (dma_info_type, 4));
+      ui_out_field_fmt (uiout, "dma_info_mask", "0x%s",
+			phex_nz (dma_info_mask, 4));
+      ui_out_field_fmt (uiout, "dma_info_status", "0x%s",
+			phex_nz (dma_info_status, 4));
+      ui_out_field_fmt (uiout, "dma_info_stall_and_notify", "0x%s",
+			phex_nz (dma_info_stall_and_notify, 4));
+      ui_out_field_fmt (uiout, "dma_info_atomic_command_status", "0x%s",
+			phex_nz (dma_info_atomic_command_status, 4));
+    }
+  else
+    {
+      const char *query_msg;
+
+      switch (dma_info_type)
+	{
+	case 0: query_msg = _("no query pending"); break;
+	case 1: query_msg = _("'any' query pending"); break;
+	case 2: query_msg = _("'all' query pending"); break;
+	default: query_msg = _("undefined query type"); break;
+	}
+
+      printf_filtered (_("Tag-Group Status  0x%s\n"),
+		       phex (dma_info_status, 4));
+      printf_filtered (_("Tag-Group Mask    0x%s (%s)\n"),
+		       phex (dma_info_mask, 4), query_msg);
+      printf_filtered (_("Stall-and-Notify  0x%s\n"),
+		       phex (dma_info_stall_and_notify, 4));
+      printf_filtered (_("Atomic Cmd Status 0x%s\n"),
+		       phex (dma_info_atomic_command_status, 4));
+      printf_filtered ("\n");
+    }
+
+  info_spu_dma_cmdlist (buf + 40, 16);
+  do_cleanups (chain);
+}
+
+static void
+info_spu_proxydma_command (char *args, int from_tty)
+{
+  struct frame_info *frame = get_selected_frame (NULL);
+  ULONGEST dma_info_type;
+  ULONGEST dma_info_mask;
+  ULONGEST dma_info_status;
+  struct cleanup *chain;
+  char annex[32];
+  gdb_byte buf[1024];
+  LONGEST len;
+  int i, id;
+
+  id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
+
+  xsnprintf (annex, sizeof annex, "%d/proxydma_info", id);
+  len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		     buf, 0, 24 + 8 * 32);
+  if (len <= 0)
+    error (_("Could not read proxydma_info."));
+
+  dma_info_type = extract_unsigned_integer (buf, 8);
+  dma_info_mask = extract_unsigned_integer (buf + 8, 8);
+  dma_info_status = extract_unsigned_integer (buf + 16, 8);
+  
+  chain = make_cleanup_ui_out_tuple_begin_end (uiout, "SPUInfoProxyDMA");
+
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_fmt (uiout, "proxydma_info_type", "0x%s",
+			phex_nz (dma_info_type, 4));
+      ui_out_field_fmt (uiout, "proxydma_info_mask", "0x%s",
+			phex_nz (dma_info_mask, 4));
+      ui_out_field_fmt (uiout, "proxydma_info_status", "0x%s",
+			phex_nz (dma_info_status, 4));
+    }
+  else
+    {
+      const char *query_msg;
+
+      switch (dma_info_type)
+	{
+	case 0: query_msg = _("no query pending"); break;
+	case 1: query_msg = _("'any' query pending"); break;
+	case 2: query_msg = _("'all' query pending"); break;
+	default: query_msg = _("undefined query type"); break;
+	}
+
+      printf_filtered (_("Tag-Group Status  0x%s\n"),
+		       phex (dma_info_status, 4));
+      printf_filtered (_("Tag-Group Mask    0x%s (%s)\n"),
+		       phex (dma_info_mask, 4), query_msg);
+      printf_filtered ("\n");
+    }
+
+  info_spu_dma_cmdlist (buf + 24, 8);
+  do_cleanups (chain);
+}
+
+static void
+info_spu_command (char *args, int from_tty)
+{
+  printf_unfiltered (_("\"info spu\" must be followed by the name of an SPU facility.\n"));
+  help_list (infospucmdlist, "info spu ", -1, gdb_stdout);
+}
+
+
 /* Set up gdbarch struct.  */
 
 static struct gdbarch *
@@ -1430,4 +2025,26 @@ _initialize_spu_tdep (void)
   /* Add ourselves to objfile event chain.  */
   observer_attach_new_objfile (spu_overlay_new_objfile);
   spu_overlay_data = register_objfile_data ();
+
+  /* Add root prefix command for all "info spu" commands.  */
+  add_prefix_cmd ("spu", class_info, info_spu_command,
+		  _("Various SPU specific commands."),
+		  &infospucmdlist, "info spu ", 0, &infolist);
+
+  /* Add various "info spu" commands.  */
+  add_cmd ("event", class_info, info_spu_event_command,
+	   _("Display SPU event facility status.\n"),
+	   &infospucmdlist);
+  add_cmd ("signal", class_info, info_spu_signal_command,
+	   _("Display SPU signal notification facility status.\n"),
+	   &infospucmdlist);
+  add_cmd ("mailbox", class_info, info_spu_mailbox_command,
+	   _("Display SPU mailbox facility status.\n"),
+	   &infospucmdlist);
+  add_cmd ("dma", class_info, info_spu_dma_command,
+	   _("Display MFC DMA status.\n"),
+	   &infospucmdlist);
+  add_cmd ("proxydma", class_info, info_spu_proxydma_command,
+	   _("Display MFC Proxy-DMA status.\n"),
+	   &infospucmdlist);
 }

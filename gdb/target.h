@@ -189,6 +189,8 @@ enum target_object
 {
   /* AVR target specific transfer.  See "avr-tdep.c" and "remote.c".  */
   TARGET_OBJECT_AVR,
+  /* SPU target specific transfer.  See "spu-tdep.c".  */
+  TARGET_OBJECT_SPU,
   /* Transfer up-to LEN bytes of memory starting at OFFSET.  */
   TARGET_OBJECT_MEMORY,
   /* Memory, avoiding GDB's data cache and trusting the executable.

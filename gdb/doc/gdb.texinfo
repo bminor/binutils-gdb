@@ -15100,6 +15100,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * Alpha::
 * MIPS::
 * HPPA::               HP PA architecture
+* SPU::                Cell Broadband Engine SPU architecture
 @end menu
 
 @node i386
@@ -15279,6 +15280,43 @@ given @var{address}.
 
 @end table
 
+
+@node SPU
+@subsection Cell Broadband Engine SPU architecture
+@cindex Cell Broadband Engine
+@cindex SPU
+
+When @value{GDBN} is debugging the Cell Broadband Engine SPU architecture,
+it provides the following special commands:
+
+@table @code
+@item info spu event
+@kindex info spu
+Display SPU event facility status.  Shows current event mask
+and pending event status.
+
+@item info spu signal
+Display SPU signal notification facility status.  Shows pending
+signal-control word and signal notification mode of both signal
+notification channels.
+
+@item info spu mailbox
+Display SPU mailbox facility status.  Shows all pending entries,
+in order of processing, in each of the SPU Write Outbound,
+SPU Write Outbound Interrupt, and SPU Read Inbound mailboxes.
+
+@item info spu dma
+Display MFC DMA status.  Shows all pending commands in the MFC
+DMA queue.  For each entry, opcode, tag, class IDs, effective
+and local store addresses and transfer size are shown.
+
+@item info spu proxydma
+Display MFC Proxy-DMA status.  Shows all pending commands in the MFC
+Proxy-DMA queue.  For each entry, opcode, tag, class IDs, effective
+and local store addresses and transfer size are shown.
+
+@end table
+ 
 
 @node Controlling GDB
 @chapter Controlling @value{GDBN}
