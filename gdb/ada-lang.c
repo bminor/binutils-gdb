@@ -10198,7 +10198,7 @@ ada_create_fundamental_type (struct objfile *objfile, int typeid)
          name "<?type?>".  When all the dust settles from the type
          reconstruction work, this should probably become an error.  */
       type = init_type (TYPE_CODE_INT,
-                        TARGET_INT_BIT / TARGET_CHAR_BIT,
+                        gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         0, "<?type?>", objfile);
       warning (_("internal error: no Ada fundamental type %d"), typeid);
       break;
@@ -10224,63 +10224,66 @@ ada_create_fundamental_type (struct objfile *objfile, int typeid)
       break;
     case FT_SHORT:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+                        gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         0, "short_integer", objfile);
       break;
     case FT_SIGNED_SHORT:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+                        gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         0, "short_integer", objfile);
       break;
     case FT_UNSIGNED_SHORT:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+                        gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         TYPE_FLAG_UNSIGNED, "unsigned short", objfile);
       break;
     case FT_INTEGER:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_INT_BIT / TARGET_CHAR_BIT,
+                        gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         0, "integer", objfile);
       break;
     case FT_SIGNED_INTEGER:
-      type = init_type (TYPE_CODE_INT, TARGET_INT_BIT /
-			TARGET_CHAR_BIT, 
+      type = init_type (TYPE_CODE_INT,
+			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "integer", objfile);        /* FIXME -fnf */
       break;
     case FT_UNSIGNED_INTEGER:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_INT_BIT / TARGET_CHAR_BIT,
+                        gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         TYPE_FLAG_UNSIGNED, "unsigned int", objfile);
       break;
     case FT_LONG:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_LONG_BIT / TARGET_CHAR_BIT,
+                        gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         0, "long_integer", objfile);
       break;
     case FT_SIGNED_LONG:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_LONG_BIT / TARGET_CHAR_BIT,
+                        gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         0, "long_integer", objfile);
       break;
     case FT_UNSIGNED_LONG:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_LONG_BIT / TARGET_CHAR_BIT,
+                        gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         TYPE_FLAG_UNSIGNED, "unsigned long", objfile);
       break;
     case FT_LONG_LONG:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-                        0, "long_long_integer", objfile);
+			gdbarch_long_long_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
+			0, "long_long_integer", objfile);
       break;
     case FT_SIGNED_LONG_LONG:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-                        0, "long_long_integer", objfile);
+			gdbarch_long_long_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
+			0, "long_long_integer", objfile);
       break;
     case FT_UNSIGNED_LONG_LONG:
       type = init_type (TYPE_CODE_INT,
-                        TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-                        TYPE_FLAG_UNSIGNED, "unsigned long long", objfile);
+			gdbarch_long_long_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
+			TYPE_FLAG_UNSIGNED, "unsigned long long", objfile);
       break;
     case FT_FLOAT:
       type = init_type (TYPE_CODE_FLT,
@@ -10326,14 +10329,17 @@ ada_language_arch_info (struct gdbarch *current_gdbarch,
     = GDBARCH_OBSTACK_CALLOC (current_gdbarch, nr_ada_primitive_types + 1,
 			      struct type *);
   lai->primitive_type_vector [ada_primitive_type_int] =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-               0, "integer", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "integer", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_long] =
-    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-               0, "long_integer", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "long_integer", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_short] =
-    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-               0, "short_integer", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "short_integer", (struct objfile *) NULL);
   lai->string_char_type = 
     lai->primitive_type_vector [ada_primitive_type_char] =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
@@ -10345,17 +10351,20 @@ ada_language_arch_info (struct gdbarch *current_gdbarch,
     init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
                0, "long_float", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_long_long] =
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_INT, 
+	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
                0, "long_long_integer", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_long_double] =
     init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
                0, "long_long_float", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_natural] =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-               0, "natural", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "natural", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_positive] =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-               0, "positive", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "positive", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_void] = builtin->builtin_void;
 
   lai->primitive_type_vector [ada_primitive_type_system_address] =

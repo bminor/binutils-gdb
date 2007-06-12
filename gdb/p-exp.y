@@ -909,16 +909,16 @@ parse_number (p, len, parsed_float, putithere)
      shift it right and see whether anything remains.  Note that we
      can't shift sizeof (LONGEST) * HOST_CHAR_BIT bits or more in one
      operation, because many compilers will warn about such a shift
-     (which always produces a zero result).  Sometimes TARGET_INT_BIT
-     or TARGET_LONG_BIT will be that big, sometimes not.  To deal with
+     (which always produces a zero result).  Sometimes gdbarch_int_bit
+     or gdbarch_long_bit will be that big, sometimes not.  To deal with
      the case where it is we just always shift the value more than
      once, with fewer bits each time.  */
 
   un = (ULONGEST)n >> 2;
   if (long_p == 0
-      && (un >> (TARGET_INT_BIT - 2)) == 0)
+      && (un >> (gdbarch_int_bit (current_gdbarch) - 2)) == 0)
     {
-      high_bit = ((ULONGEST)1) << (TARGET_INT_BIT-1);
+      high_bit = ((ULONGEST)1) << (gdbarch_int_bit (current_gdbarch) - 1);
 
       /* A large decimal (not hex or octal) constant (between INT_MAX
 	 and UINT_MAX) is a long or unsigned long, according to ANSI,
@@ -930,20 +930,21 @@ parse_number (p, len, parsed_float, putithere)
       signed_type = builtin_type_int;
     }
   else if (long_p <= 1
-	   && (un >> (TARGET_LONG_BIT - 2)) == 0)
+	   && (un >> (gdbarch_long_bit (current_gdbarch) - 2)) == 0)
     {
-      high_bit = ((ULONGEST)1) << (TARGET_LONG_BIT-1);
+      high_bit = ((ULONGEST)1) << (gdbarch_long_bit (current_gdbarch) - 1);
       unsigned_type = builtin_type_unsigned_long;
       signed_type = builtin_type_long;
     }
   else
     {
       int shift;
-      if (sizeof (ULONGEST) * HOST_CHAR_BIT < TARGET_LONG_LONG_BIT)
+      if (sizeof (ULONGEST) * HOST_CHAR_BIT
+	  < gdbarch_long_long_bit (current_gdbarch))
 	/* A long long does not fit in a LONGEST.  */
 	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
       else
-	shift = (TARGET_LONG_LONG_BIT - 1);
+	shift = (gdbarch_long_long_bit (current_gdbarch) - 1);
       high_bit = (ULONGEST) 1 << shift;
       unsigned_type = builtin_type_unsigned_long_long;
       signed_type = builtin_type_long_long;

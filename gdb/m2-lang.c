@@ -206,7 +206,7 @@ m2_create_fundamental_type (struct objfile *objfile, int typeid)
          name "<?type?>".  When all the dust settles from the type
          reconstruction work, this should probably become an error. */
       type = init_type (TYPE_CODE_INT,
-			TARGET_INT_BIT / TARGET_CHAR_BIT,
+			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "<?type?>", objfile);
       warning (_("internal error: no Modula fundamental type %d"), typeid);
       break;
@@ -242,67 +242,70 @@ m2_create_fundamental_type (struct objfile *objfile, int typeid)
       break;
     case FT_SHORT:
       type = init_type (TYPE_CODE_INT,
-			TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+			gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "short", objfile);
       break;
     case FT_SIGNED_SHORT:
       type = init_type (TYPE_CODE_INT,
-			TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+			gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "short", objfile);	/* FIXME-fnf */
       break;
     case FT_UNSIGNED_SHORT:
       type = init_type (TYPE_CODE_INT,
-			TARGET_SHORT_BIT / TARGET_CHAR_BIT,
+			gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			TYPE_FLAG_UNSIGNED, "unsigned short", objfile);
       break;
     case FT_INTEGER:
       type = init_type (TYPE_CODE_INT,
-			TARGET_INT_BIT / TARGET_CHAR_BIT,
+			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "int", objfile);
       break;
     case FT_SIGNED_INTEGER:
       type = init_type (TYPE_CODE_INT,
-			TARGET_INT_BIT / TARGET_CHAR_BIT,
+			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "int", objfile);	/* FIXME -fnf */
       break;
     case FT_UNSIGNED_INTEGER:
       type = init_type (TYPE_CODE_INT,
-			TARGET_INT_BIT / TARGET_CHAR_BIT,
+			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			TYPE_FLAG_UNSIGNED, "unsigned int", objfile);
       break;
     case FT_FIXED_DECIMAL:
       type = init_type (TYPE_CODE_INT,
-			TARGET_INT_BIT / TARGET_CHAR_BIT,
+			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "fixed decimal", objfile);
       break;
     case FT_LONG:
       type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_BIT / TARGET_CHAR_BIT,
+			gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "long", objfile);
       break;
     case FT_SIGNED_LONG:
       type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_BIT / TARGET_CHAR_BIT,
+			gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "long", objfile);	/* FIXME -fnf */
       break;
     case FT_UNSIGNED_LONG:
       type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_BIT / TARGET_CHAR_BIT,
+			gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			TYPE_FLAG_UNSIGNED, "unsigned long", objfile);
       break;
     case FT_LONG_LONG:
       type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+			gdbarch_long_long_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			0, "long long", objfile);
       break;
     case FT_SIGNED_LONG_LONG:
       type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+			gdbarch_long_long_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			0, "signed long long", objfile);
       break;
     case FT_UNSIGNED_LONG_LONG:
       type = init_type (TYPE_CODE_INT,
-			TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
+			gdbarch_long_long_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			TYPE_FLAG_UNSIGNED, "unsigned long long", objfile);
       break;
     case FT_FLOAT:
@@ -448,11 +451,12 @@ _initialize_m2_language (void)
 {
   /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
   builtin_type_m2_int =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "INTEGER", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT, 
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "INTEGER", (struct objfile *) NULL);
   builtin_type_m2_card =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_INT, 
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "CARDINAL", (struct objfile *) NULL);
   builtin_type_m2_real =
@@ -464,7 +468,8 @@ _initialize_m2_language (void)
 	       TYPE_FLAG_UNSIGNED,
 	       "CHAR", (struct objfile *) NULL);
   builtin_type_m2_bool =
-    init_type (TYPE_CODE_BOOL, TARGET_INT_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_BOOL, 
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "BOOLEAN", (struct objfile *) NULL);
 

@@ -401,11 +401,11 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->short_bit = 2*TARGET_CHAR_BIT;
   current_gdbarch->int_bit = 4*TARGET_CHAR_BIT;
   current_gdbarch->long_bit = 4*TARGET_CHAR_BIT;
-  current_gdbarch->long_long_bit = 2*TARGET_LONG_BIT;
+  current_gdbarch->long_long_bit = 2*current_gdbarch->long_bit;
   current_gdbarch->float_bit = 4*TARGET_CHAR_BIT;
   current_gdbarch->double_bit = 8*TARGET_CHAR_BIT;
   current_gdbarch->long_double_bit = 8*TARGET_CHAR_BIT;
-  current_gdbarch->ptr_bit = TARGET_INT_BIT;
+  current_gdbarch->ptr_bit = current_gdbarch->int_bit;
   current_gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
   current_gdbarch->char_signed = -1;
   current_gdbarch->write_pc = generic_target_write_pc;
@@ -977,11 +977,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: inner_than = <0x%lx>\n",
                       (long) current_gdbarch->inner_than);
-#ifdef TARGET_INT_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_INT_BIT # %s\n",
-                      XSTRING (TARGET_INT_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: int_bit = %s\n",
                       paddr_d (current_gdbarch->int_bit));
@@ -991,11 +986,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: integer_to_address = <0x%lx>\n",
                       (long) current_gdbarch->integer_to_address);
-#ifdef TARGET_LONG_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_LONG_BIT # %s\n",
-                      XSTRING (TARGET_LONG_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_bit = %s\n",
                       paddr_d (current_gdbarch->long_bit));
@@ -1015,11 +1005,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_double_format = %s\n",
                       pformat (current_gdbarch->long_double_format));
-#ifdef TARGET_LONG_LONG_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_LONG_LONG_BIT # %s\n",
-                      XSTRING (TARGET_LONG_LONG_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_long_bit = %s\n",
                       paddr_d (current_gdbarch->long_long_bit));
@@ -1194,11 +1179,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: sdb_reg_to_regnum = <0x%lx>\n",
                       (long) current_gdbarch->sdb_reg_to_regnum);
-#ifdef TARGET_SHORT_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_SHORT_BIT # %s\n",
-                      XSTRING (TARGET_SHORT_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: short_bit = %s\n",
                       paddr_d (current_gdbarch->short_bit));

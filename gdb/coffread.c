@@ -1809,7 +1809,8 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
 
     case T_LONG:
       if (cs->c_sclass == C_FIELD
-	  && aux->x_sym.x_misc.x_lnsz.x_size > TARGET_LONG_BIT)
+	  && aux->x_sym.x_misc.x_lnsz.x_size
+	     > gdbarch_long_bit (current_gdbarch))
 	return lookup_fundamental_type (current_objfile, FT_LONG_LONG);
       else
 	return lookup_fundamental_type (current_objfile, FT_LONG);
@@ -1909,7 +1910,8 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
 
     case T_ULONG:
       if (cs->c_sclass == C_FIELD
-	  && aux->x_sym.x_misc.x_lnsz.x_size > TARGET_LONG_BIT)
+	  && aux->x_sym.x_misc.x_lnsz.x_size
+	     > gdbarch_long_bit (current_gdbarch))
 	return lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG_LONG);
       else
 	return lookup_fundamental_type (current_objfile, FT_UNSIGNED_LONG);
@@ -2082,8 +2084,8 @@ coff_read_enum_type (int index, int length, int lastsym)
 
   if (length > 0)
     TYPE_LENGTH (type) = length;
-  else
-    TYPE_LENGTH (type) = TARGET_INT_BIT / TARGET_CHAR_BIT;	/* Assume ints */
+  else /* Assume ints.  */
+    TYPE_LENGTH (type) = gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)

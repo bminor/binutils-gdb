@@ -341,11 +341,11 @@ processInt (const char *base0, const char *num0, const char *exp0)
       exp -= 1;
     }
 
-  if ((result >> (TARGET_INT_BIT-1)) == 0)
+  if ((result >> (gdbarch_int_bit (current_gdbarch)-1)) == 0)
     yylval.typed_val.type = type_int ();
-  else if ((result >> (TARGET_LONG_BIT-1)) == 0)
+  else if ((result >> (gdbarch_long_bit (current_gdbarch)-1)) == 0)
     yylval.typed_val.type = type_long ();
-  else if (((result >> (TARGET_LONG_BIT-1)) >> 1) == 0)
+  else if (((result >> (gdbarch_long_bit (current_gdbarch)-1)) >> 1) == 0)
     {
       /* We have a number representable as an unsigned integer quantity.
          For consistency with the C treatment, we will treat it as an

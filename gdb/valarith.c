@@ -1028,7 +1028,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  /* Can't just call init_type because we wouldn't know what
 	     name to give the type.  */
 	  val = allocate_value
-	    (result_len > TARGET_LONG_BIT / HOST_CHAR_BIT
+	    (result_len > gdbarch_long_bit (current_gdbarch) / HOST_CHAR_BIT
 	     ? builtin_type_unsigned_long_long
 	     : builtin_type_unsigned_long);
 	  store_unsigned_integer (value_contents_raw (val),
@@ -1153,7 +1153,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  /* Can't just call init_type because we wouldn't know what
 	     name to give the type.  */
 	  val = allocate_value
-	    (result_len > TARGET_LONG_BIT / HOST_CHAR_BIT
+	    (result_len > gdbarch_long_bit (current_gdbarch) / HOST_CHAR_BIT
 	     ? builtin_type_long_long
 	     : builtin_type_long);
 	  store_signed_integer (value_contents_raw (val),

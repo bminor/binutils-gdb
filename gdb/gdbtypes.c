@@ -3434,38 +3434,38 @@ build_gdbtypes (void)
 	       TYPE_FLAG_UNSIGNED,
 	       "unsigned char", (struct objfile *) NULL);
   builtin_type_short =
-    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "short", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "short", (struct objfile *) NULL);
   builtin_type_unsigned_short =
-    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned short", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED, "unsigned short", (struct objfile *) NULL);
   builtin_type_int =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "int", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "int", (struct objfile *) NULL);
   builtin_type_unsigned_int =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned int", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED, "unsigned int", (struct objfile *) NULL);
   builtin_type_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "long", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "long", (struct objfile *) NULL);
   builtin_type_unsigned_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned long", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED, "unsigned long", (struct objfile *) NULL);
   builtin_type_long_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "long long", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "long long", (struct objfile *) NULL);
   builtin_type_unsigned_long_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
+    init_type (TYPE_CODE_INT,
+	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED, 
 	       "unsigned long long", (struct objfile *) NULL);
-
   builtin_type_float = build_flt (TARGET_FLOAT_BIT, "float",
 				  TARGET_FLOAT_FORMAT);
   builtin_type_double = build_flt (TARGET_DOUBLE_BIT, "double",
@@ -3629,37 +3629,38 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 	       TYPE_FLAG_UNSIGNED,
 	       "unsigned char", (struct objfile *) NULL);
   builtin_type->builtin_short =
-    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "short", (struct objfile *) NULL);
+    init_type
+	(TYPE_CODE_INT, gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	 0, "short", (struct objfile *) NULL);
   builtin_type->builtin_unsigned_short =
-    init_type (TYPE_CODE_INT, TARGET_SHORT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned short", (struct objfile *) NULL);
+    init_type
+	(TYPE_CODE_INT, gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	 TYPE_FLAG_UNSIGNED, "unsigned short", (struct objfile *) NULL);
   builtin_type->builtin_int =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "int", (struct objfile *) NULL);
+    init_type
+	(TYPE_CODE_INT, gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	 0, "int", (struct objfile *) NULL);
   builtin_type->builtin_unsigned_int =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned int", (struct objfile *) NULL);
+    init_type
+	(TYPE_CODE_INT, gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	 TYPE_FLAG_UNSIGNED, "unsigned int", (struct objfile *) NULL);
   builtin_type->builtin_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "long", (struct objfile *) NULL);
+    init_type
+	(TYPE_CODE_INT, gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	 0, "long", (struct objfile *) NULL);
   builtin_type->builtin_unsigned_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned long", (struct objfile *) NULL);
+    init_type
+	(TYPE_CODE_INT, gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	 TYPE_FLAG_UNSIGNED, "unsigned long", (struct objfile *) NULL);
   builtin_type->builtin_long_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "long long", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "long long", (struct objfile *) NULL);
   builtin_type->builtin_unsigned_long_long =
-    init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned long long", (struct objfile *) NULL);
+    init_type (TYPE_CODE_INT,
+	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED, "unsigned long long", 
+	       (struct objfile *) NULL);
   builtin_type->builtin_float
     = build_flt (gdbarch_float_bit (gdbarch), "float",
 		 gdbarch_float_format (gdbarch));

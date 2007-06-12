@@ -7153,8 +7153,9 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     to something sensible.  */
 	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
 	    SYMBOL_TYPE (sym) = init_type (TYPE_CODE_INT,
-					   TARGET_INT_BIT / HOST_CHAR_BIT, 0,
-					   "<variable, no debug info>",
+					   gdbarch_int_bit (current_gdbarch)
+					     / HOST_CHAR_BIT,
+					   0, "<variable, no debug info>",
 					   objfile);
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  if (attr)

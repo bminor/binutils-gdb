@@ -3027,6 +3027,7 @@ _initialize_xcoffread (void)
 				"<function, no debug info>", NULL);
   TYPE_TARGET_TYPE (func_symbol_type) = builtin_type_int;
   var_symbol_type =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
+    init_type (TYPE_CODE_INT, 
+	       gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT, 0,
 	       "<variable, no debug info>", NULL);
 }

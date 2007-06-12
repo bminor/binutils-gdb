@@ -1185,7 +1185,8 @@ build_parse (void)
     init_type (TYPE_CODE_FUNC, 1, 0, "<text variable, no debug info>", NULL);
   TYPE_TARGET_TYPE (msym_text_symbol_type) = builtin_type_int;
   msym_data_symbol_type =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
+    init_type (TYPE_CODE_INT, 
+	       gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT, 0,
 	       "<data variable, no debug info>", NULL);
   msym_unknown_symbol_type =
     init_type (TYPE_CODE_INT, 1, 0,
@@ -1193,7 +1194,8 @@ build_parse (void)
 	       NULL);
 
   msym_tls_symbol_type =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
+    init_type (TYPE_CODE_INT, 
+	       gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT, 0,
 	       "<thread local variable, no debug info>", NULL);
 }
 

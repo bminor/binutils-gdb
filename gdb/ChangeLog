@@ -1,3 +1,68 @@
+2007-06-12  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (TARGET_SHORT_BIT): Replace by gdbarch_int_bit.
+	* ada-lang.c (ada_create_fundamental_type)
+	(ada_language_arch_info): Likewise.
+	* c-lang.c (c_create_fundamental_type): Likewise.
+	* f-lang.c (f_create_fundamental_type, build_fortran_types): Likewise.
+	* gdbtypes.c (build_gdbtypes, gdbtypes_post_init): Likewise.
+	* m2-lang.c (m2_create_fundamental_type): Likewise.
+	* objc-lang.c (objc_create_fundamental_type): Likewise.
+	* p-lang.c (pascal_create_fundamental_type): Likewise.
+	* gdbarch.sh (TARGET_INT_BIT): Replace by gdbarch_int_bit.
+	* c-exp.y (parse_number): Likewise.
+	* objc-exp.y (parse_number): Likewise.
+	* ada-lex.l (processInt): Likewise.
+	* f-exp.y (parse_number): Likewise.
+	* p-exp.y (parse_number): Likewise.
+	* ada-lang.c (ada_create_fundamental_type, ada_language_arch_info)
+	(gdbtypes_post_init, build_gdbtypes): Likewise.
+	* p-lang.c (pascal_create_fundamental_type): Likewise.
+	* parse.c (build_parse): Likewise.
+	* xcoffread.c (_initialize_xcoffread): Likewise.
+	* stabsread.c (define_symbol, read_one_struct_field, read_enum_type)
+	(read_range_type): Likewise.
+	* objc-lang.c (objc_create_fundamental_type): Likewise.
+	* f-lang.c (build_fortran_types, f_create_fundamental_type): Likewise.
+	* m2-lang.c (m2_create_fundamental_type, _initialize_m2_language)
+	(m2_create_fundamental_type): Likewise.
+	* c-lang.c (c_create_fundamental_type): Likewise.
+	* coffread.c (coff_read_enum_type): Likewise.
+	* mdebugread.c (parse_symbol, _initialize_mdebugread): Likewise.
+	* dwarf2read.c (new_symbol): Likewise.
+	* gdbarch.sh (TARGET_LONG_BIT): Replace by gdbarch_long_bit.
+	* c-exp.y (parse_number): Likewise.
+	* objc-exp.y (parse_number): Likewise.
+	* ada-lex.l (processInt): Likewise.
+	* f-exp.y (parse_number): Likewise.
+	* p-exp.y (parse_number): Likewise.
+	* valarith.c (value_binop): Likewise.
+	* symfile.c (read_target_long_array, simple_overlay_update_1): Likewise.
+	* ada-lang.c (ada_create_fundamental_type)
+	(ada_language_arch_info): Likewise.
+	* gdbtypes.c (build_gdbtypes, gdbtypes_post_init): Likewise.
+	* symfile.c (TARGET_LONG_BYTES): Likewise.
+	* p-lang.c (pascal_create_fundamental_type): Likewise.
+	* objc-lang.c (objc_create_fundamental_type): Likewise.
+	* m2-lang.c (m2_create_fundamental_type): Likewise.
+	* f-lang.c (f_create_fundamental_type): Likewise.
+	* c-lang.c (c_create_fundamental_type): Likewise.
+	* coffread.c (decode_base_type): Likewise.
+	* gdbarch.sh (TARGET_LONG_LONG_BIT): Replace by gdbarch_long_long_bit.
+	* c-exp.y (parse_number): Likewise.
+	* objc-exp.y (parse_number): Likewise.
+	* p-exp.y (parse_number): Likewise.
+	* ada-lang.c (ada_create_fundamental_type)
+	(ada_language_arch_info): Likewise.
+	* gdbtypes.c (gdbtypes_post_init, build_gdbtypes): Likewise.
+	* stabsread.c (read_range_type): Likewise.
+	* p-lang.c (pascal_create_fundamental_type): Likewise.
+	* objc-lang.c (objc_create_fundamental_type): Likewise.
+	* m2-lang.c (m2_create_fundamental_type): Likewise.
+	* f-lang.c (f_create_fundamental_type): Likewise.
+	* c-lang.c (c_create_fundamental_type): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
 2007-06-12  Andreas Schwab  <schwab@suse.de>
 
 	* frame-unwind.h (frame_dealloc_cache_ftype): Define.

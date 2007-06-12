@@ -984,12 +984,14 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  /* Call it "int" because this is mainly C lossage.  */
 	  if (pcc_promotion_type == NULL)
 	    pcc_promotion_type =
-	      init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	      init_type (TYPE_CODE_INT, 
+			 gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			 0, "int", NULL);
 
 	  if (pcc_unsigned_promotion_type == NULL)
 	    pcc_unsigned_promotion_type =
-	      init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	      init_type (TYPE_CODE_INT, 
+			 gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			 TYPE_FLAG_UNSIGNED, "unsigned int", NULL);
 
 	  /* If PCC says a parameter is a short or a char, it is
@@ -2840,7 +2842,8 @@ read_one_struct_field (struct field_info *fip, char **pp, char *p,
       if ((FIELD_BITSIZE (fip->list->field)
 	   == TARGET_CHAR_BIT * TYPE_LENGTH (field_type)
 	   || (TYPE_CODE (field_type) == TYPE_CODE_ENUM
-	       && FIELD_BITSIZE (fip->list->field) == TARGET_INT_BIT)
+	       && FIELD_BITSIZE (fip->list->field)
+		  == gdbarch_int_bit (current_gdbarch))
 	  )
 	  &&
 	  FIELD_BITPOS (fip->list->field) % 8 == 0)
@@ -3533,7 +3536,7 @@ read_enum_type (char **pp, struct type *type,
 
   /* Now fill in the fields of the type-structure.  */
 
-  TYPE_LENGTH (type) = TARGET_INT_BIT / HOST_CHAR_BIT;
+  TYPE_LENGTH (type) = gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
   if (unsigned_enum)
@@ -3958,7 +3961,8 @@ read_range_type (char **pp, int typenums[2], int type_size,
       /* It is unsigned int or unsigned long.  */
       /* GCC 2.3.3 uses this for long long too, but that is just a GDB 3.5
          compatibility hack.  */
-      return init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+      return init_type (TYPE_CODE_INT, 
+			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			TYPE_FLAG_UNSIGNED, NULL, objfile);
     }
 
@@ -4000,7 +4004,8 @@ read_range_type (char **pp, int typenums[2], int type_size,
      of self_subrange.  */
   else if (n3 == 0 && n2 < 0
 	   && (self_subrange
-	       || n2 == -TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT))
+	       || n2 == -gdbarch_long_long_bit
+			  (current_gdbarch) / TARGET_CHAR_BIT))
     return init_type (TYPE_CODE_INT, -n2, 0, NULL, objfile);
   else if (n2 == -n3 - 1)
     {
@@ -4031,7 +4036,8 @@ handle_true_range:
 		 _("base type %d of range type is not defined"), rangenums[1]);
       if (range_type_index == NULL)
 	range_type_index =
-	  init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
+	  init_type (TYPE_CODE_INT, 
+		     gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 		     0, "range type index type", NULL);
       index_type = range_type_index;
     }

@@ -1046,7 +1046,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	       that too.  */
 	    if (TYPE_LENGTH (t) == TYPE_NFIELDS (t)
 		|| TYPE_LENGTH (t) == 0)
-	      TYPE_LENGTH (t) = TARGET_INT_BIT / HOST_CHAR_BIT;
+	      TYPE_LENGTH (t) = 
+		gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT;
 	    for (ext_tsym = ext_sh + external_sym_size;
 		 ;
 		 ext_tsym += external_sym_size)
@@ -4871,7 +4872,7 @@ _initialize_mdebugread (void)
      TYPE_CODE_ERROR print things in hex if it knows the size?  */
   mdebug_type_fixed_dec =
     init_type (TYPE_CODE_INT,
-	       TARGET_INT_BIT / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0, "fixed decimal",
 	       (struct objfile *) NULL);
 
@@ -4885,6 +4886,7 @@ _initialize_mdebugread (void)
 					"<function, no debug info>", NULL);
   TYPE_TARGET_TYPE (nodebug_func_symbol_type) = mdebug_type_int;
   nodebug_var_symbol_type =
-    init_type (TYPE_CODE_INT, TARGET_INT_BIT / HOST_CHAR_BIT, 0,
+    init_type (TYPE_CODE_INT, 
+	       gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT, 0,
 	       "<variable, no debug info>", NULL);
 }

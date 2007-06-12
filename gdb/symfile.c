@@ -3530,7 +3530,8 @@ enum ovly_index
   {
     VMA, SIZE, LMA, MAPPED
   };
-#define TARGET_LONG_BYTES (TARGET_LONG_BIT / TARGET_CHAR_BIT)
+#define TARGET_LONG_BYTES (gdbarch_long_bit (current_gdbarch) \
+			    / TARGET_CHAR_BIT)
 
 /* Throw away the cached copy of _ovly_table */
 static void

@@ -87,46 +87,22 @@ extern const struct target_desc * gdbarch_target_desc (struct gdbarch *gdbarch);
 
 extern int gdbarch_short_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_short_bit (struct gdbarch *gdbarch, int short_bit);
-#if !defined (GDB_TM_FILE) && defined (TARGET_SHORT_BIT)
-#error "Non multi-arch definition of TARGET_SHORT_BIT"
-#endif
-#if !defined (TARGET_SHORT_BIT)
-#define TARGET_SHORT_BIT (gdbarch_short_bit (current_gdbarch))
-#endif
 
 /* Number of bits in an int or unsigned int for the target machine. */
 
 extern int gdbarch_int_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_int_bit (struct gdbarch *gdbarch, int int_bit);
-#if !defined (GDB_TM_FILE) && defined (TARGET_INT_BIT)
-#error "Non multi-arch definition of TARGET_INT_BIT"
-#endif
-#if !defined (TARGET_INT_BIT)
-#define TARGET_INT_BIT (gdbarch_int_bit (current_gdbarch))
-#endif
 
 /* Number of bits in a long or unsigned long for the target machine. */
 
 extern int gdbarch_long_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_bit (struct gdbarch *gdbarch, int long_bit);
-#if !defined (GDB_TM_FILE) && defined (TARGET_LONG_BIT)
-#error "Non multi-arch definition of TARGET_LONG_BIT"
-#endif
-#if !defined (TARGET_LONG_BIT)
-#define TARGET_LONG_BIT (gdbarch_long_bit (current_gdbarch))
-#endif
 
 /* Number of bits in a long long or unsigned long long for the target
    machine. */
 
 extern int gdbarch_long_long_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_long_bit (struct gdbarch *gdbarch, int long_long_bit);
-#if !defined (GDB_TM_FILE) && defined (TARGET_LONG_LONG_BIT)
-#error "Non multi-arch definition of TARGET_LONG_LONG_BIT"
-#endif
-#if !defined (TARGET_LONG_LONG_BIT)
-#define TARGET_LONG_LONG_BIT (gdbarch_long_long_bit (current_gdbarch))
-#endif
 
 /* The ABI default bit-size and format for "float", "double", and "long
    double".  These bit/format pairs should eventually be combined into

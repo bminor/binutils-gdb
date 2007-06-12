@@ -379,14 +379,14 @@ i::const struct target_desc *:target_desc:::::::paddr_d ((long) current_gdbarch-
 # v:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
 #
 # Number of bits in a short or unsigned short for the target machine.
-v:TARGET_SHORT_BIT:int:short_bit:::8 * sizeof (short):2*TARGET_CHAR_BIT::0
+v::int:short_bit:::8 * sizeof (short):2*TARGET_CHAR_BIT::0
 # Number of bits in an int or unsigned int for the target machine.
-v:TARGET_INT_BIT:int:int_bit:::8 * sizeof (int):4*TARGET_CHAR_BIT::0
+v::int:int_bit:::8 * sizeof (int):4*TARGET_CHAR_BIT::0
 # Number of bits in a long or unsigned long for the target machine.
-v:TARGET_LONG_BIT:int:long_bit:::8 * sizeof (long):4*TARGET_CHAR_BIT::0
+v::int:long_bit:::8 * sizeof (long):4*TARGET_CHAR_BIT::0
 # Number of bits in a long long or unsigned long long for the target
 # machine.
-v:TARGET_LONG_LONG_BIT:int:long_long_bit:::8 * sizeof (LONGEST):2*TARGET_LONG_BIT::0
+v::int:long_long_bit:::8 * sizeof (LONGEST):2*current_gdbarch->long_bit::0
 
 # The ABI default bit-size and format for "float", "double", and "long
 # double".  These bit/format pairs should eventually be combined into
@@ -411,7 +411,7 @@ v:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat **:long_double_format:::::f
 # as well.
 #
 # ptr_bit is the size of a pointer on the target
-v:TARGET_PTR_BIT:int:ptr_bit:::8 * sizeof (void*):TARGET_INT_BIT::0
+v:TARGET_PTR_BIT:int:ptr_bit:::8 * sizeof (void*):current_gdbarch->int_bit::0
 # addr_bit is the size of a target address as represented in gdb
 v:TARGET_ADDR_BIT:int:addr_bit:::8 * sizeof (void*):0:TARGET_PTR_BIT:
 # Number of bits in a BFD_VMA for the target object file format.
