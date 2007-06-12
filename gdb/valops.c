@@ -636,12 +636,14 @@ value_assign (struct value *toval, struct value *fromval)
 	if (!frame)
 	  error (_("Value being assigned to is no longer active."));
 	
-	if (CONVERT_REGISTER_P (VALUE_REGNUM (toval), type))
+	if (gdbarch_convert_register_p
+	    (current_gdbarch, VALUE_REGNUM (toval), type))
 	  {
 	    /* If TOVAL is a special machine register requiring
 	       conversion of program values to a special raw format.  */
-	    VALUE_TO_REGISTER (frame, VALUE_REGNUM (toval),
-			       type, value_contents (fromval));
+	    gdbarch_value_to_register (current_gdbarch,
+				       frame, VALUE_REGNUM (toval),
+				       type, value_contents (fromval));
 	  }
 	else
 	  {

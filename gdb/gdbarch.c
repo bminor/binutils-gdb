@@ -751,12 +751,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: convert_from_func_ptr_addr = <0x%lx>\n",
                       (long) current_gdbarch->convert_from_func_ptr_addr);
-#ifdef CONVERT_REGISTER_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "CONVERT_REGISTER_P(regnum, type)",
-                      XSTRING (CONVERT_REGISTER_P (regnum, type)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: convert_register_p = <0x%lx>\n",
                       (long) current_gdbarch->convert_register_p);
@@ -1104,12 +1098,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_sim_regno = <0x%lx>\n",
                       (long) current_gdbarch->register_sim_regno);
-#ifdef REGISTER_TO_VALUE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_TO_VALUE(frame, regnum, type, buf)",
-                      XSTRING (REGISTER_TO_VALUE (frame, regnum, type, buf)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_to_value = <0x%lx>\n",
                       (long) current_gdbarch->register_to_value);
@@ -1247,12 +1235,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: value_from_register = <0x%lx>\n",
                       (long) current_gdbarch->value_from_register);
-#ifdef VALUE_TO_REGISTER
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "VALUE_TO_REGISTER(frame, regnum, type, buf)",
-                      XSTRING (VALUE_TO_REGISTER (frame, regnum, type, buf)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: value_to_register = <0x%lx>\n",
                       (long) current_gdbarch->value_to_register);

@@ -453,32 +453,14 @@ extern void set_gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch, int beli
 typedef int (gdbarch_convert_register_p_ftype) (int regnum, struct type *type);
 extern int gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type);
 extern void set_gdbarch_convert_register_p (struct gdbarch *gdbarch, gdbarch_convert_register_p_ftype *convert_register_p);
-#if !defined (GDB_TM_FILE) && defined (CONVERT_REGISTER_P)
-#error "Non multi-arch definition of CONVERT_REGISTER_P"
-#endif
-#if !defined (CONVERT_REGISTER_P)
-#define CONVERT_REGISTER_P(regnum, type) (gdbarch_convert_register_p (current_gdbarch, regnum, type))
-#endif
 
 typedef void (gdbarch_register_to_value_ftype) (struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf);
 extern void gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf);
 extern void set_gdbarch_register_to_value (struct gdbarch *gdbarch, gdbarch_register_to_value_ftype *register_to_value);
-#if !defined (GDB_TM_FILE) && defined (REGISTER_TO_VALUE)
-#error "Non multi-arch definition of REGISTER_TO_VALUE"
-#endif
-#if !defined (REGISTER_TO_VALUE)
-#define REGISTER_TO_VALUE(frame, regnum, type, buf) (gdbarch_register_to_value (current_gdbarch, frame, regnum, type, buf))
-#endif
 
 typedef void (gdbarch_value_to_register_ftype) (struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf);
 extern void gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_value_to_register_ftype *value_to_register);
-#if !defined (GDB_TM_FILE) && defined (VALUE_TO_REGISTER)
-#error "Non multi-arch definition of VALUE_TO_REGISTER"
-#endif
-#if !defined (VALUE_TO_REGISTER)
-#define VALUE_TO_REGISTER(frame, regnum, type, buf) (gdbarch_value_to_register (current_gdbarch, frame, regnum, type, buf))
-#endif
 
 /* Construct a value representing the contents of register REGNUM in
    frame FRAME, interpreted as type TYPE.  The routine needs to

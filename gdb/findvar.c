@@ -624,20 +624,21 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   struct type *type1 = check_typedef (type);
   struct value *v;
 
-  if (CONVERT_REGISTER_P (regnum, type1))
+  if (gdbarch_convert_register_p (current_gdbarch, regnum, type1))
     {
       /* The ISA/ABI need to something weird when obtaining the
          specified value from this register.  It might need to
          re-order non-adjacent, starting with REGNUM (see MIPS and
          i386).  It might need to convert the [float] register into
          the corresponding [integer] type (see Alpha).  The assumption
-         is that REGISTER_TO_VALUE populates the entire value
+         is that gdbarch_register_to_value populates the entire value
          including the location.  */
       v = allocate_value (type);
       VALUE_LVAL (v) = lval_register;
       VALUE_FRAME_ID (v) = get_frame_id (frame);
       VALUE_REGNUM (v) = regnum;
-      REGISTER_TO_VALUE (frame, regnum, type1, value_contents_raw (v));
+      gdbarch_register_to_value (current_gdbarch,
+				 frame, regnum, type1, value_contents_raw (v));
     }
   else
     {
