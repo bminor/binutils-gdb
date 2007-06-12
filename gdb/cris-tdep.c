@@ -4107,7 +4107,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      register is.  */
 
   set_gdbarch_double_bit (gdbarch, 64);
-  /* The default definition of a long double is 2 * TARGET_DOUBLE_BIT,
+  /* The default definition of a long double is 2 * gdbarch_double_bit,
      which means we have to set this explicitly.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
 

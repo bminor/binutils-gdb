@@ -376,9 +376,11 @@ processReal (const char *num0)
   sscanf (num0, DOUBLEST_SCAN_FORMAT, &yylval.typed_val_float.dval);
 
   yylval.typed_val_float.type = type_float ();
-  if (sizeof(DOUBLEST) >= TARGET_DOUBLE_BIT / TARGET_CHAR_BIT)
+  if (sizeof(DOUBLEST) >= gdbarch_double_bit (current_gdbarch)
+			    / TARGET_CHAR_BIT)
     yylval.typed_val_float.type = type_double ();
-  if (sizeof(DOUBLEST) >= TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT)
+  if (sizeof(DOUBLEST) >= gdbarch_long_double_bit (current_gdbarch)
+			    / TARGET_CHAR_BIT)
     yylval.typed_val_float.type = type_long_double ();
 
   return FLOAT;

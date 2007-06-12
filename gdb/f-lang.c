@@ -353,39 +353,42 @@ f_create_fundamental_type (struct objfile *objfile, int typeid)
       break;
     case FT_FLOAT:
       type = init_type (TYPE_CODE_FLT,
-			TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+			gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "real", objfile);
       break;
     case FT_DBL_PREC_FLOAT:
       type = init_type (TYPE_CODE_FLT,
-			TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "real*8", objfile);
       break;
     case FT_FLOAT_DECIMAL:
       type = init_type (TYPE_CODE_FLT,
-			TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "floating decimal", objfile);
       break;
     case FT_EXT_PREC_FLOAT:
       type = init_type (TYPE_CODE_FLT,
-			TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+			gdbarch_long_double_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			0, "real*16", objfile);
       break;
     case FT_COMPLEX:
       type = init_type (TYPE_CODE_COMPLEX,
-			2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+			2 * gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "complex*8", objfile);
       TYPE_TARGET_TYPE (type) = builtin_type_f_real;
       break;
     case FT_DBL_PREC_COMPLEX:
       type = init_type (TYPE_CODE_COMPLEX,
-			2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			2 * gdbarch_double_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			0, "complex*16", objfile);
       TYPE_TARGET_TYPE (type) = builtin_type_f_real_s8;
       break;
     case FT_EXT_PREC_COMPLEX:
       type = init_type (TYPE_CODE_COMPLEX,
-			2 * TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+			2 * gdbarch_long_double_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			0, "complex*32", objfile);
       TYPE_TARGET_TYPE (type) = builtin_type_f_real_s16;
       break;
@@ -531,28 +534,33 @@ build_fortran_types (void)
 	       TYPE_FLAG_UNSIGNED, "logical*4", (struct objfile *) NULL);
 
   builtin_type_f_real =
-    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "real", (struct objfile *) NULL);
 
   builtin_type_f_real_s8 =
-    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "real*8", (struct objfile *) NULL);
 
   builtin_type_f_real_s16 =
-    init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_long_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "real*16", (struct objfile *) NULL);
 
   builtin_type_f_complex_s8 =
-    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_COMPLEX,
+	       2 * gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "complex*8", (struct objfile *) NULL);
   TYPE_TARGET_TYPE (builtin_type_f_complex_s8) = builtin_type_f_real;
 
   builtin_type_f_complex_s16 =
-    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_COMPLEX,
+	       2 * gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "complex*16", (struct objfile *) NULL);
   TYPE_TARGET_TYPE (builtin_type_f_complex_s16) = builtin_type_f_real_s8;
@@ -561,7 +569,8 @@ build_fortran_types (void)
      complex*32 data type */
 
   builtin_type_f_complex_s32 =
-    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_COMPLEX,
+	       2 * gdbarch_long_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "complex*32", (struct objfile *) NULL);
   TYPE_TARGET_TYPE (builtin_type_f_complex_s32) = builtin_type_f_real_s16;

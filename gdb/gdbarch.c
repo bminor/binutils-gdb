@@ -373,7 +373,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
                struct gdbarch_tdep *tdep)
 {
   /* NOTE: The new architecture variable is named ``current_gdbarch''
-     so that macros such as TARGET_DOUBLE_BIT, when expanded, refer to
+     so that macros such as TARGET_ARCHITECTURE, when expanded, refer to
      the current local architecture and not the previous global
      architecture.  This ensures that the new architectures initial
      values are not influenced by the previous architecture.  Once
@@ -850,19 +850,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_use_struct_convention = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_use_struct_convention);
-#ifdef TARGET_DOUBLE_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_DOUBLE_BIT # %s\n",
-                      XSTRING (TARGET_DOUBLE_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: double_bit = %s\n",
                       paddr_d (current_gdbarch->double_bit));
-#ifdef TARGET_DOUBLE_FORMAT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_DOUBLE_FORMAT # %s\n",
-                      XSTRING (TARGET_DOUBLE_FORMAT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: double_format = %s\n",
                       pformat (current_gdbarch->double_format));
@@ -917,19 +907,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: fetch_tls_load_module_address = <0x%lx>\n",
                       (long) current_gdbarch->fetch_tls_load_module_address);
-#ifdef TARGET_FLOAT_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_FLOAT_BIT # %s\n",
-                      XSTRING (TARGET_FLOAT_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: float_bit = %s\n",
                       paddr_d (current_gdbarch->float_bit));
-#ifdef TARGET_FLOAT_FORMAT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_FLOAT_FORMAT # %s\n",
-                      XSTRING (TARGET_FLOAT_FORMAT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: float_format = %s\n",
                       pformat (current_gdbarch->float_format));
@@ -989,19 +969,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_bit = %s\n",
                       paddr_d (current_gdbarch->long_bit));
-#ifdef TARGET_LONG_DOUBLE_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_LONG_DOUBLE_BIT # %s\n",
-                      XSTRING (TARGET_LONG_DOUBLE_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_double_bit = %s\n",
                       paddr_d (current_gdbarch->long_double_bit));
-#ifdef TARGET_LONG_DOUBLE_FORMAT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_LONG_DOUBLE_FORMAT # %s\n",
-                      XSTRING (TARGET_LONG_DOUBLE_FORMAT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_double_format = %s\n",
                       pformat (current_gdbarch->long_double_format));

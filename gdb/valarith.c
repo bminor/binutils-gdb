@@ -808,8 +808,8 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       /* If either arg was long double, make sure that value is also long
          double.  */
 
-      if (TYPE_LENGTH (type1) * 8 > TARGET_DOUBLE_BIT
-	  || TYPE_LENGTH (type2) * 8 > TARGET_DOUBLE_BIT)
+      if (TYPE_LENGTH (type1) * 8 > gdbarch_double_bit (current_gdbarch)
+	  || TYPE_LENGTH (type2) * 8 > gdbarch_double_bit (current_gdbarch))
 	val = allocate_value (builtin_type_long_double);
       else
 	val = allocate_value (builtin_type_double);

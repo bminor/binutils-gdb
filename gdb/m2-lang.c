@@ -310,41 +310,45 @@ m2_create_fundamental_type (struct objfile *objfile, int typeid)
       break;
     case FT_FLOAT:
       type = init_type (TYPE_CODE_FLT,
-			TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+			gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "float", objfile);
       break;
     case FT_DBL_PREC_FLOAT:
       type = init_type (TYPE_CODE_FLT,
-			TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "double", objfile);
       break;
     case FT_FLOAT_DECIMAL:
       type = init_type (TYPE_CODE_FLT,
-			TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "floating decimal", objfile);
       break;
     case FT_EXT_PREC_FLOAT:
       type = init_type (TYPE_CODE_FLT,
-			TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+			gdbarch_long_double_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			0, "long double", objfile);
       break;
     case FT_COMPLEX:
       type = init_type (TYPE_CODE_COMPLEX,
-			2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+			2 * gdbarch_float_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			0, "complex", objfile);
       TYPE_TARGET_TYPE (type)
 	= m2_create_fundamental_type (objfile, FT_FLOAT);
       break;
     case FT_DBL_PREC_COMPLEX:
       type = init_type (TYPE_CODE_COMPLEX,
-			2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+			2 * gdbarch_double_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			0, "double complex", objfile);
       TYPE_TARGET_TYPE (type)
 	= m2_create_fundamental_type (objfile, FT_DBL_PREC_FLOAT);
       break;
     case FT_EXT_PREC_COMPLEX:
       type = init_type (TYPE_CODE_COMPLEX,
-			2 * TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+			2 * gdbarch_long_double_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
 			0, "long double complex", objfile);
       TYPE_TARGET_TYPE (type)
 	= m2_create_fundamental_type (objfile, FT_EXT_PREC_FLOAT);
@@ -460,7 +464,8 @@ _initialize_m2_language (void)
 	       TYPE_FLAG_UNSIGNED,
 	       "CARDINAL", (struct objfile *) NULL);
   builtin_type_m2_real =
-    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "REAL", (struct objfile *) NULL);
   builtin_type_m2_char =

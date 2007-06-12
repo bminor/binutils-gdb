@@ -4841,22 +4841,22 @@ _initialize_mdebugread (void)
 	       "adr_64", (struct objfile *) NULL);
   TYPE_TARGET_TYPE (mdebug_type_adr_64) = mdebug_type_void;
   mdebug_type_float =
-    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "float", (struct objfile *) NULL);
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "float", (struct objfile *) NULL);
   mdebug_type_double =
-    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "double", (struct objfile *) NULL);
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "double", (struct objfile *) NULL);
   mdebug_type_complex =
-    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "complex", (struct objfile *) NULL);
+    init_type (TYPE_CODE_COMPLEX,
+	       2 * gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "complex", (struct objfile *) NULL);
   TYPE_TARGET_TYPE (mdebug_type_complex) = mdebug_type_float;
   mdebug_type_double_complex =
-    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "double complex", (struct objfile *) NULL);
+    init_type (TYPE_CODE_COMPLEX,
+	       2 * gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "double complex", (struct objfile *) NULL);
   TYPE_TARGET_TYPE (mdebug_type_double_complex) = mdebug_type_double;
 
   /* Is a "string" the way btString means it the same as TYPE_CODE_STRING?
@@ -4878,7 +4878,7 @@ _initialize_mdebugread (void)
 
   mdebug_type_float_dec =
     init_type (TYPE_CODE_ERROR,
-	       TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0, "floating decimal",
 	       (struct objfile *) NULL);
 

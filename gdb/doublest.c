@@ -724,20 +724,24 @@ static const struct floatformat *
 floatformat_from_length (int len)
 {
   const struct floatformat *format;
-  if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
-    format = TARGET_FLOAT_FORMAT[gdbarch_byte_order (current_gdbarch)];
-  else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
-    format = TARGET_DOUBLE_FORMAT[gdbarch_byte_order (current_gdbarch)];
-  else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
-    format = TARGET_LONG_DOUBLE_FORMAT[gdbarch_byte_order (current_gdbarch)];
+  if (len * TARGET_CHAR_BIT == gdbarch_float_bit (current_gdbarch))
+    format = gdbarch_float_format (current_gdbarch)
+	       [gdbarch_byte_order (current_gdbarch)];
+  else if (len * TARGET_CHAR_BIT == gdbarch_double_bit (current_gdbarch))
+    format = gdbarch_double_format (current_gdbarch)
+	       [gdbarch_byte_order (current_gdbarch)];
+  else if (len * TARGET_CHAR_BIT == gdbarch_long_double_bit (current_gdbarch))
+    format = gdbarch_long_double_format (current_gdbarch)
+	       [gdbarch_byte_order (current_gdbarch)];
   /* On i386 the 'long double' type takes 96 bits,
      while the real number of used bits is only 80,
      both in processor and in memory.  
      The code below accepts the real bit size.  */ 
-  else if ((TARGET_LONG_DOUBLE_FORMAT != NULL) 
+  else if ((gdbarch_long_double_format (current_gdbarch) != NULL) 
 	   && (len * TARGET_CHAR_BIT ==
-               TARGET_LONG_DOUBLE_FORMAT[0]->totalsize))
-    format = TARGET_LONG_DOUBLE_FORMAT[gdbarch_byte_order (current_gdbarch)];
+               gdbarch_long_double_format (current_gdbarch)[0]->totalsize))
+    format = gdbarch_long_double_format (current_gdbarch)
+	       [gdbarch_byte_order (current_gdbarch)];
   else
     format = NULL;
   if (format == NULL)

@@ -10287,17 +10287,18 @@ ada_create_fundamental_type (struct objfile *objfile, int typeid)
       break;
     case FT_FLOAT:
       type = init_type (TYPE_CODE_FLT,
-                        TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+                        gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         0, "float", objfile);
       break;
     case FT_DBL_PREC_FLOAT:
       type = init_type (TYPE_CODE_FLT,
-                        TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+                        gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
                         0, "long_float", objfile);
       break;
     case FT_EXT_PREC_FLOAT:
       type = init_type (TYPE_CODE_FLT,
-                        TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+                        gdbarch_long_double_bit (current_gdbarch)
+			  / TARGET_CHAR_BIT,
                         0, "long_long_float", objfile);
       break;
     }
@@ -10345,17 +10346,20 @@ ada_language_arch_info (struct gdbarch *current_gdbarch,
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
                0, "character", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_float] =
-    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_float_bit (current_gdbarch)/ TARGET_CHAR_BIT,
                0, "float", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_double] =
-    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
                0, "long_float", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_long_long] =
     init_type (TYPE_CODE_INT, 
 	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
                0, "long_long_integer", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_long_double] =
-    init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
                0, "long_long_float", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_natural] =
     init_type (TYPE_CODE_INT,

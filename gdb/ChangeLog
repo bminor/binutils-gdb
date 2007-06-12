@@ -1,5 +1,59 @@
 2007-06-12  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (TARGET_FLOAT_BIT): Replace by gdbarch_float_bit.
+	* p-lang.c (pascal_create_fundamental_type): Likewise.
+	* objc-lang.c (objc_create_fundamental_type): Likewise.
+	* mdebugread.c (_initialize_mdebugread): Likewise.
+	* m2-lang.c (m2_create_fundamental_type)
+	(_initialize_m2_language): Likewise.
+	* gdbtypes.c (build_gdbtypes): Likewise.
+	* f-lang.c (f_create_fundamental_type, build_fortran_types): Likewise.
+	* doublest.c (floatformat_from_length): Likewise.
+	* c-lang.c (c_create_fundamental_type): Likewise.
+	* ada-lang.c (ada_create_fundamental_type)
+	(ada_language_arch_info): Likewise.
+	* gdbarch.sh (TARGET_FLOAT_FORMAT): Replace by gdbarch_float_format.
+	* value.c (unpack_double): Likewise (comment).
+	* gdbtypes.c (build_gdbtypes): Likewise.
+	* doublest.c (floatformat_from_length): Likewise.
+	* gdbarch.sh (TARGET_DOUBLE_BIT): Replace by gdbarch_double_bit.
+	* valarith.c (value_binop): Likewise.
+	* p-lang.c (pascal_create_fundamental_type): Likewise.
+	* objc-lang.c (objc_create_fundamental_type): Likewise.
+	* mdebugread.c (_initialize_mdebugread): Likewise.
+	* m2-lang.c (m2_create_fundamental_type): Likewise.
+	* gdbtypes.c (build_gdbtypes): Likewise.
+	* f-lang.c (f_create_fundamental_type, build_fortran_types): Likewise.
+	* doublest.c (floatformat_from_length): Likewise.
+	* cris-tdep.c (cris_gdbarch_init): Likewise (comment).
+	* c-lang.c (c_create_fundamental_type): Likewise.
+	* ada-lex.l (processReal): Likewise.
+	* ada-lang.c (ada_create_fundamental_type)
+	(ada_language_arch_info): Likewise.
+	* gdbarch.sh (TARGET_DOUBLE_FORMAT): Replace by gdbarch_double_format.
+	* value.c (unpack_double): Likewise (comment).
+	* gdbtypes.c (build_gdbtypes): Likewise.
+	* doublest.c (floatformat_from_length): Likewise.
+	* gdbarch.sh (TARGET_LONG_DOUBLE_BIT): Replace by
+	gdbarch_long_double_bit.
+	* p-lang.c (pascal_create_fundamental_type): Likewise.
+	* objc-lang.c (objc_create_fundamental_type): Likewise.
+	* m2-lang.c (m2_create_fundamental_type): Likewise.
+	* gdbtypes.c (build_gdbtypes): Likewise.
+	* f-lang.c (f_create_fundamental_type, build_fortran_types): Likewise.
+	* doublest.c (floatformat_from_length): Likewise.
+	* c-lang.c (c_create_fundamental_type): Likewise.
+	* ada-lex.l (processReal): Likewise.
+	* ada-lang.c (ada_create_fundamental_type)
+	(ada_language_arch_info): Likewise.
+	* gdbarch.sh (TARGET_LONG_DOUBLE_FORMAT): Replace by
+	gdbarch_long_double_format.
+	* gdbtypes.c (build_gdbtypes): Likewise.
+	* doublest.c (floatformat_from_length): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-12  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (TARGET_SHORT_BIT): Replace by gdbarch_int_bit.
 	* ada-lang.c (ada_create_fundamental_type)
 	(ada_language_arch_info): Likewise.

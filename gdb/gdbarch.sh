@@ -394,12 +394,12 @@ v::int:long_long_bit:::8 * sizeof (LONGEST):2*current_gdbarch->long_bit::0
 # Each format describes both the big and little endian layouts (if
 # useful).
 
-v:TARGET_FLOAT_BIT:int:float_bit:::8 * sizeof (float):4*TARGET_CHAR_BIT::0
-v:TARGET_FLOAT_FORMAT:const struct floatformat **:float_format:::::floatformats_ieee_single::pformat (current_gdbarch->float_format)
-v:TARGET_DOUBLE_BIT:int:double_bit:::8 * sizeof (double):8*TARGET_CHAR_BIT::0
-v:TARGET_DOUBLE_FORMAT:const struct floatformat **:double_format:::::floatformats_ieee_double::pformat (current_gdbarch->double_format)
-v:TARGET_LONG_DOUBLE_BIT:int:long_double_bit:::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
-v:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (current_gdbarch->long_double_format)
+v::int:float_bit:::8 * sizeof (float):4*TARGET_CHAR_BIT::0
+v::const struct floatformat **:float_format:::::floatformats_ieee_single::pformat (current_gdbarch->float_format)
+v::int:double_bit:::8 * sizeof (double):8*TARGET_CHAR_BIT::0
+v::const struct floatformat **:double_format:::::floatformats_ieee_double::pformat (current_gdbarch->double_format)
+v::int:long_double_bit:::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
+v::const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (current_gdbarch->long_double_format)
 
 # For most targets, a pointer on the target and its representation as an
 # address in GDB have the same size and "look the same".  For such a
@@ -1348,7 +1348,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
                struct gdbarch_tdep *tdep)
 {
   /* NOTE: The new architecture variable is named \`\`current_gdbarch''
-     so that macros such as TARGET_DOUBLE_BIT, when expanded, refer to
+     so that macros such as TARGET_ARCHITECTURE, when expanded, refer to
      the current local architecture and not the previous global
      architecture.  This ensures that the new architectures initial
      values are not influenced by the previous architecture.  Once

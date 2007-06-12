@@ -1138,7 +1138,7 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
 	 only in a non-portable way.  Fixing the portability problem
 	 wouldn't help since the VAX floating-point code is also badly
 	 bit-rotten.  The target needs to add definitions for the
-	 methods TARGET_FLOAT_FORMAT and TARGET_DOUBLE_FORMAT - these
+	 methods gdbarch_float_format and gdbarch_double_format - these
 	 exactly describe the target floating-point format.  The
 	 problem here is that the corresponding floatformat_vax_f and
 	 floatformat_vax_d values these methods should be set to are
