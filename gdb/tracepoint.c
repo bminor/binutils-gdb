@@ -1539,7 +1539,8 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
   *tdp_actions = NULL;
   *stepping_actions = NULL;
 
-  TARGET_VIRTUAL_FRAME_POINTER (t->address, &frame_reg, &frame_offset);
+  gdbarch_virtual_frame_pointer (current_gdbarch, 
+				 t->address, &frame_reg, &frame_offset);
 
   for (action = t->actions; action; action = action->next)
     {

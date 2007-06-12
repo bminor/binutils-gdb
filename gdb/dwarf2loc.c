@@ -387,7 +387,8 @@ dwarf2_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
 	error (_("Unexpected opcode after DW_OP_fbreg for symbol \"%s\"."),
 	       SYMBOL_PRINT_NAME (symbol));
 
-      TARGET_VIRTUAL_FRAME_POINTER (ax->scope, &frame_reg, &frame_offset);
+      gdbarch_virtual_frame_pointer (current_gdbarch, 
+				     ax->scope, &frame_reg, &frame_offset);
       ax_reg (ax, frame_reg);
       ax_const_l (ax, frame_offset);
       ax_simple (ax, aop_add);

@@ -461,7 +461,8 @@ gen_frame_args_address (struct agent_expr *ax)
   int frame_reg;
   LONGEST frame_offset;
 
-  TARGET_VIRTUAL_FRAME_POINTER (ax->scope, &frame_reg, &frame_offset);
+  gdbarch_virtual_frame_pointer (current_gdbarch,
+				 ax->scope, &frame_reg, &frame_offset);
   ax_reg (ax, frame_reg);
   gen_offset (ax, frame_offset);
 }
@@ -475,7 +476,8 @@ gen_frame_locals_address (struct agent_expr *ax)
   int frame_reg;
   LONGEST frame_offset;
 
-  TARGET_VIRTUAL_FRAME_POINTER (ax->scope, &frame_reg, &frame_offset);
+  gdbarch_virtual_frame_pointer (current_gdbarch,
+				 ax->scope, &frame_reg, &frame_offset);
   ax_reg (ax, frame_reg);
   gen_offset (ax, frame_offset);
 }

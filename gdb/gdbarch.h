@@ -217,12 +217,6 @@ extern void set_gdbarch_write_pc (struct gdbarch *gdbarch, gdbarch_write_pc_ftyp
 typedef void (gdbarch_virtual_frame_pointer_ftype) (CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset);
 extern void gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset);
 extern void set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer);
-#if !defined (GDB_TM_FILE) && defined (TARGET_VIRTUAL_FRAME_POINTER)
-#error "Non multi-arch definition of TARGET_VIRTUAL_FRAME_POINTER"
-#endif
-#if !defined (TARGET_VIRTUAL_FRAME_POINTER)
-#define TARGET_VIRTUAL_FRAME_POINTER(pc, frame_regnum, frame_offset) (gdbarch_virtual_frame_pointer (current_gdbarch, pc, frame_regnum, frame_offset))
-#endif
 
 extern int gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch);
 

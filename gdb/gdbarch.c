@@ -1265,12 +1265,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: vbit_in_delta = %s\n",
                       paddr_d (current_gdbarch->vbit_in_delta));
-#ifdef TARGET_VIRTUAL_FRAME_POINTER
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_VIRTUAL_FRAME_POINTER(pc, frame_regnum, frame_offset)",
-                      XSTRING (TARGET_VIRTUAL_FRAME_POINTER (pc, frame_regnum, frame_offset)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: virtual_frame_pointer = <0x%lx>\n",
                       (long) current_gdbarch->virtual_frame_pointer);

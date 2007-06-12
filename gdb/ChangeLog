@@ -1,5 +1,14 @@
 2007-06-12  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (TARGET_VIRTUAL_FRAME_POINTER): Replace by
+	gdbarch_virtual_frame_pointer.
+	* tracepoint.c (encode_actions): Likewise.
+	* dwarf2loc.c (dwarf2_loc_desc_needs_frame): Likewise.
+	* ax-gdb.c (gen_frame_args_address, gen_frame_locals_address): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-12  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (TARGET_FLOAT_BIT): Replace by gdbarch_float_bit.
 	* p-lang.c (pascal_create_fundamental_type): Likewise.
 	* objc-lang.c (objc_create_fundamental_type): Likewise.
