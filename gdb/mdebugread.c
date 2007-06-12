@@ -644,7 +644,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       if (sh->sc == scRegister)
 	{
 	  class = LOC_REGISTER;
-	  svalue = ECOFF_REG_TO_REGNUM (svalue);
+	  svalue = gdbarch_ecoff_reg_to_regnum (current_gdbarch, svalue);
 	}
       else
 	class = LOC_LOCAL;
@@ -682,7 +682,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	case scRegister:
 	  /* Pass by value in register.  */
 	  SYMBOL_CLASS (s) = LOC_REGPARM;
-	  svalue = ECOFF_REG_TO_REGNUM (svalue);
+	  svalue = gdbarch_ecoff_reg_to_regnum (current_gdbarch, svalue);
 	  break;
 	case scVar:
 	  /* Pass by reference on stack.  */
@@ -691,7 +691,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	case scVarRegister:
 	  /* Pass by reference in register.  */
 	  SYMBOL_CLASS (s) = LOC_REGPARM_ADDR;
-	  svalue = ECOFF_REG_TO_REGNUM (svalue);
+	  svalue = gdbarch_ecoff_reg_to_regnum (current_gdbarch, svalue);
 	  break;
 	default:
 	  /* Pass by value on stack.  */

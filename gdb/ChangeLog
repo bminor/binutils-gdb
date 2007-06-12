@@ -1,5 +1,28 @@
 2007-06-12  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (STAB_REG_TO_REGNUM): Replace by
+	gdbarch_stab_reg_to_regnum.
+	* stabsread.c (define_symbol): Likewise.
+	* gdbarch.sh (ECOFF_REG_TO_REGNUM): Replace by
+	gdbarch_ecoff_reg_to_regnum.
+	* mdebugread.c (parse_symbol): Likewise.
+	* i386-tdep.c (i386_gdbarch_init): Likewise (comment).
+	* gdbarch.sh (DWARF_REG_TO_REGNUM): Replace by
+	gdbarch_dwarf_reg_to_regnum.
+	* gdbarch.sh (SDB_REG_TO_REGNUM): Replace by gdbarch_sdb_reg_to_regnum.
+	* coffread.c (process_coff_symbol): Likewise.
+	* gdbarch.sh (DWARF2_REG_TO_REGNUM): Replace by
+	gdbarch_dwarf2_reg_to_regnum.
+	* dwarf2loc.c (dwarf_expr_read_reg,dwarf2_evaluate_loc_desc)
+	(locexpr_describe_location): Likewise.
+	* dwarf2-frame.c (read_reg,execute_cfa_program,dwarf2_frame_cache)
+	(dwarf2_frame_prev_register,dwarf2_signal_frame_this_id): Likewise.
+	* dwarf2loc.c (DWARF2_REG_TO_REGNUM): Remove macro.
+	* dwarf2read.c (DWARF2_REG_TO_REGNUM): Remove macro.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-12  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (SMASH_TEXT_ADDRESS): Replace by
 	gdbarch_smash_text_address.
 	* somread.c (som_symtab_read): Likewise.

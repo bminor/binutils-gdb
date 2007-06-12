@@ -237,7 +237,7 @@ read_reg (void *baton, int reg)
   int regnum;
   gdb_byte *buf;
 
-  regnum = DWARF2_REG_TO_REGNUM (reg);
+  regnum = gdbarch_dwarf2_reg_to_regnum (current_gdbarch, reg);
 
   buf = alloca (register_size (gdbarch, regnum));
   frame_unwind_register (next_frame, regnum, buf);
@@ -340,8 +340,10 @@ execute_cfa_program (gdb_byte *insn_ptr, gdb_byte *insn_end,
 incomplete CFI data; DW_CFA_restore unspecified\n\
 register %s (#%d) at 0x%s"),
 		       gdbarch_register_name
-			 (current_gdbarch, DWARF2_REG_TO_REGNUM(reg)),
-		       DWARF2_REG_TO_REGNUM(reg), paddr (fs->pc));
+			 (current_gdbarch, gdbarch_dwarf2_reg_to_regnum
+					     (current_gdbarch, reg)),
+		       gdbarch_dwarf2_reg_to_regnum (current_gdbarch, reg),
+		       paddr (fs->pc));
 	}
       else
 	{
@@ -901,7 +903,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
      return address column; it's perfectly all right for it to
      correspond to a real register.  If it doesn't correspond to a
      real register, or if we shouldn't treat it as such,
-     DWARF2_REG_TO_REGNUM should be defined to return a number outside
+     gdbarch_dwarf2_reg_to_regnum should be defined to return a number outside
      the range [0, gdbarch_num_regs).  */
   {
     int column;		/* CFI speak for "register number".  */
@@ -909,7 +911,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
     for (column = 0; column < fs->regs.num_regs; column++)
       {
 	/* Use the GDB register number as the destination index.  */
-	int regnum = DWARF2_REG_TO_REGNUM (column);
+	int regnum = gdbarch_dwarf2_reg_to_regnum (current_gdbarch, column);
 
 	/* If there's no corresponding GDB register, ignore it.  */
 	if (regnum < 0 || regnum >= num_regs)
@@ -1067,7 +1069,8 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *optimizedp = 0;
       *lvalp = lval_register;
       *addrp = 0;
-      *realnump = DWARF2_REG_TO_REGNUM (cache->reg[regnum].loc.reg);
+      *realnump = gdbarch_dwarf2_reg_to_regnum
+		    (current_gdbarch, cache->reg[regnum].loc.reg);
       if (valuep)
 	frame_unwind_register (next_frame, (*realnump), valuep);
       break;
@@ -1161,7 +1164,8 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
         {
           CORE_ADDR pc = cache->reg[regnum].loc.offset;
 
-          regnum = DWARF2_REG_TO_REGNUM (cache->retaddr_reg.loc.reg);
+          regnum = gdbarch_dwarf2_reg_to_regnum
+		     (current_gdbarch, cache->retaddr_reg.loc.reg);
           pc += frame_unwind_register_unsigned (next_frame, regnum);
           pack_long (valuep, register_type (gdbarch, regnum), pc);
         }

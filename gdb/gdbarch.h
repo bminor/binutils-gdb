@@ -287,58 +287,28 @@ extern void set_gdbarch_fp0_regnum (struct gdbarch *gdbarch, int fp0_regnum);
 typedef int (gdbarch_stab_reg_to_regnum_ftype) (int stab_regnr);
 extern int gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch, int stab_regnr);
 extern void set_gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum);
-#if !defined (GDB_TM_FILE) && defined (STAB_REG_TO_REGNUM)
-#error "Non multi-arch definition of STAB_REG_TO_REGNUM"
-#endif
-#if !defined (STAB_REG_TO_REGNUM)
-#define STAB_REG_TO_REGNUM(stab_regnr) (gdbarch_stab_reg_to_regnum (current_gdbarch, stab_regnr))
-#endif
 
 /* Provide a default mapping from a ecoff register number to a gdb REGNUM. */
 
 typedef int (gdbarch_ecoff_reg_to_regnum_ftype) (int ecoff_regnr);
 extern int gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch, int ecoff_regnr);
 extern void set_gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum);
-#if !defined (GDB_TM_FILE) && defined (ECOFF_REG_TO_REGNUM)
-#error "Non multi-arch definition of ECOFF_REG_TO_REGNUM"
-#endif
-#if !defined (ECOFF_REG_TO_REGNUM)
-#define ECOFF_REG_TO_REGNUM(ecoff_regnr) (gdbarch_ecoff_reg_to_regnum (current_gdbarch, ecoff_regnr))
-#endif
 
 /* Provide a default mapping from a DWARF register number to a gdb REGNUM. */
 
 typedef int (gdbarch_dwarf_reg_to_regnum_ftype) (int dwarf_regnr);
 extern int gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dwarf_regnr);
 extern void set_gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum);
-#if !defined (GDB_TM_FILE) && defined (DWARF_REG_TO_REGNUM)
-#error "Non multi-arch definition of DWARF_REG_TO_REGNUM"
-#endif
-#if !defined (DWARF_REG_TO_REGNUM)
-#define DWARF_REG_TO_REGNUM(dwarf_regnr) (gdbarch_dwarf_reg_to_regnum (current_gdbarch, dwarf_regnr))
-#endif
 
 /* Convert from an sdb register number to an internal gdb register number. */
 
 typedef int (gdbarch_sdb_reg_to_regnum_ftype) (int sdb_regnr);
 extern int gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, int sdb_regnr);
 extern void set_gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_sdb_reg_to_regnum_ftype *sdb_reg_to_regnum);
-#if !defined (GDB_TM_FILE) && defined (SDB_REG_TO_REGNUM)
-#error "Non multi-arch definition of SDB_REG_TO_REGNUM"
-#endif
-#if !defined (SDB_REG_TO_REGNUM)
-#define SDB_REG_TO_REGNUM(sdb_regnr) (gdbarch_sdb_reg_to_regnum (current_gdbarch, sdb_regnr))
-#endif
 
 typedef int (gdbarch_dwarf2_reg_to_regnum_ftype) (int dwarf2_regnr);
 extern int gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2_regnr);
 extern void set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum);
-#if !defined (GDB_TM_FILE) && defined (DWARF2_REG_TO_REGNUM)
-#error "Non multi-arch definition of DWARF2_REG_TO_REGNUM"
-#endif
-#if !defined (DWARF2_REG_TO_REGNUM)
-#define DWARF2_REG_TO_REGNUM(dwarf2_regnr) (gdbarch_dwarf2_reg_to_regnum (current_gdbarch, dwarf2_regnr))
-#endif
 
 typedef const char * (gdbarch_register_name_ftype) (int regnr);
 extern const char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);

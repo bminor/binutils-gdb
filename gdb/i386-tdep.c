@@ -2382,7 +2382,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
 
-  /* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to
+  /* We don't set gdbarch_stab_reg_to_regnum, since ECOFF doesn't seem to
      be in use on any of the supported i386 targets.  */
 
   set_gdbarch_print_float_info (gdbarch, i387_print_float_info);

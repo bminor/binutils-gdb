@@ -67,10 +67,6 @@
    can be used for any other data associated to the objfile (symbol
    names, type names, location expressions to name a few).  */
 
-#ifndef DWARF2_REG_TO_REGNUM
-#define DWARF2_REG_TO_REGNUM(REG) (REG)
-#endif
-
 #if 0
 /* .debug_info header for a compilation unit
    Because of alignment constraints, this structure has padding and cannot

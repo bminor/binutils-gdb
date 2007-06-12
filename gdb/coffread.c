@@ -1549,7 +1549,8 @@ process_coff_symbol (struct coff_symbol *cs,
 #endif
 	case C_REG:
 	  SYMBOL_CLASS (sym) = LOC_REGISTER;
-	  SYMBOL_VALUE (sym) = SDB_REG_TO_REGNUM (cs->c_value);
+	  SYMBOL_VALUE (sym) = gdbarch_sdb_reg_to_regnum
+				 (current_gdbarch, cs->c_value);
 	  add_symbol_to_list (sym, &local_symbols);
 	  break;
 
@@ -1583,7 +1584,8 @@ process_coff_symbol (struct coff_symbol *cs,
 
 	case C_REGPARM:
 	  SYMBOL_CLASS (sym) = LOC_REGPARM;
-	  SYMBOL_VALUE (sym) = SDB_REG_TO_REGNUM (cs->c_value);
+	  SYMBOL_VALUE (sym) = gdbarch_sdb_reg_to_regnum
+				 (current_gdbarch, cs->c_value);
 	  add_symbol_to_list (sym, &local_symbols);
 #if !defined (BELIEVE_PCC_PROMOTION)
 	  /* FIXME:  This should retain the current type, since it's just

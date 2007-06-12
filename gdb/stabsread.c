@@ -1022,7 +1022,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* Parameter which is in a register.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGPARM;
-      SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
+      SYMBOL_VALUE (sym) = gdbarch_stab_reg_to_regnum (current_gdbarch, valu);
       if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
 				  + gdbarch_num_pseudo_regs (current_gdbarch))
 	{
@@ -1040,7 +1040,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* Register variable (either global or local).  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGISTER;
-      SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
+      SYMBOL_VALUE (sym) = gdbarch_stab_reg_to_regnum (current_gdbarch, valu);
       if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
 				+ gdbarch_num_pseudo_regs (current_gdbarch))
 	{
@@ -1314,7 +1314,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* Reference parameter which is in a register.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
-      SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
+      SYMBOL_VALUE (sym) = gdbarch_stab_reg_to_regnum (current_gdbarch, valu);
       if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
 				+ gdbarch_num_pseudo_regs (current_gdbarch))
 	{

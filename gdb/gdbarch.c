@@ -850,30 +850,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: double_format = %s\n",
                       pformat (current_gdbarch->double_format));
-#ifdef DWARF2_REG_TO_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DWARF2_REG_TO_REGNUM(dwarf2_regnr)",
-                      XSTRING (DWARF2_REG_TO_REGNUM (dwarf2_regnr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: dwarf2_reg_to_regnum = <0x%lx>\n",
                       (long) current_gdbarch->dwarf2_reg_to_regnum);
-#ifdef DWARF_REG_TO_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DWARF_REG_TO_REGNUM(dwarf_regnr)",
-                      XSTRING (DWARF_REG_TO_REGNUM (dwarf_regnr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: dwarf_reg_to_regnum = <0x%lx>\n",
                       (long) current_gdbarch->dwarf_reg_to_regnum);
-#ifdef ECOFF_REG_TO_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ECOFF_REG_TO_REGNUM(ecoff_regnr)",
-                      XSTRING (ECOFF_REG_TO_REGNUM (ecoff_regnr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: ecoff_reg_to_regnum = <0x%lx>\n",
                       (long) current_gdbarch->ecoff_reg_to_regnum);
@@ -1122,12 +1104,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: return_value = <0x%lx>\n",
                       (long) current_gdbarch->return_value);
-#ifdef SDB_REG_TO_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SDB_REG_TO_REGNUM(sdb_regnr)",
-                      XSTRING (SDB_REG_TO_REGNUM (sdb_regnr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: sdb_reg_to_regnum = <0x%lx>\n",
                       (long) current_gdbarch->sdb_reg_to_regnum);
@@ -1184,12 +1160,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: sp_regnum = %s\n",
                       paddr_d (current_gdbarch->sp_regnum));
-#ifdef STAB_REG_TO_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "STAB_REG_TO_REGNUM(stab_regnr)",
-                      XSTRING (STAB_REG_TO_REGNUM (stab_regnr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: stab_reg_to_regnum = <0x%lx>\n",
                       (long) current_gdbarch->stab_reg_to_regnum);

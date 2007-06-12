@@ -40,10 +40,6 @@
 
 #include "gdb_string.h"
 
-#ifndef DWARF2_REG_TO_REGNUM
-#define DWARF2_REG_TO_REGNUM(REG) (REG)
-#endif
-
 /* A helper function for dealing with location lists.  Given a
    symbol baton (BATON) and a pc value (PC), find the appropriate
    location expression, set *LOCEXPR_LENGTH, and return a pointer
@@ -123,7 +119,7 @@ dwarf_expr_read_reg (void *baton, int dwarf_regnum)
   CORE_ADDR result;
   int regnum;
 
-  regnum = DWARF2_REG_TO_REGNUM (dwarf_regnum);
+  regnum = gdbarch_dwarf2_reg_to_regnum (current_gdbarch, dwarf_regnum);
   result = address_from_register (builtin_type_void_data_ptr,
 				  regnum, debaton->frame);
   return result;
@@ -229,7 +225,8 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 	  if (p->in_reg)
 	    {
 	      bfd_byte regval[MAX_REGISTER_SIZE];
-	      int gdb_regnum = DWARF2_REG_TO_REGNUM (p->value);
+	      int gdb_regnum = gdbarch_dwarf2_reg_to_regnum
+				 (current_gdbarch, p->value);
 	      get_frame_register (frame, gdb_regnum, regval);
 	      memcpy (contents + offset, regval, p->size);
 	    }
@@ -243,7 +240,8 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   else if (ctx->in_reg)
     {
       CORE_ADDR dwarf_regnum = dwarf_expr_fetch (ctx, 0);
-      int gdb_regnum = DWARF2_REG_TO_REGNUM (dwarf_regnum);
+      int gdb_regnum = gdbarch_dwarf2_reg_to_regnum
+			 (current_gdbarch, dwarf_regnum);
       retval = value_from_register (SYMBOL_TYPE (var), gdb_regnum, frame);
     }
   else
@@ -451,7 +449,8 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
       && dlbaton->data[0] >= DW_OP_reg0
       && dlbaton->data[0] <= DW_OP_reg31)
     {
-      int regno = DWARF2_REG_TO_REGNUM (dlbaton->data[0] - DW_OP_reg0);
+      int regno = gdbarch_dwarf2_reg_to_regnum
+		    (current_gdbarch, dlbaton->data[0] - DW_OP_reg0);
       fprintf_filtered (stream,
 			"a variable in register %s",
 			gdbarch_register_name (current_gdbarch, regno));
