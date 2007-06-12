@@ -1,5 +1,15 @@
 2007-06-12  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (SMASH_TEXT_ADDRESS): Replace by
+	gdbarch_smash_text_address.
+	* somread.c (som_symtab_read): Likewise.
+	* elfread.c (record_minimal_symbol): Likewise.
+	* dbxread.c (process_one_symbol): Likewise.
+	* coffread.c (coff_symtab_read): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-12  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (REGISTER_TO_VALUE): Replace by gdbarch_register_to_value.
 	* findvar.c (value_from_register): Likewise.
 	* gdbarch.sh (VALUE_TO_REGISTER): Replace by gdbarch_value_to_register.

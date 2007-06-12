@@ -1155,12 +1155,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: skip_trampoline_code = <0x%lx>\n",
                       (long) current_gdbarch->skip_trampoline_code);
-#ifdef SMASH_TEXT_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SMASH_TEXT_ADDRESS(addr)",
-                      XSTRING (SMASH_TEXT_ADDRESS (addr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: smash_text_address = <0x%lx>\n",
                       (long) current_gdbarch->smash_text_address);

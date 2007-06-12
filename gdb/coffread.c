@@ -910,7 +910,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXTFUNC
 		      || cs->c_sclass == C_THUMBEXT ?
 		      mst_text : mst_file_text;
-		    tmpaddr = SMASH_TEXT_ADDRESS (tmpaddr);
+		    tmpaddr = gdbarch_smash_text_address
+				(current_gdbarch, tmpaddr);
 		  }
 		else if (bfd_section->flags & SEC_ALLOC
 			 && bfd_section->flags & SEC_LOAD)

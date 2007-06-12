@@ -756,18 +756,12 @@ typedef CORE_ADDR (gdbarch_addr_bits_remove_ftype) (CORE_ADDR addr);
 extern CORE_ADDR gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_bits_remove_ftype *addr_bits_remove);
 
-/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
+/* It is not at all clear why gdbarch_smash_text_address is not folded into
    gdbarch_addr_bits_remove. */
 
 typedef CORE_ADDR (gdbarch_smash_text_address_ftype) (CORE_ADDR addr);
 extern CORE_ADDR gdbarch_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_smash_text_address (struct gdbarch *gdbarch, gdbarch_smash_text_address_ftype *smash_text_address);
-#if !defined (GDB_TM_FILE) && defined (SMASH_TEXT_ADDRESS)
-#error "Non multi-arch definition of SMASH_TEXT_ADDRESS"
-#endif
-#if !defined (SMASH_TEXT_ADDRESS)
-#define SMASH_TEXT_ADDRESS(addr) (gdbarch_smash_text_address (current_gdbarch, addr))
-#endif
 
 /* FIXME/cagney/2001-01-18: This should be split in two.  A target method that
    indicates if the target needs software single step.  An ISA method to

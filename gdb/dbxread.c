@@ -2738,7 +2738,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
       /* Relocate for dynamic loading.  */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
-      valu = SMASH_TEXT_ADDRESS (valu);
+      valu = gdbarch_smash_text_address (current_gdbarch, valu);
       last_function_start = valu;
 
       goto define_a_symbol;

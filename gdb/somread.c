@@ -133,7 +133,8 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
+	      bufp->symbol_value = gdbarch_smash_text_address
+				     (current_gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_ENTRY:
@@ -146,14 +147,16 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      else
 		ms_type = mst_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
+	      bufp->symbol_value = gdbarch_smash_text_address
+				     (current_gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_STUB:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_solib_trampoline;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
+	      bufp->symbol_value = gdbarch_smash_text_address
+				     (current_gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_DATA:
@@ -181,7 +184,8 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
+	      bufp->symbol_value = gdbarch_smash_text_address
+				     (current_gdbarch, bufp->symbol_value);
 
 	    check_strange_names:
 	      /* Utah GCC 2.5, FSF GCC 2.6 and later generate correct local
@@ -212,7 +216,8 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
+	      bufp->symbol_value = gdbarch_smash_text_address
+				     (current_gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_ENTRY:
@@ -223,14 +228,16 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 		 we do for SS_UNIVERSAL and SS_EXTERNAL symbols above.  */
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
+	      bufp->symbol_value = gdbarch_smash_text_address
+				     (current_gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_STUB:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_solib_trampoline;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = SMASH_TEXT_ADDRESS (bufp->symbol_value);
+	      bufp->symbol_value = gdbarch_smash_text_address
+				     (current_gdbarch, bufp->symbol_value);
 	      break;
 
 

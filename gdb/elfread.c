@@ -96,7 +96,7 @@ record_minimal_symbol (char *name, CORE_ADDR address,
 		       asection *bfd_section, struct objfile *objfile)
 {
   if (ms_type == mst_text || ms_type == mst_file_text)
-    address = SMASH_TEXT_ADDRESS (address);
+    address = gdbarch_smash_text_address (current_gdbarch, address);
 
   return prim_record_minimal_symbol_and_info
     (name, address, ms_type, NULL, bfd_section->index, bfd_section, objfile);
