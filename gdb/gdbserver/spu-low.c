@@ -248,7 +248,7 @@ spu_proc_xfer_spu (const char *annex, unsigned char *readbuf,
       && lseek (fd, (off_t) offset, SEEK_SET) != (off_t) offset)
     {
       close (fd);
-      return -1;
+      return 0;
     }
 
   if (writebuf)

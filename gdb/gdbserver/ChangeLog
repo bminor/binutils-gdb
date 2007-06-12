@@ -1,3 +1,8 @@
+2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-low.c (spu_proc_xfer_spu): Do not return failure when
+	accessing non-seekable spufs files.
+
 2007-05-16  Markus Deuling  <deuling@de.ibm.com>
 
 	* server.c (handle_query): Add reply for qC packet. 
