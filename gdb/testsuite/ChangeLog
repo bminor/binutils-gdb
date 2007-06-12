@@ -1,3 +1,8 @@
+2007-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.threads/manythreads.exp: Prevent expect buffer overflow
+	in info threads output.
+
 2007-06-12  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 	    Markus Deuling  <deuling@de.ibm.com>
 

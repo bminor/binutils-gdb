@@ -81,7 +81,25 @@ gdb_test_multiple "" "stop threads 1" {
   }
 }
 
-gdb_test "info threads" ".*1 Thread .*"
+set cmd "info threads"
+set ok 0
+gdb_test_multiple $cmd $cmd {
+    -re " 1 Thread " {
+	set ok 1
+	exp_continue
+    }
+    -re ".*\r\n" {
+	# Eat this line and continue, to prevent the buffer overflowing.
+	exp_continue
+    }
+    -re "$gdb_prompt $" {
+	if { $ok } {
+	    pass $cmd
+	} else {
+	    fail $cmd
+	}
+    }
+}
 
 set message "second continue"
 gdb_test_multiple "continue" "second continue" {
