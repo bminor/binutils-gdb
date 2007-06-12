@@ -1,4 +1,13 @@
 2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Markus Deuling  <deuling@de.ibm.com>
+
+	* remote.c (remote_write_qxfer): New function.
+	(remote_xfer_partial): Add handling for TARGET_OBJECT_SPU.
+	(remote_read_qxfer): Do not cache empty objects.
+	(_initialize_remote): Add PACKET_qXfer_spu_read and
+	PACKET_qXfer_spu_write.
+
+2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* target.h (enum target_object): Add TARGET_OBJECT_SPU.
 	* spu-linux-nat.c (spu_xfer_partial): Handle TARGET_OBJECT_SPU.

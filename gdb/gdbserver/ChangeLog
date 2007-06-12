@@ -1,4 +1,15 @@
 2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Markus Deuling  <deuling@de.ibm.com>
+
+	* remote-utils.c (decode_xfer_write): New function.
+	* server.h (decode_xfer_write): Add prototype.
+	* server.c (handle_query): Add PACKET_LEN argument.  Support
+	qXfer:spu:read and qXfer:spu:write packets.
+	(main): Pass packet_len to handle_query.
+	* spu-low.c (spu_target_ops): Add spu_proc_xfer_spu.
+	* target.h (target_ops): Add qxfer_spu.
+
+2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-low.c (spu_proc_xfer_spu): Do not return failure when
 	accessing non-seekable spufs files.

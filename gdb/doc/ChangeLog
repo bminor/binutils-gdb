@@ -1,6 +1,12 @@
 2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
 	    Markus Deuling  <deuling@de.ibm.com>
 
+	* gdb.texinfo (General Query Packets): Document qXfer:spu:read
+	and qXfer:spu:write packets and mention them under qSupported.
+
+2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Markus Deuling  <deuling@de.ibm.com>
+
 	* gdb.texinfo (Architectures): Add new SPU section to document
 	Cell Broadband Engine SPU architecture specific commands.
 

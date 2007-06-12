@@ -23634,6 +23634,16 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:spu:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
+@item @samp{qXfer:spu:write}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{QPassSignals}
 @tab No
 @tab @samp{-}
@@ -23666,6 +23676,14 @@ The remote stub understands the @samp{qXfer:features:read} packet
 @item qXfer:memory-map:read
 The remote stub understands the @samp{qXfer:memory-map:read} packet
 (@pxref{qXfer memory map read}).
+
+@item qXfer:spu:read
+The remote stub understands the @samp{qXfer:spu:read} packet
+(@pxref{qXfer spu read}).
+
+@item qXfer:spu:write
+The remote stub understands the @samp{qXfer:spu:write} packet
+(@pxref{qXfer spu write}).
 
 @item QPassSignals
 The remote stub understands the @samp{QPassSignals} packet
@@ -23752,7 +23770,7 @@ packets.)
 Read uninterpreted bytes from the target's special data area
 identified by the keyword @var{object}.  Request @var{length} bytes
 starting at @var{offset} bytes into the data.  The content and
-encoding of @var{annex} is specific to the object; it can supply
+encoding of @var{annex} is specific to @var{object}; it can supply
 additional details about what data to access.
 
 Here are the specific requests of this form defined so far.  All
@@ -23782,6 +23800,17 @@ by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 Access the target's @dfn{memory-map}.  @xref{Memory Map Format}.  The
 annex part of the generic @samp{qXfer} packet must be empty
 (@pxref{qXfer read}).
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:spu:read:@var{annex}:@var{offset},@var{length}
+@anchor{qXfer spu read}
+Read contents of an @code{spufs} file on the target system.  The
+annex specifies which file to read; it must be of the form 
+@file{@var{id}/@var{name}}, where @var{id} specifies an SPU context ID
+in the target process, and @var{name} identifes the @code{spufs} file
+in that context to be accessed.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
@@ -23822,14 +23851,27 @@ the stub, or that the object does not support reading.
 @cindex write data into object, remote request
 Write uninterpreted bytes into the target's special data area
 identified by the keyword @var{object}, starting at @var{offset} bytes
-into the data.  @samp{@var{data}@dots{}} is the binary-encoded data
+into the data.  @var{data}@dots{} is the binary-encoded data
 (@pxref{Binary Data}) to be written.  The content and encoding of @var{annex}
-is specific to the object; it can supply additional details about what data
+is specific to @var{object}; it can supply additional details about what data
 to access.
 
-No requests of this form are presently in use.  This specification
-serves as a placeholder to document the common format that new
-specific request specifications ought to use.
+Here are the specific requests of this form defined so far.  All
+@samp{qXfer:@var{object}:write:@dots{}} requests use the same reply
+formats, listed below.
+
+@table @samp
+@item qXfer:@var{spu}:write:@var{annex}:@var{offset}:@var{data}@dots{}
+@anchor{qXfer spu write}
+Write @var{data} to an @code{spufs} file on the target system.  The
+annex specifies which file to write; it must be of the form
+@file{@var{id}/@var{name}}, where @var{id} specifies an SPU context ID
+in the target process, and @var{name} identifes the @code{spufs} file
+in that context to be accessed.
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+@end table
 
 Reply:
 @table @samp

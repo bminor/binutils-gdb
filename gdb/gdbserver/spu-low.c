@@ -574,7 +574,6 @@ spu_arch_string (void)
   return "spu";
 }
 
-
 static struct target_ops spu_target_ops = {
   spu_create_inferior,
   spu_attach,
@@ -598,6 +597,7 @@ static struct target_ops spu_target_ops = {
   NULL,
   NULL,
   spu_arch_string,
+  spu_proc_xfer_spu,
 };
 
 void

@@ -141,7 +141,7 @@ decode_xfer_read (char *buf, char **annex, CORE_ADDR *ofs, unsigned int *len)
     return -1;
   *buf++ = 0;
 
-  /* After the read/write marker and annex, qXfer looks like a
+  /* After the read marker and annex, qXfer looks like a
      traditional 'm' packet.  */
   decode_m_packet (buf, ofs, len);
 
@@ -255,7 +255,7 @@ monitor_show_help (void)
 
 /* Handle all of the extended 'q' packets.  */
 void
-handle_query (char *own_buf, int *new_packet_len_p)
+handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 {
   static struct inferior_list_entry *thread_ptr;
 
@@ -311,6 +311,69 @@ handle_query (char *own_buf, int *new_packet_len_p)
       else
 	write_enn (own_buf);
       
+      return;
+    }
+
+  if (the_target->qxfer_spu != NULL
+      && strncmp ("qXfer:spu:read:", own_buf, 15) == 0)
+    {
+      char *annex;
+      int n;
+      unsigned int len;
+      CORE_ADDR ofs;
+      unsigned char *spu_buf;
+
+      strcpy (own_buf, "E00");
+      if (decode_xfer_read (own_buf + 15, &annex, &ofs, &len) < 0)
+	  return;
+      if (len > PBUFSIZ - 2)
+	len = PBUFSIZ - 2;
+      spu_buf = malloc (len + 1);
+      if (!spu_buf)
+        return;
+
+      n = (*the_target->qxfer_spu) (annex, spu_buf, NULL, ofs, len + 1);
+      if (n < 0) 
+	write_enn (own_buf);
+      else if (n > len)
+	*new_packet_len_p = write_qxfer_response
+			      (own_buf, spu_buf, len, 1);
+      else 
+	*new_packet_len_p = write_qxfer_response
+			      (own_buf, spu_buf, n, 0);
+
+      free (spu_buf);
+      return;
+    }
+
+  if (the_target->qxfer_spu != NULL
+      && strncmp ("qXfer:spu:write:", own_buf, 16) == 0)
+    {
+      char *annex;
+      int n;
+      unsigned int len;
+      CORE_ADDR ofs;
+      unsigned char *spu_buf;
+
+      strcpy (own_buf, "E00");
+      spu_buf = malloc (packet_len - 15);
+      if (!spu_buf)
+        return;
+      if (decode_xfer_write (own_buf + 16, packet_len - 16, &annex,
+			     &ofs, &len, spu_buf) < 0)
+	{
+	  free (spu_buf);
+	  return;
+	}
+
+      n = (*the_target->qxfer_spu) 
+	(annex, NULL, (unsigned const char *)spu_buf, ofs, len);
+      if (n < 0)
+	write_enn (own_buf);
+      else
+	sprintf (own_buf, "%x", n);
+
+      free (spu_buf);
       return;
     }
 
@@ -403,6 +466,9 @@ handle_query (char *own_buf, int *new_packet_len_p)
 
       if (the_target->read_auxv != NULL)
 	strcat (own_buf, ";qXfer:auxv:read+");
+     
+      if (the_target->qxfer_spu != NULL)
+	strcat (own_buf, ";qXfer:spu:read+;qXfer:spu:write+");
 
       if (get_features_xml ("target.xml") != NULL)
 	strcat (own_buf, ";qXfer:features:read+");
@@ -809,7 +875,7 @@ main (int argc, char *argv[])
 	  switch (ch)
 	    {
 	    case 'q':
-	      handle_query (own_buf, &new_packet_len);
+	      handle_query (own_buf, packet_len, &new_packet_len);
 	      break;
 	    case 'Q':
 	      handle_general_set (own_buf);

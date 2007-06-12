@@ -908,6 +908,8 @@ enum {
   PACKET_qXfer_auxv,
   PACKET_qXfer_features,
   PACKET_qXfer_memory_map,
+  PACKET_qXfer_spu_read,
+  PACKET_qXfer_spu_write,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_QPassSignals,
@@ -5516,6 +5518,45 @@ the loaded file\n"));
     printf_filtered (_("No loaded section named '%s'.\n"), args);
 }
 
+/* Write LEN bytes from WRITEBUF into OBJECT_NAME/ANNEX at OFFSET
+   into remote target.  The number of bytes written to the remote
+   target is returned, or -1 for error.  */
+
+static LONGEST
+remote_write_qxfer (struct target_ops *ops, const char *object_name,
+                    const char *annex, const gdb_byte *writebuf, 
+                    ULONGEST offset, LONGEST len, 
+                    struct packet_config *packet)
+{
+  int i, buf_len;
+  ULONGEST n;
+  gdb_byte *wbuf;
+  struct remote_state *rs = get_remote_state ();
+  int max_size = get_memory_write_packet_size (); 
+
+  if (packet->support == PACKET_DISABLE)
+    return -1;
+
+  /* Insert header.  */
+  i = snprintf (rs->buf, max_size, 
+		"qXfer:%s:write:%s:%s:",
+		object_name, annex ? annex : "",
+		phex_nz (offset, sizeof offset));
+  max_size -= (i + 1);
+
+  /* Escape as much data as fits into rs->buf.  */
+  buf_len = remote_escape_output 
+    (writebuf, len, (rs->buf + i), &max_size, max_size);
+
+  if (putpkt_binary (rs->buf, i + buf_len) < 0
+      || getpkt_sane (&rs->buf, &rs->buf_size, 0) < 0
+      || packet_ok (rs->buf, packet) != PACKET_OK)
+    return -1;
+
+  unpack_varlen_hex (rs->buf, &n);
+  return n;
+}
+
 /* Read OBJECT_NAME/ANNEX from the remote target using a qXfer packet.
    Data at OFFSET, of up to LEN bytes, is read into READBUF; the
    number of bytes read is returned, or 0 for EOF, or -1 for error.
@@ -5588,9 +5629,9 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
   i = remote_unescape_input (rs->buf + 1, packet_len - 1, readbuf, n);
 
   /* 'l' is an EOF marker, possibly including a final block of data,
-     or possibly empty.  Record it to bypass the next read, if one is
-     issued.  */
-  if (rs->buf[0] == 'l')
+     or possibly empty.  If we have the final block of a non-empty
+     object, record this fact to bypass a subsequent partial read.  */
+  if (rs->buf[0] == 'l' && offset + i > 0)
     {
       finished_object = xstrdup (object_name);
       finished_annex = xstrdup (annex ? annex : "");
@@ -5627,6 +5668,19 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 	return 0;
       else
 	return -1;
+    }
+
+  /* Handle SPU memory using qxfer packets. */
+  if (object == TARGET_OBJECT_SPU)
+    {
+      if (readbuf)
+	return remote_read_qxfer (ops, "spu", annex, readbuf, offset, len,
+				  &remote_protocol_packets
+				    [PACKET_qXfer_spu_read]);
+      else
+	return remote_write_qxfer (ops, "spu", annex, writebuf, offset, len,
+				   &remote_protocol_packets
+				     [PACKET_qXfer_spu_write]);
     }
 
   /* Only handle flash writes.  */
@@ -6538,6 +6592,12 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_memory_map],
 			 "qXfer:memory-map:read", "memory-map", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_spu_read],
+                         "qXfer:spu:read", "read-spu-object", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_spu_write],
+                         "qXfer:spu:write", "write-spu-object", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",

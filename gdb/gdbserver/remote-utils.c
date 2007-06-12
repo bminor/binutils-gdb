@@ -1042,6 +1042,36 @@ decode_X_packet (char *from, int packet_len, CORE_ADDR *mem_addr_ptr,
   return 0;
 }
 
+/* Decode a qXfer write request.  */
+int
+decode_xfer_write (char *buf, int packet_len, char **annex, CORE_ADDR *offset,
+		   unsigned int *len, unsigned char *data)
+{
+  char ch;
+
+  /* Extract and NUL-terminate the annex.  */
+  *annex = buf;
+  while (*buf && *buf != ':')
+    buf++;
+  if (*buf == '\0')
+    return -1;
+  *buf++ = 0;
+
+  /* Extract the offset.  */
+  *offset = 0;
+  while ((ch = *buf++) != ':')
+    {
+      *offset = *offset << 4;
+      *offset |= fromhex (ch) & 0x0f;
+    }
+
+  /* Get encoded data.  */
+  packet_len -= buf - *annex;
+  *len = remote_unescape_input ((const gdb_byte *) buf, packet_len,
+				data, packet_len);
+  return 0;
+}
+
 /* Ask GDB for the address of NAME, and return it in ADDRP if found.
    Returns 1 if the symbol is found, 0 if it is not, -1 on error.  */
 

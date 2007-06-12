@@ -185,6 +185,10 @@ struct target_ops
   /* Return a string identifying the current architecture, or NULL if
      this operation is not supported.  */
   const char *(*arch_string) (void);
+
+   /* Read/Write from/to spufs using qXfer packets.  */
+  int (*qxfer_spu) (const char *annex, unsigned char *readbuf,
+		    unsigned const char *writebuf, CORE_ADDR offset, int len);
 };
 
 extern struct target_ops *the_target;
