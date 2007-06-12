@@ -424,12 +424,6 @@ extern void set_gdbarch_print_vector_info (struct gdbarch *gdbarch, gdbarch_prin
 typedef int (gdbarch_register_sim_regno_ftype) (int reg_nr);
 extern int gdbarch_register_sim_regno (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_sim_regno (struct gdbarch *gdbarch, gdbarch_register_sim_regno_ftype *register_sim_regno);
-#if !defined (GDB_TM_FILE) && defined (REGISTER_SIM_REGNO)
-#error "Non multi-arch definition of REGISTER_SIM_REGNO"
-#endif
-#if !defined (REGISTER_SIM_REGNO)
-#define REGISTER_SIM_REGNO(reg_nr) (gdbarch_register_sim_regno (current_gdbarch, reg_nr))
-#endif
 
 typedef int (gdbarch_cannot_fetch_register_ftype) (int regnum);
 extern int gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int regnum);

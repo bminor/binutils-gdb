@@ -24,7 +24,7 @@
 #ifndef SIM_REGNO_H
 #define SIM_REGNO_H
 
-/* The REGISTER_SIM_REGNO(REGNUM) method, when there is a
+/* The gdbarch_register_sim_regno (REGNUM) method, when there is a
    corresponding simulator register, returns that register number as a
    cardinal.  When there is no corresponding register, it returns a
    negative value.  */

@@ -288,7 +288,7 @@ gdbsim_fetch_register (struct regcache *regcache, int regno)
       return;
     }
 
-  switch (REGISTER_SIM_REGNO (regno))
+  switch (gdbarch_register_sim_regno (current_gdbarch, regno))
     {
     case LEGACY_SIM_REGNO_IGNORE:
       break;
@@ -311,14 +311,18 @@ gdbsim_fetch_register (struct regcache *regcache, int regno)
 	gdb_assert (regno >= 0 && regno < gdbarch_num_regs (current_gdbarch));
 	memset (buf, 0, MAX_REGISTER_SIZE);
 	nr_bytes = sim_fetch_register (gdbsim_desc,
-				       REGISTER_SIM_REGNO (regno),
-				       buf, register_size (current_gdbarch, regno));
+				       gdbarch_register_sim_regno
+					 (current_gdbarch, regno),
+				       buf,
+				       register_size (current_gdbarch, regno));
 	if (nr_bytes > 0 && nr_bytes != register_size (current_gdbarch, regno) && warn_user)
 	  {
 	    fprintf_unfiltered (gdb_stderr,
 				"Size of register %s (%d/%d) incorrect (%d instead of %d))",
 				gdbarch_register_name (current_gdbarch, regno),
-				regno, REGISTER_SIM_REGNO (regno),
+				regno,
+				gdbarch_register_sim_regno
+				  (current_gdbarch, regno),
 				nr_bytes, register_size (current_gdbarch, regno));
 	    warn_user = 0;
 	  }
@@ -349,13 +353,14 @@ gdbsim_store_register (struct regcache *regcache, int regno)
 	gdbsim_store_register (regcache, regno);
       return;
     }
-  else if (REGISTER_SIM_REGNO (regno) >= 0)
+  else if (gdbarch_register_sim_regno (current_gdbarch, regno) >= 0)
     {
       char tmp[MAX_REGISTER_SIZE];
       int nr_bytes;
       regcache_cooked_read (regcache, regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc,
-				     REGISTER_SIM_REGNO (regno),
+				     gdbarch_register_sim_regno
+				       (current_gdbarch, regno),
 				     tmp, register_size (current_gdbarch, regno));
       if (nr_bytes > 0 && nr_bytes != register_size (current_gdbarch, regno))
 	internal_error (__FILE__, __LINE__,

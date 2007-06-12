@@ -1101,12 +1101,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_reggroup_p = <0x%lx>\n",
                       (long) current_gdbarch->register_reggroup_p);
-#ifdef REGISTER_SIM_REGNO
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_SIM_REGNO(reg_nr)",
-                      XSTRING (REGISTER_SIM_REGNO (reg_nr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_sim_regno = <0x%lx>\n",
                       (long) current_gdbarch->register_sim_regno);
