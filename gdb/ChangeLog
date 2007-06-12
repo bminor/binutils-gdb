@@ -1,5 +1,10 @@
 2007-06-12  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (DEPRECATED_STACK_ALIGN): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-12  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (STAB_REG_TO_REGNUM): Replace by
 	gdbarch_stab_reg_to_regnum.
 	* stabsread.c (define_symbol): Likewise.

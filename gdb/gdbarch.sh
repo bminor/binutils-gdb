@@ -573,11 +573,6 @@ M::CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame
 # frame-base.  Enable frame-base before frame-unwind.
 F::int:frame_num_args:struct frame_info *frame:frame
 #
-# DEPRECATED_STACK_ALIGN has been replaced by an initial aligning call
-# to frame_align and the requirement that methods such as
-# push_dummy_call and frame_red_zone_size maintain correct stack/frame
-# alignment.
-F:=:CORE_ADDR:deprecated_stack_align:CORE_ADDR sp:sp
 M::CORE_ADDR:frame_align:CORE_ADDR address:address
 # DEPRECATED_REG_STRUCT_HAS_ADDR has been replaced by
 # stabs_argument_has_addr.

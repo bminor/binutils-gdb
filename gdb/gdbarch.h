@@ -637,36 +637,6 @@ typedef int (gdbarch_frame_num_args_ftype) (struct frame_info *frame);
 extern int gdbarch_frame_num_args (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_frame_num_args (struct gdbarch *gdbarch, gdbarch_frame_num_args_ftype *frame_num_args);
 
-/* DEPRECATED_STACK_ALIGN has been replaced by an initial aligning call
-   to frame_align and the requirement that methods such as
-   push_dummy_call and frame_red_zone_size maintain correct stack/frame
-   alignment. */
-
-#if defined (DEPRECATED_STACK_ALIGN)
-/* Legacy for systems yet to multi-arch DEPRECATED_STACK_ALIGN */
-#if !defined (DEPRECATED_STACK_ALIGN_P)
-#define DEPRECATED_STACK_ALIGN_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_stack_align_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_STACK_ALIGN_P)
-#error "Non multi-arch definition of DEPRECATED_STACK_ALIGN"
-#endif
-#if !defined (DEPRECATED_STACK_ALIGN_P)
-#define DEPRECATED_STACK_ALIGN_P() (gdbarch_deprecated_stack_align_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_stack_align_ftype) (CORE_ADDR sp);
-extern CORE_ADDR gdbarch_deprecated_stack_align (struct gdbarch *gdbarch, CORE_ADDR sp);
-extern void set_gdbarch_deprecated_stack_align (struct gdbarch *gdbarch, gdbarch_deprecated_stack_align_ftype *deprecated_stack_align);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_STACK_ALIGN)
-#error "Non multi-arch definition of DEPRECATED_STACK_ALIGN"
-#endif
-#if !defined (DEPRECATED_STACK_ALIGN)
-#define DEPRECATED_STACK_ALIGN(sp) (gdbarch_deprecated_stack_align (current_gdbarch, sp))
-#endif
-
 extern int gdbarch_frame_align_p (struct gdbarch *gdbarch);
 
 typedef CORE_ADDR (gdbarch_frame_align_ftype) (struct gdbarch *gdbarch, CORE_ADDR address);
