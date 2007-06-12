@@ -1,3 +1,14 @@
+2007-06-12  Andreas Schwab  <schwab@suse.de>
+
+	* frame-unwind.h (frame_dealloc_cache_ftype): Define.
+	(struct frame_unwind): Add dealloc_cache.
+	* frame.c (reinit_frame_cache): Call dealloc_cache on all caches.
+
+	* libunwind-frame.h (libunwind_frame_dealloc_cache): Declare.
+	* libunwind-frame.c (libunwind_frame_dealloc_cache): Define.
+	(libunwind_frame_unwind): Set dealloc_cache.
+	* ia64-tdep.c (ia64_libunwind_frame_unwind): Set dealloc_cache.
+
 2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
 	    Markus Deuling  <deuling@de.ibm.com>
 

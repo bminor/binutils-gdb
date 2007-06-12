@@ -53,6 +53,7 @@ void libunwind_frame_prev_register (struct frame_info *next_frame, void **this_c
 				    int regnum, int *optimizedp,
 				    enum lval_type *lvalp, CORE_ADDR *addrp,
 				    int *realnump, gdb_byte *valuep);
+void libunwind_frame_dealloc_cache (struct frame_info *self, void *cache);
 CORE_ADDR libunwind_frame_base_address (struct frame_info *next_frame, void **this_cache);
 
 int libunwind_is_initialized (void);

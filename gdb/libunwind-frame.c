@@ -65,6 +65,7 @@ struct libunwind_frame_cache
   CORE_ADDR base;
   CORE_ADDR func_addr;
   unw_cursor_t cursor;
+  unw_addr_space_t as;
 };
 
 /* We need to qualify the function names with a platform-specific prefix to match 
@@ -187,9 +188,18 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
     }
 
   cache->base = (CORE_ADDR)fp;
+  cache->as = as;
 
   *this_cache = cache;
   return cache;
+}
+
+void
+libunwind_frame_dealloc_cache (struct frame_info *self, void *this_cache)
+{
+  struct libunwind_frame_cache *cache = this_cache;
+  if (cache->as)
+    unw_destroy_addr_space_p (cache->as);
 }
 
 unw_word_t
@@ -202,7 +212,11 @@ static const struct frame_unwind libunwind_frame_unwind =
 {
   NORMAL_FRAME,
   libunwind_frame_this_id,
-  libunwind_frame_prev_register
+  libunwind_frame_prev_register,
+  NULL,
+  NULL,
+  NULL,
+  libunwind_frame_dealloc_cache
 };
 
 /* Verify if there is sufficient libunwind information for the frame to use

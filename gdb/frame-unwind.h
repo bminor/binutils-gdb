@@ -125,6 +125,10 @@ typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
 typedef CORE_ADDR (frame_prev_pc_ftype) (struct frame_info *next_frame,
 					 void **this_prologue_cache);
 
+/* Deallocate extra memory associated with the frame cache if any.  */
+
+typedef void (frame_dealloc_cache_ftype) (struct frame_info *self,
+					  void *this_cache);
 
 struct frame_unwind
 {
@@ -138,6 +142,7 @@ struct frame_unwind
   const struct frame_data *unwind_data;
   frame_sniffer_ftype *sniffer;
   frame_prev_pc_ftype *prev_pc;
+  frame_dealloc_cache_ftype *dealloc_cache;
 };
 
 /* Register a frame unwinder, _prepending_ it to the front of the

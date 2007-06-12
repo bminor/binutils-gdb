@@ -2778,7 +2778,11 @@ static const struct frame_unwind ia64_libunwind_frame_unwind =
 {
   NORMAL_FRAME,
   ia64_libunwind_frame_this_id,
-  ia64_libunwind_frame_prev_register
+  ia64_libunwind_frame_prev_register,
+  NULL,
+  NULL,
+  NULL,
+  libunwind_frame_dealloc_cache
 };
 
 static const struct frame_unwind *

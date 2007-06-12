@@ -1077,6 +1077,17 @@ frame_observer_target_changed (struct target_ops *target)
 void
 reinit_frame_cache (void)
 {
+  struct frame_info *fi;
+
+  /* Tear down all frame caches.  */
+  for (fi = current_frame; fi != NULL; fi = fi->prev)
+    {
+      if (fi->prologue_cache && fi->unwind->dealloc_cache)
+	fi->unwind->dealloc_cache (fi, fi->prologue_cache);
+      if (fi->base_cache && fi->base->unwind->dealloc_cache)
+	fi->base->unwind->dealloc_cache (fi, fi->base_cache);
+    }
+
   /* Since we can't really be sure what the first object allocated was */
   obstack_free (&frame_cache_obstack, 0);
   obstack_init (&frame_cache_obstack);
