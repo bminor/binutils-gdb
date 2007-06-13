@@ -1,3 +1,20 @@
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (clean): Clean new files instead of deleted ones.
+	(reg-mips.o, reg-mips.c, reg-mips64.o, reg-mips64.c): Delete.
+	(mips-linux.o, mips-linux.c, mips64-linux.o, mips64-linux.c): New
+	rules.
+	* configure.srv: Specify XML files and new regformats for MIPS and
+	MIPS64 GNU/Linux.
+	* linux-mips-low.c (mips_num_regs): Set to only used registers.
+	(mips_regmap): Do not fetch $0.  Remove unused registers.  Add
+	an entry for the restart register.
+	(mips_cannot_fetch_register, mips_cannot_store_register)
+	(mips_reinsert_addr, mips_fill_fpregset, mips_store_fpregset): Update
+	register names to match the XML descriptions.
+	(mips_fill_gregset, mips_store_gregset): Likewise.  Handle the
+	restart register instead of $0.
+
 2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>
 	    Markus Deuling  <deuling@de.ibm.com>
 

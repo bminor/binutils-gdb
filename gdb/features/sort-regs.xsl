@@ -3,7 +3,7 @@
   <xsl:template match="/">
     <target>
       <xsl:for-each select="//reg">
-	<xsl:sort select="regnum" data-type="number"/>
+	<xsl:sort select="@regnum" data-type="number"/>
 	<xsl:copy-of select="."/>
       </xsl:for-each>
     </target>

@@ -83,13 +83,17 @@ case "${target}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
-  mips*64*-*-linux*)	srv_regobj=reg-mips64.o
+  mips*64*-*-linux*)	srv_regobj=mips64-linux.o
+			srv_xmltarget=mips64-linux.xml
+			srv_xmlfiles="mips64-cpu.xml mips64-cp0.xml mips64-fpu.xml"
 			srv_tgtobj="linux-low.o linux-mips-low.o"
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
-  mips*-*-linux*)	srv_regobj=reg-mips.o
+  mips*-*-linux*)	srv_regobj=mips-linux.o
+			srv_xmltarget=mips-linux.xml
+			srv_xmlfiles="mips-cpu.xml mips-cp0.xml mips-fpu.xml"
 			srv_tgtobj="linux-low.o linux-mips-low.o"
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes

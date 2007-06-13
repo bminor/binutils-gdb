@@ -215,10 +215,10 @@ clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
-	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c reg-mips.c
+	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c
 	rm -f reg-ppc.c reg-sh.c reg-spu.c reg-x86-64.c reg-i386-linux.c
-	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-mips64.c
-	rm -f arm-with-iwmmxt.c
+	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c
+	rm -f arm-with-iwmmxt.c mips-linux.c mips64-linux.c
 	rm -f xml-builtin.c stamp-xml target.xml
 
 maintainer-clean realclean distclean: clean
@@ -344,12 +344,12 @@ reg-m32r.c : $(srcdir)/../regformats/reg-m32r.dat $(regdat_sh)
 reg-m68k.o : reg-m68k.c $(regdef_h)
 reg-m68k.c : $(srcdir)/../regformats/reg-m68k.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-m68k.dat reg-m68k.c
-reg-mips.o : reg-mips.c $(regdef_h)
-reg-mips.c : $(srcdir)/../regformats/reg-mips.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-mips.dat reg-mips.c
-reg-mips64.o : reg-mips64.c $(regdef_h)
-reg-mips64.c : $(srcdir)/../regformats/reg-mips64.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-mips64.dat reg-mips64.c
+mips-linux.o : mips-linux.c $(regdef_h)
+mips-linux.c : $(srcdir)/../regformats/mips-linux.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/mips-linux.dat mips-linux.c
+mips64-linux.o : mips64-linux.c $(regdef_h)
+mips64-linux.c : $(srcdir)/../regformats/mips64-linux.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/mips64-linux.dat mips64-linux.c
 reg-ppc.o : reg-ppc.c $(regdef_h)
 reg-ppc.c : $(srcdir)/../regformats/reg-ppc.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-ppc.dat reg-ppc.c

@@ -25,10 +25,12 @@
 # affected XML files is changed, and the results should be kept in the
 # GDB repository.
 
-WHICH = arm-with-iwmmxt
+WHICH = arm-with-iwmmxt mips-linux mips64-linux
 
 # Record which registers should be sent to GDB by default after stop.
 arm-with-iwmmxt-expedite = r11,sp,pc
+mips-linux-expedite = r29,pc
+mips64-linux-expedite = r29,pc
 
 XSLTPROC = xsltproc
 outdir = ../regformats

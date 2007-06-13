@@ -1,5 +1,14 @@
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* features/Makefile: Generate regformats for mips-linux and
+	mips64-linux.
+	* features/sort-regs.xsl: Correct typo.
+	* regformats/reg-mips.dat, regformats/reg-mips64.dat: Delete.
+	* regformats/mips-linux.dat, regformats/mips64-linux.dat: New generated
+	files.
+
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* config/mips/linux.mh (TDEP_XML): New.
 	* features/mips-linux.xml, features/mips64-linux.xml: New files.
 	* mips-linux-nat.c (mips_linux_register_addr): Handle

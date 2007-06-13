@@ -35,7 +35,7 @@
 #include <sys/reg.h>
 #endif
 
-#define mips_num_regs 90
+#define mips_num_regs 73
 
 #include <asm/ptrace.h>
 
@@ -50,9 +50,8 @@ union mips_register
 
 /* Return the ptrace ``address'' of register REGNO. */
 
-/* Matches mips_generic32_regs */
 static int mips_regmap[] = {
-  0,  1,  2,  3,  4,  5,  6,  7,
+  -1,  1,  2,  3,  4,  5,  6,  7,
   8,  9,  10, 11, 12, 13, 14, 15,
   16, 17, 18, 19, 20, 21, 22, 23,
   24, 25, 26, 27, 28, 29, 30, 31,
@@ -69,9 +68,7 @@ static int mips_regmap[] = {
   FPR_BASE + 28, FPR_BASE + 29, FPR_BASE + 30, FPR_BASE + 31,
   FPC_CSR, FPC_EIR,
 
-  -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
+  0
 };
 
 /* From mips-linux-nat.c.  */
@@ -87,7 +84,7 @@ mips_cannot_fetch_register (int regno)
   if (mips_regmap[regno] == -1)
     return 1;
 
-  if (find_regno ("zero") == regno)
+  if (find_regno ("r0") == regno)
     return 1;
 
   return 0;
@@ -99,13 +96,13 @@ mips_cannot_store_register (int regno)
   if (mips_regmap[regno] == -1)
     return 1;
 
-  if (find_regno ("zero") == regno)
+  if (find_regno ("r0") == regno)
     return 1;
 
   if (find_regno ("cause") == regno)
     return 1;
 
-  if (find_regno ("bad") == regno)
+  if (find_regno ("badvaddr") == regno)
     return 1;
 
   if (find_regno ("fir") == regno)
@@ -145,7 +142,7 @@ static CORE_ADDR
 mips_reinsert_addr ()
 {
   union mips_register ra;
-  collect_register_by_name ("ra", ra.buf);
+  collect_register_by_name ("r31", ra.buf);
   return register_size (0) == 4 ? ra.reg32 : ra.reg64;
 }
 
@@ -242,15 +239,17 @@ mips_fill_gregset (void *buf)
 
   use_64bit = (register_size (0) == 8);
 
-  for (i = 0; i < 32; i++)
+  for (i = 1; i < 32; i++)
     mips_collect_register (use_64bit, i, regset + i);
 
   mips_collect_register (use_64bit, find_regno ("lo"), regset + 32);
   mips_collect_register (use_64bit, find_regno ("hi"), regset + 33);
   mips_collect_register (use_64bit, find_regno ("pc"), regset + 34);
-  mips_collect_register (use_64bit, find_regno ("bad"), regset + 35);
-  mips_collect_register (use_64bit, find_regno ("sr"), regset + 36);
+  mips_collect_register (use_64bit, find_regno ("badvaddr"), regset + 35);
+  mips_collect_register (use_64bit, find_regno ("status"), regset + 36);
   mips_collect_register (use_64bit, find_regno ("cause"), regset + 37);
+
+  mips_collect_register (use_64bit, find_regno ("restart"), regset + 0);
 }
 
 static void
@@ -267,9 +266,11 @@ mips_store_gregset (const void *buf)
   mips_supply_register (use_64bit, find_regno ("lo"), regset + 32);
   mips_supply_register (use_64bit, find_regno ("hi"), regset + 33);
   mips_supply_register (use_64bit, find_regno ("pc"), regset + 34);
-  mips_supply_register (use_64bit, find_regno ("bad"), regset + 35);
-  mips_supply_register (use_64bit, find_regno ("sr"), regset + 36);
+  mips_supply_register (use_64bit, find_regno ("badvaddr"), regset + 35);
+  mips_supply_register (use_64bit, find_regno ("status"), regset + 36);
   mips_supply_register (use_64bit, find_regno ("cause"), regset + 37);
+
+  mips_supply_register (use_64bit, find_regno ("restart"), regset + 0);
 }
 
 static void
@@ -290,7 +291,7 @@ mips_fill_fpregset (void *buf)
       collect_register (first_fp + i,
 			regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
 
-  mips_collect_register_32bit (use_64bit, find_regno ("fsr"), regset[32].buf);
+  mips_collect_register_32bit (use_64bit, find_regno ("fcsr"), regset[32].buf);
   mips_collect_register_32bit (use_64bit, find_regno ("fir"),
 			       regset[32].buf + 4);
 }
@@ -313,7 +314,7 @@ mips_store_fpregset (const void *buf)
       supply_register (first_fp + i,
 		       regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
 
-  mips_supply_register_32bit (use_64bit, find_regno ("fsr"), regset[32].buf);
+  mips_supply_register_32bit (use_64bit, find_regno ("fcsr"), regset[32].buf);
   mips_supply_register_32bit (use_64bit, find_regno ("fir"),
 			      regset[32].buf + 4);
 }
