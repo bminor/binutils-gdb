@@ -117,7 +117,8 @@ build_gdb_vtable_type (struct gdbarch *arch)
 
   /* ARCH can't give us the true ptrdiff_t type, so we guess.  */
   struct type *ptrdiff_type
-    = init_type (TYPE_CODE_INT, TARGET_PTR_BIT / TARGET_CHAR_BIT, 0,
+    = init_type (TYPE_CODE_INT,
+		 gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT, 0,
                  "ptrdiff_t", 0);
 
   /* We assume no padding is necessary, since GDB doesn't know

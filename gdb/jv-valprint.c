@@ -95,7 +95,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	    {
 	      gdb_byte *buf;
 
-	      buf = alloca (TARGET_PTR_BIT / HOST_CHAR_BIT);
+	      buf = alloca (gdbarch_ptr_bit (current_gdbarch) / HOST_CHAR_BIT);
 	      fputs_filtered (", ", stream);
 	      wrap_here (n_spaces (2));
 
@@ -104,7 +104,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	      else
 		{
 		  read_memory (address, buf, sizeof (buf));
-		  address += TARGET_PTR_BIT / HOST_CHAR_BIT;
+		  address += gdbarch_ptr_bit (current_gdbarch) / HOST_CHAR_BIT;
 		  /* FIXME: cagney/2003-05-24: Bogus or what.  It
                      pulls a host sized pointer out of the target and
                      then extracts that as an address (while assuming
@@ -115,7 +115,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	      for (reps = 1; i + reps < length; reps++)
 		{
 		  read_memory (address, buf, sizeof (buf));
-		  address += TARGET_PTR_BIT / HOST_CHAR_BIT;
+		  address += gdbarch_ptr_bit (current_gdbarch) / HOST_CHAR_BIT;
 		  /* FIXME: cagney/2003-05-24: Bogus or what.  It
                      pulls a host sized pointer out of the target and
                      then extracts that as an address (while assuming

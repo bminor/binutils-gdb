@@ -212,14 +212,14 @@ decode_format (char **string_ptr, int oformat, int osize)
       case 'a':
       case 's':
 	/* Pick the appropriate size for an address.  */
-	if (TARGET_PTR_BIT == 64)
+	if (gdbarch_ptr_bit (current_gdbarch) == 64)
 	  val.size = osize ? 'g' : osize;
-	else if (TARGET_PTR_BIT == 32)
+	else if (gdbarch_ptr_bit (current_gdbarch) == 32)
 	  val.size = osize ? 'w' : osize;
-	else if (TARGET_PTR_BIT == 16)
+	else if (gdbarch_ptr_bit (current_gdbarch) == 16)
 	  val.size = osize ? 'h' : osize;
 	else
-	  /* Bad value for TARGET_PTR_BIT.  */
+	  /* Bad value for gdbarch_ptr_bit.  */
 	  internal_error (__FILE__, __LINE__,
 			  _("failed internal consistency check"));
 	break;

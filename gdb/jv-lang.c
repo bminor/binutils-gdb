@@ -591,7 +591,7 @@ get_java_object_header_size (void)
 {
   struct type *objtype = get_java_object_type ();
   if (objtype == NULL)
-    return (2 * TARGET_PTR_BIT / TARGET_CHAR_BIT);
+    return (2 * gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT);
   else
     return TYPE_LENGTH (objtype);
 }

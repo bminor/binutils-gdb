@@ -313,7 +313,7 @@ make_pointer_type (struct type *type, struct type **typeptr)
 
   /* FIXME!  Assume the machine has only one representation for pointers!  */
 
-  TYPE_LENGTH (ntype) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  TYPE_LENGTH (ntype) = gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT;
   TYPE_CODE (ntype) = TYPE_CODE_PTR;
 
   /* Mark pointers as unsigned.  The target converts between pointers
@@ -392,7 +392,7 @@ make_reference_type (struct type *type, struct type **typeptr)
   /* FIXME!  Assume the machine has only one representation for references,
      and that it matches the (only) representation for pointers!  */
 
-  TYPE_LENGTH (ntype) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  TYPE_LENGTH (ntype) = gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT;
   TYPE_CODE (ntype) = TYPE_CODE_REF;
 
   if (!TYPE_REFERENCE_TYPE (type))	/* Remember it, if don't have one.  */
@@ -1073,7 +1073,7 @@ smash_to_memberptr_type (struct type *type, struct type *domain,
   TYPE_DOMAIN_TYPE (type) = domain;
   /* Assume that a data member pointer is the same size as a normal
      pointer.  */
-  TYPE_LENGTH (type) = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  TYPE_LENGTH (type) = gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_MEMBERPTR;
 }
 

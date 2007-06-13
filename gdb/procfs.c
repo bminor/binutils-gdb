@@ -5765,7 +5765,7 @@ info_proc_mappings (procinfo *pi, int summary)
 {
   char *header_fmt_string;
 
-  if (TARGET_PTR_BIT == 32)
+  if (gdbarch_ptr_bit (current_gdbarch) == 32)
     header_fmt_string = "\t%10s %10s %10s %10s %7s\n";
   else
     header_fmt_string = "  %18s %18s %10s %10s %7s\n";

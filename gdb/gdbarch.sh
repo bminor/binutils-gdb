@@ -403,17 +403,17 @@ v::const struct floatformat **:long_double_format:::::floatformats_ieee_double::
 
 # For most targets, a pointer on the target and its representation as an
 # address in GDB have the same size and "look the same".  For such a
-# target, you need only set TARGET_PTR_BIT / ptr_bit and TARGET_ADDR_BIT
+# target, you need only set gdbarch_ptr_bit and TARGET_ADDR_BIT
 # / addr_bit will be set from it.
 #
-# If TARGET_PTR_BIT and TARGET_ADDR_BIT are different, you'll probably
+# If gdbarch_ptr_bit and TARGET_ADDR_BIT are different, you'll probably
 # also need to set gdbarch_pointer_to_address and gdbarch_address_to_pointer
 # as well.
 #
 # ptr_bit is the size of a pointer on the target
-v:TARGET_PTR_BIT:int:ptr_bit:::8 * sizeof (void*):current_gdbarch->int_bit::0
+v::int:ptr_bit:::8 * sizeof (void*):current_gdbarch->int_bit::0
 # addr_bit is the size of a target address as represented in gdb
-v:TARGET_ADDR_BIT:int:addr_bit:::8 * sizeof (void*):0:TARGET_PTR_BIT:
+v:TARGET_ADDR_BIT:int:addr_bit:::8 * sizeof (void*):0:gdbarch_ptr_bit (current_gdbarch):
 # Number of bits in a BFD_VMA for the target object file format.
 v:TARGET_BFD_VMA_BIT:int:bfd_vma_bit:::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
 #

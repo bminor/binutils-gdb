@@ -519,7 +519,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
     current_gdbarch->long_double_format = floatformats_ieee_double;
   /* Skip verify of ptr_bit, invalid_p == 0 */
   if (current_gdbarch->addr_bit == 0)
-    current_gdbarch->addr_bit = TARGET_PTR_BIT;
+    current_gdbarch->addr_bit = gdbarch_ptr_bit (current_gdbarch);
   /* Skip verify of bfd_vma_bit, invalid_p == 0 */
   if (current_gdbarch->char_signed == -1)
     current_gdbarch->char_signed = 1;
@@ -1012,11 +1012,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: pseudo_register_write = <0x%lx>\n",
                       (long) current_gdbarch->pseudo_register_write);
-#ifdef TARGET_PTR_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_PTR_BIT # %s\n",
-                      XSTRING (TARGET_PTR_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: ptr_bit = %s\n",
                       paddr_d (current_gdbarch->ptr_bit));

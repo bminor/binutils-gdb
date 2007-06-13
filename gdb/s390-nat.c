@@ -53,7 +53,7 @@
    to make them look like 32-bit registers.  */
 #ifdef __s390x__
 #define SUBOFF(i) \
-	((TARGET_PTR_BIT == 32 \
+	((gdbarch_ptr_bit (current_gdbarch) == 32 \
 	  && ((i) == S390_PSWA_REGNUM \
 	      || ((i) >= S390_R0_REGNUM && (i) <= S390_R15_REGNUM)))? 4 : 0)
 #else

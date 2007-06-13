@@ -1601,9 +1601,11 @@ restart:
 
          FIXME.  Can still die if we have a mix of GR and FR argument
          stores!  */
-      if (reg_num >= (TARGET_PTR_BIT == 64 ? 19 : 23) && reg_num <= 26)
+      if (reg_num >= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 19 : 23)
+	  && reg_num <= 26)
 	{
-	  while (reg_num >= (TARGET_PTR_BIT == 64 ? 19 : 23) && reg_num <= 26)
+	  while (reg_num >= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 19 : 23)
+		 && reg_num <= 26)
 	    {
 	      pc += 4;
 	      status = read_memory_nobpt (pc, buf, 4);
@@ -1630,7 +1632,8 @@ restart:
          save.  */
       if ((inst & 0xfc000000) == 0x34000000
 	  && inst_saves_fr (next_inst) >= 4
-	  && inst_saves_fr (next_inst) <= (TARGET_PTR_BIT == 64 ? 11 : 7))
+	  && inst_saves_fr (next_inst)
+	       <= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 11 : 7))
 	{
 	  /* So we drop into the code below in a reasonable state.  */
 	  reg_num = inst_saves_fr (next_inst);
@@ -1641,9 +1644,12 @@ restart:
          This is a kludge as on the HP compiler sets this bit and it
          never does prologue scheduling.  So once we see one, skip past
          all of them.  */
-      if (reg_num >= 4 && reg_num <= (TARGET_PTR_BIT == 64 ? 11 : 7))
+      if (reg_num >= 4
+	  && reg_num <= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 11 : 7))
 	{
-	  while (reg_num >= 4 && reg_num <= (TARGET_PTR_BIT == 64 ? 11 : 7))
+	  while (reg_num >= 4
+		 && reg_num
+		      <= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 11 : 7))
 	    {
 	      pc += 8;
 	      status = read_memory_nobpt (pc, buf, 4);
@@ -2101,7 +2107,8 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
             /* Both we're expecting the SP to be saved and the SP has been
 	       saved.  The entry SP value is saved at this frame's SP
 	       address.  */
-            cache->base = read_memory_integer (this_sp, TARGET_PTR_BIT / 8);
+            cache->base = read_memory_integer
+			    (this_sp, gdbarch_ptr_bit (current_gdbarch) / 8);
 
 	    if (hppa_debug)
 	      fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [saved]",

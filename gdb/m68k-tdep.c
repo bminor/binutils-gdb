@@ -962,20 +962,23 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
       return 0;
     }
 
-  buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
+  buf = alloca (gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT);
   sp = read_register (SP_REGNUM);
 
   if (target_read_memory (sp + SP_ARG0,	/* Offset of first arg on stack */
-			  buf, TARGET_PTR_BIT / TARGET_CHAR_BIT))
+			  buf,
+			  gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT))
     return 0;
 
-  jb_addr = extract_unsigned_integer (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
+  jb_addr = extract_unsigned_integer (buf, gdbarch_ptr_bit (current_gdbarch)
+					     / TARGET_CHAR_BIT);
 
   if (target_read_memory (jb_addr + tdep->jb_pc * tdep->jb_elt_size, buf,
-			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
+			  gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
+  *pc = extract_unsigned_integer (buf, gdbarch_ptr_bit (current_gdbarch)
+					 / TARGET_CHAR_BIT);
   return 1;
 }
 

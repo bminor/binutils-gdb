@@ -725,7 +725,7 @@ info_sharedlibrary_command (char *ignore, int from_tty)
   int addr_width;
 
   /* "0x", a little whitespace, and two hex digits per byte of pointers.  */
-  addr_width = 4 + (TARGET_PTR_BIT / 4);
+  addr_width = 4 + (gdbarch_ptr_bit (current_gdbarch) / 4);
 
   update_solib_list (from_tty, 0);
 

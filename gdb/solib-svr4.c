@@ -1405,17 +1405,17 @@ svr4_free_so (struct so_list *so)
    natural pointer/address correspondence.  (For example, on the MIPS,
    converting a 32-bit pointer to a 64-bit CORE_ADDR requires you to
    sign-extend the value.  There, simply truncating the bits above
-   TARGET_PTR_BIT, as we do below, is no good.)  This should probably
+   gdbarch_ptr_bit, as we do below, is no good.)  This should probably
    be a new gdbarch method or something.  */
 static CORE_ADDR
 svr4_truncate_ptr (CORE_ADDR addr)
 {
-  if (TARGET_PTR_BIT == sizeof (CORE_ADDR) * 8)
+  if (gdbarch_ptr_bit (current_gdbarch) == sizeof (CORE_ADDR) * 8)
     /* We don't need to truncate anything, and the bit twiddling below
        will fail due to overflow problems.  */
     return addr;
   else
-    return addr & (((CORE_ADDR) 1 << TARGET_PTR_BIT) - 1);
+    return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (current_gdbarch)) - 1);
 }
 
 

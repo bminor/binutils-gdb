@@ -270,12 +270,12 @@ LM_ADDR (struct so_list *so)
 static CORE_ADDR
 nto_truncate_ptr (CORE_ADDR addr)
 {
-  if (TARGET_PTR_BIT == sizeof (CORE_ADDR) * 8)
+  if (gdbarch_ptr_bit (current_gdbarch) == sizeof (CORE_ADDR) * 8)
     /* We don't need to truncate anything, and the bit twiddling below
        will fail due to overflow problems.  */
     return addr;
   else
-    return addr & (((CORE_ADDR) 1 << TARGET_PTR_BIT) - 1);
+    return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (current_gdbarch)) - 1);
 }
 
 Elf_Internal_Phdr *

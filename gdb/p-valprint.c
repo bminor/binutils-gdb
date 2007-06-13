@@ -256,7 +256,8 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  /* Extract the address, assume that it is unsigned.  */
 	  deprecated_print_address_numeric
 	    (extract_unsigned_integer (valaddr + embedded_offset,
-				       TARGET_PTR_BIT / HOST_CHAR_BIT),
+				       gdbarch_ptr_bit (current_gdbarch)
+					 / HOST_CHAR_BIT),
 	     1, stream);
 	  if (deref_ref)
 	    fputs_filtered (": ", stream);

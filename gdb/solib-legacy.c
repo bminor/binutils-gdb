@@ -115,7 +115,7 @@ legacy_svr4_fetch_link_map_offsets (void)
       if (bfd_get_arch_size (exec_bfd) == 32)
 	return lmp32;
     }
-  if (TARGET_PTR_BIT == 32)
+  if (gdbarch_ptr_bit (current_gdbarch) == 32)
     return lmp32;
 #endif
   return lmp;

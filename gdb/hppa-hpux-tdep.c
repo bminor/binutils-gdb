@@ -316,12 +316,14 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
          the PLT entry for this function, not the address of the function
          itself.  Bit 31 has meaning too, but only for MPE.  */
       if (pc & 0x2)
-	pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, TARGET_PTR_BIT / 8);
+	pc = (CORE_ADDR) read_memory_integer
+			   (pc & ~0x3, gdbarch_ptr_bit (current_gdbarch) / 8);
     }
   if (pc == hppa_symbol_address("$$dyncall_external"))
     {
       pc = (CORE_ADDR) read_register (22);
-      pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, TARGET_PTR_BIT / 8);
+      pc = (CORE_ADDR) read_memory_integer
+			 (pc & ~0x3, gdbarch_ptr_bit (current_gdbarch) / 8);
     }
   else if (pc == hppa_symbol_address("_sr4export"))
     pc = (CORE_ADDR) (read_register (22));
@@ -513,7 +515,8 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
       else if ((curr_inst & 0xffe0f000) == 0xe840d000)
 	{
 	  return (read_memory_integer
-		  (read_register (HPPA_SP_REGNUM) - 24, TARGET_PTR_BIT / 8)) & ~0x3;
+		  (read_register (HPPA_SP_REGNUM) - 24,
+		   gdbarch_ptr_bit (current_gdbarch) / 8)) & ~0x3;
 	}
 
       /* What about be,n 0(sr0,%rp)?  It's just another way we return to
@@ -525,7 +528,8 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
 	     I guess we could check for the previous instruction being
 	     mtsp %r1,%sr0 if we want to do sanity checking.  */
 	  return (read_memory_integer
-		  (read_register (HPPA_SP_REGNUM) - 24, TARGET_PTR_BIT / 8)) & ~0x3;
+		  (read_register (HPPA_SP_REGNUM) - 24,
+		   gdbarch_ptr_bit (current_gdbarch) / 8)) & ~0x3;
 	}
 
       /* Haven't found the branch yet, but we're still in the stub.
@@ -1430,13 +1434,15 @@ hppa_hpux_unwind_adjust_stub (struct frame_info *next_frame, CORE_ADDR base,
   u = find_unwind_entry (val);
   if (u && u->stub_unwind.stub_type == EXPORT)
     {
-      stubpc = read_memory_integer (base - 24, TARGET_PTR_BIT / 8);
+      stubpc = read_memory_integer
+		 (base - 24, gdbarch_ptr_bit (current_gdbarch) / 8);
       trad_frame_set_value (saved_regs, HPPA_PCOQ_HEAD_REGNUM, stubpc);
     }
   else if (hppa_symbol_address ("__gcc_plt_call") 
            == get_pc_function_start (val))
     {
-      stubpc = read_memory_integer (base - 8, TARGET_PTR_BIT / 8);
+      stubpc = read_memory_integer
+		 (base - 8, gdbarch_ptr_bit (current_gdbarch) / 8);
       trad_frame_set_value (saved_regs, HPPA_PCOQ_HEAD_REGNUM, stubpc);
     }
 }

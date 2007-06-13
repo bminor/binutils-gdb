@@ -54,16 +54,19 @@ static int
 mips_linux_get_longjmp_target (CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
-  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
+  char buf[gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT];
 
   jb_addr = read_register (MIPS_A0_REGNUM);
 
   if (target_read_memory (jb_addr
-			  + MIPS_LINUX_JB_PC * MIPS_LINUX_JB_ELEMENT_SIZE,
-			  buf, TARGET_PTR_BIT / TARGET_CHAR_BIT))
+			    + MIPS_LINUX_JB_PC * MIPS_LINUX_JB_ELEMENT_SIZE,
+			  buf,
+			  gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
+  *pc = extract_unsigned_integer (buf,
+				  gdbarch_ptr_bit (current_gdbarch)
+				    / TARGET_CHAR_BIT);
 
   return 1;
 }
@@ -245,16 +248,19 @@ static int
 mips64_linux_get_longjmp_target (CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
-  void *buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
-  int element_size = TARGET_PTR_BIT == 32 ? 4 : 8;
+  void *buf = alloca (gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT);
+  int element_size = gdbarch_ptr_bit (current_gdbarch) == 32 ? 4 : 8;
 
   jb_addr = read_register (MIPS_A0_REGNUM);
 
   if (target_read_memory (jb_addr + MIPS64_LINUX_JB_PC * element_size,
-			  buf, TARGET_PTR_BIT / TARGET_CHAR_BIT))
+			  buf,
+			  gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
+  *pc = extract_unsigned_integer (buf,
+				  gdbarch_ptr_bit (current_gdbarch)
+				    / TARGET_CHAR_BIT);
 
   return 1;
 }
