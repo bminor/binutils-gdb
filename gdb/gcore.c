@@ -125,12 +125,11 @@ default_gcore_mach (void)
 #if 1	/* See if this even matters...  */
   return 0;
 #else
-#ifdef TARGET_ARCHITECTURE
-  const struct bfd_arch_info *bfdarch = TARGET_ARCHITECTURE;
+
+  const struct bfd_arch_info *bfdarch = gdbarch_bfd_arch_info (current_gdbarch);
 
   if (bfdarch != NULL)
     return bfdarch->mach;
-#endif /* TARGET_ARCHITECTURE */
   if (exec_bfd == NULL)
     error (_("Can't find default bfd machine type (need execfile)."));
 
@@ -141,12 +140,11 @@ default_gcore_mach (void)
 static enum bfd_architecture
 default_gcore_arch (void)
 {
-#ifdef TARGET_ARCHITECTURE
-  const struct bfd_arch_info * bfdarch = TARGET_ARCHITECTURE;
+  const struct bfd_arch_info * bfdarch = gdbarch_bfd_arch_info
+					 (current_gdbarch);
 
   if (bfdarch != NULL)
     return bfdarch->arch;
-#endif
   if (exec_bfd == NULL)
     error (_("Can't find bfd architecture for corefile (need execfile)."));
 

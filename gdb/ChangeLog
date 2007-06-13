@@ -1,5 +1,17 @@
 2007-06-13  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (TARGET_ARCHITECTURE): Replace by gdbarch_bfd_arch_info.
+	* arch-utils.c (show_architecture): Likewise.
+	* remote-mips.c (mips_open): Likewise
+	* nto-tdep.c (nto_find_and_open_solib)
+	(nto_init_solib_absolute_prefix): Likewise.
+	* nto-procfs (procfs_open): Likewise.
+	* m68hc11-tdep.c (gdb_print_insn_m68hc11): Likewise.
+	* gcore.c (default_gcore_mach, default_gcore_arch): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-13  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (TARGET_BFD_VMA_BIT): Replace by gdbarch_bfd_vma_bit.
 	* gdbtypes.c (build_flt): Likewise.
 	* gdbarch.c, gdbarch.h: Regenerate.

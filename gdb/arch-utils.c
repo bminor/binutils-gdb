@@ -404,7 +404,7 @@ show_architecture (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
   const char *arch;
-  arch = TARGET_ARCHITECTURE->printable_name;
+  arch = gdbarch_bfd_arch_info (current_gdbarch)->printable_name;
   if (target_architecture_user == NULL)
     fprintf_filtered (file, _("\
 The target architecture is set automatically (currently %s)\n"), arch);

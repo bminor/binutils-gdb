@@ -108,20 +108,22 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
 #define PATH_FMT "%s/lib:%s/usr/lib:%s/usr/photon/lib:%s/usr/photon/dll:%s/lib/dll"
 
   nto_root = nto_target ();
-  if (strcmp (TARGET_ARCHITECTURE->arch_name, "i386") == 0)
+  if (strcmp (gdbarch_bfd_arch_info (current_gdbarch)->arch_name, "i386") == 0)
     {
       arch = "x86";
       endian = "";
     }
-  else if (strcmp (TARGET_ARCHITECTURE->arch_name, "rs6000") == 0
-	   || strcmp (TARGET_ARCHITECTURE->arch_name, "powerpc") == 0)
+  else if (strcmp (gdbarch_bfd_arch_info (current_gdbarch)->arch_name,
+		   "rs6000") == 0
+	   || strcmp (gdbarch_bfd_arch_info (current_gdbarch)->arch_name,
+		   "powerpc") == 0)
     {
       arch = "ppc";
       endian = "be";
     }
   else
     {
-      arch = TARGET_ARCHITECTURE->arch_name;
+      arch = gdbarch_bfd_arch_info (current_gdbarch)->arch_name;
       endian = gdbarch_byte_order (current_gdbarch)
 	       == BFD_ENDIAN_BIG ? "be" : "le";
     }
@@ -168,20 +170,22 @@ nto_init_solib_absolute_prefix (void)
   const char *arch;
 
   nto_root = nto_target ();
-  if (strcmp (TARGET_ARCHITECTURE->arch_name, "i386") == 0)
+  if (strcmp (gdbarch_bfd_arch_info (current_gdbarch)->arch_name, "i386") == 0)
     {
       arch = "x86";
       endian = "";
     }
-  else if (strcmp (TARGET_ARCHITECTURE->arch_name, "rs6000") == 0
-	   || strcmp (TARGET_ARCHITECTURE->arch_name, "powerpc") == 0)
+  else if (strcmp (gdbarch_bfd_arch_info (current_gdbarch)->arch_name,
+		   "rs6000") == 0
+	   || strcmp (gdbarch_bfd_arch_info (current_gdbarch)->arch_name,
+		   "powerpc") == 0)
     {
       arch = "ppc";
       endian = "be";
     }
   else
     {
-      arch = TARGET_ARCHITECTURE->arch_name;
+      arch = gdbarch_bfd_arch_info (current_gdbarch)->arch_name;
       endian = gdbarch_byte_order (current_gdbarch)
 	       == BFD_ENDIAN_BIG ? "be" : "le";
     }

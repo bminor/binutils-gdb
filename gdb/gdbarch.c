@@ -404,7 +404,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->double_bit = 8*TARGET_CHAR_BIT;
   current_gdbarch->long_double_bit = 8*TARGET_CHAR_BIT;
   current_gdbarch->ptr_bit = current_gdbarch->int_bit;
-  current_gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
+  current_gdbarch->bfd_vma_bit = gdbarch_bfd_arch_info (current_gdbarch)->bits_per_address;
   current_gdbarch->char_signed = -1;
   current_gdbarch->write_pc = generic_target_write_pc;
   current_gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
@@ -696,14 +696,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: believe_pcc_promotion = %s\n",
                       paddr_d (current_gdbarch->believe_pcc_promotion));
-#ifdef TARGET_ARCHITECTURE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_ARCHITECTURE # %s\n",
-                      XSTRING (TARGET_ARCHITECTURE));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: bfd_arch_info = %s\n",
-                      TARGET_ARCHITECTURE->printable_name);
+                      gdbarch_bfd_arch_info (current_gdbarch)->printable_name);
   fprintf_unfiltered (file,
                       "gdbarch_dump: bfd_vma_bit = %s\n",
                       paddr_d (current_gdbarch->bfd_vma_bit));

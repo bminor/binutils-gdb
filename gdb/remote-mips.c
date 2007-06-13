@@ -1594,10 +1594,10 @@ static void
 mips_open (char *name, int from_tty)
 {
   const char *monitor_prompt = NULL;
-  if (TARGET_ARCHITECTURE != NULL
-      && TARGET_ARCHITECTURE->arch == bfd_arch_mips)
+  if (gdbarch_bfd_arch_info (current_gdbarch) != NULL
+      && gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_mips)
     {
-    switch (TARGET_ARCHITECTURE->mach)
+    switch (gdbarch_bfd_arch_info (current_gdbarch)->mach)
       {
       case bfd_mach_mips4100:
       case bfd_mach_mips4300:

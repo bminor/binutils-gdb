@@ -60,12 +60,6 @@ extern struct gdbarch *current_gdbarch;
 
 extern const struct bfd_arch_info * gdbarch_bfd_arch_info (struct gdbarch *gdbarch);
 /* set_gdbarch_bfd_arch_info() - not applicable - pre-initialized. */
-#if !defined (GDB_TM_FILE) && defined (TARGET_ARCHITECTURE)
-#error "Non multi-arch definition of TARGET_ARCHITECTURE"
-#endif
-#if !defined (TARGET_ARCHITECTURE)
-#define TARGET_ARCHITECTURE (gdbarch_bfd_arch_info (current_gdbarch))
-#endif
 
 extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order() - not applicable - pre-initialized. */

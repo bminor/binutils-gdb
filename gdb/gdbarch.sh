@@ -367,7 +367,7 @@ function_list ()
 {
   # See below (DOCO) for description of each field
   cat <<EOF
-i:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_arch_struct::::TARGET_ARCHITECTURE->printable_name
+i::const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_arch_struct::::gdbarch_bfd_arch_info (current_gdbarch)->printable_name
 #
 i::int:byte_order:::BFD_ENDIAN_BIG
 #
@@ -415,7 +415,7 @@ v::int:ptr_bit:::8 * sizeof (void*):current_gdbarch->int_bit::0
 # addr_bit is the size of a target address as represented in gdb
 v:TARGET_ADDR_BIT:int:addr_bit:::8 * sizeof (void*):0:gdbarch_ptr_bit (current_gdbarch):
 # Number of bits in a BFD_VMA for the target object file format.
-v::int:bfd_vma_bit:::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
+v::int:bfd_vma_bit:::8 * sizeof (void*):gdbarch_bfd_arch_info (current_gdbarch)->bits_per_address::0
 #
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
 v::int:char_signed:::1:-1:1
