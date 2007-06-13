@@ -1,3 +1,7 @@
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* utils.c (set_screen_size): Use INT_MAX for default columns.
+
 2007-06-13  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* remote.c (remote_protocol_features): Add qXfer:spu:read and

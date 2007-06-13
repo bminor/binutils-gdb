@@ -1633,7 +1633,7 @@ set_screen_size (void)
     rows = INT_MAX;
 
   if (cols <= 0)
-    rl_get_screen_size (NULL, &cols);
+    cols = INT_MAX;
 
   /* Update Readline's idea of the terminal size.  */
   rl_set_screen_size (rows, cols);
