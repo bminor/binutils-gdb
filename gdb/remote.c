@@ -5128,7 +5128,8 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
       *(p++) = 'Z';
       *(p++) = '0';
       *(p++) = ',';
-      BREAKPOINT_FROM_PC (&bp_tgt->placed_address, &bp_tgt->placed_size);
+      gdbarch_breakpoint_from_pc
+	(current_gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
       addr = (ULONGEST) remote_address_masked (bp_tgt->placed_address);
       p += hexnumstr (p, addr);
       sprintf (p, ",%d", bp_tgt->placed_size);
@@ -5323,7 +5324,8 @@ remote_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
   /* The length field should be set to the size of a breakpoint
      instruction, even though we aren't inserting one ourselves.  */
 
-  BREAKPOINT_FROM_PC (&bp_tgt->placed_address, &bp_tgt->placed_size);
+  gdbarch_breakpoint_from_pc
+    (current_gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     return -1;

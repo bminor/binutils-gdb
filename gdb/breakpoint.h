@@ -188,7 +188,7 @@ struct bp_target_info
 {
   /* Address at which the breakpoint was placed.  This is normally the
      same as ADDRESS from the bp_location, except when adjustment
-     happens in BREAKPOINT_FROM_PC.  The most common form of
+     happens in gdbarch_breakpoint_from_pc.  The most common form of
      adjustment is stripping an alternate ISA marker from the PC which
      is used to determine the type of breakpoint to insert.  */
   CORE_ADDR placed_address;
@@ -203,7 +203,7 @@ struct bp_target_info
   int shadow_len;
 
   /* The size of the placed breakpoint, according to
-     BREAKPOINT_FROM_PC, when the breakpoint was inserted.  This is
+     gdbarch_breakpoint_from_pc, when the breakpoint was inserted.  This is
      generally the same as SHADOW_LEN, unless we did not need
      to read from the target to implement the memory breakpoint
      (e.g. if a remote stub handled the details).  We may still

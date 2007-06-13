@@ -329,7 +329,7 @@ ppc_linux_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
   gdb_byte old_contents[BREAKPOINT_MAX];
 
   /* Determine appropriate breakpoint contents and size for this address.  */
-  bp = BREAKPOINT_FROM_PC (&addr, &bplen);
+  bp = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
   if (bp == NULL)
     error (_("Software breakpoints not implemented for this target."));
 

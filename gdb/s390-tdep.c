@@ -2374,7 +2374,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_char_signed (gdbarch, 0);
 
   /* Amount PC must be decremented by after a breakpoint.  This is
-     often the number of bytes returned by BREAKPOINT_FROM_PC but not
+     often the number of bytes returned by gdbarch_breakpoint_from_pc but not
      always.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
   /* Stack grows downward.  */

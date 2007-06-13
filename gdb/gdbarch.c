@@ -712,12 +712,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: bfd_vma_bit = %s\n",
                       paddr_d (current_gdbarch->bfd_vma_bit));
-#ifdef BREAKPOINT_FROM_PC
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "BREAKPOINT_FROM_PC(pcptr, lenptr)",
-                      XSTRING (BREAKPOINT_FROM_PC (pcptr, lenptr)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: breakpoint_from_pc = <0x%lx>\n",
                       (long) current_gdbarch->breakpoint_from_pc);

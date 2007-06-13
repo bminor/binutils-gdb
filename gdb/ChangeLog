@@ -1,5 +1,20 @@
 2007-06-13  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (BREAKPOINT_FROM_PC): Replace by
+	gdbarch_breakpoint_from_pc.
+	* s390-tdep.c (s390_gdbarch_init): Likewise (comment).
+	* remote.c (remote_insert_breakpoint)
+	(remote_insert_hw_breakpoint): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Likewise.
+	* mips-tdep.c (mips_breakpoint_from_pc): Likewise (comment).
+	* breakpoint.h (bp_target_info): Likewise (comment).
+	* breakpoint.c (read_memory_nobpt): Likewise.
+	* mem-break.c (default_memory_insert_breakpoint): Likewise.
+	(symtab.h, breakpoint.h): Remove include. Remove unnecessary comment.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-13  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (TARGET_PTR_BIT): Replace with gdbarch_ptr_bit.
 	* solib-svr4.c (svr4_truncate_ptr): Likewise.
 	* solib-pa64.c (read_dynamic_info): Likewise.

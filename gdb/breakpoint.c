@@ -706,7 +706,7 @@ read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr, unsigned len)
   CORE_ADDR bp_addr = 0;
   int bp_size = 0;
 
-  if (BREAKPOINT_FROM_PC (&bp_addr, &bp_size) == NULL)
+  if (gdbarch_breakpoint_from_pc (current_gdbarch, &bp_addr, &bp_size) == NULL)
     /* No breakpoints on this machine. */
     return target_read_memory (memaddr, myaddr, len);
 

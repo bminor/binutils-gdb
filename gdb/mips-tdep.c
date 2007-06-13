@@ -4397,12 +4397,12 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
     return print_insn_little_mips (memaddr, info);
 }
 
-/* This function implements the BREAKPOINT_FROM_PC macro.  It uses the program
-   counter value to determine whether a 16- or 32-bit breakpoint should be
-   used.  It returns a pointer to a string of bytes that encode a breakpoint
-   instruction, stores the length of the string to *lenptr, and adjusts pc
-   (if necessary) to point to the actual memory location where the
-   breakpoint should be inserted.  */
+/* This function implements gdbarch_breakpoint_from_pc.  It uses the program
+   counter value to determine whether a 16- or 32-bit breakpoint should be used.
+   It returns a pointer to a string of bytes that encode a breakpoint
+   instruction, stores the length of the string to *lenptr, and adjusts pc (if
+   necessary) to point to the actual memory location where the breakpoint
+   should be inserted.  */
 
 static const gdb_byte *
 mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
