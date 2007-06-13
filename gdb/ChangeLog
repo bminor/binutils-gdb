@@ -1,5 +1,20 @@
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* expression.h (enum exp_opcode): Document a register name for
+	OP_REGISTER.
+	* parse.c (write_dollar_variable): Write the register name for
+	OP_REGISTER.
+	(operator_length_standard): Expect the register name following
+	OP_REGISTER.
+	* ada-lang.c (resolve_subexp): Likewise.
+	* ax-gdb.c (gen_expr): Likewise.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* expprint.c (print_subexp_standard, dump_subexp_body_standard):
+	Likewise.
+	* tracepoint.c (encode_actions): Likewise.
+
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* utils.c (set_screen_size): Use INT_MAX for default columns.
 
 2007-06-13  Ulrich Weigand  <uweigand@de.ibm.com>

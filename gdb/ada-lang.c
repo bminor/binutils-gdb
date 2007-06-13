@@ -2710,7 +2710,6 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
     case OP_TYPE:
     case OP_BOOL:
     case OP_LAST:
-    case OP_REGISTER:
     case OP_INTERNALVAR:
       *pos += 3;
       break;
@@ -2718,6 +2717,10 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
     case UNOP_MEMVAL:
       *pos += 3;
       nargs = 1;
+      break;
+
+    case OP_REGISTER:
+      *pos += 4 + BYTES_TO_EXP_ELEM (exp->elts[pc + 1].longconst + 1);
       break;
 
     case STRUCTOP_STRUCT:

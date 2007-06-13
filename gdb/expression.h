@@ -166,9 +166,8 @@ enum exp_opcode
        With another OP_LAST at the end, this makes three exp_elements.  */
     OP_LAST,
 
-    /* OP_REGISTER is followed by an integer in the next exp_element.
-       This is the number of a register to fetch (as an int).
-       With another OP_REGISTER at the end, this makes three exp_elements.  */
+    /* OP_REGISTER is followed by a string in the next exp_element.
+       This is the name of a register to fetch.  */
     OP_REGISTER,
 
     /* OP_INTERNALVAR is followed by an internalvar ptr in the next exp_element.

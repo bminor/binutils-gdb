@@ -130,10 +130,8 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case OP_REGISTER:
       {
-	int regnum = longest_to_int (exp->elts[pc + 1].longconst);
-	const char *name = user_reg_map_regnum_to_name (current_gdbarch,
-							regnum);
-	(*pos) += 2;
+	const char *name = &exp->elts[pc + 2].string;
+	(*pos) += 3 + BYTES_TO_EXP_ELEM (exp->elts[pc + 1].longconst + 1);
 	fprintf_filtered (stream, "$%s", name);
 	return;
       }
@@ -965,9 +963,8 @@ dump_subexp_body_standard (struct expression *exp,
       elt += 2;
       break;
     case OP_REGISTER:
-      fprintf_filtered (stream, "Register %ld",
-			(long) exp->elts[elt].longconst);
-      elt += 2;
+      fprintf_filtered (stream, "Register $%s", &exp->elts[elt + 1].string);
+      elt += 3 + BYTES_TO_EXP_ELEM (exp->elts[elt].longconst + 1);
       break;
     case OP_INTERNALVAR:
       fprintf_filtered (stream, "Internal var @");

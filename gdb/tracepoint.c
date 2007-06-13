@@ -1602,11 +1602,20 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
 		  switch (exp->elts[0].opcode)
 		    {
 		    case OP_REGISTER:
-		      i = exp->elts[1].longconst;
-		      if (info_verbose)
-			printf_filtered ("OP_REGISTER: ");
-		      add_register (collect, i);
-		      break;
+		      {
+			const char *name = &exp->elts[2].string;
+
+			i = frame_map_name_to_regnum (deprecated_safe_get_selected_frame (),
+						      name, strlen (name));
+			if (i == -1)
+			  internal_error (__FILE__, __LINE__,
+					  _("Register $%s not available"),
+					  name);
+			if (info_verbose)
+			  printf_filtered ("OP_REGISTER: ");
+			add_register (collect, i);
+			break;
+		      }
 
 		    case UNOP_MEMVAL:
 		      /* safe because we know it's a simple expression */

@@ -500,16 +500,21 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_REGISTER:
       {
-	int regno = longest_to_int (exp->elts[pc + 1].longconst);
+	const char *name = &exp->elts[pc + 2].string;
+	int regno;
 	struct value *val;
-	(*pos) += 2;
+
+	(*pos) += 3 + BYTES_TO_EXP_ELEM (exp->elts[pc + 1].longconst + 1);
+	regno = frame_map_name_to_regnum (deprecated_safe_get_selected_frame (),
+					  name, strlen (name));
+	if (regno == -1)
+	  error (_("Register $%s not available."), name);
 	if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	  val = value_zero (register_type (current_gdbarch, regno), not_lval);
 	else
 	  val = value_of_register (regno, get_selected_frame (NULL));
 	if (val == NULL)
-	  error (_("Value of register %s not available."),
-		 frame_map_regnum_to_name (get_selected_frame (NULL), regno));
+	  error (_("Value of register %s not available."), name);
 	else
 	  return val;
       }

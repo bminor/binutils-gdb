@@ -548,7 +548,9 @@ handle_last:
   return;
 handle_register:
   write_exp_elt_opcode (OP_REGISTER);
-  write_exp_elt_longcst (i);
+  str.length--;
+  str.ptr++;
+  write_exp_string (str);
   write_exp_elt_opcode (OP_REGISTER);
   return;
 }
@@ -717,7 +719,6 @@ operator_length_standard (struct expression *expr, int endpos,
     case OP_TYPE:
     case OP_BOOL:
     case OP_LAST:
-    case OP_REGISTER:
     case OP_INTERNALVAR:
       oplen = 3;
       break;
@@ -772,6 +773,7 @@ operator_length_standard (struct expression *expr, int endpos,
     case STRUCTOP_PTR:
       args = 1;
       /* fall through */
+    case OP_REGISTER:
     case OP_M2_STRING:
     case OP_STRING:
     case OP_OBJC_NSSTRING:	/* Objective C Foundation Class NSString constant */

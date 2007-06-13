@@ -1599,8 +1599,14 @@ gen_expr (union exp_element **pc, struct agent_expr *ax,
 
     case OP_REGISTER:
       {
-	int reg = (int) (*pc)[1].longconst;
-	(*pc) += 3;
+	const char *name = &(*pc)[2].string;
+	int reg;
+	(*pc) += 4 + BYTES_TO_EXP_ELEM ((*pc)[1].longconst + 1);
+	reg = frame_map_name_to_regnum (deprecated_safe_get_selected_frame (),
+					name, strlen (name));
+	if (reg == -1)
+	  internal_error (__FILE__, __LINE__,
+			  _("Register $%s not available"), name);
 	value->kind = axs_lvalue_register;
 	value->u.reg = reg;
 	value->type = register_type (current_gdbarch, reg);
