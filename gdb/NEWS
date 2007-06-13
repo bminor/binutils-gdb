@@ -20,11 +20,11 @@ target's overall architecture.  GDB can read a description from
 a local file or over the remote serial protocol.
 
 * Arrays of explicitly SIGNED or UNSIGNED CHARs are now printed as arrays
-  of numbers.
+of numbers.
 
 * Target descriptions can now describe target-specific registers,
 for architectures which have implemented the support (currently
-only ARM).
+only ARM and MIPS).
 
 * GDB and the GDB remote stub, gdbserver, now support the XScale
 iWMMXt coprocessor.

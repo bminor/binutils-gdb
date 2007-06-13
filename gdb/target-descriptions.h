@@ -140,6 +140,18 @@ const char *tdesc_feature_name (const struct tdesc_feature *feature);
 struct type *tdesc_named_type (const struct tdesc_feature *feature,
 			       const char *id);
 
+/* Return the name of register REGNO, from the target description or
+   from an architecture-provided pseudo_register_name method.  */
+
+const char *tdesc_register_name (int regno);
+
+/* Check whether REGNUM is a member of REGGROUP using the target
+   description.  Return -1 if the target description does not
+   specify a group.  */
+
+int tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
+				  struct reggroup *reggroup);
+
 /* Methods for constructing a target description.  */
 
 struct target_desc *allocate_target_description (void);

@@ -2361,7 +2361,7 @@ mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(elf_bfd_h) $(symcat_h) $(sim_regno_h) $(dis_asm_h) \
 	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(infcall_h) \
 	$(floatformat_h) $(remote_h) $(target_descriptions_h) \
-	$(dwarf2_frame_h)
+	$(dwarf2_frame_h) $(user_regs_h)
 memory-map.o: memory-map.c $(defs_h) $(memory_map_h) $(xml_support_h) \
 	$(gdb_assert_h) $(exceptions_h) $(gdb_string_h)
 mn10300-linux-tdep.o: mn10300-linux-tdep.c $(defs_h) $(gdbcore_h) \

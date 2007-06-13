@@ -1,3 +1,24 @@
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (mips-tdep.o): Update.
+	* mips-tdep.c (struct register_alias, mips_o32_aliases)
+	(mips_n32_n64_aliases, mips_register_aliases): New.
+	(mips_register_name): Call tdesc_register_name.
+	(mips_tdesc_register_reggroup_p): New.
+	(mips_pseudo_register_type, value_of_mips_user_reg): New.
+	(mips_gdbarch_init): Add target-described register support.
+	Register aliases for register names.
+	* target-descriptions.c (tdesc_register_name): Make global.
+	(tdesc_register_in_reggroup_p): New function, broken out from
+	tdesc_register_reggroup_p.
+	(tdesc_register_reggroup_p): Use it.
+	* target-descriptions.h (tdesc_register_name)
+	(tdesc_register_in_reggroup_p): New prototypes.
+	* NEWS: Correct formatting.  Mention MIPS register support.
+	* features/mips-cp0.xml, features/mips-fpu.xml,
+	features/mips64-cp0.xml, gdb/features/mips64-fpu.xml, mips-cpu.xml,
+	features/mips64-cpu.xml: New files.
+
 2007-06-13  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbarch.sh (TARGET_ADDR_BIT): Replace by gdbarch_addr_bit.

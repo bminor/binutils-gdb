@@ -58,6 +58,7 @@
 #include "remote.h"
 #include "target-descriptions.h"
 #include "dwarf2-frame.h"
+#include "user-regs.h"
 
 static const struct objfile_data *mips_pdr_data;
 
@@ -92,6 +93,55 @@ static const char *mips_abi_strings[] = {
   "eabi32",
   "eabi64",
   NULL
+};
+
+/* The standard register names, and all the valid aliases for them.  */
+struct register_alias
+{
+  const char *name;
+  int regnum;
+};
+
+/* Aliases for o32 and most other ABIs.  */
+const struct register_alias mips_o32_aliases[] = {
+  { "ta0", 12 },
+  { "ta1", 13 },
+  { "ta2", 14 },
+  { "ta3", 15 }
+};
+
+/* Aliases for n32 and n64.  */
+const struct register_alias mips_n32_n64_aliases[] = {
+  { "ta0", 8 },
+  { "ta1", 9 },
+  { "ta2", 10 },
+  { "ta3", 11 }
+};
+
+/* Aliases for ABI-independent registers.  */
+const struct register_alias mips_register_aliases[] = {
+  /* The architecture manuals specify these ABI-independent names for
+     the GPRs.  */
+#define R(n) { "r" #n, n }
+  R(0), R(1), R(2), R(3), R(4), R(5), R(6), R(7),
+  R(8), R(9), R(10), R(11), R(12), R(13), R(14), R(15),
+  R(16), R(17), R(18), R(19), R(20), R(21), R(22), R(23),
+  R(24), R(25), R(26), R(27), R(28), R(29), R(30), R(31),
+#undef R
+
+  /* k0 and k1 are sometimes called these instead (for "kernel
+     temp").  */
+  { "kt0", 26 },
+  { "kt1", 27 },
+
+  /* This is the traditional GDB name for the CP0 status register.  */
+  { "sr", MIPS_PS_REGNUM },
+
+  /* This is the traditional GDB name for the CP0 BadVAddr register.  */
+  { "bad", MIPS_EMBED_BADVADDR_REGNUM },
+
+  /* This is the traditional GDB name for the FCSR.  */
+  { "fsr", MIPS_EMBED_FP0_REGNUM + 32 }
 };
 
 /* Some MIPS boards don't support floating point while others only
@@ -509,6 +559,8 @@ mips_register_name (int regno)
       else
 	return mips_gpr_names[rawnum];
     }
+  else if (tdesc_has_registers (gdbarch_target_desc (current_gdbarch)))
+    return tdesc_register_name (rawnum);
   else if (32 <= rawnum && rawnum < gdbarch_num_regs (current_gdbarch))
     {
       gdb_assert (rawnum - 32 < NUM_MIPS_PROCESSOR_REGS);
@@ -555,6 +607,35 @@ mips_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (reggroup == restore_reggroup)
     return raw_p && pseudo;
   return 0;
+}
+
+/* Return the groups that a MIPS register can be categorised into.
+   This version is only used if we have a target description which
+   describes real registers (and their groups).  */
+
+static int
+mips_tdesc_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+				struct reggroup *reggroup)
+{
+  int rawnum = regnum % gdbarch_num_regs (gdbarch);
+  int pseudo = regnum / gdbarch_num_regs (gdbarch);
+  int ret;
+
+  /* Only save, restore, and display the pseudo registers.  Need to
+     make certain that any code extracting register values from a
+     saved register cache also uses pseudo registers.
+
+     Note: saving and restoring the pseudo registers is slightly
+     strange; if we have 64 bits, we should save and restore all
+     64 bits.  But this is hard and has little benefit.  */
+  if (!pseudo)
+    return 0;
+
+  ret = tdesc_register_in_reggroup_p (gdbarch, rawnum, reggroup);
+  if (ret != -1)
+    return ret;
+
+  return mips_register_reggroup_p (gdbarch, regnum, reggroup);
 }
 
 /* Map the symbol table registers which live in the range [1 *
@@ -721,6 +802,59 @@ mips_register_type (struct gdbarch *gdbarch, int regnum)
     }
 }
 
+/* Return the GDB type for the pseudo register REGNUM, which is the
+   ABI-level view.  This function is only called if there is a target
+   description which includes registers, so we know precisely the
+   types of hardware registers.  */
+
+static struct type *
+mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
+{
+  const int num_regs = gdbarch_num_regs (gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int rawnum = regnum % num_regs;
+  struct type *rawtype;
+
+  gdb_assert (regnum >= num_regs && regnum < 2 * num_regs);
+
+  /* Absent registers are still absent.  */
+  rawtype = gdbarch_register_type (gdbarch, rawnum);
+  if (TYPE_LENGTH (rawtype) == 0)
+    return rawtype;
+
+  if (rawnum >= MIPS_EMBED_FP0_REGNUM && rawnum < MIPS_EMBED_FP0_REGNUM + 32)
+    /* Present the floating point registers however the hardware did;
+       do not try to convert between FPU layouts.  */
+    return rawtype;
+
+  if (rawnum >= MIPS_EMBED_FP0_REGNUM + 32 && rawnum <= MIPS_LAST_EMBED_REGNUM)
+    {
+      /* The pseudo/cooked view of embedded registers is always
+	 32-bit, even if the target transfers 64-bit values for them.
+	 New targets relying on XML descriptions should only transfer
+	 the necessary 32 bits, but older versions of GDB expected 64,
+	 so allow the target to provide 64 bits without interfering
+	 with the displayed type.  */
+      return builtin_type_int32;
+    }
+
+  /* Use pointer types for registers if we can.  For n32 we can not,
+     since we do not have a 64-bit pointer type.  */
+  if (mips_abi_regsize (gdbarch) == TYPE_LENGTH (builtin_type_void_data_ptr))
+    {
+      if (rawnum == MIPS_SP_REGNUM || rawnum == MIPS_EMBED_BADVADDR_REGNUM)
+	return builtin_type_void_data_ptr;
+      else if (rawnum == MIPS_EMBED_PC_REGNUM)
+	return builtin_type_void_func_ptr;
+    }
+
+  if (mips_abi_regsize (gdbarch) == 4 && TYPE_LENGTH (rawtype) == 8
+      && rawnum >= MIPS_ZERO_REGNUM && rawnum <= MIPS_EMBED_PC_REGNUM)
+    return builtin_type_int32;
+
+  /* For all other registers, pass through the hardware type.  */
+  return rawtype;
+}
 
 /* Should the upper word of 64-bit addresses be zeroed? */
 enum auto_boolean mask_address_var = AUTO_BOOLEAN_AUTO;
@@ -4724,6 +4858,13 @@ mips_register_g_packet_guesses (struct gdbarch *gdbarch)
   /* Otherwise we don't have a useful guess.  */
 }
 
+static struct value *
+value_of_mips_user_reg (struct frame_info *frame, const void *baton)
+{
+  const int *reg_p = baton;
+  return value_of_register (*reg_p, frame);
+}
+
 static struct gdbarch *
 mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -4731,8 +4872,108 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch_tdep *tdep;
   int elf_flags;
   enum mips_abi mips_abi, found_abi, wanted_abi;
-  int num_regs;
+  int i, num_regs;
   enum mips_fpu_type fpu_type;
+  struct tdesc_arch_data *tdesc_data = NULL;
+
+  /* Check any target description for validity.  */
+  if (tdesc_has_registers (info.target_desc))
+    {
+      static const char *const mips_gprs[] = {
+	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+	"r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+	"r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
+	"r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31"
+      };
+      static const char *const mips_fprs[] = {
+	"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+	"f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
+	"f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
+	"f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
+      };
+
+      const struct tdesc_feature *feature;
+      int valid_p;
+
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.mips.cpu");
+      if (feature == NULL)
+	return NULL;
+
+      tdesc_data = tdesc_data_alloc ();
+
+      valid_p = 1;
+      for (i = MIPS_ZERO_REGNUM; i <= MIPS_RA_REGNUM; i++)
+	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+					    mips_gprs[i]);
+
+
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  MIPS_EMBED_LO_REGNUM, "lo");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  MIPS_EMBED_HI_REGNUM, "hi");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  MIPS_EMBED_PC_REGNUM, "pc");
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.mips.cp0");
+      if (feature == NULL)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      valid_p = 1;
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  MIPS_EMBED_BADVADDR_REGNUM,
+					  "badvaddr");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  MIPS_PS_REGNUM, "status");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  MIPS_EMBED_CAUSE_REGNUM, "cause");
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      /* FIXME drow/2007-05-17: The FPU should be optional.  The MIPS
+	 backend is not prepared for that, though.  */
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.mips.fpu");
+      if (feature == NULL)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      valid_p = 1;
+      for (i = 0; i < 32; i++)
+	valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					    i + MIPS_EMBED_FP0_REGNUM,
+					    mips_fprs[i]);
+
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  MIPS_EMBED_FP0_REGNUM + 32, "fcsr");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					  MIPS_EMBED_FP0_REGNUM + 33, "fir");
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      /* It would be nice to detect an attempt to use a 64-bit ABI
+	 when only 32-bit registers are provided.  */
+    }
 
   /* First of all, extract the elf_flags, if available.  */
   if (info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
@@ -4876,7 +5117,11 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       && tdesc_property (info.target_desc, PROPERTY_GP32) != NULL
       && mips_abi != MIPS_ABI_EABI32
       && mips_abi != MIPS_ABI_O32)
-    return NULL;
+    {
+      if (tdesc_data != NULL)
+	tdesc_data_cleanup (tdesc_data);
+      return NULL;
+    }
 
   /* try to find a pre-existing architecture */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -4897,6 +5142,9 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* Be pedantic about which FPU is selected.  */
       if (gdbarch_tdep (arches->gdbarch)->mips_fpu_type != fpu_type)
 	continue;
+
+      if (tdesc_data != NULL)
+	tdesc_data_cleanup (tdesc_data);
       return arches->gdbarch;
     }
 
@@ -4944,7 +5192,20 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     const char **reg_names;
     struct mips_regnum *regnum = GDBARCH_OBSTACK_ZALLOC (gdbarch,
 							 struct mips_regnum);
-    if (info.osabi == GDB_OSABI_IRIX)
+    if (tdesc_has_registers (info.target_desc))
+      {
+	regnum->lo = MIPS_EMBED_LO_REGNUM;
+	regnum->hi = MIPS_EMBED_HI_REGNUM;
+	regnum->badvaddr = MIPS_EMBED_BADVADDR_REGNUM;
+	regnum->cause = MIPS_EMBED_CAUSE_REGNUM;
+	regnum->pc = MIPS_EMBED_PC_REGNUM;
+	regnum->fp0 = MIPS_EMBED_FP0_REGNUM;
+	regnum->fp_control_status = 70;
+	regnum->fp_implementation_revision = 71;
+	num_regs = MIPS_LAST_EMBED_REGNUM + 1;
+	reg_names = NULL;
+      }
+    else if (info.osabi == GDB_OSABI_IRIX)
       {
 	regnum->fp0 = 32;
 	regnum->pc = 64;
@@ -5207,6 +5468,37 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_base_append_sniffer (gdbarch, mips_stub_frame_base_sniffer);
   frame_base_append_sniffer (gdbarch, mips_insn16_frame_base_sniffer);
   frame_base_append_sniffer (gdbarch, mips_insn32_frame_base_sniffer);
+
+  if (tdesc_data)
+    {
+      set_tdesc_pseudo_register_type (gdbarch, mips_pseudo_register_type);
+      tdesc_use_registers (gdbarch, tdesc_data);
+
+      /* Override the normal target description methods to handle our
+	 dual real and pseudo registers.  */
+      set_gdbarch_register_name (gdbarch, mips_register_name);
+      set_gdbarch_register_reggroup_p (gdbarch, mips_tdesc_register_reggroup_p);
+
+      num_regs = gdbarch_num_regs (gdbarch);
+      set_gdbarch_num_pseudo_regs (gdbarch, num_regs);
+      set_gdbarch_pc_regnum (gdbarch, tdep->regnum->pc + num_regs);
+      set_gdbarch_sp_regnum (gdbarch, MIPS_SP_REGNUM + num_regs);
+    }
+
+  /* Add ABI-specific aliases for the registers.  */
+  if (mips_abi == MIPS_ABI_N32 || mips_abi == MIPS_ABI_N64)
+    for (i = 0; i < ARRAY_SIZE (mips_n32_n64_aliases); i++)
+      user_reg_add (gdbarch, mips_n32_n64_aliases[i].name,
+		    value_of_mips_user_reg, &mips_n32_n64_aliases[i].regnum);
+  else
+    for (i = 0; i < ARRAY_SIZE (mips_o32_aliases); i++)
+      user_reg_add (gdbarch, mips_o32_aliases[i].name,
+		    value_of_mips_user_reg, &mips_o32_aliases[i].regnum);
+
+  /* Add some other standard aliases.  */
+  for (i = 0; i < ARRAY_SIZE (mips_register_aliases); i++)
+    user_reg_add (gdbarch, mips_register_aliases[i].name,
+		  value_of_mips_user_reg, &mips_register_aliases[i].regnum);
 
   return gdbarch;
 }

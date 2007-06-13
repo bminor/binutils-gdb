@@ -486,7 +486,10 @@ tdesc_find_register (struct gdbarch *gdbarch, int regno)
     return NULL;
 }
 
-static const char *
+/* Return the name of register REGNO, from the target description or
+   from an architecture-provided pseudo_register_name method.  */
+
+const char *
 tdesc_register_name (int regno)
 {
   struct tdesc_reg *reg = tdesc_find_register (current_gdbarch, regno);
@@ -582,8 +585,9 @@ tdesc_remote_register_number (struct gdbarch *gdbarch, int regno)
 
 /* Check whether REGNUM is a member of REGGROUP.  Registers from the
    target description may be classified as general, float, or vector.
-   Registers with no group specified go to the default reggroup
-   function and are handled by type.
+   Unlike a gdbarch register_reggroup_p method, this function will
+   return -1 if it does not know; the caller should handle registers
+   with no specified group.
 
    Arbitrary strings (other than "general", "float", and "vector")
    from the description are not used; they cause the register to be
@@ -594,20 +598,11 @@ tdesc_remote_register_number (struct gdbarch *gdbarch, int regno)
 
    The save-restore flag is also implemented here.  */
 
-static int
-tdesc_register_reggroup_p (struct gdbarch *gdbarch, int regno,
-			   struct reggroup *reggroup)
+int
+tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
+			      struct reggroup *reggroup)
 {
-  int num_regs = gdbarch_num_regs (gdbarch);
-  int num_pseudo_regs = gdbarch_num_pseudo_regs (gdbarch);
   struct tdesc_reg *reg = tdesc_find_register (gdbarch, regno);
-
-  if (reg == NULL && regno >= num_regs && regno < num_regs + num_pseudo_regs)
-    {
-      struct tdesc_arch_data *data = gdbarch_data (gdbarch, tdesc_data);
-      gdb_assert (data->pseudo_register_reggroup_p != NULL);
-      return data->pseudo_register_reggroup_p (gdbarch, regno, reggroup);
-    }
 
   if (reg != NULL && reg->group != NULL)
     {
@@ -633,6 +628,32 @@ tdesc_register_reggroup_p (struct gdbarch *gdbarch, int regno,
   if (reg != NULL
       && (reggroup == save_reggroup || reggroup == restore_reggroup))
     return reg->save_restore;
+
+  return -1;
+}
+
+/* Check whether REGNUM is a member of REGGROUP.  Registers with no
+   group specified go to the default reggroup function and are handled
+   by type.  */
+
+static int
+tdesc_register_reggroup_p (struct gdbarch *gdbarch, int regno,
+			   struct reggroup *reggroup)
+{
+  int num_regs = gdbarch_num_regs (gdbarch);
+  int num_pseudo_regs = gdbarch_num_pseudo_regs (gdbarch);
+  int ret;
+
+  if (regno >= num_regs && regno < num_regs + num_pseudo_regs)
+    {
+      struct tdesc_arch_data *data = gdbarch_data (gdbarch, tdesc_data);
+      gdb_assert (data->pseudo_register_reggroup_p != NULL);
+      return data->pseudo_register_reggroup_p (gdbarch, regno, reggroup);
+    }
+
+  ret = tdesc_register_in_reggroup_p (gdbarch, regno, reggroup);
+  if (ret != -1)
+    return ret;
 
   return default_register_reggroup_p (gdbarch, regno, reggroup);
 }

@@ -1,3 +1,8 @@
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.xml/tdesc-regs.exp: Add MIPS support.  Allow multiple
+	required features to be included.
+
 2007-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.threads/manythreads.exp: Prevent expect buffer overflow

@@ -25767,6 +25767,23 @@ it should contain at least registers @samp{wR0} through @samp{wR15} and
 @samp{wCGR0} through @samp{wCGR3}.  The @samp{wCID}, @samp{wCon},
 @samp{wCSSF}, and @samp{wCASF} registers are optional.
 
+@subsection MIPS Features
+@cindex target descriptions, MIPS features
+
+The @samp{org.gnu.gdb.mips.cpu} feature is required for MIPS targets.
+It should contain registers @samp{r0} through @samp{r31}, @samp{lo},
+@samp{hi}, and @samp{pc}.  They may be 32-bit or 64-bit depending
+on the target.
+
+The @samp{org.gnu.gdb.mips.cp0} feature is also required.  It should
+contain at least the @samp{status}, @samp{badvaddr}, and @samp{cause}
+registers.  They may be 32-bit or 64-bit depending on the target.
+
+The @samp{org.gnu.gdb.mips.fpu} feature is currently required, though
+it may be optional in a future version of @value{GDBN}.  It should
+contain registers @samp{f0} through @samp{f31}, @samp{fcsr}, and
+@samp{fir}.  They may be 32-bit or 64-bit depending on the target.
+
 @include gpl.texi
 
 @raisesections
