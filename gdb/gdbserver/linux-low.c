@@ -165,7 +165,7 @@ linux_create_inferior (char *program, char **allargs)
 
       setpgid (0, 0);
 
-      execv (program, allargs);
+      execvp (program, allargs);
 
       fprintf (stderr, "Cannot exec %s: %s.\n", program,
 	       strerror (errno));

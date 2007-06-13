@@ -1,3 +1,8 @@
+2007-06-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* linux-low.c (linux_create_inferior): Change execv to execvp.
+	* spu-low.c (spu_create_inferior): Likewies.
+
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (clean): Clean new files instead of deleted ones.
