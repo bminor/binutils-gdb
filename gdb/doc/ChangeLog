@@ -1,5 +1,9 @@
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.texinfo (MIPS Features): Document org.gnu.gdb.mips.linux.
+
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.texinfo (MIPS Features): New subsection.
 
 2007-06-12  Ulrich Weigand  <uweigand@de.ibm.com>

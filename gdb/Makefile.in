@@ -2337,12 +2337,14 @@ mips64obsd-tdep.o: mips64obsd-tdep.c $(defs_h) $(osabi_h) $(regcache_h) \
 mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) $(osabi_h) $(elf_bfd_h)
 mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h) $(target_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_proc_service_h) $(gregset_h) \
-	$(mips_linux_tdep_h) $(inferior_h)
+	$(mips_linux_tdep_h) $(inferior_h) $(target_descriptions_h) \
+	$(xml_support_h)
 mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(mips_tdep_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(frame_h) $(regcache_h) $(trad_frame_h) \
 	$(tramp_frame_h) $(gdbtypes_h) $(solib_h) $(symtab_h) \
-	$(mips_linux_tdep_h) $(solist_h) $(solib_svr4_h)
+	$(mips_linux_tdep_h) $(solist_h) $(solib_svr4_h) \
+	$(target_descriptions_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(target_h) $(mips_tdep_h) $(mipsnbsd_tdep_h) $(inf_ptrace_h)
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \

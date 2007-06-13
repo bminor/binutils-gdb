@@ -1,5 +1,27 @@
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* config/mips/linux.mh (TDEP_XML): New.
+	* features/mips-linux.xml, features/mips64-linux.xml: New files.
+	* mips-linux-nat.c (mips_linux_register_addr): Handle
+	MIPS_RESTART_REGNUM.
+	(mips64_linux_register_addr): Likewise.
+	(super_xfer_partial, mips_linux_xfer_partial): New.
+	(_initialize_mips_linux_nat): Add them to the target_ops.
+	* mips-linux-tdep.c (mips_supply_gregset): Handle MIPS_RESTART_REGNUM.
+	(mips_fill_gregset, mips64_supply_gregset, mips64_fill_gregset)
+	(mips_linux_o32_sigframe_init)
+	(mips_linux_n32n64_sigframe_init): Likewise.
+	(mips_linux_write_pc, mips_linux_restart_reg_p): New.
+	(mips_linux_init_abi): Use mips_linux_write_pc.  Check for the
+	"org.gnu.gdb.mips.linux" feature.
+	* mips-linux-tdep.h (MIPS_RESTART_REGNUM): New constant.
+	(mips_linux_restart_reg_p): New prototype.
+	* mips-tdep.c (mips_gdbarch_init): Pass tdesc_data to the OS/ABI
+	initialization routine.
+	* Makefile.in (mips-linux-tdep.o, mips-linux-nat.o): Update.
+
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (mips-tdep.o): Update.
 	* mips-tdep.c (struct register_alias, mips_o32_aliases)
 	(mips_n32_n64_aliases, mips_register_aliases): New.

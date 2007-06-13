@@ -27,10 +27,13 @@
 #include "regcache.h"
 #include "linux-nat.h"
 #include "mips-linux-tdep.h"
+#include "target-descriptions.h"
+#include "xml-support.h"
 
 #include "gdb_proc_service.h"
 #include "gregset.h"
 
+#include <sgidefs.h>
 #include <sys/ptrace.h>
 
 #ifndef PTRACE_GET_THREAD_AREA
@@ -81,6 +84,8 @@ mips_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
     regaddr = FPC_CSR;
   else if (regno == mips_regnum (gdbarch)->fp_implementation_revision)
     regaddr = store? (CORE_ADDR) -1 : FPC_EIR;
+  else if (mips_linux_restart_reg_p (gdbarch) && regno == MIPS_RESTART_REGNUM)
+    regaddr = 0;
   else
     regaddr = (CORE_ADDR) -1;
 
@@ -114,6 +119,8 @@ mips64_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
     regaddr = MIPS64_FPC_CSR;
   else if (regno == mips_regnum (gdbarch)->fp_implementation_revision)
     regaddr = store? (CORE_ADDR) -1 : MIPS64_FPC_EIR;
+  else if (mips_linux_restart_reg_p (gdbarch) && regno == MIPS_RESTART_REGNUM)
+    regaddr = 0;
   else
     regaddr = (CORE_ADDR) -1;
 
@@ -335,6 +342,36 @@ mips_linux_register_u_offset (struct gdbarch *gdbarch, int regno, int store_p)
     return mips_linux_register_addr (gdbarch, regno, store_p);
 }
 
+static LONGEST (*super_xfer_partial) (struct target_ops *, enum target_object,
+				      const char *, gdb_byte *, const gdb_byte *,
+				      ULONGEST, LONGEST);
+
+static LONGEST
+mips_linux_xfer_partial (struct target_ops *ops,
+			 enum target_object object,
+			 const char *annex,
+			 gdb_byte *readbuf, const gdb_byte *writebuf,
+			 ULONGEST offset, LONGEST len)
+{
+  if (object == TARGET_OBJECT_AVAILABLE_FEATURES)
+    {
+      if (annex != NULL && strcmp (annex, "target.xml") == 0)
+	{
+	  /* Report that target registers are a size we know for sure
+	     that we can get from ptrace.  */
+	  if (_MIPS_SIM == _ABIO32)
+	    annex = "mips-linux.xml";
+	  else
+	    annex = "mips64-linux.xml";
+	}
+
+      return xml_builtin_xfer_partial (annex, readbuf, writebuf, offset, len);
+    }
+
+  return super_xfer_partial (ops, object, annex, readbuf, writebuf,
+			     offset, len);
+}
+
 void _initialize_mips_linux_nat (void);
 
 void
@@ -347,6 +384,10 @@ _initialize_mips_linux_nat (void)
 
   t->to_fetch_registers = mips64_linux_fetch_registers;
   t->to_store_registers = mips64_linux_store_registers;
+
+  /* Override the default to_xfer_partial.  */
+  super_xfer_partial = t->to_xfer_partial;
+  t->to_xfer_partial = mips_linux_xfer_partial;
 
   linux_nat_add_target (t);
 }

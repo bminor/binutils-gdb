@@ -92,3 +92,13 @@ void mips64_supply_gregset (struct regcache *, const mips64_elf_gregset_t *);
 void mips64_fill_gregset (const struct regcache *, mips64_elf_gregset_t *, int);
 void mips64_supply_fpregset (struct regcache *, const mips64_elf_fpregset_t *);
 void mips64_fill_fpregset (const struct regcache *, mips64_elf_fpregset_t *, int);
+
+enum {
+  /* The Linux kernel stores an error code from any interrupted
+     syscall in a "register" (in $0's save slot).  */
+  MIPS_RESTART_REGNUM = MIPS_LAST_EMBED_REGNUM + 1
+};
+
+/* Return 1 if MIPS_RESTART_REGNUM is usable.  */
+
+int mips_linux_restart_reg_p (struct gdbarch *gdbarch);
