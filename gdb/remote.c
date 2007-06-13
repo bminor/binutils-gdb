@@ -2314,6 +2314,10 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_features },
   { "qXfer:memory-map:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_memory_map },
+  { "qXfer:spu:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_spu_read },
+  { "qXfer:spu:write", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_spu_write },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QPassSignals },
 };

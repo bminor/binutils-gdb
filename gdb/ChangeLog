@@ -1,3 +1,8 @@
+2007-06-13  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* remote.c (remote_protocol_features): Add qXfer:spu:read and
+	qXfer:spu:write packet types.
+
 2007-06-12  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbarch.sh (DEPRECATED_STACK_ALIGN): Remove.
