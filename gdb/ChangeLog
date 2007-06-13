@@ -1,5 +1,12 @@
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* mips-tdep.c (mips_print_register): Remove unused ALL argument.
+	(print_gp_register_row): Stop before printing a register bigger
+	than the ABI register size.
+	(mips_print_registers_info): Update call to mips_print_register.
+
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* expression.h (enum exp_opcode): Document a register name for
 	OP_REGISTER.
 	* parse.c (write_dollar_variable): Write the register name for

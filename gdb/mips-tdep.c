@@ -3956,7 +3956,7 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
 
 static void
 mips_print_register (struct ui_file *file, struct frame_info *frame,
-		     int regnum, int all)
+		     int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte raw_buffer[MAX_REGISTER_SIZE];
@@ -4037,6 +4037,18 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
       if (TYPE_CODE (register_type (gdbarch, regnum)) ==
 	  TYPE_CODE_FLT)
 	break;			/* end the row: reached FP register */
+      /* Large registers are handled separately.  */
+      if (register_size (current_gdbarch, regnum)
+	  > mips_abi_regsize (current_gdbarch))
+	{
+	  if (col > 0)
+	    break;		/* End the row before this register.  */
+
+	  /* Print this register on a row by itself.  */
+	  mips_print_register (file, frame, regnum);
+	  fprintf_filtered (file, "\n");
+	  return regnum + 1;
+	}
       if (col == 0)
 	fprintf_filtered (file, "     ");
       fprintf_filtered (file,
@@ -4066,6 +4078,10 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
       if (TYPE_CODE (register_type (gdbarch, regnum)) ==
 	  TYPE_CODE_FLT)
 	break;			/* end row: reached FP register */
+      if (register_size (current_gdbarch, regnum)
+	  > mips_abi_regsize (current_gdbarch))
+	break;			/* End row: large register.  */
+
       /* OK: get the data in raw format.  */
       if (!frame_register_read (frame, regnum, raw_buffer))
 	error (_("can't read register %d (%s)"),
@@ -4107,7 +4123,7 @@ mips_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
       if (*(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	error (_("Not a valid register for the current processor type"));
 
-      mips_print_register (file, frame, regnum, 0);
+      mips_print_register (file, frame, regnum);
       fprintf_filtered (file, "\n");
     }
   else
