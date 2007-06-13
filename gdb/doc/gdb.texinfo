@@ -25494,7 +25494,7 @@ target, or to warn you if you connect to an unsupported target.
 Here is a simple target description:
 
 @smallexample
-<target>
+<target version="1.0">
   <architecture>i386:x86-64</architecture>
 </target>
 @end smallexample
@@ -25510,7 +25510,7 @@ are explained further below.
 @smallexample
 <?xml version="1.0"?>
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
-<target>
+<target version="1.0">
   @r{[}@var{architecture}@r{]}
   @r{[}@var{feature}@dots{}@r{]}
 </target>
@@ -25521,7 +25521,11 @@ The description is generally insensitive to whitespace and line
 breaks, under the usual common-sense rules.  The XML version
 declaration and document type declaration can generally be omitted
 (@value{GDBN} does not require them), but specifying them may be
-useful for XML validation tools.
+useful for XML validation tools.  The @samp{version} attribute for
+@samp{<target>} may also be omitted, but we recommend
+including it; if future versions of @value{GDBN} use an incompatible
+revision of @file{gdb-target.dtd}, they will detect and report
+the version mismatch.
 
 @subsection Inclusion
 @cindex target descriptions, inclusion

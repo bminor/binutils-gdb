@@ -1,3 +1,11 @@
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* xml-tdesc.c (tdesc_start_target): New.
+	(target_attributes): New.
+	(tdesc_elements): Use it.
+	* features/gdb-target.dtd: Add #FIXED version attribute for
+	<target>.
+
 2007-06-13  Arthur Huillet  <arthur.huillet@free.fr>
 
 	* mi/mi-cmd-var.c (mi_cmd_var_assign): Fix typo.

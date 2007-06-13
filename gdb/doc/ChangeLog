@@ -1,5 +1,10 @@
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.texinfo (Target Description Format): Add version attribute
+	for <target>.
+
+2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.texinfo (MIPS Features): Document org.gnu.gdb.mips.linux.
 
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>

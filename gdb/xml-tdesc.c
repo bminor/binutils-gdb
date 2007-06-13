@@ -109,6 +109,22 @@ tdesc_end_arch (struct gdb_xml_parser *parser,
   set_tdesc_architecture (data->tdesc, arch);
 }
 
+/* Handle the start of a <target> element.  */
+
+static void
+tdesc_start_target (struct gdb_xml_parser *parser,
+		    const struct gdb_xml_element *element,
+		    void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct tdesc_parsing_data *data = user_data;
+  char *version = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+
+  if (strcmp (version, "1.0") != 0)
+    gdb_xml_error (parser,
+		   _("Target description has unsupported version \"%s\""),
+		   version);
+}
+
 /* Handle the start of a <feature> element.  */
 
 static void
@@ -328,6 +344,11 @@ static const struct gdb_xml_element feature_children[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
+static const struct gdb_xml_attribute target_attributes[] = {
+  { "version", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
 static const struct gdb_xml_element target_children[] = {
   { "architecture", NULL, NULL, GDB_XML_EF_OPTIONAL,
     NULL, tdesc_end_arch },
@@ -338,8 +359,8 @@ static const struct gdb_xml_element target_children[] = {
 };
 
 static const struct gdb_xml_element tdesc_elements[] = {
-  { "target", NULL, target_children, GDB_XML_EF_NONE,
-    NULL, NULL },
+  { "target", target_attributes, target_children, GDB_XML_EF_NONE,
+    tdesc_start_target, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
