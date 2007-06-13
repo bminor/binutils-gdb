@@ -3578,7 +3578,7 @@ Show resolution of opaque struct/class/union types (if set before loading symbol
 	       TYPE_FLAG_UNSIGNED,
 	       "__CORE_ADDR", (struct objfile *) NULL);
   builtin_type_bfd_vma =
-    init_type (TYPE_CODE_INT, TARGET_BFD_VMA_BIT / 8,
+    init_type (TYPE_CODE_INT, gdbarch_addr_bit (current_gdbarch) / 8,
 	       TYPE_FLAG_UNSIGNED,
 	       "__bfd_vma", (struct objfile *) NULL);
 }

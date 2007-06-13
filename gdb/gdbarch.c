@@ -704,11 +704,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: bfd_arch_info = %s\n",
                       TARGET_ARCHITECTURE->printable_name);
-#ifdef TARGET_BFD_VMA_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_BFD_VMA_BIT # %s\n",
-                      XSTRING (TARGET_BFD_VMA_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: bfd_vma_bit = %s\n",
                       paddr_d (current_gdbarch->bfd_vma_bit));

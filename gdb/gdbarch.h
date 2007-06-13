@@ -157,12 +157,6 @@ extern void set_gdbarch_addr_bit (struct gdbarch *gdbarch, int addr_bit);
 
 extern int gdbarch_bfd_vma_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
-#if !defined (GDB_TM_FILE) && defined (TARGET_BFD_VMA_BIT)
-#error "Non multi-arch definition of TARGET_BFD_VMA_BIT"
-#endif
-#if !defined (TARGET_BFD_VMA_BIT)
-#define TARGET_BFD_VMA_BIT (gdbarch_bfd_vma_bit (current_gdbarch))
-#endif
 
 /* One if `char' acts like `signed char', zero if `unsigned char'. */
 

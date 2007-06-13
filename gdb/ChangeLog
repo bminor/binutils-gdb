@@ -1,5 +1,11 @@
 2007-06-13  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (TARGET_BFD_VMA_BIT): Replace by gdbarch_bfd_vma_bit.
+	* gdbtypes.c (build_flt): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-13  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (BREAKPOINT_FROM_PC): Replace by
 	gdbarch_breakpoint_from_pc.
 	* s390-tdep.c (s390_gdbarch_init): Likewise (comment).
