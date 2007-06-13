@@ -1,3 +1,7 @@
+2007-06-13  Claudio Fontana <claudio.fontana@gmail.com>
+
+	* fork-child.c (fork_inferior): Update comment.
+
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* features/Makefile: Generate regformats for mips-linux and

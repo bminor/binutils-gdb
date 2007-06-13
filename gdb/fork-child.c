@@ -336,11 +336,9 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
       environ = env;
 
       /* If we decided above to start up with a shell, we exec the
-        shell, "-c" says to interpret the next arg as a shell command
-        to execute, and this command is "exec <target-program>
-        <args>".  "-f" means "fast startup" to the c-shell, which
-        means don't do .cshrc file. Doing .cshrc may cause fork/exec
-        events which will confuse debugger start-up code.  */
+	 shell, "-c" says to interpret the next arg as a shell command
+	 to execute, and this command is "exec <target-program>
+	 <args>".  */
       if (shell)
 	{
 	  execlp (shell_file, shell_file, "-c", shell_command, (char *) 0);
