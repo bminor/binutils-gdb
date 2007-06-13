@@ -2535,19 +2535,19 @@ get_cell (void)
 int
 strlen_paddr (void)
 {
-  return (TARGET_ADDR_BIT / 8 * 2);
+  return (gdbarch_addr_bit (current_gdbarch) / 8 * 2);
 }
 
 char *
 paddr (CORE_ADDR addr)
 {
-  return phex (addr, TARGET_ADDR_BIT / 8);
+  return phex (addr, gdbarch_addr_bit (current_gdbarch) / 8);
 }
 
 char *
 paddr_nz (CORE_ADDR addr)
 {
-  return phex_nz (addr, TARGET_ADDR_BIT / 8);
+  return phex_nz (addr, gdbarch_addr_bit (current_gdbarch) / 8);
 }
 
 const char *
@@ -2562,7 +2562,7 @@ paddress (CORE_ADDR addr)
      either zero or sign extended.  Should gdbarch_address_to_pointer or
      some ADDRESS_TO_PRINTABLE() be used to do the conversion?  */
 
-  int addr_bit = TARGET_ADDR_BIT;
+  int addr_bit = gdbarch_addr_bit (current_gdbarch);
 
   if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
     addr &= ((CORE_ADDR) 1 << addr_bit) - 1;

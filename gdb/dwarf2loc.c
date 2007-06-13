@@ -55,7 +55,7 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
   CORE_ADDR low, high;
   gdb_byte *loc_ptr, *buf_end;
   int length;
-  unsigned int addr_size = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
+  unsigned int addr_size = gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT;
   CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
   CORE_ADDR base_offset = ANOFFSET (baton->objfile->section_offsets,

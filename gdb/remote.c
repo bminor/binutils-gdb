@@ -6411,7 +6411,7 @@ show_remote_cmd (char *args, int from_tty)
 static void
 build_remote_gdbarch_data (void)
 {
-  remote_address_size = TARGET_ADDR_BIT;
+  remote_address_size = gdbarch_addr_bit (current_gdbarch);
 }
 
 /* Function to be called whenever a new objfile (shlib) is detected.  */

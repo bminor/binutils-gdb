@@ -3443,7 +3443,7 @@ print_one_breakpoint (struct breakpoint *b,
   strcpy (wrap_indent, "                           ");
   if (addressprint)
     {
-      if (TARGET_ADDR_BIT <= 32)
+      if (gdbarch_addr_bit (current_gdbarch) <= 32)
 	strcat (wrap_indent, "           ");
       else
 	strcat (wrap_indent, "                   ");
@@ -3802,7 +3802,7 @@ breakpoint_1 (int bnum, int allflag)
 	{
 	  if (nr_printable_breakpoints > 0)
 	    annotate_field (4);
-	  if (TARGET_ADDR_BIT <= 32)
+	  if (gdbarch_addr_bit (current_gdbarch) <= 32)
 	    ui_out_table_header (uiout, 10, ui_left, "addr", "Address");/* 5 */
 	  else
 	    ui_out_table_header (uiout, 18, ui_left, "addr", "Address");/* 5 */

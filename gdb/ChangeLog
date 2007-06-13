@@ -1,5 +1,31 @@
 2007-06-13  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (TARGET_ADDR_BIT): Replace by gdbarch_addr_bit.
+	* valops.c (value_cast): Likewise.
+	* utils.c (strlen_paddr, paddr, paddr_nz, paddress): Likewise.
+	* ui-out.c (ui_out_field_core_addr): Likewise.
+	* tracepoint.c (tracepoints_info): Likewise.
+	* symtab.c (print_msymbol_info): Likewise.
+	* solib-irix.c (irix_current_sos)
+	(irix_open_symbol_file_object): Likewise.
+	* remote.c (build_remote_gdbarch_data): Likewise.
+	* prologue-value.c (make_pv_area): Likewise.
+	* procfs.c (info_mappings_callback): Likewise.
+	* printcmd.c (print_scalar_formatted)
+	(deprecated_print_address_numeric): Likewise.
+	* memattr.c (mem_info_command): Likewise.
+	* linux-nat.c (linux_nat_info_proc_cmd): Likewise.
+	* gdbtypes.c (build_flt, gdbtypes_post_init): Likewise.
+	* exec.c (print_section_info): Likewise.
+	* dwarf2read.c (read_subrange_type): Likewise.
+	* dwarf2loc.c (find_location_expression): Likewise.
+	* dwarf2expr.c (dwarf2_read_address, unsigned_address_type)
+	(signed_address_type, execute_stack_op): Likewise.
+	* breakpoint.c (print_one_breakpoint, breakpoint_1): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-13  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (TARGET_ARCHITECTURE): Replace by gdbarch_bfd_arch_info.
 	* arch-utils.c (show_architecture): Likewise.
 	* remote-mips.c (mips_open): Likewise

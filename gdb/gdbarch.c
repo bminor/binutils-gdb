@@ -650,11 +650,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: GDB_TM_FILE = %s\n",
                       gdb_tm_file);
-#ifdef TARGET_ADDR_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_ADDR_BIT # %s\n",
-                      XSTRING (TARGET_ADDR_BIT));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: addr_bit = %s\n",
                       paddr_d (current_gdbarch->addr_bit));

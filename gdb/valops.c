@@ -402,7 +402,7 @@ value_cast (struct type *type, struct value *arg2)
 	 otherwise occur when dealing with a target having two byte
 	 pointers and four byte addresses.  */
 
-      int addr_bit = TARGET_ADDR_BIT;
+      int addr_bit = gdbarch_addr_bit (current_gdbarch);
 
       LONGEST longest = value_as_long (arg2);
       if (addr_bit < sizeof (LONGEST) * HOST_CHAR_BIT)

@@ -532,8 +532,8 @@ void
 print_section_info (struct target_ops *t, bfd *abfd)
 {
   struct section_table *p;
-  /* FIXME: 16 is not wide enough when TARGET_ADDR_BIT > 64.  */
-  int wid = TARGET_ADDR_BIT <= 32 ? 8 : 16;
+  /* FIXME: 16 is not wide enough when gdbarch_addr_bit > 64.  */
+  int wid = gdbarch_addr_bit (current_gdbarch) <= 32 ? 8 : 16;
 
   printf_filtered ("\t`%s', ", bfd_get_filename (abfd));
   wrap_here ("        ");

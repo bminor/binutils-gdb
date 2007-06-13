@@ -124,10 +124,10 @@ extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struc
 
 /* For most targets, a pointer on the target and its representation as an
    address in GDB have the same size and "look the same".  For such a
-   target, you need only set gdbarch_ptr_bit and TARGET_ADDR_BIT
+   target, you need only set gdbarch_ptr_bit and gdbarch_addr_bit
    / addr_bit will be set from it.
   
-   If gdbarch_ptr_bit and TARGET_ADDR_BIT are different, you'll probably
+   If gdbarch_ptr_bit and gdbarch_addr_bit are different, you'll probably
    also need to set gdbarch_pointer_to_address and gdbarch_address_to_pointer
    as well.
   
@@ -140,12 +140,6 @@ extern void set_gdbarch_ptr_bit (struct gdbarch *gdbarch, int ptr_bit);
 
 extern int gdbarch_addr_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_addr_bit (struct gdbarch *gdbarch, int addr_bit);
-#if !defined (GDB_TM_FILE) && defined (TARGET_ADDR_BIT)
-#error "Non multi-arch definition of TARGET_ADDR_BIT"
-#endif
-#if !defined (TARGET_ADDR_BIT)
-#define TARGET_ADDR_BIT (gdbarch_addr_bit (current_gdbarch))
-#endif
 
 /* Number of bits in a BFD_VMA for the target object file format. */
 

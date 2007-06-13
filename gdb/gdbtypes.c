@@ -3574,7 +3574,7 @@ Show resolution of opaque struct/class/union types (if set before loading symbol
   builtin_type_void_func_ptr
     = lookup_pointer_type (lookup_function_type (builtin_type_void));
   builtin_type_CORE_ADDR =
-    init_type (TYPE_CODE_INT, TARGET_ADDR_BIT / 8,
+    init_type (TYPE_CODE_INT, gdbarch_addr_bit (current_gdbarch) / 8,
 	       TYPE_FLAG_UNSIGNED,
 	       "__CORE_ADDR", (struct objfile *) NULL);
   builtin_type_bfd_vma =
@@ -3725,7 +3725,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_func_ptr
     = lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
   builtin_type->builtin_core_addr =
-    init_type (TYPE_CODE_INT, TARGET_ADDR_BIT / 8,
+    init_type (TYPE_CODE_INT, gdbarch_addr_bit (current_gdbarch) / 8,
 	       TYPE_FLAG_UNSIGNED,
 	       "__CORE_ADDR", (struct objfile *) NULL);
 

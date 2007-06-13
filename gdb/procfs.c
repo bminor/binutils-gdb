@@ -5735,7 +5735,7 @@ info_mappings_callback (struct prmap *map, int (*ignore) (), void *unused)
 {
   char *data_fmt_string;
 
-  if (TARGET_ADDR_BIT == 32)
+  if (gdbarch_addr_bit (current_gdbarch) == 32)
     data_fmt_string   = "\t%#10lx %#10lx %#10x %#10x %7s\n";
   else
     data_fmt_string   = "  %#18lx %#18lx %#10x %#10x %7s\n";

@@ -202,10 +202,10 @@ dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int *bytes_read)
 {
   CORE_ADDR result;
 
-  if (buf_end - buf < TARGET_ADDR_BIT / TARGET_CHAR_BIT)
+  if (buf_end - buf < gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT)
     error (_("dwarf2_read_address: Corrupted DWARF expression."));
 
-  *bytes_read = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
+  *bytes_read = gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT;
 
   /* For most architectures, calling extract_unsigned_integer() alone
      is sufficient for extracting an address.  However, some
@@ -233,7 +233,8 @@ dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int *bytes_read)
 			      (unsigned_address_type (),
 			       extract_unsigned_integer 
 				 (buf,
-				  TARGET_ADDR_BIT / TARGET_CHAR_BIT)));
+				  gdbarch_addr_bit (current_gdbarch)
+				    / TARGET_CHAR_BIT)));
 
   return result;
 }
@@ -243,7 +244,7 @@ dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int *bytes_read)
 static struct type *
 unsigned_address_type (void)
 {
-  switch (TARGET_ADDR_BIT / TARGET_CHAR_BIT)
+  switch (gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT)
     {
     case 2:
       return builtin_type_uint16;
@@ -262,7 +263,7 @@ unsigned_address_type (void)
 static struct type *
 signed_address_type (void)
 {
-  switch (TARGET_ADDR_BIT / TARGET_CHAR_BIT)
+  switch (gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT)
     {
     case 2:
       return builtin_type_int16;
@@ -550,13 +551,16 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    {
 	    case DW_OP_deref:
 	      {
-		gdb_byte *buf = alloca (TARGET_ADDR_BIT / TARGET_CHAR_BIT);
+		gdb_byte *buf = alloca (gdbarch_addr_bit (current_gdbarch)
+					  / TARGET_CHAR_BIT);
 		int bytes_read;
 
 		(ctx->read_mem) (ctx->baton, buf, result,
-				 TARGET_ADDR_BIT / TARGET_CHAR_BIT);
+				 gdbarch_addr_bit (current_gdbarch)
+				   / TARGET_CHAR_BIT);
 		result = dwarf2_read_address (buf,
-					      buf + (TARGET_ADDR_BIT
+					      buf + (gdbarch_addr_bit
+						       (current_gdbarch)
 						     / TARGET_CHAR_BIT),
 					      &bytes_read);
 	      }
@@ -564,12 +568,15 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	    case DW_OP_deref_size:
 	      {
-		gdb_byte *buf = alloca (TARGET_ADDR_BIT / TARGET_CHAR_BIT);
+		gdb_byte *buf
+		   = alloca (gdbarch_addr_bit (current_gdbarch)
+			      / TARGET_CHAR_BIT);
 		int bytes_read;
 
 		(ctx->read_mem) (ctx->baton, buf, result, *op_ptr++);
 		result = dwarf2_read_address (buf,
-					      buf + (TARGET_ADDR_BIT
+					      buf + (gdbarch_addr_bit
+						      (current_gdbarch)
 						     / TARGET_CHAR_BIT),
 					      &bytes_read);
 	      }

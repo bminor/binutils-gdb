@@ -480,7 +480,7 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 	  printf_filtered ("Num Enb ");
 	  if (addressprint)
 	    {
-	      if (TARGET_ADDR_BIT <= 32)
+	      if (gdbarch_addr_bit (current_gdbarch) <= 32)
 		printf_filtered ("Address    ");
 	      else
 		printf_filtered ("Address            ");
@@ -490,7 +490,7 @@ tracepoints_info (char *tpnum_exp, int from_tty)
       strcpy (wrap_indent, "                           ");
       if (addressprint)
 	{
-	  if (TARGET_ADDR_BIT <= 32)
+	  if (gdbarch_addr_bit (current_gdbarch) <= 32)
 	    strcat (wrap_indent, "           ");
 	  else
 	    strcat (wrap_indent, "                   ");
@@ -502,7 +502,7 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 	{
 	  char *tmp;
 
-	  if (TARGET_ADDR_BIT <= 32)
+	  if (gdbarch_addr_bit (current_gdbarch) <= 32)
 	    tmp = hex_string_custom (t->address & (CORE_ADDR) 0xffffffff, 
 				     8);
 	  else

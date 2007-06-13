@@ -3246,7 +3246,7 @@ print_msymbol_info (struct minimal_symbol *msymbol)
 {
   char *tmp;
 
-  if (TARGET_ADDR_BIT <= 32)
+  if (gdbarch_addr_bit (current_gdbarch) <= 32)
     tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol)
 			     & (CORE_ADDR) 0xffffffff,
 			     8);

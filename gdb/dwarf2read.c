@@ -4930,7 +4930,9 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       complaint (&symfile_complaints,
                 _("DW_AT_type missing from DW_TAG_subrange_type"));
-      base_type = dwarf_base_type (DW_ATE_signed, TARGET_ADDR_BIT / 8, cu);
+      base_type
+	= dwarf_base_type (DW_ATE_signed,
+			   gdbarch_addr_bit (current_gdbarch) / 8, cu);
     }
 
   if (cu->language == language_fortran)
