@@ -1,3 +1,7 @@
+2007-06-13  Arthur Huillet  <arthur.huillet@free.fr>
+
+	* mi/mi-cmd-var.c (mi_cmd_var_assign): Fix typo.
+
 2007-06-13  Claudio Fontana <claudio.fontana@gmail.com>
 
 	* fork-child.c (fork_inferior): Update comment.

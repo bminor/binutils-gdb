@@ -497,7 +497,7 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
   expression = xstrdup (argv[1]);
 
   if (!varobj_set_value (var, expression))
-    error (_("mi_cmd_var_assign: Could not assign expression to varible object"));
+    error (_("mi_cmd_var_assign: Could not assign expression to variable object"));
 
   ui_out_field_string (uiout, "value", varobj_get_value (var));
   return MI_CMD_DONE;
