@@ -1,3 +1,9 @@
+2007-06-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spu_ovl.S: Don't trash lr on tail call from one
+	overlay to another.
+	* emultempl/spu_ovl.o: Regenerate.
+
 2007-06-11  Bob Wilson  <bob.wilson@acm.org>
 
 	* emulparams/elf32xtensa.sh (OTHER_READONLY_SECTIONS): Add ONLY_IF_RO

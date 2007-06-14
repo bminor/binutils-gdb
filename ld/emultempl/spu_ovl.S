@@ -166,7 +166,12 @@ __ovly_backchain_loop:
 	shufb		rv2, retval, lnkr, rv1
 	shufb		rv3, $lr, $78, rv1
 	fsmbi		rv1, 0xff
-	selb		$lr, rv2, rv3, rv1
+	selb		rv2, rv2, rv3, rv1
+/* If we have a tail call from one overlay function to another overlay,
+   then lr is already set up.  Don't change it.  */
+	ceq		rv1, $lr, retval
+	fsmb		rv1, rv1
+	selb		$lr, rv2, $lr, rv1
 
 /* Branch to $79 if non-overlay */
 	brz		$78, __ovly_load_restore
