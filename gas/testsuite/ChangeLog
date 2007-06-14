@@ -1,3 +1,8 @@
+2007-06-14  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.s: Add tests for shift instructions.
+	* gas/arm/thumb32.d: Ditto.
+
 2007-06-06  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb.d: Update expected output.

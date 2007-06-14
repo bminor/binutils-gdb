@@ -1001,3 +1001,32 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f935 1b30 	ldrsh.w	r1, \[r5\], #48
 0[0-9a-f]+ <[^>]+> f935 1930 	ldrsh.w	r1, \[r5\], #-48
 0[0-9a-f]+ <[^>]+> f935 1009 	ldrsh.w	r1, \[r5, r9\]
+0[0-9a-f]+ <[^>]+> 00a1      	lsls	r1, r4, #2
+0[0-9a-f]+ <[^>]+> ea5f 0389 	movs.w	r3, r9, lsl #2
+0[0-9a-f]+ <[^>]+> fa12 f103 	lsls.w	r1, r2, r3
+0[0-9a-f]+ <[^>]+> 4099      	lsls	r1, r3
+0[0-9a-f]+ <[^>]+> fa11 f109 	lsls.w	r1, r1, r9
+0[0-9a-f]+ <[^>]+> fa02 f103 	lsl.w	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fa01 f103 	lsl.w	r1, r1, r3
+0[0-9a-f]+ <[^>]+> 08a1      	lsrs	r1, r4, #2
+0[0-9a-f]+ <[^>]+> ea5f 0399 	movs.w	r3, r9, lsr #2
+0[0-9a-f]+ <[^>]+> fa32 f103 	lsrs.w	r1, r2, r3
+0[0-9a-f]+ <[^>]+> 40d9      	lsrs	r1, r3
+0[0-9a-f]+ <[^>]+> fa31 f109 	lsrs.w	r1, r1, r9
+0[0-9a-f]+ <[^>]+> fa22 f103 	lsr.w	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fa21 f103 	lsr.w	r1, r1, r3
+0[0-9a-f]+ <[^>]+> 10a1      	asrs	r1, r4, #2
+0[0-9a-f]+ <[^>]+> ea5f 03a9 	movs.w	r3, r9, asr #2
+0[0-9a-f]+ <[^>]+> fa52 f103 	asrs.w	r1, r2, r3
+0[0-9a-f]+ <[^>]+> 4119      	asrs	r1, r3
+0[0-9a-f]+ <[^>]+> fa51 f109 	asrs.w	r1, r1, r9
+0[0-9a-f]+ <[^>]+> fa42 f103 	asr.w	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fa41 f103 	asr.w	r1, r1, r3
+0[0-9a-f]+ <[^>]+> ea5f 01b4 	movs.w	r1, r4, ror #2
+0[0-9a-f]+ <[^>]+> ea5f 03b9 	movs.w	r3, r9, ror #2
+0[0-9a-f]+ <[^>]+> fa72 f103 	rors.w	r1, r2, r3
+0[0-9a-f]+ <[^>]+> 41d9      	rors	r1, r3
+0[0-9a-f]+ <[^>]+> fa71 f109 	rors.w	r1, r1, r9
+0[0-9a-f]+ <[^>]+> fa62 f103 	ror.w	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fa61 f103 	ror.w	r1, r1, r3
+0[0-9a-f]+ <[^>]+> bf00      	nop

@@ -803,3 +803,17 @@ srs:
 	ldaddr sb
 	ldaddr h
 	ldaddr sh
+	.macro movshift op s="s"
+	movs r1, r4, \op #2
+	movs r3, r9, \op #2
+	movs r1, r2, \op r3
+	movs r1, r1, \op r3
+	movs r1, r1, \op r9
+	mov r1, r2, \op r3
+	mov r1, r1, \op r3
+	.endm
+	movshift lsl
+	movshift lsr
+	movshift asr
+	movshift ror
+	nop

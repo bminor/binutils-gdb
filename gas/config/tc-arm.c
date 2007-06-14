@@ -9544,11 +9544,98 @@ do_t_mov_cmp (void)
 	      inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
 	    }
 	}
+      else if (inst.operands[1].shifted && inst.operands[1].immisreg
+	       && (inst.instruction == T_MNEM_mov
+		   || inst.instruction == T_MNEM_movs))
+	{
+	  /* Register shifts are encoded as separate shift instructions.  */
+	  bfd_boolean flags = (inst.instruction == T_MNEM_movs);
+
+	  if (current_it_mask)
+	    narrow = !flags;
+	  else
+	    narrow = flags;
+
+	  if (inst.size_req == 4)
+	    narrow = FALSE;
+
+	  if (!low_regs || inst.operands[1].imm > 7)
+	    narrow = FALSE;
+
+	  if (inst.operands[0].reg != inst.operands[1].reg)
+	    narrow = FALSE;
+
+	  switch (inst.operands[1].shift_kind)
+	    {
+	    case SHIFT_LSL:
+	      opcode = narrow ? T_OPCODE_LSL_R : THUMB_OP32 (T_MNEM_lsl);
+	      break;
+	    case SHIFT_ASR:
+	      opcode = narrow ? T_OPCODE_ASR_R : THUMB_OP32 (T_MNEM_asr);
+	      break;
+	    case SHIFT_LSR:
+	      opcode = narrow ? T_OPCODE_LSR_R : THUMB_OP32 (T_MNEM_lsr);
+	      break;
+	    case SHIFT_ROR:
+	      opcode = narrow ? T_OPCODE_ROR_R : THUMB_OP32 (T_MNEM_ror);
+	      break;
+	    default:
+	      abort();
+	    }
+
+	  inst.instruction = opcode;
+	  if (narrow)
+	    {
+	      inst.instruction |= inst.operands[0].reg;
+	      inst.instruction |= inst.operands[1].imm << 3;
+	    }
+	  else
+	    {
+	      if (flags)
+		inst.instruction |= CONDS_BIT;
+
+	      inst.instruction |= inst.operands[0].reg << 8;
+	      inst.instruction |= inst.operands[1].reg << 16;
+	      inst.instruction |= inst.operands[1].imm;
+	    }
+	}
       else if (!narrow)
 	{
-	  inst.instruction = THUMB_OP32 (inst.instruction);
-	  inst.instruction |= inst.operands[0].reg << r0off;
-	  encode_thumb32_shifted_operand (1);
+	  /* Some mov with immediate shift have narrow variants.
+	     Register shifts are handled above.  */
+	  if (low_regs && inst.operands[1].shifted
+	      && (inst.instruction == T_MNEM_mov
+		  || inst.instruction == T_MNEM_movs))
+	    {
+	      if (current_it_mask)
+		narrow = (inst.instruction == T_MNEM_mov);
+	      else
+		narrow = (inst.instruction == T_MNEM_movs);
+	    }
+
+	  if (narrow)
+	    {
+	      switch (inst.operands[1].shift_kind)
+		{
+		case SHIFT_LSL: inst.instruction = T_OPCODE_LSL_I; break;
+		case SHIFT_LSR: inst.instruction = T_OPCODE_LSR_I; break;
+		case SHIFT_ASR: inst.instruction = T_OPCODE_ASR_I; break;
+		default: narrow = FALSE; break;
+		}
+	    }
+
+	  if (narrow)
+	    {
+	      inst.instruction |= inst.operands[0].reg;
+	      inst.instruction |= inst.operands[1].reg << 3;
+	      inst.reloc.type = BFD_RELOC_ARM_THUMB_SHIFT;
+	    }
+	  else
+	    {
+	      inst.instruction = THUMB_OP32 (inst.instruction);
+	      inst.instruction |= inst.operands[0].reg << r0off;
+	      encode_thumb32_shifted_operand (1);
+	    }
 	}
       else
 	switch (inst.instruction)

@@ -1,3 +1,8 @@
+2007-06-14  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_t_mov_cmp): Handle shift by register and
+	narrow shift by immediate.
+
 2007-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ACLOCAL_AMFLAGS): Add -I ../config -I ../bfd.
