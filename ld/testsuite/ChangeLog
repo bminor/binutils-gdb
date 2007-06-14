@@ -1,3 +1,8 @@
+2007-06-14  Alan Modra  <alan@grove.modra.org>
+
+	* ld-spu/ovl.d: Update.
+	* ld-spu/ovl2.d: Update.
+
 2007-05-24  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/assert.t: Add additional cases.
