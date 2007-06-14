@@ -1,3 +1,13 @@
+2007-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): Add -I ../config -I ../bfd.
+
+	* acinclude.m4: Removed.
+
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+
 2007-06-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spu_ovl.S: Don't trash lr on tail call from one

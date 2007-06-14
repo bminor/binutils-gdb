@@ -1,3 +1,14 @@
+2007-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): Add -I ../config -I ../bfd.
+
+	* acinclude.m4: Removed.
+
+	* Makefile.in: Regenerated.
+	* doc/Makefile.in: Likewise.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+
 2007-06-05  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (thumb32_opcodes): Display writeback ldrd/strd addresses.

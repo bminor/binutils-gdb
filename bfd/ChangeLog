@@ -1,3 +1,15 @@
+2007-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): Add -I . -I ../config.
+
+	* acinclude.m4: Don't include m4 files. Remove libtool
+	kludge.
+
+	* Makefile.in: Regenerated.
+	* doc/Makefile.in: Likewise.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+
 2007-06-11  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 	
