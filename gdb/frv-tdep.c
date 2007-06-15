@@ -1291,13 +1291,14 @@ frv_check_watch_resources (int type, int cnt, int ot)
 int
 frv_stopped_data_address (CORE_ADDR *addr_p)
 {
+  struct frame_info *frame = get_current_frame ();
   CORE_ADDR brr, dbar0, dbar1, dbar2, dbar3;
 
-  brr = read_register (brr_regnum);
-  dbar0 = read_register (dbar0_regnum);
-  dbar1 = read_register (dbar1_regnum);
-  dbar2 = read_register (dbar2_regnum);
-  dbar3 = read_register (dbar3_regnum);
+  brr = get_frame_register_unsigned (frame, brr_regnum);
+  dbar0 = get_frame_register_unsigned (frame, dbar0_regnum);
+  dbar1 = get_frame_register_unsigned (frame, dbar1_regnum);
+  dbar2 = get_frame_register_unsigned (frame, dbar2_regnum);
+  dbar3 = get_frame_register_unsigned (frame, dbar3_regnum);
 
   if (brr & (1<<11))
     *addr_p = dbar0;

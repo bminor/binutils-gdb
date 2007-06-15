@@ -535,7 +535,7 @@ CORE_ADDR
 cris_stopped_data_address (void)
 {
   CORE_ADDR eda;
-  eda = read_register (EDA_REGNUM);
+  eda = get_frame_register_unsigned (get_current_frame (), EDA_REGNUM);
   return eda;
 }
 
