@@ -383,8 +383,8 @@ extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_
 
 extern int gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_get_longjmp_target_ftype) (CORE_ADDR *pc);
-extern int gdbarch_get_longjmp_target (struct gdbarch *gdbarch, CORE_ADDR *pc);
+typedef int (gdbarch_get_longjmp_target_ftype) (struct frame_info *frame, CORE_ADDR *pc);
+extern int gdbarch_get_longjmp_target (struct gdbarch *gdbarch, struct frame_info *frame, CORE_ADDR *pc);
 extern void set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch, gdbarch_get_longjmp_target_ftype *get_longjmp_target);
 
 extern int gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch);

@@ -52,12 +52,12 @@ static struct target_so_ops mips_svr4_so_ops;
 #define MIPS_LINUX_JB_PC 0
 
 static int
-mips_linux_get_longjmp_target (CORE_ADDR *pc)
+mips_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   char buf[gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT];
 
-  jb_addr = read_register (MIPS_A0_REGNUM);
+  jb_addr = get_frame_register_unsigned (frame, MIPS_A0_REGNUM);
 
   if (target_read_memory (jb_addr
 			    + MIPS_LINUX_JB_PC * MIPS_LINUX_JB_ELEMENT_SIZE,
@@ -254,13 +254,13 @@ mips_fill_fpregset (const struct regcache *regcache,
 #define MIPS64_LINUX_JB_PC 0
 
 static int
-mips64_linux_get_longjmp_target (CORE_ADDR *pc)
+mips64_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   void *buf = alloca (gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT);
   int element_size = gdbarch_ptr_bit (current_gdbarch) == 32 ? 4 : 8;
 
-  jb_addr = read_register (MIPS_A0_REGNUM);
+  jb_addr = get_frame_register_unsigned (frame, MIPS_A0_REGNUM);
 
   if (target_read_memory (jb_addr + MIPS64_LINUX_JB_PC * element_size,
 			  buf,

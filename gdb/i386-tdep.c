@@ -1266,11 +1266,11 @@ i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
    This function is 64-bit safe.  */
 
 static int
-i386_get_longjmp_target (CORE_ADDR *pc)
+i386_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   gdb_byte buf[8];
   CORE_ADDR sp, jb_addr;
-  int jb_pc_offset = gdbarch_tdep (current_gdbarch)->jb_pc_offset;
+  int jb_pc_offset = gdbarch_tdep (get_frame_arch (frame))->jb_pc_offset;
   int len = TYPE_LENGTH (builtin_type_void_func_ptr);
 
   /* If JB_PC_OFFSET is -1, we have no way to find out where the
@@ -1280,7 +1280,7 @@ i386_get_longjmp_target (CORE_ADDR *pc)
 
   /* Don't use I386_ESP_REGNUM here, since this function is also used
      for AMD64.  */
-  regcache_cooked_read (current_regcache, SP_REGNUM, buf);
+  get_frame_register (frame, SP_REGNUM, buf);
   sp = extract_typed_address (buf, builtin_type_void_data_ptr);
   if (target_read_memory (sp + len, buf, len))
     return 0;

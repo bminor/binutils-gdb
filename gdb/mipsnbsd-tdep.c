@@ -284,14 +284,14 @@ mipsnbsd_sigtramp_offset (struct frame_info *next_frame)
 					 NBSD_MIPS_JB_ELEMENT_SIZE)
 
 static int
-mipsnbsd_get_longjmp_target (CORE_ADDR *pc)
+mipsnbsd_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   char *buf;
 
   buf = alloca (NBSD_MIPS_JB_ELEMENT_SIZE);
 
-  jb_addr = read_register (MIPS_A0_REGNUM);
+  jb_addr = get_frame_register_unsigned (frame, MIPS_A0_REGNUM);
 
   if (target_read_memory (jb_addr + NBSD_MIPS_JB_OFFSET, buf,
   			  NBSD_MIPS_JB_ELEMENT_SIZE))

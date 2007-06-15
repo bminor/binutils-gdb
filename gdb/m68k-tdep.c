@@ -978,11 +978,11 @@ m68k_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
    This routine returns true on success. */
 
 static int
-m68k_get_longjmp_target (CORE_ADDR *pc)
+m68k_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   gdb_byte *buf;
   CORE_ADDR sp, jb_addr;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
 
   if (tdep->jb_pc < 0)
     {
@@ -992,7 +992,7 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
     }
 
   buf = alloca (gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT);
-  sp = read_register (SP_REGNUM);
+  sp = get_frame_register_unsigned (frame, SP_REGNUM);
 
   if (target_read_memory (sp + SP_ARG0,	/* Offset of first arg on stack */
 			  buf,

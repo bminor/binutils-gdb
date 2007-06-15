@@ -2040,13 +2040,13 @@ gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch)
 }
 
 int
-gdbarch_get_longjmp_target (struct gdbarch *gdbarch, CORE_ADDR *pc)
+gdbarch_get_longjmp_target (struct gdbarch *gdbarch, struct frame_info *frame, CORE_ADDR *pc)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->get_longjmp_target != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_get_longjmp_target called\n");
-  return gdbarch->get_longjmp_target (pc);
+  return gdbarch->get_longjmp_target (frame, pc);
 }
 
 void

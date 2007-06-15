@@ -2077,7 +2077,8 @@ process_event_stop_test:
 	remove_breakpoints ();
 	breakpoints_inserted = 0;
 	if (!gdbarch_get_longjmp_target_p (current_gdbarch)
-	    || !gdbarch_get_longjmp_target (current_gdbarch, &jmp_buf_pc))
+	    || !gdbarch_get_longjmp_target (current_gdbarch,
+					    get_current_frame (), &jmp_buf_pc))
 	  {
 	    keep_going (ecs);
 	    return;

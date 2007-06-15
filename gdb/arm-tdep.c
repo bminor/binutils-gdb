@@ -2342,13 +2342,13 @@ arm_return_value (struct gdbarch *gdbarch, struct type *valtype,
 
 
 static int
-arm_get_longjmp_target (CORE_ADDR *pc)
+arm_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   char buf[INT_REGISTER_SIZE];
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
   
-  jb_addr = read_register (ARM_A1_REGNUM);
+  jb_addr = get_frame_register_unsigned (frame, ARM_A1_REGNUM);
 
   if (target_read_memory (jb_addr + tdep->jb_pc * tdep->jb_elt_size, buf,
 			  INT_REGISTER_SIZE))

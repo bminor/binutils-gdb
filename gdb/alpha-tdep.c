@@ -724,13 +724,13 @@ alpha_skip_prologue (CORE_ADDR pc)
    into the "pc".  This routine returns true on success.  */
 
 static int
-alpha_get_longjmp_target (CORE_ADDR *pc)
+alpha_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
   CORE_ADDR jb_addr;
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
 
-  jb_addr = read_register (ALPHA_A0_REGNUM);
+  jb_addr = get_frame_register_unsigned (frame, ALPHA_A0_REGNUM);
 
   if (target_read_memory (jb_addr + (tdep->jb_pc * tdep->jb_elt_size),
 			  raw_buffer, tdep->jb_elt_size))

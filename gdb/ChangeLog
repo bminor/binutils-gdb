@@ -1,5 +1,22 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (get_longjmp_target): Add FRAME argument.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* infrun.c (handle_inferior_event): Pass current frame to
+	gdbarch_get_longjmp_target.
+
+	* alpha-tdep.c (alpha_get_longjmp_target): Add FRAME argument.
+	Read registers from FRAME instead of using read_register.
+	Use get_frame_arch instead of current_gdbarch.
+	* arm-tdep.c (arm_get_longjmp_target): Likewise.
+	* i386-tdep.c (i386_get_longjmp_target): Likewise.
+	* m68k-tdep.c (m68k_get_longjmp_target): Likewise.
+	* mips-linux-tdep.c (mips_linux_get_longjmp_target): Likewise.
+	(mips64_linux_get_longjmp_target): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_get_longjmp_target): Likewise.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (skip_trampoline_code): Add FRAME argument.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* arch-utils.c (generic_skip_trampoline_code): Add FRAME argument.
