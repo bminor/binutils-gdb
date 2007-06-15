@@ -1,5 +1,10 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mips-tdep.c (deprecated_mips_set_processor_regs_hack): Read from
+	current regcache instead of calling read_register.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mep-tdep.c (current_me_module): Read from current regcache
 	instead of calling read_register.
 	(current_options): Likewise.
