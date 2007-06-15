@@ -1547,8 +1547,8 @@ condition_true (unsigned long cond, unsigned long status_reg)
 #define ARM_PC_32 1
 
 static unsigned long
-shifted_reg_val (unsigned long inst, int carry, unsigned long pc_val,
-		 unsigned long status_reg)
+shifted_reg_val (struct frame_info *frame, unsigned long inst, int carry,
+		 unsigned long pc_val, unsigned long status_reg)
 {
   unsigned long res, shift;
   int rm = bits (inst, 0, 3);
@@ -1557,7 +1557,8 @@ shifted_reg_val (unsigned long inst, int carry, unsigned long pc_val,
   if (bit (inst, 4))
     {
       int rs = bits (inst, 8, 11);
-      shift = (rs == 15 ? pc_val + 8 : read_register (rs)) & 0xFF;
+      shift = (rs == 15 ? pc_val + 8
+			: get_frame_register_unsigned (frame, rs)) & 0xFF;
     }
   else
     shift = bits (inst, 7, 11);
@@ -1565,7 +1566,7 @@ shifted_reg_val (unsigned long inst, int carry, unsigned long pc_val,
   res = (rm == 15
 	 ? ((pc_val | (ARM_PC_32 ? 0 : status_reg))
 	    + (bit (inst, 4) ? 12 : 8))
-	 : read_register (rm));
+	 : get_frame_register_unsigned (frame, rm));
 
   switch (shifttype)
     {
@@ -1608,7 +1609,7 @@ bitcount (unsigned long val)
 }
 
 static CORE_ADDR
-thumb_get_next_pc (CORE_ADDR pc)
+thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
   unsigned short inst1 = read_memory_unsigned_integer (pc, 2);
@@ -1622,7 +1623,7 @@ thumb_get_next_pc (CORE_ADDR pc)
       /* Fetch the saved PC from the stack.  It's stored above
          all of the other registers.  */
       offset = bitcount (bits (inst1, 0, 7)) * DEPRECATED_REGISTER_SIZE;
-      sp = read_register (ARM_SP_REGNUM);
+      sp = get_frame_register_unsigned (frame, ARM_SP_REGNUM);
       nextpc = (CORE_ADDR) read_memory_unsigned_integer (sp + offset, 4);
       nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
       if (nextpc == pc)
@@ -1630,7 +1631,7 @@ thumb_get_next_pc (CORE_ADDR pc)
     }
   else if ((inst1 & 0xf000) == 0xd000)	/* conditional branch */
     {
-      unsigned long status = read_register (ARM_PS_REGNUM);
+      unsigned long status = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
       unsigned long cond = bits (inst1, 8, 11);
       if (cond != 0x0f && condition_true (cond, status))    /* 0x0f = SWI */
 	nextpc = pc_val + (sbits (inst1, 0, 7) << 1);
@@ -1653,7 +1654,7 @@ thumb_get_next_pc (CORE_ADDR pc)
       if (bits (inst1, 3, 6) == 0x0f)
 	nextpc = pc_val;
       else
-	nextpc = read_register (bits (inst1, 3, 6));
+	nextpc = get_frame_register_unsigned (frame, bits (inst1, 3, 6));
 
       nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
       if (nextpc == pc)
@@ -1664,7 +1665,7 @@ thumb_get_next_pc (CORE_ADDR pc)
 }
 
 static CORE_ADDR
-arm_get_next_pc (CORE_ADDR pc)
+arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned long pc_val;
   unsigned long this_instr;
@@ -1672,11 +1673,11 @@ arm_get_next_pc (CORE_ADDR pc)
   CORE_ADDR nextpc;
 
   if (arm_pc_is_thumb (pc))
-    return thumb_get_next_pc (pc);
+    return thumb_get_next_pc (frame, pc);
 
   pc_val = (unsigned long) pc;
   this_instr = read_memory_unsigned_integer (pc, 4);
-  status = read_register (ARM_PS_REGNUM);
+  status = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
   nextpc = (CORE_ADDR) (pc_val + 4);	/* Default case */
 
   if (condition_true (bits (this_instr, 28, 31), status))
@@ -1704,7 +1705,8 @@ arm_get_next_pc (CORE_ADDR pc)
 		|| bits (this_instr, 4, 27) == 0x12fff3)
 	      {
 		rn = bits (this_instr, 0, 3);
-		result = (rn == 15) ? pc_val + 8 : read_register (rn);
+		result = (rn == 15) ? pc_val + 8
+				    : get_frame_register_unsigned (frame, rn);
 		nextpc = (CORE_ADDR) gdbarch_addr_bits_remove
 				       (current_gdbarch, result);
 
@@ -1717,7 +1719,8 @@ arm_get_next_pc (CORE_ADDR pc)
 	    /* Multiply into PC */
 	    c = (status & FLAG_C) ? 1 : 0;
 	    rn = bits (this_instr, 16, 19);
-	    operand1 = (rn == 15) ? pc_val + 8 : read_register (rn);
+	    operand1 = (rn == 15) ? pc_val + 8
+				  : get_frame_register_unsigned (frame, rn);
 
 	    if (bit (this_instr, 25))
 	      {
@@ -1727,7 +1730,7 @@ arm_get_next_pc (CORE_ADDR pc)
 		  & 0xffffffff;
 	      }
 	    else		/* operand 2 is a shifted register */
-	      operand2 = shifted_reg_val (this_instr, c, pc_val, status);
+	      operand2 = shifted_reg_val (frame, this_instr, c, pc_val, status);
 
 	    switch (bits (this_instr, 21, 24))
 	      {
@@ -1813,14 +1816,15 @@ arm_get_next_pc (CORE_ADDR pc)
 
 		  /* byte write to PC */
 		  rn = bits (this_instr, 16, 19);
-		  base = (rn == 15) ? pc_val + 8 : read_register (rn);
+		  base = (rn == 15) ? pc_val + 8
+				    : get_frame_register_unsigned (frame, rn);
 		  if (bit (this_instr, 24))
 		    {
 		      /* pre-indexed */
 		      int c = (status & FLAG_C) ? 1 : 0;
 		      unsigned long offset =
 		      (bit (this_instr, 25)
-		       ? shifted_reg_val (this_instr, c, pc_val, status)
+		       ? shifted_reg_val (frame, this_instr, c, pc_val, status)
 		       : bits (this_instr, 0, 11));
 
 		      if (bit (this_instr, 23))
@@ -1862,7 +1866,8 @@ arm_get_next_pc (CORE_ADDR pc)
 
 		  {
 		    unsigned long rn_val =
-		    read_register (bits (this_instr, 16, 19));
+		    get_frame_register_unsigned (frame,
+						 bits (this_instr, 16, 19));
 		    nextpc =
 		      (CORE_ADDR) read_memory_integer ((CORE_ADDR) (rn_val
 								  + offset),
@@ -1912,13 +1917,13 @@ arm_get_next_pc (CORE_ADDR pc)
    and breakpoint it.  */
 
 int
-arm_software_single_step (struct regcache *regcache)
+arm_software_single_step (struct frame_info *frame)
 {
   /* NOTE: This may insert the wrong breakpoint instruction when
      single-stepping over a mode-changing instruction, if the
      CPSR heuristics are used.  */
 
-  CORE_ADDR next_pc = arm_get_next_pc (read_register (ARM_PC_REGNUM));
+  CORE_ADDR next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
   insert_single_step_breakpoint (next_pc);
 
   return 1;

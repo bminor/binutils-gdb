@@ -95,7 +95,7 @@ enum
 };
 
 /* Single step based on where the current instruction will take us.  */
-extern int mips_software_single_step (struct regcache *regcache);
+extern int mips_software_single_step (struct frame_info *frame);
 
 /* Tell if the program counter value in MEMADDR is in a MIPS16
    function.  */

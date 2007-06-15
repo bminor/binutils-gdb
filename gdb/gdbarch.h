@@ -702,14 +702,14 @@ extern int gdbarch_software_single_step_p (struct gdbarch *gdbarch);
 #define SOFTWARE_SINGLE_STEP_P() (gdbarch_software_single_step_p (current_gdbarch))
 #endif
 
-typedef int (gdbarch_software_single_step_ftype) (struct regcache *regcache);
-extern int gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache);
+typedef int (gdbarch_software_single_step_ftype) (struct frame_info *frame);
+extern int gdbarch_software_single_step (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_software_single_step_ftype *software_single_step);
 #if !defined (GDB_TM_FILE) && defined (SOFTWARE_SINGLE_STEP)
 #error "Non multi-arch definition of SOFTWARE_SINGLE_STEP"
 #endif
 #if !defined (SOFTWARE_SINGLE_STEP)
-#define SOFTWARE_SINGLE_STEP(regcache) (gdbarch_software_single_step (current_gdbarch, regcache))
+#define SOFTWARE_SINGLE_STEP(frame) (gdbarch_software_single_step (current_gdbarch, frame))
 #endif
 
 /* Return non-zero if the processor is executing a delay slot and a

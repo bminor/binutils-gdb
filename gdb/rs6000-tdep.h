@@ -21,7 +21,7 @@
 
 #include "defs.h"
 
-extern int rs6000_software_single_step (struct regcache *regcache);
+extern int rs6000_software_single_step (struct frame_info *frame);
 
 /* Hook in rs6000-tdep.c for determining the TOC address when
    calling functions in the inferior.  */

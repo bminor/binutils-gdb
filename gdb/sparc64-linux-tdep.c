@@ -106,14 +106,11 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
    address.  */
 
 static CORE_ADDR
-sparc64_linux_step_trap (unsigned long insn)
+sparc64_linux_step_trap (struct frame_info *frame, unsigned long insn)
 {
   if (insn == 0x91d0206d)
     {
-      ULONGEST sp;
-
-      regcache_cooked_read_unsigned (current_regcache,
-				     SPARC_SP_REGNUM, &sp);
+      ULONGEST sp = get_frame_register_unsigned (frame, SPARC_SP_REGNUM);
       if (sp & 1)
 	sp += BIAS;
 

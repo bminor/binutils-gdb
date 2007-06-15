@@ -1099,8 +1099,8 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
 #ifdef SOFTWARE_SINGLE_STEP
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "SOFTWARE_SINGLE_STEP(regcache)",
-                      XSTRING (SOFTWARE_SINGLE_STEP (regcache)));
+                      "SOFTWARE_SINGLE_STEP(frame)",
+                      XSTRING (SOFTWARE_SINGLE_STEP (frame)));
 #endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: software_single_step = <0x%lx>\n",
@@ -2711,13 +2711,13 @@ gdbarch_software_single_step_p (struct gdbarch *gdbarch)
 }
 
 int
-gdbarch_software_single_step (struct gdbarch *gdbarch, struct regcache *regcache)
+gdbarch_software_single_step (struct gdbarch *gdbarch, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->software_single_step != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_software_single_step called\n");
-  return gdbarch->software_single_step (regcache);
+  return gdbarch->software_single_step (frame);
 }
 
 void

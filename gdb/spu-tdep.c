@@ -1188,16 +1188,14 @@ spu_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 /* Software single-stepping support.  */
 
 int
-spu_software_single_step (struct regcache *regcache)
+spu_software_single_step (struct frame_info *frame)
 {
   CORE_ADDR pc, next_pc;
   unsigned int insn;
   int offset, reg;
   gdb_byte buf[4];
 
-  regcache_cooked_read (regcache, SPU_PC_REGNUM, buf);
-  /* Mask off interrupt enable bit.  */
-  pc = extract_unsigned_integer (buf, 4) & -4;
+  pc = get_frame_pc (frame);
 
   if (target_read_memory (pc, buf, 4))
     return 1;
@@ -1221,7 +1219,7 @@ spu_software_single_step (struct regcache *regcache)
 	target += pc;
       else if (reg != -1)
 	{
-	  regcache_cooked_read_part (regcache, reg, 0, 4, buf);
+	  get_frame_register_bytes (frame, reg, 0, 4, buf);
 	  target += extract_unsigned_integer (buf, 4) & -4;
 	}
 

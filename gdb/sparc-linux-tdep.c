@@ -131,22 +131,18 @@ sparc32_linux_sigframe_init (const struct tramp_frame *self,
    address.  */
 
 static CORE_ADDR
-sparc32_linux_step_trap (unsigned long insn)
+sparc32_linux_step_trap (struct frame_info *frame, unsigned long insn)
 {
   if (insn == 0x91d02010)
     {
-      ULONGEST sc_num;
-
-      regcache_cooked_read_unsigned (current_regcache,
-				     SPARC_G1_REGNUM, &sc_num);
+      ULONGEST sc_num = get_frame_register_unsigned (frame, SPARC_G1_REGNUM);
 
       /* __NR_rt_sigreturn is 101 and __NR_sigreturn is 216  */
       if (sc_num == 101 || sc_num == 216)
 	{
 	  ULONGEST sp, pc_offset;
 
-	  regcache_cooked_read_unsigned (current_regcache,
-					 SPARC_SP_REGNUM, &sp);
+	  sp = get_frame_register_unsigned (frame, SPARC_SP_REGNUM);
 
 	  /* The kernel puts the sigreturn registers on the stack,
 	     and this is where the signal unwinding state is take from

@@ -2059,7 +2059,7 @@ find_cris_op (unsigned short insn, inst_env_type *inst_env)
    actually an internal error.  */
 
 static int
-find_step_target (inst_env_type *inst_env)
+find_step_target (struct frame_info *frame, inst_env_type *inst_env)
 {
   int i;
   int offset;
@@ -2068,12 +2068,14 @@ find_step_target (inst_env_type *inst_env)
   /* Create a local register image and set the initial state.  */
   for (i = 0; i < NUM_GENREGS; i++)
     {
-      inst_env->reg[i] = (unsigned long) read_register (i);
+      inst_env->reg[i] = 
+	(unsigned long) get_frame_register_unsigned (frame, i);
     }
   offset = NUM_GENREGS;
   for (i = 0; i < NUM_SPECREGS; i++)
     {
-      inst_env->preg[i] = (unsigned long) read_register (offset + i);
+      inst_env->preg[i] = 
+	(unsigned long) get_frame_register_unsigned (frame, offset + i);
     }
   inst_env->branch_found = 0;
   inst_env->slot_needed = 0;
@@ -2124,13 +2126,13 @@ find_step_target (inst_env_type *inst_env)
    Either one ordinary target or two targets for branches may be found.  */
 
 static int
-cris_software_single_step (struct regcache *regcache)
+cris_software_single_step (struct frame_info *frame)
 {
   inst_env_type inst_env;
 
   /* Analyse the present instruction environment and insert 
      breakpoints.  */
-  int status = find_step_target (&inst_env);
+  int status = find_step_target (frame, &inst_env);
   if (status == -1)
     {
       /* Could not find a target.  Things are likely to go downhill 

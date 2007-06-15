@@ -265,21 +265,18 @@ sparc32nbsd_sigtramp_frame_sniffer (struct frame_info *next_frame)
    address.  */
 
 CORE_ADDR
-sparcnbsd_step_trap (unsigned long insn)
+sparcnbsd_step_trap (struct frame_info *frame, unsigned long insn)
 {
   if ((X_I (insn) == 0 && X_RS1 (insn) == 0 && X_RS2 (insn) == 0)
       || (X_I (insn) == 1 && X_RS1 (insn) == 0 && (insn & 0x7f) == 0))
     {
       /* "New" system call.  */
-      ULONGEST number;
-
-      regcache_cooked_read_unsigned (current_regcache,
-				     SPARC_G1_REGNUM, &number);
+      ULONGEST number = get_frame_register_unsigned (frame, SPARC_G1_REGNUM);
 
       if (number & 0x400)
-	return sparc_address_from_register (SPARC_G2_REGNUM);
+	return get_frame_register_unsigned (frame, SPARC_G2_REGNUM);
       if (number & 0x800)
-	return sparc_address_from_register (SPARC_G7_REGNUM);
+	return get_frame_register_unsigned (frame, SPARC_G7_REGNUM);
     }
 
   return 0;

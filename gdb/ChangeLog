@@ -1,5 +1,73 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (software_single_step): Replace REGCACHE argument by
+	FRAME argument.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* infrun.c (resume): Pass current frame to SOFTWARE_SINGLE_STEP.
+
+	* alpha-tdep.c (alpha_next_pc): Add FRAME argument.  Retrieve
+	registers from FRAME instead of using read_register.
+	(alpha_software_single_step): Replace REGCACHE by FRAME.  Pass FRAME
+	to alpha_next_pc.  Use get_frame_pc instead of read_pc.
+	* alpha-tdep.h (alpha_software_single_step): Replace REGCACHE
+	argument by FRAME.
+
+	* arm-tdep.c (shifted_reg_val): Add FRAME argument.  Read registers
+	from FRAME instead of using read_register.
+	(thumb_get_next_pc): Likewise.
+	(arm_get_next_pc): Likewise.
+	(arm_software_single_step): Replace REGCACHE by FRAME.  Pass FRAME
+	to arm_get_next_pc.  Use get_frame_pc instead of read_register.
+	* arm-tdep.h (arm_software_single_step): Replace REGCACHE
+	argument by FRAME.
+
+	* cris-tdep.c (find_step_target): Add FRAME argument.  Read registers
+	from FRAME instead of using read_register.
+	(cris_software_single_step): Replace REGCACHE by FRAME.  Pass FRAME
+	to find_step_target.
+
+	* mips-tdep.c (mips32_next_pc): Add FRAME argument.  Read registers
+	from FRAME instead of using read_register / read_signed_register.
+	(extended_mips16_next_pc): Likewise.
+	(mips16_next_pc): Likewise.
+	(mips_next_pc): Likewise.
+	(mips_software_single_step): Replace REGCACHE by FRAME.  Pass FRAME
+	to mips_next_pc.  Use get_frame_pc instead of read_pc.
+	* mips-tdep.h (mips_software_single_step): Replace REGCACHE
+	argument by FRAME.
+
+	* rs6000-tdep.c (branch_dest): Add FRAME argument.  Use it instead
+	of current frame.  Read registers from FRAME.
+	(deal_with_atomic_sequence): Add FRAME argument.  Pass it to
+	branch_dest.  Use get_frame_pc instead of read_pc.
+	(rs6000_software_single_step): Likewise.
+	(bl_to_blrl_insn_p): Do not call branch_dest.
+	* rs6000-tdep.h (rs6000_software_single_step): Replace REGCACHE
+	argument by FRAME.
+
+	* sparc64-linux-tdep.c (sparc64_linux_step_trap): Add FRAME argument.
+	Read registers from FRAME instead of current regcache.
+	* sparc-linux-tdep.c (sparc32_linux_step_trap): Likewise.
+	* sparcnbsd-tdep.c (sparcnbsd_step_trap): Likewise.
+	* sparc-tdep.c (sparc_address_from_register): Remove.
+	(sparc_analyze_control_transfer): Pass FRAME argument instead of
+	GDBARCH.  Pass FRAME to step_trap callback.
+	(sparc_step_trap): Add FRAME argument.
+	(space_software_single_step): Replace REGCACHE by FRAME.  Pass FRAME
+	to sparc_analyze_control_transfer.  Read registers from FRAME instead
+	of calling sparc_address_from_register.
+	* sparc-tdep.h (struct gdbarch_tdep): Add FRAME argument to
+	step_trap callback.
+	(sparc_address_from_register): Remove prototype.
+	(sparc_software_single_step): Replace REGCACHE argument by FRAME.
+	(sparcnbsd_step_trap): Add FRAME argument.
+
+	* spu-tdep.c (spu_software_single_step): Replace REGCACHE argument
+	by FRAME.  Read registers from FRAME instead of REGCACHE.
+
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* arm-tdep.c (arm_print_float_info): Use register value from FRAME
 	instead of calling read_register.
 

@@ -67,7 +67,7 @@ struct gdbarch_tdep
   size_t plt_entry_size;
 
   /* Alternative location for trap return.  Used for single-stepping.  */
-  CORE_ADDR (*step_trap) (unsigned long insn);
+  CORE_ADDR (*step_trap) (struct frame_info *frame, unsigned long insn);
 };
 
 /* Register numbers of various important registers.  */
@@ -150,9 +150,6 @@ struct sparc_frame_cache
 /* Fetch the instruction at PC.  */
 extern unsigned long sparc_fetch_instruction (CORE_ADDR pc);
 
-/* Return the contents if register REGNUM as an address.  */
-extern CORE_ADDR sparc_address_from_register (int regnum);
-
 /* Fetch StackGhost Per-Process XOR cookie.  */
 extern ULONGEST sparc_fetch_wcookie (void);
 
@@ -167,7 +164,7 @@ extern struct sparc_frame_cache *
 
 
 
-extern int sparc_software_single_step (struct regcache *regcache);
+extern int sparc_software_single_step (struct frame_info *frame);
 
 extern void sparc_supply_rwindow (struct regcache *regcache,
 				  CORE_ADDR sp, int regnum);
@@ -205,7 +202,8 @@ extern const struct sparc_gregset sparc32nbsd_gregset;
 
 /* Return the address of a system call's alternative return
    address.  */
-extern CORE_ADDR sparcnbsd_step_trap (unsigned long insn);
+extern CORE_ADDR sparcnbsd_step_trap (struct frame_info *frame,
+				      unsigned long insn);
 
 extern void sparc32nbsd_elf_init_abi (struct gdbarch_info info,
 				      struct gdbarch *gdbarch);

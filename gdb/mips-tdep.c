@@ -1017,7 +1017,7 @@ mips32_relative_offset (ULONGEST inst)
 /* Determine where to set a single step breakpoint while considering
    branch prediction.  */
 static CORE_ADDR
-mips32_next_pc (CORE_ADDR pc)
+mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned long inst;
   int op;
@@ -1048,8 +1048,8 @@ mips32_next_pc (CORE_ADDR pc)
 	  int tf = itype_rt (inst) & 0x01;
 	  int cnum = itype_rt (inst) >> 2;
 	  int fcrcs =
-	    read_signed_register (mips_regnum (current_gdbarch)->
-				  fp_control_status);
+	    get_frame_register_signed (frame, mips_regnum (current_gdbarch)->
+						fp_control_status);
 	  int cond = ((fcrcs >> 24) & 0x0e) | ((fcrcs >> 23) & 0x01);
 
 	  if (((cond >> cnum) & 0x01) == tf)
@@ -1073,7 +1073,7 @@ mips32_next_pc (CORE_ADDR pc)
 	    case 8:		/* JR */
 	    case 9:		/* JALR */
 	      /* Set PC to that address */
-	      pc = read_signed_register (rtype_rs (inst));
+	      pc = get_frame_register_signed (frame, rtype_rs (inst));
 	      break;
 	    default:
 	      pc += 4;
@@ -1090,7 +1090,7 @@ mips32_next_pc (CORE_ADDR pc)
 	      case 16:		/* BLTZAL */
 	      case 18:		/* BLTZALL */
 	      less_branch:
-		if (read_signed_register (itype_rs (inst)) < 0)
+		if (get_frame_register_signed (frame, itype_rs (inst)) < 0)
 		  pc += mips32_relative_offset (inst) + 4;
 		else
 		  pc += 8;	/* after the delay slot */
@@ -1099,7 +1099,7 @@ mips32_next_pc (CORE_ADDR pc)
 	      case 3:		/* BGEZL */
 	      case 17:		/* BGEZAL */
 	      case 19:		/* BGEZALL */
-		if (read_signed_register (itype_rs (inst)) >= 0)
+		if (get_frame_register_signed (frame, itype_rs (inst)) >= 0)
 		  pc += mips32_relative_offset (inst) + 4;
 		else
 		  pc += 8;	/* after the delay slot */
@@ -1129,22 +1129,22 @@ mips32_next_pc (CORE_ADDR pc)
 	  break;		/* The new PC will be alternate mode */
 	case 4:		/* BEQ, BEQL */
 	equal_branch:
-	  if (read_signed_register (itype_rs (inst)) ==
-	      read_signed_register (itype_rt (inst)))
+	  if (get_frame_register_signed (frame, itype_rs (inst)) ==
+	      get_frame_register_signed (frame, itype_rt (inst)))
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
 	  break;
 	case 5:		/* BNE, BNEL */
 	neq_branch:
-	  if (read_signed_register (itype_rs (inst)) !=
-	      read_signed_register (itype_rt (inst)))
+	  if (get_frame_register_signed (frame, itype_rs (inst)) !=
+	      get_frame_register_signed (frame, itype_rt (inst)))
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
 	  break;
 	case 6:		/* BLEZ, BLEZL */
-	  if (read_signed_register (itype_rs (inst)) <= 0)
+	  if (get_frame_register_signed (frame, itype_rs (inst)) <= 0)
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
@@ -1152,7 +1152,7 @@ mips32_next_pc (CORE_ADDR pc)
 	case 7:
 	default:
 	greater_branch:	/* BGTZ, BGTZL */
-	  if (read_signed_register (itype_rs (inst)) > 0)
+	  if (get_frame_register_signed (frame, itype_rs (inst)) > 0)
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
 	    pc += 8;
@@ -1333,7 +1333,7 @@ add_offset_16 (CORE_ADDR pc, int offset)
 }
 
 static CORE_ADDR
-extended_mips16_next_pc (CORE_ADDR pc,
+extended_mips16_next_pc (struct frame_info *frame, CORE_ADDR pc,
 			 unsigned int extension, unsigned int insn)
 {
   int op = (insn >> 11);
@@ -1369,7 +1369,7 @@ extended_mips16_next_pc (CORE_ADDR pc,
 	struct upk_mips16 upk;
 	int reg;
 	unpack_mips16 (pc, extension, insn, ritype, &upk);
-	reg = read_signed_register (upk.regx);
+	reg = get_frame_register_signed (frame, upk.regx);
 	if (reg == 0)
 	  pc += (upk.offset << 1) + 2;
 	else
@@ -1381,7 +1381,7 @@ extended_mips16_next_pc (CORE_ADDR pc,
 	struct upk_mips16 upk;
 	int reg;
 	unpack_mips16 (pc, extension, insn, ritype, &upk);
-	reg = read_signed_register (upk.regx);
+	reg = get_frame_register_signed (frame, upk.regx);
 	if (reg != 0)
 	  pc += (upk.offset << 1) + 2;
 	else
@@ -1394,7 +1394,7 @@ extended_mips16_next_pc (CORE_ADDR pc,
 	int reg;
 	unpack_mips16 (pc, extension, insn, i8type, &upk);
 	/* upk.regx contains the opcode */
-	reg = read_signed_register (24);	/* Test register is 24 */
+	reg = get_frame_register_signed (frame, 24);  /* Test register is 24 */
 	if (((upk.regx == 0) && (reg == 0))	/* BTEZ */
 	    || ((upk.regx == 1) && (reg != 0)))	/* BTNEZ */
 	  /* pc = add_offset_16(pc,upk.offset) ; */
@@ -1428,7 +1428,7 @@ extended_mips16_next_pc (CORE_ADDR pc,
 		reg = 31;
 		break;		/* BOGUS Guess */
 	      }
-	    pc = read_signed_register (reg);
+	    pc = get_frame_register_signed (frame, reg);
 	  }
 	else
 	  pc += 2;
@@ -1440,7 +1440,7 @@ extended_mips16_next_pc (CORE_ADDR pc,
          that. */
       {
 	pc += 2;
-	pc = extended_mips16_next_pc (pc, insn, fetch_mips_16 (pc));
+	pc = extended_mips16_next_pc (frame, pc, insn, fetch_mips_16 (pc));
 	break;
       }
     default:
@@ -1453,10 +1453,10 @@ extended_mips16_next_pc (CORE_ADDR pc,
 }
 
 static CORE_ADDR
-mips16_next_pc (CORE_ADDR pc)
+mips16_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned int insn = fetch_mips_16 (pc);
-  return extended_mips16_next_pc (pc, 0, insn);
+  return extended_mips16_next_pc (frame, pc, 0, insn);
 }
 
 /* The mips_next_pc function supports single_step when the remote
@@ -1465,12 +1465,12 @@ mips16_next_pc (CORE_ADDR pc)
    branch will go. This isnt hard because all the data is available.
    The MIPS32 and MIPS16 variants are quite different */
 static CORE_ADDR
-mips_next_pc (CORE_ADDR pc)
+mips_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
   if (pc & 0x01)
-    return mips16_next_pc (pc);
+    return mips16_next_pc (frame, pc);
   else
-    return mips32_next_pc (pc);
+    return mips32_next_pc (frame, pc);
 }
 
 struct mips_frame_cache
@@ -2323,12 +2323,12 @@ mips_addr_bits_remove (CORE_ADDR addr)
    the target of the coming instruction and breakpoint it.  */
 
 int
-mips_software_single_step (struct regcache *regcache)
+mips_software_single_step (struct frame_info *frame)
 {
   CORE_ADDR pc, next_pc;
 
-  pc = read_register (mips_regnum (current_gdbarch)->pc);
-  next_pc = mips_next_pc (pc);
+  pc = get_frame_pc (frame);
+  next_pc = mips_next_pc (frame, pc);
 
   insert_single_step_breakpoint (next_pc);
   return 1;

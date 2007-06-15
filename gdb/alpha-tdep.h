@@ -109,7 +109,7 @@ struct gdbarch_tdep
 };
 
 extern unsigned int alpha_read_insn (CORE_ADDR pc);
-extern int alpha_software_single_step (struct regcache *regcache);
+extern int alpha_software_single_step (struct frame_info *frame);
 extern CORE_ADDR alpha_after_prologue (CORE_ADDR pc);
 
 extern void alpha_mdebug_init_abi (struct gdbarch_info, struct gdbarch *);

@@ -170,18 +170,6 @@ sparc_fetch_wcookie (void)
 }
 
 
-/* Return the contents if register REGNUM as an address.  */
-
-CORE_ADDR
-sparc_address_from_register (int regnum)
-{
-  ULONGEST addr;
-
-  regcache_cooked_read_unsigned (current_regcache, regnum, &addr);
-  return addr;
-}
-
-
 /* The functions on this page are intended to be used to classify
    function arguments.  */
 
@@ -1249,7 +1237,7 @@ sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
    software single-step mechanism.  */
 
 static CORE_ADDR
-sparc_analyze_control_transfer (struct gdbarch *arch,
+sparc_analyze_control_transfer (struct frame_info *frame,
 				CORE_ADDR pc, CORE_ADDR *npc)
 {
   unsigned long insn = sparc_fetch_instruction (pc);
@@ -1291,7 +1279,7 @@ sparc_analyze_control_transfer (struct gdbarch *arch,
   else if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3a)
     {
       /* Trap instruction (TRAP).  */
-      return gdbarch_tdep (arch)->step_trap (insn);
+      return gdbarch_tdep (get_frame_arch (frame))->step_trap (frame, insn);
     }
 
   /* FIXME: Handle DONE and RETRY instructions.  */
@@ -1324,25 +1312,25 @@ sparc_analyze_control_transfer (struct gdbarch *arch,
 }
 
 static CORE_ADDR
-sparc_step_trap (unsigned long insn)
+sparc_step_trap (struct frame_info *frame, unsigned long insn)
 {
   return 0;
 }
 
 int
-sparc_software_single_step (struct regcache *regcache)
+sparc_software_single_step (struct frame_info *frame)
 {
-  struct gdbarch *arch = current_gdbarch;
+  struct gdbarch *arch = get_frame_arch (frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
   CORE_ADDR npc, nnpc;
 
   CORE_ADDR pc, orig_npc;
 
-  pc = sparc_address_from_register (tdep->pc_regnum);
-  orig_npc = npc = sparc_address_from_register (tdep->npc_regnum);
+  pc = get_frame_register_unsigned (frame, tdep->pc_regnum);
+  orig_npc = npc = get_frame_register_unsigned (frame, tdep->npc_regnum);
 
   /* Analyze the instruction at PC.  */
-  nnpc = sparc_analyze_control_transfer (arch, pc, &npc);
+  nnpc = sparc_analyze_control_transfer (frame, pc, &npc);
   if (npc != 0)
     insert_single_step_breakpoint (npc);
 

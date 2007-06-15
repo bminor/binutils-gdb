@@ -1398,14 +1398,13 @@ fp_register_sign_bit (LONGEST reg)
    the target of the coming instruction and breakpoint it.  */
 
 static CORE_ADDR
-alpha_next_pc (CORE_ADDR pc)
+alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned int insn;
   unsigned int op;
   int regno;
   int offset;
   LONGEST rav;
-  gdb_byte reg[ALPHA_REGISTER_SIZE];
 
   insn = alpha_read_insn (pc);
 
@@ -1416,7 +1415,7 @@ alpha_next_pc (CORE_ADDR pc)
     {
       /* Jump format: target PC is:
 	 RB & ~3  */
-      return (read_register ((insn >> 16) & 0x1f) & ~3);
+      return (get_frame_register_unsigned (frame, (insn >> 16) & 0x1f) & ~3);
     }
 
   if ((op & 0x30) == 0x30)
@@ -1447,8 +1446,7 @@ alpha_next_pc (CORE_ADDR pc)
             regno += FP0_REGNUM;
 	}
       
-      regcache_cooked_read (current_regcache, regno, reg);
-      rav = extract_signed_integer (reg, ALPHA_REGISTER_SIZE);
+      rav = get_frame_register_signed (frame, regno);
 
       switch (op)
 	{
@@ -1520,12 +1518,12 @@ alpha_next_pc (CORE_ADDR pc)
 }
 
 int
-alpha_software_single_step (struct regcache *regcache)
+alpha_software_single_step (struct frame_info *frame)
 {
   CORE_ADDR pc, next_pc;
 
-  pc = read_pc ();
-  next_pc = alpha_next_pc (pc);
+  pc = get_frame_pc (frame);
+  next_pc = alpha_next_pc (frame, pc);
 
   insert_single_step_breakpoint (next_pc);
   return 1;

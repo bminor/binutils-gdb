@@ -539,7 +539,7 @@ a command like `return' or `jump' to continue execution."));
   if (SOFTWARE_SINGLE_STEP_P () && step)
     {
       /* Do it the hard way, w/temp breakpoints */
-      if (SOFTWARE_SINGLE_STEP (current_regcache))
+      if (SOFTWARE_SINGLE_STEP (get_current_frame ()))
         {
           /* ...and don't ask hardware to do it.  */
           step = 0;

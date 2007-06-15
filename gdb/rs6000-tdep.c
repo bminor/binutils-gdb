@@ -118,8 +118,8 @@ CORE_ADDR (*rs6000_find_toc_address_hook) (CORE_ADDR) = NULL;
 
 /* Static function prototypes */
 
-static CORE_ADDR branch_dest (int opcode, int instr, CORE_ADDR pc,
-			      CORE_ADDR safety);
+static CORE_ADDR branch_dest (struct frame_info *frame, int opcode,
+			      int instr, CORE_ADDR pc, CORE_ADDR safety);
 static CORE_ADDR skip_prologue (CORE_ADDR, CORE_ADDR,
                                 struct rs6000_framedata *);
 
@@ -624,8 +624,10 @@ rs6000_fetch_pointer_argument (struct frame_info *frame, int argi,
 /* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
 
 static CORE_ADDR
-branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
+branch_dest (struct frame_info *frame, int opcode, int instr,
+	     CORE_ADDR pc, CORE_ADDR safety)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
   CORE_ADDR dest;
   int immediate;
   int absolute;
@@ -656,32 +658,26 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 
       if (ext_op == 16)		/* br conditional register */
 	{
-          dest = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum) & ~3;
+          dest = get_frame_register_unsigned (frame, tdep->ppc_lr_regnum) & ~3;
 
 	  /* If we are about to return from a signal handler, dest is
 	     something like 0x3c90.  The current frame is a signal handler
 	     caller frame, upon completion of the sigreturn system call
 	     execution will return to the saved PC in the frame.  */
-	  if (dest < gdbarch_tdep (current_gdbarch)->text_segment_base)
-	    {
-	      struct frame_info *fi;
-
-	      fi = get_current_frame ();
-	      if (fi != NULL)
-		dest = read_memory_addr (get_frame_base (fi) + SIG_FRAME_PC_OFFSET,
-					 gdbarch_tdep (current_gdbarch)->wordsize);
-	    }
+	  if (dest < tdep->text_segment_base)
+	    dest = read_memory_addr (get_frame_base (frame) + SIG_FRAME_PC_OFFSET,
+				     tdep->wordsize);
 	}
 
       else if (ext_op == 528)	/* br cond to count reg */
 	{
-          dest = read_register (gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum) & ~3;
+          dest = get_frame_register_unsigned (frame, tdep->ppc_ctr_regnum) & ~3;
 
 	  /* If we are about to execute a system call, dest is something
 	     like 0x22fc or 0x3b00.  Upon completion the system call
 	     will return to the address in the link register.  */
-	  if (dest < gdbarch_tdep (current_gdbarch)->text_segment_base)
-            dest = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum) & ~3;
+	  if (dest < tdep->text_segment_base)
+            dest = get_frame_register_unsigned (frame, tdep->ppc_lr_regnum) & ~3;
 	}
       else
 	return -1;
@@ -690,7 +686,7 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
     default:
       return -1;
     }
-  return (dest < gdbarch_tdep (current_gdbarch)->text_segment_base) ? safety : dest;
+  return (dest < tdep->text_segment_base) ? safety : dest;
 }
 
 
@@ -725,9 +721,9 @@ rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
    the sequence.  */
 
 static int 
-deal_with_atomic_sequence (struct regcache *regcache)
+deal_with_atomic_sequence (struct frame_info *frame)
 {
-  CORE_ADDR pc = read_pc ();
+  CORE_ADDR pc = get_frame_pc (frame);
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
   CORE_ADDR branch_bp; /* Breakpoint at branch instruction's destination.  */
@@ -762,7 +758,7 @@ deal_with_atomic_sequence (struct regcache *regcache)
                          to the standard single-step code.  */
           
           opcode = insn >> 26;
-          branch_bp = branch_dest (opcode, insn, pc, breaks[0]);
+          branch_bp = branch_dest (frame, opcode, insn, pc, breaks[0]);
           
           if (branch_bp != -1)
             {
@@ -807,7 +803,7 @@ deal_with_atomic_sequence (struct regcache *regcache)
 /* AIX does not support PT_STEP.  Simulate it.  */
 
 int
-rs6000_software_single_step (struct regcache *regcache)
+rs6000_software_single_step (struct frame_info *frame)
 {
   CORE_ADDR dummy;
   int breakp_sz;
@@ -817,16 +813,16 @@ rs6000_software_single_step (struct regcache *regcache)
   CORE_ADDR breaks[2];
   int opcode;
 
-  loc = read_pc ();
+  loc = get_frame_pc (frame);
 
   insn = read_memory_integer (loc, 4);
 
-  if (deal_with_atomic_sequence (regcache))
+  if (deal_with_atomic_sequence (frame))
     return 1;
   
   breaks[0] = loc + breakp_sz;
   opcode = insn >> 26;
-  breaks[1] = branch_dest (opcode, insn, loc, breaks[0]);
+  breaks[1] = branch_dest (frame, opcode, insn, loc, breaks[0]);
 
   /* Don't put two breakpoints on the same address. */
   if (breaks[1] == breaks[0])
@@ -961,13 +957,18 @@ store_param_on_stack_p (unsigned long op, int framep, int *r0_contains_arg)
 static int
 bl_to_blrl_insn_p (CORE_ADDR pc, int insn)
 {
-  const int opcode = 18;
-  const CORE_ADDR dest = branch_dest (opcode, insn, pc, -1);
+  CORE_ADDR dest;
+  int immediate;
+  int absolute;
   int dest_insn;
 
-  if (dest == -1)
-    return 0;  /* Should never happen, but just return zero to be safe.  */
-  
+  absolute = (int) ((insn >> 1) & 1);
+  immediate = ((insn & ~3) << 6) >> 6;
+  if (absolute)
+    dest = immediate;
+  else
+    dest = pc + immediate;
+
   dest_insn = read_memory_integer (dest, 4);
   if ((dest_insn & 0xfc00ffff) == 0x4c000021) /* blrl */
     return 1;
