@@ -1,3 +1,8 @@
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* NEWS: Mention "info spu" commands and qXfer:spu:read and
+	qXfer:spu:write remote packet types.
+
 2007-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* xml-tdesc.c (tdesc_start_target): New.

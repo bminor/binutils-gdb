@@ -74,6 +74,11 @@ show sysroot
   general version of "set solib-absolute-prefix", which is now
   an alias to "set sysroot".
 
+info spu
+  Provide extended SPU facility status information.  This set of
+  commands is available only when debugging the Cell/B.E. SPU
+  architecture.
+
 * New native configurations
 
 OpenBSD/sh			sh*-*openbsd*
@@ -99,6 +104,11 @@ QPassSignals:
 qXfer:features:read:
   Read an XML target description from the target, which describes its
   features.
+
+qXfer:spu:read:
+qXfer:spu:write:
+  Read or write contents of an spufs file on the target system.  These
+  packets are available only on the Cell/B.E. SPU architecture.
 
 * Removed targets
 
