@@ -96,7 +96,7 @@ legacy_register_sim_regno (int regnum)
 }
 
 CORE_ADDR
-generic_skip_trampoline_code (CORE_ADDR pc)
+generic_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   return 0;
 }

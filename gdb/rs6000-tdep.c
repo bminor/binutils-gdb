@@ -1972,7 +1972,7 @@ rs6000_in_solib_return_trampoline (CORE_ADDR pc, char *name)
    code that should be skipped.  */
 
 CORE_ADDR
-rs6000_skip_trampoline_code (CORE_ADDR pc)
+rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned int ii, op;
   int rel;
@@ -2009,7 +2009,7 @@ rs6000_skip_trampoline_code (CORE_ADDR pc)
     }
 
   /* If pc is in a shared library trampoline, return its target.  */
-  solib_target_pc = find_solib_trampoline_target (pc);
+  solib_target_pc = find_solib_trampoline_target (frame, pc);
   if (solib_target_pc)
     return solib_target_pc;
 
@@ -2019,7 +2019,7 @@ rs6000_skip_trampoline_code (CORE_ADDR pc)
       if (op != trampoline_code[ii])
 	return 0;
     }
-  ii = read_register (11);	/* r11 holds destination addr   */
+  ii = get_frame_register_unsigned (frame, 11);	/* r11 holds destination addr   */
   pc = read_memory_addr (ii, gdbarch_tdep (current_gdbarch)->wordsize); /* (r11) value */
   return pc;
 }

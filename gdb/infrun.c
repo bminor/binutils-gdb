@@ -2456,9 +2456,10 @@ process_event_stop_test:
          function.  That's what tells us (a) whether we want to step
          into it at all, and (b) what prologue we want to run to the
          end of, if we do step into it.  */
-      real_stop_pc = skip_language_trampoline (stop_pc);
+      real_stop_pc = skip_language_trampoline (get_current_frame (), stop_pc);
       if (real_stop_pc == 0)
-	real_stop_pc = gdbarch_skip_trampoline_code (current_gdbarch, stop_pc);
+	real_stop_pc = gdbarch_skip_trampoline_code
+			 (current_gdbarch, get_current_frame (), stop_pc);
       if (real_stop_pc != 0)
 	ecs->stop_func_start = real_stop_pc;
 
@@ -2520,8 +2521,9 @@ process_event_stop_test:
 					  stop_pc, ecs->stop_func_name))
     {
       /* Determine where this trampoline returns.  */
-      CORE_ADDR real_stop_pc = gdbarch_skip_trampoline_code
-				 (current_gdbarch, stop_pc);
+      CORE_ADDR real_stop_pc;
+      real_stop_pc = gdbarch_skip_trampoline_code
+		       (current_gdbarch, get_current_frame (), stop_pc);
 
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into solib return tramp\n");

@@ -1,5 +1,64 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (skip_trampoline_code): Add FRAME argument.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* arch-utils.c (generic_skip_trampoline_code): Add FRAME argument.
+	* arch-utils.h (generic_skip_trampoline_code): Likewise.
+	* infrun.c (handle_inferior_event): Pass current frame to
+	gdbarch_skip_trampoline_code and skip_language_trampoline.
+
+	* language.c (unk_lang_trampoline): Add FRAME argument.
+	(skip_language_trampoline): Add FRAME argument.  Pass it to
+	skip_trampoline callback.
+	* language.h: Add forward declaration of struct frame_info.
+	(struct language_defn): Add FRAME argument to skip_trampoline.
+	(skip_language_trampoline): Add FRAME argument.
+	* cp-abi.c (cplus_skip_trampoline): Add FRAME argument.  Pass it
+	to skip_trampoline callback.
+	* cp-abi.h: Add forward declaration of struct frame_info.
+	(cplus_skip_trampoline): Add FRAME argument.
+	(struct cp_abi_ops): Add FRAME argument to skip_trampoline callback.
+	* gnu-v3-abi.c (gnuv3_skip_trampoline): Add FRAME argument.  Pass it
+	to gdbarch_skip_trampoline_code.
+	* objc-lang.c (objc_skip_trampoline): Add FRAME argument.  Pass it
+	to gdbarch_skip_trampoline_code.
+
+	* minsyms.c (find_solib_trampoline_target): Add FRAME argument.
+	* symtab.h (find_solib_trampoline_target): Likewise.
+	* obsd-tdep.c (obsd_skip_solib_resolver): Pass current frame to
+	find_solib_trampoline_target.
+
+	* arm-tdep.c (arm_skip_stub): Add FRAME argument.  Read registers
+	from FRAME instead of calling read_register.
+
+	* hppa-hpux-tdep.c (hppa_hpux_skip_trampoline_code): Add FRAME
+	argument.  Read registers from FRAME instead of using read_register.
+	* hppa-tdep.c (hppa_skip_trampoline_code): Likewise.
+	* hppa-tdep.h (hppa_skip_trampoline_code): Add FRAME argument.
+
+	* i386-cygwin-tdep.c (i386_cygwin_skip_trampoline_code): Add FRAME
+	argument.
+
+	* m32c-tdep.c (m32c_skip_trampoline_code): Add FRAME argument.
+
+	* mips-tdep.c (mips_skip_trampoline_code): Add FRAME argument.  Read
+	registers from FRAME instead of using read_signed_register.
+
+	* ppc-linux-tdep.c (ppc_linux_skip_trampoline_code): Add FRAME
+	argument.
+	(ppc64_standard_linkage_target): Likewise.  Read registers from FRAME
+	instead of using read_register.
+	(ppc64_skip_trampoline_code): Add FRAME argument.  Pass it to
+	ppc64_standard_linkage_target.
+	* rs6000-tdep.c (rs6000_skip_trampoline_code): Add FRAME argument.
+	Pass it to find_solib_trampoline_target.  Read registers from FRAME
+	instead of using read_register.
+
+	* xstormy16-tdep.c (xstormy16_skip_trampoline_code): Add FRAME
+	argument.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (software_single_step): Replace REGCACHE argument by
 	FRAME argument.
 	* gdbarch.c, gdbarch.h: Regenerate.
@@ -64,7 +123,6 @@
 
 	* spu-tdep.c (spu_software_single_step): Replace REGCACHE argument
 	by FRAME.  Read registers from FRAME instead of REGCACHE.
-
 
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 

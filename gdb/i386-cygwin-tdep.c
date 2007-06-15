@@ -27,7 +27,7 @@
 #include "i386-tdep.h"
 
 static CORE_ADDR
-i386_cygwin_skip_trampoline_code (CORE_ADDR pc)
+i386_cygwin_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   return i386_pe_skip_trampoline_code (pc, NULL);
 }

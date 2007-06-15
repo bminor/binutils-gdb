@@ -122,11 +122,11 @@ cplus_make_method_ptr (gdb_byte *contents, CORE_ADDR value, int is_virtual)
 }
 
 CORE_ADDR
-cplus_skip_trampoline (CORE_ADDR stop_pc)
+cplus_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
 {
   if (current_cp_abi.skip_trampoline == NULL)
     return 0;
-  return (*current_cp_abi.skip_trampoline) (stop_pc);
+  return (*current_cp_abi.skip_trampoline) (frame, stop_pc);
 }
 
 struct value *

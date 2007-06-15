@@ -77,7 +77,8 @@ int cannot_register_not (int regnum);
 
 extern gdbarch_virtual_frame_pointer_ftype legacy_virtual_frame_pointer;
 
-extern CORE_ADDR generic_skip_trampoline_code (CORE_ADDR pc);
+extern CORE_ADDR generic_skip_trampoline_code (struct frame_info *frame,
+					       CORE_ADDR pc);
 
 extern CORE_ADDR generic_skip_solib_resolver (struct gdbarch *gdbarch,
 					      CORE_ADDR pc);

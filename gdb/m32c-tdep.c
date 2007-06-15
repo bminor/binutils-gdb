@@ -2332,7 +2332,7 @@ m32c_return_value (struct gdbarch *gdbarch,
    code sequence seems more fragile.  */
 
 static CORE_ADDR
-m32c_skip_trampoline_code (CORE_ADDR stop_pc)
+m32c_skip_trampoline_code (struct frame_info *frame, CORE_ADDR stop_pc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 

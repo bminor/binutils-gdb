@@ -573,7 +573,7 @@ xstormy16_find_jmp_table_entry (CORE_ADDR faddr)
 }
 
 static CORE_ADDR
-xstormy16_skip_trampoline_code (CORE_ADDR pc)
+xstormy16_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   CORE_ADDR tmp = xstormy16_resolve_jmp_table_entry (pc);
 

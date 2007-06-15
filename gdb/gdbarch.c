@@ -2769,13 +2769,13 @@ set_gdbarch_print_insn (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, CORE_ADDR pc)
+gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, struct frame_info *frame, CORE_ADDR pc)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->skip_trampoline_code != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_skip_trampoline_code called\n");
-  return gdbarch->skip_trampoline_code (pc);
+  return gdbarch->skip_trampoline_code (frame, pc);
 }
 
 void

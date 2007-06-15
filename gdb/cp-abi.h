@@ -31,6 +31,7 @@ struct fn_field;
 struct type;
 struct value;
 struct ui_file;
+struct frame_info;
 
 /* The functions here that attempt to determine what sort of thing a
    mangled name refers to may well be revised in the future.  It would
@@ -173,7 +174,7 @@ void cplus_make_method_ptr (gdb_byte *CONTENTS, CORE_ADDR address,
 /* Determine if we are currently in a C++ thunk.  If so, get the address
    of the routine we are thunking to and continue to there instead.  */
 
-CORE_ADDR cplus_skip_trampoline (CORE_ADDR stop_pc);
+CORE_ADDR cplus_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc);
 
 struct cp_abi_ops
 {
@@ -197,7 +198,7 @@ struct cp_abi_ops
   int (*method_ptr_size) (void);
   void (*make_method_ptr) (gdb_byte *, CORE_ADDR, int);
   struct value * (*method_ptr_to_value) (struct value **, struct value *);
-  CORE_ADDR (*skip_trampoline) (CORE_ADDR);
+  CORE_ADDR (*skip_trampoline) (struct frame_info *, CORE_ADDR);
 };
 
 

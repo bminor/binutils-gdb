@@ -1191,7 +1191,7 @@ extern struct minimal_symbol *lookup_minimal_symbol_by_pc_section (CORE_ADDR,
 extern struct minimal_symbol
   *lookup_solib_trampoline_symbol_by_pc (CORE_ADDR);
 
-extern CORE_ADDR find_solib_trampoline_target (CORE_ADDR);
+extern CORE_ADDR find_solib_trampoline_target (struct frame_info *, CORE_ADDR);
 
 extern void init_minimal_symbol_collection (void);
 

@@ -299,7 +299,7 @@ hppa_hpux_in_solib_return_trampoline (CORE_ADDR pc, char *name)
    used in dynamic executables.  */
 
 static CORE_ADDR
-hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
+hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   long orig_pc = pc;
   long prev_inst, curr_inst, loc;
@@ -310,7 +310,7 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
      of the function.  So we may have to do something special.  */
   if (pc == hppa_symbol_address("$$dyncall"))
     {
-      pc = (CORE_ADDR) read_register (22);
+      pc = (CORE_ADDR) get_frame_register_unsigned (frame, 22);
 
       /* If bit 30 (counting from the left) is on, then pc is the address of
          the PLT entry for this function, not the address of the function
@@ -321,12 +321,12 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
     }
   if (pc == hppa_symbol_address("$$dyncall_external"))
     {
-      pc = (CORE_ADDR) read_register (22);
+      pc = (CORE_ADDR) get_frame_register_unsigned (frame, 22);
       pc = (CORE_ADDR) read_memory_integer
 			 (pc & ~0x3, gdbarch_ptr_bit (current_gdbarch) / 8);
     }
   else if (pc == hppa_symbol_address("_sr4export"))
-    pc = (CORE_ADDR) (read_register (22));
+    pc = (CORE_ADDR) get_frame_register_unsigned (frame, 22);
 
   /* Get the unwind descriptor corresponding to PC, return zero
      if no unwind was found.  */
@@ -500,8 +500,11 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
 	  /* Yup.  See if the previous instruction loaded
 	     rp from sp - 8.  */
 	  if (prev_inst == 0x4bc23ff1)
-	    return (read_memory_integer
-		    (read_register (HPPA_SP_REGNUM) - 8, 4)) & ~0x3;
+	    {
+	      CORE_ADDR sp;
+	      sp = get_frame_register_unsigned (frame, HPPA_SP_REGNUM);
+	      return read_memory_integer (sp - 8, 4) & ~0x3;
+	    }
 	  else
 	    {
 	      warning (_("Unable to find restore of %%rp before bv (%%rp)."));
@@ -515,7 +518,7 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
       else if ((curr_inst & 0xffe0f000) == 0xe840d000)
 	{
 	  return (read_memory_integer
-		  (read_register (HPPA_SP_REGNUM) - 24,
+		  (get_frame_register_unsigned (frame, HPPA_SP_REGNUM) - 24,
 		   gdbarch_ptr_bit (current_gdbarch) / 8)) & ~0x3;
 	}
 
@@ -528,7 +531,7 @@ hppa_hpux_skip_trampoline_code (CORE_ADDR pc)
 	     I guess we could check for the previous instruction being
 	     mtsp %r1,%sr0 if we want to do sanity checking.  */
 	  return (read_memory_integer
-		  (read_register (HPPA_SP_REGNUM) - 24,
+		  (get_frame_register_unsigned (frame, HPPA_SP_REGNUM) - 24,
 		   gdbarch_ptr_bit (current_gdbarch) / 8)) & ~0x3;
 	}
 

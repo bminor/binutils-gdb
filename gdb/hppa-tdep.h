@@ -246,6 +246,6 @@ extern struct hppa_objfile_private *
 hppa_init_objfile_priv_data (struct objfile *objfile);
 
 extern int hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name);
-extern CORE_ADDR hppa_skip_trampoline_code (CORE_ADDR pc);
+extern CORE_ADDR hppa_skip_trampoline_code (struct frame_info *, CORE_ADDR pc);
 
 #endif  /* hppa-tdep.h */

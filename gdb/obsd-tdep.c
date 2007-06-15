@@ -34,5 +34,5 @@ obsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (msym && SYMBOL_VALUE_ADDRESS (msym) == pc)
     return frame_pc_unwind (get_current_frame ());
   else
-    return find_solib_trampoline_target (pc);
+    return find_solib_trampoline_target (get_current_frame (), pc);
 }

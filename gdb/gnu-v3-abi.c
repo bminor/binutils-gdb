@@ -679,14 +679,15 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
    of the routine we are thunking to and continue to there instead.  */
 
 static CORE_ADDR 
-gnuv3_skip_trampoline (CORE_ADDR stop_pc)
+gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
 {
   CORE_ADDR real_stop_pc, method_stop_pc;
   struct minimal_symbol *thunk_sym, *fn_sym;
   struct obj_section *section;
   char *thunk_name, *fn_name;
   
-  real_stop_pc = gdbarch_skip_trampoline_code (current_gdbarch, stop_pc);
+  real_stop_pc = gdbarch_skip_trampoline_code
+		   (current_gdbarch, frame, stop_pc);
   if (real_stop_pc == 0)
     real_stop_pc = stop_pc;
 
@@ -710,7 +711,7 @@ gnuv3_skip_trampoline (CORE_ADDR stop_pc)
 
   method_stop_pc = SYMBOL_VALUE_ADDRESS (fn_sym);
   real_stop_pc = gdbarch_skip_trampoline_code
-		   (current_gdbarch, method_stop_pc);
+		   (current_gdbarch, frame, method_stop_pc);
   if (real_stop_pc == 0)
     real_stop_pc = method_stop_pc;
 

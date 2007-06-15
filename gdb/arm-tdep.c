@@ -2380,7 +2380,7 @@ arm_in_call_stub (CORE_ADDR pc, char *name)
    are r0-r9, sl, fp, ip, sp, and lr.  */
 
 CORE_ADDR
-arm_skip_stub (CORE_ADDR pc)
+arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
 {
   char *name;
   CORE_ADDR start_addr;
@@ -2402,7 +2402,7 @@ arm_skip_stub (CORE_ADDR pc)
 
       for (regno = 0; regno <= 14; regno++)
 	if (strcmp (&name[10], table[regno]) == 0)
-	  return read_register (regno);
+	  return get_frame_register_unsigned (frame, regno);
     }
 
   return 0;			/* not a stub */

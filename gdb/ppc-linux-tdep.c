@@ -86,7 +86,7 @@
 
 
 static CORE_ADDR
-ppc_linux_skip_trampoline_code (CORE_ADDR pc)
+ppc_linux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   gdb_byte buf[4];
   struct obj_section *sect;
@@ -557,14 +557,16 @@ static struct insn_pattern ppc64_standard_linkage[] =
    standard linkage function will send them.  (This doesn't deal with
    dynamic linker lazy symbol resolution stubs.)  */
 static CORE_ADDR
-ppc64_standard_linkage_target (CORE_ADDR pc, unsigned int *insn)
+ppc64_standard_linkage_target (struct frame_info *frame,
+			       CORE_ADDR pc, unsigned int *insn)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
 
   /* The address of the function descriptor this linkage function
      references.  */
   CORE_ADDR desc
-    = ((CORE_ADDR) read_register (tdep->ppc_gp0_regnum + 2)
+    = ((CORE_ADDR) get_frame_register_unsigned (frame,
+						tdep->ppc_gp0_regnum + 2)
        + (insn_d_field (insn[0]) << 16)
        + insn_ds_field (insn[2]));
 
@@ -576,13 +578,14 @@ ppc64_standard_linkage_target (CORE_ADDR pc, unsigned int *insn)
 /* Given that we've begun executing a call trampoline at PC, return
    the entry point of the function the trampoline will go to.  */
 static CORE_ADDR
-ppc64_skip_trampoline_code (CORE_ADDR pc)
+ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned int ppc64_standard_linkage_insn[PPC64_STANDARD_LINKAGE_LEN];
 
   if (insns_match_pattern (pc, ppc64_standard_linkage,
                            ppc64_standard_linkage_insn))
-    return ppc64_standard_linkage_target (pc, ppc64_standard_linkage_insn);
+    return ppc64_standard_linkage_target (frame, pc,
+					  ppc64_standard_linkage_insn);
   else
     return 0;
 }

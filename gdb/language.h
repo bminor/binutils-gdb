@@ -29,6 +29,7 @@
 /* Forward decls for prototypes */
 struct value;
 struct objfile;
+struct frame_info;
 struct expression;
 struct ui_file;
 
@@ -221,7 +222,7 @@ struct language_defn
        If that PC falls in a trampoline belonging to this language,
        return the address of the first pc in the real function, or 0
        if it isn't a language tramp for this language.  */
-    CORE_ADDR (*skip_trampoline) (CORE_ADDR pc);
+    CORE_ADDR (*skip_trampoline) (struct frame_info *, CORE_ADDR);
 
     /* Now come some hooks for lookup_symbol.  */
 
@@ -453,7 +454,7 @@ extern enum language get_frame_language (void);	/* In stack.c */
 
 /* Check for a language-specific trampoline. */
 
-extern CORE_ADDR skip_language_trampoline (CORE_ADDR pc);
+extern CORE_ADDR skip_language_trampoline (struct frame_info *, CORE_ADDR pc);
 
 /* Return demangled language symbol, or NULL.  */
 extern char *language_demangle (const struct language_defn *current_language, 

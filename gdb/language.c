@@ -77,7 +77,7 @@ static void unk_lang_print_type (struct type *, char *, struct ui_file *,
 
 static int unk_lang_value_print (struct value *, struct ui_file *, int, enum val_prettyprint);
 
-static CORE_ADDR unk_lang_trampoline (CORE_ADDR pc);
+static CORE_ADDR unk_lang_trampoline (struct frame_info *, CORE_ADDR pc);
 
 /* Forward declaration */
 extern const struct language_defn unknown_language_defn;
@@ -1005,7 +1005,7 @@ add_language (const struct language_defn *lang)
    Return the result from the first that returns non-zero, or 0 if all
    `fail'.  */
 CORE_ADDR 
-skip_language_trampoline (CORE_ADDR pc)
+skip_language_trampoline (struct frame_info *frame, CORE_ADDR pc)
 {
   int i;
 
@@ -1013,7 +1013,7 @@ skip_language_trampoline (CORE_ADDR pc)
     {
       if (languages[i]->skip_trampoline)
 	{
-	  CORE_ADDR real_pc = (languages[i]->skip_trampoline) (pc);
+	  CORE_ADDR real_pc = (languages[i]->skip_trampoline) (frame, pc);
 	  if (real_pc)
 	    return real_pc;
 	}
@@ -1130,7 +1130,7 @@ unk_lang_value_print (struct value *val, struct ui_file *stream, int format,
   error (_("internal error - unimplemented function unk_lang_value_print called."));
 }
 
-static CORE_ADDR unk_lang_trampoline (CORE_ADDR pc)
+static CORE_ADDR unk_lang_trampoline (struct frame_info *frame, CORE_ADDR pc)
 {
   return 0;
 }

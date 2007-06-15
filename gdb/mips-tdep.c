@@ -4603,7 +4603,7 @@ mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
    gory details.  */
 
 static CORE_ADDR
-mips_skip_trampoline_code (CORE_ADDR pc)
+mips_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   char *name;
   CORE_ADDR start_addr;
@@ -4616,14 +4616,14 @@ mips_skip_trampoline_code (CORE_ADDR pc)
      target PC is in $31 ($ra).  */
   if (strcmp (name, "__mips16_ret_sf") == 0
       || strcmp (name, "__mips16_ret_df") == 0)
-    return read_signed_register (MIPS_RA_REGNUM);
+    return get_frame_register_signed (frame, MIPS_RA_REGNUM);
 
   if (strncmp (name, "__mips16_call_stub_", 19) == 0)
     {
       /* If the PC is in __mips16_call_stub_{1..10}, this is a call stub
          and the target PC is in $2.  */
       if (name[19] >= '0' && name[19] <= '9')
-	return read_signed_register (2);
+	return get_frame_register_signed (frame, 2);
 
       /* If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
          before the jal instruction, this is effectively a call stub
@@ -4645,7 +4645,7 @@ mips_skip_trampoline_code (CORE_ADDR pc)
 	         So scan down to the lui/addi and extract the target
 	         address from those two instructions.  */
 
-	      CORE_ADDR target_pc = read_signed_register (2);
+	      CORE_ADDR target_pc = get_frame_register_signed (frame, 2);
 	      ULONGEST inst;
 	      int i;
 
@@ -4676,7 +4676,7 @@ mips_skip_trampoline_code (CORE_ADDR pc)
 	  else
 	    /* This is the 'return' part of a call stub.  The return
 	       address is in $r18.  */
-	    return read_signed_register (18);
+	    return get_frame_register_signed (frame, 18);
 	}
     }
   return 0;			/* not a stub */

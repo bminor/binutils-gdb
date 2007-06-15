@@ -2941,7 +2941,7 @@ hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
    systems: $$dyncall, import stubs and PLT stubs.  */
 
 CORE_ADDR
-hppa_skip_trampoline_code (CORE_ADDR pc)
+hppa_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned int insn[HPPA_MAX_INSN_PATTERN_LEN];
   int dp_rel;
@@ -2949,7 +2949,7 @@ hppa_skip_trampoline_code (CORE_ADDR pc)
   /* $$dyncall handles both PLABELs and direct addresses.  */
   if (hppa_in_dyncall (pc))
     {
-      pc = read_register (HPPA_R0_REGNUM + 22);
+      pc = get_frame_register_unsigned (frame, HPPA_R0_REGNUM + 22);
 
       /* PLABELs have bit 30 set; if it's a PLABEL, then dereference it.  */
       if (pc & 0x2)
@@ -2965,9 +2965,9 @@ hppa_skip_trampoline_code (CORE_ADDR pc)
       pc = hppa_extract_21 (insn[0]) + hppa_extract_14 (insn[1]);
 
       if (dp_rel)
-        pc += read_register (HPPA_DP_REGNUM);
+        pc += get_frame_register_unsigned (frame, HPPA_DP_REGNUM);
       else
-        pc += read_register (HPPA_R0_REGNUM + 19);
+        pc += get_frame_register_unsigned (frame, HPPA_R0_REGNUM + 19);
 
       /* fallthrough */
     }

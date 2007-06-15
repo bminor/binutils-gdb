@@ -576,12 +576,13 @@ objc_create_fundamental_type (struct objfile *objfile, int typeid)
    for the user since they are only interested in stepping into the
    method function anyway.  */
 static CORE_ADDR 
-objc_skip_trampoline (CORE_ADDR stop_pc)
+objc_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
 {
   CORE_ADDR real_stop_pc;
   CORE_ADDR method_stop_pc;
   
-  real_stop_pc = gdbarch_skip_trampoline_code (current_gdbarch, stop_pc);
+  real_stop_pc = gdbarch_skip_trampoline_code
+		   (current_gdbarch, frame, stop_pc);
 
   if (real_stop_pc != 0)
     find_objc_msgcall (real_stop_pc, &method_stop_pc);
@@ -591,7 +592,7 @@ objc_skip_trampoline (CORE_ADDR stop_pc)
   if (method_stop_pc)
     {
       real_stop_pc = gdbarch_skip_trampoline_code
-		       (current_gdbarch, method_stop_pc);
+		       (current_gdbarch, frame, method_stop_pc);
       if (real_stop_pc == 0)
 	real_stop_pc = method_stop_pc;
     }
