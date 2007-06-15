@@ -850,7 +850,12 @@ static CONFIG_ATTR
 current_me_module ()
 {
   if (target_has_registers)
-    return read_register (MEP_MODULE_REGNUM);
+    {
+      ULONGEST regval;
+      regcache_cooked_read_unsigned (current_regcache,
+				     MEP_MODULE_REGNUM, &regval);
+      return regval;
+    }
   else
     return gdbarch_tdep (current_gdbarch)->me_module;
 }
@@ -868,7 +873,12 @@ static unsigned int
 current_options ()
 {
   if (target_has_registers)
-    return read_register (MEP_OPT_REGNUM);
+    {
+      ULONGEST regval;
+      regcache_cooked_read_unsigned (current_regcache,
+				     MEP_OPT_REGNUM, &regval);
+      return regval;
+    }
   else
     return me_module_opt (current_me_module ());
 }

@@ -1,5 +1,11 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mep-tdep.c (current_me_module): Read from current regcache
+	instead of calling read_register.
+	(current_options): Likewise.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* cris-tdep.c (cris_stopped_data_address): Read register values
 	from current frame instead of calling read_register.
 	* frv-tdep.c (frv_stopped_data_address): Likewise.
