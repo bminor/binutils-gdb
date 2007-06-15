@@ -1324,93 +1324,103 @@ sh64_return_value (struct gdbarch *gdbarch, struct type *type,
 }
 
 static void
-sh64_show_media_regs (void)
+sh64_show_media_regs (struct frame_info *frame)
 {
   int i;
 
-  printf_filtered ("PC=%s SR=%016llx \n",
-		   paddr (read_register (PC_REGNUM)),
-		   (long long) read_register (SR_REGNUM));
+  printf_filtered
+    ("PC=%s SR=%016llx \n",
+     paddr (get_frame_register_unsigned (frame, PC_REGNUM)),
+     (long long) get_frame_register_unsigned (frame, SR_REGNUM));
 
-  printf_filtered ("SSR=%016llx SPC=%016llx \n",
-		   (long long) read_register (SSR_REGNUM),
-		   (long long) read_register (SPC_REGNUM));
-  printf_filtered ("FPSCR=%016lx\n ",
-		   (long) read_register (FPSCR_REGNUM));
+  printf_filtered
+    ("SSR=%016llx SPC=%016llx \n",
+     (long long) get_frame_register_unsigned (frame, SSR_REGNUM),
+     (long long) get_frame_register_unsigned (frame, SPC_REGNUM));
+  printf_filtered
+    ("FPSCR=%016lx\n ",
+     (long) get_frame_register_unsigned (frame, FPSCR_REGNUM));
 
   for (i = 0; i < 64; i = i + 4)
-    printf_filtered ("\nR%d-R%d  %016llx %016llx %016llx %016llx\n",
-		     i, i + 3,
-		     (long long) read_register (i + 0),
-		     (long long) read_register (i + 1),
-		     (long long) read_register (i + 2),
-		     (long long) read_register (i + 3));
+    printf_filtered
+      ("\nR%d-R%d  %016llx %016llx %016llx %016llx\n",
+       i, i + 3,
+      (long long) get_frame_register_unsigned (frame, i + 0),
+      (long long) get_frame_register_unsigned (frame, i + 1),
+      (long long) get_frame_register_unsigned (frame, i + 2),
+      (long long) get_frame_register_unsigned (frame, i + 3));
 
   printf_filtered ("\n");
   
   for (i = 0; i < 64; i = i + 8)
-    printf_filtered ("FR%d-FR%d  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		     i, i + 7,
-		     (long) read_register (FP0_REGNUM + i + 0),
-		     (long) read_register (FP0_REGNUM + i + 1),
-		     (long) read_register (FP0_REGNUM + i + 2),
-		     (long) read_register (FP0_REGNUM + i + 3),
-		     (long) read_register (FP0_REGNUM + i + 4),
-		     (long) read_register (FP0_REGNUM + i + 5),
-		     (long) read_register (FP0_REGNUM + i + 6),
-		     (long) read_register (FP0_REGNUM + i + 7));
+    printf_filtered
+      ("FR%d-FR%d  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+       i, i + 7,
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 0),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 1),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 2),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 3),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 4),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 5),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 6),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 7));
 }
 
 static void
-sh64_show_compact_regs (void)
+sh64_show_compact_regs (struct frame_info *frame)
 {
   int i;
 
-  printf_filtered ("PC=%s \n",
-		   paddr (read_register (PC_C_REGNUM)));
+  printf_filtered
+    ("PC=%s \n",
+     paddr (get_frame_register_unsigned (frame, PC_C_REGNUM)));
 
-  printf_filtered ("GBR=%08lx MACH=%08lx MACL=%08lx PR=%08lx T=%08lx\n",
-		   (long) read_register (GBR_C_REGNUM),
-		   (long) read_register (MACH_C_REGNUM),
-		   (long) read_register (MACL_C_REGNUM),
-		   (long) read_register (PR_C_REGNUM),
-		   (long) read_register (T_C_REGNUM));
-  printf_filtered ("FPSCR=%08lx FPUL=%08lx\n",
-		   (long) read_register (FPSCR_C_REGNUM),
-		   (long) read_register (FPUL_C_REGNUM));
+  printf_filtered
+    ("GBR=%08lx MACH=%08lx MACL=%08lx PR=%08lx T=%08lx\n",
+     (long) get_frame_register_unsigned (frame, GBR_C_REGNUM),
+     (long) get_frame_register_unsigned (frame, MACH_C_REGNUM),
+     (long) get_frame_register_unsigned (frame, MACL_C_REGNUM),
+     (long) get_frame_register_unsigned (frame, PR_C_REGNUM),
+     (long) get_frame_register_unsigned (frame, T_C_REGNUM));
+  printf_filtered
+    ("FPSCR=%08lx FPUL=%08lx\n",
+     (long) get_frame_register_unsigned (frame, FPSCR_C_REGNUM),
+     (long) get_frame_register_unsigned (frame, FPUL_C_REGNUM));
 
   for (i = 0; i < 16; i = i + 4)
-    printf_filtered ("\nR%d-R%d  %08lx %08lx %08lx %08lx\n",
-		     i, i + 3,
-		     (long) read_register (i + 0),
-		     (long) read_register (i + 1),
-		     (long) read_register (i + 2),
-		     (long) read_register (i + 3));
+    printf_filtered
+      ("\nR%d-R%d  %08lx %08lx %08lx %08lx\n",
+       i, i + 3,
+       (long) get_frame_register_unsigned (frame, i + 0),
+       (long) get_frame_register_unsigned (frame, i + 1),
+       (long) get_frame_register_unsigned (frame, i + 2),
+       (long) get_frame_register_unsigned (frame, i + 3));
 
   printf_filtered ("\n");
   
   for (i = 0; i < 16; i = i + 8)
-    printf_filtered ("FR%d-FR%d  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		     i, i + 7,
-		     (long) read_register (FP0_REGNUM + i + 0),
-		     (long) read_register (FP0_REGNUM + i + 1),
-		     (long) read_register (FP0_REGNUM + i + 2),
-		     (long) read_register (FP0_REGNUM + i + 3),
-		     (long) read_register (FP0_REGNUM + i + 4),
-		     (long) read_register (FP0_REGNUM + i + 5),
-		     (long) read_register (FP0_REGNUM + i + 6),
-		     (long) read_register (FP0_REGNUM + i + 7));
+    printf_filtered
+      ("FR%d-FR%d  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+       i, i + 7,
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 0),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 1),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 2),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 3),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 4),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 5),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 6),
+       (long) get_frame_register_unsigned (frame, FP0_REGNUM + i + 7));
 }
 
 /* FIXME!!! This only shows the registers for shmedia, excluding the
    pseudo registers.  */
 void
-sh64_show_regs (void)
+sh64_show_regs (struct frame_info *frame)
 {
-  if (pc_is_isa32 (get_frame_pc (get_selected_frame (NULL))))
-    sh64_show_media_regs ();
+  if (pc_is_isa32 (get_frame_pc (frame)))
+    sh64_show_media_regs (frame);
   else
-    sh64_show_compact_regs ();
+    sh64_show_compact_regs (frame);
 }
 
 /* *INDENT-OFF* */

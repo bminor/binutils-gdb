@@ -1,5 +1,18 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* sh-tdep.h (sh_show_regs): Add FRAME parameter.
+	* sh-tdep.c (sh_show_regs): Likewise.
+	(sh_show_regs_command): Pass current frame to sh_show_regs routine.
+	(sh_generic_show_regs): Add FRAME parameter.  Use register
+	values from that frame instead of calling read_register.
+	(sh3_show_regs, sh2e_show_regs, sh2a_show_regs, sh2a_nofpu_show_regs,
+	sh3e_show_regs, sh3_dsp_show_regs, sh4_show_regs, sh4_nofpu_show_regs,
+	sh_dsp_show_regs): Likewise.
+	* sh64-tdep.c (sh64_show_media_regs, sh64_show_compact_regs,
+	sh64_show_regs): Likewise.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mips-tdep.c (deprecated_mips_set_processor_regs_hack): Read from
 	current regcache instead of calling read_register.
 

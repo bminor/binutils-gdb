@@ -85,6 +85,6 @@ enum
   };
 
 extern gdbarch_init_ftype sh64_gdbarch_init;
-extern void sh64_show_regs (void);
+extern void sh64_show_regs (struct frame_info *);
 
 #endif /* SH_TDEP_H */
