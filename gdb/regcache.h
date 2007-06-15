@@ -161,15 +161,4 @@ extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache 
 
 extern void registers_changed (void);
 
-
-/* Rename to read_unsigned_register()? */
-extern ULONGEST read_register (int regnum);
-
-/* Rename to read_unsigned_register_pid()? */
-extern ULONGEST read_register_pid (int regnum, ptid_t ptid);
-
-extern void write_register (int regnum, LONGEST val);
-
-extern void write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid);
-
 #endif /* REGCACHE_H */

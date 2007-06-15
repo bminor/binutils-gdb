@@ -1,5 +1,12 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* regcache.c (read_register, read_register_pid): Remove.
+	(write_register, write_register_pid): Likewise.
+	* regcache.h (read_register, read_register_pid): Remove prototype.
+	(write_register, write_register_pid): Likewise.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (read_pc): Add REGCACHE argument.  Remove PTID argument.
 	(write_pc): Likewise.  Remove default implementation, add predicate.
 	* gdbarch.c, gdbarch.h: Regenerate.
