@@ -312,29 +312,18 @@ avr_pointer_to_address (struct type *type, const gdb_byte *buf)
 }
 
 static CORE_ADDR
-avr_read_pc (ptid_t ptid)
+avr_read_pc (struct regcache *regcache)
 {
-  ptid_t save_ptid;
   ULONGEST pc;
-  CORE_ADDR retval;
-
-  save_ptid = inferior_ptid;
-  inferior_ptid = ptid;
-  regcache_cooked_read_unsigned (current_regcache, AVR_PC_REGNUM, &pc);
-  inferior_ptid = save_ptid;
-  retval = avr_make_iaddr (pc);
-  return retval;
+  regcache_cooked_read_unsigned (regcache, AVR_PC_REGNUM, &pc);
+  return avr_make_iaddr (pc);
 }
 
 static void
-avr_write_pc (CORE_ADDR val, ptid_t ptid)
+avr_write_pc (struct regcache *regcache, CORE_ADDR val)
 {
-  ptid_t save_ptid;
-
-  save_ptid = inferior_ptid;
-  inferior_ptid = ptid;
-  write_register (AVR_PC_REGNUM, avr_convert_iaddr_to_raw (val));
-  inferior_ptid = save_ptid;
+  regcache_cooked_write_unsigned (regcache, AVR_PC_REGNUM,
+				  avr_convert_iaddr_to_raw (val));
 }
 
 static int

@@ -1,5 +1,59 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (read_pc): Add REGCACHE argument.  Remove PTID argument.
+	(write_pc): Likewise.  Remove default implementation, add predicate.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* regcache.c (read_pc_pid): Use current regcache instead of calling
+	read_register_pid.
+	(write_pc_pid): Check gdbarch_write_pc predicate, implement default
+	case inline.
+	(generic_target_write_pc): Remove.
+	* inferior.h (generic_target_write_pc): Remove.
+	* frv-tdep.c (frv_gdbarch_init): Do not install it.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Likewise.
+	* sh64-tdep.c (sh64_gdbarch_init): Likewise.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Likewise.
+
+	* avr-tdep.c (avr_read_pc): Add REGCACHE argument.  Remove PTID
+	argument.  Use REGCACHE instead of calling read_register_pid.
+	* hppa-hpux-tdep.c (hppa_hpux_read_pc): Likewise.
+	* hppa-tdep.c (hppa_read_pc): Likewise.
+	* hppa-tdep.h (hppa_read_pc): Likewise.
+	* ia64-tdep.c (ia64_read_pc): Likewise.
+	* m32r-tdep.c (m32r_read_pc): Likewise.
+	* mep-tdep.c (mep_read_pc): Likewise.
+	* mn10300-tdep.c (mn10300_read_pc): Likewise.
+	* spu-tdep.c (spu_read_pc): Likewise.
+
+	* arm-tdep.c (arm_write_pc): Add REGCACHE argument.  Remove PTID
+	argument.  Use REGCACHE instead of calling write_register_pid.
+	* avr-tdep.c (avr_write_pc): Likewise.
+	* hppa-hpux-tdep.c (hppa_hpux_write_pc): Likewise.
+	* hppa-tdep.c (hppa_write_pc): Likewise.
+	* hppa-tdep.h (hppa_write_pc): Likewise.
+	* i386-linux-tdep.c (i386_linux_write_pc): Likewise.
+	* amd64-linux-tdep.c (amd64_linux_write_pc): Likewise.
+	* ia64-linux-tdep.c (ia64_linux_write_pc): Likewise.
+	* ia64-tdep.c (ia64_write_pc): Likewise.
+	* ia64-tdep.h (ia64_write_pc): Likewise.
+	* m32r-tdep.c (m32r_write_pc): Likewise.
+	* m88k-tdep.c (m88k_write_pc): Likewise.
+	* mep-tdep.c (mep_write_pc): Likewise.
+	* mips-tdep.c (mips_write_pc): Likewise.
+	* mips-linux-tdep.c (mips_linux_write_pc): Likewise.
+	* mn10300-tdep.c (mn10300_write_pc): Likewise.
+	* sparc-tdep.c (sparc_write_pc): Likewise.
+	* spu-tdep.c (spu_write_pc): Likewise.
+
+	* mips-tdep.c (read_signed_register): Remove.
+	(read_signed_register_pid): Likewise.
+	(mips_read_pc): Add REGCACHE argument.  Remove PTID argument.
+	Use REGCACHE instead of calling read_signed_register_pid.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (push_dummy_code): Add REGCACHE argument.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* infcall.c (generic_push_dummy_code): Add REGCACHE argument.

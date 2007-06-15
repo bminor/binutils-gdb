@@ -100,9 +100,9 @@ ia64_linux_sigcontext_register_address (CORE_ADDR sp, int regno)
 }
 
 static void
-ia64_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
+ia64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  ia64_write_pc (pc, ptid);
+  ia64_write_pc (regcache, pc);
 
   /* We must be careful with modifying the instruction-pointer: if we
      just interrupt a system call, the kernel would ordinarily try to
@@ -113,7 +113,7 @@ ia64_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
 
      The clearing of r10 is safe as long as ia64_write_pc() is only
      called as part of setting up an inferior call.  */
-  write_register_pid (IA64_GR10_REGNUM, 0, ptid);
+  regcache_cooked_write_unsigned (regcache, IA64_GR10_REGNUM, 0);
 }
 
 static void

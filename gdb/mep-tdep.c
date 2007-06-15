@@ -1121,31 +1121,17 @@ mep_register_type (struct gdbarch *gdbarch, int reg_nr)
 
 
 static CORE_ADDR
-mep_read_pc (ptid_t ptid)
+mep_read_pc (struct regcache *regcache)
 {
-  ptid_t saved_ptid;
-  CORE_ADDR pc;
-
-  saved_ptid = inferior_ptid;
-  inferior_ptid = ptid;
-
-  pc = read_register (MEP_PC_REGNUM);
-
-  inferior_ptid = saved_ptid;
+  ULONGEST pc;
+  regcache_cooked_read_unsigned (regcache, MEP_PC_REGNUM, &pc);
   return pc;
 }
 
 static void
-mep_write_pc (CORE_ADDR pc, ptid_t ptid)
+mep_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  ptid_t saved_ptid;
-
-  saved_ptid = inferior_ptid;
-  inferior_ptid = ptid;
-
-  write_register (MEP_PC_REGNUM, pc);
-
-  inferior_ptid = saved_ptid;
+  regcache_cooked_write_unsigned (regcache, MEP_PC_REGNUM, pc);
 }
 
 

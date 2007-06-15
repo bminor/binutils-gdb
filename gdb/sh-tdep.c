@@ -2669,8 +2669,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
 
-  set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-
   set_gdbarch_return_value (gdbarch, sh_return_value_nofpu);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 					    sh_extract_struct_value_address);

@@ -1054,13 +1054,13 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 }
 
 static void
-mips_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
+mips_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  write_register_pid (PC_REGNUM, pc, ptid);
+  regcache_cooked_write_unsigned (regcache, PC_REGNUM, pc);
 
   /* Clear the syscall restart flag.  */
   if (mips_linux_restart_reg_p (current_gdbarch))
-    write_register_pid (MIPS_RESTART_REGNUM, 0, ptid);
+    regcache_cooked_write_unsigned (regcache, MIPS_RESTART_REGNUM, 0);
 }
 
 /* Return 1 if MIPS_RESTART_REGNUM is usable.  */

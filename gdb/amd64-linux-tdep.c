@@ -237,9 +237,9 @@ amd64_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 /* Set the program counter for process PTID to PC.  */
 
 static void
-amd64_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
+amd64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  write_register_pid (AMD64_RIP_REGNUM, pc, ptid);
+  regcache_cooked_write_unsigned (regcache, AMD64_RIP_REGNUM, pc);
 
   /* We must be careful with modifying the program counter.  If we
      just interrupted a system call, the kernel might try to restart
@@ -255,7 +255,7 @@ amd64_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
      when we resume the inferior on return from a function call from
      within GDB.  In all other cases the system call will not be
      restarted.  */
-  write_register_pid (AMD64_LINUX_ORIG_RAX_REGNUM, -1, ptid);
+  regcache_cooked_write_unsigned (regcache, AMD64_LINUX_ORIG_RAX_REGNUM, -1);
 }
 
 static void

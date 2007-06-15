@@ -269,15 +269,17 @@ mn10300_register_type (struct gdbarch *gdbarch, int reg)
 }
 
 static CORE_ADDR
-mn10300_read_pc (ptid_t ptid)
+mn10300_read_pc (struct regcache *regcache)
 {
-  return read_register_pid (E_PC_REGNUM, ptid);
+  ULONGEST val;
+  regcache_cooked_read_unsigned (regcache, E_PC_REGNUM, &val);
+  return val;
 }
 
 static void
-mn10300_write_pc (CORE_ADDR val, ptid_t ptid)
+mn10300_write_pc (struct regcache *regcache, CORE_ADDR val)
 {
-  return write_register_pid (E_PC_REGNUM, val, ptid);
+  regcache_cooked_write_unsigned (regcache, E_PC_REGNUM, val);
 }
 
 /* The breakpoint instruction must be the same size as the smallest

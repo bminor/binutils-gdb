@@ -420,8 +420,8 @@ v::int:bfd_vma_bit:::8 * sizeof (void*):gdbarch_bfd_arch_info (current_gdbarch)-
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
 v::int:char_signed:::1:-1:1
 #
-F:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid
-f:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid:0:generic_target_write_pc::0
+F::CORE_ADDR:read_pc:struct regcache *regcache:regcache
+F::void:write_pc:struct regcache *regcache, CORE_ADDR val:regcache, val
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
 # whole scheme for dealing with "frames" and "frame pointers" needs a
 # serious shakedown.

@@ -1348,12 +1348,12 @@ sparc_software_single_step (struct frame_info *frame)
 }
 
 static void
-sparc_write_pc (CORE_ADDR pc, ptid_t ptid)
+sparc_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
 
-  write_register_pid (tdep->pc_regnum, pc, ptid);
-  write_register_pid (tdep->npc_regnum, pc + 4, ptid);
+  regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);
+  regcache_cooked_write_unsigned (regcache, tdep->npc_regnum, pc + 4);
 }
 
 /* Unglobalize NAME.  */

@@ -406,7 +406,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->ptr_bit = current_gdbarch->int_bit;
   current_gdbarch->bfd_vma_bit = gdbarch_bfd_arch_info (current_gdbarch)->bits_per_address;
   current_gdbarch->char_signed = -1;
-  current_gdbarch->write_pc = generic_target_write_pc;
   current_gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
   current_gdbarch->num_regs = -1;
   current_gdbarch->sp_regnum = -1;
@@ -524,7 +523,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   if (current_gdbarch->char_signed == -1)
     current_gdbarch->char_signed = 1;
   /* Skip verify of read_pc, has predicate */
-  /* Skip verify of write_pc, invalid_p == 0 */
+  /* Skip verify of write_pc, has predicate */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of pseudo_register_read, has predicate */
   /* Skip verify of pseudo_register_write, has predicate */
@@ -1006,21 +1005,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: push_dummy_code = <0x%lx>\n",
                       (long) current_gdbarch->push_dummy_code);
-#ifdef TARGET_READ_PC_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_READ_PC_P()",
-                      XSTRING (TARGET_READ_PC_P ()));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_read_pc_p() = %d\n",
                       gdbarch_read_pc_p (current_gdbarch));
-#ifdef TARGET_READ_PC
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_READ_PC(ptid)",
-                      XSTRING (TARGET_READ_PC (ptid)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: read_pc = <0x%lx>\n",
                       (long) current_gdbarch->read_pc);
@@ -1164,12 +1151,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: vtable_function_descriptors = %s\n",
                       paddr_d (current_gdbarch->vtable_function_descriptors));
-#ifdef TARGET_WRITE_PC
   fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_WRITE_PC(val, ptid)",
-                      XSTRING (TARGET_WRITE_PC (val, ptid)));
-#endif
+                      "gdbarch_dump: gdbarch_write_pc_p() = %d\n",
+                      gdbarch_write_pc_p (current_gdbarch));
   fprintf_unfiltered (file,
                       "gdbarch_dump: write_pc = <0x%lx>\n",
                       (long) current_gdbarch->write_pc);
@@ -1467,13 +1451,13 @@ gdbarch_read_pc_p (struct gdbarch *gdbarch)
 }
 
 CORE_ADDR
-gdbarch_read_pc (struct gdbarch *gdbarch, ptid_t ptid)
+gdbarch_read_pc (struct gdbarch *gdbarch, struct regcache *regcache)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->read_pc != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_read_pc called\n");
-  return gdbarch->read_pc (ptid);
+  return gdbarch->read_pc (regcache);
 }
 
 void
@@ -1483,14 +1467,21 @@ set_gdbarch_read_pc (struct gdbarch *gdbarch,
   gdbarch->read_pc = read_pc;
 }
 
+int
+gdbarch_write_pc_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->write_pc != NULL;
+}
+
 void
-gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, ptid_t ptid)
+gdbarch_write_pc (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR val)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->write_pc != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_write_pc called\n");
-  gdbarch->write_pc (val, ptid);
+  gdbarch->write_pc (regcache, val);
 }
 
 void

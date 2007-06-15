@@ -643,27 +643,17 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 }
 
 static CORE_ADDR
-m32r_read_pc (ptid_t ptid)
+m32r_read_pc (struct regcache *regcache)
 {
-  ptid_t save_ptid;
   ULONGEST pc;
-
-  save_ptid = inferior_ptid;
-  inferior_ptid = ptid;
-  regcache_cooked_read_unsigned (current_regcache, M32R_PC_REGNUM, &pc);
-  inferior_ptid = save_ptid;
+  regcache_cooked_read_unsigned (regcache, M32R_PC_REGNUM, &pc);
   return pc;
 }
 
 static void
-m32r_write_pc (CORE_ADDR val, ptid_t ptid)
+m32r_write_pc (struct regcache *regcache, CORE_ADDR val)
 {
-  ptid_t save_ptid;
-
-  save_ptid = inferior_ptid;
-  inferior_ptid = ptid;
-  write_register (M32R_PC_REGNUM, val);
-  inferior_ptid = save_ptid;
+  regcache_cooked_write_unsigned (regcache, M32R_PC_REGNUM, val);
 }
 
 static CORE_ADDR

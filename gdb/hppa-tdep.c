@@ -1274,13 +1274,13 @@ hppa64_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 }
 
 CORE_ADDR
-hppa_read_pc (ptid_t ptid)
+hppa_read_pc (struct regcache *regcache)
 {
   ULONGEST ipsw;
-  CORE_ADDR pc;
+  ULONGEST pc;
 
-  ipsw = read_register_pid (HPPA_IPSW_REGNUM, ptid);
-  pc = read_register_pid (HPPA_PCOQ_HEAD_REGNUM, ptid);
+  regcache_cooked_read_unsigned (regcache, HPPA_IPSW_REGNUM, &ipsw);
+  regcache_cooked_read_unsigned (regcache, HPPA_PCOQ_HEAD_REGNUM, &pc);
 
   /* If the current instruction is nullified, then we are effectively
      still executing the previous instruction.  Pretend we are still
@@ -1294,10 +1294,10 @@ hppa_read_pc (ptid_t ptid)
 }
 
 void
-hppa_write_pc (CORE_ADDR pc, ptid_t ptid)
+hppa_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  write_register_pid (HPPA_PCOQ_HEAD_REGNUM, pc, ptid);
-  write_register_pid (HPPA_PCOQ_TAIL_REGNUM, pc + 4, ptid);
+  regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_HEAD_REGNUM, pc);
+  regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_TAIL_REGNUM, pc + 4);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum

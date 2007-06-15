@@ -637,27 +637,32 @@ ia64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 }
 
 static CORE_ADDR
-ia64_read_pc (ptid_t ptid)
+ia64_read_pc (struct regcache *regcache)
 {
-  CORE_ADDR psr_value = read_register_pid (IA64_PSR_REGNUM, ptid);
-  CORE_ADDR pc_value   = read_register_pid (IA64_IP_REGNUM, ptid);
-  int slot_num = (psr_value >> 41) & 3;
+  ULONGEST psr_value, pc_value;
+  int slot_num;
+
+  regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr_value);
+  regcache_cooked_read_unsigned (regcache, IA64_IP_REGNUM, &pc_value);
+  slot_num = (psr_value >> 41) & 3;
 
   return pc_value | (slot_num * SLOT_MULTIPLIER);
 }
 
 void
-ia64_write_pc (CORE_ADDR new_pc, ptid_t ptid)
+ia64_write_pc (struct regcache *regcache, CORE_ADDR new_pc)
 {
   int slot_num = (int) (new_pc & 0xf) / SLOT_MULTIPLIER;
-  CORE_ADDR psr_value = read_register_pid (IA64_PSR_REGNUM, ptid);
+  ULONGEST psr_value;
+
+  regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr_value);
   psr_value &= ~(3LL << 41);
-  psr_value |= (CORE_ADDR)(slot_num & 0x3) << 41;
+  psr_value |= (ULONGEST)(slot_num & 0x3) << 41;
 
   new_pc &= ~0xfLL;
 
-  write_register_pid (IA64_PSR_REGNUM, psr_value, ptid);
-  write_register_pid (IA64_IP_REGNUM, new_pc, ptid);
+  regcache_cooked_write_unsigned (regcache, IA64_PSR_REGNUM, psr_value);
+  regcache_cooked_write_unsigned (regcache, IA64_IP_REGNUM, new_pc);
 }
 
 #define IS_NaT_COLLECTION_ADDR(addr) ((((addr) >> 3) & 0x3f) == 0x3f)

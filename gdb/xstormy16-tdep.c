@@ -825,8 +825,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_address_to_pointer (gdbarch, xstormy16_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, xstormy16_pointer_to_address);
 
-  set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-
   /* Stack grows up. */
   set_gdbarch_inner_than (gdbarch, core_addr_greaterthan);
 

@@ -1517,8 +1517,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-
   /* Hardware watchpoint / breakpoint support.  */
   switch (info.bfd_arch_info->mach)
     {

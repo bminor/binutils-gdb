@@ -938,19 +938,22 @@ spu_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static CORE_ADDR
-spu_read_pc (ptid_t ptid)
+spu_read_pc (struct regcache *regcache)
 {
-  CORE_ADDR pc = read_register_pid (SPU_PC_REGNUM, ptid);
+  ULONGEST pc;
+  regcache_cooked_read_unsigned (regcache, SPU_PC_REGNUM, &pc);
   /* Mask off interrupt enable bit.  */
   return pc & -4;
 }
 
 static void
-spu_write_pc (CORE_ADDR pc, ptid_t ptid)
+spu_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   /* Keep interrupt enabled state unchanged.  */
-  CORE_ADDR old_pc = read_register_pid (SPU_PC_REGNUM, ptid);
-  write_register_pid (SPU_PC_REGNUM, (pc & -4) | (old_pc & 3), ptid);
+  ULONGEST old_pc;
+  regcache_cooked_read_unsigned (regcache, SPU_PC_REGNUM, &old_pc);
+  regcache_cooked_write_unsigned (regcache, SPU_PC_REGNUM,
+				  (pc & -4) | (old_pc & 3));
 }
 
 

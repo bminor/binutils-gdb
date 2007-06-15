@@ -122,7 +122,7 @@ m88k_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static void
-m88k_write_pc (CORE_ADDR pc, ptid_t ptid)
+m88k_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   /* According to the MC88100 RISC Microprocessor User's Manual,
      section 6.4.3.1.2:
@@ -140,9 +140,9 @@ m88k_write_pc (CORE_ADDR pc, ptid_t ptid)
      with it.  We could even (presumably) give it a totally bogus
      value.  */
 
-  write_register_pid (M88K_SXIP_REGNUM, pc, ptid);
-  write_register_pid (M88K_SNIP_REGNUM, pc | 2, ptid);
-  write_register_pid (M88K_SFIP_REGNUM, (pc + 4) | 2, ptid);
+  regcache_cooked_write_unsigned (regcache, M88K_SXIP_REGNUM, pc);
+  regcache_cooked_write_unsigned (regcache, M88K_SNIP_REGNUM, pc | 2);
+  regcache_cooked_write_unsigned (regcache, M88K_SFIP_REGNUM, (pc + 4) | 2);
 }
 
 

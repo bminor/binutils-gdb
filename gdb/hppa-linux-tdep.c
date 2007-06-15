@@ -56,11 +56,11 @@ hppa_dwarf_reg_to_regnum (int reg)
 #endif
 
 static void
-hppa_linux_target_write_pc (CORE_ADDR v, ptid_t ptid)
+hppa_linux_target_write_pc (struct regcache *regcache, CORE_ADDR v)
 {
   /* Probably this should be done by the kernel, but it isn't.  */
-  write_register_pid (HPPA_PCOQ_HEAD_REGNUM, v | 0x3, ptid);
-  write_register_pid (HPPA_PCOQ_TAIL_REGNUM, (v + 4) | 0x3, ptid);
+  regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_HEAD_REGNUM, v | 0x3);
+  regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_TAIL_REGNUM, (v + 4) | 0x3);
 }
 
 /* An instruction to match.  */

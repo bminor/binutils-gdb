@@ -1502,8 +1502,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   /* Set register info.  */
   set_gdbarch_fp0_regnum (gdbarch, -1);
 
-  set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-
   set_gdbarch_sp_regnum (gdbarch, HARD_SP_REGNUM);
   set_gdbarch_register_name (gdbarch, m68hc11_register_name);
   set_gdbarch_register_type (gdbarch, m68hc11_register_type);

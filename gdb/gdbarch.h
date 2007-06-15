@@ -151,40 +151,17 @@ extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
 extern int gdbarch_char_signed (struct gdbarch *gdbarch);
 extern void set_gdbarch_char_signed (struct gdbarch *gdbarch, int char_signed);
 
-#if defined (TARGET_READ_PC)
-/* Legacy for systems yet to multi-arch TARGET_READ_PC */
-#if !defined (TARGET_READ_PC_P)
-#define TARGET_READ_PC_P() (1)
-#endif
-#endif
-
 extern int gdbarch_read_pc_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (TARGET_READ_PC_P)
-#error "Non multi-arch definition of TARGET_READ_PC"
-#endif
-#if !defined (TARGET_READ_PC_P)
-#define TARGET_READ_PC_P() (gdbarch_read_pc_p (current_gdbarch))
-#endif
 
-typedef CORE_ADDR (gdbarch_read_pc_ftype) (ptid_t ptid);
-extern CORE_ADDR gdbarch_read_pc (struct gdbarch *gdbarch, ptid_t ptid);
+typedef CORE_ADDR (gdbarch_read_pc_ftype) (struct regcache *regcache);
+extern CORE_ADDR gdbarch_read_pc (struct gdbarch *gdbarch, struct regcache *regcache);
 extern void set_gdbarch_read_pc (struct gdbarch *gdbarch, gdbarch_read_pc_ftype *read_pc);
-#if !defined (GDB_TM_FILE) && defined (TARGET_READ_PC)
-#error "Non multi-arch definition of TARGET_READ_PC"
-#endif
-#if !defined (TARGET_READ_PC)
-#define TARGET_READ_PC(ptid) (gdbarch_read_pc (current_gdbarch, ptid))
-#endif
 
-typedef void (gdbarch_write_pc_ftype) (CORE_ADDR val, ptid_t ptid);
-extern void gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, ptid_t ptid);
+extern int gdbarch_write_pc_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_write_pc_ftype) (struct regcache *regcache, CORE_ADDR val);
+extern void gdbarch_write_pc (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR val);
 extern void set_gdbarch_write_pc (struct gdbarch *gdbarch, gdbarch_write_pc_ftype *write_pc);
-#if !defined (GDB_TM_FILE) && defined (TARGET_WRITE_PC)
-#error "Non multi-arch definition of TARGET_WRITE_PC"
-#endif
-#if !defined (TARGET_WRITE_PC)
-#define TARGET_WRITE_PC(val, ptid) (gdbarch_write_pc (current_gdbarch, val, ptid))
-#endif
 
 /* Function for getting target's idea of a frame pointer.  FIXME: GDB's
    whole scheme for dealing with "frames" and "frame pointers" needs a

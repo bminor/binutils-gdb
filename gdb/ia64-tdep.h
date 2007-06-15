@@ -202,6 +202,6 @@ struct gdbarch_tdep
   int (*pc_in_sigtramp) (CORE_ADDR);
 };
 
-extern void ia64_write_pc (CORE_ADDR, ptid_t);
+extern void ia64_write_pc (struct regcache *, CORE_ADDR);
 
 #endif /* ia64-tdep.h */

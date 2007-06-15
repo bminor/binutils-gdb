@@ -317,9 +317,9 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
 /* Set the program counter for process PTID to PC.  */
 
 static void
-i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
+i386_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  write_register_pid (I386_EIP_REGNUM, pc, ptid);
+  regcache_cooked_write_unsigned (regcache, I386_EIP_REGNUM, pc);
 
   /* We must be careful with modifying the program counter.  If we
      just interrupted a system call, the kernel might try to restart
@@ -335,7 +335,7 @@ i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
      when we resume the inferior on return from a function call from
      within GDB.  In all other cases the system call will not be
      restarted.  */
-  write_register_pid (I386_LINUX_ORIG_EAX_REGNUM, -1, ptid);
+  regcache_cooked_write_unsigned (regcache, I386_LINUX_ORIG_EAX_REGNUM, -1);
 }
 
 

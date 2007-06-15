@@ -266,36 +266,6 @@ unmake_mips16_addr (CORE_ADDR addr)
   return ((addr) & ~(CORE_ADDR) 1);
 }
 
-/* Return the contents of register REGNUM as a signed integer.  */
-
-static LONGEST
-read_signed_register (int regnum)
-{
-  LONGEST val;
-  regcache_cooked_read_signed (current_regcache, regnum, &val);
-  return val;
-}
-
-static LONGEST
-read_signed_register_pid (int regnum, ptid_t ptid)
-{
-  ptid_t save_ptid;
-  LONGEST retval;
-
-  if (ptid_equal (ptid, inferior_ptid))
-    return read_signed_register (regnum);
-
-  save_ptid = inferior_ptid;
-
-  inferior_ptid = ptid;
-
-  retval = read_signed_register (regnum);
-
-  inferior_ptid = save_ptid;
-
-  return retval;
-}
-
 /* Return the MIPS ABI associated with GDBARCH.  */
 enum mips_abi
 mips_abi (struct gdbarch *gdbarch)
@@ -926,9 +896,12 @@ mips_pc_is_mips16 (CORE_ADDR memaddr)
    all registers should be sign extended for simplicity? */
 
 static CORE_ADDR
-mips_read_pc (ptid_t ptid)
+mips_read_pc (struct regcache *regcache)
 {
-  return read_signed_register_pid (mips_regnum (current_gdbarch)->pc, ptid);
+  ULONGEST pc;
+  int regnum = mips_regnum (get_regcache_arch (regcache))->pc;
+  regcache_cooked_read_signed (regcache, regnum, &pc);
+  return pc;
 }
 
 static CORE_ADDR
@@ -963,9 +936,10 @@ mips_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static void
-mips_write_pc (CORE_ADDR pc, ptid_t ptid)
+mips_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  write_register_pid (mips_regnum (current_gdbarch)->pc, pc, ptid);
+  int regnum = mips_regnum (get_regcache_arch (regcache))->pc;
+  regcache_cooked_write_unsigned (regcache, regnum, pc);
 }
 
 /* Fetch and return instruction from the specified location.  If the PC

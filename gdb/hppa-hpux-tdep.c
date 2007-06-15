@@ -1372,29 +1372,33 @@ hppa_hpux_regset_from_core_section (struct gdbarch *gdbarch,
 #define HPPA_HPUX_SS_INSYSCALL	0x02
 
 static CORE_ADDR
-hppa_hpux_read_pc (ptid_t ptid)
+hppa_hpux_read_pc (struct regcache *regcache)
 {
   ULONGEST flags;
 
   /* If we're currently in a system call return the contents of %r31.  */
-  flags = read_register_pid (HPPA_FLAGS_REGNUM, ptid);
+  regcache_cooked_read_unsigned (regcache, HPPA_FLAGS_REGNUM, &flags);
   if (flags & HPPA_HPUX_SS_INSYSCALL)
-    return read_register_pid (HPPA_R31_REGNUM, ptid) & ~0x3;
+    {
+      ULONGEST pc;
+      regcache_cooked_read_unsigned (regcache, HPPA_R31_REGNUM, &pc);
+      return pc & ~0x3;
+    }
 
-  return hppa_read_pc (ptid);
+  return hppa_read_pc (regcache);
 }
 
 static void
-hppa_hpux_write_pc (CORE_ADDR pc, ptid_t ptid)
+hppa_hpux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   ULONGEST flags;
 
   /* If we're currently in a system call also write PC into %r31.  */
-  flags = read_register_pid (HPPA_FLAGS_REGNUM, ptid);
+  regcache_cooked_read_unsigned (regcache, HPPA_FLAGS_REGNUM, &flags);
   if (flags & HPPA_HPUX_SS_INSYSCALL)
-    write_register_pid (HPPA_R31_REGNUM, pc | 0x3, ptid);
+    regcache_cooked_write_unsigned (regcache, HPPA_R31_REGNUM, pc | 0x3);
 
-  return hppa_write_pc (pc, ptid);
+  return hppa_write_pc (regcache, pc);
 }
 
 static CORE_ADDR

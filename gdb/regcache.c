@@ -887,6 +887,9 @@ regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
 CORE_ADDR
 read_pc_pid (ptid_t ptid)
 {
+  struct regcache *regcache = current_regcache;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
   ptid_t saved_inferior_ptid;
   CORE_ADDR pc_val;
 
@@ -894,12 +897,13 @@ read_pc_pid (ptid_t ptid)
   saved_inferior_ptid = inferior_ptid;
   inferior_ptid = ptid;
 
-  if (TARGET_READ_PC_P ())
-    pc_val = TARGET_READ_PC (ptid);
+  if (gdbarch_read_pc_p (gdbarch))
+    pc_val = gdbarch_read_pc (gdbarch, regcache);
   /* Else use per-frame method on get_current_frame.  */
   else if (PC_REGNUM >= 0)
     {
-      CORE_ADDR raw_val = read_register_pid (PC_REGNUM, ptid);
+      ULONGEST raw_val;
+      regcache_cooked_read_unsigned (regcache, PC_REGNUM, &raw_val);
       pc_val = gdbarch_addr_bits_remove (current_gdbarch, raw_val);
     }
   else
@@ -916,25 +920,24 @@ read_pc (void)
 }
 
 void
-generic_target_write_pc (CORE_ADDR pc, ptid_t ptid)
-{
-  if (PC_REGNUM >= 0)
-    write_register_pid (PC_REGNUM, pc, ptid);
-  else
-    internal_error (__FILE__, __LINE__,
-		    _("generic_target_write_pc"));
-}
-
-void
 write_pc_pid (CORE_ADDR pc, ptid_t ptid)
 {
+  struct regcache *regcache = current_regcache;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
   ptid_t saved_inferior_ptid;
 
   /* In case ptid != inferior_ptid. */
   saved_inferior_ptid = inferior_ptid;
   inferior_ptid = ptid;
 
-  TARGET_WRITE_PC (pc, ptid);
+  if (gdbarch_write_pc_p (gdbarch))
+    gdbarch_write_pc (gdbarch, regcache, pc);
+  else if (PC_REGNUM >= 0)
+    regcache_cooked_write_unsigned (regcache, PC_REGNUM, pc);
+  else
+    internal_error (__FILE__, __LINE__,
+		    _("write_pc_pid: Unable to update PC"));
 
   inferior_ptid = saved_inferior_ptid;
 }

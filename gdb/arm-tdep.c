@@ -2588,18 +2588,20 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
 }
 
 static void
-arm_write_pc (CORE_ADDR pc, ptid_t ptid)
+arm_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  write_register_pid (ARM_PC_REGNUM, pc, ptid);
+  regcache_cooked_write_unsigned (regcache, ARM_PC_REGNUM, pc);
 
   /* If necessary, set the T bit.  */
   if (arm_apcs_32)
     {
-      CORE_ADDR val = read_register_pid (ARM_PS_REGNUM, ptid);
+      ULONGEST val;
+      regcache_cooked_read_unsigned (regcache, ARM_PS_REGNUM, &val);
       if (arm_pc_is_thumb (pc))
-	write_register_pid (ARM_PS_REGNUM, val | 0x20, ptid);
+	regcache_cooked_write_unsigned (regcache, ARM_PS_REGNUM, val | 0x20);
       else
-	write_register_pid (ARM_PS_REGNUM, val & ~(CORE_ADDR) 0x20, ptid);
+	regcache_cooked_write_unsigned (regcache, ARM_PS_REGNUM,
+					val & ~(ULONGEST) 0x20);
     }
 }
 
