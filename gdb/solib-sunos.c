@@ -786,7 +786,7 @@ sunos_solib_create_inferior_hook (void)
   if (gdbarch_decr_pc_after_break (current_gdbarch))
     {
       stop_pc -= gdbarch_decr_pc_after_break (current_gdbarch);
-      write_register (PC_REGNUM, stop_pc);
+      write_pc (stop_pc);
     }
 
   if (!disable_break ())

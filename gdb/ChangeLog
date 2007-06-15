@@ -1,5 +1,11 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Use write_pc
+	instead of write_register (PC_REGNUM, ...).
+
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* solib-sunos.c (sunos_solib_create_inferior_hook): Add comment
 	explaining why the PC adjustment code is necessary.
 
