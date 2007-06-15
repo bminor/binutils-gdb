@@ -191,7 +191,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      if (vreg <= 13)
 		{
 		  if (write_pass)
-		    regcache_cooked_write (current_regcache,
+		    regcache_cooked_write (regcache,
 					   tdep->ppc_vr0_regnum + vreg, val);
 		  vreg++;
 		}
@@ -217,7 +217,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      if (greg <= 10)
 		{
 		  if (write_pass)
-		    regcache_cooked_write (current_regcache,
+		    regcache_cooked_write (regcache,
 					   tdep->ppc_ev0_regnum + greg, val);
 		  greg++;
 		}

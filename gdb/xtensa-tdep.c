@@ -314,7 +314,8 @@ xtensa_reg_to_regnum (int regnum)
    (Note: The size of masked registers is always less or equal 32 bits.)  */
 
 static void
-xtensa_register_write_masked (xtensa_register_t *reg, unsigned char *buffer)
+xtensa_register_write_masked (struct regcache *regcache,
+			      xtensa_register_t *reg, const gdb_byte *buffer)
 {
   unsigned int value[(MAX_REGISTER_SIZE + 3) / 4];
 
@@ -383,10 +384,12 @@ xtensa_register_write_masked (xtensa_register_t *reg, unsigned char *buffer)
       if (r >= 0 && size > 0)
 	{
 	  /* Don't overwrite the unmasked areas.  */
+	  ULONGEST old_val;
+	  regcache_cooked_read_unsigned (regcache, r, &old_val);
 	  m = 0xffffffff >> (32 - size) << start;
 	  regval <<= start;
-	  regval = (regval & m) | (read_register (r) & ~m);
-	  write_register (r, regval);
+	  regval = (regval & m) | (old_val & ~m);
+	  regcache_cooked_write_unsigned (regcache, r, regval);
 	}
     }
 }
@@ -396,7 +399,8 @@ xtensa_register_write_masked (xtensa_register_t *reg, unsigned char *buffer)
    register.  */
 
 static void
-xtensa_register_read_masked (xtensa_register_t *reg, unsigned char *buffer)
+xtensa_register_read_masked (struct regcache *regcache,
+			     xtensa_register_t *reg, gdb_byte *buffer)
 {
   unsigned int value[(MAX_REGISTER_SIZE + 3) / 4];
 
@@ -419,7 +423,15 @@ xtensa_register_read_masked (xtensa_register_t *reg, unsigned char *buffer)
   for (i = 0; i < mask->count; i++)
     {
       int r = mask->mask[i].reg_num;
-      regval = (r >= 0) ? read_register (r) : 0;
+      if (r >= 0)
+	{
+	  ULONGEST val;
+	  regcache_cooked_read_unsigned (regcache, r, &val);
+	  regval = (unsigned int) val;
+	}
+      else
+	regval = 0;
+
       start = mask->mask[i].bit_start;
       size = mask->mask[i].bit_size;
 
@@ -541,7 +553,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
       /* We can always read mapped registers.  */
       else if (type == xtRegisterTypeMapped || type == xtRegisterTypeTieState)
         {
-	  xtensa_register_read_masked (reg, (unsigned char *) buffer);
+	  xtensa_register_read_masked (regcache, reg, buffer);
 	  return;
 	}
 
@@ -629,7 +641,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
       /* We can always write mapped registers.  */
       else if (type == xtRegisterTypeMapped || type == xtRegisterTypeTieState)
         {
-	  xtensa_register_write_masked (reg, (unsigned char *) buffer);
+	  xtensa_register_write_masked (regcache, reg, buffer);
 	  return;
 	}
 
@@ -910,10 +922,9 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
   pc = frame_unwind_register_unsigned (next_frame, PC_REGNUM);
 
   op1 = read_memory_integer (pc, 1);
-  if (XTENSA_IS_ENTRY (op1) || !windowing_enabled (read_register (PS_REGNUM)))
+  if (XTENSA_IS_ENTRY (op1) || !windowing_enabled (ps))
     {
-      int callinc = CALLINC (frame_unwind_register_unsigned (next_frame,
-							     PS_REGNUM));
+      int callinc = CALLINC (ps);
       ra = frame_unwind_register_unsigned (next_frame,
 					   A0_REGNUM + callinc * 4);
 
@@ -924,7 +935,7 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
       cache->callsize = 0;
       cache->wb = wb;
       cache->ws = ws;
-      cache->prev_sp = read_register (A1_REGNUM);
+      cache->prev_sp = frame_unwind_register_unsigned (next_frame, A1_REGNUM);
     }
   else
     {
@@ -987,7 +998,7 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
 
 	  int regnum = AREG_NUMBER (A1_REGNUM, cache->wb);
 
-	  cache->prev_sp = read_register (regnum);
+	  cache->prev_sp = frame_unwind_register_unsigned (next_frame, regnum);
 	}
     }
 
@@ -1467,7 +1478,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	        /* ULONGEST v = extract_unsigned_integer (cp, REGISTER_SIZE);*/
 		regcache_cooked_write (regcache, r, cp);
 
-		/* write_register (r, v); */
+		/* regcache_cooked_write_unsigned (regcache, r, v); */
 		cp += REGISTER_SIZE;
 		n -= REGISTER_SIZE;
 		r++;

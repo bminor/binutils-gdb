@@ -832,12 +832,12 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* If a structure has to be returned, set up register 28 to hold its
      address */
   if (struct_return)
-    write_register (28, struct_addr);
+    regcache_cooked_write_unsigned (regcache, 28, struct_addr);
 
   gp = tdep->find_global_pointer (function);
 
   if (gp != 0)
-    write_register (19, gp);
+    regcache_cooked_write_unsigned (regcache, 19, gp);
 
   /* Set the return address.  */
   if (!gdbarch_push_dummy_code_p (gdbarch))

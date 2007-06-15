@@ -1,5 +1,49 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* arm-tdep.c (arm_print_float_info): Use register value from FRAME
+	instead of calling read_register.
+
+	* avr-tdep.c (avr_push_dummy_call): Write to REGCACHE instead of
+	calling write_register.
+
+	* hppa-tdep.c (hppa32_push_dummy_call): Write to REGCACHE instead of
+	calling write_register.
+
+	* ia64-tdep.c (find_func_descr): Add REGCACHE parameter.  Use it
+	instead of calling read_register.
+	(ia64_push_dummy_call): Update call to find_func_descr.  Use REGCACHE
+	instead of calling read_register and write_register.
+
+	* m32r-tdep.c (m32r_linux_supply_gregset): Use REGCACHE parameter
+	instead of current_regcache.
+
+	* mn10300-tdep.c (mn10300_push_dummy_call): Write to REGCACHE instead
+	of calling write_register.
+	* mn10300-linux-tdep.c (am33_supply_fpregset_method): Use REGCACHE
+	parameter instead of current_regcache.
+
+	* mips-tdep.c (mips2_fp_compat): Add FRAME parameter.  Use it 
+	instead of calling read_register.
+	(mips_read_fp_register_double, mips_print_fp_register): Update calls.
+	(mips_eabi_push_dummy_call): Use REGCACHE instead of write_register.
+	(mips_n32n64_push_dummy_call): Likewise.
+	(mips_o32_push_dummy_call): Likewise.
+	(mips_o64_push_dummy_call): Likewise.
+
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Use REGCACHE
+	parameter instead of current_regcache.
+
+	* xtensa-tdep.c (xtensa_register_write_masked): Add REGCACHE parameter.
+	Use it instead of read_register and write_register.
+	(xtensa_register_read_masked): Likewise.
+	(xtensa_pseudo_register_read): Update call.
+	(xtensa_pseudo_register_write): Likewise.
+	(xtensa_frame_cache): Use register values unwound from NEXT_FRAME
+	instead of calling read_register.
+	(xtensa_push_dummy_call): Update comment.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mips-tdep.c (mips16_scan_prologue): Replace read_next_frame_reg
 	by frame_unwind_register_signed calls.
 	(mips32_scan_prologue): Likewise.  Skip analysis of alloca stack

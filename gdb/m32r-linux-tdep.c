@@ -383,7 +383,7 @@ m32r_linux_supply_gregset (const struct regset *regset,
 	  break;
 	}
 
-      regcache_raw_supply (current_regcache, i,
+      regcache_raw_supply (regcache, i,
 			   regs + m32r_pt_regs_offset[i]);
     }
 }

@@ -1163,8 +1163,8 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (struct_return)
     {
       fprintf_unfiltered (gdb_stderr, "struct_return: 0x%lx\n", struct_addr);
-      write_register (argreg--, struct_addr & 0xff);
-      write_register (argreg--, (struct_addr >>8) & 0xff);
+      regcache_cooked_write_unsigned (regcache, argreg--, struct_addr & 0xff);
+      regcache_cooked_write_unsigned (regcache, argreg--, (struct_addr >>8) & 0xff);
     }
 #endif
 

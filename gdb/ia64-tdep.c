@@ -3198,7 +3198,7 @@ find_extant_func_descr (CORE_ADDR faddr)
    stack using the address at fdaptr.  */
 
 static CORE_ADDR
-find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
+find_func_descr (struct regcache *regcache, CORE_ADDR faddr, CORE_ADDR *fdaptr)
 {
   CORE_ADDR fdesc;
 
@@ -3206,7 +3206,7 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
 
   if (fdesc == 0)
     {
-      CORE_ADDR global_pointer;
+      ULONGEST global_pointer;
       char buf[16];
 
       fdesc = *fdaptr;
@@ -3215,7 +3215,8 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
       global_pointer = ia64_find_global_pointer (faddr);
 
       if (global_pointer == 0)
-	global_pointer = read_register (IA64_GR1_REGNUM);
+	regcache_cooked_read_unsigned (regcache,
+				       IA64_GR1_REGNUM, &global_pointer);
 
       store_unsigned_integer (buf, 8, faddr);
       store_unsigned_integer (buf + 8, 8, global_pointer);
@@ -3273,7 +3274,8 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int len, argoffset;
   int nslots, rseslots, memslots, slotnum, nfuncargs;
   int floatreg;
-  CORE_ADDR bsp, cfm, pfs, new_bsp, funcdescaddr, pc, global_pointer;
+  ULONGEST bsp, cfm, pfs, new_bsp;
+  CORE_ADDR funcdescaddr, pc, global_pointer;
   CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   nslots = 0;
@@ -3299,20 +3301,20 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   memslots = nslots - rseslots;
 
   /* Allocate a new RSE frame.  */
-  cfm = read_register (IA64_CFM_REGNUM);
+  regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
 
-  bsp = read_register (IA64_BSP_REGNUM);
+  regcache_cooked_read_unsigned (regcache, IA64_BSP_REGNUM, &bsp);
   new_bsp = rse_address_add (bsp, rseslots);
-  write_register (IA64_BSP_REGNUM, new_bsp);
+  regcache_cooked_write_unsigned (regcache, IA64_BSP_REGNUM, new_bsp);
 
-  pfs = read_register (IA64_PFS_REGNUM);
+  regcache_cooked_read_unsigned (regcache, IA64_PFS_REGNUM, &pfs);
   pfs &= 0xc000000000000000LL;
   pfs |= (cfm & 0xffffffffffffLL);
-  write_register (IA64_PFS_REGNUM, pfs);
+  regcache_cooked_write_unsigned (regcache, IA64_PFS_REGNUM, pfs);
 
   cfm &= 0xc000000000000000LL;
   cfm |= rseslots;
-  write_register (IA64_CFM_REGNUM, cfm);
+  regcache_cooked_write_unsigned (regcache, IA64_CFM_REGNUM, cfm);
   
   /* We will attempt to find function descriptors in the .opd segment,
      but if we can't we'll construct them ourselves.  That being the
@@ -3346,9 +3348,9 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
 	{
 	  char val_buf[8];
-
+	  ULONGEST faddr = extract_unsigned_integer (value_contents (arg), 8);
 	  store_unsigned_integer (val_buf, 8,
-				  find_func_descr (extract_unsigned_integer (value_contents (arg), 8),
+				  find_func_descr (regcache, faddr,
 						   &funcdescaddr));
 	  if (slotnum < rseslots)
 	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);
@@ -3410,11 +3412,11 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   global_pointer = ia64_find_global_pointer (func_addr);
 
   if (global_pointer != 0)
-    write_register (IA64_GR1_REGNUM, global_pointer);
+    regcache_cooked_write_unsigned (regcache, IA64_GR1_REGNUM, global_pointer);
 
-  write_register (IA64_BR0_REGNUM, bp_addr);
+  regcache_cooked_write_unsigned (regcache, IA64_BR0_REGNUM, bp_addr);
 
-  write_register (sp_regnum, sp);
+  regcache_cooked_write_unsigned (regcache, sp_regnum, sp);
 
   return sp;
 }

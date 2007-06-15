@@ -263,10 +263,10 @@ am33_supply_fpregset_method (const struct regset *regset,
 				   E_FPCR_REGNUM, fpregs, len);
     }
   else if (regnum == E_FPCR_REGNUM)
-    regcache_raw_supply (current_regcache, E_FPCR_REGNUM, 
+    regcache_raw_supply (regcache, E_FPCR_REGNUM, 
 			 &fpregset->fpcr);
   else if (E_FS0_REGNUM <= regnum && regnum < E_FS0_REGNUM + MN10300_ELF_NFPREG)
-    regcache_raw_supply (current_regcache, regnum, 
+    regcache_raw_supply (regcache, regnum, 
 			 &fpregset->fpregs[regnum - E_FS0_REGNUM]);
 
   return;
@@ -441,11 +441,11 @@ am33_collect_fpregset_method (const struct regset *regset,
 				    E_FPCR_REGNUM, fpregs, len);
     }
   else if (regnum == E_FPCR_REGNUM)
-    regcache_raw_collect (current_regcache, E_FPCR_REGNUM, 
+    regcache_raw_collect (regcache, E_FPCR_REGNUM, 
 			  &fpregset->fpcr);
   else if (E_FS0_REGNUM <= regnum
            && regnum < E_FS0_REGNUM + MN10300_ELF_NFPREG)
-    regcache_raw_collect (current_regcache, regnum, 
+    regcache_raw_collect (regcache, regnum, 
 			  &fpregset->fpregs[regnum - E_FS0_REGNUM]);
 
   return;

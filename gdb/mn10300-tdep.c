@@ -1008,7 +1008,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
   if (struct_return)
     {
       regs_used = 1;
-      write_register (E_D0_REGNUM, struct_addr);
+      regcache_cooked_write_unsigned (regcache, E_D0_REGNUM, struct_addr);
     }
   else
     regs_used = 0;
@@ -1034,8 +1034,8 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 
       while (regs_used < 2 && arg_len > 0)
 	{
-	  write_register (regs_used, 
-			  extract_unsigned_integer (val, push_size));
+	  regcache_cooked_write_unsigned (regcache, regs_used, 
+				  extract_unsigned_integer (val, push_size));
 	  val += push_size;
 	  arg_len -= push_size;
 	  regs_used++;

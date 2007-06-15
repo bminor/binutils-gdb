@@ -1363,7 +1363,7 @@ static void
 arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		      struct frame_info *frame, const char *args)
 {
-  unsigned long status = read_register (ARM_FPS_REGNUM);
+  unsigned long status = get_frame_register_unsigned (frame, ARM_FPS_REGNUM);
   int type;
 
   type = (status >> 24) & 127;
