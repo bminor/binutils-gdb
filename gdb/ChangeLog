@@ -1,3 +1,8 @@
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Add comment
+	explaining why the PC adjustment code is necessary.
+
 2007-06-15  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* m68k-tdep.h (enum m68k_flavour): New.	

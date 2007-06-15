@@ -775,7 +775,13 @@ sunos_solib_create_inferior_hook (void)
   /* We are now either at the "mapping complete" breakpoint (or somewhere
      else, a condition we aren't prepared to deal with anyway), so adjust
      the PC as necessary after a breakpoint, disable the breakpoint, and
-     add any shared libraries that were mapped in. */
+     add any shared libraries that were mapped in.
+
+     Note that adjust_pc_after_break did not perform any PC adjustment,
+     as the breakpoint the inferior just hit was not inserted by GDB,
+     but by the dynamic loader itself, and is therefore not found on
+     the GDB software break point list.  Thus we have to adjust the
+     PC here.  */
 
   if (gdbarch_decr_pc_after_break (current_gdbarch))
     {
