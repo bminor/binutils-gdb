@@ -1097,7 +1097,8 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 			   CORE_ADDR funcaddr, int using_gcc,
 			   struct value **args, int nargs,
 			   struct type *value_type,
-			   CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+			   CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
+			   struct regcache *regcache)
 {
   CORE_ADDR pc, stubaddr;
   int argreg = 0;
@@ -1115,7 +1116,7 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
       /* Intraspace call.  */
       *bp_addr = hppa_hpux_find_dummy_bpaddr (pc);
       *real_pc = funcaddr;
-      regcache_cooked_write_unsigned (current_regcache, HPPA_RP_REGNUM, *bp_addr);
+      regcache_cooked_write_unsigned (regcache, HPPA_RP_REGNUM, *bp_addr);
 
       return sp;
     }
@@ -1193,18 +1194,18 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
       if (stubaddr == 0)
         error (_("Cannot call external function not referenced by application "
 	       "(no import stub).\n"));
-      regcache_cooked_write_unsigned (current_regcache, 22, stubaddr);
+      regcache_cooked_write_unsigned (regcache, 22, stubaddr);
 
       write_memory (sp, (char *)&hppa32_tramp, sizeof (hppa32_tramp));
 
       *bp_addr = hppa_hpux_find_dummy_bpaddr (pc);
-      regcache_cooked_write_unsigned (current_regcache, 31, *bp_addr);
+      regcache_cooked_write_unsigned (regcache, 31, *bp_addr);
 
       *real_pc = hppa32_hpux_search_dummy_call_sequence (gdbarch, pc, &argreg);
       if (*real_pc == 0)
         error (_("Cannot make interspace call from here."));
 
-      regcache_cooked_write_unsigned (current_regcache, argreg, sp);
+      regcache_cooked_write_unsigned (regcache, argreg, sp);
 
       sp += sizeof (hppa32_tramp);
     }
@@ -1220,17 +1221,17 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
       /* for hppa64, we don't need to call through a stub; all functions
          return via a bve.  */
-      regcache_cooked_write_unsigned (current_regcache, 22, funcaddr);
+      regcache_cooked_write_unsigned (regcache, 22, funcaddr);
       write_memory (sp, (char *)&hppa64_tramp, sizeof (hppa64_tramp));
 
       *bp_addr = pc - 4;
-      regcache_cooked_write_unsigned (current_regcache, 31, *bp_addr);
+      regcache_cooked_write_unsigned (regcache, 31, *bp_addr);
 
       *real_pc = hppa64_hpux_search_dummy_call_sequence (gdbarch, pc, &argreg);
       if (*real_pc == 0)
         error (_("Cannot make interspace call from here."));
 
-      regcache_cooked_write_unsigned (current_regcache, argreg, sp);
+      regcache_cooked_write_unsigned (regcache, argreg, sp);
 
       sp += sizeof (hppa64_tramp);
     }

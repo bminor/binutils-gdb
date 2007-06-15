@@ -383,7 +383,8 @@ sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 			 CORE_ADDR funcaddr, int using_gcc,
 			 struct value **args, int nargs,
 			 struct type *value_type,
-			 CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+			 CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
+			 struct regcache *regcache)
 {
   *bp_addr = sp - 4;
   *real_pc = funcaddr;

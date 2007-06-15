@@ -1,5 +1,19 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (push_dummy_code): Add REGCACHE argument.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* infcall.c (generic_push_dummy_code): Add REGCACHE argument.
+	(push_dummy_code): Likewise.  Pass it to callee.
+	(call_function_by_hand): Pass current regcache to push_dummy_code.
+
+	* hppa-hpux-tdep.c (hppa_hpux_push_dummy_code): Add REGCACHE
+	argument.  Use it instead of current_regcache.
+
+	* cris-tdep.c (cris_push_dummy_code): Add REGCACHE argument.
+	* sparc-tdep.c (sparc32_push_dummy_code): Likewise.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (get_longjmp_target): Add FRAME argument.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* infrun.c (handle_inferior_event): Pass current frame to

@@ -249,7 +249,8 @@ generic_push_dummy_code (struct gdbarch *gdbarch,
 			 CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
 			 struct value **args, int nargs,
 			 struct type *value_type,
-			 CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+			 CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
+			 struct regcache *regcache)
 {
   /* Something here to findout the size of a breakpoint and then
      allocate space for it on the stack.  */
@@ -288,14 +289,17 @@ push_dummy_code (struct gdbarch *gdbarch,
 		 CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
 		 struct value **args, int nargs,
 		 struct type *value_type,
-		 CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
+		 CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
+		 struct regcache *regcache)
 {
   if (gdbarch_push_dummy_code_p (gdbarch))
     return gdbarch_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
-				    args, nargs, value_type, real_pc, bp_addr);
+				    args, nargs, value_type, real_pc, bp_addr,
+				    regcache);
   else    
     return generic_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
-				    args, nargs, value_type, real_pc, bp_addr);
+				    args, nargs, value_type, real_pc, bp_addr,
+				    regcache);
 }
 
 /* All this stuff with a dummy frame may seem unnecessarily complicated
@@ -465,7 +469,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	{
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
 				using_gcc, args, nargs, values_type,
-				&real_pc, &bp_addr);
+				&real_pc, &bp_addr, current_regcache);
 	  dummy_addr = sp;
 	}
       else
@@ -473,7 +477,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	  dummy_addr = sp;
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
 				using_gcc, args, nargs, values_type,
-				&real_pc, &bp_addr);
+				&real_pc, &bp_addr, current_regcache);
 	}
       break;
     case AT_ENTRY_POINT:
