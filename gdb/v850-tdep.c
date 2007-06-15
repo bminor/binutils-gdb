@@ -456,7 +456,7 @@ v850_is_save_register (int reg)
 
 static CORE_ADDR
 v850_analyze_prologue (CORE_ADDR func_addr, CORE_ADDR pc,
-		       struct v850_frame_cache *pi)
+		       struct v850_frame_cache *pi, ULONGEST ctbp)
 {
   CORE_ADDR prologue_end, current_pc;
   struct pifsr pifsrs[E_NUM_REGS + 1];
@@ -517,7 +517,6 @@ v850_analyze_prologue (CORE_ADDR func_addr, CORE_ADDR pc,
 	}
       else if ((insn & 0xffc0) == 0x0200 && !regsave_func_p)
 	{			/* callt <imm6> */
-	  long ctbp = read_register (E_CTBP_REGNUM);
 	  long adr = ctbp + ((insn & 0x3f) << 1);
 
 	  save_pc = current_pc;
@@ -859,7 +858,11 @@ v850_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   current_pc = frame_pc_unwind (next_frame);
   if (cache->pc != 0)
-    v850_analyze_prologue (cache->pc, current_pc, cache);
+    {
+      ULONGEST ctbp;
+      ctbp = frame_unwind_register_unsigned (next_frame, E_CTBP_REGNUM);
+      v850_analyze_prologue (cache->pc, current_pc, cache, ctbp);
+    }
 
   if (!cache->uses_fp)
     {

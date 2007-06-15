@@ -1,5 +1,24 @@
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mips-tdep.c (mips16_scan_prologue): Replace read_next_frame_reg
+	by frame_unwind_register_signed calls.
+	(mips32_scan_prologue): Likewise.  Skip analysis of alloca stack
+	frame allocations when called with NULL NEXT_FRAME parameter.
+	(read_next_frame_reg): Remove.
+
+	* sh-tdep.c (sh_analyze_prologue): Add FPSCR parameter.  Use it
+	instead of reading the FPSCR register.
+	(sh_frame_cache): Pass unwound FPSCR register value to
+	sh_analyze_prologue.
+	(sh_skip_prologue): Pass dummy FPSCR value to sh_analyze_prologue.
+
+	* v850-tdep.c (v850_analyze_prologue): Add CTBP parameter.  Use it
+	instead of reading the CTBP register.
+	(v850_frame_cache): Pass unwound CTBP register value to
+	v850_analyze_prologue.
+
+2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* sh-tdep.h (sh_show_regs): Add FRAME parameter.
 	* sh-tdep.c (sh_show_regs): Likewise.
 	(sh_show_regs_command): Pass current frame to sh_show_regs routine.

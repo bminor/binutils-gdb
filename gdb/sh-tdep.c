@@ -508,7 +508,7 @@ gdb_print_insn_sh (bfd_vma memaddr, disassemble_info * info)
 
 static CORE_ADDR
 sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
-		     struct sh_frame_cache *cache)
+		     struct sh_frame_cache *cache, ULONGEST fpscr)
 {
   ULONGEST inst;
   CORE_ADDR opc;
@@ -615,7 +615,7 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	}
       else if (IS_FPUSH (inst))
 	{
-	  if (read_register (FPSCR_REGNUM) & FPSCR_SZ)
+	  if (fpscr & FPSCR_SZ)
 	    {
 	      cache->sp_offset += 8;
 	    }
@@ -728,7 +728,7 @@ sh_skip_prologue (CORE_ADDR start_pc)
     return max (pc, start_pc);
 
   cache.sp_offset = -4;
-  pc = sh_analyze_prologue (start_pc, (CORE_ADDR) -1, &cache);
+  pc = sh_analyze_prologue (start_pc, (CORE_ADDR) -1, &cache, 0);
   if (!cache.uses_fp)
     return start_pc;
 
@@ -2360,7 +2360,11 @@ sh_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   current_pc = frame_pc_unwind (next_frame);
   if (cache->pc != 0)
-    sh_analyze_prologue (cache->pc, current_pc, cache);
+    {
+      ULONGEST fpscr;
+      fpscr = frame_unwind_register_unsigned (next_frame, FPSCR_REGNUM);
+      sh_analyze_prologue (cache->pc, current_pc, cache, fpscr);
+    }
 
   if (!cache->uses_fp)
     {

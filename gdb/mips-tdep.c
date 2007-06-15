@@ -452,8 +452,6 @@ mips2_fp_compat (void)
 
 static CORE_ADDR heuristic_proc_start (CORE_ADDR);
 
-static CORE_ADDR read_next_frame_reg (struct frame_info *, int);
-
 static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
 
 static struct type *mips_float_register_type (void);
@@ -1571,8 +1569,9 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   /* Can be called when there's no process, and hence when there's no
      NEXT_FRAME.  */
   if (next_frame != NULL)
-    sp = read_next_frame_reg (next_frame, gdbarch_num_regs (current_gdbarch)
-					   + MIPS_SP_REGNUM);
+    sp = frame_unwind_register_signed (next_frame,
+				       gdbarch_num_regs (current_gdbarch)
+				       + MIPS_SP_REGNUM);
   else
     sp = 0;
 
@@ -1892,8 +1891,9 @@ mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   /* Can be called when there's no process, and hence when there's no
      NEXT_FRAME.  */
   if (next_frame != NULL)
-    sp = read_next_frame_reg (next_frame, gdbarch_num_regs (current_gdbarch)
-					  + MIPS_SP_REGNUM);
+    sp = frame_unwind_register_signed (next_frame,
+				       gdbarch_num_regs (current_gdbarch)
+				       + MIPS_SP_REGNUM);
   else
     sp = 0;
 
@@ -1943,14 +1943,15 @@ restart:
 	  /* Old gcc frame, r30 is virtual frame pointer.  */
 	  if ((long) low_word != frame_offset)
 	    frame_addr = sp + low_word;
-	  else if (frame_reg == MIPS_SP_REGNUM)
+	  else if (next_frame && frame_reg == MIPS_SP_REGNUM)
 	    {
 	      unsigned alloca_adjust;
 
 	      frame_reg = 30;
-	      frame_addr = read_next_frame_reg (next_frame,
-						gdbarch_num_regs
-						  (current_gdbarch) + 30);
+	      frame_addr = frame_unwind_register_signed
+			     (next_frame,
+			      gdbarch_num_regs (current_gdbarch) + 30);
+
 	      alloca_adjust = (unsigned) (frame_addr - (sp + low_word));
 	      if (alloca_adjust > 0)
 		{
@@ -1973,14 +1974,15 @@ restart:
       else if (inst == 0x03A0F021 || inst == 0x03a0f025 || inst == 0x03a0f02d)
 	{
 	  /* New gcc frame, virtual frame pointer is at r30 + frame_size.  */
-	  if (frame_reg == MIPS_SP_REGNUM)
+	  if (next_frame && frame_reg == MIPS_SP_REGNUM)
 	    {
 	      unsigned alloca_adjust;
 
 	      frame_reg = 30;
-	      frame_addr = read_next_frame_reg (next_frame,
-						gdbarch_num_regs 
-						  (current_gdbarch) + 30);
+	      frame_addr = frame_unwind_register_signed
+			     (next_frame,
+			      gdbarch_num_regs (current_gdbarch) + 30);
+
 	      alloca_adjust = (unsigned) (frame_addr - sp);
 	      if (alloca_adjust > 0)
 	        {
@@ -2286,22 +2288,6 @@ mips_stub_frame_base_sniffer (struct frame_info *next_frame)
     return &mips_stub_frame_base;
   else
     return NULL;
-}
-
-static CORE_ADDR
-read_next_frame_reg (struct frame_info *fi, int regno)
-{
-  /* Always a pseudo.  */
-  gdb_assert (regno >= gdbarch_num_regs (current_gdbarch));
-  if (fi == NULL)
-    {
-      LONGEST val;
-      regcache_cooked_read_signed (current_regcache, regno, &val);
-      return val;
-    }
-  else
-    return frame_unwind_register_signed (fi, regno);
-
 }
 
 /* mips_addr_bits_remove - remove useless address bits  */
