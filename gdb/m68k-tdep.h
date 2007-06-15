@@ -60,6 +60,14 @@ enum struct_return
   reg_struct_return		/* Return "short" structures in registers.  */
 };
 
+/* Particular flavour of m68k.  */
+enum m68k_flavour
+  {
+    m68k_no_flavour,
+    m68k_coldfire_flavour,
+    m68k_fido_flavour
+  };
+
 /* Target-dependent structure in gdbarch.  */
 
 struct gdbarch_tdep
@@ -76,6 +84,16 @@ struct gdbarch_tdep
 
   /* Convention for returning structures.  */
   enum struct_return struct_return;
+
+  /* Convention for returning floats.  zero in int regs, non-zero in float.  */
+  int float_return;
+
+  /* The particular flavour of m68k.  */
+  enum m68k_flavour flavour;
+
+  /* Flag set if the floating point registers are present, or assumed
+     to be present.  */
+  int fpregs_present;
 };
 
 /* Initialize a SVR4 architecture variant.  */

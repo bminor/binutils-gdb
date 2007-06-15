@@ -1,3 +1,33 @@
+2007-06-15  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* m68k-tdep.h (enum m68k_flavour): New.	
+	(struct gdbarch_tdep): New fields
+	float_return, flavour and fpregs_present.
+	* m68k-tdep.c (m68k_register_type): Use
+	fpregs_present and conditionalize floating
+	registers type on flavour.
+	(m68k_register_names): New.
+	(m68k_register_name): Use the above.
+	(m68k_convert_register_p): Consult fpregs_present.
+	(m68k_register_to_value, m68k_value_to_register):
+	Use register_type to obtain the type of floating
+	point registers.
+	(m68k_svr4_extract_return_value): Check tdep->float_return.
+	Use register_type to get the type of floating
+	point regiters.
+	(m68k_svr4_store_return_value): Likewise.
+	(m68k_dwarf_reg_to_regnum): Check tdep->fpregs_present.
+	(m68k_analyze_register_saves): Likewise.
+	(m68k_gdbarch_init): Extract infromation
+	from XML description, if present.  Guess coldfire by
+	looking at the file, if present. Conditionalize
+	setting of long double format.  Set decr_pc_after_break
+	to 2 on coldfire and fido.  Enable XML-driven
+	register description.
+	* m68kbsd-tdep.c (m68kbsd_fpreg_offset): Use
+	size of tdep->fpreg_type, as opposed to hardcoded value.
+	* Makefile.in (m68k-tdep.o): Update dependencies.
+	
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* NEWS: Mention "info spu" commands and qXfer:spu:read and

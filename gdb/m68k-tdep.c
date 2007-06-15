@@ -36,6 +36,7 @@
 #include "arch-utils.h"
 #include "osabi.h"
 #include "dis-asm.h"
+#include "target-descriptions.h"
 
 #include "m68k-tdep.h"
 
@@ -80,15 +81,32 @@ m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 static struct type *
 m68k_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum >= FP0_REGNUM && regnum <= FP0_REGNUM + 7)
-    return builtin_type_m68881_ext;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  if (regnum == M68K_FPI_REGNUM || regnum == PC_REGNUM)
+  if (tdep->fpregs_present)
+    {
+      if (regnum >= FP0_REGNUM && regnum <= FP0_REGNUM + 7)
+	{
+	  if (tdep->flavour == m68k_coldfire_flavour)
+	    return builtin_type (gdbarch)->builtin_double;
+	  else
+	    return builtin_type_m68881_ext;
+	}
+
+      if (regnum == M68K_FPI_REGNUM)
+	return builtin_type_void_func_ptr;
+
+      if (regnum == M68K_FPC_REGNUM || regnum == M68K_FPS_REGNUM)
+	return builtin_type_int32;
+    }
+  else
+    {
+      if (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FPI_REGNUM)
+	return builtin_type_int0;
+    }
+
+  if (regnum == PC_REGNUM)
     return builtin_type_void_func_ptr;
-
-  if (regnum == M68K_FPC_REGNUM || regnum == M68K_FPS_REGNUM
-      || regnum == PS_REGNUM)
-    return builtin_type_int32;
 
   if (regnum >= M68K_A0_REGNUM && regnum <= M68K_A0_REGNUM + 7)
     return builtin_type_void_data_ptr;
@@ -96,25 +114,25 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
   return builtin_type_int32;
 }
 
+static const char *m68k_register_names[] = {
+    "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
+    "a0", "a1", "a2", "a3", "a4", "a5", "fp", "sp",
+    "ps", "pc",
+    "fp0", "fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7",
+    "fpcontrol", "fpstatus", "fpiaddr"
+  };
+
 /* Function: m68k_register_name
    Returns the name of the standard m68k register regnum. */
 
 static const char *
 m68k_register_name (int regnum)
 {
-  static char *register_names[] = {
-    "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
-    "a0", "a1", "a2", "a3", "a4", "a5", "fp", "sp",
-    "ps", "pc",
-    "fp0", "fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7",
-    "fpcontrol", "fpstatus", "fpiaddr", "fpcode", "fpflags"
-  };
-
-  if (regnum < 0 || regnum >= ARRAY_SIZE (register_names))
+  if (regnum < 0 || regnum >= ARRAY_SIZE (m68k_register_names))
     internal_error (__FILE__, __LINE__,
 		    _("m68k_register_name: illegal register number %d"), regnum);
   else
-    return register_names[regnum];
+    return m68k_register_names[regnum];
 }
 
 /* Return nonzero if a value of type TYPE stored in register REGNUM
@@ -123,6 +141,8 @@ m68k_register_name (int regnum)
 static int
 m68k_convert_register_p (int regnum, struct type *type)
 {
+  if (!gdbarch_tdep (current_gdbarch)->fpregs_present)
+    return 0;
   return (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FP0_REGNUM + 7);
 }
 
@@ -134,6 +154,7 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, gdb_byte *to)
 {
   gdb_byte from[M68K_MAX_REGISTER_SIZE];
+  struct type *fpreg_type = register_type (current_gdbarch, M68K_FP0_REGNUM);
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -146,7 +167,7 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
   /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
      the extended floating-point format used by the FPU.  */
   get_frame_register (frame, regnum, from);
-  convert_typed_floating (from, builtin_type_m68881_ext, to, type);
+  convert_typed_floating (from, fpreg_type, to, type);
 }
 
 /* Write the contents FROM of a value of type TYPE into register
@@ -157,6 +178,7 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const gdb_byte *from)
 {
   gdb_byte to[M68K_MAX_REGISTER_SIZE];
+  struct type *fpreg_type = register_type (current_gdbarch, M68K_FP0_REGNUM);
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -168,7 +190,7 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
 
   /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
      to the extended floating-point format used by the FPU.  */
-  convert_typed_floating (from, type, to, builtin_type_m68881_ext);
+  convert_typed_floating (from, type, to, fpreg_type);
   put_frame_register (frame, regnum, to);
 }
 
@@ -234,11 +256,14 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
 {
   int len = TYPE_LENGTH (type);
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
+      struct type *fpreg_type = register_type 
+	(current_gdbarch, M68K_FP0_REGNUM);
       regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
-      convert_typed_floating (buf, builtin_type_m68881_ext, valbuf, type);
+      convert_typed_floating (buf, fpreg_type, valbuf, type);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
     regcache_raw_read (regcache, M68K_A0_REGNUM, valbuf);
@@ -272,11 +297,14 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
 			      const gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
+      struct type *fpreg_type = register_type 
+	(current_gdbarch, M68K_FP0_REGNUM);
       gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-      convert_typed_floating (valbuf, type, buf, builtin_type_m68881_ext);
+      convert_typed_floating (valbuf, type, buf, fpreg_type);
       regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
@@ -477,7 +505,7 @@ m68k_dwarf_reg_to_regnum (int num)
   else if (num < 16)
     /* a0..7 */
     return (num - 8) + M68K_A0_REGNUM;
-  else if (num < 24)
+  else if (num < 24 && gdbarch_tdep (current_gdbarch)->fpregs_present)
     /* fp0..7 */
     return (num - 16) + M68K_FP0_REGNUM;
   else if (num == 25)
@@ -646,7 +674,8 @@ m68k_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
       while (pc < current_pc)
 	{
 	  op = read_memory_unsigned_integer (pc, 2);
-	  if (op == P_FMOVEMX_SP)
+	  if (op == P_FMOVEMX_SP
+	      && gdbarch_tdep (current_gdbarch)->fpregs_present)
 	    {
 	      /* fmovem.x REGS,-(%sp) */
 	      op = read_memory_unsigned_integer (pc + 2, 2);
@@ -1007,17 +1036,113 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep = NULL;
   struct gdbarch *gdbarch;
+  struct gdbarch_list *best_arch;
+  struct tdesc_arch_data *tdesc_data = NULL;
+  int i;
+  enum m68k_flavour flavour = m68k_no_flavour;
+  int has_fp = 1;
+  const struct floatformat **long_double_format = floatformats_m68881_ext;
 
-  /* find a candidate among the list of pre-declared architectures. */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return (arches->gdbarch);
+  /* Check any target description for validity.  */
+  if (tdesc_has_registers (info.target_desc))
+    {
+      const struct tdesc_feature *feature;
+      int valid_p;
+
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.m68k.core");
+      if (feature != NULL)
+	/* Do nothing.  */
+	;
+
+      if (feature == NULL)
+	{
+	  feature = tdesc_find_feature (info.target_desc,
+					"org.gnu.gdb.coldfire.core");
+	  if (feature != NULL)
+	    flavour = m68k_coldfire_flavour;
+	}
+
+      if (feature == NULL)
+	{
+	  feature = tdesc_find_feature (info.target_desc,
+					"org.gnu.gdb.fido.core");
+	  if (feature != NULL)
+	    flavour = m68k_fido_flavour;
+	}
+
+      if (feature == NULL)
+	return NULL;
+
+      tdesc_data = tdesc_data_alloc ();
+
+      valid_p = 1;
+      for (i = 0; i <= M68K_PC_REGNUM; i++)
+	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+					    m68k_register_names[i]);
+
+      if (!valid_p)
+	{
+	  tdesc_data_cleanup (tdesc_data);
+	  return NULL;
+	}
+
+      feature = tdesc_find_feature (info.target_desc,
+				    "org.gnu.gdb.coldfire.fp");
+      if (feature != NULL)
+	{
+	  valid_p = 1;
+	  for (i = M68K_FP0_REGNUM; i <= M68K_FPI_REGNUM; i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+						m68k_register_names[i]);
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	}
+      else
+	has_fp = 0;
+    }
+
+  /* The mechanism for returning floating values from function
+     and the type of long double depend on whether we're
+     on ColdFire or standard m68k. */
+
+  if (info.bfd_arch_info)
+    {
+      const bfd_arch_info_type *coldfire_arch = 
+	bfd_lookup_arch (bfd_arch_m68k, bfd_mach_mcf_isa_a_nodiv);
+
+      if (coldfire_arch
+	  && (*info.bfd_arch_info->compatible) 
+	  (info.bfd_arch_info, coldfire_arch))
+	flavour = m68k_coldfire_flavour;
+    }
+  
+  /* If there is already a candidate, use it.  */
+  for (best_arch = gdbarch_list_lookup_by_info (arches, &info);
+       best_arch != NULL;
+       best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
+    {
+      if (flavour != gdbarch_tdep (best_arch->gdbarch)->flavour)
+	continue;
+
+      if (has_fp != gdbarch_tdep (best_arch->gdbarch)->fpregs_present)
+	continue;
+
+      break;
+    }
 
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
+  tdep->fpregs_present = has_fp;
+  tdep->flavour = flavour;
 
-  set_gdbarch_long_double_format (gdbarch, floatformats_m68881_ext);
-  set_gdbarch_long_double_bit (gdbarch, 96);
+  if (flavour == m68k_coldfire_flavour || flavour == m68k_fido_flavour)
+    long_double_format = floatformats_ieee_double;
+  set_gdbarch_long_double_format (gdbarch, long_double_format);
+  set_gdbarch_long_double_bit (gdbarch, long_double_format[0]->totalsize);
 
   set_gdbarch_skip_prologue (gdbarch, m68k_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68k_local_breakpoint_from_pc);
@@ -1027,6 +1152,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_align (gdbarch, m68k_frame_align);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
+  if (flavour == m68k_coldfire_flavour || flavour == m68k_fido_flavour)
+    set_gdbarch_decr_pc_after_break (gdbarch, 2);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, m68k_dwarf_reg_to_regnum);
@@ -1043,8 +1170,29 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_to_value (gdbarch,  m68k_register_to_value);
   set_gdbarch_value_to_register (gdbarch, m68k_value_to_register);
 
+  if (has_fp)
+    set_gdbarch_fp0_regnum (gdbarch, M68K_FP0_REGNUM);
+
+  /* Try to figure out if the arch uses floating registers to return
+     floating point values from functions.  */
+  if (has_fp)
+    {
+      /* On ColdFire, floating point values are returned in D0.  */
+      if (flavour == m68k_coldfire_flavour)
+	tdep->float_return = 0;
+      else
+	tdep->float_return = 1;
+    }
+  else
+    {
+      /* No floating registers, so can't use them for returning values.  */
+      tdep->float_return = 0;
+    }
+
+  /* Function call & return */
   set_gdbarch_push_dummy_call (gdbarch, m68k_push_dummy_call);
   set_gdbarch_return_value (gdbarch, m68k_return_value);
+
 
   /* Disassembler.  */
   set_gdbarch_print_insn (gdbarch, print_insn_m68k);
@@ -1077,6 +1225,9 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_get_longjmp_target (gdbarch, m68k_get_longjmp_target);
 
   frame_unwind_append_sniffer (gdbarch, m68k_frame_sniffer);
+
+  if (tdesc_data)
+    tdesc_use_registers (gdbarch, tdesc_data);
 
   return gdbarch;
 }
