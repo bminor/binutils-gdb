@@ -1128,19 +1128,54 @@ extern struct type *builtin_type_m2_bool;
 
 /* Fortran (F77) types */
 
-extern struct type *builtin_type_f_character;
-extern struct type *builtin_type_f_integer;
-extern struct type *builtin_type_f_integer_s2;
-extern struct type *builtin_type_f_logical;
-extern struct type *builtin_type_f_logical_s1;
-extern struct type *builtin_type_f_logical_s2;
-extern struct type *builtin_type_f_real;
-extern struct type *builtin_type_f_real_s8;
-extern struct type *builtin_type_f_real_s16;
-extern struct type *builtin_type_f_complex_s8;
-extern struct type *builtin_type_f_complex_s16;
-extern struct type *builtin_type_f_complex_s32;
-extern struct type *builtin_type_f_void;
+struct builtin_f_type
+{
+  struct type *builtin_character;
+  struct type *builtin_integer;
+  struct type *builtin_integer_s2;
+  struct type *builtin_logical;
+  struct type *builtin_logical_s1;
+  struct type *builtin_logical_s2;
+  struct type *builtin_real;
+  struct type *builtin_real_s8;
+  struct type *builtin_real_s16;
+  struct type *builtin_complex_s8;
+  struct type *builtin_complex_s16;
+  struct type *builtin_complex_s32;
+  struct type *builtin_void;
+};
+
+/* Return the Fortran type table for the specified architecture.  */
+extern const struct builtin_f_type *builtin_f_type (struct gdbarch *gdbarch);
+
+/* Compatibility macros to access types for the current architecture.  */
+#define builtin_type_f_character \
+	(builtin_f_type (current_gdbarch)->builtin_character)
+#define builtin_type_f_integer \
+	(builtin_f_type (current_gdbarch)->builtin_integer)
+#define builtin_type_f_integer_s2 \
+	(builtin_f_type (current_gdbarch)->builtin_integer_s2)
+#define builtin_type_f_logical \
+	(builtin_f_type (current_gdbarch)->builtin_logical)
+#define builtin_type_f_logical_s1 \
+	(builtin_f_type (current_gdbarch)->builtin_logical_s1)
+#define builtin_type_f_logical_s2 \
+	(builtin_f_type (current_gdbarch)->builtin_logical_s2)
+#define builtin_type_f_real \
+	(builtin_f_type (current_gdbarch)->builtin_real)
+#define builtin_type_f_real_s8 \
+	(builtin_f_type (current_gdbarch)->builtin_real_s8)
+#define builtin_type_f_real_s16 \
+	(builtin_f_type (current_gdbarch)->builtin_real_s16)
+#define builtin_type_f_complex_s8 \
+	(builtin_f_type (current_gdbarch)->builtin_complex_s8)
+#define builtin_type_f_complex_s16 \
+	(builtin_f_type (current_gdbarch)->builtin_complex_s16)
+#define builtin_type_f_complex_s32 \
+	(builtin_f_type (current_gdbarch)->builtin_complex_s32)
+#define builtin_type_f_void \
+	(builtin_f_type (current_gdbarch)->builtin_void)
+
 
 /* RTTI for C++ */
 /* extern struct type *builtin_type_cxx_typeinfo; */

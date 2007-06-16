@@ -1,5 +1,30 @@
 2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (builtin_type_f_character, builtin_type_f_logical,
+	builtin_type_f_logical_s1, builtin_type_f_logical_s2,
+	builtin_type_f_integer, builtin_type_f_integer_s2, builtin_type_f_real,
+	builtin_type_f_real_s8, builtin_type_f_real_s16,
+	builtin_type_f_complex_s8, builtin_type_f_complex_s16,
+	builtin_type_f_complex_s32, builtin_type_f_void): Replace global
+	variable declaration with compatibility macro.
+	(struct builtin_f_type): New data type.
+	(builtin_f_type): Add prototype.
+	* f-lang.c (builtin_type_f_character, builtin_type_f_logical,
+	builtin_type_f_logical_s1, builtin_type_f_logical_s2,
+	builtin_type_f_integer, builtin_type_f_integer_s2, builtin_type_f_real,
+	builtin_type_f_real_s8, builtin_type_f_real_s16,
+	builtin_type_f_complex_s8, builtin_type_f_complex_s16,
+	builtin_type_f_complex_s32, builtin_type_f_void): Remove variables.
+	(f_language_arch_info): Use builtin_f_type instead of variables.
+	(build_fortran_types): Build builtin_f_type structure instead of
+	setting global type variables.
+	(f_type_data): New variable.
+	(builtin_f_type): New function.
+	(_initialize_f_language): Do not call build_fortran_types.  Do not
+	swap global type variables.  Register f_type_data per-gdbarch data.
+
+2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* f-lang.c (_initialize_f_language): Do not initialize or
 	swap builtin_type_string.
 

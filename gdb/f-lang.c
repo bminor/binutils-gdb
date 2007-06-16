@@ -34,22 +34,6 @@
 #include "valprint.h"
 #include "value.h"
 
-/* The built-in types of F77.  FIXME: integer*4 is missing, plain
-   logical is missing (builtin_type_logical is logical*4).  */
-
-struct type *builtin_type_f_character;
-struct type *builtin_type_f_logical;
-struct type *builtin_type_f_logical_s1;
-struct type *builtin_type_f_logical_s2;
-struct type *builtin_type_f_integer;
-struct type *builtin_type_f_integer_s2;
-struct type *builtin_type_f_real;
-struct type *builtin_type_f_real_s8;
-struct type *builtin_type_f_real_s16;
-struct type *builtin_type_f_complex_s8;
-struct type *builtin_type_f_complex_s16;
-struct type *builtin_type_f_complex_s32;
-struct type *builtin_type_f_void;
 
 /* Following is dubious stuff that had been in the xcoff reader. */
 
@@ -454,31 +438,33 @@ static void
 f_language_arch_info (struct gdbarch *gdbarch,
 		      struct language_arch_info *lai)
 {
-  lai->string_char_type = builtin_type_f_character;
+  const struct builtin_f_type *builtin = builtin_f_type (gdbarch);
+
+  lai->string_char_type = builtin->builtin_character;
   lai->primitive_type_vector
     = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_f_primitive_types + 1,
                               struct type *);
 
   lai->primitive_type_vector [f_primitive_type_character]
-    = builtin_type_f_character;
+    = builtin->builtin_character;
   lai->primitive_type_vector [f_primitive_type_logical]
-    = builtin_type_f_logical;
+    = builtin->builtin_logical;
   lai->primitive_type_vector [f_primitive_type_logical_s1]
-    = builtin_type_f_logical_s1;
+    = builtin->builtin_logical_s1;
   lai->primitive_type_vector [f_primitive_type_logical_s2]
-    = builtin_type_f_logical_s2;
+    = builtin->builtin_logical_s2;
   lai->primitive_type_vector [f_primitive_type_real]
-    = builtin_type_f_real;
+    = builtin->builtin_real;
   lai->primitive_type_vector [f_primitive_type_real_s8]
-    = builtin_type_f_real_s8;
+    = builtin->builtin_real_s8;
   lai->primitive_type_vector [f_primitive_type_real_s16]
-    = builtin_type_f_real_s16;
+    = builtin->builtin_real_s16;
   lai->primitive_type_vector [f_primitive_type_complex_s8]
-    = builtin_type_f_complex_s8;
+    = builtin->builtin_complex_s8;
   lai->primitive_type_vector [f_primitive_type_complex_s16]
-    = builtin_type_f_complex_s16;
+    = builtin->builtin_complex_s16;
   lai->primitive_type_vector [f_primitive_type_void]
-    = builtin_type_f_void;
+    = builtin->builtin_void;
 }
 
 /* This is declared in c-lang.h but it is silly to import that file for what
@@ -522,106 +508,107 @@ const struct language_defn f_language_defn =
   LANG_MAGIC
 };
 
-static void
-build_fortran_types (void)
+static void *
+build_fortran_types (struct gdbarch *gdbarch)
 {
-  builtin_type_f_void =
+  struct builtin_f_type *builtin_f_type
+    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_f_type);
+
+  builtin_f_type->builtin_void =
     init_type (TYPE_CODE_VOID, 1,
 	       0,
 	       "VOID", (struct objfile *) NULL);
 
-  builtin_type_f_character =
+  builtin_f_type->builtin_character =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "character", (struct objfile *) NULL);
 
-  builtin_type_f_logical_s1 =
+  builtin_f_type->builtin_logical_s1 =
     init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "logical*1", (struct objfile *) NULL);
 
-  builtin_type_f_integer_s2 =
+  builtin_f_type->builtin_integer_s2 =
     init_type (TYPE_CODE_INT,
 	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0, "integer*2", (struct objfile *) NULL);
 
-  builtin_type_f_logical_s2 =
+  builtin_f_type->builtin_logical_s2 =
     init_type (TYPE_CODE_BOOL,
 	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED, "logical*2", (struct objfile *) NULL);
 
-  builtin_type_f_integer =
+  builtin_f_type->builtin_integer =
     init_type (TYPE_CODE_INT, 
 	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0, "integer", (struct objfile *) NULL);
 
-  builtin_type_f_logical =
+  builtin_f_type->builtin_logical =
     init_type (TYPE_CODE_BOOL, 
 	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED, "logical*4", (struct objfile *) NULL);
 
-  builtin_type_f_real =
+  builtin_f_type->builtin_real =
     init_type (TYPE_CODE_FLT,
 	       gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "real", (struct objfile *) NULL);
 
-  builtin_type_f_real_s8 =
+  builtin_f_type->builtin_real_s8 =
     init_type (TYPE_CODE_FLT,
 	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "real*8", (struct objfile *) NULL);
 
-  builtin_type_f_real_s16 =
+  builtin_f_type->builtin_real_s16 =
     init_type (TYPE_CODE_FLT,
 	       gdbarch_long_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "real*16", (struct objfile *) NULL);
 
-  builtin_type_f_complex_s8 =
+  builtin_f_type->builtin_complex_s8 =
     init_type (TYPE_CODE_COMPLEX,
 	       2 * gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "complex*8", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_type_f_complex_s8) = builtin_type_f_real;
+  TYPE_TARGET_TYPE (builtin_f_type->builtin_complex_s8)
+    = builtin_f_type->builtin_real;
 
-  builtin_type_f_complex_s16 =
+  builtin_f_type->builtin_complex_s16 =
     init_type (TYPE_CODE_COMPLEX,
 	       2 * gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "complex*16", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_type_f_complex_s16) = builtin_type_f_real_s8;
+  TYPE_TARGET_TYPE (builtin_f_type->builtin_complex_s16)
+    = builtin_f_type->builtin_real_s8;
 
   /* We have a new size == 4 double floats for the
      complex*32 data type */
 
-  builtin_type_f_complex_s32 =
+  builtin_f_type->builtin_complex_s32 =
     init_type (TYPE_CODE_COMPLEX,
 	       2 * gdbarch_long_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "complex*32", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_type_f_complex_s32) = builtin_type_f_real_s16;
+  TYPE_TARGET_TYPE (builtin_f_type->builtin_complex_s32)
+    = builtin_f_type->builtin_real_s16;
+
+  return builtin_f_type;
+}
+
+static struct gdbarch_data *f_type_data;
+
+const struct builtin_f_type *
+builtin_f_type (struct gdbarch *gdbarch)
+{
+  return gdbarch_data (gdbarch, f_type_data);
 }
 
 void
 _initialize_f_language (void)
 {
-  build_fortran_types ();
-
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_character);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_logical); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_logical_s1); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_logical_s2); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_integer); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_integer_s2); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_real); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_real_s8); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_real_s16); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_complex_s8); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_complex_s16); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_complex_s32); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_void); 
-  deprecated_register_gdbarch_swap (NULL, 0, build_fortran_types);
+  f_type_data = gdbarch_data_register_post_init (build_fortran_types);
 
   add_language (&f_language_defn);
 }
