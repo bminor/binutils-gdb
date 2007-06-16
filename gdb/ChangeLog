@@ -1,5 +1,55 @@
 2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.c (builtin_type_v2_double, builtin_type_v4_float, 
+	builtin_type_v2_int64, builtin_type_v4_int32, builtin_type_v8_int16,
+	builtin_type_v16_int8, builtin_type_v2_float, builtin_type_v2_int32,
+	builtin_type_v4_int16, builtin_type_v8_int8, builtin_type_v4sf,
+	builtin_type_v4si, builtin_type_v16qi, builtin_type_v8qi, 
+	builtin_type_v8hi, builtin_type_v4hi, builtin_type_v2si,
+	builtin_type_vec64, builtin_type_vec128): Remove.
+	(init_simd_type): Remove.
+	(init_vector_type): Make global.
+	(build_builtin_type_vec64, build_builtin_type_vec128): Remove.
+	(build_gdbtypes): Do not build vector types.
+	(_initialize_gdbtypes): Do not swap vector types.
+	* gdbtypes.h (builtin_type_v2_double, builtin_type_v4_float, 
+	builtin_type_v2_int64, builtin_type_v4_int32, builtin_type_v8_int16,
+	builtin_type_v16_int8, builtin_type_v2_float, builtin_type_v2_int32,
+	builtin_type_v4_int16, builtin_type_v8_int8, builtin_type_v4sf,
+	builtin_type_v4si, builtin_type_v16qi, builtin_type_v8qi, 
+	builtin_type_v8hi, builtin_type_v4hi, builtin_type_v2si,
+	builtin_type_vec64, builtin_type_vec128): Remove declarations.
+	(init_vector_type): Add prototype.
+
+	* i386-tdep.h (struct gdbarch_tdep): Add i386_mmx_type and
+	i386_sse_type members.
+	(i386_mmx_type, i386_sse_type): Change from variables to functions.
+	* i386-tdep.c (i386_mmx_type, i386_sse_type): Remove variables.
+	(i386_init_types): Do not build vector types.
+	(i386_mmx_type, i386_sse_type): New functions.
+	(i386_register_type): Call them instead of using global variables.
+	(i386_gdbarch_init): Use XCALLOC to allocate tdep structure.
+	* amd64-tdep.c (amd64_register_type): Call i386_sse_type instead
+	of using global variable.
+
+	* rs6000-tdep.h (struct gdbarch_tdep): Add ppc_builtin_type_vec64
+	and ppc_builtin_type_vec128 members.
+	* rs6000-tdep.c (rs6000_builtin_type_vec64): New function.
+	(rs6000_builtin_type_vec128): Likewise.
+	(rs6000_register_type): Call them instead of using builtin_type_vec64
+	and builtin_type_vec128.
+	(rs6000_gdbarch_init): Use XCALLOC to allocate tdep structure.
+
+	* spu-tdep.c (struct gdbarch_tdep): New data type.
+	(spu_builtin_type_vec128): Remove variable.
+	(spu_builtin_type_vec128): New function.
+	(spu_register_type): Call it instead of using global variable.
+	(spu_gdbarch_init): Allocate tdep structure.
+	(spu_init_vector_type): Remove function.
+	(_initialize_spu_tdep): Do not call it.
+
+2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* amd64-tdep.c (struct amd64_register_info): Remove.
 	(amd64_register_info): Remove.
 	(amd64_register_names): New static variable.

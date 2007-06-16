@@ -76,29 +76,6 @@ struct type *builtin_type_int128;
 struct type *builtin_type_uint128;
 struct type *builtin_type_bool;
 
-/* 128 bit long vector types */
-struct type *builtin_type_v2_double;
-struct type *builtin_type_v4_float;
-struct type *builtin_type_v2_int64;
-struct type *builtin_type_v4_int32;
-struct type *builtin_type_v8_int16;
-struct type *builtin_type_v16_int8;
-/* 64 bit long vector types */
-struct type *builtin_type_v2_float;
-struct type *builtin_type_v2_int32;
-struct type *builtin_type_v4_int16;
-struct type *builtin_type_v8_int8;
-
-struct type *builtin_type_v4sf;
-struct type *builtin_type_v4si;
-struct type *builtin_type_v16qi;
-struct type *builtin_type_v8qi;
-struct type *builtin_type_v8hi;
-struct type *builtin_type_v4hi;
-struct type *builtin_type_v2si;
-struct type *builtin_type_vec64;
-struct type *builtin_type_vec128;
-
 /* Floatformat pairs.  */
 const struct floatformat *floatformats_ieee_single[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ieee_single_big,
@@ -950,33 +927,7 @@ init_flags_type (char *name, int length)
   return type;
 }
 
-/* Construct and return a type of the form:
-	struct NAME { ELT_TYPE ELT_NAME[N]; }
-   We use these types for SIMD registers.  For example, the type of
-   the SSE registers on the late x86-family processors is:
-	struct __builtin_v4sf { float f[4]; }
-   built by the function call:
-	init_simd_type ("__builtin_v4sf", builtin_type_float, "f", 4)
-   The type returned is a permanent type, allocated using malloc; it
-   doesn't live in any objfile's obstack.  */
-static struct type *
-init_simd_type (char *name,
-		struct type *elt_type,
-		char *elt_name,
-		int n)
-{
-  struct type *simd_type;
-  struct type *array_type;
-  
-  simd_type = init_composite_type (name, TYPE_CODE_STRUCT);
-  array_type = create_array_type (0, elt_type,
-				  create_range_type (0, builtin_type_int,
-						     0, n-1));
-  append_composite_type_field (simd_type, elt_name, array_type);
-  return simd_type;
-}
-
-static struct type *
+struct type *
 init_vector_type (struct type *elt_type, int n)
 {
   struct type *array_type;
@@ -986,66 +937,6 @@ init_vector_type (struct type *elt_type, int n)
 						     0, n-1));
   TYPE_FLAGS (array_type) |= TYPE_FLAG_VECTOR;
   return array_type;
-}
-
-static struct type *
-build_builtin_type_vec64 (void)
-{
-  /* Construct a type for the 64 bit registers.  The type we're
-     building is this: */
-#if 0
-  union __gdb_builtin_type_vec64
-  {
-    int64_t uint64;
-    float v2_float[2];
-    int32_t v2_int32[2];
-    int16_t v4_int16[4];
-    int8_t v8_int8[8];
-  };
-#endif
-
-  struct type *t;
-
-  t = init_composite_type ("__gdb_builtin_type_vec64", TYPE_CODE_UNION);
-  append_composite_type_field (t, "uint64", builtin_type_int64);
-  append_composite_type_field (t, "v2_float", builtin_type_v2_float);
-  append_composite_type_field (t, "v2_int32", builtin_type_v2_int32);
-  append_composite_type_field (t, "v4_int16", builtin_type_v4_int16);
-  append_composite_type_field (t, "v8_int8", builtin_type_v8_int8);
-
-  TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
-  TYPE_NAME (t) = "builtin_type_vec64";
-  return t;
-}
-
-static struct type *
-build_builtin_type_vec128 (void)
-{
-  /* Construct a type for the 128 bit registers.  The type we're
-     building is this: */
-#if 0
- union __gdb_builtin_type_vec128 
-  {
-    int128_t uint128;
-    float v4_float[4];
-    int32_t v4_int32[4];
-    int16_t v8_int16[8];
-    int8_t v16_int8[16];
-  };
-#endif
-
-  struct type *t;
-
-  t = init_composite_type ("__gdb_builtin_type_vec128", TYPE_CODE_UNION);
-  append_composite_type_field (t, "uint128", builtin_type_int128);
-  append_composite_type_field (t, "v4_float", builtin_type_v4_float);
-  append_composite_type_field (t, "v4_int32", builtin_type_v4_int32);
-  append_composite_type_field (t, "v8_int16", builtin_type_v8_int16);
-  append_composite_type_field (t, "v16_int8", builtin_type_v16_int8);
-
-  TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
-  TYPE_NAME (t) = "builtin_type_vec128";
-  return t;
 }
 
 /* Smash TYPE to be a type of pointers to members of DOMAIN with type
@@ -3509,39 +3400,6 @@ Show resolution of opaque struct/class/union types (if set before loading symbol
 			   &setlist, &showlist);
   opaque_type_resolution = 1;
 
-  /* Build SIMD types.  */
-  builtin_type_v4sf
-    = init_simd_type ("__builtin_v4sf", builtin_type_float, "f", 4);
-  builtin_type_v4si
-    = init_simd_type ("__builtin_v4si", builtin_type_int32, "f", 4);
-  builtin_type_v16qi
-    = init_simd_type ("__builtin_v16qi", builtin_type_int8, "f", 16);
-  builtin_type_v8qi
-    = init_simd_type ("__builtin_v8qi", builtin_type_int8, "f", 8);
-  builtin_type_v8hi
-    = init_simd_type ("__builtin_v8hi", builtin_type_int16, "f", 8);
-  builtin_type_v4hi
-    = init_simd_type ("__builtin_v4hi", builtin_type_int16, "f", 4);
-  builtin_type_v2si
-    = init_simd_type ("__builtin_v2si", builtin_type_int32, "f", 2);
-
-  /* 128 bit vectors.  */
-  builtin_type_v2_double = init_vector_type (builtin_type_double, 2);
-  builtin_type_v4_float = init_vector_type (builtin_type_float, 4);
-  builtin_type_v2_int64 = init_vector_type (builtin_type_int64, 2);
-  builtin_type_v4_int32 = init_vector_type (builtin_type_int32, 4);
-  builtin_type_v8_int16 = init_vector_type (builtin_type_int16, 8);
-  builtin_type_v16_int8 = init_vector_type (builtin_type_int8, 16);
-  /* 64 bit vectors.  */
-  builtin_type_v2_float = init_vector_type (builtin_type_float, 2);
-  builtin_type_v2_int32 = init_vector_type (builtin_type_int32, 2);
-  builtin_type_v4_int16 = init_vector_type (builtin_type_int16, 4);
-  builtin_type_v8_int8 = init_vector_type (builtin_type_int8, 8);
-
-  /* Vector types.  */
-  builtin_type_vec64 = build_builtin_type_vec64 ();
-  builtin_type_vec128 = build_builtin_type_vec128 ();
-
   /* Pointer/Address types. */
 
   /* NOTE: on some targets, addresses and pointers are not necessarily
@@ -3817,24 +3675,6 @@ _initialize_gdbtypes (void)
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_complex);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_double_complex);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_string);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v4sf);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v4si);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v16qi);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v8qi);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v8hi);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v4hi);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v2si);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v2_double);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v4_float);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v2_int64);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v4_int32);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v8_int16);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v16_int8);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v2_float);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v2_int32);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v8_int8);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_v4_int16);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_vec128);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_void_data_ptr);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_void_func_ptr);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);

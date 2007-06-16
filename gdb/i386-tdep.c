@@ -1595,9 +1595,7 @@ i386_return_value (struct gdbarch *gdbarch, struct type *type,
 /* Type for %eflags.  */
 struct type *i386_eflags_type;
 
-/* Types for the MMX and SSE registers.  */
-struct type *i386_mmx_type;
-struct type *i386_sse_type;
+/* Type for %mxcsr.  */
 struct type *i386_mxcsr_type;
 
 /* Construct types for ISA-specific registers.  */
@@ -1626,52 +1624,6 @@ i386_init_types (void)
   append_flags_type_flag (type, 21, "ID");
   i386_eflags_type = type;
 
-  /* The type we're building is this: */
-#if 0
-  union __gdb_builtin_type_vec64i
-  {
-    int64_t uint64;
-    int32_t v2_int32[2];
-    int16_t v4_int16[4];
-    int8_t v8_int8[8];
-  };
-#endif
-
-  type = init_composite_type ("__gdb_builtin_type_vec64i", TYPE_CODE_UNION);
-  append_composite_type_field (type, "uint64", builtin_type_int64);
-  append_composite_type_field (type, "v2_int32", builtin_type_v2_int32);
-  append_composite_type_field (type, "v4_int16", builtin_type_v4_int16);
-  append_composite_type_field (type, "v8_int8", builtin_type_v8_int8);
-  TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
-  TYPE_NAME (type) = "builtin_type_vec64i";
-  i386_mmx_type = type;
-
-  /* The type we're building is this: */
-#if 0
-  union __gdb_builtin_type_vec128i
-  {
-    int128_t uint128;
-    int64_t v2_int64[2];
-    int32_t v4_int32[4];
-    int16_t v8_int16[8];
-    int8_t v16_int8[16];
-    double v2_double[2];
-    float v4_float[4];
-  };
-#endif
-
-  type = init_composite_type ("__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
-  append_composite_type_field (type, "v4_float", builtin_type_v4_float);
-  append_composite_type_field (type, "v2_double", builtin_type_v2_double);
-  append_composite_type_field (type, "v16_int8", builtin_type_v16_int8);
-  append_composite_type_field (type, "v8_int16", builtin_type_v8_int16);
-  append_composite_type_field (type, "v4_int32", builtin_type_v4_int32);
-  append_composite_type_field (type, "v2_int64", builtin_type_v2_int64);
-  append_composite_type_field (type, "uint128", builtin_type_int128);
-  TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
-  TYPE_NAME (type) = "builtin_type_vec128i";
-  i386_sse_type = type;
-
   type = init_flags_type ("builtin_type_i386_mxcsr", 4);
   append_flags_type_flag (type, 0, "IE");
   append_flags_type_flag (type, 1, "DE");
@@ -1688,6 +1640,90 @@ i386_init_types (void)
   append_flags_type_flag (type, 12, "PM");
   append_flags_type_flag (type, 15, "FZ");
   i386_mxcsr_type = type;
+}
+
+/* Construct vector type for MMX registers.  */
+struct type *
+i386_mmx_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->i386_mmx_type)
+    {
+      /* The type we're building is this: */
+#if 0
+      union __gdb_builtin_type_vec64i
+      {
+        int64_t uint64;
+        int32_t v2_int32[2];
+        int16_t v4_int16[4];
+        int8_t v8_int8[8];
+      };
+#endif
+
+      struct type *t;
+
+      t = init_composite_type ("__gdb_builtin_type_vec64i", TYPE_CODE_UNION);
+      append_composite_type_field (t, "uint64", builtin_type_int64);
+      append_composite_type_field (t, "v2_int32",
+				   init_vector_type (builtin_type_int32, 2));
+      append_composite_type_field (t, "v4_int16",
+				   init_vector_type (builtin_type_int16, 4));
+      append_composite_type_field (t, "v8_int8",
+				   init_vector_type (builtin_type_int8, 8));
+
+      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_NAME (t) = "builtin_type_vec64i";
+      tdep->i386_mmx_type = t;
+    }
+
+  return tdep->i386_mmx_type;
+}
+
+struct type *
+i386_sse_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->i386_sse_type)
+    {
+      /* The type we're building is this: */
+#if 0
+      union __gdb_builtin_type_vec128i
+      {
+        int128_t uint128;
+        int64_t v2_int64[2];
+        int32_t v4_int32[4];
+        int16_t v8_int16[8];
+        int8_t v16_int8[16];
+        double v2_double[2];
+        float v4_float[4];
+      };
+#endif
+
+      struct type *t;
+
+      t = init_composite_type ("__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
+      append_composite_type_field (t, "v4_float",
+				   init_vector_type (builtin_type_float, 4));
+      append_composite_type_field (t, "v2_double",
+				   init_vector_type (builtin_type_double, 2));
+      append_composite_type_field (t, "v16_int8",
+				   init_vector_type (builtin_type_int8, 16));
+      append_composite_type_field (t, "v8_int16",
+				   init_vector_type (builtin_type_int16, 8));
+      append_composite_type_field (t, "v4_int32",
+				   init_vector_type (builtin_type_int32, 4));
+      append_composite_type_field (t, "v2_int64",
+				   init_vector_type (builtin_type_int64, 2));
+      append_composite_type_field (t, "uint128", builtin_type_int128);
+
+      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_NAME (t) = "builtin_type_vec128i";
+      tdep->i386_sse_type = t;
+    }
+
+  return tdep->i386_sse_type;
 }
 
 /* Return the GDB type object for the "standard" data type of data in
@@ -1710,10 +1746,10 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type_i387_ext;
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
-    return i386_mmx_type;
+    return i386_mmx_type (gdbarch);
 
   if (i386_sse_regnum_p (gdbarch, regnum))
-    return i386_sse_type;
+    return i386_sse_type (gdbarch);
 
 #define I387_ST0_REGNUM I386_ST0_REGNUM
 #define I387_NUM_XMM_REGS (gdbarch_tdep (current_gdbarch)->num_xmm_regs)
@@ -2274,7 +2310,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  tdep = XMALLOC (struct gdbarch_tdep);
+  tdep = XCALLOC (1, struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* General-purpose registers.  */

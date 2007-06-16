@@ -106,7 +106,7 @@ amd64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= AMD64_FCTRL_REGNUM && regnum <= AMD64_FCTRL_REGNUM + 7)
     return builtin_type_int32;
   if (regnum >= AMD64_XMM0_REGNUM && regnum <= AMD64_XMM0_REGNUM + 15)
-    return i386_sse_type;
+    return i386_sse_type (gdbarch);
   if (regnum == AMD64_MXCSR_REGNUM)
     return i386_mxcsr_type;
 

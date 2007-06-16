@@ -2024,6 +2024,88 @@ rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   return pc;
 }
 
+/* ISA-specific vector types.  */
+
+static struct type *
+rs6000_builtin_type_vec64 (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->ppc_builtin_type_vec64)
+    {
+      /* The type we're building is this: */
+#if 0
+      union __gdb_builtin_type_vec64
+	{
+	  int64_t uint64;
+	  float v2_float[2];
+	  int32_t v2_int32[2];
+	  int16_t v4_int16[4];
+	  int8_t v8_int8[8];
+	};
+#endif
+
+      struct type *t;
+
+      t = init_composite_type ("__ppc_builtin_type_vec64", TYPE_CODE_UNION);
+      append_composite_type_field (t, "uint64", builtin_type_int64);
+      append_composite_type_field (t, "v2_float",
+				   init_vector_type (builtin_type_float, 2));
+      append_composite_type_field (t, "v2_int32",
+				   init_vector_type (builtin_type_int32, 2));
+      append_composite_type_field (t, "v4_int16",
+				   init_vector_type (builtin_type_int16, 4));
+      append_composite_type_field (t, "v8_int8",
+				   init_vector_type (builtin_type_int8, 8));
+
+      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_NAME (t) = "ppc_builtin_type_vec64";
+      tdep->ppc_builtin_type_vec64 = t;
+    }
+
+  return tdep->ppc_builtin_type_vec64;
+}
+
+static struct type *
+rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->ppc_builtin_type_vec128)
+    {
+      /* The type we're building is this: */
+#if 0
+      union __gdb_builtin_type_vec128
+	{
+	  int128_t uint128;
+	  float v4_float[4];
+	  int32_t v4_int32[4];
+	  int16_t v8_int16[8];
+	  int8_t v16_int8[16];
+	};
+#endif
+
+      struct type *t;
+
+      t = init_composite_type ("__ppc_builtin_type_vec128", TYPE_CODE_UNION);
+      append_composite_type_field (t, "uint128", builtin_type_int128);
+      append_composite_type_field (t, "v4_float",
+				   init_vector_type (builtin_type_float, 4));
+      append_composite_type_field (t, "v4_int32",
+				   init_vector_type (builtin_type_int32, 4));
+      append_composite_type_field (t, "v8_int16",
+				   init_vector_type (builtin_type_int16, 8));
+      append_composite_type_field (t, "v16_int8",
+				   init_vector_type (builtin_type_int8, 16));
+
+      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_NAME (t) = "ppc_builtin_type_vec128";
+      tdep->ppc_builtin_type_vec128 = t;
+    }
+
+  return tdep->ppc_builtin_type_vec128;
+}
+
 /* Return the size of register REG when words are WORDSIZE bytes long.  If REG
    isn't available with that word size, return 0.  */
 
@@ -2069,12 +2151,12 @@ rs6000_register_type (struct gdbarch *gdbarch, int n)
 	  return builtin_type_uint32;
 	case 8:
 	  if (tdep->ppc_ev0_regnum <= n && n <= tdep->ppc_ev31_regnum)
-	    return builtin_type_vec64;
+	    return rs6000_builtin_type_vec64 (gdbarch);
 	  else
 	    return builtin_type_uint64;
 	  break;
 	case 16:
-	  return builtin_type_vec128;
+	  return rs6000_builtin_type_vec128 (gdbarch);
 	  break;
 	default:
 	  internal_error (__FILE__, __LINE__, _("Register %d size %d unknown"),
@@ -3364,7 +3446,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       info.bfd_arch_info = bfd_get_arch_info (&abfd);
       mach = info.bfd_arch_info->mach;
     }
-  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  tdep = XCALLOC (1, struct gdbarch_tdep);
   tdep->wordsize = wordsize;
 
   /* For e500 executables, the apuinfo section is of help here.  Such

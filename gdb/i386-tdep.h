@@ -104,6 +104,10 @@ struct gdbarch_tdep
      is deprecated, please use `sc_reg_offset' instead.  */
   int sc_pc_offset;
   int sc_sp_offset;
+
+  /* ISA-specific data types.  */
+  struct type *i386_mmx_type;
+  struct type *i386_sse_type;
 };
 
 /* Floating-point registers.  */
@@ -152,9 +156,10 @@ enum i386_regnum
 
 /* Types for i386-specific registers.  */
 extern struct type *i386_eflags_type;
-extern struct type *i386_mmx_type;
-extern struct type *i386_sse_type;
 extern struct type *i386_mxcsr_type;
+
+extern struct type *i386_mmx_type (struct gdbarch *gdbarch);
+extern struct type *i386_sse_type (struct gdbarch *gdbarch);
 
 /* Segment selectors.  */
 #define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */

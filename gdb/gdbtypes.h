@@ -1089,31 +1089,6 @@ extern struct type *builtin_type_uint64;
 extern struct type *builtin_type_int128;
 extern struct type *builtin_type_uint128;
 
-/* SIMD types.  We inherit these names from GCC.  */
-extern struct type *builtin_type_v4sf;
-extern struct type *builtin_type_v4si;
-extern struct type *builtin_type_v16qi;
-extern struct type *builtin_type_v8qi;
-extern struct type *builtin_type_v8hi;
-extern struct type *builtin_type_v4hi;
-extern struct type *builtin_type_v2si;
-
-/* Types for 64 bit vectors. */
-extern struct type *builtin_type_v2_float;
-extern struct type *builtin_type_v2_int32;
-extern struct type *builtin_type_v4_int16;
-extern struct type *builtin_type_v8_int8;
-extern struct type *builtin_type_vec64;
-
-/* Types for 128 bit vectors. */
-extern struct type *builtin_type_v2_double;
-extern struct type *builtin_type_v4_float;
-extern struct type *builtin_type_v2_int64;
-extern struct type *builtin_type_v4_int32;
-extern struct type *builtin_type_v8_int16;
-extern struct type *builtin_type_v16_int8;
-extern struct type *builtin_type_vec128;
-
 /* Explicit floating-point formats.  See "floatformat.h".  */
 extern const struct floatformat *floatformats_ieee_single[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ieee_double[BFD_ENDIAN_UNKNOWN];
@@ -1224,6 +1199,8 @@ extern void append_composite_type_field (struct type *t, char *name,
    append_flag_type_flag().  */
 extern struct type *init_flags_type (char *name, int length);
 extern void append_flags_type_flag (struct type *type, int bitpos, char *name);
+
+extern struct type *init_vector_type (struct type *elt_type, int n);
 
 extern struct type *lookup_reference_type (struct type *);
 

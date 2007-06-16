@@ -186,6 +186,10 @@ struct gdbarch_tdep
 
     /* Minimum possible text address.  */
     CORE_ADDR text_segment_base;
+
+    /* ISA-specific types.  */
+    struct type *ppc_builtin_type_vec64;
+    struct type *ppc_builtin_type_vec128;
 };
 
 
