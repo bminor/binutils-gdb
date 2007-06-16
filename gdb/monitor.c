@@ -1109,10 +1109,10 @@ monitor_wait (ptid_t ptid, struct target_waitstatus *status)
     }
 
   if (current_monitor->register_pattern)
-    parse_register_dump (current_regcache, buf, resp_len);
+    parse_register_dump (get_current_regcache (), buf, resp_len);
 #else
   monitor_debug ("Wait fetching registers after stop\n");
-  monitor_dump_regs (current_regcache);
+  monitor_dump_regs (get_current_regcache ());
 #endif
 
   status->kind = TARGET_WAITKIND_STOPPED;

@@ -2583,19 +2583,26 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
   gdb_fpxregset_t fpxregs;
 #endif
   unsigned long lwp = ptid_get_lwp (ptid);
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct regcache *regcache = get_thread_regcache (ptid);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct regset *regset;
   int core_regset_p;
+  struct cleanup *old_chain;
+
+  old_chain = save_inferior_ptid ();
+  inferior_ptid = ptid;
+  target_fetch_registers (regcache, -1);
+  do_cleanups (old_chain);
 
   core_regset_p = gdbarch_regset_from_core_section_p (gdbarch);
   if (core_regset_p
       && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
 						     sizeof (gregs))) != NULL
       && regset->collect_regset != NULL)
-    regset->collect_regset (regset, current_regcache, -1,
+    regset->collect_regset (regset, regcache, -1,
 			    &gregs, sizeof (gregs));
   else
-    fill_gregset (current_regcache, &gregs, -1);
+    fill_gregset (regcache, &gregs, -1);
 
   note_data = (char *) elfcore_write_prstatus (obfd,
 					       note_data,
@@ -2607,10 +2614,10 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
       && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
 						     sizeof (fpregs))) != NULL
       && regset->collect_regset != NULL)
-    regset->collect_regset (regset, current_regcache, -1,
+    regset->collect_regset (regset, regcache, -1,
 			    &fpregs, sizeof (fpregs));
   else
-    fill_fpregset (current_regcache, &fpregs, -1);
+    fill_fpregset (regcache, &fpregs, -1);
 
   note_data = (char *) elfcore_write_prfpreg (obfd,
 					      note_data,
@@ -2622,10 +2629,10 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
       && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg-xfp",
 						     sizeof (fpxregs))) != NULL
       && regset->collect_regset != NULL)
-    regset->collect_regset (regset, current_regcache, -1,
+    regset->collect_regset (regset, regcache, -1,
 			    &fpxregs, sizeof (fpxregs));
   else
-    fill_fpxregset (current_regcache, &fpxregs, -1);
+    fill_fpxregset (regcache, &fpxregs, -1);
 
   note_data = (char *) elfcore_write_prxfpreg (obfd,
 					       note_data,
@@ -2650,21 +2657,12 @@ static int
 linux_nat_corefile_thread_callback (struct lwp_info *ti, void *data)
 {
   struct linux_nat_corefile_thread_data *args = data;
-  ptid_t saved_ptid = inferior_ptid;
 
-  inferior_ptid = ti->ptid;
-  registers_changed ();
-  /* FIXME should not be necessary; fill_gregset should do it automatically. */
-  target_fetch_registers (current_regcache, -1);
   args->note_data = linux_nat_do_thread_registers (args->obfd,
 						   ti->ptid,
 						   args->note_data,
 						   args->note_size);
   args->num_notes++;
-  inferior_ptid = saved_ptid;
-  registers_changed ();
-  /* FIXME should not be necessary; fill_gregset should do it automatically. */
-  target_fetch_registers (current_regcache, -1);
 
   return 0;
 }
@@ -2675,15 +2673,11 @@ static char *
 linux_nat_do_registers (bfd *obfd, ptid_t ptid,
 			char *note_data, int *note_size)
 {
-  registers_changed ();
-  /* FIXME should not be necessary; fill_gregset should do it automatically. */
-  target_fetch_registers (current_regcache, -1);
   return linux_nat_do_thread_registers (obfd,
 					ptid_build (ptid_get_pid (inferior_ptid),
 						    ptid_get_pid (inferior_ptid),
 						    0),
 					note_data, note_size);
-  return note_data;
 }
 
 /* Fills the "to_make_corefile_note" target vector.  Builds the note

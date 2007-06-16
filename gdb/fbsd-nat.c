@@ -146,7 +146,7 @@ char *
 fbsd_make_corefile_notes (bfd *obfd, int *note_size)
 {
   struct gdbarch *gdbarch = current_gdbarch;
-  const struct regcache *regcache = current_regcache;
+  const struct regcache *regcache = get_current_regcache ();
   gregset_t gregs;
   fpregset_t fpregs;
   char *note_data = NULL;

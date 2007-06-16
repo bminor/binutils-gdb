@@ -1318,7 +1318,7 @@ win32_resume (ptid_t ptid, int step, enum target_signal sig)
       if (step)
 	{
 	  /* Single step by setting t bit */
-	  win32_fetch_inferior_registers (current_regcache, PS_REGNUM);
+	  win32_fetch_inferior_registers (get_current_regcache (), PS_REGNUM);
 	  th->context.EFlags |= FLAG_TRACE_BIT;
 	}
 

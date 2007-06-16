@@ -2535,6 +2535,7 @@ m32c_virtual_frame_pointer (CORE_ADDR pc,
   CORE_ADDR func_addr, func_end, sal_end;
   struct m32c_prologue p;
 
+  struct regcache *regcache = get_current_regcache ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
   if (!find_pc_partial_function (pc, &name, &func_addr, &func_end))
@@ -2544,15 +2545,15 @@ m32c_virtual_frame_pointer (CORE_ADDR pc,
   switch (p.kind)
     {
     case prologue_with_frame_ptr:
-      *frame_regnum = m32c_banked_register (tdep->fb, current_regcache)->num;
+      *frame_regnum = m32c_banked_register (tdep->fb, regcache)->num;
       *frame_offset = p.frame_ptr_offset;
       break;
     case prologue_sans_frame_ptr:
-      *frame_regnum = m32c_banked_register (tdep->sp, current_regcache)->num;
+      *frame_regnum = m32c_banked_register (tdep->sp, regcache)->num;
       *frame_offset = p.frame_size;
       break;
     default:
-      *frame_regnum = m32c_banked_register (tdep->sp, current_regcache)->num;
+      *frame_regnum = m32c_banked_register (tdep->sp, regcache)->num;
       *frame_offset = 0;
       break;
     }

@@ -375,7 +375,7 @@ core_open (char *filename, int from_tty)
   if (ontop)
     {
       /* Fetch all registers from core file.  */
-      target_fetch_registers (current_regcache, -1);
+      target_fetch_registers (get_current_regcache (), -1);
 
       /* Now, set up the frame cache, and print the top of stack.  */
       reinit_frame_cache ();

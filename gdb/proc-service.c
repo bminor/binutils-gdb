@@ -257,11 +257,13 @@ ps_err_e
 ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
+  struct regcache *regcache;
 
   inferior_ptid = BUILD_LWP (lwpid, ph->pid);
+  regcache = get_thread_regcache (inferior_ptid);
 
-  target_fetch_registers (current_regcache, -1);
-  fill_gregset (current_regcache, (gdb_gregset_t *) gregset, -1);
+  target_fetch_registers (regcache, -1);
+  fill_gregset (regcache, (gdb_gregset_t *) gregset, -1);
 
   do_cleanups (old_chain);
   return PS_OK;
@@ -274,11 +276,13 @@ ps_err_e
 ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, const prgregset_t gregset)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
+  struct regcache *regcache;
 
   inferior_ptid = BUILD_LWP (lwpid, ph->pid);
+  regcache = get_thread_regcache (inferior_ptid);
 
-  supply_gregset (current_regcache, (const gdb_gregset_t *) gregset);
-  target_store_registers (current_regcache, -1);
+  supply_gregset (regcache, (const gdb_gregset_t *) gregset);
+  target_store_registers (regcache, -1);
 
   do_cleanups (old_chain);
   return PS_OK;
@@ -292,11 +296,13 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       gdb_prfpregset_t *fpregset)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
+  struct regcache *regcache;
 
   inferior_ptid = BUILD_LWP (lwpid, ph->pid);
+  regcache = get_thread_regcache (inferior_ptid);
 
-  target_fetch_registers (current_regcache, -1);
-  fill_fpregset (current_regcache, (gdb_fpregset_t *) fpregset, -1);
+  target_fetch_registers (regcache, -1);
+  fill_fpregset (regcache, (gdb_fpregset_t *) fpregset, -1);
 
   do_cleanups (old_chain);
   return PS_OK;
@@ -310,11 +316,13 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       const gdb_prfpregset_t *fpregset)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
+  struct regcache *regcache;
 
   inferior_ptid = BUILD_LWP (lwpid, ph->pid);
+  regcache = get_thread_regcache (inferior_ptid);
 
-  supply_fpregset (current_regcache, (const gdb_fpregset_t *) fpregset);
-  target_store_registers (current_regcache, -1);
+  supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset);
+  target_store_registers (regcache, -1);
 
   do_cleanups (old_chain);
   return PS_OK;

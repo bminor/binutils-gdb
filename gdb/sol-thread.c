@@ -1087,16 +1087,18 @@ ps_err_e
 ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 {
   struct cleanup *old_chain;
+  struct regcache *regcache;
 
   old_chain = save_inferior_ptid ();
 
   inferior_ptid = BUILD_LWP (lwpid, PIDGET (inferior_ptid));
+  regcache = get_thread_regcache (inferior_ptid);
 
   if (target_has_execution)
-    procfs_ops.to_fetch_registers (current_regcache, -1);
+    procfs_ops.to_fetch_registers (regcache, -1);
   else
-    orig_core_ops.to_fetch_registers (current_regcache, -1);
-  fill_gregset (current_regcache, (gdb_gregset_t *) gregset, -1);
+    orig_core_ops.to_fetch_registers (regcache, -1);
+  fill_gregset (regcache, (gdb_gregset_t *) gregset, -1);
 
   do_cleanups (old_chain);
 
@@ -1110,16 +1112,18 @@ ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	     const prgregset_t gregset)
 {
   struct cleanup *old_chain;
+  struct regcache *regcache;
 
   old_chain = save_inferior_ptid ();
 
   inferior_ptid = BUILD_LWP (lwpid, PIDGET (inferior_ptid));
+  regcache = get_thread_regcache (inferior_ptid);
 
-  supply_gregset (current_regcache, (const gdb_gregset_t *) gregset);
+  supply_gregset (regcache, (const gdb_gregset_t *) gregset);
   if (target_has_execution)
-    procfs_ops.to_store_registers (current_regcache, -1);
+    procfs_ops.to_store_registers (regcache, -1);
   else
-    orig_core_ops.to_store_registers (current_regcache, -1);
+    orig_core_ops.to_store_registers (regcache, -1);
 
   do_cleanups (old_chain);
 
@@ -1219,16 +1223,18 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       prfpregset_t *fpregset)
 {
   struct cleanup *old_chain;
+  struct regcache *regcache;
 
   old_chain = save_inferior_ptid ();
 
   inferior_ptid = BUILD_LWP (lwpid, PIDGET (inferior_ptid));
+  regcache = get_thread_regcache (inferior_ptid);
 
   if (target_has_execution)
-    procfs_ops.to_fetch_registers (current_regcache, -1);
+    procfs_ops.to_fetch_registers (regcache, -1);
   else
-    orig_core_ops.to_fetch_registers (current_regcache, -1);
-  fill_fpregset (current_regcache, (gdb_fpregset_t *) fpregset, -1);
+    orig_core_ops.to_fetch_registers (regcache, -1);
+  fill_fpregset (regcache, (gdb_fpregset_t *) fpregset, -1);
 
   do_cleanups (old_chain);
 
@@ -1242,16 +1248,18 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	       const prfpregset_t * fpregset)
 {
   struct cleanup *old_chain;
+  struct regcache *regcache;
 
   old_chain = save_inferior_ptid ();
 
   inferior_ptid = BUILD_LWP (lwpid, PIDGET (inferior_ptid));
+  regcache = get_thread_regcache (inferior_ptid);
 
-  supply_fpregset (current_regcache, (const gdb_fpregset_t *) fpregset);
+  supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset);
   if (target_has_execution)
-    procfs_ops.to_store_registers (current_regcache, -1);
+    procfs_ops.to_store_registers (regcache, -1);
   else
-    orig_core_ops.to_store_registers (current_regcache, -1);
+    orig_core_ops.to_store_registers (regcache, -1);
 
   do_cleanups (old_chain);
 

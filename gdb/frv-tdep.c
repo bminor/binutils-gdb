@@ -112,17 +112,19 @@ frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
     return -1;
   else
     {
+      struct regcache *regcache = get_current_regcache ();
+
       if (interp_addr != NULL)
 	{
 	  ULONGEST val;
-	  regcache_cooked_read_unsigned (current_regcache,
+	  regcache_cooked_read_unsigned (regcache,
 					 fdpic_loadmap_interp_regnum, &val);
 	  *interp_addr = val;
 	}
       if (exec_addr != NULL)
 	{
 	  ULONGEST val;
-	  regcache_cooked_read_unsigned (current_regcache,
+	  regcache_cooked_read_unsigned (regcache,
 					 fdpic_loadmap_exec_regnum, &val);
 	  *exec_addr = val;
 	}

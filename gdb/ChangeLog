@@ -1,3 +1,71 @@
+2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* regcache.c (struct regcache): Add ptid_t member.
+	(regcache_xmalloc): Initialize it.
+	(regcache_cpy_no_passthrough): Do not refer to current_regcache.
+	(regcache_dup): Likewise.
+	(regcache_dup_no_passthrough): Likewise.
+	(current_regcache): Make static.
+	(registers_ptid): Remove variable.
+	(get_thread_regcache): New function.
+	(get_current_regcache): New function.
+	(registers_changed): Implement by freeing current regcache.
+	(regcache_raw_read): Do not refer to current_regcache.  Set 
+	inferior_ptid to regcache->ptid while calling target routines.
+	(regcache_raw_write): Likewise.
+	(regcache_raw_supply): Do not refer to current_regcache.
+	(read_pc_pid): Use thread regcache.  Do not modify inferior_ptid.
+	(write_pc_pid): Likewise.
+	(build_regcache): Remove.
+	(_initialize_regcache): Do not call DEPRECATED_REGISTER_GDBARCH_SWAP
+	or deprecated_register_gdbarch_swap.  Do not initialize
+	registers_ptid.
+	* regcache.h (get_current_regcache): Add prototype.
+	(get_thread_regcache): Likewise.
+	(current_regcache): Remove declaration.
+
+	* corelow.c (core_open): Replace current_regcache by
+	get_current_regcache ().
+	* frame.c (frame_pop): Likewise.
+	(put_frame_register): Likewise.
+	(get_current_frame, create_new_frame): Likewise.
+	* mi/mi-main.c (mi_cmd_data_write_register_values): Likewise.
+	* stack.c (return_command): Likewise.
+	* infcall.c (call_function_by_hand): Likewise.
+	* infrun.c (resume): Likewise.
+	(save_inferior_status, restore_inferior_status): Likewise.
+	* linux-fork.c (fork_load_infrun_state): Likewise.
+	(fork_save_infrun_state): Likewise.
+	* win32-nat.c (win32_resume): Likewise.
+	* i386fbsd-nat.c (i386fbsd_resume): Likewise.
+	* monitor.c (monitor_wait): Likewise.
+	* remote.c (remote_wait): Likewise.
+	* remote-mips.c (mips_wait): Likewise.
+
+	* bsd-kvm.c (bsd_kvm_open): Likewise
+	(bsd_kvm_proc_cmd, bsd_kvm_pcb_cmd): Likewise.
+	* fbsd-nat.c (fbsd_make_corefile_notes): Likewise.
+	* i386-linux-nat.c (i386_linux_resume): Likewise.
+	* ia64-linux-nat.c (ia64_linux_insert_watchpoint): Likewise.
+	(ia64_linux_stopped_data_address): Likewise.
+
+	* frv-tdep.c (frv_fdpic_loadmap_addresses): Likewise.
+	* m32c-tdep.c (m32c_virtual_frame_pointer): Likewise.
+	* mep-tdep.c (current_me_module, current_options): Likewise.
+	* mips-tdep.c (deprecated_mips_set_processor_regs_hack): Likewise.
+
+	* linux-nat.c (linux_nat_do_thread_registers): Use thread
+	regcache instead of current_regcache.  Call target_fetch_registers.
+	(linux_nat_corefile_thread_callback): Update call site.
+	(linux_nat_do_registers): Likewise.
+	* procfs.c (procfs_do_thread_registers): Use thread regcache instead
+	of current_regcache.
+	(procfs_make_note_section): Likewise.
+	* proc-service.c (ps_lgetregs, ps_lsetregs): Likewise.
+	(ps_lgetfpregs, ps_lsetfpregs): Likewise.
+	* sol-thread.c (ps_lgetregs, ps_lsetregs): Likewise.
+	(ps_lgetfpregs, ps_lsetfpregs): Likewise.
+
 2007-06-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* regcache.c (read_register, read_register_pid): Remove.

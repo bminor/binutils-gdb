@@ -203,6 +203,9 @@ struct regcache
      regcache_cpy().  The actual contents are determined by the
      reggroup_save and reggroup_restore methods.  */
   int readonly_p;
+  /* If this is a read-write cache, which thread's registers is
+     it connected to?  */
+  ptid_t ptid;
 };
 
 struct regcache *
@@ -219,6 +222,7 @@ regcache_xmalloc (struct gdbarch *gdbarch)
   regcache->register_valid_p
     = XCALLOC (descr->sizeof_raw_register_valid_p, gdb_byte);
   regcache->readonly_p = 1;
+  regcache->ptid = minus_one_ptid;
   return regcache;
 }
 
@@ -357,9 +361,9 @@ regcache_cpy_no_passthrough (struct regcache *dst, struct regcache *src)
   gdb_assert (src != NULL && dst != NULL);
   gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
   /* NOTE: cagney/2002-05-17: Don't let the caller do a no-passthrough
-     move of data into the current_regcache().  Doing this would be
+     move of data into the current regcache.  Doing this would be
      silly - it would mean that valid_p would be completely invalid.  */
-  gdb_assert (dst != current_regcache);
+  gdb_assert (dst->readonly_p);
   memcpy (dst->registers, src->registers, dst->descr->sizeof_raw_registers);
   memcpy (dst->register_valid_p, src->register_valid_p,
 	  dst->descr->sizeof_raw_register_valid_p);
@@ -369,7 +373,6 @@ struct regcache *
 regcache_dup (struct regcache *src)
 {
   struct regcache *newbuf;
-  gdb_assert (current_regcache != NULL);
   newbuf = regcache_xmalloc (src->descr->gdbarch);
   regcache_cpy (newbuf, src);
   return newbuf;
@@ -379,7 +382,6 @@ struct regcache *
 regcache_dup_no_passthrough (struct regcache *src)
 {
   struct regcache *newbuf;
-  gdb_assert (current_regcache != NULL);
   newbuf = regcache_xmalloc (src->descr->gdbarch);
   regcache_cpy_no_passthrough (newbuf, src);
   return newbuf;
@@ -412,16 +414,38 @@ regcache_invalidate (struct regcache *regcache, int regnum)
 /* Global structure containing the current regcache.  */
 /* FIXME: cagney/2002-05-11: The two global arrays registers[] and
    deprecated_register_valid[] currently point into this structure.  */
-struct regcache *current_regcache;
+static struct regcache *current_regcache;
 
 /* NOTE: this is a write-through cache.  There is no "dirty" bit for
    recording if the register values have been changed (eg. by the
    user).  Therefore all registers must be written back to the
    target when appropriate.  */
 
-/* The thread/process associated with the current set of registers. */
+struct regcache *get_thread_regcache (ptid_t ptid)
+{
+  /* NOTE: uweigand/2007-05-05:  We need to detect the thread's
+     current architecture at this point.  */
+  struct gdbarch *thread_gdbarch = current_gdbarch;
 
-static ptid_t registers_ptid;
+  if (current_regcache && ptid_equal (current_regcache->ptid, ptid)
+      && get_regcache_arch (current_regcache) == thread_gdbarch)
+    return current_regcache;
+
+  if (current_regcache)
+    regcache_xfree (current_regcache);
+
+  current_regcache = regcache_xmalloc (thread_gdbarch);
+  current_regcache->readonly_p = 0;
+  current_regcache->ptid = ptid;
+
+  return current_regcache;
+}
+
+struct regcache *get_current_regcache (void)
+{
+  return get_thread_regcache (inferior_ptid);
+}
+
 
 /* Observer for the target_changed event.  */
 
@@ -447,7 +471,8 @@ registers_changed (void)
 {
   int i;
 
-  registers_ptid = pid_to_ptid (-1);
+  regcache_xfree (current_regcache);
+  current_regcache = NULL;
 
   /* Force cleanup of any alloca areas if using C alloca instead of
      a builtin alloca.  This particular call is used to clean up
@@ -455,9 +480,6 @@ registers_changed (void)
      during lengthy interactions between gdb and the target before
      gdb gives control to the user (ie watchpoints).  */
   alloca (0);
-
-  for (i = 0; i < current_regcache->descr->nr_raw_registers; i++)
-    regcache_invalidate (current_regcache, i);
 }
 
 
@@ -472,14 +494,13 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
      On the bright side, at least there is a regcache object.  */
   if (!regcache->readonly_p)
     {
-      gdb_assert (regcache == current_regcache);
-      if (! ptid_equal (registers_ptid, inferior_ptid))
-	{
-	  registers_changed ();
-	  registers_ptid = inferior_ptid;
-	}
       if (!regcache_valid_p (regcache, regnum))
-	target_fetch_registers (regcache, regnum);
+	{
+	  struct cleanup *old_chain = save_inferior_ptid ();
+	  inferior_ptid = regcache->ptid;
+	  target_fetch_registers (regcache, regnum);
+	  do_cleanups (old_chain);
+	}
 #if 0
       /* FIXME: cagney/2004-08-07: At present a number of targets
 	 forget (or didn't know that they needed) to set this leading to
@@ -615,6 +636,8 @@ void
 regcache_raw_write (struct regcache *regcache, int regnum,
 		    const gdb_byte *buf)
 {
+  struct cleanup *old_chain;
+
   gdb_assert (regcache != NULL && buf != NULL);
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
   gdb_assert (!regcache->readonly_p);
@@ -624,14 +647,6 @@ regcache_raw_write (struct regcache *regcache, int regnum,
   if (gdbarch_cannot_store_register (current_gdbarch, regnum))
     return;
 
-  /* Make certain that the correct cache is selected.  */
-  gdb_assert (regcache == current_regcache);
-  if (! ptid_equal (registers_ptid, inferior_ptid))
-    {
-      registers_changed ();
-      registers_ptid = inferior_ptid;
-    }
-
   /* If we have a valid copy of the register, and new value == old
      value, then don't bother doing the actual store. */
   if (regcache_valid_p (regcache, regnum)
@@ -639,11 +654,16 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 		  regcache->descr->sizeof_register[regnum]) == 0))
     return;
 
+  old_chain = save_inferior_ptid ();
+  inferior_ptid = regcache->ptid;
+
   target_prepare_to_store (regcache);
   memcpy (register_buffer (regcache, regnum), buf,
 	  regcache->descr->sizeof_register[regnum]);
   regcache->register_valid_p[regnum] = 1;
   target_store_registers (regcache, regnum);
+
+  do_cleanups (old_chain);
 }
 
 void
@@ -767,15 +787,6 @@ regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
   gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_raw_registers);
   gdb_assert (!regcache->readonly_p);
 
-  /* FIXME: kettenis/20030828: It shouldn't be necessary to handle
-     CURRENT_REGCACHE specially here.  */
-  if (regcache == current_regcache
-      && !ptid_equal (registers_ptid, inferior_ptid))
-    {
-      registers_changed ();
-      registers_ptid = inferior_ptid;
-    }
-
   regbuf = register_buffer (regcache, regnum);
   size = regcache->descr->sizeof_register[regnum];
 
@@ -820,15 +831,10 @@ regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
 CORE_ADDR
 read_pc_pid (ptid_t ptid)
 {
-  struct regcache *regcache = current_regcache;
+  struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
-  ptid_t saved_inferior_ptid;
   CORE_ADDR pc_val;
-
-  /* In case ptid != inferior_ptid. */
-  saved_inferior_ptid = inferior_ptid;
-  inferior_ptid = ptid;
 
   if (gdbarch_read_pc_p (gdbarch))
     pc_val = gdbarch_read_pc (gdbarch, regcache);
@@ -842,7 +848,6 @@ read_pc_pid (ptid_t ptid)
   else
     internal_error (__FILE__, __LINE__, _("read_pc_pid: Unable to find PC"));
 
-  inferior_ptid = saved_inferior_ptid;
   return pc_val;
 }
 
@@ -855,14 +860,8 @@ read_pc (void)
 void
 write_pc_pid (CORE_ADDR pc, ptid_t ptid)
 {
-  struct regcache *regcache = current_regcache;
+  struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-
-  ptid_t saved_inferior_ptid;
-
-  /* In case ptid != inferior_ptid. */
-  saved_inferior_ptid = inferior_ptid;
-  inferior_ptid = ptid;
 
   if (gdbarch_write_pc_p (gdbarch))
     gdbarch_write_pc (gdbarch, regcache, pc);
@@ -871,8 +870,6 @@ write_pc_pid (CORE_ADDR pc, ptid_t ptid)
   else
     internal_error (__FILE__, __LINE__,
 		    _("write_pc_pid: Unable to update PC"));
-
-  inferior_ptid = saved_inferior_ptid;
 }
 
 void
@@ -889,13 +886,6 @@ reg_flush_command (char *command, int from_tty)
   registers_changed ();
   if (from_tty)
     printf_filtered (_("Register cache flushed.\n"));
-}
-
-static void
-build_regcache (void)
-{
-  current_regcache = regcache_xmalloc (current_gdbarch);
-  current_regcache->readonly_p = 0;
 }
 
 static void
@@ -1162,17 +1152,11 @@ void
 _initialize_regcache (void)
 {
   regcache_descr_handle = gdbarch_data_register_post_init (init_regcache_descr);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (current_regcache);
-  deprecated_register_gdbarch_swap (NULL, 0, build_regcache);
 
   observer_attach_target_changed (regcache_observer_target_changed);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
 	   _("Force gdb to flush its register cache (maintainer command)"));
-
-   /* Initialize the thread/process associated with the current set of
-      registers.  For now, -1 is special, and means `no current process'.  */
-  registers_ptid = pid_to_ptid (-1);
 
   add_cmd ("registers", class_maintenance, maintenance_print_registers, _("\
 Print the internal register configuration.\n\

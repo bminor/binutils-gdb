@@ -634,7 +634,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  value = parse_and_eval_address (argv[i + 1]);
 
 	  /* Write it down.  */
-	  regcache_cooked_write_signed (current_regcache, regnum, value);
+	  regcache_cooked_write_signed (get_current_regcache (), regnum, value);
 	}
       else
 	{

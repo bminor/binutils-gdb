@@ -49,6 +49,7 @@ i386fbsd_resume (ptid_t ptid, int step, enum target_signal signal)
 
   if (!step)
     {
+      struct regcache *regcache = get_current_regcache ();
       ULONGEST eflags;
 
       /* Workaround for a bug in FreeBSD.  Make sure that the trace
@@ -61,10 +62,10 @@ i386fbsd_resume (ptid_t ptid, int step, enum target_signal signal)
  	 never goes through the kernel's trap() function which would
  	 normally clear it.  */
 
-      regcache_cooked_read_unsigned (current_regcache, I386_EFLAGS_REGNUM,
+      regcache_cooked_read_unsigned (regcache, I386_EFLAGS_REGNUM,
 				     &eflags);
       if (eflags & 0x0100)
-	regcache_cooked_write_unsigned (current_regcache, I386_EFLAGS_REGNUM,
+	regcache_cooked_write_unsigned (regcache, I386_EFLAGS_REGNUM,
 					eflags & ~0x0100);
 
       request = PT_CONTINUE;

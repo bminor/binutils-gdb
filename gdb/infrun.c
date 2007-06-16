@@ -528,7 +528,8 @@ resume (int step, enum target_signal sig)
   if (breakpoint_here_p (read_pc ()) == permanent_breakpoint_here)
     {
       if (gdbarch_skip_permanent_breakpoint_p (current_gdbarch))
-	gdbarch_skip_permanent_breakpoint (current_gdbarch, current_regcache);
+	gdbarch_skip_permanent_breakpoint (current_gdbarch,
+					   get_current_regcache ());
       else
 	error (_("\
 The program is stopped at a permanent breakpoint, but GDB does not know\n\
@@ -3218,7 +3219,7 @@ Further execution is probably impossible.\n"));
   if (proceed_to_finish)
     /* NB: The copy goes through to the target picking up the value of
        all the registers.  */
-    regcache_cpy (stop_registers, current_regcache);
+    regcache_cpy (stop_registers, get_current_regcache ());
 
   if (stop_stack_dummy)
     {
@@ -3675,7 +3676,7 @@ save_inferior_status (int restore_stack_info)
 
   inf_status->stop_registers = regcache_dup_no_passthrough (stop_registers);
 
-  inf_status->registers = regcache_dup (current_regcache);
+  inf_status->registers = regcache_dup (get_current_regcache ());
 
   inf_status->selected_frame_id = get_frame_id (get_selected_frame (NULL));
   return inf_status;
@@ -3730,7 +3731,7 @@ restore_inferior_status (struct inferior_status *inf_status)
      (and perhaps other times).  */
   if (target_has_execution)
     /* NB: The register write goes through to the target.  */
-    regcache_cpy (current_regcache, inf_status->registers);
+    regcache_cpy (get_current_regcache (), inf_status->registers);
   regcache_xfree (inf_status->registers);
 
   /* FIXME: If we are being called after stopping in a function which

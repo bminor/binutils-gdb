@@ -469,7 +469,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	{
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
 				using_gcc, args, nargs, values_type,
-				&real_pc, &bp_addr, current_regcache);
+				&real_pc, &bp_addr, get_current_regcache ());
 	  dummy_addr = sp;
 	}
       else
@@ -477,7 +477,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	  dummy_addr = sp;
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
 				using_gcc, args, nargs, values_type,
-				&real_pc, &bp_addr, current_regcache);
+				&real_pc, &bp_addr, get_current_regcache ());
 	}
       break;
     case AT_ENTRY_POINT:
@@ -672,9 +672,9 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
   /* Create the dummy stack frame.  Pass in the call dummy address as,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
-  sp = gdbarch_push_dummy_call (current_gdbarch, function, current_regcache,
-				bp_addr, nargs, args, sp, struct_return,
-				struct_addr);
+  sp = gdbarch_push_dummy_call (current_gdbarch, function,
+				get_current_regcache (), bp_addr, nargs, args,
+				sp, struct_return, struct_addr);
 
   /* Set up a frame ID for the dummy frame so we can pass it to
      set_momentary_breakpoint.  We need to give the breakpoint a frame

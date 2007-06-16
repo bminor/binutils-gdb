@@ -526,7 +526,7 @@ frame_pop (struct frame_info *this_frame)
 
   /* Make a copy of all the register values unwound from this frame.
      Save them in a scratch buffer so that there isn't a race between
-     trying to extract the old values from the current_regcache while
+     trying to extract the old values from the current regcache while
      at the same time writing new values into that same cache.  */
   scratch = frame_save_as_regcache (prev_frame);
   cleanups = make_cleanup_regcache_xfree (scratch);
@@ -541,7 +541,7 @@ frame_pop (struct frame_info *this_frame)
      (arguably a bug in the target code mind).  */
   /* Now copy those saved registers into the current regcache.
      Here, regcache_cpy() calls regcache_restore().  */
-  regcache_cpy (current_regcache, scratch);
+  regcache_cpy (get_current_regcache (), scratch);
   do_cleanups (cleanups);
 
   /* We've made right mess of GDB's local state, just discard
@@ -714,7 +714,7 @@ put_frame_register (struct frame_info *frame, int regnum,
 	break;
       }
     case lval_register:
-      regcache_cooked_write (current_regcache, realnum, buf);
+      regcache_cooked_write (get_current_regcache (), realnum, buf);
       break;
     default:
       error (_("Attempt to assign to an unmodifiable value."));
@@ -919,7 +919,7 @@ get_current_frame (void)
   if (current_frame == NULL)
     {
       struct frame_info *sentinel_frame =
-	create_sentinel_frame (current_regcache);
+	create_sentinel_frame (get_current_regcache ());
       if (catch_exceptions (uiout, unwind_to_current_frame, sentinel_frame,
 			    RETURN_MASK_ERROR) != 0)
 	{
@@ -1031,7 +1031,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
-  fi->next = create_sentinel_frame (current_regcache);
+  fi->next = create_sentinel_frame (get_current_regcache ());
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */

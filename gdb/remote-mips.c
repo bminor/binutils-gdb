@@ -1755,19 +1755,20 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
 		    &rpc, &rfp, &rsp, flags);
   if (nfields >= 3)
     {
+      struct regcache *regcache = get_current_regcache ();
       char buf[MAX_REGISTER_SIZE];
 
       store_unsigned_integer (buf, register_size (current_gdbarch, PC_REGNUM), rpc);
-      regcache_raw_supply (current_regcache, PC_REGNUM, buf);
+      regcache_raw_supply (regcache, PC_REGNUM, buf);
 
       store_unsigned_integer (buf, register_size (current_gdbarch, PC_REGNUM), rfp);
-      regcache_raw_supply (current_regcache, 30, buf);	/* This register they are avoiding and so it is unnamed */
+      regcache_raw_supply (regcache, 30, buf);	/* This register they are avoiding and so it is unnamed */
 
       store_unsigned_integer (buf, register_size (current_gdbarch, SP_REGNUM), rsp);
-      regcache_raw_supply (current_regcache, SP_REGNUM, buf);
+      regcache_raw_supply (regcache, SP_REGNUM, buf);
 
       store_unsigned_integer (buf, register_size (current_gdbarch, DEPRECATED_FP_REGNUM), 0);
-      regcache_raw_supply (current_regcache, DEPRECATED_FP_REGNUM, buf);
+      regcache_raw_supply (regcache, DEPRECATED_FP_REGNUM, buf);
 
       if (nfields == 9)
 	{

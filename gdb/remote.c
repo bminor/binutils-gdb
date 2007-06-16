@@ -3232,7 +3232,7 @@ Packet: '%s'\n"),
 		    if (fieldsize < register_size (current_gdbarch,
 						   reg->regnum))
 		      warning (_("Remote reply is too short: %s"), buf);
-		    regcache_raw_supply (current_regcache,
+		    regcache_raw_supply (get_current_regcache (),
 					 reg->regnum, regs);
 		  }
 
@@ -3429,7 +3429,8 @@ Packet: '%s'\n"),
 		    if (fieldsize < register_size (current_gdbarch,
 						   reg->regnum))
 		      warning (_("Remote reply is too short: %s"), buf);
-		    regcache_raw_supply (current_regcache, reg->regnum, regs);
+		    regcache_raw_supply (get_current_regcache (),
+					 reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')

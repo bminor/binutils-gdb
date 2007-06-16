@@ -26,7 +26,8 @@
 struct regcache;
 struct gdbarch;
 
-extern struct regcache *current_regcache;
+extern struct regcache *get_current_regcache (void);
+extern struct regcache *get_thread_regcache (ptid_t ptid);
 
 void regcache_xfree (struct regcache *regcache);
 struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);

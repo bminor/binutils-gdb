@@ -1850,7 +1850,7 @@ If you continue, the return value that you specified will be ignored.\n";
 					NULL, NULL, NULL)
 		  == RETURN_VALUE_REGISTER_CONVENTION);
       gdbarch_return_value (current_gdbarch, return_type,
-			    current_regcache, NULL /*read*/,
+			    get_current_regcache (), NULL /*read*/,
 			    value_contents (return_value) /*write*/);
     }
 

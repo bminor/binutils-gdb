@@ -738,14 +738,12 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
 
   if (step)
     {
-      struct cleanup *old_chain = save_inferior_ptid ();
-      struct regcache *regcache = current_regcache;
+      struct regcache *regcache = get_thread_regcache (pid_to_ptid (pid));
       ULONGEST pc;
       gdb_byte buf[LINUX_SYSCALL_LEN];
 
       request = PTRACE_SINGLESTEP;
 
-      inferior_ptid = pid_to_ptid (pid);
       regcache_cooked_read_unsigned (regcache, PC_REGNUM, &pc);
 
       /* Returning from a signal trampoline is done by calling a
@@ -784,8 +782,6 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
 	      write_memory (addr, (gdb_byte *) &eflags, 4);
 	    }
 	}
-
-      do_cleanups (old_chain);
     }
 
   if (ptrace (request, pid, 0, target_signal_to_host (signal)) == -1)

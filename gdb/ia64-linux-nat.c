@@ -595,7 +595,7 @@ ia64_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
     }
 
   store_debug_register_pair (ptid, idx, &dbr_addr, &dbr_mask);
-  enable_watchpoints_in_psr (current_regcache);
+  enable_watchpoints_in_psr (get_current_regcache ());
 
   return 0;
 }
@@ -632,7 +632,7 @@ ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
   int tid;
   struct siginfo siginfo;
   ptid_t ptid = inferior_ptid;
-  struct regcache *regcache = current_regcache;
+  struct regcache *regcache = get_current_regcache ();
 
   tid = TIDGET(ptid);
   if (tid == 0)

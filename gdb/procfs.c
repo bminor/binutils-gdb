@@ -6013,13 +6013,14 @@ static char *
 procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
 			    char *note_data, int *note_size)
 {
+  struct regcache *regcache = get_thread_regcache (ptid);
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
   unsigned long merged_pid;
 
   merged_pid = TIDGET (ptid) << 16 | PIDGET (ptid);
 
-  fill_gregset (current_regcache, &gregs, -1);
+  fill_gregset (regcache, &gregs, -1);
 #if defined (UNIXWARE)
   note_data = (char *) elfcore_write_lwpstatus (obfd,
 						note_data,
@@ -6035,7 +6036,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
 					       stop_signal,
 					       &gregs);
 #endif
-  fill_fpregset (current_regcache, &fpregs, -1);
+  fill_fpregset (regcache, &fpregs, -1);
   note_data = (char *) elfcore_write_prfpreg (obfd,
 					      note_data,
 					      note_size,
@@ -6106,7 +6107,7 @@ procfs_make_note_section (bfd *obfd, int *note_size)
 					       psargs);
 
 #ifdef UNIXWARE
-  fill_gregset (current_regcache, &gregs, -1);
+  fill_gregset (get_current_regcache (), &gregs, -1);
   note_data = elfcore_write_pstatus (obfd, note_data, note_size,
 				     PIDGET (inferior_ptid),
 				     stop_signal, &gregs);

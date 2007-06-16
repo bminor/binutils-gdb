@@ -245,7 +245,7 @@ fork_load_infrun_state (struct fork_info *fp)
   linux_nat_switch_fork (inferior_ptid);
 
   if (fp->savedregs && fp->clobber_regs)
-    regcache_cpy (current_regcache, fp->savedregs);
+    regcache_cpy (get_current_regcache (), fp->savedregs);
 
   registers_changed ();
   reinit_frame_cache ();
@@ -278,7 +278,7 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
   if (fp->savedregs)
     regcache_xfree (fp->savedregs);
 
-  fp->savedregs = regcache_dup (current_regcache);
+  fp->savedregs = regcache_dup (get_current_regcache ());
   fp->clobber_regs = clobber_regs;
   fp->pc = read_pc ();
 
