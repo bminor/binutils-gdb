@@ -638,32 +638,10 @@ static const struct op_print objc_op_print_tab[] =
     {NULL, OP_NULL, PREC_NULL, 0}
 };
 
-struct type ** const (objc_builtin_types[]) = 
-{
-  &builtin_type_int,
-  &builtin_type_long,
-  &builtin_type_short,
-  &builtin_type_char,
-  &builtin_type_float,
-  &builtin_type_double,
-  &builtin_type_void,
-  &builtin_type_long_long,
-  &builtin_type_signed_char,
-  &builtin_type_unsigned_char,
-  &builtin_type_unsigned_short,
-  &builtin_type_unsigned_int,
-  &builtin_type_unsigned_long,
-  &builtin_type_unsigned_long_long,
-  &builtin_type_long_double,
-  &builtin_type_complex,
-  &builtin_type_double_complex,
-  0
-};
-
 const struct language_defn objc_language_defn = {
   "objective-c",		/* Language name */
   language_objc,
-  objc_builtin_types,
+  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -688,9 +666,9 @@ const struct language_defn objc_language_defn = {
   objc_op_print_tab,		/* Expression operators for printing */
   1,				/* C-style arrays */
   0,				/* String lower bound */
-  &builtin_type_char,		/* Type of string elements */
+  NULL,
   default_word_break_characters,
-  NULL, /* FIXME: la_language_arch_info.  */
+  c_language_arch_info,
   default_print_array_index,
   LANG_MAGIC
 };

@@ -402,21 +402,41 @@ struct type *builtin_type_m2_card;
 struct type *builtin_type_m2_real;
 struct type *builtin_type_m2_bool;
 
-struct type **const (m2_builtin_types[]) =
-{
-  &builtin_type_m2_char,
-    &builtin_type_m2_int,
-    &builtin_type_m2_card,
-    &builtin_type_m2_real,
-    &builtin_type_m2_bool,
-    0
+enum m2_primitive_types {
+  m2_primitive_type_char,
+  m2_primitive_type_int,
+  m2_primitive_type_card,
+  m2_primitive_type_real,
+  m2_primitive_type_bool,
+  nr_m2_primitive_types
 };
+
+static void
+m2_language_arch_info (struct gdbarch *gdbarch,
+		       struct language_arch_info *lai)
+{
+  lai->string_char_type = builtin_type_m2_char;
+  lai->primitive_type_vector
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_m2_primitive_types + 1,
+                              struct type *);
+
+  lai->primitive_type_vector [m2_primitive_type_char]
+    = builtin_type_m2_char;
+  lai->primitive_type_vector [m2_primitive_type_int]
+    = builtin_type_m2_int;
+  lai->primitive_type_vector [m2_primitive_type_card]
+    = builtin_type_m2_card;
+  lai->primitive_type_vector [m2_primitive_type_real]
+    = builtin_type_m2_real;
+  lai->primitive_type_vector [m2_primitive_type_bool]
+    = builtin_type_m2_bool;
+}
 
 const struct language_defn m2_language_defn =
 {
   "modula-2",
   language_m2,
-  m2_builtin_types,
+  NULL,
   range_check_on,
   type_check_on,
   case_sensitive_on,
@@ -441,9 +461,9 @@ const struct language_defn m2_language_defn =
   m2_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */
-  &builtin_type_m2_char,	/* Type of string elements */
+  NULL,
   default_word_break_characters,
-  NULL, /* FIXME: la_language_arch_info.  */
+  m2_language_arch_info,
   default_print_array_index,
   LANG_MAGIC
 };

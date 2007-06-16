@@ -1,5 +1,36 @@
 2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* c-lang.c (cplus_builtin_types): Remove.
+	(enum cplus_primitive_types): New data type.
+	(cplus_language_arch_info): New function.
+	(cplus_language_defn): Set la_language_arch_info member.  Do not set
+	la_builtin_type_vector and string_char_type members.
+
+	* f-lang.c (f_builtin_types): Remove.
+	(enum f_primitive_types): New data type.
+	(f_language_arch_info): New function.
+	(f_language_de): Set la_language_arch_info member.  Do not set
+	la_builtin_type_vector and string_char_type members.
+
+	* m2-lang.c (m2_builtin_types): Remove.
+	(enum m2_primitive_types): New data type.
+	(m2_language_arch_info): New function.
+	(m2_language_defn): Set la_language_arch_info member.  Do not set
+	la_builtin_type_vector and string_char_type members.
+
+	* objc-lang.c (objc_builtin_types): Remove.
+	(objc_language): Set la_language_arch_info member.  Do not set
+	la_builtin_type_vector and string_char_type members.
+
+	* p-lang.c (pascal_builtin_types): Remove.
+	(enum pascal_primitive_types): New data type.
+	(pascal_language_arch_info): New function.
+	(pascal_language_defn): Set la_language_arch_info member.  Do not set
+	la_builtin_type_vector and string_char_type members.
+
+
+2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* regcache.c (struct regcache): Add ptid_t member.
 	(regcache_xmalloc): Initialize it.
 	(regcache_cpy_no_passthrough): Do not refer to current_regcache.

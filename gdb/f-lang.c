@@ -434,25 +434,52 @@ static const struct op_print f_op_print_tab[] =
   {NULL, 0, 0, 0}
 };
 
-struct type **const (f_builtin_types[]) =
-{
-  &builtin_type_f_character,
-    &builtin_type_f_logical,
-    &builtin_type_f_logical_s1,
-    &builtin_type_f_logical_s2,
-    &builtin_type_f_integer,
-    &builtin_type_f_integer_s2,
-    &builtin_type_f_real,
-    &builtin_type_f_real_s8,
-    &builtin_type_f_real_s16,
-    &builtin_type_f_complex_s8,
-    &builtin_type_f_complex_s16,
-#if 0
-    &builtin_type_f_complex_s32,
-#endif
-    &builtin_type_f_void,
-    0
+enum f_primitive_types {
+  f_primitive_type_character,
+  f_primitive_type_logical,
+  f_primitive_type_logical_s1,
+  f_primitive_type_logical_s2,
+  f_primitive_type_integer,
+  f_primitive_type_integer_s2,
+  f_primitive_type_real,
+  f_primitive_type_real_s8,
+  f_primitive_type_real_s16,
+  f_primitive_type_complex_s8,
+  f_primitive_type_complex_s16,
+  f_primitive_type_void,
+  nr_f_primitive_types
 };
+
+static void
+f_language_arch_info (struct gdbarch *gdbarch,
+		      struct language_arch_info *lai)
+{
+  lai->string_char_type = builtin_type_f_character;
+  lai->primitive_type_vector
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_f_primitive_types + 1,
+                              struct type *);
+
+  lai->primitive_type_vector [f_primitive_type_character]
+    = builtin_type_f_character;
+  lai->primitive_type_vector [f_primitive_type_logical]
+    = builtin_type_f_logical;
+  lai->primitive_type_vector [f_primitive_type_logical_s1]
+    = builtin_type_f_logical_s1;
+  lai->primitive_type_vector [f_primitive_type_logical_s2]
+    = builtin_type_f_logical_s2;
+  lai->primitive_type_vector [f_primitive_type_real]
+    = builtin_type_f_real;
+  lai->primitive_type_vector [f_primitive_type_real_s8]
+    = builtin_type_f_real_s8;
+  lai->primitive_type_vector [f_primitive_type_real_s16]
+    = builtin_type_f_real_s16;
+  lai->primitive_type_vector [f_primitive_type_complex_s8]
+    = builtin_type_f_complex_s8;
+  lai->primitive_type_vector [f_primitive_type_complex_s16]
+    = builtin_type_f_complex_s16;
+  lai->primitive_type_vector [f_primitive_type_void]
+    = builtin_type_f_void;
+}
 
 /* This is declared in c-lang.h but it is silly to import that file for what
    is already just a hack. */
@@ -463,7 +490,7 @@ const struct language_defn f_language_defn =
 {
   "fortran",
   language_fortran,
-  f_builtin_types,
+  NULL,
   range_check_on,
   type_check_on,
   case_sensitive_off,
@@ -488,9 +515,9 @@ const struct language_defn f_language_defn =
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
-  &builtin_type_f_character,	/* Type of string elements */
+  NULL,
   default_word_break_characters,
-  NULL, /* FIXME: la_language_arch_info.  */
+  f_language_arch_info,
   default_print_array_index,
   LANG_MAGIC
 };
