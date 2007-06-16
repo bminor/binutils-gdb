@@ -621,13 +621,7 @@ _initialize_f_language (void)
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_complex_s16); 
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_complex_s32); 
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_f_void); 
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_string); 
   deprecated_register_gdbarch_swap (NULL, 0, build_fortran_types);
-
-  builtin_type_string =
-    init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "character string", (struct objfile *) NULL);
 
   add_language (&f_language_defn);
 }

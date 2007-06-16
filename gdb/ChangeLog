@@ -1,5 +1,10 @@
 2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* f-lang.c (_initialize_f_language): Do not initialize or
+	swap builtin_type_string.
+
+2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* std-regs.c (builtin_type_frame_reg, build_builtin_type_frame_reg,
 	value_of_builtin_frame_reg): Remove.
 	(_initialize_frame_reg): Do not swap builtin_type_frame_reg.  Remove
