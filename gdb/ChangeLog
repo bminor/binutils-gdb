@@ -1,6 +1,13 @@
 2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
-	* gdbarch.sh (bfd_vma): Remove.
+	* std-regs.c (builtin_type_frame_reg, build_builtin_type_frame_reg,
+	value_of_builtin_frame_reg): Remove.
+	(_initialize_frame_reg): Do not swap builtin_type_frame_reg.  Remove
+	inactive call to value_of_builtin_frame_reg.
+
+2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (bfd_vma_bit): Remove.
 	* gdbarch.c, gdbarch.h: Regenerate.
 
 	* gdbtypes.h (builtin_bfd_vma_type): Remove.

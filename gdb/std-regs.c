@@ -28,48 +28,6 @@
 #include "value.h"
 #include "gdb_string.h"
 
-/* Types that describe the various builtin registers.  */
-
-static struct type *builtin_type_frame_reg;
-
-/* Constructors for those types.  */
-
-static void
-build_builtin_type_frame_reg (void)
-{
-  /* $frame.  */
-  if (builtin_type_frame_reg == NULL)
-    {
-#if 0
-      struct frame
-      {
-	void *base;
-      };
-#endif
-      builtin_type_frame_reg = init_composite_type ("frame", TYPE_CODE_STRUCT);
-      append_composite_type_field (builtin_type_frame_reg, "base",
-				   builtin_type_void_data_ptr);
-    }
-}
-
-static struct value *
-value_of_builtin_frame_reg (struct frame_info *frame, const void *baton)
-{
-  struct value *val;
-  gdb_byte *buf;
-  build_builtin_type_frame_reg ();
-  val = allocate_value (builtin_type_frame_reg);
-  VALUE_LVAL (val) = not_lval;
-  buf = value_contents_raw (val);
-  memset (buf, 0, TYPE_LENGTH (value_type (val)));
-  /* frame.base.  */
-  if (frame != NULL)
-    gdbarch_address_to_pointer (current_gdbarch, builtin_type_void_data_ptr,
-				buf, get_frame_base (frame));
-  buf += TYPE_LENGTH (builtin_type_void_data_ptr);
-  /* frame.XXX.  */
-  return val;
-}
 
 static struct value *
 value_of_builtin_frame_fp_reg (struct frame_info *frame, const void *baton)
@@ -138,12 +96,6 @@ extern initialize_file_ftype _initialize_frame_reg; /* -Wmissing-prototypes */
 void
 _initialize_frame_reg (void)
 {
-  /* FIXME: cagney/2002-02-08: At present the local builtin types
-     can't be initialized using _initialize*() or gdbarch.  Due mainly
-     to non-multi-arch targets, GDB initializes things piece meal and,
-     as a consequence can leave these types NULL.  */
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_frame_reg);
-
   /* Frame based $fp, $pc, $sp and $ps.  These only come into play
      when the target does not define its own version of these
      registers.  */
@@ -151,10 +103,4 @@ _initialize_frame_reg (void)
   user_reg_add_builtin ("pc", value_of_builtin_frame_pc_reg, NULL);
   user_reg_add_builtin ("sp", value_of_builtin_frame_sp_reg, NULL);
   user_reg_add_builtin ("ps", value_of_builtin_frame_ps_reg, NULL);
-
-  /* NOTE: cagney/2002-04-05: For moment leave the $frame / $gdbframe
-     / $gdb.frame disabled.  It isn't yet clear which of the many
-     options is the best.  */
-  if (0)
-    user_reg_add_builtin ("frame", value_of_builtin_frame_reg, NULL);
 }
