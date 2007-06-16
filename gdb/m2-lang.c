@@ -396,12 +396,6 @@ static const struct op_print m2_op_print_tab[] =
 
 /* The built-in types of Modula-2.  */
 
-struct type *builtin_type_m2_char;
-struct type *builtin_type_m2_int;
-struct type *builtin_type_m2_card;
-struct type *builtin_type_m2_real;
-struct type *builtin_type_m2_bool;
-
 enum m2_primitive_types {
   m2_primitive_type_char,
   m2_primitive_type_int,
@@ -415,21 +409,23 @@ static void
 m2_language_arch_info (struct gdbarch *gdbarch,
 		       struct language_arch_info *lai)
 {
-  lai->string_char_type = builtin_type_m2_char;
+  const struct builtin_m2_type *builtin = builtin_m2_type (gdbarch);
+
+  lai->string_char_type = builtin->builtin_char;
   lai->primitive_type_vector
     = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_m2_primitive_types + 1,
                               struct type *);
 
   lai->primitive_type_vector [m2_primitive_type_char]
-    = builtin_type_m2_char;
+    = builtin->builtin_char;
   lai->primitive_type_vector [m2_primitive_type_int]
-    = builtin_type_m2_int;
+    = builtin->builtin_int;
   lai->primitive_type_vector [m2_primitive_type_card]
-    = builtin_type_m2_card;
+    = builtin->builtin_card;
   lai->primitive_type_vector [m2_primitive_type_real]
-    = builtin_type_m2_real;
+    = builtin->builtin_real;
   lai->primitive_type_vector [m2_primitive_type_bool]
-    = builtin_type_m2_bool;
+    = builtin->builtin_bool;
 }
 
 const struct language_defn m2_language_defn =
@@ -468,35 +464,55 @@ const struct language_defn m2_language_defn =
   LANG_MAGIC
 };
 
+static void *
+build_m2_types (struct gdbarch *gdbarch)
+{
+  struct builtin_m2_type *builtin_m2_type
+    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_m2_type);
+
+  /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
+  builtin_m2_type->builtin_int =
+    init_type (TYPE_CODE_INT, 
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0, "INTEGER", (struct objfile *) NULL);
+  builtin_m2_type->builtin_card =
+    init_type (TYPE_CODE_INT, 
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "CARDINAL", (struct objfile *) NULL);
+  builtin_m2_type->builtin_real =
+    init_type (TYPE_CODE_FLT,
+	       gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       0,
+	       "REAL", (struct objfile *) NULL);
+  builtin_m2_type->builtin_char =
+    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "CHAR", (struct objfile *) NULL);
+  builtin_m2_type->builtin_bool =
+    init_type (TYPE_CODE_BOOL, 
+	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "BOOLEAN", (struct objfile *) NULL);
+
+  return builtin_m2_type;
+}
+
+static struct gdbarch_data *m2_type_data;
+
+const struct builtin_m2_type *
+builtin_m2_type (struct gdbarch *gdbarch)
+{
+  return gdbarch_data (gdbarch, m2_type_data);
+}
+
+
 /* Initialization for Modula-2 */
 
 void
 _initialize_m2_language (void)
 {
-  /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
-  builtin_type_m2_int =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "INTEGER", (struct objfile *) NULL);
-  builtin_type_m2_card =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "CARDINAL", (struct objfile *) NULL);
-  builtin_type_m2_real =
-    init_type (TYPE_CODE_FLT,
-	       gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "REAL", (struct objfile *) NULL);
-  builtin_type_m2_char =
-    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "CHAR", (struct objfile *) NULL);
-  builtin_type_m2_bool =
-    init_type (TYPE_CODE_BOOL, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "BOOLEAN", (struct objfile *) NULL);
+  m2_type_data = gdbarch_data_register_post_init (build_m2_types);
 
   add_language (&m2_language_defn);
 }

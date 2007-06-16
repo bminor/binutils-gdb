@@ -1120,11 +1120,30 @@ extern struct type *builtin_type_unsigned_long_long;
 
 /* Modula-2 types */
 
-extern struct type *builtin_type_m2_char;
-extern struct type *builtin_type_m2_int;
-extern struct type *builtin_type_m2_card;
-extern struct type *builtin_type_m2_real;
-extern struct type *builtin_type_m2_bool;
+struct builtin_m2_type
+{
+  struct type *builtin_char;
+  struct type *builtin_int;
+  struct type *builtin_card;
+  struct type *builtin_real;
+  struct type *builtin_bool;
+};
+
+/* Return the Modula-2 type table for the specified architecture.  */
+extern const struct builtin_m2_type *builtin_m2_type (struct gdbarch *gdbarch);
+
+/* Compatibility macros to access types for the current architecture.  */
+#define builtin_type_m2_char \
+	(builtin_m2_type (current_gdbarch)->builtin_char)
+#define builtin_type_m2_int \
+	(builtin_m2_type (current_gdbarch)->builtin_int)
+#define builtin_type_m2_card \
+	(builtin_m2_type (current_gdbarch)->builtin_card)
+#define builtin_type_m2_real \
+	(builtin_m2_type (current_gdbarch)->builtin_real)
+#define builtin_type_m2_bool \
+	(builtin_m2_type (current_gdbarch)->builtin_bool)
+
 
 /* Fortran (F77) types */
 
