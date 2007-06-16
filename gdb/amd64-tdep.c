@@ -51,81 +51,26 @@
 
 /* Register information.  */
 
-struct amd64_register_info
+static const char *amd64_register_names[] = 
 {
-  char *name;
-  struct type **type;
-};
-
-static struct amd64_register_info const amd64_register_info[] =
-{
-  { "rax", &builtin_type_int64 },
-  { "rbx", &builtin_type_int64 },
-  { "rcx", &builtin_type_int64 },
-  { "rdx", &builtin_type_int64 },
-  { "rsi", &builtin_type_int64 },
-  { "rdi", &builtin_type_int64 },
-  { "rbp", &builtin_type_void_data_ptr },
-  { "rsp", &builtin_type_void_data_ptr },
+  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp",
 
   /* %r8 is indeed register number 8.  */
-  { "r8", &builtin_type_int64 },
-  { "r9", &builtin_type_int64 },
-  { "r10", &builtin_type_int64 },
-  { "r11", &builtin_type_int64 },
-  { "r12", &builtin_type_int64 },
-  { "r13", &builtin_type_int64 },
-  { "r14", &builtin_type_int64 },
-  { "r15", &builtin_type_int64 },
-  { "rip", &builtin_type_void_func_ptr },
-  { "eflags", &i386_eflags_type },
-  { "cs", &builtin_type_int32 },
-  { "ss", &builtin_type_int32 },
-  { "ds", &builtin_type_int32 },
-  { "es", &builtin_type_int32 },
-  { "fs", &builtin_type_int32 },
-  { "gs", &builtin_type_int32 },
+  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+  "rip", "eflags", "cs", "ss", "ds", "es", "fs", "gs",
 
   /* %st0 is register number 24.  */
-  { "st0", &builtin_type_i387_ext },
-  { "st1", &builtin_type_i387_ext },
-  { "st2", &builtin_type_i387_ext },
-  { "st3", &builtin_type_i387_ext },
-  { "st4", &builtin_type_i387_ext },
-  { "st5", &builtin_type_i387_ext },
-  { "st6", &builtin_type_i387_ext },
-  { "st7", &builtin_type_i387_ext },
-  { "fctrl", &builtin_type_int32 },
-  { "fstat", &builtin_type_int32 },
-  { "ftag", &builtin_type_int32 },
-  { "fiseg", &builtin_type_int32 },
-  { "fioff", &builtin_type_int32 },
-  { "foseg", &builtin_type_int32 },
-  { "fooff", &builtin_type_int32 },
-  { "fop", &builtin_type_int32 },
+  "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7",
+  "fctrl", "fstat", "ftag", "fiseg", "fioff", "foseg", "fooff", "fop",
 
   /* %xmm0 is register number 40.  */
-  { "xmm0", &i386_sse_type },
-  { "xmm1", &i386_sse_type },
-  { "xmm2", &i386_sse_type },
-  { "xmm3", &i386_sse_type },
-  { "xmm4", &i386_sse_type },
-  { "xmm5", &i386_sse_type },
-  { "xmm6", &i386_sse_type },
-  { "xmm7", &i386_sse_type },
-  { "xmm8", &i386_sse_type },
-  { "xmm9", &i386_sse_type },
-  { "xmm10", &i386_sse_type },
-  { "xmm11", &i386_sse_type },
-  { "xmm12", &i386_sse_type },
-  { "xmm13", &i386_sse_type },
-  { "xmm14", &i386_sse_type },
-  { "xmm15", &i386_sse_type },
-  { "mxcsr", &i386_mxcsr_type }
+  "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7",
+  "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15",
+  "mxcsr",
 };
 
 /* Total number of registers.  */
-#define AMD64_NUM_REGS	ARRAY_SIZE (amd64_register_info)
+#define AMD64_NUM_REGS	ARRAY_SIZE (amd64_register_names)
 
 /* Return the name of register REGNUM.  */
 
@@ -133,7 +78,7 @@ const char *
 amd64_register_name (int regnum)
 {
   if (regnum >= 0 && regnum < AMD64_NUM_REGS)
-    return amd64_register_info[regnum].name;
+    return amd64_register_names[regnum];
 
   return NULL;
 }
@@ -144,9 +89,28 @@ amd64_register_name (int regnum)
 struct type *
 amd64_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  gdb_assert (regnum >= 0 && regnum < AMD64_NUM_REGS);
+  if (regnum >= AMD64_RAX_REGNUM && regnum <= AMD64_RDI_REGNUM)
+    return builtin_type_int64;
+  if (regnum == AMD64_RBP_REGNUM || regnum == AMD64_RSP_REGNUM)
+    return builtin_type_void_data_ptr;
+  if (regnum >= AMD64_R8_REGNUM && regnum <= AMD64_R15_REGNUM)
+    return builtin_type_int64;
+  if (regnum == AMD64_RIP_REGNUM)
+    return builtin_type_void_func_ptr;
+  if (regnum == AMD64_EFLAGS_REGNUM)
+    return i386_eflags_type;
+  if (regnum >= AMD64_CS_REGNUM && regnum <= AMD64_GS_REGNUM)
+    return builtin_type_int32;
+  if (regnum >= AMD64_ST0_REGNUM && regnum <= AMD64_ST0_REGNUM + 7)
+    return builtin_type_i387_ext;
+  if (regnum >= AMD64_FCTRL_REGNUM && regnum <= AMD64_FCTRL_REGNUM + 7)
+    return builtin_type_int32;
+  if (regnum >= AMD64_XMM0_REGNUM && regnum <= AMD64_XMM0_REGNUM + 15)
+    return i386_sse_type;
+  if (regnum == AMD64_MXCSR_REGNUM)
+    return i386_mxcsr_type;
 
-  return *amd64_register_info[regnum].type;
+  internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
 
 /* DWARF Register Number Mapping as defined in the System V psABI,

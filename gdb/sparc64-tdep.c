@@ -179,181 +179,50 @@ sparc64_init_types (void)
 
 /* Register information.  */
 
-struct sparc64_register_info
+static const char *sparc64_register_names[] =
 {
-  char *name;
-  struct type **type;
-};
+  "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",
+  "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7",
+  "l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7",
+  "i0", "i1", "i2", "i3", "i4", "i5", "fp", "i7",
 
-static struct sparc64_register_info sparc64_register_info[] =
-{
-  { "g0", &builtin_type_int64 },
-  { "g1", &builtin_type_int64 },
-  { "g2", &builtin_type_int64 },
-  { "g3", &builtin_type_int64 },
-  { "g4", &builtin_type_int64 },
-  { "g5", &builtin_type_int64 },
-  { "g6", &builtin_type_int64 },
-  { "g7", &builtin_type_int64 },
+  "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+  "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
+  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
+  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
+  "f32", "f34", "f36", "f38", "f40", "f42", "f44", "f46",
+  "f48", "f50", "f52", "f54", "f56", "f58", "f60", "f62",
 
-  { "o0", &builtin_type_int64 },
-  { "o1", &builtin_type_int64 },
-  { "o2", &builtin_type_int64 },
-  { "o3", &builtin_type_int64 },
-  { "o4", &builtin_type_int64 },
-  { "o5", &builtin_type_int64 },
-  { "sp", &builtin_type_void_data_ptr },
-  { "o7", &builtin_type_int64 },
-
-  { "l0", &builtin_type_int64 },
-  { "l1", &builtin_type_int64 },
-  { "l2", &builtin_type_int64 },
-  { "l3", &builtin_type_int64 },
-  { "l4", &builtin_type_int64 },
-  { "l5", &builtin_type_int64 },
-  { "l6", &builtin_type_int64 },
-  { "l7", &builtin_type_int64 },
-
-  { "i0", &builtin_type_int64 },
-  { "i1", &builtin_type_int64 },
-  { "i2", &builtin_type_int64 },
-  { "i3", &builtin_type_int64 },
-  { "i4", &builtin_type_int64 },
-  { "i5", &builtin_type_int64 },
-  { "fp", &builtin_type_void_data_ptr },
-  { "i7", &builtin_type_int64 },
-
-  { "f0", &builtin_type_float },
-  { "f1", &builtin_type_float },
-  { "f2", &builtin_type_float },
-  { "f3", &builtin_type_float },
-  { "f4", &builtin_type_float },
-  { "f5", &builtin_type_float },
-  { "f6", &builtin_type_float },
-  { "f7", &builtin_type_float },
-  { "f8", &builtin_type_float },
-  { "f9", &builtin_type_float },
-  { "f10", &builtin_type_float },
-  { "f11", &builtin_type_float },
-  { "f12", &builtin_type_float },
-  { "f13", &builtin_type_float },
-  { "f14", &builtin_type_float },
-  { "f15", &builtin_type_float },
-  { "f16", &builtin_type_float },
-  { "f17", &builtin_type_float },
-  { "f18", &builtin_type_float },
-  { "f19", &builtin_type_float },
-  { "f20", &builtin_type_float },
-  { "f21", &builtin_type_float },
-  { "f22", &builtin_type_float },
-  { "f23", &builtin_type_float },
-  { "f24", &builtin_type_float },
-  { "f25", &builtin_type_float },
-  { "f26", &builtin_type_float },
-  { "f27", &builtin_type_float },
-  { "f28", &builtin_type_float },
-  { "f29", &builtin_type_float },
-  { "f30", &builtin_type_float },
-  { "f31", &builtin_type_float },
-  { "f32", &builtin_type_double },
-  { "f34", &builtin_type_double },
-  { "f36", &builtin_type_double },
-  { "f38", &builtin_type_double },
-  { "f40", &builtin_type_double },
-  { "f42", &builtin_type_double },
-  { "f44", &builtin_type_double },
-  { "f46", &builtin_type_double },
-  { "f48", &builtin_type_double },
-  { "f50", &builtin_type_double },
-  { "f52", &builtin_type_double },
-  { "f54", &builtin_type_double },
-  { "f56", &builtin_type_double },
-  { "f58", &builtin_type_double },
-  { "f60", &builtin_type_double },
-  { "f62", &builtin_type_double },
-
-  { "pc", &builtin_type_void_func_ptr },
-  { "npc", &builtin_type_void_func_ptr },
+  "pc", "npc",
   
-  /* This raw register contains the contents of %cwp, %pstate, %asi
-     and %ccr as laid out in a %tstate register.  */
-  /* FIXME: Give it a name until we start using register groups.  */
-  { "state", &builtin_type_int64 },
-
-  { "fsr", &sparc64_fsr_type },
-  { "fprs", &sparc64_fprs_type },
-
-  /* "Although Y is a 64-bit register, its high-order 32 bits are
-     reserved and always read as 0."  */
-  { "y", &builtin_type_int64 }
+  /* FIXME: Give "state" a name until we start using register groups.  */
+  "state",
+  "fsr",
+  "fprs",
+  "y",
 };
 
 /* Total number of registers.  */
-#define SPARC64_NUM_REGS ARRAY_SIZE (sparc64_register_info)
+#define SPARC64_NUM_REGS ARRAY_SIZE (sparc64_register_names)
 
 /* We provide the aliases %d0..%d62 and %q0..%q60 for the floating
    registers as "psuedo" registers.  */
 
-static struct sparc64_register_info sparc64_pseudo_register_info[] =
+static const char *sparc64_pseudo_register_names[] =
 {
-  { "cwp", &builtin_type_int64 },
-  { "pstate", &sparc64_pstate_type },
-  { "asi", &builtin_type_int64 },
-  { "ccr", &builtin_type_int64 },
+  "cwp", "pstate", "asi", "ccr",
 
-  { "d0", &builtin_type_double },
-  { "d2", &builtin_type_double },
-  { "d4", &builtin_type_double },
-  { "d6", &builtin_type_double },
-  { "d8", &builtin_type_double },
-  { "d10", &builtin_type_double },
-  { "d12", &builtin_type_double },
-  { "d14", &builtin_type_double },
-  { "d16", &builtin_type_double },
-  { "d18", &builtin_type_double },
-  { "d20", &builtin_type_double },
-  { "d22", &builtin_type_double },
-  { "d24", &builtin_type_double },
-  { "d26", &builtin_type_double },
-  { "d28", &builtin_type_double },
-  { "d30", &builtin_type_double },
-  { "d32", &builtin_type_double },
-  { "d34", &builtin_type_double },
-  { "d36", &builtin_type_double },
-  { "d38", &builtin_type_double },
-  { "d40", &builtin_type_double },
-  { "d42", &builtin_type_double },
-  { "d44", &builtin_type_double },
-  { "d46", &builtin_type_double },
-  { "d48", &builtin_type_double },
-  { "d50", &builtin_type_double },
-  { "d52", &builtin_type_double },
-  { "d54", &builtin_type_double },
-  { "d56", &builtin_type_double },
-  { "d58", &builtin_type_double },
-  { "d60", &builtin_type_double },
-  { "d62", &builtin_type_double },
+  "d0", "d2", "d4", "d6", "d8", "d10", "d12", "d14",
+  "d16", "d18", "d20", "d22", "d24", "d26", "d28", "d30",
+  "d32", "d34", "d36", "d38", "d40", "d42", "d44", "d46",
+  "d48", "d50", "d52", "d54", "d56", "d58", "d60", "d62",
 
-  { "q0", &builtin_type_long_double },
-  { "q4", &builtin_type_long_double },
-  { "q8", &builtin_type_long_double },
-  { "q12", &builtin_type_long_double },
-  { "q16", &builtin_type_long_double },
-  { "q20", &builtin_type_long_double },
-  { "q24", &builtin_type_long_double },
-  { "q28", &builtin_type_long_double },
-  { "q32", &builtin_type_long_double },
-  { "q36", &builtin_type_long_double },
-  { "q40", &builtin_type_long_double },
-  { "q44", &builtin_type_long_double },
-  { "q48", &builtin_type_long_double },
-  { "q52", &builtin_type_long_double },
-  { "q56", &builtin_type_long_double },
-  { "q60", &builtin_type_long_double }
+  "q0", "q4", "q8", "q12", "q16", "q20", "q24", "q28",
+  "q32", "q36", "q40", "q44", "q48", "q52", "q56", "q60",
 };
 
 /* Total number of pseudo registers.  */
-#define SPARC64_NUM_PSEUDO_REGS ARRAY_SIZE (sparc64_pseudo_register_info)
+#define SPARC64_NUM_PSEUDO_REGS ARRAY_SIZE (sparc64_pseudo_register_names)
 
 /* Return the name of register REGNUM.  */
 
@@ -361,11 +230,11 @@ static const char *
 sparc64_register_name (int regnum)
 {
   if (regnum >= 0 && regnum < SPARC64_NUM_REGS)
-    return sparc64_register_info[regnum].name;
+    return sparc64_register_names[regnum];
 
   if (regnum >= SPARC64_NUM_REGS
       && regnum < SPARC64_NUM_REGS + SPARC64_NUM_PSEUDO_REGS)
-    return sparc64_pseudo_register_info[regnum - SPARC64_NUM_REGS].name;
+    return sparc64_pseudo_register_names[regnum - SPARC64_NUM_REGS];
 
   return NULL;
 }
@@ -376,12 +245,47 @@ sparc64_register_name (int regnum)
 static struct type *
 sparc64_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum >= SPARC64_NUM_REGS
-      && regnum < SPARC64_NUM_REGS + SPARC64_NUM_PSEUDO_REGS)
-    return *sparc64_pseudo_register_info[regnum - SPARC64_NUM_REGS].type;
+  /* Raw registers.  */
 
-  gdb_assert (regnum >= 0 && regnum < SPARC64_NUM_REGS);
-  return *sparc64_register_info[regnum].type;
+  if (regnum == SPARC_SP_REGNUM || regnum == SPARC_FP_REGNUM)
+    return builtin_type_void_data_ptr;
+  if (regnum >= SPARC_G0_REGNUM && regnum <= SPARC_I7_REGNUM)
+    return builtin_type_int64;
+  if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
+    return builtin_type_float;
+  if (regnum >= SPARC64_F32_REGNUM && regnum <= SPARC64_F62_REGNUM)
+    return builtin_type_double;
+  if (regnum == SPARC64_PC_REGNUM || regnum == SPARC64_NPC_REGNUM)
+    return builtin_type_void_func_ptr;
+  /* This raw register contains the contents of %cwp, %pstate, %asi
+     and %ccr as laid out in a %tstate register.  */
+  if (regnum == SPARC64_STATE_REGNUM)
+    return builtin_type_int64;
+  if (regnum == SPARC64_FSR_REGNUM)
+    return sparc64_fsr_type;
+  if (regnum == SPARC64_FPRS_REGNUM)
+    return sparc64_fprs_type;
+  /* "Although Y is a 64-bit register, its high-order 32 bits are
+     reserved and always read as 0."  */
+  if (regnum == SPARC64_Y_REGNUM)
+    return builtin_type_int64;
+
+  /* Pseudo registers.  */
+
+  if (regnum == SPARC64_CWP_REGNUM)
+    return builtin_type_int64;
+  if (regnum == SPARC64_PSTATE_REGNUM)
+    return sparc64_pstate_type;
+  if (regnum == SPARC64_ASI_REGNUM)
+    return builtin_type_int64;
+  if (regnum == SPARC64_CCR_REGNUM)
+    return builtin_type_int64;
+  if (regnum >= SPARC64_D0_REGNUM && regnum <= SPARC64_D62_REGNUM)
+    return builtin_type_double;
+  if (regnum >= SPARC64_Q0_REGNUM && regnum <= SPARC64_Q60_REGNUM)
+    return builtin_type_long_double;
+
+  internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
 
 static void

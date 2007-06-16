@@ -65,97 +65,54 @@ struct gdbarch_tdep
 };
 
 
-/* Register information.  */
-
-struct s390_register_info
-{
-  char *name;
-  struct type **type;
-};
-
-static struct s390_register_info s390_register_info[S390_NUM_TOTAL_REGS] = 
-{
-  /* Program Status Word.  */
-  { "pswm", &builtin_type_long },
-  { "pswa", &builtin_type_long },
-
-  /* General Purpose Registers.  */
-  { "r0", &builtin_type_long },
-  { "r1", &builtin_type_long },
-  { "r2", &builtin_type_long },
-  { "r3", &builtin_type_long },
-  { "r4", &builtin_type_long },
-  { "r5", &builtin_type_long },
-  { "r6", &builtin_type_long },
-  { "r7", &builtin_type_long },
-  { "r8", &builtin_type_long },
-  { "r9", &builtin_type_long },
-  { "r10", &builtin_type_long },
-  { "r11", &builtin_type_long },
-  { "r12", &builtin_type_long },
-  { "r13", &builtin_type_long },
-  { "r14", &builtin_type_long },
-  { "r15", &builtin_type_long },
-
-  /* Access Registers.  */
-  { "acr0", &builtin_type_int },
-  { "acr1", &builtin_type_int },
-  { "acr2", &builtin_type_int },
-  { "acr3", &builtin_type_int },
-  { "acr4", &builtin_type_int },
-  { "acr5", &builtin_type_int },
-  { "acr6", &builtin_type_int },
-  { "acr7", &builtin_type_int },
-  { "acr8", &builtin_type_int },
-  { "acr9", &builtin_type_int },
-  { "acr10", &builtin_type_int },
-  { "acr11", &builtin_type_int },
-  { "acr12", &builtin_type_int },
-  { "acr13", &builtin_type_int },
-  { "acr14", &builtin_type_int },
-  { "acr15", &builtin_type_int },
-
-  /* Floating Point Control Word.  */
-  { "fpc", &builtin_type_int },
-
-  /* Floating Point Registers.  */
-  { "f0", &builtin_type_double },
-  { "f1", &builtin_type_double },
-  { "f2", &builtin_type_double },
-  { "f3", &builtin_type_double },
-  { "f4", &builtin_type_double },
-  { "f5", &builtin_type_double },
-  { "f6", &builtin_type_double },
-  { "f7", &builtin_type_double },
-  { "f8", &builtin_type_double },
-  { "f9", &builtin_type_double },
-  { "f10", &builtin_type_double },
-  { "f11", &builtin_type_double },
-  { "f12", &builtin_type_double },
-  { "f13", &builtin_type_double },
-  { "f14", &builtin_type_double },
-  { "f15", &builtin_type_double },
-
-  /* Pseudo registers.  */
-  { "pc", &builtin_type_void_func_ptr },
-  { "cc", &builtin_type_int },
-};
-
 /* Return the name of register REGNUM.  */
 static const char *
 s390_register_name (int regnum)
 {
+  static const char *register_names[S390_NUM_TOTAL_REGS] =
+    {
+      /* Program Status Word.  */
+      "pswm", "pswa",
+      /* General Purpose Registers.  */
+      "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+      "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      /* Access Registers.  */
+      "acr0", "acr1", "acr2", "acr3", "acr4", "acr5", "acr6", "acr7",
+      "acr8", "acr9", "acr10", "acr11", "acr12", "acr13", "acr14", "acr15",
+      /* Floating Point Control Word.  */
+      "fpc",
+      /* Floating Point Registers.  */
+      "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
+      "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
+      /* Pseudo registers.  */
+      "pc", "cc",
+    };
+
   gdb_assert (regnum >= 0 && regnum < S390_NUM_TOTAL_REGS);
-  return s390_register_info[regnum].name;
+  return register_names[regnum];
 }
 
 /* Return the GDB type object for the "standard" data type of data in
-   register REGNUM. */
+   register REGNUM.  */
 static struct type *
 s390_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  gdb_assert (regnum >= 0 && regnum < S390_NUM_TOTAL_REGS);
-  return *s390_register_info[regnum].type;
+  if (regnum == S390_PSWM_REGNUM || regnum == S390_PSWA_REGNUM)
+    return builtin_type_long;
+  if (regnum >= S390_R0_REGNUM && regnum <= S390_R15_REGNUM)
+    return builtin_type_long;
+  if (regnum >= S390_A0_REGNUM && regnum <= S390_A15_REGNUM)
+    return builtin_type_int;
+  if (regnum == S390_FPC_REGNUM)
+    return builtin_type_int;
+  if (regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM)
+    return builtin_type_double;
+  if (regnum == S390_PC_REGNUM)
+    return builtin_type_void_func_ptr;
+  if (regnum == S390_CC_REGNUM)
+    return builtin_type_int;
+
+  internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
 
 /* DWARF Register Mapping.  */
