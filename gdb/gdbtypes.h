@@ -1069,10 +1069,6 @@ extern struct type *builtin_type_void_func_ptr;
 
 /* The target CPU's address type.  This is the ISA address size. */
 extern struct type *builtin_type_CORE_ADDR;
-/* The symbol table address type.  Some object file formats have a 32
-   bit address type even though the TARGET has a 64 bit pointer type
-   (cf MIPS). */
-extern struct type *builtin_type_bfd_vma;
 
 /* Explicit sizes - see C9X <intypes.h> for naming scheme.  The "int0"
    is for when an architecture needs to describe a register that has

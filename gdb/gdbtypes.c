@@ -129,7 +129,6 @@ struct type *builtin_type_ia64_quad;
 struct type *builtin_type_void_data_ptr;
 struct type *builtin_type_void_func_ptr;
 struct type *builtin_type_CORE_ADDR;
-struct type *builtin_type_bfd_vma;
 
 int opaque_type_resolution = 1;
 static void
@@ -3435,10 +3434,6 @@ Show resolution of opaque struct/class/union types (if set before loading symbol
     init_type (TYPE_CODE_INT, gdbarch_addr_bit (current_gdbarch) / 8,
 	       TYPE_FLAG_UNSIGNED,
 	       "__CORE_ADDR", (struct objfile *) NULL);
-  builtin_type_bfd_vma =
-    init_type (TYPE_CODE_INT, gdbarch_addr_bit (current_gdbarch) / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "__bfd_vma", (struct objfile *) NULL);
 }
 
 static struct gdbarch_data *gdbtypes_data;
@@ -3678,7 +3673,6 @@ _initialize_gdbtypes (void)
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_void_data_ptr);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_void_func_ptr);
   DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_bfd_vma);
   deprecated_register_gdbarch_swap (NULL, 0, build_gdbtypes);
 
   /* Note: These types do not need to be swapped - they are target

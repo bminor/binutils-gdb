@@ -141,11 +141,6 @@ extern void set_gdbarch_ptr_bit (struct gdbarch *gdbarch, int ptr_bit);
 extern int gdbarch_addr_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_addr_bit (struct gdbarch *gdbarch, int addr_bit);
 
-/* Number of bits in a BFD_VMA for the target object file format. */
-
-extern int gdbarch_bfd_vma_bit (struct gdbarch *gdbarch);
-extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
-
 /* One if `char' acts like `signed char', zero if `unsigned char'. */
 
 extern int gdbarch_char_signed (struct gdbarch *gdbarch);

@@ -1,5 +1,15 @@
 2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (bfd_vma): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* gdbtypes.h (builtin_bfd_vma_type): Remove.
+	* gdbtypes.h (builtin_bfd_vma_type): Remove.
+	(build_gdbtypes): Do not initialize it.
+	(_initialize_gdbtypes): Do not swap it.
+
+2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.c (builtin_type_v2_double, builtin_type_v4_float, 
 	builtin_type_v2_int64, builtin_type_v4_int32, builtin_type_v8_int16,
 	builtin_type_v16_int8, builtin_type_v2_float, builtin_type_v2_int32,

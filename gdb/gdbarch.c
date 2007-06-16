@@ -144,7 +144,6 @@ struct gdbarch
   const struct floatformat ** long_double_format;
   int ptr_bit;
   int addr_bit;
-  int bfd_vma_bit;
   int char_signed;
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
@@ -268,7 +267,6 @@ struct gdbarch startup_gdbarch =
   0,  /* long_double_format */
   8 * sizeof (void*),  /* ptr_bit */
   8 * sizeof (void*),  /* addr_bit */
-  8 * sizeof (void*),  /* bfd_vma_bit */
   1,  /* char_signed */
   0,  /* read_pc */
   0,  /* write_pc */
@@ -404,7 +402,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->double_bit = 8*TARGET_CHAR_BIT;
   current_gdbarch->long_double_bit = 8*TARGET_CHAR_BIT;
   current_gdbarch->ptr_bit = current_gdbarch->int_bit;
-  current_gdbarch->bfd_vma_bit = gdbarch_bfd_arch_info (current_gdbarch)->bits_per_address;
   current_gdbarch->char_signed = -1;
   current_gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
   current_gdbarch->num_regs = -1;
@@ -519,7 +516,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of ptr_bit, invalid_p == 0 */
   if (current_gdbarch->addr_bit == 0)
     current_gdbarch->addr_bit = gdbarch_ptr_bit (current_gdbarch);
-  /* Skip verify of bfd_vma_bit, invalid_p == 0 */
   if (current_gdbarch->char_signed == -1)
     current_gdbarch->char_signed = 1;
   /* Skip verify of read_pc, has predicate */
@@ -693,9 +689,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: bfd_arch_info = %s\n",
                       gdbarch_bfd_arch_info (current_gdbarch)->printable_name);
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: bfd_vma_bit = %s\n",
-                      paddr_d (current_gdbarch->bfd_vma_bit));
   fprintf_unfiltered (file,
                       "gdbarch_dump: breakpoint_from_pc = <0x%lx>\n",
                       (long) current_gdbarch->breakpoint_from_pc);
@@ -1406,23 +1399,6 @@ set_gdbarch_addr_bit (struct gdbarch *gdbarch,
                       int addr_bit)
 {
   gdbarch->addr_bit = addr_bit;
-}
-
-int
-gdbarch_bfd_vma_bit (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of bfd_vma_bit, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_bfd_vma_bit called\n");
-  return gdbarch->bfd_vma_bit;
-}
-
-void
-set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch,
-                         int bfd_vma_bit)
-{
-  gdbarch->bfd_vma_bit = bfd_vma_bit;
 }
 
 int
