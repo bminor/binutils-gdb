@@ -1,3 +1,8 @@
+2007-06-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (embedded_spu_file): Deduce embedspu program
+	name prefix from that of ld.
+
 2007-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ACLOCAL_AMFLAGS): Add -I ../config -I ../bfd.
