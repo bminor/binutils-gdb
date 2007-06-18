@@ -1,5 +1,22 @@
 2007-06-18  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Remove.
+	* sh-tdep.c (sh_extract_struct_value_address): Remove.
+	(sh_gdbarch_init): Remove
+	set_gdbarch_deprecated_extract_struct_value_address.
+	* sh64-tdep.c (sh64_extract_struct_value_address): Remove.
+	(sh64_gdbarch_init): Remove
+	set_gdbarch_deprecated_extract_struct_value_address.
+	* ia64-tdep.c (ia64_extract_struct_value_address): Remove.
+	(ia64_gdbarch_init): Remove
+	set_gdbarch_deprecated_extract_struct_value_address.
+	* frv-tdep.c (frv_extract_struct_value_address): Remove.
+	(frv_gdbarch_init): Remove
+	set_gdbarch_deprecated_extract_struct_value_address.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-18  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (SP_REGNUM): Replace by gdbarch_sp_regnum.
 	* v850-tdep.c (v850_unwind_sp): Likewise.
 	* std-regs.c (value_of_builtin_frame_sp_reg): Likewise.

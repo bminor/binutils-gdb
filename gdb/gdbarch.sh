@@ -517,28 +517,6 @@ f:=:void:extract_return_value:struct type *type, struct regcache *regcache, gdb_
 f:=:void:store_return_value:struct type *type, struct regcache *regcache, const gdb_byte *valbuf:type, regcache, valbuf:0
 f:=:int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type::generic_use_struct_convention::0
 
-# As of 2004-01-17 only the 32-bit SPARC ABI has been identified as an
-# ABI suitable for the implementation of a robust extract
-# struct-convention return-value address method (the sparc saves the
-# address in the callers frame).  All the other cases so far examined,
-# the DEPRECATED_EXTRACT_STRUCT_VALUE implementation has been
-# erreneous - the code was incorrectly assuming that the return-value
-# address, stored in a register, was preserved across the entire
-# function call.
-
-# For the moment retain DEPRECATED_EXTRACT_STRUCT_VALUE as a marker of
-# the ABIs that are still to be analyzed - perhaps this should simply
-# be deleted.  The commented out extract_returned_value_address method
-# is provided as a starting point for the 32-bit SPARC.  It, or
-# something like it, along with changes to both infcmd.c and stack.c
-# will be needed for that case to work.  NB: It is passed the callers
-# frame since it is only after the callee has returned that this
-# function is used.
-
-#M::CORE_ADDR:extract_returned_value_address:struct frame_info *caller_frame:caller_frame
-F:=:CORE_ADDR:deprecated_extract_struct_value_address:struct regcache *regcache:regcache
-
-#
 f::CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 f::int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
 f::const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:

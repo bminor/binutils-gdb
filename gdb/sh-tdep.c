@@ -815,18 +815,6 @@ sh_use_struct_convention (int gcc_p, struct type *type)
   return 1;
 }
 
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-static CORE_ADDR
-sh_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST addr;
-
-  regcache_cooked_read_unsigned (regcache, STRUCT_RETURN_REGNUM, &addr);
-  return addr;
-}
-
 static CORE_ADDR
 sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
 {
@@ -2751,8 +2739,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
 
   set_gdbarch_return_value (gdbarch, sh_return_value_nofpu);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
-					    sh_extract_struct_value_address);
 
   set_gdbarch_skip_prologue (gdbarch, sh_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

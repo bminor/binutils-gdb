@@ -188,7 +188,6 @@ struct gdbarch
   gdbarch_extract_return_value_ftype *extract_return_value;
   gdbarch_store_return_value_ftype *store_return_value;
   gdbarch_deprecated_use_struct_convention_ftype *deprecated_use_struct_convention;
-  gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address;
   gdbarch_skip_prologue_ftype *skip_prologue;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
@@ -311,7 +310,6 @@ struct gdbarch startup_gdbarch =
   0,  /* extract_return_value */
   0,  /* store_return_value */
   0,  /* deprecated_use_struct_convention */
-  0,  /* deprecated_extract_struct_value_address */
   0,  /* skip_prologue */
   0,  /* inner_than */
   0,  /* breakpoint_from_pc */
@@ -555,7 +553,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of integer_to_address, has predicate */
   /* Skip verify of return_value, has predicate */
   /* Skip verify of deprecated_use_struct_convention, invalid_p == 0 */
-  /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   if (current_gdbarch->skip_prologue == 0)
     fprintf_unfiltered (log, "\n\tskip_prologue");
   if (current_gdbarch->inner_than == 0)
@@ -725,24 +722,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: decr_pc_after_break = 0x%s\n",
                       paddr_nz (current_gdbarch->decr_pc_after_break));
-#ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P()",
-                      XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_deprecated_extract_struct_value_address_p() = %d\n",
-                      gdbarch_deprecated_extract_struct_value_address_p (current_gdbarch));
-#ifdef DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regcache)",
-                      XSTRING (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (regcache)));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_extract_struct_value_address = <0x%lx>\n",
-                      (long) current_gdbarch->deprecated_extract_struct_value_address);
 #ifdef DEPRECATED_FP_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_FP_REGNUM # %s\n",
@@ -2219,30 +2198,6 @@ set_gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch,
                                               gdbarch_deprecated_use_struct_convention_ftype deprecated_use_struct_convention)
 {
   gdbarch->deprecated_use_struct_convention = deprecated_use_struct_convention;
-}
-
-int
-gdbarch_deprecated_extract_struct_value_address_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_extract_struct_value_address != NULL;
-}
-
-CORE_ADDR
-gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, struct regcache *regcache)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_extract_struct_value_address != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_extract_struct_value_address called\n");
-  return gdbarch->deprecated_extract_struct_value_address (regcache);
-}
-
-void
-set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch,
-                                                     gdbarch_deprecated_extract_struct_value_address_ftype deprecated_extract_struct_value_address)
-{
-  gdbarch->deprecated_extract_struct_value_address = deprecated_extract_struct_value_address;
 }
 
 CORE_ADDR

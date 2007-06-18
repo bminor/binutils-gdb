@@ -2994,13 +2994,6 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-CORE_ADDR
-ia64_extract_struct_value_address (struct regcache *regcache)
-{
-  error (_("ia64_extract_struct_value_address called and cannot get struct value address"));
-  return 0;
-}
-
 
 static int
 is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
@@ -3551,7 +3544,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, ia64_extract_return_value);
 
   set_gdbarch_store_return_value (gdbarch, ia64_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
 
   set_gdbarch_memory_insert_breakpoint (gdbarch, ia64_memory_insert_breakpoint);
   set_gdbarch_memory_remove_breakpoint (gdbarch, ia64_memory_remove_breakpoint);

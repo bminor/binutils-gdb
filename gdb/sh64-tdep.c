@@ -962,17 +962,6 @@ sh64_analyze_prologue (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-sh64_extract_struct_value_address (struct regcache *regcache)
-{
-  /* FIXME: cagney/2004-01-17: Does the ABI guarantee that the return
-     address regster is preserved across function calls?  Probably
-     not, making this function wrong.  */
-  ULONGEST val;
-  regcache_raw_read_unsigned (regcache, STRUCT_RETURN_REGNUM, &val);
-  return val;
-}
-
-static CORE_ADDR
 sh64_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
 {
   return sp & ~7;
@@ -2515,8 +2504,6 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
 
   set_gdbarch_return_value (gdbarch, sh64_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
-					    sh64_extract_struct_value_address);
 
   set_gdbarch_skip_prologue (gdbarch, sh64_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

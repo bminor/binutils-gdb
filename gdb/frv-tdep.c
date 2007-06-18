@@ -1049,14 +1049,6 @@ frv_extract_return_value (struct type *type, struct regcache *regcache,
 }
 
 static CORE_ADDR
-frv_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST addr;
-  regcache_cooked_read_unsigned (regcache, struct_return_regnum, &addr);
-  return addr;
-}
-
-static CORE_ADDR
 frv_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
   /* Require dword alignment.  */
@@ -1502,7 +1494,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);
 
   set_gdbarch_store_return_value (gdbarch, frv_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
 
   /* Frame stuff.  */
   set_gdbarch_unwind_pc (gdbarch, frv_unwind_pc);

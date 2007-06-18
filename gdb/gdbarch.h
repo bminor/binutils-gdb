@@ -427,49 +427,6 @@ extern void set_gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarc
 #define DEPRECATED_USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_deprecated_use_struct_convention (current_gdbarch, gcc_p, value_type))
 #endif
 
-/* As of 2004-01-17 only the 32-bit SPARC ABI has been identified as an
-   ABI suitable for the implementation of a robust extract
-   struct-convention return-value address method (the sparc saves the
-   address in the callers frame).  All the other cases so far examined,
-   the DEPRECATED_EXTRACT_STRUCT_VALUE implementation has been
-   erreneous - the code was incorrectly assuming that the return-value
-   address, stored in a register, was preserved across the entire
-   function call.
-   For the moment retain DEPRECATED_EXTRACT_STRUCT_VALUE as a marker of
-   the ABIs that are still to be analyzed - perhaps this should simply
-   be deleted.  The commented out extract_returned_value_address method
-   is provided as a starting point for the 32-bit SPARC.  It, or
-   something like it, along with changes to both infcmd.c and stack.c
-   will be needed for that case to work.  NB: It is passed the callers
-   frame since it is only after the callee has returned that this
-   function is used.
-  M::CORE_ADDR:extract_returned_value_address:struct frame_info *caller_frame:caller_frame */
-
-#if defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
-/* Legacy for systems yet to multi-arch DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS */
-#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_extract_struct_value_address_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
-#error "Non multi-arch definition of DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS"
-#endif
-#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() (gdbarch_deprecated_extract_struct_value_address_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_extract_struct_value_address_ftype) (struct regcache *regcache);
-extern CORE_ADDR gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, struct regcache *regcache);
-extern void set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
-#error "Non multi-arch definition of DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS"
-#endif
-#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regcache) (gdbarch_deprecated_extract_struct_value_address (current_gdbarch, regcache))
-#endif
-
 typedef CORE_ADDR (gdbarch_skip_prologue_ftype) (CORE_ADDR ip);
 extern CORE_ADDR gdbarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip);
 extern void set_gdbarch_skip_prologue (struct gdbarch *gdbarch, gdbarch_skip_prologue_ftype *skip_prologue);
