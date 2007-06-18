@@ -1,5 +1,15 @@
 2007-06-18  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (DEPRECATED_REG_STRUCT_HAS_ADDR): Replace by
+	gdbarch_deprecated_reg_struct_has_addr.
+	* infcall.c (call_function_by_hand): Likewise.
+	(DEPRECATED_REG_STRUCT_HAS_ADDR_P): Replace by
+	* gdbarch_deprecated_reg_struct_has_addr_p.
+	* infcall.c (call_function_by_hand): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-18  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Remove.
 	* sh-tdep.c (sh_extract_struct_value_address): Remove.
 	(sh_gdbarch_init): Remove

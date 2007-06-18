@@ -518,33 +518,14 @@ typedef CORE_ADDR (gdbarch_frame_align_ftype) (struct gdbarch *gdbarch, CORE_ADD
 extern CORE_ADDR gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address);
 extern void set_gdbarch_frame_align (struct gdbarch *gdbarch, gdbarch_frame_align_ftype *frame_align);
 
-/* DEPRECATED_REG_STRUCT_HAS_ADDR has been replaced by
+/* deprecated_reg_struct_has_addr has been replaced by
    stabs_argument_has_addr. */
 
-#if defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
-/* Legacy for systems yet to multi-arch DEPRECATED_REG_STRUCT_HAS_ADDR */
-#if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
-#define DEPRECATED_REG_STRUCT_HAS_ADDR_P() (1)
-#endif
-#endif
-
 extern int gdbarch_deprecated_reg_struct_has_addr_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
-#error "Non multi-arch definition of DEPRECATED_REG_STRUCT_HAS_ADDR"
-#endif
-#if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
-#define DEPRECATED_REG_STRUCT_HAS_ADDR_P() (gdbarch_deprecated_reg_struct_has_addr_p (current_gdbarch))
-#endif
 
 typedef int (gdbarch_deprecated_reg_struct_has_addr_ftype) (int gcc_p, struct type *type);
 extern int gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch, int gcc_p, struct type *type);
 extern void set_gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_deprecated_reg_struct_has_addr_ftype *deprecated_reg_struct_has_addr);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
-#error "Non multi-arch definition of DEPRECATED_REG_STRUCT_HAS_ADDR"
-#endif
-#if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
-#define DEPRECATED_REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_deprecated_reg_struct_has_addr (current_gdbarch, gcc_p, type))
-#endif
 
 typedef int (gdbarch_stabs_argument_has_addr_ftype) (struct gdbarch *gdbarch, struct type *type);
 extern int gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type);

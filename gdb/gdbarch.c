@@ -738,21 +738,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_function_start_offset = 0x%s\n",
                       paddr_nz (current_gdbarch->deprecated_function_start_offset));
-#ifdef DEPRECATED_REG_STRUCT_HAS_ADDR_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_REG_STRUCT_HAS_ADDR_P()",
-                      XSTRING (DEPRECATED_REG_STRUCT_HAS_ADDR_P ()));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_deprecated_reg_struct_has_addr_p() = %d\n",
                       gdbarch_deprecated_reg_struct_has_addr_p (current_gdbarch));
-#ifdef DEPRECATED_REG_STRUCT_HAS_ADDR
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_REG_STRUCT_HAS_ADDR(gcc_p, type)",
-                      XSTRING (DEPRECATED_REG_STRUCT_HAS_ADDR (gcc_p, type)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_reg_struct_has_addr = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_reg_struct_has_addr);

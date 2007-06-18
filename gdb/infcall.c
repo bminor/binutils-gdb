@@ -586,7 +586,7 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
       }
   }
 
-  if (DEPRECATED_REG_STRUCT_HAS_ADDR_P ())
+  if (gdbarch_deprecated_reg_struct_has_addr_p (current_gdbarch))
     {
       int i;
       /* This is a machine like the sparc, where we may need to pass a
@@ -603,7 +603,8 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
 	       || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
 		   && TYPE_LENGTH (arg_type) > 8)
 	       )
-	      && DEPRECATED_REG_STRUCT_HAS_ADDR (using_gcc, arg_type))
+	      && gdbarch_deprecated_reg_struct_has_addr
+		   (current_gdbarch, using_gcc, arg_type))
 	    {
 	      CORE_ADDR addr;
 	      int len;		/*  = TYPE_LENGTH (arg_type); */
