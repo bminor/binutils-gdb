@@ -925,7 +925,7 @@ disassemble_command (char *arg, int from_tty)
 	/* FIXME: cagney/2004-02-07: This should be an observer.  */
 	low = tui_get_low_disassembly_address (low, pc);
 #endif
-      low += DEPRECATED_FUNCTION_START_OFFSET;
+      low += gdbarch_deprecated_function_start_offset (current_gdbarch);
     }
   else if (!(space_index = (char *) strchr (arg, ' ')))
     {
@@ -940,7 +940,7 @@ disassemble_command (char *arg, int from_tty)
 	/* FIXME: cagney/2004-02-07: This should be an observer.  */
 	low = tui_get_low_disassembly_address (low, pc);
 #endif
-      low += DEPRECATED_FUNCTION_START_OFFSET;
+      low += gdbarch_deprecated_function_start_offset (current_gdbarch);
     }
   else
     {

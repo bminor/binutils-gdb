@@ -232,7 +232,7 @@ find_function_addr (struct value *function, struct type **retval_type)
 
   if (retval_type != NULL)
     *retval_type = value_type;
-  return funaddr + DEPRECATED_FUNCTION_START_OFFSET;
+  return funaddr + gdbarch_deprecated_function_start_offset (current_gdbarch);
 }
 
 /* Call breakpoint_auto_delete on the current contents of the bpstat

@@ -459,19 +459,13 @@ extern void set_gdbarch_decr_pc_after_break (struct gdbarch *gdbarch, CORE_ADDR 
 /* A function can be addressed by either it's "pointer" (possibly a
    descriptor address) or "entry point" (first executable instruction).
    The method "convert_from_func_ptr_addr" converting the former to the
-   latter.  DEPRECATED_FUNCTION_START_OFFSET is being used to implement
+   latter.  gdbarch_deprecated_function_start_offset is being used to implement
    a simplified subset of that functionality - the function's address
    corresponds to the "function pointer" and the function's start
    corresponds to the "function entry point" - and hence is redundant. */
 
 extern CORE_ADDR gdbarch_deprecated_function_start_offset (struct gdbarch *gdbarch);
 extern void set_gdbarch_deprecated_function_start_offset (struct gdbarch *gdbarch, CORE_ADDR deprecated_function_start_offset);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_FUNCTION_START_OFFSET)
-#error "Non multi-arch definition of DEPRECATED_FUNCTION_START_OFFSET"
-#endif
-#if !defined (DEPRECATED_FUNCTION_START_OFFSET)
-#define DEPRECATED_FUNCTION_START_OFFSET (gdbarch_deprecated_function_start_offset (current_gdbarch))
-#endif
 
 /* Return the remote protocol register number associated with this
    register.  Normally the identity mapping. */

@@ -1833,7 +1833,8 @@ minsym_found (int funfirstline, struct minimal_symbol *msymbol)
   values.sals[0].section = SYMBOL_BFD_SECTION (msymbol);
   if (funfirstline)
     {
-      values.sals[0].pc += DEPRECATED_FUNCTION_START_OFFSET;
+      values.sals[0].pc
+	+= gdbarch_deprecated_function_start_offset (current_gdbarch);
       values.sals[0].pc = gdbarch_skip_prologue
 			    (current_gdbarch, values.sals[0].pc);
     }

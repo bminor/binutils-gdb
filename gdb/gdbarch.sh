@@ -528,12 +528,12 @@ v::CORE_ADDR:decr_pc_after_break:::0:::0
 # A function can be addressed by either it's "pointer" (possibly a
 # descriptor address) or "entry point" (first executable instruction).
 # The method "convert_from_func_ptr_addr" converting the former to the
-# latter.  DEPRECATED_FUNCTION_START_OFFSET is being used to implement
+# latter.  gdbarch_deprecated_function_start_offset is being used to implement
 # a simplified subset of that functionality - the function's address
 # corresponds to the "function pointer" and the function's start
 # corresponds to the "function entry point" - and hence is redundant.
 
-v:=:CORE_ADDR:deprecated_function_start_offset:::0:::0
+v::CORE_ADDR:deprecated_function_start_offset:::0:::0
 
 # Return the remote protocol register number associated with this
 # register.  Normally the identity mapping.

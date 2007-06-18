@@ -730,11 +730,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_fp_regnum = %s\n",
                       paddr_d (current_gdbarch->deprecated_fp_regnum));
-#ifdef DEPRECATED_FUNCTION_START_OFFSET
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FUNCTION_START_OFFSET # %s\n",
-                      XSTRING (DEPRECATED_FUNCTION_START_OFFSET));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_function_start_offset = 0x%s\n",
                       paddr_nz (current_gdbarch->deprecated_function_start_offset));

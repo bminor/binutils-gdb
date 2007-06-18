@@ -2527,7 +2527,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
 	  !section_is_mapped (section))
 	pc = overlay_unmapped_address (pc, section);
 
-      pc += DEPRECATED_FUNCTION_START_OFFSET;
+      pc += gdbarch_deprecated_function_start_offset (current_gdbarch);
       pc = gdbarch_skip_prologue (current_gdbarch, pc);
 
       /* For overlays, map pc back into its mapped VMA range */
@@ -4101,7 +4101,7 @@ skip_prologue_using_sal (CORE_ADDR func_addr)
 
   /* Get an initial range for the function.  */
   find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
-  start_pc += DEPRECATED_FUNCTION_START_OFFSET;
+  start_pc += gdbarch_deprecated_function_start_offset (current_gdbarch);
 
   prologue_sal = find_pc_line (start_pc, 0);
   if (prologue_sal.line != 0)
