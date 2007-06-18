@@ -137,7 +137,7 @@ static int error_index;
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token DEFINED TARGET_K SEARCH_DIR MAP ENTRY
 %token <integer> NEXT
-%token SIZEOF ADDR LOADADDR MAX_K MIN_K
+%token SIZEOF ALIGNOF ADDR LOADADDR MAX_K MIN_K
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT NOCROSSREFS
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
@@ -840,6 +840,8 @@ exp	:
         |	SIZEOF_HEADERS
 			{ $$ = exp_nameop (SIZEOF_HEADERS,0); }
 
+	|	ALIGNOF '(' NAME ')'
+			{ $$ = exp_nameop (ALIGNOF,$3); }
 	|	SIZEOF '(' NAME ')'
 			{ $$ = exp_nameop (SIZEOF,$3); }
 	|	ADDR '(' NAME ')'
