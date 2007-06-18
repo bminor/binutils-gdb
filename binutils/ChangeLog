@@ -1,3 +1,16 @@
+2007-06-18  Andi Kleen  <ak@suse.de>
+
+	* objdump.c: Include sys/mman.h 
+	(print_file_list): Remove f, add map, mapsize, linemap, maxline,
+	last_line, first fields.
+	(slurp_file): Add.
+	(index_file): Add.
+	(print_file_open): Call slurp_file and index_file. Initialize new
+	fields.
+	(skip_to_line): Rename to print_line and write only single line.
+	(dump_line): Add.
+	(show_line): Change to new algorithm.
+
 2007-06-18  Thomas Weidenmueller  <w3seek@reactos.org>
 
 	* resres.c (probe_binary): Fix test for badly formatted headers.
