@@ -510,12 +510,12 @@ M::enum return_value_convention:return_value:struct type *valtype, struct regcac
 
 # The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
 # DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and
-# DEPRECATED_USE_STRUCT_CONVENTION have all been folded into
+# deprecated_use_struct_convention have all been folded into
 # RETURN_VALUE.
 
 f:=:void:extract_return_value:struct type *type, struct regcache *regcache, gdb_byte *valbuf:type, regcache, valbuf:0
 f:=:void:store_return_value:struct type *type, struct regcache *regcache, const gdb_byte *valbuf:type, regcache, valbuf:0
-f:=:int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type::generic_use_struct_convention::0
+f::int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type::generic_use_struct_convention::0
 
 f::CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 f::int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0

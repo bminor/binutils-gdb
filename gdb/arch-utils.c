@@ -54,7 +54,8 @@ legacy_return_value (struct gdbarch *gdbarch, struct type *valtype,
   int struct_return = ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
 			|| TYPE_CODE (valtype) == TYPE_CODE_UNION
 			|| TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
-		       && DEPRECATED_USE_STRUCT_CONVENTION (0, valtype));
+		       && gdbarch_deprecated_use_struct_convention
+			    (current_gdbarch, 0, valtype));
 
   if (writebuf != NULL)
     {

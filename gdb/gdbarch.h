@@ -394,7 +394,7 @@ extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_va
 
 /* The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
    DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and
-   DEPRECATED_USE_STRUCT_CONVENTION have all been folded into
+   deprecated_use_struct_convention have all been folded into
    RETURN_VALUE. */
 
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, gdb_byte *valbuf);
@@ -420,12 +420,6 @@ extern void set_gdbarch_store_return_value (struct gdbarch *gdbarch, gdbarch_sto
 typedef int (gdbarch_deprecated_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
 extern int gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
 extern void set_gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch, gdbarch_deprecated_use_struct_convention_ftype *deprecated_use_struct_convention);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_USE_STRUCT_CONVENTION)
-#error "Non multi-arch definition of DEPRECATED_USE_STRUCT_CONVENTION"
-#endif
-#if !defined (DEPRECATED_USE_STRUCT_CONVENTION)
-#define DEPRECATED_USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_deprecated_use_struct_convention (current_gdbarch, gcc_p, value_type))
-#endif
 
 typedef CORE_ADDR (gdbarch_skip_prologue_ftype) (CORE_ADDR ip);
 extern CORE_ADDR gdbarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip);

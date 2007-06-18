@@ -747,12 +747,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_register_size = %s\n",
                       paddr_d (current_gdbarch->deprecated_register_size));
-#ifdef DEPRECATED_USE_STRUCT_CONVENTION
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_USE_STRUCT_CONVENTION(gcc_p, value_type)",
-                      XSTRING (DEPRECATED_USE_STRUCT_CONVENTION (gcc_p, value_type)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_use_struct_convention = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_use_struct_convention);

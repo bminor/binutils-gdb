@@ -1,5 +1,12 @@
 2007-06-18  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (DEPRECATED_USE_STRUCT_CONVENTION): Replace by
+	gdbarch_deprecated_use_struct_convention.
+	* arch-utils.c (legacy_return_value): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-18  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (DEPRECATED_FUNCTION_START_OFFSET): Replace by
 	gdbarch_deprecated_function_start_offset.
 	* symtab.c (find_function_start_sal)skip_prologue_using_sal): Likewise.
