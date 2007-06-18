@@ -22,7 +22,6 @@
 	kludge.
 
 	* Makefile.in: Regenerated.
-	* doc/Makefile.in: Likewise.
 	* aclocal.m4: Likewise.
 	* configure: Likewise.
 
