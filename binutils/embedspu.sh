@@ -248,7 +248,7 @@ ${SYMBOL}:
 	print " .type '${SYMBOL}'_" substr($8, 9) ", @object"; \
 	print " .size '${SYMBOL}'_" substr($8, 9) ", 4"; \
 	print "'${SYMBOL}'_" substr($8, 9) ":"; \
-	print " .int " $2; \
+	print " .int 0x" $2; \
 } \
 '`
 EOF
