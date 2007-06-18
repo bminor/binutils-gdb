@@ -1,3 +1,19 @@
+2007-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* libpei.h (_bfd_XXi_final_link_postscript): Remove
+	duplication.
+	(bfd_target_pei_p): New.
+	(bfd_target_pei_arch): New
+	(bfd_target_efi_p): Likewise.
+	(bfd_target_efi_arch): New
+	(bfd_pe_executable_p): Use bfd_target_pei_p and
+	bfd_target_efi_p.
+
+	* peicode.h (arch_type): New enum.
+	(pe_arch): New function.
+	(pe_bfd_object_p): Don't match PE/EFI target with EFI/PE file
+	if there is an EFI/PE target.
+
 2007-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ACLOCAL_AMFLAGS): Add -I . -I ../config.

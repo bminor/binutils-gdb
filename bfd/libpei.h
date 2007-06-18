@@ -224,7 +224,6 @@
 #define _bfd_XX_only_swap_filehdr_out			_bfd_pex64_only_swap_filehdr_out
 #define _bfd_XX_print_private_bfd_data_common		_bfd_pex64_print_private_bfd_data_common
 #define _bfd_XXi_final_link_postscript			_bfd_pex64i_final_link_postscript
-#define _bfd_XXi_final_link_postscript			_bfd_pex64i_final_link_postscript
 #define _bfd_XXi_only_swap_filehdr_out			_bfd_pex64i_only_swap_filehdr_out
 #define _bfd_XXi_swap_aouthdr_in			_bfd_pex64i_swap_aouthdr_in
 #define _bfd_XXi_swap_aouthdr_out			_bfd_pex64i_swap_aouthdr_out
@@ -255,7 +254,6 @@
 #define _bfd_XX_get_symbol_info				_bfd_pep_get_symbol_info
 #define _bfd_XX_only_swap_filehdr_out			_bfd_pep_only_swap_filehdr_out
 #define _bfd_XX_print_private_bfd_data_common		_bfd_pep_print_private_bfd_data_common
-#define _bfd_XXi_final_link_postscript			_bfd_pepi_final_link_postscript
 #define _bfd_XXi_final_link_postscript			_bfd_pepi_final_link_postscript
 #define _bfd_XXi_only_swap_filehdr_out			_bfd_pepi_only_swap_filehdr_out
 #define _bfd_XXi_swap_aouthdr_in			_bfd_pepi_swap_aouthdr_in
@@ -288,7 +286,6 @@
 #define _bfd_XX_only_swap_filehdr_out			_bfd_pe_only_swap_filehdr_out
 #define _bfd_XX_print_private_bfd_data_common		_bfd_pe_print_private_bfd_data_common
 #define _bfd_XXi_final_link_postscript			_bfd_pei_final_link_postscript
-#define _bfd_XXi_final_link_postscript			_bfd_pei_final_link_postscript
 #define _bfd_XXi_only_swap_filehdr_out			_bfd_pei_only_swap_filehdr_out
 #define _bfd_XXi_swap_aouthdr_in			_bfd_pei_swap_aouthdr_in
 #define _bfd_XXi_swap_aouthdr_out			_bfd_pei_swap_aouthdr_out
@@ -302,10 +299,27 @@
 
 #endif /* !COFF_WITH_pep */
 
-/* Macro: Returns true if the bfd is a PE executable as opposed to a PE object file.  */
+/* Returns true if the target is a PE executable target.  */
+#define bfd_target_pei_p(xvec)				\
+  (CONST_STRNEQ ((xvec)->name, "pei-"))
+
+/* Return the arch string of a PE executable target.  */
+#define bfd_target_pei_arch(xvec)				\
+  ((xvec)->name + sizeof ("pei-") - 1)
+
+/* Returns true if the target is an EFI target.  */
+#define bfd_target_efi_p(xvec)				\
+   (CONST_STRNEQ ((xvec)->name, "efi-app-"))
+
+/* Return the arch string of an EFI target.  */
+#define bfd_target_efi_arch(xvec)				\
+  ((xvec)->name + sizeof ("efi-app-") - 1)
+
+/* Macro: Returns true if the bfd is a PE executable as opposed to a
+   PE object file.  */
 #define bfd_pe_executable_p(abfd)			\
-  (CONST_STRNEQ ((abfd)->xvec->name, "pei-")		\
-   || CONST_STRNEQ ((abfd)->xvec->name, "efi-app-"))
+  (bfd_target_pei_p ((abfd)->xvec)			\
+   || bfd_target_efi_p ((abfd)->xvec))
 
 /* These functions are architecture dependent, and are in peicode.h:
    coff_swap_reloc_in

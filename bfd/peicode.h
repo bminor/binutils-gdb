@@ -1234,6 +1234,25 @@ pe_ILF_object_p (bfd * abfd)
   return abfd->xvec;
 }
 
+enum arch_type
+{
+  arch_type_unknown,
+  arch_type_i386,
+  arch_type_x86_64
+};
+
+static enum arch_type
+pe_arch (const char *arch)
+{
+  if (strcmp (arch, "i386") == 0 || strcmp (arch, "ia32") == 0)
+    return arch_type_i386;
+
+  if (strcmp (arch, "x86_64") == 0 || strcmp (arch, "x86-64") == 0)
+    return arch_type_x86_64;
+
+  return arch_type_unknown;
+}
+
 static const bfd_target *
 pe_bfd_object_p (bfd * abfd)
 {
@@ -1241,6 +1260,7 @@ pe_bfd_object_p (bfd * abfd)
   struct external_PEI_DOS_hdr dos_hdr;
   struct external_PEI_IMAGE_hdr image_hdr;
   file_ptr offset;
+  const bfd_target *target;
 
   /* Detect if this a Microsoft Import Library Format element.  */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
@@ -1305,7 +1325,60 @@ pe_bfd_object_p (bfd * abfd)
       return NULL;
     }
 
-  return coff_object_p (abfd);
+  target = coff_object_p (abfd);
+  if (target)
+    {
+      pe_data_type *pe = pe_data (abfd);
+      struct internal_extra_pe_aouthdr *i = &pe->pe_opthdr;
+      bfd_boolean efi = i->Subsystem == IMAGE_SUBSYSTEM_EFI_APPLICATION;
+      enum arch_type arch;
+      const bfd_target * const *target_ptr;
+
+      /* Get the machine.  */
+      if (bfd_target_efi_p (abfd->xvec))
+	arch = pe_arch (bfd_target_efi_arch (abfd->xvec));
+      else
+	arch = pe_arch (bfd_target_pei_arch (abfd->xvec));
+
+      for (target_ptr = bfd_target_vector; *target_ptr != NULL;
+	   target_ptr++)
+	{
+	  if (*target_ptr == target
+	      || (*target_ptr)->flavour != bfd_target_coff_flavour)
+	    continue;
+
+	  if (bfd_target_efi_p (*target_ptr))
+	    {
+	      /* Skip incompatible arch.  */
+	      if (pe_arch (bfd_target_efi_arch (*target_ptr)) != arch)
+		continue;
+
+		if (efi)
+		  {
+		    /* TARGET_PTR is an EFI backend.  Don't match
+		       TARGET with a EFI file.  */
+		    bfd_set_error (bfd_error_wrong_format);
+		    return NULL;
+		  }
+	    }
+	  else if (bfd_target_pei_p (*target_ptr))
+	    {
+	      /* Skip incompatible arch.  */
+	      if (pe_arch (bfd_target_pei_arch (*target_ptr)) != arch)
+		continue;
+
+		if (!efi)
+		  {
+		    /* TARGET_PTR is a PE backend.  Don't match
+		       TARGET with a PE file.  */
+		    bfd_set_error (bfd_error_wrong_format);
+		    return NULL;
+		  }
+	    }
+	}
+    }
+
+  return target;
 }
 
 #define coff_object_p pe_bfd_object_p
