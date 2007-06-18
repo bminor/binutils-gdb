@@ -438,6 +438,8 @@ static struct sym_fns som_sym_fns =
   som_symfile_read,		/* sym_read: read a symbol file into symtab */
   som_symfile_finish,		/* sym_finish: finished with file, cleanup */
   som_symfile_offsets,		/* sym_offsets:  Translate ext. to int. relocation */
+  default_symfile_segments,	/* sym_segments: Get segment information from
+				   a file.  */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

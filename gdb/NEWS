@@ -37,6 +37,10 @@ has been rewritten to use the standard GDB remote protocol.
 
 * GDB for the Cell/B.E. SPU now supports overlay debugging.
 
+* The GDB remote protocol "qOffsets" packet can now honor ELF segment
+layout.  It also supports a TextSeg= and DataSeg= response when only
+segment base addresses (rather than offsets) are available.
+
 * New commands
 
 set remoteflow

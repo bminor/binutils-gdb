@@ -85,6 +85,28 @@ struct section_addr_info
   } other[1];
 };
 
+struct symfile_segment_data
+{
+  /* How many segments are present in this file.  If there are
+     two, the text segment is the first one and the data segment
+     is the second one.  */
+  int num_segments;
+
+  /* If NUM_SEGMENTS is greater than zero, the original base address
+     of each segment.  */
+  CORE_ADDR *segment_bases;
+
+  /* If NUM_SEGMENTS is greater than zero, the memory size of each
+     segment.  */
+  CORE_ADDR *segment_sizes;
+
+  /* If NUM_SEGMENTS is greater than zero, this is an array of entries
+     recording which segment contains each BFD section.  It is
+     ordered by section index.  A zero means that the section is not
+     in any segment.  */
+  int *segment_info;
+};
+
 /* Structure to keep track of symbol reading functions for various
    object file types.  */
 
@@ -131,6 +153,12 @@ struct sym_fns
 
   void (*sym_offsets) (struct objfile *, struct section_addr_info *);
 
+  /* This function produces a format-independent description of
+     the segments of ABFD.  Each segment is a unit of the file
+     which may be relocated independently.  */
+
+  struct symfile_segment_data *(*sym_segments) (bfd *abfd);
+
   /* Finds the next struct sym_fns.  They are allocated and
      initialized in whatever module implements the functions pointed
      to; an initializer calls add_symtab_fns to add them to the global
@@ -146,6 +174,10 @@ struct sym_fns
 extern void default_symfile_offsets (struct objfile *objfile,
 				     struct section_addr_info *);
 
+/* The default version of sym_fns.sym_segments for readers that don't
+   do anything special.  */
+
+extern struct symfile_segment_data *default_symfile_segments (bfd *abfd);
 
 extern void extend_psymbol_list (struct psymbol_allocation_list *,
 				 struct objfile *);
@@ -312,6 +344,13 @@ extern void simple_overlay_update (struct obj_section *);
 
 extern bfd_byte *symfile_relocate_debug_section (bfd *abfd, asection *sectp,
 						 bfd_byte * buf);
+
+extern int symfile_map_offsets_to_segments (bfd *,
+					    struct symfile_segment_data *,
+					    struct section_offsets *,
+					    int, const CORE_ADDR *);
+struct symfile_segment_data *get_symfile_segment_data (bfd *abfd);
+void free_symfile_segment_data (struct symfile_segment_data *data);
 
 /* From dwarf2read.c */
 

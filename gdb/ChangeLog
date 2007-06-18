@@ -1,3 +1,35 @@
+2007-06-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* coffread.c (coff_sym_fns): Add default_symfile_segments.
+	* dbxread.c (start_psymtab): Check HAVE_ELF.
+	(aout_sym_fns): Likewise.
+	* elfread.c (elf_symfile_segments): New.
+	(elf_sym_fns): Add elf_symfile_segments.
+	* mipsread.c (ecoff_sym_fns): Add default_symfile_segments.
+	* remote.c (get_offsets): Use symfile_map_offsets_to_segments.
+	Skip if there is no symfile_objfile.  Handle TextSeg and DataSeg.
+	* somread.c (som_sym_fns): Use default_symfile_segments.
+	* symfile.c (find_sym_fns): Take a BFD and return the sym_fns.
+	(init_objfile_sect_indices): Call symfile_find_segment_sections.
+	(default_symfile_segments): New function.
+	(syms_from_objfile): Update call to find_sym_fns.
+	(symfile_get_segment_data, free_symfile_segment_data): New.
+	(symfile_map_offsets_to_segments): New.
+	(symfile_find_segment_sections): New.
+	* symfile.h (struct symfile_segment_data): New.
+	(struct sym_fns): Add sym_segments.
+	(default_symfile_segments, symfile_get_segment_data)
+	(free_symfile_segment_data): New prototypes.
+	(symfile_map_offsets_to_segments): Likewise.
+	* xcoffread.c (xcoff_sym_fns): Add default_symfile_segments.
+	* Makefile.in (COMMON_OBS): Remove elfread.o.
+	(elf_internal_h): New.
+	(elfread.o): Update.
+	* configure.ac: Add elfread.o to COMMON_OBS if bfd/elf.o was
+	compiled.
+	* config.in, configure: Regenerated.
+	* NEWS: Mention qOffsets changes.
+
 2007-06-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbtypes.h (builtin_type_m2_char, builtin_type_m2_int,

@@ -1255,6 +1255,30 @@ case ${host} in
 esac	    
 AC_SUBST(WIN32LIBS)
 
+# Add ELF support to GDB, but only if BFD includes ELF support.
+OLD_CFLAGS=$CFLAGS
+OLD_LDFLAGS=$LDFLAGS
+OLD_LIBS=$LIBS
+CFLAGS="$CFLAGS -I${srcdir}/../include -I${objdir}/../bfd -I${srcdir}/../bfd"
+LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
+LIBS="$LIBS -lbfd -liberty"
+AC_CACHE_CHECK([for ELF support in BFD], gdb_cv_var_elf,
+[AC_TRY_LINK(
+[#include <stdlib.h>
+#include "bfd.h"
+#include "elf-bfd.h"
+],
+[bfd *abfd = NULL; bfd_get_elf_phdr_upper_bound (abfd); ],
+gdb_cv_var_elf=yes, gdb_cv_var_elf=no)])
+if test $gdb_cv_var_elf = yes; then
+  CONFIG_OBS="$CONFIG_OBS elfread.o"
+  AC_DEFINE(HAVE_ELF, 1,
+	    [Define if ELF support should be included.])
+fi
+CFLAGS=$OLD_CFLAGS
+LDFLAGS=$OLD_LDFLAGS
+LIBS=$OLD_LIBS
+
 # Add any host-specific objects to GDB.
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 

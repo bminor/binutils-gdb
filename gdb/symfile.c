@@ -106,7 +106,7 @@ bfd *symfile_bfd_open (char *);
 
 int get_section_index (struct objfile *, char *);
 
-static void find_sym_fns (struct objfile *);
+static struct sym_fns *find_sym_fns (bfd *);
 
 static void decrement_reading_symtab (void *);
 
@@ -145,6 +145,8 @@ static void info_ext_lang_command (char *args, int from_tty);
 static char *find_separate_debug_file (struct objfile *objfile);
 
 static void init_filename_language_table (void);
+
+static void symfile_find_segment_sections (struct objfile *objfile);
 
 void _initialize_symfile (void);
 
@@ -430,12 +432,19 @@ init_objfile_sect_indices (struct objfile *objfile)
   /* This is where things get really weird...  We MUST have valid
      indices for the various sect_index_* members or gdb will abort.
      So if for example, there is no ".text" section, we have to
-     accomodate that.  Except when explicitly adding symbol files at
-     some address, section_offsets contains nothing but zeros, so it
-     doesn't matter which slot in section_offsets the individual
-     sect_index_* members index into.  So if they are all zero, it is
-     safe to just point all the currently uninitialized indices to the
-     first slot. */
+     accomodate that.  First, check for a file with the standard
+     one or two segments.  */
+
+  symfile_find_segment_sections (objfile);
+
+  /* Except when explicitly adding symbol files at some address,
+     section_offsets contains nothing but zeros, so it doesn't matter
+     which slot in section_offsets the individual sect_index_* members
+     index into.  So if they are all zero, it is safe to just point
+     all the currently uninitialized indices to the first slot.  But
+     beware: if this is the main executable, it may be relocated
+     later, e.g. by the remote qOffsets packet, and then this will
+     be wrong!  That's why we try segments first.  */
 
   for (i = 0; i < objfile->num_sections; i++)
     {
@@ -639,6 +648,70 @@ default_symfile_offsets (struct objfile *objfile,
 }
 
 
+/* Divide the file into segments, which are individual relocatable units.
+   This is the default version of the sym_fns.sym_segments function for
+   symbol readers that do not have an explicit representation of segments.
+   It assumes that object files do not have segments, and fully linked
+   files have a single segment.  */
+
+struct symfile_segment_data *
+default_symfile_segments (bfd *abfd)
+{
+  int num_sections, i;
+  asection *sect;
+  struct symfile_segment_data *data;
+  CORE_ADDR low, high;
+
+  /* Relocatable files contain enough information to position each
+     loadable section independently; they should not be relocated
+     in segments.  */
+  if ((bfd_get_file_flags (abfd) & (EXEC_P | DYNAMIC)) == 0)
+    return NULL;
+
+  /* Make sure there is at least one loadable section in the file.  */
+  for (sect = abfd->sections; sect != NULL; sect = sect->next)
+    {
+      if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+	continue;
+
+      break;
+    }
+  if (sect == NULL)
+    return NULL;
+
+  low = bfd_get_section_vma (abfd, sect);
+  high = low + bfd_get_section_size (sect);
+
+  data = XZALLOC (struct symfile_segment_data);
+  data->num_segments = 1;
+  data->segment_bases = XCALLOC (1, CORE_ADDR);
+  data->segment_sizes = XCALLOC (1, CORE_ADDR);
+
+  num_sections = bfd_count_sections (abfd);
+  data->segment_info = XCALLOC (num_sections, int);
+
+  for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
+    {
+      CORE_ADDR vma;
+
+      if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+	continue;
+
+      vma = bfd_get_section_vma (abfd, sect);
+      if (vma < low)
+	low = vma;
+      if (vma + bfd_get_section_size (sect) > high)
+	high = vma + bfd_get_section_size (sect);
+
+      data->segment_info[i] = 1;
+    }
+
+  data->segment_bases[0] = low;
+  data->segment_sizes[0] = high - low;
+
+  return data;
+}
+
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
 
@@ -685,7 +758,7 @@ syms_from_objfile (struct objfile *objfile,
   gdb_assert (! (addrs && offsets));
 
   init_entry_point_info (objfile);
-  find_sym_fns (objfile);
+  objfile->sf = find_sym_fns (objfile->obfd);
 
   if (objfile->sf == NULL)
     return;	/* No symbols. */
@@ -1505,29 +1578,23 @@ add_symtab_fns (struct sym_fns *sf)
    struct sym_fns in the objfile structure, that contains cached
    information about the symbol file.  */
 
-static void
-find_sym_fns (struct objfile *objfile)
+static struct sym_fns *
+find_sym_fns (bfd *abfd)
 {
   struct sym_fns *sf;
-  enum bfd_flavour our_flavour = bfd_get_flavour (objfile->obfd);
-  char *our_target = bfd_get_target (objfile->obfd);
+  enum bfd_flavour our_flavour = bfd_get_flavour (abfd);
 
   if (our_flavour == bfd_target_srec_flavour
       || our_flavour == bfd_target_ihex_flavour
       || our_flavour == bfd_target_tekhex_flavour)
-    return;	/* No symbols.  */
+    return NULL;	/* No symbols.  */
 
   for (sf = symtab_fns; sf != NULL; sf = sf->next)
-    {
-      if (our_flavour == sf->sym_flavour)
-	{
-	  objfile->sf = sf;
-	  return;
-	}
-    }
+    if (our_flavour == sf->sym_flavour)
+      return sf;
 
   error (_("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown."),
-	 bfd_get_target (objfile->obfd));
+	 bfd_get_target (abfd));
 }
 
 
@@ -3769,6 +3836,111 @@ symfile_relocate_debug_section (bfd *abfd, asection *sectp, bfd_byte *buf)
   bfd_map_over_sections (abfd, symfile_dummy_outputs, NULL);
 
   return bfd_simple_get_relocated_section_contents (abfd, sectp, buf, NULL);
+}
+
+struct symfile_segment_data *
+get_symfile_segment_data (bfd *abfd)
+{
+  struct sym_fns *sf = find_sym_fns (abfd);
+
+  if (sf == NULL)
+    return NULL;
+
+  return sf->sym_segments (abfd);
+}
+
+void
+free_symfile_segment_data (struct symfile_segment_data *data)
+{
+  xfree (data->segment_bases);
+  xfree (data->segment_sizes);
+  xfree (data->segment_info);
+  xfree (data);
+}
+
+int
+symfile_map_offsets_to_segments (bfd *abfd, struct symfile_segment_data *data,
+				 struct section_offsets *offsets,
+				 int num_segment_bases,
+				 const CORE_ADDR *segment_bases)
+{
+  int i;
+  asection *sect;
+
+  /* If we do not have segment mappings for the object file, we
+     can not relocate it by segments.  */
+  gdb_assert (data != NULL);
+  gdb_assert (data->num_segments > 0);
+
+  /* If more offsets are provided than we have segments, make sure the
+     excess offsets are all the same as the last segment's offset.
+     This allows "Text=X;Data=X" for files which have only a single
+     segment.  */
+  if (num_segment_bases > data->num_segments)
+    for (i = data->num_segments; i < num_segment_bases; i++)
+      if (segment_bases[i] != segment_bases[data->num_segments - 1])
+	return 0;
+
+  for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
+    {
+      CORE_ADDR vma;
+      int which = data->segment_info[i];
+
+      if (which > num_segment_bases)
+	offsets->offsets[i] = segment_bases[num_segment_bases - 1];
+      else if (which > 0)
+	offsets->offsets[i] = segment_bases[which - 1];
+      else
+	continue;
+
+      offsets->offsets[i] -= data->segment_bases[which - 1];
+    }
+
+  return 1;
+}
+
+static void
+symfile_find_segment_sections (struct objfile *objfile)
+{
+  bfd *abfd = objfile->obfd;
+  int i;
+  asection *sect;
+  struct symfile_segment_data *data;
+
+  data = get_symfile_segment_data (objfile->obfd);
+  if (data == NULL)
+    return;
+
+  if (data->num_segments != 1 && data->num_segments != 2)
+    {
+      free_symfile_segment_data (data);
+      return;
+    }
+
+  for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
+    {
+      CORE_ADDR vma;
+      int which = data->segment_info[i];
+
+      if (which == 1)
+	{
+	  if (objfile->sect_index_text == -1)
+	    objfile->sect_index_text = sect->index;
+
+	  if (objfile->sect_index_rodata == -1)
+	    objfile->sect_index_rodata = sect->index;
+	}
+      else if (which == 2)
+	{
+	  if (objfile->sect_index_data == -1)
+	    objfile->sect_index_data = sect->index;
+
+	  if (objfile->sect_index_bss == -1)
+	    objfile->sect_index_bss = sect->index;
+	}
+    }
+
+  free_symfile_segment_data (data);
 }
 
 void

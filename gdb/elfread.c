@@ -26,6 +26,8 @@
 #include "bfd.h"
 #include "gdb_string.h"
 #include "elf-bfd.h"
+#include "elf/common.h"
+#include "elf/internal.h"
 #include "elf/mips.h"
 #include "symtab.h"
 #include "symfile.h"
@@ -50,6 +52,76 @@ struct elfinfo
   };
 
 static void free_elfinfo (void *);
+
+/* Locate the segments in ABFD.  */
+
+static struct symfile_segment_data *
+elf_symfile_segments (bfd *abfd)
+{
+  Elf_Internal_Phdr *phdrs, **segments;
+  long phdrs_size;
+  int num_phdrs, num_segments, num_sections, i;
+  asection *sect;
+  struct symfile_segment_data *data;
+
+  phdrs_size = bfd_get_elf_phdr_upper_bound (abfd);
+  if (phdrs_size == -1)
+    return NULL;
+
+  phdrs = alloca (phdrs_size);
+  num_phdrs = bfd_get_elf_phdrs (abfd, phdrs);
+  if (num_phdrs == -1)
+    return NULL;
+
+  num_segments = 0;
+  segments = alloca (sizeof (Elf_Internal_Phdr *) * num_phdrs);
+  for (i = 0; i < num_phdrs; i++)
+    if (phdrs[i].p_type == PT_LOAD)
+      segments[num_segments++] = &phdrs[i];
+
+  if (num_segments == 0)
+    return NULL;
+
+  data = XZALLOC (struct symfile_segment_data);
+  data->num_segments = num_segments;
+  data->segment_bases = XCALLOC (num_segments, CORE_ADDR);
+  data->segment_sizes = XCALLOC (num_segments, CORE_ADDR);
+
+  for (i = 0; i < num_segments; i++)
+    {
+      data->segment_bases[i] = segments[i]->p_vaddr;
+      data->segment_sizes[i] = segments[i]->p_memsz;
+    }
+
+  num_sections = bfd_count_sections (abfd);
+  data->segment_info = XCALLOC (num_sections, int);
+
+  for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
+    {
+      int j;
+      CORE_ADDR vma;
+
+      if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+	continue;
+
+      vma = bfd_get_section_vma (abfd, sect);
+
+      for (j = 0; j < num_segments; j++)
+	if (segments[j]->p_memsz > 0
+	    && vma >= segments[j]->p_vaddr
+	    && vma < segments[j]->p_vaddr + segments[j]->p_memsz)
+	  {
+	    data->segment_info[i] = j + 1;
+	    break;
+	  }
+
+      if (bfd_get_section_size (sect) > 0 && j == num_segments)
+	warning (_("Loadable segment \"%s\" outside of ELF segments"),
+		 bfd_section_name (abfd, sect));
+    }
+
+  return data;
+}
 
 /* We are called once per section from elf_symfile_read.  We
    need to examine each section we are passed, check to see
@@ -741,6 +813,8 @@ static struct sym_fns elf_sym_fns =
   elf_symfile_read,		/* sym_read: read a symbol file into symtab */
   elf_symfile_finish,		/* sym_finish: finished with file, cleanup */
   default_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocation */
+  elf_symfile_segments,		/* sym_segments: Get segment information from
+				   a file.  */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

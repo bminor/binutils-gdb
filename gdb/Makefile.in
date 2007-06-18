@@ -586,6 +586,7 @@ coff_ecoff_h =	$(INCLUDE_DIR)/coff/ecoff.h
 coff_internal_h =	$(INCLUDE_DIR)/coff/internal.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h $(bfd_h)
 elf_common_h =	$(INCLUDE_DIR)/elf/common.h
+elf_internal_h =	$(INCLUDE_DIR)/elf/internal.h
 elf_reloc_macros_h =	$(INCLUDE_DIR)/elf/reloc-macros.h
 elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
 elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)
@@ -946,7 +947,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	signals.o \
 	gdb-events.o \
 	exec.o bcache.o objfiles.o observer.o minsyms.o maint.o demangle.o \
-	dbxread.o coffread.o coff-pe-read.o elfread.o \
+	dbxread.o coffread.o coff-pe-read.o \
 	dwarf2read.o mipsread.o stabsread.o corefile.o \
 	dwarf2expr.o dwarf2loc.o dwarf2-frame.o \
 	ada-lang.o c-lang.o f-lang.o objc-lang.o \
@@ -1958,7 +1959,8 @@ dwarf2read.o: dwarf2read.c $(defs_h) $(bfd_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(gdb_assert_h)
 elfread.o: elfread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(elf_bfd_h) \
 	$(elf_mips_h) $(symtab_h) $(symfile_h) $(objfiles_h) $(buildsym_h) \
-	$(stabsread_h) $(gdb_stabs_h) $(complaints_h) $(demangle_h)
+	$(stabsread_h) $(gdb_stabs_h) $(complaints_h) $(demangle_h) \
+	$(elf_common_h) $(elf_internal_h)
 environ.o: environ.c $(defs_h) $(environ_h) $(gdb_string_h)
 eval.o: eval.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(expression_h) $(target_h) $(frame_h) $(language_h) \

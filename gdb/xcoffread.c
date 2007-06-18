@@ -3015,6 +3015,8 @@ static struct sym_fns xcoff_sym_fns =
   xcoff_initial_scan,		/* sym_read: read a symbol file into symtab */
   xcoff_symfile_finish,		/* sym_finish: finished with file, cleanup */
   xcoff_symfile_offsets,	/* sym_offsets: xlate offsets ext->int form */
+  default_symfile_segments,	/* sym_segments: Get segment information from
+				   a file.  */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

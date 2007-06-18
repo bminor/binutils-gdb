@@ -2016,9 +2016,13 @@ get_offsets (void)
   struct remote_state *rs = get_remote_state ();
   char *buf;
   char *ptr;
-  int lose;
-  CORE_ADDR text_addr, data_addr, bss_addr;
+  int lose, num_segments = 0, do_sections, do_segments;
+  CORE_ADDR text_addr, data_addr, bss_addr, segments[2];
   struct section_offsets *offs;
+  struct symfile_segment_data *data;
+
+  if (symfile_objfile == NULL)
+    return;
 
   putpkt ("qOffsets");
   getpkt (&rs->buf, &rs->buf_size, 0);
@@ -2047,47 +2051,109 @@ get_offsets (void)
       /* Don't use strtol, could lose on big values.  */
       while (*ptr && *ptr != ';')
 	text_addr = (text_addr << 4) + fromhex (*ptr++);
-    }
-  else
-    lose = 1;
 
-  if (!lose && strncmp (ptr, ";Data=", 6) == 0)
-    {
-      ptr += 6;
-      while (*ptr && *ptr != ';')
-	data_addr = (data_addr << 4) + fromhex (*ptr++);
-    }
-  else
-    lose = 1;
+      if (strncmp (ptr, ";Data=", 6) == 0)
+	{
+	  ptr += 6;
+	  while (*ptr && *ptr != ';')
+	    data_addr = (data_addr << 4) + fromhex (*ptr++);
+	}
+      else
+	lose = 1;
 
-  if (!lose && strncmp (ptr, ";Bss=", 5) == 0)
+      if (!lose && strncmp (ptr, ";Bss=", 5) == 0)
+	{
+	  ptr += 5;
+	  while (*ptr && *ptr != ';')
+	    bss_addr = (bss_addr << 4) + fromhex (*ptr++);
+
+	  if (bss_addr != data_addr)
+	    warning (_("Target reported unsupported offsets: %s"), buf);
+	}
+      else
+	lose = 1;
+    }
+  else if (strncmp (ptr, "TextSeg=", 8) == 0)
     {
-      ptr += 5;
+      ptr += 8;
+      /* Don't use strtol, could lose on big values.  */
       while (*ptr && *ptr != ';')
-	bss_addr = (bss_addr << 4) + fromhex (*ptr++);
+	text_addr = (text_addr << 4) + fromhex (*ptr++);
+      num_segments = 1;
+
+      if (strncmp (ptr, ";DataSeg=", 9) == 0)
+	{
+	  ptr += 9;
+	  while (*ptr && *ptr != ';')
+	    data_addr = (data_addr << 4) + fromhex (*ptr++);
+	  num_segments++;
+	}
     }
   else
     lose = 1;
 
   if (lose)
     error (_("Malformed response to offset query, %s"), buf);
-
-  if (symfile_objfile == NULL)
-    return;
+  else if (*ptr != '\0')
+    warning (_("Target reported unsupported offsets: %s"), buf);
 
   offs = ((struct section_offsets *)
 	  alloca (SIZEOF_N_SECTION_OFFSETS (symfile_objfile->num_sections)));
   memcpy (offs, symfile_objfile->section_offsets,
 	  SIZEOF_N_SECTION_OFFSETS (symfile_objfile->num_sections));
 
-  offs->offsets[SECT_OFF_TEXT (symfile_objfile)] = text_addr;
+  data = get_symfile_segment_data (symfile_objfile->obfd);
+  do_segments = (data != NULL);
+  do_sections = num_segments == 0;
 
-  /* This is a temporary kludge to force data and bss to use the same offsets
-     because that's what nlmconv does now.  The real solution requires changes
-     to the stub and remote.c that I don't have time to do right now.  */
+  /* Text= and Data= specify offsets for the text and data sections,
+     but symfile_map_offsets_to_segments expects base addresses
+     instead of offsets.  If we have two segments, we can still
+     try to relocate the whole segments instead of just ".text"
+     and ".data".  */
+  if (num_segments == 0)
+    {
+      do_sections = 1;
+      if (data == NULL || data->num_segments != 2)
+	do_segments = 0;
+      else
+	{
+	  segments[0] = data->segment_bases[0] + text_addr;
+	  segments[1] = data->segment_bases[1] + data_addr;
+	}
+    }
+  else
+    {
+      do_sections = 0;
+      segments[0] = text_addr;
+      segments[1] = data_addr;
+    }
 
-  offs->offsets[SECT_OFF_DATA (symfile_objfile)] = data_addr;
-  offs->offsets[SECT_OFF_BSS (symfile_objfile)] = data_addr;
+  if (do_segments)
+    {
+      int ret = symfile_map_offsets_to_segments (symfile_objfile->obfd, data,
+						 offs, num_segments, segments);
+
+      if (ret == 0 && !do_sections)
+	error (_("Can not handle qOffsets TextSeg response with this symbol file"));
+
+      if (ret > 0)
+	do_sections = 0;
+    }
+
+  free_symfile_segment_data (data);
+
+  if (do_sections)
+    {
+      offs->offsets[SECT_OFF_TEXT (symfile_objfile)] = text_addr;
+
+      /* This is a temporary kludge to force data and bss to use the same offsets
+	 because that's what nlmconv does now.  The real solution requires changes
+	 to the stub and remote.c that I don't have time to do right now.  */
+
+      offs->offsets[SECT_OFF_DATA (symfile_objfile)] = data_addr;
+      offs->offsets[SECT_OFF_BSS (symfile_objfile)] = data_addr;
+    }
 
   objfile_relocate (symfile_objfile, offs);
 }

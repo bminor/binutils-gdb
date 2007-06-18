@@ -2148,11 +2148,13 @@ start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
   STRING_OFFSET (result) = string_table_offset;
   FILE_STRING_OFFSET (result) = file_string_table_offset;
 
+#ifdef HAVE_ELF
   /* If we're handling an ELF file, drag some section-relocation info
      for this source file out of the ELF symbol table, to compensate for
      Sun brain death.  This replaces the section_offsets in this psymtab,
      if successful.  */
   elfstab_offset_sections (objfile, result);
+#endif
 
   /* Deduce the source language from the filename for this psymtab. */
   psymtab_language = deduce_language_from_filename (filename);
@@ -3505,6 +3507,8 @@ static struct sym_fns aout_sym_fns =
   dbx_symfile_read,		/* sym_read: read a symbol file into symtab */
   dbx_symfile_finish,		/* sym_finish: finished with file, cleanup */
   default_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
+  default_symfile_segments,	/* sym_segments: Get segment information from
+				   a file.  */
   NULL				/* next: pointer to next struct sym_fns */
 };
 
