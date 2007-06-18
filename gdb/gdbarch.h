@@ -270,17 +270,6 @@ typedef CORE_ADDR (gdbarch_push_dummy_call_ftype) (struct gdbarch *gdbarch, stru
 extern CORE_ADDR gdbarch_push_dummy_call (struct gdbarch *gdbarch, struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr);
 extern void set_gdbarch_push_dummy_call (struct gdbarch *gdbarch, gdbarch_push_dummy_call_ftype *push_dummy_call);
 
-/* DEPRECATED_REGISTER_SIZE can be deleted. */
-
-extern int gdbarch_deprecated_register_size (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch, int deprecated_register_size);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_REGISTER_SIZE)
-#error "Non multi-arch definition of DEPRECATED_REGISTER_SIZE"
-#endif
-#if !defined (DEPRECATED_REGISTER_SIZE)
-#define DEPRECATED_REGISTER_SIZE (gdbarch_deprecated_register_size (current_gdbarch))
-#endif
-
 extern int gdbarch_call_dummy_location (struct gdbarch *gdbarch);
 extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_dummy_location);
 

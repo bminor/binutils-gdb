@@ -1,3 +1,15 @@
+2007-06-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (deprecated_register_size): Remove.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* arm-tdep.c (arm_push_dummy_call): Replace DEPRECATED_REGISTER_SIZE
+	by INT_REGISTER_SIZE.
+	(thumb_get_next_pc, arm_return_in_memory): Likewise.
+	(arm_gdbarch_init): Do not call set_gdbarch_deprecated_register_size.
+	* ia64-tdep.c (ia64_gdbarch_init): Do not call
+	set_gdbarch_deprecated_register_size.
+
 2007-06-18  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbarch.sh (DEPRECATED_FP_REGNUM): Replace by

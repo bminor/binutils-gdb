@@ -166,7 +166,6 @@ struct gdbarch
   gdbarch_unwind_dummy_id_ftype *unwind_dummy_id;
   int deprecated_fp_regnum;
   gdbarch_push_dummy_call_ftype *push_dummy_call;
-  int deprecated_register_size;
   int call_dummy_location;
   gdbarch_push_dummy_code_ftype *push_dummy_code;
   gdbarch_print_registers_info_ftype *print_registers_info;
@@ -288,7 +287,6 @@ struct gdbarch startup_gdbarch =
   0,  /* unwind_dummy_id */
   -1,  /* deprecated_fp_regnum */
   0,  /* push_dummy_call */
-  0,  /* deprecated_register_size */
   0,  /* call_dummy_location */
   0,  /* push_dummy_code */
   default_print_registers_info,  /* print_registers_info */
@@ -734,14 +732,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_reg_struct_has_addr = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_reg_struct_has_addr);
-#ifdef DEPRECATED_REGISTER_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_REGISTER_SIZE # %s\n",
-                      XSTRING (DEPRECATED_REGISTER_SIZE));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_register_size = %s\n",
-                      paddr_d (current_gdbarch->deprecated_register_size));
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_use_struct_convention = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_use_struct_convention);
@@ -1743,22 +1733,6 @@ set_gdbarch_push_dummy_call (struct gdbarch *gdbarch,
                              gdbarch_push_dummy_call_ftype push_dummy_call)
 {
   gdbarch->push_dummy_call = push_dummy_call;
-}
-
-int
-gdbarch_deprecated_register_size (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_size called\n");
-  return gdbarch->deprecated_register_size;
-}
-
-void
-set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch,
-                                      int deprecated_register_size)
-{
-  gdbarch->deprecated_register_size = deprecated_register_size;
 }
 
 int

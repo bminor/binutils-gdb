@@ -3525,9 +3525,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, IA64_FR0_REGNUM);
 
   set_gdbarch_register_name (gdbarch, ia64_register_name);
-  /* FIXME:  Following interface should not be needed, however, without it recurse.exp
-     gets a number of extra failures.  */
-  set_gdbarch_deprecated_register_size (gdbarch, 8);
   set_gdbarch_register_type (gdbarch, ia64_register_type);
 
   set_gdbarch_pseudo_register_read (gdbarch, ia64_pseudo_register_read);
