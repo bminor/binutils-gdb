@@ -4995,6 +4995,25 @@ of @code{ALIGN} is used to defines the value of a symbol.
 
 The builtin function @code{NEXT} is closely related to @code{ALIGN}.
 
+@item ALIGNOF(@var{section})
+@kindex ALIGNOF(@var{section})
+@cindex section alignment
+Return the alignment in bytes of the named @var{section}, if that section has
+been allocated.  If the section has not been allocated when this is
+evaluated, the linker will report an error. In the following example,
+the alignment of the @code{.output} section is stored as the first
+value in that section.
+@smallexample
+@group
+SECTIONS@{ @dots{}
+  .output @{
+    LONG (ALIGNOF (.output))
+    @dots{}
+    @}
+@dots{} @}
+@end group
+@end smallexample
+
 @item BLOCK(@var{exp})
 @kindex BLOCK(@var{exp})
 This is a synonym for @code{ALIGN}, for compatibility with older linker

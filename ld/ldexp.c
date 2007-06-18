@@ -97,6 +97,7 @@ exp_print_token (token_code_type code, int infix_p)
     { MAP, "MAP" },
     { ENTRY, "ENTRY" },
     { NEXT, "NEXT" },
+    { ALIGNOF, "ALIGNOF" },
     { SIZEOF, "SIZEOF" },
     { ADDR, "ADDR" },
     { LOADADDR, "LOADADDR" },
@@ -606,9 +607,9 @@ fold_name (etree_type *tree)
       break;
 
     case SIZEOF:
+    case ALIGNOF:
       if (expld.phase != lang_first_phase_enum)
 	{
-	  int opb = bfd_octets_per_byte (output_bfd);
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
@@ -620,7 +621,16 @@ fold_name (etree_type *tree)
 	      new_abs (0);
 	    }
 	  else if (os->processed_vma)
-	    new_abs (os->bfd_section->size / opb);
+	    {
+	      bfd_vma val;
+
+	      if (tree->type.node_code == SIZEOF)
+		val = os->bfd_section->size / bfd_octets_per_byte (output_bfd);
+	      else
+		val = (bfd_vma)1 << os->bfd_section->alignment_power;
+	      
+	      new_abs (val);
+	    }
 	}
       break;
 

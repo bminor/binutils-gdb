@@ -1,3 +1,9 @@
+2007-06-18  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/alignof.s: New.
+	* ld-scripts/alignof.t: New
+	* ld-scripts/alignof.exp: New.
+
 2007-06-14  Alan Modra  <alan@grove.modra.org>
 
 	* ld-spu/ovl.d: Update.
