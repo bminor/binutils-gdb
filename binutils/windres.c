@@ -673,6 +673,7 @@ usage (FILE *stream, int status)
   -D --define <sym>[=<val>]    Define SYM when preprocessing rc file\n\
   -U --undefine <sym>          Undefine SYM when preprocessing rc file\n\
   -v --verbose                 Verbose - tells you what it's doing\n\
+  -c --codepage=<codepage>     Specify default codepage\n\
   -l --language=<val>          Set language when reading rc file\n\
      --use-temp-file           Use a temporary file instead of popen to read\n\
                                the preprocessor output\n\
@@ -749,6 +750,7 @@ static const struct option long_options[] =
   {"define", required_argument, 0, 'D'},
   {"undefine", required_argument, 0, 'U'},
   {"verbose", no_argument, 0, 'v'},
+  {"codepage", required_argument, 0, 'c'},
   {"language", required_argument, 0, 'l'},
   {"use-temp-file", no_argument, 0, OPTION_USE_TEMP_FILE},
   {"no-use-temp-file", no_argument, 0, OPTION_NO_USE_TEMP_FILE},
@@ -809,11 +811,25 @@ main (int argc, char **argv)
   language = 0x409;   /* LANG_ENGLISH, SUBLANG_ENGLISH_US.  */
   use_temp_file = 0;
 
-  while ((c = getopt_long (argc, argv, "f:i:l:o:I:J:O:F:D:U:rhHvV", long_options,
+  while ((c = getopt_long (argc, argv, "c:f:i:l:o:I:J:O:F:D:U:rhHvV", long_options,
 			   (int *) 0)) != EOF)
     {
       switch (c)
 	{
+	case 'c':
+	  {
+	    rc_uint_type ncp;
+
+	    if (optarg[0] == '0' && (optarg[1] == 'x' || optarg[1] == 'X'))
+	      ncp = (rc_uint_type) strtol (optarg + 2, NULL, 16);
+	    else
+	      ncp = (rc_uint_type) strtol (optarg, NULL, 10);
+	    if (ncp == CP_UTF16 || ! unicode_is_valid_codepage (ncp))
+	      fatal (_("invalid codepage specified.\n"));
+	    wind_default_codepage = wind_current_codepage = ncp;
+	  }
+	  break;
+
 	case 'i':
 	  input_filename = optarg;
 	  break;

@@ -142,11 +142,64 @@ cpp_line (void)
   const char *s = rclex_tok;
   int line;
   char *send, *fn;
+  size_t len, mlen;
 
   ++s;
   while (ISSPACE (*s))
     ++s;
   
+  /* Check for #pragma code_page ( DEFAULT | <nr>).  */
+  len = strlen (s);
+  mlen = strlen ("pragma");
+  if (len > mlen && memcmp (s, "pragma", mlen) == 0 && ISSPACE (s[mlen]))
+    {
+      const char *end;
+
+      s += mlen + 1;
+      while (ISSPACE (*s))
+	++s;
+      len = strlen (s);
+      mlen = strlen ("code_page");
+      if (len <= mlen || memcmp (s, "code_page", mlen) != 0)
+	/* FIXME: We ought to issue a warning message about an unrecognised pragma.  */
+	return;
+      s += mlen;
+      while (ISSPACE (*s))
+	++s;
+      if (*s != '(')
+	/* FIXME: We ought to issue an error message about a malformed pragma.  */
+	return;
+      ++s;
+      while (ISSPACE (*s))
+	++s;
+      if (*s == 0 || (end = strchr (s, ')')) == NULL)
+	/* FIXME: We ought to issue an error message about a malformed pragma.  */
+	return;
+      len = (size_t) (end - s);
+      fn = xmalloc (len + 1);
+      if (len)
+      	memcpy (fn, s, len);
+      fn[len] = 0;
+      while (len > 0 && (fn[len - 1] > 0 && fn[len - 1] <= 0x20))
+	fn[--len] = 0;
+      if (! len || (len == strlen ("DEFAULT") && strcasecmp (fn, "DEFAULT") == 0))
+	wind_current_codepage = wind_default_codepage;
+      else if (len > 0)
+	{
+	  rc_uint_type ncp;
+
+	  if (fn[0] == '0' && (fn[1] == 'x' || fn[1] == 'X'))
+	      ncp = (rc_uint_type) strtol (fn + 2, NULL, 16);
+	  else
+	      ncp = (rc_uint_type) strtol (fn, NULL, 10);
+	  if (ncp == CP_UTF16 || ! unicode_is_valid_codepage (ncp))
+	    fatal (_("invalid value specified for pragma code_page.\n"));
+	  wind_current_codepage = ncp;
+	}
+      free (fn);
+      return;
+    }
+
   line = strtol (s, &send, 0);
   if (*send != '\0' && ! ISSPACE (*send))
     return;

@@ -1,3 +1,18 @@
+2007-06-18  Kai Tietz  <Kai.Tietz@onevision.com>
+
+	* rclex.c: (cpp_line): Add code_page pragma support.
+	* windres.c: (usage, long_options, main): Add new option
+	--codepage or -c.
+	* winduni.c: (wind_default_codepage, wind_current_codepage): New.
+	(unicode_from_ascii, ascii_from_unicode): Use
+	wind_current_codepage as codepage parameter.
+	(unicode_print): Print 4 characters for hexadecimal values in
+	unicode strings.
+	* winduni.h:  (wind_default_codepage, wind_current_codepage):
+	Export.
+	* doc/binutils.texi: Document new option.
+	* NEWS: Mention new feature.
+
 2007-06-18  Brian D. Watt <bwatt@us.ibm.com>
 
 	* embedspu.sh: Parse _SPUEAR_ symbol values as hex.

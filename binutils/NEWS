@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add codepage support to the windres tool.
+
 * Add --extract-symbol command line option to objcopy, which will
   strip everything out of an ordinary object file or executable except
   for its symbol table.  Files containing just symbols can be useful

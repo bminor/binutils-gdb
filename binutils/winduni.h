@@ -96,6 +96,14 @@ extern void unicode_print_quoted (FILE *, const unichar *, rc_uint_type);
 #define CP_OEM  1	/* Default OEM code page. */
 #endif
 
+/* Specifies the default codepage to be used for unicode
+   transformations.  By default this is CP_ACP.  */
+extern rc_uint_type wind_default_codepage;
+
+/* Specifies the currently used codepage for unicode
+   transformations.  By default this is CP_ACP.  */
+extern rc_uint_type wind_current_codepage;
+
 typedef struct wind_language_t
 {
   unsigned id;

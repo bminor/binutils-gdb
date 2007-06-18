@@ -47,10 +47,11 @@
 
 static rc_uint_type wind_WideCharToMultiByte (rc_uint_type, const unichar *, char *, rc_uint_type);
 static rc_uint_type wind_MultiByteToWideChar (rc_uint_type, const char *, unichar *, rc_uint_type);
-
-/* Prototypes.  */
 static int unichar_isascii (const unichar *, rc_uint_type);
 
+/* Convert an ASCII string to a unicode string.  We just copy it,
+   expanding chars to shorts, rather than doing something intelligent.  */
+ 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
 /* Codepages mapped.  */
@@ -175,13 +176,21 @@ static const wind_language_t languages[] =
 
 #endif
 
+/* Specifies the default codepage to be used for unicode
+   transformations.  By default this is CP_ACP.  */
+rc_uint_type wind_default_codepage = CP_ACP;
+
+/* Specifies the currently used codepage for unicode
+   transformations.  By default this is CP_ACP.  */
+rc_uint_type wind_current_codepage = CP_ACP;
+
 /* Convert an ASCII string to a unicode string.  We just copy it,
    expanding chars to shorts, rather than doing something intelligent.  */
 
 void
 unicode_from_ascii (rc_uint_type *length, unichar **unicode, const char *ascii)
 {
-  unicode_from_codepage (length, unicode, ascii, 0 /*CP_ACP*/);
+  unicode_from_codepage (length, unicode, ascii, wind_current_codepage);
 }
 
 /* Convert an unicode string to an ASCII string.  We just copy it,
@@ -191,7 +200,7 @@ unicode_from_ascii (rc_uint_type *length, unichar **unicode, const char *ascii)
 void
 ascii_from_unicode (rc_uint_type *length, const unichar *unicode, char **ascii)
 {
-  codepage_from_unicode (length, unicode, ascii, 0/*CP_ACP*/);
+  codepage_from_unicode (length, unicode, ascii, wind_current_codepage);
 }
 
 /* Print the unicode string UNICODE to the file E.  LENGTH is the
@@ -267,7 +276,7 @@ unicode_print (FILE *e, const unichar *unicode, rc_uint_type length)
       else if ((ch & 0xff) == ch)
 	fprintf (e, "\\%03o", (unsigned int) ch);
       else
-	fprintf (e, "\\x%x", (unsigned int) ch);
+	fprintf (e, "\\x%04x", (unsigned int) ch);
     }
 }
 
