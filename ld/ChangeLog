@@ -1,5 +1,12 @@
 2007-06-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Add eelf32_spu.o rule.
+	* Makefile.in: Regenerate.
+	* emultempl/spuelf.em: Revert last change.  Instead use EMBEDSPU
+	defined in Makefile for embedspu name.
+
+2007-06-18  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/spuelf.em (embedded_spu_file): Deduce embedspu program
 	name prefix from that of ld.
 

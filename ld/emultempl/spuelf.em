@@ -306,8 +306,6 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   union lang_statement_union **old_file_tail;
   union lang_statement_union *new_ent;
   lang_input_statement_type *search;
-  const char *prefix;
-  size_t prefix_len;
 
   if (entry->the_bfd->format != bfd_object
       || strcmp (entry->the_bfd->xvec->name, "elf32-spu") != 0
@@ -362,23 +360,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
 
   /* Use fork() and exec() rather than system() so that we don't
      need to worry about quoting args.  */
-  prefix = base_name (program_name);
-  prefix_len = strlen (prefix);
-  if (prefix_len > 2
-      && (prefix[prefix_len - 2] == 'l'
-	  || prefix[prefix_len - 2] == 'L')
-      && (prefix[prefix_len - 1] == 'd'
-	  || prefix[prefix_len - 1] == 'D'))
-    {
-      cmd[0] = xmalloc (prefix_len + 7);
-      memcpy (cmd[0], prefix, prefix_len - 2);
-      memcpy (cmd[0] + prefix_len - 2, "embedspu", 9);
-    }
-  else
-    {
-      prefix_len = 0;
-      cmd[0] = "embedspu";
-    }
+  cmd[0] = EMBEDSPU;
   cmd[1] = flags;
   cmd[2] = handle;
   cmd[3] = entry->the_bfd->filename;
@@ -397,7 +379,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   if (pid == 0)
     {
       execvp (cmd[0], (char *const *) cmd);
-      if (prefix_len != 0)
+      if (strcmp ("embedspu", EMBEDSPU) != 0)
 	{
 	  cmd[0] = "embedspu";
 	  execvp (cmd[0], (char *const *) cmd);
