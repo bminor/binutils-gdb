@@ -61,17 +61,18 @@ legacy_return_value (struct gdbarch *gdbarch, struct type *valtype,
     {
       gdb_assert (!struct_return);
       /* NOTE: cagney/2004-06-13: See stack.c:return_command.  Old
-	 architectures don't expect STORE_RETURN_VALUE to handle small
+	 architectures don't expect store_return_value to handle small
 	 structures.  Should not be called with such types.  */
       gdb_assert (TYPE_CODE (valtype) != TYPE_CODE_STRUCT
 		  && TYPE_CODE (valtype) != TYPE_CODE_UNION);
-      STORE_RETURN_VALUE (valtype, regcache, writebuf);
+      gdbarch_store_return_value (current_gdbarch, valtype, regcache, writebuf);
     }
 
   if (readbuf != NULL)
     {
       gdb_assert (!struct_return);
-      EXTRACT_RETURN_VALUE (valtype, regcache, readbuf);
+      gdbarch_extract_return_value (current_gdbarch,
+				    valtype, regcache, readbuf);
     }
 
   if (struct_return)

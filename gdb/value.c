@@ -1654,7 +1654,7 @@ coerce_enum (struct value *arg)
 
 
 /* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc and TYPE
+   gdbarch_extract_return_value?  GCC_P is true if compiled with gcc and TYPE
    is the type (which is known to be struct, union or array).
 
    On most machines, the struct convention is used unless we are

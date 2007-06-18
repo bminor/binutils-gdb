@@ -383,7 +383,7 @@ extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_int
    should take the type/value of the function to be called and not the
    return type.  This is left as an exercise for the reader.
    NOTE: cagney/2004-06-13: The function stack.c:return_command uses
-   the predicate with default hack to avoid calling STORE_RETURN_VALUE
+   the predicate with default hack to avoid calling store_return_value
    (via legacy_return_value), when a small struct is involved. */
 
 extern int gdbarch_return_value_p (struct gdbarch *gdbarch);
@@ -392,7 +392,7 @@ typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarc
 extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf);
 extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
 
-/* The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
+/* The deprecated methods extract_return_value, store_return_value,
    DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and
    deprecated_use_struct_convention have all been folded into
    RETURN_VALUE. */
@@ -400,22 +400,10 @@ extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_va
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, gdb_byte *valbuf);
 extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, gdb_byte *valbuf);
 extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);
-#if !defined (GDB_TM_FILE) && defined (EXTRACT_RETURN_VALUE)
-#error "Non multi-arch definition of EXTRACT_RETURN_VALUE"
-#endif
-#if !defined (EXTRACT_RETURN_VALUE)
-#define EXTRACT_RETURN_VALUE(type, regcache, valbuf) (gdbarch_extract_return_value (current_gdbarch, type, regcache, valbuf))
-#endif
 
 typedef void (gdbarch_store_return_value_ftype) (struct type *type, struct regcache *regcache, const gdb_byte *valbuf);
 extern void gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, const gdb_byte *valbuf);
 extern void set_gdbarch_store_return_value (struct gdbarch *gdbarch, gdbarch_store_return_value_ftype *store_return_value);
-#if !defined (GDB_TM_FILE) && defined (STORE_RETURN_VALUE)
-#error "Non multi-arch definition of STORE_RETURN_VALUE"
-#endif
-#if !defined (STORE_RETURN_VALUE)
-#define STORE_RETURN_VALUE(type, regcache, valbuf) (gdbarch_store_return_value (current_gdbarch, type, regcache, valbuf))
-#endif
 
 typedef int (gdbarch_deprecated_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
 extern int gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);

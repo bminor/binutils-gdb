@@ -33,8 +33,8 @@ struct gdbarch_info;
 extern int gdbarch_debug;
 
 /* An implementation of return_value that props up architectures still
-   using USE_STRUCT_RETURN, EXTRACT_RETURN_VALUE and
-   STORE_RETURN_VALUE.  See also the hacks in "stack.c".  */
+   using USE_STRUCT_RETURN, gdbarch_extract_return_value and
+   store_return_value.  See also the hacks in "stack.c".  */
 enum return_value_convention legacy_return_value (struct gdbarch *gdbarch,
 						  struct type *valtype,
 						  struct regcache *regcache,

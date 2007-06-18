@@ -1792,7 +1792,7 @@ return_command (char *retval_exp, int from_tty)
 		   || TYPE_CODE (return_type) == TYPE_CODE_UNION))
 	{
 	  /* NOTE: cagney/2003-10-20: Compatibility hack for legacy
-	     code.  Old architectures don't expect STORE_RETURN_VALUE
+	     code.  Old architectures don't expect gdbarch_store_return_value
 	     to be called with with a small struct that needs to be
 	     stored in registers.  Don't start doing it now.  */
 	  query_prefix = "\

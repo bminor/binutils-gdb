@@ -2923,7 +2923,7 @@ static struct libunwind_descr ia64_libunwind_descr =
 #endif /* HAVE_LIBUNWIND_IA64_H  */
 
 /* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc and TYPE
+   gdbarch_extract_return_value?  GCC_P is true if compiled with gcc and TYPE
    is the type (which is known to be struct, union or array).  */
 int
 ia64_use_struct_convention (int gcc_p, struct type *type)

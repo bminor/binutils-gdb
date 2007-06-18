@@ -768,12 +768,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: elf_make_msymbol_special = <0x%lx>\n",
                       (long) current_gdbarch->elf_make_msymbol_special);
-#ifdef EXTRACT_RETURN_VALUE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "EXTRACT_RETURN_VALUE(type, regcache, valbuf)",
-                      XSTRING (EXTRACT_RETURN_VALUE (type, regcache, valbuf)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: extract_return_value = <0x%lx>\n",
                       (long) current_gdbarch->extract_return_value);
@@ -1035,12 +1029,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: stabs_argument_has_addr = <0x%lx>\n",
                       (long) current_gdbarch->stabs_argument_has_addr);
-#ifdef STORE_RETURN_VALUE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "STORE_RETURN_VALUE(type, regcache, valbuf)",
-                      XSTRING (STORE_RETURN_VALUE (type, regcache, valbuf)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: store_return_value = <0x%lx>\n",
                       (long) current_gdbarch->store_return_value);
