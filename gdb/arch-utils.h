@@ -72,7 +72,7 @@ void default_coff_make_msymbol_special (int val, struct minimal_symbol *msym);
 int cannot_register_not (int regnum);
 
 /* Legacy version of target_virtual_frame_pointer().  Assumes that
-   there is an DEPRECATED_FP_REGNUM and that it is the same, cooked or
+   there is an gdbarch_deprecated_fp_regnum and that it is the same, cooked or
    raw.  */
 
 extern gdbarch_virtual_frame_pointer_ftype legacy_virtual_frame_pointer;

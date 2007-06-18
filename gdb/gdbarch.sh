@@ -462,8 +462,8 @@ M::struct type *:register_type:int reg_nr:reg_nr
 # See gdbint.texinfo, and PUSH_DUMMY_CALL.
 M::struct frame_id:unwind_dummy_id:struct frame_info *info:info
 # Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
-# DEPRECATED_FP_REGNUM.
-v:=:int:deprecated_fp_regnum:::-1:-1::0
+# deprecated_fp_regnum.
+v::int:deprecated_fp_regnum:::-1:-1::0
 
 # See gdbint.texinfo.  See infcall.c.
 M::CORE_ADDR:push_dummy_call:struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:function, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr

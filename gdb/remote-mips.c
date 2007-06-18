@@ -1773,8 +1773,13 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
 			      gdbarch_sp_regnum (current_gdbarch)), rsp);
       regcache_raw_supply (regcache, gdbarch_sp_regnum (current_gdbarch), buf);
 
-      store_unsigned_integer (buf, register_size (current_gdbarch, DEPRECATED_FP_REGNUM), 0);
-      regcache_raw_supply (regcache, DEPRECATED_FP_REGNUM, buf);
+      store_unsigned_integer (buf,
+			      register_size (current_gdbarch,
+					     gdbarch_deprecated_fp_regnum
+					       (current_gdbarch)),
+			      0);
+      regcache_raw_supply (regcache,
+			   gdbarch_deprecated_fp_regnum (current_gdbarch), buf);
 
       if (nfields == 9)
 	{
@@ -1911,8 +1916,9 @@ mips_fetch_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  if (regno == DEPRECATED_FP_REGNUM || regno == MIPS_ZERO_REGNUM)
-    /* DEPRECATED_FP_REGNUM on the mips is a hack which is just
+  if (regno == gdbarch_deprecated_fp_regnum (current_gdbarch)
+      || regno == MIPS_ZERO_REGNUM)
+    /* gdbarch_deprecated_fp_regnum on the mips is a hack which is just
        supposed to read zero (see also mips-nat.c).  */
     val = 0;
   else

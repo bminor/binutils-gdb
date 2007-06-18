@@ -32,14 +32,15 @@
 static struct value *
 value_of_builtin_frame_fp_reg (struct frame_info *frame, const void *baton)
 {
-  if (DEPRECATED_FP_REGNUM >= 0)
+  if (gdbarch_deprecated_fp_regnum (current_gdbarch) >= 0)
     /* NOTE: cagney/2003-04-24: Since the mere presence of "fp" in the
        register name table overrides this built-in $fp register, there
-       is no real reason for this DEPRECATED_FP_REGNUM trickery here.
+       is no real reason for this gdbarch_deprecated_fp_regnum trickery here.
        An architecture wanting to implement "$fp" as alias for a raw
        register can do so by adding "fp" to register name table (mind
        you, doing this is probably a dangerous thing).  */
-    return value_of_register (DEPRECATED_FP_REGNUM, frame);
+    return value_of_register (gdbarch_deprecated_fp_regnum (current_gdbarch),
+			      frame);
   else
     {
       struct value *val = allocate_value (builtin_type_void_data_ptr);

@@ -722,11 +722,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: decr_pc_after_break = 0x%s\n",
                       paddr_nz (current_gdbarch->decr_pc_after_break));
-#ifdef DEPRECATED_FP_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FP_REGNUM # %s\n",
-                      XSTRING (DEPRECATED_FP_REGNUM));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_fp_regnum = %s\n",
                       paddr_d (current_gdbarch->deprecated_fp_regnum));

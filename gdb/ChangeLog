@@ -1,5 +1,31 @@
 2007-06-18  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (DEPRECATED_FP_REGNUM): Replace by
+	gdbarch_deprecated_fp_regnum.
+	* std-regs.c (value_of_builtin_frame_fp_reg): Likewise.
+	* remote-mips.c (mips_wait, mips_fetch_registers): Likewise.
+	* arch-utils.c (legacy_virtual_frame_pointer): Likewise.
+	* arch-utils.h (gdbarch_virtual_frame_pointer_ftype): Likewise
+	(comment).
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-18  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (EXTRACT_RETURN_VALUE): Replace with
+	gdbarch_extract_return_value.
+	* value.c (generic_use_struct_convention): Likewise (comment).
+	* ia64-tdep.c (ia64_use_struct_convention): Likewise (comment).
+	* arch-utils.c (legacy_return_value): Likewise.
+	* arch-utils.h (legacy_return_value): Likewise (comment).
+	* gdbarch.sh (STORE_RETURN_VALUE): Replace by
+	gdbarch_store_return_value.
+	* stack.c (return_command): Likewise (comment).
+	* arch-utils.h (legacy_return_value): Likewise (comment).
+	* arch-utils.c (legacy_return_value): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-18  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (DEPRECATED_USE_STRUCT_CONVENTION): Replace by
 	gdbarch_deprecated_use_struct_convention.
 	* arch-utils.c (legacy_return_value): Likewise.

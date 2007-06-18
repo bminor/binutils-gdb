@@ -257,16 +257,10 @@ extern struct frame_id gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, struct 
 extern void set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, gdbarch_unwind_dummy_id_ftype *unwind_dummy_id);
 
 /* Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
-   DEPRECATED_FP_REGNUM. */
+   deprecated_fp_regnum. */
 
 extern int gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch, int deprecated_fp_regnum);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_FP_REGNUM)
-#error "Non multi-arch definition of DEPRECATED_FP_REGNUM"
-#endif
-#if !defined (DEPRECATED_FP_REGNUM)
-#define DEPRECATED_FP_REGNUM (gdbarch_deprecated_fp_regnum (current_gdbarch))
-#endif
 
 /* See gdbint.texinfo.  See infcall.c. */
 
