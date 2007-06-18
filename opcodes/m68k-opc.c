@@ -2176,6 +2176,8 @@ TBL("tblunb", "tblunw", "tblunl", 0, 0),
 {"wddataw", 2,	one(0175500),   one(0177700), "~s", mcfisa_a },
 {"wddatal", 2,	one(0175600),   one(0177700), "~s", mcfisa_a },
 
+{"wdebugl", 4,	two(0175720, 03),	two(0177770, 0xffff), "as", mcfisa_a },
+{"wdebugl", 4,	two(0175750, 03),	two(0177770, 0xffff), "ds", mcfisa_a },
 {"wdebug", 4,	two(0175720, 03),	two(0177770, 0xffff), "as", mcfisa_a },
 {"wdebug", 4,	two(0175750, 03),	two(0177770, 0xffff), "ds", mcfisa_a },
 };

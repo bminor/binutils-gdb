@@ -1,3 +1,9 @@
+2007-06-18  Kazu Hirata  <kazu@codesourcery.com>
+
+	* gas/m68k/all.exp: Run mcf-wdebug.
+	* gas/testsuite/gas/m68k/mcf-wdebug.d,
+	gas/testsuite/gas/m68k/mcf-wdebug.s: New.
+
 2007-06-14  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb32.s: Add tests for shift instructions.
