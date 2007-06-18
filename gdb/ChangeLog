@@ -1,3 +1,145 @@
+2007-06-18  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (SP_REGNUM): Replace by gdbarch_sp_regnum.
+	* v850-tdep.c (v850_unwind_sp): Likewise.
+	* std-regs.c (value_of_builtin_frame_sp_reg): Likewise.
+	* stack.c (frame_info): Likewise.
+	* stabsread.c (define_symbol): Likewise.
+	* sh-tdep.c (sh_push_dummy_call_fpu, sh_push_dummy_call_nofpu)
+	(sh_dwarf2_frame_init_reg, sh_frame_cache, sh_frame_prev_register)
+	(sh_unwind_sp): Likewise.
+	* sh64-tdep.c (sh64_push_dummy_call, sh64_frame_cache)
+	(sh64_frame_prev_register, sh64_unwind_sp): Likewise.
+	* rs6000-tdep.c (rs6000_push_dummy_call, rs6000_unwind_dummy_id)
+	(rs6000_frame_cache): Likewise.
+	* rs6000-nat.c (store_register): Likewise.
+	* remote-mips.c (mips_wait): Likewise.
+	* procfs.c (procfs_fetch_registers, procfs_store_registers): Likewise.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call)
+	(ppc64_sysv_abi_push_dummy_call): Likewise.
+	* ppcobsd-tdep.c (ppcobsd_sigtramp_frame_cache): Likewise.
+	* ppcobsd-nat.c (ppcobsd_supply_pcb): Likewise.
+	* ppcnbsd-tdep.c (ppcnbsd_sigtramp_cache_init): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_sigtramp_cache): Likewise.
+	* m32r-rom.c (m32r_supply_register): Likewise.
+	* frame.c (frame_sp_unwind): Likewise.
+	* mips-tdep.c (mips_insn16_frame_cache)
+	(mips_insn32_frame_cache): Likewise (comment).
+	* m68klinux-nat.c (supply_gregset): Likewise.
+	* m68k-tdep.c (m68k_get_longjmp_target): Likewise.
+	* ia64-tdep.c (ia64_frame_prev_register): Likewise.
+	* i386-tdep.c (i386_get_longjmp_target): Likewise.
+	* dwarf2-frame.c (dwarf2_frame_default_init_reg): Likewise.
+	* cris-tdep.c (cris_regnums, cris_sigcontext_addr)
+	(cris_sigtramp_frame_unwind_cache, cris_push_dummy_call)
+	(cris_scan_prologue, crisv32_scan_prologue, cris_unwind_sp)
+	(cris_register_type, crisv32_register_type)
+	(cris_dwarf2_frame_init_reg): Likewise.
+	* arch-utils.c (legacy_virtual_frame_pointer): Likewise.
+	* amd64-tdep.c (amd64_frame_prev_register): Likewise.
+	* amd64-linux-tdep.c (amd64_linux_sigcontext_addr): Likewise.
+	* libunwind-frame.c (libunwind_frame_cache): Likewise.
+
+	* gdbarch.sh (PC_REGNUM): Replace by gdbarch_pc_regnum.
+	* regcache.c (read_pc_pid, generic_target_write_pc): Likewise.
+	* xtensa-tdep.c (xtensa_register_type, xtensa_supply_gregset)
+	(xtensa_unwind_pc, xtensa_frame_cache, xtensa_frame_prev_register)
+	(xtensa_extract_return_value, xtensa_store_return_value): Likewise.
+	* v850-tdep.c (v850_unwind_pc): Likewise.
+	* stack.c (frame_info): Likewise.
+	* sh-tdep.c (sh_generic_show_regs, sh3_show_regs, sh2e_show_regs)
+	(sh2a_show_regs, sh2a_nofpu_show_regs, sh3e_show_regs)
+	(sh3_dsp_show_regs, sh4_show_regs, sh4_nofpu_show_regs)
+	(sh_dwarf2_frame_init_reg, sh_frame_prev_register, sh_unwind_pc)
+	(sh_dsp_show_regs): Likewise.
+	* shnbsd-tdep.c (shnbsd_supply_gregset)
+	(shnbsd_collect_gregset): Likewise.
+	* shnbsd-nat.c (GETREGS_SUPPLIES): Likewise.
+	* sh64-tdep.c (sh64_compact_reg_base_num, sh64_show_media_regs)
+	(sh64_frame_prev_register, sh64_unwind_pc): Likewise.
+	* rs6000-tdep.c (ppc_supply_gregset, ppc_collect_gregset)
+	(6000_register_reggroup_p, rs6000_unwind_pc)
+	(rs6000_frame_cache): Likewise.
+	* rs6000-nat.c (regmap, rs6000_fetch_inferior_registers)
+	(rs6000_store_inferior_registers): Likewise.
+	* remote-mips.c (mips_wait, mips_load): Likewise.
+	* procfs.c (procfs_fetch_registers, procfs_store_registers): Likewise.
+	* ppcobsd-tdep.c (ppcobsd_sigtramp_frame_cache): Likewise.
+	* ppcobsd-nat.c (ppcobsd_supply_pcb): Likewise.
+	* ppcnbsd-tdep.c (ppcnbsd_sigtramp_cache_init): Likewise.
+	* ppcnbsd-nat.c (getregs_supplies, ppcnbsd_supply_pcb): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_sigtramp_cache): Likewise.
+	* ppc-linux-nat.c (ppc_register_u_addr, fetch_ppc_registers)
+	(store_ppc_registers, fill_gregset): Likewise.
+	* mips-tdep.c (mips_stub_frame_cache, mips_gdbarch_init): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_supply_reg, mipsnbsd_fill_reg): Likewise.
+	* mipsnbsd-nat.c (getregs_supplies): Likewise.
+	* m68k-tdep.c (m68k_register_type, m68k_unwind_pc): Likewise.
+	* m68klinux-nat.c (supply_gregset): Likewise.
+	* irix5-nat.c (fill_gregset): Likewise.
+	* i386-tdep.c (i386_unwind_pc): Likewise.
+	* i386-linux-nat.c (i386_linux_resume): Likewise.
+	* frame.c (get_prev_frame_1): Likewise.
+	* dwarf2-frame.c (dwarf2_frame_default_init_reg): Likewise.
+	* dbug-rom.c (dbug_supply_register): Likewise.
+	* cris-tdep.c (cris_sigtramp_frame_unwind_cache, cris_scan_prologue)
+	(crisv32_scan_prologue, cris_unwind_pc, cris_register_size)
+	(cris_register_type, crisv32_register_type, crisv32_register_name)
+	(cris_dwarf2_frame_init_reg, find_step_target)
+	(cris_software_single_step, cris_supply_gregset)
+	(cris_regnums): Likewise.
+	* alpha-linux-nat.c (alpha_linux_register_u_offset): Likewise.
+	* aix-thread.c (special_register_p, supply_sprs64, supply_sprs32)
+	(fill_sprs64, fill_sprs32, store_regs_user_thread): Likewise.
+	* std-regs.c (value_of_builtin_frame_pc_reg): Likewise.
+	* mips-linux-tdep.c (mips_linux_write_pc): Likewise.
+
+	* gdbarch.sh (PS_REGNUM): Replace by gdbarch_ps_regnum.
+	* dbug-rom.c (dbug_supply_register): Likewise.
+	* xtensa-tdep.c (xtensa_supply_gregset, xtensa_frame_cache)
+	(xtensa_frame_prev_register, xtensa_push_dummy_call): Likewise.
+	* win32-nat.c (win32_resume): Likewise.
+	* std-regs.c (value_of_builtin_frame_ps_reg): Likewise.
+	* m68k-tdep.c (m68k_register_type): Likewise.
+	* m68klinux-nat.c (supply_gregset): Likewise.
+
+	* gdbarch.sh (FP0_REGNUM): Replace by gdbarch_fp0_regnum.
+	* sh-tdep.c (sh_extract_return_value_fpu, sh_store_return_value_fpu)
+	(sh2e_show_regs, sh2a_show_regs, sh3e_show_regs, sh4_show_regs)
+	(sh_sh2a_register_type, sh_sh3e_register_type, sh_sh4_register_type)
+	(fv_reg_base_num, dr_reg_base_num): Likewise.
+	* sh64-tdep.c (sh64_fv_reg_base_num, sh64_dr_reg_base_num)
+	(sh64_fpp_reg_base_num, sh64_compact_reg_base_num, sh64_push_dummy_call)
+	(sh64_extract_return_value, sh64_store_return_value)
+	(sh64_show_media_regs, sh64_show_compact_regs, sh64_register_type)
+	(sh64_do_fp_register, sh64_media_print_registers_info): Likewise.
+	* procfs.c (procfs_fetch_registers, procfs_store_registers)
+	(invalidate_cache): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_sigtramp_cache): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_supply_fpreg)
+	(mipsnbsd_fill_fpreg): Likewise.
+	* mipsnbsd-nat.c (mipsnbsd_fetch_inferior_registers)
+	(mipsnbsd_store_inferior_registers): Likewise.
+	* mips-linux-tdep.c (mips_supply_fpregset, mips_fill_fpregset)
+	(mips64_supply_fpregset, mips64_fill_fpregset): Likewise.
+	* mips-linux-nat.c (mips64_linux_register_addr): Likewise.
+	* m68k-tdep.c (m68k_register_type, m68k_convert_register_p): Likewise.
+	* m68klinux-nat.c (getfpregs_supplies, supply_fpregset)
+	(fill_fpregset): Likewise.
+	* irix5-nat.c (supply_fpregset, fill_fpregset): Likewise.
+	* i386-tdep.h (struct_return): Likewise (comment).
+	* i386-nto-tdep.c (i386nto_register_area): Likewise.
+	* go32-nat.c (fetch_register, go32_fetch_registers, store_register)
+	(go32_store_registers): Likewise.
+	* alpha-tdep.c (alpha_next_pc): Likewise.
+	* alpha-linux-nat.c (alpha_linux_register_u_offset): Likewise.
+	* alphabsd-nat.c (alphabsd_fetch_inferior_registers)
+	(alphabsd_store_inferior_registers): Likewise.
+	* core-regset.c (fetch_core_registers): Likewise.
+	* i386v4-nat.c (supply_fpregset, fill_fpregset): Likewise.
+
+	* gdbarch.c, gdbarch.h: Regenerate.
+
 2007-06-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* coffread.c (coff_sym_fns): Add default_symfile_segments.

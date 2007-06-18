@@ -85,7 +85,8 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
 
   if (tdep->fpregs_present)
     {
-      if (regnum >= FP0_REGNUM && regnum <= FP0_REGNUM + 7)
+      if (regnum >= gdbarch_fp0_regnum (current_gdbarch)
+	  && regnum <= gdbarch_fp0_regnum (current_gdbarch) + 7)
 	{
 	  if (tdep->flavour == m68k_coldfire_flavour)
 	    return builtin_type (gdbarch)->builtin_double;
@@ -105,7 +106,7 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
 	return builtin_type_int0;
     }
 
-  if (regnum == PC_REGNUM)
+  if (regnum == gdbarch_pc_regnum (current_gdbarch))
     return builtin_type_void_func_ptr;
 
   if (regnum >= M68K_A0_REGNUM && regnum <= M68K_A0_REGNUM + 7)
@@ -801,7 +802,7 @@ m68k_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   gdb_byte buf[8];
 
-  frame_unwind_register (next_frame, PC_REGNUM, buf);
+  frame_unwind_register (next_frame, gdbarch_pc_regnum (current_gdbarch), buf);
   return extract_typed_address (buf, builtin_type_void_func_ptr);
 }
 
@@ -992,7 +993,7 @@ m68k_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
     }
 
   buf = alloca (gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT);
-  sp = get_frame_register_unsigned (frame, SP_REGNUM);
+  sp = get_frame_register_unsigned (frame, gdbarch_sp_regnum (current_gdbarch));
 
   if (target_read_memory (sp + SP_ARG0,	/* Offset of first arg on stack */
 			  buf,

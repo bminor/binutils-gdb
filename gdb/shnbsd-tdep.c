@@ -74,8 +74,10 @@ shnbsd_supply_gregset (const struct regset *regset,
 
   gdb_assert (len >= SHNBSD_SIZEOF_GREGS);
 
-  if (regnum == PC_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, PC_REGNUM, regs + (0 * 4));
+  if (regnum == gdbarch_pc_regnum (current_gdbarch) || regnum == -1)
+    regcache_raw_supply (regcache,
+			 gdbarch_pc_regnum (current_gdbarch),
+			 regs + (0 * 4));
 
   if (regnum == SR_REGNUM || regnum == -1)
     regcache_raw_supply (regcache, SR_REGNUM, regs + (1 * 4));
@@ -111,8 +113,9 @@ shnbsd_collect_gregset (const struct regset *regset,
 
   gdb_assert (len >= SHNBSD_SIZEOF_GREGS);
 
-  if (regnum == PC_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, PC_REGNUM, regs + (0 * 4));
+  if (regnum == gdbarch_pc_regnum (current_gdbarch) || regnum == -1)
+    regcache_raw_collect (regcache, gdbarch_pc_regnum (current_gdbarch),
+			  regs + (0 * 4));
 
   if (regnum == SR_REGNUM || regnum == -1)
     regcache_raw_collect (regcache, SR_REGNUM, regs + (1 * 4));

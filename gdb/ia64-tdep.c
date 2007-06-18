@@ -1618,7 +1618,7 @@ ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   
   memset (valuep, 0, register_size (current_gdbarch, regnum));
  
-  if (regnum == SP_REGNUM)
+  if (regnum == gdbarch_sp_regnum (current_gdbarch))
     {
       /* Handle SP values for all frames but the topmost. */
       store_unsigned_integer (valuep, register_size (current_gdbarch, regnum),

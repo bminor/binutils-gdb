@@ -839,10 +839,12 @@ read_pc_pid (ptid_t ptid)
   if (gdbarch_read_pc_p (gdbarch))
     pc_val = gdbarch_read_pc (gdbarch, regcache);
   /* Else use per-frame method on get_current_frame.  */
-  else if (PC_REGNUM >= 0)
+  else if (gdbarch_pc_regnum (current_gdbarch) >= 0)
     {
       ULONGEST raw_val;
-      regcache_cooked_read_unsigned (regcache, PC_REGNUM, &raw_val);
+      regcache_cooked_read_unsigned (regcache,
+				     gdbarch_pc_regnum (current_gdbarch),
+				     &raw_val);
       pc_val = gdbarch_addr_bits_remove (current_gdbarch, raw_val);
     }
   else
@@ -865,8 +867,9 @@ write_pc_pid (CORE_ADDR pc, ptid_t ptid)
 
   if (gdbarch_write_pc_p (gdbarch))
     gdbarch_write_pc (gdbarch, regcache, pc);
-  else if (PC_REGNUM >= 0)
-    regcache_cooked_write_unsigned (regcache, PC_REGNUM, pc);
+  if (gdbarch_pc_regnum (current_gdbarch) >= 0)
+    regcache_cooked_write_unsigned (regcache,
+				    gdbarch_pc_regnum (current_gdbarch), pc);
   else
     internal_error (__FILE__, __LINE__,
 		    _("write_pc_pid: Unable to update PC"));

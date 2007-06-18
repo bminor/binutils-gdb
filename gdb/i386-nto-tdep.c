@@ -166,7 +166,8 @@ i386nto_register_area (int regno, int regset, unsigned *off)
       if (regno == -1)
 	return regset_size;
 
-      *off = (regno - FP0_REGNUM) * regsize + off_adjust;
+      *off = (regno - gdbarch_fp0_regnum (current_gdbarch))
+	     * regsize + off_adjust;
       return 10;
       /* Why 10 instead of regsize?  GDB only stores 10 bytes per FP
          register so if we're sending a register back to the target,

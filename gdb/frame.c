@@ -1229,7 +1229,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
      method set the same lval and location information as
      frame_register_unwind.  */
   if (this_frame->level > 0
-      && PC_REGNUM >= 0
+      && gdbarch_pc_regnum (current_gdbarch) >= 0
       && get_frame_type (this_frame) == NORMAL_FRAME
       && get_frame_type (this_frame->next) == NORMAL_FRAME)
     {
@@ -1237,9 +1237,11 @@ get_prev_frame_1 (struct frame_info *this_frame)
       enum lval_type lval, nlval;
       CORE_ADDR addr, naddr;
 
-      frame_register_unwind_location (this_frame, PC_REGNUM, &optimized,
-				      &lval, &addr, &realnum);
-      frame_register_unwind_location (get_next_frame (this_frame), PC_REGNUM,
+      frame_register_unwind_location (this_frame,
+				      gdbarch_pc_regnum (current_gdbarch),
+				      &optimized, &lval, &addr, &realnum);
+      frame_register_unwind_location (get_next_frame (this_frame),
+				      gdbarch_pc_regnum (current_gdbarch),
 				      &optimized, &nlval, &naddr, &realnum);
 
       if (lval == lval_memory && lval == nlval && addr == naddr)
@@ -1724,11 +1726,12 @@ frame_sp_unwind (struct frame_info *next_frame)
   if (gdbarch_unwind_sp_p (current_gdbarch))
     return gdbarch_unwind_sp (current_gdbarch, next_frame);
   /* Now things are really are grim.  Hope that the value returned by
-     the SP_REGNUM register is meaningful.  */
-  if (SP_REGNUM >= 0)
+     the gdbarch_sp_regnum register is meaningful.  */
+  if (gdbarch_sp_regnum (current_gdbarch) >= 0)
     {
       ULONGEST sp;
-      frame_unwind_unsigned_register (next_frame, SP_REGNUM, &sp);
+      frame_unwind_unsigned_register (next_frame,
+				      gdbarch_sp_regnum (current_gdbarch), &sp);
       return sp;
     }
   internal_error (__FILE__, __LINE__, _("Missing unwind SP method"));

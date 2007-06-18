@@ -840,13 +840,14 @@ frame_info (char *addr_exp, int from_tty)
 
   /* Name of the value returned by get_frame_pc().  Per comments, "pc"
      is not a good name.  */
-  if (PC_REGNUM >= 0)
-    /* OK, this is weird.  The PC_REGNUM hardware register's value can
+  if (gdbarch_pc_regnum (current_gdbarch) >= 0)
+    /* OK, this is weird.  The gdbarch_pc_regnum hardware register's value can
        easily not match that of the internal value returned by
        get_frame_pc().  */
-    pc_regname = gdbarch_register_name (current_gdbarch, PC_REGNUM);
+    pc_regname = gdbarch_register_name (current_gdbarch,
+					gdbarch_pc_regnum (current_gdbarch));
   else
-    /* But then, this is weird to.  Even without PC_REGNUM, an
+    /* But then, this is weird to.  Even without gdbarch_pc_regnum, an
        architectures will often have a hardware register called "pc",
        and that register's value, again, can easily not match
        get_frame_pc().  */
@@ -1021,22 +1022,26 @@ frame_info (char *addr_exp, int from_tty)
        at one stage the frame cached the previous frame's SP instead
        of its address, hence it was easiest to just display the cached
        value.  */
-    if (SP_REGNUM >= 0)
+    if (gdbarch_sp_regnum (current_gdbarch) >= 0)
       {
 	/* Find out the location of the saved stack pointer with out
            actually evaluating it.  */
-	frame_register_unwind (fi, SP_REGNUM, &optimized, &lval, &addr,
+	frame_register_unwind (fi, gdbarch_sp_regnum (current_gdbarch),
+			       &optimized, &lval, &addr,
 			       &realnum, NULL);
 	if (!optimized && lval == not_lval)
 	  {
 	    gdb_byte value[MAX_REGISTER_SIZE];
 	    CORE_ADDR sp;
-	    frame_register_unwind (fi, SP_REGNUM, &optimized, &lval, &addr,
+	    frame_register_unwind (fi, gdbarch_sp_regnum (current_gdbarch),
+				   &optimized, &lval, &addr,
 				   &realnum, value);
 	    /* NOTE: cagney/2003-05-22: This is assuming that the
                stack pointer was packed as an unsigned integer.  That
                may or may not be valid.  */
-	    sp = extract_unsigned_integer (value, register_size (current_gdbarch, SP_REGNUM));
+	    sp = extract_unsigned_integer (value,
+					   register_size (current_gdbarch,
+					   gdbarch_sp_regnum (current_gdbarch)));
 	    printf_filtered (" Previous frame's sp is ");
 	    deprecated_print_address_numeric (sp, 1, gdb_stdout);
 	    printf_filtered ("\n");
@@ -1062,7 +1067,7 @@ frame_info (char *addr_exp, int from_tty)
     numregs = gdbarch_num_regs (current_gdbarch)
 	      + gdbarch_num_pseudo_regs (current_gdbarch);
     for (i = 0; i < numregs; i++)
-      if (i != SP_REGNUM
+      if (i != gdbarch_sp_regnum (current_gdbarch)
 	  && gdbarch_register_reggroup_p (current_gdbarch, i, all_reggroup))
 	{
 	  /* Find out the location of the saved register without

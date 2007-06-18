@@ -55,7 +55,9 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argspace = 0;		/* 0 is an initial wrong guess.  */
   int write_pass;
 
-  regcache_cooked_read_unsigned (regcache, SP_REGNUM, &saved_sp);
+  regcache_cooked_read_unsigned (regcache,
+				 gdbarch_sp_regnum (current_gdbarch),
+				 &saved_sp);
 
   /* Go through the argument list twice.
 
@@ -307,7 +309,8 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Update %sp.   */
-  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
+  regcache_cooked_write_signed (regcache,
+				gdbarch_sp_regnum (current_gdbarch), sp);
 
   /* Write the backchain (it occupies WORDSIZED bytes).  */
   write_memory_signed_integer (sp, tdep->wordsize, saved_sp);
@@ -601,7 +604,9 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* By this stage in the proceedings, SP has been decremented by "red
      zone size" + "struct return size".  Fetch the stack-pointer from
      before this and use that as the BACK_CHAIN.  */
-  regcache_cooked_read_unsigned (regcache, SP_REGNUM, &back_chain);
+  regcache_cooked_read_unsigned (regcache,
+				 gdbarch_sp_regnum (current_gdbarch),
+				 &back_chain);
 
   /* Go through the argument list twice.
 
@@ -832,7 +837,8 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Update %sp.   */
-  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
+  regcache_cooked_write_signed (regcache,
+				gdbarch_sp_regnum (current_gdbarch), sp);
 
   /* Write the backchain (it occupies WORDSIZED bytes).  */
   write_memory_signed_integer (sp, tdep->wordsize, back_chain);

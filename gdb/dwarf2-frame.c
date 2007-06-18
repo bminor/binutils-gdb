@@ -649,9 +649,9 @@ dwarf2_frame_default_init_reg (struct gdbarch *gdbarch, int regnum,
      (e.g. IBM S/390 and zSeries).  Those architectures should provide
      their own architecture-specific initialization function.  */
 
-  if (regnum == PC_REGNUM)
+  if (regnum == gdbarch_pc_regnum (current_gdbarch))
     reg->how = DWARF2_FRAME_REG_RA;
-  else if (regnum == SP_REGNUM)
+  else if (regnum == gdbarch_sp_regnum (current_gdbarch))
     reg->how = DWARF2_FRAME_REG_CFA;
 }
 

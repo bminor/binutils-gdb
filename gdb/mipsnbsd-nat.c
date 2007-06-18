@@ -36,7 +36,8 @@
 static int
 getregs_supplies (int regno)
 {
-  return ((regno) >= MIPS_ZERO_REGNUM && (regno) <= PC_REGNUM);
+  return ((regno) >= MIPS_ZERO_REGNUM
+	  && (regno) <= gdbarch_pc_regnum (current_gdbarch));
 }
 
 static void
@@ -55,7 +56,7 @@ mipsnbsd_fetch_inferior_registers (struct regcache *regcache, int regno)
 	return;
     }
 
-  if (regno == -1 || regno >= FP0_REGNUM)
+  if (regno == -1 || regno >= gdbarch_fp0_regnum (current_gdbarch))
     {
       struct fpreg fpregs;
 
@@ -88,7 +89,7 @@ mipsnbsd_store_inferior_registers (struct regcache *regcache, int regno)
 	return;
     }
 
-  if (regno == -1 || regno >= FP0_REGNUM)
+  if (regno == -1 || regno >= gdbarch_fp0_regnum (current_gdbarch))
     {
       struct fpreg fpregs; 
 

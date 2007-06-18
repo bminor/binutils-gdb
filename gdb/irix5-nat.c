@@ -95,7 +95,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
 	*(regp + regi) = extract_signed_integer (buf, size);
       }
 
-  if ((regno == -1) || (regno == PC_REGNUM))
+  if ((regno == -1) || (regno == gdbarch_pc_regnum (current_gdbarch)))
     {
       regi = mips_regnum (current_gdbarch)->pc;
       size = register_size (current_gdbarch, regi);
@@ -130,7 +130,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
 
 /*
  * Now we do the same thing for floating-point registers.
- * We don't bother to condition on FP0_REGNUM since any
+ * We don't bother to condition on gdbarch_fp0_regnum since any
  * reasonable MIPS configuration has an R3010 in it.
  *
  * Again, see the comments in m68k-tdep.c.
@@ -146,7 +146,7 @@ supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
   /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
 
   for (regi = 0; regi < 32; regi++)
-    regcache_raw_supply (regcache, FP0_REGNUM + regi,
+    regcache_raw_supply (regcache, gdbarch_fp0_regnum (current_gdbarch) + regi,
 			 (const char *) &fpregsetp->fp_r.fp_regs[regi]);
 
   /* We can't supply the FSR register directly to the regcache,
@@ -175,11 +175,13 @@ fill_fpregset (const struct regcache *regcache, fpregset_t *fpregsetp, int regno
 
   /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
 
-  for (regi = FP0_REGNUM; regi < FP0_REGNUM + 32; regi++)
+  for (regi = gdbarch_fp0_regnum (current_gdbarch);
+       regi < gdbarch_fp0_regnum (current_gdbarch) + 32; regi++)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
+	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - gdbarch_fp0_regnum
+							 (current_gdbarch)]);
           regcache_raw_collect (regcache, regi, to);
 	}
     }

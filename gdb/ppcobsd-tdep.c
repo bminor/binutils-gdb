@@ -211,7 +211,8 @@ ppcobsd_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   insn = extract_unsigned_integer (buf, PPC_INSN_SIZE);
   sigcontext_offset = (0x10000 - (insn & 0x0000ffff)) + 8;
 
-  base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+  base = frame_unwind_register_unsigned (next_frame,
+					 gdbarch_sp_regnum (current_gdbarch));
   addr = base + sigcontext_offset + 2 * tdep->wordsize;
   for (i = 0; i < ppc_num_gprs; i++, addr += tdep->wordsize)
     {
@@ -226,7 +227,8 @@ ppcobsd_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   addr += tdep->wordsize;
   trad_frame_set_reg_addr (cache, tdep->ppc_ctr_regnum, addr);
   addr += tdep->wordsize;
-  trad_frame_set_reg_addr (cache, PC_REGNUM, addr); /* SRR0? */
+  trad_frame_set_reg_addr (cache, gdbarch_pc_regnum (current_gdbarch), addr);
+  /* SRR0? */
   addr += tdep->wordsize;
 
   /* Construct the frame ID using the function start.  */

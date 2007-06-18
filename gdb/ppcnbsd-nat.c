@@ -52,7 +52,7 @@ getregs_supplies (int regnum)
           || regnum == tdep->ppc_cr_regnum
           || regnum == tdep->ppc_xer_regnum
           || regnum == tdep->ppc_ctr_regnum
-	  || regnum == PC_REGNUM);
+	  || regnum == gdbarch_pc_regnum (current_gdbarch));
 }
 
 /* Like above, but for PT_GETFPREGS.  */
@@ -169,7 +169,7 @@ ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   read_memory(cf.sp, (gdb_byte *)&cf, sizeof(cf));
   regcache_raw_supply (regcache, tdep->ppc_lr_regnum, &cf.lr);
-  regcache_raw_supply (regcache, PC_REGNUM, &cf.lr);
+  regcache_raw_supply (regcache, gdbarch_pc_regnum (current_gdbarch), &cf.lr);
 
   return 1;
 }

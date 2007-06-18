@@ -1443,7 +1443,7 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
           case 0x33:              /* FBLE */
           case 0x32:              /* FBLT */
           case 0x35:              /* FBNE */
-            regno += FP0_REGNUM;
+            regno += gdbarch_fp0_regnum (current_gdbarch);
 	}
       
       rav = get_frame_register_signed (frame, regno);

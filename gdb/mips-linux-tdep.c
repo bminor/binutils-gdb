@@ -199,7 +199,9 @@ mips_supply_fpregset (struct regcache *regcache,
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = 0; regi < 32; regi++)
-    regcache_raw_supply (regcache, FP0_REGNUM + regi, *fpregsetp + regi);
+    regcache_raw_supply (regcache,
+			 gdbarch_fp0_regnum (current_gdbarch) + regi,
+			 *fpregsetp + regi);
 
   regcache_raw_supply (regcache,
 		       mips_regnum (current_gdbarch)->fp_control_status,
@@ -220,9 +222,10 @@ mips_fill_fpregset (const struct regcache *regcache,
 {
   char *from, *to;
 
-  if ((regno >= FP0_REGNUM) && (regno < FP0_REGNUM + 32))
+  if ((regno >= gdbarch_fp0_regnum (current_gdbarch))
+      && (regno < gdbarch_fp0_regnum (current_gdbarch) + 32))
     {
-      to = (char *) (*fpregsetp + regno - FP0_REGNUM);
+      to = (char *) (*fpregsetp + regno - gdbarch_fp0_regnum (current_gdbarch));
       regcache_raw_collect (regcache, regno, to);
     }
   else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
@@ -235,7 +238,8 @@ mips_fill_fpregset (const struct regcache *regcache,
       int regi;
 
       for (regi = 0; regi < 32; regi++)
-	mips_fill_fpregset (regcache, fpregsetp, FP0_REGNUM + regi);
+	mips_fill_fpregset (regcache, fpregsetp,
+			    gdbarch_fp0_regnum (current_gdbarch) + regi);
       mips_fill_fpregset (regcache, fpregsetp,
 			  mips_regnum (current_gdbarch)->fp_control_status);
     }
@@ -407,18 +411,22 @@ mips64_supply_fpregset (struct regcache *regcache,
 
   /* See mips_linux_o32_sigframe_init for a description of the
      peculiar FP register layout.  */
-  if (register_size (current_gdbarch, FP0_REGNUM) == 4)
+  if (register_size (current_gdbarch,
+		     gdbarch_fp0_regnum (current_gdbarch)) == 4)
     for (regi = 0; regi < 32; regi++)
       {
 	const gdb_byte *reg_ptr = (const gdb_byte *)(*fpregsetp + (regi & ~1));
 	if ((gdbarch_byte_order (current_gdbarch)
 	    == BFD_ENDIAN_BIG) != (regi & 1))
 	  reg_ptr += 4;
-	regcache_raw_supply (regcache, FP0_REGNUM + regi, reg_ptr);
+	regcache_raw_supply (regcache,
+			     gdbarch_fp0_regnum (current_gdbarch) + regi,
+			     reg_ptr);
       }
   else
     for (regi = 0; regi < 32; regi++)
-      regcache_raw_supply (regcache, FP0_REGNUM + regi,
+      regcache_raw_supply (regcache,
+			   gdbarch_fp0_regnum (current_gdbarch) + regi,
 			   (const char *)(*fpregsetp + regi));
 
   supply_32bit_reg (regcache, mips_regnum (current_gdbarch)->fp_control_status,
@@ -441,13 +449,14 @@ mips64_fill_fpregset (const struct regcache *regcache,
 {
   gdb_byte *to;
 
-  if ((regno >= FP0_REGNUM) && (regno < FP0_REGNUM + 32))
+  if ((regno >= gdbarch_fp0_regnum (current_gdbarch))
+      && (regno < gdbarch_fp0_regnum (current_gdbarch) + 32))
     {
       /* See mips_linux_o32_sigframe_init for a description of the
 	 peculiar FP register layout.  */
       if (register_size (current_gdbarch, regno) == 4)
 	{
-	  int regi = regno - FP0_REGNUM;
+	  int regi = regno - gdbarch_fp0_regnum (current_gdbarch);
 
 	  to = (gdb_byte *) (*fpregsetp + (regi & ~1));
 	  if ((gdbarch_byte_order (current_gdbarch)
@@ -457,7 +466,8 @@ mips64_fill_fpregset (const struct regcache *regcache,
 	}
       else
 	{
-	  to = (gdb_byte *) (*fpregsetp + regno - FP0_REGNUM);
+	  to = (gdb_byte *) (*fpregsetp + regno
+			     - gdbarch_fp0_regnum (current_gdbarch));
 	  regcache_raw_collect (regcache, regno, to);
 	}
     }
@@ -488,7 +498,8 @@ mips64_fill_fpregset (const struct regcache *regcache,
       int regi;
 
       for (regi = 0; regi < 32; regi++)
-	mips64_fill_fpregset (regcache, fpregsetp, FP0_REGNUM + regi);
+	mips64_fill_fpregset (regcache, fpregsetp,
+			      gdbarch_fp0_regnum (current_gdbarch) + regi);
       mips64_fill_fpregset (regcache, fpregsetp,
 			    mips_regnum (current_gdbarch)->fp_control_status);
       mips64_fill_fpregset (regcache, fpregsetp,
@@ -1056,7 +1067,8 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 static void
 mips_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  regcache_cooked_write_unsigned (regcache, PC_REGNUM, pc);
+  regcache_cooked_write_unsigned (regcache,
+				  gdbarch_pc_regnum (current_gdbarch), pc);
 
   /* Clear the syscall restart flag.  */
   if (mips_linux_restart_reg_p (current_gdbarch))

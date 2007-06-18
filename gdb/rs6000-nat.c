@@ -157,7 +157,7 @@ regmap (int regno, int *isfloat)
       *isfloat = 1;
       return regno - tdep->ppc_fp0_regnum + FPR0;
     }
-  else if (regno == PC_REGNUM)
+  else if (regno == gdbarch_pc_regnum (current_gdbarch))
     return IAR;
   else if (regno == tdep->ppc_ps_regnum)
     return MSR;
@@ -297,7 +297,7 @@ store_register (const struct regcache *regcache, int regno)
   /* Fixed-point registers. */
   else
     {
-      if (regno == SP_REGNUM)
+      if (regno == gdbarch_sp_regnum (current_gdbarch))
 	/* Execute one dummy instruction (which is a breakpoint) in inferior
 	   process to give kernel a chance to do internal housekeeping.
 	   Otherwise the following ptrace(2) calls will mess up user stack
@@ -357,7 +357,7 @@ rs6000_fetch_inferior_registers (struct regcache *regcache, int regno)
           fetch_register (regcache, tdep->ppc_fp0_regnum + regno);
 
       /* Read special registers.  */
-      fetch_register (regcache, PC_REGNUM);
+      fetch_register (regcache, gdbarch_pc_regnum (current_gdbarch));
       fetch_register (regcache, tdep->ppc_ps_regnum);
       fetch_register (regcache, tdep->ppc_cr_regnum);
       fetch_register (regcache, tdep->ppc_lr_regnum);
@@ -398,7 +398,7 @@ rs6000_store_inferior_registers (struct regcache *regcache, int regno)
           store_register (regcache, tdep->ppc_fp0_regnum + regno);
 
       /* Write special registers.  */
-      store_register (regcache, PC_REGNUM);
+      store_register (regcache, gdbarch_pc_regnum (current_gdbarch));
       store_register (regcache, tdep->ppc_ps_regnum);
       store_register (regcache, tdep->ppc_cr_regnum);
       store_register (regcache, tdep->ppc_lr_regnum);

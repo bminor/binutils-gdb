@@ -1758,14 +1758,20 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
       struct regcache *regcache = get_current_regcache ();
       char buf[MAX_REGISTER_SIZE];
 
-      store_unsigned_integer (buf, register_size (current_gdbarch, PC_REGNUM), rpc);
-      regcache_raw_supply (regcache, PC_REGNUM, buf);
+      store_unsigned_integer (buf,
+			      register_size
+			        (current_gdbarch, gdbarch_pc_regnum
+						    (current_gdbarch)), rpc);
+      regcache_raw_supply (regcache, gdbarch_pc_regnum (current_gdbarch), buf);
 
-      store_unsigned_integer (buf, register_size (current_gdbarch, PC_REGNUM), rfp);
+      store_unsigned_integer
+	(buf, register_size (current_gdbarch,
+	 gdbarch_pc_regnum (current_gdbarch)), rfp);
       regcache_raw_supply (regcache, 30, buf);	/* This register they are avoiding and so it is unnamed */
 
-      store_unsigned_integer (buf, register_size (current_gdbarch, SP_REGNUM), rsp);
-      regcache_raw_supply (regcache, SP_REGNUM, buf);
+      store_unsigned_integer (buf, register_size (current_gdbarch,
+			      gdbarch_sp_regnum (current_gdbarch)), rsp);
+      regcache_raw_supply (regcache, gdbarch_sp_regnum (current_gdbarch), buf);
 
       store_unsigned_integer (buf, register_size (current_gdbarch, DEPRECATED_FP_REGNUM), 0);
       regcache_raw_supply (regcache, DEPRECATED_FP_REGNUM, buf);
@@ -3263,7 +3269,7 @@ mips_load (char *file, int from_tty)
       /* Work around problem where PMON monitor updates the PC after a load
          to a different value than GDB thinks it has. The following ensures
          that the write_pc() WILL update the PC value: */
-      deprecated_register_valid[PC_REGNUM] = 0;
+      deprecated_register_valid[gdbarch_pc_regnum (current_gdbarch)] = 0;
     }
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));

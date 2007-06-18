@@ -438,11 +438,11 @@ v::int:num_pseudo_regs:::0:0::0
 # GDB's standard (or well known) register numbers.  These can map onto
 # a real register or a pseudo (computed) register or not be defined at
 # all (-1).
-# SP_REGNUM will hopefully be replaced by UNWIND_SP.
-v:=:int:sp_regnum:::-1:-1::0
-v:=:int:pc_regnum:::-1:-1::0
-v:=:int:ps_regnum:::-1:-1::0
-v:=:int:fp0_regnum:::0:-1::0
+# gdbarch_sp_regnum will hopefully be replaced by UNWIND_SP.
+v::int:sp_regnum:::-1:-1::0
+v::int:pc_regnum:::-1:-1::0
+v::int:ps_regnum:::-1:-1::0
+v::int:fp0_regnum:::0:-1::0
 # Convert stab register number (from \`r\' declaration) to a gdb REGNUM.
 f::int:stab_reg_to_regnum:int stab_regnr:stab_regnr::no_op_reg_to_regnum::0
 # Provide a default mapping from a ecoff register number to a gdb REGNUM.

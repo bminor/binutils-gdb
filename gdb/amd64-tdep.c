@@ -870,7 +870,7 @@ amd64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
   gdb_assert (regnum >= 0);
 
-  if (regnum == SP_REGNUM && cache->saved_sp)
+  if (regnum == gdbarch_sp_regnum (current_gdbarch) && cache->saved_sp)
     {
       *optimizedp = 0;
       *lvalp = not_lval;

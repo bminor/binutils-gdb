@@ -744,7 +744,8 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
 
       request = PTRACE_SINGLESTEP;
 
-      regcache_cooked_read_unsigned (regcache, PC_REGNUM, &pc);
+      regcache_cooked_read_unsigned (regcache,
+				     gdbarch_pc_regnum (current_gdbarch), &pc);
 
       /* Returning from a signal trampoline is done by calling a
          special system call (sigreturn or rt_sigreturn, see

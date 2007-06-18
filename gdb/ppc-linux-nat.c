@@ -188,7 +188,7 @@ ppc_register_u_addr (int regno)
     u_addr = (PT_FPR0 * wordsize) + ((regno - tdep->ppc_fp0_regnum) * 8);
 
   /* UISA special purpose registers: 1 slot each */
-  if (regno == PC_REGNUM)
+  if (regno == gdbarch_pc_regnum (current_gdbarch))
     u_addr = PT_NIP * wordsize;
   if (regno == tdep->ppc_lr_regnum)
     u_addr = PT_LNK * wordsize;
@@ -463,7 +463,7 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
   if (tdep->ppc_fp0_regnum >= 0)
     for (i = 0; i < ppc_num_fprs; i++)
       fetch_register (regcache, tid, tdep->ppc_fp0_regnum + i);
-  fetch_register (regcache, tid, PC_REGNUM);
+  fetch_register (regcache, tid, gdbarch_pc_regnum (current_gdbarch));
   if (tdep->ppc_ps_regnum != -1)
     fetch_register (regcache, tid, tdep->ppc_ps_regnum);
   if (tdep->ppc_cr_regnum != -1)
@@ -747,7 +747,7 @@ store_ppc_registers (const struct regcache *regcache, int tid)
   if (tdep->ppc_fp0_regnum >= 0)
     for (i = 0; i < ppc_num_fprs; i++)
       store_register (regcache, tid, tdep->ppc_fp0_regnum + i);
-  store_register (regcache, tid, PC_REGNUM);
+  store_register (regcache, tid, gdbarch_pc_regnum (current_gdbarch));
   if (tdep->ppc_ps_regnum != -1)
     store_register (regcache, tid, tdep->ppc_ps_regnum);
   if (tdep->ppc_cr_regnum != -1)
@@ -946,8 +946,9 @@ fill_gregset (const struct regcache *regcache,
 			(regp + PT_R0 + regi));
     }
 
-  if ((regno == -1) || regno == PC_REGNUM)
-    right_fill_reg (regcache, PC_REGNUM, regp + PT_NIP);
+  if ((regno == -1) || regno == gdbarch_pc_regnum (current_gdbarch))
+    right_fill_reg (regcache, gdbarch_pc_regnum (current_gdbarch),
+		    regp + PT_NIP);
   if ((regno == -1) || regno == tdep->ppc_lr_regnum)
     right_fill_reg (regcache, tdep->ppc_lr_regnum, regp + PT_LNK);
   if ((regno == -1) || regno == tdep->ppc_cr_regnum)

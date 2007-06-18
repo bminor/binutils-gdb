@@ -81,7 +81,8 @@ getregs_supplies (int regno)
 int
 getfpregs_supplies (int regno)
 {
-  return FP0_REGNUM <= regno && regno <= M68K_FPI_REGNUM;
+  return gdbarch_fp0_regnum (current_gdbarch) <= regno
+	 && regno <= M68K_FPI_REGNUM;
 }
 
 /* Does the current host support the GETREGS request?  */
@@ -245,10 +246,14 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
   const elf_greg_t *regp = (const elf_greg_t *) gregsetp;
   int regi;
 
-  for (regi = M68K_D0_REGNUM; regi <= SP_REGNUM; regi++)
+  for (regi = M68K_D0_REGNUM;
+       regi <= gdbarch_sp_regnum (current_gdbarch);
+       regi++)
     regcache_raw_supply (regcache, regi, &regp[regmap[regi]]);
-  regcache_raw_supply (regcache, PS_REGNUM, &regp[PT_SR]);
-  regcache_raw_supply (regcache, PC_REGNUM, &regp[PT_PC]);
+  regcache_raw_supply (regcache, gdbarch_ps_regnum (current_gdbarch),
+		       &regp[PT_SR]);
+  regcache_raw_supply (regcache,
+		       gdbarch_pc_regnum (current_gdbarch), &regp[PT_PC]);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -330,9 +335,12 @@ supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
 {
   int regi;
 
-  for (regi = FP0_REGNUM; regi < FP0_REGNUM + 8; regi++)
+  for (regi = gdbarch_fp0_regnum (current_gdbarch);
+       regi < gdbarch_fp0_regnum (current_gdbarch) + 8; regi++)
     regcache_raw_supply (regcache, regi,
-			 FPREG_ADDR (fpregsetp, regi - FP0_REGNUM));
+			 FPREG_ADDR (fpregsetp,
+				     regi - gdbarch_fp0_regnum
+					    (current_gdbarch)));
   regcache_raw_supply (regcache, M68K_FPC_REGNUM, &fpregsetp->fpcntl[0]);
   regcache_raw_supply (regcache, M68K_FPS_REGNUM, &fpregsetp->fpcntl[1]);
   regcache_raw_supply (regcache, M68K_FPI_REGNUM, &fpregsetp->fpcntl[2]);
@@ -349,10 +357,13 @@ fill_fpregset (const struct regcache *regcache,
   int i;
 
   /* Fill in the floating-point registers.  */
-  for (i = FP0_REGNUM; i < FP0_REGNUM + 8; i++)
+  for (i = gdbarch_fp0_regnum (current_gdbarch);
+       i < gdbarch_fp0_regnum (current_gdbarch) + 8; i++)
     if (regno == -1 || regno == i)
       regcache_raw_collect (regcache, i,
-			    FPREG_ADDR (fpregsetp, i - FP0_REGNUM));
+			    FPREG_ADDR (fpregsetp,
+				        i - gdbarch_fp0_regnum
+					    (current_gdbarch)));
 
   /* Fill in the floating-point control registers.  */
   for (i = M68K_FPC_REGNUM; i <= M68K_FPI_REGNUM; i++)

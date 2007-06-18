@@ -1065,7 +1065,7 @@ special_register_p (int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  return regno == PC_REGNUM
+  return regno == gdbarch_pc_regnum (current_gdbarch)
       || regno == tdep->ppc_ps_regnum
       || regno == tdep->ppc_cr_regnum
       || regno == tdep->ppc_lr_regnum
@@ -1087,7 +1087,8 @@ supply_sprs64 (struct regcache *regcache,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  regcache_raw_supply (regcache, PC_REGNUM, (char *) &iar);
+  regcache_raw_supply (regcache, gdbarch_pc_regnum (current_gdbarch),
+		       (char *) &iar);
   regcache_raw_supply (regcache, tdep->ppc_ps_regnum, (char *) &msr);
   regcache_raw_supply (regcache, tdep->ppc_cr_regnum, (char *) &cr);
   regcache_raw_supply (regcache, tdep->ppc_lr_regnum, (char *) &lr);
@@ -1109,7 +1110,8 @@ supply_sprs32 (struct regcache *regcache,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  regcache_raw_supply (regcache, PC_REGNUM, (char *) &iar);
+  regcache_raw_supply (regcache, gdbarch_pc_regnum (current_gdbarch),
+		       (char *) &iar);
   regcache_raw_supply (regcache, tdep->ppc_ps_regnum, (char *) &msr);
   regcache_raw_supply (regcache, tdep->ppc_cr_regnum, (char *) &cr);
   regcache_raw_supply (regcache, tdep->ppc_lr_regnum, (char *) &lr);
@@ -1343,10 +1345,12 @@ fill_sprs64 (const struct regcache *regcache,
      they're not, then either GDB has been built incorrectly, or
      there's some other kind of internal error.  To be really safe,
      we should check all of the sizes.   */
-  gdb_assert (sizeof (*iar) == register_size (current_gdbarch, PC_REGNUM));
+  gdb_assert (sizeof (*iar) == register_size
+				 (current_gdbarch,
+				  gdbarch_pc_regnum (current_gdbarch)));
 
-  if (regcache_valid_p (regcache, PC_REGNUM))
-    regcache_raw_collect (regcache, PC_REGNUM, iar);
+  if (regcache_valid_p (regcache, gdbarch_pc_regnum (current_gdbarch)))
+    regcache_raw_collect (regcache, gdbarch_pc_regnum (current_gdbarch), iar);
   if (regcache_valid_p (regcache, tdep->ppc_ps_regnum))
     regcache_raw_collect (regcache, tdep->ppc_ps_regnum, msr);
   if (regcache_valid_p (regcache, tdep->ppc_cr_regnum))
@@ -1375,10 +1379,12 @@ fill_sprs32 (const struct regcache *regcache,
      they're not, then either GDB has been built incorrectly, or
      there's some other kind of internal error.  To be really safe,
      we should check all of the sizes.  */
-  gdb_assert (sizeof (*iar) == register_size (current_gdbarch, PC_REGNUM));
+  gdb_assert (sizeof (*iar) == register_size (current_gdbarch,
+					      gdbarch_pc_regnum
+					      (current_gdbarch)));
 
-  if (regcache_valid_p (regcache, PC_REGNUM))
-    regcache_raw_collect (regcache, PC_REGNUM, iar);
+  if (regcache_valid_p (regcache, gdbarch_pc_regnum (current_gdbarch)))
+    regcache_raw_collect (regcache, gdbarch_pc_regnum (current_gdbarch), iar);
   if (regcache_valid_p (regcache, tdep->ppc_ps_regnum))
     regcache_raw_collect (regcache, tdep->ppc_ps_regnum, msr);
   if (regcache_valid_p (regcache, tdep->ppc_cr_regnum))
@@ -1459,7 +1465,7 @@ store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
 
       fill_sprs32 (regcache, &tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr,
 			     &tmp_xer, &tmp_fpscr);
-      if (regcache_valid_p (regcache, PC_REGNUM))
+      if (regcache_valid_p (regcache, gdbarch_pc_regnum (current_gdbarch)))
 	ctx.iar = tmp_iar;
       if (regcache_valid_p (regcache, tdep->ppc_ps_regnum))
 	ctx.msr = tmp_msr;

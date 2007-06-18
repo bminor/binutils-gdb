@@ -85,7 +85,7 @@ fetch_core_registers (struct regcache *regcache,
       else
 	{
 	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
-	  if (FP0_REGNUM >= 0)
+	  if (gdbarch_fp0_regnum (current_gdbarch) >= 0)
 	    supply_fpregset (regcache, (const gdb_fpregset_t *) &fpregset);
 	}
       break;

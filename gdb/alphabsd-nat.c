@@ -101,7 +101,7 @@ alphabsd_fetch_inferior_registers (struct regcache *regcache, int regno)
 	return;
     }
 
-  if (regno == -1 || regno >= FP0_REGNUM)
+  if (regno == -1 || regno >= gdbarch_fp0_regnum (current_gdbarch))
     {
       struct fpreg fpregs;
 
@@ -136,7 +136,7 @@ alphabsd_store_inferior_registers (struct regcache *regcache, int regno)
 	return;
     }
 
-  if (regno == -1 || regno >= FP0_REGNUM)
+  if (regno == -1 || regno >= gdbarch_fp0_regnum (current_gdbarch))
     {
       struct fpreg fpregs;
 

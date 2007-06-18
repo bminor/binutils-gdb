@@ -342,8 +342,9 @@ ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
 	ppc_supply_reg (regcache, i, gregs, offset);
     }
 
-  if (regnum == -1 || regnum == PC_REGNUM)
-    ppc_supply_reg (regcache, PC_REGNUM, gregs, offsets->pc_offset);
+  if (regnum == -1 || regnum == gdbarch_pc_regnum (current_gdbarch))
+    ppc_supply_reg (regcache, gdbarch_pc_regnum (current_gdbarch),
+		    gregs, offsets->pc_offset);
   if (regnum == -1 || regnum == tdep->ppc_ps_regnum)
     ppc_supply_reg (regcache, tdep->ppc_ps_regnum,
 		    gregs, offsets->ps_offset);
@@ -418,8 +419,9 @@ ppc_collect_gregset (const struct regset *regset,
 	ppc_collect_reg (regcache, i, gregs, offset);
     }
 
-  if (regnum == -1 || regnum == PC_REGNUM)
-    ppc_collect_reg (regcache, PC_REGNUM, gregs, offsets->pc_offset);
+  if (regnum == -1 || regnum == gdbarch_pc_regnum (current_gdbarch))
+    ppc_collect_reg (regcache, gdbarch_pc_regnum (current_gdbarch),
+		     gregs, offsets->pc_offset);
   if (regnum == -1 || regnum == tdep->ppc_ps_regnum)
     ppc_collect_reg (regcache, tdep->ppc_ps_regnum,
 		     gregs, offsets->ps_offset);
@@ -1697,7 +1699,9 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 ran_out_of_registers_for_arguments:
 
-  regcache_cooked_read_unsigned (regcache, SP_REGNUM, &saved_sp);
+  regcache_cooked_read_unsigned (regcache,
+				 gdbarch_sp_regnum (current_gdbarch),
+				 &saved_sp);
 
   /* Location for 8 parameters are always reserved.  */
   sp -= wordsize * 8;
@@ -1739,7 +1743,8 @@ ran_out_of_registers_for_arguments:
          to use this area.  So, update %sp first before doing anything
          else.  */
 
-      regcache_raw_write_signed (regcache, SP_REGNUM, sp);
+      regcache_raw_write_signed (regcache,
+				 gdbarch_sp_regnum (current_gdbarch), sp);
 
       /* If the last argument copied into the registers didn't fit there 
          completely, push the rest of it into stack.  */
@@ -1786,7 +1791,7 @@ ran_out_of_registers_for_arguments:
      Not doing this can lead to conflicts with the kernel which thinks
      that it still has control over this not-yet-allocated stack
      region.  */
-  regcache_raw_write_signed (regcache, SP_REGNUM, sp);
+  regcache_raw_write_signed (regcache, gdbarch_sp_regnum (current_gdbarch), sp);
 
   /* Set back chain properly.  */
   store_unsigned_integer (tmp_buffer, wordsize, saved_sp);
@@ -2210,7 +2215,7 @@ rs6000_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 	       || regnum == tdep->ppc_lr_regnum
 	       || regnum == tdep->ppc_ctr_regnum
 	       || regnum == tdep->ppc_xer_regnum
-	       || regnum == PC_REGNUM);
+	       || regnum == gdbarch_pc_regnum (current_gdbarch));
   if (group == general_reggroup)
     return general_p;
 
@@ -3119,15 +3124,16 @@ gdb_print_insn_powerpc (bfd_vma memaddr, disassemble_info *info)
 static CORE_ADDR
 rs6000_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_unwind_register_unsigned (next_frame, PC_REGNUM);
+  return frame_unwind_register_unsigned (next_frame,
+					 gdbarch_pc_regnum (current_gdbarch));
 }
 
 static struct frame_id
 rs6000_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_id_build (frame_unwind_register_unsigned (next_frame,
-							 SP_REGNUM),
-			 frame_pc_unwind (next_frame));
+  return frame_id_build (frame_unwind_register_unsigned
+			 (next_frame, gdbarch_sp_regnum (current_gdbarch)),
+			frame_pc_unwind (next_frame));
 }
 
 struct rs6000_frame_cache
@@ -3164,7 +3170,8 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
      ->frame pointed to the outer-most address of the frame.  In
      the mean time, the address of the prev frame is used as the
      base address of this frame.  */
-  cache->base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+  cache->base = frame_unwind_register_unsigned
+		(next_frame, gdbarch_sp_regnum (current_gdbarch));
 
   /* If the function appears to be frameless, check a couple of likely
      indicators that we have simply failed to find the frame setup.
@@ -3202,7 +3209,8 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
     /* Frameless really means stackless.  */
     cache->base = read_memory_addr (cache->base, wordsize);
 
-  trad_frame_set_value (cache->saved_regs, SP_REGNUM, cache->base);
+  trad_frame_set_value (cache->saved_regs,
+			gdbarch_sp_regnum (current_gdbarch), cache->base);
 
   /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr.
      All fpr's from saved_fpr to fp31 are saved.  */
@@ -3281,7 +3289,8 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (fdata.lr_offset != 0)
     cache->saved_regs[tdep->ppc_lr_regnum].addr = cache->base + fdata.lr_offset;
   /* The PC is found in the link register.  */
-  cache->saved_regs[PC_REGNUM] = cache->saved_regs[tdep->ppc_lr_regnum];
+  cache->saved_regs[gdbarch_pc_regnum (current_gdbarch)] =
+    cache->saved_regs[tdep->ppc_lr_regnum];
 
   /* If != 0, fdata.vrsave_offset is the offset from the frame that
      holds the VRSAVE.  */
@@ -3291,7 +3300,8 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (fdata.alloca_reg < 0)
     /* If no alloca register used, then fi->frame is the value of the
        %sp for this frame, and it is good enough.  */
-    cache->initial_sp = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+    cache->initial_sp = frame_unwind_register_unsigned
+			(next_frame, gdbarch_sp_regnum (current_gdbarch));
   else
     cache->initial_sp = frame_unwind_register_unsigned (next_frame,
 							fdata.alloca_reg);

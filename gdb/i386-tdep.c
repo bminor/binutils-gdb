@@ -914,7 +914,7 @@ i386_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   gdb_byte buf[8];
 
-  frame_unwind_register (next_frame, PC_REGNUM, buf);
+  frame_unwind_register (next_frame, gdbarch_pc_regnum (current_gdbarch), buf);
   return extract_typed_address (buf, builtin_type_void_func_ptr);
 }
 
@@ -1280,7 +1280,7 @@ i386_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 
   /* Don't use I386_ESP_REGNUM here, since this function is also used
      for AMD64.  */
-  get_frame_register (frame, SP_REGNUM, buf);
+  get_frame_register (frame, gdbarch_sp_regnum (current_gdbarch), buf);
   sp = extract_typed_address (buf, builtin_type_void_data_ptr);
   if (target_read_memory (sp + len, buf, len))
     return 0;

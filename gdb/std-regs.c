@@ -56,8 +56,8 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame, const void *baton)
 static struct value *
 value_of_builtin_frame_pc_reg (struct frame_info *frame, const void *baton)
 {
-  if (PC_REGNUM >= 0)
-    return value_of_register (PC_REGNUM, frame);
+  if (gdbarch_pc_regnum (current_gdbarch) >= 0)
+    return value_of_register (gdbarch_pc_regnum (current_gdbarch), frame);
   else
     {
       struct value *val = allocate_value (builtin_type_void_data_ptr);
@@ -74,20 +74,16 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame, const void *baton)
 static struct value *
 value_of_builtin_frame_sp_reg (struct frame_info *frame, const void *baton)
 {
-#ifdef SP_REGNUM
-  if (SP_REGNUM >= 0)
-    return value_of_register (SP_REGNUM, frame);
-#endif
+  if (gdbarch_sp_regnum (current_gdbarch) >= 0)
+    return value_of_register (gdbarch_sp_regnum (current_gdbarch), frame);
   error (_("Standard register ``$sp'' is not available for this target"));
 }
 
 static struct value *
 value_of_builtin_frame_ps_reg (struct frame_info *frame, const void *baton)
 {
-#ifdef PS_REGNUM
-  if (PS_REGNUM >= 0)
-    return value_of_register (PS_REGNUM, frame);
-#endif
+  if (gdbarch_ps_regnum (current_gdbarch) >= 0)
+    return value_of_register (gdbarch_ps_regnum (current_gdbarch), frame);
   error (_("Standard register ``$ps'' is not available for this target"));
 }
 

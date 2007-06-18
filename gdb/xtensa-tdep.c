@@ -209,7 +209,7 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
       || (regnum >= A0_BASE && regnum < A0_BASE + 16))
     return builtin_type_int;
 
-  if (regnum == PC_REGNUM || regnum == A1_REGNUM)
+  if (regnum == gdbarch_pc_regnum (current_gdbarch) || regnum == A1_REGNUM)
     return lookup_pointer_type (builtin_type_void);
 
   /* Return the stored type for all other registers.  */
@@ -748,10 +748,13 @@ xtensa_supply_gregset (const struct regset *regset,
 
   DEBUGTRACE ("xtensa_supply_gregset (..., regnum==%d, ...) \n", regnum);
 
-  if (regnum == PC_REGNUM || regnum == -1)
-    regcache_raw_supply (rc, PC_REGNUM, (char *) &regs->pc);
-  if (regnum == PS_REGNUM || regnum == -1)
-    regcache_raw_supply (rc, PS_REGNUM, (char *) &regs->ps);
+  if (regnum == gdbarch_pc_regnum (current_gdbarch) || regnum == -1)
+    regcache_raw_supply (rc,
+			 gdbarch_pc_regnum (current_gdbarch),
+			 (char *) &regs->pc);
+  if (regnum == gdbarch_ps_regnum (current_gdbarch) || regnum == -1)
+    regcache_raw_supply (rc, gdbarch_ps_regnum (current_gdbarch),
+			 (char *) &regs->ps);
   if (regnum == WB_REGNUM || regnum == -1)
     regcache_raw_supply (rc, WB_REGNUM, (char *) &regs->windowbase);
   if (regnum == WS_REGNUM || regnum == -1)
@@ -868,7 +871,7 @@ xtensa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
   DEBUGTRACE ("xtensa_unwind_pc (next_frame = %p)\n", next_frame);
 
-  frame_unwind_register (next_frame, PC_REGNUM, buf);
+  frame_unwind_register (next_frame, gdbarch_pc_regnum (current_gdbarch), buf);
 
   DEBUGINFO ("[xtensa_unwind_pc] pc = 0x%08x\n", (unsigned int)
 	     extract_typed_address (buf, builtin_type_void_func_ptr));
@@ -918,8 +921,10 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* Get windowbase, windowstart, ps, and pc.  */
   wb = frame_unwind_register_unsigned (next_frame, WB_REGNUM);
   ws = frame_unwind_register_unsigned (next_frame, WS_REGNUM);
-  ps = frame_unwind_register_unsigned (next_frame, PS_REGNUM);
-  pc = frame_unwind_register_unsigned (next_frame, PC_REGNUM);
+  ps = frame_unwind_register_unsigned (next_frame,
+				       gdbarch_ps_regnum (current_gdbarch));
+  pc = frame_unwind_register_unsigned (next_frame,
+				       gdbarch_pc_regnum (current_gdbarch));
 
   op1 = read_memory_integer (pc, 1);
   if (XTENSA_IS_ENTRY (op1) || !windowing_enabled (ps))
@@ -1062,9 +1067,9 @@ xtensa_frame_prev_register (struct frame_info *next_frame,
     }
   else if (regnum == WB_REGNUM)
     saved_reg = cache->wb;
-  else if (regnum == PC_REGNUM)
+  else if (regnum == gdbarch_pc_regnum (current_gdbarch))
     saved_reg = cache->pc;
-  else if (regnum == PS_REGNUM)
+  else if (regnum == gdbarch_ps_regnum (current_gdbarch))
     saved_reg = cache->ps;
   else
     done = 0;
@@ -1169,7 +1174,8 @@ xtensa_extract_return_value (struct type *type,
   gdb_assert(len > 0);
 
   /* First, we have to find the caller window in the register file.  */
-  regcache_raw_read_unsigned (regcache, PC_REGNUM, &pc);
+  regcache_raw_read_unsigned (regcache,
+			      gdbarch_pc_regnum (current_gdbarch), &pc);
   callsize = extract_call_winsize (pc);
 
   /* On Xtensa, we can return up to 4 words (or 2 when called by call12).  */
@@ -1212,7 +1218,8 @@ xtensa_store_return_value (struct type *type,
   DEBUGTRACE ("xtensa_store_return_value (...)\n");
 
   regcache_raw_read_unsigned (regcache, WB_REGNUM, &wb);
-  regcache_raw_read_unsigned (regcache, PC_REGNUM, &pc);
+  regcache_raw_read_unsigned (regcache,
+			      gdbarch_pc_regnum (current_gdbarch), &pc);
   callsize = extract_call_winsize (pc);
 
   if (len > (callsize > 8 ? 8 : 16))
@@ -1492,10 +1499,12 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
      saved in the dummy frame, so we can savely overwrite A0 here.  */
 
   ra = (bp_addr & 0x3fffffff) | 0x40000000;
-  regcache_raw_read (regcache, PS_REGNUM, buf);
+  regcache_raw_read (regcache, gdbarch_ps_regnum (current_gdbarch), buf);
   ps = extract_unsigned_integer (buf, 4) & ~0x00030000;
   regcache_cooked_write_unsigned (regcache, A4_REGNUM, ra);
-  regcache_cooked_write_unsigned (regcache, PS_REGNUM, ps | 0x00010000);
+  regcache_cooked_write_unsigned (regcache,
+				  gdbarch_ps_regnum (current_gdbarch),
+				  ps | 0x00010000);
 
   /* Set new stack pointer and return it.  */
   regcache_cooked_write_unsigned (regcache, A1_REGNUM, sp);

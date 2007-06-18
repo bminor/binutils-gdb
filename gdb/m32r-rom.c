@@ -276,9 +276,11 @@ m32r_supply_register (struct regcache *regcache, char *regname,
 	  stackmode = psw & 0x80;
 
 	  if (regno == SPI_REGNUM && !stackmode)	/* SP == SPI */
-	    monitor_supply_register (regcache, SP_REGNUM, val);
+	    monitor_supply_register (regcache,
+				     gdbarch_sp_regnum (current_gdbarch), val);
 	  else if (regno == SPU_REGNUM && stackmode)	/* SP == SPU */
-	    monitor_supply_register (regcache, SP_REGNUM, val);
+	    monitor_supply_register (regcache,
+				     gdbarch_sp_regnum (current_gdbarch), val);
 	}
     }
 }

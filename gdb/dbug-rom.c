@@ -51,12 +51,12 @@ dbug_supply_register (struct regcache *regcache, char *regname,
     case 'S':
       if (regname[1] != 'R')
 	return;
-      regno = PS_REGNUM;
+      regno = gdbarch_ps_regnum (current_gdbarch);
       break;
     case 'P':
       if (regname[1] != 'C')
 	return;
-      regno = PC_REGNUM;
+      regno = gdbarch_pc_regnum (current_gdbarch);
       break;
     case 'D':
       if (regname[1] < '0' || regname[1] > '7')

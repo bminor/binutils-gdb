@@ -192,43 +192,19 @@ extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at
    all (-1).
-   SP_REGNUM will hopefully be replaced by UNWIND_SP. */
+   gdbarch_sp_regnum will hopefully be replaced by UNWIND_SP. */
 
 extern int gdbarch_sp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_sp_regnum (struct gdbarch *gdbarch, int sp_regnum);
-#if !defined (GDB_TM_FILE) && defined (SP_REGNUM)
-#error "Non multi-arch definition of SP_REGNUM"
-#endif
-#if !defined (SP_REGNUM)
-#define SP_REGNUM (gdbarch_sp_regnum (current_gdbarch))
-#endif
 
 extern int gdbarch_pc_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_pc_regnum (struct gdbarch *gdbarch, int pc_regnum);
-#if !defined (GDB_TM_FILE) && defined (PC_REGNUM)
-#error "Non multi-arch definition of PC_REGNUM"
-#endif
-#if !defined (PC_REGNUM)
-#define PC_REGNUM (gdbarch_pc_regnum (current_gdbarch))
-#endif
 
 extern int gdbarch_ps_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_ps_regnum (struct gdbarch *gdbarch, int ps_regnum);
-#if !defined (GDB_TM_FILE) && defined (PS_REGNUM)
-#error "Non multi-arch definition of PS_REGNUM"
-#endif
-#if !defined (PS_REGNUM)
-#define PS_REGNUM (gdbarch_ps_regnum (current_gdbarch))
-#endif
 
 extern int gdbarch_fp0_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_fp0_regnum (struct gdbarch *gdbarch, int fp0_regnum);
-#if !defined (GDB_TM_FILE) && defined (FP0_REGNUM)
-#error "Non multi-arch definition of FP0_REGNUM"
-#endif
-#if !defined (FP0_REGNUM)
-#define FP0_REGNUM (gdbarch_fp0_regnum (current_gdbarch))
-#endif
 
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM. */
 

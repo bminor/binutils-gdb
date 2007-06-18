@@ -839,11 +839,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: float_format = %s\n",
                       pformat (current_gdbarch->float_format));
-#ifdef FP0_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: FP0_REGNUM # %s\n",
-                      XSTRING (FP0_REGNUM));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: fp0_regnum = %s\n",
                       paddr_d (current_gdbarch->fp0_regnum));
@@ -928,11 +923,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: overlay_update = <0x%lx>\n",
                       (long) current_gdbarch->overlay_update);
-#ifdef PC_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PC_REGNUM # %s\n",
-                      XSTRING (PC_REGNUM));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: pc_regnum = %s\n",
                       paddr_d (current_gdbarch->pc_regnum));
@@ -963,11 +953,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: print_vector_info = <0x%lx>\n",
                       (long) current_gdbarch->print_vector_info);
-#ifdef PS_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: PS_REGNUM # %s\n",
-                      XSTRING (PS_REGNUM));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: ps_regnum = %s\n",
                       paddr_d (current_gdbarch->ps_regnum));
@@ -1085,11 +1070,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: software_single_step = <0x%lx>\n",
                       (long) current_gdbarch->software_single_step);
-#ifdef SP_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: SP_REGNUM # %s\n",
-                      XSTRING (SP_REGNUM));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: sp_regnum = %s\n",
                       paddr_d (current_gdbarch->sp_regnum));

@@ -189,8 +189,10 @@ legacy_virtual_frame_pointer (CORE_ADDR pc,
   if (DEPRECATED_FP_REGNUM >= 0
       && DEPRECATED_FP_REGNUM < gdbarch_num_regs (current_gdbarch))
     *frame_regnum = DEPRECATED_FP_REGNUM;
-  else if (SP_REGNUM >= 0 && SP_REGNUM < gdbarch_num_regs (current_gdbarch))
-    *frame_regnum = SP_REGNUM;
+  else if (gdbarch_sp_regnum (current_gdbarch) >= 0
+	   && gdbarch_sp_regnum (current_gdbarch)
+	        < gdbarch_num_regs (current_gdbarch))
+    *frame_regnum = gdbarch_sp_regnum (current_gdbarch);
   else
     /* Should this be an internal error?  I guess so, it is reflecting
        an architectural limitation in the current design.  */

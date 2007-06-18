@@ -37,7 +37,7 @@
 /* Determine if PT_GETREGS fetches this register. */
 #define GETREGS_SUPPLIES(regno) \
   (((regno) >= R0_REGNUM && (regno) <= (R0_REGNUM + 15)) \
-|| (regno) == PC_REGNUM || (regno) == PR_REGNUM \
+|| (regno) == gdbarch_pc_regnum (current_gdbarch) || (regno) == PR_REGNUM \
 || (regno) == MACH_REGNUM || (regno) == MACL_REGNUM \
 || (regno) == SR_REGNUM)
 

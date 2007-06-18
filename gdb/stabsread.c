@@ -1030,7 +1030,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 			       gdbarch_num_regs (current_gdbarch)
 				 + gdbarch_num_pseudo_regs (current_gdbarch),
 			       SYMBOL_PRINT_NAME (sym));
-	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
+	  SYMBOL_VALUE (sym) = gdbarch_sp_regnum (current_gdbarch);
+	  /* Known safe, though useless */
 	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
@@ -1048,7 +1049,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 			       gdbarch_num_regs (current_gdbarch)
 				 + gdbarch_num_pseudo_regs (current_gdbarch),
 			       SYMBOL_PRINT_NAME (sym));
-	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
+	  SYMBOL_VALUE (sym) = gdbarch_sp_regnum (current_gdbarch);
+	  /* Known safe, though useless */
 	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       if (within_function)
@@ -1322,7 +1324,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 			       gdbarch_num_regs (current_gdbarch)
 				 + gdbarch_num_pseudo_regs (current_gdbarch),
 			       SYMBOL_PRINT_NAME (sym));
-	  SYMBOL_VALUE (sym) = SP_REGNUM;	/* Known safe, though useless */
+	  SYMBOL_VALUE (sym) = gdbarch_sp_regnum (current_gdbarch);
+	  /* Known safe, though useless */
 	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);

@@ -1751,7 +1751,7 @@ mips_insn16_frame_cache (struct frame_info *next_frame, void **this_cache)
     mips16_scan_prologue (start_addr, pc, next_frame, *this_cache);
   }
   
-  /* SP_REGNUM, contains the value and not the address.  */
+  /* gdbarch_sp_regnum contains the value and not the address.  */
   trad_frame_set_value (cache->saved_regs, gdbarch_num_regs (current_gdbarch)
 					   + MIPS_SP_REGNUM, cache->base);
 
@@ -2086,7 +2086,7 @@ mips_insn32_frame_cache (struct frame_info *next_frame, void **this_cache)
     mips32_scan_prologue (start_addr, pc, next_frame, *this_cache);
   }
   
-  /* SP_REGNUM, contains the value and not the address.  */
+  /* gdbarch_sp_regnum contains the value and not the address.  */
   trad_frame_set_value (cache->saved_regs,
 			gdbarch_num_regs (current_gdbarch) + MIPS_SP_REGNUM,
 			cache->base);
@@ -2173,7 +2173,9 @@ mips_stub_frame_cache (struct frame_info *next_frame, void **this_cache)
   (*this_cache) = this_trad_cache;
 
   /* The return address is in the link register.  */
-  trad_frame_set_reg_realreg (this_trad_cache, PC_REGNUM, MIPS_RA_REGNUM);
+  trad_frame_set_reg_realreg (this_trad_cache,
+			      gdbarch_pc_regnum (current_gdbarch),
+			      MIPS_RA_REGNUM);
 
   /* Frame ID, since it's a frameless / stackless function, no stack
      space is allocated and SP on entry is the current SP.  */
@@ -5195,7 +5197,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	else
 	  reg_names = mips_generic_reg_names;
       }
-    /* FIXME: cagney/2003-11-15: For MIPS, hasn't PC_REGNUM been
+    /* FIXME: cagney/2003-11-15: For MIPS, hasn't gdbarch_pc_regnum been
        replaced by read_pc?  */
     set_gdbarch_pc_regnum (gdbarch, regnum->pc + num_regs);
     set_gdbarch_sp_regnum (gdbarch, MIPS_SP_REGNUM + num_regs);

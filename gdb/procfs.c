@@ -3709,13 +3709,13 @@ procfs_fetch_registers (struct regcache *regcache, int regnum)
 
   supply_gregset (regcache, (const gdb_gregset_t *) gregs);
 
-  if (FP0_REGNUM >= 0)		/* Do we have an FPU?  */
+  if (gdbarch_fp0_regnum (current_gdbarch) >= 0) /* Do we have an FPU?  */
     {
       gdb_fpregset_t *fpregs;
 
-      if ((regnum >= 0 && regnum < FP0_REGNUM)
-	  || regnum == PC_REGNUM
-	  || regnum == SP_REGNUM)
+      if ((regnum >= 0 && regnum < gdbarch_fp0_regnum (current_gdbarch))
+	  || regnum == gdbarch_pc_regnum (current_gdbarch)
+	  || regnum == gdbarch_sp_regnum (current_gdbarch))
 	return;			/* Not a floating point register.  */
 
       fpregs = proc_get_fpregs (pi);
@@ -3776,13 +3776,13 @@ procfs_store_registers (struct regcache *regcache, int regnum)
   if (!proc_set_gregs (pi))
     proc_error (pi, "store_registers, set_gregs", __LINE__);
 
-  if (FP0_REGNUM >= 0)		/* Do we have an FPU?  */
+  if (gdbarch_fp0_regnum (current_gdbarch) >= 0) /* Do we have an FPU?  */
     {
       gdb_fpregset_t *fpregs;
 
-      if ((regnum >= 0 && regnum < FP0_REGNUM)
-	  || regnum == PC_REGNUM
-	  || regnum == SP_REGNUM)
+      if ((regnum >= 0 && regnum < gdbarch_fp0_regnum (current_gdbarch))
+	  || regnum == gdbarch_pc_regnum (current_gdbarch)
+	  || regnum == gdbarch_sp_regnum (current_gdbarch))
 	return;			/* Not a floating point register.  */
 
       fpregs = proc_get_fpregs (pi);
@@ -4413,7 +4413,7 @@ invalidate_cache (procinfo *parent, procinfo *pi, void *ptr)
       if (!proc_set_gregs (pi))	/* flush gregs cache */
 	proc_warn (pi, "target_resume, set_gregs",
 		   __LINE__);
-  if (FP0_REGNUM >= 0)
+  if (gdbarch_fp0_regnum (current_gdbarch) >= 0)
     if (pi->fpregs_dirty)
       if (parent == NULL ||
 	  proc_get_current_thread (parent) != pi->tid)

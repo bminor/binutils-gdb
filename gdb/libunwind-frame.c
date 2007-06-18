@@ -179,7 +179,7 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
     }
 
   /* To get base address, get sp from previous frame.  */
-  uw_sp_regnum = descr->gdb2uw (SP_REGNUM);
+  uw_sp_regnum = descr->gdb2uw (gdbarch_sp_regnum (current_gdbarch));
   ret = unw_get_reg_p (&cache->cursor, uw_sp_regnum, &fp);
   if (ret < 0)
     {

@@ -40,7 +40,7 @@ struct regcache;
    - SSE control register
 
    The general purpose registers for the x86-64 architecture are quite
-   different from IA-32.  Therefore, the FP0_REGNUM target macro
+   different from IA-32.  Therefore, gdbarch_fp0_regnum
    determines the register number at which the FPU data registers
    start.  The number of FPU data and control registers is the same
    for both architectures.  The number of SSE registers however,

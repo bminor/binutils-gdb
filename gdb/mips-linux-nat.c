@@ -104,7 +104,7 @@ mips64_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
     regaddr = regno;
   else if ((regno >= mips_regnum (gdbarch)->fp0)
 	   && (regno < mips_regnum (gdbarch)->fp0 + 32))
-    regaddr = MIPS64_FPR_BASE + (regno - FP0_REGNUM);
+    regaddr = MIPS64_FPR_BASE + (regno - gdbarch_fp0_regnum (current_gdbarch));
   else if (regno == mips_regnum (gdbarch)->pc)
     regaddr = MIPS64_PC;
   else if (regno == mips_regnum (gdbarch)->cause)

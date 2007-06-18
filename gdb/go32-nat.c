@@ -467,7 +467,7 @@ go32_wait (ptid_t ptid, struct target_waitstatus *status)
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
-  if (regno < FP0_REGNUM)
+  if (regno < gdbarch_fp0_regnum (current_gdbarch))
     regcache_raw_supply (regcache, regno,
 			 (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
@@ -484,7 +484,7 @@ go32_fetch_registers (struct regcache *regcache, int regno)
     fetch_register (regcache, regno);
   else
     {
-      for (regno = 0; regno < FP0_REGNUM; regno++)
+      for (regno = 0; regno < gdbarch_fp0_regnum (current_gdbarch); regno++)
 	fetch_register (regcache, regno);
       i387_supply_fsave (regcache, -1, &npx);
     }
@@ -493,7 +493,7 @@ go32_fetch_registers (struct regcache *regcache, int regno)
 static void
 store_register (const struct regcache *regcache, int regno)
 {
-  if (regno < FP0_REGNUM)
+  if (regno < gdbarch_fp0_regnum (current_gdbarch))
     regcache_raw_collect (regcache, regno,
 			  (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
@@ -512,7 +512,7 @@ go32_store_registers (struct regcache *regcache, int regno)
     store_register (regcache, regno);
   else
     {
-      for (r = 0; r < FP0_REGNUM; r++)
+      for (r = 0; r < gdbarch_fp0_regnum (current_gdbarch); r++)
 	store_register (regcache, r);
       i387_collect_fsave (regcache, -1, &npx);
     }

@@ -146,7 +146,7 @@ mipsnbsd_supply_reg (struct regcache *regcache, const char *regs, int regno)
 {
   int i;
 
-  for (i = 0; i <= PC_REGNUM; i++)
+  for (i = 0; i <= gdbarch_pc_regnum (current_gdbarch); i++)
     {
       if (regno == i || regno == -1)
 	{
@@ -164,7 +164,7 @@ mipsnbsd_fill_reg (const struct regcache *regcache, char *regs, int regno)
 {
   int i;
 
-  for (i = 0; i <= PC_REGNUM; i++)
+  for (i = 0; i <= gdbarch_pc_regnum (current_gdbarch); i++)
     if ((regno == i || regno == -1)
 	&& ! gdbarch_cannot_store_register (current_gdbarch, i))
       regcache_raw_collect (regcache, i,
@@ -176,7 +176,7 @@ mipsnbsd_supply_fpreg (struct regcache *regcache, const char *fpregs, int regno)
 {
   int i;
 
-  for (i = FP0_REGNUM;
+  for (i = gdbarch_fp0_regnum (current_gdbarch);
        i <= mips_regnum (current_gdbarch)->fp_implementation_revision;
        i++)
     {
@@ -186,7 +186,9 @@ mipsnbsd_supply_fpreg (struct regcache *regcache, const char *fpregs, int regno)
 	    regcache_raw_supply (regcache, i, NULL);
 	  else
             regcache_raw_supply (regcache, i,
-				 fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
+				 fpregs 
+				 + ((i - gdbarch_fp0_regnum (current_gdbarch))
+				    * mips_isa_regsize (current_gdbarch)));
 	}
     }
 }
@@ -196,12 +198,15 @@ mipsnbsd_fill_fpreg (const struct regcache *regcache, char *fpregs, int regno)
 {
   int i;
 
-  for (i = FP0_REGNUM; i <= mips_regnum (current_gdbarch)->fp_control_status;
+  for (i = gdbarch_fp0_regnum (current_gdbarch);
+       i <= mips_regnum (current_gdbarch)->fp_control_status;
        i++)
     if ((regno == i || regno == -1) 
 	&& ! gdbarch_cannot_store_register (current_gdbarch, i))
       regcache_raw_collect (regcache, i,
-			    fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
+			    fpregs + ((i - gdbarch_fp0_regnum
+					     (current_gdbarch))
+			      * mips_isa_regsize (current_gdbarch)));
 }
 
 /* Under NetBSD/mips, signal handler invocations can be identified by the
