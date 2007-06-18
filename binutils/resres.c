@@ -554,10 +554,12 @@ read_unistring (windres_bfd *wrbfd, rc_uint_type *off, rc_uint_type omax,
   rc_uint_type l;
   rc_uint_type soff = off[0];
 
-  do {
-    read_res_data (wrbfd, &soff, omax, d, sizeof (unichar));
-    c = windres_get_16 (wrbfd, d, 2);
-  } while (c != 0);
+  do
+    {
+      read_res_data (wrbfd, &soff, omax, d, sizeof (unichar));
+      c = windres_get_16 (wrbfd, d, 2);
+    }
+  while (c != 0);
   l = ((soff - off[0]) / sizeof (unichar));
 
   /* there are hardly any names longer than 256 characters, but anyway. */
@@ -592,8 +594,11 @@ probe_binary (windres_bfd *wrbfd, rc_uint_type omax)
   if ((off + BIN_RES_HDR_SIZE) >= omax)
     return 1;
   read_res_data_hdr (wrbfd, &off, omax, &reshdr);
-  if ((off + reshdr.data_size + reshdr.header_size) > omax)
-      return 0;
+  /* off is advanced by BIN_RES_HDR_SIZE in read_res_data_hdr()
+     which is part of reshdr.header_size. We shouldn't take it
+     into account twice.  */
+  if ((off - BIN_RES_HDR_SIZE + reshdr.data_size + reshdr.header_size) > omax)
+    return 0;
   return 1;
 }
 

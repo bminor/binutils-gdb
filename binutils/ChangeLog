@@ -1,3 +1,7 @@
+2007-06-18  Thomas Weidenmueller  <w3seek@reactos.org>
+
+	* resres.c (probe_binary): Fix test for badly formatted headers.
+
 2007-06-18  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* rclex.c: (cpp_line): Add code_page pragma support.
