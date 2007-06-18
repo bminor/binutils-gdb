@@ -1,3 +1,7 @@
+2007-06-18  Andreas Schwab  <schwab@suse.de>
+
+	* ld-scripts/cross3.t: Add .opd section.
+
 2007-06-18  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/alignof.s: New.
