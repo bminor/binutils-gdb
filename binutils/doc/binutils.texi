@@ -3011,6 +3011,13 @@ Ignored for compatibility with rc.
 Enable verbose mode.  This tells you what the preprocessor is if you
 didn't specify one.
 
+@item -c @var{val}
+@item --codepage @var{val}
+Specify the default codepage to use when reading an @code{rc} file.
+@var{val} should be a hexadecimal prefixed by @samp{0x} or decimal
+codepage code. The valid range is from zero up to 0xffff, but the
+validity of the codepage is host and configuration dependent.
+
 @item -l @var{val}
 @item --language @var{val}
 Specify the default language to use when reading an @code{rc} file.
