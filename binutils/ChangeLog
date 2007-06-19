@@ -1,3 +1,18 @@
+2007-06-19  Kai Tietz   <kai.tietz@onevision.com>
+
+        * Makefile.am: Add windmc tool.
+        * Makefile.in: Regenerate.
+        * configure.in: Add windmc tool.
+        * configure: Regenerate.
+        * mclex.c: New.
+        * mcparse.y: New.
+        * windmc.c: New.
+        * windmc.h: New.
+        * doc/Makefile.am: Add windmc tool.
+        * doc/Makefile.in: Regenerate.
+        * doc/binutils.texi: Add windmc documentation.
+	* NEWS: Mention new tool.
+
 2007-06-18  Andi Kleen  <ak@suse.de>
 
 	* objdump.c: Include sys/mman.h 
@@ -28,7 +43,7 @@
 	* winduni.h:  (wind_default_codepage, wind_current_codepage):
 	Export.
 	* doc/binutils.texi: Document new option.
-	* NEWS: Mention new feature.
+	* NEWS: Mention new features of windres.
 
 2007-06-18  Brian D. Watt <bwatt@us.ibm.com>
 

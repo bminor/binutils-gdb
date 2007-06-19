@@ -48,18 +48,19 @@ ADDR2LINE_PROG=addr2line
 NLMCONV_PROG=nlmconv
 DLLTOOL_PROG=dlltool
 WINDRES_PROG=windres
+WINDMC_PROG=windmc
 DLLWRAP_PROG=dllwrap
 
 SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT)
 
-bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_INSTALL_MISC@
+bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ @BUILD_WINDMC@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_INSTALL_MISC@
 
 ## We need a special rule to install the programs which are built with
 ## -new, and to rename cxxfilt to c++filt.
 RENAMED_PROGS = $(NM_PROG) $(STRIP_PROG) $(DEMANGLER_PROG)
 noinst_PROGRAMS = $(RENAMED_PROGS) @BUILD_MISC@
 
-EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) $(WINDRES_PROG) $(DLLWRAP_PROG)
+EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) $(WINDRES_PROG) $(WINDMC_PROG) $(DLLWRAP_PROG)
 
 # Stuff that goes in tooldir/ if appropriate.
 TOOL_PROGS = nm-new strip-new ar ranlib dlltool objdump objcopy
@@ -80,9 +81,10 @@ INCLUDES = -D_GNU_SOURCE \
 HFILES = \
 	arsup.h binemul.h bucomm.h budbg.h \
 	coffgrok.h debug.h dlltool.h nlmconv.h \
-	windres.h winduni.h windint.h
+	windres.h winduni.h windint.h \
+	windmc.h
 
-GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h rcparse.h
+GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h rcparse.h mcparse.h
 
 CFILES = \
 	addr2line.c ar.c arsup.c bin2c.c binemul.c bucomm.c \
@@ -95,11 +97,12 @@ CFILES = \
 	rclex.c rdcoff.c rddbg.c readelf.c rename.c \
 	resbin.c rescoff.c resrc.c resres.c \
 	size.c srconv.c stabs.c strings.c sysdump.c version.c \
-	windres.c winduni.c wrstabs.c
+	windres.c winduni.c wrstabs.c \
+	windmc.c mclex.c
 
 GENERATED_CFILES = \
 	arparse.c arlex.c sysroff.c sysinfo.c syslex.c \
-	defparse.c deflex.c nlmheader.c rcparse.c
+	defparse.c deflex.c nlmheader.c rcparse.c mcparse.c
 
 DEBUG_SRCS = rddbg.c debug.c stabs.c ieee.c rdcoff.c
 WRITE_DEBUG_SRCS = $(DEBUG_SRCS) wrstabs.c
@@ -198,6 +201,7 @@ sysdump_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 coffdump_DEPENDENCIES =  $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 dlltool_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 windres_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBICONV) $(LIBIBERTY) $(BFDLIB)
+windmc_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBICONV) $(LIBIBERTY) $(BFDLIB)
 addr2line_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 readelf_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY)
 dllwrap_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY)
@@ -290,6 +294,7 @@ arparse.h: arparse.c
 defparse.h: defparse.c
 nlmheader.h: nlmheader.c
 rcparse.h: rcparse.c
+mcparse.h: mcparse.c
 sysinfo.h: sysinfo.c
 
 # Disable -Werror, if it has been enabled, since old versions of bison/
@@ -308,7 +313,11 @@ nlmheader.o:
 	$(COMPILE) -c $< $(NO_WERROR)
 rcparse.o:
 	$(COMPILE) -c $< $(NO_WERROR)
+mcparse.o:
+	$(COMPILE) -c $< $(NO_WERROR)
 rclex.o:
+	$(COMPILE) -c $< $(NO_WERROR)
+mclex.o:
 	$(COMPILE) -c $< $(NO_WERROR)
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
@@ -338,12 +347,17 @@ windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.c \
 	winduni.c resres.c $(BULIBS)
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
 
+windmc_SOURCES = windmc.c mcparse.y mclex.c \
+	winduni.c $(BULIBS)
+windmc_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
+
 dllwrap_SOURCES = dllwrap.c version.c
 dllwrap_LDADD = $(LIBIBERTY) $(LIBINTL)
 
 
 EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
-	syslex.c deflex.c defparse.h defparse.c rcparse.h rcparse.c
+	syslex.c deflex.c defparse.h defparse.c rcparse.h rcparse.c \
+	mcparse.h mcparse.c
 
 diststuff: $(EXTRA_DIST) info
 all: info
@@ -626,6 +640,11 @@ windres.o: windres.c sysdep.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
   bucomm.h windres.h winduni.h windint.h
+windmc.o: windmc.c sysdep.h $(INCDIR)/ansidecl.h \
+  ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
+  bucomm.h windmc.h winduni.h windint.h
 winduni.o: winduni.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h winduni.h $(INCDIR)/safe-ctype.h
@@ -659,8 +678,17 @@ rcparse.o: rcparse.c sysdep.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h windres.h winduni.h windint.h \
   $(INCDIR)/safe-ctype.h
+mcparse.o: mcparse.c sysdep.h $(INCDIR)/ansidecl.h \
+  ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h windmc.h winduni.h \
+  $(INCDIR)/safe-ctype.h
 rclex.o: rclex.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/safe-ctype.h windres.h winduni.h windint.h rcparse.h
+mclex.o: mclex.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
+  config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/safe-ctype.h windmc.h winduni.h mcparse.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

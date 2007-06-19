@@ -93,6 +93,7 @@ BUILD_INSTALL_MISC = @BUILD_INSTALL_MISC@
 BUILD_MISC = @BUILD_MISC@
 BUILD_NLMCONV = @BUILD_NLMCONV@
 BUILD_SRCONV = @BUILD_SRCONV@
+BUILD_WINDMC = @BUILD_WINDMC@
 BUILD_WINDRES = @BUILD_WINDRES@
 CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
@@ -249,6 +250,7 @@ man_MANS = \
 	strings.1 \
 	strip.1 \
 	windres.1 \
+	windmc.1 \
 	$(DEMANGLER_NAME).1
 
 info_TEXINFOS = binutils.texi
@@ -280,9 +282,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  doc/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  doc/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --cygnus  doc/Makefile
+	  $(AUTOMAKE) --foreign  doc/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -678,6 +680,13 @@ windres.1:	$(binutils_TEXI) $(binutils_TEXINFOS)
 	-($(POD2MAN) windres.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f windres.pod
+
+windmc.1:	$(binutils_TEXI) $(binutils_TEXINFOS)
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dwindmc < $(binutils_TEXI) > windmc.pod
+	-($(POD2MAN) windmc.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f windmc.pod
 
 cxxfilt.man:	$(binutils_TEXI) $(binutils_TEXINFOS)
 	touch $@

@@ -25,6 +25,7 @@ START-INFO-DIR-ENTRY
 * addr2line: (binutils)addr2line. Convert addresses to file and line
 * nlmconv: (binutils)nlmconv.     Converts object code into an NLM
 * windres: (binutils)windres.	  Manipulate Windows resources
+* windmc: (binutils)windmc.	  Generator for Windows message resources
 * dlltool: (binutils)dlltool.	  Create files needed to build and use DLLs
 END-INFO-DIR-ENTRY
 @end format
@@ -145,6 +146,9 @@ Convert object code into a Netware Loadable Module
 @item windres
 Manipulate Windows resources
 
+@item windmc
+Genertor for Windows message resources
+
 @item dlltool
 Create the files needed to build and use Dynamic Link Libraries
 @end table
@@ -169,6 +173,7 @@ section entitled "GNU Free Documentation License".
 * addr2line::			Convert addresses to file and line
 * nlmconv::                     Converts object code into an NLM
 * windres::			Manipulate Windows resources
+* windmc::			Generator for Windows message resources
 * dlltool::			Create files needed to build and use DLLs
 * Common Options::              Command-line options for all utilities
 * Selecting The Target System:: How these utilities determine the target.
@@ -2865,6 +2870,168 @@ Prints the version number for @command{nlmconv}.
 
 @ignore
 @c man begin SEEALSO nlmconv
+the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
+@node windmc
+@chapter windmc
+
+@command{windmc} may be used to generator Windows message resources.
+
+@quotation
+@emph{Warning:} @command{windmc} is not always built as part of the binary
+utilities, since it is only useful for Windows targets.
+@end quotation
+
+@c man title windmc generates Windows message resources.
+
+@smallexample
+@c man begin SYNOPSIS windres
+windmc [options] input-file
+@c man end
+@end smallexample
+
+@c man begin DESCRIPTION windmc
+
+@command{windmc} reads message definitions from an input file (.mc) and
+translate them into a set of output files.  The output files may be of
+four kinds:
+
+@table @code
+@item h
+A C header file containing the message definitions.
+
+@item rc
+A resource file compilable by the @command{windres} tool.
+
+@item bin
+One or more binary files containing the resource data for a specific
+message language.
+
+@item dbg
+A C include file that maps message id's to their symbolic name.
+@end table
+
+The exact description of these different formats is available in
+documentation from Microsoft.
+
+When @command{windmc} converts from the @code{mc} format to the @code{bin}
+format, @code{rc}, @code{h}, and optional @code{dbg} it is acting like the
+Windows Message Compiler.
+
+@c man end
+
+@c man begin OPTIONS windmc
+
+@table @env
+@item -a
+@itemx --ascii_in
+Specifies that the input file specified is ANSI. This is the default
+behaviour.
+
+@item -A
+@itemx --ascii_out
+Specifies that messages in the output @code{bin} files should be in ANSI
+format.
+
+@item -b
+@itemx --binprefix
+Specifies that @code{bin} filenames should have to be prefixed by the
+basename of the source file.
+
+@item -c
+@itemx --customflag
+Sets the customer bit in all message id's.
+
+@item -C @var{codepage}
+@itemx --codepage_in @var{codepage}
+Sets the default codepage to be used to convert input file to UTF16. The
+default is ocdepage 1252.
+
+@item -d
+@itemx --decimal_values
+Outputs the constants in the header file in decimal. Default is using
+hexadecimal output.
+
+@item -e @var{ext}
+@itemx --extension @var{ext}
+The extension for the header file. The default is .h extension.
+
+@item -F @var{target}
+@itemx --target @var{target}
+Specify the BFD format to use for a bin file as output.  This
+is a BFD target name; you can use the @option{--help} option to see a list
+of supported targets.  Normally @command{windmc} will use the default
+format, which is the first one listed by the @option{--help} option.
+@ifclear man
+@ref{Target Selection}.
+@end ifclear
+
+@item -h @var{path}
+@itemx --headerdir @var{path}
+The target directory of the generated header file. The default is the
+current directory.
+
+@item -H
+@itemx --help
+Displays a list of command line options and then exits.
+
+@item -m @var{characters}
+@itemx --maxlength @var{characters}
+Instructs @command{windmc} to generate a warning if the length
+of any message exceeds the number specified.
+
+@item -n
+@itemx --nullterminate
+Terminate message text in @code{bin} files by zero. By default they are
+terminated by CR/LF.
+
+@item -o
+@itemx --hresult_use
+Not yet implemented. Instructs @code{windmc} to generate an OLE2 header
+file, using HRESULT definitions. Status codes are used if the flag is not
+specified.
+
+@item -O @var{codepage}
+@itemx --codepage_out @var{codepage}
+Sets the default codepage to be used to output text files. The default
+is ocdepage 1252.
+
+@item -r @var{path}
+@itemx --rcdir @var{path}
+The target directory for the generated @code{rc} script and the generated
+@code{bin} files that the resource compiler script includes. The default
+is the current directory.
+
+@item -u
+@itemx --unicode_in
+Specifies that the input file is UTF16.
+
+@item -U
+@itemx --unicode_out
+Specifies that messages in the output @code{bin} file should be in UTF16
+format. This is the default behaviour.
+
+@item -v
+@item --verbose
+Enable verbose mode.  This tells you what the preprocessor is if you
+didn't specify one.
+
+@item -V
+@item --version
+Prints the version number for @command{windres}.
+
+@item -x @var{path}
+@itemx --xdgb @var{path}
+The path of the @code{dbg} C include file that maps message id's to the
+symbolic name. No such file is generated without specifying the switch.
+@end table
+
+@c man end
+
+@ignore
+@c man begin SEEALSO windmc
 the Info entries for @file{binutils}.
 @c man end
 @end ignore

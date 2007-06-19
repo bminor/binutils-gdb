@@ -28,6 +28,7 @@ man_MANS = \
 	strings.1 \
 	strip.1 \
 	windres.1 \
+	windmc.1 \
 	$(DEMANGLER_NAME).1
 
 info_TEXINFOS = binutils.texi
@@ -129,6 +130,13 @@ windres.1:	$(binutils_TEXI) $(binutils_TEXINFOS)
 	-($(POD2MAN) windres.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f windres.pod
+
+windmc.1:	$(binutils_TEXI) $(binutils_TEXINFOS)
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dwindmc < $(binutils_TEXI) > windmc.pod
+	-($(POD2MAN) windmc.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f windmc.pod
 
 cxxfilt.man:	$(binutils_TEXI) $(binutils_TEXINFOS)
 	touch $@

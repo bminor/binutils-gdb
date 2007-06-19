@@ -1,6 +1,14 @@
 -*- text -*-
 
-* Add codepage support to the windres tool.
+* A new tool "windmc" has been added for some targets.  This is a message
+  compiler which attempts to be compatible with the MS version.
+
+* Add codepage support to the windres tool.  It now supports many new
+  resource types (e.g. MANIFEST, TOOLBAR, etc).  The output generation
+  for binary files is done now via bfd itself.  The endianess problems
+  for different hosts are solved.  Dumps of .res files can now be
+  re-compiled by windres without lossing resources or compilation errors.
+  Some problems on dialog resource translations are corrected.
 
 * Add --extract-symbol command line option to objcopy, which will
   strip everything out of an ordinary object file or executable except
