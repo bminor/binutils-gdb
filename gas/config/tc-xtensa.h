@@ -228,7 +228,9 @@ struct xtensa_frag_type
      variable points to the frag where the literal will be stored.  For
      literal frags, this variable points to the nearest literal pool
      location frag.  This literal frag will be moved to after this
-     location.  */
+     location.  For RELAX_LITERAL_POOL_BEGIN frags, this field points
+     to the frag immediately before the corresponding RELAX_LITERAL_POOL_END
+     frag, to make moving frags for this literal pool efficient.  */
   fragS *literal_frag;
 
   /* The destination segment for literal frags.  (Note that this is only

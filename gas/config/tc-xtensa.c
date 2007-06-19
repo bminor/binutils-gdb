@@ -4548,6 +4548,7 @@ xtensa_mark_literal_pool_location (void)
      fixes into this frchain's fix list.  */
   pool_location = frag_now;
   frag_now->tc_frag_data.lit_frchain = frchain_now;
+  frag_now->tc_frag_data.literal_frag = frag_now;
   frag_variant (rs_machine_dependent, 0, 0,
 		RELAX_LITERAL_POOL_BEGIN, NULL, 0, NULL);
   xtensa_set_frag_assembly_state (frag_now);
@@ -9817,17 +9818,14 @@ xtensa_move_literals (void)
 	      frchain_to = literal_pool->tc_frag_data.lit_frchain;
 	      assert (frchain_to);
 	    }
-	  insert_after = literal_pool;
-
-	  while (insert_after->fr_next->fr_subtype != RELAX_LITERAL_POOL_END)
-	    insert_after = insert_after->fr_next;
-
+	  insert_after = literal_pool->tc_frag_data.literal_frag;
 	  dest_seg = insert_after->fr_next->tc_frag_data.lit_seg;
 
 	  *frag_splice = next_frag;
 	  search_frag->fr_next = insert_after->fr_next;
 	  insert_after->fr_next = search_frag;
 	  search_frag->tc_frag_data.lit_seg = dest_seg;
+	  literal_pool->tc_frag_data.literal_frag = search_frag;
 
 	  /* Now move any fixups associated with this frag to the
 	     right section.  */

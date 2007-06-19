@@ -1,3 +1,12 @@
+2007-06-19  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.h (struct xtensa_frag_type): Update comment about
+	use of literal_frag field.
+	* config/tc-xtensa.c (xtensa_mark_literal_pool_location): Record frag
+	in the literal_frag field.
+	(xtensa_move_literals): Use it here instead of searching.  Update
+	literal_frag field with new value.
+
 2007-06-14  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_t_mov_cmp): Handle shift by register and
