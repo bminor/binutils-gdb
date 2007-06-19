@@ -2234,37 +2234,62 @@ static unsigned int
 sort_dyn_sym_info (struct elfNN_ia64_dyn_sym_info *info,
 		   unsigned int count)
 {
-  bfd_vma curr, prev;
-  unsigned int i, dup, diff, dest, src, len;
+  bfd_vma curr, prev, got_offset;
+  unsigned int i, kept, dup, diff, dest, src, len;
 
   qsort (info, count, sizeof (*info), addend_compare);
 
   /* Find the first duplicate.  */
   prev = info [0].addend;
+  got_offset = info [0].got_offset;
   for (i = 1; i < count; i++)
     {
       curr = info [i].addend;
       if (curr == prev)
-	break;
+	{
+	  /* For duplicates, make sure that GOT_OFFSET is valid.  */
+	  if (got_offset == (bfd_vma) -1)
+	    got_offset = info [i].got_offset;
+	  break;
+	}
+      got_offset = info [i].got_offset;
       prev = curr;
     }
+
+  /* We may move a block of elements to here.  */
+  dest = i++;
 
   /* Remove duplicates.  */
   if (i < count)
     {
-      /* We need to move a block of elements to here.  */
-      dest = i++;
       while (i < count)
 	{
+	  /* For duplicates, make sure that the kept one has a valid
+	     got_offset.  */
+	  kept = dest - 1;
+	  if (got_offset != (bfd_vma) -1)
+	    info [kept].got_offset = got_offset;
+
 	  curr = info [i].addend;
+	  got_offset = info [i].got_offset;
 
 	  /* Move a block of elements whose first one is different from
 	     the previous.  */
 	  if (curr == prev)
 	    {
 	      for (src = i + 1; src < count; src++)
-		if (info [src].addend != curr)
-		  break;
+		{
+		  if (info [src].addend != curr)
+		    break;
+		  /* For duplicates, make sure that GOT_OFFSET is
+		     valid.  */
+		  if (got_offset == (bfd_vma) -1)
+		    got_offset = info [src].got_offset;
+		}
+
+	      /* Make sure that the kept one has a valid got_offset.  */
+	      if (got_offset != (bfd_vma) -1)
+		info [kept].got_offset = got_offset;
 	    }
 	  else
 	    src = i;
@@ -2272,13 +2297,25 @@ sort_dyn_sym_info (struct elfNN_ia64_dyn_sym_info *info,
 	  if (src >= count)
 	    break;
 
-	  /* Find the next duplicate.  */
+	  /* Find the next duplicate.  SRC will be kept.  */
 	  prev = info [src].addend;
+	  got_offset = info [src].got_offset;
 	  for (dup = src + 1; dup < count; dup++)
 	    {
 	      curr = info [dup].addend;
 	      if (curr == prev)
-		break;
+		{
+		  /* Make sure that got_offset is valid.  */
+		  if (got_offset == (bfd_vma) -1)
+		    got_offset = info [dup].got_offset;
+
+		  /* For duplicates, make sure that the kept one has
+		     a valid got_offset.  */
+		  if (got_offset != (bfd_vma) -1)
+		    info [dup - 1].got_offset = got_offset;
+		  break;
+		}
+	      got_offset = info [dup].got_offset;
 	      prev = curr;
 	    }
 
@@ -2289,20 +2326,41 @@ sort_dyn_sym_info (struct elfNN_ia64_dyn_sym_info *info,
 	  if (len == 1 && dup < count)
 	    {
 	      /* If we only move 1 element, we combine it with the next
-		 one.  Find the next different one.  */
+		 one.  There must be at least a duplicate.  Find the
+		 next different one.  */
 	      for (diff = dup + 1, src++; diff < count; diff++, src++)
-		if (info [diff].addend != curr)
-		  break;
+		{
+		  if (info [diff].addend != curr)
+		    break;
+		  /* Make sure that got_offset is valid.  */
+		  if (got_offset == (bfd_vma) -1)
+		    got_offset = info [diff].got_offset;
+		}
+
+	      /* Makre sure that the last duplicated one has an valid
+		 offset.  */
+	      BFD_ASSERT (curr == prev);
+	      if (got_offset != (bfd_vma) -1)
+		info [diff - 1].got_offset = got_offset;
 
 	      if (diff < count)
 		{
-		  /* Find the next duplicate.  */
+		  /* Find the next duplicate.  Track the current valid
+		     offset.  */
 		  prev = info [diff].addend;
+		  got_offset = info [diff].got_offset;
 		  for (dup = diff + 1; dup < count; dup++)
 		    {
 		      curr = info [dup].addend;
 		      if (curr == prev)
-			break;
+			{
+			  /* For duplicates, make sure that GOT_OFFSET
+			     is valid.  */
+			  if (got_offset == (bfd_vma) -1)
+			    got_offset = info [dup].got_offset;
+			  break;
+			}
+		      got_offset = info [dup].got_offset;
 		      prev = curr;
 		      diff++;
 		    }
@@ -2318,6 +2376,19 @@ sort_dyn_sym_info (struct elfNN_ia64_dyn_sym_info *info,
 	}
 
       count = dest;
+    }
+  else
+    {
+      /* When we get here, either there is no duplicate at all or
+	 the only duplicate is the last element.  */
+      if (dest < count)
+	{
+	  /* If the last element is a duplicate, make sure that the
+	     kept one has a valid got_offset.  We also update count.  */
+	  if (got_offset != (bfd_vma) -1)
+	    info [dest - 1].got_offset = got_offset;
+	  count = dest;
+	}
     }
 
   return count;
@@ -2441,6 +2512,7 @@ has_space:
       /* Append the new one to the array.  */
       dyn_i = info + count;
       memset (dyn_i, 0, sizeof (*dyn_i));
+      dyn_i->got_offset = (bfd_vma) -1;
       dyn_i->addend = addend;
       
       /* We increment count only since the new ones are unsorted and
@@ -4651,9 +4723,15 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 					- sym_sec->output_section->vma
 					- sym_sec->output_offset;
 		    }
-		  
-		  qsort (loc_h->info, loc_h->count,
-			 sizeof (*loc_h->info), addend_compare);
+
+		  /* We may have introduced duplicated entries. We need
+		     to remove them properly.  */
+		  count = sort_dyn_sym_info (loc_h->info, loc_h->count);
+		  if (count != loc_h->count)
+		    {
+		      loc_h->count = count;
+		      loc_h->sorted_count = count;
+		    }
 
 		  loc_h->sec_merge_done = 1;
 		}

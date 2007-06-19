@@ -1,3 +1,17 @@
+2007-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4590
+	* ld-ia64/merge1.d: New.
+	* ld-ia64/merge1.s: Likewise.
+	* ld-ia64/merge2.d: Likewise.
+	* ld-ia64/merge2.s: Likewise.
+	* ld-ia64/merge3.d: Likewise.
+	* ld-ia64/merge3.s: Likewise.
+	* ld-ia64/merge4.d: Likewise.
+	* ld-ia64/merge4.s: Likewise.
+	* ld-ia64/merge5.d: Likewise.
+	* ld-ia64/merge5.s: Likewise.
+
 2007-06-18  Andreas Schwab  <schwab@suse.de>
 
 	* ld-scripts/cross3.t: Add .opd section.

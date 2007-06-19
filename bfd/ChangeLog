@@ -1,3 +1,13 @@
+2007-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4590
+	* elfxx-ia64.c (sort_dyn_sym_info): Keep the valid got_offset
+	when removing duplicated entries.
+	(get_dyn_sym_info): Initialize the got_offset field to -1.
+	Update call to sort_dyn_sym_info.
+	(elfNN_ia64_relocate_section): Call sort_dyn_sym_info to sort
+	array of addend and remove duplicates.
+
 2007-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* libpei.h (_bfd_XXi_final_link_postscript): Remove
