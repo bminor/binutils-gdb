@@ -1,5 +1,11 @@
 2007-06-19  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (TARGET_PRINT_INSN): Replace by gdbarch_print_insn.
+	* disasm.c (dump_insns, gdb_print_insn): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+2007-06-19  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (BELIEVE_PCC_PROMOTION): Replace by
 	gdbarch_believe_pcc_promotion.
 	* stabsread.c (define_symbol): Likewise.

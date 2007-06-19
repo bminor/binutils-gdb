@@ -589,7 +589,7 @@ F:=:int:software_single_step:struct frame_info *frame:frame
 M::int:single_step_through_delay:struct frame_info *frame:frame
 # FIXME: cagney/2003-08-28: Need to find a better way of selecting the
 # disassembler.  Perhaps objdump can handle it?
-f:TARGET_PRINT_INSN:int:print_insn:bfd_vma vma, struct disassemble_info *info:vma, info::0:
+f::int:print_insn:bfd_vma vma, struct disassemble_info *info:vma, info::0:
 f::CORE_ADDR:skip_trampoline_code:struct frame_info *frame, CORE_ADDR pc:frame, pc::generic_skip_trampoline_code::0
 
 

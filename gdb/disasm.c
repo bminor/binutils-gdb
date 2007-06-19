@@ -135,7 +135,7 @@ dump_insns (struct ui_out *uiout, struct disassemble_info * di,
 	xfree (name);
 
       ui_file_rewind (stb->stream);
-      pc += TARGET_PRINT_INSN (pc, di);
+      pc += gdbarch_print_insn (current_gdbarch, pc, di);
       ui_out_field_stream (uiout, "inst", stb);
       ui_file_rewind (stb->stream);
       do_cleanups (ui_out_chain);
@@ -393,5 +393,5 @@ int
 gdb_print_insn (CORE_ADDR memaddr, struct ui_file *stream)
 {
   struct disassemble_info di = gdb_disassemble_info (current_gdbarch, stream);
-  return TARGET_PRINT_INSN (memaddr, &di);
+  return gdbarch_print_insn (current_gdbarch, memaddr, &di);
 }

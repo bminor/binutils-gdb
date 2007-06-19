@@ -566,12 +566,6 @@ extern void set_gdbarch_single_step_through_delay (struct gdbarch *gdbarch, gdba
 typedef int (gdbarch_print_insn_ftype) (bfd_vma vma, struct disassemble_info *info);
 extern int gdbarch_print_insn (struct gdbarch *gdbarch, bfd_vma vma, struct disassemble_info *info);
 extern void set_gdbarch_print_insn (struct gdbarch *gdbarch, gdbarch_print_insn_ftype *print_insn);
-#if !defined (GDB_TM_FILE) && defined (TARGET_PRINT_INSN)
-#error "Non multi-arch definition of TARGET_PRINT_INSN"
-#endif
-#if !defined (TARGET_PRINT_INSN)
-#define TARGET_PRINT_INSN(vma, info) (gdbarch_print_insn (current_gdbarch, vma, info))
-#endif
 
 typedef CORE_ADDR (gdbarch_skip_trampoline_code_ftype) (struct frame_info *frame, CORE_ADDR pc);
 extern CORE_ADDR gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, struct frame_info *frame, CORE_ADDR pc);

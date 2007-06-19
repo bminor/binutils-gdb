@@ -865,12 +865,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: print_float_info = <0x%lx>\n",
                       (long) current_gdbarch->print_float_info);
-#ifdef TARGET_PRINT_INSN
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "TARGET_PRINT_INSN(vma, info)",
-                      XSTRING (TARGET_PRINT_INSN (vma, info)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: print_insn = <0x%lx>\n",
                       (long) current_gdbarch->print_insn);
