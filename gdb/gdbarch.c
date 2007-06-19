@@ -673,11 +673,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: adjust_breakpoint_address = <0x%lx>\n",
                       (long) current_gdbarch->adjust_breakpoint_address);
-#ifdef BELIEVE_PCC_PROMOTION
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: BELIEVE_PCC_PROMOTION # %s\n",
-                      XSTRING (BELIEVE_PCC_PROMOTION));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: believe_pcc_promotion = %s\n",
                       paddr_d (current_gdbarch->believe_pcc_promotion));

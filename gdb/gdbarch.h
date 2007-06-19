@@ -320,12 +320,6 @@ extern void set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch, gdbarch_get
 
 extern int gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch);
 extern void set_gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch, int believe_pcc_promotion);
-#if !defined (GDB_TM_FILE) && defined (BELIEVE_PCC_PROMOTION)
-#error "Non multi-arch definition of BELIEVE_PCC_PROMOTION"
-#endif
-#if !defined (BELIEVE_PCC_PROMOTION)
-#define BELIEVE_PCC_PROMOTION (gdbarch_believe_pcc_promotion (current_gdbarch))
-#endif
 
 typedef int (gdbarch_convert_register_p_ftype) (int regnum, struct type *type);
 extern int gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type);

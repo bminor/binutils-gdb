@@ -481,7 +481,7 @@ f::int:cannot_store_register:int regnum:regnum::cannot_register_not::0
 # setjmp/longjmp support.
 F::int:get_longjmp_target:struct frame_info *frame, CORE_ADDR *pc:frame, pc
 #
-v:=:int:believe_pcc_promotion:::::::
+v::int:believe_pcc_promotion:::::::
 #
 f::int:convert_register_p:int regnum, struct type *type:regnum, type:0:generic_convert_register_p::0
 f::void:register_to_value:struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf:frame, regnum, type, buf:0

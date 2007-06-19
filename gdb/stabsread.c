@@ -162,15 +162,6 @@ void stabsread_clear_cache (void);
 static const char vptr_name[] = "_vptr$";
 static const char vb_name[] = "_vb$";
 
-/* Define this as 1 if a pcc declaration of a char or short argument
-   gives the correct address.  Otherwise assume pcc gives the
-   address of the corresponding int, which is not the same on a
-   big-endian machine.  */
-
-#if !defined (BELIEVE_PCC_PROMOTION)
-#define BELIEVE_PCC_PROMOTION 0
-#endif
-
 static void
 invalid_cpp_abbrev_complaint (const char *arg1)
 {
@@ -971,10 +962,11 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	}
 
       /* If it's gcc-compiled, if it says `short', believe it.  */
-      if (processing_gcc_compilation || BELIEVE_PCC_PROMOTION)
+      if (processing_gcc_compilation
+	  || gdbarch_believe_pcc_promotion (current_gdbarch))
 	break;
 
-      if (!BELIEVE_PCC_PROMOTION)
+      if (!gdbarch_believe_pcc_promotion (current_gdbarch))
 	{
 	  /* This is the signed type which arguments get promoted to.  */
 	  static struct type *pcc_promotion_type;
