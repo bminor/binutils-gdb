@@ -1259,7 +1259,7 @@ AC_SUBST(WIN32LIBS)
 OLD_CFLAGS=$CFLAGS
 OLD_LDFLAGS=$LDFLAGS
 OLD_LIBS=$LIBS
-CFLAGS="$CFLAGS -I${srcdir}/../include -I${objdir}/../bfd -I${srcdir}/../bfd"
+CFLAGS="$CFLAGS -I${srcdir}/../include -I../bfd -I${srcdir}/../bfd"
 LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
 LIBS="$LIBS -lbfd -liberty"
 AC_CACHE_CHECK([for ELF support in BFD], gdb_cv_var_elf,

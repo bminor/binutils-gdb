@@ -21801,7 +21801,7 @@ esac
 OLD_CFLAGS=$CFLAGS
 OLD_LDFLAGS=$LDFLAGS
 OLD_LIBS=$LIBS
-CFLAGS="$CFLAGS -I${srcdir}/../include -I${objdir}/../bfd -I${srcdir}/../bfd"
+CFLAGS="$CFLAGS -I${srcdir}/../include -I../bfd -I${srcdir}/../bfd"
 LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
 LIBS="$LIBS -lbfd -liberty"
 echo "$as_me:$LINENO: checking for ELF support in BFD" >&5

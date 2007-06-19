@@ -1,3 +1,8 @@
+2007-06-19  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.ac: Do not use ${objdir}.
+	* configure: Regenerated.
+
 2007-06-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh (deprecated_register_size): Remove.
