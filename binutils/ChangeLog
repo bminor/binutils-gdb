@@ -1,3 +1,7 @@
+2007-06-19  Danny Smith  <dannysmith@users.sourceforge.net>
+ 
+  	* objdump.c: Include sys/stat.h.
+
 2007-06-19  Kai Tietz   <kai.tietz@onevision.com>
 
         * Makefile.am: Add windmc tool.
