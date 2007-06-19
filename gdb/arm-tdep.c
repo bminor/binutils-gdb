@@ -1289,6 +1289,8 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* The argument is being passed in a general purpose
 		 register.  */
 	      CORE_ADDR regval = extract_unsigned_integer (val, partial_len);
+	      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+		regval <<= (INT_REGISTER_SIZE - partial_len) * 8;
 	      if (arm_debug)
 		fprintf_unfiltered (gdb_stdlog, "arg %d in %s = 0x%s\n",
 				    argnum,

@@ -1,3 +1,8 @@
+2007-06-19  Joseph Myers  <joseph@codesourcery.com>
+
+	* arm-tdep.c (arm_push_dummy_call): Correct padding of partial
+	registers for big-endian.
+
 2007-06-19  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbarch.sh (TARGET_PRINT_INSN): Replace by gdbarch_print_insn.
