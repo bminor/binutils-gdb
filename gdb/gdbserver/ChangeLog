@@ -1,3 +1,8 @@
+2007-06-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (linux_create_inferior): Try execv before execvp.
+	* spu-low.c (spu_create_inferior): Likewise.
+
 2007-06-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* linux-low.c (linux_create_inferior): Change execv to execvp.

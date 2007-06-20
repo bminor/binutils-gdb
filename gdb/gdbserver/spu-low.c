@@ -278,7 +278,9 @@ spu_create_inferior (char *program, char **allargs)
 
       setpgid (0, 0);
 
-      execvp (program, allargs);
+      execv (program, allargs);
+      if (errno == ENOENT)
+	execvp (program, allargs);
 
       fprintf (stderr, "Cannot exec %s: %s.\n", program,
 	       strerror (errno));
