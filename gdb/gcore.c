@@ -88,14 +88,15 @@ gcore_command (char *args, int from_tty)
   /* Create the note section.  */
   if (note_data != NULL && note_size != 0)
     {
-      note_sec = bfd_make_section_anyway (obfd, "note0");
+      note_sec = bfd_make_section_anyway_with_flags (obfd, "note0",
+						     SEC_HAS_CONTENTS
+						     | SEC_READONLY
+						     | SEC_ALLOC);
       if (note_sec == NULL)
 	error (_("Failed to create 'note' section for corefile: %s"),
 	       bfd_errmsg (bfd_get_error ()));
 
       bfd_set_section_vma (obfd, note_sec, 0);
-      bfd_set_section_flags (obfd, note_sec,
-			     SEC_HAS_CONTENTS | SEC_READONLY | SEC_ALLOC);
       bfd_set_section_alignment (obfd, note_sec, 0);
       bfd_set_section_size (obfd, note_sec, note_size);
     }
@@ -359,6 +360,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
 	      && !(bfd_get_file_flags (abfd) & BFD_IN_MEMORY))
 	    {
 	      flags &= ~SEC_LOAD;
+	      flags |= SEC_NEVER_LOAD;
 	      goto keep;	/* break out of two nested for loops */
 	    }
 	}
@@ -372,7 +374,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
   else
     flags |= SEC_DATA;
 
-  osec = bfd_make_section_anyway (obfd, "load");
+  osec = bfd_make_section_anyway_with_flags (obfd, "load", flags);
   if (osec == NULL)
     {
       warning (_("Couldn't make gcore segment: %s"),
@@ -389,7 +391,6 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
   bfd_set_section_size (obfd, osec, size);
   bfd_set_section_vma (obfd, osec, vaddr);
   bfd_section_lma (obfd, osec) = 0; /* ??? bfd_set_section_lma?  */
-  bfd_set_section_flags (obfd, osec, flags);
   return 0;
 }
 

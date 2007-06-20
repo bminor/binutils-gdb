@@ -1,3 +1,11 @@
+2007-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 4606
+	* gcore.c (gcore_command): Use bfd_make_section_anyway_with_flags
+	instead of bfd_make_section_anyway.
+	(gcore_create_callback): Likewise.  Also set SEC_NEVER_LOAD
+	when clearing SEC_LOAD.
+
 2007-06-19  Joseph Myers  <joseph@codesourcery.com>
 
 	* arm-tdep.c (arm_push_dummy_call): Correct padding of partial
