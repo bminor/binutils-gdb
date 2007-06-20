@@ -1,3 +1,7 @@
+2007-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf32_spu.sh (OTHER_SECTIONS): KEEP .note.spu_name.
+
 2007-06-18  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldlex.l, ldgram.y: Add ALIGNOF.
