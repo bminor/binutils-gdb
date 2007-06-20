@@ -1114,13 +1114,13 @@ static void
 regcache_print (char *args, enum regcache_dump_what what_to_dump)
 {
   if (args == NULL)
-    regcache_dump (current_regcache, gdb_stdout, what_to_dump);
+    regcache_dump (get_current_regcache (), gdb_stdout, what_to_dump);
   else
     {
       struct ui_file *file = gdb_fopen (args, "w");
       if (file == NULL)
 	perror_with_name (_("maintenance print architecture"));
-      regcache_dump (current_regcache, file, what_to_dump);    
+      regcache_dump (get_current_regcache (), file, what_to_dump);
       ui_file_delete (file);
     }
 }
