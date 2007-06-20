@@ -1,3 +1,8 @@
+2007-06-20  Nick Clifton  <nickc@redhat.com>
+
+	* gprof.texi: Refer readers to the gcov tool if they want
+	line-by-line profiling.
+
 2007-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ACLOCAL_AMFLAGS): Add -I ../config -I ../bfd.

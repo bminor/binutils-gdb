@@ -334,30 +334,17 @@ will not affect the flat profile (except that the @code{calls} field for
 the functions will be blank), but will greatly reduce the usefulness of the
 call graph.
 
-If you wish to perform line-by-line profiling,
-you will also need to specify the @samp{-g} option,
-instructing the compiler to insert debugging symbols into the program
-that match program addresses to source code lines.
-@xref{Line-by-line, ,Line-by-line Profiling}.
+If you wish to perform line-by-line profiling you should use the
+@code{gcov} tool instead of @code{gprof}.  See that tool's manual or
+info pages for more details of how to do this.
 
-In addition to the @samp{-pg} and @samp{-g} options, older versions of
-GCC required you to specify the @samp{-a} option when compiling in
-order to instrument it to perform basic-block counting.  Newer
-versions do not require this option and will not accept it;
-basic-block counting is always enabled when @samp{-pg} is on.
+Note, older versions of @code{gcc} produce line-by-line profiling
+information that works with @code{gprof} rather than @code{gcov} so
+there is still support for displaying this kind of information in
+@code{gprof}. @xref{Line-by-line, ,Line-by-line Profiling}.
 
-When basic-block counting is enabled, as the program runs
-it will count how many times it executed each branch of each @samp{if}
-statement, each iteration of each @samp{do} loop, etc.  This will
-enable @code{gprof} to construct an annotated source code
-listing showing how many times each line of code was executed.
-
-It also worth noting that GCC supports a different profiling method
-which is enabled by the @samp{-fprofile-arcs}, @samp{-ftest-coverage}
-and @samp{-fprofile-values} switches. These switches do not produce
-data which is useful to @code{gprof} however, so they are not
-discussed further here.  There is also the
-@samp{-finstrument-functions} switch which will cause GCC to insert
+It also worth noting that @code{gcc} implements a
+@samp{-finstrument-functions} command line option which will insert
 calls to special user supplied instrumentation routines at the entry
 and exit of every function in their program.  This can be used to
 implement an alternative profiling scheme.
@@ -696,7 +683,10 @@ symbols matching symspec @var{from} to those matching symspec @var{to}.
 @itemx --line
 The @samp{-l} option enables line-by-line profiling, which causes
 histogram hits to be charged to individual source code lines,
-instead of functions.
+instead of functions.  This feature only works with programs compiled
+by older versions of the @code{gcc} compiler.  Newer versions of
+@code{gcc} are designed to work with the @code{gcov} tool instead.
+
 If the program was compiled with basic-block counting enabled,
 this option will also identify how many times each line of
 code was executed.
@@ -1407,9 +1397,16 @@ when recursion is going on.
 @code{gprof}'s @samp{-l} option causes the program to perform
 @dfn{line-by-line} profiling.  In this mode, histogram
 samples are assigned not to functions, but to individual
-lines of source code.  The program usually must be compiled
-with a @samp{-g} option, in addition to @samp{-pg}, in order
+lines of source code.  This only works with programs compiled with
+older versions of the @code{gcc} compiler.  Newer versions of @code{gcc}
+use a different program - @code{gcov} - to display line-by-line
+profiling information.
+
+With the older versions of @code{gcc} the program usually has to be
+compiled with a @samp{-g} option, in addition to @samp{-pg}, in order
 to generate debugging symbols for tracking source code lines.
+Note, in much older versions of @code{gcc} the program had to be
+compiled with the @samp{-a} command line option as well.
 
 The flat profile is the most useful output table
 in line-by-line mode.
@@ -1500,10 +1497,13 @@ which lists the program's source code, each function labeled with the
 number of times it was called.  You may also need to specify the
 @samp{-I} option, if @code{gprof} can't find the source code files.
 
-Compiling with @samp{gcc @dots{} -g -pg -a} augments your program
-with basic-block counting code, in addition to function counting code.
-This enables @code{gprof} to determine how many times each line
-of code was executed.
+With older versions of @code{gcc} compiling with @samp{gcc @dots{} -g
+-pg -a} augments your program with basic-block counting code, in
+addition to function counting code.  This enables @code{gprof} to
+determine how many times each line of code was executed.  With newer
+versions of @code{gcc} support for displaying basic-block counts is
+provided by the @code{gcov} program.
+
 For example, consider the following function, taken from gzip,
 with line numbers added:
 
@@ -1701,15 +1701,7 @@ non-intrusive profiler, e.g.@: oprofile.
 
 @item How do I find which lines in my program were executed the most times?
 
-Compile your program with basic-block counting enabled, run it, then
-use the following pipeline:
-
-@example
-gprof -l -C @var{objfile} | sort -k 3 -n -r
-@end example
-
-This listing will show you the lines in your code executed most often,
-but not necessarily those that consumed the most time.
+Use the @code{gcov} program.
 
 @item How do I find which lines in my program called a particular function?
 
