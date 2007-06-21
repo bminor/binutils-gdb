@@ -91,12 +91,12 @@ gdb_test {display/i $pc}
 gdb_test "advance *bowler" "bowler.*" "advance to the bowler"
 set test "stepping to SIGSEGV"
 gdb_test_multiple "stepi" "$test" {
-    -re "Program received signal SIGSEGV.*pc *(0x\[0-9a-f\]*).*$gdb_prompt $" {
-	set segv_addr $expect_out(1,string)
+    -re "Program received signal SIGSEGV.*pc(\r\n| *) *(0x\[0-9a-f\]*).*$gdb_prompt $" {
+	set segv_addr $expect_out(2,string)
 	pass "$test"
     }
-    -re " .*pc *(0x\[0-9a-f\]*).*bowler.*$gdb_prompt $" {
-	set bowler_addrs [concat $expect_out(1,string) $bowler_addrs]
+    -re " .*pc(\r\n| *)(0x\[0-9a-f\]*).*bowler.*$gdb_prompt $" {
+	set bowler_addrs [concat $expect_out(2,string) $bowler_addrs]
 	send_gdb "stepi\n"
 	exp_continue
     }
@@ -183,19 +183,19 @@ proc stepi_out { name args } {
 	-re "Program received signal SIGSEGV.*$gdb_prompt $" {
 	    kfail gdb/1702 "$test (executed fault insn)"
 	}
-	-re "Breakpoint.*pc *[at_segv] .*bowler.*$gdb_prompt $" {
+	-re "Breakpoint.*pc(\r\n| *)[at_segv] .*bowler.*$gdb_prompt $" {
 	    pass "$test (at breakpoint)"
 	}
-	-re "Breakpoint.*pc *[after_segv] .*bowler.*$gdb_prompt $" {
+	-re "Breakpoint.*pc(\r\n| *)[after_segv] .*bowler.*$gdb_prompt $" {
 	    kfail gdb/1702 "$test (executed breakpoint)"
 	}
-	-re "pc *[at_segv] .*bowler.*$gdb_prompt $" {
+	-re "pc(\r\n| *)[at_segv] .*bowler.*$gdb_prompt $" {
 	    pass "$test"
 	}
-	-re "pc *[after_segv] .*bowler.*$gdb_prompt $" {
+	-re "pc(\r\n| *)[after_segv] .*bowler.*$gdb_prompt $" {
 	    kfail gdb/1702 "$test (skipped fault insn)"
 	}
-	-re "pc *0x\[a-z0-9\]* .*bowler.*$gdb_prompt $" {
+	-re "pc(\r\n| *)0x\[a-z0-9\]* .*bowler.*$gdb_prompt $" {
 	    kfail gdb/1702 "$test (corrupt pc)"
 	}
     }
@@ -239,12 +239,12 @@ proc cont_out { name args } {
     # inserted at the faulting instruction.  Note that the breakpoint
     # instruction wasn't executed, rather the inferior was SIGTRAPed
     # with the PC at the breakpoint.
-    gdb_test "continue" "Breakpoint.*pc *[at_segv] .*" \
+    gdb_test "continue" "Breakpoint.*pc(\r\n| *)[at_segv] .*" \
 	"${name}; continue to breakpoint at fault"
 
     # Now single step the faulted instrction at that breakpoint.
     gdb_test "stepi" \
-	"Program received signal SIGSEGV.*pc *[at_segv] .*" \
+	"Program received signal SIGSEGV.*pc(\r\n| *)[at_segv] .*" \
 	"${name}; stepi fault"    
 
     # Clear any breakpoints

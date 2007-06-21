@@ -1520,7 +1520,7 @@ do_one_display (struct display *d)
       print_expression (d->exp, gdb_stdout);
       annotate_display_expression_end ();
 
-      if (d->format.count != 1)
+      if (d->format.count != 1 || d->format.format == 'i')
 	printf_filtered ("\n");
       else
 	printf_filtered ("  ");

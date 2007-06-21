@@ -1,3 +1,8 @@
+2007-06-21  Chris Dearman  <chris@mips.com>
+
+	* printcmd.c (do_one_display): If display/i, start with an initial
+	line feed to avoid bad layout if there is a branch delay slot.
+
 2007-06-21  Nigel Stephens  <nigel@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 
