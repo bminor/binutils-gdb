@@ -1,3 +1,7 @@
+2007-06-21  Andreas Schwab  <schwab@suse.de>
+
+	* regcache.c (write_pc_pid): Restore missing else.
+
 2007-06-20  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* regcache.c (regcache_print): Use get_current_regcache ()

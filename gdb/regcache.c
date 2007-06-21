@@ -867,7 +867,7 @@ write_pc_pid (CORE_ADDR pc, ptid_t ptid)
 
   if (gdbarch_write_pc_p (gdbarch))
     gdbarch_write_pc (gdbarch, regcache, pc);
-  if (gdbarch_pc_regnum (current_gdbarch) >= 0)
+  else if (gdbarch_pc_regnum (current_gdbarch) >= 0)
     regcache_cooked_write_unsigned (regcache,
 				    gdbarch_pc_regnum (current_gdbarch), pc);
   else
