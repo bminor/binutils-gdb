@@ -70,6 +70,10 @@ static char last_size = 'w';
 
 static CORE_ADDR next_address;
 
+/* Number of delay instructions following current disassembled insn.  */
+
+static int branch_delay_insns;
+
 /* Last address examined.  */
 
 static CORE_ADDR last_examine_address;
@@ -277,8 +281,9 @@ print_formatted (struct value *val, int format, int size,
 
       /* We often wrap here if there are long symbolic names.  */
       wrap_here ("    ");
-      next_address = VALUE_ADDRESS (val)
-	+ gdb_print_insn (VALUE_ADDRESS (val), stream);
+      next_address = (VALUE_ADDRESS (val)
+		      + gdb_print_insn (VALUE_ADDRESS (val), stream,
+					&branch_delay_insns));
       break;
 
     default:
@@ -800,6 +805,10 @@ do_examine (struct format_data fmt, CORE_ADDR addr)
 	    release_value (last_examine_value);
 
 	  print_formatted (last_examine_value, format, size, gdb_stdout);
+
+	  /* Display any branch delay slots following the final insn.  */
+	  if (format == 'i' && count == 1)
+	    count += branch_delay_insns;
 	}
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);

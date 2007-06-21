@@ -72,7 +72,7 @@ tui_disassemble (struct tui_asm_line* asm_lines, CORE_ADDR pc, int count)
 
       ui_file_rewind (gdb_dis_out);
 
-      pc = pc + gdb_print_insn (pc, gdb_dis_out);
+      pc = pc + gdb_print_insn (pc, gdb_dis_out, NULL);
 
       asm_lines->insn = xstrdup (tui_file_get_strbuf (gdb_dis_out));
 

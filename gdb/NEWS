@@ -41,6 +41,9 @@ has been rewritten to use the standard GDB remote protocol.
 layout.  It also supports a TextSeg= and DataSeg= response when only
 segment base addresses (rather than offsets) are available.
 
+* The /i format now outputs any trailing branch delay slot instructions 
+immediately following the last instruction within the count specified.
+
 * New commands
 
 set remoteflow

@@ -387,11 +387,24 @@ gdb_disassembly (struct ui_out *uiout,
 }
 
 /* Print the instruction at address MEMADDR in debugged memory,
-   on STREAM.  Returns length of the instruction, in bytes.  */
+   on STREAM.  Returns the length of the instruction, in bytes,
+   and, if requested, the number of branch delay slot instructions.  */
 
 int
-gdb_print_insn (CORE_ADDR memaddr, struct ui_file *stream)
+gdb_print_insn (CORE_ADDR memaddr, struct ui_file *stream,
+		int *branch_delay_insns)
 {
-  struct disassemble_info di = gdb_disassemble_info (current_gdbarch, stream);
-  return gdbarch_print_insn (current_gdbarch, memaddr, &di);
+  struct disassemble_info di;
+  int length;
+
+  di = gdb_disassemble_info (current_gdbarch, stream);
+  length = gdbarch_print_insn (current_gdbarch, memaddr, &di);
+  if (branch_delay_insns)
+    {
+      if (di.insn_info_valid)
+	*branch_delay_insns = di.branch_delay_insns;
+      else
+	*branch_delay_insns = 0;
+    }
+  return length;
 }

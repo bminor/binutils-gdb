@@ -1,3 +1,7 @@
+2007-06-21  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.texinfo (Examining Memory): Document the new behaviour.
+
 2007-06-21  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (Standard Target Features): Document

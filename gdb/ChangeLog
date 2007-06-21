@@ -1,3 +1,20 @@
+2007-06-21  Nigel Stephens  <nigel@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* disasm.c (gdb_print_insn): Return the number of branch delay
+	slot instructions too.
+	* disasm.h (gdb_print_insn): Update prototype.
+	* printcmd.c (branch_delay_insns): New variable to record the
+	number of delay slot instructions after disassembling a branch.
+	(print_formatted): Record the number of branch delay slot
+	instructions.
+	(do_examine): When disassembling, if the last instruction
+	disassembled has any branch delay slots, then bump the count so
+	that they get disassembled too.
+	* tui/tui-disasm.c (tui_disassemble): Update the call to
+	gdb_print_insn().
+	* NEWS: Document the new behaviour.
+
 2007-06-21  Andreas Schwab  <schwab@suse.de>
 
 	* regcache.c (write_pc_pid): Restore missing else.

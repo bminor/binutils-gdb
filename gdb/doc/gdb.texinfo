@@ -5861,9 +5861,12 @@ specifications @samp{4xw} and @samp{4wx} mean exactly the same thing.
 Even though the unit size @var{u} is ignored for the formats @samp{s}
 and @samp{i}, you might still want to use a count @var{n}; for example,
 @samp{3i} specifies that you want to see three machine instructions,
-including any operands.  The command @code{disassemble} gives an
-alternative way of inspecting machine instructions; see @ref{Machine
-Code,,Source and Machine Code}.
+including any operands.  For convenience, especially when used with
+the @code{display} command, the @samp{i} format also prints branch delay
+slot instructions, if any, beyond the count specified, which immediately
+follow the last instruction that is within the count.  The command
+@code{disassemble} gives an alternative way of inspecting machine
+instructions; see @ref{Machine Code,,Source and Machine Code}.
 
 All the defaults for the arguments to @code{x} are designed to make it
 easy to continue scanning memory with minimal specifications each time
