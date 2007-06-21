@@ -124,7 +124,7 @@ main ()
   sections=`echo ${sections}`
   # For relocation sections, pick off file offset and info (points to
   # section where relocs apply)
-  relas=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *[0-9]*\] *[^ ]* *RELA *[0-9a-f]* *0*\([0-9a-f][0-9a-f]*\) .*\([0-9a-f][0-9a-f]*\) *[0-9a-f][0-9a-f]*$,\1 \2,p'`
+  relas=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *[0-9]*\] *[^ ]* *RELA *[0-9a-f]* *0*\([0-9a-f][0-9a-f]*\).* \([0-9a-f][0-9a-f]*\) *[0-9a-f][0-9a-f]*$,\1 \2,p'`
   relas=`echo ${relas}`
 
   # Build embedded SPU image.

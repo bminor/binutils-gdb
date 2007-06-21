@@ -1,3 +1,7 @@
+2007-06-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* embedspu.sh (relas): Correct sh_info parsing.
+
 2007-06-19  Danny Smith  <dannysmith@users.sourceforge.net>
  
   	* objdump.c: Include sys/stat.h.
@@ -49,7 +53,7 @@
 	* doc/binutils.texi: Document new option.
 	* NEWS: Mention new features of windres.
 
-2007-06-18  Brian D. Watt <bwatt@us.ibm.com>
+2007-06-18  Brian D. Watt  <bwatt@us.ibm.com>
 
 	* embedspu.sh: Parse _SPUEAR_ symbol values as hex.
 
