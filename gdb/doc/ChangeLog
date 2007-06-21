@@ -1,3 +1,8 @@
+2007-06-21  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (Standard Target Features): Document
+	m68k features.
+
 2007-06-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (General Query Packets): Document qOffsets changes.

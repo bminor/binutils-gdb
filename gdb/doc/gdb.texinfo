@@ -25773,6 +25773,13 @@ The names of registers are not case sensitive for the purpose
 of recognizing standard features, but @value{GDBN} will only display
 registers using the capitalization used in the description.
 
+@menu
+* ARM Features::
+* M68K Features::
+@end menu
+
+
+@node ARM Features
 @subsection ARM Features
 @cindex target descriptions, ARM features
 
@@ -25808,6 +25815,26 @@ contain registers @samp{f0} through @samp{f31}, @samp{fcsr}, and
 The @samp{org.gnu.gdb.mips.linux} feature is optional.  It should
 contain a single register, @samp{restart}, which is used by the
 Linux kernel to control restartable syscalls.
+
+@node M68K Features
+@subsection M68K Features
+@cindex target descriptions, M68K features
+
+@table @code
+@item @samp{org.gnu.gdb.m68k.core}
+@itemx @samp{org.gnu.gdb.coldfire.core}
+@itemx @samp{org.gnu.gdb.fido.core}
+One of those features must be always present. 
+The feature that is present determines which flavor of m86k is
+used.  The feature that is present should contain registers
+@samp{d0} through @samp{d7}, @samp{a0} through @samp{a5}, @samp{fp},
+@samp{sp}, @samp{ps} and @samp{pc}.
+
+@item @samp{org.gnu.gdb.coldfire.fp}
+This feature is optional.  If present, it should contain registers
+@samp{fp0} through @samp{fp7}, @samp{fpcontrol}, @samp{fpstatus} and
+@samp{fpiaddr}.
+@end table
 
 @include gpl.texi
 
