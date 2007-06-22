@@ -1,5 +1,12 @@
 2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* remote.c (remote_address_masked): If remote_address_size is zero,
+	default to target address size.
+	(build_remote_gdbarch_data): Remove.
+	(_initialize_remote): Do not swap remote_address_size.
+
+2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (builtin_type_true_char, builtin_type_void,
 	builtin_type_char, builtin_type_short, builtin_type_int,
 	builtin_type_long, builtin_type_signed_char,

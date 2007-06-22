@@ -85,8 +85,6 @@ static void handle_remote_sigint_twice (int);
 static void async_remote_interrupt (gdb_client_data);
 void async_remote_interrupt_twice (gdb_client_data);
 
-static void build_remote_gdbarch_data (void);
-
 static void remote_files_info (struct target_ops *ignore);
 
 static void remote_prepare_to_store (struct regcache *regcache);
@@ -3993,13 +3991,18 @@ hexnumnstr (char *buf, ULONGEST num, int width)
 static CORE_ADDR
 remote_address_masked (CORE_ADDR addr)
 {
-  if (remote_address_size > 0
-      && remote_address_size < (sizeof (ULONGEST) * 8))
+  int address_size = remote_address_size;
+  /* If "remoteaddresssize" was not set, default to target address size.  */
+  if (!address_size)
+    address_size = gdbarch_addr_bit (current_gdbarch);
+
+  if (address_size > 0
+      && address_size < (sizeof (ULONGEST) * 8))
     {
       /* Only create a mask when that mask can safely be constructed
          in a ULONGEST variable.  */
       ULONGEST mask = 1;
-      mask = (mask << remote_address_size) - 1;
+      mask = (mask << address_size) - 1;
       addr &= mask;
     }
   return addr;
@@ -6475,11 +6478,6 @@ show_remote_cmd (char *args, int from_tty)
   do_cleanups (showlist_chain);
 }
 
-static void
-build_remote_gdbarch_data (void)
-{
-  remote_address_size = gdbarch_addr_bit (current_gdbarch);
-}
 
 /* Function to be called whenever a new objfile (shlib) is detected.  */
 static void
@@ -6499,11 +6497,6 @@ _initialize_remote (void)
     gdbarch_data_register_post_init (init_remote_state);
   remote_g_packet_data_handle =
     gdbarch_data_register_pre_init (remote_g_packet_data_init);
-
-  /* Old tacky stuff.  NOTE: This comes after the remote protocol so
-     that the remote protocol has been initialized.  */
-  DEPRECATED_REGISTER_GDBARCH_SWAP (remote_address_size);
-  deprecated_register_gdbarch_swap (NULL, 0, build_remote_gdbarch_data);
 
   /* Initialize the per-target state.  At the moment there is only one
      of these, not one per target.  Only one target is active at a
