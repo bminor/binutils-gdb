@@ -1,5 +1,19 @@
 2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (gdbarch_swap_ftype, deprecated_register_gdbarch_swap,
+	DEPRECATED_REGISTER_GDBARCH_SWAP): Remove.
+	(struct gdbarch_swap, struct gdbarch_swap_registration, 
+	struct gdbarch_swap_registry, gdbarch_swap_registry,
+	current_gdbarch_swap_init_hack, current_gdbarch_swap_out_hack,
+	current_gdbarch_swap_in_hack): Remove.
+	(find_arch_by_info): Do not call current_gdbarch_swap_init_hack.
+	(gdbarch_find_by_info): Do not call current_gdbarch_swap_in_hack
+	and current_gdbarch_swap_out_hack, update current_gdbarch directly.
+	(deprecated_current_gdbarch_select_hack): Likewise.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* infrun.c (clear_proceed_status): Clean up stop_registers.
 	(normal_stop): Allocate regcache for stop_registers.
 	(struct inferior_status): Remove stop_registers member.

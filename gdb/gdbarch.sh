@@ -1094,25 +1094,6 @@ extern void deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
 
-
-/* Register per-architecture memory region.
-
-   Provide a memory-region swap mechanism.  Per-architecture memory
-   region are created.  These memory regions are swapped whenever the
-   architecture is changed.  For a new architecture, the memory region
-   is initialized with zero (0) and the INIT function is called.
-
-   Memory regions are swapped / initialized in the order that they are
-   registered.  NULL DATA and/or INIT values can be specified.
-
-   New code should use gdbarch_data_register_*(). */
-
-typedef void (gdbarch_swap_ftype) (void);
-extern void deprecated_register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
-#define DEPRECATED_REGISTER_GDBARCH_SWAP(VAR) deprecated_register_gdbarch_swap (&(VAR), sizeof ((VAR)), NULL)
-
-
-
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order, ...) using information found in the BFD */
 
@@ -1819,107 +1800,6 @@ gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 }
 
 
-
-/* Keep a registry of swapped data required by GDB modules. */
-
-struct gdbarch_swap
-{
-  void *swap;
-  struct gdbarch_swap_registration *source;
-  struct gdbarch_swap *next;
-};
-
-struct gdbarch_swap_registration
-{
-  void *data;
-  unsigned long sizeof_data;
-  gdbarch_swap_ftype *init;
-  struct gdbarch_swap_registration *next;
-};
-
-struct gdbarch_swap_registry
-{
-  int nr;
-  struct gdbarch_swap_registration *registrations;
-};
-
-struct gdbarch_swap_registry gdbarch_swap_registry = 
-{
-  0, NULL,
-};
-
-void
-deprecated_register_gdbarch_swap (void *data,
-		                  unsigned long sizeof_data,
-		                  gdbarch_swap_ftype *init)
-{
-  struct gdbarch_swap_registration **rego;
-  for (rego = &gdbarch_swap_registry.registrations;
-       (*rego) != NULL;
-       rego = &(*rego)->next);
-  (*rego) = XMALLOC (struct gdbarch_swap_registration);
-  (*rego)->next = NULL;
-  (*rego)->init = init;
-  (*rego)->data = data;
-  (*rego)->sizeof_data = sizeof_data;
-}
-
-static void
-current_gdbarch_swap_init_hack (void)
-{
-  struct gdbarch_swap_registration *rego;
-  struct gdbarch_swap **curr = &current_gdbarch->swap;
-  for (rego = gdbarch_swap_registry.registrations;
-       rego != NULL;
-       rego = rego->next)
-    {
-      if (rego->data != NULL)
-	{
-	  (*curr) = GDBARCH_OBSTACK_ZALLOC (current_gdbarch,
-					    struct gdbarch_swap);
-	  (*curr)->source = rego;
-	  (*curr)->swap = gdbarch_obstack_zalloc (current_gdbarch,
-						  rego->sizeof_data);
-	  (*curr)->next = NULL;
-	  curr = &(*curr)->next;
-	}
-      if (rego->init != NULL)
-	rego->init ();
-    }
-}
-
-static struct gdbarch *
-current_gdbarch_swap_out_hack (void)
-{
-  struct gdbarch *old_gdbarch = current_gdbarch;
-  struct gdbarch_swap *curr;
-
-  gdb_assert (old_gdbarch != NULL);
-  for (curr = old_gdbarch->swap;
-       curr != NULL;
-       curr = curr->next)
-    {
-      memcpy (curr->swap, curr->source->data, curr->source->sizeof_data);
-      memset (curr->source->data, 0, curr->source->sizeof_data);
-    }
-  current_gdbarch = NULL;
-  return old_gdbarch;
-}
-
-static void
-current_gdbarch_swap_in_hack (struct gdbarch *new_gdbarch)
-{
-  struct gdbarch_swap *curr;
-
-  gdb_assert (current_gdbarch == NULL);
-  for (curr = new_gdbarch->swap;
-       curr != NULL;
-       curr = curr->next)
-    memcpy (curr->source->data, curr->swap, curr->source->sizeof_data);
-  current_gdbarch = new_gdbarch;
-}
-
-
 /* Keep a registry of the architectures known by GDB. */
 
 struct gdbarch_registration
@@ -2163,13 +2043,6 @@ find_arch_by_info (struct gdbarch_info info)
   verify_gdbarch (new_gdbarch);
   new_gdbarch->initialized_p = 1;
 
-  /* Initialize any per-architecture swap areas.  This phase requires
-     a valid global CURRENT_GDBARCH.  Set it momentarially, and then
-     swap the entire architecture out.  */
-  current_gdbarch = new_gdbarch;
-  current_gdbarch_swap_init_hack ();
-  current_gdbarch_swap_out_hack ();
-
   if (gdbarch_debug)
     gdbarch_dump (new_gdbarch, gdb_stdlog);
 
@@ -2179,26 +2052,28 @@ find_arch_by_info (struct gdbarch_info info)
 struct gdbarch *
 gdbarch_find_by_info (struct gdbarch_info info)
 {
+  struct gdbarch *new_gdbarch;
+
   /* Save the previously selected architecture, setting the global to
      NULL.  This stops things like gdbarch->init() trying to use the
      previous architecture's configuration.  The previous architecture
      may not even be of the same architecture family.  The most recent
      architecture of the same family is found at the head of the
      rego->arches list.  */
-  struct gdbarch *old_gdbarch = current_gdbarch_swap_out_hack ();
+  struct gdbarch *old_gdbarch = current_gdbarch;
+  current_gdbarch = NULL;
 
   /* Find the specified architecture.  */
-  struct gdbarch *new_gdbarch = find_arch_by_info (info);
+  new_gdbarch = find_arch_by_info (info);
 
   /* Restore the existing architecture.  */
   gdb_assert (current_gdbarch == NULL);
-  current_gdbarch_swap_in_hack (old_gdbarch);
+  current_gdbarch = old_gdbarch;
 
   return new_gdbarch;
 }
 
-/* Make the specified architecture current, swapping the existing one
-   out.  */
+/* Make the specified architecture current.  */
 
 void
 deprecated_current_gdbarch_select_hack (struct gdbarch *new_gdbarch)
@@ -2206,8 +2081,7 @@ deprecated_current_gdbarch_select_hack (struct gdbarch *new_gdbarch)
   gdb_assert (new_gdbarch != NULL);
   gdb_assert (current_gdbarch != NULL);
   gdb_assert (new_gdbarch->initialized_p);
-  current_gdbarch_swap_out_hack ();
-  current_gdbarch_swap_in_hack (new_gdbarch);
+  current_gdbarch = new_gdbarch;
   architecture_changed_event ();
   reinit_frame_cache ();
 }

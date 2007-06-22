@@ -900,25 +900,6 @@ extern void deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
 
-
-/* Register per-architecture memory region.
-
-   Provide a memory-region swap mechanism.  Per-architecture memory
-   region are created.  These memory regions are swapped whenever the
-   architecture is changed.  For a new architecture, the memory region
-   is initialized with zero (0) and the INIT function is called.
-
-   Memory regions are swapped / initialized in the order that they are
-   registered.  NULL DATA and/or INIT values can be specified.
-
-   New code should use gdbarch_data_register_*(). */
-
-typedef void (gdbarch_swap_ftype) (void);
-extern void deprecated_register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
-#define DEPRECATED_REGISTER_GDBARCH_SWAP(VAR) deprecated_register_gdbarch_swap (&(VAR), sizeof ((VAR)), NULL)
-
-
-
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order, ...) using information found in the BFD */
 
