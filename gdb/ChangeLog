@@ -1,3 +1,29 @@
+2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbtypes.h (struct builtin_type): New members nodebug_text_symbol,
+	nodebug_data_symbol, nodebug_unknown_symbol, and nodebug_tls_symbol.
+	* gdbtypes.c (gdbtypes_post_init): Initialize nodebug_ default types.
+
+	* parse.c (msym_text_symbol_type, msym_data_symbol_type): Remove.
+	(msym_unknown_symbol_type, msym_tls_symbol_type): Remove.
+	(write_exp_msymbol): Use builtin nodebug_ types instead of them.
+	(build_parse): Remove.
+	(_initialize_parse): Do not call build_parse.  Do not register
+	msym_ types for gdbarch-swapping.
+
+	* dwarf2read.c (new_symbol): Use default nodebug_data_symbol type
+	instead of creating private type.
+
+	* xcoffread.c (func_symbol_type, var_symbol_type): Remove.
+	(_initialize_xcoffread): Do not initialized them.
+	(process_xcoff_symbol): Use builtin nodebug_ types instead of them.
+
+	* mdebugread.c (nodebug_func_symbol_type): Remove.
+	(nodebug_var_symbol_type): Remove.
+	(_initialize_mdebugread): Do not initialize them.
+	(parse_symbol): Use builtin nodebug_ type instead of them.
+	(parse_procedure): Likewise.
+
 2007-06-21  Chris Dearman  <chris@mips.com>
 
 	* printcmd.c (do_one_display): If display/i, start with an initial

@@ -7150,11 +7150,9 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     with missing type entries. Change the misleading `void' type
 	     to something sensible.  */
 	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
-	    SYMBOL_TYPE (sym) = init_type (TYPE_CODE_INT,
-					   gdbarch_int_bit (current_gdbarch)
-					     / HOST_CHAR_BIT,
-					   0, "<variable, no debug info>",
-					   objfile);
+	    SYMBOL_TYPE (sym)
+	      = builtin_type (current_gdbarch)->nodebug_data_symbol;
+
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  if (attr)
 	    {

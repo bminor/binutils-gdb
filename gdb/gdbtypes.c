@@ -3582,6 +3582,23 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 	       TYPE_FLAG_UNSIGNED,
 	       "__CORE_ADDR", (struct objfile *) NULL);
 
+
+  /* The following set of types is used for symbols with no
+     debug information.  */
+  builtin_type->nodebug_text_symbol
+    = init_type (TYPE_CODE_FUNC, 1, 0, "<text variable, no debug info>", NULL);
+  TYPE_TARGET_TYPE (builtin_type->nodebug_text_symbol)
+    = builtin_type->builtin_int;
+  builtin_type->nodebug_data_symbol
+    = init_type (TYPE_CODE_INT, gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT, 0,
+		 "<data variable, no debug info>", NULL);
+  builtin_type->nodebug_unknown_symbol
+    = init_type (TYPE_CODE_INT, 1, 0,
+		 "<variable (not text or data), no debug info>", NULL);
+  builtin_type->nodebug_tls_symbol
+    = init_type (TYPE_CODE_INT, gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT, 0,
+		 "<thread local variable, no debug info>", NULL);
+
   return builtin_type;
 }
 

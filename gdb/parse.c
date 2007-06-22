@@ -384,16 +384,12 @@ write_exp_bitstring (struct stoken str)
    based on the language, but they no longer have names like "int", so
    the initial rationale is gone.  */
 
-static struct type *msym_text_symbol_type;
-static struct type *msym_data_symbol_type;
-static struct type *msym_unknown_symbol_type;
-static struct type *msym_tls_symbol_type;
-
 void
 write_exp_msymbol (struct minimal_symbol *msymbol, 
 		   struct type *text_symbol_type, 
 		   struct type *data_symbol_type)
 {
+  struct gdbarch *gdbarch = current_gdbarch;
   CORE_ADDR addr;
 
   write_exp_elt_opcode (OP_LONG);
@@ -419,7 +415,7 @@ write_exp_msymbol (struct minimal_symbol *msymbol,
 
       write_exp_elt_opcode (UNOP_MEMVAL_TLS);
       write_exp_elt_objfile (ofp);
-      write_exp_elt_type (msym_tls_symbol_type);
+      write_exp_elt_type (builtin_type (gdbarch)->nodebug_tls_symbol);
       write_exp_elt_opcode (UNOP_MEMVAL_TLS);
       return;
     }
@@ -430,18 +426,18 @@ write_exp_msymbol (struct minimal_symbol *msymbol,
     case mst_text:
     case mst_file_text:
     case mst_solib_trampoline:
-      write_exp_elt_type (msym_text_symbol_type);
+      write_exp_elt_type (builtin_type (gdbarch)->nodebug_text_symbol);
       break;
 
     case mst_data:
     case mst_file_data:
     case mst_bss:
     case mst_file_bss:
-      write_exp_elt_type (msym_data_symbol_type);
+      write_exp_elt_type (builtin_type (gdbarch)->nodebug_data_symbol);
       break;
 
     default:
-      write_exp_elt_type (msym_unknown_symbol_type);
+      write_exp_elt_type (builtin_type (gdbarch)->nodebug_unknown_symbol);
       break;
     }
   write_exp_elt_opcode (UNOP_MEMVAL);
@@ -1177,30 +1173,6 @@ follow_types (struct type *follow_type)
   return follow_type;
 }
 
-static void build_parse (void);
-static void
-build_parse (void)
-{
-  int i;
-
-  msym_text_symbol_type =
-    init_type (TYPE_CODE_FUNC, 1, 0, "<text variable, no debug info>", NULL);
-  TYPE_TARGET_TYPE (msym_text_symbol_type) = builtin_type_int;
-  msym_data_symbol_type =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT, 0,
-	       "<data variable, no debug info>", NULL);
-  msym_unknown_symbol_type =
-    init_type (TYPE_CODE_INT, 1, 0,
-	       "<variable (not text or data), no debug info>",
-	       NULL);
-
-  msym_tls_symbol_type =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT, 0,
-	       "<thread local variable, no debug info>", NULL);
-}
-
 /* This function avoids direct calls to fprintf 
    in the parser generated debug code.  */
 void
@@ -1225,16 +1197,6 @@ _initialize_parse (void)
   type_stack_depth = 0;
   type_stack = (union type_stack_elt *)
     xmalloc (type_stack_size * sizeof (*type_stack));
-
-  build_parse ();
-
-  /* FIXME - For the moment, handle types by swapping them in and out.
-     Should be using the per-architecture data-pointer and a large
-     struct. */
-  DEPRECATED_REGISTER_GDBARCH_SWAP (msym_text_symbol_type);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (msym_data_symbol_type);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (msym_unknown_symbol_type);
-  deprecated_register_gdbarch_swap (NULL, 0, build_parse);
 
   add_setshow_zinteger_cmd ("expression", class_maintenance,
 			    &expressiondebug, _("\

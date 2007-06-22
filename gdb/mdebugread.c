@@ -237,11 +237,6 @@ static struct type *mdebug_type_fixed_dec;
 static struct type *mdebug_type_float_dec;
 static struct type *mdebug_type_string;
 
-/* Types for symbols from files compiled without debugging info.  */
-
-static struct type *nodebug_func_symbol_type;
-static struct type *nodebug_var_symbol_type;
-
 /* Nonzero if we have seen ecoff debugging info for a file.  */
 
 static int found_ecoff_debugging_info;
@@ -660,7 +655,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       /* Type could be missing if file is compiled without debugging info.  */
       if (SC_IS_UNDEF (sh->sc)
 	  || sh->sc == scNil || sh->index == indexNil)
-	SYMBOL_TYPE (s) = nodebug_var_symbol_type;
+	SYMBOL_TYPE (s) = builtin_type (current_gdbarch)->nodebug_data_symbol;
       else
 	SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
       /* Value of a data symbol is its memory address */
@@ -1984,7 +1979,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
   if (processing_gcc_compilation == 0
       && found_ecoff_debugging_info == 0
       && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (s))) == TYPE_CODE_VOID)
-    SYMBOL_TYPE (s) = nodebug_func_symbol_type;
+    SYMBOL_TYPE (s) = builtin_type (current_gdbarch)->nodebug_text_symbol;
 }
 
 /* Parse the external symbol ES. Just call parse_symbol() after
@@ -4881,12 +4876,4 @@ _initialize_mdebugread (void)
 	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
 	       0, "floating decimal",
 	       (struct objfile *) NULL);
-
-  nodebug_func_symbol_type = init_type (TYPE_CODE_FUNC, 1, 0,
-					"<function, no debug info>", NULL);
-  TYPE_TARGET_TYPE (nodebug_func_symbol_type) = mdebug_type_int;
-  nodebug_var_symbol_type =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT, 0,
-	       "<variable, no debug info>", NULL);
 }

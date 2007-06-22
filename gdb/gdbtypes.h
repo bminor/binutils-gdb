@@ -1001,6 +1001,14 @@ struct builtin_type
   /* The target CPU's address type.  This is the ISA address size.  */
   struct type *builtin_core_addr;
 
+
+  /* Types used for symbols with no debug information.  */
+  struct type *nodebug_text_symbol;
+  struct type *nodebug_data_symbol;
+  struct type *nodebug_unknown_symbol;
+  struct type *nodebug_tls_symbol;
+
+
   /* Integral types.  */
 
   /* We use this for the '/c' print format, because c_char is just a

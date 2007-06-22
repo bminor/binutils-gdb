@@ -1432,9 +1432,6 @@ read_xcoff_symtab (struct partial_symtab *pst)
   (ALLOCED) ? (NAME) : obsavestring ((NAME), strlen (NAME), &objfile->objfile_obstack);
 
 
-static struct type *func_symbol_type;
-static struct type *var_symbol_type;
-
 /* process one xcoff symbol. */
 
 static struct symbol *
@@ -1479,7 +1476,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
          patch_block_stabs (), unless the file was compiled without -g.  */
 
       DEPRECATED_SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
-      SYMBOL_TYPE (sym) = func_symbol_type;
+      SYMBOL_TYPE (sym) = builtin_type (current_gdbarch)->nodebug_text_symbol;
 
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_DUP (sym, sym2);
@@ -1492,7 +1489,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
   else
     {
       /* In case we can't figure out the type, provide default. */
-      SYMBOL_TYPE (sym) = var_symbol_type;
+      SYMBOL_TYPE (sym) = builtin_type (current_gdbarch)->nodebug_data_symbol;
 
       switch (cs->c_sclass)
 	{
@@ -3024,12 +3021,4 @@ void
 _initialize_xcoffread (void)
 {
   add_symtab_fns (&xcoff_sym_fns);
-
-  func_symbol_type = init_type (TYPE_CODE_FUNC, 1, 0,
-				"<function, no debug info>", NULL);
-  TYPE_TARGET_TYPE (func_symbol_type) = builtin_type_int;
-  var_symbol_type =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT, 0,
-	       "<variable, no debug info>", NULL);
 }
