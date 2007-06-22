@@ -93,8 +93,10 @@ struct dwarf2_debug
   /* Pointer to the end of the .debug_info section memory buffer.  */
   bfd_byte *info_ptr_end;
 
-  /* Pointer to the section and address of the beginning of the
-     section.  */
+  /* Pointer to the bfd, section and address of the beginning of the
+     section.  The bfd might be different than expected because of
+     gnu_debuglink sections.  */
+  bfd * bfd;
   asection *sec;
   bfd_byte *sec_info_ptr;
 
@@ -1888,8 +1890,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
    to get to the line number information for the compilation unit.  */
 
 static struct comp_unit *
-parse_comp_unit (bfd *abfd,
-		 struct dwarf2_debug *stash,
+parse_comp_unit (struct dwarf2_debug *stash,
 		 bfd_vma unit_length,
 		 bfd_byte *info_ptr_unit,
 		 unsigned int offset_size)
@@ -1907,6 +1908,7 @@ parse_comp_unit (bfd *abfd,
   bfd_size_type amt;
   bfd_vma low_pc = 0;
   bfd_vma high_pc = 0;
+  bfd *abfd = stash->bfd;
 
   version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
@@ -2192,10 +2194,7 @@ find_debug_info (bfd *abfd, asection *after_sec)
 {
   asection * msec;
 
-  if (after_sec)
-    msec = after_sec->next;
-  else
-    msec = abfd->sections;
+  msec = after_sec != NULL ? after_sec->next : abfd->sections;
 
   while (msec)
     {
@@ -2328,12 +2327,9 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
      a pointer to the next un-read compilation unit.  Check the
      previously read units before reading more.  */
   struct dwarf2_debug *stash;
-
   /* What address are we looking for?  */
   bfd_vma addr;
-
   struct comp_unit* each;
-
   bfd_vma found = FALSE;
 
   stash = *pinfo;
@@ -2373,35 +2369,55 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 
   if (! *pinfo)
     {
+      bfd *debug_bfd;
       bfd_size_type total_size;
       asection *msec;
 
       *pinfo = stash;
 
       msec = find_debug_info (abfd, NULL);
-      if (! msec)
-	/* No dwarf2 info.  Note that at this point the stash
-	   has been allocated, but contains zeros, this lets
-	   future calls to this function fail quicker.  */
-	goto done;
+      if (msec == NULL)
+	{
+	  char * debug_filename = bfd_follow_gnu_debuglink (abfd, NULL);
+
+	  if (debug_filename == NULL)
+	    /* No dwarf2 info, and no gnu_debuglink to follow.
+	       Note that at this point the stash has been allocated, but
+	       contains zeros.  This lets future calls to this function
+	       fail more quickly.  */
+	    goto done;
+
+	  if ((debug_bfd = bfd_openr (debug_filename, NULL)) == NULL
+	      || ! bfd_check_format (debug_bfd, bfd_object)
+	      || (msec = find_debug_info (debug_bfd, NULL)) == NULL)
+	    {
+	      if (debug_bfd)
+		bfd_close (debug_bfd);
+	      /* FIXME: Should we report our failure to follow the debuglink ?  */
+	      free (debug_filename);
+	      goto done;
+	    }
+	}
+      else
+	debug_bfd = abfd;
 
       /* There can be more than one DWARF2 info section in a BFD these days.
 	 Read them all in and produce one large stash.  We do this in two
 	 passes - in the first pass we just accumulate the section sizes.
 	 In the second pass we read in the section's contents.  The allows
 	 us to avoid reallocing the data as we add sections to the stash.  */
-      for (total_size = 0; msec; msec = find_debug_info (abfd, msec))
+      for (total_size = 0; msec; msec = find_debug_info (debug_bfd, msec))
 	total_size += msec->size;
 
-      stash->info_ptr = bfd_alloc (abfd, total_size);
+      stash->info_ptr = bfd_alloc (debug_bfd, total_size);
       if (stash->info_ptr == NULL)
 	goto done;
 
       stash->info_ptr_end = stash->info_ptr;
 
-      for (msec = find_debug_info (abfd, NULL);
+      for (msec = find_debug_info (debug_bfd, NULL);
 	   msec;
-	   msec = find_debug_info (abfd, msec))
+	   msec = find_debug_info (debug_bfd, msec))
 	{
 	  bfd_size_type size;
 	  bfd_size_type start;
@@ -2413,7 +2429,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	  start = stash->info_ptr_end - stash->info_ptr;
 
 	  if ((bfd_simple_get_relocated_section_contents
-	       (abfd, msec, stash->info_ptr + start, symbols)) == NULL)
+	       (debug_bfd, msec, stash->info_ptr + start, symbols)) == NULL)
 	    continue;
 
 	  stash->info_ptr_end = stash->info_ptr + start + size;
@@ -2421,9 +2437,10 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 
       BFD_ASSERT (stash->info_ptr_end == stash->info_ptr + total_size);
 
-      stash->sec = find_debug_info (abfd, NULL);
+      stash->sec = find_debug_info (debug_bfd, NULL);
       stash->sec_info_ptr = stash->info_ptr;
       stash->syms = symbols;
+      stash->bfd = debug_bfd;
     }
 
   /* A null info_ptr indicates that there is no dwarf2 info
@@ -2451,13 +2468,13 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       unsigned int offset_size = addr_size;
       bfd_byte *info_ptr_unit = stash->info_ptr;
 
-      length = read_4_bytes (abfd, stash->info_ptr);
+      length = read_4_bytes (stash->bfd, stash->info_ptr);
       /* A 0xffffff length is the DWARF3 way of indicating we use
 	 64-bit offsets, instead of 32-bit offsets.  */
       if (length == 0xffffffff)
 	{
 	  offset_size = 8;
-	  length = read_8_bytes (abfd, stash->info_ptr + 4);
+	  length = read_8_bytes (stash->bfd, stash->info_ptr + 4);
 	  stash->info_ptr += 12;
 	}
       /* A zero length is the IRIX way of indicating 64-bit offsets,
@@ -2466,7 +2483,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       else if (length == 0)
 	{
 	  offset_size = 8;
-	  length = read_4_bytes (abfd, stash->info_ptr + 4);
+	  length = read_4_bytes (stash->bfd, stash->info_ptr + 4);
 	  stash->info_ptr += 8;
 	}
       /* In the absence of the hints above, we assume 32-bit DWARF2
@@ -2488,14 +2505,14 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 
       if (length > 0)
 	{
-	  each = parse_comp_unit (abfd, stash, length, info_ptr_unit,
+	  each = parse_comp_unit (stash, length, info_ptr_unit,
 				  offset_size);
 	  stash->info_ptr += length;
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
 	      == stash->sec->size)
 	    {
-	      stash->sec = find_debug_info (abfd, stash->sec);
+	      stash->sec = find_debug_info (stash->bfd, stash->sec);
 	      stash->sec_info_ptr = stash->info_ptr;
 	    }
 
@@ -2552,14 +2569,10 @@ _bfd_dwarf2_find_line (bfd *abfd,
      a pointer to the next un-read compilation unit.  Check the
      previously read units before reading more.  */
   struct dwarf2_debug *stash;
-
   /* What address are we looking for?  */
   bfd_vma addr;
-
   struct comp_unit* each;
-
   asection *section;
-
   bfd_boolean found = FALSE;
 
   section = bfd_get_section (symbol);
@@ -2595,35 +2608,55 @@ _bfd_dwarf2_find_line (bfd *abfd,
 
   if (! *pinfo)
     {
+      bfd *debug_bfd;
       bfd_size_type total_size;
       asection *msec;
 
       *pinfo = stash;
 
       msec = find_debug_info (abfd, NULL);
-      if (! msec)
-	/* No dwarf2 info.  Note that at this point the stash
-	   has been allocated, but contains zeros, this lets
-	   future calls to this function fail quicker.  */
-	goto done;
+      if (msec == NULL)
+	{
+	  char * debug_filename = bfd_follow_gnu_debuglink (abfd, NULL);
+
+	  if (debug_filename == NULL)
+	    /* No dwarf2 info, and no gnu_debuglink to follow.
+	       Note that at this point the stash has been allocated, but
+	       contains zeros.  This lets future calls to this function
+	       fail more quickly.  */
+	    goto done;
+
+	  if ((debug_bfd = bfd_openr (debug_filename, NULL)) == NULL
+	      || ! bfd_check_format (debug_bfd, bfd_object)
+	      || (msec = find_debug_info (debug_bfd, NULL)) == NULL)
+	    {
+	      if (debug_bfd)
+		bfd_close (debug_bfd);
+	      /* FIXME: Should we report our failure to follow the debuglink ?  */
+	      free (debug_filename);
+	      goto done;
+	    }
+	}
+      else
+	debug_bfd = abfd;
 
       /* There can be more than one DWARF2 info section in a BFD these days.
 	 Read them all in and produce one large stash.  We do this in two
 	 passes - in the first pass we just accumulate the section sizes.
 	 In the second pass we read in the section's contents.  The allows
 	 us to avoid reallocing the data as we add sections to the stash.  */
-      for (total_size = 0; msec; msec = find_debug_info (abfd, msec))
+      for (total_size = 0; msec; msec = find_debug_info (debug_bfd, msec))
 	total_size += msec->size;
 
-      stash->info_ptr = bfd_alloc (abfd, total_size);
+      stash->info_ptr = bfd_alloc (debug_bfd, total_size);
       if (stash->info_ptr == NULL)
 	goto done;
 
       stash->info_ptr_end = stash->info_ptr;
 
-      for (msec = find_debug_info (abfd, NULL);
+      for (msec = find_debug_info (debug_bfd, NULL);
 	   msec;
-	   msec = find_debug_info (abfd, msec))
+	   msec = find_debug_info (debug_bfd, msec))
 	{
 	  bfd_size_type size;
 	  bfd_size_type start;
@@ -2635,7 +2668,7 @@ _bfd_dwarf2_find_line (bfd *abfd,
 	  start = stash->info_ptr_end - stash->info_ptr;
 
 	  if ((bfd_simple_get_relocated_section_contents
-	       (abfd, msec, stash->info_ptr + start, symbols)) == NULL)
+	       (debug_bfd, msec, stash->info_ptr + start, symbols)) == NULL)
 	    continue;
 
 	  stash->info_ptr_end = stash->info_ptr + start + size;
@@ -2643,9 +2676,10 @@ _bfd_dwarf2_find_line (bfd *abfd,
 
       BFD_ASSERT (stash->info_ptr_end == stash->info_ptr + total_size);
 
-      stash->sec = find_debug_info (abfd, NULL);
+      stash->sec = find_debug_info (debug_bfd, NULL);
       stash->sec_info_ptr = stash->info_ptr;
       stash->syms = symbols;
+      stash->bfd = debug_bfd;
     }
 
   /* A null info_ptr indicates that there is no dwarf2 info
@@ -2680,13 +2714,13 @@ _bfd_dwarf2_find_line (bfd *abfd,
       unsigned int offset_size = addr_size;
       bfd_byte *info_ptr_unit = stash->info_ptr;
 
-      length = read_4_bytes (abfd, stash->info_ptr);
+      length = read_4_bytes (stash->bfd, stash->info_ptr);
       /* A 0xffffff length is the DWARF3 way of indicating we use
 	 64-bit offsets, instead of 32-bit offsets.  */
       if (length == 0xffffffff)
 	{
 	  offset_size = 8;
-	  length = read_8_bytes (abfd, stash->info_ptr + 4);
+	  length = read_8_bytes (stash->bfd, stash->info_ptr + 4);
 	  stash->info_ptr += 12;
 	}
       /* A zero length is the IRIX way of indicating 64-bit offsets,
@@ -2695,7 +2729,7 @@ _bfd_dwarf2_find_line (bfd *abfd,
       else if (length == 0)
 	{
 	  offset_size = 8;
-	  length = read_4_bytes (abfd, stash->info_ptr + 4);
+	  length = read_4_bytes (stash->bfd, stash->info_ptr + 4);
 	  stash->info_ptr += 8;
 	}
       /* In the absence of the hints above, we assume 32-bit DWARF2
@@ -2717,14 +2751,14 @@ _bfd_dwarf2_find_line (bfd *abfd,
 
       if (length > 0)
 	{
-	  each = parse_comp_unit (abfd, stash, length, info_ptr_unit,
+	  each = parse_comp_unit (stash, length, info_ptr_unit,
 				  offset_size);
 	  stash->info_ptr += length;
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
 	      == stash->sec->size)
 	    {
-	      stash->sec = find_debug_info (abfd, stash->sec);
+	      stash->sec = find_debug_info (stash->bfd, stash->sec);
 	      stash->sec_info_ptr = stash->info_ptr;
 	    }
 

@@ -1,3 +1,17 @@
+2007-06-22  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2.c: Add support for reading in debug information via a
+	.gnu_debuglink section:
+	(struct dwarf2_debug): Add bfd field to record the bfd containing
+	the debug info.
+	(parse_comp_unit): Remove ABFD parameter.  Instead use the bfd
+	field in the dwarf2_debug structure.
+	(_bfd_dwarf2_find_nearest_line): If a debug info section could not
+	be found in the current bfd call bfd_follow_gnu_debuglink to see
+	if another file contains the debug information.  If it does, open
+	it and continue.
+	(_bfd_dwarf2_find_line): Likewise.
+
 2007-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4590
