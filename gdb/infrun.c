@@ -632,6 +632,12 @@ clear_proceed_status (void)
   proceed_to_finish = 0;
   breakpoint_proceeded = 1;	/* We're about to proceed... */
 
+  if (stop_registers)
+    {
+      regcache_xfree (stop_registers);
+      stop_registers = NULL;
+    }
+
   /* Discard any remaining commands or status from previous stop.  */
   bpstat_clear (&stop_bpstat);
 }
@@ -3218,9 +3224,15 @@ Further execution is probably impossible.\n"));
   /* Save the function value return registers, if we care.
      We might be about to restore their previous contents.  */
   if (proceed_to_finish)
-    /* NB: The copy goes through to the target picking up the value of
-       all the registers.  */
-    regcache_cpy (stop_registers, get_current_regcache ());
+    {
+      /* This should not be necessary.  */
+      if (stop_registers)
+	regcache_xfree (stop_registers);
+
+      /* NB: The copy goes through to the target picking up the value of
+	 all the registers.  */
+      stop_registers = regcache_dup (get_current_regcache ());
+    }
 
   if (stop_stack_dummy)
     {
@@ -3619,7 +3631,6 @@ struct inferior_status
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
   int stop_soon;
-  struct regcache *stop_registers;
 
   /* These are here because if call_function_by_hand has written some
      registers and then decides to call error(), we better not have changed
@@ -3675,8 +3686,6 @@ save_inferior_status (int restore_stack_info)
   inf_status->restore_stack_info = restore_stack_info;
   inf_status->proceed_to_finish = proceed_to_finish;
 
-  inf_status->stop_registers = regcache_dup_no_passthrough (stop_registers);
-
   inf_status->registers = regcache_dup (get_current_regcache ());
 
   inf_status->selected_frame_id = get_frame_id (get_selected_frame (NULL));
@@ -3723,10 +3732,6 @@ restore_inferior_status (struct inferior_status *inf_status)
   stop_bpstat = inf_status->stop_bpstat;
   breakpoint_proceeded = inf_status->breakpoint_proceeded;
   proceed_to_finish = inf_status->proceed_to_finish;
-
-  /* FIXME: Is the restore of stop_registers always needed. */
-  regcache_xfree (stop_registers);
-  stop_registers = inf_status->stop_registers;
 
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */
@@ -3778,7 +3783,6 @@ discard_inferior_status (struct inferior_status *inf_status)
   /* See save_inferior_status for info on stop_bpstat. */
   bpstat_clear (&inf_status->stop_bpstat);
   regcache_xfree (inf_status->registers);
-  regcache_xfree (inf_status->stop_registers);
   xfree (inf_status);
 }
 
@@ -3921,21 +3925,12 @@ save_inferior_ptid (void)
 }
 
 
-static void
-build_infrun (void)
-{
-  stop_registers = regcache_xmalloc (current_gdbarch);
-}
-
 void
 _initialize_infrun (void)
 {
   int i;
   int numsigs;
   struct cmd_list_element *c;
-
-  DEPRECATED_REGISTER_GDBARCH_SWAP (stop_registers);
-  deprecated_register_gdbarch_swap (NULL, 0, build_infrun);
 
   add_info ("signals", signals_info, _("\
 What debugger does when program gets various signals.\n\

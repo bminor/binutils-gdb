@@ -1,5 +1,16 @@
 2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* infrun.c (clear_proceed_status): Clean up stop_registers.
+	(normal_stop): Allocate regcache for stop_registers.
+	(struct inferior_status): Remove stop_registers member.
+	(save_inferior_status): Do not save stop_registers.
+	(restore_inferior_status): Do not restore stop_registers.
+	(discard_inferior_status): Do not discard stop_registers.
+	(build_infrun): Remove.
+	(_initialize_infrun): Do not swap stop_registers.
+
+2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* remote.c (remote_address_masked): If remote_address_size is zero,
 	default to target address size.
 	(build_remote_gdbarch_data): Remove.
