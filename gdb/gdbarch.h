@@ -526,30 +526,11 @@ extern void set_gdbarch_smash_text_address (struct gdbarch *gdbarch, gdbarch_sma
    A return value of 1 means that the software_single_step breakpoints
    were inserted; 0 means they were not. */
 
-#if defined (SOFTWARE_SINGLE_STEP)
-/* Legacy for systems yet to multi-arch SOFTWARE_SINGLE_STEP */
-#if !defined (SOFTWARE_SINGLE_STEP_P)
-#define SOFTWARE_SINGLE_STEP_P() (1)
-#endif
-#endif
-
 extern int gdbarch_software_single_step_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (SOFTWARE_SINGLE_STEP_P)
-#error "Non multi-arch definition of SOFTWARE_SINGLE_STEP"
-#endif
-#if !defined (SOFTWARE_SINGLE_STEP_P)
-#define SOFTWARE_SINGLE_STEP_P() (gdbarch_software_single_step_p (current_gdbarch))
-#endif
 
 typedef int (gdbarch_software_single_step_ftype) (struct frame_info *frame);
 extern int gdbarch_software_single_step (struct gdbarch *gdbarch, struct frame_info *frame);
 extern void set_gdbarch_software_single_step (struct gdbarch *gdbarch, gdbarch_software_single_step_ftype *software_single_step);
-#if !defined (GDB_TM_FILE) && defined (SOFTWARE_SINGLE_STEP)
-#error "Non multi-arch definition of SOFTWARE_SINGLE_STEP"
-#endif
-#if !defined (SOFTWARE_SINGLE_STEP)
-#define SOFTWARE_SINGLE_STEP(frame) (gdbarch_software_single_step (current_gdbarch, frame))
-#endif
 
 /* Return non-zero if the processor is executing a delay slot and a
    further single-step is needed before the instruction finishes. */

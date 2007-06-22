@@ -582,7 +582,7 @@ f::CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
 #
 # A return value of 1 means that the software_single_step breakpoints 
 # were inserted; 0 means they were not.
-F:=:int:software_single_step:struct frame_info *frame:frame
+F::int:software_single_step:struct frame_info *frame:frame
 
 # Return non-zero if the processor is executing a delay slot and a
 # further single-step is needed before the instruction finishes.

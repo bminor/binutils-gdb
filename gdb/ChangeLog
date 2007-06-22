@@ -1,5 +1,16 @@
 2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* infrun.c (adjust_pc_after_break): Do not assume software single-step
+	is always active if SOFTWARE_SINGLE_STEP_P is true.
+	(resume): Use gdbarch_software_single_step[_p] instead of
+	SOFTWARE_SINGLE_STEP[_P].
+	(handle_inferior_event): Do not check for SOFTWARE_SINGLE_STEP_P.
+
+	* gdbarch.sh (software_single_step): Remove target macro.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (gdbarch_swap_ftype, deprecated_register_gdbarch_swap,
 	DEPRECATED_REGISTER_GDBARCH_SWAP): Remove.
 	(struct gdbarch_swap, struct gdbarch_swap_registration, 

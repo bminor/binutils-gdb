@@ -537,10 +537,10 @@ how to step past a permanent breakpoint on this architecture.  Try using\n\
 a command like `return' or `jump' to continue execution."));
     }
 
-  if (SOFTWARE_SINGLE_STEP_P () && step)
+  if (step && gdbarch_software_single_step_p (current_gdbarch))
     {
       /* Do it the hard way, w/temp breakpoints */
-      if (SOFTWARE_SINGLE_STEP (get_current_frame ()))
+      if (gdbarch_software_single_step (current_gdbarch, get_current_frame ()))
         {
           /* ...and don't ask hardware to do it.  */
           step = 0;
@@ -1190,52 +1190,33 @@ adjust_pc_after_break (struct execution_control_state *ecs)
   breakpoint_pc = read_pc_pid (ecs->ptid) - gdbarch_decr_pc_after_break
 					    (current_gdbarch);
 
-  if (SOFTWARE_SINGLE_STEP_P ())
+  /* Check whether there actually is a software breakpoint inserted
+     at that location.  */
+  if (software_breakpoint_inserted_here_p (breakpoint_pc))
     {
-      /* When using software single-step, a SIGTRAP can only indicate
-         an inserted breakpoint.  This actually makes things
-         easier.  */
-      if (singlestep_breakpoints_inserted_p)
-	/* When software single stepping, the instruction at [prev_pc]
-	   is never a breakpoint, but the instruction following
-	   [prev_pc] (in program execution order) always is.  Assume
-	   that following instruction was reached and hence a software
-	   breakpoint was hit.  */
-	write_pc_pid (breakpoint_pc, ecs->ptid);
-      else if (software_breakpoint_inserted_here_p (breakpoint_pc))
-	/* The inferior was free running (i.e., no single-step
-	   breakpoints inserted) and it hit a software breakpoint.  */
-	write_pc_pid (breakpoint_pc, ecs->ptid);
-    }
-  else
-    {
-      /* When using hardware single-step, a SIGTRAP is reported for
-         both a completed single-step and a software breakpoint.  Need
-         to differentiate between the two as the latter needs
-         adjusting but the former does not.
+      /* When using hardware single-step, a SIGTRAP is reported for both
+	 a completed single-step and a software breakpoint.  Need to
+	 differentiate between the two, as the latter needs adjusting
+	 but the former does not.
 
-         When the thread to be examined does not match the current thread
-         context we can't use currently_stepping, so assume no
-         single-stepping in this case.  */
-      if (ptid_equal (ecs->ptid, inferior_ptid) && currently_stepping (ecs))
-	{
-	  if (prev_pc == breakpoint_pc
-	      && software_breakpoint_inserted_here_p (breakpoint_pc))
-	    /* Hardware single-stepped a software breakpoint (as
-	       occures when the inferior is resumed with PC pointing
-	       at not-yet-hit software breakpoint).  Since the
-	       breakpoint really is executed, the inferior needs to be
-	       backed up to the breakpoint address.  */
-	    write_pc_pid (breakpoint_pc, ecs->ptid);
-	}
-      else
-	{
-	  if (software_breakpoint_inserted_here_p (breakpoint_pc))
-	    /* The inferior was free running (i.e., no hardware
-	       single-step and no possibility of a false SIGTRAP) and
-	       hit a software breakpoint.  */
-	    write_pc_pid (breakpoint_pc, ecs->ptid);
-	}
+	 The SIGTRAP can be due to a completed hardware single-step only if 
+	  - we didn't insert software single-step breakpoints
+	  - the thread to be examined is still the current thread
+	  - this thread is currently being stepped
+
+	 If any of these events did not occur, we must have stopped due
+	 to hitting a software breakpoint, and have to back up to the
+	 breakpoint address.
+
+	 As a special case, we could have hardware single-stepped a
+	 software breakpoint.  In this case (prev_pc == breakpoint_pc),
+	 we also need to back up to the breakpoint address.  */
+
+      if (singlestep_breakpoints_inserted_p
+	  || !ptid_equal (ecs->ptid, inferior_ptid)
+	  || !currently_stepping (ecs)
+	  || prev_pc == breakpoint_pc)
+	write_pc_pid (breakpoint_pc, ecs->ptid);
     }
 }
 
@@ -1379,7 +1360,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 					   (LONGEST) ecs->ws.value.integer));
       gdb_flush (gdb_stdout);
       target_mourn_inferior ();
-      singlestep_breakpoints_inserted_p = 0;	/* SOFTWARE_SINGLE_STEP_P() */
+      singlestep_breakpoints_inserted_p = 0;
       stop_print_frame = 0;
       stop_stepping (ecs);
       return;
@@ -1399,7 +1380,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       target_mourn_inferior ();
 
       print_stop_reason (SIGNAL_EXITED, stop_signal);
-      singlestep_breakpoints_inserted_p = 0;	/* SOFTWARE_SINGLE_STEP_P() */
+      singlestep_breakpoints_inserted_p = 0;
       stop_stepping (ecs);
       return;
 
@@ -1555,8 +1536,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   if (stepping_past_singlestep_breakpoint)
     {
-      gdb_assert (SOFTWARE_SINGLE_STEP_P ()
-		  && singlestep_breakpoints_inserted_p);
+      gdb_assert (singlestep_breakpoints_inserted_p);
       gdb_assert (ptid_equal (singlestep_ptid, ecs->ptid));
       gdb_assert (!ptid_equal (singlestep_ptid, saved_singlestep_ptid));
 
@@ -1605,7 +1585,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  if (!breakpoint_thread_match (stop_pc, ecs->ptid))
 	    thread_hop_needed = 1;
 	}
-      else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+      else if (singlestep_breakpoints_inserted_p)
 	{
 	  /* We have not context switched yet, so this should be true
 	     no matter which thread hit the singlestep breakpoint.  */
@@ -1676,7 +1656,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  /* Saw a breakpoint, but it was hit by the wrong thread.
 	     Just continue. */
 
-	  if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+	  if (singlestep_breakpoints_inserted_p)
 	    {
 	      /* Pull the single step breakpoints out of the target. */
 	      remove_single_step_breakpoints ();
@@ -1725,7 +1705,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      return;
 	    }
 	}
-      else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+      else if (singlestep_breakpoints_inserted_p)
 	{
 	  sw_single_step_trap_p = 1;
 	  ecs->random_signal = 0;
@@ -1747,7 +1727,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	deprecated_context_hook (pid_to_thread_id (ecs->ptid));
     }
 
-  if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+  if (singlestep_breakpoints_inserted_p)
     {
       /* Pull the single step breakpoints out of the target. */
       remove_single_step_breakpoints ();

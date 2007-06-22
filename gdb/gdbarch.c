@@ -976,21 +976,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: smash_text_address = <0x%lx>\n",
                       (long) current_gdbarch->smash_text_address);
-#ifdef SOFTWARE_SINGLE_STEP_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SOFTWARE_SINGLE_STEP_P()",
-                      XSTRING (SOFTWARE_SINGLE_STEP_P ()));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_software_single_step_p() = %d\n",
                       gdbarch_software_single_step_p (current_gdbarch));
-#ifdef SOFTWARE_SINGLE_STEP
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "SOFTWARE_SINGLE_STEP(frame)",
-                      XSTRING (SOFTWARE_SINGLE_STEP (frame)));
-#endif
   fprintf_unfiltered (file,
                       "gdbarch_dump: software_single_step = <0x%lx>\n",
                       (long) current_gdbarch->software_single_step);
