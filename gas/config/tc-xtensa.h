@@ -131,18 +131,20 @@ enum xtensa_relax_statesE
 
   RELAX_IMMED,
   /* The last instruction in this fragment (at->fr_opcode) contains
-     the value defined by fr_symbol (fr_offset = 0).  If the value
-     does not fit, use the specified expansion.  This is similar to
-     "NARROW", except that these may not be expanded in order to align
-     code.  */
+     an immediate or symbol.  If the value does not fit, relax the
+     opcode using expansions from the relax table.  */
 
   RELAX_IMMED_STEP1,
   /* The last instruction in this fragment (at->fr_opcode) contains a
-     literal.  It has already been expanded at least 1 step.  */
+     literal.  It has already been expanded 1 step.  */
 
   RELAX_IMMED_STEP2,
   /* The last instruction in this fragment (at->fr_opcode) contains a
-     literal.  It has already been expanded at least 2 steps.  */
+     literal.  It has already been expanded 2 steps.  */
+
+  RELAX_IMMED_STEP3,
+  /* The last instruction in this fragment (at->fr_opcode) contains a
+     literal.  It has already been expanded 3 steps.  */
 
   RELAX_SLOTS,
   /* There are instructions within the last VLIW instruction that need
@@ -179,7 +181,7 @@ enum xtensa_relax_statesE
 
 /* This is used as a stopper to bound the number of steps that
    can be taken.  */
-#define RELAX_IMMED_MAXSTEPS (RELAX_IMMED_STEP2 - RELAX_IMMED)
+#define RELAX_IMMED_MAXSTEPS (RELAX_IMMED_STEP3 - RELAX_IMMED)
 
 struct xtensa_frag_type
 {

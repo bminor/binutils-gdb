@@ -247,7 +247,10 @@ struct string_pattern_pair_struct
      addi.n a4, 0x1010
      => addi a4, 0x1010
      => addmi a4, 0x1010
-     => addmi a4, 0x1000, addi a4, 0x10.  */
+     => addmi a4, 0x1000, addi a4, 0x10.  
+
+   See the comments in xg_assembly_relax for some important details
+   regarding how these chains must be built.  */
 
 static string_pattern_pair widen_spec_list[] =
 {
@@ -380,6 +383,10 @@ static string_pattern_pair widen_spec_list[] =
   {"bnez %as,%label ? IsaUseDensityInstruction", "beqz.n %as,%LABEL;j %label;LABEL"},
   {"beqz %as,%label", "bnez %as,%LABEL;j %label;LABEL"},
   {"bnez %as,%label", "beqz %as,%LABEL;j %label;LABEL"},
+  {"WIDE.beqz %as,%label ? IsaUseDensityInstruction", "bnez.n %as,%LABEL;j %label;LABEL"},
+  {"WIDE.bnez %as,%label ? IsaUseDensityInstruction", "beqz.n %as,%LABEL;j %label;LABEL"},
+  {"WIDE.beqz %as,%label", "bnez %as,%LABEL;j %label;LABEL"},
+  {"WIDE.bnez %as,%label", "beqz %as,%LABEL;j %label;LABEL"},
 
   /* Widening expect-taken branches.  */
   {"beqzt %as,%label ? IsaUsePredictedBranches", "bnez %as,%LABEL;j %label;LABEL"},
@@ -414,6 +421,29 @@ static string_pattern_pair widen_spec_list[] =
   {"bnall %as,%at,%label", "ball %as,%at,%LABEL;j %label;LABEL"},
   {"bbc %as,%at,%label", "bbs %as,%at,%LABEL;j %label;LABEL"},
   {"bbs %as,%at,%label", "bbc %as,%at,%LABEL;j %label;LABEL"},
+
+  {"WIDE.bgez %as,%label", "bltz %as,%LABEL;j %label;LABEL"},
+  {"WIDE.bltz %as,%label", "bgez %as,%LABEL;j %label;LABEL"},
+  {"WIDE.beqi %as,%imm,%label", "bnei %as,%imm,%LABEL;j %label;LABEL"},
+  {"WIDE.bnei %as,%imm,%label", "beqi %as,%imm,%LABEL;j %label;LABEL"},
+  {"WIDE.bgei %as,%imm,%label", "blti %as,%imm,%LABEL;j %label;LABEL"},
+  {"WIDE.blti %as,%imm,%label", "bgei %as,%imm,%LABEL;j %label;LABEL"},
+  {"WIDE.bgeui %as,%imm,%label", "bltui %as,%imm,%LABEL;j %label;LABEL"},
+  {"WIDE.bltui %as,%imm,%label", "bgeui %as,%imm,%LABEL;j %label;LABEL"},
+  {"WIDE.bbci %as,%imm,%label", "bbsi %as,%imm,%LABEL;j %label;LABEL"},
+  {"WIDE.bbsi %as,%imm,%label", "bbci %as,%imm,%LABEL;j %label;LABEL"},
+  {"WIDE.beq %as,%at,%label", "bne %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.bne %as,%at,%label", "beq %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.bge %as,%at,%label", "blt %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.blt %as,%at,%label", "bge %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.bgeu %as,%at,%label", "bltu %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.bltu %as,%at,%label", "bgeu %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.bany %as,%at,%label", "bnone %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.bnone %as,%at,%label", "bany %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.ball %as,%at,%label", "bnall %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.bnall %as,%at,%label", "ball %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.bbc %as,%at,%label", "bbs %as,%at,%LABEL;j %label;LABEL"},
+  {"WIDE.bbs %as,%at,%label", "bbc %as,%at,%LABEL;j %label;LABEL"},
 
   /* Expanding calls with literals.  */
   {"call0 %label,%ar0 ? IsaUseL32R",
@@ -1571,7 +1601,10 @@ build_transition (insn_pattern *initial_insn,
   precond_e *precond;
   insn_repl_e *r;
 
-  opcode = xtensa_opcode_lookup (isa, initial_insn->t.opcode_name);
+  if (!wide_branch_opcode (initial_insn->t.opcode_name, ".w18", &opcode) 
+      && !wide_branch_opcode (initial_insn->t.opcode_name, ".w15", &opcode))
+    opcode = xtensa_opcode_lookup (isa, initial_insn->t.opcode_name);
+
   if (opcode == XTENSA_UNDEFINED)
     {
       /* It is OK to not be able to translate some of these opcodes.  */

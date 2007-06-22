@@ -1,3 +1,14 @@
+2007-06-22  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (xg_assembly_relax): Comment termination rules.
+	(frag_format_size): Handle RELAX_IMMED_STEP3.
+	(xtensa_relax_frag, md_convert_frag): Likewise.
+	* config/tc-xtensa.h (xtensa_relax_statesE): Add RELAX_IMMED_STEP3.
+	(RELAX_IMMED_MAXSTEPS): Adjust.
+	* config/xtensa-relax.c (widen_spec_list): Add transitions from
+	wide branches to branch-over-jumps.
+	(build_transition): Handle wide branches in transition patterns.
+	
 2007-06-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (disp_size): New.

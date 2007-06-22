@@ -3498,7 +3498,33 @@ xg_expand_to_stack (IStack *istack, TInsn *insn, int lateral_steps)
 
 
 /* Relax the assembly instruction at least "min_steps".
-   Return the number of steps taken.  */
+   Return the number of steps taken.
+
+   For relaxation to correctly terminate, every relaxation chain must
+   terminate in one of two ways:
+
+   1.  If the chain from one instruction to the next consists entirely of
+       single instructions, then the chain *must* handle all possible
+       immediates without failing.  It must not ever fail because an
+       immediate is out of range.  The MOVI.N -> MOVI -> L32R relaxation
+       chain is one example.  L32R loads 32 bits, and there cannot be an
+       immediate larger than 32 bits, so it satisfies this condition.
+       Single instruction relaxation chains are as defined by
+       xg_is_single_relaxable_instruction.
+
+   2.  Otherwise, the chain must end in a multi-instruction expansion: e.g.,
+       BNEZ.N -> BNEZ -> BNEZ.W15 -> BENZ.N/J
+
+   Strictly speaking, in most cases you can violate condition 1 and be OK
+   -- in particular when the last two instructions have the same single
+   size.  But nevertheless, you should guarantee the above two conditions.
+
+   We could fix this so that single-instruction expansions correctly
+   terminate when they can't handle the range, but the error messages are
+   worse, and it actually turns out that in every case but one (18-bit wide
+   branches), you need a multi-instruction expansion to get the full range
+   anyway.  And because 18-bit branches are handled identically to 15-bit
+   branches, there isn't any point in changing it.  */
 
 static int
 xg_assembly_relax (IStack *istack,
@@ -3511,12 +3537,9 @@ xg_assembly_relax (IStack *istack,
 {
   int steps_taken = 0;
 
-  /* assert (has no symbolic operands)
-     Some of its immeds don't fit.
-     Try to build a relaxed version.
-     This may go through a couple of stages
-     of single instruction transformations before
-     we get there.  */
+  /* Some of its immeds don't fit.  Try to build a relaxed version.
+     This may go through a couple of stages of single instruction
+     transformations before we get there.  */
 
   TInsn single_target;
   TInsn current_insn;
@@ -4384,7 +4407,8 @@ frag_format_size (const fragS *fragP)
 
   /* If an instruction is about to grow, return the longer size.  */
   if (fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED_STEP1
-      || fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED_STEP2)
+      || fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED_STEP2
+      || fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED_STEP3)
     return 3;
 
   if (fragP->tc_frag_data.slot_subtypes[0] == RELAX_NARROW)
@@ -8324,6 +8348,7 @@ xtensa_relax_frag (fragS *fragP, long stretch, int *stretched_p)
 	    case RELAX_IMMED:
 	    case RELAX_IMMED_STEP1:
 	    case RELAX_IMMED_STEP2:
+	    case RELAX_IMMED_STEP3:
 	      /* Place the immediate.  */
 	      new_stretch += relax_frag_immed
 		(now_seg, fragP, stretch,
@@ -9041,6 +9066,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec, fragS *fragp)
 	    case RELAX_IMMED:
 	    case RELAX_IMMED_STEP1:
 	    case RELAX_IMMED_STEP2:
+	    case RELAX_IMMED_STEP3:
 	      /* Place the immediate.  */
 	      convert_frag_immed
 		(sec, fragp,
