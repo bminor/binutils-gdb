@@ -4076,6 +4076,40 @@ output_insn (void)
 #endif /* DEBUG386  */
 }
 
+/* Return the size of the displacement operand N.  */
+
+static int
+disp_size (unsigned int n)
+{
+  int size = 4;
+  if (i.types[n] & (Disp8 | Disp16 | Disp64))
+    {
+      size = 2;
+      if (i.types[n] & Disp8)
+	size = 1;
+      if (i.types[n] & Disp64)
+	size = 8;
+    }
+  return size;
+}
+
+/* Return the size of the immediate operand N.  */
+
+static int
+imm_size (unsigned int n)
+{
+  int size = 4;
+  if (i.types[n] & (Imm8 | Imm8S | Imm16 | Imm64))
+    {
+      size = 2;
+      if (i.types[n] & (Imm8 | Imm8S))
+	size = 1;
+      if (i.types[n] & Imm64)
+	size = 8;
+    }
+  return size;
+}
+
 static void
 output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 {
@@ -4088,18 +4122,9 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	{
 	  if (i.op[n].disps->X_op == O_constant)
 	    {
-	      int size;
+	      int size = disp_size (n);
 	      offsetT val;
 
-	      size = 4;
-	      if (i.types[n] & (Disp8 | Disp16 | Disp64))
-		{
-		  size = 2;
-		  if (i.types[n] & Disp8)
-		    size = 1;
-		  if (i.types[n] & Disp64)
-		    size = 8;
-		}
 	      val = offset_in_range (i.op[n].disps->X_add_number,
 				     size);
 	      p = frag_more (size);
@@ -4108,45 +4133,32 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	  else
 	    {
 	      enum bfd_reloc_code_real reloc_type;
-	      int size = 4;
-	      int sign = 0;
+	      int size = disp_size (n);
+	      int sign = (i.types[n] & Disp32S) != 0;
 	      int pcrel = (i.flags[n] & Operand_PCrel) != 0;
+
+	      /* We can't have 8 bit displacement here.  */
+	      assert ((i.types[n] & Disp8) == 0);
 
 	      /* The PC relative address is computed relative
 		 to the instruction boundary, so in case immediate
 		 fields follows, we need to adjust the value.  */
 	      if (pcrel && i.imm_operands)
 		{
-		  int imm_size = 4;
 		  unsigned int n1;
+		  int sz = 0;
 
 		  for (n1 = 0; n1 < i.operands; n1++)
 		    if (i.types[n1] & Imm)
 		      {
-			if (i.types[n1] & (Imm8 | Imm8S | Imm16 | Imm64))
-			  {
-			    imm_size = 2;
-			    if (i.types[n1] & (Imm8 | Imm8S))
-			      imm_size = 1;
-			    if (i.types[n1] & Imm64)
-			      imm_size = 8;
-			  }
-			break;
+			/* Only one immediate is allowed for PC
+			   relative address.  */
+			assert (sz == 0);
+			sz = imm_size (n1);
+			i.op[n].disps->X_add_number -= sz;
 		      }
 		  /* We should find the immediate.  */
-		  if (n1 == i.operands)
-		    abort ();
-		  i.op[n].disps->X_add_number -= imm_size;
-		}
-
-	      if (i.types[n] & Disp32S)
-		sign = 1;
-
-	      if (i.types[n] & (Disp16 | Disp64))
-		{
-		  size = 2;
-		  if (i.types[n] & Disp64)
-		    size = 8;
+		  assert (sz != 0);
 		}
 
 	      p = frag_more (size);
@@ -4211,18 +4223,9 @@ output_imm (fragS *insn_start_frag, offsetT insn_start_off)
 	{
 	  if (i.op[n].imms->X_op == O_constant)
 	    {
-	      int size;
+	      int size = imm_size (n);
 	      offsetT val;
 
-	      size = 4;
-	      if (i.types[n] & (Imm8 | Imm8S | Imm16 | Imm64))
-		{
-		  size = 2;
-		  if (i.types[n] & (Imm8 | Imm8S))
-		    size = 1;
-		  else if (i.types[n] & Imm64)
-		    size = 8;
-		}
 	      val = offset_in_range (i.op[n].imms->X_add_number,
 				     size);
 	      p = frag_more (size);
@@ -4235,21 +4238,15 @@ output_imm (fragS *insn_start_frag, offsetT insn_start_off)
 		 non-absolute imms).  Try to support other
 		 sizes ...  */
 	      enum bfd_reloc_code_real reloc_type;
-	      int size = 4;
-	      int sign = 0;
+	      int size = imm_size (n);
+	      int sign;
 
 	      if ((i.types[n] & (Imm32S))
 		  && (i.suffix == QWORD_MNEM_SUFFIX
 		      || (!i.suffix && (i.tm.opcode_modifier & No_lSuf))))
 		sign = 1;
-	      if (i.types[n] & (Imm8 | Imm8S | Imm16 | Imm64))
-		{
-		  size = 2;
-		  if (i.types[n] & (Imm8 | Imm8S))
-		    size = 1;
-		  if (i.types[n] & Imm64)
-		    size = 8;
-		}
+	      else
+		sign = 0;
 
 	      p = frag_more (size);
 	      reloc_type = reloc (size, 0, sign, i.reloc[n]);

@@ -1,3 +1,10 @@
+2007-06-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (disp_size): New.
+	(imm_size): Likewise.
+	(output_disp): Use disp_size and imm_size.
+	(output_imm): Use imm_size.
+
 2007-06-19  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.h (struct xtensa_frag_type): Update comment about
