@@ -44,25 +44,6 @@
 /* These variables point to the objects
    representing the predefined C data types.  */
 
-struct type *builtin_type_void;
-struct type *builtin_type_char;
-struct type *builtin_type_true_char;
-struct type *builtin_type_short;
-struct type *builtin_type_int;
-struct type *builtin_type_long;
-struct type *builtin_type_long_long;
-struct type *builtin_type_signed_char;
-struct type *builtin_type_unsigned_char;
-struct type *builtin_type_unsigned_short;
-struct type *builtin_type_unsigned_int;
-struct type *builtin_type_unsigned_long;
-struct type *builtin_type_unsigned_long_long;
-struct type *builtin_type_float;
-struct type *builtin_type_double;
-struct type *builtin_type_long_double;
-struct type *builtin_type_complex;
-struct type *builtin_type_double_complex;
-struct type *builtin_type_string;
 struct type *builtin_type_int0;
 struct type *builtin_type_int8;
 struct type *builtin_type_uint8;
@@ -74,7 +55,6 @@ struct type *builtin_type_int64;
 struct type *builtin_type_uint64;
 struct type *builtin_type_int128;
 struct type *builtin_type_uint128;
-struct type *builtin_type_bool;
 
 /* Floatformat pairs.  */
 const struct floatformat *floatformats_ieee_single[BFD_ENDIAN_UNKNOWN] = {
@@ -126,9 +106,6 @@ struct type *builtin_type_arm_ext;
 struct type *builtin_type_ia64_spill;
 struct type *builtin_type_ia64_quad;
 
-struct type *builtin_type_void_data_ptr;
-struct type *builtin_type_void_func_ptr;
-struct type *builtin_type_CORE_ADDR;
 
 int opaque_type_resolution = 1;
 static void
@@ -3298,144 +3275,6 @@ build_flt (int bit, char *name, const struct floatformat **floatformats)
   return t;
 }
 
-static void
-build_gdbtypes (void)
-{
-  builtin_type_void =
-    init_type (TYPE_CODE_VOID, 1,
-	       0,
-	       "void", (struct objfile *) NULL);
-  builtin_type_char =
-    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       (TYPE_FLAG_NOSIGN
-                | (gdbarch_char_signed (current_gdbarch) ?
-		   0 : TYPE_FLAG_UNSIGNED)),
-	       "char", (struct objfile *) NULL);
-  builtin_type_true_char =
-    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "true character", (struct objfile *) NULL);
-  builtin_type_signed_char =
-    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "signed char", (struct objfile *) NULL);
-  builtin_type_unsigned_char =
-    init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "unsigned char", (struct objfile *) NULL);
-  builtin_type_short =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "short", (struct objfile *) NULL);
-  builtin_type_unsigned_short =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED, "unsigned short", (struct objfile *) NULL);
-  builtin_type_int =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "int", (struct objfile *) NULL);
-  builtin_type_unsigned_int =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED, "unsigned int", (struct objfile *) NULL);
-  builtin_type_long =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "long", (struct objfile *) NULL);
-  builtin_type_unsigned_long =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED, "unsigned long", (struct objfile *) NULL);
-  builtin_type_long_long =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0, "long long", (struct objfile *) NULL);
-  builtin_type_unsigned_long_long =
-    init_type (TYPE_CODE_INT,
-	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED, 
-	       "unsigned long long", (struct objfile *) NULL);
-
-  builtin_type_float
-    = build_flt (gdbarch_float_bit (current_gdbarch), "float",
-				    gdbarch_float_format (current_gdbarch));
-  builtin_type_double
-    = build_flt (gdbarch_double_bit (current_gdbarch), "double",
-				     gdbarch_double_format (current_gdbarch));
-  builtin_type_long_double
-    = build_flt (gdbarch_long_double_bit (current_gdbarch), "long double",
-					  gdbarch_long_double_format
-					    (current_gdbarch));
-
-  builtin_type_complex =
-    init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "complex", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_type_complex) = builtin_type_float;
-  builtin_type_double_complex =
-    init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
-	       0,
-	       "double complex", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_type_double_complex) = builtin_type_double;
-  builtin_type_string =
-    init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "string", (struct objfile *) NULL);
-  builtin_type_bool =
-    init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "bool", (struct objfile *) NULL);
-
-  /* Add user knob for controlling resolution of opaque types */
-  add_setshow_boolean_cmd ("opaque-type-resolution", class_support,
-			   &opaque_type_resolution, _("\
-Set resolution of opaque struct/class/union types (if set before loading symbols)."), _("\
-Show resolution of opaque struct/class/union types (if set before loading symbols)."), NULL,
-			   NULL,
-			   show_opaque_type_resolution,
-			   &setlist, &showlist);
-  opaque_type_resolution = 1;
-
-  /* Pointer/Address types. */
-
-  /* NOTE: on some targets, addresses and pointers are not necessarily
-     the same --- for example, on the D10V, pointers are 16 bits long,
-     but addresses are 32 bits long.  See doc/gdbint.texinfo,
-     ``Pointers Are Not Always Addresses''.
-
-     The upshot is:
-     - gdb's `struct type' always describes the target's
-       representation.
-     - gdb's `struct value' objects should always hold values in
-       target form.
-     - gdb's CORE_ADDR values are addresses in the unified virtual
-       address space that the assembler and linker work with.  Thus,
-       since target_read_memory takes a CORE_ADDR as an argument, it
-       can access any memory on the target, even if the processor has
-       separate code and data address spaces.
-
-     So, for example:
-     - If v is a value holding a D10V code pointer, its contents are
-       in target form: a big-endian address left-shifted two bits.
-     - If p is a D10V pointer type, TYPE_LENGTH (p) == 2, just as
-       sizeof (void *) == 2 on the target.
-
-     In this context, builtin_type_CORE_ADDR is a bit odd: it's a
-     target type for a value the target will never see.  It's only
-     used to hold the values of (typeless) linker symbols, which are
-     indeed in the unified virtual address space.  */
-  builtin_type_void_data_ptr = make_pointer_type (builtin_type_void, NULL);
-  builtin_type_void_func_ptr
-    = lookup_pointer_type (lookup_function_type (builtin_type_void));
-  builtin_type_CORE_ADDR =
-    init_type (TYPE_CODE_INT, gdbarch_addr_bit (current_gdbarch) / 8,
-	       TYPE_FLAG_UNSIGNED,
-	       "__CORE_ADDR", (struct objfile *) NULL);
-}
-
 static struct gdbarch_data *gdbtypes_data;
 
 const struct builtin_type *
@@ -3606,11 +3445,12 @@ extern void _initialize_gdbtypes (void);
 void
 _initialize_gdbtypes (void)
 {
-  struct cmd_list_element *c;
+  gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
 
-  /* FIXME: Why don't the following types need to be arch-swapped?
-     See the comment at the top of the calls to
-     DEPRECATED_REGISTER_GDBARCH_SWAP below.  */
+  /* FIXME: The following types are architecture-neutral.  However, they
+     contain pointer_type and reference_type fields potentially caching
+     pointer or reference types that *are* architecture dependent.  */
+
   builtin_type_int0 =
     init_type (TYPE_CODE_INT, 0 / 8,
 	       0,
@@ -3656,45 +3496,6 @@ _initialize_gdbtypes (void)
 	       TYPE_FLAG_UNSIGNED,
 	       "uint128_t", (struct objfile *) NULL);
 
-  build_gdbtypes ();
-
-  gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
-
-  /* FIXME - For the moment, handle types by swapping them in and out.
-     Should be using the per-architecture data-pointer and a large
-     struct. 
-
-     Note that any type T that we might create a 'T *' type for must
-     be arch-swapped: we cache a type's 'T *' type in the pointer_type
-     field, so if we change architectures but don't swap T, then
-     lookup_pointer_type will start handing out pointer types made for
-     a different architecture.  */
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_void);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_char);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_short);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_int);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_long);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_long_long);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_signed_char);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_unsigned_char);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_unsigned_short);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_unsigned_int);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_unsigned_long);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_unsigned_long_long);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_float);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_double);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_long_double);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_complex);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_double_complex);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_string);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_void_data_ptr);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_void_func_ptr);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);
-  deprecated_register_gdbarch_swap (NULL, 0, build_gdbtypes);
-
-  /* Note: These types do not need to be swapped - they are target
-     neutral.  FIXME: Are you sure?  See the comment above the calls
-     to DEPRECATED_REGISTER_GDBARCH_SWAP above.  */
   builtin_type_ieee_single
     = build_flt (-1, "builtin_type_ieee_single", floatformats_ieee_single);
   builtin_type_ieee_double
@@ -3717,4 +3518,13 @@ When enabled, ranking of the functions is displayed."),
 			    NULL,
 			    show_overload_debug,
 			    &setdebuglist, &showdebuglist);
+
+  /* Add user knob for controlling resolution of opaque types */
+  add_setshow_boolean_cmd ("opaque-type-resolution", class_support,
+			   &opaque_type_resolution, _("\
+Set resolution of opaque struct/class/union types (if set before loading symbols)."), _("\
+Show resolution of opaque struct/class/union types (if set before loading symbols)."), NULL,
+			   NULL,
+			   show_opaque_type_resolution,
+			   &setlist, &showlist);
 }

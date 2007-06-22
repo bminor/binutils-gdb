@@ -1041,43 +1041,55 @@ struct builtin_type
 /* Return the type table for the specified architecture.  */
 extern const struct builtin_type *builtin_type (struct gdbarch *gdbarch);
 
-/* Implicit sizes */
-extern struct type *builtin_type_void;
-extern struct type *builtin_type_char;
-extern struct type *builtin_type_short;
-extern struct type *builtin_type_int;
-extern struct type *builtin_type_long;
-extern struct type *builtin_type_signed_char;
-extern struct type *builtin_type_unsigned_char;
-extern struct type *builtin_type_unsigned_short;
-extern struct type *builtin_type_unsigned_int;
-extern struct type *builtin_type_unsigned_long;
-extern struct type *builtin_type_float;
-extern struct type *builtin_type_double;
-extern struct type *builtin_type_long_double;
-extern struct type *builtin_type_complex;
-extern struct type *builtin_type_double_complex;
-extern struct type *builtin_type_string;
-extern struct type *builtin_type_bool;
+/* Compatibility macros to access types for the current architecture.  */
+#define builtin_type_void_data_ptr \
+	(builtin_type (current_gdbarch)->builtin_data_ptr)
+#define builtin_type_void_func_ptr \
+	(builtin_type (current_gdbarch)->builtin_func_ptr)
+#define builtin_type_CORE_ADDR \
+	(builtin_type (current_gdbarch)->builtin_core_addr)
+#define builtin_type_true_char \
+	(builtin_type (current_gdbarch)->builtin_true_char)
+#define builtin_type_void \
+	(builtin_type (current_gdbarch)->builtin_void)
+#define builtin_type_char \
+	(builtin_type (current_gdbarch)->builtin_char)
+#define builtin_type_short \
+	(builtin_type (current_gdbarch)->builtin_short)
+#define builtin_type_int \
+	(builtin_type (current_gdbarch)->builtin_int)
+#define builtin_type_long \
+	(builtin_type (current_gdbarch)->builtin_long)
+#define builtin_type_signed_char \
+	(builtin_type (current_gdbarch)->builtin_signed_char)
+#define builtin_type_unsigned_char \
+	(builtin_type (current_gdbarch)->builtin_unsigned_char)
+#define builtin_type_unsigned_short \
+	(builtin_type (current_gdbarch)->builtin_unsigned_short)
+#define builtin_type_unsigned_int \
+	(builtin_type (current_gdbarch)->builtin_unsigned_int)
+#define builtin_type_unsigned_long \
+	(builtin_type (current_gdbarch)->builtin_unsigned_long)
+#define builtin_type_float \
+	(builtin_type (current_gdbarch)->builtin_float)
+#define builtin_type_double \
+	(builtin_type (current_gdbarch)->builtin_double)
+#define builtin_type_long_double \
+	(builtin_type (current_gdbarch)->builtin_long_double)
+#define builtin_type_complex \
+	(builtin_type (current_gdbarch)->builtin_complex)
+#define builtin_type_double_complex \
+	(builtin_type (current_gdbarch)->builtin_double_complex)
+#define builtin_type_string \
+	(builtin_type (current_gdbarch)->builtin_string)
+#define builtin_type_bool \
+	(builtin_type (current_gdbarch)->builtin_bool)
+#define builtin_type_long_long \
+	(builtin_type (current_gdbarch)->builtin_long_long)
+#define builtin_type_unsigned_long_long \
+	(builtin_type (current_gdbarch)->builtin_unsigned_long_long)
 
-/* Address/pointer types: */
-/* (C) Language `pointer to data' type.  Some target platforms use an
-   implicitly {sign,zero} -extended 32 bit C language pointer on a 64
-   bit ISA.  */
-extern struct type *builtin_type_void_data_ptr;
-
-/* (C) Language `pointer to function returning void' type.  Since
-   ANSI, C standards have explicitly said that pointers to functions
-   and pointers to data are not interconvertible --- that is, you
-   can't cast a function pointer to void * and back, and expect to get
-   the same value.  However, all function pointer types are
-   interconvertible, so void (*) () can server as a generic function
-   pointer.  */
-extern struct type *builtin_type_void_func_ptr;
-
-/* The target CPU's address type.  This is the ISA address size. */
-extern struct type *builtin_type_CORE_ADDR;
-
+ 
 /* Explicit sizes - see C9X <intypes.h> for naming scheme.  The "int0"
    is for when an architecture needs to describe a register that has
    no size.  */
@@ -1113,18 +1125,11 @@ extern struct type *builtin_type_arm_ext;
 extern struct type *builtin_type_ia64_spill;
 extern struct type *builtin_type_ia64_quad;
 
-/* We use this for the '/c' print format, because builtin_type_char is
-   just a one-byte integral type, which languages less laid back than
-   C will print as ... well, a one-byte integral type.  */
-extern struct type *builtin_type_true_char;
-
 /* This type represents a type that was unrecognized in symbol
    read-in.  */
 
 extern struct type *builtin_type_error;
 
-extern struct type *builtin_type_long_long;
-extern struct type *builtin_type_unsigned_long_long;
 
 /* Modula-2 types */
 

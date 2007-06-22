@@ -1,5 +1,33 @@
 2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (builtin_type_true_char, builtin_type_void,
+	builtin_type_char, builtin_type_short, builtin_type_int,
+	builtin_type_long, builtin_type_signed_char,
+	builtin_type_unsigned_char, builtin_type_unsigned_short,
+	builtin_type_unsigned_int, builtin_type_unsigned_long,
+	builtin_type_float, builtin_type_double, builtin_type_long_double,
+	builtin_type_complex, builtin_type_double_complex, builtin_type_string,
+	builtin_type_bool, builtin_type_long_long,
+	builtin_type_unsigned_long_long, builtin_type_void_data_ptr,
+	builtin_type_void_func_ptr, builtin_type_CORE_ADDR): Replace global
+	variable declaration with compatibility macro.
+	* gdbtypes.c (builtin_type_true_char, builtin_type_void,
+	builtin_type_char, builtin_type_short, builtin_type_int,
+	builtin_type_long, builtin_type_signed_char,
+	builtin_type_unsigned_char, builtin_type_unsigned_short,
+	builtin_type_unsigned_int, builtin_type_unsigned_long,
+	builtin_type_float, builtin_type_double, builtin_type_long_double,
+	builtin_type_complex, builtin_type_double_complex, builtin_type_string,
+	builtin_type_bool, builtin_type_long_long,
+	builtin_type_unsigned_long_long, builtin_type_void_data_ptr,
+	builtin_type_void_func_ptr, builtin_type_CORE_ADDR): Remove.
+	(build_gdbtypes): Remove.
+	(_initialize_gdbtypes): Do not call build_gdbtypes, move installing
+	opaque-type-resolution command here.   Do not call 
+	deprecated_register_gdbarch_swap.
+
+2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (struct builtin_type): New members nodebug_text_symbol,
 	nodebug_data_symbol, nodebug_unknown_symbol, and nodebug_tls_symbol.
 	* gdbtypes.c (gdbtypes_post_init): Initialize nodebug_ default types.
