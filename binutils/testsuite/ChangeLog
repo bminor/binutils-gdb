@@ -1,3 +1,7 @@
+2007-06-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/strip-3.d: Also strip .xtensa.info section.
+
 2007-05-24  Kai Tietz  <Kai.Tietz@onevision.com>
 
 	* binutils-all/windres/version_cat.rc: New.
