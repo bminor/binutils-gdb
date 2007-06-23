@@ -1,3 +1,18 @@
+2007-06-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4667
+	* gas/i386/i386.exp: Run simd, simd-intel, x86-64-simd
+	and x86-64-simd-intel.
+
+	* gas/i386/opcode-intel.d: Updated.
+
+	* gas/i386/simd-intel.d: New.
+	* gas/i386/simd.d: Likewise.
+	* gas/i386/simd.s: Likewise.
+	* gas/i386/x86-64-simd-intel.d: Likewise.
+	* gas/i386/x86-64-simd.d: Likewise.
+	* gas/i386/x86-64-simd.s: Likewise.
+
 2007-06-18  Kazu Hirata  <kazu@codesourcery.com>
 
 	* gas/m68k/all.exp: Run mcf-wdebug.

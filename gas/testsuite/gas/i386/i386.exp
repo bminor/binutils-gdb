@@ -78,6 +78,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "crc32"
     run_dump_test "crc32-intel"
     run_list_test "inval-crc32" "-al"
+    run_dump_test "simd"
+    run_dump_test "simd-intel"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
@@ -170,6 +172,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-crc32"
     run_dump_test "x86-64-crc32-intel"
     run_list_test "x86-64-inval-crc32" "-al"
+    run_dump_test "x86-64-simd"
+    run_dump_test "x86-64-simd-intel"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]

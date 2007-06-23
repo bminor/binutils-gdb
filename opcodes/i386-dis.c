@@ -306,7 +306,11 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define MX { OP_MMX, 0 }
 #define XM { OP_XMM, 0 }
 #define EM { OP_EM, v_mode }
-#define EX { OP_EX, v_mode }
+#define EMd { OP_EM, d_mode }
+#define EMq { OP_EM, q_mode }
+#define EXd { OP_EX, d_mode }
+#define EXq { OP_EX, q_mode }
+#define EXx { OP_EX, x_mode }
 #define MS { OP_MS, v_mode }
 #define XS { OP_XS, v_mode }
 #define EMC { OP_EMC, v_mode }
@@ -530,6 +534,11 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP90  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 90 } }
 #define PREGRP91  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 91 } }
 #define PREGRP92  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 92 } }
+#define PREGRP93  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 93 } }
+#define PREGRP94  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 94 } }
+#define PREGRP95  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 95 } }
+#define PREGRP96  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 96 } }
+#define PREGRP97  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 97 } }
 
 
 #define X86_64_0  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 0 } }
@@ -906,11 +915,11 @@ static const struct dis386 dis386_twobyte[] = {
   { PREGRP8 },
   { PREGRP9 },
   { PREGRP30 },
-  { "movlpX",		{ EX, XM, { SIMD_Fixup, 'h' } } },
-  { "unpcklpX",		{ XM, EX } },
-  { "unpckhpX",		{ XM, EX } },
+  { "movlpX",		{ EXq, XM, { SIMD_Fixup, 'h' } } },
+  { "unpcklpX",		{ XM, EXq } },
+  { "unpckhpX",		{ XM, EXq } },
   { PREGRP31 },
-  { "movhpX",		{ EX, XM, { SIMD_Fixup, 'l' } } },
+  { "movhpX",		{ EXq, XM, { SIMD_Fixup, 'l' } } },
   /* 18 */
   { GRP16 },
   { "(bad)",		{ XX } },
@@ -930,14 +939,14 @@ static const struct dis386 dis386_twobyte[] = {
   { "movL",		{ Td, Rd } },
   { "(bad)",		{ XX } },
   /* 28 */
-  { "movapX",		{ XM, EX } },
-  { "movapX",		{ EX, XM } },
+  { "movapX",		{ XM, EXx } },
+  { "movapX",		{ EXx,  XM } },
   { PREGRP2 },
   { PREGRP33 },
   { PREGRP4 },
   { PREGRP3 },
-  { "ucomisX",		{ XM,EX } },
-  { "comisX",		{ XM,EX } },
+  { PREGRP93 },
+  { PREGRP94 },
   /* 30 */
   { "wrmsr",		{ XX } },
   { "rdtsc",		{ XX } },
@@ -979,10 +988,10 @@ static const struct dis386 dis386_twobyte[] = {
   { PREGRP13 },
   { PREGRP12 },
   { PREGRP11 },
-  { "andpX",		{ XM, EX } },
-  { "andnpX",		{ XM, EX } },
-  { "orpX",		{ XM, EX } },
-  { "xorpX",		{ XM, EX } },
+  { "andpX",		{ XM, EXx } },
+  { "andnpX",		{ XM, EXx } },
+  { "orpX",		{ XM, EXx } },
+  { "xorpX",		{ XM, EXx } },
   /* 58 */
   { PREGRP0 },
   { PREGRP10 },
@@ -993,9 +1002,9 @@ static const struct dis386 dis386_twobyte[] = {
   { PREGRP5 },
   { PREGRP6 },
   /* 60 */
-  { "punpcklbw",	{ MX, EM } },
-  { "punpcklwd",	{ MX, EM } },
-  { "punpckldq",	{ MX, EM } },
+  { PREGRP95 },
+  { PREGRP96 },
+  { PREGRP97 },
   { "packsswb",		{ MX, EM } },
   { "pcmpgtb",		{ MX, EM } },
   { "pcmpgtw",		{ MX, EM } },
@@ -1107,7 +1116,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "movntiS",		{ Ev, Gv } },
   { "pinsrw",		{ MX, Edqw, Ib } },
   { "pextrw",		{ Gdq, MS, Ib } },
-  { "shufpX",		{ XM, EX, Ib } },
+  { "shufpX",		{ XM, EXx, Ib } },
   { GRP9 },
   /* c8 */
   { "bswap",		{ RMeAX } },
@@ -1828,17 +1837,17 @@ static const struct dis386 grps[][8] = {
 static const struct dis386 prefix_user_table[][4] = {
   /* PREGRP0 */
   {
-    { "addps", { XM, EX } },
-    { "addss", { XM, EX } },
-    { "addpd", { XM, EX } },
-    { "addsd", { XM, EX } },
+    { "addps", { XM, EXx } },
+    { "addss", { XM, EXd } },
+    { "addpd", { XM, EXx } },
+    { "addsd", { XM, EXq } },
   },
   /* PREGRP1 */
   {
-    { "", { XM, EX, OPSIMD } },	/* See OP_SIMD_SUFFIX.  */
-    { "", { XM, EX, OPSIMD } },
-    { "", { XM, EX, OPSIMD } },
-    { "", { XM, EX, OPSIMD } },
+    { "", { XM, EXx, OPSIMD } },	/* See OP_SIMD_SUFFIX.  */
+    { "", { XM, EXx, OPSIMD } },
+    { "", { XM, EXx, OPSIMD } },
+    { "", { XM, EXx, OPSIMD } },
   },
   /* PREGRP2 */
   {
@@ -1849,157 +1858,157 @@ static const struct dis386 prefix_user_table[][4] = {
   },
   /* PREGRP3 */
   {
-    { "cvtps2pi", { MXC, EX } },
-    { "cvtss2siY", { Gv, EX } },
-    { "cvtpd2pi", { MXC, EX } },
-    { "cvtsd2siY", { Gv, EX } },
+    { "cvtps2pi", { MXC, EXx } },
+    { "cvtss2siY", { Gv, EXx } },
+    { "cvtpd2pi", { MXC, EXx } },
+    { "cvtsd2siY", { Gv, EXx } },
   },
   /* PREGRP4 */
   {
-    { "cvttps2pi", { MXC, EX } },
-    { "cvttss2siY", { Gv, EX } },
-    { "cvttpd2pi", { MXC, EX } },
-    { "cvttsd2siY", { Gv, EX } },
+    { "cvttps2pi", { MXC, EXx } },
+    { "cvttss2siY", { Gv, EXx } },
+    { "cvttpd2pi", { MXC, EXx } },
+    { "cvttsd2siY", { Gv, EXx } },
   },
   /* PREGRP5 */
   {
-    { "divps",	{ XM, EX } },
-    { "divss",	{ XM, EX } },
-    { "divpd",	{ XM, EX } },
-    { "divsd",	{ XM, EX } },
+    { "divps",	{ XM, EXx } },
+    { "divss",	{ XM, EXx } },
+    { "divpd",	{ XM, EXx } },
+    { "divsd",	{ XM, EXx } },
   },
   /* PREGRP6 */
   {
-    { "maxps",	{ XM, EX } },
-    { "maxss",	{ XM, EX } },
-    { "maxpd",	{ XM, EX } },
-    { "maxsd",	{ XM, EX } },
+    { "maxps",	{ XM, EXx } },
+    { "maxss",	{ XM, EXx } },
+    { "maxpd",	{ XM, EXx } },
+    { "maxsd",	{ XM, EXx } },
   },
   /* PREGRP7 */
   {
-    { "minps",	{ XM, EX } },
-    { "minss",	{ XM, EX } },
-    { "minpd",	{ XM, EX } },
-    { "minsd",	{ XM, EX } },
+    { "minps",	{ XM, EXx } },
+    { "minss",	{ XM, EXx } },
+    { "minpd",	{ XM, EXx } },
+    { "minsd",	{ XM, EXx } },
   },
   /* PREGRP8 */
   {
-    { "movups",	{ XM, EX } },
-    { "movss",	{ XM, EX } },
-    { "movupd",	{ XM, EX } },
-    { "movsd",	{ XM, EX } },
+    { "movups",	{ XM, EXx } },
+    { "movss",	{ XM, EXx } },
+    { "movupd",	{ XM, EXx } },
+    { "movsd",	{ XM, EXx } },
   },
   /* PREGRP9 */
   {
-    { "movups",	{ EX, XM } },
-    { "movss",	{ EX, XM } },
-    { "movupd",	{ EX, XM } },
-    { "movsd",	{ EX, XM } },
+    { "movups",	{ EXx,  XM } },
+    { "movss",	{ EXx,  XM } },
+    { "movupd",	{ EXx,  XM } },
+    { "movsd",	{ EXx,  XM } },
   },
   /* PREGRP10 */
   {
-    { "mulps",	{ XM, EX } },
-    { "mulss",	{ XM, EX } },
-    { "mulpd",	{ XM, EX } },
-    { "mulsd",	{ XM, EX } },
+    { "mulps",	{ XM, EXx } },
+    { "mulss",	{ XM, EXx } },
+    { "mulpd",	{ XM, EXx } },
+    { "mulsd",	{ XM, EXx } },
   },
   /* PREGRP11 */
   {
-    { "rcpps",	{ XM, EX } },
-    { "rcpss",	{ XM, EX } },
-    { "(bad)",	{ XM, EX } },
-    { "(bad)",	{ XM, EX } },
+    { "rcpps",	{ XM, EXx } },
+    { "rcpss",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
   },
   /* PREGRP12 */
   {
-    { "rsqrtps",{ XM, EX } },
-    { "rsqrtss",{ XM, EX } },
-    { "(bad)",	{ XM, EX } },
-    { "(bad)",	{ XM, EX } },
+    { "rsqrtps",{ XM, EXx } },
+    { "rsqrtss",{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
   },
   /* PREGRP13 */
   {
-    { "sqrtps", { XM, EX } },
-    { "sqrtss", { XM, EX } },
-    { "sqrtpd", { XM, EX } },
-    { "sqrtsd",	{ XM, EX } },
+    { "sqrtps", { XM, EXx } },
+    { "sqrtss", { XM, EXx } },
+    { "sqrtpd", { XM, EXx } },
+    { "sqrtsd",	{ XM, EXx } },
   },
   /* PREGRP14 */
   {
-    { "subps",	{ XM, EX } },
-    { "subss",	{ XM, EX } },
-    { "subpd",	{ XM, EX } },
-    { "subsd",	{ XM, EX } },
+    { "subps",	{ XM, EXx } },
+    { "subss",	{ XM, EXx } },
+    { "subpd",	{ XM, EXx } },
+    { "subsd",	{ XM, EXx } },
   },
   /* PREGRP15 */
   {
-    { "(bad)",	{ XM, EX } },
-    { "cvtdq2pd", { XM, EX } },
-    { "cvttpd2dq", { XM, EX } },
-    { "cvtpd2dq", { XM, EX } },
+    { "(bad)",	{ XM, EXx } },
+    { "cvtdq2pd", { XM, EXq } },
+    { "cvttpd2dq", { XM, EXx } },
+    { "cvtpd2dq", { XM, EXx } },
   },
   /* PREGRP16 */
   {
-    { "cvtdq2ps", { XM, EX } },
-    { "cvttps2dq", { XM, EX } },
-    { "cvtps2dq", { XM, EX } },
-    { "(bad)",	{ XM, EX } },
+    { "cvtdq2ps", { XM, EXx } },
+    { "cvttps2dq", { XM, EXx } },
+    { "cvtps2dq", { XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
   },
   /* PREGRP17 */
   {
-    { "cvtps2pd", { XM, EX } },
-    { "cvtss2sd", { XM, EX } },
-    { "cvtpd2ps", { XM, EX } },
-    { "cvtsd2ss", { XM, EX } },
+    { "cvtps2pd", { XM, EXq } },
+    { "cvtss2sd", { XM, EXx } },
+    { "cvtpd2ps", { XM, EXx } },
+    { "cvtsd2ss", { XM, EXx } },
   },
   /* PREGRP18 */
   {
     { "maskmovq", { MX, MS } },
-    { "(bad)",	{ XM, EX } },
+    { "(bad)",	{ XM, EXx } },
     { "maskmovdqu", { XM, XS } },
-    { "(bad)",	{ XM, EX } },
+    { "(bad)",	{ XM, EXx } },
   },
   /* PREGRP19 */
   {
     { "movq",	{ MX, EM } },
-    { "movdqu",	{ XM, EX } },
-    { "movdqa",	{ XM, EX } },
-    { "(bad)",	{ XM, EX } },
+    { "movdqu",	{ XM, EXx } },
+    { "movdqa",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
   },
   /* PREGRP20 */
   {
     { "movq",	{ EM, MX } },
-    { "movdqu",	{ EX, XM } },
-    { "movdqa",	{ EX, XM } },
-    { "(bad)",	{ EX, XM } },
+    { "movdqu",	{ EXx,  XM } },
+    { "movdqa",	{ EXx,  XM } },
+    { "(bad)",	{ EXx,  XM } },
   },
   /* PREGRP21 */
   {
-    { "(bad)",	{ EX, XM } },
+    { "(bad)",	{ EXx,  XM } },
     { "movq2dq",{ XM, MS } },
-    { "movq",	{ EX, XM } },
+    { "movq",	{ EXx,  XM } },
     { "movdq2q",{ MX, XS } },
   },
   /* PREGRP22 */
   {
     { "pshufw",	{ MX, EM, Ib } },
-    { "pshufhw",{ XM, EX, Ib } },
-    { "pshufd",	{ XM, EX, Ib } },
-    { "pshuflw",{ XM, EX, Ib } },
+    { "pshufhw",{ XM, EXx, Ib } },
+    { "pshufd",	{ XM, EXx, Ib } },
+    { "pshuflw",{ XM, EXx, Ib } },
   },
   /* PREGRP23 */
   {
     { "movd",	{ Edq, MX } },
-    { "movq",	{ XM, EX } },
+    { "movq",	{ XM, EXx } },
     { "movd",	{ Edq, XM } },
     { "(bad)",	{ Ed, XM } },
   },
   /* PREGRP24 */
   {
-    { "(bad)",	{ MX, EX } },
-    { "(bad)",	{ XM, EX } },
-    { "punpckhqdq", { XM, EX } },
-    { "(bad)",	{ XM, EX } },
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "punpckhqdq", { XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
   },
   /* PREGRP25 */
   {
@@ -2010,51 +2019,51 @@ static const struct dis386 prefix_user_table[][4] = {
   },
   /* PREGRP26 */
   {
-    { "(bad)",	{ MX, EX } },
-    { "(bad)",	{ XM, EX } },
-    { "punpcklqdq", { XM, EX } },
-    { "(bad)",	{ XM, EX } },
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "punpcklqdq", { XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
   },
   /* PREGRP27 */
   {
-    { "(bad)",	{ MX, EX } },
-    { "(bad)",	{ XM, EX } },
-    { "addsubpd", { XM, EX } },
-    { "addsubps", { XM, EX } },
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "addsubpd", { XM, EXx } },
+    { "addsubps", { XM, EXx } },
   },
   /* PREGRP28 */
   {
-    { "(bad)",	{ MX, EX } },
-    { "(bad)",	{ XM, EX } },
-    { "haddpd",	{ XM, EX } },
-    { "haddps",	{ XM, EX } },
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "haddpd",	{ XM, EXx } },
+    { "haddps",	{ XM, EXx } },
   },
   /* PREGRP29 */
   {
-    { "(bad)",	{ MX, EX } },
-    { "(bad)",	{ XM, EX } },
-    { "hsubpd",	{ XM, EX } },
-    { "hsubps",	{ XM, EX } },
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "hsubpd",	{ XM, EXx } },
+    { "hsubps",	{ XM, EXx } },
   },
   /* PREGRP30 */
   {
-    { "movlpX",	{ XM, EX, { SIMD_Fixup, 'h' } } }, /* really only 2 operands */
-    { "movsldup", { XM, EX } },
-    { "movlpd",	{ XM, EX } },
-    { "movddup", { XM, EX } },
+    { "movlpX",	{ XM, EXq, { SIMD_Fixup, 'h' } } }, /* really only 2 operands */
+    { "movsldup", { XM, EXx } },
+    { "movlpd",	{ XM, EXq } },
+    { "movddup", { XM, EXq } },
   },
   /* PREGRP31 */
   {
-    { "movhpX",	{ XM, EX, { SIMD_Fixup, 'l' } } },
-    { "movshdup", { XM, EX } },
-    { "movhpd",	{ XM, EX } },
-    { "(bad)",	{ XM, EX } },
+    { "movhpX",	{ XM, EXq, { SIMD_Fixup, 'l' } } },
+    { "movshdup", { XM, EXx } },
+    { "movhpd",	{ XM, EXq } },
+    { "(bad)",	{ XM, EXq } },
   },
   /* PREGRP32 */
   {
-    { "(bad)",	{ XM, EX } },
-    { "(bad)",	{ XM, EX } },
-    { "(bad)",	{ XM, EX } },
+    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
     { "lddqu",	{ XM, M } },
   },
   /* PREGRP33 */
@@ -2109,7 +2118,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pblendvb", {XM, EX, XMM0 } },
+    { "pblendvb", {XM, EXx, XMM0 } },
     { "(bad)",	{ XX } },
   },
 
@@ -2117,7 +2126,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "blendvps", {XM, EX, XMM0 } },
+    { "blendvps", {XM, EXx, XMM0 } },
     { "(bad)",	{ XX } },
   },
 
@@ -2125,7 +2134,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "blendvpd", { XM, EX, XMM0 } },
+    { "blendvpd", { XM, EXx, XMM0 } },
     { "(bad)",	{ XX } },
   },
 
@@ -2133,7 +2142,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "ptest",  { XM, EX } },
+    { "ptest",  { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2141,7 +2150,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxbw", { XM, EX } },
+    { "pmovsxbw", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2149,7 +2158,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxbd", { XM, EX } },
+    { "pmovsxbd", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2157,7 +2166,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxbq", { XM, EX } },
+    { "pmovsxbq", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2165,7 +2174,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxwd", { XM, EX } },
+    { "pmovsxwd", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2173,7 +2182,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxwq", { XM, EX } },
+    { "pmovsxwq", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2181,7 +2190,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxdq", { XM, EX } },
+    { "pmovsxdq", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2189,7 +2198,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmuldq", { XM, EX } },
+    { "pmuldq", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2197,7 +2206,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pcmpeqq", { XM, EX } },
+    { "pcmpeqq", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2213,7 +2222,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "packusdw", { XM, EX } },
+    { "packusdw", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2221,7 +2230,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxbw", { XM, EX } },
+    { "pmovzxbw", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2229,7 +2238,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxbd", { XM, EX } },
+    { "pmovzxbd", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2237,7 +2246,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxbq", { XM, EX } },
+    { "pmovzxbq", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2245,7 +2254,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxwd", { XM, EX } },
+    { "pmovzxwd", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2253,7 +2262,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxwq", { XM, EX } },
+    { "pmovzxwq", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2261,7 +2270,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxdq", { XM, EX } },
+    { "pmovzxdq", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2269,7 +2278,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pminsb",	{ XM, EX } },
+    { "pminsb",	{ XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2277,7 +2286,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pminsd",	{ XM, EX } },
+    { "pminsd",	{ XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2285,7 +2294,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pminuw",	{ XM, EX } },
+    { "pminuw",	{ XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2293,7 +2302,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pminud",	{ XM, EX } },
+    { "pminud",	{ XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2301,7 +2310,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmaxsb",	{ XM, EX } },
+    { "pmaxsb",	{ XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2309,7 +2318,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmaxsd",	{ XM, EX } },
+    { "pmaxsd",	{ XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2317,7 +2326,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmaxuw", { XM, EX } },
+    { "pmaxuw", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2325,7 +2334,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmaxud", { XM, EX } },
+    { "pmaxud", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2333,7 +2342,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmulld", { XM, EX } },
+    { "pmulld", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2341,7 +2350,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "phminposuw", { XM, EX } },
+    { "phminposuw", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2349,7 +2358,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "roundps", { XM, EX, Ib } },
+    { "roundps", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2357,7 +2366,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "roundpd", { XM, EX, Ib } },
+    { "roundpd", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2365,7 +2374,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "roundss", { XM, EX, Ib } },
+    { "roundss", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2373,7 +2382,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "roundsd", { XM, EX, Ib } },
+    { "roundsd", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2381,7 +2390,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "blendps", { XM, EX, Ib } },
+    { "blendps", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2389,7 +2398,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "blendpd", { XM, EX, Ib } },
+    { "blendpd", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2397,7 +2406,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pblendw", { XM, EX, Ib } },
+    { "pblendw", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2445,7 +2454,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "insertps", { XM, EX, Ib } },
+    { "insertps", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2461,7 +2470,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "dpps",	{ XM, EX, Ib } },
+    { "dpps",	{ XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2469,7 +2478,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "dppd",	{ XM, EX, Ib } },
+    { "dppd",	{ XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2477,7 +2486,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "mpsadbw", { XM, EX, Ib } },
+    { "mpsadbw", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2485,7 +2494,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pcmpgtq", { XM, EX } },
+    { "pcmpgtq", { XM, EXx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2509,7 +2518,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pcmpestrm", { XM, EX, Ib } },
+    { "pcmpestrm", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2517,7 +2526,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pcmpestri", { XM, EX, Ib } },
+    { "pcmpestri", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2525,7 +2534,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pcmpistrm", { XM, EX, Ib } },
+    { "pcmpistrm", { XM, EXx, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2533,7 +2542,47 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pcmpistri", { XM, EX, Ib } },
+    { "pcmpistri", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP93 */
+  {
+    { "ucomiss",{ XM, EXd } }, 
+    { "(bad)",	{ XX } },
+    { "ucomisd",{ XM, EXq } }, 
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP94 */
+  {
+    { "comiss",	{ XM, EXd } },
+    { "(bad)",	{ XX } },
+    { "comisd",	{ XM, EXq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP95 */
+  {
+    { "punpcklbw",{ MX, EMd } },
+    { "(bad)",	{ XX } },
+    { "punpcklbw",{ MX, EMq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP96 */
+  {
+    { "punpcklwd",{ MX, EMd } },
+    { "(bad)",	{ XX } },
+    { "punpcklwd",{ MX, EMq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP97 */
+  {
+    { "punpckldq",{ MX, EMd } },
+    { "(bad)",	{ XX } },
+    { "punpckldq",{ MX, EMq } },
     { "(bad)",	{ XX } },
   },
 };
@@ -5798,17 +5847,6 @@ OP_EX (int bytemode, int sizeflag)
   int add = 0;
   if (modrm.mod != 3)
     {
-      if (intel_syntax && bytemode == v_mode)
-	{
-	  switch (prefixes & (PREFIX_DATA|PREFIX_REPZ|PREFIX_REPNZ))
-	    {
-	    case 0:            bytemode = x_mode; break;
-	    case PREFIX_REPZ:  bytemode = d_mode; used_prefixes |= PREFIX_REPZ;  break;
-	    case PREFIX_DATA:  bytemode = x_mode; used_prefixes |= PREFIX_DATA;  break;
-	    case PREFIX_REPNZ: bytemode = q_mode; used_prefixes |= PREFIX_REPNZ; break;
-	    default:           bytemode = 0; break;
-	    }
-	}
       OP_E (bytemode, sizeflag);
       return;
     }

@@ -1,3 +1,17 @@
+2007-06-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4667
+	* i386-dis.c (EX): Removed.
+	(EMd): New.
+	(EMq): Likewise.
+	(EXd): Likewise.
+	(EXq): Likewise.
+	(EXx): Likewise.
+	(PREGRP93...PREGRP97): Likewise.
+	(dis386_twobyte): Updated.
+	(prefix_user_table): Updated. Add PREGRP93...PREGRP97.
+	(OP_EX): Remove Intel syntax handling.
+
 2007-06-18  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* m68k-opc.c (m68k_opcodes): Add wdebugl variants.
