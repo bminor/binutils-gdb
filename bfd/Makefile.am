@@ -784,6 +784,9 @@ targets.lo: targets.c Makefile
 archures.lo: archures.c Makefile
 	$(LIBTOOL) --mode=compile $(COMPILE) -c $(TDEFAULTS) $(srcdir)/archures.c
 
+dwarf2.lo: dwarf2.c Makefile
+	$(LIBTOOL) --mode=compile $(COMPILE) -c -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
+
 elf32-target.h : elfxx-target.h
 	rm -f elf32-target.h
 	sed -e s/NN/32/g < $(srcdir)/elfxx-target.h > elf32-target.new

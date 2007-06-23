@@ -66,6 +66,14 @@ if test $use_secureplt = true; then
     [Define if we should default to creating read-only plt entries])
 fi
 
+DEBUGDIR=${libdir}/debug
+	 
+AC_ARG_WITH(separate-debug-dir,
+  AS_HELP_STRING([--with-separate-debug-dir=DIR],
+                 [Look for global separate debug info in DIR [[default=LIBDIR/debug]]]),
+[DEBUGDIR="${withval}"])
+AC_SUBST(DEBUGDIR)
+
 ACX_PKGVERSION([GNU Binutils])
 ACX_BUGURL([http://www.sourceware.org/bugzilla/])
 

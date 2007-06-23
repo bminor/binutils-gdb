@@ -2378,7 +2378,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       msec = find_debug_info (abfd, NULL);
       if (msec == NULL)
 	{
-	  char * debug_filename = bfd_follow_gnu_debuglink (abfd, NULL);
+	  char * debug_filename = bfd_follow_gnu_debuglink (abfd, DEBUGDIR);
 
 	  if (debug_filename == NULL)
 	    /* No dwarf2 info, and no gnu_debuglink to follow.
@@ -2617,7 +2617,7 @@ _bfd_dwarf2_find_line (bfd *abfd,
       msec = find_debug_info (abfd, NULL);
       if (msec == NULL)
 	{
-	  char * debug_filename = bfd_follow_gnu_debuglink (abfd, NULL);
+	  char * debug_filename = bfd_follow_gnu_debuglink (abfd, DEBUGDIR);
 
 	  if (debug_filename == NULL)
 	    /* No dwarf2 info, and no gnu_debuglink to follow.

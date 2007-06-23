@@ -134,6 +134,7 @@ CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
+DEBUGDIR = @DEBUGDIR@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DUMPBIN = @DUMPBIN@
@@ -1379,6 +1380,9 @@ targets.lo: targets.c Makefile
 
 archures.lo: archures.c Makefile
 	$(LIBTOOL) --mode=compile $(COMPILE) -c $(TDEFAULTS) $(srcdir)/archures.c
+
+dwarf2.lo: dwarf2.c Makefile
+	$(LIBTOOL) --mode=compile $(COMPILE) -c -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
 
 elf32-target.h : elfxx-target.h
 	rm -f elf32-target.h

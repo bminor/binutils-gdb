@@ -1,3 +1,13 @@
+2007-06-23  Andreas Schwab  <schwab@suse.de>
+
+	* configure.in (--with-separate-debug-dir): New option.
+	* configure: Regenerate.
+	* Makefile.am (dwarf2.lo): Add rule to pass DEBUGDIR.
+	* Makefile.in: Regenerate.
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Pass DEBUGDIR to
+	bfd_follow_gnu_debuglink.
+	(_bfd_dwarf2_find_line): Likewise.
+
 2007-06-22  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2.c: Add support for reading in debug information via a
