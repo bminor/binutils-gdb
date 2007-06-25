@@ -2571,6 +2571,23 @@ The target architecture object is implemented as the C structure
 @code{struct gdbarch *}.  The structure, and its methods, are generated
 using the Bourne shell script @file{gdbarch.sh}.
 
+@menu
+* OS ABI Variant Handling::
+* Initialize New Architecture::
+* Registers and Memory::
+* Pointers and Addresses::
+* Address Classes::
+* Raw and Virtual Registers::
+* Register and Memory Data::
+* Frame Interpretation::
+* Inferior Call Setup::
+* Compiler Characteristics::
+* Target Conditionals::
+* Adding a New Target::
+* Converting Targets to Multi-arch::
+@end menu
+
+@node  OS ABI Variant Handling
 @section Operating System ABI Variant Handling
 @cindex OS ABI variants
 
@@ -2730,6 +2747,7 @@ from the note.  This function should be called via
 @code{bfd_map_over_sections}.
 @end deftypefun
 
+@node Initialize New Architecture
 @section Initializing a New Architecture
 
 Each @code{gdbarch} is associated with a single @sc{bfd} architecture,
@@ -2765,6 +2783,7 @@ However, @value{GDBN} now fills in @var{info} more thoroughly,
 so new @code{gdbarch} initialization functions should not take
 defaults from @var{arches}.
 
+@node Registers and Memory
 @section Registers and Memory
 
 @value{GDBN}'s model of the target machine is rather simple.
@@ -2779,6 +2798,7 @@ and to reflect that in the @code{REGISTER_NAME} and related macros.
 
 @value{GDBN} can handle big-endian, little-endian, and bi-endian architectures.
 
+@node Pointers and Addresses
 @section Pointers Are Not Always Addresses
 @cindex pointer representation
 @cindex address representation
@@ -2910,6 +2930,7 @@ This function may safely assume that @var{type} is either a pointer or a
 C@t{++} reference type.
 @end deftypefn
 
+@node Address Classes
 @section Address Classes
 @cindex address classes
 @cindex DW_AT_byte_size
@@ -2996,6 +3017,7 @@ type = int * @@short
 @end smallexample
 
 
+@node Raw and Virtual Registers
 @section Raw and Virtual Register Representations
 @cindex raw register representation
 @cindex virtual register representation
@@ -3104,6 +3126,7 @@ their @var{reg} and @var{type} arguments in different orders.
 @end deftypefn
 
 
+@node Register and Memory Data
 @section Using Different Register and Memory Data Representations
 @cindex register representation
 @cindex memory representation
@@ -3182,13 +3205,16 @@ the @code{CONVERT_REGISTER_P} macro returns a non-zero value.
 See @file{mips-tdep.c}.  It does not do what you want.
 @end deftypefn
 
-
+@node Frame Interpretation
 @section Frame Interpretation
 
+@node Inferior Call Setup
 @section Inferior Call Setup
 
+@node Compiler Characteristics
 @section Compiler Characteristics
 
+@node Target Conditionals
 @section Target Conditionals
 
 This section describes the macros that you can use to define the target
@@ -4255,6 +4281,7 @@ allocate some memory in the inferior. The default value is "malloc".
 
 @end ftable
 
+@node Adding a New Target
 @section Adding a New Target
 
 @cindex adding a target
@@ -4313,6 +4340,7 @@ that just @code{#include}s @file{tm-@var{arch}.h} and
 @file{config/tm-@var{os}.h}.
 
 
+@node Converting Targets to Multi-arch
 @section Converting an existing Target Architecture to Multi-arch
 @cindex converting targets to multi-arch
 
