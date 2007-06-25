@@ -1,3 +1,8 @@
+2007-06-25  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdbint.texinfo (Register and Memory Data): Break sections
+	into nodes and add a menu.
+
 2007-06-21  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.texinfo (Examining Memory): Document the new behaviour.
