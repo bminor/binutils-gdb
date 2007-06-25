@@ -1,3 +1,10 @@
+2007-06-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.h (regKludge): Renamed to ...
+	(RegKludge): This.
+
+	* i386-opc.c (i386_optab): Replace regKludge with RegKludge.
+
 2007-06-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4667

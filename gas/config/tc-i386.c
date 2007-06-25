@@ -3324,7 +3324,7 @@ process_operands (void)
   /* The imul $imm, %reg instruction is converted into
      imul $imm, %reg, %reg, and the clr %reg instruction
      is converted into xor %reg, %reg.  */
-  if (i.tm.opcode_modifier & regKludge)
+  if (i.tm.opcode_modifier & RegKludge)
     {
        if ((i.tm.cpu_flags & CpuSSE4_1))
 	 {

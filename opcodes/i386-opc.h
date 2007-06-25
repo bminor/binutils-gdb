@@ -116,7 +116,7 @@ typedef struct template
 #define No_xSuf       0x200000  /* x suffix on instruction illegal */
 #define FWait	      0x400000	/* instruction needs FWAIT */
 #define IsString      0x800000	/* quick test for string instructions */
-#define regKludge    0x1000000	/* fake an extra reg operand for clr, imul
+#define RegKludge    0x1000000	/* fake an extra reg operand for clr, imul
 				   and special register processing for
 				   some instructions.  */
 #define IsPrefix     0x2000000	/* opcode is a prefix */

@@ -234,7 +234,7 @@ const template i386_optab[] =
 {"xor",	   2,	0x80, 6, 0,	 bwlq_Suf|W|Modrm,	{ EncImm, Reg|AnyMem, 0} },
 
 /* clr with 1 operand is really xor with 2 operands.  */
-{"clr",	   1,	0x30, X, 0,	 bwlq_Suf|W|Modrm|regKludge,	{ Reg, 0, 0 } },
+{"clr",	   1,	0x30, X, 0,	 bwlq_Suf|W|Modrm|RegKludge,	{ Reg, 0, 0 } },
 
 {"adc",	   2,	0x10, X, 0,	 bwlq_Suf|D|W|Modrm,	{ Reg, Reg|AnyMem, 0} },
 {"adc",	   2,	0x83, 2, 0,	 wlq_Suf|Modrm,		{ Imm8S, WordReg|WordMem, 0} },
@@ -279,10 +279,10 @@ const template i386_optab[] =
 {"imul",   3,	0x6b, X, Cpu186, wlq_Suf|Modrm,		{ Imm8S, WordReg|WordMem, WordReg} },
 {"imul",   3,	0x69, X, Cpu186, wlq_Suf|Modrm,		{ Imm16|Imm32S|Imm32, WordReg|WordMem, WordReg} },
 /* imul with 2 operands mimics imul with 3 by putting the register in
-   both i.rm.reg & i.rm.regmem fields.  regKludge enables this
+   both i.rm.reg & i.rm.regmem fields.  RegKludge enables this
    transformation.  */
-{"imul",   2,	0x6b, X, Cpu186, wlq_Suf|Modrm|regKludge,{ Imm8S, WordReg, 0} },
-{"imul",   2,	0x69, X, Cpu186, wlq_Suf|Modrm|regKludge,{ Imm16|Imm32S|Imm32, WordReg, 0} },
+{"imul",   2,	0x6b, X, Cpu186, wlq_Suf|Modrm|RegKludge,{ Imm8S, WordReg, 0} },
+{"imul",   2,	0x69, X, Cpu186, wlq_Suf|Modrm|RegKludge,{ Imm16|Imm32S|Imm32, WordReg, 0} },
 
 {"div",	   1,	0xf6, 6, 0,	 bwlq_Suf|W|Modrm,	{ Reg|AnyMem, 0, 0} },
 {"div",	   2,	0xf6, 6, 0,	 bwlq_Suf|W|Modrm,	{ Reg|AnyMem, Acc, 0} },
@@ -1388,8 +1388,8 @@ const template i386_optab[] =
 
 {"blendpd",  3,  0x660f3a0d,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
 {"blendps",  3,  0x660f3a0c,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
-{"blendvpd", 3,  0x660f3815,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm|regKludge, { RegXMM, RegXMM|LLongMem, RegXMM } },
-{"blendvps", 3,  0x660f3814,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm|regKludge, { RegXMM, RegXMM|LLongMem, RegXMM } },
+{"blendvpd", 3,  0x660f3815,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm|RegKludge, { RegXMM, RegXMM|LLongMem, RegXMM } },
+{"blendvps", 3,  0x660f3814,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm|RegKludge, { RegXMM, RegXMM|LLongMem, RegXMM } },
 {"dppd",     3,  0x660f3a41,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
 {"dpps",     3,  0x660f3a40,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
 {"extractps",3,  0x660f3a17,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM, Reg32|Reg64|LongMem } },
@@ -1397,7 +1397,7 @@ const template i386_optab[] =
 {"movntdqa", 2,  0x660f382a,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ LLongMem, RegXMM, 0 } },
 {"mpsadbw",  3,  0x660f3a42,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
 {"packusdw", 2,  0x660f382b,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ RegXMM|LLongMem, RegXMM, 0 } },
-{"pblendvb", 3,  0x660f3810,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm|regKludge, { RegXMM, RegXMM|LLongMem, RegXMM } },
+{"pblendvb", 3,  0x660f3810,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm|RegKludge, { RegXMM, RegXMM|LLongMem, RegXMM } },
 {"pblendw",  3,  0x660f3a0e,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM|LLongMem, RegXMM } },
 {"pcmpeqq",  2,  0x660f3829,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ RegXMM|LLongMem, RegXMM, 0 } },
 {"pextrb",   3,  0x660f3a14,X, CpuSSE4_1, NoSuf|IgnoreSize|Modrm,	{ Imm8, RegXMM, Reg32|Reg64|ByteMem } },
