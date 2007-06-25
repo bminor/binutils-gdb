@@ -269,3 +269,5 @@ set mips16_intermix_test {
 }
 
 run_ld_link_tests $mips16_intermix_test
+
+run_dump_test "mips16-local-stubs-1"

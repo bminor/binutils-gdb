@@ -2792,6 +2792,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 				     reloc_type[0] == BFD_RELOC_16_PCREL_S2,
 				     reloc_type[0]);
 
+	  /* Tag symbols that have a R_MIPS16_26 relocation against them.  */
+	  if (reloc_type[0] == BFD_RELOC_MIPS16_JMP
+	      && ip->fixp[0]->fx_addsy)
+	    *symbol_get_tc (ip->fixp[0]->fx_addsy) = 1;
+
 	  /* These relocations can have an addend that won't fit in
 	     4 octets for 64bit assembly.  */
 	  if (HAVE_64BIT_GPRS
@@ -13612,11 +13617,50 @@ mips_fix_adjustable (fixS *fixp)
     return 0;
 
 #ifdef OBJ_ELF
-  /* Don't adjust relocations against mips16 symbols, so that the linker
-     can find them if it needs to set up a stub.  */
+  /* R_MIPS16_26 relocations against non-MIPS16 functions might resolve
+     to a floating-point stub.  The same is true for non-R_MIPS16_26
+     relocations against MIPS16 functions; in this case, the stub becomes
+     the function's canonical address.
+
+     Floating-point stubs are stored in unique .mips16.call.* or
+     .mips16.fn.* sections.  If a stub T for function F is in section S,
+     the first relocation in section S must be against F; this is how the
+     linker determines the target function.  All relocations that might
+     resolve to T must also be against F.  We therefore have the following
+     restrictions, which are given in an intentionally-redundant way:
+
+       1. We cannot reduce R_MIPS16_26 relocations against non-MIPS16
+	  symbols.
+
+       2. We cannot reduce a stub's relocations against non-MIPS16 symbols
+	  if that stub might be used.
+
+       3. We cannot reduce non-R_MIPS16_26 relocations against MIPS16
+	  symbols.
+
+       4. We cannot reduce a stub's relocations against MIPS16 symbols if
+	  that stub might be used.
+
+     There is a further restriction:
+
+       5. We cannot reduce R_MIPS16_26 relocations against MIPS16 symbols
+	  on targets with in-place addends; the relocation field cannot
+	  encode the low bit.
+
+     For simplicity, we deal with (3)-(5) by not reducing _any_ relocation
+     against a MIPS16 symbol.
+
+     We deal with (1)-(2) by saying that, if there's a R_MIPS16_26
+     relocation against some symbol R, no relocation against R may be
+     reduced.  (Note that this deals with (2) as well as (1) because
+     relocations against global symbols will never be reduced on ELF
+     targets.)  This approach is a little simpler than trying to detect
+     stub sections, and gives the "all or nothing" per-symbol consistency
+     that we have for MIPS16 symbols.  */
   if (IS_ELF
-      && S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16
-      && fixp->fx_subsy == NULL)
+      && fixp->fx_subsy == NULL
+      && (S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16
+	  || *symbol_get_tc (fixp->fx_addsy)))
     return 0;
 #endif
 

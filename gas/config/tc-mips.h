@@ -61,6 +61,9 @@ extern void mips_handle_align (struct frag *);
 struct insn_label_list;
 #define TC_SEGMENT_INFO_TYPE struct insn_label_list *
 
+/* This field is nonzero if the symbol is the target of a MIPS16 jump.  */
+#define TC_SYMFIELD_TYPE int
+
 /* Tell assembler that we have an itbl_mips.h header file to include.  */
 #define HAVE_ITBL_CPU
 

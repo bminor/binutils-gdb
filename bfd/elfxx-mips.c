@@ -4092,8 +4092,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   /* If this is a 16-bit call to a 32- or 64-bit function with a stub, we
      need to redirect the call to the stub.  */
   else if (r_type == R_MIPS16_26 && !info->relocatable
-	   && h != NULL
-	   && ((h->call_stub != NULL || h->call_fp_stub != NULL)
+	   && ((h != NULL && (h->call_stub != NULL || h->call_fp_stub != NULL))
 	       || (local_p
 		   && elf_tdata (input_bfd)->local_call_stubs != NULL
 		   && elf_tdata (input_bfd)->local_call_stubs[r_symndx] != NULL))

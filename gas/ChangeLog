@@ -1,3 +1,10 @@
+2007-06-25  Richard Sandiford  <richard@codesourcery.com>
+
+	* config/tc-mips.h (TC_SYMFIELD_TYPE): New.
+	* config/tc-mips.c (append_insn): Record which symbols have
+	R_MIPS16_26 relocations against them.
+	(mips_fix_adjustable): Don't reduce relocations against such symbols.
+
 2007-06-22  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (xg_assembly_relax): Comment termination rules.

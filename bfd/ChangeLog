@@ -1,3 +1,8 @@
+2007-06-25  Richard Sandiford  <richard@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Allow local stubs
+	to be used for calls from MIPS16 code.
+
 2007-06-23  Andreas Schwab  <schwab@suse.de>
 
 	* configure.in (--with-separate-debug-dir): New option.
