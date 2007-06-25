@@ -186,6 +186,7 @@ engine.o: sim-main.h engine.c $(SIM_EXTRA_DEPS)
 support.o: sim-main.h support.c $(SIM_EXTRA_DEPS)
 idecode.o: sim-main.h idecode.c $(SIM_EXTRA_DEPS)
 itable.o: sim-main.h itable.c $(SIM_EXTRA_DEPS)
+m16run.o: sim-main.h m16_idecode.h m32_idecode.h $(SIM_EXTRA_DEPS)
 
 m16_semantics.o: sim-main.h m16_semantics.c $(SIM_EXTRA_DEPS)
 m16_support.o: sim-main.h m16_support.c $(SIM_EXTRA_DEPS)

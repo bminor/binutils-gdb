@@ -1,3 +1,7 @@
+2007-06-25  Richard Sandiford  <richard@codesourcery.com>
+
+	* Makefile.in (m16_run.o): New rule.
+
 2007-05-15  Thiemo Seufer  <ths@mips.com>
 
 	* mips3264r2.igen (DSHD): Fix compile warning.
