@@ -1,3 +1,11 @@
+2007-06-26  Shantonu Sen  <ssen@apple.com>
+
+	PR binutils/4693
+	* Makefile.am (windres_DEPENDENCIES, windmc_DEPENDENCIES): Move
+	dependency on $(LIBICONV) to ...
+	(windres_LDADD, windmc_LDADD) ... here.
+	* Makefile.in: Regenerate.
+
 2007-06-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* embedspu.sh (relas): Correct sh_info parsing.
@@ -6,7 +14,7 @@
  
   	* objdump.c: Include sys/stat.h.
 
-2007-06-19  Kai Tietz   <kai.tietz@onevision.com>
+2007-06-19  Kai Tietz  <kai.tietz@onevision.com>
 
         * Makefile.am: Add windmc tool.
         * Makefile.in: Regenerate.
