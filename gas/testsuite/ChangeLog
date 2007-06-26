@@ -1,3 +1,7 @@
+2007-06-24  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/backslash-at.d: Fix for non-ELF arm targets.
+
 2007-06-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4667
