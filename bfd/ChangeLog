@@ -1,3 +1,9 @@
+2007-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf2.c (find_line): New.  Contains the duplicated code from:
+	(_bfd_dwarf2_find_nearest_line): Use it.
+	(_bfd_dwarf2_find_line): Use it.
+
 2007-06-26  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-arm.c (copy_eabi_attributes): Copy type of attributes.
