@@ -1,3 +1,7 @@
+2007-06-26  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (coprocessor_opcodes): Add fmxr/fmrx mvfr0/mvfr1.
+
 2007-06-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.h (regKludge): Renamed to ...

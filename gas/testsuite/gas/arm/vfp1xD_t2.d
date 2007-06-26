@@ -253,5 +253,19 @@ Disassembly of section .text:
 0+3b2 <[^>]*> bf04      	itt	eq
 0+3b4 <[^>]*> ee01 9a90 	fmsreq	s3, r9
 0+3b8 <[^>]*> eee0 8a10 	fmxreq	fpsid, r8
-0+3bc <[^>]*> bf00      	nop
-0+3be <[^>]*> bf00      	nop
+0+3bc <[^>]*> eef9 0a10 	fmrx	r0, fpinst	@ Impl def
+0+3c0 <[^>]*> eefa 0a10 	fmrx	r0, fpinst2	@ Impl def
+0+3c4 <[^>]*> eef7 0a10 	fmrx	r0, mvfr0
+0+3c8 <[^>]*> eef6 0a10 	fmrx	r0, mvfr1
+0+3cc <[^>]*> eefc 0a10 	fmrx	r0, <impl def 0xc>
+0+3d0 <[^>]*> eee9 0a10 	fmxr	fpinst, r0	@ Impl def
+0+3d4 <[^>]*> eeea 0a10 	fmxr	fpinst2, r0	@ Impl def
+0+3d8 <[^>]*> eee7 0a10 	fmxr	mvfr0, r0
+0+3dc <[^>]*> eee6 0a10 	fmxr	mvfr1, r0
+0+3e0 <[^>]*> eeec 0a10 	fmxr	<impl def 0xc>, r0
+0+3e4 <[^>]*> bf00      	nop
+0+3e6 <[^>]*> bf00      	nop
+0+3e8 <[^>]*> bf00      	nop
+0+3ea <[^>]*> bf00      	nop
+0+3ec <[^>]*> bf00      	nop
+0+3ee <[^>]*> bf00      	nop

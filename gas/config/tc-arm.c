@@ -5612,7 +5612,13 @@ parse_operands (char *str, const unsigned char *pattern)
 	case OP_RVD:   po_reg_or_fail (REG_TYPE_VFD);	  break;
         case OP_oRND:
 	case OP_RND:   po_reg_or_fail (REG_TYPE_VFD);	  break;
-	case OP_RVC:   po_reg_or_fail (REG_TYPE_VFC);	  break;
+	case OP_RVC:
+	  po_reg_or_goto (REG_TYPE_VFC, coproc_reg);
+	  break;
+	  /* Also accept generic coprocessor regs for unknown registers.  */
+	  coproc_reg:
+	  po_reg_or_fail (REG_TYPE_CN);
+	  break;
 	case OP_RMF:   po_reg_or_fail (REG_TYPE_MVF);	  break;
 	case OP_RMD:   po_reg_or_fail (REG_TYPE_MVD);	  break;
 	case OP_RMFX:  po_reg_or_fail (REG_TYPE_MVFX);	  break;
@@ -14506,6 +14512,10 @@ static const struct reg_entry reg_names[] =
   /* VFP control registers.  */
   REGDEF(fpsid,0,VFC), REGDEF(fpscr,1,VFC), REGDEF(fpexc,8,VFC),
   REGDEF(FPSID,0,VFC), REGDEF(FPSCR,1,VFC), REGDEF(FPEXC,8,VFC),
+  REGDEF(fpinst,9,VFC), REGDEF(fpinst2,10,VFC),
+  REGDEF(FPINST,9,VFC), REGDEF(FPINST2,10,VFC),
+  REGDEF(mvfr0,7,VFC), REGDEF(mvfr1,6,VFC),
+  REGDEF(MVFR0,7,VFC), REGDEF(MVFR1,6,VFC),
 
   /* Maverick DSP coprocessor registers.  */
   REGSET(mvf,MVF),  REGSET(mvd,MVD),  REGSET(mvfx,MVFX),  REGSET(mvdx,MVDX),

@@ -1,3 +1,10 @@
+2007-06-26  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/vfp1xD.d: Add new fmrx/fmxr tests.
+	* gas/arm/vfp1xD.s: Ditto.
+	* gas/arm/vfp1xD_t2.d: Ditto.
+	* gas/arm/vfp1xD_t2.s: Ditto.
+
 2007-06-24  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/backslash-at.d: Fix for non-ELF arm targets.
