@@ -1,3 +1,7 @@
+2007-06-26  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-arm.c (copy_eabi_attributes): Copy type of attributes.
+
 2007-06-25  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Allow local stubs

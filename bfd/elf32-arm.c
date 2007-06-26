@@ -6969,6 +6969,7 @@ copy_eabi_attributes (bfd *ibfd, bfd *obfd)
   out_attr = &elf32_arm_tdata (obfd)->known_eabi_attributes[4];
   for (i = 4; i < NUM_KNOWN_ATTRIBUTES; i++)
     {
+      out_attr->type = in_attr->type;
       out_attr->i = in_attr->i;
       if (in_attr->s && *in_attr->s)
 	out_attr->s = attr_strdup (obfd, in_attr->s);

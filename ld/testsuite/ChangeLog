@@ -1,3 +1,8 @@
+2007-06-26  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-arm/attr-merge.s, ld-arm/attr-merge.attr: New.
+	* ld-arm/arm-elf.exp (armelftests): Add new test.
+
 2007-06-25  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips-elf/mips16-local-stubs-1.s,
