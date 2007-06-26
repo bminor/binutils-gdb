@@ -6,4 +6,5 @@ SECTIONS
   ASSERT (here, "here is zero");
   }
   ASSERT (!SIZEOF(.empty), "Empty is not empty")
+  /DISCARD/ : { *(.reginfo) }
 }

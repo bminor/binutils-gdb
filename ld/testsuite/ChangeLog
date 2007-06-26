@@ -1,3 +1,7 @@
+2007-06-29  H.J. Lu <hjl@gnu.org>
+
+	* ld-scripts/assert.t: Discard .reginfo sections.
+
 2007-06-26  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-arm/attr-merge.s, ld-arm/attr-merge.attr: New.
