@@ -1,3 +1,11 @@
+2007-06-26  Richard Sandiford  <richard@codesourcery.com>
+
+	* configure.ac (sim_mipsisa3264_configs): New variable.
+	(mipsis32*-*-, mipsisa32r2*-*-*, mips64*-*-*, mips64r2*-*-*): Make
+	every configuration support all four targets, using the triplet to
+	determine the default.
+	* configure: Regenerate.
+
 2007-06-25  Richard Sandiford  <richard@codesourcery.com>
 
 	* Makefile.in (m16run.o): New rule.

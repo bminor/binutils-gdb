@@ -109,6 +109,12 @@ sim_igen_filter="32,64,f"
 sim_m16_filter="16"
 sim_mach_default="mips8000"
 
+sim_mipsisa3264_configs="\
+  mipsisa32:mips32,mips16,mips16e,smartmips:32,f:mipsisa32\
+  mipsisa32r2:mips32r2,mips16,mips16e,mdmx,dsp,dsp2,smartmips:32,f:mipsisa32r2\
+  mipsisa64:mips64,mips3d,mips16,mips16e,mdmx:32,64,f:mipsisa64\
+  mipsisa64r2:mips64r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2:32,64,f:mipsisa64r2"
+
 case "${target}" in
   mips*tx39*)		sim_gen=IGEN
 			sim_igen_filter="32,f"
@@ -152,34 +158,26 @@ case "${target}" in
 			sim_igen_filter="32,64,f"
 			sim_m16_filter="16"
 			;;
-  mipsisa32r2*-*-*)	sim_gen=M16
-			sim_igen_machine="-M mips32r2,mips16,mips16e,mdmx,dsp,dsp2,smartmips"
-			sim_m16_machine="-M mips16,mips16e,mips32r2"
-			sim_igen_filter="32,f"
-			sim_mach_default="mipsisa32r2"
+  mipsisa32r2*-*-*)	sim_gen=MULTI
+			sim_multi_configs=$sim_mipsisa3264_configs
+			sim_multi_default="mipsisa32r2"
 			;;
-  mipsisa32*-*-*)	sim_gen=M16
-			sim_igen_machine="-M mips32,mips16,mips16e,smartmips"
-			sim_m16_machine="-M mips16,mips16e,mips32"
-			sim_igen_filter="32,f"
-			sim_mach_default="mipsisa32"
+  mipsisa32*-*-*)	sim_gen=MULTI
+			sim_multi_configs=$sim_mipsisa3264_configs
+			sim_multi_default="mipsisa32"
 			;;
-  mipsisa64r2*-*-*)	sim_gen=M16
-			sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2"
-			sim_m16_machine="-M mips16,mips16e,mips64r2"
-			sim_igen_filter="32,64,f"
-			sim_mach_default="mipsisa64r2"
+  mipsisa64r2*-*-*)	sim_gen=MULTI
+			sim_multi_configs=$sim_mipsisa3264_configs
+			sim_multi_default="mipsisa64r2"
 			;;
   mipsisa64sb1*-*-*)	sim_gen=IGEN
 			sim_igen_machine="-M mips64,mips3d,sb1"
 			sim_igen_filter="32,64,f"
 			sim_mach_default="mips_sb1"
 			;;
-  mipsisa64*-*-*)	sim_gen=M16
-			sim_igen_machine="-M mips64,mips3d,mips16,mips16e,mdmx"
-			sim_m16_machine="-M mips16,mips16e,mips64"
-			sim_igen_filter="32,64,f"
-			sim_mach_default="mipsisa64"
+  mipsisa64*-*-*)	sim_gen=MULTI
+			sim_multi_configs=$sim_mipsisa3264_configs
+			sim_multi_default="mipsisa64"
 			;;
   mips*lsi*)		sim_gen=M16
 			sim_igen_machine="-M mipsIII,mips16"
