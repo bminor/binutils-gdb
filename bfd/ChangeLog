@@ -2,6 +2,7 @@
 
 	* elf32-ppc.c (ppc_elf_select_plt_layout): Properly iterate over
 	input bfds.
+	* elf32-spu.c (spu_elf_create_sections): Likewise.
 
 2007-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 

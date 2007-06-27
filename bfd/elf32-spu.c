@@ -533,7 +533,7 @@ spu_elf_create_sections (bfd *output_bfd,
   htab->stack_analysis = stack_analysis;
   htab->emit_stack_syms = emit_stack_syms;
 
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->next)
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     if (bfd_get_section_by_name (ibfd, SPU_PTNOTE_SPUNAME) != NULL)
       break;
 
