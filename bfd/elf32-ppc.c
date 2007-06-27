@@ -3703,7 +3703,7 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 	     --secure-plt and we never see REL16 relocs.  */
 	  if (plt_type == PLT_UNSET)
 	    plt_type = PLT_OLD;
-	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->next)
+	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
 	    if (is_ppc_elf_target (ibfd->xvec))
 	      {
 		if (ppc_elf_tdata (ibfd)->has_rel16)
