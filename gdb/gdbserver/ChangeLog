@@ -1,3 +1,11 @@
+2007-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* thread-db.c (thread_db_find_new_threads): Add prototype.
+	(thread_db_create_event): Check for the main thread before adding
+	a new thread.
+	(maybe_attach_thread): Only enable event reporting if TID == 0.
+	(thread_db_get_tls_address): Check for new threads.
+
 2007-06-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (linux_create_inferior): Try execv before execvp.

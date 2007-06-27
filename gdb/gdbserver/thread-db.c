@@ -41,6 +41,7 @@ static struct ps_prochandle proc_handle;
 /* Connection to the libthread_db library.  */
 static td_thragent_t *thread_agent;
 
+static void thread_db_find_new_threads (void);
 static int find_new_threads_callback (const td_thrhandle_t *th_p, void *data);
 
 static char *
@@ -135,6 +136,8 @@ thread_db_create_event (CORE_ADDR where)
   td_event_msg_t msg;
   td_err_e err;
   struct inferior_linux_data *tdata;
+  struct thread_info *inferior;
+  struct process_info *process;
 
   if (debug_threads)
     fprintf (stderr, "Thread creation event.\n");
@@ -149,6 +152,14 @@ thread_db_create_event (CORE_ADDR where)
   if (err != TD_OK)
     fprintf (stderr, "thread getmsg err: %s\n",
 	     thread_db_err_str (err));
+
+  /* If we do not know about the main thread yet, this would be a good time to
+     find it.  We need to do this to pick up the main thread before any newly
+     created threads.  */
+  inferior = (struct thread_info *) all_threads.head;
+  process = get_thread_process (inferior);
+  if (process->thread_known == 0)
+    thread_db_find_new_threads ();
 
   /* msg.event == TD_EVENT_CREATE */
 
@@ -232,8 +243,24 @@ maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
     {
       inferior = (struct thread_info *) all_threads.head;
       process = get_thread_process (inferior);
+
       if (process->thread_known == 0)
 	{
+	  /* If the new thread ID is zero, a final thread ID will be
+	     available later.  Do not enable thread debugging yet.  */
+	  if (ti_p->ti_tid == 0)
+	    {
+	      err = td_thr_event_enable (th_p, 1);
+	      if (err != TD_OK)
+		error ("Cannot enable thread event reporting for %d: %s",
+		       ti_p->ti_lid, thread_db_err_str (err));
+	      return;
+	    }
+
+	  if (process->lwpid != ti_p->ti_lid)
+	    fatal ("PID mismatch!  Expected %ld, got %ld",
+		   (long) process->lwpid, (long) ti_p->ti_lid);
+
 	  /* Switch to indexing the threads list by TID.  */
 	  change_inferior_id (&all_threads, ti_p->ti_tid);
 	  goto found;
@@ -331,6 +358,8 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   struct process_info *process;
 
   process = get_thread_process (thread);
+  if (!process->thread_known)
+    thread_db_find_new_threads ();
   if (!process->thread_known)
     return TD_NOTHR;
 

@@ -1,3 +1,19 @@
+2007-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-thread-db.c (thread_db_attach): Delete.
+	(thread_db_detach): Typo fix.  Call target_mourn_inferior
+	instead of fixing up proc_handle.
+	(have_threads_callback, have_threads): New functions.
+	(thread_db_wait): Remove dead proc_handle.pid check.  Only
+	translate PTIDs if we have registered threads.  Check for new
+	threads if we have none.
+	(thread_db_create_inferior, thread_db_post_startup_inferior): Delete.
+	(find_new_threads_callback): Only enable event reporting if TID == 0.
+	(same_ptid_callback): New.
+	(thread_db_get_thread_local_address): Check for new threads.
+	(init_thread_db_ops): Don't set to_attach, to_create_inferior,
+	or to_post_startup_inferior.
+
 2007-06-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* infrun.c (adjust_pc_after_break): Do not assume software single-step
