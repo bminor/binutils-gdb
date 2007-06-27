@@ -5768,7 +5768,7 @@ som_bfd_prep_for_ar_write (bfd *abfd,
       if (curr_bfd->format != bfd_object
 	  || curr_bfd->xvec->flavour != bfd_target_som_flavour)
 	{
-	  curr_bfd = curr_bfd->next;
+	  curr_bfd = curr_bfd->archive_next;
 	  continue;
 	}
 
@@ -5813,7 +5813,7 @@ som_bfd_prep_for_ar_write (bfd *abfd,
 	    (*stringsize)++;
 	}
 
-      curr_bfd = curr_bfd->next;
+      curr_bfd = curr_bfd->archive_next;
     }
   return TRUE;
 }
@@ -5922,7 +5922,7 @@ som_bfd_ar_write_symbol_stuff (bfd *abfd,
       if (curr_bfd->format != bfd_object
 	  || curr_bfd->xvec->flavour != bfd_target_som_flavour)
 	{
-	  curr_bfd = curr_bfd->next;
+	  curr_bfd = curr_bfd->archive_next;
 	  continue;
 	}
 
@@ -6038,7 +6038,7 @@ som_bfd_ar_write_symbol_stuff (bfd *abfd,
 	 linker requires objects begin on an even boundary.  So round
 	 up the current offset as necessary.  */
       curr_som_offset = (curr_som_offset + 0x1) &~ (unsigned) 1;
-      curr_bfd = curr_bfd->next;
+      curr_bfd = curr_bfd->archive_next;
       som_index++;
     }
 
@@ -6144,7 +6144,7 @@ som_write_armap (bfd *abfd,
       if (curr_bfd->format == bfd_object
 	  && curr_bfd->xvec->flavour == bfd_target_som_flavour)
 	lst.module_count++;
-      curr_bfd = curr_bfd->next;
+      curr_bfd = curr_bfd->archive_next;
     }
   lst.module_limit = lst.module_count;
   lst.dir_loc = lst_size;

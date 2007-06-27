@@ -1935,7 +1935,7 @@ copy_unknown_element:
 	  l->obfd = output_bfd;
 
 	  *ptr = output_bfd;
-	  ptr = &output_bfd->next;
+	  ptr = &output_bfd->archive_next;
 
 	  last_element = this_element;
 

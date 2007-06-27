@@ -2828,7 +2828,7 @@ gen_lib_file (void)
       if (exp->private)
 	continue;
       n = make_one_lib_file (exp, i);
-      n->next = head;
+      n->archive_next = head;
       head = n;
       if (ext_prefix_alias)
 	{
@@ -2847,14 +2847,14 @@ gen_lib_file (void)
 	  alias_exp.forward = exp->forward;
 	  alias_exp.next = exp->next;
 	  n = make_one_lib_file (&alias_exp, i + PREFIX_ALIAS_BASE);
-	  n->next = head;
+	  n->archive_next = head;
 	  head = n;
 	}
     }
 
   /* Now stick them all into the archive.  */
-  ar_head->next = head;
-  ar_tail->next = ar_head;
+  ar_head->archive_next = head;
+  ar_tail->archive_next = ar_head;
   head = ar_tail;
 
   if (! bfd_set_archive_head (outarch, head))
@@ -2865,7 +2865,7 @@ gen_lib_file (void)
 
   while (head != NULL)
     {
-      bfd *n = head->next;
+      bfd *n = head->archive_next;
       bfd_close (head);
       head = n;
     }

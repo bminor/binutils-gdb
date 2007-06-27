@@ -1234,7 +1234,9 @@ _bfd_construct_extended_name_table (bfd *abfd,
   *tablen = 0;
 
   /* Figure out how long the table should be.  */
-  for (current = abfd->archive_head; current != NULL; current = current->next)
+  for (current = abfd->archive_head;
+       current != NULL;
+       current = current->archive_next)
     {
       const char *normal;
       unsigned int thislen;
@@ -1286,8 +1288,9 @@ _bfd_construct_extended_name_table (bfd *abfd,
   *tablen = total_namelen;
   strptr = *tabloc;
 
-  for (current = abfd->archive_head; current != NULL; current =
-       current->next)
+  for (current = abfd->archive_head;
+       current != NULL;
+       current = current->archive_next)
     {
       const char *normal;
       unsigned int thislen;
@@ -1637,7 +1640,9 @@ _bfd_write_archive_contents (bfd *arch)
   /* Verify the viability of all entries; if any of them live in the
      filesystem (as opposed to living in an archive open for input)
      then construct a fresh ar_hdr for them.  */
-  for (current = arch->archive_head; current; current = current->next)
+  for (current = arch->archive_head;
+       current != NULL;
+       current = current->archive_next)
     {
       /* This check is checking the bfds for the objects we're reading
 	 from (which are usually either an object file or archive on
@@ -1705,7 +1710,9 @@ _bfd_write_archive_contents (bfd *arch)
 	}
     }
 
-  for (current = arch->archive_head; current; current = current->next)
+  for (current = arch->archive_head;
+       current != NULL;
+       current = current->archive_next)
     {
       char buffer[DEFAULT_BUFFERSIZE];
       unsigned int remaining = arelt_size (current);
@@ -1802,12 +1809,12 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
   /* Drop all the files called __.SYMDEF, we're going to make our own.  */
   while (arch->archive_head &&
 	 strcmp (arch->archive_head->filename, "__.SYMDEF") == 0)
-    arch->archive_head = arch->archive_head->next;
+    arch->archive_head = arch->archive_head->archive_next;
 
   /* Map over each element.  */
   for (current = arch->archive_head;
        current != NULL;
-       current = current->next, elt_no++)
+       current = current->archive_next, elt_no++)
     {
       if (bfd_check_format (current, bfd_object)
 	  && (bfd_get_file_flags (current) & HAS_SYMS) != 0)
@@ -1964,7 +1971,7 @@ bsd_write_armap (bfd *arch,
 	    {
 	      firstreal += arelt_size (current) + sizeof (struct ar_hdr);
 	      firstreal += firstreal % 2;
-	      current = current->next;
+	      current = current->archive_next;
 	    }
 	  while (current != map[count].u.abfd);
 	}
@@ -2134,7 +2141,7 @@ coff_write_armap (bfd *arch,
       archive_member_file_ptr += arelt_size (current) + sizeof (struct ar_hdr);
       /* Remember aboout the even alignment.  */
       archive_member_file_ptr += archive_member_file_ptr % 2;
-      current = current->next;
+      current = current->archive_next;
     }
 
   /* Now write the strings themselves.  */

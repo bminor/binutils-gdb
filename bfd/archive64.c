@@ -215,7 +215,7 @@ bfd_elf64_archive_write_armap (bfd *arch,
 				  + sizeof (struct ar_hdr));
       /* remember about the even alignment */
       archive_member_file_ptr += archive_member_file_ptr % 2;
-      current = current->next;
+      current = current->archive_next;
     }
 
   /* now write the strings themselves */

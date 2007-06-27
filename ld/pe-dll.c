@@ -2416,7 +2416,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename)
       def->exports[i].internal_name = def->exports[i].name;
       n = make_one (def->exports + i, outarch,
 		    ! (def->exports + i)->flag_data);
-      n->next = head;
+      n->archive_next = head;
       head = n;
       def->exports[i].internal_name = internal;
     }
@@ -2427,8 +2427,8 @@ pe_dll_generate_implib (def_file *def, const char *impfilename)
     return;
 
   /* Now stick them all into the archive.  */
-  ar_head->next = head;
-  ar_tail->next = ar_head;
+  ar_head->archive_next = head;
+  ar_tail->archive_next = ar_head;
   head = ar_tail;
 
   if (! bfd_set_archive_head (outarch, head))
@@ -2439,7 +2439,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename)
 
   while (head != NULL)
     {
-      bfd *n = head->next;
+      bfd *n = head->archive_next;
       bfd_close (head);
       head = n;
     }

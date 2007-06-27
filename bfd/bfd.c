@@ -139,7 +139,7 @@ CODE_FRAGMENT
 .  {* Stuff only useful for archives.  *}
 .  void *arelt_data;
 .  struct bfd *my_archive;      {* The containing archive BFD.  *}
-.  struct bfd *next;            {* The next BFD in the archive.  *}
+.  struct bfd *archive_next;    {* The next BFD in the archive.  *}
 .  struct bfd *archive_head;    {* The first BFD in the archive.  *}
 .  bfd_boolean has_armap;
 .

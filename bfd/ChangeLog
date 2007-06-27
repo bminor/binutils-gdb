@@ -1,5 +1,13 @@
 2007-06-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* bfd.c (struct bfd): Rename "next" to "archive_next".
+	* archive.c: Rename uses throughout file.
+	* archive64.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* ecoff.c: Likewise.
+	* som.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
 	* elf32-ppc.c (ppc_elf_select_plt_layout): Properly iterate over
 	input bfds.
 	* elf32-spu.c (spu_elf_create_sections): Likewise.

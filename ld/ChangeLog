@@ -1,3 +1,7 @@
+2007-06-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* pe-dll.c: Rename uses of bfd.next to bfd.archive_next throughout.
+
 2007-06-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf32_spu.sh (OTHER_SECTIONS): KEEP .note.spu_name.

@@ -1,3 +1,11 @@
+2007-06-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* ar.c: Rename uses of bfd.next to bfd.archive_next throughout.
+	* arsup.c: Likewise.
+	* binemul.c: Likewise.
+	* objcopy.c: Likewise.
+	* dlltool.c: Likewise.
+
 2007-06-26  Shantonu Sen  <ssen@apple.com>
 
 	PR binutils/4693

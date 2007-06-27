@@ -1649,7 +1649,7 @@ xcoff_write_armap_old (abfd, elength, map, orl_count, stridx)
 		  + SXCOFFARFMAG
 		  + arelt_size (sub));
       fileoff = (fileoff + 1) &~ 1;
-      sub = sub->next;
+      sub = sub->archive_next;
     }
 
   for (i = 0; i < orl_count; i++)
@@ -1820,7 +1820,7 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 	    }
 	  i++;
 	}
-      current_bfd = current_bfd->next;
+      current_bfd = current_bfd->archive_next;
       if (current_bfd != NULL)
 	arch_info = bfd_get_arch_info (current_bfd);
     }
@@ -1924,7 +1924,7 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 		      + SXCOFFARFMAG
 		      + arelt_size (current_bfd));
 	  fileoff += fileoff & 1;
-	  current_bfd = current_bfd->next;
+	  current_bfd = current_bfd->archive_next;
 	  if (current_bfd != NULL)
 	    arch_info = bfd_get_arch_info (current_bfd);
 	}
@@ -1945,7 +1945,7 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 		}
 	      i++;
 	    }
-	  current_bfd = current_bfd->next;
+	  current_bfd = current_bfd->archive_next;
 	  if (current_bfd != NULL)
 	    arch_info = bfd_get_arch_info (current_bfd);
 	}
@@ -2020,7 +2020,7 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 		      + SXCOFFARFMAG
 		      + arelt_size (current_bfd));
 	  fileoff += fileoff & 1;
-	  current_bfd = current_bfd->next;
+	  current_bfd = current_bfd->archive_next;
 	  if (current_bfd != NULL)
 	    arch_info = bfd_get_arch_info (current_bfd);
 	}
@@ -2041,7 +2041,7 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
 		}
 	      i++;
 	    }
-	  current_bfd = current_bfd->next;
+	  current_bfd = current_bfd->archive_next;
 	  if (current_bfd != NULL)
 	    arch_info = bfd_get_arch_info (current_bfd);
 	}
@@ -2100,7 +2100,7 @@ xcoff_write_archive_contents_old (abfd)
 
   count = 0;
   total_namlen = 0;
-  for (sub = abfd->archive_head; sub != NULL; sub = sub->next)
+  for (sub = abfd->archive_head; sub != NULL; sub = sub->archive_next)
     {
       ++count;
       total_namlen += strlen (normalize_filename (sub)) + 1;
@@ -2116,7 +2116,9 @@ xcoff_write_archive_contents_old (abfd)
   hasobjects = FALSE;
   prevoff = 0;
   nextoff = SIZEOF_AR_FILE_HDR;
-  for (sub = abfd->archive_head, i = 0; sub != NULL; sub = sub->next, i++)
+  for (sub = abfd->archive_head, i = 0;
+       sub != NULL;
+       sub = sub->archive_next, i++)
     {
       const char *name;
       bfd_size_type namlen;
@@ -2264,7 +2266,7 @@ xcoff_write_archive_contents_old (abfd)
 		      abfd) != XCOFFARMAG_ELEMENT_SIZE)
 	return FALSE;
     }
-  for (sub = abfd->archive_head; sub != NULL; sub = sub->next)
+  for (sub = abfd->archive_head; sub != NULL; sub = sub->archive_next)
     {
       const char *name;
       bfd_size_type namlen;
@@ -2334,7 +2336,7 @@ xcoff_write_archive_contents_big (abfd)
   hasobjects = FALSE;
   for (current_bfd = abfd->archive_head, count = 0, total_namlen = 0;
        current_bfd != NULL;
-       current_bfd = current_bfd->next, count++)
+       current_bfd = current_bfd->archive_next, count++)
     {
       total_namlen += strlen (normalize_filename (current_bfd)) + 1;
 
@@ -2356,7 +2358,7 @@ xcoff_write_archive_contents_big (abfd)
   nextoff = SIZEOF_AR_FILE_HDR_BIG;
   for (current_bfd = abfd->archive_head, i = 0;
        current_bfd != NULL;
-       current_bfd = current_bfd->next, i++)
+       current_bfd = current_bfd->archive_next, i++)
     {
       const char *name;
       bfd_size_type namlen;
@@ -2523,8 +2525,9 @@ xcoff_write_archive_contents_big (abfd)
       offsets = NULL;
     }
 
-  for (current_bfd = abfd->archive_head; current_bfd != NULL;
-       current_bfd = current_bfd->next)
+  for (current_bfd = abfd->archive_head;
+       current_bfd != NULL;
+       current_bfd = current_bfd->archive_next)
     {
       const char *name;
       size_t namlen;

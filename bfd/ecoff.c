@@ -3097,7 +3097,7 @@ _bfd_ecoff_write_armap (bfd *abfd,
 	    {
 	      firstreal += arelt_size (current) + sizeof (struct ar_hdr);
 	      firstreal += firstreal % 2;
-	      current = current->next;
+	      current = current->archive_next;
 	    }
 	  while (current != map[i].u.abfd);
 	}
