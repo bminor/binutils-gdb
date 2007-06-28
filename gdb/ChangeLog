@@ -1,5 +1,7 @@
 2007-06-28  Michael Snyder  <msnyder@access-company.com>
 
+	* source.c (unset_substitute_path_command): Plug leak (Coverity).
+
 	* cli/cli-script.c (build_command_line): Add null pointer guard 
 	(Coverity).
 	

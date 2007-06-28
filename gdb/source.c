@@ -1852,6 +1852,7 @@ unset_substitute_path_command (char *args, int from_tty)
 
   /* This function takes either 0 or 1 argument.  */
 
+  make_cleanup_freeargv (argv);
   if (argv != NULL && argv[0] != NULL && argv[1] != NULL)
     error (_("Incorrect usage, too many arguments in command"));
 
