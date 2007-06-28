@@ -1081,6 +1081,7 @@ thread_db_get_thread_local_address (ptid_t ptid,
 
       /* Get info about the thread.  */
       thread_info = find_thread_pid (ptid);
+      gdb_assert (thread_info);
       thread_db_map_id2thr (thread_info, 1);
 
       /* Finally, get the address of the variable.  */

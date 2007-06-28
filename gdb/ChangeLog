@@ -1,5 +1,8 @@
 2007-06-28  Michael Snyder  <msnyder@access-company.com>
 
+	* linux-thread-db.c (thread_db_get_thread_local_address): Add
+	gdb_assert before using return value of find_thread_pid (Coverity).
+
 	* source.c (unset_substitute_path_command): Plug leak (Coverity).
 
 	* cli/cli-script.c (build_command_line): Add null pointer guard 
