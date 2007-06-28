@@ -1,3 +1,8 @@
+2007-06-28  Michael Snyder  <msnyder@access-company.com>
+
+	* cli/cli-script.c (build_command_line): Add null pointer guard 
+	(Coverity).
+	
 2007-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-thread-db.c (thread_db_attach): Delete.

@@ -95,7 +95,9 @@ build_command_line (enum command_control_type type, char *args)
     = (struct command_line **) xmalloc (sizeof (struct command_line *)
 					* cmd->body_count);
   memset (cmd->body_list, 0, sizeof (struct command_line *) * cmd->body_count);
-  cmd->line = savestring (args, strlen (args));
+  if (args != NULL)
+    cmd->line = savestring (args, strlen (args));
+
   return cmd;
 }
 
