@@ -1,3 +1,7 @@
+2007-06-28  Richard Sandiford  <richard@codesourcery.com>
+
+	* configure.ac, configure: Revert last patch.
+
 2007-06-26  Richard Sandiford  <richard@codesourcery.com>
 
 	* configure.ac (sim_mipsisa3264_configs): New variable.
