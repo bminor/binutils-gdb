@@ -33,6 +33,8 @@ HFILES = \
 	fr30-desc.h fr30-opc.h \
 	frv-desc.h frv-opc.h \
 	h8500-opc.h \
+	i386-opc.h \
+	i386-tbl.h \
 	ia64-asmtab.h \
 	ia64-opc.h \
 	ip2k-desc.h ip2k-opc.h \
@@ -95,6 +97,7 @@ CFILES = \
 	i370-opc.c \
 	i386-dis.c \
 	i386-opc.c \
+	i386-gen.c \
 	i860-dis.c \
 	i960-dis.c \
 	ia64-dis.c \
@@ -563,6 +566,14 @@ stamp-xc16x: $(CGENDEPS) $(CPUDIR)/xc16x.cpu $(CPUDIR)/xc16x.opc
 	$(MAKE) run-cgen arch=xc16x prefix=xc16x options= \
 		archfile=$(CPUDIR)/xc16x.cpu opcfile=$(CPUDIR)/xc16x.opc extrafiles=
 
+i386-gen: i386-gen.o
+	$(LINK) i386-gen.o $(LIBIBERTY)
+
+i386-gen.o: i386-gen.c i386-opc.h
+
+i386-tbl.h: @MAINT@ i386-gen i386-opc.tbl i386-reg.tbl
+	./i386-gen --srcdir $(srcdir) > $(srcdir)/i386-tbl.h
+
 ia64-gen: ia64-gen.o
 	$(LINK) ia64-gen.o $(LIBIBERTY)
 
@@ -783,6 +794,9 @@ i386-dis.lo: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h opintl.h $(INCDIR)/opcode/i386.h
 i386-opc.lo: i386-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h i386-opc.h \
+  $(INCDIR)/opcode/i386.h i386-tbl.h
+i386-gen.lo: i386-gen.c $(INCDIR)/getopt.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h i386-opc.h \
   $(INCDIR)/opcode/i386.h
 i860-dis.lo: i860-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/opcode/i860.h

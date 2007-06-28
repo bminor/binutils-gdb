@@ -1,3 +1,23 @@
+2007-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (HFILES): Add i386-opc.h and i386-tbl.h.
+	(CFILES): Add i386-gen.c.
+	(i386-gen): New rule.
+	(i386-gen.o): Likewise.
+	(i386-tbl.h): Likewise.
+	Run "make dep-am".
+	* Makefile.in: Regenerated.
+
+	* i386-gen.c: New file.
+	* i386-opc.tbl: Likewise.
+	* i386-reg.tbl: Likewise.
+	* i386-tbl.h: Likewise.
+
+	* i386-opc.c: Include "i386-tbl.h".
+	(i386_optab): Removed.
+	(i386_regtab): Likewise.
+	(i386_regtab_size): Likewise.
+
 2007-06-26  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (coprocessor_opcodes): Add fmxr/fmrx mvfr0/mvfr1.
