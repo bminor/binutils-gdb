@@ -3024,6 +3024,18 @@ spu_elf_check_vma (bfd *abfd, bfd_vma lo, bfd_vma hi)
   return NULL;
 }
 
+/* Tweak the section type of .note.spu_name.  */
+
+static bfd_boolean
+spu_elf_fake_sections (bfd *obfd ATTRIBUTE_UNUSED,
+		       Elf_Internal_Shdr *hdr,
+		       asection *sec)
+{
+  if (strcmp (sec->name, SPU_PTNOTE_SPUNAME) == 0)
+    hdr->sh_type = SHT_NOTE;
+  return TRUE;
+}
+
 /* Tweak phdrs before writing them out.  */
 
 static int
@@ -3135,6 +3147,7 @@ spu_elf_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
 #define elf_backend_modify_segment_map		spu_elf_modify_segment_map
 #define elf_backend_modify_program_headers	spu_elf_modify_program_headers
 #define elf_backend_post_process_headers        spu_elf_post_process_headers
+#define elf_backend_fake_sections		spu_elf_fake_sections
 #define elf_backend_special_sections		spu_elf_special_sections
 #define bfd_elf32_bfd_final_link		spu_elf_final_link
 

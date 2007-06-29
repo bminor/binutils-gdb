@@ -1,5 +1,10 @@
 2007-06-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.c (spu_elf_fake_sections): New function.
+	(elf_backend_fake_sections): Define.
+
+2007-06-29  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (assign_file_positions_for_load_sections): Use elf
 	section header sh_size rather than bfd section size, simplifying
 	.tbss handling.
