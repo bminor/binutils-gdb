@@ -1,3 +1,9 @@
+2007-06-29  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armelftests): Add callweak.
+	* ld-arm/callweak.d: New test.
+	* ld-arm/callweak.s: New test.
+
 2007-06-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4701

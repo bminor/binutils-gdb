@@ -3236,7 +3236,8 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	      /* This one is a call from thumb code.  We look
 	         up the target of the call.  If it is not a thumb
                  target, we insert glue.  */
-	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC && !globals->use_blx)
+	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC && !globals->use_blx
+		  && h->root.type != bfd_link_hash_undefweak)
 		record_thumb_to_arm_glue (link_info, h);
 	      break;
 
@@ -4812,40 +4813,43 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  signed_addend = value;
 	  signed_addend >>= howto->rightshift;
 
-	  /* It is not an error for an undefined weak reference to be
-	     out of range.  Any program that branches to such a symbol
-	     is going to crash anyway, so there is no point worrying
-	     about getting the destination exactly right.  */
-	  if (! h || h->root.type != bfd_link_hash_undefweak)
+	  /* A branch to an undefined weak symbol is turned into a jump to
+	     the next instruction.  */
+	  if (h && h->root.type == bfd_link_hash_undefweak)
+	    {
+	      value = (bfd_get_32 (input_bfd, hit_data) & 0xf0000000)
+		      | 0x0affffff;
+	    }
+	  else
 	    {
 	      /* Perform a signed range check.  */
 	      if (   signed_addend >   ((bfd_signed_vma)  (howto->dst_mask >> 1))
 		  || signed_addend < - ((bfd_signed_vma) ((howto->dst_mask + 1) >> 1)))
 		return bfd_reloc_overflow;
-	    }
 
-	  addend = (value & 2);
+	      addend = (value & 2);
 
-	  value = (signed_addend & howto->dst_mask)
-	    | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
+	      value = (signed_addend & howto->dst_mask)
+		| (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
 
-	  /* Set the H bit in the BLX instruction.  */
-	  if (sym_flags == STT_ARM_TFUNC)
-	    {
-	      if (addend)
-		value |= (1 << 24);
-	      else
-		value &= ~(bfd_vma)(1 << 24);
-	    }
-	  if (r_type == R_ARM_CALL)
-	    {
-	      /* Select the correct instruction (BL or BLX).  */
+	      /* Set the H bit in the BLX instruction.  */
 	      if (sym_flags == STT_ARM_TFUNC)
-		value |= (1 << 28);
-	      else
 		{
-		  value &= ~(bfd_vma)(1 << 28);
-		  value |= (1 << 24);
+		  if (addend)
+		    value |= (1 << 24);
+		  else
+		    value &= ~(bfd_vma)(1 << 24);
+		}
+	      if (r_type == R_ARM_CALL)
+		{
+		  /* Select the correct instruction (BL or BLX).  */
+		  if (sym_flags == STT_ARM_TFUNC)
+		    value |= (1 << 28);
+		  else
+		    {
+		      value &= ~(bfd_vma)(1 << 28);
+		      value |= (1 << 24);
+		    }
 		}
 	    }
 	  break;
@@ -5021,6 +5025,15 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_signed_vma signed_check;
 	int bitsize;
 	int thumb2 = using_thumb2 (globals);
+
+	/* A branch to an undefined weak symbol is turned into a jump to
+	   the next instruction.  */
+	if (h && h->root.type == bfd_link_hash_undefweak)
+	  {
+	    bfd_put_16 (input_bfd, 0xe000, hit_data);
+	    bfd_put_16 (input_bfd, 0xbf00, hit_data + 2);
+	    return bfd_reloc_ok;
+	  }
 
 	/* Fetch the addend.  We use the Thumb-2 encoding (backwards compatible
            with Thumb-1) involving the J1 and J2 bits.  */

@@ -170,6 +170,9 @@ set armelftests {
      {"EABI attribute merging" "-r" "" {attr-merge.s attr-merge.s}
       {{readelf -A attr-merge.attr}}
       "attr-merge"}
+     {"callweak" "-static -T arm.ld" "" {callweak.s}
+      {{objdump -dr callweak.d}}
+      "callweak"}
 }
 
 run_ld_link_tests $armelftests
