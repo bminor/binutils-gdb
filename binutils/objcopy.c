@@ -1071,7 +1071,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	    }
 
 	  if (!undefined
-	      && (flags & BSF_LOCAL) 
+	      && (flags & BSF_LOCAL)
 	      && is_specified_symbol (name, globalize_specific_list))
 	    {
 	      sym->flags &= ~ BSF_LOCAL;
@@ -1214,7 +1214,7 @@ add_redefine_syms_file (const char *filename)
 	  if (buf[0] != '\0')
 	    redefine_list_append (filename, &buf[0], &buf[outsym_off]);
 
-	  lineno++;	
+	  lineno++;
 	  len = 0;
 	  outsym_off = 0;
 	  if (c == EOF)
@@ -2212,6 +2212,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   if (strip_symbols == STRIP_NONDEBUG
       && obfd->xvec->flavour == bfd_target_elf_flavour
       && (flags & SEC_ALLOC) != 0
+      && elf_section_type (osection) != SHT_NOTE
+      && (ibfd->xvec->flavour != bfd_target_elf_flavour
+	  || elf_section_type (isection) != SHT_NOTE)
       && (p == NULL || !p->set_flags))
     elf_section_type (osection) = SHT_NOBITS;
 
@@ -2721,7 +2724,7 @@ strip_main (int argc, char *argv[])
       display_info ();
       return 0;
     }
- 
+
   if (show_version)
     print_version ("strip");
 
@@ -2795,7 +2798,7 @@ copy_main (int argc, char *argv[])
   char * binary_architecture = NULL;
   char *input_filename = NULL;
   char *output_filename = NULL;
-  char *tmpname;    
+  char *tmpname;
   char *input_target = NULL;
   char *output_target = NULL;
   bfd_boolean show_version = FALSE;
@@ -3334,7 +3337,7 @@ copy_main (int argc, char *argv[])
       display_info ();
       return 0;
     }
- 
+
   if (show_version)
     print_version ("objcopy");
 
@@ -3389,7 +3392,7 @@ copy_main (int argc, char *argv[])
     tmpname = make_tempname (input_filename);
   else
     tmpname = output_filename;
-  
+
   if (tmpname == NULL)
     fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
 	   input_filename, strerror (errno));
