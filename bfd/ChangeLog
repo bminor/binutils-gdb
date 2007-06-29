@@ -1,5 +1,10 @@
 2007-06-29  Joseph Myers  <joseph@codesourcery.com>
 
+	* elfxx-mips.c (mips_elf_merge_obj_attributes): New.
+	(_bfd_mips_elf_merge_private_bfd_data): Call it.
+
+2007-06-29  Joseph Myers  <joseph@codesourcery.com>
+
 	* elf-attrs.c: New.
 	* Makefile.am (BFD32_BACKENDS): Add elf-attrs.lo.
 	(BFD32_BACKENDS_CFILES): Add elf-attrs.c.

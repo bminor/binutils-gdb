@@ -8346,6 +8346,60 @@ display_gnu_attribute (unsigned char *p,
   return p;
 }
 
+static unsigned char *
+display_mips_gnu_attribute (unsigned char *p, int tag)
+{
+  int type;
+  unsigned int len;
+  int val;
+
+  if (tag == Tag_GNU_MIPS_ABI_FP)
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_GNU_MIPS_ABI_FP: ");
+      switch (val)
+	{
+	case 0:
+	  printf ("Hard or soft float\n");
+	  break;
+	case 1:
+	  printf ("Hard float (-mdouble-float)\n");
+	  break;
+	case 2:
+	  printf ("Hard float (-msingle-float)\n");
+	  break;
+	case 3:
+	  printf ("Soft float\n");
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+   }
+
+  if (tag & 1)
+    type = 1; /* String.  */
+  else
+    type = 2; /* uleb128.  */
+  printf ("  Tag_unknown_%d: ", tag);
+
+  if (type == 1)
+    {
+      printf ("\"%s\"\n", p);
+      p += strlen ((char *)p) + 1;
+    }
+  else
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("%d (0x%x)\n", val, val);
+    }
+
+  return p;
+}
+
 static int
 process_attributes (FILE *file, const char *public_name,
 		    unsigned int proc_type,
@@ -8494,6 +8548,9 @@ process_mips_specific (FILE *file)
   size_t conflictsno = 0;
   size_t options_offset = 0;
   size_t conflicts_offset = 0;
+
+  process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
+		      display_mips_gnu_attribute);
 
   /* We have a lot of special sections.  Thanks SGI!  */
   if (dynamic_section == NULL)

@@ -1,3 +1,19 @@
+2007-06-29  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-mips-elf/attr-gnu-4-0.s, ld-mips-elf/attr-gnu-4-00.d,
+	ld-mips-elf/attr-gnu-4-01.d, ld-mips-elf/attr-gnu-4-02.d,
+	ld-mips-elf/attr-gnu-4-03.d, ld-mips-elf/attr-gnu-4-1.s,
+	ld-mips-elf/attr-gnu-4-10.d, ld-mips-elf/attr-gnu-4-11.d,
+	ld-mips-elf/attr-gnu-4-12.d, ld-mips-elf/attr-gnu-4-13.d,
+	ld-mips-elf/attr-gnu-4-14.d, ld-mips-elf/attr-gnu-4-2.s,
+	ld-mips-elf/attr-gnu-4-20.d, ld-mips-elf/attr-gnu-4-21.d,
+	ld-mips-elf/attr-gnu-4-22.d, ld-mips-elf/attr-gnu-4-23.d,
+	ld-mips-elf/attr-gnu-4-3.s, ld-mips-elf/attr-gnu-4-30.d,
+	ld-mips-elf/attr-gnu-4-31.d, ld-mips-elf/attr-gnu-4-32.d,
+	ld-mips-elf/attr-gnu-4-33.d, ld-mips-elf/attr-gnu-4-4.s,
+	ld-mips-elf/attr-gnu-4-41.d: New.
+	* ld-mips-elf/mips-elf.exp: Run these new tests.
+
 2007-06-29  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armelftests): Add callweak.
