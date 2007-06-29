@@ -1,6 +1,6 @@
 -*- text -*-
 * Added support for National Semicondutor CompactRISC (ie CR16) target.
-*
+
 * -l:foo now searches the library path for a filename called foo,
   without converting it to libfoo.a or libfoo.so.
 

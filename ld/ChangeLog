@@ -1,3 +1,7 @@
+2007-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Remove a line with '*' only.
+
 2007-06-29  Joseph Myers  <joseph@codesourcery.com>
 
 	* emulparams/armelf.sh (OTHER_SECTIONS): Remove .ARM.attributes.
