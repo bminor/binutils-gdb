@@ -1607,6 +1607,17 @@ ppc_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 
   BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_PPC_max);
   cache_ptr->howto = ppc_elf_howto_table[ELF32_R_TYPE (dst->r_info)];
+
+  /* Just because the above assert didn't trigger doesn't mean that
+     ELF32_R_TYPE (dst->r_info) is necessarily a valid relocation.  */
+  if (!cache_ptr->howto)
+    {
+      (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
+                             abfd, ELF32_R_TYPE (dst->r_info));
+      bfd_set_error (bfd_error_bad_value);
+
+      cache_ptr->howto = ppc_elf_howto_table[R_PPC_NONE];
+    }
 }
 
 /* Handle the R_PPC_ADDR16_HA and R_PPC_REL16_HA relocs.  */
