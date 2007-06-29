@@ -4327,6 +4327,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
        m = m->next, p++, j++)
     {
       asection **secpp;
+      bfd_vma off_adjust;
+      bfd_boolean no_contents;
 
       /* If elf_segment_map is not from map_sections_to_segments, the
          sections may not be correctly ordered.  NOTE: sorting should
@@ -4382,11 +4384,12 @@ assign_file_positions_for_load_sections (bfd *abfd,
       else
 	p->p_align = 0;
 
+      no_contents = FALSE;
+      off_adjust = 0;
       if (p->p_type == PT_LOAD
 	  && m->count > 0)
 	{
 	  bfd_size_type align;
-	  bfd_vma adjust;
 	  unsigned int align_power = 0;
 
 	  if (m->p_align_valid)
@@ -4413,28 +4416,38 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		 set via struct bfd_elf_special_section.  */
 	      elf_section_type (m->sections[i]) = SHT_NOBITS;
 
-	  adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
-	  if (adjust != 0)
+	  /* Find out whether this segment contains any loadable
+	     sections.  If the first section isn't loadable, the same
+	     holds for any other sections.  */
+	  i = 0;
+	  while (elf_section_type (m->sections[i]) == SHT_NOBITS)
 	    {
-	      /* If the first section isn't loadable, the same holds
-		 for any other sections.  We don't need to align the
-		 segment on disk since the segment doesn't need file
-		 space.  */
-	      i = 0;
-	      while (elf_section_type (m->sections[i]) == SHT_NOBITS)
+	      /* If a segment starts with .tbss, we need to look
+		 at the next section to decide whether the segment
+		 has any loadable sections.  */
+	      if ((elf_section_flags (m->sections[i]) & SHF_TLS) == 0
+		  || ++i >= m->count)
 		{
-		  /* If a segment starts with .tbss, we need to look
-		     at the next section to decide whether the segment
-		     has any loadable sections.  */
-		  if ((elf_section_flags (m->sections[i]) & SHF_TLS) == 0
-		      || ++i >= m->count)
-		    {
-		      adjust = 0;
-		      break;
-		    }
+		  no_contents = TRUE;
+		  break;
 		}
-	      off += adjust;
 	    }
+
+	  off_adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
+	  off += off_adjust;
+	  if (no_contents)
+	    {
+	      /* We shouldn't need to align the segment on disk since
+		 the segment doesn't need file space, but the gABI
+		 arguably requires the alignment and glibc ld.so
+		 checks it.  So to comply with the alignment
+		 requirement but not waste file space, we adjust
+		 p_offset for just this segment.  (OFF_ADJUST is
+		 subtracted from OFF later.)  This may put p_offset
+		 past the end of file, but that shouldn't matter.  */
+	    }
+	  else
+	    off_adjust = 0;
 	}
       /* Make sure the .dynamic section is the first section in the
 	 PT_DYNAMIC segment.  */
@@ -4455,7 +4468,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
       if (m->includes_filehdr)
 	{
-	  if (! m->p_flags_valid)
+	  if (!m->p_flags_valid)
 	    p->p_flags |= PF_R;
 	  p->p_filesz = bed->s->sizeof_ehdr;
 	  p->p_memsz = bed->s->sizeof_ehdr;
@@ -4473,14 +4486,14 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 
 	      p->p_vaddr -= off;
-	      if (! m->p_paddr_valid)
+	      if (!m->p_paddr_valid)
 		p->p_paddr -= off;
 	    }
 	}
 
       if (m->includes_phdrs)
 	{
-	  if (! m->p_flags_valid)
+	  if (!m->p_flags_valid)
 	    p->p_flags |= PF_R;
 
 	  if (!m->includes_filehdr)
@@ -4491,7 +4504,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		{
 		  BFD_ASSERT (p->p_type == PT_LOAD);
 		  p->p_vaddr -= off - p->p_offset;
-		  if (! m->p_paddr_valid)
+		  if (!m->p_paddr_valid)
 		    p->p_paddr -= off - p->p_offset;
 		}
 	    }
@@ -4503,14 +4516,15 @@ assign_file_positions_for_load_sections (bfd *abfd,
       if (p->p_type == PT_LOAD
 	  || (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core))
 	{
-	  if (! m->includes_filehdr && ! m->includes_phdrs)
+	  if (!m->includes_filehdr && !m->includes_phdrs)
 	    p->p_offset = off;
 	  else
 	    {
 	      file_ptr adjust;
 
 	      adjust = off - (p->p_offset + p->p_filesz);
-	      p->p_filesz += adjust;
+	      if (!no_contents)
+		p->p_filesz += adjust;
 	      p->p_memsz += adjust;
 	    }
 	}
@@ -4622,7 +4636,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		p->p_align = align;
 	    }
 
-	  if (! m->p_flags_valid)
+	  if (!m->p_flags_valid)
 	    {
 	      p->p_flags |= PF_R;
 	      if ((this_hdr->sh_flags & SHF_EXECINSTR) != 0)
@@ -4631,6 +4645,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		p->p_flags |= PF_W;
 	    }
 	}
+      off -= off_adjust;
 
       /* Check that all sections are in a PT_LOAD segment.
 	 Don't check funky gdb generated core files.  */

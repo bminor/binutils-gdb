@@ -1,3 +1,10 @@
+2007-06-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_for_load_sections): Ensure bss
+	segments meet gABI alignment requirements.  Don't allocate
+	file space for bss sections in a segment also containing file
+	or program headers.
+
 2007-06-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd.c (struct bfd): Rename "next" to "archive_next".
@@ -90,7 +97,7 @@
 
 2007-06-11  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* elf32-xtensa.c (extend_ebb_bounds_forward): Use renamed
 	XTENSA_PROP_NO_TRANSFORM flag instead of XTENSA_PROP_INSN_NO_TRANSFORM.
 	(extend_ebb_bounds_backward, compute_text_actions): Likewise.
@@ -99,7 +106,7 @@
 	(compute_removed_literals): Pass new arguments to is_removable_literal.
 	(is_removable_literal): Add sec, prop_table and ptblsize arguments.
 	Do not remove literal if the NO_TRANSFORM property flag is set.
-	
+
 2007-05-31  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* elfxx-mips.c (mips_elf_initialize_tls_index): When processing a
