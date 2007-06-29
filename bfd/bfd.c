@@ -1773,12 +1773,12 @@ bfd_demangle (bfd *abfd, const char *name, int options)
 	suf = res + len;
       suf_len = strlen (suf) + 1;
       final = bfd_malloc (pre_len + len + suf_len);
-      if (final == NULL)
-	return NULL;
-
-      memcpy (final, pre, pre_len);
-      memcpy (final + pre_len, res, len);
-      memcpy (final + pre_len + len, suf, suf_len);
+      if (final != NULL)
+	{
+	  memcpy (final, pre, pre_len);
+	  memcpy (final + pre_len, res, len);
+	  memcpy (final + pre_len + len, suf, suf_len);
+	}
       free (res);
       res = final;
     }
