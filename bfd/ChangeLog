@@ -6,6 +6,7 @@
 
 2007-06-29  Alan Modra  <amodra@bigpond.net.au>
 
+	PR ld/4701
 	* elf.c (assign_file_positions_for_load_sections): Ensure bss
 	segments meet gABI alignment requirements.  Don't allocate
 	file space for bss sections in a segment also containing file
