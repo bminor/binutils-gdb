@@ -1,3 +1,8 @@
+2007-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4701
+	* ld-elf/noload-2.d: New.
+
 2007-06-29  H.J. Lu <hjl@gnu.org>
 
 	* ld-scripts/assert.t: Discard .reginfo sections.
