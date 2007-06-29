@@ -4578,8 +4578,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      if (i == 0)
 		{
 		  this_hdr->sh_offset = sec->filepos = off;
-		  off += sec->size;
-		  p->p_filesz = sec->size;
+		  off += this_hdr->sh_size;
+		  p->p_filesz = this_hdr->sh_size;
 		  p->p_memsz = 0;
 		  p->p_align = 1;
 		}
@@ -4598,33 +4598,27 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		{
 		  this_hdr->sh_offset = sec->filepos = off;
 		  if (this_hdr->sh_type != SHT_NOBITS)
-		    off += sec->size;
+		    off += this_hdr->sh_size;
 		}
 
 	      if (this_hdr->sh_type != SHT_NOBITS)
 		{
-		  p->p_filesz += sec->size;
+		  p->p_filesz += this_hdr->sh_size;
 		  /* A load section without SHF_ALLOC is something like
 		     a note section in a PT_NOTE segment.  These take
 		     file space but are not loaded into memory.  */
 		  if ((this_hdr->sh_flags & SHF_ALLOC) != 0)
-		    p->p_memsz += sec->size;
+		    p->p_memsz += this_hdr->sh_size;
 		}
-
-	      /* .tbss is special.  It doesn't contribute to p_memsz of
-		 normal segments.  */
-	      else if ((this_hdr->sh_flags & SHF_ALLOC) != 0
-		       && ((this_hdr->sh_flags & SHF_TLS) == 0
-			   || p->p_type == PT_TLS))
-		p->p_memsz += sec->size;
-
-	      if (p->p_type == PT_TLS
-		  && sec->size == 0
-		  && (sec->flags & SEC_HAS_CONTENTS) == 0)
+	      else if ((this_hdr->sh_flags & SHF_ALLOC) != 0)
 		{
-		  struct bfd_link_order *o = sec->map_tail.link_order;
-		  if (o != NULL)
-		    p->p_memsz += o->offset + o->size;
+		  if (p->p_type == PT_TLS)
+		    p->p_memsz += this_hdr->sh_size;
+
+		  /* .tbss is special.  It doesn't contribute to p_memsz of
+		     normal segments.  */
+		  else if ((this_hdr->sh_flags & SHF_TLS) == 0)
+		    p->p_memsz += this_hdr->sh_size;
 		}
 
 	      if (p->p_type == PT_GNU_RELRO)
