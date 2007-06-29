@@ -1,5 +1,8 @@
 2007-06-28  Michael Snyder  <msnyder@access-company.com>
 
+	* m2-typeprint.c (m2_print_type): Move pointer ref after null test
+	(Coverity).
+
 	* linux-thread-db.c (thread_db_get_thread_local_address): Add
 	gdb_assert before using return value of find_thread_pid (Coverity).
 

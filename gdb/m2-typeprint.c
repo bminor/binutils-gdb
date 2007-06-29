@@ -72,7 +72,6 @@ m2_print_type (struct type *type, char *varstring, struct ui_file *stream,
   int demangled_args;
 
   CHECK_TYPEDEF (type);
-  code = TYPE_CODE (type);
 
   QUIT;
 
@@ -83,6 +82,7 @@ m2_print_type (struct type *type, char *varstring, struct ui_file *stream,
       return;
     }
 
+  code = TYPE_CODE (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_SET:
