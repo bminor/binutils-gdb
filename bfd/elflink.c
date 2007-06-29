@@ -1947,7 +1947,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	  /* We could not find the version for a symbol when
 	     generating a shared archive.  Return an error.  */
 	  (*_bfd_error_handler)
-	    (_("%B: undefined versioned symbol name %s"),
+	    (_("%B: version node not found for symbol %s"),
 	     sinfo->output_bfd, h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  sinfo->failed = TRUE;
@@ -10516,7 +10516,7 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	     to remove a section from the output.  */
 	  o->flags |= SEC_EXCLUDE;
 
-	  if (info->print_gc_sections == TRUE)
+	  if (info->print_gc_sections && o->size != 0)
 	    _bfd_error_handler (_("Removing unused section '%s' in file '%B'"), sub, o->name);
 
 	  /* But we also have to update some of the relocation
