@@ -1,5 +1,9 @@
 2007-06-29  Joseph Myers  <joseph@codesourcery.com>
 
+	* as.c (main): Only call create_obj_attrs_section if IS_ELF.
+
+2007-06-29  Joseph Myers  <joseph@codesourcery.com>
+
 	* as.c (create_obj_attrs_section): New.
 	(main): Call create_obj_attrs_section for ELF.
 	* read.c (s_gnu_attribute, skip_whitespace, skip_past_char,

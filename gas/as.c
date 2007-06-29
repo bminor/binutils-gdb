@@ -1174,7 +1174,8 @@ main (int argc, char ** argv)
 #endif
 
 #ifdef OBJ_ELF
-  create_obj_attrs_section ();
+  if (IS_ELF)
+    create_obj_attrs_section ();
 #endif
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
