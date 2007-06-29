@@ -6351,6 +6351,9 @@ subject, see the hardware manufacturer's manual.
 @ifset BFIN
 * BFIN-Dependent::		BFIN Dependent Features
 @end ifset
+@ifset CR16
+* CR16-Dependent::              CR16 Dependent Features
+@end ifset
 @ifset CRIS
 * CRIS-Dependent::              CRIS Dependent Features
 @end ifset
@@ -6470,6 +6473,10 @@ subject, see the hardware manufacturer's manual.
 
 @ifset BFIN
 @include c-bfin.texi
+@end ifset
+
+@ifset CR16
+@include c-cr16.texi
 @end ifset
 
 @ifset CRIS

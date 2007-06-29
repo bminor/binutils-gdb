@@ -68,6 +68,8 @@ CFILES = \
 	cgen-bitset.c \
 	cgen-dis.c \
 	cgen-opc.c \
+	cr16-dis.c \
+	cr16-opc.c \
 	cris-dis.c \
 	cris-opc.c \
 	crx-dis.c \
@@ -220,6 +222,8 @@ ALL_MACHINES = \
 	cgen-bitset.lo \
 	cgen-dis.lo \
 	cgen-opc.lo \
+	cr16-dis.lo \
+	cr16-opc.lo \
 	cris-dis.lo \
 	cris-opc.lo \
 	crx-dis.lo \
@@ -686,6 +690,11 @@ cgen-opc.lo: cgen-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h \
   $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
   $(INCDIR)/opcode/cgen.h $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h
+cr16-dis.lo: cr16-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
+  $(INCDIR)/opcode/cr16.h
+cr16-opc.lo: cr16-opc.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h $(INCDIR)/opcode/cr16.h
 cris-dis.lo: cris-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/opcode/cris.h $(INCDIR)/libiberty.h \

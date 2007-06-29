@@ -1,4 +1,6 @@
 -*- text -*-
+* Support for the National Semiconductor CR16 target has been added.
+
 * Added gas .reloc pseudo.  This is a low-level interface for creating
   relocations.
 

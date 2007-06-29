@@ -121,6 +121,7 @@ bfin-*-linux-uclibc*)	targ_emul=elf32bfin;
 			targ_extra_emuls="elf32bfinfd"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
+cr16-*-elf*)            targ_emul=elf32cr16 ;;
 cr16c-*-elf*)           targ_emul=elf32cr16c
 			;;
 cris-*-*aout*)		targ_emul=crisaout

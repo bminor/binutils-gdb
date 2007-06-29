@@ -1,3 +1,15 @@
+2006-06-29  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
+
+	* scripttemp/elf32cr16.sc: Default linker script.
+	* emulparams/elf32cr16.sh: Emulation script.
+	* emultempl/cr16elf.em: Emulation script.
+	* Makefile.am: Add entry to make cr16 target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Specify default and other emulation parameters
+	for cr16.
+	* ChangeLog: Added CR16 target entry.
+	* NEWS: Announce the support for the CR16 new target.
+
 2007-06-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* pe-dll.c: Rename uses of bfd.next to bfd.archive_next throughout.

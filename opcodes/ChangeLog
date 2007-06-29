@@ -1,3 +1,13 @@
+2007-06-29  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
+
+	* cr16-opc.c: New file.
+	* cr16-dis.c: New file.
+	* Makefile.am: Entries for cr16.
+	* Makefile.in: Regenerate.
+	* cofigure.in: Add cr16 target information.
+	* configure  : Regenerate.
+	* disassemble.c: Add cr16 target information.
+
 2007-06-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (HFILES): Add i386-opc.h and i386-tbl.h.

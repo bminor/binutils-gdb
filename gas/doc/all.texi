@@ -31,6 +31,7 @@
 @set ARM
 @set AVR
 @set BFIN
+@set CR16
 @set CRIS
 @set D10V
 @set D30V

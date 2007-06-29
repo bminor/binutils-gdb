@@ -1,3 +1,17 @@
+2007-06-29  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
+
+	* Makefile.am: Add cr16 related entry
+	* Makefile.in: Regenerate
+	* archures.c: Add bfd_cr16_arch
+	* bfd-in2.h: Regenerate
+	* config.bfd: Add cr16-elf
+	* configure.in: Add bfd_elf32_cr16_vec
+	* configure: Regenerate.
+	* targets.c: Added cr16 related information
+	* cpu-cr16.c: New file.
+	* elf32-cr16.c: New file.
+	* reloc.c: Added cr16 relocs.
+
 2007-06-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_link_assign_sym_version): Improve error

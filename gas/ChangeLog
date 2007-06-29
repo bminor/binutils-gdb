@@ -1,3 +1,16 @@
+2007-06-29  M R Swami Reddy  <MR.Swami.Redd@nsc.com>
+
+	* Makefile.am: Add CR16 related entry.
+	* Makefile.in: Regenerate.
+	* config/tc-cr16.h: New file
+	* config/tc-cr16.c: New file
+	* doc/c-cr16.texi: New file for cr16 
+	* doc/all.texi: Entry for cr16 
+	* doc/Makefile.am: Added c-cr16.texi
+	* doc/Makefile.in: Regenerate 
+	* doc/as.texinfo: Entry for CR16 target
+	* NEWS: Announce the support for the new target.
+
 2007-06-26  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (parse_operands): Accept generic coprocessor regs

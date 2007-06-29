@@ -157,6 +157,7 @@ ALL_EMULATIONS = \
 	eelf32b4300.o \
 	eelf32bfin.o \
 	eelf32bfinfd.o \
+	eelf32cr16.o \
 	eelf32cr16c.o \
 	eelf32bmip.o \
 	eelf32bmipn32.o \
@@ -746,6 +747,10 @@ eelf32b4300.c: $(srcdir)/emulparams/elf32b4300.sh \
   $(srcdir)/emulparams/elf32bmip.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32b4300 "$(tdir_elf32b4300)"
+eelf32cr16.c: $(srcdir)/emulparams/elf32cr16.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/cr16elf.em \
+  $(srcdir)/scripttempl/elf32cr16.sc ${GEN_DEPENDS} 
+	${GENSCRIPTS} elf32cr16 "$(tdir_elf32crx)"
 eelf32cr16c.c: $(srcdir)/emulparams/elf32cr16c.sh \
   $(ELF_DEPS) \
   $(srcdir)/scripttempl/elf32cr16c.sc ${GEN_DEPENDS}

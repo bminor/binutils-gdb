@@ -1,3 +1,45 @@
+2007-06-29  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
+
+	* gas/cr16: New directory
+	* gas/cr16.exp: New file
+	* add_test.d and  add_test.s: New files
+	* and_test.d and and_test.s: New files
+	* ash_test.d and ash_test.s: New files
+	* bal_test.d and bal_test.s: New files
+	* bcc_test.d and bcc_test.s: New files
+	* beq0_test.d and beq0_test.s: New files
+	* cbitb_test.d and cbitb_test.s: New files
+	* cbitw_test.d and cbitw_test.s: New files
+	* cinv_test.d and cinv_test.s: New files
+	* cmp_test.d and cmp_test.s: New files
+	* excp_test.d and excp_test.s: New files
+	* jal_test.d and jal_test.s: New files
+	* jcc_test.d and jcc_test.s: New files
+	* loadb_test.d and loadb_test.s: New files
+	* loadd_test.d and loadd_test.s: New files
+	* loadm_test.d and loadm_test.s: New files
+	* loadw_test.d and loadw_test.s: New files
+	* lpsp_test.d and lpsp_test.s: New files
+	* lsh_test.d and lsh_test.s: New files
+	* mov_test.d and mov_test.s: New files
+	* mul_test.d and mul_test.s: New files
+	* or_test.d and or_test.s: New files
+	* popret_test.d and popret_test.s: New files
+	* pop_test.d and pop_test.s: New files
+	* push_test.d and push_test.s: New files
+	* sbitb_test.d and sbitb_test.s: New files
+	* sbitw_test.d and sbitw_test.s: New files
+	* scc_test.d and scc_test.s: New files
+	* storb_test.d and storb_test.s: New files
+	* stord_test.d and stord_test.s: New files
+	* storm_test.d and storm_test.s: New files
+	* storw_test.d and storw_test.s: New files
+	* sub_test.d and sub_test.s: New files
+	* tbitb_test.d and tbitb_test.s: New files
+	* tbit_test.d and tbit_test.s: New files
+	* tbitw_test.d and tbitw_test.s: New files
+	* xor_test.d and xor_test.s: New files
+
 2007-06-26  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/vfp1xD.d: Add new fmrx/fmxr tests.

@@ -64,6 +64,7 @@ ALL_MACHINES = \
 	cpu-arm.lo \
 	cpu-avr.lo \
 	cpu-bfin.lo \
+	cpu-cr16.lo \
 	cpu-cr16c.lo \
 	cpu-cris.lo \
 	cpu-crx.lo \
@@ -129,6 +130,7 @@ ALL_MACHINES_CFILES = \
 	cpu-arm.c \
 	cpu-avr.c \
 	cpu-bfin.c \
+	cpu-cr16.c \
 	cpu-cris.c \
 	cpu-cr16c.c \
 	cpu-crx.c \
@@ -242,6 +244,7 @@ BFD32_BACKENDS = \
 	elf32-arm.lo \
 	elf32-avr.lo \
 	elf32-bfin.lo \
+	elf32-cr16.lo \
 	elf32-cr16c.lo \
 	elf32-cris.lo \
 	elf32-crx.lo \
@@ -419,6 +422,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-arm.c \
 	elf32-avr.c \
 	elf32-bfin.c \
+	elf32-cr16.c \
 	elf32-cr16c.c \
 	elf32-cris.c \
 	elf32-crx.c \
@@ -1054,6 +1058,7 @@ cpu-arm.lo: cpu-arm.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/libiberty.h
 cpu-avr.lo: cpu-avr.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-bfin.lo: cpu-bfin.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
+cpu-cr16.lo: cpu-cr16.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-cris.lo: cpu-cris.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-cr16c.lo: cpu-cr16c.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-crx.lo: cpu-crx.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
@@ -1316,10 +1321,16 @@ elf32-bfin.lo: elf32-bfin.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/bfin.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/elf/dwarf2.h \
   elf32-target.h
+elf32-cr16.lo: elf32-cr16.c $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/cr16.h \
+  $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h \
+  $(INCDIR)/libiberty.h
 elf32-cr16c.lo: elf32-cr16c.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/cr16c.h \
   $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h \
+  $(INCDIR)/libiberty.h
 elf32-cris.lo: elf32-cris.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/cris.h \
