@@ -213,6 +213,9 @@ static void do_align (int, char *, int, int);
 static void s_align (int, int);
 static void s_altmacro (int);
 static void s_bad_end (int);
+#ifdef OBJ_ELF
+static void s_gnu_attribute (int);
+#endif
 static void s_reloc (int);
 static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
@@ -339,6 +342,9 @@ static const pseudo_typeS potable[] = {
   {"func", s_func, 0},
   {"global", s_globl, 0},
   {"globl", s_globl, 0},
+#ifdef OBJ_ELF
+  {"gnu_attribute", s_gnu_attribute, 0},
+#endif
   {"hword", cons, 2},
   {"if", s_if, (int) O_ne},
   {"ifb", s_ifb, 1},
@@ -2032,6 +2038,120 @@ s_globl (int ignore ATTRIBUTE_UNUSED)
   if (flag_mri)
     mri_comment_end (stop, stopc);
 }
+
+#ifdef OBJ_ELF
+#define skip_whitespace(str)  do { if (*(str) == ' ') ++(str); } while (0)
+
+static inline int
+skip_past_char (char ** str, char c)
+{
+  if (**str == c)
+    {
+      (*str)++;
+      return 0;
+    }
+  else
+    return -1;
+}
+#define skip_past_comma(str) skip_past_char (str, ',')
+
+/* Parse an attribute directive for VENDOR.  */
+void
+s_vendor_attribute (int vendor)
+{
+  expressionS exp;
+  int type;
+  int tag;
+  unsigned int i = 0;
+  char *s = NULL;
+  char saved_char;
+
+  expression (& exp);
+  if (exp.X_op != O_constant)
+    goto bad;
+
+  tag = exp.X_add_number;
+  type = _bfd_elf_obj_attrs_arg_type (stdoutput, vendor, tag);
+
+  if (skip_past_comma (&input_line_pointer) == -1)
+    goto bad;
+  if (type & 1)
+    {
+      expression (& exp);
+      if (exp.X_op != O_constant)
+	{
+	  as_bad (_("expected numeric constant"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+      i = exp.X_add_number;
+    }
+  if (type == 3
+      && skip_past_comma (&input_line_pointer) == -1)
+    {
+      as_bad (_("expected comma"));
+      ignore_rest_of_line ();
+      return;
+    }
+  if (type & 2)
+    {
+      skip_whitespace(input_line_pointer);
+      if (*input_line_pointer != '"')
+	goto bad_string;
+      input_line_pointer++;
+      s = input_line_pointer;
+      while (*input_line_pointer && *input_line_pointer != '"')
+	input_line_pointer++;
+      if (*input_line_pointer != '"')
+	goto bad_string;
+      saved_char = *input_line_pointer;
+      *input_line_pointer = 0;
+    }
+  else
+    {
+      s = NULL;
+      saved_char = 0;
+    }
+
+  switch (type)
+    {
+    case 3:
+      bfd_elf_add_obj_attr_compat (stdoutput, vendor, i, s);
+      break;
+    case 2:
+      bfd_elf_add_obj_attr_string (stdoutput, vendor, tag, s);
+      break;
+    case 1:
+      bfd_elf_add_obj_attr_int (stdoutput, vendor, tag, i);
+      break;
+    default:
+      abort ();
+    }
+
+  if (s)
+    {
+      *input_line_pointer = saved_char;
+      input_line_pointer++;
+    }
+  demand_empty_rest_of_line ();
+  return;
+bad_string:
+  as_bad (_("bad string constant"));
+  ignore_rest_of_line ();
+  return;
+bad:
+  as_bad (_("expected <tag> , <value>"));
+  ignore_rest_of_line ();
+}
+
+/* Parse a .gnu_attribute directive.  */
+
+static void
+s_gnu_attribute (int ignored ATTRIBUTE_UNUSED)
+{
+  s_vendor_attribute (OBJ_ATTR_GNU);
+}
+#endif /* OBJ_ELF */
 
 /* Handle the MRI IRP and IRPC pseudo-ops.  */
 

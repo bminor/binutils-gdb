@@ -1113,6 +1113,10 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   elf_gp (obfd) = elf_gp (ibfd);
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
   elf_flags_init (obfd) = TRUE;
+
+  /* Copy object attributes.  */
+  _bfd_elf_copy_obj_attributes (ibfd, obfd);
+
   return TRUE;
 }
 
@@ -2195,6 +2199,16 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       break;
 
     default:
+      /* Possibly an attributes section.  */
+      if (hdr->sh_type == SHT_GNU_ATTRIBUTES
+	  || hdr->sh_type == bed->obj_attrs_section_type)
+	{
+	  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
+	    return FALSE;
+	  _bfd_elf_parse_attributes (abfd, hdr);
+	  return TRUE;
+	}
+
       /* Check for any processor-specific section types.  */
       if (bed->elf_backend_section_from_shdr (abfd, hdr, name, shindex))
 	return TRUE;

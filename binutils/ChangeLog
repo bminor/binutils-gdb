@@ -1,3 +1,9 @@
+2007-06-29  Joseph Myers  <joseph@codesourcery.com>
+
+	* readelf.c (display_gnu_attribute): New.
+	(process_arm_specific): Rearrange as process_attributes.
+	(process_arm_specific): Replace by wrapper of process_attributes.
+
 2007-06-28  Roland McGrath  <roland@frob.com>
 
 	* objcopy.c (setup_section): Don't reset ELF section type to

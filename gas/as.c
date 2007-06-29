@@ -1031,6 +1031,33 @@ perform_an_assembly_pass (int argc, char ** argv)
     read_a_source_file ("");
 }
 
+#ifdef OBJ_ELF
+static void
+create_obj_attrs_section (void)
+{
+  segT s;
+  char *p;
+  addressT addr;
+  offsetT size;
+  const char *name;
+
+  size = bfd_elf_obj_attr_size (stdoutput);
+  if (size)
+    {
+      name = get_elf_backend_data (stdoutput)->obj_attrs_section;
+      if (!name)
+	name = ".gnu.attributes";
+      s = subseg_new (name, 0);
+      elf_section_type (s)
+	= get_elf_backend_data (stdoutput)->obj_attrs_section_type;
+      bfd_set_section_flags (stdoutput, s, SEC_READONLY | SEC_DATA);
+      addr = frag_now_fix ();
+      p = frag_more (size);
+      bfd_elf_set_obj_attr_contents (stdoutput, (bfd_byte *)p, size);
+    }
+}
+#endif
+
 
 int
 main (int argc, char ** argv)
@@ -1144,6 +1171,10 @@ main (int argc, char ** argv)
 
 #ifdef md_end
   md_end ();
+#endif
+
+#ifdef OBJ_ELF
+  create_obj_attrs_section ();
 #endif
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF

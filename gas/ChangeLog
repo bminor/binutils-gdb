@@ -1,3 +1,18 @@
+2007-06-29  Joseph Myers  <joseph@codesourcery.com>
+
+	* as.c (create_obj_attrs_section): New.
+	(main): Call create_obj_attrs_section for ELF.
+	* read.c (s_gnu_attribute, skip_whitespace, skip_past_char,
+	skip_past_comma, s_vendor_attribute): New.
+	(potable): Add gnu_attribute for ELF.
+	* read.h (s_vendor_attribute): Declare.
+	* config/tc-arm.c (s_arm_eabi_attribute): Replace by wrapper
+	round s_vendor_attribute.
+	(aeabi_set_public_attributes): Update for new attributes
+	interfaces.
+	(arm_md_end): Remove attributes contents setting now done
+	generically.
+
 2007-06-29  M R Swami Reddy  <MR.Swami.Redd@nsc.com>
 
 	* Makefile.am: Add CR16 related entry.

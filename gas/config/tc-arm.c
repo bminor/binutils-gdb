@@ -3829,84 +3829,7 @@ s_arm_unwind_raw (int ignored ATTRIBUTE_UNUSED)
 static void
 s_arm_eabi_attribute (int ignored ATTRIBUTE_UNUSED)
 {
-  expressionS exp;
-  bfd_boolean is_string;
-  int tag;
-  unsigned int i = 0;
-  char *s = NULL;
-  char saved_char;
-
-  expression (& exp);
-  if (exp.X_op != O_constant)
-    goto bad;
-
-  tag = exp.X_add_number;
-  if (tag == 4 || tag == 5 || tag == 32 || (tag > 32 && (tag & 1) != 0))
-    is_string = 1;
-  else
-    is_string = 0;
-
-  if (skip_past_comma (&input_line_pointer) == FAIL)
-    goto bad;
-  if (tag == 32 || !is_string)
-    {
-      expression (& exp);
-      if (exp.X_op != O_constant)
-	{
-	  as_bad (_("expected numeric constant"));
-	  ignore_rest_of_line ();
-	  return;
-	}
-      i = exp.X_add_number;
-    }
-  if (tag == Tag_compatibility
-      && skip_past_comma (&input_line_pointer) == FAIL)
-    {
-      as_bad (_("expected comma"));
-      ignore_rest_of_line ();
-      return;
-    }
-  if (is_string)
-    {
-      skip_whitespace(input_line_pointer);
-      if (*input_line_pointer != '"')
-	goto bad_string;
-      input_line_pointer++;
-      s = input_line_pointer;
-      while (*input_line_pointer && *input_line_pointer != '"')
-	input_line_pointer++;
-      if (*input_line_pointer != '"')
-	goto bad_string;
-      saved_char = *input_line_pointer;
-      *input_line_pointer = 0;
-    }
-  else
-    {
-      s = NULL;
-      saved_char = 0;
-    }
-  
-  if (tag == Tag_compatibility)
-    elf32_arm_add_eabi_attr_compat (stdoutput, i, s);
-  else if (is_string)
-    elf32_arm_add_eabi_attr_string (stdoutput, tag, s);
-  else
-    elf32_arm_add_eabi_attr_int (stdoutput, tag, i);
-
-  if (s)
-    {
-      *input_line_pointer = saved_char;
-      input_line_pointer++;
-    }
-  demand_empty_rest_of_line ();
-  return;
-bad_string:
-  as_bad (_("bad string constant"));
-  ignore_rest_of_line ();
-  return;
-bad:
-  as_bad (_("expected <tag> , <value>"));
-  ignore_rest_of_line ();
+  s_vendor_attribute (OBJ_ATTR_PROC);
 }
 #endif /* OBJ_ELF */
 
@@ -20609,65 +20532,54 @@ aeabi_set_public_attributes (void)
 	  for (i = 0; p[i]; i++)
 	    p[i] = TOUPPER (p[i]);
 	}
-      elf32_arm_add_eabi_attr_string (stdoutput, 5, p);
+      bfd_elf_add_proc_attr_string (stdoutput, 5, p);
     }
   /* Tag_CPU_arch.  */
-  elf32_arm_add_eabi_attr_int (stdoutput, 6, arch);
+  bfd_elf_add_proc_attr_int (stdoutput, 6, arch);
   /* Tag_CPU_arch_profile.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a))
-    elf32_arm_add_eabi_attr_int (stdoutput, 7, 'A');
+    bfd_elf_add_proc_attr_int (stdoutput, 7, 'A');
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
-    elf32_arm_add_eabi_attr_int (stdoutput, 7, 'R');
+    bfd_elf_add_proc_attr_int (stdoutput, 7, 'R');
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m))
-    elf32_arm_add_eabi_attr_int (stdoutput, 7, 'M');
+    bfd_elf_add_proc_attr_int (stdoutput, 7, 'M');
   /* Tag_ARM_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_full))
-    elf32_arm_add_eabi_attr_int (stdoutput, 8, 1);
+    bfd_elf_add_proc_attr_int (stdoutput, 8, 1);
   /* Tag_THUMB_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_full))
-    elf32_arm_add_eabi_attr_int (stdoutput, 9,
+    bfd_elf_add_proc_attr_int (stdoutput, 9,
 	ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_t2) ? 2 : 1);
   /* Tag_VFP_arch.  */
   if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v3)
       || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_v3))
-    elf32_arm_add_eabi_attr_int (stdoutput, 10, 3);
+    bfd_elf_add_proc_attr_int (stdoutput, 10, 3);
   else if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v2)
            || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_v2))
-    elf32_arm_add_eabi_attr_int (stdoutput, 10, 2);
+    bfd_elf_add_proc_attr_int (stdoutput, 10, 2);
   else if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v1)
            || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_v1)
            || ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v1xd)
            || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_v1xd))
-    elf32_arm_add_eabi_attr_int (stdoutput, 10, 1);
+    bfd_elf_add_proc_attr_int (stdoutput, 10, 1);
   /* Tag_WMMX_arch.  */
   if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_cext_iwmmxt)
       || ARM_CPU_HAS_FEATURE (arm_arch_used, arm_cext_iwmmxt))
-    elf32_arm_add_eabi_attr_int (stdoutput, 11, 1);
+    bfd_elf_add_proc_attr_int (stdoutput, 11, 1);
   /* Tag_NEON_arch.  */
   if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_neon_ext_v1)
       || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_neon_ext_v1))
-    elf32_arm_add_eabi_attr_int (stdoutput, 12, 1);
+    bfd_elf_add_proc_attr_int (stdoutput, 12, 1);
 }
 
-/* Add the .ARM.attributes section.  */
+/* Add the default contents for the .ARM.attributes section.  */
 void
 arm_md_end (void)
 {
-  segT s;
-  char *p;
-  addressT addr;
-  offsetT size;
-  
   if (EF_ARM_EABI_VERSION (meabi_flags) < EF_ARM_EABI_VER4)
     return;
 
   aeabi_set_public_attributes ();
-  size = elf32_arm_eabi_attr_size (stdoutput);
-  s = subseg_new (".ARM.attributes", 0);
-  bfd_set_section_flags (stdoutput, s, SEC_READONLY | SEC_DATA);
-  addr = frag_now_fix ();
-  p = frag_more (size);
-  elf32_arm_set_eabi_attr_contents (stdoutput, (bfd_byte *)p, size);
 }
 #endif /* OBJ_ELF */
 

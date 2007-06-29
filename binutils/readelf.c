@@ -8297,8 +8297,61 @@ display_arm_attribute (unsigned char *p)
   return p;
 }
 
+
+static unsigned char *
+display_gnu_attribute (unsigned char *p,
+		       unsigned char *(*display_proc_gnu_attribute)
+			    (unsigned char *, int))
+{
+  int tag;
+  unsigned int len;
+  int val;
+  int type;
+
+  tag = read_uleb128 (p, &len);
+  p += len;
+
+  /* Tag_compatibility is the only generic GNU attribute defined at
+     present.  */
+  if (tag == 32)
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("flag = %d, vendor = %s\n", val, p);
+      p += strlen((char *)p) + 1;
+      return p;
+    }
+
+  if ((tag & 2) == 0 && display_proc_gnu_attribute)
+    return display_proc_gnu_attribute (p, tag);
+
+  if (tag & 1)
+    type = 1; /* String.  */
+  else
+    type = 2; /* uleb128.  */
+  printf ("  Tag_unknown_%d: ", tag);
+
+  if (type == 1)
+    {
+      printf ("\"%s\"\n", p);
+      p += strlen ((char *)p) + 1;
+    }
+  else
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("%d (0x%x)\n", val, val);
+    }
+
+  return p;
+}
+
 static int
-process_arm_specific (FILE *file)
+process_attributes (FILE *file, const char *public_name,
+		    unsigned int proc_type,
+		    unsigned char *(*display_pub_attribute) (unsigned char *),
+		    unsigned char *(*display_proc_gnu_attribute)
+			 (unsigned char *, int))
 {
   Elf_Internal_Shdr *sect;
   unsigned char *contents;
@@ -8313,7 +8366,7 @@ process_arm_specific (FILE *file)
        i < elf_header.e_shnum;
        i++, sect++)
     {
-      if (sect->sh_type != SHT_ARM_ATTRIBUTES)
+      if (sect->sh_type != proc_type && sect->sh_type != SHT_GNU_ATTRIBUTES)
 	continue;
 
       contents = get_data (NULL, file, sect->sh_offset, 1, sect->sh_size,
@@ -8330,6 +8383,7 @@ process_arm_specific (FILE *file)
 	    {
 	      int namelen;
 	      bfd_boolean public_section;
+	      bfd_boolean gnu_section;
 
 	      section_len = byte_get (p, 4);
 	      p += 4;
@@ -8341,10 +8395,14 @@ process_arm_specific (FILE *file)
 		}
 	      len -= section_len;
 	      printf ("Attribute Section: %s\n", p);
-	      if (strcmp ((char *)p, "aeabi") == 0)
+	      if (public_name && strcmp ((char *)p, public_name) == 0)
 		public_section = TRUE;
 	      else
 		public_section = FALSE;
+	      if (strcmp ((char *)p, "gnu") == 0)
+		gnu_section = TRUE;
+	      else
+		gnu_section = FALSE;
 	      namelen = strlen ((char *)p) + 1;
 	      p += namelen;
 	      section_len -= namelen + 4;
@@ -8393,7 +8451,13 @@ process_arm_specific (FILE *file)
 		  if (public_section)
 		    {
 		      while (p < end)
-			p = display_arm_attribute(p);
+			p = display_pub_attribute (p);
+		    }
+		  else if (gnu_section)
+		    {
+		      while (p < end)
+			p = display_gnu_attribute (p,
+						   display_proc_gnu_attribute);
 		    }
 		  else
 		    {
@@ -8412,6 +8476,13 @@ process_arm_specific (FILE *file)
       free(contents);
     }
   return 1;
+}
+
+static int
+process_arm_specific (FILE *file)
+{
+  return process_attributes (file, "aeabi", SHT_ARM_ATTRIBUTES,
+			     display_arm_attribute, NULL);
 }
 
 static int

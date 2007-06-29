@@ -6490,6 +6490,10 @@ frv_elf_copy_private_bfd_data (ibfd, obfd)
 
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
   elf_flags_init (obfd) = TRUE;
+
+  /* Copy object attributes.  */
+  _bfd_elf_copy_obj_attributes (ibfd, obfd);
+
   return TRUE;
 }
 

@@ -546,6 +546,7 @@ BFD32_BACKENDS = \
 	elf32-xc16x.lo \
 	elf32.lo \
 	elflink.lo \
+	elf-attrs.lo \
 	elf-strtab.lo \
 	elf-eh-frame.lo \
 	elf-vxworks.lo \
@@ -724,6 +725,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-xc16x.c \
 	elf32.c \
 	elflink.c \
+	elf-attrs.c \
 	elf-strtab.c \
 	elf-eh-frame.c \
 	elf-vxworks.c \
@@ -2141,6 +2143,9 @@ elflink.lo: elflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/libiberty.h $(INCDIR)/objalloc.h
+elf-attrs.lo: elf-attrs.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h
 elf-strtab.lo: elf-strtab.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h

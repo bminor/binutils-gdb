@@ -1075,6 +1075,19 @@ struct elf_backend_data
      so-called reserved entries on some systems.  */
   bfd_vma got_header_size;
 
+  /* The vendor name to use for a processor-standard attributes section.  */
+  const char *obj_attrs_vendor;
+
+  /* The section name to use for a processor-standard attributes section.  */
+  const char *obj_attrs_section;
+
+  /* Return 1, 2 or 3 to indicate what type of arguments a
+     processor-specific tag takes.  */
+  int (*obj_attrs_arg_type) (int);
+
+  /* The section type to use for an attributes section.  */
+  unsigned int obj_attrs_section_type;
+
   /* This is TRUE if the linker should act like collect and gather
      global constructors and destructors by name.  This is TRUE for
      MIPS ELF because the Irix 5 tools can not handle the .init
@@ -1268,6 +1281,46 @@ struct elf_find_verdep_info
   bfd_boolean failed;
 };
 
+/* The maximum number of known object attributes for any target.  */
+#define NUM_KNOWN_OBJ_ATTRIBUTES 32
+
+/* The value of an object attribute.  type & 1 indicates whether there
+   is an integer value; type & 2 indicates whether there is a string
+   value.  */
+
+typedef struct obj_attribute
+{
+  int type;
+  unsigned int i;
+  char *s;
+} obj_attribute;
+
+typedef struct obj_attribute_list
+{
+  struct obj_attribute_list *next;
+  int tag;
+  obj_attribute attr;
+} obj_attribute_list;
+
+/* Object attributes may either be defined by the processor ABI, index
+   OBJ_ATTR_PROC in the *_obj_attributes arrays, or be GNU-specific
+   (and possibly also processor-specific), index OBJ_ATTR_GNU.  */
+#define OBJ_ATTR_PROC 0
+#define OBJ_ATTR_GNU 1
+#define OBJ_ATTR_FIRST OBJ_ATTR_PROC
+#define OBJ_ATTR_LAST OBJ_ATTR_GNU
+
+/* The following object attribute tags are taken as generic, for all
+   targets and for "gnu" where there is no target standard.  */
+enum
+{
+  Tag_NULL = 0,
+  Tag_File = 1,
+  Tag_Section = 2,
+  Tag_Symbol = 3,
+  Tag_compatibility = 32
+};
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -1409,6 +1462,9 @@ struct elf_obj_tdata
 
   /* Symbol buffer.  */
   void *symbuf;
+
+  obj_attribute known_obj_attributes[2][NUM_KNOWN_OBJ_ATTRIBUTES];
+  obj_attribute_list *other_obj_attributes[2];
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -1438,6 +1494,12 @@ struct elf_obj_tdata
 #define elf_dyn_lib_class(bfd)	(elf_tdata(bfd) -> dyn_lib_class)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 #define elf_flags_init(bfd)	(elf_tdata(bfd) -> flags_init)
+#define elf_known_obj_attributes(bfd) (elf_tdata (bfd) -> known_obj_attributes)
+#define elf_other_obj_attributes(bfd) (elf_tdata (bfd) -> other_obj_attributes)
+#define elf_known_obj_attributes_proc(bfd) \
+  (elf_known_obj_attributes (bfd) [OBJ_ATTR_PROC])
+#define elf_other_obj_attributes_proc(bfd) \
+  (elf_other_obj_attributes (bfd) [OBJ_ATTR_PROC])
 
 extern void _bfd_elf_swap_verdef_in
   (bfd *, const Elf_External_Verdef *, Elf_Internal_Verdef *);
@@ -1952,6 +2014,26 @@ extern bfd *_bfd_elf32_bfd_from_remote_memory
 extern bfd *_bfd_elf64_bfd_from_remote_memory
   (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, int));
+
+extern bfd_vma bfd_elf_obj_attr_size (bfd *);
+extern void bfd_elf_set_obj_attr_contents (bfd *, bfd_byte *, bfd_vma);
+extern int bfd_elf_get_obj_attr_int (bfd *, int, int);
+extern void bfd_elf_add_obj_attr_int (bfd *, int, int, unsigned int);
+#define bfd_elf_add_proc_attr_int(BFD, TAG, VALUE) \
+  bfd_elf_add_obj_attr_int ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
+extern void bfd_elf_add_obj_attr_string (bfd *, int, int, const char *);
+#define bfd_elf_add_proc_attr_string(BFD, TAG, VALUE) \
+  bfd_elf_add_obj_attr_string ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
+extern void bfd_elf_add_obj_attr_compat (bfd *, int, unsigned int,
+					 const char *);
+#define bfd_elf_add_proc_attr_compat(BFD, INTVAL, STRVAL) \
+  bfd_elf_add_obj_attr_compat ((BFD), OBJ_ATTR_PROC, (INTVAL), (STRVAL))
+
+extern char *_bfd_elf_attr_strdup (bfd *, const char *);
+extern void _bfd_elf_copy_obj_attributes (bfd *, bfd *);
+extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, int);
+extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
+extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;

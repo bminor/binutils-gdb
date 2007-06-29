@@ -15,6 +15,7 @@
 #	OTHER_RELRO_SECTIONS - other than .data.rel.ro ...
 #		(e.g. PPC32 .fixup, .got[12])
 #	OTHER_BSS_SECTIONS - other than .bss .sbss ...
+#	ATTRS_SECTIONS - at the end
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
@@ -96,6 +97,7 @@ test -z "${ETEXT_NAME}" && ETEXT_NAME=etext
 test -n "$CREATE_SHLIB$CREATE_PIE" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESIZE=""
 test -z "$CREATE_SHLIB$CREATE_PIE" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
 test -n "$RELRO_NOW" && unset SEPARATE_GOTPLT
+test -z "$ATTRS_SECTIONS" && ATTRS_SECTIONS=".gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }"
 DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
 DATA_SEGMENT_RELRO_END=""
 DATA_SEGMENT_END=""
@@ -513,6 +515,7 @@ cat <<EOF
   ${TINY_BSS_SECTION}
 
   ${STACK_ADDR+${STACK}}
+  ${ATTRS_SECTIONS}
   ${OTHER_SECTIONS}
   ${RELOCATING+${OTHER_SYMBOLS}}
   ${RELOCATING+${STACKNOTE}}

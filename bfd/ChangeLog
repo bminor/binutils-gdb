@@ -1,3 +1,66 @@
+2007-06-29  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf-attrs.c: New.
+	* Makefile.am (BFD32_BACKENDS): Add elf-attrs.lo.
+	(BFD32_BACKENDS_CFILES): Add elf-attrs.c.
+	(elf-attrs.lo): Generate dependencies.
+	* Makefile.in: Regenerate.
+	* configure.in (elf): Add elf-attrs.lo.
+	* configure: Regenerate.
+	* elf-bfd.h (struct elf_backend_data): Add entries for object
+	attributes.
+	(NUM_KNOWN_OBJ_ATTRIBUTES, obj_attribute, obj_attribute_list,
+	OBJ_ATTR_PROC, OBJ_ATTR_GNU, OBJ_ATTR_FIRST, OBJ_ATTR_LAST,
+	Tag_NULL, Tag_File, Tag_Section, Tag_Symbol, Tag_compatibility):
+	New.
+	(struct elf_obj_tdata): Add entries for object attributes.
+	(elf_known_obj_attributes, elf_other_obj_attributes,
+	elf_known_obj_attributes_proc, elf_other_obj_attributes_proc):
+	New.
+	(bfd_elf_obj_attr_size, bfd_elf_set_obj_attr_contents,
+	bfd_elf_get_obj_attr_int, bfd_elf_add_obj_attr_int,
+	bfd_elf_add_proc_attr_int, bfd_elf_add_obj_attr_string,
+	bfd_elf_add_proc_attr_string, bfd_elf_add_obj_attr_compat,
+	bfd_elf_add_proc_attr_compat, _bfd_elf_attr_strdup,
+	_bfd_elf_copy_obj_attributes, _bfd_elf_obj_attrs_arg_type,
+	_bfd_elf_parse_attributes, _bfd_elf_merge_object_attributes): New.
+	* elf.c (_bfd_elf_copy_private_bfd_data): Copy object attributes.
+	(bfd_section_from_shdr): Handle attributes sections.
+	* elflink.c (bfd_elf_final_link): Handle attributes sections.
+	* elfxx-target.h (elf_backend_obj_attrs_vendor,
+	elf_backend_obj_attrs_section, elf_backend_obj_attrs_arg_type,
+	elf_backend_obj_attrs_section_type): New.
+	(elfNN_bed): Update.
+	* elf32-arm.c (NUM_KNOWN_ATTRIBUTES, aeabi_attribute,
+	aeabi_attribute_list): Remove.
+	(struct elf32_arm_obj_tdata): Remove object attributes fields.
+	(check_use_blx, bfd_elf32_arm_set_vfp11_fix, using_thumb2,
+	elf32_arm_copy_private_bfd_data, elf32_arm_merge_eabi_attributes):
+	Update for new object attributes interfaces.
+	(uleb128_size, is_default_attr, eabi_attr_size,
+	elf32_arm_eabi_attr_size, write_uleb128, write_eabi_attribute,
+	elf32_arm_set_eabi_attr_contents, elf32_arm_bfd_final_link,
+	elf32_arm_new_eabi_attr, elf32_arm_get_eabi_attr_int,
+	elf32_arm_add_eabi_attr_int, attr_strdup,
+	elf32_arm_add_eabi_attr_string, elf32_arm_add_eabi_attr_compat,
+	copy_eabi_attributes, elf32_arm_parse_attributes): Remove.  Moved
+	to generic code in elf-attrs.c.
+	(elf32_arm_obj_attrs_arg_type): New.
+	(elf32_arm_fake_sections): Do not handle .ARM.attributes.
+	(elf32_arm_section_from_shdr): Do not handle SHT_ARM_ATTRIBUTES.
+	(bfd_elf32_bfd_final_link): Remove.
+	(elf_backend_obj_attrs_vendor, elf_backend_obj_attrs_section,
+	elf_backend_obj_attrs_arg_type,
+	elf_backend_obj_attrs_section_type): New.
+	* elf32-bfin.c (bfin_elf_copy_private_bfd_data): Copy object
+	attributes.
+	* elf32-frv.c (frv_elf_copy_private_bfd_data): Likewise.
+	* elf32-iq2000.c (iq2000_elf_copy_private_bfd_data): Likewise.
+	* elf32-mep.c (mep_elf_copy_private_bfd_data): Likewise.
+	* elf32-mt.c (mt_elf_copy_private_bfd_data): Likewise.
+	* elf32-sh.c (sh_elf_copy_private_data): Likewise.
+	* elf64-sh64.c (sh_elf64_copy_private_data_internal): Likewise.
+
 2007-06-29  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (bfd_elf32_arm_process_before_allocation): Suppress

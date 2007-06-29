@@ -5356,6 +5356,9 @@ sh_elf_copy_private_data (bfd * ibfd, bfd * obfd)
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
 
+  /* Copy object attributes.  */
+  _bfd_elf_copy_obj_attributes (ibfd, obfd);
+
   return sh_elf_set_private_flags (obfd, elf_elfheader (ibfd)->e_flags);
 }
 #endif /* not sh_elf_copy_private_data */

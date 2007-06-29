@@ -9266,6 +9266,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   size_t relativecount = 0;
   asection *reldyn = 0;
   bfd_size_type amt;
+  asection *attr_section = NULL;
+  bfd_vma attr_size = 0;
+  const char *std_attrs_section;
 
   if (! is_elf_hash_table (info->hash))
     return FALSE;
@@ -9312,6 +9315,40 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   finfo.symshndxbuf = NULL;
   finfo.symbuf_count = 0;
   finfo.shndxbuf_size = 0;
+
+  /* The object attributes have been merged.  Remove the input
+     sections from the link, and set the contents of the output
+     secton.  */
+  std_attrs_section = get_elf_backend_data (abfd)->obj_attrs_section;
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      if ((std_attrs_section && strcmp (o->name, std_attrs_section) == 0)
+	  || strcmp (o->name, ".gnu.attributes") == 0)
+	{
+	  for (p = o->map_head.link_order; p != NULL; p = p->next)
+	    {
+	      asection *input_section;
+
+	      if (p->type != bfd_indirect_link_order)
+		continue;
+	      input_section = p->u.indirect.section;
+	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
+		 elf_link_input_bfd ignores this section.  */
+	      input_section->flags &= ~SEC_HAS_CONTENTS;
+	    }
+	    
+	  attr_size = bfd_elf_obj_attr_size (abfd);
+	  if (attr_size)
+	    {
+	      bfd_set_section_size (abfd, o, attr_size);
+	      attr_section = o;
+	      /* Skip this section later on.  */
+	      o->map_head.link_order = NULL;
+	    }
+	  else
+	    o->flags |= SEC_EXCLUDE;
+	}
+    }
 
   /* Count up the number of relocations we will output for each output
      section, so that we know the sizes of the reloc sections.  We
@@ -10256,6 +10293,16 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     }
 
   elf_tdata (abfd)->linker = TRUE;
+
+  if (attr_section)
+    {
+      bfd_byte *contents = bfd_malloc (attr_size);
+      if (contents == NULL)
+	goto error_return;
+      bfd_elf_set_obj_attr_contents (abfd, contents, attr_size);
+      bfd_set_section_contents (abfd, attr_section, contents, 0, attr_size);
+      free (contents);
+    }
 
   return TRUE;
 
