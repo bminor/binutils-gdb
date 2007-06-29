@@ -1,3 +1,9 @@
+2007-06-28  Roland McGrath  <roland@frob.com>
+
+	* objcopy.c (setup_section): Don't reset ELF section type to
+	SHT_NOBITS when it is SHT_NOTE.
+	* doc/binutils.texi (objcopy, strip): Mention under --only-keep-debug.
+
 2007-06-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* ar.c: Rename uses of bfd.next to bfd.archive_next throughout.
@@ -19,7 +25,7 @@
 	* embedspu.sh (relas): Correct sh_info parsing.
 
 2007-06-19  Danny Smith  <dannysmith@users.sourceforge.net>
- 
+
   	* objdump.c: Include sys/stat.h.
 
 2007-06-19  Kai Tietz  <kai.tietz@onevision.com>
@@ -39,7 +45,7 @@
 
 2007-06-18  Andi Kleen  <ak@suse.de>
 
-	* objdump.c: Include sys/mman.h 
+	* objdump.c: Include sys/mman.h
 	(print_file_list): Remove f, add map, mapsize, linemap, maxline,
 	last_line, first fields.
 	(slurp_file): Add.
