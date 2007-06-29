@@ -1,3 +1,7 @@
+2007-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-reg.tbl: Remove spaces before comments.
+
 2007-06-29  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
 
 	* cr16-opc.c: New file.

@@ -77,7 +77,7 @@ r12, Reg64|BaseIndex, RegRex, 4
 r13, Reg64|BaseIndex, RegRex, 5
 r14, Reg64|BaseIndex, RegRex, 6
 r15, Reg64|BaseIndex, RegRex, 7
-  // Segment registers.
+// Segment registers.
 es, SReg2, 0, 0
 cs, SReg2, 0, 1
 ss, SReg2, 0, 2
