@@ -1,5 +1,11 @@
 2007-06-29  Joseph Myers  <joseph@codesourcery.com>
 
+	* readelf.c (display_power_gnu_attribute, process_power_specific):
+	New.
+	(process_arch_specific): Call process_power_specific.
+
+2007-06-29  Joseph Myers  <joseph@codesourcery.com>
+
 	* readelf.c (display_mips_gnu_attribute): New.
 	(process_mips_specific): Call process_attributes.
 

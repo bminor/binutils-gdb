@@ -1,5 +1,17 @@
 2007-06-29  Joseph Myers  <joseph@codesourcery.com>
 
+	* ld-powerpc/attr-gnu-4-0.s, ld-powerpc/attr-gnu-4-00.d,
+	ld-powerpc/attr-gnu-4-01.d, ld-powerpc/attr-gnu-4-02.d,
+	ld-powerpc/attr-gnu-4-1.s, ld-powerpc/attr-gnu-4-10.d,
+	ld-powerpc/attr-gnu-4-11.d, ld-powerpc/attr-gnu-4-12.d,
+	ld-powerpc/attr-gnu-4-13.d, ld-powerpc/attr-gnu-4-2.s,
+	ld-powerpc/attr-gnu-4-20.d, ld-powerpc/attr-gnu-4-21.d,
+	ld-powerpc/attr-gnu-4-22.d, ld-powerpc/attr-gnu-4-3.s,
+	ld-powerpc/attr-gnu-4-31.d: New.
+	* ld-powerpc/powerpc.exp: Run these new tests.
+
+2007-06-29  Joseph Myers  <joseph@codesourcery.com>
+
 	* ld-mips-elf/attr-gnu-4-0.s, ld-mips-elf/attr-gnu-4-00.d,
 	ld-mips-elf/attr-gnu-4-01.d, ld-mips-elf/attr-gnu-4-02.d,
 	ld-mips-elf/attr-gnu-4-03.d, ld-mips-elf/attr-gnu-4-1.s,

@@ -3594,6 +3594,62 @@ ppc_elf_check_relocs (bfd *abfd,
   return TRUE;
 }
 
+
+/* Merge object attributes from IBFD into OBFD.  Raise an error if
+   there are conflicting attributes.  */
+static bfd_boolean
+ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
+{
+  obj_attribute *in_attr;
+  obj_attribute *out_attr;
+
+  if (!elf_known_obj_attributes_proc (obfd)[0].i)
+    {
+      /* This is the first object.  Copy the attributes.  */
+      _bfd_elf_copy_obj_attributes (ibfd, obfd);
+
+      /* Use the Tag_null value to indicate the attributes have been
+	 initialized.  */
+      elf_known_obj_attributes_proc (obfd)[0].i = 1;
+
+      return TRUE;
+    }
+
+  /* Check for conflicting Tag_GNU_Power_ABI_FP attributes and merge
+     non-conflicting ones.  */
+  in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
+  out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+  if (in_attr[Tag_GNU_Power_ABI_FP].i != out_attr[Tag_GNU_Power_ABI_FP].i)
+    {
+      out_attr[Tag_GNU_Power_ABI_FP].type = 1;
+      if (out_attr[Tag_GNU_Power_ABI_FP].i == 0)
+	out_attr[Tag_GNU_Power_ABI_FP].i = in_attr[Tag_GNU_Power_ABI_FP].i;
+      else if (in_attr[Tag_GNU_Power_ABI_FP].i == 0)
+	;
+      else if (out_attr[Tag_GNU_Power_ABI_FP].i == 1
+	       && in_attr[Tag_GNU_Power_ABI_FP].i == 2)
+	_bfd_error_handler
+	  (_("Warning: %B uses hard float, %B uses soft float"), obfd, ibfd);
+      else if (out_attr[Tag_GNU_Power_ABI_FP].i == 2
+	       && in_attr[Tag_GNU_Power_ABI_FP].i == 1)
+	_bfd_error_handler
+	  (_("Warning: %B uses hard float, %B uses soft float"), ibfd, obfd);
+      else if (in_attr[Tag_GNU_Power_ABI_FP].i > 2)
+	_bfd_error_handler
+	  (_("Warning: %B uses unknown floating point ABI %d"), ibfd,
+	   in_attr[Tag_GNU_Power_ABI_FP].i);
+      else
+	_bfd_error_handler
+	  (_("Warning: %B uses unknown floating point ABI %d"), obfd,
+	   out_attr[Tag_GNU_Power_ABI_FP].i);
+    }
+
+  /* Merge Tag_compatibility attributes and any common GNU ones.  */
+  _bfd_elf_merge_object_attributes (ibfd, obfd);
+
+  return TRUE;
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -3610,6 +3666,9 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
   /* Check if we have the same endianess.  */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+    return FALSE;
+
+  if (!ppc_elf_merge_obj_attributes (ibfd, obfd))
     return FALSE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;

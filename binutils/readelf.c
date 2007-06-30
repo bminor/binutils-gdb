@@ -8347,6 +8347,57 @@ display_gnu_attribute (unsigned char *p,
 }
 
 static unsigned char *
+display_power_gnu_attribute (unsigned char *p, int tag)
+{
+  int type;
+  unsigned int len;
+  int val;
+
+  if (tag == Tag_GNU_Power_ABI_FP)
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_GNU_Power_ABI_FP: ");
+      switch (val)
+	{
+	case 0:
+	  printf ("Hard or soft float\n");
+	  break;
+	case 1:
+	  printf ("Hard float\n");
+	  break;
+	case 2:
+	  printf ("Soft float\n");
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+   }
+
+  if (tag & 1)
+    type = 1; /* String.  */
+  else
+    type = 2; /* uleb128.  */
+  printf ("  Tag_unknown_%d: ", tag);
+
+  if (type == 1)
+    {
+      printf ("\"%s\"\n", p);
+      p += strlen ((char *)p) + 1;
+    }
+  else
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("%d (0x%x)\n", val, val);
+    }
+
+  return p;
+}
+
+static unsigned char *
 display_mips_gnu_attribute (unsigned char *p, int tag)
 {
   int type;
@@ -8537,6 +8588,13 @@ process_arm_specific (FILE *file)
 {
   return process_attributes (file, "aeabi", SHT_ARM_ATTRIBUTES,
 			     display_arm_attribute, NULL);
+}
+
+static int
+process_power_specific (FILE *file)
+{
+  return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
+			     display_power_gnu_attribute);
 }
 
 static int
@@ -9316,6 +9374,9 @@ process_arch_specific (FILE *file)
     case EM_MIPS:
     case EM_MIPS_RS3_LE:
       return process_mips_specific (file);
+      break;
+    case EM_PPC:
+      return process_power_specific (file);
       break;
     default:
       break;
