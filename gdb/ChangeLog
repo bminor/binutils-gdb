@@ -1,5 +1,10 @@
 2007-06-30  Andreas Schwab  <schwab@suse.de>
 
+	* m68k-tdep.c (m68k_ps_type): New.
+	(m68k_init_types): New.
+	(m68k_register_type): Use m68k_ps_type for PS register.
+	(_initialize_m68k_tdep): Call m68k_init_types.
+
 	* m68k-tdep.c (m68k_gdbarch_init): Don't infer coldfire flavour
 	from the generic m68k arch.
 
