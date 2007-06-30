@@ -1,3 +1,8 @@
+2007-06-30  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-tdep.c (m68k_gdbarch_init): Don't infer coldfire flavour
+	from the generic m68k arch.
+
 2007-06-28  Michael Snyder  <msnyder@access-company.com>
 
 	* m2-typeprint.c (m2_print_type): Move pointer ref after null test

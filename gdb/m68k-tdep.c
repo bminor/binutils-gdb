@@ -1110,14 +1110,14 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      and the type of long double depend on whether we're
      on ColdFire or standard m68k. */
 
-  if (info.bfd_arch_info)
+  if (info.bfd_arch_info && info.bfd_arch_info->mach != 0)
     {
       const bfd_arch_info_type *coldfire_arch = 
 	bfd_lookup_arch (bfd_arch_m68k, bfd_mach_mcf_isa_a_nodiv);
 
       if (coldfire_arch
-	  && (*info.bfd_arch_info->compatible) 
-	  (info.bfd_arch_info, coldfire_arch))
+	  && ((*info.bfd_arch_info->compatible) 
+	      (info.bfd_arch_info, coldfire_arch)))
 	flavour = m68k_coldfire_flavour;
     }
   
