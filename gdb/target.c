@@ -1084,6 +1084,11 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
       if (res > 0)
 	return res;
 
+      /* We want to continue past core files to executables, but not
+	 past a running target's memory.  */
+      if (ops->to_has_all_memory)
+	return res;
+
       ops = ops->beneath;
     }
   while (ops != NULL);

@@ -1,3 +1,9 @@
+2007-07-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR symtab/2161
+	* target.c (memory_xfer_partial): Do not continue past targets with
+	all memory.
+
 2007-06-30  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-tdep.c (m68k_ps_type): New.
