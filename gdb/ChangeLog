@@ -1,5 +1,13 @@
 2007-07-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* top.c (gdb_readline_wrapper_line): Call rl_callback_handler_remove.
+	(struct gdb_readline_wrapper_cleanup): Remove prompt_orig.
+	(gdb_readline_wrapper_cleanup): Do not reset the prompt.
+	(gdb_readline_wrapper): Do not save the prompt.  Pass our prompt
+	to display_gdb_prompt.
+
+2007-07-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	PR symtab/2161
 	* target.c (memory_xfer_partial): Do not continue past targets with
 	all memory.

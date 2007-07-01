@@ -1,3 +1,8 @@
+2007-07-01  Nick Roberts  <nickrob@snap.net.nz>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/annota3.exp: Test for if construct.
+
 2007-06-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/chng-syms.exp: Handle glibc's __GI_exit.

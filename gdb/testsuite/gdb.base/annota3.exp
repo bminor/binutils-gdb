@@ -99,7 +99,29 @@ gdb_expect_list "annotation set at level 3" "\r\n$gdb_prompt$" {
     "set annotate 3"
 }
 
-
+#
+# if construct:
+#
+send_gdb "if 1\n"
+gdb_expect {
+    -re "^if 1\r\n\r\n\032\032post-prompt\r\n\r\n\032\032pre-commands\r\n >\r\n\032\032commands\r\n$" {
+	pass "start if construct"
+    }
+    -re ".*\032\032commands\r\n" {
+	fail "start if construct"
+    }
+    timeout { fail "start if construct (timeout)" }
+}
+send_gdb "end\n"
+gdb_expect {
+    -re "^end\r\n\r\n\032\032post-commands\r\n$gdb_prompt$" {
+ 	pass "end if construct"
+    }
+    -re ".*$gdb_prompt$" {
+	fail "end if construct"
+    }
+    timeout { fail "end if construct (timeout)" }
+}
 #
 # info break:
 #

@@ -751,12 +751,16 @@ gdb_readline_wrapper_line (char *line)
   /* Prevent operate-and-get-next from acting too early.  */
   saved_after_char_processing_hook = after_char_processing_hook;
   after_char_processing_hook = NULL;
+
+  /* Prevent parts of the prompt from being redisplayed if annotations
+     are enabled, and readline's state getting out of sync.  */
+  if (async_command_editing_p)
+    rl_callback_handler_remove ();
 }
 
 struct gdb_readline_wrapper_cleanup
   {
     void (*handler_orig) (char *);
-    char *prompt_orig;
     int already_prompted_orig;
   };
 
@@ -766,7 +770,6 @@ gdb_readline_wrapper_cleanup (void *arg)
   struct gdb_readline_wrapper_cleanup *cleanup = arg;
 
   rl_already_prompted = cleanup->already_prompted_orig;
-  PROMPT (0) = cleanup->prompt_orig;
 
   gdb_assert (input_handler == gdb_readline_wrapper_line);
   input_handler = cleanup->handler_orig;
@@ -790,14 +793,12 @@ gdb_readline_wrapper (char *prompt)
   cleanup->handler_orig = input_handler;
   input_handler = gdb_readline_wrapper_line;
 
-  cleanup->prompt_orig = get_prompt ();
-  PROMPT (0) = prompt;
   cleanup->already_prompted_orig = rl_already_prompted;
 
   back_to = make_cleanup (gdb_readline_wrapper_cleanup, cleanup);
 
   /* Display our prompt and prevent double prompt display.  */
-  display_gdb_prompt (NULL);
+  display_gdb_prompt (prompt);
   rl_already_prompted = 1;
 
   if (after_char_processing_hook)
