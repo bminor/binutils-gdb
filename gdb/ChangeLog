@@ -1,5 +1,10 @@
 2007-07-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): Search fewer
+	objfiles.
+
+2007-07-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* top.c (gdb_readline_wrapper_line): Call rl_callback_handler_remove.
 	(struct gdb_readline_wrapper_cleanup): Remove prompt_orig.
 	(gdb_readline_wrapper_cleanup): Do not reset the prompt.

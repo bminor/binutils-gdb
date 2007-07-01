@@ -387,20 +387,20 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
   if (pc_section == NULL)
     return NULL;
 
-  /* NOTE: cagney/2004-01-27: Removed code (added 2003-07-19) that was
-     trying to force the PC into a valid section as returned by
-     find_pc_section.  It broke IRIX 6.5 mdebug which relies on this
-     code returning an absolute symbol - the problem was that
-     find_pc_section wasn't returning an absolute section and hence
-     the code below would skip over absolute symbols.  Since the
-     original problem was with finding a frame's function, and that
-     uses [indirectly] lookup_minimal_symbol_by_pc, the original
-     problem has been fixed by having that function use
-     find_pc_section.  */
+  /* We can not require the symbol found to be in pc_section, because
+     e.g. IRIX 6.5 mdebug relies on this code returning an absolute
+     symbol - but find_pc_section won't return an absolute section and
+     hence the code below would skip over absolute symbols.  We can
+     still take advantage of the call to find_pc_section, though - the
+     object file still must match.  In case we have separate debug
+     files, search both the file and its separate debug file.  There's
+     no telling which one will have the minimal symbols.  */
 
-  for (objfile = object_files;
-       objfile != NULL;
-       objfile = objfile->next)
+  objfile = pc_section->objfile;
+  if (objfile->separate_debug_objfile)
+    objfile = objfile->separate_debug_objfile;
+
+  for (; objfile != NULL; objfile = objfile->separate_debug_objfile_backlink)
     {
       /* If this objfile has a minimal symbol table, go search it using
          a binary search.  Note that a minimal symbol table always consists
