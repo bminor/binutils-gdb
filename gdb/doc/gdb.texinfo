@@ -2179,11 +2179,11 @@ are ready to @code{attach} another process or start one with @code{run}.
 executing the command.
 @end table
 
-If you exit @value{GDBN} or use the @code{run} command while you have an
-attached process, you kill that process.  By default, @value{GDBN} asks
-for confirmation if you try to do either of these things; you can
-control whether or not you need to confirm by using the @code{set
-confirm} command (@pxref{Messages/Warnings, ,Optional Warnings and
+If you exit @value{GDBN} while you have an attached process, you detach
+that process.  If you use the @code{run} command, you kill that process.
+By default, @value{GDBN} asks for confirmation if you try to do either of these
+things; you can control whether or not you need to confirm by using the
+@code{set confirm} command (@pxref{Messages/Warnings, ,Optional Warnings and
 Messages}).
 
 @node Kill Process
