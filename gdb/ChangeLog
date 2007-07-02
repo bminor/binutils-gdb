@@ -1,3 +1,18 @@
+2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infrun.c (inferior_ignoring_startup_exec_events): Delete.
+	(start_remote): Use STOP_QUIETLY_REMOTE.
+	(handle_inferior_event): Do not condition TARGET_WAITKIND_LOADED
+	support on a SOLIB_ADD definition.  Update breakpoints_inserted.
+	Update to match shared library event breakpoint support.  Only
+	resume if appropriate.  Handle STOP_QUIETLY_REMOTE.
+	(normal_stop): Handle TARGET_WAITKIND_LOADED.
+	* fork-child.c (startup_inferior): Do not set
+	inferior_ignoring_startup_exec_events
+	* inferior.h (inferior_ignoring_startup_exec_events): Delete
+	declaration.
+	(enum stop_kind): Improve documentation.  Add STOP_QUIETLY_REMOTE.
+
 2007-07-02  Markus Deuling  <deuling@de.ibm.com>
 
 	* breakpoint.c (insert_bp_location): Remove dead code

@@ -1,3 +1,15 @@
+2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/gdbserver.exp (gdb_reconnect): New.
+	* gdb.base/so-disc-shr.c, gdb.base/solib-disc.c,
+	gdb.base/solib-disc.exp: New files.
+	* lib/gdb.exp (gdb_test_multiple): Allow tests to match "Ending
+	remote debugging".
+	(gdb_compile): Add shlib_load flag.
+	* lib/gdbserver-support.exp (gdbserver_run): Save the protocol and
+	port.
+	(gdbserver_reconnect): New.
+
 2007-07-01  Nick Roberts  <nickrob@snap.net.nz>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

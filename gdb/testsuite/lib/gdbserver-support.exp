@@ -236,6 +236,9 @@ proc gdbserver_spawn { child_args } {
 # to it.  Return 0 on success, or non-zero on failure.
 
 proc gdbserver_run { child_args } {
+    global gdbserver_protocol
+    global gdbserver_gdbport
+
     # Kill anything running before we try to start gdbserver, in case
     # we are sharing a serial connection.
     global gdb_prompt
@@ -252,8 +255,17 @@ proc gdbserver_run { child_args } {
     }
 
     set res [gdbserver_spawn $child_args]
-    set protocol [lindex $res 0]
-    set gdbport [lindex $res 1]
+    set gdbserver_protocol [lindex $res 0]
+    set gdbserver_gdbport [lindex $res 1]
 
-    return [gdb_target_cmd $protocol $gdbport]
+    return [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
+}
+
+# Reconnect to the previous gdbserver session.
+
+proc gdbserver_reconnect { } {
+    global gdbserver_protocol
+    global gdbserver_gdbport
+
+    return [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
 }

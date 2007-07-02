@@ -414,10 +414,6 @@ startup_inferior (int ntraps)
 
   init_wait_for_inferior ();
 
-  if (STARTUP_WITH_SHELL)
-    inferior_ignoring_startup_exec_events = ntraps;
-  else
-    inferior_ignoring_startup_exec_events = 0;
   inferior_ignoring_leading_exec_events =
     target_reported_exec_events_per_exec_call () - 1;
 

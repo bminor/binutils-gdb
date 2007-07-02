@@ -124,20 +124,7 @@ extern int target_executing;
    redisplay the prompt until the execution is actually over. */
 extern int sync_execution;
 
-/* This is only valid when inferior_ptid is non-zero.
-
-   If this is 0, then exec events should be noticed and responded to
-   by the debugger (i.e., be reported to the user).
-
-   If this is > 0, then that many subsequent exec events should be
-   ignored (i.e., not be reported to the user).
- */
-extern int inferior_ignoring_startup_exec_events;
-
-/* This is only valid when inferior_ignoring_startup_exec_events is
-   zero.
-
-   Some targets (stupidly) report more than one exec event per actual
+/* Some targets (stupidly) report more than one exec event per actual
    call to an event() system call.  If only the last such exec event
    need actually be noticed and responded to by the debugger (i.e.,
    be reported to the user), then this is the number of "leading"
@@ -351,10 +338,12 @@ extern enum step_over_calls_kind step_over_calls;
 
 extern int step_multi;
 
-/* Nonzero means expecting a trap and caller will handle it
-   themselves.  It is used when running in the shell before the child
-   program has been exec'd; and when running some kinds of remote
-   stuff (FIXME?).  */
+/* Anything but NO_STOP_QUIETLY means we expect a trap and the caller
+   will handle it themselves.  STOP_QUIETLY is used when running in
+   the shell before the child program has been exec'd and when running
+   through shared library loading.  STOP_QUIETLY_REMOTE is used when
+   setting up a remote connection; it is like STOP_QUIETLY_NO_SIGSTOP
+   except that there is no need to hide a signal.  */
 
 /* It is also used after attach, due to attaching to a process. This
    is a bit trickier.  When doing an attach, the kernel stops the
@@ -378,6 +367,7 @@ enum stop_kind
   {
     NO_STOP_QUIETLY = 0,
     STOP_QUIETLY,
+    STOP_QUIETLY_REMOTE,
     STOP_QUIETLY_NO_SIGSTOP
   };
 

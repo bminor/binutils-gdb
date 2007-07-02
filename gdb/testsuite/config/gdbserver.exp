@@ -81,3 +81,7 @@ proc gdbserver_gdb_load { } {
 proc gdb_reload { } {
     return [gdbserver_run ""]
 }
+
+proc gdb_reconnect { } {
+    return [gdbserver_reconnect]
+}

@@ -84,7 +84,6 @@ static int prepare_to_proceed (void);
 
 void _initialize_infrun (void);
 
-int inferior_ignoring_startup_exec_events = 0;
 int inferior_ignoring_leading_exec_events = 0;
 
 /* When set, stop the 'step' command if we enter a function which has
@@ -828,7 +827,7 @@ start_remote (int from_tty)
 {
   init_thread_list ();
   init_wait_for_inferior ();
-  stop_soon = STOP_QUIETLY;
+  stop_soon = STOP_QUIETLY_REMOTE;
   trap_expected = 0;
 
   /* Always go on waiting for the target, regardless of the mode. */
@@ -1297,16 +1296,22 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_LOADED:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_LOADED\n");
-      /* Ignore gracefully during startup of the inferior, as it
-         might be the shell which has just loaded some objects,
-         otherwise add the symbols for the newly loaded objects.  */
-#ifdef SOLIB_ADD
+      /* Ignore gracefully during startup of the inferior, as it might
+         be the shell which has just loaded some objects, otherwise
+         add the symbols for the newly loaded objects.  Also ignore at
+         the beginning of an attach or remote session; we will query
+         the full list of libraries once the connection is
+         established.  */
       if (stop_soon == NO_STOP_QUIETLY)
 	{
+	  int breakpoints_were_inserted;
+
 	  /* Remove breakpoints, SOLIB_ADD might adjust
 	     breakpoint addresses via breakpoint_re_set.  */
+	  breakpoints_were_inserted = breakpoints_inserted;
 	  if (breakpoints_inserted)
 	    remove_breakpoints ();
+	  breakpoints_inserted = 0;
 
 	  /* Check for any newly added shared libraries if we're
 	     supposed to be adding them automatically.  Switch
@@ -1328,17 +1333,50 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     exec/process stratum, instead relying on the target stack
 	     to propagate relevant changes (stop, section table
 	     changed, ...) up to other layers.  */
+#ifdef SOLIB_ADD
 	  SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
+#else
+	  solib_add (NULL, 0, &current_target, auto_solib_add);
+#endif
 	  target_terminal_inferior ();
 
+	  /* Try to reenable shared library breakpoints, additional
+	     code segments in shared libraries might be mapped in now. */
+	  re_enable_breakpoints_in_shlibs ();
+
+	  /* If requested, stop when the dynamic linker notifies
+	     gdb of events.  This allows the user to get control
+	     and place breakpoints in initializer routines for
+	     dynamically loaded objects (among other things).  */
+	  if (stop_on_solib_events)
+	    {
+	      stop_stepping (ecs);
+	      return;
+	    }
+
+	  /* NOTE drow/2007-05-11: This might be a good place to check
+	     for "catch load".  */
+
 	  /* Reinsert breakpoints and continue.  */
-	  if (breakpoints_inserted)
-	    insert_breakpoints ();
+	  if (breakpoints_were_inserted)
+	    {
+	      insert_breakpoints ();
+	      breakpoints_inserted = 1;
+	    }
 	}
-#endif
-      resume (0, TARGET_SIGNAL_0);
-      prepare_to_wait (ecs);
-      return;
+
+      /* If we are skipping through a shell, or through shared library
+	 loading that we aren't interested in, resume the program.  If
+	 we're running the program normally, also resume.  But stop if
+	 we're attaching or setting up a remote connection.  */
+      if (stop_soon == STOP_QUIETLY || stop_soon == NO_STOP_QUIETLY)
+	{
+	  resume (0, TARGET_SIGNAL_0);
+	  prepare_to_wait (ecs);
+	  return;
+	}
+
+      break;
 
     case TARGET_WAITKIND_SPURIOUS:
       if (debug_infrun)
@@ -1862,7 +1900,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  && (stop_signal == TARGET_SIGNAL_ILL
 	      || stop_signal == TARGET_SIGNAL_SEGV
 	      || stop_signal == TARGET_SIGNAL_EMT))
-      || stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_NO_SIGSTOP)
+      || stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_NO_SIGSTOP
+      || stop_soon == STOP_QUIETLY_REMOTE)
     {
       if (stop_signal == TARGET_SIGNAL_TRAP && stop_after_trap)
 	{
@@ -1875,7 +1914,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       /* This is originated from start_remote(), start_inferior() and
          shared libraries hook functions.  */
-      if (stop_soon == STOP_QUIETLY)
+      if (stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_REMOTE)
 	{
           if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
@@ -3160,6 +3199,18 @@ Further execution is probably impossible.\n"));
 	  switch (bpstat_ret)
 	    {
 	    case PRINT_UNKNOWN:
+	      /* If we had hit a shared library event breakpoint,
+		 bpstat_print would print out this message.  If we hit
+		 an OS-level shared library event, do the same
+		 thing.  */
+	      if (last.kind == TARGET_WAITKIND_LOADED)
+		{
+		  printf_filtered (_("Stopped due to shared library event\n"));
+		  source_flag = SRC_LINE;	/* something bogus */
+		  do_frame_printing = 0;
+		  break;
+		}
+
 	      /* FIXME: cagney/2002-12-01: Given that a frame ID does
 	         (or should) carry around the function and does (or
 	         should) use that when doing a frame comparison.  */

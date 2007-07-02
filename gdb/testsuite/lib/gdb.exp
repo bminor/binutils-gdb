@@ -671,6 +671,9 @@ proc gdb_test_multiple { command message user_code } {
 	     gdb_suppress_entire_file "GDB died";
 	     set result -1;
 	 }
+    }
+    append code $processed_code
+    append code {
 	 -re "Ending remote debugging.*$gdb_prompt $" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
@@ -679,9 +682,6 @@ proc gdb_test_multiple { command message user_code } {
 	    gdb_start
 	    set result -1
 	}
-    }
-    append code $processed_code
-    append code {
 	 -re "Undefined\[a-z\]* command:.*$gdb_prompt $" {
 	    perror "Undefined command \"$command\"."
             fail "$message"
@@ -1543,6 +1543,17 @@ proc gdb_compile {source dest type options} {
                     lappend options "additional_flags=-rpath ${objdir}/${subdir}"
                 }
             }
+	} elseif { $opt == "shlib_load" } {
+	    if { ([istarget "*-*-mingw*"]
+		  || [istarget *-*-cygwin*]
+		  || [istarget *-*-pe*]
+		  || [istarget arm*-*-symbianelf*]
+		  || [istarget hppa*-*-hpux*])} {
+		# Do not need anything.
+	    } else {
+		lappend new_options "libs=-ldl"
+		lappend new_options "additional_flags=-Wl,-rpath,\\\$ORIGIN"
+	    }
         } else {
             lappend new_options $opt
         }
