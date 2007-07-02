@@ -64,6 +64,11 @@ for_each_inferior (struct inferior_list *list,
     }
 }
 
+/* When debugging a single-threaded program, the threads list (such as
+   it is) is indexed by PID.  When debugging a multi-threaded program,
+   we index by TID.  This ugly routine replaces the
+   first-debugged-thread's PID with its TID.  */
+
 void
 change_inferior_id (struct inferior_list *list,
 		    unsigned long new_id)

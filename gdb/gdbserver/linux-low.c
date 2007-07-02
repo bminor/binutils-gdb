@@ -68,6 +68,7 @@ static void linux_resume_one_process (struct inferior_list_entry *entry,
 static void linux_resume (struct thread_resume *resume_info);
 static void stop_all_processes (void);
 static int linux_wait_for_event (struct thread_info *child);
+static int check_removed_breakpoint (struct process_info *event_child);
 
 struct pending_signals
 {
@@ -224,7 +225,8 @@ linux_attach (unsigned long pid)
 
   linux_attach_lwp (pid, pid);
 
-  /* Don't ignore the initial SIGSTOP if we just attached to this process.  */
+  /* Don't ignore the initial SIGSTOP if we just attached to this process.
+     It will be collected by wait shortly.  */
   process = (struct process_info *) find_inferior_id (&all_processes, pid);
   process->stop_expected = 0;
 
@@ -286,13 +288,36 @@ linux_detach_one_process (struct inferior_list_entry *entry)
   struct thread_info *thread = (struct thread_info *) entry;
   struct process_info *process = get_thread_process (thread);
 
+  /* Make sure the process isn't stopped at a breakpoint that's
+     no longer there.  */
+  check_removed_breakpoint (process);
+
+  /* If this process is stopped but is expecting a SIGSTOP, then make
+     sure we take care of that now.  This isn't absolutely guaranteed
+     to collect the SIGSTOP, but is fairly likely to.  */
+  if (process->stop_expected)
+    {
+      /* Clear stop_expected, so that the SIGSTOP will be reported.  */
+      process->stop_expected = 0;
+      if (process->stopped)
+	linux_resume_one_process (&process->head, 0, 0, NULL);
+      linux_wait_for_event (thread);
+    }
+
+  /* Flush any pending changes to the process's registers.  */
+  regcache_invalidate_one ((struct inferior_list_entry *)
+			   get_process_thread (process));
+
+  /* Finally, let it resume.  */
   ptrace (PTRACE_DETACH, pid_of (process), 0, 0);
 }
 
 static int
 linux_detach (void)
 {
+  delete_all_breakpoints ();
   for_each_inferior (&all_threads, linux_detach_one_process);
+  clear_inferiors ();
   return 0;
 }
 
@@ -332,7 +357,8 @@ check_removed_breakpoint (struct process_info *event_child)
     return 0;
 
   if (debug_threads)
-    fprintf (stderr, "Checking for breakpoint.\n");
+    fprintf (stderr, "Checking for breakpoint in process %ld.\n",
+	     event_child->lwpid);
 
   saved_inferior = current_inferior;
   current_inferior = get_process_thread (event_child);
@@ -345,7 +371,8 @@ check_removed_breakpoint (struct process_info *event_child)
   if (stop_pc != event_child->pending_stop_pc)
     {
       if (debug_threads)
-	fprintf (stderr, "Ignoring, PC was changed.\n");
+	fprintf (stderr, "Ignoring, PC was changed.  Old PC was 0x%08llx\n",
+		 event_child->pending_stop_pc);
 
       event_child->pending_is_breakpoint = 0;
       current_inferior = saved_inferior;
@@ -817,6 +844,13 @@ send_sigstop (struct inferior_list_entry *entry)
      send another.  */
   if (process->stop_expected)
     {
+      if (debug_threads)
+	fprintf (stderr, "Have pending sigstop for process %ld\n",
+		 process->lwpid);
+
+      /* We clear the stop_expected flag so that wait_for_sigstop
+	 will receive the SIGSTOP event (instead of silently resuming and
+	 waiting again).  It'll be reset below.  */
       process->stop_expected = 0;
       return;
     }
@@ -852,7 +886,9 @@ wait_for_sigstop (struct inferior_list_entry *entry)
       && WSTOPSIG (wstat) != SIGSTOP)
     {
       if (debug_threads)
-	fprintf (stderr, "Stopped with non-sigstop signal\n");
+	fprintf (stderr, "Process %ld (thread %ld) "
+		 "stopped with non-sigstop status %06x\n",
+		 process->lwpid, process->tid, wstat);
       process->status_pending_p = 1;
       process->status_pending = wstat;
       process->stop_expected = 1;

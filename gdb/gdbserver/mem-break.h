@@ -72,4 +72,8 @@ void check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len);
 
 void set_breakpoint_data (const unsigned char *bp_data, int bp_len);
 
+/* Delete all breakpoints.  */
+
+void delete_all_breakpoints (void);
+
 #endif /* MEM_BREAK_H */

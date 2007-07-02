@@ -92,8 +92,12 @@ struct process_info
   unsigned long lwpid;
   unsigned long tid;
 
-  /* If this flag is set, the next SIGSTOP will be ignored (the process will
-     be immediately resumed).  */
+  /* If this flag is set, the next SIGSTOP will be ignored (the
+     process will be immediately resumed).  This means that either we
+     sent the SIGSTOP to it ourselves and got some other pending event
+     (so the SIGSTOP is still pending), or that we stopped the
+     inferior implicitly via PTRACE_ATTACH and have not waited for it
+     yet.  */
   int stop_expected;
 
   /* If this flag is set, the process is known to be stopped right now (stop

@@ -1,3 +1,22 @@
+2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* inferiors.c (change_inferior_id): Add comment.
+	* linux-low.c (check_removed_breakpoint): Add an early
+	prototype.  Improve debug output.
+	(linux_attach): Doc update.
+	(linux_detach_one_process, linux_detach): Clean up before releasing
+	each process.
+	(send_sigstop, wait_for_sigstop): Improve comments and debug output.
+	* linux-low.h (struct process_info): Doc improvement.
+	* mem-break.c (delete_all_breakpoints): New.
+	* mem-break.h (delete_all_breakpoints): New prototype.
+	* thread-db.c (find_first_thread): New.
+	(thread_db_create_event): Call it instead of
+	thread_db_find_new_threads.  Clean up unused variables.
+	(maybe_attach_thread): Remove first thread handling.
+	(thread_db_find_new_threads): Use find_first_thread.
+	(thread_db_get_tls_address): Likewise.
+
 2007-06-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* thread-db.c (thread_db_find_new_threads): Add prototype.

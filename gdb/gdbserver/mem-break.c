@@ -283,3 +283,12 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 	memcpy (buf + buf_offset, breakpoint_data + copy_offset, copy_len);
     }
 }
+
+/* Delete all breakpoints.  */
+
+void
+delete_all_breakpoints (void)
+{
+  while (breakpoints)
+    delete_breakpoint (breakpoints);
+}
