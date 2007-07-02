@@ -712,17 +712,18 @@ _bfd_elf_discard_section_eh_frame
 			      sym = &cookie->locsyms[r_symndx];
 			      sym_sec = (bfd_section_from_elf_index
 					 (abfd, sym->st_shndx));
-			      if (sym_sec != NULL
-				  && sym_sec->kept_section != NULL)
-				sym_sec = sym_sec->kept_section;
-			      if (sym_sec != NULL
-				  && sym_sec->output_section != NULL)
+			      if (sym_sec != NULL)
 				{
-				  val = (sym->st_value
-					 + sym_sec->output_offset
-					 + sym_sec->output_section->vma);
-				  cie->personality.val = val;
-				  cie->local_personality = 1;
+				  if (sym_sec->kept_section != NULL)
+				    sym_sec = sym_sec->kept_section;
+				  if (sym_sec->output_section != NULL)
+				    {
+				      val = (sym->st_value
+					     + sym_sec->output_offset
+					     + sym_sec->output_section->vma);
+				      cie->personality.val = val;
+				      cie->local_personality = 1;
+				    }
 				}
 			    }
 

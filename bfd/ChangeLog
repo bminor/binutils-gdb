@@ -1,5 +1,10 @@
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Tidy
+	symsec != NULL tests.
+
+2007-07-02  Alan Modra  <amodra@bigpond.net.au>
+
 	PR 4712
 	* elf.c (assign_file_positions_for_load_sections): Adjust lma
 	by p_vaddr_offset.
