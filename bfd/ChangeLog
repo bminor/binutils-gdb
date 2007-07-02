@@ -1,3 +1,9 @@
+2007-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4712
+	* elf.c (assign_file_positions_for_load_sections): Adjust lma
+	by p_vaddr_offset.
+
 2007-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aclocal.m4: Regenerated.
