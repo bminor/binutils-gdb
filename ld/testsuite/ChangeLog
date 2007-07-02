@@ -1,3 +1,7 @@
+2007-07-02  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/alignof.exp: Skip on non-elf
+
 2007-06-29  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-powerpc/attr-gnu-4-0.s, ld-powerpc/attr-gnu-4-00.d,

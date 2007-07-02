@@ -15,6 +15,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
+# Only ELF targets record section alignment.
+
+if ![is_elf_format] {
+    return
+}
+
 set testname "ALIGNOF"
 
 if ![ld_assemble $as $srcdir/$subdir/alignof.s tmpdir/alignof.o] {
