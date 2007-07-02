@@ -66,6 +66,8 @@ fetch_core_registers (struct regcache *regcache,
 {
   gdb_gregset_t gregset;
   gdb_fpregset_t fpregset;
+  gdb_gregset_t *gregset_p = &gregset;
+  gdb_fpregset_t *fpregset_p = &fpregset;
 
   switch (which)
     {
@@ -75,7 +77,7 @@ fetch_core_registers (struct regcache *regcache,
       else
 	{
 	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (regcache, (const gdb_gregset_t *) &gregset);
+	  supply_gregset (regcache, (const gdb_gregset_t *) gregset_p);
 	}
       break;
 
@@ -86,7 +88,7 @@ fetch_core_registers (struct regcache *regcache,
 	{
 	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
 	  if (gdbarch_fp0_regnum (current_gdbarch) >= 0)
-	    supply_fpregset (regcache, (const gdb_fpregset_t *) &fpregset);
+	    supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset_p);
 	}
       break;
 

@@ -1,3 +1,8 @@
+2007-07-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* core-regset.c (fetch_core_registers): Work around gcc 3.4
+	alias warning bug.
+
 2007-07-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* minsyms.c (lookup_minimal_symbol_by_pc_section): Search fewer
