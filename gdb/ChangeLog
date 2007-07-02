@@ -1,3 +1,8 @@
+2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* breakpoint.c (reattach_breakpoints): Do not use remove_breakpoint.
+	Call insert_bp_location.
+
 2007-07-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* core-regset.c (fetch_core_registers): Work around gcc 3.4

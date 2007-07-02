@@ -1338,23 +1338,19 @@ reattach_breakpoints (int pid)
   struct bp_location *b;
   int val;
   struct cleanup *old_chain = save_inferior_ptid ();
+  struct ui_file *tmp_error_stream = mem_fileopen ();
+  int dummy1 = 0, dummy2 = 0, dummy3 = 0;
 
-  /* Set inferior_ptid; remove_breakpoint uses this global.  */
+  make_cleanup_ui_file_delete (tmp_error_stream);
+
   inferior_ptid = pid_to_ptid (pid);
   ALL_BP_LOCATIONS (b)
   {
     if (b->inserted)
       {
-	remove_breakpoint (b, mark_inserted);
-	/* Note: since we insert a breakpoint right after removing,
-	   any decisions about automatically using hardware breakpoints
-	   made in insert_bp_location are preserved.  */
-	if (b->loc_type == bp_loc_hardware_breakpoint)
-	  val = target_insert_hw_breakpoint (&b->target_info);
-	else
-	  val = target_insert_breakpoint (&b->target_info);
-	/* FIXME drow/2003-10-07: This doesn't handle any other kinds of
-	   breakpoints.  It's wrong for watchpoints, for example.  */
+	b->inserted = 0;
+	val = insert_bp_location (b, tmp_error_stream,
+				  &dummy1, &dummy2, &dummy3);
 	if (val != 0)
 	  {
 	    do_cleanups (old_chain);
