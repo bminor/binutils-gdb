@@ -1,3 +1,10 @@
+2007-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
 2007-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aclocal.m4: Regenerated.

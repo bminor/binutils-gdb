@@ -201,12 +201,11 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
-
-# We have to set this, because autoconf 2.59 does not substitute YFLAGS.
-# Autoconf 2.61 does, so this can be removed when we upgrade.
-YFLAGS = 
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__include = @am__include@
@@ -225,7 +224,6 @@ cgen_cpu_prefix = @cgen_cpu_prefix@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 extra_objects = @extra_objects@
 host = @host@
@@ -240,17 +238,14 @@ install_sh = @install_sh@
 install_tooldir = @install_tooldir@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 obj_format = @obj_format@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -268,6 +263,10 @@ SUBDIRS = doc po
 # of the "cygnus" option.  But distclean still wants it.
 DIST_SUBDIRS = $(SUBDIRS)
 tooldir = $(exec_prefix)/$(target_alias)
+
+# We have to set this, because autoconf 2.59 does not substitute YFLAGS.
+# Autoconf 2.61 does, so this can be removed when we upgrade.
+YFLAGS = 
 AM_CFLAGS = $(WARN_CFLAGS)
 MKDEP = gcc -MM
 TARG_CPU = @target_cpu_type@
@@ -1339,12 +1338,6 @@ DEPOBJ_avr_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
 DEPOBJ_bfin_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-bfin.h dwarf2dbg.h \
-  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
-
-DEPOBJ_cr16_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-cr16.h dwarf2dbg.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
 

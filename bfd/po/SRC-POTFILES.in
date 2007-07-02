@@ -66,6 +66,7 @@ cpu-arc.c
 cpu-arm.c
 cpu-avr.c
 cpu-bfin.c
+cpu-cr16.c
 cpu-cr16c.c
 cpu-cris.c
 cpu-crx.c
@@ -139,6 +140,7 @@ elf32-arm.c
 elf32-avr.c
 elf32-bfin.c
 elf32.c
+elf32-cr16.c
 elf32-cr16c.c
 elf32-cris.c
 elf32-crx.c
@@ -198,6 +200,7 @@ elf64-s390.c
 elf64-sh64.c
 elf64-sparc.c
 elf64-x86-64.c
+elf-attrs.c
 elf-bfd.h
 elf.c
 elfcode.h

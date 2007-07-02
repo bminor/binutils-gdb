@@ -1,5 +1,15 @@
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/gas.pot: Regenerate.
+
+2007-07-02  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/tc-ppc.c (ppc_pe_section): Comment out code assigning
 	coff section flag values to bfd section flag.
 

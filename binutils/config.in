@@ -12,15 +12,6 @@
    language is requested. */
 #undef ENABLE_NLS
 
-/* Define if you have the iconv() function. */
-#undef HAVE_ICONV
-
-/* Define to 1 if you have the <iconv.h> header file. */
-#undef HAVE_ICONV_H
-
-/* Define as const if the declaration of iconv() needs const. */
-#undef ICONV_CONST
-
 /* Suffix used for executables, if any. */
 #undef EXECUTABLE_SUFFIX
 
@@ -70,6 +61,9 @@
    don't. */
 #undef HAVE_DECL_VSNPRINTF
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Does the platform use an executable suffix? */
 #undef HAVE_EXECUTABLE_SUFFIX
 
@@ -84,6 +78,9 @@
 
 /* Does <utime.h> define struct utimbuf? */
 #undef HAVE_GOOD_UTIME_H
+
+/* Define if you have the iconv() function. */
+#undef HAVE_ICONV
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -150,6 +147,13 @@
 
 /* Define to 1 if you have the `utimes' function. */
 #undef HAVE_UTIMES
+
+/* Define as const if the declaration of iconv() needs const. */
+#undef ICONV_CONST
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
 
 /* Name of package */
 #undef PACKAGE

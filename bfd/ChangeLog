@@ -1,5 +1,14 @@
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2007-07-02  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Tidy
 	symsec != NULL tests.
 

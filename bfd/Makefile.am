@@ -1323,16 +1323,14 @@ elf32-bfin.lo: elf32-bfin.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/bfin.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/elf/dwarf2.h \
   elf32-target.h
-elf32-cr16.lo: elf32-cr16.c $(INCDIR)/filenames.h \
-  $(INCDIR)/hashtab.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/cr16.h \
-  $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h \
-  $(INCDIR)/libiberty.h
+elf32-cr16.lo: elf32-cr16.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/hashtab.h $(INCDIR)/libiberty.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/cr16.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-cr16c.lo: elf32-cr16c.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/cr16c.h \
   $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h \
-  $(INCDIR)/libiberty.h
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h
 elf32-cris.lo: elf32-cris.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/cris.h \

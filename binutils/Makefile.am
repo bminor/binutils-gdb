@@ -547,8 +547,8 @@ objcopy.o: objcopy.c sysdep.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/bfdlink.h $(BFDDIR)/libbfd.h $(INCDIR)/hashtab.h
 objdump.o: objdump.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bucomm.h $(INCDIR)/progress.h \
-  dwarf.h $(INCDIR)/safe-ctype.h $(INCDIR)/dis-asm.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/progress.h \
+  bucomm.h dwarf.h $(INCDIR)/safe-ctype.h $(INCDIR)/dis-asm.h \
   ../bfd/bfd.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/demangle.h $(INCDIR)/libiberty.h debug.h \
   budbg.h $(INCDIR)/aout/aout64.h
@@ -557,6 +557,10 @@ prdbg.o: prdbg.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/demangle.h $(INCDIR)/libiberty.h debug.h \
   budbg.h
+rclex.o: rclex.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/safe-ctype.h windres.h $(INCDIR)/ansidecl.h \
+  winduni.h windint.h rcparse.h
 rdcoff.o: rdcoff.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(INCDIR)/libiberty.h \
@@ -593,30 +597,30 @@ rename.o: rename.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   $(INCDIR)/symcat.h bucomm.h
 resbin.o: resbin.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  bucomm.h windres.h winduni.h windint.h
+  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  windres.h winduni.h windint.h
 rescoff.o: rescoff.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/ansidecl.h bucomm.h windres.h winduni.h windint.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h windres.h winduni.h windint.h \
   $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
 resrc.o: resrc.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h bucomm.h windres.h winduni.h windint.h
+  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/safe-ctype.h windres.h winduni.h windint.h
 resres.o: resres.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  bucomm.h windres.h winduni.h windint.h
+  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  windres.h winduni.h windint.h
 size.o: size.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   bucomm.h
 srconv.o: srconv.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h sysroff.h coffgrok.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/symcat.h bucomm.h sysroff.h coffgrok.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h bucomm.h sysroff.c
+  $(INCDIR)/bfdlink.h sysroff.c
 stabs.o: stabs.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
@@ -637,23 +641,28 @@ version.o: version.c sysdep.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bucomm.h
 windres.o: windres.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
-  bucomm.h windres.h winduni.h windint.h
-windmc.o: windmc.c sysdep.h $(INCDIR)/ansidecl.h \
-  ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h \
-  bucomm.h windmc.h winduni.h windint.h
+  windres.h winduni.h windint.h
 winduni.o: winduni.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h winduni.h $(INCDIR)/safe-ctype.h
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h bucomm.h winduni.h $(INCDIR)/safe-ctype.h
 wrstabs.o: wrstabs.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h bucomm.h \
   debug.h budbg.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def
+windmc.o: windmc.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
+  config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/safe-ctype.h $(INCDIR)/obstack.h windmc.h \
+  winduni.h windint.h
+mclex.o: mclex.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
+  config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/safe-ctype.h windmc.h winduni.h mcparse.h
 arparse.o: arparse.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h arsup.h
@@ -675,20 +684,11 @@ nlmheader.o: nlmheader.c sysdep.h $(INCDIR)/ansidecl.h \
   nlmconv.h
 rcparse.o: rcparse.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h windres.h winduni.h windint.h \
   $(INCDIR)/safe-ctype.h
 mcparse.o: mcparse.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/ansidecl.h windmc.h winduni.h \
-  $(INCDIR)/safe-ctype.h
-rclex.o: rclex.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
-  config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h windres.h winduni.h windint.h rcparse.h
-mclex.o: mclex.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
-  config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h windmc.h winduni.h mcparse.h
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h windmc.h winduni.h $(INCDIR)/safe-ctype.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
