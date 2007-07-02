@@ -1,3 +1,10 @@
+2007-07-02  Markus Deuling  <deuling@de.ibm.com>
+
+	* breakpoint.c (insert_bp_location): Remove dead code
+	(DISABLE_UNSETTABLE_BREAK).
+	(disable_breakpoints_in_shlibs)
+	(disable_breakpoints_in_unloaded_shlib): Likewise (comment).
+
 2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* breakpoint.c (reattach_breakpoints): Do not use remove_breakpoint.

@@ -963,13 +963,7 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
       if (val)
 	{
 	  /* Can't set the breakpoint.  */
-	  if (
-#if defined (DISABLE_UNSETTABLE_BREAK)
-	      DISABLE_UNSETTABLE_BREAK (bpt->address)
-#else
-	      solib_address (bpt->address)
-#endif
-	      )
+	  if (solib_address (bpt->address))
 	    {
 	      /* See also: disable_breakpoints_in_shlibs. */
 	      val = 0;
@@ -4484,7 +4478,6 @@ disable_breakpoints_in_shlibs (int silent)
   struct breakpoint *b;
   int disabled_shlib_breaks = 0;
 
-  /* See also: insert_breakpoints, under DISABLE_UNSETTABLE_BREAK. */
   ALL_BREAKPOINTS (b)
   {
     if (((b->type == bp_breakpoint) || (b->type == bp_hardware_breakpoint))
@@ -4520,7 +4513,6 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
   struct breakpoint *b;
   int disabled_shlib_breaks = 0;
 
-  /* See also: insert_breakpoints, under DISABLE_UNSETTABLE_BREAK.  */
   ALL_BREAKPOINTS (b)
   {
     if ((b->loc->loc_type == bp_loc_hardware_breakpoint
