@@ -4568,7 +4568,7 @@ ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
 		case 'R': /* Remove section at link time */
 		  flags |= SEC_NEVER_LOAD;
 		  break;
-
+#if IFLICT_BRAIN_DAMAGE
 		  /* Section Protection */
 		case 'r': /* section is readable */
 		  flags |= IMAGE_SCN_MEM_READ;
@@ -4612,7 +4612,7 @@ ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
 		  flags |= IMAGE_SCN_ALIGN_64BYTES;
 		  align = 6;
 		  break;
-
+#endif
 		default:
 		  as_bad (_("unknown section attribute '%c'"),
 			  *input_line_pointer);
@@ -4638,7 +4638,6 @@ ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
     }
 
   bfd_set_section_alignment (stdoutput, sec, align);
-
 }
 
 static void

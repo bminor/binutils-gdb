@@ -1,3 +1,8 @@
+2007-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_pe_section): Comment out code assigning
+	coff section flag values to bfd section flag.
+
 2007-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aclocal.m4: Regenerated.
