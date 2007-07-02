@@ -316,9 +316,15 @@ solib_map_sections (void *arg)
          object's file by the base address to which the object was actually
          mapped. */
       ops->relocate_section_addresses (so, p);
-      if (strcmp (p->the_bfd_section->name, ".text") == 0)
+
+      /* If the target didn't provide information about the address
+	 range of the shared object, assume we want the location of
+	 the .text section.  */
+      if (so->addr_low == 0 && so->addr_high == 0
+	  && strcmp (p->the_bfd_section->name, ".text") == 0)
 	{
-	  so->textsection = p;
+	  so->addr_low = p->addr;
+	  so->addr_high = p->endaddr;
 	}
     }
 
@@ -742,15 +748,15 @@ info_sharedlibrary_command (char *ignore, int from_tty)
 	    }
 
 	  printf_unfiltered ("%-*s", addr_width,
-			     so->textsection != NULL 
+			     so->addr_high != 0
 			       ? hex_string_custom (
-			           (LONGEST) so->textsection->addr,
+			           (LONGEST) so->addr_low,
 	                           addr_width - 4)
 			       : "");
 	  printf_unfiltered ("%-*s", addr_width,
-			     so->textsection != NULL 
+			     so->addr_high != 0
 			       ? hex_string_custom (
-			           (LONGEST) so->textsection->endaddr,
+			           (LONGEST) so->addr_high,
 	                           addr_width - 4)
 			       : "");
 	  printf_unfiltered ("%-12s", so->symbols_loaded ? "Yes" : "No");

@@ -403,6 +403,7 @@ RUNTESTFLAGS=
 
 # XML files to build in to GDB.
 XMLFILES = $(srcdir)/features/gdb-target.dtd $(srcdir)/features/xinclude.dtd \
+	$(srcdir)/features/library-list.dtd \
 	$(TDEP_XML)
 
 # This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
@@ -1471,6 +1472,7 @@ ALLDEPFILES = \
 	mips64obsd-nat.c mips64obsd-tdep.c \
 	nbsd-nat.c nbsd-tdep.c obsd-tdep.c \
 	solib-osf.c \
+	solib-target.c \
 	somread.c solib-som.c \
 	posix-hdep.c \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c \
@@ -2596,6 +2598,9 @@ solib-svr4.o: solib-svr4.c $(defs_h) $(elf_external_h) $(elf_common_h) \
 	$(gdbcore_h) $(target_h) $(inferior_h) $(gdb_assert_h) \
 	$(solist_h) $(solib_h) $(solib_svr4_h) $(bfd_target_h) $(elf_bfd_h) \
 	$(exec_h)
+solib-target.o: solib-target.c $(defs_h) $(objfiles_h) $(solist_h) \
+	$(symtab_h) $(symfile_h) $(target_h) $(vec_h) $(xml_support_h) \
+	$(gdb_string_h)
 sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(inferior_h) $(gdb_stat_h) $(gdbcmd_h) $(gdbcore_h) $(regcache_h) \
 	$(solib_h) $(symfile_h) $(observer_h) $(gdb_string_h) $(gregset_h)

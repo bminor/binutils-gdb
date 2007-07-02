@@ -64,7 +64,11 @@ struct so_list
     struct objfile *objfile;	/* objfile for loaded lib */
     struct section_table *sections;
     struct section_table *sections_end;
-    struct section_table *textsection;
+
+    /* Record the range of addresses belonging to this shared library.
+       There may not be just one (e.g. if two segments are relocated
+       differently); but this is only used for "info sharedlibrary".  */
+    CORE_ADDR addr_low, addr_high;
   };
 
 struct target_so_ops

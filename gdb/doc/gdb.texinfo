@@ -12859,58 +12859,80 @@ If you do, that may be a bug in your remote debugging stub, or a bug
 in @value{GDBN}.  You may want to report the problem to the
 @value{GDBN} developers.
 
-The available settings are:
+For each packet @var{name}, the command to enable or disable the
+packet is @code{set remote @var{name}-packet}.  The available settings
+are:
 
-@multitable @columnfractions 0.3 0.2 0.35
+@multitable @columnfractions 0.28 0.32 0.25
 @item Command Name
 @tab Remote Packet
 @tab Related Features
 
-@item @code{fetch-register-packet}
+@item @code{fetch-register}
 @tab @code{p}
 @tab @code{info registers}
 
-@item @code{set-register-packet}
+@item @code{set-register}
 @tab @code{P}
 @tab @code{set}
 
-@item @code{binary-download-packet}
+@item @code{binary-download}
 @tab @code{X}
 @tab @code{load}, @code{set}
 
-@item @code{read-aux-vector-packet}
+@item @code{read-aux-vector}
 @tab @code{qXfer:auxv:read}
 @tab @code{info auxv}
 
-@item @code{symbol-lookup-packet}
+@item @code{symbol-lookup}
 @tab @code{qSymbol}
 @tab Detecting multiple threads
 
-@item @code{verbose-resume-packet}
+@item @code{verbose-resume}
 @tab @code{vCont}
 @tab Stepping or resuming multiple threads
 
-@item @code{software-breakpoint-packet}
+@item @code{software-breakpoint}
 @tab @code{Z0}
 @tab @code{break}
 
-@item @code{hardware-breakpoint-packet}
+@item @code{hardware-breakpoint}
 @tab @code{Z1}
 @tab @code{hbreak}
 
-@item @code{write-watchpoint-packet}
+@item @code{write-watchpoint}
 @tab @code{Z2}
 @tab @code{watch}
 
-@item @code{read-watchpoint-packet}
+@item @code{read-watchpoint}
 @tab @code{Z3}
 @tab @code{rwatch}
 
-@item @code{access-watchpoint-packet}
+@item @code{access-watchpoint}
 @tab @code{Z4}
 @tab @code{awatch}
 
-@item @code{get-thread-local-storage-address-packet}
+@item @code{target-features}
+@tab @code{qXfer:features:read}
+@tab @code{set architecture}
+
+@item @code{library-info}
+@tab @code{qXfer:libraries:read}
+@tab @code{info sharedlibrary}
+
+@item @code{memory-map}
+@tab @code{qXfer:memory-map:read}
+@tab @code{info mem}
+
+@item @code{read-spu-object}
+@tab @code{qXfer:spu:read}
+@tab @code{info spu}
+
+@item @code{write-spu-object}
+@tab @code{qXfer:spu:write}
+@tab @code{info spu}
+
+@item @code{get-thread-local-@*storage-address}
 @tab @code{qGetTLSAddr}
 @tab Displaying @code{__thread} variables
 
@@ -12918,7 +12940,7 @@ The available settings are:
 @tab @code{qSupported}
 @tab Remote communications parameters
 
-@item @code{pass-signals-packet}
+@item @code{pass-signals}
 @tab @code{QPassSignals}
 @tab @code{handle @var{signal}}
 
@@ -22506,6 +22528,7 @@ Show the current setting of the target wait timeout.
 * Interrupts::
 * Examples::
 * File-I/O Remote Protocol Extension::
+* Library List Format::
 * Memory Map Format::
 @end menu
 
@@ -23223,24 +23246,45 @@ number).  This is equivalent to an @samp{S} response, except that the
 and other information directly in the stop reply packet, reducing
 round-trip latency.  Single-step and breakpoint traps are reported
 this way.  Each @samp{@var{n}:@var{r}} pair is interpreted as follows:
-@enumerate
+
+@itemize @bullet
 @item
 If @var{n} is a hexadecimal number, it is a register number, and the
 corresponding @var{r} gives that register's value.  @var{r} is a
 series of bytes in target byte order, with each byte given by a
 two-digit hex number.
+
 @item
 If @var{n} is @samp{thread}, then @var{r} is the thread process ID, in
 hex.
+
 @item
-If @var{n} is @samp{watch}, @samp{rwatch}, or @samp{awatch}, then the
-packet indicates a watchpoint hit, and @var{r} is the data address, in
-hex.
+If @var{n} is a recognized @dfn{stop reason}, it describes a more
+specific event that stopped the target.  The currently defined stop
+reasons are listed below.  @var{aa} should be @samp{05}, the trap
+signal.  At most one stop reason should be present.
+
 @item
 Otherwise, @value{GDBN} should ignore this @samp{@var{n}:@var{r}} pair
 and go on to the next; this allows us to extend the protocol in the
 future.
-@end enumerate
+@end itemize
+
+The currently defined stop reasons are:
+
+@table @samp
+@item watch
+@itemx rwatch
+@itemx awatch
+The packet indicates a watchpoint hit, and @var{r} is the data address, in
+hex.
+
+@cindex shared library events, remote reply
+@item library
+The packet indicates that the loaded libraries have changed.
+@value{GDBN} should use @samp{qXfer:libraries:read} to fetch a new
+list of loaded libraries.  @var{r} is ignored.
+@end table
 
 @item W @var{AA}
 The process exited, and @var{AA} is the exit status.  This is only
@@ -23626,7 +23670,7 @@ stubs which may be configured for multiple targets.
 
 These are the currently defined stub features and their properties:
 
-@multitable @columnfractions 0.25 0.2 0.2 0.2
+@multitable @columnfractions 0.35 0.2 0.12 0.2
 @c NOTE: The first row should be @headitem, but we do not yet require
 @c a new enough version of Texinfo (4.7) to use @headitem.
 @item Feature Name
@@ -23645,6 +23689,11 @@ These are the currently defined stub features and their properties:
 @tab Yes
 
 @item @samp{qXfer:features:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
+@item @samp{qXfer:libraries:read}
 @tab No
 @tab @samp{-}
 @tab Yes
@@ -23692,6 +23741,10 @@ The remote stub understands the @samp{qXfer:auxv:read} packet
 @item qXfer:features:read
 The remote stub understands the @samp{qXfer:features:read} packet
 (@pxref{qXfer target description read}).
+
+@item qXfer:libraries:read
+The remote stub understands the @samp{qXfer:libraries:read} packet
+(@pxref{qXfer library list read}).
 
 @item qXfer:memory-map:read
 The remote stub understands the @samp{qXfer:memory-map:read} packet
@@ -23811,6 +23864,19 @@ by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 Access the @dfn{target description}.  @xref{Target Descriptions}.  The
 annex specifies which XML document to access.  The main description is
 always loaded from the @samp{target.xml} annex.
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:libraries:read:@var{annex}:@var{offset},@var{length}
+@anchor{qXfer library list read}
+Access the target's list of loaded libraries.  @xref{Library List Format}.
+The annex part of the generic @samp{qXfer} packet must be empty
+(@pxref{qXfer read}).
+
+Targets which maintain a list of libraries in the program's memory do
+not need to implement this packet; it is designed for platforms where
+the operating system manages the list of loaded libraries.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
@@ -25329,6 +25395,51 @@ host is called:
 <- @code{Fread,3,1234,6}
 -> @code{X1234,6:XXXXXX}
 <- @code{T02}
+@end smallexample
+
+@node Library List Format
+@section Library List Format
+@cindex library list format, remote protocol
+
+On some platforms, a dynamic loader (e.g.@: @file{ld.so}) runs in the
+same process as your application to manage libraries.  In this case,
+@value{GDBN} can use the loader's symbol table and normal memory
+operations to maintain a list of shared libraries.  On other
+platforms, the operating system manages loaded libraries.
+@value{GDBN} can not retrieve the list of currently loaded libraries
+through memory operations, so it uses the @samp{qXfer:libraries:read}
+packet (@pxref{qXfer library list read}) instead.  The remote stub
+queries the target's operating system and reports which libraries
+are loaded.
+
+The @samp{qXfer:libraries:read} packet returns an XML document which
+lists loaded libraries and their offsets.  Each library has an
+associated name and one or more segment base addresses, which report
+where the library was loaded in memory.  The segment bases are start
+addresses, not relocation offsets; they do not depend on the library's
+link-time base addresses.
+
+A simple memory map, with one loaded library relocated by a single
+offset, looks like this:
+
+@smallexample
+<library-list>
+  <library name="/lib/libc.so.6">
+    <segment address="0x10000000"/>
+  </library>
+</library-list>
+@end smallexample
+
+The format of a library list is described by this DTD:
+
+@smallexample
+<!-- library-list: Root element with versioning -->
+<!ELEMENT library-list  (library)*>
+<!ATTLIST library-list  version CDATA   #FIXED  "1.0">
+<!ELEMENT library       (segment)*>
+<!ATTLIST library       name    CDATA   #REQUIRED>
+<!ELEMENT segment       EMPTY>
+<!ATTLIST segment       address CDATA   #REQUIRED>
 @end smallexample
 
 @node Memory Map Format

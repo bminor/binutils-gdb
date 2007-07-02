@@ -1,5 +1,30 @@
 2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (XMLFILES): Add library-list.dtd.
+	(ALLDEPFILES): Add solib-target.o.
+	(solib-target.o): New rule.
+	* remote.c (PACKET_qXfer_libraries): New constant.
+	(remote_protocol_features): Add qXfer:libraries:read.
+	(remote_wait): Recognize library stop replies.
+	(remote_async_wait): Likewise.  Fix typo.
+	(remote_xfer_partial): Handle TARGET_OBJECT_LIBRARIES.
+	(init_remote_async_ops): Fix typo.
+	(_initialize_remote): Register "set remote library-info-packet".
+	* solib-som.c (som_current_sos): Set addr_low and addr_high.
+	* solib-target.c: New file.
+	* solib.c (solib_map_sections): Use addr_low and addr_high instead
+	of textsection.
+	(info_sharedlibrary_command): Likewise.
+	(solib_add_library, solib_remove_library): New.
+	* solist.h (struct so_list): Replace textsection with addr_low and
+	addr_high.
+	* target.h (enum target_object): Add TARGET_OBJECT_LIBRARIES.
+	* NEWS: Describe new qXfer:libraries:read and shared library
+	event support.
+	* features/library-list.dtd: New.
+
+2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* infrun.c (inferior_ignoring_startup_exec_events): Delete.
 	(start_remote): Use STOP_QUIETLY_REMOTE.
 	(handle_inferior_event): Do not condition TARGET_WAITKIND_LOADED

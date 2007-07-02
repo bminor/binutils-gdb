@@ -44,6 +44,12 @@ segment base addresses (rather than offsets) are available.
 * The /i format now outputs any trailing branch delay slot instructions 
 immediately following the last instruction within the count specified.
 
+* The GDB remote protocol "T" stop reply packet now supports a
+"library" response.  Combined with the new "qXfer:libraries:read"
+packet, this response allows GDB to debug shared libraries on targets
+where the operating system manages the list of loaded libraries (e.g.
+Windows and SymbianOS).
+
 * New commands
 
 set remoteflow
@@ -116,6 +122,12 @@ qXfer:spu:read:
 qXfer:spu:write:
   Read or write contents of an spufs file on the target system.  These
   packets are available only on the Cell/B.E. SPU architecture.
+
+qXfer:libraries:read:
+  Report the loaded shared libraries.  Combined with new "T" packet
+  response, this packet allows GDB to debug shared libraries on
+  targets where the operating system manages the list of loaded
+  libraries (e.g. Windows and SymbianOS).
 
 * Removed targets
 

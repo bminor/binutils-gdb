@@ -212,7 +212,9 @@ enum target_object
   TARGET_OBJECT_FLASH,
   /* Available target-specific features, e.g. registers and coprocessors.
      See "target-descriptions.c".  ANNEX should never be empty.  */
-  TARGET_OBJECT_AVAILABLE_FEATURES
+  TARGET_OBJECT_AVAILABLE_FEATURES,
+  /* Currently loaded libraries, in XML format.  */
+  TARGET_OBJECT_LIBRARIES
   /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC, ... */
 };
 

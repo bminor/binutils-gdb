@@ -905,6 +905,7 @@ enum {
   PACKET_Z4,
   PACKET_qXfer_auxv,
   PACKET_qXfer_features,
+  PACKET_qXfer_libraries,
   PACKET_qXfer_memory_map,
   PACKET_qXfer_spu_read,
   PACKET_qXfer_spu_write,
@@ -2376,6 +2377,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_auxv },
   { "qXfer:features:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_features },
+  { "qXfer:libraries:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_libraries },
   { "qXfer:memory-map:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_memory_map },
   { "qXfer:spu:read", PACKET_DISABLE, remote_supported_packet,
@@ -3181,6 +3184,7 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
   struct remote_arch_state *rsa = get_remote_arch_state ();
   ULONGEST thread_num = -1;
   ULONGEST addr;
+  int solibs_changed = 0;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
@@ -3266,6 +3270,16 @@ Packet: '%s'\n"),
 			p = unpack_varlen_hex (++p1, &addr);
 			remote_watch_data_address = (CORE_ADDR)addr;
 		      }
+		    else if (strncmp (p, "library", p1 - p) == 0)
+		      {
+			p1++;
+			p_temp = p1;
+			while (*p_temp && *p_temp != ';')
+			  p_temp++;
+
+			solibs_changed = 1;
+			p = p_temp;
+		      }
 		    else
  		      {
  			/* Silently skip unknown optional info.  */
@@ -3307,9 +3321,14 @@ Packet: '%s'\n"),
 	  }
 	  /* fall through */
 	case 'S':		/* Old style status, just signal only.  */
-	  status->kind = TARGET_WAITKIND_STOPPED;
-	  status->value.sig = (enum target_signal)
-	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
+	  if (solibs_changed)
+	    status->kind = TARGET_WAITKIND_LOADED;
+	  else
+	    {
+	      status->kind = TARGET_WAITKIND_STOPPED;
+	      status->value.sig = (enum target_signal)
+		(((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
+	    }
 
 	  if (buf[3] == 'p')
 	    {
@@ -3372,6 +3391,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
   struct remote_arch_state *rsa = get_remote_arch_state ();
   ULONGEST thread_num = -1;
   ULONGEST addr;
+  int solibs_changed = 0;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
@@ -3433,7 +3453,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		/* If this packet is an awatch packet, don't parse the 'a'
 		   as a register number.  */
 
-		if (!strncmp (p, "awatch", strlen ("awatch")) != 0)
+		if (strncmp (p, "awatch", strlen("awatch")) != 0)
 		  {
 		    /* Read the register number.  */
 		    pnum = strtol (p, &p_temp, 16);
@@ -3462,6 +3482,16 @@ Packet: '%s'\n"),
 			remote_stopped_by_watchpoint_p = 1;
 			p = unpack_varlen_hex (++p1, &addr);
 			remote_watch_data_address = (CORE_ADDR)addr;
+		      }
+		    else if (strncmp (p, "library", p1 - p) == 0)
+		      {
+			p1++;
+			p_temp = p1;
+			while (*p_temp && *p_temp != ';')
+			  p_temp++;
+
+			solibs_changed = 1;
+			p = p_temp;
 		      }
 		    else
  		      {
@@ -3504,9 +3534,14 @@ Packet: '%s'\n"),
 	  }
 	  /* fall through */
 	case 'S':		/* Old style status, just signal only.  */
-	  status->kind = TARGET_WAITKIND_STOPPED;
-	  status->value.sig = (enum target_signal)
-	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
+	  if (solibs_changed)
+	    status->kind = TARGET_WAITKIND_LOADED;
+	  else
+	    {
+	      status->kind = TARGET_WAITKIND_STOPPED;
+	      status->value.sig = (enum target_signal)
+		(((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
+	    }
 
 	  if (buf[3] == 'p')
 	    {
@@ -5799,6 +5834,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 	(ops, "features", annex, readbuf, offset, len,
 	 &remote_protocol_packets[PACKET_qXfer_features]);
 
+    case TARGET_OBJECT_LIBRARIES:
+      return remote_read_qxfer
+	(ops, "libraries", annex, readbuf, offset, len,
+	 &remote_protocol_packets[PACKET_qXfer_libraries]);
+
     case TARGET_OBJECT_MEMORY_MAP:
       gdb_assert (annex == NULL);
       return remote_read_qxfer (ops, "memory-map", annex, readbuf, offset, len,
@@ -6416,7 +6456,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_memory_map = remote_memory_map;
   remote_async_ops.to_flash_erase = remote_flash_erase;
   remote_async_ops.to_flash_done = remote_flash_done;
-  remote_ops.to_read_description = remote_read_description;
+  remote_async_ops.to_read_description = remote_read_description;
 }
 
 /* Set up the async extended remote vector by making a copy of the standard
@@ -6655,6 +6695,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_features],
 			 "qXfer:features:read", "target-features", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_libraries],
+			 "qXfer:libraries:read", "library-info", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_memory_map],
 			 "qXfer:memory-map:read", "memory-map", 0);

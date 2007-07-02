@@ -1,3 +1,13 @@
+2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Remote Configuration): Document library-info-packet.
+	Add other missing entries.  Adjust the table size to fit.
+	(Stop Reply Packets): Use @itemize instead of @enumerate.  Document
+	stop reasons including the new "library" event.
+	(General Query Packets): Adjust table widths for qSupported.  Mention
+	qXfer:libraries:read reply to qSupported and document the new packet.
+	(Library List Format): New section.
+
 2007-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Attach): Fixed GDB exit inferior detachment.
