@@ -270,7 +270,7 @@ base_name (const char *path)
   const char *file = strrchr (path, '/');
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
   {
-    char *bslash = strrchr (path, '\\');
+    char *bslash = strrchr (path, '\\\\');
 
     if (file == NULL || (bslash != NULL && bslash > file))
       file = bslash;

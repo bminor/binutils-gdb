@@ -1,3 +1,7 @@
+2007-07-03  Matthias Klose  <doko@ubuntu.com>
+
+	* emultempl/spuelf.em (base_name): Correct backslash quoting.
+
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
