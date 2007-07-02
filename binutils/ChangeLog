@@ -1,5 +1,10 @@
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 4716
+	* objcopy.c (filter_symbols): Correct relocatable file test.
+
+2007-07-02  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* aclocal.m4: Regenerate.
