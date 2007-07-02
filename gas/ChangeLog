@@ -1,3 +1,11 @@
+2007-07-02  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-mips.c (s_dtprelword, s_dtpreldword,
+	s_dtprel_internal): New.
+	(mips_pseudo_table): Add .dtprelword and .dtpreldword.
+	(md_apply_fix): Handle BFD_RELOC_MIPS_TLS_DTPREL32 and
+	BFD_RELOC_MIPS_TLS_DTPREL64.
+
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

@@ -4355,6 +4355,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       break;
 
     case R_MIPS_TLS_DTPREL_LO16:
+    case R_MIPS_TLS_DTPREL32:
+    case R_MIPS_TLS_DTPREL64:
       value = (symbol + addend - dtprel_base (info)) & howto->dst_mask;
       break;
 

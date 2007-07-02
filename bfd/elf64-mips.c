@@ -1327,7 +1327,20 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
   EMPTY_HOWTO (R_MIPS_TLS_DTPMOD32),
   EMPTY_HOWTO (R_MIPS_TLS_DTPREL32),
   EMPTY_HOWTO (R_MIPS_TLS_DTPMOD64),
-  EMPTY_HOWTO (R_MIPS_TLS_DTPREL64),
+
+  HOWTO (R_MIPS_TLS_DTPREL64,	/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS_TLS_DTPREL64",	/* name */
+	 TRUE,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* TLS general dynamic variable reference.  */
   HOWTO (R_MIPS_TLS_GD,		/* type */

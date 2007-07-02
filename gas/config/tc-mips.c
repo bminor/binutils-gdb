@@ -1024,6 +1024,8 @@ static void s_cpsetup (int);
 static void s_cplocal (int);
 static void s_cprestore (int);
 static void s_cpreturn (int);
+static void s_dtprelword (int);
+static void s_dtpreldword (int);
 static void s_gpvalue (int);
 static void s_gpword (int);
 static void s_gpdword (int);
@@ -1097,6 +1099,8 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"cplocal", s_cplocal, 0},
   {"cprestore", s_cprestore, 0},
   {"cpreturn", s_cpreturn, 0},
+  {"dtprelword", s_dtprelword, 0},
+  {"dtpreldword", s_dtpreldword, 0},
   {"gpvalue", s_gpvalue, 0},
   {"gpword", s_gpword, 0},
   {"gpdword", s_gpdword, 0},
@@ -11812,7 +11816,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  || fixP->fx_r_type == BFD_RELOC_CTOR
 	  || fixP->fx_r_type == BFD_RELOC_MIPS_SUB
 	  || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-	  || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY);
+	  || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+	  || fixP->fx_r_type == BFD_RELOC_MIPS_TLS_DTPREL64);
 
   buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
 
@@ -11835,6 +11840,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     {
     case BFD_RELOC_MIPS_TLS_GD:
     case BFD_RELOC_MIPS_TLS_LDM:
+    case BFD_RELOC_MIPS_TLS_DTPREL32:
+    case BFD_RELOC_MIPS_TLS_DTPREL64:
     case BFD_RELOC_MIPS_TLS_DTPREL_HI16:
     case BFD_RELOC_MIPS_TLS_DTPREL_LO16:
     case BFD_RELOC_MIPS_TLS_GOTTPREL:
@@ -12916,6 +12923,52 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
   macro_end ();
 
   demand_empty_rest_of_line ();
+}
+
+/* Handle the .dtprelword and .dtpreldword pseudo-ops.  They generate
+   a 32-bit or 64-bit DTP-relative relocation (BYTES says which) for
+   use in DWARF debug information.  */
+
+static void
+s_dtprel_internal (size_t bytes)
+{
+  expressionS ex;
+  char *p;
+
+  expression (&ex);
+
+  if (ex.X_op != O_symbol)
+    {
+      as_bad (_("Unsupported use of %s"), (bytes == 8
+					   ? ".dtpreldword"
+					   : ".dtprelword"));
+      ignore_rest_of_line ();
+    }
+
+  p = frag_more (bytes);
+  md_number_to_chars (p, 0, bytes);
+  fix_new_exp (frag_now, p - frag_now->fr_literal, bytes, &ex, FALSE,
+	       (bytes == 8
+		? BFD_RELOC_MIPS_TLS_DTPREL64
+		: BFD_RELOC_MIPS_TLS_DTPREL32));
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle .dtprelword.  */
+
+static void
+s_dtprelword (int ignore ATTRIBUTE_UNUSED)
+{
+  s_dtprel_internal (4);
+}
+
+/* Handle .dtpreldword.  */
+
+static void
+s_dtpreldword (int ignore ATTRIBUTE_UNUSED)
+{
+  s_dtprel_internal (8);
 }
 
 /* Handle the .gpvalue pseudo-op.  This is used when generating NewABI PIC
