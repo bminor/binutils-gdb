@@ -1,3 +1,7 @@
+2007-07-02  Michael Snyder  <msnyder@access-company.com>
+
+	* p-exp.y (yylex): Memory leak, 'uptokstart' must be freed (Coverity).
+
 2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (XMLFILES): Add library-list.dtd.

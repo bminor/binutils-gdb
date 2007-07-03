@@ -1342,6 +1342,7 @@ yylex ()
      removed from the input stream.  */
   if (namelen == 2 && uptokstart[0] == 'I' && uptokstart[1] == 'F')
     {
+      free (uptokstart);
       return 0;
     }
 
@@ -1354,18 +1355,31 @@ yylex ()
     {
     case 6:
       if (DEPRECATED_STREQ (uptokstart, "OBJECT"))
-	return CLASS;
+	{
+	  free (uptokstart);
+	  return CLASS;
+	}
       if (DEPRECATED_STREQ (uptokstart, "RECORD"))
-	return STRUCT;
+	{
+	  free (uptokstart);
+	  return STRUCT;
+	}
       if (DEPRECATED_STREQ (uptokstart, "SIZEOF"))
-	return SIZEOF;
+	{
+	  free (uptokstart);
+	  return SIZEOF;
+	}
       break;
     case 5:
       if (DEPRECATED_STREQ (uptokstart, "CLASS"))
-	return CLASS;
+	{
+	  free (uptokstart);
+	  return CLASS;
+	}
       if (DEPRECATED_STREQ (uptokstart, "FALSE"))
 	{
           yylval.lval = 0;
+	  free (uptokstart);
           return FALSEKEYWORD;
         }
       break;
@@ -1373,6 +1387,7 @@ yylex ()
       if (DEPRECATED_STREQ (uptokstart, "TRUE"))
 	{
           yylval.lval = 1;
+	  free (uptokstart);
   	  return TRUEKEYWORD;
         }
       if (DEPRECATED_STREQ (uptokstart, "SELF"))
@@ -1384,7 +1399,10 @@ yylex ()
 	  if (lookup_symbol (this_name, expression_context_block,
 			     VAR_DOMAIN, (int *) NULL,
 			     (struct symtab **) NULL))
-	    return THIS;
+	    {
+	      free (uptokstart);
+	      return THIS;
+	    }
 	}
       break;
     default:
@@ -1401,6 +1419,7 @@ yylex ()
         so in expression to enter hexadecimal values
         we still need to use C syntax with 0xff  */
       write_dollar_variable (yylval.sval);
+      free (uptokstart);
       return VARIABLE;
     }
 
@@ -1493,6 +1512,7 @@ yylex ()
 	strncpy (tempbuf, tokstart, namelen); tempbuf [namelen] = 0;
 	yylval.sval.ptr = tempbuf;
 	yylval.sval.length = namelen; 
+	free (uptokstart);
 	return FIELDNAME;
       } 
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
@@ -1503,6 +1523,7 @@ yylex ()
       {
 	yylval.ssym.sym = sym;
 	yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+	free (uptokstart);
 	return BLOCKNAME;
       }
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
@@ -1593,13 +1614,17 @@ yylex ()
 #else /* not 0 */
 	  yylval.tsym.type = SYMBOL_TYPE (sym);
 #endif /* not 0 */
+	  free (uptokstart);
 	  return TYPENAME;
         }
     yylval.tsym.type
       = language_lookup_primitive_type_by_name (current_language,
 						current_gdbarch, tmp);
     if (yylval.tsym.type != NULL)
-      return TYPENAME;
+      {
+	free (uptokstart);
+	return TYPENAME;
+      }
 
     /* Input names that aren't symbols but ARE valid hex numbers,
        when the input radix permits them, can be names or numbers
@@ -1614,6 +1639,7 @@ yylex ()
 	  {
 	    yylval.ssym.sym = sym;
 	    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+	    free (uptokstart);
 	    return NAME_OR_INT;
 	  }
       }
