@@ -1,50 +1,24 @@
 /* This file is tc-m68851.h
 
-   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 2000
+   Copyright 1987, 1988, 1989, 1990, 1991, 1992, 2000, 2007
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
+   the Free Software Foundation; either version 3, or (at your option)
    any later version.
 
-   GAS is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GAS is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
-
-/*
- * pmmu.h
- */
-
-/* I suppose we have to copyright this file.  Someone on the net sent it
-   to us as part of the changes for the m68851 Memory Management Unit */
-
-/* Copyright (C) 1987 Free Software Foundation, Inc.
-
-   This file is part of Gas, the GNU Assembler.
-
-   The GNU assembler is distributed in the hope that it will be
-   useful, but WITHOUT ANY WARRANTY.  No author or distributor
-   accepts responsibility to anyone for the consequences of using it
-   or for whether it serves any particular purpose or works at all,
-   unless he says so in writing.  Refer to the GNU Assembler General
-   Public License for full details.
-
-   Everyone is granted permission to copy, modify and redistribute
-   the GNU Assembler, but only under the conditions described in the
-   GNU Assembler General Public License.  A copy of this license is
-   supposed to have been given to you along with the GNU Assembler
-   so you can know your rights and responsibilities.  It should be
-   in a file named COPYING.  Among other things, the copyright
-   notice and this notice must be preserved on all copies.  */
 
 #ifdef m68851
 

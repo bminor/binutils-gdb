@@ -1,3 +1,15 @@
+2007-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* lib/gas-defs.exp: Update copyright notice to refer to GPLv3.
+	* gas/all/itbl-test.c, gas/all/test-example.c, gas/all/test-gen.c,
+	gas/arm/maverick.c, gas/cris/cris.exp, gas/hppa/basic/basic.exp,
+	gas/hppa/parse/parse.exp, gas/hppa/reloc/reloc.exp,
+	gas/hppa/unsorted/unsorted.exp, gas/mmix/mmix-err.exp,
+	gas/mmix/mmix-list.exp, gas/mmix/mmix.exp, gas/mn10200/basic.exp,
+	gas/mn10300/am33-2.c, gas/mn10300/basic.exp, gas/pdp11/opcode.s,
+	gas/ppc/aix.exp, gas/sh/arch/arch.exp, gas/sh/sh64/sh64.exp,
+	gas/sh/basic.exp, gas/sh/err.exp, gas/v850/basic.exp: Likewise.
+
 2007-07-03  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/m68k/mcf-coproc.d: New.

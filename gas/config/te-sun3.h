@@ -1,12 +1,12 @@
 /* te-sun3.h -- Sun-3 target environment declarations.
-   Copyright 1987, 1990, 1991, 1992, 2000, 2003
+   Copyright 1987, 1990, 1991, 1992, 2000, 2003, 2007
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
+   the Free Software Foundation; either version 3, or (at your option)
    any later version.
 
    GAS is distributed in the hope that it will be useful,

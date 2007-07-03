@@ -1,17 +1,17 @@
 /* bit_fix.h
-   Copyright 1987, 1992, 2000, 2001, 2003 Free Software Foundation, Inc.
+   Copyright 1987, 1992, 2000, 2001, 2003, 2007 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
+   the Free Software Foundation; either version 3, or (at your option)
    any later version.
 
-   GAS is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GAS is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
@@ -27,8 +27,7 @@
    ns32k port.
    The acbi, addqi, movqi, cmpqi instruction requires an assembler that
    can handle bitfields.  Ie. handle an expression, evaluate it and insert
-   the result in some bitfield.  (eg: 5 bits in a short field of an opcode)
-   */
+   the result in some bitfield.  (eg: 5 bits in a short field of an opcode).  */
 
 #ifndef __bit_fix_h__
 #define __bit_fix_h__

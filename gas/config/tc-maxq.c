@@ -1,6 +1,6 @@
 /* tc-maxq.c -- assembler code for a MAXQ chip.
 
-   Copyright 2004, 2005, 2006 Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
    Contributed by HCL Technologies Pvt. Ltd.
 
@@ -11,7 +11,7 @@
 
    GAS is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
-   Foundation; either version 2, or (at your option) any later version.
+   Foundation; either version 3, or (at your option) any later version.
 
    GAS is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS

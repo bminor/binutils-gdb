@@ -1,4 +1,6 @@
 -*- text -*-
+* The GAS sources are now released under the GPLv3.
+
 * Support for the National Semiconductor CR16 target has been added.
 
 * Added gas .reloc pseudo.  This is a low-level interface for creating
@@ -7,6 +9,8 @@
 * Add support for x86_64 PE+ target.
 
 * Add support for Score target.
+
+Changes in 2.17:
 
 * Support for the Infineon XC16X has been added by KPIT Cummins Infosystems.
 
