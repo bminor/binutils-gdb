@@ -550,6 +550,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 		memcpy (to, from, len);
 		to += len;
 		from += len;
+		if (to >= toend)
+		  goto tofull;
 	      }
 	  }
 

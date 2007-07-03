@@ -1,3 +1,9 @@
+2007-07-03  Mikkel Lauritsen  <renard@nospam.dk>
+
+	PR 4722
+	* app.c (do_scrub_chars <state 5>): Check for output buffer full
+	after memcpy.
+
 2007-07-02  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-mips.c (s_dtprelword, s_dtpreldword,
