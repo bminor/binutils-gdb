@@ -2259,9 +2259,19 @@ remote_check_symbols (struct objfile *objfile)
       if (sym == NULL)
 	xsnprintf (msg, get_remote_packet_size (), "qSymbol::%s", &reply[8]);
       else
-	xsnprintf (msg, get_remote_packet_size (), "qSymbol:%s:%s",
-		   paddr_nz (SYMBOL_VALUE_ADDRESS (sym)),
-		   &reply[8]);
+	{
+	  CORE_ADDR sym_addr = SYMBOL_VALUE_ADDRESS (sym);
+
+	  /* If this is a function address, return the start of code
+	     instead of any data function descriptor.  */
+	  sym_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+							 sym_addr,
+							 &current_target);
+
+	  xsnprintf (msg, get_remote_packet_size (), "qSymbol:%s:%s",
+		     paddr_nz (sym_addr), &reply[8]);
+	}
+  
       putpkt (msg);
       getpkt (&rs->buf, &rs->buf_size, 0);
       reply = rs->buf;

@@ -222,8 +222,24 @@ find_function_addr (struct value *function, struct type **retval_type)
       if (TYPE_LENGTH (ftype) == 1)
 	funaddr = value_as_address (value_addr (function));
       else
-	/* Handle integer used as address of a function.  */
-	funaddr = (CORE_ADDR) value_as_long (function);
+	{
+	  /* Handle function descriptors lacking debug info.  */
+	  int found_descriptor = 0;
+	  if (VALUE_LVAL (function) == lval_memory)
+	    {
+	      CORE_ADDR nfunaddr;
+	      funaddr = value_as_address (value_addr (function));
+	      nfunaddr = funaddr;
+	      funaddr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+							    funaddr,
+							    &current_target);
+	      if (funaddr != nfunaddr)
+		found_descriptor = 1;
+	    }
+	  if (!found_descriptor)
+	    /* Handle integer used as address of a function.  */
+	    funaddr = (CORE_ADDR) value_as_long (function);
+	}
 
       value_type = builtin_type_int;
     }

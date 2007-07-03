@@ -1,3 +1,21 @@
+2007-07-03  Paul Gilliam  <pgilliam@us.ibm.com>
+	    Thiago Bauermann  <bauerman@br.ibm.com>
+	    Joseph S. Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_check_symbols): Use
+	gdbarch_convert_from_func_ptr_addr.
+	* infcall.c (find_function_addr): Handle function descriptors
+	without debugging information.
+	* ppc-linux-tdep.c (ppc_linux_convert_from_func_ptr_addr): Renamed
+	from ppc64_linux_convert_from_func_ptr_addr.  Handle -msecure-plt.
+	(ppc_linux_init_abi): Always set convert_from_func_ptr_addr.
+	* solib-svr4.c (solib_break_names): Remove "._dl_debug_state".
+	(bfd_lookup_symbol): Do not take a SECT_FLAGS argument.  Always
+	allow SEC_CODE and SEC_DATA.
+	(enable_break): Update calls.  Pass current_target to solib_add.
+	Use gdbarch_convert_from_func_ptr_addr.
+
 2007-07-03  Ilko Iliev  <iliev@ronetix.at>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

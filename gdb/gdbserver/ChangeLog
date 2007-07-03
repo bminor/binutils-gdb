@@ -1,3 +1,7 @@
+2007-07-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-utils.c (look_up_one_symbol): Handle 'm' packets.
+
 2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* inferiors.c (change_inferior_id): Add comment.

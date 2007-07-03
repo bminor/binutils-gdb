@@ -1109,15 +1109,34 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp)
   if (len < 0)
     return -1;
 
+  /* We ought to handle pretty much any packet at this point while we
+     wait for the qSymbol "response".  That requires re-entering the
+     main loop.  For now, this is an adequate approximation; allow
+     GDB to read from memory while it figures out the address of the
+     symbol.  */
+  while (own_buf[0] == 'm')
+    {
+      CORE_ADDR mem_addr;
+      unsigned char *mem_buf;
+      unsigned int mem_len;
+
+      decode_m_packet (&own_buf[1], &mem_addr, &mem_len);
+      mem_buf = malloc (mem_len);
+      if (read_inferior_memory (mem_addr, mem_buf, mem_len) == 0)
+	convert_int_to_ascii (mem_buf, own_buf, mem_len);
+      else
+	write_enn (own_buf);
+      free (mem_buf);
+      if (putpkt (own_buf) < 0)
+	return -1;
+      len = getpkt (own_buf);
+      if (len < 0)
+	return -1;
+    }
+  
   if (strncmp (own_buf, "qSymbol:", strlen ("qSymbol:")) != 0)
     {
-      /* Malformed response.  */
-      if (remote_debug)
-	{
-	  fprintf (stderr, "Malformed response to qSymbol, ignoring.\n");
-	  fflush (stderr);
-	}
-
+      warning ("Malformed response to qSymbol, ignoring: %s\n", own_buf);
       return -1;
     }
 

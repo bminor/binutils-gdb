@@ -84,16 +84,6 @@ static char *solib_break_names[] =
   "rtld_db_dlactivity",
   "_rtld_debug_state",
 
-  /* On the 64-bit PowerPC, the linker symbol with the same name as
-     the C function points to a function descriptor, not to the entry
-     point.  The linker symbol whose name is the C function name
-     prefixed with a '.' points to the function's entry point.  So
-     when we look through this table, we ignore symbols that point
-     into the data section (thus skipping the descriptor's symbol),
-     and eventually try this one, giving us the real entry point
-     address.  */
-  "._dl_debug_state",
-
   NULL
 };
 
@@ -263,7 +253,7 @@ static char *debug_loader_name;
 
 static int match_main (char *);
 
-static CORE_ADDR bfd_lookup_symbol (bfd *, char *, flagword);
+static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
 
 /*
 
@@ -273,24 +263,25 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, char *, flagword);
 
    SYNOPSIS
 
-   CORE_ADDR bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
+   CORE_ADDR bfd_lookup_symbol (bfd *abfd, char *symname)
 
    DESCRIPTION
 
    An expensive way to lookup the value of a single symbol for
    bfd's that are only temporary anyway.  This is used by the
    shared library support to find the address of the debugger
-   interface structures in the shared library.
+   notification routine in the shared library.
 
-   If SECT_FLAGS is non-zero, only match symbols in sections whose
-   flags include all those in SECT_FLAGS.
+   The returned symbol may be in a code or data section; functions
+   will normally be in a code section, but may be in a data section
+   if this architecture uses function descriptors.
 
    Note that 0 is specifically allowed as an error return (no
    such symbol).
  */
 
 static CORE_ADDR
-bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
+bfd_lookup_symbol (bfd *abfd, char *symname)
 {
   long storage_needed;
   asymbol *sym;
@@ -312,9 +303,9 @@ bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
 	{
 	  sym = *symbol_table++;
 	  if (strcmp (sym->name, symname) == 0
-              && (sym->section->flags & sect_flags) == sect_flags)
+              && (sym->section->flags & (SEC_CODE | SEC_DATA)) != 0)
 	    {
-	      /* Bfd symbols are section relative. */
+	      /* BFD symbols are section relative.  */
 	      symaddr = sym->value + sym->section->vma;
 	      break;
 	    }
@@ -341,9 +332,9 @@ bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
 	  sym = *symbol_table++;
 
 	  if (strcmp (sym->name, symname) == 0
-              && (sym->section->flags & sect_flags) == sect_flags)
+              && (sym->section->flags & (SEC_CODE | SEC_DATA)) != 0)
 	    {
-	      /* Bfd symbols are section relative. */
+	      /* BFD symbols are section relative.  */
 	      symaddr = sym->value + sym->section->vma;
 	      break;
 	    }
@@ -1033,7 +1024,7 @@ enable_break (void)
 
       /* On a running target, we can get the dynamic linker's base
          address from the shared library table.  */
-      solib_add (NULL, 0, NULL, auto_solib_add);
+      solib_add (NULL, 0, &current_target, auto_solib_add);
       so = master_so_list ();
       while (so)
 	{
@@ -1056,7 +1047,7 @@ enable_break (void)
 	  debug_loader_name = xstrdup (buf);
 	  debug_loader_offset_p = 1;
 	  debug_loader_offset = load_addr;
-	  solib_add (NULL, 0, NULL, auto_solib_add);
+	  solib_add (NULL, 0, &current_target, auto_solib_add);
 	}
 
       /* Record the relocated start and end address of the dynamic linker
@@ -1081,19 +1072,18 @@ enable_break (void)
       /* Now try to set a breakpoint in the dynamic linker.  */
       for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
-          /* On ABI's that use function descriptors, there are usually
-             two linker symbols associated with each C function: one
-             pointing at the actual entry point of the machine code,
-             and one pointing at the function's descriptor.  The
-             latter symbol has the same name as the C function.
-
-             What we're looking for here is the machine code entry
-             point, so we are only interested in symbols in code
-             sections.  */
-	  sym_addr = bfd_lookup_symbol (tmp_bfd, *bkpt_namep, SEC_CODE);
+	  sym_addr = bfd_lookup_symbol (tmp_bfd, *bkpt_namep);
 	  if (sym_addr != 0)
 	    break;
 	}
+
+      if (sym_addr != 0)
+	/* Convert 'sym_addr' from a function pointer to an address.
+	   Because we pass tmp_bfd_target instead of the current
+	   target, this will always produce an unrelocated value.  */
+	sym_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+						       sym_addr,
+						       tmp_bfd_target);
 
       /* We're done with both the temporary bfd and target.  Remember,
          closing the target closes the underlying bfd.  */
