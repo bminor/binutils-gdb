@@ -2810,7 +2810,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 		ind_arg_len = 0;
 
 		/* The size of the commandline argument.  */
-		ind_arg_len = strlen (h8_get_cmdline_arg (sd, i) + 1);
+		ind_arg_len = strlen (h8_get_cmdline_arg (sd, i)) + 1;
 
 		/* The total size of the command line string.  */
 		size_cmdline += ind_arg_len;
