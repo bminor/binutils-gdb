@@ -1,3 +1,10 @@
+2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* target-descriptions.c (tdesc_create_reg): Do not set reg->type
+	to NULL.
+
+	* cli/cli-script.c (build_command_line): Update NULL check.
+
 2007-07-02  Michael Snyder  <msnyder@access-company.com>
 
 	* p-exp.y (yylex): Memory leak, 'uptokstart' must be freed (Coverity).

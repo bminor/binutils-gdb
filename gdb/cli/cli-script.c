@@ -85,6 +85,7 @@ build_command_line (enum command_control_type type, char *args)
 
   if (args == NULL && (type == if_control || type == while_control))
     error (_("if/while commands require arguments."));
+  gdb_assert (args != NULL);
 
   cmd = (struct command_line *) xmalloc (sizeof (struct command_line));
   cmd->next = NULL;
@@ -95,8 +96,7 @@ build_command_line (enum command_control_type type, char *args)
     = (struct command_line **) xmalloc (sizeof (struct command_line *)
 					* cmd->body_count);
   memset (cmd->body_list, 0, sizeof (struct command_line *) * cmd->body_count);
-  if (args != NULL)
-    cmd->line = savestring (args, strlen (args));
+  cmd->line = savestring (args, strlen (args));
 
   return cmd;
 }

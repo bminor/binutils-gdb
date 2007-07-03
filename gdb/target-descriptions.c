@@ -792,7 +792,7 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
   reg->save_restore = save_restore;
   reg->group = group ? xstrdup (group) : NULL;
   reg->bitsize = bitsize;
-  reg->type = type ? xstrdup (type) : NULL;
+  reg->type = type ? xstrdup (type) : xstrdup ("<unknown>");
 
   /* If the register's type is target-defined, look it up now.  We may not
      have easy access to the containing feature when we want it later.  */
