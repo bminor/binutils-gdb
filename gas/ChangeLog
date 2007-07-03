@@ -1,3 +1,9 @@
+2007-07-03  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4713
+	* config/obj-elf.c (elf_ecoff_set_ext): Make static when OBJ_MAYBE_ELF.
+	* config/obj-elf.h (obj_ecoff_set_ext): Comment.
+
 2007-07-03  Mikkel Lauritsen  <renard@nospam.dk>
 
 	PR 4722

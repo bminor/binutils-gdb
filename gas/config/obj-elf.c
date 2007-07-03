@@ -1,6 +1,7 @@
 /* ELF object file format
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1693,6 +1694,9 @@ adjust_stab_sections (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
    this at the moment, so we do it ourselves.  We save the information
    in the symbol.  */
 
+#ifdef OBJ_MAYBE_ELF
+static
+#endif
 void
 elf_ecoff_set_ext (symbolS *sym, struct ecoff_extr *ext)
 {
