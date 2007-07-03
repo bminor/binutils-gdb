@@ -1,3 +1,8 @@
+2007-07-03  Andreas Schwab  <schwab@suse.de>
+
+	* linux-nat.c (linux_nat_info_proc_cmd): Fix parsing of columns in
+	/proc/../stat.
+
 2007-07-03  Paul Gilliam  <pgilliam@us.ibm.com>
 	    Thiago Bauermann  <bauerman@br.ibm.com>
 	    Joseph S. Myers  <joseph@codesourcery.com>

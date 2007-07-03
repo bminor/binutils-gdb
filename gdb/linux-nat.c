@@ -2926,10 +2926,11 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	{
 	  int itmp;
 	  char ctmp;
+	  long ltmp;
 
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered (_("Process: %d\n"), itmp);
-	  if (fscanf (procfile, "%s ", &buffer[0]) > 0)
+	  if (fscanf (procfile, "(%[^)]) ", &buffer[0]) > 0)
 	    printf_filtered (_("Exec file: %s\n"), buffer);
 	  if (fscanf (procfile, "%c ", &ctmp) > 0)
 	    printf_filtered (_("State: %c\n"), ctmp);
@@ -2943,71 +2944,71 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	    printf_filtered (_("TTY: %d\n"), itmp);
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered (_("TTY owner process group: %d\n"), itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("Flags: 0x%x\n"), itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("Minor faults (no memory page): %u\n"),
-			     (unsigned int) itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("Minor faults, children: %u\n"),
-			     (unsigned int) itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("Major faults (memory page faults): %u\n"),
-			     (unsigned int) itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("Major faults, children: %u\n"),
-			     (unsigned int) itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("utime: %d\n", itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("stime: %d\n", itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("utime, children: %d\n", itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("stime, children: %d\n", itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered (_("jiffies remaining in current time slice: %d\n"),
-			     itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered ("'nice' value: %d\n", itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("jiffies until next timeout: %u\n"),
-			     (unsigned int) itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("jiffies until next SIGALRM: %u\n",
-			     (unsigned int) itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered (_("start time (jiffies since system boot): %d\n"),
-			     itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("Virtual memory size: %u\n"),
-			     (unsigned int) itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("Resident set size: %u\n"), (unsigned int) itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered ("rlim: %u\n", (unsigned int) itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("Start of text: 0x%x\n"), itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("End of text: 0x%x\n"), itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)
-	    printf_filtered (_("Start of stack: 0x%x\n"), itmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("Flags: 0x%lx\n"), ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("Minor faults (no memory page): %lu\n"),
+			     (unsigned long) ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("Minor faults, children: %lu\n"),
+			     (unsigned long) ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("Major faults (memory page faults): %lu\n"),
+			     (unsigned long) ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("Major faults, children: %lu\n"),
+			     (unsigned long) ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("utime: %ld\n"), ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("stime: %ld\n"), ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("utime, children: %ld\n"), ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("stime, children: %ld\n"), ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("jiffies remaining in current time slice: %ld\n"),
+			     ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("'nice' value: %ld\n"), ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("jiffies until next timeout: %lu\n"),
+			     (unsigned long) ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("jiffies until next SIGALRM: %lu\n"),
+			     (unsigned long) ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("start time (jiffies since system boot): %ld\n"),
+			     ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("Virtual memory size: %lu\n"),
+			     (unsigned long) ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("Resident set size: %lu\n"), (unsigned long) ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("rlim: %lu\n"), (unsigned long) ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("Start of text: 0x%lx\n"), ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("End of text: 0x%lx\n"), ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)
+	    printf_filtered (_("Start of stack: 0x%lx\n"), ltmp);
 #if 0				/* Don't know how architecture-dependent the rest is...
 				   Anyway the signal bitmap info is available from "status".  */
-	  if (fscanf (procfile, "%u ", &itmp) > 0)	/* FIXME arch? */
-	    printf_filtered (_("Kernel stack pointer: 0x%x\n"), itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)	/* FIXME arch? */
-	    printf_filtered (_("Kernel instr pointer: 0x%x\n"), itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered (_("Pending signals bitmap: 0x%x\n"), itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered (_("Blocked signals bitmap: 0x%x\n"), itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered (_("Ignored signals bitmap: 0x%x\n"), itmp);
-	  if (fscanf (procfile, "%d ", &itmp) > 0)
-	    printf_filtered (_("Catched signals bitmap: 0x%x\n"), itmp);
-	  if (fscanf (procfile, "%u ", &itmp) > 0)	/* FIXME arch? */
-	    printf_filtered (_("wchan (system call): 0x%x\n"), itmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch? */
+	    printf_filtered (_("Kernel stack pointer: 0x%lx\n"), ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch? */
+	    printf_filtered (_("Kernel instr pointer: 0x%lx\n"), ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("Pending signals bitmap: 0x%lx\n"), ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("Blocked signals bitmap: 0x%lx\n"), ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("Ignored signals bitmap: 0x%lx\n"), ltmp);
+	  if (fscanf (procfile, "%ld ", &ltmp) > 0)
+	    printf_filtered (_("Catched signals bitmap: 0x%lx\n"), ltmp);
+	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch? */
+	    printf_filtered (_("wchan (system call): 0x%lx\n"), ltmp);
 #endif
 	  fclose (procfile);
 	}
