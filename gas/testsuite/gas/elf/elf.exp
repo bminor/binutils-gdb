@@ -82,7 +82,7 @@ if { ([istarget "*-*-*elf*"]
 	    # against ordinary symbols into relocations against section symbols.
 	    # This is usually revealed by the error message:
 	    #  symbol `sym' required but not present
-	    setup_xfail "h8300-*-*" "mn10300-*-*"
+	    setup_xfail "cr16-*-*" "h8300-*-*" "mn10300-*-*"
 	    run_dump_test redef
 	    run_dump_test equ-reloc
 	}

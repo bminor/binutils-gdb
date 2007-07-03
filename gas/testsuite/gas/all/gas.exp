@@ -60,6 +60,7 @@ gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
 # .equ works differently on some targets.
 # linkrelax-ing prevents most forward references from working.
 case $target_triplet in {
+    { cr16*-*-* } { }
     { crx*-*-* } { }
     { h8300*-*-* } { }
     { hppa*-*-* } { }
@@ -154,12 +155,13 @@ proc do_930509a {} {
     if !$x then { fail $testname }
 }
 
-# This test is meaningless for the PA and CRX; the difference of two symbols
-# must not be resolved by the assembler.
+# This test is meaningless for the PA and CR16/CRX: the difference of two
+# symbols cannot be resolved by the assembler.
 # C54x assembler (for compatibility) does not allow differences between
-# forward references
+# forward references.
 # C30 counts a four byte offset as a difference of one.
 if { ![istarget hppa*-*-*] &&
+     ![istarget cr16*-*-*] &&
      ![istarget  crx*-*-*] &&
      ![istarget *c30*-*-*] &&
      ![istarget *c4x*-*-*] &&
