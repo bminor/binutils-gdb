@@ -1947,7 +1947,7 @@ print_transfer_performance (struct ui_file *stream,
 			    const struct timeval *start_time,
 			    const struct timeval *end_time)
 {
-  unsigned long time_count;
+  ULONGEST time_count;
 
   /* Compute the elapsed time in milliseconds, as a tradeoff between
      accuracy and overflow.  */
@@ -1957,9 +1957,23 @@ print_transfer_performance (struct ui_file *stream,
   ui_out_text (uiout, "Transfer rate: ");
   if (time_count > 0)
     {
-      ui_out_field_fmt (uiout, "transfer-rate", "%lu",
-			1000 * (data_count * 8) / time_count);
-      ui_out_text (uiout, " bits/sec");
+      unsigned long rate = ((ULONGEST) data_count * 1000) / time_count;
+
+      if (ui_out_is_mi_like_p (uiout))
+	{
+	  ui_out_field_fmt (uiout, "transfer-rate", "%lu", rate * 8);
+	  ui_out_text (uiout, " bits/sec");
+	}
+      else if (rate < 1024)
+	{
+	  ui_out_field_fmt (uiout, "transfer-rate", "%lu", rate);
+	  ui_out_text (uiout, " bytes/sec");
+	}
+      else
+	{
+	  ui_out_field_fmt (uiout, "transfer-rate", "%lu", rate / 1024);
+	  ui_out_text (uiout, " KB/sec");
+	}
     }
   else
     {

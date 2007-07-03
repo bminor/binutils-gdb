@@ -1,3 +1,9 @@
+2007-07-03  Ilko Iliev  <iliev@ronetix.at>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* symfile.c (print_transfer_performance): Avoid integer overflow.
+	Use larger units.
+
 2007-07-03  Markus Deuling  <deuling@de.ibm.com>
 
 	* cp-namespace.c (lookup_symbol_file): Add block to
