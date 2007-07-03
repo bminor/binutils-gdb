@@ -22789,8 +22789,8 @@ Reply:
 Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
 each register and their position within the @samp{g} packet are
-determined by the @value{GDBN} internal macros
-@code{DEPRECATED_REGISTER_RAW_SIZE} and @code{REGISTER_NAME} macros.  The
+determined by the @value{GDBN} internal gdbarch functions
+@code{DEPRECATED_REGISTER_RAW_SIZE} and @code{gdbarch_register_name}.  The
 specification of several standard @samp{g} packets is specified below.
 @item E @var{NN}
 for an error.
