@@ -1,3 +1,9 @@
+2007-07-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-arm/attr-merge-2a.s, ld-arm/attr-merge-2b.s,
+	ld-arm/attr-merge-2.attr: New.
+	* ld-arm/arm-elf.exp (armelftests): Add new test.
+
 2007-07-02  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/alignof.exp: Skip on non-elf

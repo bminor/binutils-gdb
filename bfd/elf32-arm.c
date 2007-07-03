@@ -6934,6 +6934,23 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	default: /* All known attributes should be explicitly covered.   */
 	  abort ();
 	}
+
+      if (in_attr[i].type && !out_attr[i].type)
+	switch (in_attr[i].type)
+	  {
+	  case 1:
+	    if (out_attr[i].i)
+	      out_attr[i].type = 1;
+	    break;
+
+	  case 2:
+	    if (out_attr[i].s)
+	      out_attr[i].type = 2;
+	    break;
+
+	  default:
+	    abort ();
+	  }
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */

@@ -1,3 +1,8 @@
+2007-07-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Copy type from
+	input attributes if value has been copied.
+
 2007-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* COPYING: Replace with GPLv3 text.
