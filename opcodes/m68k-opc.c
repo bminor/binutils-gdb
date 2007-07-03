@@ -30,6 +30,10 @@
    be consecutive.  If they aren't, the assembler will bomb at
    runtime.  */
 
+/* Format strings consist of pairs of characters.  The first describes
+   the type of the operand and the second describes the encoding.
+   include/opcodes/m68k.h describes them in detail.  */
+
 const struct m68k_opcode m68k_opcodes[] =
 {
 {"abcd", 2,	one(0140400),	one(0170770), "DsDd", m68000up },
@@ -290,7 +294,31 @@ const struct m68k_opcode m68k_opcodes[] =
 {"cmpl", 6,	one(0006200),	one(0177700), "#lDs", mcfisa_a },
 {"cmpl", 2,	one(0130610),	one(0170770), "+s+d", m68000up },
 {"cmpl", 2,	one(0130200),	one(0170700), "*lDd", m68000up | mcfisa_a },
-
+  
+{"cp0bcbusy",2, one (0176300), one (01777770), "BW", mcfisa_a},
+{"cp1bcbusy",2, one (0177300), one (01777770), "BW", mcfisa_a},
+{"cp0nop",   4, two (0176000,0), two (01777477,0170777), "jE", mcfisa_a},
+{"cp1nop",   4, two (0177000,0), two (01777477,0170777), "jE", mcfisa_a},
+/* These all have 2 opcode words, but no fixed bits in the second
+   word.  We use a leading ' ' in the args string to indicate the
+   extra opcode word.  */
+{"cp0ldb",   6, one (0176000), one (01777700), ".pwR1jEK3", mcfisa_a},
+{"cp1ldb",   6, one (0177000), one (01777700), ".pwR1jEK3", mcfisa_a},
+{"cp0ldw",   6, one (0176100), one (01777700), ".pwR1jEK3", mcfisa_a},
+{"cp1ldw",   6, one (0177100), one (01777700), ".pwR1jEK3", mcfisa_a},
+{"cp0ldl",   6, one (0176200), one (01777700), ".pwR1jEK3", mcfisa_a},
+{"cp1ldl",   6, one (0177200), one (01777700), ".pwR1jEK3", mcfisa_a},
+{"cp0ld",    6, one (0176200), one (01777700), ".pwR1jEK3", mcfisa_a},
+{"cp1ld",    6, one (0177200), one (01777700), ".pwR1jEK3", mcfisa_a},
+{"cp0stb",   6, one (0176400), one (01777700), ".R1pwjEK3", mcfisa_a},
+{"cp1stb",   6, one (0177400), one (01777700), ".R1pwjEK3", mcfisa_a},
+{"cp0stw",   6, one (0176500), one (01777700), ".R1pwjEK3", mcfisa_a},
+{"cp1stw",   6, one (0177500), one (01777700), ".R1pwjEK3", mcfisa_a},
+{"cp0stl",   6, one (0176600), one (01777700), ".R1pwjEK3", mcfisa_a},
+{"cp1stl",   6, one (0177600), one (01777700), ".R1pwjEK3", mcfisa_a},
+{"cp0st",    6, one (0176600), one (01777700), ".R1pwjEK3", mcfisa_a},
+{"cp1st",    6, one (0177600), one (01777700), ".R1pwjEK3", mcfisa_a},
+  
 {"dbcc", 2,	one(0052310),	one(0177770), "DsBw", m68000up },
 {"dbcs", 2,	one(0052710),	one(0177770), "DsBw", m68000up },
 {"dbeq", 2,	one(0053710),	one(0177770), "DsBw", m68000up },

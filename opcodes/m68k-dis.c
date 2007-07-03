@@ -280,6 +280,11 @@ fetch_arg (unsigned char *buffer,
       val = (buffer[1] >> 6);
       break;
 
+    case 'E':
+      FETCH_DATA (info, buffer + 3);
+      val = (buffer[2] >> 1);
+      break;
+
     case 'm':
       val = (buffer[1] & 0x40 ? 0x8 : 0)
 	| ((buffer[0] >> 1) & 0x7)
@@ -310,29 +315,8 @@ fetch_arg (unsigned char *buffer,
       abort ();
     }
 
-  switch (bits)
-    {
-    case 1:
-      return val & 1;
-    case 2:
-      return val & 3;
-    case 3:
-      return val & 7;
-    case 4:
-      return val & 017;
-    case 5:
-      return val & 037;
-    case 6:
-      return val & 077;
-    case 7:
-      return val & 0177;
-    case 8:
-      return val & 0377;
-    case 12:
-      return val & 07777;
-    default:
-      abort ();
-    }
+  /* bits is never too big.  */
+  return val & ((1 << bits) - 1);
 }
 
 /* Check if an EA is valid for a particular code.  This is required
@@ -682,6 +666,16 @@ print_insn_arg (const char *d,
       /* 0 means -1.  */
       if (val == 0)
 	val = -1;
+      (*info->fprintf_func) (info->stream, "#%d", val);
+      break;
+
+    case 'j':
+      val = fetch_arg (buffer, place, 3, info);
+      (*info->fprintf_func) (info->stream, "#%d", val+1);
+      break;
+
+    case 'K':
+      val = fetch_arg (buffer, place, 9, info);
       (*info->fprintf_func) (info->stream, "#%d", val);
       break;
 
@@ -1214,6 +1208,7 @@ match_insn_m68k (bfd_vma memaddr,
   unsigned char *save_p;
   unsigned char *p;
   const char *d;
+  const char *args = best->args;
 
   struct private *priv = (struct private *) info->private_data;
   bfd_byte *buffer = priv->the_buffer;
@@ -1221,6 +1216,9 @@ match_insn_m68k (bfd_vma memaddr,
   void (* save_print_address) (bfd_vma, struct disassemble_info *)
     = info->print_address_func;
 
+  if (*args == '.')
+    args++;
+  
   /* Point at first word of argument data,
      and at descriptor for first argument.  */
   p = buffer + 2;
@@ -1229,7 +1227,7 @@ match_insn_m68k (bfd_vma memaddr,
      The only place this is stored in the opcode table is
      in the arguments--look for arguments which specify fields in the 2nd
      or 3rd words of the instruction.  */
-  for (d = best->args; *d; d += 2)
+  for (d = args; *d; d += 2)
     {
       /* I don't think it is necessary to be checking d[0] here;
 	 I suspect all this could be moved to the case statement below.  */
@@ -1276,8 +1274,8 @@ match_insn_m68k (bfd_vma memaddr,
      three words long.  */
   if (p - buffer < 6
       && (best->match & 0xffff) == 0xffff
-      && best->args[0] == '#'
-      && best->args[1] == 'w')
+      && args[0] == '#'
+      && args[1] == 'w')
     {
       /* Copy the one word argument into the usual location for a one
 	 word argument, to simplify printing it.  We can get away with
@@ -1291,15 +1289,13 @@ match_insn_m68k (bfd_vma memaddr,
 
   FETCH_DATA (info, p);
 
-  d = best->args;
-
   save_p = p;
   info->print_address_func = dummy_print_address;
   info->fprintf_func = (fprintf_ftype) dummy_printer;
 
   /* We scan the operands twice.  The first time we don't print anything,
      but look for errors.  */
-  for (; *d; d += 2)
+  for (d = args; *d; d += 2)
     {
       int eaten = print_insn_arg (d, buffer, p, memaddr + (p - buffer), info);
 
@@ -1329,7 +1325,7 @@ match_insn_m68k (bfd_vma memaddr,
   info->fprintf_func = save_printer;
   info->print_address_func = save_print_address;
 
-  d = best->args;
+  d = args;
 
   info->fprintf_func (info->stream, "%s", best->name);
 
@@ -1401,6 +1397,10 @@ m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
       const struct m68k_opcode *opc = opcodes[major_opcode][i];
       unsigned long opcode = opc->opcode;
       unsigned long match = opc->match;
+      const char *args = opc->args;
+
+      if (*args == '.')
+	args++;
 
       if (((0xff & buffer[0] & (match >> 24)) == (0xff & (opcode >> 24)))
 	  && ((0xff & buffer[1] & (match >> 16)) == (0xff & (opcode >> 16)))
@@ -1416,7 +1416,7 @@ m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
 	  /* Don't use for printout the variants of divul and divsl
 	     that have the same register number in two places.
 	     The more general variants will match instead.  */
-	  for (d = opc->args; *d; d += 2)
+	  for (d = args; *d; d += 2)
 	    if (d[1] == 'D')
 	      break;
 
@@ -1424,7 +1424,7 @@ m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
 	     point coprocessor instructions which use the same
 	     register number in two places, as above.  */
 	  if (*d == '\0')
-	    for (d = opc->args; *d; d += 2)
+	    for (d = args; *d; d += 2)
 	      if (d[1] == 't')
 		break;
 
@@ -1432,7 +1432,7 @@ m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
 	     wait for fmoveml.  */
 	  if (*d == '\0')
 	    {
-	      for (d = opc->args; *d; d += 2)
+	      for (d = args; *d; d += 2)
 		{
 		  if (d[0] == 's' && d[1] == '8')
 		    {
@@ -1446,7 +1446,7 @@ m68k_scan_mask (bfd_vma memaddr, disassemble_info *info,
 	  /* Don't match FPU insns with non-default coprocessor ID.  */
 	  if (*d == '\0')
 	    {
-	      for (d = opc->args; *d; d += 2)
+	      for (d = args; *d; d += 2)
 		{
 		  if (d[0] == 'I')
 		    {

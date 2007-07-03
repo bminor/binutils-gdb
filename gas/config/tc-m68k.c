@@ -1965,6 +1965,22 @@ m68k_ip (char *instring)
 		    losing++;
 		  break;
 
+		case 'j':
+		  if (opP->mode != IMMED)
+		    losing++;
+		  else if (opP->disp.exp.X_op != O_constant
+			   || TRUNC (opP->disp.exp.X_add_number) - 1 > 7)
+		    losing++;
+		  break;
+
+		case 'K':
+		  if (opP->mode != IMMED)
+		    losing++;
+		  else if (opP->disp.exp.X_op != O_constant
+			   || TRUNC (opP->disp.exp.X_add_number) > 511)
+		    losing++;
+		  break;
+
 		  /* JF these are out of order.  We could put them
 		     in order if we were willing to put up with
 		     bunches of #ifdef m68851s in the code.
@@ -3482,6 +3498,14 @@ m68k_ip (char *instring)
 	    tmpreg = 0;
 	  install_operand (s[1], tmpreg);
 	  break;
+	case 'j':
+	  tmpreg = get_num (&opP->disp, 10);
+	  install_operand (s[1], tmpreg - 1);
+	  break;
+	case 'K':
+	  tmpreg = get_num (&opP->disp, 65);
+	  install_operand (s[1], tmpreg);
+	  break;
 	default:
 	  abort ();
 	}
@@ -3549,6 +3573,9 @@ install_operand (int mode, int val)
       break;
     case 'd':
       the_ins.opcode[0] |= val << 9;
+      break;
+    case 'E':
+      the_ins.opcode[1] |= val << 9;
       break;
     case '1':
       the_ins.opcode[1] |= val << 12;
@@ -4362,14 +4389,28 @@ md_begin (void)
 	{
 	  ins = m68k_sorted_opcodes[i];
 
-	  /* We *could* ignore insns that don't match our
-	     arch here by just leaving them out of the hash.  */
+	  /* We must enter all insns into the table, because .arch and
+	     .cpu directives can change things.  */
 	  slak->m_operands = ins->args;
-	  slak->m_opnum = strlen (slak->m_operands) / 2;
 	  slak->m_arch = ins->arch;
 	  slak->m_opcode = ins->opcode;
-	  /* This is kludgey.  */
-	  slak->m_codenum = ((ins->match) & 0xffffL) ? 2 : 1;
+	  
+	  /* In most cases we can determine the number of opcode words
+	     by checking the second word of the mask.  Unfortunately
+	     some instructions have 2 opcode words, but no fixed bits
+	     in the second word.  A leading dot in the operands
+	     string also indicates 2 opcodes.  */
+	  if (*slak->m_operands == '.')
+	    {
+	      slak->m_operands++;
+	      slak->m_codenum = 2;
+	    }
+	  else if (ins->match & 0xffffL)
+	    slak->m_codenum = 2;
+	  else
+	    slak->m_codenum = 1;
+	  slak->m_opnum = strlen (slak->m_operands) / 2;
+	  
 	  if (i + 1 != m68k_numopcodes
 	      && !strcmp (ins->name, m68k_sorted_opcodes[i + 1]->name))
 	    {
@@ -5229,6 +5270,7 @@ md_create_long_jump (char *ptr, addressT from_addr, addressT to_addr,
    50:  absolute 0:127	   only
    55:  absolute -64:63    only
    60:  absolute -128:127  only
+   65:  absolute 0:511     only
    70:  absolute 0:4095	   only
    80:  absolute -1, 1:7   only
    90:  No bignums.          */
@@ -5282,6 +5324,10 @@ get_num (struct m68k_exp *exp, int ok)
 	  break;
 	case 60:
 	  if ((valueT) SEXT (offs (exp)) + 128 > 255)
+	    goto outrange;
+	  break;
+	case 65:
+	  if ((valueT) TRUNC (offs (exp)) > 511)
 	    goto outrange;
 	  break;
 	case 70:

@@ -1,3 +1,10 @@
+2007-07-03  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (m68k_ip): Add j & K operand types.
+	(install_operand): Add E encoding.
+	(md_begin): Check and skip initial '.' arg character.
+	(get_num): Add 0..511 case.
+
 2007-07-03  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4713

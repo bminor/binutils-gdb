@@ -1,3 +1,9 @@
+2007-07-03  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/m68k/mcf-coproc.d: New.
+	* gas/m68k/mcf-coproc.s: New.
+	* gas/m68k/all.exp: Add it.
+
 2007-06-29  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
 
 	* gas/cr16: New directory
