@@ -1,3 +1,26 @@
+2007-07-03  Markus Deuling  <deuling@de.ibm.com>
+
+	* cp-namespace.c (lookup_symbol_file): Add block to
+	lookup_symbol_global call.
+	* Makefile.in (solist_h): Add dependency on symtab header.
+	(symtab.o): Add dependency on solist header.
+	* solib.c (solib_global_lookup): New function.
+	* solib-svr4.c (scan_dyntag): Likewise.
+	(elf_locate_base): Call helper routine scan_dyntag.
+	(elf_lookup_lib_symbol): New function.
+	(_initialize_svr4_solib): Add elf_lookup_lib_symbol to svr4_so_ops.
+	* solist.h (symtab.h): New include.
+	(struct target_so_ops): New member lookup_lib_global_symbol.
+	(solib_global_lookup): New prototype.
+	* symtab.c: New include solist.h.
+	(lookup_objfile_from_block): New function.
+	(lookup_global_symbol_from_objfile): New function.
+	(basic_lookup_symbol_nonlocal): Add block to lookup_symbol_global call.
+	(lookup_symbol_global): Call library-specific lookup procedure.
+	* symtab.h (lookup_global_symbol_from_objfile): New prototype.
+
+	* NEWS: Document framework.
+
 2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* target-descriptions.c (tdesc_create_reg): Do not set reg->type

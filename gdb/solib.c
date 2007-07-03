@@ -961,6 +961,24 @@ show_auto_solib_add (struct ui_file *file, int from_tty,
 }
 
 
+/* Handler for library-specific lookup of global symbol NAME in OBJFILE.  Call
+   the library-specific handler if it is installed for the current target.  */
+
+struct symbol *
+solib_global_lookup (const struct objfile *objfile,
+		     const char *name,
+		     const char *linkage_name,
+		     const domain_enum domain,
+		     struct symtab **symtab)
+{
+  if (current_target_so_ops->lookup_lib_global_symbol != NULL)
+    return current_target_so_ops->lookup_lib_global_symbol (objfile,
+				name, linkage_name, domain, symtab);
+
+  return NULL;
+}
+
+
 extern initialize_file_ftype _initialize_solib; /* -Wmissing-prototypes */
 
 void

@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.6
 
+* When looking up multiply-defined global symbols, GDB will now prefer the
+symbol definition in the current shared library if it was built using the
+-Bsymbolic linker option.
+
 * When the Text User Interface (TUI) is not configured, GDB will now
 recognize the -tui command-line option and print a message that the TUI
 is not supported.

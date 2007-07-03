@@ -1,3 +1,9 @@
+2007-07-03  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdb.base/solib-symbol.exp: New file (testcase multiple symbol lookup).
+	* gdb.base/solib-symbol-lib.c: Likewise.
+	* gdb.base/solib-symbol-main.c: Likewise.
+
 2007-07-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/gdbserver.exp (gdb_reconnect): New.

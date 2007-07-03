@@ -491,7 +491,7 @@ lookup_symbol_file (const char *name,
     }
   else
     {
-      sym = lookup_symbol_global (name, linkage_name, domain, symtab);
+      sym = lookup_symbol_global (name, linkage_name, block, domain, symtab);
     }
 
   if (sym != NULL)

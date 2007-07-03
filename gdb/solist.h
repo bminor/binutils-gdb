@@ -23,6 +23,8 @@
 #define SOLIST_H
 
 #define SO_NAME_MAX_PATH_SIZE 512	/* FIXME: Should be dynamic */
+/* For domain_enum domain.  */
+#include "symtab.h"
 
 /* Forward declaration for target specific link map information.  This
    struct is opaque to all but the target specific file.  */
@@ -107,7 +109,14 @@ struct target_so_ops
        Convenience function for remote debuggers finding host libs.  */
     int (*find_and_open_solib) (char *soname,
         unsigned o_flags, char **temp_pathname);
-    
+
+    /* Hook for looking up global symbols in a library-specific way.  */
+    struct symbol * (*lookup_lib_global_symbol) (const struct objfile *objfile,
+						 const char *name,
+						 const char *linkage_name,
+						 const domain_enum domain,
+						 struct symtab **symtab);
+
   };
 
 /* Free the memory associated with a (so_list *).  */
@@ -128,5 +137,12 @@ extern struct target_so_ops *current_target_so_ops;
   (current_target_so_ops->find_and_open_solib)
 #define TARGET_SO_IN_DYNSYM_RESOLVE_CODE \
   (current_target_so_ops->in_dynsym_resolve_code)
+
+/* Handler for library-specific global symbol lookup in solib.c.  */
+struct symbol *solib_global_lookup (const struct objfile *objfile,
+				    const char *name,
+				    const char *linkage_name,
+				    const domain_enum domain,
+				    struct symtab **symtab);
 
 #endif

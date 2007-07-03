@@ -57,6 +57,7 @@
 #include "cp-abi.h"
 #include "observer.h"
 #include "gdb_assert.h"
+#include "solist.h"
 
 /* Prototypes for local functions */
 
@@ -1261,6 +1262,26 @@ lookup_symbol_aux_local (const char *name, const char *linkage_name,
   return NULL;
 }
 
+/* Look up OBJFILE to BLOCK.  */
+
+static struct objfile *
+lookup_objfile_from_block (const struct block *block)
+{
+  struct objfile *obj;
+  struct symtab *s;
+
+  if (block == NULL)
+    return NULL;
+
+  block = block_global_block (block);
+  /* Go through SYMTABS.  */
+  ALL_SYMTABS (obj, s)
+    if (block == BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK))
+      return obj;
+
+  return NULL;
+}
+
 /* Look up a symbol in a block; if found, locate its symtab, fixup the
    symbol, and set block_found appropriately.  */
 
@@ -1298,6 +1319,57 @@ lookup_symbol_aux_block (const char *name, const char *linkage_name,
       
       return fixup_symbol_section (sym, objfile);
     }
+
+  return NULL;
+}
+
+/* Check all global symbols in OBJFILE in symtabs and
+   psymtabs.  */
+
+struct symbol *
+lookup_global_symbol_from_objfile (const struct objfile *objfile,
+				   const char *name,
+				   const char *linkage_name,
+				   const domain_enum domain,
+				   struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct blockvector *bv;
+  const struct block *block;
+  struct symtab *s;
+  struct partial_symtab *ps;
+
+  /* Go through symtabs.  */
+  ALL_OBJFILE_SYMTABS (objfile, s)
+  {
+    bv = BLOCKVECTOR (s);
+    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+    sym = lookup_block_symbol (block, name, linkage_name, domain);
+    if (sym)
+      {
+	block_found = block;
+	if (symtab != NULL)
+	  *symtab = s;
+	return fixup_symbol_section (sym, (struct objfile *)objfile);
+      }
+  }
+
+  /* Now go through psymtabs.  */
+  ALL_OBJFILE_PSYMTABS (objfile, ps)
+  {
+    if (!ps->readin
+	&& lookup_partial_symbol (ps, name, linkage_name,
+				  1, domain))
+      {
+	s = PSYMTAB_TO_SYMTAB (ps);
+	bv = BLOCKVECTOR (s);
+	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	sym = lookup_block_symbol (block, name, linkage_name, domain);
+	if (symtab != NULL)
+	  *symtab = s;
+	return fixup_symbol_section (sym, (struct objfile *)objfile);
+      }
+  }
 
   return NULL;
 }
@@ -1567,7 +1639,7 @@ basic_lookup_symbol_nonlocal (const char *name,
   if (sym != NULL)
     return sym;
 
-  return lookup_symbol_global (name, linkage_name, domain, symtab);
+  return lookup_symbol_global (name, linkage_name, block, domain, symtab);
 }
 
 /* Lookup a symbol in the static block associated to BLOCK, if there
@@ -1595,10 +1667,19 @@ lookup_symbol_static (const char *name,
 struct symbol *
 lookup_symbol_global (const char *name,
 		      const char *linkage_name,
+		      const struct block *block,
 		      const domain_enum domain,
 		      struct symtab **symtab)
 {
-  struct symbol *sym;
+  struct symbol *sym = NULL;
+  struct objfile *objfile = NULL;
+
+  /* Call library-specific lookup procedure.  */
+  objfile = lookup_objfile_from_block (block);
+  if (objfile != NULL)
+    sym = solib_global_lookup (objfile, name, linkage_name, domain, symtab);
+  if (sym != NULL)
+    return sym;
 
   sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, linkage_name,
 				   domain, symtab);

@@ -799,7 +799,7 @@ solib_h = solib.h
 solib_pa64_h = solib-pa64.h
 solib_som_h = solib-som.h
 solib_svr4_h = solib-svr4.h
-solist_h = solist.h
+solist_h = solist.h $(symtab_h)
 source_h = source.h
 sparc64_tdep_h = sparc64-tdep.h $(sparc_tdep_h)
 sparc_nat_h = sparc-nat.h
@@ -2724,7 +2724,8 @@ symtab.o: symtab.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(language_h) $(demangle_h) $(inferior_h) $(linespec_h) $(source_h) \
 	$(filenames_h) $(objc_lang_h) $(ada_lang_h) $(hashtab_h) \
 	$(gdb_obstack_h) $(block_h) $(dictionary_h) $(gdb_string_h) \
-	$(gdb_stat_h) $(cp_abi_h) $(observer_h) $(gdb_assert_h)
+	$(gdb_stat_h) $(cp_abi_h) $(observer_h) $(gdb_assert_h) \
+	$(solist_h)
 target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 	$(symtab_h) $(inferior_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_wait_h) $(dcache_h) $(regcache_h) $(gdb_assert_h) $(gdbcore_h) \

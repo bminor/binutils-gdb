@@ -1050,6 +1050,7 @@ extern struct symbol *lookup_symbol_static (const char *name,
 
 extern struct symbol *lookup_symbol_global (const char *name,
 					    const char *linkage_name,
+					    const struct block *block,
 					    const domain_enum domain,
 					    struct symtab **symtab);
 
@@ -1397,5 +1398,13 @@ extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
    const. */
 extern void set_main_name (const char *name);
 extern /*const */ char *main_name (void);
+
+/* Check global symbols in objfile.  */
+struct symbol *lookup_global_symbol_from_objfile (const struct objfile *objfile,
+						  const char *name,
+						  const char *linkage_name,
+						  const domain_enum domain,
+						  struct symtab **symtab);
+
 
 #endif /* !defined(SYMTAB_H) */
