@@ -1,3 +1,11 @@
+2007-07-04  Richard Sandiford  <richard@codesourcery.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add new entries for
+	{24k,24ke,34k,74k}f{2_1,1_1,x}.  Also add an entry for 74kf3_2.
+	Deprecate *x and *fx.
+	* doc/c-mips.texi: Document the new CPU arguments.  Deprecate
+	*x and *fx.
+
 2007-07-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-coff.h (x86_64_target_format): Renamed to ...

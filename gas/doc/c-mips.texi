@@ -249,17 +249,22 @@ rm9000,
 m4k,
 m4kp,
 24kc,
+24kf2_1,
 24kf,
-24kx,
+24kf1_1,
 24kec,
+24kef2_1,
 24kef,
-24kex,
+24kef1_1,
 34kc,
+34kf2_1,
 34kf,
-34kx,
+34kf1_1,
 74kc,
+74kf2_1,
 74kf,
-74kx,
+74kf1_1,
+74kf3_2,
 5kc,
 5kf,
 20kc,
@@ -267,6 +272,10 @@ m4kp,
 sb1,
 sb1a
 @end quotation
+
+For compatibility reasons, @samp{@var{n}x} and @samp{@var{b}fx} are
+accepted as synonyms for @samp{@var{n}f1_1}.  These values are
+deprecated.
 
 @item -mtune=@var{cpu}
 Schedule and tune for a particular MIPS cpu.  Valid @var{cpu} values are
