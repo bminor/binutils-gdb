@@ -27,3 +27,6 @@ _start:
 	rex.WRB
 	rex.WRX
 	rex.WRXB
+# Make sure that the above rex prefix won't become the rex prefix for
+# the padding.
+	rex
