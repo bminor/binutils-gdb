@@ -172,7 +172,7 @@ getccstring (unsigned cc)
    string. This routine is used when disassembling the 'cinv' instruction. */
 
 static char *
-getcinvstring (char *str)
+getcinvstring (const char *str)
 {
   const cinv_entry *cinv;
 
@@ -799,7 +799,7 @@ print_insn_cr16 (bfd_vma memaddr, struct disassemble_info *info)
   if (is_decoded > 0 && (words[0] << 16 || words[1]) != 0)
     {
       if (strneq (instruction->mnemonic, "cinv", 4))
-        info->fprintf_func (info->stream,"%s", getcinvstring ((char *)instruction->mnemonic));
+        info->fprintf_func (info->stream,"%s", getcinvstring (instruction->mnemonic));
       else
         info->fprintf_func (info->stream, "%s", instruction->mnemonic);
 

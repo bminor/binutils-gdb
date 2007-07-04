@@ -1,3 +1,9 @@
+2007-07-04  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
+
+	* cr16-dis.c (getcinvstring): Add const qualifier to char *
+	parameter.
+	(print_insn_cr16): Remove cast to char *.
+
 2007-07-03  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* m68k-dis.c (fetch_arg): Add E.  Replace length switch with
