@@ -2584,7 +2584,6 @@ using the Bourne shell script @file{gdbarch.sh}.
 * Compiler Characteristics::
 * Target Conditionals::
 * Adding a New Target::
-* Converting Targets to Multi-arch::
 @end menu
 
 @node  OS ABI Variant Handling
@@ -3427,7 +3426,7 @@ program encounters a breakpoint.  This is often the number of bytes in
 If defined, this should evaluate to 1 if @var{addr} is in a shared
 library in which breakpoints cannot be set and so should be disabled.
 
-@item void gdbarch_print_float_info (@var{gdbarch}, @var{file}, @var{frame},var{args})
+@item void gdbarch_print_float_info (@var{gdbarch}, @var{file}, @var{frame}, @var{args})
 @findex gdbarch_print_float_info
 If defined, then the @samp{info float} command will print information about
 the processor's floating point unit.
@@ -3507,14 +3506,14 @@ Otherwise return 0.
 Define this to adjust @var{address} so that it meets the alignment
 requirements for the start of a new stack frame.  A stack frame's
 alignment requirements are typically stronger than a target processors
-stack alignment requirements (@pxref{DEPRECATED_STACK_ALIGN}).
+stack alignment requirements.
 
 This function is used to ensure that, when creating a dummy frame, both
 the initial stack pointer and (if needed) the address of the return
 value are correctly aligned.
 
-Unlike @code{DEPRECATED_STACK_ALIGN}, this function always adjusts the
-address in the direction of stack growth.
+This function always adjusts the address in the direction of stack
+growth.
 
 By default, no frame based stack alignment is performed.
 

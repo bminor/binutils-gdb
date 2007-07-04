@@ -1,3 +1,7 @@
+2007-07-05  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdbint.texinfo (Target Conditionals): Fix last change.
+
 2007-07-03  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdb.texinfo: Replace following macros by their appropriate gdbarch
