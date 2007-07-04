@@ -1,3 +1,7 @@
+2007-07-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* emul_aix.c (ar_emul_aix_internal): Rename "next" to "archive_next".
+
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4716

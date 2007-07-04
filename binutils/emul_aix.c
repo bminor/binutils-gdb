@@ -1,5 +1,5 @@
 /* Binutils emulation layer.
-   Copyright 2002, 2003, 2006 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2006, 2007 Free Software Foundation, Inc.
    Written by Tom Rix, Red Hat Inc.
 
    This file is part of GNU Binutils.
@@ -89,7 +89,7 @@ ar_emul_aix_internal (bfd **after_bfd, char *file_name, bfd_boolean verbose,
     }
 
   *after_bfd = try_bfd;
-  (*after_bfd)->next = temp;
+  (*after_bfd)->archive_next = temp;
 
   return TRUE;
 }
