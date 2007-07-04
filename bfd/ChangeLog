@@ -1,3 +1,12 @@
+2007-07-04  Nick Clifton  <nickc@redhat.com>
+
+	Import this patch from an internal tree:
+	
+	2001-07-17  Richard Henderson  <rth@redhat.com>
+
+	* elf32-mep.c (mep_final_link_relocate) [R_MEP_HI16S]: Correctly
+	compensate for high bit set in R_MEP_LOW16.
+
 2007-07-03  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Copy type from

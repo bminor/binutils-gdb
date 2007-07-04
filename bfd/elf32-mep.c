@@ -333,6 +333,8 @@ mep_final_link_relocate
       byte[3^e2] = ((u >> 16) & 0xff);
       break;
     case R_MEP_HI16S: /* ----------------vutsrqponmlkjihg */
+      if (s & 0x8000)
+	s += 0x10000;
       byte[2^e2] = ((s >> 24) & 0xff);
       byte[3^e2] = ((s >> 16) & 0xff);
       break;
