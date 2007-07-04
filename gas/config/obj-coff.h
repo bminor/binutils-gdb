@@ -63,8 +63,8 @@
 
 #ifdef TE_PE
 #ifdef TE_PEP
-extern const char *   x86_64_target_format (void);
-#define TARGET_FORMAT x86_64_target_format ()
+extern const char *i386_target_format (void);
+#define TARGET_FORMAT i386_target_format ()
 #define COFF_TARGET_FORMAT "pe-x86-64"
 #else
 #define TARGET_FORMAT "pe-i386"

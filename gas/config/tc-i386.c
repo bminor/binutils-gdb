@@ -6115,28 +6115,8 @@ md_show_usage (stream)
 
 }
 
-#if defined(TE_PEP)
-const char *
-x86_64_target_format (void)
-{
-  if (strcmp (default_arch, "x86_64") == 0)
-    {
-      set_code_flag (CODE_64BIT);
-      return COFF_TARGET_FORMAT;
-    }
-  else if (strcmp (default_arch, "i386") == 0)
-    {
-      set_code_flag (CODE_32BIT);
-      return "coff-i386";
-    }
-
-  as_fatal (_("Unknown architecture"));
-  return NULL;
-}
-#endif
-
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
-     || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))
+     || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (TE_PEP))
 
 /* Pick the target format to use.  */
 
@@ -6167,6 +6147,11 @@ i386_target_format (void)
     as_fatal (_("Unknown architecture"));
   switch (OUTPUT_FLAVOR)
     {
+#ifdef TE_PEP
+    case bfd_target_coff_flavour:
+      return flag_code == CODE_64BIT ? COFF_TARGET_FORMAT : "coff-i386";
+      break;
+#endif
 #ifdef OBJ_MAYBE_AOUT
     case bfd_target_aout_flavour:
       return AOUT_TARGET_FORMAT;

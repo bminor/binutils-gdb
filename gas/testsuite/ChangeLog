@@ -1,3 +1,7 @@
+2007-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run x86-64-nops-1 for x86_64-*-mingw*.
+
 2007-07-04  Nick Clifton  <nickc@redhat.com>
 
 	* gas/mep/relocs.d: Fix expected disassembly to work on 64-bit

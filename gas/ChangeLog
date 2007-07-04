@@ -1,3 +1,12 @@
+2007-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-coff.h (x86_64_target_format): Renamed to ...
+	(i386_target_format): This
+	(TARGET_FORMAT): Use i386_target_format.
+
+	* config/tc-i386.c (x86_64_target_format): Removed.
+	(i386_target_format): Handle PE formats.
+
 2007-07-04  Nick Clifton  <nickc@redhat.com>
 
 	* symbols.c (symbol_relc_make_value): Use bfd_sprintf_vma in order
