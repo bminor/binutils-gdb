@@ -60,38 +60,38 @@ Disassembly of section .text:
     103e:	00 00       	nop
     1040:	00 00       	nop
     1042:	c5 3c ef ee 	lb \$5,-4114\(\$3\)
-    1046:	dd 49 ff df 	bsr ffffefee <0-:s3:foo>
-    104a:	e5 09 ef d2 	repeat \$5,ffffefee <0-:s3:foo>
+    1046:	dd 49 ff df 	bsr ffffefee <0-:s3:foo.*>
+    104a:	e5 09 ef d2 	repeat \$5,ffffefee <0-:s3:foo.*>
     104e:	00 00       	nop
     1050:	00 00       	nop
     1052:	c5 3c 20 2c 	lb \$5,8236\(\$3\)
     1056:	de b9 00 0f 	bsr 202c <\+:s3:foo:s3:bar>
     105a:	e5 09 07 e9 	repeat \$5,202c <\+:s3:foo:s3:bar>
-    105e:	dc 88 00 80 	jmp 8090 <<<:s3:foo:#00000003>
-    1062:	d8 18 00 02 	jmp 202 <>>:s3:foo:#00000003>
-    1066:	df c8 7f ff 	jmp 7ffff8 <&:-:s3:foo:s3:bar:#007fffff>
-    106a:	df 28 7f ff 	jmp 7fffe4 <&:-:s3:foo:s4:main:#007fffff>
-    106e:	df 78 7f ff 	jmp 7fffee <&:-:S5:.text:s3:foo:#007fffff>
-    1072:	dd 98 00 01 	jmp 1b2 <&:-:S5:.data:s3:foo:#007fffff>
+    105e:	dc 88 00 80 	jmp 8090 <<<:s3:foo:#0+03>
+    1062:	d8 18 00 02 	jmp 202 <>>:s3:foo:#0+03>
+    1066:	df c8 7f ff 	jmp 7ffff8 <&:-:s3:foo:s3:bar:#0+7fffff>
+    106a:	df 28 7f ff 	jmp 7fffe4 <&:-:s3:foo:s4:main:#0+7fffff>
+    106e:	df 78 7f ff 	jmp 7fffee <&:-:S5:.text:s3:foo:#0+7fffff>
+    1072:	dd 98 00 01 	jmp 1b2 <&:-:S5:.data:s3:foo:#0+7fffff>
     1076:	da 98 00 0f 	jmp f52 <-:s3:foo:\+:s9:.text.end:0-:S5:.text>
-    107a:	db f8 00 70 	jmp 707e <\*:s3:foo:#00000007>
-    107e:	da 58 00 02 	jmp 24a <>>:s3:foo:#00000003\+0x48>
+    107a:	db f8 00 70 	jmp 707e <\*:s3:foo:#0+07>
+    107e:	da 58 00 02 	jmp 24a <>>:s3:foo:#0+03\+0x48>
     1082:	d8 28 00 00 	jmp 4 <__assert_based_size\+0x3>
     1086:	d8 48 00 00 	jmp 8 <\^:s3:foo:s3:bar>
     108a:	d8 d8 00 10 	jmp 101a <|:s3:foo:s3:bar>
     108e:	d8 98 00 10 	jmp 1012 <&:s3:foo:s3:bar>
-    1092:	d8 08 00 00 	jmp 0 <<<:==:s3:foo:s3:bar:#00000005>
-    1096:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#00000005>
-    109a:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#00000005>
-    109e:	d8 08 00 00 	jmp 0 <<<:==:s3:foo:s3:bar:#00000005>
-    10a2:	d8 08 00 00 	jmp 0 <<<:==:s3:foo:s3:bar:#00000005>
-    10a6:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#00000005>
-    10aa:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#00000005>
+    1092:	d8 08 00 00 	jmp 0 <<<:==:s3:foo:s3:bar:#0+05>
+    1096:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#0+05>
+    109a:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#0+05>
+    109e:	d8 08 00 00 	jmp 0 <<<:==:s3:foo:s3:bar:#0+05>
+    10a2:	d8 08 00 00 	jmp 0 <<<:==:s3:foo:s3:bar:#0+05>
+    10a6:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#0+05>
+    10aa:	d9 08 00 00 	jmp 20 <<<:&&:s3:foo:s3:bar:#0+05>
     10ae:	00 00       	nop
     10b0:	00 00       	nop
     10b2:	00 00       	nop
     10b4:	00 00       	nop
-    10b6:	d8 08 00 00 	jmp 0 <<<:==:s3:foo:s3:bar:#00000005>
+    10b6:	d8 08 00 00 	jmp 0 <<<:==:s3:foo:s3:bar:#0+05>
     10ba:	00 00       	nop
     10bc:	00 00       	nop
     10be:	00 00       	nop

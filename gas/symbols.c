@@ -3004,7 +3004,7 @@ symbol_relc_make_value (offsetT val)
   char * terminal = xmalloc (28);  /* Enough for long long.  */
 
   terminal[0] = '#';
-  sprintf_vma (& terminal[1], val);
+  bfd_sprintf_vma (stdoutput, terminal + 1, val);
   return terminal;
 }
 

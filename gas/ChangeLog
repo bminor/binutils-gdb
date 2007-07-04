@@ -1,3 +1,8 @@
+2007-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* symbols.c (symbol_relc_make_value): Use bfd_sprintf_vma in order
+	to get the right length of printed value.
+
 2007-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* COPYING: Replace with GPLv3 text.

@@ -1,3 +1,8 @@
+2007-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* gas/mep/relocs.d: Fix expected disassembly to work on 64-bit
+	hosts.
+
 2007-07-03  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
 
 	* gas/elf/elf.exp: Expect redef test to fail for CR16.
