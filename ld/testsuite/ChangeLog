@@ -1,3 +1,7 @@
+2007-07-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/powerpc.exp: Disable for lynxos and nto.
+
 2007-07-03  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-arm/attr-merge-2a.s, ld-arm/attr-merge-2b.s,
