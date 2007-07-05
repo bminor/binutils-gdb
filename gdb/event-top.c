@@ -186,19 +186,20 @@ rl_callback_read_char_wrapper (gdb_client_data client_data)
 void
 cli_command_loop (void)
 {
-  int length;
-  char *a_prompt;
-  char *gdb_prompt = get_prompt ();
-
   /* If we are using readline, set things up and display the first
      prompt, otherwise just print the prompt. */
   if (async_command_editing_p)
     {
+      int length;
+      char *a_prompt;
+      char *gdb_prompt = get_prompt ();
+
       /* Tell readline what the prompt to display is and what function it
          will need to call after a whole line is read. This also displays
          the first prompt. */
-      length = strlen (PREFIX (0)) + strlen (gdb_prompt) + strlen (SUFFIX (0)) + 1;
-      a_prompt = (char *) xmalloc (length);
+      length = strlen (PREFIX (0)) 
+	+ strlen (gdb_prompt) + strlen (SUFFIX (0)) + 1;
+      a_prompt = (char *) alloca (length);
       strcpy (a_prompt, PREFIX (0));
       strcat (a_prompt, gdb_prompt);
       strcat (a_prompt, SUFFIX (0));

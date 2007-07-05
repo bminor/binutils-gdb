@@ -1,3 +1,13 @@
+2007-07-05  Michael Snyder  <msnyder@access-company.com>
+
+	* event-top.c (cli_command_loop): Prompt string can (and should)
+	be freed after call to readline (Coverity).  Also move local var
+	declarations into block where they are used.
+
+	* tui/tui-interp.c (tui_command_loop): Prompt string can (and
+	should) be freed after call to readline (Coverity).  Also move
+	local var declarations into block where they are used.
+
 2007-07-03  Andreas Schwab  <schwab@suse.de>
 
 	* linux-nat.c (linux_nat_info_proc_cmd): Fix parsing of columns in
