@@ -1,3 +1,7 @@
+2007-07-05  Tristan Gingold  <gingold@adacore.com>
+
+	* corefile.c (core_sym_class): Do not discard nested subprograms.
+
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

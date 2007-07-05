@@ -226,7 +226,7 @@ corefile.o: corefile.c $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   gprof.h $(BFDDIR)/sysdep.h ../bfd/config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h ../bfd/bfd.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h gconfig.h search_list.h \
-  source.h symtab.h hist.h corefile.h
+  source.h symtab.h hist.h corefile.h $(INCDIR)/safe-ctype.h
 gmon_io.o: gmon_io.c gprof.h $(BFDDIR)/sysdep.h ../bfd/config.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/fopen-same.h $(INCDIR)/filenames.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \

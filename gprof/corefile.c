@@ -1,6 +1,6 @@
 /* corefile.c
 
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -27,6 +27,7 @@
 #include "symtab.h"
 #include "hist.h"
 #include "corefile.h"
+#include "safe-ctype.h"
 
 bfd *core_bfd;
 static int core_num_syms;
@@ -365,8 +366,15 @@ core_sym_class (asymbol *sym)
 
   for (name = sym->name; *name; ++name)
     {
-      if (*name == '.' || *name == '$')
-	return 0;
+      if (*name == '$')
+        return 0;
+
+      /* Do not discard nested subprograms (those
+	 which end with .NNN, where N are digits).  */
+      if (*name == '.')
+	for (name++; *name; name++)
+	  if (! ISDIGIT (*name))
+	    return 0;
     }
 
   /* On systems where the C compiler adds an underscore to all
