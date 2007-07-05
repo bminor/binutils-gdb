@@ -1,3 +1,8 @@
+2007-07-05  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* ld.texinfo (--heap): Replace 'amount' with 'number of bytes'.
+	(--stack): Likewise.
+
 2007-07-03  Matthias Klose  <doko@ubuntu.com>
 
 	* emultempl/spuelf.em (base_name): Correct backslash quoting.
