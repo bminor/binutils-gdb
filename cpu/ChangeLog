@@ -1,3 +1,12 @@
+2007-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* cris.cpu: Update copyright notice to refer to GPLv3.
+	* frv.cpu, frv.opc, iq10.cpu, iq2000m.cpu, iq2000.opc, m32c.cpu,
+	m32c.opc, m32r.cpu, m32r.opc, mt.cpu, mt.opc, sh64-compact.cpu,
+	sh64-media.cpu, sh.cpu, sh.opc, simplify.inc, xc16x.cpu,
+	xc16x.opc: Likewise.
+	* iq2000.cpu: Fix copyright notice to refer to FSF.
+
 2007-04-30  Mark Salter  <msalter@sadr.localdomain>
 
 	* frv.cpu (spr-names): Support new coprocessor SPR registers.

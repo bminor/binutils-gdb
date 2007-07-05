@@ -1,6 +1,6 @@
 /* Fujitsu FRV opcode support, for GNU Binutils.  -*- C -*-
 
-   Copyright 2000, 2001, 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc; developed under contract from Fujitsu.
 
@@ -8,7 +8,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
+   the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -20,6 +20,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
+
 
 /* This file is an addendum to frv.cpu.  Heavy use of C code isn't
    appropriate in .cpu files, so it resides here.  This especially applies

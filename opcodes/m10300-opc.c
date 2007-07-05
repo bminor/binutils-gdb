@@ -1,23 +1,26 @@
 /* Assemble Matsushita MN10300 instructions.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2007
    Free Software Foundation, Inc.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This file is part of the GNU opcodes library.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This library is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   It is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
-/* This file is formatted at > 80 columns.  Attempting to read it on a
-   screeen with less than 80 columns will be difficult.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
+
+/* This file is formatted at > 80 columns.  Attempting to read it
+   on a screeen with less than 80 columns will be difficult.  */
 #include "sysdep.h"
 #include "opcode/mn10300.h"
 
