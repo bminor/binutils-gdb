@@ -1,3 +1,8 @@
+2007-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* peicode.h (pe_bfd_object_p): Don't check PE vs. EFI target
+	if arch is unknown.
+
 2007-07-04  Nick Clifton  <nickc@redhat.com>
 
 	Import this patch from an internal tree:
