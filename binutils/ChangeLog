@@ -1,3 +1,11 @@
+2007-07-05  Kai Tietz  <kai.tietz@onevision.com>
+
+        * resrc.c: (read_rc_file): Add include path of user passed rc
+	input file.
+        * windres.c: (windres_add_include_dir): New.
+        (main): Use of windres_add_include_dir.
+        * windres.h: (windres_add_include_dir): Add prototype.
+
 2007-07-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/binutils.texi (size): Document --common.

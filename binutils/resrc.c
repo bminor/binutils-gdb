@@ -436,6 +436,35 @@ read_rc_file (const char *filename, const char *preprocessor,
   char *cmd;
   const char *fnquotes = (filename_need_quotes (filename) ? "\"" : "");
 
+  /* Setup the default resource import path taken from input file.  */
+  if (strchr (filename, '/') != NULL || strchr (filename, '\\') != NULL)
+    {
+      char *e, *c;
+
+      if (filename[0] == '/'
+	  || filename[0] == '\\'
+	  || filename[1] == ':')
+	e = c = xstrdup (filename);
+      else
+	{
+	  e = c = xmalloc (strlen (filename) + 3);
+	  sprintf (c, "./%s", filename);
+	}
+      e += strlen (c);
+      while (e > c && (e[-1] != '\\' && e[-1] != '/'))
+	{
+	  --e;
+	  e[0] = 0;
+	}
+      /* Cut off trailing slash.  */
+      --e;
+      e[0] = 0;
+      while ((e = strchr (c, '\\')) != NULL)
+	*e = '/';
+
+      windres_add_include_dir (e);
+    }
+
   istream_type = (use_temp_file) ? ISTREAM_FILE : ISTREAM_PIPE;
 
   if (preprocargs == NULL)

@@ -115,6 +115,7 @@ extern rc_ver_stringinfo *append_verval (rc_ver_stringinfo *, const unichar *, c
 extern rc_ver_varinfo *append_vertrans (rc_ver_varinfo *, rc_uint_type, rc_uint_type);
 
 extern bfd *windres_open_as_binary (const char *, int);
+extern void windres_add_include_dir (const char *);
 
 extern int wr_printcomment (FILE *, const char *, ...);
 extern int wr_print (FILE *, const char *, ...);

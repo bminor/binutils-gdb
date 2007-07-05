@@ -760,6 +760,20 @@ static const struct option long_options[] =
   {0, no_argument, 0, 0}
 };
 
+void
+windres_add_include_dir (const char *p)
+{
+  struct include_dir *n, **pp;
+
+  n = xmalloc (sizeof *n);
+  n->next = NULL;
+  n->dir = (char * ) p;
+
+  for (pp = &include_dirs; *pp != NULL; pp = &(*pp)->next)
+    ;
+  *pp = n;
+}
+
 /* This keeps gcc happy when using -Wmissing-prototypes -Wstrict-prototypes.  */
 int main (int, char **);
 
@@ -926,17 +940,7 @@ main (int argc, char **argv)
 	      preprocargs = n;
 	    }
 
-	  {
-	    struct include_dir *n, **pp;
-
-	    n = (struct include_dir *) xmalloc (sizeof *n);
-	    n->next = NULL;
-	    n->dir = optarg;
-
-	    for (pp = &include_dirs; *pp != NULL; pp = &(*pp)->next)
-	      ;
-	    *pp = n;
-	  }
+	  windres_add_include_dir (optarg);
 
 	  break;
 
