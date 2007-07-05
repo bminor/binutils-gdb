@@ -6,7 +6,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
+   the Free Software Foundation; either version 3, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -16,14 +16,15 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   Foundation, 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
 #include "sysdep.h"
 #include "bfd.h"
 #include "bucomm.h"
 
-/* Print the version number and copyright information, and exit.  This
-   implements the --version option for the various programs.  */
+/* Print the version number and copyright information, and exit.
+   This implements the --version option for the various programs.  */
 
 void
 print_version (const char *name)
@@ -34,6 +35,7 @@ print_version (const char *name)
   printf (_("Copyright 2007 Free Software Foundation, Inc.\n"));
   printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
-the GNU General Public License.  This program has absolutely no warranty.\n"));
+the GNU General Public License version 3 or (at your option) any later version.\n\
+This program has absolutely no warranty.\n"));
   exit (0);
 }

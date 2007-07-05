@@ -1,3 +1,13 @@
+2007-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* lib/utils-lib.exp: Update copyright notice to refer to GPLv3.
+	* config/default.exp, binutils-all/ar.exp,
+	binutils-all/dlltool.exp, binutils-all/nm.exp,
+	binutils-all/objcopy.exp, binutils-all/arm/objdump.exp,
+	binutils-all/hppa/objdump.exp, binutils-all/m68k/objdump.exp,
+	binutils-all/vax/objdump.exp, binutils-all/windres/windres.exp,
+	binutils-all/windres/msupdate: Likewise.
+
 2007-06-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/strip-3.d: Also strip .xtensa.info section.

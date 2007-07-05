@@ -1,3 +1,26 @@
+2007-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* addr2line.c: Update copyright notice to refer to GPLv3.
+	* ar.c, arlex.l, arparse.y, arsup.c, arsup.h, bin2c.c, binemul.c,
+	binemul.h, bucomm.c, bucomm.h, budbg.h, coffdump.c, coffgrok.c,
+	coffgrok.h, cxxfilt.c, debug.c, debug.h, deflex.l, defparse.y,
+	dlltool.c, dlltool.h, dllwrap.c, dwarf.c, dwarf.h, embedspu.sh,
+	emul_aix.c, emul_vanilla.c, filemode.c, ieee.c, mclex.c,
+	mcparse.y, nlmconv.c, nlmconv.h, nlmheader.y, nm.c, objcopy.c,
+	objdump.c, prdbg.c, rclex.c, rcparse.y, rdcoff.c, rddbg.c,
+	readelf.c, rename.c, resbin.c, rescoff.c, resrc.c, resres.c,
+	size.c, srconv.c, stabs.c, strings.c, sysdep.h, sysdump.c,
+	sysinfo.y, syslex.l, unwind-ia64.c, unwind-ia64.h, version.c,
+	windint.h, windmc.c, windmc.h, windres.c, windres.h, winduni.c,
+	winduni.h, wrstabs.c: Likewise.
+	* is-ranlib.c, is-strip.c, maybe-ranlib.c, maybe-strip.c,
+	not-ranlib.c, not-strip.c, ranlib.sh, sanity.sh: Add a copyright
+	notice.
+	* NEWS: Mention that the sources are now released under GPLv3.
+	Add a marker for the changes that went into v2.17.
+	* version.c (print_version): Specify that the program is released
+	under version 3 of the GPL.
+
 2007-07-05  Kai Tietz  <kai.tietz@onevision.com>
 
         * resrc.c: (read_rc_file): Add include path of user passed rc

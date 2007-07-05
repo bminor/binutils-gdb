@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The binutils sources are now released under version 3 of the GNU General
+  Public License.
+
 * A new tool "windmc" has been added for some targets.  This is a message
   compiler which attempts to be compatible with the MS version.
 
@@ -14,6 +17,8 @@
   strip everything out of an ordinary object file or executable except
   for its symbol table.  Files containing just symbols can be useful
   to some OSes.
+
+Changes in 2.17:
 
 * Add "-x NAME" to readelf in addition to "-x NUMBER".
 
