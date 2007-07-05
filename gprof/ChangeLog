@@ -1,6 +1,8 @@
 2007-07-05  Tristan Gingold  <gingold@adacore.com>
 
 	* corefile.c (core_sym_class): Do not discard nested subprograms.
+	* Makefile.am (corefile.o): Add dependency upon safe-ctype.h.
+	* Makefile.in: Regenerate.
 
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
