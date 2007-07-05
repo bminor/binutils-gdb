@@ -3828,11 +3828,6 @@ and guess the starting and ending addresses of the compilation unit from
 them.
 @end itemize
 
-@item PC_LOAD_SEGMENT
-@findex PC_LOAD_SEGMENT
-If defined, print information about the load segment for the program
-counter.  (Defined only for the RS/6000.)
-
 @item int gdbarch_pc_regnum (@var{gdbarch})
 @findex gdbarch_pc_regnum
 If the program counter is kept in a register, then let this function return
