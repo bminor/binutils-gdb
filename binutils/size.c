@@ -40,7 +40,7 @@
 
 /* Program options.  */
 
-enum
+static enum
   {
     decimal, octal, hex
   }
@@ -49,33 +49,26 @@ radix = decimal;
 /* 0 means use AT&T-style output.  */
 static int berkeley_format = BSD_DEFAULT;
 
-int show_version = 0;
-int show_help = 0;
-int show_totals = 0;
+static int show_version = 0;
+static int show_help = 0;
+static int show_totals = 0;
+static int show_common = 0;
 
+static bfd_size_type common_size;
 static bfd_size_type total_bsssize;
 static bfd_size_type total_datasize;
 static bfd_size_type total_textsize;
 
 /* Program exit status.  */
-int return_code = 0;
+static int return_code = 0;
 
 static char *target = NULL;
 
-/* Static declarations.  */
+/* Forward declarations.  */
 
-static void usage (FILE *, int);
 static void display_file (char *);
-static void display_bfd (bfd *);
-static void display_archive (bfd *);
-static int size_number (bfd_size_type);
 static void rprint_number (int, bfd_size_type);
-static void print_berkeley_format (bfd *);
-static void sysv_internal_sizer (bfd *, asection *, void *);
-static void sysv_internal_printer (bfd *, asection *, void *);
-static void print_sysv_format (bfd *);
 static void print_sizes (bfd * file);
-static void berkeley_sum (bfd *, sec_ptr, void *);
 
 static void
 usage (FILE *stream, int status)
@@ -87,6 +80,7 @@ usage (FILE *stream, int status)
   -A|-B     --format={sysv|berkeley}  Select output style (default is %s)\n\
   -o|-d|-x  --radix={8|10|16}         Display numbers in octal, decimal or hex\n\
   -t        --totals                  Display the total sizes (Berkeley only)\n\
+            --common                  Display total size for *COM* syms\n\
             --target=<bfdname>        Set the binary file format\n\
             @<file>                   Read options from <file>\n\
   -h        --help                    Display this information\n\
@@ -104,11 +98,16 @@ usage (FILE *stream, int status)
   exit (status);
 }
 
+#define OPTION_FORMAT (200)
+#define OPTION_RADIX (OPTION_FORMAT + 1)
+#define OPTION_TARGET (OPTION_RADIX + 1)
+
 static struct option long_options[] =
 {
-  {"format", required_argument, 0, 200},
-  {"radix", required_argument, 0, 201},
-  {"target", required_argument, 0, 202},
+  {"common", no_argument, &show_common, 1},
+  {"format", required_argument, 0, OPTION_FORMAT},
+  {"radix", required_argument, 0, OPTION_RADIX},
+  {"target", required_argument, 0, OPTION_TARGET},
   {"totals", no_argument, &show_totals, 1},
   {"version", no_argument, &show_version, 1},
   {"help", no_argument, &show_help, 1},
@@ -144,7 +143,7 @@ main (int argc, char **argv)
 			   (int *) 0)) != EOF)
     switch (c)
       {
-      case 200:		/* --format */
+      case OPTION_FORMAT:
 	switch (*optarg)
 	  {
 	  case 'B':
@@ -161,11 +160,11 @@ main (int argc, char **argv)
 	  }
 	break;
 
-      case 202:		/* --target */
+      case OPTION_TARGET:
 	target = optarg;
 	break;
 
-      case 201:		/* --radix */
+      case OPTION_RADIX:
 #ifdef ANSI_LIBRARIES
 	temp = strtol (optarg, NULL, 10);
 #else
@@ -256,6 +255,39 @@ main (int argc, char **argv)
   return return_code;
 }
 
+/* Total size required for common symbols in ABFD.  */
+
+static void
+calculate_common_size (bfd *abfd)
+{
+  asymbol **syms = NULL;
+  long storage, symcount;
+
+  common_size = 0;
+  if ((bfd_get_file_flags (abfd) & (EXEC_P | DYNAMIC | HAS_SYMS)) != HAS_SYMS)
+    return;
+
+  storage = bfd_get_symtab_upper_bound (abfd);
+  if (storage < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+  if (storage)
+    syms = xmalloc (storage);
+
+  symcount = bfd_canonicalize_symtab (abfd, syms);
+  if (symcount < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  while (--symcount >= 0)
+    {
+      asymbol *sym = syms[symcount];
+
+      if (bfd_is_com_section (sym->section)
+	  && (sym->flags & BSF_SECTION_SYM) == 0)
+	common_size += sym->value;
+    }
+  free (syms);
+}
+
 /* Display stats on file or archive member ABFD.  */
 
 static void
@@ -437,6 +469,7 @@ print_berkeley_format (bfd *abfd)
 
   bfd_map_over_sections (abfd, berkeley_sum, NULL);
 
+  bsssize += common_size;
   if (files_seen++ == 0)
     puts ((radix == octal) ? "   text\t   data\t    bss\t    oct\t    hex\tfilename" :
 	  "   text\t   data\t    bss\t    dec\t    hex\tfilename");
@@ -494,6 +527,16 @@ sysv_internal_sizer (bfd *file ATTRIBUTE_UNUSED, sec_ptr sec,
 }
 
 static void
+sysv_one_line (const char *name, bfd_size_type size, bfd_vma vma)
+{
+  printf ("%-*s   ", svi_namelen, name);
+  rprint_number (svi_sizelen, size);
+  printf ("   ");
+  rprint_number (svi_vmalen, vma);
+  printf ("\n");
+}
+
+static void
 sysv_internal_printer (bfd *file ATTRIBUTE_UNUSED, sec_ptr sec,
 		       void *ignore ATTRIBUTE_UNUSED)
 {
@@ -505,11 +548,9 @@ sysv_internal_printer (bfd *file ATTRIBUTE_UNUSED, sec_ptr sec,
     {
       svi_total += size;
 
-      printf ("%-*s   ", svi_namelen, bfd_section_name (file, sec));
-      rprint_number (svi_sizelen, size);
-      printf ("   ");
-      rprint_number (svi_vmalen, bfd_section_vma (file, sec));
-      printf ("\n");
+      sysv_one_line (bfd_section_name (file, sec),
+		     size,
+		     bfd_section_vma (file, sec));
     }
 }
 
@@ -521,6 +562,13 @@ print_sysv_format (bfd *file)
   svi_maxvma = 0;
   svi_namelen = 0;
   bfd_map_over_sections (file, sysv_internal_sizer, NULL);
+  if (show_common)
+    {
+      if (svi_namelen < (int) sizeof ("*COM*") - 1)
+	svi_namelen = sizeof ("*COM*") - 1;
+      svi_total += common_size;
+    }
+
   svi_vmalen = size_number ((bfd_size_type)svi_maxvma);
 
   if ((size_t) svi_vmalen < sizeof ("addr") - 1)
@@ -540,6 +588,11 @@ print_sysv_format (bfd *file)
 	  svi_sizelen, "size", svi_vmalen, "addr");
 
   bfd_map_over_sections (file, sysv_internal_printer, NULL);
+  if (show_common)
+    {
+      svi_total += common_size;
+      sysv_one_line ("*COM*", common_size, 0);
+    }
 
   printf ("%-*s   ", svi_namelen, "Total");
   rprint_number (svi_sizelen, svi_total);
@@ -549,6 +602,8 @@ print_sysv_format (bfd *file)
 static void
 print_sizes (bfd *file)
 {
+  if (show_common)
+    calculate_common_size (file);
   if (berkeley_format)
     print_berkeley_format (file);
   else

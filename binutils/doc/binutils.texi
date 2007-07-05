@@ -2070,6 +2070,7 @@ ar(1), nm(1), and the Info entries for @file{binutils}.
 size [@option{-A}|@option{-B}|@option{--format=}@var{compatibility}]
      [@option{--help}]
      [@option{-d}|@option{-o}|@option{-x}|@option{--radix=}@var{number}]
+     [@option{--common}]
      [@option{-t}|@option{--totals}]
      [@option{--target=}@var{bfdname}] [@option{-V}|@option{--version}]
      [@var{objfile}@dots{}]
@@ -2152,6 +2153,10 @@ section is given in decimal (@option{-d}, or @option{--radix=10}); octal
 values (8, 10, 16) are supported.  The total size is always given in two
 radices; decimal and hexadecimal for @option{-d} or @option{-x} output, or
 octal and hexadecimal if you're using @option{-o}.
+
+@item --common
+Print total size of common symbols in each file.  When using Berkeley
+format these are included in the bss size.
 
 @item -t
 @itemx --totals

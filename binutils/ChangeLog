@@ -1,5 +1,21 @@
 2007-07-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* doc/binutils.texi (size): Document --common.
+	* size.c: Make a number of vars static.  Delete unnecessary
+	function declarations.
+	(show_common, common_size): New vars.
+	(usage): Describe --common.
+	(OPTION_FORMAT, OPTION_RADIX, OPTION_TARGET): Define and use.
+	(long_options): Add common.
+	(calculate_common_size): New function.
+	(print_berkeley_format): Add common_size to bsssize.
+	(sysv_one_line): New function split out from..
+	(sysv_internal_printer): ..here.
+	(print_sysv_format): Handle display of *COM*.
+	(print_sizes): Call calculate_common_size.
+
+2007-07-05  Alan Modra  <amodra@bigpond.net.au>
+
 	* emul_aix.c (ar_emul_aix_internal): Rename "next" to "archive_next".
 
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
