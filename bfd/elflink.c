@@ -3674,8 +3674,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 tell it that we are about to handle an as-needed lib.  */
       if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
 				       notice_as_needed))
-	return FALSE;
-
+	goto error_free_vers;
 
       /* Clone the symbol table and sym hashes.  Remember some
 	 pointers into the symbol table, and dynamic symbol count.  */
@@ -4382,7 +4381,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 tell it that symbols added for crefs may need to be removed.  */
       if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
 				       notice_not_needed))
-	return FALSE;
+	goto error_free_vers;
 
       free (old_tab);
       objalloc_free_block ((struct objalloc *) htab->root.table.memory,
@@ -4396,7 +4395,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     {
       if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
 				       notice_needed))
-	return FALSE;
+	goto error_free_vers;
       free (old_tab);
       old_tab = NULL;
     }
