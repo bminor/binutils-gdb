@@ -1,4 +1,7 @@
 -*- text -*-
+* Linker sources now released under version 3 of the GNU General Public
+  License.
+
 * Added support for National Semicondutor CompactRISC (ie CR16) target.
 
 * -l:foo now searches the library path for a filename called foo,
@@ -32,7 +35,7 @@
   collection.
 
 * ARM: Added --vfp11-denorm-fix option to work around an erratum in current
-VFP11 coprocessors.
+  VFP11 coprocessors.
 
 Changes in 2.17:
 

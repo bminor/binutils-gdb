@@ -1,3 +1,45 @@
+2007-07-06  Nick Clifton  <nickc@redhat.com>
+
+	* lib/default.exp: Update copyright notice to refer to GPLv3.
+	* config/default.exp, ld-alpha/alpha.exp, ld-arm/arm-elf.exp,
+	ld-auto-import/auto-import.exp, ld-bootstrap/bootstrap.exp,
+	ld-cdtest/cdtest.exp, ld-checks/checks.exp, ld-cris/cris.exp,
+	ld-crx/crx.exp, ld-cygwin/exe-export.exp, ld-d10v/d10v.exp,
+	ld-discard/discard.exp, ld-elf/elf.exp, ld-elf/exclude.exp,
+	ld-elf/frame.exp, ld-elf/sec64k.exp, ld-elf/binutils.exp,
+	ld-elf/tls_common.exp, ld-elf/shared.exp, ld-elf/dwarf.exp,
+	ld-elf/wrap.exp, ld-elfcomm/elfcomm.exp, ld-elfvers/vers.exp,
+	ld-elfvsb/elfvsb.exp, ld-elfweak/elfweak.exp, ld-xc16x/xc16x.exp,
+	ld-fastcall/fastcall.exp, ld-frv/tls.exp, ld-h8300/h8300.exp,
+	ld-i386/i386.exp, ld-ia64/ia64.exp, ld-linkonce/linkonce.exp,
+	ld-m68hc11/m68hc11.exp, ld-maxq/maxq.exp,
+	ld-mips-elf/mips-elf-flags.exp, ld-mips-elf/mips-elf.exp,
+	ld-mmix/mmix.exp, ld-pe/pe.exp, ld-pe/direct.exp,
+	ld-powerpc/powerpc.exp, ld-s390/s390.exp, ld-scripts/align.exp,
+	ld-scripts/alignof.exp, ld-scripts/assert.exp,
+	ld-scripts/crossref.exp, ld-scripts/data.exp,
+	ld-scripts/default-script.exp, ld-scripts/defined.exp,
+	ld-scripts/empty-address.exp, ld-scripts/empty-aligned.exp,
+	ld-scripts/empty-orphan.exp, ld-scripts/expr.exp,
+	ld-scripts/extern.exp, ld-scripts/map-address.exp,
+	ld-scripts/overlay-size.exp, ld-scripts/phdrs.exp,
+	ld-scripts/phdrs2.exp, ld-scripts/provide.exp,
+	ld-scripts/script.exp, ld-scripts/size.exp, ld-scripts/sizeof.exp,
+	ld-scripts/sort.exp, ld-scripts/weak.exp,
+	ld-selective/sel-dump.exp, ld-selective/selective.exp,
+	ld-sh/arch/arch.exp, ld-sh/sh64/rd-sh64.exp, ld-sh/sh64/relax.exp,
+	ld-sh/sh64/relfail.exp, ld-sh/sh64/sh64.exp, ld-sh/rd-sh.exp,
+	ld-sh/sh.exp, ld-shared/shared.exp, ld-sparc/sparc.exp,
+	ld-srec/srec.exp, ld-undefined/undefined.exp,
+	ld-undefined/weak-undef.exp, ld-versados/versados.exp,
+	ld-x86-64/x86-64.exp, ld-xstormy16/xstormy16.exp,
+	ld-xtensa/coalesce.exp, ld-xtensa/lcall.exp, ld-pie/pie.exp,
+	ld-m68k/m68k.exp, ld-mep/mep.exp, ld-spu/spu.exp,
+	ld-vxworks/vxworks.exp, lib/ld-lib.exp: Likewise.
+	* ld-frv/frv-elf.exp: Add copyright notice.
+	* ld-libs/libs.exp, ld-sh/sh-vxworks.exp,
+	ld-scripts/dynamic-sections.exp, ld-v850.v850.exp: Likewise.
+	
 2007-07-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/powerpc.exp: Disable for lynxos and nto.

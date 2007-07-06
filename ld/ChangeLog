@@ -1,3 +1,32 @@
+2007-07-06  Nick Clifton  <nickc@redhat.com>
+
+	* deffile.h: Update copyright notice to refer to GPLv3.
+	* deffilep.y, ldcref.c, ldctor.c, ldctor.h, ldemul.c, ldemul.h,
+	ldexp.c, ldexp.h, ldfile.c, ldfile.h, ldgram.y, ld.h, ldlang.c,
+	ldlang.h, ldlex.h, ldlex.l, ldmain.c, ldmain.h, ldmisc.c,
+	ldmisc.h, ldver.c, ldver.h, ldwrite.c, ldwrite.h, lexsup.c, mri.c,
+	mri.h, pe-dll.c, pe-dll.h, pep-dll.c, pep-dll.h, stamp-h.in,
+	sysdep.h, emultempl/aix.em, emultempl/alphaelf.em,
+	emultempl/armcoff.em, emultempl/armelf.em, emultempl/avrelf.em,
+	emultempl/beos.em, emultempl/cr16elf.em, emultempl/crxelf.em,
+	emultempl/elf32.em, emultempl/elf-generic.em, emultempl/genelf.em,
+	emultempl/generic.em, emultempl/gld960c.em, emultempl/gld960.em,
+	emultempl/hppaelf.em, emultempl/ia64elf.em, emultempl/irix.em,
+	emultempl/linux.em, emultempl/lnk960.em, emultempl/m68hc1xelf.em,
+	emultempl/m68kcoff.em, emultempl/m68kelf.em,
+	emultempl/mipsecoff.em, emultempl/mipself.em,
+	emultempl/mmixelf.em, emultempl/mmix-elfnmmo.em, emultempl/mmo.em,
+	emultempl/needrelax.em, emultempl/pe.em, emultempl/pep.em,
+	emultempl/ppc32elf.em, emultempl/ppc64elf.em,
+	emultempl/scoreelf.em, emultempl/sh64elf.em, emultempl/spuelf.em,
+	emultempl/spu_ovl.S, emultempl/sunos.em, emultempl/ticoff.em,
+	emultempl/vanilla.em, emultempl/xtensaelf.em: Likewise.
+	* genscripts.sh: Add copyright notice.
+	* emultempl/netbsd.em, emultempl/vxworks.em, emultempl/z80.em:
+	Likewise.
+	* NEWS: Mention that the sources are now under GPLv3.
+	* configure: Regenerate.
+
 2007-07-05  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* ld.texinfo (--heap): Replace 'amount' with 'number of bytes'.
