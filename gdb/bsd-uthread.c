@@ -337,6 +337,12 @@ bsd_uthread_wait (ptid_t ptid, struct target_waitstatus *status)
   /* Pass the request to the layer beneath.  */
   ptid = find_target_beneath (bsd_uthread_ops_hack)->to_wait (ptid, status);
 
+  /* If the process is no longer alive, there's no point in figuring
+     out the thread ID.  It will fail anyway.  */
+  if (status->kind == TARGET_WAITKIND_SIGNALLED
+      || status->kind == TARGET_WAITKIND_EXITED)
+    return ptid;
+
   /* Fetch the corresponding thread ID, and augment the returned
      process ID with it.  */
   addr = read_memory_typed_address (bsd_uthread_thread_run_addr,

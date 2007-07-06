@@ -1,3 +1,8 @@
+2007-07-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* bsd-uthread.c (bsd_uthread_wait): Don't try to fetch thread IDs
+	for terminated processes.
+
 2007-07-05  Michael Snyder  <msnyder@access-company.com>
 
 	* event-top.c (cli_command_loop): Prompt string can (and should)
