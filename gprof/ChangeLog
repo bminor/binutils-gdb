@@ -1,3 +1,12 @@
+2007-07-06  Nick Clifton  <nickc@redhat.com>
+
+	* basic_blocks.c: Update copyright notice to refer to GPLv3.
+	* basic_blocks.h, bbconv.pl, bb_exit_func.c, call_graph.c,
+	call_graph.h, cg_print.c, cg_print.h, corefile.c, corefile.h,
+	flat_bl.m, gmon_io.c, gmon_io.h, gmon_out.h, hist.c, hist.h,
+	search_list.c, search_list.h, source.c, source.h, sym_ids.c,
+	sym_ids.h, symtab.c, symtab.h: Likewise.
+	
 2007-07-05  Tristan Gingold  <gingold@adacore.com>
 
 	* corefile.c (core_sym_class): Do not discard nested subprograms.
