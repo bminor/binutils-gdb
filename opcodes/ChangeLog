@@ -1,3 +1,10 @@
+2007-07-06  Mark Kettenis  <kettenis@gnu.org>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (i386-tbl.h): Add $(srcdir)/ to target.
+	(ia64-asmtab.c): Likewise.
+	* Makefile.in: Regenerate.
+
 2007-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aclocal.m4: Regenerated.

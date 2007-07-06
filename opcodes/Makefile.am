@@ -575,8 +575,8 @@ i386-gen: i386-gen.o
 
 i386-gen.o: i386-gen.c i386-opc.h
 
-i386-tbl.h: @MAINT@ i386-gen i386-opc.tbl i386-reg.tbl
-	./i386-gen --srcdir $(srcdir) > $(srcdir)/i386-tbl.h
+$(srcdir)/i386-tbl.h: @MAINT@ i386-gen i386-opc.tbl i386-reg.tbl
+	./i386-gen --srcdir $(srcdir) > $@
 
 ia64-gen: ia64-gen.o
 	$(LINK) ia64-gen.o $(LIBIBERTY)
@@ -584,8 +584,9 @@ ia64-gen: ia64-gen.o
 ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
   ia64-opc-i.c ia64-opc-m.c ia64-opc-d.c ia64-opc.h
 
-ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
-	./ia64-gen --srcdir $(srcdir) > $(srcdir)/ia64-asmtab.c
+$(srcdir)/ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl \
+  ia64-waw.tbl ia64-war.tbl
+	./ia64-gen --srcdir $(srcdir) > $@
 
 s390-mkopc: s390-mkopc.c
 	$(CC_FOR_BUILD) -o s390-mkopc $(srcdir)/s390-mkopc.c
