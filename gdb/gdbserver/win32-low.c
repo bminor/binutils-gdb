@@ -567,7 +567,15 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
     }
 
   if (strncmp (s, "cYg", 3) != 0)
-    monitor_output (s);
+    {
+      if (!server_waiting)
+	{
+	  OUTMSG2(("%s", s));
+	  return;
+	}
+
+      monitor_output (s);
+    }
 #undef READ_BUFFER_LEN
 }
 

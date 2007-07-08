@@ -1,5 +1,10 @@
 2007-07-08  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c (handle_output_debug_string): Ignore event if not
+	waiting.
+
+2007-07-08  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* win32-arm-low.c (arm_wince_breakpoint): Fix typo.
 
 2007-07-03  Daniel Jacobowitz  <dan@codesourcery.com>
