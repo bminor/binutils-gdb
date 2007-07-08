@@ -105,7 +105,7 @@ arm_store_inferior_register (win32_thread_info *th, int r)
 }
 
 /* Correct in either endianness.  We do not support Thumb yet.  */
-static const unsigned long arm_wince_breakpoint = 0xe6000001;
+static const unsigned long arm_wince_breakpoint = 0xe6000010;
 #define arm_wince_breakpoint_len 4
 
 struct win32_target_ops the_low_target = {

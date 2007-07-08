@@ -1,3 +1,7 @@
+2007-07-08  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* win32-arm-low.c (arm_wince_breakpoint): Fix typo.
+
 2007-07-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote-utils.c (look_up_one_symbol): Handle 'm' packets.
