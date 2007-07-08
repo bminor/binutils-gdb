@@ -1,3 +1,10 @@
+2007-07-08  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.am (HFILES): Add dwarf.h, sysdep.h and unwind-ia64.h.
+	(CFILES): Add unwind-ia64.c.
+	Regenerate dependencies.
+	* Makefile.in: Regenerate.
+
 2007-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* addr2line.c: Update copyright notice to refer to GPLv3.
