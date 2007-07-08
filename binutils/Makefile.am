@@ -80,8 +80,8 @@ INCLUDES = -D_GNU_SOURCE \
 
 HFILES = \
 	arsup.h binemul.h bucomm.h budbg.h \
-	coffgrok.h debug.h dlltool.h nlmconv.h \
-	windres.h winduni.h windint.h \
+	coffgrok.h debug.h dlltool.h dwarf.h nlmconv.h \
+	sysdep.h unwind-ia64.h windres.h winduni.h windint.h \
 	windmc.h
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h rcparse.h mcparse.h
@@ -96,7 +96,8 @@ CFILES = \
 	objcopy.c objdump.c prdbg.c \
 	rclex.c rdcoff.c rddbg.c readelf.c rename.c \
 	resbin.c rescoff.c resrc.c resres.c \
-	size.c srconv.c stabs.c strings.c sysdump.c version.c \
+	size.c srconv.c stabs.c strings.c sysdump.c \
+	unwind-ia64.c version.c \
 	windres.c winduni.c wrstabs.c \
 	windmc.c mclex.c
 
@@ -557,10 +558,11 @@ prdbg.o: prdbg.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/demangle.h $(INCDIR)/libiberty.h debug.h \
   budbg.h
-rclex.o: rclex.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+rclex.o: rclex.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
+  config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h bucomm.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/safe-ctype.h windres.h $(INCDIR)/ansidecl.h \
-  winduni.h windint.h rcparse.h
+  $(INCDIR)/safe-ctype.h windres.h winduni.h windint.h \
+  rcparse.h
 rdcoff.o: rdcoff.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(INCDIR)/libiberty.h \
@@ -636,6 +638,9 @@ sysdump.o: sysdump.c sysdep.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h bucomm.h \
   sysroff.h sysroff.c $(INCDIR)/ansidecl.h
+unwind-ia64.o: unwind-ia64.c unwind-ia64.h $(INCDIR)/elf/ia64.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/ansidecl.h ../bfd/bfd.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
 version.o: version.c sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bucomm.h
