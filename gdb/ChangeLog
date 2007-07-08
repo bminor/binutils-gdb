@@ -1,3 +1,8 @@
+2007-07-08  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* solib-target.c (library_list_start_segment): Cast address to
+	CORE_ADDR.
+
 2007-07-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* bsd-uthread.c (bsd_uthread_wait): Don't try to fetch thread IDs
