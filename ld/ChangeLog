@@ -1,3 +1,13 @@
+2007-07-09  Roland McGrath  <roland@redhat.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_add_option): Add --build-id.
+	(gld${EMULATION_NAME}_handle_option): Handle --build-id.
+	(gld${EMULATION_NAME}_list_options): List --build-id.
+	(gld${EMULATION_NAME}_after_open): If --build-id was given,
+	synthesize a ".note.gnu.build-id" section and cache it in elf_tdata.
+	* ld.texinfo (Options): Describe --build-id.
+	* NEWS: Mention --build-id.
+
 2007-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* deffile.h: Update copyright notice to refer to GPLv3.
@@ -122,10 +132,10 @@
 
 2007-06-11  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* emultempl/xtensaelf.em (replace_insn_sec_with_prop_sec): Use renamed
 	XTENSA_PROP_NO_TRANSFORM flag instead of XTENSA_PROP_INSN_NO_TRANSFORM.
-	
+
 2007-06-01  Noah Misch  <noah@cs.caltech.edu>
 	    Alan Modra  <amodra@bigpond.net.au>
 
@@ -201,7 +211,7 @@
 
 2007-05-05  Anatoly Sokolov <aesok@post.ru>
 
-	* multempl/avrelf.em (PARSE_AND_LIST_ARGS_CASES): Add new value for 
+	* multempl/avrelf.em (PARSE_AND_LIST_ARGS_CASES): Add new value for
 	"--pmem-wrap-around".
 	(PARSE_AND_LIST_OPTIONS): Describe new value for "--pmem-wrap-around".
 
