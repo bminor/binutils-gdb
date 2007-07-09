@@ -122,6 +122,7 @@
 #define elf_find_section		NAME(bfd_elf,find_section)
 #define elf_write_shdrs_and_ehdr	NAME(bfd_elf,write_shdrs_and_ehdr)
 #define elf_write_out_phdrs		NAME(bfd_elf,write_out_phdrs)
+#define elf_checksum_contents		NAME(bfd_elf,checksum_contents)
 #define elf_write_relocs		NAME(bfd_elf,write_relocs)
 #define elf_slurp_reloc_table		NAME(bfd_elf,slurp_reloc_table)
 
@@ -471,7 +472,7 @@ valid_section_index_p (unsigned index, unsigned num_sections)
   /* Note: We allow SHN_UNDEF as a valid section index.  */
   if (index < SHN_LORESERVE || index > SHN_HIRESERVE)
     return index < num_sections;
-  
+
   /* We disallow the use of reserved indcies, except for those
      with OS or Application specific meaning.  The test make use
      of the knowledge that:
@@ -1101,6 +1102,53 @@ elf_write_shdrs_and_ehdr (bfd *abfd)
     return FALSE;
 
   /* need to dump the string table too...  */
+
+  return TRUE;
+}
+
+bfd_boolean
+elf_checksum_contents (bfd *abfd,
+		       void (*process) (const void *, size_t, void *),
+		       void *arg)
+{
+  Elf_Internal_Ehdr *i_ehdrp = elf_elfheader (abfd);
+  Elf_Internal_Shdr **i_shdrp = elf_elfsections (abfd);
+  Elf_Internal_Phdr *i_phdrp = elf_tdata (abfd)->phdr;
+  unsigned int count, num;
+
+  {
+    Elf_External_Ehdr x_ehdr;
+    Elf_Internal_Ehdr i_ehdr;
+
+    i_ehdr = *i_ehdrp;
+    i_ehdr.e_phoff = i_ehdr.e_shoff = 0;
+    elf_swap_ehdr_out (abfd, &i_ehdr, &x_ehdr);
+    (*process) (&x_ehdr, sizeof x_ehdr, arg);
+  }
+
+  num = i_ehdrp->e_phnum;
+  for (count = 0; count < num; count++)
+    {
+      Elf_External_Phdr x_phdr;
+      elf_swap_phdr_out (abfd, &i_phdrp[count], &x_phdr);
+      (*process) (&x_phdr, sizeof x_phdr, arg);
+    }
+
+  num = elf_numsections (abfd);
+  for (count = 0; count < num; count++)
+    {
+      Elf_Internal_Shdr i_shdr;
+      Elf_External_Shdr x_shdr;
+
+      i_shdr = *i_shdrp[count];
+      i_shdr.sh_offset = 0;
+
+      elf_swap_shdr_out (abfd, &i_shdr, &x_shdr);
+      (*process) (&x_shdr, sizeof x_shdr, arg);
+
+      if (i_shdr.contents)
+	(*process) (i_shdr.contents, i_shdr.sh_size, arg);
+    }
 
   return TRUE;
 }
@@ -1803,6 +1851,7 @@ const struct elf_size_info NAME(_bfd_elf,size_info) = {
   ELFCLASS, EV_CURRENT,
   elf_write_out_phdrs,
   elf_write_shdrs_and_ehdr,
+  elf_checksum_contents,
   elf_write_relocs,
   elf_swap_symbol_in,
   elf_swap_symbol_out,
