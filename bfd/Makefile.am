@@ -1298,7 +1298,8 @@ efi-app-ia32.lo: efi-app-ia32.c $(INCDIR)/filenames.h \
   peicode.h libpei.h
 elf.lo: elf.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/libiberty.h
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/safe-ctype.h $(INCDIR)/md5.h
 elf32-am33lin.lo: elf32-am33lin.c $(INCDIR)/filenames.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/mn10300.h \

@@ -42,6 +42,8 @@ SECTION
 #define ARCH_SIZE 0
 #include "elf-bfd.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
+#include "md5.h"
 
 static int elf_sort_sections (const void *, const void *);
 static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
@@ -5073,6 +5075,149 @@ _bfd_elf_assign_file_positions_for_relocs (bfd *abfd)
   elf_tdata (abfd)->next_file_pos = off;
 }
 
+bfd_size_type
+_bfd_id_note_section_size (bfd *abfd, struct bfd_link_info *link_info)
+{
+  const char *style = link_info->emit_note_gnu_build_id;
+  bfd_size_type size;
+
+  abfd = abfd;
+
+  size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
+  size = BFD_ALIGN (size, 4);
+
+  if (!strcmp (style, "md5") || !strcmp (style, "uuid"))
+    size += 128 / 8;
+#if 0				/* libiberty has md5 but not sha1 */
+  else if (!strcmp (style, "sha1"))
+    size += 160 / 8;
+#endif
+  else if (!strncmp (style, "0x", 2))
+    {
+      /* ID is in string form (hex).  Convert to bits.  */
+      const char *id = style + 2;
+      do
+	{
+	  if (ISXDIGIT (id[0]) && ISXDIGIT (id[1]))
+	    {
+	      ++size;
+	      id += 2;
+	    }
+	  else if (*id == '-' || *id == ':')
+	    ++id;
+	  else
+	    {
+	      size = 0;
+	      break;
+	    }
+	} while (*id != '\0');
+    }
+  else
+    size = 0;
+
+  return size;
+}
+
+static unsigned char
+read_hex (const char xdigit)
+{
+  if (ISDIGIT (xdigit))
+    return xdigit - '0';
+  if (ISUPPER (xdigit))
+    return xdigit - 'A' + 0xa;
+  if (ISLOWER (xdigit))
+    return xdigit - 'a' + 0xa;
+  abort ();
+  return 0;
+}
+
+static bfd_boolean
+_bfd_elf_write_build_id_section (bfd *abfd, const char *style)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  asection *asec;
+  Elf_Internal_Shdr *i_shdr;
+  unsigned char *contents, *id_bits;
+  bfd_size_type size;
+  Elf_External_Note *e_note;
+
+  asec = elf_tdata (abfd)->note_gnu_build_id_sec;
+  if (asec->output_section == NULL)
+    {
+      _bfd_error_handler (_(".note.gnu.build-id section missing"));
+      return FALSE;
+    }
+  i_shdr = &elf_section_data (asec->output_section)->this_hdr;
+
+  if (i_shdr->contents == NULL)
+    {
+      BFD_ASSERT (asec->output_offset == 0);
+      i_shdr->contents = bfd_zalloc (abfd, i_shdr->sh_size);
+      if (i_shdr->contents == NULL)
+	return FALSE;
+    }
+  contents = i_shdr->contents + asec->output_offset;
+
+  e_note = (void *) contents;
+  size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
+  size = BFD_ALIGN (size, 4);
+  id_bits = contents + size;
+  size = asec->size - size;
+
+  bfd_h_put_32 (abfd, sizeof "GNU", &e_note->namesz);
+  bfd_h_put_32 (abfd, size, &e_note->descsz);
+  bfd_h_put_32 (abfd, NT_GNU_BUILD_ID, &e_note->type);
+  memcpy (e_note->name, "GNU", sizeof "GNU");
+
+  if (!strcmp (style, "md5"))
+    {
+      struct md5_ctx ctx;
+      md5_init_ctx (&ctx);
+      if (bed->s->checksum_contents (abfd,
+				     (void (*) (const void *, size_t, void *))
+				     &md5_process_bytes,
+				     &ctx))
+	md5_finish_ctx (&ctx, id_bits);
+      else
+	return FALSE;
+    }
+  else if (!strcmp (style, "uuid"))
+    {
+      int n;
+      int fd = open ("/dev/urandom", O_RDONLY);
+      if (fd < 0)
+	return FALSE;
+      n = read (fd, id_bits, size);
+      close (fd);
+      if (n < (int) size)
+	return FALSE;
+    }
+  else if (!strncmp (style, "0x", 2))
+    {
+      /* ID is in string form (hex).  Convert to bits.  */
+      const char *id = style + 2;
+      size_t n = 0;
+      do
+	{
+	  if (ISXDIGIT (id[0]) && ISXDIGIT (id[1]))
+	    {
+	      id_bits[n] = read_hex (*id++) << 4;
+	      id_bits[n++] |= read_hex (*id++);
+	    }
+	  else if (*id == '-' || *id == ':')
+	    ++id;
+	  else
+	    abort ();		/* Should have been validated earlier.  */
+	} while (*id != '\0');
+    }
+  else
+    abort ();			/* Should have been validated earlier.  */
+
+  size = i_shdr->sh_size;
+  return (bfd_seek (abfd, i_shdr->sh_offset, SEEK_SET) == 0
+	  && bfd_bwrite (i_shdr->contents, size, abfd) == size);
+}
+
 bfd_boolean
 _bfd_elf_write_object_contents (bfd *abfd)
 {
@@ -5081,6 +5226,7 @@ _bfd_elf_write_object_contents (bfd *abfd)
   Elf_Internal_Shdr **i_shdrp;
   bfd_boolean failed;
   unsigned int count, num_sec;
+  char *id_style;
 
   if (! abfd->output_has_begun
       && ! _bfd_elf_compute_section_file_positions (abfd, NULL))
@@ -5124,7 +5270,15 @@ _bfd_elf_write_object_contents (bfd *abfd)
     (*bed->elf_backend_final_write_processing) (abfd,
 						elf_tdata (abfd)->linker);
 
-  return bed->s->write_shdrs_and_ehdr (abfd);
+  if (!bed->s->write_shdrs_and_ehdr (abfd))
+    return FALSE;
+
+  /* This is last since write_shdrs_and_ehdr can touch i_shdrp[0].  */
+  id_style = elf_tdata (abfd)->emit_note_gnu_build_id;
+  if (id_style && !_bfd_elf_write_build_id_section (abfd, id_style))
+    return FALSE;
+
+  return TRUE;
 }
 
 bfd_boolean
