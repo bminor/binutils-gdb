@@ -866,6 +866,45 @@ gld${EMULATION_NAME}_after_open (void)
 {
   struct bfd_link_needed_list *needed, *l;
 
+  if (link_info.emit_note_gnu_build_id)
+    {
+      bfd *abfd;
+      asection *s;
+      bfd_size_type size;
+
+      abfd = link_info.input_bfds;
+
+      size = _bfd_id_note_section_size (abfd, &link_info);
+      if (size == 0)
+	{
+	  einfo ("%P: warning: unrecognized --build-id style ignored.\n");
+	  free (link_info.emit_note_gnu_build_id);
+	  link_info.emit_note_gnu_build_id = NULL;
+	}
+      else
+	{
+	  s = bfd_make_section_with_flags (abfd, ".note.gnu.build-id",
+					   SEC_ALLOC | SEC_LOAD
+					   | SEC_IN_MEMORY | SEC_LINKER_CREATED
+					   | SEC_READONLY | SEC_DATA);
+	  if (s != NULL && bfd_set_section_alignment (abfd, s, 2))
+	    {
+	      struct elf_obj_tdata *t = elf_tdata (output_bfd);
+	      t->emit_note_gnu_build_id = link_info.emit_note_gnu_build_id;
+	      t->note_gnu_build_id_sec = s;
+	      elf_section_type (s) = SHT_NOTE;
+	      s->size = size;
+	    }
+	  else
+	    {
+	      einfo ("%P: warning: Cannot create .note.gnu.build-id section,"
+		     " --build-id ignored.\n");
+	      free (link_info.emit_note_gnu_build_id);
+	      link_info.emit_note_gnu_build_id = NULL;
+	    }
+	}
+    }
+
   if (link_info.eh_frame_hdr
       && ! link_info.traditional_format
       && ! link_info.relocatable)
@@ -1760,6 +1799,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #define OPTION_EH_FRAME_HDR		(OPTION_GROUP + 1)
 #define OPTION_EXCLUDE_LIBS		(OPTION_EH_FRAME_HDR + 1)
 #define OPTION_HASH_STYLE		(OPTION_EXCLUDE_LIBS + 1)
+#define OPTION_BUILD_ID			(OPTION_HASH_STYLE + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -1768,6 +1808,7 @@ gld${EMULATION_NAME}_add_options
 {
   static const char xtra_short[] = "${PARSE_AND_LIST_SHORTOPTS}z:";
   static const struct option xtra_long[] = {
+    {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
 EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
@@ -1798,6 +1839,8 @@ cat >>e${EMULATION_NAME}.c <<EOF
   memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
 }
 
+#define DEFAULT_BUILD_ID_STYLE	"md5"
+
 static bfd_boolean
 gld${EMULATION_NAME}_handle_option (int optc)
 {
@@ -1805,6 +1848,18 @@ gld${EMULATION_NAME}_handle_option (int optc)
     {
     default:
       return FALSE;
+
+    case OPTION_BUILD_ID:
+      if (link_info.emit_note_gnu_build_id != NULL)
+	{
+	  free (link_info.emit_note_gnu_build_id);
+	  link_info.emit_note_gnu_build_id = NULL;
+	}
+      if (optarg == NULL)
+	optarg = DEFAULT_BUILD_ID_STYLE;
+      if (strcmp (optarg, "none"))
+	link_info.emit_note_gnu_build_id = xstrdup (optarg);
+      break;
 
 EOF
 
@@ -1959,6 +2014,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 static void
 gld${EMULATION_NAME}_list_options (FILE * file)
 {
+  fprintf (file, _("  --build-id[=STYLE]\tGenerate build ID note\n"));
 EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then

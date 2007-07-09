@@ -2,6 +2,9 @@
 * Linker sources now released under version 3 of the GNU General Public
   License.
 
+* ELF: New --build-id option to generate a unique per-binary identifier
+  embedded in a note section.
+
 * Added support for National Semicondutor CompactRISC (ie CR16) target.
 
 * -l:foo now searches the library path for a filename called foo,
@@ -107,7 +110,7 @@ Changes in 2.15:
 
 * ELF: --as-needed/--no-as-needed options to control if a DT_NEEDED tag should
   be added only when a shared library is referenced.
-  
+
 * PE: --large-address-aware option to indicate executables support virtual
   addresses greater than 2 gigabytes.
 
@@ -143,7 +146,7 @@ Changes in 2.14:
 
 * Support for Texas Instruments TMS320C4x and TMS320C3x series of
   DSP's contributed by Michael Hayes and Svein E. Seldal.
-  
+
 * Added --with-lib-path configure switch to specify default value for
   LIB_PATH.
 
@@ -192,7 +195,7 @@ Changes in version 2.11:
 * TI C54x support, by Timothy Wall.
 
 * Added command line switch --section-start to set the start address of any
-  specified section. 
+  specified section.
 
 * Added ability to emit full relocation information in linked executables,
   enabled by --emit-relocs.  Some post-linkage optimization tools need
@@ -208,10 +211,10 @@ Changes in version 2.11:
 
 Changes in version 2.10:
 
-* Added AT> to the linker script language to allow load-time allocation of 
+* Added AT> to the linker script language to allow load-time allocation of
   sections into regions.
 
-* Added garbage collection of unused sections, enabled by --gc-sections. 
+* Added garbage collection of unused sections, enabled by --gc-sections.
   It does require a bit of backend support; currently implemented are
   arm-elf, avr-elf, d10v-elf, fr30-elf, i386-elf, m32r-elf, m68k-elf,
   mcore-elf, mips-elf, mn10300-elf, ppc-elf, sh-elf, sparc-elf, and v850-elf.

@@ -1143,7 +1143,7 @@ platforms which support shared libraries.
 @kindex -Bsymbolic-functions
 @item -Bsymbolic-functions
 When creating a shared library, bind references to global function
-symbols to the definition within the shared library, if any. 
+symbols to the definition within the shared library, if any.
 This option is only meaningful on ELF platforms which support shared
 libraries.
 
@@ -1966,6 +1966,28 @@ has been used.
 The @option{--reduce-memory-overheads} switch may be also be used to
 enable other tradeoffs in future versions of the linker.
 
+@kindex --build-id
+@kindex --build-id=@var{style}
+@item --build-id
+@itemx --build-id=@var{style}
+Request creation of @code{.note.gnu.build-id} ELF note section.
+The contents of the note are unique bits identifying this linked
+file.  @var{style} can be @code{uuid} to use 128 random bits,
+@code{md5} to use a 128-bit @sc{MD5} hash on the normative parts
+of the output contents, or @code{0x@var{hexstring}} to use a
+chosen bit string specified as an even number of hexadecimal
+digits (@code{-} and @code{:} characters between digit pairs are
+ignored).  If @var{style} is omitted, @code{md5} is used.
+
+The @code{md5} style produces an identifier that is always the
+same in an identical output file, but will be unique among all
+nonidentical output files.  It is not intended to be compared as
+a checksum for the file's contents.  A linked file may be
+changed later by other tools, but the build ID bit string
+identifying the original linked file does not change.
+
+Passing @code{none} for @var{style} disables the setting from any
+@code{--build-id} options earlier on the command line.
 @end table
 
 @c man end
@@ -2200,9 +2222,9 @@ documentation for ld's @code{--enable-auto-import} for details."
 
 This message occurs when some (sub)expression accesses an address
 ultimately given by the sum of two constants (Win32 import tables only
-allow one).  Instances where this may occur include accesses to member 
-fields of struct variables imported from a DLL, as well as using a 
-constant index into an array variable imported from a DLL.  Any 
+allow one).  Instances where this may occur include accesses to member
+fields of struct variables imported from a DLL, as well as using a
+constant index into an array variable imported from a DLL.  Any
 multiword variable (arrays, structs, long long, etc) may trigger
 this error condition.  However, regardless of the exact data type
 of the offending exported variable, ld will always detect it, issue
@@ -2215,14 +2237,14 @@ One way is to use --enable-runtime-pseudo-reloc switch. This leaves the task
 of adjusting references in your client code for runtime environment, so
 this method works only when runtime environment supports this feature.
 
-A second solution is to force one of the 'constants' to be a variable -- 
-that is, unknown and un-optimizable at compile time.  For arrays, 
-there are two possibilities: a) make the indexee (the array's address) 
+A second solution is to force one of the 'constants' to be a variable --
+that is, unknown and un-optimizable at compile time.  For arrays,
+there are two possibilities: a) make the indexee (the array's address)
 a variable, or b) make the 'constant' index a variable.  Thus:
 
 @example
 extern type extern_array[];
-extern_array[1] --> 
+extern_array[1] -->
    @{ volatile type *t=extern_array; t[1] @}
 @end example
 
@@ -2230,16 +2252,16 @@ or
 
 @example
 extern type extern_array[];
-extern_array[1] --> 
+extern_array[1] -->
    @{ volatile int t=1; extern_array[t] @}
 @end example
 
-For structs (and most other multiword data types) the only option 
+For structs (and most other multiword data types) the only option
 is to make the struct itself (or the long long, or the ...) variable:
 
 @example
 extern struct s extern_struct;
-extern_struct.field --> 
+extern_struct.field -->
    @{ volatile struct s *t=&extern_struct; t->field @}
 @end example
 
@@ -2252,12 +2274,12 @@ extern_ll -->
 @end example
 
 A third method of dealing with this difficulty is to abandon
-'auto-import' for the offending symbol and mark it with 
+'auto-import' for the offending symbol and mark it with
 @code{__declspec(dllimport)}.  However, in practise that
 requires using compile-time #defines to indicate whether you are
-building a DLL, building client code that will link to the DLL, or 
-merely building/linking to a static library.   In making the choice 
-between the various methods of resolving the 'direct address with 
+building a DLL, building client code that will link to the DLL, or
+merely building/linking to a static library.   In making the choice
+between the various methods of resolving the 'direct address with
 constant offset' problem, you should consider typical real-world usage:
 
 Original:
@@ -2302,7 +2324,7 @@ void main(int argc, char **argv)@{
 @}
 @end example
 
-A fourth way to avoid this problem is to re-code your 
+A fourth way to avoid this problem is to re-code your
 library to use a functional interface rather than a data interface
 for the offending variables (e.g. set_foo() and get_foo() accessor
 functions).
@@ -2310,7 +2332,7 @@ functions).
 
 @kindex --disable-auto-import
 @item --disable-auto-import
-Do not attempt to do sophisticated linking of @code{_symbol} to 
+Do not attempt to do sophisticated linking of @code{_symbol} to
 @code{__imp__symbol} for DATA imports from DLLs.
 [This option is specific to the i386 PE targeted port of the linker]
 
@@ -2319,7 +2341,7 @@ Do not attempt to do sophisticated linking of @code{_symbol} to
 If your code contains expressions described in --enable-auto-import section,
 that is, DATA imports from DLL with non-zero offset, this switch will create
 a vector of 'runtime pseudo relocations' which can be used by runtime
-environment to adjust references to such data in your client code. 
+environment to adjust references to such data in your client code.
 [This option is specific to the i386 PE targeted port of the linker]
 
 @kindex --disable-runtime-pseudo-reloc
@@ -3096,7 +3118,7 @@ Then the C source code to perform the copy would be:
 @smallexample
 @group
   extern char start_of_ROM, end_of_ROM, start_of_FLASH;
-  
+
   memcpy (& start_of_FLASH, & start_of_ROM, & end_of_ROM - & start_of_ROM);
 @end group
 @end smallexample
@@ -3416,7 +3438,7 @@ sections have the same name.
 It will sort the input sections by alignment first, then by name if 2
 sections have the same alignment.
 @item
-@code{SORT_BY_NAME} (@code{SORT_BY_NAME} (wildcard section pattern)) is 
+@code{SORT_BY_NAME} (@code{SORT_BY_NAME} (wildcard section pattern)) is
 treated the same as @code{SORT_BY_NAME} (wildcard section pattern).
 @item
 @code{SORT_BY_ALIGNMENT} (@code{SORT_BY_ALIGNMENT} (wildcard section pattern))
@@ -4191,12 +4213,12 @@ output sections directed to a memory region are too large for the
 region, the linker will issue an error message.
 
 It is possible to access the origin and length of a memory in an
-expression via the @code{ORIGIN(@var{memory})} and 
+expression via the @code{ORIGIN(@var{memory})} and
 @code{LENGTH(@var{memory})} functions:
 
 @smallexample
 @group
-  _fstack = ORIGIN(ram) + LENGTH(ram) - 4;  
+  _fstack = ORIGIN(ram) + LENGTH(ram) - 4;
 @end group
 @end smallexample
 
@@ -4397,10 +4419,10 @@ VERS_1.2 @{
 
 VERS_2.0 @{
 		 bar1; bar2;
-	 extern "C++" @{       
+	 extern "C++" @{
 		 ns::*;
 		 "int f(int, double)";
-         @}         
+         @}
 @} VERS_1.2;
 @end smallexample
 
@@ -4518,7 +4540,7 @@ You can also specify the language in the version script:
 VERSION extern "lang" @{ version-script-commands @}
 @end smallexample
 
-The supported @samp{lang}s are @samp{C}, @samp{C++}, and @samp{Java}. 
+The supported @samp{lang}s are @samp{C}, @samp{C++}, and @samp{Java}.
 The linker will iterate over the list of symbols at the link time and
 demangle them according to @samp{lang} before matching them to the
 patterns specified in @samp{version-script-commands}.
@@ -5284,20 +5306,20 @@ page of memory, and changes them to use the eight-bit address form.
 top page of memory).
 
 @item bit manipulation instructions
-@command{ld} finds all bit manipulation instructions like @code{band, bclr, 
+@command{ld} finds all bit manipulation instructions like @code{band, bclr,
 biand, bild, bior, bist, bixor, bld, bnot, bor, bset, bst, btst, bxor}
-which use 32 bit and 16 bit absolute address form, but refer to the top 
+which use 32 bit and 16 bit absolute address form, but refer to the top
 page of memory, and changes them to use the 8 bit address form.
 (That is: the linker turns @samp{bset #xx:3,@code{@@}@var{aa}:32} into
-@samp{bset #xx:3,@code{@@}@var{aa}:8} whenever the address @var{aa} is in 
+@samp{bset #xx:3,@code{@@}@var{aa}:8} whenever the address @var{aa} is in
 the top page of memory).
 
 @item system control instructions
-@command{ld} finds all @code{ldc.w, stc.w} instructions which use the 
-32 bit absolute address form, but refer to the top page of memory, and 
+@command{ld} finds all @code{ldc.w, stc.w} instructions which use the
+32 bit absolute address form, but refer to the top page of memory, and
 changes them to use 16 bit address form.
 (That is: the linker turns @samp{ldc.w @code{@@}@var{aa}:32,ccr} into
-@samp{ldc.w @code{@@}@var{aa}:16,ccr} whenever the address @var{aa} is in 
+@samp{ldc.w @code{@@}@var{aa}:16,ccr} whenever the address @var{aa} is in
 the top page of memory).
 @end table
 
@@ -5422,7 +5444,7 @@ addressing mode. These instructions consists of @code{bclr} or
 @cindex trampoline generation on M68HC12
 For 68HC11 and 68HC12, @command{ld} can generate trampoline code to
 call a far function using a normal @code{jsr} instruction. The linker
-will also change the relocation to some far function to use the 
+will also change the relocation to some far function to use the
 trampoline address instead of the function address. This is typically the
 case when a pointer to a function is taken. The pointer will in fact
 point to the function trampoline.
@@ -5663,14 +5685,14 @@ in this section will be uploaded to the MPU.
 Defines an information memory section (if applicable).  Any code in
 this section will be uploaded to the MPU.
 
-@item @samp{.infomemnobits} 
+@item @samp{.infomemnobits}
 This is the same as the @samp{.infomem} section except that any code
 in this section will not be uploaded to the MPU.
 
 @item @samp{.noinit}
 Denotes a portion of RAM located above @samp{.bss} section.
 
-The last two sections are used by gcc. 
+The last two sections are used by gcc.
 @end table
 
 @ifclear GENERIC
@@ -5907,7 +5929,7 @@ on calls to non-overlay regions.
 the address range 0 to 256k.  This option may be used to change the
 range.  Disable the check entirely with @option{--local-store=0:0}.
 
-@cindex SPU 
+@cindex SPU
 @kindex --stack-analysis
 @item --stack-analysis
 SPU local store space is limited.  Over-allocation of stack space
@@ -5926,7 +5948,7 @@ dynamic allocation, e.g. alloca, will not be detected.  If a link map
 is requested, detailed information about each function's stack usage
 and calls will be given.
 
-@cindex SPU 
+@cindex SPU
 @kindex --emit-stack-syms
 @item --emit-stack-syms
 This option, if given along with @option{--stack-analysis} will result
@@ -5936,7 +5958,7 @@ functions, and @code{__stack_<number>_<function_name>} for static
 functions.  @code{<number>} is the section id in hex.  The value of
 such symbols is the stack requirement for the corresponding function.
 The symbol size will be zero, type @code{STT_NOTYPE}, binding
-@code{STB_LOCAL}, and section @code{SHN_ABS}. 
+@code{STB_LOCAL}, and section @code{SHN_ABS}.
 @end table
 
 @ifclear GENERIC
@@ -5972,13 +5994,13 @@ header format depends on the default specified by the specific target.
 @node WIN32
 @section @command{ld} and WIN32 (cygwin/mingw)
 
-This section describes some of the win32 specific @command{ld} issues. 
+This section describes some of the win32 specific @command{ld} issues.
 See @ref{Options,,Command Line Options} for detailed description of the
 command line options mentioned here.
 
 @table @emph
-@cindex import libraries 
-@item import libraries 
+@cindex import libraries
+@item import libraries
 The standard Windows linker creates and uses so-called import
 libraries, which contains information for linking to dll's.  They are
 regular static archives and are handled as any other static
@@ -5986,8 +6008,8 @@ archive.  The cygwin and mingw ports of @command{ld} have specific
 support for creating such libraries provided with the
 @samp{--out-implib} command line option.
 
-@item   exporting DLL symbols 
-@cindex exporting DLL symbols 
+@item   exporting DLL symbols
+@cindex exporting DLL symbols
 The cygwin/mingw @command{ld} has several ways to export symbols for dll's.
 
 @table @emph
@@ -6002,7 +6024,7 @@ which is controlled by the following command line options:
 @item --exclude-libs
 @end itemize
 
-If, however, @samp{--export-all-symbols} is not given explicitly on the 
+If, however, @samp{--export-all-symbols} is not given explicitly on the
 command line, then the default auto-export behavior will be @emph{disabled}
 if either of the following are true:
 
@@ -6011,8 +6033,8 @@ if either of the following are true:
 @item Any symbol in any object file was marked with the __declspec(dllexport) attribute.
 @end itemize
 
-@item   using a DEF file 
-@cindex using a DEF file 
+@item   using a DEF file
+@cindex using a DEF file
 Another way of exporting symbols is using a DEF file.  A DEF file is
 an ASCII file containing definitions of symbols which should be
 exported when a dll is created.  Usually it is named @samp{<dll
@@ -6037,7 +6059,7 @@ bar
 _bar = bar
 another_foo = abc.dll.afoo
 var1 DATA
-@end example 
+@end example
 
 This example defines a DLL with a non-default base address and five
 symbols in the export table. The third exported symbol @code{_bar} is an
@@ -6053,11 +6075,11 @@ the default library suffix, @samp{.DLL} is appended.
 When the .DEF file is used to build an application, rather than a
 library, the @code{NAME <name>} command should be used instead of
 @code{LIBRARY}. If @samp{<name>} does not include a suffix, the default
-executable suffix, @samp{.EXE} is appended. 
+executable suffix, @samp{.EXE} is appended.
 
 With either @code{LIBRARY <name>} or @code{NAME <name>} the optional
 specification @code{BASE = <number>} may be used to specify a
-non-default base address for the image. 
+non-default base address for the image.
 
 If neither @code{LIBRARY <name>} nor  @code{NAME <name>} is specified,
 or they specify an empty string, the internal name is the same as the
@@ -6070,7 +6092,7 @@ EXPORTS
   ( (  ( <name1> [ = <name2> ] )
      | ( <name1> = <module-name> . <external-name>))
   [ @@ <integer> ] [NONAME] [DATA] [CONSTANT] [PRIVATE] ) *
-@end example 
+@end example
 
 Declares @samp{<name1>} as an exported symbol from the DLL, or declares
 @samp{<name1>} as an exported alias for @samp{<name2>}; or declares
@@ -6105,7 +6127,7 @@ it into the static import library used to resolve imports at link time. The
 symbol can still be imported using the @code{LoadLibrary/GetProcAddress}
 API at runtime or by by using the GNU ld extension of linking directly to
 the DLL without an import library.
- 
+
 See ld/deffilep.y in the binutils sources for the full specification of
 other DEF file statements
 
@@ -6130,7 +6152,7 @@ this way, then the normal auto-export behavior is disabled, unless
 the @samp{--export-all-symbols} option is also used.
 
 Note that object files that wish to access these symbols must @emph{not}
-decorate them with dllexport.  Instead, they should use dllimport, 
+decorate them with dllexport.  Instead, they should use dllimport,
 instead:
 
 @example
@@ -6138,63 +6160,63 @@ __declspec(dllimport) int a_variable
 __declspec(dllimport) void a_function(int with_args)
 @end example
 
-This complicates the structure of library header files, because 
-when included by the library itself the header must declare the 
+This complicates the structure of library header files, because
+when included by the library itself the header must declare the
 variables and functions as dllexport, but when included by client
 code the header must declare them as dllimport.  There are a number
-of idioms that are typically used to do this; often client code can 
+of idioms that are typically used to do this; often client code can
 omit the __declspec() declaration completely.  See
 @samp{--enable-auto-import} and @samp{automatic data imports} for more
 information.
-@end table 
+@end table
 
 @cindex automatic data imports
 @item automatic data imports
 The standard Windows dll format supports data imports from dlls only
 by adding special decorations (dllimport/dllexport), which let the
 compiler produce specific assembler instructions to deal with this
-issue.  This increases the effort necessary to port existing Un*x 
+issue.  This increases the effort necessary to port existing Un*x
 code to these platforms, especially for large
 c++ libraries and applications.  The auto-import feature, which was
-initially provided by Paul Sokolovsky, allows one to omit the 
+initially provided by Paul Sokolovsky, allows one to omit the
 decorations to achieve a behavior that conforms to that on POSIX/Un*x
-platforms. This feature is enabled with the @samp{--enable-auto-import} 
+platforms. This feature is enabled with the @samp{--enable-auto-import}
 command-line option, although it is enabled by default on cygwin/mingw.
 The @samp{--enable-auto-import} option itself now serves mainly to
 suppress any warnings that are ordinarily emitted when linked objects
 trigger the feature's use.
 
-auto-import of variables does not always work flawlessly without 
+auto-import of variables does not always work flawlessly without
 additional assistance.  Sometimes, you will see this message
 
-"variable '<var>' can't be auto-imported. Please read the 
+"variable '<var>' can't be auto-imported. Please read the
 documentation for ld's @code{--enable-auto-import} for details."
 
-The @samp{--enable-auto-import} documentation explains why this error 
-occurs, and several methods that can be used to overcome this difficulty.  
-One of these methods is the @emph{runtime pseudo-relocs} feature, described 
+The @samp{--enable-auto-import} documentation explains why this error
+occurs, and several methods that can be used to overcome this difficulty.
+One of these methods is the @emph{runtime pseudo-relocs} feature, described
 below.
 
 @cindex runtime pseudo-relocation
-For complex variables imported from DLLs (such as structs or classes), 
-object files typically contain a base address for the variable and an 
-offset (@emph{addend}) within the variable--to specify a particular 
-field or public member, for instance.  Unfortunately, the runtime loader used 
-in win32 environments is incapable of fixing these references at runtime 
+For complex variables imported from DLLs (such as structs or classes),
+object files typically contain a base address for the variable and an
+offset (@emph{addend}) within the variable--to specify a particular
+field or public member, for instance.  Unfortunately, the runtime loader used
+in win32 environments is incapable of fixing these references at runtime
 without the additional information supplied by dllimport/dllexport decorations.
-The standard auto-import feature described above is unable to resolve these 
+The standard auto-import feature described above is unable to resolve these
 references.
 
-The @samp{--enable-runtime-pseudo-relocs} switch allows these references to 
-be resolved without error, while leaving the task of adjusting the references 
-themselves (with their non-zero addends) to specialized code provided by the 
-runtime environment.  Recent versions of the cygwin and mingw environments and 
-compilers provide this runtime support; older versions do not.  However, the 
-support is only necessary on the developer's platform; the compiled result will 
+The @samp{--enable-runtime-pseudo-relocs} switch allows these references to
+be resolved without error, while leaving the task of adjusting the references
+themselves (with their non-zero addends) to specialized code provided by the
+runtime environment.  Recent versions of the cygwin and mingw environments and
+compilers provide this runtime support; older versions do not.  However, the
+support is only necessary on the developer's platform; the compiled result will
 run without error on an older system.
 
-@samp{--enable-runtime-pseudo-relocs} is not the default; it must be explicitly 
-enabled as needed. 
+@samp{--enable-runtime-pseudo-relocs} is not the default; it must be explicitly
+enabled as needed.
 
 @cindex direct linking to a dll
 @item direct linking to a dll
@@ -6202,16 +6224,16 @@ The cygwin/mingw ports of @command{ld} support the direct linking,
 including data symbols, to a dll without the usage of any import
 libraries.  This is much faster and uses much less memory than does the
 traditional import library method, especially when linking large
-libraries or applications.  When @command{ld} creates an import lib, each 
-function or variable exported from the dll is stored in its own bfd, even 
-though a single bfd could contain many exports.  The overhead involved in 
+libraries or applications.  When @command{ld} creates an import lib, each
+function or variable exported from the dll is stored in its own bfd, even
+though a single bfd could contain many exports.  The overhead involved in
 storing, loading, and processing so many bfd's is quite large, and explains the
-tremendous time, memory, and storage needed to link against particularly 
+tremendous time, memory, and storage needed to link against particularly
 large or complex libraries when using import libs.
 
-Linking directly to a dll uses no extra command-line switches other than 
+Linking directly to a dll uses no extra command-line switches other than
 @samp{-L} and @samp{-l}, because @command{ld} already searches for a number
-of names to match each library.  All that is needed from the developer's 
+of names to match each library.  All that is needed from the developer's
 perspective is an understanding of this search, in order to force ld to
 select the dll instead of an import library.
 
@@ -6231,14 +6253,14 @@ xxx.dll
 
 before moving on to the next directory in the search path.
 
-(*) Actually, this is not @samp{cygxxx.dll} but in fact is @samp{<prefix>xxx.dll}, 
-where @samp{<prefix>} is set by the @command{ld} option 
-@samp{--dll-search-prefix=<prefix>}. In the case of cygwin, the standard gcc spec 
-file includes @samp{--dll-search-prefix=cyg}, so in effect we actually search for 
+(*) Actually, this is not @samp{cygxxx.dll} but in fact is @samp{<prefix>xxx.dll},
+where @samp{<prefix>} is set by the @command{ld} option
+@samp{--dll-search-prefix=<prefix>}. In the case of cygwin, the standard gcc spec
+file includes @samp{--dll-search-prefix=cyg}, so in effect we actually search for
 @samp{cygxxx.dll}.
 
-Other win32-based unix environments, such as mingw or pw32, may use other 
-@samp{<prefix>}es, although at present only cygwin makes use of this feature.  It 
+Other win32-based unix environments, such as mingw or pw32, may use other
+@samp{<prefix>}es, although at present only cygwin makes use of this feature.  It
 was originally intended to help avoid name conflicts among dll's built for the
 various win32/un*x environments, so that (for example) two versions of a zlib dll
 could coexist on the same machine.
@@ -6252,16 +6274,16 @@ bin/
 	cygxxx.dll
 lib/
 	libxxx.dll.a   (in case of dll's)
-	libxxx.a       (in case of static archive) 
+	libxxx.a       (in case of static archive)
 @end example
 
-Linking directly to a dll without using the import library can be 
-done two ways: 
+Linking directly to a dll without using the import library can be
+done two ways:
 
 1. Use the dll directly by adding the @samp{bin} path to the link line
 @example
 gcc -Wl,-verbose  -o a.exe -L../bin/ -lxxx
-@end example 
+@end example
 
 However, as the dll's often have version numbers appended to their names
 (@samp{cygncurses-5.dll}) this will often fail, unless one specifies
@@ -6275,13 +6297,13 @@ making the app/dll.
 
 @example
 ln -s bin/cygxxx.dll lib/[cyg|lib|]xxx.dll[.a]
-@end example 
+@end example
 
 Then you can link without any make environment changes.
 
 @example
 gcc -Wl,-verbose  -o a.exe -L../lib/ -lxxx
-@end example 
+@end example
 
 This technique also avoids the version number problems, because the following is
 perfectly legal
@@ -6290,7 +6312,7 @@ perfectly legal
 bin/
 	cygxxx-5.dll
 lib/
-	libxxx.dll.a -> ../bin/cygxxx-5.dll 
+	libxxx.dll.a -> ../bin/cygxxx-5.dll
 @end example
 
 Linking directly to a dll without using an import lib will work
@@ -6315,71 +6337,71 @@ in which symbols are usually exported as undecorated aliases of their
 stdcall-decorated assembly names.
 
 So, import libs are not going away.  But the ability to replace
-true import libs with a simple symbolic link to (or a copy of) 
-a dll, in many cases, is a useful addition to the suite of tools 
-binutils makes available to the win32 developer.  Given the 
+true import libs with a simple symbolic link to (or a copy of)
+a dll, in many cases, is a useful addition to the suite of tools
+binutils makes available to the win32 developer.  Given the
 massive improvements in memory requirements during linking, storage
 requirements, and linking speed, we expect that many developers
 will soon begin to use this feature whenever possible.
 
-@item symbol aliasing  
+@item symbol aliasing
 @table @emph
-@item adding additional names 
-Sometimes, it is useful to export symbols with additional names.  
+@item adding additional names
+Sometimes, it is useful to export symbols with additional names.
 A symbol @samp{foo} will be exported as @samp{foo}, but it can also be
 exported as @samp{_foo} by using special directives in the DEF file
 when creating the dll.  This will affect also the optional created
-import library.  Consider the following DEF file: 
+import library.  Consider the following DEF file:
 
-@example 
+@example
 LIBRARY "xyz.dll" BASE=0x61000000
 
 EXPORTS
-foo 
+foo
 _foo = foo
-@end example 
+@end example
 
 The line @samp{_foo = foo} maps the symbol @samp{foo} to @samp{_foo}.
 
 Another method for creating a symbol alias is to create it in the
 source code using the "weak" attribute:
 
-@example 
-void foo () @{ /* Do something.  */; @} 
+@example
+void foo () @{ /* Do something.  */; @}
 void _foo () __attribute__ ((weak, alias ("foo")));
-@end example 
+@end example
 
 See the gcc manual for more information about attributes and weak
 symbols.
 
 @item renaming symbols
 Sometimes it is useful to rename exports.  For instance, the cygwin
-kernel does this regularly.  A symbol @samp{_foo} can be exported as 
+kernel does this regularly.  A symbol @samp{_foo} can be exported as
 @samp{foo} but not as @samp{_foo} by using special directives in the
 DEF file. (This will also affect the import library, if it is
-created).  In the following example: 
+created).  In the following example:
 
-@example 
+@example
 LIBRARY "xyz.dll" BASE=0x61000000
 
 EXPORTS
 _foo = foo
-@end example 
+@end example
 
 The line @samp{_foo = foo} maps the exported symbol @samp{foo} to
 @samp{_foo}.
-@end table 
+@end table
 
 Note: using a DEF file disables the default auto-export behavior,
-unless the @samp{--export-all-symbols} command line option is used. 
+unless the @samp{--export-all-symbols} command line option is used.
 If, however, you are trying to rename symbols, then you should list
-@emph{all} desired exports in the DEF file, including the symbols 
-that are not being renamed, and do @emph{not} use the 
-@samp{--export-all-symbols} option.  If you list only the 
-renamed symbols in the DEF file, and use @samp{--export-all-symbols} 
-to handle the other symbols, then the both the new names @emph{and} 
-the original names for the renamed symbols will be exported.  
-In effect, you'd be aliasing those symbols, not renaming them, 
+@emph{all} desired exports in the DEF file, including the symbols
+that are not being renamed, and do @emph{not} use the
+@samp{--export-all-symbols} option.  If you list only the
+renamed symbols in the DEF file, and use @samp{--export-all-symbols}
+to handle the other symbols, then the both the new names @emph{and}
+the original names for the renamed symbols will be exported.
+In effect, you'd be aliasing those symbols, not renaming them,
 which is probably not what you wanted.
 
 @cindex weak externals
@@ -6615,7 +6637,7 @@ location where that name is stored in memory; perhaps, if the name
 were different, the contents of that location would fool the linker
 into doing the right thing despite the bug.  Play it safe and give a
 specific, complete example.  That is the easiest thing for you to do,
-and the most helpful. 
+and the most helpful.
 
 Keep in mind that the purpose of a bug report is to enable us to fix
 the bug if it is new to us.  Therefore, always write your bug reports
