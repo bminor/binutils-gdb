@@ -448,6 +448,8 @@ struct elf_size_info {
     (bfd *, const Elf_Internal_Phdr *, unsigned int);
   bfd_boolean
     (*write_shdrs_and_ehdr) (bfd *);
+  bfd_boolean (*checksum_contents)
+    (bfd * , void (*) (const void *, size_t, void *), void *);
   void (*write_relocs)
     (bfd *, asection *, void *);
   bfd_boolean (*swap_symbol_in)
@@ -1466,6 +1468,10 @@ struct elf_obj_tdata
 
   obj_attribute known_obj_attributes[2][NUM_KNOWN_OBJ_ATTRIBUTES];
   obj_attribute_list *other_obj_attributes[2];
+
+  /* The .note.gnu.build-id section and --build-id option setting, or NULL.  */
+  char *emit_note_gnu_build_id;
+  asection *note_gnu_build_id_sec;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -1869,6 +1875,8 @@ extern bfd_boolean bfd_elf32_write_shdrs_and_ehdr
   (bfd *);
 extern int bfd_elf32_write_out_phdrs
   (bfd *, const Elf_Internal_Phdr *, unsigned int);
+extern bfd_boolean bfd_elf32_checksum_contents
+  (bfd * , void (*) (const void *, size_t, void *), void *);
 extern void bfd_elf32_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf32_slurp_reloc_table
@@ -1911,6 +1919,8 @@ extern bfd_boolean bfd_elf64_write_shdrs_and_ehdr
   (bfd *);
 extern int bfd_elf64_write_out_phdrs
   (bfd *, const Elf_Internal_Phdr *, unsigned int);
+extern bfd_boolean bfd_elf64_checksum_contents
+  (bfd * , void (*) (const void *, size_t, void *), void *);
 extern void bfd_elf64_write_relocs
   (bfd *, asection *, void *);
 extern bfd_boolean bfd_elf64_slurp_reloc_table
@@ -2035,6 +2045,9 @@ extern void _bfd_elf_copy_obj_attributes (bfd *, bfd *);
 extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, int);
 extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
 extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
+
+extern bfd_size_type _bfd_id_note_section_size
+  (bfd *abfd, struct bfd_link_info *link_info);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;
