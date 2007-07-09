@@ -2792,7 +2792,7 @@ usage (FILE *stream)
   @<file>                Read options from <file>\n\
   -H --help              Display this information\n\
   -v --version           Display the version number of readelf\n"));
-  
+
   if (REPORT_BUGS_TO[0] && stream == stdout)
     fprintf (stdout, _("Report bugs to %s\n"), REPORT_BUGS_TO);
 
@@ -7710,7 +7710,7 @@ dump_section (Elf_Internal_Shdr *section, FILE *file)
       printf (_(" NOTE: This section has relocations against it, but these have NOT been applied to this dump.\n"));
       break;
     }
-  
+
   data = start;
 
   while (bytes)
@@ -9128,6 +9128,27 @@ get_note_type (unsigned e_type)
 }
 
 static const char *
+get_gnu_elf_note_type (unsigned e_type)
+{
+  static char buff[64];
+
+  switch (e_type)
+    {
+    case NT_GNU_ABI_TAG:
+      return _("NT_GNU_ABI_TAG (ABI version tag)");
+    case NT_GNU_HWCAP:
+      return _("NT_GNU_HWCAP (DSO-supplied software HWCAP info)");
+    case NT_GNU_BUILD_ID:
+      return _("NT_GNU_BUILD_ID (unique build ID bitstring)");
+    default:
+      break;
+    }
+
+  snprintf (buff, sizeof (buff), _("Unknown note type: (0x%08x)"), e_type);
+  return buff;
+}
+
+static const char *
 get_netbsd_elfcore_note_type (unsigned e_type)
 {
   static char buff[64];
@@ -9203,6 +9224,10 @@ process_note (Elf_Internal_Note *pnote)
     /* If there is no note name, then use the default set of
        note type strings.  */
     nt = get_note_type (pnote->type);
+
+  else if (const_strneq (pnote->namedata, "GNU"))
+    /* GNU-specific object file notes.  */
+    nt = get_gnu_elf_note_type (pnote->type);
 
   else if (const_strneq (pnote->namedata, "NetBSD-CORE"))
     /* NetBSD-specific core file notes.  */
