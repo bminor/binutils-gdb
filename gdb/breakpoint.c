@@ -55,6 +55,7 @@
 #include "exceptions.h"
 #include "memattr.h"
 #include "ada-lang.h"
+#include "top.h"
 
 #include "gdb-events.h"
 #include "mi/mi-common.h"
@@ -3828,7 +3829,7 @@ breakpoint_1 (int bnum, int allflag)
     {
       /* Compare against (CORE_ADDR)-1 in case some compiler decides
 	 that a comparison of an unsigned with -1 is always false.  */
-      if (last_addr != (CORE_ADDR) -1)
+      if (last_addr != (CORE_ADDR) -1 && !server_command)
 	set_next_address (last_addr);
     }
 
@@ -8161,7 +8162,8 @@ breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\
 address and file/line number respectively.\n\
 \n\
 Convenience variable \"$_\" and default examine address for \"x\"\n\
-are set to the address of the last breakpoint listed.\n\n\
+are set to the address of the last breakpoint listed unless the command\n\
+is prefixed with \"server \".\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."));
     }
@@ -8177,7 +8179,8 @@ breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\
 address and file/line number respectively.\n\
 \n\
 Convenience variable \"$_\" and default examine address for \"x\"\n\
-are set to the address of the last breakpoint listed.\n\n\
+are set to the address of the last breakpoint listed unless the command\n\
+is prefixed with \"server \".\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."));
 
@@ -8193,7 +8196,8 @@ breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\
 address and file/line number respectively.\n\
 \n\
 Convenience variable \"$_\" and default examine address for \"x\"\n\
-are set to the address of the last breakpoint listed.\n\n\
+are set to the address of the last breakpoint listed unless the command\n\
+is prefixed with \"server \".\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."));
 
@@ -8212,8 +8216,8 @@ breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\
 address and file/line number respectively.\n\
 \n\
 Convenience variable \"$_\" and default examine address for \"x\"\n\
-are set to the address of the last breakpoint listed.\n\
-\n\
+are set to the address of the last breakpoint listed unless the command\n\
+is prefixed with \"server \".\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."),
 	   &maintenanceinfolist);
