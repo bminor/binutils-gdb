@@ -1,3 +1,8 @@
+2007-07-10  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Don't eliminate
+	copy relocs on vxworks.
+
 2007-07-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-arm.c (elf32_arm_size_info): Init checksum_contents field.

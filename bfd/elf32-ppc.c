@@ -4284,11 +4284,15 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (!h->non_got_ref)
     return TRUE;
 
-   /* If we didn't find any dynamic relocs in read-only sections, then we'll
-      be keeping the dynamic relocs and avoiding the copy reloc.  We can't
-      do this if there are any small data relocations.  */
+   /* If we didn't find any dynamic relocs in read-only sections, then
+      we'll be keeping the dynamic relocs and avoiding the copy reloc.
+      We can't do this if there are any small data relocations.  This
+      doesn't work on VxWorks, where we can not have dynamic
+      relocations (other than copy and jump slot relocations) in an
+      executable.  */
   if (ELIMINATE_COPY_RELOCS
-      && !ppc_elf_hash_entry (h)->has_sda_refs)
+      && !ppc_elf_hash_entry (h)->has_sda_refs
+      && !htab->is_vxworks)
     {
       struct ppc_elf_dyn_relocs *p;
       for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
