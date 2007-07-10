@@ -10133,6 +10133,7 @@ const struct elf_size_info elf32_arm_size_info = {
   ELFCLASS32, EV_CURRENT,
   bfd_elf32_write_out_phdrs,
   bfd_elf32_write_shdrs_and_ehdr,
+  bfd_elf32_checksum_contents,
   bfd_elf32_write_relocs,
   elf32_arm_swap_symbol_in,
   elf32_arm_swap_symbol_out,

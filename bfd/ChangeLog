@@ -1,3 +1,12 @@
+2007-07-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-arm.c (elf32_arm_size_info): Init checksum_contents field.
+	* elf64-alpha.c (alpha_elf_size_info): Likewise.
+	* elf64-hppa.c (hppa64_elf_size_info): Likewise.
+	* elf64-mips.c (mips_elf64_size_info): Likewise.
+	* elf64-s390.c (s390_elf64_size_info): Likewise.
+	* elf64-sparc.c (elf64_sparc_size_info): Likewise.
+
 2007-07-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (bfd_elf_record_link_assignment): Handle indirect
