@@ -468,8 +468,9 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
 				bfd_boolean provide,
 				bfd_boolean hidden)
 {
-  struct elf_link_hash_entry *h;
+  struct elf_link_hash_entry *h, *hv;
   struct elf_link_hash_table *htab;
+  const struct elf_backend_data *bed;
 
   if (!is_elf_hash_table (info->hash))
     return TRUE;
@@ -479,21 +480,43 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
   if (h == NULL)
     return provide;
 
-  /* Since we're defining the symbol, don't let it seem to have not
-     been defined.  record_dynamic_symbol and size_dynamic_sections
-     may depend on this.  */
-  if (h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_undefined)
+  switch (h->root.type)
     {
+    case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
+    case bfd_link_hash_common:
+      break;
+    case bfd_link_hash_undefweak:
+    case bfd_link_hash_undefined:
+      /* Since we're defining the symbol, don't let it seem to have not
+	 been defined.  record_dynamic_symbol and size_dynamic_sections
+	 may depend on this.  */
       h->root.type = bfd_link_hash_new;
       if (h->root.u.undef.next != NULL || htab->root.undefs_tail == &h->root)
 	bfd_link_repair_undef_list (&htab->root);
-    }
-
-  if (h->root.type == bfd_link_hash_new)
-    {
+      break;
+    case bfd_link_hash_new:
       bfd_elf_link_mark_dynamic_symbol (info, h, NULL);
       h->non_elf = 0;
+      break;
+    case bfd_link_hash_indirect:
+      /* We had a versioned symbol in a dynamic library.  We make the
+         the versioned symbol point to this one.  */
+      bed = get_elf_backend_data (output_bfd);
+      hv = h;
+      while (hv->root.type == bfd_link_hash_indirect
+	     || hv->root.type == bfd_link_hash_warning)
+	hv = (struct elf_link_hash_entry *) hv->root.u.i.link;
+      /* We don't need to update h->root.u since linker will set them
+	 later.  */
+      h->root.type = bfd_link_hash_undefined;
+      hv->root.type = bfd_link_hash_indirect;
+      hv->root.u.i.link = (struct bfd_link_hash_entry *) h;
+      (*bed->elf_backend_copy_indirect_symbol) (info, h, hv);
+      break;
+    case bfd_link_hash_warning:
+      abort ();
+      break;
     }
 
   /* If this symbol is being provided by the linker script, and it is
@@ -1417,10 +1440,10 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	 case, we make the versioned symbol point to the normal one.  */
       const struct elf_backend_data *bed = get_elf_backend_data (abfd);
       flip->root.type = h->root.type;
+      flip->root.u.undef.abfd = h->root.u.undef.abfd;
       h->root.type = bfd_link_hash_indirect;
       h->root.u.i.link = (struct bfd_link_hash_entry *) flip;
       (*bed->elf_backend_copy_indirect_symbol) (info, flip, h);
-      flip->root.u.undef.abfd = h->root.u.undef.abfd;
       if (h->def_dynamic)
 	{
 	  h->def_dynamic = 0;

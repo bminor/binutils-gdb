@@ -1,3 +1,10 @@
+2007-07-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (bfd_elf_record_link_assignment): Handle indirect
+	symbol.
+	(_bfd_elf_merge_symbol): Properly update normal symbol when
+	overriding the versioned symbol from a dynamic library.
+
 2007-07-09  Roland McGrath  <roland@redhat.com>
 
 	* elf-bfd.h (struct elf_obj_tdata): Add members
