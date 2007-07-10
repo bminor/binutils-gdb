@@ -30,7 +30,7 @@ INTERP=".interp       0 : { *(.interp) }"
 PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
 RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
 DATARELRO=".data.rel.ro : { *(.data.rel.ro.local) *(.data.rel.ro*) }"
-STACKNOTE="/DISCARD/ : { *(.note.GNU-stack) }"
+DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) }"
 if test -z "${NO_SMALL_DATA}"; then
   SBSS=".sbss         ${RELOCATING-0} :
   {
@@ -360,7 +360,7 @@ cat <<EOF
   ${STACK_ADDR+${STACK}}
   ${OTHER_SECTIONS}
   ${RELOCATING+${OTHER_SYMBOLS}}
-  ${RELOCATING+${STACKNOTE}}
+  ${RELOCATING+${DISCARDED}}
 EOF
 
 # These relocations sections are part of the read-only segment in SVR4

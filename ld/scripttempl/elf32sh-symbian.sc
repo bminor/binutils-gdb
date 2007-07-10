@@ -83,7 +83,7 @@ fi
     PLT=".plt            : { *(.plt) } :dynamic :dyn"
 DYNAMIC=".dynamic        : { *(.dynamic) } :dynamic :dyn"
  RODATA=".rodata    ALIGN(4) : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
-STACKNOTE="/DISCARD/ : { *(.note.GNU-stack)  *(.directive) }"
+DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.directive) }"
 test -z "$GOT" && GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) } :dynamic :dyn"
 CTOR=".ctors     ALIGN(4) : 
   {
@@ -380,6 +380,6 @@ cat <<EOF
   ${ATTRS_SECTIONS}
   ${OTHER_SECTIONS}
   ${RELOCATING+${OTHER_SYMBOLS}}
-  ${RELOCATING+${STACKNOTE}}
+  ${RELOCATING+${DISCARDED}}
 }
 EOF

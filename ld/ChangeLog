@@ -1,3 +1,12 @@
+2007-07-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf.sc (DISCARDED): Renamed from STACKNOTE.  Add
+	.gnu.debuglink.
+	* scripttempl/armbpabi.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+
 2007-07-09  Roland McGrath  <roland@redhat.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_add_option): Add --build-id.
