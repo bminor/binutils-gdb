@@ -1,3 +1,10 @@
+2007-07-10  Nick Roberts  <nickrob@snap.net.nz>
+
+	* breakpoint.c: Include "top.h".
+	(breakpoint_1): Don't set convenience variable $_ if server prefix
+	is used.
+	(_initialize_breakpoint): Describe this behaviour in command help.
+
 2007-07-08  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* solib-target.c (library_list_start_segment): Cast address to
