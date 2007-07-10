@@ -162,7 +162,10 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   int storage_needed;
   void *saved_offsets;
 
-  if (! (sec->flags & SEC_RELOC))
+  /* Don't apply relocation on executable and shared library.  See
+     PR 4756.  */
+  if ((abfd->flags & (HAS_RELOC | EXEC_P | DYNAMIC)) != HAS_RELOC
+      || ! (sec->flags & SEC_RELOC))
     {
       bfd_size_type amt = sec->rawsize > sec->size ? sec->rawsize : sec->size;
       bfd_size_type size = sec->rawsize ? sec->rawsize : sec->size;

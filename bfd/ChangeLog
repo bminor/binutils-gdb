@@ -1,3 +1,9 @@
+2007-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4756
+	* simple.c (bfd_simple_get_relocated_section_content): Don't
+	apply relocation on executable and shared library.
+
 2007-07-10  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Don't eliminate
