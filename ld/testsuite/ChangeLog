@@ -1,3 +1,18 @@
+2007-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elfvers/vers.exp: Add tests for --defsym.
+
+	* ld-elfvers/vers32.map: Likewise.
+	* ld-elfvers/vers32a.c: Likewise.
+	* ld-elfvers/vers32a.dsym: Likewise.
+	* ld-elfvers/vers32a.ver: Likewise.
+	* ld-elfvers/vers32b.c: Likewise.
+	* ld-elfvers/vers32b.dsym: Likewise.
+	* ld-elfvers/vers32b.ver: Likewise.
+	* ld-elfvers/vers32c.dsym: Likewise.
+	* ld-elfvers/vers32c.ver: Likewise.
+	* ld-elfvers/vers32d.ver: Likewise.
+
 2007-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* lib/default.exp: Update copyright notice to refer to GPLv3.
