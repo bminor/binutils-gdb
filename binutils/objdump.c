@@ -2166,8 +2166,7 @@ check_mach_o_dwarf (bfd *abfd)
 static void
 dump_dwarf (bfd *abfd)
 {
-  is_relocatable = ((abfd->flags & (HAS_RELOC | EXEC_P | DYNAMIC))
-		    == HAS_RELOC);
+  is_relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
 
   /* FIXME: bfd_get_arch_size may return -1.  We assume that 64bit
      targets will return 64.  */

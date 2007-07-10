@@ -1,3 +1,7 @@
+2007-07-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (dump_dwarf): Correct setting of is_relocatable.
+
 2007-07-09  Roland McGrath  <roland@redhat.com>
 
 	* readelf.c (get_gnu_elf_note_type): New function.
@@ -35,11 +39,11 @@
 
 2007-07-05  Kai Tietz  <kai.tietz@onevision.com>
 
-        * resrc.c: (read_rc_file): Add include path of user passed rc
+	* resrc.c: (read_rc_file): Add include path of user passed rc
 	input file.
-        * windres.c: (windres_add_include_dir): New.
-        (main): Use of windres_add_include_dir.
-        * windres.h: (windres_add_include_dir): Add prototype.
+	* windres.c: (windres_add_include_dir): New.
+	(main): Use of windres_add_include_dir.
+	* windres.h: (windres_add_include_dir): Add prototype.
 
 2007-07-05  Alan Modra  <amodra@bigpond.net.au>
 
@@ -127,21 +131,21 @@
 
 2007-06-19  Danny Smith  <dannysmith@users.sourceforge.net>
 
-  	* objdump.c: Include sys/stat.h.
+	* objdump.c: Include sys/stat.h.
 
 2007-06-19  Kai Tietz  <kai.tietz@onevision.com>
 
-        * Makefile.am: Add windmc tool.
-        * Makefile.in: Regenerate.
-        * configure.in: Add windmc tool.
-        * configure: Regenerate.
-        * mclex.c: New.
-        * mcparse.y: New.
-        * windmc.c: New.
-        * windmc.h: New.
-        * doc/Makefile.am: Add windmc tool.
-        * doc/Makefile.in: Regenerate.
-        * doc/binutils.texi: Add windmc documentation.
+	* Makefile.am: Add windmc tool.
+	* Makefile.in: Regenerate.
+	* configure.in: Add windmc tool.
+	* configure: Regenerate.
+	* mclex.c: New.
+	* mcparse.y: New.
+	* windmc.c: New.
+	* windmc.h: New.
+	* doc/Makefile.am: Add windmc tool.
+	* doc/Makefile.in: Regenerate.
+	* doc/binutils.texi: Add windmc documentation.
 	* NEWS: Mention new tool.
 
 2007-06-18  Andi Kleen  <ak@suse.de>
