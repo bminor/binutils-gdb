@@ -1,3 +1,8 @@
+2007-07-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (embedded_spu_file): Test for NULL path
+	before calling base_name, not after.
+
 2007-07-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/elf.sc (DISCARDED): Renamed from STACKNOTE.  Add

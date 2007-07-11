@@ -345,19 +345,19 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   for (search = (lang_input_statement_type *) input_file_chain.head;
        search != NULL;
        search = (lang_input_statement_type *) search->next_real_file)
-    {
-      const char *infile = base_name (search->filename);
+    if (search->filename != NULL)
+      {
+	const char *infile = base_name (search->filename);
 
-      if (infile != NULL
-	  && strncmp (infile, "crtbegin", 8) == 0)
-	{
-	  if (infile[8] == 'S')
-	    flags = concat (flags, " -fPIC", NULL);
-	  else if (infile[8] == 'T')
-	    flags = concat (flags, " -fpie", NULL);
-	  break;
-	}
-    }
+	if (strncmp (infile, "crtbegin", 8) == 0)
+	  {
+	    if (infile[8] == 'S')
+	      flags = concat (flags, " -fPIC", NULL);
+	    else if (infile[8] == 'T')
+	      flags = concat (flags, " -fpie", NULL);
+	    break;
+	  }
+      }
 
   /* Use fork() and exec() rather than system() so that we don't
      need to worry about quoting args.  */
