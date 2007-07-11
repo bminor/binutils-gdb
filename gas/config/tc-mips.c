@@ -15104,7 +15104,7 @@ MIPS options:\n\
 enum dwarf2_format
 mips_dwarf2_format (void)
 {
-  if (mips_abi == N64_ABI)
+  if (HAVE_64BIT_SYMBOLS)
     {
 #ifdef TE_IRIX
       return dwarf2_format_64bit_irix;
@@ -15119,7 +15119,7 @@ mips_dwarf2_format (void)
 int
 mips_dwarf2_addr_size (void)
 {
-  if (mips_abi == N64_ABI)
+  if (HAVE_64BIT_SYMBOLS)
     return 8;
   else
     return 4;

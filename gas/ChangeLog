@@ -1,3 +1,8 @@
+2007-07-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-mips.c (mips_dwarf2_format, mips_dwarf2_addr_size): Use
+	HAVE_64BIT_SYMBOLS.
+
 2007-07-04  Richard Sandiford  <richard@codesourcery.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Add new entries for
