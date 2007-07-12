@@ -184,7 +184,7 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 	     don't adjust the base offset in the latter case, although
 	     odds are that, if things really changed, debugging won't
 	     quite work.  */
-	  if ((l_addr & align) == 0 && ((dynaddr - l_dynaddr) & align) == 0)
+	  if ((l_addr & align) == ((l_dynaddr - dynaddr) & align))
 	    {
 	      l_addr = l_dynaddr - dynaddr;
 
