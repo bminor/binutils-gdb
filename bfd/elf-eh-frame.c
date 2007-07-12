@@ -953,7 +953,7 @@ _bfd_elf_discard_section_eh_frame
       {
 	if (!ent->cie)
 	  {
-	    ecie = ecies + (unsigned long) ent->cie_inf;
+	    ecie = ecies + (bfd_hostptr_t) ent->cie_inf;
 	    ent->cie_inf = ecie->cie.cie_inf;
 	  }
 	ent->new_offset = offset;

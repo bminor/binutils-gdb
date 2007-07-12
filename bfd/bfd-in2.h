@@ -83,6 +83,7 @@ extern "C" {
 #define BFD_DEFAULT_TARGET_SIZE @bfd_default_target_size@
 
 #define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
+#define BFD_HOST_64BIT_LONG_LONG @BFD_HOST_64BIT_LONG_LONG@
 #define BFD_HOST_LONG_LONG @BFD_HOST_LONG_LONG@
 #if @BFD_HOST_64_BIT_DEFINED@
 #define BFD_HOST_64_BIT @BFD_HOST_64_BIT@
@@ -102,6 +103,10 @@ typedef BFD_HOST_U_64_BIT bfd_uint64_t;
 #define INLINE
 #endif
 #endif
+
+/* Declaring a type wide enough to hold a host long and a host pointer.  */
+#define BFD_HOSTPTR_T	@BFD_HOSTPTR_T@
+typedef BFD_HOSTPTR_T bfd_hostptr_t;
 
 /* Forward declaration.  */
 typedef struct bfd bfd;
@@ -136,6 +141,9 @@ typedef BFD_HOST_U_64_BIT symvalue;
 #if BFD_HOST_64BIT_LONG
 #define sprintf_vma(s,x) sprintf (s, "%016lx", x)
 #define fprintf_vma(f,x) fprintf (f, "%016lx", x)
+#elif BFD_HOST_64BIT_LONG_LONG
+#define sprintf_vma(s,x) sprintf (s, "%016llx", x)
+#define fprintf_vma(f,x) fprintf (f, "%016llx", x)
 #else
 #define _bfd_int64_low(x) ((unsigned long) (((x) & 0xffffffff)))
 #define _bfd_int64_high(x) ((unsigned long) (((x) >> 32) & 0xffffffff))

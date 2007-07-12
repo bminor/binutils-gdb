@@ -464,7 +464,7 @@ print_header (int prefix)
   if (bsd_style_output)
     {
       printf (_("\ngranularity: each sample hit covers %ld byte(s)"),
-	      (long) hist_scale * sizeof (UNIT));
+	      (long) hist_scale * (long) sizeof (UNIT));
       if (total_time > 0.0)
 	{
 	  printf (_(" for %.2f%% of %.2f %s\n\n"),

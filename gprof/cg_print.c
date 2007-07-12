@@ -76,7 +76,7 @@ print_header ()
     }
 
   printf (_("\ngranularity: each sample hit covers %ld byte(s)"),
-	  (long) hist_scale * sizeof (UNIT));
+	  (long) hist_scale * (long) sizeof (UNIT));
 
   if (print_time > 0.0)
     printf (_(" for %.2f%% of %.2f seconds\n\n"),

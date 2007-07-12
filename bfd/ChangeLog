@@ -1,3 +1,24 @@
+2007-07-12  Kai Tietz   <kai.tietz@onevision.com>
+
+	* bfd-in.h: (BFD_HOST_64BIT_LONG_LONG): New.
+	(BFD_HOSTPTR_T): Host pointer type for casting a
+	pointer to an integer type.
+	(bfd_hostptr_t): The typedef of BFD_HOSTPTR_T.
+	(sprintf_vma, fprintf_vma): Add support for long long prints.
+	* bfd-in2.h: Regenerate.
+	* configure.in: (BFD_HOST_64BIT_LONG_LONG): New.
+	(BFD_HOSTPTR_T): Host pointer type for casting a
+	pointer to an integer type. Default is "unsigned long".
+	(AC_CHECK_SIZEOF(void *)): New.
+	(host64): Set it if the pointer size is 8.
+	* configure: Regenerate.
+	* config.in: Add macro SIZEOF_VOID_P.
+	* coffcode.h: Replace host ptr type assuming "long" with
+	bfd_hostptr_t type.
+	* coffgen.c: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* peicode.h: Likewise.
+
 2007-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in: Regenerated.

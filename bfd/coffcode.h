@@ -4381,7 +4381,7 @@ coff_slurp_symbol_table (bfd * abfd)
 
 	  dst->symbol.name = (char *) (src->u.syment._n._n_n._n_offset);
 	  /* We use the native name field to point to the cached field.  */
-	  src->u.syment._n._n_n._n_zeroes = (long) dst;
+	  src->u.syment._n._n_n._n_zeroes = (bfd_hostptr_t) dst;
 	  dst->symbol.section = coff_section_from_bfd_index (abfd,
 						     src->u.syment.n_scnum);
 	  dst->symbol.flags = 0;

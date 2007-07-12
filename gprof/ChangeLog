@@ -1,3 +1,8 @@
+2007-07-12  Kai Tietz   <kai.tietz@onevision.com>
+
+	* cg_print.c: Force cast of sizeof to be a long.
+	* hist.c: Likewise.
+
 2007-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* basic_blocks.c: Update copyright notice to refer to GPLv3.
