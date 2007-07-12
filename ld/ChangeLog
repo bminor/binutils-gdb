@@ -1,5 +1,11 @@
 2007-07-12  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 4782
+	* ldlang.c (lang_size_sections_1 <output_section_statement>): Only
+	use expld.result when valid.
+
+2007-07-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/spuelf.em (embedded_spu_file): Test for NULL path
 	before calling base_name, not after.
 

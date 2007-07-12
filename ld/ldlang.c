@@ -4242,13 +4242,12 @@ lang_size_sections_1
 		os->processed_vma = FALSE;
 		exp_fold_tree (os->addr_tree, bfd_abs_section_ptr, &dot);
 
-		if (!expld.result.valid_p
-		    && expld.phase != lang_mark_phase_enum)
+		if (expld.result.valid_p)
+		  dot = expld.result.value + expld.result.section->vma;
+		else if (expld.phase != lang_mark_phase_enum)
 		  einfo (_("%F%S: non constant or forward reference"
 			   " address expression for section %s\n"),
 			 os->name);
-
-		dot = expld.result.value + expld.result.section->vma;
 	      }
 
 	    if (os->bfd_section == NULL)
