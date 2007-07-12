@@ -1,18 +1,20 @@
-#  Vietnamese Translation for gprof-2.15.96.
-#  Copyright (C) 2005 Free Software Foundation, Inc.
-#  Clytie Siddall <clytie@riverland.net.au>, 2005.
+# Vietnamese Translation for GProf.
+# Copyright © 2007 Free Software Foundation, Inc.
+# Clytie Siddall <clytie@riverland.net.au>, 2005-2007.
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.15.96\n"
+"Project-Id-Version: gprof 2.16.93\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-03-03 21:05+1030\n"
-"PO-Revision-Date: 2005-03-17 15:39+1000\n"
+"POT-Creation-Date: 2005-10-01 07:23+0930\n"
+"PO-Revision-Date: 2007-07-12 15:47+0930\n"
 "Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
-"Language-Team: Vietnamese <gnomevi-list@lists.sourceforge.net> \n"
+"Language-Team: Vietnamese <vi-VN@googlegroups.com> \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: LocFactoryEditor 1.7b1\n"
 
 #: alpha.c:102 mips.c:54
 msgid "<indirect child>"
@@ -21,39 +23,39 @@ msgstr "<con gián tiếp>"
 #: alpha.c:119 mips.c:71
 #, c-format
 msgid "[find_call] %s: 0x%lx to 0x%lx\n"
-msgstr "[tìm_gọi] %s: 0x%lx đến 0x%lx\n"
+msgstr "[lời_gọi_tìm] %s: 0x%lx đến 0x%lx\n"
 
 #: alpha.c:141
 #, c-format
 msgid "[find_call] 0x%lx: jsr%s <indirect_child>\n"
-msgstr "[tìm_gọi] 0x%lx: jsr%s <con gián tiếp>\n"
+msgstr "[lời_gọi_tìm] 0x%lx: jsr%s <con gián tiếp>\n"
 
 #: alpha.c:151
 #, c-format
 msgid "[find_call] 0x%lx: bsr"
-msgstr "[tìm_gọi] 0x%lx: bsr"
+msgstr "[lời_gọi_tìm] 0x%lx: bsr"
 
 #: basic_blocks.c:128 call_graph.c:89 hist.c:97
 #, c-format
 msgid "%s: %s: unexpected end of file\n"
-msgstr "%s: %s: kết thức tập tin bất ngờ\n"
+msgstr "%s: %s: kết thúc tập tin bất thường\n"
 
 #: basic_blocks.c:196
 #, c-format
 msgid "%s: warning: ignoring basic-block exec counts (use -l or --line)\n"
-msgstr "%s: cảnh báo: đang bỏ qua việc đếm khối-cơ-bản exec (sử dụng -l hay --line)\n"
+msgstr "%s: cảnh báo : đang bỏ qua các số đếm thực hiện kiểu khối cơ bản (hãy dùng « -l » hay « --line »)\n"
 
 #. FIXME: This only works if bfd_vma is unsigned long.
-#: basic_blocks.c:287 basic_blocks.c:297
+#: basic_blocks.c:289 basic_blocks.c:299
 #, c-format
 msgid "%s:%d: (%s:0x%lx) %lu executions\n"
-msgstr "%s:%d: (%s:0x%lx) %lu việc đã thi hành\n"
+msgstr "%s:%d: (%s:0x%lx) %lu lần thực hiện\n"
 
-#: basic_blocks.c:288 basic_blocks.c:298
+#: basic_blocks.c:290 basic_blocks.c:300
 msgid "<unknown>"
-msgstr "<chưa biết>"
+msgstr "<không rõ>"
 
-#: basic_blocks.c:541
+#: basic_blocks.c:543
 #, c-format
 msgid ""
 "\n"
@@ -65,12 +67,12 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Đầu %d Dòng:\n"
+"%d dòng đầu :\n"
 "\n"
-"     Tổng số dòng\n"
+"    Dòng\tTổng\n"
 "\n"
 
-#: basic_blocks.c:565
+#: basic_blocks.c:567
 #, c-format
 msgid ""
 "\n"
@@ -81,34 +83,34 @@ msgstr ""
 "Tóm tắt thi hành:\n"
 "\n"
 
-#: basic_blocks.c:566
+#: basic_blocks.c:568
 #, c-format
 msgid "%9ld   Executable lines in this file\n"
 msgstr "%9ld   Dòng có thể thi hành trong tập tin này\n"
 
-#: basic_blocks.c:568
+#: basic_blocks.c:570
 #, c-format
 msgid "%9ld   Lines executed\n"
-msgstr "%9ld   Dòng được thi hành rồì\n"
+msgstr "%9ld   Dòng đã được thi hành\n"
 
-#: basic_blocks.c:569
+#: basic_blocks.c:571
 #, c-format
 msgid "%9.2f   Percent of the file executed\n"
-msgstr "%9.2f   Phần trăm tập tin được thi hành rồi\n"
+msgstr "%9.2f   Phần trăm tập tin đã được thi hành\n"
 
-#: basic_blocks.c:573
+#: basic_blocks.c:575
 #, c-format
 msgid ""
 "\n"
 "%9lu   Total number of line executions\n"
 msgstr ""
 "\n"
-"%9lu   Tổng số dòng để thi hành\n"
+"%9lu   Tổng dòng đã được thi hành\n"
 
-#: basic_blocks.c:575
+#: basic_blocks.c:577
 #, c-format
 msgid "%9.2f   Average executions per line\n"
-msgstr "%9.2f   Số trung bình việc thì hành trong mỗi dòng\n"
+msgstr "%9.2f   Số trung bình lần thì hành trong mỗi dòng\n"
 
 #: call_graph.c:68
 #, c-format
@@ -140,7 +142,7 @@ msgid ""
 "granularity: each sample hit covers %ld byte(s)"
 msgstr ""
 "\n"
-"độ hột: mỗi lần ghé mẫu trải ra %ld byte"
+"độ hạt: mỗi lần ghé mẫu chiếm %ld byte"
 
 #: cg_print.c:82
 #, c-format
@@ -148,7 +150,7 @@ msgid ""
 " for %.2f%% of %.2f seconds\n"
 "\n"
 msgstr ""
-" được %.2f%% của %.2f giây\n"
+" trong %.2f%% trên %.2f giây\n"
 "\n"
 
 #: cg_print.c:86
@@ -157,20 +159,20 @@ msgid ""
 " no time propagated\n"
 "\n"
 msgstr ""
-" không có thời gian truyền bá\n"
+" không có thời gian đã truyền bá\n"
 "\n"
 
 #: cg_print.c:95 cg_print.c:98 cg_print.c:100
 msgid "called"
-msgstr "được gọi"
+msgstr "đã gọi"
 
 #: cg_print.c:95 cg_print.c:100
 msgid "total"
-msgstr "tổng số"
+msgstr "tổng"
 
 #: cg_print.c:95
 msgid "parents"
-msgstr "mẹ"
+msgstr "cha"
 
 #: cg_print.c:97 cg_print.c:98
 msgid "index"
@@ -179,11 +181,11 @@ msgstr "chỉ mục"
 #: cg_print.c:97
 #, c-format
 msgid "%time"
-msgstr "%time (giờ)"
+msgstr "%time (thời gian)"
 
 #: cg_print.c:97 cg_print.c:98
 msgid "self"
-msgstr "mình"
+msgstr "bản thân"
 
 #: cg_print.c:97
 msgid "descendants"
@@ -200,12 +202,12 @@ msgstr "con"
 #: cg_print.c:105
 #, c-format
 msgid "index %% time    self  children    called     name\n"
-msgstr "chỉ mục %% giờ    mình     con    đã gọi     tên\n"
+msgstr "chỉ mục %% thời gian    bản thân     con    đã gọi     tên\n"
 
 #: cg_print.c:128
 #, c-format
 msgid " <cycle %d as a whole> [%d]\n"
-msgstr " <chu kỳ %d toàn bộ> [%d]\n"
+msgstr " <chu kỳ toàn bộ %d> [%d]\n"
 
 #: cg_print.c:354
 #, c-format
@@ -223,7 +225,7 @@ msgid ""
 "Index by function name\n"
 "\n"
 msgstr ""
-"Chỉ mục theo tên chức năng\n"
+"Chỉ mục theo tên hàm\n"
 "\n"
 
 #: cg_print.c:646 cg_print.c:655
@@ -234,140 +236,139 @@ msgstr "<chu kỳ %d>"
 #: corefile.c:64
 #, c-format
 msgid "%s: could not open %s.\n"
-msgstr "%s: không mở được %s.\n"
+msgstr "%s: không thể mở %s.\n"
 
 #: corefile.c:78 corefile.c:112
 #, c-format
 msgid "%s: unable to parse mapping file %s.\n"
-msgstr "%s: không phân tách được tập tin ánh xạ %s.\n"
+msgstr "%s: không thể phân tách tập tin ánh xạ %s.\n"
 
-#: corefile.c:155
+#: corefile.c:158
 #, c-format
 msgid "%s: %s: not in a.out format\n"
-msgstr "%s: %s: không có định dạng a.out\n"
+msgstr "%s: %s: không phải theo định dạng « a.out »\n"
 
-#: corefile.c:166
+#: corefile.c:169
 #, c-format
 msgid "%s: can't find .text section in %s\n"
-msgstr "%s: không tìm được phần .text trong %s\n"
+msgstr "%s: không tìm thấy phần văn bản « .text » trong %s\n"
 
-#: corefile.c:224
+#: corefile.c:244
 #, c-format
 msgid "%s: ran out room for %lu bytes of text space\n"
-msgstr "%s: hết sức chứa đối với %lu byte dung lượng chữ\n"
+msgstr "%s: không đủ sức chứa đối với vùng văn bản %lu byte\n"
 
-#: corefile.c:238
+#: corefile.c:258
 #, c-format
 msgid "%s: can't do -c\n"
-msgstr "%s: không thi hành được -c\n"
+msgstr "%s: không thể làm « -c »\n"
 
-#: corefile.c:272
+#: corefile.c:292
 #, c-format
 msgid "%s: -c not supported on architecture %s\n"
-msgstr "%s: -c  chưa được hỗ trợ trên kiến trúc %s\n"
+msgstr "%s: tùy chọn « -c »  không được hỗ trợ trên kiến trúc %s\n"
 
-#: corefile.c:437
+#: corefile.c:457
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
-msgstr "%s: tập tin `%s' không có ký tự nào\n"
+msgstr "%s: tập tin « %s » không có ký hiệu\n"
 
-#: corefile.c:751
+#: corefile.c:771
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
-msgstr "%s: việc đếm sai: ltab.len=%d thay thế %ld\n"
+msgstr "%s: sai đếm: ltab.len=%d thay cho %ld\n"
 
 #: gmon_io.c:83
 #, c-format
 msgid "%s: address size has unexpected value of %u\n"
-msgstr "%s: kích thước địa chỉ có trị số bất ngờ là %u\n"
+msgstr "%s: kích cỡ địa chỉ có giá trị bất thường %u\n"
 
-#: gmon_io.c:317 gmon_io.c:413
+#: gmon_io.c:320 gmon_io.c:416
 #, c-format
 msgid "%s: file too short to be a gmon file\n"
-msgstr "%s: tập tin quá ngắn nên không phải là tập tin loại gmon\n"
+msgstr "%s: tập tin quá ngắn cho tập tin kiểu gmon\n"
 
-#: gmon_io.c:327 gmon_io.c:456
+#: gmon_io.c:330 gmon_io.c:459
 #, c-format
 msgid "%s: file `%s' has bad magic cookie\n"
-msgstr "%s: tập tin `%s' có cookie ma thuật sai\n"
+msgstr "%s: tập tin « %s » có cookie ma thuật sai\n"
 
-#: gmon_io.c:338
+#: gmon_io.c:341
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
-msgstr "%s: tập tin `%s' có phiên bản chưa được hỗ trợ %d\n"
+msgstr "%s: tập tin « %s » có phiên bản không được hỗ trợ %d\n"
 
-#: gmon_io.c:368
+#: gmon_io.c:371
 #, c-format
 msgid "%s: %s: found bad tag %d (file corrupted?)\n"
-msgstr "%s: %s: đã tìm thẻ sai %d (tập tin bị hỏng không?)\n"
+msgstr "%s: %s: tìm thế thẻ sai %d (tập tin bị hỏng?)\n"
 
-#: gmon_io.c:435
+#: gmon_io.c:438
 #, c-format
 msgid "%s: profiling rate incompatible with first gmon file\n"
 msgstr "%s: tỷ lệ tính hiện trạng không tương thích với tập tin gmon thứ nhất\n"
 
-#: gmon_io.c:483
+#: gmon_io.c:486
 #, c-format
 msgid "%s: incompatible with first gmon file\n"
 msgstr "%s: không tương thích với tập tin gmon thứ nhất\n"
 
-#: gmon_io.c:511
+#: gmon_io.c:514
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
-msgstr "%s: không hình như tập tin '%s' có định dạng gmon.out\n"
+msgstr "%s: tập tin « %s » có vẻ là không theo định dạng « gmon.out »\n"
 
-#: gmon_io.c:532
+#: gmon_io.c:535
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
-msgstr "%s: kết thức tập tin bất ngờ sau khi đọc %d/%d bin\n"
+msgstr "%s: gặp kết thúc tập tin bất thường sau khi đọc %d/%d thùng\n"
 
-#: gmon_io.c:565
+#: gmon_io.c:568
 #, c-format
 msgid "time is in ticks, not seconds\n"
-msgstr "tính thời gian bằng tích, không phải bằng giây\n"
+msgstr "tính thời gian theo tích, không phải theo giây\n"
 
-#: gmon_io.c:571 gmon_io.c:747
+#: gmon_io.c:574 gmon_io.c:750
 #, c-format
 msgid "%s: don't know how to deal with file format %d\n"
-msgstr "%s: không biết cách xử lý khuôn dạng tập tin %d\n"
-
-#: gmon_io.c:578
-#, c-format
-msgid "File `%s' (version %d) contains:\n"
-msgstr "Tập tin `%s' (phiên bản %d) bao gồm:\n"
+msgstr "%s: không biết xử lý định dạng tập tin %d như thế nào\n"
 
 #: gmon_io.c:581
 #, c-format
-msgid "\t%d histogram record\n"
-msgstr "\t%d mục biểu đồ tần xuất\n"
-
-#: gmon_io.c:582
-#, c-format
-msgid "\t%d histogram records\n"
-msgstr "\t%d mục biểu đồ tần xuất\n"
+msgid "File `%s' (version %d) contains:\n"
+msgstr "Tập tin « %s » (phiên bản %d) chứa:\n"
 
 #: gmon_io.c:584
 #, c-format
-msgid "\t%d call-graph record\n"
-msgstr "\t%d mục đồ thị gọi\n"
+msgid "\t%d histogram record\n"
+msgstr "\t%d mục ghi biểu đồ tần xuất\n"
 
 #: gmon_io.c:585
 #, c-format
-msgid "\t%d call-graph records\n"
-msgstr "\t%d mục đồ thị gọi\n"
+msgid "\t%d histogram records\n"
+msgstr "\t%d mục ghi biểu đồ tần xuất\n"
 
 #: gmon_io.c:587
 #, c-format
-msgid "\t%d basic-block count record\n"
-msgstr "\t%d mục đếm khối cơ bản\n"
+msgid "\t%d call-graph record\n"
+msgstr "\t%d mục ghi đồ thị gọi\n"
 
 #: gmon_io.c:588
 #, c-format
-msgid "\t%d basic-block count records\n"
-msgstr "\t%d mục đếm khối cơ bản\n"
+msgid "\t%d call-graph records\n"
+msgstr "\t%d mục ghi đồ thị gọi\n"
 
-#  I have reservations about some of the strings presented for translation: some of them look like commands, which may not be translatable. I could not find anybody to ask about this.
-#: gprof.c:160
+#: gmon_io.c:590
+#, c-format
+msgid "\t%d basic-block count record\n"
+msgstr "\t%d mục ghi tổng khối cơ bản\n"
+
+#: gmon_io.c:591
+#, c-format
+msgid "\t%d basic-block count records\n"
+msgstr "\t%d mục ghi tổng khối cơ bản\n"
+
+#: gprof.c:158
 #, c-format
 msgid ""
 "Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n"
@@ -384,94 +385,117 @@ msgid ""
 "\t[--demangle[=STYLE]] [--no-demangle]\n"
 "\t[image-file] [profile-file...]\n"
 msgstr ""
-"Cách sử dụng: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][tên]] [-I thư-mục]\n"
-"\t[-d[s]] [-k từ/tới] [-m đếm-tối-thiểu] [-t độ-dài-bảng]\n"
-"\t[--[không-]nguồn-được-phụ-chú[=tên]] [--[không-]việc-đếm-thi-hành[=tên]]\n"
-"\t[--[không-]hiện-trạng-bằng-phẳng[=tên]] [--[không-]đồ-thị[=tên]]\n"
-"\t[--[không-]giờ=tên] [--tất-cả-dòng] [--vắn] [--gõ-lỗi[=mức]]\n"
-"\t[--sắp-xếp-chức-năng] [--sắp-xế--tập-tin]\n"
-"\t[--đường-dẫn-thư-mục=thư-mục] [--hiển-thị -các-chức-năng-chưa-được-sử-dụng]\n"
-"\t[--khuôn-dạng-tập-tin=tên] [--thông-tin-tập-tin] [--trợ-giúp] [--dòng] [--việc-đếm-tối-thiểu=n]\n"
-"\t[--không-tĩnh] [--đường-dẫn-để-in [--ngăn-cách-tập-tin]\n"
-"\t[--đồ-thị-gọi-tĩnh] [--cộng] [--độ-dài-bảng=dài] [--truyền-thống]\n"
-"\t[--phiên-bản] [--độ-rộng=n] [--bỏ-qua-điều-không-chức-năng]\n"
-"\t[--tháo-gõ[=KIỂU]] [--không-tháo-gõ]\n"
-"\t[tập-tin-ảnh] [tập-tin-hiện-trạng...]\n"
+"Cách sử dụng: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n"
+"\t[-d[số]]\n"
+"\t[-k from/to]\ttừ/đến\n"
+"\t[-m tổng_tối_thiểu]\n"
+"\t[-t độ_dài_bảng]\n"
+"\t[--[no-]annotated-source[=tên]] \t[không] có nguồn đã phụ chú\n"
+"\t[--[no-]exec-counts[=tên]]\t\t[không] có số đếm lần thực hiện\n"
+"\t[--[no-]flat-profile[=tên]] \t\t[không] có hồ sơ phẳng\n"
+"\t[--[no-]graph[=tên]]\t\t\t[không] có đồ thị\n"
+"\t[--[no-]time=tên] \t\t\t\t[không] có thời gian\n"
+"\t[--all-lines] \t\t\t\t\tmọi dòng\n"
+"\t[--brief] \t\t\t\t\t\tngắn\n"
+"\t[--debug[=cấp]]\t\t\t\tgỡ lỗi\n"
+"\t[--function-ordering] \t\t\tsắp xếp hàm\n"
+"\t[--file-ordering]\t\t\t\tsắp xếp tập tin\n"
+"\t[--directory-path=thư_mục] \tđường dẫn thư mục\n"
+"\t[--display-unused-functions]\thiển thị các hàm không dùng\n"
+"\t[--file-format=tên] \t\t\tđịnh dạng tập tin\n"
+"\t[--file-info] \t\t\t\t\tthông tin tập tin\n"
+"\t[--help] \t\t\t\t\t\ttrợ giúp\n"
+"\t[--line] \t\t\t\t\t\tdòng\n"
+"\t[--min-count=số]\t\t\t\tsố đếm tối thiểu\n"
+"\t[--no-static] \t\t\t\t\tkhông tĩnh\n"
+"\t[--print-path] \t\t\t\tđường dẫn in\n"
+"\t[--separate-files]\t\t\t\tcác tập tin riêng\n"
+"\t[--static-call-graph] \t\t\tđồ thị gọi tĩnh\n"
+"\t[--sum] \t\t\t\t\t\tcộng\n"
+"\t[--table-length=dài] \t\t\tđộ dài bảng\n"
+"\t[--traditional]\t\t\t\t\ttruyền thống\n"
+"\t[--version] \t\t\t\t\tphiên bản\n"
+"\t[--width=số] \t\t\t\t\tđộ rộng\n"
+"\t[--ignore-non-functions]\t\tbỏ qua các cái khác hàm\n"
+"\t[--demangle[=kiểu_dáng]] \t\ttháo gỡ\n"
+"\t[--no-demangle]\t\t\t\tkhông tháo gỡ\n"
+"\t[image-file] \t\t\t\t\ttập tin ảnh\n"
+"\t[profile-file...]\t\t\t\t\ttập tin hồ sơ\n"
 
-#: gprof.c:176
+#: gprof.c:174
 #, c-format
 msgid "Report bugs to %s\n"
-msgstr "Hãy trình báo lỗi nào cho %s\n"
+msgstr "Hãy thông báo lỗi cho %s\n"
 
-#: gprof.c:248
+#: gprof.c:250
 #, c-format
 msgid "%s: debugging not supported; -d ignored\n"
-msgstr "%s: chưa hỗ trợ gõ lỗi nên bỏ qua -d\n"
+msgstr "%s: không hỗ trợ khả năng gõ lỗi nên bỏ qua tùy chọn « -d »\n"
 
-#: gprof.c:328
+#: gprof.c:330
 #, c-format
 msgid "%s: unknown file format %s\n"
-msgstr "%s: không biết khuôn dạng tập tin %s\n"
+msgstr "%s: định dạng tập tin lạ %s\n"
 
 #. This output is intended to follow the GNU standards document.
-#: gprof.c:412
+#: gprof.c:414
 #, c-format
 msgid "GNU gprof %s\n"
 msgstr "GNU gprof %s\n"
 
-#: gprof.c:413
+#: gprof.c:415
 #, c-format
 msgid "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
 msgstr ""
-"Đựa vào trình gprof của BSD, bản quyền © năm 1983 của những Quan nhiếp chính \n"
-"của trường đại học California.\n"
+"Dựa vào phần mềm gprof của BSD\n"
+"tác quyền © năm 1983 của các Quan nhiếp chính của Trường Đại Học California (Mỹ).\n"
 
-#: gprof.c:414
+#: gprof.c:416
 #, c-format
 msgid "This program is free software.  This program has absolutely no warranty.\n"
-msgstr "Chương trình này là phần mềm tự do. Chương trình này không bảo đảm gì cả.\n"
+msgstr "Chương trình này là phần mềm tự do. Chương trình này không bảo hành gì cả.\n"
 
-#: gprof.c:455
+#: gprof.c:457
 #, c-format
 msgid "%s: unknown demangling style `%s'\n"
-msgstr "%s: kiểu dạng tháo gõ (demangle) chưa biết `%s'\n"
+msgstr "%s: kiểu dạng tháo gõ lạ « %s »\n"
 
-#: gprof.c:475
+#: gprof.c:477
 #, c-format
 msgid "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
 msgstr ""
-"%s: Có ghi rõ được chỉ một của hai đối --function-ordering (sắp xếp chức năng) \n"
-"và --file-ordering (sắp xếp tập tin).\n"
+"%s: Có thể ghi rõ chỉ một của hai đối số « --function-ordering » (sắp xếp hàm)\n"
+"và « --file-ordering » (sắp xếp tập tin).\n"
 
-#: gprof.c:525
+#: gprof.c:527
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
-msgstr "%s: tiếc là chưa hỗ trợ khuôn dạng tập tin`prof'\n"
+msgstr "%s: tiếc là chưa hỗ trợ định dạng tập tin « prof »\n"
 
-#: gprof.c:574
+#: gprof.c:576
 #, c-format
 msgid "%s: gmon.out file is missing histogram\n"
-msgstr "%s: tập tin gmon.out thiếu biểu đồ tần xuất\n"
+msgstr "%s: tập tin « gmon.out » còn thiếu biểu đồ tần xuất\n"
 
-#: gprof.c:581
+#: gprof.c:583
 #, c-format
 msgid "%s: gmon.out file is missing call-graph data\n"
-msgstr "%s: tập tin gmon.out file thiếu dữ liệu đồ thị gọi\n"
+msgstr "%s: tập tin « gmon.out » file còn thiếu dữ liệu đồ thị gọi\n"
 
 #: hist.c:126
 #, c-format
 msgid "%s: `%s' is incompatible with first gmon file\n"
-msgstr "%s: `%s' không tương thích với tập tin gmon thứ nhất\n"
+msgstr "%s: « %s » không tương thích với tập tin gmon thứ nhất\n"
 
 #: hist.c:142
 #, c-format
 msgid "%s: %s: unexpected EOF after reading %u of %u samples\n"
-msgstr "%s: %s: gặp kết thức tập tin bất ngờ sau khi đọc %u của %u mẫu\n"
+msgstr "%s: %s: gặp kết thúc tập tin bất thường sau khi đọc %u trên %u mẫu\n"
 
 #: hist.c:355
 #, c-format
 msgid "%c%c/call"
-msgstr "%c%c/việc gọi"
+msgstr "%c%c/lời gọi"
 
 #: hist.c:363
 #, c-format
@@ -479,7 +503,7 @@ msgid ""
 " for %.2f%% of %.2f %s\n"
 "\n"
 msgstr ""
-" đối với %.2f%% của %.2f %s\n"
+" trong %.2f%% trên %.2f %s\n"
 "\n"
 
 #: hist.c:369
@@ -497,7 +521,7 @@ msgid ""
 " no time accumulated\n"
 "\n"
 msgstr ""
-" không có thời gian được tích lũy\n"
+" chưa tích lũy thời gian\n"
 "\n"
 
 #: hist.c:381
@@ -506,19 +530,19 @@ msgstr "lũy tích"
 
 #: hist.c:381
 msgid "self  "
-msgstr "mình "
+msgstr "bản thân  "
 
 #: hist.c:381
 msgid "total "
-msgstr "tổng số"
+msgstr "tổng "
 
 #: hist.c:384
 msgid "time"
-msgstr "giờ"
+msgstr "thời gian"
 
 #: hist.c:384
 msgid "calls"
-msgstr "việc gọi"
+msgstr "lời gọi"
 
 #: hist.c:473
 #, c-format
@@ -531,32 +555,32 @@ msgstr ""
 "\n"
 "\n"
 "\n"
-"hiện trạng bằng:\n"
+"hồ sơ phẳng:\n"
 
 #: hist.c:479
 #, c-format
 msgid "Flat profile:\n"
-msgstr "Hiện trạng bằng:\n"
+msgstr "Hồ sơ phẳng:\n"
 
 #: mips.c:82
 #, c-format
 msgid "[find_call] 0x%lx: jal"
-msgstr "[tìm_gọi] 0x%lx: jal"
+msgstr "[lời_gọi_tìm] 0x%lx: jal"
 
 #: mips.c:107
 #, c-format
 msgid "[find_call] 0x%lx: jalr\n"
-msgstr "[tìm_gọi] 0x%lx: jalr\n"
+msgstr "[lời_gọi_tìm] 0x%lx: jalr\n"
 
 #: source.c:162
 #, c-format
 msgid "%s: could not locate `%s'\n"
-msgstr "%s: không định vị được `%s'\n"
+msgstr "%s: không tìm thấy « %s »\n"
 
 #: source.c:237
 #, c-format
 msgid "*** File %s:\n"
-msgstr "*** Tập tin %s:\n"
+msgstr "••• Tập tin %s:\n"
 
 #: utils.c:107
 #, c-format

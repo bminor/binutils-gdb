@@ -1,3 +1,7 @@
+2007-07-12  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated translation.
+
 2007-07-12  Kai Tietz   <kai.tietz@onevision.com>
 
 	* cg_print.c: Force cast of sizeof to be a long.

@@ -1,18 +1,18 @@
 # Dutch messages for the Opcodes Library.
-# Copyright (C) 1999, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+# Copyright (C) 1999, 2002, 2003, 2005, 2006, 2007 Free Software Foundation, Inc.
 # This file is distributed under the same license as the Opcodes package.
-# Tim Van Holder <tim.van.holder@telenet.be>, 1999, 2002, 2003, 2005, 2006.
-# 
+# Tim Van Holder <tim.van.holder@telenet.be>, 1999, 2002, 2003, 2005, 2006, 2007.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: opcodes 2.16.93\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-10-25 10:50+0930\n"
-"PO-Revision-Date: 2006-05-21 20:56+0200\n"
+"PO-Revision-Date: 2007-07-11 22:32+0200\n"
 "Last-Translator: Tim Van Holder <tim.van.holder@telenet.be>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -204,7 +204,7 @@ msgstr "Register moet tussen r8 en r15 liggen"
 
 #: fr30-asm.c:115 m32c-asm.c:820
 msgid "Register list is not valid"
-msgstr "Regijsterlijst is ongeldig"
+msgstr "Registerlijst is ongeldig"
 
 # Betere vertaling voor 'parsing'?
 #: fr30-asm.c:309 frv-asm.c:1262 ip2k-asm.c:510 iq2000-asm.c:456
@@ -212,7 +212,7 @@ msgstr "Regijsterlijst is ongeldig"
 #: xstormy16-asm.c:275
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
-msgstr "Veld %d niet herkend tijdens parsen.\n"
+msgstr "Veld %d niet herkend tijdens ontleden.\n"
 
 #: fr30-asm.c:357 frv-asm.c:1310 ip2k-asm.c:558 iq2000-asm.c:504
 #: m32c-asm.c:1524 m32r-asm.c:371 ms1-asm.c:594 openrisc-asm.c:288
@@ -817,7 +817,7 @@ msgstr "Operand buiten bereik. Moet tussen -32768 en 32767 liggen."
 # Should this even be here?
 #: ms1-asm.c:121
 msgid "Biiiig Trouble in parse_imm16!"
-msgstr "Grooooooooooot Probleem in parse_imm16!"
+msgstr "Groooooooot Probleem in parse_imm16!"
 
 #: ms1-asm.c:129
 #, c-format
@@ -932,17 +932,17 @@ msgstr "ongeldig sprg-nummer"
 #: sparc-dis.c:269
 #, c-format
 msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
-msgstr "Interne fout: sparch-opcode.h is verkeerd: \"%s\", %#.8lx, %#.8lx\n"
+msgstr "Interne fout: sparc-opcode.h is verkeerd: \"%s\", %#.8lx, %#.8lx\n"
 
 #: sparc-dis.c:280
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
-msgstr "Interne fout: sparch-opcode.h is verkeerd: \"%s\", %#.8lx, %#.8lx\n"
+msgstr "Interne fout: sparc-opcode.h is verkeerd: \"%s\", %#.8lx, %#.8lx\n"
 
 #: sparc-dis.c:330
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
-msgstr "Interne fout: sparch-opcode.h is verkeerd: \"%s\" == \"%s\"\n"
+msgstr "Interne fout: sparc-opcode.h is verkeerd: \"%s\" == \"%s\"\n"
 
 #. Mark as non-valid instruction.
 #: sparc-dis.c:984
