@@ -71,7 +71,7 @@ SECTIONS
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
     ${RELOCATING+PROVIDE (etext = .);}
-    *(.gcc_except_table)
+    ${RELOCATING+ *(.gcc_except_table)}
   }
 
   /* The Cygwin32 library uses a section to avoid copying certain data
@@ -95,7 +95,7 @@ SECTIONS
   {
     *(.rdata)
     ${R_RDATA}
-    *(.eh_frame)
+    ${RELOCATING+ *(.eh_frame)}
     ${RELOCATING+___RUNTIME_PSEUDO_RELOC_LIST__ = .;}
     ${RELOCATING+__RUNTIME_PSEUDO_RELOC_LIST__ = .;}
     *(.rdata_runtime_pseudo_reloc)

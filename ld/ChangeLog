@@ -1,3 +1,9 @@
+2007-07-12  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* scripttempl/pe.sc: Don't include .gcc_except_table and
+	.eh_frame on partial links.
+	* scripttempl/pep.sc: Likewise.
+
 2007-07-12  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4782
