@@ -15436,7 +15436,8 @@ package, to provide the history facility.  @xref{Using History
 Interactively}, for the detailed description of the History library.
 
 To issue a command to @value{GDBN} without affecting certain aspects of
-the state which is seen by users, prefix it with @samp{server }.  This
+the state which is seen by users, prefix it with @samp{server }
+(@pxref{Server Prefix}).  This
 means that this command will not affect the command history, nor will it
 affect @value{GDBN}'s notion of which command to repeat if @key{RET} is
 pressed on a line by itself.
@@ -21241,6 +21242,7 @@ This is Edition @value{EDITION}, @value{DATE}.
 
 @menu
 * Annotations Overview::  What annotations are; the general syntax.
+* Server Prefix::       Issuing a command without affecting user state.
 * Prompting::           Annotations marking @value{GDBN}'s need for input.
 * Errors::              Annotations for error messages.
 * Invalidation::        Some annotations describe things now invalid.
@@ -21318,6 +21320,20 @@ Here @samp{quit} is input to @value{GDBN}; the rest is output from
 @value{GDBN}.  The three lines beginning @samp{^Z^Z} (where @samp{^Z}
 denotes a @samp{control-z} character) are annotations; the rest is
 output from @value{GDBN}.
+
+@node Server Prefix
+@section The Server Prefix
+@cindex server prefix
+
+If you prefix a command with @samp{server } then it will not affect
+the command history, nor will it affect @value{GDBN}'s notion of which
+command to repeat if @key{RET} is pressed on a line by itself.  This
+means that commands can be run behind a user's back by a front-end in
+a transparent manner.
+
+The server prefix does not affect the recording of values into the value
+history; to print a value without recording it into the value history,
+use the @code{output} command instead of the @code{print} command.
 
 @node Prompting
 @section Annotation for @value{GDBN} Input
