@@ -90,6 +90,23 @@ sh_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
+/* Provide only a fill function for the general register set.  ps_lgetregs
+   will use this for NPTL support.  */
+
+static void sh_fill_gregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < 23; i++)
+    if (sh_regmap[i] != -1)
+      collect_register (i, (char *) buf + sh_regmap[i]);
+}
+
+struct regset_info target_regsets[] = {
+  { 0, 0, 0, GENERAL_REGS, sh_fill_gregset, NULL },
+  { 0, 0, -1, -1, NULL, NULL }
+};
+
 struct linux_target_ops the_low_target = {
   sh_num_regs,
   sh_regmap,

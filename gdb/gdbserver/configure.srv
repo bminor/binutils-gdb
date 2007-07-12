@@ -126,6 +126,7 @@ case "${target}" in
   sh*-*-linux*)		srv_regobj=reg-sh.o
 			srv_tgtobj="linux-low.o linux-sh-low.o"
 			srv_linux_usrregs=yes
+			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
   spu*-*-*)		srv_regobj=reg-spu.o

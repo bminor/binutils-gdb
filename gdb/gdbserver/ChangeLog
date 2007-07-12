@@ -1,3 +1,8 @@
+2007-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.srv: Set srv_linux_regsets for sh*-*-linux*.
+	* linux-sh-low.c (sh_fill_gregset, target_regsets): New.
+
 2007-07-08  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* win32-low.c (handle_output_debug_string): Ignore event if not
