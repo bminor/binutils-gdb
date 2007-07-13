@@ -41,6 +41,9 @@ cat >e${EMULATION_NAME}.c <<EOF
 #include "libiberty.h"
 #include "safe-ctype.h"
 #include "getopt.h"
+#include "md5.h"
+#include "sha1.h"
+#include <fcntl.h>
 
 #include "bfdlink.h"
 
@@ -859,6 +862,169 @@ EOF
 if test x"$LDEMUL_AFTER_OPEN" != xgld"$EMULATION_NAME"_after_open; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
+static bfd_size_type
+gld${EMULATION_NAME}_id_note_section_size (bfd *abfd,
+					   struct bfd_link_info *link_info)
+{
+  const char *style = link_info->emit_note_gnu_build_id;
+  bfd_size_type size;
+
+  abfd = abfd;
+
+  size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
+  size = (size + 3) & -(bfd_size_type) 4;
+
+  if (!strcmp (style, "md5") || !strcmp (style, "uuid"))
+    size += 128 / 8;
+  else if (!strcmp (style, "sha1"))
+    size += 160 / 8;
+  else if (!strncmp (style, "0x", 2))
+    {
+      /* ID is in string form (hex).  Convert to bits.  */
+      const char *id = style + 2;
+      do
+	{
+	  if (ISXDIGIT (id[0]) && ISXDIGIT (id[1]))
+	    {
+	      ++size;
+	      id += 2;
+	    }
+	  else if (*id == '-' || *id == ':')
+	    ++id;
+	  else
+	    {
+	      size = 0;
+	      break;
+	    }
+	} while (*id != '\0');
+    }
+  else
+    size = 0;
+
+  return size;
+}
+
+static unsigned char
+read_hex (const char xdigit)
+{
+  if (ISDIGIT (xdigit))
+    return xdigit - '0';
+  if (ISUPPER (xdigit))
+    return xdigit - 'A' + 0xa;
+  if (ISLOWER (xdigit))
+    return xdigit - 'a' + 0xa;
+  abort ();
+  return 0;
+}
+
+struct build_id_info
+{
+  const char *style;
+  asection *sec;
+};
+
+static bfd_boolean
+gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  struct build_id_info *info =
+    elf_tdata (abfd)->after_write_object_contents_info;
+  asection *asec;
+  Elf_Internal_Shdr *i_shdr;
+  unsigned char *contents, *id_bits;
+  bfd_size_type size;
+  Elf_External_Note *e_note;
+
+  asec = info->sec;
+  if (asec->output_section == NULL)
+    {
+      einfo (_("%P: .note.gnu.build-id section missing"));
+      return FALSE;
+    }
+  i_shdr = &elf_section_data (asec->output_section)->this_hdr;
+
+  if (i_shdr->contents == NULL)
+    {
+      ASSERT (asec->output_offset == 0);
+      i_shdr->contents = xcalloc (i_shdr->sh_size, 1);
+      if (i_shdr->contents == NULL)
+	return FALSE;
+    }
+  contents = i_shdr->contents + asec->output_offset;
+
+  e_note = (void *) contents;
+  size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
+  size = (size + 3) & -(bfd_size_type) 4;
+  id_bits = contents + size;
+  size = asec->size - size;
+
+  bfd_h_put_32 (abfd, sizeof "GNU", &e_note->namesz);
+  bfd_h_put_32 (abfd, size, &e_note->descsz);
+  bfd_h_put_32 (abfd, NT_GNU_BUILD_ID, &e_note->type);
+  memcpy (e_note->name, "GNU", sizeof "GNU");
+
+  if (!strcmp (info->style, "md5"))
+    {
+      struct md5_ctx ctx;
+      md5_init_ctx (&ctx);
+      if (bed->s->checksum_contents (abfd,
+				     (void (*) (const void *, size_t, void *))
+				     &md5_process_bytes,
+				     &ctx))
+	md5_finish_ctx (&ctx, id_bits);
+      else
+	return FALSE;
+    }
+  else if (!strcmp (info->style, "sha1"))
+    {
+      struct sha1_ctx ctx;
+      sha1_init_ctx (&ctx);
+      if (bed->s->checksum_contents (abfd,
+				     (void (*) (const void *, size_t, void *))
+				     &sha1_process_bytes,
+				     &ctx))
+	sha1_finish_ctx (&ctx, id_bits);
+      else
+	return FALSE;
+    }
+  else if (!strcmp (info->style, "uuid"))
+    {
+      int n;
+      int fd = open ("/dev/urandom", O_RDONLY);
+      if (fd < 0)
+	return FALSE;
+      n = read (fd, id_bits, size);
+      close (fd);
+      if (n < (int) size)
+	return FALSE;
+    }
+  else if (!strncmp (info->style, "0x", 2))
+    {
+      /* ID is in string form (hex).  Convert to bits.  */
+      const char *id = info->style + 2;
+      size_t n = 0;
+      do
+	{
+	  if (ISXDIGIT (id[0]) && ISXDIGIT (id[1]))
+	    {
+	      id_bits[n] = read_hex (*id++) << 4;
+	      id_bits[n++] |= read_hex (*id++);
+	    }
+	  else if (*id == '-' || *id == ':')
+	    ++id;
+	  else
+	    abort ();		/* Should have been validated earlier.  */
+	} while (*id != '\0');
+    }
+  else
+    abort ();			/* Should have been validated earlier.  */
+
+  size = i_shdr->sh_size;
+  return (bfd_seek (abfd, i_shdr->sh_offset, SEEK_SET) == 0
+	  && bfd_bwrite (i_shdr->contents, size, abfd) == size);
+}
+
+
 /* This is called after all the input files have been opened.  */
 
 static void
@@ -874,7 +1040,7 @@ gld${EMULATION_NAME}_after_open (void)
 
       abfd = link_info.input_bfds;
 
-      size = _bfd_id_note_section_size (abfd, &link_info);
+      size = gld${EMULATION_NAME}_id_note_section_size (abfd, &link_info);
       if (size == 0)
 	{
 	  einfo ("%P: warning: unrecognized --build-id style ignored.\n");
@@ -890,10 +1056,14 @@ gld${EMULATION_NAME}_after_open (void)
 	  if (s != NULL && bfd_set_section_alignment (abfd, s, 2))
 	    {
 	      struct elf_obj_tdata *t = elf_tdata (output_bfd);
-	      t->emit_note_gnu_build_id = link_info.emit_note_gnu_build_id;
-	      t->note_gnu_build_id_sec = s;
+	      struct build_id_info *b = xmalloc (sizeof *b);
+	      b->style = link_info.emit_note_gnu_build_id;
+	      b->sec = s;
 	      elf_section_type (s) = SHT_NOTE;
 	      s->size = size;
+	      t->after_write_object_contents
+		= &gld${EMULATION_NAME}_write_build_id_section;
+	      t->after_write_object_contents_info = b;
 	    }
 	  else
 	    {
@@ -1839,7 +2009,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
 }
 
-#define DEFAULT_BUILD_ID_STYLE	"md5"
+#define DEFAULT_BUILD_ID_STYLE	"sha1"
 
 static bfd_boolean
 gld${EMULATION_NAME}_handle_option (int optc)

@@ -1973,18 +1973,20 @@ enable other tradeoffs in future versions of the linker.
 Request creation of @code{.note.gnu.build-id} ELF note section.
 The contents of the note are unique bits identifying this linked
 file.  @var{style} can be @code{uuid} to use 128 random bits,
-@code{md5} to use a 128-bit @sc{MD5} hash on the normative parts
-of the output contents, or @code{0x@var{hexstring}} to use a
-chosen bit string specified as an even number of hexadecimal
-digits (@code{-} and @code{:} characters between digit pairs are
-ignored).  If @var{style} is omitted, @code{md5} is used.
+@code{sha1} to use a 160-bit @sc{SHA1} hash on the normative
+parts of the output contents, @code{md5} to use a 128-bit
+@sc{MD5} hash on the normative parts of the output contents, or
+@code{0x@var{hexstring}} to use a chosen bit string specified as
+an even number of hexadecimal digits (@code{-} and @code{:}
+characters between digit pairs are ignored).  If @var{style} is
+omitted, @code{sha1} is used.
 
-The @code{md5} style produces an identifier that is always the
-same in an identical output file, but will be unique among all
-nonidentical output files.  It is not intended to be compared as
-a checksum for the file's contents.  A linked file may be
-changed later by other tools, but the build ID bit string
-identifying the original linked file does not change.
+The @code{md5} and @code{sha1} styles produces an identifier
+that is always the same in an identical output file, but will be
+unique among all nonidentical output files.  It is not intended
+to be compared as a checksum for the file's contents.  A linked
+file may be changed later by other tools, but the build ID bit
+string identifying the original linked file does not change.
 
 Passing @code{none} for @var{style} disables the setting from any
 @code{--build-id} options earlier on the command line.
