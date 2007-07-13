@@ -3380,7 +3380,8 @@ strip_excluded_output_sections (void)
 	{
 	  /* We don't set bfd_section to NULL since bfd_section of the
 	     removed output section statement may still be used.  */
-	  if (!os->section_relative_symbol)
+	  if (!os->section_relative_symbol
+	      && !os->update_dot_tree)
 	    os->ignored = TRUE;
 	  output_section->flags |= SEC_EXCLUDE;
 	  bfd_section_list_remove (output_bfd, output_section);

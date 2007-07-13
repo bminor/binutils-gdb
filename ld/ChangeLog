@@ -1,3 +1,8 @@
+2007-07-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (strip_excluded_output_sections): Don't ignore sections
+	with update_dot_tree.
+
 2007-07-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* scripttempl/pe.sc: Don't include .gcc_except_table and
