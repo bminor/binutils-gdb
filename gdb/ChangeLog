@@ -1,3 +1,8 @@
+2007-07-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* mep-tdep.c (IS_BRA, BRA_DISP): New macros.
+	(mep_analyze_prologue): Add case for BRA instruction.
+
 2007-07-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* solib-svr4.c (LM_ADDR_CHECK): Relax prelink recognition heuristic.

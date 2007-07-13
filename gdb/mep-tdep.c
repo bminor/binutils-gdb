@@ -1578,6 +1578,10 @@ mep_get_insn (CORE_ADDR pc, long *insn)
 #define MOV_TARGET(i)	      (FIELD (i, 24, 4))
 #define MOV_SOURCE(i)	      (FIELD (i, 20, 4))
 
+/* BRA disp12.align2	      1011_dddd_dddd_ddd0 xxxx_xxxx_xxxx_xxxx */
+#define IS_BRA(i)	      (((i) & 0xf0010000) == 0xb0000000)
+#define BRA_DISP(i)           (SFIELD (i, 17, 11) << 1)
+
 
 /* This structure holds the results of a prologue analysis.  */
 struct mep_prologue
@@ -1806,6 +1810,19 @@ mep_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 
           reg[rn] = pv_area_fetch (stack, addr, 4);
         }
+      else if (IS_BRA (insn) && BRA_DISP (insn) > 0)
+	{
+	  /* When a loop appears as the first statement as a function
+	     body, gcc 4.x will use a BRA instruction to branch to the
+	     loop condition checking code.  This BRA instruction is
+	     marked as part of the prologue.  We therefore set next_pc
+	     to this branch target and also stop the prologue scan. 
+	     The instructions at and beyond the branch target should
+	     no longer be associated with the prologue.  */
+	  next_pc = pc + BRA_DISP (insn);
+	  after_last_frame_setup_insn = next_pc;
+	  break;
+	}
       else
         /* We've hit some instruction we don't know how to simulate.
            Strictly speaking, we should set every value we're
