@@ -1,3 +1,10 @@
+2007-07-13  Roland McGrath  <roland@redhat.com>
+
+	* elf-bfd.h (struct elf_obj_tdata): Revert last change.
+	Add after_write_object_contents, after_write_object_contents_info.
+	* elf.c (_bfd_elf_write_object_contents): Revert last change.
+	Instead, call after_write_object_contents if set.
+
 2007-07-12  Kai Tietz   <kai.tietz@onevision.com>
 
 	* bfd-in.h: (BFD_HOST_64BIT_LONG_LONG): New.

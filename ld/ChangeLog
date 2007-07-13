@@ -1,3 +1,18 @@
+2007-07-13  Roland McGrath  <roland@redhat.com>
+
+	* emultempl/elf32.em (struct build_id_info): New type.
+	(gld${EMULATION_NAME}_id_note_section_size): New function.
+	(gld${EMULATION_NAME}_write_build_id_section): New function.
+	(gld${EMULATION_NAME}_after_open): Use them.
+	(DEFAULT_BUILD_ID_STYLE): Change to "sha1".
+	* ld.texinfo (Options): Mention --build-id=sha1.
+
+	* sha1.h: New file (from gnulib).
+	* sha1.c: New file (from gnulib).
+	* Makefile.am (CFILES, HFILES, OFILES, ld_new_SOURCES): Add them.
+	(sha1.o): New target.
+	* Makefile.in: Regenerated.
+
 2007-07-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (strip_excluded_output_sections): Don't ignore sections
