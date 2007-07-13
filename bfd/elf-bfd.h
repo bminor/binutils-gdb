@@ -1469,9 +1469,9 @@ struct elf_obj_tdata
   obj_attribute known_obj_attributes[2][NUM_KNOWN_OBJ_ATTRIBUTES];
   obj_attribute_list *other_obj_attributes[2];
 
-  /* The .note.gnu.build-id section and --build-id option setting, or NULL.  */
-  char *emit_note_gnu_build_id;
-  asection *note_gnu_build_id_sec;
+  /* Called at the end of _bfd_elf_write_object_contents if not NULL.  */
+  bfd_boolean (*after_write_object_contents) (bfd *);
+  void *after_write_object_contents_info;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
@@ -2045,9 +2045,6 @@ extern void _bfd_elf_copy_obj_attributes (bfd *, bfd *);
 extern int _bfd_elf_obj_attrs_arg_type (bfd *, int, int);
 extern void _bfd_elf_parse_attributes (bfd *, Elf_Internal_Shdr *);
 extern bfd_boolean _bfd_elf_merge_object_attributes (bfd *, bfd *);
-
-extern bfd_size_type _bfd_id_note_section_size
-  (bfd *abfd, struct bfd_link_info *link_info);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;
