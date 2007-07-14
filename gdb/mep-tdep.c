@@ -1812,13 +1812,24 @@ mep_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
         }
       else if (IS_BRA (insn) && BRA_DISP (insn) > 0)
 	{
-	  /* When a loop appears as the first statement as a function
+	  /* When a loop appears as the first statement of a function
 	     body, gcc 4.x will use a BRA instruction to branch to the
 	     loop condition checking code.  This BRA instruction is
 	     marked as part of the prologue.  We therefore set next_pc
 	     to this branch target and also stop the prologue scan. 
 	     The instructions at and beyond the branch target should
-	     no longer be associated with the prologue.  */
+	     no longer be associated with the prologue.
+	     
+	     Note that we only consider forward branches here.  We
+	     presume that a forward branch is being used to skip over
+	     a loop body.
+	     
+	     A backwards branch is covered by the default case below.
+	     If we were to encounter a backwards branch, that would
+	     most likely mean that we've scanned through a loop body.
+	     We definitely want to stop the prologue scan when this
+	     happens and that is precisely what is done by the default
+	     case below.  */
 	  next_pc = pc + BRA_DISP (insn);
 	  after_last_frame_setup_insn = next_pc;
 	  break;
