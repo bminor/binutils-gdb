@@ -1,3 +1,9 @@
+2007-07-14  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arm.s: Add tests for re-aliasing a previously removed
+	alias.
+	* gas/arm/arm.l: Add new expected warning message.
+
 2007-07-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ssemmx2.d: Ignore padding.

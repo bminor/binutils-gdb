@@ -1971,7 +1971,7 @@ insert_reg_alias (char *str, int number, int type)
       else if (new->number != number || new->type != type)
 	as_warn (_("ignoring redefinition of register alias '%s'"), str);
 
-      return 0;
+      return NULL;
     }
 
   name = xstrdup (str);
@@ -2013,9 +2013,9 @@ insert_neon_reg_alias (char *str, int number, int type,
 	new_register_name .req existing_register_name
 
    If we find one, or if it looks sufficiently like one that we want to
-   handle any error here, return non-zero.  Otherwise return zero.  */
+   handle any error here, return TRUE.  Otherwise return FALSE.  */
 
-static int
+static bfd_boolean
 create_register_alias (char * newname, char *p)
 {
   struct reg_entry *old;
@@ -2026,17 +2026,17 @@ create_register_alias (char * newname, char *p)
      collapsed to single spaces.  */
   oldname = p;
   if (strncmp (oldname, " .req ", 6) != 0)
-    return 0;
+    return FALSE;
 
   oldname += 6;
   if (*oldname == '\0')
-    return 0;
+    return FALSE;
 
   old = hash_find (arm_reg_hsh, oldname);
   if (!old)
     {
       as_warn (_("unknown register '%s' -- .req ignored"), oldname);
-      return 1;
+      return TRUE;
     }
 
   /* If TC_CASE_SENSITIVE is defined, then newname already points to
@@ -2056,21 +2056,34 @@ create_register_alias (char * newname, char *p)
   /* Create aliases under the new name as stated; an all-lowercase
      version of the new name; and an all-uppercase version of the new
      name.  */
-  insert_reg_alias (nbuf, old->number, old->type);
+  if (insert_reg_alias (nbuf, old->number, old->type) != NULL)
+    {
+      for (p = nbuf; *p; p++)
+	*p = TOUPPER (*p);
 
-  for (p = nbuf; *p; p++)
-    *p = TOUPPER (*p);
+      if (strncmp (nbuf, newname, nlen))
+	{
+	  /* If this attempt to create an additional alias fails, do not bother
+	     trying to create the all-lower case alias.  We will fail and issue
+	     a second, duplicate error message.  This situation arises when the
+	     programmer does something like:
+	       foo .req r0
+	       Foo .req r1
+	     The second .req creates the "Foo" alias but then fails to create
+	     the artifical FOO alias because it has already been created by the
+	     first .req.  */
+	  if (insert_reg_alias (nbuf, old->number, old->type) == NULL)
+	    return TRUE;
+	}
 
-  if (strncmp (nbuf, newname, nlen))
-    insert_reg_alias (nbuf, old->number, old->type);
+      for (p = nbuf; *p; p++)
+	*p = TOLOWER (*p);
 
-  for (p = nbuf; *p; p++)
-    *p = TOLOWER (*p);
+      if (strncmp (nbuf, newname, nlen))
+	insert_reg_alias (nbuf, old->number, old->type);
+    }
 
-  if (strncmp (nbuf, newname, nlen))
-    insert_reg_alias (nbuf, old->number, old->type);
-
-  return 1;
+  return TRUE;
 }
 
 /* Create a Neon typed/indexed register alias using directives, e.g.:
@@ -2270,11 +2283,45 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 		 name);
       else
 	{
+	  char * p;
+	  char * nbuf;
+
 	  hash_delete (arm_reg_hsh, name);
 	  free ((char *) reg->name);
           if (reg->neon)
             free (reg->neon);
 	  free (reg);
+
+	  /* Also locate the all upper case and all lower case versions.
+	     Do not complain if we cannot find one or the other as it
+	     was probably deleted above.  */
+	  
+	  nbuf = strdup (name);
+	  for (p = nbuf; *p; p++)
+	    *p = TOUPPER (*p);
+	  reg = hash_find (arm_reg_hsh, nbuf);
+	  if (reg)
+	    {
+	      hash_delete (arm_reg_hsh, nbuf);
+	      free ((char *) reg->name);
+	      if (reg->neon)
+		free (reg->neon);
+	      free (reg);
+	    }
+
+	  for (p = nbuf; *p; p++)
+	    *p = TOLOWER (*p);
+	  reg = hash_find (arm_reg_hsh, nbuf);
+	  if (reg)
+	    {
+	      hash_delete (arm_reg_hsh, nbuf);
+	      free ((char *) reg->name);
+	      if (reg->neon)
+		free (reg->neon);
+	      free (reg);
+	    }
+
+	  free (nbuf);
 	}
     }
 
