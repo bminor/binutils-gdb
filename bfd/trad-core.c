@@ -48,6 +48,10 @@
 #include TRAD_HEADER
 #endif
 
+#ifndef NBPG
+# define NBPG getpagesize()
+#endif
+
 struct trad_core_struct
 {
   asection *data_section;
