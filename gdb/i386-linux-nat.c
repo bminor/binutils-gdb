@@ -246,6 +246,7 @@ static void
 fetch_regs (struct regcache *regcache, int tid)
 {
   elf_gregset_t regs;
+  elf_gregset_t *regs_p = &regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
     {
@@ -260,7 +261,7 @@ fetch_regs (struct regcache *regcache, int tid)
       perror_with_name (_("Couldn't get registers"));
     }
 
-  supply_gregset (regcache, (const elf_gregset_t *) &regs);
+  supply_gregset (regcache, (const elf_gregset_t *) regs_p);
 }
 
 /* Store all valid general-purpose registers in GDB's register array

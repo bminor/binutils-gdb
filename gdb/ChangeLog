@@ -1,3 +1,8 @@
+2007-07-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-linux-nat.c (fetch_regs): Work around gcc 3.4 alias
+	warning bug.
+
 2007-07-13  Kevin Buettner  <kevinb@redhat.com>
 
 	* mep-tdep.c (mep_analyze_prologue): Update comment for BRA
