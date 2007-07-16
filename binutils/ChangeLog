@@ -1,3 +1,9 @@
+2007-07-16  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: New Ukranian translation.
+	* configure.in (ALL_LINGUAS): Add 'uk'.
+	* configure: Regenerate.
+
 2007-07-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c (dump_dwarf): Correct setting of is_relocatable.

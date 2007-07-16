@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: opcodes 2.16.93\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2005-10-25 10:50+0930\n"
-"PO-Revision-Date: 2007-07-11 22:32+0200\n"
+"PO-Revision-Date: 2007-07-12 21:50+0200\n"
 "Last-Translator: Tim Van Holder <tim.van.holder@telenet.be>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "MIME-Version: 1.0\n"
@@ -206,13 +206,13 @@ msgstr "Register moet tussen r8 en r15 liggen"
 msgid "Register list is not valid"
 msgstr "Registerlijst is ongeldig"
 
-# Betere vertaling voor 'parsing'?
+# Klinkt niet echt geweldig, maar ja...
 #: fr30-asm.c:309 frv-asm.c:1262 ip2k-asm.c:510 iq2000-asm.c:456
 #: m32c-asm.c:1476 m32r-asm.c:323 ms1-asm.c:546 openrisc-asm.c:240
 #: xstormy16-asm.c:275
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
-msgstr "Veld %d niet herkend tijdens ontleden.\n"
+msgstr "Veld %d niet herkend tijdens analyse.\n"
 
 #: fr30-asm.c:357 frv-asm.c:1310 ip2k-asm.c:558 iq2000-asm.c:504
 #: m32c-asm.c:1524 m32r-asm.c:371 ms1-asm.c:594 openrisc-asm.c:288
