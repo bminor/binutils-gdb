@@ -1,6 +1,6 @@
 2007-07-16  Nick Clifton  <nickc@redhat.com>
 
-	* po/uk.po: New Ukranian translation.
+	* po/uk.po: New Ukrainian translation.
 	* configure.in (ALL_LINGUAS): Add 'uk'.
 	* configure: Regenerate.
 
