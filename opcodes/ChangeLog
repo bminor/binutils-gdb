@@ -1,3 +1,9 @@
+2007-07-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (EMq): Removed.
+	(EMx): New.
+	(prefix_user_table): Replace EMq with EMx.
+
 2007-07-16  Nick Clifton  <nickc@redhat.com>
 
 	* po/nl.po: Updated translation.

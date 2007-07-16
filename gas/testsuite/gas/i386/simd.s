@@ -25,5 +25,9 @@ _start:
 	punpcklbw 0x12345678,%mm1
 	punpckldq 0x12345678,%mm1
 	punpcklwd 0x12345678,%mm1
+	punpcklbw 0x12345678,%xmm1
+	punpckldq 0x12345678,%xmm1
+	punpcklwd 0x12345678,%xmm1
+	punpcklqdq 0x12345678,%xmm1
 	ucomisd 0x12345678,%xmm1
 	ucomiss 0x12345678,%xmm1

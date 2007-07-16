@@ -25,5 +25,9 @@ _start:
 	punpcklbw 0x12345678(%rip),%mm1
 	punpckldq 0x12345678(%rip),%mm1
 	punpcklwd 0x12345678(%rip),%mm1
+	punpcklbw 0x12345678(%rip),%xmm1
+	punpckldq 0x12345678(%rip),%xmm1
+	punpcklwd 0x12345678(%rip),%xmm1
+	punpcklqdq 0x12345678(%rip),%xmm1
 	ucomisd 0x12345678(%rip),%xmm1
 	ucomiss 0x12345678(%rip),%xmm1

@@ -309,7 +309,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define XM { OP_XMM, 0 }
 #define EM { OP_EM, v_mode }
 #define EMd { OP_EM, d_mode }
-#define EMq { OP_EM, q_mode }
+#define EMx { OP_EM, x_mode }
 #define EXd { OP_EX, d_mode }
 #define EXq { OP_EX, q_mode }
 #define EXx { OP_EX, x_mode }
@@ -2568,7 +2568,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "punpcklbw",{ MX, EMd } },
     { "(bad)",	{ XX } },
-    { "punpcklbw",{ MX, EMq } },
+    { "punpcklbw",{ MX, EMx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2576,7 +2576,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "punpcklwd",{ MX, EMd } },
     { "(bad)",	{ XX } },
-    { "punpcklwd",{ MX, EMq } },
+    { "punpcklwd",{ MX, EMx } },
     { "(bad)",	{ XX } },
   },
 
@@ -2584,7 +2584,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "punpckldq",{ MX, EMd } },
     { "(bad)",	{ XX } },
-    { "punpckldq",{ MX, EMq } },
+    { "punpckldq",{ MX, EMx } },
     { "(bad)",	{ XX } },
   },
 };
