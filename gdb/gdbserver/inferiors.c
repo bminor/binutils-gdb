@@ -33,10 +33,13 @@ struct thread_info
 };
 
 struct inferior_list all_threads;
+struct inferior_list all_dlls;
+int dlls_changed;
 
 struct thread_info *current_inferior;
 
 #define get_thread(inf) ((struct thread_info *)(inf))
+#define get_dll(inf) ((struct dll_info *)(inf))
 
 void
 add_inferior_to_list (struct inferior_list *list,
@@ -109,15 +112,14 @@ remove_inferior (struct inferior_list *list,
 void
 add_thread (unsigned long thread_id, void *target_data, unsigned int gdb_id)
 {
-  struct thread_info *new_thread
-    = (struct thread_info *) malloc (sizeof (*new_thread));
+  struct thread_info *new_thread = malloc (sizeof (*new_thread));
 
   memset (new_thread, 0, sizeof (*new_thread));
 
   new_thread->entry.id = thread_id;
 
   add_inferior_to_list (&all_threads, & new_thread->entry);
-  
+
   if (current_inferior == NULL)
     current_inferior = new_thread;
 
@@ -187,14 +189,6 @@ remove_thread (struct thread_info *thread)
   free_one_thread (&thread->entry);
 }
 
-void
-clear_inferiors (void)
-{
-  for_each_inferior (&all_threads, free_one_thread);
-
-  all_threads.head = all_threads.tail = NULL;
-}
-
 struct inferior_list_entry *
 find_inferior (struct inferior_list *list,
 	       int (*func) (struct inferior_list_entry *, void *), void *arg)
@@ -248,4 +242,81 @@ void
 set_inferior_regcache_data (struct thread_info *inferior, void *data)
 {
   inferior->regcache_data = data;
+}
+
+static void
+free_one_dll (struct inferior_list_entry *inf)
+{
+  struct dll_info *dll = get_dll (inf);
+  if (dll->name != NULL)
+    free (dll->name);
+  free (dll);
+}
+
+/* Find a DLL with the same name and/or base address.  A NULL name in
+   the key is ignored; so is an all-ones base address.  */
+
+static int
+match_dll (struct inferior_list_entry *inf, void *arg)
+{
+  struct dll_info *iter = (void *) inf;
+  struct dll_info *key = arg;
+
+  if (key->base_addr != ~(CORE_ADDR) 0
+      && iter->base_addr == key->base_addr)
+    return 1;
+  else if (key->name != NULL
+	   && iter->name != NULL
+	   && strcmp (key->name, iter->name) == 0)
+    return 1;
+
+  return 0;
+}
+
+/* Record a newly loaded DLL at BASE_ADDR.  */
+
+void
+loaded_dll (const char *name, CORE_ADDR base_addr)
+{
+  struct dll_info *new_dll = malloc (sizeof (*new_dll));
+  memset (new_dll, 0, sizeof (*new_dll));
+
+  new_dll->entry.id = -1;
+
+  new_dll->name = strdup (name);
+  new_dll->base_addr = base_addr;
+
+  add_inferior_to_list (&all_dlls, &new_dll->entry);
+  dlls_changed = 1;
+}
+
+/* Record that the DLL with NAME and BASE_ADDR has been unloaded.  */
+
+void
+unloaded_dll (const char *name, CORE_ADDR base_addr)
+{
+  struct dll_info *dll;
+  struct dll_info key_dll;
+
+  /* Be careful not to put the key DLL in any list.  */
+  key_dll.name = (char *) name;
+  key_dll.base_addr = base_addr;
+
+  dll = (void *) find_inferior (&all_dlls, match_dll, &key_dll);
+  remove_inferior (&all_dlls, &dll->entry);
+  free_one_dll (&dll->entry);
+  dlls_changed = 1;
+}
+
+#define clear_list(LIST) \
+  do { (LIST)->head = (LIST)->tail = NULL; } while (0)
+
+void
+clear_inferiors (void)
+{
+  for_each_inferior (&all_threads, free_one_thread);
+  for_each_inferior (&all_dlls, free_one_dll);
+
+  clear_list (&all_threads);
+  clear_list (&all_dlls);
 }

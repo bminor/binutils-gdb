@@ -29,6 +29,7 @@
 #include <windows.h>
 #include <winnt.h>
 #include <imagehlp.h>
+#include <tlhelp32.h>
 #include <psapi.h>
 #include <sys/param.h>
 #include <malloc.h>
@@ -202,8 +203,8 @@ enum target_waitkind
      value.sig.  */
   TARGET_WAITKIND_STOPPED,
 
-  /* The program is letting us know that it dynamically loaded something
-     (e.g. it called load(2) on AIX).  */
+  /* The program is letting us know that it dynamically loaded
+     or unloaded something.  */
   TARGET_WAITKIND_LOADED,
 
   /* The program has exec'ed a new executable file.  The new file's
@@ -773,6 +774,316 @@ win32_resume (struct thread_resume *resume_info)
 }
 
 static void
+win32_add_one_solib (const char *name, CORE_ADDR load_addr)
+{
+  char buf[MAX_PATH + 1];
+  char buf2[MAX_PATH + 1];
+
+#ifdef _WIN32_WCE
+  WIN32_FIND_DATA w32_fd;
+  WCHAR wname[MAX_PATH + 1];
+  mbstowcs (wname, name, MAX_PATH);
+  HANDLE h = FindFirstFile (wname, &w32_fd);
+#else
+  WIN32_FIND_DATAA w32_fd;
+  HANDLE h = FindFirstFileA (name, &w32_fd);
+#endif
+
+  if (h == INVALID_HANDLE_VALUE)
+    strcpy (buf, name);
+  else
+    {
+      FindClose (h);
+      strcpy (buf, name);
+#ifndef _WIN32_WCE
+      {
+	char cwd[MAX_PATH + 1];
+	char *p;
+	if (GetCurrentDirectoryA (MAX_PATH + 1, cwd))
+	  {
+	    p = strrchr (buf, '\\');
+	    if (p)
+	      p[1] = '\0';
+	    SetCurrentDirectoryA (buf);
+	    GetFullPathNameA (w32_fd.cFileName, MAX_PATH, buf, &p);
+	    SetCurrentDirectoryA (cwd);
+	  }
+      }
+#endif
+    }
+
+#ifdef __CYGWIN__
+  cygwin_conv_to_posix_path (buf, buf2);
+#else
+  strcpy (buf2, buf);
+#endif
+
+  loaded_dll (buf2, load_addr);
+}
+
+static char *
+get_image_name (HANDLE h, void *address, int unicode)
+{
+  static char buf[(2 * MAX_PATH) + 1];
+  DWORD size = unicode ? sizeof (WCHAR) : sizeof (char);
+  char *address_ptr;
+  int len = 0;
+  char b[2];
+  DWORD done;
+
+  /* Attempt to read the name of the dll that was detected.
+     This is documented to work only when actively debugging
+     a program.  It will not work for attached processes. */
+  if (address == NULL)
+    return NULL;
+
+#ifdef _WIN32_WCE
+  /* Windows CE reports the address of the image name,
+     instead of an address of a pointer into the image name.  */
+  address_ptr = address;
+#else
+  /* See if we could read the address of a string, and that the
+     address isn't null. */
+  if (!ReadProcessMemory (h, address,  &address_ptr,
+			  sizeof (address_ptr), &done)
+      || done != sizeof (address_ptr)
+      || !address_ptr)
+    return NULL;
+#endif
+
+  /* Find the length of the string */
+  while (ReadProcessMemory (h, address_ptr + len++ * size, &b, size, &done)
+	 && (b[0] != 0 || b[size - 1] != 0) && done == size)
+    continue;
+
+  if (!unicode)
+    ReadProcessMemory (h, address_ptr, buf, len, &done);
+  else
+    {
+      WCHAR *unicode_address = (WCHAR *) alloca (len * sizeof (WCHAR));
+      ReadProcessMemory (h, address_ptr, unicode_address, len * sizeof (WCHAR),
+			 &done);
+
+      WideCharToMultiByte (CP_ACP, 0, unicode_address, len, buf, len, 0, 0);
+    }
+
+  return buf;
+}
+
+typedef BOOL (WINAPI *winapi_EnumProcessModules) (HANDLE, HMODULE *,
+						  DWORD, LPDWORD);
+typedef BOOL (WINAPI *winapi_GetModuleInformation) (HANDLE, HMODULE,
+						    LPMODULEINFO, DWORD);
+typedef DWORD (WINAPI *winapi_GetModuleFileNameExA) (HANDLE, HMODULE,
+						     LPSTR, DWORD);
+
+static winapi_EnumProcessModules win32_EnumProcessModules;
+static winapi_GetModuleInformation win32_GetModuleInformation;
+static winapi_GetModuleFileNameExA win32_GetModuleFileNameExA;
+
+static BOOL
+load_psapi (void)
+{
+  static int psapi_loaded = 0;
+  static HMODULE dll = NULL;
+
+  if (!psapi_loaded)
+    {
+      psapi_loaded = 1;
+      dll = LoadLibrary (TEXT("psapi.dll"));
+      if (!dll)
+	return FALSE;
+      win32_EnumProcessModules =
+	      GETPROCADDRESS (dll, EnumProcessModules);
+      win32_GetModuleInformation =
+	      GETPROCADDRESS (dll, GetModuleInformation);
+      win32_GetModuleFileNameExA =
+	      GETPROCADDRESS (dll, GetModuleFileNameExA);
+    }
+
+  return (win32_EnumProcessModules != NULL
+	  && win32_GetModuleInformation != NULL
+	  && win32_GetModuleFileNameExA != NULL);
+}
+
+static int
+psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
+{
+  DWORD len;
+  MODULEINFO mi;
+  size_t i;
+  HMODULE dh_buf[1];
+  HMODULE *DllHandle = dh_buf;
+  DWORD cbNeeded;
+  BOOL ok;
+
+  if (!load_psapi ())
+    goto failed;
+
+  cbNeeded = 0;
+  ok = (*win32_EnumProcessModules) (current_process_handle,
+				    DllHandle,
+				    sizeof (HMODULE),
+				    &cbNeeded);
+
+  if (!ok || !cbNeeded)
+    goto failed;
+
+  DllHandle = (HMODULE *) alloca (cbNeeded);
+  if (!DllHandle)
+    goto failed;
+
+  ok = (*win32_EnumProcessModules) (current_process_handle,
+				    DllHandle,
+				    cbNeeded,
+				    &cbNeeded);
+  if (!ok)
+    goto failed;
+
+  for (i = 0; i < ((size_t) cbNeeded / sizeof (HMODULE)); i++)
+    {
+      if (!(*win32_GetModuleInformation) (current_process_handle,
+					  DllHandle[i],
+					  &mi,
+					  sizeof (mi)))
+	{
+	  DWORD err = GetLastError ();
+	  error ("Can't get module info: (error %d): %s\n",
+		 (int) err, strwinerror (err));
+	}
+
+      if ((DWORD) (mi.lpBaseOfDll) == BaseAddress)
+	{
+	  len = (*win32_GetModuleFileNameExA) (current_process_handle,
+					       DllHandle[i],
+					       dll_name_ret,
+					       MAX_PATH);
+	  if (len == 0)
+	    {
+	      DWORD err = GetLastError ();
+	      error ("Error getting dll name: (error %d): %s\n",
+		     (int) err, strwinerror (err));
+	    }
+	  return 1;
+	}
+    }
+
+failed:
+  dll_name_ret[0] = '\0';
+  return 0;
+}
+
+typedef HANDLE (WINAPI *winapi_CreateToolhelp32Snapshot) (DWORD, DWORD);
+typedef BOOL (WINAPI *winapi_Module32First) (HANDLE, LPMODULEENTRY32);
+typedef BOOL (WINAPI *winapi_Module32Next) (HANDLE, LPMODULEENTRY32);
+
+static winapi_CreateToolhelp32Snapshot win32_CreateToolhelp32Snapshot;
+static winapi_Module32First win32_Module32First;
+static winapi_Module32Next win32_Module32Next;
+
+static BOOL
+load_toolhelp (void)
+{
+  static int toolhelp_loaded = 0;
+  static HMODULE dll = NULL;
+
+  if (!toolhelp_loaded)
+    {
+      toolhelp_loaded = 1;
+#ifndef _WIN32_WCE
+      dll = GetModuleHandle (_T("KERNEL32.DLL"));
+#else
+      dll = GetModuleHandle (_T("COREDLL.DLL"));
+#endif
+      if (!dll)
+	return FALSE;
+
+      win32_CreateToolhelp32Snapshot =
+	GETPROCADDRESS (dll, CreateToolhelp32Snapshot);
+      win32_Module32First = GETPROCADDRESS (dll, Module32First);
+      win32_Module32Next = GETPROCADDRESS (dll, Module32Next);
+    }
+
+  return (win32_CreateToolhelp32Snapshot != NULL
+	  && win32_Module32First != NULL
+	  && win32_Module32Next != NULL);
+}
+
+static int
+toolhelp_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
+{
+  HANDLE snapshot_module;
+  MODULEENTRY32 modEntry = { sizeof (MODULEENTRY32) };
+
+  if (!load_toolhelp ())
+    return 0;
+
+  snapshot_module = win32_CreateToolhelp32Snapshot (TH32CS_SNAPMODULE,
+						    current_event.dwProcessId);
+  if (snapshot_module == INVALID_HANDLE_VALUE)
+    return 0;
+
+  /* Ignore the first module, which is the exe.  */
+  if (!win32_Module32First (snapshot_module, &modEntry))
+    goto failed;
+
+  while (win32_Module32Next (snapshot_module, &modEntry))
+    if ((DWORD) modEntry.modBaseAddr == BaseAddress)
+      {
+#ifdef UNICODE
+	wcstombs (dll_name_ret, modEntry.szExePath, MAX_PATH + 1);
+#else
+	strcpy (dll_name_ret, modEntry.szExePath);
+#endif
+	CloseHandle (snapshot_module);
+	return 1;
+      }
+
+failed:
+  CloseHandle (snapshot_module);
+  return 0;
+}
+
+static void
+handle_load_dll (void)
+{
+  LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
+  char dll_buf[MAX_PATH + 1];
+  char *dll_name = NULL;
+  DWORD load_addr;
+
+  dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
+
+  if (!psapi_get_dll_name ((DWORD) (event->lpBaseOfDll), dll_buf)
+      && !toolhelp_get_dll_name ((DWORD) (event->lpBaseOfDll), dll_buf))
+    dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
+
+  dll_name = dll_buf;
+
+  if (*dll_name == '\0')
+    dll_name = get_image_name (current_process_handle,
+			       event->lpImageName, event->fUnicode);
+  if (!dll_name)
+    return;
+
+  /* The symbols in a dll are offset by 0x1000, which is the
+     the offset from 0 of the first byte in an image - because
+     of the file header and the section alignment. */
+
+  load_addr = (DWORD) event->lpBaseOfDll + 0x1000;
+  win32_add_one_solib (dll_name, load_addr);
+}
+
+static void
+handle_unload_dll (void)
+{
+  CORE_ADDR load_addr =
+	  (CORE_ADDR) (DWORD) current_event.u.UnloadDll.lpBaseOfDll;
+  load_addr += 0x1000;
+  unloaded_dll (NULL, load_addr);
+}
+
+static void
 handle_exception (struct target_waitstatus *ourstatus)
 {
   DWORD code = current_event.u.Exception.ExceptionRecord.ExceptionCode;
@@ -963,9 +1274,10 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       CloseHandle (current_event.u.LoadDll.hFile);
+      handle_load_dll ();
 
       ourstatus->kind = TARGET_WAITKIND_LOADED;
-      ourstatus->value.integer = 0;
+      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
@@ -973,6 +1285,9 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		"for pid=%d tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
+      handle_unload_dll ();
+      ourstatus->kind = TARGET_WAITKIND_LOADED;
+      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
       break;
 
     case EXCEPTION_DEBUG_EVENT:
@@ -1035,6 +1350,7 @@ win32_wait (char *status)
 
 	  return our_status.value.integer;
 	case TARGET_WAITKIND_STOPPED:
+ 	case TARGET_WAITKIND_LOADED:
 	  OUTMSG2 (("Child Stopped with signal = %d \n",
 		    our_status.value.sig));
 
@@ -1042,12 +1358,20 @@ win32_wait (char *status)
 
 	  child_fetch_inferior_registers (-1);
 
+	  if (our_status.kind == TARGET_WAITKIND_LOADED
+	      && !server_waiting)
+	    {
+	      /* When gdb connects, we want to be stopped at the
+		 initial breakpoint, not in some dll load event.  */
+	      child_continue (DBG_CONTINUE, -1);
+	      break;
+	    }
+
 	  return our_status.value.sig;
  	default:
 	  OUTMSG (("Ignoring unknown internal event, %d\n", our_status.kind));
  	  /* fall-through */
  	case TARGET_WAITKIND_SPURIOUS:
- 	case TARGET_WAITKIND_LOADED:
  	case TARGET_WAITKIND_EXECD:
 	  /* do nothing, just continue */
 	  child_continue (DBG_CONTINUE, -1);

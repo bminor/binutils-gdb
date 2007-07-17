@@ -1,3 +1,11 @@
+2007-07-17  Pedro Alves  <pedro_alves@portugalmail.pt>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/unload.c (dlopen, dlsym, dlclose, dlerror): Define
+	for __WIN32__.
+	(SHLIB_NAME): Delete definition.  Always pass dlerror to fprintf.
+	* gdb.base/unload.exp: Use shared library test routines.
+
 2007-07-03  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdb.base/solib-symbol.exp: New file (testcase multiple symbol lookup).

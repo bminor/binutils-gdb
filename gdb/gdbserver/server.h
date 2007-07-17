@@ -91,6 +91,13 @@ struct inferior_list_entry
 /* Opaque type for user-visible threads.  */
 struct thread_info;
 
+struct dll_info
+{
+  struct inferior_list_entry entry;
+  char *name;
+  CORE_ADDR base_addr;
+};
+
 #include "regcache.h"
 #include "gdb/signals.h"
 
@@ -104,6 +111,9 @@ void initialize_low ();
 /* From inferiors.c.  */
 
 extern struct inferior_list all_threads;
+extern struct inferior_list all_dlls;
+extern int dlls_changed;
+
 void add_inferior_to_list (struct inferior_list *list,
 			   struct inferior_list_entry *new_inferior);
 void for_each_inferior (struct inferior_list *list,
@@ -131,6 +141,9 @@ void *inferior_regcache_data (struct thread_info *);
 void set_inferior_regcache_data (struct thread_info *, void *);
 void change_inferior_id (struct inferior_list *list,
 			 unsigned long new_id);
+
+void loaded_dll (const char *name, CORE_ADDR base_addr);
+void unloaded_dll (const char *name, CORE_ADDR base_addr);
 
 /* Public variables in server.c */
 
@@ -189,6 +202,8 @@ int remote_escape_output (const gdb_byte *buffer, int len,
 int look_up_one_symbol (const char *name, CORE_ADDR *addrp);
 
 void monitor_output (const char *msg);
+
+char *xml_escape_text (const char *text);
 
 /* Functions from ``signals.c''.  */
 enum target_signal target_signal_from_host (int hostsig);

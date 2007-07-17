@@ -30,36 +30,27 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-# TODO: Use LoadLibrary on these targets instead of dlopen.
-if {([istarget arm*-*-symbianelf*]
-     || [istarget *-*-mingw*]
-     || [istarget *-*-cygwin*]
-     || [istarget *-*-pe*])} {
+# TODO: Use LoadLibrary on this target instead of dlopen.
+if {[istarget arm*-*-symbianelf*]} {
     return 0
 }
 
 set testfile "unload"
 set libfile "unloadshr"
+set libname "${libfile}.sl"
 set libsrcfile ${libfile}.c
 set srcfile $srcdir/$subdir/$testfile.c
 set binfile $objdir/$subdir/$testfile
 set shlibdir ${objdir}/${subdir}
 set libsrc  $srcdir/$subdir/$libfile.c
-set lib_sl  $objdir/$subdir/$libfile.sl
-
-set lib_opts debug
-set exec_opts [list debug additional_flags=-DSHLIB_DIR\=\"${shlibdir}\"]
-
-switch -glob [istarget] {
-    "hppa*-hp-hpux*" { }
-    "*-*-linux*"     { lappend exec_opts "libs=-ldl" }
-    "*-*-solaris*"   { lappend exec_opts "libs=-ldl" }
-    default          { }
-}
+set lib_sl  $objdir/$subdir/$libname
 
 if [get_compiler_info ${binfile}] {
     return -1
 }
+
+set lib_opts debug
+set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME\=\"${libname}\"]
 
 if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
      || [gdb_compile $srcfile $binfile executable $exec_opts] != ""} {

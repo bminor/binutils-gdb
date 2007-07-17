@@ -1,3 +1,11 @@
+2007-07-17  Pedro Alves  <pedro_alves@portugalmail.pt>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/i386/cygwin.mt (TDEPFILES): Add solib-target.o.
+	* coff-pe-read.c (read_pe_exported_syms): Delete verbose
+	printf.
+	* NEWS: Mention gdbserver DLL support.
+
 2007-07-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (dwarf_decode_lines): Detect address size mismatches.

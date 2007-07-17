@@ -458,11 +458,79 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
+  if (strncmp ("qXfer:libraries:read:", own_buf, 21) == 0)
+    {
+      CORE_ADDR ofs;
+      unsigned int len, total_len;
+      char *document, *p;
+      struct inferior_list_entry *dll_ptr;
+      char *annex;
+
+      /* Reject any annex; grab the offset and length.  */
+      if (decode_xfer_read (own_buf + 21, &annex, &ofs, &len) < 0
+	  || annex[0] != '\0')
+	{
+	  strcpy (own_buf, "E00");
+	  return;
+	}
+
+      /* Over-estimate the necessary memory.  Assume that every character
+	 in the library name must be escaped.  */
+      total_len = 64;
+      for (dll_ptr = all_dlls.head; dll_ptr != NULL; dll_ptr = dll_ptr->next)
+	total_len += 128 + 6 * strlen (((struct dll_info *) dll_ptr)->name);
+
+      document = malloc (total_len);
+      strcpy (document, "<library-list>\n");
+      p = document + strlen (document);
+
+      for (dll_ptr = all_dlls.head; dll_ptr != NULL; dll_ptr = dll_ptr->next)
+	{
+	  struct dll_info *dll = (struct dll_info *) dll_ptr;
+	  char *name;
+
+	  strcpy (p, "  <library name=\"");
+	  p = p + strlen (p);
+	  name = xml_escape_text (dll->name);
+	  strcpy (p, name);
+	  free (name);
+	  p = p + strlen (p);
+	  strcpy (p, "\"><segment address=\"");
+	  p = p + strlen (p);
+	  sprintf (p, "0x%lx", (long) dll->base_addr);
+	  p = p + strlen (p);
+	  strcpy (p, "\"/></library>\n");
+	  p = p + strlen (p);
+	}
+
+      strcpy (p, "</library-list>\n");
+
+      total_len = strlen (document);
+      if (len > PBUFSIZ - 2)
+	len = PBUFSIZ - 2;
+
+      if (ofs > total_len)
+	write_enn (own_buf);
+      else if (len < total_len - ofs)
+	*new_packet_len_p = write_qxfer_response (own_buf, document + ofs,
+						  len, 1);
+      else
+	*new_packet_len_p = write_qxfer_response (own_buf, document + ofs,
+						  total_len - ofs, 0);
+
+      free (document);
+      return;
+    }
+
   /* Protocol features query.  */
   if (strncmp ("qSupported", own_buf, 10) == 0
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
     {
       sprintf (own_buf, "PacketSize=%x;QPassSignals+", PBUFSIZ - 1);
+
+      /* We do not have any hook to indicate whether the target backend
+	 supports qXfer:libraries:read, so always report it.  */
+      strcat (own_buf, ";qXfer:libraries:read+");
 
       if (the_target->read_auxv != NULL)
 	strcat (own_buf, ";qXfer:auxv:read+");
@@ -696,8 +764,7 @@ handle_v_cont (char *own_buf, char *status, int *signal)
   return;
 
 err:
-  /* No other way to report an error... */
-  strcpy (own_buf, "");
+  write_enn (own_buf);
   free (resume_info);
   return;
 }
@@ -753,7 +820,7 @@ static void
 gdbserver_version (void)
 {
   printf ("GNU gdbserver %s\n"
-	  "Copyright (C) 2006 Free Software Foundation, Inc.\n"
+	  "Copyright (C) 2007 Free Software Foundation, Inc.\n"
 	  "gdbserver is free software, covered by the GNU General Public License.\n"
 	  "This gdbserver was configured as \"%s\"\n",
 	  version, host_name);
@@ -824,7 +891,7 @@ main (int argc, char *argv[])
 
   initialize_low ();
 
-  own_buf = malloc (PBUFSIZ);
+  own_buf = malloc (PBUFSIZ + 1);
   mem_buf = malloc (PBUFSIZ);
 
   if (pid == 0)
@@ -833,6 +900,10 @@ main (int argc, char *argv[])
       signal = start_inferior (&argv[2], &status);
 
       /* We are now stopped at the first instruction of the target process */
+
+      /* Don't report shared library events on the initial connection,
+	 even if some libraries are preloaded.  */
+      dlls_changed = 0;
     }
   else
     {

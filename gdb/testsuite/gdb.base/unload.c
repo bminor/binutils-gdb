@@ -18,11 +18,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef __WIN32__
+#include <windows.h>
+#define dlopen(name, mode) LoadLibrary (name)
+#define dlsym(handle, func) GetProcAddress (handle, func)
+#define dlclose(handle) FreeLibrary (handle)
+#define dlerror() "error %d occurred", GetLastError ()
+#else
 #include <dlfcn.h>
+#endif
 
 int k = 0;
-
-#define SHLIB_NAME SHLIB_DIR "/unloadshr.sl"
 
 int main()
 {
@@ -32,11 +39,10 @@ int main()
   const char *msg;
 
   handle = dlopen (SHLIB_NAME, RTLD_LAZY);
-  msg = dlerror ();
   
   if (!handle)
     {
-      fprintf (stderr, msg);
+      fprintf (stderr, dlerror ());
       exit (1);
     }
 

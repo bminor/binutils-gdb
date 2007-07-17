@@ -965,6 +965,13 @@ prepare_resume_reply (char *buf, char status, unsigned char sig)
 	      old_thread_from_wait = thread_from_wait;
 	    }
 	}
+
+      if (dlls_changed)
+	{
+	  strcpy (buf, "library:;");
+	  buf += strlen (buf);
+	  dlls_changed = 0;
+	}
     }
   /* For W and X, we're done.  */
   *buf++ = 0;
@@ -1171,4 +1178,66 @@ monitor_output (const char *msg)
 
   putpkt (buf);
   free (buf);
+}
+
+/* Return a malloc allocated string with special characters from TEXT
+   replaced by entity references.  */
+
+char *
+xml_escape_text (const char *text)
+{
+  char *result;
+  int i, special;
+
+  /* Compute the length of the result.  */
+  for (i = 0, special = 0; text[i] != '\0'; i++)
+    switch (text[i])
+      {
+      case '\'':
+      case '\"':
+	special += 5;
+	break;
+      case '&':
+	special += 4;
+	break;
+      case '<':
+      case '>':
+	special += 3;
+	break;
+      default:
+	break;
+      }
+
+  /* Expand the result.  */
+  result = malloc (i + special + 1);
+  for (i = 0, special = 0; text[i] != '\0'; i++)
+    switch (text[i])
+      {
+      case '\'':
+	strcpy (result + i + special, "&apos;");
+	special += 5;
+	break;
+      case '\"':
+	strcpy (result + i + special, "&quot;");
+	special += 5;
+	break;
+      case '&':
+	strcpy (result + i + special, "&amp;");
+	special += 4;
+	break;
+      case '<':
+	strcpy (result + i + special, "&lt;");
+	special += 3;
+	break;
+      case '>':
+	strcpy (result + i + special, "&gt;");
+	special += 3;
+	break;
+      default:
+	result[i + special] = text[i];
+	break;
+      }
+  result[i + special] = '\0';
+
+  return result;
 }

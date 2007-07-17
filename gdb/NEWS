@@ -54,6 +54,9 @@ packet, this response allows GDB to debug shared libraries on targets
 where the operating system manages the list of loaded libraries (e.g.
 Windows and SymbianOS).
 
+* The GDB remote stub, gdbserver, now supports dynamic link libraries
+(DLLs) on Windows and Windows CE targets.
+
 * New commands
 
 set remoteflow

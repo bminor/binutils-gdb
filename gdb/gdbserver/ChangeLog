@@ -1,3 +1,32 @@
+2007-07-17  Pedro Alves  <pedro_alves@portugalmail.pt>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* inferiors.c (all_dlls, dlls_changed, get_dll): New.
+	(add_thread): Minor cleanups.
+	(clear_inferiors): Move lower in the file.  Clear the DLL
+	list.
+	(free_one_dll, match_dll, loaded_dll, unloaded_dll, clear_list): New.
+	* remote-utils.c (prepare_resume_reply): Check dlls_changed.
+	(xml_escape_text): New.
+	* server.c (handle_query): Handle qXfer:libraries:read.  Report it
+	for qSupported.
+	(handle_v_cont): Report errors.
+	(gdbserver_version): Update.
+	(main): Correct size of own_buf.  Do not report initial DLL events.
+	* server.h (struct dll_info, all_dlls, dlls_changed, loaded_dll)
+	(unloaded_dll, xml_escape_text): New.
+	* win32-low.c (enum target_waitkind): Update comments.
+	(win32_add_one_solib, get_image_name, winapi_EnumProcessModules)
+	(winapi_GetModuleInformation, winapi_GetModuleFileNameExA)
+	(win32_EnumProcessModules, win32_GetModuleInformation)
+	(win32_GetModuleFileNameExA, load_psapi, psapi_get_dll_name)
+	(winapi_CreateToolhelp32Snapshot, winapi_Module32First)
+	(winapi_Module32Next, win32_CreateToolhelp32Snapshot)
+	(win32_Module32First, win32_Module32Next, load_toolhelp)
+	(toolhelp_get_dll_name, handle_load_dll, handle_unload_dll): New.
+	(get_child_debug_event): Handle DLL events.
+	(win32_wait): Likewise.
+
 2007-07-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.srv: Set srv_linux_regsets for sh*-*-linux*.
