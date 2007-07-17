@@ -1,3 +1,7 @@
+2007-07-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Detect address size mismatches.
+
 2007-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-linux-nat.c (fetch_regs): Work around gcc 3.4 alias

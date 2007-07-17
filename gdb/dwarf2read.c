@@ -6668,9 +6668,9 @@ static void
 dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		    struct dwarf2_cu *cu, struct partial_symtab *pst)
 {
-  gdb_byte *line_ptr;
+  gdb_byte *line_ptr, *extended_end;
   gdb_byte *line_end;
-  unsigned int bytes_read;
+  unsigned int bytes_read, extended_len;
   unsigned char op_code, extended_op, adj_opcode;
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
@@ -6745,8 +6745,9 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
-	      read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	      extended_len = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 	      line_ptr += bytes_read;
+	      extended_end = line_ptr + extended_len;
 	      extended_op = read_1_byte (abfd, line_ptr);
 	      line_ptr += 1;
 	      switch (extended_op)
@@ -6788,6 +6789,15 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                   }
 		  break;
 		default:
+		  complaint (&symfile_complaints,
+			     _("mangled .debug_line section"));
+		  return;
+		}
+	      /* Make sure that we parsed the extended op correctly.  If e.g.
+		 we expected a different address size than the producer used,
+		 we may have read the wrong number of bytes.  */
+	      if (line_ptr != extended_end)
+		{
 		  complaint (&symfile_complaints,
 			     _("mangled .debug_line section"));
 		  return;
