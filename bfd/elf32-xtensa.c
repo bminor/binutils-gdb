@@ -9805,6 +9805,11 @@ xtensa_callback_required_dependence (bfd *abfd,
       (*callback) (sec, sec_size, sgotplt, 0, closure);
     }
 
+  /* Only ELF files are supported for Xtensa.  Check here to avoid a segfault
+     when building uclibc, which runs "ld -b binary /dev/null".  */
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return ok;
+
   internal_relocs = retrieve_internal_relocs (abfd, sec, 
 					      link_info->keep_memory);
   if (internal_relocs == NULL
