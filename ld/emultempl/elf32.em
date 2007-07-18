@@ -945,12 +945,12 @@ gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
 
   if (i_shdr->contents == NULL)
     {
-      ASSERT (asec->output_offset == 0);
-      i_shdr->contents = xcalloc (i_shdr->sh_size, 1);
-      if (i_shdr->contents == NULL)
-	return FALSE;
+      if (asec->contents == NULL)
+	asec->contents = xmalloc (asec->size);
+      contents = asec->contents;
     }
-  contents = i_shdr->contents + asec->output_offset;
+  else
+    contents = i_shdr->contents + asec->output_offset;
 
   e_note = (void *) contents;
   size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
@@ -1019,9 +1019,10 @@ gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
   else
     abort ();			/* Should have been validated earlier.  */
 
-  size = i_shdr->sh_size;
-  return (bfd_seek (abfd, i_shdr->sh_offset, SEEK_SET) == 0
-	  && bfd_bwrite (i_shdr->contents, size, abfd) == size);
+  size = asec->size;
+  return (bfd_seek (abfd,
+		    i_shdr->sh_offset + asec->output_offset, SEEK_SET) == 0
+	  && bfd_bwrite (contents, size, abfd) == size);
 }
 
 
