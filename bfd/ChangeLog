@@ -1,3 +1,8 @@
+2007-07-18  Bob Wilson  <bob.wilson@acm.org>
+	
+	* elf32-xtensa.c (elf_xtensa_finish_dynamic_sections): Get section
+	vma and size for dynamic tags from the output sections.
+	
 2007-07-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct sym_sec_cache): Delete "sec".  Add "shndx".

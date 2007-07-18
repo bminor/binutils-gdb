@@ -2649,19 +2649,19 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
 	  break;
 
 	case DT_XTENSA_GOT_LOC_OFF:
-	  dyn.d_un.d_ptr = htab->sgotloc->vma;
+	  dyn.d_un.d_ptr = htab->sgotloc->output_section->vma;
 	  break;
 
 	case DT_PLTGOT:
-	  dyn.d_un.d_ptr = htab->sgot->vma;
+	  dyn.d_un.d_ptr = htab->sgot->output_section->vma;
 	  break;
 
 	case DT_JMPREL:
-	  dyn.d_un.d_ptr = htab->srelplt->vma;
+	  dyn.d_un.d_ptr = htab->srelplt->output_section->vma;
 	  break;
 
 	case DT_PLTRELSZ:
-	  dyn.d_un.d_val = htab->srelplt->size;
+	  dyn.d_un.d_val = htab->srelplt->output_section->size;
 	  break;
 
 	case DT_RELASZ:
@@ -2672,7 +2672,7 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
 	     for .rela.plt to follow all other relocation sections, we
 	     don't have to worry about changing the DT_RELA entry.  */
 	  if (htab->srelplt)
-	    dyn.d_un.d_val -= htab->srelplt->size;
+	    dyn.d_un.d_val -= htab->srelplt->output_section->size;
 	  break;
 	}
 
