@@ -2273,36 +2273,35 @@ bfd_section_from_r_symndx (bfd *abfd,
 			   asection *sec,
 			   unsigned long r_symndx)
 {
-  Elf_Internal_Shdr *symtab_hdr;
-  unsigned char esym[sizeof (Elf64_External_Sym)];
-  Elf_External_Sym_Shndx eshndx;
-  Elf_Internal_Sym isym;
   unsigned int ent = r_symndx % LOCAL_SYM_CACHE_SIZE;
+  asection *s;
 
-  if (cache->abfd == abfd && cache->indx[ent] == r_symndx)
-    return cache->sec[ent];
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  if (bfd_elf_get_elf_syms (abfd, symtab_hdr, 1, r_symndx,
-			    &isym, esym, &eshndx) == NULL)
-    return NULL;
-
-  if (cache->abfd != abfd)
+  if (cache->abfd != abfd || cache->indx[ent] != r_symndx)
     {
-      memset (cache->indx, -1, sizeof (cache->indx));
-      cache->abfd = abfd;
+      Elf_Internal_Shdr *symtab_hdr;
+      unsigned char esym[sizeof (Elf64_External_Sym)];
+      Elf_External_Sym_Shndx eshndx;
+      Elf_Internal_Sym isym;
+
+      symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+      if (bfd_elf_get_elf_syms (abfd, symtab_hdr, 1, r_symndx,
+				&isym, esym, &eshndx) == NULL)
+	return NULL;
+
+      if (cache->abfd != abfd)
+	{
+	  memset (cache->indx, -1, sizeof (cache->indx));
+	  cache->abfd = abfd;
+	}
+      cache->indx[ent] = r_symndx;
+      cache->shndx[ent] = isym.st_shndx;
     }
-  cache->indx[ent] = r_symndx;
-  cache->sec[ent] = sec;
-  if ((isym.st_shndx != SHN_UNDEF && isym.st_shndx < SHN_LORESERVE)
-      || isym.st_shndx > SHN_HIRESERVE)
-    {
-      asection *s;
-      s = bfd_section_from_elf_index (abfd, isym.st_shndx);
-      if (s != NULL)
-	cache->sec[ent] = s;
-    }
-  return cache->sec[ent];
+
+  s = bfd_section_from_elf_index (abfd, cache->shndx[ent]);
+  if (s != NULL)
+    return s;
+
+  return sec;
 }
 
 /* Given an ELF section number, retrieve the corresponding BFD

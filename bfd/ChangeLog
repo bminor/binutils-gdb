@@ -1,3 +1,10 @@
+2007-07-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct sym_sec_cache): Delete "sec".  Add "shndx".
+	* elf.c (bfd_section_from_r_symndx): Don't cache bfd section of
+	symbol.  Instead cache ELF section index.  Remove redundant
+	checks of st_shndx.
+
 2007-07-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* trad-core.c (NBPG): If not defined, set to getpagesize().

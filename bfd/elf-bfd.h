@@ -423,7 +423,7 @@ struct sym_sec_cache
 {
   bfd *abfd;
   unsigned long indx[LOCAL_SYM_CACHE_SIZE];
-  asection *sec[LOCAL_SYM_CACHE_SIZE];
+  unsigned int shndx[LOCAL_SYM_CACHE_SIZE];
 };
 
 /* Constant information held for an ELF backend.  */
