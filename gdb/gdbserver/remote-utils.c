@@ -246,7 +246,8 @@ remote_open (char *name)
 
       /* Enable TCP keep alive process. */
       tmp = 1;
-      setsockopt (tmp_desc, SOL_SOCKET, SO_KEEPALIVE, (char *) &tmp, sizeof (tmp));
+      setsockopt (remote_desc, SOL_SOCKET, SO_KEEPALIVE,
+		  (char *) &tmp, sizeof (tmp));
 
       /* Tell TCP not to delay small packets.  This greatly speeds up
          interactive response. */

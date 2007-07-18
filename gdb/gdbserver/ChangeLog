@@ -1,3 +1,8 @@
+2007-07-18  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* remote-utils.c (remote_open): Set SO_KEEPALIVE on remote_desc
+	instead of on tmp_desc.
+
 2007-07-17  Pedro Alves  <pedro_alves@portugalmail.pt>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
