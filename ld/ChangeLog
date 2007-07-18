@@ -1,3 +1,9 @@
+2007-07-18  Roland McGrath  <roland@redhat.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_write_build_id_section):
+	Use ASEC->contents for CONTENTS when missing, and allocate
+	ASEC->size if needed.
+
 2007-07-13  Roland McGrath  <roland@redhat.com>
 
 	* emultempl/elf32.em (struct build_id_info): New type.
