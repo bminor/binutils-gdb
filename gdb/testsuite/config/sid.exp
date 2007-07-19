@@ -175,8 +175,10 @@ proc gdb_load { arg } {
     global gdb_prompt
     global retval
 
-    gdb_unload
-    if [gdb_file_cmd $arg] then { return -1 }
+    if { $arg != "" } {
+	if [gdb_file_cmd $arg] then { return -1 }
+    }
+
     gdb_target_sid
 
     send_gdb "load\n"
@@ -195,7 +197,7 @@ proc gdb_load { arg } {
 	    if $verbose>1 then {
 		send_user "Loaded $arg into $GDB\n"
 	    }
-	    set retval 1;
+	    set retval 0;
 	}
 	-re "$gdb_prompt $"     {
 	    if $verbose>1 then {
