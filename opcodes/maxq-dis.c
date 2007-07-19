@@ -182,7 +182,7 @@ get_reg_name (unsigned char reg_code, type1 arg_pos)
       if (reg_code == mem_acc->opcode)
 	{
 	  for (syntax = mem_access_syntax_table;
-	       mem_access_syntax_table != NULL || mem_access_syntax_table->name;
+	       syntax != NULL && syntax->name;
 	       ++syntax)
 	    if (!strcmp (mem_acc->name, syntax->name))
 	      {
