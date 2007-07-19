@@ -22,7 +22,7 @@
 # This file is sourced from elf32.em, and defines extra alpha
 # specific routines.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "elf/internal.h"
 #include "elf/alpha.h"

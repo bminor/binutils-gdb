@@ -24,7 +24,7 @@
 
 LDEMUL_BEFORE_ALLOCATION=need_relax_${EMULATION_NAME}_before_allocation
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 static void
 need_relax_${EMULATION_NAME}_before_allocation (void)

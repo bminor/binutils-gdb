@@ -25,7 +25,7 @@ if [ -z "$MACHINE" ]; then
 else
   OUTPUT_ARCH=${ARCH}:${MACHINE}
 fi
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 static void
 gld${EMULATION_NAME}_before_parse (void)
 {

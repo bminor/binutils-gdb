@@ -21,7 +21,7 @@
 
 LDEMUL_BEFORE_PARSE=gldnetbsd_before_parse
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 static void
 gld${EMULATION_NAME}_before_parse (void);
 

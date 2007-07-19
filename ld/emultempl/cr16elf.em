@@ -23,7 +23,7 @@
 # This file is sourced from elf32.em, and defines extra cr16-elf
 # specific routines.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "ldctor.h"
 
@@ -90,4 +90,3 @@ PARSE_AND_LIST_ARGS_CASES='
 #
 LDEMUL_AFTER_PARSE=cr16elf_after_parse
 LDEMUL_BEFORE_ALLOCATION=cr16elf_before_allocation
-

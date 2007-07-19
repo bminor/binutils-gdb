@@ -26,7 +26,7 @@
 LDEMUL_AFTER_ALLOCATION=sh64_elf_${EMULATION_NAME}_after_allocation
 LDEMUL_BEFORE_ALLOCATION=sh64_elf_${EMULATION_NAME}_before_allocation
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "libiberty.h"
 #include "libbfd.h"

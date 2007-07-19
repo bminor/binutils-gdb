@@ -23,7 +23,7 @@ LDEMUL_BEFORE_PARSE=gldz80_before_parse
 LDEMUL_RECOGNIZED_FILE=gldz80_recognized_file
 LDEMUL_AFTER_OPEN=gldz80_after_open
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 /* --- \begin{z80.em} */
 /* Codes for machine types, bitwise or gives the code to use for the
    output.  */
@@ -36,7 +36,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 /* Bitwise or of the machine types seen so far.  */
 static int result_mach_type;
 
-static void 
+static void
 ${LDEMUL_BEFORE_PARSE} (void)
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
@@ -53,19 +53,19 @@ ${LDEMUL_RECOGNIZED_FILE} (lang_input_statement_type *entry)
   unsigned long mach_type;
 
   mach_type = bfd_get_mach (entry->the_bfd);
-  switch (mach_type) 
+  switch (mach_type)
     {
-    case bfd_mach_z80strict:      
-      result_mach_type |= M_Z80STRICT; 
+    case bfd_mach_z80strict:
+      result_mach_type |= M_Z80STRICT;
       break;
     case bfd_mach_z80:
-      result_mach_type |= M_Z80; 
+      result_mach_type |= M_Z80;
       break;
     case bfd_mach_z80full:
-      result_mach_type |= M_Z80FULL; 
+      result_mach_type |= M_Z80FULL;
       break;
     case bfd_mach_r800:
-      result_mach_type |= M_R800; 
+      result_mach_type |= M_R800;
       break;
     default:
       result_mach_type |= M_Z80ANY;

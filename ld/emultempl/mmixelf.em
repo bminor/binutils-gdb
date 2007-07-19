@@ -22,9 +22,9 @@
 # This file is sourced from elf32.em and used to define MMIX and ELF
 # specific things.  First include what we have in common with mmo.
 
-. ${srcdir}/emultempl/mmix-elfnmmo.em
+source_em ${srcdir}/emultempl/mmix-elfnmmo.em
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 static void
 elfmmix_before_parse (void)

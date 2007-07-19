@@ -22,7 +22,7 @@
 # This file is sourced from elf32.em, and defines extra powerpc64-elf
 # specific routines.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "ldctor.h"
 #include "libbfd.h"
@@ -466,7 +466,7 @@ ppc_lang_for_each_input_file (void (*func) (lang_input_statement_type *))
 EOF
 
 if grep -q 'ld_elf32_spu_emulation' ldemul-list.h; then
-  cat >>e${EMULATION_NAME}.c <<EOF
+  fragment <<EOF
 /* Special handling for embedded SPU executables.  */
 extern bfd_boolean embedded_spu_file (lang_input_statement_type *, const char *);
 static bfd_boolean gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *);

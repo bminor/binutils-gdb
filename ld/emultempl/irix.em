@@ -19,7 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "ld.h"
 #include "ldmain.h"
@@ -40,4 +40,4 @@ irix_after_open (void)
 EOF
 
 LDEMUL_AFTER_OPEN=irix_after_open
-. "${srcdir}/emultempl/mipself.em"
+source_em "${srcdir}/emultempl/mipself.em"

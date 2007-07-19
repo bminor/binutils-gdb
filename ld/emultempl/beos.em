@@ -5,7 +5,7 @@ if [ -z "$MACHINE" ]; then
 else
   OUTPUT_ARCH=${ARCH}:${MACHINE}
 fi
-cat >e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 /* This file is part of GLD, the Gnu Linker.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
    2005, 2006, 2007 Free Software Foundation, Inc.
@@ -737,7 +737,7 @@ EOF
 # sed commands to quote an ld script as a C string.
 sc="-f stringify.sed"
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 {
   *isfile = 0;
 
@@ -755,7 +755,7 @@ echo '  ; else return'                                 >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x                  >> e${EMULATION_NAME}.c
 echo '; }'                                             >> e${EMULATION_NAME}.c
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =

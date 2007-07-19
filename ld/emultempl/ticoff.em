@@ -1,7 +1,7 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
 (echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 /* This file is part of GLD, the Gnu Linker.
    Copyright 1999, 2000, 2002, 2003, 2004, 2007
    Free Software Foundation, Inc.
@@ -116,7 +116,7 @@ s/$/\\n\\/
 1s/^/"/
 $s/$/n"/
 '
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 {
   *isfile = 0;
   if (link_info.relocatable && config.build_constructors)
@@ -135,7 +135,7 @@ EOF
 else
 # Scripts read from the filesystem.
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 {
   *isfile = 1;
 
@@ -154,7 +154,7 @@ EOF
 
 fi
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
   gld_${EMULATION_NAME}_before_parse,

@@ -25,7 +25,7 @@
 # specific routines.
 #
 test -z "$TARGET2_TYPE" && TARGET2_TYPE="rel"
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "elf/arm.h"
 
@@ -326,7 +326,7 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_USE_BLX:
       use_blx = 1;
       break;
-    
+
     case OPTION_VFP11_DENORM_FIX:
       if (strcmp (optarg, "none") == 0)
         vfp11_denorm_fix = BFD_ARM_VFP11_FIX_NONE;

@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 #   Copyright 2006, 2007 Free Software Foundation, Inc.
-#   Contributed by: 
+#   Contributed by:
 #   Mei Ligang (ligang@sunnorth.com.cn)
 #   Pei-Lin Tsai (pltsai@sunplus.com)
 
@@ -25,7 +25,7 @@
 # This file is sourced from elf32.em, and defines extra score-elf
 # specific routines.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 static void
 gld${EMULATION_NAME}_before_parse ()
@@ -71,4 +71,3 @@ LDEMUL_AFTER_OPEN=score_elf_after_open
 
 # Replace the elf before_parse function with our own.
 LDEMUL_BEFORE_PARSE=gld"${EMULATION_NAME}"_before_parse
-

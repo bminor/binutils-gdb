@@ -21,7 +21,7 @@
 
 # This file is sourced from generic.em.
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 /* Need to have this macro defined before mmix-elfnmmo, which uses the
    name for the before_allocation function, defined in ldemul.c (for
    the mmo "emulation") or in elf32.em (for the elf64mmix
@@ -36,10 +36,10 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #include "elf-bfd.h"
 EOF
 
-. ${srcdir}/emultempl/elf-generic.em
-. ${srcdir}/emultempl/mmix-elfnmmo.em
+source_em ${srcdir}/emultempl/elf-generic.em
+source_em ${srcdir}/emultempl/mmix-elfnmmo.em
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 /* Place an orphan section.  We use this to put random SEC_CODE or
    SEC_READONLY sections right after MMO_TEXT_SECTION_NAME.  Much borrowed

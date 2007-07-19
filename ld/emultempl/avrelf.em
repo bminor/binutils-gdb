@@ -25,12 +25,12 @@
 # of devices where one needs to address the issue that it is not possible
 # to reach the whole program memory by using 16 bit pointers.
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "elf32-avr.h"
 #include "ldctor.h"
 
-/* The fake file and it's corresponding section meant to hold 
+/* The fake file and it's corresponding section meant to hold
    the linker stubs if needed.  */
 
 static lang_input_statement_type *stub_file;
@@ -126,14 +126,14 @@ avr_elf_create_output_section_statements (void)
                                               ".trampolines");
   if (avr_stub_section == NULL)
     goto err_ret;
-  
+
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
            | SEC_HAS_CONTENTS | SEC_RELOC | SEC_IN_MEMORY | SEC_KEEP);
   if (!bfd_set_section_flags (stub_file->the_bfd, avr_stub_section, flags))
     goto err_ret;
 
   avr_stub_section->alignment_power = 1;
-  
+
   ldlang_add_file (stub_file);
 
   return;
@@ -147,7 +147,7 @@ avr_elf_create_output_section_statements (void)
 
 static void
 avr_elf_finish (void)
-{ 
+{
   if (!avr_no_stubs)
     {
       /* Now build the linker stubs.  */
@@ -185,15 +185,15 @@ PARSE_AND_LIST_PROLOGUE='
 '
 
 PARSE_AND_LIST_LONGOPTS='
-  { "no-call-ret-replacement", no_argument, 
+  { "no-call-ret-replacement", no_argument,
      NULL, OPTION_NO_CALL_RET_REPLACEMENT},
-  { "pmem-wrap-around", required_argument, 
+  { "pmem-wrap-around", required_argument,
     NULL, OPTION_PMEM_WRAP_AROUND},
-  { "no-stubs", no_argument, 
+  { "no-stubs", no_argument,
     NULL, OPTION_NO_STUBS},
-  { "debug-stubs", no_argument, 
+  { "debug-stubs", no_argument,
     NULL, OPTION_DEBUG_STUBS},
-  { "debug-relax", no_argument, 
+  { "debug-relax", no_argument,
     NULL, OPTION_DEBUG_RELAX},
 '
 
@@ -227,7 +227,7 @@ PARSE_AND_LIST_OPTIONS='
 PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_PMEM_WRAP_AROUND:
-      { 
+      {
         /* This variable is defined in the bfd library.  */
         if ((!strcmp (optarg,"32k"))      || (!strcmp (optarg,"32K")))
           avr_pc_wrap_around = 32768;

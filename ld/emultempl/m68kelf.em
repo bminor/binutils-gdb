@@ -31,7 +31,7 @@ case ${target} in
     ;;
 esac
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #ifdef SUPPORT_EMBEDDED_RELOCS
 static void check_sections (bfd *, asection *, void *);

@@ -22,7 +22,7 @@
 # This file is sourced from elf32.em, and defines extra spu specific
 # features.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 #include "ldctor.h"
 #include "elf32-spu.h"
 
@@ -50,7 +50,7 @@ EOF
 
 ../binutils/bin2c < ${srcdir}/emultempl/spu_ovl.o >> e${EMULATION_NAME}.c
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 };
 
 static const struct _ovl_stream ovl_mgr_stream = {
@@ -247,7 +247,7 @@ gld${EMULATION_NAME}_finish (void)
 EOF
 
 if grep -q 'ld_elf.*ppc.*_emulation' ldemul-list.h; then
-  cat >>e${EMULATION_NAME}.c <<EOF
+  fragment <<EOF
 #include "filenames.h"
 #include <fcntl.h>
 #include <sys/wait.h>

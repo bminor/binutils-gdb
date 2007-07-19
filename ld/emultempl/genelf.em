@@ -21,12 +21,12 @@
 
 # This file is sourced from generic.em
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 #include "elf-bfd.h"
 
 EOF
-. ${srcdir}/emultempl/elf-generic.em
-cat >>e${EMULATION_NAME}.c <<EOF
+source_em ${srcdir}/emultempl/elf-generic.em
+fragment <<EOF
 
 static void
 gld${EMULATION_NAME}_finish (void)

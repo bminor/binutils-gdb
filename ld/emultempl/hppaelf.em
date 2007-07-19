@@ -23,7 +23,7 @@
 # This file is sourced from elf32.em, and defines extra hppa-elf
 # specific routines.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "ldctor.h"
 #include "elf32-hppa.h"

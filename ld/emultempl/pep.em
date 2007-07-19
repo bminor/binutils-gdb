@@ -8,8 +8,8 @@ else
 fi
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
-cat >>e${EMULATION_NAME}.c <<EOF
-/* Copyright 2006, 2007 Free Software Foundation, Inc.   
+fragment <<EOF
+/* Copyright 2006, 2007 Free Software Foundation, Inc.
    Written by Kai Tietz, OneVision Software GmbH&CoKg.
 
    This file is part of the GNU Binutils.
@@ -1559,7 +1559,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive
           For backwards compatibility, libfoo.a needs to precede
           libfoo.dll and foo.dll in the search.  */
       { "lib%s.a", FALSE },
-      /* The 'native' spelling of an import lib name is "foo.lib".  */  	
+      /* The 'native' spelling of an import lib name is "foo.lib".  */
       { "%s.lib", FALSE },
 #ifdef DLL_SUPPORT
       /* Try "<prefix>foo.dll" (preferred dll name, if specified).  */
@@ -1616,7 +1616,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive
 
   for (i = 0; libname_fmt[i].format; i++)
     {
-#ifdef DLL_SUPPORT 
+#ifdef DLL_SUPPORT
       if (libname_fmt[i].use_prefix)
 	{
 	  if (!pep_dll_search_prefix)
@@ -1656,7 +1656,7 @@ EOF
 # sed commands to quote an ld script as a C string.
 sc="-f stringify.sed"
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 {
   *isfile = 0;
 
@@ -1674,7 +1674,7 @@ echo '  ; else return'					>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x			>> e${EMULATION_NAME}.c
 echo '; }'						>> e${EMULATION_NAME}.c
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =

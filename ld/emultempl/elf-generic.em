@@ -22,7 +22,7 @@
 # This file is sourced from elf32.em and from ELF targets that use
 # generic.em.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 static void
 gld${EMULATION_NAME}_map_segments (bfd_boolean need_layout)

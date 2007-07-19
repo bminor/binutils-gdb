@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-cat >e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 /* A vanilla emulation with no defaults
    Copyright 1991, 1992, 1994, 2000, 2001, 2002, 2003, 2007
    Free Software Foundation, Inc.

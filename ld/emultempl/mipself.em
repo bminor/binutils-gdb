@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 static void
 mips_after_parse (void)
 {

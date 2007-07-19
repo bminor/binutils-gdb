@@ -22,7 +22,7 @@
 # This file is sourced from elf32.em and mmo.em, used to define
 # MMIX-specific things common to ELF and MMO.
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 #include "elf/mmix.h"
 
 /* Set up handling of linker-allocated global registers.  */

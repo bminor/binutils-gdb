@@ -25,7 +25,7 @@
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 /* None zero if generating binary for Intel Itanium processor.  */
 static int itanium = 0;
@@ -60,4 +60,4 @@ PARSE_AND_LIST_ARGS_CASES='
 '
 
 LDEMUL_AFTER_PARSE=gld${EMULATION_NAME}_after_parse
-. ${srcdir}/emultempl/needrelax.em
+source_em ${srcdir}/emultempl/needrelax.em

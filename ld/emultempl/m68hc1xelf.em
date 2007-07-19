@@ -40,7 +40,7 @@
 #
 # Copied from hppaelf and adapted for M68HC11/M68HC12 specific needs.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "ldctor.h"
 #include "elf32-m68hc1x.h"

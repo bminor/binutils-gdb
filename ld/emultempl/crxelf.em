@@ -23,7 +23,7 @@
 # This file is sourced from elf32.em, and defines extra crx-elf
 # specific routines.
 #
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 #include "ldctor.h"
 
@@ -92,4 +92,3 @@ PARSE_AND_LIST_ARGS_CASES='
 #
 LDEMUL_AFTER_PARSE=crxelf_after_parse
 LDEMUL_BEFORE_ALLOCATION=crxelf_before_allocation
-

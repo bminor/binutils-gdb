@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-cat >e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 /* Copyright 1991, 1993, 1994, 1996, 1999, 2000, 2001, 2002, 2003, 2004,
    2005, 2007 Free Software Foundation, Inc.
 
@@ -94,7 +94,7 @@ then
 # sed commands to quote an ld script as a C string.
 sc="-f stringify.sed"
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 {
   *isfile = 0;
 
@@ -115,7 +115,7 @@ echo '; }'                                             >> e${EMULATION_NAME}.c
 else
 # Scripts read from the filesystem.
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 {
   *isfile = 1;
 
@@ -134,7 +134,7 @@ EOF
 
 fi
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 struct ld_emulation_xfer_struct ld_gld960coff_emulation =
 {

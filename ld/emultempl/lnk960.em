@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-cat >e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 /* intel coff loader emulation specific stuff
    Copyright 1991, 1992, 1994, 1995, 1996, 1999, 2000, 2001, 2002, 2003,
    2005, 2007 Free Software Foundation, Inc.
@@ -217,7 +217,7 @@ then
 # sed commands to quote an ld script as a C string.
 sc="-f stringify.sed"
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 {
   *isfile = 0;
 
@@ -238,7 +238,7 @@ echo '; }'                                             >> e${EMULATION_NAME}.c
 else
 # Scripts read from the filesystem.
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 {
   *isfile = 1;
 
@@ -257,7 +257,7 @@ EOF
 
 fi
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 struct ld_emulation_xfer_struct ld_lnk960_emulation =
 {

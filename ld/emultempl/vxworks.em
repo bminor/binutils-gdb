@@ -20,10 +20,10 @@
 #
 
 if test -n "$VXWORKS_BASE_EM_FILE" ; then
-. "${srcdir}/emultempl/${VXWORKS_BASE_EM_FILE}.em"
+  source_em "${srcdir}/emultempl/${VXWORKS_BASE_EM_FILE}.em"
 fi
 
-cat >>e${EMULATION_NAME}.c <<EOF
+fragment <<EOF
 
 static int force_dynamic;
 
@@ -93,7 +93,7 @@ for override in before_parse after_open; do
   var="LDEMUL_`echo ${override} | tr a-z A-Z`"
   eval value=\$${var}
   if test "${value}" = "gld${EMULATION_NAME}_${override}"; then
-    cat >>e${EMULATION_NAME}.c <<EOF
+    fragment <<EOF
 #define ${value} vxworks_${override}
 EOF
   else

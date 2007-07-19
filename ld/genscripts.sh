@@ -393,5 +393,33 @@ case " $EMULATION_LIBPATH " in
     *" ${EMULATION_NAME} "*) COMPILE_IN=true;;
 esac
 
+if test -n "${BASH+set}"; then
+  source_em()
+  {
+    local current_script="$em_script"
+    em_script=$1
+    . $em_script
+    em_script=$current_script
+  }
+  fragment()
+  {
+    local lineno=$[${BASH_LINENO[0]} + 1]
+    echo >> e${EMULATION_NAME}.c "#line $lineno \"$em_script\""
+    cat >> e${EMULATION_NAME}.c
+  }
+else
+  source_em()
+  {
+    . $1
+  }
+  fragment()
+  {
+    cat >> e${EMULATION_NAME}.c
+  }
+fi
+
 # Generate e${EMULATION_NAME}.c.
-. ${srcdir}/emultempl/${TEMPLATE_NAME-generic}.em
+# Start with an empty file, then the sourced .em script
+# can use the "fragment" function to append.
+> e${EMULATION_NAME}.c
+source_em ${srcdir}/emultempl/${TEMPLATE_NAME-generic}.em
