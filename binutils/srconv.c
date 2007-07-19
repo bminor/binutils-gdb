@@ -46,7 +46,7 @@ static char **rnames;
 static int get_member_id (int);
 static int get_ordinary_id (int);
 static char *section_translate (char *);
-static char *strip_suffix (char *);
+static char *strip_suffix (const char *);
 static void checksum (FILE *, unsigned char *, int, int);
 static void writeINT (int, unsigned char *, int *, int, FILE *);
 static void writeBITS (int, unsigned char *, int *, int);
@@ -142,9 +142,8 @@ section_translate (char *n)
 
 #define DATE "940201073000";	/* Just a time on my birthday */
 
-static
-char *
-strip_suffix (char *name)
+static char *
+strip_suffix (const char *name)
 {
   int i;
   char *res;
