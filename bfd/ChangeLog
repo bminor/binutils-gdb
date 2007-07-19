@@ -1,3 +1,9 @@
+2007-07-19  Doug Kwan  <dougkwan@google.com>
+
+       PR binutils/4797
+       * dwarf2.c: (find_line) Do not dereference functionname_ptr if
+       do_line is true.
+
 2007-07-18  Bob Wilson  <bob.wilson@acm.org>
 	
 	* elf32-xtensa.c (xtensa_callback_required_dependence): Ignore
