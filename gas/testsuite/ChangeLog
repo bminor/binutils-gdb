@@ -1,3 +1,13 @@
+2007-07-19  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/4804
+	* gas/elf/elf.exp (target_machine): Treat the arm-linux-gnu target
+	in the same way as the arm-eabi target.
+	* gas/arm/mapshort-eabi.d: Use this file for the arm-linux-gnu
+	target.
+	* gas/arm/mapshort-elf.d: Do not use this file for the
+	arm-linux-gnu target.
+
 2007-07-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/simd.s: Add tests for punpcklbw, punpckldq,

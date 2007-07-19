@@ -60,6 +60,7 @@ if { ([istarget "*-*-*elf*"]
 	  || [istarget "xscale*-*-*"]) } {
 	
 	if { ([istarget "*-*-*eabi"]
+	      || [istarget "*-*-linux-*"]
 	      || [istarget "*-*-symbianelf"])} then {
 	    set target_machine -armeabi
 	} else {
