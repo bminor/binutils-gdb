@@ -1,5 +1,10 @@
 2007-07-18  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.cp/ref-params.exp (gdb_start_again): Invoke `gdb_exit'
+	prior to `gdb_start'.
+
+2007-07-18  Kevin Buettner  <kevinb@redhat.com>
+
 	* config/sid.exp (gdb_load): Add test for empty argument.  Adjust
 	return value to be compatible with gdb_run_cmd in lib/gdb.exp.
 	Remove call to gdb_unload.

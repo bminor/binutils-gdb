@@ -46,6 +46,7 @@ proc gdb_start_again { text } {
     global binfile
     global srcfile
 
+    gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load ${binfile}
