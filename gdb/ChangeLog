@@ -1,3 +1,9 @@
+2007-07-20  Chris Dearman  <chris@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (fetch_mips_16): Fix typos and reformat the
+	description.
+
 2007-07-17  Pedro Alves  <pedro_alves@portugalmail.pt>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

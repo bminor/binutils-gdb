@@ -1198,13 +1198,11 @@ extended_offset (unsigned int extension)
 }
 
 /* Only call this function if you know that this is an extendable
-   instruction, It wont malfunction, but why make excess remote memory references?
-   If the immediate operands get sign extended or somthing, do it after
-   the extension is performed.
- */
+   instruction.  It won't malfunction, but why make excess remote memory
+   references?  If the immediate operands get sign extended or something,
+   do it after the extension is performed.  */
 /* FIXME: Every one of these cases needs to worry about sign extension
-   when the offset is to be used in relative addressing */
-
+   when the offset is to be used in relative addressing.  */
 
 static unsigned int
 fetch_mips_16 (CORE_ADDR pc)
