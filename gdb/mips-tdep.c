@@ -2396,15 +2396,28 @@ heuristic-fence-post' command.\n", paddr_nz (pc), paddr_nz (pc));
 
 	/* On MIPS16, any one of the following is likely to be the
 	   start of a function:
+  	   extend save
+	   save
 	   entry
 	   addiu sp,-n
 	   daddiu sp,-n
 	   extend -n followed by 'addiu sp,+n' or 'daddiu sp,+n'  */
 	inst = mips_fetch_instruction (start_pc);
-	if (((inst & 0xf81f) == 0xe809 && (inst & 0x700) != 0x700)	/* entry */
-	    || (inst & 0xff80) == 0x6380	/* addiu sp,-n */
-	    || (inst & 0xff80) == 0xfb80	/* daddiu sp,-n */
-	    || ((inst & 0xf810) == 0xf010 && seen_adjsp))	/* extend -n */
+	if ((inst & 0xff80) == 0x6480)		/* save */
+	  {
+	    if (start_pc - instlen >= fence)
+	      {
+		inst = mips_fetch_instruction (start_pc - instlen);
+		if ((inst & 0xf800) == 0xf000)	/* extend */
+		  start_pc -= instlen;
+	      }
+	    break;
+	  }
+	else if (((inst & 0xf81f) == 0xe809
+		  && (inst & 0x700) != 0x700)	/* entry */
+		 || (inst & 0xff80) == 0x6380	/* addiu sp,-n */
+		 || (inst & 0xff80) == 0xfb80	/* daddiu sp,-n */
+		 || ((inst & 0xf810) == 0xf010 && seen_adjsp))	/* extend -n */
 	  break;
 	else if ((inst & 0xff00) == 0x6300	/* addiu sp */
 		 || (inst & 0xff00) == 0xfb00)	/* daddiu sp */
