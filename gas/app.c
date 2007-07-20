@@ -558,8 +558,14 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  ch = GET ();
 	  if (ch == EOF)
 	    {
+	      /* This buffer is here specifically so
+		 that the UNGET below will work.  */
+	      static char one_char_buf[1];
+
 	      as_warn (_("end of file in string; '%c' inserted"), quotechar);
 	      state = old_state;
+	      from = fromend = one_char_buf + 1;
+	      fromlen = 1;
 	      UNGET ('\n');
 	      PUT (quotechar);
 	    }

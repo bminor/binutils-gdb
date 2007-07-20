@@ -1,3 +1,8 @@
+2007-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* app.c (do_scrub_chars): Provide a one character buffer to hold a
+	pushed back newline at the end of an unterminated quoted string.
+
 2007-07-14  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (create_register_alias): Return a boolean rather
