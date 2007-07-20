@@ -1435,11 +1435,11 @@ mips16_next_pc (struct frame_info *frame, CORE_ADDR pc)
    target monitor or stub is not developed enough to do a single_step.
    It works by decoding the current instruction and predicting where a
    branch will go. This isnt hard because all the data is available.
-   The MIPS32 and MIPS16 variants are quite different */
+   The MIPS32 and MIPS16 variants are quite different.  */
 static CORE_ADDR
 mips_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
-  if (pc & 0x01)
+  if (is_mips16_addr (pc))
     return mips16_next_pc (frame, pc);
   else
     return mips32_next_pc (frame, pc);

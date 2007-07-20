@@ -1,3 +1,8 @@
+2007-07-20  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (mips_next_pc): Use is_mips16_addr() instead of
+	a direct test.
+
 2007-07-20  Chris Dearman  <chris@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 
