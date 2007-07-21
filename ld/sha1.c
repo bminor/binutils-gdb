@@ -1,12 +1,13 @@
 /* sha1.c - Functions to compute SHA1 message digest of files or
    memory blocks according to the NIST specification FIPS-180-1.
 
-   Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006 Free Software
-   Foundation, Inc.
+   Copyright (C) 2007 Free Software Foundation, Inc.
+
+   This file is part of the GNU Binutils.
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
-   Free Software Foundation; either version 2, or (at your option) any
+   Free Software Foundation; either version 3, or (at your option) any
    later version.
 
    This program is distributed in the hope that it will be useful,
@@ -20,13 +21,10 @@
 
 /* Written by Scott G. Miller
    Credits:
-      Robert Klep <robert@ilse.nl>  -- Expansion function fix
-*/
+      Robert Klep <robert@ilse.nl>  -- Expansion function fix  */
 
 #include <config.h>
-
 #include "sha1.h"
-
 #include <stddef.h>
 #include <string.h>
 
@@ -54,6 +52,7 @@ static const unsigned char fillbuf[64] = { 0x80, 0 /* , 0, 0, ...  */ };
 /* Take a pointer to a 160 bit block of data (five 32 bit ints) and
    initialize it to the start constants of the SHA1 algorithm.  This
    must be called before using hash in the call to sha1_hash.  */
+
 void
 sha1_init_ctx (struct sha1_ctx *ctx)
 {
@@ -72,6 +71,7 @@ sha1_init_ctx (struct sha1_ctx *ctx)
 
    IMPORTANT: On some systems it is required that RESBUF is correctly
    aligned for a 32-bit value.  */
+
 void *
 sha1_read_ctx (const struct sha1_ctx *ctx, void *resbuf)
 {
@@ -89,6 +89,7 @@ sha1_read_ctx (const struct sha1_ctx *ctx, void *resbuf)
 
    IMPORTANT: On some systems it is required that RESBUF is correctly
    aligned for a 32-bit value.  */
+
 void *
 sha1_finish_ctx (struct sha1_ctx *ctx, void *resbuf)
 {
@@ -116,6 +117,7 @@ sha1_finish_ctx (struct sha1_ctx *ctx, void *resbuf)
 /* Compute SHA1 message digest for bytes read from STREAM.  The
    resulting message digest number will be written into the 16 bytes
    beginning at RESBLOCK.  */
+
 int
 sha1_stream (FILE *stream, void *resblock)
 {
@@ -163,8 +165,7 @@ sha1_stream (FILE *stream, void *resblock)
 	}
 
       /* Process buffer with BLOCKSIZE bytes.  Note that
-			BLOCKSIZE % 64 == 0
-       */
+			BLOCKSIZE % 64 == 0.  */
       sha1_process_block (buffer, BLOCKSIZE, &ctx);
     }
 
@@ -183,6 +184,7 @@ sha1_stream (FILE *stream, void *resblock)
    result is always in little endian byte order, so that a byte-wise
    output yields to the wanted ASCII representation of the message
    digest.  */
+
 void *
 sha1_buffer (const char *buffer, size_t len, void *resblock)
 {
@@ -230,7 +232,7 @@ sha1_process_bytes (const void *buffer, size_t len, struct sha1_ctx *ctx)
   if (len >= 64)
     {
 #if !_STRING_ARCH_unaligned
-# define alignof(type) offsetof (struct { char c; type x; }, x)
+# define alignof(type)  offsetof (struct { char c; type x; }, x)
 # define UNALIGNED_P(p) (((size_t) p) % alignof (uint32_t) != 0)
       if (UNALIGNED_P (buffer))
 	while (len > 64)
@@ -267,16 +269,16 @@ sha1_process_bytes (const void *buffer, size_t len, struct sha1_ctx *ctx)
 
 /* --- Code below is the primary difference between md5.c and sha1.c --- */
 
-/* SHA1 round constants */
+/* SHA1 round constants.  */
 #define K1 0x5a827999
 #define K2 0x6ed9eba1
 #define K3 0x8f1bbcdc
 #define K4 0xca62c1d6
 
 /* Round functions.  Note that F2 is the same as F4.  */
-#define F1(B,C,D) ( D ^ ( B & ( C ^ D ) ) )
+#define F1(B,C,D) (D ^ (B & (C ^ D)))
 #define F2(B,C,D) (B ^ C ^ D)
-#define F3(B,C,D) ( ( B & C ) | ( D & ( B | C ) ) )
+#define F3(B,C,D) ((B & C) | (D & (B | C)))
 #define F4(B,C,D) (B ^ C ^ D)
 
 /* Process LEN bytes of BUFFER, accumulating context into CTX.
@@ -305,107 +307,112 @@ sha1_process_block (const void *buffer, size_t len, struct sha1_ctx *ctx)
 
 #define rol(x, n) (((x) << (n)) | ((uint32_t) (x) >> (32 - (n))))
 
-#define M(I) ( tm =   x[I&0x0f] ^ x[(I-14)&0x0f] \
-		    ^ x[(I-8)&0x0f] ^ x[(I-3)&0x0f] \
-	       , (x[I&0x0f] = rol(tm, 1)) )
+#define M(I) (tm = x[I & 0x0f]       ^ x[(I - 14) & 0x0f] \
+		 ^ x[(I - 8) & 0x0f] ^ x[(I - 3) & 0x0f]  \
+	       , (x[I & 0x0f] = rol (tm, 1)))
 
-#define R(A,B,C,D,E,F,K,M)  do { E += rol( A, 5 )     \
-				      + F( B, C, D )  \
-				      + K	      \
-				      + M;	      \
-				 B = rol( B, 30 );    \
-			       } while(0)
+#define R(A,B,C,D,E,F,K,M)	\
+  do				\
+    {				\
+      E += rol (A, 5)		\
+	+ F (B, C, D)		\
+	+ K			\
+	+ M;			\
+      B = rol (B, 30);		\
+    }				\
+  while (0)
 
   while (words < endp)
     {
       uint32_t tm;
       int t;
+
       for (t = 0; t < 16; t++)
 	{
 	  x[t] = SWAP (*words);
 	  words++;
 	}
 
-      R( a, b, c, d, e, F1, K1, x[ 0] );
-      R( e, a, b, c, d, F1, K1, x[ 1] );
-      R( d, e, a, b, c, F1, K1, x[ 2] );
-      R( c, d, e, a, b, F1, K1, x[ 3] );
-      R( b, c, d, e, a, F1, K1, x[ 4] );
-      R( a, b, c, d, e, F1, K1, x[ 5] );
-      R( e, a, b, c, d, F1, K1, x[ 6] );
-      R( d, e, a, b, c, F1, K1, x[ 7] );
-      R( c, d, e, a, b, F1, K1, x[ 8] );
-      R( b, c, d, e, a, F1, K1, x[ 9] );
-      R( a, b, c, d, e, F1, K1, x[10] );
-      R( e, a, b, c, d, F1, K1, x[11] );
-      R( d, e, a, b, c, F1, K1, x[12] );
-      R( c, d, e, a, b, F1, K1, x[13] );
-      R( b, c, d, e, a, F1, K1, x[14] );
-      R( a, b, c, d, e, F1, K1, x[15] );
-      R( e, a, b, c, d, F1, K1, M(16) );
-      R( d, e, a, b, c, F1, K1, M(17) );
-      R( c, d, e, a, b, F1, K1, M(18) );
-      R( b, c, d, e, a, F1, K1, M(19) );
-      R( a, b, c, d, e, F2, K2, M(20) );
-      R( e, a, b, c, d, F2, K2, M(21) );
-      R( d, e, a, b, c, F2, K2, M(22) );
-      R( c, d, e, a, b, F2, K2, M(23) );
-      R( b, c, d, e, a, F2, K2, M(24) );
-      R( a, b, c, d, e, F2, K2, M(25) );
-      R( e, a, b, c, d, F2, K2, M(26) );
-      R( d, e, a, b, c, F2, K2, M(27) );
-      R( c, d, e, a, b, F2, K2, M(28) );
-      R( b, c, d, e, a, F2, K2, M(29) );
-      R( a, b, c, d, e, F2, K2, M(30) );
-      R( e, a, b, c, d, F2, K2, M(31) );
-      R( d, e, a, b, c, F2, K2, M(32) );
-      R( c, d, e, a, b, F2, K2, M(33) );
-      R( b, c, d, e, a, F2, K2, M(34) );
-      R( a, b, c, d, e, F2, K2, M(35) );
-      R( e, a, b, c, d, F2, K2, M(36) );
-      R( d, e, a, b, c, F2, K2, M(37) );
-      R( c, d, e, a, b, F2, K2, M(38) );
-      R( b, c, d, e, a, F2, K2, M(39) );
-      R( a, b, c, d, e, F3, K3, M(40) );
-      R( e, a, b, c, d, F3, K3, M(41) );
-      R( d, e, a, b, c, F3, K3, M(42) );
-      R( c, d, e, a, b, F3, K3, M(43) );
-      R( b, c, d, e, a, F3, K3, M(44) );
-      R( a, b, c, d, e, F3, K3, M(45) );
-      R( e, a, b, c, d, F3, K3, M(46) );
-      R( d, e, a, b, c, F3, K3, M(47) );
-      R( c, d, e, a, b, F3, K3, M(48) );
-      R( b, c, d, e, a, F3, K3, M(49) );
-      R( a, b, c, d, e, F3, K3, M(50) );
-      R( e, a, b, c, d, F3, K3, M(51) );
-      R( d, e, a, b, c, F3, K3, M(52) );
-      R( c, d, e, a, b, F3, K3, M(53) );
-      R( b, c, d, e, a, F3, K3, M(54) );
-      R( a, b, c, d, e, F3, K3, M(55) );
-      R( e, a, b, c, d, F3, K3, M(56) );
-      R( d, e, a, b, c, F3, K3, M(57) );
-      R( c, d, e, a, b, F3, K3, M(58) );
-      R( b, c, d, e, a, F3, K3, M(59) );
-      R( a, b, c, d, e, F4, K4, M(60) );
-      R( e, a, b, c, d, F4, K4, M(61) );
-      R( d, e, a, b, c, F4, K4, M(62) );
-      R( c, d, e, a, b, F4, K4, M(63) );
-      R( b, c, d, e, a, F4, K4, M(64) );
-      R( a, b, c, d, e, F4, K4, M(65) );
-      R( e, a, b, c, d, F4, K4, M(66) );
-      R( d, e, a, b, c, F4, K4, M(67) );
-      R( c, d, e, a, b, F4, K4, M(68) );
-      R( b, c, d, e, a, F4, K4, M(69) );
-      R( a, b, c, d, e, F4, K4, M(70) );
-      R( e, a, b, c, d, F4, K4, M(71) );
-      R( d, e, a, b, c, F4, K4, M(72) );
-      R( c, d, e, a, b, F4, K4, M(73) );
-      R( b, c, d, e, a, F4, K4, M(74) );
-      R( a, b, c, d, e, F4, K4, M(75) );
-      R( e, a, b, c, d, F4, K4, M(76) );
-      R( d, e, a, b, c, F4, K4, M(77) );
-      R( c, d, e, a, b, F4, K4, M(78) );
-      R( b, c, d, e, a, F4, K4, M(79) );
+      R (a, b, c, d, e, F1, K1, x[ 0]);
+      R (e, a, b, c, d, F1, K1, x[ 1]);
+      R (d, e, a, b, c, F1, K1, x[ 2]);
+      R (c, d, e, a, b, F1, K1, x[ 3]);
+      R (b, c, d, e, a, F1, K1, x[ 4]);
+      R (a, b, c, d, e, F1, K1, x[ 5]);
+      R (e, a, b, c, d, F1, K1, x[ 6]);
+      R (d, e, a, b, c, F1, K1, x[ 7]);
+      R (c, d, e, a, b, F1, K1, x[ 8]);
+      R (b, c, d, e, a, F1, K1, x[ 9]);
+      R (a, b, c, d, e, F1, K1, x[10]);
+      R (e, a, b, c, d, F1, K1, x[11]);
+      R (d, e, a, b, c, F1, K1, x[12]);
+      R (c, d, e, a, b, F1, K1, x[13]);
+      R (b, c, d, e, a, F1, K1, x[14]);
+      R (a, b, c, d, e, F1, K1, x[15]);
+      R (e, a, b, c, d, F1, K1, M(16));
+      R (d, e, a, b, c, F1, K1, M(17));
+      R (c, d, e, a, b, F1, K1, M(18));
+      R (b, c, d, e, a, F1, K1, M(19));
+      R (a, b, c, d, e, F2, K2, M(20));
+      R (e, a, b, c, d, F2, K2, M(21));
+      R (d, e, a, b, c, F2, K2, M(22));
+      R (c, d, e, a, b, F2, K2, M(23));
+      R (b, c, d, e, a, F2, K2, M(24));
+      R (a, b, c, d, e, F2, K2, M(25));
+      R (e, a, b, c, d, F2, K2, M(26));
+      R (d, e, a, b, c, F2, K2, M(27));
+      R (c, d, e, a, b, F2, K2, M(28));
+      R (b, c, d, e, a, F2, K2, M(29));
+      R (a, b, c, d, e, F2, K2, M(30));
+      R (e, a, b, c, d, F2, K2, M(31));
+      R (d, e, a, b, c, F2, K2, M(32));
+      R (c, d, e, a, b, F2, K2, M(33));
+      R (b, c, d, e, a, F2, K2, M(34));
+      R (a, b, c, d, e, F2, K2, M(35));
+      R (e, a, b, c, d, F2, K2, M(36));
+      R (d, e, a, b, c, F2, K2, M(37));
+      R (c, d, e, a, b, F2, K2, M(38));
+      R (b, c, d, e, a, F2, K2, M(39));
+      R (a, b, c, d, e, F3, K3, M(40));
+      R (e, a, b, c, d, F3, K3, M(41));
+      R (d, e, a, b, c, F3, K3, M(42));
+      R (c, d, e, a, b, F3, K3, M(43));
+      R (b, c, d, e, a, F3, K3, M(44));
+      R (a, b, c, d, e, F3, K3, M(45));
+      R (e, a, b, c, d, F3, K3, M(46));
+      R (d, e, a, b, c, F3, K3, M(47));
+      R (c, d, e, a, b, F3, K3, M(48));
+      R (b, c, d, e, a, F3, K3, M(49));
+      R (a, b, c, d, e, F3, K3, M(50));
+      R (e, a, b, c, d, F3, K3, M(51));
+      R (d, e, a, b, c, F3, K3, M(52));
+      R (c, d, e, a, b, F3, K3, M(53));
+      R (b, c, d, e, a, F3, K3, M(54));
+      R (a, b, c, d, e, F3, K3, M(55));
+      R (e, a, b, c, d, F3, K3, M(56));
+      R (d, e, a, b, c, F3, K3, M(57));
+      R (c, d, e, a, b, F3, K3, M(58));
+      R (b, c, d, e, a, F3, K3, M(59));
+      R (a, b, c, d, e, F4, K4, M(60));
+      R (e, a, b, c, d, F4, K4, M(61));
+      R (d, e, a, b, c, F4, K4, M(62));
+      R (c, d, e, a, b, F4, K4, M(63));
+      R (b, c, d, e, a, F4, K4, M(64));
+      R (a, b, c, d, e, F4, K4, M(65));
+      R (e, a, b, c, d, F4, K4, M(66));
+      R (d, e, a, b, c, F4, K4, M(67));
+      R (c, d, e, a, b, F4, K4, M(68));
+      R (b, c, d, e, a, F4, K4, M(69));
+      R (a, b, c, d, e, F4, K4, M(70));
+      R (e, a, b, c, d, F4, K4, M(71));
+      R (d, e, a, b, c, F4, K4, M(72));
+      R (c, d, e, a, b, F4, K4, M(73));
+      R (b, c, d, e, a, F4, K4, M(74));
+      R (a, b, c, d, e, F4, K4, M(75));
+      R (e, a, b, c, d, F4, K4, M(76));
+      R (d, e, a, b, c, F4, K4, M(77));
+      R (c, d, e, a, b, F4, K4, M(78));
+      R (b, c, d, e, a, F4, K4, M(79));
 
       a = ctx->A += a;
       b = ctx->B += b;

@@ -1,3 +1,9 @@
+2007-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* sha1.h: Change to use version 3 of the GNU General Public
+	License and tidy up formatting.
+	* sha1.c: Likewise.
+
 2007-07-19  Roland McGrath  <roland@redhat.com>
 
 	* genscripts.sh (source_em, fragment): New sh functions.
