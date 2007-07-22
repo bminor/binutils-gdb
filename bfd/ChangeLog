@@ -1,3 +1,11 @@
+2007-07-22  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* elfxx-mips.c (struct mips_elf_link_hash_table): Add new field
+	small_data_overflow_reported.
+	(_bfd_mips_elf_link_hash_table_create): Initialize it.
+	(_bfd_mips_elf_relocate_section) <bfd_reloc_overflow>: Report
+	small-data section overflow.
+
 2007-07-19  Doug Kwan  <dougkwan@google.com>
 
        PR binutils/4797

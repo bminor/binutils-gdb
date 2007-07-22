@@ -325,6 +325,8 @@ struct mips_elf_link_hash_table
   bfd_boolean mips16_stubs_seen;
   /* True if we're generating code for VxWorks.  */
   bfd_boolean is_vxworks;
+  /* True if we already reported the small-data section overflow.  */
+  bfd_boolean small_data_overflow_reported;
   /* Shortcuts to some dynamic sections, or NULL if they are not
      being used.  */
   asection *srelbss;
@@ -8032,7 +8034,21 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    ;
 	  else
 	    {
+	      struct mips_elf_link_hash_table *htab;
+
+	      htab = mips_elf_hash_table (info);
 	      BFD_ASSERT (name != NULL);
+	      if (!htab->small_data_overflow_reported
+		  && (howto->type == R_MIPS_GPREL16
+		      || howto->type == R_MIPS_LITERAL))
+		{
+		  const char *msg =
+		    _("small-data section exceeds 64KB;"
+		      " lower small-data size limit (see option -G)");
+
+		  htab->small_data_overflow_reported = TRUE;
+		  (*info->callbacks->einfo) ("%P: %s\n", msg);
+		}
 	      if (! ((*info->callbacks->reloc_overflow)
 		     (info, NULL, name, howto->name, (bfd_vma) 0,
 		      input_bfd, input_section, rel->r_offset)))
@@ -10174,6 +10190,7 @@ _bfd_mips_elf_link_hash_table_create (bfd *abfd)
   ret->rld_value = 0;
   ret->mips16_stubs_seen = FALSE;
   ret->is_vxworks = FALSE;
+  ret->small_data_overflow_reported = FALSE;
   ret->srelbss = NULL;
   ret->sdynbss = NULL;
   ret->srelplt = NULL;
