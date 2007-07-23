@@ -42,8 +42,6 @@
 	* gas/i386/nops-4-i686.d: Likewise.
 	* gas/i386/nops-4.s: Likewise.
 
-	* gas/i386/x86-64-nops-1-k8.d: Removed.
-
 2007-07-23  Richard Sandiford  <richard@codesourcery.com>
 
 	* lib/gas-defs.exp (run_list_test): Make the options optional.
