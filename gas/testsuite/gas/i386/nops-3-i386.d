@@ -1,6 +1,7 @@
+#as: -mtune=i386
 #source: nops-3.s
 #objdump: -drw
-#name: i386 nops 3
+#name: i386 nops -mtune=i386 3
 
 .*: +file format .*
 

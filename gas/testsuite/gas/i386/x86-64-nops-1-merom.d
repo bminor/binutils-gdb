@@ -1,5 +1,5 @@
 #as: -mtune=merom
-#source: x86-64-nops-1.s
+#source: nops-1.s
 #objdump: -drw
 #name: x86-64 -mtune=merom nops 1
 

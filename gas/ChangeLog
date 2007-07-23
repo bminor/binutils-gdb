@@ -1,3 +1,23 @@
+2007-07-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Change i386 to PROCESSOR_I386.
+	(f32_15): Removed.
+	(jump_31): New.
+	(f32_patt): Remove f32_15.
+	(f16_patt): Likewise.
+	(i386_align_code): Updated to alt_long_patt for 64bit by
+	default.
+
+	* config/tc-i386.h (processor_type): Add PROCESSOR_I386.
+
+2007-07-23  Evandro Menezes  <evandro.menezes@amd.com>
+
+	* config/tc-i386.c (i386_align_code): Enable alignment up to
+	MAX_MEM_FOR_RS_ALIGN_CODE bytes.  Remove special treatment
+	for K8.
+
+	* config/tc-i386.h (MAX_MEM_FOR_RS_ALIGN_CODE): Changed to
+	31.
 2007-07-20  Nick Clifton  <nickc@redhat.com>
 
 	* app.c (do_scrub_chars): Provide a one character buffer to hold a

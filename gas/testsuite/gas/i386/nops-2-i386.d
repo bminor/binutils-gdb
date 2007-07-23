@@ -1,7 +1,7 @@
-#as: -march=i386
+#as: -mtune=i386
 #source: nops-2.s
 #objdump: -drw
-#name: i386 -march=i386 nops 2
+#name: i386 nops -mtune=i386 2
 
 .*: +file format .*
 

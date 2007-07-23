@@ -431,7 +431,7 @@ static const arch_entry cpu_arch[] =
    Cpu186},
   {"i286", PROCESSOR_UNKNOWN,
    Cpu186|Cpu286},
-  {"i386", PROCESSOR_GENERIC32,
+  {"i386", PROCESSOR_I386,
    Cpu186|Cpu286|Cpu386},
   {"i486", PROCESSOR_I486,
    Cpu186|Cpu286|Cpu386|Cpu486},
@@ -608,9 +608,6 @@ i386_align_code (fragS *fragP, int count)
   static const char f32_14[] =
     {0x8d,0xb4,0x26,0x00,0x00,0x00,0x00,	/* leal 0L(%esi,1),%esi */
      0x8d,0xbc,0x27,0x00,0x00,0x00,0x00};	/* leal 0L(%edi,1),%edi */
-  static const char f32_15[] =
-    {0xeb,0x0d,0x90,0x90,0x90,0x90,0x90,	/* jmp .+15; lotsa nops	*/
-     0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
   static const char f16_3[] =
     {0x8d,0x74,0x00};				/* lea 0(%esi),%esi	*/
   static const char f16_4[] =
@@ -627,13 +624,17 @@ i386_align_code (fragS *fragP, int count)
   static const char f16_8[] =
     {0x8d,0xb4,0x00,0x00,			/* lea 0w(%si),%si	*/
      0x8d,0xbd,0x00,0x00};			/* lea 0w(%di),%di	*/
+  static const char jump_31[] =
+    {0xeb,0x1d,0x90,0x90,0x90,0x90,0x90,	/* jmp .+31; lotsa nops	*/
+     0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
+     0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,
+     0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
   static const char *const f32_patt[] = {
     f32_1, f32_2, f32_3, f32_4, f32_5, f32_6, f32_7, f32_8,
-    f32_9, f32_10, f32_11, f32_12, f32_13, f32_14, f32_15
+    f32_9, f32_10, f32_11, f32_12, f32_13, f32_14
   };
   static const char *const f16_patt[] = {
-    f32_1, f32_2, f16_3, f16_4, f16_5, f16_6, f16_7, f16_8,
-    f32_15, f32_15, f32_15, f32_15, f32_15, f32_15, f32_15
+    f32_1, f32_2, f16_3, f16_4, f16_5, f16_6, f16_7, f16_8
   };
   /* nopl (%[re]ax) */
   static const char alt_3[] =
@@ -740,57 +741,40 @@ i386_align_code (fragS *fragP, int count)
     alt_long_14, alt_long_15
   };
 
-  if (count <= 0 || count > 15)
+  /* Only align for at least a positive non-zero boundary. */
+  if (count <= 0 || count > MAX_MEM_FOR_RS_ALIGN_CODE)
     return;
 
   /* We need to decide which NOP sequence to use for 32bit and
      64bit. When -mtune= is used:
 
-     1. For PROCESSOR_I486, PROCESSOR_PENTIUM and PROCESSOR_GENERIC32,
-     f32_patt will be used.
-     2. For PROCESSOR_K8 and PROCESSOR_AMDFAM10 in 64bit, NOPs with
-     0x66 prefix will be used.
-     3. For PROCESSOR_CORE2, alt_long_patt will be used.
-     4. For PROCESSOR_PENTIUMPRO, PROCESSOR_PENTIUM4, PROCESSOR_NOCONA,
-     PROCESSOR_CORE, PROCESSOR_CORE2, PROCESSOR_K6, PROCESSOR_ATHLON
-     and PROCESSOR_GENERIC64, alt_short_patt will be used.
+     1. For PROCESSOR_I386, PROCESSOR_I486, PROCESSOR_PENTIUM and
+     PROCESSOR_GENERIC32, f32_patt will be used.
+     2. For PROCESSOR_PENTIUMPRO, PROCESSOR_PENTIUM4, PROCESSOR_NOCONA,
+     PROCESSOR_CORE, PROCESSOR_CORE2, and PROCESSOR_GENERIC64,
+     alt_long_patt will be used.
+     3. For PROCESSOR_ATHLON, PROCESSOR_K6, PROCESSOR_K8 and
+     PROCESSOR_AMDFAM10, alt_short_patt will be used.
 
-     When -mtune= isn't used, alt_short_patt will be used if
-     cpu_arch_isa_flags has Cpu686. Otherwise, f32_patt will be used.
+     When -mtune= isn't used, alt_long_patt will be used if
+     cpu_arch_isa_flags has Cpu686. Otherwise, f32_patt will
+     be used.
 
      When -march= or .arch is used, we can't use anything beyond
      cpu_arch_isa_flags.   */
 
   if (flag_code == CODE_16BIT)
     {
-      memcpy (fragP->fr_literal + fragP->fr_fix,
-	      f16_patt[count - 1], count);
       if (count > 8)
-	/* Adjust jump offset.  */
-	fragP->fr_literal[fragP->fr_fix + 1] = count - 2;
-    }
-  else if (flag_code == CODE_64BIT && cpu_arch_tune == PROCESSOR_K8)
-    {
-      int i;
-      int nnops = (count + 3) / 4;
-      int len = count / nnops;
-      int remains = count - nnops * len;
-      int pos = 0;
-
-      /* The recommended way to pad 64bit code is to use NOPs preceded
-	 by maximally four 0x66 prefixes.  Balance the size of nops.  */
-      for (i = 0; i < remains; i++)
 	{
-	  memset (fragP->fr_literal + fragP->fr_fix + pos, 0x66, len);
-	  fragP->fr_literal[fragP->fr_fix + pos + len] = 0x90;
-	  pos += len + 1;
+	  memcpy (fragP->fr_literal + fragP->fr_fix,
+		  jump_31, count);
+	  /* Adjust jump offset.  */
+	  fragP->fr_literal[fragP->fr_fix + 1] = count - 2;
 	}
-      for (; i < nnops; i++)
-	{
-	  memset (fragP->fr_literal + fragP->fr_fix + pos, 0x66, len - 1);
-	  fragP->fr_literal[fragP->fr_fix + pos + len - 1] = 0x90;
-	  pos += len;
-	}
+      else
+	memcpy (fragP->fr_literal + fragP->fr_fix,
+		f16_patt[count - 1], count);
     }
   else
     {
@@ -805,24 +789,25 @@ i386_align_code (fragS *fragP, int count)
 	      /* We use cpu_arch_isa_flags to check if we SHOULD
 		 optimize for Cpu686.  */
 	      if ((cpu_arch_isa_flags & Cpu686) != 0)
-		patt = alt_short_patt;
+		patt = alt_long_patt;
 	      else
 		patt = f32_patt;
-	      break;
-	    case PROCESSOR_CORE2:
-	      patt = alt_long_patt;
 	      break;
 	    case PROCESSOR_PENTIUMPRO:
 	    case PROCESSOR_PENTIUM4:
 	    case PROCESSOR_NOCONA:
 	    case PROCESSOR_CORE:
+	    case PROCESSOR_CORE2:
+	    case PROCESSOR_GENERIC64:
+	      patt = alt_long_patt;
+	      break;
 	    case PROCESSOR_K6:
 	    case PROCESSOR_ATHLON:
 	    case PROCESSOR_K8:
-	    case PROCESSOR_GENERIC64:
 	    case PROCESSOR_AMDFAM10:
 	      patt = alt_short_patt;
 	      break;
+	    case PROCESSOR_I386:
 	    case PROCESSOR_I486:
 	    case PROCESSOR_PENTIUM:
 	    case PROCESSOR_GENERIC32:
@@ -840,12 +825,9 @@ i386_align_code (fragS *fragP, int count)
 	      abort ();
 	      break;
 
+	    case PROCESSOR_I386:
 	    case PROCESSOR_I486:
 	    case PROCESSOR_PENTIUM:
-	    case PROCESSOR_PENTIUMPRO:
-	    case PROCESSOR_PENTIUM4:
-	    case PROCESSOR_NOCONA:
-	    case PROCESSOR_CORE:
 	    case PROCESSOR_K6:
 	    case PROCESSOR_ATHLON:
 	    case PROCESSOR_K8:
@@ -858,6 +840,10 @@ i386_align_code (fragS *fragP, int count)
 	      else
 		patt = f32_patt;
 	      break;
+	    case PROCESSOR_PENTIUMPRO:
+	    case PROCESSOR_PENTIUM4:
+	    case PROCESSOR_NOCONA:
+	    case PROCESSOR_CORE:
 	    case PROCESSOR_CORE2:
 	      if ((cpu_arch_isa_flags & Cpu686) != 0)
 		patt = alt_long_patt;
@@ -865,13 +851,44 @@ i386_align_code (fragS *fragP, int count)
 		patt = f32_patt;
 	      break;
 	    case PROCESSOR_GENERIC64:
-	      patt = alt_short_patt;
+	      patt = alt_long_patt;
 	      break;
 	    }
 	}
 
-      memcpy (fragP->fr_literal + fragP->fr_fix,
-	      patt[count - 1], count);
+      if (patt == f32_patt)
+	{
+	  /* If the padding is less than 15 bytes, we use the normal
+	     ones.  Otherwise, we use a jump instruction and adjust
+	     its offset.  */
+	  if (count < 15)
+	    memcpy (fragP->fr_literal + fragP->fr_fix,
+		    patt[count - 1], count);
+	  else
+	    {
+	      memcpy (fragP->fr_literal + fragP->fr_fix,
+		      jump_31, count);
+	      /* Adjust jump offset.  */
+	      fragP->fr_literal[fragP->fr_fix + 1] = count - 2;
+	    }
+	}
+      else
+	{
+	  /* Maximum length of an instruction is 15 byte.  If the
+	     padding is greater than 15 bytes and we don't use jump,
+	     we have to break it into smaller pieces.  */
+	  int padding = count;
+	  while (padding > 15)
+	    {
+	      padding -= 15;
+	      memcpy (fragP->fr_literal + fragP->fr_fix + padding,
+		      patt [14], 15);
+	    }
+
+	  if (padding)
+	    memcpy (fragP->fr_literal + fragP->fr_fix,
+		    patt [padding - 1], padding);
+	}
     }
   fragP->fr_var = count;
 }

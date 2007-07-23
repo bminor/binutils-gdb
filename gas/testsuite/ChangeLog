@@ -1,3 +1,49 @@
+2007-07-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run nops16-1, nops-1-i386-i686, nops-1-k8,
+	nops-3-i386, nops-4, nops-4-i386, x86-64-nops-2, x86-64-nops-3,
+	x86-64-nops-4, x86-64-nops-4-core2 and x86-64-nops-4-k8.
+
+	* gas/i386/nops-1-i386-i686.d: New.
+	* gas/i386/nops-1-k8.d: Likewise.
+	* gas/i386/nops-3-i386.d : Likewise.
+	* gas/i386/nops-3-i686.d: Likewise.
+	* gas/i386/nops-4-i386.d: Likewise.
+	* gas/i386/nops-4.d: Likewise.
+	* gas/i386/nops16-1.d: Likewise.
+	* gas/i386/nops16-1.s: Likewise.
+	* gas/i386/x86-64-nops-1-k8.d: Likewise.
+	* gas/i386/x86-64-nops-2.d: Likewise.
+	* gas/i386/x86-64-nops-3.d: Likewise.
+	* gas/i386/x86-64-nops-4-core2.d: Likewise.
+	* gas/i386/x86-64-nops-4-k8.d: Likewise.
+	* gas/i386/x86-64-nops-4.d: Likewise.
+
+	* gas/i386/nops-1-i386.d: Updated.
+	* gas/i386/nops-1-i686.d: Likewise.
+	* gas/i386/nops-1.d: Likewise.
+	* gas/i386/nops-2-i386.d: Likewise.
+	* gas/i386/nops-2-merom.d : Likewise.
+	* gas/i386/nops-2.d: Likewise.
+	* gas/i386/nops-3.d: Likewise.
+	* gas/i386/x86-64-nops-1-merom.d: Likewise.
+	* gas/i386/x86-64-nops-1-nocona.d: Likewise.
+	* gas/i386/x86-64-nops-1.d: Likewise.
+
+	* gas/i386/x86-64-nops-1.s: Removed.
+
+2007-07-23  Evandro Menezes  <evandro.menezes@amd.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Don't run x86-64-nops-1-k8. Run
+	nops-3-i686 and nops-4-i686.
+
+	* gas/i386/nops-3-i686.d: New.
+	* gas/i386/nops-4-i686.d: Likewise.
+	* gas/i386/nops-4.s: Likewise.
+
+	* gas/i386/x86-64-nops-1-k8.d: Removed.
+
 2007-07-23  Richard Sandiford  <richard@codesourcery.com>
 
 	* lib/gas-defs.exp (run_list_test): Make the options optional.

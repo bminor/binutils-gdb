@@ -165,6 +165,7 @@ sib_byte;
 enum processor_type
 {
   PROCESSOR_UNKNOWN,
+  PROCESSOR_I386,
   PROCESSOR_I486,
   PROCESSOR_PENTIUM,
   PROCESSOR_PENTIUMPRO,
@@ -261,7 +262,7 @@ if ((n)									\
     goto around;							\
   }
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE  15
+#define MAX_MEM_FOR_RS_ALIGN_CODE  31
 
 extern void i386_align_code (fragS *, int);
 
