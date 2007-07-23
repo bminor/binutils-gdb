@@ -1,3 +1,8 @@
+2007-07-23  Kevin Buettner  <kevinb@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_target_load): Do a "kill" prior
+	to restarting SID.
+
 2007-07-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.cp/ref-params.exp (gdb_start_again): Invoke `gdb_exit'

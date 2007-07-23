@@ -464,6 +464,10 @@ proc mi_gdb_target_load { } {
 	}
     } elseif { [info procs send_target_sid] != "" } {
 	# For SID, things get complex
+	send_gdb "kill\n"
+	gdb_expect 10 {
+	    -re ".*$mi_gdb_prompt$"
+	}
 	send_target_sid
 	gdb_expect 60 {
 	    -re "\\^done.*$mi_gdb_prompt$" {
