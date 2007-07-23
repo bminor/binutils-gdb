@@ -890,14 +890,14 @@ if ![string length [info proc prune_warnings]] {
     }
 }
 
-# run_list_test NAME OPTS (optional): TESTNAME
+# run_list_test NAME (optional): OPTS TESTNAME
 #
 # Assemble the file "NAME.d" with command line options OPTS and
 # compare the assembler standard error output against thee regular
 # expressions given in the file "NAME.l".  If TESTNAME is provided,
 # it will be used as the name of the test.
 
-proc run_list_test { name opts {testname {}} } {
+proc run_list_test { name {opts {}} {testname {}} } {
     global srcdir subdir
     if { [string length $testname] == 0 } then {
 	set testname "[file tail $subdir] $name"
