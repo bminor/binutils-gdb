@@ -1,3 +1,8 @@
+2007-07-23  Richard Sandiford  <richard@codesourcery.com>
+
+	* elflink.c (_bfd_elf_fix_symbol_flags): Only assert the type
+	of weakdef->root.type if weakdef has no regular definition.
+
 2007-07-22  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* elfxx-mips.c (struct mips_elf_link_hash_table): Add new field

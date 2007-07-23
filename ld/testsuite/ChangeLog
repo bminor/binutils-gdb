@@ -1,3 +1,9 @@
+2007-07-23  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-elf/weak-dyn-1a.s, ld-elf/weak-dyn-1b.s, ld-elf/weak-dyn-1.ld,
+	* ld-elf/weak-dyn-1.rd: New test.
+	* ld-elf/elf.exp: Run it.
+
 2007-07-13  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/assert.t: Tweak to avoid relying on empty's VMA being

@@ -2492,8 +2492,6 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 
       BFD_ASSERT (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak);
-      BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined
-		  || weakdef->root.type == bfd_link_hash_defweak);
       BFD_ASSERT (weakdef->def_dynamic);
 
       /* If the real definition is defined by a regular object file,
@@ -2502,8 +2500,11 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
       if (weakdef->def_regular)
 	h->u.weakdef = NULL;
       else
-	(*bed->elf_backend_copy_indirect_symbol) (eif->info, weakdef,
-						  h);
+	{
+	  BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined
+		      || weakdef->root.type == bfd_link_hash_defweak);
+	  (*bed->elf_backend_copy_indirect_symbol) (eif->info, weakdef, h);
+	}
     }
 
   return TRUE;
