@@ -10,4 +10,4 @@
 	.data
 foo:
 bar:
-	.dc.a	data_begin
+	.byte	1
