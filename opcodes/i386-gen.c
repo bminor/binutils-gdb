@@ -404,7 +404,7 @@ main (int argc, char **argv)
    You should have received a copy of the GNU General Public License\n\
    along with this program; if not, write to the Free Software\n\
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,\n\
-   MA 02110-1301, USA.  */");
+   MA 02110-1301, USA.  */\n");
 
   process_i386_opcodes ();
   process_i386_registers ();
