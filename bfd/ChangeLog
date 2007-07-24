@@ -1,5 +1,7 @@
 2007-07-24  Michael Snyder  <msnyder@access-company.com>
 
+	* opncls.c (bfd_make_writable): Check return from bfd_malloc.
+
 	* elflink.c (bfd_elf_final_link): Avoid redundant frees -- return
 	on bfd_malloc error rather than goto error_return.
 

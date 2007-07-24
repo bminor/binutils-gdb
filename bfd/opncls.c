@@ -799,6 +799,8 @@ bfd_make_writable (bfd *abfd)
     }
 
   bim = bfd_malloc (sizeof (struct bfd_in_memory));
+  if (bim == NULL)
+    return FALSE;	/* bfd_error already set.  */
   abfd->iostream = bim;
   /* bfd_bwrite will grow these as needed.  */
   bim->size = 0;
