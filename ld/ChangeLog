@@ -1,3 +1,7 @@
+2007-07-24  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pep.sc: Correct ctor/dtor sentinels for 64-bit targets.
+
 2007-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* sha1.h: Change to use version 3 of the GNU General Public

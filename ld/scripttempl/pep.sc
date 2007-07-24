@@ -64,9 +64,9 @@ SECTIONS
     *(.glue_7t)
     *(.glue_7)
     ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ; 
-			LONG (-1);*(.ctors); *(.ctor); *(SORT(.ctors.*));  LONG (0); }
+			LONG (-1); LONG (-1);*(.ctors); *(.ctor); *(SORT(.ctors.*));  LONG (0); LONG (0); }
     ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ; 
-			LONG (-1); *(.dtors); *(.dtor); *(SORT(.dtors.*));  LONG (0); }
+			LONG (-1); LONG (-1); *(.dtors); *(.dtor); *(SORT(.dtors.*));  LONG (0); LONG (0); }
     ${RELOCATING+ *(.fini)}
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
