@@ -1,3 +1,8 @@
+2007-07-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target.c (memory_xfer_partial): Accesses to unmapped overlay
+	sections should always go to the executable file.
+
 2004-07-20  Chris Dearman  <chris@mips.com>
 
 	* mips-tdep.c (heuristic_proc_start): Add more MIPS16 function

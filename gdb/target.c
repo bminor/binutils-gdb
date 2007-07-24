@@ -1017,6 +1017,14 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
 	return xfer_memory (memaddr, readbuf, len, 0, NULL, ops);
     }
 
+  /* Likewise for accesses to unmapped overlay sections.  */
+  if (readbuf != NULL && overlay_debugging)
+    {
+      asection *section = find_pc_overlay (memaddr);
+      if (pc_in_unmapped_range (memaddr, section))
+	return xfer_memory (memaddr, readbuf, len, 0, NULL, ops);
+    }
+
   /* Try GDB's internal data cache.  */
   region = lookup_mem_region (memaddr);
   /* region->hi == 0 means there's no upper bound.  */
