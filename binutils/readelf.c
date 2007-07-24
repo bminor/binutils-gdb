@@ -110,6 +110,7 @@
 #include "elf/arm.h"
 #include "elf/avr.h"
 #include "elf/bfin.h"
+#include "elf/cr16.h"
 #include "elf/cris.h"
 #include "elf/crx.h"
 #include "elf/d10v.h"
@@ -289,8 +290,6 @@ static void (*byte_put) (unsigned char *, bfd_vma, int);
 
 #define BYTE_GET(field)	byte_get (field, sizeof (field))
 
-#define NUM_ELEM(array) 	(sizeof (array) / sizeof ((array)[0]))
-
 #define GET_ELF_SYMBOLS(file, section)			\
   (is_32bit_elf ? get_32bit_elf_symbols (file, section)	\
    : get_64bit_elf_symbols (file, section))
@@ -301,8 +300,8 @@ static void (*byte_put) (unsigned char *, bfd_vma, int);
 #define GET_DYNAMIC_NAME(offset)	(dynamic_strings + offset)
 
 /* This is just a bit of syntatic sugar.  */
-#define streq(a,b)	(strcmp ((a), (b)) == 0)
-#define strneq(a,b,n)	(strncmp ((a), (b), (n)) == 0)
+#define streq(a,b)	  (strcmp ((a), (b)) == 0)
+#define strneq(a,b,n)	  (strncmp ((a), (b), (n)) == 0)
 #define const_strneq(a,b) (strncmp ((a), (b), sizeof (b) - 1) == 0)
 
 static void *
@@ -617,6 +616,7 @@ guess_is_rela (unsigned long e_machine)
     case EM_AVR:
     case EM_AVR_OLD:
     case EM_BLACKFIN:
+    case EM_CR16:
     case EM_CRIS:
     case EM_CRX:
     case EM_D30V:
@@ -1190,6 +1190,10 @@ dump_relocations (FILE *file,
 
 	case EM_CYGNUS_MEP:
 	  rtype = elf_mep_reloc_type (type);
+	  break;
+
+	case EM_CR16:
+	  rtype = elf_cr16_reloc_type (type);
 	  break;
 	}
 
@@ -1787,6 +1791,7 @@ get_machine_name (unsigned e_machine)
     case EM_ALTERA_NIOS2:	return "Altera Nios II";
     case EM_XC16X:		return "Infineon Technologies xc16x";
     case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
+    case EM_CR16:		return "National Semiconductor's CR16";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
       return buff;
@@ -5568,7 +5573,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn *entry)
 	  };
 	  unsigned int cnt;
 	  int first = 1;
-	  for (cnt = 0; cnt < NUM_ELEM (opts); ++cnt)
+	  for (cnt = 0; cnt < ARRAY_SIZE (opts); ++cnt)
 	    if (entry->d_un.d_val & (1 << cnt))
 	      {
 		printf ("%s%s", first ? "" : " ", opts[cnt]);
@@ -5657,7 +5662,7 @@ dynamic_section_parisc_val (Elf_Internal_Dyn *entry)
 	size_t cnt;
 	bfd_vma val = entry->d_un.d_val;
 
-	for (cnt = 0; cnt < sizeof (flags) / sizeof (flags[0]); ++cnt)
+	for (cnt = 0; cnt < ARRAY_SIZE (flags); ++cnt)
 	  if (val & flags[cnt].bit)
 	    {
 	      if (! first)
@@ -8297,11 +8302,9 @@ display_arm_attribute (unsigned char *p)
   return p;
 }
 
-
 static unsigned char *
-display_gnu_attribute (unsigned char *p,
-		       unsigned char *(*display_proc_gnu_attribute)
-			    (unsigned char *, int))
+display_gnu_attribute (unsigned char * p,
+		       unsigned char * (* display_proc_gnu_attribute) (unsigned char *, int))
 {
   int tag;
   unsigned int len;
@@ -8318,7 +8321,7 @@ display_gnu_attribute (unsigned char *p,
       val = read_uleb128 (p, &len);
       p += len;
       printf ("flag = %d, vendor = %s\n", val, p);
-      p += strlen((char *)p) + 1;
+      p += strlen ((char *) p) + 1;
       return p;
     }
 
@@ -8334,7 +8337,7 @@ display_gnu_attribute (unsigned char *p,
   if (type == 1)
     {
       printf ("\"%s\"\n", p);
-      p += strlen ((char *)p) + 1;
+      p += strlen ((char *) p) + 1;
     }
   else
     {
@@ -8358,6 +8361,7 @@ display_power_gnu_attribute (unsigned char *p, int tag)
       val = read_uleb128 (p, &len);
       p += len;
       printf ("  Tag_GNU_Power_ABI_FP: ");
+
       switch (val)
 	{
 	case 0:
@@ -8385,7 +8389,7 @@ display_power_gnu_attribute (unsigned char *p, int tag)
   if (type == 1)
     {
       printf ("\"%s\"\n", p);
-      p += strlen ((char *)p) + 1;
+      p += strlen ((char *) p) + 1;
     }
   else
     {
@@ -8409,6 +8413,7 @@ display_mips_gnu_attribute (unsigned char *p, int tag)
       val = read_uleb128 (p, &len);
       p += len;
       printf ("  Tag_GNU_MIPS_ABI_FP: ");
+
       switch (val)
 	{
 	case 0:
@@ -8439,7 +8444,7 @@ display_mips_gnu_attribute (unsigned char *p, int tag)
   if (type == 1)
     {
       printf ("\"%s\"\n", p);
-      p += strlen ((char *)p) + 1;
+      p += strlen ((char *) p) + 1;
     }
   else
     {
@@ -8452,11 +8457,11 @@ display_mips_gnu_attribute (unsigned char *p, int tag)
 }
 
 static int
-process_attributes (FILE *file, const char *public_name,
+process_attributes (FILE * file,
+		    const char * public_name,
 		    unsigned int proc_type,
-		    unsigned char *(*display_pub_attribute) (unsigned char *),
-		    unsigned char *(*display_proc_gnu_attribute)
-			 (unsigned char *, int))
+		    unsigned char * (* display_pub_attribute) (unsigned char *),
+		    unsigned char * (* display_proc_gnu_attribute) (unsigned char *, int))
 {
   Elf_Internal_Shdr *sect;
   unsigned char *contents;
@@ -8476,14 +8481,15 @@ process_attributes (FILE *file, const char *public_name,
 
       contents = get_data (NULL, file, sect->sh_offset, 1, sect->sh_size,
 			   _("attributes"));
-
-      if (!contents)
+      if (contents == NULL)
 	continue;
+
       p = contents;
       if (*p == 'A')
 	{
 	  len = sect->sh_size - 1;
 	  p++;
+
 	  while (len > 0)
 	    {
 	      int namelen;
@@ -8492,40 +8498,49 @@ process_attributes (FILE *file, const char *public_name,
 
 	      section_len = byte_get (p, 4);
 	      p += 4;
+
 	      if (section_len > len)
 		{
 		  printf (_("ERROR: Bad section length (%d > %d)\n"),
-			  (int)section_len, (int)len);
+			  (int) section_len, (int) len);
 		  section_len = len;
 		}
+
 	      len -= section_len;
 	      printf ("Attribute Section: %s\n", p);
-	      if (public_name && strcmp ((char *)p, public_name) == 0)
+
+	      if (public_name && streq ((char *) p, public_name))
 		public_section = TRUE;
 	      else
 		public_section = FALSE;
-	      if (strcmp ((char *)p, "gnu") == 0)
+
+	      if (streq ((char *) p, "gnu"))
 		gnu_section = TRUE;
 	      else
 		gnu_section = FALSE;
-	      namelen = strlen ((char *)p) + 1;
+
+	      namelen = strlen ((char *) p) + 1;
 	      p += namelen;
 	      section_len -= namelen + 4;
+
 	      while (section_len > 0)
 		{
 		  int tag = *(p++);
 		  int val;
 		  bfd_vma size;
+
 		  size = byte_get (p, 4);
 		  if (size > section_len)
 		    {
 		      printf (_("ERROR: Bad subsection length (%d > %d)\n"),
-			      (int)size, (int)section_len);
+			      (int) size, (int) section_len);
 		      size = section_len;
 		    }
+
 		  section_len -= size;
 		  end = p + size - 1;
 		  p += 4;
+
 		  switch (tag)
 		    {
 		    case 1:
@@ -8540,6 +8555,7 @@ process_attributes (FILE *file, const char *public_name,
 		      for (;;)
 			{
 			  unsigned int i;
+
 			  val = read_uleb128 (p, &i);
 			  p += i;
 			  if (val == 0)
@@ -8553,6 +8569,7 @@ process_attributes (FILE *file, const char *public_name,
 		      public_section = FALSE;
 		      break;
 		    }
+
 		  if (public_section)
 		    {
 		      while (p < end)
@@ -8574,11 +8591,9 @@ process_attributes (FILE *file, const char *public_name,
 	    }
 	}
       else
-	{
-	  printf (_("Unknown format '%c'\n"), *p);
-	}
+	printf (_("Unknown format '%c'\n"), *p);
 
-      free(contents);
+      free (contents);
     }
   return 1;
 }
@@ -8704,9 +8719,7 @@ process_mips_specific (FILE *file)
 		  int flags = liblist.l_flags;
 		  size_t fcnt;
 
-		  for (fcnt = 0;
-		       fcnt < sizeof (l_flags_vals) / sizeof (l_flags_vals[0]);
-		       ++fcnt)
+		  for (fcnt = 0; fcnt < ARRAY_SIZE (l_flags_vals); ++fcnt)
 		    if ((flags & l_flags_vals[fcnt].bit) != 0)
 		      {
 			fputs (l_flags_vals[fcnt].name, stdout);
@@ -9520,10 +9533,10 @@ process_object (char *file_name, FILE *file)
     }
 
   /* Initialise per file variables.  */
-  for (i = NUM_ELEM (version_info); i--;)
+  for (i = ARRAY_SIZE (version_info); i--;)
     version_info[i] = 0;
 
-  for (i = NUM_ELEM (dynamic_info); i--;)
+  for (i = ARRAY_SIZE (dynamic_info); i--;)
     dynamic_info[i] = 0;
 
   /* Process the file.  */

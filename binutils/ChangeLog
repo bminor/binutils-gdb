@@ -1,3 +1,10 @@
+2007-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (NUM_ELEM): Remove redundant macro; replace references
+	to it with references to ARRAY_SIZE.
+	Add support for CR16.
+	Fix formatting.
+
 2007-07-19  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/4802
