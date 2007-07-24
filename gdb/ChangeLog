@@ -1,3 +1,7 @@
+2007-07-24  Michael Snyder  <msnyder@access-company.com>
+
+	* ax-gdb.c (find_field): Guard against null ptr.
+
 2007-07-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* regformats/reg-spu.dat: Fix order of npc, id registers.
