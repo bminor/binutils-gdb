@@ -1,3 +1,7 @@
+2007-07-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* linker.c (generic_link_add_symbol_list): Warning fix.
+
 2007-07-24  Michael Snyder  <msnyder@access-company.com>
 
 	* opncls.c (bfd_make_writable): Check return from bfd_malloc.

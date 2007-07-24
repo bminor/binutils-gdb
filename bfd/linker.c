@@ -1316,7 +1316,7 @@ generic_link_add_symbol_list (bfd *abfd,
 	  struct generic_link_hash_entry *h;
 	  struct bfd_link_hash_entry *bh;
 
-	  name = bfd_asymbol_name (p);
+	  string = name = bfd_asymbol_name (p);
 	  if (((p->flags & BSF_INDIRECT) != 0
 	       || bfd_is_ind_section (p->section))
 	      && pp + 1 < ppend)
@@ -1329,12 +1329,9 @@ generic_link_add_symbol_list (bfd *abfd,
 	    {
 	      /* The name of P is actually the warning string, and the
 		 next symbol is the one to warn about.  */
-	      string = name;
 	      pp++;
 	      name = bfd_asymbol_name (*pp);
 	    }
-	  else
-	    string = NULL;
 
 	  bh = NULL;
 	  if (! (_bfd_generic_link_add_one_symbol
