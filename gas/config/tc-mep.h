@@ -88,8 +88,6 @@ extern void mep_prepare_relax_scan (fragS *, offsetT *, relax_substateT);
 #define md_prepare_relax_scan(FRAGP, ADDR, AIM, STATE, TYPE) \
 	mep_prepare_relax_scan (FRAGP, &AIM, STATE)
 
-#define skip_whitespace(str) while (*(str) == ' ') ++(str)
-
 /* Support for core/vliw mode switching.  */
 #define CORE 0
 #define VLIW 1

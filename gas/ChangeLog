@@ -1,3 +1,7 @@
+2007-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-mep.h (skip_whitespace): Remove definition.
+
 2007-07-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Change i386 to PROCESSOR_I386.
