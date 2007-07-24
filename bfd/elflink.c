@@ -11043,7 +11043,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       bfd_byte *contents = bfd_malloc (attr_size);
       if (contents == NULL)
-	goto error_return;
+	return FALSE;	/* Bail out and fail.  */
       bfd_elf_set_obj_attr_contents (abfd, contents, attr_size);
       bfd_set_section_contents (abfd, attr_section, contents, 0, attr_size);
       free (contents);

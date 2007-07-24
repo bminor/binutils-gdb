@@ -1,3 +1,8 @@
+2007-07-24  Michael Snyder  <msnyder@access-company.com>
+
+	* elflink.c (bfd_elf_final_link): Avoid redundant frees -- return
+	on bfd_malloc error rather than goto error_return.
+
 2007-07-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_link_just_syms, merge_sections_remove_hook,
