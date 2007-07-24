@@ -1,3 +1,8 @@
+2007-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* ld-arm/arm-elf.exp: Move EABI attribute tests into EABI only
+	section.
+
 2007-07-23  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-elf/weak-dyn-1a.s, ld-elf/weak-dyn-1b.s, ld-elf/weak-dyn-1.ld,
