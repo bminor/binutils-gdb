@@ -1,5 +1,9 @@
 2007-07-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* regformats/reg-spu.dat: Fix order of npc, id registers.
+
+2007-07-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* target.c (memory_xfer_partial): Accesses to unmapped overlay
 	sections should always go to the executable file.
 
