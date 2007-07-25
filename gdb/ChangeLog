@@ -1,3 +1,7 @@
+2007-07-05  Michael Snyder  <msnyder@access-company.com>
+
+	* stack.c (print_frame_args): Check return value of lookup_symbol.
+
 2007-07-24  Michael Snyder  <msnyder@access-company.com>
 
 	* ax-gdb.c (find_field): Guard against null ptr.

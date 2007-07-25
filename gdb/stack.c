@@ -247,6 +247,7 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	      struct symbol *nsym;
 	      nsym = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
 				    b, VAR_DOMAIN, NULL, NULL);
+	      gdb_assert (nsym != NULL);
 	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
 		{
 		  /* There is a LOC_ARG/LOC_REGISTER pair.  This means
