@@ -553,6 +553,7 @@ static xtensa_opcode xtensa_callx8_opcode;
 static xtensa_opcode xtensa_callx12_opcode;
 static xtensa_opcode xtensa_const16_opcode;
 static xtensa_opcode xtensa_entry_opcode;
+static xtensa_opcode xtensa_extui_opcode;
 static xtensa_opcode xtensa_movi_opcode;
 static xtensa_opcode xtensa_movi_n_opcode;
 static xtensa_opcode xtensa_isync_opcode;
@@ -3888,6 +3889,20 @@ xg_expand_assembly_insn (IStack *istack, TInsn *orig_insn)
   if (tinsn_has_invalid_symbolic_operands (orig_insn))
     return TRUE;
 
+  /* Special case for extui opcode which has constraints not handled
+     by the ordinary operand encoding checks.  The number of operands
+     and related syntax issues have already been checked.  */
+  if (orig_insn->opcode == xtensa_extui_opcode)
+    {
+      int shiftimm = orig_insn->tok[2].X_add_number;
+      int maskimm = orig_insn->tok[3].X_add_number;
+      if (shiftimm + maskimm > 32)
+	{
+	  as_bad (_("immediate operands sum to greater than 32"));
+	  return TRUE;
+	}
+    }
+
   /* If the instruction will definitely need to be relaxed, it is better
      to expand it now for better scheduling.  Decide whether to expand
      now....  */
@@ -5012,6 +5027,7 @@ md_begin (void)
   xtensa_callx12_opcode = xtensa_opcode_lookup (isa, "callx12");
   xtensa_const16_opcode = xtensa_opcode_lookup (isa, "const16");
   xtensa_entry_opcode = xtensa_opcode_lookup (isa, "entry");
+  xtensa_extui_opcode = xtensa_opcode_lookup (isa, "extui");
   xtensa_movi_opcode = xtensa_opcode_lookup (isa, "movi");
   xtensa_movi_n_opcode = xtensa_opcode_lookup (isa, "movi.n");
   xtensa_isync_opcode = xtensa_opcode_lookup (isa, "isync");

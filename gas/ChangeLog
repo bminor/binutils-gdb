@@ -1,3 +1,9 @@
+2007-07-25  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (xtensa_extui_opcode): New.
+	(xg_expand_assembly_insn): Check for invalid extui operands.
+	(md_begin): Initialize xtensa_extui_opcode.
+
 2007-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mep.h (skip_whitespace): Remove definition.
