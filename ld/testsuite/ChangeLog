@@ -1,3 +1,7 @@
+2007-07-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-cdtest/cdtest-foo.cc (strncpy): Fix parameter name.
+
 2007-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* ld-arm/arm-elf.exp: Move EABI attribute tests into EABI only
