@@ -1,8 +1,9 @@
-2007-07-05  Michael Snyder  <msnyder@access-company.com>
+2007-07-24  Michael Snyder  <msnyder@access-company.com>
+
+	* solib-svr4.c (svr4_fetch_objfile_link_map): Null pointer check of
+	'buffer' must cover both branches that call strcmp (Coverity).
 
 	* stack.c (print_frame_args): Check return value of lookup_symbol.
-
-2007-07-24  Michael Snyder  <msnyder@access-company.com>
 
 	* ax-gdb.c (find_field): Guard against null ptr.
 

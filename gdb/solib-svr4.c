@@ -839,8 +839,11 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
 	  /* Is this the linkmap for the file we want?  */
 	  /* If the file is not a shared library and has no name,
 	     we are sure it is the main executable, so we return that.  */
-	  if ((buffer && strcmp (buffer, objfile->name) == 0)
-              || (!(objfile->flags & OBJF_SHARED) && (strcmp (buffer, "") == 0)))
+
+	  if (buffer 
+	      && ((strcmp (buffer, objfile->name) == 0)
+		  || (!(objfile->flags & OBJF_SHARED) 
+		      && (strcmp (buffer, "") == 0))))
   	    {
     	      do_cleanups (old_chain);
     	      return lm;
