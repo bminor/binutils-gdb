@@ -1,3 +1,9 @@
+2007-07-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 4824
+	* ld.texinfo (Options): Extend the description of the -O command
+	line option.
+
 2007-07-24  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pep.sc: Correct ctor/dtor sentinels for 64-bit targets.

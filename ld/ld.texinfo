@@ -758,7 +758,11 @@ script command @code{OUTPUT} can also specify the output file name.
 @item -O @var{level}
 If @var{level} is a numeric values greater than zero @command{ld} optimizes
 the output.  This might take significantly longer and therefore probably
-should only be enabled for the final binary.
+should only be enabled for the final binary.  At the moment this
+option only affects ELF shared library generation.  Future releases of
+the linker may make more use of this option.  Also currently there is
+no difference in the linker's behaviour for different non-zero values
+of this option.  Again this may change with future releases.
 
 @kindex -q
 @kindex --emit-relocs
