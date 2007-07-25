@@ -1,3 +1,7 @@
+2007-07-25  Maciej W. Rozycki  <macro@mips.com>
+
+	* Makefile.in (MAKEHTMLFLAGS): Remove "-glossary".
+
 2007-07-24  Michael Snyder  <msnyder@access-company.com>
 
 	* solib-svr4.c (svr4_fetch_objfile_link_map): Null pointer check of

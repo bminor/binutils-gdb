@@ -101,7 +101,7 @@ MAKEINFO=makeinfo
 
 MAKEHTML = texi2html
 
-MAKEHTMLFLAGS = -glossary -menu -split_chapter
+MAKEHTMLFLAGS = -menu -split_chapter
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefined references.
