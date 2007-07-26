@@ -1020,7 +1020,7 @@ void
 _bfd_set_gp_value (bfd *abfd, bfd_vma v)
 {
   if (! abfd)
-    BFD_FAIL ();
+    abort ();
   if (abfd->format != bfd_object)
     return;
 

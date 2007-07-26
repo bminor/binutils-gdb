@@ -1,3 +1,7 @@
+2007-07-26  Thiemo Seufer  <ths@mips.com>
+
+	* bfd.c (_bfd_set_gp_value): Use abort instead of BFD_FAIL.
+
 2007-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* reloc.c (bfd_generic_get_relocated_section_contents): Avoid
