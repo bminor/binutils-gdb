@@ -651,7 +651,7 @@ bfd_decode_symclass (asymbol *symbol)
 {
   char c;
 
-  if (bfd_is_com_section (symbol->section))
+  if (symbol->section && bfd_is_com_section (symbol->section))
     return 'C';
   if (bfd_is_und_section (symbol->section))
     {

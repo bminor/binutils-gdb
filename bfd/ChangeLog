@@ -1,5 +1,8 @@
 2007-07-26  Michael Snyder  <msnyder@access-company.com>
 
+	* syms.c (bfd_decode_symclass): Guard against NULL, since 
+	bfd_is_com_section dereferences the pointer.
+
 	* srec.c (srec_scan): Check for EOF (critical because return value
 	will be used as array index).
 
