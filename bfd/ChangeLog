@@ -1,3 +1,8 @@
+2007-07-26  Michael Snyder  <msnyder@access-company.com>
+
+	* elf.c (_bfd_elf_get_synthetic_symtab): Remove meaningless 
+	pointer increment.
+
 2007-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_fix_symbol_flags): Remove unnecessary
