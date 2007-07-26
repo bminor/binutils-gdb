@@ -2946,10 +2946,10 @@ already_linked_newfunc (struct bfd_hash_entry *entry ATTRIBUTE_UNUSED,
   struct bfd_section_already_linked_hash_entry *ret =
     bfd_hash_allocate (table, sizeof *ret);
 
-  ret->entry = NULL;
-
   if (ret == NULL)
     return ret;
+
+  ret->entry = NULL;
 
   return &ret->root;
 }
