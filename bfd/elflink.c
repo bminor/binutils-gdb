@@ -2368,7 +2368,7 @@ bfd_boolean
 _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 			   struct elf_info_failed *eif)
 {
-  const struct elf_backend_data *bed = NULL;
+  const struct elf_backend_data *bed;
 
   /* If this symbol was mentioned in a non-ELF file, try to set
      DEF_REGULAR and REF_REGULAR correctly.  This is the only way to
@@ -2429,13 +2429,10 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
     }
 
   /* Backend specific symbol fixup.  */
-  if (elf_hash_table (eif->info)->dynobj)
-    {
-      bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
-      if (bed->elf_backend_fixup_symbol
-	  && !(*bed->elf_backend_fixup_symbol) (eif->info, h))
-	return FALSE;
-    }
+  bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
+  if (bed->elf_backend_fixup_symbol
+      && !(*bed->elf_backend_fixup_symbol) (eif->info, h))
+    return FALSE;
 
   /* If this is a final link, and the symbol was defined as a common
      symbol in a regular object file, and there was no definition in
@@ -2473,11 +2470,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
      hide it from the dynamic linker.  */
   if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
       && h->root.type == bfd_link_hash_undefweak)
-    {
-      const struct elf_backend_data *bed;
-      bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
-      (*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
-    }
+    (*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
 
   /* If this is a weak defined symbol in a dynamic object, and we know
      the real definition in the dynamic object, copy interesting flags

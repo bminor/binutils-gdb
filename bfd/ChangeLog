@@ -1,5 +1,8 @@
 2007-07-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (_bfd_elf_fix_symbol_flags): Remove unnecessary
+	check on dynobj.  Remove bed shadow.
+
 	* srec.c (srec_get_section_contents): Return immediately on
 	count zero.  Check that offset and count are within section.
 	* libbfd.c (_bfd_generic_get_section_contents): Check that
