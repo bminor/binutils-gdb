@@ -1,3 +1,7 @@
+2007-07-26  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2007-07-26  Maciej W. Rozycki  <macro@mips.com>
 
 	* Makefile.in (MAKEHTMLFLAGS): Also search the current directory
