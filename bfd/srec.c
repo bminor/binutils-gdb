@@ -428,6 +428,11 @@ srec_scan (bfd *abfd)
 		  symval <<= 4;
 		  symval += NIBBLE (c);
 		  c = srec_get_byte (abfd, &error);
+		  if (c == EOF)
+		    {
+		      srec_bad_byte (abfd, lineno, c, error);
+		      goto error_return;
+		    }
 		}
 
 	      if (! srec_new_symbol (abfd, symname, symval))

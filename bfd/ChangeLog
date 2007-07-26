@@ -1,5 +1,8 @@
 2007-07-26  Michael Snyder  <msnyder@access-company.com>
 
+	* srec.c (srec_scan): Check for EOF (critical because return value
+	will be used as array index).
+
 	* coffgen.c (_bfd_coff_read_internal_relocs): If internal_relocs
 	are not to be cached, free the temporary buffer.
 
