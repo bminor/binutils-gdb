@@ -86,6 +86,9 @@ struct dwarf2_debug
   /* A list of all previously read comp_units.  */
   struct comp_unit *all_comp_units;
 
+  /* Last comp unit in list above.  */
+  struct comp_unit *last_comp_unit;
+
   /* The next unread compilation unit within the .debug_info section.
      Zero indicates that the .debug_info section has not been loaded
      into a buffer yet.  */
@@ -139,6 +142,27 @@ struct dwarf2_debug
 
   /* Array of loadable sections.  */
   struct loadable_section *loadable_sections;
+
+  /* Number of times find_line is called.  This is used in
+     the heuristic for enabling the info hash tables.  */
+  int info_hash_count;
+
+#define STASH_INFO_HASH_TRIGGER    100
+
+  /* Hash table mapping symbol names to function infos.  */
+  struct info_hash_table *funcinfo_hash_table;
+
+  /* Hash table mapping symbol names to variable infos.  */
+  struct info_hash_table *varinfo_hash_table;
+
+  /* Head of comp_unit list in the last hash table update.  */
+  struct comp_unit *hash_units_head;
+
+  /* Status of info hash.  */
+  int info_hash_status;
+#define STASH_INFO_HASH_OFF        0
+#define STASH_INFO_HASH_ON         1
+#define STASH_INFO_HASH_DISABLED   2
 };
 
 struct arange
@@ -155,6 +179,10 @@ struct comp_unit
 {
   /* Chain the previously read compilation units.  */
   struct comp_unit *next_unit;
+
+  /* Likewise, chain the compilation unit read after this one.
+     The comp units are stored in reversed reading order.  */
+  struct comp_unit *prev_unit;
 
   /* Keep the bfd convenient (for memory allocation).  */
   bfd *abfd;
@@ -212,6 +240,9 @@ struct comp_unit
   /* Base address for this unit - from DW_AT_low_pc attribute of
      DW_TAG_compile_unit DIE */
   bfd_vma base_address;
+
+  /* TRUE if symbols are cached in hash table for faster lookup by name.  */
+  bfd_boolean cached;
 };
 
 /* This data structure holds the information of an abbrev.  */
@@ -237,6 +268,126 @@ struct attr_abbrev
 #ifndef ATTR_ALLOC_CHUNK
 #define ATTR_ALLOC_CHUNK 4
 #endif
+
+/* Variable and function hash tables.  This is used to speed up look-up
+   in lookup_symbol_in_var_table() and lookup_symbol_in_function_table().
+   In order to share code between variable and function infos, we use
+   a list of untyped pointer for all variable/function info associated with
+   a symbol.  We waste a bit of memory for list with one node but that
+   simplifies the code.  */
+
+struct info_list_node
+{
+  struct info_list_node *next;
+  void *info;
+};
+
+/* Info hash entry.  */
+struct info_hash_entry
+{
+  struct bfd_hash_entry root;
+  struct info_list_node *head;
+};
+
+struct info_hash_table
+{
+  struct bfd_hash_table base;
+};
+
+/* Function to create a new entry in info hash table. */
+
+static struct bfd_hash_entry *
+info_hash_table_newfunc (struct bfd_hash_entry *entry,
+			 struct bfd_hash_table *table,
+			 const char *string)
+{
+  struct info_hash_entry *ret = (struct info_hash_entry *) entry;
+
+  /* Allocate the structure if it has not already been allocated by a
+     derived class.  */
+  if (ret == NULL)
+    {
+      ret = bfd_hash_allocate (table, sizeof (* ret));
+      if (ret == NULL)
+	return NULL;
+    }
+
+  /* Call the allocation method of the base class.  */
+  ret = ((struct info_hash_entry *)
+         bfd_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
+
+  /* Initialize the local fields here.  */
+  if (ret)
+    ret->head = NULL;
+
+  return (struct bfd_hash_entry *) ret;
+}
+
+/* Function to create a new info hash table.  It returns a pointer to the
+   newly created table or NULL if there is any error.  We need abfd
+   solely for memory allocation.  */
+
+static struct info_hash_table *
+create_info_hash_table (bfd *abfd)
+{
+  struct info_hash_table *hash_table;
+
+  hash_table = bfd_alloc (abfd, sizeof (struct info_hash_table));
+  if (!hash_table)
+    return hash_table;
+
+  if (!bfd_hash_table_init (&hash_table->base, info_hash_table_newfunc,
+			    sizeof (struct info_hash_entry)))
+    {
+      bfd_release (abfd, hash_table);
+      return NULL;
+    }
+
+  return hash_table;
+}
+
+/* Insert an info entry into an info hash table.  We do not check of
+   duplicate entries.  Also, the caller need to guarantee that the
+   right type of info in inserted as info is passed as a void* pointer.
+   This function returns true if there is no error.  */
+
+static bfd_boolean
+insert_info_hash_table (struct info_hash_table *hash_table,
+			const char *key,
+			void *info,
+			bfd_boolean copy_p)
+{
+  struct info_hash_entry *entry;
+  struct info_list_node *node;
+
+  entry = (struct info_hash_entry*) bfd_hash_lookup (&hash_table->base,
+						     key, TRUE, copy_p);
+  if (!entry)
+    return FALSE;
+
+  node = bfd_hash_allocate (&hash_table->base, sizeof (*node));
+  if (!node)
+    return FALSE;
+
+  node->info = info;
+  node->next = entry->head;
+  entry->head = node;
+
+  return TRUE;
+}
+
+/* Look up an info entry list from an info hash table.  Return NULL
+   if there is none. */
+
+static struct info_list_node *
+lookup_info_hash_table (struct info_hash_table *hash_table, const char *key)
+{
+  struct info_hash_entry *entry;
+
+  entry = (struct info_hash_entry*) bfd_hash_lookup (&hash_table->base, key,
+						     FALSE, FALSE);
+  return entry ? entry->head : NULL;
+}
 
 /* VERBATIM
    The following function up to the END VERBATIM mark are
@@ -1710,6 +1861,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  func->tag = abbrev->tag;
 	  func->prev_func = unit->function_table;
 	  unit->function_table = func;
+	  BFD_ASSERT (!unit->cached);
 
 	  if (func->tag == DW_TAG_inlined_subroutine)
 	    for (i = nesting_level - 1; i >= 1; i--)
@@ -1731,6 +1883,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	      var->stack = 1;
 	      var->prev_var = unit->variable_table;
 	      unit->variable_table = var;
+	      BFD_ASSERT (!unit->cached);
 	    }
 
 	  /* No inline function in scope at this nesting level.  */
@@ -2125,21 +2278,13 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
   return line_p || func_p;
 }
 
-/* If UNIT contains SYM at ADDR, set the output parameters to the
-   values for the line containing SYM.  The output parameters,
-   FILENAME_PTR, and LINENUMBER_PTR, are pointers to the objects to be
-   filled in.
-
-   Return TRUE if UNIT contains SYM, and no errors were encountered;
+/* Check to see if line info is already decoded in a comp_unit.
+   If not, decode it.  Returns TRUE if no errors were encountered;
    FALSE otherwise.  */
 
 static bfd_boolean
-comp_unit_find_line (struct comp_unit *unit,
-		     asymbol *sym,
-		     bfd_vma addr,
-		     const char **filename_ptr,
-		     unsigned int *linenumber_ptr,
-		     struct dwarf2_debug *stash)
+comp_unit_maybe_decode_line_info (struct comp_unit *unit,
+				  struct dwarf2_debug *stash)
 {
   if (unit->error)
     return FALSE;
@@ -2168,14 +2313,131 @@ comp_unit_find_line (struct comp_unit *unit,
 	}
     }
 
+  return TRUE;
+}
+
+/* If UNIT contains SYM at ADDR, set the output parameters to the
+   values for the line containing SYM.  The output parameters,
+   FILENAME_PTR, and LINENUMBER_PTR, are pointers to the objects to be
+   filled in.
+
+   Return TRUE if UNIT contains SYM, and no errors were encountered;
+   FALSE otherwise.  */
+
+static bfd_boolean
+comp_unit_find_line (struct comp_unit *unit,
+		     asymbol *sym,
+		     bfd_vma addr,
+		     const char **filename_ptr,
+		     unsigned int *linenumber_ptr,
+		     struct dwarf2_debug *stash)
+{
+  if (!comp_unit_maybe_decode_line_info (unit, stash))
+    return FALSE;
+
   if (sym->flags & BSF_FUNCTION)
     return lookup_symbol_in_function_table (unit, sym, addr,
 					    filename_ptr,
 					    linenumber_ptr);
-  else
-    return lookup_symbol_in_variable_table (unit, sym, addr,
-					    filename_ptr,
-					    linenumber_ptr);
+
+  return lookup_symbol_in_variable_table (unit, sym, addr,
+					  filename_ptr,
+					  linenumber_ptr);
+}
+
+static struct funcinfo *
+reverse_funcinfo_list (struct funcinfo *head)
+{
+  struct funcinfo *rhead;
+  struct funcinfo *temp;
+
+  for (rhead = NULL; head; head = temp)
+    {
+      temp = head->prev_func;
+      head->prev_func = rhead;
+      rhead = head;
+    }
+  return rhead;
+}
+
+static struct varinfo *
+reverse_varinfo_list (struct varinfo *head)
+{
+  struct varinfo *rhead;
+  struct varinfo *temp;
+
+  for (rhead = NULL; head; head = temp)
+    {
+      temp = head->prev_var;
+      head->prev_var = rhead;
+      rhead = head;
+    }
+  return rhead;
+}
+
+/* Extract all interesting funcinfos and varinfos of a compilation
+   unit into hash tables for faster lookup.  Returns TRUE if no
+   errors were enountered; FALSE otherwise.  */
+
+static bfd_boolean
+comp_unit_hash_info (struct dwarf2_debug *stash,
+		     struct comp_unit *unit,
+		     struct info_hash_table *funcinfo_hash_table,
+		     struct info_hash_table *varinfo_hash_table)
+{
+  struct funcinfo* each_func;
+  struct varinfo* each_var;
+  bfd_boolean okay = TRUE;
+
+  BFD_ASSERT (stash->info_hash_status != STASH_INFO_HASH_DISABLED);
+
+  if (!comp_unit_maybe_decode_line_info (unit, stash))
+    return FALSE;
+
+  BFD_ASSERT (!unit->cached);
+
+  /* To preserve the original search order, we went to visit the function
+     infos in the reversed order of the list.  However, making the list
+     bi-directional use quite a bit of extra memory.  So we reverse
+     the list first, traverse the list in the now reversed order and
+     finally reverse the list again to get back the original order.  */
+  unit->function_table = reverse_funcinfo_list (unit->function_table);
+  for (each_func = unit->function_table;
+       each_func && okay;
+       each_func = each_func->prev_func)
+    {
+      /* Skip nameless functions. */
+      if (each_func->name)
+	/* There is no need to copy name string into hash table as
+	   name string is either in the dwarf string buffer or
+	   info in the stash.  */
+	okay = insert_info_hash_table (funcinfo_hash_table, each_func->name,
+				       (void*) each_func, FALSE);
+    }
+  unit->function_table = reverse_funcinfo_list (unit->function_table);
+  if (!okay)
+    return FALSE;
+
+  /* We do the same for variable infos.  */
+  unit->variable_table = reverse_varinfo_list (unit->variable_table);
+  for (each_var = unit->variable_table;
+       each_var && okay;
+       each_var = each_var->prev_var)
+    {
+      /* Skip stack vars and vars with no files or names.  */
+      if (each_var->stack == 0
+	  && each_var->file != NULL
+	  && each_var->name != NULL)
+	/* There is no need to copy name string into hash table as
+	   name string is either in the dwarf string buffer or
+	   info in the stash.  */
+	okay = insert_info_hash_table (varinfo_hash_table, each_var->name,
+				       (void*) each_var, FALSE);
+    }
+
+  unit->variable_table = reverse_varinfo_list (unit->variable_table);
+  unit->cached = TRUE;
+  return okay;
 }
 
 /* Locate a section in a BFD containing debugging info.  The search starts
@@ -2300,6 +2562,231 @@ place_sections (bfd *abfd, struct dwarf2_debug *stash)
     }
 
   return TRUE;
+}
+
+/* Look up a funcinfo by name using the given info hash table.  If found,
+   also update the locations pointed to by filename_ptr and linenumber_ptr.
+
+   This function returns TRUE if a funcinfo that matches the given symbol
+   and address is found with any error; otherwise it returns FALSE.  */
+
+static bfd_boolean
+info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
+			   asymbol *sym,
+			   bfd_vma addr,
+			   const char **filename_ptr,
+			   unsigned int *linenumber_ptr)
+{
+  struct funcinfo* each_func;
+  struct funcinfo* best_fit = NULL;
+  struct info_list_node *node;
+  struct arange *arange;
+  const char *name = bfd_asymbol_name (sym);
+  asection *sec = bfd_get_section (sym);
+
+  for (node = lookup_info_hash_table (hash_table, name);
+       node;
+       node = node->next)
+    {
+      each_func = node->info;
+      for (arange = &each_func->arange;
+	   arange;
+	   arange = arange->next)
+	{
+	  if ((!each_func->sec || each_func->sec == sec)
+	      && addr >= arange->low
+	      && addr < arange->high
+	      && (!best_fit
+		  || ((arange->high - arange->low)
+		      < (best_fit->arange.high - best_fit->arange.low))))
+	    best_fit = each_func;
+	}
+    }
+
+  if (best_fit)
+    {
+      best_fit->sec = sec;
+      *filename_ptr = best_fit->file;
+      *linenumber_ptr = best_fit->line;
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+/* Look up a varinfo by name using the given info hash table.  If found,
+   also update the locations pointed to by filename_ptr and linenumber_ptr.
+
+   This function returns TRUE if a varinfo that matches the given symbol
+   and address is found with any error; otherwise it returns FALSE.  */
+
+static bfd_boolean
+info_hash_lookup_varinfo (struct info_hash_table *hash_table,
+			  asymbol *sym,
+			  bfd_vma addr,
+			  const char **filename_ptr,
+			  unsigned int *linenumber_ptr)
+{
+  const char *name = bfd_asymbol_name (sym);
+  asection *sec = bfd_get_section (sym);
+  struct varinfo* each;
+  struct info_list_node *node;
+
+  for (node = lookup_info_hash_table (hash_table, name);
+       node;
+       node = node->next)
+    {
+      each = node->info;
+      if (each->addr == addr
+	  && (!each->sec || each->sec == sec))
+	{
+	  each->sec = sec;
+	  *filename_ptr = each->file;
+	  *linenumber_ptr = each->line;
+	  return TRUE;
+	}
+    }
+
+  return FALSE;
+}
+
+/* Update the funcinfo and varinfo info hash tables if they are
+   not up to date.  Returns TRUE if there is no error; otherwise
+   returns FALSE and disable the info hash tables.  */
+
+static bfd_boolean
+stash_maybe_update_info_hash_tables (struct dwarf2_debug *stash)
+{
+  struct comp_unit *each;
+
+  /* Exit if hash tables are up-to-date.  */
+  if (stash->all_comp_units == stash->hash_units_head)
+    return TRUE;
+
+  if (stash->hash_units_head)
+    each = stash->hash_units_head->prev_unit;
+  else
+    each = stash->last_comp_unit;
+
+  while (each)
+    {
+      if (!comp_unit_hash_info (stash, each, stash->funcinfo_hash_table,
+				stash->varinfo_hash_table))
+	{
+	  stash->info_hash_status = STASH_INFO_HASH_DISABLED;
+	  return FALSE;
+	}
+      each = each->prev_unit;
+    }
+
+  stash->hash_units_head = stash->all_comp_units;
+  return TRUE;
+}
+
+/* Check consistency of info hash tables.  This is for debugging only. */
+
+static void ATTRIBUTE_UNUSED
+stash_verify_info_hash_table (struct dwarf2_debug *stash)
+{
+  struct comp_unit *each_unit;
+  struct funcinfo *each_func;
+  struct varinfo *each_var;
+  struct info_list_node *node;
+  bfd_boolean found;
+
+  for (each_unit = stash->all_comp_units;
+       each_unit;
+       each_unit = each_unit->next_unit)
+    {
+      for (each_func = each_unit->function_table;
+	   each_func;
+	   each_func = each_func->prev_func)
+	{
+	  if (!each_func->name)
+	    continue;
+	  node = lookup_info_hash_table (stash->funcinfo_hash_table,
+					 each_func->name);
+	  BFD_ASSERT (node);
+	  found = FALSE;
+	  while (node && !found)
+	    {
+	      found = node->info == each_func;
+	      node = node->next;
+	    }
+	  BFD_ASSERT (found);
+	}
+
+      for (each_var = each_unit->variable_table;
+	   each_var;
+	   each_var = each_var->prev_var)
+	{
+	  if (!each_var->name || !each_var->file || each_var->stack)
+	    continue;
+	  node = lookup_info_hash_table (stash->varinfo_hash_table,
+					 each_var->name);
+	  BFD_ASSERT (node);
+	  found = FALSE;
+	  while (node && !found)
+	    {
+	      found = node->info == each_var;
+	      node = node->next;
+	    }
+	  BFD_ASSERT (found);
+	}
+    }
+}
+
+/* Check to see if we want to enable the info hash tables, which consume
+   quite a bit of memory.  Currently we only check the number times
+   bfd_dwarf2_find_line is called.  In the future, we may also want to
+   take the number of symbols into account.  */
+
+static void
+stash_maybe_enable_info_hash_tables (bfd *abfd, struct dwarf2_debug *stash)
+{
+  BFD_ASSERT (stash->info_hash_status == STASH_INFO_HASH_OFF);
+
+  if (stash->info_hash_count++ < STASH_INFO_HASH_TRIGGER)
+    return;
+
+  /* FIXME: Maybe we should check the reduce_memory_overheads
+     and optimize fields in the bfd_link_info structure ?  */
+
+  /* Create hash tables.  */
+  stash->funcinfo_hash_table = create_info_hash_table (abfd);
+  stash->varinfo_hash_table = create_info_hash_table (abfd);
+  if (!stash->funcinfo_hash_table || !stash->varinfo_hash_table)
+    {
+      /* Turn off info hashes if any allocation above fails.  */
+      stash->info_hash_status = STASH_INFO_HASH_DISABLED;
+      return;
+    }
+  /* We need a forced update so that the info hash tables will
+     be created even though there is no compilation unit.  That
+     happens if STASH_INFO_HASH_TRIGGER is 0.  */
+  stash_maybe_update_info_hash_tables (stash);
+  stash->info_hash_status = STASH_INFO_HASH_ON;
+}
+
+/* Find the file and line associated with a symbol and address using the
+   info hash tables of a stash. If there is a match, the function returns
+   TRUE and update the locations pointed to by filename_ptr and linenumber_ptr;
+   otherwise it returns FALSE.  */
+
+static bfd_boolean
+stash_find_line_fast (struct dwarf2_debug *stash,
+		      asymbol *sym,
+		      bfd_vma addr,
+		      const char **filename_ptr,
+		      unsigned int *linenumber_ptr)
+{
+  BFD_ASSERT (stash->info_hash_status == STASH_INFO_HASH_ON);
+
+  if (sym->flags & BSF_FUNCTION)
+    return info_hash_lookup_funcinfo (stash->funcinfo_hash_table, sym, addr,
+				      filename_ptr, linenumber_ptr);
+  return info_hash_lookup_varinfo (stash->varinfo_hash_table, sym, addr,
+				   filename_ptr, linenumber_ptr);
 }
 
 /* Find the source code location of SYMBOL.  If SYMBOL is NULL
@@ -2468,23 +2955,53 @@ find_line (bfd *abfd,
   stash->inliner_chain = NULL;
 
   /* Check the previously read comp. units first.  */
-  for (each = stash->all_comp_units; each; each = each->next_unit)
+  if (do_line)
     {
-      if (do_line)
-	found = (((symbol->flags & BSF_FUNCTION) == 0
-		  || comp_unit_contains_address (each, addr))
-		 && comp_unit_find_line (each, symbol, addr,
-					 filename_ptr, linenumber_ptr,
-					 stash));
+      /* The info hash tables use quite a bit of memory.  We may not want to
+	 always use them.  We use some heuristics to decide if and when to
+	 turn it on.  */
+      if (stash->info_hash_status == STASH_INFO_HASH_OFF)
+	stash_maybe_enable_info_hash_tables (abfd, stash);
+
+      /* Keep info hash table up to date if they are available.  Note that we
+	 may disable the hash tables if there is any error duing update. */
+      if (stash->info_hash_status == STASH_INFO_HASH_ON)
+	stash_maybe_update_info_hash_tables (stash);
+
+      if (stash->info_hash_status == STASH_INFO_HASH_ON)
+	{
+	  found = stash_find_line_fast (stash, symbol, addr, filename_ptr,
+					linenumber_ptr);
+	  if (found)
+	    goto done;
+	}
       else
-	found = (comp_unit_contains_address (each, addr)
-		 && comp_unit_find_nearest_line (each, addr,
-						 filename_ptr,
-						 functionname_ptr,
-						 linenumber_ptr,
-						 stash));
-      if (found)
-	goto done;
+	{
+	  /* Check the previously read comp. units first.  */
+	  for (each = stash->all_comp_units; each; each = each->next_unit)
+	    if ((symbol->flags & BSF_FUNCTION) == 0
+		|| comp_unit_contains_address (each, addr))
+	      {
+		found = comp_unit_find_line (each, symbol, addr, filename_ptr,
+					     linenumber_ptr, stash);
+		if (found)
+		  goto done;
+	      }
+	}
+    }
+  else
+    {
+      for (each = stash->all_comp_units; each; each = each->next_unit)
+	{
+	  found = (comp_unit_contains_address (each, addr)
+		   && comp_unit_find_nearest_line (each, addr,
+						   filename_ptr,
+						   functionname_ptr,
+						   linenumber_ptr,
+						   stash));
+	  if (found)
+	    goto done;
+	}
     }
 
   /* The DWARF2 spec says that the initial length field, and the
@@ -2551,6 +3068,11 @@ find_line (bfd *abfd,
 
 	  if (each)
 	    {
+	      if (stash->all_comp_units)
+		stash->all_comp_units->prev_unit = each;
+	      else
+		stash->last_comp_unit = each;
+
 	      each->next_unit = stash->all_comp_units;
 	      stash->all_comp_units = each;
 

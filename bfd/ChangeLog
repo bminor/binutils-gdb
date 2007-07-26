@@ -1,3 +1,28 @@
+2007-07-26  Doug Kwan  <dougkwan@google.com>
+ 
+	Speed up bfd_dwarf2_find_line.
+	* dwarf2.c (struct dwarf2_debug): Add new fields to support function
+	and variable info hash tables. Add last_comp_unit, info_hash_count,
+	funcinfo_hash_table, varinfo_hash_table, hash_units_head.
+	(struct comp_unit): Add prev_unit, cached.
+	(struct info_list_node, struct info_hash_entry,
+	struct info_hash_table): New.
+	(info_hash_table_newfunc, create_info_hash_table,
+	insert_info_hash_table, lookup_info_hash_table): New functions
+	implementing function and variable info hash tables.
+	(scan_unit_for_symbols): Add checks to make sure hash tables are
+	consistent with compilation units.
+	(comp_unit_maybe_decode_line_info): New function.
+	(comp_unit_find_line): Use comp_unit_maybe_decode_line_info.
+	(reverse_funcinfo_list, reverse_varinfo_list, comp_unit_hash_info,
+	info_hash_lookup_funcinfo, info_hash_lookup_varinfo,
+	stash_maybe_update_info_hash_table, stash_verify_info_hash_table,
+	stash_maybe_enable_info_hash_tables, stash_find_line_fast): New
+	functions. Make use of info hash tables to speed up
+	bfd_dwarf2_find_line.
+	(find_line): Use hash table for faster lookup if it is turned on.
+	Also add code to maintain bi-directional link in comp units.
+
 2007-07-25  Michael Snyder  <msnyder@access-company.com>
 
 	* coffgen.c (_bfd_coff_get_external_symbols): Nothing to be done
