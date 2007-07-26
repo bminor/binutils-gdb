@@ -1,5 +1,10 @@
 2007-07-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* srec.c (srec_get_section_contents): Return immediately on
+	count zero.  Check that offset and count are within section.
+	* libbfd.c (_bfd_generic_get_section_contents): Check that
+	offset + count does not overflow.
+
 	* srec.c (srec_canonicalize_symtab): Don't alloc when symcount
 	is zero.  Correct return value on error.
 	* mmo.c (mmo_canonicalize_symtab): Likewise.

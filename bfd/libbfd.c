@@ -820,7 +820,8 @@ _bfd_generic_get_section_contents (bfd *abfd,
     return TRUE;
 
   sz = section->rawsize ? section->rawsize : section->size;
-  if (offset + count > sz)
+  if (offset + count < count
+      || offset + count > sz)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
