@@ -389,6 +389,8 @@ first_phase (bfd *abfd, int type, char *src)
 	    return FALSE;
 	  memcpy (n, sym, len + 1);
 	  section = bfd_make_section (abfd, n);
+	  if (section == NULL)
+	    return FALSE;
 	}
       while (*src)
 	{
