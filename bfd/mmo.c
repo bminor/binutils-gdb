@@ -2097,7 +2097,7 @@ mmo_canonicalize_symtab (bfd *abfd, asymbol **alocation)
   unsigned int i;
 
   csymbols = abfd->tdata.mmo_data->csymbols;
-  if (csymbols == NULL)
+  if (csymbols == NULL && symcount != 0)
     {
       asymbol *c;
       struct mmo_symbol *s;
@@ -2119,8 +2119,8 @@ mmo_canonicalize_symtab (bfd *abfd, asymbol **alocation)
 	     mmo_sort_mmo_symbols);
 
       csymbols = (asymbol *) bfd_alloc (abfd, symcount * sizeof (asymbol));
-      if (csymbols == NULL && symcount != 0)
-	return FALSE;
+      if (csymbols == NULL)
+	return -1;
       abfd->tdata.mmo_data->csymbols = csymbols;
 
       for (msp = (struct mmo_symbol **) alocation, c = csymbols;

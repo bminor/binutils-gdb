@@ -169,7 +169,7 @@ binary_canonicalize_symtab (bfd *abfd, asymbol **alocation)
 
   syms = bfd_alloc (abfd, amt);
   if (syms == NULL)
-    return 0;
+    return -1;
 
   /* Start symbol.  */
   syms[0].the_bfd = abfd;

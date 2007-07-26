@@ -1125,14 +1125,14 @@ srec_canonicalize_symtab (bfd *abfd, asymbol **alocation)
   unsigned int i;
 
   csymbols = abfd->tdata.srec_data->csymbols;
-  if (csymbols == NULL)
+  if (csymbols == NULL && symcount != 0)
     {
       asymbol *c;
       struct srec_symbol *s;
 
       csymbols = bfd_alloc (abfd, symcount * sizeof (asymbol));
-      if (csymbols == NULL && symcount != 0)
-	return 0;
+      if (csymbols == NULL)
+	return -1;
       abfd->tdata.srec_data->csymbols = csymbols;
 
       for (s = abfd->tdata.srec_data->symbols, c = csymbols;

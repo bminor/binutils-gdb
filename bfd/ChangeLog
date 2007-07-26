@@ -1,3 +1,10 @@
+2007-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* srec.c (srec_canonicalize_symtab): Don't alloc when symcount
+	is zero.  Correct return value on error.
+	* mmo.c (mmo_canonicalize_symtab): Likewise.
+	* binary.c (binary_canonicalize_symtab) Correct return on error.
+
 2007-07-26  Thiemo Seufer  <ths@mips.com>
 
 	* bfd.c (_bfd_set_gp_value): Use abort instead of BFD_FAIL.
