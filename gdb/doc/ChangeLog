@@ -1,3 +1,8 @@
+2007-07-25  Maciej W. Rozycki  <macro@mips.com>
+
+	* Makefile.in (MAKEHTMLFLAGS): Also search the current directory
+	for include files.
+
 2007-07-12  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (Server Prefix): New node.  Adapt from existing node

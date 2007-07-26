@@ -49,9 +49,11 @@ MAKEINFO=makeinfo
 # Note that texinfo 4.0's makeinfo --html can only generate a
 # single file, which would be too large, so continue to use
 # texi2html. -sts 2000-03-28
-
+# Contrary to documentation, the current directory is not
+# searched by texi2html, so specify it explicitly.
+# -macro 2007-07-26
 MAKEHTML = texi2html
-MAKEHTMLFLAGS = -menu -split_chapter
+MAKEHTMLFLAGS = -menu -split_chapter -I .
 
 # where to find texi2roff, ditto
 TEXI2ROFF=texi2roff
