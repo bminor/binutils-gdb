@@ -1,5 +1,8 @@
 2007-07-26  Michael Snyder  <msnyder@access-company.com>
 
+	* coffgen.c (_bfd_coff_read_internal_relocs): If internal_relocs
+	are not to be cached, free the temporary buffer.
+
 	* aoutx.h (slurp_reloc_table): Return TRUE if reloc_size == zero
 	or count == zero.
 
