@@ -2948,6 +2948,9 @@ already_linked_newfunc (struct bfd_hash_entry *entry ATTRIBUTE_UNUSED,
 
   ret->entry = NULL;
 
+  if (ret == NULL)
+    return ret;
+
   return &ret->root;
 }
 

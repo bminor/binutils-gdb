@@ -1,5 +1,8 @@
 2007-07-26  Michael Snyder  <msnyder@access-company.com>
 
+	* linker.c (already_linked_newfunc): Check for NULL return from
+	bfd_hash_allocate.
+
 	* coffgen.c (fixup_symbol_value): Guard against null; 
 	bfd_is_com_section will dereference the section pointer.
 
