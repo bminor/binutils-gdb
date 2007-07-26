@@ -1,5 +1,11 @@
+2007-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* reloc.c (bfd_generic_get_relocated_section_contents): Avoid
+	bfd_canonicalize_reloc call when bfd_get_reloc_upper_bound
+	says there are no relocs.
+
 2007-07-26  Doug Kwan  <dougkwan@google.com>
- 
+
 	Speed up bfd_dwarf2_find_line.
 	* dwarf2.c (struct dwarf2_debug): Add new fields to support function
 	and variable info hash tables. Add last_comp_unit, info_hash_count,

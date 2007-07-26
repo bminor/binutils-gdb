@@ -5185,26 +5185,28 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 					    bfd_boolean relocatable,
 					    asymbol **symbols)
 {
-  /* Get enough memory to hold the stuff.  */
   bfd *input_bfd = link_order->u.indirect.section->owner;
   asection *input_section = link_order->u.indirect.section;
-
-  long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
-  arelent **reloc_vector = NULL;
+  long reloc_size;
+  arelent **reloc_vector;
   long reloc_count;
   bfd_size_type sz;
 
+  reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
   if (reloc_size < 0)
-    goto error_return;
-
-  reloc_vector = bfd_malloc (reloc_size);
-  if (reloc_vector == NULL && reloc_size != 0)
-    goto error_return;
+    return NULL;
 
   /* Read in the section.  */
   sz = input_section->rawsize ? input_section->rawsize : input_section->size;
   if (!bfd_get_section_contents (input_bfd, input_section, data, 0, sz))
-    goto error_return;
+    return NULL;
+
+  if (reloc_size == 0)
+    return data;
+
+  reloc_vector = bfd_malloc (reloc_size);
+  if (reloc_vector == NULL)
+    return NULL;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,
@@ -5289,12 +5291,11 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	    }
 	}
     }
-  if (reloc_vector != NULL)
-    free (reloc_vector);
+
+  free (reloc_vector);
   return data;
 
 error_return:
-  if (reloc_vector != NULL)
-    free (reloc_vector);
+  free (reloc_vector);
   return NULL;
 }
