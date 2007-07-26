@@ -567,7 +567,8 @@ fixup_symbol_value (bfd *abfd,
 		    struct internal_syment *syment)
 {
   /* Normalize the symbol flags.  */
-  if (bfd_is_com_section (coff_symbol_ptr->symbol.section))
+  if (coff_symbol_ptr->symbol.section 
+      && bfd_is_com_section (coff_symbol_ptr->symbol.section))
     {
       /* A common symbol is undefined with a value.  */
       syment->n_scnum = N_UNDEF;

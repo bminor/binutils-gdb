@@ -1,5 +1,8 @@
 2007-07-26  Michael Snyder  <msnyder@access-company.com>
 
+	* coffgen.c (fixup_symbol_value): Guard against null; 
+	bfd_is_com_section will dereference the section pointer.
+
 	* syms.c (bfd_decode_symclass): Guard against NULL, since 
 	bfd_is_com_section dereferences the pointer.
 
