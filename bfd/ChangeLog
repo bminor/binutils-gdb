@@ -1,5 +1,8 @@
 2007-07-26  Michael Snyder  <msnyder@access-company.com>
 
+	* aoutx.h (slurp_reloc_table): Return TRUE if reloc_size == zero
+	or count == zero.
+
 	* tekhex.c (first_phase): Check return value for null.
 
 	* elf.c (_bfd_elf_get_synthetic_symtab): Remove meaningless 

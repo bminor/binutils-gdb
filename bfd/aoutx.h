@@ -2280,20 +2280,25 @@ NAME (aout, slurp_reloc_table) (bfd *abfd, sec_ptr asect, asymbol **symbols)
       return FALSE;
     }
 
+  if (reloc_size == 0)
+    return TRUE;		/* Nothing to be done.  */
+
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
     return FALSE;
 
   each_size = obj_reloc_entry_size (abfd);
 
   count = reloc_size / each_size;
+  if (count == 0)
+    return TRUE;		/* Nothing to be done.  */
 
   amt = count * sizeof (arelent);
   reloc_cache = bfd_zmalloc (amt);
-  if (reloc_cache == NULL && count != 0)
+  if (reloc_cache == NULL)
     return FALSE;
 
   relocs = bfd_malloc (reloc_size);
-  if (relocs == NULL && reloc_size != 0)
+  if (relocs == NULL)
     {
       free (reloc_cache);
       return FALSE;
