@@ -1,3 +1,8 @@
+2007-07-25  Michael Snyder  <msnyder@access-company.com>
+
+	* coffgen.c (_bfd_coff_get_external_symbols): Nothing to be done
+	if size == 0; return and avoid possible null pointer issues.
+
 2007-07-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* linker.c (generic_link_add_symbol_list): Warning fix.

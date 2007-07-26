@@ -1444,9 +1444,11 @@ _bfd_coff_get_external_symbols (bfd *abfd)
   symesz = bfd_coff_symesz (abfd);
 
   size = obj_raw_syment_count (abfd) * symesz;
+  if (size == 0)
+    return TRUE;
 
   syms = bfd_malloc (size);
-  if (syms == NULL && size != 0)
+  if (syms == NULL)
     return FALSE;
 
   if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
