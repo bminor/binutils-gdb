@@ -1,3 +1,7 @@
+2007-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config.bfd (x86_64-*-mingw*): Don't include x86_64coff_vec.
+
 2007-07-26  Michael Snyder  <msnyder@access-company.com>
 
 	* coff-i386.c (coff_i386_rtype_to_howto): Guard against null.
