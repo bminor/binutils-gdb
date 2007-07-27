@@ -1739,9 +1739,12 @@ NAME (aout, slurp_symbol_table) (bfd *abfd)
     return FALSE;
 
   cached_size = obj_aout_external_sym_count (abfd);
+  if (cached_size == 0)
+    return TRUE;		/* Nothing to do.  */
+
   cached_size *= sizeof (aout_symbol_type);
   cached = bfd_zmalloc (cached_size);
-  if (cached == NULL && cached_size != 0)
+  if (cached == NULL)
     return FALSE;
 
   /* Convert from external symbol information to internal.  */
