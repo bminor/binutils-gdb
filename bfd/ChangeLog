@@ -1,3 +1,18 @@
+2007-07-26  Michael Snyder  <msnyder@svkmacdonelllnx>
+
+	* linker.c (bfd_section_already_linked_table_insert): Change 
+	return type from void to boolean.  Return FALSE on failure.
+	(_bfd_generic_section_already_linked): Test return value of
+	bfd_section_already_linked_table_insert, call fatal on error.
+
+	* elflink.c (_bfd_elf_section_already_linked): Test return value
+	of bfd_section_already_linked_table_insert, call fatal on error.
+
+	* libbfd-in.h (bfd_section_already_linked_table_insert): Update
+	return type to bfd_boolean.
+
+	* libbfd.h: Regenerate.
+
 2007-07-26  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* archive.c (do_slurp_bsd_armap, do_slurp_coff_armap,

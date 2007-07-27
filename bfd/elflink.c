@@ -12235,7 +12235,8 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section *sec,
 	}
 
   /* This is the first section with this name.  Record it.  */
-  bfd_section_already_linked_table_insert (already_linked_list, sec);
+  if (! bfd_section_already_linked_table_insert (already_linked_list, sec))
+    info->callbacks->einfo (_("%F%P: already_linked_table: %E"));
 }
 
 bfd_boolean

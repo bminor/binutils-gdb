@@ -2923,7 +2923,7 @@ bfd_section_already_linked_table_lookup (const char *name)
 			   TRUE, FALSE));
 }
 
-void
+bfd_boolean
 bfd_section_already_linked_table_insert
   (struct bfd_section_already_linked_hash_entry *already_linked_list,
    asection *sec)
@@ -2933,9 +2933,12 @@ bfd_section_already_linked_table_insert
   /* Allocate the memory from the same obstack as the hash table is
      kept in.  */
   l = bfd_hash_allocate (&_bfd_section_already_linked_table, sizeof *l);
+  if (l == NULL)
+    return FALSE;
   l->sec = sec;
   l->next = already_linked_list->entry;
   already_linked_list->entry = l;
+  return TRUE;
 }
 
 static struct bfd_hash_entry *
@@ -2947,7 +2950,7 @@ already_linked_newfunc (struct bfd_hash_entry *entry ATTRIBUTE_UNUSED,
     bfd_hash_allocate (table, sizeof *ret);
 
   if (ret == NULL)
-    return ret;
+    return NULL;
 
   ret->entry = NULL;
 
@@ -2973,7 +2976,7 @@ bfd_section_already_linked_table_free (void)
 
 void
 _bfd_generic_section_already_linked (bfd *abfd, asection *sec,
-				     struct bfd_link_info *info ATTRIBUTE_UNUSED)
+				     struct bfd_link_info *info)
 {
   flagword flags;
   const char *name;
@@ -3074,7 +3077,8 @@ _bfd_generic_section_already_linked (bfd *abfd, asection *sec,
     }
 
   /* This is the first section with this name.  Record it.  */
-  bfd_section_already_linked_table_insert (already_linked_list, sec);
+  if (! bfd_section_already_linked_table_insert (already_linked_list, sec))
+    info->callbacks->einfo (_("%F%P: already_linked_table: %E"));
 }
 
 /* Convert symbols in excluded output sections to use a kept section.  */
