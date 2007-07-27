@@ -450,7 +450,7 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 {
   reloc_howto_type *howto;
 
-  if (rel->r_type > sizeof (howto_table) / sizeof (howto_table[0]))
+  if (rel->r_type >= sizeof (howto_table) / sizeof (howto_table[0]))
     {
       bfd_set_error (bfd_error_bad_value);
       return NULL;

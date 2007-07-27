@@ -1,5 +1,7 @@
 2007-07-27  Michael Snyder  <msnyder@access-company.com>
 
+	* coff-i386.c (coff_i386_rtype_to_howto): Off by one error.
+
 	* aoutx.h (slurp_symbol_table): Return if count == 0.
 
 	* coffgen.c (_bfd_coff_read_internal_relocs): Return if count is zero.
