@@ -1,3 +1,8 @@
+2007-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/readline.exp (operate_and_get_next): Match the final
+	prompt.
+
 2007-07-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* lib/mi-support.exp (mi_gdb_target_load): Do a "kill" prior

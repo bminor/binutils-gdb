@@ -139,6 +139,9 @@ proc operate_and_get_next {name args} {
     set count [expr {$count + 2}]
   }
 
+  # Match the prompt so the next test starts at the right place.
+  gdb_test "" "" "$name - final prompt"
+
   return 1
 }
 
