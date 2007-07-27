@@ -1,3 +1,8 @@
+2007-07-26  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* archive.c (do_slurp_bsd_armap, do_slurp_coff_armap,
+	bfd_slurp_armap): Improve function comment.
+
 2007-07-26  Michael Snyder  <msnyder@access-company.com>
 
 	* linker.c (already_linked_newfunc): Check for NULL return from

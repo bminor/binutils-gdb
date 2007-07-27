@@ -698,7 +698,8 @@ bfd_generic_archive_p (bfd *abfd)
 /* The size of the string count.  */
 #define BSD_STRING_COUNT_SIZE 4
 
-/* Returns FALSE on error, TRUE otherwise.  */
+/* Read a BSD-style archive symbol table.  Returns FALSE on error,
+   TRUE otherwise.  */
 
 static bfd_boolean
 do_slurp_bsd_armap (bfd *abfd)
@@ -768,7 +769,8 @@ do_slurp_bsd_armap (bfd *abfd)
   return TRUE;
 }
 
-/* Returns FALSE on error, TRUE otherwise.  */
+/* Read a COFF archive symbol table.  Returns FALSE on error, TRUE
+   otherwise.  */
 
 static bfd_boolean
 do_slurp_coff_armap (bfd *abfd)
@@ -895,8 +897,8 @@ release_symdefs:
   return FALSE;
 }
 
-/* This routine can handle either coff-style or bsd-style armaps.
-   Returns FALSE on error, TRUE otherwise */
+/* This routine can handle either coff-style or bsd-style armaps
+   (archive symbol table).  Returns FALSE on error, TRUE otherwise */
 
 bfd_boolean
 bfd_slurp_armap (bfd *abfd)
