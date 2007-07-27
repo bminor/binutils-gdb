@@ -1,3 +1,8 @@
+2007-07-27  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ppc-opc (PPC7450): New.
+	(powerpc_opcodes): Use it in dcba.
+
 2007-07-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (main): Print a newline after copyright notice.

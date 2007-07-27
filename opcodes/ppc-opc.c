@@ -1621,6 +1621,7 @@ extract_tbr (unsigned long insn,
 #define PPC405	PPC403
 #define PPC440	PPC_OPCODE_440
 #define PPC750	PPC
+#define PPC7450 PPC
 #define PPC860	PPC
 #define PPCVEC	PPC_OPCODE_ALTIVEC
 #define	POWER   PPC_OPCODE_POWER
@@ -4130,7 +4131,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "mftgpr",  XRC(31,735,0), XRA_MASK,	POWER6,		{ RT, FRB } },
 
-{ "dcba",    X(31,758),	XRT_MASK,	PPC405 | BOOKE,	{ RA, RB } },
+{ "dcba",    X(31,758),	XRT_MASK,	PPC405 | PPC7450 | BOOKE, { RA, RB } },
 
 { "stfdux",  X(31,759),	X_MASK,		COM,		{ FRS, RAS, RB } },
 
