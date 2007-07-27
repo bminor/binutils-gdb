@@ -50,7 +50,7 @@ runto_main
 gdb_test "break sem_post"
 set test "Continue to main's call of sem_post"
 gdb_test_multiple "continue" "$test" {
-    -re " sem_post .*$gdb_prompt " {
+    -re "Breakpoint .*, .*sem_post .*$gdb_prompt " {
 	pass "$test"
     }
     -re "Program received signal .*$gdb_prompt " {

@@ -1,5 +1,9 @@
 2007-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.threads/staticthreads.exp: Match .*sem_post.
+
+2007-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/readline.exp (operate_and_get_next): Match the final
 	prompt.
 
