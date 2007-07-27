@@ -1,3 +1,8 @@
+2007-07-26  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* readelf.c (process_archive): Also skip Irix6-style archive symbol
+	tables.
+
 2007-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (NUM_ELEM): Remove redundant macro; replace references

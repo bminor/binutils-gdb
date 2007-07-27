@@ -9693,7 +9693,8 @@ process_archive (char *file_name, FILE *file)
       return 1;
     }
 
-  if (const_strneq (arhdr.ar_name, "/               "))
+  if (const_strneq (arhdr.ar_name, "/               ")
+      || const_strneq (arhdr.ar_name, "/SYM64/         "))
     {
       /* This is the archive symbol table.  Skip it.
 	 FIXME: We should have an option to dump it.  */
