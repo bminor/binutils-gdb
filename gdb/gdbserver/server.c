@@ -80,6 +80,8 @@ start_inferior (char *argv[], char *statusptr)
 
   signal_pid = create_inferior (argv[0], argv);
 
+  /* FIXME: we don't actually know at this point that the create
+     actually succeeded.  We won't know that until we wait.  */
   fprintf (stderr, "Process %s created; pid = %ld\n", argv[0],
 	   signal_pid);
   fflush (stderr);
@@ -93,7 +95,8 @@ start_inferior (char *argv[], char *statusptr)
   atexit (restore_old_foreground_pgrp);
 #endif
 
-  /* Wait till we are at 1st instruction in program, return signal number.  */
+  /* Wait till we are at 1st instruction in program, return signal
+     number (assuming success).  */
   return mywait (statusptr, 0);
 }
 
@@ -899,7 +902,9 @@ main (int argc, char *argv[])
       /* Wait till we are at first instruction in program.  */
       signal = start_inferior (&argv[2], &status);
 
-      /* We are now stopped at the first instruction of the target process */
+      /* We are now (hopefully) stopped at the first instruction of
+	 the target process.  This assumes that the target process was
+	 successfully created.  */
 
       /* Don't report shared library events on the initial connection,
 	 even if some libraries are preloaded.  */
@@ -922,6 +927,12 @@ main (int argc, char *argv[])
     {
       fprintf (stderr, "Killing inferior\n");
       kill_inferior ();
+      exit (1);
+    }
+
+  if (status == 'W' || status == 'X')
+    {
+      fprintf (stderr, "No inferior, GDBserver exiting.\n");
       exit (1);
     }
 
