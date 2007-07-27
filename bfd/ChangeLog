@@ -1,5 +1,7 @@
 2007-07-27  Michael Snyder  <msnyder@access-company.com>
 
+	* cofflink.c (coff_link_add_symbols): Return if count is zero.
+
 	* coff-i386.c (coff_i386_rtype_to_howto): Off by one error.
 
 	* aoutx.h (slurp_symbol_table): Return if count == 0.

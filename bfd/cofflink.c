@@ -302,6 +302,11 @@ coff_link_add_symbols (bfd *abfd,
   bfd_byte *esym_end;
   bfd_size_type amt;
 
+  symcount = obj_raw_syment_count (abfd);
+
+  if (symcount == 0)
+    return TRUE;		/* Nothing to do.  */
+
   /* Keep the symbols during this function, in case the linker needs
      to read the generic symbols in order to report an error message.  */
   keep_syms = obj_coff_keep_syms (abfd);
@@ -312,13 +317,11 @@ coff_link_add_symbols (bfd *abfd,
   else
     default_copy = TRUE;
 
-  symcount = obj_raw_syment_count (abfd);
-
   /* We keep a list of the linker hash table entries that correspond
      to particular symbols.  */
   amt = symcount * sizeof (struct coff_link_hash_entry *);
   sym_hash = bfd_zalloc (abfd, amt);
-  if (sym_hash == NULL && symcount != 0)
+  if (sym_hash == NULL)
     goto error_return;
   obj_coff_sym_hashes (abfd) = sym_hash;
 
