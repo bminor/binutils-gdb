@@ -1,3 +1,7 @@
+2007-07-27  Michael Snyder  <msnyder@access-company.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Check for null pointer.
+
 2007-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config.bfd (x86_64-*-mingw*): Don't include x86_64coff_vec.
@@ -473,7 +477,7 @@
 	(elf32_arm_final_link_relocate): Turn call to undefined symbol
 	into a jump to the next instruction.
 
-2007-06-29  Michael Snyder  <msnyder@svkmacdonelllnx>
+2007-06-29  Michael Snyder  <msnyder@access-company.com>
 
 	* bfd.c (bfd_demangle): Plug memory leak (Coverity).
 
