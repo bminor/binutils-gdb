@@ -518,7 +518,8 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
       *addendp -= pe_data(sec->output_section->owner)->pe_opthdr.ImageBase;
     }
 
-  if (rel->r_type == R_SECREL32)
+  BFD_ASSERT (sym != NULL);
+  if (rel->r_type == R_SECREL32 && sym != NULL)
     {
       bfd_vma osect_vma;
 

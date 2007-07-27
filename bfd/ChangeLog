@@ -1,4 +1,6 @@
-2007-07-26  Michael Snyder  <msnyder@svkmacdonelllnx>
+2007-07-26  Michael Snyder  <msnyder@access-company.com>
+
+	* coff-i386.c (coff_i386_rtype_to_howto): Guard against null.
 
 	* linker.c (bfd_section_already_linked_table_insert): Change 
 	return type from void to boolean.  Return FALSE on failure.
