@@ -409,6 +409,9 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
   struct internal_reloc *irel;
   bfd_size_type amt;
 
+  if (sec->reloc_count == 0)
+    return internal_relocs;	/* Nothing to do.  */
+
   if (coff_section_data (abfd, sec) != NULL
       && coff_section_data (abfd, sec)->relocs != NULL)
     {
@@ -425,7 +428,7 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
   if (external_relocs == NULL)
     {
       free_external = bfd_malloc (amt);
-      if (free_external == NULL && sec->reloc_count > 0)
+      if (free_external == NULL)
 	goto error_return;
       external_relocs = free_external;
     }
@@ -439,7 +442,7 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
       amt = sec->reloc_count;
       amt *= sizeof (struct internal_reloc);
       free_internal = bfd_malloc (amt);
-      if (free_internal == NULL && sec->reloc_count > 0)
+      if (free_internal == NULL)
 	goto error_return;
       internal_relocs = free_internal;
     }

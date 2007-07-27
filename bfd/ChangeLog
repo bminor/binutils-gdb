@@ -1,5 +1,7 @@
 2007-07-27  Michael Snyder  <msnyder@access-company.com>
 
+	* coffgen.c (_bfd_coff_read_internal_relocs): Return if count is zero.
+
 	* elf32-i386.c (elf_i386_check_relocs): Check for null pointer.
 
 2007-07-27  H.J. Lu  <hongjiu.lu@intel.com>
