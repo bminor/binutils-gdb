@@ -81,7 +81,7 @@ responsibility among the other maintainers.
   IQ2000	   Stan Cox <scox@redhat.com>
   i860		   Jason Eckhardt <jle@rice.edu>
   ix86		   Alan Modra <amodra@bigpond.net.au>
-  ix86 PE	   Christopher Faylor <cgf@redhat.com>
+  ix86 PE	   Christopher Faylor <me+binutils@cgf.cx>
   ix86 COFF	   DJ Delorie <dj@redhat.com>
   ix86		   H.J. Lu <hjl@gnu.org>
   ix86 INTEL MODE  Jan Beulich <jbeulich@novell.com>
