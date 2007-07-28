@@ -1,3 +1,11 @@
+2007-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/x86-64-opcode.d: Updated.
+	* gas/i386/x86-64-simd-intel.d: Likewise.
+	* gas/i386/x86-64-simd.d: Likewise.
+
+	* gas/i386/x86-64-simd.s: Add movq.
+
 2007-07-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run nops16-1, nops-1-i386-i686, nops-1-k8,

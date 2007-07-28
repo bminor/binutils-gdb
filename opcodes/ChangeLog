@@ -1,3 +1,9 @@
+2007-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (dis386_twobyte): Change "movd" to "movK".
+	(prefix_user_table): Likewise.  Use EXq instead of EXx on
+	"movq".
+
 2007-07-27  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ppc-opc (PPC7450): New.

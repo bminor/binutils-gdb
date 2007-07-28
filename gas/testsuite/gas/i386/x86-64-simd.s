@@ -18,6 +18,8 @@ _start:
 	movlpd 0x12345678(%rip),%xmm1
 	movlps %xmm1,0x12345678(%rip)
 	movlps 0x12345678(%rip),%xmm1
+	movq %xmm1,0x12345678(%rip)
+	movq 0x12345678(%rip),%xmm1
 	movshdup 0x12345678(%rip),%xmm1
 	movsldup 0x12345678(%rip),%xmm1
 	pshufhw $0x90,0x12345678(%rip),%xmm1

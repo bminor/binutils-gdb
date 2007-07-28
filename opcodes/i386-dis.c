@@ -1019,7 +1019,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "packssdw",		{ MX, EM } },
   { PREGRP26 },
   { PREGRP24 },
-  { "movd",		{ MX, Edq } },
+  { "movK",		{ MX, Edq } },
   { PREGRP19 },
   /* 70 */
   { PREGRP22 },
@@ -1988,7 +1988,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ EXx,  XM } },
     { "movq2dq",{ XM, MS } },
-    { "movq",	{ EXx,  XM } },
+    { "movq",	{ EXq, XM } },
     { "movdq2q",{ MX, XS } },
   },
   /* PREGRP22 */
@@ -2000,9 +2000,9 @@ static const struct dis386 prefix_user_table[][4] = {
   },
   /* PREGRP23 */
   {
-    { "movd",	{ Edq, MX } },
-    { "movq",	{ XM, EXx } },
-    { "movd",	{ Edq, XM } },
+    { "movK",	{ Edq, MX } },
+    { "movq",	{ XM, EXq } },
+    { "movK",	{ Edq, XM } },
     { "(bad)",	{ Ed, XM } },
   },
   /* PREGRP24 */
