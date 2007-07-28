@@ -1,3 +1,7 @@
+2007-07-27  Michael Snyder  <msnyder@access-company.com>
+
+	* tui/tui-data.c (tui_alloc_generic_win_info): Wrong arg for sizeof.
+
 2007-07-26  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* MAINTAINERS (Write After Approval): Add myself.

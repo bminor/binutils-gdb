@@ -450,7 +450,7 @@ tui_alloc_generic_win_info (void)
   struct tui_gen_win_info * win;
 
   if ((win = (struct tui_gen_win_info *) xmalloc (
-		     sizeof (struct tui_gen_win_info *))) != (struct tui_gen_win_info *) NULL)
+		     sizeof (struct tui_gen_win_info))) != (struct tui_gen_win_info *) NULL)
     tui_init_generic_part (win);
 
   return win;
