@@ -38,3 +38,35 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 6c 0d 78 56 34 12 	punpcklqdq 0x12345678,%xmm1
 [ 	]*[a-f0-9]+:	66 0f 2e 0d 78 56 34 12 	ucomisd 0x12345678,%xmm1
 [ 	]*[a-f0-9]+:	0f 2e 0d 78 56 34 12 	ucomiss 0x12345678,%xmm1
+[ 	]*[a-f0-9]+:	f2 0f c2 00 00       	cmpeqsd \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f c2 00 00       	cmpeqss \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	66 0f 2a 00          	cvtpi2pd \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	0f 2a 00             	cvtpi2ps \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	0f 2d 00             	cvtps2pi \(%eax\),%mm0
+[ 	]*[a-f0-9]+:	f2 0f 2d 00          	cvtsd2si \(%eax\),%eax
+[ 	]*[a-f0-9]+:	f2 0f 5a 00          	cvtsd2ss \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 5a 00          	cvtss2sd \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 2d 00          	cvtss2si \(%eax\),%eax
+[ 	]*[a-f0-9]+:	f2 0f 5e 00          	divsd  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 5e 00          	divss  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f2 0f 5f 00          	maxsd  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 5f 00          	maxss  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 5d 00          	minss  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 5d 00          	minss  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f2 0f 2b 00          	movntsd %xmm0,\(%eax\)
+[ 	]*[a-f0-9]+:	f3 0f 2b 00          	movntss %xmm0,\(%eax\)
+[ 	]*[a-f0-9]+:	f2 0f 10 00          	movsd  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f2 0f 11 00          	movsd  %xmm0,\(%eax\)
+[ 	]*[a-f0-9]+:	f3 0f 10 00          	movss  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 11 00          	movss  %xmm0,\(%eax\)
+[ 	]*[a-f0-9]+:	f2 0f 59 00          	mulsd  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 59 00          	mulss  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 53 00          	rcpss  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	66 0f 3a 0b 00 00    	roundsd \$0x0,\(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	66 0f 3a 0a 00 00    	roundss \$0x0,\(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 52 00          	rsqrtss \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f2 0f 51 00          	sqrtsd \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 51 00          	sqrtss \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f2 0f 5c 00          	subsd  \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 5c 00          	subss  \(%eax\),%xmm0
+#pass

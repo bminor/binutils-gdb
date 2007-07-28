@@ -33,3 +33,37 @@ _start:
 	punpcklqdq 0x12345678(%rip),%xmm1
 	ucomisd 0x12345678(%rip),%xmm1
 	ucomiss 0x12345678(%rip),%xmm1
+
+	cmpeqsd (%rax),%xmm0
+	cmpeqss (%rax),%xmm0
+	cvtpi2pd (%rax),%xmm0
+	cvtpi2ps (%rax),%xmm0
+	cvtps2pi (%rax),%mm0
+	cvtsd2si (%rax),%eax
+	cvtsd2siq (%rax),%rax
+	cvtsd2ss (%rax),%xmm0
+	cvtss2sd (%rax),%xmm0
+	cvtss2siq (%rax),%rax
+	cvtss2si (%rax),%eax
+	divsd (%rax),%xmm0
+	divss (%rax),%xmm0
+	maxsd (%rax),%xmm0
+	maxss (%rax),%xmm0
+	minss (%rax),%xmm0
+	minss (%rax),%xmm0
+	movntsd %xmm0,(%rax)
+	movntss %xmm0,(%rax)
+	movsd (%rax),%xmm0
+	movsd %xmm0,(%rax)
+	movss (%rax),%xmm0
+	movss %xmm0,(%rax)
+	mulsd (%rax),%xmm0
+	mulss (%rax),%xmm0
+	rcpss (%rax),%xmm0
+	roundsd $0,(%rax),%xmm0
+	roundss $0,(%rax),%xmm0
+	rsqrtss (%rax),%xmm0
+	sqrtsd (%rax),%xmm0
+	sqrtss (%rax),%xmm0
+	subsd (%rax),%xmm0
+	subss (%rax),%xmm0

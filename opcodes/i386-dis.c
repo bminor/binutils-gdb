@@ -207,6 +207,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Edqw { OP_E, dqw_mode }
 #define Edqb { OP_E, dqb_mode }
 #define Edqd { OP_E, dqd_mode }
+#define Eq { OP_E, q_mode }
 #define indirEv { OP_indirE, stack_v_mode }
 #define indirEp { OP_indirE, f_mode }
 #define stackEv { OP_E, stack_v_mode }
@@ -315,7 +316,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXx { OP_EX, x_mode }
 #define MS { OP_MS, v_mode }
 #define XS { OP_XS, v_mode }
-#define EMC { OP_EMC, v_mode }
+#define EMCq { OP_EMC, q_mode }
 #define MXC { OP_MXC, 0 }
 #define VM { OP_VMX, q_mode }
 #define OPSUF { OP_3DNowSuffix, 0 }
@@ -1847,100 +1848,100 @@ static const struct dis386 prefix_user_table[][4] = {
   /* PREGRP1 */
   {
     { "", { XM, EXx, OPSIMD } },	/* See OP_SIMD_SUFFIX.  */
+    { "", { XM, EXd, OPSIMD } },
     { "", { XM, EXx, OPSIMD } },
-    { "", { XM, EXx, OPSIMD } },
-    { "", { XM, EXx, OPSIMD } },
+    { "", { XM, EXq, OPSIMD } },
   },
   /* PREGRP2 */
   {
-    { "cvtpi2ps", { XM, EMC } },
+    { "cvtpi2ps", { XM, EMCq } },
     { "cvtsi2ssY", { XM, Ev } },
-    { "cvtpi2pd", { XM, EMC } },
+    { "cvtpi2pd", { XM, EMCq } },
     { "cvtsi2sdY", { XM, Ev } },
   },
   /* PREGRP3 */
   {
-    { "cvtps2pi", { MXC, EXx } },
-    { "cvtss2siY", { Gv, EXx } },
+    { "cvtps2pi", { MXC, EXq } },
+    { "cvtss2siY", { Gv, EXd } },
     { "cvtpd2pi", { MXC, EXx } },
-    { "cvtsd2siY", { Gv, EXx } },
+    { "cvtsd2siY", { Gv, EXq } },
   },
   /* PREGRP4 */
   {
-    { "cvttps2pi", { MXC, EXx } },
-    { "cvttss2siY", { Gv, EXx } },
+    { "cvttps2pi", { MXC, EXq } },
+    { "cvttss2siY", { Gv, EXd } },
     { "cvttpd2pi", { MXC, EXx } },
-    { "cvttsd2siY", { Gv, EXx } },
+    { "cvttsd2siY", { Gv, EXq } },
   },
   /* PREGRP5 */
   {
     { "divps",	{ XM, EXx } },
-    { "divss",	{ XM, EXx } },
+    { "divss",	{ XM, EXd } },
     { "divpd",	{ XM, EXx } },
-    { "divsd",	{ XM, EXx } },
+    { "divsd",	{ XM, EXq } },
   },
   /* PREGRP6 */
   {
     { "maxps",	{ XM, EXx } },
-    { "maxss",	{ XM, EXx } },
+    { "maxss",	{ XM, EXd } },
     { "maxpd",	{ XM, EXx } },
-    { "maxsd",	{ XM, EXx } },
+    { "maxsd",	{ XM, EXq } },
   },
   /* PREGRP7 */
   {
     { "minps",	{ XM, EXx } },
-    { "minss",	{ XM, EXx } },
+    { "minss",	{ XM, EXd } },
     { "minpd",	{ XM, EXx } },
-    { "minsd",	{ XM, EXx } },
+    { "minsd",	{ XM, EXq } },
   },
   /* PREGRP8 */
   {
     { "movups",	{ XM, EXx } },
-    { "movss",	{ XM, EXx } },
+    { "movss",	{ XM, EXd } },
     { "movupd",	{ XM, EXx } },
-    { "movsd",	{ XM, EXx } },
+    { "movsd",	{ XM, EXq } },
   },
   /* PREGRP9 */
   {
     { "movups",	{ EXx,  XM } },
-    { "movss",	{ EXx,  XM } },
+    { "movss",	{ EXd,  XM } },
     { "movupd",	{ EXx,  XM } },
-    { "movsd",	{ EXx,  XM } },
+    { "movsd",	{ EXq,  XM } },
   },
   /* PREGRP10 */
   {
     { "mulps",	{ XM, EXx } },
-    { "mulss",	{ XM, EXx } },
+    { "mulss",	{ XM, EXd } },
     { "mulpd",	{ XM, EXx } },
-    { "mulsd",	{ XM, EXx } },
+    { "mulsd",	{ XM, EXq } },
   },
   /* PREGRP11 */
   {
     { "rcpps",	{ XM, EXx } },
-    { "rcpss",	{ XM, EXx } },
+    { "rcpss",	{ XM, EXd } },
     { "(bad)",	{ XM, EXx } },
     { "(bad)",	{ XM, EXx } },
   },
   /* PREGRP12 */
   {
     { "rsqrtps",{ XM, EXx } },
-    { "rsqrtss",{ XM, EXx } },
+    { "rsqrtss",{ XM, EXd } },
     { "(bad)",	{ XM, EXx } },
     { "(bad)",	{ XM, EXx } },
   },
   /* PREGRP13 */
   {
     { "sqrtps", { XM, EXx } },
-    { "sqrtss", { XM, EXx } },
+    { "sqrtss", { XM, EXd } },
     { "sqrtpd", { XM, EXx } },
-    { "sqrtsd",	{ XM, EXx } },
+    { "sqrtsd",	{ XM, EXq } },
   },
   /* PREGRP14 */
   {
     { "subps",	{ XM, EXx } },
-    { "subss",	{ XM, EXx } },
+    { "subss",	{ XM, EXd } },
     { "subpd",	{ XM, EXx } },
-    { "subsd",	{ XM, EXx } },
+    { "subsd",	{ XM, EXq } },
   },
   /* PREGRP15 */
   {
@@ -1959,9 +1960,9 @@ static const struct dis386 prefix_user_table[][4] = {
   /* PREGRP17 */
   {
     { "cvtps2pd", { XM, EXq } },
-    { "cvtss2sd", { XM, EXx } },
+    { "cvtss2sd", { XM, EXd } },
     { "cvtpd2ps", { XM, EXx } },
-    { "cvtsd2ss", { XM, EXx } },
+    { "cvtsd2ss", { XM, EXq } },
   },
   /* PREGRP18 */
   {
@@ -2071,9 +2072,9 @@ static const struct dis386 prefix_user_table[][4] = {
   /* PREGRP33 */
   {
     {"movntps", { Ev, XM } },
-    {"movntss", { Ev, XM } },
+    {"movntss", { Ed, XM } },
     {"movntpd", { Ev, XM } },
-    {"movntsd", { Ev, XM } },
+    {"movntsd", { Eq, XM } },
   },
 
   /* PREGRP34 */
@@ -2376,7 +2377,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "roundss", { XM, EXx, Ib } },
+    { "roundss", { XM, EXd, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2384,7 +2385,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "roundsd", { XM, EXx, Ib } },
+    { "roundsd", { XM, EXq, Ib } },
     { "(bad)",	{ XX } },
   },
 

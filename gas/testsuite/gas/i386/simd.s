@@ -31,3 +31,35 @@ _start:
 	punpcklqdq 0x12345678,%xmm1
 	ucomisd 0x12345678,%xmm1
 	ucomiss 0x12345678,%xmm1
+
+	cmpeqsd (%eax),%xmm0
+	cmpeqss (%eax),%xmm0
+	cvtpi2pd (%eax),%xmm0
+	cvtpi2ps (%eax),%xmm0
+	cvtps2pi (%eax),%mm0
+	cvtsd2si (%eax),%eax
+	cvtsd2ss (%eax),%xmm0
+	cvtss2sd (%eax),%xmm0
+	cvtss2si (%eax),%eax
+	divsd (%eax),%xmm0
+	divss (%eax),%xmm0
+	maxsd (%eax),%xmm0
+	maxss (%eax),%xmm0
+	minss (%eax),%xmm0
+	minss (%eax),%xmm0
+	movntsd %xmm0,(%eax)
+	movntss %xmm0,(%eax)
+	movsd (%eax),%xmm0
+	movsd %xmm0,(%eax)
+	movss (%eax),%xmm0
+	movss %xmm0,(%eax)
+	mulsd (%eax),%xmm0
+	mulss (%eax),%xmm0
+	rcpss (%eax),%xmm0
+	roundsd $0,(%eax),%xmm0
+	roundss $0,(%eax),%xmm0
+	rsqrtss (%eax),%xmm0
+	sqrtsd (%eax),%xmm0
+	sqrtss (%eax),%xmm0
+	subsd (%eax),%xmm0
+	subss (%eax),%xmm0
