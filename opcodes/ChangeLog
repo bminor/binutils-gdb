@@ -1,3 +1,10 @@
+2007-07-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4834
+	* i386-dis.c (EXw): New.
+	(prefix_user_table): Updated to use EXw, EXd and EXq for SSE4
+	instructions when appropriated.
+
 2007-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4834

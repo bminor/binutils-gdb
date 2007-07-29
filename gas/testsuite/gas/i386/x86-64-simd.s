@@ -68,6 +68,20 @@ _start:
 	subsd (%rax),%xmm0
 	subss (%rax),%xmm0
 
+	pmovsxbw (%rax),%xmm0
+	pmovsxbd (%rax),%xmm0
+	pmovsxbq (%rax),%xmm0
+	pmovsxwd (%rax),%xmm0
+	pmovsxwq (%rax),%xmm0
+	pmovsxdq (%rax),%xmm0
+	pmovzxbw (%rax),%xmm0
+	pmovzxbd (%rax),%xmm0
+	pmovzxbq (%rax),%xmm0
+	pmovzxwd (%rax),%xmm0
+	pmovzxwq (%rax),%xmm0
+	pmovzxdq (%rax),%xmm0
+	insertps $0x0,(%rax),%xmm0
+
 	.intel_syntax noprefix
 	cvtss2si eax,DWORD PTR [rax]
 	cvtss2si rax,DWORD PTR [rax]

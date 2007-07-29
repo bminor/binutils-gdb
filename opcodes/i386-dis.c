@@ -311,6 +311,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EM { OP_EM, v_mode }
 #define EMd { OP_EM, d_mode }
 #define EMx { OP_EM, x_mode }
+#define EXw { OP_EX, w_mode }
 #define EXd { OP_EX, d_mode }
 #define EXq { OP_EX, q_mode }
 #define EXx { OP_EX, x_mode }
@@ -2153,7 +2154,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxbw", { XM, EXx } },
+    { "pmovsxbw", { XM, EXq } },
     { "(bad)",	{ XX } },
   },
 
@@ -2161,7 +2162,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxbd", { XM, EXx } },
+    { "pmovsxbd", { XM, EXd } },
     { "(bad)",	{ XX } },
   },
 
@@ -2169,7 +2170,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxbq", { XM, EXx } },
+    { "pmovsxbq", { XM, EXw } },
     { "(bad)",	{ XX } },
   },
 
@@ -2177,7 +2178,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxwd", { XM, EXx } },
+    { "pmovsxwd", { XM, EXq } },
     { "(bad)",	{ XX } },
   },
 
@@ -2185,7 +2186,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxwq", { XM, EXx } },
+    { "pmovsxwq", { XM, EXd } },
     { "(bad)",	{ XX } },
   },
 
@@ -2193,7 +2194,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovsxdq", { XM, EXx } },
+    { "pmovsxdq", { XM, EXq } },
     { "(bad)",	{ XX } },
   },
 
@@ -2233,7 +2234,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxbw", { XM, EXx } },
+    { "pmovzxbw", { XM, EXq } },
     { "(bad)",	{ XX } },
   },
 
@@ -2241,7 +2242,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxbd", { XM, EXx } },
+    { "pmovzxbd", { XM, EXd } },
     { "(bad)",	{ XX } },
   },
 
@@ -2249,7 +2250,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxbq", { XM, EXx } },
+    { "pmovzxbq", { XM, EXw } },
     { "(bad)",	{ XX } },
   },
 
@@ -2257,7 +2258,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxwd", { XM, EXx } },
+    { "pmovzxwd", { XM, EXq } },
     { "(bad)",	{ XX } },
   },
 
@@ -2265,7 +2266,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxwq", { XM, EXx } },
+    { "pmovzxwq", { XM, EXd } },
     { "(bad)",	{ XX } },
   },
 
@@ -2273,7 +2274,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pmovzxdq", { XM, EXx } },
+    { "pmovzxdq", { XM, EXq } },
     { "(bad)",	{ XX } },
   },
 
@@ -2457,7 +2458,7 @@ static const struct dis386 prefix_user_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "insertps", { XM, EXx, Ib } },
+    { "insertps", { XM, EXd, Ib } },
     { "(bad)",	{ XX } },
   },
 
