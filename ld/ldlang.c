@@ -1654,13 +1654,14 @@ lang_insert_orphan (asection *s,
 		    case lang_output_section_statement_enum:
 		      if (assign != NULL)
 			where = assign;
+		      break;
 		    case lang_input_statement_enum:
 		    case lang_address_statement_enum:
 		    case lang_target_statement_enum:
 		    case lang_output_statement_enum:
 		    case lang_group_statement_enum:
 		    case lang_afile_asection_pair_statement_enum:
-		      break;
+		      continue;
 		    }
 		  break;
 		}

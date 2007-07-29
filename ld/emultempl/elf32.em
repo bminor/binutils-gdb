@@ -1567,6 +1567,7 @@ output_rel_find (asection *sec, int isdyn)
   lang_output_section_statement_type *lookup;
   lang_output_section_statement_type *last = NULL;
   lang_output_section_statement_type *last_alloc = NULL;
+  lang_output_section_statement_type *last_ro_alloc = NULL;
   lang_output_section_statement_type *last_rel = NULL;
   lang_output_section_statement_type *last_rel_alloc = NULL;
   int rela = sec->name[4] == 'a';
@@ -1601,7 +1602,11 @@ output_rel_find (asection *sec, int isdyn)
       last = lookup;
       if (lookup->bfd_section != NULL
 	  && (lookup->bfd_section->flags & SEC_ALLOC) != 0)
-	last_alloc = lookup;
+	{
+	  last_alloc = lookup;
+	  if ((lookup->bfd_section->flags & SEC_READONLY) != 0)
+	    last_ro_alloc = lookup;
+	}
     }
 
   if (last_rel_alloc)
@@ -1609,6 +1614,9 @@ output_rel_find (asection *sec, int isdyn)
 
   if (last_rel)
     return last_rel;
+
+  if (last_ro_alloc)
+    return last_ro_alloc;
 
   if (last_alloc)
     return last_alloc;
