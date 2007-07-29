@@ -63,3 +63,7 @@ _start:
 	sqrtss (%eax),%xmm0
 	subsd (%eax),%xmm0
 	subss (%eax),%xmm0
+
+	.intel_syntax noprefix
+	cvtss2si eax,DWORD PTR [eax]
+	cvtsd2si eax,QWORD PTR [eax]

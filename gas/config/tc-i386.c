@@ -3164,10 +3164,21 @@ check_long_reg (void)
     else if ((i.types[op] & Reg64) != 0
 	     && (i.tm.operand_types[op] & (Reg32 | Acc)) != 0)
       {
-	as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
-		register_prefix, i.op[op].regs->reg_name,
-		i.suffix);
-	return 0;
+	if (intel_syntax
+	    && i.tm.base_opcode == 0xf30f2d
+	    && (i.types[0] & RegXMM) == 0)
+	  {
+	    /* cvtss2si converts DWORD memory to Reg64.  We want
+	       REX byte. */
+	    i.suffix = QWORD_MNEM_SUFFIX;
+	  }
+	else
+	  {
+	    as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+		    register_prefix, i.op[op].regs->reg_name,
+		    i.suffix);
+	    return 0;
+	  }
       }
   return 1;
 }
@@ -3191,16 +3202,26 @@ check_qword_reg (void)
 	return 0;
       }
   /* Warn if the e prefix on a general reg is missing.  */
-    else if (((i.types[op] & Reg16) != 0
-	      || (i.types[op] & Reg32) != 0)
+    else if ((i.types[op] & (Reg16 | Reg32)) != 0
 	     && (i.tm.operand_types[op] & (Reg32 | Acc)) != 0)
       {
 	/* Prohibit these changes in the 64bit mode, since the
 	   lowering is more complicated.  */
-	as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
-		register_prefix, i.op[op].regs->reg_name,
-		i.suffix);
-	return 0;
+	if (intel_syntax
+	    && i.tm.base_opcode == 0xf20f2d
+	    && (i.types[0] & RegXMM) == 0)
+	  {
+	    /* cvtsd2si converts QWORD memory to Reg32.  We don't want
+	       REX byte. */
+	    i.suffix = LONG_MNEM_SUFFIX;
+	  }
+	else
+	  {
+	    as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+		    register_prefix, i.op[op].regs->reg_name,
+		    i.suffix);
+	    return 0;
+	  }
       }
   return 1;
 }

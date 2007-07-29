@@ -73,4 +73,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f3 0f 51 00          	sqrtss \(%rax\),%xmm0
 [ 	]*[a-f0-9]+:	f2 0f 5c 00          	subsd  \(%rax\),%xmm0
 [ 	]*[a-f0-9]+:	f3 0f 5c 00          	subss  \(%rax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 2d 00          	cvtss2si \(%rax\),%eax
+[ 	]*[a-f0-9]+:	f3 48 0f 2d 00       	cvtss2siq \(%rax\),%rax
+[ 	]*[a-f0-9]+:	f2 0f 2d 00          	cvtsd2si \(%rax\),%eax
+[ 	]*[a-f0-9]+:	f2 48 0f 2d 00       	cvtsd2siq \(%rax\),%rax
 #pass

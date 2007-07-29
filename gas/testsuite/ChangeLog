@@ -1,3 +1,14 @@
+2007-07-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/simd.s: Add tests for cvtss2si/cvtsd2si in Intel
+	mode.
+	* gas/i386/x86-64-simd.s: Likewise.
+
+	* gas/i386/simd-intel.d: Updated.
+	* gas/i386/simd.d: Likewise.
+	* gas/i386/x86-64-simd-intel.d: Likewise.
+	* gas/i386/x86-64-simd.d: Likewise.
+
 2007-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4835

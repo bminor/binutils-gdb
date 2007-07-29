@@ -67,3 +67,9 @@ _start:
 	sqrtss (%rax),%xmm0
 	subsd (%rax),%xmm0
 	subss (%rax),%xmm0
+
+	.intel_syntax noprefix
+	cvtss2si eax,DWORD PTR [rax]
+	cvtss2si rax,DWORD PTR [rax]
+	cvtsd2si eax,QWORD PTR [rax]
+	cvtsd2si rax,QWORD PTR [rax]

@@ -1,3 +1,10 @@
+2007-07-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (check_long_reg): Allow cvtss2si to convert
+	DWORD memory to Reg64 in Intel synax.
+	(check_qword_reg): Allow cvtsd2si to convert QWORD memory to
+	Reg32 in Intel syntax.
+
 2007-07-25  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (xtensa_extui_opcode): New.
