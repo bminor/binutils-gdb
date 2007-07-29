@@ -11,7 +11,7 @@
 
 2007-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR binutils/4835
+	PR binutils/4834
 	* gas/i386/simd-intel.d: Updated.
 	* gas/i386/simd.d: Likewise.
 	* gas/i386/x86-64-simd-intel.d: Likewise.

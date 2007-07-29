@@ -1,6 +1,6 @@
 2007-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR binutils/4835
+	PR binutils/4834
 	* i386-dis.c (Eq): New.
 	(EMC): Renamed to ...
 	(EMCq): This.  Use q_mode instead of v_mode.
