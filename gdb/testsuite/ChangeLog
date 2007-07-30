@@ -1,3 +1,8 @@
+2007-07-30  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.base/dump.exp: Force the correct endianness for binary
+	formats not carrying this information.
+
 2007-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.threads/staticthreads.exp: Match .*sem_post.

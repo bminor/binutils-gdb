@@ -34,6 +34,7 @@ set binfile  ${objdir}/${subdir}/${testfile}
 set options  {debug}
 
 set is64bitonly "no"
+set endian "auto"
 
 if [istarget "alpha*-*-*"] then {
     # SREC etc cannot handle 64-bit addresses.  Force the test
@@ -68,6 +69,19 @@ remote_exec build "rm -f intarr1.bin intarr1b.bin intarr1.ihex intarr1.srec inta
 if { ! [ runto checkpoint1 ] } then {
     untested dump.exp
     return -1
+}
+
+# Get the endianness for the later use with endianless formats.
+
+send_gdb "show endian\n"
+gdb_expect {
+    -re ".* (big|little) endian.*$gdb_prompt $" { 
+	set endian $expect_out(1,string) 
+	pass "endianness: $endian"
+    }
+    default {
+	fail "(timeout) getting target endianness"
+    }
 }
 
 # Now generate some dump files.
@@ -189,6 +203,18 @@ make_dump_file \
 gdb_exit
 gdb_start
 gdb_file_cmd ${binfile}
+
+# Now fix the endianness at the correct state.
+
+send_gdb "set endian $endian\n"
+gdb_expect {
+    -re ".* (big|little) endian.*$gdb_prompt $" { 
+	pass "setting $endian endianness"
+    }
+    default {
+	fail "(timeout) setting $endian endianness"
+    }
+}
 
 # Reload saved values one by one, and compare.
 
