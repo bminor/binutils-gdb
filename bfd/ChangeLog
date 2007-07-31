@@ -1,3 +1,8 @@
+2007-07-30  Michael Snyder  <msnyder@access-company.com>
+
+	* coffgen.c (_bfd_coff_read_internal_relocs): Revert change of
+	2007-07-26.  Buffer still in use, can't be freed.
+
 2007-07-27  Michael Snyder  <msnyder@access-company.com>
 
 	* cofflink.c (coff_link_add_symbols): Return if count is zero.

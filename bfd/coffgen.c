@@ -460,22 +460,17 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
       free_external = NULL;
     }
 
-  if (free_internal != NULL)
+  if (cache && free_internal != NULL)
     {
-      if (cache)
-	free (free_internal);
-      else
+      if (coff_section_data (abfd, sec) == NULL)
 	{
-	  if (coff_section_data (abfd, sec) == NULL)
-	    {
-	      amt = sizeof (struct coff_section_tdata);
-	      sec->used_by_bfd = bfd_zalloc (abfd, amt);
-	      if (sec->used_by_bfd == NULL)
-		goto error_return;
-	      coff_section_data (abfd, sec)->contents = NULL;
-	    }
-	  coff_section_data (abfd, sec)->relocs = free_internal;
+	  amt = sizeof (struct coff_section_tdata);
+	  sec->used_by_bfd = bfd_zalloc (abfd, amt);
+	  if (sec->used_by_bfd == NULL)
+	    goto error_return;
+	  coff_section_data (abfd, sec)->contents = NULL;
 	}
+      coff_section_data (abfd, sec)->relocs = free_internal;
     }
 
   return internal_relocs;
