@@ -55,9 +55,6 @@ arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* On ARM WinCE char defaults to signed.  */
   set_gdbarch_char_signed (gdbarch, 1);
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
-
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 

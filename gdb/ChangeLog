@@ -1,3 +1,9 @@
+2007-07-31  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* arm-wince-tdep.c (arm_wince_init_abi): Remove svr4 related call.
+	* config/arm/wince.mt (TDEPFILES): Remove solib-legacy.o and
+	solib-svr4.o, and add solib-target.o
+
 2007-07-27  Michael Snyder  <msnyder@access-company.com>
 
 	* tui/tui-data.c (tui_alloc_generic_win_info): Wrong arg for sizeof.
