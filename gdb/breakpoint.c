@@ -1729,7 +1729,7 @@ breakpoint_init_inferior (enum inf_context context)
 	/* Likewise for watchpoints on local expressions.  */
 	if (b->exp_valid_block != NULL)
 	  delete_breakpoint (b);
-	if (context == inf_starting) 
+	else if (context == inf_starting) 
 	  {
 	    /* Reset val field to force reread of starting value
 	       in insert_breakpoints.  */

@@ -1,5 +1,8 @@
 2007-07-31  Michael Snyder  <msnyder@access-company.com>
 
+	* breakpoint.c (breakpoint_init_inferior): Add 'else' to 'if'.
+	True and false paths are mutually exclusive.
+
 	* event-top.c (command_line_handler): Add pedantic return.
 
 	* f-valprint.c (info_common_command): Bail out to prevent null
