@@ -673,6 +673,7 @@ command_line_handler (char *rl)
     {
       got_eof = 1;
       command_handler (0);
+      return;			/* Lint. */
     }
   if (strlen (rl) + 1 + (p - linebuffer) > linelength)
     {
