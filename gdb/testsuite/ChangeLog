@@ -1,3 +1,8 @@
+2007-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/prologue.c, gdb.base/prologue.exp: New.
+	* lib/gdb.exp (gdb_breakpoint): Handle "temporary".
+
 2007-07-30  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.base/dump.exp: Force the correct endianness for binary
