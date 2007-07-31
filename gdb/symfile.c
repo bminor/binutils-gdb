@@ -2439,6 +2439,8 @@ reread_separate_symbols (struct objfile *objfile)
       objfile->separate_debug_objfile->separate_debug_objfile_backlink
         = objfile;
     }
+  if (debug_file)
+    xfree (debug_file);
 }
 
 
