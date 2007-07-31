@@ -1,5 +1,7 @@
 2007-07-31  Michael Snyder  <msnyder@access-company.com>
 
+	* exec.c (xfer_memory): Remove redundant condition from 'if'.
+
 	* symfile.c (reread_separate_symbols): Free xmalloced memory.
 
 	* printcmd.c (build_address_symbolic): Remove dead code and dead 
