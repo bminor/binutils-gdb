@@ -3329,6 +3329,19 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
 	{
 	  /* We need a PT_NOTE segment.  */
 	  ++segs;
+	  /* Try to create just one PT_NOTE segment
+	     for all adjacent loadable .note* sections.
+	     gABI requires that within a PT_NOTE segment
+	     (and also inside of each SHT_NOTE section)
+	     each note is padded to a multiple of 4 size,
+	     so we check whether the sections are correctly
+	     aligned.  */
+	  if (s->alignment_power == 2)
+	    while (s->next != NULL
+		   && s->next->alignment_power == 2
+		   && (s->next->flags & SEC_LOAD) != 0
+		   && CONST_STRNEQ (s->next->name, ".note"))
+	      s = s->next;
 	}
     }
 
@@ -3703,25 +3716,44 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  pm = &m->next;
 	}
 
-      /* For each loadable .note section, add a PT_NOTE segment.  We don't
-	 use bfd_get_section_by_name, because if we link together
-	 nonloadable .note sections and loadable .note sections, we will
-	 generate two .note sections in the output file.  FIXME: Using
-	 names for section types is bogus anyhow.  */
+      /* For each batch of consecutive loadable .note sections,
+	 add a PT_NOTE segment.  We don't use bfd_get_section_by_name,
+	 because if we link together nonloadable .note sections and
+	 loadable .note sections, we will generate two .note sections
+	 in the output file.  FIXME: Using names for section types is
+	 bogus anyhow.  */
       for (s = abfd->sections; s != NULL; s = s->next)
 	{
 	  if ((s->flags & SEC_LOAD) != 0
 	      && CONST_STRNEQ (s->name, ".note"))
 	    {
+	      asection *s2;
+	      unsigned count = 1;
 	      amt = sizeof (struct elf_segment_map);
+	      if (s->alignment_power == 2)
+		for (s2 = s; s2->next != NULL; s2 = s2->next)
+		  if (s2->next->alignment_power == 2
+		      && (s2->next->flags & SEC_LOAD) != 0
+		      && CONST_STRNEQ (s2->next->name, ".note")
+		      && align_power (s2->vma + s2->size, 2) == s2->next->vma)
+		    count++;
+		  else
+		    break;
+	      amt += (count - 1) * sizeof (asection *);
 	      m = bfd_zalloc (abfd, amt);
 	      if (m == NULL)
 		goto error_return;
 	      m->next = NULL;
 	      m->p_type = PT_NOTE;
-	      m->count = 1;
-	      m->sections[0] = s;
-
+	      m->count = count;
+	      while (count > 1)
+		{
+		  m->sections[m->count - count--] = s;
+		  BFD_ASSERT ((s->flags & SEC_THREAD_LOCAL) == 0);
+		  s = s->next;
+		}
+	      m->sections[m->count - 1] = s;
+	      BFD_ASSERT ((s->flags & SEC_THREAD_LOCAL) == 0);
 	      *pm = m;
 	      pm = &m->next;
 	    }

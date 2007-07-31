@@ -1,3 +1,9 @@
+2007-07-31  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (get_program_header_size): Adjacent loadable .note*
+	sections need just one PT_NOTE segment.
+	(_bfd_elf_map_sections_to_segments): Likewise.
+
 2007-07-30  Michael Snyder  <msnyder@access-company.com>
 
 	* coffgen.c (_bfd_coff_read_internal_relocs): Revert change of
