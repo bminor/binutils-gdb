@@ -1,5 +1,8 @@
 2007-07-31  Michael Snyder  <msnyder@access-company.com>
 
+	* f-valprint.c (info_common_command): Bail out to prevent null
+	pointer deref.  Break up a long line.
+
 	* exec.c (xfer_memory): Remove redundant condition from 'if'.
 
 	* symfile.c (reread_separate_symbols): Free xmalloced memory.

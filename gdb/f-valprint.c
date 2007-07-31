@@ -671,7 +671,8 @@ info_common_command (char *comname, int from_tty)
          be any minimal symbols in the middle of a function.
          FIXME:  (Not necessarily true.  What about text labels) */
 
-      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
+      struct minimal_symbol *msymbol = 
+	lookup_minimal_symbol_by_pc (get_frame_pc (fi));
 
       if (msymbol != NULL
 	  && (SYMBOL_VALUE_ADDRESS (msymbol)
@@ -687,6 +688,8 @@ info_common_command (char *comname, int from_tty)
 
       if (msymbol != NULL)
 	funname = DEPRECATED_SYMBOL_NAME (msymbol);
+      else /* Got no 'funname', code below will fail.  */
+	error (_("No function found for frame."));
     }
 
   /* If comname is NULL, we assume the user wishes to see the 
