@@ -565,7 +565,6 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 {
   struct minimal_symbol *msymbol;
   struct symbol *symbol;
-  struct symtab *symtab = 0;
   CORE_ADDR name_location = 0;
   asection *section = 0;
   char *name_temp = "";
@@ -613,7 +612,6 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	  /* The msymbol is closer to the address than the symbol;
 	     use the msymbol instead.  */
 	  symbol = 0;
-	  symtab = 0;
 	  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
 	  if (do_demangle || asm_demangle)
 	    name_temp = SYMBOL_PRINT_NAME (msymbol);
@@ -649,16 +647,6 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 	{
 	  *filename = xstrdup (sal.symtab->filename);
 	  *line = sal.line;
-	}
-      else if (symtab && symbol && symbol->line)
-	{
-	  *filename = xstrdup (symtab->filename);
-	  *line = symbol->line;
-	}
-      else if (symtab)
-	{
-	  *filename = xstrdup (symtab->filename);
-	  *line = -1;
 	}
     }
   return 0;
