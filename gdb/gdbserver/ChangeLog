@@ -1,3 +1,13 @@
+2007-07-31  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* win32-low.c (winapi_CloseToolhelp32Snapshot) [_WIN32_WCE]: New
+	typedef.
+	(win32_CloseToolhelp32Snapshot) [_WIN32_WCE]: New global var.
+	(load_toolhelp) [_WIN32_WCE]: Load TOOLHELP.DLL.  Get
+	CloseToolhelp32Snapshot.
+	(toolhelp_get_dll_name) [_WIN32_WCE]: Close the snapshot with
+	CloseToolhelp32Snapshot.
+
 2007-07-27  Michael Snyder  <michael.snyder@access-company.com>
 
 	* server.c (main): Check for inferior exit before main loop.

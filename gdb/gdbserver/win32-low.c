@@ -980,6 +980,10 @@ typedef BOOL (WINAPI *winapi_Module32Next) (HANDLE, LPMODULEENTRY32);
 static winapi_CreateToolhelp32Snapshot win32_CreateToolhelp32Snapshot;
 static winapi_Module32First win32_Module32First;
 static winapi_Module32Next win32_Module32Next;
+#ifdef _WIN32_WCE
+typedef BOOL (WINAPI *winapi_CloseToolhelp32Snapshot) (HANDLE);
+static winapi_CloseToolhelp32Snapshot win32_CloseToolhelp32Snapshot;
+#endif
 
 static BOOL
 load_toolhelp (void)
@@ -993,7 +997,7 @@ load_toolhelp (void)
 #ifndef _WIN32_WCE
       dll = GetModuleHandle (_T("KERNEL32.DLL"));
 #else
-      dll = GetModuleHandle (_T("COREDLL.DLL"));
+      dll = LoadLibrary (L"TOOLHELP.DLL");
 #endif
       if (!dll)
 	return FALSE;
@@ -1002,11 +1006,19 @@ load_toolhelp (void)
 	GETPROCADDRESS (dll, CreateToolhelp32Snapshot);
       win32_Module32First = GETPROCADDRESS (dll, Module32First);
       win32_Module32Next = GETPROCADDRESS (dll, Module32Next);
+#ifdef _WIN32_WCE
+      win32_CloseToolhelp32Snapshot =
+	GETPROCADDRESS (dll, CloseToolhelp32Snapshot);
+#endif
     }
 
   return (win32_CreateToolhelp32Snapshot != NULL
 	  && win32_Module32First != NULL
-	  && win32_Module32Next != NULL);
+	  && win32_Module32Next != NULL
+#ifdef _WIN32_WCE
+	  && win32_CloseToolhelp32Snapshot != NULL
+#endif
+	  );
 }
 
 static int
@@ -1014,6 +1026,7 @@ toolhelp_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
 {
   HANDLE snapshot_module;
   MODULEENTRY32 modEntry = { sizeof (MODULEENTRY32) };
+  int found = 0;
 
   if (!load_toolhelp ())
     return 0;
@@ -1024,24 +1037,25 @@ toolhelp_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
     return 0;
 
   /* Ignore the first module, which is the exe.  */
-  if (!win32_Module32First (snapshot_module, &modEntry))
-    goto failed;
-
-  while (win32_Module32Next (snapshot_module, &modEntry))
-    if ((DWORD) modEntry.modBaseAddr == BaseAddress)
-      {
+  if (win32_Module32First (snapshot_module, &modEntry))
+    while (win32_Module32Next (snapshot_module, &modEntry))
+      if ((DWORD) modEntry.modBaseAddr == BaseAddress)
+	{
 #ifdef UNICODE
-	wcstombs (dll_name_ret, modEntry.szExePath, MAX_PATH + 1);
+	  wcstombs (dll_name_ret, modEntry.szExePath, MAX_PATH + 1);
 #else
-	strcpy (dll_name_ret, modEntry.szExePath);
+	  strcpy (dll_name_ret, modEntry.szExePath);
 #endif
-	CloseHandle (snapshot_module);
-	return 1;
-      }
+	  found = 1;
+	  break;
+	}
 
-failed:
+#ifdef _WIN32_WCE
+  win32_CloseToolhelp32Snapshot (snapshot_module);
+#else
   CloseHandle (snapshot_module);
-  return 0;
+#endif
+  return found;
 }
 
 static void
