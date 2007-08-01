@@ -549,6 +549,7 @@ putpkt_binary (char *buf, int cnt)
       if (write (remote_desc, buf2, p - buf2) != p - buf2)
 	{
 	  perror ("putpkt(write)");
+	  free (buf2);
 	  return -1;
 	}
 
