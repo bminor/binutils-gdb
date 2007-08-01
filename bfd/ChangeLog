@@ -1,3 +1,10 @@
+2007-08-01  Alan Modra  <amodra@bigpond.net.au>
+
+	PR4694
+	* aoutx.h (final_link): Write a zero in first word of
+	stringtab if no symbols rather than corrupting last byte
+	of text/data.
+
 2007-07-31  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf.c (get_program_header_size): Adjacent loadable .note*

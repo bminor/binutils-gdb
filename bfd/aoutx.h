@@ -5557,22 +5557,19 @@ NAME (aout, final_link) (bfd *abfd,
     exec_hdr (abfd)->a_drsize / obj_reloc_entry_size (abfd);
 
   /* Write out the string table, unless there are no symbols.  */
+  if (bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET) != 0)
+    goto error_return;
   if (abfd->symcount > 0)
     {
-      if (bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET) != 0
-	  || ! emit_stringtab (abfd, aout_info.strtab))
+      if (!emit_stringtab (abfd, aout_info.strtab))
 	goto error_return;
     }
-  else if (obj_textsec (abfd)->reloc_count == 0
-	   && obj_datasec (abfd)->reloc_count == 0)
+  else
     {
-      bfd_byte b;
-      file_ptr pos;
+      bfd_byte b[BYTES_IN_WORD];
 
-      b = 0;
-      pos = obj_datasec (abfd)->filepos + exec_hdr (abfd)->a_data - 1;
-      if (bfd_seek (abfd, pos, SEEK_SET) != 0
-	  || bfd_bwrite (&b, (bfd_size_type) 1, abfd) != 1)
+      memset (b, 0, BYTES_IN_WORD);
+      if (bfd_bwrite (b, (bfd_size_type) BYTES_IN_WORD, abfd) != BYTES_IN_WORD)
 	goto error_return;
     }
 
