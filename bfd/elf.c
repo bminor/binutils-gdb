@@ -1364,7 +1364,7 @@ bfd_elf_print_symbol (bfd *abfd,
 	   we've already printed the size; now print the alignment.
 	   For other symbols, we have no specified alignment, and
 	   we've printed the address; now print the size.  */
-	if (bfd_is_com_section (symbol->section))
+	if (symbol->section && bfd_is_com_section (symbol->section))
 	  val = ((elf_symbol_type *) symbol)->internal_elf_sym.st_value;
 	else
 	  val = ((elf_symbol_type *) symbol)->internal_elf_sym.st_size;
