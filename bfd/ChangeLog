@@ -1,5 +1,7 @@
 2007-08-01  Michael Snyder  <msnyder@access-company.com>
 
+	* vms-tir.c (new_section): Fix cut and paste error.
+
 	* aoutx.h (aout_link_add_symbols): Return if count is zero.
 
 	* elf.c (bfd_elf_print_symbol): Macro dereferences pointer, so

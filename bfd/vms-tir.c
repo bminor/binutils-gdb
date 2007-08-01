@@ -808,7 +808,7 @@ new_section (bfd * abfd ATTRIBUTE_UNUSED, int idx)
   if (section == 0)
     {
 #if VMS_DEBUG
-      _bfd_vms_debug (6,  "bfd_make_section (%s) failed", name);
+      _bfd_vms_debug (6,  "new_section (%s) failed", name);
 #endif
       return NULL;
     }
