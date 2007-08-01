@@ -2959,13 +2959,16 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
+  if (sym_count == 0)
+    return TRUE;		/* Nothing to do.  */
+
   /* We keep a list of the linker hash table entries that correspond
      to particular symbols.  We could just look them up in the hash
      table, but keeping the list is more efficient.  Perhaps this
      should be conditional on info->keep_memory.  */
   amt = sym_count * sizeof (struct aout_link_hash_entry *);
   sym_hash = bfd_alloc (abfd, amt);
-  if (sym_hash == NULL && sym_count != 0)
+  if (sym_hash == NULL)
     return FALSE;
   obj_aout_sym_hashes (abfd) = sym_hash;
 
