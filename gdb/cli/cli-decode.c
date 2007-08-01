@@ -1226,28 +1226,27 @@ lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
 	    int allow_unknown, int ignore_help_classes)
 {
   struct cmd_list_element *last_list = 0;
-  struct cmd_list_element *c =
-  lookup_cmd_1 (line, list, &last_list, ignore_help_classes);
+  struct cmd_list_element *c;
 
   /* Note: Do not remove trailing whitespace here because this
      would be wrong for complete_command.  Jim Kingdon  */
+
+  if (!*line)
+    error (_("Lack of needed %scommand"), cmdtype);
+
+  c = lookup_cmd_1 (line, list, &last_list, ignore_help_classes);
 
   if (!c)
     {
       if (!allow_unknown)
 	{
-	  if (!*line)
-	    error (_("Lack of needed %scommand"), cmdtype);
-	  else
-	    {
-	      char *q;
-	      int len = find_command_name_length (*line);
+	  char *q;
+	  int len = find_command_name_length (*line);
 
-	      q = (char *) alloca (len + 1);
-	      strncpy (q, *line, len);
-	      q[len] = '\0';
-	      undef_cmd_error (cmdtype, q);
-	    }
+	  q = (char *) alloca (len + 1);
+	  strncpy (q, *line, len);
+	  q[len] = '\0';
+	  undef_cmd_error (cmdtype, q);
 	}
       else
 	return 0;

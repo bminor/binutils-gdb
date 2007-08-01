@@ -1,5 +1,8 @@
 2007-08-01  Michael Snyder  <msnyder@access-company.com>
 
+	* cli/cli-decode.c (lookup_cmd): Check for null earlier, to 
+	avoid dereference in lookup_cmd_1.
+
 	* tui/tui-data.c (tui_alloc_content): Move assign out of if, 
 	clean up long lines.
 	(tui_alloc_generic_win_info): Tidy by using XMALLOC macro.
