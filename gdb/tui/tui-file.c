@@ -59,7 +59,7 @@ static int tui_file_magic;
 static struct ui_file *
 tui_file_new (void)
 {
-  struct tui_stream *tui = xmalloc (sizeof (struct tui_stream));
+  struct tui_stream *tui = XMALLOC (struct tui_stream);
   struct ui_file *file = ui_file_new ();
   set_ui_file_data (file, tui, tui_file_delete);
   set_ui_file_flush (file, tui_file_flush);

@@ -1,3 +1,12 @@
+2007-08-01  Michael Snyder  <msnyder@access-company.com>
+
+	* tui/tui-data.c (tui_alloc_content): Move assign out of if, 
+	clean up long lines.
+	(tui_alloc_generic_win_info): Tidy by using XMALLOC macro.
+	(tui_alloc_win_info): Ditto.
+	(tui_add_content_elements): Ditto.
+	* tui/tui-file.c (tui_file_magic): Ditto.
+
 2007-07-31  Michael Snyder  <msnyder@access-company.com>
 
 	* breakpoint.c (breakpoint_init_inferior): Add 'else' to 'if'.

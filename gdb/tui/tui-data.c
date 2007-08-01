@@ -449,8 +449,7 @@ tui_alloc_generic_win_info (void)
 {
   struct tui_gen_win_info * win;
 
-  if ((win = (struct tui_gen_win_info *) xmalloc (
-		     sizeof (struct tui_gen_win_info))) != (struct tui_gen_win_info *) NULL)
+  if ((win = XMALLOC (struct tui_gen_win_info)) != NULL)
     tui_init_generic_part (win);
 
   return win;
@@ -568,10 +567,10 @@ init_win_info (struct tui_win_info * win_info)
 struct tui_win_info *
 tui_alloc_win_info (enum tui_win_type type)
 {
-  struct tui_win_info * win_info = (struct tui_win_info *) NULL;
+  struct tui_win_info * win_info;
 
-  win_info = (struct tui_win_info *) xmalloc (sizeof (struct tui_win_info));
-  if ((win_info != NULL))
+  win_info = XMALLOC (struct tui_win_info);
+  if (win_info != NULL)
     {
       win_info->generic.type = type;
       init_win_info (win_info);
@@ -585,21 +584,24 @@ tui_alloc_win_info (enum tui_win_type type)
 tui_win_content
 tui_alloc_content (int num_elements, enum tui_win_type type)
 {
-  tui_win_content content = (tui_win_content) NULL;
-  char *element_block_ptr = (char *) NULL;
+  tui_win_content content;
+  char *element_block_ptr;
   int i;
 
-  if ((content = (tui_win_content)
-  xmalloc (sizeof (struct tui_win_element *) * num_elements)) != (tui_win_content) NULL)
-    {				/*
-				   ** All windows, except the data window, can allocate the elements
-				   ** in a chunk.  The data window cannot because items can be
-				   ** added/removed from the data display by the user at any time.
-				 */
+  content = xmalloc (sizeof (struct tui_win_element *) * num_elements);
+  if (content != NULL)
+    {
+      /*
+       * All windows, except the data window, can allocate the
+       * elements in a chunk.  The data window cannot because items
+       * can be added/removed from the data display by the user at any
+       * time.
+       */
       if (type != DATA_WIN)
 	{
-	  if ((element_block_ptr = (char *)
-	   xmalloc (sizeof (struct tui_win_element) * num_elements)) != (char *) NULL)
+	  element_block_ptr =
+	    xmalloc (sizeof (struct tui_win_element) * num_elements);
+	  if (element_block_ptr != NULL)
 	    {
 	      for (i = 0; i < num_elements; i++)
 		{
@@ -642,14 +644,13 @@ tui_add_content_elements (struct tui_gen_win_info * win_info, int num_elements)
     {
       for (i = index_start; (i < num_elements + index_start); i++)
 	{
-	  if ((element_ptr = (struct tui_win_element *)
-	       xmalloc (sizeof (struct tui_win_element))) != (struct tui_win_element *) NULL)
+	  if ((element_ptr = XMALLOC (struct tui_win_element)) != NULL)
 	    {
 	      win_info->content[i] = (void *) element_ptr;
 	      init_content_element (element_ptr, win_info->type);
 	      win_info->content_size++;
 	    }
-	  else			/* things must be really hosed now! We ran out of memory!? */
+	  else	/* Things must be really hosed now!  We ran out of memory!? */
 	    return (-1);
 	}
     }
