@@ -1,5 +1,14 @@
 2007-08-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* aoutx.h (swap_ext_reloc_in): Set howto to NULL for unknown
+	r_type.
+	(swap_std_reloc_in): Likewise.
+	(aout_link_input_section_std): Likewise.  Return with an error
+	on unexpected relocation type.
+	(aout_link_input_section_ext): Likewise.
+
+2007-08-01  Alan Modra  <amodra@bigpond.net.au>
+
 	PR4694
 	* aoutx.h (final_link): Write a zero in first word of
 	stringtab if no symbols rather than corrupting last byte

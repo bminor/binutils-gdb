@@ -2162,7 +2162,10 @@ NAME (aout, swap_ext_reloc_in) (bfd *abfd,
 		>> RELOC_EXT_BITS_TYPE_SH_LITTLE);
     }
 
-  cache_ptr->howto =  howto_table_ext + r_type;
+  if (r_type < TABLE_SIZE (howto_table_ext))
+    cache_ptr->howto = howto_table_ext + r_type;
+  else
+    cache_ptr->howto = NULL;
 
   /* Base relative relocs are always against the symbol table,
      regardless of the setting of r_extern.  r_extern just reflects
@@ -2230,9 +2233,14 @@ NAME (aout, swap_std_reloc_in) (bfd *abfd,
 
   howto_idx = (r_length + 4 * r_pcrel + 8 * r_baserel
 	       + 16 * r_jmptable + 32 * r_relative);
-  BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
-  cache_ptr->howto =  howto_table_std + howto_idx;
-  BFD_ASSERT (cache_ptr->howto->type != (unsigned int) -1);
+  if (howto_idx < TABLE_SIZE (howto_table_std))
+    {
+      cache_ptr->howto = howto_table_std + howto_idx;
+      if (cache_ptr->howto->type == (unsigned int) -1)
+	cache_ptr->howto = NULL;
+    }
+  else
+    cache_ptr->howto = NULL;
 
   /* Base relative relocs are always against the symbol table,
      regardless of the setting of r_extern.  r_extern just reflects
@@ -3963,10 +3971,20 @@ aout_link_input_section_std (struct aout_final_link_info *finfo,
 
 	howto_idx = (r_length + 4 * r_pcrel + 8 * r_baserel
 		     + 16 * r_jmptable + 32 * r_relative);
-	BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_std));
-	howto = howto_table_std + howto_idx;
+	if (howto_idx < TABLE_SIZE (howto_table_std))
+	  howto = howto_table_std + howto_idx;
+	else
+	  howto = NULL;
       }
 #endif
+
+      if (howto == NULL)
+	{
+	  (*finfo->info->callbacks->einfo)
+	    (_("%P: %B: unexpected relocation type\n"), input_bfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       if (relocatable)
 	{
@@ -4286,7 +4304,13 @@ aout_link_input_section_ext (struct aout_final_link_info *finfo,
 
       r_addend = GET_SWORD (input_bfd, rel->r_addend);
 
-      BFD_ASSERT (r_type < TABLE_SIZE (howto_table_ext));
+      if (r_type >= TABLE_SIZE (howto_table_ext))
+	{
+	  (*finfo->info->callbacks->einfo)
+	    (_("%P: %B: unexpected relocation type\n"), input_bfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       if (relocatable)
 	{
