@@ -1,3 +1,9 @@
+2007-08-01  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* ld-mips-elf/reloc-4.s, ld-mips-elf/reloc-4.d,
+	ld-mips-elf/reloc-5.s, ld-mips-elf/reloc-5.d: New tests.
+	* ld-mips-elf/mips-elf.exp: Invoke them.
+
 2007-07-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/weak-dyn-1.rd: Adjust.
