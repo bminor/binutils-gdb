@@ -198,7 +198,7 @@
 	scripttempl/elf_chaos.sc, scripttempl/elfi370.sc,
 	scripttempl/elfxtensa.sc: Handle ATTRS_SECTIONS.
 
-2006-06-29  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
+2007-06-29  M R Swami Reddy  <MR.Swami.Reddy@nsc.com>
 
 	* scripttemp/elf32cr16.sc: Default linker script.
 	* emulparams/elf32cr16.sh: Emulation script.
