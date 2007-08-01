@@ -1,3 +1,8 @@
+2007-08-01  Tristan Gingold  <gingold@adacore.com>
+
+	* coffcode.h (coff_sort_func_alent): New function.
+	(coff_slurp_line_table): Sort line table if not already sorted.
+
 2007-08-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf.c (_bfd_elf_map_sections_to_segments): Work around buggy
