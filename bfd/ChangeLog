@@ -1,3 +1,8 @@
+2007-08-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Work around buggy
+	GCC 3.4.x warning.
+
 2007-08-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* aoutx.h (swap_ext_reloc_in): Set howto to NULL for unknown

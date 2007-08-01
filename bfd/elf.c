@@ -3732,13 +3732,16 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	      amt = sizeof (struct elf_segment_map);
 	      if (s->alignment_power == 2)
 		for (s2 = s; s2->next != NULL; s2 = s2->next)
-		  if (s2->next->alignment_power == 2
-		      && (s2->next->flags & SEC_LOAD) != 0
-		      && CONST_STRNEQ (s2->next->name, ".note")
-		      && align_power (s2->vma + s2->size, 2) == s2->next->vma)
-		    count++;
-		  else
-		    break;
+		  {
+		    if (s2->next->alignment_power == 2
+			&& (s2->next->flags & SEC_LOAD) != 0
+			&& CONST_STRNEQ (s2->next->name, ".note")
+			&& align_power (s2->vma + s2->size, 2)
+			   == s2->next->vma)
+		      count++;
+		    else
+		      break;
+		  }
 	      amt += (count - 1) * sizeof (asection *);
 	      m = bfd_zalloc (abfd, amt);
 	      if (m == NULL)
