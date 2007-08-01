@@ -33,8 +33,8 @@
 	MAX_MEM_FOR_RS_ALIGN_CODE bytes.  Remove special treatment
 	for K8.
 
-	* config/tc-i386.h (MAX_MEM_FOR_RS_ALIGN_CODE): Changed to
-	31.
+	* config/tc-i386.h (MAX_MEM_FOR_RS_ALIGN_CODE): Changed to 31.
+
 2007-07-20  Nick Clifton  <nickc@redhat.com>
 
 	* app.c (do_scrub_chars): Provide a one character buffer to hold a
