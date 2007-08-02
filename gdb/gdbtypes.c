@@ -1318,6 +1318,8 @@ check_typedef (struct type *type)
   struct type *orig_type = type;
   int is_const, is_volatile;
 
+  gdb_assert (type);
+
   while (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
     {
       if (!TYPE_TARGET_TYPE (type))

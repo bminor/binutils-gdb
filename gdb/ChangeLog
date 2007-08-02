@@ -1,3 +1,7 @@
+2007-08-02  Michael Snyder  <msnyder@access-company.com>
+
+	* gdbtypes.c (check_typedef): Guard NULL.
+
 2007-08-01  Michael Snyder  <msnyder@access-company.com>
 
 	* cli/cli-decode.c (lookup_cmd): Check for null earlier, to 
