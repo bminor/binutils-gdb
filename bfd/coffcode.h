@@ -1628,19 +1628,6 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
 #else /* ! COFF_ALIGN_IN_SECTION_HEADER */
 #ifdef COFF_WITH_PE
 
-/* A couple of macros to help setting the alignment power field.  */
-#define ALIGN_SET(field, x, y) \
-  if (((field) & IMAGE_SCN_ALIGN_64BYTES) == x)\
-    {\
-      section->alignment_power = y;\
-    }
-
-#define ELIFALIGN_SET(field, x, y) \
-  else if (((field) & IMAGE_SCN_ALIGN_64BYTES) == x) \
-    {\
-      section->alignment_power = y;\
-    }
-
 static void
 coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
 			 asection * section,
@@ -1648,14 +1635,31 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
 {
   struct internal_scnhdr *hdr = (struct internal_scnhdr *) scnhdr;
   bfd_size_type amt;
+  unsigned int alignment_power_const
+    = hdr->s_flags & IMAGE_SCN_ALIGN_POWER_BIT_MASK;
 
-  ALIGN_SET     (hdr->s_flags, IMAGE_SCN_ALIGN_64BYTES, 6)
-  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_32BYTES, 5)
-  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_16BYTES, 4)
-  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_8BYTES,  3)
-  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_4BYTES,  2)
-  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_2BYTES,  1)
-  ELIFALIGN_SET (hdr->s_flags, IMAGE_SCN_ALIGN_1BYTES,  0)
+  switch (alignment_power_const)
+    {
+    case IMAGE_SCN_ALIGN_8192BYTES:
+    case IMAGE_SCN_ALIGN_4096BYTES:
+    case IMAGE_SCN_ALIGN_2048BYTES:
+    case IMAGE_SCN_ALIGN_1024BYTES:
+    case IMAGE_SCN_ALIGN_512BYTES:
+    case IMAGE_SCN_ALIGN_256BYTES:
+    case IMAGE_SCN_ALIGN_128BYTES:
+    case IMAGE_SCN_ALIGN_64BYTES:
+    case IMAGE_SCN_ALIGN_32BYTES:
+    case IMAGE_SCN_ALIGN_16BYTES:
+    case IMAGE_SCN_ALIGN_8BYTES:
+    case IMAGE_SCN_ALIGN_4BYTES:
+    case IMAGE_SCN_ALIGN_2BYTES:
+    case IMAGE_SCN_ALIGN_1BYTES:
+      section->alignment_power
+	= IMAGE_SCN_ALIGN_POWER_NUM (alignment_power_const);
+      break;
+    default:
+      break;
+    }
 
   /* In a PE image file, the s_paddr field holds the virtual size of a
      section, while the s_size field holds the raw size.  We also keep

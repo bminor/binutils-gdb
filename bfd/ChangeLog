@@ -1,3 +1,12 @@
+2007-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* coffcode.h (ALIGN_SET): Removed.
+	(ELIFALIGN_SET): Likewise.
+	(coff_set_alignment_hook): Handle IMAGE_SCN_ALIGN_128BYTES,
+	IMAGE_SCN_ALIGN_256BYTES, IMAGE_SCN_ALIGN_512BYTES,
+	IMAGE_SCN_ALIGN_1024BYTES, IMAGE_SCN_ALIGN_2048BYTES,
+	IMAGE_SCN_ALIGN_4096BYTES and IMAGE_SCN_ALIGN_8192BYTES.
+
 2007-08-01  Michael Snyder  <msnyder@access-company.com>
 
 	* vms-tir.c (new_section): Fix cut and paste error.
