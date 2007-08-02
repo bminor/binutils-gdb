@@ -843,7 +843,6 @@ create_string_type (struct type *result_type, struct type *range_type)
 struct type *
 create_set_type (struct type *result_type, struct type *domain_type)
 {
-  LONGEST low_bound, high_bound, bit_length;
   if (result_type == NULL)
     {
       result_type = alloc_type (TYPE_OBJFILE (domain_type));
@@ -856,16 +855,16 @@ create_set_type (struct type *result_type, struct type *domain_type)
 
   if (!TYPE_STUB (domain_type))
     {
+      LONGEST low_bound, high_bound, bit_length;
       if (get_discrete_bounds (domain_type, &low_bound, &high_bound) < 0)
 	low_bound = high_bound = 0;
       bit_length = high_bound - low_bound + 1;
       TYPE_LENGTH (result_type)
 	= (bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
+      if (low_bound >= 0)
+	TYPE_FLAGS (result_type) |= TYPE_FLAG_UNSIGNED;
     }
   TYPE_FIELD_TYPE (result_type, 0) = domain_type;
-
-  if (low_bound >= 0)
-    TYPE_FLAGS (result_type) |= TYPE_FLAG_UNSIGNED;
 
   return (result_type);
 }
