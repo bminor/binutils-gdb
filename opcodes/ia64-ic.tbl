@@ -15,7 +15,7 @@ fp-arith-s0;	IC:fp-arith[Field(sf)==s0]
 fp-arith-s1;	IC:fp-arith[Field(sf)==s1]
 fp-arith-s2;	IC:fp-arith[Field(sf)==s2]
 fp-arith-s3;	IC:fp-arith[Field(sf)==s3]
-fp-non-arith;	fabs, fand, fandcm, fclass, fcvt.xf, fmerge, fmix, fneg, fnegabs, for, fpabs, fpmerge, fpack, fpneg, fpnegabs, fselect, fswap, fsxt, fxor, xma
+fp-non-arith;	fabs, fand, fandcm, fclass, fcvt.xf, fmerge, fmix, fneg, fnegabs, for, fpabs, fpmerge, fpack, fpneg, fpnegabs, fselect, fswap, fsxt, fxor, xma, xmpy
 fpcmp-s0;	fpcmp[Field(sf)==s0]
 fpcmp-s1;	fpcmp[Field(sf)==s1]
 fpcmp-s2;	fpcmp[Field(sf)==s2]

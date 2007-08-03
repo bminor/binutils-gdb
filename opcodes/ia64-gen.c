@@ -2872,7 +2872,7 @@ main (int argc, char **argv)
    You should have received a copy of the GNU General Public License\n\
    along with this program; see the file COPYING.  If not, write to the\n\
    Free Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA\n\
-   02110-1301, USA.  */");
+   02110-1301, USA.  */\n");
 
   print_string_table ();
   print_dependency_table ();
