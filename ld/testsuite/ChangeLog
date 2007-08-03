@@ -1,3 +1,7 @@
+2007-08-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-srec/srec.exp: XFAIL for powerpc*-*-*.
+
 2007-08-01  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* ld-mips-elf/reloc-4.s, ld-mips-elf/reloc-4.d,
