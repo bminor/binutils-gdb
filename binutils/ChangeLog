@@ -1,3 +1,11 @@
+2007-08-04  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4888
+	* objcopy.c (setup_section): Do modify section flags for ELF
+	STRIP_NONDEBUG (reverting part of 2007-05-30 change).  Prevent
+	header rewrite by twiddling input section flags instead.
+	Simplify code setting SHT_NOBITS.
+
 2007-07-28  Christopher Faylor  <me+binutils@cgf.cx>
 
 	* MAINTAINERS: Update my email address.

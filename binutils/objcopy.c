@@ -2165,6 +2165,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   const char *err;
   const char * name;
   char *prefix = NULL;
+  bfd_boolean make_nobits;
 
   if (is_strip_section (ibfd, isection))
     return;
@@ -2193,12 +2194,26 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       name = n;
     }
 
+  make_nobits = FALSE;
   if (p != NULL && p->set_flags)
     flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
   else if (strip_symbols == STRIP_NONDEBUG
-	   && obfd->xvec->flavour != bfd_target_elf_flavour
-	   && (flags & SEC_ALLOC) != 0)
-    flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
+	   && (flags & SEC_ALLOC) != 0
+	   && (ibfd->xvec->flavour != bfd_target_elf_flavour
+	       || elf_section_type (isection) != SHT_NOTE))
+    {
+      flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
+      if (obfd->xvec->flavour == bfd_target_elf_flavour)
+	{
+	  make_nobits = TRUE;
+
+	  /* Twiddle the input section flags so that it seems to
+	     elf.c:copy_private_bfd_data that section flags have not
+	     changed between input and output sections.  This hack
+	     prevents wholesale rewriting of the program headers.  */
+	  isection->flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
+	}
+    }
 
   osection = bfd_make_section_anyway_with_flags (obfd, name, flags);
 
@@ -2208,13 +2223,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       goto loser;
     }
 
-  if (strip_symbols == STRIP_NONDEBUG
-      && obfd->xvec->flavour == bfd_target_elf_flavour
-      && (flags & SEC_ALLOC) != 0
-      && elf_section_type (osection) != SHT_NOTE
-      && (ibfd->xvec->flavour != bfd_target_elf_flavour
-	  || elf_section_type (isection) != SHT_NOTE)
-      && (p == NULL || !p->set_flags))
+  if (make_nobits)
     elf_section_type (osection) = SHT_NOBITS;
 
   size = bfd_section_size (ibfd, isection);
