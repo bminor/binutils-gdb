@@ -139,7 +139,6 @@ enum mi_cmd_result
 mi_cmd_var_delete (char *command, char **argv, int argc)
 {
   char *name;
-  char *expr;
   struct varobj *var;
   int numdel;
   int children_only_p = 0;
@@ -167,13 +166,12 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
      which would be the variable name. */
   if (argc == 2)
     {
-      expr = xstrdup (argv[1]);
       if (strcmp (name, "-c") != 0)
 	error (_("mi_cmd_var_delete: Invalid option."));
       children_only_p = 1;
-      xfree (name);
-      name = xstrdup (expr);
-      xfree (expr);
+      do_cleanups (old_cleanups);
+      name = xstrdup (argv[1]);
+      make_cleanup (free_current_contents, &name);
     }
 
   /* If we didn't error out, now NAME contains the name of the
