@@ -1,3 +1,10 @@
+2007-08-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (xvec_get_elf_backend_data): Add const.
+
+	* elfcode.h (elf_object_p): Use xvec_get_elf_backend_data.
+	* elfcore.h (elf_core_file_p): Likewise.
+
 2007-08-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coffcode.h (ALIGN_SET): Removed.

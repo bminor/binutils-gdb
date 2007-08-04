@@ -1239,7 +1239,7 @@ struct bfd_elf_section_data
 #define elf_sec_group(sec)	(elf_section_data(sec)->sec_group)
 
 #define xvec_get_elf_backend_data(xvec) \
-  ((struct elf_backend_data *) (xvec)->backend_data)
+  ((const struct elf_backend_data *) (xvec)->backend_data)
 
 #define get_elf_backend_data(abfd) \
    xvec_get_elf_backend_data ((abfd)->xvec)

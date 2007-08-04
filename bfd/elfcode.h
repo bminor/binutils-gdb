@@ -605,7 +605,7 @@ elf_object_p (bfd *abfd)
 
 	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
 	    continue;
-	  back = (const struct elf_backend_data *) (*target_ptr)->backend_data;
+	  back = xvec_get_elf_backend_data (*target_ptr);
 	  if (back->elf_machine_code == i_ehdrp->e_machine
 	      || (back->elf_machine_alt1 != 0
 		  && back->elf_machine_alt1 == i_ehdrp->e_machine)
@@ -658,7 +658,7 @@ elf_object_p (bfd *abfd)
 		  != target->header_byteorder))
 	    continue;
 
-	  back = (const struct elf_backend_data *) (*target_ptr)->backend_data;
+	  back = xvec_get_elf_backend_data (*target_ptr);
 	  if (back->elf_osabi == i_ehdrp->e_ident[EI_OSABI]
 	      && (back->elf_machine_code == i_ehdrp->e_machine
 		  || (back->elf_machine_alt1 != 0

@@ -158,7 +158,7 @@ elf_core_file_p (bfd *abfd)
 
 	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
 	    continue;
-	  back = (const struct elf_backend_data *) (*target_ptr)->backend_data;
+	  back = xvec_get_elf_backend_data (*target_ptr);
 	  if (back->elf_machine_code == i_ehdrp->e_machine
 	      || (back->elf_machine_alt1 != 0
 	          && i_ehdrp->e_machine == back->elf_machine_alt1)
