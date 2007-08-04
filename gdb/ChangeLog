@@ -1,3 +1,7 @@
+2007-08-03  Michael Snyder  <msnyder@access-company.com>
+
+	* jv-lang.c (java_link_class_type): Guard against NULL.
+
 2007-08-02  Michael Snyder  <msnyder@access-company.com>
 
 	* gdbtypes.c (create_set_type): Test should only be done within

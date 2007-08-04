@@ -39,6 +39,7 @@
 #include "demangle.h"
 #include "dictionary.h"
 #include <ctype.h>
+#include "gdb_assert.h"
 
 struct type *java_int_type;
 struct type *java_byte_type;
@@ -351,13 +352,14 @@ java_link_class_type (struct type *type, struct value *clas)
   struct objfile *objfile = get_dynamics_objfile ();
   struct type *tsuper;
 
+  gdb_assert (name != NULL);
   unqualified_name = strrchr (name, '.');
   if (unqualified_name == NULL)
     unqualified_name = name;
 
   temp = clas;
   temp = value_struct_elt (&temp, NULL, "superclass", NULL, "structure");
-  if (name != NULL && strcmp (name, "java.lang.Object") == 0)
+  if (strcmp (name, "java.lang.Object") == 0)
     {
       tsuper = get_java_object_type ();
       if (tsuper && TYPE_CODE (tsuper) == TYPE_CODE_PTR)
