@@ -850,6 +850,7 @@ remote_fileio_func_write (char *buf)
     {
       case FIO_FD_CONSOLE_IN:
 	remote_fileio_badfd ();
+	xfree (buffer);
 	return;
       case FIO_FD_CONSOLE_OUT:
 	ui_file_write (target_fd == 1 ? gdb_stdtarg : gdb_stdtargerr,

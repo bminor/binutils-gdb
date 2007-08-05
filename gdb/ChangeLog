@@ -1,5 +1,7 @@
 2007-08-04  Michael Snyder  <msnyder@access-company.com>
 
+	* remote-fileio.c (remote_fileio_func_write): Memory leak.
+
 	* breakpoint.c (print_one_breakpoint): Off by one error.
 
 	* tracepoint.c (add_register): Off by one error.
