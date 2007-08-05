@@ -81,9 +81,6 @@ struct macro_buffer
 static void
 init_buffer (struct macro_buffer *b, int n)
 {
-  /* Small value for initial testing.  */
-  n = 1;
-
   b->size = n;
   if (n > 0)
     b->text = (char *) xmalloc (n);
@@ -715,7 +712,7 @@ gather_arguments (const char *name, struct macro_buffer *src, int *argc_p)
   get_token (&tok, src);
 
   args_len = 0;
-  args_size = 1;                /* small for initial testing */
+  args_size = 6;
   args = (struct macro_buffer *) xmalloc (sizeof (*args) * args_size);
 
   for (;;)

@@ -1,3 +1,10 @@
+2007-08-05  Jim Blandy  <jimb@codesourcery.com>
+
+	* macroexp.c (init_buffer): Remove testing code that overrides the
+	caller's length guess.
+	(gather_arguments): Use a larger initial size, now that the vector
+	growth code has been exercised.
+
 2007-08-05  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* solib-target.c (solib_target_relocate_section_addresses): Add
