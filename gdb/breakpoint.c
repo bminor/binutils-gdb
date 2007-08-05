@@ -3414,7 +3414,7 @@ print_one_breakpoint (struct breakpoint *b,
 
   /* 2 */
   annotate_field (1);
-  if (((int) b->type > (sizeof (bptypes) / sizeof (bptypes[0])))
+  if (((int) b->type >= (sizeof (bptypes) / sizeof (bptypes[0])))
       || ((int) b->type != bptypes[(int) b->type].type))
     internal_error (__FILE__, __LINE__,
 		    _("bptypes table does not describe type #%d."),
