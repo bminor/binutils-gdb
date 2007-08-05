@@ -1162,7 +1162,7 @@ add_register (struct collection_list *collection, unsigned int regno)
 {
   if (info_verbose)
     printf_filtered ("collect register %d\n", regno);
-  if (regno > (8 * sizeof (collection->regs_mask)))
+  if (regno >= (8 * sizeof (collection->regs_mask)))
     error (_("Internal: register number %d too large for tracepoint"),
 	   regno);
   collection->regs_mask[regno / 8] |= 1 << (regno % 8);
@@ -1489,7 +1489,10 @@ stringify_collection_list (struct collection_list *list, char *string)
   (*str_list)[ndx] = NULL;
 
   if (ndx == 0)
-    return NULL;
+    {
+      free (str_list);
+      return NULL;
+    }
   else
     return *str_list;
 }

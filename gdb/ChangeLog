@@ -1,3 +1,8 @@
+2007-08-04  Michael Snyder  <msnyder@access-company.com>
+
+	* tracepoint.c (add_register): Off by one error.
+	(stringify_collection_list): Free malloc buffer.
+
 2007-08-03  Michael Snyder  <msnyder@access-company.com>
 
 	* mi-cmd-var.c (mi_cmd_var_delete): Remove unused variable,
