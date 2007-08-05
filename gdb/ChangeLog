@@ -1,3 +1,8 @@
+2007-08-05  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* solib-target.c (solib_target_relocate_section_addresses): Add
+	orig_delta to addr_high.
+
 2007-08-04  Michael Snyder  <msnyder@access-company.com>
 
 	* remote-fileio.c (remote_fileio_func_write): Memory leak.

@@ -332,7 +332,8 @@ solib_target_relocate_section_addresses (struct so_list *so,
 	  so->addr_low = segment_bases[0];
 	  so->addr_high = (data->segment_bases[i - 1]
 			   + data->segment_sizes[i - 1]
-			   /* FIXME this must be needed! + orig_delta */);
+			   + orig_delta);
+	  gdb_assert (so->addr_low <= so->addr_high);
 
 	  free_symfile_segment_data (data);
 	}
