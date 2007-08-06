@@ -106,7 +106,7 @@ static int support_old_code = 0;
 static lang_assignment_statement_type *image_base_statement = 0;
 
 #ifdef DLL_SUPPORT
-static int    pep_enable_stdcall_fixup = -1; /* 0=disable 1=enable.  */
+static int    pep_enable_stdcall_fixup = 1; /* 0=disable 1=enable (default).  */
 static char * pep_out_def_filename = NULL;
 static char * pep_implib_filename = NULL;
 static int    pep_enable_auto_image_base = 0;
@@ -1305,19 +1305,8 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
 #ifdef TARGET_IS_i386pep
   pep_dll_id_target ("pei-x86-64");
 #endif
-  if (bfd_get_format (entry->the_bfd) == bfd_object)
-    {
-      char fbuf[LD_PATHMAX + 1];
-      const char *ext;
-
-      if (REALPATH (entry->filename, fbuf) == NULL)
-	strncpy (fbuf, entry->filename, sizeof (fbuf));
-
-      ext = fbuf + strlen (fbuf) - 4;
-
-      if (strcmp (ext, ".dll") == 0 || strcmp (ext, ".DLL") == 0)
-	return pep_implied_import_dll (fbuf);
-    }
+  if (pep_bfd_is_dll (entry->the_bfd))
+    return pep_implied_import_dll (entry->filename);
 #endif
   return FALSE;
 }
