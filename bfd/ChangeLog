@@ -1,3 +1,7 @@
+2007-08-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* po/bfd.pot: Regenerate.
+
 2007-08-06  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_link_hash_entry): Add
