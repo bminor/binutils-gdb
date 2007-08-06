@@ -1,5 +1,10 @@
 2007-08-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.am (BUILD_HFILES): Clean bfd_stdint.h.
+	* Makefile.in: Regenerated.
+
+2007-08-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* configure.in: Update version to 2.17.90.
 	* configure: Regenerated.
 
