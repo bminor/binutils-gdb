@@ -5286,7 +5286,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		  || (bed->want_p_paddr_set_to_zero &&
 		      IS_CONTAINED_BY_VMA (output_section, segment)))
 		{
-		  if (matching_lma == 0)
+		  if (matching_lma == 0 || output_section->lma < matching_lma)
 		    matching_lma = output_section->lma;
 
 		  /* We assume that if the section fits within the segment
@@ -5539,6 +5539,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       bfd_size_type amt;
       Elf_Internal_Shdr *this_hdr;
       asection *first_section = NULL;
+      asection *lowest_section = NULL;
 
       /* FIXME: Do we need to copy PT_NULL segment?  */
       if (segment->p_type == PT_NULL)
@@ -5553,7 +5554,9 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	  if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
 	    {
 	      if (!first_section)
-		first_section = section;
+		first_section = lowest_section = section;
+	      if (section->lma < lowest_section->lma)
+		lowest_section = section;
 	      section_count++;
 	    }
 	}
@@ -5599,7 +5602,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 
       if (!map->includes_phdrs && !map->includes_filehdr)
 	/* There is some other padding before the first section.  */
-	map->p_vaddr_offset = ((first_section ? first_section->lma : 0)
+	map->p_vaddr_offset = ((lowest_section ? lowest_section->lma : 0)
 			       - segment->p_paddr);
 
       if (section_count != 0)

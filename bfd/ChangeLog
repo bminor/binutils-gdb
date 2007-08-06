@@ -1,3 +1,9 @@
+2007-08-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf.c (rewrite_elf_program_header): Handle sections not sorted
+	by address.
+	(copy_elf_program_header): Likewise.
+
 2007-08-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (xvec_get_elf_backend_data): Add const.
