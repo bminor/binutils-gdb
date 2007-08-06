@@ -1,3 +1,7 @@
+2007-08-06  Michael Snyder  <msnyder@access-company.com>
+
+	* ada-lang.c (desc_bounds): Comparison of function address to NULL.
+
 2007-08-05  Jim Blandy  <jimb@codesourcery.com>
 
 	* macroexp.c (init_buffer): Remove testing code that overrides the

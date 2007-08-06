@@ -1322,7 +1322,7 @@ desc_bounds (struct value *arr)
         desc_bounds_type (thin_descriptor_type (type));
       LONGEST addr;
 
-      if (desc_bounds_type == NULL)
+      if (bounds_type == NULL)
         error (_("Bad GNAT array descriptor"));
 
       /* NOTE: The following calculation is not really kosher, but
