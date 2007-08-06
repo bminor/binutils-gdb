@@ -677,7 +677,7 @@ SOURCE_HFILES = \
 
 ## ... and all .h files which are in the build tree.
 BUILD_HFILES = \
-	bfdver.h elf32-target.h elf64-target.h targmatch.h
+	bfdver.h elf32-target.h elf64-target.h targmatch.h bfd_stdint.h
 
 HFILES = $(SOURCE_HFILES) $(BUILD_HFILES)
 

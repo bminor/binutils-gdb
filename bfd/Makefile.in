@@ -926,7 +926,7 @@ SOURCE_HFILES = \
 	vms.h xcoff-target.h xsym.h
 
 BUILD_HFILES = \
-	bfdver.h elf32-target.h elf64-target.h targmatch.h
+	bfdver.h elf32-target.h elf64-target.h targmatch.h bfd_stdint.h
 
 HFILES = $(SOURCE_HFILES) $(BUILD_HFILES)
 SRC_POTFILES = $(SOURCE_CFILES) $(SOURCE_HFILES)
