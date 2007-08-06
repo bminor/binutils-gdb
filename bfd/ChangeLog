@@ -1,5 +1,10 @@
 2007-08-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* configure.in: Update version to 2.17.90.
+	* configure: Regenerated.
+
+2007-08-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* po/bfd.pot: Regenerate.
 
 2007-08-06  Paul Brook  <paul@codesourcery.com>
