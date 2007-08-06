@@ -29,9 +29,16 @@ if {    ![istarget i*86-*-cygwin*]
     return
 }
 
-set pe_tests {
+if {[istarget x86_64-*-mingw*] } {
+  set pe_tests {
+    {".secrel32" "" "" {secrel1.s secrel2.s}
+    {{objdump -s secrel_64.d}} "secrel.x"}
+  }
+} else {
+  set pe_tests {
     {".secrel32" "" "" {secrel1.s secrel2.s}
      {{objdump -s secrel.d}} "secrel.x"}
+  }
 }
 
 run_ld_link_tests $pe_tests
