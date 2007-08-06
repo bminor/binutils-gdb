@@ -2129,6 +2129,10 @@ struct elf32_arm_link_hash_entry
        so that we can emit the Thumb trampoline only if needed.  */
     bfd_signed_vma plt_thumb_refcount;
 
+    /* Some references from Thumb code may be eliminated by BL->BLX
+       conversion, so record them separately.  */
+    bfd_signed_vma plt_maybe_thumb_refcount;
+
     /* Since PLT entries have variable size if the Thumb prologue is
        used, we need to record the index into .got.plt instead of
        recomputing it from the PLT offset.  */
@@ -2267,6 +2271,7 @@ elf32_arm_link_hash_newfunc (struct bfd_hash_entry * entry,
       ret->relocs_copied = NULL;
       ret->tls_type = GOT_UNKNOWN;
       ret->plt_thumb_refcount = 0;
+      ret->plt_maybe_thumb_refcount = 0;
       ret->plt_got_offset = -1;
       ret->export_glue = NULL;
     }
@@ -2422,6 +2427,8 @@ elf32_arm_copy_indirect_symbol (struct bfd_link_info *info,
       /* Copy over PLT info.  */
       edir->plt_thumb_refcount += eind->plt_thumb_refcount;
       eind->plt_thumb_refcount = 0;
+      edir->plt_maybe_thumb_refcount += eind->plt_maybe_thumb_refcount;
+      eind->plt_maybe_thumb_refcount = 0;
 
       if (dir->got.refcount <= 0)
 	{
@@ -3162,7 +3169,8 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	      && r_type != R_ARM_PLT32
 	      && r_type != R_ARM_CALL
 	      && r_type != R_ARM_JUMP24
-	      && r_type != R_ARM_THM_CALL)
+	      && r_type != R_ARM_THM_CALL
+	      && r_type != R_ARM_THM_JUMP24)
 	    continue;
 
 	  /* Get the section contents if we haven't done so already.  */
@@ -3216,10 +3224,12 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	      break;
 
 	    case R_ARM_THM_CALL:
+	    case R_ARM_THM_JUMP24:
 	      /* This one is a call from thumb code.  We look
 	         up the target of the call.  If it is not a thumb
                  target, we insert glue.  */
-	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC && !globals->use_blx
+	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC
+		  && !(globals->use_blx && r_type == R_ARM_THM_CALL)
 		  && h->root.type != bfd_link_hash_undefweak)
 		record_thumb_to_arm_glue (link_info, h);
 	      break;
@@ -4996,6 +5006,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
     case R_ARM_THM_XPC22:
     case R_ARM_THM_CALL:
+    case R_ARM_THM_JUMP24:
       /* Thumb BL (branch long instruction).  */
       {
 	bfd_vma relocation;
@@ -5059,7 +5070,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		&& (h == NULL || splt == NULL
 		    || h->plt.offset == (bfd_vma) -1))
 	      {
-		if (globals->use_blx)
+		if (globals->use_blx && r_type == R_ARM_THM_CALL)
 		  {
 		    /* Convert BL to BLX.  */
 		    lower_insn = (lower_insn & ~0x1000) | 0x0800;
@@ -5072,7 +5083,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		else
 		  return bfd_reloc_dangerous;
 	      }
-	    else if (sym_flags == STT_ARM_TFUNC && globals->use_blx)
+	    else if (sym_flags == STT_ARM_TFUNC && globals->use_blx
+		     && r_type == R_ARM_THM_CALL)
 	      {
 		/* Make sure this is a BL.  */
 		lower_insn |= 0x1800;
@@ -5085,7 +5097,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    value = (splt->output_section->vma
 		     + splt->output_offset
 		     + h->plt.offset);
- 	    if (globals->use_blx)
+ 	    if (globals->use_blx && r_type == R_ARM_THM_CALL)
  	      {
  		/* If the Thumb BLX instruction is available, convert the
 		   BL to a BLX instruction to call the ARM-mode PLT entry.  */
@@ -5125,7 +5137,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	if (signed_check > reloc_signed_max || signed_check < reloc_signed_min)
 	  overflow = TRUE;
 
-	if ((lower_insn & 0x1800) == 0x0800)
+	if ((lower_insn & 0x5000) == 0x4000)
 	  /* For a BLX instruction, make sure that the relocation is rounded up
 	     to a word boundary.  This follows the semantics of the instruction
 	     which specifies that bit 1 of the target address will come from bit
@@ -5151,79 +5163,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	return (overflow ? bfd_reloc_overflow : bfd_reloc_ok);
       }
       break;
-
-    case R_ARM_THM_JUMP24:
-      /* Thumb32 unconditional branch instruction.  */
-      {
-	bfd_vma relocation;
-	bfd_boolean overflow = FALSE;
-	bfd_vma upper_insn = bfd_get_16 (input_bfd, hit_data);
-	bfd_vma lower_insn = bfd_get_16 (input_bfd, hit_data + 2);
-	bfd_signed_vma reloc_signed_max = ((1 << (howto->bitsize - 1)) - 1) >> howto->rightshift;
-	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
-	bfd_vma check;
-	bfd_signed_vma signed_check;
-
-	/* Need to refetch the addend, reconstruct the top three bits, and glue the
-	   two pieces together.  */
-	if (globals->use_rel)
-	  {
-	    bfd_vma S  = (upper_insn & 0x0400) >> 10;
-	    bfd_vma hi = (upper_insn & 0x03ff);
-	    bfd_vma I1 = (lower_insn & 0x2000) >> 13;
-	    bfd_vma I2 = (lower_insn & 0x0800) >> 11;
-	    bfd_vma lo = (lower_insn & 0x07ff);
-
-	    I1 = !(I1 ^ S);
-	    I2 = !(I2 ^ S);
-	    S  = !S;
-
-	    signed_addend = (S << 24) | (I1 << 23) | (I2 << 22) | (hi << 12) | (lo << 1);
-	    signed_addend -= (1 << 24); /* Sign extend.  */
-	  }
-
-	/* ??? Should handle interworking?  GCC might someday try to
-	   use this for tail calls.  */
-
-      	relocation = value + signed_addend;
-	relocation -= (input_section->output_section->vma
-		       + input_section->output_offset
-		       + rel->r_offset);
-
-	check = relocation >> howto->rightshift;
-
-	/* If this is a signed value, the rightshift just dropped
-	   leading 1 bits (assuming twos complement).  */
-	if ((bfd_signed_vma) relocation >= 0)
-	  signed_check = check;
-	else
-	  signed_check = check | ~((bfd_vma) -1 >> howto->rightshift);
-
-	/* Assumes two's complement.  */
-	if (signed_check > reloc_signed_max || signed_check < reloc_signed_min)
-	  overflow = TRUE;
-
-	/* Put RELOCATION back into the insn.  */
-	{
-	  bfd_vma S  = (relocation & 0x01000000) >> 24;
-	  bfd_vma I1 = (relocation & 0x00800000) >> 23;
-	  bfd_vma I2 = (relocation & 0x00400000) >> 22;
-	  bfd_vma hi = (relocation & 0x003ff000) >> 12;
-	  bfd_vma lo = (relocation & 0x00000ffe) >>  1;
-
-	  I1 = !(I1 ^ S);
-	  I2 = !(I2 ^ S);
-
-	  upper_insn = (upper_insn & (bfd_vma) 0xf800) | (S << 10) | hi;
-	  lower_insn = (lower_insn & (bfd_vma) 0xd000) | (I1 << 13) | (I2 << 11) | lo;
-	}
-
-	/* Put the relocated value back in the object file:  */
-	bfd_put_16 (input_bfd, upper_insn, hit_data);
-	bfd_put_16 (input_bfd, lower_insn, hit_data + 2);
-
-	return (overflow ? bfd_reloc_overflow : bfd_reloc_ok);
-      }
 
     case R_ARM_THM_JUMP19:
       /* Thumb32 conditional branch instruction.  */
@@ -5253,6 +5192,17 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	    addend = (upper << 12) | (lower << 1);
 	    signed_addend = addend;
+	  }
+
+	/* Handle calls via the PLT.  */
+	if (h != NULL && splt != NULL && h->plt.offset != (bfd_vma) -1)
+	  {
+	    value = (splt->output_section->vma
+		     + splt->output_offset
+		     + h->plt.offset);
+	    /* Target the Thumb stub before the ARM PLT entry.  */
+	    value -= PLT_THUMB_STUB_SIZE;
+	    *unresolved_reloc_p = FALSE;
 	  }
 
 	/* ??? Should handle interworking?  GCC might someday try to
@@ -6266,7 +6216,8 @@ arm_add_to_rel (bfd *              abfd,
 {
   bfd_signed_vma addend;
 
-  if (howto->type == R_ARM_THM_CALL)
+  if (howto->type == R_ARM_THM_CALL
+      || howto->type == R_ARM_THM_JUMP24)
     {
       int upper_insn, lower_insn;
       int upper, lower;
@@ -7400,6 +7351,8 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
+  check_use_blx(globals);
+
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
     {
@@ -7450,6 +7403,8 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	case R_ARM_JUMP24:
 	case R_ARM_PREL31:
 	case R_ARM_THM_CALL:
+	case R_ARM_THM_JUMP24:
+	case R_ARM_THM_JUMP19:
 	case R_ARM_MOVW_ABS_NC:
 	case R_ARM_MOVT_ABS:
 	case R_ARM_MOVW_PREL_NC:
@@ -7471,7 +7426,11 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	      if (h->plt.refcount > 0)
 		{
 		  h->plt.refcount -= 1;
-		  if (ELF32_R_TYPE (rel->r_info) == R_ARM_THM_CALL)
+		  if (r_type == R_ARM_THM_CALL)
+		    eh->plt_maybe_thumb_refcount--;
+
+		  if (r_type == R_ARM_THM_JUMP24
+		      || r_type == R_ARM_THM_JUMP19)
 		    eh->plt_thumb_refcount--;
 		}
 
@@ -7673,6 +7632,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_JUMP24:
 	  case R_ARM_PREL31:
 	  case R_ARM_THM_CALL:
+	  case R_ARM_THM_JUMP24:
+	  case R_ARM_THM_JUMP19:
 	  case R_ARM_MOVW_ABS_NC:
 	  case R_ARM_MOVT_ABS:
 	  case R_ARM_MOVW_PREL_NC:
@@ -7708,7 +7669,15 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   it, even if it's an ABS32 relocation.  */
 		h->plt.refcount += 1;
 
+		/* It's too early to use htab->use_blx here, so we have to
+		   record possible blx references separately from
+		   relocs that definitely need a thumb stub.  */
+
 		if (r_type == R_ARM_THM_CALL)
+		  eh->plt_maybe_thumb_refcount += 1;
+
+		if (r_type == R_ARM_THM_JUMP24
+		    || r_type == R_ARM_THM_JUMP19)
 		  eh->plt_thumb_refcount += 1;
 	      }
 
@@ -8059,6 +8028,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
 	     linkage table, and we can just do a PC24 reloc instead.  */
 	  h->plt.offset = (bfd_vma) -1;
 	  eh->plt_thumb_refcount = 0;
+	  eh->plt_maybe_thumb_refcount = 0;
 	  h->needs_plt = 0;
 	}
 
@@ -8073,6 +8043,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
 	 the link may change h->type.  So fix it now.  */
       h->plt.offset = (bfd_vma) -1;
       eh->plt_thumb_refcount = 0;
+      eh->plt_maybe_thumb_refcount = 0;
     }
 
   /* If this is a weak symbol, and there is a real definition, the
@@ -8150,6 +8121,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   struct elf32_arm_link_hash_table *htab;
   struct elf32_arm_link_hash_entry *eh;
   struct elf32_arm_relocs_copied *p;
+  bfd_signed_vma thumb_refs;
 
   eh = (struct elf32_arm_link_hash_entry *) h;
 
@@ -8191,7 +8163,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
 	  /* If we will insert a Thumb trampoline before this PLT, leave room
 	     for it.  */
-	  if (!htab->use_blx && eh->plt_thumb_refcount > 0)
+	  thumb_refs = eh->plt_thumb_refcount;
+	  if (!htab->use_blx)
+	    thumb_refs += eh->plt_maybe_thumb_refcount;
+
+	  if (thumb_refs > 0)
 	    {
 	      h->plt.offset += PLT_THUMB_STUB_SIZE;
 	      s->size += PLT_THUMB_STUB_SIZE;
@@ -8900,6 +8876,7 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 	    }
 	  else
 	    {
+	      bfd_signed_vma thumb_refs;
 	      /* Calculate the displacement between the PLT slot and the
 		 entry in the GOT.  The eight-byte offset accounts for the
 		 value produced by adding to pc in the first instruction
@@ -8908,7 +8885,11 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 
 	      BFD_ASSERT ((got_displacement & 0xf0000000) == 0);
 
-	      if (!htab->use_blx && eh->plt_thumb_refcount > 0)
+	      thumb_refs = eh->plt_thumb_refcount;
+	      if (!htab->use_blx)
+		thumb_refs += eh->plt_maybe_thumb_refcount;
+
+	      if (thumb_refs > 0)
 		{
 		  put_thumb_insn (htab, output_bfd,
 				  elf32_arm_plt_thumb_stub[0], ptr - 4);
@@ -9638,10 +9619,13 @@ elf32_arm_output_plt_map (struct elf_link_hash_entry *h, void *inf)
     }
   else
     {
-      bfd_boolean thumb_stub;
+      bfd_signed_vma thumb_refs;
 
-      thumb_stub = eh->plt_thumb_refcount > 0 && !htab->use_blx;
-      if (thumb_stub)
+      thumb_refs = eh->plt_thumb_refcount;
+      if (!htab->use_blx)
+	thumb_refs += eh->plt_maybe_thumb_refcount;
+
+      if (thumb_refs > 0)
 	{
 	  if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_THUMB, addr - 4))
 	    return FALSE;
@@ -9655,7 +9639,7 @@ elf32_arm_output_plt_map (struct elf_link_hash_entry *h, void *inf)
       /* A three-word PLT with no Thumb thunk contains only Arm code, 
 	 so only need to output a mapping symbol for the first PLT entry and
 	 entries with thumb thunks.  */
-      if (thumb_stub || addr == 20)
+      if (thumb_refs > 0 || addr == 20)
 	{
 	  if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
 	    return FALSE;

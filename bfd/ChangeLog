@@ -1,3 +1,22 @@
+2007-08-06  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_link_hash_entry): Add
+	plt_maybe_thumb_refcount.
+	(elf32_arm_link_hash_newfunc): Set plt_maybe_thumb_refcount.
+	(elf32_arm_copy_indirect_symbol): Ditto.
+	(elf32_arm_adjust_dynamic_symbol): Ditto.
+	(bfd_elf32_arm_process_before_allocation): Handle R_ARM_THM_JUMP24.
+	(arm_add_to_rel): Ditto.
+	(elf32_arm_final_link_relocate): Merge R_ARM_THM_JUMP24 with
+	R_ARM_THM_CALL.  Handle R_ARM_THM_JUMP19 against a PLT stub.
+	(elf32_arm_gc_sweep_hook): Call check_use_blx.  Update plt counts
+	for R_ARM_THM_JUMP24 and R_ARM_THM_JUMP19.
+	(elf32_arm_check_relocs): Update plt counts for R_ARM_THM_JUMP24
+	and R_ARM_THM_JUMP19.  
+	(allocate_dynrelocs): Use plt_maybe_thumb_refcount.
+	(elf32_arm_finish_dynamic_symbol): Ditto.
+	(elf32_arm_output_plt_map): Ditto.
+
 2007-08-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf.c (rewrite_elf_program_header): Handle sections not sorted
