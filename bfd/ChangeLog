@@ -1,3 +1,8 @@
+2007-08-07  Nick Clifton  <nickc@redhat.com>
+
+	* po/bfd.po: Updated template.
+	* po/BLD-POTFILES.in: Regenerate.
+
 2007-08-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c: (_bfd_elf_make_section_from_phdr): Properly handle

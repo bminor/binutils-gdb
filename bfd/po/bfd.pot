@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-06 16:21-0400\n"
+"POT-Creation-Date: 2007-08-07 09:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2238,7 +2238,7 @@ msgstr ""
 msgid "%B: no group info for section %A"
 msgstr ""
 
-#: elf.c:703 elf.c:2886 elflink.c:9858
+#: elf.c:703 elf.c:2905 elflink.c:9858
 msgid "%B: warning: sh_link not set for section `%A'"
 msgstr ""
 
@@ -2305,50 +2305,50 @@ msgstr ""
 msgid "%B: don't know how to handle section `%s' [0x%8x]"
 msgstr ""
 
-#: elf.c:2843
+#: elf.c:2862
 msgid "%B: sh_link of section `%A' points to discarded section `%A' of `%B'"
 msgstr ""
 
-#: elf.c:2866
+#: elf.c:2885
 msgid "%B: sh_link of section `%A' points to removed section `%A' of `%B'"
 msgstr ""
 
-#: elf.c:4142
+#: elf.c:4161
 msgid ""
 "%B: The first section in the PT_DYNAMIC segment is not the .dynamic section"
 msgstr ""
 
-#: elf.c:4165
+#: elf.c:4184
 msgid "%B: Not enough room for program headers, try linking with -N"
 msgstr ""
 
-#: elf.c:4243
+#: elf.c:4262
 msgid "%B: section %A lma 0x%lx overlaps previous sections"
 msgstr ""
 
-#: elf.c:4341
+#: elf.c:4360
 msgid "%B: section `%A' can't be allocated in segment %d"
 msgstr ""
 
-#: elf.c:4390
+#: elf.c:4409
 msgid "%B: warning: allocated section `%s' not in segment"
 msgstr ""
 
-#: elf.c:4886
+#: elf.c:4905
 msgid "%B: symbol `%s' required but not present"
 msgstr ""
 
-#: elf.c:5199
+#: elf.c:5218
 msgid "%B: warning: Empty loadable segment detected, is this intentional ?\n"
 msgstr ""
 
-#: elf.c:6105
+#: elf.c:6124
 #, c-format
 msgid ""
 "Unable to find equivalent output section for symbol '%s' from section '%s'"
 msgstr ""
 
-#: elf.c:7079
+#: elf.c:7098
 msgid "%B: unsupported relocation type %s"
 msgstr ""
 
