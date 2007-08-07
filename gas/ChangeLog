@@ -1419,7 +1419,7 @@
 	(check_qword_reg): Likewise.
 	(check_word_reg): Likewise.
 
-2006-01-04  Julian Brown  <julian@codesourcery.com>
+2007-01-04  Julian Brown  <julian@codesourcery.com>
 
 	* config/tc-arm.c (do_neon_shl_imm): Swap rN, rM.
 	(do_neon_qshl_imm): Likewise.
