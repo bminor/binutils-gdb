@@ -113,6 +113,10 @@ bfin-*-elf)		targ_emul=elf32bfin;
 			targ_extra_emuls="elf32bfinfd"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
+bfin-*-rtems*)		targ_emul=elf32bfin;
+			targ_extra_emuls="elf32bfinfd"
+			targ_extra_libpath=$targ_extra_emuls
+			;;
 bfin-*-uclinux*)	targ_emul=elf32bfin;
 			targ_extra_emuls="elf32bfinfd"
 			targ_extra_libpath=$targ_extra_emuls

@@ -1,3 +1,7 @@
+2007-08-07	Ralf Corsépius <ralf.corsepius@rtems.org>
+
+	* configure.tgt: Add bfin-*rtems*.
+
 2007-08-06  Kai Tietz  <kai.tietz@onevision.com>
 
 	* emultempl/pep.em: (pep_enable_stdcall_fixup): Set to value 1.
