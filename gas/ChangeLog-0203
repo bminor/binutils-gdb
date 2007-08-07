@@ -4641,7 +4641,7 @@ Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* read.c (do_align): Use ATTRIBUTE_UNUSED_LABEL for label, not
 	ATTRIBUTE_UNUSED.
 
-2000-08-28  Catherine Moore  <clm@redhat.com>
+2002-08-28  Catherine Moore  <clm@redhat.com>
 
 	* tc-v850.c (v850_relax): Declare.
 	(v850_longcode): New routine.

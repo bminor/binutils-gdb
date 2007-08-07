@@ -1442,7 +1442,7 @@
 
 	* config/tc-m32r.c (m32r_check_fixup): Fixed X_op check.
 
-2007-07-27  H.J. Lu <hongjiu.lu@intel.com>
+2005-07-27  H.J. Lu <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (handle_large_common): Declare only for ELF.
 
@@ -1628,7 +1628,7 @@
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 
-2007-07-15  H.J. Lu <hongjiu.lu@intel.com>
+2005-07-15  H.J. Lu <hongjiu.lu@intel.com>
 
 	* gas/config/tc-i386.h (CpuVMX): New.
 	(CpuUnknownFlags): Add CpuVMX.

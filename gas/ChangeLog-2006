@@ -2032,7 +2032,7 @@
 	config/tc-mips.c, config/tc-msp430.c, config/tc-sh.c,
 	config/tc-tic4x.c, config/tc-xtensa.c: Fix comment typos.
 
-2005-04-20  Paul Brook  <paul@codesourcery.com>
+2006-04-20  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (s_arm_arch, s_arm_cpu, s_arm_fpu): Enable for
 	all targets.
@@ -2506,7 +2506,7 @@
 	* config/tc-ia64.c (specify_resource): Add the rule 17 from
 	SDM 2.2.
 
-2005-02-22  Paul Brook  <paul@codesourcery.com>
+2006-02-22  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_pld): Remove incorrect write to
 	inst.instruction.
@@ -2517,7 +2517,7 @@
 	* config/tc-arm.c (md_apply_fix): Fix off-by-one errors.
 
 2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
-            Anil Paranjape   <anilp1@kpitcummins.com>
+	    Anil Paranjape   <anilp1@kpitcummins.com>
             Shilin Shakti    <shilins@kpitcummins.com>
 
 	* Makefile.am: Add xc16x related entry.
@@ -2631,7 +2631,7 @@
 
 	* config/tc-arm.c (do_shift): Remove Thumb-1 constraint.
 
-2005-02-02  Paul Brook  <paul@codesourcery.com>
+2006-02-02  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (T2_OPCODE_MASK, T2_DATA_OP_SHIFT, T2_OPCODE_AND,
 	T2_OPCODE_BIC, T2_OPCODE_ORR, T2_OPCODE_ORN, T2_OPCODE_EOR,
