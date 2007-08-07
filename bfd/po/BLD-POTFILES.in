@@ -1,3 +1,4 @@
+bfd_stdint.h
 bfdver.h
 elf32-ia64.c
 elf32-target.h
