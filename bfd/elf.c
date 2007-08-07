@@ -2223,7 +2223,7 @@ _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
    for the single program segment.  The first has the length specified by
    the file size of the segment, and the second has the length specified
    by the difference between the two sizes.  In effect, the segment is split
-   into it's initialized and uninitialized parts.
+   into its initialized and uninitialized parts.
 
  */
 
@@ -2242,40 +2242,46 @@ _bfd_elf_make_section_from_phdr (bfd *abfd,
   split = ((hdr->p_memsz > 0)
 	    && (hdr->p_filesz > 0)
 	    && (hdr->p_memsz > hdr->p_filesz));
-  sprintf (namebuf, "%s%d%s", typename, index, split ? "a" : "");
-  len = strlen (namebuf) + 1;
-  name = bfd_alloc (abfd, len);
-  if (!name)
-    return FALSE;
-  memcpy (name, namebuf, len);
-  newsect = bfd_make_section (abfd, name);
-  if (newsect == NULL)
-    return FALSE;
-  newsect->vma = hdr->p_vaddr;
-  newsect->lma = hdr->p_paddr;
-  newsect->size = hdr->p_filesz;
-  newsect->filepos = hdr->p_offset;
-  newsect->flags |= SEC_HAS_CONTENTS;
-  newsect->alignment_power = bfd_log2 (hdr->p_align);
-  if (hdr->p_type == PT_LOAD)
+
+  if (hdr->p_filesz > 0)
     {
-      newsect->flags |= SEC_ALLOC;
-      newsect->flags |= SEC_LOAD;
-      if (hdr->p_flags & PF_X)
+      sprintf (namebuf, "%s%d%s", typename, index, split ? "a" : "");
+      len = strlen (namebuf) + 1;
+      name = bfd_alloc (abfd, len);
+      if (!name)
+	return FALSE;
+      memcpy (name, namebuf, len);
+      newsect = bfd_make_section (abfd, name);
+      if (newsect == NULL)
+	return FALSE;
+      newsect->vma = hdr->p_vaddr;
+      newsect->lma = hdr->p_paddr;
+      newsect->size = hdr->p_filesz;
+      newsect->filepos = hdr->p_offset;
+      newsect->flags |= SEC_HAS_CONTENTS;
+      newsect->alignment_power = bfd_log2 (hdr->p_align);
+      if (hdr->p_type == PT_LOAD)
 	{
-	  /* FIXME: all we known is that it has execute PERMISSION,
-	     may be data.  */
-	  newsect->flags |= SEC_CODE;
+	  newsect->flags |= SEC_ALLOC;
+	  newsect->flags |= SEC_LOAD;
+	  if (hdr->p_flags & PF_X)
+	    {
+	      /* FIXME: all we known is that it has execute PERMISSION,
+		 may be data.  */
+	      newsect->flags |= SEC_CODE;
+	    }
+	}
+      if (!(hdr->p_flags & PF_W))
+	{
+	  newsect->flags |= SEC_READONLY;
 	}
     }
-  if (!(hdr->p_flags & PF_W))
-    {
-      newsect->flags |= SEC_READONLY;
-    }
 
-  if (split)
+  if (hdr->p_memsz > hdr->p_filesz)
     {
-      sprintf (namebuf, "%s%db", typename, index);
+      bfd_vma align;
+
+      sprintf (namebuf, "%s%d%s", typename, index, split ? "b" : "");
       len = strlen (namebuf) + 1;
       name = bfd_alloc (abfd, len);
       if (!name)
@@ -2287,8 +2293,21 @@ _bfd_elf_make_section_from_phdr (bfd *abfd,
       newsect->vma = hdr->p_vaddr + hdr->p_filesz;
       newsect->lma = hdr->p_paddr + hdr->p_filesz;
       newsect->size = hdr->p_memsz - hdr->p_filesz;
+      newsect->filepos = hdr->p_offset + hdr->p_filesz;
+      align = newsect->vma & -newsect->vma;
+      if (align == 0 || align > hdr->p_align)
+	align = hdr->p_align;
+      newsect->alignment_power = bfd_log2 (align);
       if (hdr->p_type == PT_LOAD)
 	{
+	  /* Hack for gdb.  Segments that have not been modified do
+	     not have their contents written to a core file, on the
+	     assumption that a debugger can find the contents in the
+	     executable.  We flag this case by setting the fake
+	     section size to zero.  Note that "real" bss sections will
+	     always have their contents dumped to the core file.  */
+	  if (bfd_get_format (abfd) == bfd_core)
+	    newsect->size = 0;
 	  newsect->flags |= SEC_ALLOC;
 	  if (hdr->p_flags & PF_X)
 	    newsect->flags |= SEC_CODE;
