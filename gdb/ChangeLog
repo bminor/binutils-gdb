@@ -1,5 +1,7 @@
 2007-08-08  Michael Snyder  <msnyder@access-company.com>
 
+	* target.c (target_read_string): Guard against null.
+
 	* varobj.c (value_of_root): Move alloc after return to avoid leak.
 
 	* tui/tui-layout.c (tui_set_layout): Dead code, dead variable.

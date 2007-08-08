@@ -919,6 +919,8 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
   char *bufptr;
   unsigned int nbytes_read = 0;
 
+  gdb_assert (string);
+
   /* Small for testing.  */
   buffer_allocated = 4;
   buffer = xmalloc (buffer_allocated);
@@ -968,10 +970,9 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
       nbytes_read += tlen;
     }
 done:
+  *string = buffer;
   if (errnop != NULL)
     *errnop = errcode;
-  if (string != NULL)
-    *string = buffer;
   return nbytes_read;
 }
 
