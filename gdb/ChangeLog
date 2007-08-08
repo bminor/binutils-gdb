@@ -1,3 +1,7 @@
+2007-08-08  Michael Snyder  <msnyder@access-company.com>
+
+	* dwarf2read.c (add_partial_symbol): Memory leak.
+
 2007-08-06  Michael Snyder  <msnyder@access-company.com>
 
 	* ada-lang.c (desc_bounds): Comparison of function address to NULL.

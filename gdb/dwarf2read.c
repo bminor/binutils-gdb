@@ -1886,15 +1886,13 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   CORE_ADDR addr = 0;
-  char *actual_name;
+  char *actual_name = NULL;
   const char *my_prefix;
   const struct partial_symbol *psym = NULL;
   CORE_ADDR baseaddr;
   int built_actual_name = 0;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-
-  actual_name = NULL;
 
   if (pdi_needs_namespace (pdi->tag))
     {
@@ -1959,7 +1957,11 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	{
 	  /* Static Variable. Skip symbols without location descriptors.  */
 	  if (pdi->locdesc == NULL)
-	    return;
+	    {
+	      if (built_actual_name)
+		xfree (actual_name);
+	      return;
+	    }
 	  addr = decode_locdesc (pdi->locdesc, cu);
 	  /*prim_record_minimal_symbol (actual_name, addr + baseaddr,
 	     mst_file_data, objfile); */
@@ -1994,7 +1996,11 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
          union or class entry that does not have a byte size attribute
          and that has a DW_AT_declaration attribute."  */
       if (!pdi->has_byte_size && pdi->is_declaration)
-        return;
+	{
+	  if (built_actual_name)
+	    xfree (actual_name);
+	  return;
+	}
 
       /* NOTE: carlton/2003-10-07: See comment in new_symbol about
 	 static vs. global.  */
