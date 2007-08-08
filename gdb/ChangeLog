@@ -1,5 +1,7 @@
 2007-08-08  Michael Snyder  <msnyder@access-company.com>
 
+	* cp-valprint.c (cp_print_hpacc_virtual_table_entries): Memory leak.
+
 	* dwarf2read.c (add_partial_symbol): Memory leak.
 
 2007-08-06  Michael Snyder  <msnyder@access-company.com>

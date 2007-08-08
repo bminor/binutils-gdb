@@ -757,6 +757,7 @@ cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
 	  /* pai: (temp) FIXME Maybe this should be DMGL_ANSI */
 	  vf_name = cplus_demangle (field_physname, DMGL_ARM);
 	  fprintf_filtered (stream, " %s", vf_name);
+	  xfree (vf_name);
 	  if (--(*vfuncs) > 0)
 	    fputs_filtered (", ", stream);
 	}
