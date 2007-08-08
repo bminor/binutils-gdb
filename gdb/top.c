@@ -1093,8 +1093,8 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	    }
 	  strcpy (linebuffer, history_value);
 	  p = linebuffer + strlen (linebuffer);
-	  xfree (history_value);
 	}
+      xfree (history_value);
     }
 
   /* If we just got an empty line, and that is supposed
