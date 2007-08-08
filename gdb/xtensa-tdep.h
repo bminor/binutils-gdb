@@ -44,6 +44,8 @@ typedef enum
 
 /*  Xtensa register group.  */
 
+#define XTENSA_MAX_COPROCESSOR	0x08  /* Number of Xtensa coprocessors.  */
+
 typedef enum 
 {
   xtRegisterGroupUnknown = 0,
@@ -58,6 +60,16 @@ typedef enum
   xtRegisterGroupFloat		= 0x0400,    /* Floating Point.  */
   xtRegisterGroupVectra		= 0x0800,    /* Vectra.  */
   xtRegisterGroupSystem		= 0x1000,    /* System.  */
+
+  xtRegisterGroupCP0	    = 0x01000000,    /* CP0.  */
+  xtRegisterGroupCP1	    = 0x02000000,    /* CP1.  */
+  xtRegisterGroupCP2	    = 0x04000000,    /* CP2.  */
+  xtRegisterGroupCP3	    = 0x08000000,    /* CP3.  */
+  xtRegisterGroupCP4	    = 0x10000000,    /* CP4.  */
+  xtRegisterGroupCP5	    = 0x20000000,    /* CP5.  */
+  xtRegisterGroupCP6	    = 0x40000000,    /* CP6.  */
+  xtRegisterGroupCP7	    = 0x80000000,    /* CP7.  */
+
 } xtensa_register_group_t;
 
 

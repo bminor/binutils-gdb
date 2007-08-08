@@ -1,3 +1,13 @@
+2007-08-08  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.h (XTENSA_MAX_COPROCESSOR): New.
+	(xtensa_register_group_t): Add entries for coprocessors.
+	* xtensa-tdep.c (xtensa_init_reggroups): New register groups.
+	(xtensa_add_reggroups): Likewise.
+	(xtensa_register_reggroup_p): Likewise.
+	(xtensa_coprocessor_register_group): New function.
+	(xtensa_cp): New.
+
 2007-08-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* serial.c (serial_open): Fix the OPEN parameter macro expansion.

@@ -658,6 +658,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 static struct reggroup *xtensa_ar_reggroup;
 static struct reggroup *xtensa_user_reggroup;
 static struct reggroup *xtensa_vectra_reggroup;
+static struct reggroup *xtensa_cp[XTENSA_MAX_COPROCESSOR];
 
 static void
 xtensa_init_reggroups (void)
@@ -665,25 +666,51 @@ xtensa_init_reggroups (void)
   xtensa_ar_reggroup = reggroup_new ("ar", USER_REGGROUP);
   xtensa_user_reggroup = reggroup_new ("user", USER_REGGROUP);
   xtensa_vectra_reggroup = reggroup_new ("vectra", USER_REGGROUP);
-}
 
+  xtensa_cp[0] = reggroup_new ("cp0", USER_REGGROUP);
+  xtensa_cp[1] = reggroup_new ("cp1", USER_REGGROUP);
+  xtensa_cp[2] = reggroup_new ("cp2", USER_REGGROUP);
+  xtensa_cp[3] = reggroup_new ("cp3", USER_REGGROUP);
+  xtensa_cp[4] = reggroup_new ("cp4", USER_REGGROUP);
+  xtensa_cp[5] = reggroup_new ("cp5", USER_REGGROUP);
+  xtensa_cp[6] = reggroup_new ("cp6", USER_REGGROUP);
+  xtensa_cp[7] = reggroup_new ("cp7", USER_REGGROUP);
+}
 
 static void
 xtensa_add_reggroups (struct gdbarch *gdbarch)
 {
+  int i;
+
+  /* Predefined groups.  */
   reggroup_add (gdbarch, all_reggroup);
   reggroup_add (gdbarch, save_reggroup);
   reggroup_add (gdbarch, restore_reggroup);
   reggroup_add (gdbarch, system_reggroup);
-  reggroup_add (gdbarch, vector_reggroup);		/* vectra */
-  reggroup_add (gdbarch, general_reggroup);		/* core */
-  reggroup_add (gdbarch, float_reggroup);		/* float */
+  reggroup_add (gdbarch, vector_reggroup);
+  reggroup_add (gdbarch, general_reggroup);
+  reggroup_add (gdbarch, float_reggroup);
 
-  reggroup_add (gdbarch, xtensa_ar_reggroup);		/* ar */
-  reggroup_add (gdbarch, xtensa_user_reggroup);		/* user */
-  reggroup_add (gdbarch, xtensa_vectra_reggroup);	/* vectra */
+  /* Xtensa-specific groups.  */
+  reggroup_add (gdbarch, xtensa_ar_reggroup);
+  reggroup_add (gdbarch, xtensa_user_reggroup);
+  reggroup_add (gdbarch, xtensa_vectra_reggroup);
+
+  for (i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
+    reggroup_add (gdbarch, xtensa_cp[i]);
 }
 
+static int 
+xtensa_coprocessor_register_group (struct reggroup *group)
+{
+  int i;
+
+  for (i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
+    if (group == xtensa_cp[i])
+      return i;
+
+  return -1;
+}
 
 #define SAVE_REST_FLAGS	(XTENSA_REGISTER_FLAGS_READABLE \
 			| XTENSA_REGISTER_FLAGS_WRITABLE \
@@ -700,6 +727,7 @@ xtensa_register_reggroup_p (struct gdbarch *gdbarch,
   xtensa_register_t* reg = &REGMAP[regnum];
   xtensa_register_type_t type = reg->type;
   xtensa_register_group_t rg = reg->group;
+  int cp_number;
 
   /* First, skip registers that are not visible to this target
      (unknown and unmapped registers when not using ISS).  */
@@ -725,6 +753,8 @@ xtensa_register_reggroup_p (struct gdbarch *gdbarch,
   if (group == save_reggroup || group == restore_reggroup)
     return (regnum < gdbarch_num_regs (current_gdbarch)
 	    && (reg->flags & SAVE_REST_FLAGS) == SAVE_REST_VALID);
+  if ((cp_number = xtensa_coprocessor_register_group (group)) >= 0)
+    return rg & (xtRegisterGroupCP0 << cp_number);
   else
     return 1;
 }
