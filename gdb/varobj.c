@@ -1710,13 +1710,14 @@ value_of_root (struct varobj **var_handle, int *type_changed)
     {
       struct varobj *tmp_var;
       char *old_type, *new_type;
-      old_type = varobj_get_type (var);
+
       tmp_var = varobj_create (NULL, var->name, (CORE_ADDR) 0,
 			       USE_SELECTED_FRAME);
       if (tmp_var == NULL)
 	{
 	  return NULL;
 	}
+      old_type = varobj_get_type (var);
       new_type = varobj_get_type (tmp_var);
       if (strcmp (old_type, new_type) == 0)
 	{

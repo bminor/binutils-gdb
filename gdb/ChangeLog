@@ -1,5 +1,7 @@
 2007-08-08  Michael Snyder  <msnyder@access-company.com>
 
+	* varobj.c (value_of_root): Move alloc after return to avoid leak.
+
 	* tui/tui-layout.c (tui_set_layout): Dead code, dead variable.
 
 	* top.c (command_line_input): Memory leak.
