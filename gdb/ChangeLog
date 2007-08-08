@@ -1,5 +1,9 @@
 2007-08-08  Michael Snyder  <msnyder@access-company.com>
 
+	* solib-svr4.c (open_symbol_file_object): Memory leak.
+	(svr4_current_sos): Ditto.
+	(enable_break): Ditto.
+
 	* cp-valprint.c (cp_print_hpacc_virtual_table_entries): Memory leak.
 
 	* dwarf2read.c (add_partial_symbol): Memory leak.

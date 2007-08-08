@@ -623,6 +623,7 @@ open_symbol_file_object (void *from_ttyp)
 
   /* Now fetch the filename from target memory.  */
   target_read_string (l_name, &filename, SO_NAME_MAX_PATH_SIZE - 1, &errcode);
+  make_cleanup (xfree, filename);
 
   if (errcode)
     {
@@ -631,7 +632,6 @@ open_symbol_file_object (void *from_ttyp)
       return 0;
     }
 
-  make_cleanup (xfree, filename);
   /* Have a pathname: read the symbol file.  */
   symbol_file_add_main (filename, from_tty);
 
@@ -751,9 +751,9 @@ svr4_current_sos (void)
 	    {
 	      strncpy (new->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
 	      new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-	      xfree (buffer);
 	      strcpy (new->so_original_name, new->so_name);
 	    }
+	  xfree (buffer);
 
 	  /* If this entry has no name, or its name matches the name
 	     for the main executable, don't include it in the list.  */
@@ -1008,6 +1008,7 @@ enable_break (void)
       tmp_fd = solib_open (buf, &tmp_pathname);
       if (tmp_fd >= 0)
 	tmp_bfd = bfd_fopen (tmp_pathname, gnutarget, FOPEN_RB, tmp_fd);
+      xfree (tmp_pathname);
 
       if (tmp_bfd == NULL)
 	goto bkpt_at_symbol;
