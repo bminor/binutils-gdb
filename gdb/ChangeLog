@@ -1,3 +1,7 @@
+2007-08-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* serial.c (serial_open): Fix the OPEN parameter macro expansion.
+
 2007-08-08  Michael Snyder  <msnyder@access-company.com>
 
 	* target.c (target_read_string): Guard against null.
