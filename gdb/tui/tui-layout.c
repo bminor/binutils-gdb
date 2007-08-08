@@ -139,7 +139,6 @@ tui_set_layout (enum tui_layout_type layout_type,
       enum tui_layout_type cur_layout = tui_current_layout (), new_layout = UNDEFINED_LAYOUT;
       int regs_populate = FALSE;
       CORE_ADDR addr = extract_display_start_addr ();
-      struct tui_win_info * new_win_with_focus = (struct tui_win_info *) NULL;
       struct tui_win_info * win_with_focus = tui_win_with_focus ();
       struct tui_layout_def * layout_def = tui_layout_def ();
 
@@ -234,10 +233,8 @@ tui_set_layout (enum tui_layout_type layout_type,
 		      break;
 		    }
 		}
-	      if (new_win_with_focus != (struct tui_win_info *) NULL)
-		tui_set_win_focus_to (new_win_with_focus);
 	      /*
-	         ** Now update the window content
+	       * Now update the window content.
 	       */
 	      if (!regs_populate &&
 		  (new_layout == SRC_DATA_COMMAND ||
@@ -494,10 +491,10 @@ tui_set_layout_for_display_command (const char *layout_name)
 	    new_layout = prev_layout ();
 	  else
 	    status = TUI_FAILURE;
-	  xfree (buf_ptr);
 
 	  tui_set_layout (new_layout, dpy_type);
 	}
+      xfree (buf_ptr);
     }
   else
     status = TUI_FAILURE;

@@ -1,5 +1,7 @@
 2007-08-08  Michael Snyder  <msnyder@access-company.com>
 
+	* tui/tui-layout.c (tui_set_layout): Dead code, dead variable.
+
 	* top.c (command_line_input): Memory leak.
 
 	* solib-svr4.c (open_symbol_file_object): Memory leak.
