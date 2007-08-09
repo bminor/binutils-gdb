@@ -1,3 +1,7 @@
+2007-08-09  Ludovic Courtès  <ludo@gnu.org>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2007-08-09  Michael Snyder  <msnyder@access-company.com>
 
 	* solib.c (solib_open): Memory leak -- openp returns xmalloc buffer.
