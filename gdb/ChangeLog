@@ -1,3 +1,8 @@
+2007-08-10  Ludovic Courtès  <ludo@gnu.org>
+
+	* MAINTAINERS: Add Emacs local variables to use UTF-8 upon
+	opening.
+
 2007-08-09  Ludovic Courtès  <ludo@gnu.org>
 
 	* MAINTAINERS (Write After Approval): Add myself.
@@ -6236,4 +6241,5 @@ mode: change-log
 left-margin: 8
 fill-column: 74
 version-control: never
+coding: utf-8
 End:
