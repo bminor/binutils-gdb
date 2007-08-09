@@ -3971,6 +3971,32 @@ vma_page_aligned_bias (bfd_vma vma, ufile_ptr off, bfd_vma maxpagesize)
   return ((vma - off) % maxpagesize);
 }
 
+static void
+print_segment_map (const struct elf_segment_map *m)
+{
+  unsigned int j;
+  const char *pt = get_segment_type (m->p_type);
+  char buf[32];
+
+  if (pt == NULL)
+    {
+      if (m->p_type >= PT_LOPROC && m->p_type <= PT_HIPROC)
+	sprintf (buf, "LOPROC+%7.7x",
+		 (unsigned int) (m->p_type - PT_LOPROC));
+      else if (m->p_type >= PT_LOOS && m->p_type <= PT_HIOS)
+	sprintf (buf, "LOOS+%7.7x",
+		 (unsigned int) (m->p_type - PT_LOOS));
+      else
+	snprintf (buf, sizeof (buf), "%8.8x",
+		  (unsigned int) m->p_type);
+      pt = buf;
+    }
+  fprintf (stderr, "%s:", pt);
+  for (j = 0; j < m->count; j++)
+    fprintf (stderr, " %s", m->sections [j]->name);
+  putc ('\n',stderr);
+}
+
 /* Assign file positions to the sections based on the mapping from
    sections to segments.  This function also sets up some fields in
    the file header.  */
@@ -4359,6 +4385,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		(*_bfd_error_handler)
 		  (_("%B: section `%A' can't be allocated in segment %d"),
 		   abfd, sec, j);
+		print_segment_map (m);
 		bfd_set_error (bfd_error_bad_value);
 		return FALSE;
 	      }

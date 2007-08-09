@@ -1,3 +1,10 @@
+2007-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4909
+	* elf.c (print_segment_map): New function.
+	(assign_file_positions_for_load_sections): Call print_segment_map
+	when a section can't be allocated in segment.
+
 2007-08-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* opncls.c (bfd_openr_iovec): Fix the OPEN parameter macro expansion.
