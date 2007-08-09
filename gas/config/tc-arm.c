@@ -16787,7 +16787,31 @@ relaxed_symbol_addr(fragS *fragp, long stretch)
 
   if (stretch != 0
       && sym_frag->relax_marker != fragp->relax_marker)
-    addr += stretch;
+    {
+      fragS *f;
+
+      /* Adjust stretch for any alignment frag.  Note that if have
+	 been expanding the earlier code, the symbol may be
+	 defined in what appears to be an earlier frag.  FIXME:
+	 This doesn't handle the fr_subtype field, which specifies
+	 a maximum number of bytes to skip when doing an
+	 alignment.  */
+      for (f = fragp; f != NULL && f != sym_frag; f = f->fr_next)
+	{
+	  if (f->fr_type == rs_align || f->fr_type == rs_align_code)
+	    {
+	      if (stretch < 0)
+		stretch = - ((- stretch)
+			     & ~ ((1 << (int) f->fr_offset) - 1));
+	      else
+		stretch &= ~ ((1 << (int) f->fr_offset) - 1);
+	      if (stretch == 0)
+		break;
+	    }
+	}
+      if (f != NULL)
+	addr += stretch;
+    }
 
   return addr;
 }

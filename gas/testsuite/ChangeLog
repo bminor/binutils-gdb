@@ -1,3 +1,8 @@
+2007-08-09  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/relax_load_align.d: new test.
+	* gas/arm/relax_load_align.s: new test.
+
 2007-08-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run sse4_1-intel, sse4_2-intel,

@@ -1,3 +1,7 @@
+2007-08-09  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (relaxed_symbol_addr): Compensate for alignment.
+
 2007-08-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (check_byte_reg): Support pextrb and pinsrb.
