@@ -545,7 +545,8 @@ bfd_openr_iovec (const char *filename, const char *target,
   nbfd->filename = filename;
   nbfd->direction = read_direction;
 
-  stream = open (nbfd, open_closure);
+  /* `open (...)' would get expanded by an the open(2) syscall macro.  */
+  stream = (*open) (nbfd, open_closure);
   if (stream == NULL)
     {
       _bfd_delete_bfd (nbfd);

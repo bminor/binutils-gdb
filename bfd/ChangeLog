@@ -1,3 +1,7 @@
+2007-08-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* opncls.c (bfd_openr_iovec): Fix the OPEN parameter macro expansion.
+
 2007-08-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/bfd.pot: Updated template.
