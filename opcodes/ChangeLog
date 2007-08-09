@@ -1,3 +1,9 @@
+2007-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Add NoRex64 to pmovsxbw, pmovsxwd, pmovsxdq,
+	pmovzxbw, pmovzxwd, pmovzxdq and roundsd.
+	* i386-tbl.h: Regenerated.
+
 2007-08-03  James E. Wilson  <wilson@specifix.com>
 
 	* ia64-gen.c: (main): Add missing newline to copyright message.

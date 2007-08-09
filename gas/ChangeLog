@@ -1,3 +1,7 @@
+2007-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (check_byte_reg): Support pextrb and pinsrb.
+
 2007-07-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (check_long_reg): Allow cvtss2si to convert

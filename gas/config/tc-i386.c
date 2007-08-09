@@ -3062,13 +3062,16 @@ check_byte_reg (void)
       if (i.types[op] & Reg8)
 	continue;
 
-      /* movzx and movsx should not generate this warning.  */
+      /* movzx, movsx, pextrb and pinsrb should not generate this
+	 warning.  */
       if (intel_syntax
 	  && (i.tm.base_opcode == 0xfb7
 	      || i.tm.base_opcode == 0xfb6
 	      || i.tm.base_opcode == 0x63
 	      || i.tm.base_opcode == 0xfbe
-	      || i.tm.base_opcode == 0xfbf))
+	      || i.tm.base_opcode == 0xfbf
+	      || i.tm.base_opcode == 0x660f3a14
+	      || i.tm.base_opcode == 0x660f3a20))
 	continue;
 
       /* crc32 doesn't generate this warning.  */

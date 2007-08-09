@@ -104,4 +104,107 @@ foo:
 	roundss		$0x0,(%rcx),%xmm0
 	roundss		$0x0,%xmm1,%xmm0
 
+	.intel_syntax noprefix
+	blendpd xmm0,XMMWORD PTR [rcx],0x0
+	blendpd xmm0,xmm1,0x0
+	blendps xmm0,XMMWORD PTR [rcx],0x0
+	blendps xmm0,xmm1,0x0
+	blendvpd xmm0,XMMWORD PTR [rcx],xmm0
+	blendvpd xmm0,xmm1,xmm0
+	blendvps xmm0,XMMWORD PTR [rcx],xmm0
+	blendvps xmm0,xmm1,xmm0
+	dppd   xmm0,XMMWORD PTR [rcx],0x0
+	dppd   xmm0,xmm1,0x0
+	dpps   xmm0,XMMWORD PTR [rcx],0x0
+	dpps   xmm0,xmm1,0x0
+	extractps rcx,xmm0,0x0
+	extractps ecx,xmm0,0x0
+	extractps DWORD PTR [rcx],xmm0,0x0
+	insertps xmm0,xmm1,0x0
+	insertps xmm0,DWORD PTR [rcx],0x0
+	movntdqa xmm0,XMMWORD PTR [rcx]
+	mpsadbw xmm0,XMMWORD PTR [rcx],0x0
+	mpsadbw xmm0,xmm1,0x0
+	packusdw xmm0,XMMWORD PTR [rcx]
+	packusdw xmm0,xmm1
+	pblendvb xmm0,XMMWORD PTR [rcx],xmm0
+	pblendvb xmm0,xmm1,xmm0
+	pblendw xmm0,XMMWORD PTR [rcx],0x0
+	pblendw xmm0,xmm1,0x0
+	pcmpeqq xmm0,xmm1
+	pcmpeqq xmm0,XMMWORD PTR [rcx]
+	pextrb rcx,xmm0,0x0
+	pextrb ecx,xmm0,0x0
+	pextrb BYTE PTR [rcx],xmm0,0x0
+	pextrd ecx,xmm0,0x0
+	pextrd DWORD PTR [rcx],xmm0,0x0
+	pextrq rcx,xmm0,0x0
+	pextrq QWORD PTR [rcx],xmm0,0x0
+	pextrw rcx,xmm0,0x0
+	pextrw ecx,xmm0,0x0
+	pextrw WORD PTR [rcx],xmm0,0x0
+	phminposuw xmm0,xmm1
+	phminposuw xmm0,XMMWORD PTR [rcx]
+	pinsrb xmm0,BYTE PTR [rcx],0x0
+	pinsrb xmm0,ecx,0x0
+	pinsrb xmm0,rcx,0x0
+	pinsrd xmm0,DWORD PTR [rcx],0x0
+	pinsrd xmm0,ecx,0x0
+	pinsrq xmm0,QWORD PTR [rcx],0x0
+	pinsrq xmm0,rcx,0x0
+	pmaxsb xmm0,xmm1
+	pmaxsb xmm0,XMMWORD PTR [rcx]
+	pmaxsd xmm0,xmm1
+	pmaxsd xmm0,XMMWORD PTR [rcx]
+	pmaxud xmm0,xmm1
+	pmaxud xmm0,XMMWORD PTR [rcx]
+	pmaxuw xmm0,xmm1
+	pmaxuw xmm0,XMMWORD PTR [rcx]
+	pminsb xmm0,xmm1
+	pminsb xmm0,XMMWORD PTR [rcx]
+	pminsd xmm0,xmm1
+	pminsd xmm0,XMMWORD PTR [rcx]
+	pminud xmm0,xmm1
+	pminud xmm0,XMMWORD PTR [rcx]
+	pminuw xmm0,xmm1
+	pminuw xmm0,XMMWORD PTR [rcx]
+	pmovsxbw xmm0,xmm1
+	pmovsxbw xmm0,QWORD PTR [rcx]
+	pmovsxbd xmm0,xmm1
+	pmovsxbd xmm0,DWORD PTR [rcx]
+	pmovsxbq xmm0,xmm1
+	pmovsxbq xmm0,WORD PTR [rcx]
+	pmovsxwd xmm0,xmm1
+	pmovsxwd xmm0,QWORD PTR [rcx]
+	pmovsxwq xmm0,xmm1
+	pmovsxwq xmm0,DWORD PTR [rcx]
+	pmovsxdq xmm0,xmm1
+	pmovsxdq xmm0,QWORD PTR [rcx]
+	pmovzxbw xmm0,xmm1
+	pmovzxbw xmm0,QWORD PTR [rcx]
+	pmovzxbd xmm0,xmm1
+	pmovzxbd xmm0,DWORD PTR [rcx]
+	pmovzxbq xmm0,xmm1
+	pmovzxbq xmm0,WORD PTR [rcx]
+	pmovzxwd xmm0,xmm1
+	pmovzxwd xmm0,QWORD PTR [rcx]
+	pmovzxwq xmm0,xmm1
+	pmovzxwq xmm0,DWORD PTR [rcx]
+	pmovzxdq xmm0,xmm1
+	pmovzxdq xmm0,QWORD PTR [rcx]
+	pmuldq xmm0,xmm1
+	pmuldq xmm0,XMMWORD PTR [rcx]
+	pmulld xmm0,xmm1
+	pmulld xmm0,XMMWORD PTR [rcx]
+	ptest  xmm0,xmm1
+	ptest  xmm0,XMMWORD PTR [rcx]
+	roundpd xmm0,XMMWORD PTR [rcx],0x0
+	roundpd xmm0,xmm1,0x0
+	roundps xmm0,XMMWORD PTR [rcx],0x0
+	roundps xmm0,xmm1,0x0
+	roundsd xmm0,QWORD PTR [rcx],0x0
+	roundsd xmm0,xmm1,0x0
+	roundss xmm0,DWORD PTR [rcx],0x0
+	roundss xmm0,xmm1,0x0
+
 	.p2align	4,0
