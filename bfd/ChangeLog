@@ -1,3 +1,7 @@
+2007-08-09  Michael Snyder  <msnyder@access-company.com>
+
+	* aoutx.h (aout_get_external_symbols): Return if count is zero.
+
 2007-08-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4909

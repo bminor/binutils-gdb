@@ -1294,6 +1294,8 @@ aout_get_external_symbols (bfd *abfd)
       bfd_size_type amt;
 
       count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
+      if (count == 0)
+	return TRUE;		/* Nothing to do.  */
 
 #ifdef USE_MMAP
       if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd),
@@ -1306,7 +1308,7 @@ aout_get_external_symbols (bfd *abfd)
 	 later on.  If we put them on the objalloc it might not be
 	 possible to free them.  */
       syms = bfd_malloc (count * EXTERNAL_NLIST_SIZE);
-      if (syms == NULL && count != 0)
+      if (syms == NULL)
 	return FALSE;
 
       amt = exec_hdr (abfd)->a_syms;
