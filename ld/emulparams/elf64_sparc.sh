@@ -15,11 +15,9 @@ NO_SMALL_DATA=yes
 case "$target" in
   sparc*-solaris*)
     TEXT_START_ADDR=0x100000000
-    NONPAGED_TEXT_START_ADDR=0x100000000
     ;;
   *)
     TEXT_START_ADDR=0x100000
-    NONPAGED_TEXT_START_ADDR=0x100000
     ;;
 esac
 

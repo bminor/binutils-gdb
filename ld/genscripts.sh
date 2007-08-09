@@ -289,7 +289,6 @@ RELOCATING=" "
 
 LD_FLAG=n
 DATA_ALIGNMENT=${DATA_ALIGNMENT_n}
-TEXT_START_ADDR=${NONPAGED_TEXT_START_ADDR-${TEXT_START_ADDR}}
 ( echo "/* Script for -n: mix text and data on same page */"
   . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
@@ -327,7 +326,6 @@ if test -n "$GENERATE_SHLIB_SCRIPT"; then
   LD_FLAG=shared
   DATA_ALIGNMENT=${DATA_ALIGNMENT_s-${DATA_ALIGNMENT_}}
   CREATE_SHLIB=" "
-  # Note that TEXT_START_ADDR is set to NONPAGED_TEXT_START_ADDR.
   (
     echo "/* Script for ld --shared: link shared library */"
     . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
@@ -360,7 +358,6 @@ if test -n "$GENERATE_PIE_SCRIPT"; then
   LD_FLAG=pie
   DATA_ALIGNMENT=${DATA_ALIGNMENT_s-${DATA_ALIGNMENT_}}
   CREATE_PIE=" "
-  # Note that TEXT_START_ADDR is set to NONPAGED_TEXT_START_ADDR.
   (
     echo "/* Script for ld -pie: link position independent executable */"
     . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
