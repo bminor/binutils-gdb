@@ -1,4 +1,62 @@
-2007-08-07	Ralf Corsépius <ralf.corsepius@rtems.org>
+2007-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4515
+	* genscripts.sh: Delete all references to NONPAGED_TEXT_START_ADDR.
+	* ldint.texinfo: Likewise.
+	* emulparams/armaoutb.sh (NONPAGED_TEXT_START_ADDRESS): Delete.
+	* emulparams/armaoutl.sh: Likewise.
+	* emulparams/arcelf.sh (NONPAGED_TEXT_START_ADDR): Delete.
+	* emulparams/bfin.sh: Likewise
+	* emulparams/crisaout.sh: Likewise
+	* emulparams/elf32_sparc.sh: Likewise
+	* emulparams/elf32am33lin.sh: Likewise
+	* emulparams/elf32b4300.sh: Likewise
+	* emulparams/elf32bmip.sh: Likewise
+	* emulparams/elf32mcore.sh: Likewise
+	* emulparams/elf32xtensa.sh: Likewise
+	* emulparams/elf64_s390.sh: Likewise
+	* emulparams/elf64_sparc.sh: Likewise
+	* emulparams/elf64alpha.sh: Likewise
+	* emulparams/elf_i386.sh: Likewise
+	* emulparams/elf_i386_be.sh: Likewise
+	* emulparams/elf_i386_chaos.sh: Likewise
+	* emulparams/elf_i386_ldso.sh: Likewise
+	* emulparams/elf_i386_vxworks.sh: Likewise
+	* emulparams/elf_s390.sh: Likewise
+	* emulparams/elf_x86_64.sh: Likewise
+	* emulparams/i386aout.sh: Likewise
+	* emulparams/i386moss.sh: Likewise
+	* emulparams/i386msdos.sh: Likewise
+	* emulparams/i386nto.sh: Likewise
+	* emulparams/i386nw.sh: Likewise
+	* emulparams/m68kaout.sh: Likewise
+	* emulparams/m68kelf.sh: Likewise
+	* emulparams/ppcnw.sh: Likewise
+	* emulparams/sun4.sh: Likewise
+	* emulparams/tic80coff.sh: Likewise
+	* emulparams/vaxnbsd.sh: Likewise
+	* emulparams/armnbsd.sh (NONPAGED_TEXT_START_ADDR): Delete.
+	(TEXT_START_ADDR): Set for -n, -N.
+	* emulparams/coff_sparc.sh: Likewise
+	* emulparams/elf32vax.sh: Likewise
+	* emulparams/i386bsd.sh: Likewise
+	* emulparams/i386go32.sh: Likewise
+	* emulparams/i386linux.sh: Likewise
+	* emulparams/i386lynx.sh: Likewise
+	* emulparams/i386mach.sh: Likewise
+	* emulparams/m68k4knbsd.sh: Likewise
+	* emulparams/m68klinux.sh: Likewise
+	* emulparams/m68knbsd.sh: Likewise
+	* emulparams/ns32knbsd.sh: Likewise
+	* emulparams/pc532macha.sh: Likewise
+	* emulparams/ppclynx.sh: Likewise
+	* emulparams/scoreelf.sh: Likewise
+	* emulparams/sparcaout.sh: Likewise
+	* emulparams/sparclinux.sh: Likewise
+	* emulparams/sun3.sh: Likewise
+	* emulparams/vsta.sh: Likewise
+
+2007-08-07  Ralf Corsépius <ralf.corsepius@rtems.org>
 
 	* configure.tgt: Add bfin-*rtems*.
 

@@ -214,12 +214,6 @@ Some @file{scripttempl} scripts use this to set the entry address, in an
 Some @file{scripttempl} scripts use this to set the start address of the
 @samp{.text} section.
 
-@item NONPAGED_TEXT_START_ADDR
-If this is defined, the @file{genscripts.sh} script sets
-@code{TEXT_START_ADDR} to its value before running the
-@file{scripttempl} script for the @code{-n} and @code{-N} options
-(@pxref{linker scripts}).
-
 @item SEGMENT_SIZE
 The @file{genscripts.sh} script uses this to set the default value of
 @code{DATA_ALIGNMENT} when running the @file{scripttempl} script.

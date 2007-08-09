@@ -39,12 +39,6 @@ ARCH=tic80
 #
 TEXT_START_ADDR=0x2000000
 
-# If this is defined, the genscripts.sh script sets TEXT_START_ADDR to
-# its value before running the scripttempl script for the -n and -N
-# options.
-#
-# NONPAGED_TEXT_START_ADDR=
-
 # The genscripts.sh script uses this to set the default value of 
 # DATA_ALIGNMENT when running the scripttempl script.
 #
