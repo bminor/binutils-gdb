@@ -1,3 +1,10 @@
+2007-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/copy-2.d (not-target): Match *-*-*aout.
+	* binutils-all/copy-3.d (not-target): Likewise.
+	* binutils-all/objcopy.exp (objcopy_test): Remove extraneous
+	setup_xfail.
+
 2007-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* lib/utils-lib.exp: Update copyright notice to refer to GPLv3.

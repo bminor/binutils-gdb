@@ -103,9 +103,6 @@ proc objcopy_test {testname srcfile} {
 	    # On OSF/1, this succeeds with gas and fails with /bin/as.
 	    setup_xfail "alpha*-*-osf*"
 
-	    # This fails for COFF i960-vxworks targets.
-	    setup_xfail "i960-*-vxworks*"
-
 	    fail "objcopy ($testname)"
 	}
     }

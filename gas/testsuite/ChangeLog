@@ -1,3 +1,7 @@
+2007-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/all/weakref1u.d (not-target): Match *-*-*aout.
+
 2007-07-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4834
