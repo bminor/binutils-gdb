@@ -1,3 +1,8 @@
+2007-08-09  Joel Brobecker  <brobecker@adacore.com>
+
+        * solib-som.c (som_relocate_section_addresses): Stop saving
+        the $CODE$ section in the so_list structure.
+
 2007-08-08  Maxim Grigoriev  <maxim2405@gmail.com>
 
 	* xtensa-tdep.h (XTENSA_MAX_COPROCESSOR): New.

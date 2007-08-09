@@ -113,13 +113,6 @@ som_relocate_section_addresses (struct so_list *so,
 {
   flagword aflag = bfd_get_section_flags(so->abfd, sec->the_bfd_section);
 
-  /* solib.c does something similar, but it only recognizes ".text", SOM calls
-     the text section "$CODE$".  */
-  if (strcmp (sec->the_bfd_section->name, "$CODE$") == 0)
-    {
-      so->textsection = sec;
-    }
-
   if (aflag & SEC_CODE)
     {
       sec->addr    += so->lm_info->text_addr - so->lm_info->text_link_addr; 
