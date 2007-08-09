@@ -555,6 +555,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
 	prologue-value.c \
 	regcache.c reggroups.c remote.c remote-fileio.c \
+	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
 	serial.c ser-base.c ser-unix.c \
 	solib.c solib-null.c source.c \
@@ -787,6 +788,8 @@ remote_fileio_h = remote-fileio.h
 remote_h = remote.h
 rs6000_tdep_h = rs6000-tdep.h $(defs_h)
 s390_tdep_h = s390-tdep.h
+scm_lang_h = scm-lang.h $(scm_tags_h)
+scm_tags_h = scm-tags.h
 score_tdep_h = score-tdep.h
 sentinel_frame_h = sentinel-frame.h
 serial_h = serial.h
@@ -958,6 +961,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	varobj.o vec.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
 	m2-lang.o p-lang.o p-typeprint.o p-valprint.o \
+	scm-exp.o scm-lang.o scm-valprint.o \
 	sentinel-frame.o \
 	complaints.o typeprint.o \
 	ada-typeprint.o c-typeprint.o f-typeprint.o m2-typeprint.o \
@@ -2534,6 +2538,15 @@ s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
 	$(frame_unwind_h) $(dwarf2_frame_h) $(reggroups_h) $(regset_h) \
 	$(value_h) $(gdb_assert_h) $(dis_asm_h) $(solib_svr4_h) \
 	$(prologue_value_h) $(s390_tdep_h)
+scm-exp.o: scm-exp.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
+	$(parser_defs_h) $(language_h) $(value_h) $(c_lang_h) $(scm_lang_h) \
+	$(scm_tags_h)
+scm-lang.o: scm-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
+	$(parser_defs_h) $(language_h) $(value_h) $(c_lang_h) $(scm_lang_h) \
+	$(scm_tags_h) $(source_h) $(gdb_string_h) $(gdbcore_h) $(infcall_h)
+scm-valprint.o: scm-valprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
+	$(expression_h) $(parser_defs_h) $(language_h) $(value_h) \
+	$(scm_lang_h) $(valprint_h) $(gdbcore_h) $(c_lang_h)
 score-tdep.o: score-tdep.c $(defs_h) $(gdb_assert_h) $(inferior_h) \
 	$(symtab_h) $(objfiles_h) $(gdbcore_h) $(target_h) \
 	$(arch_utils_h) $(regcache_h) $(dis_asm_h) $(frame_unwind_h) \

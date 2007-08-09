@@ -1,5 +1,11 @@
 2007-08-10  Ludovic Courtès  <ludo@gnu.org>
 
+	* Makefile.in (SFILES): Add scm-{exp,lang,valprint}.c.
+	(scm_lang_h, scm_tags_h): New.
+	(COMMON_OBS): Add scm-{exp,lang,valprint}.o.
+	(scm-exp.o, scm-lang.o, scm-valprint.o): New targets.
+	* defs.h (enum language): Add `language_scm'.
+
 	* MAINTAINERS: Add Emacs local variables to use UTF-8 upon
 	opening.
 

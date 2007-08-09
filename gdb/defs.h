@@ -212,6 +212,7 @@ enum language
     language_asm,		/* Assembly language */
     language_pascal,		/* Pascal */
     language_ada,		/* Ada */
+    language_scm,		/* Guile Scheme */
     language_minimal,		/* All other languages, minimal support only */
     nr_languages
   };
