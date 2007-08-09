@@ -1,3 +1,7 @@
+2007-08-09  Michael Snyder  <msnyder@access-company.com>
+
+	* solib.c (solib_open): Memory leak -- openp returns xmalloc buffer.
+
 2007-08-09  Joel Brobecker  <brobecker@adacore.com>
 
         * solib-som.c (som_relocate_section_addresses): Stop saving

@@ -176,6 +176,17 @@ solib_open (char *in_pathname, char **found_pathname)
   /* Now see if we can open it.  */
   found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
 
+  /* We try to find the library in various ways.  After each attempt
+     (except for the one above), either found_file >= 0 and
+     temp_pathname is a malloc'd string, or found_file < 0 and
+     temp_pathname does not point to storage that needs to be
+     freed.  */
+
+    if (found_file < 0)
+      temp_pathname = NULL;
+    else
+      temp_pathname = xstrdup (temp_pathname);
+
   /* If the search in gdb_sysroot failed, and the path name is
      absolute at this point, make it relative.  (openp will try and open the
      file according to its absolute path otherwise, which is not what we want.)
@@ -224,8 +235,13 @@ solib_open (char *in_pathname, char **found_pathname)
 
   /* Done.  If not found, tough luck.  Return found_file and 
      (optionally) found_pathname.  */
-  if (found_pathname != NULL && temp_pathname != NULL)
-    *found_pathname = xstrdup (temp_pathname);
+  if (temp_pathname)
+    {
+      if (found_pathname != NULL)
+	*found_pathname = temp_pathname;
+      else
+	xfree (temp_pathname);
+    }
   return found_file;
 }
 
