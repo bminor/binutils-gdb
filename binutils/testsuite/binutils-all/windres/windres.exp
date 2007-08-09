@@ -88,7 +88,11 @@ foreach res $res_list {
     if ![string match "" $err] then {
 	send_log "$err\n"
 	verbose "$err" 1
-	fail "windres/$broot (parse)"
+	if [string match "*windows.h: No such file*" $err] then {
+	    unsupported "windres/$broot (parse)"
+	} else {
+	    fail "windres/$broot (parse)"
+	}
 	continue
     }
     pass "windres/$broot (parse)"

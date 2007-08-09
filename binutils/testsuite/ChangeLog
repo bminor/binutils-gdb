@@ -4,6 +4,8 @@
 	* binutils-all/copy-3.d (not-target): Likewise.
 	* binutils-all/objcopy.exp (objcopy_test): Remove extraneous
 	setup_xfail.
+	* windres/windres.exp: Return unsupported rather than fail if
+	windows.h not found.
 
 2007-07-05  Nick Clifton  <nickc@redhat.com>
 
