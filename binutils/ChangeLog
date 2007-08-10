@@ -1,3 +1,8 @@
+2007-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: Updated Finnish translation.
+	* po/vi.po: Updated Vietnamese translation.
+
 2007-08-10  Kai Tietz  <kai.tietz@onevision.com>
 
 	* doc/binutils.texi: (windmc): Correct incorrect desciption.

@@ -4,10 +4,10 @@
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.16.93\n"
+"Project-Id-Version: gprof 2.17.90\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-01 07:23+0930\n"
-"PO-Revision-Date: 2007-07-12 15:47+0930\n"
+"POT-Creation-Date: 2007-05-15 16:49+0930\n"
+"PO-Revision-Date: 2007-08-07 21:11+0930\n"
 "Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
 "Language-Team: Vietnamese <vi-VN@googlegroups.com> \n"
 "MIME-Version: 1.0\n"
@@ -20,22 +20,22 @@ msgstr ""
 msgid "<indirect child>"
 msgstr "<con gián tiếp>"
 
-#: alpha.c:119 mips.c:71
+#: alpha.c:107 mips.c:59
 #, c-format
 msgid "[find_call] %s: 0x%lx to 0x%lx\n"
 msgstr "[lời_gọi_tìm] %s: 0x%lx đến 0x%lx\n"
 
-#: alpha.c:141
+#: alpha.c:129
 #, c-format
 msgid "[find_call] 0x%lx: jsr%s <indirect_child>\n"
 msgstr "[lời_gọi_tìm] 0x%lx: jsr%s <con gián tiếp>\n"
 
-#: alpha.c:151
+#: alpha.c:139
 #, c-format
 msgid "[find_call] 0x%lx: bsr"
 msgstr "[lời_gọi_tìm] 0x%lx: bsr"
 
-#: basic_blocks.c:128 call_graph.c:89 hist.c:97
+#: basic_blocks.c:128 call_graph.c:89 hist.c:105
 #, c-format
 msgid "%s: %s: unexpected end of file\n"
 msgstr "%s: %s: kết thúc tập tin bất thường\n"
@@ -135,7 +135,7 @@ msgstr ""
 "\t\t\tĐồ thị gọi\n"
 "\n"
 
-#: cg_print.c:78 hist.c:359
+#: cg_print.c:78 hist.c:466
 #, c-format
 msgid ""
 "\n"
@@ -191,7 +191,7 @@ msgstr "bản thân"
 msgid "descendants"
 msgstr "con cháu"
 
-#: cg_print.c:98 hist.c:385
+#: cg_print.c:98 hist.c:492
 msgid "name"
 msgstr "tên"
 
@@ -233,47 +233,47 @@ msgstr ""
 msgid "<cycle %d>"
 msgstr "<chu kỳ %d>"
 
-#: corefile.c:64
-#, c-format
-msgid "%s: could not open %s.\n"
-msgstr "%s: không thể mở %s.\n"
-
-#: corefile.c:78 corefile.c:112
+#: corefile.c:59
 #, c-format
 msgid "%s: unable to parse mapping file %s.\n"
 msgstr "%s: không thể phân tách tập tin ánh xạ %s.\n"
 
-#: corefile.c:158
+#: corefile.c:72
 #, c-format
-msgid "%s: %s: not in a.out format\n"
-msgstr "%s: %s: không phải theo định dạng « a.out »\n"
+msgid "%s: could not open %s.\n"
+msgstr "%s: không thể mở %s.\n"
 
-#: corefile.c:169
+#: corefile.c:166
+#, c-format
+msgid "%s: %s: not in executable format\n"
+msgstr "%s: %s: không phải theo định dạng có thể thực hiện\n"
+
+#: corefile.c:177
 #, c-format
 msgid "%s: can't find .text section in %s\n"
 msgstr "%s: không tìm thấy phần văn bản « .text » trong %s\n"
 
-#: corefile.c:244
+#: corefile.c:252
 #, c-format
 msgid "%s: ran out room for %lu bytes of text space\n"
 msgstr "%s: không đủ sức chứa đối với vùng văn bản %lu byte\n"
 
-#: corefile.c:258
+#: corefile.c:266
 #, c-format
 msgid "%s: can't do -c\n"
 msgstr "%s: không thể làm « -c »\n"
 
-#: corefile.c:292
+#: corefile.c:305
 #, c-format
 msgid "%s: -c not supported on architecture %s\n"
 msgstr "%s: tùy chọn « -c »  không được hỗ trợ trên kiến trúc %s\n"
 
-#: corefile.c:457
+#: corefile.c:470
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr "%s: tập tin « %s » không có ký hiệu\n"
 
-#: corefile.c:771
+#: corefile.c:772
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr "%s: sai đếm: ltab.len=%d thay cho %ld\n"
@@ -308,62 +308,62 @@ msgstr "%s: %s: tìm thế thẻ sai %d (tập tin bị hỏng?)\n"
 msgid "%s: profiling rate incompatible with first gmon file\n"
 msgstr "%s: tỷ lệ tính hiện trạng không tương thích với tập tin gmon thứ nhất\n"
 
-#: gmon_io.c:486
+#: gmon_io.c:489
 #, c-format
 msgid "%s: incompatible with first gmon file\n"
 msgstr "%s: không tương thích với tập tin gmon thứ nhất\n"
 
-#: gmon_io.c:514
+#: gmon_io.c:516
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
 msgstr "%s: tập tin « %s » có vẻ là không theo định dạng « gmon.out »\n"
 
-#: gmon_io.c:535
+#: gmon_io.c:529
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
 msgstr "%s: gặp kết thúc tập tin bất thường sau khi đọc %d/%d thùng\n"
 
-#: gmon_io.c:568
+#: gmon_io.c:563
 #, c-format
 msgid "time is in ticks, not seconds\n"
 msgstr "tính thời gian theo tích, không phải theo giây\n"
 
-#: gmon_io.c:574 gmon_io.c:750
+#: gmon_io.c:569 gmon_io.c:746
 #, c-format
 msgid "%s: don't know how to deal with file format %d\n"
 msgstr "%s: không biết xử lý định dạng tập tin %d như thế nào\n"
 
-#: gmon_io.c:581
+#: gmon_io.c:576
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
 msgstr "Tập tin « %s » (phiên bản %d) chứa:\n"
 
-#: gmon_io.c:584
+#: gmon_io.c:579
 #, c-format
 msgid "\t%d histogram record\n"
 msgstr "\t%d mục ghi biểu đồ tần xuất\n"
 
-#: gmon_io.c:585
+#: gmon_io.c:580
 #, c-format
 msgid "\t%d histogram records\n"
 msgstr "\t%d mục ghi biểu đồ tần xuất\n"
 
-#: gmon_io.c:587
+#: gmon_io.c:582
 #, c-format
 msgid "\t%d call-graph record\n"
 msgstr "\t%d mục ghi đồ thị gọi\n"
 
-#: gmon_io.c:588
+#: gmon_io.c:583
 #, c-format
 msgid "\t%d call-graph records\n"
 msgstr "\t%d mục ghi đồ thị gọi\n"
 
-#: gmon_io.c:590
+#: gmon_io.c:585
 #, c-format
 msgid "\t%d basic-block count record\n"
 msgstr "\t%d mục ghi tổng khối cơ bản\n"
 
-#: gmon_io.c:591
+#: gmon_io.c:586
 #, c-format
 msgid "\t%d basic-block count records\n"
 msgstr "\t%d mục ghi tổng khối cơ bản\n"
@@ -382,7 +382,7 @@ msgid ""
 "\t[--no-static] [--print-path] [--separate-files]\n"
 "\t[--static-call-graph] [--sum] [--table-length=len] [--traditional]\n"
 "\t[--version] [--width=n] [--ignore-non-functions]\n"
-"\t[--demangle[=STYLE]] [--no-demangle]\n"
+"\t[--demangle[=STYLE]] [--no-demangle] [@FILE]\n"
 "\t[image-file] [profile-file...]\n"
 msgstr ""
 "Cách sử dụng: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n"
@@ -418,6 +418,7 @@ msgstr ""
 "\t[--width=số] \t\t\t\t\tđộ rộng\n"
 "\t[--ignore-non-functions]\t\tbỏ qua các cái khác hàm\n"
 "\t[--demangle[=kiểu_dáng]] \t\ttháo gỡ\n"
+"\t[@TẬP_TIN]\n"
 "\t[--no-demangle]\t\t\t\tkhông tháo gỡ\n"
 "\t[image-file] \t\t\t\t\ttập tin ảnh\n"
 "\t[profile-file...]\t\t\t\t\ttập tin hồ sơ\n"
@@ -472,32 +473,59 @@ msgstr ""
 msgid "%s: sorry, file format `prof' is not yet supported\n"
 msgstr "%s: tiếc là chưa hỗ trợ định dạng tập tin « prof »\n"
 
-#: gprof.c:576
+#: gprof.c:581
 #, c-format
 msgid "%s: gmon.out file is missing histogram\n"
 msgstr "%s: tập tin « gmon.out » còn thiếu biểu đồ tần xuất\n"
 
-#: gprof.c:583
+#: gprof.c:588
 #, c-format
 msgid "%s: gmon.out file is missing call-graph data\n"
 msgstr "%s: tập tin « gmon.out » file còn thiếu dữ liệu đồ thị gọi\n"
 
-#: hist.c:126
+#: hist.c:133
 #, c-format
-msgid "%s: `%s' is incompatible with first gmon file\n"
-msgstr "%s: « %s » không tương thích với tập tin gmon thứ nhất\n"
+msgid ""
+"%s: dimension unit changed between histogram records\n"
+"%s: from '%s'\n"
+"%s: to '%s'\n"
+msgstr ""
+"%s: đơn vị chiều đã thay đổi giữa hai mục ghi đồ thị\n"
+"%s: từ « %s »\n"
+"%s: sang « %s »\n"
 
-#: hist.c:142
+#: hist.c:143
+#, c-format
+msgid ""
+"%s: dimension abbreviation changed between histogram records\n"
+"%s: from '%c'\n"
+"%s: to '%c'\n"
+msgstr ""
+"%s: cách viết tắt chiều đã thay đổi giữa hai mục ghi đồ thị\n"
+"%s: từ « %c »\n"
+"%s: sang « %c »\n"
+
+#: hist.c:157
+#, c-format
+msgid "%s: different scales in histogram records"
+msgstr "%s: tỷ lệ khác nhau trong mục ghi đồ thị"
+
+#: hist.c:194
+#, c-format
+msgid "%s: overlapping histogram records\n"
+msgstr "%s: mục ghi đồ thị chồng chéo lên nhau\n"
+
+#: hist.c:228
 #, c-format
 msgid "%s: %s: unexpected EOF after reading %u of %u samples\n"
 msgstr "%s: %s: gặp kết thúc tập tin bất thường sau khi đọc %u trên %u mẫu\n"
 
-#: hist.c:355
+#: hist.c:462
 #, c-format
 msgid "%c%c/call"
 msgstr "%c%c/lời gọi"
 
-#: hist.c:363
+#: hist.c:470
 #, c-format
 msgid ""
 " for %.2f%% of %.2f %s\n"
@@ -506,7 +534,7 @@ msgstr ""
 " trong %.2f%% trên %.2f %s\n"
 "\n"
 
-#: hist.c:369
+#: hist.c:476
 #, c-format
 msgid ""
 "\n"
@@ -515,7 +543,7 @@ msgstr ""
 "\n"
 "Mỗi mẫu được tính là %g %s.\n"
 
-#: hist.c:374
+#: hist.c:481
 #, c-format
 msgid ""
 " no time accumulated\n"
@@ -524,27 +552,27 @@ msgstr ""
 " chưa tích lũy thời gian\n"
 "\n"
 
-#: hist.c:381
+#: hist.c:488
 msgid "cumulative"
 msgstr "lũy tích"
 
-#: hist.c:381
+#: hist.c:488
 msgid "self  "
 msgstr "bản thân  "
 
-#: hist.c:381
+#: hist.c:488
 msgid "total "
 msgstr "tổng "
 
-#: hist.c:384
+#: hist.c:491
 msgid "time"
 msgstr "thời gian"
 
-#: hist.c:384
+#: hist.c:491
 msgid "calls"
 msgstr "lời gọi"
 
-#: hist.c:473
+#: hist.c:580
 #, c-format
 msgid ""
 "\n"
@@ -557,17 +585,22 @@ msgstr ""
 "\n"
 "hồ sơ phẳng:\n"
 
-#: hist.c:479
+#: hist.c:586
 #, c-format
 msgid "Flat profile:\n"
 msgstr "Hồ sơ phẳng:\n"
 
-#: mips.c:82
+#: hist.c:705
+#, c-format
+msgid "%s: found a symbol that covers several histogram records"
+msgstr "%s: tìm thấy một ký hiệu bàn đến vài mục ghi đồ thị"
+
+#: mips.c:71
 #, c-format
 msgid "[find_call] 0x%lx: jal"
 msgstr "[lời_gọi_tìm] 0x%lx: jal"
 
-#: mips.c:107
+#: mips.c:96
 #, c-format
 msgid "[find_call] 0x%lx: jalr\n"
 msgstr "[lời_gọi_tìm] 0x%lx: jalr\n"
@@ -582,7 +615,10 @@ msgstr "%s: không tìm thấy « %s »\n"
 msgid "*** File %s:\n"
 msgstr "••• Tập tin %s:\n"
 
-#: utils.c:107
+#: utils.c:99
 #, c-format
 msgid " <cycle %d>"
 msgstr " <chu kỳ %d>"
+
+#~ msgid "%s: `%s' is incompatible with first gmon file\n"
+#~ msgstr "%s: « %s » không tương thích với tập tin gmon thứ nhất\n"

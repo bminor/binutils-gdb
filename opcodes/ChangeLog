@@ -1,3 +1,9 @@
+2007-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: Updated Finnish translation.
+	* po/ga.po: Updated Irish translation.
+	* po/vi.po: Updated Vietnamese translation.
+
 2007-08-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add NoRex64 to pmovsxbw, pmovsxwd, pmovsxdq,
