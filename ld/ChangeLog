@@ -1,5 +1,9 @@
 2007-08-10  Nick Clifton  <nickc@redhat.com>
 
+	* NEWS: Add a marker for the 2.18 features.
+
+2007-08-10  Nick Clifton  <nickc@redhat.com>
+
 	* po/ga.po: Updated Irish translation.
 	* po/vi.po: Updated Vietnamese translation.
 

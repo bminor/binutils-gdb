@@ -1,3 +1,7 @@
+2007-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Add a marker for the 2.18 features.
+
 2007-08-09  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (relaxed_symbol_addr): Compensate for alignment.
