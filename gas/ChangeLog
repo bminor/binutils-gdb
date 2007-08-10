@@ -1,3 +1,7 @@
+2007-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Add a marker for the 2.18 features.
+
 2007-07-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (check_long_reg): Allow cvtss2si to convert

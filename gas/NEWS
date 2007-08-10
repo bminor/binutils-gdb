@@ -1,4 +1,6 @@
 -*- text -*-
+Changes in 2.18:
+
 * The GAS sources are now released under the GPLv3.
 
 * Support for the National Semiconductor CR16 target has been added.

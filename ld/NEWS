@@ -1,4 +1,6 @@
 -*- text -*-
+Changes in 2.18:
+
 * Linker sources now released under version 3 of the GNU General Public
   License.
 
