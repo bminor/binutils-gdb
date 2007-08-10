@@ -1008,7 +1008,6 @@ enable_break (void)
       tmp_fd = solib_open (buf, &tmp_pathname);
       if (tmp_fd >= 0)
 	tmp_bfd = bfd_fopen (tmp_pathname, gnutarget, FOPEN_RB, tmp_fd);
-      xfree (tmp_pathname);
 
       if (tmp_bfd == NULL)
 	goto bkpt_at_symbol;
@@ -1102,6 +1101,7 @@ enable_break (void)
       /* For whatever reason we couldn't set a breakpoint in the dynamic
          linker.  Warn and drop into the old code.  */
     bkpt_at_symbol:
+      xfree (tmp_pathname);
       warning (_("Unable to find dynamic linker breakpoint function.\n"
                "GDB will be unable to debug shared library initializers\n"
                "and track explicitly loaded dynamic code."));

@@ -1,5 +1,8 @@
 2007-08-10  Michael Snyder  <msnyder@access-company.com>
 
+	* solib-svr4.c (enable_break): Don't free tmp_pathname until
+	after closing bfd.
+
 	* completer.c: Comment/whitespace cleanup.
 
 2007-08-10  Joel Brobecker  <brobecker@adacore.com>
