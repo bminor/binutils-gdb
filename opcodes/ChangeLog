@@ -1,3 +1,9 @@
+2007-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: Updated Finish translation.
+	* po/ga.po: Updated Irish translation.
+	* po/vi.po: Updated Vietnamese translation.
+
 2007-08-03  James E. Wilson  <wilson@specifix.com>
 
 	* ia64-gen.c: (main): Add missing newline to copyright message.
