@@ -691,6 +691,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   if (argc != 1)
     {
       mi_error_message = xstrprintf ("mi_cmd_data_evaluate_expression: Usage: -data-evaluate-expression expression");
+      ui_out_stream_delete (stb);
       return MI_CMD_ERROR;
     }
 

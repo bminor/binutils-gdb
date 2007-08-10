@@ -1,5 +1,7 @@
 2007-08-10  Michael Snyder  <msnyder@access-company.com>
 
+	* mi/mi-main.c (mi_cmd_data_evaluate_expression): Resource leak.
+
 	* mi/mi-cmd-var.c (mi_cmd_var_list_children): Memory leak.
 
 	* solib-svr4.c (enable_break): Don't free tmp_pathname until
