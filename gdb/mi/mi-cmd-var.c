@@ -373,7 +373,10 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
     print_values = PRINT_NO_VALUES;
 
   if (numchild <= 0)
-    return MI_CMD_DONE;
+    {
+      xfree (childlist);
+      return MI_CMD_DONE;
+    }
 
   if (mi_version (uiout) == 1)
     cleanup_children = make_cleanup_ui_out_tuple_begin_end (uiout, "children");
