@@ -1,5 +1,6 @@
 2007-08-06  Kai Tietz   <kai.tietz@onevision.com>
 
+	PR ld/4877
 	* ld-pe/pe.exp: Special diff file for x86_64-mingw target.
 	* ld-pe/secrel_64.d: New.
 
