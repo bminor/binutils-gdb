@@ -22,7 +22,7 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
-#include "filenames.h"		/* for DOSish file names */
+#include "filenames.h"		/* For DOSish file names.  */
 #include "language.h"
 
 #include "cli/cli-decode.h"
@@ -40,7 +40,7 @@
 
 #include "completer.h"
 
-/* Prototypes for local functions */
+/* Prototypes for local functions.  */
 static
 char *line_completion_function (const char *text, int matches, 
 				char *line_buffer,
@@ -63,7 +63,7 @@ char *line_completion_function (const char *text, int matches,
    word break characters, since we use it in command names.  If the
    readline library sees one in any of the current completion strings,
    it thinks that the string needs to be quoted and automatically supplies
-   a leading quote. */
+   a leading quote.  */
 static char *gdb_completer_command_word_break_characters =
 " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,";
 
@@ -85,10 +85,10 @@ static char *gdb_completer_loc_break_characters = " \t\n*|\"';:?><,";
 
 /* Characters that can be used to quote completion strings.  Note that we
    can't include '"' because the gdb C parser treats such quoted sequences
-   as strings. */
+   as strings.  */
 static char *gdb_completer_quote_characters = "'";
 
-/* Accessor for some completer data that may interest other files. */
+/* Accessor for some completer data that may interest other files.  */
 
 char *
 get_gdb_completer_quote_characters (void)
@@ -231,7 +231,7 @@ location_completer (char *text, char *word)
 	  if (*p == quote_found)
 	    quote_found = 0;
 	  else
-	    break;		/* hit the end of text */
+	    break;		/* Hit the end of text.  */
 	}
 #if HAVE_DOS_BASED_FILE_SYSTEM
       /* If we have a DOS-style absolute file name at the beginning of
@@ -395,7 +395,7 @@ complete_line (const char *text, char *line_buffer, int point)
   rl_completer_word_break_characters =
     current_language->la_word_break_characters();
 
-      /* Decide whether to complete on a list of gdb commands or on symbols. */
+  /* Decide whether to complete on a list of gdb commands or on symbols. */
   tmp_command = (char *) alloca (point + 1);
   p = tmp_command;
 
@@ -486,7 +486,7 @@ complete_line (const char *text, char *line_buffer, int point)
 		  list = complete_on_cmdlist (*c->prefixlist, p, word);
 
 		  /* Insure that readline does the right thing
-		         with respect to inserting quotes.  */
+		     with respect to inserting quotes.  */
 		  rl_completer_word_break_characters =
 		    gdb_completer_command_word_break_characters;
 		}
@@ -551,8 +551,8 @@ complete_line (const char *text, char *line_buffer, int point)
 
 	      list = complete_on_cmdlist (result_list, q, word);
 
-		  /* Insure that readline does the right thing
-		     with respect to inserting quotes.  */
+	      /* Insure that readline does the right thing
+		 with respect to inserting quotes.  */
 	      rl_completer_word_break_characters =
 		gdb_completer_command_word_break_characters;
 	    }
@@ -624,22 +624,23 @@ complete_line (const char *text, char *line_buffer, int point)
    free the string.  */
 
 static char *
-line_completion_function (const char *text, int matches, char *line_buffer, int point)
+line_completion_function (const char *text, int matches, 
+			  char *line_buffer, int point)
 {
-  static char **list = (char **) NULL;	/* Cache of completions */
-  static int index;		/* Next cached completion */
+  static char **list = (char **) NULL;	/* Cache of completions.  */
+  static int index;			/* Next cached completion.  */
   char *output = NULL;
 
   if (matches == 0)
     {
       /* The caller is beginning to accumulate a new set of completions, so
          we need to find all of them now, and cache them for returning one at
-         a time on future calls. */
+         a time on future calls.  */
 
       if (list)
 	{
 	  /* Free the storage used by LIST, but not by the strings inside.
-	     This is because rl_complete_internal () frees the strings. */
+	     This is because rl_complete_internal () frees the strings.  */
 	  xfree (list);
 	}
       index = 0;
@@ -650,7 +651,7 @@ line_completion_function (const char *text, int matches, char *line_buffer, int 
      dole them out one at a time.  The vector of completions is NULL
      terminated, so after returning the last one, return NULL (and continue
      to do so) each time we are called after that, until a new list is
-     available. */
+     available.  */
 
   if (list)
     {
@@ -696,10 +697,10 @@ skip_quoted_chars (char *str, char *quotechars, char *breakchars)
     {
       if (quote_char != '\0')
 	{
-	  /* Ignore everything until the matching close quote char */
+	  /* Ignore everything until the matching close quote char.  */
 	  if (*scan == quote_char)
 	    {
-	      /* Found matching close quote. */
+	      /* Found matching close quote.  */
 	      scan++;
 	      break;
 	    }
@@ -720,7 +721,7 @@ skip_quoted_chars (char *str, char *quotechars, char *breakchars)
 
 /* Skip over the possibly quoted word STR (as defined by the quote
    characters and word break characters used by the completer).
-   Returns pointer to the location after the "word". */
+   Returns pointer to the location after the "word".  */
 
 char *
 skip_quoted (char *str)
