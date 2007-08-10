@@ -1105,7 +1105,7 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
   if (i1 > 0)
     {
       sym_arr = (struct symbol **) alloca ((i1 + 1) * sizeof (struct symbol *));
-      sym_arr[i1] = 0;
+      sym_arr[i1] = NULL;
 
       copy = find_imps (file_symtab, block, *argptr, sym_arr, &i1, &i2); 
       *argptr = copy;
@@ -1145,7 +1145,7 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
       else
 	{
 	  /* The only match was a non-debuggable symbol.  */
-	  values.sals[0].symtab = 0;
+	  values.sals[0].symtab = NULL;
 	  values.sals[0].line = 0;
 	  values.sals[0].end = 0;
 	  values.sals[0].pc = SYMBOL_VALUE_ADDRESS (sym_arr[0]);
@@ -1411,7 +1411,7 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
 	     char *copy, struct type *t, struct symbol *sym_class)
 {
   struct symtabs_and_lines values;
-  struct symbol *sym = 0;
+  struct symbol *sym = NULL;
   int i1;	/*  Counter for the symbol array.  */
   struct symbol **sym_arr =  alloca (total_number_of_methods (t)
 				     * sizeof (struct symbol *));
@@ -1573,7 +1573,7 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
   sign = none;
 
   /* We might need a canonical line spec if no file was specified.  */
-  int need_canonical = (file_symtab == 0) ? 1 : 0;
+  int need_canonical = (file_symtab == NULL) ? 1 : 0;
 
   init_sal (&val);
 
@@ -1675,7 +1675,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
       /* Look up entire name as a symbol first.  */
       sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
-      file_symtab = (struct symtab *) 0;
+      file_symtab = (struct symtab *) NULL;
       need_canonical = 1;
       /* Symbol was found --> jump to normal symbol processing.  */
       if (sym)
@@ -1689,7 +1689,6 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 	return minsym_found (funfirstline, msymbol);
 
       /* Not a user variable or function -- must be convenience variable.  */
-      need_canonical = (file_symtab == 0) ? 1 : 0;
       valx = value_of_internalvar (lookup_internalvar (copy + 1));
       if (TYPE_CODE (value_type (valx)) != TYPE_CODE_INT)
 	error (_("Convenience variables used in line specs must have integer values."));

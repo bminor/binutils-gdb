@@ -1,5 +1,11 @@
 2007-08-10  Michael Snyder  <msnyder@access-company.com>
 
+	* linespec.c (decode_dollar): Dead code, ptr can't be non-null.
+	(decode_objc): Use "NULL" instead of 0.
+	(find_method): Ditto.
+	(decode_all_digits): Ditto.
+	(decode_dollar): Ditto.
+
 	* mi/mi-main.c (mi_cmd_data_evaluate_expression): Resource leak.
 
 	* mi/mi-cmd-var.c (mi_cmd_var_list_children): Memory leak.
