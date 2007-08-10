@@ -22,7 +22,7 @@
 #define SHA1_H 1
 
 #include <stdio.h>
-#include <stdint.h>
+#include "bfd_stdint.h"
 
 /* Structure to save state of computation between the single steps.  */
 struct sha1_ctx
