@@ -1,3 +1,12 @@
+2007-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* sim-memopt.c (memory_options): Mention that the
+	--memory-size switch accepts suffixes.
+        (parse_size): Handle a suffix on the size value.
+        * sim-options.c (standard_options): Mention that the mem-size
+	switch accepts suffixes.
+        (standard_option_handler): Handle a suffix on the size value.
+
 2006-12-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* acconfig.h: Remove.

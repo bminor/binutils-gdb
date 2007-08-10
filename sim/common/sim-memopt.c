@@ -90,8 +90,8 @@ static const OPTION memory_options[] =
       memory_option_handler },
 
   { {"memory-size", required_argument, NULL, OPTION_MEMORY_SIZE },
-      '\0', "SIZE", "Add memory at address zero",
-      memory_option_handler },
+      '\0', "<size>[in bytes, Kb (k suffix), Mb (m suffix) or Gb (g suffix)]",
+     "Add memory at address zero", memory_option_handler },
 
   { {"memory-fill", required_argument, NULL, OPTION_MEMORY_FILL },
       '\0', "VALUE", "Fill subsequently added memory regions",
@@ -286,11 +286,28 @@ parse_size (char *chp,
 	    address_word *nr_bytes,
 	    unsigned *modulo)
 {
-  /* <nr_bytes> [ "%" <modulo> ] */
+  /* <nr_bytes>[K|M|G] [ "%" <modulo> ] */
   *nr_bytes = strtoul (chp, &chp, 0);
-  if (*chp == '%')
+  switch (*chp)
     {
+    case '%':
       *modulo = strtoul (chp + 1, &chp, 0);
+      break;
+    case 'g': case 'G': /* Gigabyte suffix.  */
+      *nr_bytes <<= 10;
+      /* Fall through.  */
+    case 'm': case 'M': /* Megabyte suffix.  */
+      *nr_bytes <<= 10;
+      /* Fall through.  */
+    case 'k': case 'K': /* Kilobyte suffix.  */
+      *nr_bytes <<= 10;
+      /* Check for a modulo specifier after the suffix.  */
+      ++ chp;
+      if (* chp == 'b' || * chp == 'B')
+	++ chp;
+      if (* chp == '%')
+	*modulo = strtoul (chp + 1, &chp, 0);
+      break;
     }
   return chp;
 }

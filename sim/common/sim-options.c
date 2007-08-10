@@ -167,8 +167,8 @@ static const OPTION standard_options[] =
 
 #ifdef SIM_HAVE_FLATMEM
   { {"mem-size", required_argument, NULL, OPTION_MEM_SIZE},
-      'm', "MEMORY SIZE", "Specify memory size",
-      standard_option_handler },
+     'm', "<size>[in bytes, Kb (k suffix), Mb (m suffix) or Gb (g suffix)]",
+     "Specify memory size", standard_option_handler },
 #endif
 
   { {"do-command", required_argument, NULL, OPTION_DO_COMMAND},
@@ -381,7 +381,21 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 #ifdef SIM_HAVE_FLATMEM
     case OPTION_MEM_SIZE:
       {
-	unsigned long ul = strtol (arg, NULL, 0);
+	char * endp;
+	unsigned long ul = strtol (arg, &endp, 0);
+
+	switch (* endp)
+	  {
+	  case 'k': case 'K': size <<= 10; break;
+	  case 'm': case 'M': size <<= 20; break;
+	  case 'g': case 'G': size <<= 30; break;
+	  case ' ': case '\0': case '\t':  break;
+	  default:
+	    if (ul > 0)
+	      sim_io_eprintf (sd, "Ignoring strange character at end of memory size: %c\n", * endp);
+	    break;
+	  }
+
 	/* 16384: some minimal amount */
 	if (! isdigit (arg[0]) || ul < 16384)
 	  {
