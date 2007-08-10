@@ -3714,7 +3714,7 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
   int nbits = 0;
   int c;
   long upper_limit;
-  int twos_complement_representation = radix == 8 && twos_complement_bits > 0;
+  int twos_complement_representation;
 
   if (*p == '-')
     {
@@ -3730,6 +3730,7 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
       p++;
     }
 
+  twos_complement_representation = radix == 8 && twos_complement_bits > 0;
   upper_limit = LONG_MAX / radix;
 
   while ((c = *p++) >= '0' && c < ('0' + radix))
