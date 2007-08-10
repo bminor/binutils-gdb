@@ -228,11 +228,9 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = `if [ -f ../bison/bison ]; then echo ../bison/bison -y -L$(srcdir)/../bison/; else echo @YACC@; fi`
-ac_ct_AR = @ac_ct_AR@
+YFLAGS = -d
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
-ac_ct_RANLIB = @ac_ct_RANLIB@
-ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__include = @am__include@
@@ -249,6 +247,7 @@ build_vendor = @build_vendor@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
+dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
@@ -261,13 +260,16 @@ infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
+psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -281,7 +283,6 @@ AUTOMAKE_OPTIONS = cygnus dejagnu
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 SUBDIRS = po
 tooldir = $(exec_prefix)/$(target_alias)
-YFLAGS = -d
 AM_CFLAGS = $(WARN_CFLAGS)
 
 # We put the scripts in the directory $(scriptdir)/ldscripts.
@@ -2821,6 +2822,7 @@ pep-dll.o: pep-dll.c pe-dll.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ldmisc.h ldgram.h ldmain.h ldfile.h ldemul.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h deffile.h pe-dll.h \
   pep-dll.h
+sha1.o: sha1.c config.h sha1.h ../bfd/bfd_stdint.h
 ldgram.o: ldgram.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/bfdlink.h ld.h ldexp.h ldver.h ldlang.h ldfile.h \
@@ -2834,7 +2836,6 @@ deffilep.o: deffilep.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   ld.h ldmisc.h deffile.h
-sha1.o: sha1.c config.h sha1.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

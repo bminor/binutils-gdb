@@ -1,5 +1,10 @@
 2007-08-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2007-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/4875
 	* elf-hints-local.h: Include bfd_stdint.h.  Use uint32_t
 	instead of u_int32_t.

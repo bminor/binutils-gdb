@@ -2034,6 +2034,7 @@ pep-dll.o: pep-dll.c pe-dll.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ldmisc.h ldgram.h ldmain.h ldfile.h ldemul.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h deffile.h pe-dll.h \
   pep-dll.h
+sha1.o: sha1.c config.h sha1.h ../bfd/bfd_stdint.h
 ldgram.o: ldgram.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/bfdlink.h ld.h ldexp.h ldver.h ldlang.h ldfile.h \
@@ -2047,5 +2048,4 @@ deffilep.o: deffilep.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   ld.h ldmisc.h deffile.h
-sha1.o: sha1.c config.h sha1.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
