@@ -70,12 +70,16 @@ remote_fileio_init_fd_map (void)
 static int
 remote_fileio_resize_fd_map (void)
 {
+  int i = remote_fio_data.fd_map_size;
+
   if (!remote_fio_data.fd_map)
     return remote_fileio_init_fd_map ();
   remote_fio_data.fd_map_size += 10;
   remote_fio_data.fd_map =
     (int *) xrealloc (remote_fio_data.fd_map,
 		      remote_fio_data.fd_map_size * sizeof (int));
+  for (; i < remote_fio_data.fd_map_size; i++)
+    remote_fio_data.fd_map[i] = FIO_FD_INVALID;
   return remote_fio_data.fd_map_size - 10;
 }
 

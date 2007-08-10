@@ -1,3 +1,8 @@
+2007-08-09  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* remote-fileio.c (remote_fileio_resize_fd_map): Initialize newly
+	allocated file descriptors.
+
 2007-08-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in: Minor cleanup throughout; add some missing variables,
