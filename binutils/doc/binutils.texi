@@ -3021,12 +3021,11 @@ format. This is the default behaviour.
 
 @item -v
 @item --verbose
-Enable verbose mode.  This tells you what the preprocessor is if you
-didn't specify one.
+Enable verbose mode.
 
 @item -V
 @item --version
-Prints the version number for @command{windres}.
+Prints the version number for @command{windmc}.
 
 @item -x @var{path}
 @itemx --xdgb @var{path}
