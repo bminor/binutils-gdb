@@ -1,3 +1,8 @@
+2007-08-10  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* MAINTAINERS: Add myself as CR16 support maintainer and
+	update myself as CRX support maintainer.
+
 2007-08-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.

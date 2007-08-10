@@ -66,8 +66,9 @@ responsibility among the other maintainers.
   BFIN		   Bernd Schmidt <bernd.schmidt@analog.com>
   BUILD SYSTEM	   Ben Elliston <bje@gnu.org>
   BUILD SYSTEM	   Daniel Jacobowitz <dan@debian.org>
+  CR16		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
-  CRX		   Tomer Levi <Tomer.Levi@nsc.com>
+  CRX		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
   DLX              Nikolaos Kavvadias <nkavv@physics.auth.gr>
   DWARF2	   Jason Merrill <jason@redhat.com>
   FR30		   Dave Brolley <brolley@redhat.com>
