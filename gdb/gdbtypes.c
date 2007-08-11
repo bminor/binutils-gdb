@@ -1196,8 +1196,8 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
       type = TYPE_TARGET_TYPE (type);
     }
 
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT &&
-      TYPE_CODE (type) != TYPE_CODE_UNION)
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT 
+      && TYPE_CODE (type) != TYPE_CODE_UNION)
     {
       target_terminal_ours ();
       gdb_flush (gdb_stdout);
@@ -1874,8 +1874,8 @@ is_ancestor (struct type *base, struct type *dclass)
 
   if (base == dclass)
     return 1;
-  if (TYPE_NAME (base) && TYPE_NAME (dclass) &&
-      !strcmp (TYPE_NAME (base), TYPE_NAME (dclass)))
+  if (TYPE_NAME (base) && TYPE_NAME (dclass) 
+      && !strcmp (TYPE_NAME (base), TYPE_NAME (dclass)))
     return 1;
 
   for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
@@ -1918,8 +1918,8 @@ has_vtable (struct type *dclass)
      vtable.  */
   if (TYPE_FIELD_VIRTUAL_BITS (dclass))
     for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
-      if ((!B_TST (TYPE_FIELD_VIRTUAL_BITS (dclass), i)) &&
-	  (has_vtable (TYPE_FIELD_TYPE (dclass, i))))
+      if ((!B_TST (TYPE_FIELD_VIRTUAL_BITS (dclass), i)) 
+	  && (has_vtable (TYPE_FIELD_TYPE (dclass, i))))
 	return 1;
 
   /* Well, maybe we don't need a virtual table.  */
@@ -1947,8 +1947,8 @@ primary_base_class (struct type *dclass)
     return NULL;
 
   for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
-    if (!TYPE_FIELD_VIRTUAL (dclass, i) &&
-	has_vtable (TYPE_FIELD_TYPE (dclass, i)))
+    if (!TYPE_FIELD_VIRTUAL (dclass, i) 
+	&& has_vtable (TYPE_FIELD_TYPE (dclass, i)))
       return TYPE_FIELD_TYPE (dclass, i);
 
   return NULL;
@@ -2123,8 +2123,8 @@ virtual_base_index (struct type *base, struct type *dclass)
   struct type *vbase;
   int i;
 
-  if ((TYPE_CODE (dclass) != TYPE_CODE_CLASS) ||
-      (TYPE_CODE (base) != TYPE_CODE_CLASS))
+  if ((TYPE_CODE (dclass) != TYPE_CODE_CLASS) 
+      || (TYPE_CODE (base) != TYPE_CODE_CLASS))
     return -1;
 
   i = 0;
@@ -2155,8 +2155,8 @@ virtual_base_index_skip_primaries (struct type *base,
   int i, j;
   struct type *primary;
 
-  if ((TYPE_CODE (dclass) != TYPE_CODE_CLASS) ||
-      (TYPE_CODE (base) != TYPE_CODE_CLASS))
+  if ((TYPE_CODE (dclass) != TYPE_CODE_CLASS) 
+      || (TYPE_CODE (base) != TYPE_CODE_CLASS))
     return -1;
 
   primary = TYPE_RUNTIME_PTR (dclass) ? TYPE_PRIMARY_BASE (dclass) : NULL;
@@ -2379,8 +2379,8 @@ rank_one_type (struct type *parm, struct type *arg)
      really are the same.
   */
 
-  if (TYPE_NAME (parm) && TYPE_NAME (arg) &&
-      !strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
+  if (TYPE_NAME (parm) && TYPE_NAME (arg) 
+      && !strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
     return 0;
 
   /* Check if identical after resolving typedefs.  */
