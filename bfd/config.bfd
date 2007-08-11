@@ -1297,6 +1297,7 @@ case "${targ}" in
     # they're necessary for coff-sh.c (which is unconditionally used) to be
     # compiled correctly.
     targ_selvecs="$targ_selvecs shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
+    targ_underscore=yes
     ;;
   sh-*-*)
     targ_defvec=shcoff_vec
