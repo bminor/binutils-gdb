@@ -1,5 +1,7 @@
 2007-08-10  Michael Snyder  <msnyder@access-company.com>
 
+	* gdbtypes.c: Comment/whitespace cleanup.
+
 	* stabsread.c (read_huge_number): Attempt to compute value before
 	values that it depends on.
 
