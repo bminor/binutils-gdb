@@ -182,7 +182,7 @@ filename_completer (char *text, char *word)
   /* There is no way to do this just long enough to affect quote inserting
      without also affecting the next completion.  This should be fixed in
      readline.  FIXME.  */
-  /* Insure that readline does the right thing
+  /* Ensure that readline does the right thing
      with respect to inserting quotes.  */
   rl_completer_word_break_characters = "";
 #endif
@@ -461,7 +461,7 @@ complete_line (const char *text, char *line_buffer, int point)
 	    {
 	      list = complete_on_cmdlist (cmdlist, p, word);
 	    }
-	  /* Insure that readline does the right thing with respect to
+	  /* Ensure that readline does the right thing with respect to
 	     inserting quotes.  */
 	  rl_completer_word_break_characters =
 	    gdb_completer_command_word_break_characters;
@@ -485,7 +485,7 @@ complete_line (const char *text, char *line_buffer, int point)
 		     a subcommand (e.g. "info ").  */
 		  list = complete_on_cmdlist (*c->prefixlist, p, word);
 
-		  /* Insure that readline does the right thing
+		  /* Ensure that readline does the right thing
 		     with respect to inserting quotes.  */
 		  rl_completer_word_break_characters =
 		    gdb_completer_command_word_break_characters;
@@ -551,7 +551,7 @@ complete_line (const char *text, char *line_buffer, int point)
 
 	      list = complete_on_cmdlist (result_list, q, word);
 
-	      /* Insure that readline does the right thing
+	      /* Ensure that readline does the right thing
 		 with respect to inserting quotes.  */
 	      rl_completer_word_break_characters =
 		gdb_completer_command_word_break_characters;

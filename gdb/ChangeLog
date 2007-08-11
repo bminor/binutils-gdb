@@ -1,3 +1,7 @@
+2007-08-11  Michael Snyder  <msnyder@access-company.com>
+
+	* completer.c: Spelling fix in comments.
+
 2007-08-10  Michael Snyder  <msnyder@access-company.com>
 
 	* gdbtypes.c: Coding standard cleanup.
