@@ -1122,11 +1122,12 @@ find_source_lines (struct symtab *s, int desc)
   long mtime = 0;
   int size;
 
+  gdb_assert (s);
   line_charpos = (int *) xmalloc (lines_allocated * sizeof (int));
   if (fstat (desc, &st) < 0)
     perror_with_name (s->filename);
 
-  if (s && s->objfile && s->objfile->obfd)
+  if (s->objfile && s->objfile->obfd)
     mtime = bfd_get_mtime (s->objfile->obfd);
   else if (exec_bfd)
     mtime = bfd_get_mtime (exec_bfd);

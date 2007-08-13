@@ -1,3 +1,7 @@
+2007-08-13  Michael Snyder  <msnyder@access-company.com>
+
+	* source.c (find_source_lines): Require symtab 's'.
+
 2007-08-11  Michael Snyder  <msnyder@access-company.com>
 
 	* completer.c: Spelling fix in comments.
