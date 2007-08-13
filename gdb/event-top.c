@@ -754,8 +754,8 @@ command_line_handler (char *rl)
 	    }
 	  strcpy (linebuffer, history_value);
 	  p = linebuffer + strlen (linebuffer);
-	  xfree (history_value);
 	}
+      xfree (history_value);
     }
 
   /* If we just got an empty line, and that is supposed

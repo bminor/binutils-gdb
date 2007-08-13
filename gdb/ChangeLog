@@ -1,5 +1,7 @@
 2007-08-13  Michael Snyder  <msnyder@access-company.com>
 
+	* event-top.c (command_line_handler): Memory leak.
+
 	* mi/mi-cmd-var.c (mi_cmd_var_set_format): Memory leak.
 	No need to make copy.
 
