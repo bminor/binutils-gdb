@@ -8,21 +8,20 @@
 
 Disassembly of section \.text:
 
-.* <_start-0x1c>:
-.*	3d 82 00 00 	addis   r12,r2,0
+.* <_start-0x18>:
 .*	f8 41 00 28 	std     r2,40\(r1\)
-.*	e9 6c 80 70 	ld      r11,-32656\(r12\)
-.*	e8 4c 80 78 	ld      r2,-32648\(r12\)
+.*	e9 62 80 70 	ld      r11,-32656\(r2\)
 .*	7d 69 03 a6 	mtctr   r11
-.*	e9 6c 80 80 	ld      r11,-32640\(r12\)
+.*	e9 62 80 80 	ld      r11,-32640\(r2\)
+.*	e8 42 80 78 	ld      r2,-32648\(r2\)
 .*	4e 80 04 20 	bctr
 
 .* <_start>:
 .*	38 62 80 08 	addi    r3,r2,-32760
-.*	4b ff ff e1 	bl      .*
+.*	4b ff ff e5 	bl      .*
 .*	e8 41 00 28 	ld      r2,40\(r1\)
 .*	38 62 80 18 	addi    r3,r2,-32744
-.*	4b ff ff d5 	bl      .*
+.*	4b ff ff d9 	bl      .*
 .*	e8 41 00 28 	ld      r2,40\(r1\)
 .*	3c 6d 00 00 	addis   r3,r13,0
 .*	60 00 00 00 	nop
@@ -40,7 +39,6 @@ Disassembly of section \.text:
 .*	89 4d 90 60 	lbz     r10,-28576\(r13\)
 .*	3d 2d 00 00 	addis   r9,r13,0
 .*	99 49 90 68 	stb     r10,-28568\(r9\)
-.*	60 00 00 00 	nop
 .*	00 00 00 00 .*
 .*	00 01 02 18 .*
 .*	7d 88 02 a6 	mflr    r12
