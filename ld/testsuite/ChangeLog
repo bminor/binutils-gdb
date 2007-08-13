@@ -1,3 +1,17 @@
+2007-08-13  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/vxworks-forced-local-1.d,
+	* ld-mips-elf/vxworks-forced-local-1.s,
+	* ld-mips-elf/vxworks-forced-local-1.ver: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+	* ld-mips-elf/tlsdyn-o32-2.d: Adjust for removal of unnecessary
+	local GOT entry.
+	* ld-mips-elf/tlsdyn-o32-2.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.got: Likewise.
+	* ld-mips-elf/vxworks1-lib.dd: Likewise.
+	* ld-mips-elf/vxworks1-lib.rd: Likewise.
+
 2007-08-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/relbrlt.s (.text.pad2): Adjust space.

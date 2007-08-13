@@ -22,7 +22,7 @@ Disassembly of section \.text:
    80c0c:	3c1c0000 	lui	gp,0x0
    80c10:	8f9c0000 	lw	gp,0\(gp\)
    80c14:	8f9c0000 	lw	gp,0\(gp\)
-   80c18:	8f820014 	lw	v0,20\(gp\)
+   80c18:	8f820010 	lw	v0,16\(gp\)
    80c1c:	8c430000 	lw	v1,0\(v0\)
    80c20:	24630001 	addiu	v1,v1,1
    80c24:	ac430000 	sw	v1,0\(v0\)

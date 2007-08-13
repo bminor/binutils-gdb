@@ -44,6 +44,7 @@ if {[istarget "mips*-*-vxworks"]} {
     }
     run_ld_link_tests $mipsvxtests
     run_dump_test "vxworks1-static"
+    run_dump_test "vxworks-forced-local-1"
     return
 }
 

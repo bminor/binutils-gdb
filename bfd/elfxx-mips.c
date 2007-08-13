@@ -323,6 +323,8 @@ struct mips_elf_link_hash_table
   bfd_vma rld_value;
   /* This is set if we see any mips16 stub sections.  */
   bfd_boolean mips16_stubs_seen;
+  /* True if we've computed the size of the GOT.  */
+  bfd_boolean computed_got_sizes;
   /* True if we're generating code for VxWorks.  */
   bfd_boolean is_vxworks;
   /* True if we already reported the small-data section overflow.  */
@@ -2691,7 +2693,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
 
   memcpy (*loc, &entry, sizeof entry);
 
-  if (g->assigned_gotno >= g->local_gotno)
+  if (g->assigned_gotno > g->local_gotno)
     {
       (*loc)->gotidx = -1;
       /* We didn't allocate enough space in the GOT.  */
@@ -2876,11 +2878,15 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
   if (h->got.offset != MINUS_ONE)
     return TRUE;
 
-  /* By setting this to a value other than -1, we are indicating that
-     there needs to be a GOT entry for H.  Avoid using zero, as the
-     generic ELF copy_indirect_symbol tests for <= 0.  */
   if (tls_flag == 0)
-    h->got.offset = 1;
+    {
+      /* By setting this to a value other than -1, we are indicating that
+	 there needs to be a GOT entry for H.  Avoid using zero, as the
+	 generic ELF copy_indirect_symbol tests for <= 0.  */
+      h->got.offset = 1;
+      if (h->forced_local)
+	g->local_gotno++;
+    }
 
   return TRUE;
 }
@@ -6528,7 +6534,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* VxWorks call relocations point the function's .got.plt
 		 entry, which will be allocated by adjust_dynamic_symbol.
 		 Otherwise, this symbol requires a global GOT entry.  */
-	      if (!htab->is_vxworks
+	      if ((!htab->is_vxworks || h->forced_local)
 		  && !mips_elf_record_global_got_symbol (h, abfd, info, g, 0))
 		return FALSE;
 
@@ -7312,6 +7318,7 @@ _bfd_mips_elf_always_size_sections (bfd *output_bfd,
       g->tls_assigned_gotno = g->global_gotno + g->local_gotno;
       htab_traverse (g->got_entries, mips_elf_initialize_tls_index, g);
     }
+  htab->computed_got_sizes = TRUE;
 
   return TRUE;
 }
@@ -9671,6 +9678,7 @@ _bfd_mips_elf_hide_symbol (struct bfd_link_info *info,
   asection *got;
   struct mips_got_info *g;
   struct mips_elf_link_hash_entry *h;
+  struct mips_elf_link_hash_table *htab;
 
   h = (struct mips_elf_link_hash_entry *) entry;
   if (h->forced_local)
@@ -9678,6 +9686,7 @@ _bfd_mips_elf_hide_symbol (struct bfd_link_info *info,
   h->forced_local = force_local;
 
   dynobj = elf_hash_table (info)->dynobj;
+  htab = mips_elf_hash_table (info);
   if (dynobj != NULL && force_local && h->root.type != STT_TLS
       && (got = mips_elf_got_section (dynobj, TRUE)) != NULL
       && (g = mips_elf_section_data (got)->u.got_info) != NULL)
@@ -9715,20 +9724,30 @@ _bfd_mips_elf_hide_symbol (struct bfd_link_info *info,
 	      gg->assigned_gotno--;
 	    }
 	}
-      else if (g->global_gotno == 0 && g->global_gotsym == NULL)
-	/* If we haven't got through GOT allocation yet, just bump up the
-	   number of local entries, as this symbol won't be counted as
-	   global.  */
-	g->local_gotno++;
       else if (h->root.got.offset == 1)
 	{
-	  /* If we're past non-multi-GOT allocation and this symbol had
-	     been marked for a global got entry, give it a local entry
-	     instead.  */
-	  BFD_ASSERT (g->global_gotno > 0);
+	  /* check_relocs didn't know that this symbol would be
+	     forced-local, so add an extra local got entry.  */
 	  g->local_gotno++;
-	  g->global_gotno--;
+	  if (htab->computed_got_sizes)
+	    {
+	      /* We'll have treated this symbol as global rather
+		 than local.  */
+	      BFD_ASSERT (g->global_gotno > 0);
+	      g->global_gotno--;
+	    }
 	}
+      else if (htab->is_vxworks && h->root.needs_plt)
+	{
+	  /* check_relocs didn't know that this symbol would be
+	     forced-local, so add an extra local got entry.  */
+	  g->local_gotno++;
+	  if (htab->computed_got_sizes)
+	    /* The symbol is only used in call relocations, so we'll
+	       have assumed it only needs a .got.plt entry.  Increase
+	       the size of .got accordingly.  */
+	    got->size += MIPS_ELF_GOT_SIZE (dynobj);
+        }
     }
 
   _bfd_elf_link_hash_hide_symbol (info, &h->root, force_local);
@@ -10189,6 +10208,7 @@ _bfd_mips_elf_link_hash_table_create (bfd *abfd)
   ret->use_rld_obj_head = FALSE;
   ret->rld_value = 0;
   ret->mips16_stubs_seen = FALSE;
+  ret->computed_got_sizes = FALSE;
   ret->is_vxworks = FALSE;
   ret->small_data_overflow_reported = FALSE;
   ret->srelbss = NULL;
