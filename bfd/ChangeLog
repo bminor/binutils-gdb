@@ -1,3 +1,7 @@
+2007-08-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* coffgen.c (coff_get_normalized_symtab): Correct cast.
+
 2007-08-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elf_modify_segment_map): Add remove_empty_load param.
