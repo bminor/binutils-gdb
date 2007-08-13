@@ -1,3 +1,7 @@
+2007-08-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/default.exp: New file.
+
 2007-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/prologue.c, gdb.base/prologue.exp: New.
