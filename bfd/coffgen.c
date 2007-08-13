@@ -1693,7 +1693,7 @@ coff_get_normalized_symtab (bfd *abfd)
 	      internal_ptr->u.syment._n._n_n._n_zeroes = 0;
 	    }
 	  else if (internal_ptr->u.syment._n._n_n._n_offset == 0)
-	    internal_ptr->u.syment._n._n_n._n_offset = (bfd_vma) "";
+	    internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) "";
 	  else if (!bfd_coff_symname_in_debug (abfd, &internal_ptr->u.syment))
 	    {
 	      /* Long name already.  Point symbol at the string in the

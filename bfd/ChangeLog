@@ -1,3 +1,7 @@
+2007-08-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* coffgen.c (coff_get_normalized_symtab): Correct cast.
+
 2007-08-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/bfd.po: Updated template.
