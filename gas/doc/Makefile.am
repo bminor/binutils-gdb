@@ -19,9 +19,9 @@ info_TEXINFOS = as.texinfo
 as_TEXINFOS = asconfig.texi $(CPU_DOCS)
 
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		   -I ../../bfd/doc
+		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		   -I ../../bfd/doc
+		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
 
 asconfig.texi: $(CONFIG).texi
 	rm -f asconfig.texi

@@ -256,10 +256,10 @@ man_MANS = \
 info_TEXINFOS = binutils.texi
 binutils_TEXI = $(srcdir)/binutils.texi
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		   -I ../../bfd/doc
+		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
 
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		    -I ../../bfd/doc
+		    -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
 
 MOSTLYCLEANFILES = $(DEMANGLER_NAME).1
 html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;

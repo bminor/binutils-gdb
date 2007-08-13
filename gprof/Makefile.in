@@ -272,8 +272,8 @@ POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
 info_TEXINFOS = gprof.texi
 gprof_TEXINFOS = config.texi
 man_MANS = gprof.1
-AM_MAKEINFOFLAGS = -I "$(srcdir)" -I ../bfd/doc
-TEXI2DVI = texi2dvi -I "$(srcdir)" -I ../bfd/doc
+AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../bfd/doc" -I ../bfd/doc
+TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../bfd/doc" -I ../bfd/doc
 html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
 MAINTAINERCLEANFILES = gprof.info

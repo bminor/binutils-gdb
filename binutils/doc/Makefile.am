@@ -35,9 +35,9 @@ info_TEXINFOS = binutils.texi
 binutils_TEXI = $(srcdir)/binutils.texi
 
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		   -I ../../bfd/doc
+		   -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../libiberty" \
-		    -I ../../bfd/doc
+		    -I "$(top_srcdir)/../bfd/doc" -I ../../bfd/doc
 
 # Man page generation from texinfo
 addr2line.1:	$(binutils_TEXI) $(binutils_TEXINFOS)
