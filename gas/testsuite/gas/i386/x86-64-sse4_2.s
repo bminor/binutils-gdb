@@ -39,4 +39,42 @@ foo:
 	popcntl		%ecx,%ebx
 	popcntq		%rcx,%rbx
 
+	.intel_syntax noprefix
+	crc32  ebx,cl
+	crc32  rbx,cl
+	crc32  ebx,cx
+	crc32  ebx,ecx
+	crc32  rbx,rcx
+	crc32  ebx,BYTE PTR [rcx]
+	crc32  ebx,WORD PTR [rcx]
+	crc32  ebx,DWORD PTR [rcx]
+	crc32  rbx,QWORD PTR [rcx]
+	crc32  ebx,cl
+	crc32  rbx,cl
+	crc32  ebx,cx
+	crc32  ebx,ecx
+	crc32  rbx,rcx
+	pcmpgtq xmm0,XMMWORD PTR [rcx]
+	pcmpgtq xmm0,xmm1
+	pcmpestri xmm0,XMMWORD PTR [rcx],0x0
+	pcmpestri xmm0,xmm1,0x0
+	pcmpestrm xmm0,XMMWORD PTR [rcx],0x1
+	pcmpestrm xmm0,xmm1,0x1
+	pcmpistri xmm0,XMMWORD PTR [rcx],0x2
+	pcmpistri xmm0,xmm1,0x2
+	pcmpistrm xmm0,XMMWORD PTR [rcx],0x3
+	pcmpistrm xmm0,xmm1,0x3
+	popcnt bx,WORD PTR [rcx]
+	popcnt ebx,DWORD PTR [rcx]
+	popcnt rbx,QWORD PTR [rcx]
+	popcnt bx,WORD PTR [rcx]
+	popcnt ebx,DWORD PTR [rcx]
+	popcnt rbx,QWORD PTR [rcx]
+	popcnt bx,cx
+	popcnt ebx,ecx
+	popcnt rbx,rcx
+	popcnt bx,cx
+	popcnt ebx,ecx
+	popcnt rbx,rcx
+
 	.p2align	4,0
