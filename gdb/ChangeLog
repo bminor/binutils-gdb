@@ -1,5 +1,8 @@
 2007-08-13  Michael Snyder  <msnyder@access-company.com>
 
+	* mi/mi-cmd-var.c (mi_cmd_var_set_format): Memory leak.
+	No need to make copy.
+
 	* source.c (find_source_lines): Require symtab 's'.
 
 2007-08-11  Michael Snyder  <msnyder@access-company.com>

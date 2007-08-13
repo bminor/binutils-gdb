@@ -207,7 +207,7 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
   if (var == NULL)
     error (_("mi_cmd_var_set_format: Variable object not found"));
 
-  formspec = xstrdup (argv[1]);
+  formspec = argv[1];
   if (formspec == NULL)
     error (_("mi_cmd_var_set_format: Must specify the format as: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\""));
 
