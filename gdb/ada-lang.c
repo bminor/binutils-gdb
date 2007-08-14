@@ -6116,8 +6116,16 @@ static unsigned int
 field_alignment (struct type *type, int f)
 {
   const char *name = TYPE_FIELD_NAME (type, f);
-  int len = (name == NULL) ? 0 : strlen (name);
+  int len;
   int align_offset;
+
+  /* The field name should never be null, unless the debugging information
+     is somehow malformed.  In this case, we assume the field does not
+     require any alignment.  */
+  if (name == NULL)
+    return 1;
+
+  len = strlen (name);
 
   if (!isdigit (name[len - 1]))
     return 1;
