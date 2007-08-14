@@ -78,7 +78,8 @@ key_is_command_char (int ch)
 
 /* Use definition from readline 4.3.  */
 #undef CTRL_CHAR
-#define CTRL_CHAR(c) ((c) < control_character_threshold && (((c) & 0x80) == 0))
+#define CTRL_CHAR(c) \
+     ((c) < control_character_threshold && (((c) & 0x80) == 0))
 
 /* This file controls the IO interactions between gdb and curses.
    When the TUI is enabled, gdb has two modes a curses and a standard
@@ -404,7 +405,8 @@ static void
 tui_rl_display_match_list (char **matches, int len, int max)
 {
   typedef int QSFUNC (const void *, const void *);
-  extern int _rl_qsort_string_compare (const void*, const void*);
+  extern int _rl_qsort_string_compare (const void *, 
+				       const void *);
   extern int _rl_print_completions_horizontally;
   
   int count, limit, printed_len;

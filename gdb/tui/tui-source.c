@@ -41,7 +41,9 @@
 
 /* Function to display source in the source window.  */
 enum tui_status
-tui_set_source_content (struct symtab *s, int line_no, int noerror)
+tui_set_source_content (struct symtab *s, 
+			int line_no,
+			int noerror)
 {
   enum tui_status ret = TUI_FAILURE;
 
@@ -240,7 +242,8 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
    source files cannot be accessed.  */
 
 void
-tui_set_source_content_nil (struct tui_win_info *win_info, char *warning_string)
+tui_set_source_content_nil (struct tui_win_info *win_info, 
+			    char *warning_string)
 {
   int line_width;
   int n_lines;
@@ -309,7 +312,9 @@ tui_set_source_content_nil (struct tui_win_info *win_info, char *warning_string)
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_show_symtab_source (struct symtab *s, struct tui_line_or_address line, int noerror)
+tui_show_symtab_source (struct symtab *s, 
+			struct tui_line_or_address line, 
+			int noerror)
 {
   TUI_SRC_WIN->detail.source_info.horizontal_offset = 0;
   tui_update_source_window_as_is (TUI_SRC_WIN, s, line, noerror);

@@ -51,14 +51,20 @@ tui_display_register (struct tui_data_element *data,
                       struct tui_gen_win_info *win_info);
 
 static enum tui_status
-tui_show_register_group (struct gdbarch *gdbarch, struct reggroup *group,
-                         struct frame_info *frame, int refresh_values_only);
+tui_show_register_group (struct gdbarch *gdbarch, 
+			 struct reggroup *group,
+                         struct frame_info *frame, 
+			 int refresh_values_only);
 
 static enum tui_status
-tui_get_register (struct gdbarch *gdbarch, struct frame_info *frame,
-                  struct tui_data_element *data, int regnum, int *changedp);
-static void tui_register_format
-  (struct gdbarch *, struct frame_info *, struct tui_data_element*, int);
+tui_get_register (struct gdbarch *gdbarch, 
+		  struct frame_info *frame,
+                  struct tui_data_element *data, 
+		  int regnum, int *changedp);
+static void tui_register_format (struct gdbarch *, 
+				 struct frame_info *, 
+				 struct tui_data_element*, 
+				 int);
 static void tui_scroll_regs_forward_command (char *, int);
 static void tui_scroll_regs_backward_command (char *, int);
 
@@ -203,8 +209,10 @@ tui_show_registers (struct reggroup *group)
    refresh_values_only is TRUE.  */
 
 static enum tui_status
-tui_show_register_group (struct gdbarch *gdbarch, struct reggroup *group,
-                         struct frame_info *frame, int refresh_values_only)
+tui_show_register_group (struct gdbarch *gdbarch, 
+			 struct reggroup *group,
+                         struct frame_info *frame, 
+			 int refresh_values_only)
 {
   enum tui_status ret = TUI_FAILURE;
   int nr_regs;
@@ -409,7 +417,8 @@ tui_display_registers_from (int start_element_no)
    content or the end of the display height.  This function checks
    that we won't display off the end of the register display.  */
 void
-tui_display_reg_element_at_line (int start_element_no, int start_line_no)
+tui_display_reg_element_at_line (int start_element_no,
+				 int start_line_no)
 {
   if (TUI_DATA_WIN->detail.data_display_info.regs_content != (tui_win_content) NULL &&
       TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
@@ -443,7 +452,8 @@ tui_display_reg_element_at_line (int start_element_no, int start_line_no)
    data window.  Answers the line number that the display actually
    started from.  If nothing is displayed (-1) is returned.  */
 int
-tui_display_registers_from_line (int line_no, int force_display)
+tui_display_registers_from_line (int line_no, 
+				 int force_display)
 {
   if (TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
     {
@@ -650,8 +660,10 @@ tui_restore_gdbout (void *ui)
 /* Get the register from the frame and make a printable representation
    of it in the data element.  */
 static void
-tui_register_format (struct gdbarch *gdbarch, struct frame_info *frame,
-                     struct tui_data_element *data_element, int regnum)
+tui_register_format (struct gdbarch *gdbarch, 
+		     struct frame_info *frame,
+                     struct tui_data_element *data_element, 
+		     int regnum)
 {
   struct ui_file *stream;
   struct ui_file *old_stdout;
@@ -705,8 +717,10 @@ tui_register_format (struct gdbarch *gdbarch, struct frame_info *frame,
    display.  When changep is set, check if the new register value has
    changed with respect to the previous call.  */
 static enum tui_status
-tui_get_register (struct gdbarch *gdbarch, struct frame_info *frame,
-                  struct tui_data_element *data, int regnum, int *changedp)
+tui_get_register (struct gdbarch *gdbarch, 
+		  struct frame_info *frame,
+                  struct tui_data_element *data, 
+		  int regnum, int *changedp)
 {
   enum tui_status ret = TUI_FAILURE;
 

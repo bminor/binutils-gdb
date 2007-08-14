@@ -1,5 +1,12 @@
 2007-08-14  Michael Snyder  <msnyder@access-company.com>
 
+	* tui-data.c, tui-data.h, tui-disasm.c, tui-disasm.h, tui-hooks.c,
+	tui-io.c, tui-layout.c, tui-layout.h, tui-out.c, tui-regs.c,
+	tui-source.c, tui-source.h, tui-stack.c, tui-win.c, tui-win.h,
+	tui-windata.c, tui-windata.h, tui-wingeneral.c, tui-winsource.c,
+	tui-winsource.h, tui.c, tui.h: Function declarations and 
+	definitions, wrap long lines.
+
 	* tui-command.c, tui-data.c, tui-disasm.c, tui-layout.c,
 	tui-regs.c, tui-win.c, tui-windata.c, tui-winsource.c, tui.c:
 	Reformat block comments to GNU standard.

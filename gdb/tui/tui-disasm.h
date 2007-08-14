@@ -31,7 +31,8 @@
 extern enum tui_status tui_set_disassem_content (CORE_ADDR);
 extern void tui_show_disassem (CORE_ADDR);
 extern void tui_show_disassem_and_update_source (CORE_ADDR);
-extern void tui_vertical_disassem_scroll (enum tui_scroll_direction, int);
+extern void tui_vertical_disassem_scroll (enum tui_scroll_direction, 
+					  int);
 extern CORE_ADDR tui_get_begin_asm_address (void);
 
 #endif

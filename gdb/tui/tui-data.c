@@ -47,19 +47,24 @@ static struct tui_win_info *src_win_list[2];
 static struct tui_list source_windows = {src_win_list, 0};
 static int default_tab_len = DEFAULT_TAB_LEN;
 static struct tui_win_info *win_with_focus = (struct tui_win_info *) NULL;
-static struct tui_layout_def layout_def =
-{SRC_WIN,			/* DISPLAY_MODE */
- FALSE,				/* SPLIT */
- TUI_UNDEFINED_REGS,		/* REGS_DISPLAY_TYPE */
- TUI_SFLOAT_REGS};		/* FLOAT_REGS_DISPLAY_TYPE */
+static struct tui_layout_def layout_def = {
+  SRC_WIN,			/* DISPLAY_MODE */
+  FALSE,			/* SPLIT */
+  TUI_UNDEFINED_REGS,		/* REGS_DISPLAY_TYPE */
+  TUI_SFLOAT_REGS};		/* FLOAT_REGS_DISPLAY_TYPE */
+
 static int win_resized = FALSE;
 
 
 /*********************************
 ** Static function forward decls
 **********************************/
-static void free_content (tui_win_content, int, enum tui_win_type);
-static void free_content_elements (tui_win_content, int, enum tui_win_type);
+static void free_content (tui_win_content, 
+			  int, 
+			  enum tui_win_type);
+static void free_content_elements (tui_win_content, 
+				   int, 
+				   enum tui_win_type);
 
 
 
@@ -82,12 +87,13 @@ tui_win_is_auxillary (enum tui_win_type win_type)
 int
 tui_win_has_locator (struct tui_win_info *win_info)
 {
-  return (win_info != NULL \
+  return (win_info != NULL 
 	  && win_info->detail.source_info.has_locator);
 }
 
 void
-tui_set_win_highlight (struct tui_win_info *win_info, int highlight)
+tui_set_win_highlight (struct tui_win_info *win_info, 
+		       int highlight)
 {
   if (win_info != NULL)
     win_info->is_highlighted = highlight;
@@ -309,7 +315,8 @@ tui_set_current_layout_to (enum tui_layout_type new_layout)
 
 /* Set the origin of the window.  */
 void
-set_gen_win_origin (struct tui_gen_win_info *win_info, int x, int y)
+set_gen_win_origin (struct tui_gen_win_info *win_info, 
+		    int x, int y)
 {
   win_info->origin.x = x;
   win_info->origin.y = y;
@@ -477,7 +484,8 @@ tui_init_generic_part (struct tui_gen_win_info *win)
 /* init_content_element().
  */
 void
-init_content_element (struct tui_win_element *element, enum tui_win_type type)
+init_content_element (struct tui_win_element *element, 
+		      enum tui_win_type type)
 {
   element->highlight = FALSE;
   switch (type)
@@ -627,7 +635,8 @@ tui_alloc_content (int num_elements, enum tui_win_type type)
    there is a memory allocation error, in which case, (-1) is
    returned.  */
 int
-tui_add_content_elements (struct tui_gen_win_info *win_info, int num_elements)
+tui_add_content_elements (struct tui_gen_win_info *win_info, 
+			  int num_elements)
 {
   struct tui_win_element *element_ptr;
   int i, index_start;
@@ -809,7 +818,8 @@ tui_free_win_content (struct tui_gen_win_info *win_info)
 
 
 void
-tui_del_data_windows (tui_win_content content, int content_size)
+tui_del_data_windows (tui_win_content content, 
+		      int content_size)
 {
   int i;
 
@@ -831,7 +841,8 @@ tui_del_data_windows (tui_win_content content, int content_size)
 
 
 void
-tui_free_data_content (tui_win_content content, int content_size)
+tui_free_data_content (tui_win_content content, 
+		       int content_size)
 {
   int i;
 
@@ -850,8 +861,8 @@ tui_free_data_content (tui_win_content content, int content_size)
 	}
     }
   free_content (content,
-	       content_size,
-	       DATA_WIN);
+		content_size,
+		DATA_WIN);
 }
 
 
@@ -861,7 +872,9 @@ tui_free_data_content (tui_win_content content, int content_size)
 
 
 static void
-free_content (tui_win_content content, int content_size, enum tui_win_type win_type)
+free_content (tui_win_content content, 
+	      int content_size, 
+	      enum tui_win_type win_type)
 {
   if (content != (tui_win_content) NULL)
     {
@@ -874,7 +887,9 @@ free_content (tui_win_content content, int content_size, enum tui_win_type win_t
 /* free_content_elements().
  */
 static void
-free_content_elements (tui_win_content content, int content_size, enum tui_win_type type)
+free_content_elements (tui_win_content content, 
+		       int content_size, 
+		       enum tui_win_type type)
 {
   if (content != (tui_win_content) NULL)
     {

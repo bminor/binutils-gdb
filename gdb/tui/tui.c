@@ -458,7 +458,8 @@ tui_disable (void)
 }
 
 void
-strcat_to_buf (char *buf, int buflen, const char *item_to_add)
+strcat_to_buf (char *buf, int buflen, 
+	       const char *item_to_add)
 {
   if (item_to_add != (char *) NULL && buf != (char *) NULL)
     {
@@ -555,7 +556,8 @@ tui_is_window_visible (enum tui_win_type type)
 }
 
 int
-tui_get_command_dimension (unsigned int *width, unsigned int *height)
+tui_get_command_dimension (unsigned int *width, 
+			   unsigned int *height)
 {
   if (!tui_active || (TUI_CMD_WIN == NULL))
     {

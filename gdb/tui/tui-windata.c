@@ -56,7 +56,7 @@ tui_first_data_item_displayed (void)
       struct tui_gen_win_info *data_item_win;
 
       data_item_win = &((tui_win_content)
-		      TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
+			TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
       if (data_item_win->handle != (WINDOW *) NULL && data_item_win->is_visible)
 	element_no = i;
     }
@@ -93,7 +93,7 @@ tui_delete_data_content_windows (void)
   for (i = 0; (i < TUI_DATA_WIN->generic.content_size); i++)
     {
       data_item_win_ptr = &((tui_win_content)
-		      TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
+			    TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
       tui_delete_win (data_item_win_ptr->handle);
       data_item_win_ptr->handle = (WINDOW *) NULL;
       data_item_win_ptr->is_visible = FALSE;
@@ -263,7 +263,8 @@ tui_check_data_values (struct frame_info *frame)
 
 /* Scroll the data window vertically forward or backward.  */
 void
-tui_vertical_data_scroll (enum tui_scroll_direction scroll_direction, int num_to_scroll)
+tui_vertical_data_scroll (enum tui_scroll_direction scroll_direction,
+			  int num_to_scroll)
 {
   int first_element_no;
   int first_line = (-1);

@@ -47,7 +47,7 @@ tui_refresh_win (struct tui_gen_win_info *win_info)
 	  struct tui_gen_win_info *data_item_win_ptr;
 
 	  data_item_win_ptr = &((tui_win_content)
-			     win_info->content)[i]->which_element.data_window;
+				win_info->content)[i]->which_element.data_window;
 	  if (data_item_win_ptr != NULL
 	      && data_item_win_ptr->handle != (WINDOW *) NULL)
 	    wrefresh (data_item_win_ptr->handle);
@@ -80,7 +80,8 @@ tui_delete_win (WINDOW *window)
 
 /* Draw a border arround the window.  */
 void
-box_win (struct tui_gen_win_info *win_info, int highlight_flag)
+box_win (struct tui_gen_win_info *win_info, 
+	 int highlight_flag)
 {
   if (win_info && win_info->handle)
     {

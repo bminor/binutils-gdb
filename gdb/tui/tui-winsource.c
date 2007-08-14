@@ -71,8 +71,10 @@ tui_display_main (void)
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_update_source_window (struct tui_win_info *win_info, struct symtab *s,
-			  struct tui_line_or_address line_or_addr, int noerror)
+tui_update_source_window (struct tui_win_info *win_info,
+			  struct symtab *s,
+			  struct tui_line_or_address line_or_addr,
+			  int noerror)
 {
   win_info->detail.source_info.horizontal_offset = 0;
   tui_update_source_window_as_is (win_info, s, line_or_addr, noerror);
@@ -84,8 +86,10 @@ tui_update_source_window (struct tui_win_info *win_info, struct symtab *s,
 /* Function to display source in the source/asm window.  This function
    shows the source as specified by the horizontal offset.  */
 void
-tui_update_source_window_as_is (struct tui_win_info *win_info, struct symtab *s,
-				struct tui_line_or_address line_or_addr, int noerror)
+tui_update_source_window_as_is (struct tui_win_info *win_info, 
+				struct symtab *s,
+				struct tui_line_or_address line_or_addr, 
+				int noerror)
 {
   enum tui_status ret;
 
@@ -197,7 +201,8 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
 }
 
 void
-tui_clear_source_content (struct tui_win_info *win_info, int display_prompt)
+tui_clear_source_content (struct tui_win_info *win_info, 
+			  int display_prompt)
 {
   if (win_info != NULL)
     {
@@ -217,7 +222,8 @@ tui_clear_source_content (struct tui_win_info *win_info, int display_prompt)
 
 
 void
-tui_erase_source_content (struct tui_win_info *win_info, int display_prompt)
+tui_erase_source_content (struct tui_win_info *win_info, 
+			  int display_prompt)
 {
   int x_pos;
   int half_width = (win_info->generic.width - 2) / 2;
@@ -339,7 +345,8 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
    line_no.  */
 
 void
-tui_set_is_exec_point_at (struct tui_line_or_address l, struct tui_win_info *win_info)
+tui_set_is_exec_point_at (struct tui_line_or_address l, 
+			  struct tui_win_info *win_info)
 {
   int changed = 0;
   int i;
@@ -401,7 +408,8 @@ tui_update_all_breakpoint_info (void)
    refreshed.  */
 
 int
-tui_update_breakpoint_info (struct tui_win_info *win, int current_only)
+tui_update_breakpoint_info (struct tui_win_info *win, 
+			    int current_only)
 {
   int i;
   int need_refresh = 0;
@@ -611,7 +619,8 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
 /* Answer whether the a particular line number or address is displayed
    in the current source window.  */
 int
-tui_line_is_displayed (int line, struct tui_win_info *win_info,
+tui_line_is_displayed (int line, 
+		       struct tui_win_info *win_info,
 		       int check_threshold)
 {
   int is_displayed = FALSE;
@@ -640,8 +649,9 @@ tui_line_is_displayed (int line, struct tui_win_info *win_info,
 /* Answer whether the a particular line number or address is displayed
    in the current source window.  */
 int
-tui_addr_is_displayed (CORE_ADDR addr, struct tui_win_info *win_info,
-		    int check_threshold)
+tui_addr_is_displayed (CORE_ADDR addr, 
+		       struct tui_win_info *win_info,
+		       int check_threshold)
 {
   int is_displayed = FALSE;
   int i, threshold;

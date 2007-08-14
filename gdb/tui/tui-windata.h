@@ -36,6 +36,7 @@ extern int tui_first_data_element_no_in_line (int);
 extern void tui_delete_data_content_windows (void);
 extern void tui_refresh_data_win (void);
 extern void tui_display_data_from (int, int);
-extern void tui_vertical_data_scroll (enum tui_scroll_direction, int);
+extern void tui_vertical_data_scroll (enum tui_scroll_direction, 
+				      int);
 
 #endif

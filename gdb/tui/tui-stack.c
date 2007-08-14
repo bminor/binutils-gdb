@@ -50,7 +50,8 @@ static char *tui_get_function_from_frame (struct frame_info *fi);
 static void tui_set_locator_filename (const char *filename);
 
 /* Update the locator, with the provided arguments.  */
-static void tui_set_locator_info (const char *filename, const char *procname,
+static void tui_set_locator_info (const char *filename,
+				  const char *procname,
                                   int lineno, CORE_ADDR addr);
 
 static void tui_update_command (char *, int);
@@ -286,7 +287,9 @@ tui_set_locator_filename (const char *filename)
 
 /* Update the locator, with the provided arguments.  */
 static void
-tui_set_locator_info (const char *filename, const char *procname, int lineno,
+tui_set_locator_info (const char *filename, 
+		      const char *procname, 
+		      int lineno,
                       CORE_ADDR addr)
 {
   struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();

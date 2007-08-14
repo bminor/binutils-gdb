@@ -56,7 +56,8 @@ enum tui_win_type
 
 /* GENERAL TUI FUNCTIONS */
 /* tui.c */
-extern CORE_ADDR tui_get_low_disassembly_address (CORE_ADDR, CORE_ADDR);
+extern CORE_ADDR tui_get_low_disassembly_address (CORE_ADDR, 
+						  CORE_ADDR);
 extern void tui_show_assembly (CORE_ADDR addr);
 extern int tui_is_window_visible (enum tui_win_type type);
 extern int tui_get_command_dimension (unsigned int *width,
@@ -98,6 +99,6 @@ extern void tui_show_source (const char *file, int line);
 extern struct ui_out *tui_out_new (struct ui_file *stream);
 
 /* tui-layout.c */
-extern enum tui_status tui_set_layout_for_display_command (const char *name);
+extern enum tui_status tui_set_layout_for_display_command (const char *);
 
 #endif

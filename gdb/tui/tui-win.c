@@ -56,8 +56,10 @@
 ** Static Local Decls
 ********************************/
 static void make_visible_with_new_height (struct tui_win_info *);
-static void make_invisible_and_set_new_height (struct tui_win_info *, int);
-static enum tui_status tui_adjust_win_heights (struct tui_win_info *, int);
+static void make_invisible_and_set_new_height (struct tui_win_info *, 
+					       int);
+static enum tui_status tui_adjust_win_heights (struct tui_win_info *, 
+					       int);
 static int new_height_ok (struct tui_win_info *, int);
 static void tui_set_tab_width_command (char *, int);
 static void tui_refresh_all_command (char *, int);
@@ -69,15 +71,17 @@ static void tui_scroll_forward_command (char *, int);
 static void tui_scroll_backward_command (char *, int);
 static void tui_scroll_left_command (char *, int);
 static void tui_scroll_right_command (char *, int);
-static void parse_scrolling_args (char *, struct tui_win_info **, int *);
+static void parse_scrolling_args (char *, 
+				  struct tui_win_info **, 
+				  int *);
 
 
 /***************************************
 ** DEFINITIONS
 ***************************************/
-#define WIN_HEIGHT_USAGE      "Usage: winheight <win_name> [+ | -] <#lines>\n"
-#define XDBWIN_HEIGHT_USAGE   "Usage: w <#lines>\n"
-#define FOCUS_USAGE           "Usage: focus {<win> | next | prev}\n"
+#define WIN_HEIGHT_USAGE    "Usage: winheight <win_name> [+ | -] <#lines>\n"
+#define XDBWIN_HEIGHT_USAGE "Usage: w <#lines>\n"
+#define FOCUS_USAGE         "Usage: focus {<win> | next | prev}\n"
 
 /***************************************
 ** PUBLIC FUNCTIONS
@@ -199,8 +203,10 @@ struct tui_translate tui_border_kind_translate_lrcorner[] = {
 /* Tui configuration variables controlled with set/show command.  */
 const char *tui_active_border_mode = "bold-standout";
 static void
-show_tui_active_border_mode (struct ui_file *file, int from_tty,
-			     struct cmd_list_element *c, const char *value)
+show_tui_active_border_mode (struct ui_file *file,
+			     int from_tty,
+			     struct cmd_list_element *c, 
+			     const char *value)
 {
   fprintf_filtered (file, _("\
 The attribute mode to use for the active TUI window border is \"%s\".\n"),
@@ -209,8 +215,10 @@ The attribute mode to use for the active TUI window border is \"%s\".\n"),
 
 const char *tui_border_mode = "normal";
 static void
-show_tui_border_mode (struct ui_file *file, int from_tty,
-		      struct cmd_list_element *c, const char *value)
+show_tui_border_mode (struct ui_file *file, 
+		      int from_tty,
+		      struct cmd_list_element *c, 
+		      const char *value)
 {
   fprintf_filtered (file, _("\
 The attribute mode to use for the TUI window borders is \"%s\".\n"),
@@ -219,8 +227,10 @@ The attribute mode to use for the TUI window borders is \"%s\".\n"),
 
 const char *tui_border_kind = "acs";
 static void
-show_tui_border_kind (struct ui_file *file, int from_tty,
-		      struct cmd_list_element *c, const char *value)
+show_tui_border_kind (struct ui_file *file, 
+		      int from_tty,
+		      struct cmd_list_element *c, 
+		      const char *value)
 {
   fprintf_filtered (file, _("The kind of border for TUI windows is \"%s\".\n"),
 		    value);
@@ -336,7 +346,8 @@ tui_get_cmd_list (void)
   return &tuilist;
 }
 
-/* Function to initialize gdb commands, for tui window manipulation.  */
+/* Function to initialize gdb commands, for tui window
+   manipulation.  */
 void
 _initialize_tui_win (void)
 {
@@ -480,7 +491,8 @@ tui_set_win_focus_to (struct tui_win_info *win_info)
 
 
 void
-tui_scroll_forward (struct tui_win_info *win_to_scroll, int num_to_scroll)
+tui_scroll_forward (struct tui_win_info *win_to_scroll, 
+		    int num_to_scroll)
 {
   if (win_to_scroll != TUI_CMD_WIN)
     {
@@ -504,7 +516,8 @@ tui_scroll_forward (struct tui_win_info *win_to_scroll, int num_to_scroll)
 }
 
 void
-tui_scroll_backward (struct tui_win_info *win_to_scroll, int num_to_scroll)
+tui_scroll_backward (struct tui_win_info *win_to_scroll, 
+		     int num_to_scroll)
 {
   if (win_to_scroll != TUI_CMD_WIN)
     {
@@ -529,7 +542,8 @@ tui_scroll_backward (struct tui_win_info *win_to_scroll, int num_to_scroll)
 
 
 void
-tui_scroll_left (struct tui_win_info *win_to_scroll, int num_to_scroll)
+tui_scroll_left (struct tui_win_info *win_to_scroll,
+		 int num_to_scroll)
 {
   if (win_to_scroll != TUI_CMD_WIN)
     {
@@ -549,7 +563,8 @@ tui_scroll_left (struct tui_win_info *win_to_scroll, int num_to_scroll)
 
 
 void
-tui_scroll_right (struct tui_win_info *win_to_scroll, int num_to_scroll)
+tui_scroll_right (struct tui_win_info *win_to_scroll, 
+		  int num_to_scroll)
 {
   if (win_to_scroll != TUI_CMD_WIN)
     {
@@ -1090,7 +1105,8 @@ tui_xdb_set_win_height_command (char *arg, int from_tty)
 
 /* Function to adjust all window heights around the primary.   */
 static enum tui_status
-tui_adjust_win_heights (struct tui_win_info *primary_win_info, int new_height)
+tui_adjust_win_heights (struct tui_win_info *primary_win_info,
+			int new_height)
 {
   enum tui_status status = TUI_FAILURE;
 
@@ -1242,7 +1258,8 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info, int new_height)
    with the targer) invisible, and set the new height and
    location.  */
 static void
-make_invisible_and_set_new_height (struct tui_win_info *win_info, int height)
+make_invisible_and_set_new_height (struct tui_win_info *win_info, 
+				   int height)
 {
   int i;
   struct tui_gen_win_info *gen_win_info;
@@ -1363,7 +1380,8 @@ make_visible_with_new_height (struct tui_win_info *win_info)
 
 
 static int
-new_height_ok (struct tui_win_info *primary_win_info, int new_height)
+new_height_ok (struct tui_win_info *primary_win_info, 
+	       int new_height)
 {
   int ok = (new_height < tui_term_height ());
 
@@ -1470,7 +1488,8 @@ new_height_ok (struct tui_win_info *primary_win_info, int new_height)
 
 
 static void
-parse_scrolling_args (char *arg, struct tui_win_info **win_to_scroll,
+parse_scrolling_args (char *arg, 
+		      struct tui_win_info **win_to_scroll,
 		      int *num_to_scroll)
 {
   if (num_to_scroll)

@@ -167,8 +167,7 @@ tui_event_default (int number)
 
 static struct gdb_events *tui_old_event_hooks;
 
-static struct gdb_events tui_event_hooks =
-{
+static struct gdb_events tui_event_hooks = {
   tui_event_create_breakpoint,
   tui_event_delete_breakpoint,
   tui_event_modify_breakpoint,
@@ -180,7 +179,8 @@ static struct gdb_events tui_event_hooks =
 /* Called when going to wait for the target.
    Leave curses mode and setup program mode.  */
 static ptid_t
-tui_target_wait_hook (ptid_t pid, struct target_waitstatus *status)
+tui_target_wait_hook (ptid_t pid, 
+		      struct target_waitstatus *status)
 {
   ptid_t res;
 
@@ -246,8 +246,10 @@ tui_selected_frame_level_changed_hook (int level)
 
 /* Called from print_frame_info to list the line we stopped in.  */
 static void
-tui_print_frame_info_listing_hook (struct symtab *s, int line,
-                                   int stopline, int noerror)
+tui_print_frame_info_listing_hook (struct symtab *s,
+				   int line,
+                                   int stopline, 
+				   int noerror)
 {
   select_source_symtab (s);
   tui_show_frame_info (get_selected_frame (NULL));

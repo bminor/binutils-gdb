@@ -51,7 +51,8 @@ struct tui_asm_line
    Disassemble count lines starting at pc.
    Return address of the count'th instruction after pc.  */
 static CORE_ADDR
-tui_disassemble (struct tui_asm_line *asm_lines, CORE_ADDR pc, int count)
+tui_disassemble (struct tui_asm_line *asm_lines, 
+		 CORE_ADDR pc, int count)
 {
   struct ui_file *gdb_dis_out;
 
@@ -355,7 +356,8 @@ tui_get_begin_asm_address (void)
    disassembly window.  This may or may not be the same as the low
    address input.  */
 CORE_ADDR
-tui_get_low_disassembly_address (CORE_ADDR low, CORE_ADDR pc)
+tui_get_low_disassembly_address (CORE_ADDR low, 
+				 CORE_ADDR pc)
 {
   int pos;
 
