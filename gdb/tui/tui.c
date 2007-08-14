@@ -67,7 +67,7 @@ enum tui_key_mode tui_current_key_mode = TUI_COMMAND_MODE;
 struct tui_char_command
 {
   unsigned char key;
-  const char* cmd;
+  const char *cmd;
 };
 
 /* Key mapping to gdb commands when the TUI is using the single key mode.  */
@@ -211,7 +211,7 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 static int
 tui_rl_other_window (int count, int key)
 {
-  struct tui_win_info * win_info;
+  struct tui_win_info *win_info;
 
   if (!tui_active)
     tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
@@ -241,7 +241,7 @@ tui_rl_command_key (int count, int key)
         {
           /* Must save the command because it can be modified
              by execute_command.  */
-          char* cmd = alloca (strlen (tui_commands[i].cmd) + 1);
+          char *cmd = alloca (strlen (tui_commands[i].cmd) + 1);
           strcpy (cmd, tui_commands[i].cmd);
           execute_command (cmd, TRUE);
           return 0;

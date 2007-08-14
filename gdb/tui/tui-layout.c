@@ -49,11 +49,11 @@ static void show_layout (enum tui_layout_type);
 static void init_gen_win_info (struct tui_gen_win_info *, enum tui_win_type, int, int, int, int);
 static void *init_and_make_win (void *, enum tui_win_type, int, int, int, int, int);
 static void show_source_or_disasm_and_command (enum tui_layout_type);
-static void make_source_or_disasm_window (struct tui_win_info * *, enum tui_win_type, int, int);
-static void make_command_window (struct tui_win_info * *, int, int);
-static void make_source_window (struct tui_win_info * *, int, int);
-static void make_disasm_window (struct tui_win_info * *, int, int);
-static void make_data_window (struct tui_win_info * *, int, int);
+static void make_source_or_disasm_window (struct tui_win_info **, enum tui_win_type, int, int);
+static void make_command_window (struct tui_win_info **, int, int);
+static void make_source_window (struct tui_win_info **, int, int);
+static void make_disasm_window (struct tui_win_info **, int, int);
+static void make_data_window (struct tui_win_info **, int, int);
 static void show_source_command (void);
 static void show_disasm_command (void);
 static void show_source_disasm_command (void);
@@ -139,8 +139,8 @@ tui_set_layout (enum tui_layout_type layout_type,
       enum tui_layout_type cur_layout = tui_current_layout (), new_layout = UNDEFINED_LAYOUT;
       int regs_populate = FALSE;
       CORE_ADDR addr = extract_display_start_addr ();
-      struct tui_win_info * win_with_focus = tui_win_with_focus ();
-      struct tui_layout_def * layout_def = tui_layout_def ();
+      struct tui_win_info *win_with_focus = tui_win_with_focus ();
+      struct tui_layout_def *layout_def = tui_layout_def ();
 
 
       if (layout_type == UNDEFINED_LAYOUT &&
@@ -535,7 +535,7 @@ extract_display_start_addr (void)
 
 
 static void
-tui_handle_xdb_layout (struct tui_layout_def * layout_def)
+tui_handle_xdb_layout (struct tui_layout_def *layout_def)
 {
   if (layout_def->split)
     {
@@ -555,7 +555,7 @@ tui_handle_xdb_layout (struct tui_layout_def * layout_def)
 static void
 tui_toggle_layout_command (char *arg, int from_tty)
 {
-  struct tui_layout_def * layout_def = tui_layout_def ();
+  struct tui_layout_def *layout_def = tui_layout_def ();
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -572,7 +572,7 @@ tui_toggle_layout_command (char *arg, int from_tty)
 static void
 tui_toggle_split_layout_command (char *arg, int from_tty)
 {
-  struct tui_layout_def * layout_def = tui_layout_def ();
+  struct tui_layout_def *layout_def = tui_layout_def ();
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -635,7 +635,7 @@ prev_layout (void)
 
 
 static void
-make_command_window (struct tui_win_info * * win_info_ptr, int height, int origin_y)
+make_command_window (struct tui_win_info **win_info_ptr, int height, int origin_y)
 {
   *win_info_ptr = init_and_make_win (*win_info_ptr,
 				     CMD_WIN,
@@ -653,7 +653,7 @@ make_command_window (struct tui_win_info * * win_info_ptr, int height, int origi
    ** make_source_window().
  */
 static void
-make_source_window (struct tui_win_info * * win_info_ptr, int height, int origin_y)
+make_source_window (struct tui_win_info **win_info_ptr, int height, int origin_y)
 {
   make_source_or_disasm_window (win_info_ptr, SRC_WIN, height, origin_y);
 
@@ -665,7 +665,7 @@ make_source_window (struct tui_win_info * * win_info_ptr, int height, int origin
    ** make_disasm_window().
  */
 static void
-make_disasm_window (struct tui_win_info * * win_info_ptr, int height, int origin_y)
+make_disasm_window (struct tui_win_info **win_info_ptr, int height, int origin_y)
 {
   make_source_or_disasm_window (win_info_ptr, DISASSEM_WIN, height, origin_y);
 
@@ -674,7 +674,7 @@ make_disasm_window (struct tui_win_info * * win_info_ptr, int height, int origin
 
 
 static void
-make_data_window (struct tui_win_info * * win_info_ptr, int height, int origin_y)
+make_data_window (struct tui_win_info **win_info_ptr, int height, int origin_y)
 {
   *win_info_ptr = init_and_make_win (*win_info_ptr,
 				     DATA_WIN,
@@ -742,7 +742,7 @@ show_source_disasm_command (void)
 	}
       if (TUI_SRC_WIN != NULL)
 	{
-	  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+	  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
 
 	  tui_show_source_content (TUI_SRC_WIN);
 	  if (TUI_DISASM_WIN == NULL)
@@ -822,7 +822,7 @@ show_data (enum tui_layout_type new_layout)
   int total_height = (tui_term_height () - TUI_CMD_WIN->generic.height);
   int src_height, data_height;
   enum tui_win_type win_type;
-  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
 
 
   data_height = total_height / 2;
@@ -883,7 +883,7 @@ show_data (enum tui_layout_type new_layout)
    ** init_gen_win_info().
  */
 static void
-init_gen_win_info (struct tui_gen_win_info * win_info, enum tui_win_type type,
+init_gen_win_info (struct tui_gen_win_info *win_info, enum tui_win_type type,
                  int height, int width, int origin_x, int origin_y)
 {
   int h = height;
@@ -913,7 +913,7 @@ init_and_make_win (void *opaque_win_info, enum tui_win_type win_type,
 		   int height, int width, int origin_x, int origin_y,
 		   int box_it)
 {
-  struct tui_gen_win_info * generic;
+  struct tui_gen_win_info *generic;
 
   if (opaque_win_info == NULL)
     {
@@ -944,10 +944,10 @@ init_and_make_win (void *opaque_win_info, enum tui_win_type win_type,
 
 
 static void
-make_source_or_disasm_window (struct tui_win_info * * win_info_ptr, enum tui_win_type type,
+make_source_or_disasm_window (struct tui_win_info **win_info_ptr, enum tui_win_type type,
                              int height, int origin_y)
 {
-  struct tui_gen_win_info * execution_info = (struct tui_gen_win_info *) NULL;
+  struct tui_gen_win_info *execution_info = (struct tui_gen_win_info *) NULL;
 
   /*
      ** Create the exeuction info window.
@@ -984,9 +984,9 @@ show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 {
   if (tui_current_layout () != layout_type)
     {
-      struct tui_win_info * *win_info_ptr;
+      struct tui_win_info **win_info_ptr;
       int src_height, cmd_height;
-      struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+      struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
 
       if (TUI_CMD_WIN != NULL)
 	cmd_height = TUI_CMD_WIN->generic.height;

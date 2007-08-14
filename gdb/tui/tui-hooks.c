@@ -68,7 +68,7 @@ tui_new_objfile_hook (struct objfile* objfile)
 }
 
 static int ATTR_FORMAT (printf, 1, 0)
-tui_query_hook (const char * msg, va_list argp)
+tui_query_hook (const char *msg, va_list argp)
 {
   int retval;
   int ans2;

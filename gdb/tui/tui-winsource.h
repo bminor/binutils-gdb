@@ -37,7 +37,7 @@ extern void tui_update_all_breakpoint_info (void);
 /* Scan the source window and the breakpoints to update the hasBreak
    information for each line.  Returns 1 if something changed and the
    execution window must be refreshed.  */
-extern int tui_update_breakpoint_info (struct tui_win_info * win,
+extern int tui_update_breakpoint_info (struct tui_win_info *win,
 				       int current_only);
 
 /* Function to display the "main" routine.  */

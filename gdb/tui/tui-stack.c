@@ -44,7 +44,7 @@
 /* Get a printable name for the function at the address.
    The symbol name is demangled if demangling is turned on.
    Returns a pointer to a static area holding the result.  */
-static char* tui_get_function_from_frame (struct frame_info *fi);
+static char *tui_get_function_from_frame (struct frame_info *fi);
 
 /* Set the filename portion of the locator.  */
 static void tui_set_locator_filename (const char *filename);
@@ -60,15 +60,15 @@ static void tui_update_command (char *, int);
    can on this single line: target name, process number, current
    function, current line, current PC, SingleKey mode.  */
 static char*
-tui_make_status_line (struct tui_locator_element* loc)
+tui_make_status_line (struct tui_locator_element *loc)
 {
-  char* string;
+  char *string;
   char line_buf[50], *pname;
-  char* buf;
+  char *buf;
   int status_size;
   int i, proc_width;
-  const char* pid_name;
-  const char* pc_buf;
+  const char *pid_name;
+  const char *pc_buf;
   int target_width;
   int pid_width;
   int line_width;
@@ -242,13 +242,13 @@ void
 tui_show_locator_content (void)
 {
   char *string;
-  struct tui_gen_win_info * locator;
+  struct tui_gen_win_info *locator;
 
   locator = tui_locator_win_info_ptr ();
 
   if (locator != NULL && locator->handle != (WINDOW *) NULL)
     {
-      struct tui_win_element * element;
+      struct tui_win_element *element;
 
       element = (struct tui_win_element *) locator->content[0];
 
@@ -270,8 +270,8 @@ tui_show_locator_content (void)
 static void
 tui_set_locator_filename (const char *filename)
 {
-  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
-  struct tui_locator_element * element;
+  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
+  struct tui_locator_element *element;
 
   if (locator->content[0] == NULL)
     {
@@ -289,8 +289,8 @@ static void
 tui_set_locator_info (const char *filename, const char *procname, int lineno,
                       CORE_ADDR addr)
 {
-  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
-  struct tui_locator_element * element;
+  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
+  struct tui_locator_element *element;
 
   /* Allocate the locator content if necessary.  */
   if (locator->content_size <= 0)
@@ -319,14 +319,14 @@ tui_update_locator_filename (const char *filename)
 void
 tui_show_frame_info (struct frame_info *fi)
 {
-  struct tui_win_info * win_info;
+  struct tui_win_info *win_info;
   int i;
 
   if (fi)
     {
       int start_line, i;
       CORE_ADDR low;
-      struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+      struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
       int source_already_displayed;
       struct symtab_and_line sal;
 

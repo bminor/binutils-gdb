@@ -88,8 +88,8 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 	      else
 		{
 		  int offset, cur_line_no, cur_line, cur_len, threshold;
-		  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
-                  struct tui_source_info * src = &TUI_SRC_WIN->detail.source_info;
+		  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
+                  struct tui_source_info *src = &TUI_SRC_WIN->detail.source_info;
 
                   if (TUI_SRC_WIN->generic.title)
                     xfree (TUI_SRC_WIN->generic.title);
@@ -113,7 +113,7 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 					   (threshold + 1) * sizeof (char));
 		  while (cur_line < nlines)
 		    {
-		      struct tui_win_element * element = (struct tui_win_element *)
+		      struct tui_win_element *element = (struct tui_win_element *)
 		      TUI_SRC_WIN->generic.content[cur_line];
 
 		      /* get the first character in the line */
@@ -239,7 +239,7 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
    source files cannot be accessed.  */
 
 void
-tui_set_source_content_nil (struct tui_win_info * win_info, char *warning_string)
+tui_set_source_content_nil (struct tui_win_info *win_info, char *warning_string)
 {
   int line_width;
   int n_lines;
@@ -256,8 +256,8 @@ tui_set_source_content_nil (struct tui_win_info * win_info, char *warning_string
          to null: i.e. the line number is 0, there is no bp,
          it is not where the program is stopped */
 
-      struct tui_win_element * element =
-      (struct tui_win_element *) win_info->generic.content[curr_line];
+      struct tui_win_element *element =
+	(struct tui_win_element *) win_info->generic.content[curr_line];
       element->which_element.source.line_or_addr.loa = LOA_LINE;
       element->which_element.source.line_or_addr.u.line_no = 0;
       element->which_element.source.is_exec_point = FALSE;

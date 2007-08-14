@@ -43,15 +43,15 @@
 struct tui_asm_line 
 {
   CORE_ADDR addr;
-  char* addr_string;
-  char* insn;
+  char *addr_string;
+  char *insn;
 };
 
 /* Function to set the disassembly window's content.
    Disassemble count lines starting at pc.
    Return address of the count'th instruction after pc.  */
 static CORE_ADDR
-tui_disassemble (struct tui_asm_line* asm_lines, CORE_ADDR pc, int count)
+tui_disassemble (struct tui_asm_line *asm_lines, CORE_ADDR pc, int count)
 {
   struct ui_file *gdb_dis_out;
 
@@ -92,7 +92,7 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
   CORE_ADDR new_low;
   int max_lines;
   int i;
-  struct tui_asm_line* asm_lines;
+  struct tui_asm_line *asm_lines;
 
   max_lines = (from > 0) ? from : - from;
   if (max_lines <= 1)
@@ -112,7 +112,7 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
     {
       CORE_ADDR last_addr;
       int pos;
-      struct minimal_symbol* msymbol;
+      struct minimal_symbol *msymbol;
               
       /* Find backward an address which is a symbol
          and for which disassembling from that address will fill
@@ -174,12 +174,12 @@ tui_set_disassem_content (CORE_ADDR pc)
   int offset = TUI_DISASM_WIN->detail.source_info.horizontal_offset;
   int line_width, max_lines;
   CORE_ADDR cur_pc;
-  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
   int tab_len = tui_default_tab_len ();
-  struct tui_asm_line* asm_lines;
+  struct tui_asm_line *asm_lines;
   int insn_pos;
   int addr_size, max_size;
-  char* line;
+  char *line;
   
   if (pc == 0)
     return TUI_FAILURE;
@@ -226,8 +226,8 @@ tui_set_disassem_content (CORE_ADDR pc)
   /* Now construct each line */
   for (i = 0; i < max_lines; i++)
     {
-      struct tui_win_element * element;
-      struct tui_source_element* src;
+      struct tui_win_element *element;
+      struct tui_source_element *src;
       int cur_len;
 
       element = (struct tui_win_element *) TUI_DISASM_WIN->generic.content[i];
@@ -271,7 +271,7 @@ void
 tui_show_disassem (CORE_ADDR start_addr)
 {
   struct symtab *s = find_pc_symtab (start_addr);
-  struct tui_win_info * win_with_focus = tui_win_with_focus ();
+  struct tui_win_info *win_with_focus = tui_win_with_focus ();
   struct tui_line_or_address val;
 
   val.loa = LOA_ADDRESS;
@@ -323,8 +323,8 @@ tui_show_disassem_and_update_source (CORE_ADDR start_addr)
 CORE_ADDR
 tui_get_begin_asm_address (void)
 {
-  struct tui_gen_win_info * locator;
-  struct tui_locator_element * element;
+  struct tui_gen_win_info *locator;
+  struct tui_locator_element *element;
   CORE_ADDR addr;
 
   locator = tui_locator_win_info_ptr ();

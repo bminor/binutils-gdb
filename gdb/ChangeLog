@@ -1,3 +1,11 @@
+2007-08-14  Michael Snyder  <msnyder@access-company.com>
+
+	* tui-data.c, tui-data.h, tui-disasm.c, tui-hooks.c, tui-layout.c,
+	tui-regs.c, tui-source.c, tui-stack.c, tui-win.c, tui-windata.c,
+	tui-wingeneral.c, tui-wingeneral.h, tui-winsource.c, tui.c,
+	tui-winsource.h: Whitespace changes, fix pointer declarations
+	to be consistant.
+
 2007-08-14  Joel Brobecker  <brobecker@adacore.com>
             Michael Snyder  <msnyder@access-company.com>
 

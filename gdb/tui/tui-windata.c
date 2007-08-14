@@ -53,7 +53,7 @@ tui_first_data_item_displayed (void)
 
   for (i = 0; (i < TUI_DATA_WIN->generic.content_size && element_no < 0); i++)
     {
-      struct tui_gen_win_info * data_item_win;
+      struct tui_gen_win_info *data_item_win;
 
       data_item_win = &((tui_win_content)
 		      TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
@@ -92,7 +92,7 @@ void
 tui_delete_data_content_windows (void)
 {
   int i;
-  struct tui_gen_win_info * data_item_win_ptr;
+  struct tui_gen_win_info *data_item_win_ptr;
 
   for (i = 0; (i < TUI_DATA_WIN->generic.content_size); i++)
     {
@@ -249,7 +249,7 @@ tui_check_data_values (struct frame_info *frame)
 	{
 #ifdef LATER
 	  tui_data_element_ptr data_element_ptr;
-	  struct tui_gen_win_info * data_item_win_ptr;
+	  struct tui_gen_win_info *data_item_win_ptr;
 	  Opaque new_value;
 
 	  data_item_ptr = &TUI_DATA_WIN->detail.data_display_info.

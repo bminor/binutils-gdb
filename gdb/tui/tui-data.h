@@ -264,7 +264,7 @@ struct tui_source_info
   struct tui_gen_win_info *execution_info;
   int horizontal_offset;	/* used for horizontal scroll */
   struct tui_line_or_address start_line_or_addr;
-  char* filename;
+  char *filename;
 };
 
 
@@ -334,22 +334,22 @@ extern void tui_set_gen_win_origin (struct tui_gen_win_info *, int, int);
 extern struct tui_gen_win_info *tui_locator_win_info_ptr (void);
 extern struct tui_gen_win_info *tui_source_exec_info_win_ptr (void);
 extern struct tui_gen_win_info *tui_disassem_exec_info_win_ptr (void);
-extern struct tui_list * tui_source_windows (void);
+extern struct tui_list *tui_source_windows (void);
 extern void tui_clear_source_windows (void);
 extern void tui_clear_source_windows_detail (void);
-extern void tui_clear_win_detail (struct tui_win_info * win_info);
+extern void tui_clear_win_detail (struct tui_win_info *win_info);
 extern void tui_add_to_source_windows (struct tui_win_info *);
 extern int tui_default_tab_len (void);
 extern void tui_set_default_tab_len (int);
 extern struct tui_win_info *tui_win_with_focus (void);
 extern void tui_set_win_with_focus (struct tui_win_info *);
-extern struct tui_layout_def * tui_layout_def (void);
+extern struct tui_layout_def *tui_layout_def (void);
 extern int tui_win_resized (void);
 extern void tui_set_win_resized_to (int);
 
 extern struct tui_win_info *tui_next_win (struct tui_win_info *);
 extern struct tui_win_info *tui_prev_win (struct tui_win_info *);
 
-extern void tui_add_to_source_windows (struct tui_win_info * win_info);
+extern void tui_add_to_source_windows (struct tui_win_info *win_info);
 
 #endif /* TUI_DATA_H */

@@ -39,7 +39,7 @@ extern void tui_box_win (struct tui_gen_win_info *, int);
 extern void tui_highlight_win (struct tui_win_info *);
 extern void tui_check_and_display_highlight_if_needed (struct tui_win_info *);
 extern void tui_refresh_all (struct tui_win_info **);
-extern void tui_delete_win (WINDOW * window);
+extern void tui_delete_win (WINDOW *window);
 extern void tui_refresh_win (struct tui_gen_win_info *);
 
 #endif

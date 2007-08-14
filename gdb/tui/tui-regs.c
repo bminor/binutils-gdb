@@ -364,8 +364,8 @@ tui_display_registers_from (int start_element_no)
 	       (j < display_info->regs_column_count &&
 		i < display_info->regs_content_count); j++)
 	    {
-	      struct tui_gen_win_info * data_item_win;
-	      struct tui_data_element * data_element_ptr;
+	      struct tui_gen_win_info *data_item_win;
+	      struct tui_data_element *data_element_ptr;
 
 	      /* create the window if necessary */
 	      data_item_win = &display_info->regs_content[i]

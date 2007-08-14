@@ -69,7 +69,7 @@ static void tui_scroll_forward_command (char *, int);
 static void tui_scroll_backward_command (char *, int);
 static void tui_scroll_left_command (char *, int);
 static void tui_scroll_right_command (char *, int);
-static void parse_scrolling_args (char *, struct tui_win_info * *, int *);
+static void parse_scrolling_args (char *, struct tui_win_info **, int *);
 
 
 /***************************************
@@ -463,11 +463,11 @@ tui_update_gdb_sizes (void)
 
 /* Set the logical focus to win_info.    */
 void
-tui_set_win_focus_to (struct tui_win_info * win_info)
+tui_set_win_focus_to (struct tui_win_info *win_info)
 {
   if (win_info != NULL)
     {
-      struct tui_win_info * win_with_focus = tui_win_with_focus ();
+      struct tui_win_info *win_with_focus = tui_win_with_focus ();
 
       if (win_with_focus != NULL
 	  && win_with_focus->generic.type != CMD_WIN)
@@ -480,7 +480,7 @@ tui_set_win_focus_to (struct tui_win_info * win_info)
 
 
 void
-tui_scroll_forward (struct tui_win_info * win_to_scroll, int num_to_scroll)
+tui_scroll_forward (struct tui_win_info *win_to_scroll, int num_to_scroll)
 {
   if (win_to_scroll != TUI_CMD_WIN)
     {
@@ -504,7 +504,7 @@ tui_scroll_forward (struct tui_win_info * win_to_scroll, int num_to_scroll)
 }
 
 void
-tui_scroll_backward (struct tui_win_info * win_to_scroll, int num_to_scroll)
+tui_scroll_backward (struct tui_win_info *win_to_scroll, int num_to_scroll)
 {
   if (win_to_scroll != TUI_CMD_WIN)
     {
@@ -529,7 +529,7 @@ tui_scroll_backward (struct tui_win_info * win_to_scroll, int num_to_scroll)
 
 
 void
-tui_scroll_left (struct tui_win_info * win_to_scroll, int num_to_scroll)
+tui_scroll_left (struct tui_win_info *win_to_scroll, int num_to_scroll)
 {
   if (win_to_scroll != TUI_CMD_WIN)
     {
@@ -550,7 +550,7 @@ tui_scroll_left (struct tui_win_info * win_to_scroll, int num_to_scroll)
 
 
 void
-tui_scroll_right (struct tui_win_info * win_to_scroll, int num_to_scroll)
+tui_scroll_right (struct tui_win_info *win_to_scroll, int num_to_scroll)
 {
   if (win_to_scroll != TUI_CMD_WIN)
     {
@@ -573,7 +573,7 @@ tui_scroll_right (struct tui_win_info * win_to_scroll, int num_to_scroll)
 /* Scroll a window.  Arguments are passed through a va_list.    */
 void
 tui_scroll (enum tui_scroll_direction direction,
-	    struct tui_win_info * win_to_scroll,
+	    struct tui_win_info *win_to_scroll,
 	    int num_to_scroll)
 {
   switch (direction)
@@ -642,10 +642,10 @@ tui_resize_all (void)
   if (height_diff || width_diff)
     {
       enum tui_layout_type cur_layout = tui_current_layout ();
-      struct tui_win_info * win_with_focus = tui_win_with_focus ();
+      struct tui_win_info *win_with_focus = tui_win_with_focus ();
       struct tui_win_info *first_win;
       struct tui_win_info *second_win;
-      struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+      struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
       enum tui_win_type win_type;
       int new_height, split_diff, cmd_split_diff, num_wins_displayed = 2;
 
@@ -811,7 +811,7 @@ static void
 tui_scroll_forward_command (char *arg, int from_tty)
 {
   int num_to_scroll = 1;
-  struct tui_win_info * win_to_scroll;
+  struct tui_win_info *win_to_scroll;
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -827,7 +827,7 @@ static void
 tui_scroll_backward_command (char *arg, int from_tty)
 {
   int num_to_scroll = 1;
-  struct tui_win_info * win_to_scroll;
+  struct tui_win_info *win_to_scroll;
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -843,7 +843,7 @@ static void
 tui_scroll_left_command (char *arg, int from_tty)
 {
   int num_to_scroll;
-  struct tui_win_info * win_to_scroll;
+  struct tui_win_info *win_to_scroll;
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -856,7 +856,7 @@ static void
 tui_scroll_right_command (char *arg, int from_tty)
 {
   int num_to_scroll;
-  struct tui_win_info * win_to_scroll;
+  struct tui_win_info *win_to_scroll;
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -873,7 +873,7 @@ tui_set_focus (char *arg, int from_tty)
     {
       char *buf_ptr = (char *) xstrdup (arg);
       int i;
-      struct tui_win_info * win_info = (struct tui_win_info *) NULL;
+      struct tui_win_info *win_info = (struct tui_win_info *) NULL;
 
       for (i = 0; (i < strlen (buf_ptr)); i++)
 	buf_ptr[i] = toupper (arg[i]);
@@ -917,7 +917,7 @@ static void
 tui_all_windows_info (char *arg, int from_tty)
 {
   enum tui_win_type type;
-  struct tui_win_info * win_with_focus = tui_win_with_focus ();
+  struct tui_win_info *win_with_focus = tui_win_with_focus ();
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
     if (tui_win_list[type] && tui_win_list[type]->generic.is_visible)
@@ -975,7 +975,7 @@ tui_set_win_height (char *arg, int from_tty)
       char *buf_ptr = buf;
       char *wname = (char *) NULL;
       int new_height, i;
-      struct tui_win_info * win_info;
+      struct tui_win_info *win_info;
 
       wname = buf_ptr;
       buf_ptr = strchr (buf_ptr, ' ');
@@ -1097,7 +1097,7 @@ tui_xdb_set_win_height_command (char *arg, int from_tty)
 
 /* Function to adjust all window heights around the primary.   */
 static enum tui_status
-tui_adjust_win_heights (struct tui_win_info * primary_win_info, int new_height)
+tui_adjust_win_heights (struct tui_win_info *primary_win_info, int new_height)
 {
   enum tui_status status = TUI_FAILURE;
 
@@ -1107,14 +1107,14 @@ tui_adjust_win_heights (struct tui_win_info * primary_win_info, int new_height)
       if (new_height != primary_win_info->generic.height)
 	{
 	  int diff;
-	  struct tui_win_info * win_info;
-	  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
+	  struct tui_win_info *win_info;
+	  struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
 	  enum tui_layout_type cur_layout = tui_current_layout ();
 
 	  diff = (new_height - primary_win_info->generic.height) * (-1);
 	  if (cur_layout == SRC_COMMAND || cur_layout == DISASSEM_COMMAND)
 	    {
-	      struct tui_win_info * src_win_info;
+	      struct tui_win_info *src_win_info;
 
 	      make_invisible_and_set_new_height (primary_win_info, new_height);
 	      if (primary_win_info->generic.type == CMD_WIN)
@@ -1249,10 +1249,10 @@ tui_adjust_win_heights (struct tui_win_info * primary_win_info, int new_height)
 /* Function make the target window (and auxillary windows associated
    with the targer) invisible, and set the new height and location.  */
 static void
-make_invisible_and_set_new_height (struct tui_win_info * win_info, int height)
+make_invisible_and_set_new_height (struct tui_win_info *win_info, int height)
 {
   int i;
-  struct tui_gen_win_info * gen_win_info;
+  struct tui_gen_win_info *gen_win_info;
 
   tui_make_invisible (&win_info->generic);
   win_info->generic.height = height;
@@ -1306,7 +1306,7 @@ make_invisible_and_set_new_height (struct tui_win_info * win_info, int height)
    re-creating the windows' content since the window had to be
    destroyed to be made invisible.  */
 static void
-make_visible_with_new_height (struct tui_win_info * win_info)
+make_visible_with_new_height (struct tui_win_info *win_info)
 {
   struct symtab *s;
 
@@ -1370,7 +1370,7 @@ make_visible_with_new_height (struct tui_win_info * win_info)
 
 
 static int
-new_height_ok (struct tui_win_info * primary_win_info, int new_height)
+new_height_ok (struct tui_win_info *primary_win_info, int new_height)
 {
   int ok = (new_height < tui_term_height ());
 
@@ -1390,7 +1390,7 @@ new_height_ok (struct tui_win_info * primary_win_info, int new_height)
 		 new_height >= MIN_WIN_HEIGHT));
 	  if (ok)
 	    {			/* check the total height */
-	      struct tui_win_info * win_info;
+	      struct tui_win_info *win_info;
 
 	      if (primary_win_info == TUI_CMD_WIN)
 		win_info = (tui_source_windows ())->list[0];
@@ -1484,7 +1484,7 @@ new_height_ok (struct tui_win_info * primary_win_info, int new_height)
 
 
 static void
-parse_scrolling_args (char *arg, struct tui_win_info * * win_to_scroll,
+parse_scrolling_args (char *arg, struct tui_win_info **win_to_scroll,
 		      int *num_to_scroll)
 {
   if (num_to_scroll)
