@@ -1,5 +1,7 @@
 2007-08-14  Michael Snyder  <msnyder@access-company.com>
 
+	* ada-lang.c (possible_user_operator_p): Guard against NULL.
+
 	* varobj.c (cplus_describe_child): Guard against null.
 	Use "NULL" instead of "0" to initialize pointers.
 

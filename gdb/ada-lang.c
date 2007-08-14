@@ -3536,7 +3536,7 @@ possible_user_operator_p (enum exp_opcode op, struct value *args[])
         ((TYPE_CODE (type0) != TYPE_CODE_ARRAY
           && (TYPE_CODE (type0) != TYPE_CODE_PTR
               || TYPE_CODE (TYPE_TARGET_TYPE (type0)) != TYPE_CODE_ARRAY))
-         || (TYPE_CODE (type1) != TYPE_CODE_ARRAY
+         || (type1 != NULL && TYPE_CODE (type1) != TYPE_CODE_ARRAY
              && (TYPE_CODE (type1) != TYPE_CODE_PTR
                  || (TYPE_CODE (TYPE_TARGET_TYPE (type1)) 
 		     != TYPE_CODE_ARRAY))));
