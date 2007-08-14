@@ -218,18 +218,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 
   for (i = 1; i < argc; i++)
     {
-      char *buff = NULL;
-      /* Do this in a cleaner way...  We want to force execution to be
-         asynchronous for commands that run the target.  */
-      if (target_can_async_p () && (strcmp (argv[0], "console") == 0))
-	{
-	  int len = strlen (argv[i]);
-	  buff = xmalloc (len + 2);
-	  memcpy (buff, argv[i], len);
-	  buff[len] = '&';
-	  buff[len + 1] = '\0';
-	}
-
       /* We had to set sync_execution = 0 for the mi (well really for Project
          Builder's use of the mi - particularly so interrupting would work.
          But for console commands to work, we need to initialize it to 1 -
@@ -245,7 +233,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 	    break;
 	  }
       }
-      xfree (buff);
       do_exec_error_cleanups (ALL_CLEANUPS);
       sync_execution = 0;
     }
