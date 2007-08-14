@@ -1,3 +1,7 @@
+2007-08-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (Global Maintainers): Add self.
+
 2007-08-14  Michael Snyder  <msnyder@access-company.com>
 
 	* mi/mi-interp.c (mi_cmd_interpreter_exec): Dead code, dead variable.

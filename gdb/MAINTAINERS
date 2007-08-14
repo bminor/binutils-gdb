@@ -159,6 +159,7 @@ future, if there are, a reference to the list will be included here.
 The current global maintainers are (in alphabetical order):
 
 Jim Blandy			jimb@codesourcery.com
+Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			cagney@gnu.org
 Fred Fish			fnf@ninemoons.com
