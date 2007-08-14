@@ -11678,6 +11678,8 @@ tc_gen_reloc (sec, fixp)
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    "Cannot represent %s relocation in object file",
 		    bfd_get_reloc_code_name (fixp->fx_r_type));
+      free (reloc);
+      return NULL;
     }
   return reloc;
 }
