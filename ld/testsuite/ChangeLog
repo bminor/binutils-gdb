@@ -1,3 +1,18 @@
+2007-08-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4918
+	* ld-i386/i386.exp (i386tests): Add tlsgd1 and tlsld1 tests.
+	* ld-x86-64/x86-64.exp (x86_64tests): Likewise.
+
+	* ld-i386/tlsgd1.dd: New file.
+	* ld-i386/tlsgd1.s: Likewise.
+	* ld-i386/tlsld1.dd: Likewise.
+	* ld-i386/tlsld1.s: Likewise.
+	* ld-x86-64/tlsgd1.dd: Likewise.
+	* ld-x86-64/tlsgd1.s: Likewise.
+	* ld-x86-64/tlsld1.dd: Likewise.
+	* ld-x86-64/tlsld1.s: Likewise.
+
 2007-08-13  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips-elf/vxworks-forced-local-1.d,

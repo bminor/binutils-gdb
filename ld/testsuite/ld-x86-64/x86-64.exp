@@ -66,6 +66,12 @@ set x86_64tests {
     {"TLS in debug sections" "-melf_x86_64"
      "--64" {tlsg.s}
      {{objdump -sj.debug_foobar tlsg.sd}} "tlsg"}
+    {"TLS GD->LE transition" "-melf_x86_64"
+     "--64" {tlsgd1.s}
+     {{objdump -dwr tlsgd1.dd}} "tlsgd1"}
+    {"TLS LD->LE transition" "-melf_x86_64"
+     "--64" {tlsld1.s}
+     {{objdump -dwr tlsld1.dd}} "tlsld1"}
 }
 
 run_ld_link_tests $x86_64tests

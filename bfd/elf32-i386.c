@@ -2652,6 +2652,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 		{
 		  unsigned int val, type;
 		  bfd_vma roff;
+		  unsigned long tls_r_symndx;
+		  struct elf_link_hash_entry *tls_h;
 
 		  /* GD->LE transition.  */
 		  BFD_ASSERT (rel->r_offset >= 2);
@@ -2662,7 +2664,16 @@ elf_i386_relocate_section (bfd *output_bfd,
 					 contents + rel->r_offset + 4)
 			      == 0xe8);
 		  BFD_ASSERT (rel + 1 < relend);
-		  BFD_ASSERT (ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32);
+		  tls_r_symndx = ELF32_R_SYM (rel[1].r_info);
+		  BFD_ASSERT (tls_r_symndx >= symtab_hdr->sh_info);
+		  tls_h = sym_hashes[tls_r_symndx - symtab_hdr->sh_info];
+		  BFD_ASSERT (tls_h != NULL
+			      && tls_h->root.root.string != NULL
+			      && strcmp (tls_h->root.root.string,
+					 "___tls_get_addr") == 0);
+		  BFD_ASSERT ((! info->shared
+			       && ELF32_R_TYPE (rel[1].r_info) == R_386_PC32)
+			      || ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32);
 		  roff = rel->r_offset + 5;
 		  val = bfd_get_8 (input_bfd,
 				   contents + rel->r_offset - 1);
@@ -2707,7 +2718,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    }
 		  bfd_put_32 (output_bfd, tpoff (info, relocation),
 			      contents + roff);
-		  /* Skip R_386_PLT32.  */
+		  /* Skip R_386_PC32/R_386_PLT32.  */
 		  rel++;
 		  continue;
 		}
@@ -3191,6 +3202,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  if (! info->shared)
 	    {
 	      unsigned int val;
+	      unsigned long tls_r_symndx;
+	      struct elf_link_hash_entry *tls_h;
 
 	      /* LD->LE transition:
 		 Ensure it is:
@@ -3206,10 +3219,18 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset + 4)
 			  == 0xe8);
 	      BFD_ASSERT (rel + 1 < relend);
-	      BFD_ASSERT (ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32);
+	      tls_r_symndx = ELF32_R_SYM (rel[1].r_info);
+	      BFD_ASSERT (tls_r_symndx >= symtab_hdr->sh_info);
+	      tls_h = sym_hashes[tls_r_symndx - symtab_hdr->sh_info];
+	      BFD_ASSERT (tls_h != NULL
+			  && tls_h->root.root.string != NULL
+			  && strcmp (tls_h->root.root.string,
+				     "___tls_get_addr") == 0);
+	      BFD_ASSERT (ELF32_R_TYPE (rel[1].r_info) == R_386_PC32
+			  || ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32);
 	      memcpy (contents + rel->r_offset - 2,
 		      "\x65\xa1\0\0\0\0\x90\x8d\x74\x26", 11);
-	      /* Skip R_386_PLT32.  */
+	      /* Skip R_386_PC32/R_386_PLT32.  */
 	      rel++;
 	      continue;
 	    }

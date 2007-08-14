@@ -2527,10 +2527,12 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  unsigned int i;
 		  static unsigned char tlsgd[8]
 		    = { 0x66, 0x48, 0x8d, 0x3d, 0x66, 0x66, 0x48, 0xe8 };
+		  unsigned long tls_r_symndx;
+		  struct elf_link_hash_entry *tls_h;
 
 		  /* GD->LE transition.
 		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
-		     .word 0x6666; rex64; call __tls_get_addr@plt
+		     .word 0x6666; rex64; call __tls_get_addr
 		     Change it into:
 		     movq %fs:0, %rax
 		     leaq foo@tpoff(%rax), %rax */
@@ -2545,13 +2547,22 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 					   contents + rel->r_offset + 4 + i)
 				== tlsgd[i+4]);
 		  BFD_ASSERT (rel + 1 < relend);
-		  BFD_ASSERT (ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
+		  tls_r_symndx = ELF64_R_SYM (rel[1].r_info);
+		  BFD_ASSERT (tls_r_symndx >= symtab_hdr->sh_info);
+		  tls_h = sym_hashes[tls_r_symndx - symtab_hdr->sh_info];
+		  BFD_ASSERT (tls_h != NULL
+			      && tls_h->root.root.string != NULL
+			      && strcmp (tls_h->root.root.string,
+					 "__tls_get_addr") == 0);
+		  BFD_ASSERT ((! info->shared
+			       && ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PC32)
+			      || ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
 		  memcpy (contents + rel->r_offset - 4,
 			  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
 			  16);
 		  bfd_put_32 (output_bfd, tpoff (info, relocation),
 			      contents + rel->r_offset + 8);
-		  /* Skip R_X86_64_PLT32.  */
+		  /* Skip R_X86_64_PC32/R_X86_64_PLT32.  */
 		  rel++;
 		  continue;
 		}
@@ -2919,9 +2930,12 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_X86_64_TLSLD:
 	  if (! info->shared)
 	    {
+	      unsigned long tls_r_symndx;
+	      struct elf_link_hash_entry *tls_h;
+
 	      /* LD->LE transition:
 		 Ensure it is:
-		 leaq foo@tlsld(%rip), %rdi; call __tls_get_addr@plt.
+		 leaq foo@tlsld(%rip), %rdi; call __tls_get_addr.
 		 We change it into:
 		 .word 0x6666; .byte 0x66; movl %fs:0, %rax.  */
 	      BFD_ASSERT (rel->r_offset >= 3);
@@ -2935,10 +2949,18 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset + 4)
 			  == 0xe8);
 	      BFD_ASSERT (rel + 1 < relend);
-	      BFD_ASSERT (ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
+	      tls_r_symndx = ELF64_R_SYM (rel[1].r_info);
+	      BFD_ASSERT (tls_r_symndx >= symtab_hdr->sh_info);
+	      tls_h = sym_hashes[tls_r_symndx - symtab_hdr->sh_info];
+	      BFD_ASSERT (tls_h != NULL
+			  && tls_h->root.root.string != NULL
+			  && strcmp (tls_h->root.root.string,
+				     "__tls_get_addr") == 0);
+	      BFD_ASSERT (ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PC32
+			  || ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
 	      memcpy (contents + rel->r_offset - 3,
 		      "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
-	      /* Skip R_X86_64_PLT32.  */
+	      /* Skip R_X86_64_PC32/R_X86_64_PLT32.  */
 	      rel++;
 	      continue;
 	    }
