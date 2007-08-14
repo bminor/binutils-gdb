@@ -1,5 +1,7 @@
 2007-08-13  Michael Snyder  <msnyder@access-company.com>
 
+	* valops.c: Whitespace clean-up.
+
 	* tui/tui-winsource.c (tui_alloc_source_buffer): Clean up allocation.
 
 	* event-top.c (command_line_handler): Memory leak.
