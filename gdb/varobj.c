@@ -2315,7 +2315,7 @@ static void
 cplus_describe_child (struct varobj *parent, int index,
 		      char **cname, struct value **cvalue, struct type **ctype)
 {
-  char *name = 0;
+  char *name = NULL;
   struct value *value;
   struct type *type;
 
@@ -2396,7 +2396,7 @@ cplus_describe_child (struct varobj *parent, int index,
 	}
       else
 	{
-	  char *access = 0;
+	  char *access = NULL;
 	  int children[3];
 	  cplus_class_num_children (type, children);
 
@@ -2435,7 +2435,8 @@ cplus_describe_child (struct varobj *parent, int index,
 	      /* error! */
 	      break;
 	    }
-	  
+
+	  gdb_assert (access);
 	  if (cname)
 	    *cname = xstrdup (access);
 
