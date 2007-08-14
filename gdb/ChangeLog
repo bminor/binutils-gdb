@@ -1,6 +1,5 @@
 2007-08-14  Vladimir Prus  <vladimir@codesourcery.com>
 
-	gdb/
 	* breakpoint.c (disable_breakpoints_in_shlibs): Remove
 	the 'silent' parameter and code to implement that.
 	* breakpoint.h (disable_breakpoints_in_shlibs): Adjust
@@ -10,7 +9,6 @@
 	
 2007-08-14  Vladimir Prus  <vladimir@codesourcery.com>
 
-	gdb/
 	* breakpoint.c (update_breakpoints_after_exec): Don't
 	set address to zero.
 
