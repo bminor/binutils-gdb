@@ -1635,6 +1635,7 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   int err;
   unsigned int i;
   bfd_vma loadbase;
+  bfd_boolean loadbase_set;
 
   /* Read in the ELF header in external format.  */
   err = target_read_memory (ehdr_vma, (bfd_byte *) &x_ehdr, sizeof x_ehdr);
@@ -1711,13 +1712,11 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   contents_size = 0;
   last_phdr = NULL;
   loadbase = ehdr_vma;
+  loadbase_set = FALSE;
   for (i = 0; i < i_ehdr.e_phnum; ++i)
     {
       elf_swap_phdr_in (templ, &x_phdrs[i], &i_phdrs[i]);
-      /* IA-64 vDSO may have two mappings for one segment, where one mapping
-	 is executable only, and one is read only.  We must not use the
-	 executable one.  */
-      if (i_phdrs[i].p_type == PT_LOAD && (i_phdrs[i].p_flags & PF_R))
+      if (i_phdrs[i].p_type == PT_LOAD)
 	{
 	  bfd_vma segment_end;
 	  segment_end = (i_phdrs[i].p_offset + i_phdrs[i].p_filesz
@@ -1725,8 +1724,14 @@ NAME(_bfd_elf,bfd_from_remote_memory)
 	  if (segment_end > (bfd_vma) contents_size)
 	    contents_size = segment_end;
 
-	  if ((i_phdrs[i].p_offset & -i_phdrs[i].p_align) == 0)
-	    loadbase = ehdr_vma - (i_phdrs[i].p_vaddr & -i_phdrs[i].p_align);
+	  /* LOADADDR is the `Base address' from the gELF specification:
+	     `lowest p_vaddr value for a PT_LOAD segment' is P_VADDR from the
+	     first PT_LOAD as PT_LOADs are ordered by P_VADDR.  */
+	  if (!loadbase_set && (i_phdrs[i].p_offset & -i_phdrs[i].p_align) == 0)
+	    {
+	      loadbase = ehdr_vma - (i_phdrs[i].p_vaddr & -i_phdrs[i].p_align);
+	      loadbase_set = TRUE;
+	    }
 
 	  last_phdr = &i_phdrs[i];
 	}
@@ -1764,10 +1769,7 @@ NAME(_bfd_elf,bfd_from_remote_memory)
     }
 
   for (i = 0; i < i_ehdr.e_phnum; ++i)
-    /* IA-64 vDSO may have two mappings for one segment, where one mapping
-       is executable only, and one is read only.  We must not use the
-       executable one.  */
-    if (i_phdrs[i].p_type == PT_LOAD && (i_phdrs[i].p_flags & PF_R))
+    if (i_phdrs[i].p_type == PT_LOAD)
       {
 	bfd_vma start = i_phdrs[i].p_offset & -i_phdrs[i].p_align;
 	bfd_vma end = (i_phdrs[i].p_offset + i_phdrs[i].p_filesz

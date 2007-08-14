@@ -1,3 +1,10 @@
+2007-08-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elfcode.h (NAME(_bfd_elf,bfd_from_remote_memory)): LOADBASE is now
+	initialized only on the first PT_LOAD.  New variable LOADBASE_SET.
+	Removed PF_R checking for IA-64 vDSOs as redundant now.
+	Code advisory: Roland McGrath
+
 2007-08-13  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_link_hash_table): Add computed_got_sizes.
