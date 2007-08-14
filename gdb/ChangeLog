@@ -1,3 +1,8 @@
+2007-08-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/i386/linux.mh (NATDEPFILES): Move corelow.o from here...
+	* config/i386/linux.mt (TDEPFILES): ...to here.
+
 2007-08-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* breakpoint.c (disable_breakpoints_in_shlibs): Remove
