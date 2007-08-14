@@ -65,10 +65,9 @@ tui_dispatch_ctrl_char (unsigned int ch)
       int i;
       char *term;
 
-      /* If this is an xterm, page next/prev keys aren't returned
-         ** by keypad as a single char, so we must handle them here.
-         ** Seems like a bug in the curses library?
-       */
+      /* If this is an xterm, page next/prev keys aren't returned by
+         keypad as a single char, so we must handle them here.  Seems
+         like a bug in the curses library?  */
       term = (char *) getenv ("TERM");
       if (term)
 	{

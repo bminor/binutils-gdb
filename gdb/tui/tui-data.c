@@ -474,8 +474,7 @@ tui_init_generic_part (struct tui_gen_win_info *win)
 }
 
 
-/*
-   ** init_content_element().
+/* init_content_element().
  */
 void
 init_content_element (struct tui_win_element *element, enum tui_win_type type)
@@ -814,11 +813,9 @@ tui_del_data_windows (tui_win_content content, int content_size)
 {
   int i;
 
-  /*
-     ** Remember that data window content elements are of type 
-     ** struct tui_gen_win_info *, each of which whose single 
-     ** element is a data element.
-   */
+  /* Remember that data window content elements are of type struct
+     tui_gen_win_info *, each of which whose single element is a data
+     element.  */
   for (i = 0; i < content_size; i++)
     {
       struct tui_gen_win_info *generic_win = &content[i]->which_element.data_window;
@@ -838,11 +835,9 @@ tui_free_data_content (tui_win_content content, int content_size)
 {
   int i;
 
-  /*
-     ** Remember that data window content elements are of type 
-     ** struct tui_gen_win_info *, each of which whose single 
-     ** element is a data element.
-   */
+  /* Remember that data window content elements are of type struct
+     tui_gen_win_info *, each of which whose single element is a data
+     element.  */
   for (i = 0; i < content_size; i++)
     {
       struct tui_gen_win_info *generic_win = &content[i]->which_element.data_window;
@@ -876,8 +871,7 @@ free_content (tui_win_content content, int content_size, enum tui_win_type win_t
 }
 
 
-/*
-   ** free_content_elements().
+/* free_content_elements().
  */
 static void
 free_content_elements (tui_win_content content, int content_size, enum tui_win_type type)
@@ -906,11 +900,9 @@ free_content_elements (tui_win_content content, int content_size, enum tui_win_t
 		      xfree (element);
 		      break;
 		    case DATA_ITEM_WIN:
-		      /*
-		         ** Note that data elements are not allocated
-		         ** in a single block, but individually, as
-			 ** needed.
-		       */
+		      /* Note that data elements are not allocated in
+		         a single block, but individually, as
+		         needed.  */
 		      if (element->which_element.data.type != TUI_REGISTER)
 			xfree ((void *)element->which_element.data.name);
 		      xfree (element->which_element.data.value);

@@ -81,11 +81,9 @@ show_layout (enum tui_layout_type layout)
 
   if (layout != cur_layout)
     {
-      /*
-         ** Since the new layout may cause changes in window size, we
-         ** should free the content and reallocate on next display of
-         ** source/asm.
-       */
+      /* Since the new layout may cause changes in window size, we
+         should free the content and reallocate on next display of
+         source/asm.  */
       tui_free_all_source_wins_content ();
       tui_clear_source_windows ();
       if (layout == SRC_DATA_COMMAND || layout == DISASSEM_DATA_COMMAND)
@@ -165,9 +163,8 @@ tui_set_layout (enum tui_layout_type layout_type,
 	  if (new_layout != cur_layout)
 	    {
 	      show_layout (new_layout);
-	      /*
-	         ** Now determine where focus should be.
-	       */
+
+	      /* Now determine where focus should be.  */
 	      if (win_with_focus != TUI_CMD_WIN)
 		{
 		  switch (new_layout)
@@ -178,26 +175,28 @@ tui_set_layout (enum tui_layout_type layout_type,
 		      layout_def->split = FALSE;
 		      break;
 		    case DISASSEM_COMMAND:
-		      /* The previous layout was not showing
-		         ** code. this can happen if there is no
-		         ** source available:
-		         ** 1. if the source file is in another dir OR
-		         ** 2. if target was compiled without -g
-		         ** We still want to show the assembly though!
-		       */
+		      /* The previous layout was not showing code.
+		         This can happen if there is no source
+		         available:
+
+		         1. if the source file is in another dir OR
+		         2. if target was compiled without -g
+		         We still want to show the assembly though!  */
+
 		      addr = tui_get_begin_asm_address ();
 		      tui_set_win_focus_to (TUI_DISASM_WIN);
 		      layout_def->display_mode = DISASSEM_WIN;
 		      layout_def->split = FALSE;
 		      break;
 		    case SRC_DISASSEM_COMMAND:
-		      /* The previous layout was not showing
-		         ** code. this can happen if there is no
-		         ** source available:
-		         ** 1. if the source file is in another dir OR
-		         ** 2. if target was compiled without -g
-		         ** We still want to show the assembly though!
-		       */
+		      /* The previous layout was not showing code.
+		         This can happen if there is no source
+		         available:
+
+		         1. if the source file is in another dir OR
+		         2. if target was compiled without -g
+		         We still want to show the assembly though!  */
+
 		      addr = tui_get_begin_asm_address ();
 		      if (win_with_focus == TUI_SRC_WIN)
 			tui_set_win_focus_to (TUI_SRC_WIN);
@@ -214,13 +213,14 @@ tui_set_layout (enum tui_layout_type layout_type,
 		      layout_def->split = FALSE;
 		      break;
 		    case DISASSEM_DATA_COMMAND:
-		      /* The previous layout was not showing
-		         ** code. this can happen if there is no
-		         ** source available:
-		         ** 1. if the source file is in another dir OR
-		         ** 2. if target was compiled without -g
-		         ** We still want to show the assembly though!
-		       */
+		      /* The previous layout was not showing code.
+		         This can happen if there is no source
+		         available:
+
+			 1. if the source file is in another dir OR
+		         2. if target was compiled without -g
+		         We still want to show the assembly though!  */
+
 		      addr = tui_get_begin_asm_address ();
 		      if (win_with_focus != TUI_DATA_WIN)
 			tui_set_win_focus_to (TUI_DISASM_WIN);
@@ -648,8 +648,7 @@ make_command_window (struct tui_win_info **win_info_ptr, int height, int origin_
 }
 
 
-/*
-   ** make_source_window().
+/* make_source_window().
  */
 static void
 make_source_window (struct tui_win_info **win_info_ptr, int height, int origin_y)
@@ -660,8 +659,7 @@ make_source_window (struct tui_win_info **win_info_ptr, int height, int origin_y
 }				/* make_source_window */
 
 
-/*
-   ** make_disasm_window().
+/* make_disasm_window().
  */
 static void
 make_disasm_window (struct tui_win_info **win_info_ptr, int height, int origin_y)
@@ -878,8 +876,7 @@ show_data (enum tui_layout_type new_layout)
   tui_set_current_layout_to (new_layout);
 }
 
-/*
-   ** init_gen_win_info().
+/* init_gen_win_info().
  */
 static void
 init_gen_win_info (struct tui_gen_win_info *win_info, enum tui_win_type type,
@@ -904,8 +901,7 @@ init_gen_win_info (struct tui_gen_win_info *win_info, enum tui_win_type type,
   return;
 }				/* init_gen_win_info */
 
-/*
-   ** init_and_make_win().
+/* init_and_make_win().
  */
 static void *
 init_and_make_win (void *opaque_win_info, enum tui_win_type win_type,
@@ -948,9 +944,7 @@ make_source_or_disasm_window (struct tui_win_info **win_info_ptr, enum tui_win_t
 {
   struct tui_gen_win_info *execution_info = (struct tui_gen_win_info *) NULL;
 
-  /*
-     ** Create the exeuction info window.
-   */
+  /* Create the exeuction info window.  */
   if (type == SRC_WIN)
     execution_info = tui_source_exec_info_win_ptr ();
   else
@@ -962,9 +956,8 @@ make_source_or_disasm_window (struct tui_win_info **win_info_ptr, enum tui_win_t
 				      0,
 				      origin_y,
 				      DONT_BOX_WINDOW);
-  /*
-     ** Now create the source window.
-   */
+
+  /* Now create the source window.  */
   *win_info_ptr = init_and_make_win (*win_info_ptr,
 				     type,
 				     height,

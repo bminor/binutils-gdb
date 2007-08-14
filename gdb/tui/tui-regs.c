@@ -354,10 +354,8 @@ tui_display_registers_from (int start_element_no)
       item_win_width =
         (TUI_DATA_WIN->generic.width - 2) / display_info->regs_column_count;
 
-      /*
-         ** Now create each data "sub" window, and write the display
-	 ** into it.
-       */
+      /* Now create each data "sub" window, and write the display into
+	 it.  */
       cur_y = 1;
       while (i < display_info->regs_content_count &&
 	     cur_y <= TUI_DATA_WIN->generic.viewport_height)
@@ -426,12 +424,11 @@ tui_display_reg_element_at_line (int start_element_no, int start_line_no)
 	  first_line_on_last_page = last_line_no - (TUI_DATA_WIN->generic.height - 2);
 	  if (first_line_on_last_page < 0)
 	    first_line_on_last_page = 0;
-	  /*
-	     ** If there is no other data displayed except registers,
-	     ** and the element_no causes us to scroll past the end of
-	     ** the registers, adjust what element to really start the
-	     ** display at.
-	   */
+
+	  /* If there is no other data displayed except registers, and
+	     the element_no causes us to scroll past the end of the
+	     registers, adjust what element to really start the
+	     display at.  */
 	  if (TUI_DATA_WIN->detail.data_display_info.data_content_count <= 0 &&
 	      start_line_no > first_line_on_last_page)
 	    element_no = tui_first_reg_element_no_inline (first_line_on_last_page);
@@ -455,10 +452,9 @@ tui_display_registers_from_line (int line_no, int force_display)
       if (line_no < 0)
 	line = 0;
       else if (force_display)
-	{ /*
-	   ** If we must display regs (force_display is true), then make
-	   ** sure that we don't display off the end of the registers.
-	  */
+	{ /* If we must display regs (force_display is true), then
+	     make sure that we don't display off the end of the
+	     registers.  */
 	  if (line_no >= tui_last_regs_line_no ())
 	    {
 	      if ((line = tui_line_from_reg_element_no (

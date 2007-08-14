@@ -279,10 +279,9 @@ tui_show_disassem (CORE_ADDR start_addr)
   val.u.addr = start_addr;
   tui_add_win_to_layout (DISASSEM_WIN);
   tui_update_source_window (TUI_DISASM_WIN, s, val, FALSE);
-  /*
-     ** If the focus was in the src win, put it in the asm win, if
-     ** the source view isn't split.
-   */
+
+  /* If the focus was in the src win, put it in the asm win, if the
+     source view isn't split.  */
   if (tui_current_layout () != SRC_DISASSEM_COMMAND && win_with_focus == TUI_SRC_WIN)
     tui_set_win_focus_to (TUI_DISASM_WIN);
 
@@ -301,11 +300,9 @@ tui_show_disassem_and_update_source (CORE_ADDR start_addr)
     {
       struct tui_line_or_address val;
 
-      /*
-         ** Update what is in the source window if it is displayed too,
-         ** note that it follows what is in the disassembly window and 
-	 ** visa-versa.
-       */
+      /* Update what is in the source window if it is displayed too,
+         note that it follows what is in the disassembly window and
+         visa-versa.  */
       sal = find_pc_line (start_addr, 0);
       val.loa = LOA_LINE;
       val.u.line_no = sal.line;

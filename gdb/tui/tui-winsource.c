@@ -112,10 +112,8 @@ tui_update_source_window_as_is (struct tui_win_info *win_info, struct symtab *s,
 	    (win_info->generic.content_size - 2);
 	  sal.symtab = s;
 	  set_current_source_symtab_and_line (&sal);
-	  /*
-	     ** If the focus was in the asm win, put it in the src
-	     ** win if we don't have a split layout.
-	   */
+	  /* If the focus was in the asm win, put it in the src win if
+	     we don't have a split layout.  */
 	  if (tui_win_with_focus () == TUI_DISASM_WIN &&
 	      tui_current_layout () != SRC_DISASSEM_COMMAND)
 	    tui_set_win_focus_to (TUI_SRC_WIN);

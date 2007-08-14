@@ -483,10 +483,8 @@ tui_reset (void)
 {
   struct termio mode;
 
-  /*
-     ** Reset the teletype mode bits to a sensible state.
-     ** Copied tset.c
-   */
+  /* Reset the teletype mode bits to a sensible state.
+     Copied tset.c.  */
 #if defined (TIOCGETC)
   struct tchars tbuf;
 #endif /* TIOCGETC */

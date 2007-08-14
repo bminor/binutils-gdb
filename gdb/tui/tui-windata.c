@@ -72,14 +72,10 @@ tui_first_data_element_no_in_line (int line_no)
 {
   int first_element_no = (-1);
 
-  /*
-     ** First see if there is a register on line_no, and if so, set the
-     ** first element number.
-   */
+  /* First see if there is a register on line_no, and if so, set the
+     first element number.  */
   if ((first_element_no = tui_first_reg_element_no_inline (line_no)) == -1)
-    {	/*
-	   ** Looking at the general data, the 1st element on line_no.
-	 */
+    { /* Looking at the general data, the 1st element on line_no.  */
     }
 
   return first_element_no;
@@ -141,9 +137,8 @@ tui_display_all_data (void)
       tui_delete_data_content_windows ();
       tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
       tui_display_registers_from (0);
-      /*
-         ** Then display the other data.
-       */
+
+      /* Then display the other data.  */
       if (TUI_DATA_WIN->detail.data_display_info.data_content !=
 	  (tui_win_content) NULL &&
 	  TUI_DATA_WIN->detail.data_display_info.data_content_count > 0)
@@ -177,21 +172,17 @@ tui_display_data_from_line (int line_no)
 
       /* Display regs if we can.  */
       if (tui_display_registers_from_line (_line_no, FALSE) < 0)
-	{	/*
-		   ** _line_no is past the regs display, so calc where the
-		   ** start data element is.
-		 */
+	{ /* _line_no is past the regs display, so calc where the
+	     start data element is.  */
 	  if (regs_last_line < _line_no)
-	    {	/* Figure out how many lines each element is to obtain
-		   the start element_no.  */
+	    { /* Figure out how many lines each element is to obtain
+		 the start element_no.  */
 	    }
 	}
       else
-	{	/*
-		   ** Calculate the starting element of the data display,
-		   ** given regs_last_line and how many lines each element
-		   ** is, up to _line_no.
-		 */
+	{ /* Calculate the starting element of the data display, given
+	     regs_last_line and how many lines each element is, up to
+	     _line_no.  */
 	}
       /* Now display the data , starting at element_no.  */
     }
