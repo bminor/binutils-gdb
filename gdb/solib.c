@@ -854,7 +854,7 @@ clear_solib (void)
      So: disable breakpoints only if we're using ELF shared libs.  */
   if (exec_bfd != NULL
       && bfd_get_flavour (exec_bfd) != bfd_target_aout_flavour)
-    disable_breakpoints_in_shlibs (1);
+    disable_breakpoints_in_shlibs ();
 
   while (so_list_head)
     {

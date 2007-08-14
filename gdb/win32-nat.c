@@ -1585,7 +1585,7 @@ do_initial_win32_stuff (DWORD pid)
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
   push_target (&win32_ops);
-  disable_breakpoints_in_shlibs (1);
+  disable_breakpoints_in_shlibs ();
   win32_clear_solib ();
   clear_proceed_status ();
   init_wait_for_inferior ();

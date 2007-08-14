@@ -4448,7 +4448,7 @@ create_solib_event_breakpoint (CORE_ADDR address)
    apply to enabled breakpoints, disabled ones can just stay disabled.  */
 
 void
-disable_breakpoints_in_shlibs (int silent)
+disable_breakpoints_in_shlibs (void)
 {
   struct breakpoint *b;
   int disabled_shlib_breaks = 0;
@@ -4463,19 +4463,7 @@ disable_breakpoints_in_shlibs (int silent)
 	&& solib_address (b->loc->address)
 #endif
 	)
-      {
 	b->enable_state = bp_shlib_disabled;
-	if (!silent)
-	  {
-	    if (!disabled_shlib_breaks)
-	      {
-		target_terminal_ours_for_output ();
-		warning (_("Temporarily disabling shared library breakpoints:"));
-	      }
-	    disabled_shlib_breaks = 1;
-	    warning (_("breakpoint #%d "), b->number);
-	  }
-      }
   }
 }
 
