@@ -84,7 +84,7 @@ show_layout (enum tui_layout_type layout)
       /*
          ** Since the new layout may cause changes in window size, we
          ** should free the content and reallocate on next display of
-         ** source/asm
+         ** source/asm.
        */
       tui_free_all_source_wins_content ();
       tui_clear_source_windows ();
@@ -95,13 +95,13 @@ show_layout (enum tui_layout_type layout)
 	}
       else
 	{
-	  /* First make the current layout be invisible */
+	  /* First make the current layout be invisible.  */
 	  tui_make_all_invisible ();
 	  tui_make_invisible (tui_locator_win_info_ptr ());
 
 	  switch (layout)
 	    {
-	      /* Now show the new layout */
+	      /* Now show the new layout.  */
 	    case SRC_COMMAND:
 	      show_source_command ();
 	      tui_add_to_source_windows (TUI_SRC_WIN);
@@ -166,7 +166,7 @@ tui_set_layout (enum tui_layout_type layout_type,
 	    {
 	      show_layout (new_layout);
 	      /*
-	         ** Now determine where focus should be
+	         ** Now determine where focus should be.
 	       */
 	      if (win_with_focus != TUI_CMD_WIN)
 		{
@@ -178,7 +178,7 @@ tui_set_layout (enum tui_layout_type layout_type,
 		      layout_def->split = FALSE;
 		      break;
 		    case DISASSEM_COMMAND:
-		      /* the previous layout was not showing
+		      /* The previous layout was not showing
 		         ** code. this can happen if there is no
 		         ** source available:
 		         ** 1. if the source file is in another dir OR
@@ -191,7 +191,7 @@ tui_set_layout (enum tui_layout_type layout_type,
 		      layout_def->split = FALSE;
 		      break;
 		    case SRC_DISASSEM_COMMAND:
-		      /* the previous layout was not showing
+		      /* The previous layout was not showing
 		         ** code. this can happen if there is no
 		         ** source available:
 		         ** 1. if the source file is in another dir OR
@@ -214,7 +214,7 @@ tui_set_layout (enum tui_layout_type layout_type,
 		      layout_def->split = FALSE;
 		      break;
 		    case DISASSEM_DATA_COMMAND:
-		      /* the previous layout was not showing
+		      /* The previous layout was not showing
 		         ** code. this can happen if there is no
 		         ** source available:
 		         ** 1. if the source file is in another dir OR
@@ -417,7 +417,7 @@ tui_set_layout_for_display_command (const char *layout_name)
       for (i = 0; (i < strlen (layout_name)); i++)
 	buf_ptr[i] = toupper (buf_ptr[i]);
 
-      /* First check for ambiguous input */
+      /* First check for ambiguous input.  */
       if (strlen (buf_ptr) <= 1 && (*buf_ptr == 'S' || *buf_ptr == '$'))
 	{
 	  warning (_("Ambiguous command input."));
@@ -442,11 +442,11 @@ tui_set_layout_for_display_command (const char *layout_name)
 	      else
 		new_layout = DISASSEM_DATA_COMMAND;
 
-/* could ifdef out the following code. when compile with -z, there are null 
-   pointer references that cause a core dump if 'layout regs' is the first 
-   layout command issued by the user. HP has asked us to hook up this code 
-   - edie epstein
- */
+	      /* Could ifdef out the following code. when compile with
+		 -z, there are null pointer references that cause a
+		 core dump if 'layout regs' is the first layout
+		 command issued by the user. HP has asked us to hook
+		 up this code.  - edie epstein  */
 	      if (subset_compare (buf_ptr, TUI_FLOAT_REGS_NAME))
 		{
 		  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type !=
@@ -475,15 +475,14 @@ tui_set_layout_for_display_command (const char *layout_name)
 		    dpy_type = TUI_GENERAL_REGS;
 		}
 
-/* end of potential ifdef 
- */
+	      /* End of potential ifdef.
+	       */
 
-/* if ifdefed out code above, then assume that the user wishes to display the 
-   general purpose registers 
- */
+	      /* If ifdefed out code above, then assume that the user
+		 wishes to display the general purpose registers .
+	      */
 
-/*              dpy_type = TUI_GENERAL_REGS; 
- */
+	      /* dpy_type = TUI_GENERAL_REGS; */
 	    }
 	  else if (subset_compare (buf_ptr, "NEXT"))
 	    new_layout = next_layout ();
@@ -978,7 +977,7 @@ make_source_or_disasm_window (struct tui_win_info **win_info_ptr, enum tui_win_t
 }
 
 
-/* Show the Source/Command or the Disassem layout.   */
+/* Show the Source/Command or the Disassem layout.  */
 static void
 show_source_or_disasm_and_command (enum tui_layout_type layout_type)
 {

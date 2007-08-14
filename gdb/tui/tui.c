@@ -70,7 +70,8 @@ struct tui_char_command
   const char *cmd;
 };
 
-/* Key mapping to gdb commands when the TUI is using the single key mode.  */
+/* Key mapping to gdb commands when the TUI is using the single key
+   mode.  */
 static const struct tui_char_command tui_commands[] = {
   { 'c', "continue" },
   { 'd', "down" },
@@ -103,19 +104,22 @@ tui_rl_switch_mode (int notused1, int notused2)
       tui_enable ();
     }
 
-  /* Clear the readline in case switching occurred in middle of something.  */
+  /* Clear the readline in case switching occurred in middle of
+     something.  */
   if (rl_end)
     rl_kill_text (0, rl_end);
 
   /* Since we left the curses mode, the terminal mode is restored to
      some previous state.  That state may not be suitable for readline
      to work correctly (it may be restored in line mode).  We force an
-     exit of the current readline so that readline is re-entered and it
-     will be able to setup the terminal for its needs.  By re-entering
-     in readline, we also redisplay its prompt in the non-curses mode.  */
+     exit of the current readline so that readline is re-entered and
+     it will be able to setup the terminal for its needs.  By
+     re-entering in readline, we also redisplay its prompt in the
+     non-curses mode.  */
   rl_newline (1, '\n');
 
-  /* Make sure the \n we are returning does not repeat the last command.  */
+  /* Make sure the \n we are returning does not repeat the last
+     command.  */
   dont_repeat ();
   return 0;
 }
@@ -123,13 +127,13 @@ tui_rl_switch_mode (int notused1, int notused2)
 /* TUI readline command.
    Change the TUI layout to show a next layout.
    This function is bound to CTRL-X 2.  It is intended to provide
-   a functionality close to the Emacs split-window command.  We always
-   show two windows (src+asm), (src+regs) or (asm+regs).  */
+   a functionality close to the Emacs split-window command.  We
+   always show two windows (src+asm), (src+regs) or (asm+regs).  */
 static int
 tui_rl_change_windows (int notused1, int notused2)
 {
   if (!tui_active)
-    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
+    tui_rl_switch_mode (0 /* notused */, 0 /* notused */);
 
   if (tui_active)
     {
@@ -138,8 +142,8 @@ tui_rl_change_windows (int notused1, int notused2)
 
       new_layout = tui_current_layout ();
 
-      /* Select a new layout to have a rolling layout behavior
-	 with always two windows (except when undefined).  */
+      /* Select a new layout to have a rolling layout behavior with
+	 always two windows (except when undefined).  */
       switch (new_layout)
 	{
 	case SRC_COMMAND:
@@ -177,7 +181,7 @@ static int
 tui_rl_delete_other_windows (int notused1, int notused2)
 {
   if (!tui_active)
-    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
+    tui_rl_switch_mode (0 /* notused */, 0 /* notused */);
 
   if (tui_active)
     {
@@ -214,7 +218,7 @@ tui_rl_other_window (int count, int key)
   struct tui_win_info *win_info;
 
   if (!tui_active)
-    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
+    tui_rl_switch_mode (0 /* notused */, 0 /* notused */);
 
   win_info = tui_next_win (tui_win_with_focus ());
   if (win_info)
@@ -239,8 +243,8 @@ tui_rl_command_key (int count, int key)
     {
       if (tui_commands[i].key == key)
         {
-          /* Must save the command because it can be modified
-             by execute_command.  */
+          /* Must save the command because it can be modified by
+             execute_command.  */
           char *cmd = alloca (strlen (tui_commands[i].cmd) + 1);
           strcpy (cmd, tui_commands[i].cmd);
           execute_command (cmd, TRUE);
@@ -267,7 +271,7 @@ static int
 tui_rl_next_keymap (int notused1, int notused2)
 {
   if (!tui_active)
-    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
+    tui_rl_switch_mode (0 /* notused */, 0 /* notused */);
 
   tui_set_key_mode (tui_current_key_mode == TUI_COMMAND_MODE
                     ? TUI_SINGLE_KEY_MODE : TUI_COMMAND_MODE);
@@ -288,7 +292,8 @@ tui_rl_startup_hook (void)
   return 0;
 }
 
-/* Change the TUI key mode by installing the appropriate readline keymap.  */
+/* Change the TUI key mode by installing the appropriate readline
+   keymap.  */
 void
 tui_set_key_mode (enum tui_key_mode mode)
 {
@@ -375,7 +380,7 @@ tui_enable (void)
   
       cbreak ();
       noecho ();
-      /*timeout (1);*/
+      /* timeout (1); */
       nodelay(w, FALSE);
       nl();
       keypad (w, TRUE);
@@ -465,7 +470,7 @@ strcat_to_buf (char *buf, int buflen, const char *item_to_add)
 }
 
 #if 0
-/* Solaris <sys/termios.h> defines CTRL. */
+/* Solaris <sys/termios.h> defines CTRL.  */
 #ifndef CTRL
 #define CTRL(x)         (x & ~0140)
 #endif
@@ -479,7 +484,7 @@ tui_reset (void)
   struct termio mode;
 
   /*
-     ** reset the teletype mode bits to a sensible state.
+     ** Reset the teletype mode bits to a sensible state.
      ** Copied tset.c
    */
 #if defined (TIOCGETC)
@@ -507,7 +512,7 @@ tui_reset (void)
   tbuf.t_startc = CHK (tbuf.t_startc, CTRL ('Q'));
   tbuf.t_stopc = CHK (tbuf.t_stopc, CTRL ('S'));
   tbuf.t_eofc = CHK (tbuf.t_eofc, CTRL ('D'));
-  /* brkc is left alone */
+  /* brkc is left alone.  */
   ioctl (FILEDES, TIOCSETC, &tbuf);
 #endif /* TIOCGETC */
   mode.sg_flags &= ~(RAW
@@ -525,7 +530,7 @@ void
 tui_show_source (const char *file, int line)
 {
   struct symtab_and_line cursal = get_current_source_symtab_and_line ();
-  /* make sure that the source window is displayed */
+  /* Make sure that the source window is displayed.  */
   tui_add_win_to_layout (SRC_WIN);
 
   tui_update_source_windows_with_line (cursal.symtab, line);

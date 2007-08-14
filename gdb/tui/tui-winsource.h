@@ -68,6 +68,6 @@ extern int tui_addr_is_displayed (CORE_ADDR, struct tui_win_info *, int);
 
 
 /* Constant definitions. */
-#define        SCROLL_THRESHOLD            2	/* threshold for lazy scroll */
+#define SCROLL_THRESHOLD 2	/* Threshold for lazy scroll.  */
 
 #endif

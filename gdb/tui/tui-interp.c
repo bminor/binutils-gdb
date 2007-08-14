@@ -33,7 +33,8 @@
 #include "tui/tui-io.h"
 #include "exceptions.h"
 
-/* Set to 1 when the TUI mode must be activated when we first start gdb.  */
+/* Set to 1 when the TUI mode must be activated when we first start
+   gdb.  */
 static int tui_start_enabled = 0;
 
 /* Cleanup the tui before exiting.  */
@@ -41,8 +42,8 @@ static int tui_start_enabled = 0;
 static void
 tui_exit (void)
 {
-  /* Disable the tui.  Curses mode is left leaving the screen
-     in a clean state (see endwin()).  */
+  /* Disable the tui.  Curses mode is left leaving the screen in a
+     clean state (see endwin()).  */
   tui_disable ();
 }
 
@@ -67,8 +68,9 @@ tui_resume (void *data)
 {
   struct ui_file *stream;
 
-  /* gdb_setup_readline will change gdb_stdout.  If the TUI was previously
-     writing to gdb_stdout, then set it to the new gdb_stdout afterwards.  */
+  /* gdb_setup_readline will change gdb_stdout.  If the TUI was
+     previously writing to gdb_stdout, then set it to the new
+     gdb_stdout afterwards.  */
 
   stream = cli_out_set_stream (tui_old_uiout, gdb_stdout);
   if (stream != gdb_stdout)
@@ -198,7 +200,7 @@ _initialize_tui_interp (void)
   };
   struct interp *tui_interp;
 
-  /* Create a default uiout builder for the TUI. */
+  /* Create a default uiout builder for the TUI.  */
   tui_out = tui_out_new (gdb_stdout);
   interp_add (interp_new (INTERP_TUI, NULL, tui_out, &procs));
   if (interpreter_p && strcmp (interpreter_p, INTERP_TUI) == 0)

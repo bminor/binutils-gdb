@@ -56,9 +56,9 @@ static void tui_set_locator_info (const char *filename, const char *procname,
 static void tui_update_command (char *, int);
 
 
-/* Create the status line to display as much information as we
-   can on this single line: target name, process number, current
-   function, current line, current PC, SingleKey mode.  */
+/* Create the status line to display as much information as we can on
+   this single line: target name, process number, current function,
+   current line, current PC, SingleKey mode.  */
 static char*
 tui_make_status_line (struct tui_locator_element *loc)
 {
@@ -145,13 +145,13 @@ tui_make_status_line (struct tui_locator_element *loc)
         }
     }
 
-  /* Now convert elements to string form */
+  /* Now convert elements to string form.  */
   pname = loc->proc_name;
 
-  /* Now create the locator line from the string version
-     of the elements.  We could use sprintf() here but
-     that wouldn't ensure that we don't overrun the size
-     of the allocated buffer.  strcat_to_buf() will.  */
+  /* Now create the locator line from the string version of the
+     elements.  We could use sprintf() here but that wouldn't ensure
+     that we don't overrun the size of the allocated buffer.
+     strcat_to_buf() will.  */
   *string = (char) 0;
 
   if (target_width > 0)
@@ -174,7 +174,7 @@ tui_make_status_line (struct tui_locator_element *loc)
       strcat_to_buf (string, status_size, " ");
     }
 
-  /* procedure/class name */
+  /* Procedure/class name.  */
   if (proc_width > 0)
     {
       if (strlen (pname) > proc_width)
@@ -207,9 +207,9 @@ tui_make_status_line (struct tui_locator_element *loc)
   return string;
 }
 
-/* Get a printable name for the function at the address.
-   The symbol name is demangled if demangling is turned on.
-   Returns a pointer to a static area holding the result.  */
+/* Get a printable name for the function at the address.  The symbol
+   name is demangled if demangling is turned on.  Returns a pointer to
+   a static area holding the result.  */
 static char*
 tui_get_function_from_frame (struct frame_info *fi)
 {
@@ -220,9 +220,9 @@ tui_get_function_from_frame (struct frame_info *fi)
   print_address_symbolic (get_frame_pc (fi), stream, demangle, "");
   p = tui_file_get_strbuf (stream);
 
-  /* Use simple heuristics to isolate the function name.  The symbol can
-     be demangled and we can have function parameters.  Remove them because
-     the status line is too short to display them.  */
+  /* Use simple heuristics to isolate the function name.  The symbol
+     can be demangled and we can have function parameters.  Remove
+     them because the status line is too short to display them.  */
   if (*p == '<')
     p++;
   strncpy (name, p, sizeof (name));

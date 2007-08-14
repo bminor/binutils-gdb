@@ -55,10 +55,10 @@ tui_disassemble (struct tui_asm_line *asm_lines, CORE_ADDR pc, int count)
 {
   struct ui_file *gdb_dis_out;
 
-  /* now init the ui_file structure */
+  /* Now init the ui_file structure.  */
   gdb_dis_out = tui_sfileopen (256);
 
-  /* Now construct each line */
+  /* Now construct each line.  */
   for (; count > 0; count--, asm_lines++)
     {
       if (asm_lines->addr_string)
@@ -76,16 +76,16 @@ tui_disassemble (struct tui_asm_line *asm_lines, CORE_ADDR pc, int count)
 
       asm_lines->insn = xstrdup (tui_file_get_strbuf (gdb_dis_out));
 
-      /* reset the buffer to empty */
+      /* Reset the buffer to empty.  */
       ui_file_rewind (gdb_dis_out);
     }
   ui_file_delete (gdb_dis_out);
   return pc;
 }
 
-/* Find the disassembly address that corresponds to FROM lines
-   above or below the PC.  Variable sized instructions are taken
-   into account by the algorithm.  */
+/* Find the disassembly address that corresponds to FROM lines above
+   or below the PC.  Variable sized instructions are taken into
+   account by the algorithm.  */
 static CORE_ADDR
 tui_find_disassembly_address (CORE_ADDR pc, int from)
 {
@@ -114,9 +114,9 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
       int pos;
       struct minimal_symbol *msymbol;
               
-      /* Find backward an address which is a symbol
-         and for which disassembling from that address will fill
-         completely the window.  */
+      /* Find backward an address which is a symbol and for which
+         disassembling from that address will fill completely the
+         window.  */
       pos = max_lines - 1;
       do {
          new_low -= 1 * max_lines;
@@ -131,11 +131,10 @@ tui_find_disassembly_address (CORE_ADDR pc, int from)
          last_addr = asm_lines[pos].addr;
       } while (last_addr > pc && msymbol);
 
-      /* Scan forward disassembling one instruction at a time
-         until the last visible instruction of the window
-         matches the pc.  We keep the disassembled instructions
-         in the 'lines' window and shift it downward (increasing
-         its addresses).  */
+      /* Scan forward disassembling one instruction at a time until
+         the last visible instruction of the window matches the pc.
+         We keep the disassembled instructions in the 'lines' window
+         and shift it downward (increasing its addresses).  */
       if (last_addr < pc)
         do
           {
@@ -193,7 +192,8 @@ tui_set_disassem_content (CORE_ADDR pc)
   cur_pc = (CORE_ADDR)
     (((struct tui_win_element *) locator->content[0])->which_element.locator.addr);
 
-  max_lines = TUI_DISASM_WIN->generic.height - 2;	/* account for hilite */
+  max_lines = TUI_DISASM_WIN->generic.height - 2;	/* Account for
+							   hilite.  */
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   asm_lines = (struct tui_asm_line*) alloca (sizeof (struct tui_asm_line)
@@ -223,7 +223,7 @@ tui_set_disassem_content (CORE_ADDR pc)
   line = (char*) alloca (max_size);
   insn_pos = (1 + (addr_size / tab_len)) * tab_len;
 
-  /* Now construct each line */
+  /* Now construct each line.  */
   for (i = 0; i < max_lines; i++)
     {
       struct tui_win_element *element;
@@ -235,7 +235,8 @@ tui_set_disassem_content (CORE_ADDR pc)
       strcpy (line, asm_lines[i].addr_string);
       cur_len = strlen (line);
 
-      /* Add spaces to make the instructions start on the same column */
+      /* Add spaces to make the instructions start on the same
+	 column.  */
       while (cur_len < insn_pos)
         {
           strcat (line, " ");
@@ -244,7 +245,7 @@ tui_set_disassem_content (CORE_ADDR pc)
 
       strcat (line, asm_lines[i].insn);
 
-      /* Now copy the line taking the offset into account */
+      /* Now copy the line taking the offset into account.  */
       if (strlen (line) > offset)
         strcpy (src->line, &line[offset]);
       else
@@ -266,7 +267,7 @@ tui_set_disassem_content (CORE_ADDR pc)
 }
 
 
-/* Function to display the disassembly window with disassembled code.   */
+/* Function to display the disassembly window with disassembled code.  */
 void
 tui_show_disassem (CORE_ADDR start_addr)
 {
@@ -279,8 +280,8 @@ tui_show_disassem (CORE_ADDR start_addr)
   tui_add_win_to_layout (DISASSEM_WIN);
   tui_update_source_window (TUI_DISASM_WIN, s, val, FALSE);
   /*
-     ** if the focus was in the src win, put it in the asm win, if the
-     ** source view isn't split
+     ** If the focus was in the src win, put it in the asm win, if
+     ** the source view isn't split.
    */
   if (tui_current_layout () != SRC_DISASSEM_COMMAND && win_with_focus == TUI_SRC_WIN)
     tui_set_win_focus_to (TUI_DISASM_WIN);
@@ -289,7 +290,7 @@ tui_show_disassem (CORE_ADDR start_addr)
 }
 
 
-/* Function to display the disassembly window.   */
+/* Function to display the disassembly window.  */
 void
 tui_show_disassem_and_update_source (CORE_ADDR start_addr)
 {
@@ -302,7 +303,8 @@ tui_show_disassem_and_update_source (CORE_ADDR start_addr)
 
       /*
          ** Update what is in the source window if it is displayed too,
-         ** note that it follows what is in the disassembly window and visa-versa
+         ** note that it follows what is in the disassembly window and 
+	 ** visa-versa.
        */
       sal = find_pc_line (start_addr, 0);
       val.loa = LOA_LINE;
@@ -346,22 +348,22 @@ tui_get_begin_asm_address (void)
       else
         addr = 0;
     }
-  else				/* the target is executing */
+  else				/* The target is executing.  */
     addr = element->addr;
 
   return addr;
 }
 
 /* Determine what the low address will be to display in the TUI's
-   disassembly window.  This may or may not be the same as the
-   low address input.  */
+   disassembly window.  This may or may not be the same as the low
+   address input.  */
 CORE_ADDR
 tui_get_low_disassembly_address (CORE_ADDR low, CORE_ADDR pc)
 {
   int pos;
 
-  /* Determine where to start the disassembly so that the pc is about in the
-     middle of the viewport.  */
+  /* Determine where to start the disassembly so that the pc is about
+     in the middle of the viewport.  */
   pos = tui_default_win_viewport_height (DISASSEM_WIN, DISASSEM_COMMAND) / 2;
   pc = tui_find_disassembly_address (pc, -pos);
 
@@ -390,7 +392,7 @@ tui_vertical_disassem_scroll (enum tui_scroll_direction scroll_direction,
       else
 	s = cursal.symtab;
 
-      /* account for hilite */
+      /* Account for hilite.  */
       max_lines = TUI_DISASM_WIN->generic.height - 2;
       pc = content[0]->which_element.source.line_or_addr.u.addr;
       dir = (scroll_direction == FORWARD_SCROLL) ? max_lines : - max_lines;

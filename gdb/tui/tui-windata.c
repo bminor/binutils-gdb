@@ -74,12 +74,12 @@ tui_first_data_element_no_in_line (int line_no)
 
   /*
      ** First see if there is a register on line_no, and if so, set the
-     ** first element number
+     ** first element number.
    */
   if ((first_element_no = tui_first_reg_element_no_inline (line_no)) == -1)
-    {				/*
-				   ** Looking at the general data, the 1st element on line_no
-				 */
+    {	/*
+	   ** Looking at the general data, the 1st element on line_no.
+	 */
     }
 
   return first_element_no;
@@ -142,7 +142,7 @@ tui_display_all_data (void)
       tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
       tui_display_registers_from (0);
       /*
-         ** Then display the other data
+         ** Then display the other data.
        */
       if (TUI_DATA_WIN->detail.data_display_info.data_content !=
 	  (tui_win_content) NULL &&
@@ -165,7 +165,8 @@ tui_display_data_from_line (int line_no)
 
   tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
 
-  /* there is no general data, force regs to display (if there are any) */
+  /* There is no general data, force regs to display (if there are
+     any).  */
   if (TUI_DATA_WIN->detail.data_display_info.data_content_count <= 0)
     tui_display_registers_from_line (_line_no, TRUE);
   else
@@ -174,30 +175,30 @@ tui_display_data_from_line (int line_no)
       int regs_last_line = tui_last_regs_line_no ();
 
 
-      /* display regs if we can */
+      /* Display regs if we can.  */
       if (tui_display_registers_from_line (_line_no, FALSE) < 0)
-	{			/*
-				   ** _line_no is past the regs display, so calc where the
-				   ** start data element is
-				 */
+	{	/*
+		   ** _line_no is past the regs display, so calc where the
+		   ** start data element is.
+		 */
 	  if (regs_last_line < _line_no)
-	    {			/* figure out how many lines each element is to obtain
-				   the start element_no */
+	    {	/* Figure out how many lines each element is to obtain
+		   the start element_no.  */
 	    }
 	}
       else
-	{			/*
-				   ** calculate the starting element of the data display, given
-				   ** regs_last_line and how many lines each element is, up to
-				   ** _line_no
-				 */
+	{	/*
+		   ** Calculate the starting element of the data display,
+		   ** given regs_last_line and how many lines each element
+		   ** is, up to _line_no.
+		 */
 	}
-      /* Now display the data , starting at element_no */
+      /* Now display the data , starting at element_no.  */
     }
 }
 
 
-/* Display data starting at element element_no.   */
+/* Display data starting at element element_no.  */
 void
 tui_display_data_from (int element_no, int reuse_windows)
 {
@@ -206,7 +207,7 @@ tui_display_data_from (int element_no, int reuse_windows)
   if (element_no < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
     first_line = tui_line_from_reg_element_no (element_no);
   else
-    {				/* calculate the first_line from the element number */
+    { /* Calculate the first_line from the element number.  */
     }
 
   if (first_line >= 0)
@@ -228,19 +229,20 @@ tui_refresh_data_win (void)
     {
       int first_element = tui_first_data_item_displayed ();
 
-      if (first_element >= 0)	/* re-use existing windows */
+      if (first_element >= 0)	/* Re-use existing windows.  */
 	tui_display_data_from (first_element, TRUE);
     }
 }
 
 
-/* Function to check the data values and hilite any that have changed.  */
+/* Function to check the data values and hilite any that have
+   changed.  */
 void
 tui_check_data_values (struct frame_info *frame)
 {
   tui_check_register_values (frame);
 
-  /* Now check any other data values that there are */
+  /* Now check any other data values that there are.  */
   if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->generic.is_visible)
     {
       int i;
@@ -268,7 +270,7 @@ tui_check_data_values (struct frame_info *frame)
 }
 
 
-/* Scroll the data window vertically forward or backward.   */
+/* Scroll the data window vertically forward or backward.  */
 void
 tui_vertical_data_scroll (enum tui_scroll_direction scroll_direction, int num_to_scroll)
 {
@@ -279,9 +281,8 @@ tui_vertical_data_scroll (enum tui_scroll_direction scroll_direction, int num_to
   if (first_element_no < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
     first_line = tui_line_from_reg_element_no (first_element_no);
   else
-    {				/* calculate the first line from the element number which is in
-				   ** the general data content
-				 */
+    { /* Calculate the first line from the element number which is in
+        the general data content.  */
     }
 
   if (first_line >= 0)

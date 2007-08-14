@@ -114,7 +114,7 @@ tui_update_source_window_as_is (struct tui_win_info *win_info, struct symtab *s,
 	  set_current_source_symtab_and_line (&sal);
 	  /*
 	     ** If the focus was in the asm win, put it in the src
-	     ** win if we don't have a split layout
+	     ** win if we don't have a split layout.
 	   */
 	  if (tui_win_with_focus () == TUI_DISASM_WIN &&
 	      tui_current_layout () != SRC_DISASSEM_COMMAND)
@@ -245,10 +245,10 @@ tui_erase_source_content (struct tui_win_info *win_info, int display_prompt)
 		     x_pos,
 		     no_src_str);
 
-	  /* elz: added this function call to set the real contents of
-	     the window to what is on the  screen, so that later calls
-	     to refresh, do display
-	     the correct stuff, and not the old image */
+	  /* elz: Added this function call to set the real contents of
+	     the window to what is on the screen, so that later calls
+	     to refresh, do display the correct stuff, and not the old
+	     image.  */
 
 	  tui_set_source_content_nil (win_info, no_src_str);
 	}
@@ -337,7 +337,9 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
 }
 
 
-/* Set or clear the has_break flag in the line whose line is line_no.  */
+/* Set or clear the has_break flag in the line whose line is
+   line_no.  */
+
 void
 tui_set_is_exec_point_at (struct tui_line_or_address l, struct tui_win_info *win_info)
 {
@@ -394,10 +396,12 @@ tui_update_all_breakpoint_info (void)
 }
 
 
-/* Scan the source window and the breakpoints to update the
-   has_break information for each line.
-   Returns 1 if something changed and the execution window
-   must be refreshed.  */
+/* Scan the source window and the breakpoints to update the has_break
+   information for each line.
+
+   Returns 1 if something changed and the execution window must be
+   refreshed.  */
+
 int
 tui_update_breakpoint_info (struct tui_win_info *win, int current_only)
 {
@@ -570,7 +574,7 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
   char *src_line_buf;
   int i, line_width, max_lines;
 
-  max_lines = win_info->generic.height;	/* less the highlight box */
+  max_lines = win_info->generic.height;	/* Less the highlight box.  */
   line_width = win_info->generic.width - 1;
   /*
    * Allocate the buffer for the source lines.  Do this only once
@@ -587,7 +591,7 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
 			    gdb_stderr);
 	  return TUI_FAILURE;
 	}
-      /* allocate the content list */
+      /* Allocate the content list.  */
       if ((win_info->generic.content =
 	   (void **) tui_alloc_content (max_lines, SRC_WIN)) == NULL)
 	{

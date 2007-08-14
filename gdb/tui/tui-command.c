@@ -43,7 +43,8 @@
 ** PUBLIC FUNCTIONS                        **
 ******************************************/
 
-/* Dispatch the correct tui function based upon the control character.   */
+/* Dispatch the correct tui function based upon the control
+   character.  */
 unsigned int
 tui_dispatch_ctrl_char (unsigned int ch)
 {
@@ -54,8 +55,8 @@ tui_dispatch_ctrl_char (unsigned int ch)
     tui_refresh_all_win ();
 
   /* If the command window has the logical focus, or no-one does
-     assume it is the command window; in this case, pass the
-     character on through and do nothing here.  */
+     assume it is the command window; in this case, pass the character
+     on through and do nothing here.  */
   if (win_info == NULL || win_info == TUI_CMD_WIN)
     return ch;
   else

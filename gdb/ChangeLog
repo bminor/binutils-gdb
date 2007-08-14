@@ -1,5 +1,12 @@
 2007-08-14  Michael Snyder  <msnyder@access-company.com>
 
+	* tui-command.c, tui-data.c, tui-data.h, tui-disasm.c, tui-file.c,
+	tui-hooks.c, tui-interp.c, tui-io.c, tui-layout.c, tui-out.c,
+	tui-regs.c, tui-regs.h, tui-source.c, tui-stack.c, tui-win.c,
+	tui-windata.c, tui-wingeneral.c, tui-winsource.c, tui-winsource.h,
+	tui.c, tui.h: Comment reformatting to coding standard (capitals, 
+	spaces after periods, etc).	
+
 	* tui-data.c, tui-data.h, tui-disasm.c, tui-hooks.c, tui-layout.c,
 	tui-regs.c, tui-source.c, tui-stack.c, tui-win.c, tui-windata.c,
 	tui-wingeneral.c, tui-wingeneral.h, tui-winsource.c, tui.c,

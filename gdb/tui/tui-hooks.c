@@ -77,7 +77,7 @@ tui_query_hook (const char *msg, va_list argp)
   echo ();
   while (1)
     {
-      wrap_here ("");		/* Flush any buffered output */
+      wrap_here ("");		/* Flush any buffered output.  */
       gdb_flush (gdb_stdout);
 
       vfprintf_filtered (gdb_stdout, msg, argp);
@@ -93,7 +93,7 @@ tui_query_hook (const char *msg, va_list argp)
 	  retval = 1;
 	  break;
 	}
-      /* Eat rest of input line, to EOF or newline */
+      /* Eat rest of input line, to EOF or newline.  */
       if (answer != '\n')
 	do
 	  {
@@ -204,7 +204,8 @@ tui_target_wait_hook (ptid_t pid, struct target_waitstatus *status)
 }
 
 /* The selected frame has changed.  This is happens after a target
-   stop or when the user explicitly changes the frame (up/down/thread/...).  */
+   stop or when the user explicitly changes the frame
+   (up/down/thread/...).  */
 static void
 tui_selected_frame_level_changed_hook (int level)
 {
@@ -215,17 +216,18 @@ tui_selected_frame_level_changed_hook (int level)
     return;
 
   fi = get_selected_frame (NULL);
-  /* Ensure that symbols for this frame are read in.  Also, determine the
-     source language of this frame, and switch to it if desired.  */
+  /* Ensure that symbols for this frame are read in.  Also, determine
+     the source language of this frame, and switch to it if
+     desired.  */
   if (fi)
     {
       struct symtab *s;
       
       s = find_pc_symtab (get_frame_pc (fi));
-      /* elz: this if here fixes the problem with the pc not being displayed
-         in the tui asm layout, with no debug symbols. The value of s 
-         would be 0 here, and select_source_symtab would abort the
-         command by calling the 'error' function */
+      /* elz: This if here fixes the problem with the pc not being
+         displayed in the tui asm layout, with no debug symbols.  The
+         value of s would be 0 here, and select_source_symtab would
+         abort the command by calling the 'error' function.  */
       if (s)
         select_source_symtab (s);
 

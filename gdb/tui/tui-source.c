@@ -54,8 +54,8 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
       if ((ret = tui_alloc_source_buffer (TUI_SRC_WIN)) == TUI_SUCCESS)
 	{
 	  line_width = TUI_SRC_WIN->generic.width - 1;
-	  /* Take hilite (window border) into account, when calculating
-	     the number of lines  */
+	  /* Take hilite (window border) into account, when
+	     calculating the number of lines.  */
 	  nlines = (line_no + (TUI_SRC_WIN->generic.height - 2)) - line_no;
 	  desc = open_source_file (s);
 	  if (desc < 0)
@@ -99,8 +99,8 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
                     xfree (src->filename);
                   src->filename = xstrdup (s->filename);
 
-		  /* Determine the threshold for the length of the line
-                     and the offset to start the display.  */
+		  /* Determine the threshold for the length of the
+                     line and the offset to start the display.  */
 		  offset = src->horizontal_offset;
 		  threshold = (line_width - 1) + offset;
 		  stream = fdopen (desc, FOPEN_RT);
@@ -116,14 +116,14 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 		      struct tui_win_element *element = (struct tui_win_element *)
 		      TUI_SRC_WIN->generic.content[cur_line];
 
-		      /* get the first character in the line */
+		      /* Get the first character in the line.  */
 		      c = fgetc (stream);
 
 		      if (offset == 0)
 			src_line = ((struct tui_win_element *)
 				   TUI_SRC_WIN->generic.content[
 					cur_line])->which_element.source.line;
-		      /* Init the line with the line number */
+		      /* Init the line with the line number.  */
 		      sprintf (src_line, "%-6d", cur_line_no);
 		      cur_len = strlen (src_line);
 		      i = cur_len -
@@ -136,8 +136,8 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 			}
 		      src_line[cur_len] = (char) 0;
 
-		      /* Set whether element is the execution point and
-		         whether there is a break point on it.  */
+		      /* Set whether element is the execution point
+		         and whether there is a break point on it.  */
 		      element->which_element.source.line_or_addr.loa =
 			LOA_LINE;
 		      element->which_element.source.line_or_addr.u.line_no =
@@ -167,11 +167,11 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 				      src_line[i] = '?';
 				    }
 				  else
-				    {	/* Store the charcter in the line
-					   buffer.  If it is a tab, then
-					   translate to the correct number of
-					   chars so we don't overwrite our
-					   buffer.  */
+				    { /* Store the charcter in the
+					 line buffer.  If it is a tab,
+					 then translate to the correct
+					 number of chars so we don't
+					 overwrite our buffer.  */
 				      if (c == '\t')
 					{
 					  int j, max_tab_len = tui_default_tab_len ();
@@ -190,8 +190,8 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 				  src_line[i + 1] = 0;
 				}
 			      else
-				{	/* If we have not reached EOL, then eat
-                                           chars until we do  */
+				{ /* If we have not reached EOL, then
+				     eat chars until we do.  */
 				  while (c != EOF && c != '\n' && c != '\r')
 				    c = fgetc (stream);
 				  /* Handle non-'\n' end-of-line.  */
@@ -207,7 +207,8 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 			  while (c != EOF && c != '\n' && c != '\r' &&
 				 i < threshold && (c = fgetc (stream)));
 			}
-		      /* Now copy the line taking the offset into account */
+		      /* Now copy the line taking the offset into
+			 account.  */
 		      if (strlen (src_line) > offset)
 			strcpy (((struct tui_win_element *) TUI_SRC_WIN->generic.content[
 					cur_line])->which_element.source.line,
@@ -232,9 +233,9 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 }
 
 
-/* elz: this function sets the contents of the source window to empty
+/* elz: This function sets the contents of the source window to empty
    except for a line in the middle with a warning message about the
-   source not being available. This function is called by
+   source not being available.  This function is called by
    tui_erase_source_contents(), which in turn is invoked when the
    source files cannot be accessed.  */
 
@@ -248,13 +249,13 @@ tui_set_source_content_nil (struct tui_win_info *win_info, char *warning_string)
   line_width = win_info->generic.width - 1;
   n_lines = win_info->generic.height - 2;
 
-  /* set to empty each line in the window, except for the one
-     which contains the message */
+  /* Set to empty each line in the window, except for the one which
+     contains the message.  */
   while (curr_line < win_info->generic.content_size)
     {
-      /* set the information related to each displayed line
-         to null: i.e. the line number is 0, there is no bp,
-         it is not where the program is stopped */
+      /* Set the information related to each displayed line to null:
+         i.e. the line number is 0, there is no bp, it is not where
+         the program is stopped.  */
 
       struct tui_win_element *element =
 	(struct tui_win_element *) win_info->generic.content[curr_line];
@@ -263,14 +264,15 @@ tui_set_source_content_nil (struct tui_win_info *win_info, char *warning_string)
       element->which_element.source.is_exec_point = FALSE;
       element->which_element.source.has_break = FALSE;
 
-      /* set the contents of the line to blank */
+      /* Set the contents of the line to blank.  */
       element->which_element.source.line[0] = (char) 0;
 
-      /* if the current line is in the middle of the screen, then we
+      /* If the current line is in the middle of the screen, then we
          want to display the 'no source available' message in it.
          Note: the 'weird' arithmetic with the line width and height
-         comes from the function tui_erase_source_content(). We need
-         to keep the screen and the window's actual contents in synch.  */
+         comes from the function tui_erase_source_content().  We need
+         to keep the screen and the window's actual contents in
+         synch.  */
 
       if (curr_line == (n_lines / 2 + 1))
 	{
@@ -348,8 +350,8 @@ tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
 	  l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no
 	    + num_to_scroll;
 	  if (l.u.line_no > s->nlines)
-	    /*line = s->nlines - win_info->generic.content_size + 1; */
-	    /*elz: fix for dts 23398 */
+	    /* line = s->nlines - win_info->generic.content_size + 1; */
+	    /* elz: fix for dts 23398.  */
 	    l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no;
 	}
       else

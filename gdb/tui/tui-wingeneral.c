@@ -34,7 +34,7 @@
 ** PUBLIC FUNCTIONS
 ***********************/
 
-/* Refresh the window.   */
+/* Refresh the window.  */
 void
 tui_refresh_win (struct tui_gen_win_info *win_info)
 {
@@ -55,7 +55,7 @@ tui_refresh_win (struct tui_gen_win_info *win_info)
     }
   else if (win_info->type == CMD_WIN)
     {
-      /* Do nothing */
+      /* Do nothing.  */
     }
   else
     {
@@ -67,7 +67,7 @@ tui_refresh_win (struct tui_gen_win_info *win_info)
 }
 
 
-/* Function to delete the curses window, checking for NULL.   */
+/* Function to delete the curses window, checking for NULL.  */
 void
 tui_delete_win (WINDOW *window)
 {
@@ -175,7 +175,7 @@ tui_make_window (struct tui_gen_win_info *win_info, int box_it)
 static void
 make_visible (struct tui_gen_win_info *win_info, int visible)
 {
-  /* Don't tear down/recreate command window */
+  /* Don't tear down/recreate command window.  */
   if (win_info->type == CMD_WIN)
     return;
 
@@ -213,7 +213,8 @@ tui_make_invisible (struct tui_gen_win_info *win_info)
 }
 
 
-/* Makes all windows invisible (except the command and locator windows).   */
+/* Makes all windows invisible (except the command and locator
+   windows).  */
 static void
 make_all_visible (int visible)
 {

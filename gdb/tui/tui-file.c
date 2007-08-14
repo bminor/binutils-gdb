@@ -28,7 +28,7 @@
 #include "gdb_string.h"
 
 /* A ``struct ui_file'' that is compatible with all the legacy
-   code. */
+   code.  */
 
 /* new */
 enum streamtype
@@ -111,8 +111,8 @@ tui_sfileopen (int n)
       tmpstream->ts_strbuf[0] = '\0';
     }
   else
-    /* Do not allocate the buffer now.  The first time something is printed
-       one will be allocated by tui_file_adjust_strbuf()  */
+    /* Do not allocate the buffer now.  The first time something is
+       printed one will be allocated by tui_file_adjust_strbuf().  */
     tmpstream->ts_strbuf = NULL;
   tmpstream->ts_buflen = n;
   return file;
@@ -161,7 +161,7 @@ tui_file_put (struct ui_file *file,
    gdb_stderr are sent to the hook.  Everything else is sent on to
    fputs to allow file I/O to be handled appropriately.  */
 
-/* FIXME: Should be broken up and moved to a TUI specific file. */
+/* FIXME: Should be broken up and moved to a TUI specific file.  */
 
 void
 tui_file_fputs (const char *linebuffer, struct ui_file *file)
@@ -189,8 +189,9 @@ tui_file_get_strbuf (struct ui_file *file)
   return (stream->ts_strbuf);
 }
 
-/* adjust the length of the buffer by the amount necessary
-   to accomodate appending a string of length N to the buffer contents */
+/* Adjust the length of the buffer by the amount necessary to
+   accomodate appending a string of length N to the buffer
+   contents.  */
 void
 tui_file_adjust_strbuf (int n, struct ui_file *file)
 {
@@ -205,7 +206,7 @@ tui_file_adjust_strbuf (int n, struct ui_file *file)
 
   if (stream->ts_strbuf)
     {
-      /* There is already a buffer allocated */
+      /* There is already a buffer allocated.  */
       non_null_chars = strlen (stream->ts_strbuf);
 
       if (n > (stream->ts_buflen - non_null_chars - 1))
@@ -215,7 +216,7 @@ tui_file_adjust_strbuf (int n, struct ui_file *file)
 	}
     }
   else
-    /* No buffer yet, so allocate one of the desired size */
+    /* No buffer yet, so allocate one of the desired size.  */
     stream->ts_strbuf = xmalloc ((n + 1) * sizeof (char));
 }
 

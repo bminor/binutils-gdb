@@ -38,7 +38,7 @@ struct ui_out_data
   };
 typedef struct ui_out_data tui_out_data;
 
-/* These are the CLI output functions */
+/* These are the CLI output functions.  */
 
 static void tui_table_begin (struct ui_out *uiout, int nbrofcols,
 			     int nr_rows, const char *tblid);
@@ -69,10 +69,10 @@ static void tui_message (struct ui_out *uiout, int verbosity,
 static void tui_wrap_hint (struct ui_out *uiout, char *identstring);
 static void tui_flush (struct ui_out *uiout);
 
-/* This is the CLI ui-out implementation functions vector */
+/* This is the CLI ui-out implementation functions vector.  */
 
 /* FIXME: This can be initialized dynamically after default is set to
-   handle initial output in main.c */
+   handle initial output in main.c.  */
 
 static struct ui_out_impl tui_ui_out_impl =
 {
@@ -95,7 +95,7 @@ static struct ui_out_impl tui_ui_out_impl =
   0, /* Does not need MI hacks (i.e. needs CLI hacks).  */
 };
 
-/* Prototypes for local functions */
+/* Prototypes for local functions.  */
 
 extern void _initialize_tui_out (void);
 
@@ -109,7 +109,7 @@ static void out_field_fmt (struct ui_out *uiout, int fldno,
 
 /* (none yet) */
 
-/* Mark beginning of a table */
+/* Mark beginning of a table.  */
 
 void
 tui_table_begin (struct ui_out *uiout, int nbrofcols,
@@ -121,11 +121,11 @@ tui_table_begin (struct ui_out *uiout, int nbrofcols,
     data->suppress_output = 1;
   else
     /* Only the table suppresses the output and, fortunately, a table
-       is not a recursive data structure. */
+       is not a recursive data structure.  */
     gdb_assert (data->suppress_output == 0);
 }
 
-/* Mark beginning of a table body */
+/* Mark beginning of a table body.  */
 
 void
 tui_table_body (struct ui_out *uiout)
@@ -133,11 +133,11 @@ tui_table_body (struct ui_out *uiout)
   tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
     return;
-  /* first, close the table header line */
+  /* First, close the table header line.  */
   tui_text (uiout, "\n");
 }
 
-/* Mark end of a table */
+/* Mark end of a table.  */
 
 void
 tui_table_end (struct ui_out *uiout)
@@ -146,7 +146,7 @@ tui_table_end (struct ui_out *uiout)
   data->suppress_output = 0;
 }
 
-/* Specify table header */
+/* Specify table header.  */
 
 void
 tui_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
@@ -159,7 +159,7 @@ tui_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
   tui_field_string (uiout, 0, width, alignment, 0, colhdr);
 }
 
-/* Mark beginning of a list */
+/* Mark beginning of a list.  */
 
 void
 tui_begin (struct ui_out *uiout,
@@ -172,7 +172,7 @@ tui_begin (struct ui_out *uiout,
     return;
 }
 
-/* Mark end of a list */
+/* Mark end of a list.  */
 
 void
 tui_end (struct ui_out *uiout,
@@ -184,14 +184,14 @@ tui_end (struct ui_out *uiout,
     return;
 }
 
-/* output an int field */
+/* Output an int field.  */
 
 void
 tui_field_int (struct ui_out *uiout, int fldno, int width,
 	       enum ui_align alignment,
 	       const char *fldname, int value)
 {
-  char buffer[20];		/* FIXME: how many chars long a %d can become? */
+  char buffer[20];	/* FIXME: how many chars long a %d can become?  */
 
   tui_out_data *data = ui_out_data (uiout);
   if (data->suppress_output)
@@ -209,7 +209,7 @@ tui_field_int (struct ui_out *uiout, int fldno, int width,
   tui_field_string (uiout, fldno, width, alignment, fldname, buffer);
 }
 
-/* used to ommit a field */
+/* Used to ommit a field.  */
 
 void
 tui_field_skip (struct ui_out *uiout, int fldno, int width,
@@ -222,8 +222,8 @@ tui_field_skip (struct ui_out *uiout, int fldno, int width,
   tui_field_string (uiout, fldno, width, alignment, fldname, "");
 }
 
-/* other specific tui_field_* end up here so alignment and field
-   separators are both handled by tui_field_string */
+/* Other specific tui_field_* end up here so alignment and field
+   separators are both handled by tui_field_string.  */
 
 void
 tui_field_string (struct ui_out *uiout,
@@ -285,7 +285,7 @@ tui_field_string (struct ui_out *uiout,
     field_separator ();
 }
 
-/* This is the only field function that does not align */
+/* This is the only field function that does not align.  */
 
 void
 tui_field_fmt (struct ui_out *uiout, int fldno,
@@ -362,10 +362,10 @@ tui_flush (struct ui_out *uiout)
   gdb_flush (data->stream);
 }
 
-/* local functions */
+/* Local functions.  */
 
-/* Like tui_field_fmt, but takes a variable number of args
-   and makes a va_list and does not insert a separator */
+/* Like tui_field_fmt, but takes a variable number of args and makes a
+   va_list and does not insert a separator.  */
 
 /* VARARGS */
 static void
@@ -382,7 +382,7 @@ out_field_fmt (struct ui_out *uiout, int fldno,
   va_end (args);
 }
 
-/* access to ui_out format private members */
+/* Access to ui_out format private members.  */
 
 static void
 field_separator (void)
@@ -391,7 +391,7 @@ field_separator (void)
   fputc_filtered (' ', data->stream);
 }
 
-/* initalize private members at startup */
+/* Initalize private members at startup.  */
 
 struct ui_out *
 tui_out_new (struct ui_file *stream)
@@ -406,9 +406,9 @@ tui_out_new (struct ui_file *stream)
   return ui_out_new (&tui_ui_out_impl, data, flags);
 }
 
-/* standard gdb initialization hook */
+/* Standard gdb initialization hook.  */
 void
 _initialize_tui_out (void)
 {
-  /* nothing needs to be done */
+  /* Nothing needs to be done.  */
 }

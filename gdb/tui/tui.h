@@ -36,7 +36,7 @@ enum tui_status
   TUI_FAILURE
 };
 
-/* Types of windows */
+/* Types of windows.  */
 enum tui_win_type
 {
   SRC_WIN = 0,
@@ -80,13 +80,15 @@ enum tui_key_mode
   /* SingleKey mode with some keys bound to gdb commands.  */
   TUI_SINGLE_KEY_MODE,
 
-  /* Read/edit one command and return to SingleKey after it's processed.  */
+  /* Read/edit one command and return to SingleKey after it's
+     processed.  */
   TUI_ONE_COMMAND_MODE
 };
 
 extern enum tui_key_mode tui_current_key_mode;
 
-/* Change the TUI key mode by installing the appropriate readline keymap.  */
+/* Change the TUI key mode by installing the appropriate readline
+   keymap.  */
 extern void tui_set_key_mode (enum tui_key_mode mode);
 
 extern int tui_active;

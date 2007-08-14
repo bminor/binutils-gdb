@@ -97,7 +97,7 @@ tui_set_win_highlight (struct tui_win_info *win_info, int highlight)
 ** ACCESSORS & MUTATORS FOR PRIVATE DATA
 ******************************************/
 
-/* Answer a whether the terminal window has been resized or not.   */
+/* Answer a whether the terminal window has been resized or not.  */
 int
 tui_win_resized (void)
 {
@@ -105,7 +105,7 @@ tui_win_resized (void)
 }
 
 
-/* Set a whether the terminal window has been resized or not.   */
+/* Set a whether the terminal window has been resized or not.  */
 void
 tui_set_win_resized_to (int resized)
 {
@@ -113,7 +113,7 @@ tui_set_win_resized_to (int resized)
 }
 
 
-/* Answer a pointer to the current layout definition.   */
+/* Answer a pointer to the current layout definition.  */
 struct tui_layout_def *
 tui_layout_def (void)
 {
@@ -121,7 +121,7 @@ tui_layout_def (void)
 }
 
 
-/* Answer the window with the logical focus.    */
+/* Answer the window with the logical focus.  */
 struct tui_win_info *
 tui_win_with_focus (void)
 {
@@ -129,7 +129,7 @@ tui_win_with_focus (void)
 }
 
 
-/* Set the window that has the logical focus.   */
+/* Set the window that has the logical focus.  */
 void
 tui_set_win_with_focus (struct tui_win_info *win_info)
 {
@@ -137,7 +137,7 @@ tui_set_win_with_focus (struct tui_win_info *win_info)
 }
 
 
-/* Answer the length in chars, of tabs.    */
+/* Answer the length in chars, of tabs.  */
 int
 tui_default_tab_len (void)
 {
@@ -145,7 +145,7 @@ tui_default_tab_len (void)
 }
 
 
-/* Set the length in chars, of tabs.   */
+/* Set the length in chars, of tabs.  */
 void
 tui_set_default_tab_len (int len)
 {
@@ -175,7 +175,7 @@ tui_clear_source_windows (void)
 }
 
 
-/* Clear the pertinant detail in the source windows.   */
+/* Clear the pertinant detail in the source windows.  */
 void
 tui_clear_source_windows_detail (void)
 {
@@ -197,7 +197,7 @@ tui_add_to_source_windows (struct tui_win_info *win_info)
 }
 
 
-/* Clear the pertinant detail in the windows.   */
+/* Clear the pertinant detail in the windows.  */
 void
 tui_clear_win_detail (struct tui_win_info *win_info)
 {
@@ -267,7 +267,7 @@ tui_term_height (void)
 }
 
 
-/* Mutator for the term height.   */
+/* Mutator for the term height.  */
 void
 tui_set_term_height_to (int h)
 {
@@ -275,7 +275,7 @@ tui_set_term_height_to (int h)
 }
 
 
-/* Accessor for the term_width.   */
+/* Accessor for the term_width.  */
 int
 tui_term_width (void)
 {
@@ -291,7 +291,7 @@ tui_set_term_width_to (int w)
 }
 
 
-/* Accessor for the current layout.   */
+/* Accessor for the current layout.  */
 enum tui_layout_type
 tui_current_layout (void)
 {
@@ -379,7 +379,7 @@ tui_prev_win (struct tui_win_info *cur_win)
 }
 
 
-/* Answer the window represented by name.    */
+/* Answer the window represented by name.  */
 struct tui_win_info *
 tui_partial_win_by_name (char *name)
 {
@@ -650,7 +650,8 @@ tui_add_content_elements (struct tui_gen_win_info *win_info, int num_elements)
 	      init_content_element (element_ptr, win_info->type);
 	      win_info->content_size++;
 	    }
-	  else	/* Things must be really hosed now!  We ran out of memory!? */
+	  else	/* Things must be really hosed now!  We ran out of
+		   memory!?  */
 	    return (-1);
 	}
     }
@@ -659,8 +660,8 @@ tui_add_content_elements (struct tui_gen_win_info *win_info, int num_elements)
 }
 
 
-/* Delete all curses windows associated with win_info, leaving everything
-   else intact.  */
+/* Delete all curses windows associated with win_info, leaving
+   everything else intact.  */
 void
 tui_del_window (struct tui_win_info *win_info)
 {
@@ -814,8 +815,9 @@ tui_del_data_windows (tui_win_content content, int content_size)
   int i;
 
   /*
-     ** Remember that data window content elements are of type struct tui_gen_win_info *,
-     ** each of which whose single element is a data element.
+     ** Remember that data window content elements are of type 
+     ** struct tui_gen_win_info *, each of which whose single 
+     ** element is a data element.
    */
   for (i = 0; i < content_size; i++)
     {
@@ -837,8 +839,9 @@ tui_free_data_content (tui_win_content content, int content_size)
   int i;
 
   /*
-     ** Remember that data window content elements are of type struct tui_gen_win_info *,
-     ** each of which whose single element is a data element.
+     ** Remember that data window content elements are of type 
+     ** struct tui_gen_win_info *, each of which whose single 
+     ** element is a data element.
    */
   for (i = 0; i < content_size; i++)
     {
@@ -885,7 +888,7 @@ free_content_elements (tui_win_content content, int content_size, enum tui_win_t
 
       if (type == SRC_WIN || type == DISASSEM_WIN)
 	{
-	  /* free whole source block */
+	  /* Free whole source block.  */
 	  xfree (content[0]->which_element.source.line);
 	}
       else
@@ -905,7 +908,8 @@ free_content_elements (tui_win_content content, int content_size, enum tui_win_t
 		    case DATA_ITEM_WIN:
 		      /*
 		         ** Note that data elements are not allocated
-		         ** in a single block, but individually, as needed.
+		         ** in a single block, but individually, as
+			 ** needed.
 		       */
 		      if (element->which_element.data.type != TUI_REGISTER)
 			xfree ((void *)element->which_element.data.name);
@@ -923,6 +927,6 @@ free_content_elements (tui_win_content content, int content_size, enum tui_win_t
 	    }
 	}
       if (type != DATA_WIN && type != DATA_ITEM_WIN)
-	xfree (content[0]);	/* free the element block */
+	xfree (content[0]);	/* Free the element block.  */
     }
 }
