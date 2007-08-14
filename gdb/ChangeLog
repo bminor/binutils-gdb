@@ -1,5 +1,11 @@
 2007-08-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* arm-tdep.c (arm_gdbarch_init): Allow unknown ABI and FPU settings
+	to match any gdbarch with matching OSABI.  Set default ABI and FPU
+	after running the OSABI handler.
+
+2007-08-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* config/i386/linux.mh (NATDEPFILES): Move corelow.o from here...
 	* config/i386/linux.mt (TDEPFILES): ...to here.
 

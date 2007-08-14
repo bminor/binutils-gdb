@@ -2835,39 +2835,17 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
     }
 
-  /* Now that we have inferred any architecture settings that we
-     can, try to inherit from the last ARM ABI.  */
-  if (arches != NULL)
-    {
-      if (arm_abi == ARM_ABI_AUTO)
-	arm_abi = gdbarch_tdep (arches->gdbarch)->arm_abi;
-
-      if (fp_model == ARM_FLOAT_AUTO)
-	fp_model = gdbarch_tdep (arches->gdbarch)->fp_model;
-    }
-  else
-    {
-      /* There was no prior ARM architecture; fill in default values.  */
-
-      if (arm_abi == ARM_ABI_AUTO)
-	arm_abi = ARM_ABI_APCS;
-
-      /* We used to default to FPA for generic ARM, but almost nobody
-	 uses that now, and we now provide a way for the user to force
-	 the model.  So default to the most useful variant.  */
-      if (fp_model == ARM_FLOAT_AUTO)
-	fp_model = ARM_FLOAT_SOFT_FPA;
-    }
-
   /* If there is already a candidate, use it.  */
   for (best_arch = gdbarch_list_lookup_by_info (arches, &info);
        best_arch != NULL;
        best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
     {
-      if (arm_abi != gdbarch_tdep (best_arch->gdbarch)->arm_abi)
+      if (arm_abi != ARM_ABI_AUTO
+	  && arm_abi != gdbarch_tdep (best_arch->gdbarch)->arm_abi)
 	continue;
 
-      if (fp_model != gdbarch_tdep (best_arch->gdbarch)->fp_model)
+      if (fp_model != ARM_FLOAT_AUTO
+	  && fp_model != gdbarch_tdep (best_arch->gdbarch)->fp_model)
 	continue;
 
       /* Found a match.  */
@@ -2997,12 +2975,23 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Now we have tuned the configuration, set a few final things,
      based on what the OS ABI has told us.  */
 
+  /* If the ABI is not otherwise marked, assume the old GNU APCS.  EABI
+     binaries are always marked.  */
+  if (tdep->arm_abi == ARM_ABI_AUTO)
+    tdep->arm_abi = ARM_ABI_APCS;
+
+  /* We used to default to FPA for generic ARM, but almost nobody
+     uses that now, and we now provide a way for the user to force
+     the model.  So default to the most useful variant.  */
+  if (tdep->fp_model == ARM_FLOAT_AUTO)
+    tdep->fp_model = ARM_FLOAT_SOFT_FPA;
+
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, arm_get_longjmp_target);
 
   /* Floating point sizes and format.  */
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
-  if (fp_model == ARM_FLOAT_SOFT_FPA || fp_model == ARM_FLOAT_FPA)
+  if (tdep->fp_model == ARM_FLOAT_SOFT_FPA || tdep->fp_model == ARM_FLOAT_FPA)
     {
       set_gdbarch_double_format
 	(gdbarch, floatformats_ieee_double_littlebyte_bigword);
