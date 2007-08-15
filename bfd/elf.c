@@ -3446,7 +3446,9 @@ _bfd_elf_make_dynamic_segment (bfd *abfd, asection *dynsec)
 /* Possibly add or remove segments from the segment map.  */
 
 static bfd_boolean
-elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
+elf_modify_segment_map (bfd *abfd,
+			struct bfd_link_info *info,
+			bfd_boolean remove_empty_load)
 {
   struct elf_segment_map **m;
   const struct elf_backend_data *bed;
@@ -3473,7 +3475,7 @@ elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 	}
       (*m)->count = new_count;
 
-      if ((*m)->p_type == PT_LOAD && (*m)->count == 0)
+      if (remove_empty_load && (*m)->p_type == PT_LOAD && (*m)->count == 0)
 	*m = (*m)->next;
       else
 	m = &(*m)->next;
@@ -3498,9 +3500,10 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
   struct elf_segment_map *m;
   asection **sections = NULL;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  bfd_boolean no_user_phdrs;
 
-  if (elf_tdata (abfd)->segment_map == NULL
-      && bfd_count_sections (abfd) != 0)
+  no_user_phdrs = elf_tdata (abfd)->segment_map == NULL;
+  if (no_user_phdrs && bfd_count_sections (abfd) != 0)
     {
       asection *s;
       unsigned int i;
@@ -3869,7 +3872,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       elf_tdata (abfd)->segment_map = mfirst;
     }
 
-  if (!elf_modify_segment_map (abfd, info))
+  if (!elf_modify_segment_map (abfd, info, no_user_phdrs))
     return FALSE;
 
   for (count = 0, m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
@@ -3989,7 +3992,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   unsigned int i, j;
 
   if (link_info == NULL
-      && !elf_modify_segment_map (abfd, link_info))
+      && !elf_modify_segment_map (abfd, link_info, FALSE))
     return FALSE;
 
   alloc = 0;

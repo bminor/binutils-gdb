@@ -1,5 +1,14 @@
 2007-08-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (elf_modify_segment_map): Add remove_empty_load param.
+	Don't remove empty PT_LOAD header if false.
+	(_bfd_elf_map_sections_to_segments): If user phdrs, pass false
+	to elf_modify_segment_map.
+	(assign_file_positions_for_load_sections): Pass false to
+	elf_modify_segment_map.
+
+2007-08-15  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ADDI_R12_R12, LD_R11_0R2, LD_R2_0R2): Define.
 	Update stub comments.
 	(build_plt_stub): Build two variants, one without "addis".
