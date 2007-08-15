@@ -91,7 +91,8 @@ show_layout (enum tui_layout_type layout)
          source/asm.  */
       tui_free_all_source_wins_content ();
       tui_clear_source_windows ();
-      if (layout == SRC_DATA_COMMAND || layout == DISASSEM_DATA_COMMAND)
+      if (layout == SRC_DATA_COMMAND 
+	  || layout == DISASSEM_DATA_COMMAND)
 	{
 	  show_data (layout);
 	  tui_refresh_all (tui_win_list);
@@ -137,33 +138,37 @@ tui_set_layout (enum tui_layout_type layout_type,
 {
   enum tui_status status = TUI_SUCCESS;
 
-  if (layout_type != UNDEFINED_LAYOUT || regs_display_type != TUI_UNDEFINED_REGS)
+  if (layout_type != UNDEFINED_LAYOUT 
+      || regs_display_type != TUI_UNDEFINED_REGS)
     {
-      enum tui_layout_type cur_layout = tui_current_layout (), new_layout = UNDEFINED_LAYOUT;
+      enum tui_layout_type cur_layout = tui_current_layout (),
+	new_layout = UNDEFINED_LAYOUT;
       int regs_populate = FALSE;
       CORE_ADDR addr = extract_display_start_addr ();
       struct tui_win_info *win_with_focus = tui_win_with_focus ();
       struct tui_layout_def *layout_def = tui_layout_def ();
 
 
-      if (layout_type == UNDEFINED_LAYOUT &&
-	  regs_display_type != TUI_UNDEFINED_REGS)
+      if (layout_type == UNDEFINED_LAYOUT
+	  && regs_display_type != TUI_UNDEFINED_REGS)
 	{
 	  if (cur_layout == SRC_DISASSEM_COMMAND)
 	    new_layout = DISASSEM_DATA_COMMAND;
-	  else if (cur_layout == SRC_COMMAND || cur_layout == SRC_DATA_COMMAND)
+	  else if (cur_layout == SRC_COMMAND 
+		   || cur_layout == SRC_DATA_COMMAND)
 	    new_layout = SRC_DATA_COMMAND;
-	  else if (cur_layout == DISASSEM_COMMAND ||
-		   cur_layout == DISASSEM_DATA_COMMAND)
+	  else if (cur_layout == DISASSEM_COMMAND 
+		   || cur_layout == DISASSEM_DATA_COMMAND)
 	    new_layout = DISASSEM_DATA_COMMAND;
 	}
       else
 	new_layout = layout_type;
 
-      regs_populate = (new_layout == SRC_DATA_COMMAND ||
-		      new_layout == DISASSEM_DATA_COMMAND ||
-		      regs_display_type != TUI_UNDEFINED_REGS);
-      if (new_layout != cur_layout || regs_display_type != TUI_UNDEFINED_REGS)
+      regs_populate = (new_layout == SRC_DATA_COMMAND 
+		       || new_layout == DISASSEM_DATA_COMMAND 
+		       || regs_display_type != TUI_UNDEFINED_REGS);
+      if (new_layout != cur_layout
+	  || regs_display_type != TUI_UNDEFINED_REGS)
 	{
 	  if (new_layout != cur_layout)
 	    {
@@ -241,9 +246,9 @@ tui_set_layout (enum tui_layout_type layout_type,
 	      /*
 	       * Now update the window content.
 	       */
-	      if (!regs_populate &&
-		  (new_layout == SRC_DATA_COMMAND ||
-		   new_layout == DISASSEM_DATA_COMMAND))
+	      if (!regs_populate 
+		  && (new_layout == SRC_DATA_COMMAND 
+		      || new_layout == DISASSEM_DATA_COMMAND))
 		tui_display_all_data ();
 
 	      tui_update_source_windows_with_addr (addr);
@@ -271,9 +276,9 @@ tui_add_win_to_layout (enum tui_win_type type)
   switch (type)
     {
     case SRC_WIN:
-      if (cur_layout != SRC_COMMAND &&
-	  cur_layout != SRC_DISASSEM_COMMAND &&
-	  cur_layout != SRC_DATA_COMMAND)
+      if (cur_layout != SRC_COMMAND
+	  && cur_layout != SRC_DISASSEM_COMMAND
+	  && cur_layout != SRC_DATA_COMMAND)
 	{
 	  tui_clear_source_windows_detail ();
 	  if (cur_layout == DISASSEM_DATA_COMMAND)
@@ -283,9 +288,9 @@ tui_add_win_to_layout (enum tui_win_type type)
 	}
       break;
     case DISASSEM_WIN:
-      if (cur_layout != DISASSEM_COMMAND &&
-	  cur_layout != SRC_DISASSEM_COMMAND &&
-	  cur_layout != DISASSEM_DATA_COMMAND)
+      if (cur_layout != DISASSEM_COMMAND
+	  && cur_layout != SRC_DISASSEM_COMMAND
+	  && cur_layout != DISASSEM_DATA_COMMAND)
 	{
 	  tui_clear_source_windows_detail ();
 	  if (cur_layout == SRC_DATA_COMMAND)
@@ -295,8 +300,8 @@ tui_add_win_to_layout (enum tui_win_type type)
 	}
       break;
     case DATA_WIN:
-      if (cur_layout != SRC_DATA_COMMAND &&
-	  cur_layout != DISASSEM_DATA_COMMAND)
+      if (cur_layout != SRC_DATA_COMMAND
+	  && cur_layout != DISASSEM_DATA_COMMAND)
 	{
 	  if (cur_layout == DISASSEM_COMMAND)
 	    show_layout (DISASSEM_DATA_COMMAND);
@@ -424,7 +429,8 @@ tui_set_layout_for_display_command (const char *layout_name)
 	buf_ptr[i] = toupper (buf_ptr[i]);
 
       /* First check for ambiguous input.  */
-      if (strlen (buf_ptr) <= 1 && (*buf_ptr == 'S' || *buf_ptr == '$'))
+      if (strlen (buf_ptr) <= 1 
+	  && (*buf_ptr == 'S' || *buf_ptr == '$'))
 	{
 	  warning (_("Ambiguous command input."));
 	  status = TUI_FAILURE;
@@ -437,13 +443,14 @@ tui_set_layout_for_display_command (const char *layout_name)
 	    new_layout = DISASSEM_COMMAND;
 	  else if (subset_compare (buf_ptr, "SPLIT"))
 	    new_layout = SRC_DISASSEM_COMMAND;
-	  else if (subset_compare (buf_ptr, "REGS") ||
-		   subset_compare (buf_ptr, TUI_GENERAL_SPECIAL_REGS_NAME) ||
-		   subset_compare (buf_ptr, TUI_GENERAL_REGS_NAME) ||
-		   subset_compare (buf_ptr, TUI_FLOAT_REGS_NAME) ||
-		   subset_compare (buf_ptr, TUI_SPECIAL_REGS_NAME))
+	  else if (subset_compare (buf_ptr, "REGS") 
+		   || subset_compare (buf_ptr, TUI_GENERAL_SPECIAL_REGS_NAME)
+		   || subset_compare (buf_ptr, TUI_GENERAL_REGS_NAME)
+		   || subset_compare (buf_ptr, TUI_FLOAT_REGS_NAME)
+		   || subset_compare (buf_ptr, TUI_SPECIAL_REGS_NAME))
 	    {
-	      if (cur_layout == SRC_COMMAND || cur_layout == SRC_DATA_COMMAND)
+	      if (cur_layout == SRC_COMMAND 
+		  || cur_layout == SRC_DATA_COMMAND)
 		new_layout = SRC_DATA_COMMAND;
 	      else
 		new_layout = DISASSEM_DATA_COMMAND;
@@ -455,10 +462,8 @@ tui_set_layout_for_display_command (const char *layout_name)
 		 up this code.  - edie epstein  */
 	      if (subset_compare (buf_ptr, TUI_FLOAT_REGS_NAME))
 		{
-		  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type !=
-		      TUI_SFLOAT_REGS &&
-		      TUI_DATA_WIN->detail.data_display_info.regs_display_type !=
-		      TUI_DFLOAT_REGS)
+		  if (TUI_DATA_WIN->detail.data_display_info.regs_display_type != TUI_SFLOAT_REGS
+		      && TUI_DATA_WIN->detail.data_display_info.regs_display_type != TUI_DFLOAT_REGS)
 		    dpy_type = TUI_SFLOAT_REGS;
 		  else
 		    dpy_type =

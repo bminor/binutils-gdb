@@ -51,13 +51,16 @@ tui_first_data_item_displayed (void)
   int element_no = (-1);
   int i;
 
-  for (i = 0; (i < TUI_DATA_WIN->generic.content_size && element_no < 0); i++)
+  for (i = 0; 
+       i < TUI_DATA_WIN->generic.content_size && element_no < 0;
+       i++)
     {
       struct tui_gen_win_info *data_item_win;
 
       data_item_win = &((tui_win_content)
 			TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
-      if (data_item_win->handle != (WINDOW *) NULL && data_item_win->is_visible)
+      if (data_item_win->handle != (WINDOW *) NULL 
+	  && data_item_win->is_visible)
 	element_no = i;
     }
 
@@ -140,8 +143,8 @@ tui_display_all_data (void)
 
       /* Then display the other data.  */
       if (TUI_DATA_WIN->detail.data_display_info.data_content !=
-	  (tui_win_content) NULL &&
-	  TUI_DATA_WIN->detail.data_display_info.data_content_count > 0)
+	  (tui_win_content) NULL 
+	  && TUI_DATA_WIN->detail.data_display_info.data_content_count > 0)
 	{
 	}
     }
@@ -238,7 +241,9 @@ tui_check_data_values (struct frame_info *frame)
     {
       int i;
 
-      for (i = 0; TUI_DATA_WIN->detail.data_display_info.data_content_count; i++)
+      for (i = 0; 
+	   TUI_DATA_WIN->detail.data_display_info.data_content_count; 
+	   i++)
 	{
 #ifdef LATER
 	  tui_data_element_ptr data_element_ptr;

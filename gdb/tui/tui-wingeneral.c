@@ -113,7 +113,8 @@ box_win (struct tui_gen_win_info *win_info,
 void
 tui_unhighlight_win (struct tui_win_info *win_info)
 {
-  if (win_info != NULL && win_info->generic.handle != (WINDOW *) NULL)
+  if (win_info != NULL 
+      && win_info->generic.handle != (WINDOW *) NULL)
     {
       box_win ((struct tui_gen_win_info *) win_info, NO_HILITE);
       wrefresh (win_info->generic.handle);
@@ -190,8 +191,9 @@ make_visible (struct tui_gen_win_info *win_info, int visible)
 	  win_info->is_visible = TRUE;
 	}
     }
-  else if (!visible &&
-	   win_info->is_visible && win_info->handle != (WINDOW *) NULL)
+  else if (!visible
+	   && win_info->is_visible
+	   && win_info->handle != (WINDOW *) NULL)
     {
       win_info->is_visible = FALSE;
       tui_delete_win (win_info->handle);

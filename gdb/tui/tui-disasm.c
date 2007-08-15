@@ -283,7 +283,8 @@ tui_show_disassem (CORE_ADDR start_addr)
 
   /* If the focus was in the src win, put it in the asm win, if the
      source view isn't split.  */
-  if (tui_current_layout () != SRC_DISASSEM_COMMAND && win_with_focus == TUI_SRC_WIN)
+  if (tui_current_layout () != SRC_DISASSEM_COMMAND 
+      && win_with_focus == TUI_SRC_WIN)
     tui_set_win_focus_to (TUI_DISASM_WIN);
 
   return;

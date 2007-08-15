@@ -1,5 +1,10 @@
 2007-08-14  Michael Snyder  <msnyder@access-company.com>
 
+	* tui-command.c, tui-data.c, tui-disasm.c, tui-file.c, tui-io.c,
+	tui-layout.c, tui-regs.c, tui-source.c, tui-win.c, tui-windata.c,
+	tui-wingeneral.c, tui-winsource.c: Coding standard, && and ||
+	go at beginning of new line.
+
 	* tui-data.c, tui-data.h, tui-disasm.c, tui-disasm.h, tui-hooks.c,
 	tui-io.c, tui-layout.c, tui-layout.h, tui-out.c, tui-regs.c,
 	tui-source.c, tui-source.h, tui-stack.c, tui-win.c, tui-win.h,

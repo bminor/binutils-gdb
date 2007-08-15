@@ -146,17 +146,17 @@ tui_set_source_content (struct symtab *s,
 			cur_line_no;
 		      element->which_element.source.is_exec_point =
 			(strcmp (((struct tui_win_element *)
-			locator->content[0])->which_element.locator.file_name,
+				  locator->content[0])->which_element.locator.file_name,
 				 s->filename) == 0
 			 && cur_line_no == ((struct tui_win_element *)
-			 locator->content[0])->which_element.locator.line_no);
+					    locator->content[0])->which_element.locator.line_no);
 		      if (c != EOF)
 			{
 			  i = strlen (src_line) - 1;
 			  do
 			    {
-			      if ((c != '\n') &&
-				  (c != '\r') && (++i < threshold))
+			      if ((c != '\n') && (c != '\r') 
+				  && (++i < threshold))
 				{
 				  if (c < 040 && c != '\t')
 				    {
@@ -178,10 +178,9 @@ tui_set_source_content (struct symtab *s,
 					{
 					  int j, max_tab_len = tui_default_tab_len ();
 
-					  for (j = i - (
-					       (i / max_tab_len) * max_tab_len);
-					       ((j < max_tab_len) &&
-						i < threshold);
+					  for (j = i - ((i / max_tab_len) * max_tab_len);
+					       j < max_tab_len
+						 && i < threshold;
 					       i++, j++)
 					    src_line[i] = ' ';
 					  i--;
@@ -197,8 +196,9 @@ tui_set_source_content (struct symtab *s,
 				  while (c != EOF && c != '\n' && c != '\r')
 				    c = fgetc (stream);
 				  /* Handle non-'\n' end-of-line.  */
-				  if (c == '\r' &&
-				     (c = fgetc (stream)) != '\n' && c != EOF)
+				  if (c == '\r' 
+				      && (c = fgetc (stream)) != '\n' 
+				      && c != EOF)
 				    {
 				       ungetc (c, stream);
 				       c = '\r';
@@ -206,8 +206,9 @@ tui_set_source_content (struct symtab *s,
 				  
 				}
 			    }
-			  while (c != EOF && c != '\n' && c != '\r' &&
-				 i < threshold && (c = fgetc (stream)));
+			  while (c != EOF && c != '\n' && c != '\r' 
+				 && i < threshold 
+				 && (c = fgetc (stream)));
 			}
 		      /* Now copy the line taking the offset into
 			 account.  */
@@ -326,9 +327,9 @@ tui_show_symtab_source (struct symtab *s,
 int
 tui_source_is_displayed (char *fname)
 {
-  return (TUI_SRC_WIN->generic.content_in_use &&
-	  (strcmp (((struct tui_win_element *) (tui_locator_win_info_ptr ())->
-		  content[0])->which_element.locator.file_name, fname) == 0));
+  return (TUI_SRC_WIN->generic.content_in_use 
+	  && (strcmp (((struct tui_win_element *) (tui_locator_win_info_ptr ())->
+		       content[0])->which_element.locator.file_name, fname) == 0));
 }
 
 

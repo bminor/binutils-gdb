@@ -73,7 +73,8 @@ key_is_command_char (int ch)
 	  || (ch == KEY_LEFT) || (ch == KEY_RIGHT)
 	  || (ch == KEY_UP) || (ch == KEY_DOWN)
 	  || (ch == KEY_SF) || (ch == KEY_SR)
-	  || (ch == (int)'\f') || key_is_start_sequence (ch));
+	  || (ch == (int)'\f') 
+	  || key_is_start_sequence (ch));
 }
 
 /* Use definition from readline 4.3.  */
@@ -329,7 +330,9 @@ printable_part (char *pathname)
 
   temp = rl_filename_completion_desired ? strrchr (pathname, '/') : (char *)NULL;
 #if defined (__MSDOS__)
-  if (rl_filename_completion_desired && temp == 0 && isalpha (pathname[0]) && pathname[1] == ':')
+  if (rl_filename_completion_desired 
+      && temp == 0 && isalpha (pathname[0]) 
+      && pathname[1] == ':')
     temp = pathname + 1;
 #endif
   return (temp ? ++temp : pathname);

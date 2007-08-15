@@ -73,7 +73,8 @@ tui_dispatch_ctrl_char (unsigned int ch)
 	{
 	  for (i = 0; term[i]; i++)
 	    term[i] = toupper (term[i]);
-	  if ((strcmp (term, "XTERM") == 0) && key_is_start_sequence (ch))
+	  if ((strcmp (term, "XTERM") == 0) 
+	      && key_is_start_sequence (ch))
 	    {
 	      unsigned int page_ch = 0;
 	      unsigned int tmp_char;

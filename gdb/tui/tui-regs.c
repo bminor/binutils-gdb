@@ -321,8 +321,8 @@ tui_display_registers_from (int start_element_no)
 {
   struct tui_data_info *display_info = &TUI_DATA_WIN->detail.data_display_info;
 
-  if (display_info->regs_content != (tui_win_content) NULL &&
-      display_info->regs_content_count > 0)
+  if (display_info->regs_content != (tui_win_content) NULL 
+      && display_info->regs_content_count > 0)
     {
       int i = start_element_no;
       int j, value_chars_wide, item_win_width, cur_y;
@@ -365,12 +365,13 @@ tui_display_registers_from (int start_element_no)
       /* Now create each data "sub" window, and write the display into
 	 it.  */
       cur_y = 1;
-      while (i < display_info->regs_content_count &&
-	     cur_y <= TUI_DATA_WIN->generic.viewport_height)
+      while (i < display_info->regs_content_count 
+	     && cur_y <= TUI_DATA_WIN->generic.viewport_height)
 	{
 	  for (j = 0;
-	       (j < display_info->regs_column_count &&
-		i < display_info->regs_content_count); j++)
+	       j < display_info->regs_column_count
+		 && i < display_info->regs_content_count;
+	       j++)
 	    {
 	      struct tui_gen_win_info *data_item_win;
 	      struct tui_data_element *data_element_ptr;
@@ -420,8 +421,8 @@ void
 tui_display_reg_element_at_line (int start_element_no,
 				 int start_line_no)
 {
-  if (TUI_DATA_WIN->detail.data_display_info.regs_content != (tui_win_content) NULL &&
-      TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
+  if (TUI_DATA_WIN->detail.data_display_info.regs_content != (tui_win_content) NULL
+      && TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
     {
       int element_no = start_element_no;
 
@@ -438,8 +439,8 @@ tui_display_reg_element_at_line (int start_element_no,
 	     the element_no causes us to scroll past the end of the
 	     registers, adjust what element to really start the
 	     display at.  */
-	  if (TUI_DATA_WIN->detail.data_display_info.data_content_count <= 0 &&
-	      start_line_no > first_line_on_last_page)
+	  if (TUI_DATA_WIN->detail.data_display_info.data_content_count <= 0
+	      && start_line_no > first_line_on_last_page)
 	    element_no = tui_first_reg_element_no_inline (first_line_on_last_page);
 	}
       tui_display_registers_from (element_no);
@@ -496,12 +497,14 @@ tui_display_registers_from_line (int line_no,
 void
 tui_check_register_values (struct frame_info *frame)
 {
-  if (TUI_DATA_WIN != NULL && TUI_DATA_WIN->generic.is_visible)
+  if (TUI_DATA_WIN != NULL
+      && TUI_DATA_WIN->generic.is_visible)
     {
       struct tui_data_info *display_info
         = &TUI_DATA_WIN->detail.data_display_info;
 
-      if (display_info->regs_content_count <= 0 && display_info->display_regs)
+      if (display_info->regs_content_count <= 0 
+	  && display_info->display_regs)
 	tui_show_registers (display_info->current_group);
       else
 	{

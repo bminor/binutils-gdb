@@ -118,8 +118,8 @@ tui_update_source_window_as_is (struct tui_win_info *win_info,
 	  set_current_source_symtab_and_line (&sal);
 	  /* If the focus was in the asm win, put it in the src win if
 	     we don't have a split layout.  */
-	  if (tui_win_with_focus () == TUI_DISASM_WIN &&
-	      tui_current_layout () != SRC_DISASSEM_COMMAND)
+	  if (tui_win_with_focus () == TUI_DISASM_WIN
+	      && tui_current_layout () != SRC_DISASSEM_COMMAND)
 	    tui_set_win_focus_to (TUI_SRC_WIN);
 	}
     }
@@ -631,14 +631,15 @@ tui_line_is_displayed (int line,
   else
     threshold = 0;
   i = 0;
-  while (i < win_info->generic.content_size - threshold && !is_displayed)
+  while (i < win_info->generic.content_size - threshold
+	 && !is_displayed)
     {
       is_displayed = (((struct tui_win_element *)
-		      win_info->generic.content[i])->which_element.source.line_or_addr.loa
+		       win_info->generic.content[i])->which_element.source.line_or_addr.loa
 		      == LOA_LINE)
-		     && (((struct tui_win_element *)
-		      win_info->generic.content[i])->which_element.source.line_or_addr.u.line_no
-		      == (int) line);
+	&& (((struct tui_win_element *)
+	     win_info->generic.content[i])->which_element.source.line_or_addr.u.line_no
+	    == (int) line);
       i++;
     }
 
@@ -661,14 +662,15 @@ tui_addr_is_displayed (CORE_ADDR addr,
   else
     threshold = 0;
   i = 0;
-  while (i < win_info->generic.content_size - threshold && !is_displayed)
+  while (i < win_info->generic.content_size - threshold
+	 && !is_displayed)
     {
       is_displayed = (((struct tui_win_element *)
-		      win_info->generic.content[i])->which_element.source.line_or_addr.loa
+		       win_info->generic.content[i])->which_element.source.line_or_addr.loa
 		      == LOA_ADDRESS)
-		     && (((struct tui_win_element *)
-		      win_info->generic.content[i])->which_element.source.line_or_addr.u.addr
-		      == addr);
+	&& (((struct tui_win_element *)
+	     win_info->generic.content[i])->which_element.source.line_or_addr.u.addr
+	    == addr);
       i++;
     }
 

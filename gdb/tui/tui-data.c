@@ -342,7 +342,8 @@ tui_next_win (struct tui_win_info *cur_win)
     type = cur_win->generic.type + 1;
   while (type != cur_win->generic.type && (next_win == NULL))
     {
-      if (tui_win_list[type] && tui_win_list[type]->generic.is_visible)
+      if (tui_win_list[type]
+	  && tui_win_list[type]->generic.is_visible)
 	next_win = tui_win_list[type];
       else
 	{
@@ -401,8 +402,8 @@ tui_partial_win_by_name (char *name)
           if (tui_win_list[i] != 0)
             {
               char *cur_name = tui_win_name (&tui_win_list[i]->generic);
-              if (strlen (name) <= strlen (cur_name) &&
-                  strncmp (name, cur_name, strlen (name)) == 0)
+              if (strlen (name) <= strlen (cur_name)
+		  && strncmp (name, cur_name, strlen (name)) == 0)
                 win_info = tui_win_list[i];
             }
 	  i++;
