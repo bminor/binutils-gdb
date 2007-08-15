@@ -131,20 +131,24 @@ static bfd_vma opd_entry_value
 
 /* .plt call stub instructions.  The normal stub is like this, but
    sometimes the .plt entry crosses a 64k boundary and we need to
-   insert an addis to adjust r12.  */
+   insert an addi to adjust r12.  */
 #define PLT_CALL_STUB_SIZE (7*4)
 #define ADDIS_R12_R2	0x3d820000	/* addis %r12,%r2,xxx@ha     */
 #define STD_R2_40R1	0xf8410028	/* std	 %r2,40(%r1)	     */
 #define LD_R11_0R12	0xe96c0000	/* ld	 %r11,xxx+0@l(%r12)  */
-#define LD_R2_0R12	0xe84c0000	/* ld	 %r2,xxx+8@l(%r12)   */
 #define MTCTR_R11	0x7d6903a6	/* mtctr %r11		     */
+#define LD_R2_0R12	0xe84c0000	/* ld	 %r2,xxx+8@l(%r12)   */
 					/* ld	 %r11,xxx+16@l(%r12) */
 #define BCTR		0x4e800420	/* bctr			     */
 
 
 #define ADDIS_R12_R12	0x3d8c0000	/* addis %r12,%r12,off@ha  */
+#define ADDI_R12_R12	0x398c0000	/* addi %r12,%r12,off@l  */
 #define ADDIS_R2_R2	0x3c420000	/* addis %r2,%r2,off@ha  */
 #define ADDI_R2_R2	0x38420000	/* addi  %r2,%r2,off@l   */
+
+#define LD_R11_0R2	0xe9620000	/* ld	 %r11,xxx+0(%r2) */
+#define LD_R2_0R2	0xe8420000	/* ld	 %r2,xxx+0(%r2)  */
 
 #define LD_R2_40R1	0xe8410028	/* ld    %r2,40(%r1)     */
 
@@ -3235,13 +3239,12 @@ struct plt_entry
    ppc_stub_plt_call:
    Used to call a function in a shared library.  If it so happens that
    the plt entry referenced crosses a 64k boundary, then an extra
-   "addis %r12,%r12,1" will be inserted before the load at xxx+8 or
-   xxx+16 as appropriate.
+   "addi %r12,%r12,xxx@toc@l" will be inserted before the "mtctr".
    .	addis	%r12,%r2,xxx@toc@ha
    .	std	%r2,40(%r1)
    .	ld	%r11,xxx+0@toc@l(%r12)
-   .	ld	%r2,xxx+8@toc@l(%r12)
    .	mtctr	%r11
+   .	ld	%r2,xxx+8@toc@l(%r12)
    .	ld	%r11,xxx+16@toc@l(%r12)
    .	bctr
 
@@ -3261,6 +3264,9 @@ struct plt_entry
    .	addi	%r2,%r2,off@l
    .	mtctr	%r11
    .	bctr
+
+   In cases where the "addis" instruction would add zero, the "addis" is
+   omitted and following instructions modified slightly in some cases.
 */
 
 enum ppc_stub_type {
@@ -8193,19 +8199,35 @@ build_plt_stub (bfd *obfd, bfd_byte *p, int offset)
 #define PPC_HI(v) (((v) >> 16) & 0xffff)
 #define PPC_HA(v) PPC_HI ((v) + 0x8000)
 
-  bfd_put_32 (obfd, ADDIS_R12_R2 | PPC_HA (offset), p),	p += 4;
-  bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
-  bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset), p),	p += 4;
-  if (PPC_HA (offset + 8) != PPC_HA (offset))
-    bfd_put_32 (obfd, ADDIS_R12_R12 | 1, p),		p += 4;
-  offset += 8;
-  bfd_put_32 (obfd, LD_R2_0R12 | PPC_LO (offset), p),	p += 4;
-  if (PPC_HA (offset + 8) != PPC_HA (offset))
-    bfd_put_32 (obfd, ADDIS_R12_R12 | 1, p),		p += 4;
-  offset += 8;
-  bfd_put_32 (obfd, MTCTR_R11, p),			p += 4;
-  bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset), p),	p += 4;
-  bfd_put_32 (obfd, BCTR, p),				p += 4;
+  if (PPC_HA (offset) != 0)
+    {
+      bfd_put_32 (obfd, ADDIS_R12_R2 | PPC_HA (offset), p),	p += 4;
+      bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
+      bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset), p),	p += 4;
+      if (PPC_HA (offset + 16) != PPC_HA (offset))
+	{
+	  bfd_put_32 (obfd, ADDI_R12_R12 | PPC_LO (offset), p),	p += 4;
+	  offset = 0;
+	}
+      bfd_put_32 (obfd, MTCTR_R11, p),				p += 4;
+      bfd_put_32 (obfd, LD_R2_0R12 | PPC_LO (offset + 8), p),	p += 4;
+      bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset + 16), p),	p += 4;
+      bfd_put_32 (obfd, BCTR, p),				p += 4;
+    }
+  else
+    {
+      bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
+      bfd_put_32 (obfd, LD_R11_0R2 | PPC_LO (offset), p),	p += 4;
+      if (PPC_HA (offset + 16) != PPC_HA (offset))
+	{
+	  bfd_put_32 (obfd, ADDI_R2_R2 | PPC_LO (offset), p),	p += 4;
+	  offset = 0;
+	}
+      bfd_put_32 (obfd, MTCTR_R11, p),				p += 4;
+      bfd_put_32 (obfd, LD_R11_0R2 | PPC_LO (offset + 16), p),	p += 4;
+      bfd_put_32 (obfd, LD_R2_0R2 | PPC_LO (offset + 8), p),	p += 4;
+      bfd_put_32 (obfd, BCTR, p),				p += 4;
+    }
   return p;
 }
 
@@ -8248,9 +8270,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      + stub_entry->stub_sec->output_offset
 	      + stub_entry->stub_sec->output_section->vma);
 
-      if (stub_entry->stub_type != ppc_stub_long_branch_r2off)
-	size = 4;
-      else
+      size = 4;
+      if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
 	{
 	  bfd_vma r2off;
 
@@ -8258,12 +8279,16 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 		   - htab->stub_group[stub_entry->id_sec->id].toc_off);
 	  bfd_put_32 (htab->stub_bfd, STD_R2_40R1, loc);
 	  loc += 4;
-	  bfd_put_32 (htab->stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
-	  loc += 4;
+	  size = 12;
+	  if (PPC_HA (r2off) != 0)
+	    {
+	      size = 16;
+	      bfd_put_32 (htab->stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
+	      loc += 4;
+	    }
 	  bfd_put_32 (htab->stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
 	  loc += 4;
-	  off -= 12;
-	  size = 16;
+	  off -= size - 4;
 	}
       bfd_put_32 (htab->stub_bfd, B_DOT | (off & 0x3fffffc), loc);
 
@@ -8420,10 +8445,18 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       indx = off;
       if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
 	{
-	  bfd_put_32 (htab->stub_bfd, ADDIS_R12_R2 | PPC_HA (indx), loc);
-	  loc += 4;
-	  bfd_put_32 (htab->stub_bfd, LD_R11_0R12 | PPC_LO (indx), loc);
-	  size = 16;
+	  if (PPC_HA (indx) != 0)
+	    {
+	      size = 16;
+	      bfd_put_32 (htab->stub_bfd, ADDIS_R12_R2 | PPC_HA (indx), loc);
+	      loc += 4;
+	      bfd_put_32 (htab->stub_bfd, LD_R11_0R12 | PPC_LO (indx), loc);
+	    }
+	  else
+	    {
+	      size = 12;
+	      bfd_put_32 (htab->stub_bfd, LD_R11_0R2 | PPC_LO (indx), loc);
+	    }
 	}
       else
 	{
@@ -8433,14 +8466,28 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 		   - htab->stub_group[stub_entry->id_sec->id].toc_off);
 	  bfd_put_32 (htab->stub_bfd, STD_R2_40R1, loc);
 	  loc += 4;
-	  bfd_put_32 (htab->stub_bfd, ADDIS_R12_R2 | PPC_HA (indx), loc);
-	  loc += 4;
-	  bfd_put_32 (htab->stub_bfd, LD_R11_0R12 | PPC_LO (indx), loc);
-	  loc += 4;
-	  bfd_put_32 (htab->stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
-	  loc += 4;
+	  size = 20;
+	  if (PPC_HA (indx) != 0)
+	    {
+	      size += 4;
+	      bfd_put_32 (htab->stub_bfd, ADDIS_R12_R2 | PPC_HA (indx), loc);
+	      loc += 4;
+	      bfd_put_32 (htab->stub_bfd, LD_R11_0R12 | PPC_LO (indx), loc);
+	      loc += 4;
+	    }
+	  else
+	    {
+	      bfd_put_32 (htab->stub_bfd, LD_R11_0R2 | PPC_LO (indx), loc);
+	      loc += 4;
+	    }
+
+	  if (PPC_HA (r2off) != 0)
+	    {
+	      size += 4;
+	      bfd_put_32 (htab->stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
+	      loc += 4;
+	    }
 	  bfd_put_32 (htab->stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
-	  size = 28;
 	}
       loc += 4;
       bfd_put_32 (htab->stub_bfd, MTCTR_R11, loc);
@@ -8579,6 +8626,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      - htab->stub_group[stub_entry->id_sec->id].toc_off);
 
       size = PLT_CALL_STUB_SIZE;
+      if (PPC_HA (off) == 0)
+	size -= 4;
       if (PPC_HA (off + 16) != PPC_HA (off))
 	size += 4;
     }
@@ -8586,6 +8635,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     {
       /* ppc_stub_long_branch or ppc_stub_plt_branch, or their r2off
 	 variants.  */
+      bfd_vma r2off = 0;
+
       off = (stub_entry->target_value
 	     + stub_entry->target_section->output_offset
 	     + stub_entry->target_section->output_section->vma);
@@ -8601,14 +8652,19 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       size = 4;
       if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
 	{
-	  off -= 12;
-	  size = 16;
+	  r2off = (htab->stub_group[stub_entry->target_section->id].toc_off
+		   - htab->stub_group[stub_entry->id_sec->id].toc_off);
+	  size = 12;
+	  if (PPC_HA (r2off) != 0)
+	    size = 16;
+	  off -= size - 4;
 	}
 
       /* If the branch offset if too big, use a ppc_stub_plt_branch.  */
       if (off + (1 << 25) >= (bfd_vma) (1 << 26))
 	{
 	  struct ppc_branch_hash_entry *br_entry;
+	  unsigned int indx;
 
 	  br_entry = ppc_branch_hash_lookup (&htab->branch_hash_table,
 					     stub_entry->root.string + 9,
@@ -8637,9 +8693,28 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    }
 
 	  stub_entry->stub_type += ppc_stub_plt_branch - ppc_stub_long_branch;
-	  size = 16;
-	  if (stub_entry->stub_type != ppc_stub_plt_branch)
-	    size = 28;
+	  off = (br_entry->offset
+		 + htab->brlt->output_offset
+		 + htab->brlt->output_section->vma
+		 - elf_gp (htab->brlt->output_section->owner)
+		 - htab->stub_group[stub_entry->id_sec->id].toc_off);
+
+	  indx = off;
+	  if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
+	    {
+	      size = 12;
+	      if (PPC_HA (indx) != 0)
+		size = 16;
+	    }
+	  else
+	    {
+	      size = 20;
+	      if (PPC_HA (indx) != 0)
+		size += 4;
+
+	      if (PPC_HA (r2off) != 0)
+		size += 4;
+	    }
 	}
       else if (info->emitrelocations)
 	{
