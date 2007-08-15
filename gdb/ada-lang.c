@@ -2691,6 +2691,9 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
     case BINOP_REPEAT:
     case BINOP_SUBSCRIPT:
     case BINOP_COMMA:
+      *pos += 1;
+      nargs = 2;
+      break;
 
     case UNOP_NEG:
     case UNOP_PLUS:
