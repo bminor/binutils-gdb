@@ -1,3 +1,9 @@
+2007-08-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4923
+	* emultempl/elf32.em (after_open): Return immediately when
+        non-ELF output.
+
 2007-08-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.in (ALL_LINGUAS): Add fi.
