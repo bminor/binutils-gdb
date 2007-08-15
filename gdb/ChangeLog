@@ -1,3 +1,9 @@
+2007-08-15  Paul Hilfinger  <hilfinger@adacore.com>
+            Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (possible_user_operator_p): Alternative fix to last
+	checkin guarding against NULL.
+
 2007-08-14  Michael Snyder  <msnyder@access-company.com>
 
 	* tui-command.c, tui-data.c, tui-disasm.c, tui-file.c, tui-io.c,

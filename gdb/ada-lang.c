@@ -3532,14 +3532,7 @@ possible_user_operator_p (enum exp_opcode op, struct value *args[])
       return (!(scalar_type_p (type0) && scalar_type_p (type1)));
 
     case BINOP_CONCAT:
-      return
-        ((TYPE_CODE (type0) != TYPE_CODE_ARRAY
-          && (TYPE_CODE (type0) != TYPE_CODE_PTR
-              || TYPE_CODE (TYPE_TARGET_TYPE (type0)) != TYPE_CODE_ARRAY))
-         || (type1 != NULL && TYPE_CODE (type1) != TYPE_CODE_ARRAY
-             && (TYPE_CODE (type1) != TYPE_CODE_PTR
-                 || (TYPE_CODE (TYPE_TARGET_TYPE (type1)) 
-		     != TYPE_CODE_ARRAY))));
+      return !ada_is_array_type (type0) || !ada_is_array_type (type1);
 
     case BINOP_EXP:
       return (!(numeric_type_p (type0) && integer_type_p (type1)));
