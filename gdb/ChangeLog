@@ -1,3 +1,7 @@
+2007-08-16  Michael Snyder  <msnyder@access-company.com>
+
+        * event-loop.c (gdb_wait_for_event): Move statement into "if" block.
+
 2007-08-15  Paul Hilfinger  <hilfinger@adacore.com>
             Joel Brobecker  <brobecker@adacore.com>
 

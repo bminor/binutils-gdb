@@ -825,9 +825,8 @@ gdb_wait_for_event (void)
 		  file_event_ptr = create_file_event (file_ptr->fd);
 		  async_queue_event (file_event_ptr, TAIL);
 		}
+	      file_ptr->ready_mask = (gdb_notifier.poll_fds + i)->revents;
 	    }
-
-	  file_ptr->ready_mask = (gdb_notifier.poll_fds + i)->revents;
 	}
 #else
       internal_error (__FILE__, __LINE__,
