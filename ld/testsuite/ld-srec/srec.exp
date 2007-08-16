@@ -228,8 +228,9 @@ proc run_srec_test { test objs } {
     global sizeof_headers
     global host_triplet
 
-    # Tell the ELF linker to not do anything clever with .eh_frame.
-    set flags "--traditional-format"
+    # Tell the ELF linker to not do anything clever with .eh_frame,
+    # and not to put anything in small data.
+    set flags "--traditional-format -G 0"
 
     # If the linker script uses SIZEOF_HEADERS, use a -Ttext argument
     # to force both the normal link and the S-record link to be put in
@@ -374,10 +375,6 @@ setup_xfail "thumb-*-pe*"
 setup_xfail "thumb-*-elf*"
 setup_xfail "arm*-*-linux*"
 
-# The S-record linker doesn't put common symbols in small data
-# the way the ELF linker does.
-setup_xfail "powerpc*-*-*"
-
 # The S-record linker doesn't include the .{zda} sections.
 setup_xfail "v850*-*-elf"
 
@@ -420,7 +417,6 @@ setup_xfail "*-*-aix*" "*-*-xcoff*"
 setup_xfail "arm*-*-*"
 setup_xfail "strongarm*-*-*"
 setup_xfail "thumb-*-*"
-setup_xfail "powerpc*-*-eabi*"
 setup_xfail "v850*-*-elf"
 setup_xfail "alpha*-*-elf*" "alpha*-*-linux-*" "alpha*-*-gnu*"
 setup_xfail "alpha*-*-netbsd*"
