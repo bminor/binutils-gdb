@@ -1083,7 +1083,7 @@ get_segment_type (unsigned int p_type)
     case PT_PHDR: pt = "PHDR"; break;
     case PT_TLS: pt = "TLS"; break;
     case PT_GNU_EH_FRAME: pt = "EH_FRAME"; break;
-    case PT_GNU_ATTR: pt = "ATTR"; break;
+    case PT_GNU_STACK: pt = "STACK"; break;
     case PT_GNU_RELRO: pt = "RELRO"; break;
     default: pt = NULL; break;
     }
@@ -2355,8 +2355,8 @@ bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index)
       return _bfd_elf_make_section_from_phdr (abfd, hdr, index,
 					      "eh_frame_hdr");
 
-    case PT_GNU_ATTR:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "attr");
+    case PT_GNU_STACK:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "stack");
 
     case PT_GNU_RELRO:
       return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "relro");
@@ -3300,8 +3300,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
 {
   size_t segs;
   asection *s;
-  asection *attr = NULL;
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct elf_backend_data *bed;
 
   /* Assume we will need exactly two PT_LOAD segments: one for text
      and one for data.  */
@@ -3336,26 +3335,14 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
       ++segs;
     }
 
+  if (elf_tdata (abfd)->stack_flags)
+    {
+      /* We need a PT_GNU_STACK segment.  */
+      ++segs;
+    }
+
   for (s = abfd->sections; s != NULL; s = s->next)
     {
-      if (elf_section_type (s) == bed->obj_attrs_section_type)
-	{
-	  BFD_ASSERT (attr == NULL);
-	  attr = s;
-
-	  /* elf_tdata (abfd)->stack_flags is checked for the
-	     PT_GNU_ATTR segment.  If there is an attribute
-	     section, we make sure that stack_flags isn't zero so
-	     that the PT_GNU_ATTR segment will be created.  */
-	  if (! elf_tdata (abfd)->stack_flags)
-	    {
-	      if (bed->default_execstack)
-		elf_tdata (abfd)->stack_flags = PF_R | PF_W | PF_X;
-	      else
-		elf_tdata (abfd)->stack_flags = PF_R | PF_W;
-	    }
-	}
-
       if ((s->flags & SEC_LOAD) != 0
 	  && CONST_STRNEQ (s->name, ".note"))
 	{
@@ -3377,12 +3364,6 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (elf_tdata (abfd)->stack_flags)
-    {
-      /* We need a PT_GNU_ATTR segment.  */
-      ++segs;
-    }
-
   for (s = abfd->sections; s != NULL; s = s->next)
     {
       if (s->flags & SEC_THREAD_LOCAL)
@@ -3394,6 +3375,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* Let the backend count up any program headers it might need.  */
+  bed = get_elf_backend_data (abfd);
   if (bed->elf_backend_additional_program_headers)
     {
       int a;
@@ -3538,7 +3520,6 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       asection *first_tls = NULL;
       asection *dynsec, *eh_frame_hdr;
       bfd_size_type amt;
-      asection *attr = NULL;
 
       /* Select the allocated sections, and sort them.  */
 
@@ -3549,12 +3530,6 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       i = 0;
       for (s = abfd->sections; s != NULL; s = s->next)
 	{
-	  if (elf_section_type (s) == bed->obj_attrs_section_type)
-	    {
-	      BFD_ASSERT (attr == NULL);
-	      attr = s;
-	    }
-
 	  if ((s->flags & SEC_ALLOC) != 0)
 	    {
 	      sections[i] = s;
@@ -3868,16 +3843,9 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  if (m == NULL)
 	    goto error_return;
 	  m->next = NULL;
-	  m->p_type = PT_GNU_ATTR;
+	  m->p_type = PT_GNU_STACK;
 	  m->p_flags = elf_tdata (abfd)->stack_flags;
 	  m->p_flags_valid = 1;
-
-	  if (attr)
-	    {
-	      /* Add the attribute section if needed.  */
-	      m->count = 1;
-	      m->sections[0] = attr;
-	    } 
 
 	  *pm = m;
 	  pm = &m->next;
@@ -5065,33 +5033,31 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
        2. It is an allocated segment,
        3. There is an output section associated with it,
        4. The section has not already been allocated to a previous segment.
-       5. PT_GNU_ATTR only contains attribute section.
+       5. PT_GNU_STACK segments do not include any sections.
        6. PT_TLS segment includes only SHF_TLS sections.
        7. SHF_TLS sections are only in PT_TLS or PT_LOAD segments.
        8. PT_DYNAMIC should not contain empty sections at the beginning
 	  (with the possible exception of .dynamic).  */
 #define IS_SECTION_IN_INPUT_SEGMENT(section, segment, bed)		\
-  ((segment->p_type == PT_GNU_ATTR					\
-    && elf_section_type (section) == bed->obj_attrs_section_type)	\
-   || ((((segment->p_paddr						\
-	  ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
-	  : IS_CONTAINED_BY_VMA (section, segment))			\
-	 && (section->flags & SEC_ALLOC) != 0)				\
-	|| IS_COREFILE_NOTE (segment, section))				\
-       && segment->p_type != PT_GNU_ATTR				\
-       && (segment->p_type != PT_TLS					\
-	   || (section->flags & SEC_THREAD_LOCAL))			\
-       && (segment->p_type == PT_LOAD					\
-	   || segment->p_type == PT_TLS					\
-	   || (section->flags & SEC_THREAD_LOCAL) == 0)			\
-       && (segment->p_type != PT_DYNAMIC				\
-	   || SECTION_SIZE (section, segment) > 0			\
-	   || (segment->p_paddr						\
-	       ? segment->p_paddr != section->lma			\
-	       : segment->p_vaddr != section->vma)			\
-	   || (strcmp (bfd_get_section_name (ibfd, section),		\
-		       ".dynamic") == 0))				\
-       && ! section->segment_mark))
+  ((((segment->p_paddr							\
+      ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
+      : IS_CONTAINED_BY_VMA (section, segment))				\
+     && (section->flags & SEC_ALLOC) != 0)				\
+    || IS_COREFILE_NOTE (segment, section))				\
+   && segment->p_type != PT_GNU_STACK					\
+   && (segment->p_type != PT_TLS					\
+       || (section->flags & SEC_THREAD_LOCAL))				\
+   && (segment->p_type == PT_LOAD					\
+       || segment->p_type == PT_TLS					\
+       || (section->flags & SEC_THREAD_LOCAL) == 0)			\
+   && (segment->p_type != PT_DYNAMIC					\
+       || SECTION_SIZE (section, segment) > 0				\
+       || (segment->p_paddr						\
+	   ? segment->p_paddr != section->lma				\
+	   : segment->p_vaddr != section->vma)				\
+       || (strcmp (bfd_get_section_name (ibfd, section), ".dynamic")	\
+	   == 0))							\
+   && ! section->segment_mark)
 
 /* If the output section of a section in the input segment is NULL,
    it is removed from the corresponding output segment.   */

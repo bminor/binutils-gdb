@@ -1,5 +1,9 @@
 2007-08-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c: Revert last change.
+
+2007-08-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf.c (get_segment_type): Change PT_GNU_STACK to PT_GNU_ATTR.
 	(bfd_section_from_phdr): Likewise.
 	(get_program_header_size): Likewise. Add a PT_GNU_ATTR segment
