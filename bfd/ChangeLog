@@ -1,3 +1,12 @@
+2007-08-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (get_segment_type): Change PT_GNU_STACK to PT_GNU_ATTR.
+	(bfd_section_from_phdr): Likewise.
+	(get_program_header_size): Likewise. Add a PT_GNU_ATTR segment
+	if there is an attribute section.
+	(_bfd_elf_map_sections_to_segments): Likewise.
+	(IS_SECTION_IN_INPUT_SEGMENT): Likewise.
+
 2007-08-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4918

@@ -2467,7 +2467,7 @@ get_segment_type (unsigned long p_type)
 
     case PT_GNU_EH_FRAME:
 			return "GNU_EH_FRAME";
-    case PT_GNU_STACK:	return "GNU_STACK";
+    case PT_GNU_ATTR:	return "GNU_ATTR";
     case PT_GNU_RELRO:  return "GNU_RELRO";
 
     default:
