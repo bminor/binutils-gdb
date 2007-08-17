@@ -1096,9 +1096,13 @@ parse_number (p, len, parsed_float, putithere)
 	    putithere->typed_val_float.type = 
 	      builtin_type (current_gdbarch)->builtin_long_double;
 	  else
-	    return ERROR;
+	    {
+	      free (s);
+	      return ERROR;
+	    }
 	}
 
+      free (s);
       return FLOAT;
     }
 
