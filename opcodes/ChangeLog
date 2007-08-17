@@ -1,3 +1,7 @@
+2007-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/Make-in: Add --msgid-bugs-address to xgettext invocation.
+
 2007-08-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finish translation.
