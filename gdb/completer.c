@@ -281,7 +281,8 @@ location_completer (char *text, char *word)
       list = make_symbol_completion_list (symbol_start, word);
       /* If text includes characters which cannot appear in a file
 	 name, they cannot be asking for completion on files.  */
-      if (strcspn (text, gdb_completer_file_name_break_characters) == text_len)
+      if (strcspn (text, 
+		   gdb_completer_file_name_break_characters) == text_len)
 	fn_list = make_source_files_completion_list (text, text);
     }
 
@@ -331,7 +332,10 @@ location_completer (char *text, char *word)
       /* No completions at all.  As the final resort, try completing
 	 on the entire text as a symbol.  */
       list = make_symbol_completion_list (orig_text, word);
+      xfree (fn_list);
     }
+  else
+    xfree (fn_list);
 
   return list;
 }

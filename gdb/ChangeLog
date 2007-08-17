@@ -1,5 +1,8 @@
 2007-08-17  Michael Snyder  <msnyder@access-company.com>
 
+	* completer.c (location_completer): Must free 'fn_list', except 
+	in the one case where it is returned (as 'list').
+
 	* varobj.c (value_of_root): Memory leak.
 
 	* gdbtypes.h (virtual_base_list): Remove export decl.
