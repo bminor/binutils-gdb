@@ -450,13 +450,13 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
-  --plugin              Make SPU plugin.\n\
-  --no-overlays         No overlay handling.\n\
-  --emit-stub-syms      Add symbols on overlay call stubs.\n\
-  --extra-overlay-stubs Add stubs on all calls out of overlay regions.\n\
-  --local-store=lo:hi   Valid address range.\n\
-  --stack-analysis      Estimate maximum stack requirement.\n\
-  --emit-stack-syms     Add __stack_func giving stack needed for each func.\n"
+  --plugin                    Make SPU plugin.\n\
+  --no-overlays               No overlay handling.\n\
+  --emit-stub-syms            Add symbols on overlay call stubs.\n\
+  --extra-overlay-stubs       Add stubs on all calls out of overlay regions.\n\
+  --local-store=lo:hi         Valid address range.\n\
+  --stack-analysis            Estimate maximum stack requirement.\n\
+  --emit-stack-syms           Add sym giving stack needed for each func.\n"
 		   ));
 '
 

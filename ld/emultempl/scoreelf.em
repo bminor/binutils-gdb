@@ -56,15 +56,6 @@ score_elf_after_open (void)
 
 EOF
 
-# Define some shell vars to insert bits of code into the standard elf
-# parse_args and list_options functions.
-#
-PARSE_AND_LIST_PROLOGUE=''
-PARSE_AND_LIST_SHORTOPTS=
-PARSE_AND_LIST_LONGOPTS=''
-PARSE_AND_LIST_OPTIONS=''
-PARSE_AND_LIST_ARGS_CASES=''
-
 # We have our own after_open and before_allocation functions, but they call
 # the standard routines, so give them a different name.
 LDEMUL_AFTER_OPEN=score_elf_after_open

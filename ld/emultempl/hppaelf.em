@@ -349,17 +349,18 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
-  --multi-subspace      Generate import and export stubs to support\n\
-                          multiple sub-space shared libraries\n"
+  --multi-subspace            Generate import and export stubs to support\n\
+                                multiple sub-space shared libraries\n"
 		   ));
   fprintf (file, _("\
-  --stub-group-size=N   Maximum size of a group of input sections that can be\n\
-                          handled by one stub section.  A negative value\n\
-                          locates all stubs before their branches (with a\n\
-                          group size of -N), while a positive value allows\n\
-                          two groups of input sections, one before, and one\n\
-                          after each stub section.  Values of +/-1 indicate\n\
-                          the linker should choose suitable defaults.\n"
+  --stub-group-size=N         Maximum size of a group of input sections that\n\
+                                can be handled by one stub section.  A negative\n\
+                                value locates all stubs before their branches\n\
+                                (with a group size of -N), while a positive\n\
+                                value allows two groups of input sections, one\n\
+                                before, and one after each stub section.\n\
+                                Values of +/-1 indicate the linker should\n\
+                                choose suitable defaults.\n"
 		   ));
 '
 

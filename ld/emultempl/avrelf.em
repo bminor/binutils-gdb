@@ -198,30 +198,32 @@ PARSE_AND_LIST_LONGOPTS='
 '
 
 PARSE_AND_LIST_OPTIONS='
-  fprintf (file, _("     --pmem-wrap-around=<val> "
-                           "Make the linker relaxation machine assume that a\n"
-                   "                              "
-                           "program counter wrap-around occures at address\n"
-                   "                              "
-                           "<val>. Supported values are 8k, 16k, 32k and 64k.\n"));
-  fprintf (file, _("     --no-call-ret-replacement "
-                           "The relaxation machine normally will\n"
-                   "                               "
-                           "substitute two immediately following call/ret\n"
-                   "                               "
-                           "instructions by a single jump instruction.\n"
-                   "                               "
-                           "This option disables this optimization.\n"));
-  fprintf (file, _("     --no-stubs "
-                           "If the linker detects to attempt to access\n"
-                   "                               "
-                           "an instruction beyond 128k by a reloc that\n"
-                   "                               "
-                           "is limited to 128k max, it inserts a jump\n"
-                   "                               "
-                           "stub. You can de-active this with this switch.\n"));
-  fprintf (file, _("     --debug-stubs Used for debugging avr-ld.\n"));
-  fprintf (file, _("     --debug-relax Used for debugging avr-ld.\n"));
+  fprintf (file, _("  --pmem-wrap-around=<val>    "
+		   "Make the linker relaxation machine assume that a\n"
+		   "                              "
+		   "  program counter wrap-around occures at address\n"
+		   "                              "
+		   "  <val>.  Supported values: 8k, 16k, 32k and 64k.\n"));
+  fprintf (file, _("  --no-call-ret-replacement   "
+		   "The relaxation machine normally will\n"
+		   "                              "
+		   "  substitute two immediately following call/ret\n"
+		   "                              "
+		   "  instructions by a single jump instruction.\n"
+		   "                              "
+		   "  This option disables this optimization.\n"));
+  fprintf (file, _("  --no-stubs                  "
+		   "If the linker detects to attempt to access\n"
+		   "                              "
+		   "  an instruction beyond 128k by a reloc that\n"
+		   "                              "
+		   "  is limited to 128k max, it inserts a jump\n"
+		   "                              "
+		   "  stub. You can de-active this with this switch.\n"));
+  fprintf (file, _("  --debug-stubs               "
+		   "Used for debugging avr-ld.\n"));
+  fprintf (file, _("  --debug-relax               "
+		   "Used for debugging avr-ld.\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='

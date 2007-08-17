@@ -165,11 +165,11 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
-  --emit-stub-syms      Label linker stubs with a symbol.\n\
-  --no-tls-optimize     Don'\''t try to optimize TLS accesses.\n\
-  --secure-plt          Use new-style PLT if possible.\n\
-  --bss-plt             Force old-style BSS PLT.\n\
-  --sdata-got           Force GOT location just before .sdata.\n"
+  --emit-stub-syms            Label linker stubs with a symbol.\n\
+  --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n\
+  --secure-plt                Use new-style PLT if possible.\n\
+  --bss-plt                   Force old-style BSS PLT.\n\
+  --sdata-got                 Force GOT location just before .sdata.\n"
 		   ));
 '
 

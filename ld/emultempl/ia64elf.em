@@ -49,7 +49,7 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
-  --itanium             Generate code for Intel Itanium processor\n"
+  --itanium                   Generate code for Intel Itanium processor\n"
 		   ));
 '
 

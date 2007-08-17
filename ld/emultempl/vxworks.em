@@ -67,7 +67,7 @@ PARSE_AND_LIST_LONGOPTS=$PARSE_AND_LIST_LONGOPTS'
 
 PARSE_AND_LIST_OPTIONS=$PARSE_AND_LIST_OPTIONS'
   fprintf (file, _("\
-  --force-dynamic       Always create dynamic sections\n"));
+  --force-dynamic             Always create dynamic sections\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES=$PARSE_AND_LIST_ARGS_CASES'

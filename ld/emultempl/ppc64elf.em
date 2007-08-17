@@ -512,41 +512,42 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
-  --stub-group-size=N   Maximum size of a group of input sections that can be\n\
-                          handled by one stub section.  A negative value\n\
-                          locates all stubs before their branches (with a\n\
-                          group size of -N), while a positive value allows\n\
-                          two groups of input sections, one before, and one\n\
-                          after each stub section.  Values of +/-1 indicate\n\
-                          the linker should choose suitable defaults.\n"
+  --stub-group-size=N         Maximum size of a group of input sections that\n\
+                                can be handled by one stub section.  A negative\n\
+                                value locates all stubs before their branches\n\
+                                (with a group size of -N), while a positive\n\
+                                value allows two groups of input sections, one\n\
+                                before, and one after each stub section.\n\
+                                Values of +/-1 indicate the linker should\n\
+                                choose suitable defaults.\n"
 		   ));
   fprintf (file, _("\
-  --emit-stub-syms      Label linker stubs with a symbol.\n"
+  --emit-stub-syms            Label linker stubs with a symbol.\n"
 		   ));
   fprintf (file, _("\
-  --dotsyms             For every version pattern \"foo\" in a version script,\n\
-                          add \".foo\" so that function code symbols are\n\
-                          treated the same as function descriptor symbols.\n\
-                          Defaults to on.\n"
+  --dotsyms                   For every version pattern \"foo\" in a version\n\
+                                script, add \".foo\" so that function code\n\
+                                symbols are treated the same as function\n\
+                                descriptor symbols.  Defaults to on.\n"
 		   ));
   fprintf (file, _("\
-  --no-dotsyms          Don'\''t do anything special in version scripts.\n"
+  --no-dotsyms                Don'\''t do anything special in version scripts.\n"
 		   ));
   fprintf (file, _("\
-  --no-tls-optimize     Don'\''t try to optimize TLS accesses.\n"
+  --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n"
 		   ));
   fprintf (file, _("\
-  --no-opd-optimize     Don'\''t optimize the OPD section.\n"
+  --no-opd-optimize           Don'\''t optimize the OPD section.\n"
 		   ));
   fprintf (file, _("\
-  --no-toc-optimize     Don'\''t optimize the TOC section.\n"
+  --no-toc-optimize           Don'\''t optimize the TOC section.\n"
 		   ));
   fprintf (file, _("\
-  --no-multi-toc        Disallow automatic multiple toc sections.\n"
+  --no-multi-toc              Disallow automatic multiple toc sections.\n"
 		   ));
   fprintf (file, _("\
-  --non-overlapping-opd Canonicalize .opd, so that there are no overlapping\n\
-                          .opd entries.\n"
+  --non-overlapping-opd       Canonicalize .opd, so that there are no\n\
+                                overlapping .opd entries.\n"
 		   ));
 '
 

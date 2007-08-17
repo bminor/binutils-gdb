@@ -1,5 +1,23 @@
 2007-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/alphaelf.em: Format option help.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/avrelf.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/ia64elf.em: Likewise.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/scoreelf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/vxworks.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
+
+2007-08-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldexp.c (exp_get_vma, exp_get_fill): Canonicalise error messages.
 	* lexsup.c (ld_options): Don't use tabs in help text.
 	* emultempl/armcoff.em (gld${EMULATION_NAME}_finish): Fix typo.

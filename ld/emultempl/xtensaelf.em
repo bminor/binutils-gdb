@@ -1999,8 +1999,11 @@ PARSE_AND_LIST_LONGOPTS='
 '
 
 PARSE_AND_LIST_OPTIONS='
-  fprintf (file, _("  --size-opt\t\tWhen relaxing longcalls, prefer size optimization\n\t\t\t  over branch target alignment\n"));
-  fprintf (file, _("  --no-relax\t\tDo not relax branches or coalesce literals\n"));
+  fprintf (file, _("\
+  --size-opt                  When relaxing longcalls, prefer size\n\
+                                optimization over branch target alignment\n"));
+  fprintf (file, _("\
+  --no-relax                  Do not relax branches or coalesce literals\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='

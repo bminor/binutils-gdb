@@ -352,11 +352,11 @@ PARSE_AND_LIST_LONGOPTS='
 '
 
 PARSE_AND_LIST_OPTIONS='
-  fprintf (file, _(""
-"  --no-trampoline         Do not generate the far trampolines used to call\n"
-"                          a far function using 'jsr' or 'bsr'.\n"
-"  --bank-window NAME      Specify the name of the memory region describing\n"
-"                          the layout of the memory bank window.\n"
+  fprintf (file, _(
+"  --no-trampoline             Do not generate the far trampolines used to call\n"
+"                                a far function using 'jsr' or 'bsr'.\n"
+"  --bank-window NAME          Specify the name of the memory region describing\n"
+"                                the layout of the memory bank window.\n"
 		   ));
 '
 

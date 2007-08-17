@@ -70,8 +70,8 @@ gld${EMULATION_NAME}_add_options
 static void
 gld${EMULATION_NAME}_list_options (FILE *file)
 {
-  fprintf (file, _("  --support-old-code   Support interworking with old code\n"));
-  fprintf (file, _("  --thumb-entry=<sym>  Set the entry point to be Thumb symbol <sym>\n"));
+  fprintf (file, _("  --support-old-code          Support interworking with old code\n"));
+  fprintf (file, _("  --thumb-entry=<sym>         Set the entry point to be Thumb symbol <sym>\n"));
 }
 
 static bfd_boolean

@@ -2192,54 +2192,83 @@ fragment <<EOF
 static void
 gld${EMULATION_NAME}_list_options (FILE * file)
 {
-  fprintf (file, _("  --build-id[=STYLE]\tGenerate build ID note\n"));
+  fprintf (file, _("\
+  --build-id[=STYLE]          Generate build ID note\n"));
 EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
-  fprintf (file, _("  -Bgroup\t\tSelects group name lookup rules for DSO\n"));
-  fprintf (file, _("  --disable-new-dtags\tDisable new dynamic tags\n"));
-  fprintf (file, _("  --enable-new-dtags\tEnable new dynamic tags\n"));
-  fprintf (file, _("  --eh-frame-hdr\tCreate .eh_frame_hdr section\n"));
-  fprintf (file, _("  --hash-style=STYLE\tSet hash style to sysv, gnu or both\n"));
-  fprintf (file, _("  -z combreloc\t\tMerge dynamic relocs into one section and sort\n"));
-  fprintf (file, _("  -z defs\t\tReport unresolved symbols in object files.\n"));
-  fprintf (file, _("  -z execstack\t\tMark executable as requiring executable stack\n"));
-  fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at runtime\n"));
-  fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but executable\n"));
-  fprintf (file, _("  -z lazy\t\tMark object lazy runtime binding (default)\n"));
-  fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));
-  fprintf (file, _("  -z muldefs\t\tAllow multiple definitions\n"));
-  fprintf (file, _("  -z nocombreloc\tDon't merge dynamic relocs into one section\n"));
-  fprintf (file, _("  -z nocopyreloc\tDon't create copy relocs\n"));
-  fprintf (file, _("  -z nodefaultlib\tMark object not to use default search paths\n"));
-  fprintf (file, _("  -z nodelete\t\tMark DSO non-deletable at runtime\n"));
-  fprintf (file, _("  -z nodlopen\t\tMark DSO not available to dlopen\n"));
-  fprintf (file, _("  -z nodump\t\tMark DSO not available to dldump\n"));
-  fprintf (file, _("  -z noexecstack\tMark executable as not requiring executable stack\n"));
+  fprintf (file, _("\
+  -Bgroup                     Selects group name lookup rules for DSO\n"));
+  fprintf (file, _("\
+  --disable-new-dtags         Disable new dynamic tags\n"));
+  fprintf (file, _("\
+  --enable-new-dtags          Enable new dynamic tags\n"));
+  fprintf (file, _("\
+  --eh-frame-hdr              Create .eh_frame_hdr section\n"));
+  fprintf (file, _("\
+  --hash-style=STYLE          Set hash style to sysv, gnu or both\n"));
+  fprintf (file, _("\
+  -z combreloc                Merge dynamic relocs into one section and sort\n"));
+  fprintf (file, _("\
+  -z defs                     Report unresolved symbols in object files.\n"));
+  fprintf (file, _("\
+  -z execstack                Mark executable as requiring executable stack\n"));
+  fprintf (file, _("\
+  -z initfirst                Mark DSO to be initialized first at runtime\n"));
+  fprintf (file, _("\
+  -z interpose                Mark object to interpose all DSOs but executable\n"));
+  fprintf (file, _("\
+  -z lazy                     Mark object lazy runtime binding (default)\n"));
+  fprintf (file, _("\
+  -z loadfltr                 Mark object requiring immediate process\n"));
+  fprintf (file, _("\
+  -z muldefs                  Allow multiple definitions\n"));
+  fprintf (file, _("\
+  -z nocombreloc              Don't merge dynamic relocs into one section\n"));
+  fprintf (file, _("\
+  -z nocopyreloc              Don't create copy relocs\n"));
+  fprintf (file, _("\
+  -z nodefaultlib             Mark object not to use default search paths\n"));
+  fprintf (file, _("\
+  -z nodelete                 Mark DSO non-deletable at runtime\n"));
+  fprintf (file, _("\
+  -z nodlopen                 Mark DSO not available to dlopen\n"));
+  fprintf (file, _("\
+  -z nodump                   Mark DSO not available to dldump\n"));
+  fprintf (file, _("\
+  -z noexecstack              Mark executable as not requiring executable stack\n"));
 EOF
 
   if test -n "$COMMONPAGESIZE"; then
 fragment <<EOF
-  fprintf (file, _("  -z norelro\t\tDon't create RELRO program header\n"));
+  fprintf (file, _("\
+  -z norelro                  Don't create RELRO program header\n"));
 EOF
   fi
 
 fragment <<EOF
-  fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
-  fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n\t\t\t  at runtime\n"));
+  fprintf (file, _("\
+  -z now                      Mark object non-lazy runtime binding\n"));
+  fprintf (file, _("\
+  -z origin                   Mark object requiring immediate \$ORIGIN\n\
+                                processing at runtime\n"));
 EOF
 
   if test -n "$COMMONPAGESIZE"; then
 fragment <<EOF
-  fprintf (file, _("  -z relro\t\tCreate RELRO program header\n"));
+  fprintf (file, _("\
+  -z relro                    Create RELRO program header\n"));
 EOF
   fi
 
 fragment <<EOF
-  fprintf (file, _("  -z max-page-size=SIZE\tSet maximum page size to SIZE\n"));
-  fprintf (file, _("  -z common-page-size=SIZE\n\t\t\tSet common page size to SIZE\n"));
-  fprintf (file, _("  -z KEYWORD\t\tIgnored for Solaris compatibility\n"));
+  fprintf (file, _("\
+  -z max-page-size=SIZE       Set maximum page size to SIZE\n"));
+  fprintf (file, _("\
+  -z common-page-size=SIZE    Set common page size to SIZE\n"));
+  fprintf (file, _("\
+  -z KEYWORD                  Ignored for Solaris compatibility\n"));
 EOF
 fi
 

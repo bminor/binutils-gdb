@@ -123,11 +123,11 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
-  --taso		Load executable in the lower 31-bit addressable\n\
-			virtual address range.\n\
-  --no-relax		Do not relax call and gp sequences.\n\
-  --secureplt		Force PLT in text segment.\n\
-  --no-secureplt	Force PLT in data segment.\n\
+  --taso                      Load executable in the lower 31-bit addressable\n\
+                                virtual address range.\n\
+  --no-relax                  Do not relax call and gp sequences.\n\
+  --secureplt                 Force PLT in text segment.\n\
+  --no-secureplt              Force PLT in data segment.\n\
 "));
 '
 
