@@ -1,3 +1,24 @@
+2007-08-17  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.c (ARG_NOF, ARG_1ST, PS_WOE, PS_EXC, C0_MAXOPDS)
+	(C0_NREGS, C0_CLESV, C0_SP, C0_FP, C0_RA, C0_ARGS, C0_NARGS)
+	(C0_CONST, C0_INEXP, C0_NOSTK): New macros.
+	(xtensa_read_register): New function.
+	(xtensa_windowed_frame_cache, xtensa_call0_frame_cache, xtensa_c0reg)
+	(xtensa_insn_kind): New types.
+	(xtensa_frame_cache, xtensa_alloc_frame_cache, xtensa_frame_cache)
+	(xtensa_frame_prev_register, xtensa_return_value, xtensa_skip_prologue)
+	(xtensa_verify_config, xtensa_pseudo_register_read)
+	(xtensa_pseudo_register_write, xtensa_extract_return_value)
+	(xtensa_store_return_value)
+	(xtensa_push_dummy_call): Extended to support Xtensa Call0 ABI.
+	(windowing_enabled, extract_call_winsize, xtensa_unwind_dummy_id)
+	(xtensa_frame_this_id, xtensa_frame_prev_register)
+	(xtensa_register_type, xtensa_reg_to_regnum): Cosmetic changes.
+	(call0_frame_cache, call0_frame_get_reg_at_entry)
+	(call0_classify_opcode, call0_track_op)
+	(call0_analyze_prologue, call0_frame_cache): New functions.
+
 2007-08-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* breakpoint.c (bpstat_free): New.
