@@ -1325,7 +1325,7 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_sparc_vec sunos_big_vec"
     targ_underscore=yes
     ;;
-  sparc-*-linux-*)
+  sparc-*-linux-* | sparcv*-*-linux-*)
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs="sparclinux_vec bfd_elf64_sparc_vec sunos_big_vec"
     ;;
@@ -1374,7 +1374,7 @@ case "${targ}" in
     targ_underscore=yes
     want64=true
     ;;
-  sparc64-*-linux-*)
+  sparc64*-*-linux-*)
     targ_defvec=bfd_elf64_sparc_vec
     targ_selvecs="bfd_elf32_sparc_vec sparclinux_vec sunos_big_vec"
     want64=true

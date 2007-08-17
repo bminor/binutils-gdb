@@ -3,7 +3,7 @@
 #as: --32
 #ld: -shared -melf32_sparc
 #readelf: -WSsrl
-#target: sparc-*-*
+#target: sparc*-*-*
 
 .*
 

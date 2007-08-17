@@ -3,7 +3,7 @@
 #as: --32
 #ld: -shared -melf32_sparc
 #objdump: -sj.got
-#target: sparc-*-*
+#target: sparc*-*-*
 
 .*:     file format elf32-sparc
 

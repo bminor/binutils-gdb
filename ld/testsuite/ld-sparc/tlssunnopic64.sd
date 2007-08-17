@@ -3,7 +3,7 @@
 #as: --64 -Av9
 #ld: -shared -melf64_sparc
 #objdump: -sj.got
-#target: sparc-*-*
+#target: sparc*-*-*
 
 .*:     file format elf64-sparc
 

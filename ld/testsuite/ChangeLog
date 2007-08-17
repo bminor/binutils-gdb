@@ -1,3 +1,12 @@
+2007-08-17  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-sparc/tlssunnopic32.dd: Fix up #target.
+	* ld-sparc/tlssunnopic32.rd: Likewise.
+	* ld-sparc/tlssunnopic32.sd: Likewise.
+	* ld-sparc/tlssunnopic64.dd: Likewise.
+	* ld-sparc/tlssunnopic64.rd: Likewise.
+	* ld-sparc/tlssunnopic64.sd: Likewise.
+
 2007-08-17  Richard Sandiford  <richard@codesourcery.com>
 
 	* lib/ld-lib.exp (run_dump_test): Allow [big_or_little_endian]

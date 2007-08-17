@@ -221,11 +221,11 @@ sparc64-*-solaris2* | sparcv9-*-solaris2*)
   HOSTING_LIBS="$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} -print-file-name=crtend.o; fi` `if [ -f ../gcc/crtn.o ]; then echo ../gcc/crtn.o; else ${CC} -print-file-name=crtn.o; fi`'
   ;;
 
-sparc-*-linux-*)
+sparc-*-linux-* | sparcv*-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib/ld-linux.so.2,"`
   ;;
 
-sparc64-*-linux-*)
+sparc64*-*-linux-*)
   HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,\\\`specs.*\"\\\`,/lib64/ld-linux.so.2,"`
   ;;
 
