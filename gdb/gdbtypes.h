@@ -1346,8 +1346,6 @@ extern int has_vtable (struct type *);
 
 extern struct type *primary_base_class (struct type *);
 
-extern struct type **virtual_base_list (struct type *);
-
 extern int virtual_base_list_length (struct type *);
 extern int virtual_base_list_length_skip_primaries (struct type *);
 

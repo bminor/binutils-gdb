@@ -2024,7 +2024,7 @@ virtual_base_list_aux (struct type *dclass)
    This routine merely hands off the argument to virtual_base_list_aux()
    and then copies the result into an array to save space.  */
 
-struct type **
+static struct type **
 virtual_base_list (struct type *dclass)
 {
   struct vbase *tmp_vbase;
@@ -2112,7 +2112,6 @@ virtual_base_list_length_skip_primaries (struct type *dclass)
   return i;
 }
 
-
 /* Return the index (position) of type BASE, which is a virtual base
    class of DCLASS, in the latter's virtual base list.  A return of -1
    indicates "not found" or a problem.  */
@@ -2120,26 +2119,23 @@ virtual_base_list_length_skip_primaries (struct type *dclass)
 int
 virtual_base_index (struct type *base, struct type *dclass)
 {
-  struct type *vbase;
+  struct type *vbase, **vbase_list;
   int i;
 
   if ((TYPE_CODE (dclass) != TYPE_CODE_CLASS) 
       || (TYPE_CODE (base) != TYPE_CODE_CLASS))
     return -1;
 
-  i = 0;
-  vbase = virtual_base_list (dclass)[0];
-  while (vbase)
-    {
-      if (vbase == base)
-	break;
-      vbase = virtual_base_list (dclass)[++i];
-    }
+  vbase_list = virtual_base_list (dclass);
+  for (i = 0, vbase = vbase_list[0];
+       vbase != NULL;
+       vbase = vbase_list[++i])
+    if (vbase == base)
+      break;
 
+  xfree (vbase_list);
   return vbase ? i : -1;
 }
-
-
 
 /* Return the index (position) of type BASE, which is a virtual base
    class of DCLASS, in the latter's virtual base list.  Skip over all
@@ -2151,7 +2147,7 @@ int
 virtual_base_index_skip_primaries (struct type *base, 
 				   struct type *dclass)
 {
-  struct type *vbase;
+  struct type *vbase, **vbase_list;
   int i, j;
   struct type *primary;
 
@@ -2161,19 +2157,18 @@ virtual_base_index_skip_primaries (struct type *base,
 
   primary = TYPE_RUNTIME_PTR (dclass) ? TYPE_PRIMARY_BASE (dclass) : NULL;
 
-  j = -1;
-  i = 0;
-  vbase = virtual_base_list (dclass)[0];
-  while (vbase)
+  vbase_list = virtual_base_list (dclass);
+  for (i = 0, j = -1, vbase = vbase_list[0];
+       vbase != NULL;
+       vbase = vbase_list[++i])
     {
       if (!primary 
 	  || (virtual_base_index_skip_primaries (vbase, primary) < 0))
 	j++;
       if (vbase == base)
 	break;
-      vbase = virtual_base_list (dclass)[++i];
     }
-
+  xfree (vbase_list);
   return vbase ? j : -1;
 }
 
