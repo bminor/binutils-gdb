@@ -1052,7 +1052,7 @@ exp_get_vma (etree_type *tree, bfd_vma def, char *name)
       if (expld.result.valid_p)
 	return expld.result.value;
       else if (name != NULL && expld.phase != lang_mark_phase_enum)
-	einfo (_("%F%S nonconstant expression for %s\n"), name);
+	einfo (_("%F%S: nonconstant expression for %s\n"), name);
     }
   return def;
 }
@@ -1077,7 +1077,7 @@ exp_get_fill (etree_type *tree, fill_type *def, char *name)
   if (!expld.result.valid_p)
     {
       if (name != NULL && expld.phase != lang_mark_phase_enum)
-	einfo (_("%F%S nonconstant expression for %s\n"), name);
+	einfo (_("%F%S: nonconstant expression for %s\n"), name);
       return def;
     }
 

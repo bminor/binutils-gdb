@@ -327,10 +327,12 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"add-needed", no_argument, NULL, OPTION_ADD_NEEDED},
     '\0', NULL, N_("Set DT_NEEDED tags for DT_NEEDED entries in\n"
-		   "\t\t\t\tfollowing dynamic libs"), TWO_DASHES },
+		   "                                following dynamic libs"),
+    TWO_DASHES },
   { {"no-add-needed", no_argument, NULL, OPTION_NO_ADD_NEEDED},
     '\0', NULL, N_("Do not set DT_NEEDED tags for DT_NEEDED entries\n"
-		   "\t\t\t\tin following dynamic libs"), TWO_DASHES },
+		   "                                in following dynamic libs"),
+    TWO_DASHES },
   { {"as-needed", no_argument, NULL, OPTION_AS_NEEDED},
     '\0', NULL, N_("Only set DT_NEEDED for following dynamic libs if used"),
     TWO_DASHES },
@@ -442,7 +444,8 @@ static const struct ld_option ld_options[] =
     '\0', NULL, NULL, NO_HELP },
   { {"nostdlib", no_argument, NULL, OPTION_NOSTDLIB},
     '\0', NULL, N_("Only use library directories specified on\n"
-		   "\t\t\t\tthe command line"), ONE_DASH },
+		   "                                the command line"),
+    ONE_DASH },
   { {"oformat", required_argument, NULL, OPTION_OFORMAT},
     '\0', N_("TARGET"), N_("Specify target of output file"),
     EXACTLY_TWO_DASHES },
@@ -506,8 +509,9 @@ static const struct ld_option ld_options[] =
   { {"unresolved-symbols=<method>", required_argument, NULL,
      OPTION_UNRESOLVED_SYMBOLS},
     '\0', NULL, N_("How to handle unresolved symbols.  <method> is:\n"
-		   "\t\t\t\tignore-all, report-all, ignore-in-object-files,\n"
-		   "\t\t\t\tignore-in-shared-libs"), TWO_DASHES },
+		   "                                ignore-all, report-all, ignore-in-object-files,\n"
+		   "                                ignore-in-shared-libs"),
+    TWO_DASHES },
   { {"verbose", no_argument, NULL, OPTION_VERBOSE},
     '\0', NULL, N_("Output lots of information during link"), TWO_DASHES },
   { {"dll-verbose", no_argument, NULL, OPTION_VERBOSE}, /* Linux.  */
@@ -517,7 +521,8 @@ static const struct ld_option ld_options[] =
   { {"version-exports-section", required_argument, NULL,
      OPTION_VERSION_EXPORTS_SECTION },
     '\0', N_("SYMBOL"), N_("Take export symbols list from .exports, using\n"
-			   "\t\t\t\tSYMBOL as the version."), TWO_DASHES },
+			   "                                SYMBOL as the version."),
+    TWO_DASHES },
   { {"dynamic-list-data", no_argument, NULL, OPTION_DYNAMIC_LIST_DATA},
     '\0', NULL, N_("Add data symbols to dynamic list"), TWO_DASHES },
   { {"dynamic-list-cpp-new", no_argument, NULL, OPTION_DYNAMIC_LIST_CPP_NEW},

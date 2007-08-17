@@ -1533,7 +1533,7 @@ gld_${EMULATION_NAME}_finish (void)
 	  entry_symbol.name = buffer;
 	}
       else
-	einfo (_("%P: warning: connot find thumb start symbol %s\n"), thumb_entry_symbol);
+	einfo (_("%P: warning: cannot find thumb start symbol %s\n"), thumb_entry_symbol);
     }
 #endif /* defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) || defined(TARGET_IS_arm_wince_pe) */
 

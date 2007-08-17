@@ -1,5 +1,12 @@
 2007-08-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldexp.c (exp_get_vma, exp_get_fill): Canonicalise error messages.
+	* lexsup.c (ld_options): Don't use tabs in help text.
+	* emultempl/armcoff.em (gld${EMULATION_NAME}_finish): Fix typo.
+	* emultempl/pe.em (gld${EMULATION_NAME}_finish): Fix typo.
+
+2007-08-17  Alan Modra  <amodra@bigpond.net.au>
+
 	* po/Make-in: Add --msgid-bugs-address to xgettext invocation.
 
 2007-08-15  Alan Modra  <amodra@bigpond.net.au>
