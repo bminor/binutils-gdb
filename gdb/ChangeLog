@@ -1,3 +1,11 @@
+2007-08-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* breakpoint.c (bpstat_free): New.
+	(bpstat_clear): Use bpstat_free.
+	(delete_breakpoint): Document why we cannot
+	remove bpstats from stop_bpstat.
+	* breakpoint.h (bpstat_free): Declare.
+		
 2007-08-16  Michael Snyder  <msnyder@access-company.com>
 
         * event-loop.c (gdb_wait_for_event): Move statement into "if" block.

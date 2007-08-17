@@ -430,9 +430,12 @@ struct breakpoint
 
 typedef struct bpstats *bpstat;
 
-/* Interface:  */
-/* Clear a bpstat so that it says we are not at any breakpoint.
-   Also free any storage that is part of a bpstat.  */
+/* Frees any storage that is part of a bpstat.
+   Does not walk the 'next' chain.  */
+extern void bpstat_free (bpstat);
+
+/* Clears a chain of bpstat, freeing storage
+   of each.  */
 extern void bpstat_clear (bpstat *);
 
 /* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that

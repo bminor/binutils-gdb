@@ -1897,6 +1897,15 @@ ep_is_exception_catchpoint (struct breakpoint *ep)
     || (ep->type == bp_catch_throw);
 }
 
+void 
+bpstat_free (bpstat bs)
+{
+  if (bs->old_val != NULL)
+    value_free (bs->old_val);
+  free_command_lines (&bs->commands);
+  xfree (bs);
+}
+
 /* Clear a bpstat so that it says we are not at any breakpoint.
    Also free any storage that is part of a bpstat.  */
 
@@ -1912,10 +1921,7 @@ bpstat_clear (bpstat *bsp)
   while (p != NULL)
     {
       q = p->next;
-      if (p->old_val != NULL)
-	value_free (p->old_val);
-      free_command_lines (&p->commands);
-      xfree (p);
+      bpstat_free (p);
       p = q;
     }
   *bsp = NULL;
@@ -7051,7 +7057,13 @@ delete_breakpoint (struct breakpoint *bpt)
 
   /* Be sure no bpstat's are pointing at it after it's been freed.  */
   /* FIXME, how can we find all bpstat's?
-     We just check stop_bpstat for now.  */
+     We just check stop_bpstat for now.  Note that we cannot just
+     remove bpstats pointing at bpt from the stop_bpstat list
+     entirely, as breakpoint commands are associated with the bpstat;
+     if we remove it here, then the later call to
+         bpstat_do_actions (&stop_bpstat);
+     in event-top.c won't do anything, and temporary breakpoints
+     with commands won't work.  */
   for (bs = stop_bpstat; bs; bs = bs->next)
     if (bs->breakpoint_at == bpt)
       {
