@@ -1,3 +1,9 @@
+2007-08-17  Richard Sandiford  <richard@codesourcery.com>
+
+	* lib/ld-lib.exp (run_dump_test): Allow [big_or_little_endian]
+	to appear in assembler and linker options.
+	* ld-mips-elf/vxworks1-static.d (ld): Add [big_or_little_endian].
+
 2007-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-srec/srec.exp: Always pass "-G 0".  Remove all powerpc

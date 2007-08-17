@@ -708,6 +708,10 @@ proc run_dump_test { name } {
 	}
 	set opts($opt_name) [concat $opts($opt_name) $opt_val]
     }
+    foreach opt { as ld } {
+	regsub {\[big_or_little_endian\]} $opts($opt) \
+	    [big_or_little_endian] opts($opt)
+    }
 
     # Decide early whether we should run the test for this target.
     if { [llength $opts(target)] > 0 } {
