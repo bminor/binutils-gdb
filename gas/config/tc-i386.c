@@ -4575,6 +4575,17 @@ x86_cons (expressionS *exp, int size)
 				+ (input_line_pointer - gotfree_input_line)
 				+ adjust);
 	  free (gotfree_input_line);
+	  if (exp->X_op == O_constant
+	      || exp->X_op == O_absent
+	      || exp->X_op == O_illegal
+	      || exp->X_op == O_register
+	      || exp->X_op == O_big)
+	    {
+	      char c = *input_line_pointer;
+	      *input_line_pointer = 0;
+	      as_bad (_("missing or invalid expression `%s'"), save);
+	      *input_line_pointer = c;
+	    }
 	}
     }
   else
@@ -4651,15 +4662,16 @@ i386_immediate (char *imm_start)
   if (gotfree_input_line)
     free (gotfree_input_line);
 
-  if (exp->X_op == O_absent || exp->X_op == O_big)
+  if (exp->X_op == O_absent
+      || exp->X_op == O_illegal
+      || exp->X_op == O_big
+      || (gotfree_input_line
+	  && (exp->X_op == O_constant
+	      || exp->X_op == O_register)))
     {
-      /* Missing or bad expr becomes absolute 0.  */
-      as_bad (_("missing or invalid immediate expression `%s' taken as 0"),
+      as_bad (_("missing or invalid immediate expression `%s'"),
 	      imm_start);
-      exp->X_op = O_constant;
-      exp->X_add_number = 0;
-      exp->X_add_symbol = (symbolS *) 0;
-      exp->X_op_symbol = (symbolS *) 0;
+      return 0;
     }
   else if (exp->X_op == O_constant)
     {
@@ -4758,6 +4770,7 @@ i386_displacement (char *disp_start, char *disp_end)
   char *gotfree_input_line;
   int bigdisp, override;
   unsigned int types = Disp;
+  int ret;
 
   if (i.disp_operands == MAX_MEMORY_OPERANDS)
     {
@@ -4866,10 +4879,10 @@ i386_displacement (char *disp_start, char *disp_end)
 #if GCC_ASM_O_HACK
   RESTORE_END_STRING (disp_end + 1);
 #endif
-  RESTORE_END_STRING (disp_end);
   input_line_pointer = save_input_line_pointer;
   if (gotfree_input_line)
     free (gotfree_input_line);
+  ret = 1;
 
   /* We do this to make sure that the section symbol is in
      the symbol table.  We will ultimately change the relocation
@@ -4879,13 +4892,7 @@ i386_displacement (char *disp_start, char *disp_end)
       || i.reloc[this_operand] == BFD_RELOC_X86_64_GOTOFF64)
     {
       if (exp->X_op != O_symbol)
-	{
-	  as_bad (_("bad expression used with @%s"),
-		  (i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL
-		   ? "GOTPCREL"
-		   : "GOTOFF"));
-	  return 0;
-	}
+	goto inv_disp;
 
       if (S_IS_LOCAL (exp->X_add_symbol)
 	  && S_GET_SEGMENT (exp->X_add_symbol) != undefined_section)
@@ -4900,36 +4907,40 @@ i386_displacement (char *disp_start, char *disp_end)
 	i.reloc[this_operand] = BFD_RELOC_32;
     }
 
-  if (exp->X_op == O_absent || exp->X_op == O_big)
+  else if (exp->X_op == O_absent
+	   || exp->X_op == O_illegal
+	   || exp->X_op == O_big
+	   || (gotfree_input_line
+	       && (exp->X_op == O_constant
+		   || exp->X_op == O_register)))
     {
-      /* Missing or bad expr becomes absolute 0.  */
-      as_bad (_("missing or invalid displacement expression `%s' taken as 0"),
+    inv_disp:
+      as_bad (_("missing or invalid displacement expression `%s'"),
 	      disp_start);
-      exp->X_op = O_constant;
-      exp->X_add_number = 0;
-      exp->X_add_symbol = (symbolS *) 0;
-      exp->X_op_symbol = (symbolS *) 0;
+      ret = 0;
     }
 
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
-  if (exp->X_op != O_constant
-      && OUTPUT_FLAVOR == bfd_target_aout_flavour
-      && exp_seg != absolute_section
-      && exp_seg != text_section
-      && exp_seg != data_section
-      && exp_seg != bss_section
-      && exp_seg != undefined_section
-      && !bfd_is_com_section (exp_seg))
+  else if (exp->X_op != O_constant
+	   && OUTPUT_FLAVOR == bfd_target_aout_flavour
+	   && exp_seg != absolute_section
+	   && exp_seg != text_section
+	   && exp_seg != data_section
+	   && exp_seg != bss_section
+	   && exp_seg != undefined_section
+	   && !bfd_is_com_section (exp_seg))
     {
       as_bad (_("unimplemented segment %s in operand"), exp_seg->name);
-      return 0;
+      ret = 0;
     }
 #endif
+
+  RESTORE_END_STRING (disp_end);
 
   if (!(i.types[this_operand] & ~Disp))
     i.types[this_operand] &= types;
 
-  return 1;
+  return ret;
 }
 
 /* Make sure the memory operand we've been dealt is valid.
