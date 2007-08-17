@@ -96,12 +96,14 @@ $(srcdir)/$(PACKAGE).pot: $(SRC-POTFILES) $(BLD-POTFILES)
 	$(XGETTEXT) --default-domain=$(PACKAGE) \
 	  --directory=$(top_srcdir) \
 	  --add-comments --keyword=_ --keyword=N_ \
+	  --msgid-bugs-address=bug-binutils@gnu.org \
 	  --files-from=$(srcdir)/SRC-POTFILES.in 
 	$(XGETTEXT) --default-domain=$(PACKAGE) \
 	  --directory=.. \
 	  --directory=. \
 	  --add-comments --keyword=_ --keyword=N_ \
 	  --join-existing \
+	  --msgid-bugs-address=bug-binutils@gnu.org \
 	  --files-from=$(srcdir)/BLD-POTFILES.in
 	rm -f $(srcdir)/$(PACKAGE).pot
 	mv $(PACKAGE).po $(srcdir)/$(PACKAGE).pot
