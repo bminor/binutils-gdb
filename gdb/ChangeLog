@@ -1,5 +1,7 @@
 2007-08-17  Michael Snyder  <msnyder@access-company.com>
 
+	* varobj.c (value_of_root): Memory leak.
+
 	* gdbtypes.h (virtual_base_list): Remove export decl.
 	* gdbtypes.c (virtual_base_list): Make static.  Not called outside.
 	(virtual_base_index): Memory leak.

@@ -1741,6 +1741,8 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	  var = *var_handle;
 	  *type_changed = 1;
 	}
+      xfree (old_type);
+      xfree (new_type);
     }
   else
     {
