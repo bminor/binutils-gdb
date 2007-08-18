@@ -283,15 +283,12 @@ dbx_lookup_type (int typenums[2])
 
       if (real_filenum >= N_HEADER_FILES (current_objfile))
 	{
-	  struct type *temp_type;
-	  struct type **temp_type_p;
+	  static struct type **temp_type_p;
 
 	  warning (_("GDB internal error: bad real_filenum"));
 
 	error_return:
-	  temp_type = init_type (TYPE_CODE_ERROR, 0, 0, NULL, NULL);
-	  temp_type_p = (struct type **) xmalloc (sizeof (struct type *));
-	  *temp_type_p = temp_type;
+	  temp_type_p = &builtin_type_error;
 	  return temp_type_p;
 	}
 

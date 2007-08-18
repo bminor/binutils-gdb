@@ -1,5 +1,7 @@
 2007-08-18  Michael Snyder  <msnyder@svkmacdonelllnx>
 
+	* stabsread.c (dbx_lookup_type): Memory leak.
+
 	* event-loop.c (delete_async_signal_handler): Move pointer null
 	test to before pointer dereference.
 
