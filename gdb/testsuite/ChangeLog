@@ -1,5 +1,11 @@
 2007-08-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/step-line.c: Switch license to GPL version 3, and
+	update copyright year.
+	* gdb.base/step-line.inp: Likewise.
+
+2007-08-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/gdb1555.exp: Make expected output immune to formatting
 	changes inside gdb1555.c.
 	* gdb.base/pending.exp: Likewise.
