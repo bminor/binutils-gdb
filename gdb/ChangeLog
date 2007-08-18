@@ -1,5 +1,8 @@
 2007-08-18  Michael Snyder  <msnyder@svkmacdonelllnx>
 
+	* event-loop.c (delete_async_signal_handler): Move pointer null
+	test to before pointer dereference.
+
 	* ui-out.c (append_header_to_list): Possible cut and paste error.
 
 	* MAINTAINERS: white space tweak.

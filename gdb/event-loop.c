@@ -950,7 +950,7 @@ delete_async_signal_handler (async_signal_handler ** async_handler_ptr)
   else
     {
       prev_ptr = sighandler_list.first_handler;
-      while (prev_ptr->next_handler != (*async_handler_ptr) && prev_ptr)
+      while (prev_ptr && prev_ptr->next_handler != (*async_handler_ptr))
 	prev_ptr = prev_ptr->next_handler;
       prev_ptr->next_handler = (*async_handler_ptr)->next_handler;
       if (sighandler_list.last_handler == (*async_handler_ptr))
