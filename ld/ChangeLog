@@ -1,3 +1,7 @@
+2007-08-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo (Input Section Basics): Correct EXCLUDE_FILE example.
+
 2007-08-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* configure.host: Handle sparcv*-*-linux-* the same as
