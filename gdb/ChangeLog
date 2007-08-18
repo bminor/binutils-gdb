@@ -1,5 +1,8 @@
 2007-08-17  Michael Snyder  <msnyder@access-company.com>
 
+	* completer.c (filename_completer): Avoid memory leak.
+	Remove unnecessary nested block.
+
 	* c-exp.y (parse_number): Memory leak.
 
 	* completer.c (location_completer): Must free 'fn_list', except 

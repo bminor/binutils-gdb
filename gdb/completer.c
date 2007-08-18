@@ -129,7 +129,7 @@ filename_completer (char *text, char *word)
   subsequent_name = 0;
   while (1)
     {
-      char *p;
+      char *p, *q;
       p = rl_filename_completion_function (text, subsequent_name);
       if (return_val_used >= return_val_alloced)
 	{
@@ -151,32 +151,32 @@ filename_completer (char *text, char *word)
       /* Like emacs, don't complete on old versions.  Especially useful
          in the "source" command.  */
       if (p[strlen (p) - 1] == '~')
-	continue;
+	{
+	  xfree (p);
+	  continue;
+	}
 
-      {
-	char *q;
-	if (word == text)
-	  /* Return exactly p.  */
-	  return_val[return_val_used++] = p;
-	else if (word > text)
-	  {
-	    /* Return some portion of p.  */
-	    q = xmalloc (strlen (p) + 5);
-	    strcpy (q, p + (word - text));
-	    return_val[return_val_used++] = q;
-	    xfree (p);
-	  }
-	else
-	  {
-	    /* Return some of TEXT plus p.  */
-	    q = xmalloc (strlen (p) + (text - word) + 5);
-	    strncpy (q, word, text - word);
-	    q[text - word] = '\0';
-	    strcat (q, p);
-	    return_val[return_val_used++] = q;
-	    xfree (p);
-	  }
-      }
+      if (word == text)
+	/* Return exactly p.  */
+	return_val[return_val_used++] = p;
+      else if (word > text)
+	{
+	  /* Return some portion of p.  */
+	  q = xmalloc (strlen (p) + 5);
+	  strcpy (q, p + (word - text));
+	  return_val[return_val_used++] = q;
+	  xfree (p);
+	}
+      else
+	{
+	  /* Return some of TEXT plus p.  */
+	  q = xmalloc (strlen (p) + (text - word) + 5);
+	  strncpy (q, word, text - word);
+	  q[text - word] = '\0';
+	  strcat (q, p);
+	  return_val[return_val_used++] = q;
+	  xfree (p);
+	}
     }
 #if 0
   /* There is no way to do this just long enough to affect quote inserting
