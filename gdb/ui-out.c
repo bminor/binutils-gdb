@@ -1036,15 +1036,20 @@ append_header_to_list (struct ui_out *uiout,
   temphdr = XMALLOC (struct ui_out_hdr);
   temphdr->width = width;
   temphdr->alignment = alignment;
-  /* we have to copy the column title as the original may be an automatic */
+  /* We have to copy the column title as the original may be an
+     automatic.  */
   if (colhdr != NULL)
     temphdr->colhdr = xstrdup (colhdr);
   else
     temphdr->colhdr = NULL;
+
   if (col_name != NULL)
+    temphdr->col_name = xstrdup (col_name);
+  else if (colhdr != NULL)
     temphdr->col_name = xstrdup (colhdr);
   else
-    temphdr->col_name = xstrdup (colhdr);
+    temphdr->col_name = NULL;
+
   temphdr->next = NULL;
   if (uiout->table.header_first == NULL)
     {
