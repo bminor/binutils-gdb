@@ -66,7 +66,7 @@ if ![runto_main] then {
 set name "Step into shared lib function"
 gdb_test_multiple "s" $name \
 {
-    -re "hithere2 \\(\\) at.*${libfile}.c:25\r\n25.*a = 21;.*$gdb_prompt $"  {
+    -re "hithere2 \\(\\) at.*${libfile}.c:\[0-9\]+\r\n\[0-9\]+.*a = 21;.*$gdb_prompt $"  {
 	pass $name
     }
     -re "0x\[0-9a-f\]+ in .* \\(\\) from /lib/ld.so.1.*$gdb_prompt $" { 
@@ -78,7 +78,7 @@ gdb_test_multiple "s" $name \
 set name "Next while in a shared lib function"
 gdb_test_multiple "n" $name \
 {
-    -re "26.*return a;.*$gdb_prompt $" {
+    -re "\[0-9\]+.*return a;.*$gdb_prompt $" {
 	pass $name
     }
     -re "Single stepping until exit from function .*, \r\nwhich has no line number information.\r\n\r\nProgram exited normally.*$gdb_prompt $" { 
