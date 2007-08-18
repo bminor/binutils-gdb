@@ -1,3 +1,7 @@
+2007-08-18  Michael Snyder  <msnyder@svkmacdonelllnx>
+
+	* MAINTAINERS: white space tweak.
+
 2007-08-17  Michael Snyder  <msnyder@access-company.com>
 
 	* stack.c (print_frame): Memory leak.
