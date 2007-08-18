@@ -3327,7 +3327,7 @@ of files from matching the file name wildcard, EXCLUDE_FILE may be used to
 match all files except the ones specified in the EXCLUDE_FILE list.  For
 example:
 @smallexample
-(*(EXCLUDE_FILE (*crtend.o *otherfile.o) .ctors))
+*(EXCLUDE_FILE (*crtend.o *otherfile.o) .ctors)
 @end smallexample
 will cause all .ctors sections from all files except @file{crtend.o} and
 @file{otherfile.o} to be included.
