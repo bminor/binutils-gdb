@@ -582,6 +582,8 @@ print_frame (struct frame_info *frame, int print_level,
 		   the symbol table. That'll have parameters, but
 		   that's preferable to displaying a mangled name.  */
 		funname = SYMBOL_PRINT_NAME (func);
+	      else
+		xfree (demangled);
 	    }
 	}
     }
@@ -882,6 +884,8 @@ frame_info (char *addr_exp, int from_tty)
 	     preferable to displaying a mangled name.  */
 	  if (demangled == NULL)
 	    funname = SYMBOL_PRINT_NAME (func);
+	  else
+	    xfree (demangled);
 	}
     }
   else

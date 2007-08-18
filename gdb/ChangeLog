@@ -1,5 +1,7 @@
 2007-08-17  Michael Snyder  <msnyder@access-company.com>
 
+	* stack.c (print_frame): Memory leak.
+
 	* completer.c (filename_completer): Avoid memory leak.
 	Remove unnecessary nested block.
 
