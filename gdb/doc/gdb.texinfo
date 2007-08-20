@@ -24423,8 +24423,7 @@ The @code{F} reply packet has the following format:
 
 @table @samp
 
-@item F@var{retcode},@var{errno},@var{Ctrl-C flag};@var{call-specific
-attachment}
+@item F@var{retcode},@var{errno},@var{Ctrl-C flag};@var{call-specific attachment}
 
 @var{retcode} is the return code of the system call as hexadecimal value.
 

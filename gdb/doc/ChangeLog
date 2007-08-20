@@ -1,3 +1,8 @@
+2007-08-20  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.texinfo (The F Reply Packet): Avoid confusing texi2html:
+	don't break a @var across a line.
+
 2007-07-25  Maciej W. Rozycki  <macro@mips.com>
 
 	* Makefile.in (MAKEHTMLFLAGS): Also search the current directory
