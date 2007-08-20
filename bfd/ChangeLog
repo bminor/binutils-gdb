@@ -1,3 +1,19 @@
+2007-08-20  Richard Sandiford  <richard@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_link_hash_table): Add computed_got_sizes.
+	(mips_elf_record_global_got_symbol): Increment local_gotno for
+	each forced-local symbol.
+	(_bfd_mips_elf_check_relocs): Pass forced-local call symbols to
+	mips_elf_record_global_got_symbol for VxWorks too.
+	(_bfd_mips_elf_always_size_sections): Set computed_got_sizes
+	to true after computing the GOT size.
+	(_bfd_mips_elf_hide_symbol): Increase local_gotno whenever
+	got.offset == 1.  Only adjust global_gotno if computed_got_sizes.
+	For VxWorks, add a local entry when hiding a symbol that needs a
+	plt but has not been marked as needing a global got entry.
+	(_bfd_mips_elf_link_hash_table_create): Set computed_got_sizes to
+	false.
+
 2007-08-20  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_fixup_link_order): Rewrite conversion of

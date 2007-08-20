@@ -9,9 +9,8 @@ Relocation section '\.rela\.dyn' at offset .* contains .* entries:
 00081804  00000002 R_MIPS_32                                    00081800
 00081808  .*02 R_MIPS_32         00081808   dglobal \+ 0
 0008180c  .*02 R_MIPS_32         00000000   dexternal \+ 0
-00081424  .*02 R_MIPS_32         00081c00   x \+ 0
-00000000  00000000 R_MIPS_NONE                                  00000000
-#...
+00081420  .*02 R_MIPS_32         00081c00   x \+ 0
+
 Relocation section '\.rela\.plt' at offset .* contains 2 entries:
  Offset     Info    Type            Sym\.Value  Sym\. Name \+ Addend
 00081400  .*7f R_MIPS_JUMP_SLOT  00000000   sexternal \+ 0
