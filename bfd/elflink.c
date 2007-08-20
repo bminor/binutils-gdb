@@ -9965,7 +9965,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   for (n = 0; n < seen_linkorder; n++)
     {
       s = sections[n]->u.indirect.section;
-      offset &= ~(bfd_vma)((1 << s->alignment_power) - 1);
+      offset &= (bfd_vma)~((1L << s->alignment_power) - 1L);
       s->output_offset = offset;
       sections[n]->offset = offset;
       offset += sections[n]->size;
