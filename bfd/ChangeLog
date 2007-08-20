@@ -1,3 +1,9 @@
+2007-08-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elfxx-target.h [ELF_COMMONPAGESIZE && ELF_MAXPAGESIZE]
+	(ELF_MINPAGESIZE): Fixed its size guess.  Sanity checked its size.
+	(ELF_COMMONPAGESIZE, ELF_MAXPAGESIZE): Sanity checked their size.
+
 2007-08-20  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_fixup_link_order): Rewrite conversion of
