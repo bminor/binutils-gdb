@@ -1,3 +1,8 @@
+2007-08-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_tls_transition): Break long line.
+	* elf64-x86-64.c (elf64_x86_64_tls_transition): Likewise.
+
 2007-08-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elfxx-target.h [ELF_COMMONPAGESIZE && ELF_MAXPAGESIZE]

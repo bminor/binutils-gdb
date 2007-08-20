@@ -713,7 +713,8 @@ elf64_x86_64_elf_object_p (bfd *abfd)
 }
 
 static int
-elf64_x86_64_tls_transition (struct bfd_link_info *info, int r_type, int is_local)
+elf64_x86_64_tls_transition (struct bfd_link_info *info, int r_type,
+			     int is_local)
 {
   if (info->shared)
     return r_type;

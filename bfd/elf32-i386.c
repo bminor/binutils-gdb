@@ -894,7 +894,8 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
 }
 
 static int
-elf_i386_tls_transition (struct bfd_link_info *info, int r_type, int is_local)
+elf_i386_tls_transition (struct bfd_link_info *info, int r_type,
+			 int is_local)
 {
   if (info->shared)
     return r_type;
