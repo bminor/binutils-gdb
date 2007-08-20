@@ -1,3 +1,9 @@
+2007-08-20  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_fixup_link_order): Rewrite conversion of
+	s->alignment_power into an offset mask in order to avoid a gcc
+	error message.
+
 2007-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/Make-in: Add --msgid-bugs-address to xgettext invocation.
