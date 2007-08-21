@@ -1141,7 +1141,20 @@ extern "C" void
 script_add_file(void* closurev, const char* name)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
-  Input_file_argument file(name, false, closure->position_dependent_options());
+  std::string absname;
+  if (name[0] == '/')
+    {
+      absname = name;
+    }
+  else
+    {
+      // Prepend `dirname closure->filename()` to make the path absolute.
+      char *slash = strrchr(closure->filename(), '/');
+      absname.assign(closure->filename(),
+                     slash ? slash - closure->filename() + 1 : 0);
+      absname += name;
+    }
+  Input_file_argument file(absname.c_str(), false, closure->position_dependent_options());
   closure->inputs()->add_file(file);
 }
 

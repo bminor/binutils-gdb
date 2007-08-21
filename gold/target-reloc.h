@@ -91,7 +91,7 @@ scan_relocs(
 }
 
 // This function implements the generic part of relocation processing.
-// This is an inline function which take a class whose operator()
+// This is an inline function which take a class whose relocate()
 // implements the machine specific part of relocation.  We do it this
 // way to avoid making a function call for each relocation, and to
 // avoid repeating the generic relocation handling code for each
