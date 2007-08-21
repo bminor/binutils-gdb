@@ -55,7 +55,7 @@ class File_read
   // Unlock the descriptor, permitting it to be closed if necessary.
   void
   unlock();
-  
+
   // Test whether the object is locked.
   bool
   is_locked();
@@ -65,12 +65,12 @@ class File_read
   // we can not read enough data.  Otherwise *PBYTES is set to the
   // number of bytes read.
   const unsigned char*
-  get_view(off_t start, off_t size, off_t *pbytes = NULL);
+  get_view(off_t start, off_t size, off_t* pbytes = NULL);
 
   // Read data from the file into the buffer P.  PBYTES is as in
   // get_view.
   void
-  read(off_t start, off_t size, void* p, off_t *pbytes = NULL);
+  read(off_t start, off_t size, void* p, off_t* pbytes = NULL);
 
   // Return a lasting view into the file.  This is allocated with new,
   // and the caller is responsible for deleting it when done.  The
@@ -240,6 +240,12 @@ class Input_file
   filename() const
   { return this->file_.filename(); }
 
+  // Return the position dependent options.
+  const Position_dependent_options&
+  options() const
+  { return this->input_argument_->options(); }
+
+  // Return the file.
   File_read&
   file()
   { return this->file_; }

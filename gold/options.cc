@@ -257,6 +257,14 @@ options::Command_line_options::options[] =
   POSDEP_NOARG('\0', "no-as-needed",
 	       N_("Always DT_NEEDED for following dynamic libs (default)"),
 	       NULL, TWO_DASHES, &Position_dependent_options::clear_as_needed),
+  POSDEP_NOARG('\0', "whole-archive",
+               N_("Include all archive contents"),
+               NULL, TWO_DASHES,
+               &Position_dependent_options::set_whole_archive),
+  POSDEP_NOARG('\0', "no-whole-archive",
+               N_("Include only needed archive contents"),
+               NULL, TWO_DASHES,
+               &Position_dependent_options::clear_whole_archive),
   SPECIAL('\0', "help", N_("Report usage information"), NULL,
 	  TWO_DASHES, &help)
 };
@@ -271,6 +279,7 @@ General_options::General_options()
     search_path_(),
     output_file_name_("a.out"),
     is_relocatable_(false),
+    rpath_(),
     is_shared_(false),
     is_static_(false)
 {
@@ -279,7 +288,9 @@ General_options::General_options()
 // The default values for the position dependent options.
 
 Position_dependent_options::Position_dependent_options()
-  : do_static_search_(false)
+  : do_static_search_(false),
+    as_needed_(false),
+    include_whole_archive_(false)
 {
 }
 

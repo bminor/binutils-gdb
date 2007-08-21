@@ -57,16 +57,45 @@ Archive::setup()
   // The first member of the archive should be the symbol table.
   std::string armap_name;
   off_t armap_size = this->read_header(sarmag, &armap_name);
-  if (!armap_name.empty())
+  off_t off;
+  if (armap_name.empty())
+    {
+      this->read_armap(sarmag + sizeof(Archive_header), armap_size);
+      off = sarmag + sizeof(Archive_header) + armap_size;
+    }
+  else if (!this->input_file_->options().include_whole_archive())
     {
       fprintf(stderr, _("%s: %s: no archive symbol table (run ranlib)\n"),
 	      program_name, this->name().c_str());
       gold_exit(false);
     }
+  else
+    off = sarmag;
 
+  // See if there is an extended name table.
+  if ((off & 1) != 0)
+    ++off;
+  std::string xname;
+  off_t extended_size = this->read_header(off, &xname);
+  if (xname == "/")
+    {
+      const unsigned char* p = this->get_view(off + sizeof(Archive_header),
+                                              extended_size);
+      const char* px = reinterpret_cast<const char*>(p);
+      this->extended_names_.assign(px, extended_size);
+    }
+
+  // Opening the file locked it.  Unlock it now.
+  this->input_file_->file().unlock();
+}
+
+// Read the archive symbol map.
+
+void
+Archive::read_armap(off_t start, off_t size)
+{
   // Read in the entire armap.
-  const unsigned char* p = this->get_view(sarmag + sizeof(Archive_header),
-					  armap_size);
+  const unsigned char* p = this->get_view(start, size);
 
   // Numbers in the armap are always big-endian.
   const elfcpp::Elf_Word* pword = reinterpret_cast<const elfcpp::Elf_Word*>(p);
@@ -86,32 +115,16 @@ Archive::setup()
       ++pword;
     }
 
-  if (reinterpret_cast<const unsigned char*>(pnames) - p > armap_size)
+  if (reinterpret_cast<const unsigned char*>(pnames) - p > size)
     {
       fprintf(stderr, _("%s: %s: bad archive symbol table names\n"),
 	      program_name, this->name().c_str());
       gold_exit(false);
     }
 
-  // See if there is an extended name table.
-  off_t off = sarmag + sizeof(Archive_header) + armap_size;
-  if ((off & 1) != 0)
-    ++off;
-  std::string xname;
-  off_t extended_size = this->read_header(off, &xname);
-  if (xname == "/")
-    {
-      p = this->get_view(off + sizeof(Archive_header), extended_size);
-      const char* px = reinterpret_cast<const char*>(p);
-      this->extended_names_.assign(px, extended_size);
-    }
-
   // This array keeps track of which symbols are for archive elements
   // which we have already included in the link.
   this->seen_.resize(nsyms);
-
-  // Opening the file locked it.  Unlock it now.
-  this->input_file_->file().unlock();
 }
 
 // Read the header of an archive member at OFF.  Fail if something
@@ -123,7 +136,17 @@ Archive::read_header(off_t off, std::string* pname)
 {
   const unsigned char* p = this->get_view(off, sizeof(Archive_header));
   const Archive_header* hdr = reinterpret_cast<const Archive_header*>(p);
+  return this->interpret_header(hdr, off,  pname);
+}
 
+// Interpret the header of HDR, the header of the archive member at
+// file offset OFF.  Fail if something goes wrong.  Return the size of
+// the member.  Set *PNAME to the name of the member.
+
+off_t
+Archive::interpret_header(const Archive_header* hdr, off_t off,
+                          std::string* pname)
+{
   if (memcmp(hdr->ar_fmag, arfmag, sizeof arfmag) != 0)
     {
       fprintf(stderr, _("%s; %s: malformed archive header at %ld\n"),
@@ -218,6 +241,9 @@ void
 Archive::add_symbols(const General_options& options, Symbol_table* symtab,
 		     Layout* layout, Input_objects* input_objects)
 {
+  if (this->input_file_->options().include_whole_archive())
+    return this->include_all_members(options, symtab, layout, input_objects);
+
   const size_t armap_size = this->armap_.size();
 
   bool added_new_object;
@@ -254,6 +280,52 @@ Archive::add_symbols(const General_options& options, Symbol_table* symtab,
 	}
     }
   while (added_new_object);
+}
+
+// Include all the archive members in the link.  This is for --whole-archive.
+
+void
+Archive::include_all_members(const General_options& options,
+                             Symbol_table* symtab, Layout* layout,
+                             Input_objects* input_objects)
+{
+  off_t off = sarmag;
+  while (true)
+    {
+      off_t bytes;
+      const unsigned char* p = this->get_view(off, sizeof(Archive_header),
+                                              &bytes);
+      if (bytes < sizeof(Archive_header))
+        {
+          if (bytes != 0)
+            {
+              fprintf(stderr, _("%s: %s: short archive header at %ld\n"),
+                      program_name, this->name().c_str(),
+                      static_cast<long>(off));
+              gold_exit(false);
+            }
+
+          break;
+        }
+
+      const Archive_header* hdr = reinterpret_cast<const Archive_header*>(p);
+      std::string name;
+      off_t size = this->interpret_header(hdr, off, &name);
+      if (name.empty())
+        {
+          // Symbol table.
+        }
+      else if (name == "/")
+        {
+          // Extended name table.
+        }
+      else
+        this->include_member(options, symtab, layout, input_objects, off);
+
+      off += sizeof(Archive_header) + size;
+      if ((off & 1) != 0)
+        ++off;
+    }
 }
 
 // Include an archive member in the link.  OFF is the file offset of
@@ -339,7 +411,7 @@ class Add_archive_symbols::Add_archive_symbols_locker : public Task_locker
 
  private:
   Task_locker_block blocker_;
-  Task_locker_obj<File_read> filelock_;			     
+  Task_locker_obj<File_read> filelock_;
 };
 
 Task_locker*
@@ -354,7 +426,7 @@ void
 Add_archive_symbols::run(Workqueue*)
 {
   this->archive_->add_symbols(this->options_, this->symtab_, this->layout_,
-			      this->input_objects_);
+                              this->input_objects_);
 
   if (this->input_group_ != NULL)
     this->input_group_->add_archive(this->archive_);

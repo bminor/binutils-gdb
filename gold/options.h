@@ -142,6 +142,12 @@ class Position_dependent_options
   as_needed() const
   { return this->as_needed_; }
 
+  // --whole-archive: Whether to include the entire contents of an
+  // --archive.
+  bool
+  include_whole_archive() const
+  { return this->include_whole_archive_; }
+
   void
   set_static_search()
   { this->do_static_search_ = true; }
@@ -158,9 +164,18 @@ class Position_dependent_options
   clear_as_needed()
   { this->as_needed_ = false; }
 
+  void
+  set_whole_archive()
+  { this->include_whole_archive_ = true; }
+
+  void
+  clear_whole_archive()
+  { this->include_whole_archive_ = false; }
+
  private:
   bool do_static_search_;
   bool as_needed_;
+  bool include_whole_archive_;
 };
 
 // A single file or library argument from the command line.

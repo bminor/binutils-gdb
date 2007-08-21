@@ -79,13 +79,27 @@ class Archive
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, off_t size)
-  { return this->input_file_->file().get_view(start, size); }
+  get_view(off_t start, off_t size, off_t* pbytes = NULL)
+  { return this->input_file_->file().get_view(start, size, pbytes); }
+
+  // Read the archive symbol map.
+  void
+  read_armap(off_t start, off_t size);
 
   // Read an archive member header at OFF.  Return the size of the
   // member, and set *PNAME to the name.
   off_t
   read_header(off_t off, std::string* pname);
+
+  // Interpret an archive header HDR at OFF.  Return the size of the
+  // member, and set *PNAME to the name.
+  off_t
+  interpret_header(const Archive_header* hdr, off_t off, std::string* pname);
+
+  // Include all the archive members in the link.
+  void
+  include_all_members(const General_options&, Symbol_table*, Layout*,
+                      Input_objects*);
 
   // Include an archive member in the link.
   void
