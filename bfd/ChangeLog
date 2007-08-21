@@ -1,3 +1,18 @@
+2007-08-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_tls_transition): Accept a pointer
+	to ELF hash entry instead of an integer for local test.
+	(elf_i386_check_relocs): Updated.
+	(elf_i386_gc_sweep_hook): Likewise.
+	(elf_i386_relocate_section): Likewise.
+
+	* elf64-x86-64.c  (elf64_x86_64_tls_transition): Accept a
+	pointer to ELF hash entry instead of an integer for local
+	test.
+	(elf64_x86_64_check_relocs): Updated.
+	(elf64_x86_64_gc_sweep_hook): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+
 2007-08-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_tls_transition): Break long line.

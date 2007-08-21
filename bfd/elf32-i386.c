@@ -895,7 +895,7 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
 
 static int
 elf_i386_tls_transition (struct bfd_link_info *info, int r_type,
-			 int is_local)
+			 struct elf_link_hash_entry *h)
 {
   if (info->shared)
     return r_type;
@@ -906,12 +906,12 @@ elf_i386_tls_transition (struct bfd_link_info *info, int r_type,
     case R_386_TLS_GOTDESC:
     case R_386_TLS_DESC_CALL:
     case R_386_TLS_IE_32:
-      if (is_local)
+      if (h == NULL)
 	return R_386_TLS_LE_32;
       return R_386_TLS_IE_32;
     case R_386_TLS_IE:
     case R_386_TLS_GOTIE:
-      if (is_local)
+      if (h == NULL)
 	return R_386_TLS_LE_32;
       return r_type;
     case R_386_TLS_LDM:
@@ -975,7 +975,7 @@ elf_i386_check_relocs (bfd *abfd,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
-      r_type = elf_i386_tls_transition (info, r_type, h == NULL);
+      r_type = elf_i386_tls_transition (info, r_type, h);
 
       switch (r_type)
 	{
@@ -1364,7 +1364,7 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
-      r_type = elf_i386_tls_transition (info, r_type, h != NULL);
+      r_type = elf_i386_tls_transition (info, r_type, h);
       switch (r_type)
 	{
 	case R_386_TLS_LDM:
@@ -2624,7 +2624,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	case R_386_TLS_DESC_CALL:
 	case R_386_TLS_IE_32:
 	case R_386_TLS_GOTIE:
-	  r_type = elf_i386_tls_transition (info, r_type, h == NULL);
+	  r_type = elf_i386_tls_transition (info, r_type, h);
 	  tls_type = GOT_UNKNOWN;
 	  if (h == NULL && local_got_offsets)
 	    tls_type = elf_i386_local_got_tls_type (input_bfd) [r_symndx];

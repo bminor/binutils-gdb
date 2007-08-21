@@ -714,7 +714,7 @@ elf64_x86_64_elf_object_p (bfd *abfd)
 
 static int
 elf64_x86_64_tls_transition (struct bfd_link_info *info, int r_type,
-			     int is_local)
+			     struct elf_link_hash_entry *h)
 {
   if (info->shared)
     return r_type;
@@ -725,7 +725,7 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, int r_type,
     case R_X86_64_GOTPC32_TLSDESC:
     case R_X86_64_TLSDESC_CALL:
     case R_X86_64_GOTTPOFF:
-      if (is_local)
+      if (h == NULL)
 	return R_X86_64_TPOFF32;
       return R_X86_64_GOTTPOFF;
     case R_X86_64_TLSLD:
@@ -786,7 +786,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
-      r_type = elf64_x86_64_tls_transition (info, r_type, h == NULL);
+      r_type = elf64_x86_64_tls_transition (info, r_type, h);
       switch (r_type)
 	{
 	case R_X86_64_TLSLD:
@@ -1216,7 +1216,7 @@ elf64_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	}
 
       r_type = ELF64_R_TYPE (rel->r_info);
-      r_type = elf64_x86_64_tls_transition (info, r_type, h != NULL);
+      r_type = elf64_x86_64_tls_transition (info, r_type, h);
       switch (r_type)
 	{
 	case R_X86_64_TLSLD:
@@ -2502,7 +2502,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_X86_64_GOTPC32_TLSDESC:
 	case R_X86_64_TLSDESC_CALL:
 	case R_X86_64_GOTTPOFF:
-	  r_type = elf64_x86_64_tls_transition (info, r_type, h == NULL);
+	  r_type = elf64_x86_64_tls_transition (info, r_type, h);
 	  tls_type = GOT_UNKNOWN;
 	  if (h == NULL && local_got_offsets)
 	    tls_type = elf64_x86_64_local_got_tls_type (input_bfd) [r_symndx];
