@@ -43,7 +43,7 @@ class General_options
   { return this->dynamic_linker_; }
 
   // -L: Library search path.
-  typedef std::list<const char*> Dir_list;
+  typedef std::vector<const char*> Dir_list;
 
   const Dir_list&
   search_path() const
@@ -58,6 +58,11 @@ class General_options
   bool
   is_relocatable() const
   { return this->is_relocatable_; }
+
+  // --rpath: The runtime search path.
+  const Dir_list&
+  rpath() const
+  { return this->rpath_; }
 
   // --shared: Whether generating a shared object.
   bool
@@ -94,6 +99,10 @@ class General_options
   { this->is_relocatable_ = true; }
 
   void
+  add_to_rpath(const char* arg)
+  { this->rpath_.push_back(arg); }
+
+  void
   set_shared()
   { this->is_shared_ = true; }
 
@@ -109,6 +118,7 @@ class General_options
   Dir_list search_path_;
   const char* output_file_name_;
   bool is_relocatable_;
+  Dir_list rpath_;
   bool is_shared_;
   bool is_static_;
 };

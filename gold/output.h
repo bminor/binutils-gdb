@@ -1040,6 +1040,10 @@ class Output_data_dynamic : public Output_section_data
   add_string(elfcpp::DT tag, const char* str)
   { this->add_entry(Dynamic_entry(tag, this->pool_->add(str, NULL))); }
 
+  void
+  add_string(elfcpp::DT tag, const std::string& str)
+  { this->add_string(tag, str.c_str()); }
+
   // Set the final data size.
   void
   do_set_address(uint64_t, off_t);

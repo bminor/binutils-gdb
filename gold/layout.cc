@@ -1148,6 +1148,35 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     odyn->add_symbol(elfcpp::DT_FINI, sym);
 
   // FIXME: Support DT_INIT_ARRAY and DT_FINI_ARRAY.
+
+  // Add a DT_RPATH entry if needed.
+  const General_options::Dir_list& rpath(this->options_.rpath());
+  if (!rpath.empty())
+    {
+      std::string rpath_val;
+      for (General_options::Dir_list::const_iterator p = rpath.begin();
+           p != rpath.end();
+           ++p)
+        {
+          if (rpath_val.empty())
+            rpath_val = *p;
+          else
+            {
+              // Eliminate duplicates.
+              General_options::Dir_list::const_iterator q;
+              for (q = rpath.begin(); q != p; ++q)
+                if (strcmp(*q, *p) == 0)
+                  break;
+              if (q == p)
+                {
+                  rpath_val += ':';
+                  rpath_val += *p;
+                }
+            }
+        }
+
+      odyn->add_string(elfcpp::DT_RPATH, rpath_val);
+    }
 }
 
 // The mapping of .gnu.linkonce section names to real section names.
