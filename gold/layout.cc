@@ -610,6 +610,10 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 	  uint64_t aligned_addr = addr;
 	  uint64_t abi_pagesize = target->abi_pagesize();
+
+          // FIXME: This should depend on the -n and -N options.
+          (*p)->set_minimum_addralign(target->common_pagesize());
+
 	  if (was_readonly && ((*p)->flags() & elfcpp::PF_W) != 0)
 	    {
 	      uint64_t align = (*p)->addralign();

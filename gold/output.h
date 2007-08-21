@@ -1674,6 +1674,15 @@ class Output_segment
   uint64_t
   set_section_addresses(uint64_t addr, off_t* poff, unsigned int* pshndx);
 
+  // Set the minimum alignment of this segment.  This may be adjusted
+  // upward based on the section alignments.
+  void
+  set_minimum_addralign(uint64_t align)
+  {
+    gold_assert(!this->is_align_known_);
+    this->align_ = align;
+  }
+
   // Set the offset of this segment based on the section.  This should
   // only be called for a non-PT_LOAD segment.
   void
@@ -1735,7 +1744,9 @@ class Output_segment
   uint64_t paddr_;
   // The size of the segment in memory.
   uint64_t memsz_;
-  // The segment alignment.
+  // The segment alignment.  The is_align_known_ field indicates
+  // whether this has been finalized.  It can be set to a minimum
+  // value before it is finalized.
   uint64_t align_;
   // The offset of the segment data within the file.
   off_t offset_;
@@ -1745,7 +1756,7 @@ class Output_segment
   elfcpp::Elf_Word type_;
   // The segment flags.
   elfcpp::Elf_Word flags_;
-  // Whether we have set align_.
+  // Whether we have finalized align_.
   bool is_align_known_;
 };
 
