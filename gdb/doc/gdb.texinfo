@@ -104,6 +104,10 @@ and with the Back-Cover Texts as in (a) below.
 freedom to copy and modify this GNU Manual, like GNU software.  Copies
 published by the Free Software Foundation raise funds for GNU
 development.''
+@page
+This edition of the GDB manual is dedicated to the memory of Fred
+Fish.  Fred was a long-standing contributor to GDB and to Free
+software in general.  We will miss him.
 @end titlepage
 @page
 
@@ -118,6 +122,10 @@ This is the @value{EDITION} Edition, for @value{GDBN} Version
 @value{GDBVN}.
 
 Copyright (C) 1988-2006 Free Software Foundation, Inc.
+
+This edition of the GDB manual is dedicated to the memory of Fred
+Fish.  Fred was a long-standing contributor to GDB and to Free
+software in general.  We will miss him.
 
 @menu
 * Summary::                     Summary of @value{GDBN}

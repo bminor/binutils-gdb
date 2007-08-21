@@ -1,5 +1,9 @@
 2007-08-20  Jim Blandy  <jimb@codesourcery.com>
 
+	* gdb.texinfo (Top): Dedicate manual to the memory of Fred Fish.
+	(title page): Include the dedication in the printed manual, as a
+	separate page after the copyright notice.
+	
 	* gdb.texinfo (The F Reply Packet): Avoid confusing texi2html:
 	don't break a @var across a line.
 
