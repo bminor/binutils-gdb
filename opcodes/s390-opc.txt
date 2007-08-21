@@ -262,70 +262,13 @@ b252 msr RRE_RR "multiply single" g5 esa,zarch
 a700 tmh RI_RU "test under mask high" g5 esa,zarch
 a701 tml RI_RU "test under mask low" g5 esa,zarch
 0700 nopr RR_0R "no operation" g5 esa,zarch
-0710 bor RR_0R "branch on overflow / if ones" g5 esa,zarch
-0720 bhr RR_0R "branch on high" g5 esa,zarch
-0720 bpr RR_0R "branch on plus" g5 esa,zarch
-0730 bnler RR_0R "branch on not low or equal" g5 esa,zarch
-0740 blr RR_0R "branch on low" g5 esa,zarch
-0740 bmr RR_0R "branch on minus / if mixed" g5 esa,zarch
-0750 bnher RR_0R "branch on not high or equal" g5 esa,zarch
-0760 blhr RR_0R "branch on low or high" g5 esa,zarch
-0770 bner RR_0R "branch on not equal" g5 esa,zarch
-0770 bnzr RR_0R "branch on not zero / if not zeros" g5 esa,zarch
-0780 ber RR_0R "branch on equal" g5 esa,zarch
-0780 bzr RR_0R "branch on zero / if zeros" g5 esa,zarch
-0790 bnlhr RR_0R "branch on not low or high" g5 esa,zarch
-07a0 bher RR_0R "branch on high or equal" g5 esa,zarch
-07b0 bnlr RR_0R "branch on not low" g5 esa,zarch
-07b0 bnmr RR_0R "branch on not minus / if not mixed" g5 esa,zarch
-07c0 bler RR_0R "brach on low or equal" g5 esa,zarch
-07d0 bnhr RR_0R "branch on not high" g5 esa,zarch
-07d0 bnpr RR_0R "branch on not plus" g5 esa,zarch
-07e0 bnor RR_0R "branch on not overflow / if not ones" g5 esa,zarch
+0700 b*8r RR_0R "conditional branch" g5 esa,zarch
 07f0 br RR_0R "unconditional branch" g5 esa,zarch
 4700 nop RX_0RRD "no operation" g5 esa,zarch
-4710 bo RX_0RRD "branch on overflow / if ones" g5 esa,zarch
-4720 bh RX_0RRD "branch on high" g5 esa,zarch
-4720 bp RX_0RRD "branch on plus" g5 esa,zarch
-4730 bnle RX_0RRD "branch on not low or equal" g5 esa,zarch
-4740 bl RX_0RRD "branch on low" g5 esa,zarch
-4740 bm RX_0RRD "branch on minus / if mixed" g5 esa,zarch
-4750 bnhe RX_0RRD "branch on not high or equal" g5 esa,zarch
-4760 blh RX_0RRD "branch on low or high" g5 esa,zarch
-4770 bne RX_0RRD "branch on not equal" g5 esa,zarch
-4770 bnz RX_0RRD "branch on not zero / if not zeros" g5 esa,zarch
-4780 be RX_0RRD "branch on equal" g5 esa,zarch
-4780 bz RX_0RRD "branch on zero / if zeros" g5 esa,zarch
-4790 bnlh RX_0RRD "branch on not low or high" g5 esa,zarch
-47a0 bhe RX_0RRD "branch on high or equal" g5 esa,zarch
-47b0 bnl RX_0RRD "branch on not low" g5 esa,zarch
-47b0 bnm RX_0RRD "branch on not minus / if not mixed" g5 esa,zarch
-47c0 ble RX_0RRD "branch on low or equal" g5 esa,zarch
-47d0 bnh RX_0RRD "branch on not high" g5 esa,zarch
-47d0 bnp RX_0RRD "branch on not plus" g5 esa,zarch
-47e0 bno RX_0RRD "branch on not overflow / if not ones" g5 esa,zarch
+4700 b*8 RX_0RRD "conditional branch" g5 esa,zarch
 47f0 b RX_0RRD "unconditional branch" g5 esa,zarch
-a714 jo RI_0P "jump on overflow / if ones" g5 esa,zarch
-a724 jh RI_0P "jump on A high" g5 esa,zarch
-a724 jp RI_0P "jump on plus" g5 esa,zarch
-a734 jnle RI_0P "jump on not low or equal" g5 esa,zarch
-a744 jl RI_0P "jump on A low" g5 esa,zarch
-a744 jm RI_0P "jump on minus / if mixed" g5 esa,zarch
-a754 jnhe RI_0P "jump on not high or equal" g5 esa,zarch
-a764 jlh RI_0P "jump on low or high" g5 esa,zarch
-a774 jne RI_0P "jump on A not equal B" g5 esa,zarch
-a774 jnz RI_0P "jump on not zero / if not zeros" g5 esa,zarch
-a784 je RI_0P "jump on A equal B" g5 esa,zarch
-a784 jz RI_0P "jump on zero / if zeros" g5 esa,zarch
-a794 jnlh RI_0P "jump on not low or high" g5 esa,zarch
-a7a4 jhe RI_0P "jump on high or equal" g5 esa,zarch
-a7b4 jnl RI_0P "jump on A not low" g5 esa,zarch
-a7b4 jnm RI_0P "jump on not minus / if not mixed" g5 esa,zarch
-a7c4 jle RI_0P "jump on low or equal" g5 esa,zarch
-a7d4 jnh RI_0P "jump on A not high" g5 esa,zarch
-a7d4 jnp RI_0P "jump on not plus" g5 esa,zarch
-a7e4 jno RI_0P "jump on not overflow / if not ones" g5 esa,zarch
-a7f4 j RI_0P "jump" g5 esa,zarch
+a704 j*8 RI_0P "conditional jump" g5 esa,zarch
+a7f4 j RI_0P "unconditional jump" g5 esa,zarch
 b34a axbr RRE_FF "add extended bfp" g5 esa,zarch
 b31a adbr RRE_FF "add long bfp" g5 esa,zarch
 ed000000001a adb RXE_FRRD "add long bfp" g5 esa,zarch
@@ -520,27 +463,8 @@ eb0000000080 icmh RSE_RURD "insert characters under mask high" z900 zarch
 a702 tmhh RI_RU "test under mask high high" z900 zarch
 a703 tmhl RI_RU "test under mask high low" z900 zarch
 c004 brcl RIL_UP "branch relative on condition long" z900 esa,zarch
-c014 jgo RIL_0P "jump long on overflow / if ones" z900 esa,zarch
-c024 jgh RIL_0P "jump long on high" z900 esa,zarch
-c024 jgp RIL_0P "jump long on plus" z900 esa,zarch
-c034 jgnle RIL_0P "jump long on not low or equal" z900 esa,zarch
-c044 jgl RIL_0P "jump long on low" z900 esa,zarch
-c044 jgm RIL_0P "jump long on minus / if mixed" z900 esa,zarch
-c054 jgnhe RIL_0P "jump long on not high or equal" z900 esa,zarch
-c064 jglh RIL_0P "jump long on low or high" z900 esa,zarch
-c074 jgne RIL_0P "jump long on not equal" z900 esa,zarch
-c074 jgnz RIL_0P "jump long on not zero / if not zeros" z900 esa,zarch
-c084 jge RIL_0P "jump long on equal" z900 esa,zarch
-c084 jgz RIL_0P "jump long on zero / if zeros" z900 esa,zarch
-c094 jgnlh RIL_0P "jump long on not low or high" z900 esa,zarch
-c0a4 jghe RIL_0P "jump long on high or equal" z900 esa,zarch
-c0b4 jgnl RIL_0P "jump long on not low" z900 esa,zarch
-c0b4 jgnm RIL_0P "jump long on not minus / if not mixed" z900 esa,zarch
-c0c4 jgle RIL_0P "jump long on low or equal" z900 esa,zarch
-c0d4 jgnh RIL_0P "jump long on not high" z900 esa,zarch
-c0d4 jgnp RIL_0P "jump long on not plus" z900 esa,zarch
-c0e4 jgno RIL_0P "jump long on not overflow / if not ones" z900 esa,zarch
-c0f4 jg RIL_0P "jump long" z900 esa,zarch
+c004 jg*8 RIL_0P "conditional jump long" z900 esa,zarch
+c0f4 jg RIL_0P "unconditional jump long" z900 esa,zarch
 c005 brasl RIL_RP "branch relative and save long" z900 esa,zarch
 a707 brctg RI_RP "branch relative on count 64" z900 zarch
 a709 lghi RI_RI "load halfword immediate 64" z900 zarch

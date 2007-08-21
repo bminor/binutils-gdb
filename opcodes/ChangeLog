@@ -1,3 +1,12 @@
+2007-08-21  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* s390-mkopc.c (struct s390_cond_ext_format): New global struct.
+	(s390_cond_ext_format): New global variable.
+	(expandConditionalJump): New function.
+	(main): Invoke expandConditionalJump for mnemonics containing '*'.	
+	* s390-opc.txt: Replace mnemonics with conditional
+	mask extensions with instructions using the newly introduced '*' tag.
+
 2007-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/Make-in: Add --msgid-bugs-address to xgettext invocation.
