@@ -1067,6 +1067,7 @@ read_command_lines (char *prompt_arg, int from_tty)
 
   while (1)
     {
+      dont_repeat ();
       val = read_next_line (&next);
 
       /* Ignore blank lines or comments.  */
