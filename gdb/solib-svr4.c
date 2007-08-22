@@ -354,7 +354,7 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
   int arch_size, step, sect_size;
   long dyn_tag;
   CORE_ADDR dyn_ptr, dyn_addr;
-  gdb_byte *bufend, *buf;
+  gdb_byte *bufend, *bufstart, *buf;
   Elf32_External_Dyn *x_dynp_32;
   Elf64_External_Dyn *x_dynp_64;
   struct bfd_section *sect;
@@ -371,16 +371,13 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
     return 0;
   dyn_addr = bfd_section_vma (abfd, sect);
 
-  /* Read in .dynamic section, silently ignore errors.  */
+  /* Read in .dynamic from the BFD.  We will get the actual value
+     from memory later.  */
   sect_size = bfd_section_size (abfd, sect);
-  buf = alloca (sect_size);
-  if (target_read_memory (dyn_addr, buf, sect_size))
-    {
-      /* If target_read_memory fails, try reading the BFD file.  */
-      if (!bfd_get_section_contents (abfd, sect,
-				     buf, 0, sect_size))
-	return 0;
-    }
+  buf = bufstart = alloca (sect_size);
+  if (!bfd_get_section_contents (abfd, sect,
+				 buf, 0, sect_size))
+    return 0;
 
   /* Iterate over BUF and scan for DYNTAG.  If found, set PTR and return.  */
   step = (arch_size == 32) ? sizeof (Elf32_External_Dyn)
@@ -395,7 +392,7 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 	dyn_tag = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp_32->d_tag);
 	dyn_ptr = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp_32->d_un.d_ptr);
       }
-      else
+    else
       {
 	x_dynp_64 = (Elf64_External_Dyn *) buf;
 	dyn_tag = bfd_h_get_64 (abfd, (bfd_byte *) x_dynp_64->d_tag);
@@ -405,9 +402,20 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
        return 0;
      if (dyn_tag == dyntag)
        {
+	 /* If requested, try to read the runtime value of this .dynamic
+	    entry.  */
 	 if (ptr)
-	   *ptr = dyn_ptr;
-         return 1;
+	   {
+	     gdb_byte ptr_buf[8];
+	     CORE_ADDR ptr_addr;
+
+	     ptr_addr = dyn_addr + (buf - bufstart) + arch_size / 8;
+	     if (target_read_memory (ptr_addr, ptr_buf, arch_size / 8) == 0)
+	       dyn_ptr = extract_typed_address (ptr_buf,
+						builtin_type_void_data_ptr);
+	     *ptr = dyn_ptr;
+	   }
+	 return 1;
        }
   }
 
@@ -445,11 +453,9 @@ elf_locate_base (void)
   struct minimal_symbol *msymbol;
   CORE_ADDR dyn_ptr;
 
-  /* Find DT_DEBUG.  */
-  if (scan_dyntag (DT_DEBUG, exec_bfd, &dyn_ptr))
-    return dyn_ptr;
-
-  /* Find DT_MIPS_RLD_MAP.  */
+  /* Look for DT_MIPS_RLD_MAP first.  MIPS executables use this
+     instead of DT_DEBUG, although they sometimes contain an unused
+     DT_DEBUG.  */
   if (scan_dyntag (DT_MIPS_RLD_MAP, exec_bfd, &dyn_ptr))
     {
       gdb_byte *pbuf;
@@ -461,6 +467,10 @@ elf_locate_base (void)
 	return 0;
       return extract_typed_address (pbuf, builtin_type_void_data_ptr);
     }
+
+  /* Find DT_DEBUG.  */
+  if (scan_dyntag (DT_DEBUG, exec_bfd, &dyn_ptr))
+    return dyn_ptr;
 
   /* This may be a static executable.  Look for the symbol
      conventionally named _r_debug, as a last resort.  */
@@ -1549,7 +1559,7 @@ elf_lookup_lib_symbol (const struct objfile *objfile,
      || scan_dyntag (DT_SYMBOLIC, objfile->obfd, NULL) != 1)
     return NULL;
 
-  return  lookup_global_symbol_from_objfile
+  return lookup_global_symbol_from_objfile
 		(objfile, name, linkage_name, domain, symtab);
 }
 

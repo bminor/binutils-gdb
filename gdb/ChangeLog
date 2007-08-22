@@ -1,3 +1,10 @@
+2007-08-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib-svr4.c (scan_dyntag): Only read target memory when necessary.
+	Fix formatting.
+	(elf_locate_base): Look for DT_MIPS_RLD_MAP first.  Expand comments.
+	(elf_lookup_lib_symbol): Fix formatting.
+
 2007-08-21  Michael Snyder  <msnyder@access-company.com>
 
 	* dbxread.c (read_dbx_symtab): Guard null deref.
