@@ -1,5 +1,8 @@
 2007-08-21  Michael Snyder  <msnyder@access-company.com>
 
+	* dbxread.c (read_dbx_symtab): Guard null deref.
+	Break up long line.
+
 	* valops.c (find_overload_match): Guard against NULL.
 
 2007-08-21  Daniel Jacobowitz  <dan@codesourcery.com>

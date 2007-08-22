@@ -1828,7 +1828,8 @@ read_dbx_symtab (struct objfile *objfile)
 		function_outside_compilation_unit_complaint (name);
 		xfree (name);
 	      }
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	    nlist.n_value += ANOFFSET (objfile->section_offsets, 
+				       SECT_OFF_TEXT (objfile));
 	    /* Kludges for ELF/STABS with Sun ACC */
 	    last_function_name = namestring;
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
@@ -1838,7 +1839,9 @@ read_dbx_symtab (struct objfile *objfile)
 					   SECT_OFF_TEXT (objfile)))
 	      {
 		CORE_ADDR minsym_valu = 
-		  find_stab_function_addr (namestring, pst->filename, objfile);
+		  find_stab_function_addr (namestring, 
+					   pst ? pst->filename : NULL, 
+					   objfile);
 		/* find_stab_function_addr will return 0 if the minimal
 		   symbol wasn't found.  (Unfortunately, this might also
 		   be a valid address.)  Anyway, if it *does* return 0,
@@ -1893,7 +1896,8 @@ read_dbx_symtab (struct objfile *objfile)
 		function_outside_compilation_unit_complaint (name);
 		xfree (name);
 	      }
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	    nlist.n_value += ANOFFSET (objfile->section_offsets, 
+				       SECT_OFF_TEXT (objfile));
 	    /* Kludges for ELF/STABS with Sun ACC */
 	    last_function_name = namestring;
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
@@ -1903,7 +1907,9 @@ read_dbx_symtab (struct objfile *objfile)
 					   SECT_OFF_TEXT (objfile)))
 	      {
 		CORE_ADDR minsym_valu = 
-		  find_stab_function_addr (namestring, pst->filename, objfile);
+		  find_stab_function_addr (namestring, 
+					   pst ? pst->filename : NULL, 
+					   objfile);
 		/* find_stab_function_addr will return 0 if the minimal
 		   symbol wasn't found.  (Unfortunately, this might also
 		   be a valid address.)  Anyway, if it *does* return 0,
