@@ -163,6 +163,11 @@ proc do_function_calls {} {
 	gdb_test "p t_double_values(double_val1,double_val2)" " = 1"
 	gdb_test "p t_double_values(45.654,double_val2)" " = 1"
 	gdb_test "p t_double_values(double_val1,-67.66)" " = 1"
+
+	gdb_test "p t_double_int(99.0, 1)" " = 0"
+	gdb_test "p t_double_int(99.0, 99)" " = 1"
+	gdb_test "p t_int_double(99, 1.0)" " = 0"
+	gdb_test "p t_int_double(99, 99.0)" " = 1"
     }
 
     gdb_test "p t_string_values(string_val2,string_val1)" " = 0"

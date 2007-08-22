@@ -1,3 +1,9 @@
+2007-08-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): Use t_double_int
+	and t_int_double.
+	* gdb.base/callfuncs.c (t_double_int, t_int_double): New.
+
 2007-08-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/step-line.c: Switch license to GPL version 3, and

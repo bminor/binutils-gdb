@@ -1,5 +1,11 @@
 2007-08-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* mips-tdep.c (mips_n32n64_fp_arg_chunk_p): New.
+	(mips_n32n64_push_dummy_call): Always increment float_argreg along
+	with argreg.  Use mips_n32n64_fp_arg_chunk_p.
+
+2007-08-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* solib-svr4.c (scan_dyntag): Only read target memory when necessary.
 	Fix formatting.
 	(elf_locate_base): Look for DT_MIPS_RLD_MAP first.  Expand comments.

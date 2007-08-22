@@ -334,6 +334,29 @@ char char_array_arg1[], char_array_arg2[];
 	  !strcmp (char_array_arg2, char_array_val2));
 }
 
+#ifdef PROTOTYPES
+int t_double_int (double double_arg1, int int_arg2)
+#else
+int t_double_int (double_arg1, int_arg2)
+double double_arg1;
+int int_arg2;
+#endif
+{
+  return ((double_arg1 - int_arg2) < DELTA
+	  && (double_arg1 - int_arg2) > -DELTA);
+}
+
+#ifdef PROTOTYPES
+int t_int_double (int int_arg1, double double_arg2)
+#else
+int t_int_double (int_arg1, double_arg2)
+int int_arg1;
+double double_arg2;
+#endif
+{
+  return ((int_arg1 - double_arg2) < DELTA
+	  && (int_arg1 - double_arg2) > -DELTA);
+}
 
 /* This used to simply compare the function pointer arguments with
    known values for func_val1 and func_val2.  Doing so is valid ANSI

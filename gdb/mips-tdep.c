@@ -2781,6 +2781,59 @@ mips_eabi_return_value (struct gdbarch *gdbarch,
 
 /* N32/N64 ABI stuff.  */
 
+/* Search for a naturally aligned double at OFFSET inside a struct
+   ARG_TYPE.  The N32 / N64 ABIs pass these in floating point
+   registers.  */
+
+static int
+mips_n32n64_fp_arg_chunk_p (struct type *arg_type, int offset)
+{
+  int i;
+
+  if (TYPE_CODE (arg_type) != TYPE_CODE_STRUCT)
+    return 0;
+
+  if (MIPS_FPU_TYPE != MIPS_FPU_DOUBLE)
+    return 0;
+
+  if (TYPE_LENGTH (arg_type) < offset + MIPS64_REGSIZE)
+    return 0;
+
+  for (i = 0; i < TYPE_NFIELDS (arg_type); i++)
+    {
+      int pos;
+      struct type *field_type;
+
+      /* We're only looking at normal fields.  */
+      if (TYPE_FIELD_STATIC (arg_type, i)
+	  || (TYPE_FIELD_BITPOS (arg_type, i) % 8) != 0)
+	continue;
+
+      /* If we have gone past the offset, there is no double to pass.  */
+      pos = TYPE_FIELD_BITPOS (arg_type, i) / 8;
+      if (pos > offset)
+	return 0;
+
+      field_type = check_typedef (TYPE_FIELD_TYPE (arg_type, i));
+
+      /* If this field is entirely before the requested offset, go
+	 on to the next one.  */
+      if (pos + TYPE_LENGTH (field_type) <= offset)
+	continue;
+
+      /* If this is our special aligned double, we can stop.  */
+      if (TYPE_CODE (field_type) == TYPE_CODE_FLT
+	  && TYPE_LENGTH (field_type) == MIPS64_REGSIZE)
+	return 1;
+
+      /* This field starts at or before the requested offset, and
+	 overlaps it.  If it is a structure, recurse inwards.  */
+      return mips_n32n64_fp_arg_chunk_p (field_type, offset - pos);
+    }
+
+  return 0;
+}
+
 static CORE_ADDR
 mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			     struct regcache *regcache, CORE_ADDR bp_addr,
@@ -2855,23 +2908,22 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       val = value_contents (arg);
 
       if (fp_register_arg_p (typecode, arg_type)
-	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
+	  && argreg <= MIPS_LAST_ARG_REGNUM)
 	{
 	  /* This is a floating point value that fits entirely
 	     in a single register.  */
-	  /* On 32 bit ABI's the float_argreg is further adjusted
-	     above to ensure that it is even register aligned.  */
 	  LONGEST regval = extract_unsigned_integer (val, len);
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
 				float_argreg, phex (regval, len));
-	  regcache_cooked_write_unsigned (regcache, float_argreg++, regval);
+	  regcache_cooked_write_unsigned (regcache, float_argreg, regval);
 
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
 				argreg, phex (regval, len));
 	  regcache_cooked_write_unsigned (regcache, argreg, regval);
-	  argreg += 1;
+	  float_argreg++;
+	  argreg++;
 	}
       else
 	{
@@ -2896,10 +2948,12 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		fprintf_unfiltered (gdb_stdlog, " -- partial=%d",
 				    partial_len);
 
+	      if (fp_register_arg_p (typecode, arg_type))
+		gdb_assert (argreg > MIPS_LAST_ARG_REGNUM);
+
 	      /* Write this portion of the argument to the stack.  */
 	      if (argreg > MIPS_LAST_ARG_REGNUM
-		  || odd_sized_struct
-		  || fp_register_arg_p (typecode, arg_type))
+		  || odd_sized_struct)
 		{
 		  /* Should shorter than int integer values be
 		     promoted to int before being stored? */
@@ -2940,12 +2994,10 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		}
 
 	      /* Note!!! This is NOT an else clause.  Odd sized
-	         structs may go thru BOTH paths.  Floating point
-	         arguments will not.  */
+	         structs may go thru BOTH paths.  */
 	      /* Write this portion of the argument to a general
 	         purpose register.  */
-	      if (argreg <= MIPS_LAST_ARG_REGNUM
-		  && !fp_register_arg_p (typecode, arg_type))
+	      if (argreg <= MIPS_LAST_ARG_REGNUM)
 		{
 		  LONGEST regval =
 		    extract_unsigned_integer (val, partial_len);
@@ -2971,6 +3023,19 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				      argreg,
 				      phex (regval, MIPS64_REGSIZE));
 		  regcache_cooked_write_unsigned (regcache, argreg, regval);
+
+		  if (mips_n32n64_fp_arg_chunk_p (arg_type,
+						  TYPE_LENGTH (arg_type) - len))
+		    {
+		      if (mips_debug)
+			fprintf_filtered (gdb_stdlog, " - fpreg=%d val=%s",
+					  float_argreg,
+					  phex (regval, MIPS64_REGSIZE));
+		      regcache_cooked_write_unsigned (regcache, float_argreg,
+						      regval);
+		    }
+
+		  float_argreg++;
 		  argreg++;
 		}
 
