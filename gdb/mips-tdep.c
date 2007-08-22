@@ -4913,6 +4913,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int i, num_regs;
   enum mips_fpu_type fpu_type;
   struct tdesc_arch_data *tdesc_data = NULL;
+  int elf_fpu_type = 0;
 
   /* Check any target description for validity.  */
   if (tdesc_has_registers (info.target_desc))
@@ -5120,8 +5121,32 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 			mips64_transfers_32bit_regs_p);
 
   /* Determine the MIPS FPU type.  */
+#ifdef HAVE_ELF
+  if (info.abfd
+      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    elf_fpu_type = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
+					     Tag_GNU_MIPS_ABI_FP);
+#endif /* HAVE_ELF */
+
   if (!mips_fpu_type_auto)
     fpu_type = mips_fpu_type;
+  else if (elf_fpu_type != 0)
+    {
+      switch (elf_fpu_type)
+	{
+	case 1:
+	  fpu_type = MIPS_FPU_DOUBLE;
+	  break;
+	case 2:
+	  fpu_type = MIPS_FPU_SINGLE;
+	  break;
+	case 3:
+	default:
+	  /* Soft float or unknown.  */
+	  fpu_type = MIPS_FPU_NONE;
+	  break;
+	}
+    }
   else if (info.bfd_arch_info != NULL
 	   && info.bfd_arch_info->arch == bfd_arch_mips)
     switch (info.bfd_arch_info->mach)

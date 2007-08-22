@@ -1,5 +1,10 @@
 2007-08-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* mips-tdep.c (mips_gdbarch_init): Use Tag_GNU_MIPS_ABI_FP to
+	determine the file's FPU type.
+
+2007-08-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* mips-tdep.c (mips_n32n64_fp_arg_chunk_p): New.
 	(mips_n32n64_push_dummy_call): Always increment float_argreg along
 	with argreg.  Use mips_n32n64_fp_arg_chunk_p.
