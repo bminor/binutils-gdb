@@ -3603,7 +3603,7 @@ elf64_x86_64_merge_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	}
       else if (sym->st_shndx == SHN_X86_64_LCOMMON
 	       && (elf_section_flags (*oldsec) & SHF_X86_64_LARGE) == 0)
-	*psec = *sec = bfd_com_section_ptr; 
+	*psec = *sec = bfd_com_section_ptr;
     }
 
   return TRUE;
@@ -3614,7 +3614,7 @@ elf64_x86_64_additional_program_headers (bfd *abfd,
 					 struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *s;
-  int count = 0; 
+  int count = 0;
 
   /* Check to see if we need a large readonly segment.  */
   s = bfd_get_section_by_name (abfd, ".lrodata");
@@ -3644,7 +3644,7 @@ elf64_x86_64_hash_symbol (struct elf_link_hash_entry *h)
   return _bfd_elf_hash_symbol (h);
 }
 
-static const struct bfd_elf_special_section 
+static const struct bfd_elf_special_section
   elf64_x86_64_special_sections[]=
 {
   { STRING_COMMA_LEN (".gnu.linkonce.lb"), -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},

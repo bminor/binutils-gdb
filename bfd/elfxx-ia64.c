@@ -804,7 +804,7 @@ elfNN_ia64_relax_br (bfd_byte *contents, bfd_vma off)
       /* It should never happen.  */
       abort ();
     }
-  
+
   /* We can turn br.cond/br.call into brl.cond/brl.call.  */
   if (!(IS_BR_COND (br_code) || IS_BR_CALL (br_code)))
     return FALSE;
@@ -2515,7 +2515,7 @@ has_space:
       memset (dyn_i, 0, sizeof (*dyn_i));
       dyn_i->got_offset = (bfd_vma) -1;
       dyn_i->addend = addend;
-      
+
       /* We increment count only since the new ones are unsorted and
 	 may have duplicate.  */
       (*count_p)++;
@@ -2968,7 +2968,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
     }
 
   /* Now, we only do lookup without insertion, which is very fast
-     with the modified get_dyn_sym_info.  */ 
+     with the modified get_dyn_sym_info.  */
   for (rel = relocs; rel < relend; ++rel)
     {
       struct elfNN_ia64_dyn_sym_info *dyn_i;
