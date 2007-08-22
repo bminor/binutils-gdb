@@ -1,5 +1,10 @@
 2007-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-ia64.c: Convert to ISO C90 prototypes.
+	(elfNN_hpux_backend_section_from_bfd_section): Make it static.
+
+2007-08-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c: Remove trailing whitespace.
 	* elfxx-ia64.c: Likewise.
 
