@@ -64,6 +64,11 @@ class General_options
   is_relocatable() const
   { return this->is_relocatable_; }
 
+  // --eh-frame-hdr: Whether to generate an exception frame header.
+  bool
+  create_eh_frame_hdr() const
+  { return this->create_eh_frame_hdr_; }
+
   // --rpath: The runtime search path.
   const Dir_list&
   rpath() const
@@ -108,6 +113,10 @@ class General_options
   { this->is_relocatable_ = true; }
 
   void
+  create_eh_frame_hdr()
+  { this->create_eh_frame_hdr_ = true; }
+
+  void
   add_to_rpath(const char* arg)
   { this->rpath_.push_back(arg); }
 
@@ -128,6 +137,7 @@ class General_options
   Dir_list search_path_;
   const char* output_file_name_;
   bool is_relocatable_;
+  bool create_eh_frame_hdr_;
   Dir_list rpath_;
   bool is_shared_;
   bool is_static_;

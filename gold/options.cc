@@ -252,6 +252,8 @@ options::Command_line_options::options[] =
   GENERAL_ARG('R', "rpath", N_("Add directory to runtime search path"),
               N_("-R DIR, -rpath DIR"), ONE_DASH,
               &General_options::add_to_rpath),
+  GENERAL_NOARG('\0', "eh-frame-hdr", N_("Create exception frame header"),
+                NULL, TWO_DASHES, &General_options::create_eh_frame_hdr),
   GENERAL_NOARG('\0', "shared", N_("Generate shared library"),
 		NULL, ONE_DASH, &General_options::set_shared),
   GENERAL_NOARG('\0', "static", N_("Do not link against shared libraries"),
@@ -285,6 +287,7 @@ General_options::General_options()
     search_path_(),
     output_file_name_("a.out"),
     is_relocatable_(false),
+    create_eh_frame_hdr_(false),
     rpath_(),
     is_shared_(false),
     is_static_(false)
