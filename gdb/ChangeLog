@@ -1,3 +1,7 @@
+2007-08-21  Michael Snyder  <msnyder@access-company.com>
+
+	* valops.c (find_overload_match): Guard against NULL.
+
 2007-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS (Patch Champions): Remove self.
@@ -7,7 +11,7 @@
 	* cli/cli-script.c (read_command_lines): Call dont_repeat for each
 	line.
 
-2007-08-18  Michael Snyder  <msnyder@svkmacdonelllnx>
+2007-08-18  Michael Snyder  <msnyder@access-company.com>
 
 	* stabsread.c (dbx_lookup_type): Memory leak.
 

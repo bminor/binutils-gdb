@@ -1895,6 +1895,7 @@ find_overload_match (struct type **arg_types, int nargs,
   /* Get the list of overloaded methods or functions.  */
   if (method)
     {
+      gdb_assert (obj);
       obj_type_name = TYPE_NAME (value_type (obj));
       /* Hack: evaluate_subexp_standard often passes in a pointer
          value rather than the object itself, so try again.  */
