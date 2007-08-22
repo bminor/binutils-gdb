@@ -337,6 +337,14 @@ class Symbol
 		|| this->type_ == elfcpp::STT_COMMON));
   }
 
+  // Return whether this symbol can be seen outside this object.
+  bool
+  is_externally_visible() const
+  {
+    return (this->visibility_ == elfcpp::STV_DEFAULT
+            || this->visibility_ == elfcpp::STV_PROTECTED);
+  }
+
   // Return whether there should be a warning for references to this
   // symbol.
   bool

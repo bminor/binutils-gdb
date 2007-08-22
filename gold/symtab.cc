@@ -1001,7 +1001,10 @@ Symbol_table::set_dynsym_indexes(const General_options* options,
       // some symbols appear more than once in the symbol table, with
       // and without a version.
 
-      if (!sym->needs_dynsym_entry())
+      if (!sym->needs_dynsym_entry()
+          && (!options->export_dynamic()
+              || !sym->in_reg()
+              || !sym->is_externally_visible()))
 	sym->set_dynsym_index(-1U);
       else if (!sym->has_dynsym_index())
 	{

@@ -138,6 +138,7 @@ help(int, char**, char*, gold::Command_line*)
 		}
 	      printf(options[j].help_output);
 	      len += std::strlen(options[i].help_output);
+              comma = true;
 	    }
 	  else
 	    {
@@ -150,6 +151,7 @@ help(int, char**, char*, gold::Command_line*)
 		    }
 		  printf("-%c", options[j].short_option);
 		  len += 2;
+                  comma = true;
 		}
 
 	      if (options[j].long_option != NULL)
@@ -171,13 +173,14 @@ help(int, char**, char*, gold::Command_line*)
 		    }
 		  printf("%s", options[j].long_option);
 		  len += std::strlen(options[j].long_option);
+                  comma = true;
 		}
 	    }
 	  ++j;
 	}
       while (j < options_size && options[j].doc == NULL);
 
-      if (len > 30)
+      if (len >= 30)
 	{
 	  printf("\n");
 	  len = 0;
@@ -225,12 +228,14 @@ const options::One_option
 options::Command_line_options::options[] =
 {
   SPECIAL('l', "library", N_("Search for library LIBNAME"),
-	  N_("-lLIBNAME --library LIBNAME"), TWO_DASHES,
+	  N_("-lLIBNAME, --library LIBNAME"), TWO_DASHES,
 	  &library),
   SPECIAL('(', "start-group", N_("Start a library search group"), NULL,
 	  TWO_DASHES, &start_group),
   SPECIAL(')', "end-group", N_("End a library search group"), NULL,
 	  TWO_DASHES, &end_group),
+  GENERAL_NOARG('E', "export-dynamic", N_("Export all dynamic symbols"),
+                NULL, TWO_DASHES, &General_options::set_export_dynamic),
   GENERAL_ARG('I', "dynamic-linker", N_("Set dynamic linker path"),
 	      N_("-I PROGRAM, --dynamic-linker PROGRAM"), TWO_DASHES,
 	      &General_options::set_dynamic_linker),
@@ -252,10 +257,10 @@ options::Command_line_options::options[] =
   GENERAL_NOARG('\0', "static", N_("Do not link against shared libraries"),
 		NULL, ONE_DASH, &General_options::set_static),
   POSDEP_NOARG('\0', "as-needed",
-	       N_("Only set DT_NEEDED for following dynamic libs if used"),
+	       N_("Only set DT_NEEDED for dynamic libs if used"),
 	       NULL, TWO_DASHES, &Position_dependent_options::set_as_needed),
   POSDEP_NOARG('\0', "no-as-needed",
-	       N_("Always DT_NEEDED for following dynamic libs (default)"),
+	       N_("Always DT_NEEDED for dynamic libs (default)"),
 	       NULL, TWO_DASHES, &Position_dependent_options::clear_as_needed),
   POSDEP_NOARG('\0', "whole-archive",
                N_("Include all archive contents"),
@@ -275,7 +280,8 @@ const int options::Command_line_options::options_size =
 // The default values for the general options.
 
 General_options::General_options()
-  : dynamic_linker_(NULL),
+  : export_dynamic_(false),
+    dynamic_linker_(NULL),
     search_path_(),
     output_file_name_("a.out"),
     is_relocatable_(false),

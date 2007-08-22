@@ -37,6 +37,11 @@ class General_options
  public:
   General_options();
 
+  // -E: export dynamic symbols.
+  bool
+  export_dynamic() const
+  { return this->export_dynamic_; }
+
   // -I: dynamic linker name.
   const char*
   dynamic_linker() const
@@ -83,6 +88,10 @@ class General_options
   friend class options::Command_line_options;
 
   void
+  set_export_dynamic()
+  { this->export_dynamic_ = true; }
+
+  void
   set_dynamic_linker(const char* arg)
   { this->dynamic_linker_ = arg; }
 
@@ -114,6 +123,7 @@ class General_options
   ignore(const char*)
   { }
 
+  bool export_dynamic_;
   const char* dynamic_linker_;
   Dir_list search_path_;
   const char* output_file_name_;
