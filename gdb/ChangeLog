@@ -1,3 +1,9 @@
+2007-08-17  Joel Brobecker  <brobecker@adacore.com>
+
+	Switch the license of all .c files to GPLv3.
+	Switch the license of all .h files to GPLv3.
+	Switch the license of all .cc files to GPLv3.
+
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Switch license to GPLv3.
