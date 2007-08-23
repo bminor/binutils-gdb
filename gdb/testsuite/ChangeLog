@@ -1,5 +1,11 @@
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>
 
+	Switch the license of all .exp files to GPLv3.
+	Switch the license of all .f and .f90 files to GPLv3.
+	Switch the license of all .s and .S files to GPLv3.
+
+2007-08-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: Switch license to GPLv3.
 
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>
