@@ -2085,9 +2085,10 @@ proc default_gdb_init { args } {
     # with the appropriate multilib option.
     set gdb_wrapper_initialized 0
     
-    # Uh, this is lame. Really, really, really lame. But there's this *one*
-    # testcase that will fail in random places if we don't increase this.
-    match_max -d 20000
+    # Unlike most tests, we have a small number of tests that generate
+    # a very large amount of output.  We therefore increase the expect
+    # buffer size to be able to contain the entire test output.
+    match_max -d 30000
 
     # We want to add the name of the TCL testcase to the PASS/FAIL messages.
     if { [llength $args] > 0 } {
