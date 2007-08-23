@@ -1,4 +1,16 @@
-2007-08-17  Joel Brobecker  <brobecker@adacore.com>
+2007-08-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* config/djgpp/djconfig.sh: Switch license to GPLv3.
+	* copyright.sh: Likewise.
+	* gdb-events.sh: Likewise.
+	* gdb_gcore.sh: Likewise.
+	* gdb_mbuild.sh: Likewise.
+	* gdbarch.sh: Likewise.
+	* observer.sh: Likewise.
+	* features/feature_to_c.sh: Likewise.
+	* regformats/regdat.sh: Likewise.
+
+2007-08-23  Joel Brobecker  <brobecker@adacore.com>
 
 	Switch the license of all .c files to GPLv3.
 	Switch the license of all .h files to GPLv3.
