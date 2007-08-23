@@ -1,3 +1,7 @@
+2007-08-23  Joel Brobecker  <brobecker@adacore.com>
+
+	Switch the licensing to GPLv3 for all .ads and .adb files.
+
 2007-08-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/callfuncs.exp (do_function_calls): Use t_double_int
