@@ -32,7 +32,7 @@ Key to Flags:
 .*
 
 Elf file type is EXEC \(Executable file\)
-Entry point 0x8049178
+Entry point 0x8049188
 There are 6 program headers, starting at offset [0-9]+
 
 Program Headers:
@@ -137,7 +137,7 @@ Symbol table '.symtab' contains 70 entries:
  +[0-9]+: 00000058 +0 TLS +GLOBAL HIDDEN +9 sh7
  +[0-9]+: 0000005c +0 TLS +GLOBAL HIDDEN +9 sh8
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +9 sg1
- +[0-9]+: 0+8049178 +0 FUNC +GLOBAL DEFAULT +8 _start
+ +[0-9]+: 0+8049188 +0 FUNC +GLOBAL DEFAULT +8 _start
  +[0-9]+: 0000004c +0 TLS +GLOBAL HIDDEN +9 sh4
  +[0-9]+: 00000078 +0 TLS +GLOBAL DEFAULT +10 bg7
  +[0-9]+: 00000050 +0 TLS +GLOBAL HIDDEN +9 sh5

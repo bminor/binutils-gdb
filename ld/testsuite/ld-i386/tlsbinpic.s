@@ -162,6 +162,11 @@ fn2:
 	movl	%gs:(%edx), %edx
 	nop;nop;nop;nop
 
+	/* GD -> IE because variable is not defined in executable */
+	leal	sG1@tlsgd(%ebx), %eax
+	call	___tls_get_addr@plt
+	nop;nop;nop;nop;nop
+
 	movl    -4(%ebp), %ebx
 	leave
 	ret

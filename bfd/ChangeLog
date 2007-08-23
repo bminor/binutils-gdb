@@ -1,3 +1,30 @@
+2007-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c: Include "bfd_stdint.h".
+	(elf_i386_rtype_to_howto): New function.
+	(elf_i386_info_to_howto_rel): Use it.
+	(x86_64_opcode16): New union type.
+	(elf_i386_check_tls_transition): New function.
+	(elf_i386_tls_transition): Updated to check transition and
+	issue an error if a transition isn't supported.
+	(elf_i386_check_relocs): Return FALSE if
+	elf_i386_tls_transition returns FALSE.
+	(elf_i386_gc_sweep_hook): Likewise.
+	(elf_i386_relocate_section): Likewise. Remove BFD_ASSERT
+	on TLS transitions.
+
+	* elf64-x86-64.c: Include "bfd_stdint.h".
+	(x86_64_opcode16): New union type.
+	(x86_64_opcode32): Likewise.
+	(elf64_x86_64_check_tls_transition): New function.
+	(elf64_x86_64_tls_transition): Updated to check transition and
+	issue an error if a transition isn't supported.
+	(elf64_x86_64_check_relocs): Return FALSE if
+	elf64_x86_64_tls_transition returns FALSE.
+	(elf64_x86_64_gc_sweep_hook): Likewise.
+	(elf64_x86_64_relocate_section): Likewise. Remove BFD_ASSERT
+	on TLS transitions.
+
 2007-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c: Convert to ISO C90 prototypes.

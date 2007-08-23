@@ -25,6 +25,7 @@
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+#include "bfd_stdint.h"
 
 #include "elf/x86-64.h"
 
@@ -712,27 +713,262 @@ elf64_x86_64_elf_object_p (bfd *abfd)
   return TRUE;
 }
 
-static int
-elf64_x86_64_tls_transition (struct bfd_link_info *info, int r_type,
+typedef union
+  {
+    unsigned char c[2];
+    uint16_t i;
+  }
+x86_64_opcode16;
+
+typedef union
+  {
+    unsigned char c[4];
+    uint32_t i;
+  }
+x86_64_opcode32;
+
+/* Return TRUE if the TLS access code sequence support transition
+   from R_TYPE.  */
+
+static bfd_boolean
+elf64_x86_64_check_tls_transition (bfd *abfd, asection *sec,
+				   bfd_byte *contents,
+				   Elf_Internal_Shdr *symtab_hdr,
+				   struct elf_link_hash_entry **sym_hashes,
+				   unsigned int r_type,
+				   const Elf_Internal_Rela *rel,
+				   const Elf_Internal_Rela *relend)
+{
+  unsigned int val;
+  unsigned long r_symndx;
+  struct elf_link_hash_entry *h;
+  bfd_vma offset;
+
+  /* Get the section contents.  */
+  if (contents == NULL)
+    {
+      if (elf_section_data (sec)->this_hdr.contents != NULL)
+	contents = elf_section_data (sec)->this_hdr.contents;
+      else
+	{
+	  /* FIXME: How to better handle error condition?  */
+	  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
+	    return FALSE;
+
+	  /* Cache the section contents for elf_link_input_bfd.  */
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	}
+    }
+
+  offset = rel->r_offset;
+  switch (r_type)
+    {
+    case R_X86_64_TLSGD:
+    case R_X86_64_TLSLD:
+      if ((rel + 1) >= relend)
+	return FALSE;
+
+      if (r_type == R_X86_64_TLSGD)
+	{
+	  /* Check transition from GD access model.  Only
+		.byte 0x66; leaq foo@tlsgd(%rip), %rdi
+		.word 0x6666; rex64; call __tls_get_addr
+	     can transit to different access model.  */
+
+	  static x86_64_opcode32 leaq = { { 0x66, 0x48, 0x8d, 0x3d } },
+				 call = { { 0x66, 0x66, 0x48, 0xe8 } };
+	  if (offset < 4
+	      || (offset + 12) > sec->size
+	      || bfd_get_32 (abfd, contents + offset - 4) != leaq.i
+	      || bfd_get_32 (abfd, contents + offset + 4) != call.i)
+	    return FALSE;
+	}
+      else
+	{
+	  /* Check transition from LD access model.  Only
+		leaq foo@tlsld(%rip), %rdi;
+		call __tls_get_addr
+	     can transit to different access model.  */
+
+	  static x86_64_opcode32 ld = { { 0x48, 0x8d, 0x3d, 0xe8 } };
+	  x86_64_opcode32 op;
+
+	  if (offset < 3 || (offset + 9) > sec->size)
+	    return FALSE;
+
+	  op.i = bfd_get_32 (abfd, contents + offset - 3);
+	  op.c[3] = bfd_get_8 (abfd, contents + offset + 4);
+	  if (op.i != ld.i)
+	    return FALSE;
+	}
+
+      r_symndx = ELF64_R_SYM (rel[1].r_info);
+      if (r_symndx < symtab_hdr->sh_info)
+	return FALSE;
+
+      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+      return (h != NULL
+	      && h->root.root.string != NULL
+	      && (ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PC32
+		  || ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32)
+	      && (strcmp (h->root.root.string, "__tls_get_addr") == 0));
+
+    case R_X86_64_GOTTPOFF:
+      /* Check transition from IE access model:
+		movq foo@gottpoff(%rip), %reg
+		addq foo@gottpoff(%rip), %reg
+       */
+
+      if (offset < 3 || (offset + 4) > sec->size)
+	return FALSE;
+
+      val = bfd_get_8 (abfd, contents + offset - 3);
+      if (val != 0x48 && val != 0x4c)
+	return FALSE;
+
+      val = bfd_get_8 (abfd, contents + offset - 2);
+      if (val != 0x8b && val != 0x03)
+	return FALSE;
+
+      val = bfd_get_8 (abfd, contents + offset - 1);
+      return (val & 0xc7) == 5;
+
+    case R_X86_64_GOTPC32_TLSDESC:
+      /* Check transition from GDesc access model:
+		leaq x@tlsdesc(%rip), %rax
+
+	 Make sure it's a leaq adding rip to a 32-bit offset
+	 into any register, although it's probably almost always
+	 going to be rax.  */
+
+      if (offset < 3 || (offset + 4) > sec->size)
+	return FALSE;
+
+      val = bfd_get_8 (abfd, contents + offset - 3);
+      if ((val & 0xfb) != 0x48)
+	return FALSE;
+
+      if (bfd_get_8 (abfd, contents + offset - 2) != 0x8d)
+	return FALSE;
+
+      val = bfd_get_8 (abfd, contents + offset - 1);
+      return (val & 0xc7) == 0x05;
+
+    case R_X86_64_TLSDESC_CALL:
+      /* Check transition from GDesc access model:
+		call *x@tlsdesc(%rax)
+       */
+      if (offset + 2 <= sec->size)
+	{
+	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
+	  static x86_64_opcode16 call = { { 0xff, 0x10 } };
+	  return bfd_get_16 (abfd, contents + offset) == call.i;
+	}
+
+      return FALSE;
+
+    default:
+      abort ();
+    }
+}
+
+/* Return TRUE if the TLS access transition is OK or no transition
+   will be performed.  Update R_TYPE if there is a transition.  */
+
+static bfd_boolean
+elf64_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
+			     asection *sec, bfd_byte *contents,
+			     Elf_Internal_Shdr *symtab_hdr,
+			     struct elf_link_hash_entry **sym_hashes,
+			     unsigned int *r_type, int tls_type,
+			     const Elf_Internal_Rela *rel,
+			     const Elf_Internal_Rela *relend,
 			     struct elf_link_hash_entry *h)
 {
-  if (info->shared)
-    return r_type;
+  unsigned int from_type = *r_type;
+  unsigned int to_type = from_type;
+  bfd_boolean check = TRUE;
 
-  switch (r_type)
+  switch (from_type)
     {
     case R_X86_64_TLSGD:
     case R_X86_64_GOTPC32_TLSDESC:
     case R_X86_64_TLSDESC_CALL:
     case R_X86_64_GOTTPOFF:
-      if (h == NULL)
-	return R_X86_64_TPOFF32;
-      return R_X86_64_GOTTPOFF;
+      if (!info->shared)
+	{
+	  if (h == NULL)
+	    to_type = R_X86_64_TPOFF32;
+	  else
+	    to_type = R_X86_64_GOTTPOFF;
+	}
+
+      /* When we are called from elf64_x86_64_relocate_section,
+	 CONTENTS isn't NULL and there may be additional transitions
+	 based on TLS_TYPE.  */
+      if (contents != NULL)
+	{
+	  unsigned int new_to_type = to_type;
+
+	  if (!info->shared
+	      && h != NULL
+	      && h->dynindx == -1
+	      && tls_type == GOT_TLS_IE)
+	    new_to_type = R_X86_64_TPOFF32;
+
+	  if (to_type == R_X86_64_TLSGD
+	      || to_type == R_X86_64_GOTPC32_TLSDESC
+	      || to_type == R_X86_64_TLSDESC_CALL)
+	    {
+	      if (tls_type == GOT_TLS_IE)
+		new_to_type = R_X86_64_GOTTPOFF;
+	    }
+
+	  /* We checked the transition before when we were called from
+	     elf64_x86_64_check_relocs.  We only want to check the new
+	     transition which hasn't been checked before.  */
+	  check = new_to_type != to_type && from_type == to_type;
+	  to_type = new_to_type;
+	}
+
+      break;
+
     case R_X86_64_TLSLD:
-      return R_X86_64_TPOFF32;
+      if (!info->shared)
+	to_type = R_X86_64_TPOFF32;
+      break;
+
+    default:
+      return TRUE;
     }
 
-   return r_type;
+  /* Return TRUE if there is no transition.  */
+  if (from_type == to_type)
+    return TRUE;
+
+  /* Check if the transition can be performed.  */
+  if (check
+      && ! elf64_x86_64_check_tls_transition (abfd, sec, contents,
+					      symtab_hdr, sym_hashes,
+					      from_type, rel, relend))
+    {
+      const reloc_howto_type *from, *to;
+
+      from = elf64_x86_64_rtype_to_howto (abfd, from_type);
+      to = elf64_x86_64_rtype_to_howto (abfd, to_type);
+
+      (*_bfd_error_handler)
+	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
+	   "in section `%A' failed"),
+	 abfd, sec, from->name, to->name,
+	 h ? h->root.root.string : "a local symbol",
+	 (unsigned long) rel->r_offset);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  *r_type = to_type;
+  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase, and
@@ -740,7 +976,8 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, int r_type,
    linkage table, and dynamic reloc sections.  */
 
 static bfd_boolean
-elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
+elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+			   asection *sec,
 			   const Elf_Internal_Rela *relocs)
 {
   struct elf64_x86_64_link_hash_table *htab;
@@ -786,7 +1023,12 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
-      r_type = elf64_x86_64_tls_transition (info, r_type, h);
+      if (! elf64_x86_64_tls_transition (info, abfd, sec, NULL,
+					 symtab_hdr, sym_hashes,
+					 &r_type, GOT_UNKNOWN,
+					 rel, rel_end, h))
+	return FALSE;
+
       switch (r_type)
 	{
 	case R_X86_64_TLSLD:
@@ -1173,7 +1415,8 @@ elf64_x86_64_gc_mark_hook (asection *sec,
 
 static bfd_boolean
 elf64_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
-			    asection *sec, const Elf_Internal_Rela *relocs)
+			    asection *sec,
+			    const Elf_Internal_Rela *relocs)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -1216,7 +1459,12 @@ elf64_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	}
 
       r_type = ELF64_R_TYPE (rel->r_info);
-      r_type = elf64_x86_64_tls_transition (info, r_type, h);
+      if (! elf64_x86_64_tls_transition (info, abfd, sec, NULL,
+					 symtab_hdr, sym_hashes,
+					 &r_type, GOT_UNKNOWN,
+					 rel, relend, h))
+	return FALSE;
+
       switch (r_type)
 	{
 	case R_X86_64_TLSLD:
@@ -2502,67 +2750,38 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_X86_64_GOTPC32_TLSDESC:
 	case R_X86_64_TLSDESC_CALL:
 	case R_X86_64_GOTTPOFF:
-	  r_type = elf64_x86_64_tls_transition (info, r_type, h);
 	  tls_type = GOT_UNKNOWN;
 	  if (h == NULL && local_got_offsets)
 	    tls_type = elf64_x86_64_local_got_tls_type (input_bfd) [r_symndx];
 	  else if (h != NULL)
-	    {
-	      tls_type = elf64_x86_64_hash_entry (h)->tls_type;
-	      if (!info->shared && h->dynindx == -1 && tls_type == GOT_TLS_IE)
-		r_type = R_X86_64_TPOFF32;
-	    }
-	  if (r_type == R_X86_64_TLSGD
-	      || r_type == R_X86_64_GOTPC32_TLSDESC
-	      || r_type == R_X86_64_TLSDESC_CALL)
-	    {
-	      if (tls_type == GOT_TLS_IE)
-		r_type = R_X86_64_GOTTPOFF;
-	    }
+	    tls_type = elf64_x86_64_hash_entry (h)->tls_type;
+
+	  if (! elf64_x86_64_tls_transition (info, input_bfd,
+					     input_section, contents,
+					     symtab_hdr, sym_hashes,
+					     &r_type, tls_type, rel,
+					     relend, h))
+	      return FALSE;
 
 	  if (r_type == R_X86_64_TPOFF32)
 	    {
+	      bfd_vma roff = rel->r_offset;
+
 	      BFD_ASSERT (! unresolved_reloc);
+
 	      if (ELF64_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
 		{
-		  unsigned int i;
-		  static unsigned char tlsgd[8]
-		    = { 0x66, 0x48, 0x8d, 0x3d, 0x66, 0x66, 0x48, 0xe8 };
-		  unsigned long tls_r_symndx;
-		  struct elf_link_hash_entry *tls_h;
-
 		  /* GD->LE transition.
 		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
 		     .word 0x6666; rex64; call __tls_get_addr
 		     Change it into:
 		     movq %fs:0, %rax
 		     leaq foo@tpoff(%rax), %rax */
-		  BFD_ASSERT (rel->r_offset >= 4);
-		  for (i = 0; i < 4; i++)
-		    BFD_ASSERT (bfd_get_8 (input_bfd,
-					   contents + rel->r_offset - 4 + i)
-				== tlsgd[i]);
-		  BFD_ASSERT (rel->r_offset + 12 <= input_section->size);
-		  for (i = 0; i < 4; i++)
-		    BFD_ASSERT (bfd_get_8 (input_bfd,
-					   contents + rel->r_offset + 4 + i)
-				== tlsgd[i+4]);
-		  BFD_ASSERT (rel + 1 < relend);
-		  tls_r_symndx = ELF64_R_SYM (rel[1].r_info);
-		  BFD_ASSERT (tls_r_symndx >= symtab_hdr->sh_info);
-		  tls_h = sym_hashes[tls_r_symndx - symtab_hdr->sh_info];
-		  BFD_ASSERT (tls_h != NULL
-			      && tls_h->root.root.string != NULL
-			      && strcmp (tls_h->root.root.string,
-					 "__tls_get_addr") == 0);
-		  BFD_ASSERT ((! info->shared
-			       && ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PC32)
-			      || ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
-		  memcpy (contents + rel->r_offset - 4,
+		  memcpy (contents + roff - 4,
 			  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
 			  16);
 		  bfd_put_32 (output_bfd, tpoff (info, relocation),
-			      contents + rel->r_offset + 8);
+			      contents + roff + 8);
 		  /* Skip R_X86_64_PC32/R_X86_64_PLT32.  */
 		  rel++;
 		  continue;
@@ -2575,26 +2794,13 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 		     Change it to:
 		     movl $x@tpoff, %rax
-
-		     Registers other than %rax may be set up here.  */
+		   */
 
 		  unsigned int val, type, type2;
-		  bfd_vma roff;
 
-		  /* First, make sure it's a leaq adding rip to a
-		     32-bit offset into any register, although it's
-		     probably almost always going to be rax.  */
-		  roff = rel->r_offset;
-		  BFD_ASSERT (roff >= 3);
 		  type = bfd_get_8 (input_bfd, contents + roff - 3);
-		  BFD_ASSERT ((type & 0xfb) == 0x48);
 		  type2 = bfd_get_8 (input_bfd, contents + roff - 2);
-		  BFD_ASSERT (type2 == 0x8d);
 		  val = bfd_get_8 (input_bfd, contents + roff - 1);
-		  BFD_ASSERT ((val & 0xc7) == 0x05);
-		  BFD_ASSERT (roff + 4 <= input_section->size);
-
-		  /* Now modify the instruction as appropriate.  */
 		  bfd_put_8 (output_bfd, 0x48 | ((type >> 2) & 1),
 			     contents + roff - 3);
 		  bfd_put_8 (output_bfd, 0xc7, contents + roff - 2);
@@ -2610,29 +2816,13 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		     It's originally:
 		     call *(%rax)
 		     Turn it into:
-		     nop; nop.  */
-
-		  unsigned int val, type;
-		  bfd_vma roff;
-
-		  /* First, make sure it's a call *(%rax).  */
-		  roff = rel->r_offset;
-		  BFD_ASSERT (roff + 2 <= input_section->size);
-		  type = bfd_get_8 (input_bfd, contents + roff);
-		  BFD_ASSERT (type == 0xff);
-		  val = bfd_get_8 (input_bfd, contents + roff + 1);
-		  BFD_ASSERT (val == 0x10);
-
-		  /* Now modify the instruction as appropriate.  Use
-		     xchg %ax,%ax instead of 2 nops.  */
+		     xchg %ax,%ax.  */
 		  bfd_put_8 (output_bfd, 0x66, contents + roff);
 		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 		  continue;
 		}
-	      else
+	      else if (ELF64_R_TYPE (rel->r_info) == R_X86_64_GOTTPOFF)
 		{
-		  unsigned int val, type, reg;
-
 		  /* IE->LE transition:
 		     Originally it can be one of:
 		     movq foo@gottpoff(%rip), %reg
@@ -2641,25 +2831,23 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		     movq $foo, %reg
 		     leaq foo(%reg), %reg
 		     addq $foo, %reg.  */
-		  BFD_ASSERT (rel->r_offset >= 3);
-		  val = bfd_get_8 (input_bfd, contents + rel->r_offset - 3);
-		  BFD_ASSERT (val == 0x48 || val == 0x4c);
-		  type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
-		  BFD_ASSERT (type == 0x8b || type == 0x03);
-		  reg = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
-		  BFD_ASSERT ((reg & 0xc7) == 5);
+
+		  unsigned int val, type, reg;
+
+		  val = bfd_get_8 (input_bfd, contents + roff - 3);
+		  type = bfd_get_8 (input_bfd, contents + roff - 2);
+		  reg = bfd_get_8 (input_bfd, contents + roff - 1);
 		  reg >>= 3;
-		  BFD_ASSERT (rel->r_offset + 4 <= input_section->size);
 		  if (type == 0x8b)
 		    {
 		      /* movq */
 		      if (val == 0x4c)
 			bfd_put_8 (output_bfd, 0x49,
-				   contents + rel->r_offset - 3);
+				   contents + roff - 3);
 		      bfd_put_8 (output_bfd, 0xc7,
-				 contents + rel->r_offset - 2);
+				 contents + roff - 2);
 		      bfd_put_8 (output_bfd, 0xc0 | reg,
-				 contents + rel->r_offset - 1);
+				 contents + roff - 1);
 		    }
 		  else if (reg == 4)
 		    {
@@ -2667,27 +2855,29 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			 special  */
 		      if (val == 0x4c)
 			bfd_put_8 (output_bfd, 0x49,
-				   contents + rel->r_offset - 3);
+				   contents + roff - 3);
 		      bfd_put_8 (output_bfd, 0x81,
-				 contents + rel->r_offset - 2);
+				 contents + roff - 2);
 		      bfd_put_8 (output_bfd, 0xc0 | reg,
-				 contents + rel->r_offset - 1);
+				 contents + roff - 1);
 		    }
 		  else
 		    {
 		      /* addq -> leaq */
 		      if (val == 0x4c)
 			bfd_put_8 (output_bfd, 0x4d,
-				   contents + rel->r_offset - 3);
+				   contents + roff - 3);
 		      bfd_put_8 (output_bfd, 0x8d,
-				 contents + rel->r_offset - 2);
+				 contents + roff - 2);
 		      bfd_put_8 (output_bfd, 0x80 | reg | (reg << 3),
-				 contents + rel->r_offset - 1);
+				 contents + roff - 1);
 		    }
 		  bfd_put_32 (output_bfd, tpoff (info, relocation),
-			      contents + rel->r_offset);
+			      contents + roff);
 		  continue;
 		}
+	      else
+		BFD_ASSERT (FALSE);
 	    }
 
 	  if (htab->sgot == NULL)
@@ -2814,151 +3004,104 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  + htab->sgot->output_offset + off;
 	      unresolved_reloc = FALSE;
 	    }
-	  else if (ELF64_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
-	    {
-	      unsigned int i;
-	      static unsigned char tlsgd[8]
-		= { 0x66, 0x48, 0x8d, 0x3d, 0x66, 0x66, 0x48, 0xe8 };
-
-	      /* GD->IE transition.
-		 .byte 0x66; leaq foo@tlsgd(%rip), %rdi
-		 .word 0x6666; rex64; call __tls_get_addr@plt
-		 Change it into:
-		 movq %fs:0, %rax
-		 addq foo@gottpoff(%rip), %rax */
-	      BFD_ASSERT (rel->r_offset >= 4);
-	      for (i = 0; i < 4; i++)
-		BFD_ASSERT (bfd_get_8 (input_bfd,
-				       contents + rel->r_offset - 4 + i)
-			    == tlsgd[i]);
-	      BFD_ASSERT (rel->r_offset + 12 <= input_section->size);
-	      for (i = 0; i < 4; i++)
-		BFD_ASSERT (bfd_get_8 (input_bfd,
-				       contents + rel->r_offset + 4 + i)
-			    == tlsgd[i+4]);
-	      BFD_ASSERT (rel + 1 < relend);
-	      BFD_ASSERT (ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
-	      memcpy (contents + rel->r_offset - 4,
-		      "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
-		      16);
-
-	      relocation = (htab->sgot->output_section->vma
-			    + htab->sgot->output_offset + off
-			    - rel->r_offset
-			    - input_section->output_section->vma
-			    - input_section->output_offset
-			    - 12);
-	      bfd_put_32 (output_bfd, relocation,
-			  contents + rel->r_offset + 8);
-	      /* Skip R_X86_64_PLT32.  */
-	      rel++;
-	      continue;
-	    }
-	  else if (ELF64_R_TYPE (rel->r_info) == R_X86_64_GOTPC32_TLSDESC)
-	    {
-	      /* GDesc -> IE transition.
-		 It's originally something like:
-		 leaq x@tlsdesc(%rip), %rax
-
-		 Change it to:
-		 movq x@gottpoff(%rip), %rax # before nop; nop
-
-		 Registers other than %rax may be set up here.  */
-
-	      unsigned int val, type, type2;
-	      bfd_vma roff;
-
-	      /* First, make sure it's a leaq adding rip to a 32-bit
-		 offset into any register, although it's probably
-		 almost always going to be rax.  */
-	      roff = rel->r_offset;
-	      BFD_ASSERT (roff >= 3);
-	      type = bfd_get_8 (input_bfd, contents + roff - 3);
-	      BFD_ASSERT ((type & 0xfb) == 0x48);
-	      type2 = bfd_get_8 (input_bfd, contents + roff - 2);
-	      BFD_ASSERT (type2 == 0x8d);
-	      val = bfd_get_8 (input_bfd, contents + roff - 1);
-	      BFD_ASSERT ((val & 0xc7) == 0x05);
-	      BFD_ASSERT (roff + 4 <= input_section->size);
-
-	      /* Now modify the instruction as appropriate.  */
-	      /* To turn a leaq into a movq in the form we use it, it
-		 suffices to change the second byte from 0x8d to
-		 0x8b.  */
-	      bfd_put_8 (output_bfd, 0x8b, contents + roff - 2);
-
-	      bfd_put_32 (output_bfd,
-			  htab->sgot->output_section->vma
-			  + htab->sgot->output_offset + off
-			  - rel->r_offset
-			  - input_section->output_section->vma
-			  - input_section->output_offset
-			  - 4,
-			  contents + roff);
-	      continue;
-	    }
-	  else if (ELF64_R_TYPE (rel->r_info) == R_X86_64_TLSDESC_CALL)
-	    {
-	      /* GDesc -> IE transition.
-		 It's originally:
-		 call *(%rax)
-
-		 Change it to:
-		 nop; nop.  */
-
-	      unsigned int val, type;
-	      bfd_vma roff;
-
-	      /* First, make sure it's a call *(%eax).  */
-	      roff = rel->r_offset;
-	      BFD_ASSERT (roff + 2 <= input_section->size);
-	      type = bfd_get_8 (input_bfd, contents + roff);
-	      BFD_ASSERT (type == 0xff);
-	      val = bfd_get_8 (input_bfd, contents + roff + 1);
-	      BFD_ASSERT (val == 0x10);
-
-	      /* Now modify the instruction as appropriate.  Use
-		 xchg %ax,%ax instead of 2 nops.  */
-	      bfd_put_8 (output_bfd, 0x66, contents + roff);
-	      bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
-
-	      continue;
-	    }
 	  else
-	    BFD_ASSERT (FALSE);
+	    {
+	      bfd_vma roff = rel->r_offset;
+
+	      if (ELF64_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
+		{
+		  /* GD->IE transition.
+		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
+		     .word 0x6666; rex64; call __tls_get_addr@plt
+		     Change it into:
+		     movq %fs:0, %rax
+		     addq foo@gottpoff(%rip), %rax */
+		  memcpy (contents + roff - 4,
+			  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
+			  16);
+
+		  relocation = (htab->sgot->output_section->vma
+				+ htab->sgot->output_offset + off
+				- roff
+				- input_section->output_section->vma
+				- input_section->output_offset
+				- 12);
+		  bfd_put_32 (output_bfd, relocation,
+			      contents + roff + 8);
+		  /* Skip R_X86_64_PLT32.  */
+		  rel++;
+		  continue;
+		}
+	      else if (ELF64_R_TYPE (rel->r_info) == R_X86_64_GOTPC32_TLSDESC)
+		{
+		  /* GDesc -> IE transition.
+		     It's originally something like:
+		     leaq x@tlsdesc(%rip), %rax
+
+		     Change it to:
+		     movq x@gottpoff(%rip), %rax # before xchg %ax,%ax
+		   */
+
+		  unsigned int val, type, type2;
+
+		  type = bfd_get_8 (input_bfd, contents + roff - 3);
+		  type2 = bfd_get_8 (input_bfd, contents + roff - 2);
+		  val = bfd_get_8 (input_bfd, contents + roff - 1);
+
+		  /* Now modify the instruction as appropriate. To
+		     turn a leaq into a movq in the form we use it, it
+		     suffices to change the second byte from 0x8d to
+		     0x8b.  */
+		  bfd_put_8 (output_bfd, 0x8b, contents + roff - 2);
+
+		  bfd_put_32 (output_bfd,
+			      htab->sgot->output_section->vma
+			      + htab->sgot->output_offset + off
+			      - rel->r_offset
+			      - input_section->output_section->vma
+			      - input_section->output_offset
+			      - 4,
+			      contents + roff);
+		  continue;
+		}
+	      else if (ELF64_R_TYPE (rel->r_info) == R_X86_64_TLSDESC_CALL)
+		{
+		  /* GDesc -> IE transition.
+		     It's originally:
+		     call *(%rax)
+
+		     Change it to:
+		     xchg %ax,%ax.  */
+
+		  unsigned int val, type;
+
+		  type = bfd_get_8 (input_bfd, contents + roff);
+		  val = bfd_get_8 (input_bfd, contents + roff + 1);
+		  bfd_put_8 (output_bfd, 0x66, contents + roff);
+		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
+		  continue;
+		}
+	      else
+		BFD_ASSERT (FALSE);
+	    }
 	  break;
 
 	case R_X86_64_TLSLD:
-	  if (! info->shared)
-	    {
-	      unsigned long tls_r_symndx;
-	      struct elf_link_hash_entry *tls_h;
+	  if (! elf64_x86_64_tls_transition (info, input_bfd,
+					     input_section, contents,
+					     symtab_hdr, sym_hashes,
+					     &r_type, GOT_UNKNOWN,
+					     rel, relend, h))
+	    return FALSE;
 
+	  if (r_type != R_X86_64_TLSLD)
+	    {
 	      /* LD->LE transition:
-		 Ensure it is:
 		 leaq foo@tlsld(%rip), %rdi; call __tls_get_addr.
 		 We change it into:
 		 .word 0x6666; .byte 0x66; movl %fs:0, %rax.  */
-	      BFD_ASSERT (rel->r_offset >= 3);
-	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset - 3)
-			  == 0x48);
-	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset - 2)
-			  == 0x8d);
-	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset - 1)
-			  == 0x3d);
-	      BFD_ASSERT (rel->r_offset + 9 <= input_section->size);
-	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset + 4)
-			  == 0xe8);
-	      BFD_ASSERT (rel + 1 < relend);
-	      tls_r_symndx = ELF64_R_SYM (rel[1].r_info);
-	      BFD_ASSERT (tls_r_symndx >= symtab_hdr->sh_info);
-	      tls_h = sym_hashes[tls_r_symndx - symtab_hdr->sh_info];
-	      BFD_ASSERT (tls_h != NULL
-			  && tls_h->root.root.string != NULL
-			  && strcmp (tls_h->root.root.string,
-				     "__tls_get_addr") == 0);
-	      BFD_ASSERT (ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PC32
-			  || ELF64_R_TYPE (rel[1].r_info) == R_X86_64_PLT32);
+
+	      BFD_ASSERT (r_type == R_X86_64_TPOFF32);
 	      memcpy (contents + rel->r_offset - 3,
 		      "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
 	      /* Skip R_X86_64_PC32/R_X86_64_PLT32.  */

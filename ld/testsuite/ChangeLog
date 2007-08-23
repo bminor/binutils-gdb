@@ -1,3 +1,13 @@
+2007-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/tlsbinpic.s: Add a new GD -> IE test.
+
+	* ld-i386/tlsgd1.s: Add a new GD -> LE test.
+
+	* ld-i386/tlsbin.dd: Updated.
+	* ld-i386/tlsbin.rd: Likewise.
+	* ld-i386/tlsgd1.dd: Likewise.
+
 2007-08-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-sparc/tlssunnopic32.dd: Fix up #target.

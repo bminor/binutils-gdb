@@ -25,6 +25,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf-vxworks.h"
+#include "bfd_stdint.h"
 
 /* 386 uses REL relocations instead of RELA.  */
 #define USE_REL	1
@@ -345,12 +346,9 @@ elf_i386_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
-static void
-elf_i386_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
-			    arelent *cache_ptr,
-			    Elf_Internal_Rela *dst)
+static reloc_howto_type *
+elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
 {
-  unsigned int r_type = ELF32_R_TYPE (dst->r_info);
   unsigned int indx;
 
   if ((indx = r_type) >= R_386_standard
@@ -365,7 +363,17 @@ elf_i386_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
 			     abfd, (int) r_type);
       indx = R_386_NONE;
     }
-  cache_ptr->howto = &elf_howto_table[indx];
+  BFD_ASSERT (elf_howto_table [indx].type == r_type);
+  return &elf_howto_table[indx];
+}
+
+static void
+elf_i386_info_to_howto_rel (bfd *abfd ATTRIBUTE_UNUSED,
+			    arelent *cache_ptr,
+			    Elf_Internal_Rela *dst)
+{
+  unsigned int r_type = ELF32_R_TYPE (dst->r_info);
+  cache_ptr->howto = elf_i386_rtype_to_howto (abfd, r_type);
 }
 
 /* Return whether a symbol name implies a local label.  The UnixWare
@@ -893,32 +901,293 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
     _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
-static int
-elf_i386_tls_transition (struct bfd_link_info *info, int r_type,
+typedef union 
+  {
+    unsigned char c[2];
+    uint16_t i;
+  }
+i386_opcode16;
+
+/* Return TRUE if the TLS access code sequence support transition
+   from R_TYPE.  */
+
+static bfd_boolean
+elf_i386_check_tls_transition (bfd *abfd, asection *sec,
+			       bfd_byte *contents,
+			       Elf_Internal_Shdr *symtab_hdr,
+			       struct elf_link_hash_entry **sym_hashes,
+			       unsigned int r_type,
+			       const Elf_Internal_Rela *rel,
+			       const Elf_Internal_Rela *relend)
+{
+  unsigned int val, type;
+  unsigned long r_symndx;
+  struct elf_link_hash_entry *h;
+  bfd_vma offset;
+
+  /* Get the section contents.  */
+  if (contents == NULL)
+    {
+      if (elf_section_data (sec)->this_hdr.contents != NULL)
+	contents = elf_section_data (sec)->this_hdr.contents;
+      else
+	{
+	  /* FIXME: How to better handle error condition?  */
+	  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
+	    return FALSE;
+
+	  /* Cache the section contents for elf_link_input_bfd.  */
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	}
+    }
+
+  offset = rel->r_offset;
+  switch (r_type)
+    {
+    case R_386_TLS_GD:
+    case R_386_TLS_LDM:
+      if (offset < 2 || (rel + 1) >= relend)
+	return FALSE;
+
+      type = bfd_get_8 (abfd, contents + offset - 2);
+      if (r_type == R_386_TLS_GD)
+	{
+	  /* Check transition from LD access model.  Only
+		leal foo@tlsgd(,%reg,1), %eax; call ___tls_get_addr
+		leal foo@tlsgd(%reg), %eax; call ___tls_get_addr; nop
+	     can transit to different access model.  */
+	  if ((offset + 10) > sec->size ||
+	      (type != 0x8d && type != 0x04))
+	    return FALSE;
+
+	  val = bfd_get_8 (abfd, contents + offset - 1);
+	  if (type == 0x04)
+	    {
+	      /* leal foo@tlsgd(,%reg,1), %eax; call ___tls_get_addr */
+	      if (offset < 3)
+		return FALSE;
+
+	      if (bfd_get_8 (abfd, contents + offset - 3) != 0x8d)
+		return FALSE;
+
+	      if ((val & 0xc7) != 0x05 || val == (4 << 3))
+		return FALSE;
+	    }
+	  else
+	    {
+	      /* leal foo@tlsgd(%reg), %eax; call ___tls_get_addr; nop  */
+	      if ((val & 0xf8) != 0x80 || (val & 7) == 4)
+		return FALSE;
+
+	      if (bfd_get_8 (abfd, contents + offset + 9) != 0x90)
+		return FALSE;
+	    }
+	}
+      else
+	{
+	  /* Check transition from LD access model.  Only
+		leal foo@tlsgd(%reg), %eax; call ___tls_get_addr
+	     can transit to different access model.  */
+	  if (type != 0x8d || (offset + 9) > sec->size)
+	    return FALSE;
+
+	  val = bfd_get_8 (abfd, contents + offset - 1);
+	  if ((val & 0xf8) != 0x80 || (val & 7) == 4)
+	    return FALSE;
+	}
+
+      if (bfd_get_8 (abfd, contents + offset + 4) != 0xe8)
+	return FALSE;
+
+      r_symndx = ELF32_R_SYM (rel[1].r_info);
+      if (r_symndx < symtab_hdr->sh_info)
+	return FALSE;
+
+      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+      return (h != NULL
+	      && h->root.root.string != NULL
+	      && (ELF32_R_TYPE (rel[1].r_info) == R_386_PC32
+		  || ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32)
+	      && (strcmp (h->root.root.string, "___tls_get_addr") == 0));
+
+    case R_386_TLS_IE:
+      /* Check transition from IE access model:
+		movl foo@indntpoff(%rip), %eax
+		movl foo@indntpoff(%rip), %reg
+		addl foo@indntpoff(%rip), %reg
+       */
+
+      if (offset < 1 || (offset + 4) > sec->size)
+	return FALSE;
+
+      /* Check "movl foo@tpoff(%rip), %eax" first.  */
+      val = bfd_get_8 (abfd, contents + offset - 1);
+      if (val == 0xa1)
+	return TRUE;
+
+      if (offset < 2)
+	return FALSE;
+
+      /* Check movl|addl foo@tpoff(%rip), %reg.   */
+      type = bfd_get_8 (abfd, contents + offset - 2);
+      return ((type == 0x8b || type == 0x03)
+	      && (val & 0xc7) == 0x05);
+
+    case R_386_TLS_GOTIE:
+    case R_386_TLS_IE_32:
+      /* Check transition from {IE_32,GOTIE} access model:
+		subl foo@{tpoff,gontoff}(%reg1), %reg2
+		movl foo@{tpoff,gontoff}(%reg1), %reg2
+		addl foo@{tpoff,gontoff}(%reg1), %reg2
+       */
+
+      if (offset < 2 || (offset + 4) > sec->size)
+	return FALSE;
+
+      val = bfd_get_8 (abfd, contents + offset - 1);
+      if ((val & 0xc0) != 0x80 || (val & 7) == 4)
+	return FALSE;
+
+      type = bfd_get_8 (abfd, contents + offset - 2);
+      return type == 0x8b || type == 0x2b || type == 0x03;
+
+    case R_386_TLS_GOTDESC:
+      /* Check transition from GDesc access model:
+		leal x@tlsdesc(%ebx), %eax
+
+	 Make sure it's a leal adding ebx to a 32-bit offset
+	 into any register, although it's probably almost always
+	 going to be eax.  */
+
+      if (offset < 2 || (offset + 4) > sec->size)
+	return FALSE;
+
+      if (bfd_get_8 (abfd, contents + offset - 2) != 0x8d)
+	return FALSE;
+
+      val = bfd_get_8 (abfd, contents + offset - 1);
+      return (val & 0xc7) == 0x83;
+
+    case R_386_TLS_DESC_CALL:
+      /* Check transition from GDesc access model:
+		call *x@tlsdesc(%rax)
+       */
+      if (offset + 2 <= sec->size)
+	{
+	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
+	  static i386_opcode16 call = { { 0xff, 0x10 } };
+	  return bfd_get_16 (abfd, contents + offset) == call.i;
+	}
+
+      return FALSE;
+
+    default:
+      abort ();
+    }
+}
+
+/* Return TRUE if the TLS access transition is OK or no transition
+   will be performed.  Update R_TYPE if there is a transition.  */
+
+static bfd_boolean
+elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
+			 asection *sec, bfd_byte *contents,
+			 Elf_Internal_Shdr *symtab_hdr,
+			 struct elf_link_hash_entry **sym_hashes,
+			 unsigned int *r_type, int tls_type,
+			 const Elf_Internal_Rela *rel,
+			 const Elf_Internal_Rela *relend,
 			 struct elf_link_hash_entry *h)
 {
-  if (info->shared)
-    return r_type;
+  unsigned int from_type = *r_type;
+  unsigned int to_type = from_type;
+  bfd_boolean check = TRUE;
 
-  switch (r_type)
+  switch (from_type)
     {
     case R_386_TLS_GD:
     case R_386_TLS_GOTDESC:
     case R_386_TLS_DESC_CALL:
     case R_386_TLS_IE_32:
-      if (h == NULL)
-	return R_386_TLS_LE_32;
-      return R_386_TLS_IE_32;
     case R_386_TLS_IE:
     case R_386_TLS_GOTIE:
-      if (h == NULL)
-	return R_386_TLS_LE_32;
-      return r_type;
+      if (!info->shared)
+	{
+	  if (h == NULL)
+	    to_type = R_386_TLS_LE_32;
+	  else if (from_type != R_386_TLS_IE
+		   && from_type != R_386_TLS_GOTIE)
+	    to_type = R_386_TLS_IE_32;
+	}
+
+      /* When we are called from elf_i386_relocate_section, CONTENTS
+	 isn't NULL and there may be additional transitions based on
+	 TLS_TYPE.  */
+      if (contents != NULL)
+	{
+	  unsigned int new_to_type = to_type;
+
+	  if (!info->shared
+	      && h != NULL
+	      && h->dynindx == -1
+	      && (tls_type & GOT_TLS_IE))
+	    new_to_type = R_386_TLS_LE_32;
+
+	  if (to_type == R_386_TLS_GD
+	      || to_type == R_386_TLS_GOTDESC
+	      || to_type == R_386_TLS_DESC_CALL)
+	    {
+	      if (tls_type == GOT_TLS_IE_POS)
+		new_to_type = R_386_TLS_GOTIE;
+	      else if (tls_type & GOT_TLS_IE)
+		new_to_type = R_386_TLS_IE_32;
+	    }
+
+	  /* We checked the transition before when we were called from
+	     elf_i386_check_relocs.  We only want to check the new
+	     transition which hasn't been checked before.  */
+	  check = new_to_type != to_type && from_type == to_type;
+	  to_type = new_to_type;
+	}
+
+      break;
+
     case R_386_TLS_LDM:
-      return R_386_TLS_LE_32;
+      if (!info->shared)
+	to_type = R_386_TLS_LE_32;
+      break;
+
+    default:
+      return TRUE;
     }
 
-  return r_type;
+  /* Return TRUE if there is no transition.  */
+  if (from_type == to_type)
+    return TRUE;
+
+  /* Check if the transition can be performed.  */
+  if (check
+      && ! elf_i386_check_tls_transition (abfd, sec, contents,
+					  symtab_hdr, sym_hashes,
+					  from_type, rel, relend))
+    {
+      const reloc_howto_type *from, *to;
+
+      from = elf_i386_rtype_to_howto (abfd, from_type);
+      to = elf_i386_rtype_to_howto (abfd, to_type);
+
+      (*_bfd_error_handler)
+	(_("%B: TLS transition from %s to %s against `%s' at 0x%lx "
+	   "in section `%A' failed"),
+	 abfd, sec, from->name, to->name,
+	 h ? h->root.root.string : "a local symbol",
+	 (unsigned long) rel->r_offset);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  *r_type = to_type;
+  return TRUE;
 }
 
 /* Look through the relocs for a section during the first phase, and
@@ -975,7 +1244,11 @@ elf_i386_check_relocs (bfd *abfd,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
-      r_type = elf_i386_tls_transition (info, r_type, h);
+      if (! elf_i386_tls_transition (info, abfd, sec, NULL,
+				     symtab_hdr, sym_hashes,
+				     &r_type, GOT_UNKNOWN,
+				     rel, rel_end, h)) 
+	return FALSE;
 
       switch (r_type)
 	{
@@ -1364,7 +1637,12 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
-      r_type = elf_i386_tls_transition (info, r_type, h);
+      if (! elf_i386_tls_transition (info, abfd, sec, NULL,
+				     symtab_hdr, sym_hashes,
+				     &r_type, GOT_UNKNOWN,
+				     rel, relend, h)) 
+	return FALSE;
+
       switch (r_type)
 	{
 	case R_386_TLS_LDM:
@@ -2624,98 +2902,50 @@ elf_i386_relocate_section (bfd *output_bfd,
 	case R_386_TLS_DESC_CALL:
 	case R_386_TLS_IE_32:
 	case R_386_TLS_GOTIE:
-	  r_type = elf_i386_tls_transition (info, r_type, h);
 	  tls_type = GOT_UNKNOWN;
 	  if (h == NULL && local_got_offsets)
 	    tls_type = elf_i386_local_got_tls_type (input_bfd) [r_symndx];
 	  else if (h != NULL)
-	    {
-	      tls_type = elf_i386_hash_entry(h)->tls_type;
-	      if (!info->shared && h->dynindx == -1 && (tls_type & GOT_TLS_IE))
-		r_type = R_386_TLS_LE_32;
-	    }
+	    tls_type = elf_i386_hash_entry(h)->tls_type;
 	  if (tls_type == GOT_TLS_IE)
 	    tls_type = GOT_TLS_IE_NEG;
-	  if (r_type == R_386_TLS_GD
-	      || r_type == R_386_TLS_GOTDESC
-	      || r_type == R_386_TLS_DESC_CALL)
-	    {
-	      if (tls_type == GOT_TLS_IE_POS)
-		r_type = R_386_TLS_GOTIE;
-	      else if (tls_type & GOT_TLS_IE)
-		r_type = R_386_TLS_IE_32;
-	    }
+
+	  if (! elf_i386_tls_transition (info, input_bfd,
+					 input_section, contents,
+					 symtab_hdr, sym_hashes,
+					 &r_type, tls_type, rel,
+					 relend, h))
+	    return FALSE;
 
 	  if (r_type == R_386_TLS_LE_32)
 	    {
 	      BFD_ASSERT (! unresolved_reloc);
 	      if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
 		{
-		  unsigned int val, type;
+		  unsigned int type;
 		  bfd_vma roff;
-		  unsigned long tls_r_symndx;
-		  struct elf_link_hash_entry *tls_h;
 
 		  /* GD->LE transition.  */
-		  BFD_ASSERT (rel->r_offset >= 2);
 		  type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
-		  BFD_ASSERT (type == 0x8d || type == 0x04);
-		  BFD_ASSERT (rel->r_offset + 9 <= input_section->size);
-		  BFD_ASSERT (bfd_get_8 (input_bfd,
-					 contents + rel->r_offset + 4)
-			      == 0xe8);
-		  BFD_ASSERT (rel + 1 < relend);
-		  tls_r_symndx = ELF32_R_SYM (rel[1].r_info);
-		  BFD_ASSERT (tls_r_symndx >= symtab_hdr->sh_info);
-		  tls_h = sym_hashes[tls_r_symndx - symtab_hdr->sh_info];
-		  BFD_ASSERT (tls_h != NULL
-			      && tls_h->root.root.string != NULL
-			      && strcmp (tls_h->root.root.string,
-					 "___tls_get_addr") == 0);
-		  BFD_ASSERT ((! info->shared
-			       && ELF32_R_TYPE (rel[1].r_info) == R_386_PC32)
-			      || ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32);
-		  roff = rel->r_offset + 5;
-		  val = bfd_get_8 (input_bfd,
-				   contents + rel->r_offset - 1);
 		  if (type == 0x04)
 		    {
 		      /* leal foo(,%reg,1), %eax; call ___tls_get_addr
 			 Change it into:
 			 movl %gs:0, %eax; subl $foo@tpoff, %eax
 			 (6 byte form of subl).  */
-		      BFD_ASSERT (rel->r_offset >= 3);
-		      BFD_ASSERT (bfd_get_8 (input_bfd,
-					     contents + rel->r_offset - 3)
-				  == 0x8d);
-		      BFD_ASSERT ((val & 0xc7) == 0x05 && val != (4 << 3));
 		      memcpy (contents + rel->r_offset - 3,
 			      "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
+		      roff = rel->r_offset + 5;
 		    }
 		  else
 		    {
-		      BFD_ASSERT ((val & 0xf8) == 0x80 && (val & 7) != 4);
-		      if (rel->r_offset + 10 <= input_section->size
-			  && bfd_get_8 (input_bfd,
-					contents + rel->r_offset + 9) == 0x90)
-			{
-			  /* leal foo(%reg), %eax; call ___tls_get_addr; nop
-			     Change it into:
-			     movl %gs:0, %eax; subl $foo@tpoff, %eax
-			     (6 byte form of subl).  */
-			  memcpy (contents + rel->r_offset - 2,
-				  "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
-			  roff = rel->r_offset + 6;
-			}
-		      else
-			{
-			  /* leal foo(%reg), %eax; call ___tls_get_addr
-			     Change it into:
-			     movl %gs:0, %eax; subl $foo@tpoff, %eax
-			     (5 byte form of subl).  */
-			  memcpy (contents + rel->r_offset - 2,
-				  "\x65\xa1\0\0\0\0\x2d\0\0\0", 11);
-			}
+		      /* leal foo(%reg), %eax; call ___tls_get_addr; nop
+			 Change it into:
+			 movl %gs:0, %eax; subl $foo@tpoff, %eax
+			 (6 byte form of subl).  */
+		      memcpy (contents + rel->r_offset - 2,
+			      "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
+		      roff = rel->r_offset + 6;
 		    }
 		  bfd_put_32 (output_bfd, tpoff (info, relocation),
 			      contents + roff);
@@ -2733,19 +2963,11 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 		     Registers other than %eax may be set up here.  */
 
-		  unsigned int val, type;
+		  unsigned int val;
 		  bfd_vma roff;
 
-		  /* First, make sure it's a leal adding ebx to a
-		     32-bit offset into any register, although it's
-		     probably almost always going to be eax.  */
 		  roff = rel->r_offset;
-		  BFD_ASSERT (roff >= 2);
-		  type = bfd_get_8 (input_bfd, contents + roff - 2);
-		  BFD_ASSERT (type == 0x8d);
 		  val = bfd_get_8 (input_bfd, contents + roff - 1);
-		  BFD_ASSERT ((val & 0xc7) == 0x83);
-		  BFD_ASSERT (roff + 4 <= input_section->size);
 
 		  /* Now modify the instruction as appropriate.  */
 		  /* aoliva FIXME: remove the above and xor the byte
@@ -2762,28 +2984,18 @@ elf_i386_relocate_section (bfd *output_bfd,
 		     It's originally:
 		     call *(%eax)
 		     Turn it into:
-		     nop; nop  */
+		     xchg %ax,%ax  */
 
-		  unsigned int val, type;
 		  bfd_vma roff;
-
-		  /* First, make sure it's a call *(%eax).  */
+		  
 		  roff = rel->r_offset;
-		  BFD_ASSERT (roff + 2 <= input_section->size);
-		  type = bfd_get_8 (input_bfd, contents + roff);
-		  BFD_ASSERT (type == 0xff);
-		  val = bfd_get_8 (input_bfd, contents + roff + 1);
-		  BFD_ASSERT (val == 0x10);
-
-		  /* Now modify the instruction as appropriate.  Use
-		     xchg %ax,%ax instead of 2 nops.  */
 		  bfd_put_8 (output_bfd, 0x66, contents + roff);
 		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
 		  continue;
 		}
 	      else if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_IE)
 		{
-		  unsigned int val, type;
+		  unsigned int val;
 
 		  /* IE->LE transition:
 		     Originally it can be one of:
@@ -2794,9 +3006,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		     movl $foo, %eax
 		     movl $foo, %reg
 		     addl $foo, %reg.  */
-		  BFD_ASSERT (rel->r_offset >= 1);
 		  val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
-		  BFD_ASSERT (rel->r_offset + 4 <= input_section->size);
 		  if (val == 0xa1)
 		    {
 		      /* movl foo, %eax.  */
@@ -2805,14 +3015,14 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    }
 		  else
 		    {
-		      BFD_ASSERT (rel->r_offset >= 2);
+		      unsigned int type;
+
 		      type = bfd_get_8 (input_bfd,
 					contents + rel->r_offset - 2);
 		      switch (type)
 			{
 			case 0x8b:
 			  /* movl */
-			  BFD_ASSERT ((val & 0xc7) == 0x05);
 			  bfd_put_8 (output_bfd, 0xc7,
 				     contents + rel->r_offset - 2);
 			  bfd_put_8 (output_bfd,
@@ -2821,7 +3031,6 @@ elf_i386_relocate_section (bfd *output_bfd,
 			  break;
 			case 0x03:
 			  /* addl */
-			  BFD_ASSERT ((val & 0xc7) == 0x05);
 			  bfd_put_8 (output_bfd, 0x81,
 				     contents + rel->r_offset - 2);
 			  bfd_put_8 (output_bfd,
@@ -2850,11 +3059,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 		     subl $foo, %reg2
 		     movl $foo, %reg2 (6 byte form)
 		     addl $foo, %reg2.  */
-		  BFD_ASSERT (rel->r_offset >= 2);
 		  type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
 		  val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
-		  BFD_ASSERT (rel->r_offset + 4 <= input_section->size);
-		  BFD_ASSERT ((val & 0xc0) == 0x80 && (val & 7) != 4);
 		  if (type == 0x8b)
 		    {
 		      /* movl */
@@ -3055,38 +3261,21 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      bfd_vma roff;
 
 	      /* GD->IE transition.  */
-	      BFD_ASSERT (rel->r_offset >= 2);
 	      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
-	      BFD_ASSERT (type == 0x8d || type == 0x04);
-	      BFD_ASSERT (rel->r_offset + 9 <= input_section->size);
-	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset + 4)
-			  == 0xe8);
-	      BFD_ASSERT (rel + 1 < relend);
-	      BFD_ASSERT (ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32);
-	      roff = rel->r_offset - 3;
 	      val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
 	      if (type == 0x04)
 		{
 		  /* leal foo(,%reg,1), %eax; call ___tls_get_addr
 		     Change it into:
 		     movl %gs:0, %eax; subl $foo@gottpoff(%reg), %eax.  */
-		  BFD_ASSERT (rel->r_offset >= 3);
-		  BFD_ASSERT (bfd_get_8 (input_bfd,
-					 contents + rel->r_offset - 3)
-			      == 0x8d);
-		  BFD_ASSERT ((val & 0xc7) == 0x05 && val != (4 << 3));
 		  val >>= 3;
+		  roff = rel->r_offset - 3;
 		}
 	      else
 		{
 		  /* leal foo(%reg), %eax; call ___tls_get_addr; nop
 		     Change it into:
 		     movl %gs:0, %eax; subl $foo@gottpoff(%reg), %eax.  */
-		  BFD_ASSERT (rel->r_offset + 10 <= input_section->size);
-		  BFD_ASSERT ((val & 0xf8) == 0x80 && (val & 7) != 4);
-		  BFD_ASSERT (bfd_get_8 (input_bfd,
-					 contents + rel->r_offset + 9)
-			      == 0x90);
 		  roff = rel->r_offset - 2;
 		}
 	      memcpy (contents + roff,
@@ -3116,25 +3305,18 @@ elf_i386_relocate_section (bfd *output_bfd,
 		 leal x@tlsdesc(%ebx), %eax
 
 		 Change it to:
-		 movl x@gotntpoff(%ebx), %eax # before nop; nop
+		 movl x@gotntpoff(%ebx), %eax # before xchg %ax,%ax
 		 or:
 		 movl x@gottpoff(%ebx), %eax # before negl %eax
 
 		 Registers other than %eax may be set up here.  */
 
-	      unsigned int val, type;
 	      bfd_vma roff;
 
 	      /* First, make sure it's a leal adding ebx to a 32-bit
 		 offset into any register, although it's probably
 		 almost always going to be eax.  */
 	      roff = rel->r_offset;
-	      BFD_ASSERT (roff >= 2);
-	      type = bfd_get_8 (input_bfd, contents + roff - 2);
-	      BFD_ASSERT (type == 0x8d);
-	      val = bfd_get_8 (input_bfd, contents + roff - 1);
-	      BFD_ASSERT ((val & 0xc7) == 0x83);
-	      BFD_ASSERT (roff + 4 <= input_section->size);
 
 	      /* Now modify the instruction as appropriate.  */
 	      /* To turn a leal into a movl in the form we use it, it
@@ -3162,22 +3344,15 @@ elf_i386_relocate_section (bfd *output_bfd,
 		 call *(%eax)
 
 		 Change it to:
-		 nop; nop
+		 xchg %ax,%ax
 		 or
 		 negl %eax
 		 depending on how we transformed the TLS_GOTDESC above.
 	      */
 
-	      unsigned int val, type;
 	      bfd_vma roff;
 
-	      /* First, make sure it's a call *(%eax).  */
 	      roff = rel->r_offset;
-	      BFD_ASSERT (roff + 2 <= input_section->size);
-	      type = bfd_get_8 (input_bfd, contents + roff);
-	      BFD_ASSERT (type == 0xff);
-	      val = bfd_get_8 (input_bfd, contents + roff + 1);
-	      BFD_ASSERT (val == 0x10);
 
 	      /* Now modify the instruction as appropriate.  */
 	      if (tls_type != GOT_TLS_IE_NEG)
@@ -3200,35 +3375,20 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_386_TLS_LDM:
-	  if (! info->shared)
-	    {
-	      unsigned int val;
-	      unsigned long tls_r_symndx;
-	      struct elf_link_hash_entry *tls_h;
+	  if (! elf_i386_tls_transition (info, input_bfd,
+					 input_section, contents,
+					 symtab_hdr, sym_hashes,
+					 &r_type, GOT_UNKNOWN, rel,
+					 relend, h))
+	    return FALSE;
 
+	  if (r_type != R_386_TLS_LDM)
+	    {
 	      /* LD->LE transition:
-		 Ensure it is:
 		 leal foo(%reg), %eax; call ___tls_get_addr.
 		 We change it into:
 		 movl %gs:0, %eax; nop; leal 0(%esi,1), %esi.  */
-	      BFD_ASSERT (rel->r_offset >= 2);
-	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset - 2)
-			  == 0x8d);
-	      val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
-	      BFD_ASSERT ((val & 0xf8) == 0x80 && (val & 7) != 4);
-	      BFD_ASSERT (rel->r_offset + 9 <= input_section->size);
-	      BFD_ASSERT (bfd_get_8 (input_bfd, contents + rel->r_offset + 4)
-			  == 0xe8);
-	      BFD_ASSERT (rel + 1 < relend);
-	      tls_r_symndx = ELF32_R_SYM (rel[1].r_info);
-	      BFD_ASSERT (tls_r_symndx >= symtab_hdr->sh_info);
-	      tls_h = sym_hashes[tls_r_symndx - symtab_hdr->sh_info];
-	      BFD_ASSERT (tls_h != NULL
-			  && tls_h->root.root.string != NULL
-			  && strcmp (tls_h->root.root.string,
-				     "___tls_get_addr") == 0);
-	      BFD_ASSERT (ELF32_R_TYPE (rel[1].r_info) == R_386_PC32
-			  || ELF32_R_TYPE (rel[1].r_info) == R_386_PLT32);
+	      BFD_ASSERT (r_type == R_386_TLS_LE_32);
 	      memcpy (contents + rel->r_offset - 2,
 		      "\x65\xa1\0\0\0\0\x90\x8d\x74\x26", 11);
 	      /* Skip R_386_PC32/R_386_PLT32.  */
