@@ -19,12 +19,12 @@ BEGIN	{
 	  print "{";
 	  print "  immediate_quit++;";
 	}
-NR == 1,/^[ 	]*NO WARRANTY[ 	]*$/	{
+NR == 1,/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/	{
 	  if ($0 ~ //)
 	    {
 	      printf "  printf_filtered (\"\\n\");\n";
 	    }
-	  else if ($0 !~ /^[ 	]*NO WARRANTY[ 	]*$/) 
+	  else if ($0 !~ /^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/) 
 	    {
 	      printf "  printf_filtered (\"";
 	      for (i = 1; i < NF; i++)
@@ -32,7 +32,7 @@ NR == 1,/^[ 	]*NO WARRANTY[ 	]*$/	{
 	      printf "%s\\n\");\n", $NF;
 	    }
 	}
-/^[	 ]*NO WARRANTY[ 	]*$/	{
+/^[	 ]*15\. Disclaimer of Warranty\.[ 	]*$/	{
 	  print "  immediate_quit--;";
 	  print "}";
 	  print "";
@@ -41,7 +41,7 @@ NR == 1,/^[ 	]*NO WARRANTY[ 	]*$/	{
 	  print "{";
 	  print "  immediate_quit++;";
 	}
-/^[ 	]*NO WARRANTY[ 	]*$/, /^[ 	]*END OF TERMS AND CONDITIONS[ 	]*$/{  
+/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/, /^[ 	]*END OF TERMS AND CONDITIONS[ 	]*$/{  
 	  if (! ($0 ~ /^[ 	]*END OF TERMS AND CONDITIONS[ 	]*$/)) 
 	    {
 	      printf "  printf_filtered (\"";

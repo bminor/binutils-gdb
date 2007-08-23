@@ -1386,9 +1386,9 @@ doc/gdb.info:
 
 # Make copying.c from COPYING
 $(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ \
-		$(srcdir)/COPYING $(srcdir)/copying.awk
+		$(srcdir)/../COPYING3 $(srcdir)/copying.awk
 	awk -f $(srcdir)/copying.awk \
-		< $(srcdir)/COPYING > $(srcdir)/copying.tmp
+		< $(srcdir)/../COPYING3 > $(srcdir)/copying.tmp
 	mv $(srcdir)/copying.tmp $(srcdir)/copying.c
 
 version.c: Makefile version.in

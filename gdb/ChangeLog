@@ -1,5 +1,12 @@
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* Makefile.in (copying.c): Use the top-level COPYING3 as the file
+	that contains the GDB license.
+	* copying.awk: Adjust to the GPLv3 wording.
+	* copying.c: Regenerate.
+
+2007-08-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* copying.awk: Protoization, and i18n markup.
 
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>
