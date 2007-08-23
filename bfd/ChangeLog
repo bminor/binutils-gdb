@@ -1,5 +1,10 @@
 2007-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerated.
+
+2007-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c: Include "bfd_stdint.h".
 	(elf_i386_rtype_to_howto): New function.
 	(elf_i386_info_to_howto_rel): Use it.
