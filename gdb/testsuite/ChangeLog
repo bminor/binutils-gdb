@@ -1,5 +1,10 @@
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/default.exp: Adjust the expected output of "info
+	warranty" after the switch to GPLv3.
+
+2007-08-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* lib/gdb.exp (default_gdb_init): Increase expect buffer size
 	to 30000 (from 20000).
 
