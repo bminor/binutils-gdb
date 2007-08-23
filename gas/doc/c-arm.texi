@@ -403,8 +403,8 @@ be used to delete builtin in register name aliases (eg 'r0').  This
 should only be done if it is really necessary.
 
 @cindex @code{dn} and @code{qn} directives, ARM
-@item @var{name} .dn @var{register name} [@var{.type}] [@var{[index]}]
-@item @var{name} .qn @var{register name} [@var{.type}] [@var{[index]}]
+@item @var{name} .dn @var{register name} [@var{.type}] [[@var{index}]]
+@item @var{name} .qn @var{register name} [@var{.type}] [[@var{index}]]
 
 The @code{dn} and @code{qn} directives are used to create typed
 and/or indexed register aliases for use in Advanced SIMD Extension
