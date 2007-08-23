@@ -1,5 +1,9 @@
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* copying.awk: Protoization, and I18n markup.
+
+2007-08-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* config/djgpp/djconfig.sh: Switch license to GPLv3.
 	* copyright.sh: Likewise.
 	* gdb-events.sh: Likewise.
