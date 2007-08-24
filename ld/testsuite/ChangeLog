@@ -1,3 +1,34 @@
+2007-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp (i386tests): Add a test for TLS IE->LE
+	transition.
+	Run tlsie2, tlsie3, tlsie4 and tlsie5.
+
+	* ld-i386/tlsie1.dd: New file.
+	* ld-i386/tlsie1.s: Likewise.
+	* ld-i386/tlsie2.d: Likewise.
+	* ld-i386/tlsie2.s: Likewise.
+	* ld-i386/tlsie3.d: Likewise.
+	* ld-i386/tlsie3.s: Likewise.
+	* ld-i386/tlsie4.d: Likewise.
+	* ld-i386/tlsie4.s: Likewise.
+	* ld-i386/tlsie5.d: Likewise.
+	* ld-i386/tlsie5.s: Likewise.
+	* ld-x86-64/tlsgd2.d: Likewise.
+	* ld-x86-64/tlsgd2.s: Likewise.
+	* ld-x86-64/tlsgd3.d: Likewise.
+	* ld-x86-64/tlsgd3.s: Likewise.
+	* ld-x86-64/tlsie1.dd: Likewise.
+	* ld-x86-64/tlsie1.s: Likewise.
+	* ld-x86-64/tlsie2.d: Likewise.
+	* ld-x86-64/tlsie2.s: Likewise.
+	* ld-x86-64/tlsie3.d: Likewise.
+	* ld-x86-64/tlsie3.s: Likewise.
+
+	* ld-x86-64/x86-64.exp (x86_64tests): Add a test for TLS LD->LE
+	transition.
+	Run tlsgd2, tlsgd3, tlsie2 and tlsie3.
+
 2007-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/tlsbinpic.s: Add a new GD -> IE test.
