@@ -1,3 +1,8 @@
+2007-08-24  Aurelien Jarno  <aurel32@debian.org>
+
+	* config/tc-arm.c (md_apply_fix): Cast bfd_vma values to long
+	before printing them.
+
 2007-08-24  Anders Waldenborg  <anders@0x63.nu>
 	    Alan Modra  <amodra@bigpond.net.au>
 
