@@ -1,3 +1,16 @@
+2007-08-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* bfd/elf-bfd.h (struct elf_obj_tdata): New build_id_size, build_id.
+	* bfd/elf.c (elfcore_read_notes): Split to ...
+	(elf_read_notes) ... here ...
+	(elf_parse_notes): ... and here.  Check `bfd_get_format (abfd)' with
+	the former subfunctions called only for BFD_CORE.
+	Call ELFOBJ_GROK_GNU_NOTE for BFD_OBJECT files with the owner "GNU".
+	(_bfd_elf_make_section_from_shdr): Call ELF_PARSE_NOTES for SHT_NOTEs.
+	(bfd_section_from_phdr): Update the call for renamed ELFCORE_READ_NOTES.
+	(elfobj_grok_gnu_build_id, elfobj_grok_gnu_note): New functions.
+	Code advisory: Roland McGrath
+
 2007-08-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf64-mips.c (elf_backend_sign_extend_vma): Define.

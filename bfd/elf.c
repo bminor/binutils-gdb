@@ -48,7 +48,9 @@ static int elf_sort_sections (const void *, const void *);
 static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
 static bfd_boolean prep_headers (bfd *);
 static bfd_boolean swap_out_syms (bfd *, struct bfd_strtab_hash **, int) ;
-static bfd_boolean elfcore_read_notes (bfd *, file_ptr, bfd_size_type) ;
+static bfd_boolean elf_read_notes (bfd *, file_ptr, bfd_size_type) ;
+static bfd_boolean elf_parse_notes (bfd *abfd, char *buf, size_t size,
+				    file_ptr offset);
 
 /* Swap version information in and out.  The version information is
    currently size independent.  If that ever changes, this code will
@@ -898,6 +900,28 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 
   if (! bfd_set_section_flags (abfd, newsect, flags))
     return FALSE;
+
+  /* We do not parse the PT_NOTE segments as we are interested even in the
+     separate debug info files which may have the segments offsets corrupted.
+     PT_NOTEs from the core files are currently not parsed using BFD.  */
+  if (hdr->sh_type == SHT_NOTE)
+    {
+      char *contents;
+
+      contents = bfd_malloc (hdr->sh_size);
+      if (!contents)
+	return FALSE;
+
+      if (!bfd_get_section_contents (abfd, hdr->bfd_section, contents, 0,
+				     hdr->sh_size)
+	  || !elf_parse_notes (abfd, contents, hdr->sh_size, -1))
+	{
+	  free (contents);
+	  return FALSE;
+	}
+      
+      free (contents);
+    }
 
   if ((flags & SEC_ALLOC) != 0)
     {
@@ -2341,7 +2365,7 @@ bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index)
     case PT_NOTE:
       if (! _bfd_elf_make_section_from_phdr (abfd, hdr, index, "note"))
 	return FALSE;
-      if (! elfcore_read_notes (abfd, hdr->p_offset, hdr->p_filesz))
+      if (! elf_read_notes (abfd, hdr->p_offset, hdr->p_filesz))
 	return FALSE;
       return TRUE;
 
@@ -7713,6 +7737,32 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 }
 
 static bfd_boolean
+elfobj_grok_gnu_build_id (bfd *abfd, Elf_Internal_Note *note)
+{
+  elf_tdata (abfd)->build_id_size = note->descsz;
+  elf_tdata (abfd)->build_id = bfd_alloc (abfd, note->descsz);
+  if (elf_tdata (abfd)->build_id == NULL)
+    return FALSE;
+
+  memcpy (elf_tdata (abfd)->build_id, note->descdata, note->descsz);
+
+  return TRUE;
+}
+
+static bfd_boolean
+elfobj_grok_gnu_note (bfd *abfd, Elf_Internal_Note *note)
+{
+  switch (note->type)
+    {
+    default:
+      return TRUE;
+
+    case NT_GNU_BUILD_ID:
+      return elfobj_grok_gnu_build_id (abfd, note);
+    }
+}
+
+static bfd_boolean
 elfcore_netbsd_get_lwpid (Elf_Internal_Note *note, int *lwpidp)
 {
   char *cp;
@@ -8186,27 +8236,9 @@ elfcore_write_prxfpreg (bfd *abfd,
 }
 
 static bfd_boolean
-elfcore_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
+elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset)
 {
-  char *buf;
   char *p;
-
-  if (size <= 0)
-    return TRUE;
-
-  if (bfd_seek (abfd, offset, SEEK_SET) != 0)
-    return FALSE;
-
-  buf = bfd_malloc (size);
-  if (buf == NULL)
-    return FALSE;
-
-  if (bfd_bread (buf, size, abfd) != size)
-    {
-    error:
-      free (buf);
-      return FALSE;
-    }
 
   p = buf;
   while (p < buf + size)
@@ -8224,23 +8256,64 @@ elfcore_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
       in.descdata = in.namedata + BFD_ALIGN (in.namesz, 4);
       in.descpos = offset + (in.descdata - buf);
 
-      if (CONST_STRNEQ (in.namedata, "NetBSD-CORE"))
-	{
-	  if (! elfcore_grok_netbsd_note (abfd, &in))
-	    goto error;
-	}
-      else if (CONST_STRNEQ (in.namedata, "QNX"))
-	{
-	  if (! elfcore_grok_nto_note (abfd, &in))
-	    goto error;
-	}
-      else
-	{
-	  if (! elfcore_grok_note (abfd, &in))
-	    goto error;
+      switch (bfd_get_format (abfd))
+        {
+	default:
+	  return TRUE;
+
+	case bfd_core:
+	  if (CONST_STRNEQ (in.namedata, "NetBSD-CORE"))
+	    {
+	      if (! elfcore_grok_netbsd_note (abfd, &in))
+		return FALSE;
+	    }
+	  else if (CONST_STRNEQ (in.namedata, "QNX"))
+	    {
+	      if (! elfcore_grok_nto_note (abfd, &in))
+		return FALSE;
+	    }
+	  else
+	    {
+	      if (! elfcore_grok_note (abfd, &in))
+		return FALSE;
+	    }
+	  break;
+
+	case bfd_object:
+	  if (in.namesz == sizeof "GNU" && strcmp (in.namedata, "GNU") == 0)
+	    {
+	      if (! elfobj_grok_gnu_note (abfd, &in))
+		return FALSE;
+	    }
+	  break;
 	}
 
       p = in.descdata + BFD_ALIGN (in.descsz, 4);
+    }
+
+  return TRUE;
+}
+
+static bfd_boolean
+elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
+{
+  char *buf;
+
+  if (size <= 0)
+    return TRUE;
+
+  if (bfd_seek (abfd, offset, SEEK_SET) != 0)
+    return FALSE;
+
+  buf = bfd_malloc (size);
+  if (buf == NULL)
+    return FALSE;
+
+  if (bfd_bread (buf, size, abfd) != size
+      || !elf_parse_notes (abfd, buf, size, offset))
+    {
+      free (buf);
+      return FALSE;
     }
 
   free (buf);

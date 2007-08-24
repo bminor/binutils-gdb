@@ -1472,6 +1472,10 @@ struct elf_obj_tdata
   /* Called at the end of _bfd_elf_write_object_contents if not NULL.  */
   bfd_boolean (*after_write_object_contents) (bfd *);
   void *after_write_object_contents_info;
+
+  /* NT_GNU_BUILD_ID note type.  */
+  bfd_size_type build_id_size;
+  bfd_byte *build_id;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
