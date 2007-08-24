@@ -18824,7 +18824,7 @@ md_apply_fix (fixS *	fixP,
          if (encoded_addend == (unsigned int) FAIL)
 	   as_bad_where (fixP->fx_file, fixP->fx_line,
 	                 _("the offset 0x%08lX is not representable"),
-                         addend_abs);
+                         (unsigned long) addend_abs);
 
          /* Extract the instruction.  */
          insn = md_chars_to_number (buf, INSN_SIZE);
@@ -18864,7 +18864,7 @@ md_apply_fix (fixS *	fixP,
           if (addend_abs >= 0x1000)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 	  	          _("bad offset 0x%08lX (only 12 bits available for the magnitude)"),
-                          addend_abs);
+                          (unsigned long) addend_abs);
 
           /* Extract the instruction.  */
           insn = md_chars_to_number (buf, INSN_SIZE);
@@ -18903,7 +18903,7 @@ md_apply_fix (fixS *	fixP,
           if (addend_abs >= 0x100)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 	  	          _("bad offset 0x%08lX (only 8 bits available for the magnitude)"),
-                          addend_abs);
+                          (unsigned long) addend_abs);
 
           /* Extract the instruction.  */
           insn = md_chars_to_number (buf, INSN_SIZE);
@@ -18943,12 +18943,12 @@ md_apply_fix (fixS *	fixP,
           if (addend_abs & 0x3)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 	  	          _("bad offset 0x%08lX (must be word-aligned)"),
-                          addend_abs);
+                          (unsigned long) addend_abs);
 
           if ((addend_abs >> 2) > 0xff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 	  	          _("bad offset 0x%08lX (must be an 8-bit number of words)"),
-                          addend_abs);
+                          (unsigned long) addend_abs);
 
           /* Extract the instruction.  */
           insn = md_chars_to_number (buf, INSN_SIZE);
