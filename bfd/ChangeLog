@@ -1,3 +1,7 @@
+2007-08-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf64-mips.c (elf_backend_sign_extend_vma): Define.
+
 2007-08-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfxx-ia64.c (elfNN_ia64_add_symbol_hook): Warning fix.
