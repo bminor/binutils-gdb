@@ -1,7 +1,7 @@
 2007-08-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
-	* bfd/elf-bfd.h (struct elf_obj_tdata): New build_id_size, build_id.
-	* bfd/elf.c (elfcore_read_notes): Split to ...
+	* elf-bfd.h (struct elf_obj_tdata): New BUILD_ID_SIZE, BUILD_ID.
+	* elf.c (elfcore_read_notes): Split to ...
 	(elf_read_notes) ... here ...
 	(elf_parse_notes): ... and here.  Check `bfd_get_format (abfd)' with
 	the former subfunctions called only for BFD_CORE.
