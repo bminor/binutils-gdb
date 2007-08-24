@@ -1467,10 +1467,13 @@ elfNN_ia64_final_write_processing (bfd *abfd,
    file.  We use it to put .comm items in .sbss, and not .bss.  */
 
 static bfd_boolean
-elfNN_ia64_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
+elfNN_ia64_add_symbol_hook (bfd *abfd,
+			    struct bfd_link_info *info,
 			    Elf_Internal_Sym *sym,
-			    const char **namep, flagword *flagsp,
-			    asection **secp, bfd_vma *valp)
+			    const char **namep ATTRIBUTE_UNUSED,
+			    flagword *flagsp ATTRIBUTE_UNUSED,
+			    asection **secp,
+			    bfd_vma *valp)
 {
   if (sym->st_shndx == SHN_COMMON
       && !info->relocatable
