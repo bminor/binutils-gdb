@@ -2761,7 +2761,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 					     symtab_hdr, sym_hashes,
 					     &r_type, tls_type, rel,
 					     relend, h))
-	      return FALSE;
+	    return FALSE;
 
 	  if (r_type == R_X86_64_TPOFF32)
 	    {

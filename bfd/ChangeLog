@@ -1,3 +1,8 @@
+2007-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Adjust
+	indentation.
+
 2007-08-24  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* elf.c (elfcore_grok_win32pstatus): Remove HAVE_WIN32_PSTATUS_T
