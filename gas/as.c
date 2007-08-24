@@ -244,6 +244,8 @@ Options:\n\
   fprintf (stream, _("\
   -D                      produce assembler debugging messages\n"));
   fprintf (stream, _("\
+  --debug-prefix-map OLD=NEW  Map OLD to NEW in debug information\n"));
+  fprintf (stream, _("\
   --defsym SYM=VAL        define symbol SYM to given value\n"));
 #ifdef USE_EMULATIONS
   {
@@ -407,6 +409,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_DUMPCONFIG,
       OPTION_VERBOSE,
       OPTION_EMULATION,
+      OPTION_DEBUG_PREFIX_MAP,
       OPTION_DEFSYM,
       OPTION_INSTTBL,
       OPTION_LISTING_LHS_WIDTH,
@@ -445,6 +448,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"a", optional_argument, NULL, 'a'}
     /* Handle -al=<FILE>.  */
     ,{"al", optional_argument, NULL, OPTION_AL}
+    ,{"debug-prefix-map", required_argument, NULL, OPTION_DEBUG_PREFIX_MAP}
     ,{"defsym", required_argument, NULL, OPTION_DEFSYM}
     ,{"dump-config", no_argument, NULL, OPTION_DUMPCONFIG}
     ,{"emulation", required_argument, NULL, OPTION_EMULATION}
@@ -619,6 +623,10 @@ This program has absolutely no warranty.\n"));
 	  fprintf (stderr, _("bfd-target = %s\n"), TARGET_FORMAT);
 #endif
 	  exit (EXIT_SUCCESS);
+
+	case OPTION_DEBUG_PREFIX_MAP:
+	  add_debug_prefix_map (optarg);
+	  break;
 
 	case OPTION_DEFSYM:
 	  {

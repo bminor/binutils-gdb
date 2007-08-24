@@ -1,3 +1,18 @@
+2007-08-24  Joseph Myers  <joseph@codesourcery.com>
+            Paul Brook  <paul@codesourcery.com>
+
+	* remap.c: New.
+	* as.h (remap_debug_filename, add_debug_prefix_map): Declare.
+	* as.c (show_usage): Document --debug-prefix-map option.
+	(parse_args): Handle --debug-prefix-map.
+	* dwarf2dbg.c (out_file_list, out_debug_info): Remap debug paths.
+	* stabs.c (stabs_generate_asm_file): Remap debug paths.
+	* Makefile.am (GAS_CFILES): Add remap.c
+	(GENERIC_OBJS): Add remap.o.
+	Regenerate dependencies.
+	* Makefile.in: Regenerate.
+	* doc/as.texinfo (--debug-prefix-map): Document.
+
 2007-08-24  Aurelien Jarno  <aurel32@debian.org>
 
 	* config/tc-arm.c (md_apply_fix): Cast bfd_vma values to long

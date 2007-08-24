@@ -226,6 +226,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @smallexample
 @c man begin SYNOPSIS
 @value{AS} [@b{-a}[@b{cdhlns}][=@var{file}]] [@b{--alternate}] [@b{-D}]
+ [@b{--debug-prefix-map} @var{old}=@var{new}]
  [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}]
  [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
  [@b{-K}] [@b{-L}] [@b{--listing-lhs-width}=@var{NUM}]
@@ -500,6 +501,10 @@ Begin in alternate macro mode.
 @item -D
 Ignored.  This option is accepted for script compatibility with calls to
 other assemblers.
+
+@item --debug-prefix-map @var{old}=@var{new}
+When assembling files in directory @file{@var{old}}, record debugging
+information describing them as in @file{@var{new}} instead.
 
 @item --defsym @var{sym}=@var{value}
 Define the symbol @var{sym} to be @var{value} before assembling the input file.

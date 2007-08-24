@@ -195,6 +195,7 @@ GAS_CFILES = \
 	messages.c \
 	output-file.c \
 	read.c \
+	remap.c \
 	sb.c \
 	stabs.c \
 	subsegs.c \
@@ -439,6 +440,7 @@ GENERIC_OBJS = \
 	messages.o \
 	output-file.o \
 	read.o \
+	remap.o \
 	subsegs.o \
 	symbols.o \
 	write.o \
@@ -1490,6 +1492,11 @@ DEPOBJ_bfin_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-bfin.h dwarf2dbg.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
+DEPOBJ_cr16_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-cr16.h dwarf2dbg.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
 DEPOBJ_cris_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-cris.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/obstack.h
@@ -2158,6 +2165,7 @@ messages.o: messages.c
 output-file.o: output-file.c output-file.h
 read.o: read.c $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   sb.h macro.h ecoff.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h
+remap.o: remap.c
 sb.o: sb.c sb.h
 stabs.o: stabs.c $(INCDIR)/obstack.h subsegs.h ecoff.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def

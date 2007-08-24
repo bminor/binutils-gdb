@@ -492,9 +492,10 @@ stabs_generate_asm_file (void)
   as_where (&file, &lineno);
   if (use_gnu_debug_info_extensions)
     {
-      char *dir, *dir2;
+      const char *dir;
+      char *dir2;
 
-      dir = getpwd ();
+      dir = remap_debug_filename (getpwd ());
       dir2 = alloca (strlen (dir) + 2);
       sprintf (dir2, "%s%s", dir, "/");
       generate_asm_file (N_SO, dir2);

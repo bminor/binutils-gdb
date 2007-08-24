@@ -76,9 +76,9 @@ am__objects_1 = app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
 	flonum-mult.$(OBJEXT) frags.$(OBJEXT) hash.$(OBJEXT) \
 	input-file.$(OBJEXT) input-scrub.$(OBJEXT) listing.$(OBJEXT) \
 	literal.$(OBJEXT) macro.$(OBJEXT) messages.$(OBJEXT) \
-	output-file.$(OBJEXT) read.$(OBJEXT) sb.$(OBJEXT) \
-	stabs.$(OBJEXT) subsegs.$(OBJEXT) symbols.$(OBJEXT) \
-	write.$(OBJEXT)
+	output-file.$(OBJEXT) read.$(OBJEXT) remap.$(OBJEXT) \
+	sb.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) \
+	symbols.$(OBJEXT) write.$(OBJEXT)
 am_as_new_OBJECTS = $(am__objects_1)
 as_new_OBJECTS = $(am_as_new_OBJECTS)
 am__DEPENDENCIES_1 = tc-@target_cpu_type@.o
@@ -439,6 +439,7 @@ GAS_CFILES = \
 	messages.c \
 	output-file.c \
 	read.c \
+	remap.c \
 	sb.c \
 	stabs.c \
 	subsegs.c \
@@ -682,6 +683,7 @@ GENERIC_OBJS = \
 	messages.o \
 	output-file.o \
 	read.o \
+	remap.o \
 	subsegs.o \
 	symbols.o \
 	write.o \
@@ -1338,6 +1340,12 @@ DEPOBJ_avr_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
 DEPOBJ_bfin_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-bfin.h dwarf2dbg.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
+
+DEPOBJ_cr16_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-cr16.h dwarf2dbg.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/obstack.h struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
 
@@ -2996,6 +3004,7 @@ messages.o: messages.c
 output-file.o: output-file.c output-file.h
 read.o: read.c $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   sb.h macro.h ecoff.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h
+remap.o: remap.c
 sb.o: sb.c sb.h
 stabs.o: stabs.c $(INCDIR)/obstack.h subsegs.h ecoff.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
