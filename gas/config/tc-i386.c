@@ -4485,7 +4485,7 @@ lex_got (enum bfd_reloc_code_real *reloc,
     return NULL;
 
   for (cp = input_line_pointer; *cp != '@'; cp++)
-    if (is_end_of_line[(unsigned char) *cp])
+    if (is_end_of_line[(unsigned char) *cp] || *cp == ',')
       return NULL;
 
   for (j = 0; j < sizeof (gotrel) / sizeof (gotrel[0]); j++)
@@ -4519,12 +4519,12 @@ lex_got (enum bfd_reloc_code_real *reloc,
 	      first = cp - input_line_pointer;
 
 	      /* The second part goes from after the reloc token until
-		 (and including) an end_of_line char.  Don't use strlen
-		 here as the end_of_line char may not be a NUL.  */
+		 (and including) an end_of_line char or comma.  */
 	      past_reloc = cp + 1 + len;
-	      for (cp = past_reloc; !is_end_of_line[(unsigned char) *cp++]; )
-		;
-	      second = cp - past_reloc;
+	      cp = past_reloc;
+	      while (!is_end_of_line[(unsigned char) *cp] && *cp != ',')
+		++cp;
+	      second = cp + 1 - past_reloc;
 
 	      /* Allocate and copy string.  The trailing NUL shouldn't
 		 be necessary, but be safe.  */

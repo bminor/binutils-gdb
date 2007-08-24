@@ -1,3 +1,8 @@
+2007-08-24  Anders Waldenborg  <anders@0x63.nu>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c (lex_got): Don't scan past a comma.
+
 2007-08-23  Ben Elliston  <bje@au.ibm.com>
 
 	* config/tc-ppc.c (parse_cpu): Handle "750cl".
