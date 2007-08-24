@@ -25,16 +25,18 @@
 #ifndef	_ELF_HINTS_H_
 #define	_ELF_HINTS_H_
 
+#include "bfd_stdint.h"
+
 /* Hints file produced by ldconfig.  */
 struct elfhints_hdr
 {
-  u_int32_t magic;		/* Magic number.  */
-  u_int32_t version;		/* File version (1).  */
-  u_int32_t strtab;		/* Offset of string table in file.  */
-  u_int32_t strsize;		/* Size of string table.  */
-  u_int32_t dirlist;		/* Offset of directory list in string table.  */
-  u_int32_t dirlistlen;		/* strlen(dirlist).  */
-  u_int32_t spare[26];		/* Room for expansion.  */
+  uint32_t magic;		/* Magic number.  */
+  uint32_t version;		/* File version (1).  */
+  uint32_t strtab;		/* Offset of string table in file.  */
+  uint32_t strsize;		/* Size of string table.  */
+  uint32_t dirlist;		/* Offset of directory list in string table.  */
+  uint32_t dirlistlen;		/* strlen(dirlist).  */
+  uint32_t spare[26];		/* Room for expansion.  */
 };
 
 #define ELFHINTS_MAGIC	0x746e6845

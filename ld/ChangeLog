@@ -27,6 +27,14 @@
 	* po/ga.po: Updated Irish translation.
 	* po/vi.po: Updated Vietnamese translation.
 
+2007-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4875
+	* elf-hints-local.h: Include bfd_stdint.h.  Use uint32_t
+	instead of u_int32_t.
+
+	* sha1.h: Include bfd_stdint.h instead of <stdint.h>.
+
 2007-08-09  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4515
