@@ -1,3 +1,10 @@
+2007-08-24  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* elf.c (elfcore_grok_win32pstatus): Remove HAVE_WIN32_PSTATUS_T
+	guard.  Make it host independent.
+	(elfcore_grok_note): Remove HAVE_WIN32_PSTATUS_T guard around
+	NT_WIN32PSTATUS.
+
 2007-08-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf-bfd.h (struct elf_obj_tdata): New BUILD_ID_SIZE, BUILD_ID.

@@ -7585,7 +7585,6 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
 }
 #endif /* defined (HAVE_LWPSTATUS_T) */
 
-#if defined (HAVE_WIN32_PSTATUS_T)
 static bfd_boolean
 elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 {
@@ -7593,24 +7592,32 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
   char *name;
   size_t len;
   asection *sect;
-  win32_pstatus_t pstatus;
+  int type;
+  int is_active_thread;
+  bfd_vma base_addr;
 
-  if (note->descsz < sizeof (pstatus))
+  if (note->descsz < 728)
     return TRUE;
 
-  memcpy (&pstatus, note->descdata, sizeof (pstatus));
+  if (! CONST_STRNEQ (note->namedata, "win32"))
+    return TRUE;
 
-  switch (pstatus.data_type)
+  type = bfd_get_32 (abfd, note->descdata);
+
+  switch (type)
     {
-    case NOTE_INFO_PROCESS:
+    case 1 /* NOTE_INFO_PROCESS */:
       /* FIXME: need to add ->core_command.  */
-      elf_tdata (abfd)->core_signal = pstatus.data.process_info.signal;
-      elf_tdata (abfd)->core_pid = pstatus.data.process_info.pid;
+      /* process_info.pid */
+      elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 8);
+      /* process_info.signal */
+      elf_tdata (abfd)->core_signal = bfd_get_32 (abfd, note->descdata + 12);
       break;
 
-    case NOTE_INFO_THREAD:
+    case 2 /* NOTE_INFO_THREAD */:
       /* Make a ".reg/999" section.  */
-      sprintf (buf, ".reg/%ld", (long) pstatus.data.thread_info.tid);
+      /* thread_info.tid */
+      sprintf (buf, ".reg/%ld", (long) bfd_get_32 (abfd, note->descdata + 8));
 
       len = strlen (buf) + 1;
       name = bfd_alloc (abfd, len);
@@ -7623,21 +7630,25 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
       if (sect == NULL)
 	return FALSE;
 
-      sect->size = sizeof (pstatus.data.thread_info.thread_context);
-      sect->filepos = (note->descpos
-		       + offsetof (struct win32_pstatus,
-				   data.thread_info.thread_context));
+      /* sizeof (thread_info.thread_context) */
+      sect->size = 716;
+      /* offsetof (thread_info.thread_context) */
+      sect->filepos = note->descpos + 12;
       sect->alignment_power = 2;
 
-      if (pstatus.data.thread_info.is_active_thread)
+      /* thread_info.is_active_thread */
+      is_active_thread = bfd_get_32 (abfd, note->descdata + 8);
+
+      if (is_active_thread)
 	if (! elfcore_maybe_make_sect (abfd, ".reg", sect))
 	  return FALSE;
       break;
 
-    case NOTE_INFO_MODULE:
+    case 3 /* NOTE_INFO_MODULE */:
       /* Make a ".module/xxxxxxxx" section.  */
-      sprintf (buf, ".module/%08lx",
-	       (long) pstatus.data.module_info.base_address);
+      /* module_info.base_address */
+      base_addr = bfd_get_32 (abfd, note->descdata + 4);
+      sprintf (buf, ".module/%08lx", (long) base_addr);
 
       len = strlen (buf) + 1;
       name = bfd_alloc (abfd, len);
@@ -7662,7 +7673,6 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
   return TRUE;
 }
-#endif /* HAVE_WIN32_PSTATUS_T */
 
 static bfd_boolean
 elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
@@ -7697,10 +7707,8 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
     case NT_FPREGSET:		/* FIXME: rename to NT_PRFPREG */
       return elfcore_grok_prfpreg (abfd, note);
 
-#if defined (HAVE_WIN32_PSTATUS_T)
     case NT_WIN32PSTATUS:
       return elfcore_grok_win32pstatus (abfd, note);
-#endif
 
     case NT_PRXFPREG:		/* Linux SSE extension */
       if (note->namesz == 6
