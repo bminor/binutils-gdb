@@ -238,7 +238,9 @@ const struct powerpc_operand powerpc_operands[] =
     PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED | PPC_OPERAND_DS },
 
   /* The E field in a wrteei instruction.  */
+  /* And the W bit in the pair singles instructions.  */
 #define E DS + 1
+#define PSW E
   { 0x1, 15, NULL, NULL, 0 },
 
   /* The FL1 field in a POWER SC form instruction.  */
@@ -519,12 +521,29 @@ const struct powerpc_operand powerpc_operands[] =
 #define WS EVUIMM_8 + 1
   { 0x7, 11, NULL, NULL, 0 },
 
-  /* The L field in an mtmsrd or A form instruction or W in an X form.  */
-#define A_L WS + 1
+  /* PowerPC paired singles extensions.  */
+  /* W bit in the pair singles instructions for x type instructions.  */
+#define PSWM WS + 1
+  {  0x1, 10, 0, 0, 0 },
+
+  /* IDX bits for quantization in the pair singles instructions.  */
+#define PSQ PSWM + 1
+  {  0x7, 12, 0, 0, 0 },
+
+  /* IDX bits for quantization in the pair singles x-type instructions.  */
+#define PSQM PSQ + 1
+  {  0x7, 7, 0, 0, 0 },
+
+  /* Smaller D field for quantization in the pair singles instructions.  */
+#define PSD PSQM + 1
+  {  0xfff, 0, 0, 0,  PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
+
+#define A_L PSD + 1
 #define W A_L
+#define MTMSRD_L W
   { 0x1, 16, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
-#define RMC A_L + 1
+#define RMC MTMSRD_L + 1
   { 0x3, 9, NULL, NULL, 0 },
 
 #define R RMC + 1
@@ -1519,6 +1538,12 @@ extract_tbr (unsigned long insn,
 /* An XO_MASK with the RB field fixed.  */
 #define XORB_MASK (XO_MASK | RB_MASK)
 
+/* An XOPS form instruction for paired singles.  */
+#define XOPS(op, xop, rc) \
+  (OP (op) | ((((unsigned long)(xop)) & 0x3ff) << 1) | (((unsigned long)(rc)) & 1))
+#define XOPS_MASK XOPS (0x3f, 0x3ff, 1)
+
+
 /* An XS form instruction.  */
 #define XS(op, xop, rc) (OP (op) | ((((unsigned long)(xop)) & 0x1ff) << 2) | (((unsigned long)(rc)) & 1))
 #define XS_MASK XS (0x3f, 0x1ff, 1)
@@ -1550,6 +1575,11 @@ extract_tbr (unsigned long insn,
 /* An X form user context instruction.  */
 #define XUC(op, xop)  (OP (op) | (((unsigned long)(xop)) & 0x1f))
 #define XUC_MASK      XUC(0x3f, 0x1f)
+
+/* An XW form instruction.  */
+#define XW(op, xop, rc) (OP (op) | ((((unsigned long)(xop)) & 0x3f) << 1) | ((rc) & 1))
+/* The mask for a G form instruction. rc not supported at present.  */
+#define XW_MASK XW (0x3f, 0x3f, 0)
 
 /* The BO encodings used in extended conditional branch mnemonics.  */
 #define BODNZF	(0x0)
@@ -1623,6 +1653,7 @@ extract_tbr (unsigned long insn,
 #define PPC750	PPC
 #define PPC7450 PPC
 #define PPC860	PPC
+#define PPCPS	PPC_OPCODE_PPCPS
 #define PPCVEC	PPC_OPCODE_ALTIVEC
 #define	POWER   PPC_OPCODE_POWER
 #define	POWER2	PPC_OPCODE_POWER | PPC_OPCODE_POWER2
@@ -1714,6 +1745,65 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "twi",     OP(3),	OP_MASK,	PPCCOM,		{ TO, RA, SI } },
 { "ti",      OP(3),	OP_MASK,	PWRCOM,		{ TO, RA, SI } },
 
+{ "dcbz_l",    X(4,1014),     XRT_MASK,      PPCPS,  { RA, RB } },
+{ "ps_cmpu0",  X(4 ,0),       X_MASK|(3<<21),PPCPS,  { BF, FRA, FRB } },
+{ "psq_lx",    XW(4,6,0),     XW_MASK,        PPCPS, { FRT, RA, RB, PSWM, PSQM } },
+{ "psq_stx",   XW(4,7,0),     XW_MASK,        PPCPS, { FRS, RA, RB, PSWM, PSQM } },
+{ "ps_sum0",   A(4 ,10,0),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_sum0.",  A(4 ,10,1),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_sum1",   A(4 ,11,0),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_sum1.",  A(4 ,11,1),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_muls0",  A(4 ,12,0),    AFRB_MASK,     PPCPS,  { FRT, FRA, FRC } },
+{ "ps_muls0.", A(4 ,12,1),    AFRB_MASK,     PPCPS,  { FRT, FRA, FRC } },
+{ "ps_muls1",  A(4 ,13,0),    AFRB_MASK,     PPCPS,  { FRT, FRA, FRC } },
+{ "ps_muls1.", A(4 ,13,1),    AFRB_MASK,     PPCPS,  { FRT, FRA, FRC } },
+{ "ps_madds0",  A(4 ,14,0),   A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_madds0.", A(4 ,14,1),   A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_madds1",  A(4 ,15,0),   A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_madds1.", A(4 ,15,1),   A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_div",     A(4,18,0),    AFRC_MASK,     PPCPS,  { FRT, FRA, FRB } },
+{ "ps_div.",    A(4,18,1),    AFRC_MASK,     PPCPS,  { FRT, FRA, FRB } },
+{ "ps_sub",     A(4,20,0),    AFRC_MASK,     PPCPS,  { FRT, FRA, FRB } },
+{ "ps_sub.",    A(4,20,1),    AFRC_MASK,     PPCPS,  { FRT, FRA, FRB } },
+{ "ps_add",     A(4,21,0),    AFRC_MASK,     PPCPS,  { FRT, FRA, FRB } },
+{ "ps_add.",    A(4,21,1),    AFRC_MASK,     PPCPS,  { FRT, FRA, FRB } },
+{ "ps_sel",     A(4,23,0),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_sel.",    A(4,23,1),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_res",     A(4,24,0),    AFRAFRC_MASK,  PPCPS,  { FRT, FRB } },
+{ "ps_res.",    A(4,24,1),    AFRAFRC_MASK,  PPCPS,  { FRT, FRB } },
+{ "ps_mul",     A(4,25,0),    AFRB_MASK,     PPCPS,  { FRT, FRA, FRC } },
+{ "ps_mul.",    A(4,25,1),    AFRB_MASK,     PPCPS,  { FRT, FRA, FRC } },
+{ "ps_rsqrte",  A(4 ,26,0),   AFRAFRC_MASK,  PPCPS,  { FRT, FRB } },
+{ "ps_rsqrte.", A(4 ,26,1),   AFRAFRC_MASK,  PPCPS,  { FRT, FRB } },
+{ "ps_madd",    A(4,29,0),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_madd.",   A(4,29,1),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_msub",    A(4,28,0),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_msub.",   A(4,28,1),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_nmsub",   A(4,30,0),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_nmsub.",  A(4,30,1),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_nmadd",   A(4,31,0),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_nmadd.",  A(4,31,1),    A_MASK,        PPCPS,  { FRT,FRA,FRC,FRB } },
+{ "ps_cmpo0",   X(4 ,32),     X_MASK|(3<<21),PPCPS,  { BF, FRA, FRB } },
+{ "psq_lux",    XW(4,38,0),   XW_MASK,        PPCPS,  { FRT, RA, RB, PSWM, PSQM } },
+{ "psq_stux",   XW(4,39,0),   XW_MASK,        PPCPS,  { FRS, RA, RB, PSWM, PSQM } },
+{ "ps_neg",     XRC(4 ,40,0), XRA_MASK,      PPCPS,  { FRT, FRB } },
+{ "ps_neg.",    XRC(4 ,40,1), XRA_MASK,      PPCPS,  { FRT, FRB } },
+{ "ps_cmpu1",   X(4 ,64),   X_MASK|(3<<21),  PPCPS,  { BF, FRA, FRB } },
+{ "ps_mr",      XRC(4 ,72,0), XRA_MASK,      PPCPS,  { FRT, FRB } },
+{ "ps_mr.",     XRC(4 ,72,1), XRA_MASK,      PPCPS,  { FRT, FRB } },
+{ "ps_cmpo1",   X(4 ,96),   X_MASK|(3<<21),  PPCPS,  { BF, FRA, FRB } },
+{ "ps_nabs",    XRC(4 ,136,0), XRA_MASK,     PPCPS,  { FRT, FRB } },
+{ "ps_nabs.",   XRC(4 ,136,1), XRA_MASK,     PPCPS,  { FRT, FRB } },
+{ "ps_abs",     XRC(4,264,0), XRA_MASK,      PPCPS,  { FRT, FRB } },
+{ "ps_abs.",    XRC(4,264,1), XRA_MASK,      PPCPS,  { FRT, FRB } },
+{ "ps_merge00", XOPS(4,528,0), XOPS_MASK,    PPCPS,  { FRT, FRA, FRB } },
+{ "ps_merge00.",XOPS(4,528,1), XOPS_MASK,    PPCPS,  { FRT, FRA, FRB } },
+{ "ps_merge01", XOPS(4,560,0), XOPS_MASK,    PPCPS,  { FRT, FRA, FRB } },
+{ "ps_merge01.",XOPS(4,560,1), XOPS_MASK,    PPCPS,  { FRT, FRA, FRB } },
+{ "ps_merge10", XOPS(4,592,0), XOPS_MASK,    PPCPS,  { FRT, FRA, FRB } },
+{ "ps_merge10.",XOPS(4,592,1), XOPS_MASK,    PPCPS,  { FRT, FRA, FRB } },
+{ "ps_merge11", XOPS(4,624,0), XOPS_MASK,    PPCPS,  { FRT, FRA, FRB } },
+{ "ps_merge11.",XOPS(4,624,1), XOPS_MASK,    PPCPS,  { FRT, FRA, FRB } },
 { "macchw",	XO(4,172,0,0), XO_MASK,	PPC405|PPC440,	{ RT, RA, RB } },
 { "macchw.",	XO(4,172,0,1), XO_MASK,	PPC405|PPC440,	{ RT, RA, RB } },
 { "macchwo",	XO(4,172,1,0), XO_MASK,	PPC405|PPC440,	{ RT, RA, RB } },
@@ -4337,7 +4427,11 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "lfq",     OP(56),	OP_MASK,	POWER2,		{ FRT, D, RA0 } },
 
+{ "psq_l",   OP(56),    OP_MASK,        PPCPS,          { FRT, PSD, RA, PSW, PSQ } },
+
 { "lfqu",    OP(57),	OP_MASK,	POWER2,		{ FRT, D, RA0 } },
+
+{ "psq_lu",   OP(57),    OP_MASK,       PPCPS,          { FRT, PSD, RA, PSW, PSQ } },
 
 { "lfdp",    OP(57),	OP_MASK,	POWER6,		{ FRT, D, RA0 } },
 
@@ -4400,6 +4494,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "fnmadds", A(59,31,0), A_MASK,	PPC,		{ FRT,FRA,FRC,FRB } },
 { "fnmadds.",A(59,31,1), A_MASK,	PPC,		{ FRT,FRA,FRC,FRB } },
+
+{ "psq_st",  OP(60),    OP_MASK,        PPCPS,          { FRS, PSD, RA, PSW, PSQ } },
+{ "psq_stu", OP(61),    OP_MASK,        PPCPS,          { FRS, PSD, RA, PSW, PSQ } },
 
 { "dmul",    XRC(59,34,0), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 { "dmul.",   XRC(59,34,1), X_MASK,	POWER6,		{ FRT, FRA, FRB } },

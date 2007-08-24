@@ -1,3 +1,7 @@
+2007-08-22  Ben Elliston  <bje@au.ibm.com>
+
+	* doc/binutils.texi (objdump): Document -Mppcps.
+
 2007-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/Make-in: Add --msgid-bugs-address to xgettext invocation.

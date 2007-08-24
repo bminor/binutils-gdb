@@ -1,3 +1,12 @@
+2007-08-22  Ben Elliston  <bje@au.ibm.com>
+
+	* ppc-opc.c (PSW, PSWM, PSQ, PSQM, PSD, MTMSRD_L): New.
+	(XOPS, XOPS_MASK, XW, XW_MASK): Likewise.
+	(PPCPS): Likewise.
+	(powerpc_opcodes): Add all pair singles instructions.
+	* ppc-dis.c (powerpc_dialect): Handle "ppcps".
+	(print_ppc_disassembler_options): Document -Mppcps.
+
 2007-08-21  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* s390-mkopc.c (struct s390_cond_ext_format): New global struct.

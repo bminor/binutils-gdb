@@ -396,6 +396,24 @@ static const struct pd_reg pre_defined_registers[] =
 
   { "fpscr", 0 },
 
+  /* Quantization registers used with pair single instructions.  */
+  { "gqr.0", 0 },
+  { "gqr.1", 1 },
+  { "gqr.2", 2 },
+  { "gqr.3", 3 },
+  { "gqr.4", 4 },
+  { "gqr.5", 5 },
+  { "gqr.6", 6 },
+  { "gqr.7", 7 },
+  { "gqr0", 0 },
+  { "gqr1", 1 },
+  { "gqr2", 2 },
+  { "gqr3", 3 },
+  { "gqr4", 4 },
+  { "gqr5", 5 },
+  { "gqr6", 6 },
+  { "gqr7", 7 },
+
   { "lr", 8 },     /* Link Register */
 
   { "pmr", 0 },
@@ -824,6 +842,9 @@ parse_cpu (const char *arg)
 	   || strcmp (arg, "603") == 0
 	   || strcmp (arg, "604") == 0)
     ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_32;
+  /* Do all PPC750s have paired single ops?  */
+  else if (strcmp (arg, "750cl") == 0)
+    ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_PPCPS;
   /* -m403 and -m405 mean to assemble for the PowerPC 403/405.  */
   else if (strcmp (arg, "403") == 0
 	   || strcmp (arg, "405") == 0)
@@ -1091,7 +1112,8 @@ PowerPC options:\n\
 -m403, -m405		generate code for PowerPC 403/405\n\
 -m440			generate code for PowerPC 440\n\
 -m7400, -m7410, -m7450, -m7455\n\
-			generate code For PowerPC 7400/7410/7450/7455\n"));
+			generate code for PowerPC 7400/7410/7450/7455\n\
+-m750cl			generate code for PowerPC 750cl\n"));
   fprintf (stream, _("\
 -mppc64, -m620		generate code for PowerPC 620/625/630\n\
 -mppc64bridge		generate code for PowerPC 64, including bridge insns\n\
@@ -2639,6 +2661,14 @@ md_assemble (char *str)
 	{
 	  endc = ')';
 	  need_paren = 0;
+	  /* If expecting more operands, then we want to see "),".  */
+	  if (*str == endc && opindex_ptr[1] != 0)
+	    {
+	      do
+		++str;
+	      while (ISSPACE (*str));
+	      endc = ',';
+	    }
 	}
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0)
 	{

@@ -46,6 +46,9 @@ powerpc_dialect (struct disassemble_info *info)
     dialect |= PPC_OPCODE_64;
 
   if (info->disassembler_options
+      && strstr (info->disassembler_options, "ppcps") != NULL)
+    dialect |= PPC_OPCODE_PPCPS;
+  else if (info->disassembler_options
       && strstr (info->disassembler_options, "booke") != NULL)
     dialect |= PPC_OPCODE_BOOKE | PPC_OPCODE_BOOKE64;
   else if ((info->mach == bfd_mach_ppc_e500)
@@ -365,6 +368,7 @@ the -M switch:\n");
   fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
   fprintf (stream, "  440                      Disassemble the 440 instructions\n");
   fprintf (stream, "  efs                      Disassemble the EFS instructions\n");
+  fprintf (stream, "  ppcps                    Disassemble the PowerPC paired singles instructions\n");
   fprintf (stream, "  power4                   Disassemble the Power4 instructions\n");
   fprintf (stream, "  power5                   Disassemble the Power5 instructions\n");
   fprintf (stream, "  power6                   Disassemble the Power6 instructions\n");
