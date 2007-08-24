@@ -1,14 +1,14 @@
 # Swedish messages for gprof.
-# Copyright (C) 2001, 2002, 2004, 2006 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2002, 2004, 2006, 2007 Free Software Foundation, Inc.
 # Christian Rose <menthos@menthos.com>, 2001, 2002, 2004.
-# Daniel Nylander <po@danielnylander.se>, 2006.
+# Daniel Nylander <po@danielnylander.se>, 2006, 2007.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.15.96\n"
+"Project-Id-Version: gprof 2.17.90\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-03-03 21:05+1030\n"
-"PO-Revision-Date: 2006-02-12 23:55+0100\n"
+"POT-Creation-Date: 2007-05-15 16:49+0930\n"
+"PO-Revision-Date: 2007-08-24 13:42+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "MIME-Version: 1.0\n"
@@ -19,22 +19,22 @@ msgstr ""
 msgid "<indirect child>"
 msgstr "<indirekt barn>"
 
-#: alpha.c:119 mips.c:71
+#: alpha.c:107 mips.c:59
 #, c-format
 msgid "[find_call] %s: 0x%lx to 0x%lx\n"
 msgstr "[find_call] %s: 0x%lx till 0x%lx\n"
 
-#: alpha.c:141
+#: alpha.c:129
 #, c-format
 msgid "[find_call] 0x%lx: jsr%s <indirect_child>\n"
 msgstr "[find_call] 0x%lx: jsr%s <indirekt_barn>\n"
 
-#: alpha.c:151
+#: alpha.c:139
 #, c-format
 msgid "[find_call] 0x%lx: bsr"
 msgstr "[find_call] 0x%lx: bsr"
 
-#: basic_blocks.c:128 call_graph.c:89 hist.c:97
+#: basic_blocks.c:128 call_graph.c:89 hist.c:105
 #, c-format
 msgid "%s: %s: unexpected end of file\n"
 msgstr "%s: %s: oväntat filslut\n"
@@ -45,16 +45,16 @@ msgid "%s: warning: ignoring basic-block exec counts (use -l or --line)\n"
 msgstr "%s: varning: ignorerar exekveringsräkning för grundblock (använd -l eller --line)\n"
 
 #. FIXME: This only works if bfd_vma is unsigned long.
-#: basic_blocks.c:287 basic_blocks.c:297
+#: basic_blocks.c:289 basic_blocks.c:299
 #, c-format
 msgid "%s:%d: (%s:0x%lx) %lu executions\n"
 msgstr "%s:%d: (%s:0x%lx) %lu exekveringar\n"
 
-#: basic_blocks.c:288 basic_blocks.c:298
+#: basic_blocks.c:290 basic_blocks.c:300
 msgid "<unknown>"
 msgstr "<okänd>"
 
-#: basic_blocks.c:541
+#: basic_blocks.c:543
 #, c-format
 msgid ""
 "\n"
@@ -71,7 +71,7 @@ msgstr ""
 "     Rad       Antal\n"
 "\n"
 
-#: basic_blocks.c:565
+#: basic_blocks.c:567
 #, c-format
 msgid ""
 "\n"
@@ -82,22 +82,22 @@ msgstr ""
 "Exekveringssammanfattning:\n"
 "\n"
 
-#: basic_blocks.c:566
+#: basic_blocks.c:568
 #, c-format
 msgid "%9ld   Executable lines in this file\n"
 msgstr "%9ld   Exekverbara rader i denna fil\n"
 
-#: basic_blocks.c:568
+#: basic_blocks.c:570
 #, c-format
 msgid "%9ld   Lines executed\n"
 msgstr "%9ld   Exekverade rader\n"
 
-#: basic_blocks.c:569
+#: basic_blocks.c:571
 #, c-format
 msgid "%9.2f   Percent of the file executed\n"
 msgstr "%9.2f   Procent av filen som exekverats\n"
 
-#: basic_blocks.c:573
+#: basic_blocks.c:575
 #, c-format
 msgid ""
 "\n"
@@ -106,7 +106,7 @@ msgstr ""
 "\n"
 "%9lu   Totala antalet radexekveringar\n"
 
-#: basic_blocks.c:575
+#: basic_blocks.c:577
 #, c-format
 msgid "%9.2f   Average executions per line\n"
 msgstr "%9.2f   Medelexekveringar per rad\n"
@@ -134,7 +134,7 @@ msgstr ""
 "\t\t\tAnropsgraf\n"
 "\n"
 
-#: cg_print.c:78 hist.c:359
+#: cg_print.c:78 hist.c:466
 #, c-format
 msgid ""
 "\n"
@@ -190,7 +190,7 @@ msgstr "själv"
 msgid "descendants"
 msgstr "ättlingar"
 
-#: cg_print.c:98 hist.c:385
+#: cg_print.c:98 hist.c:492
 msgid "name"
 msgstr "namn"
 
@@ -232,47 +232,47 @@ msgstr ""
 msgid "<cycle %d>"
 msgstr "<cykel %d>"
 
-#: corefile.c:64
-#, c-format
-msgid "%s: could not open %s.\n"
-msgstr "%s: kunde inte öppna %s.\n"
-
-#: corefile.c:78 corefile.c:112
+#: corefile.c:59
 #, c-format
 msgid "%s: unable to parse mapping file %s.\n"
 msgstr "%s: kan inte tolka mappfilen %s.\n"
 
-#: corefile.c:155
+#: corefile.c:72
 #, c-format
-msgid "%s: %s: not in a.out format\n"
-msgstr "%s: %s: inte i a.out-format\n"
+msgid "%s: could not open %s.\n"
+msgstr "%s: kunde inte öppna %s.\n"
 
 #: corefile.c:166
+#, c-format
+msgid "%s: %s: not in executable format\n"
+msgstr "%s: %s: inte i ett körbart format\n"
+
+#: corefile.c:177
 #, c-format
 msgid "%s: can't find .text section in %s\n"
 msgstr "%s: kan inte hitta .text-sektion i %s\n"
 
-#: corefile.c:224
+#: corefile.c:252
 #, c-format
 msgid "%s: ran out room for %lu bytes of text space\n"
 msgstr "%s: slut på utrymme för %lu byte textutrymme\n"
 
-#: corefile.c:238
+#: corefile.c:266
 #, c-format
 msgid "%s: can't do -c\n"
 msgstr "%s: kan inte göra -c\n"
 
-#: corefile.c:272
+#: corefile.c:305
 #, c-format
 msgid "%s: -c not supported on architecture %s\n"
 msgstr "%s: -c stöds inte på arkitekturen %s\n"
 
-#: corefile.c:437
+#: corefile.c:470
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr "%s: filen \"%s\" har inga symboler\n"
 
-#: corefile.c:751
+#: corefile.c:772
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr "%s: någon räknade fel: ltab.len=%d istället för %ld\n"
@@ -282,94 +282,94 @@ msgstr "%s: någon räknade fel: ltab.len=%d istället för %ld\n"
 msgid "%s: address size has unexpected value of %u\n"
 msgstr "%s: adresstorleken har ett oväntat värde på %u\n"
 
-#: gmon_io.c:317 gmon_io.c:413
+#: gmon_io.c:320 gmon_io.c:416
 #, c-format
 msgid "%s: file too short to be a gmon file\n"
 msgstr "%s: filen är för kort för att vara en gmon-fil\n"
 
-#: gmon_io.c:327 gmon_io.c:456
+#: gmon_io.c:330 gmon_io.c:459
 #, c-format
 msgid "%s: file `%s' has bad magic cookie\n"
 msgstr "%s: filen \"%s\" har felaktigt magiskt tal\n"
 
-#: gmon_io.c:338
+#: gmon_io.c:341
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
 msgstr "%s: filen \"%s\" har version %d som inte stöds\n"
 
-#: gmon_io.c:368
+#: gmon_io.c:371
 #, c-format
 msgid "%s: %s: found bad tag %d (file corrupted?)\n"
 msgstr "%s: %s: hittade felaktig tagg %d (är filen skadad?)\n"
 
-#: gmon_io.c:435
+#: gmon_io.c:438
 #, c-format
 msgid "%s: profiling rate incompatible with first gmon file\n"
 msgstr "%s: profileringshastighet är inkompatibel med första gmon-filen\n"
 
-#: gmon_io.c:483
+#: gmon_io.c:489
 #, c-format
 msgid "%s: incompatible with first gmon file\n"
 msgstr "%s: inkompatibel med första gmon-filen\n"
 
-#: gmon_io.c:511
+#: gmon_io.c:516
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
 msgstr "%s: filen \"%s\" verkar inte vara i gmon.out-format\n"
 
 # Man brukar tala om "bins" i hashtabeller
 #
-#: gmon_io.c:532
+#: gmon_io.c:529
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
 msgstr "%s: oväntat filslut efter läsning av %d/%d poster\n"
 
-#: gmon_io.c:565
+#: gmon_io.c:563
 #, c-format
 msgid "time is in ticks, not seconds\n"
 msgstr "tiden är i tick, inte sekunder\n"
 
-#: gmon_io.c:571 gmon_io.c:747
+#: gmon_io.c:569 gmon_io.c:746
 #, c-format
 msgid "%s: don't know how to deal with file format %d\n"
 msgstr "%s: vet inte hur fileformat %d ska hanteras\n"
 
-#: gmon_io.c:578
+#: gmon_io.c:576
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
 msgstr "Filen \"%s\" (version %d) innehåller:\n"
 
-#: gmon_io.c:581
+#: gmon_io.c:579
 #, c-format
 msgid "\t%d histogram record\n"
 msgstr "\t%d histogrampost\n"
 
-#: gmon_io.c:582
+#: gmon_io.c:580
 #, c-format
 msgid "\t%d histogram records\n"
 msgstr "\t%d histogramposter\n"
 
-#: gmon_io.c:584
+#: gmon_io.c:582
 #, c-format
 msgid "\t%d call-graph record\n"
 msgstr "\t%d anropsgrafpost\n"
 
-#: gmon_io.c:585
+#: gmon_io.c:583
 #, c-format
 msgid "\t%d call-graph records\n"
 msgstr "\t%d anropsgrafposter\n"
 
-#: gmon_io.c:587
+#: gmon_io.c:585
 #, c-format
 msgid "\t%d basic-block count record\n"
 msgstr "\t%d grundblocksräkningspost\n"
 
-#: gmon_io.c:588
+#: gmon_io.c:586
 #, c-format
 msgid "\t%d basic-block count records\n"
 msgstr "\t%d grundblocksräkningsposter\n"
 
-#: gprof.c:160
+#: gprof.c:158
 #, c-format
 msgid ""
 "Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n"
@@ -383,97 +383,124 @@ msgid ""
 "\t[--no-static] [--print-path] [--separate-files]\n"
 "\t[--static-call-graph] [--sum] [--table-length=len] [--traditional]\n"
 "\t[--version] [--width=n] [--ignore-non-functions]\n"
-"\t[--demangle[=STYLE]] [--no-demangle]\n"
+"\t[--demangle[=STYLE]] [--no-demangle] [@FILE]\n"
 "\t[image-file] [profile-file...]\n"
 msgstr ""
-"Användning: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][namn]]\n"
-"\t[-I kataloger] [-d[tal]] [-k från/till] [-m minsta-antal]\n"
-"\t[-t table-length] [--[no-]annotated-source[=namn]]\n"
-"\t[--[no-]exec-counts[=namn]] [--[no-]flat-profile[=namn]]\n"
-"\t[--[no-]graph[=namn]] [--[no-]time=namn] [--all-lines] [--brief]\n"
-"\t[--debug[=nivå]] [--function-ordering] [--file-ordering]\n"
+"Användning: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I kataloger]\n"
+"\t[-d[num]] [-k från/till] [-m min_antal] [-t tabell_längd]\n"
+"\t[--[no-]annotated-source[=namn]] [--[no-]exec-counts[=namn]]\n"
+"\t[--[no-]flat-profile[=namn]] [--[no-]graph[=namn]]\n"
+"\t[--[no-]time=namn] [--all-lines] [--brief] [--debug[=nivå]]\n"
+"\t[--function-ordering] [--file-ordering]\n"
 "\t[--directory-path=kataloger] [--display-unused-functions]\n"
 "\t[--file-format=namn] [--file-info] [--help] [--line] [--min-count=n]\n"
 "\t[--no-static] [--print-path] [--separate-files]\n"
 "\t[--static-call-graph] [--sum] [--table-length=längd] [--traditional]\n"
 "\t[--version] [--width=n] [--ignore-non-functions]\n"
-"\t[--demangle[=STIL]] [--no-demangle]\n"
+"\t[--demangle[=STIL]] [--no-demangle] [@FIL]\n"
 "\t[bildfil] [profilfil...]\n"
 
-#: gprof.c:176
+#: gprof.c:174
 #, c-format
 msgid "Report bugs to %s\n"
 msgstr ""
 "Rapportera fel till %s,\n"
-"och synpunkter på översättningen till sv@li.org\n"
+"Rapportera synpunkter på översättningen till tp-sv@listor.tp-sv.se\n"
 
-#: gprof.c:248
+#: gprof.c:250
 #, c-format
 msgid "%s: debugging not supported; -d ignored\n"
 msgstr "%s: felsökning stöds inte; -d ignorerades\n"
 
-#: gprof.c:328
+#: gprof.c:330
 #, c-format
 msgid "%s: unknown file format %s\n"
 msgstr "%s: okänt filformat %s\n"
 
 #. This output is intended to follow the GNU standards document.
-#: gprof.c:412
+#: gprof.c:414
 #, c-format
 msgid "GNU gprof %s\n"
 msgstr "GNU gprof %s\n"
 
-#: gprof.c:413
+#: gprof.c:415
 #, c-format
 msgid "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
 msgstr "Baserat på BSD gprof, copyright 1983 Regents of the University of California.\n"
 
-#: gprof.c:414
+#: gprof.c:416
 #, c-format
 msgid "This program is free software.  This program has absolutely no warranty.\n"
 msgstr "Detta program är fri programvara. Detta program har ingen som helst garanti.\n"
 
-#: gprof.c:455
+#: gprof.c:457
 #, c-format
 msgid "%s: unknown demangling style `%s'\n"
 msgstr "%s: okänd avmanglingsstil \"%s\"\n"
 
-#: gprof.c:475
+#: gprof.c:477
 #, c-format
 msgid "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
 msgstr "%s: Endast en av --function-ordering och --file-ordering kan anges.\n"
 
-#: gprof.c:525
+#: gprof.c:527
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
 msgstr "%s: tyvärr, filformatet \"prof\" stöds inte än\n"
 
-#: gprof.c:574
+#: gprof.c:581
 #, c-format
 msgid "%s: gmon.out file is missing histogram\n"
 msgstr "%s: gmon.out-filen saknar histogram\n"
 
-#: gprof.c:581
+#: gprof.c:588
 #, c-format
 msgid "%s: gmon.out file is missing call-graph data\n"
 msgstr "%s: gmon.out-filen saknar anropsgrafdata\n"
 
-#: hist.c:126
+#: hist.c:133
 #, c-format
-msgid "%s: `%s' is incompatible with first gmon file\n"
-msgstr "%s: \"%s\" är inkompatibel med första gmon-filen\n"
+msgid ""
+"%s: dimension unit changed between histogram records\n"
+"%s: from '%s'\n"
+"%s: to '%s'\n"
+msgstr ""
+"%s: dimensionsenhet ändrades mellan histogramposter\n"
+"%s: från \"%s\"\n"
+"%s: till \"%s\"\n"
 
-#: hist.c:142
+#: hist.c:143
+#, c-format
+msgid ""
+"%s: dimension abbreviation changed between histogram records\n"
+"%s: from '%c'\n"
+"%s: to '%c'\n"
+msgstr ""
+"%s: dimensionsförkortning ändrades mellan histogramposter\n"
+"%s: från \"%c\"\n"
+"%s: till \"%c\"\n"
+
+#: hist.c:157
+#, c-format
+msgid "%s: different scales in histogram records"
+msgstr "%s: olika skalor i histogramposter"
+
+#: hist.c:194
+#, c-format
+msgid "%s: overlapping histogram records\n"
+msgstr "%s: överlappande histogramposter\n"
+
+#: hist.c:228
 #, c-format
 msgid "%s: %s: unexpected EOF after reading %u of %u samples\n"
 msgstr "%s: %s: oväntat filslut efter läsning av %u av %u stickprov\n"
 
-#: hist.c:355
+#: hist.c:462
 #, c-format
 msgid "%c%c/call"
 msgstr "%c%c/anrop"
 
-#: hist.c:363
+#: hist.c:470
 #, c-format
 msgid ""
 " for %.2f%% of %.2f %s\n"
@@ -482,7 +509,7 @@ msgstr ""
 " för %.2f%% av %.2f %s\n"
 "\n"
 
-#: hist.c:369
+#: hist.c:476
 #, c-format
 msgid ""
 "\n"
@@ -491,7 +518,7 @@ msgstr ""
 "\n"
 "Varje stickprov räknas som %g %s.\n"
 
-#: hist.c:374
+#: hist.c:481
 #, c-format
 msgid ""
 " no time accumulated\n"
@@ -500,27 +527,27 @@ msgstr ""
 " ingen ackumulerad tid\n"
 "\n"
 
-#: hist.c:381
+#: hist.c:488
 msgid "cumulative"
 msgstr "kumulativ"
 
-#: hist.c:381
+#: hist.c:488
 msgid "self  "
 msgstr "själv"
 
-#: hist.c:381
+#: hist.c:488
 msgid "total "
 msgstr "totalt"
 
-#: hist.c:384
+#: hist.c:491
 msgid "time"
 msgstr "tid"
 
-#: hist.c:384
+#: hist.c:491
 msgid "calls"
 msgstr "anrop"
 
-#: hist.c:473
+#: hist.c:580
 #, c-format
 msgid ""
 "\n"
@@ -533,17 +560,22 @@ msgstr ""
 "\n"
 "platt profil:\n"
 
-#: hist.c:479
+#: hist.c:586
 #, c-format
 msgid "Flat profile:\n"
 msgstr "Platt profil:\n"
 
-#: mips.c:82
+#: hist.c:705
+#, c-format
+msgid "%s: found a symbol that covers several histogram records"
+msgstr "%s: hittade en symbol som täcker in flera histogramposter"
+
+#: mips.c:71
 #, c-format
 msgid "[find_call] 0x%lx: jal"
 msgstr "[find_call] 0x%lx: jal"
 
-#: mips.c:107
+#: mips.c:96
 #, c-format
 msgid "[find_call] 0x%lx: jalr\n"
 msgstr "[find_call] 0x%lx: jalr\n"
@@ -558,10 +590,13 @@ msgstr "%s: kunde inte hitta \"%s\"\n"
 msgid "*** File %s:\n"
 msgstr "*** Fil %s:\n"
 
-#: utils.c:107
+#: utils.c:99
 #, c-format
 msgid " <cycle %d>"
 msgstr " <cykel %d>"
+
+#~ msgid "%s: `%s' is incompatible with first gmon file\n"
+#~ msgstr "%s: \"%s\" är inkompatibel med första gmon-filen\n"
 
 #~ msgid "%s: bfd_vma has unexpected size of %ld bytes\n"
 #~ msgstr "%s: bfd_vma har en oväntad storlek på %ld byte\n"
