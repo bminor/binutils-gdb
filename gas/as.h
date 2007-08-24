@@ -567,6 +567,9 @@ void   register_dependency (char *);
 void   print_dependencies (void);
 segT   subseg_get (const char *, int);
 
+const char *remap_debug_filename (const char *);
+void add_debug_prefix_map (const char *);
+
 struct expressionS;
 struct fix;
 typedef struct symbol symbolS;

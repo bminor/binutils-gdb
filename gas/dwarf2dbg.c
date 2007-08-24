@@ -1224,15 +1224,17 @@ static void
 out_file_list (void)
 {
   size_t size;
+  const char *dir;
   char *cp;
   unsigned int i;
 
   /* Emit directory list.  */
   for (i = 1; i < dirs_in_use; ++i)
     {
-      size = strlen (dirs[i]) + 1;
+      dir = remap_debug_filename (dirs[i]);
+      size = strlen (dir) + 1;
       cp = frag_more (size);
-      memcpy (cp, dirs[i], size);
+      memcpy (cp, dir, size);
     }
   /* Terminate it.  */
   out_byte ('\0');
@@ -1514,7 +1516,8 @@ static void
 out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
 {
   char producer[128];
-  char *comp_dir;
+  const char *comp_dir;
+  const char *dirname;
   expressionS expr;
   symbolS *info_start;
   symbolS *info_end;
@@ -1604,9 +1607,10 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
     abort ();
   if (files[1].dir)
     {
-      len = strlen (dirs[files[1].dir]);
+      dirname = remap_debug_filename (dirs[files[1].dir]);
+      len = strlen (dirname);
       p = frag_more (len + 1);
-      memcpy (p, dirs[files[1].dir], len);
+      memcpy (p, dirname, len);
       INSERT_DIR_SEPARATOR (p, len);
     }
   len = strlen (files[1].filename) + 1;
@@ -1614,7 +1618,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
   memcpy (p, files[1].filename, len);
 
   /* DW_AT_comp_dir */
-  comp_dir = getpwd ();
+  comp_dir = remap_debug_filename (getpwd ());
   len = strlen (comp_dir) + 1;
   p = frag_more (len);
   memcpy (p, comp_dir, len);
