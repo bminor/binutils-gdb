@@ -14531,7 +14531,7 @@ do
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	  BUILD_WINDMC='$(WINDMC_PROG)$(EXEEXT)'
 	  ;;
-	powerpc*-*-linux* | powerpc*-*-elf*)
+	powerpc*-*-linux* | powerpc*-*-elf* | powerpc*-*-eabi*)
 	  BUILD_INSTALL_MISC="${BUILD_INSTALL_MISC} embedspu"
 	  ;;
 	sh*-*-pe)

@@ -1,5 +1,10 @@
 2007-08-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* configure.in: Install embedspu on powerpc*-*-eabi* also.
+	* configure: Regenerated.
+
+2007-08-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* po/uk.po: Updated Ukrainian translation.
 
 2007-08-22  Ben Elliston  <bje@au.ibm.com>
