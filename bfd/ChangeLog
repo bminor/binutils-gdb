@@ -1,3 +1,9 @@
+2007-08-25  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elfcore_grok_spu_note): New function.
+	(elfcore_read_notes): Call it.
+
 2007-08-20  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_link_hash_table): Add computed_got_sizes.

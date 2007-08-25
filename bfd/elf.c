@@ -7895,6 +7895,32 @@ elfcore_grok_nto_note (bfd *abfd, Elf_Internal_Note *note)
     }
 }
 
+static bfd_boolean
+elfcore_grok_spu_note (bfd *abfd, Elf_Internal_Note *note)
+{
+  char *name;
+  asection *sect;
+  size_t len;
+
+  /* Use note name as section name.  */
+  len = note->namesz;
+  name = bfd_alloc (abfd, len);
+  if (name == NULL)
+    return FALSE;
+  memcpy (name, note->namedata, len);
+  name[len - 1] = '\0';
+
+  sect = bfd_make_section_anyway_with_flags (abfd, name, SEC_HAS_CONTENTS);
+  if (sect == NULL)
+    return FALSE;
+
+  sect->size            = note->descsz;
+  sect->filepos         = note->descpos;
+  sect->alignment_power = 1;
+
+  return TRUE;
+}
+
 /* Function: elfcore_write_note
 
    Inputs:
@@ -8206,6 +8232,11 @@ elfcore_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size)
 	{
 	  if (! elfcore_grok_nto_note (abfd, &in))
 	    goto error;
+	}
+      else if (CONST_STRNEQ (in.namedata, "SPU/"))
+	{
+	  if (! elfcore_grok_spu_note (abfd, &in))
+	    return FALSE;
 	}
       else
 	{
