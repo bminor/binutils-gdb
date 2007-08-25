@@ -9231,6 +9231,7 @@ get_netbsd_elfcore_note_type (unsigned e_type)
 static int
 process_note (Elf_Internal_Note *pnote)
 {
+  const char *name = pnote->namesz ? pnote->namedata : "(NONE)";
   const char *nt;
 
   if (pnote->namesz == 0)
@@ -9246,14 +9247,19 @@ process_note (Elf_Internal_Note *pnote)
     /* NetBSD-specific core file notes.  */
     nt = get_netbsd_elfcore_note_type (pnote->type);
 
+  else if (strneq (pnote->namedata, "SPU/", 4))
+    {
+      /* SPU-specific core file notes.  */
+      nt = pnote->namedata + 4;
+      name = "SPU";
+    }
+
   else
     /* Don't recognize this note name; just use the default set of
        note type strings.  */
       nt = get_note_type (pnote->type);
 
-  printf ("  %s\t\t0x%08lx\t%s\n",
-	  pnote->namesz ? pnote->namedata : "(NONE)",
-	  pnote->descsz, nt);
+  printf ("  %s\t\t0x%08lx\t%s\n", name, pnote->descsz, nt);
   return 1;
 }
 
