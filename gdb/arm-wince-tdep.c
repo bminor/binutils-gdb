@@ -32,7 +32,7 @@ static const char arm_wince_thumb_le_breakpoint[] = { 0xfe, 0xdf };
 
 /* Description of the longjmp buffer.  */
 #define ARM_WINCE_JB_ELEMENT_SIZE	INT_REGISTER_SIZE
-#define ARM_WINCE_JB_PC			21
+#define ARM_WINCE_JB_PC			10
 
 static void
 arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)

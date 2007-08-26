@@ -1,3 +1,7 @@
+2007-08-26  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* arm-wince-tdep.c (ARM_WINCE_JB_PC): Change to 10.
+
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in (copying.c): Use the top-level COPYING3 as the file
