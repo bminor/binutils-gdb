@@ -1,3 +1,10 @@
+2007-08-27  Markus Deuling  <deuling@de.ibm.com>
+
+	* spu-tdep.c (spu_pointer_to_address): New function.
+	(spu_integer_to_address): Likewise.
+	(spu_gdbarch_init): Add spu_pointer_to_address and 
+	spu_integer_to_address to gdbarch.
+
 2007-08-26  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* arm-wince-tdep.c (ARM_WINCE_JB_PC): Change to 10.

@@ -322,6 +322,35 @@ spu_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
 
+/* Address conversion.  */
+
+static CORE_ADDR
+spu_pointer_to_address (struct type *type, const gdb_byte *buf)
+{
+  ULONGEST addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
+  ULONGEST lslr = SPU_LS_SIZE - 1; /* Hard-wired LS size.  */
+
+  if (target_has_registers && target_has_stack && target_has_memory)
+    lslr = get_frame_register_unsigned (get_selected_frame (NULL),
+					SPU_LSLR_REGNUM);
+
+  return addr & lslr;
+}
+
+static CORE_ADDR
+spu_integer_to_address (struct gdbarch *gdbarch,
+			struct type *type, const gdb_byte *buf)
+{
+  ULONGEST addr = unpack_long (type, buf);
+  ULONGEST lslr = SPU_LS_SIZE - 1; /* Hard-wired LS size.  */
+
+  if (target_has_registers && target_has_stack && target_has_memory)
+    lslr = get_frame_register_unsigned (get_selected_frame (NULL),
+					SPU_LSLR_REGNUM);
+
+  return addr & lslr;
+}
+
 
 /* Decoding SPU instructions.  */
 
@@ -2005,6 +2034,10 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
+
+  /* Address conversion.  */
+  set_gdbarch_pointer_to_address (gdbarch, spu_pointer_to_address);
+  set_gdbarch_integer_to_address (gdbarch, spu_integer_to_address);
 
   /* Inferior function calls.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);

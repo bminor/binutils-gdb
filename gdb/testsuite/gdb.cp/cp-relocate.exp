@@ -123,7 +123,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-gdb_test "add-symbol-file ${binfile} 0 -s ${func1_sec} 0x40000 -s ${func2_sec} 0x80000" \
+gdb_test "add-symbol-file ${binfile} 0 -s ${func1_sec} 0x10000 -s ${func2_sec} 0x20000" \
 	"Reading symbols from .*${testfile}\\.o\\.\\.\\.done\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
 	"add-symbol-file ${testfile}.o" \
 	"add symbol table from file \".*${testfile}\\.o\" at.*\\(y or n\\) " \
@@ -131,6 +131,6 @@ gdb_test "add-symbol-file ${binfile} 0 -s ${func1_sec} 0x40000 -s ${func2_sec} 0
 
 # Make sure the function addresses were updated.
 gdb_test "break *'$func1_name'" \
-    "Breakpoint $decimal at 0x4....: file .*"
+    "Breakpoint $decimal at 0x1....: file .*"
 gdb_test "break *'$func2_name'" \
-    "Breakpoint $decimal at 0x8....: file .*"
+    "Breakpoint $decimal at 0x2....: file .*"

@@ -1,3 +1,8 @@
+2007-08-27  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdb.cp/cp-relocate.exp (add-symbol-file): Change addresses
+	to fit into SPU Local Store memory.
+
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/default.exp: Adjust the expected output of "info
