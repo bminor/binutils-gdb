@@ -23,15 +23,78 @@
 
 proc gas_version {} {
     global AS
-    catch "exec $AS -version < /dev/null" tmp
+    if [is_remote host] then {
+	remote_exec host "$AS -version < /dev/null" "" "" "gas.version"
+	remote_exec host "which $AS" "" "" "gas.which"
+
+	remote_upload host "gas.version"
+	remote_upload host "gas.which"
+
+	set which_as [file_contents "gas.which"]
+	set tmp [file_contents "gas.version"]
+
+    	remote_file build delete "gas.version"
+   	remote_file build delete "gas.which"
+    	remote_file host delete "gas.version"
+    	remote_file host delete "gas.which"
+    } else {
+	set which_as [which $AS]
+	catch "exec $AS -version < /dev/null" tmp
+    }
+
     # Should find a way to discard constant parts, keep whatever's
     # left, so the version string could be almost anything at all...
     regexp "\[^\n\]* (cygnus-|)(\[-0-9.a-zA-Z-\]+)\[\r\n\].*" $tmp version cyg number
     if ![info exists number] then {
-        return "[which $AS] (no version number)\n"
+        return "$which_as (no version number)\n"
     }
-    clone_output "[which $AS] $number\n"
+    clone_output "$which_as $number\n"
     unset version
+}
+
+proc gas_host_run { cmd redir } {
+    verbose "Executing $cmd $redir"
+    set return_contents_of ""
+    if [regexp ">& */dev/null" $redir] then {
+	set output_file ""
+	set command "$cmd $redir"
+    } elseif [regexp "> */dev/null" $redir] then {
+	set output_file ""
+	set command "$cmd 2>gas.stderr"
+	set return_contents_of "gas.stderr"
+    } elseif [regexp ">&.*" $redir] then {
+	set output_file [regsub ">&" $redir ""]
+	set command "$cmd 2>&1"
+    } elseif [regexp "2>.*" $redir] then {
+	set output_file "gas.out"
+	set command "$cmd $redir"
+	set return_contents_of "gas.out"
+    } elseif [regexp ">.*" $redir] then {
+	set output_file ""
+	set command "$cmd $redir 2>gas.stderr"
+	set return_contents_of "gas.stderr"
+    } elseif { "$redir" == "" } then {
+	set output_file "gas.out"
+	set command "$cmd 2>&1"
+	set return_contents_of "gas.out"
+    } else {
+	fail "gas_host_run: unknown form of redirection string"
+    }
+
+    set status [remote_exec host [concat sh -c [list $command]] "" "/dev/null" "$output_file"]
+    set to_return ""
+    if { "$return_contents_of" != "" } then {
+	remote_upload host "$return_contents_of"
+	set to_return [file_contents "$return_contents_of"]
+	regsub "\n$" $to_return "" to_return
+    }
+
+    if { [lindex $status 0] == 0 && "$output_file" != ""
+	 && "$output_file" != "$return_contents_of" } then {
+	remote_upload host "$output_file"
+    }
+
+    return [list [lindex $status 0] "$to_return"]
 }
 
 proc gas_run { prog as_opts redir } {
@@ -42,8 +105,11 @@ proc gas_run { prog as_opts redir } {
     global subdir
     global host_triplet
 
-    verbose -log "Executing $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog $redir"
-    catch "exec $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog $redir" comp_output
+    set status [gas_host_run "$AS $ASFLAGS $as_opts $srcdir/$subdir/$prog" "$redir"]
+    set comp_output [lindex $status 1]
+    if { [lindex $status 0] != 0 && [regexp "2>.*" $redir] } then {
+	append comp_output "child process exited abnormally"
+    }
     set comp_output [prune_warnings $comp_output]
     verbose "output was $comp_output"
     return [list $comp_output ""]
@@ -71,12 +137,8 @@ proc gas_start { prog as_opts } {
     set gas_started 1
 
     verbose -log "Starting $AS $ASFLAGS $as_opts $prog" 2
-    catch {
-	spawn -noecho -nottycopy $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog
-    } foo
-    if ![regexp {^[0-9]+} $foo] then {
-	perror "Can't run $subdir/$prog: $foo"
-    }
+    set status [gas_host_run "$AS $ASFLAGS $as_opts $srcdir/$subdir/$prog" ">&gas.out"]
+    spawn -noecho -nottycopy cat gas.out
 }
 
 proc gas_finish { } {
@@ -422,6 +484,9 @@ proc run_dump_test { name {extra_options {}} } {
 	    unresolved $subdir/$name
 	    return
 	}
+	if { $opt_name == "as" } {
+	    set opt_val [subst $opt_val]
+	}
 	set opts($opt_name) $opt_val
     }
 
@@ -554,10 +619,11 @@ proc run_dump_test { name {extra_options {}} } {
 	set sourcefile $srcdir/$subdir/$opts(source)
     }
 
-    set cmd "$srcdir/lib/run $AS $ASFLAGS $opts(as) -o dump.o $sourcefile"
+    set cmd "$AS $ASFLAGS $opts(as) -o dump.o $sourcefile"
     send_log "$cmd\n"
-    set cmdret [catch "exec $cmd" comp_output]
-    set comp_output [prune_warnings $comp_output]
+    set status [gas_host_run $cmd ""]
+    set cmdret [lindex $status 0]
+    set comp_output [prune_warnings [lindex $status 1]]
 
     set expmsg $opts(error)
     if { $opts(warning) != "" } {
@@ -632,7 +698,7 @@ proc run_dump_test { name {extra_options {}} } {
     eval set progopts \$[string toupper $program]FLAGS
     eval set binary \$[string toupper $program]
 
-    if { [which $binary] == 0 } {
+    if { ![is_remote host] && [which $binary] == 0 } {
 	untested $testname
 	return
     }
@@ -642,9 +708,11 @@ proc run_dump_test { name {extra_options {}} } {
 
     # Objcopy, unlike the other two, won't send its output to stdout,
     # so we have to run it specially.
-    set cmd "$binary $progopts $progopts1 dump.o > dump.out"
+    set cmd "$binary $progopts $progopts1 dump.o"
+    set redir ">dump.out"
     if { $program == "objcopy" } {
 	set cmd "$binary $progopts $progopts1 dump.o dump.out"
+	set redir ""
     }
 
     # Ensure consistent sorting of symbols
@@ -653,7 +721,8 @@ proc run_dump_test { name {extra_options {}} } {
     }
     set env(LC_ALL) "C"
     send_log "$cmd\n"
-    catch "exec $cmd" comp_output
+    set status [gas_host_run "$cmd" "$redir"]
+    set comp_output [prune_warnings [lindex $status 1]]
     if {[info exists old_lc_all]} {
 	set env(LC_ALL) $old_lc_all
     } else {
@@ -708,8 +777,8 @@ proc objdump { opts } {
     global comp_output
     global host_triplet
 
-    catch "exec $OBJDUMP $opts" comp_output
-    set comp_output [prune_warnings $comp_output]
+    set status [gas_host_run "$OBJDUMP $opts" ""]
+    set comp_output [prune_warnings [lindex $status 1]]
     verbose "objdump output=$comp_output\n" 3
 }
 
@@ -719,12 +788,8 @@ proc objdump_start_no_subdir { prog opts } {
     global spawn_id
 
     verbose "Starting $OBJDUMP $opts $prog" 2
-    catch {
-	spawn -noecho -nottyinit $srcdir/lib/run $OBJDUMP $opts $prog
-    } foo
-    if ![regexp {^[0-9]+} $foo] then {
-	perror "Can't run $prog: $foo"
-    }
+    set status [gas_host_run "$OBJDUMP $opts $prog" ">&gas.out"]
+    spawn -noecho -nottycopy cat gas.out
 }
 
 proc objdump_finish { } {

@@ -31,7 +31,14 @@ if {![ld_simple_link $ld tmpdir/map-address \
 	  tmpdir/map-address.o \
 	  -Map tmpdir/map-address.map"]} {
     fail $testname
-} elseif {[regexp_diff \
+    return
+}
+
+if [is_remote host] then {
+    remote_upload host "tmpdir/map_address.map"
+}
+
+if {[regexp_diff \
 	       "tmpdir/map-address.map" \
 	       "$srcdir/$subdir/map-address.d"]} {
     fail $testname

@@ -24,7 +24,7 @@ set test1 "NOCROSSREFS 1"
 set test2 "NOCROSSREFS 2"
 set test3 "NOCROSSREFS 3"
 
-if { [which $CC] == 0 } {
+if { ![is_remote host] && [which $CC] == 0 } {
     untested $test1
     untested $test2
     untested $test3
@@ -62,9 +62,7 @@ if [istarget sh64*-*-elf] {
 # IA64 has both ordered and unordered sections in an input file.
 setup_xfail ia64-*-*
 
-verbose -log "$ld $flags -o tmpdir/cross1 -T $srcdir/$subdir/cross1.t tmpdir/cross1.o tmpdir/cross2.o"
-
-catch "exec $ld $flags -o tmpdir/cross1 -T $srcdir/$subdir/cross1.t tmpdir/cross1.o tmpdir/cross2.o" exec_output
+set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross1 -T $srcdir/$subdir/cross1.t tmpdir/cross1.o tmpdir/cross2.o"]
 
 set exec_output [prune_warnings $exec_output]
 
@@ -88,10 +86,7 @@ if { ![ld_compile $CC "$srcdir/$subdir/cross3.c" tmpdir/cross3.o] } {
     return
 }
 
-verbose -log "$ld $flags -o tmpdir/cross2 -T $srcdir/$subdir/cross2.t tmpdir/cross3.o"
-
-catch "exec $ld $flags -o tmpdir/cross2 -T $srcdir/$subdir/cross2.t tmpdir/cross3.o" exec_output
-
+set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross2 -T $srcdir/$subdir/cross2.t tmpdir/cross3.o"]
 set exec_output [prune_warnings $exec_output]
 
 regsub -all "(^|\n)($ld: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
@@ -119,9 +114,7 @@ if ![ld_relocate $ld tmpdir/cross3-partial.o "tmpdir/cross1.o tmpdir/cross4.o"] 
     return
 }
 
-verbose -log "$ld $flags -o tmpdir/cross3 -T $srcdir/$subdir/cross3.t tmpdir/cross3-partial.o tmpdir/cross2.o"
-
-catch "exec $ld $flags -o tmpdir/cross3 -T $srcdir/$subdir/cross3.t tmpdir/cross3-partial.o tmpdir/cross2.o" exec_output
+set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross3 -T $srcdir/$subdir/cross3.t tmpdir/cross3-partial.o tmpdir/cross2.o"]
 
 set exec_output [prune_warnings $exec_output]
 

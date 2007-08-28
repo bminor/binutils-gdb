@@ -1,3 +1,20 @@
+2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* binutils-all/ar.exp (long_filenames): Delete temporary files on
+	the host.
+	* binutils-all/arm/objdump.exp: Only check "which $OBJDUMP" if
+	host is local.
+	* binutils-all/objcopy.exp: Use ${srecfile} to get the name of the
+	srec file to be passed to binutils_run.
+	(objcopy_test_readelf): Use remote_exec.
+	* binutils-all/readelf.exp (readelf_find_size): Use remote_exec.
+	(readelf_test): Likewise.
+	(readelf_wi_test): Likewise.
+	* lib/utils-lib.exp (run_dump_test): Only check "which $binary" if
+	host is local.  Use remote_exec.  Use $tempfile not
+	tmpdir/bintest.o.
+
 2007-08-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/copy-2.d (not-target): Match *-*-*aout.

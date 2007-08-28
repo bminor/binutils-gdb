@@ -62,24 +62,24 @@ proc binutils_test { prog_name ld_options test } {
     }
 
     send_log "$READELF -l --wide tmpdir/$test > tmpdir/$test.exp\n"
-    catch "exec $READELF -l --wide tmpdir/$test > tmpdir/$test.exp" got
-    if ![string match "" $got] then {
+    set got [remote_exec host "$READELF -l --wide tmpdir/$test" "" "/dev/null" "tmpdir/$test.exp"]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	send_log "$got\n"
 	unresolved "$test_name"
 	return
     }
 
     send_log "$prog tmpdir/$test\n"
-    catch "exec $prog tmpdir/$test" got
-    if ![string match "" $got] then {
+    set got [remote_exec host "$prog tmpdir/$test"]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	send_log "$got\n"
 	fail "$test_name"
 	return
     }
 
     send_log "$READELF -l --wide tmpdir/$test > tmpdir/$test.out\n"
-    catch "exec $READELF -l --wide tmpdir/$test > tmpdir/$test.out" got
-    if ![string match "" $got] then {
+    set got [remote_exec host "$READELF -l --wide tmpdir/$test" "" "/dev/null" "tmpdir/$test.out"]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	send_log "$got\n"
 	unresolved "$test_name"
 	return

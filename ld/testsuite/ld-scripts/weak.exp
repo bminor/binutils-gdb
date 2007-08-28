@@ -60,14 +60,13 @@ set weak_regexp_little \
 if {! [ld_simple_link $ld tmpdir/weak "$flags -T $srcdir/$subdir/weak.t tmpdir/weak1.o tmpdir/weak2.o"] } then {
     fail $testname
 } else {
-    if {[which $objdump] == 0} then {
+    if {![is_remote host] && [which $objdump] == 0} then {
 	unresolved $testname
 	set LDFLAGS "$saved_LDFLAGS"
 	return
     }
 
-    verbose -log "$objdump -s tmpdir/weak"
-    catch "exec $objdump -s tmpdir/weak" exec_output
+    set exec_output [run_host_cmd "$objdump" "-s tmpdir/weak"]
     set exec_output [prune_warnings $exec_output]
     verbose -log $exec_output
 

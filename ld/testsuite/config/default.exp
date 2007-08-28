@@ -50,9 +50,7 @@ if ![info exists strip] then {
     set strip [findfile $base_dir/../binutils/strip-new $base_dir/../binutils/strip-new [transform strip]]
 }
 
-if {![file isdirectory tmpdir]} then {
-    catch "exec mkdir tmpdir" status
-}
+remote_exec host "mkdir -p tmpdir"
 
 # Make a symlink from tmpdir/as to the assembler in the build tree, so
 # that we can use a -B option to gcc to force it to use the newly

@@ -66,13 +66,12 @@ set output_regexp \
 if {! [ld_simple_link $ld tmpdir/weak-undef "$flags tmpdir/weak-undef.o -T $srcdir/$subdir/weak-undef.t"] } then {
     fail $testname
 } else {
-    if {[which $objdump] == 0} then {
+    if {![is_remote host] && [which $objdump] == 0} then {
 	unresolved $testname
 	return
     }
 
-    verbose -log "$objdump -s tmpdir/weak-undef"
-    catch "exec $objdump -s tmpdir/weak-undef" exec_output
+    set exec_output [run_host_cmd "$objdump" "-s tmpdir/weak-undef"]
     set exec_output [prune_warnings $exec_output]
     verbose -log $exec_output
 

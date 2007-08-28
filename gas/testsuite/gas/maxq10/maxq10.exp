@@ -4,10 +4,9 @@
 proc gas_64_check { } {
     global NM
     global NMFLAGS
-    global srcdir
 
-    catch "exec $srcdir/lib/run $NM $NMFLAGS --help" nm_help
-    return [regexp "targets:.*maxq" $nm_help]
+    set status [gas_host_run "$NM $NMFLAGS --help" ""]
+    return [regexp "targets:.*maxq" [lindex $status 1]]
 }
 
 proc gas_32_check { } {
@@ -15,8 +14,8 @@ proc gas_32_check { } {
     global NMFLAGS
     global srcdir
 
-    catch "exec $srcdir/lib/run $NM $NMFLAGS --help" nm_help
-    return [regexp "targets:.*maxq" $nm_help]
+    set status [gas_host_run "$NM $NMFLAGS --help" ""]
+    return [regexp "targets:.*maxq" [lindex $status 1]]
 }
 
 if [expr ([istarget "maxq-*-*"] ||  [istarget "maxq-coff-*"]) && [gas_32_check]]  then {

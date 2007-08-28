@@ -29,6 +29,10 @@ if { [istarget spu*-*-*] } {
     set LDFLAGS "$LDFLAGS --local-store 0:0"
 }
 
+if { [is_remote host] } then {
+    remote_download host merge.ld
+}
+
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 foreach t $test_list {
     # We need to strip the ".d", but can leave the dirname.

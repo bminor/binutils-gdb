@@ -1,3 +1,9 @@
+2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* ldlang.c (sort_sections_by_lma): Sort by internal id after lma
+	for stable sort.
+
 2007-08-28  Robert Sebastian Gerus  <arachnist@gmail.com>
 
 	* configure.host: Add support for i[3-7]86-*-dragonfly*.

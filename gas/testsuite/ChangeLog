@@ -1,3 +1,30 @@
+2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* lib/gas-defs.exp (gas_version): Use remote_* functions instead
+	of exec.
+	(gas_host_run): New.
+	(gas_run): Use gas_host_run.
+	(gas_start): Likewise.
+	(run_dump_test): Likewise.
+	(objdump): Use gas_host_run.
+	(objdump_start_no_subdir): Likewise.
+	* lib/gas-dg.exp (gas-dg-test): Use "remote_file host delete".
+	* lib/run: Remove.
+	* gas/macros/macros.exp: Download app4b.s to host.
+	* gas/i386/i386.exp (gas_64_check): Use gas_host_run.
+	(gas_32_check): Likewise.
+	* gas/maxq10/maxq10.exp (gas_64_check): Likewise
+	(gas_32_check): Likewise.
+	* gas/maxq20/maxq20.exp (gas_64_check): Likewise
+	(gas_32_check): Likewise.
+	* gas/sparc/sparc.exp (gas_64_check): Likewise.
+	* gas/cfi/cfi.exp: Likewise.
+	* gas/elf/elf.exp (run_list_test): Likewise.  Use temporary file
+	for readelf output in place of pipe.
+	* gas/all/gas.exp: Download incbin.dat to host.
+	(do_comment): Allow \r\r\n.
+
 2007-08-09  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/relax_load_align.d: new test.

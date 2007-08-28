@@ -4103,6 +4103,10 @@ sort_sections_by_lma (const void *arg1, const void *arg2)
   else if (bfd_section_lma (sec1->owner, sec1)
 	   > bfd_section_lma (sec2->owner, sec2))
     return 1;
+  else if (sec1->id < sec2->id)
+    return -1;
+  else if (sec1->id > sec2->id)
+    return 1;
 
   return 0;
 }

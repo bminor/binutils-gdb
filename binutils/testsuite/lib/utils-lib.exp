@@ -462,7 +462,7 @@ proc run_dump_test { name {extra_options {}} } {
 	set srcfile $srcdir/$subdir/$opts(source)
     }
 
-    set exec_output [binutils_assemble ${srcfile} tmpdir/bintest.o]
+    set exec_output [binutils_assemble ${srcfile} $tempfile]
     if [string match "" $exec_output] then {
 	send_log "$exec_output\n"
 	verbose "$exec_output"
@@ -486,14 +486,14 @@ proc run_dump_test { name {extra_options {}} } {
     eval set progopts \$[string toupper $dumpprogram]FLAGS
     eval set binary \$[string toupper $dumpprogram]
 
-    if { [which $binary] == 0 } {
+    if { ![is_remote host] && [which $binary] == 0 } {
 	untested $testname
 	return
     }
 
     verbose "running $binary $progopts $progopts1" 3
 
-    set cmd "$binary $progopts $progopts1 ${copyfile}.o > tmpdir/dump.out"
+    set cmd "$binary $progopts $progopts1 ${copyfile}.o"
 
     # Ensure consistent sorting of symbols
     if {[info exists env(LC_ALL)]} {
@@ -501,13 +501,18 @@ proc run_dump_test { name {extra_options {}} } {
     }
     set env(LC_ALL) "C"
     send_log "$cmd\n"
-    catch "exec $cmd" comp_output
+    set comp_output [remote_exec host $cmd "" "/dev/null" "tmpdir/dump.out"]
     if {[info exists old_lc_all]} {
 	set env(LC_ALL) $old_lc_all
     } else {
 	unset env(LC_ALL)
     }
-    set comp_output [prune_warnings $comp_output]
+    if { [lindex $comp_output 0] != 0 } then {
+	send_log "$comp_output\n"
+	fail $testname
+	return
+    }
+    set comp_output [prune_warnings [lindex $comp_output 1]]
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
 	fail $testname

@@ -9774,8 +9774,22 @@ elf32_arm_new_section_hook (bfd *abfd, asection *sec)
 static int
 elf32_arm_compare_mapping (const void * a, const void * b)
 {
-  return ((const elf32_arm_section_map *) a)->vma
-	 > ((const elf32_arm_section_map *) b)->vma;
+  const elf32_arm_section_map *amap = (const elf32_arm_section_map *) a;
+  const elf32_arm_section_map *bmap = (const elf32_arm_section_map *) b;
+
+  if (amap->vma > bmap->vma)
+    return 1;
+  else if (amap->vma < bmap->vma)
+    return -1;
+  else if (amap->type > bmap->type)
+    /* Ensure results do not depend on the host qsort for objects with
+       multiple mapping symbols at the same address by sorting on type
+       after vma.  */
+    return 1;
+  else if (amap->type < bmap->type)
+    return -1;
+  else
+    return 0;
 }
 
 

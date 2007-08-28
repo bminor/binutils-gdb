@@ -117,7 +117,7 @@ proc do_comment {} {
 	expect {
 	    -re "^ +1\[ \t\]+# This\[^\n\]*\n"		{ set x1 1 }
 	    -re "^ +2\[ \t\]+# correctly\[^\n\]*\n"	{ set x2 1 }
-	    -re "^ +3\[ \t\]+/. C comments too. ./\r?\n" { set x3 1 }
+	    -re "^ +3\[ \t\]+/. C comments too. ./\r?\r?\n" { set x3 1 }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -254,6 +254,7 @@ case $target_triplet in {
     { *c54x*-*-* } { }
     default {
         test_cond
+	remote_download host "$srcdir/$subdir/incbin.dat"
         run_dump_test incbin
     }
 }

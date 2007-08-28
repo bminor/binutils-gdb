@@ -34,7 +34,7 @@ set test1w2	"$test1 (warning 2)"
 set test1c1	"$test1 (change 1)"
 set test1c2	"$test1 (change 2)"
 
-if { [which $CC] == 0 } {
+if { ![is_remote host] && [which $CC] == 0 } {
     untested $test1w1
     untested $test1w2
     untested $test1c1
@@ -54,7 +54,8 @@ proc dump_common1 { testname } {
     global READELF
 
     send_log "$READELF -s tmpdir/common1.o | grep foo\n"
-    catch "exec $READELF -s tmpdir/common1.o | grep foo" exec_output
+    set exec_output [run_host_cmd "readelf" "-s tmpdir/common1.o | grep foo"]
+
     if { ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+)4(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(PRC\\\[0xff03\\\]|COM|SCOM)(\[ 	\]+)_?foo2" $exec_output]
  	 || ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0-9\]+)(\[ 	\]+)21(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)_?foo1" $exec_output] } {
 	send_log "$exec_output\n"

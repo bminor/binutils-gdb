@@ -1,3 +1,46 @@
+2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-elfcomm/elfcomm.exp: Use run_host_cmd.  Only check "which
+	$CC" if host is local.
+	* ld-checks/checks.exp: Use run_host_cmd.
+	* ld-elf/exclude.exp: Likewise.
+	* ld-elf/elf.exp: Download merge.ld if host is remote.
+	* ld-elf/binutils.exp (binutils_test): Use remote_exec.
+	* ld-elf/tls_common.exp: Use run_host_cmd.
+	* lib/ld-lib.exp (ld_version): Only check "which $ld" if host is
+	local.  Use remote_exec.
+	(run_host_cmd): New.
+	(run_host_cmd_yesno): New.
+	(default_ld_relocate): Use run_host_cmd_yesno.
+	(default_ld_link): Likewise.
+	(default_ld_simple_link): Use run_host_cmd.
+	(default_ld_compile): Only check "which $ccprog" if host is local.
+	Use remote_file and remote_exec.
+	(default_ld_assemble): Only check "which $as" if host is local.
+	Use run_host_cmd.
+	(default_ld_nm): Use remote_exec, remote_upload and remote_file.
+	(run_dump_test): Use remote_exec, remote_upload and remote_file.
+	Only check "which $binary" if host is local.
+	(run_ld_link_tests): Use remote_exec, remote_upload and
+	remote_file.
+	* ld-selective/selective.exp: Only check "which $CXX" if host is
+	local.  Use remote_exec.
+	* ld-scripts/phdrs.exp: Only check "which $objdump" if host is
+	local.  Use run_host_cmd.
+	* ld-scripts/phdrs2.exp: Likewise.
+	* ld-scripts/weak.exp: Likewise.
+	* ld-undefined/weak-undef.exp: Likewise.
+	* ld-scripts/crossref.exp: Only check "which $CC" if host is local.
+	Use run_host_cmd.
+	* ld-scripts/map-address.exp: Upload map_address.map if host is
+	remote.
+	* ld-srec/srec.exp (run_srec_tests): Use run_host_cmd.  Only check
+	"which $CC" and "which $CXX" if host is local.
+	* ld-undefined/undefined.exp: Only check "which $CC" if host is
+	local.  Use remote_file and run_host_cmd.
+	* config/default.exp: Use remote_exec to create tmpdir.
+
 2007-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/i386.exp (i386tests): Add a test for TLS IE->LE

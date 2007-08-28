@@ -57,13 +57,12 @@ set ldopt "$ldopt -T $srcdir/$subdir/phdrs2.t tmpdir/phdrs2.o"
 if ![ld_simple_link $ld tmpdir/phdrs2 $ldopt] {
     fail $testname
 } else {
-    if {[which $objdump] == 0} {
+    if {![is_remote host] && [which $objdump] == 0} {
 	unresolved $testname
 	return
     }
 
-    verbose -log "$objdump --private tmpdir/phdrs2"
-    catch "exec $objdump --private tmpdir/phdrs2" exec_output
+    set exec_output [run_host_cmd "$objdump" "--private tmpdir/phdrs2"]
     set exec_output [prune_warnings $exec_output]
     verbose -log $exec_output
 

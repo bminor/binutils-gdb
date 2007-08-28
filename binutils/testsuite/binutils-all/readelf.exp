@@ -41,9 +41,12 @@ proc readelf_find_size { binary_file } {
 
     set readelf_size ""
     set testname "finding out ELF size with readelf -h"
-    catch "exec $READELF $READELFFLAGS -h $binary_file > readelf.out" got
+    set got [remote_exec host "$READELF $READELFFLAGS -h $binary_file" "" "/dev/null" "readelf.out"]
+    if [is_remote host] then {
+        remote_upload host "readelf.out"
+    }
 
-    if ![string match "" $got] then {
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]]} then {
 	send_log $got
 	fail $testname
 	return
@@ -76,13 +79,13 @@ proc readelf_test { options binary_file regexp_file xfails } {
     global subdir
     
     send_log "exec $READELF $READELFFLAGS $options $binary_file > readelf.out\n"
-    catch "exec $READELF $READELFFLAGS $options $binary_file > readelf.out" got
+    set got [remote_exec host "$READELF $READELFFLAGS $options $binary_file" "" "/dev/null" "readelf.out"]
 
     foreach xfail $xfails {
 	setup_xfail $xfail
     }
 
-    if ![string match "" $got] then {
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "readelf $options (reason: unexpected output)"
 	send_log $got
 	send_log "\n"
@@ -146,8 +149,7 @@ proc readelf_wi_test {} {
     set tempfile [remote_download host tmpdir/testprog.o]
 
     # Run "readelf -wi" on it.
-    send_log "exec $READELF $READELFFLAGS -wi $tempfile > readelf.out\n"
-    catch "exec $READELF $READELFFLAGS -wi $tempfile > readelf.out" got
+    set got [remote_exec host "$READELF $READELFFLAGS -wi $tempfile" "" "/dev/null" "readelf.out"]
 
     # Upload the results.
     set output [remote_upload host readelf.out]
@@ -155,7 +157,7 @@ proc readelf_wi_test {} {
     file_on_host delete $tempfile
     
     # Strip any superflous warnings.
-    set got [prune_readelf_wi_warnings $got]
+    set got [prune_readelf_wi_warnings [lindex $got 1]]
 
     if ![string match "" $got] then {
 	fail "readelf $READELFFLAGS -wi (reason: unexpected output)"

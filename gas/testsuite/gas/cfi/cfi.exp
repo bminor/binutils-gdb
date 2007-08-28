@@ -28,11 +28,10 @@ if [istarget "x86_64-*"] then {
 } elseif { [istarget sparc*-*-*] } then {
     global NM
     global NMFLAGS
-    global srcdir
 
-    catch "exec $srcdir/lib/run $NM $NMFLAGS --help" nm_help
+    set nm_status [gas_host_run "$NM $NMFLAGS --help" ""]
     run_dump_test "cfi-sparc-1"
-    if { [regexp "elf64\[_-\]sparc" $nm_help] } then {
+    if { [regexp "elf64\[_-\]sparc" [lindex $nm_status 1]] } then {
 	run_dump_test "cfi-sparc64-1"
     }
 

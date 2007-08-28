@@ -24,43 +24,67 @@
 proc default_ld_version { ld } {
     global host_triplet
 
-    if { [which $ld] == 0 } then {
+    if { ![is_remote host] && [which $ld] == 0 } then {
 	perror "$ld does not exist"
 	exit 1
     }
 
-    catch "exec $ld --version" tmp
-    set tmp [prune_warnings $tmp]
+    remote_exec host "$ld --version" "" "/dev/null" "ld.version"
+    remote_upload host "ld.version"
+    set tmp [prune_warnings [file_contents "ld.version"]]
+    remote_file build delete "ld.version"
+    remote_file host delete "ld.version"
+
     regexp "\[^\n\]* (cygnus-|)(\[-0-9.a-zA-Z-\]+)\[\r\n\].*" $tmp version cyg number
     if [info exists number] then {
 	clone_output "$ld $number\n"
     }
 }
 
+proc run_host_cmd { prog command } {
+    global link_output
+
+    if { ![is_remote host] && [which "$prog"] == 0 } then {
+	perror "$prog does not exist"
+	return 0
+    }
+
+    verbose -log "$prog $command"
+    set status [remote_exec host [concat sh -c [list "$prog $command 2>&1"]] "" "/dev/null" "ld.tmp"]
+    remote_upload host "ld.tmp"
+    set link_output [file_contents "ld.tmp"]
+    regsub "\n$" $link_output "" link_output
+    if { [lindex $status 0] != 0 && [string match "" $link_output] } then {
+	append link_output "child process exited abnormally"
+    }
+    remote_file build delete ld.tmp
+    remote_file host delete ld.tmp
+
+    if [string match "" $link_output] then {
+	return ""
+    }
+
+    verbose -log "$link_output"
+    return "$link_output"
+}
+
+proc run_host_cmd_yesno { prog command } {
+    global exec_output
+
+    set exec_output [prune_warnings [run_host_cmd "$prog" "$command"]]
+    if [string match "" $exec_output] then {
+	return 1;
+    }
+    return 0;
+}
+
 # Link an object using relocation.
 #
 proc default_ld_relocate { ld target objects } {
     global HOSTING_EMU
-    global host_triplet
-    global exec_output
 
-    if { [which $ld] == 0 } then {
-	perror "$ld does not exist"
-	return 0
-    }
-
-    catch "exec rm -f $target" exec_output
-
-    verbose -log "$ld $HOSTING_EMU -o $target -r $objects"
-
-    catch "exec $ld $HOSTING_EMU -o $target -r $objects" exec_output
-    set exec_output [prune_warnings $exec_output]
-    if [string match "" $exec_output] then {
-	return 1
-    } else {
-	verbose -log "$exec_output"
-	return 0
-    }
+    remote_file host delete $target
+    return [run_host_cmd_yesno "$ld" "$HOSTING_EMU -o $target -r $objects"]
 }
 
 # Check to see if ld is being invoked with a non-endian output format
@@ -126,43 +150,23 @@ proc default_ld_link { ld target objects } {
     set objs "$HOSTING_CRT0 $objects"
     set libs "$LIBS $HOSTING_LIBS"
 
-    if { [which $ld] == 0 } then {
-	perror "$ld does not exist"
-	return 0
-    }
-
     if [is_endian_output_format $objects] then {
 	set flags [big_or_little_endian]
     } else {
 	set flags ""
     }
 
-    catch "exec rm -f $target" exec_output
+    remote_file host delete $target
 
-    verbose -log "$ld $HOSTING_EMU $flags -o $target $objs $libs"
-
-    catch "exec $ld $HOSTING_EMU $flags -o $target $objs $libs" link_output
-    set exec_output [prune_warnings $link_output]
-    if [string match "" $exec_output] then {
-	return 1
-    } else {
-	verbose -log "$exec_output"
-	return 0
-    }
+    return [run_host_cmd_yesno "$ld" "$HOSTING_EMU $flags -o $target $objs $libs"]
 }
 
 # Link a program using ld, without including any libraries.
 #
 proc default_ld_simple_link { ld target objects } {
     global host_triplet
-    global link_output
     global gcc_ld_flag
     global exec_output
-
-    if { [which $ld] == 0 } then {
-	perror "$ld does not exist"
-	return 0
-    }
 
     if [is_endian_output_format $objects] then {
 	set flags [big_or_little_endian]
@@ -183,12 +187,10 @@ proc default_ld_simple_link { ld target objects } {
 	set flags "$gcc_ld_flag $flags"
     }
 
-    catch "exec rm -f $target" exec_output
+    remote_file host delete $target
 
-    verbose -log "$ld $flags -o $target $objects"
-
-    catch "exec $ld $flags -o $target $objects" link_output
-    set exec_output [prune_warnings $link_output]
+    set exec_output [run_host_cmd "$ld" "$flags -o $target $objects"]
+    set exec_output [prune_warnings $exec_output]
 
     # We don't care if we get a warning about a non-existent start
     # symbol, since the default linker script might use ENTRY.
@@ -197,7 +199,6 @@ proc default_ld_simple_link { ld target objects } {
     if [string match "" $exec_output] then {
 	return 1
     } else {
-	verbose -log "$exec_output"
 	return 0
     }
 }
@@ -215,12 +216,13 @@ proc default_ld_compile { cc source object } {
     if {[llength $cc_prog] > 1} then {
 	set cc_prog [lindex $cc_prog 0]
     }
-    if {[which $cc_prog] == 0} then {
+    if {![is_remote host] && [which $cc_prog] == 0} then {
 	perror "$cc_prog does not exist"
 	return 0
     }
 
-    catch "exec rm -f $object" exec_output
+    remote_file build delete "$object"
+    remote_file host delete "$object"
 
     set flags "-I$srcdir/$subdir $CFLAGS"
 
@@ -246,22 +248,20 @@ proc default_ld_compile { cc source object } {
 
     verbose -log "$cc $flags $ccflags -c $source -o $object"
 
-    catch "exec $cc $flags $ccflags -c $source -o $object" exec_output
+    set status [remote_exec host [concat sh -c [list "$cc $flags $ccflags -c $source -o $object 2>&1"]] "" "/dev/null" "ld.tmp"]
+    remote_upload host "ld.tmp"
+    set exec_output [file_contents "ld.tmp"]
+    remote_file build delete "ld.tmp"
+    remote_file host delete "ld.tmp"
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	if {![file exists $object]} then {
 	    regexp ".*/(\[^/\]*)$" $source all dobj
 	    regsub "\\.c" $dobj ".o" realobj
 	    verbose "looking for $realobj"
-	    if {[file exists $realobj]} then {
+	    if {[remote_file host exists $realobj]} then {
 		verbose -log "mv $realobj $object"
-		catch "exec mv $realobj $object" exec_output
-		set exec_output [prune_warnings $exec_output]
-		if {![string match "" $exec_output]} then {
-		    verbose -log "$exec_output"
-		    perror "could not move $realobj to $object"
-		    return 0
-		}
+		remote_upload "$realobj" "$object"
 	    } else {
 		perror "$object not found after compilation"
 		return 0
@@ -281,23 +281,14 @@ proc default_ld_assemble { as source object } {
     global ASFLAGS
     global host_triplet
 
-    if {[which $as] == 0} then {
-	perror "$as does not exist"
-	return 0
-    }
-
     if ![info exists ASFLAGS] { set ASFLAGS "" }
 
     set flags [big_or_little_endian]
-
-    verbose -log "$as $flags $ASFLAGS -o $object $source"
-
-    catch "exec $as $flags $ASFLAGS -o $object $source" exec_output
+    set exec_output [run_host_cmd "$as" "$flags $ASFLAGS -o $object $source"]
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	return 1
     } else {
-	verbose -log "$exec_output"
 	perror "$source: assembly failed"
 	return 0
     }
@@ -310,11 +301,6 @@ proc default_ld_nm { nm nmflags object } {
     global nm_output
     global host_triplet
 
-    if {[which $nm] == 0} then {
-	perror "$nm does not exist"
-	return 0
-    }
-
     if {[info exists nm_output]} {
       unset nm_output
     }
@@ -326,15 +312,20 @@ proc default_ld_nm { nm nmflags object } {
 	set old_lc_all $env(LC_ALL)
     }
     set env(LC_ALL) "C"
+
     verbose -log "$nm $NMFLAGS $nmflags $object >tmpdir/nm.out"
 
-    catch "exec $nm $NMFLAGS $nmflags $object >tmpdir/nm.out" exec_output
+    set status [remote_exec host [concat sh -c [list "$nm $NMFLAGS $nmflags $object 2>ld.stderr"]] "" "/dev/null" "tmpdir/nm.out"]
     if {[info exists old_lc_all]} {
 	set env(LC_ALL) $old_lc_all
     } else {
 	unset env(LC_ALL)
     }
-    set exec_output [prune_warnings $exec_output]
+    remote_upload host "ld.stderr"
+    remote_upload host "tmpdir/nm.out" "tmpdir/nm.out"
+    set exec_output [prune_warnings [file_contents "ld.stderr"]]
+    remote_file host delete "ld.stderr"
+    remote_file build delete "ld.stderr"
     if [string match "" $exec_output] then {
 	set file [open tmpdir/nm.out r]
 	while { [gets $file line] != -1 } {
@@ -706,6 +697,9 @@ proc run_dump_test { name } {
 		}
 	    }
 	}
+	if { $opt_name == "as" || $opt_name == "ld" } {
+	    set opt_val [subst $opt_val]
+	}
 	set opts($opt_name) [concat $opts($opt_name) $opt_val]
     }
     foreach opt { as ld } {
@@ -805,10 +799,13 @@ proc run_dump_test { name } {
 	set cmd "$AS $ASFLAGS $opts(as) $asflags($sourcefile) -o $objfile $sourcefile"
 
 	send_log "$cmd\n"
-	set cmdret [catch "exec $cmd" comp_output]
-	set comp_output [prune_warnings $comp_output]
+	set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]
+	remote_upload host "ld.tmp"
+	set comp_output [prune_warnings [file_contents "ld.tmp"]]
+	remote_file host delete "ld.tmp"
+	remote_file build delete "ld.tmp"
 
-	if { $cmdret != 0 || ![string match "" $comp_output] } then {
+	if { [lindex $cmdret 0] != 0 || ![string match "" $comp_output] } then {
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3
 
@@ -840,43 +837,32 @@ proc run_dump_test { name } {
 		   $opts(ld) -o $objfile $objfiles"
 
 	send_log "$cmd\n"
-	set cmdret [catch "exec $cmd" comp_output]
-	set comp_output [prune_warnings $comp_output]
-
-	if { $cmdret != 0 } then {
-	    # If the executed program writes to stderr and stderr is not
-	    # redirected, exec *always* returns failure, regardless of the
-	    # program exit code.  Thankfully, we can retrieve the true
-	    # return status from a special variable.  Redirection would
-	    # cause a Tcl-specific message to be appended, and we'd rather
-	    # not deal with that if we can help it.
-	    global errorCode
-	    if { [lindex $errorCode 0] == "NONE" } {
-		set cmdret 0
-	    }
-	}
+	set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]
+	remote_upload host "ld.tmp"
+	set comp_output [prune_warnings [file_contents "ld.tmp"]]
+	remote_file host delete "ld.tmp"
+	remote_file build delete "ld.tmp"
+	set cmdret [lindex $cmdret 0]
 
 	if { $cmdret == 0 && $run_objcopy } {
 	    set infile $objfile
 	    set objfile "tmpdir/dump1"
-	    catch "exec rm -f $objfile" exec_output
+	    remote_file host delete $objfile
 
 	    # Note that we don't use OBJCOPYFLAGS here; any flags must be
 	    # explicitly specified.
 	    set cmd "$OBJCOPY $opts(objcopy_linked_file) $infile $objfile"
 
 	    send_log "$cmd\n"
-	    set cmdret [catch "exec $cmd" comp_output]
-	    append comp_output [prune_warnings $comp_output]
-
-	    if { $cmdret != 0 } then {
-		global errorCode
-		if { [lindex $errorCode 0] == "NONE" } {
-		    set cmdret 0
-		}
-	    }
+	    set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]
+	    remote_upload host "ld.tmp"
+	    append comp_output [prune_warnings [file_contents "ld.tmp"]]
+	    remote_file host delete "ld.tmp"
+	    remote_file build delete "ld.tmp"
+	    set cmdret [lindex $cmdret 0]
 	}
 
+	regsub "\n$" $comp_output "" comp_output
 	if { $cmdret != 0 || $comp_output != "" || $expmsg != "" } then {
 	    set exitstat "succeeded"
 	    if { $cmdret != 0 } { set exitstat "failed" }
@@ -911,7 +897,7 @@ proc run_dump_test { name } {
     eval set progopts \$[string toupper $program]FLAGS
     eval set binary \$[string toupper $program]
 
-    if { [which $binary] == 0 } {
+    if { ![is_remote host] && [which $binary] == 0 } {
 	untested $testname
 	return
     }
@@ -932,13 +918,16 @@ proc run_dump_test { name } {
     }
     set env(LC_ALL) "C"
     send_log "$cmd\n"
-    catch "exec $cmd" comp_output
+    set cmdret [remote_exec host [concat sh -c [list "$cmd 2>ld.tmp"]] "" "/dev/null"]
+    remote_upload host "ld.tmp"
+    set comp_output [prune_warnings [file_contents "ld.tmp"]]
+    remote_file host delete "ld.tmp"
+    remote_file build delete "ld.tmp"
     if {[info exists old_lc_all]} {
 	set env(LC_ALL) $old_lc_all
     } else {
 	unset env(LC_ALL)
     }
-    set comp_output [prune_warnings $comp_output]
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
 	fail $testname
@@ -1196,15 +1185,19 @@ proc run_ld_link_tests { ldtests } {
 			set old_lc_all $env(LC_ALL)
 		    }
 		    set env(LC_ALL) "C"
-		    set cmd "$binary $progopts $binfile > dump.out"
+		    set cmd "$binary $progopts $binfile"
+    		    set status [remote_exec host [concat sh -c [list "$cmd >dump.out 2>ld.stderr"]] "" "/dev/null"]
 		    send_log "$cmd\n"
-		    catch "exec $cmd" comp_output
+    		    remote_upload host "ld.stderr"
+    		    set comp_output [prune_warnings [file_contents "ld.stderr"]]
+    		    remote_file host delete "ld.stderr"
+    		    remote_file build delete "ld.stderr"
+                    
 		    if {[info exists old_lc_all]} {
 			set env(LC_ALL) $old_lc_all
 		    } else {
 			unset env(LC_ALL)
 		    }
-		    set comp_output [prune_warnings $comp_output]
 
 		    if ![string match "" $comp_output] then {
 			send_log "$comp_output\n"
@@ -1212,11 +1205,17 @@ proc run_ld_link_tests { ldtests } {
 			break
 		    }
 
+		    remote_upload host "dump.out"
+
 		    if { [regexp_diff "dump.out" "$srcdir/$subdir/$dumpfile"] } then {
 			verbose "output is [file_contents "dump.out"]" 2
 			set failed 1
+		   	remote_file build delete "dump.out"
+		   	remote_file host delete "dump.out"
 			break
 		    }
+		    remote_file build delete "dump.out"
+		    remote_file host delete "dump.out"
 		}
 	    }
 

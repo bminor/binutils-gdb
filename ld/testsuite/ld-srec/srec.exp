@@ -305,8 +305,7 @@ proc run_srec_test { test objs } {
     }
 
     send_log "$objcopy -O srec tmpdir/sr1 tmpdir/sr1.sr\n"
-    verbose "$objcopy -O srec tmpdir/sr1 tmpdir/sr1.sr"
-    catch "exec $objcopy -O srec tmpdir/sr1 tmpdir/sr1.sr" exec_output
+    set exec_output [run_host_cmd "$objcopy" "-O srec tmpdir/sr1 tmpdir/sr1.sr"]
     set exec_output [prune_warnings $exec_output]
     if ![string match "" $exec_output] {
 	send_log "$exec_output\n"
@@ -330,7 +329,7 @@ set test1 "S-records"
 set test2 "S-records with constructors"
 
 # See whether the default linker script uses SIZEOF_HEADERS.
-catch "exec $ld --verbose" exec_output
+set exec_output [run_host_cmd "$ld" "--verbose"]
 set sizeof_headers [string match "*SIZEOF_HEADERS*" $exec_output]
 
 # First test linking a C program.  We don't require any libraries.  We
@@ -338,7 +337,7 @@ set sizeof_headers [string match "*SIZEOF_HEADERS*" $exec_output]
 # directly to the S-record format, and require that the two files
 # contain the same data.
 
-if { [which $CC] == 0 } {
+if { ![is_remote host] && [which $CC] == 0 } {
     untested $test1
     untested $test2
     return
@@ -400,7 +399,7 @@ run_srec_test $test1 "tmpdir/sr1.o tmpdir/sr2.o"
 # destructors.  Note that since we are not linking against any
 # libraries, this program won't actually work or anything.
 
-if { [which $CXX] == 0 } {
+if { ![is_remote host] && [which $CXX] == 0 } {
     untested $test2
     return
 }

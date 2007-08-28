@@ -194,7 +194,7 @@ if ![string match "" $got] then {
 		verbose $line
 		fail "objcopy -O srec"
 	    } else {
-		set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -f ${copyfile}.srec"]
+		set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -f ${srecfile}"]
 		if ![regexp "file format srec" $got] then {
 		    send_log "objdump failed\n"
 		    fail "objcopy -O srec"
@@ -722,23 +722,32 @@ proc objcopy_test_readelf {testname srcfile} {
     }
 
     verbose -log "$OBJCOPY $OBJCOPYFLAGS tmpdir/bintest.o tmpdir/copy.o"
-    catch "exec $OBJCOPY $OBJCOPYFLAGS tmpdir/bintest.o tmpdir/copy.o" exec_output
-    if ![string match "" $exec_output] then {
+    set exec_output [remote_exec host "$OBJCOPY $OBJCOPYFLAGS tmpdir/bintest.o tmpdir/copy.o"]
+    if { [lindex $exec_output 0] != 0
+	 || ![string match "" [lindex $exec_output 1]] } then {
 	fail "objcopy ($testname)"
 	return
     }
 
     verbose -log "$READELF -a tmpdir/bintest.o > tmpdir/bintest.o.out"
-    catch "exec $READELF -a tmpdir/bintest.o > tmpdir/bintest.o.out" exec_output
-    set exec_output [prune_warnings $exec_output]
+    set exec_output [remote_exec host "$READELF -a tmpdir/bintest.o" "" "/dev/null" "tmpdir/bintest.o.out"]
+    if { [lindex $exec_output 0] != 0 } then {
+	unresolved "objcopy ($testname)"
+	return
+    }
+    set exec_output [prune_warnings [lindex $exec_output 1]]
     if ![string match "" $exec_output] then {
 	unresolved "objcopy ($testname)"
 	return
     }
 
     verbose -log "$READELF -a tmpdir/copy.o > tmpdir/copy.o.out"
-    catch "exec $READELF -a tmpdir/copy.o > tmpdir/copy.o.out" exec_output
-    set exec_output [prune_warnings $exec_output]
+    set exec_output [remote_exec host "$READELF -a tmpdir/copy.o" "" "/dev/null" "tmpdir/copy.o.out"]
+    if { [lindex $exec_output 0] != 0 } then {
+	unresolved "objcopy ($testname)"
+	return
+    }
+    set exec_output [prune_warnings [lindex $exec_output 1]]
     if ![string match "" $exec_output] then {
 	unresolved "objcopy ($testname)"
 	return

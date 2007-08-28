@@ -15,7 +15,13 @@ proc run_elf_list_test { name suffix opts readelf_opts readelf_pipe } {
 	return
     }
     send_log "$READELF $readelf_opts dump.o $readelf_pipe > dump.out\n"
-    catch "exec $READELF $readelf_opts dump.o $readelf_pipe > dump.out\n" comp_output
+    set status [gas_host_run "$READELF $readelf_opts dump.o" ">readelf.out"]
+    if { [lindex $status 0] != 0 || ![string match "" [lindex $status 1]] } then {
+	send_log "[lindex $status 1]\n"
+	fail $testname
+	return
+    }
+    catch "exec cat readelf.out $readelf_pipe > dump.out\n" comp_output
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
 	fail $testname

@@ -42,6 +42,7 @@ proc long_filenames { } {
     set file2 tmpdir/$n2
 
     remote_file build delete $file1
+    remote_file host delete $n1
 
     # Some file systems truncate file names at 14 characters, which
     # makes it impossible to run this test.  Check for that now.
@@ -54,8 +55,8 @@ proc long_filenames { } {
     puts $f "first"
     close $f
 
-
     remote_file build delete $file2
+    remote_file host delete $n2
 
     set status [catch "set f [open tmpdir/$n2 w]" errs]
     if { $status != 0 } {

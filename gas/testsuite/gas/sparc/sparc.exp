@@ -10,10 +10,9 @@
 proc gas_64_check { } {
     global NM
     global NMFLAGS
-    global srcdir
 
-    catch "exec $srcdir/lib/run $NM $NMFLAGS --help" nm_help
-    return [regexp "elf64\[_-\]sparc" $nm_help]
+    set status [gas_host_run "$NM $NMFLAGS --help" ""]
+    return [regexp "elf64\[_-\]sparc" [lindex $status 1]]
 }
 
 proc sparc_elf_setup { } {

@@ -53,8 +53,8 @@ if { ![ld_assemble $as $srcdir/$subdir/exclude1.s tmpdir/exclude1.o ]
     return
 }
 
-catch "exec rm -f tmpdir/libexclude.a" catch_output
-catch "exec $ar cq tmpdir/libexclude.a tmpdir/exclude2.o" catch_output
+remote_file host delete "tmpdir/libexclude.a"
+set catch_output [run_host_cmd "$ar" "cq tmpdir/libexclude.a tmpdir/exclude2.o"]
 if {![string match "" $catch_output]} {
     unresolved $test1
     return

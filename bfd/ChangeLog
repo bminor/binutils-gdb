@@ -1,3 +1,9 @@
+2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_compare_mapping): Compare first on vma,
+	then on type.
+
 2007-08-28  Robert Sebastian Gerus  <arachnist@gmail.com>
 
 	* config.bfd: Add support for i[3-7]86-*-dragonfly*.

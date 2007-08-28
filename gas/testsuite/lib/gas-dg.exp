@@ -21,7 +21,7 @@ proc gas-dg-test { prog do_what tool_flags } {
 	"run" {
 	    # This is the only place where we care if an executable was
 	    # created or not.  If it was, dg.exp will try to run it.
-	    catch "exec rm -f $output_file"
+	    remote_file host delete "$output_file"
 	}
 	default {
 	    perror "$do_what: not a valid dg-do keyword"

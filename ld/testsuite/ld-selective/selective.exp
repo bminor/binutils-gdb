@@ -71,7 +71,7 @@ if [istarget sh64*-*-elf] {
 }
 
 # If we don't have g++ for the target, mark all tests as untested.
-if { [which $CXX] == 0 } {
+if { ![is_remote host] && [which $CXX] == 0 } {
     foreach testitem $seltests {
 	untested "[lindex $testitem 0]"
     }
@@ -103,7 +103,8 @@ foreach testitem $seltests {
 	if [string match "*gcc*" [lindex $CC 0]] {
 	    # Starting with 3.4.0, -fvtable-gc is no longer supported and thus
 	    # the functionality we try to test for cannot be expected to work.
-	    catch "exec -- $CC -dumpversion" version
+	    set version [remote_exec host "$CC -dumpversion"]
+	    set version [lindex $version 1]
 	    if [regexp "^(\[1-9\]\[0-9\]+|\[4-9\]|3.(\[1-9\]\[0-9\]+|\[4-9\]))\\." $version] {
 		setup_xfail {*-*-*}
 	    }
@@ -122,19 +123,25 @@ foreach testitem $seltests {
 
     # V850 targets need libgcc.a
     if [istarget v850*-*-elf] {
-    	catch "exec $CC -print-libgcc-file-name" libgcc
+	set libgcc [remote_exec host "$CC -print-libgcc-file-name"]
+	set libgcc [lindex $libgcc 1]
+	regsub -all "\[\r\n\]" $libgcc "" libgcc
 	set objfile "$objfile $libgcc"
     }
 
     # ARM targets need libgcc.a in THUMB mode so that __call_via_r3 is provided
     if {[istarget arm-*-*] || [istarget xscale-*-*]} {
-    	catch "exec $CC -print-libgcc-file-name" libgcc
+	set libgcc [remote_exec host "$CC -print-libgcc-file-name"]
+	set libgcc [lindex $libgcc 1]
+	regsub -all "\[\r\n\]" $libgcc "" libgcc
 	set objfile "$objfile $libgcc"
     }
 
     # HPPA linux targets need libgcc.a for millicode routines ($$dyncall).
     if [istarget hppa*-*-linux*] {
-    	catch "exec $CC -print-libgcc-file-name" libgcc
+	set libgcc [remote_exec host "$CC -print-libgcc-file-name"]
+	set libgcc [lindex $libgcc 1]
+	regsub -all "\[\r\n\]" $libgcc "" libgcc
 	set objfile "$objfile $libgcc"
     }
 

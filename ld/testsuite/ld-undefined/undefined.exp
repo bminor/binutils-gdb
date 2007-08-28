@@ -25,7 +25,7 @@ set testund "undefined"
 set testfn "undefined function"
 set testline "undefined line"
 
-if { [which $CC] == 0 } {
+if { ![is_remote host] && [which $CC] == 0 } {
     verbose "Could not find C compiler!" 1
     untested $testund
     untested $testfn
@@ -41,16 +41,15 @@ if ![ld_compile "$CC -g" $srcdir/$subdir/undefined.c tmpdir/undefined.o] {
     return
 }
 
-catch "exec rm -f tmpdir/undefined" exec_output
+remote_file host delete "tmpdir/undefined"
 
 set flags [big_or_little_endian]
 
 # Using -e start prevents the SunOS linker from trying to build a
 # shared library.
 send_log "$ld -e start $flags -o tmpdir/undefined tmpdir/undefined.o\n"
-verbose "$ld -e start $flags -o tmpdir/undefined tmpdir/undefined.o"
+set exec_output [run_host_cmd "$ld" "-e start $flags -o tmpdir/undefined tmpdir/undefined.o"]
 
-catch "exec $ld -e start $flags -o tmpdir/undefined tmpdir/undefined.o" exec_output
 send_log "$exec_output\n"
 verbose "$exec_output"
 

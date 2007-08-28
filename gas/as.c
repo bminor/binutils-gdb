@@ -1223,6 +1223,8 @@ main (int argc, char ** argv)
   if (keep_it)
     write_object_file ();
 
+  fflush (stderr);
+
 #ifndef NO_LISTING
   listing_print (listing_filename);
 #endif
