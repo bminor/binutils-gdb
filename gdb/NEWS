@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.6
 
+* Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 
+bfd, libiberty and opcodes, as revealed by static analysis donated by
+Coverity, Inc. (http://scan.coverity.com).
+
 * When looking up multiply-defined global symbols, GDB will now prefer the
 symbol definition in the current shared library if it was built using the
 -Bsymbolic linker option.

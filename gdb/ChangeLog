@@ -1,3 +1,7 @@
+2007-08-28  Michael Snyder  <msnyder@access-company.com>
+
+	* NEWS: Mention Coverity bug fixes.
+
 2007-08-27  Markus Deuling  <deuling@de.ibm.com>
 
 	* spu-tdep.c (spu_pointer_to_address): New function.
