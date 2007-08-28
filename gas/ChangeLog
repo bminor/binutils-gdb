@@ -1,3 +1,7 @@
+2007-08-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/c-arc.texi: Fix typo.
+
 2007-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (process_suffix): Handle cmpxchg8b in

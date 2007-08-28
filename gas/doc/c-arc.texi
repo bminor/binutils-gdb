@@ -230,7 +230,7 @@ Determines the kinds of suffixes to be allowed.  Valid values are
 @code{SUFFIX_FLAG} which indicates the absence or presence of
 conditional suffixes and flag setting by the extension instruction.
 It is also possible to specify that an instruction sets the flags and
-is condtional by using @code{SUFFIX_CODE} | @code{SUFFIX_FLAG}.
+is conditional by using @code{SUFFIX_CODE} | @code{SUFFIX_FLAG}.
 
 @item @var{syntaxclass}
 Determines the syntax class for the instruction.  It can have the
