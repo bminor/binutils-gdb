@@ -1,5 +1,8 @@
 -*- text -*-
 Changes in 2.18:
+* Resolved 37 coding problems in bfd including static array overruns, null
+  pointer dereferences and use of a malloc buffer after it has been freed, as
+  revealed by static analysis donated by Coverity, Inc. (http://scan.coverity.com).
 
 * The binutils sources are now released under version 3 of the GNU General
   Public License.
