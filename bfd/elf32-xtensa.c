@@ -6926,6 +6926,8 @@ compute_ebb_actions (ebb_constraint *ebb_table)
 		      bad_alignment = FALSE;
 		      break;
 		    }
+		  if (new_action->do_action)
+		    removed_bytes += new_action->removed_bytes;
 		}
 	      if (!bad_alignment)
 		{

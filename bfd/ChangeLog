@@ -1,3 +1,8 @@
+2007-08-28  David Heine  <dlheine@tensilica.com>
+
+	* elf32-xtensa.c (compute_ebb_actions): Update removed_bytes when
+	narrowing instructions.
+
 2007-08-28  Robert Sebastian Gerus  <arachnist@gmail.com>
 
 	* config.bfd: Add support for i[3-7]86-*-dragonfly*.
