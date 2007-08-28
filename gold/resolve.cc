@@ -32,6 +32,10 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
   this->binding_ = sym.get_st_bind();
   this->visibility_ = sym.get_st_visibility();
   this->nonvis_ = sym.get_st_nonvis();
+  if (object->is_dynamic())
+    this->in_dyn_ = true;
+  else
+    this->in_reg_ = true;
 }
 
 // Override the fields in Sized_symbol.
