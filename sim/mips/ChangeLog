@@ -1,3 +1,8 @@
+2007-08-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Change license of multi-run.c to GPL version 3.
+	* configure: Regenerate.
+
 2007-06-28  Richard Sandiford  <richard@codesourcery.com>
 
 	* configure.ac, configure: Revert last patch.
