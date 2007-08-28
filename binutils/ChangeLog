@@ -1,3 +1,7 @@
+2007-08-28  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention Coverity's contribution.
+
 2007-08-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* readelf.c (process_note): Recognize SPU core file notes.
