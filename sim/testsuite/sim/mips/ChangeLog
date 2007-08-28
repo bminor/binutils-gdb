@@ -1,3 +1,10 @@
+2007-08-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* testutils.inc: Change license to GPL version 3.
+	* utils-dsp.inc: Change license to GPL version 3.
+	* utils-fpu.inc: Change license to GPL version 3.
+	* utils-mdmx.inc: Change license to GPL version 3.
+
 2007-02-20  Thiemo Seufer  <ths@mips.com>
             Chao-Ying Fu  <fu@mips.com>
 	* basic.exp: Run the dsp2 test.
