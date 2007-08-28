@@ -325,8 +325,7 @@ Must be: 0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
 static int
 mi_print_value_p (struct type *type, enum print_values print_values)
 {
-  if (type != NULL)
-    type = check_typedef (type);
+  type = check_typedef (type);
 
   if (print_values == PRINT_NO_VALUES)
     return 0;

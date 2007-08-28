@@ -1,5 +1,8 @@
 2007-08-28  Michael Snyder  <msnyder@access-company.com>
 
+	* mi/mi-cmd-var.c (mi_print_value_p): No longer necessary to 
+	check for null before calling check_typedef.
+
 	* NEWS: Mention Coverity bug fixes.
 
 2007-08-27  Markus Deuling  <deuling@de.ibm.com>
