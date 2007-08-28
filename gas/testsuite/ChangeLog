@@ -1,5 +1,16 @@
+2007-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/mem.s: New. Add tests for instructions with one
+	memory operand.
+	* gas/i386/x86-64-mem.s: Likewise.
+
+	* gas/i386/mem-intel.d: Updated.
+	* gas/i386/mem.d: Likewise.
+	* gas/i386/x86-64-mem-intel.d: Likewise.
+	* gas/i386/x86-64-mem.d: Likewise.
+
 2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* lib/gas-defs.exp (gas_version): Use remote_* functions instead
 	of exec.

@@ -1,3 +1,8 @@
+2007-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (process_suffix): Handle cmpxchg8b in
+	Intel mode.
+
 2007-08-28  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-m68k.c (mcf52235_ctrl): Add cache registers.
@@ -11,7 +16,7 @@
 	(m68k_cpus): Define 51QE cpu.
 
 2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* as.c (main): Flush stderr before printing listings to ensure
 	consistent output order across platforms.
@@ -21,7 +26,7 @@
 	* configure.tgt: Add support for i[3-7]86-*-dragonfly*.
 
 2007-08-24  Joseph Myers  <joseph@codesourcery.com>
-            Paul Brook  <paul@codesourcery.com>
+	    Paul Brook  <paul@codesourcery.com>
 
 	* remap.c: New.
 	* as.h (remap_debug_filename, add_debug_prefix_map): Declare.

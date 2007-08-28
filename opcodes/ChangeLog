@@ -1,3 +1,10 @@
+2007-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (Md): New.
+	(grps): Use 0 on invlpg.  Use M on fxsave and fxrstor.  Use
+	Md on ldmxcsr and stmxcsr.  Use b_mode on clflush.
+	(OP_0fae): Clear bytemode for sfence.
+
 2007-08-22  Ben Elliston  <bje@au.ibm.com>
 
 	* ppc-opc.c (PSW, PSWM, PSQ, PSQM, PSD, MTMSRD_L): New.

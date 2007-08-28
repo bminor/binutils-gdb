@@ -215,6 +215,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Ew { OP_E, w_mode }
 #define M { OP_M, 0 }		/* lea, lgdt, etc. */
 #define Ma { OP_M, v_mode }
+#define Md { OP_M, d_mode }
 #define Mp { OP_M, f_mode }		/* 32 or 48 bit memory operand for LDS, LES etc */
 #define Mq { OP_M, q_mode }
 #define Gb { OP_G, b_mode }
@@ -1702,7 +1703,7 @@ static const struct dis386 grps[][8] = {
     { "smswD",	{ Sv } },
     { "(bad)",	{ XX } },
     { "lmsw",	{ Ew } },
-    { "invlpg",	{ { INVLPG_Fixup, w_mode } } },
+    { "invlpg",	{ { INVLPG_Fixup, 0 } } },
   },
   /* GRP8 */
   {
@@ -1783,14 +1784,14 @@ static const struct dis386 grps[][8] = {
   },
   /* GRP15 */
   {
-    { "fxsave",		{ Ev } },
-    { "fxrstor",	{ Ev } },
-    { "ldmxcsr",	{ Ev } },
-    { "stmxcsr",	{ Ev } },
+    { "fxsave",		{ M } },
+    { "fxrstor",	{ M } },
+    { "ldmxcsr",	{ Md } },
+    { "stmxcsr",	{ Md } },
     { "(bad)",		{ XX } },
     { "lfence",		{ { OP_0fae, 0 } } },
     { "mfence",		{ { OP_0fae, 0 } } },
-    { "clflush",	{ { OP_0fae, 0 } } },
+    { "clflush",	{ { OP_0fae, b_mode } } },
   },
   /* GRP16 */
   {
@@ -5908,7 +5909,11 @@ OP_0fae (int bytemode, int sizeflag)
   if (modrm.mod == 3)
     {
       if (modrm.reg == 7)
-	strcpy (obuf + strlen (obuf) - sizeof ("clflush") + 1, "sfence");
+	{
+	  bytemode = 0;
+	  strcpy (obuf + strlen (obuf) - sizeof ("clflush") + 1,
+		  "sfence");
+	}
 
       if (modrm.reg < 5 || modrm.rm != 0)
 	{

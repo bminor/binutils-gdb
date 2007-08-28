@@ -3032,11 +3032,17 @@ process_suffix (void)
 	  && (i.tm.opcode_modifier & NoRex64) == 0)
 	{
 	  /* Special case for xchg %rax,%rax.  It is NOP and doesn't
-	     need rex64.  */
-	  if (i.operands != 2
-	      || i.types [0] != (Acc | Reg64)
-	      || i.types [1] != (Acc | Reg64)
-	      || i.tm.base_opcode != 0x90)
+	     need rex64.  cmpxchg8b is also a special case. */
+	  if (! (i.operands == 2
+		 && i.tm.base_opcode == 0x90
+		 && i.tm.extension_opcode == None
+		 && i.types [0] == (Acc | Reg64)
+		 && i.types [1] == (Acc | Reg64))
+	      && ! (i.operands == 1
+		    && i.tm.base_opcode == 0xfc7
+		    && i.tm.extension_opcode == 1
+		    && (i.types [0] & Reg) == 0
+		    && (i.types [0] & AnyMem) != 0))
 	    i.rex |= REX_W;
 	}
 
