@@ -1,3 +1,7 @@
+2007-08-28  Robert Sebastian Gerus  <arachnist@gmail.com>
+
+	* configure.tgt: Add support for i[3-7]86-*-dragonfly*.
+
 2007-08-24  Joseph Myers  <joseph@codesourcery.com>
             Paul Brook  <paul@codesourcery.com>
 
