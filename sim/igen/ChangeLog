@@ -1,3 +1,7 @@
+2008-08-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* compare_igen_models: Change license to GPL version 3.
+
 2007-08-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* lf.c (lf_print__gnu_copyleft): Change license to GPL version 3.
