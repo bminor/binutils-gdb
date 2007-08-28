@@ -128,12 +128,13 @@
 .\" ========================================================================
 .\"
 .IX Title "AS 1"
-.TH AS 1 "2007-08-06" "binutils-2.17.90" "GNU Development Tools"
+.TH AS 1 "2007-08-28" "binutils-2.18" "GNU Development Tools"
 .SH "NAME"
 AS \- the portable GNU assembler.
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 as [\fB\-a\fR[\fBcdhlns\fR][=\fIfile\fR]] [\fB\-\-alternate\fR] [\fB\-D\fR]
+ [\fB\-\-debug\-prefix\-map\fR \fIold\fR=\fInew\fR]
  [\fB\-\-defsym\fR \fIsym\fR=\fIval\fR] [\fB\-f\fR] [\fB\-g\fR] [\fB\-\-gstabs\fR]
  [\fB\-\-gstabs+\fR] [\fB\-\-gdwarf\-2\fR] [\fB\-\-help\fR] [\fB\-I\fR \fIdir\fR] [\fB\-J\fR]
  [\fB\-K\fR] [\fB\-L\fR] [\fB\-\-listing\-lhs\-width\fR=\fI\s-1NUM\s0\fR]
@@ -411,6 +412,10 @@ Begin in alternate macro mode.
 .IX Item "-D"
 Ignored.  This option is accepted for script compatibility with calls to
 other assemblers.
+.IP "\fB\-\-debug\-prefix\-map\fR \fIold\fR\fB=\fR\fInew\fR" 4
+.IX Item "--debug-prefix-map old=new"
+When assembling files in directory \fI\fIold\fI\fR, record debugging
+information describing them as in \fI\fInew\fI\fR instead.
 .IP "\fB\-\-defsym\fR \fIsym\fR\fB=\fR\fIvalue\fR" 4
 .IX Item "--defsym sym=value"
 Define the symbol \fIsym\fR to be \fIvalue\fR before assembling the input file.

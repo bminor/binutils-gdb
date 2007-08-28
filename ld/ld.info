@@ -2714,7 +2714,7 @@ include all input `.text' sections, you would write:
 a list of files from matching the file name wildcard, EXCLUDE_FILE may
 be used to match all files except the ones specified in the
 EXCLUDE_FILE list.  For example:
-     (*(EXCLUDE_FILE (*crtend.o *otherfile.o) .ctors))
+     *(EXCLUDE_FILE (*crtend.o *otherfile.o) .ctors)
    will cause all .ctors sections from all files except `crtend.o' and
 `otherfile.o' to be included.
 
@@ -6984,58 +6984,58 @@ Node: Output Section Name113263
 Node: Output Section Address114139
 Node: Input Section115788
 Node: Input Section Basics116589
-Node: Input Section Wildcards118941
-Node: Input Section Common123674
-Node: Input Section Keep125156
-Node: Input Section Example125646
-Node: Output Section Data126614
-Node: Output Section Keywords129391
-Node: Output Section Discarding132960
-Node: Output Section Attributes134141
-Node: Output Section Type135145
-Node: Output Section LMA136299
-Node: Forced Output Alignment138812
-Node: Forced Input Alignment139080
-Node: Output Section Region139465
-Node: Output Section Phdr139895
-Node: Output Section Fill140559
-Node: Overlay Description141701
-Node: MEMORY146004
-Node: PHDRS150204
-Node: VERSION155243
-Node: Expressions163035
-Node: Constants163913
-Node: Symbols164474
-Node: Orphan Sections165212
-Node: Location Counter165975
-Node: Operators170411
-Node: Evaluation171333
-Node: Expression Section172697
-Node: Builtin Functions174186
-Node: Implicit Linker Scripts182153
-Node: Machine Dependent182928
-Node: H8/300183899
-Node: i960185524
-Node: M68HC11/68HC12187209
-Node: ARM188912
-Node: HPPA ELF32193762
-Node: MMIX195385
-Node: MSP430196602
-Node: PowerPC ELF32197651
-Node: PowerPC64 ELF64200265
-Node: SPU ELF204679
-Node: TI COFF207311
-Node: WIN32207837
-Node: Xtensa226194
-Node: BFD229316
-Node: BFD outline230771
-Node: BFD information loss232057
-Node: Canonical format234574
-Node: Reporting Bugs238931
-Node: Bug Criteria239625
-Node: Bug Reporting240324
-Node: MRI247363
-Node: GNU Free Documentation License252006
-Node: LD Index271723
+Node: Input Section Wildcards118939
+Node: Input Section Common123672
+Node: Input Section Keep125154
+Node: Input Section Example125644
+Node: Output Section Data126612
+Node: Output Section Keywords129389
+Node: Output Section Discarding132958
+Node: Output Section Attributes134139
+Node: Output Section Type135143
+Node: Output Section LMA136297
+Node: Forced Output Alignment138810
+Node: Forced Input Alignment139078
+Node: Output Section Region139463
+Node: Output Section Phdr139893
+Node: Output Section Fill140557
+Node: Overlay Description141699
+Node: MEMORY146002
+Node: PHDRS150202
+Node: VERSION155241
+Node: Expressions163033
+Node: Constants163911
+Node: Symbols164472
+Node: Orphan Sections165210
+Node: Location Counter165973
+Node: Operators170409
+Node: Evaluation171331
+Node: Expression Section172695
+Node: Builtin Functions174184
+Node: Implicit Linker Scripts182151
+Node: Machine Dependent182926
+Node: H8/300183897
+Node: i960185522
+Node: M68HC11/68HC12187207
+Node: ARM188910
+Node: HPPA ELF32193760
+Node: MMIX195383
+Node: MSP430196600
+Node: PowerPC ELF32197649
+Node: PowerPC64 ELF64200263
+Node: SPU ELF204677
+Node: TI COFF207309
+Node: WIN32207835
+Node: Xtensa226192
+Node: BFD229314
+Node: BFD outline230769
+Node: BFD information loss232055
+Node: Canonical format234572
+Node: Reporting Bugs238929
+Node: Bug Criteria239623
+Node: Bug Reporting240322
+Node: MRI247361
+Node: GNU Free Documentation License252004
+Node: LD Index271721
 
 End Tag Table
