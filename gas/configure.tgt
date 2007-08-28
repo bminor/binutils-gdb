@@ -198,7 +198,7 @@ case ${generic_target} in
   i386-*-freebsdaout*)			fmt=aout em=386bsd ;;
   i386-*-freebsd[12].*)			fmt=aout em=386bsd ;;
   i386-*-freebsd[12])			fmt=aout em=386bsd ;;
-  i386-*-freebsd* | i386-*-kfreebsd*-gnu)
+  i386-*-freebsd* | i386-*-kfreebsd*-gnu | i386-*-dragonfly*)
 				    	fmt=elf em=freebsd ;;
   i386-*-sysv*)				fmt=coff ;;
   i386-*-sco3.2v5*coff)			fmt=coff ;;
@@ -399,7 +399,8 @@ case ${generic_target} in
   z8k-*-coff | z8k-*-sim)		fmt=coff ;;
 
   *-*-aout | *-*-scout)			fmt=aout ;;
-  *-*-freebsd* | *-*-kfreebsd*-gnu)	fmt=elf em=freebsd ;;
+  *-*-freebsd* | *-*-kfreebsd*-gnu | *-*-dragonfly*)
+					fmt=elf em=freebsd ;;
   *-*-bsd*)				fmt=aout em=sun3 ;;
   *-*-generic)				fmt=generic ;;
   *-*-xray | *-*-hms)			fmt=coff ;;
