@@ -176,6 +176,10 @@ static const enum m68k_register mcf_ctrl[] = {
   RAMBAR0, RAMBAR1, RAMBAR, MBAR,
   0
 };
+static const enum m68k_register mcf51qe_ctrl[] = {
+  VBR,
+  0
+};
 static const enum m68k_register mcf5206_ctrl[] = {
   CACR, ACR0, ACR1,  VBR, RAMBAR0, RAMBAR_ALT, MBAR,
   0
@@ -559,6 +563,8 @@ static const struct m68k_cpu m68k_cpus[] =
   {cpu32|m68881,				cpu32_ctrl, "68341", 1},
   {cpu32|m68881,				cpu32_ctrl, "68349", 1},
   {cpu32|m68881,				cpu32_ctrl, "68360", 1},
+
+  {mcfisa_a|mcfisa_c|mcfusp,                    mcf51qe_ctrl, "51qe", 0},
   
   {mcfisa_a,					mcf_ctrl, "5200", 0},
   {mcfisa_a,					mcf_ctrl, "5202", 1},

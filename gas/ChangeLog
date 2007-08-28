@@ -1,3 +1,8 @@
+2007-08-28  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* config/tc-m68k.c (mcf51qe_ctrl): Define 51QE control registers.
+	(m68k_cpus): Define 51QE cpu.
+
 2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 
