@@ -205,7 +205,7 @@ static const enum m68k_register mcf52223_ctrl[] = {
   0
 };
 static const enum m68k_register mcf52235_ctrl[] = {
-  VBR, FLASHBAR, RAMBAR, RAMBAR1,
+  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5225_ctrl[] = {
@@ -225,7 +225,7 @@ static const enum m68k_register mcf5250_ctrl[] = {
   0
 };
 static const enum m68k_register mcf5253_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, RAMBAR0, RAMBAR1, MBAR,
+  VBR, CACR, ACR0, ACR1, RAMBAR0, RAMBAR1, RAMBAR, MBAR, MBAR2,
   0
 };
 static const enum m68k_register mcf5271_ctrl[] = {
@@ -270,6 +270,15 @@ static const enum m68k_register mcfv4e_ctrl[] = {
   ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
   MBAR1 /* MBAR */, MBAR2 /* SECMBAR */, MBAR0 /* SECMBAR */,
   ROMBAR /* ROMBAR0 */, RAMBAR /* RAMBAR1 */,
+  0
+};
+static const enum m68k_register mcf5407_ctrl[] = {
+  CACR, ASID, ACR0, ACR1, ACR2, ACR3,
+  VBR, PC, RAMBAR0, RAMBAR1, MBAR,
+  /* Legacy names */
+  TC /* ASID */,
+  ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
+  MBAR1 /* MBAR */, RAMBAR /* RAMBAR1 */,
   0
 };
 static const enum m68k_register mcf54455_ctrl[] = {
@@ -632,7 +641,7 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5373_ctrl, "5373", -1},
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5373_ctrl, "537x", 0},
   
-  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfmac,		mcf_ctrl, "5407",0},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfmac,		mcf5407_ctrl, "5407",0},
 
   {mcfisa_a|mcfisa_c|mcfhwdiv|mcfemac|mcfusp,   mcf54455_ctrl, "54450", -1},
   {mcfisa_a|mcfisa_c|mcfhwdiv|mcfemac|mcfusp,   mcf54455_ctrl, "54451", -1},

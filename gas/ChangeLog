@@ -1,3 +1,10 @@
+2007-08-28  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (mcf52235_ctrl): Add cache registers.
+	(mcf5253_ctrl): Add RAMBAR, MBAR, MBAR2.
+	(mcf5407_ctrl): New.
+	(m68k_cpus): Adjust 5407 entry.
+
 2007-08-28  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* config/tc-m68k.c (mcf51qe_ctrl): Define 51QE control registers.
