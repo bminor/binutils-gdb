@@ -1,5 +1,10 @@
 2007-08-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.am (RELEASE): Unset.
+	* Makefile.in: Regenerated.
+
+2007-08-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* configure.in (VERSION): Update.
 	* Makefile.am (RELEASE): Set.
 	* configure, Makefile.in: Regenerated.

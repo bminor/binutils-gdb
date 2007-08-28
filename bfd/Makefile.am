@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = 1.9 cygnus
 ACLOCAL_AMFLAGS = -I . -I .. -I ../config
 
 # Uncomment the following line when doing a release.
-RELEASE=y
+# RELEASE=y
 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
