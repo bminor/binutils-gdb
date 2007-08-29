@@ -5767,28 +5767,6 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	error (_("Target can only support one kind of HW watchpoint at a time."));
     }
 
-#if defined(HPUXHPPA)
-  /*  On HP-UX if you set a h/w
-     watchpoint before the "run" command, the inferior dies with a e.g.,
-     SIGILL once you start it.  I initially believed this was due to a
-     bad interaction between page protection traps and the initial
-     startup sequence by the dynamic linker.
-
-     However, I tried avoiding that by having HP-UX's implementation of
-     TARGET_CAN_USE_HW_WATCHPOINT return FALSE if there was no inferior_ptid
-     yet, which forced slow watches before a "run" or "attach", and it
-     still fails somewhere in the startup code.
-
-     Until I figure out what's happening, I'm disallowing watches altogether
-     before the "run" or "attach" command.  We'll tell the user they must
-     set watches after getting the program started. */
-  if (!target_has_execution)
-    {
-      warning (_("can't do that without a running program; try \"break main\"), \"run\" first");
-      return;
-    }
-#endif /* HPUXHPPA */
-
   /* Change the type of breakpoint to an ordinary watchpoint if a hardware
      watchpoint could not be set.  */
   if (!mem_cnt || target_resources_ok <= 0)

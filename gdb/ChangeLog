@@ -1,3 +1,8 @@
+2007-08-29  Jim Blandy  <jimb@codesourcery.com>
+
+	* breakpoint.c (watch_command_1): Remove '#ifdef HPUXHPPA' block;
+	this code has not been compiled for two years.
+
 2007-08-29  Michael Snyder  <msnyder@access-company.com>
 
 	* event-top.c (gdb_readline2): Return after EOF.
