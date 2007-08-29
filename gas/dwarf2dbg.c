@@ -570,6 +570,11 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 {
   offsetT filenum, line;
 
+  /* If we see two .loc directives in a row, force the first one to be
+     output now.  */
+  if (loc_directive_seen)
+    dwarf2_emit_insn (0);
+
   filenum = get_absolute_expression ();
   SKIP_WHITESPACE ();
   line = get_absolute_expression ();

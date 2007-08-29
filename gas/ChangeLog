@@ -1,3 +1,7 @@
+2007-08-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2dbg.c (dwarf2_directive_loc): Emit duplicate .loc directives.
+
 2007-08-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/c-arc.texi: Fix typo.
