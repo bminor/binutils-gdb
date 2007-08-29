@@ -863,6 +863,7 @@ gdb_readline2 (gdb_client_data client_data)
 	    break;
 	  xfree (result);
 	  (*input_handler) (0);
+	  return;
 	}
 
       if (c == '\n')
