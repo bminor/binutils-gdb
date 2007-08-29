@@ -1,3 +1,7 @@
+2007-08-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* symtab.c: Remove a function that has been commented out 3 years ago.
+
 2007-08-29  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa32_cannot_fetch_register)
