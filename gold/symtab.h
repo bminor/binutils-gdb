@@ -195,6 +195,11 @@ class Symbol
   set_in_reg()
   { this->in_reg_ = true; }
 
+  // Return whether this symbol has been seen in a dynamic object.
+  bool
+  in_dyn() const
+  { return this->in_dyn_; }
+
   // Mark this symbol as having been seen in a dynamic object.
   void
   set_in_dyn()

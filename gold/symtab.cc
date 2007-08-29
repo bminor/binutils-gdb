@@ -267,6 +267,10 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
   esym.put_st_other(from->visibility(), from->nonvis());
   esym.put_st_shndx(from->shndx());
   Symbol_table::resolve(to, esym.sym(), from->object(), version);
+  if (from->in_reg())
+    to->set_in_reg();
+  if (from->in_dyn())
+    to->set_in_dyn();
 }
 
 // Add one symbol from OBJECT to the symbol table.  NAME is symbol
