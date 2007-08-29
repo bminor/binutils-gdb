@@ -2674,12 +2674,32 @@ hppa32_cannot_store_register (int regnum)
 }
 
 static int
+hppa32_cannot_fetch_register (int regnum)
+{
+  /* cr26 and cr27 are readable (but not writable) from userspace.  */
+  if (regnum == HPPA_CR26_REGNUM || regnum == HPPA_CR27_REGNUM)
+    return 0;
+  else
+    return hppa32_cannot_store_register (regnum);
+}
+
+static int
 hppa64_cannot_store_register (int regnum)
 {
   return (regnum == 0
           || regnum == HPPA_PCSQ_HEAD_REGNUM
           || (regnum >= HPPA_PCSQ_TAIL_REGNUM && regnum < HPPA_IPSW_REGNUM)
           || (regnum > HPPA_IPSW_REGNUM && regnum < HPPA64_FP4_REGNUM));
+}
+
+static int
+hppa64_cannot_fetch_register (int regnum)
+{
+  /* cr26 and cr27 are readable (but not writable) from userspace.  */
+  if (regnum == HPPA_CR26_REGNUM || regnum == HPPA_CR27_REGNUM)
+    return 0;
+  else
+    return hppa64_cannot_store_register (regnum);
 }
 
 static CORE_ADDR
@@ -3074,7 +3094,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	set_gdbarch_cannot_store_register (gdbarch,
 					   hppa32_cannot_store_register);
 	set_gdbarch_cannot_fetch_register (gdbarch,
-					   hppa32_cannot_store_register);
+					   hppa32_cannot_fetch_register);
         break;
       case 8:
         set_gdbarch_num_regs (gdbarch, hppa64_num_regs);
@@ -3085,7 +3105,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	set_gdbarch_cannot_store_register (gdbarch,
 					   hppa64_cannot_store_register);
 	set_gdbarch_cannot_fetch_register (gdbarch,
-					   hppa64_cannot_store_register);
+					   hppa64_cannot_fetch_register);
         break;
       default:
         internal_error (__FILE__, __LINE__, _("Unsupported address size: %d"),

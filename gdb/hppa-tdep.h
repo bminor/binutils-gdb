@@ -57,6 +57,7 @@ enum hppa_regnum
   HPPA_PID3_REGNUM = 56,	/* Protection ID */
   HPPA_CCR_REGNUM = 54,		/* Coprocessor Configuration Register */
   HPPA_TR0_REGNUM = 57,		/* Temporary Registers (cr24 -> cr31) */
+  HPPA_CR26_REGNUM = 59,
   HPPA_CR27_REGNUM = 60,	/* Base register for thread-local storage, cr27 */
   HPPA_FP0_REGNUM = 64,		/* First floating-point.  */
   HPPA_FP4_REGNUM = 72,
