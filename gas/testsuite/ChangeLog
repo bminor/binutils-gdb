@@ -11,11 +11,13 @@
 
 2007-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/i386/i386.exp: Run mem, mem-intel, x86-64-mem and
+	x86-64-mem-intel.
+
 	* gas/i386/mem.s: New. Add tests for instructions with one
 	memory operand.
 	* gas/i386/x86-64-mem.s: Likewise.
-
-	* gas/i386/mem-intel.d: Updated.
+	* gas/i386/mem-intel.d: Likewise.
 	* gas/i386/mem.d: Likewise.
 	* gas/i386/x86-64-mem-intel.d: Likewise.
 	* gas/i386/x86-64-mem.d: Likewise.
