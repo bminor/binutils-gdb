@@ -1,5 +1,9 @@
 2007-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (prefix_user_table): Fix comment.
+
+2007-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (OP_Skip_MODRM): New.
 	(OP_Monitor): Likewise.
 	(OP_Mwait): Likewise.
@@ -33,7 +37,7 @@
 	(threebyte_0x3a_uses_REPNZ_prefix): Likewise.
 	(threebyte_0x3a_uses_REPZ_prefix): Likewise.
 	(grps): Use OPC_EXT_0...OPC_EXT_24.
-	(prefix_user_table): Use PREGRP98.
+	(prefix_user_table): Add PREGRP98...PREGRP100.
 	(print_insn): Remove uses_DATA_prefix, uses_LOCK_prefix,
 	uses_REPNZ_prefix and uses_REPZ_prefix.  Initialize
 	repz_prefix, repnz_prefix, lock_prefix, addr_prefix and
