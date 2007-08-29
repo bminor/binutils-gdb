@@ -1,3 +1,14 @@
+2007-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run reg and reg-intel.
+
+	* gas/i386/katmai.d: Update bad instructions.
+
+	* gas/i386/reg.s: New. Add tests for instructions with one
+	register operand.
+	* gas/i386/reg-intel.d: Likewise.
+	* gas/i386/reg.d: Likewise.
+
 2007-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/mem.s: New. Add tests for instructions with one

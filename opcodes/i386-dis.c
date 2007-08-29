@@ -60,6 +60,7 @@ static bfd_signed_vma get32 (void);
 static bfd_signed_vma get32s (void);
 static int get16 (void);
 static void set_op (bfd_vma, int);
+static void OP_Skip_MODRM (int, int);
 static void OP_REG (int, int);
 static void OP_IMREG (int, int);
 static void OP_I (int, int);
@@ -86,19 +87,17 @@ static void OP_MXC (int,int);
 static void OP_MS (int, int);
 static void OP_XS (int, int);
 static void OP_M (int, int);
-static void OP_VMX (int, int);
-static void OP_0fae (int, int);
 static void OP_0f07 (int, int);
+static void OP_Monitor (int, int);
+static void OP_Mwait (int, int);
 static void NOP_Fixup1 (int, int);
 static void NOP_Fixup2 (int, int);
 static void OP_3DNowSuffix (int, int);
 static void OP_SIMD_Suffix (int, int);
 static void SIMD_Fixup (int, int);
-static void PNI_Fixup (int, int);
 static void SVME_Fixup (int, int);
 static void INVLPG_Fixup (int, int);
 static void BadOp (void);
-static void VMX_Fixup (int, int);
 static void REP_Fixup (int, int);
 static void CMPXCHG8B_Fixup (int, int);
 static void XMM_Fixup (int, int);
@@ -215,6 +214,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Ew { OP_E, w_mode }
 #define M { OP_M, 0 }		/* lea, lgdt, etc. */
 #define Ma { OP_M, v_mode }
+#define Mb { OP_M, b_mode }
 #define Md { OP_M, d_mode }
 #define Mp { OP_M, f_mode }		/* 32 or 48 bit memory operand for LDS, LES etc */
 #define Mq { OP_M, q_mode }
@@ -238,6 +238,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Cm { OP_C, m_mode }
 #define Dm { OP_D, m_mode }
 #define Td { OP_T, d_mode }
+#define Skip_MODRM { OP_Skip_MODRM, 0 }
 
 #define RMeAX { OP_REG, eAX_reg }
 #define RMeBX { OP_REG, eBX_reg }
@@ -320,7 +321,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define XS { OP_XS, v_mode }
 #define EMCq { OP_EMC, q_mode }
 #define MXC { OP_MXC, 0 }
-#define VM { OP_VMX, q_mode }
 #define OPSUF { OP_3DNowSuffix, 0 }
 #define OPSIMD { OP_SIMD_Suffix, 0 }
 #define XMM0 { XMM_Fixup, 0 }
@@ -414,6 +414,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define USE_PREFIX_USER_TABLE 3
 #define X86_64_SPECIAL 4
 #define IS_3BYTE_OPCODE 5
+#define USE_OPC_EXT_TABLE 6
+#define USE_OPC_EXT_RM_TABLE 7
 
 #define FLOAT	  NULL, { { NULL, FLOATCODE } }
 
@@ -544,6 +546,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP95  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 95 } }
 #define PREGRP96  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 96 } }
 #define PREGRP97  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 97 } }
+#define PREGRP98  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 98 } }
+#define PREGRP99  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 99 } }
+#define PREGRP100 NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 100 } }
 
 
 #define X86_64_0  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 0 } }
@@ -553,6 +558,38 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 
 #define THREE_BYTE_0 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 0 } }
 #define THREE_BYTE_1 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 1 } }
+
+#define OPC_EXT_0  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 0 } }
+#define OPC_EXT_1  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 1 } }
+#define OPC_EXT_2  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 2 } }
+#define OPC_EXT_3  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 3 } }
+#define OPC_EXT_4  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 4 } }
+#define OPC_EXT_5  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 5 } }
+#define OPC_EXT_6  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 6 } }
+#define OPC_EXT_7  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 7 } }
+#define OPC_EXT_8  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 8 } }
+#define OPC_EXT_9  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 9 } }
+#define OPC_EXT_10 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 10 } }
+#define OPC_EXT_11 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 11 } }
+#define OPC_EXT_12 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 12 } }
+#define OPC_EXT_13 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 13 } }
+#define OPC_EXT_14 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 14 } }
+#define OPC_EXT_15 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 15 } }
+#define OPC_EXT_16 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 16 } }
+#define OPC_EXT_17 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 17 } }
+#define OPC_EXT_18 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 18 } }
+#define OPC_EXT_19 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 19 } }
+#define OPC_EXT_20 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 20 } }
+#define OPC_EXT_21 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 21 } }
+#define OPC_EXT_22 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 22 } }
+#define OPC_EXT_23 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 23 } }
+#define OPC_EXT_24 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 24 } }
+
+#define OPC_EXT_RM_0  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 0 } }
+#define OPC_EXT_RM_1  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 1 } }
+#define OPC_EXT_RM_2  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 2 } }
+#define OPC_EXT_RM_3  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 3 } }
+#define OPC_EXT_RM_4  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 4 } }
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
 
@@ -1234,225 +1271,17 @@ static const unsigned char twobyte_has_modrm[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
-static const unsigned char twobyte_uses_DATA_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1, /* 6f */
-  /* 70 */ 1,0,0,0,0,0,0,0,1,1,0,0,1,1,1,1, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-static const unsigned char twobyte_uses_REPNZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,1,0,0,0,0,0,0,1,1,1,0,1,1,1,1, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 1,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-static const unsigned char twobyte_uses_REPZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1, /* 6f */
-  /* 70 */ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0, /* bf */
-  /* c0 */ 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 38 XX uses DATA prefix.  */
-static const unsigned char threebyte_0x38_uses_DATA_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0, /* 0f */
-  /* 10 */ 1,0,0,0,1,1,0,1,0,0,0,0,1,1,1,0, /* 1f */
-  /* 20 */ 1,1,1,1,1,1,0,0,1,1,1,1,0,0,0,0, /* 2f */
-  /* 30 */ 1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1, /* 3f */
-  /* 40 */ 1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 38 XX uses REPNZ prefix.  */
-static const unsigned char threebyte_0x38_uses_REPNZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 38 XX uses REPZ prefix.  */
-static const unsigned char threebyte_0x38_uses_REPZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 3a XX uses DATA prefix.  */
-static const unsigned char threebyte_0x3a_uses_DATA_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1, /* 0f */
-  /* 10 */ 0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 3a XX uses REPNZ prefix.  */
-static const unsigned char threebyte_0x3a_uses_REPNZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
-/* This is used to determine if opcode 0f 3a XX uses REPZ prefix.  */
-static const unsigned char threebyte_0x3a_uses_REPZ_prefix[256] = {
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-  /*       -------------------------------        */
-  /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
-  /* 20 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 2f */
-  /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
-  /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
-  /* 50 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 5f */
-  /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 6f */
-  /* 70 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 7f */
-  /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
-  /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
-  /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
-  /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
-  /* c0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* df */
-  /* e0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ff */
-  /*       -------------------------------        */
-  /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
-};
-
 static char obuf[100];
 static char *obufp;
 static char scratchbuf[100];
 static unsigned char *start_codep;
 static unsigned char *insn_codep;
 static unsigned char *codep;
+static const char *lock_prefix;
+static const char *data_prefix;
+static const char *addr_prefix;
+static const char *repz_prefix;
+static const char *repnz_prefix;
 static disassemble_info *the_info;
 static struct
   {
@@ -1696,8 +1525,8 @@ static const struct dis386 grps[][8] = {
   },
   /* GRP7 */
   {
-    { "sgdt{Q|IQ||}", { { VMX_Fixup, 0 } } },
-    { "sidt{Q|IQ||}", { { PNI_Fixup, 0 } } },
+    { OPC_EXT_0 },
+    { OPC_EXT_1 },
     { "lgdt{Q|Q||}",	 { M } },
     { "lidt{Q|Q||}",	 { { SVME_Fixup, 0 } } },
     { "smswD",	{ Sv } },
@@ -1724,8 +1553,8 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "",	{ VM } },		/* See OP_VMX.  */
-    { "vmptrst", { Mq } },
+    { OPC_EXT_2 },
+    { OPC_EXT_3 },
   },
   /* GRP11_C6 */
   {
@@ -1753,56 +1582,56 @@ static const struct dis386 grps[][8] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "psrlw",	{ MS, Ib } },
+    { OPC_EXT_4 },
     { "(bad)",	{ XX } },
-    { "psraw",	{ MS, Ib } },
+    { OPC_EXT_5 },
     { "(bad)",	{ XX } },
-    { "psllw",	{ MS, Ib } },
+    { OPC_EXT_6 },
     { "(bad)",	{ XX } },
   },
   /* GRP13 */
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "psrld",	{ MS, Ib } },
+    { OPC_EXT_7 },
     { "(bad)",	{ XX } },
-    { "psrad",	{ MS, Ib } },
+    { OPC_EXT_8 },
     { "(bad)",	{ XX } },
-    { "pslld",	{ MS, Ib } },
+    { OPC_EXT_9 },
     { "(bad)",	{ XX } },
   },
   /* GRP14 */
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "psrlq",	{ MS, Ib } },
-    { "psrldq",	{ MS, Ib } },
+    { OPC_EXT_10 },
+    { OPC_EXT_11 },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "psllq",	{ MS, Ib } },
-    { "pslldq",	{ MS, Ib } },
+    { OPC_EXT_12 },
+    { OPC_EXT_13 },
   },
   /* GRP15 */
   {
-    { "fxsave",		{ M } },
-    { "fxrstor",	{ M } },
-    { "ldmxcsr",	{ Md } },
-    { "stmxcsr",	{ Md } },
-    { "(bad)",		{ XX } },
-    { "lfence",		{ { OP_0fae, 0 } } },
-    { "mfence",		{ { OP_0fae, 0 } } },
-    { "clflush",	{ { OP_0fae, b_mode } } },
+    { OPC_EXT_14 },
+    { OPC_EXT_15 },
+    { OPC_EXT_16 },
+    { OPC_EXT_17 },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_18 },
+    { OPC_EXT_19 },
+    { OPC_EXT_20 },
   },
   /* GRP16 */
   {
-    { "prefetchnta",	{ Ev } },
-    { "prefetcht0",	{ Ev } },
-    { "prefetcht1",	{ Ev } },
-    { "prefetcht2",	{ Ev } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { OPC_EXT_21 },
+    { OPC_EXT_22 },
+    { OPC_EXT_23 },
+    { OPC_EXT_24 },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
   },
   /* GRPAMD */
   {
@@ -2590,6 +2419,30 @@ static const struct dis386 prefix_user_table[][4] = {
     { "punpckldq",{ MX, EMx } },
     { "(bad)",	{ XX } },
   },
+
+  /* PREGRP98 */
+  {
+    { "vmptrld",{ Mq } },
+    { "vmxon",	{ Mq } },
+    { "vmclear",{ Mq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP99 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "psrldq",	{ MS, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP99 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pslldq",	{ MS, Ib } },
+    { "(bad)",	{ XX } },
+  },
 };
 
 static const struct dis386 x86_64_table[][2] = {
@@ -3196,6 +3049,192 @@ static const struct dis386 three_byte_table[][256] = {
   }
 };
 
+static const struct dis386 opc_ext_table[][2] = {
+  {
+    /* OPC_EXT_0 */
+    { "sgdt{Q|IQ||}",	{ M } },
+    { OPC_EXT_RM_0 },
+  },
+  {
+    /* OPC_EXT_1 */
+    { "sidt{Q|IQ||}",	{ M } },
+    { OPC_EXT_RM_1 },
+  },
+  {
+    /* OPC_EXT_2 */
+    { PREGRP98 },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_3 */
+    { "vmptrst",	{ Mq } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_4 */
+    { "(bad)",		{ XX } },
+    { "psrlw",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_5 */
+    { "(bad)",		{ XX } },
+    { "psraw",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_6 */
+    { "(bad)",		{ XX } },
+    { "psllw",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_7 */
+    { "(bad)",		{ XX } },
+    { "psrld",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_8 */
+    { "(bad)",		{ XX } },
+    { "psrad",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_9 */
+    { "(bad)",		{ XX } },
+    { "pslld",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_10 */
+    { "(bad)",		{ XX } },
+    { "psrlq",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_11 */
+    { "(bad)",		{ XX } },
+    { PREGRP99 },
+  },
+  {
+    /* OPC_EXT_12 */
+    { "(bad)",		{ XX } },
+    { "psllq",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_13 */
+    { "(bad)",		{ XX } },
+    { PREGRP100 },
+  },
+  {
+    /* OPC_EXT_14 */
+    { "fxsave",		{ M } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_15 */
+    { "fxrstor",	{ M } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_16 */
+    { "ldmxcsr",	{ Md } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_17 */
+    { "stmxcsr",	{ Md } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_18 */
+    { "(bad)",		{ XX } },
+    { OPC_EXT_RM_2 },
+  },
+  {
+    /* OPC_EXT_19 */
+    { "(bad)",		{ XX } },
+    { OPC_EXT_RM_3 },
+  },
+  {
+    /* OPC_EXT_20 */
+    { "clflush",	{ Mb } },
+    { OPC_EXT_RM_4 },
+  },
+  {
+    /* OPC_EXT_21 */
+    { "prefetchnta",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_22 */
+    { "prefetcht0",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_23 */
+    { "prefetcht1",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_24 */
+    { "prefetcht2",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+};
+
+static const struct dis386 opc_ext_rm_table[][8] = {
+  {
+    /* OPC_EXT_RM_0 */
+    { "(bad)",		{ XX } },
+    { "vmcall",		{ Skip_MODRM } },
+    { "vmlaunch",	{ Skip_MODRM } },
+    { "vmresume",	{ Skip_MODRM } },
+    { "vmxoff",		{ Skip_MODRM } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_RM_1 */
+    { "monitor",	{ { OP_Monitor, 0 } } },
+    { "mwait",		{ { OP_Mwait, 0 } } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_RM_2 */
+    { "lfence",		{ Skip_MODRM } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_RM_3 */
+    { "mfence",		{ Skip_MODRM } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_RM_4 */
+    { "sfence",		{ Skip_MODRM } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+};
+
 #define INTERNAL_DISASSEMBLER_ERROR _("<internal disassembler error>")
 
 static void
@@ -3440,6 +3479,79 @@ with the -M switch (multiple options should be separated by commas):\n"));
   fprintf (stream, _("  suffix      Always display instruction suffix in AT&T syntax\n"));
 }
 
+/* Get a pointer to struct dis386 with a valid name.  */
+
+static const struct dis386 *
+get_valid_dis386 (const struct dis386 *dp)
+{
+  int index;
+
+  if (dp->name != NULL)
+    return dp;
+
+  switch (dp->op[0].bytemode)
+    {
+    case USE_GROUPS:
+      dp = &grps[dp->op[1].bytemode][modrm.reg];
+      break;
+
+    case USE_PREFIX_USER_TABLE:
+      index = 0;
+      used_prefixes |= (prefixes & PREFIX_REPZ);
+      if (prefixes & PREFIX_REPZ)
+	{
+	  index = 1;
+	  repz_prefix = NULL;
+	}
+      else
+	{
+	  /* We should check PREFIX_REPNZ and PREFIX_REPZ before
+	     PREFIX_DATA.  */
+	  used_prefixes |= (prefixes & PREFIX_REPNZ);
+	  if (prefixes & PREFIX_REPNZ)
+	    {
+	      index = 3;
+	      repnz_prefix = NULL;
+	    }
+	  else
+	    {
+	      used_prefixes |= (prefixes & PREFIX_DATA);
+	      if (prefixes & PREFIX_DATA)
+		{
+		  index = 2;
+		  data_prefix = NULL;
+		}
+	    }
+	}
+      dp = &prefix_user_table[dp->op[1].bytemode][index];
+      break;
+
+    case X86_64_SPECIAL:
+      index = address_mode == mode_64bit ? 1 : 0;
+      dp = &x86_64_table[dp->op[1].bytemode][index];
+      break;
+
+    case USE_OPC_EXT_TABLE:
+      index = modrm.mod == 0x3 ? 1 : 0;
+      dp = &opc_ext_table[dp->op[1].bytemode][index];
+      break;
+
+    case USE_OPC_EXT_RM_TABLE:
+      index = modrm.rm;
+      dp = &opc_ext_rm_table[dp->op[1].bytemode][index];
+      break;
+
+    default:
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
+      return NULL;
+    }
+
+  if (dp->name != NULL)
+    return dp;
+  else
+    return get_valid_dis386 (dp);
+}
+
 static int
 print_insn (bfd_vma pc, disassemble_info *info)
 {
@@ -3447,12 +3559,12 @@ print_insn (bfd_vma pc, disassemble_info *info)
   int i;
   char *op_txt[MAX_OPERANDS];
   int needcomma;
-  unsigned char uses_DATA_prefix, uses_LOCK_prefix;
-  unsigned char uses_REPNZ_prefix, uses_REPZ_prefix;
   int sizeflag;
   const char *p;
   struct dis_private priv;
   unsigned char op;
+  char prefix_obuf[32];
+  char *prefix_obufp;
 
   if (info->mach == bfd_mach_x86_64_intel_syntax
       || info->mach == bfd_mach_x86_64)
@@ -3637,75 +3749,60 @@ print_insn (bfd_vma pc, disassemble_info *info)
       threebyte = *++codep;
       dp = &dis386_twobyte[threebyte];
       need_modrm = twobyte_has_modrm[*codep];
-      uses_DATA_prefix = twobyte_uses_DATA_prefix[*codep];
-      uses_REPNZ_prefix = twobyte_uses_REPNZ_prefix[*codep];
-      uses_REPZ_prefix = twobyte_uses_REPZ_prefix[*codep];
-      uses_LOCK_prefix = (*codep & ~0x02) == 0x20;
       codep++;
       if (dp->name == NULL && dp->op[0].bytemode == IS_3BYTE_OPCODE)
 	{
 	  FETCH_DATA (info, codep + 2);
 	  op = *codep++;
-	  switch (threebyte)
-	    {
-	    case 0x38:
-	      uses_DATA_prefix = threebyte_0x38_uses_DATA_prefix[op];
-	      uses_REPNZ_prefix = threebyte_0x38_uses_REPNZ_prefix[op];
-	      uses_REPZ_prefix = threebyte_0x38_uses_REPZ_prefix[op];
-	      break;
-	    case 0x3a:
-	      uses_DATA_prefix = threebyte_0x3a_uses_DATA_prefix[op];
-	      uses_REPNZ_prefix = threebyte_0x3a_uses_REPNZ_prefix[op];
-	      uses_REPZ_prefix = threebyte_0x3a_uses_REPZ_prefix[op];
-	      break;
-	    default:
-	      break;
-	    }
 	}
     }
   else
     {
       dp = &dis386[*codep];
       need_modrm = onebyte_has_modrm[*codep];
-      uses_DATA_prefix = 0;
-      uses_REPNZ_prefix = 0;
-      /* pause is 0xf3 0x90.  */
-      uses_REPZ_prefix = *codep == 0x90;
-      uses_LOCK_prefix = 0;
       codep++;
     }
 
-  if (!uses_REPZ_prefix && (prefixes & PREFIX_REPZ))
+  if ((prefixes & PREFIX_REPZ))
     {
-      oappend ("repz ");
+      repz_prefix = "repz ";
       used_prefixes |= PREFIX_REPZ;
     }
-  if (!uses_REPNZ_prefix && (prefixes & PREFIX_REPNZ))
+  else
+    repz_prefix = NULL;
+
+  if ((prefixes & PREFIX_REPNZ))
     {
-      oappend ("repnz ");
+      repnz_prefix = "repnz ";
       used_prefixes |= PREFIX_REPNZ;
     }
+  else
+    repnz_prefix = NULL;
 
-  if (!uses_LOCK_prefix && (prefixes & PREFIX_LOCK))
+  if ((prefixes & PREFIX_LOCK))
     {
-      oappend ("lock ");
+      lock_prefix = "lock ";
       used_prefixes |= PREFIX_LOCK;
     }
+  else
+    lock_prefix = NULL;
 
+  addr_prefix = NULL;
   if (prefixes & PREFIX_ADDR)
     {
       sizeflag ^= AFLAG;
       if (dp->op[2].bytemode != loop_jcxz_mode || intel_syntax)
 	{
 	  if ((sizeflag & AFLAG) || address_mode == mode_64bit)
-	    oappend ("addr32 ");
+	    addr_prefix = "addr32 ";
 	  else
-	    oappend ("addr16 ");
+	    addr_prefix = "addr16 ";
 	  used_prefixes |= PREFIX_ADDR;
 	}
     }
 
-  if (!uses_DATA_prefix && (prefixes & PREFIX_DATA))
+  data_prefix = NULL;
+  if ((prefixes & PREFIX_DATA))
     {
       sizeflag ^= DFLAG;
       if (dp->op[2].bytemode == cond_jump_mode
@@ -3713,9 +3810,9 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	  && !intel_syntax)
 	{
 	  if (sizeflag & DFLAG)
-	    oappend ("data32 ");
+	    data_prefix = "data32 ";
 	  else
-	    oappend ("data16 ");
+	    data_prefix = "data16 ";
 	  used_prefixes |= PREFIX_DATA;
 	}
     }
@@ -3741,49 +3838,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
     }
   else
     {
-      int index;
-      if (dp->name == NULL)
-	{
-	  switch (dp->op[0].bytemode)
-	    {
-	    case USE_GROUPS:
-	      dp = &grps[dp->op[1].bytemode][modrm.reg];
-	      break;
-
-	    case USE_PREFIX_USER_TABLE:
-	      index = 0;
-	      used_prefixes |= (prefixes & PREFIX_REPZ);
-	      if (prefixes & PREFIX_REPZ)
-		index = 1;
-	      else
-		{
-		  /* We should check PREFIX_REPNZ and PREFIX_REPZ
-		     before PREFIX_DATA.  */
-		  used_prefixes |= (prefixes & PREFIX_REPNZ);
-		  if (prefixes & PREFIX_REPNZ)
-		    index = 3;
-		  else
-		    {
-		      used_prefixes |= (prefixes & PREFIX_DATA);
-		      if (prefixes & PREFIX_DATA)
-			index = 2;
-		    }
-		}
-	      dp = &prefix_user_table[dp->op[1].bytemode][index];
-	      break;
-
-	    case X86_64_SPECIAL:
-	      index = address_mode == mode_64bit ? 1 : 0;
-	      dp = &x86_64_table[dp->op[1].bytemode][index];
-	      break;
-
-	    default:
-	      oappend (INTERNAL_DISASSEMBLER_ERROR);
-	      break;
-	    }
-	}
-
-      if (dp->name != NULL && putop (dp->name, sizeflag) == 0)
+      dp = get_valid_dis386 (dp);
+      if (dp != NULL && putop (dp->name, sizeflag) == 0)
         {
 	  for (i = 0; i < MAX_OPERANDS; ++i)
 	    {
@@ -3818,8 +3874,24 @@ print_insn (bfd_vma pc, disassemble_info *info)
       (*info->fprintf_func) (info->stream, "%s ", name);
     }
 
+  prefix_obuf[0] = 0;
+  prefix_obufp = prefix_obuf;
+  if (lock_prefix)
+    prefix_obufp = stpcpy (prefix_obufp, lock_prefix);
+  if (repz_prefix)
+    prefix_obufp = stpcpy (prefix_obufp, repz_prefix);
+  if (repnz_prefix)
+    prefix_obufp = stpcpy (prefix_obufp, repnz_prefix);
+  if (addr_prefix)
+    prefix_obufp = stpcpy (prefix_obufp, addr_prefix);
+  if (data_prefix)
+    prefix_obufp = stpcpy (prefix_obufp, data_prefix);
+
+  if (prefix_obuf[0] != 0)
+    (*info->fprintf_func) (info->stream, "%s", prefix_obuf);
+
   obufp = obuf + strlen (obuf);
-  for (i = strlen (obuf); i < 6; i++)
+  for (i = strlen (obuf) + strlen (prefix_obuf); i < 6; i++)
     oappend (" ");
   oappend (" ");
   (*info->fprintf_func) (info->stream, "%s", obuf);
@@ -4188,6 +4260,15 @@ static char *fgrps[][8] = {
     "fNstsw","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)","(bad)",
   },
 };
+
+static void
+OP_Skip_MODRM (int bytemode ATTRIBUTE_UNUSED,
+	       int sizeflag ATTRIBUTE_UNUSED)
+{
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  codep++;
+}
 
 static void
 dofloat (int sizeflag)
@@ -5714,6 +5795,7 @@ OP_C (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
     }
   else if (address_mode != mode_64bit && (prefixes & PREFIX_LOCK))
     {
+      lock_prefix = NULL;
       used_prefixes |= PREFIX_LOCK;
       add = 8;
     }
@@ -5903,33 +5985,6 @@ OP_0f07 (int bytemode, int sizeflag)
     OP_E (bytemode, sizeflag);
 }
 
-static void
-OP_0fae (int bytemode, int sizeflag)
-{
-  if (modrm.mod == 3)
-    {
-      if (modrm.reg == 7)
-	{
-	  bytemode = 0;
-	  strcpy (obuf + strlen (obuf) - sizeof ("clflush") + 1,
-		  "sfence");
-	}
-
-      if (modrm.reg < 5 || modrm.rm != 0)
-	{
-	  BadOp ();	/* bad sfence, mfence, or lfence */
-	  return;
-	}
-    }
-  else if (modrm.reg != 7)
-    {
-      BadOp ();		/* bad clflush */
-      return;
-    }
-
-  OP_E (bytemode, sizeflag);
-}
-
 /* NOP is an alias of "xchg %ax,%ax" in 16bit mode, "xchg %eax,%eax" in
    32bit mode and "xchg %rax,%rax" in 64bit mode.  */
 
@@ -6115,67 +6170,53 @@ SIMD_Fixup (int extrachar, int sizeflag ATTRIBUTE_UNUSED)
 }
 
 static void
-PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
+OP_Mwait (int bytemode ATTRIBUTE_UNUSED,
+	  int sizeflag ATTRIBUTE_UNUSED)
 {
-  if (modrm.mod == 3 && modrm.reg == 1 && modrm.rm <= 1)
+  /* mwait %eax,%ecx  */
+  if (!intel_syntax)
     {
-      /* Override "sidt".  */
-      size_t olen = strlen (obuf);
-      char *p = obuf + olen - 4;
+      const char **names = (address_mode == mode_64bit
+			    ? names64 : names32);
+      strcpy (op_out[0], names[0]);
+      strcpy (op_out[1], names[1]);
+      two_source_ops = 1;
+    }
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  codep++;
+}
+
+static void
+OP_Monitor (int bytemode ATTRIBUTE_UNUSED,
+	    int sizeflag ATTRIBUTE_UNUSED)
+{
+  /* monitor %eax,%ecx,%edx"  */
+  if (!intel_syntax)
+    {
+      const char **op1_names;
       const char **names = (address_mode == mode_64bit
 			    ? names64 : names32);
 
-      /* We might have a suffix when disassembling with -Msuffix.  */
-      if (*p == 'i')
-	--p;
-
-      /* Remove "addr16/addr32" if we aren't in Intel mode.  */
-      if (!intel_syntax
-	  && (prefixes & PREFIX_ADDR)
-	  && olen >= (4 + 7)
-	  && *(p - 1) == ' '
-	  && CONST_STRNEQ (p - 7, "addr")
-	  && (CONST_STRNEQ (p - 3, "16")
-	      || CONST_STRNEQ (p - 3, "32")))
-	p -= 7;
-
-      if (modrm.rm)
-	{
-	  /* mwait %eax,%ecx  */
-	  strcpy (p, "mwait");
-	  if (!intel_syntax)
-	    strcpy (op_out[0], names[0]);
-	}
+      if (!(prefixes & PREFIX_ADDR))
+	op1_names = (address_mode == mode_16bit
+		     ? names16 : names);
       else
 	{
-	  /* monitor %eax,%ecx,%edx"  */
-	  strcpy (p, "monitor");
-	  if (!intel_syntax)
-	    {
-	      const char **op1_names;
-	      if (!(prefixes & PREFIX_ADDR))
-		op1_names = (address_mode == mode_16bit
-			     ? names16 : names);
-	      else
-		{
-		  op1_names = (address_mode != mode_32bit
-			       ? names32 : names16);
-		  used_prefixes |= PREFIX_ADDR;
-		}
-	      strcpy (op_out[0], op1_names[0]);
-	      strcpy (op_out[2], names[2]);
-	    }
+	  /* Remove "addr16/addr32".  */
+	  addr_prefix = NULL;
+	  op1_names = (address_mode != mode_32bit
+		       ? names32 : names16);
+	  used_prefixes |= PREFIX_ADDR;
 	}
-      if (!intel_syntax)
-	{
-	  strcpy (op_out[1], names[1]);
-	  two_source_ops = 1;
-	}
-
-      codep++;
+      strcpy (op_out[0], op1_names[0]);
+      strcpy (op_out[1], names[1]);
+      strcpy (op_out[2], names[2]);
+      two_source_ops = 1;
     }
-  else
-    OP_M (0, sizeflag);
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  codep++;
 }
 
 static void
@@ -6279,108 +6320,12 @@ BadOp (void)
 }
 
 static void
-VMX_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
-{
-  if (modrm.mod == 3
-      && modrm.reg == 0
-      && modrm.rm >=1
-      && modrm.rm <= 4)
-    {
-      /* Override "sgdt".  */
-      char *p = obuf + strlen (obuf) - 4;
-
-      /* We might have a suffix when disassembling with -Msuffix.  */
-      if (*p == 'g')
-	--p;
-
-      switch (modrm.rm)
-	{
-	case 1:
-	  strcpy (p, "vmcall");
-	  break;
-	case 2:
-	  strcpy (p, "vmlaunch");
-	  break;
-	case 3:
-	  strcpy (p, "vmresume");
-	  break;
-	case 4:
-	  strcpy (p, "vmxoff");
-	  break;
-	}
-
-      codep++;
-    }
-  else
-    OP_E (0, sizeflag);
-}
-
-static void
-OP_VMX (int bytemode, int sizeflag)
-{
-  used_prefixes |= (prefixes & (PREFIX_DATA | PREFIX_REPZ));
-  if (prefixes & PREFIX_DATA)
-    strcpy (obuf, "vmclear");
-  else if (prefixes & PREFIX_REPZ)
-    strcpy (obuf, "vmxon");
-  else
-    strcpy (obuf, "vmptrld");
-  OP_E (bytemode, sizeflag);
-}
-
-static void
 REP_Fixup (int bytemode, int sizeflag)
 {
   /* The 0xf3 prefix should be displayed as "rep" for ins, outs, movs,
      lods and stos.  */
-  size_t ilen = 0;
-
   if (prefixes & PREFIX_REPZ)
-    switch (*insn_codep)
-      {
-      case 0x6e:	/* outsb */
-      case 0x6f:	/* outsw/outsl */
-      case 0xa4:	/* movsb */
-      case 0xa5:	/* movsw/movsl/movsq */
-	if (!intel_syntax)
-	  ilen = 5;
-	else
-	  ilen = 4;
-	break;
-      case 0xaa:	/* stosb */
-      case 0xab:	/* stosw/stosl/stosq */
-      case 0xac:	/* lodsb */
-      case 0xad:	/* lodsw/lodsl/lodsq */
-	if (!intel_syntax && (sizeflag & SUFFIX_ALWAYS))
-	  ilen = 5;
-	else
-	  ilen = 4;
-	break;
-      case 0x6c:	/* insb */
-      case 0x6d:	/* insl/insw */
-	if (!intel_syntax)
-	  ilen = 4;
-	else
-	  ilen = 3;
-	break;
-      default:
-	abort ();
-	break;
-      }
-
-  if (ilen != 0)
-    {
-      size_t olen;
-      char *p;
-
-      olen = strlen (obuf);
-      p = obuf + olen - ilen - 1 - 4;
-      /* Handle "repz [addr16|addr32]".  */
-      if ((prefixes & PREFIX_ADDR))
-	p -= 1 + 6;
-
-      memmove (p + 3, p + 4, olen - (p + 3 - obuf));
-    }
+    repz_prefix = "rep ";
 
   switch (bytemode)
     {
