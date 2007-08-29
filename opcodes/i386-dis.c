@@ -584,6 +584,15 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define OPC_EXT_22 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 22 } }
 #define OPC_EXT_23 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 23 } }
 #define OPC_EXT_24 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 24 } }
+#define OPC_EXT_25 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 25 } }
+#define OPC_EXT_26 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 26 } }
+#define OPC_EXT_27 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 27 } }
+#define OPC_EXT_28 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 28 } }
+#define OPC_EXT_29 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 29 } }
+#define OPC_EXT_30 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 30 } }
+#define OPC_EXT_31 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 31 } }
+#define OPC_EXT_32 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 32 } }
+#define OPC_EXT_33 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 33 } }
 
 #define OPC_EXT_RM_0  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 0 } }
 #define OPC_EXT_RM_1  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 1 } }
@@ -803,7 +812,7 @@ static const struct dis386 dis386[] = {
   { "movB",		{ Gb, Eb } },
   { "movS",		{ Gv, Ev } },
   { "movD",		{ Sv, Sw } },
-  { "leaS",		{ Gv, M } },
+  { OPC_EXT_0 },
   { "movD",		{ Sw, Sv } },
   { GRP1a },
   /* 90 */
@@ -865,8 +874,8 @@ static const struct dis386 dis386[] = {
   { GRP2S },
   { "retT",		{ Iw } },
   { "retT",		{ XX } },
-  { "les{S|}",		{ Gv, Mp } },
-  { "ldsS",		{ Gv, Mp } },
+  { OPC_EXT_1 },
+  { OPC_EXT_2 },
   { GRP11_C6 },
   { GRP11_C7 },
   /* c8 */
@@ -1136,10 +1145,10 @@ static const struct dis386 dis386_twobyte[] = {
   /* b0 */
   { "cmpxchgB",		{ Eb, Gb } },
   { "cmpxchgS",		{ Ev, Gv } },
-  { "lssS",		{ Gv, Mp } },
+  { OPC_EXT_3 },
   { "btrS",		{ Ev, Gv } },
-  { "lfsS",		{ Gv, Mp } },
-  { "lgsS",		{ Gv, Mp } },
+  { OPC_EXT_4 },
+  { OPC_EXT_5 },
   { "movz{bR|x|bR|x}",	{ Gv, Eb } },
   { "movz{wR|x|wR|x}",	{ Gv, Ew } }, /* yes, there really is movzww ! */
   /* b8 */
@@ -1525,9 +1534,9 @@ static const struct dis386 grps[][8] = {
   },
   /* GRP7 */
   {
-    { OPC_EXT_0 },
-    { OPC_EXT_1 },
-    { "lgdt{Q|Q||}",	 { M } },
+    { OPC_EXT_6 },
+    { OPC_EXT_7 },
+    { OPC_EXT_8 },
     { "lidt{Q|Q||}",	 { { SVME_Fixup, 0 } } },
     { "smswD",	{ Sv } },
     { "(bad)",	{ XX } },
@@ -1553,8 +1562,8 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { OPC_EXT_2 },
-    { OPC_EXT_3 },
+    { OPC_EXT_9 },
+    { OPC_EXT_10 },
   },
   /* GRP11_C6 */
   {
@@ -1582,52 +1591,52 @@ static const struct dis386 grps[][8] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { OPC_EXT_4 },
+    { OPC_EXT_11 },
     { "(bad)",	{ XX } },
-    { OPC_EXT_5 },
+    { OPC_EXT_12 },
     { "(bad)",	{ XX } },
-    { OPC_EXT_6 },
+    { OPC_EXT_13 },
     { "(bad)",	{ XX } },
   },
   /* GRP13 */
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { OPC_EXT_7 },
+    { OPC_EXT_14 },
     { "(bad)",	{ XX } },
-    { OPC_EXT_8 },
+    { OPC_EXT_15 },
     { "(bad)",	{ XX } },
-    { OPC_EXT_9 },
+    { OPC_EXT_16 },
     { "(bad)",	{ XX } },
   },
   /* GRP14 */
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { OPC_EXT_10 },
-    { OPC_EXT_11 },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { OPC_EXT_12 },
-    { OPC_EXT_13 },
-  },
-  /* GRP15 */
-  {
-    { OPC_EXT_14 },
-    { OPC_EXT_15 },
-    { OPC_EXT_16 },
     { OPC_EXT_17 },
-    { "(bad)",	{ XX } },
     { OPC_EXT_18 },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
     { OPC_EXT_19 },
     { OPC_EXT_20 },
   },
-  /* GRP16 */
+  /* GRP15 */
   {
     { OPC_EXT_21 },
     { OPC_EXT_22 },
     { OPC_EXT_23 },
     { OPC_EXT_24 },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_25 },
+    { OPC_EXT_26 },
+    { OPC_EXT_27 },
+  },
+  /* GRP16 */
+  {
+    { OPC_EXT_28 },
+    { OPC_EXT_29 },
+    { OPC_EXT_30 },
+    { OPC_EXT_31 },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
@@ -1898,7 +1907,7 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)",	{ XM, EXx } },
     { "(bad)",	{ XM, EXx } },
     { "(bad)",	{ XM, EXx } },
-    { "lddqu",	{ XM, M } },
+    { OPC_EXT_32 },
   },
   /* PREGRP33 */
   {
@@ -2455,7 +2464,7 @@ static const struct dis386 x86_64_table[][2] = {
     { "(bad)", { XX } },
   },
   {
-    { "bound{S|}", { Gv, Ma } },
+    { OPC_EXT_33 },
     { "(bad)", { XX } },
   },
   {
@@ -3052,127 +3061,172 @@ static const struct dis386 three_byte_table[][256] = {
 static const struct dis386 opc_ext_table[][2] = {
   {
     /* OPC_EXT_0 */
-    { "sgdt{Q|IQ||}",	{ M } },
-    { OPC_EXT_RM_0 },
+    { "leaS",		{ Gv, M } },
+    { "(bad)",		{ XX } },
   },
   {
     /* OPC_EXT_1 */
-    { "sidt{Q|IQ||}",	{ M } },
-    { OPC_EXT_RM_1 },
+    { "les{S|}",	{ Gv, Mp } },
+    { "(bad)",		{ XX } },
   },
   {
     /* OPC_EXT_2 */
-    { PREGRP98 },
+    { "ldsS",		{ Gv, Mp } },
     { "(bad)",		{ XX } },
   },
   {
     /* OPC_EXT_3 */
-    { "vmptrst",	{ Mq } },
+    { "lssS",		{ Gv, Mp } },
     { "(bad)",		{ XX } },
   },
   {
     /* OPC_EXT_4 */
+    { "lfsS",		{ Gv, Mp } },
     { "(bad)",		{ XX } },
-    { "psrlw",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_5 */
+    { "lgsS",		{ Gv, Mp } },
     { "(bad)",		{ XX } },
-    { "psraw",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_6 */
-    { "(bad)",		{ XX } },
-    { "psllw",		{ MS, Ib } },
+    { "sgdt{Q|IQ||}",	{ M } },
+    { OPC_EXT_RM_0 },
   },
   {
     /* OPC_EXT_7 */
-    { "(bad)",		{ XX } },
-    { "psrld",		{ MS, Ib } },
+    { "sidt{Q|IQ||}",	{ M } },
+    { OPC_EXT_RM_1 },
   },
   {
     /* OPC_EXT_8 */
+    { "lgdt{Q|Q||}",	{ M } },
     { "(bad)",		{ XX } },
-    { "psrad",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_9 */
+    { PREGRP98 },
     { "(bad)",		{ XX } },
-    { "pslld",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_10 */
+    { "vmptrst",	{ Mq } },
     { "(bad)",		{ XX } },
-    { "psrlq",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_11 */
     { "(bad)",		{ XX } },
-    { PREGRP99 },
+    { "psrlw",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_12 */
     { "(bad)",		{ XX } },
-    { "psllq",		{ MS, Ib } },
+    { "psraw",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_13 */
     { "(bad)",		{ XX } },
-    { PREGRP100 },
+    { "psllw",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_14 */
-    { "fxsave",		{ M } },
     { "(bad)",		{ XX } },
+    { "psrld",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_15 */
-    { "fxrstor",	{ M } },
     { "(bad)",		{ XX } },
+    { "psrad",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_16 */
-    { "ldmxcsr",	{ Md } },
     { "(bad)",		{ XX } },
+    { "pslld",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_17 */
-    { "stmxcsr",	{ Md } },
     { "(bad)",		{ XX } },
+    { "psrlq",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_18 */
     { "(bad)",		{ XX } },
-    { OPC_EXT_RM_2 },
+    { PREGRP99 },
   },
   {
     /* OPC_EXT_19 */
     { "(bad)",		{ XX } },
-    { OPC_EXT_RM_3 },
+    { "psllq",		{ MS, Ib } },
   },
   {
     /* OPC_EXT_20 */
-    { "clflush",	{ Mb } },
-    { OPC_EXT_RM_4 },
+    { "(bad)",		{ XX } },
+    { PREGRP100 },
   },
   {
     /* OPC_EXT_21 */
-    { "prefetchnta",	{ Mb } },
+    { "fxsave",		{ M } },
     { "(bad)",		{ XX } },
   },
   {
     /* OPC_EXT_22 */
-    { "prefetcht0",	{ Mb } },
+    { "fxrstor",	{ M } },
     { "(bad)",		{ XX } },
   },
   {
     /* OPC_EXT_23 */
-    { "prefetcht1",	{ Mb } },
+    { "ldmxcsr",	{ Md } },
     { "(bad)",		{ XX } },
   },
   {
     /* OPC_EXT_24 */
+    { "stmxcsr",	{ Md } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_25 */
+    { "(bad)",		{ XX } },
+    { OPC_EXT_RM_2 },
+  },
+  {
+    /* OPC_EXT_26 */
+    { "(bad)",		{ XX } },
+    { OPC_EXT_RM_3 },
+  },
+  {
+    /* OPC_EXT_27 */
+    { "clflush",	{ Mb } },
+    { OPC_EXT_RM_4 },
+  },
+  {
+    /* OPC_EXT_28 */
+    { "prefetchnta",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_29 */
+    { "prefetcht0",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_30 */
+    { "prefetcht1",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_31 */
     { "prefetcht2",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_32 */
+    { "lddqu",		{ XM, M } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_33 */
+    { "bound{S|}",	{ Gv, Ma } },
     { "(bad)",		{ XX } },
   },
 };

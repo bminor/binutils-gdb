@@ -1,5 +1,15 @@
 2007-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (OPC_EXT_25...OPC_EXT_33): New.
+	(dis386): Use OPC_EXT_0...OPC_EXT_2.
+	(dis386_twobyte): Use OPC_EXT_3...OPC_EXT_5.
+	(grps): Updated to use OPC_EXT_6...OPC_EXT_31.
+	(prefix_user_table): Use OPC_EXT_32.
+	(x86_64_table): Use OPC_EXT_33.
+	(opc_ext_table): Reorder and add OPC_EXT_25...OPC_EXT_33.
+
+2007-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (prefix_user_table): Fix comment.
 
 2007-08-29  H.J. Lu  <hongjiu.lu@intel.com>
