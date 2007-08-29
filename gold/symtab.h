@@ -178,7 +178,10 @@ class Symbol
   // table.
   bool
   needs_dynsym_entry() const
-  { return this->needs_dynsym_entry_; }
+  {
+    return (this->needs_dynsym_entry_
+            || (this->in_reg() && this->in_dyn()));
+  }
 
   // Mark this symbol as needing an entry in the dynamic symbol table.
   void

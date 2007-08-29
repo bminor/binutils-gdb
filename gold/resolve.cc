@@ -189,15 +189,6 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       break;
     }
 
-  if ((tobits & (1 << 1)) != (frombits & (1 << 1)))
-    {
-      // This symbol is seen in both a dynamic object and a regular
-      // object.  That means that we need the symbol to go into the
-      // dynamic symbol table, so that the dynamic linker can use the
-      // regular symbol to override or define the dynamic symbol.
-      to->set_needs_dynsym_entry();
-    }
-
   // FIXME: Warn if either but not both of TO and SYM are STT_TLS.
 
   // We use a giant switch table for symbol resolution.  This code is
