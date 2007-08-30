@@ -95,7 +95,6 @@ static void NOP_Fixup2 (int, int);
 static void OP_3DNowSuffix (int, int);
 static void OP_SIMD_Suffix (int, int);
 static void SVME_Fixup (int, int);
-static void INVLPG_Fixup (int, int);
 static void BadOp (void);
 static void REP_Fixup (int, int);
 static void CMPXCHG8B_Fixup (int, int);
@@ -596,12 +595,14 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define OPC_EXT_35 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 35 } }
 #define OPC_EXT_36 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 36 } }
 #define OPC_EXT_37 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 37 } }
+#define OPC_EXT_38 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 38 } }
 
 #define OPC_EXT_RM_0  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 0 } }
 #define OPC_EXT_RM_1  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 1 } }
 #define OPC_EXT_RM_2  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 2 } }
 #define OPC_EXT_RM_3  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 3 } }
 #define OPC_EXT_RM_4  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 4 } }
+#define OPC_EXT_RM_5  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 5 } }
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
 
@@ -1544,7 +1545,7 @@ static const struct dis386 grps[][8] = {
     { "smswD",	{ Sv } },
     { "(bad)",	{ XX } },
     { "lmsw",	{ Ew } },
-    { "invlpg",	{ { INVLPG_Fixup, 0 } } },
+    { OPC_EXT_38 },
   },
   /* GRP8 */
   {
@@ -3252,6 +3253,11 @@ static const struct dis386 opc_ext_table[][2] = {
     { "movhpX",		{ XM, EXq } },
     { "movlhpX",	{ XM, EXq } },
   },
+  {
+    /* OPC_EXT_38 */
+    { "invlpg",		{ Mb } },
+    { OPC_EXT_RM_5 },
+  },
 };
 
 static const struct dis386 opc_ext_rm_table[][8] = {
@@ -3303,6 +3309,17 @@ static const struct dis386 opc_ext_rm_table[][8] = {
     /* OPC_EXT_RM_4 */
     { "sfence",		{ Skip_MODRM } },
     { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_RM_5 */
+    { "swapgs",		{ Skip_MODRM } },
+    { "rdtscp",		{ Skip_MODRM } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -6348,28 +6365,6 @@ SVME_Fixup (int bytemode, int sizeflag)
       *obufp = '\0';
       break;
     }
-}
-
-static void
-INVLPG_Fixup (int bytemode, int sizeflag)
-{
-  const char *alt;
-
-  switch (*codep)
-    {
-    case 0xf8:
-      alt = "swapgs";
-      break;
-    case 0xf9:
-      alt = "rdtscp";
-      break;
-    default:
-      OP_M (bytemode, sizeflag);
-      return;
-    }
-  /* Override "invlpg".  */
-  strcpy (obuf + strlen (obuf) - 6, alt);
-  codep++;
 }
 
 static void

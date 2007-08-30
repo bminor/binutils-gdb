@@ -25,6 +25,8 @@ foo:
  pi2fd		%mm6,%mm1
  pmulhrw	%mm7,%mm2
 
+ rdtscp
+
 # This is a 3DNow! instruction, with a prefix, that isn't quite right
 # Everything's good bar the opcode suffix
 .byte 0x2e, 0x0f, 0x0f, 0x54, 0xc3, 0x07, 0xc3

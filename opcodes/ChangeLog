@@ -1,3 +1,12 @@
+2007-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (INVLPG_Fixup): Removed.
+	(OPC_EXT_38): New.
+	(OPC_EXT_RM_5): Likewise.
+	(grps): Use OPC_EXT_38.
+	(opc_ext_table): Add OPC_EXT_38.
+	(opc_ext_rm_table): Add OPC_EXT_RM_5.
+
 2007-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (SIMD_Fixup): Removed.

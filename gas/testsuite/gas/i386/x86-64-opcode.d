@@ -292,4 +292,5 @@ Disassembly of section .text:
 [	 ]*[0-9a-f]+:[	 ]+0f 00 c8[	 ]+str[	 ]+%eax[	 ]*(#.*)*
 [	 ]*[0-9a-f]+:[	 ]+66 0f 00 c8[	 ]+str[	 ]+%ax[	 ]*(#.*)*
 [	 ]*[0-9a-f]+:[	 ]+0f 00 08[	 ]+str[	 ]+\(%rax\)[	 ]*(#.*)*
+[ 	]*[a-f0-9]+:	0f 01 f8             	swapgs 
 #pass

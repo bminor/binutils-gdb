@@ -1,3 +1,14 @@
+2007-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/amd.s: Add rdtscp.
+	* gas/i386/amd.d: Updated.
+
+	* gas/i386/mem-intel.d: Update invlpg for BYTE PTR.
+	* gas/i386/x86-64-mem-intel.d: Likewise.
+
+	* gas/i386/x86-64-opcode.s: Add swapgs.
+	* gas/i386/x86-64-opcode.d: Updated.
+
 2007-08-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/lns/lns-duplicate.d, gas/lns/lns-duplicate.s: New.
