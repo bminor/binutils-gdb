@@ -34,6 +34,8 @@ static struct ppc_reg_offsets rs6000_aix32_reg_offsets =
 {
   /* General-purpose registers.  */
   208, /* r0_offset */
+  4,  /* gpr_size */
+  4,  /* xr_size */
   24, /* pc_offset */
   28, /* ps_offset */
   32, /* cr_offset */
@@ -45,6 +47,7 @@ static struct ppc_reg_offsets rs6000_aix32_reg_offsets =
   /* Floating-point registers.  */
   336, /* f0_offset */
   56, /* fpscr_offset */
+  4,  /* fpscr_size */
 
   /* AltiVec registers.  */
   -1, /* vr0_offset */
@@ -56,6 +59,8 @@ static struct ppc_reg_offsets rs6000_aix64_reg_offsets =
 {
   /* General-purpose registers.  */
   0, /* r0_offset */
+  8,  /* gpr_size */
+  4,  /* xr_size */
   264, /* pc_offset */
   256, /* ps_offset */
   288, /* cr_offset */
@@ -67,6 +72,7 @@ static struct ppc_reg_offsets rs6000_aix64_reg_offsets =
   /* Floating-point registers.  */
   312, /* f0_offset */
   296, /* fpscr_offset */
+  4,  /* fpscr_size */
 
   /* AltiVec registers.  */
   -1, /* vr0_offset */
@@ -85,9 +91,7 @@ rs6000_aix_supply_regset (const struct regset *regset,
 			  const void *gregs, size_t len)
 {
   ppc_supply_gregset (regset, regcache, regnum, gregs, len);
-
-  if (ppc_floating_point_unit_p (get_regcache_arch (regcache)))
-    ppc_supply_fpregset (regset, regcache, regnum, gregs, len);
+  ppc_supply_fpregset (regset, regcache, regnum, gregs, len);
 }
 
 /* Collect register REGNUM in the general-purpose register set
@@ -101,9 +105,7 @@ rs6000_aix_collect_regset (const struct regset *regset,
 			   void *gregs, size_t len)
 {
   ppc_collect_gregset (regset, regcache, regnum, gregs, len);
-
-  if (ppc_floating_point_unit_p (get_regcache_arch (regcache)))
-    ppc_collect_fpregset (regset, regcache, regnum, gregs, len);
+  ppc_collect_fpregset (regset, regcache, regnum, gregs, len);
 }
 
 /* AIX register set.  */

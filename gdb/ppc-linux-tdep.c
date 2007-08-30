@@ -38,51 +38,6 @@
 #include "frame-unwind.h"
 #include "tramp-frame.h"
 
-/* From <asm/ptrace.h>, values for PT_NIP, PT_R1, and PT_LNK */
-#define PPC_LINUX_PT_R0		0
-#define PPC_LINUX_PT_R1		1
-#define PPC_LINUX_PT_R2		2
-#define PPC_LINUX_PT_R3		3
-#define PPC_LINUX_PT_R4		4
-#define PPC_LINUX_PT_R5		5
-#define PPC_LINUX_PT_R6		6
-#define PPC_LINUX_PT_R7		7
-#define PPC_LINUX_PT_R8		8
-#define PPC_LINUX_PT_R9		9
-#define PPC_LINUX_PT_R10	10
-#define PPC_LINUX_PT_R11	11
-#define PPC_LINUX_PT_R12	12
-#define PPC_LINUX_PT_R13	13
-#define PPC_LINUX_PT_R14	14
-#define PPC_LINUX_PT_R15	15
-#define PPC_LINUX_PT_R16	16
-#define PPC_LINUX_PT_R17	17
-#define PPC_LINUX_PT_R18	18
-#define PPC_LINUX_PT_R19	19
-#define PPC_LINUX_PT_R20	20
-#define PPC_LINUX_PT_R21	21
-#define PPC_LINUX_PT_R22	22
-#define PPC_LINUX_PT_R23	23
-#define PPC_LINUX_PT_R24	24
-#define PPC_LINUX_PT_R25	25
-#define PPC_LINUX_PT_R26	26
-#define PPC_LINUX_PT_R27	27
-#define PPC_LINUX_PT_R28	28
-#define PPC_LINUX_PT_R29	29
-#define PPC_LINUX_PT_R30	30
-#define PPC_LINUX_PT_R31	31
-#define PPC_LINUX_PT_NIP	32
-#define PPC_LINUX_PT_MSR	33
-#define PPC_LINUX_PT_CTR	35
-#define PPC_LINUX_PT_LNK	36
-#define PPC_LINUX_PT_XER	37
-#define PPC_LINUX_PT_CCR	38
-#define PPC_LINUX_PT_MQ		39
-#define PPC_LINUX_PT_FPR0	48	/* each FP reg occupies 2 slots in this space */
-#define PPC_LINUX_PT_FPR31 (PPC_LINUX_PT_FPR0 + 2*31)
-#define PPC_LINUX_PT_FPSCR (PPC_LINUX_PT_FPR0 + 2*32 + 1)
-
-
 static CORE_ADDR
 ppc_linux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
@@ -660,99 +615,102 @@ ppc_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
   return addr;
 }
 
-static void
-right_supply_register (struct regcache *regcache, int wordsize, int regnum,
-		       const bfd_byte *buf)
-{
-  regcache_raw_supply (regcache, regnum,
-		       (buf + wordsize - register_size (current_gdbarch, regnum)));
-}
-
-/* Extract the register values found in the WORDSIZED ABI GREGSET,
-   storing their values in REGCACHE.  Note that some are left-aligned,
-   while others are right aligned.  */
-
-void
-ppc_linux_supply_gregset (struct regcache *regcache,
-			  int regnum, const void *gregs, size_t size,
-			  int wordsize)
-{
-  int regi;
-  struct gdbarch *regcache_arch = get_regcache_arch (regcache); 
-  struct gdbarch_tdep *regcache_tdep = gdbarch_tdep (regcache_arch);
-  const bfd_byte *buf = gregs;
-
-  for (regi = 0; regi < ppc_num_gprs; regi++)
-    right_supply_register (regcache, wordsize,
-                           regcache_tdep->ppc_gp0_regnum + regi,
-                           buf + wordsize * regi);
-
-  right_supply_register (regcache, wordsize, gdbarch_pc_regnum (regcache_arch),
-			 buf + wordsize * PPC_LINUX_PT_NIP);
-  right_supply_register (regcache, wordsize, regcache_tdep->ppc_lr_regnum,
-			 buf + wordsize * PPC_LINUX_PT_LNK);
-  regcache_raw_supply (regcache, regcache_tdep->ppc_cr_regnum,
-		       buf + wordsize * PPC_LINUX_PT_CCR);
-  regcache_raw_supply (regcache, regcache_tdep->ppc_xer_regnum,
-		       buf + wordsize * PPC_LINUX_PT_XER);
-  regcache_raw_supply (regcache, regcache_tdep->ppc_ctr_regnum,
-		       buf + wordsize * PPC_LINUX_PT_CTR);
-  if (regcache_tdep->ppc_mq_regnum != -1)
-    right_supply_register (regcache, wordsize, regcache_tdep->ppc_mq_regnum,
-			   buf + wordsize * PPC_LINUX_PT_MQ);
-  right_supply_register (regcache, wordsize, regcache_tdep->ppc_ps_regnum,
-			 buf + wordsize * PPC_LINUX_PT_MSR);
-}
+/* This wrapper clears areas in the linux gregset not written by
+   ppc_collect_gregset.  */
 
 static void
-ppc32_linux_supply_gregset (const struct regset *regset,
-			    struct regcache *regcache,
-			    int regnum, const void *gregs, size_t size)
+ppc_linux_collect_gregset (const struct regset *regset,
+			   const struct regcache *regcache,
+			   int regnum, void *gregs, size_t len)
 {
-  ppc_linux_supply_gregset (regcache, regnum, gregs, size, 4);
+  if (regnum == -1)
+    memset (gregs, 0, len);
+  ppc_collect_gregset (regset, regcache, regnum, gregs, len);
 }
 
-static struct regset ppc32_linux_gregset = {
-  NULL, ppc32_linux_supply_gregset
+/* Regset descriptions.  */
+static const struct ppc_reg_offsets ppc32_linux_reg_offsets =
+  {
+    /* General-purpose registers.  */
+    /* .r0_offset = */ 0,
+    /* .gpr_size = */ 4,
+    /* .xr_size = */ 4,
+    /* .pc_offset = */ 128,
+    /* .ps_offset = */ 132,
+    /* .cr_offset = */ 152,
+    /* .lr_offset = */ 144,
+    /* .ctr_offset = */ 140,
+    /* .xer_offset = */ 148,
+    /* .mq_offset = */ 156,
+
+    /* Floating-point registers.  */
+    /* .f0_offset = */ 0,
+    /* .fpscr_offset = */ 256,
+    /* .fpscr_size = */ 8,
+
+    /* AltiVec registers.  */
+    /* .vr0_offset = */ 0,
+    /* .vrsave_offset = */ 512,
+    /* .vscr_offset = */ 512 + 12
+  };
+
+static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
+  {
+    /* General-purpose registers.  */
+    /* .r0_offset = */ 0,
+    /* .gpr_size = */ 8,
+    /* .xr_size = */ 8,
+    /* .pc_offset = */ 256,
+    /* .ps_offset = */ 264,
+    /* .cr_offset = */ 304,
+    /* .lr_offset = */ 288,
+    /* .ctr_offset = */ 280,
+    /* .xer_offset = */ 296,
+    /* .mq_offset = */ 312,
+
+    /* Floating-point registers.  */
+    /* .f0_offset = */ 0,
+    /* .fpscr_offset = */ 256,
+    /* .fpscr_size = */ 8,
+
+    /* AltiVec registers.  */
+    /* .vr0_offset = */ 0,
+    /* .vrsave_offset = */ 528,
+    /* .vscr_offset = */ 512 + 12
+  };
+
+static const struct regset ppc32_linux_gregset = {
+  &ppc32_linux_reg_offsets,
+  ppc_supply_gregset,
+  ppc_linux_collect_gregset,
+  NULL
 };
 
-static void
-ppc64_linux_supply_gregset (const struct regset *regset,
-			    struct regcache * regcache,
-			    int regnum, const void *gregs, size_t size)
-{
-  ppc_linux_supply_gregset (regcache, regnum, gregs, size, 8);
-}
-
-static struct regset ppc64_linux_gregset = {
-  NULL, ppc64_linux_supply_gregset
+static const struct regset ppc64_linux_gregset = {
+  &ppc64_linux_reg_offsets,
+  ppc_supply_gregset,
+  ppc_linux_collect_gregset,
+  NULL
 };
 
-void
-ppc_linux_supply_fpregset (const struct regset *regset,
-			   struct regcache * regcache,
-			   int regnum, const void *fpset, size_t size)
+static const struct regset ppc32_linux_fpregset = {
+  &ppc32_linux_reg_offsets,
+  ppc_supply_fpregset,
+  ppc_collect_fpregset,
+  NULL
+};
+
+const struct regset *
+ppc_linux_gregset (int wordsize)
 {
-  int regi;
-  struct gdbarch *regcache_arch = get_regcache_arch (regcache); 
-  struct gdbarch_tdep *regcache_tdep = gdbarch_tdep (regcache_arch);
-  const bfd_byte *buf = fpset;
-
-  if (! ppc_floating_point_unit_p (regcache_arch))
-    return;
-
-  for (regi = 0; regi < ppc_num_fprs; regi++)
-    regcache_raw_supply (regcache, 
-                         regcache_tdep->ppc_fp0_regnum + regi,
-                         buf + 8 * regi);
-
-  /* The FPSCR is stored in the low order word of the last
-     doubleword in the fpregset.  */
-  regcache_raw_supply (regcache, regcache_tdep->ppc_fpscr_regnum,
-                       buf + 8 * 32 + 4);
+  return wordsize == 8 ? &ppc64_linux_gregset : &ppc32_linux_gregset;
 }
 
-static struct regset ppc_linux_fpregset = { NULL, ppc_linux_supply_fpregset };
+const struct regset *
+ppc_linux_fpregset (void)
+{
+  return &ppc32_linux_fpregset;
+}
 
 static const struct regset *
 ppc_linux_regset_from_core_section (struct gdbarch *core_arch,
@@ -767,7 +725,7 @@ ppc_linux_regset_from_core_section (struct gdbarch *core_arch,
 	return &ppc64_linux_gregset;
     }
   if (strcmp (sect_name, ".reg2") == 0)
-    return &ppc_linux_fpregset;
+    return &ppc32_linux_fpregset;
   return NULL;
 }
 

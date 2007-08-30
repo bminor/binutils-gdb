@@ -198,6 +198,8 @@ _initialize_ppcobsd_nat (void)
 
   /* General-purpose registers.  */
   ppcobsd_reg_offsets.r0_offset = offsetof (struct reg, gpr);
+  ppcobsd_reg_offsets.gpr_size = 4;
+  ppcobsd_reg_offsets.xr_size = 4;
   ppcobsd_reg_offsets.pc_offset = offsetof (struct reg, pc);
   ppcobsd_reg_offsets.ps_offset = offsetof (struct reg, ps);
   ppcobsd_reg_offsets.cr_offset = offsetof (struct reg, cnd);
@@ -212,6 +214,7 @@ _initialize_ppcobsd_nat (void)
 #ifdef PT_GETFPREGS
   ppcobsd_fpreg_offsets.f0_offset = offsetof (struct fpreg, fpr);
   ppcobsd_fpreg_offsets.fpscr_offset = offsetof (struct fpreg, fpscr);
+  ppcobsd_fpreg_offsets.fpscr_size = 4;
 #endif
 
   /* AltiVec registers.  */

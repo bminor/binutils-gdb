@@ -56,12 +56,8 @@ CORE_ADDR ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
 						    CORE_ADDR bpaddr);
 int ppc_linux_memory_remove_breakpoint (struct bp_target_info *bp_tgt);
 struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
-void ppc_linux_supply_gregset (struct regcache *regcache,
-			       int regnum, const void *gregs, size_t size,
-			       int wordsize);
-void ppc_linux_supply_fpregset (const struct regset *regset,
-				struct regcache *regcache,
-				int regnum, const void *gregs, size_t size);
+const struct regset *ppc_linux_gregset (int);
+const struct regset *ppc_linux_fpregset (void);
 
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
 							  struct type *valtype,
@@ -83,6 +79,8 @@ struct ppc_reg_offsets
 {
   /* General-purpose registers.  */
   int r0_offset;
+  int gpr_size; /* size for r0-31, pc, ps, lr, ctr.  */
+  int xr_size;  /* size for cr, xer, mq.  */
   int pc_offset;
   int ps_offset;
   int cr_offset;
@@ -94,6 +92,7 @@ struct ppc_reg_offsets
   /* Floating-point registers.  */
   int f0_offset;
   int fpscr_offset;
+  int fpscr_size;
 
   /* AltiVec registers.  */
   int vr0_offset;

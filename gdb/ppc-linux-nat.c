@@ -901,101 +901,48 @@ ppc_linux_store_inferior_registers (struct regcache *regcache, int regno)
     store_ppc_registers (regcache, tid);
 }
 
+/* Functions for transferring registers between a gregset_t or fpregset_t
+   (see sys/ucontext.h) and gdb's regcache.  The word size is that used
+   by the ptrace interface, not the current program's ABI.  eg. If a
+   powerpc64-linux gdb is being used to debug a powerpc32-linux app, we
+   read or write 64-bit gregsets.  This is to suit the host libthread_db.  */
+
 void
 supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
 {
-  /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
-     interface, and not the wordsize of the program's ABI.  */
-  int wordsize = sizeof (long);
-  ppc_linux_supply_gregset (regcache, -1, gregsetp,
-			    sizeof (gdb_gregset_t), wordsize);
-}
+  const struct regset *regset = ppc_linux_gregset (sizeof (long));
 
-static void
-right_fill_reg (const struct regcache *regcache, int regnum, void *reg)
-{
-  /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
-     interface, and not the wordsize of the program's ABI.  */
-  int wordsize = sizeof (long);
-  /* Right fill the register.  */
-  regcache_raw_collect (regcache, regnum,
-			((bfd_byte *) reg
-			 + wordsize
-			 - register_size (current_gdbarch, regnum)));
+  ppc_supply_gregset (regset, regcache, -1, gregsetp, sizeof (*gregsetp));
 }
 
 void
 fill_gregset (const struct regcache *regcache,
 	      gdb_gregset_t *gregsetp, int regno)
 {
-  int regi;
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
-  const int elf_ngreg = 48;
+  const struct regset *regset = ppc_linux_gregset (sizeof (long));
 
-
-  /* Start with zeros.  */
-  memset (regp, 0, elf_ngreg * sizeof (*regp));
-
-  for (regi = 0; regi < ppc_num_gprs; regi++)
-    {
-      if ((regno == -1) || regno == tdep->ppc_gp0_regnum + regi)
-	right_fill_reg (regcache, tdep->ppc_gp0_regnum + regi,
-			(regp + PT_R0 + regi));
-    }
-
-  if ((regno == -1) || regno == gdbarch_pc_regnum (current_gdbarch))
-    right_fill_reg (regcache, gdbarch_pc_regnum (current_gdbarch),
-		    regp + PT_NIP);
-  if ((regno == -1) || regno == tdep->ppc_lr_regnum)
-    right_fill_reg (regcache, tdep->ppc_lr_regnum, regp + PT_LNK);
-  if ((regno == -1) || regno == tdep->ppc_cr_regnum)
-    regcache_raw_collect (regcache, tdep->ppc_cr_regnum,
-			  regp + PT_CCR);
-  if ((regno == -1) || regno == tdep->ppc_xer_regnum)
-    regcache_raw_collect (regcache, tdep->ppc_xer_regnum,
-			  regp + PT_XER);
-  if ((regno == -1) || regno == tdep->ppc_ctr_regnum)
-    right_fill_reg (regcache, tdep->ppc_ctr_regnum, regp + PT_CTR);
-#ifdef PT_MQ
-  if (((regno == -1) || regno == tdep->ppc_mq_regnum)
-      && (tdep->ppc_mq_regnum != -1))
-    right_fill_reg (regcache, tdep->ppc_mq_regnum, regp + PT_MQ);
-#endif
-  if ((regno == -1) || regno == tdep->ppc_ps_regnum)
-    right_fill_reg (regcache, tdep->ppc_ps_regnum, regp + PT_MSR);
+  if (regno == -1)
+    memset (gregsetp, 0, sizeof (*gregsetp));
+  ppc_collect_gregset (regset, regcache, regno, gregsetp, sizeof (*gregsetp));
 }
 
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t * fpregsetp)
 {
-  ppc_linux_supply_fpregset (NULL, regcache, -1, fpregsetp,
-			     sizeof (gdb_fpregset_t));
+  const struct regset *regset = ppc_linux_fpregset ();
+
+  ppc_supply_fpregset (regset, regcache, -1,
+		       fpregsetp, sizeof (*fpregsetp));
 }
 
-/* Given a pointer to a floating point register set in /proc format
-   (fpregset_t *), update the register specified by REGNO from gdb's
-   idea of the current floating point register set.  If REGNO is -1,
-   update them all.  */
 void
 fill_fpregset (const struct regcache *regcache,
 	       gdb_fpregset_t *fpregsetp, int regno)
 {
-  int regi;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
-  bfd_byte *fpp = (void *) fpregsetp;
-  
-  if (ppc_floating_point_unit_p (current_gdbarch))
-    {
-      for (regi = 0; regi < ppc_num_fprs; regi++)
-        {
-          if ((regno == -1) || (regno == tdep->ppc_fp0_regnum + regi))
-            regcache_raw_collect (regcache, tdep->ppc_fp0_regnum + regi,
-				  fpp + 8 * regi);
-        }
-      if (regno == -1 || regno == tdep->ppc_fpscr_regnum)
-        right_fill_reg (regcache, tdep->ppc_fpscr_regnum, (fpp + 8 * 32));
-    }
+  const struct regset *regset = ppc_linux_fpregset ();
+
+  ppc_collect_fpregset (regset, regcache, regno,
+			fpregsetp, sizeof (*fpregsetp));
 }
 
 void _initialize_ppc_linux_nat (void);

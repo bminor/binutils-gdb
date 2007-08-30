@@ -213,6 +213,8 @@ _initialize_ppcnbsd_tdep (void)
     {
       /* General-purpose registers.  */
       ppcnbsd_reg_offsets.r0_offset = 0;
+      ppcnbsd_reg_offsets.gpr_size = 4;
+      ppcnbsd_reg_offsets.xr_size = 4;
       ppcnbsd_reg_offsets.lr_offset = 128;
       ppcnbsd_reg_offsets.cr_offset = 132;
       ppcnbsd_reg_offsets.xer_offset = 136;
@@ -224,6 +226,7 @@ _initialize_ppcnbsd_tdep (void)
       /* Floating-point registers.  */
       ppcnbsd_reg_offsets.f0_offset = 0;
       ppcnbsd_reg_offsets.fpscr_offset = 256;
+      ppcnbsd_reg_offsets.fpscr_size = 4;
 
       /* AltiVec registers.  */
       ppcnbsd_reg_offsets.vr0_offset = 0;

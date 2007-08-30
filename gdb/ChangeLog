@@ -1,3 +1,48 @@
+2007-08-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-linux-nat.c (right_fill_reg): Delete.
+	(supply_gregset): Use ppc_supply_gregset.
+	(supply_fpregset): Use ppc_supply_fpregset.
+	(fill_gregset): Use ppc_collect_gregset.
+	(fill_fpregset): Use ppc_collect_fpregset.
+	* ppc-linux-tdep.c (PPC_LINUX_PT_*): Don't define.
+	(right_supply_register, ppc_linux_supply_gregset): Delete.
+	(ppc32_linux_supply_gregset, ppc64_linux_supply_gregset): Delete.
+	(ppc_linux_supply_fpregset): Delete.
+	(ppc_linux_collect_gregset): New function.
+	(ppc32_linux_reg_offsets, ppc64_linux_reg_offsets): New.
+	(ppc32_linux_gregset, ppc64_linux_gregset): Update to use reg offsets,
+	ppc_linux_supply_gregset, and ppc_collect_gregset.
+	(ppc_linux_fpregset): Rename to ppc32_linux_fpregset and update.
+	(ppc_linux_gregset, ppc_linux_fpregset): New functions.
+	(ppc_linux_regset_from_core_section): Update.
+	* ppc-tdep.h (ppc_linux_gregset, ppc_linux_fpregset): Declare.
+	(ppc_linux_supply_gregset, ppc_linux_supply_fpregset): Delete.
+	(struct ppc_reg_offsets): Add gpr_size, xr_size, fpscr_size fields.
+	* ppcobsd-tdep.c (ppcobsd_supply_gregset): Delete FIXME and assert.
+	(ppcobsd_collect_gregset): Likewise.
+	(_initialize_ppcnbsd_tdep): Init gpr_size, xr_size, fpscr_size.
+	* ppcnbsd-tdep.c (_initialize_ppcobsd_tdep): Likewise.
+	* ppcobsd-nat.c (_initialize_ppcobsd_nat): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix32_reg_offsets): Likewise.
+	(rs6000_aix64_reg_offsets): Likewise.
+	(rs6000_aix_supply_regset): Call ppc_supply_fpregset without testing
+	ppc_floating_point_unit_p.
+	(rs6000_aix_collect_regset): Similarly.
+	* rs6000-tdep.c (ppc_supply_reg): Add regsize param.  Adjust offset
+	when regsize is larger than regcache register size.
+	(ppc_collect_reg): Similarly zero pad when regsize is larger than
+	regcache register size.
+	(ppc_greg_offset): New function, split out from..
+	(ppc_supply_gregset): ..here.  Separate code handling all regs from
+	single reg case.  Correct xer offset.
+	(ppc_fpreg_offset): New function, split out from..
+	(ppc_supply_fpregset): ..here.  Separate code handling all regs from
+	single reg case.
+	(ppc_collect_gregset, ppc_collect_fpregset): Likewise.
+	(ppc_supply_fpregset, ppc_collect_fpregset): Don't assert we have
+	a fp unit, instead return if no fp.
+
 2007-08-29  Jim Blandy  <jimb@codesourcery.com>
 
 	* breakpoint.c (watch_command_1): Remove '#ifdef HPUXHPPA' block;
