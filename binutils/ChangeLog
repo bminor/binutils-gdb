@@ -1,3 +1,14 @@
+2007-08-30  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* bucomm.c (bfd_nonfatal_message): New.
+	* bucomm.h (bfd_nonfatal_message): Declare.
+	* objcopy.c (RETURN_NONFATAL): Take BFD not NAME, use
+	bfd_nonfatal_message.
+	(copy_unknown_object): Adjust bfd_nonfatal and RETURN_NONFATAL
+	calls, or replace with bfd_nonfatal_message calls as appropriate.
+	(copy_object, copy_archive, copy_file, setup_section,
+	copy_section, write_debugging_info): Likewise.
+
 2007-08-28  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention Coverity's contribution.

@@ -27,6 +27,9 @@ const char *bfd_get_archive_filename (bfd *);
 
 void bfd_nonfatal (const char *);
 
+void bfd_nonfatal_message (const char *, const bfd *, const asection *,
+			   const char *, ...);
+
 void bfd_fatal (const char *) ATTRIBUTE_NORETURN;
 
 void report (const char *, va_list) ATTRIBUTE_PRINTF(1,0);
