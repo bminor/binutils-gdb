@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: gprof 2.17.90\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-05-15 16:49+0930\n"
-"PO-Revision-Date: 2007-08-10 16:17+0300\n"
+"PO-Revision-Date: 2007-08-29 20:12+0300\n"
 "Last-Translator: Jorma Karvonen <karvjorm@users.sf.net>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -23,17 +23,17 @@ msgstr "<epäsuora lapsi>"
 #: alpha.c:107 mips.c:59
 #, c-format
 msgid "[find_call] %s: 0x%lx to 0x%lx\n"
-msgstr "[find_call] %s: 0x%lx to 0x%lx\n"
+msgstr "[etsi_kutsu] %s: 0x%lx arvoon 0x%lx\n"
 
 #: alpha.c:129
 #, c-format
 msgid "[find_call] 0x%lx: jsr%s <indirect_child>\n"
-msgstr "[find_call] 0x%lx: jsr%s <indirect_child>\n"
+msgstr "[etsi_kutsu] 0x%lx: jsr%s-käsky <epäsuora_lapsi>\n"
 
 #: alpha.c:139
 #, c-format
 msgid "[find_call] 0x%lx: bsr"
-msgstr "[find_call] 0x%lx: bsr"
+msgstr "[etsi_kutsu] 0x%lx: bsr-käsky"
 
 #  ensimmäinen %s whoami, toinen %s filename
 #: basic_blocks.c:128 call_graph.c:89 hist.c:105
@@ -51,7 +51,7 @@ msgstr "%s: varoitus: ei oteta huomioon peruslohkotietueen suorituslukumäärä�
 #: basic_blocks.c:289 basic_blocks.c:299
 #, c-format
 msgid "%s:%d: (%s:0x%lx) %lu executions\n"
-msgstr "%s:%d: (%s:0x%lx) %lu suorituksia\n"
+msgstr "%s:%d: (%s:0x%lx) %lu suoritusta\n"
 
 #: basic_blocks.c:290 basic_blocks.c:300
 msgid "<unknown>"
@@ -125,7 +125,7 @@ msgid ""
 "\t\t     Call graph (explanation follows)\n"
 "\n"
 msgstr ""
-"\t\t     Kutsugrafiikka (selitys seuraa)\n"
+"\t\t     Kutsugraafi (selitys seuraa)\n"
 "\n"
 
 #: cg_print.c:75
@@ -134,7 +134,7 @@ msgid ""
 "\t\t\tCall graph\n"
 "\n"
 msgstr ""
-"\t\t\tKutsugrafiikka\n"
+"\t\t\tKutsugraafi\n"
 "\n"
 
 #: cg_print.c:78 hist.c:466
@@ -256,7 +256,7 @@ msgstr "%s: %s: ei ole suoritustiedostomuotoinen\n"
 #: corefile.c:177
 #, c-format
 msgid "%s: can't find .text section in %s\n"
-msgstr "%s: ei löydy \".text\"-lohkoa kohteesta %s\n"
+msgstr "%s: ei löydy ”.text”-lohkoa kohteesta %s\n"
 
 #: corefile.c:252
 #, c-format
@@ -276,7 +276,7 @@ msgstr "%s: -c ei ole tuettu arkkitehtuurissa %s\n"
 #: corefile.c:470
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
-msgstr "%s: tiedostossa \"%s\" ei ole symboleja\n"
+msgstr "%s: tiedostossa ”%s” ei ole symboleja\n"
 
 #: corefile.c:772
 #, c-format
@@ -296,12 +296,12 @@ msgstr "%s: tiedosto on liian lyhyt, jotta se olisi gmon-tiedosto\n"
 #: gmon_io.c:330 gmon_io.c:459
 #, c-format
 msgid "%s: file `%s' has bad magic cookie\n"
-msgstr "%s: tiedostossa \"%s\" on virheellinen maaginen pipari\n"
+msgstr "%s: tiedostossa ”%s” on virheellinen maaginen pipari\n"
 
 #: gmon_io.c:341
 #, c-format
 msgid "%s: file `%s' has unsupported version %d\n"
-msgstr "%s: tiedostossa \"%s\" on tukematon versio %d\n"
+msgstr "%s: tiedostossa ”%s” on tukematon versio %d\n"
 
 #: gmon_io.c:371
 #, c-format
@@ -321,12 +321,12 @@ msgstr "%s: ei ole yhteensopiva ensimmäisen gmon-tiedoston kanssa\n"
 #: gmon_io.c:516
 #, c-format
 msgid "%s: file '%s' does not appear to be in gmon.out format\n"
-msgstr "%s: tiedosto \"%s\" ei vaikuta olevan \"gmon.out\"-muotoinen\n"
+msgstr "%s: tiedosto ”%s” ei vaikuta olevan ”gmon.out”-muotoinen\n"
 
 #: gmon_io.c:529
 #, c-format
 msgid "%s: unexpected EOF after reading %d/%d bins\n"
-msgstr "%s: odottamaton tiedoston loppumerkki \"%d/%d bins\"-lukemisen jälkeen\n"
+msgstr "%s: odottamaton tiedoston loppumerkki ”%d/%d bins”-lukemisen jälkeen\n"
 
 #: gmon_io.c:563
 #, c-format
@@ -341,7 +341,7 @@ msgstr "%s: ei tiedetä, kuinka tiedostomuotoa %d pitää käsitellä\n"
 #: gmon_io.c:576
 #, c-format
 msgid "File `%s' (version %d) contains:\n"
-msgstr "Tiedosto \"%s\" (versio %d) sisältää:\n"
+msgstr "Tiedosto ”%s” (versio %d) sisältää:\n"
 
 #: gmon_io.c:579
 #, c-format
@@ -356,12 +356,12 @@ msgstr "\t%d histogrammitietueet\n"
 #: gmon_io.c:582
 #, c-format
 msgid "\t%d call-graph record\n"
-msgstr "\t%d kutsugrafiikkatietue\n"
+msgstr "\t%d kutsugraafitietue\n"
 
 #: gmon_io.c:583
 #, c-format
 msgid "\t%d call-graph records\n"
-msgstr "\t%d kutsugrafiikkatietueet\n"
+msgstr "\t%d kutsugraafitietueet\n"
 
 #: gmon_io.c:585
 #, c-format
@@ -407,12 +407,12 @@ msgstr ""
 #: gprof.c:174
 #, c-format
 msgid "Report bugs to %s\n"
-msgstr "Raportoi virheestä osoitteeseen %s\n"
+msgstr "Lähetä raportit ohjelmistovioista (englanniksi) osoitteeseen %s\n"
 
 #: gprof.c:250
 #, c-format
 msgid "%s: debugging not supported; -d ignored\n"
-msgstr "%s: debuggausta ei tueta; -d ei oteta huomioon\n"
+msgstr "%s: debuggausta ei tueta; -d:tä ei oteta huomioon\n"
 
 #: gprof.c:330
 #, c-format
@@ -428,7 +428,7 @@ msgstr "GNU gprof %s\n"
 #: gprof.c:415
 #, c-format
 msgid "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
-msgstr "Perustuu BSD gprof, copyright 1983 Regents of the University of California.\n"
+msgstr "Perustuu BSD:n gprofiin, copyright 1983 Regents of the University of California.\n"
 
 #: gprof.c:416
 #, c-format
@@ -438,27 +438,27 @@ msgstr "Tämä ohjelma on vapaa ohjelmisto. Tällä ohjelmalla ei ehdottomasti o
 #: gprof.c:457
 #, c-format
 msgid "%s: unknown demangling style `%s'\n"
-msgstr "%s: tuntematon eheytystyyli \"%s\"\n"
+msgstr "%s: tuntematon eheytystyyli ”%s”\n"
 
 #: gprof.c:477
 #, c-format
 msgid "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
-msgstr "%s: Vain joko \"--function-ordering\" tai \"--file-ordering\" saadaan määritellä.\n"
+msgstr "%s: Vain joko ”--function-ordering” tai ”--file-ordering” saadaan määritellä.\n"
 
 #: gprof.c:527
 #, c-format
 msgid "%s: sorry, file format `prof' is not yet supported\n"
-msgstr "%s: valitettavasti tiedostomuotoa \"prof\" ei vielä tueta\n"
+msgstr "%s: valitettavasti tiedostomuotoa ”prof” ei vielä tueta\n"
 
 #: gprof.c:581
 #, c-format
 msgid "%s: gmon.out file is missing histogram\n"
-msgstr "%s: \"gmon.out\"-tiedosto puuttuu histogrammista\n"
+msgstr "%s: ”gmon.out”-tiedosto puuttuu histogrammista\n"
 
 #: gprof.c:588
 #, c-format
 msgid "%s: gmon.out file is missing call-graph data\n"
-msgstr "%s: \"gmon.out\"-tiedosto puuttuu kutsugrafiikkadatasta\n"
+msgstr "%s: ”gmon.out”-tiedosto puuttuu kutsugraafidatasta\n"
 
 #: hist.c:133
 #, c-format
@@ -468,8 +468,8 @@ msgid ""
 "%s: to '%s'\n"
 msgstr ""
 "%s: mittasuhdeyksikkö muuttui histogrammitietueiden välillä\n"
-"%s: arvosta \"%s\"\n"
-"%s: arvoon \"%s\"\n"
+"%s: arvosta ”%s”\n"
+"%s: arvoon ”%s”\n"
 
 #: hist.c:143
 #, c-format
@@ -479,8 +479,8 @@ msgid ""
 "%s: to '%c'\n"
 msgstr ""
 "%s: mittasuhdelyhenne muuttui histogrammitietueiden välillä\n"
-"%s: arvosta \"%c\"\n"
-"%s: arvoon \"%c\"\n"
+"%s: arvosta ”%c”\n"
+"%s: arvoon ”%c”\n"
 
 #: hist.c:157
 #, c-format
@@ -508,7 +508,7 @@ msgid ""
 " for %.2f%% of %.2f %s\n"
 "\n"
 msgstr ""
-" kohteelle %.2f%% of %.2f %s\n"
+" kohteelle %.2f%% / %.2f %s\n"
 "\n"
 
 #: hist.c:476
@@ -526,7 +526,7 @@ msgid ""
 " no time accumulated\n"
 "\n"
 msgstr ""
-" ei akkumuloitunutta aikaa\n"
+" ei kerääntynyttä aikaa\n"
 "\n"
 
 #: hist.c:488
@@ -575,17 +575,17 @@ msgstr "%s: löydetty symboli, joka kattaa useita histogrammitietueita"
 #: mips.c:71
 #, c-format
 msgid "[find_call] 0x%lx: jal"
-msgstr "[find_call] 0x%lx: jal-käsky"
+msgstr "[etsi_kutsu] 0x%lx: jal-käsky"
 
 #: mips.c:96
 #, c-format
 msgid "[find_call] 0x%lx: jalr\n"
-msgstr "[find_call] 0x%lx: jalr-käsky (epäsuora kutsu)\n"
+msgstr "[etsi_kutsu] 0x%lx: jalr-käsky (epäsuora kutsu)\n"
 
 #: source.c:162
 #, c-format
 msgid "%s: could not locate `%s'\n"
-msgstr "%s: ei voitu paikantaa \"%s\"\n"
+msgstr "%s: ei voitu paikantaa ”%s”\n"
 
 #: source.c:237
 #, c-format
