@@ -1,5 +1,13 @@
 2007-08-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (SIMD_Fixup): Removed.
+	(OPC_EXT_34...OPC_EXT_37): New.
+	(dis386_twobyte): Use OPC_EXT_34 and OPC_EXT_35.
+	(prefix_user_table): Use OPC_EXT_36 and OPC_EXT_37.
+	(opc_ext_table): Add OPC_EXT_34...OPC_EXT_37.
+
+2007-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (OPC_EXT_25...OPC_EXT_33): New.
 	(dis386): Use OPC_EXT_0...OPC_EXT_2.
 	(dis386_twobyte): Use OPC_EXT_3...OPC_EXT_5.

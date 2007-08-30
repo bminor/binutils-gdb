@@ -94,7 +94,6 @@ static void NOP_Fixup1 (int, int);
 static void NOP_Fixup2 (int, int);
 static void OP_3DNowSuffix (int, int);
 static void OP_SIMD_Suffix (int, int);
-static void SIMD_Fixup (int, int);
 static void SVME_Fixup (int, int);
 static void INVLPG_Fixup (int, int);
 static void BadOp (void);
@@ -593,6 +592,10 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define OPC_EXT_31 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 31 } }
 #define OPC_EXT_32 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 32 } }
 #define OPC_EXT_33 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 33 } }
+#define OPC_EXT_34 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 34 } }
+#define OPC_EXT_35 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 35 } }
+#define OPC_EXT_36 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 36 } }
+#define OPC_EXT_37 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 37 } }
 
 #define OPC_EXT_RM_0  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 0 } }
 #define OPC_EXT_RM_1  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 1 } }
@@ -966,11 +969,11 @@ static const struct dis386 dis386_twobyte[] = {
   { PREGRP8 },
   { PREGRP9 },
   { PREGRP30 },
-  { "movlpX",		{ EXq, XM, { SIMD_Fixup, 'h' } } },
+  { OPC_EXT_34 },
   { "unpcklpX",		{ XM, EXq } },
   { "unpckhpX",		{ XM, EXq } },
   { PREGRP31 },
-  { "movhpX",		{ EXq, XM, { SIMD_Fixup, 'l' } } },
+  { OPC_EXT_35 },
   /* 18 */
   { GRP16 },
   { "(bad)",		{ XX } },
@@ -1890,14 +1893,14 @@ static const struct dis386 prefix_user_table[][4] = {
   },
   /* PREGRP30 */
   {
-    { "movlpX",	{ XM, EXq, { SIMD_Fixup, 'h' } } }, /* really only 2 operands */
+    { OPC_EXT_36 },
     { "movsldup", { XM, EXx } },
     { "movlpd",	{ XM, EXq } },
     { "movddup", { XM, EXq } },
   },
   /* PREGRP31 */
   {
-    { "movhpX",	{ XM, EXq, { SIMD_Fixup, 'l' } } },
+    { OPC_EXT_37 },
     { "movshdup", { XM, EXx } },
     { "movhpd",	{ XM, EXq } },
     { "(bad)",	{ XM, EXq } },
@@ -3228,6 +3231,26 @@ static const struct dis386 opc_ext_table[][2] = {
     /* OPC_EXT_33 */
     { "bound{S|}",	{ Gv, Ma } },
     { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_34 */
+    { "movlpX",		{ EXq, XM } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_35 */
+    { "movhpX",		{ EXq, XM } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_36 */
+    { "movlpX",		{ XM, EXq } },
+    { "movhlpX",	{ XM, EXq } },
+  },
+  {
+    /* OPC_EXT_37 */
+    { "movhpX",		{ XM, EXq } },
+    { "movlhpX",	{ XM, EXq } },
   },
 };
 
@@ -6204,22 +6227,6 @@ OP_SIMD_Suffix (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
       op_out[0][0] = '\0';
       op_out[1][0] = '\0';
       BadOp ();
-    }
-}
-
-static void
-SIMD_Fixup (int extrachar, int sizeflag ATTRIBUTE_UNUSED)
-{
-  /* Change movlps/movhps to movhlps/movlhps for 2 register operand
-     forms of these instructions.  */
-  if (modrm.mod == 3)
-    {
-      char *p = obuf + strlen (obuf);
-      *(p + 1) = '\0';
-      *p       = *(p - 1);
-      *(p - 1) = *(p - 2);
-      *(p - 2) = *(p - 3);
-      *(p - 3) = extrachar;
     }
 }
 
