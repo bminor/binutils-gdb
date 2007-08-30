@@ -1,3 +1,8 @@
+2007-08-30  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/dumptest.s: New test file.
+	* binutils-all/readelf.exp: Add test of readelf's -p switch.
+
 2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 

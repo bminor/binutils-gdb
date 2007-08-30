@@ -158,6 +158,7 @@
 
 #include "getopt.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 
 char *program_name = "readelf";
 static long archive_file_offset;
@@ -219,33 +220,37 @@ static size_t group_count;
 static struct group *section_groups;
 static struct group **section_headers_groups;
 
-/* A linked list of the section names for which dumps were requested
-   by name.  */
+
+/* Flag bits indicating particular types of dump.  */
+#define HEX_DUMP	(1 << 0)	/* The -x command line switch.  */
+#define DISASS_DUMP	(1 << 1)	/* The -i command line switch.  */
+#define DEBUG_DUMP	(1 << 2)	/* The -w command line switch.  */
+#define STRING_DUMP     (1 << 3)	/* The -p command line switch.  */
+
+typedef unsigned char dump_type;
+
+/* A linked list of the section names for which dumps were requested.  */
 struct dump_list_entry
 {
   char *name;
-  int type;
+  dump_type type;
   struct dump_list_entry *next;
 };
 static struct dump_list_entry *dump_sects_byname;
 
-/* A dynamic array of flags indicating for which sections a hex dump
-   has been requested (via the -x switch) and/or a disassembly dump
-   (via the -i switch).  */
-char *cmdline_dump_sects = NULL;
-unsigned num_cmdline_dump_sects = 0;
+/* A dynamic array of flags indicating for which sections a dump
+   has been requested via command line switches.  */
+static dump_type *   cmdline_dump_sects = NULL;
+static unsigned int  num_cmdline_dump_sects = 0;
 
 /* A dynamic array of flags indicating for which sections a dump of
    some kind has been requested.  It is reset on a per-object file
    basis and then initialised from the cmdline_dump_sects array,
    the results of interpreting the -w switch, and the
    dump_sects_byname list.  */
-char *dump_sects = NULL;
-unsigned int num_dump_sects = 0;
+static dump_type *   dump_sects = NULL;
+static unsigned int  num_dump_sects = 0;
 
-#define HEX_DUMP	(1 << 0)
-#define DISASS_DUMP	(1 << 1)
-#define DEBUG_DUMP	(1 << 2)
 
 /* How to print a vma value.  */
 typedef enum print_mode
@@ -2745,9 +2750,10 @@ static struct option options[] =
   {"arch-specific",    no_argument, 0, 'A'},
   {"version-info",     no_argument, 0, 'V'},
   {"use-dynamic",      no_argument, 0, 'D'},
+  {"unwind",	       no_argument, 0, 'u'},
   {"hex-dump",	       required_argument, 0, 'x'},
   {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
-  {"unwind",	       no_argument, 0, 'u'},
+  {"string-dump",      required_argument, 0, 'p'},
 #ifdef SUPPORT_DISASSEMBLY
   {"instruction-dump", required_argument, 0, 'i'},
 #endif
@@ -2782,14 +2788,17 @@ usage (FILE *stream)
   -V --version-info      Display the version sections (if present)\n\
   -A --arch-specific     Display architecture specific information (if any).\n\
   -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
-  -x --hex-dump=<number> Dump the contents of section <number>\n\
+  -x --hex-dump=<number|name>\n\
+                         Dump the contents of section <number|name> as bytes\n\
+  -p --string-dump=<number|name>\n\
+                         Dump the contents of section <number|name> as strings\n\
   -w[liaprmfFsoR] or\n\
   --debug-dump[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n\
                          Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stream, _("\
-  -i --instruction-dump=<number>\n\
-                         Disassemble the contents of section <number>\n"));
+  -i --instruction-dump=<number|name>\n\
+                         Disassemble the contents of section <number|name>\n"));
 #endif
   fprintf (stream, _("\
   -I --histogram         Display histogram of bucket list lengths\n\
@@ -2810,20 +2819,20 @@ usage (FILE *stream)
    the first time.  */
 
 static void
-request_dump (unsigned int section, int type)
+request_dump_bynumber (unsigned int section, dump_type type)
 {
   if (section >= num_dump_sects)
     {
-      char *new_dump_sects;
+      dump_type *new_dump_sects;
 
-      new_dump_sects = calloc (section + 1, 1);
+      new_dump_sects = calloc (section + 1, sizeof (* dump_sects));
 
       if (new_dump_sects == NULL)
 	error (_("Out of memory allocating dump request table.\n"));
       else
 	{
 	  /* Copy current flag settings.  */
-	  memcpy (new_dump_sects, dump_sects, num_dump_sects);
+	  memcpy (new_dump_sects, dump_sects, num_dump_sects * sizeof (* dump_sects));
 
 	  free (dump_sects);
 
@@ -2841,7 +2850,7 @@ request_dump (unsigned int section, int type)
 /* Request a dump by section name.  */
 
 static void
-request_dump_byname (const char *section, int type)
+request_dump_byname (const char *section, dump_type type)
 {
   struct dump_list_entry *new_request;
 
@@ -2868,7 +2877,7 @@ parse_args (int argc, char **argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ersuahnldSDAINtgw::x:i:vVWH", options, NULL)) != EOF)
+	  (argc, argv, "ersuahnldSDAINtgw::x:i:vVWHp:", options, NULL)) != EOF)
     {
       char *cp;
       int section;
@@ -2946,9 +2955,17 @@ parse_args (int argc, char **argv)
 	  do_dump++;
 	  section = strtoul (optarg, & cp, 0);
 	  if (! *cp && section >= 0)
-	    request_dump (section, HEX_DUMP);
+	    request_dump_bynumber (section, HEX_DUMP);
 	  else
 	    request_dump_byname (optarg, HEX_DUMP);
+	  break;
+	case 'p':
+	  do_dump++;
+	  section = strtoul (optarg, & cp, 0);
+	  if (! *cp && section >= 0)
+	    request_dump_bynumber (section, STRING_DUMP);
+	  else
+	    request_dump_byname (optarg, STRING_DUMP);
 	  break;
 	case 'w':
 	  do_dump++;
@@ -3097,11 +3114,9 @@ parse_args (int argc, char **argv)
 	  do_dump++;
 	  section = strtoul (optarg, & cp, 0);
 	  if (! *cp && section >= 0)
-	    {
-	      request_dump (section, DISASS_DUMP);
-	      break;
-	    }
-	  goto oops;
+	    request_dump_bynumber (section, DISASS_DUMP);
+	  else
+	    request_dump_byname (optarg, DISASS_DUMP);
 #endif
 	case 'v':
 	  print_version (program_name);
@@ -3113,9 +3128,6 @@ parse_args (int argc, char **argv)
 	  do_wide++;
 	  break;
 	default:
-#ifdef SUPPORT_DISASSEMBLY
-	oops:
-#endif
 	  /* xgettext:c-format */
 	  error (_("Invalid option '-%c'\n"), c);
 	  /* Drop through.  */
@@ -4182,14 +4194,14 @@ process_section_headers (FILE *file)
 	      || (do_debug_str      && streq (name, "str"))
 	      || (do_debug_loc      && streq (name, "loc"))
 	      )
-	    request_dump (i, DEBUG_DUMP);
+	    request_dump_bynumber (i, DEBUG_DUMP);
 	}
       /* linkonce section to be combined with .debug_info at link time.  */
       else if ((do_debugging || do_debug_info)
 	       && const_strneq (name, ".gnu.linkonce.wi."))
-	request_dump (i, DEBUG_DUMP);
+	request_dump_bynumber (i, DEBUG_DUMP);
       else if (do_debug_frames && streq (name, ".eh_frame"))
-	request_dump (i, DEBUG_DUMP);
+	request_dump_bynumber (i, DEBUG_DUMP);
     }
 
   if (! do_sections)
@@ -7670,7 +7682,84 @@ disassemble_section (Elf_Internal_Shdr *section, FILE *file)
 #endif
 
 static int
-dump_section (Elf_Internal_Shdr *section, FILE *file)
+dump_section_as_strings (Elf_Internal_Shdr *section, FILE *file)
+{
+  Elf_Internal_Shdr *relsec;
+  bfd_size_type num_bytes;
+  bfd_vma addr;
+  char *data;
+  char *end;
+  char *start;
+  char *name = SECTION_NAME (section);
+  bfd_boolean some_strings_shown;
+
+  num_bytes = section->sh_size;
+
+  if (num_bytes == 0 || section->sh_type == SHT_NOBITS)
+    {
+      printf (_("\nSection '%s' has no data to dump.\n"), name);
+      return 0;
+    }
+
+  addr = section->sh_addr;
+
+  start = get_data (NULL, file, section->sh_offset, 1, num_bytes,
+		    _("section data"));
+  if (!start)
+    return 0;
+
+  printf (_("\nString dump of section '%s':\n"), name);
+
+  /* If the section being dumped has relocations against it the user might
+     be expecting these relocations to have been applied.  Check for this
+     case and issue a warning message in order to avoid confusion.
+     FIXME: Maybe we ought to have an option that dumps a section with
+     relocs applied ?  */
+  for (relsec = section_headers;
+       relsec < section_headers + elf_header.e_shnum;
+       ++relsec)
+    {
+      if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
+	  || SECTION_HEADER_INDEX (relsec->sh_info) >= elf_header.e_shnum
+	  || SECTION_HEADER (relsec->sh_info) != section
+	  || relsec->sh_size == 0
+	  || SECTION_HEADER_INDEX (relsec->sh_link) >= elf_header.e_shnum)
+	continue;
+
+      printf (_("  Note: This section has relocations against it, but these have NOT been applied to this dump.\n"));
+      break;
+    }
+
+  data = start;
+  end  = start + num_bytes;
+  some_strings_shown = FALSE;
+
+  while (data < end)
+    {
+      while (!ISPRINT (* data))
+	if (++ data >= end)
+	  break;
+
+      if (data < end)
+	{
+	  printf ("  [%6zx]  %s\n", data - start, data);
+	  data += strlen (data);
+	  some_strings_shown = TRUE;
+	}
+    }
+
+  if (! some_strings_shown)
+    printf (_("  No strings found in this section."));
+
+  free (start);
+
+  putchar ('\n');
+  return 1;
+}
+
+
+static int
+dump_section_as_bytes (Elf_Internal_Shdr *section, FILE *file)
 {
   Elf_Internal_Shdr *relsec;
   bfd_size_type bytes;
@@ -8023,7 +8112,7 @@ initialise_dumps_byname (void)
       for (i = 0, any = 0; i < elf_header.e_shnum; i++)
 	if (streq (SECTION_NAME (section_headers + i), cur->name))
 	  {
-	    request_dump (i, cur->type);
+	    request_dump_bynumber (i, cur->type);
 	    any = 1;
 	  }
 
@@ -8053,10 +8142,13 @@ process_section_contents (FILE *file)
 	disassemble_section (section, file);
 #endif
       if (dump_sects[i] & HEX_DUMP)
-	dump_section (section, file);
+	dump_section_as_bytes (section, file);
 
       if (dump_sects[i] & DEBUG_DUMP)
 	display_debug_section (section, file);
+
+      if (dump_sects[i] & STRING_DUMP)
+	dump_section_as_strings (section, file);
     }
 
   /* Check to see if the user requested a
@@ -9554,16 +9646,17 @@ process_object (char *file_name, FILE *file)
      must make sure that the dump_sets array is zeroed out before each
      object file is processed.  */
   if (num_dump_sects > num_cmdline_dump_sects)
-    memset (dump_sects, 0, num_dump_sects);
+    memset (dump_sects, 0, num_dump_sects * sizeof (* dump_sects));
 
   if (num_cmdline_dump_sects > 0)
     {
       if (num_dump_sects == 0)
 	/* A sneaky way of allocating the dump_sects array.  */
-	request_dump (num_cmdline_dump_sects, 0);
+	request_dump_bynumber (num_cmdline_dump_sects, 0);
 
       assert (num_dump_sects >= num_cmdline_dump_sects);
-      memcpy (dump_sects, cmdline_dump_sects, num_cmdline_dump_sects);
+      memcpy (dump_sects, cmdline_dump_sects,
+	      num_cmdline_dump_sects * sizeof (* dump_sects));
     }
 
   if (! process_file_header ())
@@ -9938,12 +10031,13 @@ main (int argc, char **argv)
   if (num_dump_sects > 0)
     {
       /* Make a copy of the dump_sects array.  */
-      cmdline_dump_sects = malloc (num_dump_sects);
+      cmdline_dump_sects = malloc (num_dump_sects * sizeof (* dump_sects));
       if (cmdline_dump_sects == NULL)
 	error (_("Out of memory allocating dump request table.\n"));
       else
 	{
-	  memcpy (cmdline_dump_sects, dump_sects, num_dump_sects);
+	  memcpy (cmdline_dump_sects, dump_sects,
+		  num_dump_sects * sizeof (* dump_sects));
 	  num_cmdline_dump_sects = num_dump_sects;
 	}
     }

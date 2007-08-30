@@ -1,4 +1,6 @@
 -*- text -*-
+* Added -p switch to readelf to allow string dumps of sections.
+
 Changes in 2.18:
 * Resolved 37 coding problems in bfd including static array overruns, null
   pointer dereferences and use of a malloc buffer after it has been freed, as

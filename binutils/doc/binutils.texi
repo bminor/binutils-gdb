@@ -3601,6 +3601,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-A}|@option{--arch-specific}]
         [@option{-D}|@option{--use-dynamic}]
         [@option{-x} <number or name>|@option{--hex-dump=}<number or name>]
+        [@option{-p} <number or name>|@option{--string-dump=}<number or name>]
         [@option{-w[liaprmfFsoR]}|
          @option{--debug-dump}[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]]
         [@option{-I}|@option{-histogram}]
@@ -3723,6 +3724,12 @@ symbols section.
 @item -x <number or name>
 @itemx --hex-dump=<number or name>
 Displays the contents of the indicated section as a hexadecimal dump.
+A number identifies a particular section by index in the section table;
+any other string identifies all sections with that name in the object file.
+
+@item -p <number or name>
+@itemx --string-dump=<number or name>
+Displays the contents of the indicated section as printable strings.
 A number identifies a particular section by index in the section table;
 any other string identifies all sections with that name in the object file.
 

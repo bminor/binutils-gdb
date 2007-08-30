@@ -1,3 +1,25 @@
+2007-08-30  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (dump_type): New type used to classify the kinds of
+	dump requested by the user.
+	(dump_sects, cmdline_dump_sects): Use the new type.
+	(options): Add --string-dump option.
+	(request_dump): Rename to request_dump_bynumber.  Use dump_type.
+	(request_dump_byname): Use dump_type.
+	(parse_args): Parse --string-dump option.
+	(process_section_headers): Fix calls to request_dump.
+	(initialise_dumps_byname): Likewise.
+	(dump_section): Rename to dump_section_as_bytes.
+	(dump_section_as_strings): New function.  Display the contents of
+	a section as printable strings.
+	(process_section_contents): String dump the section if requested.
+	(process_object): Use dump_type.
+	(main): Likewise.
+	* Makefile.am: Add dependency for readelf.c on safe-ctype.h.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi: Document the new feature.
+
 2007-08-30  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* bucomm.c (bfd_nonfatal_message): New.

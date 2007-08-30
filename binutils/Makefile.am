@@ -593,7 +593,7 @@ readelf.o: readelf.c sysdep.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/spu.h $(INCDIR)/elf/v850.h $(INCDIR)/elf/vax.h \
   $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/xstormy16.h $(INCDIR)/elf/xtensa.h \
   $(INCDIR)/aout/ar.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  unwind-ia64.h
+  unwind-ia64.h $(INCDIR)/safe-ctype.h
 rename.o: rename.c sysdep.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   config.h $(INCDIR)/fopen-same.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h bucomm.h

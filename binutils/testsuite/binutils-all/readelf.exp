@@ -21,6 +21,12 @@
 # Based on scripts written by Ian Lance Taylor <ian@cygnus.com>
 # and Ken Raeburn <raeburn@cygnus.com>.
 
+# Exclude non-ELF targets.
+if ![is_elf_format] {
+    verbose "$READELF is only intended for ELF targets" 2
+    return
+}
+
 # First some helpful procedures, then the tests themselves
 
 # Return the contents of the filename given
@@ -203,10 +209,58 @@ proc readelf_wi_test {} {
 }
 
 
-# Exclude non-ELF targets.
-if ![is_elf_format] {
-    verbose "$READELF is only intended for ELF targets" 2
-    return
+# Test readelf's dumping abilities.
+
+proc readelf_dump_test {} {
+    global READELF
+    global READELFFLAGS
+    global srcdir
+    global subdir
+    
+    # Assemble the dump test file.
+    if {![binutils_assemble $srcdir/$subdir/dumptest.s tmpdir/dumptest.o]} then {
+      unresolved "readelf -p: failed to assemble dump test file"
+      return
+    }
+    # Download it.
+    set tempfile [remote_download host tmpdir/dumptest.o]
+
+    # Run "readelf -p.data" on it.
+    set got [remote_exec host "$READELF $READELFFLAGS -p.data $tempfile" "" "/dev/null" "readelf.out"]
+    set got [lindex $got 1]
+
+    # Upload the results.
+    set output [remote_upload host readelf.out]
+
+    # Check for something going wrong.
+    if ![string match "" $got] then {
+	fail "readelf -p: unexpected output"
+	send_log $got
+	send_log "\n"
+	return
+    }
+
+    # Search for strings that should be in the output.
+    set sought {
+	".*test_string.*"
+    }
+    
+    foreach looked_for $sought {	
+	set lines [grep $output $looked_for]
+	if ![llength $lines] then {
+	    fail "readelf -p: missing: $looked_for"
+	    send_log readelf.out
+	    return
+	}
+    }
+
+    file_on_host delete $tempfile    
+    file_on_host delete $output
+
+    # All done.
+    pass "readelf -p"
+
+    # XXX FIXME: Add test of readelf -x here
 }
 
 if ![is_remote host] {
@@ -220,7 +274,7 @@ send_user "Version [binutil_version $READELF]"
 
 # Assemble the test file.
 if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
-    perror "unresolved 1"
+    perror "could not assemble test file"
     unresolved "readelf - failed to assemble"
     return
 }
@@ -241,3 +295,5 @@ readelf_test -s $tempfile readelf.ss {}
 readelf_test -r $tempfile readelf.r  {}
 
 readelf_wi_test
+
+readelf_dump_test
