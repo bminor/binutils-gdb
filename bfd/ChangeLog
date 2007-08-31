@@ -1,3 +1,8 @@
+2007-08-31  Jesse Michael  <jmichael@suse.de>
+
+	* mach-o.c (bfd_mach_o_make_bfd_section): Fix test for non
+	zerofill sections.
+
 2007-08-28  David Heine  <dlheine@tensilica.com>
 
 	* elf32-xtensa.c (compute_ebb_actions): Update removed_bytes when

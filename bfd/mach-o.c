@@ -644,7 +644,7 @@ bfd_mach_o_make_bfd_section (bfd *abfd, bfd_mach_o_section *section)
   sprintf (sname, "%s.%s.%s", prefix, section->segname, section->sectname);
 
   flags = SEC_ALLOC;
-  if (!(section->flags & BFD_MACH_O_S_ZEROFILL))
+  if ((section->flags & SECTION_TYPE) != BFD_MACH_O_S_ZEROFILL)
     flags = SEC_HAS_CONTENTS | SEC_LOAD | SEC_ALLOC | SEC_CODE;
   bfdsec = bfd_make_section_anyway_with_flags (abfd, sname, flags);
   if (bfdsec == NULL)
