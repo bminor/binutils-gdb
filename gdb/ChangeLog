@@ -1,5 +1,11 @@
 2007-08-31  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* varobj.c (struct varobj): Fix comment
+	for the type member not to lie when it can be 
+	NULL.
+	
+2007-08-31  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement -var-info-path-expression.
 
 	* mi/mi-cmds.h (mi_cmd_var_info_path_expression):

@@ -110,7 +110,9 @@ struct varobj
   /* Index of this variable in its parent or -1 */
   int index;
 
-  /* The type of this variable. This may NEVER be NULL. */
+  /* The type of this variable.  This can be NULL
+     for artifial variable objects -- currently, the "accessibility" 
+     variable objects in C++.  */
   struct type *type;
 
   /* The value of this expression or subexpression.  A NULL value
