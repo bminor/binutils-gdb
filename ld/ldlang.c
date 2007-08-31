@@ -1811,6 +1811,7 @@ lang_map (void)
 	bfd_map_over_sections (p, init_map_userdata, 0);
       bfd_link_hash_traverse (link_info.hash, sort_def_symbol, 0);
     }
+  lang_statement_iteration ++;
   print_statements ();
 }
 
@@ -3539,7 +3540,7 @@ print_assignment (lang_assignment_statement_type *assignment,
 	      value = h->u.def.value;
 
 	      if (expld.result.section)
-	      value += expld.result.section->vma;
+		value += expld.result.section->vma;
 
 	      minfo ("[0x%V]", value);
 	    }

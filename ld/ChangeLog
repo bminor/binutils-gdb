@@ -1,3 +1,8 @@
+2007-08-31  Tristan Gingold  <gingold@adacore.com>
+
+	* ldlang.c (lang_map): Increment lang_statement_iteration so that
+	DEFINED() expressions are correctly computed.
+
 2007-08-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_record_phdrs): Give a fatal error if no sections
