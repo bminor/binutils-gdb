@@ -1,3 +1,9 @@
+2007-08-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_record_phdrs): Give a fatal error if no sections
+	assigned to phdrs.  Avoid multiple forward scans for a section
+	with phdr assignment.
+
 2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 

@@ -6263,9 +6263,7 @@ lang_record_phdrs (void)
 		  || (os->bfd_section->flags & SEC_ALLOC) == 0)
 		continue;
 
-	      if (last)
-		pl = last;
-	      else
+	      if (last == NULL)
 		{
 		  lang_output_section_statement_type * tmp_os;
 
@@ -6279,9 +6277,14 @@ lang_record_phdrs (void)
 		     http://sourceware.org/ml/binutils/2007-02/msg00291.html  */
 		  for (tmp_os = os; tmp_os; tmp_os = tmp_os->next)
 		    if (tmp_os->phdrs)
-		      break;
-		  pl = tmp_os->phdrs;
+		      {
+			last = tmp_os->phdrs;
+			break;
+		      }
+		  if (last == NULL)
+		    einfo (_("%F%P: no sections assigned to phdrs\n"));
 		}
+	      pl = last;
 	    }
 
 	  if (os->bfd_section == NULL)
