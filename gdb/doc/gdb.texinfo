@@ -19312,7 +19312,9 @@ access this functionality:
 @item @code{-var-info-type}
 @tab show the type of this variable object
 @item @code{-var-info-expression}
-@tab print what this variable object represents
+@tab print parent-relative expression that this variable object represents
+@item @code{-var-info-path-expression}
+@tab print full expression that this variable object represents
 @item @code{-var-show-attributes}
 @tab is this variable editable? does it exist here?
 @item @code{-var-evaluate-expression}
@@ -19513,14 +19515,50 @@ returned as a string in the same format as it is output by the
  -var-info-expression @var{name}
 @end smallexample
 
-Returns what is represented by the variable object @var{name}:
+Returns a string that is suitable for presenting this
+variable object in user interface.  The string is generally
+not valid expression in the current language, and cannot be evaluated.
+
+For example, if @code{a} is an array, and variable object
+@code{A} was created for @code{a}, then we'll get this output:
 
 @smallexample
- lang=@var{lang-spec},exp=@var{expression}
+(gdb) -var-info-expression A.1
+^done,lang="C",exp="1"
 @end smallexample
 
 @noindent
-where @var{lang-spec} is @code{@{"C" | "C++" | "Java"@}}.
+Here, the values of @code{lang} can be @code{@{"C" | "C++" | "Java"@}}.
+
+Note that the output of the @code{-var-list-children} command also
+includes those expressions, so the @code{-var-info-expression} command
+is of limited use.
+
+@subheading The @code{-var-info-path-expression} Command
+@findex -var-info-path-expression
+
+@subsubheading Synopsis
+
+@smallexample
+ -var-info-path-expression @var{name}
+@end smallexample
+
+Returns an expression that can be evaluated in the current
+context and will yield the same value that a variable object has.
+Compare this with the @code{-var-info-expression} command, which
+result can be used only for UI presentation.  Typical use of
+the @code{-var-info-path-expression} command is creating a 
+watchpoint from a variable object.
+
+For example, suppose @code{C} is a C@t{++} class, derived from class
+@code{Base}, and that the @code{Base} class has a member called
+@code{m_size}.  Assume a variable @code{c} is has the type of
+@code{C} and a variable object @code{C} was created for variable
+@code{c}.  Then, we'll get this output:
+@smallexample
+(gdb) -var-info-path-expression C.Base.public.m_size
+^done,path_expr=((Base)c).m_size)
+@end smallexample
 
 @subheading The @code{-var-show-attributes} Command
 @findex -var-show-attributes

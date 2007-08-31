@@ -149,6 +149,8 @@ struct mi_cmd mi_cmds[] =
   { "var-create", { NULL, 0 }, 0, mi_cmd_var_create},
   { "var-delete", { NULL, 0 }, 0, mi_cmd_var_delete},
   { "var-evaluate-expression", { NULL, 0 }, 0, mi_cmd_var_evaluate_expression},
+  { "var-info-path-expression", { NULL, 0 }, 0, 
+    mi_cmd_var_info_path_expression},
   { "var-info-expression", { NULL, 0 }, 0, mi_cmd_var_info_expression},
   { "var-info-num-children", { NULL, 0 }, 0, mi_cmd_var_info_num_children},
   { "var-info-type", { NULL, 0 }, 0, mi_cmd_var_info_type},

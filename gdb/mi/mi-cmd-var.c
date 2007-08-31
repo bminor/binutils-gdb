@@ -413,6 +413,27 @@ mi_cmd_var_info_type (char *command, char **argv, int argc)
 }
 
 enum mi_cmd_result
+mi_cmd_var_info_path_expression (char *command, char **argv, int argc)
+{
+  struct varobj *var;
+  char *path_expr;
+
+  if (argc != 1)
+    error (_("Usage: NAME."));
+
+  /* Get varobj handle, if a valid var obj name was specified.  */
+  var = varobj_get_handle (argv[0]);
+  if (var == NULL)
+    error (_("Variable object not found"));
+  
+  path_expr = varobj_get_path_expr (var);
+
+  ui_out_field_string (uiout, "path_expr", path_expr);
+
+  return MI_CMD_DONE;
+}
+
+enum mi_cmd_result
 mi_cmd_var_info_expression (char *command, char **argv, int argc)
 {
   enum varobj_languages lang;

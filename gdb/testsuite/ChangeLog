@@ -1,3 +1,9 @@
+2007-08-31  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-var-cp.cc (path_expression): New
+	function.
+	* gdb.mi/mi-var-cp.exp: Run path exression tests.
+
 2007-08-27  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdb.cp/cp-relocate.exp (add-symbol-file): Change addresses

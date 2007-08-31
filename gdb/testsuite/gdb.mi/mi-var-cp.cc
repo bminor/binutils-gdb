@@ -120,11 +120,97 @@ int reference_to_struct ()
   /*: END: reference_to_struct :*/
 }
 
+struct Base1
+{
+  int i;
+};
+
+struct Base2
+{
+  int i;
+};
+
+struct Derived : public Base1, public Base2
+{
+  int i;
+};
+
+/* Test for the -var-info-path-expression command.  Although
+   said command is not specific to C++, it's of more importance
+   to C++ than to C, so we test it in mi-var-cp test.  */
+int path_expression ()
+{
+  /*: BEGIN: path_expression :*/
+  int i = 10;
+  int *ip = &i;
+  /*: mi_create_varobj IP ip "create varobj for ip"
+      mi_list_varobj_children IP {{IP.\\*ip \\*ip 0 int}} "list children of IP"
+      mi_gdb_test "-var-info-path-expression IP.*ip" \
+          "\\^done,path_expr=\"\\*\\(ip\\)\"" \
+	  "-var-info-path-expression IP.*ip"
+    :*/
+  Derived d;
+  Derived *dp = &d;
+  /*: mi_create_varobj DP dp "create varobj for dp"
+      mi_list_varobj_children DP                        \
+      {{DP.Base1 Base1 1 Base1}                         \
+       {DP.Base2 Base2 1 Base2}                         \
+       {DP.public public 1}} "list children of DP"
+      mi_gdb_test "-var-info-path-expression DP.Base1" \
+          "\\^done,path_expr=\"\\(\\*\\(Base1\\*\\) dp\\)\"" \
+	  "-var-info-path-expression DP.Base1"       
+      mi_list_varobj_children DP.public {               \
+        {DP.public.i i 0 int}                           \
+      } "list children of DP.public"
+      mi_gdb_test "-var-info-path-expression DP.public.i" \
+          "\\^done,path_expr=\"\\(\\(dp\\)->i\\)\"" \
+	  "-var-info-path-expression DP.public.i"
+      mi_list_varobj_children DP.Base1 {                 \
+        {DP.Base1.public public 1}                             \
+      } "list children of DP.Base1"
+      mi_list_varobj_children DP.Base1.public {               \
+        {DP.Base1.public.i i 0 int}                           \
+      } "list children of DP.Base1.public"
+      mi_gdb_test "-var-info-path-expression DP.Base1.public.i" \
+          "\\^done,path_expr=\"\\(\\(\\(\\*\\(Base1\\*\\) dp\\)\\).i\\)\"" \
+	  "-var-info-path-expression DP.Base1.public.i"
+
+      mi_gdb_test "-var-info-path-expression DP.public" \
+          "\\^done,path_expr=\"\"" \
+	  "-var-info-path-expression DP.public"
+
+      mi_create_varobj D d "create varobj for d"
+      mi_list_varobj_children D                        \
+      {{D.Base1 Base1 1 Base1}                         \
+       {D.Base2 Base2 1 Base2}                         \
+       {D.public public 1}} "list children of D"
+      mi_gdb_test "-var-info-path-expression D.Base1" \
+          "\\^done,path_expr=\"\\(\\(Base1\\) d\\)\"" \
+	  "-var-info-path-expression D.Base1"
+  :*/
+  int array[4] = {1,2,3};
+  array[3] = 10;
+  /*: mi_create_varobj A array "create varobj for array"
+      mi_list_varobj_children A { \
+          {A.0 0 0 int}
+          {A.1 1 0 int}
+          {A.2 2 0 int}
+          {A.3 3 0 int}} "list children of A"
+      mi_gdb_test "-var-info-path-expression A.2" \
+          "\\^done,path_expr=\"\\(array\\)\\\[2\\\]\"" \
+	  "-var-info-path-expression A.2"
+    :*/
+
+  return 99;
+  /*: END: path_expression :*/
+}
+
 int main ()
 {
   reference_update_tests ();
   base_in_reference_test_main ();
   reference_to_pointer ();
   reference_to_struct ();
+  path_expression ();
   return 0;
 }

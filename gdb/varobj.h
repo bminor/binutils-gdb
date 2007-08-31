@@ -97,6 +97,8 @@ extern char *varobj_get_type (struct varobj *var);
 
 extern struct type *varobj_get_gdb_type (struct varobj *var);
 
+extern char *varobj_get_path_expr (struct varobj *var);
+
 extern enum varobj_languages varobj_get_language (struct varobj *var);
 
 extern int varobj_get_attributes (struct varobj *var);

@@ -99,6 +99,10 @@ struct varobj
   /* NOTE: This is the "expression" */
   char *name;
 
+  /* Alloc'd expression for this child.  Can be used to create a
+     root variable corresponding to this child.  */
+  char *path_expr;
+
   /* The alloc'd name for this variable's object. This is here for
      convenience when constructing this object's children. */
   char *obj_name;
@@ -234,6 +238,8 @@ static char *c_name_of_variable (struct varobj *parent);
 
 static char *c_name_of_child (struct varobj *parent, int index);
 
+static char *c_path_expr_of_child (struct varobj *child);
+
 static struct value *c_value_of_root (struct varobj **var_handle);
 
 static struct value *c_value_of_child (struct varobj *parent, int index);
@@ -254,6 +260,8 @@ static char *cplus_name_of_variable (struct varobj *parent);
 
 static char *cplus_name_of_child (struct varobj *parent, int index);
 
+static char *cplus_path_expr_of_child (struct varobj *child);
+
 static struct value *cplus_value_of_root (struct varobj **var_handle);
 
 static struct value *cplus_value_of_child (struct varobj *parent, int index);
@@ -271,6 +279,8 @@ static int java_number_of_children (struct varobj *var);
 static char *java_name_of_variable (struct varobj *parent);
 
 static char *java_name_of_child (struct varobj *parent, int index);
+
+static char *java_path_expr_of_child (struct varobj *child);
 
 static struct value *java_value_of_root (struct varobj **var_handle);
 
@@ -299,6 +309,10 @@ struct language_specific
   /* The name of the INDEX'th child of PARENT. */
   char *(*name_of_child) (struct varobj * parent, int index);
 
+  /* Returns the rooted expression of CHILD, which is a variable
+     obtain that has some parent.  */
+  char *(*path_expr_of_child) (struct varobj * child);
+
   /* The ``struct value *'' of the root variable ROOT. */
   struct value *(*value_of_root) (struct varobj ** root_handle);
 
@@ -323,6 +337,7 @@ static struct language_specific languages[vlang_end] = {
    c_number_of_children,
    c_name_of_variable,
    c_name_of_child,
+   c_path_expr_of_child,
    c_value_of_root,
    c_value_of_child,
    c_type_of_child,
@@ -335,6 +350,7 @@ static struct language_specific languages[vlang_end] = {
    c_number_of_children,
    c_name_of_variable,
    c_name_of_child,
+   c_path_expr_of_child,
    c_value_of_root,
    c_value_of_child,
    c_type_of_child,
@@ -347,6 +363,7 @@ static struct language_specific languages[vlang_end] = {
    cplus_number_of_children,
    cplus_name_of_variable,
    cplus_name_of_child,
+   cplus_path_expr_of_child,
    cplus_value_of_root,
    cplus_value_of_child,
    cplus_type_of_child,
@@ -359,6 +376,7 @@ static struct language_specific languages[vlang_end] = {
    java_number_of_children,
    java_name_of_variable,
    java_name_of_child,
+   java_path_expr_of_child,
    java_value_of_root,
    java_value_of_child,
    java_type_of_child,
@@ -442,6 +460,7 @@ varobj_create (char *objname,
       char *p;
       enum varobj_languages lang;
       struct value *value = NULL;
+      int expr_len;
 
       /* Parse and evaluate the expression, filling in as much
          of the variable's data as possible */
@@ -486,7 +505,10 @@ varobj_create (char *objname,
 
       var->format = variable_default_display (var);
       var->root->valid_block = innermost_block;
-      var->name = savestring (expression, strlen (expression));
+      expr_len = strlen (expression);
+      var->name = savestring (expression, expr_len);
+      /* For a root var, the name and the expr are the same.  */
+      var->path_expr = savestring (expression, expr_len);
 
       /* When the frame is different from the current frame, 
          we must select the appropriate frame before parsing
@@ -802,6 +824,23 @@ struct type *
 varobj_get_gdb_type (struct varobj *var)
 {
   return var->type;
+}
+
+/* Return a pointer to the full rooted expression of varobj VAR.
+   If it has not been computed yet, compute it.  */
+char *
+varobj_get_path_expr (struct varobj *var)
+{
+  if (var->path_expr != NULL)
+    return var->path_expr;
+  else 
+    {
+      /* For root varobjs, we initialize path_expr
+	 when creating varobj, so here it should be
+	 child varobj.  */
+      gdb_assert (!is_root_p (var));
+      return (*var->root->lang->path_expr_of_child) (var);
+    }
 }
 
 enum varobj_languages
@@ -1457,6 +1496,7 @@ new_variable (void)
 
   var = (struct varobj *) xmalloc (sizeof (struct varobj));
   var->name = NULL;
+  var->path_expr = NULL;
   var->obj_name = NULL;
   var->index = -1;
   var->type = NULL;
@@ -1505,6 +1545,7 @@ free_variable (struct varobj *var)
   xfree (var->name);
   xfree (var->obj_name);
   xfree (var->print_value);
+  xfree (var->path_expr);
   xfree (var);
 }
 
@@ -1845,12 +1886,20 @@ varobj_value_is_changeable_p (struct varobj *var)
    Both TYPE and *TYPE should be non-null. VALUE
    can be null if we want to only translate type.
    *VALUE can be null as well -- if the parent
-   value is not known.  */
+   value is not known.  
+
+   If WAS_PTR is not NULL, set *WAS_PTR to 0 or 1
+   depending on whether pointer was deferenced
+   in this function.  */
 static void
 adjust_value_for_child_access (struct value **value,
-				  struct type **type)
+				  struct type **type,
+				  int *was_ptr)
 {
   gdb_assert (type && *type);
+
+  if (was_ptr)
+    *was_ptr = 0;
 
   *type = check_typedef (*type);
   
@@ -1872,6 +1921,8 @@ adjust_value_for_child_access (struct value **value,
 	  if (value && *value)
 	    gdb_value_ind (*value, value);	  
 	  *type = target_type;
+	  if (was_ptr)
+	    *was_ptr = 1;
 	}
     }
 
@@ -1888,7 +1939,7 @@ c_number_of_children (struct varobj *var)
   int children = 0;
   struct type *target;
 
-  adjust_value_for_child_access (NULL, &type);
+  adjust_value_for_child_access (NULL, &type, NULL);
   target = get_target_type (type);
 
   switch (TYPE_CODE (type))
@@ -1984,10 +2035,13 @@ value_struct_element_index (struct value *value, int type_index)
    to NULL.  */
 static void 
 c_describe_child (struct varobj *parent, int index,
-		  char **cname, struct value **cvalue, struct type **ctype)
+		  char **cname, struct value **cvalue, struct type **ctype,
+		  char **cfull_expression)
 {
   struct value *value = parent->value;
   struct type *type = get_value_type (parent);
+  char *parent_expression = NULL;
+  int was_ptr;
 
   if (cname)
     *cname = NULL;
@@ -1995,8 +2049,12 @@ c_describe_child (struct varobj *parent, int index,
     *cvalue = NULL;
   if (ctype)
     *ctype = NULL;
-
-  adjust_value_for_child_access (&value, &type);
+  if (cfull_expression)
+    {
+      *cfull_expression = NULL;
+      parent_expression = varobj_get_path_expr (parent);
+    }
+  adjust_value_for_child_access (&value, &type, &was_ptr);
       
   switch (TYPE_CODE (type))
     {
@@ -2015,6 +2073,12 @@ c_describe_child (struct varobj *parent, int index,
 
       if (ctype)
 	*ctype = get_target_type (type);
+
+      if (cfull_expression)
+	*cfull_expression = xstrprintf ("(%s)[%d]", parent_expression, 
+					index
+					+ TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)));
+
 
       break;
 
@@ -2035,6 +2099,13 @@ c_describe_child (struct varobj *parent, int index,
       if (ctype)
 	*ctype = TYPE_FIELD_TYPE (type, index);
 
+      if (cfull_expression)
+	{
+	  char *join = was_ptr ? "->" : ".";
+	  *cfull_expression = xstrprintf ("(%s)%s%s", parent_expression, join,
+					  TYPE_FIELD_NAME (type, index));
+	}
+
       break;
 
     case TYPE_CODE_PTR:
@@ -2049,6 +2120,9 @@ c_describe_child (struct varobj *parent, int index,
 	 declared type of the variable.  */
       if (ctype)
 	*ctype = TYPE_TARGET_TYPE (type);
+
+      if (cfull_expression)
+	*cfull_expression = xstrprintf ("*(%s)", parent_expression);
       
       break;
 
@@ -2056,6 +2130,8 @@ c_describe_child (struct varobj *parent, int index,
       /* This should not happen */
       if (cname)
 	*cname = xstrdup ("???");
+      if (cfull_expression)
+	*cfull_expression = xstrdup ("???");
       /* Don't set value and type, we don't know then. */
     }
 }
@@ -2064,8 +2140,16 @@ static char *
 c_name_of_child (struct varobj *parent, int index)
 {
   char *name;
-  c_describe_child (parent, index, &name, NULL, NULL);
+  c_describe_child (parent, index, &name, NULL, NULL, NULL);
   return name;
+}
+
+static char *
+c_path_expr_of_child (struct varobj *child)
+{
+  c_describe_child (child->parent, child->index, NULL, NULL, NULL, 
+		    &child->path_expr);
+  return child->path_expr;
 }
 
 static struct value *
@@ -2116,7 +2200,7 @@ static struct value *
 c_value_of_child (struct varobj *parent, int index)
 {
   struct value *value = NULL;
-  c_describe_child (parent, index, NULL, &value, NULL);
+  c_describe_child (parent, index, NULL, &value, NULL, NULL);
 
   return value;
 }
@@ -2125,7 +2209,7 @@ static struct type *
 c_type_of_child (struct varobj *parent, int index)
 {
   struct type *type = NULL;
-  c_describe_child (parent, index, NULL, NULL, &type);
+  c_describe_child (parent, index, NULL, NULL, &type, NULL);
   return type;
 }
 
@@ -2215,7 +2299,7 @@ cplus_number_of_children (struct varobj *var)
   if (!CPLUS_FAKE_CHILD (var))
     {
       type = get_value_type (var);
-      adjust_value_for_child_access (NULL, &type);
+      adjust_value_for_child_access (NULL, &type, NULL);
 
       if (((TYPE_CODE (type)) == TYPE_CODE_STRUCT) ||
 	  ((TYPE_CODE (type)) == TYPE_CODE_UNION))
@@ -2242,7 +2326,7 @@ cplus_number_of_children (struct varobj *var)
       int kids[3];
 
       type = get_value_type (var->parent);
-      adjust_value_for_child_access (NULL, &type);
+      adjust_value_for_child_access (NULL, &type, NULL);
 
       cplus_class_num_children (type, kids);
       if (strcmp (var->name, "public") == 0)
@@ -2313,11 +2397,14 @@ match_accessibility (struct type *type, int index, enum accessibility acc)
 
 static void
 cplus_describe_child (struct varobj *parent, int index,
-		      char **cname, struct value **cvalue, struct type **ctype)
+		      char **cname, struct value **cvalue, struct type **ctype,
+		      char **cfull_expression)
 {
   char *name = NULL;
   struct value *value;
   struct type *type;
+  int was_ptr;
+  char *parent_expression = NULL;
 
   if (cname)
     *cname = NULL;
@@ -2325,24 +2412,30 @@ cplus_describe_child (struct varobj *parent, int index,
     *cvalue = NULL;
   if (ctype)
     *ctype = NULL;
-
+  if (cfull_expression)
+    *cfull_expression = NULL;
 
   if (CPLUS_FAKE_CHILD (parent))
     {
       value = parent->parent->value;
       type = get_value_type (parent->parent);
+      if (cfull_expression)
+	parent_expression = varobj_get_path_expr (parent->parent);
     }
   else
     {
       value = parent->value;
       type = get_value_type (parent);
+      if (cfull_expression)
+	parent_expression = varobj_get_path_expr (parent);
     }
 
-  adjust_value_for_child_access (&value, &type);
+  adjust_value_for_child_access (&value, &type, &was_ptr);
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       || TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
+      char *join = was_ptr ? "->" : ".";
       if (CPLUS_FAKE_CHILD (parent))
 	{
 	  /* The fields of the class type are ordered as they
@@ -2377,6 +2470,11 @@ cplus_describe_child (struct varobj *parent, int index,
 
 	  if (ctype)
 	    *ctype = TYPE_FIELD_TYPE (type, type_index);
+
+	  if (cfull_expression)
+	    *cfull_expression = xstrprintf ("((%s)%s%s)", parent_expression,
+					    join, 
+					    TYPE_FIELD_NAME (type, type_index));
 	}
       else if (index < TYPE_N_BASECLASSES (type))
 	{
@@ -2387,11 +2485,29 @@ cplus_describe_child (struct varobj *parent, int index,
 	  if (cvalue && value)
 	    {
 	      *cvalue = value_cast (TYPE_FIELD_TYPE (type, index), value);
+	      release_value (*cvalue);
 	    }
 
 	  if (ctype)
 	    {
 	      *ctype = TYPE_FIELD_TYPE (type, index);
+	    }
+
+	  if (cfull_expression)
+	    {
+	      char *ptr = was_ptr ? "*" : "";
+	      /* Cast the parent to the base' type. Note that in gdb,
+		 expression like 
+		         (Base1)d
+		 will create an lvalue, for all appearences, so we don't
+		 need to use more fancy:
+		         *(Base1*)(&d)
+		 construct.  */
+	      *cfull_expression = xstrprintf ("(%s(%s%s) %s)", 
+					      ptr, 
+					      TYPE_FIELD_NAME (type, index),
+					      ptr,
+					      parent_expression);
 	    }
 	}
       else
@@ -2440,12 +2556,12 @@ cplus_describe_child (struct varobj *parent, int index,
 	  if (cname)
 	    *cname = xstrdup (access);
 
-	  /* Value and type are null here.  */
+	  /* Value and type and full expression are null here.  */
 	}
     }
   else
     {
-      c_describe_child (parent, index, cname, cvalue, ctype);
+      c_describe_child (parent, index, cname, cvalue, ctype, cfull_expression);
     }  
 }
 
@@ -2453,8 +2569,16 @@ static char *
 cplus_name_of_child (struct varobj *parent, int index)
 {
   char *name = NULL;
-  cplus_describe_child (parent, index, &name, NULL, NULL);
+  cplus_describe_child (parent, index, &name, NULL, NULL, NULL);
   return name;
+}
+
+static char *
+cplus_path_expr_of_child (struct varobj *child)
+{
+  cplus_describe_child (child->parent, child->index, NULL, NULL, NULL, 
+			&child->path_expr);
+  return child->path_expr;
 }
 
 static struct value *
@@ -2467,7 +2591,7 @@ static struct value *
 cplus_value_of_child (struct varobj *parent, int index)
 {
   struct value *value = NULL;
-  cplus_describe_child (parent, index, NULL, &value, NULL);
+  cplus_describe_child (parent, index, NULL, &value, NULL, NULL);
   return value;
 }
 
@@ -2475,7 +2599,7 @@ static struct type *
 cplus_type_of_child (struct varobj *parent, int index)
 {
   struct type *type = NULL;
-  cplus_describe_child (parent, index, NULL, NULL, &type);
+  cplus_describe_child (parent, index, NULL, NULL, &type, NULL);
   return type;
 }
 
@@ -2545,6 +2669,12 @@ java_name_of_child (struct varobj *parent, int index)
     }
 
   return name;
+}
+
+static char *
+java_path_expr_of_child (struct varobj *child)
+{
+  return NULL;
 }
 
 static struct value *

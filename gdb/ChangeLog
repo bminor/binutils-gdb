@@ -1,5 +1,34 @@
 2007-08-31  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement -var-info-path-expression.
+
+	* mi/mi-cmds.h (mi_cmd_var_info_path_expression):
+	Declare.
+	* mi/mi-cmds.c (mi_cmds): Register var-info-path-expression.
+	* mi/mi-cmd-var.c (mi_cmd_var_info_path_expression): New.
+	* varobj.c (struct varobj): New field 'path_expr'.
+	(c_path_expr_of_child, cplus_path_expr_of_child)
+	(java_path_expr_of_child): New.
+	(struct language_specific): New field path_expr_of_child.
+	(varobj_create): Initialize the path_expr field.
+	(varobj_get_path_expr): New.
+	(new_variable): Initialize the path_expr field.
+	(free_variable): Free the path_expr field.
+	(adjust_value_for_children_access): New parameter
+	WAS_TYPE.
+	(c_number_of_children): Adjust.
+	(c_describe_child): New parameter CFULL_EXPRESSION.
+	Compute full expression.
+	(c_value_of_child, c_type_of_child): Adjust.
+	(cplus_number_of_children): Adjust.
+	(cplus_describe_child): New parameter CFULL_EXPRESSION.
+	Compute full expression.
+	(cplus_name_of_child, cplus_value_of_child)
+	(cplus_type_of_child): Adjust.
+	* varobj.h (varobj_get_path_expr): Declare.
+
+2007-08-31  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* mi/mi-cmd-var.c (print_varobj): If a varobj
 	type is NULL, don't try to print it.
 	

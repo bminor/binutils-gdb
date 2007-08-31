@@ -44,6 +44,7 @@ mi_run_inline_test reference_update
 mi_run_inline_test base_in_reference
 mi_run_inline_test reference_to_pointer
 mi_run_inline_test reference_to_struct
+mi_run_inline_test path_expression
 
 mi_gdb_exit
 return 0

@@ -107,6 +107,7 @@ extern mi_cmd_argv_ftype mi_cmd_var_create;
 extern mi_cmd_argv_ftype mi_cmd_var_delete;
 extern mi_cmd_argv_ftype mi_cmd_var_evaluate_expression;
 extern mi_cmd_argv_ftype mi_cmd_var_info_expression;
+extern mi_cmd_argv_ftype mi_cmd_var_info_path_expression;
 extern mi_cmd_argv_ftype mi_cmd_var_info_num_children;
 extern mi_cmd_argv_ftype mi_cmd_var_info_type;
 extern mi_cmd_argv_ftype mi_cmd_var_list_children;
