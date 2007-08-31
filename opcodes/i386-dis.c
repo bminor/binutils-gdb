@@ -596,6 +596,12 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define OPC_EXT_37 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 37 } }
 #define OPC_EXT_38 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 38 } }
 #define OPC_EXT_39 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 39 } }
+#define OPC_EXT_40 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 40 } }
+#define OPC_EXT_41 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 41 } }
+#define OPC_EXT_42 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 42 } }
+#define OPC_EXT_43 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 43 } }
+#define OPC_EXT_44 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 44 } }
+#define OPC_EXT_45 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 45 } }
 
 #define OPC_EXT_RM_0  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 0 } }
 #define OPC_EXT_RM_1  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 1 } }
@@ -986,13 +992,13 @@ static const struct dis386 dis386_twobyte[] = {
   { "(bad)",		{ XX } },
   { "nopQ",		{ Ev } },
   /* 20 */
-  { "movZ",		{ Rm, Cm } },
-  { "movZ",		{ Rm, Dm } },
-  { "movZ",		{ Cm, Rm } },
-  { "movZ",		{ Dm, Rm } },
-  { "movL",		{ Rd, Td } },
+  { OPC_EXT_40 },
+  { OPC_EXT_41 },
+  { OPC_EXT_42 },
+  { OPC_EXT_43 },
+  { OPC_EXT_44 },
   { "(bad)",		{ XX } },
-  { "movL",		{ Td, Rd } },
+  { OPC_EXT_45 },
   { "(bad)",		{ XX } },
   /* 28 */
   { "movapX",		{ XM, EXx } },
@@ -3263,6 +3269,36 @@ static const struct dis386 opc_ext_table[][2] = {
     /* OPC_EXT_39 */
     { "lidt{Q|Q||}",	{ M } },
     { OPC_EXT_RM_6 },
+  },
+  {
+    /* OPC_EXT_40 */
+    { "(bad)",		{ XX } },
+    { "movZ",		{ Rm, Cm } },
+  },
+  {
+    /* OPC_EXT_41 */
+    { "(bad)",		{ XX } },
+    { "movZ",		{ Rm, Dm } },
+  },
+  {
+    /* OPC_EXT_42 */
+    { "(bad)",		{ XX } },
+    { "movZ",		{ Cm, Rm } },
+  },
+  {
+    /* OPC_EXT_43 */
+    { "(bad)",		{ XX } },
+    { "movZ",		{ Dm, Rm } },
+  },
+  {
+    /* OPC_EXT_44 */
+    { "(bad)",		{ XX } },
+    { "movL",		{ Rd, Td } },
+  },
+  {
+    /* OPC_EXT_45 */
+    { "(bad)",		{ XX } },
+    { "movL",		{ Td, Rd } },
   },
 };
 
