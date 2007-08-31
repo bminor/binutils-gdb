@@ -21,12 +21,12 @@
 #ifndef _BIN_SYSDEP_H
 #define _BIN_SYSDEP_H
 
+#include "config.h"
 #include "ansidecl.h"
 #include <stdio.h>
 #include <sys/types.h>
 
 #include "bfdver.h"
-#include "config.h"
 
 #include <stdarg.h>
 

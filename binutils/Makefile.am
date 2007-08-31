@@ -71,8 +71,7 @@ INCDIR	= $(BASEDIR)/include
 
 MKDEP = gcc -MM
 
-INCLUDES = -D_GNU_SOURCE \
-	 -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
+INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
 	 @INCINTL@ \
 	 -DLOCALEDIR="\"$(datadir)/locale\"" \
