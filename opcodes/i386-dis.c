@@ -94,7 +94,6 @@ static void NOP_Fixup1 (int, int);
 static void NOP_Fixup2 (int, int);
 static void OP_3DNowSuffix (int, int);
 static void OP_SIMD_Suffix (int, int);
-static void SVME_Fixup (int, int);
 static void BadOp (void);
 static void REP_Fixup (int, int);
 static void CMPXCHG8B_Fixup (int, int);
@@ -596,6 +595,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define OPC_EXT_36 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 36 } }
 #define OPC_EXT_37 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 37 } }
 #define OPC_EXT_38 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 38 } }
+#define OPC_EXT_39 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 39 } }
 
 #define OPC_EXT_RM_0  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 0 } }
 #define OPC_EXT_RM_1  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 1 } }
@@ -603,6 +603,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define OPC_EXT_RM_3  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 3 } }
 #define OPC_EXT_RM_4  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 4 } }
 #define OPC_EXT_RM_5  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 5 } }
+#define OPC_EXT_RM_6  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 6 } }
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
 
@@ -1541,7 +1542,7 @@ static const struct dis386 grps[][8] = {
     { OPC_EXT_6 },
     { OPC_EXT_7 },
     { OPC_EXT_8 },
-    { "lidt{Q|Q||}",	 { { SVME_Fixup, 0 } } },
+    { OPC_EXT_39 },
     { "smswD",	{ Sv } },
     { "(bad)",	{ XX } },
     { "lmsw",	{ Ew } },
@@ -3258,6 +3259,11 @@ static const struct dis386 opc_ext_table[][2] = {
     { "invlpg",		{ Mb } },
     { OPC_EXT_RM_5 },
   },
+  {
+    /* OPC_EXT_39 */
+    { "lidt{Q|Q||}",	{ M } },
+    { OPC_EXT_RM_6 },
+  },
 };
 
 static const struct dis386 opc_ext_rm_table[][8] = {
@@ -3326,6 +3332,17 @@ static const struct dis386 opc_ext_rm_table[][8] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_RM_6 */
+    { "vmrun",		{ Skip_MODRM } },
+    { "vmmcall",	{ Skip_MODRM } },
+    { "vmload",		{ Skip_MODRM } },
+    { "vmsave",		{ Skip_MODRM } },
+    { "stgi",		{ Skip_MODRM } },
+    { "clgi",		{ Skip_MODRM } },
+    { "skinit",		{ Skip_MODRM } },
+    { "invlpga",	{ Skip_MODRM } },
   },
 };
 
@@ -6295,76 +6312,6 @@ OP_Monitor (int bytemode ATTRIBUTE_UNUSED,
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
-}
-
-static void
-SVME_Fixup (int bytemode, int sizeflag)
-{
-  const char *alt;
-  char *p;
-
-  switch (*codep)
-    {
-    case 0xd8:
-      alt = "vmrun";
-      break;
-    case 0xd9:
-      alt = "vmmcall";
-      break;
-    case 0xda:
-      alt = "vmload";
-      break;
-    case 0xdb:
-      alt = "vmsave";
-      break;
-    case 0xdc:
-      alt = "stgi";
-      break;
-    case 0xdd:
-      alt = "clgi";
-      break;
-    case 0xde:
-      alt = "skinit";
-      break;
-    case 0xdf:
-      alt = "invlpga";
-      break;
-    default:
-      OP_M (bytemode, sizeflag);
-      return;
-    }
-  /* Override "lidt".  */
-  p = obuf + strlen (obuf) - 4;
-  /* We might have a suffix.  */
-  if (*p == 'i')
-    --p;
-  strcpy (p, alt);
-  if (!(prefixes & PREFIX_ADDR))
-    {
-      ++codep;
-      return;
-    }
-  used_prefixes |= PREFIX_ADDR;
-  switch (*codep++)
-    {
-    case 0xdf:
-      strcpy (op_out[1], names32[1]);
-      two_source_ops = 1;
-	  /* Fall through.  */
-    case 0xd8:
-    case 0xda:
-    case 0xdb:
-      *obufp++ = open_char;
-      if (address_mode == mode_64bit || (sizeflag & AFLAG))
-        alt = names32[0];
-      else
-        alt = names16[0];
-      strcpy (obufp, alt);
-      obufp += strlen (alt);
-      *obufp++ = close_char;
-      *obufp = '\0';
-      break;
-    }
 }
 
 static void

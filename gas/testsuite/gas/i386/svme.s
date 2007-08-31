@@ -18,19 +18,21 @@ common:
 
 .ifdef __amd64__
 att64:
-	do_args	(%rax), %ecx
-.endif
+	do_args	%rax, %ecx
+.else
 att32:
-	skinit	(%eax)
-	do_args	(%eax), %ecx
+	do_args	%eax, %ecx
+.endif
+	skinit	%eax
 
 .intel_syntax noprefix
 .ifdef __amd64__
 intel64:
-	do_args	[rax], ecx
-.endif
+	do_args	rax, ecx
+.else
 intel32:
-	skinit	[eax]
-	do_args	[eax], ecx
+	do_args	eax, ecx
+.endif
+	skinit	eax
 
 	.p2align 4,0

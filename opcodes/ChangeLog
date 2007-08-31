@@ -1,5 +1,18 @@
 2007-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (SVME_Fixup): Removed.
+	(OPC_EXT_39): New.
+	(OPC_EXT_RM_6): Likewise.
+	(grps): Use OPC_EXT_39.
+	(opc_ext_table): Add OPC_EXT_39.
+	(opc_ext_rm_table): Add OPC_EXT_RM_6.
+
+	* i386-opc.tbl: Correct SVME instructions to take register
+	operand only.
+	* i386-tbl.h: Regenerated.
+
+2007-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am (INCLUDES): Remove -D_GNU_SOURCE.
 	* Makefile.in: Regenerated.
 

@@ -1,3 +1,10 @@
+2007-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/svme.s: Updated to accept eax in 32bit and rax in
+	64bit.
+	* gas/i386/svme.d: Updated.
+	* gas/i386/svme64.d: Likewise.
+
 2007-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/amd.s: Add rdtscp.
