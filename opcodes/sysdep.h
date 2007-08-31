@@ -42,3 +42,7 @@
 #include <strings.h>
 #endif
 #endif
+
+#if !HAVE_DECL_STPCPY
+extern char *stpcpy (char *__dest, const char *__src);
+#endif

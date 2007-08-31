@@ -583,7 +583,7 @@ OFILES = @BFD_MACHINES@
 # We should reconfigure whenever bfd/configure.in changes, because
 # that's where the version number in Makefile comes from.
 CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
-INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCINTL@
+INCLUDES = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCINTL@
 libopcodes_la_SOURCES = dis-buf.c disassemble.c dis-init.c
 # It's desirable to list ../bfd/libbfd.la in DEPENDENCIES and LIBADD.
 # Unfortunately this causes libtool to add -L$(libdir), referring to the

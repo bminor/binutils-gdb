@@ -17,6 +17,9 @@ changequote([,])dnl
 
 AM_INIT_AUTOMAKE(opcodes, ${BFD_VERSION})
 
+AC_PROG_CC
+AC_GNU_SOURCE
+
 dnl These must be called before AM_PROG_LIBTOOL, because it may want
 dnl to call AC_CHECK_PROG.
 AC_CHECK_TOOL(AR, ar)
@@ -58,8 +61,6 @@ AC_EXEEXT
 
 # host-specific stuff:
 
-AC_PROG_CC
-
 ALL_LINGUAS="fr sv tr es da de id pt_BR ro nl fi vi ga zh_CN"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
@@ -73,7 +74,7 @@ AC_PROG_INSTALL
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 
-AC_CHECK_DECLS(basename)
+AC_CHECK_DECLS([basename, stpcpy])
 
 cgen_maint=no
 cgendir='$(srcdir)/../cgen'

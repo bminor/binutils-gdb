@@ -1,3 +1,18 @@
+2007-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (INCLUDES): Remove -D_GNU_SOURCE.
+	* Makefile.in: Regenerated.
+
+	* configure.in (AC_GNU_SOURCE): Added.
+	(AC_PROG_CC): Moved before AC_GNU_SOURCE.
+	(AC_CHECK_DECLS): Add stpcpy.
+	* configure: Regenerated.
+	* config.in: Likewise.
+
+	* i386-dis.c: Include "sysdep.h" before "dis-asm.h".
+
+	* sysdep.h (stpcpy): New.
+
 2007-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (INVLPG_Fixup): Removed.

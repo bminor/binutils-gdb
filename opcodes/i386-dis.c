@@ -33,8 +33,8 @@
    and the small letter tells about the operand size.  Refer to
    the Intel manual for details.  */
 
-#include "dis-asm.h"
 #include "sysdep.h"
+#include "dis-asm.h"
 #include "opintl.h"
 #include "opcode/i386.h"
 

@@ -8,6 +8,10 @@
    don't. */
 #undef HAVE_DECL_BASENAME
 
+/* Define to 1 if you have the declaration of `stpcpy', and to 0 if you don't.
+   */
+#undef HAVE_DECL_STPCPY
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
@@ -65,3 +69,8 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
