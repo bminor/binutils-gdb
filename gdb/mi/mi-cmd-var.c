@@ -47,6 +47,7 @@ static void
 print_varobj (struct varobj *var, enum print_values print_values,
 	      int print_expression)
 {
+  struct type *gdb_type;
   char *type;
 
   ui_out_field_string (uiout, "name", varobj_get_objname (var));
@@ -54,7 +55,8 @@ print_varobj (struct varobj *var, enum print_values print_values,
     ui_out_field_string (uiout, "exp", varobj_get_expression (var));
   ui_out_field_int (uiout, "numchild", varobj_get_num_children (var));
   
-  if (mi_print_value_p (varobj_get_gdb_type (var), print_values))
+  gdb_type = varobj_get_gdb_type (var);
+  if (gdb_type && mi_print_value_p (gdb_type, print_values))
     ui_out_field_string (uiout, "value", varobj_get_value (var));
 
   type = varobj_get_type (var);
