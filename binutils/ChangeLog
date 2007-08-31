@@ -1,3 +1,9 @@
+2007-08-31  Nick Clifton  <nickc@redhat.com>
+
+	* po/sk.po: New Slovakian translation.
+	* configure.in (LINGUAS): Add sk.
+	* configure: Regenerate.
+
 2007-08-30  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (dump_type): New type used to classify the kinds of

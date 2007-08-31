@@ -10677,7 +10677,7 @@ if test "$LEX" = :; then
   LEX=${am_missing_run}flex
 fi
 
-ALL_LINGUAS="fr tr ja es sv da zh_CN ru ro rw zh_TW fi vi uk"
+ALL_LINGUAS="fr tr ja es sv da zh_CN ru ro rw zh_TW fi vi uk sk"
 # If we haven't got the data from the intl directory,
 # assume NLS is disabled.
 USE_NLS=no
