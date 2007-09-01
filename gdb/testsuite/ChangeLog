@@ -1,3 +1,15 @@
+2007-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/gdb.exp (build_id_debug_filename_get): New function.
+	* gdb.base/sepdebug.exp: Reflect the changes in the heading comment.
+	Remove the generate DEBUG file for the future testcase runs.
+	New testcase for the NT_GNU_BUILD_ID retrieval.
+	Move the final testing step to ...
+	(test_different_dir): ... a new function.
+	New parameter XFAIL to XFAIL all the tests performed.
+	New parameter TEST_DIFFERENT_DIR parametrizing the directory.
+	New parameter TYPE to PF_PREFIX all the tests performed.
+
 2007-08-31  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-var-cp.cc (path_expression): New
