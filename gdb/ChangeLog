@@ -1,3 +1,13 @@
+2007-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (symfile.o): Update dependencies.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Initialize the
+	DEBUGFILE variable.  FIND_SEPARATE_DEBUG_FILE called only if !PSYMTABS.
+	(struct build_id): New structure.
+	(build_id_bfd_get, build_id_verify, build_id_to_debug_filename): New.
+	(find_separate_debug_file): New variable BUILD_ID.
+	Call BUILD_ID_BFD_GET with BUILD_ID_TO_DEBUG_FILENAME as the first try.
+
 2007-08-31  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.c (struct varobj): Fix comment

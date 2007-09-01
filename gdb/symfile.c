@@ -51,6 +51,7 @@
 #include "exec.h"
 #include "parser-defs.h"
 #include "varobj.h"
+#include "elf-bfd.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1017,7 +1018,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
-  char *debugfile;
+  char *debugfile = NULL;
   struct section_addr_info *orig_addrs = NULL;
   struct cleanup *my_cleanups;
   const char *name = bfd_get_filename (abfd);
@@ -1081,7 +1082,11 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 	}
     }
 
-  debugfile = find_separate_debug_file (objfile);
+  /* If the file has its own symbol tables it has no separate debug info.
+     `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to SYMTABS/PSYMTABS.
+     `.gnu_debuglink' may no longer be present with `.note.gnu.build-id'.  */
+  if (objfile->psymtabs == NULL)
+    debugfile = find_separate_debug_file (objfile);
   if (debugfile)
     {
       if (addrs != NULL)
@@ -1223,6 +1228,97 @@ symbol_file_clear (int from_tty)
       printf_unfiltered (_("No symbol file now.\n"));
 }
 
+struct build_id
+  {
+    size_t size;
+    gdb_byte data[1];
+  };
+
+/* Locate NT_GNU_BUILD_ID from ABFD and return its content.  */
+
+static struct build_id *
+build_id_bfd_get (bfd *abfd)
+{
+  struct build_id *retval;
+
+  if (!bfd_check_format (abfd, bfd_object)
+      || bfd_get_flavour (abfd) != bfd_target_elf_flavour
+      || elf_tdata (abfd)->build_id == NULL)
+    return NULL;
+
+  retval = xmalloc (sizeof *retval - 1 + elf_tdata (abfd)->build_id_size);
+  retval->size = elf_tdata (abfd)->build_id_size;
+  memcpy (retval->data, elf_tdata (abfd)->build_id, retval->size);
+
+  return retval;
+}
+
+/* Return if FILENAME has NT_GNU_BUILD_ID matching the CHECK value.  */
+
+static int
+build_id_verify (const char *filename, struct build_id *check)
+{
+  bfd *abfd;
+  struct build_id *found = NULL;
+  int retval = 0;
+
+  /* We expect to be silent on the non-existing files.  */
+  abfd = bfd_openr (filename, gnutarget);
+  if (abfd == NULL)
+    return 0;
+
+  found = build_id_bfd_get (abfd);
+
+  if (found == NULL)
+    warning (_("File \"%s\" has no build-id, file skipped"), filename);
+  else if (found->size != check->size
+           || memcmp (found->data, check->data, found->size) != 0)
+    warning (_("File \"%s\" has a different build-id, file skipped"), filename);
+  else
+    retval = 1;
+
+  if (!bfd_close (abfd))
+    warning (_("cannot close \"%s\": %s"), filename,
+	     bfd_errmsg (bfd_get_error ()));
+  return retval;
+}
+
+static char *
+build_id_to_debug_filename (struct build_id *build_id)
+{
+  char *link, *s, *retval = NULL;
+  gdb_byte *data = build_id->data;
+  size_t size = build_id->size;
+
+  /* DEBUG_FILE_DIRECTORY/.build-id/ab/cdef */
+  link = xmalloc (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
+		  + 2 * size + (sizeof ".debug" - 1) + 1);
+  s = link + sprintf (link, "%s/.build-id/", debug_file_directory);
+  if (size > 0)
+    {
+      size--;
+      s += sprintf (s, "%02x", (unsigned) *data++);
+    }
+  if (size > 0)
+    *s++ = '/';
+  while (size-- > 0)
+    s += sprintf (s, "%02x", (unsigned) *data++);
+  strcpy (s, ".debug");
+
+  /* lrealpath() is expensive even for the usually non-existent files.  */
+  if (access (link, F_OK) == 0)
+    retval = lrealpath (link);
+  xfree (link);
+
+  if (retval != NULL && !build_id_verify (retval, build_id))
+    {
+      xfree (retval);
+      retval = NULL;
+    }
+
+  return retval;
+}
+
 static char *
 get_debug_link_info (struct objfile *objfile, unsigned long *crc32_out)
 {
@@ -1300,6 +1396,25 @@ find_separate_debug_file (struct objfile *objfile)
   bfd_size_type debuglink_size;
   unsigned long crc32;
   int i;
+  struct build_id *build_id;
+
+  build_id = build_id_bfd_get (objfile->obfd);
+  if (build_id != NULL)
+    {
+      char *build_id_name;
+
+      build_id_name = build_id_to_debug_filename (build_id);
+      free (build_id);
+      /* Prevent looping on a stripped .debug file.  */
+      if (build_id_name != NULL && strcmp (build_id_name, objfile->name) == 0)
+        {
+	  warning (_("\"%s\": separate debug info file has no debug info"),
+		   build_id_name);
+	  xfree (build_id_name);
+	}
+      else if (build_id_name != NULL)
+        return build_id_name;
+    }
 
   basename = get_debug_link_info (objfile, &crc32);
 
