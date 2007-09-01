@@ -1,3 +1,8 @@
+2007-09-01  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Separate Debug Files): Fix last change.  Add
+	indexing for ``build ID'' support.
+
 2007-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Separate Debug Files): Included a BUILD ID description.

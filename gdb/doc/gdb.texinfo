@@ -11893,66 +11893,79 @@ Display the current shared library search path.
 @cindex @file{.debug} subdirectories
 @cindex debugging information directory, global
 @cindex global debugging information directory
+@cindex build ID, and separate debugging files
+@cindex @file{.build-id} directory
 
 @value{GDBN} allows you to put a program's debugging information in a
 file separate from the executable itself, in a way that allows
 @value{GDBN} to find and load the debugging information automatically.
-Since debugging information can be very large --- sometimes larger
-than the executable code itself --- some systems distribute debugging
+Since debugging information can be very large---sometimes larger
+than the executable code itself---some systems distribute debugging
 information for their executables in separate files, which users can
 install only when they need to debug a problem.
 
-There are two identificators how the separate debug file may be found:
+@value{GDBN} supports two ways of specifying the separate debug info
+file:
 
 @itemize @bullet
 @item
-@dfn{debug link} is present only in the executable if its debug information has
-been split out.  It is not present in the separate debug file.  It provides the
-separate debug file filename, usually as @file{executable.debug}.
+The executable contains a @dfn{debug link} that specifies the name of
+the separate debug info file.  The separate debug file's name is
+usually @file{@var{executable}.debug}, where @var{executable} is the
+name of the corresponding executable file without leading directories
+(e.g., @file{ls.debug} for @file{/usr/bin/ls}).  In addition, the
+debug link specifies a CRC32 checksum for the debug file, which
+@value{GDBN} uses to validate that the executable and the debug file
+came from the same build.
+
 @item
-@dfn{build id} is present in all the files (if the operating system supports
-it).  The executable file and its separate debug file have the same unique
-@dfn{build id} content.
+The executable contains a @dfn{build ID}, a unique signature that is
+also present in the corresponding debug info file.  (This is supported
+only on some operating systems, notably on @sc{gnu}/Linux.  For more
+details about this feature, see
+@uref{http://fedoraproject.org/wiki/Releases/FeatureBuildId, the
+Fedora Project's description of the buid ID feature}.)  The debug info
+file's name is not specified explicitly by the debug ID, but can be
+computed from the build ID, see below.
 @end itemize
 
-If the full name of the directory containing the executable is @var{execdir},
-the executable has a debug link that specifies the name @var{debugfile},
-@var{bu} is the first byte (two hexadecimal characters) of the build id
-content, @var{ild-id} are the remaining bytes / hexadecimal characters and
-@var{globaldebugdir} is the global debug file directory then @value{GDBN} will
-automatically search for the debugging information file in four places:
+Depending on the way the debug info file is specified, @value{GDBN}
+uses two different methods of looking for the debug file:
 
 @itemize @bullet
 @item
-a specific file in the subdirectory of the global debug file directory
-according to the @dfn{build id} content (if present), the file tried is
-@file{@var{globaldebugdir}/.debug-id/@var{bu}/@var{ild-id}.debug}.
-@item
-the directory containing the executable file (that is, it will look
-for a file named @file{@var{execdir}/@var{debugfile}},
-@item
-a subdirectory of that directory named @file{.debug} (that is, the
-file @file{@var{execdir}/.debug/@var{debugfile}}, and
-@item
-a subdirectory of the global debug file directory that includes the
-executable's full path, and the name from the link (that is, the file
-@file{@var{globaldebugdir}/@var{execdir}/@var{debugfile}}, where
-@var{globaldebugdir} is the global debug file directory, and
-@var{execdir} has been turned into a relative path).
-@end itemize
-@noindent
-@value{GDBN} checks under each of these names for a debugging
-information file with build id content matching the build id content of the
-executable file - or - whose checksum matches the one given in the link in the
-debug link case.  In each case @value{GDBN} reads the debugging information
-from the first debug file it finds.
+For the ``debug link'' method, @value{GDBN} looks up the named file in
+the directory of the executable file, then in a subdirectory of that
+directory named @file{.debug}, and finally under the global debug
+directory, in a subdirectory whose name is identical to the leading
+directories of the executable's absolute file name.
 
-So, for example, if you ask @value{GDBN} to debug @file{/usr/bin/ls}, which has
-a @dfn{debug link} containing the name @file{ls.debug}, its @dfn{build id}
-value in hexadecimal is @code{abcdef} and the global debug directory is
-@file{/usr/lib/debug}, then @value{GDBN} will look for debug information in
-@file{/usr/lib/debug/.build-id/ab/cdef.debug}, @file{/usr/bin/ls.debug},
-@file{/usr/bin/.debug/ls.debug}, and @file{/usr/lib/debug/usr/bin/ls.debug}.
+@item
+For the ``debug ID'' method, @value{GDBN} looks in the
+@file{.build-id} subdirectory of the global debug directory for a file
+named @file{@var{nn}/@var{nnnnnnnn}.debug}, where @var{nn} are the
+first 2 hex characters of the debug ID signature, and @var{nnnnnnnn}
+are the rest of the signature.  (Real signatures are 32 or more
+characters, not 10.)
+@end itemize
+
+So, for example, suppose you ask @value{GDBN} to debug
+@file{/usr/bin/ls}, which has a @dfn{debug link} that specifies the
+file @file{ls.debug}, and a @dfn{build id} whose value in hex is
+@code{abcdef1234}.  If the global debug directory is
+@file{/usr/lib/debug}, then @value{GDBN} will look for the following
+debug information files, in the indicated order:
+
+@itemize @minus
+@item
+@file{/usr/lib/debug/.build-id/ab/cdef1234.debug}
+@item
+@file{/usr/bin/ls.debug}
+@item
+@file{/usr/bin/.debug/ls.debug}
+@item
+@file{/usr/lib/debug/usr/bin/ls.debug}.
+@end itemize
 
 You can set the global debugging info directory's name, and view the
 name @value{GDBN} is currently using.
@@ -11972,7 +11985,7 @@ information files.
 @end table
 
 @cindex @code{.gnu_debuglink} sections
-@cindex debug links
+@cindex debug link sections
 A debug link is a special section of the executable file named
 @code{.gnu_debuglink}.  The section must contain:
 
@@ -11995,37 +12008,46 @@ contain a section named @code{.gnu_debuglink} with the contents
 described above.
 
 @cindex @code{.note.gnu.build-id} sections
-@cindex build id
-Build id is a special section of the executable file named
-@code{.note.gnu.build-id}.  The section contains unique identification hash
-derived from the built files - it remains the same across multiple builds of
-the same build tree.  The default algorithm SHA1 produces 160 bits (40
-hexadecimal characters) of the content.  The same section and value is present
-in the original built binary with symbols, in its stripped variant and in the
-separate debug information file.
+@cindex build ID sections
+A build ID is a special section of the executable file named
+@code{.note.gnu.build-id}.  This section contains unique
+identification for the built files---it remains the same across
+multiple builds of the same build tree.  The default algorithm SHA1
+produces 160 bits (40 hexadecimal characters) of the content.  The
+same section with an identical value is present in the original built
+binary with symbols, in its stripped variant, and in the separate
+debugging information file.
 
 The debugging information file itself should be an ordinary
 executable, containing a full set of linker symbols, sections, and
 debugging information.  The sections of the debugging information file
-should have the same names, addresses and sizes as the original file,
-but they need not contain any data --- much like a @code{.bss} section
+should have the same names, addresses, and sizes as the original file,
+but they need not contain any data---much like a @code{.bss} section
 in an ordinary executable.
 
-@sc{gnu} binary utilities contain the @samp{objcopy} utility able to produce
-the separated executable / debugging information file pairs by commands
-@kbd{objcopy --only-keep-debug foo foo.debug; strip -g foo; objcopy
---add-gnu-debuglink="foo.debug" "foo"}.  These commands remove the debugging
+@sc{gnu} binary utilities (Binutils) package includes the
+@samp{objcopy} utility that can produce
+the separated executable / debugging information file pairs using the
+following commands:
+
+@smallexample
+@kbd{objcopy --only-keep-debug foo foo.debug}
+@kbd{strip -g foo}
+@kbd{objcopy --add-gnu-debuglink="foo.debug" "foo"}
+@end smallexample
+
+@noindent
+These commands remove the debugging
 information from the executable file @file{foo}, place it in the file
 @file{foo.debug}, and leave behind a debug link in @file{foo}.  Ulrich
 Drepper's @file{elfutils} package, starting with version 0.53, contains
 a version of the @code{strip} command such that the command @kbd{strip foo -f
 foo.debug} has the same functionality as the three commands above.
 
-Since there are many different ways to compute CRC's for the debug link
-(different polynomials, reversals, byte ordering, etc.).  This computation does
-not apply to the build id section.  The simplest way to describe the CRC used
-in @code{.gnu_debuglink} sections is to give the complete code for a function
-that computes it:
+Since there are many different ways to compute CRC's for the debug
+link (different polynomials, reversals, byte ordering, etc.), the
+simplest way to describe the CRC used in @code{.gnu_debuglink}
+sections is to give the complete code for a function that computes it:
 
 @kindex gnu_debuglink_crc32
 @smallexample
@@ -12096,6 +12118,9 @@ gnu_debuglink_crc32 (unsigned long crc,
   return ~crc & 0xffffffff;
 @}
 @end smallexample
+
+@noindent
+This computation does not apply to the ``build ID'' method.
 
 
 @node Symbol Errors
