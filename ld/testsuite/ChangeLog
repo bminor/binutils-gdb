@@ -1,3 +1,9 @@
+2007-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4986
+	* ld-x86-64/line.exp: New
+	* ld-x86-64/undefined.s: Likewise.
+
 2007-08-31  Tristan Gingold  <gingold@adacore.com>
 
 	* ld-script/map-address.t: Add a test for testing DEFINED in map
@@ -5,7 +11,7 @@
 	* ld-script/map-address.d: Update expected output.
 
 2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-elfcomm/elfcomm.exp: Use run_host_cmd.  Only check "which
 	$CC" if host is local.
