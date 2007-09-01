@@ -1,3 +1,10 @@
+2007-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Separate Debug Files): Included a BUILD ID description.
+	Enlisted BUILD ID to the debug file searching example.
+	Included a BUILD ID `.note.gnu.build-id' section description.
+	Updated/added the debug files splitting instructions for OBJCOPY.
+
 2007-08-31  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (Variable Objects): Adjust docs
