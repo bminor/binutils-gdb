@@ -1,3 +1,10 @@
+2007-09-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/2138
+	From readline 5.2:
+	* configure.in (CROSS_COMPILE): Initialize to empty.
+	* configure: Regenerated.
+
 2007-03-27  Brooks Moses  <brooks.moses@codesourcery.com>
 
 	* Makefile.in: Add dummy "pdf" target.

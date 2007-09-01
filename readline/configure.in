@@ -77,6 +77,7 @@ dnl files as necessary
 dnl Note that host and target machine are the same, and different than the
 dnl build machine.
 
+CROSS_COMPILE=
 if test "x$cross_compiling" = "xyes"; then
     case "${host}" in
     *-cygwin*)
