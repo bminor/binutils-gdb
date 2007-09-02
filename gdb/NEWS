@@ -61,6 +61,9 @@ Windows and SymbianOS).
 * The GDB remote stub, gdbserver, now supports dynamic link libraries
 (DLLs) on Windows and Windows CE targets.
 
+* GDB now supports a faster verification that a .debug file matches its binary
+according to its build-id signature, if the signature is present.
+
 * New commands
 
 set remoteflow
