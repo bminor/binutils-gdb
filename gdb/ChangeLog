@@ -1,3 +1,7 @@
+2007-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* top.c (print_gdb_version): Fixed a string end-of-line compiler error.
+
 2007-09-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* top.c (print_gdb_version): Update for GPL version 3.
