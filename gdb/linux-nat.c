@@ -2686,7 +2686,9 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
 {
   struct linux_nat_corefile_thread_data thread_args;
   struct cleanup *old_chain;
+  /* The variable size must be >= sizeof (prpsinfo_t.pr_fname).  */
   char fname[16] = { '\0' };
+  /* The variable size must be >= sizeof (prpsinfo_t.pr_psargs).  */
   char psargs[80] = { '\0' };
   char *note_data = NULL;
   ptid_t current_ptid = inferior_ptid;
@@ -2699,9 +2701,18 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
       strncpy (psargs, get_exec_file (0), sizeof (psargs));
       if (get_inferior_args ())
 	{
-	  strncat (psargs, " ", sizeof (psargs) - strlen (psargs));
-	  strncat (psargs, get_inferior_args (),
-		   sizeof (psargs) - strlen (psargs));
+	  char *string_end;
+	  char *psargs_end = psargs + sizeof (psargs);
+
+	  /* linux_elfcore_write_prpsinfo () handles zero unterminated
+	     strings fine.  */
+	  string_end = memchr (psargs, 0, sizeof (psargs));
+	  if (string_end != NULL)
+	    {
+	      *string_end++ = ' ';
+	      strncpy (string_end, get_inferior_args (),
+		       psargs_end - string_end);
+	    }
 	}
       note_data = (char *) elfcore_write_prpsinfo (obfd,
 						   note_data,

@@ -1,3 +1,7 @@
+2007-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-nat.c (linux_nat_make_corefile_notes): Fixed a buffer overflow.
+
 2007-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (symfile.o): Update dependencies.
