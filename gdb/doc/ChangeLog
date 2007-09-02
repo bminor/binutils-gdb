@@ -1,3 +1,7 @@
+2007-09-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo: Update the FSF's Back-Cover Text.
+
 2007-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 

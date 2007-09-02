@@ -62,10 +62,9 @@ Invariant Sections being ``Free Software'' and ``Free Software Needs
 Free Documentation'', with the Front-Cover Texts being ``A GNU Manual,''
 and with the Back-Cover Texts as in (a) below.
 
-(a) The Free Software Foundation's Back-Cover Text is: ``You have
-freedom to copy and modify this GNU Manual, like GNU software.  Copies
-published by the Free Software Foundation raise funds for GNU
-development.''
+(a) The FSF's Back-Cover Text is: ``You are free to copy and modify
+this GNU Manual.  Buying copies from GNU Press supports the FSF in
+developing GNU and promoting software freedom.''
 @end ifinfo
 
 @titlepage
@@ -100,10 +99,9 @@ Invariant Sections being ``Free Software'' and ``Free Software Needs
 Free Documentation'', with the Front-Cover Texts being ``A GNU Manual,''
 and with the Back-Cover Texts as in (a) below.
 
-(a) The Free Software Foundation's Back-Cover Text is: ``You have
-freedom to copy and modify this GNU Manual, like GNU software.  Copies
-published by the Free Software Foundation raise funds for GNU
-development.''
+(a) The FSF's Back-Cover Text is: ``You are free to copy and modify
+this GNU Manual.  Buying copies from GNU Press supports the FSF in
+developing GNU and promoting software freedom.''
 @page
 This edition of the GDB manual is dedicated to the memory of Fred
 Fish.  Fred was a long-standing contributor to GDB and to Free

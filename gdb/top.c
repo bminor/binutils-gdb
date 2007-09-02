@@ -1155,10 +1155,10 @@ print_gdb_version (struct ui_file *stream)
      there is no warranty. */
 
   fprintf_filtered (stream, "\
-GDB is free software, covered by the GNU General Public License, and you are\n\
-welcome to change it and/or distribute copies of it under certain conditions.\n\
-Type \"show copying\" to see the conditions.\n\
-There is absolutely no warranty for GDB.  Type \"show warranty\" for details.\n");
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
+This is free software: you are free to change and redistribute it.\n\
+There is NO WARRANTY, to the extent permitted by law.  Type \"show copying\"
+and \"show warranty\" for details.\n");
 
   /* After the required info we print the configuration information. */
 
