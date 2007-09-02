@@ -11925,7 +11925,7 @@ only on some operating systems, notably on @sc{gnu}/Linux.  For more
 details about this feature, see
 @uref{http://fedoraproject.org/wiki/Releases/FeatureBuildId, the
 Fedora Project's description of the buid ID feature}.)  The debug info
-file's name is not specified explicitly by the debug ID, but can be
+file's name is not specified explicitly by the build ID, but can be
 computed from the build ID, see below.
 @end itemize
 
@@ -11941,10 +11941,10 @@ directory, in a subdirectory whose name is identical to the leading
 directories of the executable's absolute file name.
 
 @item
-For the ``debug ID'' method, @value{GDBN} looks in the
+For the ``build ID'' method, @value{GDBN} looks in the
 @file{.build-id} subdirectory of the global debug directory for a file
 named @file{@var{nn}/@var{nnnnnnnn}.debug}, where @var{nn} are the
-first 2 hex characters of the debug ID signature, and @var{nnnnnnnn}
+first 2 hex characters of the build ID signature, and @var{nnnnnnnn}
 are the rest of the signature.  (Real signatures are 32 or more
 characters, not 10.)
 @end itemize
@@ -12033,16 +12033,36 @@ following commands:
 @smallexample
 @kbd{objcopy --only-keep-debug foo foo.debug}
 @kbd{strip -g foo}
-@kbd{objcopy --add-gnu-debuglink="foo.debug" "foo"}
 @end smallexample
 
 @noindent
 These commands remove the debugging
-information from the executable file @file{foo}, place it in the file
-@file{foo.debug}, and leave behind a debug link in @file{foo}.  Ulrich
-Drepper's @file{elfutils} package, starting with version 0.53, contains
+information from the executable file @file{foo} and place it in the file
+@file{foo.debug}.  You can use the first, second or both methods to link the
+two files:
+
+@itemize @bullet
+@item
+The debug link method needs the following additional command to also leave
+behind a debug link in @file{foo}:
+
+@smallexample
+@kbd{objcopy --add-gnu-debuglink=foo.debug foo}
+@end smallexample
+
+Ulrich Drepper's @file{elfutils} package, starting with version 0.53, contains
 a version of the @code{strip} command such that the command @kbd{strip foo -f
-foo.debug} has the same functionality as the three commands above.
+foo.debug} has the same functionality as the two @code{objcopy} commands and
+the @code{ln -s} command above, together.
+
+@item
+Build ID gets embedded into the main executable using @code{ld --build-id} or
+the @value{NGCC} counterpart @code{gcc -Wl,--build-id}.  Build ID support plus
+compatibility fixes for debug files separation are present in @sc{gnu} binary
+utilities (Binutils) since version 2.18.
+@end itemize
+
+@noindent
 
 Since there are many different ways to compute CRC's for the debug
 link (different polynomials, reversals, byte ordering, etc.), the

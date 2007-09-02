@@ -1,3 +1,11 @@
+2007-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Separate Debug Files): Cosmetic quoting removal.
+	Fixed the ``build ID'' name.  New binaries build instructions for the
+	build ID inclusion.  Explain how the commands are specific to the build
+	ID vs. debug link.
+
 2007-09-01  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Separate Debug Files): Fix last change.  Add
