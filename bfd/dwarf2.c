@@ -917,8 +917,7 @@ new_line_sorts_after (struct line_info *new_line, struct line_info *line)
 {
   return (new_line->address > line->address
 	  || (new_line->address == line->address
-	      && (new_line->line > line->line
-		  || new_line->end_sequence < line->end_sequence)));
+	      && new_line->end_sequence < line->end_sequence));
 }
 
 
@@ -968,7 +967,18 @@ add_line_info (struct line_info_table *table,
 
      Note: we may receive duplicate entries from 'decode_line_info'.  */
 
-  if (!table->last_line
+  if (table->last_line
+      && table->last_line->address == address
+      && table->last_line->end_sequence == end_sequence)
+    {
+      /* We only keep the last entry with the same address and end
+	 sequence.  See PR ld/4986.  */
+      if (table->lcl_head == table->last_line)
+	table->lcl_head = info;
+      info->prev_line = table->last_line->prev_line;
+      table->last_line = info;
+    }
+  else if (!table->last_line
       || new_line_sorts_after (info, table->last_line))
     {
       /* Normal case: add 'info' to the beginning of the list */

@@ -1,3 +1,11 @@
+2007-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4986
+	* ld-ia64/line.exp: New.
+	* ld-ia64/undefined.s: Likewise.
+
+	* ld-x86-64/line.exp: Don't check CC.
+
 2007-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4986
