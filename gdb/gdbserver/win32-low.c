@@ -1066,9 +1066,18 @@ handle_load_dll (void)
 
   dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
-  if (!psapi_get_dll_name ((DWORD) (event->lpBaseOfDll), dll_buf)
-      && !toolhelp_get_dll_name ((DWORD) (event->lpBaseOfDll), dll_buf))
-    dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
+  /* Windows does not report the image name of the dlls in the debug
+     event on attaches.  We resort to iterating over the list of
+     loaded dlls looking for a match by image base.  */
+  if (!psapi_get_dll_name ((DWORD) event->lpBaseOfDll, dll_buf))
+    {
+      if (!server_waiting)
+	/* On some versions of Windows and Windows CE, we can't create
+	   toolhelp snapshots while the inferior is stopped in a
+	   LOAD_DLL_DEBUG_EVENT due to a dll load, but we can while
+	   Windows is reporting the already loaded dlls.  */
+	toolhelp_get_dll_name ((DWORD) event->lpBaseOfDll, dll_buf);
+    }
 
   dll_name = dll_buf;
 
