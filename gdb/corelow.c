@@ -592,6 +592,18 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 	}
       return -1;
 
+    case TARGET_OBJECT_LIBRARIES:
+      if (core_gdbarch
+	  && gdbarch_core_xfer_shared_libraries_p (core_gdbarch))
+	{
+	  if (writebuf)
+	    return -1;
+	  return
+	    gdbarch_core_xfer_shared_libraries (core_gdbarch,
+						readbuf, offset, len);
+	}
+      /* FALL THROUGH */
+
     default:
       if (ops->beneath != NULL)
 	return ops->beneath->to_xfer_partial (ops->beneath, object, annex,

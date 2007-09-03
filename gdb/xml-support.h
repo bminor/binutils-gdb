@@ -28,6 +28,30 @@ struct gdb_xml_parser;
 struct gdb_xml_element;
 struct gdb_xml_attribute;
 
+/* Return an XML document which was compiled into GDB, from
+   the given FILENAME, or NULL if the file was not compiled in.  */
+
+const char *fetch_xml_builtin (const char *filename);
+
+/* A to_xfer_partial helper function which reads XML files which were
+   compiled into GDB.  The target may call this function from its own
+   to_xfer_partial handler, after converting object and annex to the
+   appropriate filename.  */
+
+LONGEST xml_builtin_xfer_partial (const char *filename,
+				  gdb_byte *readbuf, const gdb_byte *writebuf,
+				  ULONGEST offset, LONGEST len);
+
+/* The text of compiled-in XML documents, from xml-builtin.c
+   (generated).  */
+
+extern const char *xml_builtin[][2];
+
+/* Return a malloc allocated string with special characters from TEXT
+   replaced by entity references.  */
+
+char *xml_escape_text (const char *text);
+
 /* Support for XInclude.  */
 
 /* Callback to fetch a new XML file, based on the provided HREF.  */
@@ -45,24 +69,6 @@ typedef char *(*xml_fetch_another) (const char *href, void *baton);
 char *xml_process_xincludes (const char *name, const char *text,
 			     xml_fetch_another fetcher, void *fetcher_baton,
 			     int depth);
-
-/* Return an XML document which was compiled into GDB, from
-   the given FILENAME, or NULL if the file was not compiled in.  */
-
-const char *fetch_xml_builtin (const char *filename);
-
-/* A to_xfer_partial helper function which reads XML files which were
-   compiled into GDB.  The target may call this function from its own
-   to_xfer_partial handler, after converting object and annex to the
-   appropriate filename.  */
-
-LONGEST xml_builtin_xfer_partial (const char *filename,
-				  gdb_byte *readbuf, const gdb_byte *writebuf,
-				  ULONGEST offset, LONGEST len);
-
-/* The text of compiled-in XML documents, from xml-builtin.c
-   (generated).  */
-extern const char *xml_builtin[][2];
 
 /* Simplified XML parser infrastructure.  */
 

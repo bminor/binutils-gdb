@@ -544,6 +544,8 @@ gdb_xml_parse (struct gdb_xml_parser *parser, const char *buffer)
   enum XML_Status status;
   const char *error_string;
 
+  gdb_xml_debug (parser, _("Starting:\n%s"), buffer);
+
   status = XML_Parse (parser->expat_parser, buffer, strlen (buffer), 1);
 
   if (status == XML_STATUS_OK && parser->error.reason == 0)
@@ -869,8 +871,7 @@ xml_process_xincludes (const char *name, const char *text,
       result = xstrdup (obstack_finish (&data->obstack));
 
       if (depth == 0)
-	gdb_xml_debug (parser, _("XInclude processing succeeded:\n%s"),
-		       result);
+	gdb_xml_debug (parser, _("XInclude processing succeeded."));
     }
   else
     result = NULL;
@@ -932,6 +933,68 @@ show_debug_xml (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("XML debugging is %s.\n"), value);
+}
+
+/* Return a malloc allocated string with special characters from TEXT
+   replaced by entity references.  */
+
+char *
+xml_escape_text (const char *text)
+{
+  char *result;
+  int i, special;
+
+  /* Compute the length of the result.  */
+  for (i = 0, special = 0; text[i] != '\0'; i++)
+    switch (text[i])
+      {
+      case '\'':
+      case '\"':
+	special += 5;
+	break;
+      case '&':
+	special += 4;
+	break;
+      case '<':
+      case '>':
+	special += 3;
+	break;
+      default:
+	break;
+      }
+
+  /* Expand the result.  */
+  result = xmalloc (i + special + 1);
+  for (i = 0, special = 0; text[i] != '\0'; i++)
+    switch (text[i])
+      {
+      case '\'':
+	strcpy (result + i + special, "&apos;");
+	special += 5;
+	break;
+      case '\"':
+	strcpy (result + i + special, "&quot;");
+	special += 5;
+	break;
+      case '&':
+	strcpy (result + i + special, "&amp;");
+	special += 4;
+	break;
+      case '<':
+	strcpy (result + i + special, "&lt;");
+	special += 3;
+	break;
+      case '>':
+	strcpy (result + i + special, "&gt;");
+	special += 3;
+	break;
+      default:
+	result[i + special] = text[i];
+	break;
+      }
+  result[i + special] = '\0';
+
+  return result;
 }
 
 void _initialize_xml_support (void);

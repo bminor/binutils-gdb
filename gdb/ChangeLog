@@ -1,3 +1,39 @@
+2007-09-04  Pedro Alves  <pedro_alves@portugalmail.pt>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbarch.sh (core_xfer_shared_libraries): New.
+
+	* corelow.c (core_xfer_partial): Handle TARGET_OBJECT_LIBRARIES.
+
+	* gdb_obstack.h (obstack_grow_str, obstack_grow_str0): New.
+
+	* xml-support.c (gdb_xml_parse): Debug output tweaks.
+	(xml_escape_text): New.
+	* xml-support.h (xml_escape_text): Declare.
+
+	* config/i386/cygwin.mh (NATDEPFILES): Move corelow.o to ...
+	* config/i386/cygwin.mt (TDEPFILES): ... here.
+
+	* win32-nat.c: (fetch_elf_core_registers): Delete.
+	(win32_elf_core_fn): Delete.
+	(_initialize_core_win32): Delete.
+
+	* i386-cygwin-tdep.c: Include "regset.h", "gdb_objstack.h",
+	"xml-support.h" and "gdbcore.h".
+	(i386_win32_gregset_reg_offset): New.
+	(I386_WIN32_SIZEOF_GREGSET): New.
+	(i386_win32_regset_from_core_section): New.
+	(win32_xfer_shared_library): New.
+	(struct cpms_data): New.
+	(core_process_module_section): New.
+	(win32_core_xfer_shared_libraries): New.
+	(i386_cygwin_skip_trampoline_code): Register gregset_reg_offset,
+	gregset_num_regs, sizeof_gregset members of tdep.  Register
+	regset_from_core_section and core_xfer_shared_libraries callbacks.
+
+	* Makefile.in (i386-cygwin-tdep.o): Update dependencies.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2007-09-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* corelow.c (core_xfer_partial): Pass writebuf to

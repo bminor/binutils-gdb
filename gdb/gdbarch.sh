@@ -634,6 +634,10 @@ F::CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct t
 # name SECT_NAME and size SECT_SIZE.
 M::const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
 
+# Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
+# core file into buffer READBUF with length LEN.
+M::LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
+
 # If the elements of C++ vtables are in-place function descriptors rather
 # than normal function pointers (which may point to code or a descriptor),
 # set this to one.

@@ -2242,23 +2242,6 @@ win32_current_sos (void)
   return start;
 }
 
-static void
-fetch_elf_core_registers (struct regcache *regcache,
-			  char *core_reg_sect,
-			  unsigned core_reg_size,
-			  int which,
-			  CORE_ADDR reg_addr)
-{
-  int r;
-  if (core_reg_size < sizeof (CONTEXT))
-    {
-      error (_("Core file register section too small (%u bytes)."), core_reg_size);
-      return;
-    }
-  for (r = 0; r < gdbarch_num_regs (current_gdbarch); r++)
-    regcache_raw_supply (regcache, r, core_reg_sect + mappings[r]);
-}
-
 static int
 open_symbol_file_object (void *from_ttyp)
 {
@@ -2458,21 +2441,6 @@ win32_win32_thread_alive (ptid_t ptid)
 
   return WaitForSingleObject (thread_rec (pid, FALSE)->h, 0) == WAIT_OBJECT_0 ?
     FALSE : TRUE;
-}
-
-static struct core_fns win32_elf_core_fns =
-{
-  bfd_target_elf_flavour,
-  default_check_format,
-  default_core_sniffer,
-  fetch_elf_core_registers,
-  NULL
-};
-
-void
-_initialize_core_win32 (void)
-{
-  deprecated_add_core_fns (&win32_elf_core_fns);
 }
 
 void

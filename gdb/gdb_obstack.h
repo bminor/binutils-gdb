@@ -40,4 +40,9 @@
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free xfree
 
+#define obstack_grow_str(OBSTACK,STRING) \
+  obstack_grow (OBSTACK, STRING, strlen (STRING))
+#define obstack_grow_str0(OBSTACK,STRING) \
+  obstack_grow0 (OBSTACK, STRING, strlen (STRING))
+
 #endif

@@ -2,7 +2,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -11,12 +11,12 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-
+  
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+  
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -225,6 +225,7 @@ struct gdbarch
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
+  gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   int vtable_function_descriptors;
   int vbit_in_delta;
   gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint;
@@ -346,6 +347,7 @@ struct gdbarch startup_gdbarch =
   default_register_reggroup_p,  /* register_reggroup_p */
   0,  /* fetch_pointer_argument */
   0,  /* regset_from_core_section */
+  0,  /* core_xfer_shared_libraries */
   0,  /* vtable_function_descriptors */
   0,  /* vbit_in_delta */
   0,  /* skip_permanent_breakpoint */
@@ -592,6 +594,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of register_reggroup_p, invalid_p == 0 */
   /* Skip verify of fetch_pointer_argument, has predicate */
   /* Skip verify of regset_from_core_section, has predicate */
+  /* Skip verify of core_xfer_shared_libraries, has predicate */
   /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
   /* Skip verify of vbit_in_delta, invalid_p == 0 */
   /* Skip verify of skip_permanent_breakpoint, has predicate */
@@ -710,6 +713,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: convert_register_p = <0x%lx>\n",
                       (long) current_gdbarch->convert_register_p);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_core_xfer_shared_libraries_p() = %d\n",
+                      gdbarch_core_xfer_shared_libraries_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: core_xfer_shared_libraries = <0x%lx>\n",
+                      (long) current_gdbarch->core_xfer_shared_libraries);
   fprintf_unfiltered (file,
                       "gdbarch_dump: decr_pc_after_break = 0x%s\n",
                       paddr_nz (current_gdbarch->decr_pc_after_break));
@@ -2884,6 +2893,30 @@ set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch,
                                       gdbarch_regset_from_core_section_ftype regset_from_core_section)
 {
   gdbarch->regset_from_core_section = regset_from_core_section;
+}
+
+int
+gdbarch_core_xfer_shared_libraries_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->core_xfer_shared_libraries != NULL;
+}
+
+LONGEST
+gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->core_xfer_shared_libraries != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_core_xfer_shared_libraries called\n");
+  return gdbarch->core_xfer_shared_libraries (gdbarch, readbuf, offset, len);
+}
+
+void
+set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch,
+                                        gdbarch_core_xfer_shared_libraries_ftype core_xfer_shared_libraries)
+{
+  gdbarch->core_xfer_shared_libraries = core_xfer_shared_libraries;
 }
 
 int
