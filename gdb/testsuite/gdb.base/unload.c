@@ -20,8 +20,12 @@
 
 #ifdef __WIN32__
 #include <windows.h>
-#define dlopen(name, mode) LoadLibrary (name)
-#define dlsym(handle, func) GetProcAddress (handle, func)
+#define dlopen(name, mode) LoadLibrary (TEXT (name))
+#ifdef _WIN32_WCE
+# define dlsym(handle, func) GetProcAddress (handle, TEXT (func))
+#else
+# define dlsym(handle, func) GetProcAddress (handle, func)
+#endif
 #define dlclose(handle) FreeLibrary (handle)
 #define dlerror() "error %d occurred", GetLastError ()
 #else
