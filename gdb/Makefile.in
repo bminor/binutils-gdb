@@ -1823,8 +1823,8 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(gdb_assert_h) $(bfd_in2_h) $(libcoff_h) $(objfiles_h) \
 	$(dwarf2_frame_h) $(gdbtypes_h) $(prologue_value_h) \
 	$(target_descriptions_h) $(user_regs_h)
-arm-wince-tdep.o: arm-wince-tdep.c $(defs_h) $(osabi_h) $(solib_svr4_h) \
-	$(target_h) $(gdb_string_h) $(arm_tdep_h)
+arm-wince-tdep.o: arm-wince-tdep.c $(defs_h) $(osabi_h) \
+	$(gdbcore_h) $(target_h) $(gdb_string_h) $(arm_tdep_h)
 auxv.o: auxv.c $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) \
 	$(inferior_h) $(valprint_h) $(gdb_assert_h) $(auxv_h) \
 	$(elf_common_h)

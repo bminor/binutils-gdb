@@ -180,6 +180,7 @@ struct gdbarch_tdep
 #define LOWEST_PC (gdbarch_tdep (current_gdbarch)->lowest_pc)
 #endif
 
+CORE_ADDR arm_skip_stub (struct frame_info *, CORE_ADDR);
 int arm_software_single_step (struct frame_info *);
 
 /* Functions exported from armbsd-tdep.h.  */

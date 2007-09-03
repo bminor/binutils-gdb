@@ -1,3 +1,13 @@
+2007-09-03  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* arm-tdep.h (arm_skip_stub): Declare.
+	* arm-wince-tdep.c: Don't include "solib-svr4.h".  Include
+	"gdbcore.h".
+	(arm_pe_skip_trampoline_code): New function.
+	(arm_wince_init_abi): Register arm_pe_skip_trampoline_code as
+	gdbarch_skip_trampoline_code callback.
+	* Makefile.in (arm-wince-tdep.o): Update dependencies.
+
 2007-09-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Move Fred Fish to Past Maintainers.
