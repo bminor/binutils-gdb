@@ -1,5 +1,13 @@
 2007-09-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c (create_process): New.
+	(win32_create_inferior): Use create_process instead of
+	CreateProcess.  If create_process failed retry appending an ".exe"
+	suffix.  Store the GetLastError result immediatelly after
+	create_process calls and use it on the call to error.
+
+2007-09-03  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* win32-low.c (handle_load_dll): Don't use toolhelp when waiting.
 
 2007-08-23  Joel Brobecker  <brobecker@adacore.com>

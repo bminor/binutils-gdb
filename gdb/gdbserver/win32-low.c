@@ -373,6 +373,55 @@ strwinerror (DWORD error)
   return buf;
 }
 
+static BOOL
+create_process (const char *program, char *args,
+		DWORD flags, PROCESS_INFORMATION *pi)
+{
+  BOOL ret;
+
+#ifdef _WIN32_WCE
+  wchar_t *p, *wprogram, *wargs;
+  size_t argslen;
+
+  wprogram = alloca ((strlen (program) + 1) * sizeof (wchar_t));
+  mbstowcs (wprogram, program, strlen (program) + 1);
+
+  for (p = wprogram; *p; ++p)
+    if (L'/' == *p)
+      *p = L'\\';
+
+  argslen = strlen (args);
+  wargs = alloca ((argslen + 1) * sizeof (wchar_t));
+  mbstowcs (wargs, args, argslen + 1);
+
+  ret = CreateProcessW (wprogram, /* image name */
+                        wargs,    /* command line */
+                        NULL,     /* security, not supported */
+                        NULL,     /* thread, not supported */
+                        FALSE,    /* inherit handles, not supported */
+                        flags,    /* start flags */
+                        NULL,     /* environment, not supported */
+                        NULL,     /* current directory, not supported */
+                        NULL,     /* start info, not supported */
+                        pi);      /* proc info */
+#else
+  STARTUPINFOA si = { sizeof (STARTUPINFOA) };
+
+  ret = CreateProcessA (program,  /* image name */
+			args,     /* command line */
+			NULL,     /* security */
+			NULL,     /* thread */
+			TRUE,     /* inherit handles */
+			flags,    /* start flags */
+			NULL,     /* environment */
+			NULL,     /* current directory */
+			&si,      /* start info */
+			pi);      /* proc info */
+#endif
+
+  return ret;
+}
+
 /* Start a new process.
    PROGRAM is a path to the program to execute.
    ARGS is a standard NULL-terminated array of arguments,
@@ -392,12 +441,7 @@ win32_create_inferior (char *program, char **program_args)
   int argslen;
   int argc;
   PROCESS_INFORMATION pi;
-#ifndef __MINGW32CE__
-  STARTUPINFOA si = { sizeof (STARTUPINFOA) };
-  char *winenv = NULL;
-#else
-  wchar_t *wargs, *wprogram;
-#endif
+  DWORD err;
 
   if (!program)
     error ("No executable specified, specify executable to debug.\n");
@@ -437,34 +481,15 @@ win32_create_inferior (char *program, char **program_args)
   flags |= CREATE_NEW_PROCESS_GROUP;
 #endif
 
-#ifdef __MINGW32CE__
-  to_back_slashes (program);
-  wargs = alloca (argslen * sizeof (wchar_t));
-  mbstowcs (wargs, args, argslen);
-  wprogram = alloca ((strlen (program) + 1) * sizeof (wchar_t));
-  mbstowcs (wprogram, program, strlen (program) + 1);
-  ret = CreateProcessW (wprogram, /* image name */
-                        wargs,    /* command line */
-                        NULL,     /* security, not supported */
-                        NULL,     /* thread, not supported */
-                        FALSE,    /* inherit handles, not supported */
-                        flags,    /* start flags */
-                        NULL,     /* environment, not supported */
-                        NULL,     /* current directory, not supported */
-                        NULL,     /* start info, not supported */
-                        &pi);     /* proc info */
-#else
-  ret = CreateProcessA (program,  /* image name */
-			args,     /* command line */
-			NULL,     /* security */
-			NULL,     /* thread */
-			TRUE,     /* inherit handles */
-			flags,    /* start flags */
-			winenv,   /* environment */
-			NULL,     /* current directory */
-			&si,      /* start info */
-			&pi);     /* proc info */
-#endif
+  ret = create_process (program, args, flags, &pi);
+  err = GetLastError ();
+  if (!ret && err == ERROR_FILE_NOT_FOUND)
+    {
+      char *exename = alloca (strlen (program) + 5);
+      strcat (strcpy (exename, program), ".exe");
+      ret = create_process (exename, args, flags, &pi);
+      err = GetLastError ();
+    }
 
 #ifndef USE_WIN32API
   if (orig_path)
@@ -473,7 +498,6 @@ win32_create_inferior (char *program, char **program_args)
 
   if (!ret)
     {
-      DWORD err = GetLastError ();
       error ("Error creating process \"%s%s\", (error %d): %s\n",
 	     program, args, (int) err, strwinerror (err));
     }
