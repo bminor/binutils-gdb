@@ -462,6 +462,7 @@
 	* varobj.c (value_of_root): Move alloc after return to avoid leak.
 
 	* tui/tui-layout.c (tui_set_layout): Dead code, dead variable.
+	(tui_set_layout_for_display_command): Mem leak.
 
 	* top.c (command_line_input): Memory leak.
 
