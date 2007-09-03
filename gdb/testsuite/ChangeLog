@@ -1,3 +1,8 @@
+2007-09-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/default.exp (show version): Update the version text.
+	* gdb.gdb/selftest.exp (xgdb is at prompt): Likewise.
+
 2007-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/gcore-buffer-overflow.c, gdb.base/gcore-buffer-overflow.exp:
