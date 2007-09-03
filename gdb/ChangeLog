@@ -1,3 +1,8 @@
+2007-09-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* corelow.c (core_xfer_partial): Pass writebuf to
+	deprecated_xfer_memory in TARGET_OBJECT_MEMORY write case.
+
 2007-09-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* arm-tdep.h (arm_skip_stub): Declare.
