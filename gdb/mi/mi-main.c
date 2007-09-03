@@ -1463,10 +1463,13 @@ mi_load_progress (const char *section_name,
      of this function.  */
   saved_uiout = uiout;
 
-  if (current_interp_named_p (INTERP_MI))
+  if (current_interp_named_p (INTERP_MI)
+      || current_interp_named_p (INTERP_MI2))
     uiout = mi_out_new (2);
   else if (current_interp_named_p (INTERP_MI1))
     uiout = mi_out_new (1);
+  else if (current_interp_named_p (INTERP_MI3))
+    uiout = mi_out_new (3);
   else
     return;
 

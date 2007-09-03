@@ -1,3 +1,8 @@
+2007-09-03  Maxim Grigoriev  <maxim2405@gmail.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mi-main.c (mi_load_progress): Handle MI2 and MI3 interpreters.
+
 2007-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* top.c (print_gdb_version): Fixed a string end-of-line compiler error.
