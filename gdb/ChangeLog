@@ -1,5 +1,9 @@
 2007-09-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* MAINTAINERS: Move Fred Fish to Past Maintainers.
+
+2007-09-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* configure.ac: Add --with-expat.
 	* configure: Regenerated.
 

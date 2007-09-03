@@ -162,7 +162,6 @@ Jim Blandy			jimb@codesourcery.com
 Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			cagney@gnu.org
-Fred Fish			fnf@ninemoons.com
 Daniel Jacobowitz		dan@debian.org
 Mark Kettenis           	kettenis@gnu.org
 Stan Shebs			shebs@mozilla.com
@@ -481,7 +480,6 @@ Steve Ellcey					sje@cup.hp.com
 Frank Ch. Eigler				fche@redhat.com
 Ben Elliston					bje@gnu.org
 Adam Fedor					fedor@gnu.org
-Fred Fish					fnf@ninemoons.com
 Brian Ford					ford@vss.fsi.com
 Orjan Friberg					orjanf@axis.com
 Nathan Froyd					froydnj@codesourcery.com
@@ -611,6 +609,7 @@ Peter Schauer (global, AIX, xcoffsolib,
 Scott Bambrough (ARM)				scottb at netwinder dot org
 Philippe De Muyter (coff)			phdm at macqel dot be
 Michael Chastain (testsuite)			mec.gnu at mindspring dot com
+Fred Fish (global)
 
 
 
