@@ -335,6 +335,23 @@ if test "$ac_cv_search_tgetent" = no; then
   AC_MSG_ERROR([no termcap library found])
 fi
 
+AC_ARG_WITH([system-readline],
+  [AS_HELP_STRING([--with-system-readline],
+                  [use installed readline library])])
+
+if test "$with_system_readline" = yes; then
+  READLINE=-lreadline
+  READLINE_DEPS=
+  READLINE_CFLAGS=
+else
+  READLINE='$(READLINE_DIR)/libreadline.a'
+  READLINE_DEPS='$(READLINE)'
+  READLINE_CFLAGS='-I$(READLINE_SRC)/..'
+fi
+AC_SUBST(READLINE)
+AC_SUBST(READLINE_DEPS)
+AC_SUBST(READLINE_CFLAGS)
+
 AC_LIB_HAVE_LINKFLAGS([expat], [], [#include "expat.h"],
 		      [XML_Parser p = XML_ParserCreate (0);])
 if test "$HAVE_LIBEXPAT" != yes; then

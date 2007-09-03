@@ -1,3 +1,12 @@
+2007-09-03  Andreas Schwab  <schwab@suse.de>
+
+	* configure.ac: Accept --with-system-readline.
+	(READLINE, READLINE_DEPS, READLINE_CFLAGS): Define and substitute.
+	* configure: Regenerate.
+	* Makefile.in (READLINE, READLINE_DEPS, READLINE_CFLAGS): Use
+	substituted values.
+	(CDEPS): Use $(READLINE_DEPS) instead of $(READLINE).
+
 2007-09-03  Maxim Grigoriev  <maxim2405@gmail.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
