@@ -352,15 +352,30 @@ AC_SUBST(READLINE)
 AC_SUBST(READLINE_DEPS)
 AC_SUBST(READLINE_CFLAGS)
 
-AC_LIB_HAVE_LINKFLAGS([expat], [], [#include "expat.h"],
-		      [XML_Parser p = XML_ParserCreate (0);])
-if test "$HAVE_LIBEXPAT" != yes; then
-  AC_MSG_WARN([expat is missing or unusable; some features may be disabled.])
+AC_ARG_WITH(expat,
+  AS_HELP_STRING([--with-expat], [include expat support (auto/yes/no)]),
+  [], [with_expat=auto])
+AC_MSG_CHECKING([whether to use expat])
+AC_MSG_RESULT([$with_expat])
+
+if test "${with_expat}" = no; then
+  AC_MSG_WARN([expat support disabled; some features may be unavailable.])
+  HAVE_LIBEXPAT=no
 else
-  save_LIBS=$LIBS
-  LIBS="$LIBS $LIBEXPAT"
-  AC_CHECK_FUNCS(XML_StopParser)
-  LIBS=$save_LIBS
+  AC_LIB_HAVE_LINKFLAGS([expat], [], [#include "expat.h"],
+			[XML_Parser p = XML_ParserCreate (0);])
+  if test "$HAVE_LIBEXPAT" != yes; then
+    if test "$with_expat" = yes; then
+      AC_MSG_ERROR([expat is missing or unusable])
+    else
+      AC_MSG_WARN([expat is missing or unusable; some features may be unavailable.])
+    fi
+  else
+    save_LIBS=$LIBS
+    LIBS="$LIBS $LIBEXPAT"
+    AC_CHECK_FUNCS(XML_StopParser)
+    LIBS=$save_LIBS
+  fi
 fi
 
 # ------------------------- #

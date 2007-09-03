@@ -878,6 +878,7 @@ Optional Packages:
   --with-separate-debug-dir=path   Look for global separate debug info in this path LIBDIR/debug
   --with-libunwind            Use libunwind frame unwinding support
   --with-system-readline  use installed readline library
+  --with-expat            include expat support (auto/yes/no)
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libexpat-prefix[=DIR]  search for libexpat in DIR/include and DIR/lib
   --without-libexpat-prefix     don't search for libexpat in includedir and libdir
@@ -5739,6 +5740,24 @@ fi
 
 
 
+# Check whether --with-expat or --without-expat was given.
+if test "${with_expat+set}" = set; then
+  withval="$with_expat"
+
+else
+  with_expat=auto
+fi;
+echo "$as_me:$LINENO: checking whether to use expat" >&5
+echo $ECHO_N "checking whether to use expat... $ECHO_C" >&6
+echo "$as_me:$LINENO: result: $with_expat" >&5
+echo "${ECHO_T}$with_expat" >&6
+
+if test "${with_expat}" = no; then
+  { echo "$as_me:$LINENO: WARNING: expat support disabled; some features may be unavailable." >&5
+echo "$as_me: WARNING: expat support disabled; some features may be unavailable." >&2;}
+  HAVE_LIBEXPAT=no
+else
+
       if test "X$prefix" = "XNONE"; then
     acl_final_prefix="$ac_default_prefix"
   else
@@ -6390,12 +6409,18 @@ echo "${ECHO_T}$LIBEXPAT" >&6
 
 
 
-if test "$HAVE_LIBEXPAT" != yes; then
-  { echo "$as_me:$LINENO: WARNING: expat is missing or unusable; some features may be disabled." >&5
-echo "$as_me: WARNING: expat is missing or unusable; some features may be disabled." >&2;}
-else
-  save_LIBS=$LIBS
-  LIBS="$LIBS $LIBEXPAT"
+  if test "$HAVE_LIBEXPAT" != yes; then
+    if test "$with_expat" = yes; then
+      { { echo "$as_me:$LINENO: error: expat is missing or unusable" >&5
+echo "$as_me: error: expat is missing or unusable" >&2;}
+   { (exit 1); exit 1; }; }
+    else
+      { echo "$as_me:$LINENO: WARNING: expat is missing or unusable; some features may be unavailable." >&5
+echo "$as_me: WARNING: expat is missing or unusable; some features may be unavailable." >&2;}
+    fi
+  else
+    save_LIBS=$LIBS
+    LIBS="$LIBS $LIBEXPAT"
 
 for ac_func in XML_StopParser
 do
@@ -6498,7 +6523,8 @@ _ACEOF
 fi
 done
 
-  LIBS=$save_LIBS
+    LIBS=$save_LIBS
+  fi
 fi
 
 # ------------------------- #
