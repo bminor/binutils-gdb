@@ -1,3 +1,8 @@
+2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* printcmd.c (printf_command): Handle ptr_arg.  Correct typo
+	in internal error message.
+
 2007-09-04  Pedro Alves  <pedro_alves@portugalmail.pt>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

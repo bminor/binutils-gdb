@@ -178,6 +178,8 @@ gdb_test "printf \"\\\\!\\a\\f\\r\\t\\v\\b\\n\"" ".*!.*"
 gdb_test "printf \"\"" ".*" "re-set term"
 gdb_test "printf \"\\w\"" ".*Unrecognized escape character.*"
 gdb_test "printf \"%d\" j" ".*Invalid argument syntax.*"
+gdb_test "printf \"%p\\n\", 0" "\\(nil\\)"
+gdb_test "printf \"%p\\n\", 1" "0x1"
 
 # play with "print", too
 #

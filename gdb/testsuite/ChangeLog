@@ -1,3 +1,7 @@
+2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/display.exp: Add tests for printf %p.
+
 2007-09-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* gdb.base/unload.c (dlopen, dlsym): Use the TEXT macro to convert

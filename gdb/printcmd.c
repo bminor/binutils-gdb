@@ -2079,9 +2079,68 @@ printf_command (char *arg, int from_tty)
 	      printf_filtered (current_substring, val);
 	      break;
 	    }
+	  case ptr_arg:
+	    {
+	      /* We avoid the host's %p because pointers are too
+		 likely to be the wrong size.  The only interesting
+		 modifier for %p is a width; extract that, and then
+		 handle %p as glibc would: %#x or a literal "(nil)".  */
+
+	      char *p, *fmt, *fmt_p;
+#if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
+	      long long val = value_as_long (val_args[i]);
+#else
+	      long val = value_as_long (val_args[i]);
+#endif
+
+	      fmt = alloca (strlen (current_substring) + 5);
+
+	      /* Copy up to the leading %.  */
+	      p = current_substring;
+	      fmt_p = fmt;
+	      while (*p)
+		{
+		  int is_percent = (*p == '%');
+		  *fmt_p++ = *p++;
+		  if (is_percent)
+		    {
+		      if (*p == '%')
+			*fmt_p++ = *p++;
+		      else
+			break;
+		    }
+		}
+
+	      if (val != 0)
+		*fmt_p++ = '#';
+
+	      /* Copy any width.  */
+	      while (*p >= '0' && *p < '9')
+		*fmt_p++ = *p++;
+
+	      gdb_assert (*p == 'p' && *(p + 1) == '\0');
+	      if (val != 0)
+		{
+#if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
+		  *fmt_p++ = 'l';
+#endif
+		  *fmt_p++ = 'l';
+		  *fmt_p++ = 'x';
+		  *fmt_p++ = '\0';
+		  printf_filtered (fmt, val);
+		}
+	      else
+		{
+		  *fmt_p++ = 's';
+		  *fmt_p++ = '\0';
+		  printf_filtered (fmt, "(nil)");
+		}
+
+	      break;
+	    }
 	  default:
 	    internal_error (__FILE__, __LINE__,
-			    _("failed internal consitency check"));
+			    _("failed internal consistency check"));
 	  }
 	/* Skip to the next substring.  */
 	current_substring += strlen (current_substring) + 1;
