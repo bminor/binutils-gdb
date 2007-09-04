@@ -1197,11 +1197,11 @@ print_return_value (int struct_return, struct type *value_type)
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
   if (value)
     {
       /* Print it.  */
+      stb = ui_out_stream_new (uiout);
+      old_chain = make_cleanup_ui_out_stream_delete (stb);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
 			record_latest_value (value));
@@ -1209,16 +1209,15 @@ print_return_value (int struct_return, struct type *value_type)
       value_print (value, stb->stream, 0, Val_no_prettyprint);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
+      do_cleanups (old_chain);
     }
   else
     {
-      /* Just print the type.  */
       ui_out_text (uiout, "Value returned has type: ");
-      type_print (value_type, NULL, stb->stream, 0);
-      ui_out_field_stream (uiout, "return-type", stb);
-      ui_out_text (uiout, ". Cannot determine contents.\n");
+      ui_out_field_string (uiout, "return-type", TYPE_NAME (value_type));
+      ui_out_text (uiout, ".");
+      ui_out_text (uiout, " Cannot determine contents\n");
     }
-  do_cleanups (old_chain);
 }
 
 /* Stuff that needs to be done by the finish command after the target
