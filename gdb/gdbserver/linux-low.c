@@ -589,12 +589,14 @@ linux_wait_for_event (struct thread_info *child)
       /* If GDB is not interested in this signal, don't stop other
 	 threads, and don't report it to GDB.  Just resume the
 	 inferior right away.  We do this for threading-related
-	 signals as well as any that GDB specifically requested
-	 we ignore.  But never ignore SIGSTOP if we sent it
-	 ourselves.  */
+	 signals as well as any that GDB specifically requested we
+	 ignore.  But never ignore SIGSTOP if we sent it ourselves,
+	 and do not ignore signals when stepping - they may require
+	 special handling to skip the signal handler.  */
       /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
 	 thread library?  */
       if (WIFSTOPPED (wstat)
+	  && !event_child->stepping
 	  && ((using_threads && (WSTOPSIG (wstat) == __SIGRTMIN
 				 || WSTOPSIG (wstat) == __SIGRTMIN + 1))
 	      || (pass_signals[target_signal_from_host (WSTOPSIG (wstat))]

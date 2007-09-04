@@ -1,3 +1,8 @@
+2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (linux_wait_for_event): Do not pass signals while
+	single-stepping.
+
 2007-09-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* win32-low.c (create_process): New.
