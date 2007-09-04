@@ -180,9 +180,11 @@ enum {
   OPTION_DINERO_TRACE = OPTION_START,
   OPTION_DINERO_FILE,
   OPTION_FIRMWARE,
+  OPTION_INFO_MEMORY,
   OPTION_BOARD
 };
 
+static int display_mem_info = 0;
 
 static SIM_RC
 mips_option_handler (sd, cpu, opt, arg, is_command)
@@ -259,6 +261,10 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 	  }
 	return SIM_RC_OK;
       }
+
+    case OPTION_INFO_MEMORY:
+      display_mem_info = 1;
+      break;
     }
   
   return SIM_RC_OK;
@@ -290,6 +296,20 @@ static const OPTION mips_options[] =
 
     , "Customize simulation for a particular board.", mips_option_handler },
 
+  /* These next two options have the same names as ones found in the
+     memory_options[] array in common/sim-memopt.c.  This is because
+     the intention is to provide an alternative handler for those two
+     options.  We need an alternative handler because the memory
+     regions are not set up until after the command line arguments
+     have been parsed, and so we cannot display the memory info whilst
+     processing the command line.  There is a hack in sim_open to
+     remove these handlers when we want the real --memory-info option
+     to work.  */
+  { { "info-memory", no_argument, NULL, OPTION_INFO_MEMORY },
+    '\0', NULL, "List configured memory regions", mips_option_handler },
+  { { "memory-info", no_argument, NULL, OPTION_INFO_MEMORY },
+    '\0', NULL, NULL, mips_option_handler },
+  
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
 
@@ -587,6 +607,31 @@ sim_open (kind, cb, abfd, argv)
     }
 #endif
 
+  if (display_mem_info)
+    {
+      struct option_list * ol;
+      struct option_list * prev;
+
+      /* This is a hack.  We want to execute the real --memory-info command
+	 line switch which is handled in common/sim-memopts.c, not the
+	 override we have defined in this file.  So we remove the
+	 mips_options array from the state options list.  This is safe
+         because we have now processed all of the command line.  */
+      for (ol = STATE_OPTIONS (sd), prev = NULL;
+	   ol != NULL;
+	   prev = ol, ol = ol->next)
+	if (ol->options == mips_options)
+	  break;
+
+      SIM_ASSERT (ol != NULL);
+
+      if (prev == NULL)
+	STATE_OPTIONS (sd) = ol->next;
+      else
+	prev->next = ol->next;
+
+      sim_do_commandf (sd, "memory-info");
+    }
 
   /* check for/establish the a reference program image */
   if (sim_analyze_program (sd,

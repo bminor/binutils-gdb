@@ -1,3 +1,14 @@
+2007-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* interp.c (options enum): Add OPTION_INFO_MEMORY.
+	(display_mem_info): New static variable.
+	(mips_option_handler): Handle OPTION_INFO_MEMORY.
+	(mips_options): Add info-memory and memory-info.
+	(sim_open): After processing the command line and board
+	specification, check display_mem_info.  If it is set then
+	call the real handler for the --memory-info command line
+	switch.
+
 2007-08-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Change license of multi-run.c to GPL version 3.
