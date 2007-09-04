@@ -203,6 +203,7 @@ emul_bugapi_create(device *root,
 {
   device *node;
   os_emul_data *bugapi;
+  char *filename;
 
   /* check it really is for us */
   if (name != NULL
@@ -301,8 +302,12 @@ emul_bugapi_create(device *root,
 		: "ppc-xcoff"));
 
   if (image != NULL)
-    tree_parse(root, "/openprom/init/load-binary/file-name \"%s",
-	       bfd_get_filename(image));
+    {
+      filename = tree_quote_property (bfd_get_filename(image));
+      tree_parse(root, "/openprom/init/load-binary/file-name %s",
+		 filename);
+      free (filename);
+    }
 
   return bugapi;
 }

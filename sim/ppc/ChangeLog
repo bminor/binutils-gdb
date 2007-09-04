@@ -1,3 +1,8 @@
+2007-09-04  Jerome Guitton  <guitton@adacore.com>
+
+	* sim/ppc/emul_bugapi.c (emul_bugapi_create): quote the file
+	name property before parsing it.
+
 2006-12-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* acconfig.h: Remove.
