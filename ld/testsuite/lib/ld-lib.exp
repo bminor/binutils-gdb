@@ -207,6 +207,7 @@ proc default_ld_simple_link { ld target objects } {
 #
 proc default_ld_compile { cc source object } {
     global CFLAGS
+    global CXXFLAGS
     global srcdir
     global subdir
     global host_triplet
@@ -224,7 +225,7 @@ proc default_ld_compile { cc source object } {
     remote_file build delete "$object"
     remote_file host delete "$object"
 
-    set flags "-I$srcdir/$subdir $CFLAGS"
+    set flags "-I$srcdir/$subdir"
 
     # If we are compiling with gcc, we want to add gcc_gas_flag to
     # flags.  Rather than determine this in some complex way, we guess
@@ -240,6 +241,12 @@ proc default_ld_compile { cc source object } {
     set ccexe [string replace $ccexe 0 [string last "/" $ccexe] ""]
     if {[string match "*gcc*" $ccexe] || [string match "*++*" $ccexe]} then {
 	set flags "$gcc_gas_flag $flags"
+    }
+
+    if {[string match "*++*" $ccexe]} {
+	set flags "$flags $CXXFLAGS"
+    } else {
+	set flags "$flags $CFLAGS"
     }
 
     if [board_info [target_info name] exists multilib_flags] {
@@ -1285,6 +1292,7 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
     global CC
     global CXX
     global CFLAGS
+    global CXXFLAGS
     global errcnt
     global exec_output
 
@@ -1319,7 +1327,11 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 	    # We ignore warnings since some compilers may generate
 	    # incorrect section attributes and the assembler will warn
 	    # them.
-	    ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+	    if { [ string match "c++" $lang ] } {
+		ld_compile "$CXX -c $CXXFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+	    } else {
+		ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+	    }
 
 	    # We have to use $CC to build PIE and shared library.
 	    if { [ string match "c" $lang ] } {
@@ -1411,6 +1423,7 @@ proc run_cc_link_tests { ldtests } {
     global CC
     global CXX
     global CFLAGS
+    global CXXFLAGS
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
@@ -1432,7 +1445,11 @@ proc run_cc_link_tests { ldtests } {
 	    # We ignore warnings since some compilers may generate
 	    # incorrect section attributes and the assembler will warn
 	    # them.
-	    ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+	    if { [ string match "c++" $lang ] } {
+		ld_compile "$CXX -c $CXXFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+	    } else {
+		ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
+	    }
 	}
 
 	# Clear error and warning counts.

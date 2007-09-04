@@ -1,3 +1,11 @@
+2007-09-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/ld-lib.exp (default_ld_compile): Pull in global CXXFLAGS and
+	add it to $flags when $ccexe matches *++*.
+	(run_ld_link_exec_tests): Pull in global CXXFLAGS and execute CXX
+	with CXXFLAGS when $lang matches c++.
+	(run_cc_link_tests): Likewise.
+
 2007-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4986
