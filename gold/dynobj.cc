@@ -1520,18 +1520,27 @@ Versions::need_section_contents(const Stringpool* dynpool,
 // Instantiate the templates we need.  We could use the configure
 // script to restrict this to only the ones for implemented targets.
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 class Sized_dynobj<32, false>;
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 class Sized_dynobj<32, true>;
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 class Sized_dynobj<64, false>;
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 class Sized_dynobj<64, true>;
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Versions::symbol_section_contents<32, false>(
@@ -1541,7 +1550,9 @@ Versions::symbol_section_contents<32, false>(
     unsigned char**,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(32, false)) const;
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
 Versions::symbol_section_contents<32, true>(
@@ -1551,7 +1562,9 @@ Versions::symbol_section_contents<32, true>(
     unsigned char**,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(32, true)) const;
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Versions::symbol_section_contents<64, false>(
@@ -1561,7 +1574,9 @@ Versions::symbol_section_contents<64, false>(
     unsigned char**,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(64, false)) const;
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 void
 Versions::symbol_section_contents<64, true>(
@@ -1571,7 +1586,9 @@ Versions::symbol_section_contents<64, true>(
     unsigned char**,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(64, true)) const;
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Versions::def_section_contents<32, false>(
@@ -1580,7 +1597,9 @@ Versions::def_section_contents<32, false>(
     unsigned int*,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(32, false)) const;
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
 Versions::def_section_contents<32, true>(
@@ -1589,7 +1608,9 @@ Versions::def_section_contents<32, true>(
     unsigned int*,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(32, true)) const;
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Versions::def_section_contents<64, false>(
@@ -1598,7 +1619,9 @@ Versions::def_section_contents<64, false>(
     unsigned int*,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(64, false)) const;
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 void
 Versions::def_section_contents<64, true>(
@@ -1607,7 +1630,9 @@ Versions::def_section_contents<64, true>(
     unsigned int*,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(64, true)) const;
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Versions::need_section_contents<32, false>(
@@ -1616,7 +1641,9 @@ Versions::need_section_contents<32, false>(
     unsigned int*,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(32, false)) const;
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
 Versions::need_section_contents<32, true>(
@@ -1625,7 +1652,9 @@ Versions::need_section_contents<32, true>(
     unsigned int*,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(32, true)) const;
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Versions::need_section_contents<64, false>(
@@ -1634,7 +1663,9 @@ Versions::need_section_contents<64, false>(
     unsigned int*,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(64, false)) const;
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 void
 Versions::need_section_contents<64, true>(
@@ -1643,5 +1674,6 @@ Versions::need_section_contents<64, true>(
     unsigned int*,
     unsigned int*
     ACCEPT_SIZE_ENDIAN_EXPLICIT(64, true)) const;
+#endif
 
 } // End namespace gold.

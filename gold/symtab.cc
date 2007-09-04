@@ -809,13 +809,25 @@ Symbol_table::do_define_in_output_data(
   Sized_symbol<size>* sym;
 
   if (target->is_big_endian())
-    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-	target, name, version, only_if_ref
-        SELECT_SIZE_ENDIAN(size, true));
+    {
+#if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
+      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
+          target, name, version, only_if_ref
+          SELECT_SIZE_ENDIAN(size, true));
+#else
+      gold_unreachable();
+#endif
+    }
   else
-    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, name, version, only_if_ref
-        SELECT_SIZE_ENDIAN(size, false));
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
+      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
+          target, name, version, only_if_ref
+          SELECT_SIZE_ENDIAN(size, false));
+#else
+      gold_unreachable();
+#endif
+    }
 
   if (sym == NULL)
     return NULL;
@@ -1494,16 +1506,7 @@ Warnings::issue_warning(const Symbol* sym, const std::string& location) const
 // script to restrict this to only the ones needed for implemented
 // targets.
 
-template
-void
-Symbol_table::add_from_relobj<32, true>(
-    Sized_relobj<32, true>* relobj,
-    const unsigned char* syms,
-    size_t count,
-    const char* sym_names,
-    size_t sym_name_size,
-    Symbol** sympointers);
-
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Symbol_table::add_from_relobj<32, false>(
@@ -1513,17 +1516,21 @@ Symbol_table::add_from_relobj<32, false>(
     const char* sym_names,
     size_t sym_name_size,
     Symbol** sympointers);
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
-Symbol_table::add_from_relobj<64, true>(
-    Sized_relobj<64, true>* relobj,
+Symbol_table::add_from_relobj<32, true>(
+    Sized_relobj<32, true>* relobj,
     const unsigned char* syms,
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
     Symbol** sympointers);
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Symbol_table::add_from_relobj<64, false>(
@@ -1533,19 +1540,21 @@ Symbol_table::add_from_relobj<64, false>(
     const char* sym_names,
     size_t sym_name_size,
     Symbol** sympointers);
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 void
-Symbol_table::add_from_dynobj<32, true>(
-    Sized_dynobj<32, true>* dynobj,
+Symbol_table::add_from_relobj<64, true>(
+    Sized_relobj<64, true>* relobj,
     const unsigned char* syms,
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
-    const unsigned char* versym,
-    size_t versym_size,
-    const std::vector<const char*>* version_map);
+    Symbol** sympointers);
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Symbol_table::add_from_dynobj<32, false>(
@@ -1557,11 +1566,13 @@ Symbol_table::add_from_dynobj<32, false>(
     const unsigned char* versym,
     size_t versym_size,
     const std::vector<const char*>* version_map);
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
-Symbol_table::add_from_dynobj<64, true>(
-    Sized_dynobj<64, true>* dynobj,
+Symbol_table::add_from_dynobj<32, true>(
+    Sized_dynobj<32, true>* dynobj,
     const unsigned char* syms,
     size_t count,
     const char* sym_names,
@@ -1569,7 +1580,9 @@ Symbol_table::add_from_dynobj<64, true>(
     const unsigned char* versym,
     size_t versym_size,
     const std::vector<const char*>* version_map);
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Symbol_table::add_from_dynobj<64, false>(
@@ -1581,5 +1594,20 @@ Symbol_table::add_from_dynobj<64, false>(
     const unsigned char* versym,
     size_t versym_size,
     const std::vector<const char*>* version_map);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Symbol_table::add_from_dynobj<64, true>(
+    Sized_dynobj<64, true>* dynobj,
+    const unsigned char* syms,
+    size_t count,
+    const char* sym_names,
+    size_t sym_name_size,
+    const unsigned char* versym,
+    size_t versym_size,
+    const std::vector<const char*>* version_map);
+#endif
 
 } // End namespace gold.

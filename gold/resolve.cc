@@ -520,14 +520,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 // script to restrict this to only the ones needed for implemented
 // targets.
 
-template
-void
-Symbol_table::resolve<32, true>(
-    Sized_symbol<32>* to,
-    const elfcpp::Sym<32, true>& sym,
-    Object* object,
-    const char* version);
-
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Symbol_table::resolve<32, false>(
@@ -535,15 +528,19 @@ Symbol_table::resolve<32, false>(
     const elfcpp::Sym<32, false>& sym,
     Object* object,
     const char* version);
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
-Symbol_table::resolve<64, true>(
-    Sized_symbol<64>* to,
-    const elfcpp::Sym<64, true>& sym,
+Symbol_table::resolve<32, true>(
+    Sized_symbol<32>* to,
+    const elfcpp::Sym<32, true>& sym,
     Object* object,
     const char* version);
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Symbol_table::resolve<64, false>(
@@ -551,5 +548,16 @@ Symbol_table::resolve<64, false>(
     const elfcpp::Sym<64, false>& sym,
     Object* object,
     const char* version);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Symbol_table::resolve<64, true>(
+    Sized_symbol<64>* to,
+    const elfcpp::Sym<64, true>& sym,
+    Object* object,
+    const char* version);
+#endif
 
 } // End namespace gold.

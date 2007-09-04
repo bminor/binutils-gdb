@@ -10,6 +10,75 @@ AM_INIT_AUTOMAKE(gold, 0.1)
 
 AM_CONFIG_HEADER(config.h:config.in)
 
+AC_ARG_ENABLE([targets],
+[  --enable-targets        alternative target configurations],
+[case "${enableval}" in
+  yes | "")
+    AC_MSG_ERROR([--enable-targets option must specify target names or 'all'])
+    ;;
+  no)
+    enable_targets=
+    ;;
+  *)
+    enable_targets=$enableval
+    ;;
+esac],
+[# For now, enable all targets by default
+ enable_targets=all
+])
+
+# Canonicalize the enabled targets.
+if test -n "$enable_targets"; then
+  for targ in `echo $enable_targets | sed -e 's/,/ /g'`; do
+    result=`$ac_config_sub $targ 2>/dev/null`
+    if test -n "$result"; then
+      canon_targets="$canon_targets $result"
+    else
+      # Permit unrecognized target names, like "all".
+      canon_targets="$canon_targets $targ"
+    fi
+  done
+fi
+
+# See which specific instantiations we need.
+for targ in $target $canon_targets; do
+  targ_32_little=
+  targ_32_big=
+  targ_64_little=
+  targ_64_big=
+  if test "$targ" = "all"; then
+    targ_32_little=yes
+    targ_32_big=yes
+    targ_64_little=yes
+    targ_64_big=yes
+  else
+    case "$targ" in
+    i?86-*) targ_32_little=yes ;;
+    x86_64-*) targ_64_little=yes ;;
+    *)
+      AC_MSG_ERROR("target $targ: unknown size and endianness")
+      ;;
+    esac
+  fi
+done
+
+if test -n "$targ_32_little"; then
+  AC_DEFINE(HAVE_TARGET_32_LITTLE, 1,
+	      [Define to support 32-bit little-endian targets])
+fi
+if test -n "$targ_32_big"; then
+  AC_DEFINE(HAVE_TARGET_32_BIG, 1,
+	      [Define to support 32-bit big-endian targets])
+fi
+if test -n "$targ_64_little"; then
+  AC_DEFINE(HAVE_TARGET_64_LITTLE, 1,
+	      [Define to support 64-bit little-endian targets])
+fi
+if test -n "$targ_64_big"; then
+  AC_DEFINE(HAVE_TARGET_64_BIG, 1,
+	      [Define to support 64-bit big-endian targets])
+fi
+
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_YACC

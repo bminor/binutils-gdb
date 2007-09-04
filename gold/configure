@@ -858,6 +858,7 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-targets        alternative target configurations
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-nls           do not use Native Language Support
@@ -1840,6 +1841,94 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
           ac_config_headers="$ac_config_headers config.h:config.in"
 
+
+# Check whether --enable-targets or --disable-targets was given.
+if test "${enable_targets+set}" = set; then
+  enableval="$enable_targets"
+  case "${enableval}" in
+  yes | "")
+    { { echo "$as_me:$LINENO: error: --enable-targets option must specify target names or 'all'" >&5
+echo "$as_me: error: --enable-targets option must specify target names or 'all'" >&2;}
+   { (exit 1); exit 1; }; }
+    ;;
+  no)
+    enable_targets=
+    ;;
+  *)
+    enable_targets=$enableval
+    ;;
+esac
+else
+  # For now, enable all targets by default
+ enable_targets=all
+
+fi;
+
+# Canonicalize the enabled targets.
+if test -n "$enable_targets"; then
+  for targ in `echo $enable_targets | sed -e 's/,/ /g'`; do
+    result=`$ac_config_sub $targ 2>/dev/null`
+    if test -n "$result"; then
+      canon_targets="$canon_targets $result"
+    else
+      # Permit unrecognized target names, like "all".
+      canon_targets="$canon_targets $targ"
+    fi
+  done
+fi
+
+# See which specific instantiations we need.
+for targ in $target $canon_targets; do
+  targ_32_little=
+  targ_32_big=
+  targ_64_little=
+  targ_64_big=
+  if test "$targ" = "all"; then
+    targ_32_little=yes
+    targ_32_big=yes
+    targ_64_little=yes
+    targ_64_big=yes
+  else
+    case "$targ" in
+    i?86-*) targ_32_little=yes ;;
+    x86_64-*) targ_64_little=yes ;;
+    *)
+      { { echo "$as_me:$LINENO: error: \"target $targ: unknown size and endianness\"" >&5
+echo "$as_me: error: \"target $targ: unknown size and endianness\"" >&2;}
+   { (exit 1); exit 1; }; }
+      ;;
+    esac
+  fi
+done
+
+if test -n "$targ_32_little"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_TARGET_32_LITTLE 1
+_ACEOF
+
+fi
+if test -n "$targ_32_big"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_TARGET_32_BIG 1
+_ACEOF
+
+fi
+if test -n "$targ_64_little"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_TARGET_64_LITTLE 1
+_ACEOF
+
+fi
+if test -n "$targ_64_big"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_TARGET_64_BIG 1
+_ACEOF
+
+fi
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'

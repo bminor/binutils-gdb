@@ -611,128 +611,176 @@ Copy_relocs<size, big_endian>::emit(
 // Instantiate the templates we need.  We could use the configure
 // script to restrict this to only the ones for implemented targets.
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Sized_relobj<32, false>::do_read_relocs(Read_relocs_data* rd);
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
 Sized_relobj<32, true>::do_read_relocs(Read_relocs_data* rd);
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Sized_relobj<64, false>::do_read_relocs(Read_relocs_data* rd);
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 void
 Sized_relobj<64, true>::do_read_relocs(Read_relocs_data* rd);
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Sized_relobj<32, false>::do_scan_relocs(const General_options& options,
 					Symbol_table* symtab,
 					Layout* layout,
 					Read_relocs_data* rd);
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
 Sized_relobj<32, true>::do_scan_relocs(const General_options& options,
 				       Symbol_table* symtab,
 				       Layout* layout,
 				       Read_relocs_data* rd);
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Sized_relobj<64, false>::do_scan_relocs(const General_options& options,
 					Symbol_table* symtab,
 					Layout* layout,
 					Read_relocs_data* rd);
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 void
 Sized_relobj<64, true>::do_scan_relocs(const General_options& options,
 				       Symbol_table* symtab,
 				       Layout* layout,
 				       Read_relocs_data* rd);
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Sized_relobj<32, false>::do_relocate(const General_options& options,
 				     const Symbol_table* symtab,
 				     const Layout* layout,
 				     Output_file* of);
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
 Sized_relobj<32, true>::do_relocate(const General_options& options,
 				    const Symbol_table* symtab,
 				    const Layout* layout,
 				    Output_file* of);
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Sized_relobj<64, false>::do_relocate(const General_options& options,
 				     const Symbol_table* symtab,
 				     const Layout* layout,
 				     Output_file* of);
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 void
 Sized_relobj<64, true>::do_relocate(const General_options& options,
 				    const Symbol_table* symtab,
 				    const Layout* layout,
 				    Output_file* of);
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 class Copy_relocs<32, false>;
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 class Copy_relocs<32, true>;
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 class Copy_relocs<64, false>;
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 class Copy_relocs<64, true>;
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Copy_relocs<32, false>::emit<elfcpp::SHT_REL>(
     Output_data_reloc<elfcpp::SHT_REL, true, 32, false>*);
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
 Copy_relocs<32, true>::emit<elfcpp::SHT_REL>(
     Output_data_reloc<elfcpp::SHT_REL, true, 32, true>*);
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Copy_relocs<64, false>::emit<elfcpp::SHT_REL>(
     Output_data_reloc<elfcpp::SHT_REL, true, 64, false>*);
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 void
 Copy_relocs<64, true>::emit<elfcpp::SHT_REL>(
     Output_data_reloc<elfcpp::SHT_REL, true, 64, true>*);
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 void
 Copy_relocs<32, false>::emit<elfcpp::SHT_RELA>(
     Output_data_reloc<elfcpp::SHT_RELA , true, 32, false>*);
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 void
 Copy_relocs<32, true>::emit<elfcpp::SHT_RELA>(
     Output_data_reloc<elfcpp::SHT_RELA, true, 32, true>*);
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 void
 Copy_relocs<64, false>::emit<elfcpp::SHT_RELA>(
     Output_data_reloc<elfcpp::SHT_RELA, true, 64, false>*);
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 void
 Copy_relocs<64, true>::emit<elfcpp::SHT_RELA>(
     Output_data_reloc<elfcpp::SHT_RELA, true, 64, true>*);
+#endif
 
 } // End namespace gold.

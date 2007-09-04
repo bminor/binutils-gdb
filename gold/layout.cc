@@ -986,24 +986,52 @@ Layout::create_version_sections(const Target* target, const Versions* versions,
   if (target->get_size() == 32)
     {
       if (target->is_big_endian())
-	this->sized_create_version_sections SELECT_SIZE_ENDIAN_NAME(32, true)(
-            versions, local_symcount, dynamic_symbols, dynstr
-            SELECT_SIZE_ENDIAN(32, true));
+        {
+#ifdef HAVE_TARGET_32_BIG
+          this->sized_create_version_sections
+              SELECT_SIZE_ENDIAN_NAME(32, true)(
+                  versions, local_symcount, dynamic_symbols, dynstr
+                  SELECT_SIZE_ENDIAN(32, true));
+#else
+          gold_unreachable();
+#endif
+        }
       else
-	this->sized_create_version_sections SELECT_SIZE_ENDIAN_NAME(32, false)(
-            versions, local_symcount, dynamic_symbols, dynstr
-            SELECT_SIZE_ENDIAN(32, false));
+        {
+#ifdef HAVE_TARGET_32_LITTLE
+          this->sized_create_version_sections
+              SELECT_SIZE_ENDIAN_NAME(32, false)(
+                  versions, local_symcount, dynamic_symbols, dynstr
+                  SELECT_SIZE_ENDIAN(32, false));
+#else
+          gold_unreachable();
+#endif
+        }
     }
   else if (target->get_size() == 64)
     {
       if (target->is_big_endian())
-	this->sized_create_version_sections SELECT_SIZE_ENDIAN_NAME(64, true)(
-            versions, local_symcount, dynamic_symbols, dynstr
-            SELECT_SIZE_ENDIAN(64, true));
+        {
+#ifdef HAVE_TARGET_64_BIG
+          this->sized_create_version_sections
+              SELECT_SIZE_ENDIAN_NAME(64, true)(
+                  versions, local_symcount, dynamic_symbols, dynstr
+                  SELECT_SIZE_ENDIAN(64, true));
+#else
+          gold_unreachable();
+#endif
+        }
       else
-	this->sized_create_version_sections SELECT_SIZE_ENDIAN_NAME(64, false)(
-            versions, local_symcount, dynamic_symbols, dynstr
-            SELECT_SIZE_ENDIAN(64, false));
+        {
+#ifdef HAVE_TARGET_64_LITTLE
+          this->sized_create_version_sections
+              SELECT_SIZE_ENDIAN_NAME(64, false)(
+                  versions, local_symcount, dynamic_symbols, dynstr
+                  SELECT_SIZE_ENDIAN(64, false));
+#else
+          gold_unreachable();
+#endif
+        }
     }
   else
     gold_unreachable();
@@ -1449,25 +1477,33 @@ Close_task_runner::run(Workqueue*)
 // Instantiate the templates we need.  We could use the configure
 // script to restrict this to only the ones for implemented targets.
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 Output_section*
 Layout::layout<32, false>(Relobj* object, unsigned int shndx, const char* name,
 			  const elfcpp::Shdr<32, false>& shdr, off_t*);
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 Output_section*
 Layout::layout<32, true>(Relobj* object, unsigned int shndx, const char* name,
 			 const elfcpp::Shdr<32, true>& shdr, off_t*);
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 Output_section*
 Layout::layout<64, false>(Relobj* object, unsigned int shndx, const char* name,
 			  const elfcpp::Shdr<64, false>& shdr, off_t*);
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 Output_section*
 Layout::layout<64, true>(Relobj* object, unsigned int shndx, const char* name,
 			 const elfcpp::Shdr<64, true>& shdr, off_t*);
+#endif
 
 
 } // End namespace gold.

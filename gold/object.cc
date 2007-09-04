@@ -493,7 +493,7 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
   const char* sym_names =
     reinterpret_cast<const char*>(sd->symbol_names->data());
-  symtab->add_from_relobj(this, sd->symbols->data(), symcount, sym_names, 
+  symtab->add_from_relobj(this, sd->symbols->data(), symcount, sym_names,
 			  sd->symbol_names_size, this->symbols_);
 
   delete sd->symbols;
@@ -909,15 +909,29 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	}
       if (big_endian)
 	{
+#ifdef HAVE_TARGET_32_BIG
 	  elfcpp::Ehdr<32, true> ehdr(p);
 	  return make_elf_sized_object<32, true>(name, input_file,
 						 offset, ehdr);
+#else
+          fprintf(stderr,
+                  _("%s: %s: not configured to support 32-bit big-endian object\n"),
+                  program_name, name.c_str());
+          gold_exit(false);
+#endif
 	}
       else
 	{
+#ifdef HAVE_TARGET_32_LITTLE
 	  elfcpp::Ehdr<32, false> ehdr(p);
 	  return make_elf_sized_object<32, false>(name, input_file,
 						  offset, ehdr);
+#else
+          fprintf(stderr,
+                  _("%s: %s: not configured to support 32-bit little-endian object\n"),
+                  program_name, name.c_str());
+          gold_exit(false);
+#endif
 	}
     }
   else
@@ -930,15 +944,29 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	}
       if (big_endian)
 	{
+#ifdef HAVE_TARGET_64_BIG
 	  elfcpp::Ehdr<64, true> ehdr(p);
 	  return make_elf_sized_object<64, true>(name, input_file,
 						 offset, ehdr);
+#else
+          fprintf(stderr,
+                  _("%s: %s: not configured to support 64-bit big-endian object\n"),
+                  program_name, name.c_str());
+          gold_exit(false);
+#endif
 	}
       else
 	{
+#ifdef HAVE_TARGET_64_LITTLE
 	  elfcpp::Ehdr<64, false> ehdr(p);
 	  return make_elf_sized_object<64, false>(name, input_file,
 						  offset, ehdr);
+#else
+          fprintf(stderr,
+                  _("%s: %s: not configured to support 64-bit little-endian object\n"),
+                  program_name, name.c_str());
+          gold_exit(false);
+#endif
 	}
     }
 }
@@ -946,28 +974,44 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 // Instantiate the templates we need.  We could use the configure
 // script to restrict this to only the ones for implemented targets.
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 class Sized_relobj<32, false>;
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 class Sized_relobj<32, true>;
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 class Sized_relobj<64, false>;
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 class Sized_relobj<64, true>;
+#endif
 
+#ifdef HAVE_TARGET_32_LITTLE
 template
 struct Relocate_info<32, false>;
+#endif
 
+#ifdef HAVE_TARGET_32_BIG
 template
 struct Relocate_info<32, true>;
+#endif
 
+#ifdef HAVE_TARGET_64_LITTLE
 template
 struct Relocate_info<64, false>;
+#endif
 
+#ifdef HAVE_TARGET_64_BIG
 template
 struct Relocate_info<64, true>;
+#endif
 
 } // End namespace gold.

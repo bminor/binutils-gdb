@@ -37,6 +37,18 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define to support 32-bit big-endian targets */
+#undef HAVE_TARGET_32_BIG
+
+/* Define to support 32-bit little-endian targets */
+#undef HAVE_TARGET_32_LITTLE
+
+/* Define to support 64-bit big-endian targets */
+#undef HAVE_TARGET_64_BIG
+
+/* Define to support 64-bit little-endian targets */
+#undef HAVE_TARGET_64_LITTLE
+
 /* Define to 1 if you have the <tr1/unordered_map> header file. */
 #undef HAVE_TR1_UNORDERED_MAP
 
