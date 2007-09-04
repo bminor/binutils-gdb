@@ -734,6 +734,7 @@ gnu_v2_abi_h = gnu-v2-abi.h
 gregset_h = gregset.h
 hppa_tdep_h = hppa-tdep.h
 i386bsd_nat_h = i386bsd-nat.h
+i386_cygwin_tdep_h = i386-cygwin-tdep.h
 i386_linux_tdep_h = i386-linux-tdep.h
 i386_tdep_h = i386-tdep.h
 i387_tdep_h = i387-tdep.h
@@ -2103,7 +2104,7 @@ i386bsd-tdep.o: i386bsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) $(i386_tdep_h)
 i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
 	$(i386_tdep_h) $(regset_h) $(gdb_obstack_h) $(xml_support_h) \
-	$(gdbcore_h)
+	$(gdbcore_h) $(i386_cygwin_tdep_h)
 i386fbsd-nat.o: i386fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(target_h) $(fbsd_nat_h) $(i386_tdep_h) $(i386bsd_nat_h) \
 	$(bsd_kvm_h)
@@ -2838,7 +2839,8 @@ win32-nat.o: win32-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(exceptions_h) $(gdbcore_h) $(command_h) $(completer_h) \
 	$(regcache_h) $(top_h) $(buildsym_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_string_h) $(gdbthread_h) $(gdbcmd_h) $(exec_h) $(solist_h) \
-	$(solib_h) $(i386_tdep_h) $(i387_tdep_h)
+	$(solib_h) $(i386_tdep_h) $(i387_tdep_h) $(gdb_obstack_h) \
+	$(xml_support_h) $(i386_cygwin_tdep_h)
 win32-termcap.o: win32-termcap.c
 wrapper.o: wrapper.c $(defs_h) $(value_h) $(exceptions_h) $(wrapper_h) \
 	$(ui_out_h)

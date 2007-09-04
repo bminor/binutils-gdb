@@ -1,6 +1,51 @@
 2007-09-04  Pedro Alves  <pedro_alves@portugalmail.pt>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* infcmd.c (post_create_inferior): Update comment.
+	(run_command_1): Always call post_create_inferior with 0 as
+	from_tty.
+
+	* i386-cygwin-tdep.h: New.
+	* i386-cygwin-tdep.c: Include "i386-cygwin-tdep.h".
+	(win32_xfer_shared_library): Make it extern.
+
+	* win32-nat.c: Include gdb_obstack.h and xml-support.h and
+	i386-cygwin-tdep.h.
+	(win32_so_ops): Delete.
+	(get_relocated_section_addrs): Delete.
+	(solib_symbols_add): Delete.
+	(register_loaded_dll): Delete.
+	(win32_make_so): New.
+	(handle_load_dll): Use win32_make_so.
+	(win32_free_so): Free the passed in so.
+	(win32_relocate_section_addresses): Delete.
+	(win32_solib_create_inferior_hook): Delete.
+	(handle_unload_dll): Don't add PE offset here.  Free so with
+	win32_free_so instead of free_so.
+	(win32_special_symbol_handling): Delete.
+	(get_win32_debug_event): Remove unneeded calls.  Set state to
+	TARGET_WAITKIND_LOADED on a dll unload.
+	(do_initial_win32_stuff): Clear cygwin_load_start and
+	cygwin_load_end.
+	(map_code_section_args): Delete.
+	(dll_code_sections_add): Delete.
+	(core_section_load_dll_symbols): Delete.
+	(win32_xfer_shared_libraries): New.
+	(win32_current_sos): Delete.
+	(win32_xfer_partial): New.
+	(open_symbol_file_object): Delete.
+	(in_dynsym_resolve_code): Delete.
+	(init_win32_ops): Set win32_xfer_partial as to_xfer_partial member
+	of win32_ops.  Remove win32_so_ops settings.  Don't set
+	current_target_so_ops here.
+
+	* Makefile.in (i386_cygwin_tdep_h): New variable.
+	(i386-cygwin-tdep.o): Update dependencies.
+	(win32-nat.o): Update dependencies.
+
+2007-09-04  Pedro Alves  <pedro_alves@portugalmail.pt>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdbarch.sh (core_xfer_shared_libraries): New.
 
 	* corelow.c (core_xfer_partial): Handle TARGET_OBJECT_LIBRARIES.

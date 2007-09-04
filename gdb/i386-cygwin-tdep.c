@@ -21,6 +21,7 @@
 #include "osabi.h"
 #include "gdb_string.h"
 #include "i386-tdep.h"
+#include "i386-cygwin-tdep.h"
 #include "regset.h"
 #include "gdb_obstack.h"
 #include "xml-support.h"
@@ -108,7 +109,7 @@ i386_win32_regset_from_core_section (struct gdbarch *gdbarch,
   return NULL;
 }
 
-static void
+void
 win32_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
 			   struct obstack *obstack)
 {

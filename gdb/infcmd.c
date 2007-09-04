@@ -417,7 +417,9 @@ post_create_inferior (struct target_ops *target, int from_tty)
     {
       /* Sometimes the platform-specific hook loads initial shared
 	 libraries, and sometimes it doesn't.  Try to do so first, so
-	 that we can add them with the correct value for FROM_TTY.  */
+	 that we can add them with the correct value for FROM_TTY.
+	 If we made all the inferior hook methods consistent,
+	 this call could be removed.  */
 #ifdef SOLIB_ADD
       SOLIB_ADD (NULL, from_tty, target, auto_solib_add);
 #else
@@ -558,7 +560,9 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   target_create_inferior (exec_file, get_inferior_args (),
 			  environ_vector (inferior_environ), from_tty);
 
-  post_create_inferior (&current_target, from_tty);
+  /* Pass zero for FROM_TTY, because at this point the "run" command
+     has done its thing; now we are setting up the running program.  */
+  post_create_inferior (&current_target, 0);
 
   /* Start the target running.  */
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
@@ -1193,11 +1197,11 @@ print_return_value (int struct_return, struct type *value_type)
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
+  stb = ui_out_stream_new (uiout);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
   if (value)
     {
       /* Print it.  */
-      stb = ui_out_stream_new (uiout);
-      old_chain = make_cleanup_ui_out_stream_delete (stb);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
 			record_latest_value (value));
@@ -1205,15 +1209,16 @@ print_return_value (int struct_return, struct type *value_type)
       value_print (value, stb->stream, 0, Val_no_prettyprint);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
-      do_cleanups (old_chain);
     }
   else
     {
+      /* Just print the type.  */
       ui_out_text (uiout, "Value returned has type: ");
-      ui_out_field_string (uiout, "return-type", TYPE_NAME (value_type));
-      ui_out_text (uiout, ".");
-      ui_out_text (uiout, " Cannot determine contents\n");
+      type_print (value_type, NULL, stb->stream, 0);
+      ui_out_field_stream (uiout, "return-type", stb);
+      ui_out_text (uiout, ". Cannot determine contents.\n");
     }
+  do_cleanups (old_chain);
 }
 
 /* Stuff that needs to be done by the finish command after the target
