@@ -3477,9 +3477,9 @@ process_operands (void)
       default_seg = &ds;
     }
 
-  if ((i.tm.base_opcode == 0x8d /* lea */
-       || (i.tm.cpu_flags & CpuSVME))
-      && i.seg[0] && !quiet_warnings)
+  if (i.tm.base_opcode == 0x8d /* lea */
+      && i.seg[0]
+      && !quiet_warnings)
     as_warn (_("segment override on `%s' is ineffectual"), i.tm.name);
 
   /* If a segment was explicitly specified, and the specified segment
@@ -4962,30 +4962,7 @@ i386_index_check (const char *operand_string)
  tryprefix:
 #endif
   ok = 1;
-  if ((current_templates->start->cpu_flags & CpuSVME)
-      && current_templates->end[-1].operand_types[0] == AnyMem)
-    {
-      /* Memory operands of SVME insns are special in that they only allow
-	 rAX as their memory address and ignore any segment override.  */
-      unsigned RegXX;
-
-      /* SKINIT is even more restrictive: it always requires EAX.  */
-      if (strcmp (current_templates->start->name, "skinit") == 0)
-	RegXX = Reg32;
-      else if (flag_code == CODE_64BIT)
-	RegXX = i.prefix[ADDR_PREFIX] == 0 ? Reg64 : Reg32;
-      else
-	RegXX = ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0)
-		 ? Reg16
-		 : Reg32);
-      if (!i.base_reg
-	  || !(i.base_reg->reg_type & Acc)
-	  || !(i.base_reg->reg_type & RegXX)
-	  || i.index_reg
-	  || (i.types[0] & Disp))
-	ok = 0;
-    }
-  else if (flag_code == CODE_64BIT)
+  if (flag_code == CODE_64BIT)
     {
       unsigned RegXX = (i.prefix[ADDR_PREFIX] == 0 ? Reg64 : Reg32);
 

@@ -1,3 +1,10 @@
+2007-09-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (process_operands): Remove segment override
+	check on SVME instructions.
+	(i386_index_check): Remove memory operand check on  SVME
+	instructions.
+
 2007-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-spu.c (struct spu_insn): Delete "flag".  Add "reloc".
