@@ -44,7 +44,7 @@ struct spu_insn
   unsigned int opcode;
   expressionS exp[MAX_RELOCS];
   int reloc_arg[MAX_RELOCS];
-  int flag[MAX_RELOCS];
+  bfd_reloc_code_real_type reloc[MAX_RELOCS];
   enum spu_insns tag;
 };
 
@@ -303,7 +303,7 @@ md_assemble (char *op)
 	  insn.exp[i].X_add_number = 0;
 	  insn.exp[i].X_op = O_illegal;
 	  insn.reloc_arg[i] = -1;
-	  insn.flag[i] = 0;
+	  insn.reloc[i] = BFD_RELOC_NONE;
 	}
       insn.opcode = format->opcode;
       insn.tag = (enum spu_insns) (format - spu_opcodes);
@@ -352,17 +352,13 @@ md_assemble (char *op)
     if (insn.reloc_arg[i] >= 0) 
       {
         fixS *fixP;
-        bfd_reloc_code_real_type reloc = arg_encode[insn.reloc_arg[i]].reloc;
+        bfd_reloc_code_real_type reloc = insn.reloc[i];
 	int pcrel = 0;
 
-        if (reloc == BFD_RELOC_SPU_PCREL9a
+	if (reloc == BFD_RELOC_SPU_PCREL9a
 	    || reloc == BFD_RELOC_SPU_PCREL9b
-            || reloc == BFD_RELOC_SPU_PCREL16)
+	    || reloc == BFD_RELOC_SPU_PCREL16)
 	  pcrel = 1;
-	if (insn.flag[i] == 1)
-	  reloc = BFD_RELOC_SPU_HI16;
-	else if (insn.flag[i] == 2)
-	  reloc = BFD_RELOC_SPU_LO16;
 	fixP = fix_new_exp (frag_now,
 			    thisfrag - frag_now->fr_literal,
 			    4,
@@ -394,7 +390,7 @@ calcop (struct spu_opcode *format, const char *param, struct spu_insn *insn)
       if (arg < A_P)
         param = get_reg (param, insn, arg, 1);
       else if (arg > A_P)
-        param = get_imm (param, insn,  arg);
+        param = get_imm (param, insn, arg);
       else if (arg == A_P)
 	{
 	  paren++;
@@ -688,16 +684,16 @@ get_imm (const char *param, struct spu_insn *insn, int arg)
       insn->opcode |= (((val >> arg_encode[arg].rshift)
 			& ((1 << arg_encode[arg].size) - 1))
 		       << arg_encode[arg].pos);
-      insn->reloc_arg[reloc_i] = -1;
-      insn->flag[reloc_i] = 0;
     }
   else
     {
       insn->reloc_arg[reloc_i] = arg;
       if (high)
-	insn->flag[reloc_i] = 1;
+	insn->reloc[reloc_i] = BFD_RELOC_SPU_HI16;
       else if (low)
-	insn->flag[reloc_i] = 2;
+	insn->reloc[reloc_i] = BFD_RELOC_SPU_LO16;
+      else
+	insn->reloc[reloc_i] = arg_encode[arg].reloc;
     }
 
   return param;
