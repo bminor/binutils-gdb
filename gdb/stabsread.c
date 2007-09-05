@@ -45,6 +45,7 @@
 #include "doublest.h"
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "gdb_assert.h"
 
 #include <ctype.h>
 
@@ -359,6 +360,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	{
 	  name = stabs->stab[ii];
 	  pp = (char *) strchr (name, ':');
+	  gdb_assert (pp);	/* Must find a ':' or game's over.  */
 	  while (pp[1] == ':')
 	    {
 	      pp += 2;

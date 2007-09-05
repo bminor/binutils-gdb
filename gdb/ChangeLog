@@ -1,3 +1,8 @@
+2007-09-04  Michael Snyder  <msnyder@access-company.com>
+
+	* stabsread.c (patch_block_status): Guard against null.
+	* Makefile.in (stabsread.o): Depend on gdb_assert.h.
+
 2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* printcmd.c (printf_command): Handle ptr_arg.  Correct typo

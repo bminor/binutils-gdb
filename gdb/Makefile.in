@@ -2718,7 +2718,8 @@ stabsread.o: stabsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(gdb_obstack_h) \
 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(symfile_h) $(objfiles_h) \
 	$(aout_stab_gnu_h) $(libaout_h) $(aout_aout64_h) $(gdb_stabs_h) \
 	$(buildsym_h) $(complaints_h) $(demangle_h) $(language_h) \
-	$(doublest_h) $(cp_abi_h) $(cp_support_h) $(stabsread_h)
+	$(doublest_h) $(cp_abi_h) $(cp_support_h) $(stabsread_h) \
+	$(gdb_assert_h)
 stack.o: stack.c $(defs_h) $(value_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(language_h) $(frame_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(target_h) $(source_h) $(breakpoint_h) $(demangle_h) $(inferior_h) \
