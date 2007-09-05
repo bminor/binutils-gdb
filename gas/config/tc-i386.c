@@ -4981,7 +4981,7 @@ i386_index_check (const char *operand_string)
 	{
 	  /* 16bit checks.  */
 	  if ((i.base_reg
-	       && ((i.base_reg->reg_type & (Reg16 | BaseIndex | RegRex))
+	       && ((i.base_reg->reg_type & (Reg16 | BaseIndex))
 		   != (Reg16 | BaseIndex)))
 	      || (i.index_reg
 		  && (((i.index_reg->reg_type & (Reg16 | BaseIndex))
@@ -4996,9 +4996,9 @@ i386_index_check (const char *operand_string)
 	{
 	  /* 32bit checks.  */
 	  if ((i.base_reg
-	       && (i.base_reg->reg_type & (Reg32 | RegRex)) != Reg32)
+	       && (i.base_reg->reg_type & Reg32) != Reg32)
 	      || (i.index_reg
-		  && ((i.index_reg->reg_type & (Reg32 | BaseIndex | RegRex))
+		  && ((i.index_reg->reg_type & (Reg32 | BaseIndex))
 		      != (Reg32 | BaseIndex))))
 	    ok = 0;
 	}
@@ -5885,7 +5885,8 @@ parse_real_register (char *reg_string, char **end_op)
     }
 
   if (r != NULL
-      && ((r->reg_flags & (RegRex64 | RegRex)) | (r->reg_type & Reg64)) != 0
+      && ((r->reg_flags & (RegRex64 | RegRex))
+	  || (r->reg_type & Reg64))
       && (r->reg_type != Control || !(cpu_arch_flags & CpuSledgehammer))
       && flag_code != CODE_64BIT)
     return (const reg_entry *) NULL;

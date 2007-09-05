@@ -1,3 +1,9 @@
+2007-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (i386_index_check): Don't use RegRex
+	on the reg_type field.
+	(parse_real_register): Use `||' instead of `|'.
+
 2007-09-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (process_operands): Remove segment override
