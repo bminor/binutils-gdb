@@ -1,5 +1,8 @@
 2007-09-04  Michael Snyder  <msnyder@access-company.com>
 
+	* expprint.c (print_subexp_standard): Check strchr for null.
+	* Makefile.in (expprint.o): Depend on gdb_assert.h.
+
 	* gnu-v2-abi.c (gnuv2_value_rtti_type): Guard against null.
 
 	* stabsread.c (patch_block_status): Guard against null.

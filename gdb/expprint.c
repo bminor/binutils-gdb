@@ -30,6 +30,7 @@
 #include "gdb_string.h"
 #include "block.h"
 #include "objfiles.h"
+#include "gdb_assert.h"
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -212,6 +213,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 	    for (tem = 0; tem < nargs; tem++)
 	      {
 		nextS = strchr (s, ':');
+		gdb_assert (nextS);	/* Make sure we found ':'.  */
 		*nextS = '\0';
 		fprintf_unfiltered (stream, " %s: ", s);
 		s = nextS + 1;
