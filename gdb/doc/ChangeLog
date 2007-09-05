@@ -1,3 +1,10 @@
+2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.texinfo (Output Formats): Update 'c' description.  Describe 's'.
+	(Examining Memory): Update mentions of the 's' format.
+	(Automatic Display): Likewise.
+
 2007-09-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo: Update the FSF's Back-Cover Text.

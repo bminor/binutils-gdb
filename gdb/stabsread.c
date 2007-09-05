@@ -1916,7 +1916,7 @@ again:
       if (is_string)
 	TYPE_CODE (type) = TYPE_CODE_STRING;
       if (is_vector)
-	TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
+	make_vector_type (type);
       break;
 
     case 'S':			/* Set or bitstring  type */

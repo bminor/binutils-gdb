@@ -589,18 +589,18 @@ proc test_print_char_arrays {} {
     gdb_test "set print address on" ""
 
     gdb_test "p arrays" \
-	" = \\{array1 = \\{97 'a', 98 'b', 99 'c', 0 '\\\\0'\\}, array2 = \\{100 'd'\\}, array3 = \\{101 'e'\\}, array4 = \\{102 'f', 103 'g'\\}, array5 = \\{104 'h', 105 'i', 106 'j', 0 '\\\\0'\\}\\}"
+	" = {array1 = \"abc\", array2 = \"d\", array3 = \"e\", array4 = \"fg\", array5 = \"hij\"}"
 
     gdb_test "p parrays"		" = \\(struct some_arrays \\*\\) $hex"
-    gdb_test "p parrays->array1"	" = \\{97 'a', 98 'b', 99 'c', 0 '\\\\0'\\}"
+    gdb_test "p parrays->array1"	" = \"abc\""
     gdb_test "p &parrays->array1"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex"
-    gdb_test "p parrays->array2"	" = \\{100 'd'\\}"
+    gdb_test "p parrays->array2"	" = \"d\""
     gdb_test "p &parrays->array2"	" = \\(unsigned char \\(\\*\\)\\\[1\\\]\\) $hex"
-    gdb_test "p parrays->array3"	" = \\{101 'e'\\}"
+    gdb_test "p parrays->array3"	" = \"e\""
     gdb_test "p &parrays->array3"	" = \\(unsigned char \\(\\*\\)\\\[1\\\]\\) $hex"
-    gdb_test "p parrays->array4"	" = \\{102 'f', 103 'g'\\}"
+    gdb_test "p parrays->array4"	" = \"fg\""
     gdb_test "p &parrays->array4"	" = \\(unsigned char \\(\\*\\)\\\[2\\\]\\) $hex"
-    gdb_test "p parrays->array5"	" = \\{104 'h', 105 'i', 106 'j', 0 '\\\\0'\\}"
+    gdb_test "p parrays->array5"	" = \"hij\""
     gdb_test "p &parrays->array5"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex"
 
     gdb_test "set print address off" ""

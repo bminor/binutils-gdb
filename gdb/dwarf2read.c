@@ -4325,7 +4325,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
      to functions.  */
   attr = dwarf2_attr (die, DW_AT_GNU_vector, cu);
   if (attr)
-    TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
+    make_vector_type (type);
 
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr && DW_STRING (attr))

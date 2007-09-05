@@ -277,12 +277,8 @@ tdesc_start_vector (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Vector \"%s\" references undefined type \"%s\""),
 		   id, field_type_id);
 
-  /* A vector is just an array plus a special flag.  */
-  range_type = create_range_type (NULL, builtin_type_int, 0, count - 1);
-  type = create_array_type (NULL, field_type, range_type);
+  type = init_vector_type (field_type, count);
   TYPE_NAME (type) = xstrdup (id);
-
-  TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
 
   tdesc_record_type (data->current_feature, type);
 }

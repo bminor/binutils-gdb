@@ -5767,9 +5767,27 @@ prints both the numerical value and its character representation.  The
 character representation is replaced with the octal escape @samp{\nnn}
 for characters outside the 7-bit @sc{ascii} range.
 
+Without this format, @value{GDBN} displays @code{char},
+@w{@code{unsigned char}}, and @w{@code{signed char}} data as character
+constants.  Single-byte members of vectors are displayed as integer
+data.
+
 @item f
 Regard the bits of the value as a floating point number and print
 using typical floating point syntax.
+
+@item s
+@cindex printing strings
+@cindex printing byte arrays
+Regard as a string, if possible.  With this format, pointers to single-byte
+data are displayed as null-terminated strings and arrays of single-byte data
+are displayed as fixed-length strings.  Other values are displayed in their
+natural types.
+
+Without this format, @value{GDBN} displays pointers to and arrays of
+@code{char}, @w{@code{unsigned char}}, and @w{@code{signed char}} as
+strings.  Single-byte members of a vector are displayed as an integer
+array.
 @end table
 
 For example, to print the program counter in hex (@pxref{Registers}), type
@@ -5817,10 +5835,9 @@ how much memory (counting by units @var{u}) to display.
 @item @var{f}, the display format
 The display format is one of the formats used by @code{print}
 (@samp{x}, @samp{d}, @samp{u}, @samp{o}, @samp{t}, @samp{a}, @samp{c},
-@samp{f}), and in addition @samp{s} (for null-terminated strings) and
-@samp{i} (for machine instructions).  The default is @samp{x}
-(hexadecimal) initially.  The default changes each time you use either
-@code{x} or @code{print}.
+@samp{f}, @samp{s}), and in addition @samp{i} (for machine instructions).
+The default is @samp{x} (hexadecimal) initially.  The default changes
+each time you use either @code{x} or @code{print}.
 
 @item @var{u}, the unit size
 The unit size is any of
@@ -5936,10 +5953,9 @@ The automatic display looks like this:
 This display shows item numbers, expressions and their current values.  As with
 displays you request manually using @code{x} or @code{print}, you can
 specify the output format you prefer; in fact, @code{display} decides
-whether to use @code{print} or @code{x} depending on how elaborate your
-format specification is---it uses @code{x} if you specify a unit size,
-or one of the two formats (@samp{i} and @samp{s}) that are only
-supported by @code{x}; otherwise it uses @code{print}.
+whether to use @code{print} or @code{x} depending your format
+specification---it uses @code{x} if you specify either the @samp{i}
+or @samp{s} format, or a unit size; otherwise it uses @code{print}.
 
 @table @code
 @kindex display

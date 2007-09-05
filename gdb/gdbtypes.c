@@ -917,6 +917,32 @@ init_flags_type (char *name, int length)
   return type;
 }
 
+/* Convert ARRAY_TYPE to a vector type.  This may modify ARRAY_TYPE
+   and any array types nested inside it.  */
+
+void
+make_vector_type (struct type *array_type)
+{
+  struct type *inner_array, *elt_type;
+  int flags;
+
+  /* Find the innermost array type, in case the array is
+     multi-dimensional.  */
+  inner_array = array_type;
+  while (TYPE_CODE (TYPE_TARGET_TYPE (inner_array)) == TYPE_CODE_ARRAY)
+    inner_array = TYPE_TARGET_TYPE (inner_array);
+
+  elt_type = TYPE_TARGET_TYPE (inner_array);
+  if (TYPE_CODE (elt_type) == TYPE_CODE_INT)
+    {
+      flags = TYPE_INSTANCE_FLAGS (elt_type) | TYPE_FLAG_NOTTEXT;
+      elt_type = make_qualified_type (elt_type, flags, NULL);
+      TYPE_TARGET_TYPE (inner_array) = elt_type;
+    }
+
+  TYPE_FLAGS (array_type) |= TYPE_FLAG_VECTOR;
+}
+
 struct type *
 init_vector_type (struct type *elt_type, int n)
 {
@@ -926,7 +952,7 @@ init_vector_type (struct type *elt_type, int n)
 				  create_range_type (0, 
 						     builtin_type_int,
 						     0, n-1));
-  TYPE_FLAGS (array_type) |= TYPE_FLAG_VECTOR;
+  make_vector_type (array_type);
   return array_type;
 }
 
@@ -3410,6 +3436,10 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "true character", (struct objfile *) NULL);
+  builtin_type->builtin_true_unsigned_char =
+    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "true character", (struct objfile *) NULL);
   builtin_type->builtin_signed_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
@@ -3557,11 +3587,11 @@ _initialize_gdbtypes (void)
 	       "int0_t", (struct objfile *) NULL);
   builtin_type_int8 =
     init_type (TYPE_CODE_INT, 8 / 8,
-	       0,
+	       TYPE_FLAG_NOTTEXT,
 	       "int8_t", (struct objfile *) NULL);
   builtin_type_uint8 =
     init_type (TYPE_CODE_INT, 8 / 8,
-	       TYPE_FLAG_UNSIGNED,
+	       TYPE_FLAG_UNSIGNED | TYPE_FLAG_NOTTEXT,
 	       "uint8_t", (struct objfile *) NULL);
   builtin_type_int16 =
     init_type (TYPE_CODE_INT, 16 / 8,

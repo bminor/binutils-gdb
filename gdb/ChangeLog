@@ -1,3 +1,27 @@
+2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jim Blandy  <jimb@codesourcery.com>
+
+	* NEWS: Update description of string changes.  Mention print/s.
+	* c-valprint.c (textual_element_type): New.
+	(c_val_print): Use it.  Do not skip address printing for pointers
+	with a string format.
+	(c_value_print): Doc update.
+	* dwarf2read.c (read_array_type): Use make_vector_type.
+	* gdbtypes.c (make_vector_type): New.
+	(init_vector_type): Use it.
+	(gdbtypes_post_init): Initialize builtin_true_unsigned_char.
+	(_initialize_gdbtypes): Mark int8_t and uint8_t as TYPE_FLAG_NOTTEXT.
+	* gdbtypes.h (struct builtin_type): Add builtin_true_unsigned_char.
+	(TYPE_FLAG_NOTTEXT, TYPE_NOTTEXT): New.
+	(make_vector_type): New.
+	* printcmd.c (print_formatted): Only handle 's' and 'i' for examine.
+	Call the language print routine for string format.
+	(print_scalar_formatted): Call val_print for string format.  Handle
+	unsigned original types for char format.
+	(validate_format): Do not reject string format.
+	* stabsread.c (read_type): Use make_vector_type.
+	* xml-tdesc.c (tdesc_start_vector): Use init_vector_type.
+
 2007-09-04  Michael Snyder  <msnyder@access-company.com>
 
 	* expprint.c (print_subexp_standard): Check strchr for null.

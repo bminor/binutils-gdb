@@ -250,7 +250,8 @@ decode_format (char **string_ptr, int oformat, int osize)
    Do not end with a newline.
    0 means print VAL according to its own type.
    SIZE is the letter for the size of datum being printed.
-   This is used to pad hex numbers so they line up.  */
+   This is used to pad hex numbers so they line up.  SIZE is 0
+   for print / output and set for examine.  */
 
 static void
 print_formatted (struct value *val, int format, int size,
@@ -262,45 +263,41 @@ print_formatted (struct value *val, int format, int size,
   if (VALUE_LVAL (val) == lval_memory)
     next_address = VALUE_ADDRESS (val) + len;
 
-  switch (format)
+  if (size)
     {
-    case 's':
-      /* FIXME: Need to handle wchar_t's here... */
-      next_address = VALUE_ADDRESS (val)
-	+ val_print_string (VALUE_ADDRESS (val), -1, 1, stream);
-      break;
+      switch (format)
+	{
+	case 's':
+	  /* FIXME: Need to handle wchar_t's here... */
+	  next_address = VALUE_ADDRESS (val)
+	    + val_print_string (VALUE_ADDRESS (val), -1, 1, stream);
+	  return;
 
-    case 'i':
-      /* The old comment says
-         "Force output out, print_insn not using _filtered".
-         I'm not completely sure what that means, I suspect most print_insn
-         now do use _filtered, so I guess it's obsolete.
-         --Yes, it does filter now, and so this is obsolete.  -JB  */
-
-      /* We often wrap here if there are long symbolic names.  */
-      wrap_here ("    ");
-      next_address = (VALUE_ADDRESS (val)
-		      + gdb_print_insn (VALUE_ADDRESS (val), stream,
-					&branch_delay_insns));
-      break;
-
-    default:
-      if (format == 0
-	  || TYPE_CODE (type) == TYPE_CODE_ARRAY
-	  || TYPE_CODE (type) == TYPE_CODE_STRING
-	  || TYPE_CODE (type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (type) == TYPE_CODE_UNION
-	  || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
-	/* If format is 0, use the 'natural' format for that type of
-	   value.  If the type is non-scalar, we have to use language
-	   rules to print it as a series of scalars.  */
-	value_print (val, stream, format, Val_pretty_default);
-      else
-	/* User specified format, so don't look to the the type to
-	   tell us what to do.  */
-	print_scalar_formatted (value_contents (val), type,
-				format, size, stream);
+	case 'i':
+	  /* We often wrap here if there are long symbolic names.  */
+	  wrap_here ("    ");
+	  next_address = (VALUE_ADDRESS (val)
+			  + gdb_print_insn (VALUE_ADDRESS (val), stream,
+					    &branch_delay_insns));
+	  return;
+	}
     }
+
+  if (format == 0 || format == 's'
+      || TYPE_CODE (type) == TYPE_CODE_ARRAY
+      || TYPE_CODE (type) == TYPE_CODE_STRING
+      || TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_UNION
+      || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
+    /* If format is 0, use the 'natural' format for that type of
+       value.  If the type is non-scalar, we have to use language
+       rules to print it as a series of scalars.  */
+    value_print (val, stream, format, Val_pretty_default);
+  else
+    /* User specified format, so don't look to the the type to
+       tell us what to do.  */
+    print_scalar_formatted (value_contents (val), type,
+			    format, size, stream);
 }
 
 /* Print a scalar of data of type TYPE, pointed to in GDB by VALADDR,
@@ -316,6 +313,15 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 {
   LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
+
+  /* If we get here with a string format, try again without it.  Go
+     all the way back to the language printers, which may call us
+     again.  */
+  if (format == 's')
+    {
+      val_print (type, valaddr, 0, 0, stream, 0, 0, 0, Val_pretty_default);
+      return;
+    }
 
   if (len > sizeof(LONGEST) &&
       (TYPE_CODE (type) == TYPE_CODE_INT
@@ -407,8 +413,17 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       break;
 
     case 'c':
-      value_print (value_from_longest (builtin_type_true_char, val_long),
-		   stream, 0, Val_pretty_default);
+      if (TYPE_UNSIGNED (type))
+	{
+	  struct type *utype;
+
+	  utype = builtin_type (current_gdbarch)->builtin_true_unsigned_char;
+	  value_print (value_from_longest (utype, val_long),
+		       stream, 0, Val_pretty_default);
+	}
+      else
+	value_print (value_from_longest (builtin_type_true_char, val_long),
+		     stream, 0, Val_pretty_default);
       break;
 
     case 'f':
@@ -809,7 +824,7 @@ validate_format (struct format_data fmt, char *cmdname)
   if (fmt.count != 1)
     error (_("Item count other than 1 is meaningless in \"%s\" command."),
 	   cmdname);
-  if (fmt.format == 'i' || fmt.format == 's')
+  if (fmt.format == 'i')
     error (_("Format letter \"%c\" is meaningless in \"%s\" command."),
 	   fmt.format, cmdname);
 }

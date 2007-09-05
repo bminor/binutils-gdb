@@ -54,6 +54,52 @@ print_function_pointer_address (CORE_ADDR address, struct ui_file *stream)
 }
 
 
+/* Apply a heuristic to decide whether an array of TYPE or a pointer
+   to TYPE should be printed as a textual string.  Return non-zero if
+   it should, or zero if it should be treated as an array of integers
+   or pointer to integers.  FORMAT is the current format letter,
+   or 0 if none.
+
+   We guess that "char" is a character.  Explicitly signed and
+   unsigned character types are also characters.  Integer data from
+   vector types is not.  The user can override this by using the /s
+   format letter.  */
+
+static int
+textual_element_type (struct type *type, char format)
+{
+  struct type *true_type = check_typedef (type);
+
+  if (format != 0 && format != 's')
+    return 0;
+
+  /* TYPE_CODE_CHAR is always textual.  */
+  if (TYPE_CODE (true_type) == TYPE_CODE_CHAR)
+    return 1;
+
+  if (format == 's')
+    {
+      /* Print this as a string if we can manage it.  For now, no
+	 wide character support.  */
+      if (TYPE_CODE (true_type) == TYPE_CODE_INT
+	  && TYPE_LENGTH (true_type) == 1)
+	return 1;
+    }
+  else
+    {
+      /* If a one-byte TYPE_CODE_INT is missing the not-a-character
+	 flag, then we treat it as text; otherwise, we assume it's
+	 being used as data.  */
+      if (TYPE_CODE (true_type) == TYPE_CODE_INT
+	  && TYPE_LENGTH (true_type) == 1
+	  && !TYPE_NOTTEXT (true_type))
+	return 1;
+    }
+
+  return 0;
+}
+
+
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
    the inferior at address ADDRESS, onto stdio stream STREAM according to
    FORMAT (a letter or 0 for natural format).  The data at VALADDR is in
@@ -92,12 +138,9 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
-	  /* For an array of chars, print with string syntax.  */
-	  if (eltlen == 1 &&
-	      ((TYPE_CODE (elttype) == TYPE_CODE_INT && TYPE_NOSIGN (elttype))
-	       || ((current_language->la_language == language_m2)
-		   && (TYPE_CODE (elttype) == TYPE_CODE_CHAR)))
-	      && (format == 0 || format == 's'))
+
+	  /* Print arrays of textual chars with a string syntax.  */
+          if (textual_element_type (elttype, format))
 	    {
 	      /* If requested, look for the first null char and only print
 	         elements up to it.  */
@@ -184,19 +227,16 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      return (0);
 	    }
 
-	  if (addressprint && format != 's')
+	  if (addressprint)
 	    {
 	      deprecated_print_address_numeric (addr, 1, stream);
 	    }
 
-	  /* For a pointer to char or unsigned char, also print the string
+	  /* For a pointer to a textual type, also print the string
 	     pointed to, unless pointer is null.  */
 	  /* FIXME: need to handle wchar_t here... */
 
-	  if (TYPE_LENGTH (elttype) == 1
-	      && TYPE_CODE (elttype) == TYPE_CODE_INT
-	      && (format == 0 || format == 's')
-	      && addr != 0)
+	  if (textual_element_type (elttype, format) && addr != 0)
 	    {
 	      i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream);
 	    }
@@ -395,8 +435,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  /* C and C++ has no single byte int type, char is used instead.
 	     Since we don't know whether the value is really intended to
 	     be used as an integer or a character, print the character
-	     equivalent as well. */
-	  if (TYPE_LENGTH (type) == 1)
+	     equivalent as well.  */
+	  if (textual_element_type (type, format))
 	    {
 	      fputs_filtered (" ", stream);
 	      LA_PRINT_CHAR ((unsigned char) unpack_long (type, valaddr + embedded_offset),
@@ -498,7 +538,9 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
       || TYPE_CODE (type) == TYPE_CODE_REF)
     {
       /* Hack:  remove (char *) for char strings.  Their
-         type is indicated by the quoted string anyway. */
+         type is indicated by the quoted string anyway.
+         (Don't use textual_element_type here; quoted strings
+         are always exactly (char *).  */
       if (TYPE_CODE (type) == TYPE_CODE_PTR
 	  && TYPE_NAME (type) == NULL
 	  && TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL

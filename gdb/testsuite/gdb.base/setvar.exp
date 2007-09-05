@@ -232,11 +232,11 @@ test_set "set variable v_char_array\[0\]='h'" "set variable v_char_array\[1\]='i
 #
 # test "set variable" for "signed char array[2]"
 #
-test_set "set variable v_signed_char_array\[0\]='h'" "set variable v_signed_char_array\[1\]='i'" "print v_signed_char_array" ".*.\[0-9\]* =.*\\{104 'h', 105 'i'\\}"        "set variable signed char array=\"hi\" (string)" 
+test_set "set variable v_signed_char_array\[0\]='h'" "set variable v_signed_char_array\[1\]='i'" "print v_signed_char_array" ".*.\[0-9\]* =.*\"hi\""        "set variable signed char array=\"hi\" (string)" 
 #
 # test "set variable" for "unsigned char array[2]"
 #
-test_set "set variable v_unsigned_char_array\[0\]='h'" "set variable v_unsigned_char_array\[1\]='i'" "print v_unsigned_char_array" ".*.\[0-9\]* =.*\\{104 'h', 105 'i'\\}"        "set variable unsigned char array=\"hi\" (string)" 
+test_set "set variable v_unsigned_char_array\[0\]='h'" "set variable v_unsigned_char_array\[1\]='i'" "print v_unsigned_char_array" ".*.\[0-9\]* =.*\"hi\""        "set variable unsigned char array=\"hi\" (string)" 
 #
 # test "set variable" for "short array[2]"
 #
@@ -288,11 +288,11 @@ test_set "set v_char_pointer=v_char_array" "set variable *(v_char_pointer)='h'" 
 #
 # test "set variable" for type "signed char *"
 #
-test_set "set v_signed_char_pointer=v_signed_char_array" "set variable *(v_signed_char_pointer)='h'" "set variable *(v_signed_char_pointer+1)='i'" "print v_signed_char_array" ".*.\[0-9\]* =.*\\{104 'h', 105 'i'\\}"  "print *(v_signed_char_pointer+1)" ".*.\[0-9\]* = 105 \'i\'"     "set variable signed char pointer=\"hi\" (string)" 
+test_set "set v_signed_char_pointer=v_signed_char_array" "set variable *(v_signed_char_pointer)='h'" "set variable *(v_signed_char_pointer+1)='i'" "print v_signed_char_array" ".*.\[0-9\]* =.*\"hi\""  "print *(v_signed_char_pointer+1)" ".*.\[0-9\]* = 105 \'i\'"     "set variable signed char pointer=\"hi\" (string)" 
 #
 # test "set variable" for type "unsigned char *"
 #
-test_set "set v_unsigned_char_pointer=v_unsigned_char_array" "set variable *(v_unsigned_char_pointer)='h'" "set variable *(v_unsigned_char_pointer+1)='i'" "print v_unsigned_char_array" ".*.\[0-9\]* =.*\\{104 'h', 105 'i'\\}"  "print *(v_unsigned_char_pointer+1)" ".*.\[0-9\]* = 105 \'i\'"     "set variable unsigned char pointer=\"hi\" (string)" 
+test_set "set v_unsigned_char_pointer=v_unsigned_char_array" "set variable *(v_unsigned_char_pointer)='h'" "set variable *(v_unsigned_char_pointer+1)='i'" "print v_unsigned_char_array" ".*.\[0-9\]* =.*\"hi\""  "print *(v_unsigned_char_pointer+1)" ".*.\[0-9\]* = 105 \'i\'"     "set variable unsigned char pointer=\"hi\" (string)" 
 #
 # test "set variable" for type "short *"
 #

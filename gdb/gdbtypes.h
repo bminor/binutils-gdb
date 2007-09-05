@@ -325,6 +325,12 @@ enum type_code
 #define TYPE_FLAG_STUB_SUPPORTED (1 << 16)
 #define TYPE_STUB_SUPPORTED(t)   (TYPE_FLAGS (t) & TYPE_FLAG_STUB_SUPPORTED)
 
+/* Not textual.  By default, GDB treats all single byte integers as
+   characters (or elements of strings) unless this flag is set.  */
+
+#define TYPE_FLAG_NOTTEXT	(1 << 17)
+#define TYPE_NOTTEXT(t)		(TYPE_FLAGS (t) & TYPE_FLAG_NOTTEXT)
+
 /*  Array bound type.  */
 enum array_bound_type
 {
@@ -1009,10 +1015,11 @@ struct builtin_type
 
   /* Integral types.  */
 
-  /* We use this for the '/c' print format, because c_char is just a
+  /* We use these for the '/c' print format, because c_char is just a
      one-byte integral type, which languages less laid back than C
      will print as ... well, a one-byte integral type.  */
   struct type *builtin_true_char;
+  struct type *builtin_true_unsigned_char;
 
   /* Implicit size/sign (based on the the architecture's ABI).  */
   struct type *builtin_void;
@@ -1261,6 +1268,7 @@ extern void append_composite_type_field (struct type *t, char *name,
 extern struct type *init_flags_type (char *name, int length);
 extern void append_flags_type_flag (struct type *type, int bitpos, char *name);
 
+extern void make_vector_type (struct type *array_type);
 extern struct type *init_vector_type (struct type *elt_type, int n);
 
 extern struct type *lookup_reference_type (struct type *);

@@ -27,8 +27,12 @@ frequency signals (e.g. SIGALRM) via the QPassSignals packet.
 target's overall architecture.  GDB can read a description from
 a local file or over the remote serial protocol.
 
-* Arrays of explicitly SIGNED or UNSIGNED CHARs are now printed as arrays
-of numbers.
+* Vectors of single-byte data use a new integer type which is not
+automatically displayed as character or string data.
+
+* The /s format now works with the print command.  It displays
+arrays of single-byte integers and pointers to single-byte integers
+as strings.
 
 * Target descriptions can now describe target-specific registers,
 for architectures which have implemented the support (currently

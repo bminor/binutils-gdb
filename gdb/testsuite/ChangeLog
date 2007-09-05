@@ -1,4 +1,13 @@
 2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.arch/i386-sse.exp: Do not expect character constants.
+	* gdb.base/charsign.c, gdb.base/charsign.exp: Delete.
+	* gdb.base/display.exp: Allow print/s.
+	* gdb.base/printcmds.exp, gdb.base/setvar.exp: Revert signed
+	and unsigned char array changes.
+
+2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/display.exp: Add tests for printf %p.
 

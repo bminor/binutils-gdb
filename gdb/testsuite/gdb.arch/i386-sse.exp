@@ -84,7 +84,7 @@ foreach r {0 1 2 3 4 5 6 7} {
         ".. = \\{$r, $r.25, $r.5, $r.75\\}.*" \
         "check float contents of %xmm$r"
     gdb_test "print \$xmm$r.v16_int8" \
-        ".. = \\{(-?\[0-9\]+ '.*', ){15}-?\[0-9\]+ '.*'\\}.*" \
+        ".. = \\{(-?\[0-9\]+, ){15}-?\[0-9\]+\\}.*" \
         "check int8 contents of %xmm$r"
 }
 
