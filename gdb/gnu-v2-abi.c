@@ -192,7 +192,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   CORE_ADDR vtbl;
   struct minimal_symbol *minsym;
   struct symbol *sym;
-  char *demangled_name;
+  char *demangled_name, *p;
   struct type *btype;
 
   if (full)
@@ -252,7 +252,9 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 
   /* If we just skip the prefix, we get screwed by namespaces */
   demangled_name=cplus_demangle(demangled_name,DMGL_PARAMS|DMGL_ANSI);
-  *(strchr(demangled_name,' '))=0;
+  p = strchr (demangled_name, ' ');
+  if (p)
+    *p = '\0';
 
   /* Lookup the type for the name */
   /* FIXME: chastain/2003-11-26: block=NULL is bogus.  See pr gdb/1465. */

@@ -1,5 +1,7 @@
 2007-09-04  Michael Snyder  <msnyder@access-company.com>
 
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Guard against null.
+
 	* stabsread.c (patch_block_status): Guard against null.
 	* Makefile.in (stabsread.o): Depend on gdb_assert.h.
 
