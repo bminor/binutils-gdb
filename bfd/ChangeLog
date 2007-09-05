@@ -1,3 +1,8 @@
+2007-09-04  Michael Snyder  <msnyder@access-company.com>
+
+	* elf32-bfin.c (howto_table): Cut and paste error?  
+	Name field of reloc is wrong.
+
 2007-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (elf_howto_table): Formatting.

@@ -716,7 +716,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_BFIN_GOT12",		/* name */
+	 "R_BFIN_GOT17M4",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffff,	        /* src_mask */
 	 0xffff,	        /* dst_mask */
