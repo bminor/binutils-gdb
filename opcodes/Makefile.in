@@ -1127,7 +1127,7 @@ i386-gen: i386-gen.o
 i386-gen.o: i386-gen.c i386-opc.h
 
 $(srcdir)/i386-tbl.h: @MAINT@ i386-gen i386-opc.tbl i386-reg.tbl
-	./i386-gen --srcdir $(srcdir) > $@
+	./i386-gen --srcdir $(srcdir)
 
 ia64-gen: ia64-gen.o
 	$(LINK) ia64-gen.o $(LIBIBERTY)
