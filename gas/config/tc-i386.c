@@ -2664,9 +2664,15 @@ match_template (void)
 	      || !MATCH (overlap1, i.types[1], operand_types[1])
 	      /* monitor in SSE3 is a very special case.  The first
 		 register and the second register may have different
-		 sizes.  The same applies to crc32 in SSE4.2.  */
+		 sizes.  The same applies to crc32 in SSE4.2.  It is
+		 also true for invlpga, vmload, vmrun and vmsave in
+		 SVME.  */
 	      || !((t->base_opcode == 0x0f01
-		    && t->extension_opcode == 0xc8)
+		    && (t->extension_opcode == 0xc8
+			|| t->extension_opcode == 0xd8
+			|| t->extension_opcode == 0xda
+			|| t->extension_opcode == 0xdb
+			|| t->extension_opcode == 0xdf))
 		   || t->base_opcode == 0xf20f38f1
 		   || CONSISTENT_REGISTER_MATCH (overlap0, i.types[0],
 						 operand_types[0],
@@ -3000,11 +3006,17 @@ process_suffix (void)
       /* Now select between word & dword operations via the operand
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
-      if (i.tm.base_opcode == 0x0f01 && i.tm.extension_opcode == 0xc8)
+      if (i.tm.base_opcode == 0x0f01
+	   && (i.tm.extension_opcode == 0xc8
+	       || i.tm.extension_opcode == 0xd8
+	       || i.tm.extension_opcode == 0xda
+	       || i.tm.extension_opcode == 0xdb
+	       || i.tm.extension_opcode == 0xdf))
 	{
 	  /* monitor in SSE3 is a very special case. The default size
 	     of AX is the size of mode. The address size override
-	     prefix will change the size of AX.  */
+	     prefix will change the size of AX.  It is also true for
+	     invlpga, vmload, vmrun and vmsave in SVME.  */
 	  if (i.op->regs[0].reg_type &
 	      (flag_code == CODE_32BIT ? Reg16 : Reg32))
 	    if (!add_prefix (ADDR_PREFIX_OPCODE))

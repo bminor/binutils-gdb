@@ -1,3 +1,9 @@
+2007-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Correct SVME instructions to allow 32bit register
+	operand in 64bit mode.
+	* i386-tbl.h: Regenerated.
+
 2007-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OPC_EXT_40...OPC_EXT_45): New.
