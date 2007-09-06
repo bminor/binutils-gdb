@@ -1,3 +1,8 @@
+2007-09-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.mi/mi2-watch.exp: Set can-use-hw-watchpoints to 0 if required.
+	* gdb.mi/mi-watch.exp: Likewise.
+
 2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Jim Blandy  <jimb@codesourcery.com>
 
