@@ -1,5 +1,13 @@
 2007-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (table): Moved ...
+	(main): Here.  Call process_copyright to output copyright.
+	(process_copyright): New.
+	(process_i386_opcodes): Take FILE *table.
+	(process_i386_registers): Likewise.
+
+2007-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (table): New.
 	(process_i386_opcodes): Report errno when faied to open
 	i386-opc.tbl.  Output opcodes to table.  Close i386-opc.tbl
