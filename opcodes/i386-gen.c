@@ -100,16 +100,16 @@ remove_trailing_whitespaces (char *str)
   while (last != 0);
 }
 
-/* Find next field separated by '.' and terminate it. Return a
+/* Find next field separated by SEP and terminate it. Return a
    pointer to the one after it.  */
 
 static char *
-next_field (char *str, char **next)
+next_field (char *str, char sep, char **next)
 {
   char *p;
 
   p = remove_leading_whitespaces (str);
-  for (str = p; *str != ',' && *str != '\0'; str++);
+  for (str = p; *str != sep && *str != '\0'; str++);
 
   *str = '\0';
   remove_trailing_whitespaces (p);
@@ -165,37 +165,37 @@ process_i386_opcodes (FILE *table)
       last = p + strlen (p);
 
       /* Find name.  */
-      name = next_field (p, &str);
+      name = next_field (p, ',', &str);
 
       if (str >= last)
 	abort ();
 
       /* Find number of operands.  */
-      operands = next_field (str, &str);
+      operands = next_field (str, ',', &str);
 
       if (str >= last)
 	abort ();
 
       /* Find base_opcode.  */
-      base_opcode = next_field (str, &str);
+      base_opcode = next_field (str, ',', &str);
 
       if (str >= last)
 	abort ();
 
       /* Find extension_opcode.  */
-      extension_opcode = next_field (str, &str);
+      extension_opcode = next_field (str, ',', &str);
 
       if (str >= last)
 	abort ();
 
       /* Find cpu_flags.  */
-      cpu_flags = next_field (str, &str);
+      cpu_flags = next_field (str, ',', &str);
 
       if (str >= last)
 	abort ();
 
       /* Find opcode_modifier.  */
-      opcode_modifier = next_field (str, &str);
+      opcode_modifier = next_field (str, ',', &str);
 
       if (str >= last)
 	abort ();
@@ -234,7 +234,7 @@ process_i386_opcodes (FILE *table)
 	      break;
 	    }
 
-	  operand_types [i] = next_field (str, &str);
+	  operand_types [i] = next_field (str, ',', &str);
 	  if (*operand_types[i] == '0')
 	    {
 	      if (i != 0)
@@ -319,25 +319,25 @@ process_i386_registers (FILE *table)
       last = p + strlen (p);
 
       /* Find reg_name.  */
-      reg_name = next_field (p, &str);
+      reg_name = next_field (p, ',', &str);
 
       if (str >= last)
 	abort ();
 
       /* Find reg_type.  */
-      reg_type = next_field (str, &str);
+      reg_type = next_field (str, ',', &str);
 
       if (str >= last)
 	abort ();
 
       /* Find reg_flags.  */
-      reg_flags = next_field (str, &str);
+      reg_flags = next_field (str, ',', &str);
 
       if (str >= last)
 	abort ();
 
       /* Find reg_num.  */
-      reg_num = next_field (str, &str);
+      reg_num = next_field (str, ',', &str);
 
       fprintf (table, "  { \"%s\", %s, %s, %s },\n",
 	       reg_name, reg_type, reg_flags, reg_num);

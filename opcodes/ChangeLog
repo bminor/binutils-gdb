@@ -1,5 +1,11 @@
 2007-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (next_field): Updated to take a separator.
+	(process_i386_opcodes): Updated.
+	(process_i386_registers): Likewise.
+
+2007-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (table): Moved ...
 	(main): Here.  Call process_copyright to output copyright.
 	(process_copyright): New.
