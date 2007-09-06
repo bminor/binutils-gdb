@@ -74,6 +74,11 @@ class General_options
   rpath() const
   { return this->rpath_; }
 
+  // --rpath-link: The link time search patch for shared libraries.
+  const Dir_list&
+  rpath_link() const
+  { return this->rpath_link_; }
+
   // --shared: Whether generating a shared object.
   bool
   is_shared() const
@@ -121,6 +126,10 @@ class General_options
   { this->rpath_.push_back(arg); }
 
   void
+  add_to_rpath_link(const char* arg)
+  { this->rpath_link_.push_back(arg); }
+
+  void
   set_shared()
   { this->is_shared_ = true; }
 
@@ -139,6 +148,7 @@ class General_options
   bool is_relocatable_;
   bool create_eh_frame_hdr_;
   Dir_list rpath_;
+  Dir_list rpath_link_;
   bool is_shared_;
   bool is_static_;
 };
