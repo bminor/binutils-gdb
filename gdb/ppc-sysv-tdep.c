@@ -388,8 +388,13 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
-  if (TYPE_CODE (type) == TYPE_CODE_INT
-      && TYPE_LENGTH (type) <= tdep->wordsize)
+  else if ((TYPE_CODE (type) == TYPE_CODE_INT
+	    || TYPE_CODE (type) == TYPE_CODE_CHAR
+	    || TYPE_CODE (type) == TYPE_CODE_BOOL
+	    || TYPE_CODE (type) == TYPE_CODE_PTR
+	    || TYPE_CODE (type) == TYPE_CODE_REF
+	    || TYPE_CODE (type) == TYPE_CODE_ENUM)
+	   && TYPE_LENGTH (type) <= tdep->wordsize)
     {
       if (readbuf)
 	{

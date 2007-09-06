@@ -1,3 +1,8 @@
+2007-09-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ppc-sysv-tdep.c (do_ppc_sysv_return_value): Handle other integer
+	types.
+
 2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Jim Blandy  <jimb@codesourcery.com>
 
