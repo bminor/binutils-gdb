@@ -1,3 +1,9 @@
+2007-09-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/2103
+	* arm-tdep.c (arm_in_call_stub): Delete.
+	(arm_skip_stub): Handle from_arm and from_thumb stubs.
+
 2007-09-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ppc-sysv-tdep.c (do_ppc_sysv_return_value): Handle other integer

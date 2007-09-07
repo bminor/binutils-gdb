@@ -2358,38 +2358,24 @@ arm_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   return 1;
 }
 
-/* Return non-zero if the PC is inside a thumb call thunk.  */
-
-int
-arm_in_call_stub (CORE_ADDR pc, char *name)
-{
-  CORE_ADDR start_addr;
-
-  /* Find the starting address of the function containing the PC.  If
-     the caller didn't give us a name, look it up at the same time.  */
-  if (0 == find_pc_partial_function (pc, name ? NULL : &name, 
-				     &start_addr, NULL))
-    return 0;
-
-  return strncmp (name, "_call_via_r", 11) == 0;
-}
-
-/* If PC is in a Thumb call or return stub, return the address of the
-   target PC, which is in a register.  The thunk functions are called
-   _called_via_xx, where x is the register name.  The possible names
-   are r0-r9, sl, fp, ip, sp, and lr.  */
+/* Recognize GCC and GNU ld's trampolines.  If we are in a trampoline,
+   return the target PC.  Otherwise return 0.  */
 
 CORE_ADDR
 arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
 {
   char *name;
+  int namelen;
   CORE_ADDR start_addr;
 
   /* Find the starting address and name of the function containing the PC.  */
   if (find_pc_partial_function (pc, &name, &start_addr, NULL) == 0)
     return 0;
 
-  /* Call thunks always start with "_call_via_".  */
+  /* If PC is in a Thumb call or return stub, return the address of the
+     target PC, which is in a register.  The thunk functions are called
+     _call_via_xx, where x is the register name.  The possible names
+     are r0-r9, sl, fp, ip, sp, and lr.  */
   if (strncmp (name, "_call_via_", 10) == 0)
     {
       /* Use the name suffix to determine which register contains the
@@ -2399,10 +2385,47 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
        "r8", "r9", "sl", "fp", "ip", "sp", "lr"
       };
       int regno;
+      int offset = strlen (name) - 2;
 
       for (regno = 0; regno <= 14; regno++)
-	if (strcmp (&name[10], table[regno]) == 0)
+	if (strcmp (&name[offset], table[regno]) == 0)
 	  return get_frame_register_unsigned (frame, regno);
+    }
+
+  /* GNU ld generates __foo_from_arm or __foo_from_thumb for
+     non-interworking calls to foo.  We could decode the stubs
+     to find the target but it's easier to use the symbol table.  */
+  namelen = strlen (name);
+  if (name[0] == '_' && name[1] == '_'
+      && ((namelen > 2 + strlen ("_from_thumb")
+	   && strncmp (name + namelen - strlen ("_from_thumb"), "_from_thumb",
+		       strlen ("_from_thumb")) == 0)
+	  || (namelen > 2 + strlen ("_from_arm")
+	      && strncmp (name + namelen - strlen ("_from_arm"), "_from_arm",
+			  strlen ("_from_arm")) == 0)))
+    {
+      char *target_name;
+      int target_len = namelen - 2;
+      struct minimal_symbol *minsym;
+      struct objfile *objfile;
+      struct obj_section *sec;
+
+      if (name[namelen - 1] == 'b')
+	target_len -= strlen ("_from_thumb");
+      else
+	target_len -= strlen ("_from_arm");
+
+      target_name = alloca (target_len + 1);
+      memcpy (target_name, name + 2, target_len);
+      target_name[target_len] = '\0';
+
+      sec = find_pc_section (pc);
+      objfile = (sec == NULL) ? NULL : sec->objfile;
+      minsym = lookup_minimal_symbol (target_name, NULL, objfile);
+      if (minsym != NULL)
+	return SYMBOL_VALUE_ADDRESS (minsym);
+      else
+	return 0;
     }
 
   return 0;			/* not a stub */
