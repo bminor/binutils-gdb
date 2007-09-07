@@ -1,3 +1,12 @@
+2007-09-07  2007-09-07  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	 * p-valprint.c: Fix 7 ARI reported problems.
+	 (pascal_val_print): Fix one operator at end of line issue.
+	 Use paddress function to remove use of
+	 deprecated_print_address_numeric function (2 times).
+	 Use SYMBOL_LINKAGE_NAME instead of DEPRECATED_SYMBOL_NAME.
+	 (pascal_value_print): Fix 3 operator at end of line issues.
+
 2007-09-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/2103

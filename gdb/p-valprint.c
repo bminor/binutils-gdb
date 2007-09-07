@@ -85,8 +85,8 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  /* For an array of chars, print with string syntax.  */
-	  if (eltlen == 1 &&
-	      ((TYPE_CODE (elttype) == TYPE_CODE_INT)
+	  if (eltlen == 1 
+	      && ((TYPE_CODE (elttype) == TYPE_CODE_INT)
 	       || ((current_language->la_language == language_m2)
 		   && (TYPE_CODE (elttype) == TYPE_CODE_CHAR)))
 	      && (format == 0 || format == 's'))
@@ -164,7 +164,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 
 	  if (addressprint && format != 's')
 	    {
-	      deprecated_print_address_numeric (addr, 1, stream);
+	      fputs_filtered (paddress (addr), stream);
 	    }
 
 	  /* For a pointer to char or unsigned char, also print the string
@@ -217,7 +217,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 		  int is_this_fld;
 
 		  if (msymbol != NULL)
-		    wsym = lookup_symbol (DEPRECATED_SYMBOL_NAME (msymbol), block,
+		    wsym = lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol), block,
 					  VAR_DOMAIN, &is_this_fld, NULL);
 
 		  if (wsym)
@@ -252,11 +252,9 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	{
 	  fprintf_filtered (stream, "@");
 	  /* Extract the address, assume that it is unsigned.  */
-	  deprecated_print_address_numeric
-	    (extract_unsigned_integer (valaddr + embedded_offset,
-				       gdbarch_ptr_bit (current_gdbarch)
-					 / HOST_CHAR_BIT),
-	     1, stream);
+	  fputs_filtered (paddress (
+	    extract_unsigned_integer (valaddr + embedded_offset,
+	       gdbarch_ptr_bit (current_gdbarch) / HOST_CHAR_BIT)), stream);
 	  if (deref_ref)
 	    fputs_filtered (": ", stream);
 	}
@@ -530,14 +528,14 @@ pascal_value_print (struct value *val, struct ui_file *stream, int format,
 
      Object pascal: if it is a member pointer, we will take care
      of that when we print it.  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR ||
-      TYPE_CODE (type) == TYPE_CODE_REF)
+  if (TYPE_CODE (type) == TYPE_CODE_PTR
+      || TYPE_CODE (type) == TYPE_CODE_REF)
     {
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway. */
-      if (TYPE_CODE (type) == TYPE_CODE_PTR &&
-	  TYPE_NAME (type) == NULL &&
-	  TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL
+      if (TYPE_CODE (type) == TYPE_CODE_PTR 
+	  && TYPE_NAME (type) == NULL
+	  && TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL
 	  && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") == 0)
 	{
 	  /* Print nothing */
