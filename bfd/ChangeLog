@@ -1,5 +1,9 @@
 2007-09-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* config.bfd: Set want64 for spu-*-elf.
+
+2007-09-08  Alan Modra  <amodra@bigpond.net.au>
+
 	PR ld/2864, ld/5006
 	* elf.c (special_sections): Comment typo.
 	(elf_fake_sections): Force SHT_PROGBITS for sections that are

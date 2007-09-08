@@ -1399,6 +1399,7 @@ case "${targ}" in
 
   spu-*-elf)
     targ_defvec=bfd_elf32_spu_vec
+    want64=true
     ;;
 
 #if HAVE_host_aout_vec
