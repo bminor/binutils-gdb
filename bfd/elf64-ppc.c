@@ -5651,6 +5651,8 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
     {
       fh->elf.root.type = fh->oh->elf.root.type;
       fh->elf.forced_local = 1;
+      fh->elf.def_regular = fh->oh->elf.def_regular;
+      fh->elf.def_dynamic = fh->oh->elf.def_dynamic;
     }
 
   /* If this is a function code symbol, transfer dynamic linking

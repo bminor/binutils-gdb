@@ -1,5 +1,11 @@
 2007-09-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (func_desc_adjust): When resolving undefined
+	references to dot-symbols, transfer def_regular and
+	def_dynamic from the descriptor symbol.
+
+2007-09-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* config.bfd: Set want64 for spu-*-elf.
 
 2007-09-08  Alan Modra  <amodra@bigpond.net.au>
