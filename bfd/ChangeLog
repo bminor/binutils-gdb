@@ -1,3 +1,10 @@
+2007-09-08  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/2864, ld/5006
+	* elf.c (special_sections): Comment typo.
+	(elf_fake_sections): Force SHT_PROGBITS for sections that are
+	SHT_NOBITS if BFD section flags say they have contents.
+
 2007-09-04  Michael Snyder  <msnyder@access-company.com>
 
 	* elf32-bfin.c (howto_table): Cut and paste error?  

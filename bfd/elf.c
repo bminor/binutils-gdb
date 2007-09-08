@@ -2084,7 +2084,7 @@ static const struct bfd_elf_special_section special_sections_t[] =
 static const struct bfd_elf_special_section *special_sections[] =
 {
   special_sections_b,		/* 'b' */
-  special_sections_c,		/* 'b' */
+  special_sections_c,		/* 'c' */
   special_sections_d,		/* 'd' */
   NULL,				/* 'e' */
   special_sections_f,		/* 'f' */
@@ -2475,16 +2475,28 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
 
   /* If the section type is unspecified, we set it based on
      asect->flags.  */
+  if ((asect->flags & SEC_GROUP) != 0)
+    sh_type = SHT_GROUP;
+  else if ((asect->flags & SEC_ALLOC) != 0
+	   && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+	       || (asect->flags & SEC_NEVER_LOAD) != 0))
+    sh_type = SHT_NOBITS;
+  else
+    sh_type = SHT_PROGBITS;
+
   if (this_hdr->sh_type == SHT_NULL)
+    this_hdr->sh_type = sh_type;
+  else if (this_hdr->sh_type == SHT_NOBITS
+	   && sh_type == SHT_PROGBITS
+	   && (asect->flags & SEC_ALLOC) != 0)
     {
-      if ((asect->flags & SEC_GROUP) != 0)
-	this_hdr->sh_type = SHT_GROUP;
-      else if ((asect->flags & SEC_ALLOC) != 0
-	       && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
-		   || (asect->flags & SEC_NEVER_LOAD) != 0))
-	this_hdr->sh_type = SHT_NOBITS;
-      else
-	this_hdr->sh_type = SHT_PROGBITS;
+      /* Warn if we are changing a NOBITS section to PROGBITS, but
+	 allow the link to proceed.  This can happen when users link
+	 non-bss input sections to bss output sections, or emit data
+	 to a bss output section via a linker script.  */
+      (*_bfd_error_handler)
+	(_("section `%A' type changed to PROGBITS"), asect);
+      this_hdr->sh_type = sh_type;
     }
 
   switch (this_hdr->sh_type)
