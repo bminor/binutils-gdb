@@ -1,3 +1,8 @@
+2007-09-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldwrite.c (build_link_order <lang_padding_statement_enum>): Correct
+	condition under which we build a bfd_data_link_order.
+
 2007-08-31  Tristan Gingold  <gingold@adacore.com>
 
 	* ldlang.c (lang_map): Increment lang_statement_iteration so that

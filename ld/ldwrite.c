@@ -270,7 +270,10 @@ build_link_order (lang_statement_union_type *statement)
 	output_section = statement->padding_statement.output_section;
 	ASSERT (statement->padding_statement.output_section->owner
 		== output_bfd);
-	if ((output_section->flags & SEC_HAS_CONTENTS) != 0)
+	if (((output_section->flags & SEC_HAS_CONTENTS) != 0
+	     || ((output_section->flags & SEC_LOAD) != 0
+		 && (output_section->flags & SEC_THREAD_LOCAL)))
+	    && (output_section->flags & SEC_NEVER_LOAD) == 0)
 	  {
 	    link_order = bfd_new_link_order (output_bfd, output_section);
 	    link_order->type = bfd_data_link_order;
