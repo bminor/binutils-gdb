@@ -1,5 +1,10 @@
 2007-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2007-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* configure.in (AC_CHECK_HEADERS): Add limits.h.
 	* configure: Regenerated.
 	* config.in: Likewise.

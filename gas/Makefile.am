@@ -1131,19 +1131,22 @@ DEPTC_i386_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-i386.h \
   $(srcdir)/../opcodes/i386-opc.h $(INCDIR)/opcode/i386.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h \
   subsegs.h $(INCDIR)/obstack.h dwarf2dbg.h dw2gencfi.h \
-  $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/reloc-macros.h \
+  $(srcdir)/../opcodes/i386-init.h
 DEPTC_i386_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i386.h \
   $(srcdir)/../opcodes/i386-opc.h $(INCDIR)/opcode/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/x86_64.h $(INCDIR)/coff/external.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h \
   subsegs.h $(INCDIR)/obstack.h dwarf2dbg.h dw2gencfi.h \
-  $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/reloc-macros.h \
+  $(srcdir)/../opcodes/i386-init.h
 DEPTC_i386_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i386.h $(srcdir)/../opcodes/i386-opc.h \
   $(INCDIR)/opcode/i386.h dwarf2dbg.h $(INCDIR)/safe-ctype.h \
   subsegs.h $(INCDIR)/obstack.h dwarf2dbg.h dw2gencfi.h \
-  $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/reloc-macros.h
+  $(INCDIR)/elf/dwarf2.h $(INCDIR)/elf/x86-64.h $(INCDIR)/elf/reloc-macros.h \
+  $(srcdir)/../opcodes/i386-init.h
 DEPTC_i860_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i860.h dwarf2dbg.h \
