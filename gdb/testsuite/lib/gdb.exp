@@ -2491,7 +2491,14 @@ proc separate_debug_filename { exec } {
 # Return "" if no build-id found.
 proc build_id_debug_filename_get { exec } {
     set tmp "${exec}-tmp"
-    exec objcopy -j .note.gnu.build-id -O binary $exec $tmp
+    set objcopy_program [transform objcopy]
+
+    set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $exec $tmp" output]
+    verbose "result is $result"
+    verbose "output is $output"
+    if {$result == 1} {
+	return ""
+    }
     set fi [open $tmp]
     # Skip the NOTE header.
     read $fi 16

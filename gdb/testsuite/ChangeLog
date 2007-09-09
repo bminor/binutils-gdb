@@ -1,5 +1,8 @@
 2007-09-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* lib/gdb.exp (build_id_debug_filename_get): Improve check for
+	build-id.
+
 	* lib/gdb.exp (gdb_compile): OpenBSD doesn't need -dl, and doesn't
 	know about $ORIGIN.  Calculate output dir from $dest instead of
 	using ${objdir}/{$subdir}.
