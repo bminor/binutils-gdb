@@ -1,3 +1,107 @@
+2007-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.in (AC_CHECK_HEADERS): Add limits.h.
+	* configure: Regenerated.
+	* config.in: Likewise.
+
+	* config/tc-i386.c: Include "opcodes/i386-init.h".
+	(_i386_insn): Use i386_operand_type for types.
+	(cpu_arch_flags): Updated to new types with bitfield.
+	(cpu_arch_tune_flags): Likewise.
+	(cpu_arch_isa_flags): Likewise.
+	(cpu_arch): Likewise.
+	(i386_align_code): Likewise.
+	(set_code_flag): Likewise.
+	(set_16bit_gcc_code_flag): Likewise.
+	(set_cpu_arch): Likewise.
+	(md_assemble): Likewise.
+	(parse_insn): Likewise.
+	(process_operands): Likewise.
+	(output_branch): Likewise.
+	(output_jump): Likewise.
+	(parse_real_register): Likewise.
+	(mode_from_disp_size): Likewise.
+	(smallest_imm_type): Likewise.
+	(pi): Likewise.
+	(type_names): Likewise.
+	(pt): Likewise.
+	(pte): Likewise.
+	(swap_2_operands): Likewise.
+	(optimize_imm): Likewise.
+	(optimize_disp): Likewise.
+	(match_template): Likewise.
+	(check_string): Likewise.
+	(process_suffix): Likewise.
+	(check_byte_reg): Likewise.
+	(check_long_reg): Likewise.
+	(check_qword_reg): Likewise.
+	(check_word_reg): Likewise.
+	(finalize_imm): Likewise.
+	(build_modrm_byte): Likewise.
+	(output_insn): Likewise.
+	(disp_size): Likewise.
+	(imm_size): Likewise.
+	(output_disp): Likewise.
+	(output_imm): Likewise.
+	(gotrel): Likewise.
+	(i386_immediate): Likewise.
+	(i386_displacement): Likewise.
+	(i386_index_check): Likewise.
+	(i386_operand): Likewise.
+	(parse_real_register): Likewise.
+	(i386_intel_operand): Likewise.
+	(intel_e09): Likewise.
+	(intel_bracket_expr): Likewise.
+	(intel_e11): Likewise.
+	(cpu_arch_flags_not): New.
+	(cpu_flags_check_x64): Likewise.
+	(cpu_flags_all_zero): Likewise.
+	(cpu_flags_not): Likewise.
+	(i386_cpu_flags_biop): Likewise.
+	(cpu_flags_biop): Likewise.
+	(cpu_flags_match); Likewise.
+	(acc32): New.
+	(acc64): Likewise.
+	(control): Likewise.
+	(reg16_inoutportreg): Likewise.
+	(disp16): Likewise.
+	(disp32): Likewise.
+	(disp32s): Likewise.
+	(disp16_32): Likewise.
+	(anydisp): Likewise.
+	(baseindex): Likewise.
+	(regxmm): Likewise.
+	(imm8): Likewise.
+	(imm8s): Likewise.
+	(imm16): Likewise.
+	(imm32): Likewise.
+	(imm32s): Likewise.
+	(imm64): Likewise.
+	(imm16_32): Likewise.
+	(imm16_32s): Likewise.
+	(imm16_32_32s): Likewise.
+	(operand_type): Likewise.
+	(operand_type_check): Likewise.
+	(operand_type_match): Likewise.
+	(operand_type_register_match): Likewise.
+	(update_imm): Likewise.
+	(set_code_flag): Also update cpu_arch_flags_not.
+	(set_16bit_gcc_code_flag): Likewise.
+	(md_begin): Likewise.
+	(parse_insn): Use cpu_flags_check_x64 to check 64bit support.
+	Use cpu_flags_match to match instructions.
+	(i386_target_format): Update cpu_arch_isa_flags and
+	cpu_arch_tune_flags to i386_cpu_flags type with bitfield.
+	(smallest_imm_type): Check cpu_arch_tune to tune for i486.
+	(match_template): Don't initialize overlap0, overlap1,
+	overlap2, overlap3 and operand_types.
+	(process_suffix): Handle crc32 with 64bit register.
+	(MATCH): Removed.
+	(CONSISTENT_REGISTER_MATCH): Likewise.
+
+	* config/tc-i386.h (arch_entry): Updated to i386_cpu_flags
+	type.
+
 2007-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Handle invlpga, vmload,

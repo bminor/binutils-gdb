@@ -186,7 +186,7 @@ typedef struct
 {
   const char *name;		/* arch name */
   enum processor_type type;	/* arch type */
-  unsigned int flags;		/* cpu feature flags */
+  i386_cpu_flags flags;		/* cpu feature flags */
 }
 arch_entry;
 

@@ -260,6 +260,7 @@ HFILES = \
 	fr30-desc.h fr30-opc.h \
 	frv-desc.h frv-opc.h \
 	h8500-opc.h \
+	i386-init.h \
 	i386-opc.h \
 	i386-tbl.h \
 	ia64-asmtab.h \
@@ -1126,7 +1127,10 @@ i386-gen: i386-gen.o
 
 i386-gen.o: i386-gen.c i386-opc.h
 
-$(srcdir)/i386-tbl.h: @MAINT@ i386-gen i386-opc.tbl i386-reg.tbl
+$(srcdir)/i386-tbl.h: $(srcdir)/i386-init.h 
+	@echo $@
+
+$(srcdir)/i386-init.h: @MAINT@ i386-gen i386-opc.tbl i386-reg.tbl
 	./i386-gen --srcdir $(srcdir)
 
 ia64-gen: ia64-gen.o

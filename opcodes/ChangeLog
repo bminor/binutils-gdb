@@ -1,3 +1,181 @@
+2007-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.in (AC_CHECK_HEADERS): Add limits.h.
+	* configure: Regenerated.
+	* config.in: Likewise.
+
+	* i386-gen.c: Include "sysdep.h" instead of <stdlib.h> and
+	<string.h>.  Use xstrerror instead of strerror.
+	(initializer): New.
+	(cpu_flag_init): Likewise.
+	(bitfield): Likewise.
+	(BITFIELD): New.
+	(cpu_flags): Likewise.
+	(opcode_modifiers): Likewise.
+	(operand_types): Likewise.
+	(compare): Likewise.
+	(set_cpu_flags): Likewise.
+	(output_cpu_flags): Likewise.
+	(process_i386_cpu_flags): Likewise.
+	(output_opcode_modifier): Likewise.
+	(process_i386_opcode_modifier): Likewise.
+	(output_operand_type): Likewise.
+	(process_i386_operand_type): Likewise.
+	(set_bitfield): Likewise.
+	(operand_type_init): Likewise.
+	(process_i386_initializers): Likewise.
+	(process_i386_opcodes): Call process_i386_opcode_modifier to
+	process opcode_modifier.  Call process_i386_operand_type to
+	process operand_types.
+	(process_i386_registers): Call process_i386_operand_type to
+	process reg_type.
+	(main): Check unused bits in i386_cpu_flags and i386_operand_type.
+	Sort cpu_flags, opcode_modifiers and operand_types.  Call
+	process_i386_initializers.
+
+	* i386-init.h: New.
+	* i386-tbl.h: Regenerated.
+
+	* i386-opc.h: Include <limits.h>.
+	(CHAR_BIT): Define as 8 if not defined.
+	(Cpu186): Changed to position of bitfiled.
+	(Cpu286): Likewise.
+	(Cpu386): Likewise.
+	(Cpu486): Likewise.
+	(Cpu586): Likewise.
+	(Cpu686): Likewise.
+	(CpuP4): Likewise.
+	(CpuK6): Likewise.
+	(CpuK8): Likewise.
+	(CpuMMX): Likewise.
+	(CpuMMX2): Likewise.
+	(CpuSSE): Likewise.
+	(CpuSSE2): Likewise.
+	(Cpu3dnow): Likewise.
+	(Cpu3dnowA): Likewise.
+	(CpuSSE3): Likewise.
+	(CpuPadLock): Likewise.
+	(CpuSVME): Likewise.
+	(CpuVMX): Likewise.
+	(CpuSSSE3): Likewise.
+	(CpuSSE4a): Likewise.
+	(CpuABM): Likewise.
+	(CpuSSE4_1): Likewise.
+	(CpuSSE4_2): Likewise.
+	(Cpu64): Likewise.
+	(CpuNo64): Likewise.
+	(D): Likewise.
+	(W): Likewise.
+	(Modrm): Likewise.
+	(ShortForm): Likewise.
+	(Jump): Likewise.
+	(JumpDword): Likewise.
+	(JumpByte): Likewise.
+	(JumpInterSegment): Likewise.
+	(FloatMF): Likewise.
+	(FloatR): Likewise.
+	(FloatD): Likewise.
+	(Size16): Likewise.
+	(Size32): Likewise.
+	(Size64): Likewise.
+	(IgnoreSize): Likewise.
+	(DefaultSize): Likewise.
+	(No_bSuf): Likewise.
+	(No_wSuf): Likewise.
+	(No_lSuf): Likewise.
+	(No_sSuf): Likewise.
+	(No_qSuf): Likewise.
+	(No_xSuf): Likewise.
+	(FWait): Likewise.
+	(IsString): Likewise.
+	(RegKludge): Likewise.
+	(IsPrefix): Likewise.
+	(ImmExt): Likewise.
+	(NoRex64): Likewise.
+	(Rex64): Likewise.
+	(Ugh): Likewise.
+	(Reg8): Likewise.
+	(Reg16): Likewise.
+	(Reg32): Likewise.
+	(Reg64): Likewise.
+	(FloatReg): Likewise.
+	(RegMMX): Likewise.
+	(RegXMM): Likewise.
+	(Imm8): Likewise.
+	(Imm8S): Likewise.
+	(Imm16): Likewise.
+	(Imm32): Likewise.
+	(Imm32S): Likewise.
+	(Imm64): Likewise.
+	(Imm1): Likewise.
+	(BaseIndex): Likewise.
+	(Disp8): Likewise.
+	(Disp16): Likewise.
+	(Disp32): Likewise.
+	(Disp32S): Likewise.
+	(Disp64): Likewise.
+	(InOutPortReg): Likewise.
+	(ShiftCount): Likewise.
+	(Control): Likewise.
+	(Debug): Likewise.
+	(Test): Likewise.
+	(SReg2): Likewise.
+	(SReg3): Likewise.
+	(Acc): Likewise.
+	(FloatAcc): Likewise.
+	(JumpAbsolute): Likewise.
+	(EsSeg): Likewise.
+	(RegMem): Likewise.
+	(OTMax): Likewise.
+	(Reg): Commented out.
+	(WordReg): Likewise.
+	(ImplicitRegister): Likewise.
+	(Imm): Likewise.
+	(EncImm): Likewise.
+	(Disp): Likewise.
+	(AnyMem): Likewise.
+	(LLongMem): Likewise.
+	(LongMem): Likewise.
+	(ShortMem): Likewise.
+	(WordMem): Likewise.
+	(ByteMem): Likewise.
+	(CpuMax): New
+	(CpuLM): Likewise.
+	(CpuNumOfUints): Likewise.
+	(CpuNumOfBits): Likewise.
+	(CpuUnused): Likewise.
+	(OTNumOfUints): Likewise.
+	(OTNumOfBits): Likewise.
+	(OTUnused): Likewise.
+	(i386_cpu_flags): New type.
+	(i386_operand_type): Likewise.
+	(i386_opcode_modifier): Likewise.
+	(CpuSledgehammer): Removed.
+	(CpuSSE4): Likewise.
+	(CpuUnknownFlags): Likewise.
+	(Reg): Likewise.
+	(WordReg): Likewise.
+	(ImplicitRegister): Likewise.
+	(Imm): Likewise.
+	(EncImm): Likewise.
+	(Disp): Likewise.
+	(AnyMem): Likewise.
+	(LLongMem): Likewise.
+	(LongMem): Likewise.
+	(ShortMem): Likewise.
+	(WordMem): Likewise.
+	(ByteMem): Likewise.
+	(template): Use i386_cpu_flags for cpu_flags, use
+	i386_opcode_modifier for opcode_modifier, use
+	i386_operand_type for operand_types.
+	(reg_entry): Use i386_operand_type for reg_type.
+
+	* Makefile.am (HFILES): Add i386-init.h.
+	($(srcdir)/i386-init.h): New rule.
+	($(srcdir)/i386-tbl.h): Depend on $(srcdir)/i386-init.h
+	instead.
+	* Makefile.in: Regenerated.
+
 2007-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (next_field): Updated to take a separator.
