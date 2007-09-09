@@ -4578,11 +4578,11 @@ output_insn (void)
       /* All opcodes on i386 have either 1 or 2 bytes.  SSSE3 and
 	 SSE4 instructions have 3 bytes.  We may use one more higher
 	 byte to specify a prefix the instruction requires.  Exclude
-	 instructions which are in both SSE4 and ABM.  */
-      opc_3b = ((i.tm.cpu_flags.bitfield.cpussse3
-		 || i.tm.cpu_flags.bitfield.cpusse4_1
-		 || i.tm.cpu_flags.bitfield.cpusse4_2)
-		&& !i.tm.cpu_flags.bitfield.cpuabm);
+	 instructions which are in both SSE4.2 and ABM.  */
+      opc_3b = (i.tm.cpu_flags.bitfield.cpussse3
+		|| i.tm.cpu_flags.bitfield.cpusse4_1
+		|| (i.tm.cpu_flags.bitfield.cpusse4_2
+		    && !i.tm.cpu_flags.bitfield.cpuabm));
       if (opc_3b)
 	{
 	  if (i.tm.base_opcode & 0xff000000)

@@ -1,3 +1,8 @@
+2007-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* tc-i386.c (output_insn): Only check SSE4.2 and ABM for 3
+	byte opcode.
+
 2007-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_flags_check_x64): Renamed to ...
