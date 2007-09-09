@@ -1,5 +1,50 @@
 2007-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (cpu_flags_check_x64): Renamed to ...
+	(cpu_flags_check_cpu64): This. Inline.
+	(uints_all_zero): New.
+	(uints_set): Likewise
+	(uints_equal): Likewise
+	(UINTS_ALL_ZERO): Likewise
+	(UINTS_SET): Likewise
+	(UINTS_CLEAR): Likewise
+	(UINTS_EQUAL): Likewise
+	(cpu_flags_and): Likewise.
+	(cpu_flags_or): Likewise.
+	(operand_type_and): Likewise.
+	(operand_type_or): Likewise.
+	(operand_type_xor): Likewise.
+	(cpu_flags_not): Inline and use switch instead of loop.
+	(cpu_flags_match): Updated.
+	(operand_type_match): Likewise.
+	(smallest_imm_type): Likewise.
+	(set_cpu_arch): Likewise.
+	(pt): Likewise.
+	(md_assemble): Likewise.
+	(parse_insn): Likewise.
+	(optimize_imm): Likewise.
+	(match_template): Likewise.
+	(process_suffix): Likewise.
+	(update_imm): Likewise.
+	(finalize_imm): Likewise.
+	(process_operands): Likewise.
+	(build_modrm_byte): Likewise.
+	(i386_immediate): Likewise.
+	(i386_displacement): Likewise.
+	(i386_index_check): Likewise.
+	(i386_operand): Likewise.
+	(i386_target_format): Likewise.
+	(intel_e11): Likewise.
+	(operand_type): Remove implicitregister.
+	(operand_type_check): Updated. Inline.
+	(cpu_flags_all_zero): Removed.
+	(operand_type_all_zero): Likewise.
+	(i386_array_biop): Likewise.
+	(cpu_flags_biop): Likewise.
+	(operand_type_biop): Likewise.
+
+2007-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 
