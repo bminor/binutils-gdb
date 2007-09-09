@@ -1520,11 +1520,13 @@ proc gdb_compile {source dest type options} {
     global gdb_wrapper_flags;
     global gdb_wrapper_initialized;
 
-     # Add platform-specific options if a shared library was specified using
-     # "shlib=librarypath" in OPTIONS.
-     set new_options ""
-     set shlib_found 0
-     foreach opt $options {
+    set outdir [file dirname $dest]
+
+    # Add platform-specific options if a shared library was specified using
+    # "shlib=librarypath" in OPTIONS.
+    set new_options ""
+    set shlib_found 0
+    foreach opt $options {
         if [regexp {^shlib=(.*)} $opt dummy_var shlib_name] {
             if [test_compiler_info "xlc-*"] {
 		# IBM xlc compiler doesn't accept shared library named other
@@ -1542,9 +1544,9 @@ proc gdb_compile {source dest type options} {
                 if { ([test_compiler_info "gcc-*"]
                       &&  ([istarget "powerpc*-*-aix*"]
                         || [istarget "rs6000*-*-aix*"] )) } {
-                    lappend options "additional_flags=-L${objdir}/${subdir}"
+                    lappend options "additional_flags=-L${outdir}"
                 } elseif { [istarget "mips-sgi-irix*"] } {
-                    lappend options "additional_flags=-rpath ${objdir}/${subdir}"
+                    lappend options "additional_flags=-rpath ${outdir}"
                 }
             }
 	} elseif { $opt == "shlib_load" } {
@@ -1554,6 +1556,8 @@ proc gdb_compile {source dest type options} {
 		  || [istarget arm*-*-symbianelf*]
 		  || [istarget hppa*-*-hpux*])} {
 		# Do not need anything.
+	    } elseif { [istarget *-*-openbsd*] } {
+		lappend new_options "additional_flags=-Wl,-rpath,${outdir}"
 	    } else {
 		lappend new_options "libs=-ldl"
 		lappend new_options "additional_flags=-Wl,-rpath,\\\$ORIGIN"
@@ -1561,8 +1565,8 @@ proc gdb_compile {source dest type options} {
         } else {
             lappend new_options $opt
         }
-     }
-     set options $new_options
+    }
+    set options $new_options
 
     if [target_info exists gdb_stub] {
 	set options2 { "additional_flags=-Dusestubs" }

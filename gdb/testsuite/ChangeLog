@@ -1,3 +1,9 @@
+2007-09-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* lib/gdb.exp (gdb_compile): OpenBSD doesn't need -dl, and doesn't
+	know about $ORIGIN.  Calculate output dir from $dest instead of
+	using ${objdir}/{$subdir}.
+
 2007-09-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/gcore-buffer-overflow.exp: Check whether gdb supports
