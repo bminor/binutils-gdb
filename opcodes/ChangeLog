@@ -1,3 +1,7 @@
+2007-09-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (main): Remove the local variable, unused.
+
 2007-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".

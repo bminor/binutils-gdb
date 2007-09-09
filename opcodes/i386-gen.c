@@ -887,7 +887,7 @@ main (int argc, char **argv)
 {
   extern int chdir (char *);
   char *srcdir = NULL;
-  int c, unused;
+  int c;
   FILE *table;
   
   program_name = *argv;
@@ -924,16 +924,16 @@ main (int argc, char **argv)
 
   /* Check the unused bitfield in i386_cpu_flags.  */
 #ifndef CpuUnused
-  unused = CpuNumOfBits - CpuMax - 1;
-  if (unused)
-    fail (_("%d unused bits in i386_cpu_flags.\n"), unused);
+  c = CpuNumOfBits - CpuMax - 1;
+  if (c)
+    fail (_("%d unused bits in i386_cpu_flags.\n"), c);
 #endif
 
   /* Check the unused bitfield in i386_operand_type.  */
 #ifndef OTUnused
-  unused = OTNumOfBits - OTMax - 1;
-  if (unused)
-    fail (_("%d unused bits in i386_operand_type.\n"), unused);
+  c = OTNumOfBits - OTMax - 1;
+  if (c)
+    fail (_("%d unused bits in i386_operand_type.\n"), c);
 #endif
 
   qsort (cpu_flags, ARRAY_SIZE (cpu_flags), sizeof (cpu_flags [0]),
