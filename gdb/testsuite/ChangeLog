@@ -1,3 +1,8 @@
+2007-09-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/gcore-buffer-overflow.exp: Check whether gdb supports
+	gcore, before continuing with the test.
+
 2007-09-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.mi/mi2-watch.exp: Set can-use-hw-watchpoints to 0 if required.
