@@ -102,4 +102,9 @@ extern int mips_pc_is_mips16 (bfd_vma memaddr);
 /* Return the currently configured (or set) saved register size. */
 extern unsigned int mips_abi_regsize (struct gdbarch *gdbarch);
 
+/* Target descriptions which only indicate the size of general
+   registers.  */
+extern struct target_desc *mips_tdesc_gp32;
+extern struct target_desc *mips_tdesc_gp64;
+
 #endif /* MIPS_TDEP_H */

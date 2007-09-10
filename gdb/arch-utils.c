@@ -661,6 +661,8 @@ gdbarch_info_fill (struct gdbarch_info *info)
   /* Check for the current file.  */
   if (info->abfd == NULL)
     info->abfd = exec_bfd;
+  if (info->abfd == NULL)
+    info->abfd = core_bfd;
 
   /* Check for the current target description.  */
   if (info->target_desc == NULL)

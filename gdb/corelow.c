@@ -635,6 +635,20 @@ core_file_thread_alive (ptid_t tid)
   return 1;
 }
 
+/* Ask the current architecture what it knows about this core file.
+   That will be used, in turn, to pick a better architecture.  This
+   wrapper could be avoided if targets got a chance to specialize
+   core_ops.  */
+
+static const struct target_desc *
+core_read_description (struct target_ops *target)
+{
+  if (gdbarch_core_read_description_p (current_gdbarch))
+    return gdbarch_core_read_description (current_gdbarch, target, core_bfd);
+
+  return NULL;
+}
+
 /* Fill in core_ops with its defined operations and properties.  */
 
 static void
@@ -656,6 +670,7 @@ init_core_ops (void)
   core_ops.to_remove_breakpoint = ignore;
   core_ops.to_create_inferior = find_default_create_inferior;
   core_ops.to_thread_alive = core_file_thread_alive;
+  core_ops.to_read_description = core_read_description;
   core_ops.to_stratum = core_stratum;
   core_ops.to_has_memory = 1;
   core_ops.to_has_stack = 1;

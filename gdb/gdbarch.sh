@@ -652,6 +652,8 @@ F::void:skip_permanent_breakpoint:struct regcache *regcache:regcache
 
 # Refresh overlay mapped state for section OSECT.
 F::void:overlay_update:struct obj_section *osect:osect
+
+M::const struct target_desc *:core_read_description:struct target_ops *target, bfd *abfd:target, abfd
 EOF
 }
 

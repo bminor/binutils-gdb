@@ -687,6 +687,12 @@ typedef void (gdbarch_overlay_update_ftype) (struct obj_section *osect);
 extern void gdbarch_overlay_update (struct gdbarch *gdbarch, struct obj_section *osect);
 extern void set_gdbarch_overlay_update (struct gdbarch *gdbarch, gdbarch_overlay_update_ftype *overlay_update);
 
+extern int gdbarch_core_read_description_p (struct gdbarch *gdbarch);
+
+typedef const struct target_desc * (gdbarch_core_read_description_ftype) (struct gdbarch *gdbarch, struct target_ops *target, bfd *abfd);
+extern const struct target_desc * gdbarch_core_read_description (struct gdbarch *gdbarch, struct target_ops *target, bfd *abfd);
+extern void set_gdbarch_core_read_description (struct gdbarch *gdbarch, gdbarch_core_read_description_ftype *core_read_description);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

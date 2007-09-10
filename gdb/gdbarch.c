@@ -230,6 +230,7 @@ struct gdbarch
   int vbit_in_delta;
   gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint;
   gdbarch_overlay_update_ftype *overlay_update;
+  gdbarch_core_read_description_ftype *core_read_description;
 };
 
 
@@ -352,6 +353,7 @@ struct gdbarch startup_gdbarch =
   0,  /* vbit_in_delta */
   0,  /* skip_permanent_breakpoint */
   0,  /* overlay_update */
+  0,  /* core_read_description */
   /* startup_gdbarch() */
 };
 
@@ -599,6 +601,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of vbit_in_delta, invalid_p == 0 */
   /* Skip verify of skip_permanent_breakpoint, has predicate */
   /* Skip verify of overlay_update, has predicate */
+  /* Skip verify of core_read_description, has predicate */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -713,6 +716,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: convert_register_p = <0x%lx>\n",
                       (long) current_gdbarch->convert_register_p);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_core_read_description_p() = %d\n",
+                      gdbarch_core_read_description_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: core_read_description = <0x%lx>\n",
+                      (long) current_gdbarch->core_read_description);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_core_xfer_shared_libraries_p() = %d\n",
                       gdbarch_core_xfer_shared_libraries_p (current_gdbarch));
@@ -2999,6 +3008,30 @@ set_gdbarch_overlay_update (struct gdbarch *gdbarch,
                             gdbarch_overlay_update_ftype overlay_update)
 {
   gdbarch->overlay_update = overlay_update;
+}
+
+int
+gdbarch_core_read_description_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->core_read_description != NULL;
+}
+
+const struct target_desc *
+gdbarch_core_read_description (struct gdbarch *gdbarch, struct target_ops *target, bfd *abfd)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->core_read_description != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_core_read_description called\n");
+  return gdbarch->core_read_description (gdbarch, target, abfd);
+}
+
+void
+set_gdbarch_core_read_description (struct gdbarch *gdbarch,
+                                   gdbarch_core_read_description_ftype core_read_description)
+{
+  gdbarch->core_read_description = core_read_description;
 }
 
 

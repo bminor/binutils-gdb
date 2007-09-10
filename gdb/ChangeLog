@@ -1,3 +1,17 @@
+2007-09-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arch-utils.c (gdbarch_info_fill): Also try core_bfd.
+	* corelow.c (core_read_description): New.
+	(init_core_ops): Set to_read_description.
+	* gdbarch.sh: Add gdbarch_core_read_description.
+	* mips-linux-tdep.c (mips_linux_core_read_description): New.
+	(mips_linux_init_abi): Call set_gdbarch_core_read_description.
+	* mips-tdep.c (mips_tdesc_gp32, mips_tdesc_gp64): New.
+	(mips_register_g_packet_guesses): Use them.
+	(_initialize_mips_tdep): Initialize them.
+	* mips-tdep.h (mips_tdesc_gp32, mips_tdesc_gp64): Declare.
+	* gdbarch.h, gdbarch.c: Regenerated.
+
 2007-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* infrun.c (stepping_past_breakpoint): New global variable.

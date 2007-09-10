@@ -573,6 +573,28 @@ static struct core_fns regset_core_fns =
   NULL					/* next */
 };
 
+static const struct target_desc *
+mips_linux_core_read_description (struct gdbarch *gdbarch,
+				  struct target_ops *target,
+				  bfd *abfd)
+{
+  asection *section = bfd_get_section_by_name (abfd, ".reg");
+  if (! section)
+    return NULL;
+
+  switch (bfd_section_size (abfd, section))
+    {
+    case sizeof (mips_elf_gregset_t):
+      return mips_tdesc_gp32;
+
+    case sizeof (mips64_elf_gregset_t):
+      return mips_tdesc_gp64;
+
+    default:
+      return NULL;
+    }
+}
+
 
 /* Check the code at PC for a dynamic linker lazy resolution stub.
    Because they aren't in the .plt section, we pattern-match on the
@@ -1159,6 +1181,9 @@ mips_linux_init_abi (struct gdbarch_info info,
   set_solib_ops (gdbarch, &mips_svr4_so_ops);
 
   set_gdbarch_write_pc (gdbarch, mips_linux_write_pc);
+
+  set_gdbarch_core_read_description (gdbarch,
+				     mips_linux_core_read_description);
 
   if (tdesc_data)
     {

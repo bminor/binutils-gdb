@@ -165,6 +165,9 @@ static int mips_debug = 0;
 #define PROPERTY_GP32 "internal: transfers-32bit-registers"
 #define PROPERTY_GP64 "internal: transfers-64bit-registers"
 
+struct target_desc *mips_tdesc_gp32;
+struct target_desc *mips_tdesc_gp64;
+
 /* MIPS specific per-architecture information */
 struct gdbarch_tdep
 {
@@ -4866,30 +4869,16 @@ global_mips_abi (void)
 static void
 mips_register_g_packet_guesses (struct gdbarch *gdbarch)
 {
-  static struct target_desc *tdesc_gp32, *tdesc_gp64;
-
-  if (tdesc_gp32 == NULL)
-    {
-      /* Create feature sets with the appropriate properties.  The values
-	 are not important.  */
-
-      tdesc_gp32 = allocate_target_description ();
-      set_tdesc_property (tdesc_gp32, PROPERTY_GP32, "");
-
-      tdesc_gp64 = allocate_target_description ();
-      set_tdesc_property (tdesc_gp64, PROPERTY_GP64, "");
-    }
-
   /* If the size matches the set of 32-bit or 64-bit integer registers,
      assume that's what we've got.  */
-  register_remote_g_packet_guess (gdbarch, 38 * 4, tdesc_gp32);
-  register_remote_g_packet_guess (gdbarch, 38 * 8, tdesc_gp64);
+  register_remote_g_packet_guess (gdbarch, 38 * 4, mips_tdesc_gp32);
+  register_remote_g_packet_guess (gdbarch, 38 * 8, mips_tdesc_gp64);
 
   /* If the size matches the full set of registers GDB traditionally
      knows about, including floating point, for either 32-bit or
      64-bit, assume that's what we've got.  */
-  register_remote_g_packet_guess (gdbarch, 90 * 4, tdesc_gp32);
-  register_remote_g_packet_guess (gdbarch, 90 * 8, tdesc_gp64);
+  register_remote_g_packet_guess (gdbarch, 90 * 4, mips_tdesc_gp32);
+  register_remote_g_packet_guess (gdbarch, 90 * 8, mips_tdesc_gp64);
 
   /* Otherwise we don't have a useful guess.  */
 }
@@ -5695,6 +5684,14 @@ _initialize_mips_tdep (void)
   gdbarch_register (bfd_arch_mips, mips_gdbarch_init, mips_dump_tdep);
 
   mips_pdr_data = register_objfile_data ();
+
+  /* Create feature sets with the appropriate properties.  The values
+     are not important.  */
+  mips_tdesc_gp32 = allocate_target_description ();
+  set_tdesc_property (mips_tdesc_gp32, PROPERTY_GP32, "");
+
+  mips_tdesc_gp64 = allocate_target_description ();
+  set_tdesc_property (mips_tdesc_gp64, PROPERTY_GP64, "");
 
   /* Add root prefix command for all "set mips"/"show mips" commands */
   add_prefix_cmd ("mips", no_class, set_mips_command,
