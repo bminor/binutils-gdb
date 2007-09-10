@@ -84,9 +84,11 @@ static void
 free_thread (struct thread_info *tp)
 {
   /* NOTE: this will take care of any left-over step_resume breakpoints,
-     but not any user-specified thread-specific breakpoints. */
+     but not any user-specified thread-specific breakpoints.  We can not
+     delete the breakpoint straight-off, because the inferior might not
+     be stopped at the moment.  */
   if (tp->step_resume_breakpoint)
-    delete_breakpoint (tp->step_resume_breakpoint);
+    tp->step_resume_breakpoint->disposition = disp_del_at_next_stop;
 
   /* FIXME: do I ever need to call the back-end to give it a
      chance at this private data before deleting the thread?  */

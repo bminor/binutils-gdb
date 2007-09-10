@@ -1,5 +1,10 @@
 2007-09-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* thread.c (free_thread): Do not delete the step resume breakpoint
+	right away.
+
+2007-09-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arch-utils.c (gdbarch_info_fill): Also try core_bfd.
 	* corelow.c (core_read_description): New.
 	(init_core_ops): Set to_read_description.
