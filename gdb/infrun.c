@@ -78,7 +78,7 @@ static int currently_stepping (struct execution_control_state *ecs);
 
 static void xdb_handle_command (char *args, int from_tty);
 
-static int prepare_to_proceed (void);
+static int prepare_to_proceed (int);
 
 void _initialize_infrun (void);
 
@@ -445,6 +445,11 @@ static CORE_ADDR singlestep_pc;
    thread here so that we can resume single-stepping it later.  */
 static ptid_t saved_singlestep_ptid;
 static int stepping_past_singlestep_breakpoint;
+
+/* Similarly, if we are stepping another thread past a breakpoint,
+   save the original thread here so that we can resume stepping it later.  */
+static ptid_t stepping_past_breakpoint_ptid;
+static int stepping_past_breakpoint;
 
 
 /* Things to clean up if we QUIT out of resume ().  */
@@ -642,7 +647,7 @@ clear_proceed_status (void)
 /* This should be suitable for any targets that support threads. */
 
 static int
-prepare_to_proceed (void)
+prepare_to_proceed (int step)
 {
   ptid_t wait_ptid;
   struct target_waitstatus wait_status;
@@ -650,42 +655,35 @@ prepare_to_proceed (void)
   /* Get the last target status returned by target_wait().  */
   get_last_target_status (&wait_ptid, &wait_status);
 
-  /* Make sure we were stopped either at a breakpoint, or because
-     of a Ctrl-C.  */
+  /* Make sure we were stopped at a breakpoint.  */
   if (wait_status.kind != TARGET_WAITKIND_STOPPED
-      || (wait_status.value.sig != TARGET_SIGNAL_TRAP
-	  && wait_status.value.sig != TARGET_SIGNAL_INT))
+      || wait_status.value.sig != TARGET_SIGNAL_TRAP)
     {
       return 0;
     }
 
+  /* Switched over from WAIT_PID.  */
   if (!ptid_equal (wait_ptid, minus_one_ptid)
-      && !ptid_equal (inferior_ptid, wait_ptid))
+      && !ptid_equal (inferior_ptid, wait_ptid)
+      && breakpoint_here_p (read_pc_pid (wait_ptid)))
     {
-      /* Switched over from WAIT_PID.  */
-      CORE_ADDR wait_pc = read_pc_pid (wait_ptid);
-
-      if (wait_pc != read_pc ())
+      /* If stepping, remember current thread to switch back to.  */
+      if (step)
 	{
-	  /* Switch back to WAIT_PID thread.  */
-	  inferior_ptid = wait_ptid;
-
-	  /* FIXME: This stuff came from switch_to_thread() in
-	     thread.c (which should probably be a public function).  */
-	  reinit_frame_cache ();
-	  registers_changed ();
-	  stop_pc = wait_pc;
+	  stepping_past_breakpoint = 1;
+	  stepping_past_breakpoint_ptid = inferior_ptid;
 	}
 
+      /* Switch back to WAIT_PID thread.  */
+      switch_to_thread (wait_ptid);
+
       /* We return 1 to indicate that there is a breakpoint here,
-         so we need to step over it before continuing to avoid
-         hitting it straight away. */
-      if (breakpoint_here_p (wait_pc))
-	return 1;
+	 so we need to step over it before continuing to avoid
+	 hitting it straight away. */
+      return 1;
     }
 
   return 0;
-
 }
 
 /* Record the pc of the program the last time it stopped.  This is
@@ -751,7 +749,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      prepare_to_proceed checks the current thread against the thread
      that reported the most recent event.  If a step-over is required
      it returns TRUE and sets the current thread to the old thread. */
-  if (prepare_to_proceed () && breakpoint_here_p (read_pc ()))
+  if (prepare_to_proceed (step))
     oneproc = 1;
 
   if (oneproc)
@@ -872,6 +870,7 @@ init_wait_for_inferior (void)
   clear_proceed_status ();
 
   stepping_past_singlestep_breakpoint = 0;
+  stepping_past_breakpoint = 0;
 }
 
 /* This enum encodes possible reasons for doing a target_wait, so that
@@ -1141,8 +1140,8 @@ context_switch (struct execution_control_state *ecs)
 			 &ecs->stepping_through_solib_catchpoints,
 			 &ecs->current_line, &ecs->current_symtab);
     }
-  inferior_ptid = ecs->ptid;
-  reinit_frame_cache ();
+
+  switch_to_thread (ecs->ptid);
 }
 
 static void
@@ -1603,6 +1602,37 @@ handle_inferior_event (struct execution_control_state *ecs)
     }
 
   stepping_past_singlestep_breakpoint = 0;
+
+  if (stepping_past_breakpoint)
+    {
+      stepping_past_breakpoint = 0;
+
+      /* If we stopped for some other reason than single-stepping, ignore
+	 the fact that we were supposed to switch back.  */
+      if (stop_signal == TARGET_SIGNAL_TRAP)
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: stepping_past_breakpoint\n");
+
+	  /* Pull the single step breakpoints out of the target.  */
+	  if (singlestep_breakpoints_inserted_p)
+	    {
+	      remove_single_step_breakpoints ();
+	      singlestep_breakpoints_inserted_p = 0;
+	    }
+
+	  /* Note: We do not call context_switch at this point, as the
+	     context is already set up for stepping the original thread.  */
+	  switch_to_thread (stepping_past_breakpoint_ptid);
+	  /* Suppress spurious "Switching to ..." message.  */
+	  previous_inferior_ptid = inferior_ptid;
+
+	  resume (1, TARGET_SIGNAL_0);
+	  prepare_to_wait (ecs);
+	  return;
+	}
+    }
 
   /* See if a thread hit a thread-specific breakpoint that was meant for
      another thread.  If so, then step that thread past the breakpoint,

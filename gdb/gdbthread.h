@@ -135,6 +135,9 @@ extern void load_infrun_state (ptid_t ptid,
 			       int       *current_line,
 			       struct symtab **current_symtab);
 
+/* Switch from one thread to another.  */
+extern void switch_to_thread (ptid_t ptid);
+
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
 

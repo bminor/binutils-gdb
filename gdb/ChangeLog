@@ -1,3 +1,21 @@
+2007-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* infrun.c (stepping_past_breakpoint): New global variable.
+	(stepping_past_breakpoint_ptid): Likewise.
+	(prepare_to_proceed): Add STEP parameter.  Do not check for Ctrl-C.
+	Only switch threads if we need to single-step over a breakpoint hit
+	in the previously selected thread.  If stepping, remember previous
+	thread to switch back to in STEPPING_PAST_BREAKPOINT[_PTID].  Call
+	switch_to_thread instead of copying its contents.
+	(proceed): Pass STEP to prepare_to_proceed.  Always set ONEPROC if
+	prepare_to_proceed returns true.
+	(init_wait_for_inferior): Reset STEPPING_PAST_BREAKPOINT.
+	(context_switch): Call switch_to_thread.
+	(handle_inferior_event): Switch back to previous thread if requested
+	in STEPPING_PAST_BREAKPOINT[_PTID] by prepare_to_proceed.
+	* gdbthread.h (switch_to_thread): Add prototype.
+	* thread.c (switch_to_thread): Make global.
+
 2007-09-07  2007-09-07  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	 * p-valprint.c: Fix 7 ARI reported problems.

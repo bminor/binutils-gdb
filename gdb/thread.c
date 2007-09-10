@@ -59,7 +59,6 @@ static int thread_alive (struct thread_info *);
 static void info_threads_command (char *, int);
 static void thread_apply_command (char *, int);
 static void restore_current_thread (ptid_t);
-static void switch_to_thread (ptid_t ptid);
 static void prune_threads (void);
 static struct cleanup *make_cleanup_restore_current_thread (ptid_t,
                                                             struct frame_id);
@@ -452,7 +451,7 @@ info_threads_command (char *arg, int from_tty)
 
 /* Switch from one thread to another. */
 
-static void
+void
 switch_to_thread (ptid_t ptid)
 {
   if (ptid_equal (ptid, inferior_ptid))
