@@ -1,3 +1,9 @@
+2007-09-10  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 5011
+	* readelf.c (process_version_sections): Don't read past end of
+	various section buffers.
+
 2007-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (INCLUDES): Remove -D_GNU_SOURCE.

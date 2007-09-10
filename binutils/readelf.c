@@ -6454,6 +6454,7 @@ process_version_sections (FILE *file)
 	    Elf_External_Verdef *edefs;
 	    unsigned int idx;
 	    unsigned int cnt;
+	    char *endbuf;
 
 	    found = 1;
 
@@ -6473,6 +6474,7 @@ process_version_sections (FILE *file)
 	    edefs = get_data (NULL, file, section->sh_offset, 1,
 			      section->sh_size,
 			      _("version definition section"));
+	    endbuf = (char *) edefs + section->sh_size;
 	    if (!edefs)
 	      break;
 
@@ -6487,6 +6489,8 @@ process_version_sections (FILE *file)
 		int isum;
 
 		vstart = ((char *) edefs) + idx;
+		if (vstart + sizeof (*edef) > endbuf)
+		  break;
 
 		edef = (Elf_External_Verdef *) vstart;
 
@@ -6524,6 +6528,8 @@ process_version_sections (FILE *file)
 		    vstart += aux.vda_next;
 
 		    eaux = (Elf_External_Verdaux *) vstart;
+		    if (vstart + sizeof (*eaux) > endbuf)
+		      break;
 
 		    aux.vda_name = BYTE_GET (eaux->vda_name);
 		    aux.vda_next = BYTE_GET (eaux->vda_next);
@@ -6535,9 +6541,13 @@ process_version_sections (FILE *file)
 		      printf (_("  %#06x: Parent %d, name index: %ld\n"),
 			      isum, j, aux.vda_name);
 		  }
+		if (j < ent.vd_cnt)
+		  printf (_("  Version def aux past end of section\n"));
 
 		idx += ent.vd_next;
 	      }
+	    if (cnt < section->sh_info)
+	      printf (_("  Version definition past end of section\n"));
 
 	    free (edefs);
 	  }
@@ -6548,6 +6558,7 @@ process_version_sections (FILE *file)
 	    Elf_External_Verneed *eneed;
 	    unsigned int idx;
 	    unsigned int cnt;
+	    char *endbuf;
 
 	    found = 1;
 
@@ -6566,6 +6577,7 @@ process_version_sections (FILE *file)
 	    eneed = get_data (NULL, file, section->sh_offset, 1,
 			      section->sh_size,
 			      _("version need section"));
+	    endbuf = (char *) eneed + section->sh_size;
 	    if (!eneed)
 	      break;
 
@@ -6578,6 +6590,8 @@ process_version_sections (FILE *file)
 		char *vstart;
 
 		vstart = ((char *) eneed) + idx;
+		if (vstart + sizeof (*entry) > endbuf)
+		  break;
 
 		entry = (Elf_External_Verneed *) vstart;
 
@@ -6603,6 +6617,8 @@ process_version_sections (FILE *file)
 		    Elf_External_Vernaux *eaux;
 		    Elf_Internal_Vernaux aux;
 
+		    if (vstart + sizeof (*eaux) > endbuf)
+		      break;
 		    eaux = (Elf_External_Vernaux *) vstart;
 
 		    aux.vna_hash  = BYTE_GET (eaux->vna_hash);
@@ -6624,9 +6640,13 @@ process_version_sections (FILE *file)
 		    isum   += aux.vna_next;
 		    vstart += aux.vna_next;
 		  }
+		if (j < ent.vn_cnt)
+		  printf (_("  Version need aux past end of section\n"));
 
 		idx += ent.vn_next;
 	      }
+	    if (cnt < section->sh_info)
+	      printf (_("  Version need past end of section\n"));
 
 	    free (eneed);
 	  }
@@ -6771,7 +6791,10 @@ process_version_sections (FILE *file)
 				{
 				  ivna.vna_name = BYTE_GET (evna.vna_name);
 
-				  name = strtab + ivna.vna_name;
+				  if (ivna.vna_name >= string_sec->sh_size)
+				    name = _("*invalid*");
+				  else
+				    name = strtab + ivna.vna_name;
 				  nn += printf ("(%s%-*s",
 						name,
 						12 - (int) strlen (name),
@@ -6823,7 +6846,10 @@ process_version_sections (FILE *file)
 
 			      ivda.vda_name = BYTE_GET (evda.vda_name);
 
-			      name = strtab + ivda.vda_name;
+			      if (ivda.vda_name >= string_sec->sh_size)
+				name = _("*invalid*");
+			      else
+				name = strtab + ivda.vda_name;
 			      nn += printf ("(%s%-*s",
 					    name,
 					    12 - (int) strlen (name),
