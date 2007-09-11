@@ -1195,7 +1195,10 @@ Versions::record_version(const General_options* options,
   const char* version = dynpool->add(sym->version(), &version_key);
 
   if (!sym->is_from_dynobj())
-    this->add_def(options, sym, version, version_key);
+    {
+      if (options->is_shared())
+        this->add_def(options, sym, version, version_key);
+    }
   else
     {
       // This is a version reference.
@@ -1331,6 +1334,7 @@ Versions::finalize(const Target* target, Symbol_table* symtab,
 						    elfcpp::STV_DEFAULT, 0,
 						    false);
 	  vsym->set_needs_dynsym_entry();
+          vsym->set_dynsym_index(dynsym_index);
 	  ++dynsym_index;
 	  syms->push_back(vsym);
 	  // The name is already in the dynamic pool.
