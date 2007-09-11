@@ -1,3 +1,15 @@
+2007-09-11  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* archures.c: Add bfd_mach_mcf_isa_c_nodiv,
+	bfd_mach_mcf_isa_c_nodiv_mac & bfd_mach_mcf_isa_c_nodiv_emac.
+	* ieee.c (ieee_write_processor): Update coldfire architecture
+	list.
+	* bfd-in2.h: Rebuilt.
+	* cpu-m68k.c (arch_info_struct): Add isa_c nodiv architectures.
+	(m68k_arch_features): Likewise.
+	* elf32-m68k.c (elf32_m68k_object_p): Add EF_M68K_CF_ISA_C_NODIV.
+	(elf32_m68k_print_private_bfd_data): Likewise.
+
 2007-09-11  Jan Beulich  <jbeulich@novell.com>
 
 	* elf64-i386.c (elf64_i386_tls_transition): Remove redundant 'const'.

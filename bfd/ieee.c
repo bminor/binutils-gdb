@@ -3487,6 +3487,12 @@ ieee_write_processor (bfd *abfd)
 	  case bfd_mach_mcf_isa_b_float: id = "isa-b:float"; break;
 	  case bfd_mach_mcf_isa_b_float_mac: id = "isa-b:float:mac"; break;
 	  case bfd_mach_mcf_isa_b_float_emac: id = "isa-b:float:emac"; break;
+	  case bfd_mach_mcf_isa_c: id = "isa-c"; break;
+	  case bfd_mach_mcf_isa_c_mac: id = "isa-c:mac"; break;
+	  case bfd_mach_mcf_isa_c_emac: id = "isa-c:emac"; break;
+	  case bfd_mach_mcf_isa_c_nodiv: id = "isa-c:nodiv"; break;
+	  case bfd_mach_mcf_isa_c_nodiv_mac: id = "isa-c:nodiv:mac"; break;
+	  case bfd_mach_mcf_isa_c_nodiv_emac: id = "isa-c:nodiv:emac"; break;
 	  }
 
 	if (! ieee_write_id (abfd, id))

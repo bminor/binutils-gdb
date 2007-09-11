@@ -2186,6 +2186,9 @@ m68k_ip (char *instring)
 		case mcfisa_b:
 		  APPEND (_("ColdFire ISA_B"));
 		  break;
+		case mcfisa_c:
+		  APPEND (_("ColdFire ISA_C"));
+		  break;
 		case cfloat:
 		  APPEND (_("ColdFire fpu"));
 		  break;
@@ -7749,6 +7752,7 @@ m68k_elf_final_processing (void)
 	{EF_M68K_CF_ISA_B_NOUSP,mcfisa_a|mcfisa_b|mcfhwdiv},
 	{EF_M68K_CF_ISA_B,	mcfisa_a|mcfisa_b|mcfhwdiv|mcfusp},
 	{EF_M68K_CF_ISA_C,	mcfisa_a|mcfisa_c|mcfhwdiv|mcfusp},
+	{EF_M68K_CF_ISA_C_NODIV,mcfisa_a|mcfisa_c|mcfusp},
 	{0,0},
       };
       static const unsigned mac_features[][2] =

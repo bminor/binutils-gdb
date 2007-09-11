@@ -1,3 +1,8 @@
+2007-09-11  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (m68k_ip): Add mcfisa_c case.
+	(m68k_elf_final_processing): Add EF_M68K_CF_ISA_C_NODIV.
+
 2007-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* tc-i386.c (output_insn): Only check SSE4.2 and ABM for 3

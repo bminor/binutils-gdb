@@ -83,19 +83,25 @@ static const bfd_arch_info_type arch_info_struct[] =
       FALSE, &arch_info_struct[27]),
     N(bfd_mach_mcf_isa_c_emac, "m68k:isa-c:emac",
       FALSE, &arch_info_struct[28]),
+    N(bfd_mach_mcf_isa_c_nodiv, "m68k:isa-c:nodiv",
+      FALSE, &arch_info_struct[29]),
+    N(bfd_mach_mcf_isa_c_nodiv_mac, "m68k:isa-c:nodiv:mac",
+      FALSE, &arch_info_struct[30]),
+    N(bfd_mach_mcf_isa_c_nodiv_emac, "m68k:isa-c:nodiv:emac",
+      FALSE, &arch_info_struct[31]),
 
     /* Legacy names for CF architectures */
-    N(bfd_mach_mcf_isa_a_nodiv, "m68k:5200", FALSE, &arch_info_struct[29]),
-    N(bfd_mach_mcf_isa_a_mac,"m68k:5206e", FALSE, &arch_info_struct[30]),
-    N(bfd_mach_mcf_isa_a_mac, "m68k:5307", FALSE, &arch_info_struct[31]),
-    N(bfd_mach_mcf_isa_b_nousp_mac, "m68k:5407", FALSE, &arch_info_struct[32]),
-    N(bfd_mach_mcf_isa_aplus_emac, "m68k:528x", FALSE, &arch_info_struct[33]),
-    N(bfd_mach_mcf_isa_aplus_emac, "m68k:521x", FALSE, &arch_info_struct[34]),
-    N(bfd_mach_mcf_isa_a_emac, "m68k:5249", FALSE, &arch_info_struct[35]),
+    N(bfd_mach_mcf_isa_a_nodiv, "m68k:5200", FALSE, &arch_info_struct[32]),
+    N(bfd_mach_mcf_isa_a_mac,"m68k:5206e", FALSE, &arch_info_struct[33]),
+    N(bfd_mach_mcf_isa_a_mac, "m68k:5307", FALSE, &arch_info_struct[34]),
+    N(bfd_mach_mcf_isa_b_nousp_mac, "m68k:5407", FALSE, &arch_info_struct[35]),
+    N(bfd_mach_mcf_isa_aplus_emac, "m68k:528x", FALSE, &arch_info_struct[36]),
+    N(bfd_mach_mcf_isa_aplus_emac, "m68k:521x", FALSE, &arch_info_struct[37]),
+    N(bfd_mach_mcf_isa_a_emac, "m68k:5249", FALSE, &arch_info_struct[38]),
     N(bfd_mach_mcf_isa_b_float_emac, "m68k:547x",
-      FALSE, &arch_info_struct[36]),
+      FALSE, &arch_info_struct[39]),
     N(bfd_mach_mcf_isa_b_float_emac, "m68k:548x",
-      FALSE, &arch_info_struct[37]),
+      FALSE, &arch_info_struct[40]),
     N(bfd_mach_mcf_isa_b_float_emac, "m68k:cfv4e", FALSE, 0),
   };
 
@@ -135,6 +141,9 @@ static const unsigned m68k_arch_features[] =
   mcfisa_a|mcfhwdiv|mcfisa_c|mcfusp,
   mcfisa_a|mcfhwdiv|mcfisa_c|mcfusp|mcfmac,
   mcfisa_a|mcfhwdiv|mcfisa_c|mcfusp|mcfemac,
+  mcfisa_a|mcfisa_c|mcfusp,
+  mcfisa_a|mcfisa_c|mcfusp|mcfmac,
+  mcfisa_a|mcfisa_c|mcfusp|mcfemac,
 };
 
 /* Return the count of bits set in MASK  */
