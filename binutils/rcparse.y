@@ -1263,16 +1263,17 @@ string_data:
 	| string_data numexpr res_unicode_string_concat
 	  {
 	    define_stringtable (&sub_res_info, $2, $3);
-	    if (yychar != YYEMPTY)
-	      YYERROR;
 	    rcparse_discard_strings ();
 	  }
 	| string_data numexpr ',' res_unicode_string_concat
 	  {
 	    define_stringtable (&sub_res_info, $2, $4);
-	    if (yychar != YYEMPTY)
-	      YYERROR;
 	    rcparse_discard_strings ();
+	  }
+	| string_data error
+	  {
+	    rcparse_warning (_("invalid stringtable resource."));
+	    abort ();
 	  }
 	;
 
