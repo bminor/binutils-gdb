@@ -952,7 +952,7 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 					      symtab_hdr, sym_hashes,
 					      from_type, rel, relend))
     {
-      const reloc_howto_type *from, *to;
+      reloc_howto_type *from, *to;
 
       from = elf64_x86_64_rtype_to_howto (abfd, from_type);
       to = elf64_x86_64_rtype_to_howto (abfd, to_type);

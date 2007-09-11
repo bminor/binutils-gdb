@@ -1171,7 +1171,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 					  symtab_hdr, sym_hashes,
 					  from_type, rel, relend))
     {
-      const reloc_howto_type *from, *to;
+      reloc_howto_type *from, *to;
 
       from = elf_i386_rtype_to_howto (abfd, from_type);
       to = elf_i386_rtype_to_howto (abfd, to_type);
