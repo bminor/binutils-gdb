@@ -1,3 +1,8 @@
+2007-09-11  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 6.7 branch created (branch timestamp: 2007-09-07 14:00 UTC)
+	* version.in: Bump version to 6.7.50-20070911-cvs.
+
 2007-09-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* thread.c (free_thread): Do not delete the step resume breakpoint
