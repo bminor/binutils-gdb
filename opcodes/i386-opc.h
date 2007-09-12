@@ -94,7 +94,7 @@
 
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
-#define CpuUnused	(CpuNo64 + 1)
+#define CpuUnused	(CpuMax + 1)
 
 /* We can check if an instruction is available with array instead
    of bitfield. */
@@ -334,7 +334,7 @@ typedef struct i386_opcode_modifier
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
 #if 0
-#define OTUnused		(RegMem + 1)
+#define OTUnused		(OTMax + 1)
 #endif
 
 typedef union i386_operand_type
