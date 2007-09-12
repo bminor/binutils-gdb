@@ -17,5 +17,21 @@ foo:
 	movntsd	%xmm1,(%ecx)
 	movntss %xmm1,(%ecx)
 
+	.intel_syntax noprefix
+	lzcnt	ebx,[ecx]
+	lzcnt	bx,[ecx]
+	lzcnt	ebx,ecx
+	lzcnt	bx,cx
+	popcnt	ebx,[ecx]
+	popcnt	bx,[ecx]
+	popcnt	ebx,ecx
+	popcnt	bx,cx
+	extrq	xmm1,xmm2
+	extrq	xmm1,2,4
+	insertq	xmm1,xmm2
+	insertq	xmm1,xmm2,2,4
+	movntsd	[ecx],xmm1
+	movntss [ecx],xmm1
+
 	# Force a good alignment.
 	.p2align	4,0

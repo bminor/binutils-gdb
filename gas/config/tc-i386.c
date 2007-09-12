@@ -2135,20 +2135,6 @@ md_assemble (line)
   if (line == NULL)
     return;
 
-  /* The order of the immediates should be reversed
-     for 2 immediates extrq and insertq instructions */
-  if ((i.imm_operands == 2)
-      && ((strcmp (mnemonic, "extrq") == 0)
-	  || (strcmp (mnemonic, "insertq") == 0)))
-    {
-      swap_2_operands (0, 1);
-      /* "extrq" and insertq" are the only two instructions whose operands
-	 have to be reversed even though they have two immediate operands.
-      */
-      if (intel_syntax)
-	swap_operands ();
-    }
-
   /* Now we've parsed the mnemonic into a set of templates, and have the
      operands at hand.  */
 
@@ -2163,6 +2149,13 @@ md_assemble (line)
       && !(operand_type_check (i.types[0], imm)
 	   && operand_type_check (i.types[1], imm)))
     swap_operands ();
+
+  /* The order of the immediates should be reversed
+     for 2 immediates extrq and insertq instructions */
+  if (i.imm_operands == 2
+      && (strcmp (mnemonic, "extrq") == 0
+	  || strcmp (mnemonic, "insertq") == 0))
+      swap_2_operands (0, 1);
 
   if (i.imm_operands)
     optimize_imm ();

@@ -1,3 +1,8 @@
+2007-09-12  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (md_assemble): Move handling of extrq/insertq
+	after generic operand swapping, and swap only the immediate operands.
+
 2007-09-11  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-m68k.c (m68k_ip): Add mcfisa_c case.

@@ -1,3 +1,8 @@
+2007-09-12  Jan Beulich  <jbeulich@novell.com>
+	* gas/i386/amdfam10.s, gas/i386/x86-64-amdfam10.s: Add Intel syntax
+	code.
+	* gas/i386/amdfam10.d, gas/i386/x86-64-amdfam10.d: Adjust.
+
 2007-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/svme.s: Updated to allow eax in 64bit.

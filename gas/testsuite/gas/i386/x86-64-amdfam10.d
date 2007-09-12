@@ -24,4 +24,22 @@ Disassembly of section .text:
   46:	f2 0f 78 ca 02 04[ 	]+insertq \$0x4,\$0x2,%xmm2,%xmm1
   4c:	f2 0f 2b 09[ 	]+movntsd %xmm1,\(%rcx\)
   50:	f3 0f 2b 09[ 	]+movntss %xmm1,\(%rcx\)
-	...
+[ 	]*[a-f0-9]+:	f3 48 0f bd 19[ 	]+lzcnt  \(%rcx\),%rbx
+[ 	]*[a-f0-9]+:	f3 0f bd 19[ 	]+lzcnt  \(%rcx\),%ebx
+[ 	]*[a-f0-9]+:	66 f3 0f bd 19[ 	 ]+lzcnt  \(%rcx\),%bx
+[ 	]*[a-f0-9]+:	f3 48 0f bd d9[ 	 ]+lzcnt  %rcx,%rbx
+[ 	]*[a-f0-9]+:	f3 0f bd d9[ 	 ]+lzcnt  %ecx,%ebx
+[ 	]*[a-f0-9]+:	66 f3 0f bd d9[ 	 ]+lzcnt  %cx,%bx
+[ 	]*[a-f0-9]+:	f3 48 0f b8 19[ 	]+popcnt \(%rcx\),%rbx
+[ 	]*[a-f0-9]+:	f3 0f b8 19[ 	]+popcnt \(%rcx\),%ebx
+[ 	]*[a-f0-9]+:	66 f3 0f b8 19[ 	]+popcnt \(%rcx\),%bx
+[ 	]*[a-f0-9]+:	f3 48 0f b8 d9[ 	]+popcnt %rcx,%rbx
+[ 	]*[a-f0-9]+:	f3 0f b8 d9[ 	]+popcnt %ecx,%ebx
+[ 	]*[a-f0-9]+:	66 f3 0f b8 d9[ 	]+popcnt %cx,%bx
+[ 	]*[a-f0-9]+:	66 0f 79 ca[ 	]+extrq  %xmm2,%xmm1
+[ 	]*[a-f0-9]+:	66 0f 78 c1 02 04[ 	]*extrq  \$0x4,\$0x2,%xmm1
+[ 	]*[a-f0-9]+:	f2 0f 79 ca[ 	]+insertq %xmm2,%xmm1
+[ 	]*[a-f0-9]+:	f2 0f 78 ca 02 04[ 	]*insertq \$0x4,\$0x2,%xmm2,%xmm1
+[ 	]*[a-f0-9]+:	f2 0f 2b 09[ 	]+movntsd %xmm1,\(%rcx\)
+[ 	]*[a-f0-9]+:	f3 0f 2b 09[ 	]+movntss %xmm1,\(%rcx\)
+#pass
