@@ -494,12 +494,6 @@
 #ifndef elf_backend_write_core_note
 #define elf_backend_write_core_note		NULL
 #endif
-#ifndef elf_backend_sprintf_vma
-#define elf_backend_sprintf_vma			_bfd_elf_sprintf_vma
-#endif
-#ifndef elf_backend_fprintf_vma
-#define elf_backend_fprintf_vma			_bfd_elf_fprintf_vma
-#endif
 #ifndef elf_backend_reloc_type_class
 #define elf_backend_reloc_type_class		_bfd_elf_reloc_type_class
 #endif
@@ -676,8 +670,6 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_grok_prstatus,
   elf_backend_grok_psinfo,
   elf_backend_write_core_note,
-  elf_backend_sprintf_vma,
-  elf_backend_fprintf_vma,
   elf_backend_reloc_type_class,
   elf_backend_discard_info,
   elf_backend_ignore_discarded_relocs,

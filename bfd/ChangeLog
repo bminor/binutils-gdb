@@ -1,3 +1,15 @@
+2007-09-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Delete elf_backend_sprintf_vma
+	and elf_backend_fprintf_vma.
+	(_bfd_elf_sprintf_vma, _bfd_elf_fprintf_vma): Delete.
+	* elf.c (_bfd_elf_sprintf_vma, _bfd_elf_fprintf_vma): Delete.
+	* elfxx-target.h (elf_backend_sprintf_vma): Don't define.
+	(elf_backend_fprintf_vma): Likewise.
+	(elfNN_bed): Don't init removed fields.
+	* bfd.c (is32bit): New function.
+	(bfd_sprintf_vma, bfd_fprintf_vma): Use the above.
+
 2007-09-11  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* archures.c: Add bfd_mach_mcf_isa_c_nodiv,

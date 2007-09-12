@@ -8415,63 +8415,6 @@ bfd_get_elf_phdrs (bfd *abfd, void *phdrs)
   return num_phdrs;
 }
 
-void
-_bfd_elf_sprintf_vma (bfd *abfd ATTRIBUTE_UNUSED, char *buf, bfd_vma value)
-{
-#ifdef BFD64
-  Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
-
-  i_ehdrp = elf_elfheader (abfd);
-  if (i_ehdrp == NULL)
-    sprintf_vma (buf, value);
-  else
-    {
-      if (i_ehdrp->e_ident[EI_CLASS] == ELFCLASS64)
-	{
-#if BFD_HOST_64BIT_LONG
-	  sprintf (buf, "%016lx", value);
-#else
-	  sprintf (buf, "%08lx%08lx", _bfd_int64_high (value),
-		   _bfd_int64_low (value));
-#endif
-	}
-      else
-	sprintf (buf, "%08lx", (unsigned long) (value & 0xffffffff));
-    }
-#else
-  sprintf_vma (buf, value);
-#endif
-}
-
-void
-_bfd_elf_fprintf_vma (bfd *abfd ATTRIBUTE_UNUSED, void *stream, bfd_vma value)
-{
-#ifdef BFD64
-  Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
-
-  i_ehdrp = elf_elfheader (abfd);
-  if (i_ehdrp == NULL)
-    fprintf_vma ((FILE *) stream, value);
-  else
-    {
-      if (i_ehdrp->e_ident[EI_CLASS] == ELFCLASS64)
-	{
-#if BFD_HOST_64BIT_LONG
-	  fprintf ((FILE *) stream, "%016lx", value);
-#else
-	  fprintf ((FILE *) stream, "%08lx%08lx",
-		   _bfd_int64_high (value), _bfd_int64_low (value));
-#endif
-	}
-      else
-	fprintf ((FILE *) stream, "%08lx",
-		 (unsigned long) (value & 0xffffffff));
-    }
-#else
-  fprintf_vma ((FILE *) stream, value);
-#endif
-}
-
 enum elf_reloc_type_class
 _bfd_elf_reloc_type_class (const Elf_Internal_Rela *rela ATTRIBUTE_UNUSED)
 {

@@ -953,12 +953,6 @@ struct elf_backend_data
   char *(*elf_backend_write_core_note)
     (bfd *abfd, char *buf, int *bufsiz, int note_type, ...);
 
-  /* Functions to print VMAs.  Special code to handle 64 bit ELF files.  */
-  void (* elf_backend_sprintf_vma)
-    (bfd *, char *, bfd_vma);
-  void (* elf_backend_fprintf_vma)
-    (bfd *, void *, bfd_vma);
-
   /* This function returns class of a reloc type.  */
   enum elf_reloc_type_class (*elf_backend_reloc_type_class)
     (const Elf_Internal_Rela *);
@@ -1551,11 +1545,6 @@ extern bfd_boolean _bfd_elf_print_private_bfd_data
   (bfd *, void *);
 extern void bfd_elf_print_symbol
   (bfd *, void *, asymbol *, bfd_print_symbol_type);
-
-extern void _bfd_elf_sprintf_vma
-  (bfd *, char *, bfd_vma);
-extern void _bfd_elf_fprintf_vma
-  (bfd *, void *, bfd_vma);
 
 extern unsigned int _bfd_elf_eh_frame_address_size
   (bfd *, asection *);

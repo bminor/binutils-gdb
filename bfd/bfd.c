@@ -1376,31 +1376,51 @@ bfd_record_phdr (bfd *abfd,
   return TRUE;
 }
 
-void
-bfd_sprintf_vma (bfd *abfd, char *buf, bfd_vma value)
+#ifdef BFD64
+/* Return true iff this target is 32-bit.  */
+
+static bfd_boolean
+is32bit (bfd *abfd)
 {
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    get_elf_backend_data (abfd)->elf_backend_sprintf_vma (abfd, buf, value);
-  else
-    sprintf_vma (buf, value);
+    {
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+      return bed->s->elfclass == ELFCLASS32;
+    }
+
+  /* For non-ELF, make a guess based on the target name.  */
+  return (strstr (bfd_get_target (abfd), "64") == NULL
+	  && strcmp (bfd_get_target (abfd), "mmo") != 0);
+}
+#endif
+
+/* bfd_sprintf_vma and bfd_fprintf_vma display an address in the
+   target's address size.  */
+
+void
+bfd_sprintf_vma (bfd *abfd ATTRIBUTE_UNUSED, char *buf, bfd_vma value)
+{
+#ifdef BFD64
+  if (is32bit (abfd))
+    {
+      sprintf (buf, "%08lx", (unsigned long) value & 0xffffffff);
+      return;
+    }
+#endif
+  sprintf_vma (buf, value);
 }
 
 void
-bfd_fprintf_vma (bfd *abfd, void *stream, bfd_vma value)
+bfd_fprintf_vma (bfd *abfd ATTRIBUTE_UNUSED, void *stream, bfd_vma value)
 {
-  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    get_elf_backend_data (abfd)->elf_backend_fprintf_vma (abfd, stream, value);
 #ifdef BFD64
-  /* fprintf_vma() on a 64-bit enabled host will always print a 64-bit
-     value, but really we want to display the address in the target's
-     address size.  Since we do not have a field in the bfd structure
-     to tell us this, we take a guess, based on the target's name.  */
-  else if (strstr (bfd_get_target (abfd), "64") == NULL
-	   && strcmp (bfd_get_target (abfd), "mmo") != 0)
-    fprintf ((FILE *) stream, "%08lx", (unsigned long) (value & 0xffffffff));
+  if (is32bit (abfd))
+    {
+      fprintf ((FILE *) stream, "%08lx", (unsigned long) value & 0xffffffff);
+      return;
+    }
 #endif
-  else
-    fprintf_vma ((FILE *) stream, value);
+  fprintf_vma ((FILE *) stream, value);
 }
 
 /*
