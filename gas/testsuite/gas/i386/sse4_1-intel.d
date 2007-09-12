@@ -11,10 +11,14 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 3a 0d c1 00    	blendpd xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 0c 01 00    	blendps xmm0,XMMWORD PTR \[ecx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 0c c1 00    	blendps xmm0,xmm1,0x0
-[ 	]*[a-f0-9]+:	66 0f 38 15 01       	blendvpd xmm0,XMMWORD PTR \[ecx\],xmm0
-[ 	]*[a-f0-9]+:	66 0f 38 15 c1       	blendvpd xmm0,xmm1,xmm0
-[ 	]*[a-f0-9]+:	66 0f 38 14 01       	blendvps xmm0,XMMWORD PTR \[ecx\],xmm0
-[ 	]*[a-f0-9]+:	66 0f 38 14 c1       	blendvps xmm0,xmm1,xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 15 01       	blendvpd xmm0,XMMWORD PTR \[ecx\](,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 15 c1       	blendvpd xmm0,xmm1(,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 15 01       	blendvpd xmm0,XMMWORD PTR \[ecx\](,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 15 c1       	blendvpd xmm0,xmm1(,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 14 01       	blendvps xmm0,XMMWORD PTR \[ecx\](,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 14 c1       	blendvps xmm0,xmm1(,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 14 01       	blendvps xmm0,XMMWORD PTR \[ecx\](,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 14 c1       	blendvps xmm0,xmm1(,xmm0)?
 [ 	]*[a-f0-9]+:	66 0f 3a 41 01 00    	dppd   xmm0,XMMWORD PTR \[ecx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 41 c1 00    	dppd   xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 40 01 00    	dpps   xmm0,XMMWORD PTR \[ecx\],0x0
@@ -28,8 +32,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 3a 42 c1 00    	mpsadbw xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 38 2b 01       	packusdw xmm0,XMMWORD PTR \[ecx\]
 [ 	]*[a-f0-9]+:	66 0f 38 2b c1       	packusdw xmm0,xmm1
-[ 	]*[a-f0-9]+:	66 0f 38 10 01       	pblendvb xmm0,XMMWORD PTR \[ecx\],xmm0
-[ 	]*[a-f0-9]+:	66 0f 38 10 c1       	pblendvb xmm0,xmm1,xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 10 01       	pblendvb xmm0,XMMWORD PTR \[ecx\](,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 10 c1       	pblendvb xmm0,xmm1(,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 10 01       	pblendvb xmm0,XMMWORD PTR \[ecx\](,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 10 c1       	pblendvb xmm0,xmm1(,xmm0)?
 [ 	]*[a-f0-9]+:	66 0f 3a 0e 01 00    	pblendw xmm0,XMMWORD PTR \[ecx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 0e c1 00    	pblendw xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 38 29 c1       	pcmpeqq xmm0,xmm1

@@ -10,10 +10,14 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	66 0f 3a 0d c1 00    	blendpd \$0x0,%xmm1,%xmm0
 [ 	]*[0-9a-f]+:	66 0f 3a 0c 01 00    	blendps \$0x0,\(%ecx\),%xmm0
 [ 	]*[0-9a-f]+:	66 0f 3a 0c c1 00    	blendps \$0x0,%xmm1,%xmm0
-[ 	]*[0-9a-f]+:	66 0f 38 15 01       	blendvpd %xmm0,\(%ecx\),%xmm0
-[ 	]*[0-9a-f]+:	66 0f 38 15 c1       	blendvpd %xmm0,%xmm1,%xmm0
-[ 	]*[0-9a-f]+:	66 0f 38 14 01       	blendvps %xmm0,\(%ecx\),%xmm0
-[ 	]*[0-9a-f]+:	66 0f 38 14 c1       	blendvps %xmm0,%xmm1,%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 15 01       	blendvpd (%xmm0,)?\(%ecx\),%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 15 c1       	blendvpd (%xmm0,)?%xmm1,%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 15 01       	blendvpd (%xmm0,)?\(%ecx\),%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 15 c1       	blendvpd (%xmm0,)?%xmm1,%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 14 01       	blendvps (%xmm0,)?\(%ecx\),%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 14 c1       	blendvps (%xmm0,)?%xmm1,%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 14 01       	blendvps (%xmm0,)?\(%ecx\),%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 14 c1       	blendvps (%xmm0,)?%xmm1,%xmm0
 [ 	]*[0-9a-f]+:	66 0f 3a 41 01 00    	dppd   \$0x0,\(%ecx\),%xmm0
 [ 	]*[0-9a-f]+:	66 0f 3a 41 c1 00    	dppd   \$0x0,%xmm1,%xmm0
 [ 	]*[0-9a-f]+:	66 0f 3a 40 01 00    	dpps   \$0x0,\(%ecx\),%xmm0
@@ -27,8 +31,10 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	66 0f 3a 42 c1 00    	mpsadbw \$0x0,%xmm1,%xmm0
 [ 	]*[0-9a-f]+:	66 0f 38 2b 01       	packusdw \(%ecx\),%xmm0
 [ 	]*[0-9a-f]+:	66 0f 38 2b c1       	packusdw %xmm1,%xmm0
-[ 	]*[0-9a-f]+:	66 0f 38 10 01       	pblendvb %xmm0,\(%ecx\),%xmm0
-[ 	]*[0-9a-f]+:	66 0f 38 10 c1       	pblendvb %xmm0,%xmm1,%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 10 01       	pblendvb (%xmm0,)?\(%ecx\),%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 10 c1       	pblendvb (%xmm0,)?%xmm1,%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 10 01       	pblendvb (%xmm0,)?\(%ecx\),%xmm0
+[ 	]*[0-9a-f]+:	66 0f 38 10 c1       	pblendvb (%xmm0,)?%xmm1,%xmm0
 [ 	]*[0-9a-f]+:	66 0f 3a 0e 01 00    	pblendw \$0x0,\(%ecx\),%xmm0
 [ 	]*[0-9a-f]+:	66 0f 3a 0e c1 00    	pblendw \$0x0,%xmm1,%xmm0
 [ 	]*[0-9a-f]+:	66 0f 38 29 c1       	pcmpeqq %xmm1,%xmm0

@@ -1,4 +1,12 @@
 2007-09-12  Jan Beulich  <jbeulich@novell.com>
+	* gas/i386/sse4_1.s, gas/i386/x86-64-sse4_1.s: Add two-operand forms
+	of blendvps, blendvpd, and pblendvb.
+	* gas/i386/sse4_1.d, gas/i386/sse4_1-intel.d,
+	gas/i386/x86-64-sse4_1.d, gas/i386/x86-64-sse4_1-intel.d: Adjust,
+	making last/first operand of blendvps, blendvpd, and pblendvb
+	optional.
+
+2007-09-12  Jan Beulich  <jbeulich@novell.com>
 	* gas/i386/amdfam10.s, gas/i386/x86-64-amdfam10.s: Add Intel syntax
 	code.
 	* gas/i386/amdfam10.d, gas/i386/x86-64-amdfam10.d: Adjust.

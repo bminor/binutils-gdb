@@ -8,8 +8,12 @@ foo:
 	blendps		$0,%xmm1,%xmm0
 	blendvpd	%xmm0,(%ecx),%xmm0
 	blendvpd	%xmm0,%xmm1,%xmm0
+	blendvpd	(%ecx),%xmm0
+	blendvpd	%xmm1,%xmm0
 	blendvps	%xmm0,(%ecx),%xmm0
 	blendvps	%xmm0,%xmm1,%xmm0
+	blendvps	(%ecx),%xmm0
+	blendvps	%xmm1,%xmm0
 	dppd		$0,(%ecx),%xmm0
 	dppd		$0,%xmm1,%xmm0
 	dpps		$0,(%ecx),%xmm0
@@ -25,6 +29,8 @@ foo:
 	packusdw	%xmm1,%xmm0
 	pblendvb	%xmm0,(%ecx),%xmm0
 	pblendvb	%xmm0,%xmm1,%xmm0
+	pblendvb	(%ecx),%xmm0
+	pblendvb	%xmm1,%xmm0
 	pblendw		$0,(%ecx),%xmm0
 	pblendw		$0,%xmm1,%xmm0
 	pcmpeqq		%xmm1,%xmm0
