@@ -415,7 +415,8 @@ class Versions
   // version section (.gnu.version).
   template<int size, bool big_endian>
   void
-  symbol_section_contents(const Stringpool*, unsigned int local_symcount,
+  symbol_section_contents(const General_options*, const Stringpool*,
+                          unsigned int local_symcount,
 			  const std::vector<Symbol*>& syms,
 			  unsigned char**, unsigned int*
                           ACCEPT_SIZE_ENDIAN) const;
@@ -455,7 +456,8 @@ class Versions
 
   // Return the version index to use for SYM.
   unsigned int
-  version_index(const Stringpool*, const Symbol* sym) const;
+  version_index(const General_options*, const Stringpool*,
+                const Symbol* sym) const;
 
   // We keep a hash table mapping canonicalized name/version pairs to
   // a version base.

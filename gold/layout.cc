@@ -1056,8 +1056,8 @@ Layout::sized_create_version_sections(
   unsigned char* vbuf;
   unsigned int vsize;
   versions->symbol_section_contents SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
-      &this->dynpool_, local_symcount, dynamic_symbols, &vbuf, &vsize
-      SELECT_SIZE_ENDIAN(size, big_endian));
+      &this->options_, &this->dynpool_, local_symcount, dynamic_symbols,
+      &vbuf, &vsize SELECT_SIZE_ENDIAN(size, big_endian));
 
   Output_section_data* vdata = new Output_data_const_buffer(vbuf, vsize, 2);
 

@@ -1366,7 +1366,8 @@ Versions::finalize(const Target* target, Symbol_table* symtab,
 // pointers.
 
 unsigned int
-Versions::version_index(const Stringpool* dynpool, const Symbol* sym) const
+Versions::version_index(const General_options* options,
+                        const Stringpool* dynpool, const Symbol* sym) const
 {
   Stringpool::Key version_key;
   const char* version = dynpool->find(sym->version(), &version_key);
@@ -1374,7 +1375,11 @@ Versions::version_index(const Stringpool* dynpool, const Symbol* sym) const
 
   Key k;
   if (!sym->is_from_dynobj())
-    k = Key(version_key, 0);
+    {
+      if (!options->is_shared())
+        return elfcpp::VER_NDX_GLOBAL;
+      k = Key(version_key, 0);
+    }
   else
     {
       Object* object = sym->object();
@@ -1399,7 +1404,8 @@ Versions::version_index(const Stringpool* dynpool, const Symbol* sym) const
 
 template<int size, bool big_endian>
 void
-Versions::symbol_section_contents(const Stringpool* dynpool,
+Versions::symbol_section_contents(const General_options* options,
+                                  const Stringpool* dynpool,
 				  unsigned int local_symcount,
 				  const std::vector<Symbol*>& syms,
 				  unsigned char** pp,
@@ -1424,7 +1430,7 @@ Versions::symbol_section_contents(const Stringpool* dynpool,
       if (version == NULL)
 	version_index = elfcpp::VER_NDX_GLOBAL;
       else
-	version_index = this->version_index(dynpool, *p);
+	version_index = this->version_index(options, dynpool, *p);
       elfcpp::Swap<16, big_endian>::writeval(pbuf + (*p)->dynsym_index() * 2,
 					     version_index);
     }
@@ -1548,6 +1554,7 @@ class Sized_dynobj<64, true>;
 template
 void
 Versions::symbol_section_contents<32, false>(
+    const General_options*,
     const Stringpool*,
     unsigned int,
     const std::vector<Symbol*>&,
@@ -1560,6 +1567,7 @@ Versions::symbol_section_contents<32, false>(
 template
 void
 Versions::symbol_section_contents<32, true>(
+    const General_options*,
     const Stringpool*,
     unsigned int,
     const std::vector<Symbol*>&,
@@ -1572,6 +1580,7 @@ Versions::symbol_section_contents<32, true>(
 template
 void
 Versions::symbol_section_contents<64, false>(
+    const General_options*,
     const Stringpool*,
     unsigned int,
     const std::vector<Symbol*>&,
@@ -1584,6 +1593,7 @@ Versions::symbol_section_contents<64, false>(
 template
 void
 Versions::symbol_section_contents<64, true>(
+    const General_options*,
     const Stringpool*,
     unsigned int,
     const std::vector<Symbol*>&,
