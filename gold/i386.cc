@@ -666,7 +666,7 @@ Target_i386::optimize_tls_reloc(const General_options* options,
       if (is_final)
 	return elfcpp::R_386_TLS_LE_32;
       return r_type;
-	
+
     case elfcpp::R_386_TLS_LE:
     case elfcpp::R_386_TLS_LE_32:
       // When we already have Local-Exec, there is nothing further we
@@ -804,7 +804,7 @@ Target_i386::Scan::global(const General_options& options,
     {
     case elfcpp::R_386_NONE:
     case elfcpp::R_386_GNU_VTINHERIT:
-    case elfcpp::R_386_GNU_VTENTRY: 
+    case elfcpp::R_386_GNU_VTENTRY:
       break;
 
     case elfcpp::R_386_32:
@@ -834,14 +834,22 @@ Target_i386::Scan::global(const General_options& options,
       break;
 
     case elfcpp::R_386_GOT32:
-      // The symbol requires a GOT entry.
-      if (target->got_section(&options, symtab, layout)->add_global(gsym))
-	{
-	  // If this symbol is not fully resolved, we need to add a
-	  // dynamic relocation for it.
-	  if (!gsym->final_value_is_known(&options))
-	    gold_unreachable();
-	}
+      {
+        // The symbol requires a GOT entry.
+        Output_data_got<32, false>* got = target->got_section(&options, symtab,
+                                                              layout);
+        if (got->add_global(gsym))
+	  {
+            // If this symbol is not fully resolved, we need to add a
+            // dynamic relocation for it.
+            if (!gsym->final_value_is_known(&options))
+              {
+                Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+                rel_dyn->add_global(gsym, elfcpp::R_386_GLOB_DAT, got,
+                                    gsym->got_offset());
+              }
+          }
+      }
       break;
 
     case elfcpp::R_386_PLT32:
@@ -1051,11 +1059,8 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 
   // Pick the value to use for symbols defined in shared objects.
   Symbol_value<32> symval;
-  if (gsym != NULL && gsym->is_from_dynobj())
+  if (gsym != NULL && gsym->is_from_dynobj() && gsym->has_plt_offset())
     {
-      if (!gsym->has_plt_offset())
-	gold_unreachable();
-
       symval.set_output_value(target->plt_section()->address()
 			      + gsym->plt_offset());
       psymval = &symval;
