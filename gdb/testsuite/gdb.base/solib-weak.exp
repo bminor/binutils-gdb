@@ -41,31 +41,38 @@ if {![test_compiler_info "gcc-*"]} {
 proc do_test { lib1opts lib2opts lib1first } {
     global objdir srcdir subdir
 
-    set testopts ""
-    if {$lib1opts == ""} {
-	append testopts "lib1 nodebug, "
-    } else {
-	append testopts "lib1 debug, "
-    }
-    if {$lib2opts == ""} {
-	append testopts "lib2 nodebug, "
-    } else {
-	append testopts "lib2 debug, "
-    }
-    if {$lib1first} {
-	append testopts "lib1 first"
-    } else {
-	append testopts "lib2 first"
-    }
-
     set testfile "solib-weak"
     set srcfile ${testfile}.c
-    set binfile ${objdir}/${subdir}/${testfile}
 
     set libfile1 "weaklib1"
     set libfile2 "weaklib2"
     set lib1src ${srcdir}/${subdir}/${libfile1}.c
     set lib2src ${srcdir}/${subdir}/${libfile2}.c
+
+    # Select a unique name for this test.  Give each library and
+    # executable a name reflecting its options, so that file caching
+    # on the target system does not pick up the wrong file.
+    set testopts ""
+    if {$lib1opts == ""} {
+	append testopts "lib1 nodebug, "
+    } else {
+	append testopts "lib1 debug, "
+	append lib1 "-dbg"
+    }
+    if {$lib2opts == ""} {
+	append testopts "lib2 nodebug, "
+    } else {
+	append testopts "lib2 debug, "
+	append lib2 "-dbg"
+    }
+    if {$lib1first} {
+	append testopts "lib1 first"
+    } else {
+	append testopts "lib2 first"
+	append testfile "-lib2"
+    }
+
+    set binfile ${objdir}/${subdir}/${testfile}
     set lib1 ${objdir}/${subdir}/${libfile1}.sl
     set lib2 ${objdir}/${subdir}/${libfile2}.sl
 
