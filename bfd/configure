@@ -458,7 +458,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LIBTOOL SED EGREP FGREP GREP LD DUMPBIN ac_ct_DUMPBIN NM LN_S lt_ECHO CPP DEBUGDIR PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI WARN_CFLAGS NO_WERROR MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT GENINSRC_NEVER_TRUE GENINSRC_NEVER_FALSE INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE HDEFINES BFD_HOST_64BIT_LONG BFD_HOST_64BIT_LONG_LONG BFD_HOST_LONG_LONG BFD_HOST_64_BIT_DEFINED BFD_HOST_64_BIT BFD_HOST_U_64_BIT BFD_HOSTPTR_T CC_FOR_BUILD EXEEXT_FOR_BUILD COREFILE COREFLAG WIN32LDFLAGS WIN32LIBADD TDEFINES wordsize bfd64_libs all_backends bfd_backends bfd_machines bfd_default_target_size bfd_file_ptr bfd_ufile_ptr tdefaults datarootdir docdir htmldir LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LIBTOOL SED EGREP FGREP GREP LD DUMPBIN ac_ct_DUMPBIN NM LN_S lt_ECHO CPP DEBUGDIR PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI WARN_CFLAGS NO_WERROR MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT GENINSRC_NEVER_TRUE GENINSRC_NEVER_FALSE INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE HDEFINES BFD_HOST_64BIT_LONG BFD_HOST_64BIT_LONG_LONG BFD_HOST_64_BIT_DEFINED BFD_HOST_64_BIT BFD_HOST_U_64_BIT BFD_HOSTPTR_T CC_FOR_BUILD EXEEXT_FOR_BUILD COREFILE COREFLAG WIN32LDFLAGS WIN32LIBADD TDEFINES wordsize bfd64_libs all_backends bfd_backends bfd_machines bfd_default_target_size bfd_file_ptr bfd_ufile_ptr tdefaults datarootdir docdir htmldir LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -11192,69 +11192,12 @@ test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 BFD_HOST_64BIT_LONG=0
 BFD_HOST_64BIT_LONG_LONG=0
-BFD_HOST_LONG_LONG=0
 BFD_HOST_64_BIT_DEFINED=0
 BFD_HOST_64_BIT=
 BFD_HOST_U_64_BIT=
 BFD_HOSTPTR_T="unsigned long"
 
 echo "$as_me:$LINENO: checking for long long" >&5
-echo $ECHO_N "checking for long long... $ECHO_C" >&6
-if test "${bfd_cv_has_long_long+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-unsigned long long ll = 18446744073709551615ULL;
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  bfd_cv_has_long_long=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-bfd_cv_has_long_long=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
-echo "$as_me:$LINENO: result: $bfd_cv_has_long_long" >&5
-echo "${ECHO_T}$bfd_cv_has_long_long" >&6
-if test $bfd_cv_has_long_long = yes; then
-  BFD_HOST_LONG_LONG=1
-  echo "$as_me:$LINENO: checking for long long" >&5
 echo $ECHO_N "checking for long long... $ECHO_C" >&6
 if test "${ac_cv_type_long_long+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -11667,8 +11610,6 @@ cat >>confdefs.h <<_ACEOF
 #define SIZEOF_LONG_LONG $ac_cv_sizeof_long_long
 _ACEOF
 
-
-fi
 
 echo "$as_me:$LINENO: checking for void *" >&5
 echo $ECHO_N "checking for void *... $ECHO_C" >&6
@@ -12501,19 +12442,19 @@ _ACEOF
 
 if test "x${ac_cv_sizeof_void_p}" = "x8"; then
   host64=true
-  if test "x${ac_cv_sizeof_long}" = "x8"; then
+fi
+
+if test "x${ac_cv_sizeof_long}" = "x8"; then
   BFD_HOST_64BIT_LONG=1
   test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long"
   test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long"
-  elif test "x${ac_cv_sizeof_long_long}" = "x8"; then
-    BFD_HOST_64BIT_LONG_LONG=1
-    test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long long"
-    test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long long"
-    BFD_HOSTPTR_T="unsigned long long"
-  fi
 elif test "x${ac_cv_sizeof_long_long}" = "x8"; then
+  BFD_HOST_64BIT_LONG_LONG=1
   test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long long"
   test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long long"
+  if test "x${ac_cv_sizeof_void_p}" = "x8"; then
+    BFD_HOSTPTR_T="unsigned long long"
+  fi
 fi
 
 if test -n "${HOST_64BIT_TYPE}" -a -n "${HOST_U_64BIT_TYPE}"; then
@@ -12521,7 +12462,6 @@ if test -n "${HOST_64BIT_TYPE}" -a -n "${HOST_U_64BIT_TYPE}"; then
   BFD_HOST_64_BIT="${HOST_64BIT_TYPE}"
   BFD_HOST_U_64_BIT="${HOST_U_64BIT_TYPE}"
 fi
-
 
 
 
@@ -21550,7 +21490,6 @@ s,@MSGMERGE@,$MSGMERGE,;t t
 s,@HDEFINES@,$HDEFINES,;t t
 s,@BFD_HOST_64BIT_LONG@,$BFD_HOST_64BIT_LONG,;t t
 s,@BFD_HOST_64BIT_LONG_LONG@,$BFD_HOST_64BIT_LONG_LONG,;t t
-s,@BFD_HOST_LONG_LONG@,$BFD_HOST_LONG_LONG,;t t
 s,@BFD_HOST_64_BIT_DEFINED@,$BFD_HOST_64_BIT_DEFINED,;t t
 s,@BFD_HOST_64_BIT@,$BFD_HOST_64_BIT,;t t
 s,@BFD_HOST_U_64_BIT@,$BFD_HOST_U_64_BIT,;t t

@@ -1,3 +1,7 @@
+2007-09-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+
 2007-07-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

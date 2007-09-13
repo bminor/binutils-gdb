@@ -1,3 +1,13 @@
+2007-09-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Delete BFD_HOST_LONG_LONG and bfd checks for
+	long long.  Partly revert 2007-07-12 change, so that
+	BFD_HOST_64BIT_LONG and BFD_HOST_64BIT_LONG_LONG are set
+	independent of "void *" size.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in: Regenerate.
+
 2007-09-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_backend_data): Delete elf_backend_sprintf_vma
