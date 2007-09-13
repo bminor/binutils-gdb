@@ -1,3 +1,13 @@
+2007-09-13  Alan Modra  <amodra@bigpond.net.au>
+	    Zhou Drangon <drangon.mail@gmail.com>
+
+	* nm.c (value_format_64bit, set_print_radix, print_value): Handle
+	BFD_HOST_64BIT_LONG_LONG.
+	* readelf.c (print_dec_vma): Don't define if BFD_HOST_64BIT_LONG_LONG.
+	(print_vma): Handle BFD_HOST_64BIT_LONG_LONG.
+	(dump_relocations): Likewise.  Expand _bfd_int64_low in a
+	number of places.
+
 2007-09-11  Kai Tietz  <kai.tietz@onevision.com>
 
 	* rcparse.y: (string_data): Removed ill token removal.

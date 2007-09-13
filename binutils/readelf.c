@@ -383,7 +383,7 @@ byte_put_little_endian (unsigned char *field, bfd_vma value, int size)
     }
 }
 
-#if defined BFD64 && !BFD_HOST_64BIT_LONG
+#if defined BFD64 && !BFD_HOST_64BIT_LONG && !BFD_HOST_64BIT_LONG_LONG
 static int
 print_dec_vma (bfd_vma vma, int is_signed)
 {
@@ -491,6 +491,8 @@ print_vma (bfd_vma vma, print_mode mode)
 	case HEX:
 #if BFD_HOST_64BIT_LONG
 	  return nc + printf ("%lx", vma);
+#elif BFD_HOST_64BIT_LONG_LONG
+	  return nc + printf ("%llx", vma);
 #else
 	  return nc + print_hex_vma (vma);
 #endif
@@ -498,6 +500,8 @@ print_vma (bfd_vma vma, print_mode mode)
 	case DEC:
 #if BFD_HOST_64BIT_LONG
 	  return printf ("%ld", vma);
+#elif BFD_HOST_64BIT_LONG_LONG
+	  return printf ("%lld", vma);
 #else
 	  return print_dec_vma (vma, 1);
 #endif
@@ -508,6 +512,11 @@ print_vma (bfd_vma vma, print_mode mode)
 	    return printf ("%5ld", vma);
 	  else
 	    return printf ("%#lx", vma);
+#elif BFD_HOST_64BIT_LONG_LONG
+	  if (vma <= 99999)
+	    return printf ("%5lld", vma);
+	  else
+	    return printf ("%#llx", vma);
 #else
 	  if (vma <= 99999)
 	    return printf ("%5ld", _bfd_int64_low (vma));
@@ -518,6 +527,8 @@ print_vma (bfd_vma vma, print_mode mode)
 	case UNSIGNED:
 #if BFD_HOST_64BIT_LONG
 	  return printf ("%lu", vma);
+#elif BFD_HOST_64BIT_LONG_LONG
+	  return printf ("%llu", vma);
 #else
 	  return print_dec_vma (vma, 0);
 #endif
@@ -953,15 +964,23 @@ dump_relocations (FILE *file,
 
       if (is_32bit_elf)
 	{
-#ifdef _bfd_int64_low
-	  printf ("%8.8lx  %8.8lx ", _bfd_int64_low (offset), _bfd_int64_low (info));
-#else
-	  printf ("%8.8lx  %8.8lx ", offset, info);
-#endif
+	  printf ("%8.8lx  %8.8lx ",
+		  (unsigned long) offset & 0xffffffff,
+		  (unsigned long) info & 0xffffffff);
 	}
       else
 	{
-#ifdef _bfd_int64_low
+#if BFD_HOST_64BIT_LONG
+	  printf (do_wide
+		  ? "%16.16lx  %16.16lx "
+		  : "%12.12lx  %12.12lx ",
+		  offset, info);
+#elif BFD_HOST_64BIT_LONG_LONG
+	  printf (do_wide
+		  ? "%16.16llx  %16.16llx "
+		  : "%12.12llx  %12.12llx ",
+		  offset, info);
+#else
 	  printf (do_wide
 		  ? "%8.8lx%8.8lx  %8.8lx%8.8lx "
 		  : "%4.4lx%8.8lx  %4.4lx%8.8lx ",
@@ -969,11 +988,6 @@ dump_relocations (FILE *file,
 		  _bfd_int64_low (offset),
 		  _bfd_int64_high (info),
 		  _bfd_int64_low (info));
-#else
-	  printf (do_wide
-		  ? "%16.16lx  %16.16lx "
-		  : "%12.12lx  %12.12lx ",
-		  offset, info);
 #endif
 	}
 
@@ -1203,11 +1217,7 @@ dump_relocations (FILE *file,
 	}
 
       if (rtype == NULL)
-#ifdef _bfd_int64_low
-	printf (_("unrecognized: %-7lx"), _bfd_int64_low (type));
-#else
-	printf (_("unrecognized: %-7lx"), type);
-#endif
+	printf (_("unrecognized: %-7lx"), (unsigned long) type & 0xffffffff);
       else
 	printf (do_wide ? "%-22.22s" : "%-17.17s", rtype);
 
@@ -1323,22 +1333,16 @@ dump_relocations (FILE *file,
 	  printf ("                    Type2: ");
 
 	  if (rtype2 == NULL)
-#ifdef _bfd_int64_low
-	    printf (_("unrecognized: %-7lx"), _bfd_int64_low (type2));
-#else
-	    printf (_("unrecognized: %-7lx"), type2);
-#endif
+	    printf (_("unrecognized: %-7lx"),
+		    (unsigned long) type2 & 0xffffffff);
 	  else
 	    printf ("%-17.17s", rtype2);
 
 	  printf ("\n                    Type3: ");
 
 	  if (rtype3 == NULL)
-#ifdef _bfd_int64_low
-	    printf (_("unrecognized: %-7lx"), _bfd_int64_low (type3));
-#else
-	    printf (_("unrecognized: %-7lx"), type3);
-#endif
+	    printf (_("unrecognized: %-7lx"),
+		    (unsigned long) type3 & 0xffffffff);
 	  else
 	    printf ("%-17.17s", rtype3);
 

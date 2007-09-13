@@ -160,7 +160,11 @@ static int filename_per_symbol = 0;	/* Once per symbol, at start of line.  */
 
 /* Print formats for printing a symbol value.  */
 static char value_format_32bit[] = "%08lx";
+#if BFD_HOST_64BIT_LONG
 static char value_format_64bit[] = "%016lx";
+#elif BFD_HOST_64BIT_LONG_LONG
+static char value_format_64bit[] = "%016llx";
+#endif
 static int print_width = 0;
 static int print_radix = 16;
 /* Print formats for printing stab info.  */
@@ -269,7 +273,11 @@ set_print_radix (char *radix)
       else
 	print_radix = 8;
       value_format_32bit[4] = *radix;
+#if BFD_HOST_64BIT_LONG
       value_format_64bit[5] = *radix;
+#elif BFD_HOST_64BIT_LONG_LONG
+      value_format_64bit[6] = *radix;
+#endif
       other_format[3] = desc_format[3] = *radix;
       break;
     default:
@@ -1341,7 +1349,7 @@ print_value (bfd *abfd ATTRIBUTE_UNUSED, bfd_vma val)
       break;
 
     case 64:
-#if BFD_HOST_64BIT_LONG
+#if BFD_HOST_64BIT_LONG || BFD_HOST_64BIT_LONG_LONG
       printf (value_format_64bit, val);
 #else
       /* We have a 64 bit value to print, but the host is only 32 bit.  */
