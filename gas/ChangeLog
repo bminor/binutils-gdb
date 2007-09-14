@@ -1,3 +1,7 @@
+2007-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_modrm_byte): Adjust indentation.
+
 2007-09-14  Michael Meissner  <michael.meissner@amd.com>
 	    Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 	    Tony Linthicum  <tony.linthicum@amd.com>

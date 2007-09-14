@@ -4476,10 +4476,10 @@ build_modrm_byte (void)
  	    op = i.drex.modrm_regmem;
  	  else
  	    {
-	  for (op = 0; op < i.operands; op++)
-	    if (operand_type_check (i.types[op], anymem))
-	      break;
-	  assert (op < i.operands);
+	      for (op = 0; op < i.operands; op++)
+		if (operand_type_check (i.types[op], anymem))
+		  break;
+	      assert (op < i.operands);
 	    }
 
 	  default_seg = &ds;
@@ -4686,35 +4686,36 @@ build_modrm_byte (void)
 	    }
 	  else
 	    {
-	  for (op = 0; op < i.operands; op++)
-	    if (i.types[op].bitfield.reg8
-		|| i.types[op].bitfield.reg16
-		|| i.types[op].bitfield.reg32
-		|| i.types[op].bitfield.reg64
-		|| i.types[op].bitfield.regmmx
-		|| i.types[op].bitfield.regxmm
-		|| i.types[op].bitfield.sreg2
-		|| i.types[op].bitfield.sreg3
-		|| i.types[op].bitfield.control
-		|| i.types[op].bitfield.debug
-		|| i.types[op].bitfield.test)
-	      break;
-	  assert (op < i.operands);
+	      for (op = 0; op < i.operands; op++)
+		if (i.types[op].bitfield.reg8
+		    || i.types[op].bitfield.reg16
+		    || i.types[op].bitfield.reg32
+		    || i.types[op].bitfield.reg64
+		    || i.types[op].bitfield.regmmx
+		    || i.types[op].bitfield.regxmm
+		    || i.types[op].bitfield.sreg2
+		    || i.types[op].bitfield.sreg3
+		    || i.types[op].bitfield.control
+		    || i.types[op].bitfield.debug
+		    || i.types[op].bitfield.test)
+		  break;
+
+	      assert (op < i.operands);
 
 	      /* If there is an extension opcode to put here, the 
 		 register number must be put into the regmem field.  */
-	  if (i.tm.extension_opcode != None)
-	    {
-	      i.rm.regmem = i.op[op].regs->reg_num;
-	      if ((i.op[op].regs->reg_flags & RegRex) != 0)
-		i.rex |= REX_B;
-	    }
-	  else
-	    {
-	      i.rm.reg = i.op[op].regs->reg_num;
-	      if ((i.op[op].regs->reg_flags & RegRex) != 0)
-		i.rex |= REX_R;
-	    }
+	      if (i.tm.extension_opcode != None)
+		{
+		  i.rm.regmem = i.op[op].regs->reg_num;
+		  if ((i.op[op].regs->reg_flags & RegRex) != 0)
+		    i.rex |= REX_B;
+		}
+	      else
+		{
+		  i.rm.reg = i.op[op].regs->reg_num;
+		  if ((i.op[op].regs->reg_flags & RegRex) != 0)
+		    i.rex |= REX_R;
+		}
 	    }
 
 	  /* Now, if no memory operand has set i.rm.mode = 0, 1, 2 we
