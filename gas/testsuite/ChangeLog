@@ -1,14 +1,14 @@
-2007-08-31  Michael Meissner  <michael.meissner@amd.com>
+2007-09-14  Michael Meissner  <michael.meissner@amd.com>
 	    Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 	    Tony Linthicum  <tony.linthicum@amd.com>
 
 	* gas/i386/i386.exp (x86-64-sse5): Run SSE5 64-bit tests.
-	(sse5): Do not currently run 32-bit  tests.
 
 	* gas/i386/x86-64-sse5.s: New file for SSE5 support.
 	* gas/i386/x86-64-sse5.d: Ditto.
 
 2007-09-12  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/sse4_1.s, gas/i386/x86-64-sse4_1.s: Add two-operand forms
 	of blendvps, blendvpd, and pblendvb.
 	* gas/i386/sse4_1.d, gas/i386/sse4_1-intel.d,
@@ -17,6 +17,7 @@
 	optional.
 
 2007-09-12  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/amdfam10.s, gas/i386/x86-64-amdfam10.s: Add Intel syntax
 	code.
 	* gas/i386/amdfam10.d, gas/i386/x86-64-amdfam10.d: Adjust.
