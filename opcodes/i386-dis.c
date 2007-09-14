@@ -3629,7 +3629,7 @@ with the -M switch (multiple options should be separated by commas):\n"));
 /* Get a pointer to struct dis386 with a valid name.  */
 
 static const struct dis386 *
-get_valid_dis386 (const struct dis386 *dp)
+get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 {
   int index;
 
@@ -3678,6 +3678,15 @@ get_valid_dis386 (const struct dis386 *dp)
       dp = &x86_64_table[dp->op[1].bytemode][index];
       break;
 
+    case IS_3BYTE_OPCODE:
+      FETCH_DATA (info, codep + 2);
+      index = *codep++;
+      dp = &three_byte_table[dp->op[1].bytemode][index];
+      modrm.mod = (*codep >> 6) & 3;
+      modrm.reg = (*codep >> 3) & 7;
+      modrm.rm = *codep & 7;
+      break;
+
     case USE_OPC_EXT_TABLE:
       index = modrm.mod == 0x3 ? 1 : 0;
       dp = &opc_ext_table[dp->op[1].bytemode][index];
@@ -3696,7 +3705,7 @@ get_valid_dis386 (const struct dis386 *dp)
   if (dp->name != NULL)
     return dp;
   else
-    return get_valid_dis386 (dp);
+    return get_valid_dis386 (dp, info);
 }
 
 static int
@@ -3897,11 +3906,6 @@ print_insn (bfd_vma pc, disassemble_info *info)
       dp = &dis386_twobyte[threebyte];
       need_modrm = twobyte_has_modrm[*codep];
       codep++;
-      if (dp->name == NULL && dp->op[0].bytemode == IS_3BYTE_OPCODE)
-	{
-	  FETCH_DATA (info, codep + 2);
-	  op = *codep++;
-	}
     }
   else
     {
@@ -3964,14 +3968,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	}
     }
 
-  if (dp->name == NULL && dp->op[0].bytemode == IS_3BYTE_OPCODE)
-    {
-      dp = &three_byte_table[dp->op[1].bytemode][op];
-      modrm.mod = (*codep >> 6) & 3;
-      modrm.reg = (*codep >> 3) & 7;
-      modrm.rm = *codep & 7;
-    }
-  else if (need_modrm)
+  if (need_modrm)
     {
       FETCH_DATA (info, codep + 1);
       modrm.mod = (*codep >> 6) & 3;
@@ -3985,7 +3982,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     }
   else
     {
-      dp = get_valid_dis386 (dp);
+      dp = get_valid_dis386 (dp, info);
       if (dp != NULL && putop (dp->name, sizeflag) == 0)
         {
 	  for (i = 0; i < MAX_OPERANDS; ++i)
