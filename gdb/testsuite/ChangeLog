@@ -1,3 +1,11 @@
+2007-09-14  Maciej W. Rozycki  <macro@mips.com>
+
+	[mti-fix-scope]
+	* gdb.mi/mi-watch.exp (test_watchpoint_all): New function.
+	Move all the tests here and run them twice, once using software
+	watchpoints and once using hardware watchpoints.
+	* gdb.mi/mi2-watch.exp (test_watchpoint_all): Likewise.
+
 2007-09-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/solib-weak.exp (do_test): Adjust the file names for each
