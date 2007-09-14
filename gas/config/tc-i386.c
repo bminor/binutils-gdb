@@ -4373,7 +4373,7 @@ build_modrm_byte (void)
      here, it looks to GAS as if this is a 2 operand instruction.  */
   if ((i.tm.opcode_modifier.drex 
        || i.tm.opcode_modifier.drexv 
-       || i.tm.opcode_modifier.drexc) != 0 
+       || i.tm.opcode_modifier.drexc)
       && i.reg_operands == 2)
     {
       const reg_entry *reg = i.op[i.drex.modrm_reg].regs;
@@ -4470,9 +4470,9 @@ build_modrm_byte (void)
 
  	  /* This has been precalculated for SSE5 instructions 
 	     that have a DREX field earlier in process_drex.  */
- 	  if ((i.tm.opcode_modifier.drex 
-	       || i.tm.opcode_modifier.drexv 
-	       || i.tm.opcode_modifier.drexc) != 0)
+ 	  if (i.tm.opcode_modifier.drex 
+	      || i.tm.opcode_modifier.drexv 
+	      || i.tm.opcode_modifier.drexc)
  	    op = i.drex.modrm_regmem;
  	  else
  	    {
@@ -4675,9 +4675,9 @@ build_modrm_byte (void)
 
 	  /* This has been precalculated for SSE5 instructions 
 	     that have a DREX field earlier in process_drex.  */
-	  if ((i.tm.opcode_modifier.drex 
-	       || i.tm.opcode_modifier.drexv 
-	       || i.tm.opcode_modifier.drexc) != 0)
+	  if (i.tm.opcode_modifier.drex 
+	      || i.tm.opcode_modifier.drexv 
+	      || i.tm.opcode_modifier.drexc)
 	    {
 	      op = i.drex.modrm_reg;
 	      i.rm.reg = i.op[op].regs->reg_num;
