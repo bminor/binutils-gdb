@@ -41,7 +41,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-proc test_watchpoint_creation_and_listing {} {
+proc test_watchpoint_creation_and_listing {type} {
     global mi_gdb_prompt
     global srcfile
     global hex
@@ -65,7 +65,7 @@ proc test_watchpoint_creation_and_listing {} {
 }
 
 # UNUSED at the time
-proc test_awatch_creation_and_listing {} {
+proc test_awatch_creation_and_listing {type} {
     global mi_gdb_prompt
     global srcfile
     global hex
@@ -92,7 +92,7 @@ proc test_awatch_creation_and_listing {} {
 }
 
 # UNUSED at the time
-proc test_rwatch_creation_and_listing {} {
+proc test_rwatch_creation_and_listing {type} {
     global mi_gdb_prompt
     global srcfile
     global hex
@@ -118,7 +118,7 @@ proc test_rwatch_creation_and_listing {} {
 	    "delete read watchpoint"
 }
 
-proc test_watchpoint_triggering {} {
+proc test_watchpoint_triggering {type} {
     global mi_gdb_prompt
     global hex fullname_syntax srcfile
 
@@ -147,6 +147,9 @@ proc test_watchpoint_triggering {} {
       timeout {fail "watchpoint trigger (timeout 1)"}
     }
 
+    if { $type == "sw" } {
+      setup_xfail *-*-*
+    }
     send_gdb "223-exec-continue\n"
     gdb_expect {
       -re "223\\^running\r\n$mi_gdb_prompt" {
@@ -161,6 +164,7 @@ proc test_watchpoint_triggering {} {
       -re ".*$mi_gdb_prompt$" {fail "wp out of scope (1)"}
       timeout {fail "wp out of scope (timeout 1)"}
     }
+    clear_xfail *-*-*
 }
 
 proc test_watchpoint_all {type} {
@@ -177,10 +181,10 @@ proc test_watchpoint_all {type} {
     mi_gdb_load ${binfile}
 
     mi_runto callee4
-    test_watchpoint_creation_and_listing
-    #test_rwatch_creation_and_listing
-    #test_awatch_creation_and_listing
-    test_watchpoint_triggering
+    test_watchpoint_creation_and_listing $type
+    #test_rwatch_creation_and_listing $type
+    #test_awatch_creation_and_listing $type
+    test_watchpoint_triggering $type
 
     set pf_prefix $old_prefix
 }

@@ -1,6 +1,16 @@
 2007-09-14  Maciej W. Rozycki  <macro@mips.com>
 
-	[mti-fix-scope]
+	* gdb.mi/mi-watch.exp (test_watchpoint_all): Pass the watchpoint
+	type down.
+	(test_watchpoint_triggering): XFAIL the sw watchpoint scope
+	test.
+	* gdb.mi/mi2-watch.exp (test_watchpoint_all): Pass the
+	watchpoint type down.
+	(test_watchpoint_triggering): XFAIL the sw watchpoint scope
+	test.
+
+2007-09-14  Maciej W. Rozycki  <macro@mips.com>
+
 	* gdb.mi/mi-watch.exp (test_watchpoint_all): New function.
 	Move all the tests here and run them twice, once using software
 	watchpoints and once using hardware watchpoints.
