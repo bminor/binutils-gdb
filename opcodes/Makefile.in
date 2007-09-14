@@ -1357,7 +1357,8 @@ i370-opc.lo: i370-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/i370.h
 i386-dis.lo: i386-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-  opintl.h $(INCDIR)/opcode/i386.h
+  opintl.h $(INCDIR)/opcode/i386.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h
 i386-opc.lo: i386-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h i386-opc.h \
   $(INCDIR)/opcode/i386.h i386-tbl.h

@@ -1,4 +1,9 @@
-2007-08-31  Michael Meissner  <michael.meissner@amd.com>
+2007-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2007-09-14  Michael Meissner  <michael.meissner@amd.com>
 	    Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 	    Tony Linthicum  <tony.linthicum@amd.com>
 
@@ -70,6 +75,7 @@
 	(cvtph2ps,cvtps2ph): Ditto.
 
 	* i386-tbl.h: Regenerate from i386-opc.tbl.
+	* i386-init.h: Likewise.
 
 	* i386-dis.c (libiberty.h): Include to get ARRAY_SIZE.
 	(dis386_move_test): New disassembly support for move from test
@@ -97,10 +103,6 @@
 	byte opcode support for SSE5 instructions.
 	(dis386_twobyte): Add SSE5 24/25/7a/7b support.
 	(three_byte_table): Add rows for describing SSE5 instructions.
-
-	* Makefile.am (i386-dis.lo): Add $(INCDIR)/libiberty.h.
-
-	* Makefile.in (i386-dis.lo): Add $(INCDIR)/libiberty.h.
 
 2007-09-13  H.J. Lu  <hongjiu.lu@intel.com>
 
