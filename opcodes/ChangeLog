@@ -1,3 +1,107 @@
+2007-08-31  Michael Meissner  <michael.meissner@amd.com>
+	    Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+	    Tony Linthicum  <tony.linthicum@amd.com>
+
+	* i386-opc.h (CpuSSE5):  New macro.
+	(i386_cpu_flags): Add Drex, Drexv and Drexc.
+
+	* i386-gen.c (cpu_flag_init): Add CPU_SSE5_FLAGS.
+	(operand_type_init): Add CpuSSE5.
+	(opcode_modifiers): Add Drex, Drexv and Drexc.
+	(i386_opcode_modifier): Ditto.
+
+	* i386-opc.tbl (fmaddps,fmaddpd,fmaddss,fmaddsd): Define SSE5
+	instructions here.
+	(fmsubps,fmsubpd,fmsubss,fmsubsd): Ditto.
+	(fnmaddps,fnmaddpd,fnmaddss,fnmaddsd): Ditto.
+	(fnmsubps,fnmsubpd,fnmsubss,fnmsubsd): Ditto.
+	(pmacssww,pmacsww,pmacsswd,pmacswd): Ditto.
+	(pmacssdd,pmacsdd,pmacssdql,pmacssdqh): Ditto.
+	(pmacsdql,pmacsdqh,pmadcsswd,pmadcswd): Ditto.
+	(phaddbw,phaddbd,phaddbq,phaddwd): Ditto.
+	(phaddwq,phadddq,phaddubw,phaddubd): Ditto.
+	(phaddubq,phadduwd,phadduwq,phaddudq): Ditto.
+	(phsubbw,phsubwd,phsubdq): Ditto.
+	(pcmov,pperm,permps,permpd): Ditto.
+	(protb,protw,protd,protq): Ditto.
+	(pshlb,pshlw,pshld,pshlq): Ditto.
+	(pshab,pshaw,pshad,pshaq): Ditto.
+	(comps,comeqps,comltps,comungeps,comleps,comungtps): Ditto.
+	(comunordps,comneps,comneqps,comnltps,comugeps): Ditto.
+	(comnleps,comugtps,comordps,comueqps,comultps): Ditto.
+	(comngeps,comuleps,comngtps,comfalseps,comuneps): Ditto.
+	(comuneqps,comunltps,comgeps,comunleps,comgtps,comtrueps): Ditto.
+	(compd,comeqpd,comltpd,comungepd,comlepd,comungtpd,comunordpd): Ditto.
+	(comnepd,comneqpd,comnltpd,comugepd,comnlepd,comugtpd): Ditto.
+	(comordpd,comueqpd,comultpd,comngepd,comulepd,comngtpd): Ditto.
+	(comfalsepd,comunepd,comuneqpd,comunltpd,comgepd): Ditto.
+	(comunlepd,comgtpd,comtruepd): Ditto.
+	(comss,comeqss,comltss,comungess,comless,comungtss,comunordss): Ditto.
+	(comness,comneqss,comnltss,comugess,comnless,comugtss): Ditto.
+	(comordss,comueqss,comultss,comngess,comuless,comngtss): Ditto.
+	(comfalsess,comuness,comuneqss,comunltss,comgess): Ditto.
+	(comunless,comgtss,comtruess): Ditto.
+	(comsd,comeqsd,comltsd,comungesd,comlesd,comungtsd,comunordsd): Ditto.
+	(comnesd,comneqsd,comnltsd,comugesd,comnlesd,comugtsd): Ditto.
+	(comordsd,comueqsd,comultsd,comngesd,comulesd,comngtsd): Ditto.
+	(comfalsesd,comunesd,comuneqsd,comunltsd,comgesd): Ditto.
+	(comunlesd,comgtsd,comtruesd): Ditto.
+	(pcomub,pcomltub,pcomleub,pcomgtub,pcomgeub,pcomequb): Ditto.
+	(pcomnequb,pcomneub): Ditto.
+	(pcomuw,pcomltuw,pcomleuw,pcomgtuw,pcomgeuw,pcomequw): Ditto.
+	(pcomnequw,pcomneuw): Ditto.
+	(pcomud,pcomltud,pcomleud,pcomgtud,pcomgeud,pcomequd): Ditto.
+	(pcomnequd,pcomneud): Ditto.
+	(pcomuq,pcomltuq,pcomleuq,pcomgtuq,pcomgeuq,pcomequq): Ditto.
+	(pcomnequq,pcomneuq): Ditto.
+	(pcomb,pcomltb,pcomleb,pcomgtb,pcomgeb,pcomeqb): Ditto.
+	(pcomneqb,pcomneb): Ditto.
+	(pcomw,pcomltw,pcomlew,pcomgtw,pcomgew,pcomeqw): Ditto.
+	(pcomneqw,pcomnew): Ditto.
+	(pcomd,pcomltd,pcomled,pcomgtd,pcomged,pcomeqd): Ditto.
+	(pcomneqd,pcomned): Ditto.
+	(pcomq,pcomltq,pcomleq,pcomgtq,pcomgeq): Ditto.
+	(pcomeqq,pcomneqq,pcomneq): Ditto.
+	(pcomtrueb, pcomtruew, pcomtrued, pcomtrueq): Ditto.
+	(pcomtrueub, pcomtrueuw, pcomtrueud, pcomtrueuq): Ditto.
+	(pcomfalseb, pcomfalsew, pcomfalsed, pcomfalseq): Ditto.
+	(pcomfalseub, pcomfalseuw, pcomfalseud, pcomfalseuq): Ditto.
+	(frczps,frczpd,frczss,frczsd): Ditto.
+	(cvtph2ps,cvtps2ph): Ditto.
+
+	* i386-tbl.h: Regenerate from i386-opc.tbl.
+
+	* i386-dis.c (libiberty.h): Include to get ARRAY_SIZE.
+	(dis386_move_test): New disassembly support for move from test
+	register instruction that overlaps with SSE5 instructions.
+	(print_insn): Add support for special casing the i386/i486 move
+	from test register instruction that overlaps with the SSE5
+	0x0f24 4 operand instructions.
+	(OP_DREX_ICMP): New macros for SSE5 DREX handling.
+	(OP_DREX_FCMP): Ditto.
+	(OP_E_extended): Rename from OP_E, add additional argument to skip
+	the DREX byte.
+	(OP_E): Call OP_E_extended.
+	(DREX_REG_MEMORY): New macros for drex handling.
+	(DREX_REG_UNKNOWN): Ditto.
+	(DREX4_OC1): Ditto.
+	(DREX4_NO_OC0): Ditto.
+	(DREX4_MASK): Ditto.
+	(three_byte_table): Add SSE5 instructions.
+	(print_drex_arg): New function to print a DREX register or memory
+	reference.
+	(OP_DREX4): New function for handling DREX 4 argument ops.
+	(OP_DREX3): New function for handling DREX 3 argument ops.
+	(twobyte_has_modrm): 0f{25,7a,7b} all use the modrm byte.
+	(THREE_BYTE_SSE5_0F{24,25,7A,7B}): New macros for initializing 3
+	byte opcode support for SSE5 instructions.
+	(dis386_twobyte): Add SSE5 24/25/7a/7b support.
+	(three_byte_table): Add rows for describing SSE5 instructions.
+
+	* Makefile.am (i386-dis.lo): Add $(INCDIR)/libiberty.h.
+
+	* Makefile.in (i386-dis.lo): Add $(INCDIR)/libiberty.h.
+
 2007-09-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (get_valid_dis386): Take a pointer to

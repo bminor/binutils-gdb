@@ -78,8 +78,10 @@
 #define CpuSSE4_1	(CpuABM + 1)
 /* SSE4.2 support required */
 #define CpuSSE4_2	(CpuSSE4_1 + 1)
+/* SSE5 support required */
+#define CpuSSE5         (CpuSSE4_2 + 1)
 /* 64bit support available, used by -march= in assembler.  */
-#define CpuLM		(CpuSSE4_2 + 1)
+#define CpuLM		(CpuSSE5 + 1)
 /* 64bit support required  */
 #define Cpu64		(CpuLM + 1)
 /* Not supported in the 64bit mode  */
@@ -126,6 +128,7 @@ typedef union i386_cpu_flags
       unsigned int cpuabm:1;
       unsigned int cpusse4_1:1;
       unsigned int cpusse4_2:1;
+      unsigned int cpusse5:1;
       unsigned int cpulm:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
@@ -199,8 +202,13 @@ typedef union i386_cpu_flags
 #define Rex64			(NoRex64 + 1)
 /* deprecated fp insn, gets a warning */
 #define Ugh			(Rex64 + 1)
+#define Drex                    (Ugh + 1)
+/* instruction needs DREX with multiple encodings for memory ops */
+#define Drexv                   (Drex + 1)
+/* special DREX for comparisons */
+#define Drexc                   (Drexv + 1)
 /* The last bitfield in i386_opcode_modifier.  */
-#define Opcode_Modifier_Max	Ugh
+#define Opcode_Modifier_Max	Drexc
 
 typedef struct i386_opcode_modifier
 {
@@ -234,6 +242,9 @@ typedef struct i386_opcode_modifier
   unsigned int norex64:1;
   unsigned int rex64:1;
   unsigned int ugh:1;
+  unsigned int drex:1;
+  unsigned int drexv:1;
+  unsigned int drexc:1;
 } i386_opcode_modifier;
 
 /* Position of operand_type bits.  */
@@ -400,7 +411,8 @@ typedef struct template
   /* extension_opcode is the 3 bit extension for group <n> insns.
      This field is also used to store the 8-bit opcode suffix for the
      AMD 3DNow! instructions.
-     If this template has no extension opcode (the usual case) use None */
+     If this template has no extension opcode (the usual case) use None 
+     Instructions with Drex use this to specify 2 bits for OC */
   unsigned int extension_opcode;
 #define None 0xffff		/* If no extension_opcode is possible.  */
 

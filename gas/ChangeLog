@@ -1,3 +1,38 @@
+2007-08-31  Michael Meissner  <michael.meissner@amd.com>
+	    Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+	    Tony Linthicum  <tony.linthicum@amd.com>
+
+	* NEWS: Add SSE5 support to NEWS file.
+	
+	* config/tc-i386.h (drex_byte): Add fields to allow process_drex
+	and build_modrm_byte to communicate.
+	(DREX_OC0): New SSE5 macro.
+	(DREX_OC0_MASK): Ditto.
+	(DREX_OC1): Ditto.
+	(DREX_OC1_MASK): Ditto.
+	(DREX_XMEM_X1_X2_X2): Ditto.
+	(DREX_X1_XMEM_X2_X2): Ditto.
+	(DREX_X1_XMEM_X2_X1: Ditto.
+	(DREX_X1_X2_XMEM_X1: Ditto.
+	(DREX_XMEM_X1_X2): Ditto.
+	(DREX_X1_XMEM_X2): Ditto.
+	(drex_byte): New structure to describe the DREX byte.
+
+	* config/tc-i386.c (process_drex): New function to handle SSE5
+	DREX bits.
+	(build_modrm_byte): Use the information cached away in
+	process_drex in the case of DREX instructions.
+	(i386_insn): Add drex field.
+	(pi): Add debugging of drex field.
+	(md_assemble): Treat SSE5 like SSE3 in instructions with an
+	immediate byte.  Move REX field to DREX if this is a DREX
+	instruction.
+	(process_operands): Add SSE5 support.
+	(build_modrm_byte): Ditto.
+	(output_insn): Ditto.
+	(cpu_arch): Ditto.
+	(i386_align_code): Ditto.
+
 2007-09-12  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (md_assemble): Move handling of extrq/insertq

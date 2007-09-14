@@ -1,4 +1,6 @@
 -*- text -*-
+* Support for SSE5 has been added to the i386 port.
+
 * Added -p switch to readelf to allow string dumps of sections.
 
 Changes in 2.18:

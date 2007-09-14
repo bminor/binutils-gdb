@@ -1,4 +1,6 @@
 -*- text -*-
+* Support for SSE5 has been added to the i386 port.
+
 Changes in 2.18:
 
 * The GAS sources are now released under the GPLv3.

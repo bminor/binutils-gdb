@@ -1,3 +1,8 @@
+2007-08-31  Michael Meissner  <michael.meissner@amd.com>
+	    Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+
+	* NEWS: Add note about SSE5 being added on i386.
+
 2007-09-13  Alan Modra  <amodra@bigpond.net.au>
 	    Zhou Drangon <drangon.mail@gmail.com>
 

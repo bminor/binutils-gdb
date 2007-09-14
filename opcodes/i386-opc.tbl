@@ -1404,11 +1404,11 @@ pmovzxwq, 2, 0x660f3834, None, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lS
 pmovzxdq, 2, 0x660f3835, None, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|NoRex64, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pmuldq, 2, 0x660f3828, None, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pmulld, 2, 0x660f3840, None, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-ptest, 2, 0x660f3817, None, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundpd, 3, 0x660f3a09, None, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundps, 3, 0x660f3a08, None, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundsd, 3, 0x660f3a0b, None, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|NoRex64, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundss, 3, 0x660f3a0a, None, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+ptest, 2, 0x660f3817, None, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundpd, 3, 0x660f3a09, None, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundps, 3, 0x660f3a08, None, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundsd, 3, 0x660f3a0b, None, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|NoRex64, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundss, 3, 0x660f3a0a, None, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 
 // Streaming SIMD extensions 4.2 Instructions.
 
@@ -1493,6 +1493,264 @@ insertq, 4, 0xf20f78, None, CpuSSE4a, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|N
 popcnt, 2, 0xf30fb8, None, CpuABM|CpuSSE4_2, Modrm|No_bSuf|No_sSuf|No_xSuf, { Reg16|Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 lzcnt, 2, 0xf30fbd, None, CpuABM, Modrm|No_bSuf|No_sSuf|No_xSuf, { Reg16|Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 
+// SSE5 instructions
+fmaddps,    4, 0x0f2400, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fmaddpd,    4, 0x0f2401, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fmaddss,    4, 0x0f2402, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM }
+fmaddsd,    4, 0x0f2403, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fmsubps,    4, 0x0f2408, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fmsubpd,    4, 0x0f2409, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fmsubss,    4, 0x0f240a, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM }
+fmsubsd,    4, 0x0f240b, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fnmaddps,   4, 0x0f2410, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fnmaddpd,   4, 0x0f2411, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fnmaddss,   4, 0x0f2412, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM }
+fnmaddsd,   4, 0x0f2413, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fnmsubps,   4, 0x0f2418, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fnmsubpd,   4, 0x0f2419, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+fnmsubss,   4, 0x0f241a, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM }
+fnmsubsd,   4, 0x0f241b, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pmacssww,   4, 0x0f2485, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex, { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmacsww,    4, 0x0f2495, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex, { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmacsswd,   4, 0x0f2486, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmacswd,    4, 0x0f2496, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmacssdd,   4, 0x0f248e, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmacsdd,    4, 0x0f249e, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmacssdql,  4, 0x0f2487, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmacssdqh,  4, 0x0f248f, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmacsdql,   4, 0x0f2497, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmacsdqh,   4, 0x0f249f, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmadcsswd,  4, 0x0f24a6, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pmadcswd,   4, 0x0f24b6, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex,       { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+phaddbw,    2, 0x0f7a41, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,	        { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phaddbd,    2, 0x0f7a42, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phaddbq,    2, 0x0f7a43, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phaddwd,    2, 0x0f7a46, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phaddwq,    2, 0x0f7a47, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phadddq,    2, 0x0f7a4b, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phaddubw,   2, 0x0f7a51, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phaddubd,   2, 0x0f7a52, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phaddubq,   2, 0x0f7a53, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phadduwd,   2, 0x0f7a56, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phadduwq,   2, 0x0f7a57, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phaddudq,   2, 0x0f7a5b, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phsubbw,    2, 0x0f7a61, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phsubwd,    2, 0x0f7a62, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+phsubdq,    2, 0x0f7a63, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pcmov,      4, 0x0f2422, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pperm,      4, 0x0f2423, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+permps,     4, 0x0f2420, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+permpd,     4, 0x0f2421, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+protb,      3, 0x0f2440, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+protb,      3, 0x0f7b40, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { Imm8,            RegXMM,          RegXMM }
+protw,      3, 0x0f2441, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+protw,      3, 0x0f7b41, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { Imm8,            RegXMM,          RegXMM }
+protd,      3, 0x0f2442, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+protd,      3, 0x0f7b42, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { Imm8,            RegXMM,          RegXMM }
+protq,      3, 0x0f2443, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+protq,      3, 0x0f7b43, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,            { Imm8,            RegXMM,          RegXMM }
+pshlb,      3, 0x0f2444, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pshlw,      3, 0x0f2445, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pshld,      3, 0x0f2446, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pshlq,      3, 0x0f2447, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pshab,      3, 0x0f2448, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pshaw,      3, 0x0f2449, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pshad,      3, 0x0f244a, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+pshaq,      3, 0x0f244b, 0x0,  CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm|Drex|Drexv, { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+comps,      4, 0x0f252c, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comeqps,    3, 0x0f252c, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comltps,    3, 0x0f252c, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comungeps,  3, 0x0f252c, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comleps,    3, 0x0f252c, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comungtps,  3, 0x0f252c, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunordps, 3, 0x0f252c, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comneps,    3, 0x0f252c, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comneqps,   3, 0x0f252c, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnltps,   3, 0x0f252c, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comugeps,   3, 0x0f252c, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnleps,   3, 0x0f252c, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comugtps,   3, 0x0f252c, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comordps,   3, 0x0f252c, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comueqps,   3, 0x0f252c, 0x8,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comultps,   3, 0x0f252c, 0x9,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comngeps,   3, 0x0f252c, 0x9,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comuleps,   3, 0x0f252c, 0xa,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comngtps,   3, 0x0f252c, 0xa,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comfalseps, 3, 0x0f252c, 0xb,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comuneps,   3, 0x0f252c, 0xc,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comuneqps,  3, 0x0f252c, 0xc,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunltps,  3, 0x0f252c, 0xd,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comgeps,    3, 0x0f252c, 0xd,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunleps,  3, 0x0f252c, 0xe,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comgtps,    3, 0x0f252c, 0xe,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comtrueps,  3, 0x0f252c, 0xf,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+compd,      4, 0x0f252d, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comeqpd,    3, 0x0f252d, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comltpd,    3, 0x0f252d, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comungepd,  3, 0x0f252d, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comlepd,    3, 0x0f252d, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comungtpd,  3, 0x0f252d, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunordpd, 3, 0x0f252d, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnepd,    3, 0x0f252d, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comneqpd,   3, 0x0f252d, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnltpd,   3, 0x0f252d, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comugepd,   3, 0x0f252d, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnlepd,   3, 0x0f252d, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comugtpd,   3, 0x0f252d, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comordpd,   3, 0x0f252d, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comueqpd,   3, 0x0f252d, 0x8,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comultpd,   3, 0x0f252d, 0x9,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comngepd,   3, 0x0f252d, 0x9,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comulepd,   3, 0x0f252d, 0xa,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comngtpd,   3, 0x0f252d, 0xa,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comfalsepd, 3, 0x0f252d, 0xb,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunepd,   3, 0x0f252d, 0xc,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comuneqpd,  3, 0x0f252d, 0xc,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunltpd,  3, 0x0f252d, 0xd,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comgepd,    3, 0x0f252d, 0xd,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunlepd,  3, 0x0f252d, 0xe,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comgtpd,    3, 0x0f252d, 0xe,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comtruepd,  3, 0x0f252d, 0xf,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comss,      4, 0x0f252e, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comeqss,    3, 0x0f252e, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comltss,    3, 0x0f252e, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comungess,  3, 0x0f252e, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comless,    3, 0x0f252e, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comungtss,  3, 0x0f252e, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunordss, 3, 0x0f252e, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comness,    3, 0x0f252e, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comneqss,   3, 0x0f252e, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnltss,   3, 0x0f252e, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comugess,   3, 0x0f252e, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnless,   3, 0x0f252e, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comugtss,   3, 0x0f252e, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comordss,   3, 0x0f252e, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comueqss,   3, 0x0f252e, 0x8,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comultss,   3, 0x0f252e, 0x9,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comngess,   3, 0x0f252e, 0x9,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comuless,   3, 0x0f252e, 0xa,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comngtss,   3, 0x0f252e, 0xa,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comfalsess, 3, 0x0f252e, 0xb,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comuness,   3, 0x0f252e, 0xc,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comuneqss,  3, 0x0f252e, 0xc,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunltss,  3, 0x0f252e, 0xd,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comgess,    3, 0x0f252e, 0xd,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunless,  3, 0x0f252e, 0xe,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comgtss,    3, 0x0f252e, 0xe,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comtruess,  3, 0x0f252e, 0xf,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comsd,      4, 0x0f252f, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comeqsd,    3, 0x0f252f, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comltsd,    3, 0x0f252f, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comungesd,  3, 0x0f252f, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comlesd,    3, 0x0f252f, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comungtsd,  3, 0x0f252f, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunordsd, 3, 0x0f252f, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnesd,    3, 0x0f252f, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comneqsd,   3, 0x0f252f, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnltsd,   3, 0x0f252f, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comugesd,   3, 0x0f252f, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comnlesd,   3, 0x0f252f, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comugtsd,   3, 0x0f252f, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comordsd,   3, 0x0f252f, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comueqsd,   3, 0x0f252f, 0x8,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comultsd,   3, 0x0f252f, 0x9,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comngesd,   3, 0x0f252f, 0x9,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comulesd,   3, 0x0f252f, 0xa,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comngtsd,   3, 0x0f252f, 0xa,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comfalsesd, 3, 0x0f252f, 0xb,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunesd,   3, 0x0f252f, 0xc,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comuneqsd,  3, 0x0f252f, 0xc,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunltsd,  3, 0x0f252f, 0xd,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comgesd,    3, 0x0f252f, 0xd,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comunlesd,  3, 0x0f252f, 0xe,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comgtsd,    3, 0x0f252f, 0xe,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+comtruesd,  3, 0x0f252f, 0xf,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomub,     4, 0x0f256c, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomltub,   3, 0x0f256c, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomleub,   3, 0x0f256c, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgtub,   3, 0x0f256c, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgeub,   3, 0x0f256c, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomequb,   3, 0x0f256c, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomnequb,  3, 0x0f256c, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneub,   3, 0x0f256c, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomfalseub,3, 0x0f256c, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomtrueub, 3, 0x0f256c, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomuw,     4, 0x0f256d, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomltuw,   3, 0x0f256d, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomleuw,   3, 0x0f256d, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgtuw,   3, 0x0f256d, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgeuw,   3, 0x0f256d, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomequw,   3, 0x0f256d, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomnequw,  3, 0x0f256d, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneuw,   3, 0x0f256d, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomfalseuw,3, 0x0f256d, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomtrueuw, 3, 0x0f256d, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomud,     4, 0x0f256e, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomltud,   3, 0x0f256e, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomleud,   3, 0x0f256e, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgtud,   3, 0x0f256e, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgeud,   3, 0x0f256e, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomequd,   3, 0x0f256e, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomnequd,  3, 0x0f256e, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneud,   3, 0x0f256e, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomfalseud,3, 0x0f256e, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomtrueud, 3, 0x0f256e, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomuq,     4, 0x0f256f, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomltuq,   3, 0x0f256f, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomleuq,   3, 0x0f256f, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgtuq,   3, 0x0f256f, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgeuq,   3, 0x0f256f, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomequq,   3, 0x0f256f, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomnequq,  3, 0x0f256f, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneuq,   3, 0x0f256f, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomfalseuq,3, 0x0f256f, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomtrueuq, 3, 0x0f256f, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomb,      4, 0x0f254c, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomltb,    3, 0x0f254c, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomleb,    3, 0x0f254c, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgtb,    3, 0x0f254c, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgeb,    3, 0x0f254c, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomeqb,    3, 0x0f254c, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneqb,   3, 0x0f254c, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneb,    3, 0x0f254c, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomfalseb, 3, 0x0f254c, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomtrueb,  3, 0x0f254c, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomw,      4, 0x0f254d, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomltw,    3, 0x0f254d, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomlew,    3, 0x0f254d, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgtw,    3, 0x0f254d, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgew,    3, 0x0f254d, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomeqw,    3, 0x0f254d, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneqw,   3, 0x0f254d, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomnew,    3, 0x0f254d, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomfalsew, 3, 0x0f254d, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomtruew,  3, 0x0f254d, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomd,      4, 0x0f254e, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomltd,    3, 0x0f254e, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomled,    3, 0x0f254e, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgtd,    3, 0x0f254e, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomged,    3, 0x0f254e, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomeqd,    3, 0x0f254e, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneqd,   3, 0x0f254e, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomned,    3, 0x0f254e, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomfalsed, 3, 0x0f254e, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomtrued,  3, 0x0f254e, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomq,      4, 0x0f254f, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|Drexc,      { Imm8,            RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomltq,    3, 0x0f254f, 0x0,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomleq,    3, 0x0f254f, 0x1,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgtq,    3, 0x0f254f, 0x2,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomgeq,    3, 0x0f254f, 0x3,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomeqq,    3, 0x0f254f, 0x4,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneqq,   3, 0x0f254f, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomneq,    3, 0x0f254f, 0x5,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomfalseq, 3, 0x0f254f, 0x6,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+pcomtrueq,  3, 0x0f254f, 0x7,  CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm|ImmExt|Drexc,      { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM,          RegXMM }
+frczps,     2, 0x0f7a10, None, CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm,          { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+frczpd,     2, 0x0f7a11, None, CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm,          { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+frczss,     2, 0x0f7a12, None, CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm,          { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM }
+frczsd,     2, 0x0f7a13, None, CpuSSE5, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|Modrm,          { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex, RegXMM }
+cvtph2ps,   2, 0x0f7a30, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,          { RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex,  RegXMM }
+cvtps2ph,   2, 0x0f7a31, None, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_xSuf|No_qSuf|IgnoreSize|Modrm,          { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex }
 
 // VIA PadLock extensions.
 xstore-rng, 0, 0xfa7, 0xc0, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|IsString|ImmExt, { 0 }

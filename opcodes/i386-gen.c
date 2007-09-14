@@ -107,7 +107,9 @@ static initializer cpu_flag_init [] =
   { "CPU_SSE4A_FLAGS",
     "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a" },
   { "CPU_ABM_FLAGS",
-    "CpuABM" }
+    "CpuABM" },
+  { "CPU_SSE5_FLAGS",
+    "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuSSE5"}
 };
 
 static initializer operand_type_init [] =
@@ -231,6 +233,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuSSE4_1),
   BITFIELD (CpuSSE4_2),
   BITFIELD (CpuSSE4a),
+  BITFIELD (CpuSSE5),
   BITFIELD (Cpu3dnow),
   BITFIELD (Cpu3dnowA),
   BITFIELD (CpuPadLock),
@@ -277,6 +280,9 @@ static bitfield opcode_modifiers[] =
   BITFIELD (NoRex64),
   BITFIELD (Rex64),
   BITFIELD (Ugh),
+  BITFIELD (Drex),
+  BITFIELD (Drexv),
+  BITFIELD (Drexc),
 };
 
 static bitfield operand_types[] =

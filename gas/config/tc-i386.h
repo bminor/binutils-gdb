@@ -153,6 +153,33 @@ modrm_byte;
 /* x86-64 extension prefix.  */
 typedef int rex_byte;
 
+/* The SSE5 instructions have a two bit instruction modifier (OC) that 
+   is stored in two separate bytes in the instruction.  Pick apart OC 
+   into the 2 separate bits for instruction.  */
+#define DREX_OC0(x)	(((x) & 1) != 0)
+#define DREX_OC1(x)	(((x) & 2) != 0)
+
+#define DREX_OC0_MASK	(1 << 3)	/* set OC0 in byte 4 */
+#define DREX_OC1_MASK	(1 << 2)	/* set OC1 in byte 3 */
+
+/* OC mappings */
+#define DREX_XMEM_X1_X2_X2 0	/* 4 op insn, dest = src3, src1 = reg/mem */
+#define DREX_X1_XMEM_X2_X2 1	/* 4 op insn, dest = src3, src2 = reg/mem */
+#define DREX_X1_XMEM_X2_X1 2	/* 4 op insn, dest = src1, src2 = reg/mem */
+#define DREX_X1_X2_XMEM_X1 3	/* 4 op insn, dest = src1, src3 = reg/mem */
+
+#define DREX_XMEM_X1_X2	   0	/* 3 op insn, src1 = reg/mem */
+#define DREX_X1_XMEM_X2	   1	/* 3 op insn, src1 = reg/mem */
+
+/* Information needed to create the DREX byte in SSE5 instructions.  */
+typedef struct
+{
+  unsigned int reg;		/* register */
+  unsigned int rex;		/* REX flags */
+  unsigned int modrm_reg;	/* which arg goes in the modrm.reg field */
+  unsigned int modrm_regmem;	/* which arg goes in the modrm.regmem field */
+} drex_byte;
+
 /* 386 opcode byte to code indirect addressing.  */
 typedef struct
 {
