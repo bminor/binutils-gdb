@@ -11933,14 +11933,15 @@ debug link specifies a CRC32 checksum for the debug file, which
 came from the same build.
 
 @item
-The executable contains a @dfn{build ID}, a unique signature that is
+The executable contains a @dfn{build ID}, a unique bit string that is
 also present in the corresponding debug info file.  (This is supported
-only on some operating systems, notably on @sc{gnu}/Linux.  For more
-details about this feature, see
-@uref{http://fedoraproject.org/wiki/Releases/FeatureBuildId, the
-Fedora Project's description of the buid ID feature}.)  The debug info
-file's name is not specified explicitly by the build ID, but can be
-computed from the build ID, see below.
+only on some operating systems, notably those which use the ELF format
+for binary files and the @sc{gnu} Binutils.)  For more details about
+this feature, see the description of the @option{--build-id}
+command-line option in @ref{Options, , Command Line Options, ld.info,
+The GNU Linker}.  The debug info file's name is not specified
+explicitly by the build ID, but can be computed from the build ID, see
+below.
 @end itemize
 
 Depending on the way the debug info file is specified, @value{GDBN}
@@ -11958,14 +11959,14 @@ directories of the executable's absolute file name.
 For the ``build ID'' method, @value{GDBN} looks in the
 @file{.build-id} subdirectory of the global debug directory for a file
 named @file{@var{nn}/@var{nnnnnnnn}.debug}, where @var{nn} are the
-first 2 hex characters of the build ID signature, and @var{nnnnnnnn}
-are the rest of the signature.  (Real signatures are 32 or more
-characters, not 10.)
+first 2 hex characters of the build ID bit string, and @var{nnnnnnnn}
+are the rest of the bit string.  (Real build ID strings are 32 or more
+hex characters, not 10.)
 @end itemize
 
 So, for example, suppose you ask @value{GDBN} to debug
-@file{/usr/bin/ls}, which has a @dfn{debug link} that specifies the
-file @file{ls.debug}, and a @dfn{build id} whose value in hex is
+@file{/usr/bin/ls}, which has a debug link that specifies the
+file @file{ls.debug}, and a build ID whose value in hex is
 @code{abcdef1234}.  If the global debug directory is
 @file{/usr/lib/debug}, then @value{GDBN} will look for the following
 debug information files, in the indicated order:
@@ -12023,14 +12024,15 @@ described above.
 
 @cindex @code{.note.gnu.build-id} sections
 @cindex build ID sections
-A build ID is a special section of the executable file named
-@code{.note.gnu.build-id}.  This section contains unique
-identification for the built files---it remains the same across
-multiple builds of the same build tree.  The default algorithm SHA1
-produces 160 bits (40 hexadecimal characters) of the content.  The
-same section with an identical value is present in the original built
-binary with symbols, in its stripped variant, and in the separate
-debugging information file.
+The build ID is a special section in the executable file (and in other
+ELF binary files that @value{GDBN} may consider).  This section is
+often named @code{.note.gnu.build-id}, but that name is not mandatory.
+It contains unique identification for the built files---the ID remains
+the same across multiple builds of the same build tree.  The default
+algorithm SHA1 produces 160 bits (40 hexadecimal characters) of the
+content for the build ID string.  The same section with an identical
+value is present in the original built binary with symbols, in its
+stripped variant, and in the separate debugging information file.
 
 The debugging information file itself should be an ordinary
 executable, containing a full set of linker symbols, sections, and
@@ -12039,7 +12041,7 @@ should have the same names, addresses, and sizes as the original file,
 but they need not contain any data---much like a @code{.bss} section
 in an ordinary executable.
 
-@sc{gnu} binary utilities (Binutils) package includes the
+The @sc{gnu} binary utilities (Binutils) package includes the
 @samp{objcopy} utility that can produce
 the separated executable / debugging information file pairs using the
 following commands:
@@ -12073,7 +12075,7 @@ the @code{ln -s} command above, together.
 Build ID gets embedded into the main executable using @code{ld --build-id} or
 the @value{NGCC} counterpart @code{gcc -Wl,--build-id}.  Build ID support plus
 compatibility fixes for debug files separation are present in @sc{gnu} binary
-utilities (Binutils) since version 2.18.
+utilities (Binutils) package since version 2.18.
 @end itemize
 
 @noindent

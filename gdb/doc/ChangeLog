@@ -2,6 +2,8 @@
 
 	* gdb.texinfo (Output): Spell out which features of C's printf are
 	not supported by GDB's printf.
+	(Separate Debug Files): More accurate wording regarding build ID
+	and a reference to the ld manual rather than the Fedora wiki.
 
 2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Jim Blandy  <jimb@codesourcery.com>
