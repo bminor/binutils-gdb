@@ -7913,6 +7913,9 @@ intel_e04 (void)
       if (!intel_e05())
 	return 0;
 
+      if (cur_token.code == T_NIL)
+	return 1;
+
       if (nregs >= 0 && NUM_ADDRESS_REGS > nregs)
 	i.base_reg = i386_regtab + REGNAM_AL; /* al is invalid as base */
 

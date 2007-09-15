@@ -1,3 +1,10 @@
+2007-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5034
+	* gas/i386/x86-64-rip.s: Add Intel mode testcases.
+	* gas/i386/x86-64-rip-intel.d: Updated.
+	* gas/i386/x86-64-rip.d: Likewise.
+
 2007-09-14  Michael Meissner  <michael.meissner@amd.com>
 	    Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 	    Tony Linthicum  <tony.linthicum@amd.com>
