@@ -476,6 +476,9 @@ _bfd_default_error_handler (const char *fmt, ...)
   size_t avail = 1000;
   char buf[1000];
 
+  /* PR 4992: Don't interrupt output being sent to stdout.  */
+  fflush (stdout);
+
   if (_bfd_error_program_name != NULL)
     fprintf (stderr, "%s: ", _bfd_error_program_name);
   else
