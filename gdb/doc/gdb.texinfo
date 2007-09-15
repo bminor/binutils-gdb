@@ -16418,20 +16418,24 @@ the same formats as for @code{print}.  @xref{Output Formats,,Output
 Formats}, for more information.
 
 @kindex printf
-@item printf @var{string}, @var{expressions}@dots{}
-Print the values of the @var{expressions} under the control of
-@var{string}.  The @var{expressions} are separated by commas and may be
-either numbers or pointers.  Their values are printed as specified by
-@var{string}, exactly as if your program were to execute the C
-subroutine
-@c FIXME: the above implies that at least all ANSI C formats are
-@c supported, but it isn't true: %E and %G don't work (or so it seems).
-@c Either this is a bug, or the manual should document what formats are
-@c supported.
+@item printf @var{template}, @var{expressions}@dots{}
+Print the values of one or more @var{expressions} under the control of
+the string @var{template}.  To print several values, make
+@var{expressions} be a comma-separated list of individual expressions,
+which may be either numbers or pointers.  Their values are printed as
+specified by @var{template}, exactly as a C program would do by
+executing the code below:
 
 @smallexample
-printf (@var{string}, @var{expressions}@dots{});
+printf (@var{template}, @var{expressions}@dots{});
 @end smallexample
+
+As in @code{C} @code{printf}, ordinary characters in @var{template}
+are printed verbatim, while @dfn{conversion specification} introduced
+by the @samp{%} character cause subsequent @var{expressions} to be
+evaluated, their values converted and formatted according to type and
+style information encoded in the conversion specifications, and then
+printed.
 
 For example, you can print two values in hex like this:
 
@@ -16439,9 +16443,44 @@ For example, you can print two values in hex like this:
 printf "foo, bar-foo = 0x%x, 0x%x\n", foo, bar-foo
 @end smallexample
 
-The only backslash-escape sequences that you can use in the format
-string are the simple ones that consist of backslash followed by a
-letter.
+@code{printf} supports all the standard @code{C} conversion
+specifications, including the flags and modifiers between the @samp{%}
+character and the conversion letter, with the following exceptions:
+
+@itemize @bullet
+@item
+The argument-ordering modifiers, such as @samp{2$}, are not supported.
+
+@item
+The modifier @samp{*} is not supported for specifying precision or
+width.
+
+@item
+The @samp{'} flag (for separation of digits into groups according to
+@code{LC_NUMERIC'}) is not supported.
+
+@item
+The type modifiers @samp{hh}, @samp{j}, @samp{t}, and @samp{z} are not
+supported.
+
+@item
+The conversion letter @samp{n} (as in @samp{%n}) is not supported.
+
+@item
+The conversion letters @samp{a} and @samp{A} are not supported.
+@end itemize
+
+@noindent
+Note that the @samp{ll} type modifier is supported only if the
+underlying @code{C} implementation used to build @value{GDBN} supports
+the @code{long long int} type, and the @samp{L} type modifier is
+supported only if @code{long double} type is available.
+
+As in @code{C}, @code{printf} supports simple backslash-escape
+sequences, such as @code{\n}, @samp{\t}, @samp{\\}, @samp{\"},
+@samp{\a}, and @samp{\f}, that consist of backslash followed by a
+single character.  Octal and hexadecimal escape sequences are not
+supported.
 @end table
 
 @node Interpreters

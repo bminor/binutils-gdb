@@ -1,3 +1,8 @@
+2007-09-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Output): Spell out which features of C's printf are
+	not supported by GDB's printf.
+
 2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Jim Blandy  <jimb@codesourcery.com>
 
