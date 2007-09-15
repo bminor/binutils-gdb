@@ -936,10 +936,11 @@ gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
   Elf_External_Note *e_note;
 
   asec = info->sec;
-  if (asec->output_section == NULL)
+  if (bfd_is_abs_section (asec->output_section))
     {
-      einfo (_("%P: .note.gnu.build-id section missing"));
-      return FALSE;
+      einfo (_("%P: warning: .note.gnu.build-id section discarded,"
+	       " --build-id ignored.\n"));
+      return TRUE;
     }
   i_shdr = &elf_section_data (asec->output_section)->this_hdr;
 

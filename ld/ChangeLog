@@ -1,3 +1,10 @@
+2007-09-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/5025
+	* emultempl/elf32.em (write_build_id_section): Correct test for
+	"missing" .note.gnu.build-id.  Downgrade error to a warning if
+	it has been discarded.
+
 2007-09-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldwrite.c (build_link_order <lang_padding_statement_enum>): Correct
