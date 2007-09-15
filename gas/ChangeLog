@@ -1,5 +1,10 @@
 2007-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (build_modrm_byte): Adjust comment line
+	wrap.
+
+2007-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (build_modrm_byte): Use (A || B) instead
 	of (A || B) != 0.
 

@@ -4627,8 +4627,8 @@ build_modrm_byte (void)
 		     extra modrm byte.  */
 		  i.sib.index = NO_INDEX_REGISTER;
 #if !SCALE1_WHEN_NO_INDEX
-		  /* Another case where we force the second 
-		     modrm byte.  */
+		  /* Another case where we force the second modrm
+		     byte.  */
 		  if (i.log2_scale_factor)
 		    i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 #endif
