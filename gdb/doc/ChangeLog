@@ -1,3 +1,8 @@
+2007-09-19  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (Miscellaneous gdb/mi Commands):
+	Document -list-features.
+	
 2007-09-15  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Output): Spell out which features of C's printf are

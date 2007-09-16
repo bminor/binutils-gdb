@@ -1075,6 +1075,25 @@ mi_cmd_enable_timings (char *command, char **argv, int argc)
   return MI_CMD_ERROR;
 }
 
+enum mi_cmd_result
+mi_cmd_list_features (char *command, char **argv, int argc)
+{
+  if (argc == 0)
+    {
+      struct cleanup *cleanup = NULL;
+      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
+
+      ui_out_field_string (uiout, NULL, "frozen-varobjs");
+      
+      do_cleanups (cleanup);
+
+      return MI_CMD_DONE;
+    }
+
+  error ("-list-features should be passed no arguments");
+  return MI_CMD_ERROR;
+}
+ 
 /* Execute a command within a safe environment.
    Return <0 for error; >=0 for ok.
 

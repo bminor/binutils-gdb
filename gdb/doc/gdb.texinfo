@@ -21277,6 +21277,37 @@ default shows this information when you start an interactive session.
 (gdb)
 @end smallexample
 
+@subheading The @code{-list-features} Command
+@findex -list-features
+
+Returns a list of particular features of the MI protocol that
+this version of gdb implements.  A feature can be a command,
+or a new field in an output of some command, or even an
+important bugfix.  While a frontend can sometimes detect presence
+of a feature at runtime, it is easier to perform detection at debugger
+startup. 
+
+The command returns a list of strings, with each string naming an
+available feature.  Each returned string is just a name, it does not
+have any internal structure.  The list of possible feature names 
+is given below.
+
+Example output:
+
+@smallexample
+(gdb) -list-features
+^done,result=["feature1","feature2"]
+@end smallexample
+
+The current list of features is:
+
+@itemize @minus
+@item
+@samp{frozen-varobjs}---indicates presence of the
+@code{-var-set-frozen} command, as well as possible presense of the
+@code{frozen} field in the output of @code{-varobj-create}.
+@end itemize
+
 @subheading The @code{-interpreter-exec} Command
 @findex -interpreter-exec
 

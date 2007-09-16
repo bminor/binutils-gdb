@@ -88,6 +88,7 @@ struct mi_cmd mi_cmds[] =
   { "inferior-tty-set", { NULL, 0 }, NULL, mi_cmd_inferior_tty_set},
   { "inferior-tty-show", { NULL, 0 }, NULL, mi_cmd_inferior_tty_show},
   { "interpreter-exec", { NULL, 0 }, 0, mi_cmd_interpreter_exec},
+  { "list-features", { NULL, 0 }, 0, mi_cmd_list_features},
   { "overlay-auto", { NULL, 0 }, NULL, NULL },
   { "overlay-list-mapping-state", { NULL, 0 }, NULL, NULL },
   { "overlay-list-overlays", { NULL, 0 }, NULL, NULL },

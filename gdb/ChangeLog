@@ -1,3 +1,9 @@
+2007-09-16  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-cmds.c (mi_cmds): Register -list-features.
+	* mi/mi-cmds.h (mi_cmd_list_features): New.
+	* mi/mi-main.c (mi_cmd_list_features): New.
+	
 2007-09-11  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 6.7 branch created (branch timestamp: 2007-09-07 14:00 UTC)
