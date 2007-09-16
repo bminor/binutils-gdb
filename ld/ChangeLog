@@ -1,3 +1,7 @@
+2007-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em: Check DF_BIND_NOW instead of DT_BIND_NOW.
+
 2007-09-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/5025
