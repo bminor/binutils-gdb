@@ -1,3 +1,11 @@
+2007-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: New Finnish translation.
+	* po/es.po: Updated Spanish translation.
+	* configure.in (ALL_LINGUAS): Add fi.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
 2007-09-15  Nick Clifton  <nickc@redhat.com>
 
 	* bfd.c (_bfd_default_error_handler): fflush stdout.

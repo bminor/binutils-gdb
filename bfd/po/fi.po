@@ -1,241 +1,244 @@
-# Mensajes en espaÒol para bfd 2.17.90.
-# Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
-# Cristian OthÛn MartÌnez Vera <cfuga@itam.mx>, 2002, 2003, 2004, 2005, 2006, 2007
+# translation of bfd-2.17.90.po to Finnish
+# Copyright (C) 2007 Free Software Foundation, Inc.
+# This file is distributed under the same license as the binutils package.
 #
+# Jorma Karvonen <karvjorm@users.sf.net>, 2007.
 msgid ""
 msgstr ""
 "Project-Id-Version: bfd 2.17.90\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-08-06 16:21-0400\n"
-"PO-Revision-Date: 2007-09-08 08:57-0500\n"
-"Last-Translator: Cristian OthÛn MartÌnez Vera <cfuga@itam.mx>\n"
-"Language-Team: Spanish <es@li.org>\n"
+"PO-Revision-Date: 2007-09-11 22:29+0300\n"
+"Last-Translator: Jorma Karvonen <karvjorm@users.sf.net>\n"
+"Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.2\n"
 
 #: aout-adobe.c:127
 msgid "%B: Unknown section type in a.out.adobe file: %x\n"
-msgstr "%B: Tipo de secciÛn desconocido en el fichero a.out.adobe: %x\n"
+msgstr "%B: Tuntematon lohkotyyppi ‚Äùa.out.adobe‚Äù-tiedostossa: %x\n"
 
 #: aout-cris.c:204
 #, c-format
 msgid "%s: Invalid relocation type exported: %d"
-msgstr "%s: Tipo de reubicaciÛn exportado inv·lido: %d"
+msgstr "%s: Virheellinen sijoitustyyppi viety: %d"
 
 #: aout-cris.c:247
 msgid "%B: Invalid relocation type imported: %d"
-msgstr "%B: Tipo de reubicaciÛn importado inv·lido: %d"
+msgstr "%B: Virheellinen sijoitustyyppi tuotu: %d"
 
 #: aout-cris.c:258
 msgid "%B: Bad relocation record imported: %d"
-msgstr "%B: Registro de reubicaciÛn importado errÛneo: %d"
+msgstr "%B: V√§√§r√§ sijoitustietue tuotu: %d"
 
 #: aoutx.h:1268 aoutx.h:1602
 #, c-format
 msgid "%s: can not represent section `%s' in a.out object file format"
-msgstr "%s: no se puede representar la secciÛn `%s' en el fichero objeto de formato a.out"
+msgstr "%s: ei voi edustaa lohkoa ‚Äù%s‚Äù ‚Äùa.out‚Äù-objektitiedostomuodossa"
 
 #: aoutx.h:1568
 #, c-format
 msgid "%s: can not represent section for symbol `%s' in a.out object file format"
-msgstr "%s: no se puede representar la secciÛn para el sÌmbolo `%s' en el fichero objeto de formato a.out"
+msgstr "%s: ei voi edustaa lohkoa symbolille ‚Äù%s‚Äù ‚Äùa.out‚Äù-objektitiedostomuodossa"
 
 #: aoutx.h:1570
 msgid "*unknown*"
-msgstr "*desconocido*"
+msgstr "*tuntematon*"
 
 #: aoutx.h:3987 aoutx.h:4313
 msgid "%P: %B: unexpected relocation type\n"
-msgstr "%P: %B: tipo de reubicaciÛn inesperado\n"
+msgstr "%P: %B: odottamaton sijoitustyyppi\n"
 
 #: aoutx.h:5347
 #, c-format
 msgid "%s: relocatable link from %s to %s not supported"
-msgstr "%s: no se admite el enlace reubicable de %s a %s"
+msgstr "%s: sijoitettava linkki kohteesta %s kohteeseen %s ei ole tuettu"
 
 #: archive.c:1766
 msgid "Warning: writing archive was slow: rewriting timestamp\n"
-msgstr "Aviso: la escritura del fichero fue lenta: se reescribe la marca de tiempo\n"
+msgstr "Varoitus: arkiston kirjoitus oli hidasta: aikaleiman uudelleenkirjoitus\n"
 
-# °Uff! Si utiliz·ramos file=archivo, esta traducciÛn serÌa imposible. cfuga
 #: archive.c:2029
 msgid "Reading archive file mod timestamp"
-msgstr "Se lee el archivo de la modificaciÛn de marca de tiempo del fichero"
+msgstr "Luetaan arkistotiedoston muokkausaikaleima"
 
+#  Intel coff armap
 #: archive.c:2053
 msgid "Writing updated armap timestamp"
-msgstr "Se escribe la marca de tiempo actualizada de armap"
+msgstr "Kirjoitetaan p√§ivitetty ‚Äùarmap‚Äù-aikaleima"
 
 #: bfd.c:289
 msgid "No error"
-msgstr "No hay error"
+msgstr "Ei virhett√§"
 
 #: bfd.c:290
 msgid "System call error"
-msgstr "Error en la llamada al sistema"
+msgstr "J√§rjestelm√§kutsuvirhe"
 
 #: bfd.c:291
 msgid "Invalid bfd target"
-msgstr "Objetivo bfd inv·lido"
+msgstr "Virheellinen bfd-kohde"
 
 #: bfd.c:292
 msgid "File in wrong format"
-msgstr "Fichero en formato errÛneo"
+msgstr "Tiedosto v√§√§r√§ss√§ muodossa"
 
 #: bfd.c:293
 msgid "Archive object file in wrong format"
-msgstr "Archivo de ficheros objeto en formato errÛneo"
+msgstr "Arkisto-objektitiedosto v√§√§r√§ss√§ muodossa"
 
 #: bfd.c:294
 msgid "Invalid operation"
-msgstr "OperaciÛn inv·lida"
+msgstr "Virheellinen toiminta"
 
 #: bfd.c:295
 msgid "Memory exhausted"
-msgstr "Memoria agotada"
+msgstr "Muisti loppunut"
 
 #: bfd.c:296
 msgid "No symbols"
-msgstr "No hay sÌmbolos"
+msgstr "Ei symboleja"
 
 #: bfd.c:297
 msgid "Archive has no index; run ranlib to add one"
-msgstr "El archivo no tiene Ìndice; ejecute ranlib para agregar uno"
+msgstr "Arkistossa ei ole hakemistoa; lis√§√§ sellainen ajamalla ranlib"
 
 #: bfd.c:298
 msgid "No more archived files"
-msgstr "No hay m·s ficheros archivados"
+msgstr "Ei en√§√§ arkistoituja tiedostoja"
 
 #: bfd.c:299
 msgid "Malformed archive"
-msgstr "Archivo malformado"
+msgstr "Muodoltaan virheellinen arkisto"
 
 #: bfd.c:300
 msgid "File format not recognized"
-msgstr "No se reconoce el formato del fichero"
+msgstr "Tiedostomuotoa ei tunnistettu"
 
 #: bfd.c:301
 msgid "File format is ambiguous"
-msgstr "El formato del fichero es ambiguo"
+msgstr "Tiedostomuoto on moniselitteinen"
 
 #: bfd.c:302
 msgid "Section has no contents"
-msgstr "La secciÛn no tiene contenidos"
+msgstr "Lohkossa ei ole sis√§lt√∂√§"
 
 #: bfd.c:303
 msgid "Nonrepresentable section on output"
-msgstr "SecciÛn no representable en la salida"
+msgstr "Ei-edustava lohko tulosteessa"
 
 #: bfd.c:304
 msgid "Symbol needs debug section which does not exist"
-msgstr "Un sÌmbolo requiere de una secciÛn de depuraciÛn, la cual no existe"
+msgstr "Symboli tarvitsee debuggauslohkon, jota ei ole"
 
 #: bfd.c:305
 msgid "Bad value"
-msgstr "Valor errÛneo"
+msgstr "V√§√§r√§ arvo"
 
 #: bfd.c:306
 msgid "File truncated"
-msgstr "Fichero truncado"
+msgstr "Tiedosto typistetty"
 
 #: bfd.c:307
 msgid "File too big"
-msgstr "Fichero demasiado grande"
+msgstr "Tiedosto on liian iso"
 
 #: bfd.c:308
 #, c-format
 msgid "Error reading %s: %s"
-msgstr "Error al leer %s: %s"
+msgstr "Virhe luettaessa %s: %s"
 
 #: bfd.c:309
 msgid "#<Invalid error code>"
-msgstr "#<CÛdigo de error inv·lido>"
+msgstr "#<Virheellinen virhekoodi>"
 
 #: bfd.c:830
 #, c-format
 msgid "BFD %s assertion fail %s:%d"
-msgstr "fallÛ la aseveraciÛn BFD %s %s:%d"
+msgstr "BFD %s suoritusehto ei onnistunut %s:%d"
 
 #: bfd.c:842
 #, c-format
 msgid "BFD %s internal error, aborting at %s line %d in %s\n"
-msgstr "error interno de BFD %s, se aborta en %s lÌnea %d en %s\n"
+msgstr "BFD %s sis√§inen virhe, virhelopetetaan tiedostossa %s rivill√§ %d funktiossa %s\n"
 
 #: bfd.c:846
 #, c-format
 msgid "BFD %s internal error, aborting at %s line %d\n"
-msgstr "error interno de BFD %s, se aborta en %s lÌnea %d\n"
+msgstr "BFD %s sis√§inen virhe, virhelopetetaan tiedostossa %s rivill√§ %d\n"
 
 #: bfd.c:848
 msgid "Please report this bug.\n"
-msgstr "Por favor reporte este bicho.\n"
+msgstr "L√§het√§ raportit ohjelmistovioista (englanniksi) osoitteeseen http://sourceware.org/bugzilla/.\n"
 
 #: bfdwin.c:208
 #, c-format
 msgid "not mapping: data=%lx mapped=%d\n"
-msgstr "no se mapea: datos=%lx mapeados%d\n"
+msgstr "ei kuvausta: data=%lx kuvattu=%d\n"
 
+#  Ilmeisesti debug_windows-ymp√§rist√∂muuttuja
 #: bfdwin.c:211
 #, c-format
 msgid "not mapping: env var not set\n"
-msgstr "no se mapea: no se estableciÛ la variable de ambiente\n"
+msgstr "ei kuvausta: ymp√§rist√∂muuttuja ei ole asetettu\n"
 
 #: binary.c:284
 #, c-format
 msgid "Warning: Writing section `%s' to huge (ie negative) file offset 0x%lx."
-msgstr "Aviso: Se escribe la secciÛn `%s' a un desplazamiento de fichero grande (pe negativo) 0x%lx."
+msgstr "Varoitus: Kirjoitetaan lohko ‚Äù%s‚Äù valtavaan (ts. negatiiviseen) tiedostosiirrokseen 0x%lx."
 
 #: cache.c:238
 msgid "reopening %B: %s\n"
-msgstr "se reabre %B: %s\n"
+msgstr "avataan uudelleen %B: %s\n"
 
 #: coff64-rs6000.c:2126 coff-rs6000.c:3624
 msgid "%B: symbol `%s' has unrecognized smclas %d"
-msgstr "%B: el sÌmbolo `%s' tiene smclas %d que no se reconoce"
+msgstr "%B: symbolissa ‚Äù%s‚Äù on tunnistamaton ‚Äùsmclas‚Äù-arvo %d"
 
 #: coff-alpha.c:490
 msgid ""
 "%B: Cannot handle compressed Alpha binaries.\n"
 "   Use compiler flags, or objZ, to generate uncompressed binaries."
 msgstr ""
-"%B: No se pueden manejar binarios Alpha comprimidos.\n"
-"   Use las opciones del compilador, o objZ, para generar binarios sin comprimir."
+"%B: Ei voi k√§sitell√§ tiivistettyj√§ Alpha-binaareja.\n"
+"   K√§yt√§ k√§√§nt√§j√§lippuja, tai objZ:aa, tiivist√§m√§tt√∂mien binaarien luomiseksi."
 
 #: coff-alpha.c:647
 msgid "%B: unknown/unsupported relocation type %d"
-msgstr "%B: tipo de reubicaciÛn %d desconocida/no admitida"
+msgstr "%B: tuntematon/ei-tuettu sijoitustyyppi %d"
 
 #: coff-alpha.c:899 coff-alpha.c:936 coff-alpha.c:2024 coff-mips.c:1002
 msgid "GP relative relocation used when GP not defined"
-msgstr "se usÛ una reubicaciÛn GP relativa cuando GP no estaba definido"
+msgstr "GP-suhteellista sijoitusta k√§ytetty kun GP:t√§ ei ole m√§√§ritelty"
 
 #: coff-alpha.c:1501
 msgid "using multiple gp values"
-msgstr "se usan valores m˙ltiples de gp"
+msgstr "k√§ytet√§√§n useita gp-arvoja"
 
 #: coff-alpha.c:1560
 msgid "%B: unsupported relocation: ALPHA_R_GPRELHIGH"
-msgstr "%B: tipo de reubicaciÛn no admitida: ALPHA_R_GPRELHIGH"
+msgstr "%B: ei-tuettu sijoitus: ALPHA_R_GPRELHIGH"
 
 #: coff-alpha.c:1567
 msgid "%B: unsupported relocation: ALPHA_R_GPRELLOW"
-msgstr "%B: tipo de reubicaciÛn no admitida: ALPHA_R_GPRELLOW"
+msgstr "%B: ei-tuettu sijoitus: ALPHA_R_GPRELLOW"
 
 #: coff-alpha.c:1574 elf32-m32r.c:2487 elf64-alpha.c:3953 elf64-alpha.c:4106
 #: elf32-ia64.c:4675 elf64-ia64.c:4675
 msgid "%B: unknown relocation type %d"
-msgstr "%B: tipo de reubicaciÛn %d desconocido"
+msgstr "%B: tuntematon sijoitustyyppi %d"
 
 #: coff-arm.c:1036
 #, c-format
 msgid "%B: unable to find THUMB glue '%s' for `%s'"
-msgstr "%B: no se puede encontrar el pegamento THUMB '%s' para `%s'"
+msgstr "%B: ei l√∂ydetty THUMB-vihjett√§ ‚Äù%s‚Äù nimelle ‚Äù%s‚Äù"
 
 #: coff-arm.c:1065
 #, c-format
 msgid "%B: unable to find ARM glue '%s' for `%s'"
-msgstr "%B: no se puede encontrar el pegamento ARM '%s' para `%s'"
+msgstr "%B: ei l√∂ydetty ARM-vihjett√§ ‚Äù%s‚Äù nimelle ‚Äù%s‚Äù"
 
 #: coff-arm.c:1367 elf32-arm.c:4167
 #, c-format
@@ -243,8 +246,8 @@ msgid ""
 "%B(%s): warning: interworking not enabled.\n"
 "  first occurrence: %B: arm call to thumb"
 msgstr ""
-"%B(%s): aviso: no se activÛ la interoperabilidad.\n"
-"  primer suceso: %B: llamada arm a thumb"
+"%B(%s): varoitus: rinnank√§ytt√∂ ei ole aktivoitu.\n"
+"  ensimm√§inen esiintym√§: %B: ‚Äùarm‚Äù-kutsu thumb-koodiin"
 
 #: coff-arm.c:1457
 #, c-format
@@ -253,326 +256,328 @@ msgid ""
 "  first occurrence: %B: thumb call to arm\n"
 "  consider relinking with --support-old-code enabled"
 msgstr ""
-"%B(%s): aviso: no se activÛ la interoperabilidad.\n"
-"  primer suceso: %B: llamada arm a thumb\n"
-"  considere reenlazar con --support-old-code activado"
+"%B(%s): varoitus: rinnank√§ytt√∂√§ ei ole aktivoitu.\n"
+"  ensimm√§inen esiintym√§: %B: thumb-kutsu arm-koodiin\n"
+"  harkitse uudelleenlinkityst√§ --support-old-code aktivoituna"
 
 #: coff-arm.c:1750 cofflink.c:3018 coff-tic80.c:695
 msgid "%B: bad reloc address 0x%lx in section `%A'"
-msgstr "%B: direcciÛn de reubicaciÛn 0x%lx errÛnea en la secciÛn `%A'"
+msgstr "%B: virheellinen reloc-tietueosoite 0x%lx lohkossa ‚Äù%A‚Äù"
 
 #: coff-arm.c:2075
 msgid "%B: illegal symbol index in reloc: %d"
-msgstr "%B: Ìndice de sÌmbolos ilegal en la reubicaciÛn: %d"
+msgstr "%B: virheellinen symboli-indeksi reloc-tietueessa: %d"
 
 #: coff-arm.c:2206
 #, c-format
 msgid "ERROR: %B is compiled for APCS-%d, whereas %B is compiled for APCS-%d"
-msgstr "ERROR: %B est· compilado para APCS-%d, mientras que %B est· compilado para APCS-%d"
+msgstr "VIRHE: %B on k√§√§nnetty APCS-%d:lle, kun taas %B on k√§√§nnetty APCS-%d:lle"
 
 #: coff-arm.c:2222 elf32-arm.c:7072
 #, c-format
 msgid "ERROR: %B passes floats in float registers, whereas %B passes them in integer registers"
-msgstr "ERROR: %B pasa n˙meros de coma flotante en registros de coma flotante, mientras que %B los pasa en registros enteros"
+msgstr "VIRHE: %B v√§litt√§√§ float-liukuluvut liukulukurekistereissa, kun taas %B v√§litt√§√§ ne kokonaislukurekistereissa"
 
 #: coff-arm.c:2225 elf32-arm.c:7076
 #, c-format
 msgid "ERROR: %B passes floats in integer registers, whereas %B passes them in float registers"
-msgstr "ERROR: %B pasa n˙meros de coma flotante en registros enteros, mientras que %B los pasa en registros de coma flotante"
+msgstr "VIRHE: %B v√§litt√§√§ float-liukuluvut kokonaislukurekistereissa, kun taas %B v√§litt√§√§ ne float-liukulukurekistereissa"
 
 #: coff-arm.c:2239
 #, c-format
 msgid "ERROR: %B is compiled as position independent code, whereas target %B is absolute position"
-msgstr "ERROR: %B est· compilado como cÛdigo independiente de posiciÛn, mientras que el objetivo %B es de posiciÛn absoluta"
+msgstr "VIRHE: %B k√§√§nnet√§√§n paikkariippumattomana koodina, kun taas kohde %B on absoluuttipaikkainen"
 
 #: coff-arm.c:2242
 #, c-format
 msgid "ERROR: %B is compiled as absolute position code, whereas target %B is position independent"
-msgstr "ERROR: %B est· compilado como cÛdigo de posiciÛn absoluta, mientras que el objetivo %B es independiente de posiciÛn"
+msgstr "VIRHE: %B k√§√§nnet√§√§n absoluuttisella paikkakoodilla, kun taas kohde %B on paikkariippumaton"
 
 #: coff-arm.c:2270 elf32-arm.c:7141
 #, c-format
 msgid "Warning: %B supports interworking, whereas %B does not"
-msgstr "Aviso: %B admite interoperabilidad, mientras que %B no"
+msgstr "Varoitus: %B tukee rinnank√§ytt√∂√§, kun taas %B ei tue"
 
 #: coff-arm.c:2273 elf32-arm.c:7147
 #, c-format
 msgid "Warning: %B does not support interworking, whereas %B does"
-msgstr "Aviso: %B no admite interoperabilidad, mientras que %B sÌ"
+msgstr "Varoitus: %B ei tue rinnank√§ytt√∂√§, kun taas %B tukee"
 
 #: coff-arm.c:2297
 #, c-format
 msgid "private flags = %x:"
-msgstr "opciones privadas = %x:"
+msgstr "yksityiset liput = %x:"
 
 #: coff-arm.c:2305 elf32-arm.c:7198
 #, c-format
 msgid " [floats passed in float registers]"
-msgstr "[n˙meros de coma flotante pasados en registros de coma flotante]"
+msgstr " [liukuluvut v√§litetty liukulukurekistereiss√§]"
 
 #: coff-arm.c:2307
 #, c-format
 msgid " [floats passed in integer registers]"
-msgstr "[n˙meros de coma flotante pasados en registros enteros]"
+msgstr " [liukuluvut v√§litetty kokonaislukurekistereiss√§]"
 
 #: coff-arm.c:2310 elf32-arm.c:7201
 #, c-format
 msgid " [position independent]"
-msgstr "[independiente de posiciÛn]"
+msgstr " [paikkariippumaton]"
 
 #: coff-arm.c:2312
 #, c-format
 msgid " [absolute position]"
-msgstr "[posiciÛn absoluta]"
+msgstr " [absoluuttinen paikka]"
 
 #: coff-arm.c:2316
 #, c-format
 msgid " [interworking flag not initialised]"
-msgstr "[no se inicializÛ la opciÛn de interoperabilidad]"
+msgstr " [rinnank√§ytt√∂lippua ei ole alustettu]"
 
 #: coff-arm.c:2318
 #, c-format
 msgid " [interworking supported]"
-msgstr "[admite interoperabilidad]"
+msgstr " [rinnank√§ytt√∂√§ tuettu]"
 
 #: coff-arm.c:2320
 #, c-format
 msgid " [interworking not supported]"
-msgstr "[no admite interoperabilidad]"
+msgstr " [rinnank√§ytt√∂√§ ei tuettu]"
 
 #: coff-arm.c:2366 elf32-arm.c:6578
 #, c-format
 msgid "Warning: Not setting interworking flag of %B since it has already been specified as non-interworking"
-msgstr "Aviso: No se establece la opciÛn de interoperabilidad de %B ya que se habÌa especificado con anterioridad como no interoperable"
+msgstr "Varoitus: Ei aseteta %B:n rinnank√§ytt√∂lippua koska se on jo m√§√§ritelty ei-rinnank√§ytt√∂√§-kohteena"
 
 #: coff-arm.c:2370 elf32-arm.c:6582
 #, c-format
 msgid "Warning: Clearing the interworking flag of %B due to outside request"
-msgstr "Aviso: Se limpia la opciÛn de interoperabilidad de %B debido a una peticiÛn externa"
+msgstr "Varoitus: %B:n rinnank√§ytt√∂lipun nollaus johtuu ulkopuolisesta pyynn√∂st√§"
 
 #: coffcode.h:850
 msgid "%B: warning: COMDAT symbol '%s' does not match section name '%s'"
-msgstr "%B: aviso: el sÌmbolo COMDAT '%s' no coincide con el nombre de secciÛn '%s'"
+msgstr "%B: varoitus: COMDAT-symboli ‚Äù%s‚Äù ei t√§sm√§√§ lohkonimen ‚Äù%s‚Äù kanssa"
 
 #. Generate a warning message rather using the 'unhandled'
 #. variable as this will allow some .sys files generate by
 #. other toolchains to be processed.  See bugzilla issue 196.
 #: coffcode.h:1062
 msgid "%B: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"
-msgstr "%B: Aviso: Se descarta la opciÛn de secciÛn IMAGE_SCN_MEM_NOT_PAGED en la secciÛn %s"
+msgstr "%B: Varoitus: Ei oteta huomioon lohkolippua IMAGE_SCN_MEM_NOT_PAGED lohkossa %s"
 
 #: coffcode.h:1117
 msgid "%B (%s): Section flag %s (0x%x) ignored"
-msgstr "%B (%s): Se descarta la opciÛn de secciÛn %s (0x%x)"
+msgstr "%B (%s): Lohkolippua %s (0x%x) ei oteta huomioon"
 
+#  TI tarkoittaa luultavasti Texas Instruments
 #: coffcode.h:2236
 #, c-format
 msgid "Unrecognized TI COFF target id '0x%x'"
-msgstr "No se reconoce el id de objetivo TI COFF '0x%x'"
+msgstr "Tunnistamaton ‚ÄùTI COFF‚Äù-kohdetunniste ‚Äù0x%x‚Äù"
 
 #: coffcode.h:2551
 msgid "%B: reloc against a non-existant symbol index: %ld"
-msgstr "%B: reubicaciÛn contra un Ìndice sÌmbolo que no existe: %ld"
+msgstr "%B: reloc-tietue k√§ytt√§en ei-olemassaolevaa symboli-indeksi√§: %ld"
 
 #: coffcode.h:4296
 msgid "%B: warning: line number table read failed"
-msgstr "%B: aviso: fallÛ la lectura de tabla de n˙meros de lÌnea"
+msgstr "%B: varoitus: rivinumerotaulun lukeminen ei onnistunut"
 
 #: coffcode.h:4329
 msgid "%B: warning: illegal symbol index %ld in line numbers"
-msgstr "%B: aviso: Ìndice de sÌmbolos %ld ilegal en los n˙meros de lÌnea"
+msgstr "%B: varoitus: virheellinen symboli-indeksi %ld rivinumeroissa"
 
 #: coffcode.h:4343
 msgid "%B: warning: duplicate line number information for `%s'"
-msgstr "%B: aviso: informaciÛn duplicada de n˙meros de lÌnea para `%s'"
+msgstr "%B: varoitus: rivinumerojen kaksoiskappaleita symbolille ‚Äù%s‚Äù"
 
 #: coffcode.h:4735
 msgid "%B: Unrecognized storage class %d for %s symbol `%s'"
-msgstr "%B: Clase de almacenamiento %d no reconocida para %s sÌmbolo `%s'"
+msgstr "%B: Tunnistamaton tallennusluokka: %d lohkonimi: %s symbolinimi: ‚Äù%s‚Äù"
 
 #: coffcode.h:4861
 msgid "warning: %B: local symbol `%s' has no section"
-msgstr "aviso: %B: el sÌmbolo local `%s' no tiene secciÛn"
+msgstr "varoitus: %B: paikallisessa symbolissa ‚Äù%s‚Äù ei ole lohkoa"
 
 #: coffcode.h:4966 coff-i860.c:601 coff-tic54x.c:393
 msgid "%B: warning: illegal symbol index %ld in relocs"
-msgstr "%B: aviso: Ìndice de sÌmbolos %ld ilegal en reubicaciones"
+msgstr "%B: varoitus: virheellinen symboli-indeksi %ld relocs-tietueissa"
 
 #: coffcode.h:5004
 msgid "%B: illegal relocation type %d at address 0x%lx"
-msgstr "%B: tipo de reubicaciÛn %d ilegal en la direcciÛn 0x%lx"
+msgstr "%B: virheellinen sijoitustyyppi %d osoitteessa 0x%lx"
 
 #: coffgen.c:1518
 msgid "%B: bad string table size %lu"
-msgstr "%B: tamaÒo de tabla de cadenas %lu errÛneo"
+msgstr "%B: virheellinen merkkijonotaulukoko %lu"
 
 #: coff-h8300.c:1122
 #, c-format
 msgid "cannot handle R_MEM_INDIRECT reloc when using %s output"
-msgstr "no se puede manejar la reubicaciÛn R_MEM_INDIRECT cuando se utiliza la salida %s"
+msgstr "ei voi k√§sitell√§ ‚ÄùR_MEM_INDIRECT reloc‚Äù-tietuetta kun k√§ytet√§√§n %s tulostetta"
 
 #: coff-i860.c:143
 #, c-format
 msgid "Relocation `%s' not yet implemented\n"
-msgstr "La reubicaciÛn `%s' a˙n no est· implementada\n"
+msgstr "Sijoitusta ‚Äù%s‚Äù ei ole viel√§ toteutettu\n"
 
 #: coff-i960.c:138 coff-i960.c:501
 msgid "uncertain calling convention for non-COFF symbol"
-msgstr "convenciÛn de llamada incierta para un sÌmbolo que no es COFF"
+msgstr "ep√§varma kutsuk√§yt√§nt√∂ ei-COFF-symbolille"
 
+#  Ep√§ilen, ett√§ l√§hdekoodissa on virhe: tyypit ovat kaksi viimeist√§ parametri√§.
 #: cofflink.c:513 elflink.c:4175
 msgid "Warning: type of symbol `%s' changed from %d to %d in %B"
-msgstr "Aviso: el tipo del sÌmbolo `%s' cambiÛ de %d a %d en %B"
+msgstr "Varoitus: symbolityyppi ‚Äù%s‚Äù vaihtui tyypist√§ %d tyyppiin %d kohteessa %B"
 
 #: cofflink.c:2296
 msgid "%B: relocs in section `%A', but it has no contents"
-msgstr "%B: reubicaciones en la secciÛn `%A', pero no tiene contenido"
+msgstr "%B: relocs-tietueet lohkossa ‚Äù%A‚Äù, mutta ilman sis√§lt√∂√§"
 
 #: cofflink.c:2627 coffswap.h:824
 #, c-format
 msgid "%s: %s: reloc overflow: 0x%lx > 0xffff"
-msgstr "%s: %s: desbordamiento de reubicaciÛn: 0x%lx > 0xffff"
+msgstr "%s: %s: reloc-tietueylivuoto: 0x%lx > 0xffff"
 
 #: cofflink.c:2636 coffswap.h:810
 #, c-format
 msgid "%s: warning: %s: line number overflow: 0x%lx > 0xffff"
-msgstr "%s: aviso: %s: desbordamiento de n˙mero de lÌnea: 0x%lx > 0xffff"
+msgstr "%s: varoitus: %s: rivinumeroylivuoto: 0x%lx > 0xffff"
 
 #: coff-m68k.c:506 elf32-bfin.c:5434 elf32-m68k.c:2393
 msgid "unsupported reloc type"
-msgstr "no se admite el tipo de reubicaciÛn"
+msgstr "ei-tuettu reloc-tyyppi"
 
 #: coff-maxq.c:126
 msgid "Can't Make it a Short Jump"
-msgstr "No se Puede Convertir en un Salto Corto"
+msgstr "Sit√§ ei voi tehd√§ lyhyeksi hypyksi"
 
 #: coff-maxq.c:191
 msgid "Exceeds Long Jump Range"
-msgstr "Excede el Rango de Salto Largo"
+msgstr "Ylitt√§√§ pitk√§n hypyn arvoalueen"
 
 #: coff-maxq.c:202 coff-maxq.c:276
 msgid "Absolute address Exceeds 16 bit Range"
-msgstr "La direcciÛn Absoluta Excede el Rango de 16 bit"
+msgstr "Absoluuttinen osoite ylitt√§√§ 16-bittialueen"
 
 #: coff-maxq.c:240
 msgid "Absolute address Exceeds 8 bit Range"
-msgstr "La direcciÛn Absoluta Excede el Rango de 8 bit"
+msgstr "Absoluuttinen osoite ylitt√§√§ 8-bittialueen"
 
 #: coff-maxq.c:333
 msgid "Unrecognized Reloc Type"
-msgstr "Tipo de ReubicaciÛn no Reconocida"
+msgstr "Tunnistamaton Reloc-tyyppi"
 
 #: coff-mips.c:687 elf32-mips.c:958 elf32-score.c:345 elf64-mips.c:1911
 #: elfn32-mips.c:1752
 msgid "GP relative relocation when _gp not defined"
-msgstr "reubicaciÛn GP relativa cuando _gp no est· definido"
+msgstr "GP-suhteellinen sijoitus kun ‚Äù_gp‚Äù ei ole m√§√§ritelty"
 
 #: coff-or32.c:228
 msgid "Unrecognized reloc"
-msgstr "ReubicaciÛn no reconocida"
+msgstr "Tunnistamaton reloc-tietue"
 
 #: coff-rs6000.c:2799
 #, c-format
 msgid "%s: unsupported relocation type 0x%02x"
-msgstr "%s: no se admite el tipo de reubicaciÛn 0x%02x"
+msgstr "%s: ei-tuettu sijoitustyyppi 0x%02x"
 
 #: coff-rs6000.c:2892
 #, c-format
 msgid "%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry"
-msgstr "%s: reubicaciÛn de TOC en 0x%x al sÌmbolo `%s' sin entrada TOC"
+msgstr "%s: ‚ÄùSis√§lt√∂luettelo-reloc‚Äù-tietue osoitteessa 0x%x symboliin ‚Äù%s‚Äù ilman sis√§lt√∂luettelotulokohtaa"
 
 #: coff-tic4x.c:191 coff-tic54x.c:299 coff-tic80.c:458
 #, c-format
 msgid "Unrecognized reloc type 0x%x"
-msgstr "Tipo de reubicaciÛn 0x%x no reconocida"
+msgstr "Tunnistamaton reloc-tyyppi 0x%x"
 
 #: coff-tic4x.c:236
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in relocs"
-msgstr "%s: aviso: Ìncide de sÌmbolos %ld ilegal en reubicaciones"
+msgstr "%s: varoitus: virheellinen symboli-indeksi %ld relocs-tietueissa"
 
 #: coff-w65.c:367
 #, c-format
 msgid "ignoring reloc %s\n"
-msgstr "se descarta la reubicaciÛn %s\n"
+msgstr "ei oteta huomioon reloc-tietuetta %s\n"
 
 #: cpu-arm.c:189 cpu-arm.c:200
 msgid "ERROR: %B is compiled for the EP9312, whereas %B is compiled for XScale"
-msgstr "ERROR: %B est· compilado para el EP9312, mientras que %B est· compilado para XScale"
+msgstr "VIRHE: %B on k√§√§nnetty EP9312:lle, kun taas %B on k√§√§nnetty XScalelle"
 
 #: cpu-arm.c:332
 #, c-format
 msgid "warning: unable to update contents of %s section in %s"
-msgstr "aviso: no se puede actualizar el contenido de la secciÛn %s en %s"
+msgstr "varoitus: ei voi p√§ivitt√§√§ %s-lohkon sis√§lt√∂√§ kohteessa %s"
 
 #: dwarf2.c:481
 msgid "Dwarf Error: Can't find .debug_str section."
-msgstr "Error de Dwarf: No se puede encontrar la secciÛn .debug_str."
+msgstr "Dwarf-virhe: Ei l√∂ydy ‚Äù.debug_str‚Äù-lohkoa."
 
 #: dwarf2.c:499
 #, c-format
 msgid "Dwarf Error: DW_FORM_strp offset (%lu) greater than or equal to .debug_str size (%lu)."
-msgstr "Error de Dwarf: El desplazamiento DW_FROM_strp (%lu) es m·s grande o igual que el tamaÒo de .debug_str (%lu)."
+msgstr "Dwarf-virhe: DW_FORM_strp siirros (%lu) suurempi tai sama kuin ‚Äù.debug_str‚Äù-koko (%lu)."
 
 #: dwarf2.c:592
 msgid "Dwarf Error: Can't find .debug_abbrev section."
-msgstr "Error de Dwarf: No se puede encontrar la secciÛn .debug_abbrev."
+msgstr "Dwarf-virhe: Ei l√∂ydy ‚Äù.debug_abbrev‚Äù-lohkoa."
 
 #: dwarf2.c:607
 #, c-format
 msgid "Dwarf Error: Abbrev offset (%lu) greater than or equal to .debug_abbrev size (%lu)."
-msgstr "Error de Dwarf: El desplazamiento de abreviatura (%lu) es m·s grande o igual que el tamaÒo de .debug_abbrev (%lu)."
+msgstr "Dwarf-virhe: Lyhennesiirros (%lu) suurempi tai sama kuin ‚Äù.debug_abbrev‚Äù-koko (%lu)."
 
 #: dwarf2.c:822
 #, c-format
 msgid "Dwarf Error: Invalid or unhandled FORM value: %u."
-msgstr "Error de Dwarf: Valor de FORM inv·lido o no manejado: %u."
+msgstr "Dwarf-virhe: Virheellinen tai k√§sittelem√§t√∂n FORM-arvo: %u."
 
 #: dwarf2.c:1025
 msgid "Dwarf Error: mangled line number section (bad file number)."
-msgstr "Error de Dwarf: secciÛn de n˙meros de lÌnea revuelta (n˙mero errÛneo de fichero)."
+msgstr "Dwarf-virhe: runneltu rivinumerolohko (virheellinen tiedostonumero)."
 
 #: dwarf2.c:1137
 msgid "Dwarf Error: Can't find .debug_line section."
-msgstr "Error de Dwarf: No se puede encontrar lan secciÛn .debug_line."
+msgstr "Dwarf-virhe: Ei l√∂ydy ‚Äù.debug_line‚Äù-lohkoa."
 
 #: dwarf2.c:1154
 #, c-format
 msgid "Dwarf Error: Line offset (%lu) greater than or equal to .debug_line size (%lu)."
-msgstr "Error de Dwarf: El desplazamiento de lÌnea (%lu) es m·s grande o igual que el tamaÒo de .debug_line (%lu)."
+msgstr "Dwarf-virhe: Rivisiirros (%lu) suurempi tai sama kuin ‚Äù.debug_line‚Äù-koko (%lu)."
 
 #: dwarf2.c:1380
 msgid "Dwarf Error: mangled line number section."
-msgstr "Error de Dwarf: secciÛn de n˙meros de lÌnea revuelta."
+msgstr "Dwarf-virhe: runneltu rivinumerolohko."
 
 #: dwarf2.c:1568
 msgid "Dwarf Error: Can't find .debug_ranges section."
-msgstr "Error de Dwarf: No se puede encontrar lan secciÛn .debug_ranges."
+msgstr "Dwarf-virhe: Ei l√∂ydy ‚Äù.debug_ranges‚Äù-lohkoa."
 
 #: dwarf2.c:1731 dwarf2.c:1847 dwarf2.c:2119
 #, c-format
 msgid "Dwarf Error: Could not find abbrev number %u."
-msgstr "Error de Dwarf: No se puede encontrar el n˙mero de abreviatura %u."
+msgstr "Dwarf-virhe: Ei l√∂ytynyt lyhennenumeroa %u."
 
 #: dwarf2.c:2080
 #, c-format
 msgid "Dwarf Error: found dwarf version '%u', this reader only handles version 2 information."
-msgstr "Error de Dwarf: se encontrÛ la versiÛn de dwarf '%u', este lector solamente maneja informaciÛn de la versiÛn 2."
+msgstr "Dwarf-virhe: l√∂ytyi dwarf-versio ‚Äù%u‚Äù, t√§m√§ lukija k√§sittelee vain version 2 tietoja."
 
 #: dwarf2.c:2087
 #, c-format
 msgid "Dwarf Error: found address size '%u', this reader can not handle sizes greater than '%u'."
-msgstr "Error de Dwarf: se encontrÛ el tamaÒo de direcciÛn '%u', este lector no puede manejar tamaÒos m·s grandes que '%u'."
+msgstr "Dwarf-virhe: l√∂ytyi osoitekoko ‚Äù%u‚Äù, t√§m√§ lukija ei voi k√§sitell√§ kokoja, jotka ovat suurempia kuin ‚Äù%u‚Äù."
 
 #: dwarf2.c:2110
 #, c-format
 msgid "Dwarf Error: Bad abbrev number: %u."
-msgstr "Error de Dwarf: N˙mero de abreviaciÛn errÛneo: %u."
+msgstr "Dwarf-virhe: V√§√§r√§ lyhennenumero: %u."
 
 #: ecoff.c:1227
 #, c-format
 msgid "Unknown basic type %d"
-msgstr "Tipo b·sico %d desconocido"
+msgstr "Tuntematon perustyyppi %d"
 
 #: ecoff.c:1484
 #, c-format
@@ -581,7 +586,7 @@ msgid ""
 "      End+1 symbol: %ld"
 msgstr ""
 "\n"
-"      SÌmbolo final+1: %ld"
+"      Loppu+1 symboli: %ld"
 
 #: ecoff.c:1491 ecoff.c:1494
 #, c-format
@@ -590,7 +595,7 @@ msgid ""
 "      First symbol: %ld"
 msgstr ""
 "\n"
-"      Primer sÌmbolo: %ld"
+"      Ensimm√§inen symboli: %ld"
 
 #: ecoff.c:1506
 #, c-format
@@ -599,7 +604,7 @@ msgid ""
 "      End+1 symbol: %-7ld   Type:  %s"
 msgstr ""
 "\n"
-"      SÌmbolo final+1: %-7ld Tipo: %s"
+"      Loppu+1 symboli: %-7ld   Tyyppi:  %s"
 
 #: ecoff.c:1513
 #, c-format
@@ -608,7 +613,7 @@ msgid ""
 "      Local symbol: %ld"
 msgstr ""
 "\n"
-"      SÌmbolo local: %ld"
+"      Paikallinen symboli: %ld"
 
 #: ecoff.c:1521
 #, c-format
@@ -617,7 +622,7 @@ msgid ""
 "      struct; End+1 symbol: %ld"
 msgstr ""
 "\n"
-"      struct; sÌmbolo final+1: %ld"
+"      struct; Loppu+1 symboli: %ld"
 
 #: ecoff.c:1526
 #, c-format
@@ -626,7 +631,7 @@ msgid ""
 "      union; End+1 symbol: %ld"
 msgstr ""
 "\n"
-"      union; sÌmbolo final+1: %ld"
+"      union; Loppu+1 symboli: %ld"
 
 #: ecoff.c:1531
 #, c-format
@@ -635,7 +640,7 @@ msgid ""
 "      enum; End+1 symbol: %ld"
 msgstr ""
 "\n"
-"      enum; sÌmbolo final+1: %ld"
+"      enum; Loppu+1 symboli: %ld"
 
 #: ecoff.c:1537
 #, c-format
@@ -644,166 +649,170 @@ msgid ""
 "      Type: %s"
 msgstr ""
 "\n"
-"      Tipo: %s"
+"      Tyyppi: %s"
 
 #: elf32-arm.c:2524
 #, c-format
 msgid "unable to find THUMB glue '%s' for '%s'"
-msgstr "no se puede encontrar el pegamento THUMB '%s' para `%s'"
+msgstr "ei l√∂ydy THUMB-vihjett√§ ‚Äù%s‚Äù kohteelle ‚Äù%s‚Äù"
 
 #: elf32-arm.c:2557
 #, c-format
 msgid "unable to find ARM glue '%s' for '%s'"
-msgstr "no se puede encontrar el pegamento ARM '%s' para `%s'"
+msgstr "ei l√∂ydy ARM-vihjett√§ ‚Äù%s‚Äù kohteelle ‚Äù%s‚Äù"
 
 #: elf32-arm.c:3127
 msgid "%B: BE8 images only valid in big-endian mode."
-msgstr "%B: las im·genes BE8 sÛlo son v·lidas en modo big-endian."
+msgstr "%B: BE8-vedokset ovat oikeita vain big-endian-tavuj√§rjestyksess√§."
 
+#  Vector Floating Point (VFP)
 #. Give a warning, but do as the user requests anyway.
 #: elf32-arm.c:3331
 msgid "%B: warning: selected VFP11 erratum workaround is not necessary for target architecture"
-msgstr "%B: aviso: no se necesita la alternativa para evita la errata del VFP11 seleccionado para la arquitectura objetivo"
+msgstr "%B: varoitus: valittu VFP11-virheenkiertotapa ei ole v√§ltt√§m√§t√∂n kohdearkkitehtuurille"
 
 #: elf32-arm.c:3865 elf32-arm.c:3885
 msgid "%B: unable to find VFP11 veneer `%s'"
-msgstr "%B: no se puede encontrar la chapa de VFP11 `%s'"
+msgstr "%B: ei l√∂ydy VFP11-julkisivua ‚Äù%s‚Äù"
 
 #: elf32-arm.c:3930
 #, c-format
 msgid "Invalid TARGET2 relocation type '%s'."
-msgstr "Tipo de reubicaciÛn TARGET2 '%s' inv·lido."
+msgstr "Virheellinen TARGET2-sijoitustyyppi ‚Äù%s‚Äù."
 
 #: elf32-arm.c:4071
 msgid ""
 "%B(%s): warning: interworking not enabled.\n"
 "  first occurrence: %B: thumb call to arm"
 msgstr ""
-"%s(%s): aviso: no se activÛ la interoperabilidad.\n"
-"  primer suceso: %B: llamada thumb para arm"
+"%B(%s): varoitus: rinnank√§ytt√∂ ei ole aktivoitu.\n"
+"  ensimm√§inen esiintym√§: %B: thumb-kutsu arm-koodiin"
 
 #: elf32-arm.c:4759
 msgid "\\%B: Warning: Arm BLX instruction targets Arm function '%s'."
-msgstr "\\%B: Aviso: La instrucciÛn Arm BLX apunta a la funciÛn Arm '%s'."
+msgstr "\\%B: Varoitus: ‚ÄùArm BLX‚Äù-k√§skykohteet Arm-funktiossa ‚Äù%s‚Äù."
 
 #: elf32-arm.c:5059
 msgid "%B: Warning: Thumb BLX instruction targets thumb function '%s'."
-msgstr "%B: Aviso: La instrucciÛn Thumb BLX apunta a la funciÛn thumb '%s'."
+msgstr "%B: Varoitus: ‚ÄùThumb BLX‚Äù-k√§skykohteet thumb-funktiossa ‚Äù%s‚Äù."
 
 #: elf32-arm.c:5689
 msgid "%B(%A+0x%lx): R_ARM_TLS_LE32 relocation not permitted in shared object"
-msgstr "%B(%A+0x%lx): la reubicaciÛn R_ARM_TLS_LE32 no se permite en objetos compartidos"
+msgstr "%B(%A+0x%lx): R_ARM_TLS_LE32-sijoitukset eiv√§t ole sallittuja jaetuissa objekteissa"
 
 #: elf32-arm.c:5890
 msgid "%B(%A+0x%lx): Only ADD or SUB instructions are allowed for ALU group relocations"
-msgstr "%B(%A+0x%lx): SÛlo se permiten las instrucciones ADD o SUB para la reubicaciÛn de grupo ALU"
+msgstr "%B(%A+0x%lx): Vain ADD- tai SUB-k√§skyt ovat sallittuja ALU-ryhm√§n sijoituksille"
 
 #: elf32-arm.c:5930 elf32-arm.c:6017 elf32-arm.c:6100 elf32-arm.c:6185
 msgid "%B(%A+0x%lx): Overflow whilst splitting 0x%lx for group relocation %s"
-msgstr "%B(%A+0x%lx): Desborde al dividirse 0x%lx para la reubicaciÛn de grupo %s"
+msgstr "%B(%A+0x%lx): Ylivuoto, kun halkaistaan 0x%lx ryhm√§sijoitukselle %s"
 
 #: elf32-arm.c:6369 elf32-sh.c:3304 elf64-sh64.c:1556
 msgid "%B(%A+0x%lx): %s relocation against SEC_MERGE section"
-msgstr "%B(%A+0x%lx): reubicaciÛn %s contra la secciÛn SEC_MERGE"
+msgstr "%B(%A+0x%lx): %s sijoitus SEC_MERGE-lohkoa varten"
 
+#  TLS: transport layer security
 #: elf32-arm.c:6458 elf64-ppc.c:9973
 msgid "%B(%A+0x%lx): %s used with TLS symbol %s"
-msgstr "%B(%A+0x%lx): se usÛ %s con el sÌmbolo TLS %s"
+msgstr "%B(%A+0x%lx): %s k√§ytet√§√§n TLS-symbolin %s kanssa"
 
 #: elf32-arm.c:6459 elf64-ppc.c:9974
 msgid "%B(%A+0x%lx): %s used with non-TLS symbol %s"
-msgstr "%B(%A+0x%lx): se usÛ %s con el sÌmbolo %s que no es TLS"
+msgstr "%B(%A+0x%lx): %s k√§ytet√§√§n ei-TLS-symbolin %s kanssa"
 
 #: elf32-arm.c:6482 elf32-i386.c:3310 elf32-m32r.c:2598 elf32-m68k.c:1982
 #: elf32-ppc.c:6796 elf32-s390.c:3048 elf32-sh.c:3408 elf32-xtensa.c:2290
 #: elf64-ppc.c:11138 elf64-s390.c:3009 elf64-sh64.c:1648 elf64-x86-64.c:3002
 #: elf-hppa.h:2194 elf-m10300.c:1460 elfxx-sparc.c:3256
 msgid "%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"
-msgstr "%B(%A+0x%lx): reubicaciÛn %s sin resoluciÛn contra el sÌmbolo `%s'"
+msgstr "%B(%A+0x%lx): ratkaisematon %s sijoitus symbolia ‚Äù%s‚Äù varten"
 
 #: elf32-arm.c:6516
 msgid "out of range"
-msgstr "fuera de rango"
+msgstr "lukualueen ulkopuolella"
 
 #: elf32-arm.c:6520
 msgid "unsupported relocation"
-msgstr "no se admite la reubicaciÛn"
+msgstr "ei-tuettu sijoitus"
 
 #: elf32-arm.c:6528
 msgid "unknown error"
-msgstr "error desconocido"
+msgstr "tuntematon virhe"
 
 #: elf32-arm.c:6628
 msgid "Warning: Clearing the interworking flag of %B because non-interworking code in %B has been linked with it"
-msgstr "Aviso: Se limpia la opciÛn de interoperaciÛn en %B porque se ha enlazado con Èl cÛdigo no interoperable en %B"
+msgstr "Varoitus: Nollataan %B:n rinnank√§ytt√∂lippu, koska se on linkitetty ‚Äùei-rinnank√§ytt√∂√§‚Äù-koodiin %B:ssa"
 
 #: elf32-arm.c:6730
 msgid "ERROR: %B uses VFP register arguments, %B does not"
-msgstr "ERROR: %B utiliza argumentos de registro VFP, mientras que %B no"
+msgstr "VIRHE: %B k√§ytt√§√§ VFP-rekisteriargumentteja, %B ei k√§yt√§"
 
 #: elf32-arm.c:6780
 msgid "ERROR: %B: Conflicting architecture profiles %c/%c"
-msgstr "ERROR: %B: Perfiles de arquitecturas en conflicto %c/%c"
+msgstr "VIRHE: %B: Ristiriitaisia arkkitehtuuriprofiileja %c/%c"
 
 #: elf32-arm.c:6795
 msgid "Warning: %B: Conflicting platform configuration"
-msgstr "Aviso: %B: ConfiguraciÛn de plataformas en conflicto"
+msgstr "Varoitus: %B: Ristiriitainen alustakonfiguraatio"
 
 #: elf32-arm.c:6804
 msgid "ERROR: %B: Conflicting use of R9"
-msgstr "ERROR: %B: Uso en conflicto de R9"
+msgstr "VIRHE: %B: Ristiriitainen R9:n k√§ytt√∂"
 
 #: elf32-arm.c:6816
 msgid "ERROR: %B: SB relative addressing conflicts with use of R9"
-msgstr "ERROR: %B: El direccionamiento relativo a SB tiene conflictos con el uso de R9"
+msgstr "VIRHE: %B: SB suhteellinen osoitteitus on ristiriidassa R9:n k√§yt√∂n kanssa"
 
 #: elf32-arm.c:6838
 msgid "ERROR: %B: Conflicting definitions of wchar_t"
-msgstr "ERROR: %B: Definiciones en conflicto de wchar_t"
+msgstr "VIRHE: %B: Ristiriitaisia wchar_t-m√§√§rittelyj√§"
 
 #: elf32-arm.c:6867
 msgid "warning: %B uses %s enums yet the output is to use %s enums; use of enum values across objects may fail"
-msgstr "aviso: %B usa %s enums aunque la salida usa %s enums; el uso de valores enum entre objetos puede fallar"
+msgstr "varoitus: %B k√§ytt√§√§ %s enums-alkioita vaikka tuloste k√§ytt√§√§ %s enums-alkioita; enum-arvojen k√§ytt√∂ kaikissa objekteissa saattaa ep√§onnistua"
 
 #: elf32-arm.c:6880
 msgid "ERROR: %B uses iWMMXt register arguments, %B does not"
-msgstr "ERROR: %B utiliza argumentos de registro iWMMXt, mientras que %B no"
+msgstr "VIRHE: %B k√§ytt√§√§ iWMMXt-rekisteriargumentteja, %B ei k√§yt√§"
 
 #: elf32-arm.c:6920
 msgid "Warning: %B: Unknown EABI object attribute %d"
-msgstr "Aviso: %B: Atributo de objeto EABI %d desconocido"
+msgstr "Varoitus: %B: Tuntematon EABI-objektiattribuutti %d"
 
 #: elf32-arm.c:7045
 msgid "ERROR: Source object %B has EABI version %d, but target %B has EABI version %d"
-msgstr "ERROR: El objeto fuente %B tiene EABI versiÛn %d, pero el objetivo %B tiene EABI versiÛn %d"
+msgstr "VIRHE: L√§hdeobjektissa %B on EABI-versio %d, mutta kohteessa %B on EABI-versio %d"
 
 #: elf32-arm.c:7061
 msgid "ERROR: %B is compiled for APCS-%d, whereas target %B uses APCS-%d"
-msgstr "ERROR: %B est· compilado para APCS-%d mientras que el objetivo %B usa APCS-%d"
+msgstr "VIRHE: %B on k√§√§nnetty APCS-%d:lle, kun taas kohde %B k√§ytt√§√§ APCS-%d:ta"
 
+#  Vector floating point (coprosessor)
 #: elf32-arm.c:7086
 msgid "ERROR: %B uses VFP instructions, whereas %B does not"
-msgstr "ERROR: %B utiliza instrucciones VFP, mientras que %B no"
+msgstr "VIRHE: %B k√§ytt√§√§ vektoriliukulukuk√§skyj√§, kun taas %B ei k√§yt√§"
 
+#  Floating Point Accelerator (chip)
 #: elf32-arm.c:7090
 msgid "ERROR: %B uses FPA instructions, whereas %B does not"
-msgstr "ERROR: %B utiliza instrucciones FPA, mientras que %B no"
+msgstr "VIRHE: %B k√§ytt√§√§ liukulukukiihdytink√§skyj√§, kun taas %B ei k√§yt√§"
 
 #: elf32-arm.c:7100
 msgid "ERROR: %B uses Maverick instructions, whereas %B does not"
-msgstr "ERROR: %B utiliza instrucciones Maverick, mientras que %B no"
+msgstr "VIRHE: %B k√§ytt√§√§ Maverick-k√§skyj√§, kun taas %B ei k√§yt√§"
 
 #: elf32-arm.c:7104
 msgid "ERROR: %B does not use Maverick instructions, whereas %B does"
-msgstr "ERROR: %B no utiliza instrucciones Maverick, mientras que %B sÌ"
+msgstr "VIRHE: %B ei k√§yt√§ Maverick-k√§skyj√§, kun taas %B k√§ytt√§√§"
 
 #: elf32-arm.c:7123
 msgid "ERROR: %B uses software FP, whereas %B uses hardware FP"
-msgstr "ERROR: %B utiliza FP de software, mientras que %B utiliza FP de hardware"
+msgstr "VIRHE: %B k√§ytt√§√§ ohjelmistoliukulukuja, kun taas %B k√§ytt√§√§ laitteistoliukulukuja"
 
 #: elf32-arm.c:7127
 msgid "ERROR: %B uses hardware FP, whereas %B uses software FP"
-msgstr "ERROR: %B utiliza FP de hardware, mientras que %B utiliza FP de software"
+msgstr "VIRHE: %B k√§ytt√§√§ laitteistoliukulukuja, kun taas %B k√§ytt√§√§ ohjelmistoliukulukuja"
 
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
@@ -812,87 +821,87 @@ msgstr "ERROR: %B utiliza FP de hardware, mientras que %B utiliza FP de software
 #: elf32-m68k.c:620 elf32-score.c:3753 elf32-vax.c:538 elfxx-mips.c:11331
 #, c-format
 msgid "private flags = %lx:"
-msgstr "opciones privadas = %lx:"
+msgstr "yksityiset liput = %lx:"
 
 #: elf32-arm.c:7183
 #, c-format
 msgid " [interworking enabled]"
-msgstr " [interoperabilidad activada]"
+msgstr " [rinnank√§ytt√∂ aktivoitu]"
 
 #: elf32-arm.c:7191
 #, c-format
 msgid " [VFP float format]"
-msgstr " [formato de coma flotante VFP]"
+msgstr " [vektoriliukulukumuoto]"
 
 #: elf32-arm.c:7193
 #, c-format
 msgid " [Maverick float format]"
-msgstr " [formato de coma flotante Maverick]"
+msgstr " [Maverick-liukulukumuoto]"
 
 #: elf32-arm.c:7195
 #, c-format
 msgid " [FPA float format]"
-msgstr " [formato de coma flotante FPA]"
+msgstr " [Liukulukukiihdytin-liukulukumuoto]"
 
 #: elf32-arm.c:7204
 #, c-format
 msgid " [new ABI]"
-msgstr " [ABI nuevo]"
+msgstr " [uusi ABI]"
 
 #: elf32-arm.c:7207
 #, c-format
 msgid " [old ABI]"
-msgstr " [ABI antiguo]"
+msgstr " [vanha ABI]"
 
 #: elf32-arm.c:7210
 #, c-format
 msgid " [software FP]"
-msgstr " [FP por software]"
+msgstr " [ohjelmistoliukuluku]"
 
 #: elf32-arm.c:7219
 #, c-format
 msgid " [Version1 EABI]"
-msgstr " [EABI Version1]"
+msgstr " [Versio 1 EABI]"
 
 #: elf32-arm.c:7222 elf32-arm.c:7233
 #, c-format
 msgid " [sorted symbol table]"
-msgstr " [tabla de sÌmbolos ordenados]"
+msgstr " [lajiteltu symbolitaulu]"
 
 #: elf32-arm.c:7224 elf32-arm.c:7235
 #, c-format
 msgid " [unsorted symbol table]"
-msgstr " [tabla de sÌmbolos sin ordenar]"
+msgstr " [lajittelematon symbolitaulu]"
 
 #: elf32-arm.c:7230
 #, c-format
 msgid " [Version2 EABI]"
-msgstr " [EABI Version2]"
+msgstr " [Versio 2 EABI]"
 
 #: elf32-arm.c:7238
 #, c-format
 msgid " [dynamic symbols use segment index]"
-msgstr " [los sÌmbolos din·micos utilizan Ìndices de segmento]"
+msgstr " [dynaamiset symbolit k√§ytt√§v√§t segmentti-indeksi√§]"
 
 #: elf32-arm.c:7241
 #, c-format
 msgid " [mapping symbols precede others]"
-msgstr " [el mapeo de sÌmbolos precede a otros]"
+msgstr " [kuvaussymbolit ylitt√§v√§t t√§rkeydess√§ muut]"
 
 #: elf32-arm.c:7248
 #, c-format
 msgid " [Version3 EABI]"
-msgstr " [EABI Version3]"
+msgstr " [Versio 3 EABI]"
 
 #: elf32-arm.c:7252
 #, c-format
 msgid " [Version4 EABI]"
-msgstr " [EABI Version4]"
+msgstr " [Versio 4 EABI]"
 
 #: elf32-arm.c:7256
 #, c-format
 msgid " [Version5 EABI]"
-msgstr " [EABI Version5]"
+msgstr " [Versio 5 EABI]"
 
 #: elf32-arm.c:7259
 #, c-format
@@ -907,27 +916,27 @@ msgstr " [LE8]"
 #: elf32-arm.c:7268
 #, c-format
 msgid " <EABI version unrecognised>"
-msgstr " <versiÛn de EABI no reconocida>"
+msgstr " <EABI-versio tunnistamaton>"
 
 #: elf32-arm.c:7275
 #, c-format
 msgid " [relocatable executable]"
-msgstr " [ejecutable reubicable]"
+msgstr " [sijoitettava suoritettava tiedosto]"
 
 #: elf32-arm.c:7278
 #, c-format
 msgid " [has entry point]"
-msgstr " [tiene punto de entrada]"
+msgstr " [on tulokohta]"
 
 #: elf32-arm.c:7283
 #, c-format
 msgid "<Unrecognised flag bits set>"
-msgstr "<Conjunto de bits de opciÛn sin reconocer>"
+msgstr "<Tunnistamaton lippubittijoukko>"
 
 #: elf32-arm.c:7522 elf32-i386.c:961 elf32-s390.c:1003 elf32-xtensa.c:814
 #: elf64-s390.c:958 elf64-x86-64.c:773 elfxx-sparc.c:1115
 msgid "%B: bad symbol index: %d"
-msgstr "%B: Ìndice de sÌmbolos errÛneo: %d"
+msgstr "%B: virheellinen symboli-indeksi: %d"
 
 #: elf32-arm.c:8080 elf32-cris.c:2400 elf32-hppa.c:1906 elf32-i370.c:506
 #: elf32-i386.c:1522 elf32-m32r.c:1931 elf32-m68k.c:1331 elf32-ppc.c:4314
@@ -936,16 +945,16 @@ msgstr "%B: Ìndice de sÌmbolos errÛneo: %d"
 #: elfxx-sparc.c:1797
 #, c-format
 msgid "dynamic variable `%s' is zero size"
-msgstr "la variable din·mica `%s' es de tamaÒo cero"
+msgstr "dynaaminen muuttuja ‚Äù%s‚Äù on nollakokoinen"
 
 #: elf32-arm.c:8603
 #, c-format
 msgid "Errors encountered processing file %s"
-msgstr "Se encontraron errores al procesar el fichero %s"
+msgstr "Kohdattiin virheit√§ prosessoitaessa tiedostoa %s"
 
 #: elf32-arm.c:9839 elf32-arm.c:9861
 msgid "%B: error: VFP11 veneer out of range"
-msgstr "%B: error: la chapa VFP11 est· fuera de rango"
+msgstr "%B: virhe: VFP11-julkisivu lukualueen ulkopuolella"
 
 #: elf32-avr.c:1253 elf32-bfin.c:2795 elf32-cr16.c:887 elf32-cr16c.c:790
 #: elf32-cris.c:1538 elf32-crx.c:933 elf32-d10v.c:517 elf32-fr30.c:616
@@ -955,7 +964,7 @@ msgstr "%B: error: la chapa VFP11 est· fuera de rango"
 #: elf32-score.c:2456 elf32-spu.c:2813 elf32-v850.c:1701 elf32-xstormy16.c:946
 #: elf64-mmix.c:1533 elf-m10200.c:456 elf-m10300.c:1523
 msgid "internal error: out of range error"
-msgstr "error interno: error fuera de rango"
+msgstr "sis√§inen virhe: ‚Äùlukualueen ulkopuolella‚Äù-virhe"
 
 #: elf32-avr.c:1257 elf32-bfin.c:2799 elf32-cr16.c:891 elf32-cr16c.c:794
 #: elf32-cris.c:1542 elf32-crx.c:937 elf32-d10v.c:521 elf32-fr30.c:620
@@ -965,7 +974,7 @@ msgstr "error interno: error fuera de rango"
 #: elf32-v850.c:1705 elf32-xstormy16.c:950 elf64-mmix.c:1537 elf-m10200.c:460
 #: elf-m10300.c:1527 elfxx-mips.c:8025
 msgid "internal error: unsupported relocation error"
-msgstr "error interno: error de reubicaciÛn no admitida"
+msgstr "sis√§inen virhe: ei-tuettu sijoitusvirhe"
 
 #: elf32-avr.c:1261 elf32-bfin.c:2803 elf32-cris.c:1546 elf32-fr30.c:624
 #: elf32-frv.c:4137 elf32-i860.c:1226 elf32-ip2k.c:1510 elf32-iq2000.c:655
@@ -973,7 +982,7 @@ msgstr "error interno: error de reubicaciÛn no admitida"
 #: elf32-openrisc.c:419 elf32-v850.c:1709 elf32-xstormy16.c:954
 #: elf64-mmix.c:1541
 msgid "internal error: dangerous relocation"
-msgstr "error interno: reubicaciÛn peligrosa"
+msgstr "sis√§inen virhe: vaarallinen sijoitus"
 
 #: elf32-avr.c:1265 elf32-bfin.c:2807 elf32-cr16.c:899 elf32-cr16c.c:802
 #: elf32-cris.c:1550 elf32-crx.c:945 elf32-d10v.c:529 elf32-fr30.c:628
@@ -983,138 +992,142 @@ msgstr "error interno: reubicaciÛn peligrosa"
 #: elf32-score.c:2468 elf32-spu.c:2825 elf32-v850.c:1725 elf32-xstormy16.c:958
 #: elf64-mmix.c:1545 elf-m10200.c:468 elf-m10300.c:1540
 msgid "internal error: unknown error"
-msgstr "error interno: error desconocido"
+msgstr "sis√§inen virhe: tuntematon virhe"
 
 #: elf32-avr.c:2369 elf32-hppa.c:595 elf32-m68hc1x.c:164 elf64-ppc.c:3802
 msgid "%B: cannot create stub entry %s"
-msgstr "%B: no se puede crear la entrada de cabo %s"
+msgstr "%B: ei voi luoda stub-tulokohtaa %s"
 
 #: elf32-bfin.c:2274
 msgid "%B: relocation at `%A+0x%x' references symbol `%s' with nonzero addend"
-msgstr "%B: la reubicaciÛn en `%A+0x%x' referencÌa al sÌmbolo `%s' con adiciÛn que no es cero"
+msgstr "%B: sijoitus kohteessa ‚Äù%A+0x%x‚Äù viittaa symboliin ‚Äù%s‚Äù, jossa on ei-nolla-yhteenlaskettava"
 
 #: elf32-bfin.c:2288 elf32-frv.c:2919
 msgid "relocation references symbol not defined in the module"
-msgstr "la reubicaciÛn referencÌa un sÌmbolo que no est· definido en el mÛdulo"
+msgstr "sijoitusviitteet-symboli ei ole m√§√§ritelty modulissa"
 
 #: elf32-bfin.c:2385
 msgid "R_BFIN_FUNCDESC references dynamic symbol with nonzero addend"
-msgstr "R_BFIN_FUNCDESC referencÌa un sÌmbolo din·mico con adiciÛn que no es cero"
+msgstr "R_BFIN_FUNCDESC viittaa dynaamiseen symboliin, jossa on ei-nolla-yhteenlaskettava"
 
 #: elf32-bfin.c:2424 elf32-bfin.c:2547 elf32-frv.c:3656 elf32-frv.c:3777
 msgid "cannot emit fixups in read-only section"
-msgstr "no se pueden emitir composturas en la secciÛn de sÛlo lectura"
+msgstr "ei voi l√§hett√§√§ korjauksia kirjoitussuojattuun lohkoon"
 
 #: elf32-bfin.c:2452 elf32-bfin.c:2587 elf32-frv.c:3687 elf32-frv.c:3821
 msgid "cannot emit dynamic relocations in read-only section"
-msgstr "no se pueden emitri reubicaciones din·micas en la secciÛn de sÛlo lectura"
+msgstr "ei voi l√§hett√§√§ dynaamisia sijoituksia kirjoitussuojattussa lohkossa"
 
 #: elf32-bfin.c:2505
 msgid "R_BFIN_FUNCDESC_VALUE references dynamic symbol with nonzero addend"
-msgstr "R_BFIN_FUNCDESC_VALUE referencÌa un sÌmbolo din·mico con adiciÛn que no es cero"
+msgstr "R_BFIN_FUNCDESC_VALUE viittaa dynaamiseen symboliin, jossa on ei-nolla-yhteenlaskettava"
 
 #: elf32-bfin.c:2673
 msgid "relocations between different segments are not supported"
-msgstr "no se admiten las reubicaciones entre segmentos diferentes"
+msgstr "sijoituksia eri segmenttien v√§lill√§ ei tueta"
 
 #: elf32-bfin.c:2674
 msgid "warning: relocation references a different segment"
-msgstr "aviso: la reubicaciÛn referencÌa un segmento diferente"
+msgstr "varoitus: sijoitus viittaa eri segmenttiin"
 
 #: elf32-bfin.c:3083
 msgid "%B(%A+0x%lx): unresolvable relocation against symbol `%s'"
-msgstr "%B(%A+0x%lx): reubicaciÛn sin resoluciÛn contra el sÌmbolo `%s'"
+msgstr "%B(%A+0x%lx): ratkaisematon sijoitus symboliin ‚Äù%s‚Äù"
 
 #: elf32-bfin.c:3116 elf32-i386.c:3351 elf32-m68k.c:2023 elf32-s390.c:3100
 #: elf64-s390.c:3061 elf64-x86-64.c:3041
 msgid "%B(%A+0x%lx): reloc against `%s': error %d"
-msgstr "%B(%A+0x%lx): reubicaciÛn contra `%s': error %d"
+msgstr "%B(%A+0x%lx): reloc-tietue kohdetta ‚Äù%s‚Äù varten: virhe %d"
 
 #: elf32-bfin.c:4687 elf32-frv.c:6423
 msgid "%B: unsupported relocation type %i"
-msgstr "%B: no se admite el tipo de reubicaciÛn %i"
+msgstr "%B: ei-tuettu sijoitustyyppi %i"
 
+#  The FR-V FDPIC ABI: The FDPIC register is used as a base register for accessing the global offset table (GOT) and function descriptors.
+#  Yksi prosessorin rekistereist√§ on nimetty fdpic-rekisteriksi milloin data- ja tekstilohkot ovat sijoitettavia (eli niiden siirros ei ole vakio).
 #: elf32-bfin.c:4868 elf32-frv.c:6831
 #, c-format
 msgid "%s: cannot link non-fdpic object file into fdpic executable"
-msgstr "%s: no se puede enlazar el fichero objeto que no es fdpic en un ejecutable fdpic"
+msgstr "%s: ei voi linkitt√§√§ objektitiedostoa ilman fdpic-rekisteri√§ suoritettavaan tiedostoon, joka k√§ytt√§√§ fdpic-rekisteri√§"
 
 #: elf32-bfin.c:4872 elf32-frv.c:6835
 #, c-format
 msgid "%s: cannot link fdpic object file into non-fdpic executable"
-msgstr "%s: no se puede enlazar el fichero objeto fdpic en un ejecutable que no es fdpic"
+msgstr "%s: ei voi linkitt√§√§ fdpic-rekisteri√§ k√§ytt√§v√§√§ objektitiedostoa suoritettavaan tiedostoon, joka ei k√§yt√§ fdpic-rekisteri√§"
 
 #: elf32-cr16.c:895 elf32-cr16c.c:798 elf32-crx.c:941 elf32-d10v.c:525
 #: elf32-h8300.c:524 elf32-m32r.c:3132 elf32-m68hc1x.c:1141 elf32-score.c:2464
 #: elf32-spu.c:2821 elf-m10200.c:464
 msgid "internal error: dangerous error"
-msgstr "error interno: error peligroso"
+msgstr "sis√§inen virhe: vaarallinen virhe"
 
 #: elf32-cris.c:1060
 msgid "%B, section %A: unresolvable relocation %s against symbol `%s'"
-msgstr "%B, secciÛn %A: reubicaciÛn %s sin resoluciÛn contra el sÌmbolo `%s'"
+msgstr "%B, lohko %A: ratkaisematon sijoitus %s symbolia ‚Äù%s‚Äù varten"
 
+#  Procedure Linkage Table (PLT) and Global Offset Table (GOT)
 #: elf32-cris.c:1129
 msgid "%B, section %A: No PLT nor GOT for relocation %s against symbol `%s'"
-msgstr "%B, secciÛn %A: No hay PLT ni GOT para la reubicaciÛn %s contra el sÌmbolo `%s'"
+msgstr "%B, lohko %A: Ei proseduurilinkitystaulua eik√§ yleissiirrostaulua sijoitukselle %s symbolia ‚Äù%s‚Äù varten"
 
 #: elf32-cris.c:1131
 msgid "%B, section %A: No PLT for relocation %s against symbol `%s'"
-msgstr "%B, secciÛn %A: No hay PLT para la reubicaciÛn %s contra el sÌmbolo `%s'"
+msgstr "%B, lohko %A: Ei proseduurilinkitystaulua sijoituksille %s symbolia ‚Äù%s‚Äù varten"
 
 #: elf32-cris.c:1137 elf32-cris.c:1269
 msgid "[whose name is lost]"
-msgstr "[cuyo nombre se pierde]"
+msgstr "[jonka nimi on kadonnut]"
 
 #: elf32-cris.c:1255
 msgid "%B, section %A: relocation %s with non-zero addend %d against local symbol"
-msgstr "%B, secciÛn %A: reubicaciÛn %s con adiciÛn %d que no es cero contra el sÌmbolo local"
+msgstr "%B, lohko %A: sijoitus %s ei-nolla-yhteenlaskettavalla %d paikallista symbolia varten"
 
 #: elf32-cris.c:1263
 msgid "%B, section %A: relocation %s with non-zero addend %d against symbol `%s'"
-msgstr "%B, secciÛn %A: reubicaciÛn %s con adiciÛn %d que no es cero contra el sÌmbolo `%s'"
+msgstr "%B, lohko %A: sijoitus %s ei-nolla-yhteenlaskettavalla %d symbolia ‚Äù%s‚Äù varten"
 
 #: elf32-cris.c:1289
 msgid "%B, section %A: relocation %s is not allowed for global symbol: `%s'"
-msgstr "%B, secciÛn %A: no se permite la reubicaciÛn %s para el sÌmbolo global: `%s'"
+msgstr "%B, lohko %A: sijoitusta %s ei sallita yleissymbolille: ‚Äù%s‚Äù"
 
 #: elf32-cris.c:1305
 msgid "%B, section %A: relocation %s with no GOT created"
-msgstr "%B, secciÛn %A: la reubicaciÛn %s sin GOT creado"
+msgstr "%B, lohko %A: sijoitus %s ilman yleissiirrostaulun luontia"
 
 #: elf32-cris.c:1423
 msgid "%B: Internal inconsistency; no relocation section %s"
-msgstr "%B: Inconsistencia interna; no se encuentra la secciÛn de reubicaciÛn %s"
+msgstr "%B: Sis√§inen ep√§johdonmukaisuus; ei sijoituslohkoa %s"
 
+#  position-independent code (PIC)
 #: elf32-cris.c:2511
 msgid ""
 "%B, section %A:\n"
 "  v10/v32 compatible object %s must not contain a PIC relocation"
 msgstr ""
-"%B, secciÛn %A:\n"
-"  el objeto %s compatible con v10/v32 no debe contener una reubicaciÛn PIC"
+"%B, lohko %A:\n"
+"  v10/v32 yhteensopiva objekti %s ei saa sis√§lt√§√§ sijaintiriippumatonta koodisijoitusta"
 
 #: elf32-cris.c:2698 elf32-cris.c:2766
 msgid ""
 "%B, section %A:\n"
 "  relocation %s should not be used in a shared object; recompile with -fPIC"
 msgstr ""
-"%B, secciÛn %A:\n"
-"  la reubicaciÛn %s no se debe usar en un objeto compartido; recompile con -fPIC"
+"%B, lohko %A:\n"
+"  sijoitusta %s ei pit√§isi k√§ytt√§√§ jaettussa objektissa; k√§√§nn√§ uudelleen argumentilla -fPIC"
 
 #: elf32-cris.c:3183
 msgid "Unexpected machine number"
-msgstr "N˙mero de m·quina inesperado"
+msgstr "Odottamaton konenumero"
 
 #: elf32-cris.c:3237
 #, c-format
 msgid " [symbols have a _ prefix]"
-msgstr " [los sÌmbolos tiene un prefijo _]"
+msgstr " [symboleissa on ‚Äù_‚Äù-prefiksi]"
 
 #: elf32-cris.c:3240
 #, c-format
 msgid " [v10 and v32]"
-msgstr " [v10 y v32]"
+msgstr " [v10 ja v32]"
 
 #: elf32-cris.c:3243
 #, c-format
@@ -1123,278 +1136,281 @@ msgstr " [v32]"
 
 #: elf32-cris.c:3288
 msgid "%B: uses _-prefixed symbols, but writing file with non-prefixed symbols"
-msgstr "%B: utiliza sÌmbolos con prefijo _, pero escribe el fichero con sÌmbolos sin prefijo"
+msgstr "%B: k√§ytt√§√§ ‚Äù_‚Äù-prefiksisymboleja, mutta kirjoittaa tiedoston ilman prefiksisymboleja"
 
 #: elf32-cris.c:3289
 msgid "%B: uses non-prefixed symbols, but writing file with _-prefixed symbols"
-msgstr "%B: utiliza sÌmbolos sin prefijo, pero escribe el fichero con sÌmbolos con prefijo _"
+msgstr "%B: k√§ytt√§√§ ilman prefiksisymboleja, mutta kirjoittaa tiedoston ‚Äù_‚Äù-prefiksisymboleilla"
 
+#  CRIS v32 info: The chip with the CRIS v32 core.
 #: elf32-cris.c:3308
 msgid "%B contains CRIS v32 code, incompatible with previous objects"
-msgstr "%B contiene cÛdigo CRIS v32, incompatible con objetos previos"
+msgstr "%B sis√§lt√§√§ ‚ÄùCRIS v32‚Äù-koodia, ei ole yhteensopiva aiempien objektien kanssa"
 
 #: elf32-cris.c:3310
 msgid "%B contains non-CRIS-v32 code, incompatible with previous objects"
-msgstr "%B contiene cÛdigo que no es CRIS v32, incompatible con objetos previos"
+msgstr "%B ei sis√§ll√§ ‚ÄùCRIS-v32‚Äù-koodia, yhteensopimaton aiempien objektien kanssa"
 
 #: elf32-frv.c:1523 elf32-frv.c:1672
 msgid "relocation requires zero addend"
-msgstr "la reubicaciÛn requiere una adiciÛn cero"
+msgstr "sijoitus vaatii nolla-yhteenlaskettavan"
 
 #: elf32-frv.c:2906
 msgid "%B(%A+0x%x): relocation to `%s+%x' may have caused the error above"
-msgstr "%B(%A+0x%x): la reubicaciÛn a `%s+%x' tal vez causÛ el error anterior"
+msgstr "%B(%A+0x%x): sijoitus kohteeseen ‚Äù%s+%x‚Äù saatta olla yl√§puolella olevan virheen aiheuttama"
 
 #: elf32-frv.c:2995
 msgid "R_FRV_GETTLSOFF not applied to a call instruction"
-msgstr "no se aplicÛ R_FRV_GETTLSOFF a una instrucciÛn call"
+msgstr "R_FRV_GETTLSOFF ei sovelleta kutsuk√§skyyn"
 
 #: elf32-frv.c:3037
 msgid "R_FRV_GOTTLSDESC12 not applied to an lddi instruction"
-msgstr "no se aplicÛ R_FRV_GOTTLSDESC12 a una instrucciÛn lddi"
+msgstr "R_FRV_GOTTLSDESC12 ei sovelleta ‚Äùlddi‚Äù-k√§skyyn"
 
 #: elf32-frv.c:3108
 msgid "R_FRV_GOTTLSDESCHI not applied to a sethi instruction"
-msgstr "no se aplicÛ R_FRV_GOTTLSDESCHI a una instrucciÛn sethi"
+msgstr "R_FRV_GOTTLSDESCHI ei sovelleta ‚Äùsethi‚Äù-k√§skyyn"
 
 #: elf32-frv.c:3145
 msgid "R_FRV_GOTTLSDESCLO not applied to a setlo or setlos instruction"
-msgstr "no se aplicÛ R_FRV_GOTTLSDESCLO a una instrucciÛn setlo o setlos"
+msgstr "R_FRV_GOTTLSDESCLO ei sovelleta ‚Äùsetlo‚Äù- tai ‚Äùsetlos‚Äù-k√§skyyn"
 
 #: elf32-frv.c:3193
 msgid "R_FRV_TLSDESC_RELAX not applied to an ldd instruction"
-msgstr "no se aplicÛ R_FRV_GOTTLSDESC_RELAX a una instrucciÛn ldd"
+msgstr "R_FRV_TLSDESC_RELAX ei sovelleta ‚Äùldd‚Äù-k√§skyyn"
 
+#  msgid-virhe: calll, eli yksi √§ll√§ liikaa
 #: elf32-frv.c:3277
 msgid "R_FRV_GETTLSOFF_RELAX not applied to a calll instruction"
-msgstr "no se aplicÛ R_FRV_GETTLSOFF_RELAX a una instrucciÛn calll"
+msgstr "R_FRV_GETTLSOFF_RELAX ei sovelleta kutsuk√§skyyn"
 
 #: elf32-frv.c:3332
 msgid "R_FRV_GOTTLSOFF12 not applied to an ldi instruction"
-msgstr "no se aplicÛ R_FRV_GOTTLSOFF12 a una instrucciÛn ldi"
+msgstr "R_FRV_GOTTLSOFF12 ei sovelleta ‚Äùldi‚Äù-k√§skyyn"
 
 #: elf32-frv.c:3362
 msgid "R_FRV_GOTTLSOFFHI not applied to a sethi instruction"
-msgstr "no se aplicÛ R_FRV_GOTTLSOFFHI a una instrucciÛn sethi"
+msgstr "R_FRV_GOTTLSOFFHI ei sovelleta ‚Äùsethi‚Äù-k√§skyyn"
 
 #: elf32-frv.c:3391
 msgid "R_FRV_GOTTLSOFFLO not applied to a setlo or setlos instruction"
-msgstr "no se aplicÛ R_FRV_GOTTLSOFFLO a una instrucciÛn setlo o setlos"
+msgstr "R_FRV_GOTTLSOFFLO ei sovelleta ‚Äùsetlo‚Äù- tai ‚Äùsetlos‚Äù-k√§skyyn"
 
 #: elf32-frv.c:3422
 msgid "R_FRV_TLSOFF_RELAX not applied to an ld instruction"
-msgstr "no se aplicÛ R_FRV_TLSOFF_RELAX a una instrucciÛn ld"
+msgstr "R_FRV_TLSOFF_RELAX ei sovelleta ‚Äùld‚Äù-k√§skyyn"
 
 #: elf32-frv.c:3467
 msgid "R_FRV_TLSMOFFHI not applied to a sethi instruction"
-msgstr "no se aplicÛ R_FRV_TLSMOFFHI a una instrucciÛn sethi"
+msgstr "R_FRV_TLSMOFFHI ei sovelleta ‚Äùsethi‚Äù-k√§skyyn"
 
 #: elf32-frv.c:3494
 msgid "R_FRV_TLSMOFFLO not applied to a setlo or setlos instruction"
-msgstr "no se aplicÛ R_FRV_TLSMOFFLO a una instrucciÛn setlo o setlos"
+msgstr "R_FRV_TLSMOFFLO ei sovelleta ‚Äùsetlo‚Äù- tai ‚Äùsetlos‚Äù-k√§skyyn"
 
 #: elf32-frv.c:3615
 msgid "R_FRV_FUNCDESC references dynamic symbol with nonzero addend"
-msgstr "R_FRV_FUNCDESC referencÌa un sÌmbolo din·mico con adiciÛn que no es cero"
+msgstr "R_FRV_FUNCDESC viittaa dynaamiseen symboliin ei-nolla-yhteenlaskettavalla"
 
 #: elf32-frv.c:3735
 msgid "R_FRV_FUNCDESC_VALUE references dynamic symbol with nonzero addend"
-msgstr "R_FRV_FUNCDESC_VALUE referencÌa un sÌmbolo din·mico con adiciÛn que no es cero"
+msgstr "R_FRV_FUNCDESC_VALUE viittaa dynaamiseen symboliin ei-nolla-yhteenlaskettavalla"
 
 #: elf32-frv.c:3992 elf32-frv.c:4148
 msgid "%B(%A+0x%lx): reloc against `%s': %s"
-msgstr "%B(%A+0x%lx): reubicaciÛn contra `%s': %s"
+msgstr "%B(%A+0x%lx): reloc-tietue ‚Äù%s‚Äù: %s varten"
 
 #: elf32-frv.c:3994 elf32-frv.c:3998
 msgid "relocation references a different segment"
-msgstr "la reubicaciÛn referencÌa un segmento diferente"
+msgstr "sijoitus viittaa eri segmenttiin"
 
 #: elf32-frv.c:6745
 #, c-format
 msgid "%s: compiled with %s and linked with modules that use non-pic relocations"
-msgstr "%s: compilado con %s y enlazado con mÛdulos que usan reubicaciones que no son pic"
+msgstr "%s: k√§√§nnetty %s:n kanssa ja linkitetty paikkariippuvaisia koodisijoituksia k√§ytt√§vien modulien kanssa"
 
 #: elf32-frv.c:6798 elf32-iq2000.c:808 elf32-m32c.c:819
 #, c-format
 msgid "%s: compiled with %s and linked with modules compiled with %s"
-msgstr "%s: compilado con %s y enlazado con mÛdulos compilados con %s"
+msgstr "%s: k√§√§nnetty %s:n kanssa ja linkitetty moduleihin, jotka on k√§√§nnetty %s:n kanssa"
 
 #: elf32-frv.c:6810
 #, c-format
 msgid "%s: uses different unknown e_flags (0x%lx) fields than previous modules (0x%lx)"
-msgstr "%s: usa campos e_flags desconocidos (0x%lx) diferentes a aquÈllos de los mÛdulos previos (0x%lx)"
+msgstr "%s: k√§ytt√§√§ erilaisia tuntemattomia ‚Äùe_flags (0x%lx)‚Äù-kentti√§ kuin edelliset modulit (0x%lx)"
 
 #: elf32-frv.c:6860 elf32-iq2000.c:845 elf32-m32c.c:855 elf32-mt.c:587
 #, c-format
 msgid "private flags = 0x%lx:"
-msgstr "opciones privadas = 0x%lx:"
+msgstr "yksityiset liput = 0x%lx:"
 
 #: elf32-gen.c:69 elf64-gen.c:69
 msgid "%B: Relocations in generic ELF (EM: %d)"
-msgstr "%B: Reubicaciones en ELF genÈrico (EM: %d)"
+msgstr "%B: Sijoituksia geneerisess√§ ELF (EM: %d):ssa"
 
 #: elf32-hppa.c:844 elf32-hppa.c:3577
 msgid "%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"
-msgstr "%B(%A+0x%lx): no se puede alcanzar %s, recompile con -ffuntion-sections"
+msgstr "%B(%A+0x%lx): ei tavoita kohdetta %s, k√§√§nn√§ uudelleen ‚Äù-ffunction-sections‚Äù-valitsimilla"
 
 #: elf32-hppa.c:1253
 msgid "%B: relocation %s can not be used when making a shared object; recompile with -fPIC"
-msgstr "%B: no se puede usar la reubicaciÛn %s cuando se hace un objeto compartido; recompile con -fPIC"
+msgstr "%B: sijoitusta %s ei voi k√§ytt√§√§ kun tehd√§√§n jaettua objektia; k√§√§nn√§ uudelleen ‚Äù-fPIC‚Äù-argumentilla"
 
 #: elf32-hppa.c:1506
 #, c-format
 msgid "Could not find relocation section for %s"
-msgstr "No se puede encontrar la secciÛn de reubicaciÛn para %s"
+msgstr "Ei l√∂ytynyt sijoituslohkoa kohteelle %s"
 
 #: elf32-hppa.c:2795
 msgid "%B: duplicate export stub %s"
-msgstr "%B: cabo de exportaciÛn %s duplicado"
+msgstr "%B: vienti-stubin %s kaksoiskappale"
 
 #: elf32-hppa.c:3413
 msgid "%B(%A+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"
-msgstr "%B(%A+0x%lx): la compostura %s para la insn 0x%x no se admite en un enlazado que no es compartido"
+msgstr "%B(%A+0x%lx): %s korjaus k√§skylle 0x%x ei ole tuettu ei-jaetussa linkiss√§"
 
 #: elf32-hppa.c:4267
 msgid "%B(%A+0x%lx): cannot handle %s for %s"
-msgstr "%B(%A+0x%lx): no se puede manejar %s para %s"
+msgstr "%B(%A+0x%lx): ei voi k√§sitell√§ %s kohteelle %s"
 
 #: elf32-hppa.c:4574
 msgid ".got section not immediately after .plt section"
-msgstr "la secciÛn .got no est· inmediatamente despuÈs de la secciÛn .plt"
+msgstr "‚Äù.got‚Äù-alilohko ei ole v√§litt√∂m√§sti ‚Äù.plt‚Äù-lohkon j√§lkeen"
 
 #: elf32-i386.c:364 elf32-ppc.c:1616 elf32-s390.c:379 elf64-ppc.c:2148
 #: elf64-s390.c:403 elf64-x86-64.c:221
 msgid "%B: invalid relocation type %d"
-msgstr "%B: tipo de reubicaciÛn %d inv·lido"
+msgstr "%B: virheellinen sijoitustyyppi %d"
 
 #: elf32-i386.c:1085 elf32-s390.c:1185 elf32-sh.c:5063 elf64-s390.c:1149
 #: elfxx-sparc.c:1243
 msgid "%B: `%s' accessed both as normal and thread local symbol"
-msgstr "%B: se accesÛ `%s' como un sÌmbolo normal y un sÌmbolo local de hilo"
+msgstr "%B: ‚Äù%s‚Äù haettu sek√§ normaalina ett√§ s√§ikeisen√§ paikallissymbolina"
 
 #: elf32-i386.c:1200 elf32-s390.c:1294 elf64-ppc.c:4864 elf64-s390.c:1261
 #: elf64-x86-64.c:1051
 msgid "%B: bad relocation section name `%s'"
-msgstr "%B: nombre de secciÛn de reubicaciÛn `%s' errÛneo"
+msgstr "%B: virheellinen sijoituslohkonimi ‚Äù%s‚Äù"
 
 #: elf32-i386.c:2257
 msgid "%B: unrecognized relocation (0x%x) in section `%A'"
-msgstr "%B: no se reconoce la direcciÛn de reubicaciÛn (0x%lx) en la secciÛn `%A'"
+msgstr "%B: tunnistamaton sijoitus (0x%x) lohkossa ‚Äù%A‚Äù"
 
 #: elf32-i386.c:2479
 msgid "%B: relocation R_386_GOTOFF against protected function `%s' can not be used when making a shared object"
-msgstr "%B: no se puede usar la reubicaciÛn R_386_GOTOFF contra la funciÛn protegida `%s' cuando se hace un objeto compartido"
+msgstr "%B: R_386_GOTOFF-sijoitusta suojattua funktiota ‚Äù%s‚Äù varten ei voida k√§ytt√§√§ kun tehd√§√§n jaettua objektia"
 
 #: elf32-ip2k.c:868 elf32-ip2k.c:874 elf32-ip2k.c:941 elf32-ip2k.c:947
 msgid "ip2k relaxer: switch table without complete matching relocation information."
-msgstr "relajador ip2k: tabla switch sin informaciÛn completa de reubicaciÛn de coincidencias."
+msgstr "ip2k-avartaja: kytkintaulu ilman t√§ydellisesti t√§sm√§√§vi√§ sijoitustietoja."
 
 #: elf32-ip2k.c:891 elf32-ip2k.c:974
 msgid "ip2k relaxer: switch table header corrupt."
-msgstr "relajador ip2k: encabezado de tabla switch corrupto."
+msgstr "ip2k-avartaja: kytkintauluotsake rikkin√§inen."
 
 #: elf32-ip2k.c:1316
 #, c-format
 msgid "ip2k linker: missing page instruction at 0x%08lx (dest = 0x%08lx)."
-msgstr "enlazador ip2k: instrucciÛn de p·gina faltante en 0x%08lx (dest = 0x%08lx)."
+msgstr "ip2k-linkkeri: puuttuva sivuk√§sky kohteessa 0x%08lx (kohde = 0x%08lx)."
 
 #: elf32-ip2k.c:1332
 #, c-format
 msgid "ip2k linker: redundant page instruction at 0x%08lx (dest = 0x%08lx)."
-msgstr "enlazador ip2k: instrucciÛn de p·gina redundante en 0x%08lx (dest = 0x%08lx)."
+msgstr "ip2k-linkkeri: redundanssisivuk√§sky kohteessa 0x%08lx (kohde = 0x%08lx)."
 
 #. Only if it's not an unresolved symbol.
 #: elf32-ip2k.c:1506
 msgid "unsupported relocation between data/insn address spaces"
-msgstr "no se admite la reubicaciÛn entre espacios de direcciones datos/insn"
+msgstr "ei-tuettu sijoitus data/k√§skyosoitetilojen v√§lill√§"
 
 #: elf32-iq2000.c:821 elf32-m32c.c:831
 #, c-format
 msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
-msgstr "%s: usa campos de e_flags diferentes (0x%lx) que los mÛdulos previos (0x%lx)"
+msgstr "%s: k√§ytt√§√§ eri ‚Äùe_flags (0x%lx)‚Äù-kentti√§ kuin edelliset modulit (0x%lx)"
 
 #: elf32-m32r.c:1453
 msgid "SDA relocation when _SDA_BASE_ not defined"
-msgstr "reubicaciÛn SDA cuando _SDA_BASE_ no est· definido"
+msgstr "SDA-sijoitus kun ‚Äù_SDA_BASE_‚Äù ei ole m√§√§ritelty"
 
 #: elf32-m32r.c:3061
 msgid "%B: The target (%s) of an %s relocation is in the wrong section (%A)"
-msgstr "%B: El objetivo (%s) de una reubicaciÛn %s est· en la secciÛn errÛnea (%A)"
+msgstr "%B: Kohteen (%s) sijoitus %s on v√§√§r√§ss√§ lohkossa (%A)"
 
 #: elf32-m32r.c:3589
 msgid "%B: Instruction set mismatch with previous modules"
-msgstr "%B: Conjunto de instrucciones no coincidente con mÛdulos previos"
+msgstr "%B: K√§skyjoukko ei t√§sm√§√§ edellisten modulien kanssa"
 
 #: elf32-m32r.c:3610
 #, c-format
 msgid "private flags = %lx"
-msgstr "opciones privadas = %lx"
+msgstr "yksityiset liput = %lx"
 
 #: elf32-m32r.c:3615
 #, c-format
 msgid ": m32r instructions"
-msgstr ": instrucciones m32r"
+msgstr ": m32r-k√§skyt"
 
 #: elf32-m32r.c:3616
 #, c-format
 msgid ": m32rx instructions"
-msgstr ": instrucciones m32rx"
+msgstr ": m32rx-k√§skyt"
 
 #: elf32-m32r.c:3617
 #, c-format
 msgid ": m32r2 instructions"
-msgstr ": instrucciones m32r2"
+msgstr ": m32r2-k√§skyt"
 
 #: elf32-m68hc1x.c:1045
 #, c-format
 msgid "Reference to the far symbol `%s' using a wrong relocation may result in incorrect execution"
-msgstr "El referenciar al sÌmbolo far `%s' usando una reubicaciÛn incorrecta puede resultar en una ejecuciÛn incorrecta"
+msgstr "Viite et√§symboliin ‚Äù%s‚Äù k√§ytt√§en v√§√§r√§√§ sijoitus saattaa aiheuttaa virheellisen suorituksen"
 
+#  memory bank: A physical section of memory.
 #: elf32-m68hc1x.c:1068
 #, c-format
 msgid "banked address [%lx:%04lx] (%lx) is not in the same bank as current banked address [%lx:%04lx] (%lx)"
-msgstr "la direcciÛn almacenada [%lx:%04lx] (%lx) no est· en el mismo banco que la direcciÛn almacenada actual [%lx:%04lx] (%lx)"
+msgstr "muistilohkottu osoite [%lx:%04lx] (%lx) ei ole samassa muistilohkossa kuin nykyinen muistilohkottu osoite [%lx:%04lx] (%lx)"
 
 #: elf32-m68hc1x.c:1087
 #, c-format
 msgid "reference to a banked address [%lx:%04lx] in the normal address space at %04lx"
-msgstr "referencia a una direcciÛn almacenada [%lx:%04lx] en el espacio normal de direcciones en %04lx"
+msgstr "viite muistilohkottuun osoitteeseen [%lx:%04lx] tavallisessa osoitetilassa osoitteessa %04lx"
 
 #: elf32-m68hc1x.c:1220
 msgid "%B: linking files compiled for 16-bit integers (-mshort) and others for 32-bit integers"
-msgstr "%B: se enlazan ficheros compilados con enteros de 16-bit (-mshort) y otros con enteros de 32-bit"
+msgstr "%B: linkitystiedostot k√§√§nnetty 16-bittisille kokonaisluvuille (-mshort) ja muut 32-bittisille kokonaisluvuille"
 
 #: elf32-m68hc1x.c:1227
 msgid "%B: linking files compiled for 32-bit double (-fshort-double) and others for 64-bit double"
-msgstr "%B: se enlazan ficheros compilados con dobles de 32-bit (-fshort-double) y otros con dobles de 64-bit"
+msgstr "%B: linkitystiedostot k√§√§nnetty 32-bittiselle double-liukuluvulle (-fshort-double) ja muut 64-bittiselle double-liukuluvulle"
 
 #: elf32-m68hc1x.c:1236
 msgid "%B: linking files compiled for HCS12 with others compiled for HC12"
-msgstr "%B: se enlazan ficheros compilados para HCS12, con otros compilados para HC12"
+msgstr "%B: linkitystiedostot k√§√§nnetty HCS12:lle, muut k√§√§nnetty HC12:lle"
 
 #: elf32-m68hc1x.c:1252 elf32-ppc.c:3734 elf64-sparc.c:697 elfxx-mips.c:11292
 msgid "%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
-msgstr "%B: usa campos de e_flags diferentes (0x%lx) que los mÛdulos previos (0x%lx)"
+msgstr "%B: k√§ytt√§√§ eri ‚Äùe_flags (0x%lx)‚Äù-kentti√§ kuin edelliset modulit (0x%lx)"
 
 #: elf32-m68hc1x.c:1280
 #, c-format
 msgid "[abi=32-bit int, "
-msgstr "[abi=int de 32-bit, "
+msgstr "[abi=32-bittinen kokonaisluku, "
 
 #: elf32-m68hc1x.c:1282
 #, c-format
 msgid "[abi=16-bit int, "
-msgstr "[abi=int de 16-bit, "
+msgstr "[abi=16-bittinen kokonaisluku, "
 
 #: elf32-m68hc1x.c:1285
 #, c-format
 msgid "64-bit double, "
-msgstr "doble de 64-bit, "
+msgstr "64-bittinen double-liukuluku, "
 
 #: elf32-m68hc1x.c:1287
 #, c-format
 msgid "32-bit double, "
-msgstr "doble de 32-bit, "
+msgstr "32-bittinen double-liukuluku, "
 
 #: elf32-m68hc1x.c:1290
 #, c-format
@@ -1414,328 +1430,330 @@ msgstr "cpu=HC12]"
 #: elf32-m68hc1x.c:1297
 #, c-format
 msgid " [memory=bank-model]"
-msgstr " [memoria=modelo de bancos]"
+msgstr " [muisti=muistilohkomalli]"
 
 #: elf32-m68hc1x.c:1299
 #, c-format
 msgid " [memory=flat]"
-msgstr " [memoria=plana]"
+msgstr " [muisti=litte√§]"
 
 #: elf32-m68k.c:635 elf32-m68k.c:636
 msgid "unknown"
-msgstr "desconocido"
+msgstr "tuntematon"
 
 #: elf32-mcore.c:99 elf32-mcore.c:442
 msgid "%B: Relocation %s (%d) is not currently supported.\n"
-msgstr "%B: La reubicaciÛn %s (%d) actualmente no se admite.\n"
+msgstr "%B: Sijoitusta %s (%d) ei t√§ll√§ hetkell√§ tueta.\n"
 
 #: elf32-mcore.c:428
 msgid "%B: Unknown relocation type %d\n"
-msgstr "%B: Tipo de reubicaciÛn %d desconocido\n"
+msgstr "%B: Tuntematon sijoitustyyppi %d\n"
 
 #: elf32-mep.c:812
 msgid "%B and %B are for different cores"
-msgstr "%B y %B son para n˙cleos diferentes"
+msgstr "%B ja %B ovat eri ytimille"
 
 #: elf32-mep.c:829
 msgid "%B and %B are for different configurations"
-msgstr "%B y %B son para configuraciones diferentes"
+msgstr "%B ja %B ovat eri konfiguraatioille"
 
 #: elf32-mep.c:867
 #, c-format
 msgid "private flags = 0x%lx"
-msgstr "opciones privadas = 0x%lx"
+msgstr "yksityiset liput = 0x%lx"
 
 #: elf32-mips.c:989 elf64-mips.c:1976 elfn32-mips.c:1808
 msgid "literal relocation occurs for an external symbol"
-msgstr "la reubicaciÛn literal sucede para un sÌmbolo externo"
+msgstr "literaali sijoitus tapahtuu ulkoiselle symbolille"
 
 #: elf32-mips.c:1029 elf32-score.c:484 elf64-mips.c:2019 elfn32-mips.c:1849
 msgid "32bits gp relative relocation occurs for an external symbol"
-msgstr "la reubicaciÛn gp relativa de 32bits sucede para un sÌmbolo externo"
+msgstr "32-bittinen gp-suhteellinen sijoitus tapahtuu ulkoiselle symbolille"
 
 #: elf32-ppc.c:1681
 #, c-format
 msgid "generic linker can't handle %s"
-msgstr "el enlazador genÈrico no puede manejar %s"
+msgstr "geneerinen linkkeri ei voi k√§sitell√§ kohdetta %s"
 
 #: elf32-ppc.c:2163
 msgid "corrupt or empty %s section in %B"
-msgstr "secciÛn %s corrupta o vacÌa en %B"
+msgstr "rikkin√§inen tai tyhj√§ %s-lohko kohteessa %B"
 
 #: elf32-ppc.c:2170
 msgid "unable to read in %s section from %B"
-msgstr "no se puede leer en la secciÛn %s desde %B"
+msgstr "ei voi lukea %s-lohkoon kohteesta %B"
 
 #: elf32-ppc.c:2176
 msgid "corrupt %s section in %B"
-msgstr "secciÛn %s corrupta en %B"
+msgstr "rikkin√§inen %s-lohko kohteessa %B"
 
 #: elf32-ppc.c:2219
 msgid "warning: unable to set size of %s section in %B"
-msgstr "aviso: no se puede establecer el tamaÒo de la secciÛn %s en %B"
+msgstr "varoitus: ei voi asettaa %s-lohkon kokoa kohteessa %B"
 
 #: elf32-ppc.c:2267
 msgid "failed to allocate space for new APUinfo section."
-msgstr "no se puede reservar espacio para la nueva secciÛn APUinfo."
+msgstr "ei onnistuttu varaamaan muistitilaa uudelle APUinfo-lohkolle."
 
 #: elf32-ppc.c:2286
 msgid "failed to compute new APUinfo section."
-msgstr "no se puede calcular la nueva secciÛn APUinfo."
+msgstr "ei onnistuttu laskemaan uutta APUinfo-lohkoa"
 
 #: elf32-ppc.c:2289
 msgid "failed to install new APUinfo section."
-msgstr "no se puede instalar la nueva secciÛn APUinfo."
+msgstr "ei onnistuttu asentamaan uutta APUinfo-lohkoa"
 
 #: elf32-ppc.c:3022
 msgid "%B: relocation %s cannot be used when making a shared object"
-msgstr "%B: no se puede usar la reubicaciÛn %s cuando se hace un objeto compartido"
+msgstr "%B: sijoitusta %s ei voi k√§ytt√§√§ kun tehd√§√§n jaettua objektia"
 
 #. It does not make sense to have a procedure linkage
 #. table entry for a local symbol.
 #: elf32-ppc.c:3292
 msgid "%B(%A+0x%lx): %s reloc against local symbol"
-msgstr "%B(%A+0x%lx): reubicaciÛn %s contra un sÌmbolo local"
+msgstr "%B(%A+0x%lx): %s reloc-tietue paikallista symbolia varten"
 
+#  Otaksun t√§ss√§ ett√§ hard float tarkoittaa t√§ss√§ muistipaikkaa (esim. rekisteri√§), joka on varattu float-tyyppisille liukuluvuille
 #: elf32-ppc.c:3633 elf32-ppc.c:3637 elfxx-mips.c:11036 elfxx-mips.c:11055
 #: elfxx-mips.c:11070
 msgid "Warning: %B uses hard float, %B uses soft float"
-msgstr "Aviso: %B usa coma flotante hard, %B usa coma flotante soft"
+msgstr "Varoitus: %B k√§ytt√§√§ laitteistoliukulukua, %B k√§ytt√§√§ ohjelmistoliukulukua"
 
 #: elf32-ppc.c:3640 elf32-ppc.c:3644 elfxx-mips.c:11017 elfxx-mips.c:11021
 msgid "Warning: %B uses unknown floating point ABI %d"
-msgstr "Aviso: %B usa la ABI de coma flotante desconocida %d"
+msgstr "Varoitus: %B k√§ytt√§√§ tuntematonta liukuluku-ABI:a %d"
 
 #: elf32-ppc.c:3699
 msgid "%B: compiled with -mrelocatable and linked with modules compiled normally"
-msgstr "%B: compilado con -mrelocatable y enlazado con mÛdulos compilados de forma normal"
+msgstr "%B: k√§√§nnetty ‚Äù-mrelocatable‚Äù-argumentilla ja linkitetty tavallisesti k√§√§nnetyill√§ moduleilla"
 
 #: elf32-ppc.c:3707
 msgid "%B: compiled normally and linked with modules compiled with -mrelocatable"
-msgstr "%B: compilado de forma normal y enlazado con mÛdulos compilados con -mrelocatable"
+msgstr "%B: k√§√§nnetty tavallisesti ja linkitetty moduleilla, jotka on k√§√§nnetty ‚Äù-mrelocatable‚Äù-argumentilla"
 
 #: elf32-ppc.c:3793
 msgid "Using bss-plt due to %B"
-msgstr "Se usa bss-plt debido a %B"
+msgstr "K√§ytet√§√§n bss-plt-argumenttia %B:n vuoksi"
 
 #: elf32-ppc.c:6002 elf64-ppc.c:10490
 msgid "%B: unknown relocation type %d for symbol %s"
-msgstr "%B: tipo de reubicaciÛn %d desconocido para el sÌmbolo %s"
+msgstr "%B: tuntematon sijoitustyyppi %d symbolille %s"
 
 #: elf32-ppc.c:6252
 msgid "%B(%A+0x%lx): non-zero addend on %s reloc against `%s'"
-msgstr "%B(%A+0x%lx): adiciÛn que no es cero en la reubicaciÛn %s contra `%s'"
+msgstr "%B(%A+0x%lx): ei-nolla-yhteenlaskettava %s reloc-tietueessa symbolia ‚Äù%s‚Äù varten"
 
 #: elf32-ppc.c:6597 elf32-ppc.c:6623 elf32-ppc.c:6682
 msgid "%B: the target (%s) of a %s relocation is in the wrong output section (%s)"
-msgstr "%B: el objetivo (%s) de una reubicaciÛn %s est· en la secciÛn de salida errÛnea (%s)"
+msgstr "%B: kohde (%s) sijoituksessa %s on v√§√§r√§ss√§ tulostelohkossa (%s)"
 
 #: elf32-ppc.c:6737
 msgid "%B: relocation %s is not yet supported for symbol %s."
-msgstr "%B: la reubicaciÛn %s a˙n no se admite para el sÌmbolo %s."
+msgstr "%B: sijoitus %s ei ole viel√§ tuettu symbolille %s."
 
 #: elf32-ppc.c:6845 elf64-ppc.c:11185
 msgid "%B(%A+0x%lx): %s reloc against `%s': error %d"
-msgstr "%B(%A+0x%lx): reubicaciÛn %s contra `%s': error %d"
+msgstr "%B(%A+0x%lx): %s reloc-tietuetta ‚Äù%s‚Äù varten: virhe %d"
 
 #: elf32-s390.c:2238 elf64-s390.c:2212
 msgid "%B(%A+0x%lx): invalid instruction for TLS relocation %s"
-msgstr "%B(%A+0x%lx): instrucciÛn inv·lida para la reubicaciÛn TLS %s"
+msgstr "%B(%A+0x%lx): virheellinen k√§sky TLS-sijoitukselle %s"
 
 #: elf32-score.c:1418 elfxx-mips.c:2699
 msgid "not enough GOT space for local GOT entries"
-msgstr "no hay suficiente espacio GOT para entradas GOT locales"
+msgstr "ei tarpeeksi yleissiirrostaulutilaa paikallisille yleissiirrostaulutulokohdille"
 
 #: elf32-score.c:2550
 #, c-format
 msgid "%s: Malformed reloc detected for section %s"
-msgstr "%s: Se detectÛ una reubicaciÛn malformada para la secciÛn %s"
+msgstr "%s: V√§√§r√§n muotoinen reloc-tietue havaittu lohkolle %s"
 
 #: elf32-score.c:2601
 msgid "%B: CALL15 reloc at 0x%lx not against global symbol"
-msgstr "%B: la reubicaciÛn CALL15 en 0x%lx no es contra un sÌmbolo global"
+msgstr "%B: CALL15 reloc-tietue kohteessa 0x%lx ei ole yleissymbolia varten"
 
 #: elf32-score.c:3756
 #, c-format
 msgid " [pic]"
-msgstr " [pic]"
+msgstr " [sijaintiriippumaton koodi]"
 
 #: elf32-score.c:3760
 #, c-format
 msgid " [fix dep]"
-msgstr " [fix dep]"
+msgstr " [korjaussyvyys]"
 
 #: elf32-score.c:3802 elfxx-mips.c:11201
 msgid "%B: warning: linking PIC files with non-PIC files"
-msgstr "%B: aviso: se enlazan ficheros PIC con ficheros que no son PIC"
+msgstr "%B: varoitus: linkitet√§√§n sijaintiriippumattomia kooditiedostoja sijaintiriippuvaisten kooditiedostojen kanssa"
 
 #: elf32-sh64.c:222 elf64-sh64.c:2350
 #, c-format
 msgid "%s: compiled as 32-bit object and %s is 64-bit"
-msgstr "%s: compilado como un objeto de 32-bit y %s es de 64-bit"
+msgstr "%s: k√§√§nnetty 32-bittisen√§ objektina ja %s on 64-bittinen"
 
 #: elf32-sh64.c:225 elf64-sh64.c:2353
 #, c-format
 msgid "%s: compiled as 64-bit object and %s is 32-bit"
-msgstr "%s: compilado como un objeto de 64-bit y %s es de 32-bit"
+msgstr "%s: k√§√§nnetty 64-bittisen√§ objektina ja %s on 32-bittinen"
 
 #: elf32-sh64.c:227 elf64-sh64.c:2355
 #, c-format
 msgid "%s: object size does not match that of target %s"
-msgstr "%s: el tamaÒo del objeto no coincide con el tamaÒo del objetivo %s"
+msgstr "%s: objektikoko ei t√§sm√§√§ kohteen %s objektikoon kanssa"
 
 #: elf32-sh64.c:450 elf64-sh64.c:2894
 #, c-format
 msgid "%s: encountered datalabel symbol in input"
-msgstr "%s: se encontrÛ un sÌmbolo datalabel en la entrada"
+msgstr "%s: kohdattiin datalabel-symboli sy√∂tteess√§"
 
+#  prepare-to-branch (PTB) instruction
 #: elf32-sh64.c:527
 msgid "PTB mismatch: a SHmedia address (bit 0 == 1)"
-msgstr "No coincide PTB: una direcciÛn SHmedia (bit 0 == 1)"
+msgstr "PTB-t√§sm√§√§m√§tt√∂myys: SHmedia-osoite (bitti 0 == 1)"
 
 #: elf32-sh64.c:530
 msgid "PTA mismatch: a SHcompact address (bit 0 == 0)"
-msgstr "No coincide PTA: una direcciÛn SHcompact (bit 0 == 0)"
+msgstr "PTA-t√§sm√§√§m√§tt√∂myys: SHcompact-osoite (bitti 0 == 0)"
 
 #: elf32-sh64.c:548
 #, c-format
 msgid "%s: GAS error: unexpected PTB insn with R_SH_PT_16"
-msgstr "%s: error de GAS: instrucciÛn PTB inesperada con R_SH_PT_16"
+msgstr "%s: GAS-virhe: odottamaton PTB-k√§sky R_SH_PT_16-tyypill√§"
 
 #: elf32-sh64.c:597
 msgid "%B: error: unaligned relocation type %d at %08x reloc %p\n"
-msgstr "%B: error: tipo de reubicaciÛn %d sin alinear en %08x reubicaciÛn %p\n"
+msgstr "%B: virhe: tasaamaton sijoitustyyppi %d siirroksessa %08x reloc-tietue %p\n"
 
 #: elf32-sh64.c:673
 #, c-format
 msgid "%s: could not write out added .cranges entries"
-msgstr "%s: no se pueden escribir las entradas .cranges agregadas"
+msgstr "%s: ei voitu kirjoittaa lis√§ttyj√§ ‚Äù.cranges‚Äù-tulokohtia kokonaisuudessaan"
 
 #: elf32-sh64.c:733
 #, c-format
 msgid "%s: could not write out sorted .cranges entries"
-msgstr "%s: no se pueden escribir las entradas .cranges ordenadas"
+msgstr "%s: ei voitu kirjoittaa lajiteltuja ‚Äù.cranges‚Äù-tulokohtia kokonaisuudessaan"
 
 #: elf32-sh.c:533
 msgid "%B: 0x%lx: warning: bad R_SH_USES offset"
-msgstr "%B: 0x%lx: aviso: desplazamiento R_SH_USES errÛneo"
+msgstr "%B: 0x%lx: varoitus: virheellinen R_SH_USES-siirros"
 
 #: elf32-sh.c:545
 msgid "%B: 0x%lx: warning: R_SH_USES points to unrecognized insn 0x%x"
-msgstr "%B: 0x%lx: aviso: R_SH_USES seÒala al insn 0x%x que no se reconoce"
+msgstr "%B: 0x%lx: varoitus: R_SH_USES osoittaa tunnistamattomaan k√§skyyn 0x%x"
 
 #: elf32-sh.c:562
 msgid "%B: 0x%lx: warning: bad R_SH_USES load offset"
-msgstr "%B: 0x%lx: aviso: desplazamiento de carga R_SH_USES errÛneo"
+msgstr "%B: 0x%lx: varoitus: virheellinen R_SH_USES lataussiirros"
 
 #: elf32-sh.c:577
 msgid "%B: 0x%lx: warning: could not find expected reloc"
-msgstr "%B: 0x%lx: aviso: no se puede encontrar la reubicaciÛn esperada"
+msgstr "%B: 0x%lx: varoitus: ei voitu l√∂yt√§√§ odotettua reloc-tietuetta"
 
 #: elf32-sh.c:605
 msgid "%B: 0x%lx: warning: symbol in unexpected section"
-msgstr "%B: 0x%lx: aviso: sÌmbolo en una secciÛn inesperada"
+msgstr "%B: 0x%lx: varoitus: symboli odottamattomassa lohkossa"
 
 #: elf32-sh.c:731
 msgid "%B: 0x%lx: warning: could not find expected COUNT reloc"
-msgstr "%B: 0x%lx: aviso: no se puede encontrar la reubicaciÛn COUNT esperada"
+msgstr "%B: 0x%lx: varoitus: ei voitu l√∂yt√§√§ odotettua ‚ÄùCOUNT reloc‚Äù-tietuetta"
 
 #: elf32-sh.c:740
 msgid "%B: 0x%lx: warning: bad count"
-msgstr "%B: 0x%lx: aviso: cuenta errÛnea"
+msgstr "%B: 0x%lx: varoitus: virheellinen lukum√§√§r√§"
 
 #: elf32-sh.c:1144 elf32-sh.c:1514
 msgid "%B: 0x%lx: fatal: reloc overflow while relaxing"
-msgstr "%B: 0x%lx: fatal: desbordamiento de reubicaciÛn durante la relajaciÛn"
+msgstr "%B: 0x%lx: kohtalokas: reloc-tietue ylivuoto avartamisen aikana"
 
 #: elf32-sh.c:3249 elf64-sh64.c:1526
 msgid "Unexpected STO_SH5_ISA32 on local symbol is not handled"
-msgstr "No se maneja un STO_SH5_ISA32 inesperado en un sÌmbolo local"
+msgstr "Odottamatonta STO_SH5_ISA32 paikallisessa symbolissa ei k√§sitell√§"
 
 #: elf32-sh.c:3486
 msgid "%B: 0x%lx: fatal: unaligned branch target for relax-support relocation"
-msgstr "%B: 0x%lx: fatal: objetivo de ramificaciÛn sin alineaciÛn para la reubicaciÛn de soporte de relajamiento"
+msgstr "%B: 0x%lx: kohtalokas: tasaamaton haarautumiskohde avarrustukisijoitukselle"
 
 #: elf32-sh.c:3519 elf32-sh.c:3534
 msgid "%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"
-msgstr "%B: 0x%lx: fatal: reubicaciÛn %s sin alineaciÛn 0x%lx"
+msgstr "%B: 0x%lx: kohtalokas: tasaamaton %s sijoitus 0x%lx"
 
 #: elf32-sh.c:3548
 msgid "%B: 0x%lx: fatal: R_SH_PSHA relocation %d not in range -32..32"
-msgstr "%B: 0x%lx: fatal: la reubicaciÛn R_SH_PSHA %d no est· en el rango -32..32"
+msgstr "%B: 0x%lx: kohtalokas: R_SH_PSHA-sijoitus %d ei ole lukualueella -32..32"
 
 #: elf32-sh.c:3562
 msgid "%B: 0x%lx: fatal: R_SH_PSHL relocation %d not in range -32..32"
-msgstr "%B: 0x%lx: fatal: la reubicaciÛn R_SH_PSHL %d no est· en el rango -32..32"
+msgstr "%B: 0x%lx: kohtalokas: R_SH_PSHL-sijoitus %d ei ole lukualueella -32..32"
 
 #: elf32-sh.c:5275 elf64-alpha.c:4533
 msgid "%B: TLS local exec code cannot be linked into shared objects"
-msgstr "%B: el cÛdigo de ejecuciÛn local TLS no se puede enlazar en objetos compartidos"
+msgstr "%B: TLS-tyyppist√§ paikallista suoritettavaa koodia ei voida linkitt√§√§ jaettuihin objekteihin"
 
 #: elf32-sh-symbian.c:130
 msgid "%B: IMPORT AS directive for %s conceals previous IMPORT AS"
-msgstr "%B: la directiva IMPORT AS para %s oculta un IMPORT AS previo"
+msgstr "%B: ‚ÄùIMPORT AS‚Äù-direktiivi kohteelle %s k√§tkee edellisen ‚ÄùIMPORT AS‚Äù-direktiivin"
 
 #: elf32-sh-symbian.c:383
 msgid "%B: Unrecognised .directive command: %s"
-msgstr "%B: Orden .directive no reconocida: %s"
+msgstr "%B: Tunnistamaton ‚Äù.directive‚Äù-komento: %s"
 
 #: elf32-sh-symbian.c:504
 msgid "%B: Failed to add renamed symbol %s"
-msgstr "%B: FallÛ al agregar el sÌmbolo renombrado %s"
+msgstr "%B: Ei onnistuttu lis√§√§m√§√§n uudelleennimetty√§ symbolia %s"
 
 #: elf32-sparc.c:89
 msgid "%B: compiled for a 64 bit system and target is 32 bit"
-msgstr "%B: compilado para un sistema de 64 bit y el objetivo es de 32 bit"
+msgstr "%B: k√§√§nnetty 64-bittiselle j√§rjestelm√§lle ja kohde on 32-bittinen"
 
 #: elf32-sparc.c:102
 msgid "%B: linking little endian files with big endian files"
-msgstr "%B: se enlazan ficheros little endian con ficheros big endian"
+msgstr "%B: linkitetty ‚Äùlittle endian‚Äù-tiedostoja ‚Äùbig endian‚Äù-tiedostojen kanssa"
 
 #: elf32-spu.c:995
 msgid "warning: call to non-function symbol %s defined in %B"
-msgstr "aviso: se llama al sÌmbolo %s que no es funciÛn, definido en %B"
+msgstr "varoitus: kutsu ei-funktiosymboliin %s m√§√§ritelty kohteessa %B"
 
 #: elf32-spu.c:1315
 msgid "%B is not allowed to define %s"
-msgstr "%B no se permite para definir %s"
+msgstr "%B ei ole sallittu m√§√§ritell√§ %s"
 
 #: elf32-spu.c:1352
 #, c-format
 msgid "%s in overlay section"
-msgstr "%s en la secciÛn de sobreescritura"
+msgstr "%s p√§√§llyslohkossa"
 
 #: elf32-spu.c:1363
 msgid "overlay stub relocation overflow"
-msgstr "desbordamiento del segmento de reubicaciÛn de sobreescritura"
+msgstr "p√§√§llys-stub-sijoitusylivuoto"
 
 #: elf32-spu.c:1820
 #, c-format
 msgid "warning: %s overlaps %s\n"
-msgstr "aviso: %s sobreescribe %s\n"
+msgstr "varoitus: %s menee p√§√§llekk√§in %s:n kanssa\n"
 
 #: elf32-spu.c:1836
 #, c-format
 msgid "warning: %s exceeds section size\n"
-msgstr "aviso: %s excede el tamaÒo de la secciÛn\n"
+msgstr "varoitus: %s ylitt√§√§ lohkokoon\n"
 
 #: elf32-spu.c:1867
 msgid "%A:0x%v not found in function table\n"
-msgstr "%A:0x%v no se encuentra en la tabla de funciÛn\n"
+msgstr "%A:0x%v ei l√∂ytynyt funktiotaulusta\n"
 
 #: elf32-spu.c:1958
 msgid "%B(%A+0x%v): call to non-code section %B(%A), stack analysis incomplete\n"
-msgstr "%B(%A+0x%v): se llama a la secciÛn %B(%A) que no es de cÛdigo, an·lisis de pila incompleto\n"
+msgstr "%B(%A+0x%v): kutsu ei-koodilohkoon %B(%A), pinoanalyysi ei ole t√§ydellinen\n"
 
 #: elf32-spu.c:2079
 #, c-format
 msgid "%A link_order not found\n"
-msgstr "no se encontrÛ link_order %A\n"
+msgstr "%A link_order ei l√∂ytynyt\n"
 
 #: elf32-spu.c:2358
 #, c-format
 msgid "Stack analysis will ignore the call from %s to %s\n"
-msgstr "El an·lisis de pila descartar· la llamada de %s a %s\n"
+msgstr "Pinoanalyysi ei ota huomioon kutsua kohteesta %s kohteeseen %s\n"
 
 #: elf32-spu.c:2513
 msgid "%s: 0x%v 0x%v\n"
@@ -1743,7 +1761,7 @@ msgstr "%s: 0x%v 0x%v\n"
 
 #: elf32-spu.c:2517
 msgid "  calls:\n"
-msgstr "  llama:\n"
+msgstr "  kutsut:\n"
 
 #: elf32-spu.c:2524
 #, c-format
@@ -1752,15 +1770,16 @@ msgstr "   %s%s %s\n"
 
 #: elf32-spu.c:2585
 msgid "Stack size for call graph root nodes.\n"
-msgstr "TamaÒo de la pila para los nodos raÌz del grafo de llamadas.\n"
+msgstr "Pinokoko kutsugraafijuurinodeille.\n"
 
+#  Wikipedia: A tail call is a subroutine call just before the end of a subroutine.
 #: elf32-spu.c:2586
 msgid ""
 "\n"
 "Stack size for functions.  Annotations: '*' max stack, 't' tail call\n"
 msgstr ""
 "\n"
-"TamaÒo de la pila para funciones. Anotaciones: '*' max de pila, 't' llamada cola\n"
+"Pinokoko funktioille.  Sivuhuomautukset: ‚Äù*‚Äù maksimipino, ‚Äùt‚Äù alikutsu\n"
 
 #: elf32-spu.c:2615
 msgid "  %s: 0x%v\n"
@@ -1768,209 +1787,216 @@ msgstr "  %s: 0x%v\n"
 
 #: elf32-spu.c:2625
 msgid "Maximum stack required is 0x%v\n"
-msgstr "La pila m·xima requerida es 0x%v\n"
+msgstr "Vaadittu maksimipino on 0x%v\n"
 
 #: elf32-spu.c:2751
 msgid "%B(%s+0x%lx): unresolvable %s relocation against symbol `%s'"
-msgstr "%B(%s+0x%lx): reubicaciÛn %s sin resoluciÛn contra el sÌmbolo `%s'"
+msgstr "%B(%s+0x%lx): ratkaisematon %s sijoitus symbolia ‚Äù%s‚Äù varten"
 
+#  small data region on sama kuin .scommon data region
 #: elf32-v850.c:163
 #, c-format
 msgid "Variable `%s' cannot occupy in multiple small data regions"
-msgstr "La variable `%s' no puede ocupar m˙ltiples regiones de datos small"
+msgstr "Muuttuja ‚Äù%s‚Äù ei voi sijaita useissa ‚Äùsmall‚Äù-data-alueissa"
 
+#  small on .scommon, zero on .zcommon ja tiny on .tcommon
 #: elf32-v850.c:166
 #, c-format
 msgid "Variable `%s' can only be in one of the small, zero, and tiny data regions"
-msgstr "La variable `%s' solamente puede estar en una de las regiones de datos small, cero, y tiny"
+msgstr "Muuttuja ‚Äù%s‚Äù voi olla vain yhdess√§ ‚Äùsmall‚Äù-, ‚Äùzero‚Äù- ja ‚Äùtiny‚Äù-data-alueista"
 
 #: elf32-v850.c:169
 #, c-format
 msgid "Variable `%s' cannot be in both small and zero data regions simultaneously"
-msgstr "La variable `%s' no puede estar simult·neamente en las regiones de datos small y cero"
+msgstr "Muuttuja ‚Äù%s‚Äù ei voi olla sek√§ ‚Äùsmall‚Äù- ett√§ ‚Äùzero‚Äù-data-alueissa samanaikaisesti"
 
 #: elf32-v850.c:172
 #, c-format
 msgid "Variable `%s' cannot be in both small and tiny data regions simultaneously"
-msgstr "La variable `%s' no puede estar simult·neamente en las regiones de datos small y tiny"
+msgstr "Muuttuja ‚Äù%s‚Äù ei voi olla sek√§ ‚Äùsmall‚Äù- ett√§ ‚Äùtiny‚Äù-data-alueissa samanaikaisesti"
 
 #: elf32-v850.c:175
 #, c-format
 msgid "Variable `%s' cannot be in both zero and tiny data regions simultaneously"
-msgstr "La variable `%s' no puede estar simult·neamente en las regiones de datos cero y tiny"
+msgstr "Muuttuja ‚Äù%s‚Äù ei voi olla sek√§ ‚Äùzero‚Äù- ett√§ ‚Äùtiny‚Äù-data-alueissa samanaikaisesti"
 
 #: elf32-v850.c:478
 #, c-format
 msgid "FAILED to find previous HI16 reloc\n"
-msgstr "FALLO para encontrar la reubicaciÛn HI16 previa\n"
+msgstr "EI ONNISTUTTU l√∂yt√§m√§√§n edellist√§ HI16 reloc-tietuetta\n"
 
 #: elf32-v850.c:1713
 msgid "could not locate special linker symbol __gp"
-msgstr "no se puede localizar el sÌmbolo especial del enlazador __gp"
+msgstr "ei voitu paikallistaa erityist√§ linkkerisymbolia ‚Äù__gp‚Äù"
 
 #: elf32-v850.c:1717
 msgid "could not locate special linker symbol __ep"
-msgstr "no se puede localizar el sÌmbolo especial del enlazador __ep"
+msgstr "ei voitu paikallistaa erityist√§ linkkerisymbolia ‚Äù__ep‚Äù"
 
 #: elf32-v850.c:1721
 msgid "could not locate special linker symbol __ctbp"
-msgstr "no se puede localizar el sÌmbolo especial del enlazador __ctbp"
+msgstr "ei voitu paikallistaa erityist√§ linkkerisymbolia ‚Äù__ctbp‚Äù"
 
 #: elf32-v850.c:1871
 msgid "%B: Architecture mismatch with previous modules"
-msgstr "%B: No coincide la arquitectura con los mÛdulos previos"
+msgstr "%B: Arkkitehtuuri ei t√§sm√§nnyt edellisten modulien kanssa"
 
 #: elf32-v850.c:1890
 #, c-format
 msgid "private flags = %lx: "
-msgstr "opciones privadas = %lx: "
+msgstr "yksityiset liput = %lx: "
 
 #: elf32-v850.c:1895
 #, c-format
 msgid "v850 architecture"
-msgstr "arquitectura v850"
+msgstr "v850-arkkitehtuuri"
 
 #: elf32-v850.c:1896
 #, c-format
 msgid "v850e architecture"
-msgstr "arquitectura v850e"
+msgstr "v850e-arkkitehtuuri"
 
 #: elf32-v850.c:1897
 #, c-format
 msgid "v850e1 architecture"
-msgstr "arquitectura v850e1"
+msgstr "v850e1-arkkitehtuuri"
 
 #: elf32-vax.c:541
 #, c-format
 msgid " [nonpic]"
-msgstr " [no pic]"
+msgstr " [sijaintiriippuvaisen koodin lippu]"
 
 #: elf32-vax.c:544
 #, c-format
 msgid " [d-float]"
-msgstr " [flotante-d]"
+msgstr " [d-float-liukulukulippu]"
 
 #: elf32-vax.c:547
 #, c-format
 msgid " [g-float]"
-msgstr " [flotante-g]"
+msgstr " [g-float-liukulukulippu]"
 
 #: elf32-vax.c:657
 #, c-format
 msgid "%s: warning: GOT addend of %ld to `%s' does not match previous GOT addend of %ld"
-msgstr "%s: aviso: la adiciÛn GOT de %ld a `%s' no coincide con la adiciÛn previa GOT de %ld"
+msgstr "%s: varoitus: Yleissiirrostaulun %ld-yhteenlaskettava kohteelle ‚Äù%s‚Äùei t√§sm√§√§ edellisen yleissiirrostaulun %ld-yhteenlaskettavan kanssa "
 
 #: elf32-vax.c:1584
 #, c-format
 msgid "%s: warning: PLT addend of %d to `%s' from %s section ignored"
-msgstr "%s: aviso: se descarta la adiciÛn PLT de %d a `%s' de la secciÛn %s"
+msgstr "%s: varoitus: %d:n PLT-yhteenlaskettavaa kohteelle ‚Äù%s‚Äù lohkosta %s ei oteta huomioon"
 
 #: elf32-vax.c:1721
 #, c-format
 msgid "%s: warning: %s relocation against symbol `%s' from %s section"
-msgstr "%s: aviso: reubicaciÛn %s contra el sÌmbolo `%s' de la secciÛn %s"
+msgstr "%s: varoitus: %s sijoitus symbolia ‚Äù%s‚Äù varten %s-lohkosta"
 
 #: elf32-vax.c:1727
 #, c-format
 msgid "%s: warning: %s relocation to 0x%x from %s section"
-msgstr "%s: aviso: reubicaciÛn %s a 0x%x de la secciÛn %s"
+msgstr "%s: varoitus: %s sijoitus kohteeseen 0x%x ‚Äù%s‚Äù-lohkosta"
 
 #: elf32-xstormy16.c:451 elf32-ia64.c:2962 elf64-ia64.c:2962
 msgid "non-zero addend in @fptr reloc"
-msgstr "adiciÛn que no es cero en la reubicaciÛn @fptr"
+msgstr "ei-nolla-yhteenlaskettava ‚Äù@fptr reloc‚Äù-tietueessa"
 
 #: elf32-xtensa.c:733
 msgid "%B(%A): invalid property table"
-msgstr "%B(%A): tabla de propiedades inv·lida"
+msgstr "%B(%A): virheellinen ominaisuustaulu"
 
 #: elf32-xtensa.c:2177
 msgid "%B(%A+0x%lx): relocation offset out of range (size=0x%x)"
-msgstr "%B(%A+0x%lx): desplazamiento de reubicaciÛn fuera de rango (tamaÒo=0x%x)"
+msgstr "%B(%A+0x%lx): sijoitussiirros lukualueen (koko=0x%x) ulkopuolella"
 
 #: elf32-xtensa.c:2234
 msgid "dynamic relocation in read-only section"
-msgstr "reubicaciÛn din·mica en la secciÛn de sÛlo lectura"
+msgstr "dynaaminen sijoitus kirjoitussuojatussa lohkossa"
 
 #: elf32-xtensa.c:2407
 msgid "internal inconsistency in size of .got.loc section"
-msgstr "inconsistencia interna en el tamaÒo de la secciÛn .got.loc"
+msgstr "sis√§inen ep√§johdonmukaisuus ‚Äù.got.loc‚Äù-alilohkokoossa"
 
 #: elf32-xtensa.c:2714
 msgid "%B: incompatible machine type. Output is 0x%x. Input is 0x%x"
-msgstr "%B: tipo de m·quina incompatible. La salida es 0x%x. La entrada es 0x%x"
+msgstr "%B: yhteensopimaton konetyyppi. Tuloste on 0x%x. Sy√∂te on 0x%x"
 
 #: elf32-xtensa.c:3920 elf32-xtensa.c:3928
 msgid "Attempt to convert L32R/CALLX to CALL failed"
-msgstr "FallÛ el intento de convertir L32R/CALLX a CALL"
+msgstr "Yritys muuttaa ‚ÄùL32R/CALLX‚Äù-kutsu ‚ÄùCALL‚Äù-kutsuksi ei onnistunut"
 
 #: elf32-xtensa.c:5522 elf32-xtensa.c:5598 elf32-xtensa.c:6714
 msgid "%B(%A+0x%lx): could not decode instruction; possible configuration mismatch"
-msgstr "%B(%A+0x%lx): no se puede decodificar la instrucciÛn; posible falta de coincidencia de la configuraciÛn"
+msgstr "%B(%A+0x%lx): ei voitu avata k√§sky√§; mahdollinen konfiguraatiot√§sm√§√§m√§tt√∂myys"
 
 #: elf32-xtensa.c:6454
 msgid "%B(%A+0x%lx): could not decode instruction for XTENSA_ASM_SIMPLIFY relocation; possible configuration mismatch"
-msgstr "%B(%A+0x%lx): no se puede decodificar la instrucciÛn para la reubicaciÛn XTENSA_ASM_SIMPLIFY; posible falta de coincidencia de la configuraciÛn"
+msgstr "%B(%A+0x%lx): ei voitu avata k√§sky√§ XTENSA_ASM_SIMPLIFY-sijoitukselle; mahdollinen konfiguraatiot√§sm√§√§m√§tt√∂myys"
 
 #: elf32-xtensa.c:8166
 msgid "invalid relocation address"
-msgstr "direcciÛn de reubicaciÛn inv·lida"
+msgstr "virheellinen sijoitusosoite"
 
+#  Kun k√§skyoperandi on sen lukualueen ulkopuolella, joka sallitaan kullekin k√§skykent√§lle,
+#  assembler voi muuntaa koodin k√§ytt√§m√§√§n toiminnallisesti samanlaista k√§sky√§ tai k√§skysekvenssi√§.
+#  T√§m√§ prosessi tunnetaan nimell√§ relaxation. T√§t√§ tehd√§√§n tyypillisesti haarautumisk√§skyiss√§, koska
+#  haarautumiskohteen et√§isyytt√§ ei tunneta ennen linkityst√§. Tavallaan t√§ll√§ tavalla kumotaan lukualueen
+#  rajoitteet (constraints). Siksi olen suomentanut sen termill√§ avartaminen.
 #: elf32-xtensa.c:8215
 msgid "overflow after relaxation"
-msgstr "desbordamiento despuÈs de la relajaciÛn"
+msgstr "ylivuoto avartamisen j√§lkeen"
 
 #: elf32-xtensa.c:9341
 msgid "%B(%A+0x%lx): unexpected fix for %s relocation"
-msgstr "%B(%A+0x%lx): compostura inesperada para la reubicaciÛn %s"
+msgstr "%B(%A+0x%lx): odottamaton korjaus %s-sijoitukselle"
 
 #: elf64-alpha.c:453
 msgid "GPDISP relocation did not find ldah and lda instructions"
-msgstr "la reubicaciÛn GPDISP no encontrÛ las instrucciones ldah y lda"
+msgstr "GPDISP-sijoitus ei l√∂yt√§nyt ‚Äùldah‚Äù- ja ‚Äùlda‚Äù-k√§skyj√§"
 
 #: elf64-alpha.c:2404
 msgid "%B: .got subsegment exceeds 64K (size %d)"
-msgstr "%B: el subsegmento .got excede los 64K (tamaÒo %d)"
+msgstr "%B: ‚Äù.got‚Äù-alisegmentti ylitt√§√§ 64kilotavun rajan (koko %d)"
 
 #: elf64-alpha.c:4277 elf64-alpha.c:4289
 msgid "%B: gp-relative relocation against dynamic symbol %s"
-msgstr "%B: reubicaciÛn gp relativa contra el sÌmbolo din·mico %s"
+msgstr "%B: gp-suhteellinen sijoitus dynaamista symbolia %s varten"
 
 #: elf64-alpha.c:4315 elf64-alpha.c:4450
 msgid "%B: pc-relative relocation against dynamic symbol %s"
-msgstr "%B: reubicaciÛn relativa al pc contra el sÌmbolo din·mico %s"
+msgstr "%B: pc-suhteellinen sijoitus dynaamista symbolia %s varten"
 
 #: elf64-alpha.c:4343
 msgid "%B: change in gp: BRSGP %s"
-msgstr "%B: cambio en gp: BRSGP %s"
+msgstr "%B: vaihto gp:ss√§: BRSGP %s"
 
 #: elf64-alpha.c:4368
 msgid "<unknown>"
-msgstr "<desconocido>"
+msgstr "<tuntematon>"
 
 #: elf64-alpha.c:4373
 msgid "%B: !samegp reloc against symbol without .prologue: %s"
-msgstr "%B: reubicaciÛn !samegp contra un sÌmbolo sin .prologue: %s"
+msgstr "%B: ‚Äù!samegp reloc‚Äù-tietue symbolia varten ilman ‚Äù.prologue‚Äù-lohkoa: %s"
 
 #: elf64-alpha.c:4425
 msgid "%B: unhandled dynamic relocation against %s"
-msgstr "%B: reubicaciÛn din·mica sin manejar contra %s"
+msgstr "%B: k√§sittelem√§t√∂n dynaaminen sijoitus %s:ta varten"
 
 #: elf64-alpha.c:4457
 msgid "%B: pc-relative relocation against undefined weak symbol %s"
-msgstr "%B: reubicaciÛn relativa al pc contra el sÌmbolo dÈbil sin definir %s"
+msgstr "%B: pc-suhteellinen sijoitus m√§√§rittelem√§t√∂nt√§ heikkoa  symbolia %s varten"
 
 #: elf64-alpha.c:4517
 msgid "%B: dtp-relative relocation against dynamic symbol %s"
-msgstr "%B: reubicaciÛn relativa a dtp contra el sÌmbolo din·mico %s"
+msgstr "%B: dtp-suhteellinen sijoitus dynaamista symbolia %s varten"
 
 #: elf64-alpha.c:4540
 msgid "%B: tp-relative relocation against dynamic symbol %s"
-msgstr "%B: reubicaciÛn relativa a tp contra el sÌmbolo din·mico %s"
+msgstr "%B: tp-suhteellinen sijoitus dynaamista symbolia %s varten"
 
 #: elf64-hppa.c:2040
 #, c-format
 msgid "stub entry for %s cannot load .plt, dp offset = %ld"
-msgstr "la entrada de cabo para %s no puede cargar .plt, desplazamiento dp = %ld"
+msgstr "stub-tulokohta kohteelle %s ei voi ladata ‚Äù.plt‚Äù, dp-siirros = %ld"
 
 #: elf64-mmix.c:1177
 #, c-format
@@ -1978,47 +2004,47 @@ msgid ""
 "%s: Internal inconsistency error for value for\n"
 " linker-allocated global register: linked: 0x%lx%08lx != relaxed: 0x%lx%08lx\n"
 msgstr ""
-"%s: Error de inconsistencia interna para el valor para\n"
-" un registro global colocado por el enlazador: enlazado: 0x%lx%08lx != relajado: 0x%lx%08lx\n"
+"%s: Sis√§inen yhteensopimattomuusvirhe linkkerin varaamalle\n"
+" yleisrekisteriarvolle: 0x%lx%08lx != avarrettu: 0x%lx%08lx\n"
 
 #: elf64-mmix.c:1618
 #, c-format
 msgid "%s: base-plus-offset relocation against register symbol: (unknown) in %s"
-msgstr "%s: reubicaciÛn base-m·s-desplazamiento contra un sÌmbolo de registro: (desconocido) en %s"
+msgstr "%s: ‚Äùbase-plus-offset‚Äù-sijoitus rekisterisymbolia varten: (tuntematon) kohteessa %s"
 
 #: elf64-mmix.c:1623
 #, c-format
 msgid "%s: base-plus-offset relocation against register symbol: %s in %s"
-msgstr "%s: reubicaciÛn base-m·s-desplazamiento contra un sÌmbolo de registro: %s en %s"
+msgstr "%s: ‚Äùbase-plus-offset‚Äù-sijoitus rekisterisymbolia varten: %s kohteessa %s"
 
 #: elf64-mmix.c:1667
 #, c-format
 msgid "%s: register relocation against non-register symbol: (unknown) in %s"
-msgstr "%s: reubicaciÛn de registro contra un sÌmbolo que no es registro: (desconocido) en %s"
+msgstr "%s: rekisterisijoitus ei-rekisterisymbolia varten: (tuntematon) kohteessa %s"
 
 #: elf64-mmix.c:1672
 #, c-format
 msgid "%s: register relocation against non-register symbol: %s in %s"
-msgstr "%s: reubicaciÛn de registro contra un sÌmbolo que no es registro: %s en %s"
+msgstr "%s: rekisterisijoitus ei-rekisterisymbolia varten: %s kohteessa %s"
 
 #: elf64-mmix.c:1709
 #, c-format
 msgid "%s: directive LOCAL valid only with a register or absolute value"
-msgstr "%s: la directiva LOCAL sÛlo es v·lida con un registro o un valor absoluto"
+msgstr "%s: direktiivi LOCAL on oikea vain rekisteriss√§ tai absoluuttiarvona"
 
 #: elf64-mmix.c:1737
 #, c-format
 msgid "%s: LOCAL directive: Register $%ld is not a local register.  First global register is $%ld."
-msgstr "%s: directiva LOCAL: El registro $%ld no es un registro local.  El primer registro global es $%ld."
+msgstr "%s: LOCAL-direktiivi: Rekisteri $%ld ei ole paikallinen rekisteri.  Ensimm√§inen yleisrekisteri on $%ld."
 
 #: elf64-mmix.c:2202
 #, c-format
 msgid "%s: Error: multiple definition of `%s'; start of %s is set in a earlier linked file\n"
-msgstr "%s: Error: definiciÛn m˙ltiple de `%s'; el inicio de %s est· definido en un fichero enlazado con anterioridad\n"
+msgstr "%s: Virhe: useita ‚Äù%s‚Äù-m√§√§rittelyj√§; %s-alku on asetettu aiemmin linkitetyss√§ tiedostossa\n"
 
 #: elf64-mmix.c:2260
 msgid "Register section has contents\n"
-msgstr "La secciÛn de registros no tiene contenido\n"
+msgstr "Rekisterilohkossa on sis√§lt√∂\n"
 
 #: elf64-mmix.c:2452
 #, c-format
@@ -2026,70 +2052,70 @@ msgid ""
 "Internal inconsistency: remaining %u != max %u.\n"
 "  Please report this bug."
 msgstr ""
-"Inconsistencia interna: %u restante != %u m·ximo.\n"
-"  Por favor reporte este bicho."
+"Sis√§inen yhteensopimattomuus: j√§ljelle j√§√§v√§ %u != maksimi %u.\n"
+"  L√§het√§ raportit ohjelmistovioista (englanniksi) osoitteeseen http://sourceware.org/bugzilla/."
 
 #: elf64-ppc.c:2569 libbfd.c:950
 msgid "%B: compiled for a big endian system and target is little endian"
-msgstr "%B: compilado para un sistema big endian y el objetivo es little endian"
+msgstr "%B: k√§√§nnetty ‚Äùbig endian‚Äù-j√§rjestelm√§lle ja kohde on ‚Äùlittle endian‚Äù"
 
 #: elf64-ppc.c:2572 libbfd.c:952
 msgid "%B: compiled for a little endian system and target is big endian"
-msgstr "%B: compilado para un sistema little endian y el objetivo es big endian"
+msgstr "%B: k√§√§nnetty ‚Äùlittle endian‚Äù-j√§rjestelm√§lle ja kohde on ‚Äùbig endian‚Äù"
 
 #: elf64-ppc.c:5888
 #, c-format
 msgid "copy reloc against `%s' requires lazy plt linking; avoid setting LD_BIND_NOW=1 or upgrade gcc"
-msgstr "la reubicaciÛn de copia contra `%s' requiere de enlazado plt suelto; evite establecer LD_BIND_NOW=1 o actualice gcc"
+msgstr "kopio-reloc-tietue ‚Äù%s‚Äù:ta varten vaatii laiskan plt-linkityksen; v√§lt√§ asettamasta LD_BIND_NOW=1 tai p√§ivit√§ gcc"
 
 #: elf64-ppc.c:6316
 msgid "dynreloc miscount for %B, section %A"
-msgstr "cuenta errÛnea de la reubicaciÛn din·mica de %B, secciÛn %A"
+msgstr "dynreloc-v√§√§rinlaskenta kohteelle %B, lohko %A"
 
 #: elf64-ppc.c:6420
 msgid "%B: .opd is not a regular array of opd entries"
-msgstr "%B: .opd no es una matriz regular de entradas opd"
+msgstr "%B: ‚Äù.opd‚Äù ei ole s√§√§nn√∂nmukainen opd-tulokohtien taulukko"
 
 #: elf64-ppc.c:6429
 msgid "%B: unexpected reloc type %u in .opd section"
-msgstr "%B: tipo de reubicaciÛn %u inesperado en la secciÛn .opd"
+msgstr "%B: odottamaton reloc-tyyppi %u ‚Äù.opd‚Äù-lohkossa"
 
 #: elf64-ppc.c:6450
 msgid "%B: undefined sym `%s' in .opd section"
-msgstr "%B: sÌmbolo `%s' indefinido en la secciÛn .opd"
+msgstr "%B: m√§√§rittelem√§t√∂n symboli ‚Äù%s‚Äù ‚Äù.opd‚Äù-lohkossa"
 
 #: elf64-ppc.c:7157 elf64-ppc.c:7537
 #, c-format
 msgid "%s defined in removed toc entry"
-msgstr "se definiÛ %s en la entrada toc eliminada"
+msgstr "%s m√§√§ritelty poistetussa ‚Äùsis√§llysluettelo‚Äù-tulokohdassa"
 
 #: elf64-ppc.c:8272
 #, c-format
 msgid "long branch stub `%s' offset overflow"
-msgstr "desbordamiento del desplazamiento de stub de ramificaciÛn long `%s'"
+msgstr "pitk√§ haarautumis-stub ‚Äù%s‚Äù siirrosylivuoto"
 
 #: elf64-ppc.c:8347
 #, c-format
 msgid "can't find branch stub `%s'"
-msgstr "no se puede encontrar la ramificaciÛn de cabo `%s'"
+msgstr "ei l√∂ydy haarautumis-stub-kohdetta ‚Äù%s‚Äù"
 
 #: elf64-ppc.c:8413 elf64-ppc.c:8489
 #, c-format
 msgid "linkage table error against `%s'"
-msgstr "error de la tabla de enlazado contra `%s'"
+msgstr "linkitystauluvirhe ‚Äù%s‚Äù:ta varten"
 
 #: elf64-ppc.c:8618
 #, c-format
 msgid "can't build branch stub `%s'"
-msgstr "no se puede construir la ramificaciÛn de cabos `%s'"
+msgstr "ei voi muodostaa haaroitus-stub-kohdetta ‚Äù%s‚Äù"
 
 #: elf64-ppc.c:9070
 msgid "%B section %A exceeds stub group size"
-msgstr "%B secciÛn %A excede el tamaÒo de grupo de stub"
+msgstr "%B lohko %A ylitt√§√§ stub-ryhm√§koon"
 
 #: elf64-ppc.c:9682
 msgid "stubs don't match calculated size"
-msgstr "los cabos no coinciden con el tamaÒo calculado"
+msgstr "stubit ei t√§sm√§√§ lasketun koon kanssa"
 
 #: elf64-ppc.c:9694
 #, c-format
@@ -2101,109 +2127,110 @@ msgid ""
 "  long toc adj %lu\n"
 "  plt call     %lu"
 msgstr ""
-"cabos de enlazador en %u grupo%s\n"
-"  rama            %lu\n"
-"  ajuste toc      %lu\n"
-"  rama long       %lu\n"
-"  ajuste toc long %lu\n"
-"  llamada plt     %lu"
+"linkkeristubit %u-ryhm√§%s:ss√§\n"
+"  haarautuminen       %lu\n"
+"  sis√§lt√∂luettelos√§√§t√∂   %lu\n"
+"  pitk√§ haarautuminen  %lu\n"
+"  pitk√§ sis√§lt√∂luettelos√§√§t√∂ %lu\n"
+"  plt-kutsu     %lu"
 
 #: elf64-ppc.c:10378
 msgid "%B(%A+0x%lx): automatic multiple TOCs not supported using your crt files; recompile with -mminimal-toc or upgrade gcc"
-msgstr "%B(%A+0x%lx): no se admiten los TOCs m˙ltiples autom·ticos, utilizando sus ficheros crt; recompile con -mminimal-toc o actualice gcc"
+msgstr "%B(%A+0x%lx): automaattisia useita sis√§lt√∂luettelotauluja ei ole tuettu crt-tiedostoissasi; k√§√§nn√§ uudelleen ‚Äù-mminimal-toc‚Äù-argumentilla tai p√§ivit√§ gcc"
 
 #: elf64-ppc.c:10386
 msgid "%B(%A+0x%lx): sibling call optimization to `%s' does not allow automatic multiple TOCs; recompile with -mminimal-toc or -fno-optimize-sibling-calls, or make `%s' extern"
-msgstr "%B(%A+0x%lx): la optimizaciÛn de llamada hermana a `%s' no permite TOCs m˙ltiples autom·ticos; recompile con -mminimal-toc Û -fno-optimize-sibling-calls, o vuelva `%s' externa"
+msgstr "%B(%A+0x%lx): sisarruskutsuoptimointi kohteeseen ‚Äù%s‚Äù ei salli automaattisia useita sis√§llysluettelotauluja; k√§√§nn√§ uudelleen ‚Äù-mminimal-toc‚Äù-argumentilla tai ‚Äù-fno-optimize-sibling-calls‚Äù-argumentilla, tai tee kohteesta ‚Äù%s‚Äù ulkoinen"
 
 #: elf64-ppc.c:11037
 msgid "%B: relocation %s is not supported for symbol %s."
-msgstr "%B: no se admite la reubicaciÛn %s para el sÌmbolo %s."
+msgstr "%B: sijoitus %s ei ole tuettu symbolille %s."
 
 #: elf64-ppc.c:11119
 msgid "%B: error: relocation %s not a multiple of %d"
-msgstr "%B: error: la reubicaciÛn %s no es un m˙ltiplo de %d"
+msgstr "%B: virhe: sijoitus %s ei ole %d:n kerrannainen"
 
 #: elf64-sh64.c:1701
 #, c-format
 msgid "%s: error: unaligned relocation type %d at %08x reloc %08x\n"
-msgstr "%s: error: tipo de reubicaciÛn %d sin alinear en %08x reubicaciÛn %08x\n"
+msgstr "%s: virhe: tasaamaton sijoitustyyppi %d kohteessa %08x reloc-tietue %08x\n"
 
 #: elf64-sparc.c:439
 msgid "%B: Only registers %%g[2367] can be declared using STT_REGISTER"
-msgstr "%B: Solamente los registros %%g[2367] se pueden declarar utilizando STT_REGISTER"
+msgstr "%B: Vain rekisterit %%g[2367] voidaan esitell√§ k√§ytt√§en STT_REGISTER-symbolia"
 
 #: elf64-sparc.c:459
 msgid "Register %%g%d used incompatibly: %s in %B, previously %s in %B"
-msgstr "El registro %%g%d se usÛ de forma incompatible: %s en %B, previamente %s en %B"
+msgstr "Rekisteri√§ %%g%d k√§ytetty yhteensopimattomasti: %s kohteessa %B, aikaisemmin %s kohteessa %B"
 
 #: elf64-sparc.c:482
 msgid "Symbol `%s' has differing types: REGISTER in %B, previously %s in %B"
-msgstr "El sÌmbolo `%s' tiene tipos divergentes: REGISTER en %B, previamente %s en %B"
+msgstr "Symbolissa ‚Äù%s‚Äù on eri tyyppej√§: REGISTER kohteessa %B, aiemmin %s kohteessa %B"
 
 #: elf64-sparc.c:527
 msgid "Symbol `%s' has differing types: %s in %B, previously REGISTER in %B"
-msgstr "El sÌmbolo `%s' tiene tipos divergentes: %s en %B, previamente REGISTER en %B"
+msgstr "Symbolissa ‚Äù%s‚Äù on eri tyyppej√§: %s kohteessa %B, aiemmin REGISTER kohteessa %B"
 
 #: elf64-sparc.c:678
 msgid "%B: linking UltraSPARC specific with HAL specific code"
-msgstr "%B: se enlaza cÛdigo especÌfico de UltraSPARC con cÛdigo especÌfico de HAL"
+msgstr "%B: linkitet√§√§n UltraSPARC-kohtainen HAL-kohtaisella koodilla"
 
 #: elf64-x86-64.c:799 elf64-x86-64.c:959 elf64-x86-64.c:2360
 msgid "%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"
-msgstr "%B: no se puede usar la reubicaciÛn %s contra `%s' cuando se hace un objeto compartido; recompile con -fPIC"
+msgstr "%B: sijoitusta %s kohdetta ‚Äù%s‚Äù varten ei voida k√§ytt√§√§ kun tehd√§√§n jaettua objektia; k√§√§nn√§ uudelleen -fPIC-argumentilla"
 
+#  t√§ss√§ on ehk√§ virhe msgid-koodissa ja kaksoispisteen j√§lkeen pit√§isi ehk√§ olla lainausmerkki.
 #: elf64-x86-64.c:890
 msgid "%B: %s' accessed both as normal and thread local symbol"
-msgstr "%B: se accesÛ `%s' como un sÌmbolo normal y como un sÌmbolo local de hilo"
+msgstr "%B: %s‚Äù kutsuttu sek√§ normaalina ett√§ s√§ikeisen√§ paikallissymbolina"
 
 #: elf64-x86-64.c:2272
 msgid "%B: relocation R_X86_64_GOTOFF64 against protected function `%s' can not be used when making a shared object"
-msgstr "%B: no se puede usar la reubicaciÛn R_X86_64_GOTOFF contra la funciÛn protegida `%s' cuando se hace un objeto compartido"
+msgstr "%B: sijoitusta R_X86_64_GOTOFF64 suojattua funktiota ‚Äù%s‚Äù varten ei voida k√§ytt√§√§ kun tehd√§√§n jaettua objektia"
 
 #: elf64-x86-64.c:2356
 msgid "%B: relocation R_X86_64_PC32 against protected function `%s' can not be used when making a shared object"
-msgstr "%B: no se puede usar la reubicaciÛn R_X86_64_PC32 contra la funciÛn protegida `%' cuando se hace un objeto compartido"
+msgstr "%B: sijoitusta R_X86_64_PC32 suojattua funktiota ‚Äù%s‚Äù varten ei voida k√§ytt√§√§ kun tehd√§√§n jaettua objektia"
 
 #: elf-attrs.c:582
 msgid "ERROR: %B: Must be processed by '%s' toolchain"
-msgstr "ERROR: %B: Se debe procesar por la cadena de compilaciÛn '%s'"
+msgstr "VIRHE: %B: ‚Äù%s‚Äù-ty√∂kaluketjun on prosessoitava"
 
 #: elf-attrs.c:602 elf-attrs.c:621
 msgid "ERROR: %B: Incompatible object tag '%s':%d"
-msgstr "ERROR: %B: Etiqueta de objeto '%s' incompatible:%d"
+msgstr "VIRHE: %B: Yhteensopimaton objektitunnus ‚Äù%s‚Äù:%d"
 
 #: elf.c:312
 msgid "%B: invalid string offset %u >= %lu for section `%s'"
-msgstr "%B: desplazamiento de cadena inv·lido %u >= %lu para la secciÛn `%s'"
+msgstr "%B: virheellinen merkkijonosiirros %u >= %lu lohkolle ‚Äù%s‚Äù"
 
 #: elf.c:414
 msgid "%B symbol number %lu references nonexistent SHT_SYMTAB_SHNDX section"
-msgstr "%B el n˙mero de sÌmbolo %lu hace referencia a la secciÛn inexistente SHT_SYMTAB_SHNDX"
+msgstr "%B symbolinumero %lu viittaa puuttuvaan SHT_SYMTAB_SHNDX-lohkoon"
 
 #: elf.c:567
 msgid "%B: Corrupt size field in group section header: 0x%lx"
-msgstr "%B: TamaÒo de campo corrupto en el encabezado de la secciÛn de grupo: 0x%lx"
+msgstr "%B: Rikkin√§inen kokokentt√§ ryhm√§lohko-otsakkeessa: 0x%lx"
 
 #: elf.c:603
 msgid "%B: invalid SHT_GROUP entry"
-msgstr "%B: entrada SHT_GROUP inv·lida"
+msgstr "%B: virheellinen SHT_GROUP-tulokohta"
 
 #: elf.c:673
 msgid "%B: no group info for section %A"
-msgstr "%B: no hay informaciÛn de grupo para la secciÛn %A"
+msgstr "%B: ei ryhm√§tietoja lohkolle %A"
 
 #: elf.c:703 elf.c:2886 elflink.c:9858
 msgid "%B: warning: sh_link not set for section `%A'"
-msgstr "%B: aviso: no se estableciÛn sh_link para la secciÛn `%A'"
+msgstr "%B: varoitus: sh_link-kentt√§√§ ei aseteta lohkolle ‚Äù%A‚Äù"
 
 #: elf.c:719
 msgid "%B: sh_link [%d] in section `%A' is incorrect"
-msgstr "%B: sh_link [%d] en la secciÛn `%A', es incorrecto"
+msgstr "%B: sh_link [%d]-kentt√§ lohkossa ‚Äù%A‚Äù on virheellinen"
 
 #: elf.c:754
 msgid "%B: unknown [%d] section `%s' in group [%s]"
-msgstr "%B: secciÛn [%d] desconocida `%s' en el grupo [%s]"
+msgstr "%B: tuntematon [%d] lohko ‚Äù%s‚Äù ryhm√§ss√§ [%s]"
 
 #: elf.c:1108
 #, c-format
@@ -2212,7 +2239,7 @@ msgid ""
 "Program Header:\n"
 msgstr ""
 "\n"
-"Encabezado del Programa:\n"
+"Ohjelmaotsake:\n"
 
 #: elf.c:1150
 #, c-format
@@ -2221,7 +2248,7 @@ msgid ""
 "Dynamic Section:\n"
 msgstr ""
 "\n"
-"SecciÛn Din·mica:\n"
+"Dynaaminen lohko:\n"
 
 #: elf.c:1276
 #, c-format
@@ -2230,7 +2257,7 @@ msgid ""
 "Version definitions:\n"
 msgstr ""
 "\n"
-"Definiciones de versiÛn:\n"
+"Versiom√§√§rittelyt:\n"
 
 #: elf.c:1301
 #, c-format
@@ -2239,271 +2266,272 @@ msgid ""
 "Version References:\n"
 msgstr ""
 "\n"
-"Referencias de VersiÛn:\n"
+"Versioviitteet:\n"
 
 #: elf.c:1306
 #, c-format
 msgid "  required from %s:\n"
-msgstr "  requerido desde %s:\n"
+msgstr "  kysytty kohteesta %s:\n"
 
 #: elf.c:1690
 msgid "%B: invalid link %lu for reloc section %s (index %u)"
-msgstr "%B: enlace %lu inv·lido para la secciÛn de reubicaciÛn %s (Ìndice %u)"
+msgstr "%B: virheellinen linkki %lu reloc-tietueelle %s (indeksi %u)"
 
 #: elf.c:1858
 msgid "%B: don't know how to handle allocated, application specific section `%s' [0x%8x]"
-msgstr "%B: no se sabe cÛmo manejar lo reservado, aplicaciÛn especÌfica de la secciÛn `%s' [0x%8x]"
+msgstr "%B: ei tied√§ kuinka k√§sitell√§ varattua, sovelluskohtaista lohkoa ‚Äù%s‚Äù [0x%8x]"
 
 #: elf.c:1870
 msgid "%B: don't know how to handle processor specific section `%s' [0x%8x]"
-msgstr "%B: no se sabe cÛmo manejar la secciÛn especÌfica de procesador `%s' [0x%8x]"
+msgstr "%B: ei tied√§, kuinka k√§sitell√§ prosessorikohtaista lohkoa ‚Äù%s‚Äù [0x%8x]"
 
 #: elf.c:1881
 msgid "%B: don't know how to handle OS specific section `%s' [0x%8x]"
-msgstr "%B: no se sabe cÛmo manejar la secciÛn especÌfica de SO `%s' [0x%8x]"
+msgstr "%B: ei tied√§, kuinka k√§sitell√§ k√§ytt√∂j√§rjestelm√§kohtaista lohkoa ‚Äù%s‚Äù [0x%8x]"
 
 #: elf.c:1891
 msgid "%B: don't know how to handle section `%s' [0x%8x]"
-msgstr "%B: no se sabe cÛmo manejar la secciÛn `%s' [0x%8x]"
+msgstr "%B: ei tied√§ kuinka k√§sitell√§ lohkoa ‚Äù%s‚Äù [0x%8x]"
 
 #: elf.c:2843
 msgid "%B: sh_link of section `%A' points to discarded section `%A' of `%B'"
-msgstr "%B: sh_link de la secciÛn `%A' apunta a la secciÛn descartada `%A' de `%B'"
+msgstr "%B: sh_link-lohko ‚Äù%A‚Äù osoittaa hyl√§ttyyn lohkoon ‚Äù%A‚Äù kohteessa ‚Äù%B‚Äù"
 
 #: elf.c:2866
 msgid "%B: sh_link of section `%A' points to removed section `%A' of `%B'"
-msgstr "%B: sh_link de la secciÛn `%A' apunta a la secciÛn descartada `%A' de `%B'"
+msgstr "%B: sh_link-lohko ‚Äù%A‚Äù osoittaa poistettuun lohkoon ‚Äù%A‚Äù kohteessa ‚Äù%B‚Äù"
 
 #: elf.c:4142
 msgid "%B: The first section in the PT_DYNAMIC segment is not the .dynamic section"
-msgstr "%B: La primera secciÛn en el segmento PT_DYNAMIC no es la secciÛn .dynamic"
+msgstr "%B: Ensimm√§inen lohko PT_DYNAMIC-segmentiss√§ ei ole ‚Äù.dynamic‚Äù-lohko"
 
 #: elf.c:4165
 msgid "%B: Not enough room for program headers, try linking with -N"
-msgstr "%B: No hay suficiente espacio para los encabezados del programa, pruebe enlazar con -N"
+msgstr "%B: Ei tarpeeksi tilaa ohjelmaotsakkeille, yrit√§ linkitt√§√§ ‚Äù-N‚Äù-argumentilla"
 
+#  Lightspeed Memory Architecture  (rekister√∂ity tavaramerkki) eli LMA
 #: elf.c:4243
 msgid "%B: section %A lma 0x%lx overlaps previous sections"
-msgstr "%B: la secciÛn %A lma 0x%lx traslapa las secciones anteriores"
+msgstr "%B: lohko %A lma 0x%lx menee p√§√§llekk√§in edellisten lohkojen kanssa"
 
 #: elf.c:4341
 msgid "%B: section `%A' can't be allocated in segment %d"
-msgstr "%B: la secciÛn `%A' no se puede asignar en el segmento %d"
+msgstr "%B: lohkoa ‚Äù%A‚Äù ei voida varata segmentiss√§ %d"
 
 #: elf.c:4390
 msgid "%B: warning: allocated section `%s' not in segment"
-msgstr "%B: aviso: la secciÛn asignada `%s' no est· en el segmento"
+msgstr "%B: varoitus: varattu lohko ‚Äù%s‚Äù ei ole segmentiss√§"
 
 #: elf.c:4886
 msgid "%B: symbol `%s' required but not present"
-msgstr "%B: se requiere el sÌmbolo `%s' pero no est· presente"
+msgstr "%B: symboli ‚Äù%s‚Äù vaadittu, mutta ei ole annettu"
 
 #: elf.c:5199
 msgid "%B: warning: Empty loadable segment detected, is this intentional ?\n"
-msgstr "%B: aviso: Se detectÛ un segmento cargable vacÌo, ø esto es intencional ?\n"
+msgstr "%B: varoitus: Tyhj√§ ladattava segmentti havaittu, onko t√§m√§ tarkoituksellinen ?\n"
 
 #: elf.c:6105
 #, c-format
 msgid "Unable to find equivalent output section for symbol '%s' from section '%s'"
-msgstr "No se puede encontrar la secciÛn de salida equivalente para el sÌmbolo '%s' de la secciÛn '%s'"
+msgstr "Ei l√∂ydy samanlaista tulostelohkoa symbolille ‚Äù%s‚Äù lohkosta ‚Äù%s‚Äù"
 
 #: elf.c:7079
 msgid "%B: unsupported relocation type %s"
-msgstr "%B: no se admite el tipo de reubicaciÛn %s"
+msgstr "%B: ei-tuettu sijoitustyyppi %s"
 
 #: elfcode.h:813
 #, c-format
 msgid "warning: %s has a corrupt string table index - ignoring"
-msgstr "aviso: %s tiene un Ìndice de tablas de cadenas corrupto - se descarta"
+msgstr "varoitus: %s:ssa on rikkin√§inen merkkijonotauluindeksi - ei oteta huomioon"
 
 #: elfcode.h:1226
 #, c-format
 msgid "%s: version count (%ld) does not match symbol count (%ld)"
-msgstr "%s: la cuenta de versiÛn (%ld) no coincide con la cuenta de sÌmbolos (%ld)"
+msgstr "%s: versiolukum√§√§r√§ (%ld) ei t√§sm√§√§ symbolilukum√§√§r√§n (%ld) kanssa"
 
 #: elfcode.h:1459
 #, c-format
 msgid "%s(%s): relocation %d has invalid symbol index %ld"
-msgstr "%s(%s): la reubicaciÛn %d tiene un Ìndice de sÌmbolo %ld inv·lido"
+msgstr "%s(%s): sijoituksessa %d on virheellinen symboli-indeksi %ld"
 
 #: elf-eh-frame.c:823
 msgid "%P: fde encoding in %B(%A) prevents .eh_frame_hdr table being created.\n"
-msgstr "%P: la codificaciÛn fde en %B(%A) previene la creaciÛn de la tabla .eh_frame_hdr.\n"
+msgstr "%P: fde-koodaus kohteessa %B(%A) est√§√§ ‚Äù.eh_frame_hdr‚Äù-taulun luomisen.\n"
 
 #: elf-eh-frame.c:974
 msgid "%P: error in %B(%A); no .eh_frame_hdr table will be created.\n"
-msgstr "%P: error en %B(%A); no se crear· la tabla .eh_frame_hdr.\n"
+msgstr "%P: virhe kohteessa %B(%A); ‚Äù.eh_frame_hdr‚Äù-taulua ei luotu.\n"
 
 #: elf-hppa.h:2219 elf-hppa.h:2233
 msgid "%B(%A): warning: unresolvable relocation against symbol `%s'"
-msgstr "%B(%A): aviso: reubicaciÛn sin resoluciÛn contra el sÌmbolo `%s'"
+msgstr "%B(%A): varoitus: ratkaisematon sijoitus symbolia ‚Äù%s‚Äù varten"
 
 #: elflink.c:1028
 msgid "%s: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"
-msgstr "%s: la definiciÛn TLS en %B secciÛn %A no coincide con la definiciÛn que no es TLS en %B secciÛn %A"
+msgstr "%s: TLS-m√§√§rittely kohteessa %B lohko %A ei t√§sm√§√§ ei-TLS-m√§√§rittelyn kanssa kohteessa %B lohko %A"
 
 #: elflink.c:1032
 msgid "%s: TLS reference in %B mismatches non-TLS reference in %B"
-msgstr "%s: la referencia TLS en %b no coincide con la referencia que no es TLS en %B"
+msgstr "%s: TLS-viite kohteessa %B ei t√§sm√§√§ ei-TLS-viitteen kanssa kohteessa %B"
 
 #: elflink.c:1036
 msgid "%s: TLS definition in %B section %A mismatches non-TLS reference in %B"
-msgstr "%s: la definiciÛn TLS en %B secciÛn %A no coincide con la referencia que no es TLS en %B"
+msgstr "%s: TLS-m√§√§rittely kohteessa %B lohko %A ei t√§sm√§√§ ei-TLS-viitteen kanssa kohteessa %B"
 
 #: elflink.c:1040
 msgid "%s: TLS reference in %B mismatches non-TLS definition in %B section %A"
-msgstr "%s: la referencia TLS en %B no coincide con la definiciÛn que no es TLS en %B secciÛn %A"
+msgstr "%s: TLS-viite kohteessa %B ei t√§sm√§√§ ei-TLS-m√§√§rittelyn kanssa kohteessa %B lohko %A"
 
 #: elflink.c:1654
 msgid "%B: unexpected redefinition of indirect versioned symbol `%s'"
-msgstr "%B: redefiniciÛn inesperada del sÌmbolo con versiÛn indirecta `%s'"
+msgstr "%B: ep√§suoran versioidun symbolin ‚Äù%s‚Äù odottamaton uudelleenm√§√§rittely"
 
 #: elflink.c:1974
 msgid "%B: version node not found for symbol %s"
-msgstr "%B: no se encuentra la versiÛn del nodo para el sÌmbolo %s"
+msgstr "%B: versiosolmua ei l√∂ydetty symbolille %s"
 
 #: elflink.c:2122
 msgid "%B: bad reloc symbol index (0x%lx >= 0x%lx) for offset 0x%lx in section `%A'"
-msgstr "%B: Ìndice de sÌmbolos de reubicaciÛn inv·lido (0x%lx >= 0x%lx) errÛneo para el desplazamiento 0x%lx en la secciÛn `%A'"
+msgstr "%B: virheellinen reloc-tietuesymboli-indeksi (0x%lx >= 0x%lx) siirrokselle 0x%lx lohkossa ‚Äù%A‚Äù"
 
 #: elflink.c:2314
 msgid "%B: relocation size mismatch in %B section %A"
-msgstr "%B: el tamaÒo de reubicaciÛn no coincide en %B secciÛn %A"
+msgstr "%B: sijoituskokot√§sm√§√§m√§tt√∂myys  %B:n tulolohkossa %A"
 
 #: elflink.c:2616
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
-msgstr "aviso: el tipo y tamaÒo del sÌmbolo din·mico `%s' no est·n definidos"
+msgstr "varoitus: dynaamisen symbolin ‚Äù%s‚Äù tyyppi ja koko ei ole m√§√§ritelty"
 
 #: elflink.c:3910
 msgid "%B: %s: invalid version %u (max %d)"
-msgstr "%B: %s: versiÛn %u inv·lida (m·ximo %d)"
+msgstr "%B: %s: virheellinen versio %u (maksimi %d)"
 
 #: elflink.c:3946
 msgid "%B: %s: invalid needed version %d"
-msgstr "%B: %s: versiÛn requerida %d inv·lida"
+msgstr "%B: %s: virheellinen tarvittu versio %d"
 
 #: elflink.c:4129
 msgid "Warning: alignment %u of common symbol `%s' in %B is greater than the alignment (%u) of its section %A"
-msgstr "Aviso: la alineaciÛn %u del sÌmbolo com˙n `%s' en %B es m·s grande que la alineaciÛn (%u) de su secciÛn %A"
+msgstr "Varoitus: tasaus %u yhteissymbolissa ‚Äù%s‚Äù kohteessa %B on suurempi kuin tasaus (%u) sen lohkossa %A"
 
 #: elflink.c:4135
 msgid "Warning: alignment %u of symbol `%s' in %B is smaller than %u in %B"
-msgstr "Aviso: la alineaciÛn %u del sÌmbolo `%s' en %B es m·s pequeÒa que %u en %B"
+msgstr "Varoitus: tasaus %u symbolissa ‚Äù%s‚Äù kohteessa %B on pienempi kuin %u kohteessa %B"
 
 #: elflink.c:4150
 msgid "Warning: size of symbol `%s' changed from %lu in %B to %lu in %B"
-msgstr "Aviso: el tamaÒo del sÌmbolo `%s' cambiÛ de %lu en %B a %lu en %B"
+msgstr "Varoitus: symbolin ‚Äù%s‚Äù koko vaihtui koosta %lu kohteessa %B kokoon %lu kohteessa %B"
 
 #: elflink.c:4326
 #, c-format
 msgid "%s: invalid DSO for symbol `%s' definition"
-msgstr "%s: DSO inv·lido para la definiciÛn del sÌmbolo `%s'"
+msgstr "%s: virheellinen DSO symbolin ‚Äù%s‚Äù m√§√§rittelylle"
 
 #: elflink.c:5552
 #, c-format
 msgid "%s: undefined version: %s"
-msgstr "%s: versiÛn sin definir: %s"
+msgstr "%s: m√§√§rittelem√§t√∂n versio: %s"
 
 #: elflink.c:5620
 msgid "%B: .preinit_array section is not allowed in DSO"
-msgstr "%B: no se permite la secciÛn .preinit_array en DSO"
+msgstr "%B: ‚Äù.preinit_array‚Äù-lohkoa ei sallita kohteessa DSO"
 
 #: elflink.c:7359
 #, c-format
 msgid "undefined %s reference in complex symbol: %s"
-msgstr "referencia %s indefinida en el sÌmbolo complejo: %s"
+msgstr "m√§√§rittelem√§t√∂n %s-viite kompleksisymbolissa: %s"
 
 #: elflink.c:7514
 #, c-format
 msgid "unknown operator '%c' in complex symbol"
-msgstr "operador desconocido '%c' en el sÌmbolo complejo"
+msgstr "tuntematon operaattori ‚Äù%c‚Äù kompleksisymbolissa"
 
 #: elflink.c:8053 elflink.c:8070 elflink.c:8107 elflink.c:8124
 msgid "%B: Unable to sort relocs - they are in more than one size"
-msgstr "%B: No se pueden ordenar las reubicaciones - son de tamaÒos diferentes"
+msgstr "%B: Ei voi lajitella relocs-tietueita - niit√§ on useampia kuin yht√§ kokoa"
 
 #: elflink.c:8084 elflink.c:8138
 msgid "%B: Unable to sort relocs - they are of an unknown size"
-msgstr "%B: No se pueden ordenar las reubicaciones - son de tamaÒo desconocido"
+msgstr "%B: Ei voi lajitella relocs-tietueita - niiden koko on tuntematon"
 
 #: elflink.c:8187
 msgid "Not enough memory to sort relocations"
-msgstr "No hay suficiente memoria para ordenar las reubicaciones"
+msgstr "Ei tarpeeksi muistia sijoitusten lajittelemiseen"
 
 #: elflink.c:8374
 msgid "%B: Too many sections: %d (>= %d)"
-msgstr "%B: Demasiadas secciones:  %d (>= %d)"
+msgstr "%B: Liian monia lohkoja: %d (>= %d)"
 
 #: elflink.c:8608
 msgid "%B: %s symbol `%s' in %B is referenced by DSO"
-msgstr "%B: el sÌmbolo %s `%s' en %B est· referenciado por DSO"
+msgstr "%B: %s symboli ‚Äù%s‚Äù kohteessa %B on DSO:n viitteen√§"
 
 #: elflink.c:8691
 msgid "%B: could not find output section %A for input section %A"
-msgstr "%B: no se puede encontrar la secciÛn de salida %A para la secciÛn de entrada %A"
+msgstr "%B: ei l√∂ytynyt tulostelohkoa %A sy√∂telohkolle %A"
 
 #: elflink.c:8788
 msgid "%B: %s symbol `%s' isn't defined"
-msgstr "%B: el sÌmbolo %s `%s' no est· definido"
+msgstr "%B: %s symbolia ‚Äù%s‚Äù ei ole m√§√§ritelty"
 
 #: elflink.c:9284
 msgid "error: %B contains a reloc (0x%s) for section %A that references a non-existent global symbol"
-msgstr "error: %B contiene una reubicaciÛn (0x%s) para la secciÛn %A que refiere a un sÌmbolo global que no existe"
+msgstr "virhe: %B sis√§lt√§√§ reloc-tietueen (0x%s) lohkolle %A, joka viittaa puuttuvaan yleissymboliin"
 
 #: elflink.c:9318
 msgid "%X`%s' referenced in section `%A' of %B: defined in discarded section `%A' of %B\n"
-msgstr "%X`%s' referido en la secciÛn `%A' de %B: se definiÛ en la secciÛn descartada `%A' de %B\n"
+msgstr "%X‚Äù%s‚Äù viitattu lohkossa ‚Äù%A‚Äù kohteessa %B: m√§√§ritelty hyl√§tyss√§ lohkossa ‚Äù%A‚Äù / %B\n"
 
 #: elflink.c:9936
 msgid "%A has both ordered [`%A' in %B] and unordered [`%A' in %B] sections"
-msgstr "%A tiene tanto secciones ordenadas [`%A' en %B] como desordenadas [`%A' en %B]"
+msgstr "%A:ssa on sek√§ j√§rjestettyj√§ [‚Äù%A‚Äù kohteessa %B] ett√§ j√§rjest√§m√§tt√∂mi√§ [‚Äù%A‚Äù kohteessa %B] lohkoja"
 
 #: elflink.c:9941
 #, c-format
 msgid "%A has both ordered and unordered sections"
-msgstr "%A tiene tanto secciones ordenadas como desordenadas"
+msgstr "%A:ssa on sek√§ j√§rjestettyj√§ ett√§ j√§rjest√§m√§tt√∂mi√§ lohkoja"
 
 #: elflink.c:10828 elflink.c:10872
 msgid "%B: could not find output section %s"
-msgstr "%B: no se puede encontrar la secciÛn de salida %s"
+msgstr "%B: ei l√∂ytynyt tulostelohkoa %s"
 
 #: elflink.c:10833
 #, c-format
 msgid "warning: %s section has zero size"
-msgstr "aviso: la secciÛn %s es de tamaÒo cero"
+msgstr "varoitus: %s-lohkossa on nollakoko"
 
 #: elflink.c:10937
 msgid "%P: warning: creating a DT_TEXTREL in a shared object.\n"
-msgstr "%P: aviso: se crea un DT_TEXTREL en un objeto compartido.\n"
+msgstr "%P: varoitus: luodaan DT_TEXTREL-tunniste jaettussa objektissa.\n"
 
 #: elflink.c:11305
 msgid "Removing unused section '%s' in file '%B'"
-msgstr "Se elimina la secciÛn sin uso '%s' en el fichero '%B'"
+msgstr "Poistetaan k√§ytt√§m√§t√∂n lohko ‚Äù%s‚Äù tiedostossa ‚Äù%B‚Äù"
 
 #: elflink.c:11496
 msgid "Warning: gc-sections option ignored"
-msgstr "Aviso: se descarta la opciÛn gc-sections"
+msgstr "Varoitus: ‚Äùgc-sections‚Äù-valitsinta ei oteta huomioon"
 
 #: elflink.c:11987
 msgid "%P%X: can not read symbols: %E\n"
-msgstr "%P%X: no se pueden leer sÌmbolos: %E\n"
+msgstr "%P%X: ei voi lukea symboleja: %E\n"
 
 #: elflink.c:12129
 msgid "%B: ignoring duplicate section `%A'"
-msgstr "%B: se descarta la secciÛn duplicada `%A'"
+msgstr "%B: ei oteta huomioon lohkon ‚Äù%A‚Äù kaksoiskappaletta"
 
 #: elflink.c:12136 elflink.c:12143
 msgid "%B: duplicate section `%A' has different size"
-msgstr "%B: la secciÛn duplicada `%A' tiene tamaÒo diferente"
+msgstr "%B: lohkon ‚Äù%A‚Äù kaksoiskappaleessa on eri koko"
 
 #: elflink.c:12151 elflink.c:12156
 msgid "%B: warning: could not read contents of section `%A'"
-msgstr "%B: aviso: no se puede leer el contenido de la secciÛn `%A'"
+msgstr "%B: varoitus: ei voitu lukea lohkon ‚Äù%A‚Äù sis√§lt√∂√§"
 
 #: elflink.c:12160
 msgid "%B: warning: duplicate section `%A' has different contents"
-msgstr "%B: aviso: la secciÛn duplicada `%A' tiene contenido diferente"
+msgstr "%B: varoitus: lohkon ‚Äù%A‚Äù kaksoiskappaleella on erilainen sis√§lt√∂"
 
 #: elflink.c:12239 linker.c:3081
 msgid "%F%P: already_linked_table: %E"
@@ -2511,72 +2539,72 @@ msgstr "%F%P: already_linked_table: %E"
 
 #: elf-m10300.c:1532
 msgid "error: inappropriate relocation type for shared library (did you forget -fpic?)"
-msgstr "error: tipo de reubicaciÛn inapropiada para la biblioteca compartida (øolvidÛ -fpic?)"
+msgstr "virhe: sopimaton sijoitustyyppi jaetulle kirjastolle (unohtuiko -fpic?)"
 
 #: elf-m10300.c:1535
 msgid "internal error: suspicious relocation type used in shared library"
-msgstr "error interno: se usÛ un tipo de reubicaciÛn sospechosa en una biblioteca compartida"
+msgstr "sis√§inen virhe: ep√§ilytt√§v√§√§ sijoitustyyppi√§ k√§ytet√§√§n jaetussa kirjastossa"
 
 #: elfxx-mips.c:990
 msgid "static procedure (no name)"
-msgstr "procedimiento est·tico (sin nombre)"
+msgstr "staattinen proseduuri (ei nime√§)"
 
 #: elfxx-mips.c:4663
 msgid "%B: %A+0x%lx: jump to stub routine which is not jal"
-msgstr "%B: %A+0x%lx: salto a una rutina cabo la cual no es jal"
+msgstr "%B: %A+0x%lx: hypp√§√§ stub-rutiiniin, joka ei ole jal-k√§sky"
 
 #: elfxx-mips.c:5326 elfxx-mips.c:5546
 msgid "%B: Warning: bad `%s' option size %u smaller than its header"
-msgstr "%B: Aviso: el tamaÒo de opciÛn `%s' %u errÛneo es m·s pequeÒo que su encabezado"
+msgstr "%B: Varoitus: virheellinen ‚Äù%s‚Äù-valitsinkoko %u pienempi kuin sen otsake"
 
 #: elfxx-mips.c:6405
 msgid "%B: Malformed reloc detected for section %s"
-msgstr "%B: Se detectÛ una reubicaciÛn malformada para la secciÛn %s"
+msgstr "%B: Muodoltaan virheellinen reloc-tietue havaittu lohkossa %s"
 
 #: elfxx-mips.c:6447
 msgid "%B: GOT reloc at 0x%lx not expected in executables"
-msgstr "%B: no se esperaba la reubicaciÛn GOT en 0x%lx en ejecutables"
+msgstr "%B: Yleissiirrostaulu-reloc-tietue siirroksessa 0x%lx ei odotettu suoritettavissa tiedostoissa"
 
 #: elfxx-mips.c:6517
 msgid "%B: CALL16 reloc at 0x%lx not against global symbol"
-msgstr "%B: la reubicaciÛn CALL16 en 0x%lx no es contra un sÌmbolo global"
+msgstr "%B: ‚ÄùCALL16 reloc‚Äù-tietue siirroksessa 0x%lx ei yleissymbolia varten"
 
 #: elfxx-mips.c:7880
 msgid "%B: Can't find matching LO16 reloc against `%s' for %s at 0x%lx in section `%A'"
-msgstr "%B: No se puede encontrar una reubicaciÛn LO16 coincidente contra `%s' para %s en 0x%lx en la secciÛn `%A'"
+msgstr "%B: Ei l√∂ydy t√§sm√§√§v√§√§ ‚ÄùLO16 reloc‚Äù-tietuetta tulolohkoa ‚Äù%s‚Äù varten symbolinimelle %s kohteessa 0x%lx lohkossa ‚Äù%A‚Äù"
 
 #: elfxx-mips.c:8046
 msgid "small-data section exceeds 64KB; lower small-data size limit (see option -G)"
-msgstr "la secciÛn small-data excede los 64KB; disminuya el lÌmite de tamaÒo de small-data (vea la opciÛn -G)"
+msgstr "‚Äùsmall‚Äù-datalohko ylitt√§√§ 64 kilotavua; alenna ‚Äùsmall‚Äù-datalohkon kokorajaa (katso valitsin -G)"
 
 #: elfxx-mips.c:10661
 #, c-format
 msgid "%s: illegal section name `%s'"
-msgstr "%s: nombre de secciÛn `%s' ilegal"
+msgstr "%s: virheellinen lohkonimi ‚Äù%s‚Äù"
 
 #: elfxx-mips.c:11031 elfxx-mips.c:11050
 msgid "Warning: %B uses -msingle-float, %B uses -mdouble-float"
-msgstr "Aviso: %B usa -msingle-float, %B usa -mdouble-float"
+msgstr "Varoitus: %B k√§ytt√§√§ ‚Äù-msingle-float‚Äù-valitsinta, %B k√§ytt√§√§ ‚Äù-mdouble-float‚Äù-valitsinta"
 
 #: elfxx-mips.c:11106
 msgid "%B: endianness incompatible with that of the selected emulation"
-msgstr "%B: la endianez es incompatible con aquella de la emulaciÛn seleccionada"
+msgstr "%B: tavuj√§rjestys tyypilt√§√§n sopimaton valitun emuloinnin tavuj√§rjestystyypin kanssa"
 
 #: elfxx-mips.c:11118
 msgid "%B: ABI is incompatible with that of the selected emulation"
-msgstr "%B: la ABI es incompatible con aquella de la emulaciÛn seleccionada"
+msgstr "%B: ABI ei ole yhteensopiva valitun emuloinnin ABIn kanssa"
 
 #: elfxx-mips.c:11218
 msgid "%B: linking 32-bit code with 64-bit code"
-msgstr "%B: se enlaza cÛdigo de 32-bit con cÛdigo de 64-bit"
+msgstr "%B: linkitet√§√§n 32-bittinen koodi 64-bittisen koodin kanssa"
 
 #: elfxx-mips.c:11246
 msgid "%B: linking %s module with previous %s modules"
-msgstr "%B: se enlaza el mÛdulo %s con mÛdulos %s previos"
+msgstr "%B: linkitet√§√§n %s-moduli edellisten %s-modulien kanssa"
 
 #: elfxx-mips.c:11269
 msgid "%B: ABI mismatch: linking %s module with previous %s modules"
-msgstr "%B: no coincide el ABI: se enlaza el mÛdulo %s con mÛdulos %s previos"
+msgstr "%B: ABI-t√§sm√§√§m√§tt√∂myys: linkitet√§√§n %s-moduli edellisten %s-modulien kanssa"
 
 #: elfxx-mips.c:11334
 #, c-format
@@ -2601,7 +2629,7 @@ msgstr " [abi=EABI64]"
 #: elfxx-mips.c:11342
 #, c-format
 msgid " [abi unknown]"
-msgstr " [abi desconocido]"
+msgstr " [abi tuntematon]"
 
 #: elfxx-mips.c:11344
 #, c-format
@@ -2616,309 +2644,309 @@ msgstr " [abi=64]"
 #: elfxx-mips.c:11348
 #, c-format
 msgid " [no abi set]"
-msgstr " [no hay conjunto abi]"
+msgstr " [ei abia asetettu]"
 
 #: elfxx-mips.c:11369
 #, c-format
 msgid " [unknown ISA]"
-msgstr " [ISA desconocido]"
+msgstr " [tuntematon ISA]"
 
 #: elfxx-mips.c:11380
 #, c-format
 msgid " [not 32bitmode]"
-msgstr " [no es modo 32bit]"
+msgstr " [ei 32-bittitila]"
 
 #: elfxx-sparc.c:430
 #, c-format
 msgid "invalid relocation type %d"
-msgstr "tipo de reubicaciÛn %d inv·lido"
+msgstr "virheellinen sijoitustyyppi %d"
 
 #: elfxx-sparc.c:2901
 msgid "%B: probably compiled without -fPIC?"
-msgstr "%B: øCompilado probablemente sin -fPIC?"
+msgstr "%B: luultavasti k√§√§nnetty ilman -fPIC-argumenttia?"
 
 #: i386linux.c:455 m68klinux.c:459 sparclinux.c:453
 #, c-format
 msgid "Output file requires shared library `%s'\n"
-msgstr "El fichero de salida requiere la biblioteca compartida `%s'\n"
+msgstr "Tulostetiedosto vaatii jaetun kirjaston ‚Äù%s‚Äù\n"
 
 #: i386linux.c:463 m68klinux.c:467 sparclinux.c:461
 #, c-format
 msgid "Output file requires shared library `%s.so.%s'\n"
-msgstr "El fichero de salida requiere la biblioteca compartida `%s.so.%s'\n"
+msgstr "Tulostetiedosto vaatii jaetun kirjaston ‚Äù%s.so.%s‚Äù\n"
 
 #: i386linux.c:652 i386linux.c:702 m68klinux.c:659 m68klinux.c:707
 #: sparclinux.c:651 sparclinux.c:701
 #, c-format
 msgid "Symbol %s not defined for fixups\n"
-msgstr "El sÌmbolo %s no est· definido para composturas\n"
+msgstr "Symbolia %s ei ole m√§√§ritelty korjauksia varten\n"
 
 #: i386linux.c:726 m68klinux.c:731 sparclinux.c:725
 msgid "Warning: fixup count mismatch\n"
-msgstr "Aviso: no coincide la cuenta de composturas\n"
+msgstr "Varoitus: korjauslukum√§√§r√§n t√§sm√§√§m√§tt√∂myys\n"
 
 #: ieee.c:159
 #, c-format
 msgid "%s: string too long (%d chars, max 65535)"
-msgstr "%s: la cadena es demasiado larga (%d caracteres, m·ximo 65535)"
+msgstr "%s: merkkijono on liian pitk√§ (%d merkki√§, maksimi 65535)"
 
 #: ieee.c:286
 #, c-format
 msgid "%s: unrecognized symbol `%s' flags 0x%x"
-msgstr "%s: no se reconoce el sÌmbolo `%s' opciones 0x%x"
+msgstr "%s: tunnistamaton symboli ‚Äù%s‚Äù liput 0x%x"
 
 #: ieee.c:788
 msgid "%B: unimplemented ATI record %u for symbol %u"
-msgstr "%B: grabaciÛn ATI %u sin implementar para el sÌmbolo %u"
+msgstr "%B: toteuttamaton ATI-tietue %u symbolille %u"
 
 #: ieee.c:812
 msgid "%B: unexpected ATN type %d in external part"
-msgstr "%B: tipo ATN %d inesperado en la parte externa"
+msgstr "%B: odottamaton ATN-tyyppi %d ulkoisessa osassa"
 
 #: ieee.c:834
 msgid "%B: unexpected type after ATN"
-msgstr "%B: tipo inesperado despuÈs de ATN"
+msgstr "%B: odottamaton tyyppi ATN:n j√§lkeen"
 
 #: ihex.c:230
 msgid "%B:%d: unexpected character `%s' in Intel Hex file"
-msgstr "%B:%d: car·cter `%s' inesperado en el fichero Hexadecimal de Intel"
+msgstr "%B:%d: odottamaton merkki ‚Äù%s‚Äù Intel-heksatiedostossa"
 
 #: ihex.c:337
 msgid "%B:%u: bad checksum in Intel Hex file (expected %u, found %u)"
-msgstr "%B:%u: suma de comprobaciÛn errÛnea en el fichero Hexadecimal de Intel (se esperaba %u, se obtuvo %u)"
+msgstr "%B:%u: virheellinen tarkistussumma Intel-heksatiedostossa (odotettiin %u, l√∂ydettiin %u)"
 
 #: ihex.c:392
 msgid "%B:%u: bad extended address record length in Intel Hex file"
-msgstr "%B:%u: longitud de registro de direcciÛn extendida errÛnea en el fichero Hexadecimal de Intel"
+msgstr "%B:%u: virheellinen laajennettu osoitetietuepituus Intel-heksatiedostossa"
 
 #: ihex.c:409
 msgid "%B:%u: bad extended start address length in Intel Hex file"
-msgstr "%B:%u: longitud de direcciÛn de inicio extendida errÛnea en el fichero Hexadecimal de Intel"
+msgstr "%B:%u: virheellinen laajennettu aloitusosoitepituus Intel-heksatiedostossa"
 
 #: ihex.c:426
 msgid "%B:%u: bad extended linear address record length in Intel Hex file"
-msgstr "%B:%u: longitud de registro de direcciÛn lineal extendida errÛnea en el fichero Hexadecimal de Intel"
+msgstr "%B:%u: virheellinen laajennettu lineaariosoitetietuepituus Intel-heksatiedosto"
 
 #: ihex.c:443
 msgid "%B:%u: bad extended linear start address length in Intel Hex file"
-msgstr "%B:%u: longitud de direcciÛn de inicio lineal extendida errÛnea en el fichero Hexadecimal de Intel"
+msgstr "%B:%u: virheellinen laajennettu lineaarialkuosoitepituus Intel-heksatiedostossa"
 
 #: ihex.c:460
 msgid "%B:%u: unrecognized ihex type %u in Intel Hex file"
-msgstr "%B:%u: no se reconoce el tipo ihex %u en el fichero Hexadecimal de Intel"
+msgstr "%B:%u: tunnistamaton ihex-tyyppi %u Intel-heksatiedostossa"
 
 #: ihex.c:579
 msgid "%B: internal error in ihex_read_section"
-msgstr "%B: error interno en ihex_read_section"
+msgstr "%B: sis√§inen virhe ‚Äùihex_read_section‚Äù-lohkossa"
 
 #: ihex.c:613
 msgid "%B: bad section length in ihex_read_section"
-msgstr "%B: longitud de secciÛn errÛnea en ihex_read_section"
+msgstr "%B: virheellinen lohkopituus ‚Äùihex_read_section‚Äù-lohkossa"
 
 #: ihex.c:825
 #, c-format
 msgid "%s: address 0x%s out of range for Intel Hex file"
-msgstr "%s: la direcciÛn 0x%s est· fuera de rango en el fichero Hexadecimal de Intel"
+msgstr "%s: osoite 0x%s lukualueen ulkopuolella Intel-heksatiedostolle"
 
 #: libbfd.c:980
 #, c-format
 msgid "Deprecated %s called at %s line %d in %s\n"
-msgstr "Se llamÛ a %s que es obsoleto en %s lÌnea %d en %s\n"
+msgstr "K√§yt√∂st√§ poistettu %s kutsuttiin tiedostossa %s rivill√§ %d funktiossa %s\n"
 
 #: libbfd.c:983
 #, c-format
 msgid "Deprecated %s called\n"
-msgstr "Se llamÛ a %s que es obsoleto\n"
+msgstr "K√§yt√∂st√§ poistettu %s kutsuttu\n"
 
 #: linker.c:1875
 msgid "%B: indirect symbol `%s' to `%s' is a loop"
-msgstr "%B: el sÌmbolo indirecto `%s' para `%s' es un ciclo"
+msgstr "%B: ep√§suora symboli ‚Äù%s‚Äù kohteeseen ‚Äù%s‚Äù on silmukka"
 
 #: linker.c:2741
 #, c-format
 msgid "Attempt to do relocatable link with %s input and %s output"
-msgstr "Se intentÛ hacer un enlace reubicable con entrada %s y salida %s"
+msgstr "Yritettiin tehd√§ sijoitettava linkki %s-sy√∂tteell√§ ja %s-tulosteella"
 
 #: linker.c:3048
 msgid "%B: warning: ignoring duplicate section `%A'\n"
-msgstr "%B: aviso: se descarta la secciÛn duplicada `%A'\n"
+msgstr "%B: varoitus: ei oteta huomioon lohkon ‚Äù%A‚Äù kaksoiskappaletta\n"
 
 #: linker.c:3062
 msgid "%B: warning: duplicate section `%A' has different size\n"
-msgstr "%B: aviso: la secciÛn duplicada `%A' es de tamaÒo diferente\n"
+msgstr "%B: varoitus: lohkon ‚Äù%A‚Äù kaksoiskappaleessa on eri koko\n"
 
 #: merge.c:820
 #, c-format
 msgid "%s: access beyond end of merged section (%ld)"
-msgstr "%s: acceso m·s all· del final de la secciÛn mezclada (%ld)"
+msgstr "%s: p√§√§sy lomitetun lohkon (%ld) lopun yli"
 
 #: mmo.c:456
 #, c-format
 msgid "%s: No core to allocate section name %s\n"
-msgstr "%s: No hay core para asignar el nombre de secciÛn %s\n"
+msgstr "%s: Ei ydint√§ lohkonimen %s varaamiseen\n"
 
 #: mmo.c:531
 #, c-format
 msgid "%s: No core to allocate a symbol %d bytes long\n"
-msgstr "%s: No hay core para asignar un sÌmbolo de %d bytes de longitud\n"
+msgstr "%s: Ei ydint√§ symbolin varaamiseksi %d tavua pitk√§n√§\n"
 
 #: mmo.c:1187
 #, c-format
 msgid "%s: invalid mmo file: initialization value for $255 is not `Main'\n"
-msgstr "%s: fichero mmo inv·lido: el valor de iniciaciÛn para $255 no es `Main'\n"
+msgstr "%s: virheellinen mmo-tiedosto: alustusarvo kohteelle $255 ei ole ‚ÄùMain‚Äù\n"
 
 #: mmo.c:1332
 #, c-format
 msgid "%s: unsupported wide character sequence 0x%02X 0x%02X after symbol name starting with `%s'\n"
-msgstr "%s: no se admite la secuencia de caracteres anchos 0x%02X 0x%02X despuÈs del nombre de sÌmbolo que inicia con `%s'\n"
+msgstr "%s: ei-tuettu leve√§merkkisekvenssi 0x%02X 0x%02X symbolinimen j√§lkeen alkaen arvolla ‚Äù%s‚Äù\n"
 
 #: mmo.c:1566
 #, c-format
 msgid "%s: invalid mmo file: unsupported lopcode `%d'\n"
-msgstr "%s: fichero mmo inv·lido: no se admite el cÛdigo de operaciÛn-l `%d'\n"
+msgstr "%s: virheellinen mmo-tiedosto: ei-tuettu lopcode ‚Äù%d‚Äù\n"
 
 #: mmo.c:1576
 #, c-format
 msgid "%s: invalid mmo file: expected YZ = 1 got YZ = %d for lop_quote\n"
-msgstr "%s: fichero mmo inv·lido: se esperaba YZ = 1 se obtuvo YZ = %d para lop_quote\n"
+msgstr "%s: virheellinen mmo-tiedosto: odotettu YZ = 1 saatiin YZ = %d kohteelle lop_quote\n"
 
 #: mmo.c:1612
 #, c-format
 msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_loc\n"
-msgstr "%s: fichero mmo inv·lido: se esperaba z = 1 Û z = 2, se obtuvo z = %d para lop_loc\n"
+msgstr "%s: virheellinen mmo-tiedosto: odotettiin z = 1 tai z = 2, saatiin z = %d kohteelle lop_loc\n"
 
 #: mmo.c:1658
 #, c-format
 msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_fixo\n"
-msgstr "%s: fichero mmo inv·lido: se esperaba z = 1 Û z = 2, se obtuvo z = %d para lop_fixo\n"
+msgstr "%s: virheellinen mmo-tiedosto: odotettiin z = 1 tai z = 2, saatiin z = %d kohteelle lop_fixo\n"
 
 #: mmo.c:1697
 #, c-format
 msgid "%s: invalid mmo file: expected y = 0, got y = %d for lop_fixrx\n"
-msgstr "%s: fichero mmo inv·lido: se esperaba y = 0, se obtuvo y = %d para lop_fixrx\n"
+msgstr "%s: virheellinen mmo-tiedosto: odotettiin y = 0, saatiin y = %d kohteelle lop_fixrx\n"
 
 #: mmo.c:1706
 #, c-format
 msgid "%s: invalid mmo file: expected z = 16 or z = 24, got z = %d for lop_fixrx\n"
-msgstr "%s: fichero mmo inv·lido: se esperaba z = 16 Û z = 24, se obtuvo z = %d para lop_fixrx\n"
+msgstr "%s: virheellinen mmo-tiedosto: odotettiin z = 16 tai z = 24, saatiin z = %d kohteelle lop_fixrx\n"
 
 #: mmo.c:1729
 #, c-format
 msgid "%s: invalid mmo file: leading byte of operand word must be 0 or 1, got %d for lop_fixrx\n"
-msgstr "%s: fichero mmo inv·lido: el byte inicial de la palabra operando debe ser 0 Û 1, se obtuvo %d para lop_fixrx\n"
+msgstr "%s: virheellinen mmo-tiedosto: operandisanan etutavun on oltava 0 tai 1, saatiin %d kohteelle lop_fixrx\n"
 
 #: mmo.c:1752
 #, c-format
 msgid "%s: cannot allocate file name for file number %d, %d bytes\n"
-msgstr "%s: no se puede asignar el nombre de fichero para el n˙mero de fichero %d, %d bytes\n"
+msgstr "%s: ei voi varata tiedostonime√§ tiedostonumerolle %d, %d tavua\n"
 
 #: mmo.c:1772
 #, c-format
 msgid "%s: invalid mmo file: file number %d `%s', was already entered as `%s'\n"
-msgstr "%s: fichero mmo inv·lido: el n˙mero de fichero %d `%s' ya se habÌa introducido como `%s'\n"
+msgstr "%s: virheellinen mmo-tiedosto: tiedostonumero %d ‚Äù%s‚Äù, oli jo kirjoitettu arvona ‚Äù%s‚Äù\n"
 
 #: mmo.c:1785
 #, c-format
 msgid "%s: invalid mmo file: file name for number %d was not specified before use\n"
-msgstr "%s: fichero mmo inv·lido: no se especificÛ un nombre de fichero para el n˙mero %d antes de utilizarse\n"
+msgstr "%s: virheellinen mmo-tiedosto: tiedostonimi numerolle %d ei ole m√§√§ritelty ennen k√§ytt√∂√§\n"
 
 #: mmo.c:1892
 #, c-format
 msgid "%s: invalid mmo file: fields y and z of lop_stab non-zero, y: %d, z: %d\n"
-msgstr "%s: fichero mmo inv·lido: los campos y y z de lop_stab no son cero, y: %d, z: %d\n"
+msgstr "%s: virheellinen mmo-tiedosto: lop_stab:n kent√§t y ja z ovat nollasta poikkeavia, y: %d, z: %d\n"
 
 #: mmo.c:1928
 #, c-format
 msgid "%s: invalid mmo file: lop_end not last item in file\n"
-msgstr "%s: fichero mmo inv·lido: lop_end no es el ˙ltimo elemento en el fichero\n"
+msgstr "%s: virheellinen mmo-tiedosto: lop_end ei ole viimeinen alkio tiedostossa\n"
 
 #: mmo.c:1941
 #, c-format
 msgid "%s: invalid mmo file: YZ of lop_end (%ld) not equal to the number of tetras to the preceding lop_stab (%ld)\n"
-msgstr "%s: fichero mmo inv·lido: YZ de lop_end (%ld) no es igual al n˙mero de tetras del lop_stab precedente (%ld)\n"
+msgstr "%s: virheellinen mmo-tiedosto: lop_end:n YZ (%ld) ei ole sama kuin tetras-numero edelt√§v√§√§n kohteeseen lop_stab (%ld)\n"
 
 #: mmo.c:2651
 #, c-format
 msgid "%s: invalid symbol table: duplicate symbol `%s'\n"
-msgstr "%s: tabla de sÌmbolos inv·lida: sÌmbolo `%s' duplicado\n"
+msgstr "%s: virheellinen symbolitaulu: symbolin ‚Äù%s‚Äù kaksoiskappale\n"
 
 #: mmo.c:2894
 #, c-format
 msgid "%s: Bad symbol definition: `Main' set to %s rather than the start address %s\n"
-msgstr "%s: DefiniciÛn de sÌmbolo errÛnea: `Main' se estableciÛn como %s en lugar de la direcciÛn de inicio %s\n"
+msgstr "%s: Virheellinen symbolim√§√§rittely: ‚ÄùMain‚Äù asetettu kohteeseen %s pikemmin kuin aloitusosoitteeseen %s\n"
 
 #: mmo.c:2986
 #, c-format
 msgid "%s: warning: symbol table too large for mmo, larger than 65535 32-bit words: %d.  Only `Main' will be emitted.\n"
-msgstr "%s: aviso: la tabla de sÌmbolos es demasiado grande para mmo, es m·s grande que 65535 words de 32-bit: %d. SÛlo se emitir· `Main'.\n"
+msgstr "%s: varoitus: symbolitaulu liian laaja kohteelle mmo, laajempi kuin 65535 32-bittist√§ sanaa: %d.  Vain ‚ÄùMain‚Äù l√§hetet√§√§n.\n"
 
 #: mmo.c:3031
 #, c-format
 msgid "%s: internal error, symbol table changed size from %d to %d words\n"
-msgstr "%s: error interno, la tabla de sÌmbolos cambiÛ de tamaÒo de %d a %d words\n"
+msgstr "%s: sis√§inen virhe, symbolitaulu vaihtoi kokoa %d:sta sanasta %d sanaan\n"
 
 #: mmo.c:3083
 #, c-format
 msgid "%s: internal error, internal register section %s had contents\n"
-msgstr "%s: error interno, la secciÛn interna de registros %s tiene contenido\n"
+msgstr "%s: sis√§inen virhe, sis√§isess√§ rekisterilohkossa %s oli sis√§lt√∂√§\n"
 
 #: mmo.c:3134
 #, c-format
 msgid "%s: no initialized registers; section length 0\n"
-msgstr "%s: no hay registros iniciados; longitud de secciÛn 0\n"
+msgstr "%s: ei alustettuja rekistereit√§; lohkopituus 0\n"
 
 #: mmo.c:3140
 #, c-format
 msgid "%s: too many initialized registers; section length %ld\n"
-msgstr "%s: demasiados registros iniciados: longitud de secciÛn %ld\n"
+msgstr "%s: liian monia alustettuja rekistereit√§; lohkopituus %ld\n"
 
 #: mmo.c:3145
 #, c-format
 msgid "%s: invalid start address for initialized registers of length %ld: 0x%lx%08lx\n"
-msgstr "%s: direcciÛn de inicio inv·lida para los registros iniciados de longitud %ld: 0x%lx%08lx\n"
+msgstr "%s: virheellinen aloitusosoite alustetuille rekistereille pituudeltaan %ld: 0x%lx%08lx\n"
 
 #: oasys.c:881
 #, c-format
 msgid "%s: can not represent section `%s' in oasys"
-msgstr "%s: no se puede representar la secciÛn `%s' en oasys"
+msgstr "%s: ei voi edustaa lohkoa ‚Äù%s‚Äù oasys-lohkossa"
 
 #: osf-core.c:139
 #, c-format
 msgid "Unhandled OSF/1 core file section type %d\n"
-msgstr "Tipo de secciÛn de fichero n˙cleo OSF/1 %d sin manejar\n"
+msgstr "K√§sittelem√§t√∂n OSF/1 ydintiedostolohkotyyppi %d\n"
 
 #. XXX code yet to be written.
 #: peicode.h:759
 msgid "%B: Unhandled import type; %x"
-msgstr "%B: Tipo de importaciÛn sin manejar; %x"
+msgstr "%B: K√§sittelem√§t√∂n tuontityyppi; %x"
 
 #: peicode.h:764
 msgid "%B: Unrecognised import type; %x"
-msgstr "%B: Tipo de importaciÛn no reconocida; %x"
+msgstr "%B: Tunnistamaton tuontityyppi; %x"
 
 #: peicode.h:778
 msgid "%B: Unrecognised import name type; %x"
-msgstr "%B: Tipo de nombre de importaciÛn no reconocida; %x"
+msgstr "%B: Tunnistamaton tuontinimityyppi; %x"
 
 #: peicode.h:1161
 msgid "%B: Unrecognised machine type (0x%x) in Import Library Format archive"
-msgstr "%B: Tipo de m·quina (0x%x) no reconocida en el archivo de Formato de ImportaciÛn de Bibliotecas"
+msgstr "%B: Tunnistamaton konetyyppi (0x%x) ‚ÄùImport Library Format‚Äù-arkistossa"
 
 #: peicode.h:1173
 msgid "%B: Recognised but unhandled machine type (0x%x) in Import Library Format archive"
-msgstr "%B: Tipo de m·quina (0x%x) reconocida pero sin manejar en el archivo de Formato de ImportaciÛn de Bibliotecas"
+msgstr "%B: Tunnistettu, mutta k√§sittelem√§t√∂n konetyyppi (0x%x) ‚ÄùImport Library Format‚Äù-arkistossa"
 
 #: peicode.h:1191
 msgid "%B: size field is zero in Import Library Format header"
-msgstr "%B: el tamaÒo del campo es cero en el encabezado del Formato de ImportaciÛn de Bibliotecas"
+msgstr "%B: kokokentt√§ on nolla ‚ÄùImport Library Format‚Äù-otsakkeessa"
 
 #: peicode.h:1222
 msgid "%B: string not null terminated in ILF object file."
-msgstr "%B: cadena no terminada en null en el fichero objeto ILF."
+msgstr "%B: merkkijonoa ei ole p√§√§tetty nollaan ILF-objektitiedostossa."
 
 #: pe-mips.c:606
 msgid "%B: `ld -r' not supported with PE MIPS objects\n"
-msgstr "%B: `ld -r' no se admite con objetos PE MIPS\n"
+msgstr "%B: ‚Äùld -r‚Äù ei tuettu ‚ÄùPE MIPS‚Äù-objekteilla\n"
 
 #. OK, at this point the following variables are set up:
 #. src = VMA of the memory we're fixing up
@@ -2926,15 +2954,15 @@ msgstr "%B: `ld -r' no se admite con objetos PE MIPS\n"
 #. val = VMA of what we need to refer to.
 #: pe-mips.c:722
 msgid "%B: unimplemented %s\n"
-msgstr "%B: %s sin implementar\n"
+msgstr "%B: toteuttamaton %s\n"
 
 #: pe-mips.c:748
 msgid "%B: jump too far away\n"
-msgstr "%B: salto demasiado lejos\n"
+msgstr "%B: hyppy liian kauas\n"
 
 #: pe-mips.c:774
 msgid "%B: bad pair/reflo after refhi\n"
-msgstr "%B: pair/reflo errÛneo despuÈs de refhi\n"
+msgstr "%B: virheellinen pari/reflo refhi:n j√§lkeen\n"
 
 #: ppcboot.c:414
 #, c-format
@@ -2943,27 +2971,27 @@ msgid ""
 "ppcboot header:\n"
 msgstr ""
 "\n"
-"encabezado de ppcboot:\n"
+"ppcboot-otsake:\n"
 
 #: ppcboot.c:415
 #, c-format
 msgid "Entry offset        = 0x%.8lx (%ld)\n"
-msgstr "Desplazamiento de entrada = 0x%.8lx (%ld)\n"
+msgstr "Tulokohtasiirros        = 0x%.8lx (%ld)\n"
 
 #: ppcboot.c:416
 #, c-format
 msgid "Length              = 0x%.8lx (%ld)\n"
-msgstr "Longitud                  = 0x%.8lx (%ld)\n"
+msgstr "Pituus              = 0x%.8lx (%ld)\n"
 
 #: ppcboot.c:419
 #, c-format
 msgid "Flag field          = 0x%.2x\n"
-msgstr "Campo de opciones         = 0x%.2x\n"
+msgstr "Lippukentt√§          = 0x%.2x\n"
 
 #: ppcboot.c:425
 #, c-format
 msgid "Partition name      = \"%s\"\n"
-msgstr "Nombre de la particiÛn    = \"%s\"\n"
+msgstr "Osionimi      = ‚Äù%s‚Äù\n"
 
 #: ppcboot.c:444
 #, c-format
@@ -2972,22 +3000,22 @@ msgid ""
 "Partition[%d] start  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
 msgstr ""
 "\n"
-"ParticiÛn[%d] inicio = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
+"Osio[%d] alku  = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
 
 #: ppcboot.c:450
 #, c-format
 msgid "Partition[%d] end    = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
-msgstr "ParticiÛn[%d] fin    = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
+msgstr "Osio[%d] loppu    = { 0x%.2x, 0x%.2x, 0x%.2x, 0x%.2x }\n"
 
 #: ppcboot.c:456
 #, c-format
 msgid "Partition[%d] sector = 0x%.8lx (%ld)\n"
-msgstr "ParticiÛn[%d] sector = 0x%.8lx (%ld)\n"
+msgstr "Osio[%d] sektori = 0x%.8lx (%ld)\n"
 
 #: ppcboot.c:457
 #, c-format
 msgid "Partition[%d] length = 0x%.8lx (%ld)\n"
-msgstr "ParticiÛn[%d] longitud = 0x%.8lx (%ld)\n"
+msgstr "Osio[%d] pituus = 0x%.8lx (%ld)\n"
 
 #: som.c:5088
 #, c-format
@@ -2996,98 +3024,98 @@ msgid ""
 "Exec Auxiliary Header\n"
 msgstr ""
 "\n"
-"Encabezado Auxiliar de EjecuciÛn\n"
+"Suoritettavan tiedoston apuotsake\n"
 
 #: som.c:5349
 msgid "som_sizeof_headers unimplemented"
-msgstr "som_sizeof_headers sin implementar"
+msgstr "som_sizeof_headers ei ole toteutettu"
 
 #: srec.c:261
 msgid "%B:%d: Unexpected character `%s' in S-record file\n"
-msgstr "%B:%d: CaractÈr `%s' inesperado en el fichero S-record\n"
+msgstr "%B:%d: Odottamaton merkki ‚Äù%s‚Äù S-tietuetiedostossa\n"
 
 #: stabs.c:279
 msgid "%B(%A+0x%lx): Stabs entry has invalid string index."
-msgstr "%B(%A+0x%lx): La entrada de cabos tiene una cadena Ìndice inv·lida."
+msgstr "%B(%A+0x%lx): Stabs-tulokohdassa on virheellinen merkkijonoindeksi."
 
 #: syms.c:1057
 msgid "Unsupported .stab relocation"
-msgstr "No se admite la reubicaciÛn .stab"
+msgstr "‚ÄùEi-tuettu .stab‚Äù-sijoitus"
 
 #: vms-gsd.c:338
 #, c-format
 msgid "bfd_make_section (%s) failed"
-msgstr "bfd_make_section (%s) fallÛ"
+msgstr "bfd_make_section (%s) ei onnistunut"
 
 #: vms-gsd.c:353
 #, c-format
 msgid "bfd_set_section_flags (%s, %x) failed"
-msgstr "bfd_set_section_flags (%s, %x) fallÛ"
+msgstr "bfd_set_section_flags (%s, %x) ei onnistunut"
 
 #: vms-gsd.c:388
 #, c-format
 msgid "Size mismatch section %s=%lx, %s=%lx"
-msgstr "No coincide el tamaÒo de la secciÛn %s=%lx, %s=%lx"
+msgstr "Kokot√§sm√§√§m√§t√∂n lohko %s=%lx, %s=%lx"
 
 #: vms-gsd.c:679
 #, c-format
 msgid "unknown gsd/egsd subtype %d"
-msgstr "subtipo de gsd/egsd %d desconocido"
+msgstr "tuntematon ‚Äùgsd/egsd‚Äù-alityyppi %d"
 
 #: vms-hdr.c:328
 msgid "Object module NOT error-free !\n"
-msgstr "° El mÛdulo objeto NO est· libre de errores !\n"
+msgstr "Objektimoduli EI ole virheet√∂n !\n"
 
 #: vms-misc.c:474
 #, c-format
 msgid "Stack overflow (%d) in _bfd_vms_push"
-msgstr "Desbordamiento de la pila (%d) en _bfd_vms_push"
+msgstr "Pinon ylivuoto (%d) kohteessa _bfd_vms_push"
 
 #: vms-misc.c:489
 msgid "Stack underflow in _bfd_vms_pop"
-msgstr "Desbordamiento por debajo de la pila en _bfd_vms_pop"
+msgstr "Pinon ylivuoto kohteessa _bfd_vms_pop"
 
 #: vms-misc.c:803
 msgid "_bfd_vms_output_counted called with zero bytes"
-msgstr "se llamÛ _bfd_vms_output_counted con cero bytes"
+msgstr "_bfd_vms_output_counted kutsuttu nollatavuilla"
 
 #: vms-misc.c:808
 msgid "_bfd_vms_output_counted called with too many bytes"
-msgstr "se llamÛ _bfd_vms_output_counted con demasiados bytes"
+msgstr "_bfd_vms_output_counted kutsuttu liian monilla tavuilla"
 
 #: vms-misc.c:926
 #, c-format
 msgid "Symbol %s replaced by %s\n"
-msgstr "El sÌmbolo %s fue reemplazado por %s\n"
+msgstr "Symboli %s korvattu kohteella %s\n"
 
 #: vms-misc.c:985
 #, c-format
 msgid "failed to enter %s"
-msgstr "fallÛ la introducciÛn de %s"
+msgstr "ei onnistuttu kirjoittamaan %s"
 
 #: vms-tir.c:57
 msgid "No Mem !"
-msgstr "° No hay Memoria !"
+msgstr "Ei muistia !"
 
 #: vms-tir.c:300
 #, c-format
 msgid "bad section index in %s"
-msgstr "Õndice de secciÛn errÛneo en %s"
+msgstr "virheellinen lohkoindeksi kohteessa %s"
 
 #: vms-tir.c:313
 #, c-format
 msgid "unsupported STA cmd %s"
-msgstr "no se admite la orden STA %s"
+msgstr "ei-tuettu STA-komento %s"
 
 #: vms-tir.c:318 vms-tir.c:1120
 #, c-format
 msgid "reserved STA cmd %d"
-msgstr "orden STA %d reservada"
+msgstr "varattu STA-komento %d"
 
 #: vms-tir.c:410 vms-tir.c:432
 #, c-format
 msgid "%s: no symbol \"%s\""
-msgstr "%s: no existe el sÌmbolo \"%s\""
+msgstr "%s: ei symbolia ‚Äù%s‚Äù"
 
 #. Unsigned shift.
 #. Rotate.
@@ -3097,37 +3125,37 @@ msgstr "%s: no existe el sÌmbolo \"%s\""
 #: vms-tir.c:736 vms-tir.c:1440
 #, c-format
 msgid "%s: not supported"
-msgstr "%s: no se admite"
+msgstr "%s: ei tuettu"
 
 #: vms-tir.c:502 vms-tir.c:1297
 #, c-format
 msgid "%s: not implemented"
-msgstr "%s: sin implementar"
+msgstr "%s: ei toteutettu"
 
 #: vms-tir.c:506 vms-tir.c:1301
 #, c-format
 msgid "reserved STO cmd %d"
-msgstr "orden STO %d reservada"
+msgstr "varattu STO-komento %d"
 
 #: vms-tir.c:621 vms-tir.c:1445
 #, c-format
 msgid "reserved OPR cmd %d"
-msgstr "orden OPR %d reservada"
+msgstr "varattu OPR-komento %d"
 
 #: vms-tir.c:681 vms-tir.c:1509
 #, c-format
 msgid "reserved CTL cmd %d"
-msgstr "orden CTL %d reservada"
+msgstr "varattu CTL-komento %d"
 
 #. stack byte from image
 #. arg: none.
 #: vms-tir.c:1028
 msgid "stack-from-image not implemented"
-msgstr "pila-desde-imagen sin implementar"
+msgstr "stack-from-image ei ole toteutettu"
 
 #: vms-tir.c:1046
 msgid "stack-entry-mask not fully implemented"
-msgstr "pila-m·scara-entrada no est· completamente implementado"
+msgstr "stack-entry-mask ei ole t√§ysin toteutettu"
 
 #. compare procedure argument
 #. arg: cs	symbol name
@@ -3138,262 +3166,262 @@ msgstr "pila-m·scara-entrada no est· completamente implementado"
 #. and stack TRUE (args match) or FALSE (args dont match) value.
 #: vms-tir.c:1060
 msgid "PASSMECH not fully implemented"
-msgstr "PASSMECH no est· completamente implementado"
+msgstr "PASSMECH ei ole t√§ysin toteutettu"
 
 #: vms-tir.c:1079
 msgid "stack-local-symbol not fully implemented"
-msgstr "pila-sÌmbolo-local no est· completamente implementado"
+msgstr "stack-local-symbol ei ole t√§ysin toteutettu"
 
 #: vms-tir.c:1092
 msgid "stack-literal not fully implemented"
-msgstr "pila-literal no est· completamente implementado"
+msgstr "stack-literal ei ole t√§ysin toteutettu"
 
 #: vms-tir.c:1113
 msgid "stack-local-symbol-entry-point-mask not fully implemented"
-msgstr "pila-sÌmbolo-local-m·scara-punto-entrada no est· completamente implementado"
+msgstr "stack-local-symbol-entry-point-mask ei ole t√§ysin toteutettu"
 
 #: vms-tir.c:1387 vms-tir.c:1399 vms-tir.c:1411 vms-tir.c:1423 vms-tir.c:1488
 #: vms-tir.c:1496 vms-tir.c:1504
 #, c-format
 msgid "%s: not fully implemented"
-msgstr "%s: no est· completamente implementado"
+msgstr "%s: ei ole t√§ysin toteutettu"
 
 #: vms-tir.c:1562
 #, c-format
 msgid "obj code %d not found"
-msgstr "no se encontrÛ el cÛdigo objeto %d"
+msgstr "obj-koodia %d ei l√∂ytynyt"
 
 #: vms-tir.c:1870
 #, c-format
 msgid "SEC_RELOC with no relocs in section %s"
-msgstr "SEC_RELOC sin reubicaciones en la secciÛn %s"
+msgstr "SEC_RELOC ilman relocs-tietueita lohkossa %s"
 
 #: vms-tir.c:2152
 #, c-format
 msgid "Unhandled relocation %s"
-msgstr "ReubicaciÛn %s sin manejar"
+msgstr "K√§sittelem√§t√∂n sijoitus %s"
 
 #: xcofflink.c:566
 #, c-format
 msgid "%s: XCOFF shared object when not producing XCOFF output"
-msgstr "%s: objeto compartido XCOFF cuando no se produce salida XCOFF"
+msgstr "%s: XCOFF jaettu objekti kun ei tuoteta XCOFF-tulostetta"
 
 #: xcofflink.c:587
 #, c-format
 msgid "%s: dynamic object with no .loader section"
-msgstr "%s: objeto din·mico sin secciÛn .loader"
+msgstr "%s: dynaaminen objekti ilman ‚Äù.loader‚Äù-lohkoa"
 
 #: xcofflink.c:1150
 msgid "%B: `%s' has line numbers but no enclosing section"
-msgstr "%B: `%s' tiene n˙meros de lÌnea pero no una secciÛn contenedora"
+msgstr "%B: ‚Äù%s‚Äù on rivinumerot, mutta ei sulkevaa lohkoa"
 
 #: xcofflink.c:1202
 msgid "%B: class %d symbol `%s' has no aux entries"
-msgstr "%B: clase %d sÌmbolo `%s' no tiene entradas auxiliares"
+msgstr "%B: luokassa %d symbolissa ‚Äù%s‚Äù ei ole aputulokohtia"
 
 #: xcofflink.c:1225
 msgid "%B: symbol `%s' has unrecognized csect type %d"
-msgstr "%B: el sÌmbolo `%s' tiene un tipo csect %d que no se reconoce"
+msgstr "%B: symbolissa ‚Äù%s‚Äù on tunnistamaton ohjauslohkotyyppi %d"
 
 #: xcofflink.c:1237
 msgid "%B: bad XTY_ER symbol `%s': class %d scnum %d scnlen %d"
-msgstr "%B: sÌmbolo XTY_ER `%s' errÛneo: clase %d scnum %d scnlen %d"
+msgstr "%B: virheellinen XTY_ER-symboli ‚Äù%s‚Äù: luokka %d ohjauslohkonumero %d ohjauslohkopituus %d"
 
 #: xcofflink.c:1273
 msgid "%B: XMC_TC0 symbol `%s' is class %d scnlen %d"
-msgstr "%B: sÌmbolo XMC_TCO `%s' es clase %d scnlen %d"
+msgstr "%B: XMC_TC0-symboli ‚Äù%s‚Äù on luokka %d ohjauslohkopituus %d"
 
 #: xcofflink.c:1419
 msgid "%B: csect `%s' not in enclosing section"
-msgstr "%B: csect `%s' no est· contenido en una secciÛn"
+msgstr "%B: ohjauslohkoa ‚Äù%s‚Äù ei ole sulkeutuvassa lohkossa"
 
 #: xcofflink.c:1526
 msgid "%B: misplaced XTY_LD `%s'"
-msgstr "%B: XTY_LD `%s' mal ubicado"
+msgstr "%B: v√§√§rin sijoitettu XTY_LD ‚Äù%s‚Äù"
 
 #: xcofflink.c:1842
 msgid "%B: reloc %s:%d not in csect"
-msgstr "%B: la reubicaciÛn %s:%d no est· en csect"
+msgstr "%B: reloc-tietue %s:%d ei ole ohjauslohkossa"
 
 #: xcofflink.c:2640
 #, c-format
 msgid "%s: no such symbol"
-msgstr "%s: no hay tal sÌmbolo"
+msgstr "%s: tuntematon symboli"
 
 #: xcofflink.c:2869
 #, c-format
 msgid "warning: attempt to export undefined symbol `%s'"
-msgstr "aviso: intento de exportar el sÌmbolo sin definir `%s'"
+msgstr "varoitus: yritettiin vied√§ m√§√§rittelem√§t√∂n symboli ‚Äù%s‚Äù"
 
 #: xcofflink.c:3036
 msgid "error: undefined symbol __rtinit"
-msgstr "error: sÌmbolo __rtinit indefinido"
+msgstr "virhe: m√§√§rittelem√§t√∂n symboli ‚Äù__rtinit‚Äù"
 
 #: xcofflink.c:3656
 #, c-format
 msgid "TOC overflow: 0x%lx > 0x10000; try -mminimal-toc when compiling"
-msgstr "Desbordamiento de TOC: 0x%lx > 0x10000; pruebe -mminimal-toc al compilar"
+msgstr "Sis√§lt√∂luettelon ylivuoto: 0x%lx > 0x10000; yrit√§ ‚Äù-mminimal-toc‚Äù k√§√§nnett√§ess√§"
 
 #: xcofflink.c:4492
 msgid "%B: loader reloc in unrecognized section `%A'"
-msgstr "%B: reubicaciÛn del cargador en la secciÛn `%A' no reconocida"
+msgstr "%B: ‚Äùloader reloc‚Äù-tietue tunnistamattomassa lohkossa ‚Äù%A‚Äù"
 
 #: xcofflink.c:4513
 msgid "%B: `%s' in loader reloc but not loader sym"
-msgstr "%B: `%s' en la reubicaciÛn del cargador pero no es un sÌmbolo del cargador"
+msgstr "%B: ‚Äù%s‚Äù ‚Äùloader reloc‚Äù-tietueessa, mutta ei ‚Äùloader.sym‚Äù-binaarissa"
 
 #: xcofflink.c:4528
 msgid "%B: loader reloc in read-only section %A"
-msgstr "%B: reubicaciÛn del cargador en la secciÛn de sÛlo lectura %A"
+msgstr "%B: ‚Äùloader reloc‚Äù-tietue kirjoitussuojatussa lohkossa %A"
 
 #: xcofflink.c:4937 xcofflink.c:4999 xcofflink.c:5294
 #, c-format
 msgid "%s: loader reloc in unrecognized section `%s'"
-msgstr "%s: reubicaciÛn del cargador en la secciÛn `%s' no reconocida"
+msgstr "%s: ‚Äùloader reloc‚Äù-tietue tunnistamattomassa lohkossa ‚Äù%s‚Äù"
 
 #: xcofflink.c:5305
 #, c-format
 msgid "%s: `%s' in loader reloc but not loader sym"
-msgstr "%s: `%s' en la reubicaciÛn del cargador pero no es un sÌmbolo del cargador"
+msgstr "%s: ‚Äù%s‚Äù ‚Äùloader reloc‚Äù-tietueessa, mutta ei ‚Äùloader.sym‚Äù-binaarissa"
 
 #: elf32-ia64.c:1169 elf64-ia64.c:1169
 msgid "%B: Can't relax br at 0x%lx in section `%A'. Please use brl or indirect branch."
-msgstr "%B: No se puede relajar br en 0x%lx en la secciÛn `%A'. Por favor use brl o ramificaciÛn indirecta."
+msgstr "%B: Ei voi avartaa br-k√§sky√§ kohteessa 0x%lx lohkossa ‚Äù%A‚Äù. K√§yt√§ ‚Äùbrl‚Äù-k√§sky√§ tai ep√§suoraa haarautumista."
 
 #: elf32-ia64.c:2910 elf64-ia64.c:2910
 msgid "@pltoff reloc against local symbol"
-msgstr "reubicaciÛn @pltoff contra un sÌmbolo local"
+msgstr "‚Äù@pltoff reloc‚Äù-tietue paikallista symbolia varten"
 
 #: elf32-ia64.c:4523 elf64-ia64.c:4523
 #, c-format
 msgid "%s: short data segment overflowed (0x%lx >= 0x400000)"
-msgstr "%s: segmento de datos short desbordado (0x%lx >= 0x400000)"
+msgstr "%s: ‚Äùshort‚Äù-datasegmentti ylivuotanut (0x%lx >= 0x400000)"
 
 #: elf32-ia64.c:4534 elf64-ia64.c:4534
 #, c-format
 msgid "%s: __gp does not cover short data segment"
-msgstr "%s: __gp no cubre el segmento de datos short"
+msgstr "%s: ‚Äù__gp‚Äù ei kata ‚Äùshort‚Äù-datasegmentti√§"
 
 #: elf32-ia64.c:4808 elf64-ia64.c:4808
 msgid "%B: non-pic code with imm relocation against dynamic symbol `%s'"
-msgstr "%B: cÛdigo que no es pic con reubicaciÛn imm contra el sÌmbolo din·mico %s"
+msgstr "%B: paikkariippuvainen koodi v√§litt√∂m√§ll√§ sijoituksella dynaamista symbolia ‚Äù%s‚Äù varten"
 
 #: elf32-ia64.c:4875 elf64-ia64.c:4875
 msgid "%B: @gprel relocation against dynamic symbol %s"
-msgstr "%B: reubicaciÛn @gprel contra el sÌmbolo din·mico %s"
+msgstr "%B: ‚Äù@gprel‚Äù-sijoitus dynaamista symbolia %s varten"
 
 #: elf32-ia64.c:4938 elf64-ia64.c:4938
 msgid "%B: linking non-pic code in a position independent executable"
-msgstr "%B: se enlaza cÛdigo que no es pic en un ejecutable independiente de posiciÛn"
+msgstr "%B: linkitet√§√§n paikkariippuvainen koodi paikkariippumattomassa suoritettavassa tiedostossa"
 
 #: elf32-ia64.c:5075 elf64-ia64.c:5075
 msgid "%B: @internal branch to dynamic symbol %s"
-msgstr "%B: ramificaciÛn @internal al sÌmbolo din·mico %s"
+msgstr "%B: @sis√§inen haarautuminen dynaamiseen symboliin %s"
 
 #: elf32-ia64.c:5077 elf64-ia64.c:5077
 msgid "%B: speculation fixup to dynamic symbol %s"
-msgstr "%B: compostura de especulaciÛn al sÌmbolo din·mico %s"
+msgstr "%B: spekulaatiokorjaus dynaamiseen symboliin %s"
 
 #: elf32-ia64.c:5079 elf64-ia64.c:5079
 msgid "%B: @pcrel relocation against dynamic symbol %s"
-msgstr "%B: reubicaciÛn @pcrel contra el sÌmbolo din·mico %s"
+msgstr "%B: ‚Äù@pcrel‚Äù-sijoitus dynaamista symbolia %s varten"
 
 #: elf32-ia64.c:5279 elf64-ia64.c:5279
 msgid "unsupported reloc"
-msgstr "no se admite la reubicaciÛn"
+msgstr "ei-tuettu reloc-tietue"
 
 #: elf32-ia64.c:5312 elf64-ia64.c:5312
 msgid "%B: Can't relax br (%s) to `%s' at 0x%lx in section `%A' with size 0x%lx (> 0x1000000)."
-msgstr "%B: No se puede relajar br (%s) a `%s' en 0x%lx en la secciÛn `%A' con tamaÒo 0x%lx (> 0x1000000)."
+msgstr "%B: Ei voi avartaa br-k√§sky√§ (%s) kohteelle ‚Äù%s‚Äù kohteessa 0x%lx lohkossa ‚Äù%A‚Äù koolla 0x%lx (> 0x1000000)."
 
 #: elf32-ia64.c:5573 elf64-ia64.c:5573
 msgid "%B: linking trap-on-NULL-dereference with non-trapping files"
-msgstr "%B: se enlaza deferencias-captura-en-NULL con ficheros que no son de captura"
+msgstr "%B: linkitet√§√§n keskeytysnollassa uudelleenviite ‚Äùei-keskeytet√§‚Äù-tiedostojen kanssa"
 
 #: elf32-ia64.c:5582 elf64-ia64.c:5582
 msgid "%B: linking big-endian files with little-endian files"
-msgstr "%B: se enlazan ficheros big-endian con ficheros little-endian"
+msgstr "%B: linkitet√§√§n ‚Äùbig-endian‚Äù-tiedostoja ‚Äùlittle-endian‚Äù-tiedostojen kanssa"
 
 #: elf32-ia64.c:5591 elf64-ia64.c:5591
 msgid "%B: linking 64-bit files with 32-bit files"
-msgstr "%B: se enlazan ficheros de 64-bit con ficheros de 32-bit"
+msgstr "%B: linkitet√§√§n 64-bittiset tiedostot 32-bittisten tiedostojen kanssa"
 
 #: elf32-ia64.c:5600 elf64-ia64.c:5600
 msgid "%B: linking constant-gp files with non-constant-gp files"
-msgstr "%B: se enlazan ficheros de gp constante con ficheros con gp no constante"
+msgstr "%B: linkitet√§√§n vakiot gp-tiedostot ei-vakioiden gp-tiedostojen kanssa"
 
 #: elf32-ia64.c:5610 elf64-ia64.c:5610
 msgid "%B: linking auto-pic files with non-auto-pic files"
-msgstr "%B: se enlazan ficheros de pic autom·tico con ficheros sin pic autom·tico"
+msgstr "%B: linkitet√§√§n automaattiset paikkariippumattomat kooditiedostot ei-automaattisten paikkariippumattomien kooditiedostojen kanssa"
 
 #: peigen.c:1000 pepigen.c:1000 pex64igen.c:1000
 #, c-format
 msgid "%s: line number overflow: 0x%lx > 0xffff"
-msgstr "%s: desbordamiento de n˙mero de lÌnea: 0x%lx > 0xffff"
+msgstr "%s: rivinumeroylivuoto: 0x%lx > 0xffff"
 
 #: peigen.c:1027 pepigen.c:1027 pex64igen.c:1027
 msgid "Export Directory [.edata (or where ever we found it)]"
-msgstr "Directorio de ExportaciÛn [.edata (o donde quiera que se encuentre)]"
+msgstr "Vientihakemisto [.edata (tai miss√§ sen sitten l√∂ysimmekin)]"
 
 #: peigen.c:1028 pepigen.c:1028 pex64igen.c:1028
 msgid "Import Directory [parts of .idata]"
-msgstr "Directorio de ImportaciÛn [partes de .idata]"
+msgstr "Tuontihakemisto [‚Äù.idata‚Äù-osat]"
 
 #: peigen.c:1029 pepigen.c:1029 pex64igen.c:1029
 msgid "Resource Directory [.rsrc]"
-msgstr "Directorio de Recursos [.rsrc]"
+msgstr "Resurssihakemisto [.rsrc]"
 
 #: peigen.c:1030 pepigen.c:1030 pex64igen.c:1030
 msgid "Exception Directory [.pdata]"
-msgstr "Directorio de Excepciones [.pdata]"
+msgstr "Poikkeushakemisto [.pdata]"
 
 #: peigen.c:1031 pepigen.c:1031 pex64igen.c:1031
 msgid "Security Directory"
-msgstr "Directorio de Seguridad"
+msgstr "Turvallisuushakemisto"
 
 #: peigen.c:1032 pepigen.c:1032 pex64igen.c:1032
 msgid "Base Relocation Directory [.reloc]"
-msgstr "Directorio de ReubicaciÛn Base [.reloc]"
+msgstr "Perussijoitushakemisto [.reloc]"
 
 #: peigen.c:1033 pepigen.c:1033 pex64igen.c:1033
 msgid "Debug Directory"
-msgstr "Directorio de DepuraciÛn"
+msgstr "Virheenetsint√§hakemisto"
 
 #: peigen.c:1034 pepigen.c:1034 pex64igen.c:1034
 msgid "Description Directory"
-msgstr "Directorio de Descripciones"
+msgstr "Kuvaushakemisto"
 
 #: peigen.c:1035 pepigen.c:1035 pex64igen.c:1035
 msgid "Special Directory"
-msgstr "Directorio Especial"
+msgstr "Erityishakemisto"
 
 #: peigen.c:1036 pepigen.c:1036 pex64igen.c:1036
 msgid "Thread Storage Directory [.tls]"
-msgstr "Directorio de Almacenamiento de Hilos [.tls]"
+msgstr "S√§ievarastohakemisto [.tls]"
 
 #: peigen.c:1037 pepigen.c:1037 pex64igen.c:1037
 msgid "Load Configuration Directory"
-msgstr "Directorio de Carga de Configuraciones"
+msgstr "Lataa konfigurationhakemisto"
 
 #: peigen.c:1038 pepigen.c:1038 pex64igen.c:1038
 msgid "Bound Import Directory"
-msgstr "Directorio de ImportaciÛn de Relaciones"
+msgstr "Sidottu tuontihakemisto"
 
 #: peigen.c:1039 pepigen.c:1039 pex64igen.c:1039
 msgid "Import Address Table Directory"
-msgstr "Directorio de ImportaciÛn de Tablas de Direcciones"
+msgstr "Tuontiosoitetauluhakemisto"
 
 #: peigen.c:1040 pepigen.c:1040 pex64igen.c:1040
 msgid "Delay Import Directory"
-msgstr "Directorio de Retardo de ImportaciÛn"
+msgstr "Viivetuontihakemisto"
 
 #: peigen.c:1041 pepigen.c:1041 pex64igen.c:1041
 msgid "CLR Runtime Header"
-msgstr "Encabezado de Tiempo de EjecuciÛn CLR"
+msgstr "CLR ajoaikaotsake"
 
 #: peigen.c:1042 pepigen.c:1042 pex64igen.c:1042
 msgid "Reserved"
-msgstr "Reservado"
+msgstr "Varattu"
 
 #: peigen.c:1102 pepigen.c:1102 pex64igen.c:1102
 #, c-format
@@ -3402,7 +3430,7 @@ msgid ""
 "There is an import table, but the section containing it could not be found\n"
 msgstr ""
 "\n"
-"Hay una tabla de importaciÛn, pero la secciÛn que la contiene no se puede encontrar\n"
+"Tuontitaulu l√∂ytyi, mutta ei lohkoa, joka sis√§lt√§√§ sen\n"
 
 #: peigen.c:1107 pepigen.c:1107 pex64igen.c:1107
 #, c-format
@@ -3411,7 +3439,7 @@ msgid ""
 "There is an import table in %s at 0x%lx\n"
 msgstr ""
 "\n"
-"Hay una tabla de importaciÛn en %s en 0x%lx\n"
+"Tuontitaulu lohkossa %s osoitteessa 0x%lx\n"
 
 #: peigen.c:1150 pepigen.c:1150 pex64igen.c:1150
 #, c-format
@@ -3420,12 +3448,12 @@ msgid ""
 "Function descriptor located at the start address: %04lx\n"
 msgstr ""
 "\n"
-"Se localizÛ el descriptor de funciÛn en la direcciÛn de inicio: %04lx\n"
+"Funktiokuvaaja sijaitsi alkuosoitteessa: %04lx\n"
 
 #: peigen.c:1153 pepigen.c:1153 pex64igen.c:1153
 #, c-format
 msgid "\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"
-msgstr "\tcÛdigo-base %08lx tabla-de-contenidos (cargable/actual) %08lx/%08lx\n"
+msgstr "\tkoodipohja %08lx sis√§lt√∂luettelo (ladattava/todellinen) %08lx/%08lx\n"
 
 #: peigen.c:1161 pepigen.c:1161 pex64igen.c:1161
 #, c-format
@@ -3434,7 +3462,7 @@ msgid ""
 "No reldata section! Function descriptor not decoded.\n"
 msgstr ""
 "\n"
-"°No est· la secciÛn reldata! No se decodificÛ el descriptor de funciÛn.\n"
+"Ei reldata-lohkoa! Funktiokuvaaja ei ole koodattu.\n"
 
 #: peigen.c:1166 pepigen.c:1166 pex64igen.c:1166
 #, c-format
@@ -3443,16 +3471,17 @@ msgid ""
 "The Import Tables (interpreted %s section contents)\n"
 msgstr ""
 "\n"
-"Las Tablas de ImportaciÛn (se interpretaron los contenidos de la secciÛn %s)\n"
+"Tuontitaulut (tulkittu %s lohkosis√§lt√∂)\n"
 
+#  Taulukko-otsake, jossa sanat on kahdella rivill√§ (ilman tavuviivaa), esimerkiksi: Vihjetaulu
 #: peigen.c:1169 pepigen.c:1169 pex64igen.c:1169
 #, c-format
 msgid ""
 " vma:            Hint    Time      Forward  DLL       First\n"
 "                 Table   Stamp     Chain    Name      Thunk\n"
 msgstr ""
-" vma:            Pista   Fecha     Adelante DLL       Primero\n"
-"                 Tabla   Estampa   Cadena   Nombre    Thunk\n"
+" vma:            Vihje-  Aika-     Jatkol√§h.  DLL-    Ensimm√§inen\n"
+"                 taulu   leima     ketju      nimi    Thunk-funktio\n"
 
 #: peigen.c:1217 pepigen.c:1217 pex64igen.c:1217
 #, c-format
@@ -3461,12 +3490,12 @@ msgid ""
 "\tDLL Name: %s\n"
 msgstr ""
 "\n"
-"\tNombre de la DLL: %s\n"
+"\tDLL-nimi: %s\n"
 
 #: peigen.c:1228 pepigen.c:1228 pex64igen.c:1228
 #, c-format
 msgid "\tvma:  Hint/Ord Member-Name Bound-To\n"
-msgstr "\tvma:  Pista/Ord Nombre-Miembro Unido-A\n"
+msgstr "\tvma:  Vihje/J√§r J√§sen-Nimi Sidottu\n"
 
 #: peigen.c:1253 pepigen.c:1253 pex64igen.c:1253
 #, c-format
@@ -3475,7 +3504,7 @@ msgid ""
 "There is a first thunk, but the section containing it could not be found\n"
 msgstr ""
 "\n"
-"Hay un thunk inicial, pero la secciÛn que lo contiene no se puede encontrar\n"
+"Ensimm√§inen thunk-funktio l√∂ytyi, mutta ei sen sis√§lt√§v√§√§ lohkoa\n"
 
 #: peigen.c:1418 pepigen.c:1418 pex64igen.c:1418
 #, c-format
@@ -3484,7 +3513,7 @@ msgid ""
 "There is an export table, but the section containing it could not be found\n"
 msgstr ""
 "\n"
-"Hay una tabla de exportaciÛn, pero la secciÛn que la contiene no se puede encontrar\n"
+"Vientitaulu l√∂ytyi, mutta ei sen sis√§lt√§v√§√§ lohkoa\n"
 
 #: peigen.c:1427 pepigen.c:1427 pex64igen.c:1427
 #, c-format
@@ -3493,7 +3522,7 @@ msgid ""
 "There is an export table in %s, but it does not fit into that section\n"
 msgstr ""
 "\n"
-"Hay una tabla de exportaciÛn en %s, pero no cabe en esa secciÛn\n"
+"Vientitaulu kohteessa %s, mutta ei sovi tuohon lohkoon\n"
 
 #: peigen.c:1433 pepigen.c:1433 pex64igen.c:1433
 #, c-format
@@ -3502,7 +3531,7 @@ msgid ""
 "There is an export table in %s at 0x%lx\n"
 msgstr ""
 "\n"
-"Hay una tabla de exportaciÛn en %s en 0x%lx\n"
+"Vientitaulu lohkossa %s osoitteessa 0x%lx\n"
 
 #: peigen.c:1461 pepigen.c:1461 pex64igen.c:1461
 #, c-format
@@ -3512,69 +3541,68 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Las Tablas de ExportaciÛn (se interpretaron los contenidos de la secciÛn %s)\n"
+"Vientitaulut (tulkittu %s lohkosis√§lt√∂)\n"
 "\n"
 
 #: peigen.c:1465 pepigen.c:1465 pex64igen.c:1465
 #, c-format
 msgid "Export Flags \t\t\t%lx\n"
-msgstr "Opciones de ExportaciÛn \t\t\t%lx\n"
+msgstr "Vientiliput \t\t\t%lx\n"
 
 #: peigen.c:1468 pepigen.c:1468 pex64igen.c:1468
 #, c-format
 msgid "Time/Date stamp \t\t%lx\n"
-msgstr "marca de Hora/Fecha \t\t%lx\n"
+msgstr "Aika/P√§iv√§m√§√§r√§leima \t\t%lx\n"
 
 #: peigen.c:1471 pepigen.c:1471 pex64igen.c:1471
 #, c-format
 msgid "Major/Minor \t\t\t%d/%d\n"
-msgstr "Mayor/Menor \t\t\t%d/%d\n"
+msgstr "Suurempi/Pienempi \t\t\t%d/%d\n"
 
 #: peigen.c:1474 pepigen.c:1474 pex64igen.c:1474
 #, c-format
 msgid "Name \t\t\t\t"
-msgstr "Nombre \t\t\t\t"
+msgstr "Nimi \t\t\t\t"
 
 #: peigen.c:1480 pepigen.c:1480 pex64igen.c:1480
 #, c-format
 msgid "Ordinal Base \t\t\t%ld\n"
-msgstr "Base Ordinal \t\t\t%ld\n"
+msgstr "J√§rjestyslukukanta \t\t\t%ld\n"
 
 #: peigen.c:1483 pepigen.c:1483 pex64igen.c:1483
 #, c-format
 msgid "Number in:\n"
-msgstr "N˙mero en:\n"
+msgstr "Numero kohteessa:\n"
 
 #: peigen.c:1486 pepigen.c:1486 pex64igen.c:1486
 #, c-format
 msgid "\tExport Address Table \t\t%08lx\n"
-msgstr "\tTabla de ExportaciÛn de Direcciones \t\t%08lx\n"
+msgstr "\tVientiosoitetaulu \t\t%08lx\n"
 
 #: peigen.c:1490 pepigen.c:1490 pex64igen.c:1490
 #, c-format
 msgid "\t[Name Pointer/Ordinal] Table\t%08lx\n"
-msgstr "\tTabla [Nombre Puntero/Ordinal]\t%08lx\n"
+msgstr "\t[Nimi Osoitin/J√§rjestysnumero] taulu\t%08lx\n"
 
 #: peigen.c:1493 pepigen.c:1493 pex64igen.c:1493
 #, c-format
 msgid "Table Addresses\n"
-msgstr "Direcciones de la Tabla\n"
+msgstr "Tauluosoitteet\n"
 
 #: peigen.c:1496 pepigen.c:1496 pex64igen.c:1496
 #, c-format
 msgid "\tExport Address Table \t\t"
-msgstr "\tTabla de ExportaciÛn de Direcciones \t\t"
+msgstr "\tVientiosoitetaulu \t\t"
 
 #: peigen.c:1501 pepigen.c:1501 pex64igen.c:1501
 #, c-format
 msgid "\tName Pointer Table \t\t"
-msgstr "\tNombre de la Tabla de Punteros \t\t"
+msgstr "\tNimi Osoitin Taulu \t\t"
 
-# continuar aqui
 #: peigen.c:1506 pepigen.c:1506 pex64igen.c:1506
 #, c-format
 msgid "\tOrdinal Table \t\t\t"
-msgstr "\tTabla Ordinal \t\t\t"
+msgstr "\tJ√§rjestysnumerotaulu \t\t\t"
 
 #: peigen.c:1520 pepigen.c:1520 pex64igen.c:1520
 #, c-format
@@ -3583,15 +3611,15 @@ msgid ""
 "Export Address Table -- Ordinal Base %ld\n"
 msgstr ""
 "\n"
-"Tabla de ExportaciÛn de Direcciones -- Base Ordinal %ld\n"
+"Vientiosoitetaulu -- J√§rjestyslukukanta %ld\n"
 
 #: peigen.c:1539 pepigen.c:1539 pex64igen.c:1539
 msgid "Forwarder RVA"
-msgstr "RVA Adelantador"
+msgstr "Jatkol√§hetyksen suhteellinen muuttujaosoite"
 
 #: peigen.c:1550 pepigen.c:1550 pex64igen.c:1550
 msgid "Export RVA"
-msgstr "RVA Exportador"
+msgstr "Viennin suhteellinen muuttujaosoite"
 
 #: peigen.c:1557 pepigen.c:1557 pex64igen.c:1557
 #, c-format
@@ -3600,12 +3628,12 @@ msgid ""
 "[Ordinal/Name Pointer] Table\n"
 msgstr ""
 "\n"
-"Tabla [Puntero a Ordinal/Nombre]\n"
+"[J√§rjestysnumero/Nimi Osoitin] Taulu\n"
 
 #: peigen.c:1610 pepigen.c:1610 pex64igen.c:1610
 #, c-format
 msgid "Warning, .pdata section size (%ld) is not a multiple of %d\n"
-msgstr "Aviso, el tamaÒo de la secciÛn .pdata (%ld) no es un m˙ltiplo de %d\n"
+msgstr "Varoitus,‚Äù .pdata‚Äù-lohkokoko (%ld) ei ole %d:n monikerta\n"
 
 #: peigen.c:1614 pepigen.c:1614 pex64igen.c:1614
 #, c-format
@@ -3614,36 +3642,37 @@ msgid ""
 "The Function Table (interpreted .pdata section contents)\n"
 msgstr ""
 "\n"
-"La Tabla de Funciones (se interpretaron los contenidos de la secciÛn .pdata)\n"
+"Funktiotaulu (tulkittu ‚Äù.pdata‚Äù-lohkosis√§lt√∂)\n"
 
 #: peigen.c:1617 pepigen.c:1617 pex64igen.c:1617
 #, c-format
 msgid " vma:\t\t\tBegin Address    End Address      Unwind Info\n"
-msgstr " vma:\t\t\tDirecciÛn Inicio DirecciÛn Fin    InformaciÛn Desenvuelta\n"
+msgstr " vma:\t\t\tAlkuosoite       Loppuosoite      Unwind-tiedot\n"
 
+#  Taulukko-otsake, jossa sanat jakautuvat taas alekkain kahdelle riville ilman tavuviivoja
 #: peigen.c:1619 pepigen.c:1619 pex64igen.c:1619
 #, c-format
 msgid ""
 " vma:\t\tBegin    End      EH       EH       PrologEnd  Exception\n"
 "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
 msgstr ""
-" vma:\t\tInicio   Fin      EH       EH       FinPrÛlogo ExcepciÛn\n"
-"     \t\tDirecc   Direcc   Asa      Datos    DirecciÛn  M·scara\n"
+" vma:\t\tAlku-    Loppu-   EH-k√§sit- EH-     PrologEnd  Poikkeus-\n"
+"     \t\tosoite   osoite   telij√§   data     osoite     peite\n"
 
 #: peigen.c:1689 pepigen.c:1689 pex64igen.c:1689
 #, c-format
 msgid " Register save millicode"
-msgstr " Registro para guardar milicÛdigo"
+msgstr " Rekisteri tallentaa millicode-bitin"
 
 #: peigen.c:1692 pepigen.c:1692 pex64igen.c:1692
 #, c-format
 msgid " Register restore millicode"
-msgstr " Registro para restaurar milicÛdigo"
+msgstr " Rekisteri palauttaa millicode-bitin"
 
 #: peigen.c:1695 pepigen.c:1695 pex64igen.c:1695
 #, c-format
 msgid " Glue code sequence"
-msgstr " Secuencia de cÛdigo pegamento"
+msgstr " Vihje-koodisekvenssi"
 
 #: peigen.c:1745 pepigen.c:1745 pex64igen.c:1745
 #, c-format
@@ -3654,8 +3683,9 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Reubicaciones de Fichero Base PE (se interpretaron los contenidos de la secciÛn .reloc)\n"
+"PE-tiedostokantasijoitukset (tulkittu ‚Äù.reloc‚Äù-lohkosis√§lt√∂)\n"
 
+#  Esimerkiksi v√§limuistissa RAM-alue koostuu usein pienist√§ palasista, joita kutsutaan nimell√§ chunk. Suomensin sen t√§ss√§ sanalla alilohko
 #: peigen.c:1775 pepigen.c:1775 pex64igen.c:1775
 #, c-format
 msgid ""
@@ -3663,12 +3693,12 @@ msgid ""
 "Virtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"
 msgstr ""
 "\n"
-"DirecciÛn Virtual: %08lx TamaÒo del trozo %ld (0x%lx) N˙mero de composturas %ld\n"
+"Virtuaaliosoite: %08lx alilohkokoko %ld (0x%lx) Korjausten lukum√§√§r√§ %ld\n"
 
 #: peigen.c:1788 pepigen.c:1788 pex64igen.c:1788
 #, c-format
 msgid "\treloc %4d offset %4x [%4lx] %s"
-msgstr "\treubicaciÛn %4d desplazamiento %4x [%4lx] %s"
+msgstr "\treloc-tietue %4d siirros %4x [%4lx] %s"
 
 #. The MS dumpbin program reportedly ands with 0xff0f before
 #. printing the characteristics field.  Not sure why.  No reason to
@@ -3680,348 +3710,24 @@ msgid ""
 "Characteristics 0x%x\n"
 msgstr ""
 "\n"
-"CaracterÌsticas 0x%x\n"
+"Luonteenominaisuus 0x%x\n"
 
 #: peigen.c:2088 pepigen.c:2088 pex64igen.c:2088
 msgid "%B: unable to fill in DataDictionary[1] because .idata$2 is missing"
-msgstr "%B: no se puede llenar DataDictionary[1] porque falta .idata$2"
+msgstr "%B: DataDictionary[1]:ia ei voi t√§ytt√§√§, koska ‚Äù.idata$2‚Äù puuttuu"
 
 #: peigen.c:2106 pepigen.c:2106 pex64igen.c:2106
 msgid "%B: unable to fill in DataDictionary[1] because .idata$4 is missing"
-msgstr "%B: no se puede llenar DataDictionary[1] porque falta .idata$4"
+msgstr "%B: DataDictionary[1]:ia ei voi t√§ytt√§√§, koska ‚Äù.idata$4‚Äù puuttuu"
 
 #: peigen.c:2125 pepigen.c:2125 pex64igen.c:2125
 msgid "%B: unable to fill in DataDictionary[12] because .idata$5 is missing"
-msgstr "%B: no se puede llenar DataDictionary[12] porque falta .idata$5"
+msgstr "%B: DataDictionary[12]:ia ei voi t√§ytt√§√§, koska ‚Äù.idata$5‚Äù puuttuu"
 
 #: peigen.c:2143 pepigen.c:2143 pex64igen.c:2143
 msgid "%B: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] because .idata$6 is missing"
-msgstr "%B: no se puede llenar DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] porque falta .idata$6"
+msgstr "%B: DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)]:ia ei voi t√§ytt√§√§, koska ‚Äù.idata$6‚Äù puuttuu"
 
 #: peigen.c:2163 pepigen.c:2163 pex64igen.c:2163
 msgid "%B: unable to fill in DataDictionary[9] because __tls_used is missing"
-msgstr "%B: no se puede llenar DataDictionary[9] porque falta __tls_used"
-
-#~ msgid "ERROR: %B: Conflicting enum sizes"
-#~ msgstr "ERROR: %B: TamaÒos de enum en conflicto"
-
-#~ msgid "Division by zero. "
-#~ msgstr "DivisiÛn por cero. "
-
-#~ msgid " [cpu32]"
-#~ msgstr " [cpu32]"
-
-#~ msgid " [m68000]"
-#~ msgstr " [m68000]"
-
-#~ msgid "Linking mips16 objects into %s format is not supported"
-#~ msgstr "No se admite enlazar objetos mips16 en el formato %s"
-
-#~ msgid ".glink and .plt too far apart"
-#~ msgstr ".glink y .plt est·n demasiado alejados"
-
-#~ msgid "%B: Not enough room for program headers (allocated %u, need %u)"
-#~ msgstr "%B: No hay suficiente espacio para los encabezados del programa (%u asignados, %u necesarios)"
-
-#~ msgid " [mips1]"
-#~ msgstr " [mips1]"
-
-#~ msgid " [mips2]"
-#~ msgstr " [mips2]"
-
-#~ msgid " [mips3]"
-#~ msgstr " [mips3]"
-
-#~ msgid " [mips4]"
-#~ msgstr " [mips4]"
-
-#~ msgid " [mips5]"
-#~ msgstr " [mips5]"
-
-#~ msgid " [mips32]"
-#~ msgstr " [mips32]"
-
-#~ msgid " [mips64]"
-#~ msgstr " [mips64]"
-
-#~ msgid " [mips32r2]"
-#~ msgstr " [mips32r2]"
-
-#~ msgid " [mips64r2]"
-#~ msgstr " [mips64r2]"
-
-#~ msgid " [mdmx]"
-#~ msgstr " [mdmx]"
-
-#~ msgid " [mips16]"
-#~ msgstr " [mips16]"
-
-#~ msgid " [32bitmode]"
-#~ msgstr " [modo 32bit]"
-
-#~ msgid "Missing IHCONST"
-#~ msgstr "IHCONST faltante"
-
-#~ msgid "Missing IHIHALF"
-#~ msgstr "IHIHALF faltante"
-
-#~ msgid "missing IHCONST reloc"
-#~ msgstr "reubicaciÛn IHCONST faltante"
-
-#~ msgid "missing IHIHALF reloc"
-#~ msgstr "reubicaciÛn IHIHALF faltante"
-
-#~ msgid "%B(%A): warning: unresolvable relocation %d against symbol `%s'"
-#~ msgstr "%B(%A): aviso: reubicaciÛn %d sin resoluciÛn contra el sÌmbolo `%s'"
-
-#~ msgid "%s: warning: unresolvable relocation against symbol `%s' from %s section"
-#~ msgstr "%s: aviso: reubicaciÛn sin resoluciÛn contra el sÌmbolo `%s' de la secciÛn %s"
-
-#~ msgid "%B(%A): unresolvable relocation against symbol `%s'"
-#~ msgstr "%B(%A+0x%lx): reubicaciÛn sin resoluciÛn contra el sÌmbolo `%s'"
-
-#~ msgid "Symbol %s has no GOT subsection for offset 0x%x"
-#~ msgstr "El sÌmbolo %s no tiene subsecciÛn GOT para el desplazamiento 0x%x"
-
-#~ msgid "%B: check_relocs: unhandled reloc type %d"
-#~ msgstr "%B: check_relocs: tipo de reubicaciÛn %d sin manejar"
-
-#~ msgid "%B: warning: sh_link not set for section `%S'"
-#~ msgstr "%B: aviso: no se estableciÛ sh_link para la secciÛn `%S'"
-
-#~ msgid "  first occurrence: %s: arm call to thumb"
-#~ msgstr "  primera ocurrencia: %s: llamada arm a thumb"
-
-#~ msgid "  first occurrence: %s: thumb call to arm"
-#~ msgstr "  primera ocurrencia: %s: llamada thumb a arm"
-
-#~ msgid "  consider relinking with --support-old-code enabled"
-#~ msgstr "  considere el reenlace con --support-old-code activado"
-
-#~ msgid "reloc against unsupported section"
-#~ msgstr "reubicaciÛn contra una secciÛn no admitida"
-
-#~ msgid "reloc not properly aligned"
-#~ msgstr "reubicaciÛn no alineada adecuadamente"
-
-#~ msgid "Error: First section in segment (%s) starts at 0x%x whereas the segment starts at 0x%x"
-#~ msgstr "Error: La primera secciÛn en el segmento (%s) inicia en 0x%x mientras que el segmento inicia en 0x%x"
-
-#~ msgid "ERROR: %s is compiled for EABI version %d, whereas %s is compiled for version %d"
-#~ msgstr "ERROR: %s est· compilado para EABI versiÛn %d, mientras que %s est· compilado para la versiÛn %d"
-
-#~ msgid "%s: unresolvable relocation %s against symbol `%s' from %s section"
-#~ msgstr "%s: reubicaciÛn %s sin resoluciÛn contra el sÌmbolo `%s' de la secciÛn %s"
-
-#~ msgid "%s: relocation %s should not be used when making a shared object; recompile with -fPIC"
-#~ msgstr "%s: no se debe usar la reubicaciÛn %s cuando se hace un objeto compartido; recompile con -fPIC"
-
-#~ msgid "%s(%s+0x%lx): fixing %s"
-#~ msgstr "%s(%s+0x%lx): fijando %s"
-
-#~ msgid "%s: unresolvable relocation against symbol `%s' from %s section"
-#~ msgstr "%s: reubicaciÛn sin resoluciÛn contra el sÌmbolo `%s' de la secciÛn %s"
-
-#~ msgid "%s: linking non-pic code in a shared library"
-#~ msgstr "%s: se enlaza cÛdigo que no es pic en una biblioteca compartida"
-
-#~ msgid "%s: reloc overflow 1: 0x%lx > 0xffff"
-#~ msgstr "%s: desbordamiento de reubicaciÛn 1: 0x%lx > 0xffff"
-
-#~ msgid "%s: Unknown special linker type %d"
-#~ msgstr "%s: Tipo de enlazador especial %d desconocido"
-
-#~ msgid "v850ea architecture"
-#~ msgstr "arquitectura v850ea"
-
-#~ msgid "%s: Section %s is too large to add hole of %ld bytes"
-#~ msgstr "%s: La secciÛn %s es muy grande para agregar un agujero de %ld bytes"
-
-#~ msgid "Error: out of memory"
-#~ msgstr "Error: memoria agotada"
-
-#~ msgid "warning: relocation against removed section; zeroing"
-#~ msgstr "aviso: reubicaciÛn contra una secciÛn eliminada; se cambia a ceros"
-
-#~ msgid "local symbols in discarded section %s"
-#~ msgstr "sÌmbolos locales en la secciÛn descartada %s"
-
-#~ msgid "%s: linking abicalls files with non-abicalls files"
-#~ msgstr "%s: se enlazan ficheros de llamadas abi con ficheros que no son de llamadas abi"
-
-#~ msgid "%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"
-#~ msgstr "%s: no coincide el ISA (-mips%d) con mÛdulos previos (-mips%d)"
-
-#~ msgid "%s: ISA mismatch (%d) with previous modules (%d)"
-#~ msgstr "%s: no coincide el ISA (%d) con mÛdulos previos (%d)"
-
-#~ msgid "%s: dynamic relocation against speculation fixup"
-#~ msgstr "%s: reubicaciÛn din·mica contra una compostura de especulaciÛn"
-
-#~ msgid "%s: speculation fixup against undefined weak symbol"
-#~ msgstr "%s: compostura de especulaciÛn contra un sÌmbolo dÈbil indefinido"
-
-#~ msgid "\tThe Import Address Table (difference found)\n"
-#~ msgstr "\tLa Tabla de ImportaciÛn de Direcciones (se encontrÛ una diferencia)\n"
-
-#~ msgid "\t>>> Ran out of IAT members!\n"
-#~ msgstr "\t>>> °Se terminaron los miembros IAT!\n"
-
-#~ msgid "\tThe Import Address Table is identical\n"
-#~ msgstr "\tLa Tabla de ImportaciÛn de Direcciones es idÈntica\n"
-
-#~ msgid "GP relative relocation when GP not defined"
-#~ msgstr "reubicaciÛn GP relativa cuando GP no estaba definido"
-
-#~ msgid "%s: ERROR: passes floats in float registers whereas target %s uses integer registers"
-#~ msgstr "%s: ERROR: pasan n˙meros de coma flotante en registros de coma flotante mientras que el objetivo %s usa registros enteros"
-
-#~ msgid "%s: ERROR: passes floats in integer registers whereas target %s uses float registers"
-#~ msgstr "%s: ERROR: pasan n˙meros de coma flotante en registros enteros mientras que el objetivo %s usa registros de coma flotante"
-
-#~ msgid "Warning: input file %s supports interworking, whereas %s does not."
-#~ msgstr "Aviso: el fichero de entrada %s admite interoperabilidad, mientras que %s no."
-
-#~ msgid "Warning: input file %s does not support interworking, whereas %s does."
-#~ msgstr "Aviso: el fichero de entrada %s no admite interoperabilidad, mientras que %s sÌ."
-
-# FIXME: Revisar en el cÛdigo si son abreviaturas comunes, o corresponden a
-# partes fijas dentro del programa. cfuga
-#~ msgid "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"
-#~ msgstr "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"
-
-#~ msgid "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = 0x%.8lx%s\n"
-#~ msgstr "elf_symbol_from_bfd_symbol 0x%.8lx, nombre = %s, n˙m sim = %d, opciones = 0x%.8lx%s\n"
-
-#~ msgid "Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"
-#~ msgstr "Aviso: No se activa la opciÛn de interoperaciÛn de %s ya que se habÌa especificado como no interoperable"
-
-#~ msgid "Warning: Clearing the interwork flag of %s due to outside request"
-#~ msgstr "Aviso: Se limpia la opciÛn de interoperaciÛn de %s debido a una peticiÛn externa"
-
-#~ msgid " [APCS-26]"
-#~ msgstr " [APCS-26]"
-
-#~ msgid " [APCS-32]"
-#~ msgstr " [APCS-32]"
-
-#~ msgid "(unknown)"
-#~ msgstr "(desconocido)"
-
-#~ msgid "  previously %s in %s"
-#~ msgstr "  previamente %s en %s"
-
-#~ msgid "Symbol `%s' has differing types: %s in %s"
-#~ msgstr "El sÌmbolo `%s' tiene tipos diferentes: %s en %s"
-
-#~ msgid "ETIR_S_C_STO_GBL: no symbol \"%s\""
-#~ msgstr "ETIR_S_C_STO_GBL: no est· el sÌmbolo \"%s\""
-
-#~ msgid "ETIR_S_C_STO_CA: no symbol \"%s\""
-#~ msgstr "ETIR_S_C_STO_CA: no est· el sÌmbolo \"%s\""
-
-#~ msgid "ETIR_S_C_STO_RB/AB: Not supported"
-#~ msgstr "ETIR_S_C_STO_RB/AB: No se admite"
-
-#~ msgid "ETIR_S_C_STO_LP_PSB: Not supported"
-#~ msgstr "ETIR_S_C_STO_LP_PSB: No se admite"
-
-#~ msgid "ETIR_S_C_STO_HINT_GBL: not implemented"
-#~ msgstr "ETIR_S_C_STO_HINT_GBL: sin implementar"
-
-#~ msgid "ETIR_S_C_STO_HINT_PS: not implemented"
-#~ msgstr "ETIR_S_C_STO_HINT_PS: sin implementar"
-
-#~ msgid "ETIR_S_C_OPR_INSV: Not supported"
-#~ msgstr "ETIR_S_C_OPR_INSV: No se admite"
-
-#~ msgid "ETIR_S_C_OPR_USH: Not supported"
-#~ msgstr "ETIR_S_C_OPR_USH: No se admite"
-
-#~ msgid "ETIR_S_C_OPR_ROT: Not supported"
-#~ msgstr "ETIR_S_C_OPR_ROT: No se admite"
-
-#~ msgid "ETIR_S_C_OPR_REDEF: Not supported"
-#~ msgstr "ETIR_S_C_OPR_REDEF: No se admite"
-
-#~ msgid "ETIR_S_C_OPR_DFLIT: Not supported"
-#~ msgstr "ETIR_S_C_OPR_DFLIT: No se admite"
-
-#~ msgid "ETIR_S_C_STC_LP: not supported"
-#~ msgstr "ETIR_S_C_STC_LP: no se admite"
-
-#~ msgid "ETIR_S_C_STC_GBL: not supported"
-#~ msgstr "ETIR_S_C_STC_GBL: no se admite"
-
-#~ msgid "ETIR_S_C_STC_GCA: not supported"
-#~ msgstr "ETIR_S_C_STC_GCA: no se admite"
-
-#~ msgid "ETIR_S_C_STC_PS: not supported"
-#~ msgstr "ETIR_S_C_STC_PS: no se admite"
-
-#~ msgid "Unimplemented STO cmd %d"
-#~ msgstr "Orden STO %d sin implementar"
-
-#~ msgid "TIR_S_C_OPR_ASH incomplete"
-#~ msgstr "TIR_S_C_OPR_ASH incompleto"
-
-#~ msgid "TIR_S_C_OPR_USH incomplete"
-#~ msgstr "TIR_S_C_OPR_USH incompleto"
-
-#~ msgid "TIR_S_C_OPR_ROT incomplete"
-#~ msgstr "TIR_S_C_OPR_ROT incompleto"
-
-#~ msgid "TIR_S_C_OPR_REDEF not supported"
-#~ msgstr "TIR_S_C_OPR_REDEF no se admite"
-
-#~ msgid "TIR_S_C_OPR_DFLIT not supported"
-#~ msgstr "TIR_S_C_OPR_DFLIT no se admite"
-
-#~ msgid "TIR_S_C_CTL_DFLOC not fully implemented"
-#~ msgstr "TIR_S_C_CTL_DFLOC no est· completamente implementado"
-
-#~ msgid "TIR_S_C_CTL_STLOC not fully implemented"
-#~ msgstr "TIR_S_C_CTL_STLOC no est· completamente implementado"
-
-#~ msgid "TIR_S_C_CTL_STKDL not fully implemented"
-#~ msgstr "TIR_S_C_CTL_STKDL no est· completamente implementado"
-
-#~ msgid " vma:            Hint    Time      Forward  DLL       First\n"
-#~ msgstr " vma:            Pista   Tiempo    Adelante DLL       Primero\n"
-
-#~ msgid "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
-#~ msgstr "      \t\tDirecciÛn DirecciÛn Manejador Datos DirecciÛn M·scara\n"
-
-#~ msgid "integer"
-#~ msgstr "entero"
-
-# FIXME: Revisar el contexto en el cÛdigo para confirmar esta traducciÛn. cfuga
-#~ msgid "soft"
-#~ msgstr "suave"
-
-#~ msgid "hard"
-#~ msgstr "duro"
-
-#~ msgid "Warning: %s %s interworking, whereas %s %s"
-#~ msgstr "Aviso: %s %s interoperatibilidad, mientras que %s %s"
-
-#~ msgid "supports"
-#~ msgstr "admite"
-
-#~ msgid "does not"
-#~ msgstr "no"
-
-#~ msgid "does"
-#~ msgstr " "
-
-#~ msgid "%s(%s+0x%lx): cannot find stub entry %s"
-#~ msgstr "%s(%s+0x%lx): no se puede encontrar la entrada de cabo %s"
-
-#~ msgid "%s(%s+0x%lx): cannot relocate %s, recompile with -ffunction-sections"
-#~ msgstr "%s(%s+0x%lx): no se puede reubicar %s, recompile con -ffuncion-sections"
-
-#~ msgid "creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = 0x%.8lx\n"
-#~ msgstr "se crea el sÌmbolo de secciÛn, nombre = %s, valor = 0x%.8lx, Ìndice = %d, secciÛn 0x%.8lx\n"
-
-#~ msgid "       whereas segment starts at 0x%x"
-#~ msgstr "       mientras que el segmento inicia en 0x%x"
+msgstr "%B: DataDictionary[9]:ia ei voi t√§ytt√§√§, koska ‚Äù__tls_used‚Äù puuttuu"
