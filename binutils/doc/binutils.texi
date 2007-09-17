@@ -2002,10 +2002,14 @@ looks like this:
 Here the first number is the symbol's value (sometimes refered to as
 its address).  The next field is actually a set of characters and
 spaces indicating the flag bits that are set on the symbol.  These
-characters are described below.  The next field is another number
-associated with the symbol, which for common symbols is the alignment
-and for other symbol is the size.  Finally the symbol's name is
-displayed.
+characters are described below.  Next is the section with which the
+symbol is associated or @emph{*ABS*} if the section is absolute (ie
+not connected with any section), or @emph{*UND*} if the section is
+referenced in the file being dumped, but not defined there.
+
+After the section name comes another field, a number, which for common
+symbols is the alignment and for other symbol is the size.  Finally
+the symbol's name is displayed.
 
 The flag characters are divided into 7 groups as follows:
 @table @code
@@ -2040,7 +2044,7 @@ normal symbol (a space).
 @item F
 @item f
 @item O
-The symbol is the name of a function (f) or a file (F) or an object
+The symbol is the name of a function (F) or a file (f) or an object
 (O) or just a normal symbol (a space).
 @end table
 

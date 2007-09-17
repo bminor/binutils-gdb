@@ -1,3 +1,8 @@
+2007-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi (objdump): Describe the output of the --syms
+	option in more detail. 
+
 2007-09-17  Alon Bar-Lev  <alon.barlev@gmail.com>
 
 	PR binutils/4987
