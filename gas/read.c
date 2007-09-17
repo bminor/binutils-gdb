@@ -4106,8 +4106,8 @@ emit_expr (expressionS *exp, unsigned int nbytes)
 	  && ((get & mask) != mask
 	      || (get & hibit) == 0))
 	{		/* Leading bits contain both 0s & 1s.  */
-	  as_warn (_("value 0x%lx truncated to 0x%lx"),
-		   (unsigned long) get, (unsigned long) use);
+	  as_warn (_("value 0x%llx truncated to 0x%llx"),
+		   (unsigned long long) get, (unsigned long long) use);
 	}
       /* Put bytes in right order.  */
       md_number_to_chars (p, use, (int) nbytes);
