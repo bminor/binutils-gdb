@@ -436,8 +436,10 @@ read_rc_file (const char *filename, const char *preprocessor,
   char *cmd;
   const char *fnquotes = (filename_need_quotes (filename) ? "\"" : "");
 
+  if (filename == NULL)
+    filename = "-";
   /* Setup the default resource import path taken from input file.  */
-  if (strchr (filename, '/') != NULL || strchr (filename, '\\') != NULL)
+  else if (strchr (filename, '/') != NULL || strchr (filename, '\\') != NULL)
     {
       char *e, *c;
 
@@ -469,8 +471,6 @@ read_rc_file (const char *filename, const char *preprocessor,
 
   if (preprocargs == NULL)
     preprocargs = "";
-  if (filename == NULL)
-    filename = "-";
 
   if (preprocessor)
     {

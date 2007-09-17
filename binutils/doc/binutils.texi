@@ -708,6 +708,7 @@ The symbol's value is absolute, and will not be changed by further
 linking.
 
 @item B
+@itemx b
 The symbol is in the uninitialized data section (known as BSS).
 
 @item C
@@ -721,9 +722,11 @@ For more details on common symbols, see the discussion of
 @end ifclear
 
 @item D
+@itemx d
 The symbol is in the initialized data section.
 
 @item G
+@itemx g
 The symbol is in an initialized data section for small objects.  Some
 object file formats permit more efficient access to small data objects,
 such as a global int variable as opposed to a large global array.
@@ -732,28 +735,40 @@ such as a global int variable as opposed to a large global array.
 The symbol is an indirect reference to another symbol.  This is a @sc{gnu}
 extension to the a.out object file format which is rarely used.
 
+@item i
+The symbol is in a section specific to the implementation of DLLs.
+
 @item N
 The symbol is a debugging symbol.
 
+@item p
+The symbols is in a stack unwind section.
+
 @item R
+@itemx r
 The symbol is in a read only data section.
 
 @item S
+@itemx s
 The symbol is in an uninitialized data section for small objects.
 
 @item T
+@itemx t
 The symbol is in the text (code) section.
 
 @item U
 The symbol is undefined.
 
 @item V
+@itemx v
 The symbol is a weak object.  When a weak defined symbol is linked with
 a normal defined symbol, the normal defined symbol is used with no error.
 When a weak undefined symbol is linked and the symbol is not defined,
-the value of the weak symbol becomes zero with no error.
+the value of the weak symbol becomes zero with no error.  On some
+systems, uppercase indicates that a default value has been specified.
 
 @item W
+@itemx w
 The symbol is a weak symbol that has not been specifically tagged as a
 weak object symbol.  When a weak defined symbol is linked with a normal
 defined symbol, the normal defined symbol is used with no error.
@@ -761,7 +776,6 @@ When a weak undefined symbol is linked and the symbol is not defined,
 the value of the symbol is determined in a system-specific manner without
 error.  On some systems, uppercase indicates that a default value has been
 specified.
-
 
 @item -
 The symbol is a stabs symbol in an a.out object file.  In this case, the
@@ -1960,7 +1974,75 @@ of the @option{-d}, @option{-r} and @option{-s} options.
 @itemx --syms
 @cindex symbol table entries, printing
 Print the symbol table entries of the file.
-This is similar to the information provided by the @samp{nm} program.
+This is similar to the information provided by the @samp{nm} program,
+although the display format is different.  The format of the output
+depends upon the format of the file being dumped, but there are two main
+types.  One looks like this:
+
+@smallexample
+[  4](sec  3)(fl 0x00)(ty   0)(scl   3) (nx 1) 0x00000000 .bss
+[  6](sec  1)(fl 0x00)(ty   0)(scl   2) (nx 0) 0x00000000 fred
+@end smallexample
+
+where the number inside the square brackets is the number of the entry
+in the symbol table, the @var{sec} number is the section number, the
+@var{fl} value are the symbol's flag bits, the @var{ty} number is the
+symbol's type, the @var{scl} number is the symbol's storage class and
+the @var{nx} value is the number of auxilary entries associated with
+the symbol.  The last two fields are the symbol's value and its name.
+
+The other common output format, usually seen with ELF based files,
+looks like this:
+
+@smallexample
+00000000 l    d  .bss   00000000 .bss
+00000000 g       .text  00000000 fred
+@end smallexample
+
+Here the first number is the symbol's value (sometimes refered to as
+its address).  The next field is actually a set of characters and
+spaces indicating the flag bits that are set on the symbol.  These
+characters are described below.  The next field is another number
+associated with the symbol, which for common symbols is the alignment
+and for other symbol is the size.  Finally the symbol's name is
+displayed.
+
+The flag characters are divided into 7 groups as follows:
+@table @code
+@item l
+@itemx g
+@itemx !
+The symbol is local (l), global (g), neither (a space) or both (!).  A
+symbol can be neither local or global for a variety of reasons, eg
+because it is used for debugging, but it is probably an indication of
+a bug if it is ever both local and global.
+
+@item w
+The symbol is weak (w) or strong (a space).
+
+@item C
+The symbol denotes a constructor (C) or an ordinary symbol (a space).
+
+@item W
+The symbol is a warning (W) or a normal symbol (a space).  A warning
+symbol's name is a message to be displayed if the symbol following the
+warning symbol is ever referenced.
+
+@item I
+The symbol is an indirect reference to another symbol (I) or a normal
+symbol (a space).
+
+@item d
+@itemx D
+The symbol is a debugging symbol (d) or a dynamic symbol (D) or a
+normal symbol (a space).
+
+@item F
+@item f
+@item O
+The symbol is the name of a function (f) or a file (F) or an object
+(O) or just a normal symbol (a space).
+@end table
 
 @item -T
 @itemx --dynamic-syms

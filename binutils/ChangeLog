@@ -1,3 +1,9 @@
+2007-09-17  Alon Bar-Lev  <alon.barlev@gmail.com>
+
+	PR binutils/4987
+        * resrc.c: (read_rc_file): Move 'filename' default initialization 
+	to start of function.
+
 2007-08-31  Michael Meissner  <michael.meissner@amd.com>
 	    Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 
