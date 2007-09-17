@@ -777,7 +777,6 @@ obj_coff_endef (int ignore ATTRIBUTE_UNUSED)
 
   if (SF_GET_FUNCTION (def_symbol_in_progress))
     {
-      know (sizeof (def_symbol_in_progress) <= sizeof (long));
       set_function (def_symbol_in_progress);
       SF_SET_PROCESS (def_symbol_in_progress);
 

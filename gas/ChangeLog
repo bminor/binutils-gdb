@@ -1,3 +1,9 @@
+2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5035
+	* config/obj-coff.c (obj_coff_endef): Remove checking size of
+	def_symbol_in_progress.
+
 2007-09-17  Evandro Menezes  <evandro@yahoo.com>
 
 	PR gas/5026
