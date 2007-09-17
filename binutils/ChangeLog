@@ -1,3 +1,13 @@
+2007-09-17  Shen Feng  <shen@cn.fujitsu.com>
+
+	* readelf.c (do_archive_index): New.
+	(options): Add -c and --archive-index option.
+	(usage): Add -c option.
+	(parse_args): Add c option parsing.
+	(process_archive): Dump archive index.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi: Document the new feature.
+
 2007-09-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

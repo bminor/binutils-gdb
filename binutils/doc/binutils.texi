@@ -3688,6 +3688,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-D}|@option{--use-dynamic}]
         [@option{-x} <number or name>|@option{--hex-dump=}<number or name>]
         [@option{-p} <number or name>|@option{--string-dump=}<number or name>]
+        [@option{-c}|@option{--archive-index}]
         [@option{-w[liaprmfFsoR]}|
          @option{--debug-dump}[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]]
         [@option{-I}|@option{-histogram}]
@@ -3818,6 +3819,13 @@ any other string identifies all sections with that name in the object file.
 Displays the contents of the indicated section as printable strings.
 A number identifies a particular section by index in the section table;
 any other string identifies all sections with that name in the object file.
+
+@item -c
+@itemx --archive-index
+@cindex Archive file symbol index information
+Displays the file symbol index infomation contained in the header part
+of binary archives.  Performs the same function as the @option{t}
+command to @command{ar}, but without using the BFD library.  @xref{ar}.
 
 @item -w[liaprmfFsoR]
 @itemx --debug-dump[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]

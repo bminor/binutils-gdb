@@ -202,6 +202,7 @@ static int do_histogram;
 static int do_debugging;
 static int do_arch;
 static int do_notes;
+static int do_archive_index;
 static int is_32bit_elf;
 
 struct group_list
@@ -2755,6 +2756,7 @@ static struct option options[] =
   {"version-info",     no_argument, 0, 'V'},
   {"use-dynamic",      no_argument, 0, 'D'},
   {"unwind",	       no_argument, 0, 'u'},
+  {"archive-index",    no_argument, 0, 'c'},
   {"hex-dump",	       required_argument, 0, 'x'},
   {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
   {"string-dump",      required_argument, 0, 'p'},
@@ -2791,6 +2793,7 @@ usage (FILE *stream)
   -d --dynamic           Display the dynamic section (if present)\n\
   -V --version-info      Display the version sections (if present)\n\
   -A --arch-specific     Display architecture specific information (if any).\n\
+  -c --archive-index     Display the symbol/file index in an archive\n\
   -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
   -x --hex-dump=<number|name>\n\
                          Dump the contents of section <number|name> as bytes\n\
@@ -2881,7 +2884,7 @@ parse_args (int argc, char **argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ersuahnldSDAINtgw::x:i:vVWHp:", options, NULL)) != EOF)
+	  (argc, argv, "ADHINSVWacdeghi:lnp:rstuvw::x:", options, NULL)) != EOF)
     {
       char *cp;
       int section;
@@ -2954,6 +2957,9 @@ parse_args (int argc, char **argv)
 	  break;
 	case 'n':
 	  do_notes++;
+	  break;
+	case 'c':
+	  do_archive_index++;
 	  break;
 	case 'x':
 	  do_dump++;
@@ -3143,7 +3149,7 @@ parse_args (int argc, char **argv)
   if (!do_dynamic && !do_syms && !do_reloc && !do_unwind && !do_sections
       && !do_segments && !do_header && !do_dump && !do_version
       && !do_histogram && !do_debugging && !do_arch && !do_notes
-      && !do_section_groups)
+      && !do_section_groups && !do_archive_index)
     usage (stderr);
   else if (argc < 3)
     {
@@ -9796,8 +9802,8 @@ process_object (char *file_name, FILE *file)
   return 0;
 }
 
-/* Process an ELF archive.  The file is positioned just after the
-   ARMAG string.  */
+/* Process an ELF archive.
+   On entry the file is positioned just after the ARMAG string.  */
 
 static int
 process_archive (char *file_name, FILE *file)
@@ -9805,6 +9811,10 @@ process_archive (char *file_name, FILE *file)
   struct ar_hdr arhdr;
   size_t got;
   unsigned long size;
+  unsigned long index_num = 0;
+  unsigned long *index_array = NULL;
+  char *sym_table = NULL;
+  unsigned long sym_size = 0;
   char *longnames = NULL;
   unsigned long longnames_size = 0;
   size_t file_name_size;
@@ -9822,28 +9832,124 @@ process_archive (char *file_name, FILE *file)
       return 1;
     }
 
+  /* See if this is the archive symbol table.  */
   if (const_strneq (arhdr.ar_name, "/               ")
       || const_strneq (arhdr.ar_name, "/SYM64/         "))
     {
-      /* This is the archive symbol table.  Skip it.
-	 FIXME: We should have an option to dump it.  */
       size = strtoul (arhdr.ar_size, NULL, 10);
-      if (fseek (file, size + (size & 1), SEEK_CUR) != 0)
+      size = size + (size & 1);
+
+      if (do_archive_index)
 	{
-	  error (_("%s: failed to skip archive symbol table\n"), file_name);
-	  return 1;
+	  unsigned long i;
+	  /* A buffer used to hold numbers read in from an archive index.
+	     These are always 4 bytes long and stored in big-endian format.  */
+#define SIZEOF_AR_INDEX_NUMBERS 4
+	  unsigned char integer_buffer[SIZEOF_AR_INDEX_NUMBERS];
+	  unsigned char * index_buffer;
+
+	  /* Check the size of the archive index.  */
+	  if (size < SIZEOF_AR_INDEX_NUMBERS)
+	    {
+	      error (_("%s: the archive index is empty\n"), file_name);
+	      return 1;
+	    }
+
+	  /* Read the numer of entries in the archive index.  */
+	  got = fread (integer_buffer, 1, sizeof integer_buffer, file);
+	  if (got != sizeof (integer_buffer))
+	    {
+	      error (_("%s: failed to read archive index\n"), file_name);
+	      return 1;
+	    }
+	  index_num = byte_get_big_endian (integer_buffer, sizeof integer_buffer);
+	  size -= SIZEOF_AR_INDEX_NUMBERS;
+
+	  /* Read in the archive index.  */
+	  if (size < index_num * SIZEOF_AR_INDEX_NUMBERS)
+	    {
+	      error (_("%s: the archive index is supposed to have %ld entries, but the size in the header is too small\n"),
+		     file_name, index_num);
+	      return 1;
+	    }
+	  index_buffer = malloc (index_num * SIZEOF_AR_INDEX_NUMBERS);
+	  if (index_buffer == NULL)
+	    {
+	      error (_("Out of memory whilst trying to read archive symbol index\n"));
+	      return 1;
+	    }
+	  got = fread (index_buffer, SIZEOF_AR_INDEX_NUMBERS, index_num, file);
+	  if (got != index_num)
+	    {
+	      free (index_buffer);
+	      error (_("%s: failed to read archive index\n"), file_name);
+	      ret = 1;
+	      goto out;
+	    }
+	  size -= index_num * SIZEOF_AR_INDEX_NUMBERS;
+
+	  /* Convert the index numbers into the host's numeric format.  */
+	  index_array = malloc (index_num * sizeof (* index_array));	  
+	  if (index_array == NULL)
+	    {
+	      free (index_buffer);
+	      error (_("Out of memory whilst trying to convert the archive symbol index\n"));
+	      return 1;
+	    }
+
+	  for (i = 0; i < index_num; i++)
+	    index_array[i] = byte_get_big_endian ((unsigned char *)(index_buffer + (i * SIZEOF_AR_INDEX_NUMBERS)),
+						  SIZEOF_AR_INDEX_NUMBERS);
+	  free (index_buffer);
+
+	  /* The remaining space in the header is taken up by the symbol table.  */
+	  if (size < 1)
+	    {
+	      error (_("%s: the archive has an index but no symbols\n"), file_name);
+	      ret = 1;
+	      goto out;
+	    }
+	  sym_table = malloc (size);
+	  sym_size = size;
+	  if (sym_table == NULL)
+	    {
+	      error (_("Out of memory whilst trying to read archive index symbol table\n"));
+	      ret = 1;
+	      goto out;
+	    }
+	  got = fread (sym_table, 1, size, file);
+	  if (got != size)
+	    {
+	      error (_("%s: failed to read archive index symbol table\n"), file_name);
+	      ret = 1;
+	      goto out;
+	    }	  
+  	}
+      else
+	{
+	  if (fseek (file, size, SEEK_CUR) != 0)
+	    {
+	      error (_("%s: failed to skip archive symbol table\n"), file_name);
+	      return 1;
+	    }
 	}
 
-      got = fread (&arhdr, 1, sizeof arhdr, file);
+      got = fread (& arhdr, 1, sizeof arhdr, file);
       if (got != sizeof arhdr)
 	{
 	  if (got == 0)
-	    return 0;
+	    {
+	      ret = 0;
+	      goto out;
+	    }
 
-	  error (_("%s: failed to read archive header\n"), file_name);
-	  return 1;
+	  error (_("%s: failed to read archive header following archive index\n"), file_name);
+	  ret = 1;
+	  goto out;
 	}
     }
+  else if (do_archive_index)
+    printf (_("%s has no archive index\n"), file_name);
 
   if (const_strneq (arhdr.ar_name, "//              "))
     {
@@ -9851,35 +9957,120 @@ process_archive (char *file_name, FILE *file)
 	 names.  */
 
       longnames_size = strtoul (arhdr.ar_size, NULL, 10);
-
       longnames = malloc (longnames_size);
       if (longnames == NULL)
 	{
-	  error (_("Out of memory\n"));
-	  return 1;
+	  error (_("Out of memory reading long symbol names in archive\n"));
+	  ret = 1;
+	  goto out;
 	}
 
       if (fread (longnames, longnames_size, 1, file) != 1)
 	{
 	  free (longnames);
-	  error (_("%s: failed to read string table\n"), file_name);
-	  return 1;
+	  error (_("%s: failed to read long symbol name string table\n"), file_name);
+	  ret = 1;
+	  goto out;
 	}
 
       if ((longnames_size & 1) != 0)
 	getc (file);
 
-      got = fread (&arhdr, 1, sizeof arhdr, file);
+      got = fread (& arhdr, 1, sizeof arhdr, file);
       if (got != sizeof arhdr)
 	{
-	  free (longnames);
-
 	  if (got == 0)
-	    return 0;
-
-	  error (_("%s: failed to read archive header\n"), file_name);
-	  return 1;
+	    ret = 0;
+	  else
+	    {
+	      error (_("%s: failed to read archive header following long symbol names\n"), file_name);
+	      ret = 1;
+	    }
+	  goto out;
 	}
+    }
+
+  if (do_archive_index)
+    {
+      if (sym_table == NULL)
+	error (_("%s: unable to dump the index as none was found\n"), file_name);
+      else
+	{
+	  unsigned int i, j, k, l;
+	  char elf_name[16];
+	  unsigned long current_pos;
+
+	  printf (_("Index of archive %s: (%ld entries, 0x%lx bytes in the symbol table)\n"),
+		  file_name, index_num, sym_size);
+	  current_pos = ftell (file);
+
+	  for (i = l = 0; i < index_num; i++)
+	    {
+	      if ((i == 0) || ((i > 0) && (index_array[i] != index_array[i - 1])))
+		{
+		  if (fseek (file, index_array[i], SEEK_SET) != 0)
+		    {
+		      error (_("%s: failed to seek to next file name\n"), file_name);
+		      ret = 1;
+		      goto out;
+		    }
+		  got = fread (elf_name, 1, 16, file);
+		  if (got != 16)
+		    {
+		      error (_("%s: failed to read file name\n"), file_name);
+		      ret = 1;
+		      goto out;
+		    }
+
+		  if (elf_name[0] == '/')
+		    {
+		      /* We have a long name.  */
+		      k = j = strtoul (elf_name + 1, NULL, 10);
+		      while ((j < longnames_size) && (longnames[j] != '/'))
+			j++;
+		      longnames[j] = '\0';
+		      printf (_("Binary %s contains:\n"), longnames + k);
+		      longnames[j] = '/';
+		    }
+		  else
+		    {
+		      j = 0;
+		      while ((elf_name[j] != '/') && (j < 16))
+			j++;
+		      elf_name[j] = '\0';
+		      printf(_("Binary %s contains:\n"), elf_name);
+		    }
+		}
+	      if (l >= sym_size)
+		{
+		  error (_("%s: end of the symbol table reached before the end of the index\n"),
+			 file_name);
+		  break;			 
+		}
+	      printf ("\t%s\n", sym_table + l);
+	      l += strlen (sym_table + l) + 1;
+	    }
+
+	  if (l < sym_size)
+	    error (_("%s: symbols remain in the index symbol table, but without corresponding entries in the index table\n"),
+		   file_name);
+
+	  free (index_array);
+	  index_array = NULL;
+	  free (sym_table);
+	  sym_table = NULL;
+	  if (fseek (file, current_pos, SEEK_SET) != 0)
+	    {
+	      error (_("%s: failed to seek back to start of object files in the archive\n"), file_name);
+	      return 1;
+	    }
+	}
+
+      if (!do_dynamic && !do_syms && !do_reloc && !do_unwind && !do_sections
+	  && !do_segments && !do_header && !do_dump && !do_version
+	  && !do_histogram && !do_debugging && !do_arch && !do_notes
+	  && !do_section_groups)
+	return 0; /* Archive index only.  */
     }
 
   file_name_size = strlen (file_name);
@@ -9963,7 +10154,12 @@ process_archive (char *file_name, FILE *file)
 	}
     }
 
-  if (longnames != 0)
+ out:
+  if (index_array != NULL)
+    free (index_array);
+  if (sym_table != NULL)
+    free (sym_table);
+  if (longnames != NULL)
     free (longnames);
 
   return ret;
@@ -10002,7 +10198,7 @@ process_file (char *file_name)
 
   if (fread (armag, SARMAG, 1, file) != 1)
     {
-      error (_("%s: Failed to read file header\n"), file_name);
+      error (_("%s: Failed to read file's magic number\n"), file_name);
       fclose (file);
       return 1;
     }
@@ -10011,6 +10207,10 @@ process_file (char *file_name)
     ret = process_archive (file_name, file);
   else
     {
+      if (do_archive_index)
+	error (_("File %s is not an archive so its index cannot be displayed.\n"),
+	       file_name);
+
       rewind (file);
       archive_file_size = archive_file_offset = 0;
       ret = process_object (file_name, file);
