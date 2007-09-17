@@ -1,3 +1,8 @@
+2007-09-17  Jerome Guitton  <guitton@adacore.com>
+
+	* dwarf2loc.c (dwarf_expr_frame_base): Guard against NULL.
+	* Makefile.in (dwarf2loc.o): Depend on gdb_assert.h.
+
 2007-09-16  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-cmds.c (mi_cmds): Register -list-features.

@@ -37,6 +37,7 @@
 #include "dwarf2loc.h"
 
 #include "gdb_string.h"
+#include "gdb_assert.h"
 
 /* A helper function for dealing with location lists.  Given a
    symbol baton (BATON) and a pc value (PC), find the appropriate
@@ -144,6 +145,11 @@ dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
 
   framefunc = get_frame_function (debaton->frame);
+
+  /* If we found a frame-relative symbol then it was certainly within
+     some function associated with a frame. If we can't find the frame,
+     something has gone wrong.  */
+  gdb_assert (framefunc != NULL);
 
   if (SYMBOL_OPS (framefunc) == &dwarf2_loclist_funcs)
     {
