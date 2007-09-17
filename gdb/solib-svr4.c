@@ -41,6 +41,7 @@
 #include "bfd-target.h"
 #include "elf-bfd.h"
 #include "exec.h"
+#include "auxv.h"
 
 static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
@@ -1008,11 +1009,6 @@ enable_break (void)
          be trivial on GNU/Linux).  Therefore, we have to try an alternate
          mechanism to find the dynamic linker's base address.  */
 
-      /* TODO drow/2006-09-12: This is somewhat fragile, because it
-	 relies on read_pc.  On both Solaris and GNU/Linux we can use
-	 the AT_BASE auxilliary entry, which GDB now knows how to
-	 access, to find the base address.  */
-
       tmp_fd = solib_open (buf, &tmp_pathname);
       if (tmp_fd >= 0)
 	tmp_bfd = bfd_fopen (tmp_pathname, gnutarget, FOPEN_RB, tmp_fd);
@@ -1048,9 +1044,19 @@ enable_break (void)
 	  so = so->next;
 	}
 
+      /* If we were not able to find the base address of the loader
+         from our so_list, then try using the AT_BASE auxilliary entry.  */
+      if (!load_addr_found)
+        if (target_auxv_search (&current_target, AT_BASE, &load_addr) > 0)
+          load_addr_found = 1;
+
       /* Otherwise we find the dynamic linker's base address by examining
 	 the current pc (which should point at the entry point for the
-	 dynamic linker) and subtracting the offset of the entry point.  */
+	 dynamic linker) and subtracting the offset of the entry point.
+
+         This is more fragile than the previous approaches, but is a good
+         fallback method because it has actually been working well in
+         most cases.  */
       if (!load_addr_found)
 	{
 	  load_addr = (read_pc ()
