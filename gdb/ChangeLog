@@ -1,3 +1,9 @@
+2007-09-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
 2007-09-17  Jerome Guitton  <guitton@adacore.com>
 
 	* dwarf2loc.c (dwarf_expr_frame_base): Guard against NULL.

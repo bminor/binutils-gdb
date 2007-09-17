@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.6
+*** Changes since GDB 6.7
+
+*** Changes in GDB 6.6
 
 * Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 
 bfd, libiberty and opcodes, as revealed by static analysis donated by
