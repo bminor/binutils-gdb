@@ -1,3 +1,10 @@
+2007-09-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* schedlock.c (NUM): Change to 1.
+	(main): Use args[0] for the main thread.
+	* schedlock.exp: Only expect two threads.  Only issue one pass or fail
+	regardless of the number of threads.
+
 2007-09-14  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.mi/mi-watch.exp (test_watchpoint_all): Pass the watchpoint
