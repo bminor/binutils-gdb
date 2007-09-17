@@ -1,5 +1,9 @@
 2007-09-17  Nick Clifton  <nickc@redhat.com>
 
+	* po/es.po: Updated Spanish translation.
+
+2007-09-17  Nick Clifton  <nickc@redhat.com>
+
 	* doc/binutils.texi (objdump): Describe the output of the --syms
 	option in more detail. 
 
