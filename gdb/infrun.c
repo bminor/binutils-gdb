@@ -2868,6 +2868,7 @@ insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
 {
   struct symtab_and_line sr_sal;
 
+  gdb_assert (return_frame != NULL);
   init_sal (&sr_sal);		/* initialize to zeros */
 
   sr_sal.pc = gdbarch_addr_bits_remove

@@ -1,5 +1,10 @@
 2007-09-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* infrun.c (insert_step_resume_breakpoint_at_frame): Add assertion
+	that return_frame is not null.
+
+2007-09-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* solib-svr4.c: Add include of "auxv.h".
 	(enable_break): Use the AT_BASE auxiliary entry if available.
 	* Makefile.in (solib-svr4.o): Update dependencies.
