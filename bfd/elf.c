@@ -1784,6 +1784,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	    BFD_ASSERT (elf_section_data (target_sect)->rel_hdr2 == NULL);
 	    amt = sizeof (*hdr2);
 	    hdr2 = bfd_alloc (abfd, amt);
+	    if (hdr2 == NULL)
+	      return FALSE;
 	    elf_section_data (target_sect)->rel_hdr2 = hdr2;
 	  }
 	*hdr2 = *hdr;
@@ -8105,6 +8107,8 @@ elfcore_write_note (bfd *abfd,
   newspace = 12 + ((namesz + 3) & -4) + ((size + 3) & -4);
 
   buf = realloc (buf, *bufsiz + newspace);
+  if (buf == NULL)
+    return buf;
   dest = buf + *bufsiz;
   *bufsiz += newspace;
   xnp = (Elf_External_Note *) dest;

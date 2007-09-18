@@ -1,3 +1,22 @@
+2007-09-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (bfd_section_from_shdr): Check bfd_alloc return.
+	(elfcore_write_note): Check realloc return.
+	* elflink.c (_bfd_elf_link_find_version_dependencies): Check
+	bfd_zalloc return.
+	(_bfd_elf_link_assign_sym_version): Check bfd_malloc return.
+	(elf_link_add_object_symbols): Likewise.
+	(struct hash_codes_info): New.
+	(elf_collect_hash_codes): Return bfd_malloc error.
+	(struct collect_gnu_hash_codes): Add "error".
+	(elf_collect_gnu_hash_codes): Return bfd_malloc error.
+	(bfd_elf_size_dynamic_sections): Check return status of
+	_bfd_elf_link_find_version_dependencies.
+	(bfd_elf_size_dynsym_hash_dynstr): Adjust for elf_collect_hash_codes
+	and elf_collect_gnu_hash_codes changes.
+	(elf_sym_name_compare): Formatting.
+	(elf_fixup_link_order): Use bfd_malloc, not xmalloc.
+
 2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3281

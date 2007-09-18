@@ -1807,6 +1807,11 @@ _bfd_elf_link_find_version_dependencies (struct elf_link_hash_entry *h,
 
   amt = sizeof *a;
   a = bfd_zalloc (rinfo->output_bfd, amt);
+  if (a == NULL)
+    {
+      rinfo->failed = TRUE;
+      return FALSE;
+    }
 
   /* Note that we are copying a string pointer here, and testing it
      above.  If bfd_elf_string_from_elf_section is ever changed to
@@ -1901,7 +1906,10 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	      len = p - h->root.root.string;
 	      alc = bfd_malloc (len);
 	      if (alc == NULL)
-		return FALSE;
+		{
+		  sinfo->failed = TRUE;
+		  return FALSE;
+		}
 	      memcpy (alc, h->root.root.string, len - 1);
 	      alc[len - 1] = '\0';
 	      if (alc[len - 2] == ELF_VER_CHR)
@@ -4278,6 +4286,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		      amt = ((isymend - isym + 1)
 			     * sizeof (struct elf_link_hash_entry *));
 		      nondeflt_vers = bfd_malloc (amt);
+		      if (!nondeflt_vers)
+			goto error_free_vers;
 		    }
 		  nondeflt_vers[nondeflt_vers_cnt++] = h;
 		}
@@ -4436,6 +4446,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  amt = p - h->root.root.string;
 	  shortname = bfd_malloc (amt + 1);
+	  if (!shortname)
+	    goto error_free_vers;
 	  memcpy (shortname, h->root.root.string, amt);
 	  shortname[amt] = '\0';
 
@@ -4980,13 +4992,19 @@ bfd_elf_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
     }
 }
 
+struct hash_codes_info
+{
+  unsigned long *hashcodes;
+  bfd_boolean error;
+};
+  
 /* This function will be called though elf_link_hash_traverse to store
    all hash value of the exported symbols in an array.  */
 
 static bfd_boolean
 elf_collect_hash_codes (struct elf_link_hash_entry *h, void *data)
 {
-  unsigned long **valuep = data;
+  struct hash_codes_info *inf = data;
   const char *name;
   char *p;
   unsigned long ha;
@@ -5004,6 +5022,11 @@ elf_collect_hash_codes (struct elf_link_hash_entry *h, void *data)
   if (p != NULL)
     {
       alc = bfd_malloc (p - name + 1);
+      if (alc == NULL)
+	{
+	  inf->error = TRUE;
+	  return FALSE;
+	}
       memcpy (alc, name, p - name);
       alc[p - name] = '\0';
       name = alc;
@@ -5013,7 +5036,7 @@ elf_collect_hash_codes (struct elf_link_hash_entry *h, void *data)
   ha = bfd_elf_hash (name);
 
   /* Store the found hash value in the array given as the argument.  */
-  *(*valuep)++ = ha;
+  *(inf->hashcodes)++ = ha;
 
   /* And store it in the struct so that we can put it in the hash table
      later.  */
@@ -5043,6 +5066,7 @@ struct collect_gnu_hash_codes
   long int local_indx;
   long int shift1, shift2;
   unsigned long int mask;
+  bfd_boolean error;
 };
 
 /* This function will be called though elf_link_hash_traverse to store
@@ -5073,6 +5097,11 @@ elf_collect_gnu_hash_codes (struct elf_link_hash_entry *h, void *data)
   if (p != NULL)
     {
       alc = bfd_malloc (p - name + 1);
+      if (alc == NULL)
+	{
+	  s->error = TRUE;
+	  return FALSE;
+	}
       memcpy (alc, name, p - name);
       alc[p - name] = '\0';
       name = alc;
@@ -5943,6 +5972,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	elf_link_hash_traverse (elf_hash_table (info),
 				_bfd_elf_link_find_version_dependencies,
 				&sinfo);
+	if (sinfo.failed)
+	  return FALSE;
 
 	if (elf_tdata (output_bfd)->verref == NULL)
 	  s->flags |= SEC_EXCLUDE;
@@ -6164,7 +6195,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
       if (info->emit_hash)
 	{
 	  unsigned long int *hashcodes;
-	  unsigned long int *hashcodesp;
+	  struct hash_codes_info hashinf;
 	  bfd_size_type amt;
 	  unsigned long int nsyms;
 	  size_t bucketcount;
@@ -6177,13 +6208,16 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	  hashcodes = bfd_malloc (amt);
 	  if (hashcodes == NULL)
 	    return FALSE;
-	  hashcodesp = hashcodes;
+	  hashinf.hashcodes = hashcodes;
+	  hashinf.error = FALSE;
 
 	  /* Put all hash values in HASHCODES.  */
 	  elf_link_hash_traverse (elf_hash_table (info),
-				  elf_collect_hash_codes, &hashcodesp);
+				  elf_collect_hash_codes, &hashinf);
+	  if (hashinf.error)
+	    return FALSE;
 
-	  nsyms = hashcodesp - hashcodes;
+	  nsyms = hashinf.hashcodes - hashcodes;
 	  bucketcount
 	    = compute_bucket_count (info, hashcodes, nsyms, 0);
 	  free (hashcodes);
@@ -6232,6 +6266,8 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	  /* Put all hash values in HASHCODES.  */
 	  elf_link_hash_traverse (elf_hash_table (info),
 				  elf_collect_gnu_hash_codes, &cinfo);
+	  if (cinfo.error)
+	    return FALSE;
 
 	  bucketcount
 	    = compute_bucket_count (info, cinfo.hashcodes, cinfo.nsyms, 1);
@@ -6795,12 +6831,12 @@ elf_sym_name_compare (const void *arg1, const void *arg2)
 static struct elf_symbuf_head *
 elf_create_symbuf (bfd_size_type symcount, Elf_Internal_Sym *isymbuf)
 {
-  Elf_Internal_Sym **ind, **indbufend, **indbuf
-    = bfd_malloc2 (symcount, sizeof (*indbuf));
+  Elf_Internal_Sym **ind, **indbufend, **indbuf;
   struct elf_symbuf_symbol *ssym;
   struct elf_symbuf_head *ssymbuf, *ssymhead;
   bfd_size_type i, shndx_count;
 
+  indbuf = bfd_malloc2 (symcount, sizeof (*indbuf));
   if (indbuf == NULL)
     return NULL;
 
@@ -9948,7 +9984,9 @@ elf_fixup_link_order (bfd *abfd, asection *o)
     return TRUE;
 
   sections = (struct bfd_link_order **)
-    xmalloc (seen_linkorder * sizeof (struct bfd_link_order *));
+    bfd_malloc (seen_linkorder * sizeof (struct bfd_link_order *));
+  if (sections == NULL)
+    return FALSE;
   seen_linkorder = 0;
 
   for (p = o->map_head.link_order; p != NULL; p = p->next)
