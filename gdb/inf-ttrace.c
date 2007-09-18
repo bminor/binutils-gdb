@@ -76,6 +76,11 @@ struct inf_ttrace_page_dict
   int count;			/* Number of pages in this dictionary.  */
 } inf_ttrace_page_dict;
 
+struct inf_ttrace_private_thread_info
+{
+  int dying;
+};
+
 /* Number of lwps that are currently in a system call.  */
 static int inf_ttrace_num_lwps_in_syscall;
 
@@ -794,6 +799,14 @@ inf_ttrace_resume_callback (struct thread_info *info, void *arg)
   return 0;
 }
 
+static int
+inf_ttrace_delete_dying_threads_callback (struct thread_info *info, void *arg)
+{
+  if (((struct inf_ttrace_private_thread_info *)info->private)->dying == 1)
+    delete_thread (info->ptid);
+  return 0;
+}
+
 static void
 inf_ttrace_resume (ptid_t ptid, int step, enum target_signal signal)
 {
@@ -815,6 +828,7 @@ inf_ttrace_resume (ptid_t ptid, int step, enum target_signal signal)
     {
       /* Let all the other threads run too.  */
       iterate_over_threads (inf_ttrace_resume_callback, NULL);
+      iterate_over_threads (inf_ttrace_delete_dying_threads_callback, NULL);
     }
 }
 
@@ -824,6 +838,7 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   pid_t pid = ptid_get_pid (ptid);
   lwpid_t lwpid = ptid_get_lwp (ptid);
   ttstate_t tts;
+  struct thread_info *ti;
 
   /* Until proven otherwise.  */
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
@@ -940,19 +955,31 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	{
 	  /* Now that we're going to be multi-threaded, add the
 	     original thread to the list first.  */
-	  add_thread (ptid_build (tts.tts_pid, tts.tts_lwpid, 0));
+	  ti = add_thread (ptid_build (tts.tts_pid, tts.tts_lwpid, 0));
+	  ti->private =
+	    xmalloc (sizeof (struct inf_ttrace_private_thread_info));
+	  memset (ti->private, 0,
+		  sizeof (struct inf_ttrace_private_thread_info));
 	  inf_ttrace_num_lwps++;
 	}
       printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid));
-      add_thread (ptid);
+      ti = add_thread (ptid);
+      ti->private =
+	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
+      memset (ti->private, 0,
+	      sizeof (struct inf_ttrace_private_thread_info));
       inf_ttrace_num_lwps++;
       ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
       break;
 
     case TTEVT_LWP_EXIT:
       printf_filtered(_("[%s exited]\n"), target_pid_to_str (ptid));
-      delete_thread (ptid);
+      ti = find_thread_pid (ptid);
+      gdb_assert (ti != NULL);
+      ((struct inf_ttrace_private_thread_info *)ti->private)->dying = 1;
       inf_ttrace_num_lwps--;
+      ttrace (TT_LWP_CONTINUE, ptid_get_pid (ptid),
+              ptid_get_lwp (ptid), TT_NOPC, 0, 0);
       /* If we don't return -1 here, core GDB will re-add the thread.  */
       ptid = minus_one_ptid;
       break;
@@ -961,7 +988,9 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       lwpid = tts.tts_u.tts_thread.tts_target_lwpid;
       ptid = ptid_build (tts.tts_pid, lwpid, 0);
       printf_filtered(_("[%s has been terminated]\n"), target_pid_to_str (ptid));
-      delete_thread (ptid);
+      ti = find_thread_pid (ptid);
+      gdb_assert (ti != NULL);
+      ((struct inf_ttrace_private_thread_info *)ti->private)->dying = 1;
       inf_ttrace_num_lwps--;
       ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
       break;
@@ -1084,7 +1113,9 @@ inf_ttrace_files_info (struct target_ops *ignore)
 static int
 inf_ttrace_thread_alive (ptid_t ptid)
 {
-  return 1;
+  struct thread_info *ti;
+  ti = find_thread_pid (ptid);
+  return !(((struct inf_ttrace_private_thread_info *)ti->private)->dying);
 }
 
 static char *

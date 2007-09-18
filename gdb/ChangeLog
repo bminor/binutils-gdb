@@ -1,3 +1,14 @@
+2007-09-18  Jerome Guitton  <guitton@adacore.com>
+
+	* inf-ttrace.c (inf_ttrace_private_thread_info): New structure type.
+	(inf_ttrace_delete_dying_threads_callback): New function.
+	(inf_ttrace_resume): After resuming the execution, iterate over
+	the dying threads to delete them for the thread list.
+	(inf_ttrace_wait): on TTEVT_LWP_EXIT and TTEVT_LWP_TERMINATE,
+	mark the corresponding thread as dying instead of removing it
+	from the thread list.
+	(inf_ttrace_thread_alive): return 0 for dying threads.
+
 2007-09-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* infrun.c (insert_step_resume_breakpoint_at_frame): Add assertion
