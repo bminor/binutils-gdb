@@ -967,6 +967,12 @@ refine_prologue_limit (CORE_ADDR pc, CORE_ADDR lim_pc, int *trust_limit)
 {
   struct symtab_and_line prologue_sal;
   CORE_ADDR start_pc = pc;
+  CORE_ADDR end_pc;
+
+  /* The prologue can not possibly go past the function end itself,
+     so we can already adjust LIM_PC accordingly.  */
+  if (find_pc_partial_function (pc, NULL, NULL, &end_pc) && end_pc < lim_pc)
+    lim_pc = end_pc;
 
   /* Start off not trusting the limit.  */
   *trust_limit = 0;

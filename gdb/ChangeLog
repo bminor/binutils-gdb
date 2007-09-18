@@ -1,3 +1,8 @@
+2007-09-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64-tdep.c (refine_prologue_limit): Make sure we don't scan
+	the linetable past the function end.
+
 2007-09-18  James E. Wilson  <wilson@specifix.com>
 
 	* MAINTAINERS: Update my email address.
