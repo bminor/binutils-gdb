@@ -1,3 +1,20 @@
+2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3281
+	PR binutils/5037
+	* elf-bfd.h (elf_obj_tdata): Remove relro.
+
+	* elf.c (get_program_header_size): Check info->relro instead
+	of elf_tdata (abfd)->relro.
+	(_bfd_elf_map_sections_to_segments): Likewise.
+	(assign_file_positions_for_load_sections): Don't set
+	PT_GNU_RELRO segment alignment here.
+	(assign_file_positions_for_non_load_sections): Properly set up
+	PT_GNU_RELRO segment for copying executable/shared library.
+	(rewrite_elf_program_header): Remove PT_GNU_RELRO segment.
+	(copy_elf_program_header): Set p_size and p_size_valid fields for
+	PT_GNU_RELRO segment. 
+
 2007-09-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: New Finnish translation.

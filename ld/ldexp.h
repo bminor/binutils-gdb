@@ -98,6 +98,8 @@ typedef enum {
   lang_final_phase_enum
 } lang_phase_type;
 
+union lang_statement_union;
+
 struct ldexp_control {
   /* Modify expression evaluation depending on this.  */
   lang_phase_type phase;
@@ -125,6 +127,15 @@ struct ldexp_control {
     } phase;
 
     bfd_vma base, min_base, relro_end, end, pagesize, maxpagesize;
+
+    enum {
+      exp_dataseg_relro_none,
+      exp_dataseg_relro_start,
+      exp_dataseg_relro_end,
+    } relro;
+
+    union lang_statement_union *relro_start_stat;
+    union lang_statement_union *relro_end_stat;
   } dataseg;
 };
 

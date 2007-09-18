@@ -4636,9 +4636,31 @@ lang_size_sections_1
 	    bfd_vma newdot = dot;
 	    etree_type *tree = s->assignment_statement.exp;
 
+	    expld.dataseg.relro = exp_dataseg_relro_none;
+
 	    exp_fold_tree (tree,
 			   output_section_statement->bfd_section,
 			   &newdot);
+
+	    if (expld.dataseg.relro == exp_dataseg_relro_start)
+	      {
+		if (!expld.dataseg.relro_start_stat)
+		  expld.dataseg.relro_start_stat = s;
+		else
+		  {
+		    ASSERT (expld.dataseg.relro_start_stat == s);
+		  }
+	      }
+	    else if (expld.dataseg.relro == exp_dataseg_relro_end)
+	      {
+		if (!expld.dataseg.relro_end_stat)
+		  expld.dataseg.relro_end_stat = s;
+		else
+		  {
+		    ASSERT (expld.dataseg.relro_end_stat == s);
+		  }
+	      }
+	    expld.dataseg.relro = exp_dataseg_relro_none;
 
 	    /* This symbol is relative to this section.  */
 	    if ((tree->type.node_class == etree_provided
@@ -5665,6 +5687,81 @@ lang_gc_sections (void)
     bfd_gc_sections (output_bfd, &link_info);
 }
 
+/* Worker for lang_find_relro_sections_1.  */
+
+static void
+find_relro_section_callback (lang_wild_statement_type *ptr ATTRIBUTE_UNUSED,
+			     struct wildcard_list *sec ATTRIBUTE_UNUSED,
+			     asection *section,
+			     lang_input_statement_type *file ATTRIBUTE_UNUSED,
+			     void *data)
+{
+  /* Discarded, excluded and ignored sections effectively have zero
+     size.  */
+  if (section->output_section != NULL
+      && section->output_section->owner == output_bfd
+      && (section->output_section->flags & SEC_EXCLUDE) == 0
+      && !IGNORE_SECTION (section)
+      && section->size != 0)
+    {
+      bfd_boolean *has_relro_section = (bfd_boolean *) data;
+      *has_relro_section = TRUE;
+    }
+}
+
+/* Iterate over sections for relro sections.  */
+
+static void
+lang_find_relro_sections_1 (lang_statement_union_type *s,
+			    bfd_boolean *has_relro_section)
+{
+  if (*has_relro_section)
+    return;
+
+  for (; s != NULL; s = s->header.next)
+    {
+      if (s == expld.dataseg.relro_end_stat)
+	break;
+
+      switch (s->header.type)
+	{
+	case lang_wild_statement_enum:
+	  walk_wild (&s->wild_statement,
+		     find_relro_section_callback,
+		     has_relro_section);
+	  break;
+	case lang_constructors_statement_enum:
+	  lang_find_relro_sections_1 (constructor_list.head,
+				      has_relro_section);
+	  break;
+	case lang_output_section_statement_enum:
+	  lang_find_relro_sections_1 (s->output_section_statement.children.head,
+				      has_relro_section);
+	  break;
+	case lang_group_statement_enum:
+	  lang_find_relro_sections_1 (s->group_statement.children.head,
+				      has_relro_section);
+	  break;
+	default:
+	  break;
+	}
+    }
+}
+
+static void
+lang_find_relro_sections (void)
+{
+  bfd_boolean has_relro_section = FALSE;
+
+  /* Check all sections in the link script.  */
+
+  lang_find_relro_sections_1 (expld.dataseg.relro_start_stat,
+			      &has_relro_section);
+
+  if (!has_relro_section)
+    link_info.relro = FALSE;
+}
+
 /* Relax all sections until bfd_relax_section gives up.  */
 
 static void
@@ -5791,6 +5888,10 @@ lang_process (void)
   /* We must record the program headers before we try to fix the
      section positions, since they will affect SIZEOF_HEADERS.  */
   lang_record_phdrs ();
+
+  /* Check relro sections.  */
+  if (link_info.relro && ! link_info.relocatable)
+    lang_find_relro_sections ();
 
   /* Size up the sections.  */
   lang_size_sections (NULL, !command_line.relax);

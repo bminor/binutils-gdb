@@ -3357,7 +3357,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
       /* We need a PT_DYNAMIC segment.  */
       ++segs;
 
-      if (elf_tdata (abfd)->relro)
+      if (info->relro)
 	{
 	  /* We need a PT_GNU_RELRO segment only when there is a
 	     PT_DYNAMIC segment.  */
@@ -3887,7 +3887,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  pm = &m->next;
 	}
 
-      if (dynsec != NULL && elf_tdata (abfd)->relro)
+      if (dynsec != NULL && info->relro)
 	{
 	  /* We make a PT_GNU_RELRO segment only when there is a
 	     PT_DYNAMIC segment.  */
@@ -4388,12 +4388,10 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		    p->p_memsz += this_hdr->sh_size;
 		}
 
-	      if (p->p_type == PT_GNU_RELRO)
-		p->p_align = 1;
-	      else if (align > p->p_align
-		       && !m->p_align_valid
-		       && (p->p_type != PT_LOAD
-			   || (abfd->flags & D_PAGED) == 0))
+	      if (align > p->p_align
+		  && !m->p_align_valid
+		  && (p->p_type != PT_LOAD
+		      || (abfd->flags & D_PAGED) == 0))
 		p->p_align = align;
 	    }
 
@@ -4543,18 +4541,53 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
       if (m->count != 0)
 	{
 	  if (p->p_type != PT_LOAD
-	      && (p->p_type != PT_NOTE || bfd_get_format (abfd) != bfd_core))
+	      && (p->p_type != PT_NOTE
+		  || bfd_get_format (abfd) != bfd_core))
 	    {
 	      Elf_Internal_Shdr *hdr;
+	      asection *sect;
+
 	      BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
 
-	      hdr = &elf_section_data (m->sections[m->count - 1])->this_hdr;
-	      p->p_filesz = (m->sections[m->count - 1]->filepos
-			     - m->sections[0]->filepos);
+	      sect = m->sections[m->count - 1];
+	      hdr = &elf_section_data (sect)->this_hdr;
+	      p->p_filesz = sect->filepos - m->sections[0]->filepos;
 	      if (hdr->sh_type != SHT_NOBITS)
 		p->p_filesz += hdr->sh_size;
 
-	      p->p_offset = m->sections[0]->filepos;
+	      if (p->p_type == PT_GNU_RELRO)
+		{
+		  /* When we get here, we are copying executable
+		     or shared library. But we need to use the same
+		     linker logic.  */
+		  Elf_Internal_Phdr *lp;
+
+		  for (lp = phdrs; lp < phdrs + count; ++lp)
+		    {
+		      if (lp->p_type == PT_LOAD
+			  && lp->p_paddr == p->p_paddr)
+			break;
+		    }
+	  
+		  if (lp < phdrs + count)
+		    {
+		      /* We should use p_size if it is valid since it
+			 may contain the first few bytes of the next
+			 SEC_ALLOC section.  */
+		      if (m->p_size_valid)
+			p->p_filesz = m->p_size;
+		      else
+			abort ();
+		      p->p_vaddr = lp->p_vaddr;
+		      p->p_offset = lp->p_offset;
+		      p->p_memsz = p->p_filesz;
+		      p->p_align = 1;
+		    }
+		  else
+		    abort ();
+		}
+	      else
+		p->p_offset = m->sections[0]->filepos;
 	    }
 	}
       else
@@ -5143,7 +5176,12 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	    }
 
       if (segment->p_type != PT_LOAD)
-	continue;
+	{
+	  /* Remove PT_GNU_RELRO segment.  */
+	  if (segment->p_type == PT_GNU_RELRO)
+	    segment->p_type = PT_NULL;
+	  continue;
+	}
 
       /* Determine if this segment overlaps any previous segments.  */
       for (j = 0, segment2 = elf_tdata (ibfd)->phdr; j < i; j++, segment2 ++)
@@ -5666,6 +5704,17 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_align = segment->p_align;
       map->p_align_valid = 1;
       map->p_vaddr_offset = 0;
+
+      if (map->p_type == PT_GNU_RELRO
+	  && segment->p_filesz == segment->p_memsz)
+	{
+	  /* The PT_GNU_RELRO segment may contain the first a few
+	     bytes in the .got.plt section even if the whole .got.plt
+	     section isn't in the PT_GNU_RELRO segment.  We won't
+	     change the size of the PT_GNU_RELRO segment.  */
+	  map->p_size = segment->p_filesz;
+	  map->p_size_valid = 1;
+	}
 
       /* Determine if this segment contains the ELF file header
 	 and if it contains the program headers themselves.  */

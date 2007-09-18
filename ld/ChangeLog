@@ -1,3 +1,24 @@
+2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3281
+	PR binutils/5037
+	* ldexp.h (ldexp_control): Add relro, relro_start_stat and
+	relro_end_stat.
+
+	* ldexp.c (fold_binary): Set expld.dataseg.relro to
+	exp_dataseg_relro_start or exp_dataseg_relro_end when
+	seeing DATA_SEGMENT_ALIGN or DATA_SEGMENT_RELRO_END,
+	respectively.
+
+	* ldlang.c (lang_size_sections_1): Properly set
+	expld.dataseg.relro_start_stat and
+	expld.dataseg.relro_end_stat.
+	(find_relro_section_callback): New function.
+	(lang_find_relro_sections_1): Likewise.
+	(lang_find_relro_sections): Likewise.
+	(lang_process): Call lang_find_relro_sections for
+	non-relocatable link.
+
 2007-09-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

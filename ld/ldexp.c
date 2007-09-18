@@ -390,6 +390,7 @@ fold_binary (etree_type *tree)
 	      break;
 
 	    case DATA_SEGMENT_ALIGN:
+	      expld.dataseg.relro = exp_dataseg_relro_start;
 	      if (expld.phase != lang_first_phase_enum
 		  && expld.section == bfd_abs_section_ptr
 		  && (expld.dataseg.phase == exp_dataseg_none
@@ -425,6 +426,7 @@ fold_binary (etree_type *tree)
 	      break;
 
 	    case DATA_SEGMENT_RELRO_END:
+	      expld.dataseg.relro = exp_dataseg_relro_end;
 	      if (expld.phase != lang_first_phase_enum
 		  && (expld.dataseg.phase == exp_dataseg_align_seen
 		      || expld.dataseg.phase == exp_dataseg_adjust

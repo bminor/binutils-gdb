@@ -1422,9 +1422,6 @@ struct elf_obj_tdata
   /* Segment flags for the PT_GNU_STACK segment.  */
   unsigned int stack_flags;
 
-  /* Should the PT_GNU_RELRO segment be emitted?  */
-  bfd_boolean relro;
-
   /* Symbol version definitions in external objects.  */
   Elf_Internal_Verdef *verdef;
 

@@ -1,3 +1,14 @@
+2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/3281
+	PR binutils/5037
+	* ld-elf/binutils.exp: Update "-z relro" tests to use relro1.s.
+	Add "-z relro" tests with relro2.s.  Add "-z relro" tests with
+	TLS for objcopy.
+
+	* ld-elf/relro1.s: New file.
+	* ld-elf/relro2.s: Likewise.
+
 2007-09-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* lib/ld-lib.exp (default_ld_compile): Pull in global CXXFLAGS and
