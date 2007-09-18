@@ -1,3 +1,8 @@
+2007-09-18  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* config/bfin-parse.y (asm_1): Slightly improve error messages
+	for "reg += const;".
+
 2007-09-18  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/5026

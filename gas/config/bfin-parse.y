@@ -1432,6 +1432,8 @@ asm_1:
 	      notethat ("COMPI2opD: dregs += imm7\n");
 	      $$ = COMPI2OPD (&$1, imm7 ($3), 1);
 	    }
+	  else if ((IS_DREG ($1) || IS_PREG ($1)) && IS_CONST ($3))
+	    return yyerror ("Immediate value out of range");
 	  else
 	    return yyerror ("Register mismatch");
 	}
