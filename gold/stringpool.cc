@@ -258,14 +258,14 @@ Stringpool_template<Stringpool_char>::find(const Stringpool_char* s,
 template<typename Stringpool_char>
 bool
 Stringpool_template<Stringpool_char>::Stringpool_sort_comparison::operator()(
-  typename String_set_type::iterator it1,
-  typename String_set_type::iterator it2) const
+  const Stringpool_sort_info& sort_info1,
+  const Stringpool_sort_info& sort_info2) const
 {
-  const Stringpool_char* s1 = it1->first;
-  const Stringpool_char* s2 = it2->first;
-  size_t len1 = string_length(s1);
-  size_t len2 = string_length(s2);
-  size_t minlen = len1 < len2 ? len1 : len2;
+  const Stringpool_char* s1 = sort_info1.it->first;
+  const Stringpool_char* s2 = sort_info2.it->first;
+  const size_t len1 = sort_info1.string_length;
+  const size_t len2 = sort_info2.string_length;
+  const size_t minlen = len1 < len2 ? len1 : len2;
   const Stringpool_char* p1 = s1 + len1 - 1;
   const Stringpool_char* p2 = s2 + len2 - 1;
   for (size_t i = minlen; i > 0; --i, --p1, --p2)
@@ -281,10 +281,10 @@ Stringpool_template<Stringpool_char>::Stringpool_sort_comparison::operator()(
 template<typename Stringpool_char>
 bool
 Stringpool_template<Stringpool_char>::is_suffix(const Stringpool_char* s1,
-						const Stringpool_char* s2)
+                                                size_t len1,
+						const Stringpool_char* s2,
+                                                size_t len2)
 {
-  size_t len1 = string_length(s1);
-  size_t len2 = string_length(s2);
   if (len1 > len2)
     return false;
   return memcmp(s1, s2 + len2 - len1, len1 * sizeof(Stringpool_char)) == 0;
@@ -305,13 +305,13 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
 
   size_t count = this->string_set_.size();
 
-  std::vector<typename String_set_type::iterator> v;
+  std::vector<Stringpool_sort_info> v;
   v.reserve(count);
 
   for (typename String_set_type::iterator p = this->string_set_.begin();
        p != this->string_set_.end();
        ++p)
-    v.push_back(p);
+    v.push_back(Stringpool_sort_info(p, string_length(p->first)));
 
   std::sort(v.begin(), v.end(), Stringpool_sort_comparison());
 
@@ -319,19 +319,25 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
 
   // Offset 0 may be reserved for the empty string.
   off_t offset = this->zero_null_ ? charsize : 0;
-  for (size_t i = 0; i < count; ++i)
+
+  for (typename std::vector<Stringpool_sort_info>::iterator last = v.end(),
+         curr = v.begin();
+       curr != v.end();
+       last = curr++)
     {
-      if (this->zero_null_ && v[i]->first[0] == 0)
-	v[i]->second.second = 0;
-      else if (i > 0 && is_suffix(v[i]->first, v[i - 1]->first))
-	v[i]->second.second = (v[i - 1]->second.second
-			       + ((string_length(v[i - 1]->first)
-				   - string_length(v[i]->first))
-				  * charsize));
+      if (this->zero_null_ && curr->it->first[0] == 0)
+	curr->it->second.second = 0;
+      else if (last != v.end()
+               && is_suffix(curr->it->first, curr->string_length,
+                            last->it->first, last->string_length))
+	curr->it->second.second = (last->it->second.second
+                                   + ((last->string_length
+                                       - curr->string_length)
+                                      * charsize));
       else
 	{
-	  v[i]->second.second = offset;
-	  offset += (string_length(v[i]->first) + 1) * charsize;
+	  curr->it->second.second = offset;
+	  offset += (curr->string_length + 1) * charsize;
 	}
     }
 

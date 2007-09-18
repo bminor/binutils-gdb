@@ -116,7 +116,8 @@ class Stringpool_template
 
   // Return whether s1 is a suffix of s2.
   static bool
-  is_suffix(const Stringpool_char* s1, const Stringpool_char* s2);
+  is_suffix(const Stringpool_char* s1, size_t len1,
+            const Stringpool_char* s2, size_t len2);
 
   // The hash table is a map from string names to a pair of Key and
   // ELF strtab offsets.  We only use the offsets if we turn this into
@@ -135,13 +136,22 @@ class Stringpool_template
 			Stringpool_eq> String_set_type;
 #endif
 
-  // Comparison routine used when sorting into an ELF strtab.
+  // Comparison routine used when sorting into an ELF strtab.  We
+  // store string-sizes in the sort-vector so we don't have to
+  // recompute them log(n) times as we sort.
+  struct Stringpool_sort_info
+  {
+    typename String_set_type::iterator it;
+    size_t string_length;
+    Stringpool_sort_info(typename String_set_type::iterator i, size_t s)
+      : it(i), string_length(s)
+    { }
+  };
 
   struct Stringpool_sort_comparison
   {
     bool
-    operator()(typename String_set_type::iterator,
-	       typename String_set_type::iterator) const;
+    operator()(const Stringpool_sort_info&, const Stringpool_sort_info&) const;
   };
 
   // List of Stringdata structures.
