@@ -1,3 +1,10 @@
+2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.h (RegRip): New.
+
+	* i386-reg.tbl (rip): Use RegRip for reg_num.
+	* i386-tbl.h: Regenerated.
+
 2007-09-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

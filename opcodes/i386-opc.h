@@ -443,6 +443,7 @@ typedef struct
 #define RegRex	    0x1  /* Extended register.  */
 #define RegRex64    0x2  /* Extended 8 bit register.  */
   unsigned int reg_num;
+#define RegRip	((unsigned int ) ~0)
 }
 reg_entry;
 

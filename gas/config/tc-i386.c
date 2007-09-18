@@ -1098,7 +1098,6 @@ static const i386_operand_type disp32s = OPERAND_TYPE_DISP32S;
 static const i386_operand_type disp16_32 = OPERAND_TYPE_DISP16_32;
 static const i386_operand_type anydisp
   = OPERAND_TYPE_ANYDISP;
-static const i386_operand_type baseindex = OPERAND_TYPE_BASEINDEX;
 static const i386_operand_type regxmm = OPERAND_TYPE_REGXMM;
 static const i386_operand_type imm8 = OPERAND_TYPE_IMM8;
 static const i386_operand_type imm8s = OPERAND_TYPE_IMM8S;
@@ -4541,7 +4540,7 @@ build_modrm_byte (void)
 		}
 	    }
 	  /* RIP addressing for 64bit mode.  */
-	  else if (UINTS_EQUAL (i.base_reg->reg_type, baseindex))
+	  else if (i.base_reg->reg_num == RegRip)
 	    {
 	      i.rm.regmem = NO_BASE_REGISTER;
 	      i.types[op].bitfield.disp8 = 0;
@@ -5977,7 +5976,7 @@ i386_index_check (const char *operand_string)
 	       || (i.prefix[ADDR_PREFIX]
 		   && !i.base_reg->reg_type.bitfield.reg32))
 	   && (i.index_reg
-	       || !UINTS_EQUAL (i.base_reg->reg_type, baseindex)))
+	       || i.base_reg->reg_num != RegRip))
 	  || (i.index_reg
 	      && (!i.index_reg->reg_type.bitfield.baseindex
 		  || (i.prefix[ADDR_PREFIX] == 0

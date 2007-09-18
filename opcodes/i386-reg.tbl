@@ -189,7 +189,7 @@ xmm14, RegXMM, RegRex, 6
 xmm15, RegXMM, RegRex, 7
 // No type will make this register rejected for all purposes except
 // for addressing.  This saves creating one extra type for RIP.
-rip, BaseIndex, 0, 0
+rip, BaseIndex, 0, RegRip
 // fp regs.
 st(0), FloatReg|FloatAcc, 0, 0
 st(1), FloatReg, 0, 1

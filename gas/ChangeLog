@@ -1,5 +1,12 @@
 2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (baseindex): Removed.
+	(build_modrm_byte): Check reg_num for RIP register instead of
+	reg_type.
+	(i386_index_check): Likewise.
+
+2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/5035
 	* config/obj-coff.c (obj_coff_endef): Remove checking size of
 	def_symbol_in_progress.
