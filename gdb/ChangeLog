@@ -1,3 +1,7 @@
+2007-09-18  James E. Wilson  <wilson@specifix.com>
+
+	* MAINTAINERS: Update my email address.
+
 2007-09-18  Jerome Guitton  <guitton@adacore.com>
 
 	* inf-ttrace.c (inf_ttrace_private_thread_info): New structure type.
