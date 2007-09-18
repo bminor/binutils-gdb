@@ -1,3 +1,8 @@
+2007-09-18  Alan Modra  <amodra@bigpond.net.au>
+
+	PR gas/5026
+	* read.c (emit_expr): Only use long long if required and available.
+
 2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (baseindex): Removed.

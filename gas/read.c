@@ -4106,8 +4106,13 @@ emit_expr (expressionS *exp, unsigned int nbytes)
 	  && ((get & mask) != mask
 	      || (get & hibit) == 0))
 	{		/* Leading bits contain both 0s & 1s.  */
+#if defined (BFD64) && BFD_HOST_64BIT_LONG_LONG
 	  as_warn (_("value 0x%llx truncated to 0x%llx"),
 		   (unsigned long long) get, (unsigned long long) use);
+#else
+	  as_warn (_("value 0x%lx truncated to 0x%lx"),
+		   (unsigned long) get, (unsigned long) use);
+#endif
 	}
       /* Put bytes in right order.  */
       md_number_to_chars (p, use, (int) nbytes);
