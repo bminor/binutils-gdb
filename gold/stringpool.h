@@ -27,6 +27,9 @@ class Output_file;
 // string pointer so that repeated runs of the linker will generate
 // precisely the same output.
 
+// When you add a string to a Stringpool, Stringpool will make a copy
+// of it.  Thus there is no need to keep a copy elsewhere.
+
 // A Stringpool can be turned into a string table, a sequential series
 // of null terminated strings.  The first string may optionally be a
 // single zero byte, as required for SHT_STRTAB sections.  This
