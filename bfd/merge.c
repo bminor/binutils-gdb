@@ -220,16 +220,11 @@ sec_merge_hash_lookup (struct sec_merge_hash *table, const char *string,
     return NULL;
 
   hashp = ((struct sec_merge_hash_entry *)
-	   sec_merge_hash_newfunc (NULL, &table->table, string));
+	   bfd_hash_insert (&table->table, string, hash));
   if (hashp == NULL)
     return NULL;
-  hashp->root.string = string;
-  hashp->root.hash = hash;
   hashp->len = len;
   hashp->alignment = alignment;
-  hashp->root.next = table->table.table[index];
-  table->table.table[index] = (struct bfd_hash_entry *) hashp;
-
   return hashp;
 }
 

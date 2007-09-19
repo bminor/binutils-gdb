@@ -451,9 +451,6 @@ bfd_hash_lookup (struct bfd_hash_table *table,
   if (! create)
     return NULL;
 
-  hashp = (*table->newfunc) (NULL, table, string);
-  if (hashp == NULL)
-    return NULL;
   if (copy)
     {
       char *new;
@@ -467,8 +464,26 @@ bfd_hash_lookup (struct bfd_hash_table *table,
       memcpy (new, string, len + 1);
       string = new;
     }
+
+  return bfd_hash_insert (table, string, hash);
+}
+
+/* Insert an entry in a hash table.  */
+
+struct bfd_hash_entry *
+bfd_hash_insert (struct bfd_hash_table *table,
+		 const char *string,
+		 unsigned long hash)
+{
+  struct bfd_hash_entry *hashp;
+  unsigned int index;
+
+  hashp = (*table->newfunc) (NULL, table, string);
+  if (hashp == NULL)
+    return NULL;
   hashp->string = string;
   hashp->hash = hash;
+  index = hash % table->size;
   hashp->next = table->table[index];
   table->table[index] = hashp;
   table->count++;
@@ -490,6 +505,11 @@ bfd_hash_lookup (struct bfd_hash_table *table,
 
       newtable = ((struct bfd_hash_entry **)
 		  objalloc_alloc ((struct objalloc *) table->memory, alloc));
+      if (newtable == NULL)
+	{
+	  table->frozen = 1;
+	  return hashp;
+	}
       memset ((PTR) newtable, 0, alloc);
 
       for (hi = 0; hi < table->size; hi ++)
@@ -497,7 +517,6 @@ bfd_hash_lookup (struct bfd_hash_table *table,
 	  {
 	    struct bfd_hash_entry *chain = table->table[hi];
 	    struct bfd_hash_entry *chain_end = chain;
-	    int index;
 
 	    while (chain_end->next && chain_end->next->hash == chain->hash)
 	      chain_end = chain_end->next;

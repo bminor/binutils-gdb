@@ -1,3 +1,12 @@
+2007-09-19  Alan Modra  <amodra@bigpond.net.au>
+	    Doug Kwan  <dougkwan@google.com>
+
+	* bfd-in.h (bfd_hash_insert): Declare.
+	* bfd-in2.h: Regenerate.
+	* hash.c (bfd_hash_insert): New function.  Split out from..
+	(bfd_hash_lookup): ..here.
+	* merge.c (sec_merge_hash_lookup): Use bfd_hash_insert.
+
 2007-09-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (bfd_section_from_shdr): Check bfd_alloc return.
