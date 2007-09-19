@@ -404,6 +404,10 @@ class Symbol
   override_base(const elfcpp::Sym<size, big_endian>&, Object* object,
 		const char* version);
 
+  // Override existing symbol with a special symbol.
+  void
+  override_base_with_special(const Symbol* from);
+
  private:
   Symbol(const Symbol&);
   Symbol& operator=(const Symbol&);
@@ -548,6 +552,10 @@ class Sized_symbol : public Symbol
   void
   override(const elfcpp::Sym<size, big_endian>&, Object* object,
 	   const char* version);
+
+  // Override existing symbol with a special symbol.
+  void
+  override_with_special(const Sized_symbol<size>*);
 
   // Return the symbol's value.
   Value_type
@@ -905,12 +913,22 @@ class Symbol_table
   resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
           const char* version ACCEPT_SIZE_ENDIAN);
 
+  // Whether we should override a symbol, based on flags in
+  // resolve.cc.
+  static bool
+  should_override(const Symbol*, unsigned int, bool*);
+
+  // Whether we should override a symbol with a special symbol which
+  // is automatically defined by the linker.
+  static bool
+  should_override_with_special(const Symbol*);
+
   // Define a special symbol.
   template<int size, bool big_endian>
   Sized_symbol<size>*
   define_special_symbol(const Target* target, const char* name,
-			const char* version, bool only_if_ref
-			ACCEPT_SIZE_ENDIAN);
+			const char* version, bool only_if_ref,
+			Sized_symbol<size>** poldsym ACCEPT_SIZE_ENDIAN);
 
   // Define a symbol in an Output_data, sized version.
   template<int size>

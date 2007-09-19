@@ -666,28 +666,28 @@ Symbol_table::add_from_dynobj(
 
 // Create and return a specially defined symbol.  If ONLY_IF_REF is
 // true, then only create the symbol if there is a reference to it.
+// If this does not return NULL, it sets *POLDSYM to the existing
+// symbol if there is one.
 
 template<int size, bool big_endian>
 Sized_symbol<size>*
 Symbol_table::define_special_symbol(const Target* target, const char* name,
-				    const char* version, bool only_if_ref
+				    const char* version, bool only_if_ref,
+                                    Sized_symbol<size>** poldsym
                                     ACCEPT_SIZE_ENDIAN)
 {
   gold_assert(this->size_ == size);
 
   Symbol* oldsym;
   Sized_symbol<size>* sym;
+  bool add_to_table = false;
+  typename Symbol_table_type::iterator add_loc = this->table_.end();
 
   if (only_if_ref)
     {
       oldsym = this->lookup(name, version);
       if (oldsym == NULL || !oldsym->is_undefined())
 	return NULL;
-      sym = NULL;
-
-      // Canonicalize NAME and VERSION.
-      name = oldsym->name();
-      version = oldsym->version();
     }
   else
     {
@@ -710,53 +710,38 @@ Symbol_table::define_special_symbol(const Target* target, const char* name,
 	  // We already have a symbol table entry for NAME/VERSION.
 	  oldsym = ins.first->second;
 	  gold_assert(oldsym != NULL);
-	  sym = NULL;
 	}
       else
 	{
 	  // We haven't seen this symbol before.
 	  gold_assert(ins.first->second == NULL);
-
-	  if (!target->has_make_symbol())
-	    sym = new Sized_symbol<size>();
-	  else
-	    {
-	      gold_assert(target->get_size() == size);
-	      gold_assert(target->is_big_endian() ? big_endian : !big_endian);
-	      typedef Sized_target<size, big_endian> My_target;
-	      const My_target* sized_target =
-		static_cast<const My_target*>(target);
-	      sym = sized_target->make_symbol();
-	      if (sym == NULL)
-		return NULL;
-	    }
-
-	  ins.first->second = sym;
+          add_to_table = true;
+          add_loc = ins.first;
 	  oldsym = NULL;
 	}
     }
 
-  if (oldsym != NULL)
+  if (!target->has_make_symbol())
+    sym = new Sized_symbol<size>();
+  else
     {
-      gold_assert(sym == NULL);
-
-      sym = this->get_sized_symbol SELECT_SIZE_NAME(size) (oldsym
-                                                           SELECT_SIZE(size));
-      gold_assert(sym->source() == Symbol::FROM_OBJECT);
-      const int old_shndx = sym->shndx();
-      if (old_shndx != elfcpp::SHN_UNDEF
-	  && old_shndx != elfcpp::SHN_COMMON
-	  && !sym->object()->is_dynamic())
-	{
-	  fprintf(stderr, "%s: linker defined: multiple definition of %s\n",
-		  program_name, name);
-	  // FIXME: Report old location.  Record that we have seen an
-	  // error.
-	  return NULL;
-	}
-
-      // Our new definition is going to override the old reference.
+      gold_assert(target->get_size() == size);
+      gold_assert(target->is_big_endian() ? big_endian : !big_endian);
+      typedef Sized_target<size, big_endian> My_target;
+      const My_target* sized_target =
+          static_cast<const My_target*>(target);
+      sym = sized_target->make_symbol();
+      if (sym == NULL)
+        return NULL;
     }
+
+  if (add_to_table)
+    add_loc->second = sym;
+  else
+    gold_assert(oldsym != NULL);
+
+  *poldsym = this->get_sized_symbol SELECT_SIZE_NAME(size) (oldsym
+                                                            SELECT_SIZE(size));
 
   return sym;
 }
@@ -775,15 +760,29 @@ Symbol_table::define_in_output_data(const Target* target, const char* name,
 {
   gold_assert(target->get_size() == this->size_);
   if (this->size_ == 32)
-    return this->do_define_in_output_data<32>(target, name, version, od, value,
-					      symsize, type, binding,
-					      visibility, nonvis,
-					      offset_is_from_end, only_if_ref);
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+      return this->do_define_in_output_data<32>(target, name, version, od,
+                                                value, symsize, type, binding,
+                                                visibility, nonvis,
+                                                offset_is_from_end,
+                                                only_if_ref);
+#else
+      gold_unreachable();
+#endif
+    }
   else if (this->size_ == 64)
-    return this->do_define_in_output_data<64>(target, name, version, od, value,
-					      symsize, type, binding,
-					      visibility, nonvis,
-					      offset_is_from_end, only_if_ref);
+    {
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+      return this->do_define_in_output_data<64>(target, name, version, od,
+                                                value, symsize, type, binding,
+                                                visibility, nonvis,
+                                                offset_is_from_end,
+                                                only_if_ref);
+#else
+      gold_unreachable();
+#endif
+    }
   else
     gold_unreachable();
 }
@@ -807,12 +806,13 @@ Symbol_table::do_define_in_output_data(
     bool only_if_ref)
 {
   Sized_symbol<size>* sym;
+  Sized_symbol<size>* oldsym;
 
   if (target->is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-          target, name, version, only_if_ref
+          target, name, version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, true));
 #else
       gold_unreachable();
@@ -822,7 +822,7 @@ Symbol_table::do_define_in_output_data(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-          target, name, version, only_if_ref
+          target, name, version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, false));
 #else
       gold_unreachable();
@@ -834,6 +834,10 @@ Symbol_table::do_define_in_output_data(
 
   sym->init(name, od, value, symsize, type, binding, visibility, nonvis,
 	    offset_is_from_end);
+
+  if (oldsym != NULL
+      && Symbol_table::should_override_with_special(oldsym))
+    oldsym->override_with_special(sym);
 
   return sym;
 }
@@ -852,15 +856,27 @@ Symbol_table::define_in_output_segment(const Target* target, const char* name,
 {
   gold_assert(target->get_size() == this->size_);
   if (this->size_ == 32)
-    return this->do_define_in_output_segment<32>(target, name, version, os,
-						 value, symsize, type, binding,
-						 visibility, nonvis,
-						 offset_base, only_if_ref);
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+      return this->do_define_in_output_segment<32>(target, name, version, os,
+                                                   value, symsize, type,
+                                                   binding, visibility, nonvis,
+                                                   offset_base, only_if_ref);
+#else
+      gold_unreachable();
+#endif
+    }
   else if (this->size_ == 64)
-    return this->do_define_in_output_segment<64>(target, name, version, os,
-						 value, symsize, type, binding,
-						 visibility, nonvis,
-						 offset_base, only_if_ref);
+    {
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+      return this->do_define_in_output_segment<64>(target, name, version, os,
+                                                   value, symsize, type,
+                                                   binding, visibility, nonvis,
+                                                   offset_base, only_if_ref);
+#else
+      gold_unreachable();
+#endif
+    }
   else
     gold_unreachable();
 }
@@ -884,14 +900,15 @@ Symbol_table::do_define_in_output_segment(
     bool only_if_ref)
 {
   Sized_symbol<size>* sym;
+  Sized_symbol<size>* oldsym;
 
   if (target->is_big_endian())
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-        target, name, version, only_if_ref
+        target, name, version, only_if_ref, &oldsym
         SELECT_SIZE_ENDIAN(size, true));
   else
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, name, version, only_if_ref
+        target, name, version, only_if_ref, &oldsym
         SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
@@ -899,6 +916,10 @@ Symbol_table::do_define_in_output_segment(
 
   sym->init(name, os, value, symsize, type, binding, visibility, nonvis,
 	    offset_base);
+
+  if (oldsym != NULL
+      && Symbol_table::should_override_with_special(oldsym))
+    oldsym->override_with_special(sym);
 
   return sym;
 }
@@ -915,13 +936,25 @@ Symbol_table::define_as_constant(const Target* target, const char* name,
 {
   gold_assert(target->get_size() == this->size_);
   if (this->size_ == 32)
-    return this->do_define_as_constant<32>(target, name, version, value,
-					   symsize, type, binding, visibility,
-					   nonvis, only_if_ref);
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+      return this->do_define_as_constant<32>(target, name, version, value,
+                                             symsize, type, binding,
+                                             visibility, nonvis, only_if_ref);
+#else
+      gold_unreachable();
+#endif
+    }
   else if (this->size_ == 64)
-    return this->do_define_as_constant<64>(target, name, version, value,
-					   symsize, type, binding, visibility,
-					   nonvis, only_if_ref);
+    {
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+      return this->do_define_as_constant<64>(target, name, version, value,
+                                             symsize, type, binding,
+                                             visibility, nonvis, only_if_ref);
+#else
+      gold_unreachable();
+#endif
+    }
   else
     gold_unreachable();
 }
@@ -943,20 +976,25 @@ Symbol_table::do_define_as_constant(
     bool only_if_ref)
 {
   Sized_symbol<size>* sym;
+  Sized_symbol<size>* oldsym;
 
   if (target->is_big_endian())
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-        target, name, version, only_if_ref
+        target, name, version, only_if_ref, &oldsym
         SELECT_SIZE_ENDIAN(size, true));
   else
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, name, version, only_if_ref
+        target, name, version, only_if_ref, &oldsym
         SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
     return NULL;
 
   sym->init(name, value, symsize, type, binding, visibility, nonvis);
+
+  if (oldsym != NULL
+      && Symbol_table::should_override_with_special(oldsym))
+    oldsym->override_with_special(sym);
 
   return sym;
 }
