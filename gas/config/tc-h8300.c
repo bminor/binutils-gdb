@@ -2129,6 +2129,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       *buf++ = (val >> 8);
       *buf++ = val;
       break;
+    case 8:
+      /* This can arise when the .quad or .8byte pseudo-ops are used.
+	 Returning here (without setting fx_done) will cause the code
+	 to attempt to generate a reloc which will then fail with the
+	 slightly more helpful error message: "Cannot represent
+	 relocation type BFD_RELOC_64".  */
+      return;
     default:
       abort ();
     }
