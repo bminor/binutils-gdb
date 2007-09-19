@@ -8908,7 +8908,8 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	memset (b - dyn_skipped, 0, dyn_skipped);
     }
 
-  if (sgot != NULL && sgot->size > 0)
+  if (sgot != NULL && sgot->size > 0
+      && !bfd_is_abs_section (sgot->output_section))
     {
       if (htab->is_vxworks)
 	{
