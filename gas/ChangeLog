@@ -1,3 +1,7 @@
+2007-09-19  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/c-xtensa.texi (Xtensa Immediate Relaxation): Fix "addi" typo.
+
 2007-09-18  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* config/bfin-parse.y (asm_1): Slightly improve error messages

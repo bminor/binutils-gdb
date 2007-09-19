@@ -451,7 +451,7 @@ is translated to:
     l32r a1, .L1
 @end group
 @group
-    addi a1, a0, a1
+    add a1, a0, a1
     l32i a1, a1, 0
 @end group
 @end smallexample
