@@ -3,9 +3,6 @@
 #include <string>
 #include <list>
 
-// Stringpool
-//   Manage a pool of unique strings.
-
 #ifndef GOLD_STRINGPOOL_H
 #define GOLD_STRINGPOOL_H
 
@@ -14,58 +11,98 @@ namespace gold
 
 class Output_file;
 
+// A Stringpool is a pool of unique strings.  It provides the
+// following features:
+
+// Every string in the pool is unique.  Thus, if you have two strings
+// in the Stringpool, you can compare them for equality by using
+// pointer comparison rather than string comparison.
+
+// There is a key associated with every string in the pool.  If you
+// add strings to the Stringpool in the same order, then the key for
+// each string will always be the same for any run of the linker.
+// This is not true of the string pointers themselves, as they may
+// change due to address space randomization.  Some parts of the
+// linker (e.g., the symbol table) use the key value instead of the
+// string pointer so that repeated runs of the linker will generate
+// precisely the same output.
+
+// A Stringpool can be turned into a string table, a sequential series
+// of null terminated strings.  The first string may optionally be a
+// single zero byte, as required for SHT_STRTAB sections.  This
+// conversion is only permitted after all strings have been added to
+// the Stringpool.  After doing this conversion, you can ask for the
+// offset of any string in the stringpool in the string table, and you
+// can write the resulting string table to an output file.
+
+// When a Stringpool is turned into a string table, then as an
+// optimization it will reuse string suffixes to avoid duplicating
+// strings.  That is, given the strings "abc" and "bc", only the
+// string "abc" will be stored, and "bc" will be represented by an
+// offset into the middle of the string "abc".
+
+// Stringpools are implemented in terms of Stringpool_template, which
+// is generalized on the type of character used for the strings.  Most
+// uses will want the Stringpool type which uses char.  Other cases
+// are used for merging wide string constants.
+
 template<typename Stringpool_char>
 class Stringpool_template
 {
  public:
-  // The type of a key into the stringpool.  A key value will always
-  // be the same during any run of the linker.  The string pointers
-  // may change when using address space randomization.  We use key
-  // values in order to get repeatable runs when the value is inserted
-  // into an unordered hash table.  Zero is never a valid key.
+  // The type of a key into the stringpool.  As described above, a key
+  // value will always be the same during any run of the linker.  Zero
+  // is never a valid key value.
   typedef size_t Key;
 
   // Create a Stringpool.  ZERO_NULL is true if we should reserve
-  // offset 0 to hold the empty string.
+  // offset 0 to hold the empty string when converting the stringpool
+  // to a string table.  ZERO_NULL should be true if you want a proper
+  // ELF SHT_STRTAB section.
   Stringpool_template(bool zero_null = true);
 
   ~Stringpool_template();
 
-  // Add a string to the pool.  This returns a canonical permanent
-  // pointer to the string.  If PKEY is not NULL, this sets *PKEY to
-  // the key for the string.
+  // Add the string S to the pool.  This returns a canonical permanent
+  // pointer to the string in the pool.  If PKEY is not NULL, this
+  // sets *PKEY to the key for the string.
   const Stringpool_char*
-  add(const Stringpool_char*, Key* pkey);
+  add(const Stringpool_char* s, Key* pkey);
 
+  // Add the string S to the pool.
   const Stringpool_char*
   add(const std::basic_string<Stringpool_char>& s, Key* pkey)
   { return this->add(s.c_str(), pkey); }
 
-  // Add the prefix of a string to the pool.
+  // Add the prefix of length LEN of string S to the pool.
   const Stringpool_char*
-  add(const Stringpool_char*, size_t, Key* pkey);
+  add(const Stringpool_char* s, size_t len, Key* pkey);
 
-  // If a string is present, return the canonical string.  Otherwise,
-  // return NULL.  If PKEY is not NULL, set *PKEY to the key.
+  // If the string S is present in the pool, return the canonical
+  // string pointer.  Otherwise, return NULL.  If PKEY is not NULL,
+  // set *PKEY to the key.
   const Stringpool_char*
-  find(const Stringpool_char*, Key* pkey) const;
+  find(const Stringpool_char* s, Key* pkey) const;
 
-  // Turn the stringpool into an ELF strtab: determine the offsets of
-  // all the strings.
+  // Turn the stringpool into a string table: determine the offsets of
+  // all the strings.  After this is called, no more strings may be
+  // added to the stringpool.
   void
   set_string_offsets();
 
-  // Get the offset of a string in an ELF strtab.  This returns the
-  // offset in bytes, not characters.
+  // Get the offset of the string S in the string table.  This returns
+  // the offset in bytes, not in units of Stringpool_char.  This may
+  // only be called after set_string_offsets has been called.
   off_t
-  get_offset(const Stringpool_char*) const;
+  get_offset(const Stringpool_char* s) const;
 
+  // Get the offset of the string S in the string table.
   off_t
   get_offset(const std::basic_string<Stringpool_char>& s) const
   { return this->get_offset(s.c_str()); }
 
-  // Get the size of the ELF strtab.  This returns the number of
-  // bytes, not characters.
+  // Get the size of the string table.  This returns the number of
+  // bytes, not in units of Stringpool_char.
   off_t
   get_strtab_size() const
   {
@@ -73,7 +110,8 @@ class Stringpool_template
     return this->strtab_size_;
   }
 
-  // Write the strtab into the output file at the specified offset.
+  // Write the string table into the output file at the specified
+  // offset.
   void
   write(Output_file*, off_t offset);
 
@@ -81,7 +119,7 @@ class Stringpool_template
   Stringpool_template(const Stringpool_template&);
   Stringpool_template& operator=(const Stringpool_template&);
 
-  // Return the length of a string.
+  // Return the length of a string in units of Stringpool_char.
   static size_t
   string_length(const Stringpool_char*);
 
@@ -102,12 +140,14 @@ class Stringpool_template
   const Stringpool_char*
   add_string(const Stringpool_char*, Key*);
 
+  // Hash function.
   struct Stringpool_hash
   {
     size_t
     operator()(const Stringpool_char*) const;
   };
 
+  // Equality comparison function for hash table.
   struct Stringpool_eq
   {
     bool
@@ -120,8 +160,8 @@ class Stringpool_template
             const Stringpool_char* s2, size_t len2);
 
   // The hash table is a map from string names to a pair of Key and
-  // ELF strtab offsets.  We only use the offsets if we turn this into
-  // an ELF strtab section.
+  // string table offsets.  We only use the offsets if we turn this
+  // into an string table section.
 
   typedef std::pair<Key, off_t> Val;
 
@@ -136,7 +176,7 @@ class Stringpool_template
 			Stringpool_eq> String_set_type;
 #endif
 
-  // Comparison routine used when sorting into an ELF strtab.  We
+  // Comparison routine used when sorting into a string table.  We
   // store string-sizes in the sort-vector so we don't have to
   // recompute them log(n) times as we sort.
   struct Stringpool_sort_info
@@ -161,7 +201,7 @@ class Stringpool_template
   String_set_type string_set_;
   // List of buffers.
   Stringdata_list strings_;
-  // Size of ELF strtab.
+  // Size of string table.
   off_t strtab_size_;
   // Next Stringdata index.
   unsigned int next_index_;
