@@ -2171,14 +2171,15 @@ mips_stub_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* The return address is in the link register.  */
   trad_frame_set_reg_realreg (this_trad_cache,
 			      gdbarch_pc_regnum (current_gdbarch),
-			      MIPS_RA_REGNUM);
+			      (gdbarch_num_regs (current_gdbarch)
+			       + MIPS_RA_REGNUM));
 
   /* Frame ID, since it's a frameless / stackless function, no stack
      space is allocated and SP on entry is the current SP.  */
   pc = frame_pc_unwind (next_frame);
   find_pc_partial_function (pc, NULL, &start_addr, NULL);
   stack_addr = frame_unwind_register_signed (next_frame, MIPS_SP_REGNUM);
-  trad_frame_set_id (this_trad_cache, frame_id_build (start_addr, stack_addr));
+  trad_frame_set_id (this_trad_cache, frame_id_build (stack_addr, start_addr));
 
   /* Assume that the frame's base is the same as the
      stack-pointer.  */
@@ -2219,8 +2220,13 @@ static const struct frame_unwind mips_stub_frame_unwind =
 static const struct frame_unwind *
 mips_stub_frame_sniffer (struct frame_info *next_frame)
 {
+  gdb_byte dummy[4];
   struct obj_section *s;
   CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+
+  /* Use the stub unwinder for unreadable code.  */
+  if (target_read_memory (frame_pc_unwind (next_frame), dummy, 4) != 0)
+    return &mips_stub_frame_unwind;
 
   if (in_plt_section (pc, NULL))
     return &mips_stub_frame_unwind;

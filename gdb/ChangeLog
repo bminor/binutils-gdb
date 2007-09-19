@@ -1,3 +1,10 @@
+2007-09-19  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mips-tdep.c (mips_stub_frame_cache): Correct the saved return
+	address register.  Correct the call to frame_id_build.
+	(mips_stub_frame_sniffer): Use the stub unwinder when the PC
+	is invalid.
+
 2007-09-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* ia64-tdep.c (refine_prologue_limit): Make sure we don't scan
