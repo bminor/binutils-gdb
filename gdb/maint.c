@@ -638,15 +638,15 @@ show_maintenance_profile_p (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Internal profiling is %s.\n"), value);
 }
 
-#if defined (HAVE_MONSTARTUP) && defined (HAVE__MCLEANUP)
-
 #ifdef HAVE__ETEXT
 extern char _etext;
 #define TEXTEND &_etext
-#else
+#elif defined (HAVE_ETEXT)
 extern char etext;
 #define TEXTEND &etext
 #endif
+
+#if defined (HAVE_MONSTARTUP) && defined (HAVE__MCLEANUP) && defined (TEXTEND)
 
 static int profiling_state;
 

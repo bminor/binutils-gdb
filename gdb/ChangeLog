@@ -1,3 +1,11 @@
+2007-09-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Add check for "etext".
+	* configure, config.in: Regenerate.
+	* maint.c (TEXTEND): Only define if either _etext or etext
+	are available.
+	Disable the profiling functionality if TEXTEND is not defined.
+
 2007-09-19  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mips-tdep.c (mips_stub_frame_cache): Correct the saved return

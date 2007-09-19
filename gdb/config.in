@@ -113,6 +113,9 @@
 /* Define if ELF support should be included. */
 #undef HAVE_ELF
 
+/* Define to 1 if your system has the etext variable. */
+#undef HAVE_ETEXT
+
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 

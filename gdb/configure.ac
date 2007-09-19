@@ -242,6 +242,16 @@ if test $ac_cv_var__etext = yes; then
   AC_DEFINE(HAVE__ETEXT, 1,
             [Define to 1 if your system has the _etext variable. ])
 fi
+AC_CACHE_CHECK([for etext], ac_cv_var_etext,
+[AC_TRY_LINK(
+[#include <stdlib.h>
+extern char etext;
+],
+[free (&etext);], ac_cv_var_etext=yes, ac_cv_var_etext=no)])
+if test $ac_cv_var_etext = yes; then
+  AC_DEFINE(HAVE_ETEXT, 1,
+            [Define to 1 if your system has the etext variable. ])
+fi
 if test "$enable_profiling" = yes ; then
   if test $ac_cv_func_monstartup = no || test $ac_cv_func__mcleanup = no; then
     AC_MSG_ERROR(--enable-profiling requires monstartup and _mcleanup)
