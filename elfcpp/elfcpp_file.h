@@ -106,6 +106,10 @@ class Elf_file
   typename Elf_types<size>::Elf_WXword
   section_flags(unsigned int shndx);
 
+  // Return the type of section SHNDX.
+  Elf_Word
+  section_type(unsigned int shndx);
+
  private:
   // Shared constructor code.
   void
@@ -271,6 +275,25 @@ Elf_file<size, big_endian, File>::section_flags(unsigned int shndx)
 
   Ef_shdr shdr(v.data());
   return shdr.get_sh_flags();
+}
+
+// Return the type of section SHNDX.
+
+template<int size, bool big_endian, typename File>
+Elf_Word
+Elf_file<size, big_endian, File>::section_type(unsigned int shndx)
+{
+  File* const file = this->file_;
+
+  if (shndx >= this->shnum())
+    file->error(_("section_type: bad shndx %u >= %u"),
+		shndx, this->shnum());
+
+  typename File::View v(file->view(this->section_header_offset(shndx),
+				   This::shdr_size));
+
+  Ef_shdr shdr(v.data());
+  return shdr.get_sh_type();
 }
 
 } // End namespace elfcpp.
