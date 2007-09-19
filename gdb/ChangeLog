@@ -1,5 +1,9 @@
 2007-09-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set version to 6.6.90.
+
+2007-09-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Re-phrase "Changes since..." into "Changes in..." in
 	preparation for the gdb-6.7 release and its associated pre-releases.
 
