@@ -116,9 +116,21 @@ void
 Symbol_table::allocate_commons(const General_options& options, Layout* layout)
 {
   if (this->get_size() == 32)
-    this->do_allocate_commons<32>(options, layout);
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+      this->do_allocate_commons<32>(options, layout);
+#else
+      gold_unreachable();
+#endif
+    }
   else if (this->get_size() == 64)
-    this->do_allocate_commons<64>(options, layout);
+    {
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+      this->do_allocate_commons<64>(options, layout);
+#else
+      gold_unreachable();
+#endif
+    }
   else
     gold_unreachable();
 }
