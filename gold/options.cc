@@ -253,7 +253,7 @@ options::Command_line_options::options[] =
               N_("-R DIR, -rpath DIR"), ONE_DASH,
               &General_options::add_to_rpath),
   GENERAL_NOARG('\0', "eh-frame-hdr", N_("Create exception frame header"),
-                NULL, TWO_DASHES, &General_options::create_eh_frame_hdr),
+                NULL, TWO_DASHES, &General_options::set_create_eh_frame_hdr),
   GENERAL_ARG('\0', "rpath-link",
               N_("Add DIR to link time shared library search path"),
               N_("--rpath-link DIR"), TWO_DASHES,

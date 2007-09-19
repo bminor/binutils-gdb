@@ -118,7 +118,7 @@ class General_options
   { this->is_relocatable_ = true; }
 
   void
-  create_eh_frame_hdr()
+  set_create_eh_frame_hdr()
   { this->create_eh_frame_hdr_ = true; }
 
   void
