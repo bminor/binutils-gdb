@@ -1,3 +1,10 @@
+2007-09-19  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (O_LARGEFILE): Define.
+	(linux_read_memory): Use /proc/PID/mem.
+	* configure.ac: Use AC_GNU_SOURCE.  Check for pread64.
+	* configure, config.in: Regenerated.
+
 2007-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (linux_wait_for_event): Do not pass signals while

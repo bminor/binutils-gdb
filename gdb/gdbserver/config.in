@@ -53,6 +53,9 @@
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
 
+/* Define to 1 if you have the `pread64' function. */
+#undef HAVE_PREAD64
+
 /* Define if <sys/procfs.h> has prgregset_t. */
 #undef HAVE_PRGREGSET_T
 
@@ -160,3 +163,8 @@
 
 /* Define if an XML target description is available. */
 #undef USE_XML
+
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif

@@ -40,6 +40,10 @@
 # define PTRACE_SETSIGINFO 0x4203
 #endif
 
+#ifndef O_LARGEFILE
+#define O_LARGEFILE 0
+#endif
+
 #ifdef __UCLIBC__
 #if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
 #define HAS_NOMMU
@@ -1488,7 +1492,38 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   /* Allocate buffer of that many longwords.  */
   register PTRACE_XFER_TYPE *buffer
     = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
+  int fd;
+  char filename[64];
 
+  /* Try using /proc.  Don't bother for one word.  */
+  if (len >= 3 * sizeof (long))
+    {
+      /* We could keep this file open and cache it - possibly one per
+	 thread.  That requires some juggling, but is even faster.  */
+      sprintf (filename, "/proc/%ld/mem", inferior_pid);
+      fd = open (filename, O_RDONLY | O_LARGEFILE);
+      if (fd == -1)
+	goto no_proc;
+
+      /* If pread64 is available, use it.  It's faster if the kernel
+	 supports it (only one syscall), and it's 64-bit safe even on
+	 32-bit platforms (for instance, SPARC debugging a SPARC64
+	 application).  */
+#ifdef HAVE_PREAD64
+      if (pread64 (fd, myaddr, len, memaddr) != len)
+#else
+      if (lseek (fd, memaddr, SEEK_SET) == -1 || read (fd, memaddr, len) != len)
+#endif
+	{
+	  close (fd);
+	  goto no_proc;
+	}
+
+      close (fd);
+      return 0;
+    }
+
+ no_proc:
   /* Read all the longwords */
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
