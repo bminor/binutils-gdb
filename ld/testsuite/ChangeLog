@@ -1,3 +1,8 @@
+2007-09-19  Nick Clifton  <nickc@redhat.com>
+
+	* ld-scripts/crossref.exp: Compile test source with -mtiny=0 in
+	order to prevent the use of the small data area.
+
 2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3281

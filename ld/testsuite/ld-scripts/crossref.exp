@@ -45,6 +45,12 @@ if [istarget powerpc64*-*-*] {
     set CFLAGS "$CFLAGS -mcall-aixdesc"
 }
 
+# Prevent the use of the MeP's small data area which references a symbol
+# called __sdabase which will not be defined by our test linker scripts.
+if [istarget mep*-*-elf] {
+    set CFLAGS "-mtiny=0"
+}
+
 if { ![ld_compile $CC "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
      || ![ld_compile $CC "$srcdir/$subdir/cross2.c" tmpdir/cross2.o] } {
     unresolved $test1
