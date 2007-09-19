@@ -114,6 +114,9 @@ start:
 	mov	eax, [word+eax*dword]
 	mov	eax, word[eax*dword]
 
+	mov	eax, [eax*1]
+	mov	eax, [eax*+1]
+	mov	eax, [+1*eax]
 	mov	eax, [eax*+2]
 	mov	eax, [+2*eax]
 	mov	eax, [ecx*dword]

@@ -6303,12 +6303,14 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
       int havedisp;
       int havesib;
       int havebase;
+      int haveindex;
       int base;
       int index = 0;
       int scale = 0;
 
       havesib = 0;
       havebase = 1;
+      haveindex = 0;
       base = modrm.rm;
 
       if (base == 4)
@@ -6323,6 +6325,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	  USED_REX (REX_X);
 	  if (rex & REX_X)
 	    index += 8;
+	  haveindex = index != 4;
 	  codep++;
 	}
       base += add;
@@ -6357,7 +6360,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	  break;
 	}
 
-      havedisp = havebase || (havesib && (index != 4 || scale != 0));
+      havedisp = havebase || (havesib && (haveindex || scale != 0));
 
       if (!intel_syntax)
 	if (modrm.mod != 0 || (base & 7) == 5)
@@ -6388,7 +6391,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 		     ? names64[base] : names32[base]);
 	  if (havesib)
 	    {
-	      if (index != 4)
+	      if (haveindex)
 		{
 		  if (!intel_syntax || havebase)
 		    {
@@ -6399,7 +6402,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 			   && (sizeflag & AFLAG)
 			   ? names64[index] : names32[index]);
 		}
-	      if (scale != 0 || (!intel_syntax && index != 4))
+	      if (scale != 0 || haveindex)
 		{
 		  *obufp++ = scale_char;
 		  *obufp = '\0';
