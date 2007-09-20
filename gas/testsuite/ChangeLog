@@ -1,3 +1,26 @@
+2007-09-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 658
+	* gas/i386/i386.exp: Run sib-intel, x86-64-sib and
+	x86-64-sib-intel.
+
+	* gas/i386/nops-1-i386-i686.d: Updated.
+	* gas/i386/nops-1-i386.d: Likewise.
+	* gas/i386/nops-1.d: Likewise.
+	* gas/i386/nops-2-i386.d: Likewise.
+	* gas/i386/nops-2-merom.d: Likewise.
+	* gas/i386/nops-2.d: Likewise.
+	* gas/i386/nops-3-i386.d: Likewise.
+	* gas/i386/nops-3.d : Likewise.
+	* gas/i386/sib.d: Likewise.
+
+	* gas/i386/sib.s: Use %eiz in testcases.
+
+	* gas/i386/sib-intel.d: New.
+	* gas/i386/x86-64-sib-intel.d: Likewise.
+	* gas/i386/x86-64-sib.d: Likewise.
+	* gas/i386/x86-64-sib.s: Likewise.
+
 2007-09-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/intelok.s: Add tests for memory without base.

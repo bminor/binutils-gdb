@@ -1,3 +1,22 @@
+2007-09-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 658
+	* 386-dis.c (index64): New.
+	(index32): Likewise.
+	(intel_index64): Likewise.
+	(intel_index32): Likewise.
+	(att_index64): Likewise.
+	(att_index32): Likewise.
+	(print_insn): Set index64 and index32.
+	(OP_E_extended): Use index64/index32 for index register for
+	SIB with INDEX == 4.
+
+	* i386-opc.h (RegEiz): New.
+	(RegRiz): Likewise.
+
+	* i386-reg.tbl: Add eiz and riz.
+	* i386-tbl.h: Regenerated.
+
 2007-09-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_E_extended): Always display scale for memory.

@@ -444,6 +444,9 @@ typedef struct
 #define RegRex64    0x2  /* Extended 8 bit register.  */
   unsigned int reg_num;
 #define RegRip	((unsigned int ) ~0)
+/* EIZ and RIZ are fake index registers.  */
+#define RegEiz	(RegRip - 1)
+#define RegRiz	(RegEiz - 1)
 }
 reg_entry;
 

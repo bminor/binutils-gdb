@@ -1353,6 +1353,8 @@ static const char **names16;
 static const char **names8;
 static const char **names8rex;
 static const char **names_seg;
+static const char *index64;
+static const char *index32;
 static const char **index16;
 
 static const char *intel_names64[] = {
@@ -1377,6 +1379,8 @@ static const char *intel_names8rex[] = {
 static const char *intel_names_seg[] = {
   "es", "cs", "ss", "ds", "fs", "gs", "?", "?",
 };
+static const char *intel_index64 = "riz";
+static const char *intel_index32 = "eiz";
 static const char *intel_index16[] = {
   "bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"
 };
@@ -1403,6 +1407,8 @@ static const char *att_names8rex[] = {
 static const char *att_names_seg[] = {
   "%es", "%cs", "%ss", "%ds", "%fs", "%gs", "%?", "%?",
 };
+static const char *att_index64 = "%riz";
+static const char *att_index32 = "%eiz";
 static const char *att_index16[] = {
   "%bx,%si", "%bx,%di", "%bp,%si", "%bp,%di", "%si", "%di", "%bp", "%bx"
 };
@@ -5001,6 +5007,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
       names8 = intel_names8;
       names8rex = intel_names8rex;
       names_seg = intel_names_seg;
+      index64 = intel_index64;
+      index32 = intel_index32;
       index16 = intel_index16;
       open_char = '[';
       close_char = ']';
@@ -5015,6 +5023,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
       names8 = att_names8;
       names8rex = att_names8rex;
       names_seg = att_names_seg;
+      index64 = att_index64;
+      index32 = att_index32;
       index16 = att_index16;
       open_char = '(';
       close_char =  ')';
@@ -6318,9 +6328,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	  havesib = 1;
 	  FETCH_DATA (the_info, codep + 1);
 	  index = (*codep >> 3) & 7;
-	  if (address_mode == mode_64bit || index != 0x4)
-	    /* When INDEX == 0x4 in 32 bit mode, SCALE is ignored.  */
-	    scale = (*codep >> 6) & 3;
+	  scale = (*codep >> 6) & 3;
 	  base = *codep & 7;
 	  USED_REX (REX_X);
 	  if (rex & REX_X)
@@ -6391,19 +6399,26 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 		     ? names64[base] : names32[base]);
 	  if (havesib)
 	    {
-	      if (haveindex)
+	      /* ESP/RSP won't allow index.  If base isn't ESP/RSP,
+		 print index to tell base + index from base.  */
+	      if (scale != 0
+		  || haveindex
+		  || (havebase && base != ESP_REG_NUM))
 		{
 		  if (!intel_syntax || havebase)
 		    {
 		      *obufp++ = separator_char;
 		      *obufp = '\0';
 		    }
-		  oappend (address_mode == mode_64bit 
-			   && (sizeflag & AFLAG)
-			   ? names64[index] : names32[index]);
-		}
-	      if (scale != 0 || haveindex)
-		{
+		  if (haveindex)
+		    oappend (address_mode == mode_64bit 
+			     && (sizeflag & AFLAG)
+			     ? names64[index] : names32[index]);
+		  else
+		    oappend (address_mode == mode_64bit 
+			     && (sizeflag & AFLAG)
+			     ? index64 : index32);
+
 		  *obufp++ = scale_char;
 		  *obufp = '\0';
 		  sprintf (scratchbuf, "%d", 1 << scale);
@@ -6413,7 +6428,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	  if (intel_syntax
 	      && (disp || modrm.mod != 0 || (base & 7) == 5))
 	    {
-	      if ((bfd_signed_vma) disp >= 0)
+	      if (!havedisp || (bfd_signed_vma) disp >= 0)
 		{
 		  *obufp++ = '+';
 		  *obufp = '\0';
@@ -6425,7 +6440,10 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 		  disp = - (bfd_signed_vma) disp;
 		}
 
-	      print_displacement (scratchbuf, disp);
+	      if (havedisp)
+		print_displacement (scratchbuf, disp);
+	      else
+		print_operand_value (scratchbuf, 1, disp);
 	      oappend (scratchbuf);
 	    }
 

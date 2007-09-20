@@ -1,11 +1,16 @@
 #Test the special case of the index bits, 0x4, in SIB.
 
 	.text
+	.allow_index_reg
 foo:
-	.byte	0x8B, 0x04, 0x23	# effect is: movl (%ebx), %eax
-	.byte	0x8B, 0x04, 0x63	# effect is: movl (%ebx), %eax	
-	.byte	0x8B, 0x04, 0xA3	# effect is: movl (%ebx), %eax
-	.byte	0x8B, 0x04, 0xE3	# effect is: movl (%ebx), %eax
-	nop
-	nop
-	.p2align	4,0
+	mov	(%ebx),%eax
+	mov	(%ebx,%eiz,1),%eax
+	mov	(%ebx,%eiz,2),%eax
+	mov	(%ebx,%eiz,4),%eax
+	mov	(%ebx,%eiz,8),%eax
+	mov	(%esp),%eax
+	mov	(%esp,%eiz,1),%eax
+	mov	(%esp,%eiz,2),%eax
+	mov	(%esp,%eiz,4),%eax
+	mov	(%esp,%eiz,8),%eax
+	.p2align 4

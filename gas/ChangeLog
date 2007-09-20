@@ -1,3 +1,18 @@
+2007-09-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 658
+	* config/tc-i386.c (SCALE1_WHEN_NO_INDEX): Removed.
+	(set_allow_index_reg): New.
+	(allow_index_reg): Likewise.
+	(md_pseudo_table): Add "allow_index_reg" and
+	"disallow_index_reg".
+	(build_modrm_byte): Set i.sib.index to NO_INDEX_REGISTER for
+	fake index registers.
+	(i386_scale): Updated.
+	(i386_index_check): Support fake index registers.
+	(parse_real_register): Return NULL on eiz/riz if fake index
+	registers aren't allowed.
+
 2007-09-19  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-h8300.c (md_apply_fix): Do not abort or handle 8 byte

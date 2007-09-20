@@ -1,3 +1,9 @@
+2007-09-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 658
+	* ld-i386/tlsbin.dd: Updated.
+	* ld-i386/tlsld1.dd: Likewise.
+
 2007-09-19  Nick Clifton  <nickc@redhat.com>
 
 	* ld-scripts/crossref.exp: Compile test source with -mtiny=0 in

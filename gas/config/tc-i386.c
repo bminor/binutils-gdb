@@ -43,14 +43,6 @@
 #define INFER_ADDR_PREFIX 1
 #endif
 
-#ifndef SCALE1_WHEN_NO_INDEX
-/* Specifying a scale factor besides 1 when there is no index is
-   futile.  eg. `mov (%ebx,2),%al' does exactly the same as
-   `mov (%ebx),%al'.  To slavishly follow what the programmer
-   specified, set SCALE1_WHEN_NO_INDEX to 0.  */
-#define SCALE1_WHEN_NO_INDEX 1
-#endif
-
 #ifndef DEFAULT_ARCH
 #define DEFAULT_ARCH "i386"
 #endif
@@ -66,6 +58,7 @@
 static void set_code_flag (int);
 static void set_16bit_gcc_code_flag (int);
 static void set_intel_syntax (int);
+static void set_allow_index_reg (int);
 static void set_cpu_arch (int);
 #ifdef TE_PE
 static void pe_directive_secrel (int);
@@ -293,6 +286,9 @@ static int intel_syntax = 0;
 
 /* 1 if register prefix % not required.  */
 static int allow_naked_reg = 0;
+
+/* 1 if fake index register, eiz/riz, is allowed .  */
+static int allow_index_reg = 0;
 
 /* Register prefix used for error message.  */
 static const char *register_prefix = "%";
@@ -539,6 +535,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"code64", set_code_flag, CODE_64BIT},
   {"intel_syntax", set_intel_syntax, 1},
   {"att_syntax", set_intel_syntax, 0},
+  {"allow_index_reg", set_allow_index_reg, 1},
+  {"disallow_index_reg", set_allow_index_reg, 0},
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"largecomm", handle_large_common, 0},
 #else
@@ -1505,6 +1503,12 @@ set_intel_syntax (int syntax_flag)
   identifier_chars['%'] = intel_syntax && allow_naked_reg ? '%' : 0;
   identifier_chars['$'] = intel_syntax ? '$' : 0;
   register_prefix = allow_naked_reg ? "" : "%";
+}
+
+static void
+set_allow_index_reg (int flag)
+{
+  allow_index_reg = flag;
 }
 
 static void
@@ -4517,7 +4521,11 @@ build_modrm_byte (void)
 		}
 	      else /* !i.base_reg && i.index_reg  */
 		{
-		  i.sib.index = i.index_reg->reg_num;
+		  if (i.index_reg->reg_num == RegEiz
+		      || i.index_reg->reg_num == RegRiz)
+		    i.sib.index = NO_INDEX_REGISTER;
+		  else
+		    i.sib.index = i.index_reg->reg_num;
 		  i.sib.base = NO_BASE_REGISTER;
 		  i.sib.scale = i.log2_scale_factor;
 		  i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
@@ -4625,16 +4633,14 @@ build_modrm_byte (void)
 		     Any base register besides %esp will not use the
 		     extra modrm byte.  */
 		  i.sib.index = NO_INDEX_REGISTER;
-#if !SCALE1_WHEN_NO_INDEX
-		  /* Another case where we force the second modrm
-		     byte.  */
-		  if (i.log2_scale_factor)
-		    i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
-#endif
 		}
 	      else
 		{
-		  i.sib.index = i.index_reg->reg_num;
+		  if (i.index_reg->reg_num == RegEiz
+		      || i.index_reg->reg_num == RegRiz)
+		    i.sib.index = NO_INDEX_REGISTER;
+		  else
+		    i.sib.index = i.index_reg->reg_num;
 		  i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 		  if ((i.index_reg->reg_flags & RegRex) != 0)
 		    i.rex |= REX_X;
@@ -5740,9 +5746,7 @@ i386_scale (char *scale)
     {
       as_warn (_("scale factor of %d without an index register"),
 	       1 << i.log2_scale_factor);
-#if SCALE1_WHEN_NO_INDEX
       i.log2_scale_factor = 0;
-#endif
     }
   scale = input_line_pointer;
   input_line_pointer = save;
@@ -5980,8 +5984,11 @@ i386_index_check (const char *operand_string)
 	  || (i.index_reg
 	      && (!i.index_reg->reg_type.bitfield.baseindex
 		  || (i.prefix[ADDR_PREFIX] == 0
-		      && !i.index_reg->reg_type.bitfield.reg64)
+		      && i.index_reg->reg_num != RegRiz
+		      && !i.index_reg->reg_type.bitfield.reg64
+		      )
 		  || (i.prefix[ADDR_PREFIX]
+		      && i.index_reg->reg_num != RegEiz
 		      && !i.index_reg->reg_type.bitfield.reg32))))
 	ok = 0;
     }
@@ -6008,7 +6015,8 @@ i386_index_check (const char *operand_string)
 	  if ((i.base_reg
 	       && !i.base_reg->reg_type.bitfield.reg32)
 	      || (i.index_reg
-		  && (!i.index_reg->reg_type.bitfield.reg32
+		  && ((!i.index_reg->reg_type.bitfield.reg32
+		       && i.index_reg->reg_num != RegEiz)
 		      || !i.index_reg->reg_type.bitfield.baseindex)))
 	    ok = 0;
 	}
@@ -6903,6 +6911,12 @@ parse_real_register (char *reg_string, char **end_op)
 	  return (const reg_entry *) NULL;
 	}
     }
+
+  /* Don't allow fake index register unless allow_index_reg isn't 0. */
+  if (r != NULL
+      && !allow_index_reg
+      && (r->reg_num == RegEiz || r->reg_num == RegRiz))
+    return (const reg_entry *) NULL;
 
   if (r != NULL
       && ((r->reg_flags & (RegRex64 | RegRex))
