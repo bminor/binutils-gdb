@@ -1,3 +1,8 @@
+2007-09-19  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-h8300.c (md_apply_fix): Do not abort or handle 8 byte
+	fixups.
+
 2007-09-19  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/c-xtensa.texi (Xtensa Immediate Relaxation): Fix "addi" typo.
