@@ -123,9 +123,6 @@ class Archive
   std::vector<Armap_entry> armap_;
   // The extended name table.
   std::string extended_names_;
-  // Track which symbols in the archive map are for elements which
-  // have already been included in the link.
-  std::vector<bool> seen_;
 };
 
 // This class is used to read an archive and pick out the desired

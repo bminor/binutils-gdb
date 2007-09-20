@@ -121,10 +121,6 @@ Archive::read_armap(off_t start, off_t size)
 	      program_name, this->name().c_str());
       gold_exit(false);
     }
-
-  // This array keeps track of which symbols are for archive elements
-  // which we have already included in the link.
-  this->seen_.resize(nsyms);
 }
 
 // Read the header of an archive member at OFF.  Fail if something
@@ -230,6 +226,14 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
   return member_size;
 }
 
+// A simple hash code for off_t values.
+class Seen_hash
+{
+ public:
+  size_t operator()(off_t val) const
+  { return static_cast<size_t>(val); }
+};
+
 // Select members from the archive and add them to the link.  We walk
 // through the elements in the archive map, and look each one up in
 // the symbol table.  If it exists as a strong undefined symbol, we
@@ -246,18 +250,25 @@ Archive::add_symbols(const General_options& options, Symbol_table* symtab,
 
   const size_t armap_size = this->armap_.size();
 
+  // Track which elements in the archive map have already been included
+  // in the link.  Elements are identified by their offset.
+  Unordered_set<off_t, Seen_hash> seen;
+  // This is a quick optimization, since we usually see many symbols
+  // in a row with the same offset.  last_seen holds the last offset
+  // we saw that was present in the seen_ set.
+  off_t last_seen = -1;
+
   bool added_new_object;
   do
     {
       added_new_object = false;
-      off_t last = -1;
       for (size_t i = 0; i < armap_size; ++i)
 	{
-	  if (this->seen_[i])
+	  if (this->armap_[i].offset == last_seen)
 	    continue;
-	  if (this->armap_[i].offset == last)
+	  if (seen.find(this->armap_[i].offset) != seen.end())
 	    {
-	      this->seen_[i] = true;
+	      last_seen = this->armap_[i].offset;
 	      continue;
 	    }
 
@@ -266,16 +277,18 @@ Archive::add_symbols(const General_options& options, Symbol_table* symtab,
 	    continue;
 	  else if (!sym->is_undefined())
 	    {
-	      this->seen_[i] = true;
+	      seen.insert(this->armap_[i].offset);
+	      last_seen = this->armap_[i].offset;
 	      continue;
 	    }
 	  else if (sym->binding() == elfcpp::STB_WEAK)
 	    continue;
 
 	  // We want to include this object in the link.
-	  last = this->armap_[i].offset;
-	  this->include_member(options, symtab, layout, input_objects, last);
-	  this->seen_[i] = true;
+	  last_seen = this->armap_[i].offset;
+	  seen.insert(last_seen);
+	  this->include_member(options, symtab, layout, input_objects,
+			       last_seen);
 	  added_new_object = true;
 	}
     }
