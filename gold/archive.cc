@@ -247,8 +247,8 @@ Archive::add_symbols(const General_options& options, Symbol_table* symtab,
   const size_t armap_size = this->armap_.size();
 
   // This is a quick optimization, since we usually see many symbols
-  // in a row with the same offset.  last_seen holds the last offset
-  // we saw that was present in the seen_ set.
+  // in a row with the same offset.  last_seen_offset holds the last
+  // offset we saw that was present in the seen_offsets_ set.
   off_t last_seen_offset = -1;
 
   // Track which symbols in the symbol table we've already found to be
