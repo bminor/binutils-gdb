@@ -439,7 +439,8 @@ Sized_relobj<size, big_endian>::do_layout(const General_options& options,
 	      if (!this->include_section_group(layout, i, shdr, &omit))
 		discard = true;
 	    }
-	  else if (Layout::is_linkonce(name))
+          else if ((shdr.get_sh_flags() & elfcpp::SHF_GROUP) == 0
+                   && Layout::is_linkonce(name))
 	    {
 	      if (!this->include_linkonce_section(layout, name, shdr))
 		discard = true;
