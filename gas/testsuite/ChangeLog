@@ -1,5 +1,15 @@
 2007-09-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/i386/sib.s: Add more eiz tests.
+	* gas/i386/x86-64-sib.s: Add more riz tests.
+
+	* gas/i386/sib-intel.d: Updated.
+	* gas/i386/sib.d: Likewise.
+	* gas/i386/x86-64-sib-intel.d: Likewise.
+	* gas/i386/x86-64-sib.d: Likewise.
+
+2007-09-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR 658
 	* gas/i386/i386.exp: Run sib-intel, x86-64-sib and
 	x86-64-sib-intel.

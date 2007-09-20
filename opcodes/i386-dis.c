@@ -6314,6 +6314,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
       int havesib;
       int havebase;
       int haveindex;
+      int needindex;
       int base;
       int index = 0;
       int scale = 0;
@@ -6368,7 +6369,15 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	  break;
 	}
 
-      havedisp = havebase || (havesib && (haveindex || scale != 0));
+      /* In 32bit mode, we need index register to tell [offset] from
+	 [eiz*1 + offset].  */
+      needindex = (havesib
+		   && !havebase
+		   && !haveindex
+		   && address_mode == mode_32bit);
+      havedisp = (havebase
+		  || needindex
+		  || (havesib && (haveindex || scale != 0)));
 
       if (!intel_syntax)
 	if (modrm.mod != 0 || (base & 7) == 5)
@@ -6402,6 +6411,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	      /* ESP/RSP won't allow index.  If base isn't ESP/RSP,
 		 print index to tell base + index from base.  */
 	      if (scale != 0
+		  || needindex
 		  || haveindex
 		  || (havebase && base != ESP_REG_NUM))
 		{
