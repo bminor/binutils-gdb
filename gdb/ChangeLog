@@ -1,3 +1,10 @@
+2007-09-20  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (mips32_in_function_epilogue_p): New function.
+	(mips16_in_function_epilogue_p): Likewise.
+	(mips_in_function_epilogue_p): Likewise.
+	(mips_gdbarch_init): Register mips_in_function_epilogue_p().
+
 2007-09-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Add check for "etext".

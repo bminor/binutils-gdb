@@ -4404,6 +4404,95 @@ mips_skip_prologue (CORE_ADDR pc)
     return mips32_scan_prologue (pc, limit_pc, NULL, NULL);
 }
 
+/* Check whether the PC is in a function epilogue (32-bit version).
+   This is a helper function for mips_in_function_epilogue_p.  */
+static int
+mips32_in_function_epilogue_p (CORE_ADDR pc)
+{
+  CORE_ADDR func_addr = 0, func_end = 0;
+
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      /* The MIPS epilogue is max. 12 bytes long.  */
+      CORE_ADDR addr = func_end - 12;
+
+      if (addr < func_addr + 4)
+        addr = func_addr + 4;
+      if (pc < addr)
+        return 0;
+
+      for (; pc < func_end; pc += MIPS_INSN32_SIZE)
+	{
+	  unsigned long high_word;
+	  unsigned long inst;
+
+	  inst = mips_fetch_instruction (pc);
+	  high_word = (inst >> 16) & 0xffff;
+
+	  if (high_word != 0x27bd	/* addiu $sp,$sp,offset */
+	      && high_word != 0x67bd	/* daddiu $sp,$sp,offset */
+	      && inst != 0x03e00008	/* jr $ra */
+	      && inst != 0x00000000)	/* nop */
+	    return 0;
+	}
+
+      return 1;
+    }
+
+  return 0;
+}
+
+/* Check whether the PC is in a function epilogue (16-bit version).
+   This is a helper function for mips_in_function_epilogue_p.  */
+static int
+mips16_in_function_epilogue_p (CORE_ADDR pc)
+{
+  CORE_ADDR func_addr = 0, func_end = 0;
+
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      /* The MIPS epilogue is max. 12 bytes long.  */
+      CORE_ADDR addr = func_end - 12;
+
+      if (addr < func_addr + 4)
+        addr = func_addr + 4;
+      if (pc < addr)
+        return 0;
+
+      for (; pc < func_end; pc += MIPS_INSN16_SIZE)
+	{
+	  unsigned short inst;
+
+	  inst = mips_fetch_instruction (pc);
+
+	  if ((inst & 0xf800) == 0xf000)	/* extend */
+	    continue;
+
+	  if (inst != 0x6300		/* addiu $sp,offset */
+	      && inst != 0xfb00		/* daddiu $sp,$sp,offset */
+	      && inst != 0xe820		/* jr $ra */
+	      && inst != 0xe8a0		/* jrc $ra */
+	      && inst != 0x6500)	/* nop */
+	    return 0;
+	}
+
+      return 1;
+    }
+
+  return 0;
+}
+
+/* The epilogue is defined here as the area at the end of a function,
+   after an instruction which destroys the function's stack frame.  */
+static int
+mips_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  if (mips_pc_is_mips16 (pc))
+    return mips16_in_function_epilogue_p (pc);
+  else
+    return mips32_in_function_epilogue_p (pc);
+}
+
 /* Root of all "set mips "/"show mips " commands. This will eventually be
    used for all MIPS-specific commands.  */
 
@@ -5484,6 +5573,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, mips_breakpoint_from_pc);
 
   set_gdbarch_skip_prologue (gdbarch, mips_skip_prologue);
+
+  set_gdbarch_in_function_epilogue_p (gdbarch, mips_in_function_epilogue_p);
 
   set_gdbarch_pointer_to_address (gdbarch, signed_pointer_to_address);
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);
