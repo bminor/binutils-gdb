@@ -115,6 +115,14 @@ class Archive
     off_t offset;
   };
 
+  // A simple hash code for off_t values.
+  class Seen_hash
+  {
+   public:
+    size_t operator()(off_t val) const
+    { return static_cast<size_t>(val); }
+  };
+
   // Name of object as printed to user.
   std::string name_;
   // For reading the file.
@@ -123,6 +131,11 @@ class Archive
   std::vector<Armap_entry> armap_;
   // The extended name table.
   std::string extended_names_;
+  // Track which symbols in the archive map are for elements which are
+  // defined or which have already been included in the link.
+  std::vector<bool> armap_checked_;
+  // Track which elements have been included by offset.
+  Unordered_set<off_t, Seen_hash> seen_offsets_;
 };
 
 // This class is used to read an archive and pick out the desired
