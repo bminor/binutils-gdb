@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "output.h"
+#include "parameters.h"
 #include "stringpool.h"
 
 namespace gold
@@ -303,42 +304,65 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
       return;
     }
 
-  size_t count = this->string_set_.size();
-
-  std::vector<Stringpool_sort_info> v;
-  v.reserve(count);
-
-  for (typename String_set_type::iterator p = this->string_set_.begin();
-       p != this->string_set_.end();
-       ++p)
-    v.push_back(Stringpool_sort_info(p, string_length(p->first)));
-
-  std::sort(v.begin(), v.end(), Stringpool_sort_comparison());
-
   const size_t charsize = sizeof(Stringpool_char);
 
   // Offset 0 may be reserved for the empty string.
   off_t offset = this->zero_null_ ? charsize : 0;
 
-  for (typename std::vector<Stringpool_sort_info>::iterator last = v.end(),
-         curr = v.begin();
-       curr != v.end();
-       last = curr++)
+  // Sorting to find suffixes can take over 25% of the total CPU time
+  // used by the linker.  Since it's merely an optimization to reduce
+  // the strtab size, and gives a relatively small benefit (it's
+  // typically rare for a symbol to be a suffix of another), we only
+  // take the time to sort when the user asks for heavy optimization.
+  if (parameters->optimization_level() < 2)
     {
-      if (this->zero_null_ && curr->it->first[0] == 0)
-	curr->it->second.second = 0;
-      else if (last != v.end()
-               && is_suffix(curr->it->first, curr->string_length,
-                            last->it->first, last->string_length))
-	curr->it->second.second = (last->it->second.second
-                                   + ((last->string_length
-                                       - curr->string_length)
-                                      * charsize));
-      else
-	{
-	  curr->it->second.second = offset;
-	  offset += (curr->string_length + 1) * charsize;
-	}
+      for (typename String_set_type::iterator curr = this->string_set_.begin();
+           curr != this->string_set_.end();
+           curr++)
+        {
+          if (this->zero_null_ && curr->first[0] == 0)
+            curr->second.second = 0;
+          else
+            {
+              curr->second.second = offset;
+              offset += (string_length(curr->first) + 1) * charsize;
+            }
+        }
+    }
+  else
+    {
+      size_t count = this->string_set_.size();
+
+      std::vector<Stringpool_sort_info> v;
+      v.reserve(count);
+
+      for (typename String_set_type::iterator p = this->string_set_.begin();
+           p != this->string_set_.end();
+           ++p)
+        v.push_back(Stringpool_sort_info(p, string_length(p->first)));
+
+      std::sort(v.begin(), v.end(), Stringpool_sort_comparison());
+
+      for (typename std::vector<Stringpool_sort_info>::iterator last = v.end(),
+             curr = v.begin();
+           curr != v.end();
+           last = curr++)
+        {
+          if (this->zero_null_ && curr->it->first[0] == 0)
+            curr->it->second.second = 0;
+          else if (last != v.end()
+                   && is_suffix(curr->it->first, curr->string_length,
+                                last->it->first, last->string_length))
+            curr->it->second.second = (last->it->second.second
+                                       + ((last->string_length
+                                           - curr->string_length)
+                                          * charsize));
+          else
+            {
+              curr->it->second.second = offset;
+              offset += (curr->string_length + 1) * charsize;
+            }
+        }
     }
 
   this->strtab_size_ = offset;
