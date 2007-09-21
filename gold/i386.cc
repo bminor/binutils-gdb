@@ -338,7 +338,7 @@ class Output_data_plt_i386 : public Output_section_data
 
 Output_data_plt_i386::Output_data_plt_i386(Layout* layout,
 					   Output_data_space* got_plt)
-  : Output_section_data(4), got_plt_(got_plt)
+  : Output_section_data(4), got_plt_(got_plt), count_(0)
 {
   this->rel_ = new Reloc_section();
   layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
@@ -739,8 +739,8 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_TLS_GOTDESC:
     case elfcpp::R_386_TLS_DESC_CALL:
       {
-	bool output_is_executable = parameters->output_is_executable();
-	r_type = Target_i386::optimize_tls_reloc(output_is_executable,
+	bool output_is_shared = parameters->output_is_shared();
+	r_type = Target_i386::optimize_tls_reloc(!output_is_shared,
 						 r_type);
 	switch (r_type)
 	  {
@@ -748,7 +748,7 @@ Target_i386::Scan::local(const General_options&,
 	  case elfcpp::R_386_TLS_LE_32:
 	    // FIXME: If generating a shared object, we need to copy
 	    // this relocation into the object.
-	    gold_assert(output_is_executable);
+	    gold_assert(!output_is_shared);
 	    break;
 
 	  case elfcpp::R_386_TLS_IE:
