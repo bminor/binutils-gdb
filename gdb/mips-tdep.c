@@ -2937,12 +2937,14 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  /* Copy the argument to general registers or the stack in
 	     register-sized pieces.  Large arguments are split between
 	     registers and stack.  */
-	  /* Note: structs whose size is not a multiple of MIPS64_REGSIZE
-	     are treated specially: Irix cc passes them in registers
-	     where gcc sometimes puts them on the stack.  For maximum
-	     compatibility, we will put them in both places.  */
-	  int odd_sized_struct = (len > MIPS64_REGSIZE
-				  && len % MIPS64_REGSIZE != 0);
+	  /* For N32/N64, structs, unions, or other composite types are
+	     treated as a sequence of doublewords, and are passed in integer
+	     or floating point registers as though they were simple scalar
+	     parameters to the extent that they fit, with any excess on the
+	     stack packed according to the normal memory layout of the
+	     object.
+	     The caller does not reserve space for the register arguments;
+	     the callee is responsible for reserving it if required.  */
 	  /* Note: Floating-point values that didn't fit into an FP
 	     register are only written to memory.  */
 	  while (len > 0)
@@ -2959,8 +2961,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		gdb_assert (argreg > MIPS_LAST_ARG_REGNUM);
 
 	      /* Write this portion of the argument to the stack.  */
-	      if (argreg > MIPS_LAST_ARG_REGNUM
-		  || odd_sized_struct)
+	      if (argreg > MIPS_LAST_ARG_REGNUM)
 		{
 		  /* Should shorter than int integer values be
 		     promoted to int before being stored? */

@@ -1,3 +1,9 @@
+2007-09-21  David Ung  <davidu@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (mips_n32n64_push_dummy_call): Per N32/N64 ABI
+	rules do not treat composite types specially.
+
 2007-09-20  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-tdep.c (mips32_in_function_epilogue_p): New function.
