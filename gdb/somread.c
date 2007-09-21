@@ -438,6 +438,7 @@ static struct sym_fns som_sym_fns =
   som_symfile_offsets,		/* sym_offsets:  Translate ext. to int. relocation */
   default_symfile_segments,	/* sym_segments: Get segment information from
 				   a file.  */
+  NULL,                         /* sym_read_linetable */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

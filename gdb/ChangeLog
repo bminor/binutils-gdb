@@ -1,3 +1,16 @@
+2007-09-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* symfile.h (struct sym_fns): Add new field sym_read_linetable.
+	* coffread.c, dbxread.c, elfread.c, mipsread.c somread.c:
+	Adjust the struct sym_fns object accordingly by setting
+	the new field to NULL.
+	* xcoffread.c (aix_process_linenos): Make static.
+	(xcoff_sym_fns): Set new field to aix_process_linenos.
+	* buildsym.c (end_symtab): Replace call to PROCESS_LINENUMBER_HOOK
+	by call to new the new sym_fns sym_read_linetable function.
+	* config/powerpc/aix.mt (DEPRECATED_TM_FILE): Delete.
+	* config/rs6000/tm-rs6000.h: Delete.
+
 2007-09-21  David Ung  <davidu@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 

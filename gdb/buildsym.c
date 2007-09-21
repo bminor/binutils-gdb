@@ -933,10 +933,9 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 			     &objfile->objfile_obstack);
     }
 
-#ifndef PROCESS_LINENUMBER_HOOK
-#define PROCESS_LINENUMBER_HOOK()
-#endif
-  PROCESS_LINENUMBER_HOOK ();	/* Needed for xcoff. */
+  /* Read the line table if it has to be read separately.  */
+  if (objfile->sf->sym_read_linetable != NULL)
+    objfile->sf->sym_read_linetable ();
 
   /* Now create the symtab objects proper, one for each subfile.  */
   /* (The main file is the last one on the chain.)  */

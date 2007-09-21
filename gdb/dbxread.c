@@ -3513,6 +3513,7 @@ static struct sym_fns aout_sym_fns =
   default_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
   default_symfile_segments,	/* sym_segments: Get segment information from
 				   a file.  */
+  NULL,                         /* sym_read_linetable */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

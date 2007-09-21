@@ -727,7 +727,7 @@ return_after_cleanup:
   memset (&main_subfile, '\0', sizeof (struct subfile));
 }
 
-void
+static void
 aix_process_linenos (void)
 {
   /* process line numbers and enter them into line vector */
@@ -3012,6 +3012,7 @@ static struct sym_fns xcoff_sym_fns =
   xcoff_symfile_offsets,	/* sym_offsets: xlate offsets ext->int form */
   default_symfile_segments,	/* sym_segments: Get segment information from
 				   a file.  */
+  aix_process_linenos,          /* sym_read_linetable */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

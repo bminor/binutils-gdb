@@ -2100,6 +2100,7 @@ static struct sym_fns coff_sym_fns =
   default_symfile_offsets,	/* sym_offsets:  xlate external to internal form */
   default_symfile_segments,	/* sym_segments: Get segment information from
 				   a file.  */
+  NULL,                         /* sym_read_linetable  */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

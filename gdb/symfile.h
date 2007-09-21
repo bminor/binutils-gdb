@@ -157,6 +157,11 @@ struct sym_fns
 
   struct symfile_segment_data *(*sym_segments) (bfd *abfd);
 
+  /* This function should read the linetable from the objfile when
+     the line table cannot be read while processing the debugging
+     information.  */
+  void (*sym_read_linetable) (void);
+
   /* Finds the next struct sym_fns.  They are allocated and
      initialized in whatever module implements the functions pointed
      to; an initializer calls add_symtab_fns to add them to the global
