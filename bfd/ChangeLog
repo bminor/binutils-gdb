@@ -1,3 +1,13 @@
+2007-09-21  Olivier Hainque  <hainque@adacore.com>
+	    Tristan Gingold  <gingold@adacore.com>
+	
+	* syms.c (_bfd_stab_section_find_nearest_line): Look at the 
+        specific SOM sections for stabs if the regular ones are not found.
+	* som.h (struct somdata): Add a line_info field, to be used by
+        som_find_nearest_line.
+	* som.c (som_find_nearest_line): Implement using the bfd stabs
+	function above.
+
 2007-09-19  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Make sure .got

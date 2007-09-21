@@ -5331,15 +5331,57 @@ som_set_arch_mach (bfd *abfd,
 }
 
 static bfd_boolean
-som_find_nearest_line (bfd *abfd ATTRIBUTE_UNUSED,
-		       asection *section ATTRIBUTE_UNUSED,
-		       asymbol **symbols ATTRIBUTE_UNUSED,
-		       bfd_vma offset ATTRIBUTE_UNUSED,
-		       const char **filename_ptr ATTRIBUTE_UNUSED,
-		       const char **functionname_ptr ATTRIBUTE_UNUSED,
-		       unsigned int *line_ptr ATTRIBUTE_UNUSED)
+som_find_nearest_line (bfd *abfd,
+		       asection *section,
+		       asymbol **symbols,
+		       bfd_vma offset,
+		       const char **filename_ptr,
+		       const char **functionname_ptr,
+		       unsigned int *line_ptr)
 {
-  return FALSE;
+  bfd_boolean found;
+  asymbol *func;
+  bfd_vma low_func;
+  asymbol **p;
+
+  if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
+                                             & found, filename_ptr,
+                                             functionname_ptr, line_ptr,
+                                             & somdata (abfd).line_info))
+    return FALSE;
+
+  if (found)
+    return TRUE;
+
+  if (symbols == NULL)
+    return FALSE;
+
+  /* Fallback: find function name from symbols table.  */
+  func = NULL;
+  low_func = 0;
+
+  for (p = symbols; *p != NULL; p++)
+    { 
+      som_symbol_type *q = (som_symbol_type *) *p;
+  
+      if (q->som_type == SYMBOL_TYPE_ENTRY
+	  && q->symbol.section == section
+	  && q->symbol.value >= low_func
+	  && q->symbol.value <= offset)
+	{
+	  func = (asymbol *) q;
+	  low_func = q->symbol.value;
+	}
+    }
+
+  if (func == NULL)
+    return FALSE;
+
+  *filename_ptr = NULL;
+  *functionname_ptr = bfd_asymbol_name (func);
+  *line_ptr = 0;
+
+  return TRUE;
 }
 
 static int

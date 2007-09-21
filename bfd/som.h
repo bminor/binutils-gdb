@@ -136,6 +136,7 @@ struct somdata
   file_ptr str_filepos;
   file_ptr reloc_filepos;
   unsigned stringtab_size;
+  void * line_info;
 };
 
 struct som_data_struct
