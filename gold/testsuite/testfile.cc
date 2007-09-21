@@ -45,6 +45,7 @@ const Target::Target_info Target_test::test_target_info =
   static_cast<elfcpp::EM>(0xffff),	// machine_code
   false,				// has_make_symbol
   false,				// has_resolve
+  false,				// has_code_fill
   "/dummy",				// dynamic_linker
   0x08000000,				// text_segment_address
   0x1000,				// abi_pagesize
