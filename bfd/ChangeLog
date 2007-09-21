@@ -1,3 +1,44 @@
+2007-09-21  Doug Kwan  <dougkwan@google.com>
+
+	* Makefile.am (BFD32_LIBS): Add arange-set.lo.
+	(BFD32_LIBS_CFILES): Add arange-set.c.
+	(SOURCE_HFILES): Add arange-set.h
+	(dwarf2.lo): Add dependency upon arange-set.h.
+	(arange-set.lo): New target.
+	* Makefile.in: Regenerate.
+	* arange-set.c: New file.
+	* arange-set.h: New file.
+	* dwarf2.c: Include arange-set.h.  
+	(struct dwarf2_debug) Add new fields comp_unit_count and
+	comp_unit_arange_set.
+	(struct comp_unit) Replace field arange with a new field arange_set.
+	(dwarf2_arange_set_allocate, dwarf2_arange_set_deallocate,
+	dwarf2_combine_arange_value, dwarf2_arange_set_new,
+	dwarf2_arange_set_with_value_new, dwarf2_comp_unit_arange_add): New
+	functions to utilize arange set in dwarf2.c.
+	(arange_add): Formatting change for a line longer than 80 characters.
+	(decode_line_info): Replace call target arange_add with
+	dwarf2_comp_unit_arange_add.
+	(read_rangelist_insert_arange_list,
+	read_rangelist_comp_unit_arange_add): New functions used as callbacks
+	for read_rangelist.
+	(read_rangelist): Change interface to accept a callback and data to
+	allow caller to select the action peformed on a new range list read.
+	(scan_unit_for_symbols): Use new interface of read_rangelist.
+	(parse_comp_unit): Create an arange set for each new comp unit.  Use new
+	interface of read_rangelist.  Replace call to arange_add with that to
+	dwarf2_comp_unit_arange_add.
+	(comp_unit_contains_address): Replace sequential search with a call to
+	arange_set_lookup_address, which can handles large set efficiently.
+	(stash_copy_local_aranges, stash_maybe_enable_arange_set,
+	stash_find_nearest_line_fast): New functions maintaining and using a
+	valued global arange set for all compilation units to speed up
+	bfd_dwarf2_find_nearest_line.
+	(find_line): Use global arange set.  Replace sequential search over all
+	compilation units with a call to stash_find_nearest_line_fast.  Add
+	book keeping to count number of compilation units.  Replace empty
+	arange list test with a call to arange_set_empty_p.
+
 2007-09-21  Olivier Hainque  <hainque@adacore.com>
 	    Tristan Gingold  <gingold@adacore.com>
 	
