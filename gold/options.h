@@ -12,6 +12,7 @@
 #ifndef GOLD_OPTIONS_H
 #define GOLD_OPTIONS_H
 
+#include <cstdlib>
 #include <list>
 #include <string>
 #include <vector>
@@ -53,6 +54,11 @@ class General_options
   const Dir_list&
   search_path() const
   { return this->search_path_; }
+
+  // -O: optimization level (0: don't try to optimize output size).
+  int
+  optimization_level() const
+  { return this->optimization_level_; }
 
   // -o: Output file name.
   const char*
@@ -110,6 +116,10 @@ class General_options
   { this->search_path_.push_back(arg); }
 
   void
+  set_optimization_level(const char* arg)
+  { this->optimization_level_ = atoi(arg); }
+
+  void
   set_output_file_name(const char* arg)
   { this->output_file_name_ = arg; }
 
@@ -144,6 +154,7 @@ class General_options
   bool export_dynamic_;
   const char* dynamic_linker_;
   Dir_list search_path_;
+  int optimization_level_;
   const char* output_file_name_;
   bool is_relocatable_;
   bool create_eh_frame_hdr_;
