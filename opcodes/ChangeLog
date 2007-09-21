@@ -1,3 +1,7 @@
+2007-09-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.h: Adjust whitespaces.
+
 2007-09-21  Dave Brolley  <brolley@redhat.com>
 
 	* mep-desc.c: Regenerated.
