@@ -202,11 +202,8 @@ WARN_CFLAGS = @WARN_CFLAGS@
 WIN32LDFLAGS = @WIN32LDFLAGS@
 WIN32LIBADD = @WIN32LIBADD@
 XGETTEXT = @XGETTEXT@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
-ac_ct_RANLIB = @ac_ct_RANLIB@
-ac_ct_STRIP = @ac_ct_STRIP@
 all_backends = @all_backends@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
@@ -232,6 +229,7 @@ build_vendor = @build_vendor@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
+dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
@@ -245,13 +243,16 @@ infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
+psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -979,15 +980,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
-	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
+	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --cygnus  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -1630,10 +1631,10 @@ dwarf2.lo: dwarf2.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/dwarf2.h arange-set.h
-arange-set.lo: arange-set.c arange-set.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/splay-tree.h
 simple.lo: simple.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/bfdlink.h
+arange-set.lo: arange-set.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/hashtab.h arange-set.h $(INCDIR)/splay-tree.h
 archive64.lo: archive64.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/aout/ar.h
 cpu-alpha.lo: cpu-alpha.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h

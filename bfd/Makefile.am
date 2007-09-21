@@ -1050,10 +1050,10 @@ dwarf2.lo: dwarf2.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/dwarf2.h arange-set.h
-arange-set.lo: arange-set.c arange-set.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/splay-tree.h
 simple.lo: simple.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/bfdlink.h
+arange-set.lo: arange-set.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/hashtab.h arange-set.h $(INCDIR)/splay-tree.h
 archive64.lo: archive64.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/aout/ar.h
 cpu-alpha.lo: cpu-alpha.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
