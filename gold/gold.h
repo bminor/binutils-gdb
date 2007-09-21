@@ -1,6 +1,7 @@
 // gold.h -- general definitions for gold   -*- C++ -*-
 
 #ifndef GOLD_GOLD_H
+#define GOLD_GOLD_H
 
 #include "config.h"
 #include "ansidecl.h"
