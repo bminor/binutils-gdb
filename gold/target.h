@@ -63,6 +63,11 @@ class Target
   has_resolve() const
   { return this->pti_->has_resolve; }
 
+  // Whether this target has a specific code fill function.
+  bool
+  has_code_fill() const
+  { return this->pti_->has_code_fill; }
+
   // Return the default name of the dynamic linker.
   const char*
   dynamic_linker() const
@@ -89,6 +94,13 @@ class Target
   finalize_sections(const General_options* options, Layout* layout)
   { return this->do_finalize_sections(options, layout); }
 
+  // Return a string to use to fill out a code section.  This is
+  // basically one or more NOPS which must fill out the specified
+  // length in bytes.
+  std::string
+  code_fill(off_t length)
+  { return this->do_code_fill(length); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -105,6 +117,8 @@ class Target
     bool has_make_symbol;
     // Whether this target has a specific resolve function.
     bool has_resolve;
+    // Whether this target has a specific code fill function.
+    bool has_code_fill;
     // The default dynamic linker name.
     const char* dynamic_linker;
     // The default text segment address.
@@ -123,6 +137,12 @@ class Target
   virtual void
   do_finalize_sections(const General_options*, Layout*)
   { }
+
+  // Virtual function which must be implemented by the child class if
+  // needed.
+  virtual std::string
+  do_code_fill(off_t)
+  { gold_unreachable(); }
 
  private:
   Target(const Target&);

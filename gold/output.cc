@@ -863,6 +863,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     dynsym_index_(0),
     input_sections_(),
     first_input_offset_(0),
+    fills_(),
     needs_symtab_index_(false),
     needs_dynsym_index_(false),
     should_link_to_symtab_(false),
@@ -923,19 +924,41 @@ Output_section::add_input_section(Relobj* object, unsigned int shndx,
 	}
     }
 
-  off_t ssize = this->data_size();
-  ssize = align_address(ssize, addralign);
-  this->set_data_size(ssize + shdr.get_sh_size());
+  off_t offset_in_section = this->data_size();
+  off_t aligned_offset_in_section = align_address(offset_in_section,
+                                                  addralign);
+
+  if (aligned_offset_in_section > offset_in_section
+      && (shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) != 0
+      && object->target()->has_code_fill())
+    {
+      // We need to add some fill data.  Using fill_list_ when
+      // possible is an optimization, since we will often have fill
+      // sections without input sections.
+      off_t fill_len = aligned_offset_in_section - offset_in_section;
+      if (this->input_sections_.empty())
+        this->fills_.push_back(Fill(offset_in_section, fill_len));
+      else
+        {
+          // FIXME: When relaxing, the size needs to adjust to
+          // maintain a constant alignment.
+          std::string fill_data(object->target()->code_fill(fill_len));
+          Output_data_const* odc = new Output_data_const(fill_data, 1);
+          this->input_sections_.push_back(Input_section(odc));
+        }
+    }
+
+  this->set_data_size(aligned_offset_in_section + shdr.get_sh_size());
 
   // We need to keep track of this section if we are already keeping
   // track of sections, or if we are relaxing.  FIXME: Add test for
   // relaxing.
-  if (! this->input_sections_.empty())
+  if (!this->input_sections_.empty())
     this->input_sections_.push_back(Input_section(object, shndx,
 						  shdr.get_sh_size(),
 						  addralign));
 
-  return ssize;
+  return aligned_offset_in_section;
 }
 
 // Add arbitrary data to an output section.
@@ -1105,6 +1128,16 @@ Output_section::write_header(const Layout* layout,
 void
 Output_section::do_write(Output_file* of)
 {
+  off_t output_section_file_offset = this->offset();
+  for (Fill_list::iterator p = this->fills_.begin();
+       p != this->fills_.end();
+       ++p)
+    {
+      std::string fill_data(of->target()->code_fill(p->length()));
+      of->write(output_section_file_offset + p->section_offset(),
+                fill_data.data(), fill_data.size());
+    }
+
   for (Input_section_list::iterator p = this->input_sections_.begin();
        p != this->input_sections_.end();
        ++p)
@@ -1496,8 +1529,9 @@ Output_segment::write_section_headers_list(const Layout* layout,
 
 // Output_file methods.
 
-Output_file::Output_file(const General_options& options)
+Output_file::Output_file(const General_options& options, Target* target)
   : options_(options),
+    target_(target),
     name_(options.output_file_name()),
     o_(-1),
     file_size_(0),

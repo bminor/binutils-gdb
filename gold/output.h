@@ -1533,6 +1533,37 @@ class Output_section : public Output_data
 
   typedef std::vector<Input_section> Input_section_list;
 
+  // Fill data.  This is used to fill in data between input sections.
+  // When we have to keep track of the input sections, we can use an
+  // Output_data_const, but we don't want to have to keep track of
+  // input sections just to implement fills.  For a fill we record the
+  // offset, and the actual data to be written out.
+  class Fill
+  {
+   public:
+    Fill(off_t section_offset, off_t length)
+      : section_offset_(section_offset), length_(length)
+    { }
+
+    // Return section offset.
+    off_t
+    section_offset() const
+    { return this->section_offset_; }
+
+    // Return fill length.
+    off_t
+    length() const
+    { return this->length_; }
+
+   private:
+    // The offset within the output section.
+    off_t section_offset_;
+    // The length of the space to fill.
+    off_t length_;
+  };
+
+  typedef std::vector<Fill> Fill_list;
+
   // Add a new output section by Input_section.
   void
   add_output_section_data(Input_section*);
@@ -1590,6 +1621,10 @@ class Output_section : public Output_data
   Input_section_list input_sections_;
   // The offset of the first entry in input_sections_.
   off_t first_input_offset_;
+  // The fill data.  This is separate from input_sections_ because we
+  // often will need fill sections without needing to keep track of
+  // input sections.
+  Fill_list fills_;
   // Whether this output section needs a STT_SECTION symbol in the
   // normal symbol table.  This will be true if there is a relocation
   // which needs it.
@@ -1765,7 +1800,12 @@ class Output_segment
 class Output_file
 {
  public:
-  Output_file(const General_options& options);
+  Output_file(const General_options& options, Target*);
+
+  // Get a pointer to the target.
+  Target*
+  target() const
+  { return this->target_; }
 
   // Open the output file.  FILE_SIZE is the final size of the file.
   void
@@ -1801,6 +1841,8 @@ class Output_file
  private:
   // General options.
   const General_options& options_;
+  // Target.
+  Target* target_;
   // File name.
   const char* name_;
   // File descriptor.

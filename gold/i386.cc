@@ -63,6 +63,10 @@ class Target_i386 : public Sized_target<32, false>
 		   elfcpp::Elf_types<32>::Elf_Addr view_address,
 		   off_t view_size);
 
+  // Return a string used to fill a code section with nops.
+  std::string
+  do_code_fill(off_t length);
+
  private:
   // The class which scans relocations.
   struct Scan
@@ -212,6 +216,7 @@ const Target::Target_info Target_i386::i386_info =
   elfcpp::EM_386,	// machine_code
   false,		// has_make_symbol
   false,		// has_resolve
+  true,			// has_code_fill
   "/usr/lib/libc.so.1",	// dynamic_linker
   0x08048000,		// text_segment_address
   0x1000,		// abi_pagesize
@@ -1488,6 +1493,69 @@ Target_i386::relocate_section(const Relocate_info<32, false>* relinfo,
     view,
     address,
     view_size);
+}
+
+// Return a string used to fill a code section with nops to take up
+// the specified length.
+
+std::string
+Target_i386::do_code_fill(off_t length)
+{
+  if (length >= 16)
+    {
+      // Build a jmp instruction to skip over the bytes.
+      unsigned char jmp[5];
+      jmp[0] = 0xe9;
+      elfcpp::Swap_unaligned<32, false>::writeval(jmp + 1, length - 5);
+      return (std::string(reinterpret_cast<char*>(&jmp[0]), 5)
+              + std::string(length - 5, '\0'));
+    }
+
+  // Nop sequences of various lengths.
+  const char nop1[1] = { 0x90 };                   // nop
+  const char nop2[2] = { 0x66, 0x90 };             // xchg %ax %ax
+  const char nop3[3] = { 0x8d, 0x76, 0x00 };       // leal 0(%esi),%esi
+  const char nop4[4] = { 0x8d, 0x74, 0x26, 0x00};  // leal 0(%esi,1),%esi
+  const char nop5[5] = { 0x90, 0x8d, 0x74, 0x26,   // nop
+                         0x00 };                   // leal 0(%esi,1),%esi
+  const char nop6[6] = { 0x8d, 0xb6, 0x00, 0x00,   // leal 0L(%esi),%esi
+                         0x00, 0x00 };
+  const char nop7[7] = { 0x8d, 0xb4, 0x26, 0x00,   // leal 0L(%esi,1),%esi
+                         0x00, 0x00, 0x00 };
+  const char nop8[8] = { 0x90, 0x8d, 0xb4, 0x26,   // nop
+                         0x00, 0x00, 0x00, 0x00 }; // leal 0L(%esi,1),%esi
+  const char nop9[9] = { 0x89, 0xf6, 0x8d, 0xbc,   // movl %esi,%esi
+                         0x27, 0x00, 0x00, 0x00,   // leal 0L(%edi,1),%edi
+                         0x00 };
+  const char nop10[10] = { 0x8d, 0x76, 0x00, 0x8d, // leal 0(%esi),%esi
+                           0xbc, 0x27, 0x00, 0x00, // leal 0L(%edi,1),%edi
+                           0x00, 0x00 };
+  const char nop11[11] = { 0x8d, 0x74, 0x26, 0x00, // leal 0(%esi,1),%esi
+                           0x8d, 0xbc, 0x27, 0x00, // leal 0L(%edi,1),%edi
+                           0x00, 0x00, 0x00 };
+  const char nop12[12] = { 0x8d, 0xb6, 0x00, 0x00, // leal 0L(%esi),%esi
+                           0x00, 0x00, 0x8d, 0xbf, // leal 0L(%edi),%edi
+                           0x00, 0x00, 0x00, 0x00 };
+  const char nop13[13] = { 0x8d, 0xb6, 0x00, 0x00, // leal 0L(%esi),%esi
+                           0x00, 0x00, 0x8d, 0xbc, // leal 0L(%edi,1),%edi
+                           0x27, 0x00, 0x00, 0x00,
+                           0x00 };
+  const char nop14[14] = { 0x8d, 0xb4, 0x26, 0x00, // leal 0L(%esi,1),%esi
+                           0x00, 0x00, 0x00, 0x8d, // leal 0L(%edi,1),%edi
+                           0xbc, 0x27, 0x00, 0x00,
+                           0x00, 0x00 };
+  const char nop15[15] = { 0xeb, 0x0d, 0x90, 0x90, // jmp .+15
+                           0x90, 0x90, 0x90, 0x90, // nop,nop,nop,...
+                           0x90, 0x90, 0x90, 0x90,
+                           0x90, 0x90, 0x90 };
+
+  const char* nops[16] = {
+    NULL,
+    nop1, nop2, nop3, nop4, nop5, nop6, nop7,
+    nop8, nop9, nop10, nop11, nop12, nop13, nop14, nop15
+  };
+
+  return std::string(nops[length], length);
 }
 
 // The selector for i386 object files.

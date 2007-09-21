@@ -28,7 +28,8 @@ Layout_task_runner::run(Workqueue* workqueue)
 
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
-  Output_file* of = new Output_file(this->options_);
+  Output_file* of = new Output_file(this->options_,
+                                    this->input_objects_->target());
   of->open(file_size);
 
   // Queue up the final set of tasks.
