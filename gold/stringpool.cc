@@ -13,9 +13,9 @@ namespace gold
 {
 
 template<typename Stringpool_char>
-Stringpool_template<Stringpool_char>::Stringpool_template(bool zero_null)
+Stringpool_template<Stringpool_char>::Stringpool_template()
   : string_set_(), strings_(), strtab_size_(0), next_index_(1),
-    zero_null_(zero_null)
+    zero_null_(true)
 {
 }
 

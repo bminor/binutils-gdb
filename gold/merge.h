@@ -169,8 +169,8 @@ class Output_merge_string : public Output_merge_base
 {
  public:
   Output_merge_string()
-    : Output_merge_base(sizeof(Char_type)), stringpool_(false), hashtable_()
-  { }
+    : Output_merge_base(sizeof(Char_type)), stringpool_(), hashtable_()
+  { this->stringpool_.set_no_zero_null(); }
 
   // Add an input section.
   bool

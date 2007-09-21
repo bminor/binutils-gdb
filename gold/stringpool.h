@@ -58,13 +58,17 @@ class Stringpool_template
   // is never a valid key value.
   typedef size_t Key;
 
-  // Create a Stringpool.  ZERO_NULL is true if we should reserve
-  // offset 0 to hold the empty string when converting the stringpool
-  // to a string table.  ZERO_NULL should be true if you want a proper
-  // ELF SHT_STRTAB section.
-  Stringpool_template(bool zero_null = true);
+  // Create a Stringpool.
+  Stringpool_template();
 
   ~Stringpool_template();
+
+  // Indicate that we should not reserve offset 0 to hold the empty
+  // string when converting the stringpool to a string table.  This
+  // should not be called for a proper ELF SHT_STRTAB section.
+  void
+  set_no_zero_null()
+  { this->zero_null_ = false; }
 
   // Add the string S to the pool.  This returns a canonical permanent
   // pointer to the string in the pool.  If PKEY is not NULL, this
