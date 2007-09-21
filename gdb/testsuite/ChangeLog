@@ -1,3 +1,7 @@
+2007-09-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/sepdebug.exp (test_different_dir): Append to pf_prefix.
+
 2007-09-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.mi/mi2-watch.exp: Set can-use-hw-watchpoints to 0 if required.
