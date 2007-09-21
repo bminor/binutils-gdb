@@ -1,3 +1,7 @@
+2007-09-21  Dave Brolley  <brolley@redhat.com>
+
+	* mep-desc.c: Regenerated.
+
 2007-09-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_E_extended): Display eiz for [eiz*1 + offset].

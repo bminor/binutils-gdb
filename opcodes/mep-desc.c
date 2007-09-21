@@ -822,19 +822,19 @@ const CGEN_OPERAND mep_cgen_operand_table[] =
 /* rnc: register Rn holding char */
   { "rnc", MEP_OPERAND_RNC, HW_H_GPR, 4, 4,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN] } }, 
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_CHAR, 0 } }, { { 1, 0 } } } }  },
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
 /* rnuc: register Rn holding unsigned char */
   { "rnuc", MEP_OPERAND_RNUC, HW_H_GPR, 4, 4,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN] } }, 
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_UCHAR, 0 } }, { { 1, 0 } } } }  },
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
 /* rns: register Rn holding short */
   { "rns", MEP_OPERAND_RNS, HW_H_GPR, 4, 4,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN] } }, 
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_SHORT, 0 } }, { { 1, 0 } } } }  },
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
 /* rnus: register Rn holding unsigned short */
   { "rnus", MEP_OPERAND_RNUS, HW_H_GPR, 4, 4,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN] } }, 
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_USHORT, 0 } }, { { 1, 0 } } } }  },
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
 /* rnl: register Rn holding long */
   { "rnl", MEP_OPERAND_RNL, HW_H_GPR, 4, 4,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN] } }, 
@@ -846,19 +846,19 @@ const CGEN_OPERAND mep_cgen_operand_table[] =
 /* rn3c: register 0-7 holding unsigned char */
   { "rn3c", MEP_OPERAND_RN3C, HW_H_GPR, 5, 3,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN3] } }, 
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_CHAR, 0 } }, { { 1, 0 } } } }  },
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
 /* rn3uc: register 0-7 holding byte */
   { "rn3uc", MEP_OPERAND_RN3UC, HW_H_GPR, 5, 3,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN3] } }, 
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_UCHAR, 0 } }, { { 1, 0 } } } }  },
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
 /* rn3s: register 0-7 holding unsigned short */
   { "rn3s", MEP_OPERAND_RN3S, HW_H_GPR, 5, 3,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN3] } }, 
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_SHORT, 0 } }, { { 1, 0 } } } }  },
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
 /* rn3us: register 0-7 holding short */
   { "rn3us", MEP_OPERAND_RN3US, HW_H_GPR, 5, 3,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN3] } }, 
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_USHORT, 0 } }, { { 1, 0 } } } }  },
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xe0" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
 /* rn3l: register 0-7 holding unsigned long */
   { "rn3l", MEP_OPERAND_RN3L, HW_H_GPR, 5, 3,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_RN3] } }, 
