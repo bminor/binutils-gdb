@@ -836,7 +836,8 @@ proc test_different_dir {type test_different_dir xfail} {
     global pf_prefix
     global bp_location6 decimal hex
 
-    set pf_prefix "$type:"
+    set old_pf_prefix $pf_prefix
+    append pf_prefix " $type:"
 
     gdb_exit
     gdb_start
@@ -937,7 +938,7 @@ proc test_different_dir {type test_different_dir xfail} {
 	gdb_expect -re ".*$gdb_prompt $" {}
     }
 
-    unset pf_prefix
+    set pf_prefix $old_pf_prefix
 # proc test_different_dir
 }
 

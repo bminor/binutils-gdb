@@ -1,3 +1,7 @@
+2007-09-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/sepdebug.exp (test_different_dir): Append to pf_prefix.
+
 2007-09-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* schedlock.c (NUM): Change to 1.
