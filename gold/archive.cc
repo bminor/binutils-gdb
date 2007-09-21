@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "elfcpp.h"
+#include "options.h"
 #include "fileread.h"
 #include "readsyms.h"
 #include "symtab.h"
@@ -238,11 +239,11 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 // may be satisfied by other objects in the archive.
 
 void
-Archive::add_symbols(const General_options& options, Symbol_table* symtab,
-		     Layout* layout, Input_objects* input_objects)
+Archive::add_symbols(Symbol_table* symtab, Layout* layout,
+		     Input_objects* input_objects)
 {
   if (this->input_file_->options().include_whole_archive())
-    return this->include_all_members(options, symtab, layout, input_objects);
+    return this->include_all_members(symtab, layout, input_objects);
 
   const size_t armap_size = this->armap_.size();
 
@@ -290,7 +291,7 @@ Archive::add_symbols(const General_options& options, Symbol_table* symtab,
 	  last_seen_offset = this->armap_[i].offset;
 	  this->seen_offsets_.insert(last_seen_offset);
           this->armap_checked_[i] = true;
-	  this->include_member(options, symtab, layout, input_objects,
+	  this->include_member(symtab, layout, input_objects,
 			       last_seen_offset);
 	  added_new_object = true;
 	}
@@ -301,8 +302,7 @@ Archive::add_symbols(const General_options& options, Symbol_table* symtab,
 // Include all the archive members in the link.  This is for --whole-archive.
 
 void
-Archive::include_all_members(const General_options& options,
-                             Symbol_table* symtab, Layout* layout,
+Archive::include_all_members(Symbol_table* symtab, Layout* layout,
                              Input_objects* input_objects)
 {
   off_t off = sarmag;
@@ -336,7 +336,7 @@ Archive::include_all_members(const General_options& options,
           // Extended name table.
         }
       else
-        this->include_member(options, symtab, layout, input_objects, off);
+        this->include_member(symtab, layout, input_objects, off);
 
       off += sizeof(Archive_header) + size;
       if ((off & 1) != 0)
@@ -348,9 +348,8 @@ Archive::include_all_members(const General_options& options,
 // the member header.
 
 void
-Archive::include_member(const General_options& options, Symbol_table* symtab,
-			Layout* layout, Input_objects* input_objects,
-			off_t off)
+Archive::include_member(Symbol_table* symtab, Layout* layout,
+			Input_objects* input_objects, off_t off)
 {
   std::string n;
   this->read_header(off, &n);
@@ -392,7 +391,7 @@ Archive::include_member(const General_options& options, Symbol_table* symtab,
 
   Read_symbols_data sd;
   obj->read_symbols(&sd);
-  obj->layout(options, symtab, layout, &sd);
+  obj->layout(symtab, layout, &sd);
   obj->add_symbols(symtab, &sd);
 }
 
@@ -441,8 +440,8 @@ Add_archive_symbols::locks(Workqueue* workqueue)
 void
 Add_archive_symbols::run(Workqueue*)
 {
-  this->archive_->add_symbols(this->options_, this->symtab_, this->layout_,
-                              this->input_objects_);
+  this->archive_->add_symbols(this->symtab_, this->layout_,
+			      this->input_objects_);
 
   if (this->input_group_ != NULL)
     this->input_group_->add_archive(this->archive_);

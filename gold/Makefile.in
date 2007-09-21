@@ -72,9 +72,9 @@ am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) defstd.$(OBJEXT) \
 	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) fileread.$(OBJEXT) \
 	gold.$(OBJEXT) gold-threads.$(OBJEXT) layout.$(OBJEXT) \
 	merge.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
-	output.$(OBJEXT) readsyms.$(OBJEXT) reloc.$(OBJEXT) \
-	resolve.$(OBJEXT) script.$(OBJEXT) symtab.$(OBJEXT) \
-	stringpool.$(OBJEXT) target-select.$(OBJEXT) \
+	output.$(OBJEXT) parameters.$(OBJEXT) readsyms.$(OBJEXT) \
+	reloc.$(OBJEXT) resolve.$(OBJEXT) script.$(OBJEXT) \
+	symtab.$(OBJEXT) stringpool.$(OBJEXT) target-select.$(OBJEXT) \
 	workqueue.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
@@ -261,6 +261,7 @@ CCFILES = \
 	object.cc \
 	options.cc \
 	output.cc \
+	parameters.cc \
 	readsyms.cc \
 	reloc.cc \
 	resolve.cc \
@@ -284,6 +285,7 @@ HFILES = \
 	object.h \
 	options.h \
 	output.h \
+	parameters.h \
 	readsyms.h \
 	reloc.h \
 	reloc-types.h \
@@ -405,6 +407,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/output.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameters.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readsyms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolve.Po@am__quote@

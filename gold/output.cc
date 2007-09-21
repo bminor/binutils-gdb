@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 #include <algorithm>
 
+#include "parameters.h"
 #include "object.h"
 #include "symtab.h"
 #include "reloc.h"
@@ -226,13 +227,11 @@ Output_segment_headers::do_sized_write(Output_file* of)
 
 Output_file_header::Output_file_header(int size,
 				       bool big_endian,
-				       const General_options& options,
 				       const Target* target,
 				       const Symbol_table* symtab,
 				       const Output_segment_headers* osh)
   : size_(size),
     big_endian_(big_endian),
-    options_(options),
     target_(target),
     symtab_(symtab),
     segment_header_(osh),
@@ -316,7 +315,7 @@ Output_file_header::do_sized_write(Output_file* of)
 
   elfcpp::ET e_type;
   // FIXME: ET_DYN.
-  if (this->options_.is_relocatable())
+  if (parameters->output_is_object())
     e_type = elfcpp::ET_REL;
   else
     e_type = elfcpp::ET_EXEC;
@@ -564,9 +563,7 @@ Output_data_reloc_base<sh_type, dynamic, size, big_endian>::do_write(
 
 template<int size, bool big_endian>
 void
-Output_data_got<size, big_endian>::Got_entry::write(
-    const General_options* options,
-    unsigned char* pov) const
+Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 {
   Valtype val = 0;
 
@@ -580,7 +577,7 @@ Output_data_got<size, big_endian>::Got_entry::write(
 	// value.  Otherwise we just write zero.  The target code is
 	// responsible for creating a relocation entry to fill in the
 	// value at runtime.
-	if (gsym->final_value_is_known(options))
+	if (gsym->final_value_is_known())
 	  {
 	    Sized_symbol<size>* sgsym;
 	    // This cast is a bit ugly.  We don't want to put a
@@ -639,7 +636,7 @@ Output_data_got<size, big_endian>::do_write(Output_file* of)
        p != this->entries_.end();
        ++p)
     {
-      p->write(this->options_, pov);
+      p->write(pov);
       pov += add;
     }
 
@@ -1546,7 +1543,7 @@ Output_file::open(off_t file_size)
 {
   this->file_size_ = file_size;
 
-  int mode = this->options_.is_relocatable() ? 0666 : 0777;
+  int mode = parameters->output_is_object() ? 0666 : 0777;
   int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
   if (o < 0)
     {

@@ -91,8 +91,8 @@ class Target
   // This is called to tell the target to complete any sections it is
   // handling.  After this all sections must have their final size.
   void
-  finalize_sections(const General_options* options, Layout* layout)
-  { return this->do_finalize_sections(options, layout); }
+  finalize_sections(Layout* layout)
+  { return this->do_finalize_sections(layout); }
 
   // Return a string to use to fill out a code section.  This is
   // basically one or more NOPS which must fill out the specified
@@ -135,7 +135,7 @@ class Target
 
   // Virtual function which may be implemented by the child class.
   virtual void
-  do_finalize_sections(const General_options*, Layout*)
+  do_finalize_sections(Layout*)
   { }
 
   // Virtual function which must be implemented by the child class if

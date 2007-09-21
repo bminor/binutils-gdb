@@ -7,6 +7,7 @@
 #include <iostream>
 #include <utility>
 
+#include "parameters.h"
 #include "output.h"
 #include "symtab.h"
 #include "dynobj.h"
@@ -86,7 +87,7 @@ Layout::include_section(Object*, const char*,
     case elfcpp::SHT_RELA:
     case elfcpp::SHT_REL:
     case elfcpp::SHT_GROUP:
-      return this->options_.is_relocatable();
+      return parameters->output_is_object();
 
     default:
       // FIXME: Handle stripping debug sections here.
@@ -170,7 +171,7 @@ Layout::layout(Relobj* object, unsigned int shndx, const char* name,
   // If we are not doing a relocateable link, choose the name to use
   // for the output section.
   size_t len = strlen(name);
-  if (!this->options_.is_relocatable())
+  if (!parameters->output_is_object())
     name = Layout::output_section_name(name, &len);
 
   // FIXME: Handle SHF_OS_NONCONFORMING here.
@@ -395,7 +396,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   Target* const target = input_objects->target();
   const int size = target->get_size();
 
-  target->finalize_sections(&this->options_, this);
+  target->finalize_sections(this);
 
   Output_segment* phdr_seg = NULL;
   if (input_objects->any_dynamic())
@@ -453,7 +454,6 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   Output_file_header* file_header;
   file_header = new Output_file_header(size,
 				       big_endian,
-				       this->options_,
 				       target,
 				       symtab,
 				       segment_headers);
@@ -1057,8 +1057,8 @@ Layout::sized_create_version_sections(
   unsigned char* vbuf;
   unsigned int vsize;
   versions->symbol_section_contents SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
-      &this->options_, &this->dynpool_, local_symcount, dynamic_symbols,
-      &vbuf, &vsize SELECT_SIZE_ENDIAN(size, big_endian));
+      &this->dynpool_, local_symcount, dynamic_symbols, &vbuf, &vsize
+      SELECT_SIZE_ENDIAN(size, big_endian));
 
   Output_section_data* vdata = new Output_data_const_buffer(vbuf, vsize, 2);
 

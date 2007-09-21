@@ -248,7 +248,6 @@ class Output_file_header : public Output_data
  public:
   Output_file_header(int size,
 		     bool big_endian,
-		     const General_options&,
 		     const Target*,
 		     const Symbol_table*,
 		     const Output_segment_headers*);
@@ -281,7 +280,6 @@ class Output_file_header : public Output_data
 
   int size_;
   bool big_endian_;
-  const General_options& options_;
   const Target* target_;
   const Symbol_table* symtab_;
   const Output_segment_headers* segment_header_;
@@ -892,9 +890,8 @@ class Output_data_got : public Output_section_data
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Valtype;
 
-  Output_data_got(const General_options* options)
-    : Output_section_data(Output_data::default_alignment(size)),
-      options_(options), entries_()
+  Output_data_got()
+    : Output_section_data(Output_data::default_alignment(size)), entries_()
   { }
 
   // Add an entry for a global symbol to the GOT.  Return true if this
@@ -958,7 +955,7 @@ class Output_data_got : public Output_section_data
 
     // Write the GOT entry to an output view.
     void
-    write(const General_options*, unsigned char* pov) const;
+    write(unsigned char* pov) const;
 
    private:
     enum
@@ -998,8 +995,6 @@ class Output_data_got : public Output_section_data
   set_got_size()
   { this->set_data_size(this->got_offset(this->entries_.size())); }
 
-  // Options.
-  const General_options* options_;
   // The list of GOT entries.
   Got_entries entries_;
 };

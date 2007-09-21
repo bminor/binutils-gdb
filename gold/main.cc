@@ -3,6 +3,7 @@
 #include "gold.h"
 
 #include "options.h"
+#include "parameters.h"
 #include "dirsearch.h"
 #include "workqueue.h"
 #include "object.h"
@@ -28,6 +29,7 @@ main(int argc, char** argv)
   // Handle the command line options.
   Command_line command_line;
   command_line.process(argc - 1, argv + 1);
+  initialize_parameters(&command_line.options());
 
   // The work queue.
   Workqueue workqueue(command_line.options());

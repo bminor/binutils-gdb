@@ -25,6 +25,8 @@ options.cc
 options.h
 output.cc
 output.h
+parameters.cc
+parameters.h
 readsyms.cc
 readsyms.h
 reloc.cc

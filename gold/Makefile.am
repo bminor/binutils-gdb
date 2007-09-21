@@ -34,6 +34,7 @@ CCFILES = \
 	object.cc \
 	options.cc \
 	output.cc \
+	parameters.cc \
 	readsyms.cc \
 	reloc.cc \
 	resolve.cc \
@@ -57,6 +58,7 @@ HFILES = \
 	object.h \
 	options.h \
 	output.h \
+	parameters.h \
 	readsyms.h \
 	reloc.h \
 	reloc-types.h \

@@ -171,9 +171,8 @@ class Object
   // Pass sections which should be included in the link to the Layout
   // object, and record where the sections go in the output file.
   void
-  layout(const General_options& options, Symbol_table* symtab,
-	 Layout* layout, Read_symbols_data* sd)
-  { this->do_layout(options, symtab, layout, sd); }
+  layout(Symbol_table* symtab, Layout* layout, Read_symbols_data* sd)
+  { this->do_layout(symtab, layout, sd); }
 
   // Add symbol information to the global symbol table.
   void
@@ -233,8 +232,7 @@ class Object
 
   // Lay out sections--implemented by child class.
   virtual void
-  do_layout(const General_options&, Symbol_table*, Layout*,
-	    Read_symbols_data*) = 0;
+  do_layout(Symbol_table*, Layout*, Read_symbols_data*) = 0;
 
   // Add symbol information to the global symbol table--implemented by
   // child class.
@@ -589,8 +587,7 @@ class Sized_relobj : public Relobj
 
   // Lay out the input sections.
   void
-  do_layout(const General_options&, Symbol_table*, Layout*,
-	    Read_symbols_data*);
+  do_layout(Symbol_table*, Layout*, Read_symbols_data*);
 
   // Add the symbols to the symbol table.
   void

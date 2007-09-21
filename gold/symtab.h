@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "elfcpp.h"
+#include "parameters.h"
 #include "stringpool.h"
 #include "object.h"
 
@@ -305,9 +306,9 @@ class Symbol
   // Return true if the final value of this symbol is known at link
   // time.
   bool
-  final_value_is_known(const General_options* options) const
+  final_value_is_known() const
   {
-    if (options->is_shared())
+    if (parameters->output_is_shared())
       return false;
     return this->source_ != FROM_OBJECT || !this->object()->is_dynamic();
   }

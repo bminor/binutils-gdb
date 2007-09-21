@@ -386,8 +386,7 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_layout(const General_options& options,
-					  Symbol_table* symtab,
+Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 					  Layout* layout,
 					  Read_symbols_data* sd)
 {
@@ -427,7 +426,7 @@ Sized_relobj<size, big_endian>::do_layout(const General_options& options,
 
       if (this->handle_gnu_warning_section(name, i, symtab))
 	{
-	  if (!options.is_relocatable())
+	  if (!parameters->output_is_object())
 	    omit[i] = true;
 	}
 
