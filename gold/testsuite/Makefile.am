@@ -16,7 +16,11 @@ INCLUDES = -D_GNU_SOURCE \
 
 if GCC
 if NATIVE_LINKER
-NATIVE_TESTING = t1 t1_pic
+NATIVE_TESTING = \
+	basic_test \
+	basic_pic_test \
+	basic_static_test \
+	basic_static_pic_test
 endif
 endif
 
@@ -40,15 +44,19 @@ gcctestdir/ld: ../ld-new
 	(cd gcctestdir && $(LN_S) ../../ld-new ld)
 
 # Override the default CXXFLAGS--we don't want any optimization
-t1.o: t1.cc
+basic_test.o: basic_test.cc
 	$(CXXCOMPILE) -O0 -c -o $@ $<
-t1: t1.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ t1.o
+basic_test: basic_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ basic_test.o
+basic_static_test: basic_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -static basic_test.o
 
-t1_pic.o: t1.cc
+basic_pic_test.o: basic_test.cc
 	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
-t1_pic: t1_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ t1_pic.o
+basic_pic_test: basic_pic_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ basic_pic_test.o
+basic_static_pic_test: basic_pic_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -static basic_pic_test.o
 
 endif
 endif

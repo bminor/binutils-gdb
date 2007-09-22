@@ -208,7 +208,12 @@ INCLUDES = -D_GNU_SOURCE \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@NATIVE_TESTING = t1 t1_pic
+@GCC_TRUE@@NATIVE_LINKER_TRUE@NATIVE_TESTING = \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test
+
 TESTS = object_unittest $(NATIVE_TESTING)
 check_LIBRARIES = libgoldtest.a
 libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
@@ -533,15 +538,19 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	(cd gcctestdir && $(LN_S) ../../ld-new ld)
 
 # Override the default CXXFLAGS--we don't want any optimization
-@GCC_TRUE@@NATIVE_LINKER_TRUE@t1.o: t1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@basic_test.o: basic_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@t1: t1.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ t1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@basic_test: basic_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@basic_static_test: basic_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -static basic_test.o
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@t1_pic.o: t1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@basic_pic_test.o: basic_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@t1_pic: t1_pic.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ t1_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@basic_pic_test: basic_pic_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_pic_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@basic_static_pic_test: basic_pic_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -static basic_pic_test.o
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
