@@ -1,6 +1,20 @@
 2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
 
-	gdb/
+	* breakpoint.c (create_breakpoint): Split from
+	create_breakpoints, implementing most of its logic.
+	Take just a single sal, single address string and
+	single condition.  Do not take parsed condition at
+	all.
+	(create_breakpoints): Just call create_breakpoint
+	for each sal.
+	(find_condition_and_thread): New.
+	(break_command_1): Use find_condition_and_thread.
+	Do not keep parsed conditions.
+	(do_captured_breakpoint): Don't convert
+	condition string to struct expression.
+	
+2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* breakpoint.h (struct breakpoint): Move the cond 
 	field to...
 	(struct bp_location): Here.

@@ -4984,93 +4984,125 @@ mention (struct breakpoint *b)
 }
 
 
-/* Add SALS.nelts breakpoints to the breakpoint table.  For each
-   SALS.sal[i] breakpoint, include the corresponding ADDR_STRING[i],
-   COND[i] and COND_STRING[i] values.
 
-   The parameter PENDING_BP points to a pending breakpoint that is
-   the basis of the breakpoints currently being created.  The pending
-   breakpoint may contain a separate condition string or commands
-   that were added after the initial pending breakpoint was created.
+/* Create a breakpoint with SAL as location.  Use ADDR_STRING
+   as textual description of the location, and COND_STRING
+   as condition expression.
 
-   NOTE: If the function succeeds, the caller is expected to cleanup
-   the arrays ADDR_STRING, COND_STRING, COND and SALS (but not the
-   array contents).  If the function fails (error() is called), the
-   caller is expected to cleanups both the ADDR_STRING, COND_STRING,
-   COND and SALS arrays and each of those arrays contents. */
+   The paramter PENDING_BP is same as for the
+   create_breakpoints function.  */
 
 static void
-create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
-		    struct expression **cond, char **cond_string,
-		    enum bptype type, enum bpdisp disposition,
-		    int thread, int ignore_count, int from_tty,
-		    struct breakpoint *pending_bp)
+create_breakpoint (struct symtab_and_line sal, char *addr_string,
+		   char *cond_string,
+		   enum bptype type, enum bpdisp disposition,
+		   int thread, int ignore_count, int from_tty,
+		   struct breakpoint *pending_bp)
 {
+  struct breakpoint *b;
+
   if (type == bp_hardware_breakpoint)
     {
       int i = hw_breakpoint_used_count ();
       int target_resources_ok = 
 	TARGET_CAN_USE_HARDWARE_WATCHPOINT (bp_hardware_breakpoint, 
-					    i + sals.nelts, 0);
+					    i + 1, 0);
       if (target_resources_ok == 0)
 	error (_("No hardware breakpoint support in the target."));
       else if (target_resources_ok < 0)
 	error (_("Hardware breakpoints used exceeds limit."));
     }
 
-  /* Now set all the breakpoints.  */
-  {
-    int i;
-    for (i = 0; i < sals.nelts; i++)
-      {
-	struct breakpoint *b;
-	struct symtab_and_line sal = sals.sals[i];
-
-	if (from_tty)
-	  describe_other_breakpoints (sal.pc, sal.section, thread);
-	
-	b = set_raw_breakpoint (sal, type);
-	set_breakpoint_count (breakpoint_count + 1);
-	b->number = breakpoint_count;
-	b->loc->cond = cond[i];
-	b->thread = thread;
-	if (addr_string[i])
-	  b->addr_string = addr_string[i];
-	else
-	  /* addr_string has to be used or breakpoint_re_set will delete
-	     me.  */
-	  b->addr_string = xstrprintf ("*0x%s", paddr (b->loc->address));
-	b->cond_string = cond_string[i];
-	b->ignore_count = ignore_count;
-	b->enable_state = bp_enabled;
-	b->disposition = disposition;
-	/* If resolving a pending breakpoint, a check must be made to see if
-	   the user has specified a new condition or commands for the 
-	   breakpoint.  A new condition will override any condition that was 
-	   initially specified with the initial breakpoint command.  */
-	if (pending_bp)
-	  {
-	    char *arg;
-	    if (pending_bp->cond_string)
-	      {
-		arg = pending_bp->cond_string;
-		b->cond_string = savestring (arg, strlen (arg));
-		b->loc->cond = parse_exp_1 (&arg, block_for_pc (b->loc->address), 0);
-		if (*arg)
-		  error (_("Junk at end of pending breakpoint condition expression"));
-	      }
-	    /* If there are commands associated with the breakpoint, they should 
-	       be copied too.  */
-	    if (pending_bp->commands)
-	      b->commands = copy_command_lines (pending_bp->commands);
+  if (from_tty)
+    describe_other_breakpoints (sal.pc, sal.section, thread);
+  
+  b = set_raw_breakpoint (sal, type);
+  set_breakpoint_count (breakpoint_count + 1);
+  b->number = breakpoint_count;
+  b->thread = thread;
+  
+  b->cond_string = cond_string;
+  b->ignore_count = ignore_count;
+  b->enable_state = bp_enabled;
+  b->disposition = disposition;
+  /* If resolving a pending breakpoint, a check must be made to see if
+     the user has specified a new condition or commands for the 
+     breakpoint.  A new condition will override any condition that was 
+     initially specified with the initial breakpoint command.  */
+  if (pending_bp)
+    {
+      if (pending_bp->cond_string)
+	b->cond_string = savestring (pending_bp->cond_string, 
+				     strlen (pending_bp->cond_string));
+      
+      /* If there are commands associated with the breakpoint, they should 
+	 be copied too.  */
+      if (pending_bp->commands)
+	b->commands = copy_command_lines (pending_bp->commands);
 	    
-	    /* We have to copy over the ignore_count and thread as well.  */
-	    b->ignore_count = pending_bp->ignore_count;
-	    b->thread = pending_bp->thread;
-	  }
-	mention (b);
-      }
-  }    
+      /* We have to copy over the ignore_count and thread as well.  */
+      b->ignore_count = pending_bp->ignore_count;
+      b->thread = pending_bp->thread;
+    }
+
+  if (b->cond_string)
+    {
+      char *arg = b->cond_string;
+      b->loc->cond = parse_exp_1 (&arg, block_for_pc (b->loc->address), 0);
+      if (*arg)
+	{
+	  if (pending_bp)
+	    error (_("Junk at end of pending breakpoint condition expression"));
+	  else
+	    error (_("Garbage %s follows condition"), arg);
+	}
+    }	    
+
+  if (addr_string)
+    b->addr_string = addr_string;
+  else
+    /* addr_string has to be used or breakpoint_re_set will delete
+       me.  */
+    b->addr_string = xstrprintf ("*0x%s", paddr (b->loc->address));
+
+  mention (b);
+}
+
+/* Add SALS.nelts breakpoints to the breakpoint table.  For each
+   SALS.sal[i] breakpoint, include the corresponding ADDR_STRING[i]
+   value.  COND_STRING, if not NULL, specified the condition to be
+   used for all breakpoints.  Essentially the only case where
+   SALS.nelts is not 1 is when we set a breakpoint on an overloaded
+   function.  In that case, it's still not possible to specify
+   separate conditions for different overloaded functions, so
+   we take just a single condition string.
+   
+   The parameter PENDING_BP points to a pending breakpoint that is
+   the basis of the breakpoints currently being created.  The pending
+   breakpoint may contain a separate condition string or commands
+   that were added after the initial pending breakpoint was created.
+
+   NOTE: If the function succeeds, the caller is expected to cleanup
+   the arrays ADDR_STRING, COND_STRING, and SALS (but not the
+   array contents).  If the function fails (error() is called), the
+   caller is expected to cleanups both the ADDR_STRING, COND_STRING,
+   COND and SALS arrays and each of those arrays contents. */
+
+static void
+create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
+		    char *cond_string,
+		    enum bptype type, enum bpdisp disposition,
+		    int thread, int ignore_count, int from_tty,
+		    struct breakpoint *pending_bp)
+{
+  int i;
+  for (i = 0; i < sals.nelts; ++i)
+    {
+      create_breakpoint (sals.sals[i], addr_string[i],
+			 cond_string, type, disposition,
+			 thread, ignore_count, from_tty,
+			 pending_bp);
+    }
 }
 
 /* Parse ARG which is assumed to be a SAL specification possibly
@@ -5192,6 +5224,59 @@ do_captured_parse_breakpoint (struct ui_out *ui, void *data)
 		         args->not_found_ptr);
 }
 
+/* Given TOK, a string specification of condition and thread, as
+   accepted by the 'break' command, extract the condition
+   string and thread number and set *COND_STRING and *THREAD.
+   PC identifies the context at which the condition should be parsed.  
+   If no condition is found, *COND_STRING is set to NULL.
+   If no thread is found, *THREAD is set to -1.  */
+static void 
+find_condition_and_thread (char *tok, CORE_ADDR pc, 
+			   char **cond_string, int *thread)
+{
+  *cond_string = NULL;
+  *thread = -1;
+  while (tok && *tok)
+    {
+      char *end_tok;
+      int toklen;
+      char *cond_start = NULL;
+      char *cond_end = NULL;
+      while (*tok == ' ' || *tok == '\t')
+	tok++;
+      
+      end_tok = tok;
+      
+      while (*end_tok != ' ' && *end_tok != '\t' && *end_tok != '\000')
+	end_tok++;
+      
+      toklen = end_tok - tok;
+      
+      if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
+	{
+	  tok = cond_start = end_tok + 1;
+	  parse_exp_1 (&tok, block_for_pc (pc), 0);
+	  cond_end = tok;
+	  *cond_string = savestring (cond_start, 
+				     cond_end - cond_start);
+	}
+      else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
+	{
+	  char *tmptok;
+	  
+	  tok = end_tok + 1;
+	  tmptok = tok;
+	  *thread = strtol (tok, &tok, 0);
+	  if (tok == tmptok)
+	    error (_("Junk after thread keyword."));
+	  if (!valid_thread_id (*thread))
+	    error (_("Unknown thread %d."), *thread);
+	}
+      else
+	error (_("Junk at end of arguments."));
+    }
+}
+
 /* Set a breakpoint according to ARG (function, linenum or *address)
    flag: first bit  : 0 non-temporary, 1 temporary.
    second bit : 0 normal breakpoint, 1 hardware breakpoint. 
@@ -5205,9 +5290,8 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
   struct gdb_exception e;
   int tempflag, hardwareflag;
   struct symtabs_and_lines sals;
-  struct expression **cond = 0;
   struct symtab_and_line pending_sal;
-  char **cond_string = (char **) NULL;
+  char *cond_string = NULL;
   char *copy_arg;
   char *err_msg;
   char *addr_start = arg;
@@ -5297,14 +5381,6 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
       make_cleanup (xfree, addr_string);
     }
 
-  /* Allocate space for all the cond expressions. */
-  cond = xcalloc (sals.nelts, sizeof (struct expression *));
-  make_cleanup (xfree, cond);
-
-  /* Allocate space for all the cond strings. */
-  cond_string = xcalloc (sals.nelts, sizeof (char **));
-  make_cleanup (xfree, cond_string);
-
   /* ----------------------------- SNIP -----------------------------
      Anything added to the cleanup chain beyond this point is assumed
      to be part of a breakpoint.  If the breakpoint create succeeds
@@ -5328,56 +5404,16 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
   /* Verify that condition can be parsed, before setting any
      breakpoints.  Allocate a separate condition expression for each
      breakpoint. */
-  thread = -1;			/* No specific thread yet */
   if (!pending)
     {
-      for (i = 0; i < sals.nelts; i++)
-	{
-	  char *tok = arg;
-	  while (tok && *tok)
-	    {
-	      char *end_tok;
-	      int toklen;
-	      char *cond_start = NULL;
-	      char *cond_end = NULL;
-	      while (*tok == ' ' || *tok == '\t')
-		tok++;
-	      
-	      end_tok = tok;
-	      
-	      while (*end_tok != ' ' && *end_tok != '\t' && *end_tok != '\000')
-		end_tok++;
-	      
-	      toklen = end_tok - tok;
-	      
-	      if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
-		{
-		  tok = cond_start = end_tok + 1;
-		  cond[i] = parse_exp_1 (&tok, block_for_pc (sals.sals[i].pc), 
-				         0);
-		  make_cleanup (xfree, cond[i]);
-		  cond_end = tok;
-		  cond_string[i] = savestring (cond_start, 
-				               cond_end - cond_start);
-		  make_cleanup (xfree, cond_string[i]);
-		}
-	      else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
-		{
-		  char *tmptok;
-		  
-		  tok = end_tok + 1;
-		  tmptok = tok;
-		  thread = strtol (tok, &tok, 0);
-		  if (tok == tmptok)
-		    error (_("Junk after thread keyword."));
-		  if (!valid_thread_id (thread))
-		    error (_("Unknown thread %d."), thread);
-		}
-	      else
-		error (_("Junk at end of arguments."));
-	    }
-	}
-      create_breakpoints (sals, addr_string, cond, cond_string,
+      /* Here we only parse 'arg' to separate condition
+	 from thread number, so parsing in context of first
+	 sal is OK.  When setting the breakpoint we'll 
+	 re-parse it in context of each sal.  */
+      find_condition_and_thread (arg, sals.sals[0].pc, &cond_string, &thread);
+      if (cond_string)
+	make_cleanup (xfree, cond_string);
+      create_breakpoints (sals, addr_string, cond_string,
 			  hardwareflag ? bp_hardware_breakpoint 
 			  : bp_breakpoint,
 			  tempflag ? disp_del : disp_donttouch,
@@ -5398,10 +5434,10 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 		              : bp_breakpoint);
       set_breakpoint_count (breakpoint_count + 1);
       b->number = breakpoint_count;
-      b->loc->cond = *cond;
+      b->loc->cond = NULL;
       b->thread = thread;
-      b->addr_string = *addr_string;
-      b->cond_string = *cond_string;
+      b->addr_string = addr_string[0];
+      b->cond_string = cond_string;
       b->ignore_count = ignore_count;
       b->pending = 1;
       b->disposition = tempflag ? disp_del : disp_donttouch;
@@ -5445,7 +5481,7 @@ do_captured_breakpoint (struct ui_out *uiout, void *data)
   struct cleanup *breakpoint_chain = NULL;
   int i;
   char **addr_string;
-  char **cond_string;
+  char *cond_string;
 
   char *address_end;
 
@@ -5502,22 +5538,13 @@ do_captured_breakpoint (struct ui_out *uiout, void *data)
   /* Resolve all line numbers to PC's.  */
   breakpoint_sals_to_pc (&sals, args->address);
 
-  /* Verify that conditions can be parsed, before setting any
-     breakpoints.  */
-  for (i = 0; i < sals.nelts; i++)
+  if (args->condition != NULL)
     {
-      if (args->condition != NULL)
-	{
-	  char *tok = args->condition;
-	  cond[i] = parse_exp_1 (&tok, block_for_pc (sals.sals[i].pc), 0);
-	  if (*tok != '\0')
-	    error (_("Garbage %s follows condition"), tok);
-	  make_cleanup (xfree, cond[i]);
-	  cond_string[i] = xstrdup (args->condition);
-	}
+      cond_string = xstrdup (args->condition);
+      make_cleanup (xfree, cond_string);
     }
 
-  create_breakpoints (sals, addr_string, cond, cond_string,
+  create_breakpoints (sals, addr_string, args->condition,
 		      args->hardwareflag ? bp_hardware_breakpoint : bp_breakpoint,
 		      args->tempflag ? disp_del : disp_donttouch,
 		      args->thread, args->ignore_count, 0/*from-tty*/, 
