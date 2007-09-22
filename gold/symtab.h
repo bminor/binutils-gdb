@@ -927,8 +927,8 @@ class Symbol_table
   // Define a special symbol.
   template<int size, bool big_endian>
   Sized_symbol<size>*
-  define_special_symbol(const Target* target, const char* name,
-			const char* version, bool only_if_ref,
+  define_special_symbol(const Target* target, const char** pname,
+			const char** pversion, bool only_if_ref,
 			Sized_symbol<size>** poldsym ACCEPT_SIZE_ENDIAN);
 
   // Define a symbol in an Output_data, sized version.

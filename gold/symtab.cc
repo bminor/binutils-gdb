@@ -667,12 +667,12 @@ Symbol_table::add_from_dynobj(
 // Create and return a specially defined symbol.  If ONLY_IF_REF is
 // true, then only create the symbol if there is a reference to it.
 // If this does not return NULL, it sets *POLDSYM to the existing
-// symbol if there is one.
+// symbol if there is one.  This canonicalizes *PNAME and *PVERSION.
 
 template<int size, bool big_endian>
 Sized_symbol<size>*
-Symbol_table::define_special_symbol(const Target* target, const char* name,
-				    const char* version, bool only_if_ref,
+Symbol_table::define_special_symbol(const Target* target, const char** pname,
+				    const char** pversion, bool only_if_ref,
                                     Sized_symbol<size>** poldsym
                                     ACCEPT_SIZE_ENDIAN)
 {
@@ -685,19 +685,22 @@ Symbol_table::define_special_symbol(const Target* target, const char* name,
 
   if (only_if_ref)
     {
-      oldsym = this->lookup(name, version);
+      oldsym = this->lookup(*pname, *pversion);
       if (oldsym == NULL || !oldsym->is_undefined())
 	return NULL;
+
+      *pname = oldsym->name();
+      *pversion = oldsym->version();
     }
   else
     {
       // Canonicalize NAME and VERSION.
       Stringpool::Key name_key;
-      name = this->namepool_.add(name, &name_key);
+      *pname = this->namepool_.add(*pname, &name_key);
 
       Stringpool::Key version_key = 0;
-      if (version != NULL)
-	version = this->namepool_.add(version, &version_key);
+      if (*pversion != NULL)
+	*pversion = this->namepool_.add(*pversion, &version_key);
 
       Symbol* const snull = NULL;
       std::pair<typename Symbol_table_type::iterator, bool> ins =
@@ -812,7 +815,7 @@ Symbol_table::do_define_in_output_data(
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-          target, name, version, only_if_ref, &oldsym
+          target, &name, &version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, true));
 #else
       gold_unreachable();
@@ -822,7 +825,7 @@ Symbol_table::do_define_in_output_data(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-          target, name, version, only_if_ref, &oldsym
+          target, &name, &version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, false));
 #else
       gold_unreachable();
@@ -832,6 +835,7 @@ Symbol_table::do_define_in_output_data(
   if (sym == NULL)
     return NULL;
 
+  gold_assert(version == NULL);
   sym->init(name, od, value, symsize, type, binding, visibility, nonvis,
 	    offset_is_from_end);
 
@@ -904,16 +908,17 @@ Symbol_table::do_define_in_output_segment(
 
   if (target->is_big_endian())
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-        target, name, version, only_if_ref, &oldsym
+        target, &name, &version, only_if_ref, &oldsym
         SELECT_SIZE_ENDIAN(size, true));
   else
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, name, version, only_if_ref, &oldsym
+        target, &name, &version, only_if_ref, &oldsym
         SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
     return NULL;
 
+  gold_assert(version == NULL);
   sym->init(name, os, value, symsize, type, binding, visibility, nonvis,
 	    offset_base);
 
@@ -980,16 +985,17 @@ Symbol_table::do_define_as_constant(
 
   if (target->is_big_endian())
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-        target, name, version, only_if_ref, &oldsym
+        target, &name, &version, only_if_ref, &oldsym
         SELECT_SIZE_ENDIAN(size, true));
   else
     sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, name, version, only_if_ref, &oldsym
+        target, &name, &version, only_if_ref, &oldsym
         SELECT_SIZE_ENDIAN(size, false));
 
   if (sym == NULL)
     return NULL;
 
+  gold_assert(version == NULL);
   sym->init(name, value, symsize, type, binding, visibility, nonvis);
 
   if (oldsym != NULL
