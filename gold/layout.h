@@ -85,6 +85,10 @@ class Layout
   void
   create_initial_dynamic_sections(const Input_objects*, Symbol_table*);
 
+  // Define __start and __stop symbols for output sections.
+  void
+  define_section_symbols(Symbol_table*, const Target*);
+
   // Return the Stringpool used for symbol names.
   const Stringpool*
   sympool() const

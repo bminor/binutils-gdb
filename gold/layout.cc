@@ -337,6 +337,58 @@ Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
   this->dynamic_section_->add_output_section_data(this->dynamic_data_);
 }
 
+// For each output section whose name can be represented as C symbol,
+// define __start and __stop symbols for the section.  This is a GNU
+// extension.
+
+void
+Layout::define_section_symbols(Symbol_table* symtab, const Target* target)
+{
+  for (Section_list::const_iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      const char* const name = (*p)->name();
+      if (name[strspn(name,
+		      ("0123456789"
+		       "ABCDEFGHIJKLMNOPWRSTUVWXYZ"
+		       "abcdefghijklmnopqrstuvwxyz"
+		       "_"))]
+	  == '\0')
+	{
+	  const std::string name_string(name);
+	  const std::string start_name("__start_" + name_string);
+	  const std::string stop_name("__stop_" + name_string);
+
+	  symtab->define_in_output_data(target,
+					start_name.c_str(),
+					NULL, // version
+					*p,
+					0, // value
+					0, // symsize
+					elfcpp::STT_NOTYPE,
+					elfcpp::STB_GLOBAL,
+					elfcpp::STV_DEFAULT,
+					0, // nonvis
+					false, // offset_is_from_end
+					false); // only_if_ref
+
+	  symtab->define_in_output_data(target,
+					stop_name.c_str(),
+					NULL, // version
+					*p,
+					0, // value
+					0, // symsize
+					elfcpp::STT_NOTYPE,
+					elfcpp::STB_GLOBAL,
+					elfcpp::STV_DEFAULT,
+					0, // nonvis
+					true, // offset_is_from_end
+					false); // only_if_ref
+	}
+    }
+}
+
 // Find the first read-only PT_LOAD segment, creating one if
 // necessary.
 

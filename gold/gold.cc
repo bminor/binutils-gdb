@@ -148,6 +148,10 @@ queue_middle_tasks(const General_options& options,
   // bother to create a task for it.
   define_standard_symbols(symtab, layout, input_objects->target());
 
+  // Define __start and __stop symbols for output sections where
+  // appropriate.
+  layout->define_section_symbols(symtab, input_objects->target());
+
   // Read the relocations of the input files.  We do this to find
   // which symbols are used by relocations which require a GOT and/or
   // a PLT entry, or a COPY reloc.  When we implement garbage
