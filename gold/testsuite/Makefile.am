@@ -1,5 +1,9 @@
 # Process this file with automake to generate Makefile.in
 
+# As far as I can tell automake testing support assumes that the build
+# system and the host system are the same.  So these tests will not
+# work when building with a cross-compiler.
+
 AUTOMAKE_OPTIONS =
 
 AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS)

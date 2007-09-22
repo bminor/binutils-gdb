@@ -81,9 +81,13 @@ EXTRA_DIST = yyscript.c yyscript.h
 
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
 
-ld_new_SOURCES = main.cc $(TARGETFILES)
-ld_new_DEPENDENCIES = libgold.a $(LIBINTL_DEP)
-ld_new_LDADD = libgold.a $(LIBINTL)
+sources_var = main.cc $(TARGETFILES)
+deps_var = libgold.a $(LIBINTL_DEP)
+ldadd_var = libgold.a $(LIBINTL)
+
+ld_new_SOURCES = $(sources_var)
+ld_new_DEPENDENCIES = $(deps_var)
+ld_new_LDADD = $(ldadd_var)
 
 # Use an explicit dependency for the bison generated header file.
 script.$(OBJEXT): yyscript.h
@@ -112,3 +116,43 @@ POTFILES= $(CCFILES) $(HFILES) $(TARGETFILES)
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
+
+# Bootstrap test support.  We use ld-new to build ld1, then use ld1 to
+# build ld2.  ld1 and ld2 should be identical.  ld-new need not be
+# identical to ld1, since it was linked with the host linker.
+
+if GCC
+if NATIVE_LINKER
+
+gcctestdir1/ld: ld-new
+	test -d gcctestdir1 || mkdir -p gcctestdir1
+	rm -f gcctestdir1/ld
+	(cd gcctestdir1 && $(LN_S) ../ld-new ld)
+
+ld1_SOURCES = $(sources_var)
+ld1_DEPENDENCIES = $(deps_var) gcctestdir1/ld
+ld1_LDADD = $(ldadd_var)
+ld1_LDFLAGS = -Bgcctestdir1/
+
+gcctestdir2/ld: ld1
+	test -d gcctestdir2 || mkdir -p gcctestdir2
+	rm -f gcctestdir2/ld
+	(cd gcctestdir2 && $(LN_S) ../ld1 ld)
+
+ld2_SOURCES = $(sources_var)
+ld2_DEPENDENCIES = $(deps_var) gcctestdir2/ld
+ld2_LDADD = $(ldadd_var)
+ld2_LDFLAGS = -Bgcctestdir2/
+
+check_PROGRAMS = ld1 ld2
+
+bootstrap-test: ld2
+	rm -f $@
+	echo "#!/bin/sh" > $@
+	echo "cmp ld1 ld2" > $@
+	chmod +x $@
+
+TESTS = bootstrap-test
+
+endif
+endif

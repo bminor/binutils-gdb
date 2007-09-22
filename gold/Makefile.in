@@ -41,6 +41,8 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 noinst_PROGRAMS = ld-new$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@check_PROGRAMS = ld1$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ld2$(EXEEXT)
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
 	$(srcdir)/../config.sub $(srcdir)/../depcomp \
 	$(srcdir)/../install-sh $(srcdir)/../missing \
@@ -83,9 +85,17 @@ am_libgold_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
 libgold_a_OBJECTS = $(am_libgold_a_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 am__objects_4 = i386.$(OBJEXT)
-am_ld_new_OBJECTS = main.$(OBJEXT) $(am__objects_4)
+am__objects_5 = main.$(OBJEXT) $(am__objects_4)
+am_ld_new_OBJECTS = $(am__objects_5)
 ld_new_OBJECTS = $(am_ld_new_OBJECTS)
 am__DEPENDENCIES_1 =
+am__DEPENDENCIES_2 = libgold.a $(am__DEPENDENCIES_1)
+am__ld1_SOURCES_DIST = main.cc i386.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_ld1_OBJECTS = $(am__objects_5)
+ld1_OBJECTS = $(am_ld1_OBJECTS)
+am__ld2_SOURCES_DIST = main.cc i386.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_ld2_OBJECTS = $(am__objects_5)
+ld2_OBJECTS = $(am_ld2_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -99,8 +109,10 @@ CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
-SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES)
-DIST_SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES)
+SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES) $(ld1_SOURCES) \
+	$(ld2_SOURCES)
+DIST_SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES) \
+	$(am__ld1_SOURCES_DIST) $(am__ld2_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -148,6 +160,8 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+GCC_FALSE = @GCC_FALSE@
+GCC_TRUE = @GCC_TRUE@
 GENCAT = @GENCAT@
 GMSGFMT = @GMSGFMT@
 INCINTL = @INCINTL@
@@ -162,6 +176,7 @@ LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
@@ -170,6 +185,8 @@ MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
+NATIVE_LINKER_FALSE = @NATIVE_LINKER_FALSE@
+NATIVE_LINKER_TRUE = @NATIVE_LINKER_TRUE@
 NO_WERROR = @NO_WERROR@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -306,10 +323,22 @@ YFILES = \
 
 EXTRA_DIST = yyscript.c yyscript.h
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
-ld_new_SOURCES = main.cc $(TARGETFILES)
-ld_new_DEPENDENCIES = libgold.a $(LIBINTL_DEP)
-ld_new_LDADD = libgold.a $(LIBINTL)
+sources_var = main.cc $(TARGETFILES)
+deps_var = libgold.a $(LIBINTL_DEP)
+ldadd_var = libgold.a $(LIBINTL)
+ld_new_SOURCES = $(sources_var)
+ld_new_DEPENDENCIES = $(deps_var)
+ld_new_LDADD = $(ldadd_var)
 POTFILES = $(CCFILES) $(HFILES) $(TARGETFILES)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_SOURCES = $(sources_var)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_DEPENDENCIES = $(deps_var) gcctestdir1/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_LDADD = $(ldadd_var)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_LDFLAGS = -Bgcctestdir1/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_SOURCES = $(sources_var)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_DEPENDENCIES = $(deps_var) gcctestdir2/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_LDADD = $(ldadd_var)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_LDFLAGS = -Bgcctestdir2/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@TESTS = bootstrap-test
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -380,11 +409,20 @@ libgold.a: $(libgold_a_OBJECTS) $(libgold_a_DEPENDENCIES)
 	$(libgold_a_AR) libgold.a $(libgold_a_OBJECTS) $(libgold_a_LIBADD)
 	$(RANLIB) libgold.a
 
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 ld-new$(EXEEXT): $(ld_new_OBJECTS) $(ld_new_DEPENDENCIES) 
 	@rm -f ld-new$(EXEEXT)
 	$(CXXLINK) $(ld_new_LDFLAGS) $(ld_new_OBJECTS) $(ld_new_LDADD) $(LIBS)
+ld1$(EXEEXT): $(ld1_OBJECTS) $(ld1_DEPENDENCIES) 
+	@rm -f ld1$(EXEEXT)
+	$(CXXLINK) $(ld1_LDFLAGS) $(ld1_OBJECTS) $(ld1_LDADD) $(LIBS)
+ld2$(EXEEXT): $(ld2_OBJECTS) $(ld2_DEPENDENCIES) 
+	@rm -f ld2$(EXEEXT)
+	$(CXXLINK) $(ld2_LDFLAGS) $(ld2_OBJECTS) $(ld2_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -600,6 +638,79 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; skip=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+		xpass=`expr $$xpass + 1`; \
+		failed=`expr $$failed + 1`; \
+		echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+		echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+		xfail=`expr $$xfail + 1`; \
+		echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+		failed=`expr $$failed + 1`; \
+		echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    else \
+	      skip=`expr $$skip + 1`; \
+	      echo "SKIP: $$tst"; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes="$$banner"; \
+	  skipped=""; \
+	  if test "$$skip" -ne 0; then \
+	    skipped="($$skip tests were not run)"; \
+	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$skipped"; \
+	  fi; \
+	  report=""; \
+	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
+	    report="Please report to $(PACKAGE_BUGREPORT)"; \
+	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$report"; \
+	  fi; \
+	  dashes=`echo "$$dashes" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  test -z "$$skipped" || echo "$$skipped"; \
+	  test -z "$$report" || echo "$$report"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	else :; fi
+
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
@@ -743,6 +854,8 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LIBRARIES) $(PROGRAMS) config.h
 installdirs: installdirs-recursive
@@ -775,8 +888,8 @@ maintainer-clean-generic:
 	-rm -f yyscript.h
 clean: clean-recursive
 
-clean-am: clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
-	mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -829,21 +942,21 @@ uninstall-am: uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am am--refresh check \
-	check-am clean clean-generic clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS clean-recursive ctags ctags-recursive \
-	dist dist-all dist-bzip2 dist-gzip dist-shar dist-tarZ \
-	dist-zip distcheck distclean distclean-compile \
-	distclean-generic distclean-hdr distclean-recursive \
-	distclean-tags distcleancheck distdir distuninstallcheck dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-data-local install-exec \
-	install-exec-am install-exec-local install-info \
-	install-info-am install-man install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-recursive pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-info-am
+	check-TESTS check-am clean clean-checkPROGRAMS clean-generic \
+	clean-noinstLIBRARIES clean-noinstPROGRAMS clean-recursive \
+	ctags ctags-recursive dist dist-all dist-bzip2 dist-gzip \
+	dist-shar dist-tarZ dist-zip distcheck distclean \
+	distclean-compile distclean-generic distclean-hdr \
+	distclean-recursive distclean-tags distcleancheck distdir \
+	distuninstallcheck dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am \
+	install-data-local install-exec install-exec-am \
+	install-exec-local install-info install-info-am install-man \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-recursive pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-info-am
 
 
 # Use an explicit dependency for the bison generated header file.
@@ -871,6 +984,26 @@ install-data-local: install-info
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
+
+# Bootstrap test support.  We use ld-new to build ld1, then use ld1 to
+# build ld2.  ld1 and ld2 should be identical.  ld-new need not be
+# identical to ld1, since it was linked with the host linker.
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gcctestdir1/ld: ld-new
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d gcctestdir1 || mkdir -p gcctestdir1
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f gcctestdir1/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	(cd gcctestdir1 && $(LN_S) ../ld-new ld)
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gcctestdir2/ld: ld1
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d gcctestdir2 || mkdir -p gcctestdir2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f gcctestdir2/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	(cd gcctestdir2 && $(LN_S) ../ld1 ld)
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@bootstrap-test: ld2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo "#!/bin/sh" > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo "cmp ld1 ld2" > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod +x $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

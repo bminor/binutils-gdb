@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CXXFLAGS CXXCPP EGREP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB LN_S USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE NATIVE_LINKER_TRUE NATIVE_LINKER_FALSE GCC_TRUE GCC_FALSE WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CXXFLAGS CXXCPP EGREP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3698,6 +3698,17 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL}'
 
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
+echo "$as_me:$LINENO: checking whether ln -s works" >&5
+echo $ECHO_N "checking whether ln -s works... $ECHO_C" >&6
+LN_S=$as_ln_s
+if test "$LN_S" = "ln -s"; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no, using $LN_S" >&5
+echo "${ECHO_T}no, using $LN_S" >&6
+fi
+
 # If we haven't got the data from the intl directory,
 # assume NLS is disabled.
 USE_NLS=no
@@ -4310,6 +4321,27 @@ presetting ac_cv_c_bigendian=no (or yes) will help" >&2;}
 esac
 
 
+
+
+
+
+if test "x$target_alias" = "x" -o "x$host_alias" = "x$target_alias"; then
+  NATIVE_LINKER_TRUE=
+  NATIVE_LINKER_FALSE='#'
+else
+  NATIVE_LINKER_TRUE='#'
+  NATIVE_LINKER_FALSE=
+fi
+
+
+
+if test "$GCC" = yes; then
+  GCC_TRUE=
+  GCC_FALSE='#'
+else
+  GCC_TRUE='#'
+  GCC_FALSE=
+fi
 
 
 
@@ -5352,6 +5384,20 @@ echo "$as_me: error: conditional \"am__fastdepCXX\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${NATIVE_LINKER_TRUE}" && test -z "${NATIVE_LINKER_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"NATIVE_LINKER\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"NATIVE_LINKER\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${GCC_TRUE}" && test -z "${GCC_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"GCC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"GCC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"MAINTAINER_MODE\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -5960,6 +6006,7 @@ s,@am__fastdepCXX_FALSE@,$am__fastdepCXX_FALSE,;t t
 s,@YACC@,$YACC,;t t
 s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
+s,@LN_S@,$LN_S,;t t
 s,@USE_NLS@,$USE_NLS,;t t
 s,@LIBINTL@,$LIBINTL,;t t
 s,@LIBINTL_DEP@,$LIBINTL_DEP,;t t
@@ -5975,6 +6022,10 @@ s,@CATOBJEXT@,$CATOBJEXT,;t t
 s,@MKINSTALLDIRS@,$MKINSTALLDIRS,;t t
 s,@MSGFMT@,$MSGFMT,;t t
 s,@MSGMERGE@,$MSGMERGE,;t t
+s,@NATIVE_LINKER_TRUE@,$NATIVE_LINKER_TRUE,;t t
+s,@NATIVE_LINKER_FALSE@,$NATIVE_LINKER_FALSE,;t t
+s,@GCC_TRUE@,$GCC_TRUE,;t t
+s,@GCC_FALSE@,$GCC_FALSE,;t t
 s,@WARN_CFLAGS@,$WARN_CFLAGS,;t t
 s,@NO_WERROR@,$NO_WERROR,;t t
 s,@WARN_CXXFLAGS@,$WARN_CXXFLAGS,;t t

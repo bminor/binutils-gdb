@@ -15,6 +15,10 @@
 @SET_MAKE@
 
 # Process this file with automake to generate Makefile.in
+
+# As far as I can tell automake testing support assumes that the build
+# system and the host system are the same.  So these tests will not
+# work when building with a cross-compiler.
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -104,6 +108,8 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+GCC_FALSE = @GCC_FALSE@
+GCC_TRUE = @GCC_TRUE@
 GENCAT = @GENCAT@
 GMSGFMT = @GMSGFMT@
 INCINTL = @INCINTL@
@@ -118,6 +124,7 @@ LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
@@ -126,6 +133,8 @@ MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
+NATIVE_LINKER_FALSE = @NATIVE_LINKER_FALSE@
+NATIVE_LINKER_TRUE = @NATIVE_LINKER_TRUE@
 NO_WERROR = @NO_WERROR@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
