@@ -14,7 +14,13 @@ INCLUDES = -D_GNU_SOURCE \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
-TESTS = object_unittest
+if GCC
+if NATIVE_LINKER
+NATIVE_TESTING = t1 t1_pic
+endif
+endif
+
+TESTS = object_unittest $(NATIVE_TESTING)
 
 check_LIBRARIES = libgoldtest.a
 libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
@@ -24,3 +30,25 @@ LDADD = libgoldtest.a ../libgold.a
 check_PROGRAMS = object_unittest
 
 object_unittest_SOURCES = object_unittest.cc
+
+if GCC
+if NATIVE_LINKER
+
+gcctestdir/ld: ../ld-new
+	test -d gcctestdir || mkdir -p gcctestdir
+	rm -f gcctestdir/ld
+	(cd gcctestdir && $(LN_S) ../../ld-new ld)
+
+# Override the default CXXFLAGS--we don't want any optimization
+t1.o: t1.cc
+	$(CXXCOMPILE) -O0 -c -o $@ $<
+t1: t1.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ t1.o
+
+t1_pic.o: t1.cc
+	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
+t1_pic: t1_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ t1_pic.o
+
+endif
+endif

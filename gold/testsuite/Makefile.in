@@ -208,7 +208,8 @@ INCLUDES = -D_GNU_SOURCE \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
-TESTS = object_unittest
+@GCC_TRUE@@NATIVE_LINKER_TRUE@NATIVE_TESTING = t1 t1_pic
+TESTS = object_unittest $(NATIVE_TESTING)
 check_LIBRARIES = libgoldtest.a
 libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 LDADD = libgoldtest.a ../libgold.a
@@ -226,9 +227,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  testsuite/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  testsuite/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  testsuite/Makefile
+	  $(AUTOMAKE) --gnu  testsuite/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -525,6 +526,22 @@ uninstall-am: uninstall-info-am
 	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-info-am
 
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gcctestdir/ld: ../ld-new
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d gcctestdir || mkdir -p gcctestdir
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	(cd gcctestdir && $(LN_S) ../../ld-new ld)
+
+# Override the default CXXFLAGS--we don't want any optimization
+@GCC_TRUE@@NATIVE_LINKER_TRUE@t1.o: t1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@t1: t1.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ t1.o
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@t1_pic.o: t1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@t1_pic: t1_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ t1_pic.o
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
