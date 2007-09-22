@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-09-21 08:52-0700\n"
+"POT-Creation-Date: 2007-09-21 18:47-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -698,12 +698,12 @@ msgstr ""
 msgid "%s: %s: versym for symbol %zu has no name: %u\n"
 msgstr ""
 
-#: symtab.cc:1174 symtab.cc:1346
+#: symtab.cc:1180 symtab.cc:1352
 #, c-format
 msgid "%s: %s: unsupported symbol section 0x%x\n"
 msgstr ""
 
-#: symtab.cc:1539
+#: symtab.cc:1545
 #, c-format
 msgid "%s: %s: warning: %s\n"
 msgstr ""
