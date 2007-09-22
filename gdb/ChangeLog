@@ -1,3 +1,14 @@
+2007-09-21  Jim Blandy  <jimb@codesourcery.com>
+
+	* macrotab.h (new_macro_table): Document that removing information
+	from an obstack/bcache-managed macro table leaks memory.
+	* macrotab.c (macro_free, macro_bcache_free): Instead of asserting
+	that data is never freed in obstack/bcache-managed macro tables,
+	just leak the storage.
+	(macro_undef): If we're undefining a macro at exactly the same
+	source location that we defined it, simply remove the definition
+	altogether.
+
 2007-09-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* symfile.h (struct sym_fns): Add new field sym_read_linetable.

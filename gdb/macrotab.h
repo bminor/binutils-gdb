@@ -152,15 +152,15 @@ struct macro_source_file
    amongst compilation units in an executable file; if BCACHE is zero,
    don't cache these things.
 
-   Note that, if either OBSTACK or BCACHE are non-zero, then you
-   should only ever add information the macro table --- you should
-   never remove things from it.  You'll get an error if you try.  At
-   the moment, since we only provide obstacks and bcaches for macro
-   tables for symtabs, this restriction makes a nice sanity check.
-   Obstacks and bcaches are pretty much grow-only structures anyway.
-   However, if we find that it's occasionally useful to delete things
-   even from the symtab's tables, and the storage leak isn't a
-   problem, this restriction could be lifted.  */
+   Note that, if either OBSTACK or BCACHE are non-zero, then removing
+   information from the table may leak memory.  Neither obstacks nor
+   bcaches really allow you to remove information, so although we can
+   update the data structure to record the change, we can't free the
+   old data.  At the moment, since we only provide obstacks and
+   bcaches for macro tables for symtabs, this isn't a problem; only
+   odd debugging information makes a definition and then deletes it at
+   the same source location (although 'gcc -DFOO -UFOO -DFOO=2' does
+   do that in GCC 4.1.2.).  */
 struct macro_table *new_macro_table (struct obstack *obstack,
                                      struct bcache *bcache);
 

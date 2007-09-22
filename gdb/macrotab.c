@@ -87,8 +87,14 @@ macro_alloc (int size, struct macro_table *t)
 static void
 macro_free (void *object, struct macro_table *t)
 {
-  gdb_assert (! t->obstack);
-  xfree (object);
+  if (t->obstack)
+    /* There are cases where we need to remove entries from a macro
+       table, even when reading debugging information.  This should be
+       rare, and there's no easy way to free arbitrary data from an
+       obstack, so we just leak it.  */
+    ;
+  else
+    xfree (object);
 }
 
 
@@ -120,12 +126,18 @@ macro_bcache_str (struct macro_table *t, const char *s)
 
 
 /* Free a possibly bcached object OBJ.  That is, if the macro table T
-   has a bcache, it's an error; otherwise, xfree OBJ.  */
+   has a bcache, do nothing; otherwise, xfree OBJ.  */
 static void
 macro_bcache_free (struct macro_table *t, void *obj)
 {
-  gdb_assert (! t->bcache);
-  xfree (obj);
+  if (t->bcache)
+    /* There are cases where we need to remove entries from a macro
+       table, even when reading debugging information.  This should be
+       rare, and there's no easy way to free data from a bcache, so we
+       just leak it.  */
+    ;
+  else
+    xfree (obj);
 }
 
 
@@ -781,25 +793,39 @@ macro_undef (struct macro_source_file *source, int line,
 
   if (n)
     {
-      /* This function is the only place a macro's end-of-scope
-         location gets set to anything other than "end of the
-         compilation unit" (i.e., end_file is zero).  So if this macro
-         already has its end-of-scope set, then we're probably seeing
-         a second #undefinition for the same #definition.  */
       struct macro_key *key = (struct macro_key *) n->key;
 
-      if (key->end_file)
-        {
-	  complaint (&symfile_complaints,
-		     _("macro '%s' is #undefined twice, at %s:%d and %s:%d"), name,
-		     source->filename, line, key->end_file->filename,
-		     key->end_line);
-        }
+      /* If we're removing a definition at exactly the same point that
+         we defined it, then just delete the entry altogether.  GCC
+         4.1.2 will generate DWARF that says to do this if you pass it
+         arguments like '-DFOO -UFOO -DFOO=2'.  */
+      if (source == key->start_file
+          && line == key->start_line)
+        splay_tree_remove (source->table->definitions, n->key);
 
-      /* Whatever the case, wipe out the old ending point, and 
-         make this the ending point.  */
-      key->end_file = source;
-      key->end_line = line;
+      else
+        {
+          /* This function is the only place a macro's end-of-scope
+             location gets set to anything other than "end of the
+             compilation unit" (i.e., end_file is zero).  So if this
+             macro already has its end-of-scope set, then we're
+             probably seeing a second #undefinition for the same
+             #definition.  */
+          if (key->end_file)
+            {
+              complaint (&symfile_complaints,
+                         _("macro '%s' is #undefined twice,"
+                           " at %s:%d and %s:%d"),
+                         name,
+                         source->filename, line,
+                         key->end_file->filename, key->end_line);
+            }
+
+          /* Whether or not we've seen a prior #undefinition, wipe out
+             the old ending point, and make this the ending point.  */
+          key->end_file = source;
+          key->end_line = line;
+        }
     }
   else
     {
