@@ -1,4 +1,4 @@
-// t1.cc -- a test case for gold
+// basic_test.cc -- a test case for gold
 
 // Copyright 2006, 2007 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
