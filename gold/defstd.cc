@@ -152,7 +152,7 @@ const Define_symbol_in_segment in_segment[] =
   {
     "_edata",			// name
     elfcpp::PT_LOAD,		// segment_type
-    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF_W,		// segment_flags_set
     elfcpp::PF(0),		// segment_flags_clear
     0,				// value
     0,				// size
@@ -166,7 +166,7 @@ const Define_symbol_in_segment in_segment[] =
   {
     "edata",			// name
     elfcpp::PT_LOAD,		// segment_type
-    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF_W,		// segment_flags_set
     elfcpp::PF(0),		// segment_flags_clear
     0,				// value
     0,				// size
@@ -180,7 +180,7 @@ const Define_symbol_in_segment in_segment[] =
   {
     "__bss_start",		// name
     elfcpp::PT_LOAD,		// segment_type
-    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF_W,		// segment_flags_set
     elfcpp::PF(0),		// segment_flags_clear
     0,				// value
     0,				// size
@@ -194,7 +194,7 @@ const Define_symbol_in_segment in_segment[] =
   {
     "_end",			// name
     elfcpp::PT_LOAD,		// segment_type
-    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF_W,		// segment_flags_set
     elfcpp::PF(0),		// segment_flags_clear
     0,				// value
     0,				// size
@@ -202,13 +202,13 @@ const Define_symbol_in_segment in_segment[] =
     elfcpp::STB_GLOBAL,		// binding
     elfcpp::STV_DEFAULT,	// visibility
     0,				// nonvis
-    Symbol::SEGMENT_START,	// offset_from_base
+    Symbol::SEGMENT_END,	// offset_from_base
     false			// only_if_ref
   },
   {
     "end",			// name
     elfcpp::PT_LOAD,		// segment_type
-    elfcpp::PF_X,		// segment_flags_set
+    elfcpp::PF_W,		// segment_flags_set
     elfcpp::PF(0),		// segment_flags_clear
     0,				// value
     0,				// size
@@ -216,7 +216,7 @@ const Define_symbol_in_segment in_segment[] =
     elfcpp::STB_GLOBAL,		// binding
     elfcpp::STV_DEFAULT,	// visibility
     0,				// nonvis
-    Symbol::SEGMENT_START,	// offset_from_base
+    Symbol::SEGMENT_END,	// offset_from_base
     false			// only_if_ref
   }
 };
