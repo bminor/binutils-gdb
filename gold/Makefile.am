@@ -15,7 +15,7 @@ INCLUDES = -D_GNU_SOURCE \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
-YFLAGS = -d
+AM_YFLAGS = -d
 
 noinst_PROGRAMS = ld-new
 noinst_LIBRARIES = libgold.a
