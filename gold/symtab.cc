@@ -835,7 +835,7 @@ Symbol_table::do_define_in_output_data(
   if (sym == NULL)
     return NULL;
 
-  gold_assert(version == NULL);
+  gold_assert(version == NULL || oldsym != NULL);
   sym->init(name, od, value, symsize, type, binding, visibility, nonvis,
 	    offset_is_from_end);
 
@@ -918,7 +918,7 @@ Symbol_table::do_define_in_output_segment(
   if (sym == NULL)
     return NULL;
 
-  gold_assert(version == NULL);
+  gold_assert(version == NULL || oldsym != NULL);
   sym->init(name, os, value, symsize, type, binding, visibility, nonvis,
 	    offset_base);
 
@@ -995,7 +995,7 @@ Symbol_table::do_define_as_constant(
   if (sym == NULL)
     return NULL;
 
-  gold_assert(version == NULL);
+  gold_assert(version == NULL || oldsym != NULL);
   sym->init(name, value, symsize, type, binding, visibility, nonvis);
 
   if (oldsym != NULL
