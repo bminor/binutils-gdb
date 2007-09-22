@@ -1,3 +1,25 @@
+2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Associate bp_stat with bp_location, not breakpoint.
+	* breakpoint.h (breakpoint_at): Change type
+	to bp_location*.
+	* breakpoint.c (bpstat_alloc): Take bp_location,
+	not breakpoint.
+	(bpstat_find_breakpoint): Look at bpstat's location's
+	owner, not at bpstat->breakpoint_at.
+	(bpstat_find_step_resume_breakpoint): Likewise.
+	(bpstat_num): Likewise.
+	(print_it_typical): Likewise.
+	(print_bp_stop_message): Likewise.
+	(watchpoint_check): Likewise.
+	(bpstat_what): Likewise.
+	(bpstat_get_triggered_catchpoints): Likewise.
+	(breakpoint_auto_delete): Likewise.
+	(delete_breakpoint): Likewise.	
+	(bpstat_stop_status): Pass location, not breakpoint,
+	to bpstat_alloc.  Look at bpstat's location's
+	owner, not at bpstat->breakpoint_at.
+
 2007-09-21  Jim Blandy  <jimb@codesourcery.com>
 
 	* macrotab.h (new_macro_table): Document that removing information

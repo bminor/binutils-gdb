@@ -109,7 +109,7 @@ static void breakpoints_info (char *, int);
 
 static void breakpoint_1 (int, int);
 
-static bpstat bpstat_alloc (struct breakpoint *, bpstat);
+static bpstat bpstat_alloc (struct bp_location *, bpstat);
 
 static int breakpoint_cond_eval (void *);
 
@@ -1968,7 +1968,7 @@ bpstat_find_breakpoint (bpstat bsp, struct breakpoint *breakpoint)
 
   for (; bsp != NULL; bsp = bsp->next)
     {
-      if (bsp->breakpoint_at == breakpoint)
+      if (bsp->breakpoint_at && bsp->breakpoint_at->owner == breakpoint)
 	return bsp;
     }
   return NULL;
@@ -1994,10 +1994,10 @@ bpstat_find_step_resume_breakpoint (bpstat bsp)
   for (; bsp != NULL; bsp = bsp->next)
     {
       if ((bsp->breakpoint_at != NULL) &&
-	  (bsp->breakpoint_at->type == bp_step_resume) &&
-	  (bsp->breakpoint_at->thread == current_thread || 
-	   bsp->breakpoint_at->thread == -1))
-	return bsp->breakpoint_at;
+	  (bsp->breakpoint_at->owner->type == bp_step_resume) &&
+	  (bsp->breakpoint_at->owner->thread == current_thread || 
+	   bsp->breakpoint_at->owner->thread == -1))
+	return bsp->breakpoint_at->owner;
     }
 
   internal_error (__FILE__, __LINE__, _("No step_resume breakpoint found."));
@@ -2021,7 +2021,11 @@ bpstat_num (bpstat *bsp, int *num)
   if ((*bsp) == NULL)
     return 0;			/* No more breakpoint values */
 
-  b = (*bsp)->breakpoint_at;
+  /* We assume we'll never have several bpstats that
+     correspond to a single breakpoint -- otherwise, 
+     this function might return the same number more
+     than once and this will look ugly.  */
+  b = (*bsp)->breakpoint_at ? (*bsp)->breakpoint_at->owner : NULL;
   *bsp = (*bsp)->next;
   if (b == NULL)
     return -1;			/* breakpoint that's been deleted since */
@@ -2152,6 +2156,7 @@ static enum print_stop_action
 print_it_typical (bpstat bs)
 {
   struct cleanup *old_chain, *ui_out_chain;
+  struct breakpoint *b;
   struct ui_stream *stb;
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -2159,21 +2164,22 @@ print_it_typical (bpstat bs)
      which has since been deleted.  */
   if (bs->breakpoint_at == NULL)
     return PRINT_UNKNOWN;
+  b = bs->breakpoint_at->owner;
 
-  switch (bs->breakpoint_at->type)
+  switch (b->type)
     {
     case bp_breakpoint:
     case bp_hardware_breakpoint:
-      if (bs->breakpoint_at->loc->address != bs->breakpoint_at->loc->requested_address)
-	breakpoint_adjustment_warning (bs->breakpoint_at->loc->requested_address,
-	                               bs->breakpoint_at->loc->address,
-				       bs->breakpoint_at->number, 1);
-      annotate_breakpoint (bs->breakpoint_at->number);
+      if (b->loc->address != b->loc->requested_address)
+	breakpoint_adjustment_warning (b->loc->requested_address,
+	                               b->loc->address,
+				       b->number, 1);
+      annotate_breakpoint (b->number);
       ui_out_text (uiout, "\nBreakpoint ");
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", 
 			     async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
-      ui_out_field_int (uiout, "bkptno", bs->breakpoint_at->number);
+      ui_out_field_int (uiout, "bkptno", b->number);
       ui_out_text (uiout, ", ");
       return PRINT_SRC_AND_LOC;
       break;
@@ -2200,42 +2206,42 @@ print_it_typical (bpstat bs)
       break;
 
     case bp_catch_load:
-      annotate_catchpoint (bs->breakpoint_at->number);
+      annotate_catchpoint (b->number);
       printf_filtered (_("\nCatchpoint %d (loaded %s), "),
-		       bs->breakpoint_at->number,
-		       bs->breakpoint_at->triggered_dll_pathname);
+		       b->number,
+		       b->triggered_dll_pathname);
       return PRINT_SRC_AND_LOC;
       break;
 
     case bp_catch_unload:
-      annotate_catchpoint (bs->breakpoint_at->number);
+      annotate_catchpoint (b->number);
       printf_filtered (_("\nCatchpoint %d (unloaded %s), "),
-		       bs->breakpoint_at->number,
-		       bs->breakpoint_at->triggered_dll_pathname);
+		       b->number,
+		       b->triggered_dll_pathname);
       return PRINT_SRC_AND_LOC;
       break;
 
     case bp_catch_fork:
-      annotate_catchpoint (bs->breakpoint_at->number);
+      annotate_catchpoint (b->number);
       printf_filtered (_("\nCatchpoint %d (forked process %d), "),
-		       bs->breakpoint_at->number, 
-		       bs->breakpoint_at->forked_inferior_pid);
+		       b->number, 
+		       b->forked_inferior_pid);
       return PRINT_SRC_AND_LOC;
       break;
 
     case bp_catch_vfork:
-      annotate_catchpoint (bs->breakpoint_at->number);
+      annotate_catchpoint (b->number);
       printf_filtered (_("\nCatchpoint %d (vforked process %d), "),
-		       bs->breakpoint_at->number, 
-		       bs->breakpoint_at->forked_inferior_pid);
+		       b->number, 
+		       b->forked_inferior_pid);
       return PRINT_SRC_AND_LOC;
       break;
 
     case bp_catch_exec:
-      annotate_catchpoint (bs->breakpoint_at->number);
+      annotate_catchpoint (b->number);
       printf_filtered (_("\nCatchpoint %d (exec'd %s), "),
-		       bs->breakpoint_at->number,
-		       bs->breakpoint_at->exec_pathname);
+		       b->number,
+		       b->exec_pathname);
       return PRINT_SRC_AND_LOC;
       break;
 
@@ -2243,9 +2249,9 @@ print_it_typical (bpstat bs)
       if (current_exception_event && 
 	  (CURRENT_EXCEPTION_KIND == EX_EVENT_CATCH))
 	{
-	  annotate_catchpoint (bs->breakpoint_at->number);
+	  annotate_catchpoint (b->number);
 	  printf_filtered (_("\nCatchpoint %d (exception caught), "), 
-			   bs->breakpoint_at->number);
+			   b->number);
 	  if (CURRENT_EXCEPTION_THROW_PC && CURRENT_EXCEPTION_THROW_LINE)
 	    printf_filtered (_("throw location %s:%d, "),
 			     CURRENT_EXCEPTION_THROW_FILE,
@@ -2274,9 +2280,9 @@ print_it_typical (bpstat bs)
       if (current_exception_event && 
 	  (CURRENT_EXCEPTION_KIND == EX_EVENT_THROW))
 	{
-	  annotate_catchpoint (bs->breakpoint_at->number);
+	  annotate_catchpoint (b->number);
 	  printf_filtered (_("\nCatchpoint %d (exception thrown), "),
-			   bs->breakpoint_at->number);
+			   b->number);
 	  if (CURRENT_EXCEPTION_THROW_PC && CURRENT_EXCEPTION_THROW_LINE)
 	    printf_filtered (_("throw location %s:%d, "),
 			     CURRENT_EXCEPTION_THROW_FILE,
@@ -2305,18 +2311,18 @@ print_it_typical (bpstat bs)
     case bp_hardware_watchpoint:
       if (bs->old_val != NULL)
 	{
-	  annotate_watchpoint (bs->breakpoint_at->number);
+	  annotate_watchpoint (b->number);
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string
 	      (uiout, "reason",
 	       async_reason_lookup (EXEC_ASYNC_WATCHPOINT_TRIGGER));
-	  mention (bs->breakpoint_at);
+	  mention (b);
 	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "old", stb);
 	  ui_out_text (uiout, "\nNew value = ");
-	  value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
+	  value_print (b->val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "new", stb);
 	  do_cleanups (ui_out_chain);
 	  ui_out_text (uiout, "\n");
@@ -2332,10 +2338,10 @@ print_it_typical (bpstat bs)
 	ui_out_field_string
 	  (uiout, "reason",
 	   async_reason_lookup (EXEC_ASYNC_READ_WATCHPOINT_TRIGGER));
-      mention (bs->breakpoint_at);
+      mention (b);
       ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
-      value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
+      value_print (b->val, stb->stream, 0, Val_pretty_default);
       ui_out_field_stream (uiout, "value", stb);
       do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
@@ -2345,12 +2351,12 @@ print_it_typical (bpstat bs)
     case bp_access_watchpoint:
       if (bs->old_val != NULL)     
 	{
-	  annotate_watchpoint (bs->breakpoint_at->number);
+	  annotate_watchpoint (b->number);
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string
 	      (uiout, "reason",
 	       async_reason_lookup (EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER));
-	  mention (bs->breakpoint_at);
+	  mention (b);
 	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
@@ -2361,7 +2367,7 @@ print_it_typical (bpstat bs)
 	}
       else 
 	{
-	  mention (bs->breakpoint_at);
+	  mention (b);
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string
 	      (uiout, "reason",
@@ -2369,7 +2375,7 @@ print_it_typical (bpstat bs)
 	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
-      value_print (bs->breakpoint_at->val, stb->stream, 0,Val_pretty_default);
+      value_print (b->val, stb->stream, 0,Val_pretty_default);
       ui_out_field_stream (uiout, "new", stb);
       do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
@@ -2429,14 +2435,19 @@ print_bp_stop_message (bpstat bs)
       break;
 
     case print_it_normal:
-      /* Normal case.  Call the breakpoint's print_it method, or
-	 print_it_typical.  */
-      if (bs->breakpoint_at != NULL && bs->breakpoint_at->ops != NULL
-	  && bs->breakpoint_at->ops->print_it != NULL)
-	return bs->breakpoint_at->ops->print_it (bs->breakpoint_at);
-      else
-	return print_it_typical (bs);
-      break;
+      {
+	struct bp_location *bl = bs->breakpoint_at;
+	struct breakpoint *b = bl ? bl->owner : NULL;
+	
+	/* Normal case.  Call the breakpoint's print_it method, or
+	   print_it_typical.  */
+	/* FIXME: how breakpoint can ever be NULL here?  */
+	if (b != NULL && b->ops != NULL && b->ops->print_it != NULL)
+	  return b->ops->print_it (b);
+	else
+	  return print_it_typical (bs);
+      }
+	break;
 
     default:
       internal_error (__FILE__, __LINE__,
@@ -2505,13 +2516,13 @@ breakpoint_cond_eval (void *exp)
 /* Allocate a new bpstat and chain it to the current one.  */
 
 static bpstat
-bpstat_alloc (struct breakpoint *b, bpstat cbs /* Current "bs" value */ )
+bpstat_alloc (struct bp_location *bl, bpstat cbs /* Current "bs" value */ )
 {
   bpstat bs;
 
   bs = (bpstat) xmalloc (sizeof (*bs));
   cbs->next = bs;
-  bs->breakpoint_at = b;
+  bs->breakpoint_at = bl;
   /* If the condition is false, etc., don't do the commands.  */
   bs->commands = NULL;
   bs->old_val = NULL;
@@ -2541,7 +2552,7 @@ watchpoint_check (void *p)
   struct frame_info *fr;
   int within_current_scope;
 
-  b = bs->breakpoint_at;
+  b = bs->breakpoint_at->owner;
 
   if (b->exp_valid_block == NULL)
     within_current_scope = 1;
@@ -2588,7 +2599,7 @@ watchpoint_check (void *p)
          we might be in the middle of evaluating a function call.  */
 
       struct value *mark = value_mark ();
-      struct value *new_val = evaluate_expression (bs->breakpoint_at->exp);
+      struct value *new_val = evaluate_expression (b->exp);
       if (!value_equal (b->val, new_val))
 	{
 	  release_value (new_val);
@@ -2624,7 +2635,7 @@ watchpoint_check (void *p)
 	ui_out_field_string
 	  (uiout, "reason", async_reason_lookup (EXEC_ASYNC_WATCHPOINT_SCOPE));
       ui_out_text (uiout, "\nWatchpoint ");
-      ui_out_field_int (uiout, "wpnum", bs->breakpoint_at->number);
+      ui_out_field_int (uiout, "wpnum", b->number);
       ui_out_text (uiout, " deleted because the program has left the block in\n\
 which its expression is valid.\n");     
 
@@ -2760,7 +2771,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 
     /* Come here if it's a watchpoint, or if the break address matches */
 
-    bs = bpstat_alloc (b, bs);	/* Alloc a bpstat to explain stop */
+    bs = bpstat_alloc (b->loc, bs);	/* Alloc a bpstat to explain stop */
 
     /* Watchpoints may change this, if not found to have triggered. */
     bs->stop = 1;
@@ -2971,9 +2982,9 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
   /* The value of a hardware watchpoint hasn't changed, but the
      intermediate memory locations we are watching may have.  */
   if (bs && !bs->stop &&
-      (bs->breakpoint_at->type == bp_hardware_watchpoint ||
-       bs->breakpoint_at->type == bp_read_watchpoint ||
-       bs->breakpoint_at->type == bp_access_watchpoint))
+      (bs->breakpoint_at->owner->type == bp_hardware_watchpoint ||
+       bs->breakpoint_at->owner->type == bp_read_watchpoint ||
+       bs->breakpoint_at->owner->type == bp_access_watchpoint))
     {
       remove_breakpoints ();
       insert_breakpoints ();
@@ -3134,7 +3145,7 @@ bpstat_what (bpstat bs)
 	/* I suspect this can happen if it was a momentary breakpoint
 	   which has since been deleted.  */
 	continue;
-      switch (bs->breakpoint_at->type)
+      switch (bs->breakpoint_at->owner->type)
 	{
 	case bp_none:
 	  continue;
@@ -3289,7 +3300,7 @@ bpstat_get_triggered_catchpoints (bpstat ep_list, bpstat *cp_list)
   for (; ep_list != NULL; ep_list = ep_list->next)
     {
       /* Is this eventpoint a catchpoint?  If not, ignore it. */
-      ep = ep_list->breakpoint_at;
+      ep = ep_list->breakpoint_at->owner;
       if (ep == NULL)
 	break;
       if ((ep->type != bp_catch_load) &&
@@ -3300,7 +3311,7 @@ bpstat_get_triggered_catchpoints (bpstat ep_list, bpstat *cp_list)
 	continue;
 
       /* Yes; add it to the list. */
-      bs = bpstat_alloc (ep, bs);
+      bs = bpstat_alloc (ep_list->breakpoint_at, bs);
       *bs = *ep_list;
       bs->next = NULL;
       bs = root_bs->next;
@@ -6849,9 +6860,9 @@ breakpoint_auto_delete (bpstat bs)
   struct breakpoint *b, *temp;
 
   for (; bs; bs = bs->next)
-    if (bs->breakpoint_at && bs->breakpoint_at->disposition == disp_del
+    if (bs->breakpoint_at && bs->breakpoint_at->owner->disposition == disp_del
 	&& bs->stop)
-      delete_breakpoint (bs->breakpoint_at);
+      delete_breakpoint (bs->breakpoint_at->owner);
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
@@ -7041,7 +7052,7 @@ delete_breakpoint (struct breakpoint *bpt)
      in event-top.c won't do anything, and temporary breakpoints
      with commands won't work.  */
   for (bs = stop_bpstat; bs; bs = bs->next)
-    if (bs->breakpoint_at == bpt)
+    if (bs->breakpoint_at && bs->breakpoint_at->owner == bpt)
       {
 	bs->breakpoint_at = NULL;
 	bs->old_val = NULL;
