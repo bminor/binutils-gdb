@@ -3,8 +3,6 @@
 // This is included by elfcpp.h, the external interface, but holds
 // information which we want to keep private.
 
-#include "elfcpp_config.h"
-
 #ifndef ELFCPP_INTERNAL_H
 #define ELFCPP_INTERNAL_H
 

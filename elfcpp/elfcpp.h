@@ -5,7 +5,6 @@
 #ifndef ELFCPP_H
 #define ELFCPP_H
 
-#include "elfcpp_config.h"
 #include "elfcpp_swap.h"
 
 #include <stdint.h>
