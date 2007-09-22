@@ -433,10 +433,6 @@ post_create_inferior (struct target_ops *target, int from_tty)
 #else
       solib_create_inferior_hook ();
 #endif
-
-      /* Enable any breakpoints which were disabled when the
-	 underlying shared library was deleted.  */
-      re_enable_breakpoints_in_shlibs ();
     }
 
   observer_notify_inferior_created (target, from_tty);

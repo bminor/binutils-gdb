@@ -336,9 +336,6 @@ osf_solib_create_inferior_hook (void)
      suppresses the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
   stop_soon = NO_STOP_QUIETLY;
-
-  /* Enable breakpoints disabled (unnecessarily) by clear_solib().  */
-  re_enable_breakpoints_in_shlibs ();
 }
 
 /* target_so_ops callback.  Do additional symbol handling, lookup, etc. after

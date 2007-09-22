@@ -194,9 +194,7 @@ gdb_test "info break" \
 
 gdb_run_cmd
 gdb_test "" \
-"Breakpoint.*at.*
-Pending breakpoint \"pendshr.c:$bp2_loc if x > 3\" resolved.*
-Breakpoint.*, main.*$mainline.*" \
+".*Breakpoint.*, main.*$mainline.*" \
 "running to main"
 
 #
@@ -204,8 +202,7 @@ Breakpoint.*, main.*$mainline.*" \
 #
 
 gdb_test "enable 1" \
-"Breakpoint.*at.*
-Pending breakpoint \"pendfunc1.* resolved.*" \
+"" \
 "re-enabling pending breakpoint that can resolve instantly"
 
 #

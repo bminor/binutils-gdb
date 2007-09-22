@@ -89,9 +89,7 @@ set unloadshr_line [gdb_get_line_number "unloadshr break" ${libsrcfile}]
 
 gdb_run_cmd
 gdb_test "" \
-"Breakpoint.*at.*
-Pending breakpoint \"shrfunc1\" resolved.*
-Breakpoint.*, shrfunc1 \\\(x=3\\\).*unloadshr.c:$unloadshr_line.*" \
+".*Breakpoint.*, shrfunc1 \\\(x=3\\\).*unloadshr.c:$unloadshr_line.*" \
 "running program"
 
 gdb_test "continue" \

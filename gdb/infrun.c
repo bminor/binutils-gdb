@@ -1337,10 +1337,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 #endif
 	  target_terminal_inferior ();
 
-	  /* Try to reenable shared library breakpoints, additional
-	     code segments in shared libraries might be mapped in now. */
-	  re_enable_breakpoints_in_shlibs ();
-
 	  /* If requested, stop when the dynamic linker notifies
 	     gdb of events.  This allows the user to get control
 	     and place breakpoints in initializer routines for
@@ -2275,10 +2271,6 @@ process_event_stop_test:
 	  solib_add (NULL, 0, &current_target, auto_solib_add);
 #endif
 	  target_terminal_inferior ();
-
-	  /* Try to reenable shared library breakpoints, additional
-	     code segments in shared libraries might be mapped in now. */
-	  re_enable_breakpoints_in_shlibs ();
 
 	  /* If requested, stop when the dynamic linker notifies
 	     gdb of events.  This allows the user to get control

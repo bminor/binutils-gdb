@@ -1,3 +1,10 @@
+2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.base/pending.exp: No longer expect "Pending breakpoint resolved"
+	messages.
+	* gdb.base/chng-syms.exp: Likewise.
+	* gdb.base/unload.exp: Likewise.
+		
 2007-09-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/sepdebug.exp (test_different_dir): Append to pf_prefix.

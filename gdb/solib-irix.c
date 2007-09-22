@@ -457,7 +457,6 @@ irix_solib_create_inferior_hook (void)
      suppresses the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
   stop_soon = NO_STOP_QUIETLY;
-  re_enable_breakpoints_in_shlibs ();
 }
 
 /* LOCAL FUNCTION

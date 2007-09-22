@@ -203,6 +203,8 @@ static void ep_skip_leading_whitespace (char **s);
 
 static int single_step_breakpoint_inserted_here_p (CORE_ADDR pc);
 
+static void free_bp_location (struct bp_location *loc);
+
 /* Prototypes for exported functions. */
 
 /* If FALSE, gdb will not use hardware support for watchpoints, even
@@ -4140,6 +4142,13 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
   return loc;
 }
 
+static void free_bp_location (struct bp_location *loc)
+{
+  if (loc->cond)
+    xfree (loc->cond);
+  xfree (loc);
+}
+
 /* set_raw_breakpoint() is a low level routine for allocating and
    partially initializing a breakpoint of type BPTYPE.  The newly
    created breakpoint's address, section, source file name, and line
@@ -4396,51 +4405,6 @@ struct lang_and_radix
     int radix;
   };
 
-/* Cleanup helper routine to restore the current language and
-   input radix.  */
-static void
-do_restore_lang_radix_cleanup (void *old)
-{
-  struct lang_and_radix *p = old;
-  set_language (p->lang);
-  input_radix = p->radix;
-}
-
-/* Try and resolve a pending breakpoint.  */
-static int
-resolve_pending_breakpoint (struct breakpoint *b)
-{
-  /* Try and reparse the breakpoint in case the shared library
-     is now loaded.  */
-  struct symtabs_and_lines sals;
-  struct symtab_and_line pending_sal;
-  char **cond_string = (char **) NULL;
-  char *copy_arg = b->addr_string;
-  char **addr_string;
-  char *errmsg;
-  int rc;
-  int not_found = 0;
-  struct ui_file *old_gdb_stderr;
-  struct lang_and_radix old_lr;
-  struct cleanup *old_chain;
-  
-  /* Set language, input-radix, then reissue breakpoint command. 
-     Ensure the language and input-radix are restored afterwards.  */
-  old_lr.lang = current_language->la_language;
-  old_lr.radix = input_radix;
-  old_chain = make_cleanup (do_restore_lang_radix_cleanup, &old_lr);
-  
-  set_language (b->language);
-  input_radix = b->input_radix;
-  rc = break_command_1 (b->addr_string, b->flag, b->from_tty, b);
-  
-  if (rc == GDB_RC_OK)
-    /* Pending breakpoint has been resolved.  */
-    printf_filtered (_("Pending breakpoint \"%s\" resolved\n"), b->addr_string);
-
-  do_cleanups (old_chain);
-  return rc;
-}
 
 void
 remove_solib_event_breakpoints (void)
@@ -4519,37 +4483,6 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 	      }
 	    disabled_shlib_breaks = 1;
 	  }
-      }
-  }
-}
-
-/* Try to reenable any breakpoints in shared libraries.  */
-void
-re_enable_breakpoints_in_shlibs (void)
-{
-  struct breakpoint *b, *tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, tmp)
-  {
-    if (b->enable_state == bp_shlib_disabled)
-      {
-	gdb_byte buf[1];
-	char *lib;
-	
-	/* Do not reenable the breakpoint if the shared library is
-	   still not mapped in.  */
-#ifdef PC_SOLIB
-	lib = PC_SOLIB (b->loc->address);
-#else
-	lib = solib_address (b->loc->address);
-#endif
-	if (lib != NULL && target_read_memory (b->loc->address, buf, 1) == 0)
-	  b->enable_state = bp_enabled;
-      }
-    else if (b->pending && (b->enable_state == bp_enabled))
-      {
-	if (resolve_pending_breakpoint (b) == GDB_RC_OK)
-	  delete_breakpoint (b);
       }
   }
 }
@@ -5422,11 +5355,8 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
     }
   else
     {
-      struct symtab_and_line sal;
+      struct symtab_and_line sal = {0};
       struct breakpoint *b;
-
-      sal.symtab = NULL;
-      sal.pc = 0;
 
       make_cleanup (xfree, copy_arg);
 
@@ -7153,6 +7083,97 @@ delete_command (char *arg, int from_tty)
     map_breakpoint_numbers (arg, delete_breakpoint);
 }
 
+static void
+unlink_locations_from_global_list (struct breakpoint *bpt)
+  /* Remove locations of this breakpoint from the list of
+     all breakpoint locations.  */
+{
+  struct bp_location **tmp = &bp_location_chain;
+  struct bp_location *here = bpt->loc;
+
+  if (here == NULL)
+    return;
+
+  for (; *tmp && *tmp != here; tmp = &((*tmp)->next));
+  gdb_assert (*tmp);
+       
+  *tmp = here->next;	
+}
+
+
+static void
+update_breakpoint_location (struct breakpoint *b,
+			    struct symtabs_and_lines sals)
+{
+  int i;
+  char *s;
+  /* FIXME: memleak.  */
+  struct bp_location *existing = b->loc;
+  struct bp_location *loc;
+  struct symtab_and_line sal;
+  
+  if (b->enable_state == bp_shlib_disabled && sals.nelts == 0)
+    return;
+
+  unlink_locations_from_global_list (b);
+  b->loc = NULL;
+
+  gdb_assert (sals.nelts == 0 || sals.nelts == 1);
+  if (sals.nelts == 0)
+    return;
+  sal = sals.sals[0];
+
+  loc = allocate_bp_location (b, b->type);
+  loc->requested_address = sal.pc;
+  loc->address = adjust_breakpoint_address (loc->requested_address,
+					    b->type);
+  loc->section = sal.section;
+  b->loc = loc;
+
+  /* Reparse conditions, they might contain references to the
+     old symtab.  */
+  if (b->cond_string != NULL)
+    {
+      struct gdb_exception e;
+      
+      s = b->cond_string;
+      TRY_CATCH (e, RETURN_MASK_ERROR)
+	{
+	  loc->cond = parse_exp_1 (&s, block_for_pc (sal.pc), 
+				   0);
+	}
+      if (e.reason < 0)
+	{
+	  warning (_("failed to reevaluate condition for breakpoint %d: %s"), 
+		   b->number, e.message);
+	  b->enable_state = bp_disabled;
+	}
+    }
+
+  if (b->source_file != NULL)
+    xfree (b->source_file);
+  if (sal.symtab == NULL)
+    b->source_file = NULL;
+  else
+    b->source_file =
+      savestring (sal.symtab->filename,
+		  strlen (sal.symtab->filename));
+
+  if (b->line_number == 0)
+    b->line_number = sal.line;
+
+  if (b->enable_state == bp_shlib_disabled)
+    b->enable_state = bp_enabled;
+
+  b->pending = 0;
+
+  check_duplicates (b);
+
+  if (existing)
+    free_bp_location (existing);
+}
+
+
 /* Reset a breakpoint given it's struct breakpoint * BINT.
    The value we return ends up being the return value from catch_errors.
    Unused in this case.  */
@@ -7164,11 +7185,13 @@ breakpoint_re_set_one (void *bint)
   struct breakpoint *b = (struct breakpoint *) bint;
   struct value *mark;
   int i;
-  int not_found;
-  int *not_found_ptr = NULL;
-  struct symtabs_and_lines sals;
+  int not_found = 0;
+  int *not_found_ptr = &not_found;
+  struct symtabs_and_lines sals = {};
   char *s;
   enum enable_state save_enable;
+  struct gdb_exception e;
+
 
   switch (b->type)
     {
@@ -7186,115 +7209,59 @@ breakpoint_re_set_one (void *bint)
 	  delete_breakpoint (b);
 	  return 0;
 	}
-      /* HACK: cagney/2001-11-11: kettenis/2001-11-11: MarkK wrote:
-
-	 ``And a hack it is, although Apple's Darwin version of GDB
-	 contains an almost identical hack to implement a "future
-	 break" command.  It seems to work in many real world cases,
-	 but it is easy to come up with a test case where the patch
-	 doesn't help at all.''
-
-	 ``It seems that the way GDB implements breakpoints - in -
-	 shared - libraries was designed for a.out shared library
-	 systems (SunOS 4) where shared libraries were loaded at a
-	 fixed address in memory.  Since ELF shared libraries can (and
-	 will) be loaded at any address in memory, things break.
-	 Fixing this is not trivial.  Therefore, I'm not sure whether
-	 we should add this hack to the branch only.  I cannot
-	 guarantee that things will be fixed on the trunk in the near
-	 future.''
-
-         In case we have a problem, disable this breakpoint.  We'll
-         restore its status if we succeed.  Don't disable a
-         shlib_disabled breakpoint though.  There's a fair chance we
-         can't re-set it if the shared library it's in hasn't been
-         loaded yet.  */
-
-      if (b->pending)
-	break;
-
-      save_enable = b->enable_state;
-      if (b->enable_state != bp_shlib_disabled)
-        b->enable_state = bp_disabled;
-      else
-	/* If resetting a shlib-disabled breakpoint, we don't want to
-	   see an error message if it is not found since we will expect
-	   this to occur until the shared library is finally reloaded.
-	   We accomplish this by giving decode_line_1 a pointer to use
-	   for silent notification that the symbol is not found.  */
-	not_found_ptr = &not_found;
 
       set_language (b->language);
       input_radix = b->input_radix;
       s = b->addr_string;
-      sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL,
-		            not_found_ptr);
-      for (i = 0; i < sals.nelts; i++)
+      TRY_CATCH (e, RETURN_MASK_ERROR)
 	{
-	  resolve_sal_pc (&sals.sals[i]);
-
-	  /* Reparse conditions, they might contain references to the
-	     old symtab.  */
-	  if (b->cond_string != NULL)
-	    {
-	      s = b->cond_string;
-	      if (b->loc->cond)
-		{
-		  xfree (b->loc->cond);
-		  /* Avoid re-freeing b->exp if an error during the call
-		     to parse_exp_1.  */
-		  b->loc->cond = NULL;
-		}
-	      b->loc->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
-	    }
-
-	  /* We need to re-set the breakpoint if the address changes... */
-	  if (b->loc->address != sals.sals[i].pc
-	  /* ...or new and old breakpoints both have source files, and
-	     the source file name or the line number changes...  */
-	      || (b->source_file != NULL
-		  && sals.sals[i].symtab != NULL
-		  && (strcmp (b->source_file, sals.sals[i].symtab->filename) != 0
-		      || b->line_number != sals.sals[i].line)
-	      )
-	  /* ...or we switch between having a source file and not having
-	     one.  */
-	      || ((b->source_file == NULL) != (sals.sals[i].symtab == NULL))
-	    )
-	    {
-	      if (b->source_file != NULL)
-		xfree (b->source_file);
-	      if (sals.sals[i].symtab == NULL)
-		b->source_file = NULL;
-	      else
-		b->source_file =
-		  savestring (sals.sals[i].symtab->filename,
-			      strlen (sals.sals[i].symtab->filename));
-	      b->line_number = sals.sals[i].line;
-	      b->loc->requested_address = sals.sals[i].pc;
-	      b->loc->address
-	        = adjust_breakpoint_address (b->loc->requested_address,
-		                             b->type);
-
-	      /* Used to check for duplicates here, but that can
-	         cause trouble, as it doesn't check for disabled
-	         breakpoints. */
-
-	      mention (b);
-
-	      /* Might be better to do this just once per breakpoint_re_set,
-	         rather than once for every breakpoint.  */
-	      breakpoints_changed ();
-	    }
-	  b->loc->section = sals.sals[i].section;
-	  b->enable_state = save_enable;	/* Restore it, this worked. */
-
-
-	  /* Now that this is re-enabled, check_duplicates
-	     can be used. */
-	  check_duplicates (b);
-
+	  sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, (char ***) NULL,
+				not_found_ptr);
 	}
+      if (e.reason < 0)
+	{
+	  int not_found_and_ok = 0;
+	  /* For pending breakpoints, it's expected that parsing
+	     will fail until the right shared library is loaded.
+	     User has already told to create pending breakpoints and
+	     don't need extra messages.  If breakpoint is in bp_shlib_disabled
+	     state, then user already saw the message about that breakpoint
+	     being disabled, and don't want to see more errors.  */
+	  if (not_found && (b->pending || b->enable_state == bp_shlib_disabled
+			    || b->enable_state == bp_disabled))
+	    not_found_and_ok = 1;
+
+	  if (!not_found_and_ok)
+	    {
+	      /* We surely don't want to warn about the same breakpoint
+		 10 times.  One solution, implemented here, is disable
+		 the breakpoint on error.  Another solution would be to
+		 have separate 'warning emitted' flag.  Since this
+		 happens only when a binary has changed, I don't know
+		 which approach is better.  */
+	      b->enable_state = bp_disabled;
+	      throw_exception (e);
+	    }
+	}
+
+      if (not_found)
+	break;
+      
+      gdb_assert (sals.nelts == 1);
+      resolve_sal_pc (&sals.sals[0]);
+      if (b->pending && s && s[0])
+	{
+	  char *cond_string = 0;
+	  int thread = -1;
+	  find_condition_and_thread (s, sals.sals[0].pc, 
+				     &cond_string, &thread);
+	  if (cond_string)
+	    b->cond_string = cond_string;
+	  b->thread = thread;
+	}
+
+      update_breakpoint_location (b, sals);
+
       xfree (sals.sals);
       break;
 
@@ -7408,7 +7375,7 @@ breakpoint_re_set (void)
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
     /* Format possible error msg */
-    char *message = xstrprintf ("Error in re-setting breakpoint %d:\n",
+    char *message = xstrprintf ("Error in re-setting breakpoint %d: ",
 				b->number);
     struct cleanup *cleanups = make_cleanup (xfree, message);
     catch_errors (breakpoint_re_set_one, b, message, RETURN_MASK_ALL);
@@ -7635,94 +7602,75 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 	error (_("Hardware breakpoints used exceeds limit."));
     }
 
-  if (bpt->pending)
+  if (bpt->enable_state != bp_permanent)
+    bpt->enable_state = bp_enabled;
+  bpt->disposition = disposition;
+  check_duplicates (bpt);
+  breakpoints_changed ();
+  
+  if (bpt->type == bp_watchpoint || 
+      bpt->type == bp_hardware_watchpoint ||
+      bpt->type == bp_read_watchpoint || 
+      bpt->type == bp_access_watchpoint)
     {
-      if (bpt->enable_state != bp_enabled)
-	{
-	  /* When enabling a pending breakpoint, we need to check if the breakpoint
-	     is resolvable since shared libraries could have been loaded
-	     after the breakpoint was disabled.  */
-	  breakpoints_changed ();
- 	  if (resolve_pending_breakpoint (bpt) == GDB_RC_OK)
-	    {
-	      delete_breakpoint (bpt);
-	      return;
-	    }
-	  bpt->enable_state = bp_enabled;
-	  bpt->disposition = disposition;
-	}
-    }
-  else  /* Not a pending breakpoint.  */
-    {
-      if (bpt->enable_state != bp_permanent)
-	bpt->enable_state = bp_enabled;
-      bpt->disposition = disposition;
-      check_duplicates (bpt);
-      breakpoints_changed ();
+      struct frame_id saved_frame_id;
       
-      if (bpt->type == bp_watchpoint || 
-	  bpt->type == bp_hardware_watchpoint ||
-	  bpt->type == bp_read_watchpoint || 
-	  bpt->type == bp_access_watchpoint)
+      saved_frame_id = get_frame_id (get_selected_frame (NULL));
+      if (bpt->exp_valid_block != NULL)
 	{
-	  struct frame_id saved_frame_id;
-
-	  saved_frame_id = get_frame_id (get_selected_frame (NULL));
-	  if (bpt->exp_valid_block != NULL)
+	  struct frame_info *fr =
+	    fr = frame_find_by_id (bpt->watchpoint_frame);
+	  if (fr == NULL)
 	    {
-	      struct frame_info *fr =
-		fr = frame_find_by_id (bpt->watchpoint_frame);
-	      if (fr == NULL)
-		{
-		  printf_filtered (_("\
+	      printf_filtered (_("\
 Cannot enable watchpoint %d because the block in which its expression\n\
 is valid is not currently in scope.\n"), bpt->number);
-		  bpt->enable_state = bp_disabled;
-		  return;
-		}
-	      select_frame (fr);
+	      bpt->enable_state = bp_disabled;
+	      return;
 	    }
+	  select_frame (fr);
+	}
+      
+      value_free (bpt->val);
+      mark = value_mark ();
+      bpt->val = evaluate_expression (bpt->exp);
+      release_value (bpt->val);
+      if (value_lazy (bpt->val))
+	value_fetch_lazy (bpt->val);
+      
+      if (bpt->type == bp_hardware_watchpoint ||
+	  bpt->type == bp_read_watchpoint ||
+	  bpt->type == bp_access_watchpoint)
+	{
+	  int i = hw_watchpoint_used_count (bpt->type, &other_type_used);
+	  int mem_cnt = can_use_hardware_watchpoint (bpt->val);
 	  
-	  value_free (bpt->val);
-	  mark = value_mark ();
-	  bpt->val = evaluate_expression (bpt->exp);
-	  release_value (bpt->val);
-	  if (value_lazy (bpt->val))
-	    value_fetch_lazy (bpt->val);
-	  
-	  if (bpt->type == bp_hardware_watchpoint ||
-	      bpt->type == bp_read_watchpoint ||
-	      bpt->type == bp_access_watchpoint)
+	  /* Hack around 'unused var' error for some targets here */
+	  (void) mem_cnt, (void) i;
+	  target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT (
+								    bpt->type, i + mem_cnt, other_type_used);
+	  /* we can consider of type is bp_hardware_watchpoint, convert to 
+	     bp_watchpoint in the following condition */
+	  if (target_resources_ok < 0)
 	    {
-	      int i = hw_watchpoint_used_count (bpt->type, &other_type_used);
-	      int mem_cnt = can_use_hardware_watchpoint (bpt->val);
-	      
-	      /* Hack around 'unused var' error for some targets here */
-	      (void) mem_cnt, (void) i;
-	      target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT (
-									bpt->type, i + mem_cnt, other_type_used);
-	      /* we can consider of type is bp_hardware_watchpoint, convert to 
-		 bp_watchpoint in the following condition */
-	      if (target_resources_ok < 0)
-		{
-		  printf_filtered (_("\
+	      printf_filtered (_("\
 Cannot enable watchpoint %d because target watch resources\n\
 have been allocated for other watchpoints.\n"), bpt->number);
-		  bpt->enable_state = bp_disabled;
-		  value_free_to_mark (mark);
-		  return;
-		}
+	      bpt->enable_state = bp_disabled;
+	      value_free_to_mark (mark);
+	      return;
 	    }
-	  
-	  select_frame (frame_find_by_id (saved_frame_id));
-	  value_free_to_mark (mark);
 	}
+      
+      select_frame (frame_find_by_id (saved_frame_id));
+      value_free_to_mark (mark);
     }
 
   if (deprecated_modify_breakpoint_hook)
     deprecated_modify_breakpoint_hook (bpt);
   breakpoint_modify_event (bpt->number);
 }
+
 
 void
 enable_breakpoint (struct breakpoint *bpt)

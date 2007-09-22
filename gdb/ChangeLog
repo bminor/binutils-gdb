@@ -1,5 +1,31 @@
 2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* breakpoint.c (do_restore_lang_radix_cleanup): Remove.
+	(resolve_pending_breakpoint): Remove.
+	(re_enable_breakpoints_in_shlibs): Remove.
+	(unlink_locations_from_global_list): New.
+	(update_breakpoint_locations): New.
+	(breakpoint_re_set_one): Don't bail out on pending breakpoints.
+	Use parse_condition and update_breakpoint_location to
+	reset breakpoint.  Ignore 'symbol not found' error from
+	decode_line_1.
+	(breakpoint_re_set): Don't emit newline before the
+	reason why breakpoint is not reset.
+	(do_enable_breakpoint): Don't specially process pending
+	breakpoints.
+	(free_bp_location): New.
+	(break_command_1): For pending breakpoints, initialize
+	all fields of a sal with zeroes.
+	* breakpoint.h (re_enable_breakpoints_in_shlibs): Remove.
+	* infcmd.c (post_create_inferior): Don't call
+	re_enable_breakpoints_in_shlibs.
+	* infrun.c (handle_inferior_event): Likewise.
+	* solib-irix.c (irix_solib_create_inferior_hook): Likewise.
+	* solib-osf.c (osf_solib_create_inferior_hook): Likewise.
+	* win32-nat.c (get_win32_debug_event): Likewise.
+	
+2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* breakpoint.c (create_breakpoint): Split from
 	create_breakpoints, implementing most of its logic.
 	Take just a single sal, single address string and

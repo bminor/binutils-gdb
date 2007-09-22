@@ -799,8 +799,6 @@ extern void remove_thread_event_breakpoints (void);
 
 extern void disable_breakpoints_in_shlibs (void);
 
-extern void re_enable_breakpoints_in_shlibs (void);
-
 extern void create_solib_load_event_breakpoint (char *, int, char *, char *);
 
 extern void create_solib_unload_event_breakpoint (char *, int,

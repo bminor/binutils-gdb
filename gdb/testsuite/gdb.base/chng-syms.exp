@@ -105,10 +105,10 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
     gdb_run_cmd
     gdb_expect {
-	-re "Error in re-setting .*No symbol .var1..*Program exited normally.*$gdb_prompt $" {
+	-re ".*No symbol .var1..*Program exited normally.*$gdb_prompt $" {
 	    pass "running with invalidated bpt condition after executable changes" 
 	}
-	-re "Error in re-setting .*No symbol .var1..*Breakpoint .*,( 0x.* in)? (\[^ \]*)exit .*$gdb_prompt $" {
+	-re "No symbol .var1..*Breakpoint .*,( 0x.* in)? (\[^ \]*)exit .*$gdb_prompt $" {
 	    pass "running with invalidated bpt condition after executable changes" 
 	}
 	-re "$gdb_prompt $" { 
