@@ -88,7 +88,7 @@ class File_read
   class View
   {
    public:
-    View(off_t start, off_t size, unsigned char* data)
+    View(off_t start, off_t size, const unsigned char* data)
       : start_(start), size_(size), data_(data), lock_count_(0)
     { }
 
@@ -102,7 +102,7 @@ class File_read
     size() const
     { return this->size_; }
 
-    unsigned char*
+    const unsigned char*
     data() const
     { return this->data_; }
 
@@ -121,7 +121,7 @@ class File_read
 
     off_t start_;
     off_t size_;
-    unsigned char* data_;
+    const unsigned char* data_;
     int lock_count_;
   };
 
