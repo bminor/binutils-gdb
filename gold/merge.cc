@@ -208,32 +208,6 @@ Output_merge_data::do_write(Output_file* of)
   of->write(this->offset(), this->p_, this->len_);
 }
 
-// Compute a hash code for a Merge_string_key, which is an object, a
-// section index, and an offset.
-
-template<typename Char_type>
-size_t
-Output_merge_string<Char_type>::Merge_string_key_hash::operator()(
-    const Merge_string_key& key) const
-{
-  // This is a very simple minded hash code.  Fix it if it we get too
-  // many collisions.
-  const std::string& oname(key.object->name());
-  return oname[0] + oname.length() + key.shndx + key.offset;
-}
-
-// Compare two Merge_string_keys for equality.
-
-template<typename Char_type>
-bool
-Output_merge_string<Char_type>::Merge_string_key_eq::operator()(
-    const Merge_string_key& k1, const Merge_string_key& k2) const
-{
-  return (k1.object == k2.object
-	  && k1.shndx == k2.shndx
-	  && k1.offset == k2.offset);
-}
-
 // Add an input section to a merged string section.
 
 template<typename Char_type>
@@ -275,10 +249,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
       const Char_type* str = this->stringpool_.add(p, NULL);
 
-      Merge_string_key k(object, shndx, i);
-      typename Merge_string_hashtable::value_type v(k, str);
-      bool b = this->hashtable_.insert(v).second;
-      gold_assert(b);
+      this->merged_strings_.push_back(Merged_string(object, shndx, i, str));
 
       p += plen + 1;
       i += plen + 1;
@@ -297,17 +268,17 @@ Output_merge_string<Char_type>::do_set_address(uint64_t, off_t)
 {
   this->stringpool_.set_string_offsets();
 
-  for (typename Merge_string_hashtable::const_iterator p =
-	 this->hashtable_.begin();
-       p != this->hashtable_.end();
+  for (typename Merged_strings::const_iterator p =
+	 this->merged_strings_.begin();
+       p != this->merged_strings_.end();
        ++p)
-    this->add_mapping(p->first.object, p->first.shndx, p->first.offset,
-		      this->stringpool_.get_offset(p->second));
+    this->add_mapping(p->object, p->shndx, p->offset,
+		      this->stringpool_.get_offset(p->string));
 
   this->set_data_size(this->stringpool_.get_strtab_size());
 
   // Save some memory.
-  this->hashtable_.clear();
+  this->merged_strings_.clear();
 }
 
 // Write out a merged string section.

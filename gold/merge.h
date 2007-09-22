@@ -169,7 +169,7 @@ class Output_merge_string : public Output_merge_base
 {
  public:
   Output_merge_string()
-    : Output_merge_base(sizeof(Char_type)), stringpool_(), hashtable_()
+    : Output_merge_base(sizeof(Char_type)), stringpool_(), merged_strings_()
   { this->stringpool_.set_no_zero_null(); }
 
   // Add an input section.
@@ -187,38 +187,30 @@ class Output_merge_string : public Output_merge_base
  private:
   // As we see input sections, we build a mapping from object, section
   // index and offset to strings.
-  struct Merge_string_key
+  struct Merged_string
   {
+    // The input object where the string was found.
     Relobj* object;
+    // The input section in the input object.
     unsigned int shndx;
+    // The offset in the input section.
     off_t offset;
+    // The string itself, a pointer into a Stringpool.
+    const Char_type* string;
 
-    Merge_string_key(Relobj *objecta, unsigned int shndxa, off_t offseta)
-      : object(objecta), shndx(shndxa), offset(offseta)
+    Merged_string(Relobj *objecta, unsigned int shndxa, off_t offseta,
+		  const Char_type* stringa)
+      : object(objecta), shndx(shndxa), offset(offseta), string(stringa)
     { }
   };
 
-  struct Merge_string_key_hash
-  {
-    size_t
-    operator()(const Merge_string_key&) const;
-  };
-
-  struct Merge_string_key_eq
-  {
-    bool
-    operator()(const Merge_string_key&, const Merge_string_key&) const;
-  };
-
-  typedef Unordered_map<Merge_string_key, const Char_type*,
-			Merge_string_key_hash, Merge_string_key_eq>
-    Merge_string_hashtable;
+  typedef std::vector<Merged_string> Merged_strings;
 
   // As we see the strings, we add them to a Stringpool.
   Stringpool_template<Char_type> stringpool_;
   // Map from a location in an input object to an entry in the
   // Stringpool.
-  Merge_string_hashtable hashtable_;
+  Merged_strings merged_strings_;
 };
 
 } // End namespace gold.
