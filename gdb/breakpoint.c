@@ -569,17 +569,17 @@ condition_command (char *arg, int from_tty)
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
     {
-      if (b->cond)
+      struct bp_location *loc = b->loc;
+      if (loc->cond)
 	{
-	  xfree (b->cond);
-	  b->cond = 0;
+	  xfree (loc->cond);
+	  loc->cond = 0;
 	}
       if (b->cond_string != NULL)
 	xfree (b->cond_string);
 
       if (*p == 0)
 	{
-	  b->cond = 0;
 	  b->cond_string = NULL;
 	  if (from_tty)
 	    printf_filtered (_("Breakpoint %d now unconditional.\n"), bnum);
@@ -592,7 +592,8 @@ condition_command (char *arg, int from_tty)
 	  b->cond_string = savestring (arg, strlen (arg));
 	  if (!b->pending)
 	    {
-	      b->cond = parse_exp_1 (&arg, block_for_pc (b->loc->address), 0);
+	      b->loc->cond = parse_exp_1 (&arg, 
+					  block_for_pc (b->loc->address), 0);
 	      if (*arg)
 		error (_("Junk at end of expression"));
 	    }
@@ -2923,19 +2924,19 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
       {
 	int value_is_zero = 0;
 
-	if (b->cond)
+	if (b->loc->cond)
 	  {
 	    /* Need to select the frame, with all that implies
 	       so that the conditions will have the right context.  */
 	    select_frame (get_current_frame ());
 	    value_is_zero
-	      = catch_errors (breakpoint_cond_eval, (b->cond),
+	      = catch_errors (breakpoint_cond_eval, (b->loc->cond),
 			      "Error in testing breakpoint condition:\n",
 			      RETURN_MASK_ALL);
 	    /* FIXME-someday, should give breakpoint # */
 	    free_all_values ();
 	  }
-	if (b->cond && value_is_zero)
+	if (b->loc->cond && value_is_zero)
 	  {
 	    bs->stop = 0;
 	    /* Don't consider this a hit.  */
@@ -3606,14 +3607,14 @@ print_one_breakpoint (struct breakpoint *b,
       ui_out_text (uiout, "\n");
     }
   
-  if (b->cond && !ada_exception_catchpoint_p (b))
+  if (b->loc->cond && !ada_exception_catchpoint_p (b))
     {
       /* We do not print the condition for Ada exception catchpoints
          because the condition is an internal implementation detail
          that we do not want to expose to the user.  */
       annotate_field (7);
       ui_out_text (uiout, "\tstop only if ");
-      print_expression (b->cond, stb->stream);
+      print_expression (b->loc->cond, stb->stream);
       ui_out_field_stream (uiout, "cond", stb);
       ui_out_text (uiout, "\n");
     }
@@ -4085,6 +4086,7 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
   memset (loc, 0, sizeof (*loc));
 
   loc->owner = bpt;
+  loc->cond = NULL;
 
   switch (bp_type)
     {
@@ -4604,7 +4606,6 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
   b = set_raw_breakpoint (sals.sals[0], bp_kind);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->cond = NULL;
   b->cond_string = (cond_string == NULL) ? 
     NULL : savestring (cond_string, strlen (cond_string));
   b->thread = thread;
@@ -4661,7 +4662,6 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
   b = set_raw_breakpoint (sal, bp_kind);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->cond = NULL;
   b->cond_string = (cond_string == NULL) ? 
     NULL : savestring (cond_string, strlen (cond_string));
   b->thread = thread;
@@ -4700,7 +4700,6 @@ create_exec_event_catchpoint (int tempflag, char *cond_string)
   b = set_raw_breakpoint (sal, bp_catch_exec);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->cond = NULL;
   b->cond_string = (cond_string == NULL) ?
     NULL : savestring (cond_string, strlen (cond_string));
   b->thread = thread;
@@ -5033,7 +5032,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	b = set_raw_breakpoint (sal, type);
 	set_breakpoint_count (breakpoint_count + 1);
 	b->number = breakpoint_count;
-	b->cond = cond[i];
+	b->loc->cond = cond[i];
 	b->thread = thread;
 	if (addr_string[i])
 	  b->addr_string = addr_string[i];
@@ -5056,7 +5055,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	      {
 		arg = pending_bp->cond_string;
 		b->cond_string = savestring (arg, strlen (arg));
-		b->cond = parse_exp_1 (&arg, block_for_pc (b->loc->address), 0);
+		b->loc->cond = parse_exp_1 (&arg, block_for_pc (b->loc->address), 0);
 		if (*arg)
 		  error (_("Junk at end of pending breakpoint condition expression"));
 	      }
@@ -5399,7 +5398,7 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 		              : bp_breakpoint);
       set_breakpoint_count (breakpoint_count + 1);
       b->number = breakpoint_count;
-      b->cond = *cond;
+      b->loc->cond = *cond;
       b->thread = thread;
       b->addr_string = *addr_string;
       b->cond_string = *cond_string;
@@ -5792,7 +5791,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   b->exp_valid_block = exp_valid_block;
   b->exp_string = savestring (exp_start, exp_end - exp_start);
   b->val = val;
-  b->cond = cond;
+  b->loc->cond = cond;
   if (cond_start)
     b->cond_string = savestring (cond_start, cond_end - cond_start);
   else
@@ -6352,7 +6351,6 @@ create_exception_catchpoint (int tempflag, char *cond_string,
   b = set_raw_breakpoint (*sal, bptype);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->cond = NULL;
   b->cond_string = (cond_string == NULL) ? 
     NULL : savestring (cond_string, strlen (cond_string));
   b->thread = thread;
@@ -6432,7 +6430,6 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
   b = set_raw_breakpoint (sals.sals[0], bp_breakpoint);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->cond = NULL;
   b->cond_string = (cond_string == NULL) ? 
     NULL : savestring (cond_string, strlen (cond_string));
   b->thread = -1;
@@ -6519,7 +6516,7 @@ create_ada_exception_breakpoint (struct symtab_and_line sal,
   b->disposition = tempflag ? disp_del : disp_donttouch;
   b->number = breakpoint_count;
   b->ignore_count = 0;
-  b->cond = cond;
+  b->loc->cond = cond;
   b->addr_string = addr_string;
   b->language = language_ada;
   b->cond_string = cond_string;
@@ -6701,7 +6698,6 @@ set_breakpoint_sal (struct symtab_and_line sal)
   b = set_raw_breakpoint (sal, bp_breakpoint);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->cond = 0;
   b->thread = -1;
   return b;
 }
@@ -7021,8 +7017,6 @@ delete_breakpoint (struct breakpoint *bpt)
     }
 
   free_command_lines (&bpt->commands);
-  if (bpt->cond)
-    xfree (bpt->cond);
   if (bpt->cond_string != NULL)
     xfree (bpt->cond_string);
   if (bpt->addr_string != NULL)
@@ -7062,6 +7056,8 @@ delete_breakpoint (struct breakpoint *bpt)
      bp, we mark it as deleted before freeing its storage. */
   bpt->type = bp_none;
 
+  if (bpt->loc->cond)
+    xfree (bpt->loc->cond);
   xfree (bpt->loc);
   xfree (bpt);
 }
@@ -7215,14 +7211,14 @@ breakpoint_re_set_one (void *bint)
 	  if (b->cond_string != NULL)
 	    {
 	      s = b->cond_string;
-	      if (b->cond)
+	      if (b->loc->cond)
 		{
-		  xfree (b->cond);
+		  xfree (b->loc->cond);
 		  /* Avoid re-freeing b->exp if an error during the call
 		     to parse_exp_1.  */
-		  b->cond = NULL;
+		  b->loc->cond = NULL;
 		}
-	      b->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
+	      b->loc->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
 	    }
 
 	  /* We need to re-set the breakpoint if the address changes... */
@@ -7314,14 +7310,14 @@ breakpoint_re_set_one (void *bint)
       if (b->cond_string != NULL)
 	{
 	  s = b->cond_string;
-	  if (b->cond)
+	  if (b->loc->cond)
 	    {
-	      xfree (b->cond);
+	      xfree (b->loc->cond);
 	      /* Avoid re-freeing b->exp if an error during the call
 		 to parse_exp_1.  */
-	      b->cond = NULL;
+	      b->loc->cond = NULL;
 	    }
-	  b->cond = parse_exp_1 (&s, (struct block *) 0, 0);
+	  b->loc->cond = parse_exp_1 (&s, (struct block *) 0, 0);
 	}
       if (breakpoint_enabled (b))
 	mention (b);

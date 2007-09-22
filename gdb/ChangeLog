@@ -1,5 +1,20 @@
 2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
 
+	gdb/
+	* breakpoint.h (struct breakpoint): Move the cond 
+	field to...
+	(struct bp_location): Here.
+	* breakpoint.c (condition_command, bpstat_stop_status)
+	(print_one_breakpoint, allocate_bp_location)
+	(solib_load_unload_1, create_fork_vfork_event_catchpoint)
+	(create_exec_event_catchpoint, create_breakpoints)
+	(break_command_1, watch_command_1, handle_gnu_v3_exceptions)
+	(create_ada_exception_breakpoint, set_breakpoint_sal)
+	(delete_breakpoint, breakpoint_re_set_one): Adjust.
+	* tui/tui-winsource.c (tui_update_breakpoint_info): Adjust.
+	
+2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Associate bp_stat with bp_location, not breakpoint.
 	* breakpoint.h (breakpoint_at): Change type
 	to bp_location*.

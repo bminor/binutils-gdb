@@ -243,6 +243,13 @@ struct bp_location
      than reference counting.  */
   struct breakpoint *owner;
 
+  /* Conditional.  Break only if this expression's value is nonzero.  
+     Unlike string form of condition, which is associated with breakpoint,
+     this is associated with location, since if breakpoint has several
+     locations,  the evaluation of expression can be different for
+     different locations.  */
+  struct expression *cond;
+  
   /* Nonzero if this breakpoint is now inserted.  */
   char inserted;
 
@@ -341,8 +348,6 @@ struct breakpoint
     /* Stack depth (address of frame).  If nonzero, break only if fp
        equals this.  */
     struct frame_id frame_id;
-    /* Conditional.  Break only if this expression's value is nonzero.  */
-    struct expression *cond;
 
     /* String we used to set the breakpoint (malloc'd).  */
     char *addr_string;
