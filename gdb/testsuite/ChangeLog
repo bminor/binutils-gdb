@@ -1,3 +1,15 @@
+2007-09-23  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* gdb.base/annota1.exp: Adjust for 'info break'
+	format changes.
+	* gdb.base/annota3.exp: Likewise.
+	* gdb.base/break.exp: Likewise.
+	* gdb.base/condbreak.exp: Likewise.
+	* gdb.base/pending.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/unload.exp: Likewise.
+	* gdb.base/ovldbreak.exp: Likewise.
+	
 2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.base/pending.exp: No longer expect "Pending breakpoint resolved"

@@ -1,3 +1,80 @@
+2007-09-23  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Allow a code breakpoint to have several locations
+	associated with it.
+	* breakpoint.h (enum enable_state): Remove the
+	bp_shlib_disabled enumerator. 
+	(struct bp_location): New members shlib_disabled,
+	global_next, enabled and function_name.
+	Rename pending to condition_not_parsed.
+
+	* breakpoint.c (ALL_BP_LOCATIONS): Iterate over global_next.
+	(ALL_BP_LOCATIONS_SAFE): Likewise.
+	(breakpoint_enabled): Don't check for pending.
+	(condition_command): Free and update all locations of
+	a breakpoint.
+	(insert_bp_location): Adjust.
+	(software_breakpoint_inserted_here_p): Don't care
+	if breakpoint is enabled, as soon as it's inserted.
+	(print_it_typical): Print bpstat's location, not
+	bpstat's breakpoint's location.
+	(bpstat_stop_status): Iterate over all locations, not
+	all breakpoints.
+	(print_breakpoint_location): New.
+	(print_one_breakpoint): Renamed to
+	(print_one_breakpoint_location): ...this. Take
+	parameters to describe which location is being
+	printed. Modify code to properly print header
+	for several locations and individual locations.
+	(print_one_breakpoint): Print all locations.
+	(breakpoint_has_pc): New.
+	(describe_other_breakpoints): Use the above.
+	(check_duplicates): Renamed to...
+	(check_duplicates_for): .. this.
+	(check_duplicates): Use check_duplicates_for.
+	(allocate_bp_location): Adjust.
+	(set_raw_breakpoint_without_location): New,
+	extracted from set_raw_breakpoint.
+	(set_breakpoint_location_function): New.
+	(set_raw_breakpoint): Use 
+	set_raw_breakpoint_without_location.
+	(make_breakpoint_permanent): Mark all locations
+	as inserted.
+	(disable_breakpoints_in_shlibs): Iterate over
+	locations.
+	(disable_breakpoints_in_unloaded_shlib): Likewise.
+	(re_enable_breakpoints_in_shlibs): Likewise.
+	(mention): Say "pending" when breakpoint has
+	zero locations.  If breakpoint has more than one
+	location, say so.
+	(add_location_to_breakpoint): New.
+	(create_breakpoint): Accept symtabs_and_lines, not
+	symtab_and_line. Pass extra sals to 
+	add_location_to_breakpoint.
+	(create_breakpoints): Pass symtabs_and_lines to
+	create_breakpoints.
+	(break_command_1): Make pending breakpoints
+	have zero locations.
+	(do_captured_breakpoint): Remove wrong allocation.
+	(clear_command): Iterate over all locations.
+	(unlink_locations_from_global_list): Renamed
+	from unlink_location_from_global_list. Remove
+	all locations.
+	(delete_breakpoint): Remove all locations.
+	Iterate over all locations when deciding which
+	other location to re-enable.
+	(all_locations_are_pending): New.
+	(update_breakpoint_locations): Renamed from
+	update_breakpoint_location. Try to match old
+	and new locations using names of containing
+	functions.
+	(breakpoint_re_set_one): Adjust.
+	(find_location_by_number): New.
+	(disable_command): Allow disabling individual location.
+	(enable_command): Allow enabling individual location.
+	* breakpoint.c: Adjust all uses of breakpoint's
+	enable state to for bp_shlib_disabled change.
+	
 2007-09-22  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* breakpoint.c (do_restore_lang_radix_cleanup): Remove.

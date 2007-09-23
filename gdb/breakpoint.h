@@ -143,9 +143,6 @@ enum enable_state
   {
     bp_disabled,	/* The eventpoint is inactive, and cannot trigger. */
     bp_enabled,		/* The eventpoint is active, and can trigger. */
-    bp_shlib_disabled,	/* The eventpoint's address is in an unloaded solib.
-			   The eventpoint will be automatically enabled 
-			   and reset when that solib is loaded. */
     bp_call_disabled,	/* The eventpoint has been disabled while a call 
 			   into the inferior is "in flight", because some 
 			   eventpoints interfere with the implementation of 
@@ -232,9 +229,14 @@ enum bp_loc_type
 
 struct bp_location
 {
-  /* Chain pointer to the next breakpoint location.  */
+  /* Chain pointer to the next breakpoint location for
+     the same parent breakpoint.  */
   struct bp_location *next;
 
+  /* Pointer to the next breakpoint location, in a global
+     list of all breakpoint locations.  */
+  struct bp_location *global_next;
+ 
   /* Type of this breakpoint location.  */
   enum bp_loc_type loc_type;
 
@@ -249,6 +251,14 @@ struct bp_location
      locations,  the evaluation of expression can be different for
      different locations.  */
   struct expression *cond;
+
+  /* This location's address is in an unloaded solib, and so this
+     location should not be inserted.  It will be automatically
+     enabled when that solib is loaded.  */
+  char shlib_disabled; 
+
+  /* Is this particular location enabled.  */
+  char enabled;
   
   /* Nonzero if this breakpoint is now inserted.  */
   char inserted;
@@ -280,6 +290,8 @@ struct bp_location
      which to place the breakpoint in order to comply with a
      processor's architectual constraints.  */
   CORE_ADDR requested_address;
+
+  char *function_name;
 
   /* Details of the placed breakpoint, when inserted.  */
   struct bp_target_info target_info;
@@ -423,8 +435,10 @@ struct breakpoint
        second bit : 0 normal breakpoint, 1 hardware breakpoint. */
     int flag;
 
-    /* Is breakpoint pending on shlib loads?  */
-    int pending;
+    /* Is breakpoint's condition not yet parsed because we found
+       no location initially so had no context to parse
+       the condition in.  */
+    int condition_not_parsed;
   };
 
 /* The following stuff is an abstract data type "bpstat" ("breakpoint
