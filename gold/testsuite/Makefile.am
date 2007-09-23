@@ -16,11 +16,17 @@ INCLUDES = -D_GNU_SOURCE \
 
 if GCC
 if NATIVE_LINKER
+
 NATIVE_TESTING = \
 	basic_test \
 	basic_pic_test \
 	basic_static_test \
-	basic_static_pic_test
+	basic_static_pic_test \
+	constructor_test
+
+NATIVE_PROGS = \
+	constructor_test
+
 endif
 endif
 
@@ -31,7 +37,7 @@ libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 
 LDADD = libgoldtest.a ../libgold.a
 
-check_PROGRAMS = object_unittest
+check_PROGRAMS = object_unittest $(NATIVE_PROGS)
 
 object_unittest_SOURCES = object_unittest.cc
 
@@ -57,6 +63,10 @@ basic_pic_test: basic_pic_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ basic_pic_test.o
 basic_static_pic_test: basic_pic_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -static basic_pic_test.o
+
+constructor_test_SOURCES = constructor_test.cc
+constructor_test_DEPENDENCIES = gcctestdir/ld
+constructor_test_LDFLAGS = -Bgcctestdir/
 
 endif
 endif

@@ -42,7 +42,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-check_PROGRAMS = object_unittest$(EXEEXT)
+check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1)
+@GCC_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a ../libgold.a
+@NATIVE_LINKER_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -64,6 +67,13 @@ libgoldtest_a_LIBADD =
 am_libgoldtest_a_OBJECTS = test.$(OBJEXT) testmain.$(OBJEXT) \
 	testfile.$(OBJEXT)
 libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_1 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test$(EXEEXT)
+am__constructor_test_SOURCES_DIST = constructor_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_constructor_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test.$(OBJEXT)
+constructor_test_OBJECTS = $(am_constructor_test_OBJECTS)
+constructor_test_LDADD = $(LDADD)
 am_object_unittest_OBJECTS = object_unittest.$(OBJEXT)
 object_unittest_OBJECTS = $(am_object_unittest_OBJECTS)
 object_unittest_LDADD = $(LDADD)
@@ -76,8 +86,11 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(libgoldtest_a_SOURCES) $(object_unittest_SOURCES)
-DIST_SOURCES = $(libgoldtest_a_SOURCES) $(object_unittest_SOURCES)
+SOURCES = $(libgoldtest_a_SOURCES) $(constructor_test_SOURCES) \
+	$(object_unittest_SOURCES)
+DIST_SOURCES = $(libgoldtest_a_SOURCES) \
+	$(am__constructor_test_SOURCES_DIST) \
+	$(object_unittest_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -212,13 +225,20 @@ INCLUDES = -D_GNU_SOURCE \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@NATIVE_PROGS = \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test
 
 TESTS = object_unittest $(NATIVE_TESTING)
 check_LIBRARIES = libgoldtest.a
 libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 LDADD = libgoldtest.a ../libgold.a
 object_unittest_SOURCES = object_unittest.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_SOURCES = constructor_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_LDFLAGS = -Bgcctestdir/
 all: all-am
 
 .SUFFIXES:
@@ -262,6 +282,9 @@ libgoldtest.a: $(libgoldtest_a_OBJECTS) $(libgoldtest_a_DEPENDENCIES)
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+constructor_test$(EXEEXT): $(constructor_test_OBJECTS) $(constructor_test_DEPENDENCIES) 
+	@rm -f constructor_test$(EXEEXT)
+	$(CXXLINK) $(constructor_test_LDFLAGS) $(constructor_test_OBJECTS) $(constructor_test_LDADD) $(LIBS)
 object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENCIES) 
 	@rm -f object_unittest$(EXEEXT)
 	$(CXXLINK) $(object_unittest_LDFLAGS) $(object_unittest_OBJECTS) $(object_unittest_LDADD) $(LIBS)
@@ -272,6 +295,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constructor_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfile.Po@am__quote@
