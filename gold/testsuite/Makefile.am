@@ -22,10 +22,12 @@ NATIVE_TESTING = \
 	basic_pic_test \
 	basic_static_test \
 	basic_static_pic_test \
-	constructor_test
+	constructor_test \
+	constructor_static_test
 
 NATIVE_PROGS = \
-	constructor_test
+	constructor_test \
+	constructor_static_test
 
 endif
 endif
@@ -67,6 +69,10 @@ basic_static_pic_test: basic_pic_test.o gcctestdir/ld
 constructor_test_SOURCES = constructor_test.cc
 constructor_test_DEPENDENCIES = gcctestdir/ld
 constructor_test_LDFLAGS = -Bgcctestdir/
+
+constructor_static_test_SOURCES = constructor_test.cc
+constructor_static_test_DEPENDENCIES = gcctestdir/ld
+constructor_static_test_LDFLAGS = -Bgcctestdir/ -static
 
 endif
 endif
