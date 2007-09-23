@@ -323,6 +323,21 @@ class Symbol
     this->plt_offset_ = plt_offset;
   }
 
+  // Return whether this dynamic symbol needs a special value in the
+  // dynamic symbol table.
+  bool
+  needs_dynsym_value() const
+  { return this->needs_dynsym_value_; }
+
+  // Set that this dynamic symbol needs a special value in the dynamic
+  // symbol table.
+  void
+  set_needs_dynsym_value()
+  {
+    gold_assert(this->object()->is_dynamic());
+    this->needs_dynsym_value_ = true;
+  }
+
   // Return true if the final value of this symbol is known at link
   // time.
   bool
@@ -528,6 +543,9 @@ class Symbol
   bool has_got_offset_ : 1;
   // True if the symbol has an entry in the PLT section.
   bool has_plt_offset_ : 1;
+  // True if this is a dynamic symbol which needs a special value in
+  // the dynamic symbol table.
+  bool needs_dynsym_value_ : 1;
   // True if there is a warning for this symbol.
   bool has_warning_ : 1;
 };
@@ -1003,7 +1021,9 @@ class Symbol_table
   // Write out a symbol to P.
   template<int size, bool big_endian>
   void
-  sized_write_symbol(Sized_symbol<size>*, unsigned int shndx,
+  sized_write_symbol(Sized_symbol<size>*,
+		     typename elfcpp::Elf_types<size>::Elf_Addr value,
+		     unsigned int shndx,
 		     const Stringpool*, unsigned char* p
                      ACCEPT_SIZE_ENDIAN) const;
 

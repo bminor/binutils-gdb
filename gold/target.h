@@ -114,6 +114,13 @@ class Target
   finalize_sections(Layout* layout)
   { return this->do_finalize_sections(layout); }
 
+  // Return the value to use for a global symbol which needs a special
+  // value in the dynamic symbol table.  This will only be called if
+  // the backend first calls symbol->set_needs_dynsym_value().
+  uint64_t
+  dynsym_value(const Symbol* sym) const
+  { return this->do_dynsym_value(sym); }
+
   // Return a string to use to fill out a code section.  This is
   // basically one or more NOPS which must fill out the specified
   // length in bytes.
@@ -157,6 +164,11 @@ class Target
   virtual void
   do_finalize_sections(Layout*)
   { }
+
+  // Virtual function which may be implemented by the child class.
+  virtual uint64_t
+  do_dynsym_value(const Symbol*) const
+  { gold_unreachable(); }
 
   // Virtual function which must be implemented by the child class if
   // needed.

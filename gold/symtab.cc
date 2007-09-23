@@ -1307,7 +1307,7 @@ Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
 
 template<int size, bool big_endian>
 void
-Symbol_table::sized_write_globals(const Target*,
+Symbol_table::sized_write_globals(const Target* target,
 				  const Stringpool* sympool,
 				  const Stringpool* dynpool,
 				  Output_file* of) const
@@ -1359,6 +1359,7 @@ Symbol_table::sized_write_globals(const Target*,
 	}
 
       unsigned int shndx;
+      typename elfcpp::Elf_types<32>::Elf_Addr value = sym->value();
       switch (sym->source())
 	{
 	case Symbol::FROM_OBJECT:
@@ -1377,7 +1378,8 @@ Symbol_table::sized_write_globals(const Target*,
 	    Object* symobj = sym->object();
 	    if (symobj->is_dynamic())
 	      {
-		// FIXME.
+		if (sym->needs_dynsym_value())
+		  value = target->dynsym_value(sym);
 		shndx = elfcpp::SHN_UNDEF;
 	      }
 	    else if (in_shndx == elfcpp::SHN_UNDEF
@@ -1413,7 +1415,7 @@ Symbol_table::sized_write_globals(const Target*,
       if (sym_index != -1U)
 	{
 	  this->sized_write_symbol SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-              sym, shndx, sympool, ps
+	      sym, sym->value(), shndx, sympool, ps
               SELECT_SIZE_ENDIAN(size, big_endian));
 	  ps += sym_size;
 	}
@@ -1424,7 +1426,7 @@ Symbol_table::sized_write_globals(const Target*,
 	  gold_assert(dynsym_index < dynamic_count);
 	  unsigned char* pd = dynamic_view + (dynsym_index * sym_size);
 	  this->sized_write_symbol SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-              sym, shndx, dynpool, pd
+	      sym, value, shndx, dynpool, pd
               SELECT_SIZE_ENDIAN(size, big_endian));
 	}
     }
@@ -1441,15 +1443,17 @@ Symbol_table::sized_write_globals(const Target*,
 
 template<int size, bool big_endian>
 void
-Symbol_table::sized_write_symbol(Sized_symbol<size>* sym,
-				 unsigned int shndx,
-				 const Stringpool* pool,
-				 unsigned char* p
-                                 ACCEPT_SIZE_ENDIAN) const
+Symbol_table::sized_write_symbol(
+    Sized_symbol<size>* sym,
+    typename elfcpp::Elf_types<size>::Elf_Addr value,
+    unsigned int shndx,
+    const Stringpool* pool,
+    unsigned char* p
+    ACCEPT_SIZE_ENDIAN) const
 {
   elfcpp::Sym_write<size, big_endian> osym(p);
   osym.put_st_name(pool->get_offset(sym->name()));
-  osym.put_st_value(sym->value());
+  osym.put_st_value(value);
   osym.put_st_size(sym->symsize());
   osym.put_st_info(elfcpp::elf_st_info(sym->binding(), sym->type()));
   osym.put_st_other(elfcpp::elf_st_other(sym->visibility(), sym->nonvis()));
