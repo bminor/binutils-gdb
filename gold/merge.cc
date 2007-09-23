@@ -86,7 +86,8 @@ Output_merge_base::do_output_address(const Relobj* object, unsigned int shndx,
 
   // If MK is not in the map, lower_bound returns the next iterator
   // larger than it.
-  if (p->first.object != object
+  if (p == this->merge_map_.end()
+      || p->first.object != object
       || p->first.shndx != shndx
       || p->first.offset != offset)
     {
