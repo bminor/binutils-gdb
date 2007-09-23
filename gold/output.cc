@@ -839,7 +839,8 @@ Output_section::Input_section::output_address(const Relobj* object,
 					  output_section_address, poutput);
   else
     {
-      if (this->u2_.object != object)
+      if (this->shndx_ != shndx
+	  || this->u2_.object != object)
 	return false;
       off_t output_offset;
       Output_section* os = object->output_section(shndx, &output_offset);
