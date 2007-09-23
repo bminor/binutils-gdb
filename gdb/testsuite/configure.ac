@@ -46,6 +46,8 @@ case $target in
  | *-sun-*        \
  | hppa*-*-*      \
  | *-*-elf*       \
+ | *-*-cygwin*    \
+ | *-*-mingw*     \
  )
     with_stabs=yes ;;
  *)
