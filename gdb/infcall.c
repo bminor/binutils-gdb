@@ -339,8 +339,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
   CORE_ADDR sp;
   CORE_ADDR dummy_addr;
-  struct type *values_type;
-  unsigned char struct_return;
+  struct type *values_type, *target_values_type;
+  unsigned char struct_return = 0, lang_struct_return = 0;
   CORE_ADDR struct_addr = 0;
   struct regcache *retbuf;
   struct cleanup *retbuf_cleanup;
@@ -354,6 +354,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct regcache *caller_regcache;
   struct cleanup *caller_regcache_cleanup;
   struct frame_id dummy_id;
+  struct cleanup *args_cleanup;
 
   if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
     ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
@@ -460,10 +461,30 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     using_gcc = (b == NULL ? 2 : BLOCK_GCC_COMPILED (b));
   }
 
-  /* Are we returning a value using a structure return or a normal
-     value return? */
+  /* Are we returning a value using a structure return (passing a
+     hidden argument pointing to storage) or a normal value return?
+     There are two cases: language-mandated structure return and
+     target ABI structure return.  The variable STRUCT_RETURN only
+     describes the latter.  The language version is handled by passing
+     the return location as the first parameter to the function,
+     even preceding "this".  This is different from the target
+     ABI version, which is target-specific; for instance, on ia64
+     the first argument is passed in out0 but the hidden structure
+     return pointer would normally be passed in r8.  */
 
-  struct_return = using_struct_return (values_type, using_gcc);
+  if (language_pass_by_reference (values_type))
+    {
+      lang_struct_return = 1;
+
+      /* Tell the target specific argument pushing routine not to
+	 expect a value.  */
+      target_values_type = builtin_type_void;
+    }
+  else
+    {
+      struct_return = using_struct_return (values_type, using_gcc);
+      target_values_type = values_type;
+    }
 
   /* Determine the location of the breakpoint (and possibly other
      stuff) that the called function will return to.  The SPARC, for a
@@ -482,7 +503,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       if (gdbarch_inner_than (current_gdbarch, 1, 2))
 	{
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
-				using_gcc, args, nargs, values_type,
+				using_gcc, args, nargs, target_values_type,
 				&real_pc, &bp_addr, get_current_regcache ());
 	  dummy_addr = sp;
 	}
@@ -490,7 +511,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	{
 	  dummy_addr = sp;
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
-				using_gcc, args, nargs, values_type,
+				using_gcc, args, nargs, target_values_type,
 				&real_pc, &bp_addr, get_current_regcache ());
 	}
       break;
@@ -557,8 +578,11 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	  param_type = TYPE_FIELD_TYPE (ftype, i);
 	else
 	  param_type = NULL;
-	
+
 	args[i] = value_arg_coerce (args[i], param_type, prototyped);
+
+	if (param_type != NULL && language_pass_by_reference (param_type))
+	  args[i] = value_addr (args[i]);
 
 	/* elz: this code is to handle the case in which the function
 	   to be called has a pointer to function as parameter and the
@@ -659,7 +683,7 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
      stack, if necessary.  Make certain that the value is correctly
      aligned. */
 
-  if (struct_return)
+  if (struct_return || lang_struct_return)
     {
       int len = TYPE_LENGTH (values_type);
       if (gdbarch_inner_than (current_gdbarch, 1, 2))
@@ -684,12 +708,30 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
 	}
     }
 
+  if (lang_struct_return)
+    {
+      struct value **new_args;
+
+      /* Add the new argument to the front of the argument list.  */
+      new_args = xmalloc (sizeof (struct value *) * (nargs + 1));
+      new_args[0] = value_from_pointer (lookup_pointer_type (values_type),
+					struct_addr);
+      memcpy (&new_args[1], &args[0], sizeof (struct value *) * nargs);
+      args = new_args;
+      nargs++;
+      args_cleanup = make_cleanup (xfree, args);
+    }
+  else
+    args_cleanup = make_cleanup (null_cleanup, NULL);
+
   /* Create the dummy stack frame.  Pass in the call dummy address as,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
   sp = gdbarch_push_dummy_call (current_gdbarch, function,
 				get_current_regcache (), bp_addr, nargs, args,
 				sp, struct_return, struct_addr);
+
+  do_cleanups (args_cleanup);
 
   /* Set up a frame ID for the dummy frame so we can pass it to
      set_momentary_breakpoint.  We need to give the breakpoint a frame
@@ -882,7 +924,9 @@ the function call)."), name);
   {
     struct value *retval = NULL;
 
-    if (TYPE_CODE (values_type) == TYPE_CODE_VOID)
+    if (lang_struct_return)
+      retval = value_at (values_type, struct_addr);
+    else if (TYPE_CODE (target_values_type) == TYPE_CODE_VOID)
       {
 	/* If the function returns void, don't bother fetching the
 	   return value.  */
@@ -892,7 +936,7 @@ the function call)."), name);
       {
 	struct gdbarch *arch = current_gdbarch;
 
-	switch (gdbarch_return_value (arch, values_type, NULL, NULL, NULL))
+	switch (gdbarch_return_value (arch, target_values_type, NULL, NULL, NULL))
 	  {
 	  case RETURN_VALUE_REGISTER_CONVENTION:
 	  case RETURN_VALUE_ABI_RETURNS_ADDRESS:

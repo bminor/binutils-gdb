@@ -1045,6 +1045,23 @@ language_class_name_from_physname (const struct language_defn *current_language,
   return NULL;
 }
 
+/* Return non-zero if TYPE should be passed (and returned) by
+   reference at the language level.  */
+int
+language_pass_by_reference (struct type *type)
+{
+  return current_language->la_pass_by_reference (type);
+}
+
+/* Return zero; by default, types are passed by value at the language
+   level.  The target ABI may pass or return some structs by reference
+   independent of this.  */
+int
+default_pass_by_reference (struct type *type)
+{
+  return 0;
+}
+
 /* Return the default string containing the list of characters
    delimiting words.  This is a reasonable default value that
    most languages should be able to use.  */
@@ -1191,6 +1208,7 @@ const struct language_defn unknown_language_defn =
   default_word_break_characters,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
+  default_pass_by_reference,
   LANG_MAGIC
 };
 
@@ -1228,6 +1246,7 @@ const struct language_defn auto_language_defn =
   default_word_break_characters,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
+  default_pass_by_reference,
   LANG_MAGIC
 };
 
@@ -1264,6 +1283,7 @@ const struct language_defn local_language_defn =
   default_word_break_characters,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
+  default_pass_by_reference,
   LANG_MAGIC
 };
 

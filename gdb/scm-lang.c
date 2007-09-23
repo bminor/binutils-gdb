@@ -267,6 +267,7 @@ const struct language_defn scm_language_defn =
   default_word_break_characters,
   c_language_arch_info,
   default_print_array_index,
+  default_pass_by_reference,
   LANG_MAGIC
 };
 

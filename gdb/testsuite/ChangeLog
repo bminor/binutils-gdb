@@ -1,3 +1,7 @@
+2007-09-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/pass-by-ref.cc, gdb.cp/pass-by-ref.exp: New files.
+
 2007-09-23  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* configure.ac: Do gdb.stabs tests by default on Cygwin and MinGW

@@ -1,3 +1,31 @@
+2007-09-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infcall.c (call_function_by_hand): Handle language-specific
+	pass and return by reference.
+
+	* cp-abi.c (cp_pass_by_reference): New.
+	* cp-abi.h (cp_pass_by_reference): Declare.
+	(struct cp_abi_ops): Add pass_by_reference.
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): New.
+	(init_gnuv3_ops): Set pass_by_reference.
+
+	* language.c (language_pass_by_reference): New.
+	(default_pass_by_reference): New.
+	(unknown_language_defn, auto_language_defn, local_language_defn): Add
+	default_pass_by_reference.
+	* langauge.h (struct language_defn): Add la_pass_by_reference.
+	(language_pass_by_reference, default_pass_by_reference): Declare.
+	* ada-lang.c (ada_language_defn): Add default_pass_by_reference.
+	* c-lang.c (c_language_defn, asm_language_defn)
+	(minimal_language_defn): Likewise.
+	(cplus_language_defn): Add cp_pass_by_reference.
+	* f-lang.c (f_language_defn): Add default_pass_by_reference.
+	* jv-lang.c (java_language_defn): Likewise.
+	* m2-lang.c (m2_language_defn): Likewise.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* p-lang.c (pascal_language_defn): Likewise.
+	* scm-lang.c (scm_language_defn): Likewise
+
 2007-09-23  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Allow a code breakpoint to have several locations

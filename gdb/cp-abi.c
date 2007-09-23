@@ -135,6 +135,14 @@ cplus_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   return (*current_cp_abi.method_ptr_to_value) (this_p, method_ptr);
 }
 
+int
+cp_pass_by_reference (struct type *type)
+{
+  if ((current_cp_abi.pass_by_reference) == NULL)
+    return 0;
+  return (*current_cp_abi.pass_by_reference) (type);
+}
+
 /* Set the current C++ ABI to SHORT_NAME.  */
 
 static int

@@ -716,6 +716,87 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
   return real_stop_pc;
 }
 
+/* Return nonzero if a type should be passed by reference.
+
+   The rule in the v3 ABI document comes from section 3.1.1.  If the
+   type has a non-trivial copy constructor or destructor, then the
+   caller must make a copy (by calling the copy constructor if there
+   is one or perform the copy itself otherwise), pass the address of
+   the copy, and then destroy the temporary (if necessary).
+
+   For return values with non-trivial copy constructors or
+   destructors, space will be allocated in the caller, and a pointer
+   will be passed as the first argument (preceding "this").
+
+   We don't have a bulletproof mechanism for determining whether a
+   constructor or destructor is trivial.  For GCC and DWARF2 debug
+   information, we can check the artificial flag.
+
+   We don't do anything with the constructors or destructors,
+   but we have to get the argument passing right anyway.  */
+static int
+gnuv3_pass_by_reference (struct type *type)
+{
+  int fieldnum, fieldelem;
+
+  CHECK_TYPEDEF (type);
+
+  /* We're only interested in things that can have methods.  */
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+      && TYPE_CODE (type) != TYPE_CODE_CLASS
+      && TYPE_CODE (type) != TYPE_CODE_UNION)
+    return 0;
+
+  for (fieldnum = 0; fieldnum < TYPE_NFN_FIELDS (type); fieldnum++)
+    for (fieldelem = 0; fieldelem < TYPE_FN_FIELDLIST_LENGTH (type, fieldnum);
+	 fieldelem++)
+      {
+	struct fn_field *fn = TYPE_FN_FIELDLIST1 (type, fieldnum);
+	char *name = TYPE_FN_FIELDLIST_NAME (type, fieldnum);
+	struct type *fieldtype = TYPE_FN_FIELD_TYPE (fn, fieldelem);
+
+	/* If this function is marked as artificial, it is compiler-generated,
+	   and we assume it is trivial.  */
+	if (TYPE_FN_FIELD_ARTIFICIAL (fn, fieldelem))
+	  continue;
+
+	/* If we've found a destructor, we must pass this by reference.  */
+	if (name[0] == '~')
+	  return 1;
+
+	/* If the mangled name of this method doesn't indicate that it
+	   is a constructor, we're not interested.
+
+	   FIXME drow/2007-09-23: We could do this using the name of
+	   the method and the name of the class instead of dealing
+	   with the mangled name.  We don't have a convenient function
+	   to strip off both leading scope qualifiers and trailing
+	   template arguments yet.  */
+	if (!is_constructor_name (TYPE_FN_FIELD_PHYSNAME (fn, fieldelem)))
+	  continue;
+
+	/* If this method takes two arguments, and the second argument is
+	   a reference to this class, then it is a copy constructor.  */
+	if (TYPE_NFIELDS (fieldtype) == 2
+	    && TYPE_CODE (TYPE_FIELD_TYPE (fieldtype, 1)) == TYPE_CODE_REF
+	    && check_typedef (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (fieldtype, 1))) == type)
+	  return 1;
+      }
+
+  /* Even if all the constructors and destructors were artificial, one
+     of them may have invoked a non-artificial constructor or
+     destructor in a base class.  If any base class needs to be passed
+     by reference, so does this class.  Similarly for members, which
+     are constructed whenever this class is.  We do not need to worry
+     about recursive loops here, since we are only looking at members
+     of complete class type.  */
+  for (fieldnum = 0; fieldnum < TYPE_NFIELDS (type); fieldnum++)
+    if (gnuv3_pass_by_reference (TYPE_FIELD_TYPE (type, fieldnum)))
+      return 1;
+
+  return 0;
+}
+
 static void
 init_gnuv3_ops (void)
 {
@@ -738,6 +819,7 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.make_method_ptr = gnuv3_make_method_ptr;
   gnu_v3_abi_ops.method_ptr_to_value = gnuv3_method_ptr_to_value;
   gnu_v3_abi_ops.skip_trampoline = gnuv3_skip_trampoline;
+  gnu_v3_abi_ops.pass_by_reference = gnuv3_pass_by_reference;
 }
 
 extern initialize_file_ftype _initialize_gnu_v3_abi; /* -Wmissing-prototypes */

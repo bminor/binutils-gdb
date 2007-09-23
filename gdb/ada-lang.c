@@ -10441,6 +10441,7 @@ const struct language_defn ada_language_defn = {
   ada_get_gdb_completer_word_break_characters,
   ada_language_arch_info,
   ada_print_array_index,
+  default_pass_by_reference,
   LANG_MAGIC
 };
 

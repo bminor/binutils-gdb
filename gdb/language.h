@@ -280,6 +280,10 @@ struct language_defn
                                   int format,
                                   enum val_prettyprint pretty);
 
+    /* Return non-zero if TYPE should be passed (and returned) by
+       reference at the language level.  */
+    int (*la_pass_by_reference) (struct type *type);
+
     /* Add fields above this point, so the magic number is always last. */
     /* Magic number for compat checking */
 
@@ -470,5 +474,14 @@ extern void default_print_array_index (struct value *index_value,
                                        struct ui_file *stream,
                                        int format,
                                        enum val_prettyprint pretty);
+
+/* Return non-zero if TYPE should be passed (and returned) by
+   reference at the language level.  */
+int language_pass_by_reference (struct type *type);
+
+/* Return zero; by default, types are passed by value at the language
+   level.  The target ABI may pass or return some structs by reference
+   independent of this.  */
+int default_pass_by_reference (struct type *type);
 
 #endif /* defined (LANGUAGE_H) */
