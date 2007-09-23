@@ -17,17 +17,27 @@ INCLUDES = -D_GNU_SOURCE \
 if GCC
 if NATIVE_LINKER
 
+NATIVE_PROGS = \
+	constructor_test \
+	constructor_static_test \
+	two_file_test \
+	two_file_shared_1_test \
+	two_file_shared_2_test \
+	two_file_same_shared_test \
+	two_file_separate_shared_12_test \
+	two_file_separate_shared_21_test \
+	two_file_shared_1_nonpic_test \
+	two_file_shared_2_nonpic_test \
+	two_file_same_shared_nonpic_test \
+	two_file_separate_shared_12_nonpic_test \
+	two_file_separate_shared_21_nonpic_test
+
 NATIVE_TESTING = \
 	basic_test \
 	basic_pic_test \
 	basic_static_test \
 	basic_static_pic_test \
-	constructor_test \
-	constructor_static_test
-
-NATIVE_PROGS = \
-	constructor_test \
-	constructor_static_test
+	$(NATIVE_PROGS)
 
 endif
 endif
@@ -73,6 +83,99 @@ constructor_test_LDFLAGS = -Bgcctestdir/
 constructor_static_test_SOURCES = constructor_test.cc
 constructor_static_test_DEPENDENCIES = gcctestdir/ld
 constructor_static_test_LDFLAGS = -Bgcctestdir/ -static
+
+two_file_test_SOURCES = \
+	two_file_test_1.cc \
+	two_file_test_2.cc \
+	two_file_test_main.cc \
+	two_file_test.h
+two_file_test_DEPENDENCIES = gcctestdir/ld
+two_file_test_LDFLAGS = -Bgcctestdir/
+
+two_file_shared_1_test_SOURCES = two_file_test_2.cc two_file_test_main.cc
+two_file_shared_1_test_DEPENDENCIES = gcctestdir/ld two_file_shared_1.so
+two_file_shared_1_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_shared_1_test_LDADD = two_file_shared_1.so
+
+two_file_shared_2_test_SOURCES = two_file_test_1.cc two_file_test_main.cc
+two_file_shared_2_test_DEPENDENCIES = gcctestdir/ld two_file_shared_2.so
+two_file_shared_2_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_shared_2_test_LDADD = two_file_shared_2.so
+
+two_file_same_shared_test_SOURCES = two_file_test_main.cc
+two_file_same_shared_test_DEPENDENCIES = gcctestdir/ld two_file_shared.so
+two_file_same_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_same_shared_test_LDADD = two_file_shared.so
+
+two_file_separate_shared_12_test_SOURCES = two_file_test_main.cc
+two_file_separate_shared_12_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_shared_1.so two_file_shared_2.so
+two_file_separate_shared_12_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_separate_shared_12_test_LDADD = \
+	two_file_shared_1.so two_file_shared_2.so
+
+two_file_separate_shared_21_test_SOURCES = two_file_test_main.cc
+two_file_separate_shared_21_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_shared_1.so two_file_shared_2.so
+two_file_separate_shared_21_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_separate_shared_21_test_LDADD = \
+	two_file_shared_2.so two_file_shared_1.so
+
+# FIXME: The nonpic tests will fail on platforms which can not put
+# non-PIC code into shared libraries; how should we handle this?
+
+two_file_shared_1_nonpic_test_SOURCES = \
+	two_file_test_2.cc two_file_test_main.cc
+two_file_shared_1_nonpic_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_shared_1_nonpic.so
+two_file_shared_1_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_shared_1_nonpic_test_LDADD = two_file_shared_1_nonpic.so
+
+two_file_shared_2_nonpic_test_SOURCES = \
+	two_file_test_1.cc two_file_test_main.cc
+two_file_shared_2_nonpic_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_shared_2_nonpic.so
+two_file_shared_2_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_shared_2_nonpic_test_LDADD = two_file_shared_2_nonpic.so
+
+two_file_same_shared_nonpic_test_SOURCES = two_file_test_main.cc
+two_file_same_shared_nonpic_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_shared_nonpic.so
+two_file_same_shared_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_same_shared_nonpic_test_LDADD = two_file_shared_nonpic.so
+
+two_file_separate_shared_12_nonpic_test_SOURCES = two_file_test_main.cc
+two_file_separate_shared_12_nonpic_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_shared_1_nonpic.so two_file_shared_2_nonpic.so
+two_file_separate_shared_12_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_separate_shared_12_nonpic_test_LDADD = \
+	two_file_shared_1_nonpic.so two_file_shared_2_nonpic.so
+
+two_file_separate_shared_21_nonpic_test_SOURCES = two_file_test_main.cc
+two_file_separate_shared_21_nonpic_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_shared_1_nonpic.so two_file_shared_2_nonpic.so
+two_file_separate_shared_21_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_separate_shared_21_nonpic_test_LDADD = \
+	two_file_shared_2_nonpic.so two_file_shared_1_nonpic.so
+
+two_file_test_1_pic.o: two_file_test_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+two_file_test_2_pic.o: two_file_test_2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+
+two_file_shared_1.so: two_file_test_1_pic.o
+	$(CXXLINK) -shared two_file_test_1_pic.o
+two_file_shared_2.so: two_file_test_2_pic.o
+	$(CXXLINK) -shared two_file_test_2_pic.o
+two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o
+	$(CXXLINK) -shared two_file_test_1_pic.o two_file_test_2_pic.o
+
+two_file_shared_1_nonpic.so: two_file_test_1.o
+	$(CXXLINK) -shared two_file_test_1.o
+two_file_shared_2_nonpic.so: two_file_test_2.o
+	$(CXXLINK) -shared two_file_test_2.o
+two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o
+	$(CXXLINK) -shared two_file_test_1.o two_file_test_2.o
 
 endif
 endif
