@@ -1416,7 +1416,7 @@ Layout::add_comdat(const char* signature, bool group)
   else if (group)
     {
       // This is a real section group, and we've already seen a
-      // linkonce section with tihs signature.  Record that we've seen
+      // linkonce section with this signature.  Record that we've seen
       // a section group, and don't include this section group.
       ins.first->second = true;
       return false;
