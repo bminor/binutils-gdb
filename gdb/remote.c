@@ -2103,28 +2103,24 @@ get_offsets (void)
   do_segments = (data != NULL);
   do_sections = num_segments == 0;
 
-  /* Text= and Data= specify offsets for the text and data sections,
-     but symfile_map_offsets_to_segments expects base addresses
-     instead of offsets.  If we have two segments, we can still
-     try to relocate the whole segments instead of just ".text"
-     and ".data".  */
-  if (num_segments == 0)
+  if (num_segments > 0)
     {
-      do_sections = 1;
-      if (data == NULL || data->num_segments != 2)
-	do_segments = 0;
-      else
-	{
-	  segments[0] = data->segment_bases[0] + text_addr;
-	  segments[1] = data->segment_bases[1] + data_addr;
-	}
-    }
-  else
-    {
-      do_sections = 0;
       segments[0] = text_addr;
       segments[1] = data_addr;
     }
+  /* If we have two segments, we can still try to relocate everything
+     by assuming that the .text and .data offsets apply to the whole
+     text and data segments.  Convert the offsets given in the packet
+     to base addresses for symfile_map_offsets_to_segments.  */
+  else if (data && data->num_segments == 2)
+    {
+      segments[0] = data->segment_bases[0] + text_addr;
+      segments[1] = data->segment_bases[1] + data_addr;
+      num_segments = 2;
+    }
+  /* There's no way to relocate by segment.  */
+  else
+    do_segments = 0;
 
   if (do_segments)
     {
