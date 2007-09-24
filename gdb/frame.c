@@ -1231,7 +1231,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
       && get_frame_type (this_frame) == NORMAL_FRAME
       && get_frame_type (this_frame->next) == NORMAL_FRAME)
     {
-      int optimized, realnum;
+      int optimized, realnum, nrealnum;
       enum lval_type lval, nlval;
       CORE_ADDR addr, naddr;
 
@@ -1240,9 +1240,10 @@ get_prev_frame_1 (struct frame_info *this_frame)
 				      &optimized, &lval, &addr, &realnum);
       frame_register_unwind_location (get_next_frame (this_frame),
 				      gdbarch_pc_regnum (current_gdbarch),
-				      &optimized, &nlval, &naddr, &realnum);
+				      &optimized, &nlval, &naddr, &nrealnum);
 
-      if (lval == lval_memory && lval == nlval && addr == naddr)
+      if ((lval == lval_memory && lval == nlval && addr == naddr)
+	  || (lval == lval_register && lval == nlval && realnum == nrealnum))
 	{
 	  if (frame_debug)
 	    {
