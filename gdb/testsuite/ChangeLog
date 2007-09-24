@@ -1,3 +1,10 @@
+2007-09-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.cp/mb-ctor.cc: New.
+	* gdb.cp/mb-ctor.exp: New.
+	* gdb.cp/mb-templates.cc: New.
+	* gdb.cp/mb-templates.exp: New.
+
 2007-09-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/pass-by-ref.cc, gdb.cp/pass-by-ref.exp: New files.

@@ -1213,6 +1213,8 @@ struct symtab_and_line
 
   CORE_ADDR pc;
   CORE_ADDR end;
+  int explicit_pc;
+  int explicit_line;
 };
 
 extern void init_sal (struct symtab_and_line *sal);
@@ -1404,5 +1406,7 @@ struct symbol *lookup_global_symbol_from_objfile (const struct objfile *objfile,
 						  const domain_enum domain,
 						  struct symtab **symtab);
 
+extern struct symtabs_and_lines
+expand_line_sal (struct symtab_and_line sal);
 
 #endif /* !defined(SYMTAB_H) */

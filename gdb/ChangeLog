@@ -1,3 +1,20 @@
+2007-09-24  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* breakpoint.c (remove_sal): New.
+	(expand_line_sal_maybe): New.
+	(create_breakpoints): Call expand_line_sal_maybe.
+	(clear_command): Add comment.
+	(breakpoint_re_set_one): Call expand_line_sal_maybe.
+	* linespec.c (decode_indirect): Set explicit_pc to 1.
+	(decode_all_digits): Set explicit_line to 1.
+	(append_expanded_sal): New.
+	(expand_line_sal): New.
+	* linespec.h (expand_line_sal): Declare.
+	* symtab.c (init_sal): Initialize explicit_pc 
+	and explicit_line.
+	* symtab.h (struct symtab_and_line): New fields
+	explicit_pc and explicit_line.	
+
 2007-09-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infcall.c (call_function_by_hand): Handle language-specific

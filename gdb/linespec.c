@@ -963,6 +963,7 @@ decode_indirect (char **argptr)
   values.sals[0] = find_pc_line (pc, 0);
   values.sals[0].pc = pc;
   values.sals[0].section = find_pc_overlay (pc);
+  values.sals[0].explicit_pc = 1;
 
   return values;
 }
@@ -1633,6 +1634,7 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
   values.nelts = 1;
   if (need_canonical)
     build_canonical_line_spec (values.sals, NULL, canonical);
+  values.sals[0].explicit_line = 1;
   return values;
 }
 

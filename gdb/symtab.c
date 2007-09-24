@@ -691,6 +691,8 @@ init_sal (struct symtab_and_line *sal)
   sal->line = 0;
   sal->pc = 0;
   sal->end = 0;
+  sal->explicit_pc = 0;
+  sal->explicit_line = 0;
 }
 
 
@@ -4171,6 +4173,166 @@ symtab_observer_executable_changed (void *unused)
   /* NAME_OF_MAIN may no longer be the same, so reset it for now.  */
   set_main_name (NULL);
 }
+
+/* Helper to expand_line_sal below.  Appends new sal to SAL,
+   initializing it from SYMTAB, LINENO and PC.  */
+static void
+append_expanded_sal (struct symtabs_and_lines *sal,
+		     struct symtab *symtab,
+		     int lineno, CORE_ADDR pc)
+{
+  CORE_ADDR func_addr, func_end;
+  
+  sal->sals = xrealloc (sal->sals, 
+			sizeof (sal->sals[0]) 
+			* (sal->nelts + 1));
+  init_sal (sal->sals + sal->nelts);
+  sal->sals[sal->nelts].symtab = symtab;
+  sal->sals[sal->nelts].section = NULL;
+  sal->sals[sal->nelts].end = 0;
+  sal->sals[sal->nelts].line = lineno;  
+  sal->sals[sal->nelts].pc = pc;
+  ++sal->nelts;      
+}
+
+/* Compute a set of all sals in
+   the entire program that correspond to same file
+   and line as SAL and return those.  If there
+   are several sals that belong to the same block,
+   only one sal for the block is included in results.  */
+   
+struct symtabs_and_lines
+expand_line_sal (struct symtab_and_line sal)
+{
+  struct symtabs_and_lines ret, this_line;
+  int i, j;
+  struct objfile *objfile;
+  struct partial_symtab *psymtab;
+  struct symtab *symtab;
+  int lineno;
+  int deleted = 0;
+  struct block **blocks = NULL;
+  int *filter;
+
+  ret.nelts = 0;
+  ret.sals = NULL;
+
+  if (sal.symtab == NULL || sal.line == 0 || sal.pc != 0)
+    {
+      ret.sals = xmalloc (sizeof (struct symtab_and_line));
+      ret.sals[0] = sal;
+      ret.nelts = 1;
+      return ret;
+    }
+  else
+    {
+      struct linetable_entry *best_item = 0;
+      struct symtab *best_symtab = 0;
+      int exact = 0;
+
+      lineno = sal.line;
+
+      /* We meed to find all symtabs for a file which name
+	 is described by sal. We cannot just directly 
+	 iterate over symtabs, since a symtab might not be
+	 yet created. We also cannot iterate over psymtabs,
+	 calling PSYMTAB_TO_SYMTAB and working on that symtab,
+	 since PSYMTAB_TO_SYMTAB will return NULL for psymtab
+	 corresponding to an included file. Therefore, we do
+	 first pass over psymtabs, reading in those with
+	 the right name.  Then, we iterate over symtabs, knowing
+	 that all symtabs we're interested in are loaded.  */
+
+      ALL_PSYMTABS (objfile, psymtab)
+	{
+	  if (strcmp (sal.symtab->filename,
+		      psymtab->filename) == 0)
+	    PSYMTAB_TO_SYMTAB (psymtab);
+	}
+
+	 
+      /* For each symtab, we add all pcs to ret.sals. I'm actually
+	 not sure what to do if we have exact match in one symtab,
+	 and non-exact match on another symtab.
+      */
+      ALL_SYMTABS (objfile, symtab)
+	{
+	  if (strcmp (sal.symtab->filename,
+		      symtab->filename) == 0)
+	    {
+	      struct linetable *l;
+	      int len;
+	      l = LINETABLE (symtab);
+	      if (!l)
+		continue;
+	      len = l->nitems;
+
+	      for (j = 0; j < len; j++)
+		{
+		  struct linetable_entry *item = &(l->item[j]);
+
+		  if (item->line == lineno)
+		    {
+		      exact = 1;
+		      append_expanded_sal (&ret, symtab, lineno, item->pc);
+		    }      
+		  else if (!exact && item->line > lineno
+			   && (best_item == NULL || item->line < best_item->line))
+		  
+		    {
+		      best_item = item;
+		      best_symtab = symtab;
+		    }
+		}
+	    }
+	}
+      if (!exact && best_item)
+	append_expanded_sal (&ret, best_symtab, lineno, best_item->pc);
+    }
+
+  /* For optimized code, compiler can scatter one source line accross
+     disjoint ranges of PC values, even when no duplicate functions
+     or inline functions are involved.  For example, 'for (;;)' inside
+     non-template non-inline non-ctor-or-dtor function can result
+     in two PC ranges.  In this case, we don't want to set breakpoint
+     on first PC of each range.  To filter such cases, we use containing
+     blocks -- for each PC found above we see if there are other PCs
+     that are in the same block.  If yes, the other PCs are filtered out.  */  
+
+  filter = xmalloc (ret.nelts * sizeof (int));
+  blocks = xmalloc (ret.nelts * sizeof (struct block *));
+  for (i = 0; i < ret.nelts; ++i)
+    {
+      filter[i] = 1;
+      blocks[i] = block_for_pc (ret.sals[i].pc);
+    }
+
+  for (i = 0; i < ret.nelts; ++i)
+    if (blocks[i] != NULL)
+      for (j = i+1; j < ret.nelts; ++j)
+	if (blocks[j] == blocks[i])
+	  {
+	    filter[j] = 0;
+	    ++deleted;
+	    break;
+	  }
+  
+  {
+    struct symtab_and_line *final = 
+      xmalloc (sizeof (struct symtab_and_line) * (ret.nelts-deleted));
+    
+    for (i = 0, j = 0; i < ret.nelts; ++i)
+      if (filter[i])
+	final[j++] = ret.sals[i];
+    
+    ret.nelts -= deleted;
+    xfree (ret.sals);
+    ret.sals = final;
+  }
+
+  return ret;
+}
+
 
 void
 _initialize_symtab (void)

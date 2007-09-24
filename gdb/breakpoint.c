@@ -5184,6 +5184,128 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
   mention (b);
 }
 
+/* Remove element at INDEX_TO_REMOVE from SAL, shifting other
+   elements to fill the void space.  */
+static void remove_sal (struct symtabs_and_lines *sal, int index_to_remove)
+{
+  int i = index_to_remove+1;
+  int last_index = sal->nelts-1;
+
+  for (;i <= last_index; ++i)
+    sal->sals[i-1] = sal->sals[i];
+
+  --(sal->nelts);
+}
+
+/* If appropriate, obtains all sals that correspond
+   to the same file and line as SAL.  This is done
+   only if SAL does not have explicit PC and has
+   line and file information.  If we got just a single
+   expanded sal, return the original.
+
+   Otherwise, if SAL.explicit_line is not set, filter out 
+   all sals for which the name of enclosing function 
+   is different from SAL. This makes sure that if we have
+   breakpoint originally set in template instantiation, say
+   foo<int>(), we won't expand SAL to locations at the same
+   line in all existing instantiations of 'foo'.
+
+*/
+struct symtabs_and_lines
+expand_line_sal_maybe (struct symtab_and_line sal)
+{
+  struct symtabs_and_lines expanded;
+  CORE_ADDR original_pc = sal.pc;
+  char *original_function = NULL;
+  int found;
+  int i;
+
+  /* If we have explicit pc, don't expand.
+     If we have no line number, we can't expand.  */
+  if (sal.explicit_pc || sal.line == 0 || sal.symtab == NULL)
+    {
+      expanded.nelts = 1;
+      expanded.sals = xmalloc (sizeof (struct symtab_and_line));
+      expanded.sals[0] = sal;
+      return expanded;
+    }
+
+  sal.pc = 0;
+  find_pc_partial_function (original_pc, &original_function, NULL, NULL);
+  
+  expanded = expand_line_sal (sal);
+  if (expanded.nelts == 1)
+    {
+      /* We had one sal, we got one sal.  Without futher
+	 processing, just return the original sal.  */
+      xfree (expanded.sals);
+      expanded.nelts = 1;
+      expanded.sals = xmalloc (sizeof (struct symtab_and_line));
+      sal.pc = original_pc;
+      expanded.sals[0] = sal;
+      return expanded;      
+    }
+
+  if (!sal.explicit_line)
+    {
+      CORE_ADDR func_addr, func_end;
+      for (i = 0; i < expanded.nelts; ++i)
+	{
+	  CORE_ADDR pc = expanded.sals[i].pc;
+	  char *this_function;
+	  if (find_pc_partial_function (pc, &this_function, 
+					&func_addr, &func_end))
+	    {
+	      if (this_function && 
+		  strcmp (this_function, original_function) != 0)
+		{
+		  remove_sal (&expanded, i);
+		  --i;
+		}
+	      else if (func_addr == pc)	    
+		{	     
+		  /* We're at beginning of a function, and should
+		     skip prologue.  */
+		  struct symbol *sym = find_pc_function (pc);
+		  if (sym)
+		    expanded.sals[i] = find_function_start_sal (sym, 1);
+		  else
+		    expanded.sals[i].pc 
+		      = gdbarch_skip_prologue (current_gdbarch, pc);
+		}
+	    }
+	}
+    }
+
+  
+  if (expanded.nelts <= 1)
+    {
+      /* This is un ugly workaround. If we get zero
+       expanded sals then something is really wrong.
+      Fix that by returnign the original sal. */
+      xfree (expanded.sals);
+      expanded.nelts = 1;
+      expanded.sals = xmalloc (sizeof (struct symtab_and_line));
+      sal.pc = original_pc;
+      expanded.sals[0] = sal;
+      return expanded;      
+    }
+
+  if (original_pc)
+    {
+      found = 0;
+      for (i = 0; i < expanded.nelts; ++i)
+	if (expanded.sals[i].pc == original_pc)
+	  {
+	    found = 1;
+	    break;
+	  }
+      gdb_assert (found);
+    }
+
+  return expanded;
+}
+
 /* Add SALS.nelts breakpoints to the breakpoint table.  For each
    SALS.sal[i] breakpoint, include the corresponding ADDR_STRING[i]
    value.  COND_STRING, if not NULL, specified the condition to be
@@ -5214,11 +5336,10 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
   int i;
   for (i = 0; i < sals.nelts; ++i)
     {
-      struct symtabs_and_lines sals2;
-      sals2.sals = sals.sals + i;
-      sals2.nelts = 1;
+      struct symtabs_and_lines expanded = 
+	expand_line_sal_maybe (sals.sals[i]);
 
-      create_breakpoint (sals2, addr_string[i],
+      create_breakpoint (expanded, addr_string[i],
 			 cond_string, type, disposition,
 			 thread, ignore_count, from_tty,
 			 pending_bp);
@@ -6889,6 +7010,23 @@ clear_command (char *arg, int from_tty)
       default_match = 1;
     }
 
+  /* We don't call resolve_sal_pc here. That's not
+     as bad as it seems, because all existing breakpoints
+     typically have both file/line and pc set.  So, if
+     clear is given file/line, we can match this to existing
+     breakpoint without obtaining pc at all.
+
+     We only support clearing given the address explicitly 
+     present in breakpoint table.  Say, we've set breakpoint 
+     at file:line. There were several PC values for that file:line,
+     due to optimization, all in one block.
+     We've picked one PC value. If "clear" is issued with another
+     PC corresponding to the same file:line, the breakpoint won't
+     be cleared.  We probably can still clear the breakpoint, but 
+     since the other PC value is never presented to user, user
+     can only find it by guessing, and it does not seem important
+     to support that.  */
+
   /* For each line spec given, delete bps which correspond
      to it.  Do it in two passes, solely to preserve the current
      behavior that from_tty is forced true if we delete more than
@@ -7404,8 +7542,12 @@ update_breakpoint_locations (struct breakpoint *b,
       }
   }
 
-  if (existing_locations)
-    free_bp_location (existing_locations);
+  while (existing_locations)
+    {
+      struct bp_location *next = existing_locations->next;
+      free_bp_location (existing_locations);
+      existing_locations = next;
+    }
 }
 
 
@@ -7423,6 +7565,7 @@ breakpoint_re_set_one (void *bint)
   int not_found = 0;
   int *not_found_ptr = &not_found;
   struct symtabs_and_lines sals = {};
+  struct symtabs_and_lines expanded;
   char *s;
   enum enable_state save_enable;
   struct gdb_exception e;
@@ -7497,8 +7640,8 @@ breakpoint_re_set_one (void *bint)
 	  b->thread = thread;
 	  b->condition_not_parsed = 0;
 	}
-
-      update_breakpoint_locations (b, sals);
+      expanded = expand_line_sal_maybe (sals.sals[0]);
+      update_breakpoint_locations (b, expanded);
 
       /* Now that this is re-enabled, check_duplicates
 	 can be used. */
