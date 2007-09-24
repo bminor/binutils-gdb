@@ -1,3 +1,9 @@
+2007-09-24  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
+
+	* elf32-spu.c (is_indirect_branch): New function.
+	(find_function_stack_adjust): End scan on hitting indirect branch.
+	(sum_stack): Cast %v arg to correct type.
+
 2007-09-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".

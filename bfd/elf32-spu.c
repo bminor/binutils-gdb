@@ -698,6 +698,22 @@ is_branch (const unsigned char *insn)
   return (insn[0] & 0xec) == 0x20 && (insn[1] & 0x80) == 0;
 }
 
+/* Return true for all indirect branch instructions.
+   bi     00110101 000
+   bisl   00110101 001
+   iret   00110101 010
+   bisled 00110101 011
+   biz    00100101 000
+   binz   00100101 001
+   bihz   00100101 010
+   bihnz  00100101 011  */
+
+static bfd_boolean
+is_indirect_branch (const unsigned char *insn)
+{
+  return (insn[0] & 0xef) == 0x25 && (insn[1] & 0x80) == 0;
+}
+
 /* Return true for branch hint instructions.
    hbra  0001000..
    hbrr  0001001..  */
@@ -1534,7 +1550,7 @@ find_function_stack_adjust (asection *sec, bfd_vma offset)
 	  reg[rt] = 0;
 	  continue;
 	}
-      else if (is_branch (buf))
+      else if (is_branch (buf) || is_indirect_branch (buf))
 	/* If we hit a branch then we must be out of the prologue.  */
 	break;
     unknown_insn:
@@ -2510,7 +2526,8 @@ sum_stack (struct function_info *fun,
     }
 
   f1 = func_name (fun);
-  info->callbacks->minfo (_("%s: 0x%v 0x%v\n"), f1, fun->stack, max_stack);
+  info->callbacks->minfo (_("%s: 0x%v 0x%v\n"),
+			  f1, (bfd_vma) fun->stack, max_stack);
 
   if (fun->call_list)
     {
