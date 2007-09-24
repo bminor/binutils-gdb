@@ -83,6 +83,9 @@ struct section_addr_info
   } other[1];
 };
 
+
+/* A table listing the load segments in a symfile, and which segment
+   each BFD section belongs to.  */
 struct symfile_segment_data
 {
   /* How many segments are present in this file.  If there are
@@ -99,9 +102,9 @@ struct symfile_segment_data
   CORE_ADDR *segment_sizes;
 
   /* If NUM_SEGMENTS is greater than zero, this is an array of entries
-     recording which segment contains each BFD section.  It is
-     ordered by section index.  A zero means that the section is not
-     in any segment.  */
+     recording which segment contains each BFD section.
+     SEGMENT_INFO[I] is S+1 if the I'th BFD section belongs to segment
+     S, or zero if it is not in any segment.  */
   int *segment_info;
 };
 

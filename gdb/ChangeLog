@@ -1,3 +1,14 @@
+2007-09-24  Jim Blandy  <jimb@codesourcery.com>
+
+	* symfile.h (struct symfile_segment_data): Doc fixes.
+	* symfile.c (symfile_map_offsets_to_segments): Doc fixes.
+	Assert that we were passed some loaded segment addresses,
+	and that sections' segment numbers are valid.
+	Simplify offset calculation.
+	* remote.c (get_offsets): Clarify selection of relocate-by-segment
+	strategy, and set num_segments correctly.  Delete redundant
+	assignments to do_sections.
+ 
 2007-09-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 6.6.90.20070919-cvs.

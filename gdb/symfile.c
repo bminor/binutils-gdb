@@ -3987,6 +3987,22 @@ free_symfile_segment_data (struct symfile_segment_data *data)
   xfree (data);
 }
 
+
+/* Given:
+   - DATA, containing segment addresses from the object file ABFD, and
+     the mapping from ABFD's sections onto the segments that own them,
+     and
+   - SEGMENT_BASES[0 .. NUM_SEGMENT_BASES - 1], holding the actual
+     segment addresses reported by the target,
+   store the appropriate offsets for each section in OFFSETS.
+
+   If there are fewer entries in SEGMENT_BASES than there are segments
+   in DATA, then apply SEGMENT_BASES' last entry to all the segments.
+
+   If there are more, then verify that all the excess addresses are
+   the same as the last legitimate one, and then ignore them.  This
+   allows "TextSeg=X;DataSeg=X" qOffset replies for files which have
+   only a single segment.  */
 int
 symfile_map_offsets_to_segments (bfd *abfd, struct symfile_segment_data *data,
 				 struct section_offsets *offsets,
@@ -3996,15 +4012,16 @@ symfile_map_offsets_to_segments (bfd *abfd, struct symfile_segment_data *data,
   int i;
   asection *sect;
 
+  /* It doesn't make sense to call this function unless you have some
+     segment base addresses.  */
+  gdb_assert (segment_bases > 0);
+
   /* If we do not have segment mappings for the object file, we
      can not relocate it by segments.  */
   gdb_assert (data != NULL);
   gdb_assert (data->num_segments > 0);
 
-  /* If more offsets are provided than we have segments, make sure the
-     excess offsets are all the same as the last segment's offset.
-     This allows "Text=X;Data=X" for files which have only a single
-     segment.  */
+  /* Check any extra SEGMENT_BASES entries.  */
   if (num_segment_bases > data->num_segments)
     for (i = data->num_segments; i < num_segment_bases; i++)
       if (segment_bases[i] != segment_bases[data->num_segments - 1])
@@ -4012,17 +4029,22 @@ symfile_map_offsets_to_segments (bfd *abfd, struct symfile_segment_data *data,
 
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {
-      CORE_ADDR vma;
       int which = data->segment_info[i];
 
-      if (which > num_segment_bases)
-	offsets->offsets[i] = segment_bases[num_segment_bases - 1];
-      else if (which > 0)
-	offsets->offsets[i] = segment_bases[which - 1];
-      else
-	continue;
+      gdb_assert (0 <= which && which <= data->num_segments);
 
-      offsets->offsets[i] -= data->segment_bases[which - 1];
+      /* Don't bother computing offsets for sections that aren't
+         loaded as part of any segment.  */
+      if (! which)
+        continue;
+
+      /* Use the last SEGMENT_BASES entry as the address of any extra
+         segments mentioned in DATA->segment_info.  */
+      if (which > num_segment_bases)
+        which = num_segment_bases;
+
+      offsets->offsets[i] = (segment_bases[which - 1]
+                             - data->segment_bases[which - 1]);
     }
 
   return 1;
