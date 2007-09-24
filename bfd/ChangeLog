@@ -1,3 +1,9 @@
+2007-09-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Trust
+	p_align_valid.
+	(copy_elf_program_header): Copy PT_NULL segments.
+
 2007-09-24  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 
 	* elf32-spu.c (is_indirect_branch): New function.
