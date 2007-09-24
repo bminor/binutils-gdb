@@ -12047,7 +12047,7 @@ s_align (int x ATTRIBUTE_UNUSED)
 {
   int temp;
   long temp_fill;
-  long max_alignment = 15;
+  long max_alignment = 28;
 
   /* o Note that the assembler pulls down any immediately preceding label
        to the aligned address.

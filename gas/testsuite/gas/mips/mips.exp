@@ -774,4 +774,5 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "vxworks1-xgot-el"
 
     run_dump_test "noreorder"
+    run_dump_test "align"
 }
