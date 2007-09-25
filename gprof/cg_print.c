@@ -166,7 +166,7 @@ sort_members (Sym *cyc)
   todo = cyc->cg.cyc.next;
   cyc->cg.cyc.next = 0;
 
-  for (doing = todo; doing && doing->cg.cyc.next; doing = todo)
+  for (doing = todo; doing != NULL; doing = todo)
     {
       todo = doing->cg.cyc.next;
 
