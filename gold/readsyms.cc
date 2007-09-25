@@ -86,10 +86,11 @@ Read_symbols::run(Workqueue* workqueue)
 
   // Read enough of the file to pick up the entire ELF header.
 
-  int ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
+  const int ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
+  unsigned char ehdr_buf[ehdr_size];
   off_t bytes;
-  const unsigned char* p = input_file->file().get_view_and_size(0, ehdr_size,
-								&bytes);
+  input_file->file().read_up_to(0, ehdr_size, ehdr_buf, &bytes);
+
   if (bytes >= 4)
     {
       static unsigned char elfmagic[4] =
@@ -97,12 +98,12 @@ Read_symbols::run(Workqueue* workqueue)
 	  elfcpp::ELFMAG0, elfcpp::ELFMAG1,
 	  elfcpp::ELFMAG2, elfcpp::ELFMAG3
 	};
-      if (memcmp(p, elfmagic, 4) == 0)
+      if (memcmp(ehdr_buf, elfmagic, 4) == 0)
 	{
 	  // This is an ELF object.
 
 	  Object* obj = make_elf_object(input_file->filename(),
-					input_file, 0, p, bytes);
+					input_file, 0, ehdr_buf, bytes);
 
 	  // We don't have a way to record a non-archive in an input
 	  // group.  If this is an ordinary object file, we can't
@@ -133,7 +134,7 @@ Read_symbols::run(Workqueue* workqueue)
 
   if (bytes >= Archive::sarmag)
     {
-      if (memcmp(p, Archive::armag, Archive::sarmag) == 0)
+      if (memcmp(ehdr_buf, Archive::armag, Archive::sarmag) == 0)
 	{
 	  // This is an archive.
 	  Archive* arch = new Archive(this->input_argument_->file().name(),
@@ -161,7 +162,8 @@ Read_symbols::run(Workqueue* workqueue)
   if (read_input_script(workqueue, this->options_, this->symtab_,
 			this->layout_, this->dirpath_, this->input_objects_,
 			this->input_group_, this->input_argument_, input_file,
-			p, bytes, this->this_blocker_, this->next_blocker_))
+			ehdr_buf, bytes, this->this_blocker_,
+			this->next_blocker_))
     return;
 
   // Here we have to handle any other input file types we need.

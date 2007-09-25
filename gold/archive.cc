@@ -328,10 +328,11 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
   off_t off = sarmag;
   while (true)
     {
+      unsigned char hdr_buf[sizeof(Archive_header)];
       off_t bytes;
-      const unsigned char* p = this->get_view_and_size(off,
-						       sizeof(Archive_header),
-						       &bytes);
+      this->input_file_->file().read_up_to(off, sizeof(Archive_header),
+					   hdr_buf, &bytes);
+
       if (bytes < sizeof(Archive_header))
         {
           if (bytes != 0)
@@ -345,7 +346,8 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
           break;
         }
 
-      const Archive_header* hdr = reinterpret_cast<const Archive_header*>(p);
+      const Archive_header* hdr =
+	reinterpret_cast<const Archive_header*>(hdr_buf);
       std::string name;
       off_t size = this->interpret_header(hdr, off, &name);
       if (name.empty())
@@ -379,9 +381,9 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   // Read enough of the file to pick up the entire ELF header.
   int ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
+  unsigned char ehdr_buf[ehdr_size];
   off_t bytes;
-  const unsigned char* p =
-    this->input_file_->file().get_view_and_size(memoff, ehdr_size, &bytes);
+  this->input_file_->file().read_up_to(memoff, ehdr_size, ehdr_buf, &bytes);
   if (bytes < 4)
     {
       fprintf(stderr, _("%s: %s: member at %ld is not an ELF object"),
@@ -395,7 +397,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       elfcpp::ELFMAG0, elfcpp::ELFMAG1,
       elfcpp::ELFMAG2, elfcpp::ELFMAG3
     };
-  if (memcmp(p, elfmagic, 4) != 0)
+  if (memcmp(ehdr_buf, elfmagic, 4) != 0)
     {
       fprintf(stderr, _("%s: %s: member at %ld is not an ELF object"),
 	      program_name, this->name().c_str(),
@@ -405,7 +407,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   Object* obj = make_elf_object((std::string(this->input_file_->filename())
 				 + "(" + n + ")"),
-				this->input_file_, memoff, p, bytes);
+				this->input_file_, memoff, ehdr_buf, bytes);
 
   input_objects->add_object(obj);
 

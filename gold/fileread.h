@@ -87,13 +87,6 @@ class File_read
   const unsigned char*
   get_view(off_t start, off_t size);
 
-  // Return a view into the file starting at file offset START, for up
-  // to SIZE bytes.  Set *PBYTES to the number of bytes read.  This
-  // may be less than SIZE.  The pointer will remain valid until the
-  // File_read is unlocked.
-  const unsigned char*
-  get_view_and_size(off_t start, off_t size, off_t* pbytes);
-
   // Read data from the file into the buffer P starting at file offset
   // START for SIZE bytes.
   void
@@ -170,7 +163,7 @@ class File_read
 
   // Find or make a view into the file.
   View*
-  find_or_make_view(off_t start, off_t size, off_t* pbytes);
+  find_or_make_view(off_t start, off_t size);
 
   // Clear the file views.
   void

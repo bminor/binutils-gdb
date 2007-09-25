@@ -239,7 +239,7 @@ File_read::read_up_to(off_t start, off_t size, void* p, off_t* pbytes)
 // Find an existing view or make a new one.
 
 File_read::View*
-File_read::find_or_make_view(off_t start, off_t size, off_t* pbytes)
+File_read::find_or_make_view(off_t start, off_t size)
 {
   gold_assert(this->lock_count_ > 0);
 
@@ -254,11 +254,7 @@ File_read::find_or_make_view(off_t start, off_t size, off_t* pbytes)
       // There was an existing view at this offset.
       File_read::View* v = ins.first->second;
       if (v->size() - (start - v->start()) >= size)
-	{
-	  if (pbytes != NULL)
-	    *pbytes = size;
-	  return v;
-	}
+	return v;
 
       // This view is not large enough.
       this->saved_views_.push_back(v);
@@ -277,17 +273,7 @@ File_read::find_or_make_view(off_t start, off_t size, off_t* pbytes)
   ins.first->second = v;
 
   if (bytes - (start - poff) >= size)
-    {
-      if (pbytes != NULL)
-	*pbytes = size;
-      return v;
-    }
-
-  if (pbytes != NULL)
-    {
-      *pbytes = bytes - (start - poff);
-      return v;
-    }
+    return v;
 
   fprintf(stderr,
 	  _("%s: %s: file too short: read only %lld of %lld bytes at %lld\n"),
@@ -306,15 +292,7 @@ const unsigned char*
 File_read::get_view(off_t start, off_t size)
 {
   gold_assert(this->lock_count_ > 0);
-  File_read::View* pv = this->find_or_make_view(start, size, NULL);
-  return pv->data() + (start - pv->start());
-}
-
-const unsigned char*
-File_read::get_view_and_size(off_t start, off_t size, off_t* pbytes)
-{
-  gold_assert(this->lock_count_ > 0);
-  File_read::View* pv = this->find_or_make_view(start, size, pbytes);
+  File_read::View* pv = this->find_or_make_view(start, size);
   return pv->data() + (start - pv->start());
 }
 
@@ -322,7 +300,7 @@ File_view*
 File_read::get_lasting_view(off_t start, off_t size)
 {
   gold_assert(this->lock_count_ > 0);
-  File_read::View* pv = this->find_or_make_view(start, size, NULL);
+  File_read::View* pv = this->find_or_make_view(start, size);
   pv->lock();
   return new File_view(*this, pv, pv->data() + (start - pv->start()));
 }
