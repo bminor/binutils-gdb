@@ -1,3 +1,9 @@
+2007-09-25  David Ung  <davidu@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (mips_n32n64_return_value): Per N32/N64 ABI
+	rules return composite types in registers as appropriate.
+
 2007-09-24  Jim Blandy  <jimb@codesourcery.com>
 
 	* symfile.h (struct symfile_segment_data): Doc fixes.

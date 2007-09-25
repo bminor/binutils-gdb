@@ -3076,9 +3076,30 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 			  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_UNION
-      || TYPE_CODE (type) == TYPE_CODE_ARRAY
+
+  /* From MIPSpro N32 ABI Handbook, Document Number: 007-2816-004
+
+     Function results are returned in $2 (and $3 if needed), or $f0 (and $f2
+     if needed), as appropriate for the type.  Composite results (struct,
+     union, or array) are returned in $2/$f0 and $3/$f2 according to the
+     following rules:
+
+     * A struct with only one or two floating point fields is returned in $f0
+     (and $f2 if necessary).  This is a generalization of the Fortran COMPLEX
+     case.
+
+     * Any other struct or union results of at most 128 bits are returned in
+     $2 (first 64 bits) and $3 (remainder, if necessary).
+
+     * Larger composite results are handled by converting the function to a
+     procedure with an implicit first parameter, which is a pointer to an area
+     reserved by the caller to receive the result.  [The o32-bit ABI requires
+     that all composite results be handled by conversion to implicit first
+     parameters.  The MIPS/SGI Fortran implementation has always made a
+     specific exception to return COMPLEX results in the floating point
+     registers.]  */
+
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
       || TYPE_LENGTH (type) > 2 * MIPS64_REGSIZE)
     return RETURN_VALUE_STRUCT_CONVENTION;
   else if (TYPE_CODE (type) == TYPE_CODE_FLT
@@ -3122,12 +3143,12 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 	   && TYPE_NFIELDS (type) <= 2
 	   && TYPE_NFIELDS (type) >= 1
 	   && ((TYPE_NFIELDS (type) == 1
-		&& (TYPE_CODE (TYPE_FIELD_TYPE (type, 0))
+		&& (TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type, 0)))
 		    == TYPE_CODE_FLT))
 	       || (TYPE_NFIELDS (type) == 2
-		   && (TYPE_CODE (TYPE_FIELD_TYPE (type, 0))
+		   && (TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type, 0)))
 		       == TYPE_CODE_FLT)
-		   && (TYPE_CODE (TYPE_FIELD_TYPE (type, 1))
+		   && (TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type, 1)))
 		       == TYPE_CODE_FLT)))
 	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
     {
