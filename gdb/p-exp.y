@@ -640,9 +640,9 @@ variable:	name_not_typename
 			    {
 			      if (symbol_read_needs_frame (sym))
 				{
-				  if (innermost_block == 0 ||
-				      contained_in (block_found,
-						    innermost_block))
+				  if (innermost_block == 0
+				      || contained_in (block_found,
+						       innermost_block))
 				    innermost_block = block_found;
 				}
 
@@ -661,8 +661,9 @@ variable:	name_not_typename
 			      /* Object pascal: it hangs off of `this'.  Must
 			         not inadvertently convert from a method call
 				 to data ref.  */
-			      if (innermost_block == 0 ||
-				  contained_in (block_found, innermost_block))
+			      if (innermost_block == 0
+				  || contained_in (block_found,
+						   innermost_block))
 				innermost_block = block_found;
 			      write_exp_elt_opcode (OP_THIS);
 			      write_exp_elt_opcode (OP_THIS);
@@ -1354,29 +1355,29 @@ yylex ()
   switch (namelen)
     {
     case 6:
-      if (DEPRECATED_STREQ (uptokstart, "OBJECT"))
+      if (strcmp (uptokstart, "OBJECT") == 0)
 	{
 	  free (uptokstart);
 	  return CLASS;
 	}
-      if (DEPRECATED_STREQ (uptokstart, "RECORD"))
+      if (strcmp (uptokstart, "RECORD") == 0)
 	{
 	  free (uptokstart);
 	  return STRUCT;
 	}
-      if (DEPRECATED_STREQ (uptokstart, "SIZEOF"))
+      if (strcmp (uptokstart, "SIZEOF") == 0)
 	{
 	  free (uptokstart);
 	  return SIZEOF;
 	}
       break;
     case 5:
-      if (DEPRECATED_STREQ (uptokstart, "CLASS"))
+      if (strcmp (uptokstart, "CLASS") == 0)
 	{
 	  free (uptokstart);
 	  return CLASS;
 	}
-      if (DEPRECATED_STREQ (uptokstart, "FALSE"))
+      if (strcmp (uptokstart, "FALSE") == 0)
 	{
           yylval.lval = 0;
 	  free (uptokstart);
@@ -1384,13 +1385,13 @@ yylex ()
         }
       break;
     case 4:
-      if (DEPRECATED_STREQ (uptokstart, "TRUE"))
+      if (strcmp (uptokstart, "TRUE") == 0)
 	{
           yylval.lval = 1;
 	  free (uptokstart);
   	  return TRUEKEYWORD;
         }
-      if (DEPRECATED_STREQ (uptokstart, "SELF"))
+      if (strcmp (uptokstart, "SELF") == 0)
         {
           /* here we search for 'this' like
              inserted in FPC stabs debug info */
@@ -1518,8 +1519,8 @@ yylex ()
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */
-    if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK) ||
-        lookup_symtab (tmp))
+    if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+        || lookup_symtab (tmp))
       {
 	yylval.ssym.sym = sym;
 	yylval.ssym.is_a_field_of_this = is_a_field_of_this;
@@ -1629,9 +1630,9 @@ yylex ()
     /* Input names that aren't symbols but ARE valid hex numbers,
        when the input radix permits them, can be names or numbers
        depending on the parse.  Note we support radixes > 16 here.  */
-    if (!sym &&
-        ((tokstart[0] >= 'a' && tokstart[0] < 'a' + input_radix - 10) ||
-         (tokstart[0] >= 'A' && tokstart[0] < 'A' + input_radix - 10)))
+    if (!sym
+        && ((tokstart[0] >= 'a' && tokstart[0] < 'a' + input_radix - 10)
+            || (tokstart[0] >= 'A' && tokstart[0] < 'A' + input_radix - 10)))
       {
  	YYSTYPE newlval;	/* Its value is ignored.  */
 	hextype = parse_number (tokstart, namelen, 0, &newlval);

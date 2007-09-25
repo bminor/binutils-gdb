@@ -1,3 +1,10 @@
+2007-09-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y: Fix 12 ARI reported problems.
+	(name_not_typename): Fix 2 operator at end of line issues.
+	(yylex): Fix 3 operator at end of line issues.
+	Replace 7 DEPRECATED_STREQ macros using strcmp function.
+
 2007-09-25  David Ung  <davidu@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 
@@ -360,7 +367,7 @@
 	* gdbthread.h (switch_to_thread): Add prototype.
 	* thread.c (switch_to_thread): Make global.
 
-2007-09-07  2007-09-07  Pierre Muller  <muller@ics.u-strasbg.fr>
+2007-09-07  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	 * p-valprint.c: Fix 7 ARI reported problems.
 	 (pascal_val_print): Fix one operator at end of line issue.
