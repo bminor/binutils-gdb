@@ -88,9 +88,12 @@ class File_read
   // Return a view into the file starting at file offset START for
   // SIZE bytes.  The pointer will remain valid until the File_read is
   // unlocked.  It is an error if we can not read enough data from the
-  // file.
+  // file.  The CACHE parameter is a hint as to whether it will be
+  // useful to cache this data for later accesses--i.e., later calls
+  // to get_view, read, or get_lasting_view which retrieve the same
+  // data.
   const unsigned char*
-  get_view(off_t start, off_t size);
+  get_view(off_t start, off_t size, bool cache);
 
   // Read data from the file into the buffer P starting at file offset
   // START for SIZE bytes.
@@ -101,9 +104,10 @@ class File_read
   // for SIZE bytes.  This is allocated with new, and the caller is
   // responsible for deleting it when done.  The data associated with
   // this view will remain valid until the view is deleted.  It is an
-  // error if we can not read enough data from the file.
+  // error if we can not read enough data from the file.  The CACHE
+  // parameter is as in get_view.
   File_view*
-  get_lasting_view(off_t start, off_t size);
+  get_lasting_view(off_t start, off_t size, bool cache);
 
  private:
   // This class may not be copied.
@@ -114,8 +118,9 @@ class File_read
   class View
   {
    public:
-    View(off_t start, off_t size, const unsigned char* data)
-      : start_(start), size_(size), data_(data), lock_count_(0)
+    View(off_t start, off_t size, const unsigned char* data, bool cache)
+      : start_(start), size_(size), data_(data), lock_count_(0),
+	cache_(cache)
     { }
 
     ~View();
@@ -141,6 +146,14 @@ class File_read
     bool
     is_locked();
 
+    void
+    set_cache()
+    { this->cache_ = true; }
+
+    bool
+    should_cache() const
+    { return this->cache_; }
+
    private:
     View(const View&);
     View& operator=(const View&);
@@ -149,6 +162,7 @@ class File_read
     off_t size_;
     const unsigned char* data_;
     int lock_count_;
+    bool cache_;
   };
 
   friend class File_view;
@@ -158,16 +172,12 @@ class File_read
   find_view(off_t start, off_t size);
 
   // Read data from the file into a buffer.
-  off_t
-  do_read(off_t start, off_t size, void* p);
-
-  // Read an exact number of bytes into a buffer.
   void
-  do_read_exact(off_t start, off_t size, void* p);
+  do_read(off_t start, off_t size, void* p);
 
   // Find or make a view into the file.
   View*
-  find_or_make_view(off_t start, off_t size);
+  find_or_make_view(off_t start, off_t size, bool cache);
 
   // Clear the file views.
   void

@@ -44,7 +44,8 @@ class Archive
 {
  public:
   Archive(const std::string& name, Input_file* input_file)
-    : name_(name), input_file_(input_file), armap_(), extended_names_()
+    : name_(name), input_file_(input_file), armap_(), armap_names_(),
+      extended_names_(), armap_checked_(), seen_offsets_()
   { }
 
   // The length of the magic string at the start of an archive.
@@ -98,8 +99,8 @@ class Archive
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, off_t size)
-  { return this->input_file_->file().get_view(start, size); }
+  get_view(off_t start, off_t size, bool cache)
+  { return this->input_file_->file().get_view(start, size, cache); }
 
   // Read the archive symbol map.
   void
@@ -126,10 +127,10 @@ class Archive
   // An entry in the archive map of symbols to object files.
   struct Armap_entry
   {
-    // The symbol name.
-    const char* name;
-    // The offset to the file.
-    off_t offset;
+    // The offset to the symbol name in armap_names_.
+    off_t name_offset;
+    // The file offset to the object in the archive.
+    off_t file_offset;
   };
 
   // A simple hash code for off_t values.
@@ -146,6 +147,8 @@ class Archive
   Input_file* input_file_;
   // The archive map.
   std::vector<Armap_entry> armap_;
+  // The names in the archive map.
+  std::string armap_names_;
   // The extended name table.
   std::string extended_names_;
   // Track which symbols in the archive map are for elements which are

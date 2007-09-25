@@ -168,9 +168,9 @@ class Object
   { return this->shnum_; }
 
   // Return a view of the contents of a section.  Set *PLEN to the
-  // size.
+  // size.  CACHE is a hint as in File_read::get_view.
   const unsigned char*
-  section_contents(unsigned int shndx, off_t* plen);
+  section_contents(unsigned int shndx, off_t* plen, bool cache);
 
   // Return the name of a section given a section index.  This is only
   // used for error messages.
@@ -224,7 +224,7 @@ class Object
   // Return a View.
   View
   view(off_t file_offset, off_t data_size)
-  { return View(this->get_view(file_offset, data_size)); }
+  { return View(this->get_view(file_offset, data_size, true)); }
 
   // Report an error.
   void
@@ -243,7 +243,7 @@ class Object
 
   // Get a View given a Location.
   View view(Location loc)
-  { return View(this->get_view(loc.file_offset, loc.data_size)); }
+  { return View(this->get_view(loc.file_offset, loc.data_size, true)); }
 
  protected:
   // Read the symbols--implemented by child class.
@@ -284,15 +284,18 @@ class Object
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, off_t size)
-  { return this->input_file_->file().get_view(start + this->offset_, size); }
+  get_view(off_t start, off_t size, bool cache)
+  {
+    return this->input_file_->file().get_view(start + this->offset_, size,
+					      cache);
+  }
 
   // Get a lasting view into the underlying file.
   File_view*
-  get_lasting_view(off_t start, off_t size)
+  get_lasting_view(off_t start, off_t size, bool cache)
   {
     return this->input_file_->file().get_lasting_view(start + this->offset_,
-						      size);
+						      size, cache);
   }
 
   // Read data from the underlying file.

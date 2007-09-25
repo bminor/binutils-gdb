@@ -101,7 +101,7 @@ Archive::setup()
   if (xname == "/")
     {
       const unsigned char* p = this->get_view(off + sizeof(Archive_header),
-                                              extended_size);
+                                              extended_size, false);
       const char* px = reinterpret_cast<const char*>(p);
       this->extended_names_.assign(px, extended_size);
     }
@@ -116,7 +116,7 @@ void
 Archive::read_armap(off_t start, off_t size)
 {
   // Read in the entire armap.
-  const unsigned char* p = this->get_view(start, size);
+  const unsigned char* p = this->get_view(start, size, false);
 
   // Numbers in the armap are always big-endian.
   const elfcpp::Elf_Word* pword = reinterpret_cast<const elfcpp::Elf_Word*>(p);
@@ -125,14 +125,17 @@ Archive::read_armap(off_t start, off_t size)
 
   // Note that the addition is in units of sizeof(elfcpp::Elf_Word).
   const char* pnames = reinterpret_cast<const char*>(pword + nsyms);
+  off_t names_size = reinterpret_cast<const char*>(p) + size - pnames;
+  this->armap_names_.assign(pnames, names_size);
 
   this->armap_.resize(nsyms);
 
+  off_t name_offset = 0;
   for (unsigned int i = 0; i < nsyms; ++i)
     {
-      this->armap_[i].name = pnames;
-      this->armap_[i].offset = elfcpp::Swap<32, true>::readval(pword);
-      pnames += strlen(pnames) + 1;
+      this->armap_[i].name_offset = name_offset;
+      this->armap_[i].file_offset = elfcpp::Swap<32, true>::readval(pword);
+      name_offset += strlen(pnames + name_offset) + 1;
       ++pword;
     }
 
@@ -155,7 +158,7 @@ Archive::read_armap(off_t start, off_t size)
 off_t
 Archive::read_header(off_t off, std::string* pname)
 {
-  const unsigned char* p = this->get_view(off, sizeof(Archive_header));
+  const unsigned char* p = this->get_view(off, sizeof(Archive_header), false);
   const Archive_header* hdr = reinterpret_cast<const Archive_header*>(p);
   return this->interpret_header(hdr, off,  pname);
 }
@@ -283,20 +286,22 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 	{
           if (this->armap_checked_[i])
             continue;
-	  if (this->armap_[i].offset == last_seen_offset)
+	  if (this->armap_[i].file_offset == last_seen_offset)
             {
               this->armap_checked_[i] = true;
               continue;
             }
-	  if (this->seen_offsets_.find(this->armap_[i].offset)
+	  if (this->seen_offsets_.find(this->armap_[i].file_offset)
               != this->seen_offsets_.end())
 	    {
               this->armap_checked_[i] = true;
-	      last_seen_offset = this->armap_[i].offset;
+	      last_seen_offset = this->armap_[i].file_offset;
 	      continue;
 	    }
 
-	  Symbol* sym = symtab->lookup(this->armap_[i].name);
+	  const char* sym_name = (this->armap_names_.data()
+				  + this->armap_[i].name_offset);
+	  Symbol* sym = symtab->lookup(sym_name);
 	  if (sym == NULL)
 	    continue;
 	  else if (!sym->is_undefined())
@@ -308,7 +313,7 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 	    continue;
 
 	  // We want to include this object in the link.
-	  last_seen_offset = this->armap_[i].offset;
+	  last_seen_offset = this->armap_[i].file_offset;
 	  this->seen_offsets_.insert(last_seen_offset);
           this->armap_checked_[i] = true;
 	  this->include_member(symtab, layout, input_objects,

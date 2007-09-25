@@ -73,11 +73,11 @@ Object::error(const char* format, ...)
 // Return a view of the contents of a section.
 
 const unsigned char*
-Object::section_contents(unsigned int shndx, off_t* plen)
+Object::section_contents(unsigned int shndx, off_t* plen, bool cache)
 {
   Location loc(this->do_section_contents(shndx));
   *plen = loc.data_size;
-  return this->get_view(loc.file_offset, loc.data_size);
+  return this->get_view(loc.file_offset, loc.data_size, cache);
 }
 
 // Read the section data into SD.  This is code common to Sized_relobj
@@ -93,7 +93,7 @@ Object::read_section_data(elfcpp::Elf_file<size, big_endian, Object>* elf_file,
   // Read the section headers.
   const off_t shoff = elf_file->shoff();
   const unsigned int shnum = this->shnum();
-  sd->section_headers = this->get_lasting_view(shoff, shnum * shdr_size);
+  sd->section_headers = this->get_lasting_view(shoff, shnum * shdr_size, true);
 
   // Read the section names.
   const unsigned char* pshdrs = sd->section_headers->data();
@@ -111,7 +111,7 @@ Object::read_section_data(elfcpp::Elf_file<size, big_endian, Object>* elf_file,
 
   sd->section_names_size = shdrnames.get_sh_size();
   sd->section_names = this->get_lasting_view(shdrnames.get_sh_offset(),
-					     sd->section_names_size);
+					     sd->section_names_size, false);
 }
 
 // If NAME is the name of a special .gnu.warning section, arrange for
@@ -239,7 +239,7 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   off_t extsize = symtabshdr.get_sh_size() - locsize;
 
   // Read the symbol table.
-  File_view* fvsymtab = this->get_lasting_view(extoff, extsize);
+  File_view* fvsymtab = this->get_lasting_view(extoff, extsize, false);
 
   // Read the section header for the symbol names.
   unsigned int strtab_shndx = symtabshdr.get_sh_link();
@@ -261,7 +261,7 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   // Read the symbol names.
   File_view* fvstrtab = this->get_lasting_view(strtabshdr.get_sh_offset(),
-					       strtabshdr.get_sh_size());
+					       strtabshdr.get_sh_size(), true);
 
   sd->symbols = fvsymtab;
   sd->symbols_size = extsize;
@@ -285,7 +285,7 @@ Sized_relobj<size, big_endian>::include_section_group(
 {
   // Read the section contents.
   const unsigned char* pcon = this->get_view(shdr.get_sh_offset(),
-					     shdr.get_sh_size());
+					     shdr.get_sh_size(), false);
   const elfcpp::Elf_Word* pword =
     reinterpret_cast<const elfcpp::Elf_Word*>(pcon);
 
@@ -314,13 +314,14 @@ Sized_relobj<size, big_endian>::include_section_group(
       gold_exit(false);
     }
   off_t symoff = symshdr.get_sh_offset() + shdr.get_sh_info() * This::sym_size;
-  const unsigned char* psym = this->get_view(symoff, This::sym_size);
+  const unsigned char* psym = this->get_view(symoff, This::sym_size, true);
   elfcpp::Sym<size, big_endian> sym(psym);
 
   // Read the symbol table names.
   off_t symnamelen;
   const unsigned char* psymnamesu;
-  psymnamesu = this->section_contents(symshdr.get_sh_link(), &symnamelen);
+  psymnamesu = this->section_contents(symshdr.get_sh_link(), &symnamelen,
+				      true);
   const char* psymnames = reinterpret_cast<const char*>(psymnamesu);
 
   // Get the section group signature.
@@ -557,7 +558,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
   gold_assert(loccount == symtabshdr.get_sh_info());
   off_t locsize = loccount * sym_size;
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
-					      locsize);
+					      locsize, true);
 
   this->local_values_.resize(loccount);
 
@@ -565,7 +566,8 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
   const unsigned int strtab_shndx = symtabshdr.get_sh_link();
   off_t strtab_size;
   const unsigned char* pnamesu = this->section_contents(strtab_shndx,
-							&strtab_size);
+							&strtab_size,
+							true);
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
   // Loop over the local symbols.
@@ -700,13 +702,14 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
   const int sym_size = This::sym_size;
   off_t locsize = loccount * sym_size;
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
-					      locsize);
+					      locsize, false);
 
   // Read the symbol names.
   const unsigned int strtab_shndx = symtabshdr.get_sh_link();
   off_t strtab_size;
   const unsigned char* pnamesu = this->section_contents(strtab_shndx,
-							&strtab_size);
+							&strtab_size,
+							true);
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
   // Get a view into the output file.

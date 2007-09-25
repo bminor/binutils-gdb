@@ -177,7 +177,7 @@ bool
 Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
 {
   off_t len;
-  const unsigned char* p = object->section_contents(shndx, &len);
+  const unsigned char* p = object->section_contents(shndx, &len, false);
 
   uint64_t entsize = this->entsize();
 
@@ -237,7 +237,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 						     unsigned int shndx)
 {
   off_t len;
-  const unsigned char* pdata = object->section_contents(shndx, &len);
+  const unsigned char* pdata = object->section_contents(shndx, &len, false);
 
   const Char_type* p = reinterpret_cast<const Char_type*>(pdata);
 

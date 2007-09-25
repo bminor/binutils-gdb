@@ -174,7 +174,8 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
       gold_exit(false);
     }
 
-  *view = this->get_lasting_view(shdr.get_sh_offset(), shdr.get_sh_size());
+  *view = this->get_lasting_view(shdr.get_sh_offset(), shdr.get_sh_size(),
+				 false);
   *view_size = shdr.get_sh_size();
   *view_info = shdr.get_sh_info();
 }
@@ -198,7 +199,7 @@ Sized_dynobj<size, big_endian>::set_soname(const unsigned char* pshdrs,
 
   const off_t dynamic_size = dynamicshdr.get_sh_size();
   const unsigned char* pdynamic = this->get_view(dynamicshdr.get_sh_offset(),
-						 dynamic_size);
+						 dynamic_size, false);
 
   const unsigned int link = dynamicshdr.get_sh_link();
   if (link != strtab_shndx)
@@ -223,7 +224,7 @@ Sized_dynobj<size, big_endian>::set_soname(const unsigned char* pshdrs,
 	}
 
       strtab_size = strtabshdr.get_sh_size();
-      strtabu = this->get_view(strtabshdr.get_sh_offset(), strtab_size);
+      strtabu = this->get_view(strtabshdr.get_sh_offset(), strtab_size, false);
     }
 
   for (const unsigned char* p = pdynamic;
@@ -295,7 +296,7 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
       gold_assert(dynsymshdr.get_sh_type() == elfcpp::SHT_DYNSYM);
 
       sd->symbols = this->get_lasting_view(dynsymshdr.get_sh_offset(),
-					   dynsymshdr.get_sh_size());
+					   dynsymshdr.get_sh_size(), false);
       sd->symbols_size = dynsymshdr.get_sh_size();
 
       // Get the symbol names.
@@ -319,7 +320,8 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 	}
 
       sd->symbol_names = this->get_lasting_view(strtabshdr.get_sh_offset(),
-						strtabshdr.get_sh_size());
+						strtabshdr.get_sh_size(),
+						true);
       sd->symbol_names_size = strtabshdr.get_sh_size();
 
       // Get the version information.

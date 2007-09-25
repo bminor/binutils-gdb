@@ -136,6 +136,8 @@ File_read::unlock()
 {
   gold_assert(this->lock_count_ > 0);
   --this->lock_count_;
+  if (this->lock_count_ == 0)
+    this->clear_views(false);
 }
 
 bool
@@ -160,54 +162,44 @@ File_read::find_view(off_t start, off_t size)
 }
 
 // Read SIZE bytes from the file starting at offset START.  Read into
-// the buffer at P.  Return the number of bytes read, which should
-// always be at least SIZE except at the end of the file.
+// the buffer at P.
 
-off_t
+void
 File_read::do_read(off_t start, off_t size, void* p)
 {
   gold_assert(this->lock_count_ > 0);
 
+  off_t bytes;
   if (this->contents_ != NULL)
     {
-      off_t bytes = this->size_ - start;
+      bytes = this->size_ - start;
+      if (bytes >= size)
+	{
+	  memcpy(p, this->contents_ + start, size);
+	  return;
+	}
+    }
+  else
+    {
+      bytes = ::pread(this->descriptor_, p, size, start);
+      if (bytes == size)
+	return;
+
       if (bytes < 0)
-	bytes = 0;
-      else if (bytes > size)
-	bytes = size;
-      memcpy(p, this->contents_ + start, bytes);
-      return bytes;
+	{
+	  fprintf(stderr, _("%s: %s: pread failed: %s\n"),
+		  program_name, this->filename().c_str(), strerror(errno));
+	  gold_exit(false);
+	}
     }
 
-  off_t bytes = ::pread(this->descriptor_, p, size, start);
-  if (bytes < 0)
-    {
-      fprintf(stderr, _("%s: %s: pread failed: %s\n"),
-	      program_name, this->filename().c_str(), strerror(errno));
-      gold_exit(false);
-    }
-
-  return bytes;
-}
-
-// Read exactly SIZE bytes from the file starting at offset START.
-// Read into the buffer at P.
-
-void
-File_read::do_read_exact(off_t start, off_t size, void* p)
-{
-  off_t bytes = this->do_read(start, size, p);
-  if (bytes != size)
-    {
-      fprintf(stderr,
-	      _("%s: %s: file too short: read only %lld of %lld "
-		"bytes at %lld\n"),
-	      program_name, this->filename().c_str(),
-	      static_cast<long long>(bytes),
-	      static_cast<long long>(size),
-	      static_cast<long long>(start));
-      gold_exit(false);
-    }
+  fprintf(stderr,
+	  _("%s: %s: file too short: read only %lld of %lld bytes at %lld\n"),
+	  program_name, this->filename().c_str(),
+	  static_cast<long long>(bytes),
+	  static_cast<long long>(size),
+	  static_cast<long long>(start));
+  gold_exit(false);
 }
 
 // Read data from the file.
@@ -224,13 +216,13 @@ File_read::read(off_t start, off_t size, void* p)
       return;
     }
 
-  this->do_read_exact(start, size, p);
+  this->do_read(start, size, p);
 }
 
 // Find an existing view or make a new one.
 
 File_read::View*
-File_read::find_or_make_view(off_t start, off_t size)
+File_read::find_or_make_view(off_t start, off_t size, bool cache)
 {
   gold_assert(this->lock_count_ > 0);
 
@@ -245,7 +237,11 @@ File_read::find_or_make_view(off_t start, off_t size)
       // There was an existing view at this offset.
       File_read::View* v = ins.first->second;
       if (v->size() - (start - v->start()) >= size)
-	return v;
+	{
+	  if (cache)
+	    v->set_cache();
+	  return v;
+	}
 
       // This view is not large enough.
       this->saved_views_.push_back(v);
@@ -264,9 +260,9 @@ File_read::find_or_make_view(off_t start, off_t size)
 
   unsigned char* p = new unsigned char[psize];
 
-  this->do_read_exact(poff, psize, p);
+  this->do_read(poff, psize, p);
 
-  File_read::View* v = new File_read::View(poff, psize, p);
+  File_read::View* v = new File_read::View(poff, psize, p, cache);
   ins.first->second = v;
   return v;
 }
@@ -276,18 +272,18 @@ File_read::find_or_make_view(off_t start, off_t size)
 // mmap.
 
 const unsigned char*
-File_read::get_view(off_t start, off_t size)
+File_read::get_view(off_t start, off_t size, bool cache)
 {
   gold_assert(this->lock_count_ > 0);
-  File_read::View* pv = this->find_or_make_view(start, size);
+  File_read::View* pv = this->find_or_make_view(start, size, cache);
   return pv->data() + (start - pv->start());
 }
 
 File_view*
-File_read::get_lasting_view(off_t start, off_t size)
+File_read::get_lasting_view(off_t start, off_t size, bool cache)
 {
   gold_assert(this->lock_count_ > 0);
-  File_read::View* pv = this->find_or_make_view(start, size);
+  File_read::View* pv = this->find_or_make_view(start, size, cache);
   pv->lock();
   return new File_view(*this, pv, pv->data() + (start - pv->start()));
 }
@@ -301,7 +297,8 @@ File_read::clear_views(bool destroying)
        p != this->views_.end();
        ++p)
     {
-      if (!p->second->is_locked())
+      if (!p->second->is_locked()
+	  && (destroying || !p->second->should_cache()))
 	delete p->second;
       else
 	{
@@ -314,7 +311,8 @@ File_read::clear_views(bool destroying)
   Saved_views::iterator p = this->saved_views_.begin();
   while (p != this->saved_views_.end())
     {
-      if (!(*p)->is_locked())
+      if (!(*p)->is_locked()
+	  && (destroying || !(*p)->should_cache()))
 	{
 	  delete *p;
 	  p = this->saved_views_.erase(p);

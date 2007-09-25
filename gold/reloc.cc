@@ -172,7 +172,8 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
   rd->relocs.reserve(shnum / 2);
 
   const unsigned char *pshdrs = this->get_view(this->elf_file_.shoff(),
-					       shnum * This::shdr_size);
+					       shnum * This::shdr_size,
+					       true);
   // Skip the first, dummy, section.
   const unsigned char *ps = pshdrs + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, ps += This::shdr_size)
@@ -242,7 +243,8 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       Section_relocs& sr(rd->relocs.back());
       sr.reloc_shndx = i;
       sr.data_shndx = shndx;
-      sr.contents = this->get_lasting_view(shdr.get_sh_offset(), sh_size);
+      sr.contents = this->get_lasting_view(shdr.get_sh_offset(), sh_size,
+					   true);
       sr.sh_type = sh_type;
       sr.reloc_count = reloc_count;
     }
@@ -261,7 +263,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       gold_assert(loccount == symtabshdr.get_sh_info());
       off_t locsize = loccount * sym_size;
       rd->local_symbols = this->get_lasting_view(symtabshdr.get_sh_offset(),
-						 locsize);
+						 locsize, true);
     }
 }
 
@@ -316,7 +318,8 @@ Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
 
   // Read the section headers.
   const unsigned char* pshdrs = this->get_view(this->elf_file_.shoff(),
-					       shnum * This::shdr_size);
+					       shnum * This::shdr_size,
+					       true);
 
   Views views;
   views.resize(shnum);
@@ -455,7 +458,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
 
       off_t sh_size = shdr.get_sh_size();
       const unsigned char* prelocs = this->get_view(shdr.get_sh_offset(),
-						    sh_size);
+						    sh_size, false);
 
       unsigned int reloc_size;
       if (sh_type == elfcpp::SHT_REL)

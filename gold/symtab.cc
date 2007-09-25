@@ -1550,7 +1550,8 @@ Warnings::note_warnings(Symbol_table* symtab)
 	    Task_locker_obj<Object> tl(*p->second.object);
 	    const unsigned char* c;
 	    off_t len;
-	    c = p->second.object->section_contents(p->second.shndx, &len);
+	    c = p->second.object->section_contents(p->second.shndx, &len,
+						   false);
 	    p->second.set_text(reinterpret_cast<const char*>(c), len);
 	  }
 	}
