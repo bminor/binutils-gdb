@@ -114,13 +114,14 @@ class File_read
   File_read(const File_read&);
   File_read& operator=(const File_read&);
 
-  // A view into the file when not using mmap.
+  // A view into the file.
   class View
   {
    public:
-    View(off_t start, off_t size, const unsigned char* data, bool cache)
+    View(off_t start, off_t size, const unsigned char* data, bool cache,
+         bool mapped)
       : start_(start), size_(size), data_(data), lock_count_(0),
-	cache_(cache)
+	cache_(cache), mapped_(mapped)
     { }
 
     ~View();
@@ -163,6 +164,7 @@ class File_read
     const unsigned char* data_;
     int lock_count_;
     bool cache_;
+    bool mapped_;
   };
 
   friend class File_view;

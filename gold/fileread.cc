@@ -26,6 +26,7 @@
 #include <cerrno>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/mman.h>
 
 #include "options.h"
 #include "dirsearch.h"
@@ -39,7 +40,14 @@ namespace gold
 File_read::View::~View()
 {
   gold_assert(!this->is_locked());
-  delete[] this->data_;
+  if (!this->mapped_)
+    delete[] this->data_;
+  else
+    {
+      if (::munmap(const_cast<unsigned char*>(this->data_), this->size_) != 0)
+        fprintf(stderr, _("%s: munmap failed: %s\n"),
+                program_name, strerror(errno));
+    }
 }
 
 void
@@ -258,11 +266,32 @@ File_read::find_or_make_view(off_t start, off_t size, bool cache)
       gold_assert(psize >= size);
     }
 
-  unsigned char* p = new unsigned char[psize];
+  File_read::View* v;
 
-  this->do_read(poff, psize, p);
+  if (this->contents_ != NULL)
+    {
+      unsigned char* p = new unsigned char[psize];
+      this->do_read(poff, psize, p);
+      v = new File_read::View(poff, psize, p, cache, false);
+    }
+  else
+    {
+      void* p = ::mmap(NULL, psize, PROT_READ, MAP_SHARED,
+                       this->descriptor_, poff);
+      if (p == MAP_FAILED)
+        {
+          fprintf(stderr, _("%s: %s: mmap offset %lld size %lld failed: %s\n"),
+                  program_name, this->filename().c_str(),
+                  static_cast<long long>(poff),
+                  static_cast<long long>(psize),
+                  strerror(errno));
+          gold_exit(false);
+        }
 
-  File_read::View* v = new File_read::View(poff, psize, p, cache);
+      const unsigned char* pbytes = static_cast<const unsigned char*>(p);
+      v = new File_read::View(poff, psize, pbytes, cache, true);
+    }
+
   ins.first->second = v;
   return v;
 }
