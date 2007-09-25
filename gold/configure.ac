@@ -106,6 +106,8 @@ dnl host dependent.  If build == host, we can check getconf LFS_CFLAGS.
 LFS_CXXFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 AC_SUBST(LFS_CXXFLAGS)
 
+AC_REPLACE_FUNCS(pread)
+
 AC_LANG_PUSH(C++)
 
 AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)

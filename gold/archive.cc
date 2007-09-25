@@ -326,16 +326,12 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
                              Input_objects* input_objects)
 {
   off_t off = sarmag;
+  off_t filesize = this->input_file_->file().filesize();
   while (true)
     {
-      unsigned char hdr_buf[sizeof(Archive_header)];
-      off_t bytes;
-      this->input_file_->file().read_up_to(off, sizeof(Archive_header),
-					   hdr_buf, &bytes);
-
-      if (bytes < sizeof(Archive_header))
+      if (filesize - off < sizeof(Archive_header))
         {
-          if (bytes != 0)
+          if (filesize != off)
             {
               fprintf(stderr, _("%s: %s: short archive header at %ld\n"),
                       program_name, this->name().c_str(),
@@ -345,6 +341,9 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
 
           break;
         }
+
+      unsigned char hdr_buf[sizeof(Archive_header)];
+      this->input_file_->file().read(off, sizeof(Archive_header), hdr_buf);
 
       const Archive_header* hdr =
 	reinterpret_cast<const Archive_header*>(hdr_buf);
@@ -380,17 +379,22 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
   size_t memoff = off + sizeof(Archive_header);
 
   // Read enough of the file to pick up the entire ELF header.
-  int ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
-  unsigned char ehdr_buf[ehdr_size];
-  off_t bytes;
-  this->input_file_->file().read_up_to(memoff, ehdr_size, ehdr_buf, &bytes);
-  if (bytes < 4)
+  unsigned char ehdr_buf[elfcpp::Elf_sizes<64>::ehdr_size];
+
+  off_t filesize = this->input_file_->file().filesize();
+  int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
+  if (filesize - memoff < read_size)
+    read_size = filesize - memoff;
+
+  if (read_size < 4)
     {
       fprintf(stderr, _("%s: %s: member at %ld is not an ELF object"),
 	      program_name, this->name().c_str(),
 	      static_cast<long>(off));
       gold_exit(false);
     }
+
+  this->input_file_->file().read(memoff, read_size, ehdr_buf);
 
   static unsigned char elfmagic[4] =
     {
@@ -407,7 +411,8 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   Object* obj = make_elf_object((std::string(this->input_file_->filename())
 				 + "(" + n + ")"),
-				this->input_file_, memoff, ehdr_buf, bytes);
+				this->input_file_, memoff, ehdr_buf,
+				read_size);
 
   input_objects->add_object(obj);
 

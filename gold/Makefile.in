@@ -48,8 +48,8 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
 	$(srcdir)/../install-sh $(srcdir)/../missing \
 	$(srcdir)/../mkinstalldirs $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.in \
-	$(top_srcdir)/configure $(top_srcdir)/po/Make-in yyscript.c \
-	yyscript.h
+	$(top_srcdir)/configure $(top_srcdir)/po/Make-in pread.c \
+	yyscript.c yyscript.h
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
@@ -90,6 +90,7 @@ am_ld_new_OBJECTS = $(am__objects_5)
 ld_new_OBJECTS = $(am_ld_new_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = libgold.a $(am__DEPENDENCIES_1)
+am__DEPENDENCIES_3 = @LIBOBJS@
 am__ld1_SOURCES_DIST = main.cc i386.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ld1_OBJECTS = $(am__objects_5)
 ld1_OBJECTS = $(am_ld1_OBJECTS)
@@ -327,8 +328,8 @@ sources_var = main.cc $(TARGETFILES)
 deps_var = libgold.a $(LIBINTL_DEP)
 ldadd_var = libgold.a $(LIBINTL)
 ld_new_SOURCES = $(sources_var)
-ld_new_DEPENDENCIES = $(deps_var)
-ld_new_LDADD = $(ldadd_var)
+ld_new_DEPENDENCIES = $(deps_var) $(LIBOBJS)
+ld_new_LDADD = $(ldadd_var) $(LIBOBJS)
 POTFILES = $(CCFILES) $(HFILES) $(TARGETFILES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_SOURCES = $(sources_var)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_DEPENDENCIES = $(deps_var) gcctestdir1/ld
@@ -430,6 +431,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/defstd.Po@am__quote@
@@ -893,7 +895,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-noinstLIBRARIES \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf ./$(DEPDIR)
+	-rm -rf $(DEPDIR) ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -921,7 +923,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf ./$(DEPDIR)
+	-rm -rf $(DEPDIR) ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

@@ -86,12 +86,24 @@ Read_symbols::run(Workqueue* workqueue)
 
   // Read enough of the file to pick up the entire ELF header.
 
-  const int ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
-  unsigned char ehdr_buf[ehdr_size];
-  off_t bytes;
-  input_file->file().read_up_to(0, ehdr_size, ehdr_buf, &bytes);
+  off_t filesize = input_file->file().filesize();
 
-  if (bytes >= 4)
+  if (filesize == 0)
+    {
+      fprintf(stderr, _("%s: %s: file is empty\n"),
+	      program_name, input_file->file().filename().c_str());
+      gold_exit(false);
+    }
+
+  unsigned char ehdr_buf[elfcpp::Elf_sizes<64>::ehdr_size];
+
+  int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
+  if (filesize < read_size)
+    read_size = filesize;
+
+  input_file->file().read(0, read_size, ehdr_buf);
+
+  if (read_size >= 4)
     {
       static unsigned char elfmagic[4] =
 	{
@@ -103,7 +115,7 @@ Read_symbols::run(Workqueue* workqueue)
 	  // This is an ELF object.
 
 	  Object* obj = make_elf_object(input_file->filename(),
-					input_file, 0, ehdr_buf, bytes);
+					input_file, 0, ehdr_buf, read_size);
 
 	  // We don't have a way to record a non-archive in an input
 	  // group.  If this is an ordinary object file, we can't
@@ -132,7 +144,7 @@ Read_symbols::run(Workqueue* workqueue)
 	}
     }
 
-  if (bytes >= Archive::sarmag)
+  if (read_size >= Archive::sarmag)
     {
       if (memcmp(ehdr_buf, Archive::armag, Archive::sarmag) == 0)
 	{
@@ -151,18 +163,11 @@ Read_symbols::run(Workqueue* workqueue)
 	}
     }
 
-  if (bytes == 0)
-    {
-      fprintf(stderr, _("%s: %s: file is empty\n"),
-	      program_name, input_file->file().filename().c_str());
-      gold_exit(false);
-    }
-
   // Try to parse this file as a script.
   if (read_input_script(workqueue, this->options_, this->symtab_,
 			this->layout_, this->dirpath_, this->input_objects_,
 			this->input_group_, this->input_argument_, input_file,
-			ehdr_buf, bytes, this->this_blocker_,
+			ehdr_buf, read_size, this->this_blocker_,
 			this->next_blocker_))
     return;
 

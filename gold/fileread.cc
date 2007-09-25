@@ -89,8 +89,23 @@ File_read::open(const std::string& name)
 	      && this->descriptor_ < 0
 	      && this->name_.empty());
   this->name_ = name;
+
   this->descriptor_ = ::open(this->name_.c_str(), O_RDONLY);
+
+  if (this->descriptor_ >= 0)
+    {
+      struct stat s;
+      if (::fstat(this->descriptor_, &s) < 0)
+	{
+	  fprintf(stderr, _("%s: %s: fstat failed: %s"), program_name,
+		  this->name_.c_str(), strerror(errno));
+	  gold_exit(false);
+	}
+      this->size_ = s.st_size;
+    }
+
   ++this->lock_count_;
+
   return this->descriptor_ >= 0;
 }
 
@@ -98,14 +113,14 @@ File_read::open(const std::string& name)
 
 bool
 File_read::open(const std::string& name, const unsigned char* contents,
-		off_t contents_size)
+		off_t size)
 {
   gold_assert(this->lock_count_ == 0
 	      && this->descriptor_ < 0
 	      && this->name_.empty());
   this->name_ = name;
   this->contents_ = contents;
-  this->contents_size_ = contents_size;
+  this->size_ = size;
   ++this->lock_count_;
   return true;
 }
@@ -144,50 +159,45 @@ File_read::find_view(off_t start, off_t size)
   return p->second;
 }
 
-// Read data from the file.  Return the number of bytes read.  If
-// PBYTES is not NULL, store the number of bytes in *PBYTES, otherwise
-// require that we read exactly the number of bytes requested.
+// Read SIZE bytes from the file starting at offset START.  Read into
+// the buffer at P.  Return the number of bytes read, which should
+// always be at least SIZE except at the end of the file.
 
 off_t
-File_read::do_read(off_t start, off_t size, void* p, off_t* pbytes)
+File_read::do_read(off_t start, off_t size, void* p)
 {
   gold_assert(this->lock_count_ > 0);
 
-  off_t bytes;
-  if (this->contents_ == NULL)
+  if (this->contents_ != NULL)
     {
-      int o = this->descriptor_;
-
-      if (lseek(o, start, SEEK_SET) < 0)
-	{
-	  fprintf(stderr, _("%s: %s: lseek to %lld failed: %s"),
-		  program_name, this->filename().c_str(),
-		  static_cast<long long>(start),
-		  strerror(errno));
-	  gold_exit(false);
-	}
-
-      bytes = ::read(o, p, size);
-      if (bytes < 0)
-	{
-	  fprintf(stderr, _("%s: %s: read failed: %s\n"),
-		  program_name, this->filename().c_str(), strerror(errno));
-	  gold_exit(false);
-	}
-    }
-  else
-    {
-      bytes = this->contents_size_ - start;
+      off_t bytes = this->size_ - start;
       if (bytes < 0)
 	bytes = 0;
       else if (bytes > size)
 	bytes = size;
       memcpy(p, this->contents_ + start, bytes);
+      return bytes;
     }
 
-  if (pbytes != NULL)
-    *pbytes = bytes;
-  else if (bytes != size)
+  off_t bytes = ::pread(this->descriptor_, p, size, start);
+  if (bytes < 0)
+    {
+      fprintf(stderr, _("%s: %s: pread failed: %s\n"),
+	      program_name, this->filename().c_str(), strerror(errno));
+      gold_exit(false);
+    }
+
+  return bytes;
+}
+
+// Read exactly SIZE bytes from the file starting at offset START.
+// Read into the buffer at P.
+
+void
+File_read::do_read_exact(off_t start, off_t size, void* p)
+{
+  off_t bytes = this->do_read(start, size, p);
+  if (bytes != size)
     {
       fprintf(stderr,
 	      _("%s: %s: file too short: read only %lld of %lld "
@@ -198,8 +208,6 @@ File_read::do_read(off_t start, off_t size, void* p, off_t* pbytes)
 	      static_cast<long long>(start));
       gold_exit(false);
     }
-
-  return bytes;
 }
 
 // Read data from the file.
@@ -216,24 +224,7 @@ File_read::read(off_t start, off_t size, void* p)
       return;
     }
 
-  this->do_read(start, size, p, NULL);
-}
-
-void
-File_read::read_up_to(off_t start, off_t size, void* p, off_t* pbytes)
-{
-  gold_assert(this->lock_count_ > 0);
-
-  File_read::View* pv = this->find_view(start, size);
-  if (pv != NULL)
-    {
-      memcpy(p, pv->data() + (start - pv->start()), size);
-      if (pbytes != NULL)
-	*pbytes = size;
-      return;
-    }
-
-  this->do_read(start, size, p, pbytes);
+  this->do_read_exact(start, size, p);
 }
 
 // Find an existing view or make a new one.
@@ -260,28 +251,24 @@ File_read::find_or_make_view(off_t start, off_t size)
       this->saved_views_.push_back(v);
     }
 
-  // We need to read data from the file.
+  // We need to read data from the file.  We read full pages for
+  // greater efficiency on small files.
 
   off_t psize = File_read::pages(size + (start - poff));
+
+  if (poff + psize >= this->size_)
+    {
+      psize = this->size_ - poff;
+      gold_assert(psize >= size);
+    }
+
   unsigned char* p = new unsigned char[psize];
 
-  off_t got_bytes;
-  off_t bytes = this->do_read(poff, psize, p, &got_bytes);
+  this->do_read_exact(poff, psize, p);
 
-  File_read::View* v = new File_read::View(poff, bytes, p);
-
+  File_read::View* v = new File_read::View(poff, psize, p);
   ins.first->second = v;
-
-  if (bytes - (start - poff) >= size)
-    return v;
-
-  fprintf(stderr,
-	  _("%s: %s: file too short: read only %lld of %lld bytes at %lld\n"),
-	  program_name, this->filename().c_str(),
-	  static_cast<long long>(bytes - (start - poff)),
-	  static_cast<long long>(size),
-	  static_cast<long long>(start));
-  gold_exit(false);
+  return v;
 }
 
 // This implementation of get_view just reads into a memory buffer,

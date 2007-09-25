@@ -45,8 +45,8 @@ class File_read
 {
  public:
   File_read()
-    : name_(), descriptor_(-1), lock_count_(0), views_(),
-      saved_views_(), contents_(NULL), contents_size_(0)
+    : name_(), descriptor_(-1), size_(0), lock_count_(0), views_(),
+      saved_views_(), contents_(NULL)
   { }
 
   ~File_read();
@@ -80,6 +80,11 @@ class File_read
   bool
   is_locked();
 
+  // Return the size of the file.
+  off_t
+  filesize() const
+  { return this->size_; }
+
   // Return a view into the file starting at file offset START for
   // SIZE bytes.  The pointer will remain valid until the File_read is
   // unlocked.  It is an error if we can not read enough data from the
@@ -91,11 +96,6 @@ class File_read
   // START for SIZE bytes.
   void
   read(off_t start, off_t size, void* p);
-
-  // Read up to SIZE bytes from the file into the buffer P starting at
-  // file offset START.  Set *PBYTES to the number of bytes read.
-  void
-  read_up_to(off_t start, off_t size, void* p, off_t* pbytes);
 
   // Return a lasting view into the file starting at file offset START
   // for SIZE bytes.  This is allocated with new, and the caller is
@@ -159,7 +159,11 @@ class File_read
 
   // Read data from the file into a buffer.
   off_t
-  do_read(off_t start, off_t size, void* p, off_t* pbytes);
+  do_read(off_t start, off_t size, void* p);
+
+  // Read an exact number of bytes into a buffer.
+  void
+  do_read_exact(off_t start, off_t size, void* p);
 
   // Find or make a view into the file.
   View*
@@ -192,6 +196,8 @@ class File_read
   std::string name_;
   // File descriptor.
   int descriptor_;
+  // File size.
+  off_t size_;
   // Number of locks on the file.
   int lock_count_;
   // Buffered views into the file.
@@ -201,8 +207,6 @@ class File_read
   Saved_views saved_views_;
   // Specified file contents.  Used only for testing purposes.
   const unsigned char* contents_;
-  // Specified file size.  Used only for testing purposes.
-  off_t contents_size_;
 };
 
 // A view of file data that persists even when the file is unlocked.

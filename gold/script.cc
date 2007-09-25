@@ -299,17 +299,21 @@ class Lex
 void
 Lex::read_file(std::string* contents)
 {
+  off_t filesize = this->input_file_->file().filesize();
   contents->clear();
+  contents->reserve(filesize);
+
   off_t off = 0;
-  off_t got;
   unsigned char buf[BUFSIZ];
-  do
+  while (off < filesize)
     {
-      this->input_file_->file().read_up_to(off, sizeof buf, buf, &got);
-      contents->append(reinterpret_cast<char*>(&buf[0]), got);
-      off += got;
+      off_t get = BUFSIZ;
+      if (get > filesize - off)
+	get = filesize - off;
+      this->input_file_->file().read(off, get, buf);
+      contents->append(reinterpret_cast<char*>(&buf[0]), get);
+      off += get;
     }
-  while (got == sizeof buf);
 }
 
 // Return whether C can be the start of a name, if the next character

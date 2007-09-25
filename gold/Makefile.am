@@ -86,8 +86,8 @@ deps_var = libgold.a $(LIBINTL_DEP)
 ldadd_var = libgold.a $(LIBINTL)
 
 ld_new_SOURCES = $(sources_var)
-ld_new_DEPENDENCIES = $(deps_var)
-ld_new_LDADD = $(ldadd_var)
+ld_new_DEPENDENCIES = $(deps_var) $(LIBOBJS)
+ld_new_LDADD = $(ldadd_var) $(LIBOBJS)
 
 # Use an explicit dependency for the bison generated header file.
 script.$(OBJEXT): yyscript.h

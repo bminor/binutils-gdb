@@ -98,6 +98,10 @@ struct hash<T*>
 
 #endif
 
+#ifndef HAVE_PREAD
+extern "C" ssize_t pread(int, void*, size_t, off_t);
+#endif
+
 namespace gold
 {
 // This is a hack to work around a problem with older versions of g++.
