@@ -202,8 +202,25 @@ File_read::do_read(off_t start, off_t size, void* p, off_t* pbytes)
   return bytes;
 }
 
+// Read data from the file.
+
 void
-File_read::read(off_t start, off_t size, void* p, off_t* pbytes)
+File_read::read(off_t start, off_t size, void* p)
+{
+  gold_assert(this->lock_count_ > 0);
+
+  File_read::View* pv = this->find_view(start, size);
+  if (pv != NULL)
+    {
+      memcpy(p, pv->data() + (start - pv->start()), size);
+      return;
+    }
+
+  this->do_read(start, size, p, NULL);
+}
+
+void
+File_read::read_up_to(off_t start, off_t size, void* p, off_t* pbytes)
 {
   gold_assert(this->lock_count_ > 0);
 
@@ -286,7 +303,15 @@ File_read::find_or_make_view(off_t start, off_t size, off_t* pbytes)
 // mmap.
 
 const unsigned char*
-File_read::get_view(off_t start, off_t size, off_t* pbytes)
+File_read::get_view(off_t start, off_t size)
+{
+  gold_assert(this->lock_count_ > 0);
+  File_read::View* pv = this->find_or_make_view(start, size, NULL);
+  return pv->data() + (start - pv->start());
+}
+
+const unsigned char*
+File_read::get_view_and_size(off_t start, off_t size, off_t* pbytes)
 {
   gold_assert(this->lock_count_ > 0);
   File_read::View* pv = this->find_or_make_view(start, size, pbytes);
@@ -294,10 +319,10 @@ File_read::get_view(off_t start, off_t size, off_t* pbytes)
 }
 
 File_view*
-File_read::get_lasting_view(off_t start, off_t size, off_t* pbytes)
+File_read::get_lasting_view(off_t start, off_t size)
 {
   gold_assert(this->lock_count_ > 0);
-  File_read::View* pv = this->find_or_make_view(start, size, pbytes);
+  File_read::View* pv = this->find_or_make_view(start, size, NULL);
   pv->lock();
   return new File_view(*this, pv, pv->data() + (start - pv->start()));
 }

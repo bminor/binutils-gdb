@@ -305,7 +305,7 @@ Lex::read_file(std::string* contents)
   unsigned char buf[BUFSIZ];
   do
     {
-      this->input_file_->file().read(off, sizeof buf, buf, &got);
+      this->input_file_->file().read_up_to(off, sizeof buf, buf, &got);
       contents->append(reinterpret_cast<char*>(&buf[0]), got);
       off += got;
     }

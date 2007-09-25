@@ -80,24 +80,37 @@ class File_read
   bool
   is_locked();
 
-  // Return a view into the file.  The pointer will remain valid until
-  // the File_read is unlocked.  If PBYTES is NULL, it is an error if
-  // we can not read enough data.  Otherwise *PBYTES is set to the
-  // number of bytes read.
+  // Return a view into the file starting at file offset START for
+  // SIZE bytes.  The pointer will remain valid until the File_read is
+  // unlocked.  It is an error if we can not read enough data from the
+  // file.
   const unsigned char*
-  get_view(off_t start, off_t size, off_t* pbytes = NULL);
+  get_view(off_t start, off_t size);
 
-  // Read data from the file into the buffer P.  PBYTES is as in
-  // get_view.
+  // Return a view into the file starting at file offset START, for up
+  // to SIZE bytes.  Set *PBYTES to the number of bytes read.  This
+  // may be less than SIZE.  The pointer will remain valid until the
+  // File_read is unlocked.
+  const unsigned char*
+  get_view_and_size(off_t start, off_t size, off_t* pbytes);
+
+  // Read data from the file into the buffer P starting at file offset
+  // START for SIZE bytes.
   void
-  read(off_t start, off_t size, void* p, off_t* pbytes = NULL);
+  read(off_t start, off_t size, void* p);
 
-  // Return a lasting view into the file.  This is allocated with new,
-  // and the caller is responsible for deleting it when done.  The
-  // data associated with this view will remain valid until the view
-  // is deleted.  PBYTES is handled as with get_view.
+  // Read up to SIZE bytes from the file into the buffer P starting at
+  // file offset START.  Set *PBYTES to the number of bytes read.
+  void
+  read_up_to(off_t start, off_t size, void* p, off_t* pbytes);
+
+  // Return a lasting view into the file starting at file offset START
+  // for SIZE bytes.  This is allocated with new, and the caller is
+  // responsible for deleting it when done.  The data associated with
+  // this view will remain valid until the view is deleted.  It is an
+  // error if we can not read enough data from the file.
   File_view*
-  get_lasting_view(off_t start, off_t size, off_t *pbytes = NULL);
+  get_lasting_view(off_t start, off_t size);
 
  private:
   // This class may not be copied.

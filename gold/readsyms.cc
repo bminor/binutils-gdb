@@ -88,7 +88,8 @@ Read_symbols::run(Workqueue* workqueue)
 
   int ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
   off_t bytes;
-  const unsigned char* p = input_file->file().get_view(0, ehdr_size, &bytes);
+  const unsigned char* p = input_file->file().get_view_and_size(0, ehdr_size,
+								&bytes);
   if (bytes >= 4)
     {
       static unsigned char elfmagic[4] =

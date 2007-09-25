@@ -329,8 +329,9 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
   while (true)
     {
       off_t bytes;
-      const unsigned char* p = this->get_view(off, sizeof(Archive_header),
-                                              &bytes);
+      const unsigned char* p = this->get_view_and_size(off,
+						       sizeof(Archive_header),
+						       &bytes);
       if (bytes < sizeof(Archive_header))
         {
           if (bytes != 0)
@@ -379,9 +380,8 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
   // Read enough of the file to pick up the entire ELF header.
   int ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
   off_t bytes;
-  const unsigned char* p = this->input_file_->file().get_view(memoff,
-							      ehdr_size,
-							      &bytes);
+  const unsigned char* p =
+    this->input_file_->file().get_view_and_size(memoff, ehdr_size, &bytes);
   if (bytes < 4)
     {
       fprintf(stderr, _("%s: %s: member at %ld is not an ELF object"),

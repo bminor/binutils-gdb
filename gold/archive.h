@@ -98,8 +98,12 @@ class Archive
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, off_t size, off_t* pbytes = NULL)
-  { return this->input_file_->file().get_view(start, size, pbytes); }
+  get_view(off_t start, off_t size)
+  { return this->input_file_->file().get_view(start, size); }
+
+  const unsigned char*
+  get_view_and_size(off_t start, off_t size, off_t* pbytes)
+  { return this->input_file_->file().get_view_and_size(start, size, pbytes); }
 
   // Read the archive symbol map.
   void
