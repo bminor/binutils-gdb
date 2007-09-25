@@ -213,7 +213,7 @@ choice of branch name would be:
 
   binutils-tgc-fm
 
-A data stamp is not required as part of the name field, but some
+A date stamp is not required as part of the name field, but some
 organizations like to have one.  If you do include the date, you
 should follow these rules:
 
