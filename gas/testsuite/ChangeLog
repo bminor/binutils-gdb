@@ -1,3 +1,9 @@
+2007-09-25  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/m68k/br-isaa.d: Dump relocs too.
+	* gas/m68k/br-isab.d: Likewise.
+	* gas/m68k/br-isac.d: Likewise.  Adjust for long branch relaxation.
+
 2007-09-24  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* gas/mips/align.s, gas/mips/align.d: New test.

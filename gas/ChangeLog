@@ -1,3 +1,13 @@
+2007-09-25  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (LONG_BRANCH_VIA_COND): New.
+	(BRANCHBWPL, FRAG_VAR_SIZE): New.
+	(md_relax_table): Add BRANCHBWPL entries.
+	(m68k_ip): Choose BRANCHBWPL relaxation if necessary.
+	(md_assemble): Use FRAG_VAR_SIZE.
+	(md_convert_frag_1): Add BRANCHBWPL cases.
+	(md_estimate_size_before_relaz): Likewise.
+
 2007-09-24  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* config/tc-mips.c (s_align): Set max_alignment to 28.

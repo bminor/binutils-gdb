@@ -380,6 +380,7 @@ struct m68k_it
 	((x) & (m68020|m68030|m68040|m68060|cpu32|fido_a|mcfisa_b|mcfisa_c))
 #define HAVE_LONG_BRANCH(x)	\
 	((x) & (m68020|m68030|m68040|m68060|cpu32|fido_a|mcfisa_b))
+#define LONG_BRANCH_VIA_COND(x) (HAVE_LONG_COND(x) && !HAVE_LONG_BRANCH(x))
 
 static struct m68k_it the_ins;	/* The instruction being assembled.  */
 
@@ -734,8 +735,14 @@ static void m68k_init_arch (void);
 #define PCINDEX		8	/* PC + displacement + index. */
 #define ABSTOPCREL	9	/* Absolute relax down to 16-bit PC-relative.  */
 
+/* This relaxation is required for branches where there is no long
+   branch and we are in pcrel mode.  We generate a bne/beq pair.  */
+#define BRANCHBWPL	10      /* Branch byte, word or pair of longs
+				   */
+
 /* Note that calls to frag_var need to specify the maximum expansion
-   needed; this is currently 10 bytes for DBCC.  */
+   needed; this is currently 12 bytes for bne/beq pair.  */
+#define FRAG_VAR_SIZE 12
 
 /* The fields are:
    How far Forward this mode will reach:
@@ -795,6 +802,11 @@ relax_typeS md_relax_table[] =
   { 32767, -32768,  2, TAB (ABSTOPCREL, LONG) },
   {	0,	0,  4, 0 },
   {	1,	1,  0, 0 },
+  
+  {   127,   -128,  0, TAB (BRANCHBWPL, SHORT) },
+  { 32767, -32768,  2, TAB (BRANCHBWPL, LONG) },
+  {     0,	0,  10, 0 },
+  {     1,	1,  0, 0 },
 };
 
 /* These are the machine dependent pseudo-ops.  These are included so
@@ -2275,6 +2287,7 @@ m68k_ip (char *instring)
   for (s = the_ins.args, opP = &the_ins.operands[0]; *s; s += 2, opP++)
     {
       int have_disp = 0;
+      int use_pl = 0;
       
       /* This switch is a doozy.
 	 Watch the first step; its a big one! */
@@ -2958,6 +2971,7 @@ m68k_ip (char *instring)
 	      
 	    case 'b': /* Unconditional branch */
 	      have_disp = HAVE_LONG_BRANCH (current_architecture);
+	      use_pl = LONG_BRANCH_VIA_COND (current_architecture);
 	      goto var_branch;
 	      
 	    case 's': /* Unconditional subroutine */
@@ -3021,7 +3035,8 @@ m68k_ip (char *instring)
 	      else
 		add_frag (adds (&opP->disp),
 			  SEXT (offs (&opP->disp)),
-			  TAB (BRANCHBW, SZ_UNDEF));
+			  (use_pl ? TAB (BRANCHBWPL, SZ_UNDEF)
+			   : TAB (BRANCHBW, SZ_UNDEF)));
 	      break;
 	    case 'w':
 	      if (isvar (&opP->disp))
@@ -3571,10 +3586,9 @@ reverse_8_bits (int in)
   return out;
 }				/* reverse_8_bits() */
 
-/* Cause an extra frag to be generated here, inserting up to 10 bytes
-   (that value is chosen in the frag_var call in md_assemble).  TYPE
-   is the subtype of the frag to be generated; its primary type is
-   rs_machine_dependent.
+/* Cause an extra frag to be generated here, inserting up to
+   FRAG_VAR_SIZE bytes.  TYPE is the subtype of the frag to be
+   generated; its primary type is rs_machine_dependent.
 
    The TYPE parameter is also used by md_convert_frag_1 and
    md_estimate_size_before_relax.  The appropriate type of fixup will
@@ -4247,7 +4261,7 @@ md_assemble (char *str)
     for (n = 1; n < the_ins.nfrag; n++)
       wid += 2 * (the_ins.numo - the_ins.fragb[n - 1].fragoff);
     /* frag_var part.  */
-    wid += 10;
+    wid += FRAG_VAR_SIZE;
     /* Make sure the whole insn fits in one chunk, in particular that
        the var part is attached, as we access one byte before the
        variable frag for byte branches.  */
@@ -4295,7 +4309,7 @@ md_assemble (char *str)
 					      the_ins.reloc[m].pic_reloc));
 	  fixP->fx_pcrel_adjust = the_ins.reloc[m].pcrel_fix;
 	}
-      (void) frag_var (rs_machine_dependent, 10, 0,
+      (void) frag_var (rs_machine_dependent, FRAG_VAR_SIZE, 0,
 		       (relax_substateT) (the_ins.fragb[n].fragty),
 		       the_ins.fragb[n].fadd, the_ins.fragb[n].foff, to_beg_P);
     }
@@ -4867,6 +4881,7 @@ md_convert_frag_1 (fragS *fragP)
     case TAB (BRABSJUNC, BYTE):
     case TAB (BRABSJCOND, BYTE):
     case TAB (BRANCHBW, BYTE):
+    case TAB (BRANCHBWPL, BYTE):
       know (issbyte (disp));
       if (disp == 0)
 	as_bad_where (fragP->fr_file, fragP->fr_line,
@@ -4879,6 +4894,7 @@ md_convert_frag_1 (fragS *fragP)
     case TAB (BRABSJUNC, SHORT):
     case TAB (BRABSJCOND, SHORT):
     case TAB (BRANCHBW, SHORT):
+    case TAB (BRANCHBWPL, SHORT):
       fragP->fr_opcode[1] = 0x00;
       fixP = fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
 		      fragP->fr_offset, 1, RELAX_RELOC_PC16);
@@ -4886,6 +4902,24 @@ md_convert_frag_1 (fragS *fragP)
       break;
     case TAB (BRANCHBWL, LONG):
       fragP->fr_opcode[1] = (char) 0xFF;
+      fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC32);
+      fragP->fr_fix += 4;
+      break;
+    case TAB (BRANCHBWPL, LONG):
+      /* Here we are converting an unconditional branch into a pair of
+	 conditional branches, in order to get the range.  */
+      fragP->fr_opcode[0] = 0x66; /* bne */
+      fragP->fr_opcode[1] = 0xFF;
+      fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
+		      fragP->fr_offset, 1, RELAX_RELOC_PC32);
+      fixP->fx_file = fragP->fr_file;
+      fixP->fx_line = fragP->fr_line;
+      fragP->fr_fix += 4;  /* Skip first offset */
+      buffer_address += 4;
+      *buffer_address++ = 0x67; /* beq */
+      *buffer_address++ = 0xff;
+      fragP->fr_fix += 2;  /* Skip second branch opcode */
       fixP = fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
 		      fragP->fr_offset, 1, RELAX_RELOC_PC32);
       fragP->fr_fix += 4;
@@ -5085,6 +5119,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
   switch (fragP->fr_subtype)
     {
     case TAB (BRANCHBWL, SZ_UNDEF):
+    case TAB (BRANCHBWPL, SZ_UNDEF):
     case TAB (BRABSJUNC, SZ_UNDEF):
     case TAB (BRABSJCOND, SZ_UNDEF):
       {
