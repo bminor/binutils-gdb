@@ -272,6 +272,7 @@ struct spu_link_hash_table
   asection *ovtab;
 
   struct elf_link_hash_entry *ovly_load;
+  unsigned long ovly_load_r_symndx;
 
   /* An array of two output sections per overlay region, chosen such that
      the first section vma is the overlay buffer vma (ie. the section has
@@ -1148,12 +1149,16 @@ spu_elf_size_stubs (bfd *output_bfd,
 	{
 	  htab->stubs.sh[i]->off = htab->stub->size;
 	  htab->stub->size += SIZEOF_STUB1;
+	  if (info->emitrelocations)
+	    htab->stub->reloc_count += 1;
 	}
       else
 	htab->stubs.sh[i]->off = htab->stubs.sh[i - 1]->off;
     }
   if (group != i)
     htab->stub->size += SIZEOF_STUB2;
+  if (info->emitrelocations)
+    htab->stub->flags |= SEC_RELOC;
   for (; group != i; group++)
     htab->stubs.sh[group]->delta
       = htab->stubs.sh[i - 1]->off - htab->stubs.sh[group]->off;
@@ -1241,6 +1246,56 @@ write_one_stub (struct spu_stub_hash_entry *ent, struct bfd_link_info *info)
   bfd_put_32 (sec->owner, BR + ((val << 5) & 0x007fff80),
 	      sec->contents + ent->off + 4);
 
+  if (info->emitrelocations)
+    {
+      Elf_Internal_Rela *relocs, *r;
+      struct bfd_elf_section_data *elfsec_data;
+
+      elfsec_data = elf_section_data (sec);
+      relocs = elfsec_data->relocs;
+      if (relocs == NULL)
+	{
+	  bfd_size_type relsize;
+	  Elf_Internal_Shdr *symtab_hdr;
+	  struct elf_link_hash_entry **sym_hash;
+	  unsigned long symcount;
+	  bfd_vma amt;
+
+	  relsize = sec->reloc_count * sizeof (*relocs);
+	  relocs = bfd_alloc (sec->owner, relsize);
+	  if (relocs == NULL)
+	    return FALSE;
+	  elfsec_data->relocs = relocs;
+	  elfsec_data->rel_hdr.sh_size
+	    = sec->reloc_count * sizeof (Elf32_External_Rela);
+	  elfsec_data->rel_hdr.sh_entsize = sizeof (Elf32_External_Rela);
+	  sec->reloc_count = 0;
+
+	  /* Increase the size of symbol hash array on the bfd to
+	     which we attached our .stub section.  This hack allows
+	     us to create relocs against global symbols.  */
+	  symtab_hdr = &elf_tdata (sec->owner)->symtab_hdr;
+	  symcount = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
+	  symcount -= symtab_hdr->sh_info;
+	  amt = symcount * sizeof (*sym_hash);
+	  sym_hash = bfd_alloc (sec->owner, amt + sizeof (*sym_hash));
+	  if (sym_hash == NULL)
+	    return FALSE;
+	  memcpy (sym_hash, elf_sym_hashes (sec->owner), amt);
+	  sym_hash[symcount] = htab->ovly_load;
+	  htab->ovly_load_r_symndx = symcount + symtab_hdr->sh_info;
+	  elf_sym_hashes (sec->owner) = sym_hash;
+	}
+      r = relocs + sec->reloc_count;
+      sec->reloc_count += 1;
+      r->r_offset = ent->off + 4;
+      r->r_info = ELF32_R_INFO (0, R_SPU_REL16);
+      r->r_addend = (sec->output_section->vma
+		     + sec->output_offset
+		     + ent->off + 4
+		     + val);
+    }
+
   /* If this is the last stub of this group, write stub2.  */
   if (ent->delta == 0)
     {
@@ -1263,6 +1318,20 @@ write_one_stub (struct spu_stub_hash_entry *ent, struct bfd_link_info *info)
 
       bfd_put_32 (sec->owner, BR + ((val << 5) & 0x007fff80),
 		  sec->contents + ent->off + 12);
+
+      if (info->emitrelocations)
+	{
+	  Elf_Internal_Rela *relocs, *r;
+	  struct bfd_elf_section_data *elfsec_data;
+
+	  elfsec_data = elf_section_data (sec);
+	  relocs = elfsec_data->relocs;
+	  /* The last branch is overwritten, so overwrite its reloc too.  */
+	  r = relocs + sec->reloc_count - 1;
+	  r->r_offset = ent->off + 12;
+	  r->r_info = ELF32_R_INFO (htab->ovly_load_r_symndx, R_SPU_REL16);
+	  r->r_addend = 0;
+	}
     }
 
   if (htab->emit_stub_syms)

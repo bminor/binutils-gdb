@@ -1,3 +1,8 @@
+2007-09-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/ovl.d: Adjust for stub relocs.
+	* ld-spu/ovl2.d: Likewise.
+
 2007-09-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 658

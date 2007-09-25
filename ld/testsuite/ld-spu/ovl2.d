@@ -26,18 +26,21 @@ Disassembly of section \.text:
  124:	40 20 00 00 	nop	\$0
  128:	42 00 00 4e 	ila	\$78,0
  12c:	32 00 0a 80 	br	180 <__ovly_load>	# 180
+			12c: SPU_REL16	__ovly_load
 
 00000130 <00000000\.ovl_call.f1_a1>:
  130:	42 02 00 4f 	ila	\$79,1024	# 400
  134:	40 20 00 00 	nop	\$0
  138:	42 00 00 ce 	ila	\$78,1
  13c:	32 00 08 80 	br	180 <__ovly_load>	# 180
+			13c: SPU_REL16	__ovly_load
 
 00000140 <_SPUEAR_f1_a2>:
  140:	42 02 00 4f 	ila	\$79,1024	# 400
  144:	40 20 00 00 	nop	\$0
  148:	42 00 01 4e 	ila	\$78,2
  14c:	32 00 06 80 	br	180 <__ovly_load>	# 180
+			14c: SPU_REL16	__ovly_load
 #...
 Disassembly of section \.ov_a1:
 

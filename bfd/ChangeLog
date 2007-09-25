@@ -1,5 +1,9 @@
 2007-09-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.c (struct spu_link_hash_table): Add ovly_load_r_symndx.
+	(spu_elf_size_stubs): Count stub relocs.
+	(write_one_stub): Emit relocs on overlay call stubs.
+
 	* elf32-spu.c (struct spu_link_hash_table): Add "stubs".
 	(spu_elf_link_hash_table_create): Init new field.
 	(spu_elf_size_stubs): Store sorted stub syms in new htab field
