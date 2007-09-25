@@ -1,3 +1,14 @@
+2007-09-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (struct spu_link_hash_table): Add "stubs".
+	(spu_elf_link_hash_table_create): Init new field.
+	(spu_elf_size_stubs): Store sorted stub syms in new htab field
+	rather than local var.
+	(spu_elf_build_stubs): Iterate over htab stubs rather than
+	hash traversal.
+	(struct stubarr): Delete.
+	(allocate_spuear_stubs, populate_stubs, write_one_stub): Adjust.
+
 2007-09-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf.c (assign_file_positions_for_load_sections): Trust

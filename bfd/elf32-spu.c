@@ -260,6 +260,13 @@ struct spu_link_hash_table
   /* The stub hash table.  */
   struct bfd_hash_table stub_hash_table;
 
+  /* Sorted array of stubs.  */
+  struct {
+    struct spu_stub_hash_entry **sh;
+    unsigned int count;
+    int err;
+  } stubs;
+
   /* Shortcuts to overlay sections.  */
   asection *stub;
   asection *ovtab;
@@ -370,8 +377,8 @@ spu_elf_link_hash_table_create (bfd *abfd)
 			    sizeof (struct spu_stub_hash_entry)))
     return NULL;
 
-  memset (&htab->stub, 0,
-	  sizeof (*htab) - offsetof (struct spu_link_hash_table, stub));
+  memset (&htab->stubs, 0,
+	  sizeof (*htab) - offsetof (struct spu_link_hash_table, stubs));
 
   return &htab->elf.root;
 }
@@ -764,13 +771,6 @@ needs_ovl_stub (const char *sym_name,
   return !is_branch;
 }
 
-struct stubarr {
-  struct bfd_hash_table *stub_hash_table;
-  struct spu_stub_hash_entry **sh;
-  unsigned int count;
-  int err;
-};
-
 /* Called via elf_link_hash_traverse to allocate stubs for any _SPUEAR_
    symbols.  */
 
@@ -784,19 +784,19 @@ allocate_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
       && h->def_regular
       && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0)
     {
-      struct stubarr *stubs = inf;
+      struct spu_link_hash_table *htab = inf;
       static Elf_Internal_Rela zero_rel;
       char *stub_name = spu_stub_name (h->root.u.def.section, h, &zero_rel);
       struct spu_stub_hash_entry *sh;
 
       if (stub_name == NULL)
 	{
-	  stubs->err = 1;
+	  htab->stubs.err = 1;
 	  return FALSE;
 	}
 
       sh = (struct spu_stub_hash_entry *)
-	bfd_hash_lookup (stubs->stub_hash_table, stub_name, TRUE, FALSE);
+	bfd_hash_lookup (&htab->stub_hash_table, stub_name, TRUE, FALSE);
       if (sh == NULL)
 	{
 	  free (stub_name);
@@ -812,7 +812,7 @@ allocate_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
 
       sh->target_section = h->root.u.def.section;
       sh->target_off = h->root.u.def.value;
-      stubs->count += 1;
+      htab->stubs.count += 1;
     }
   
   return TRUE;
@@ -824,9 +824,9 @@ allocate_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
 static bfd_boolean
 populate_stubs (struct bfd_hash_entry *bh, void *inf)
 {
-  struct stubarr *stubs = inf;
+  struct spu_link_hash_table *htab = inf;
 
-  stubs->sh[--stubs->count] = (struct spu_stub_hash_entry *) bh;
+  htab->stubs.sh[--htab->stubs.count] = (struct spu_stub_hash_entry *) bh;
   return TRUE;
 }
 
@@ -873,14 +873,10 @@ spu_elf_size_stubs (bfd *output_bfd,
 {
   struct spu_link_hash_table *htab = spu_hash_table (info);
   bfd *ibfd;
-  struct stubarr stubs;
   unsigned i, group;
   flagword flags;
 
   htab->non_overlay_stubs = non_overlay_stubs;
-  stubs.stub_hash_table = &htab->stub_hash_table;
-  stubs.count = 0;
-  stubs.err = 0;
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
       extern const bfd_target bfd_elf32_spu_vec;
@@ -1054,7 +1050,7 @@ spu_elf_size_stubs (bfd *output_bfd,
 		sh->target_off = sym->st_value;
 	      sh->target_off += irela->r_addend;
 
-	      stubs.count += 1;
+	      htab->stubs.count += 1;
 	    }
 
 	  /* We're done with the internal relocs, free them.  */
@@ -1072,12 +1068,12 @@ spu_elf_size_stubs (bfd *output_bfd,
 	}
     }
 
-  elf_link_hash_traverse (&htab->elf, allocate_spuear_stubs, &stubs);
-  if (stubs.err)
+  elf_link_hash_traverse (&htab->elf, allocate_spuear_stubs, htab);
+  if (htab->stubs.err)
     return FALSE;
 
   *stub = NULL;
-  if (stubs.count == 0)
+  if (htab->stubs.count == 0)
     return TRUE;
 
   ibfd = info->input_bfds;
@@ -1104,15 +1100,16 @@ spu_elf_size_stubs (bfd *output_bfd,
   (*toe)->size = 16;
 
   /* Retrieve all the stubs and sort.  */
-  stubs.sh = bfd_malloc (stubs.count * sizeof (*stubs.sh));
-  if (stubs.sh == NULL)
+  htab->stubs.sh = bfd_malloc (htab->stubs.count * sizeof (*htab->stubs.sh));
+  if (htab->stubs.sh == NULL)
     return FALSE;
-  i = stubs.count;
-  bfd_hash_traverse (&htab->stub_hash_table, populate_stubs, &stubs);
-  BFD_ASSERT (stubs.count == 0);
+  i = htab->stubs.count;
+  bfd_hash_traverse (&htab->stub_hash_table, populate_stubs, htab);
+  BFD_ASSERT (htab->stubs.count == 0);
 
-  stubs.count = i;
-  qsort (stubs.sh, stubs.count, sizeof (*stubs.sh), sort_stubs);
+  htab->stubs.count = i;
+  qsort (htab->stubs.sh, htab->stubs.count, sizeof (*htab->stubs.sh),
+	 sort_stubs);
 
   /* Now that the stubs are sorted, place them in the stub section.
      Stubs are grouped per overlay
@@ -1129,36 +1126,37 @@ spu_elf_size_stubs (bfd *output_bfd,
      .	    br __ovly_load  */
 
   group = 0;
-  for (i = 0; i < stubs.count; i++)
+  for (i = 0; i < htab->stubs.count; i++)
     {
-      if (spu_elf_section_data (stubs.sh[group]->target_section
+      if (spu_elf_section_data (htab->stubs.sh[group]->target_section
 				->output_section)->ovl_index
-	  != spu_elf_section_data (stubs.sh[i]->target_section
+	  != spu_elf_section_data (htab->stubs.sh[i]->target_section
 				   ->output_section)->ovl_index)
 	{
 	  htab->stub->size += SIZEOF_STUB2;
 	  for (; group != i; group++)
-	    stubs.sh[group]->delta
-	      = stubs.sh[i - 1]->off - stubs.sh[group]->off;
+	    htab->stubs.sh[group]->delta
+	      = htab->stubs.sh[i - 1]->off - htab->stubs.sh[group]->off;
 	}
       if (group == i
-	  || ((stubs.sh[i - 1]->target_section->output_section->vma
-	       + stubs.sh[i - 1]->target_section->output_offset
-	       + stubs.sh[i - 1]->target_off)
-	      != (stubs.sh[i]->target_section->output_section->vma
-		  + stubs.sh[i]->target_section->output_offset
-		  + stubs.sh[i]->target_off)))
+	  || ((htab->stubs.sh[i - 1]->target_section->output_section->vma
+	       + htab->stubs.sh[i - 1]->target_section->output_offset
+	       + htab->stubs.sh[i - 1]->target_off)
+	      != (htab->stubs.sh[i]->target_section->output_section->vma
+		  + htab->stubs.sh[i]->target_section->output_offset
+		  + htab->stubs.sh[i]->target_off)))
 	{
-	  stubs.sh[i]->off = htab->stub->size;
+	  htab->stubs.sh[i]->off = htab->stub->size;
 	  htab->stub->size += SIZEOF_STUB1;
 	}
       else
-	stubs.sh[i]->off = stubs.sh[i - 1]->off;
+	htab->stubs.sh[i]->off = htab->stubs.sh[i - 1]->off;
     }
   if (group != i)
     htab->stub->size += SIZEOF_STUB2;
   for (; group != i; group++)
-    stubs.sh[group]->delta = stubs.sh[i - 1]->off - stubs.sh[group]->off;
+    htab->stubs.sh[group]->delta
+      = htab->stubs.sh[i - 1]->off - htab->stubs.sh[group]->off;
 
  /* htab->ovtab consists of two arrays.
     .	struct {
@@ -1228,10 +1226,9 @@ spu_elf_open_builtin_lib (bfd **ovl_bfd, const struct _ovl_stream *stream)
    write the stub that sets the overlay number too.  */
 
 static bfd_boolean
-write_one_stub (struct bfd_hash_entry *bh, void *inf)
+write_one_stub (struct spu_stub_hash_entry *ent, struct bfd_link_info *info)
 {
-  struct spu_stub_hash_entry *ent = (struct spu_stub_hash_entry *) bh;
-  struct spu_link_hash_table *htab = inf;
+  struct spu_link_hash_table *htab = spu_hash_table (info);
   asection *sec = htab->stub;
   asection *s = ent->target_section;
   unsigned int ovl;
@@ -1372,7 +1369,8 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms, asection *toe)
     }
 
   /* Write out all the stubs.  */
-  bfd_hash_traverse (&htab->stub_hash_table, write_one_stub, htab);
+  for (i = 0; i < htab->stubs.count; i++)
+    write_one_stub (htab->stubs.sh[i], info);
 
   if (htab->stub_overflow)
     {
