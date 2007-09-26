@@ -1,5 +1,9 @@
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/x86-64-addr32.d: Adjust expectations.
+
+2007-09-26  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/reloc64.s: Adjust for %eip-relative addressing no
 	longer generating errors.
 	* gas/i386/reloc64.d, gas/i386/reloc64.l: Update.

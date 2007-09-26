@@ -6390,9 +6390,12 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	    if (riprel)
 	      {
 		set_op (disp, 1);
-		oappend ("(%rip)");
+		oappend (sizeflag & AFLAG ? "(%rip)" : "(%eip)");
 	      }
 	  }
+
+      if (havebase || haveindex || riprel)
+	used_prefixes |= PREFIX_ADDR;
 
       if (havedisp || (intel_syntax && riprel))
 	{
@@ -6400,7 +6403,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	  if (intel_syntax && riprel)
 	    {
 	      set_op (disp, 1);
-	      oappend ("rip");
+	      oappend (sizeflag & AFLAG ? "rip" : "eip");
 	    }
 	  *obufp = '\0';
 	  if (havebase)

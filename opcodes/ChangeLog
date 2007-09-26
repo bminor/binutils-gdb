@@ -1,5 +1,11 @@
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
+	* i386-dis.c (OP_E_extended): Distinguish rip- and eip-
+	relative addressing. Update used_prefixes based on whether any
+	base or index register was printed.
+
+2007-09-26  Jan Beulich  <jbeulich@novell.com>
+
 	* i386-opc.h (RegEip): Define.
 	(RegEiz): Adjust.
 	* i386-reg.tbl: Add eip. Mark rip and eip with RegRex64.
