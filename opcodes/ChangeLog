@@ -1,3 +1,7 @@
+2007-09-26  James E. Wilson  <wilson@specifix.com>
+
+	* ia64-gen.c (print_dependency_table): Fix typo in last patch.
+
 2007-09-26  Nick Clifton  <nickc@redhat.com>
 
 	* mt-asm.c (parse_imm16): Reword error message in order to allow

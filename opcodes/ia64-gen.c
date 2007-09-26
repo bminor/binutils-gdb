@@ -1552,7 +1552,7 @@ print_dependency_table ()
 	    if (rdeps[i]->total_chks == 0)
 	      {
 		if (rdeps[i]->total_regs)
-		  warn (_("Warning: rsrc %s (%s) has no chks%\n"), 
+		  warn (_("Warning: rsrc %s (%s) has no chks\n"), 
 			rdeps[i]->name, mode_str[rdeps[i]->mode]);
 		else
 		  warn (_("Warning: rsrc %s (%s) has no chks or regs\n"), 
