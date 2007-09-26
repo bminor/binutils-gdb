@@ -190,7 +190,7 @@ Sized_symbol<size>::init(const char* name, Value_type value, Size_type symsize,
 // Class Symbol_table.
 
 Symbol_table::Symbol_table()
-  : size_(0), saw_undefined_(0), offset_(0), table_(), namepool_(),
+  : saw_undefined_(0), offset_(0), table_(), namepool_(),
     forwarders_(), commons_(), warnings_()
 {
 }
@@ -467,16 +467,8 @@ Symbol_table::add_from_relobj(
     size_t sym_name_size,
     Symbol** sympointers)
 {
-  // We take the size from the first object we see.
-  if (this->get_size() == 0)
-    this->set_size(size);
-
-  if (size != this->get_size() || size != relobj->target()->get_size())
-    {
-      fprintf(stderr, _("%s: %s: mixing 32-bit and 64-bit ELF objects\n"),
-	      program_name, relobj->name().c_str());
-      gold_exit(false);
-    }
+  gold_assert(size == relobj->target()->get_size());
+  gold_assert(size == parameters->get_size());
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
 
@@ -564,16 +556,8 @@ Symbol_table::add_from_dynobj(
     size_t versym_size,
     const std::vector<const char*>* version_map)
 {
-  // We take the size from the first object we see.
-  if (this->get_size() == 0)
-    this->set_size(size);
-
-  if (size != this->get_size() || size != dynobj->target()->get_size())
-    {
-      fprintf(stderr, _("%s: %s: mixing 32-bit and 64-bit ELF objects\n"),
-	      program_name, dynobj->name().c_str());
-      gold_exit(false);
-    }
+  gold_assert(size == dynobj->target()->get_size());
+  gold_assert(size == parameters->get_size());
 
   if (versym != NULL && versym_size / 2 < count)
     {
@@ -696,8 +680,6 @@ Symbol_table::define_special_symbol(const Target* target, const char** pname,
                                     Sized_symbol<size>** poldsym
                                     ACCEPT_SIZE_ENDIAN)
 {
-  gold_assert(this->size_ == size);
-
   Symbol* oldsym;
   Sized_symbol<size>* sym;
   bool add_to_table = false;
@@ -781,8 +763,7 @@ Symbol_table::define_in_output_data(const Target* target, const char* name,
 				    bool offset_is_from_end,
 				    bool only_if_ref)
 {
-  gold_assert(target->get_size() == this->size_);
-  if (this->size_ == 32)
+  if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
       return this->do_define_in_output_data<32>(target, name, version, od,
@@ -794,7 +775,7 @@ Symbol_table::define_in_output_data(const Target* target, const char* name,
       gold_unreachable();
 #endif
     }
-  else if (this->size_ == 64)
+  else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
       return this->do_define_in_output_data<64>(target, name, version, od,
@@ -831,7 +812,7 @@ Symbol_table::do_define_in_output_data(
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
 
-  if (target->is_big_endian())
+  if (parameters->is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
@@ -878,8 +859,7 @@ Symbol_table::define_in_output_segment(const Target* target, const char* name,
 				       Symbol::Segment_offset_base offset_base,
 				       bool only_if_ref)
 {
-  gold_assert(target->get_size() == this->size_);
-  if (this->size_ == 32)
+  if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
       return this->do_define_in_output_segment<32>(target, name, version, os,
@@ -890,7 +870,7 @@ Symbol_table::define_in_output_segment(const Target* target, const char* name,
       gold_unreachable();
 #endif
     }
-  else if (this->size_ == 64)
+  else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
       return this->do_define_in_output_segment<64>(target, name, version, os,
@@ -926,14 +906,26 @@ Symbol_table::do_define_in_output_segment(
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
 
-  if (target->is_big_endian())
-    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-        target, &name, &version, only_if_ref, &oldsym
-        SELECT_SIZE_ENDIAN(size, true));
+  if (parameters->is_big_endian())
+    {
+#if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
+      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
+          target, &name, &version, only_if_ref, &oldsym
+          SELECT_SIZE_ENDIAN(size, true));
+#else
+      gold_unreachable();
+#endif
+    }
   else
-    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, &name, &version, only_if_ref, &oldsym
-        SELECT_SIZE_ENDIAN(size, false));
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
+      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
+          target, &name, &version, only_if_ref, &oldsym
+          SELECT_SIZE_ENDIAN(size, false));
+#else
+      gold_unreachable();
+#endif
+    }
 
   if (sym == NULL)
     return NULL;
@@ -959,8 +951,7 @@ Symbol_table::define_as_constant(const Target* target, const char* name,
 				 elfcpp::STB binding, elfcpp::STV visibility,
 				 unsigned char nonvis, bool only_if_ref)
 {
-  gold_assert(target->get_size() == this->size_);
-  if (this->size_ == 32)
+  if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
       return this->do_define_as_constant<32>(target, name, version, value,
@@ -970,7 +961,7 @@ Symbol_table::define_as_constant(const Target* target, const char* name,
       gold_unreachable();
 #endif
     }
-  else if (this->size_ == 64)
+  else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
       return this->do_define_as_constant<64>(target, name, version, value,
@@ -1003,14 +994,26 @@ Symbol_table::do_define_as_constant(
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
 
-  if (target->is_big_endian())
-    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-        target, &name, &version, only_if_ref, &oldsym
-        SELECT_SIZE_ENDIAN(size, true));
+  if (parameters->is_big_endian())
+    {
+#if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
+      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
+          target, &name, &version, only_if_ref, &oldsym
+          SELECT_SIZE_ENDIAN(size, true));
+#else
+      gold_unreachable();
+#endif
+    }
   else
-    sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-        target, &name, &version, only_if_ref, &oldsym
-        SELECT_SIZE_ENDIAN(size, false));
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
+      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
+          target, &name, &version, only_if_ref, &oldsym
+          SELECT_SIZE_ENDIAN(size, false));
+#else
+      gold_unreachable();
+#endif
+    }
 
   if (sym == NULL)
     return NULL;
@@ -1135,10 +1138,22 @@ Symbol_table::finalize(unsigned int index, off_t off, off_t dynoff,
   this->first_dynamic_global_index_ = dyn_global_index;
   this->dynamic_count_ = dyncount;
 
-  if (this->size_ == 32)
-    ret = this->sized_finalize<32>(index, off, pool);
-  else if (this->size_ == 64)
-    ret = this->sized_finalize<64>(index, off, pool);
+  if (parameters->get_size() == 32)
+    {
+#if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_32_LITTLE)
+      ret = this->sized_finalize<32>(index, off, pool);
+#else
+      gold_unreachable();
+#endif
+    }
+  else if (parameters->get_size() == 64)
+    {
+#if defined(HAVE_TARGET_64_BIG) || defined(HAVE_TARGET_64_LITTLE)
+      ret = this->sized_finalize<64>(index, off, pool);
+#else
+      gold_unreachable();
+#endif
+    }
   else
     gold_unreachable();
 
@@ -1285,19 +1300,43 @@ void
 Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
 			    const Stringpool* dynpool, Output_file* of) const
 {
-  if (this->size_ == 32)
+  if (parameters->get_size() == 32)
     {
-      if (target->is_big_endian())
-	this->sized_write_globals<32, true>(target, sympool, dynpool, of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  this->sized_write_globals<32, true>(target, sympool, dynpool, of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->sized_write_globals<32, false>(target, sympool, dynpool, of);
+	{
+#ifdef HAVE_TARGET_32_LITTLE
+	  this->sized_write_globals<32, false>(target, sympool, dynpool, of);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
-  else if (this->size_ == 64)
+  else if (parameters->get_size() == 64)
     {
-      if (target->is_big_endian())
-	this->sized_write_globals<64, true>(target, sympool, dynpool, of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  this->sized_write_globals<64, true>(target, sympool, dynpool, of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->sized_write_globals<64, false>(target, sympool, dynpool, of);
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  this->sized_write_globals<64, false>(target, sympool, dynpool, of);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
   else
     gold_unreachable();
@@ -1463,24 +1502,47 @@ Symbol_table::sized_write_symbol(
 // Write out a section symbol.  Return the update offset.
 
 void
-Symbol_table::write_section_symbol(const Target* target,
-				   const Output_section *os,
+Symbol_table::write_section_symbol(const Output_section *os,
 				   Output_file* of,
 				   off_t offset) const
 {
-  if (this->size_ == 32)
+  if (parameters->get_size() == 32)
     {
-      if (target->is_big_endian())
-	this->sized_write_section_symbol<32, true>(os, of, offset);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  this->sized_write_section_symbol<32, true>(os, of, offset);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->sized_write_section_symbol<32, false>(os, of, offset);
+	{
+#ifdef HAVE_TARGET_32_LITTLE
+	  this->sized_write_section_symbol<32, false>(os, of, offset);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
-  else if (this->size_ == 64)
+  else if (parameters->get_size() == 64)
     {
-      if (target->is_big_endian())
-	this->sized_write_section_symbol<64, true>(os, of, offset);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  this->sized_write_section_symbol<64, true>(os, of, offset);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->sized_write_section_symbol<64, false>(os, of, offset);
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  this->sized_write_section_symbol<64, false>(os, of, offset);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
   else
     gold_unreachable();

@@ -250,9 +250,7 @@ queue_final_tasks(const General_options& options,
 
   // Queue a task to write out everything else.
   final_blocker->add_blocker();
-  workqueue->queue(new Write_data_task(layout, symtab,
-				       input_objects->target(),
-				       of, final_blocker));
+  workqueue->queue(new Write_data_task(layout, symtab, of, final_blocker));
 
   // Queue a task to close the output file.  This will be blocked by
   // FINAL_BLOCKER.

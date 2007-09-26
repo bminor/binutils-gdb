@@ -56,10 +56,31 @@ class Parameters
   output_is_object() const
   { return this->output_file_type_ == OUTPUT_OBJECT; }
 
+  // The size of the output file we are generating.  This should
+  // return 32 or 64.
+  int
+  get_size() const
+  {
+    gold_assert(this->is_size_and_endian_valid_);
+    return this->size_;
+  }
+
+  // Whether the output is big endian.
+  bool
+  is_big_endian() const
+  {
+    gold_assert(this->is_size_and_endian_valid_);
+    return this->is_big_endian_;
+  }
+
   // The general linker optimization level.
   int
   optimization_level() const
   { return this->optimization_level_; }
+
+  // Set the size and endianness.
+  void
+  set_size_and_endianness(int size, bool is_big_endian);
 
  private:
   // The types of output files.
@@ -75,6 +96,12 @@ class Parameters
 
   // The type of the output file.
   Output_file_type output_file_type_;
+  // Whether the size_ and is_big_endian_ fields are valid.
+  bool is_size_and_endian_valid_;
+  // The size of the output file--32 or 64.
+  int size_;
+  // Whether the output file is big endian.
+  bool is_big_endian_;
   // The optimization level.
   int optimization_level_;
 };
@@ -84,6 +111,9 @@ extern const Parameters* parameters;
 
 // Initialize the global variable.
 extern void initialize_parameters(const General_options*);
+
+// Set the size and endianness of the global parameters variable.
+extern void set_parameters_size_and_endianness(int size, bool is_big_endian);
 
 } // End namespace gold.
 

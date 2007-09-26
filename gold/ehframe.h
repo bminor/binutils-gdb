@@ -42,7 +42,7 @@ namespace gold
 class Eh_frame_hdr : public Output_section_data
 {
  public:
-  Eh_frame_hdr(const Target*, Output_section* eh_frame_section);
+  Eh_frame_hdr(Output_section* eh_frame_section);
 
   // Set the final data size.
   void
@@ -53,8 +53,6 @@ class Eh_frame_hdr : public Output_section_data
   do_write(Output_file*);
 
  private:
-  // The output target.
-  const Target* target_;
   // The .eh_frame section.
   Output_section* eh_frame_section_;
 };

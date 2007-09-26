@@ -31,7 +31,8 @@ namespace gold
 // Initialize the parameters from the options.
 
 Parameters::Parameters(const General_options* options)
-  : optimization_level_(options->optimization_level())
+  : is_size_and_endian_valid_(false), size_(0), is_big_endian_(false),
+    optimization_level_(options->optimization_level())
 {
   if (options->is_shared())
     this->output_file_type_ = OUTPUT_SHARED;
@@ -40,6 +41,28 @@ Parameters::Parameters(const General_options* options)
   else
     this->output_file_type_ = OUTPUT_EXECUTABLE;
 }
+
+// Set the size and endianness.
+
+void
+Parameters::set_size_and_endianness(int size, bool is_big_endian)
+{
+  if (!this->is_size_and_endian_valid_)
+    {
+      this->size_ = size;
+      this->is_big_endian_ = is_big_endian;
+      this->is_size_and_endian_valid_ = true;
+    }
+  else
+    {
+      gold_assert(size == this->size_);
+      gold_assert(is_big_endian == this->is_big_endian_);
+    }
+}
+
+// Our local version of the variable, which is not const.
+
+static Parameters* static_parameters;
 
 // The global variable.
 
@@ -50,7 +73,13 @@ const Parameters* parameters;
 void
 initialize_parameters(const General_options* options)
 {
-  parameters = new Parameters(options);
+  parameters = static_parameters = new Parameters(options);
+}
+
+void
+set_parameters_size_and_endianness(int size, bool is_big_endian)
+{
+  static_parameters->set_size_and_endianness(size, is_big_endian);
 }
 
 } // End namespace gold.

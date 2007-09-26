@@ -794,6 +794,9 @@ Input_objects::add_object(Object* obj)
       gold_exit(false);
     }
 
+  set_parameters_size_and_endianness(target->get_size(),
+				     target->is_big_endian());
+
   return true;
 }
 

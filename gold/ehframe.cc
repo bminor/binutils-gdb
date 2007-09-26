@@ -75,10 +75,9 @@ const int eh_frame_hdr_size = 4;
 
 // Construct the exception frame header.
 
-Eh_frame_hdr::Eh_frame_hdr(const Target* target,
-			   Output_section* eh_frame_section)
+Eh_frame_hdr::Eh_frame_hdr(Output_section* eh_frame_section)
   : Output_section_data(4),
-    target_(target), eh_frame_section_(eh_frame_section)
+    eh_frame_section_(eh_frame_section)
 {
 }
 
@@ -109,7 +108,7 @@ Eh_frame_hdr::do_write(Output_file* of)
   uint64_t eh_frame_hdr_address = this->address();
   uint64_t eh_frame_offset = (eh_frame_address -
 			      (eh_frame_hdr_address + 4));
-  if (this->target_->is_big_endian())
+  if (parameters->is_big_endian())
     elfcpp::Swap<32, true>::writeval(oview + 4, eh_frame_offset);
   else
     elfcpp::Swap<32, false>::writeval(oview + 4, eh_frame_offset);

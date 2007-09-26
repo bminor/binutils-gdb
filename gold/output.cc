@@ -78,15 +78,11 @@ Output_data::default_alignment(int size)
 // segment and section lists are complete at construction time.
 
 Output_section_headers::Output_section_headers(
-    int size,
-    bool big_endian,
     const Layout* layout,
     const Layout::Segment_list* segment_list,
     const Layout::Section_list* unattached_section_list,
     const Stringpool* secnamepool)
-  : size_(size),
-    big_endian_(big_endian),
-    layout_(layout),
+  : layout_(layout),
     segment_list_(segment_list),
     unattached_section_list_(unattached_section_list),
     secnamepool_(secnamepool)
@@ -100,6 +96,7 @@ Output_section_headers::Output_section_headers(
       count += (*p)->output_section_count();
   count += unattached_section_list->size();
 
+  const int size = parameters->get_size();
   int shdr_size;
   if (size == 32)
     shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
@@ -116,19 +113,43 @@ Output_section_headers::Output_section_headers(
 void
 Output_section_headers::do_write(Output_file* of)
 {
-  if (this->size_ == 32)
+  if (parameters->get_size() == 32)
     {
-      if (this->big_endian_)
-	this->do_sized_write<32, true>(of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  this->do_sized_write<32, true>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->do_sized_write<32, false>(of);
+	{
+#ifdef HAVE_TARGET_32_LITTLE
+	  this->do_sized_write<32, false>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
-  else if (this->size_ == 64)
+  else if (parameters->get_size() == 64)
     {
-      if (this->big_endian_)
-	this->do_sized_write<64, true>(of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  this->do_sized_write<64, true>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->do_sized_write<64, false>(of);
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  this->do_sized_write<64, false>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
   else
     gold_unreachable();
@@ -185,11 +206,10 @@ Output_section_headers::do_sized_write(Output_file* of)
 // Output_segment_header methods.
 
 Output_segment_headers::Output_segment_headers(
-    int size,
-    bool big_endian,
     const Layout::Segment_list& segment_list)
-  : size_(size), big_endian_(big_endian), segment_list_(segment_list)
+  : segment_list_(segment_list)
 {
+  const int size = parameters->get_size();
   int phdr_size;
   if (size == 32)
     phdr_size = elfcpp::Elf_sizes<32>::phdr_size;
@@ -204,19 +224,43 @@ Output_segment_headers::Output_segment_headers(
 void
 Output_segment_headers::do_write(Output_file* of)
 {
-  if (this->size_ == 32)
+  if (parameters->get_size() == 32)
     {
-      if (this->big_endian_)
-	this->do_sized_write<32, true>(of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  this->do_sized_write<32, true>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
+	{
+#ifdef HAVE_TARGET_32_LITTLE
 	this->do_sized_write<32, false>(of);
+#else
+	gold_unreachable();
+#endif
+	}
     }
-  else if (this->size_ == 64)
+  else if (parameters->get_size() == 64)
     {
-      if (this->big_endian_)
-	this->do_sized_write<64, true>(of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  this->do_sized_write<64, true>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->do_sized_write<64, false>(of);
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  this->do_sized_write<64, false>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
   else
     gold_unreachable();
@@ -245,19 +289,16 @@ Output_segment_headers::do_sized_write(Output_file* of)
 
 // Output_file_header methods.
 
-Output_file_header::Output_file_header(int size,
-				       bool big_endian,
-				       const Target* target,
+Output_file_header::Output_file_header(const Target* target,
 				       const Symbol_table* symtab,
 				       const Output_segment_headers* osh)
-  : size_(size),
-    big_endian_(big_endian),
-    target_(target),
+  : target_(target),
     symtab_(symtab),
     segment_header_(osh),
     section_header_(NULL),
     shstrtab_(NULL)
 {
+  const int size = parameters->get_size();
   int ehdr_size;
   if (size == 32)
     ehdr_size = elfcpp::Elf_sizes<32>::ehdr_size;
@@ -284,19 +325,43 @@ Output_file_header::set_section_info(const Output_section_headers* shdrs,
 void
 Output_file_header::do_write(Output_file* of)
 {
-  if (this->size_ == 32)
+  if (parameters->get_size() == 32)
     {
-      if (this->big_endian_)
-	this->do_sized_write<32, true>(of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  this->do_sized_write<32, true>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->do_sized_write<32, false>(of);
+	{
+#ifdef HAVE_TARGET_32_LITTLE
+	  this->do_sized_write<32, false>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
-  else if (this->size_ == 64)
+  else if (parameters->get_size() == 64)
     {
-      if (this->big_endian_)
-	this->do_sized_write<64, true>(of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  this->do_sized_write<64, true>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->do_sized_write<64, false>(of);
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  this->do_sized_write<64, false>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
   else
     gold_unreachable();
@@ -722,9 +787,9 @@ Output_data_dynamic::Dynamic_entry::write(
 void
 Output_data_dynamic::do_adjust_output_section(Output_section* os)
 {
-  if (this->target_->get_size() == 32)
+  if (parameters->get_size() == 32)
     os->set_entsize(elfcpp::Elf_sizes<32>::dyn_size);
-  else if (this->target_->get_size() == 64)
+  else if (parameters->get_size() == 64)
     os->set_entsize(elfcpp::Elf_sizes<64>::dyn_size);
   else
     gold_unreachable();
@@ -739,9 +804,9 @@ Output_data_dynamic::do_set_address(uint64_t, off_t)
   this->add_constant(elfcpp::DT_NULL, 0);
 
   int dyn_size;
-  if (this->target_->get_size() == 32)
+  if (parameters->get_size() == 32)
     dyn_size = elfcpp::Elf_sizes<32>::dyn_size;
-  else if (this->target_->get_size() == 64)
+  else if (parameters->get_size() == 64)
     dyn_size = elfcpp::Elf_sizes<64>::dyn_size;
   else
     gold_unreachable();
@@ -753,19 +818,43 @@ Output_data_dynamic::do_set_address(uint64_t, off_t)
 void
 Output_data_dynamic::do_write(Output_file* of)
 {
-  if (this->target_->get_size() == 32)
+  if (parameters->get_size() == 32)
     {
-      if (this->target_->is_big_endian())
-	this->sized_write<32, true>(of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  this->sized_write<32, true>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->sized_write<32, false>(of);
+	{
+#ifdef HAVE_TARGET_32_LITTLE
+	  this->sized_write<32, false>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
-  else if (this->target_->get_size() == 64)
+  else if (parameters->get_size() == 64)
     {
-      if (this->target_->is_big_endian())
-	this->sized_write<64, true>(of);
+      if (parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  this->sized_write<64, true>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	this->sized_write<64, false>(of);
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  this->sized_write<64, false>(of);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
   else
     gold_unreachable();

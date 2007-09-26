@@ -167,7 +167,7 @@ class Layout
   // Write out data not associated with an input file or the symbol
   // table.
   void
-  write_data(const Symbol_table*, const Target*, Output_file*) const;
+  write_data(const Symbol_table*, Output_file*) const;
 
   // Return an output section named NAME, or NULL if there is none.
   Output_section*
@@ -220,8 +220,7 @@ class Layout
 
   // Create the output sections for the symbol table.
   void
-  create_symtab_sections(int size, const Input_objects*, Symbol_table*,
-			 off_t*);
+  create_symtab_sections(const Input_objects*, Symbol_table*, off_t*);
 
   // Create the .shstrtab section.
   Output_section*
@@ -229,7 +228,7 @@ class Layout
 
   // Create the section header table.
   Output_section_headers*
-  create_shdrs(int size, bool big_endian, off_t*);
+  create_shdrs(off_t*);
 
   // Create the dynamic symbol table.
   void
@@ -248,7 +247,7 @@ class Layout
 
   // Create the version sections.
   void
-  create_version_sections(const Target*, const Versions*,
+  create_version_sections(const Versions*,
 			  unsigned int local_symcount,
 			  const std::vector<Symbol*>& dynamic_symbols,
 			  const Output_section* dynstr);
@@ -374,10 +373,8 @@ class Write_data_task : public Task
 {
  public:
   Write_data_task(const Layout* layout, const Symbol_table* symtab,
-		  const Target* target, Output_file* of,
-		  Task_token* final_blocker)
-    : layout_(layout), symtab_(symtab), target_(target), of_(of),
-      final_blocker_(final_blocker)
+		  Output_file* of, Task_token* final_blocker)
+    : layout_(layout), symtab_(symtab), of_(of), final_blocker_(final_blocker)
   { }
 
   // The standard Task methods.
@@ -394,7 +391,6 @@ class Write_data_task : public Task
  private:
   const Layout* layout_;
   const Symbol_table* symtab_;
-  const Target* target_;
   Output_file* of_;
   Task_token* final_blocker_;
 };

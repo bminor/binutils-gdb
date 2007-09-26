@@ -740,8 +740,7 @@ Dynobj::elf_hash(const char* name)
 // symbol table.
 
 void
-Dynobj::create_elf_hash_table(const Target* target,
-			      const std::vector<Symbol*>& dynsyms,
+Dynobj::create_elf_hash_table(const std::vector<Symbol*>& dynsyms,
 			      unsigned int local_dynsym_count,
 			      unsigned char** pphash,
 			      unsigned int* phashlen)
@@ -774,10 +773,24 @@ Dynobj::create_elf_hash_table(const Target* target,
 			  * 4);
   unsigned char* phash = new unsigned char[hashlen];
 
-  if (target->is_big_endian())
-    Dynobj::sized_create_elf_hash_table<true>(bucket, chain, phash, hashlen);
+  if (parameters->is_big_endian())
+    {
+#if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
+      Dynobj::sized_create_elf_hash_table<true>(bucket, chain, phash,
+						hashlen);
+#else
+      gold_unreachable();
+#endif
+    }
   else
-    Dynobj::sized_create_elf_hash_table<false>(bucket, chain, phash, hashlen);
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
+      Dynobj::sized_create_elf_hash_table<false>(bucket, chain, phash,
+						 hashlen);
+#else
+      gold_unreachable();
+#endif
+    }
 
   *pphash = phash;
   *phashlen = hashlen;
@@ -840,8 +853,7 @@ Dynobj::gnu_hash(const char* name)
 // symbol table.
 
 void
-Dynobj::create_gnu_hash_table(const Target* target,
-			      const std::vector<Symbol*>& dynsyms,
+Dynobj::create_gnu_hash_table(const std::vector<Symbol*>& dynsyms,
 			      unsigned int local_dynsym_count,
 			      unsigned char** pphash,
 			      unsigned int* phashlen)
@@ -890,37 +902,61 @@ Dynobj::create_gnu_hash_table(const Target* target,
 
   // For the actual data generation we call out to a templatized
   // function.
-  int size = target->get_size();
-  bool big_endian = target->is_big_endian();
+  int size = parameters->get_size();
+  bool big_endian = parameters->is_big_endian();
   if (size == 32)
     {
       if (big_endian)
-	Dynobj::sized_create_gnu_hash_table<32, true>(hashed_dynsyms,
-						      dynsym_hashvals,
-						      unhashed_dynsym_index,
-						      pphash,
-						      phashlen);
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  Dynobj::sized_create_gnu_hash_table<32, true>(hashed_dynsyms,
+							dynsym_hashvals,
+							unhashed_dynsym_index,
+							pphash,
+							phashlen);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	Dynobj::sized_create_gnu_hash_table<32, false>(hashed_dynsyms,
-						       dynsym_hashvals,
-						       unhashed_dynsym_index,
-						       pphash,
-						       phashlen);
+	{
+#ifdef HAVE_TARGET_32_LITTLE
+	  Dynobj::sized_create_gnu_hash_table<32, false>(hashed_dynsyms,
+							 dynsym_hashvals,
+							 unhashed_dynsym_index,
+							 pphash,
+							 phashlen);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
   else if (size == 64)
     {
       if (big_endian)
-	Dynobj::sized_create_gnu_hash_table<64, true>(hashed_dynsyms,
-						      dynsym_hashvals,
-						      unhashed_dynsym_index,
-						      pphash,
-						      phashlen);
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  Dynobj::sized_create_gnu_hash_table<64, true>(hashed_dynsyms,
+							dynsym_hashvals,
+							unhashed_dynsym_index,
+							pphash,
+							phashlen);
+#else
+	  gold_unreachable();
+#endif
+	}
       else
-	Dynobj::sized_create_gnu_hash_table<64, false>(hashed_dynsyms,
-						       dynsym_hashvals,
-						       unhashed_dynsym_index,
-						       pphash,
-						       phashlen);
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  Dynobj::sized_create_gnu_hash_table<64, false>(hashed_dynsyms,
+							 dynsym_hashvals,
+							 unhashed_dynsym_index,
+							 pphash,
+							 phashlen);
+#else
+	  gold_unreachable();
+#endif
+	}
     }
   else
     gold_unreachable();

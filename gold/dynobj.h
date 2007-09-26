@@ -56,7 +56,7 @@ class Dynobj : public Object
   // number of local dynamic symbols, which is the index of the first
   // dynamic gobal symbol.
   static void
-  create_elf_hash_table(const Target*, const std::vector<Symbol*>& dynsyms,
+  create_elf_hash_table(const std::vector<Symbol*>& dynsyms,
 			unsigned int local_dynsym_count,
 			unsigned char** pphash,
 			unsigned int* phashlen);
@@ -66,7 +66,7 @@ class Dynobj : public Object
   // of local dynamic symbols, which is the index of the first dynamic
   // gobal symbol.
   static void
-  create_gnu_hash_table(const Target*, const std::vector<Symbol*>& dynsyms,
+  create_gnu_hash_table(const std::vector<Symbol*>& dynsyms,
 			unsigned int local_dynsym_count,
 			unsigned char** pphash, unsigned int* phashlen);
 

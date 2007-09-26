@@ -29,6 +29,7 @@
 #include "elfcpp.h"
 #include "layout.h"
 #include "reloc-types.h"
+#include "parameters.h"
 
 namespace gold
 {
@@ -203,9 +204,7 @@ class Output_data
 class Output_section_headers : public Output_data
 {
  public:
-  Output_section_headers(int size,
-			 bool big_endian,
-			 const Layout*,
+  Output_section_headers(const Layout*,
 			 const Layout::Segment_list*,
 			 const Layout::Section_list*,
 			 const Stringpool*);
@@ -217,7 +216,7 @@ class Output_section_headers : public Output_data
   // Return the required alignment.
   uint64_t
   do_addralign() const
-  { return Output_data::default_alignment(this->size_); }
+  { return Output_data::default_alignment(parameters->get_size()); }
 
  private:
   // Write the data to the file with the right size and endianness.
@@ -225,8 +224,6 @@ class Output_section_headers : public Output_data
   void
   do_sized_write(Output_file*);
 
-  int size_;
-  bool big_endian_;
   const Layout* layout_;
   const Layout::Segment_list* segment_list_;
   const Layout::Section_list* unattached_section_list_;
@@ -238,8 +235,7 @@ class Output_section_headers : public Output_data
 class Output_segment_headers : public Output_data
 {
  public:
-  Output_segment_headers(int size, bool big_endian,
-			 const Layout::Segment_list& segment_list);
+  Output_segment_headers(const Layout::Segment_list& segment_list);
 
   // Write the data to the file.
   void
@@ -248,7 +244,7 @@ class Output_segment_headers : public Output_data
   // Return the required alignment.
   uint64_t
   do_addralign() const
-  { return Output_data::default_alignment(this->size_); }
+  { return Output_data::default_alignment(parameters->get_size()); }
 
  private:
   // Write the data to the file with the right size and endianness.
@@ -256,8 +252,6 @@ class Output_segment_headers : public Output_data
   void
   do_sized_write(Output_file*);
 
-  int size_;
-  bool big_endian_;
   const Layout::Segment_list& segment_list_;
 };
 
@@ -266,9 +260,7 @@ class Output_segment_headers : public Output_data
 class Output_file_header : public Output_data
 {
  public:
-  Output_file_header(int size,
-		     bool big_endian,
-		     const Target*,
+  Output_file_header(const Target*,
 		     const Symbol_table*,
 		     const Output_segment_headers*);
 
@@ -284,7 +276,7 @@ class Output_file_header : public Output_data
   // Return the required alignment.
   uint64_t
   do_addralign() const
-  { return Output_data::default_alignment(this->size_); }
+  { return Output_data::default_alignment(parameters->get_size()); }
 
   // Set the address and offset--we only implement this for error
   // checking.
@@ -298,8 +290,6 @@ class Output_file_header : public Output_data
   void
   do_sized_write(Output_file*);
 
-  int size_;
-  bool big_endian_;
   const Target* target_;
   const Symbol_table* symtab_;
   const Output_segment_headers* segment_header_;
@@ -1025,9 +1015,10 @@ class Output_data_got : public Output_section_data
 class Output_data_dynamic : public Output_section_data
 {
  public:
-  Output_data_dynamic(const Target* target, Stringpool* pool)
-    : Output_section_data(Output_data::default_alignment(target->get_size())),
-      target_(target), entries_(), pool_(pool)
+  Output_data_dynamic(Stringpool* pool)
+    : Output_section_data(Output_data::default_alignment(
+			   parameters->get_size())),
+      entries_(), pool_(pool)
   { }
 
   // Add a new dynamic entry with a fixed numeric value.
@@ -1150,8 +1141,6 @@ class Output_data_dynamic : public Output_section_data
   // The type of the list of entries.
   typedef std::vector<Dynamic_entry> Dynamic_entries;
 
-  // The target.
-  const Target* target_;
   // The entries.
   Dynamic_entries entries_;
   // The pool used for strings.

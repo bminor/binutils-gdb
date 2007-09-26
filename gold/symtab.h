@@ -851,11 +851,6 @@ class Symbol_table
   Symbol*
   resolve_forwards(const Symbol* from) const;
 
-  // Return the bitsize (32 or 64) of the symbols in the table.
-  int
-  get_size() const
-  { return this->size_; }
-
   // Return the sized version of a symbol in this table.
   template<int size>
   Sized_symbol<size>*
@@ -917,17 +912,11 @@ class Symbol_table
 
   // Write out a section symbol.  Return the updated offset.
   void
-  write_section_symbol(const Target*, const Output_section*, Output_file*,
-		       off_t) const;
+  write_section_symbol(const Output_section*, Output_file*, off_t) const;
 
  private:
   Symbol_table(const Symbol_table&);
   Symbol_table& operator=(const Symbol_table&);
-
-  // Set the size (32 or 64) of the symbols in the table.
-  void
-  set_size(int size)
-  { this->size_ = size; }
 
   // Make FROM a forwarder symbol to TO.
   void
@@ -1055,9 +1044,6 @@ class Symbol_table
 
   typedef std::vector<Symbol*> Commons_type;
 
-  // The size of the symbols in the symbol table (32 or 64).
-  int size_;
-
   // We increment this every time we see a new undefined symbol, for
   // use in archive groups.
   int saw_undefined_;
@@ -1108,7 +1094,7 @@ template<int size>
 Sized_symbol<size>*
 Symbol_table::get_sized_symbol(Symbol* sym ACCEPT_SIZE) const
 {
-  gold_assert(size == this->get_size());
+  gold_assert(size == parameters->get_size());
   return static_cast<Sized_symbol<size>*>(sym);
 }
 
@@ -1116,7 +1102,7 @@ template<int size>
 const Sized_symbol<size>*
 Symbol_table::get_sized_symbol(const Symbol* sym ACCEPT_SIZE) const
 {
-  gold_assert(size == this->get_size());
+  gold_assert(size == parameters->get_size());
   return static_cast<const Sized_symbol<size>*>(sym);
 }
 

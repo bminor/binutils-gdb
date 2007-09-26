@@ -135,7 +135,7 @@ Sort_commons<size>::operator()(const Symbol* pa, const Symbol* pb) const
 void
 Symbol_table::allocate_commons(const General_options& options, Layout* layout)
 {
-  if (this->get_size() == 32)
+  if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
       this->do_allocate_commons<32>(options, layout);
@@ -143,7 +143,7 @@ Symbol_table::allocate_commons(const General_options& options, Layout* layout)
       gold_unreachable();
 #endif
     }
-  else if (this->get_size() == 64)
+  else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
       this->do_allocate_commons<64>(options, layout);

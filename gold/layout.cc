@@ -251,7 +251,7 @@ Layout::layout_eh_frame(Relobj* object,
 				     elfcpp::SHT_PROGBITS,
 				     elfcpp::SHF_ALLOC);
 
-	  Eh_frame_hdr* hdr_posd = new Eh_frame_hdr(object->target(), os);
+	  Eh_frame_hdr* hdr_posd = new Eh_frame_hdr(os);
 	  hdr_os->add_output_section_data(hdr_posd);
 
 	  Output_segment* hdr_oseg =
@@ -404,8 +404,7 @@ Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
 				elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
 				elfcpp::STV_HIDDEN, 0, false, false);
 
-  this->dynamic_data_ =  new Output_data_dynamic(input_objects->target(),
-						 &this->dynpool_);
+  this->dynamic_data_ =  new Output_data_dynamic(&this->dynpool_);
 
   this->dynamic_section_->add_output_section_data(this->dynamic_data_);
 }
@@ -519,7 +518,6 @@ off_t
 Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 {
   Target* const target = input_objects->target();
-  const int size = target->get_size();
 
   target->finalize_sections(this);
 
@@ -557,7 +555,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
       // Create the version sections.  We can't do this until the
       // dynamic string table is complete.
-      this->create_version_sections(target, &versions, local_dynamic_count,
+      this->create_version_sections(&versions, local_dynamic_count,
 				    dynamic_symbols, dynstr);
     }
 
@@ -566,10 +564,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   Output_segment* load_seg = this->find_first_load_seg();
 
   // Lay out the segment headers.
-  bool big_endian = target->is_big_endian();
   Output_segment_headers* segment_headers;
-  segment_headers = new Output_segment_headers(size, big_endian,
-					       this->segment_list_);
+  segment_headers = new Output_segment_headers(this->segment_list_);
   load_seg->add_initial_output_data(segment_headers);
   this->special_output_list_.push_back(segment_headers);
   if (phdr_seg != NULL)
@@ -577,11 +573,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Lay out the file header.
   Output_file_header* file_header;
-  file_header = new Output_file_header(size,
-				       big_endian,
-				       target,
-				       symtab,
-				       segment_headers);
+  file_header = new Output_file_header(target, symtab, segment_headers);
   load_seg->add_initial_output_data(file_header);
   this->special_output_list_.push_back(file_header);
 
@@ -594,7 +586,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   off_t off = this->set_segment_offsets(target, load_seg, &shndx);
 
   // Create the symbol table sections.
-  this->create_symtab_sections(size, input_objects, symtab, &off);
+  this->create_symtab_sections(input_objects, symtab, &off);
 
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();
@@ -604,7 +596,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   off = this->set_section_offsets(off, &shndx);
 
   // Create the section table header.
-  Output_section_headers* oshdrs = this->create_shdrs(size, big_endian, &off);
+  Output_section_headers* oshdrs = this->create_shdrs(&off);
 
   file_header->set_section_info(oshdrs, shstrtab_section);
 
@@ -826,18 +818,18 @@ Layout::set_section_offsets(off_t off, unsigned int* pshndx)
 // fully laid out.
 
 void
-Layout::create_symtab_sections(int size, const Input_objects* input_objects,
+Layout::create_symtab_sections(const Input_objects* input_objects,
 			       Symbol_table* symtab,
 			       off_t* poff)
 {
   int symsize;
   unsigned int align;
-  if (size == 32)
+  if (parameters->get_size() == 32)
     {
       symsize = elfcpp::Elf_sizes<32>::sym_size;
       align = 4;
     }
-  else if (size == 64)
+  else if (parameters->get_size() == 64)
     {
       symsize = elfcpp::Elf_sizes<64>::sym_size;
       align = 8;
@@ -960,10 +952,10 @@ Layout::create_shstrtab()
 // offset.
 
 Output_section_headers*
-Layout::create_shdrs(int size, bool big_endian, off_t* poff)
+Layout::create_shdrs(off_t* poff)
 {
   Output_section_headers* oshdrs;
-  oshdrs = new Output_section_headers(size, big_endian, this,
+  oshdrs = new Output_section_headers(this,
 				      &this->segment_list_,
 				      &this->unattached_section_list_,
 				      &this->namepool_);
@@ -1020,7 +1012,7 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
 
   int symsize;
   unsigned int align;
-  const int size = target->get_size();
+  const int size = parameters->get_size();
   if (size == 32)
     {
       symsize = elfcpp::Elf_sizes<32>::sym_size;
@@ -1079,7 +1071,7 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
 
   unsigned char* phash;
   unsigned int hashlen;
-  Dynobj::create_elf_hash_table(target, *pdynamic_symbols, local_symcount,
+  Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
 				&phash, &hashlen);
 
   const char* hash_name = this->namepool_.add(".hash", NULL);
@@ -1101,7 +1093,7 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
 // Create the version sections.
 
 void
-Layout::create_version_sections(const Target* target, const Versions* versions,
+Layout::create_version_sections(const Versions* versions,
 				unsigned int local_symcount,
 				const std::vector<Symbol*>& dynamic_symbols,
 				const Output_section* dynstr)
@@ -1109,9 +1101,9 @@ Layout::create_version_sections(const Target* target, const Versions* versions,
   if (!versions->any_defs() && !versions->any_needs())
     return;
 
-  if (target->get_size() == 32)
+  if (parameters->get_size() == 32)
     {
-      if (target->is_big_endian())
+      if (parameters->is_big_endian())
         {
 #ifdef HAVE_TARGET_32_BIG
           this->sized_create_version_sections
@@ -1134,9 +1126,9 @@ Layout::create_version_sections(const Target* target, const Versions* versions,
 #endif
         }
     }
-  else if (target->get_size() == 64)
+  else if (parameters->get_size() == 64)
     {
-      if (target->is_big_endian())
+      if (parameters->is_big_endian())
         {
 #ifdef HAVE_TARGET_64_BIG
           this->sized_create_version_sections
@@ -1486,8 +1478,7 @@ Layout::add_comdat(const char* signature, bool group)
 // Write out data not associated with a section or the symbol table.
 
 void
-Layout::write_data(const Symbol_table* symtab, const Target* target,
-		   Output_file* of) const
+Layout::write_data(const Symbol_table* symtab, Output_file* of) const
 {
   const Output_section* symtab_section = this->symtab_section_;
   for (Section_list::const_iterator p = this->section_list_.begin();
@@ -1501,7 +1492,7 @@ Layout::write_data(const Symbol_table* symtab, const Target* target,
 	  gold_assert(index > 0 && index != -1U);
 	  off_t off = (symtab_section->offset()
 		       + index * symtab_section->entsize());
-	  symtab->write_section_symbol(target, *p, of, off);
+	  symtab->write_section_symbol(*p, of, off);
 	}
     }
 
@@ -1517,7 +1508,7 @@ Layout::write_data(const Symbol_table* symtab, const Target* target,
 	  gold_assert(index > 0 && index != -1U);
 	  off_t off = (dynsym_section->offset()
 		       + index * dynsym_section->entsize());
-	  symtab->write_section_symbol(target, *p, of, off);
+	  symtab->write_section_symbol(*p, of, off);
 	}
     }
 
@@ -1560,7 +1551,7 @@ Write_data_task::locks(Workqueue* workqueue)
 void
 Write_data_task::run(Workqueue*)
 {
-  this->layout_->write_data(this->symtab_, this->target_, this->of_);
+  this->layout_->write_data(this->symtab_, this->of_);
 }
 
 // Write_symbols_task methods.
