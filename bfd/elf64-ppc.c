@@ -8317,8 +8317,9 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      if (relocs == NULL)
 		return FALSE;
 	      elfsec_data->relocs = relocs;
-	      elfsec_data->rel_hdr.sh_size = relsize;
-	      elfsec_data->rel_hdr.sh_entsize = 24;
+	      elfsec_data->rel_hdr.sh_size = (stub_entry->stub_sec->reloc_count
+					      * sizeof (Elf64_External_Rela));
+	      elfsec_data->rel_hdr.sh_entsize = sizeof (Elf64_External_Rela);
 	      stub_entry->stub_sec->reloc_count = 0;
 	    }
 	  r = relocs + stub_entry->stub_sec->reloc_count;
@@ -8415,8 +8416,9 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      if (relocs == NULL)
 		return FALSE;
 	      elfsec_data->relocs = relocs;
-	      elfsec_data->rel_hdr.sh_size = relsize;
-	      elfsec_data->rel_hdr.sh_entsize = 24;
+	      elfsec_data->rel_hdr.sh_size = (stub_entry->stub_sec->reloc_count
+					      * sizeof (Elf64_External_Rela));
+	      elfsec_data->rel_hdr.sh_entsize = sizeof (Elf64_External_Rela);
 	      htab->brlt->reloc_count = 0;
 	    }
 	  r = relocs + htab->brlt->reloc_count;

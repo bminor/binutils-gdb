@@ -1,3 +1,7 @@
+2007-09-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc_build_one_stub): Correct rel_hdr.sh_size.
+
 2007-09-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (struct spu_link_hash_table): Add ovly_load_r_symndx.
