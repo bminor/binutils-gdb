@@ -1,3 +1,8 @@
+2007-09-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (output_insn): Use i.tm.opcode_length to
+	check opcode length.
+
 2007-09-25  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-m68k.c (LONG_BRANCH_VIA_COND): New.

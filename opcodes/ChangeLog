@@ -1,3 +1,11 @@
+2007-09-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (process_i386_opcodes): Process opcode_length.
+
+	* i386-opc.h (template): Add opcode_length.
+	* 386-opc.tbl: Likewise.
+	* i386-tbl.h: Regenerated.
+
 2007-09-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.h: Adjust whitespaces.

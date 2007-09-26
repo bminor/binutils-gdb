@@ -416,6 +416,9 @@ typedef struct template
   unsigned int extension_opcode;
 #define None 0xffff		/* If no extension_opcode is possible.  */
 
+  /* Opcode length.  */
+  unsigned char opcode_length;
+
   /* cpu feature flags */
   i386_cpu_flags cpu_flags;
 

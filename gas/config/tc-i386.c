@@ -4976,38 +4976,35 @@ output_insn (void)
       char *p;
       unsigned char *q;
       unsigned int prefix;
-      int opc_3b;
 
-      /* All opcodes on i386 have either 1 or 2 bytes.  SSSE3 and
-	 SSE4 and SSE5 instructions have 3 bytes.  We may use one 
-	 more higher byte to specify a prefix the instruction 
-	 requires. Exclude instructions which are in both SSE4.2 
-	 and ABM.  */
-      opc_3b = (i.tm.cpu_flags.bitfield.cpussse3
-		|| i.tm.cpu_flags.bitfield.cpusse5
-		|| i.tm.cpu_flags.bitfield.cpusse4_1
-		|| (i.tm.cpu_flags.bitfield.cpusse4_2
-		    && !i.tm.cpu_flags.bitfield.cpuabm));
-      if (opc_3b)
+      switch (i.tm.opcode_length)
 	{
+	case 3:
 	  if (i.tm.base_opcode & 0xff000000)
 	    {
 	      prefix = (i.tm.base_opcode >> 24) & 0xff;
 	      goto check_prefix;
 	    }
-	}
-      else if ((i.tm.base_opcode & 0xff0000) != 0)
-	{
-	  prefix = (i.tm.base_opcode >> 16) & 0xff;
-	  if (i.tm.cpu_flags.bitfield.cpupadlock)
+	  break;
+	case 2:
+	  if ((i.tm.base_opcode & 0xff0000) != 0)
 	    {
-	    check_prefix:
-	      if (prefix != REPE_PREFIX_OPCODE
-		  || i.prefix[LOCKREP_PREFIX] != REPE_PREFIX_OPCODE)
+	      prefix = (i.tm.base_opcode >> 16) & 0xff;
+	      if (i.tm.cpu_flags.bitfield.cpupadlock)
+		{
+check_prefix:
+		  if (prefix != REPE_PREFIX_OPCODE
+		      || i.prefix[LOCKREP_PREFIX] != REPE_PREFIX_OPCODE)
+		    add_prefix (prefix);
+		}
+	      else
 		add_prefix (prefix);
 	    }
-	  else
-	    add_prefix (prefix);
+	  break;
+	case 1:
+	  break;
+	default:
+	  abort ();
 	}
 
       /* The prefix bytes.  */
@@ -5023,19 +5020,25 @@ output_insn (void)
 	}
 
       /* Now the opcode; be careful about word order here!  */
-      if (fits_in_unsigned_byte (i.tm.base_opcode))
+      if (i.tm.opcode_length == 1)
 	{
 	  FRAG_APPEND_1_CHAR (i.tm.base_opcode);
 	}
       else
 	{
-	  if (opc_3b)
+	  switch (i.tm.opcode_length)
 	    {
+	    case 3:
 	      p = frag_more (3);
 	      *p++ = (i.tm.base_opcode >> 16) & 0xff;
+	      break;
+	    case 2:
+	      p = frag_more (2);
+	      break;
+	    default:
+	      abort ();
+	      break;
 	    }
-	  else
-	    p = frag_more (2);
 
 	  /* Put out high byte first: can't use md_number_to_chars!  */
 	  *p++ = (i.tm.base_opcode >> 8) & 0xff;

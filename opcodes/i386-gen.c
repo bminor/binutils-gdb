@@ -591,6 +591,7 @@ process_i386_opcodes (FILE *table)
   unsigned int i;
   char *str, *p, *last;
   char *name, *operands, *base_opcode, *extension_opcode;
+  char *opcode_length;
   char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
 
   if (fp == NULL)
@@ -652,6 +653,12 @@ process_i386_opcodes (FILE *table)
       if (str >= last)
 	abort ();
 
+      /* Find opcode_length.  */
+      opcode_length = next_field (str, ',', &str);
+
+      if (str >= last)
+	abort ();
+
       /* Find cpu_flags.  */
       cpu_flags = next_field (str, ',', &str);
 
@@ -707,8 +714,9 @@ process_i386_opcodes (FILE *table)
 	    }
 	}
 
-      fprintf (table, "  { \"%s\", %s, %s, %s,\n",
-	       name, operands, base_opcode, extension_opcode);
+      fprintf (table, "  { \"%s\", %s, %s, %s, %s,\n",
+	       name, operands, base_opcode, extension_opcode,
+	       opcode_length);
 
       process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ");
 
@@ -737,7 +745,7 @@ process_i386_opcodes (FILE *table)
 
   fclose (fp);
 
-  fprintf (table, "  { NULL, 0, 0, 0,\n");
+  fprintf (table, "  { NULL, 0, 0, 0, 0,\n");
 
   process_i386_cpu_flag (table, "0", 0, ",", "    ");
 
