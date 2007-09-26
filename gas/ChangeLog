@@ -1,5 +1,9 @@
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (NUM_FLAG_CODE): Remove.
+
+2007-09-26  Jan Beulich  <jbeulich@novell.com>
+
 	* as.c (itbl_parse): Remove #define.
 	(struct itbl_file_list): Move down and ...
 	(itbl_files): .. conditionalize upon HAVE_ITBL_CPU.

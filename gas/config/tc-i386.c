@@ -266,7 +266,6 @@ enum flag_code {
 	CODE_32BIT,
 	CODE_16BIT,
 	CODE_64BIT };
-#define NUM_FLAG_CODE ((int) CODE_64BIT + 1)
 
 static enum flag_code flag_code;
 static unsigned int object_64bit;
