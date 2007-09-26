@@ -1,3 +1,8 @@
+2007-09-26  Jim Blandy  <jimb@codesourcery.com>
+
+	* remote.c (getpkt_sane): Fix error message.  No animals were
+	harmed in the making of this debugger.
+
 2007-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-typeprint.c: Fix 11 ARI reported problems.

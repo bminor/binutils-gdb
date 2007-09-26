@@ -5029,7 +5029,7 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 		{
 		  QUIT;
 		  target_mourn_inferior ();
-		  error (_("Watchdog has expired.  Target detached."));
+		  error (_("Watchdog timeout has expired.  Target detached."));
 		}
 	      if (remote_debug)
 		fputs_filtered ("Timed out.\n", gdb_stdlog);
