@@ -5282,14 +5282,13 @@ dot_pred_rel (type)
       SKIP_WHITESPACE ();
     }
 
-  SKIP_WHITESPACE ();
   while (1)
     {
       valueT bits = 1;
-      int regno;
+      int sep, regno;
       expressionS pr, *pr1, *pr2;
 
-      expression_and_evaluate (&pr);
+      sep = parse_operand (&pr, ',');
       if (pr.X_op == O_register
 	  && pr.X_add_number >= REG_P
 	  && pr.X_add_number <= REG_P + 63)
@@ -5336,10 +5335,8 @@ dot_pred_rel (type)
       if (mask & bits)
 	as_warn (_("Duplicate predicate register ignored"));
       mask |= bits;
-      if (*input_line_pointer != ',')
+      if (sep != ',')
 	break;
-      ++input_line_pointer;
-      SKIP_WHITESPACE ();
     }
 
   switch (type)
