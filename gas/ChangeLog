@@ -1,5 +1,16 @@
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.h (md_register_arithmetic): Define.
+	* config/tc-ia64.h (md_register_arithmetic): Likewise.
+	* doc/internals.texi: Document md_register_arithmetic.
+	* expr.c (make_expr_symbol): Force O_register expressions into
+	reg_section.
+	(expr): Provide default for md_register_arithmetic. Don't resolve
+	adding/subtracting constants to/from registers if
+	md_register_arithmetic is zero.
+
+2007-09-26  Jan Beulich  <jbeulich@novell.com>
+
 	* dw2gencfi.c: Conditionalize whole body upon TARGET_USE_CFIPOP.
 	(cfi_finish): Add second empty instance.
 

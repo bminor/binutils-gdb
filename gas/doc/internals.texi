@@ -1045,6 +1045,16 @@ pointer, for any expression that can not be recognized.  When the function
 is called, @code{input_line_pointer} will point to the start of the
 expression.
 
+@item md_register_arithmetic
+@cindex md_register_arithmetic
+If this macro is defined and evaluates to zero then GAS will not fold
+expressions that add or subtract a constant to/from a register to give
+another register.  For example GAS's default behaviour is to fold the
+expression "r8 + 1" into "r9", which is probably not the result
+intended by the programmer.  The default is to allow such folding,
+since this maintains backwards compatibility with earlier releases of
+GAS.
+
 @item tc_unrecognized_line
 @cindex tc_unrecognized_line
 If you define this macro, GAS will call it when it finds a line that it can not

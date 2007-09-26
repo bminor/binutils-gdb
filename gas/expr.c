@@ -95,7 +95,9 @@ make_expr_symbol (expressionS *expressionP)
   symbolP = symbol_create (FAKE_LABEL_NAME,
 			   (expressionP->X_op == O_constant
 			    ? absolute_section
-			    : expr_section),
+			    : expressionP->X_op == O_register
+			      ? reg_section
+			      : expr_section),
 			   0, &zero_address_frag);
   symbol_set_value_expression (symbolP, expressionP);
 
@@ -1722,7 +1724,11 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	}
       else
 #endif
-      if (op_left == O_add && right.X_op == O_constant)
+#ifndef md_register_arithmetic
+# define md_register_arithmetic 1
+#endif
+      if (op_left == O_add && right.X_op == O_constant
+	  && (md_register_arithmetic || resultP->X_op != O_register))
 	{
 	  /* X + constant.  */
 	  resultP->X_add_number += right.X_add_number;
@@ -1745,12 +1751,14 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  resultP->X_op = O_constant;
 	  resultP->X_add_symbol = 0;
 	}
-      else if (op_left == O_subtract && right.X_op == O_constant)
+      else if (op_left == O_subtract && right.X_op == O_constant
+	       && (md_register_arithmetic || resultP->X_op != O_register))
 	{
 	  /* X - constant.  */
 	  resultP->X_add_number -= right.X_add_number;
 	}
-      else if (op_left == O_add && resultP->X_op == O_constant)
+      else if (op_left == O_add && resultP->X_op == O_constant
+	       && (md_register_arithmetic || right.X_op != O_register))
 	{
 	  /* Constant + X.  */
 	  resultP->X_op = right.X_op;
