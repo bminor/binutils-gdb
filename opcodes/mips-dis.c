@@ -1208,7 +1208,7 @@ print_insn_args (const char *d,
 	default:
 	  /* xgettext:c-format */
 	  (*info->fprintf_func) (info->stream,
-				 _("# internal error, undefined modifier(%c)"),
+				 _("# internal error, undefined modifier (%c)"),
 				 *d);
 	  return;
 	}

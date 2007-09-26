@@ -1,3 +1,10 @@
+2007-09-26  Nick Clifton  <nickc@redhat.com>
+
+	* mt-asm.c (parse_imm16): Reword error message in order to allow
+	it to be translated properly.
+	* ia64-gen.c (print_dependency_table): Likewise.
+	* mips-dis.c (print_insn_args): Likewise.
+
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (OP_E_extended): Distinguish rip- and eip-

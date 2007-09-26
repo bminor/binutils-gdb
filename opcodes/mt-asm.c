@@ -154,7 +154,7 @@ parse_imm16 (CGEN_CPU_DESC cd,
 	       break;
 
 	     default:
-	       errmsg = _("%operator operand is not a symbol");
+	       errmsg = _("The percent-operator's operand is not a symbol");
 	       break;
              }
 	 }
