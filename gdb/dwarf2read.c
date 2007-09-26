@@ -4744,11 +4744,12 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   type = die_type (die, cu);
   ftype = make_function_type (type, (struct type **) 0);
 
-  /* All functions in C++ and Java have prototypes.  */
+  /* All functions in C++, Pascal and Java have prototypes.  */
   attr = dwarf2_attr (die, DW_AT_prototyped, cu);
   if ((attr && (DW_UNSND (attr) != 0))
       || cu->language == language_cplus
-      || cu->language == language_java)
+      || cu->language == language_java
+      || cu->language == language_pascal)
     TYPE_FLAGS (ftype) |= TYPE_FLAG_PROTOTYPED;
 
   if (die->child != NULL)
