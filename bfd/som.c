@@ -4939,8 +4939,11 @@ som_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
 	return -1;
       return (asect->reloc_count + 1) * sizeof (arelent *);
     }
-  /* There are no relocations.  */
-  return 0;
+
+  /* There are no relocations.  Return enough space to hold the
+     NULL pointer which will be installed if som_canonicalize_reloc
+     is called.  */
+  return sizeof (arelent *);
 }
 
 /* Convert relocations from SOM (external) form into BFD internal
