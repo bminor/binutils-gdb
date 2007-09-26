@@ -56,23 +56,23 @@ pascal_print_type (struct type *type, char *varstring, struct ui_file *stream,
   if (show > 0)
     CHECK_TYPEDEF (type);
 
-  if ((code == TYPE_CODE_FUNC ||
-       code == TYPE_CODE_METHOD))
+  if ((code == TYPE_CODE_FUNC
+       || code == TYPE_CODE_METHOD))
     {
       pascal_type_print_varspec_prefix (type, stream, show, 0);
     }
   /* first the name */
   fputs_filtered (varstring, stream);
 
-  if ((varstring != NULL && *varstring != '\0') &&
-      !(code == TYPE_CODE_FUNC ||
-	code == TYPE_CODE_METHOD))
+  if ((varstring != NULL && *varstring != '\0')
+      && !(code == TYPE_CODE_FUNC
+	   || code == TYPE_CODE_METHOD))
     {
       fputs_filtered (" : ", stream);
     }
 
-  if (!(code == TYPE_CODE_FUNC ||
-	code == TYPE_CODE_METHOD))
+  if (!(code == TYPE_CODE_FUNC
+	|| code == TYPE_CODE_METHOD))
     {
       pascal_type_print_varspec_prefix (type, stream, show, 0);
     }
@@ -137,8 +137,8 @@ void
 pascal_type_print_method_args (char *physname, char *methodname,
 			       struct ui_file *stream)
 {
-  int is_constructor = DEPRECATED_STREQN (physname, "__ct__", 6);
-  int is_destructor = DEPRECATED_STREQN (physname, "__dt__", 6);
+  int is_constructor = (strncmp (physname, "__ct__", 6) == 0);
+  int is_destructor = (strncmp (physname, "__dt__", 6) == 0);
 
   if (is_constructor || is_destructor)
     {
@@ -537,7 +537,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    {
 	      QUIT;
 	      /* Don't print out virtual function table.  */
-	      if (DEPRECATED_STREQN (TYPE_FIELD_NAME (type, i), "_vptr", 5)
+	      if ((strncmp (TYPE_FIELD_NAME (type, i), "_vptr", 5) == 0)
 		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
 		continue;
 
@@ -615,8 +615,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		{
 		  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 
-		  int is_constructor = DEPRECATED_STREQN (physname, "__ct__", 6);
-		  int is_destructor = DEPRECATED_STREQN (physname, "__dt__", 6);
+		  int is_constructor = (strncmp (physname, "__ct__", 6) == 0);
+		  int is_destructor = (strncmp (physname, "__dt__", 6) == 0);
 
 		  QUIT;
 		  if (TYPE_FN_FIELD_PROTECTED (f, j))
@@ -664,8 +664,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		    {
 		      fprintf_filtered (stream, "destructor  ");
 		    }
-		  else if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) != 0 &&
-			   TYPE_CODE (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j))) != TYPE_CODE_VOID)
+		  else if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) != 0
+			   && TYPE_CODE (TYPE_TARGET_TYPE (
+				TYPE_FN_FIELD_TYPE (f, j))) != TYPE_CODE_VOID)
 		    {
 		      fprintf_filtered (stream, "function  ");
 		    }
@@ -679,8 +680,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 						 method_name,
 						 stream);
 
-		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) != 0 &&
-		      TYPE_CODE (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j))) != TYPE_CODE_VOID)
+		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) != 0
+		      && TYPE_CODE (TYPE_TARGET_TYPE (
+			   TYPE_FN_FIELD_TYPE (f, j))) != TYPE_CODE_VOID)
 		    {
 		      fputs_filtered (" : ", stream);
 		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),

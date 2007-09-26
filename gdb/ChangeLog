@@ -1,5 +1,16 @@
 2007-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* p-typeprint.c: Fix 11 ARI reported problems.
+	(pascal_print_type): Fix 4 operator at end of line.
+	(pascal_type_print_method_args) : Replace 2 DEPRECATED_STREQN macros 
+	using strncmp function.
+	(pascal_type_print_base): Fix 2 operator at end of line.
+	(pascal_type_print_base) : Replace 3 DEPRECATED_STREQN macros 
+	using strncmp function.
+
+
+2007-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* Fix PR pascal/2231
 	dwarf2read.c (read_subroutine_type): 
 	All pascal functions are prototyped. 
