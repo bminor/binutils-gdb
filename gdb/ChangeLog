@@ -1,3 +1,9 @@
+2007-09-26  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* breakpoint.c (create_breakpoint): Set
+	condition on each location, not on the first
+	location of breakpoint.
+	
 2007-09-26  Jim Blandy  <jimb@codesourcery.com>
 
 	* remote.c (getpkt_sane): Fix error message.  No animals were

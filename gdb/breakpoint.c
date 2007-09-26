@@ -5163,7 +5163,7 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
       if (b->cond_string)
 	{
 	  char *arg = b->cond_string;
-	  b->loc->cond = parse_exp_1 (&arg, block_for_pc (b->loc->address), 0);
+	  loc->cond = parse_exp_1 (&arg, block_for_pc (loc->address), 0);
 	  if (*arg)
 	    {
 	      if (pending_bp)
