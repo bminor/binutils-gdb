@@ -73,8 +73,38 @@
 #define irq_stat	$9
 #endif
 
+# Stack quadword minux N
+#define	SQWM1	-16*1
+#define	SQWM2	-16*2
+#define	SQWM3	-16*3
+#define	SQWM4	-16*4
+#define	SQWM5	-16*5
+#define	SQWM6	-16*6
+#define	SQWM7	-16*7
+#define	SQWM8	-16*8
+#define	SQWM9	-16*9
+#define	SQWM10	-16*10
+#define	SQWM11	-16*11
+#define	SQWM12	-16*12
+#define	SQWM13	-16*13
+#define	SQWM14	-16*14
+#define	SQWM15	-16*15
+#define	SQWM16	-16*16
+
 	.extern		_ovly_table
 	.extern		_ovly_buf_table
+
+#ifdef OVLY_PRINTFS
+#define SPE_C99_VPRINTF 37
+__entry_event_format:
+	.string		"In entry_event_hook segment=0x%08x entry-address=0x%08x\n"
+__debug_event_format:
+  	.string		"In debug_event_hook link-register=0x%08x %08x %08x %08x\n"
+__dma_event_format:
+  	.string		"In dma_event_hook vma=0x%08x ea=%08x%08x sz=%08x\n"
+__ovly_buf_table_format:
+  	.string		"_ovly_buf_table[%08x]=%08x\n"
+#endif
 
 	.text
 	.align 		4
@@ -118,7 +148,7 @@ __ovly_return:
  * outputs:
  *	$lr	new link register, returning through __ovly_return.
  *
- * Copy a new overlay partition into local store, or return 
+ * Copy a new overlay partition into local store, or return
  * immediately if the partition is already resident.
  */
 	.global		__ovly_load
@@ -131,12 +161,113 @@ __ovly_load:
 	stqd		$8, -48($sp)
 
 #ifdef OVLY_IRQ_SAVE
-/* Save irq state, then disable interrupts. */ 
+/* Save irq state, then disable interrupts. */
 	stqd		$9, -64($sp)
 	ila		irqtmp, __ovly_irq_save
 	rdch		irq_stat, $SPU_RdMachStat
 	bid		irqtmp
 __ovly_irq_save:
+#endif
+
+#ifdef OVLY_PRINTFS
+//==============================================
+// In entry_event_hook segment=0x%08x entry-address=0x%08x
+//==============================================
+# save registers
+	stqd	$10, SQWM5($sp)
+	stqd	$11, SQWM6($sp)
+	stqd	$12, SQWM7($sp)
+# Place input parameters onto the stack to form the
+# local storage memory image.
+	ila	$10, __entry_event_format
+	stqd	$10, SQWM12($sp)
+	ai	$10, $sp, SQWM9
+	stqd	$10, SQWM11($sp)
+	stqd	$sp, SQWM10($sp)
+	stqd	$78, SQWM9($sp)
+	stqd	$79, SQWM8($sp)
+# Construct a message consisting of the 8-bit opcode
+# and 24-bit local store pointer to the input
+# parameters and place it forllowing the stop and signal
+	ila	$10, 0x3ffff		# address mask
+	ilhu	$11, SPE_C99_VPRINTF << 8
+	ai	$12, $sp, SQWM12	# parameter pointer
+	selb	$11, $11, $12, $10	# combine command & address ptr
+	brsl	$10, next1a
+next1a:
+	.type	next1a, @function
+	lqr	$12, message1a
+	cwd	$10, message1a-next1a($10)
+	shufb	$11, $11, $12, $10	# insert msg into inst word
+	stqr	$11, message1a		# store cmd/ptr into msg word
+	dsync
+# Notify the PPE to perform the assisted call request
+# by issing a stop and signal with a signal code
+# of 0x2100 (C99 class)
+	stop	0x2100
+message1a:
+	.word	0
+
+# save registers
+	stqd	$13, SQWM8($sp)
+	stqd	$14, SQWM9($sp)
+	stqd	$15, SQWM10($sp)
+	stqd	$16, SQWM11($sp)
+
+# initialize loop
+	il	$13, 1
+	ila	$14, _ovly_buf_table
+	ila	$15, _ovly_buf_table_end
+
+loop_start1:
+# Place input parameters onto the stack to form the
+# local storage memory image.
+	ila	$10, __ovly_buf_table_format
+	stqd	$10, SQWM16($sp)
+	ai	$10, $sp, SQWM13
+	stqd	$10, SQWM15($sp)
+	stqd	$sp, SQWM14($sp)
+	stqd	$13, SQWM13($sp)
+	lqd	$16, 0($14)
+	rotqby	$16, $16, $14
+	stqd	$16, SQWM12($sp)
+# Construct a message consisting of the 8-bit opcode
+# and 24-bit local store pointer to the input
+# parameters and place it forllowing the stop and signal
+	ila	$10, 0x3ffff		# address mask
+	ilhu	$11, SPE_C99_VPRINTF << 8
+	ai	$12, $sp, SQWM16	# parameter pointer
+	selb	$11, $11, $12, $10	# combine command & address ptr
+	brsl	$10, next1b
+next1b:
+	.type	next1b, @function
+	lqr	$12, message1b
+	cwd	$10, message1b-next1b($10)
+	shufb	$11, $11, $12, $10	# insert msg into inst word
+	stqr	$11, message1b		# store cmd/ptr into msg word
+	dsync
+# Notify the PPE to perform the assisted call request
+# by issing a stop and signal with a signal code
+# of 0x2100 (C99 class)
+	stop	0x2100
+message1b:
+	.word	0
+
+# move to next entry
+	ai	$13, $13, 1
+	ai	$14, $14, 4
+	clgt	$16, $15, $14
+	brnz	$16, loop_start1
+
+# restore registers
+	lqd	$16, SQWM11($sp)
+	lqd	$15, SQWM10($sp)
+	lqd	$14, SQWM9($sp)
+	lqd	$13, SQWM8($sp)
+	lqd	$12, SQWM7($sp)
+	lqd	$11, SQWM6($sp)
+	lqd	$10, SQWM5($sp)
+//==============================================
 #endif
 
 /* Set branch hint to overlay target. */
@@ -153,7 +284,7 @@ __ovly_backchain_loop:
 	lqd		bchn, 0(bchn)
 	ceq		cmp, lnkr, retval
 	ceqi		cmp2, bchn, 0
-	or		cmp, cmp, cmp2	
+	or		cmp, cmp, cmp2
 	brz		cmp, __ovly_backchain_loop
 
 /* If we reached the zero back-chain, then lnkr is bogus.  Clear the
@@ -216,7 +347,7 @@ __ovly_load_event:
 	shufb		map, $78, map, genwi
 	stqx		map, tab, off
 
-/* A new partition needs to be loaded. Prepare for DMA loop. 
+/* A new partition needs to be loaded. Prepare for DMA loop.
  * _EAR_ is the 64b base EA, filled in at run time by the
  * loader, and indicating the value for SPU executable image start.
  */
@@ -247,6 +378,54 @@ __ovly_xfer_loop:
 	ila		cmd, MFC_GET_CMD
 	wrch		$MFC_Cmd, cmd
 
+#ifdef OVLY_PRINTFS
+//==============================================
+// In dma_event_hook vma=0x%08x ea=%08x%08x sz=%08x
+//==============================================
+# save registers
+	stqd	$10, SQWM5($sp)
+	stqd	$11, SQWM6($sp)
+	stqd	$12, SQWM7($sp)
+# Place input parameters onto the stack to form the
+# local storage memory image.
+	ila	$10, __dma_event_format
+	stqd	$10, SQWM14($sp)
+	ai	$10, $sp, SQWM11
+	stqd	$10, SQWM13($sp)
+	stqd	$sp, SQWM12($sp)
+	stqd	vma, SQWM11($sp)
+	stqd	ea64, SQWM10($sp)
+	stqd	ealo, SQWM9($sp)
+	stqd	sz, SQWM8($sp)
+# Construct a message consisting of the 8-bit opcode
+# and 24-bit local store pointer to the input
+# parameters and place it forllowing the stop and signal
+	ila	$10, 0x3ffff		# address mask
+	ilhu	$11, SPE_C99_VPRINTF << 8
+	ai	$12, $sp, SQWM14	# parameter pointer
+	selb	$11, $11, $12, $10	# combine command & address ptr
+	brsl	$10, next3a
+next3a:
+	.type	next3a, @function
+	lqr	$12, message3a
+	cwd	$10, message3a-next3a($10)
+	shufb	$11, $11, $12, $10	# insert msg into inst word
+	stqr	$11, message3a		# store cmd/ptr into msg word
+	dsync
+# Notify the PPE to perform the assisted call request
+# by issing a stop and signal with a signal code
+# of 0x2100 (C99 class)
+	stop	0x2100
+message3a:
+	.word	0
+
+# restore registers
+	lqd	$12, SQWM7($sp)
+	lqd	$11, SQWM6($sp)
+	lqd	$10, SQWM5($sp)
+//==============================================
+#endif
+
 /* Increment vma, decrement size, branch back as needed. */
 	a		vma, vma, sz
 	sf		osize, sz, osize
@@ -265,6 +444,112 @@ __ovly_xfer_loop:
 	rdch		tagstat, $MFC_RdTagStat
 	sync
 	wrch		$MFC_WrTagMask, oldmask
+
+#ifdef OVLY_PRINTFS
+//==============================================
+// In debug_event_hook link-register=0x%08x %08x %08x %08x
+//==============================================
+# save registers
+	stqd	$10, SQWM5($sp)
+	stqd	$11, SQWM6($sp)
+	stqd	$12, SQWM7($sp)
+# Place input parameters onto the stack to form the
+# local storage memory image.
+	ila	$10, __debug_event_format
+	stqd	$10, SQWM14($sp)
+	ai	$10, $sp, SQWM11
+	stqd	$10, SQWM13($sp)
+	stqd	$sp, SQWM12($sp)
+	stqd	$lr, SQWM11($sp)
+	rotqbyi $10, $lr, 4
+	stqd	$10, SQWM10($sp)
+	rotqbyi $10, $10, 4
+	stqd	$10, SQWM9($sp)
+	rotqbyi $10, $10, 4
+	stqd	$10, SQWM8($sp)
+# Construct a message consisting of the 8-bit opcode
+# and 24-bit local store pointer to the input
+# parameters and place it forllowing the stop and signal
+	ila	$10, 0x3ffff		# address mask
+	ilhu	$11, SPE_C99_VPRINTF << 8
+	ai	$12, $sp, SQWM14	# parameter pointer
+	selb	$11, $11, $12, $10	# combine command & address ptr
+	brsl	$10, next2a
+next2a:
+	.type	next2a, @function
+	lqr	$12, message2a
+	cwd	$10, message2a-next2a($10)
+	shufb	$11, $11, $12, $10	# insert msg into inst word
+	stqr	$11, message2a		# store cmd/ptr into msg word
+	dsync
+# Notify the PPE to perform the assisted call request
+# by issing a stop and signal with a signal code
+# of 0x2100 (C99 class)
+	stop	0x2100
+message2a:
+	.word	0
+
+# save registers
+	stqd	$13, SQWM8($sp)
+	stqd	$14, SQWM9($sp)
+	stqd	$15, SQWM10($sp)
+	stqd	$16, SQWM11($sp)
+
+# initialize loop
+	il	$13, 1
+	ila	$14, _ovly_buf_table
+	ila	$15, _ovly_buf_table_end
+
+loop_start2:
+# Place input parameters onto the stack to form the
+# local storage memory image.
+	ila	$10, __ovly_buf_table_format
+	stqd	$10, SQWM16($sp)
+	ai	$10, $sp, SQWM13
+	stqd	$10, SQWM15($sp)
+	stqd	$sp, SQWM14($sp)
+	stqd	$13, SQWM13($sp)
+	lqd	$16, 0($14)
+	rotqby	$16, $16, $14
+	stqd	$16, SQWM12($sp)
+# Construct a message consisting of the 8-bit opcode
+# and 24-bit local store pointer to the input
+# parameters and place it forllowing the stop and signal
+	ila	$10, 0x3ffff		# address mask
+	ilhu	$11, SPE_C99_VPRINTF << 8
+	ai	$12, $sp, SQWM16	# parameter pointer
+	selb	$11, $11, $12, $10	# combine command & address ptr
+	brsl	$10, next2b
+next2b:
+	.type	next2b, @function
+	lqr	$12, message2b
+	cwd	$10, message2b-next2b($10)
+	shufb	$11, $11, $12, $10	# insert msg into inst word
+	stqr	$11, message2b		# store cmd/ptr into msg word
+	dsync
+# Notify the PPE to perform the assisted call request
+# by issing a stop and signal with a signal code
+# of 0x2100 (C99 class)
+	stop	0x2100
+message2b:
+	.word	0
+
+# move to next entry
+	ai	$13, $13, 1
+	ai	$14, $14, 4
+	clgt	$16, $15, $14
+	brnz	$16, loop_start2
+
+# restore registers
+	lqd	$16, SQWM11($sp)
+	lqd	$15, SQWM10($sp)
+	lqd	$14, SQWM9($sp)
+	lqd	$13, SQWM8($sp)
+	lqd	$12, SQWM7($sp)
+	lqd	$11, SQWM6($sp)
+	lqd	$10, SQWM5($sp)
+//==============================================
+#endif
 
 	.global		_ovly_debug_event
 	.type		_ovly_debug_event, @function

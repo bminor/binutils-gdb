@@ -1,3 +1,7 @@
+2007-09-26  Brian Watt  <bwatt@us.ibm.com>
+
+	* emultempl/spu_ovl.S: Add debug printf code.
+
 2007-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/3281
