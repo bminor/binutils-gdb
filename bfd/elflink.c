@@ -7230,38 +7230,43 @@ struct elf_outext_info
 
 static void
 set_symbol_value (bfd *                         bfd_with_globals,
-		  struct elf_final_link_info *  finfo,    
-		  int                           symidx,
+		  Elf_Internal_Sym *		isymbuf,
+		  size_t			locsymcount,
+		  size_t                        symidx,
 		  bfd_vma                       val)
 {
-  bfd_boolean                    is_local;
-  Elf_Internal_Sym *             sym;
-  struct elf_link_hash_entry **  sym_hashes;
-  struct elf_link_hash_entry *   h;
+  struct elf_link_hash_entry **sym_hashes;
+  struct elf_link_hash_entry *h;
+  size_t extsymoff = locsymcount;
+
+  if (symidx < locsymcount)
+    {
+      Elf_Internal_Sym *sym;
+
+      sym = isymbuf + symidx;
+      if (ELF_ST_BIND (sym->st_info) == STB_LOCAL)
+	{
+	  /* It is a local symbol: move it to the
+	     "absolute" section and give it a value.  */
+	  sym->st_shndx = SHN_ABS;
+	  sym->st_value = val;
+	  return;
+	}
+      BFD_ASSERT (elf_bad_symtab (bfd_with_globals));
+      extsymoff = 0;
+    }
+
+  /* It is a global symbol: set its link type
+     to "defined" and give it a value.  */
 
   sym_hashes = elf_sym_hashes (bfd_with_globals);
-  sym = finfo->internal_syms + symidx;  
-  is_local = ELF_ST_BIND(sym->st_info) == STB_LOCAL;
-  
-  if (is_local)
-    {
-      /* It is a local symbol: move it to the
-	 "absolute" section and give it a value.  */
-      sym->st_shndx = SHN_ABS;
-      sym->st_value = val;
-    }
-  else 
-    {
-      /* It is a global symbol: set its link type
-	 to "defined" and give it a value.  */
-      h = sym_hashes [symidx];	  
-      while (h->root.type == bfd_link_hash_indirect
-	     || h->root.type == bfd_link_hash_warning)
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;
-      h->root.type = bfd_link_hash_defined;
-      h->root.u.def.value = val;
-      h->root.u.def.section = bfd_abs_section_ptr;
-    }
+  h = sym_hashes [symidx - extsymoff];
+  while (h->root.type == bfd_link_hash_indirect
+	 || h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+  h->root.type = bfd_link_hash_defined;
+  h->root.u.def.value = val;
+  h->root.u.def.section = bfd_abs_section_ptr;
 }
 
 static bfd_boolean 
@@ -7269,6 +7274,7 @@ resolve_symbol (const char *                  name,
 		bfd *                         input_bfd,
 		struct elf_final_link_info *  finfo,
 		bfd_vma *                     result,
+		Elf_Internal_Sym *            isymbuf,
 		size_t                        locsymcount)
 {
   Elf_Internal_Sym *            sym;
@@ -7282,7 +7288,7 @@ resolve_symbol (const char *                  name,
 
   for (i = 0; i < locsymcount; ++ i)
     {
-      sym = finfo->internal_syms + i;
+      sym = isymbuf + i;
       sec = finfo->sections [i];
 
       if (ELF_ST_BIND (sym->st_info) != STB_LOCAL)
@@ -7402,6 +7408,7 @@ eval_symbol (bfd_vma *                     result,
 	     struct elf_final_link_info *  finfo,
 	     bfd_vma                       addr,
 	     bfd_vma                       section_offset,
+	     Elf_Internal_Sym *            isymbuf,
 	     size_t                        locsymcount,
 	     int                           signed_p)
 {
@@ -7459,8 +7466,9 @@ eval_symbol (bfd_vma *                     result,
 
       if (symbol_is_section) 
 	{
-	  if ((resolve_section (symbuf, finfo->output_bfd->sections, result) != TRUE)
-	      && (resolve_symbol (symbuf, input_bfd, finfo, result, locsymcount) != TRUE))
+	  if (!resolve_section (symbuf, finfo->output_bfd->sections, result)
+	      && !resolve_symbol (symbuf, input_bfd, finfo, result,
+				  isymbuf, locsymcount))
 	    {
 	      undefined_reference ("section", symbuf);
 	      return FALSE;
@@ -7468,9 +7476,10 @@ eval_symbol (bfd_vma *                     result,
 	} 
       else 
 	{
-	  if ((resolve_symbol (symbuf, input_bfd, finfo, result, locsymcount) != TRUE)
-	      && (resolve_section (symbuf, finfo->output_bfd->sections,
-				   result) != TRUE))
+	  if (!resolve_symbol (symbuf, input_bfd, finfo, result,
+			       isymbuf, locsymcount)
+	      && !resolve_section (symbuf, finfo->output_bfd->sections,
+				   result))
 	    {
 	      undefined_reference ("symbol", symbuf);
 	      return FALSE;
@@ -7487,9 +7496,9 @@ eval_symbol (bfd_vma *                     result,
       sym += strlen (#op);					\
       if (* sym == ':')						\
         ++ sym;							\
-      if (eval_symbol (& a, sym, & sym, input_bfd, finfo, addr, \
-                       section_offset, locsymcount, signed_p)   \
-	                                             != TRUE)	\
+      if (!eval_symbol (&a, sym, &sym, input_bfd, finfo, addr,	\
+			section_offset, isymbuf, locsymcount,	\
+			signed_p))				\
         return FALSE;						\
       if (signed_p)                                             \
         * result = op ((signed)a);         			\
@@ -7505,14 +7514,14 @@ eval_symbol (bfd_vma *                     result,
       sym += strlen (#op);					\
       if (* sym == ':')						\
         ++ sym;							\
-      if (eval_symbol (& a, sym, & sym, input_bfd, finfo, addr, \
-                       section_offset, locsymcount, signed_p)   \
-                                                     != TRUE)	\
+      if (!eval_symbol (&a, sym, &sym, input_bfd, finfo, addr,	\
+			section_offset, isymbuf, locsymcount,	\
+			signed_p))				\
         return FALSE;						\
       ++ sym;							\
-      if (eval_symbol (& b, sym, & sym, input_bfd, finfo, addr, \
-                       section_offset, locsymcount, signed_p)   \
-                                                     != TRUE)	\
+      if (!eval_symbol (&b, sym, &sym, input_bfd, finfo, addr,	\
+			section_offset, isymbuf, locsymcount,	\
+			signed_p))				\
         return FALSE;						\
       if (signed_p)                                             \
         * result = ((signed) a) op ((signed) b);	        \
@@ -7555,8 +7564,9 @@ eval_symbol (bfd_vma *                     result,
 /* Entry point to evaluator, called from elf_link_input_bfd.  */
 
 static bfd_boolean
-evaluate_complex_relocation_symbols (bfd * input_bfd,
-				     struct elf_final_link_info * finfo,
+evaluate_complex_relocation_symbols (bfd *input_bfd,
+				     struct elf_final_link_info *finfo,
+				     Elf_Internal_Sym *isymbuf,
 				     size_t locsymcount)
 {
   const struct elf_backend_data * bed;
@@ -7626,7 +7636,7 @@ evaluate_complex_relocation_symbols (bfd * input_bfd,
 	  if (index < locsymcount)
 	    {
 	      /* The symbol is local.  */
-	      sym = finfo->internal_syms + index;
+	      sym = isymbuf + index;
 
 	      /* We're only processing STT_RELC or STT_SRELC type symbols.  */
 	      if ((ELF_ST_TYPE (sym->st_info) != STT_RELC) &&
@@ -7668,10 +7678,10 @@ evaluate_complex_relocation_symbols (bfd * input_bfd,
 	  printf (" Evaluating '%s' ...\n ", sym_name);
 #endif
 	  if (eval_symbol (& result, sym_name, & sym_name, input_bfd, 
-			   finfo, addr, section_offset, locsymcount,
+			   finfo, addr, section_offset, isymbuf, locsymcount,
 			   signed_p))
 	    /* Symbol evaluated OK.  Update to absolute value.  */
-	    set_symbol_value (input_bfd, finfo, index, result);
+	    set_symbol_value (input_bfd, isymbuf, locsymcount, index, result);
 
 	  else
 	    result = FALSE;
@@ -9066,15 +9076,6 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
       if (isymbuf == NULL)
 	return FALSE;
     }
-  /* evaluate_complex_relocation_symbols looks for symbols in
-     finfo->internal_syms.  */
-  else if (isymbuf != NULL && locsymcount != 0)
-    {
-      bfd_elf_get_elf_syms (input_bfd, symtab_hdr, locsymcount, 0,
-			    finfo->internal_syms,
-			    finfo->external_syms,
-			    finfo->locsym_shndx);
-    }
 
   /* Find local symbol sections and adjust values of symbols in
      SEC_MERGE sections.  Write out those local symbols we know are
@@ -9212,7 +9213,8 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	return FALSE;
     }
 
-  if (! evaluate_complex_relocation_symbols (input_bfd, finfo, locsymcount))
+  if (! evaluate_complex_relocation_symbols (input_bfd, finfo, isymbuf,
+					     locsymcount))
     return FALSE;
 
   /* Relocate the contents of each section.  */

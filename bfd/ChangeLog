@@ -1,3 +1,14 @@
+2007-09-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (set_symbol_value): Add isymbuf and locsymcount
+	params.  Change symidx to a size_t.  Don't access past end
+	of symbol buffer.
+	(resolve_symbol): Add isymbuf param and use instead of
+	finfo->internal_syms.
+	(eval_symbol, evaluate_complex_relocation_symbols): Likewise.
+	(elf_link_input_bfd): Don't read symbols specially for
+	evaluate_complex_relocation_symbols.
+
 2007-09-26  Tristan Gingold  <gingold@adacore.com>
 
 	* som.c (som_get_reloc_upper_bound): If there are no relocs return
