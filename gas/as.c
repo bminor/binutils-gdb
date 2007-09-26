@@ -45,7 +45,6 @@
 #ifdef HAVE_ITBL_CPU
 #include "itbl-ops.h"
 #else
-#define itbl_parse(itbl_file) 1
 #define itbl_init()
 #endif
 
@@ -59,13 +58,6 @@ extern PTR sbrk ();
 /* Perform any cgen specific initialisation for gas.  */
 extern void gas_cgen_begin (void);
 #endif
-
-/* Keep a record of the itbl files we read in.  */
-struct itbl_file_list
-{
-  struct itbl_file_list *next;
-  char *name;
-};
 
 /* We build a list of defsyms as we read the options, and then define
    them after we have initialized everything.  */
@@ -117,7 +109,15 @@ static char *listing_filename = NULL;
 
 static struct defsym_list *defsyms;
 
+#ifdef HAVE_ITBL_CPU
+/* Keep a record of the itbl files we read in.  */
+struct itbl_file_list
+{
+  struct itbl_file_list *next;
+  char *name;
+};
 static struct itbl_file_list *itbl_files;
+#endif
 
 static long start_time;
 
@@ -323,9 +323,11 @@ Options:\n\
   --warn                  don't suppress warnings\n"));
   fprintf (stream, _("\
   --fatal-warnings        treat warnings as errors\n"));
+#ifdef HAVE_ITBL_CPU
   fprintf (stream, _("\
   --itbl INSTTBL          extend instruction set to include instructions\n\
                           matching the specifications defined in file INSTTBL\n"));
+#endif
   fprintf (stream, _("\
   -w                      ignored\n"));
   fprintf (stream, _("\
@@ -392,8 +394,10 @@ parse_args (int * pargc, char *** pargv)
     'v',
 #endif
     'w', 'X',
+#ifdef HAVE_ITBL_CPU
     /* New option for extending instruction set (see also --itbl below).  */
     't', ':',
+#endif
     '\0'
   };
   struct option *longopts;
@@ -411,7 +415,6 @@ parse_args (int * pargc, char *** pargv)
       OPTION_EMULATION,
       OPTION_DEBUG_PREFIX_MAP,
       OPTION_DEFSYM,
-      OPTION_INSTTBL,
       OPTION_LISTING_LHS_WIDTH,
       OPTION_LISTING_LHS_WIDTH2,
       OPTION_LISTING_RHS_WIDTH,
@@ -466,13 +469,15 @@ parse_args (int * pargc, char *** pargv)
     ,{"gstabs+", no_argument, NULL, OPTION_GSTABS_PLUS}
     ,{"hash-size", required_argument, NULL, OPTION_HASH_TABLE_SIZE}
     ,{"help", no_argument, NULL, OPTION_HELP}
+#ifdef HAVE_ITBL_CPU
     /* New option for extending instruction set (see also -t above).
        The "-t file" or "--itbl file" option extends the basic set of
        valid instructions by reading "file", a text file containing a
        list of instruction formats.  The additional opcodes and their
        formats are added to the built-in set of instructions, and
        mnemonics for new registers may also be defined.  */
-    ,{"itbl", required_argument, NULL, OPTION_INSTTBL}
+    ,{"itbl", required_argument, NULL, 't'}
+#endif
     /* getopt allows abbreviations, so we do this to stop it from
        treating -k as an abbreviation for --keep-locals.  Some
        ports use -k to enable PIC assembly.  */
@@ -648,7 +653,7 @@ This program has absolutely no warranty.\n"));
 	  }
 	  break;
 
-	case OPTION_INSTTBL:
+#ifdef HAVE_ITBL_CPU
 	case 't':
 	  {
 	    /* optarg is the name of the file containing the instruction
@@ -676,6 +681,7 @@ This program has absolutely no warranty.\n"));
 			itbl_files->name);
 	  }
 	  break;
+#endif
 
 	case OPTION_DEPFILE:
 	  start_dependencies (optarg);

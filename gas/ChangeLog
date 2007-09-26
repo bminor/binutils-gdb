@@ -1,3 +1,14 @@
+2007-09-26  Jan Beulich  <jbeulich@novell.com>
+
+	* as.c (itbl_parse): Remove #define.
+	(struct itbl_file_list): Move down and ...
+	(itbl_files): .. conditionalize upon HAVE_ITBL_CPU.
+	(show_usage): Conditionalize printing of --itbl option upon
+	HAVE_ITBL_CPU.
+	(parse_args): Conditionalize handling of -t/--itbl options upon
+	HAVE_ITBL_CPU. Remove OPTION_INSTTBL and replace its use with
+	't'.
+
 2007-09-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (output_insn): Use i.tm.opcode_length to
