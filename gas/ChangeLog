@@ -1,5 +1,10 @@
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
+	* dw2gencfi.c: Conditionalize whole body upon TARGET_USE_CFIPOP.
+	(cfi_finish): Add second empty instance.
+
+2007-09-26  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (dot_pred_rel): Replace specialized handling
 	with simple call to parse_operand.
 

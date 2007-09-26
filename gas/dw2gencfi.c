@@ -23,23 +23,12 @@
 #include "dw2gencfi.h"
 #include "subsegs.h"
 
+#ifdef TARGET_USE_CFIPOP
 
 /* We re-use DWARF2_LINE_MIN_INSN_LENGTH for the code alignment field
    of the CIE.  Default to 1 if not otherwise specified.  */
 #ifndef  DWARF2_LINE_MIN_INSN_LENGTH
 # define DWARF2_LINE_MIN_INSN_LENGTH 1
-#endif
-
-/* If TARGET_USE_CFIPOP is defined, it is required that the target
-   provide the following definitions.  Otherwise provide them to 
-   allow compilation to continue.  */
-#ifndef TARGET_USE_CFIPOP
-# ifndef  DWARF2_DEFAULT_RETURN_COLUMN
-#  define DWARF2_DEFAULT_RETURN_COLUMN 0
-# endif
-# ifndef  DWARF2_CIE_DATA_ALIGNMENT
-#  define DWARF2_CIE_DATA_ALIGNMENT 1
-# endif
 #endif
 
 #ifndef EH_FRAME_ALIGNMENT
@@ -1346,3 +1335,10 @@ cfi_finish (void)
 
   flag_traditional_format = save_flag_traditional_format;
 }
+
+#else /* TARGET_USE_CFIPOP */
+void
+cfi_finish (void)
+{
+}
+#endif /* TARGET_USE_CFIPOP */
