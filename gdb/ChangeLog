@@ -1,3 +1,10 @@
+2007-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* Fix PR pascal/2283
+	p-valprint.c (pascal_val_print): correct current language check.
+	Also print array of char as strings.
+
+
 2007-09-26  David Ung  <davidu@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 

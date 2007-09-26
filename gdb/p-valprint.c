@@ -87,7 +87,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  /* For an array of chars, print with string syntax.  */
 	  if (eltlen == 1 
 	      && ((TYPE_CODE (elttype) == TYPE_CODE_INT)
-	       || ((current_language->la_language == language_m2)
+	       || ((current_language->la_language == language_pascal)
 		   && (TYPE_CODE (elttype) == TYPE_CODE_CHAR)))
 	      && (format == 0 || format == 's'))
 	    {
@@ -170,7 +170,8 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
 	  if (TYPE_LENGTH (elttype) == 1
-	      && TYPE_CODE (elttype) == TYPE_CODE_INT
+	      && (TYPE_CODE (elttype) == TYPE_CODE_INT
+		  || TYPE_CODE(elttype) == TYPE_CODE_CHAR)
 	      && (format == 0 || format == 's')
 	      && addr != 0)
 	    {
