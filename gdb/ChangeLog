@@ -1,3 +1,8 @@
+2007-09-26  David Ung  <davidu@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (mips_n32n64_return_value): Fix a comment.
+
 2007-09-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-exp.y: Fix 12 ARI reported problems.

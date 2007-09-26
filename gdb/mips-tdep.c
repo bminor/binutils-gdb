@@ -3127,8 +3127,7 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
   else if (TYPE_CODE (type) == TYPE_CODE_FLT
 	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
     {
-      /* A floating-point value belongs in the least significant part
-         of FP0.  */
+      /* A single or double floating-point value that fits in FP0.  */
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
       mips_xfer_register (regcache,
