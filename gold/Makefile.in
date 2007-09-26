@@ -71,13 +71,13 @@ ARFLAGS = cru
 libgold_a_AR = $(AR) $(ARFLAGS)
 libgold_a_LIBADD =
 am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) defstd.$(OBJEXT) \
-	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) fileread.$(OBJEXT) \
-	gold.$(OBJEXT) gold-threads.$(OBJEXT) layout.$(OBJEXT) \
-	merge.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
-	output.$(OBJEXT) parameters.$(OBJEXT) readsyms.$(OBJEXT) \
-	reloc.$(OBJEXT) resolve.$(OBJEXT) script.$(OBJEXT) \
-	symtab.$(OBJEXT) stringpool.$(OBJEXT) target-select.$(OBJEXT) \
-	workqueue.$(OBJEXT)
+	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) ehframe.$(OBJEXT) \
+	fileread.$(OBJEXT) gold.$(OBJEXT) gold-threads.$(OBJEXT) \
+	layout.$(OBJEXT) merge.$(OBJEXT) object.$(OBJEXT) \
+	options.$(OBJEXT) output.$(OBJEXT) parameters.$(OBJEXT) \
+	readsyms.$(OBJEXT) reloc.$(OBJEXT) resolve.$(OBJEXT) \
+	script.$(OBJEXT) symtab.$(OBJEXT) stringpool.$(OBJEXT) \
+	target-select.$(OBJEXT) workqueue.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
 am_libgold_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
@@ -271,6 +271,7 @@ CCFILES = \
 	defstd.cc \
 	dirsearch.cc \
 	dynobj.cc \
+	ehframe.cc \
 	fileread.cc \
 	gold.cc \
 	gold-threads.cc \
@@ -295,6 +296,7 @@ HFILES = \
 	defstd.h \
 	dirsearch.h \
 	dynobj.h \
+	ehframe.h \
 	fileread.h \
 	gold.h \
 	gold-threads.h \
@@ -437,6 +439,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/defstd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dirsearch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynobj.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ehframe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold-threads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold.Po@am__quote@

@@ -31,6 +31,7 @@
 #include "output.h"
 #include "symtab.h"
 #include "dynobj.h"
+#include "ehframe.h"
 #include "layout.h"
 
 namespace gold
@@ -65,7 +66,8 @@ Layout::Layout(const General_options& options)
     section_name_map_(), segment_list_(), section_list_(),
     unattached_section_list_(), special_output_list_(),
     tls_segment_(NULL), symtab_section_(NULL),
-    dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL)
+    dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL),
+    eh_frame_section_(NULL)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -206,11 +208,62 @@ Layout::layout(Relobj* object, unsigned int shndx, const char* name,
 						shdr.get_sh_type(),
 						shdr.get_sh_flags());
 
+  // Special GNU handling of sections named .eh_frame.
+  if (!parameters->output_is_object()
+      && strcmp(name, ".eh_frame") == 0
+      && shdr.get_sh_size() > 0
+      && shdr.get_sh_type() == elfcpp::SHT_PROGBITS
+      && shdr.get_sh_flags() == elfcpp::SHF_ALLOC)
+    {
+      this->layout_eh_frame(object, shndx, name, shdr, os, off);
+      return os;
+    }
+
   // FIXME: Handle SHF_LINK_ORDER somewhere.
 
   *off = os->add_input_section(object, shndx, name, shdr);
 
   return os;
+}
+
+// Special GNU handling of sections named .eh_frame.  They will
+// normally hold exception frame data.
+
+template<int size, bool big_endian>
+void
+Layout::layout_eh_frame(Relobj* object,
+			unsigned int shndx,
+			const char* name,
+			const elfcpp::Shdr<size, big_endian>& shdr,
+			Output_section* os, off_t* off)
+{
+  if (this->eh_frame_section_ == NULL)
+    {
+      this->eh_frame_section_ = os;
+
+      if (this->options_.create_eh_frame_hdr())
+	{
+	  Stringpool::Key hdr_name_key;
+	  const char* hdr_name = this->namepool_.add(".eh_frame_hdr",
+						     &hdr_name_key);
+	  Output_section* hdr_os =
+	    this->get_output_section(hdr_name, hdr_name_key,
+				     elfcpp::SHT_PROGBITS,
+				     elfcpp::SHF_ALLOC);
+
+	  Eh_frame_hdr* hdr_posd = new Eh_frame_hdr(object->target(), os);
+	  hdr_os->add_output_section_data(hdr_posd);
+
+	  Output_segment* hdr_oseg =
+	    new Output_segment(elfcpp::PT_GNU_EH_FRAME, elfcpp::PF_R);
+	  this->segment_list_.push_back(hdr_oseg);
+	  hdr_oseg->add_output_section(hdr_os, elfcpp::PF_R);
+	}
+    }
+
+  gold_assert(this->eh_frame_section_ == os);
+
+  *off = os->add_input_section(object, shndx, name, shdr);
 }
 
 // Add POSD to an output section using NAME, TYPE, and FLAGS.

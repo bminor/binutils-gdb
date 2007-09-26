@@ -26,6 +26,7 @@ CCFILES = \
 	defstd.cc \
 	dirsearch.cc \
 	dynobj.cc \
+	ehframe.cc \
 	fileread.cc \
 	gold.cc \
 	gold-threads.cc \
@@ -50,6 +51,7 @@ HFILES = \
 	defstd.h \
 	dirsearch.h \
 	dynobj.h \
+	ehframe.h \
 	fileread.h \
 	gold.h \
 	gold-threads.h \

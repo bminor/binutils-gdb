@@ -206,6 +206,13 @@ class Layout
   static const Linkonce_mapping linkonce_mapping[];
   static const int linkonce_mapping_count;
 
+  // Handle an exception frame section.
+  template<int size, bool big_endian>
+  void
+  layout_eh_frame(Relobj*, unsigned int, const char*,
+		  const elfcpp::Shdr<size, big_endian>&,
+		  Output_section*, off_t*);
+
   // Find the first read-only PT_LOAD segment, creating one if
   // necessary.
   Output_segment*
@@ -356,6 +363,8 @@ class Layout
   Output_section* dynamic_section_;
   // The dynamic data which goes into dynamic_section_.
   Output_data_dynamic* dynamic_data_;
+  // The exception frame section.
+  Output_section* eh_frame_section_;
 };
 
 // This task handles writing out data which is not part of a section

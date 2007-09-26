@@ -8,6 +8,8 @@ dirsearch.cc
 dirsearch.h
 dynobj.cc
 dynobj.h
+ehframe.cc
+ehframe.h
 fileread.cc
 fileread.h
 gold.cc

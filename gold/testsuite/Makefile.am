@@ -30,7 +30,14 @@ NATIVE_PROGS = \
 	two_file_shared_2_nonpic_test \
 	two_file_same_shared_nonpic_test \
 	two_file_separate_shared_12_nonpic_test \
-	two_file_separate_shared_21_nonpic_test
+	two_file_separate_shared_21_nonpic_test \
+	exception_test \
+	exception_static_test \
+	exception_shared_1_test \
+	exception_shared_2_test \
+	exception_same_shared_test \
+	exception_separate_shared_12_test \
+	exception_separate_shared_21_test
 
 NATIVE_TESTING = \
 	basic_test \
@@ -176,6 +183,62 @@ two_file_shared_2_nonpic.so: two_file_test_2.o
 	$(CXXLINK) -shared two_file_test_2.o
 two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o
 	$(CXXLINK) -shared two_file_test_1.o two_file_test_2.o
+
+exception_test_SOURCES = \
+	exception_test_main.cc \
+	exception_test_1.cc \
+	exception_test_2.cc \
+	exception_test.h
+exception_test_DEPENDENCIES = gcctestdir/ld
+exception_test_LDFLAGS = -Bgcctestdir/
+
+exception_static_test_SOURCES = \
+	exception_test_main.cc \
+	exception_test_1.cc \
+	exception_test_2.cc
+exception_static_test_DEPENDENCIES = gcctestdir/ld
+exception_static_test_LDFLAGS = -Bgcctestdir/ -static
+
+exception_shared_1_test_SOURCES = exception_test_2.cc exception_test_main.cc
+exception_shared_1_test_DEPENDENCIES = gcctestdir/ld exception_shared_1.so
+exception_shared_1_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+exception_shared_1_test_LDADD = exception_shared_1.so
+
+exception_shared_2_test_SOURCES = exception_test_1.cc exception_test_main.cc
+exception_shared_2_test_DEPENDENCIES = gcctestdir/ld exception_shared_2.so
+exception_shared_2_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+exception_shared_2_test_LDADD = exception_shared_2.so
+
+exception_same_shared_test_SOURCES = exception_test_main.cc
+exception_same_shared_test_DEPENDENCIES = gcctestdir/ld exception_shared.so
+exception_same_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+exception_same_shared_test_LDADD = exception_shared.so
+
+exception_separate_shared_12_test_SOURCES = exception_test_main.cc
+exception_separate_shared_12_test_DEPENDENCIES = \
+	gcctestdir/ld exception_shared_1.so exception_shared_2.so
+exception_separate_shared_12_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+exception_separate_shared_12_test_LDADD = \
+	exception_shared_1.so exception_shared_2.so
+
+exception_separate_shared_21_test_SOURCES = exception_test_main.cc
+exception_separate_shared_21_test_DEPENDENCIES = \
+	gcctestdir/ld exception_shared_1.so exception_shared_2.so
+exception_separate_shared_21_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+exception_separate_shared_21_test_LDADD = \
+	exception_shared_2.so exception_shared_1.so
+
+exception_test_1_pic.o: exception_test_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+exception_test_2_pic.o: exception_test_2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+
+exception_shared_1.so: exception_test_1_pic.o
+	$(CXXLINK) -shared exception_test_1_pic.o
+exception_shared_2.so: exception_test_2_pic.o
+	$(CXXLINK) -shared exception_test_2_pic.o
+exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o
+	$(CXXLINK) -shared exception_test_1_pic.o exception_test_2_pic.o
 
 endif
 endif
