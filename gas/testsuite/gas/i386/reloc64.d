@@ -18,6 +18,7 @@ Disassembly of section \.text:
 .*[ 	]+R_X86_64_PC8[ 	]+xtrn\+0x0*1
 .*[ 	]+R_X86_64_PC32[ 	]+xtrn\+0xf+c
 .*[ 	]+R_X86_64_PC32[ 	]+xtrn\+0xf+c
+.*[ 	]+R_X86_64_PC32[ 	]+xtrn\+0xf+c
 .*[ 	]+R_X86_64_PC8[ 	]+xtrn\+0xf+f
 .*[ 	]+R_X86_64_GOT64[ 	]+xtrn
 .*[ 	]+R_X86_64_GOT32[ 	]+xtrn
@@ -27,6 +28,7 @@ Disassembly of section \.text:
 .*[ 	]+R_X86_64_GOTPCREL[ 	]+xtrn
 .*[ 	]+R_X86_64_GOTPCREL[ 	]+xtrn\+0xf+c
 .*[ 	]+R_X86_64_GOTPC32[ 	]+_GLOBAL_OFFSET_TABLE_\+0x0*2
+.*[ 	]+R_X86_64_GOTPC32[ 	]+_GLOBAL_OFFSET_TABLE_\+0xf+c
 .*[ 	]+R_X86_64_GOTPC32[ 	]+_GLOBAL_OFFSET_TABLE_\+0xf+c
 .*[ 	]+R_X86_64_GOTPC32[ 	]+_GLOBAL_OFFSET_TABLE_\+0x0*2
 .*[ 	]+R_X86_64_PLT32[ 	]+xtrn

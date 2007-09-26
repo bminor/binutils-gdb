@@ -4547,7 +4547,8 @@ build_modrm_byte (void)
 		}
 	    }
 	  /* RIP addressing for 64bit mode.  */
-	  else if (i.base_reg->reg_num == RegRip)
+	  else if (i.base_reg->reg_num == RegRip ||
+		   i.base_reg->reg_num == RegEip)
 	    {
 	      i.rm.regmem = NO_BASE_REGISTER;
 	      i.types[op].bitfield.disp8 = 0;
@@ -5982,7 +5983,8 @@ i386_index_check (const char *operand_string)
 	       || (i.prefix[ADDR_PREFIX]
 		   && !i.base_reg->reg_type.bitfield.reg32))
 	   && (i.index_reg
-	       || i.base_reg->reg_num != RegRip))
+	       || i.base_reg->reg_num !=
+		  (i.prefix[ADDR_PREFIX] == 0 ? RegRip : RegEip)))
 	  || (i.index_reg
 	      && (!i.index_reg->reg_type.bitfield.baseindex
 		  || (i.prefix[ADDR_PREFIX] == 0

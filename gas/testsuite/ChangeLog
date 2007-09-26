@@ -1,3 +1,11 @@
+2007-09-26  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/reloc64.s: Adjust for %eip-relative addressing no
+	longer generating errors.
+	* gas/i386/reloc64.d, gas/i386/reloc64.l: Update.
+	* gas/i386/x86-64-addr32.s: Remove explicit addr32 prefix
+	for %eip-realtive addressing case.
+
 2007-09-25  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/m68k/br-isaa.d: Dump relocs too.

@@ -26,7 +26,7 @@ ill	mov	$(xtrn - .), %eax
 	mov	$(xtrn - .), %ax
 	mov	$(xtrn - .), %al
 	mov	xtrn(%rip), %eax
-bad	mov	xtrn(%eip), %eax
+	mov	xtrn(%eip), %eax
 	call	xtrn
 	jrcxz	xtrn
 
@@ -62,8 +62,8 @@ ill	movabs	$_GLOBAL_OFFSET_TABLE_, %rax
 ill	add	$_GLOBAL_OFFSET_TABLE_, %eax
 ill	add	$_GLOBAL_OFFSET_TABLE_, %ax
 ill	add	$_GLOBAL_OFFSET_TABLE_, %al
-	lea	_GLOBAL_OFFSET_TABLE_(%rip), %rax #???
-bad	lea	_GLOBAL_OFFSET_TABLE_(%eip), %rax
+	lea	_GLOBAL_OFFSET_TABLE_(%rip), %rax
+	lea	_GLOBAL_OFFSET_TABLE_(%eip), %rax
 ill	movabs	$(_GLOBAL_OFFSET_TABLE_ - .), %rax
 	add	$(_GLOBAL_OFFSET_TABLE_ - .), %rax
 ill	add	$(_GLOBAL_OFFSET_TABLE_ - .), %eax

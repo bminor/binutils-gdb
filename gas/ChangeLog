@@ -1,5 +1,10 @@
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (build_modrm_byte): Also check for RegEip
+	when considering IP-relative addressing.
+
+2007-09-26  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.h (md_register_arithmetic): Define.
 	* config/tc-ia64.h (md_register_arithmetic): Likewise.
 	* doc/internals.texi: Document md_register_arithmetic.

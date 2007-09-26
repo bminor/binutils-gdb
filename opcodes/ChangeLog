@@ -1,3 +1,10 @@
+2007-09-26  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-opc.h (RegEip): Define.
+	(RegEiz): Adjust.
+	* i386-reg.tbl: Add eip. Mark rip and eip with RegRex64.
+	* i386-tbl.h: Re-generate.
+
 2007-09-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (process_i386_opcodes): Process opcode_length.

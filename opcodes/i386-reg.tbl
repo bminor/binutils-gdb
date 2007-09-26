@@ -187,9 +187,10 @@ xmm12, RegXMM, RegRex, 4
 xmm13, RegXMM, RegRex, 5
 xmm14, RegXMM, RegRex, 6
 xmm15, RegXMM, RegRex, 7
-// No type will make this register rejected for all purposes except
-// for addressing.  This saves creating one extra type for RIP.
-rip, BaseIndex, 0, RegRip
+// No type will make these registers rejected for all purposes except
+// for addressing.  This saves creating one extra type for RIP/EIP.
+rip, BaseIndex, RegRex64, RegRip
+eip, BaseIndex, RegRex64, RegEip
 // No type will make these registers rejected for all purposes except
 // for addressing.
 eiz, BaseIndex, 0, RegEiz

@@ -1,7 +1,7 @@
 .text
 	lea		symbol(%eax), %rax
 	lea		symbol(%r8d), %rax
-	addr32 lea	symbol(%rip), %rax
+	lea		symbol(%eip), %rax
 	addr32 lea	symbol, %rax
 	addr32 mov	0x600898,%al
 	addr32 mov	0x600898,%ax
