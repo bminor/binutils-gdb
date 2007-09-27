@@ -1,3 +1,10 @@
+2007-09-27  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/var-cmd.c (do_children_tests): Initialize
+	the 'struct_declarations' variable to zeros.
+	* gdb.mi/mi2-var-child.exp: Step over said
+	initialization.
+	
 2007-09-24  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.cp/mb-ctor.cc: New.

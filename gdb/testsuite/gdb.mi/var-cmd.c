@@ -16,6 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdlib.h>
+#include <string.h>
 
 struct _simple_struct {
   int integer;
@@ -210,6 +211,7 @@ do_children_tests (void)
   int bar;
 
   struct _struct_decl struct_declarations;
+  memset (&struct_declarations, 0, sizeof (struct_declarations));
   weird = &struct_declarations;
 
   struct_declarations.integer = 123;

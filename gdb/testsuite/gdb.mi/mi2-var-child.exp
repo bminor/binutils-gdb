@@ -50,6 +50,10 @@ mi_continue_to_line $line_dlt_first_real "step to real start of do_children_test
 #                #
 #####        #####
 
+# Step to "weird = &struct_declarations;"
+set line_dct_weird [gdb_get_line_number "weird = &struct_declarations;"]
+mi_next_to do_children_tests {} {.*var-cmd.c} \
+      $line_dct_weird "step to line \$line_dct_weird"
 
 # Test: c_variable-4.2
 # Desc: create variable "struct_declarations"
