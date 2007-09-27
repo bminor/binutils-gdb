@@ -937,7 +937,7 @@ static const struct dis386 dis386[] = {
   { "retT",		{ Iw } },
   { "retT",		{ XX } },
   { OPC_EXT_1 },
-  { OPC_EXT_2 },
+  { X86_64_27 },
   { GRP11_C6 },
   { GRP11_C7 },
   /* c8 */
@@ -2687,7 +2687,7 @@ static const struct dis386 x86_64_table[][2] = {
 
   /* X86_64_27 */
   {
-    { "ldsS", { Gv, Mp } },
+    { OPC_EXT_2 },
     { "(bad)", { XX } },
   },
 };
@@ -4454,7 +4454,7 @@ static const struct dis386 opc_ext_table[][2] = {
   },
   {
     /* OPC_EXT_2 */
-    { X86_64_27 },
+    { "ldsS",		{ Gv, Mp } },
     { "(bad)",		{ XX } },
   },
   {

@@ -1,5 +1,11 @@
 2007-09-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (dis386): Swap X86_64_27 with OPC_EXT_2.
+	(x86_64_table): Likewise.
+	(opc_ext_table): Likewise.
+
+2007-09-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/5072
 	* i386-dis.c: Update comments on '{', '}' and '|' to support
 	only AT&T and Intel modes.
@@ -8,7 +14,7 @@
 	(dis386_twobyte): Updated.
 	(float_mem): Likewise.
 	(x86_64_table): Add X86_64_4...X86_64_27.
-	(opc_ext_table): Updated.  Use X86_64_22 and X86_64_27.
+	(opc_ext_table): Updated.  Use X86_64_22...X86_64_27.
 	(putop): Updated handling of '{', '}' and '|' to support only
 	AT&T and Intel modes.
 
