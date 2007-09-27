@@ -641,7 +641,7 @@ print_insn_arg (const char *d,
              {"%urp", 0x806}, {"%srp", 0x807}, {"%pcr", 0x808},
 
 	     /* Fido added these.  */
-             {"%cac", 0xffe}, {"%mbb", 0xfff}};
+             {"%cac", 0xffe}, {"%mbo", 0xfff}};
 
 	val = fetch_arg (buffer, place, 12, info);
 	for (regno = sizeof names / sizeof names[0] - 1; regno >= 0; regno--)

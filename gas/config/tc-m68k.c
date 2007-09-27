@@ -309,7 +309,7 @@ static const enum m68k_register mcf5485_ctrl[] = {
   0
 };
 static const enum m68k_register fido_ctrl[] = {
-  SFC, DFC, USP, VBR, CAC, MBB,
+  SFC, DFC, USP, VBR, CAC, MBO,
   0
 };
 #define cpu32_ctrl m68010_ctrl
@@ -3265,7 +3265,7 @@ m68k_ip (char *instring)
             case CAC:
               tmpreg = 0xFFE;
               break;
-            case MBB:
+            case MBO:
               tmpreg = 0xFFF;
               break;
 	    default:
@@ -4006,7 +4006,8 @@ static const struct init_entry init_table[] =
   { "mbar2",    MBAR2 },  	/* mcf5249 registers.  */
 
   { "cac",    CAC },  		/* fido registers.  */
-  { "mbb",    MBB },  		/* fido registers.  */
+  { "mbb",    MBO },  		/* fido registers (obsolete).  */
+  { "mbo",    MBO },  		/* fido registers.  */
   /* End of control registers.  */
 
   { "ac", AC },

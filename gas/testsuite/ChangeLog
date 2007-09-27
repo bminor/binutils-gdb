@@ -1,3 +1,8 @@
+2007-09-27  Kazu Hirata  <kazu@codesourcery.com>
+
+	* gas/m68k/fido.s: Add tests for %mbo.
+	* gas/m68k/fido.d: Update accordingly.
+
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/x86-64-addr32.d: Adjust expectations.

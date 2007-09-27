@@ -1,3 +1,11 @@
+2007-09-27  Kazu Hirata  <kazu@codesourcery.com>
+
+	* config/m68k-parse.h (m68k_register): Use MBO instead of MBB.
+	(last_movec_reg): Change to MBO.
+	* config/tc-m68k.c (fido_ctrl): Use MBO instead of MBB.
+	(m68k_ip): Use MBO instead of MBO.
+	(init_table): Use MBO instead of MBO.  Add an entry for mbo.
+
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (build_modrm_byte): Also check for RegEip

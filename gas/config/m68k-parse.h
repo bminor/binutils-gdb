@@ -131,8 +131,8 @@ enum m68k_register
   MBAR,
   ASID,				/* m5475.  */
   CAC,  		        /* fido added this.  */
-  MBB,
-#define last_movec_reg MBB
+  MBO,
+#define last_movec_reg MBO
   /* End of movec ordering constraints.  */
 
   FPI,
