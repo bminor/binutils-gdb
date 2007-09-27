@@ -1,3 +1,12 @@
+2007-09-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-linux-tdep.c (arm_linux_software_single_step): New.
+	(arm_linux_init_abi): Use it.
+	* arm-tdep.c (arm_get_next_pc): Make global.  Handle all-ones
+	condition correctly.
+	* arm-tdep.h (arm_get_next_pc): Declare.
+	* Makefile.in (arm-linux-tdep.o): Update.
+
 2007-09-26  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.c (install_new_value): Don't

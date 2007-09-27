@@ -1664,7 +1664,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   return nextpc;
 }
 
-static CORE_ADDR
+CORE_ADDR
 arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
   unsigned long pc_val;
@@ -1680,7 +1680,30 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   status = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
   nextpc = (CORE_ADDR) (pc_val + 4);	/* Default case */
 
-  if (condition_true (bits (this_instr, 28, 31), status))
+  if (bits (this_instr, 28, 31) == INST_NV)
+    switch (bits (this_instr, 24, 27))
+      {
+      case 0xa:
+      case 0xb:
+	{
+	  /* Branch with Link and change to Thumb.  */
+	  nextpc = BranchDest (pc, this_instr);
+	  nextpc |= bit (this_instr, 24) << 1;
+
+	  nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
+	  if (nextpc == pc)
+	    error (_("Infinite loop detected"));
+	  break;
+	}
+      case 0xc:
+      case 0xd:
+      case 0xe:
+	/* Coprocessor register transfer.  */
+        if (bits (this_instr, 12, 15) == 15)
+	  error (_("Invalid update to pc in instruction"));
+	break;
+      }
+  else if (condition_true (bits (this_instr, 28, 31), status))
     {
       switch (bits (this_instr, 24, 27))
 	{
@@ -1885,10 +1908,6 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	case 0xa:		/* branch */
 	  {
 	    nextpc = BranchDest (pc, this_instr);
-
-	    /* BLX */
-	    if (bits (this_instr, 28, 31) == INST_NV)
-	      nextpc |= bit (this_instr, 24) << 1;
 
 	    nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
 	    if (nextpc == pc)

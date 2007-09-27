@@ -32,6 +32,7 @@
 #include "regset.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
+#include "breakpoint.h"
 
 #include "arm-tdep.h"
 #include "arm-linux-tdep.h"
@@ -568,6 +569,26 @@ arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
   return NULL;
 }
 
+/* Insert a single step breakpoint at the next executed instruction.  */
+
+int
+arm_linux_software_single_step (struct frame_info *frame)
+{
+  CORE_ADDR next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
+
+  /* The Linux kernel offers some user-mode helpers in a high page.  We can
+     not read this page (as of 2.6.23), and even if we could then we couldn't
+     set breakpoints in it, and even if we could then the atomic operations
+     would fail when interrupted.  They are all called as functions and return
+     to the address in LR, so step to there instead.  */
+  if (next_pc > 0xffff0000)
+    next_pc = get_frame_register_unsigned (frame, ARM_LR_REGNUM);
+
+  insert_single_step_breakpoint (next_pc);
+
+  return 1;
+}
+
 static void
 arm_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
@@ -604,7 +625,7 @@ arm_linux_init_abi (struct gdbarch_info info,
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
   /* Single stepping.  */
-  set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
+  set_gdbarch_software_single_step (gdbarch, arm_linux_software_single_step);
 
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
