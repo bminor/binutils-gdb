@@ -985,6 +985,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   int need_to_fetch;
   int changed = 0;
   int intentionally_not_fetched = 0;
+  char *print_value = NULL;
 
   /* We need to know the varobj's type to decide if the value should
      be fetched or not.  C++ fake children (public/protected/private) don't have
@@ -1042,12 +1043,17 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	}
     }
 
+  /* Below, we'll be comparing string rendering of old and new
+     values.  Don't get string rendering if the value is
+     lazy -- if it is, the code above has decided that the value
+     should not be fetched.  */
+  if (value && !value_lazy (value))
+      print_value = value_get_print_value (value, var->format);
+
   /* If the type is changeable, compare the old and the new values.
      If this is the initial assignment, we don't have any old value
      to compare with.  */
-  if (initial && changeable)
-    var->print_value = value_get_print_value (value, var->format);
-  else if (changeable)
+  if (!initial && changeable)
     {
       /* If the value of the varobj was changed by -var-set-value, then the 
 	 value in the varobj and in the target is the same.  However, that value
@@ -1055,8 +1061,6 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	 -var-update. So need to the varobj as changed.  */
       if (var->updated)
 	{
-	  xfree (var->print_value);
-	  var->print_value = value_get_print_value (value, var->format);
 	  changed = 1;
 	}
       else 
@@ -1077,26 +1081,16 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	    ;
 	  else if (var->value == NULL || value == NULL)
 	    {
-	      xfree (var->print_value);
-	      var->print_value = value_get_print_value (value, var->format);
 	      changed = 1;
 	    }
 	  else
 	    {
-	      char *print_value;
 	      gdb_assert (!value_lazy (var->value));
 	      gdb_assert (!value_lazy (value));
-	      print_value = value_get_print_value (value, var->format);
 
 	      gdb_assert (var->print_value != NULL && print_value != NULL);
 	      if (strcmp (var->print_value, print_value) != 0)
-		{
-		  xfree (var->print_value);
-		  var->print_value = print_value;
-		  changed = 1;
-		}
-	      else
-		xfree (print_value);
+		changed = 1;
 	    }
 	}
     }
@@ -1105,6 +1099,9 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   if (var->value != NULL && var->value != value)
     value_free (var->value);
   var->value = value;
+  if (var->print_value)
+    xfree (var->print_value);
+  var->print_value = print_value;
   if (value && value_lazy (value) && intentionally_not_fetched)
     var->not_fetched = 1;
   else
