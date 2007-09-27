@@ -1,3 +1,13 @@
+2007-09-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/5072
+	* gas/i386/i386.exp: Run x86-64-opcode-inval and
+	x86-64-opcode-inval-intel.
+
+	* gas/i386/x86-64-opcode-inval-intel.d: New.
+	* gas/i386/x86-64-opcode-inval.d: Likewise.
+	* gas/i386/x86-64-opcode-inval.s: Likewise.
+
 2007-09-27  Kazu Hirata  <kazu@codesourcery.com>
 
 	* gas/m68k/fido.s: Add tests for %mbo.

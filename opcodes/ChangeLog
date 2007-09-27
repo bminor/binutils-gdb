@@ -1,3 +1,17 @@
+2007-09-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/5072
+	* i386-dis.c: Update comments on '{', '}' and '|' to support
+	only AT&T and Intel modes.
+	(X86_64_4...X86_64_27): New.
+	(dis386): Updated.  Use X86_64_4...X86_64_21.
+	(dis386_twobyte): Updated.
+	(float_mem): Likewise.
+	(x86_64_table): Add X86_64_4...X86_64_27.
+	(opc_ext_table): Updated.  Use X86_64_22 and X86_64_27.
+	(putop): Updated handling of '{', '}' and '|' to support only
+	AT&T and Intel modes.
+
 2007-09-27  Kazu Hirata  <kazu@codesourcery.com>
 
 	* m68k-dis.c (print_insn_arg): Use %mbo instead of %mbb.

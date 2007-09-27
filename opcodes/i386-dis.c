@@ -578,6 +578,30 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define X86_64_1  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 1 } }
 #define X86_64_2  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 2 } }
 #define X86_64_3  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 3 } }
+#define X86_64_4  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 4 } }
+#define X86_64_5  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 5 } }
+#define X86_64_6  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 6 } }
+#define X86_64_7  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 7 } }
+#define X86_64_8  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 8 } }
+#define X86_64_9  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 9 } }
+#define X86_64_10  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 10 } }
+#define X86_64_11  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 11 } }
+#define X86_64_12  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 12 } }
+#define X86_64_13  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 13 } }
+#define X86_64_14  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 14 } }
+#define X86_64_15  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 15 } }
+#define X86_64_16  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 16 } }
+#define X86_64_17  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 17 } }
+#define X86_64_18  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 18 } }
+#define X86_64_19  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 19 } }
+#define X86_64_20  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 20 } }
+#define X86_64_21  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 21 } }
+#define X86_64_22  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 22 } }
+#define X86_64_23  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 23 } }
+#define X86_64_24  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 24 } }
+#define X86_64_25  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 25 } }
+#define X86_64_26  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 26 } }
+#define X86_64_27  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 27 } }
 
 #define THREE_BYTE_0 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 0 } }
 #define THREE_BYTE_1 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 1 } }
@@ -688,10 +712,7 @@ struct dis386 {
    for the details.
 
    Braces '{' and '}', and vertical bars '|', indicate alternative
-   mnemonic strings for AT&T, Intel, X86_64 AT&T, and X86_64 Intel
-   modes.  In cases where there are only two alternatives, the X86_64
-   instruction is reserved, and "(bad)" is printed.
-*/
+   mnemonic strings for AT&T and Intel.  */
 
 static const struct dis386 dis386[] = {
   /* 00 */
@@ -701,8 +722,8 @@ static const struct dis386 dis386[] = {
   { "addS",		{ Gv, Ev } },
   { "addB",		{ AL, Ib } },
   { "addS",		{ eAX, Iv } },
-  { "push{T|}",		{ es } },
-  { "pop{T|}",		{ es } },
+  { X86_64_4 },
+  { X86_64_5 },
   /* 08 */
   { "orB",		{ Eb, Gb } },
   { "orS",		{ Ev, Gv } },
@@ -710,7 +731,7 @@ static const struct dis386 dis386[] = {
   { "orS",		{ Gv, Ev } },
   { "orB",		{ AL, Ib } },
   { "orS",		{ eAX, Iv } },
-  { "push{T|}",		{ cs } },
+  { X86_64_6 },
   { "(bad)",		{ XX } },	/* 0x0f extended opcode escape */
   /* 10 */
   { "adcB",		{ Eb, Gb } },
@@ -719,8 +740,8 @@ static const struct dis386 dis386[] = {
   { "adcS",		{ Gv, Ev } },
   { "adcB",		{ AL, Ib } },
   { "adcS",		{ eAX, Iv } },
-  { "push{T|}",		{ ss } },
-  { "pop{T|}",		{ ss } },
+  { X86_64_7 },
+  { X86_64_8 },
   /* 18 */
   { "sbbB",		{ Eb, Gb } },
   { "sbbS",		{ Ev, Gv } },
@@ -728,8 +749,8 @@ static const struct dis386 dis386[] = {
   { "sbbS",		{ Gv, Ev } },
   { "sbbB",		{ AL, Ib } },
   { "sbbS",		{ eAX, Iv } },
-  { "push{T|}",		{ ds } },
-  { "pop{T|}",		{ ds } },
+  { X86_64_9 },
+  { X86_64_10 },
   /* 20 */
   { "andB",		{ Eb, Gb } },
   { "andS",		{ Ev, Gv } },
@@ -738,7 +759,7 @@ static const struct dis386 dis386[] = {
   { "andB",		{ AL, Ib } },
   { "andS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG ES prefix */
-  { "daa{|}",		{ XX } },
+  { X86_64_11 },
   /* 28 */
   { "subB",		{ Eb, Gb } },
   { "subS",		{ Ev, Gv } },
@@ -747,7 +768,7 @@ static const struct dis386 dis386[] = {
   { "subB",		{ AL, Ib } },
   { "subS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG CS prefix */
-  { "das{|}",		{ XX } },
+  { X86_64_12 },
   /* 30 */
   { "xorB",		{ Eb, Gb } },
   { "xorS",		{ Ev, Gv } },
@@ -756,7 +777,7 @@ static const struct dis386 dis386[] = {
   { "xorB",		{ AL, Ib } },
   { "xorS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG SS prefix */
-  { "aaa{|}",		{ XX } },
+  { X86_64_13 },
   /* 38 */
   { "cmpB",		{ Eb, Gb } },
   { "cmpS",		{ Ev, Gv } },
@@ -765,7 +786,7 @@ static const struct dis386 dis386[] = {
   { "cmpB",		{ AL, Ib } },
   { "cmpS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG DS prefix */
-  { "aas{|}",		{ XX } },
+  { X86_64_14 },
   /* 40 */
   { "inc{S|}",		{ RMeAX } },
   { "inc{S|}",		{ RMeCX } },
@@ -816,10 +837,10 @@ static const struct dis386 dis386[] = {
   { "imulS",		{ Gv, Ev, Iv } },
   { "pushT",		{ sIb } },
   { "imulS",		{ Gv, Ev, sIb } },
-  { "ins{b||b|}",	{ Ybr, indirDX } },
-  { "ins{R||G|}",	{ Yzr, indirDX } },
-  { "outs{b||b|}",	{ indirDXr, Xb } },
-  { "outs{R||G|}",	{ indirDXr, Xz } },
+  { "ins{b|}",		{ Ybr, indirDX } },
+  { X86_64_15 },
+  { "outs{b|}",		{ indirDXr, Xb } },
+  { X86_64_16 },
   /* 70 */
   { "joH",		{ Jb, XX, cond_jump_flag } },
   { "jnoH",		{ Jb, XX, cond_jump_flag } },
@@ -866,23 +887,23 @@ static const struct dis386 dis386[] = {
   { "xchgS",		{ RMeSI, eAX } },
   { "xchgS",		{ RMeDI, eAX } },
   /* 98 */
-  { "cW{t||t|}R",	{ XX } },
-  { "cR{t||t|}O",	{ XX } },
-  { "Jcall{T|}",	{ Ap } },
+  { "cW{t|}R",		{ XX } },
+  { "cR{t|}O",		{ XX } },
+  { X86_64_17 },
   { "(bad)",		{ XX } },	/* fwait */
   { "pushfT",		{ XX } },
   { "popfT",		{ XX } },
-  { "sahf{|}",		{ XX } },
-  { "lahf{|}",		{ XX } },
+  { "sahf",		{ XX } },
+  { "lahf",		{ XX } },
   /* a0 */
   { "movB",		{ AL, Ob } },
   { "movS",		{ eAX, Ov } },
   { "movB",		{ Ob, AL } },
   { "movS",		{ Ov, eAX } },
-  { "movs{b||b|}",	{ Ybr, Xb } },
-  { "movs{R||R|}",	{ Yvr, Xv } },
-  { "cmps{b||b|}",	{ Xb, Yb } },
-  { "cmps{R||R|}",	{ Xv, Yv } },
+  { "movs{b|}",		{ Ybr, Xb } },
+  { "movs{R|}",		{ Yvr, Xv } },
+  { "cmps{b|}",		{ Xb, Yb } },
+  { "cmps{R|}",		{ Xv, Yv } },
   /* a8 */
   { "testB",		{ AL, Ib } },
   { "testS",		{ eAX, Iv } },
@@ -926,15 +947,15 @@ static const struct dis386 dis386[] = {
   { "lretP",		{ XX } },
   { "int3",		{ XX } },
   { "int",		{ Ib } },
-  { "into{|}",		{ XX } },
+  { X86_64_18 },
   { "iretP",		{ XX } },
   /* d0 */
   { GRP2b_one },
   { GRP2S_one },
   { GRP2b_cl },
   { GRP2S_cl },
-  { "aam{|}",		{ sIb } },
-  { "aad{|}",		{ sIb } },
+  { X86_64_19 },
+  { X86_64_20 },
   { "(bad)",		{ XX } },
   { "xlat",		{ DSBX } },
   /* d8 */
@@ -958,7 +979,7 @@ static const struct dis386 dis386[] = {
   /* e8 */
   { "callT",		{ Jv } },
   { "jmpT",		{ Jv } },
-  { "Jjmp{T|}",		{ Ap } },
+  { X86_64_21 },
   { "jmp",		{ Jb } },
   { "inB",		{ AL, indirDX } },
   { "inG",		{ zAX, indirDX } },
@@ -1190,8 +1211,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "btrS",		{ Ev, Gv } },
   { OPC_EXT_4 },
   { OPC_EXT_5 },
-  { "movz{bR|x|bR|x}",	{ Gv, Eb } },
-  { "movz{wR|x|wR|x}",	{ Gv, Ew } }, /* yes, there really is movzww ! */
+  { "movz{bR|x}",	{ Gv, Eb } },
+  { "movz{wR|x}",	{ Gv, Ew } }, /* yes, there really is movzww ! */
   /* b8 */
   { PREGRP37 },
   { "ud2b",		{ XX } },
@@ -1199,8 +1220,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "btcS",		{ Ev, Gv } },
   { "bsfS",		{ Gv, Ev } },
   { PREGRP36 },
-  { "movs{bR|x|bR|x}",	{ Gv, Eb } },
-  { "movs{wR|x|wR|x}",	{ Gv, Ew } }, /* yes, there really is movsww ! */
+  { "movs{bR|x}",	{ Gv, Eb } },
+  { "movs{wR|x}",	{ Gv, Ew } }, /* yes, there really is movsww ! */
   /* c0 */
   { "xaddB",		{ Eb, Gb } },
   { "xaddS",		{ Ev, Gv } },
@@ -2502,21 +2523,172 @@ static const struct dis386 prefix_user_table[][4] = {
 };
 
 static const struct dis386 x86_64_table[][2] = {
+  /* X86_64_0 */
   {
     { "pusha{P|}", { XX } },
     { "(bad)", { XX } },
   },
+
+  /* X86_64_1 */
   {
     { "popa{P|}", { XX } },
     { "(bad)", { XX } },
   },
+
+  /* X86_64_2 */
   {
     { OPC_EXT_33 },
     { "(bad)", { XX } },
   },
+
+  /* X86_64_3 */
   {
     { "arpl", { Ew, Gw } },
-    { "movs{||lq|xd}", { Gv, Ed } },
+    { "movs{lq|xd}", { Gv, Ed } },
+  },
+
+  /* X86_64_4 */
+  {
+    { "push{T|}", { es } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_5 */
+  {
+    { "pop{T|}", { es } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_6 */
+  {
+    { "push{T|}", { cs } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_7 */
+  {
+    { "push{T|}", { ss } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_8 */
+  {
+    { "pop{T|}", { ss } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_9 */
+  {
+    { "push{T|}", { ds } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_10 */
+  {
+    { "pop{T|}", { ds } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_11 */
+  {
+    { "daa", { XX } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_12 */
+  {
+    { "das", { XX } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_13 */
+  {
+    { "aaa", { XX } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_14 */
+  {
+    { "aas", { XX } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_15 */
+  {
+    { "ins{R|}", { Yzr, indirDX } },
+    { "ins{G|}", { Yzr, indirDX } },
+  },
+
+  /* X86_64_16 */
+  {
+    { "outs{R|}", { indirDXr, Xz } },
+    { "outs{G|}", { indirDXr, Xz } },
+  },
+
+  /* X86_64_17 */
+  {
+    { "Jcall{T|}", { Ap } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_18 */
+  {
+    { "into", { XX } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_19 */
+  {
+    { "aam", { sIb } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_20 */
+  {
+    { "aad", { sIb } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_21 */
+  {
+    { "Jjmp{T|}", { Ap } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_22 */
+  {
+    { "sgdt{Q|IQ}", { M } },
+    { "sgdt", { M } },
+  },
+
+  /* X86_64_23 */
+  {
+    { "sidt{Q|IQ}", { M } },
+    { "sidt", { M } },
+  },
+
+  /* X86_64_24 */
+  {
+    { "lgdt{Q|Q}", { M } },
+    { "lgdt", { M } },
+  },
+
+  /* X86_64_25 */
+  {
+    { "lidt{Q|Q}", { M } },
+    { "lidt", { M } },
+  },
+
+  /* X86_64_26 */
+  {
+    { "lesS", { Gv, Mp } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_27 */
+  {
+    { "ldsS", { Gv, Mp } },
+    { "(bad)", { XX } },
   },
 };
 
@@ -4277,12 +4449,12 @@ static const struct dis386 opc_ext_table[][2] = {
   },
   {
     /* OPC_EXT_1 */
-    { "les{S|}",	{ Gv, Mp } },
+    { X86_64_26 },
     { "(bad)",		{ XX } },
   },
   {
     /* OPC_EXT_2 */
-    { "ldsS",		{ Gv, Mp } },
+    { X86_64_27 },
     { "(bad)",		{ XX } },
   },
   {
@@ -4302,17 +4474,17 @@ static const struct dis386 opc_ext_table[][2] = {
   },
   {
     /* OPC_EXT_6 */
-    { "sgdt{Q|IQ||}",	{ M } },
+    { X86_64_22 },
     { OPC_EXT_RM_0 },
   },
   {
     /* OPC_EXT_7 */
-    { "sidt{Q|IQ||}",	{ M } },
+    { X86_64_23 },
     { OPC_EXT_RM_1 },
   },
   {
     /* OPC_EXT_8 */
-    { "lgdt{Q|Q||}",	{ M } },
+    { X86_64_24 },
     { "(bad)",		{ XX } },
   },
   {
@@ -4467,7 +4639,7 @@ static const struct dis386 opc_ext_table[][2] = {
   },
   {
     /* OPC_EXT_39 */
-    { "lidt{Q|Q||}",	{ M } },
+    { X86_64_25 },
     { OPC_EXT_RM_6 },
   },
   {
@@ -5295,55 +5467,55 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
 static const char *float_mem[] = {
   /* d8 */
-  "fadd{s||s|}",
-  "fmul{s||s|}",
-  "fcom{s||s|}",
-  "fcomp{s||s|}",
-  "fsub{s||s|}",
-  "fsubr{s||s|}",
-  "fdiv{s||s|}",
-  "fdivr{s||s|}",
+  "fadd{s|}",
+  "fmul{s|}",
+  "fcom{s|}",
+  "fcomp{s|}",
+  "fsub{s|}",
+  "fsubr{s|}",
+  "fdiv{s|}",
+  "fdivr{s|}",
   /* d9 */
-  "fld{s||s|}",
+  "fld{s|}",
   "(bad)",
-  "fst{s||s|}",
-  "fstp{s||s|}",
+  "fst{s|}",
+  "fstp{s|}",
   "fldenvIC",
   "fldcw",
   "fNstenvIC",
   "fNstcw",
   /* da */
-  "fiadd{l||l|}",
-  "fimul{l||l|}",
-  "ficom{l||l|}",
-  "ficomp{l||l|}",
-  "fisub{l||l|}",
-  "fisubr{l||l|}",
-  "fidiv{l||l|}",
-  "fidivr{l||l|}",
+  "fiadd{l|}",
+  "fimul{l|}",
+  "ficom{l|}",
+  "ficomp{l|}",
+  "fisub{l|}",
+  "fisubr{l|}",
+  "fidiv{l|}",
+  "fidivr{l|}",
   /* db */
-  "fild{l||l|}",
-  "fisttp{l||l|}",
-  "fist{l||l|}",
-  "fistp{l||l|}",
+  "fild{l|}",
+  "fisttp{l|}",
+  "fist{l|}",
+  "fistp{l|}",
   "(bad)",
   "fld{t||t|}",
   "(bad)",
   "fstp{t||t|}",
   /* dc */
-  "fadd{l||l|}",
-  "fmul{l||l|}",
-  "fcom{l||l|}",
-  "fcomp{l||l|}",
-  "fsub{l||l|}",
-  "fsubr{l||l|}",
-  "fdiv{l||l|}",
-  "fdivr{l||l|}",
+  "fadd{l|}",
+  "fmul{l|}",
+  "fcom{l|}",
+  "fcomp{l|}",
+  "fsub{l|}",
+  "fsubr{l|}",
+  "fdiv{l|}",
+  "fdivr{l|}",
   /* dd */
-  "fld{l||l|}",
-  "fisttp{ll||ll|}",
-  "fst{l||l|}",
-  "fstp{l||l|}",
+  "fld{l|}",
+  "fisttp{ll|}",
+  "fst{l||}",
+  "fstp{l|}",
   "frstorIC",
   "(bad)",
   "fNsaveIC",
@@ -5363,9 +5535,9 @@ static const char *float_mem[] = {
   "fist",
   "fistp",
   "fbld",
-  "fild{ll||ll|}",
+  "fild{ll|}",
   "fbstp",
-  "fistp{ll||ll|}",
+  "fistp{ll|}",
 };
 
 static const unsigned char float_mem_mode[] = {
@@ -5695,24 +5867,10 @@ putop (const char *template, int sizeflag)
 	case '{':
 	  alt = 0;
 	  if (intel_syntax)
-	    alt += 1;
-	  if (address_mode == mode_64bit)
-	    alt += 2;
-	  while (alt != 0)
 	    {
 	      while (*++p != '|')
-		{
-		  if (*p == '}')
-		    {
-		      /* Alternative not valid.  */
-		      strcpy (obuf, "(bad)");
-		      obufp = obuf + 5;
-		      return 1;
-		    }
-		  else if (*p == '\0')
-		    abort ();
-		}
-	      alt--;
+		if (*p == '}' || *p == '\0')
+		  abort ();
 	    }
 	  /* Fall through.  */
 	case 'I':
