@@ -434,236 +434,243 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 
 #define FLOATCODE 1
 #define USE_GROUPS 2
-#define USE_PREFIX_USER_TABLE 3
-#define X86_64_SPECIAL 4
-#define IS_3BYTE_OPCODE 5
+#define USE_PREFIX_TABLE 3
+#define USE_X86_64_TABLE 4
+#define USE_3BYTE_TABLE 5
 #define USE_OPC_EXT_TABLE 6
 #define USE_OPC_EXT_RM_TABLE 7
 
 #define FLOAT	  NULL, { { NULL, FLOATCODE } }
 
-#define GRP1a	  NULL, { { NULL, USE_GROUPS }, { NULL,  0 } }
-#define GRP1b	  NULL, { { NULL, USE_GROUPS }, { NULL,  1 } }
-#define GRP1S	  NULL, { { NULL, USE_GROUPS }, { NULL,  2 } }
-#define GRP1Ss	  NULL, { { NULL, USE_GROUPS }, { NULL,  3 } }
-#define GRP2b	  NULL, { { NULL, USE_GROUPS }, { NULL,  4 } }
-#define GRP2S	  NULL, { { NULL, USE_GROUPS }, { NULL,  5 } }
-#define GRP2b_one NULL, { { NULL, USE_GROUPS }, { NULL,  6 } }
-#define GRP2S_one NULL, { { NULL, USE_GROUPS }, { NULL,  7 } }
-#define GRP2b_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  8 } }
-#define GRP2S_cl  NULL, { { NULL, USE_GROUPS }, { NULL,  9 } }
-#define GRP3b	  NULL, { { NULL, USE_GROUPS }, { NULL, 10 } }
-#define GRP3S	  NULL, { { NULL, USE_GROUPS }, { NULL, 11 } }
-#define GRP4	  NULL, { { NULL, USE_GROUPS }, { NULL, 12 } }
-#define GRP5	  NULL, { { NULL, USE_GROUPS }, { NULL, 13 } }
-#define GRP6	  NULL, { { NULL, USE_GROUPS }, { NULL, 14 } }
-#define GRP7	  NULL, { { NULL, USE_GROUPS }, { NULL, 15 } }
-#define GRP8	  NULL, { { NULL, USE_GROUPS }, { NULL, 16 } }
-#define GRP9	  NULL, { { NULL, USE_GROUPS }, { NULL, 17 } }
-#define GRP11_C6  NULL, { { NULL, USE_GROUPS }, { NULL, 18 } }
-#define GRP11_C7  NULL, { { NULL, USE_GROUPS }, { NULL, 19 } }
-#define GRP12	  NULL, { { NULL, USE_GROUPS }, { NULL, 20 } }
-#define GRP13	  NULL, { { NULL, USE_GROUPS }, { NULL, 21 } }
-#define GRP14	  NULL, { { NULL, USE_GROUPS }, { NULL, 22 } }
-#define GRP15	  NULL, { { NULL, USE_GROUPS }, { NULL, 23 } }
-#define GRP16	  NULL, { { NULL, USE_GROUPS }, { NULL, 24 } }
-#define GRPAMD	  NULL, { { NULL, USE_GROUPS }, { NULL, 25 } }
-#define GRPPADLCK1 NULL, { { NULL, USE_GROUPS }, { NULL, 26 } }
-#define GRPPADLCK2 NULL, { { NULL, USE_GROUPS }, { NULL, 27 } }
+#define DIS386(T, I)		NULL, { { NULL, (T)}, { NULL,  (I) } }
+#define GRP(I)			DIS386 (USE_GROUPS, (I))
+#define PREGRP(I)		DIS386 (USE_PREFIX_TABLE, (I))
+#define X86_64_TABLE(I)		DIS386 (USE_X86_64_TABLE, (I))
+#define THREE_BYTE_TABLE(I)	DIS386 (USE_3BYTE_TABLE, (I))
+#define OPC_EXT_TABLE(I)	DIS386 (USE_OPC_EXT_TABLE, (I))
+#define OPC_EXT_RM_TABLE(I)	DIS386 (USE_OPC_EXT_RM_TABLE, (I))
 
-#define PREGRP0   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  0 } }
-#define PREGRP1   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  1 } }
-#define PREGRP2   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  2 } }
-#define PREGRP3   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  3 } }
-#define PREGRP4   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  4 } }
-#define PREGRP5   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  5 } }
-#define PREGRP6   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  6 } }
-#define PREGRP7   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  7 } }
-#define PREGRP8   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  8 } }
-#define PREGRP9   NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL,  9 } }
-#define PREGRP10  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 10 } }
-#define PREGRP11  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 11 } }
-#define PREGRP12  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 12 } }
-#define PREGRP13  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 13 } }
-#define PREGRP14  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 14 } }
-#define PREGRP15  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 15 } }
-#define PREGRP16  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 16 } }
-#define PREGRP17  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 17 } }
-#define PREGRP18  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 18 } }
-#define PREGRP19  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 19 } }
-#define PREGRP20  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 20 } }
-#define PREGRP21  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 21 } }
-#define PREGRP22  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 22 } }
-#define PREGRP23  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 23 } }
-#define PREGRP24  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 24 } }
-#define PREGRP25  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 25 } }
-#define PREGRP26  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 26 } }
-#define PREGRP27  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 27 } }
-#define PREGRP28  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 28 } }
-#define PREGRP29  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 29 } }
-#define PREGRP30  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 30 } }
-#define PREGRP31  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 31 } }
-#define PREGRP32  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 32 } }
-#define PREGRP33  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 33 } }
-#define PREGRP34  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 34 } }
-#define PREGRP35  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 35 } }
-#define PREGRP36  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 36 } }
-#define PREGRP37  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 37 } }
-#define PREGRP38  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 38 } }
-#define PREGRP39  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 39 } }
-#define PREGRP40  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 40 } }
-#define PREGRP41  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 41 } }
-#define PREGRP42  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 42 } }
-#define PREGRP43  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 43 } }
-#define PREGRP44  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 44 } }
-#define PREGRP45  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 45 } }
-#define PREGRP46  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 46 } }
-#define PREGRP47  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 47 } }
-#define PREGRP48  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 48 } }
-#define PREGRP49  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 49 } }
-#define PREGRP50  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 50 } }
-#define PREGRP51  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 51 } }
-#define PREGRP52  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 52 } }
-#define PREGRP53  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 53 } }
-#define PREGRP54  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 54 } }
-#define PREGRP55  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 55 } }
-#define PREGRP56  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 56 } }
-#define PREGRP57  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 57 } }
-#define PREGRP58  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 58 } }
-#define PREGRP59  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 59 } }
-#define PREGRP60  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 60 } }
-#define PREGRP61  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 61 } }
-#define PREGRP62  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 62 } }
-#define PREGRP63  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 63 } }
-#define PREGRP64  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 64 } }
-#define PREGRP65  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 65 } }
-#define PREGRP66  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 66 } }
-#define PREGRP67  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 67 } }
-#define PREGRP68  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 68 } }
-#define PREGRP69  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 69 } }
-#define PREGRP70  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 70 } }
-#define PREGRP71  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 71 } }
-#define PREGRP72  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 72 } }
-#define PREGRP73  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 73 } }
-#define PREGRP74  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 74 } }
-#define PREGRP75  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 75 } }
-#define PREGRP76  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 76 } }
-#define PREGRP77  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 77 } }
-#define PREGRP78  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 78 } }
-#define PREGRP79  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 79 } }
-#define PREGRP80  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 80 } }
-#define PREGRP81  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 81 } }
-#define PREGRP82  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 82 } }
-#define PREGRP83  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 83 } }
-#define PREGRP84  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 84 } }
-#define PREGRP85  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 85 } }
-#define PREGRP86  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 86 } }
-#define PREGRP87  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 87 } }
-#define PREGRP88  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 88 } }
-#define PREGRP89  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 89 } }
-#define PREGRP90  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 90 } }
-#define PREGRP91  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 91 } }
-#define PREGRP92  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 92 } }
-#define PREGRP93  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 93 } }
-#define PREGRP94  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 94 } }
-#define PREGRP95  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 95 } }
-#define PREGRP96  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 96 } }
-#define PREGRP97  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 97 } }
-#define PREGRP98  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 98 } }
-#define PREGRP99  NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 99 } }
-#define PREGRP100 NULL, { { NULL, USE_PREFIX_USER_TABLE }, { NULL, 100 } }
+#define GRP_80			0
+#define GRP_81			(GRP_80 + 1)
+#define GRP_82			(GRP_81 + 1)
+#define GRP_8F			(GRP_82 + 1)
+#define GRP_C0			(GRP_8F + 1)
+#define GRP_C1			(GRP_C0 + 1)
+#define GRP_C6			(GRP_C1 + 1)
+#define GRP_C7			(GRP_C6 + 1)
+#define GRP_D0			(GRP_C7 + 1)
+#define GRP_D1			(GRP_D0 + 1)
+#define GRP_D2			(GRP_D1 + 1)
+#define GRP_D3			(GRP_D2 + 1)
+#define GRP_F6			(GRP_D3 + 1)
+#define GRP_F7			(GRP_F6 + 1)
+#define GRP_FE			(GRP_F7 + 1)
+#define GRP_FF			(GRP_FE + 1)
+#define GRP_0F00		(GRP_FF + 1)
+#define GRP_0F01		(GRP_0F00 + 1)
+#define GRP_0F0E		(GRP_0F01 + 1)
+#define GRP_0F18		(GRP_0F0E + 1)
+#define GRP_0F71		(GRP_0F18 + 1)
+#define GRP_0F72		(GRP_0F71 + 1)
+#define GRP_0F73		(GRP_0F72 + 1)
+#define GRP_0FA6		(GRP_0F73 + 1)
+#define GRP_0FA7		(GRP_0FA6 + 1)
+#define GRP_0FAE		(GRP_0FA7 + 1)
+#define GRP_0FBA		(GRP_0FAE + 1)
+#define GRP_0FC7		(GRP_0FBA + 1)
 
+#define PREGRP_90		0
+#define PREGRP_0F10		(PREGRP_90 + 1)
+#define PREGRP_0F11		(PREGRP_0F10 + 1)
+#define PREGRP_0F12		(PREGRP_0F11 + 1)
+#define PREGRP_0F16		(PREGRP_0F12 + 1)
+#define PREGRP_0F2A		(PREGRP_0F16 + 1)
+#define PREGRP_0F2B		(PREGRP_0F2A + 1)
+#define PREGRP_0F2C		(PREGRP_0F2B + 1)
+#define PREGRP_0F2D		(PREGRP_0F2C + 1)
+#define PREGRP_0F2E		(PREGRP_0F2D + 1)
+#define PREGRP_0F2F		(PREGRP_0F2E + 1)
+#define PREGRP_0F51		(PREGRP_0F2F + 1)
+#define PREGRP_0F52		(PREGRP_0F51 + 1)
+#define PREGRP_0F53		(PREGRP_0F52 + 1)
+#define PREGRP_0F58		(PREGRP_0F53 + 1)
+#define PREGRP_0F59		(PREGRP_0F58 + 1)
+#define PREGRP_0F5A		(PREGRP_0F59 + 1)
+#define PREGRP_0F5B		(PREGRP_0F5A + 1)
+#define PREGRP_0F5C		(PREGRP_0F5B + 1)
+#define PREGRP_0F5D		(PREGRP_0F5C + 1)
+#define PREGRP_0F5E		(PREGRP_0F5D + 1)
+#define PREGRP_0F5F		(PREGRP_0F5E + 1)
+#define PREGRP_0F60		(PREGRP_0F5F + 1)
+#define PREGRP_0F61		(PREGRP_0F60 + 1)
+#define PREGRP_0F62		(PREGRP_0F61 + 1)
+#define PREGRP_0F6C		(PREGRP_0F62 + 1)
+#define PREGRP_0F6D		(PREGRP_0F6C + 1)
+#define PREGRP_0F6F		(PREGRP_0F6D + 1)
+#define PREGRP_0F70		(PREGRP_0F6F + 1)
+#define PREGRP_0F78		(PREGRP_0F70 + 1)
+#define PREGRP_0F79		(PREGRP_0F78 + 1)
+#define PREGRP_0F7C		(PREGRP_0F79 + 1)
+#define PREGRP_0F7D		(PREGRP_0F7C + 1)
+#define PREGRP_0F7E		(PREGRP_0F7D + 1)
+#define PREGRP_0F7F		(PREGRP_0F7E + 1)
+#define PREGRP_0FB8		(PREGRP_0F7F + 1)
+#define PREGRP_0FBD		(PREGRP_0FB8 + 1)
+#define PREGRP_0FC2		(PREGRP_0FBD + 1)
+#define PREGRP_0FD0		(PREGRP_0FC2 + 1)
+#define PREGRP_0FD6		(PREGRP_0FD0 + 1)
+#define PREGRP_0FE6		(PREGRP_0FD6 + 1)
+#define PREGRP_0FE7		(PREGRP_0FE6 + 1)
+#define PREGRP_0FF0		(PREGRP_0FE7 + 1)
+#define PREGRP_0FF7		(PREGRP_0FF0 + 1)
+#define PREGRP_0F3810		(PREGRP_0FF7 + 1)
+#define PREGRP_0F3814		(PREGRP_0F3810 + 1)
+#define PREGRP_0F3815		(PREGRP_0F3814 + 1)
+#define PREGRP_0F3817		(PREGRP_0F3815 + 1)
+#define PREGRP_0F3820		(PREGRP_0F3817 + 1)
+#define PREGRP_0F3821		(PREGRP_0F3820 + 1)
+#define PREGRP_0F3822		(PREGRP_0F3821 + 1)
+#define PREGRP_0F3823		(PREGRP_0F3822 + 1)
+#define PREGRP_0F3824		(PREGRP_0F3823 + 1)
+#define PREGRP_0F3825		(PREGRP_0F3824 + 1)
+#define PREGRP_0F3828		(PREGRP_0F3825 + 1)
+#define PREGRP_0F3829		(PREGRP_0F3828 + 1)
+#define PREGRP_0F382A		(PREGRP_0F3829 + 1)
+#define PREGRP_0F382B		(PREGRP_0F382A + 1)
+#define PREGRP_0F3830		(PREGRP_0F382B + 1)
+#define PREGRP_0F3831		(PREGRP_0F3830 + 1)
+#define PREGRP_0F3832		(PREGRP_0F3831 + 1)
+#define PREGRP_0F3833		(PREGRP_0F3832 + 1)
+#define PREGRP_0F3834		(PREGRP_0F3833 + 1)
+#define PREGRP_0F3835		(PREGRP_0F3834 + 1)
+#define PREGRP_0F3837		(PREGRP_0F3835 + 1)
+#define PREGRP_0F3838		(PREGRP_0F3837 + 1)
+#define PREGRP_0F3839		(PREGRP_0F3838 + 1)
+#define PREGRP_0F383A		(PREGRP_0F3839 + 1)
+#define PREGRP_0F383B		(PREGRP_0F383A + 1)
+#define PREGRP_0F383C		(PREGRP_0F383B + 1)
+#define PREGRP_0F383D		(PREGRP_0F383C + 1)
+#define PREGRP_0F383E		(PREGRP_0F383D + 1)
+#define PREGRP_0F383F		(PREGRP_0F383E + 1)
+#define PREGRP_0F3840		(PREGRP_0F383F + 1)
+#define PREGRP_0F3841		(PREGRP_0F3840 + 1)
+#define PREGRP_0F38F0		(PREGRP_0F3841 + 1)
+#define PREGRP_0F38F1		(PREGRP_0F38F0 + 1)
+#define PREGRP_0F3A08		(PREGRP_0F38F1 + 1)
+#define PREGRP_0F3A09		(PREGRP_0F3A08 + 1)
+#define PREGRP_0F3A0A		(PREGRP_0F3A09 + 1)
+#define PREGRP_0F3A0B		(PREGRP_0F3A0A + 1)
+#define PREGRP_0F3A0C		(PREGRP_0F3A0B + 1)
+#define PREGRP_0F3A0D		(PREGRP_0F3A0C + 1)
+#define PREGRP_0F3A0E		(PREGRP_0F3A0D + 1)
+#define PREGRP_0F3A14		(PREGRP_0F3A0E + 1)
+#define PREGRP_0F3A15		(PREGRP_0F3A14 + 1)
+#define PREGRP_0F3A16		(PREGRP_0F3A15 + 1)
+#define PREGRP_0F3A17		(PREGRP_0F3A16 + 1)
+#define PREGRP_0F3A20		(PREGRP_0F3A17 + 1)
+#define PREGRP_0F3A21		(PREGRP_0F3A20 + 1)
+#define PREGRP_0F3A22		(PREGRP_0F3A21 + 1)
+#define PREGRP_0F3A40		(PREGRP_0F3A22 + 1)
+#define PREGRP_0F3A41		(PREGRP_0F3A40 + 1)
+#define PREGRP_0F3A42		(PREGRP_0F3A41 + 1)
+#define PREGRP_0F3A60		(PREGRP_0F3A42 + 1)
+#define PREGRP_0F3A61		(PREGRP_0F3A60 + 1)
+#define PREGRP_0F3A62		(PREGRP_0F3A61 + 1)
+#define PREGRP_0F3A63		(PREGRP_0F3A62 + 1)
+#define PREGRP_0F73_REG_3	(PREGRP_0F3A63 + 1)
+#define PREGRP_0F73_REG_7	(PREGRP_0F73_REG_3 + 1)
+#define PREGRP_0FC7_REG_6	(PREGRP_0F73_REG_7 + 1)
 
-#define X86_64_0  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 0 } }
-#define X86_64_1  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 1 } }
-#define X86_64_2  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 2 } }
-#define X86_64_3  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 3 } }
-#define X86_64_4  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 4 } }
-#define X86_64_5  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 5 } }
-#define X86_64_6  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 6 } }
-#define X86_64_7  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 7 } }
-#define X86_64_8  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 8 } }
-#define X86_64_9  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 9 } }
-#define X86_64_10  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 10 } }
-#define X86_64_11  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 11 } }
-#define X86_64_12  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 12 } }
-#define X86_64_13  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 13 } }
-#define X86_64_14  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 14 } }
-#define X86_64_15  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 15 } }
-#define X86_64_16  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 16 } }
-#define X86_64_17  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 17 } }
-#define X86_64_18  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 18 } }
-#define X86_64_19  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 19 } }
-#define X86_64_20  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 20 } }
-#define X86_64_21  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 21 } }
-#define X86_64_22  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 22 } }
-#define X86_64_23  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 23 } }
-#define X86_64_24  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 24 } }
-#define X86_64_25  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 25 } }
-#define X86_64_26  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 26 } }
-#define X86_64_27  NULL, { { NULL, X86_64_SPECIAL }, { NULL, 27 } }
+#define X86_64_06		0
+#define X86_64_07		(X86_64_06 + 1)
+#define X86_64_0D		(X86_64_07 + 1)
+#define X86_64_16		(X86_64_0D + 1)
+#define X86_64_17		(X86_64_16 + 1)
+#define X86_64_1E		(X86_64_17 + 1)
+#define X86_64_1F		(X86_64_1E + 1)
+#define X86_64_27		(X86_64_1F + 1)
+#define X86_64_2F		(X86_64_27 + 1)
+#define X86_64_37		(X86_64_2F + 1)
+#define X86_64_3F		(X86_64_37 + 1)
+#define X86_64_60		(X86_64_3F + 1)
+#define X86_64_61		(X86_64_60 + 1)
+#define X86_64_62		(X86_64_61 + 1)
+#define X86_64_63		(X86_64_62 + 1)
+#define X86_64_6D		(X86_64_63 + 1)
+#define X86_64_6F		(X86_64_6D + 1)
+#define X86_64_9A		(X86_64_6F + 1)
+#define X86_64_C4		(X86_64_9A + 1)
+#define X86_64_C5		(X86_64_C4 + 1)
+#define X86_64_CE		(X86_64_C5 + 1)
+#define X86_64_D4		(X86_64_CE + 1)
+#define X86_64_D5		(X86_64_D4 + 1)
+#define X86_64_EA		(X86_64_D5 + 1)
+#define X86_64_0F01_REG_0	(X86_64_EA + 1)
+#define X86_64_0F01_REG_1	(X86_64_0F01_REG_0 + 1)
+#define X86_64_0F01_REG_2	(X86_64_0F01_REG_1 + 1)
+#define X86_64_0F01_REG_3	(X86_64_0F01_REG_2 + 1)
 
-#define THREE_BYTE_0 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 0 } }
-#define THREE_BYTE_1 NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 1 } }
-#define THREE_BYTE_SSE5_0F24	NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 2 } }
-#define THREE_BYTE_SSE5_0F25	NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 3 } }
-#define THREE_BYTE_SSE5_0F7A	NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 4 } }
-#define THREE_BYTE_SSE5_0F7B	NULL, { { NULL, IS_3BYTE_OPCODE }, { NULL, 5 } }
+#define THREE_BYTE_0F24		0
+#define THREE_BYTE_0F25		(THREE_BYTE_0F24 + 1)
+#define THREE_BYTE_0F38		(THREE_BYTE_0F25 + 1)
+#define THREE_BYTE_0F3A		(THREE_BYTE_0F38 + 1)
+#define THREE_BYTE_0F7A		(THREE_BYTE_0F3A + 1)
+#define THREE_BYTE_0FBA		(THREE_BYTE_0F7A + 1)
 
-#define OPC_EXT_0  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 0 } }
-#define OPC_EXT_1  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 1 } }
-#define OPC_EXT_2  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 2 } }
-#define OPC_EXT_3  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 3 } }
-#define OPC_EXT_4  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 4 } }
-#define OPC_EXT_5  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 5 } }
-#define OPC_EXT_6  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 6 } }
-#define OPC_EXT_7  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 7 } }
-#define OPC_EXT_8  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 8 } }
-#define OPC_EXT_9  NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 9 } }
-#define OPC_EXT_10 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 10 } }
-#define OPC_EXT_11 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 11 } }
-#define OPC_EXT_12 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 12 } }
-#define OPC_EXT_13 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 13 } }
-#define OPC_EXT_14 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 14 } }
-#define OPC_EXT_15 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 15 } }
-#define OPC_EXT_16 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 16 } }
-#define OPC_EXT_17 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 17 } }
-#define OPC_EXT_18 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 18 } }
-#define OPC_EXT_19 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 19 } }
-#define OPC_EXT_20 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 20 } }
-#define OPC_EXT_21 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 21 } }
-#define OPC_EXT_22 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 22 } }
-#define OPC_EXT_23 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 23 } }
-#define OPC_EXT_24 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 24 } }
-#define OPC_EXT_25 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 25 } }
-#define OPC_EXT_26 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 26 } }
-#define OPC_EXT_27 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 27 } }
-#define OPC_EXT_28 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 28 } }
-#define OPC_EXT_29 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 29 } }
-#define OPC_EXT_30 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 30 } }
-#define OPC_EXT_31 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 31 } }
-#define OPC_EXT_32 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 32 } }
-#define OPC_EXT_33 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 33 } }
-#define OPC_EXT_34 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 34 } }
-#define OPC_EXT_35 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 35 } }
-#define OPC_EXT_36 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 36 } }
-#define OPC_EXT_37 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 37 } }
-#define OPC_EXT_38 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 38 } }
-#define OPC_EXT_39 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 39 } }
-#define OPC_EXT_40 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 40 } }
-#define OPC_EXT_41 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 41 } }
-#define OPC_EXT_42 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 42 } }
-#define OPC_EXT_43 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 43 } }
-#define OPC_EXT_44 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 44 } }
-#define OPC_EXT_45 NULL, { { NULL, USE_OPC_EXT_TABLE }, { NULL, 45 } }
+#define OPC_EXT_8D		0
+#define OPC_EXT_0F13		(OPC_EXT_8D + 1)
+#define OPC_EXT_0F17		(OPC_EXT_0F13 + 1)
+#define OPC_EXT_0F20		(OPC_EXT_0F17 + 1)
+#define OPC_EXT_0F21		(OPC_EXT_0F20 + 1)
+#define OPC_EXT_0F22		(OPC_EXT_0F21 + 1)
+#define OPC_EXT_0F23		(OPC_EXT_0F22 + 1)
+#define OPC_EXT_0F24		(OPC_EXT_0F23 + 1)
+#define OPC_EXT_0F26		(OPC_EXT_0F24 + 1)
+#define OPC_EXT_0FB2		(OPC_EXT_0F26 + 1)
+#define OPC_EXT_0FB4		(OPC_EXT_0FB2 + 1)
+#define OPC_EXT_0FB5		(OPC_EXT_0FB4 + 1)
+#define OPC_EXT_0F01_REG_0	(OPC_EXT_0FB5 + 1)
+#define OPC_EXT_0F01_REG_1	(OPC_EXT_0F01_REG_0 + 1)
+#define OPC_EXT_0F01_REG_2	(OPC_EXT_0F01_REG_1 + 1)
+#define OPC_EXT_0F01_REG_3	(OPC_EXT_0F01_REG_2 + 1)
+#define OPC_EXT_0F01_REG_7	(OPC_EXT_0F01_REG_3 + 1)
+#define OPC_EXT_0F18_REG_0	(OPC_EXT_0F01_REG_7 + 1)
+#define OPC_EXT_0F18_REG_1	(OPC_EXT_0F18_REG_0 + 1)
+#define OPC_EXT_0F18_REG_2	(OPC_EXT_0F18_REG_1 + 1)
+#define OPC_EXT_0F18_REG_3	(OPC_EXT_0F18_REG_2 + 1)
+#define OPC_EXT_0F71_REG_2	(OPC_EXT_0F18_REG_3 + 1)
+#define OPC_EXT_0F71_REG_4	(OPC_EXT_0F71_REG_2 + 1)
+#define OPC_EXT_0F71_REG_6	(OPC_EXT_0F71_REG_4 + 1)
+#define OPC_EXT_0F72_REG_2	(OPC_EXT_0F71_REG_6 + 1)
+#define OPC_EXT_0F72_REG_4	(OPC_EXT_0F72_REG_2 + 1)
+#define OPC_EXT_0F72_REG_6	(OPC_EXT_0F72_REG_4 + 1)
+#define OPC_EXT_0F73_REG_2	(OPC_EXT_0F72_REG_6 + 1)
+#define OPC_EXT_0F73_REG_3	(OPC_EXT_0F73_REG_2 + 1)
+#define OPC_EXT_0F73_REG_6	(OPC_EXT_0F73_REG_3 + 1)
+#define OPC_EXT_0F73_REG_7	(OPC_EXT_0F73_REG_6 + 1)
+#define OPC_EXT_0FAE_REG_0	(OPC_EXT_0F73_REG_7 + 1)
+#define OPC_EXT_0FAE_REG_1	(OPC_EXT_0FAE_REG_0 + 1)
+#define OPC_EXT_0FAE_REG_2	(OPC_EXT_0FAE_REG_1 + 1)
+#define OPC_EXT_0FAE_REG_3	(OPC_EXT_0FAE_REG_2 + 1)
+#define OPC_EXT_0FAE_REG_5	(OPC_EXT_0FAE_REG_3 + 1)
+#define OPC_EXT_0FAE_REG_6	(OPC_EXT_0FAE_REG_5 + 1)
+#define OPC_EXT_0FAE_REG_7	(OPC_EXT_0FAE_REG_6 + 1)
+#define OPC_EXT_0FC7_REG_6	(OPC_EXT_0FAE_REG_7 + 1)
+#define OPC_EXT_0FC7_REG_7	(OPC_EXT_0FC7_REG_6 + 1)
+#define OPC_EXT_0F12_PREFIX_0	(OPC_EXT_0FC7_REG_7 + 1)
+#define OPC_EXT_0F16_PREFIX_0	(OPC_EXT_0F12_PREFIX_0 + 1)
+#define OPC_EXT_0FF0_PREFIX_3	(OPC_EXT_0F16_PREFIX_0 + 1)
+#define OPC_EXT_62_32BIT	(OPC_EXT_0FF0_PREFIX_3 + 1)
+#define OPC_EXT_C4_32BIT	(OPC_EXT_62_32BIT + 1)
+#define OPC_EXT_C5_32BIT	(OPC_EXT_C4_32BIT + 1)
 
-#define OPC_EXT_RM_0  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 0 } }
-#define OPC_EXT_RM_1  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 1 } }
-#define OPC_EXT_RM_2  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 2 } }
-#define OPC_EXT_RM_3  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 3 } }
-#define OPC_EXT_RM_4  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 4 } }
-#define OPC_EXT_RM_5  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 5 } }
-#define OPC_EXT_RM_6  NULL, { { NULL, USE_OPC_EXT_RM_TABLE }, { NULL, 6 } }
+#define OPC_EXT_RM_0F01_REG_0	0
+#define OPC_EXT_RM_0F01_REG_1	(OPC_EXT_RM_0F01_REG_0 + 1)
+#define OPC_EXT_RM_0F01_REG_3	(OPC_EXT_RM_0F01_REG_1 + 1)
+#define OPC_EXT_RM_0F01_REG_7	(OPC_EXT_RM_0F01_REG_3 + 1)
+#define OPC_EXT_RM_0FAE_REG_5	(OPC_EXT_RM_0F01_REG_7 + 1)
+#define OPC_EXT_RM_0FAE_REG_6	(OPC_EXT_RM_0FAE_REG_5 + 1)
+#define OPC_EXT_RM_0FAE_REG_7	(OPC_EXT_RM_0FAE_REG_6 + 1)
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
 
@@ -722,8 +729,8 @@ static const struct dis386 dis386[] = {
   { "addS",		{ Gv, Ev } },
   { "addB",		{ AL, Ib } },
   { "addS",		{ eAX, Iv } },
-  { X86_64_4 },
-  { X86_64_5 },
+  { X86_64_TABLE (X86_64_06) },
+  { X86_64_TABLE (X86_64_07) },
   /* 08 */
   { "orB",		{ Eb, Gb } },
   { "orS",		{ Ev, Gv } },
@@ -731,7 +738,7 @@ static const struct dis386 dis386[] = {
   { "orS",		{ Gv, Ev } },
   { "orB",		{ AL, Ib } },
   { "orS",		{ eAX, Iv } },
-  { X86_64_6 },
+  { X86_64_TABLE (X86_64_0D) },
   { "(bad)",		{ XX } },	/* 0x0f extended opcode escape */
   /* 10 */
   { "adcB",		{ Eb, Gb } },
@@ -740,8 +747,8 @@ static const struct dis386 dis386[] = {
   { "adcS",		{ Gv, Ev } },
   { "adcB",		{ AL, Ib } },
   { "adcS",		{ eAX, Iv } },
-  { X86_64_7 },
-  { X86_64_8 },
+  { X86_64_TABLE (X86_64_16) },
+  { X86_64_TABLE (X86_64_17) },
   /* 18 */
   { "sbbB",		{ Eb, Gb } },
   { "sbbS",		{ Ev, Gv } },
@@ -749,8 +756,8 @@ static const struct dis386 dis386[] = {
   { "sbbS",		{ Gv, Ev } },
   { "sbbB",		{ AL, Ib } },
   { "sbbS",		{ eAX, Iv } },
-  { X86_64_9 },
-  { X86_64_10 },
+  { X86_64_TABLE (X86_64_1E) },
+  { X86_64_TABLE (X86_64_1F) },
   /* 20 */
   { "andB",		{ Eb, Gb } },
   { "andS",		{ Ev, Gv } },
@@ -759,7 +766,7 @@ static const struct dis386 dis386[] = {
   { "andB",		{ AL, Ib } },
   { "andS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG ES prefix */
-  { X86_64_11 },
+  { X86_64_TABLE (X86_64_27) },
   /* 28 */
   { "subB",		{ Eb, Gb } },
   { "subS",		{ Ev, Gv } },
@@ -768,7 +775,7 @@ static const struct dis386 dis386[] = {
   { "subB",		{ AL, Ib } },
   { "subS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG CS prefix */
-  { X86_64_12 },
+  { X86_64_TABLE (X86_64_2F) },
   /* 30 */
   { "xorB",		{ Eb, Gb } },
   { "xorS",		{ Ev, Gv } },
@@ -777,7 +784,7 @@ static const struct dis386 dis386[] = {
   { "xorB",		{ AL, Ib } },
   { "xorS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG SS prefix */
-  { X86_64_13 },
+  { X86_64_TABLE (X86_64_37) },
   /* 38 */
   { "cmpB",		{ Eb, Gb } },
   { "cmpS",		{ Ev, Gv } },
@@ -786,7 +793,7 @@ static const struct dis386 dis386[] = {
   { "cmpB",		{ AL, Ib } },
   { "cmpS",		{ eAX, Iv } },
   { "(bad)",		{ XX } },	/* SEG DS prefix */
-  { X86_64_14 },
+  { X86_64_TABLE (X86_64_3F) },
   /* 40 */
   { "inc{S|}",		{ RMeAX } },
   { "inc{S|}",		{ RMeCX } },
@@ -824,10 +831,10 @@ static const struct dis386 dis386[] = {
   { "popV",		{ RMrSI } },
   { "popV",		{ RMrDI } },
   /* 60 */
-  { X86_64_0 },
-  { X86_64_1 },
-  { X86_64_2 },
-  { X86_64_3 },
+  { X86_64_TABLE (X86_64_60) },
+  { X86_64_TABLE (X86_64_61) },
+  { X86_64_TABLE (X86_64_62) },
+  { X86_64_TABLE (X86_64_63) },
   { "(bad)",		{ XX } },	/* seg fs */
   { "(bad)",		{ XX } },	/* seg gs */
   { "(bad)",		{ XX } },	/* op size prefix */
@@ -838,9 +845,9 @@ static const struct dis386 dis386[] = {
   { "pushT",		{ sIb } },
   { "imulS",		{ Gv, Ev, sIb } },
   { "ins{b|}",		{ Ybr, indirDX } },
-  { X86_64_15 },
+  { X86_64_TABLE (X86_64_6D) },
   { "outs{b|}",		{ indirDXr, Xb } },
-  { X86_64_16 },
+  { X86_64_TABLE (X86_64_6F) },
   /* 70 */
   { "joH",		{ Jb, XX, cond_jump_flag } },
   { "jnoH",		{ Jb, XX, cond_jump_flag } },
@@ -860,10 +867,10 @@ static const struct dis386 dis386[] = {
   { "jleH",		{ Jb, XX, cond_jump_flag } },
   { "jgH",		{ Jb, XX, cond_jump_flag } },
   /* 80 */
-  { GRP1b },
-  { GRP1S },
+  { GRP (GRP_80) },
+  { GRP (GRP_81) },
   { "(bad)",		{ XX } },
-  { GRP1Ss },
+  { GRP (GRP_82) },
   { "testB",		{ Eb, Gb } },
   { "testS",		{ Ev, Gv } },
   { "xchgB",		{ Eb, Gb } },
@@ -874,11 +881,11 @@ static const struct dis386 dis386[] = {
   { "movB",		{ Gb, Eb } },
   { "movS",		{ Gv, Ev } },
   { "movD",		{ Sv, Sw } },
-  { OPC_EXT_0 },
+  { OPC_EXT_TABLE (OPC_EXT_8D) },
   { "movD",		{ Sw, Sv } },
-  { GRP1a },
+  { GRP (GRP_8F) },
   /* 90 */
-  { PREGRP38 },
+  { PREGRP (PREGRP_90) },
   { "xchgS",		{ RMeCX, eAX } },
   { "xchgS",		{ RMeDX, eAX } },
   { "xchgS",		{ RMeBX, eAX } },
@@ -889,7 +896,7 @@ static const struct dis386 dis386[] = {
   /* 98 */
   { "cW{t|}R",		{ XX } },
   { "cR{t|}O",		{ XX } },
-  { X86_64_17 },
+  { X86_64_TABLE (X86_64_9A) },
   { "(bad)",		{ XX } },	/* fwait */
   { "pushfT",		{ XX } },
   { "popfT",		{ XX } },
@@ -932,14 +939,14 @@ static const struct dis386 dis386[] = {
   { "movS",		{ RMeSI, Iv64 } },
   { "movS",		{ RMeDI, Iv64 } },
   /* c0 */
-  { GRP2b },
-  { GRP2S },
+  { GRP (GRP_C0) },
+  { GRP (GRP_C1) },
   { "retT",		{ Iw } },
   { "retT",		{ XX } },
-  { OPC_EXT_1 },
-  { X86_64_27 },
-  { GRP11_C6 },
-  { GRP11_C7 },
+  { X86_64_TABLE (X86_64_C4) },
+  { X86_64_TABLE (X86_64_C5) },
+  { GRP (GRP_C6) },
+  { GRP (GRP_C7) },
   /* c8 */
   { "enterT",		{ Iw, Ib } },
   { "leaveT",		{ XX } },
@@ -947,15 +954,15 @@ static const struct dis386 dis386[] = {
   { "lretP",		{ XX } },
   { "int3",		{ XX } },
   { "int",		{ Ib } },
-  { X86_64_18 },
+  { X86_64_TABLE (X86_64_CE) },
   { "iretP",		{ XX } },
   /* d0 */
-  { GRP2b_one },
-  { GRP2S_one },
-  { GRP2b_cl },
-  { GRP2S_cl },
-  { X86_64_19 },
-  { X86_64_20 },
+  { GRP (GRP_D0) },
+  { GRP (GRP_D1) },
+  { GRP (GRP_D2) },
+  { GRP (GRP_D3) },
+  { X86_64_TABLE (X86_64_D4) },
+  { X86_64_TABLE (X86_64_D5) },
   { "(bad)",		{ XX } },
   { "xlat",		{ DSBX } },
   /* d8 */
@@ -979,7 +986,7 @@ static const struct dis386 dis386[] = {
   /* e8 */
   { "callT",		{ Jv } },
   { "jmpT",		{ Jv } },
-  { X86_64_21 },
+  { X86_64_TABLE (X86_64_EA) },
   { "jmp",		{ Jb } },
   { "inB",		{ AL, indirDX } },
   { "inG",		{ zAX, indirDX } },
@@ -992,8 +999,8 @@ static const struct dis386 dis386[] = {
   { "(bad)",		{ XX } },	/* repz */
   { "hlt",		{ XX } },
   { "cmc",		{ XX } },
-  { GRP3b },
-  { GRP3S },
+  { GRP (GRP_F6) },
+  { GRP (GRP_F7) },
   /* f8 */
   { "clc",		{ XX } },
   { "stc",		{ XX } },
@@ -1001,14 +1008,14 @@ static const struct dis386 dis386[] = {
   { "sti",		{ XX } },
   { "cld",		{ XX } },
   { "std",		{ XX } },
-  { GRP4 },
-  { GRP5 },
+  { GRP (GRP_FE) },
+  { GRP (GRP_FF) },
 };
 
 static const struct dis386 dis386_twobyte[] = {
   /* 00 */
-  { GRP6 },
-  { GRP7 },
+  { GRP (GRP_0F00 ) },
+  { GRP (GRP_0F01 ) },
   { "larS",		{ Gv, Ew } },
   { "lslS",		{ Gv, Ew } },
   { "(bad)",		{ XX } },
@@ -1021,20 +1028,20 @@ static const struct dis386 dis386_twobyte[] = {
   { "(bad)",		{ XX } },
   { "ud2a",		{ XX } },
   { "(bad)",		{ XX } },
-  { GRPAMD },
+  { GRP (GRP_0F0E) },
   { "femms",		{ XX } },
   { "",			{ MX, EM, OPSUF } }, /* See OP_3DNowSuffix.  */
   /* 10 */
-  { PREGRP8 },
-  { PREGRP9 },
-  { PREGRP30 },
-  { OPC_EXT_34 },
+  { PREGRP (PREGRP_0F10) },
+  { PREGRP (PREGRP_0F11) },
+  { PREGRP (PREGRP_0F12) },
+  { OPC_EXT_TABLE (OPC_EXT_0F13) },
   { "unpcklpX",		{ XM, EXq } },
   { "unpckhpX",		{ XM, EXq } },
-  { PREGRP31 },
-  { OPC_EXT_35 },
+  { PREGRP (PREGRP_0F16) },
+  { OPC_EXT_TABLE (OPC_EXT_0F17) },
   /* 18 */
-  { GRP16 },
+  { GRP (GRP_0F18) },
   { "(bad)",		{ XX } },
   { "(bad)",		{ XX } },
   { "(bad)",		{ XX } },
@@ -1043,23 +1050,23 @@ static const struct dis386 dis386_twobyte[] = {
   { "(bad)",		{ XX } },
   { "nopQ",		{ Ev } },
   /* 20 */
-  { OPC_EXT_40 },
-  { OPC_EXT_41 },
-  { OPC_EXT_42 },
-  { OPC_EXT_43 },
-  { OPC_EXT_44 },
-  { THREE_BYTE_SSE5_0F25 },
-  { OPC_EXT_45 },
+  { OPC_EXT_TABLE (OPC_EXT_0F20) },
+  { OPC_EXT_TABLE (OPC_EXT_0F21) },
+  { OPC_EXT_TABLE (OPC_EXT_0F22) },
+  { OPC_EXT_TABLE (OPC_EXT_0F23) },
+  { OPC_EXT_TABLE (OPC_EXT_0F24) },
+  { THREE_BYTE_TABLE (THREE_BYTE_0F25) },
+  { OPC_EXT_TABLE (OPC_EXT_0F26) },
   { "(bad)",		{ XX } },
   /* 28 */
   { "movapX",		{ XM, EXx } },
   { "movapX",		{ EXx,  XM } },
-  { PREGRP2 },
-  { PREGRP33 },
-  { PREGRP4 },
-  { PREGRP3 },
-  { PREGRP93 },
-  { PREGRP94 },
+  { PREGRP (PREGRP_0F2A) },
+  { PREGRP (PREGRP_0F2B) },
+  { PREGRP (PREGRP_0F2C) },
+  { PREGRP (PREGRP_0F2D) },
+  { PREGRP (PREGRP_0F2E) },
+  { PREGRP (PREGRP_0F2F) },
   /* 30 */
   { "wrmsr",		{ XX } },
   { "rdtsc",		{ XX } },
@@ -1070,9 +1077,9 @@ static const struct dis386 dis386_twobyte[] = {
   { "(bad)",		{ XX } },
   { "(bad)",		{ XX } },
   /* 38 */
-  { THREE_BYTE_0 },
+  { THREE_BYTE_TABLE (THREE_BYTE_0F38) },
   { "(bad)",		{ XX } },
-  { THREE_BYTE_1 },
+  { THREE_BYTE_TABLE (THREE_BYTE_0F3A) },
   { "(bad)",		{ XX } },
   { "(bad)",		{ XX } },
   { "(bad)",		{ XX } },
@@ -1098,26 +1105,26 @@ static const struct dis386 dis386_twobyte[] = {
   { "cmovg",		{ Gv, Ev } },
   /* 50 */
   { "movmskpX",		{ Gdq, XS } },
-  { PREGRP13 },
-  { PREGRP12 },
-  { PREGRP11 },
+  { PREGRP (PREGRP_0F51) },
+  { PREGRP (PREGRP_0F52) },
+  { PREGRP (PREGRP_0F53) },
   { "andpX",		{ XM, EXx } },
   { "andnpX",		{ XM, EXx } },
   { "orpX",		{ XM, EXx } },
   { "xorpX",		{ XM, EXx } },
   /* 58 */
-  { PREGRP0 },
-  { PREGRP10 },
-  { PREGRP17 },
-  { PREGRP16 },
-  { PREGRP14 },
-  { PREGRP7 },
-  { PREGRP5 },
-  { PREGRP6 },
+  { PREGRP (PREGRP_0F58) },
+  { PREGRP (PREGRP_0F59) },
+  { PREGRP (PREGRP_0F5A) },
+  { PREGRP (PREGRP_0F5B) },
+  { PREGRP (PREGRP_0F5C) },
+  { PREGRP (PREGRP_0F5D) },
+  { PREGRP (PREGRP_0F5E) },
+  { PREGRP (PREGRP_0F5F) },
   /* 60 */
-  { PREGRP95 },
-  { PREGRP96 },
-  { PREGRP97 },
+  { PREGRP (PREGRP_0F60) },
+  { PREGRP (PREGRP_0F61) },
+  { PREGRP (PREGRP_0F62) },
   { "packsswb",		{ MX, EM } },
   { "pcmpgtb",		{ MX, EM } },
   { "pcmpgtw",		{ MX, EM } },
@@ -1128,28 +1135,28 @@ static const struct dis386 dis386_twobyte[] = {
   { "punpckhwd",	{ MX, EM } },
   { "punpckhdq",	{ MX, EM } },
   { "packssdw",		{ MX, EM } },
-  { PREGRP26 },
-  { PREGRP24 },
+  { PREGRP (PREGRP_0F6C) },
+  { PREGRP (PREGRP_0F6D) },
   { "movK",		{ MX, Edq } },
-  { PREGRP19 },
+  { PREGRP (PREGRP_0F6F) },
   /* 70 */
-  { PREGRP22 },
-  { GRP12 },
-  { GRP13 },
-  { GRP14 },
+  { PREGRP (PREGRP_0F70) },
+  { GRP (GRP_0F71) },
+  { GRP (GRP_0F72) },
+  { GRP (GRP_0F73) },
   { "pcmpeqb",		{ MX, EM } },
   { "pcmpeqw",		{ MX, EM } },
   { "pcmpeqd",		{ MX, EM } },
   { "emms",		{ XX } },
   /* 78 */
-  { PREGRP34 },
-  { PREGRP35 },
-  { THREE_BYTE_SSE5_0F7A },
-  { THREE_BYTE_SSE5_0F7B },
-  { PREGRP28 },
-  { PREGRP29 },
-  { PREGRP23 },
-  { PREGRP20 },
+  { PREGRP (PREGRP_0F78) },
+  { PREGRP (PREGRP_0F79) },
+  { THREE_BYTE_TABLE (THREE_BYTE_0F7A) },
+  { THREE_BYTE_TABLE (THREE_BYTE_0FBA) },
+  { PREGRP (PREGRP_0F7C) },
+  { PREGRP (PREGRP_0F7D) },
+  { PREGRP (PREGRP_0F7E) },
+  { PREGRP (PREGRP_0F7F) },
   /* 80 */
   { "joH",		{ Jv, XX, cond_jump_flag } },
   { "jnoH",		{ Jv, XX, cond_jump_flag } },
@@ -1193,8 +1200,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "btS",		{ Ev, Gv } },
   { "shldS",		{ Ev, Gv, Ib } },
   { "shldS",		{ Ev, Gv, CL } },
-  { GRPPADLCK2 },
-  { GRPPADLCK1 },
+  { GRP (GRP_0FA6) },
+  { GRP (GRP_0FA7) },
   /* a8 */
   { "pushT",		{ gs } },
   { "popT",		{ gs } },
@@ -1202,35 +1209,35 @@ static const struct dis386 dis386_twobyte[] = {
   { "btsS",		{ Ev, Gv } },
   { "shrdS",		{ Ev, Gv, Ib } },
   { "shrdS",		{ Ev, Gv, CL } },
-  { GRP15 },
+  { GRP (GRP_0FAE) },
   { "imulS",		{ Gv, Ev } },
   /* b0 */
   { "cmpxchgB",		{ Eb, Gb } },
   { "cmpxchgS",		{ Ev, Gv } },
-  { OPC_EXT_3 },
+  { OPC_EXT_TABLE (OPC_EXT_0FB2) },
   { "btrS",		{ Ev, Gv } },
-  { OPC_EXT_4 },
-  { OPC_EXT_5 },
+  { OPC_EXT_TABLE (OPC_EXT_0FB4) },
+  { OPC_EXT_TABLE (OPC_EXT_0FB5) },
   { "movz{bR|x}",	{ Gv, Eb } },
   { "movz{wR|x}",	{ Gv, Ew } }, /* yes, there really is movzww ! */
   /* b8 */
-  { PREGRP37 },
+  { PREGRP (PREGRP_0FB8) },
   { "ud2b",		{ XX } },
-  { GRP8 },
+  { GRP (GRP_0FBA) },
   { "btcS",		{ Ev, Gv } },
   { "bsfS",		{ Gv, Ev } },
-  { PREGRP36 },
+  { PREGRP (PREGRP_0FBD) },
   { "movs{bR|x}",	{ Gv, Eb } },
   { "movs{wR|x}",	{ Gv, Ew } }, /* yes, there really is movsww ! */
   /* c0 */
   { "xaddB",		{ Eb, Gb } },
   { "xaddS",		{ Ev, Gv } },
-  { PREGRP1 },
+  { PREGRP (PREGRP_0FC2) },
   { "movntiS",		{ Ev, Gv } },
   { "pinsrw",		{ MX, Edqw, Ib } },
   { "pextrw",		{ Gdq, MS, Ib } },
   { "shufpX",		{ XM, EXx, Ib } },
-  { GRP9 },
+  { GRP (GRP_0FC7) },
   /* c8 */
   { "bswap",		{ RMeAX } },
   { "bswap",		{ RMeCX } },
@@ -1241,13 +1248,13 @@ static const struct dis386 dis386_twobyte[] = {
   { "bswap",		{ RMeSI } },
   { "bswap",		{ RMeDI } },
   /* d0 */
-  { PREGRP27 },
+  { PREGRP (PREGRP_0FD0) },
   { "psrlw",		{ MX, EM } },
   { "psrld",		{ MX, EM } },
   { "psrlq",		{ MX, EM } },
   { "paddq",		{ MX, EM } },
   { "pmullw",		{ MX, EM } },
-  { PREGRP21 },
+  { PREGRP (PREGRP_0FD6) },
   { "pmovmskb",		{ Gdq, MS } },
   /* d8 */
   { "psubusb",		{ MX, EM } },
@@ -1265,8 +1272,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "pavgw",		{ MX, EM } },
   { "pmulhuw",		{ MX, EM } },
   { "pmulhw",		{ MX, EM } },
-  { PREGRP15 },
-  { PREGRP25 },
+  { PREGRP (PREGRP_0FE6) },
+  { PREGRP (PREGRP_0FE7) },
   /* e8 */
   { "psubsb",		{ MX, EM } },
   { "psubsw",		{ MX, EM } },
@@ -1277,14 +1284,14 @@ static const struct dis386 dis386_twobyte[] = {
   { "pmaxsw",		{ MX, EM } },
   { "pxor",		{ MX, EM } },
   /* f0 */
-  { PREGRP32 },
+  { PREGRP (PREGRP_0FF0) },
   { "psllw",		{ MX, EM } },
   { "pslld",		{ MX, EM } },
   { "psllq",		{ MX, EM } },
   { "pmuludq",		{ MX, EM } },
   { "pmaddwd",		{ MX, EM } },
   { "psadbw",		{ MX, EM } },
-  { PREGRP18 },
+  { PREGRP (PREGRP_0FF7) },
   /* f8 */
   { "psubb",		{ MX, EM } },
   { "psubw",		{ MX, EM } },
@@ -1435,18 +1442,7 @@ static const char *att_index16[] = {
 };
 
 static const struct dis386 grps[][8] = {
-  /* GRP1a */
-  {
-    { "popU",	{ stackEv } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-  },
-  /* GRP1b */
+  /* GRP_80 */
   {
     { "addA",	{ Eb, Ib } },
     { "orA",	{ Eb, Ib } },
@@ -1457,7 +1453,7 @@ static const struct dis386 grps[][8] = {
     { "xorA",	{ Eb, Ib } },
     { "cmpA",	{ Eb, Ib } },
   },
-  /* GRP1S */
+  /* GRP_81 */
   {
     { "addQ",	{ Ev, Iv } },
     { "orQ",	{ Ev, Iv } },
@@ -1468,7 +1464,7 @@ static const struct dis386 grps[][8] = {
     { "xorQ",	{ Ev, Iv } },
     { "cmpQ",	{ Ev, Iv } },
   },
-  /* GRP1Ss */
+  /* GRP_82 */
   {
     { "addQ",	{ Ev, sIb } },
     { "orQ",	{ Ev, sIb } },
@@ -1479,7 +1475,18 @@ static const struct dis386 grps[][8] = {
     { "xorQ",	{ Ev, sIb } },
     { "cmpQ",	{ Ev, sIb } },
   },
-  /* GRP2b */
+  /* GRP_8F */
+  {
+    { "popU",	{ stackEv } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+  },
+  /* GRP_C0 */
   {
     { "rolA",	{ Eb, Ib } },
     { "rorA",	{ Eb, Ib } },
@@ -1490,7 +1497,7 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	{ XX } },
     { "sarA",	{ Eb, Ib } },
   },
-  /* GRP2S */
+  /* GRP_C1 */
   {
     { "rolQ",	{ Ev, Ib } },
     { "rorQ",	{ Ev, Ib } },
@@ -1501,139 +1508,7 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	{ XX } },
     { "sarQ",	{ Ev, Ib } },
   },
-  /* GRP2b_one */
-  {
-    { "rolA",	{ Eb, I1 } },
-    { "rorA",	{ Eb, I1 } },
-    { "rclA",	{ Eb, I1 } },
-    { "rcrA",	{ Eb, I1 } },
-    { "shlA",	{ Eb, I1 } },
-    { "shrA",	{ Eb, I1 } },
-    { "(bad)",	{ XX } },
-    { "sarA",	{ Eb, I1 } },
-  },
-  /* GRP2S_one */
-  {
-    { "rolQ",	{ Ev, I1 } },
-    { "rorQ",	{ Ev, I1 } },
-    { "rclQ",	{ Ev, I1 } },
-    { "rcrQ",	{ Ev, I1 } },
-    { "shlQ",	{ Ev, I1 } },
-    { "shrQ",	{ Ev, I1 } },
-    { "(bad)",	{ XX } },
-    { "sarQ",	{ Ev, I1 } },
-  },
-  /* GRP2b_cl */
-  {
-    { "rolA",	{ Eb, CL } },
-    { "rorA",	{ Eb, CL } },
-    { "rclA",	{ Eb, CL } },
-    { "rcrA",	{ Eb, CL } },
-    { "shlA",	{ Eb, CL } },
-    { "shrA",	{ Eb, CL } },
-    { "(bad)",	{ XX } },
-    { "sarA",	{ Eb, CL } },
-  },
-  /* GRP2S_cl */
-  {
-    { "rolQ",	{ Ev, CL } },
-    { "rorQ",	{ Ev, CL } },
-    { "rclQ",	{ Ev, CL } },
-    { "rcrQ",	{ Ev, CL } },
-    { "shlQ",	{ Ev, CL } },
-    { "shrQ",	{ Ev, CL } },
-    { "(bad)",	{ XX } },
-    { "sarQ",	{ Ev, CL } },
-  },
-  /* GRP3b */
-  {
-    { "testA",	{ Eb, Ib } },
-    { "(bad)",	{ Eb } },
-    { "notA",	{ Eb } },
-    { "negA",	{ Eb } },
-    { "mulA",	{ Eb } },	/* Don't print the implicit %al register,  */
-    { "imulA",	{ Eb } },	/* to distinguish these opcodes from other */
-    { "divA",	{ Eb } },	/* mul/imul opcodes.  Do the same for div  */
-    { "idivA",	{ Eb } },	/* and idiv for consistency.		   */
-  },
-  /* GRP3S */
-  {
-    { "testQ",	{ Ev, Iv } },
-    { "(bad)",	{ XX } },
-    { "notQ",	{ Ev } },
-    { "negQ",	{ Ev } },
-    { "mulQ",	{ Ev } },	/* Don't print the implicit register.  */
-    { "imulQ",	{ Ev } },
-    { "divQ",	{ Ev } },
-    { "idivQ",	{ Ev } },
-  },
-  /* GRP4 */
-  {
-    { "incA",	{ Eb } },
-    { "decA",	{ Eb } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-  },
-  /* GRP5 */
-  {
-    { "incQ",	{ Ev } },
-    { "decQ",	{ Ev } },
-    { "callT",	{ indirEv } },
-    { "JcallT",	{ indirEp } },
-    { "jmpT",	{ indirEv } },
-    { "JjmpT",	{ indirEp } },
-    { "pushU",	{ stackEv } },
-    { "(bad)",	{ XX } },
-  },
-  /* GRP6 */
-  {
-    { "sldtD",	{ Sv } },
-    { "strD",	{ Sv } },
-    { "lldt",	{ Ew } },
-    { "ltr",	{ Ew } },
-    { "verr",	{ Ew } },
-    { "verw",	{ Ew } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-  },
-  /* GRP7 */
-  {
-    { OPC_EXT_6 },
-    { OPC_EXT_7 },
-    { OPC_EXT_8 },
-    { OPC_EXT_39 },
-    { "smswD",	{ Sv } },
-    { "(bad)",	{ XX } },
-    { "lmsw",	{ Ew } },
-    { OPC_EXT_38 },
-  },
-  /* GRP8 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "btQ",	{ Ev, Ib } },
-    { "btsQ",	{ Ev, Ib } },
-    { "btrQ",	{ Ev, Ib } },
-    { "btcQ",	{ Ev, Ib } },
-  },
-  /* GRP9 */
-  {
-    { "(bad)",	{ XX } },
-    { "cmpxchg8b", { { CMPXCHG8B_Fixup, q_mode } } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { OPC_EXT_9 },
-    { OPC_EXT_10 },
-  },
-  /* GRP11_C6 */
+  /* GRP_C6 */
   {
     { "movA",	{ Eb, Ib } },
     { "(bad)",	{ XX } },
@@ -1644,7 +1519,7 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
   },
-  /* GRP11_C7 */
+  /* GRP_C7 */
   {
     { "movQ",	{ Ev, Iv } },
     { "(bad)",	{ XX } },
@@ -1655,62 +1530,117 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	{ XX } },
     { "(bad)",  { XX } },
   },
-  /* GRP12 */
+  /* GRP_D0 */
   {
+    { "rolA",	{ Eb, I1 } },
+    { "rorA",	{ Eb, I1 } },
+    { "rclA",	{ Eb, I1 } },
+    { "rcrA",	{ Eb, I1 } },
+    { "shlA",	{ Eb, I1 } },
+    { "shrA",	{ Eb, I1 } },
+    { "(bad)",	{ XX } },
+    { "sarA",	{ Eb, I1 } },
+  },
+  /* GRP_D1 */
+  {
+    { "rolQ",	{ Ev, I1 } },
+    { "rorQ",	{ Ev, I1 } },
+    { "rclQ",	{ Ev, I1 } },
+    { "rcrQ",	{ Ev, I1 } },
+    { "shlQ",	{ Ev, I1 } },
+    { "shrQ",	{ Ev, I1 } },
+    { "(bad)",	{ XX } },
+    { "sarQ",	{ Ev, I1 } },
+  },
+  /* GRP_D2 */
+  {
+    { "rolA",	{ Eb, CL } },
+    { "rorA",	{ Eb, CL } },
+    { "rclA",	{ Eb, CL } },
+    { "rcrA",	{ Eb, CL } },
+    { "shlA",	{ Eb, CL } },
+    { "shrA",	{ Eb, CL } },
+    { "(bad)",	{ XX } },
+    { "sarA",	{ Eb, CL } },
+  },
+  /* GRP_D3 */
+  {
+    { "rolQ",	{ Ev, CL } },
+    { "rorQ",	{ Ev, CL } },
+    { "rclQ",	{ Ev, CL } },
+    { "rcrQ",	{ Ev, CL } },
+    { "shlQ",	{ Ev, CL } },
+    { "shrQ",	{ Ev, CL } },
+    { "(bad)",	{ XX } },
+    { "sarQ",	{ Ev, CL } },
+  },
+  /* GRP_F6 */
+  {
+    { "testA",	{ Eb, Ib } },
+    { "(bad)",	{ Eb } },
+    { "notA",	{ Eb } },
+    { "negA",	{ Eb } },
+    { "mulA",	{ Eb } },	/* Don't print the implicit %al register,  */
+    { "imulA",	{ Eb } },	/* to distinguish these opcodes from other */
+    { "divA",	{ Eb } },	/* mul/imul opcodes.  Do the same for div  */
+    { "idivA",	{ Eb } },	/* and idiv for consistency.		   */
+  },
+  /* GRP_F7 */
+  {
+    { "testQ",	{ Ev, Iv } },
+    { "(bad)",	{ XX } },
+    { "notQ",	{ Ev } },
+    { "negQ",	{ Ev } },
+    { "mulQ",	{ Ev } },	/* Don't print the implicit register.  */
+    { "imulQ",	{ Ev } },
+    { "divQ",	{ Ev } },
+    { "idivQ",	{ Ev } },
+  },
+  /* GRP_FE */
+  {
+    { "incA",	{ Eb } },
+    { "decA",	{ Eb } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { OPC_EXT_11 },
     { "(bad)",	{ XX } },
-    { OPC_EXT_12 },
     { "(bad)",	{ XX } },
-    { OPC_EXT_13 },
+    { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
   },
-  /* GRP13 */
+  /* GRP_FF */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { OPC_EXT_14 },
-    { "(bad)",	{ XX } },
-    { OPC_EXT_15 },
-    { "(bad)",	{ XX } },
-    { OPC_EXT_16 },
+    { "incQ",	{ Ev } },
+    { "decQ",	{ Ev } },
+    { "callT",	{ indirEv } },
+    { "JcallT",	{ indirEp } },
+    { "jmpT",	{ indirEv } },
+    { "JjmpT",	{ indirEp } },
+    { "pushU",	{ stackEv } },
     { "(bad)",	{ XX } },
   },
-  /* GRP14 */
+  /* GRP_0F00 */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { OPC_EXT_17 },
-    { OPC_EXT_18 },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { OPC_EXT_19 },
-    { OPC_EXT_20 },
-  },
-  /* GRP15 */
-  {
-    { OPC_EXT_21 },
-    { OPC_EXT_22 },
-    { OPC_EXT_23 },
-    { OPC_EXT_24 },
-    { "(bad)",	{ XX } },
-    { OPC_EXT_25 },
-    { OPC_EXT_26 },
-    { OPC_EXT_27 },
-  },
-  /* GRP16 */
-  {
-    { OPC_EXT_28 },
-    { OPC_EXT_29 },
-    { OPC_EXT_30 },
-    { OPC_EXT_31 },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
+    { "sldtD",	{ Sv } },
+    { "strD",	{ Sv } },
+    { "lldt",	{ Ew } },
+    { "ltr",	{ Ew } },
+    { "verr",	{ Ew } },
+    { "verw",	{ Ew } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
   },
-  /* GRPAMD */
+  /* GRP_0F01 */
+  {
+    { OPC_EXT_TABLE (OPC_EXT_0F01_REG_0) },
+    { OPC_EXT_TABLE (OPC_EXT_0F01_REG_1) },
+    { OPC_EXT_TABLE (OPC_EXT_0F01_REG_2) },
+    { OPC_EXT_TABLE (OPC_EXT_0F01_REG_3) },
+    { "smswD",	{ Sv } },
+    { "(bad)",	{ XX } },
+    { "lmsw",	{ Ew } },
+    { OPC_EXT_TABLE (OPC_EXT_0F01_REG_7) },
+  },
+  /* GRP_0F0E */
   {
     { "prefetch",	{ Eb } },
     { "prefetchw",	{ Eb } },
@@ -1721,7 +1651,62 @@ static const struct dis386 grps[][8] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
   },
-  /* GRPPADLCK1 */
+  /* GRP_0F18 */
+  {
+    { OPC_EXT_TABLE (OPC_EXT_0F18_REG_0) },
+    { OPC_EXT_TABLE (OPC_EXT_0F18_REG_1) },
+    { OPC_EXT_TABLE (OPC_EXT_0F18_REG_2) },
+    { OPC_EXT_TABLE (OPC_EXT_0F18_REG_3) },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+  },
+  /* GRP_0F71 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F71_REG_2) },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F71_REG_4) },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F71_REG_6) },
+    { "(bad)",	{ XX } },
+  },
+  /* GRP_0F72 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F72_REG_2) },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F72_REG_4) },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F72_REG_6) },
+    { "(bad)",	{ XX } },
+  },
+  /* GRP_0F73 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F73_REG_2) },
+    { OPC_EXT_TABLE (OPC_EXT_0F73_REG_3) },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F73_REG_6) },
+    { OPC_EXT_TABLE (OPC_EXT_0F73_REG_7) },
+  },
+  /* GRP_0FA6 */
+  {
+    { "montmul",	{ { OP_0f07, 0 } } },
+    { "xsha1",		{ { OP_0f07, 0 } } },
+    { "xsha256",	{ { OP_0f07, 0 } } },
+    { "(bad)",		{ { OP_0f07, 0 } } },
+    { "(bad)",		{ { OP_0f07, 0 } } },
+    { "(bad)",		{ { OP_0f07, 0 } } },
+    { "(bad)",		{ { OP_0f07, 0 } } },
+    { "(bad)",		{ { OP_0f07, 0 } } },
+  },
+  /* GRP_0FA7 */
   {
     { "xstore-rng",	{ { OP_0f07, 0 } } },
     { "xcrypt-ecb",	{ { OP_0f07, 0 } } },
@@ -1732,292 +1717,43 @@ static const struct dis386 grps[][8] = {
     { "(bad)",		{ { OP_0f07, 0 } } },
     { "(bad)",		{ { OP_0f07, 0 } } },
   },
-  /* GRPPADLCK2 */
+  /* GRP_0FAE */
   {
-    { "montmul",	{ { OP_0f07, 0 } } },
-    { "xsha1",		{ { OP_0f07, 0 } } },
-    { "xsha256",	{ { OP_0f07, 0 } } },
-    { "(bad)",		{ { OP_0f07, 0 } } },
-    { "(bad)",		{ { OP_0f07, 0 } } },
-    { "(bad)",		{ { OP_0f07, 0 } } },
-    { "(bad)",		{ { OP_0f07, 0 } } },
-    { "(bad)",		{ { OP_0f07, 0 } } },
-  }
+    { OPC_EXT_TABLE (OPC_EXT_0FAE_REG_0) },
+    { OPC_EXT_TABLE (OPC_EXT_0FAE_REG_1) },
+    { OPC_EXT_TABLE (OPC_EXT_0FAE_REG_2) },
+    { OPC_EXT_TABLE (OPC_EXT_0FAE_REG_3) },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0FAE_REG_5) },
+    { OPC_EXT_TABLE (OPC_EXT_0FAE_REG_6) },
+    { OPC_EXT_TABLE (OPC_EXT_0FAE_REG_7) },
+  },
+  /* GRP_0FBA */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "btQ",	{ Ev, Ib } },
+    { "btsQ",	{ Ev, Ib } },
+    { "btrQ",	{ Ev, Ib } },
+    { "btcQ",	{ Ev, Ib } },
+  },
+  /* GRP_0FC7 */
+  {
+    { "(bad)",	{ XX } },
+    { "cmpxchg8b", { { CMPXCHG8B_Fixup, q_mode } } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0FC7_REG_6) },
+    { OPC_EXT_TABLE (OPC_EXT_0FC7_REG_7) },
+  },
 };
 
 static const struct dis386 prefix_user_table[][4] = {
-  /* PREGRP0 */
-  {
-    { "addps", { XM, EXx } },
-    { "addss", { XM, EXd } },
-    { "addpd", { XM, EXx } },
-    { "addsd", { XM, EXq } },
-  },
-  /* PREGRP1 */
-  {
-    { "", { XM, EXx, OPSIMD } },	/* See OP_SIMD_SUFFIX.  */
-    { "", { XM, EXd, OPSIMD } },
-    { "", { XM, EXx, OPSIMD } },
-    { "", { XM, EXq, OPSIMD } },
-  },
-  /* PREGRP2 */
-  {
-    { "cvtpi2ps", { XM, EMCq } },
-    { "cvtsi2ssY", { XM, Ev } },
-    { "cvtpi2pd", { XM, EMCq } },
-    { "cvtsi2sdY", { XM, Ev } },
-  },
-  /* PREGRP3 */
-  {
-    { "cvtps2pi", { MXC, EXq } },
-    { "cvtss2siY", { Gv, EXd } },
-    { "cvtpd2pi", { MXC, EXx } },
-    { "cvtsd2siY", { Gv, EXq } },
-  },
-  /* PREGRP4 */
-  {
-    { "cvttps2pi", { MXC, EXq } },
-    { "cvttss2siY", { Gv, EXd } },
-    { "cvttpd2pi", { MXC, EXx } },
-    { "cvttsd2siY", { Gv, EXq } },
-  },
-  /* PREGRP5 */
-  {
-    { "divps",	{ XM, EXx } },
-    { "divss",	{ XM, EXd } },
-    { "divpd",	{ XM, EXx } },
-    { "divsd",	{ XM, EXq } },
-  },
-  /* PREGRP6 */
-  {
-    { "maxps",	{ XM, EXx } },
-    { "maxss",	{ XM, EXd } },
-    { "maxpd",	{ XM, EXx } },
-    { "maxsd",	{ XM, EXq } },
-  },
-  /* PREGRP7 */
-  {
-    { "minps",	{ XM, EXx } },
-    { "minss",	{ XM, EXd } },
-    { "minpd",	{ XM, EXx } },
-    { "minsd",	{ XM, EXq } },
-  },
-  /* PREGRP8 */
-  {
-    { "movups",	{ XM, EXx } },
-    { "movss",	{ XM, EXd } },
-    { "movupd",	{ XM, EXx } },
-    { "movsd",	{ XM, EXq } },
-  },
-  /* PREGRP9 */
-  {
-    { "movups",	{ EXx,  XM } },
-    { "movss",	{ EXd,  XM } },
-    { "movupd",	{ EXx,  XM } },
-    { "movsd",	{ EXq,  XM } },
-  },
-  /* PREGRP10 */
-  {
-    { "mulps",	{ XM, EXx } },
-    { "mulss",	{ XM, EXd } },
-    { "mulpd",	{ XM, EXx } },
-    { "mulsd",	{ XM, EXq } },
-  },
-  /* PREGRP11 */
-  {
-    { "rcpps",	{ XM, EXx } },
-    { "rcpss",	{ XM, EXd } },
-    { "(bad)",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
-  },
-  /* PREGRP12 */
-  {
-    { "rsqrtps",{ XM, EXx } },
-    { "rsqrtss",{ XM, EXd } },
-    { "(bad)",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
-  },
-  /* PREGRP13 */
-  {
-    { "sqrtps", { XM, EXx } },
-    { "sqrtss", { XM, EXd } },
-    { "sqrtpd", { XM, EXx } },
-    { "sqrtsd",	{ XM, EXq } },
-  },
-  /* PREGRP14 */
-  {
-    { "subps",	{ XM, EXx } },
-    { "subss",	{ XM, EXd } },
-    { "subpd",	{ XM, EXx } },
-    { "subsd",	{ XM, EXq } },
-  },
-  /* PREGRP15 */
-  {
-    { "(bad)",	{ XM, EXx } },
-    { "cvtdq2pd", { XM, EXq } },
-    { "cvttpd2dq", { XM, EXx } },
-    { "cvtpd2dq", { XM, EXx } },
-  },
-  /* PREGRP16 */
-  {
-    { "cvtdq2ps", { XM, EXx } },
-    { "cvttps2dq", { XM, EXx } },
-    { "cvtps2dq", { XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
-  },
-  /* PREGRP17 */
-  {
-    { "cvtps2pd", { XM, EXq } },
-    { "cvtss2sd", { XM, EXd } },
-    { "cvtpd2ps", { XM, EXx } },
-    { "cvtsd2ss", { XM, EXq } },
-  },
-  /* PREGRP18 */
-  {
-    { "maskmovq", { MX, MS } },
-    { "(bad)",	{ XM, EXx } },
-    { "maskmovdqu", { XM, XS } },
-    { "(bad)",	{ XM, EXx } },
-  },
-  /* PREGRP19 */
-  {
-    { "movq",	{ MX, EM } },
-    { "movdqu",	{ XM, EXx } },
-    { "movdqa",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
-  },
-  /* PREGRP20 */
-  {
-    { "movq",	{ EM, MX } },
-    { "movdqu",	{ EXx,  XM } },
-    { "movdqa",	{ EXx,  XM } },
-    { "(bad)",	{ EXx,  XM } },
-  },
-  /* PREGRP21 */
-  {
-    { "(bad)",	{ EXx,  XM } },
-    { "movq2dq",{ XM, MS } },
-    { "movq",	{ EXq, XM } },
-    { "movdq2q",{ MX, XS } },
-  },
-  /* PREGRP22 */
-  {
-    { "pshufw",	{ MX, EM, Ib } },
-    { "pshufhw",{ XM, EXx, Ib } },
-    { "pshufd",	{ XM, EXx, Ib } },
-    { "pshuflw",{ XM, EXx, Ib } },
-  },
-  /* PREGRP23 */
-  {
-    { "movK",	{ Edq, MX } },
-    { "movq",	{ XM, EXq } },
-    { "movK",	{ Edq, XM } },
-    { "(bad)",	{ Ed, XM } },
-  },
-  /* PREGRP24 */
-  {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
-    { "punpckhqdq", { XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
-  },
-  /* PREGRP25 */
-  {
-    { "movntq",	{ EM, MX } },
-    { "(bad)",	{ EM, XM } },
-    { "movntdq",{ EM, XM } },
-    { "(bad)",	{ EM, XM } },
-  },
-  /* PREGRP26 */
-  {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
-    { "punpcklqdq", { XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
-  },
-  /* PREGRP27 */
-  {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
-    { "addsubpd", { XM, EXx } },
-    { "addsubps", { XM, EXx } },
-  },
-  /* PREGRP28 */
-  {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
-    { "haddpd",	{ XM, EXx } },
-    { "haddps",	{ XM, EXx } },
-  },
-  /* PREGRP29 */
-  {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
-    { "hsubpd",	{ XM, EXx } },
-    { "hsubps",	{ XM, EXx } },
-  },
-  /* PREGRP30 */
-  {
-    { OPC_EXT_36 },
-    { "movsldup", { XM, EXx } },
-    { "movlpd",	{ XM, EXq } },
-    { "movddup", { XM, EXq } },
-  },
-  /* PREGRP31 */
-  {
-    { OPC_EXT_37 },
-    { "movshdup", { XM, EXx } },
-    { "movhpd",	{ XM, EXq } },
-    { "(bad)",	{ XM, EXq } },
-  },
-  /* PREGRP32 */
-  {
-    { "(bad)",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
-    { OPC_EXT_32 },
-  },
-  /* PREGRP33 */
-  {
-    {"movntps", { Ev, XM } },
-    {"movntss", { Ed, XM } },
-    {"movntpd", { Ev, XM } },
-    {"movntsd", { Eq, XM } },
-  },
-
-  /* PREGRP34 */
-  {
-    {"vmread",	{ Em, Gm } },
-    {"(bad)",	{ XX } },
-    {"extrq",	{ XS, Ib, Ib } },
-    {"insertq",	{ XM, XS, Ib, Ib } },
-  },
-
- /* PREGRP35 */
-  {
-    {"vmwrite",	{ Gm, Em } },
-    {"(bad)",	{ XX } },
-    {"extrq",	{ XM, XS } },
-    {"insertq",	{ XM, XS } },
-  },
-
-  /* PREGRP36 */
-  {
-    { "bsrS",	{ Gv, Ev } },
-    { "lzcntS",	{ Gv, Ev } },
-    { "bsrS",	{ Gv, Ev } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP37 */
-  {
-    { "(bad)", { XX } },
-    { "popcntS", { Gv, Ev } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-  },
-
-  /* PREGRP38 */
+  /* PREGRP_90 */
   {
     { "xchgS", { { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } } },
     { "pause", { XX } },
@@ -2025,439 +1761,71 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)", { XX } },
   },
 
-  /* PREGRP39 */
+  /* PREGRP_0F10 */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pblendvb", {XM, EXx, XMM0 } },
-    { "(bad)",	{ XX } },
+    { "movups",	{ XM, EXx } },
+    { "movss",	{ XM, EXd } },
+    { "movupd",	{ XM, EXx } },
+    { "movsd",	{ XM, EXq } },
   },
 
-  /* PREGRP40 */
+  /* PREGRP_0F11 */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "blendvps", {XM, EXx, XMM0 } },
-    { "(bad)",	{ XX } },
+    { "movups",	{ EXx,  XM } },
+    { "movss",	{ EXd,  XM } },
+    { "movupd",	{ EXx,  XM } },
+    { "movsd",	{ EXq,  XM } },
   },
 
-  /* PREGRP41 */
+  /* PREGRP_0F12 */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "blendvpd", { XM, EXx, XMM0 } },
-    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F12_PREFIX_0) },
+    { "movsldup", { XM, EXx } },
+    { "movlpd",	{ XM, EXq } },
+    { "movddup", { XM, EXq } },
   },
 
-  /* PREGRP42 */
+  /* PREGRP_0F16 */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "ptest",  { XM, EXx } },
-    { "(bad)",	{ XX } },
+    { OPC_EXT_TABLE (OPC_EXT_0F16_PREFIX_0) },
+    { "movshdup", { XM, EXx } },
+    { "movhpd",	{ XM, EXq } },
+    { "(bad)",	{ XM, EXq } },
   },
 
-  /* PREGRP43 */
+  /* PREGRP_0F2A */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovsxbw", { XM, EXq } },
-    { "(bad)",	{ XX } },
+    { "cvtpi2ps", { XM, EMCq } },
+    { "cvtsi2ssY", { XM, Ev } },
+    { "cvtpi2pd", { XM, EMCq } },
+    { "cvtsi2sdY", { XM, Ev } },
   },
 
-  /* PREGRP44 */
+  /* PREGRP_0F2B */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovsxbd", { XM, EXd } },
-    { "(bad)",	{ XX } },
+    {"movntps", { Ev, XM } },
+    {"movntss", { Ed, XM } },
+    {"movntpd", { Ev, XM } },
+    {"movntsd", { Eq, XM } },
   },
 
-  /* PREGRP45 */
+  /* PREGRP_0F2C */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovsxbq", { XM, EXw } },
-    { "(bad)",	{ XX } },
+    { "cvttps2pi", { MXC, EXq } },
+    { "cvttss2siY", { Gv, EXd } },
+    { "cvttpd2pi", { MXC, EXx } },
+    { "cvttsd2siY", { Gv, EXq } },
   },
 
-  /* PREGRP46 */
+  /* PREGRP_0F2D */
   {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovsxwd", { XM, EXq } },
-    { "(bad)",	{ XX } },
+    { "cvtps2pi", { MXC, EXq } },
+    { "cvtss2siY", { Gv, EXd } },
+    { "cvtpd2pi", { MXC, EXx } },
+    { "cvtsd2siY", { Gv, EXq } },
   },
 
-  /* PREGRP47 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovsxwq", { XM, EXd } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP48 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovsxdq", { XM, EXq } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP49 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmuldq", { XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP50 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pcmpeqq", { XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP51 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "movntdqa", { XM, EM } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP52 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "packusdw", { XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP53 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovzxbw", { XM, EXq } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP54 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovzxbd", { XM, EXd } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP55 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovzxbq", { XM, EXw } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP56 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovzxwd", { XM, EXq } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP57 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovzxwq", { XM, EXd } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP58 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmovzxdq", { XM, EXq } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP59 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pminsb",	{ XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP60 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pminsd",	{ XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP61 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pminuw",	{ XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP62 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pminud",	{ XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP63 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmaxsb",	{ XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP64 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmaxsd",	{ XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP65 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmaxuw", { XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP66 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmaxud", { XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP67 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pmulld", { XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP68 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "phminposuw", { XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP69 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "roundps", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP70 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "roundpd", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP71 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "roundss", { XM, EXd, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP72 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "roundsd", { XM, EXq, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP73 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "blendps", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP74 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "blendpd", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP75 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pblendw", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP76 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pextrb",	{ Edqb, XM, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP77 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pextrw",	{ Edqw, XM, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP78 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pextrK",	{ Edq, XM, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP79 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "extractps", { Edqd, XM, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP80 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pinsrb",	{ XM, Edqb, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP81 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "insertps", { XM, EXd, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP82 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pinsrK",	{ XM, Edq, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP83 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "dpps",	{ XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP84 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "dppd",	{ XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP85 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "mpsadbw", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP86 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pcmpgtq", { XM, EXx } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP87 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "crc32",	{ Gdq, { CRC32_Fixup, b_mode } } },	
-  },
-
-  /* PREGRP88 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "crc32",	{ Gdq, { CRC32_Fixup, v_mode } } },	
-  },
-
-  /* PREGRP89 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pcmpestrm", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP90 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pcmpestri", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP91 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pcmpistrm", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP92 */
-  {
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "pcmpistri", { XM, EXx, Ib } },
-    { "(bad)",	{ XX } },
-  },
-
-  /* PREGRP93 */
+  /* PREGRP_0F2E */
   {
     { "ucomiss",{ XM, EXd } }, 
     { "(bad)",	{ XX } },
@@ -2465,7 +1833,7 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
-  /* PREGRP94 */
+  /* PREGRP_0F2F */
   {
     { "comiss",	{ XM, EXd } },
     { "(bad)",	{ XX } },
@@ -2473,7 +1841,95 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
-  /* PREGRP95 */
+  /* PREGRP_0F51 */
+  {
+    { "sqrtps", { XM, EXx } },
+    { "sqrtss", { XM, EXd } },
+    { "sqrtpd", { XM, EXx } },
+    { "sqrtsd",	{ XM, EXq } },
+  },
+
+  /* PREGRP_0F52 */
+  {
+    { "rsqrtps",{ XM, EXx } },
+    { "rsqrtss",{ XM, EXd } },
+    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+  },
+
+  /* PREGRP_0F53 */
+  {
+    { "rcpps",	{ XM, EXx } },
+    { "rcpss",	{ XM, EXd } },
+    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+  },
+
+  /* PREGRP_0F58 */
+  {
+    { "addps", { XM, EXx } },
+    { "addss", { XM, EXd } },
+    { "addpd", { XM, EXx } },
+    { "addsd", { XM, EXq } },
+  },
+
+  /* PREGRP_0F59 */
+  {
+    { "mulps",	{ XM, EXx } },
+    { "mulss",	{ XM, EXd } },
+    { "mulpd",	{ XM, EXx } },
+    { "mulsd",	{ XM, EXq } },
+  },
+
+  /* PREGRP_0F5A */
+  {
+    { "cvtps2pd", { XM, EXq } },
+    { "cvtss2sd", { XM, EXd } },
+    { "cvtpd2ps", { XM, EXx } },
+    { "cvtsd2ss", { XM, EXq } },
+  },
+
+  /* PREGRP_0F5B */
+  {
+    { "cvtdq2ps", { XM, EXx } },
+    { "cvttps2dq", { XM, EXx } },
+    { "cvtps2dq", { XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+  },
+
+  /* PREGRP_0F5C */
+  {
+    { "subps",	{ XM, EXx } },
+    { "subss",	{ XM, EXd } },
+    { "subpd",	{ XM, EXx } },
+    { "subsd",	{ XM, EXq } },
+  },
+
+  /* PREGRP_0F5D */
+  {
+    { "minps",	{ XM, EXx } },
+    { "minss",	{ XM, EXd } },
+    { "minpd",	{ XM, EXx } },
+    { "minsd",	{ XM, EXq } },
+  },
+
+  /* PREGRP_0F5E */
+  {
+    { "divps",	{ XM, EXx } },
+    { "divss",	{ XM, EXd } },
+    { "divpd",	{ XM, EXx } },
+    { "divsd",	{ XM, EXq } },
+  },
+
+  /* PREGRP_0F5F */
+  {
+    { "maxps",	{ XM, EXx } },
+    { "maxss",	{ XM, EXd } },
+    { "maxpd",	{ XM, EXx } },
+    { "maxsd",	{ XM, EXq } },
+  },
+
+  /* PREGRP_0F60 */
   {
     { "punpcklbw",{ MX, EMd } },
     { "(bad)",	{ XX } },
@@ -2481,7 +1937,7 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
-  /* PREGRP96 */
+  /* PREGRP_0F61 */
   {
     { "punpcklwd",{ MX, EMd } },
     { "(bad)",	{ XX } },
@@ -2489,7 +1945,7 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
-  /* PREGRP97 */
+  /* PREGRP_0F62 */
   {
     { "punpckldq",{ MX, EMd } },
     { "(bad)",	{ XX } },
@@ -2497,15 +1953,591 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
-  /* PREGRP98 */
+  /* PREGRP_0F6C */
   {
-    { "vmptrld",{ Mq } },
-    { "vmxon",	{ Mq } },
-    { "vmclear",{ Mq } },
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "punpcklqdq", { XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+  },
+
+  /* PREGRP_0F6D */
+  {
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "punpckhqdq", { XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+  },
+
+  /* PREGRP_0F6F */
+  {
+    { "movq",	{ MX, EM } },
+    { "movdqu",	{ XM, EXx } },
+    { "movdqa",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+  },
+
+  /* PREGRP_0F70 */
+  {
+    { "pshufw",	{ MX, EM, Ib } },
+    { "pshufhw",{ XM, EXx, Ib } },
+    { "pshufd",	{ XM, EXx, Ib } },
+    { "pshuflw",{ XM, EXx, Ib } },
+  },
+
+  /* PREGRP_0F78 */
+  {
+    {"vmread",	{ Em, Gm } },
+    {"(bad)",	{ XX } },
+    {"extrq",	{ XS, Ib, Ib } },
+    {"insertq",	{ XM, XS, Ib, Ib } },
+  },
+
+  /* PREGRP_0F79 */
+  {
+    {"vmwrite",	{ Gm, Em } },
+    {"(bad)",	{ XX } },
+    {"extrq",	{ XM, XS } },
+    {"insertq",	{ XM, XS } },
+  },
+
+  /* PREGRP_0F7C */
+  {
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "haddpd",	{ XM, EXx } },
+    { "haddps",	{ XM, EXx } },
+  },
+
+  /* PREGRP_0F7D */
+  {
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "hsubpd",	{ XM, EXx } },
+    { "hsubps",	{ XM, EXx } },
+  },
+
+  /* PREGRP_0F7E */
+  {
+    { "movK",	{ Edq, MX } },
+    { "movq",	{ XM, EXq } },
+    { "movK",	{ Edq, XM } },
+    { "(bad)",	{ Ed, XM } },
+  },
+
+  /* PREGRP_0F7F */
+  {
+    { "movq",	{ EM, MX } },
+    { "movdqu",	{ EXx,  XM } },
+    { "movdqa",	{ EXx,  XM } },
+    { "(bad)",	{ EXx,  XM } },
+  },
+
+  /* PREGRP_0FB8 */
+  {
+    { "(bad)", { XX } },
+    { "popcntS", { Gv, Ev } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+  },
+
+  /* PREGRP_0FBD */
+  {
+    { "bsrS",	{ Gv, Ev } },
+    { "lzcntS",	{ Gv, Ev } },
+    { "bsrS",	{ Gv, Ev } },
     { "(bad)",	{ XX } },
   },
 
-  /* PREGRP99 */
+  /* PREGRP_0FC2 */
+  {
+    { "", { XM, EXx, OPSIMD } },	/* See OP_SIMD_SUFFIX.  */
+    { "", { XM, EXd, OPSIMD } },
+    { "", { XM, EXx, OPSIMD } },
+    { "", { XM, EXq, OPSIMD } },
+  },
+
+  /* PREGRP_0FD0 */
+  {
+    { "(bad)",	{ MX, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "addsubpd", { XM, EXx } },
+    { "addsubps", { XM, EXx } },
+  },
+
+  /* PREGRP_0FD6 */
+  {
+    { "(bad)",	{ EXx,  XM } },
+    { "movq2dq",{ XM, MS } },
+    { "movq",	{ EXq, XM } },
+    { "movdq2q",{ MX, XS } },
+  },
+
+  /* PREGRP_0FE6 */
+  {
+    { "(bad)",	{ XM, EXx } },
+    { "cvtdq2pd", { XM, EXq } },
+    { "cvttpd2dq", { XM, EXx } },
+    { "cvtpd2dq", { XM, EXx } },
+  },
+
+  /* PREGRP_0FE7 */
+  {
+    { "movntq",	{ EM, MX } },
+    { "(bad)",	{ EM, XM } },
+    { "movntdq",{ EM, XM } },
+    { "(bad)",	{ EM, XM } },
+  },
+
+  /* PREGRP_0FF0 */
+  {
+    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XM, EXx } },
+    { OPC_EXT_TABLE (OPC_EXT_0FF0_PREFIX_3) },
+  },
+
+  /* PREGRP_0FF7 */
+  {
+    { "maskmovq", { MX, MS } },
+    { "(bad)",	{ XM, EXx } },
+    { "maskmovdqu", { XM, XS } },
+    { "(bad)",	{ XM, EXx } },
+  },
+
+  /* PREGRP_0F3810 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pblendvb", {XM, EXx, XMM0 } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3814 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "blendvps", {XM, EXx, XMM0 } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3815 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "blendvpd", { XM, EXx, XMM0 } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3817 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "ptest",  { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3820 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxbw", { XM, EXq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3821 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxbd", { XM, EXd } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3822 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxbq", { XM, EXw } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3823 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxwd", { XM, EXq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3824 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxwq", { XM, EXd } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3825 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovsxdq", { XM, EXq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3828 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmuldq", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3829 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpeqq", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F382A */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "movntdqa", { XM, EM } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F382B */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "packusdw", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3830 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxbw", { XM, EXq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3831 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxbd", { XM, EXd } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3832 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxbq", { XM, EXw } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3833 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxwd", { XM, EXq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3834 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxwq", { XM, EXd } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3835 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmovzxdq", { XM, EXq } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3837 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpgtq", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3838 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pminsb",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3839 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pminsd",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F383A */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pminuw",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F383B */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pminud",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F383C */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmaxsb",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F383D */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmaxsd",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F383E */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmaxuw", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F383F */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmaxud", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3840 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pmulld", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3841 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "phminposuw", { XM, EXx } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F38F0 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "crc32",	{ Gdq, { CRC32_Fixup, b_mode } } },	
+  },
+
+  /* PREGRP_0F38F1 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "crc32",	{ Gdq, { CRC32_Fixup, v_mode } } },	
+  },
+
+  /* PREGRP_0F3A08 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "roundps", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A09 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "roundpd", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A0A */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "roundss", { XM, EXd, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A0B */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "roundsd", { XM, EXq, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A0C */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "blendps", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A0D */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "blendpd", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A0E */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pblendw", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A14 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pextrb",	{ Edqb, XM, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A15 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pextrw",	{ Edqw, XM, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A16 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pextrK",	{ Edq, XM, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A17 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "extractps", { Edqd, XM, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A20 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pinsrb",	{ XM, Edqb, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A21 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "insertps", { XM, EXd, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A22 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pinsrK",	{ XM, Edq, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A40 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "dpps",	{ XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A41 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "dppd",	{ XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A42 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "mpsadbw", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A60 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpestrm", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A61 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpestri", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A62 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpistrm", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F3A63 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "pcmpistri", { XM, EXx, Ib } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREGRP_0F73_REG_3 */
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
@@ -2513,769 +2545,195 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
-  /* PREGRP100 */
+  /* PREGRP_0F73_REG_7 */
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
     { "pslldq",	{ MS, Ib } },
     { "(bad)",	{ XX } },
   },
+
+  /*PREGRP_0FC7_REG_6 */
+  {
+    { "vmptrld",{ Mq } },
+    { "vmxon",	{ Mq } },
+    { "vmclear",{ Mq } },
+    { "(bad)",	{ XX } },
+  },
 };
 
 static const struct dis386 x86_64_table[][2] = {
-  /* X86_64_0 */
-  {
-    { "pusha{P|}", { XX } },
-    { "(bad)", { XX } },
-  },
-
-  /* X86_64_1 */
-  {
-    { "popa{P|}", { XX } },
-    { "(bad)", { XX } },
-  },
-
-  /* X86_64_2 */
-  {
-    { OPC_EXT_33 },
-    { "(bad)", { XX } },
-  },
-
-  /* X86_64_3 */
-  {
-    { "arpl", { Ew, Gw } },
-    { "movs{lq|xd}", { Gv, Ed } },
-  },
-
-  /* X86_64_4 */
+  /* X86_64_06 */
   {
     { "push{T|}", { es } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_5 */
+  /* X86_64_07 */
   {
     { "pop{T|}", { es } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_6 */
+  /* X86_64_0D */
   {
     { "push{T|}", { cs } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_7 */
+  /* X86_64_16 */
   {
     { "push{T|}", { ss } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_8 */
+  /* X86_64_17 */
   {
     { "pop{T|}", { ss } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_9 */
+  /* X86_64_1E */
   {
     { "push{T|}", { ds } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_10 */
+  /* X86_64_1F */
   {
     { "pop{T|}", { ds } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_11 */
+  /* X86_64_27 */
   {
     { "daa", { XX } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_12 */
+  /* X86_64_2F */
   {
     { "das", { XX } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_13 */
+  /* X86_64_37 */
   {
     { "aaa", { XX } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_14 */
+  /* X86_64_3F */
   {
     { "aas", { XX } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_15 */
+  /* X86_64_60 */
+  {
+    { "pusha{P|}", { XX } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_61 */
+  {
+    { "popa{P|}", { XX } },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_62 */
+  {
+    { OPC_EXT_TABLE (OPC_EXT_62_32BIT) },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_63 */
+  {
+    { "arpl", { Ew, Gw } },
+    { "movs{lq|xd}", { Gv, Ed } },
+  },
+
+  /* X86_64_6D */
   {
     { "ins{R|}", { Yzr, indirDX } },
     { "ins{G|}", { Yzr, indirDX } },
   },
 
-  /* X86_64_16 */
+  /* X86_64_6F */
   {
     { "outs{R|}", { indirDXr, Xz } },
     { "outs{G|}", { indirDXr, Xz } },
   },
 
-  /* X86_64_17 */
+  /* X86_64_9A */
   {
     { "Jcall{T|}", { Ap } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_18 */
+  /* X86_64_C4 */
+  {
+    { OPC_EXT_TABLE (OPC_EXT_C4_32BIT) },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_C5 */
+  {
+    { OPC_EXT_TABLE (OPC_EXT_C5_32BIT) },
+    { "(bad)", { XX } },
+  },
+
+  /* X86_64_CE */
   {
     { "into", { XX } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_19 */
+  /* X86_64_D4 */
   {
     { "aam", { sIb } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_20 */
+  /* X86_64_D5 */
   {
     { "aad", { sIb } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_21 */
+  /* X86_64_EA */
   {
     { "Jjmp{T|}", { Ap } },
     { "(bad)", { XX } },
   },
 
-  /* X86_64_22 */
+  /* X86_64_0F01_REG_0 */
   {
     { "sgdt{Q|IQ}", { M } },
     { "sgdt", { M } },
   },
 
-  /* X86_64_23 */
+  /* X86_64_0F01_REG_1 */
   {
     { "sidt{Q|IQ}", { M } },
     { "sidt", { M } },
   },
 
-  /* X86_64_24 */
+  /* X86_64_0F01_REG_2 */
   {
     { "lgdt{Q|Q}", { M } },
     { "lgdt", { M } },
   },
 
-  /* X86_64_25 */
+  /* X86_64_0F01_REG_3 */
   {
     { "lidt{Q|Q}", { M } },
     { "lidt", { M } },
   },
-
-  /* X86_64_26 */
-  {
-    { "lesS", { Gv, Mp } },
-    { "(bad)", { XX } },
-  },
-
-  /* X86_64_27 */
-  {
-    { OPC_EXT_2 },
-    { "(bad)", { XX } },
-  },
 };
 
 static const struct dis386 three_byte_table[][256] = {
-  /* THREE_BYTE_0 */
-  {
-    /* 00 */
-    { "pshufb", { MX, EM } },
-    { "phaddw", { MX, EM } },
-    { "phaddd",	{ MX, EM } },
-    { "phaddsw", { MX, EM } },
-    { "pmaddubsw", { MX, EM } },
-    { "phsubw", { MX, EM } },
-    { "phsubd", { MX, EM } },
-    { "phsubsw", { MX, EM } },
-    /* 08 */
-    { "psignb", { MX, EM } },
-    { "psignw", { MX, EM } },
-    { "psignd", { MX, EM } },
-    { "pmulhrsw", { MX, EM } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 10 */
-    { PREGRP39 },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { PREGRP40 },
-    { PREGRP41 },
-    { "(bad)", { XX } },
-    { PREGRP42 },
-    /* 18 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "pabsb", { MX, EM } },
-    { "pabsw", { MX, EM } },
-    { "pabsd", { MX, EM } },
-    { "(bad)", { XX } },
-    /* 20 */
-    { PREGRP43 },
-    { PREGRP44 },
-    { PREGRP45 },
-    { PREGRP46 },
-    { PREGRP47 },
-    { PREGRP48 },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 28 */
-    { PREGRP49 },
-    { PREGRP50 },
-    { PREGRP51 },
-    { PREGRP52 },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 30 */
-    { PREGRP53 },
-    { PREGRP54 },
-    { PREGRP55 },
-    { PREGRP56 },
-    { PREGRP57 },
-    { PREGRP58 },
-    { "(bad)", { XX } },
-    { PREGRP86 },
-    /* 38 */
-    { PREGRP59 },
-    { PREGRP60 },
-    { PREGRP61 },
-    { PREGRP62 },
-    { PREGRP63 },
-    { PREGRP64 },
-    { PREGRP65 },
-    { PREGRP66 },
-    /* 40 */
-    { PREGRP67 },
-    { PREGRP68 },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 48 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 50 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 58 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 60 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 68 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 70 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 78 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 80 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 88 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 90 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 98 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* a0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* a8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* b0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* b8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* c0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* c8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* d0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* d8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* e0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* e8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* f0 */
-    { PREGRP87 },
-    { PREGRP88 },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* f8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-  },
-  /* THREE_BYTE_1 */
-  {
-    /* 00 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 08 */
-    { PREGRP69 },
-    { PREGRP70 },
-    { PREGRP71 },
-    { PREGRP72 },
-    { PREGRP73 },
-    { PREGRP74 },
-    { PREGRP75 },
-    { "palignr", { MX, EM, Ib } },
-    /* 10 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { PREGRP76 },
-    { PREGRP77 },
-    { PREGRP78 },
-    { PREGRP79 },
-    /* 18 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 20 */
-    { PREGRP80 },
-    { PREGRP81 },
-    { PREGRP82 },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 28 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 30 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 38 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 40 */
-    { PREGRP83 },
-    { PREGRP84 },
-    { PREGRP85 },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 48 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 50 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 58 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 60 */
-    { PREGRP89 },
-    { PREGRP90 },
-    { PREGRP91 },
-    { PREGRP92 },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 68 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 70 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 78 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 80 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 88 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 90 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* 98 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* a0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* a8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* b0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* b8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* c0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* c8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* d0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* d8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* e0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* e8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* f0 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    /* f8 */
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-    { "(bad)", { XX } },
-  },
-  /* THREE_BYTE_SSE5_0F24 */
+  /* THREE_BYTE_0F24 */
   {
     /* 00 */
     { "fmaddps",	{ { OP_DREX4, q_mode } } },
@@ -3566,7 +3024,7 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
   },
-  /* THREE_BYTE_SSE5_0F25 */
+  /* THREE_BYTE_0F25 */
   {
     /* 00 */
     { "(bad)",		{ XX } },
@@ -3856,6 +3314,588 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
+  },
+  /* THREE_BYTE_0F38 */
+  {
+    /* 00 */
+    { "pshufb", { MX, EM } },
+    { "phaddw", { MX, EM } },
+    { "phaddd",	{ MX, EM } },
+    { "phaddsw", { MX, EM } },
+    { "pmaddubsw", { MX, EM } },
+    { "phsubw", { MX, EM } },
+    { "phsubd", { MX, EM } },
+    { "phsubsw", { MX, EM } },
+    /* 08 */
+    { "psignb", { MX, EM } },
+    { "psignw", { MX, EM } },
+    { "psignd", { MX, EM } },
+    { "pmulhrsw", { MX, EM } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 10 */
+    { PREGRP (PREGRP_0F3810) },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { PREGRP (PREGRP_0F3814) },
+    { PREGRP (PREGRP_0F3815) },
+    { "(bad)", { XX } },
+    { PREGRP (PREGRP_0F3817) },
+    /* 18 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "pabsb", { MX, EM } },
+    { "pabsw", { MX, EM } },
+    { "pabsd", { MX, EM } },
+    { "(bad)", { XX } },
+    /* 20 */
+    { PREGRP (PREGRP_0F3820) },
+    { PREGRP (PREGRP_0F3821) },
+    { PREGRP (PREGRP_0F3822) },
+    { PREGRP (PREGRP_0F3823) },
+    { PREGRP (PREGRP_0F3824) },
+    { PREGRP (PREGRP_0F3825) },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 28 */
+    { PREGRP (PREGRP_0F3828) },
+    { PREGRP (PREGRP_0F3829) },
+    { PREGRP (PREGRP_0F382A) },
+    { PREGRP (PREGRP_0F382B) },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 30 */
+    { PREGRP (PREGRP_0F3830) },
+    { PREGRP (PREGRP_0F3831) },
+    { PREGRP (PREGRP_0F3832) },
+    { PREGRP (PREGRP_0F3833) },
+    { PREGRP (PREGRP_0F3834) },
+    { PREGRP (PREGRP_0F3835) },
+    { "(bad)", { XX } },
+    { PREGRP (PREGRP_0F3837) },
+    /* 38 */
+    { PREGRP (PREGRP_0F3838) },
+    { PREGRP (PREGRP_0F3839) },
+    { PREGRP (PREGRP_0F383A) },
+    { PREGRP (PREGRP_0F383B) },
+    { PREGRP (PREGRP_0F383C) },
+    { PREGRP (PREGRP_0F383D) },
+    { PREGRP (PREGRP_0F383E) },
+    { PREGRP (PREGRP_0F383F) },
+    /* 40 */
+    { PREGRP (PREGRP_0F3840) },
+    { PREGRP (PREGRP_0F3841) },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 48 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 50 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 58 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 60 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 68 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 70 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 78 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 80 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 88 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 90 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 98 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* a0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* a8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* b0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* b8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* c0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* c8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* d0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* d8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* e0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* e8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* f0 */
+    { PREGRP (PREGRP_0F38F0) },
+    { PREGRP (PREGRP_0F38F1) },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* f8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+  },
+  /* THREE_BYTE_0F3A */
+  {
+    /* 00 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 08 */
+    { PREGRP (PREGRP_0F3A08) },
+    { PREGRP (PREGRP_0F3A09) },
+    { PREGRP (PREGRP_0F3A0A) },
+    { PREGRP (PREGRP_0F3A0B) },
+    { PREGRP (PREGRP_0F3A0C) },
+    { PREGRP (PREGRP_0F3A0D) },
+    { PREGRP (PREGRP_0F3A0E) },
+    { "palignr", { MX, EM, Ib } },
+    /* 10 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { PREGRP (PREGRP_0F3A14) },
+    { PREGRP (PREGRP_0F3A15) },
+    { PREGRP (PREGRP_0F3A16) },
+    { PREGRP (PREGRP_0F3A17) },
+    /* 18 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 20 */
+    { PREGRP (PREGRP_0F3A20) },
+    { PREGRP (PREGRP_0F3A21) },
+    { PREGRP (PREGRP_0F3A22) },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 28 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 30 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 38 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 40 */
+    { PREGRP (PREGRP_0F3A40) },
+    { PREGRP (PREGRP_0F3A41) },
+    { PREGRP (PREGRP_0F3A42) },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 48 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 50 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 58 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 60 */
+    { PREGRP (PREGRP_0F3A60) },
+    { PREGRP (PREGRP_0F3A61) },
+    { PREGRP (PREGRP_0F3A62) },
+    { PREGRP (PREGRP_0F3A63) },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 68 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 70 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 78 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 80 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 88 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 90 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* 98 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* a0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* a8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* b0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* b8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* c0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* c8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* d0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* d8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* e0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* e8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* f0 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    /* f8 */
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
+    { "(bad)", { XX } },
   },
   /* THREE_BYTE_SSE5_0F7A */
   {
@@ -4443,240 +4483,240 @@ static const struct dis386 three_byte_table[][256] = {
 
 static const struct dis386 opc_ext_table[][2] = {
   {
-    /* OPC_EXT_0 */
+    /* OPC_EXT_8D */
     { "leaS",		{ Gv, M } },
     { "(bad)",		{ XX } },
   },
   {
-    /* OPC_EXT_1 */
-    { X86_64_26 },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_2 */
-    { "ldsS",		{ Gv, Mp } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_3 */
-    { "lssS",		{ Gv, Mp } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_4 */
-    { "lfsS",		{ Gv, Mp } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_5 */
-    { "lgsS",		{ Gv, Mp } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_6 */
-    { X86_64_22 },
-    { OPC_EXT_RM_0 },
-  },
-  {
-    /* OPC_EXT_7 */
-    { X86_64_23 },
-    { OPC_EXT_RM_1 },
-  },
-  {
-    /* OPC_EXT_8 */
-    { X86_64_24 },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_9 */
-    { PREGRP98 },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_10 */
-    { "vmptrst",	{ Mq } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_11 */
-    { "(bad)",		{ XX } },
-    { "psrlw",		{ MS, Ib } },
-  },
-  {
-    /* OPC_EXT_12 */
-    { "(bad)",		{ XX } },
-    { "psraw",		{ MS, Ib } },
-  },
-  {
-    /* OPC_EXT_13 */
-    { "(bad)",		{ XX } },
-    { "psllw",		{ MS, Ib } },
-  },
-  {
-    /* OPC_EXT_14 */
-    { "(bad)",		{ XX } },
-    { "psrld",		{ MS, Ib } },
-  },
-  {
-    /* OPC_EXT_15 */
-    { "(bad)",		{ XX } },
-    { "psrad",		{ MS, Ib } },
-  },
-  {
-    /* OPC_EXT_16 */
-    { "(bad)",		{ XX } },
-    { "pslld",		{ MS, Ib } },
-  },
-  {
-    /* OPC_EXT_17 */
-    { "(bad)",		{ XX } },
-    { "psrlq",		{ MS, Ib } },
-  },
-  {
-    /* OPC_EXT_18 */
-    { "(bad)",		{ XX } },
-    { PREGRP99 },
-  },
-  {
-    /* OPC_EXT_19 */
-    { "(bad)",		{ XX } },
-    { "psllq",		{ MS, Ib } },
-  },
-  {
-    /* OPC_EXT_20 */
-    { "(bad)",		{ XX } },
-    { PREGRP100 },
-  },
-  {
-    /* OPC_EXT_21 */
-    { "fxsave",		{ M } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_22 */
-    { "fxrstor",	{ M } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_23 */
-    { "ldmxcsr",	{ Md } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_24 */
-    { "stmxcsr",	{ Md } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_25 */
-    { "(bad)",		{ XX } },
-    { OPC_EXT_RM_2 },
-  },
-  {
-    /* OPC_EXT_26 */
-    { "(bad)",		{ XX } },
-    { OPC_EXT_RM_3 },
-  },
-  {
-    /* OPC_EXT_27 */
-    { "clflush",	{ Mb } },
-    { OPC_EXT_RM_4 },
-  },
-  {
-    /* OPC_EXT_28 */
-    { "prefetchnta",	{ Mb } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_29 */
-    { "prefetcht0",	{ Mb } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_30 */
-    { "prefetcht1",	{ Mb } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_31 */
-    { "prefetcht2",	{ Mb } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_32 */
-    { "lddqu",		{ XM, M } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_33 */
-    { "bound{S|}",	{ Gv, Ma } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_34 */
+    /* OPC_EXT_0F13 */
     { "movlpX",		{ EXq, XM } },
     { "(bad)",		{ XX } },
   },
   {
-    /* OPC_EXT_35 */
+    /* OPC_EXT_0F17 */
     { "movhpX",		{ EXq, XM } },
     { "(bad)",		{ XX } },
   },
   {
-    /* OPC_EXT_36 */
-    { "movlpX",		{ XM, EXq } },
-    { "movhlpX",	{ XM, EXq } },
-  },
-  {
-    /* OPC_EXT_37 */
-    { "movhpX",		{ XM, EXq } },
-    { "movlhpX",	{ XM, EXq } },
-  },
-  {
-    /* OPC_EXT_38 */
-    { "invlpg",		{ Mb } },
-    { OPC_EXT_RM_5 },
-  },
-  {
-    /* OPC_EXT_39 */
-    { X86_64_25 },
-    { OPC_EXT_RM_6 },
-  },
-  {
-    /* OPC_EXT_40 */
+    /* OPC_EXT_0F20 */
     { "(bad)",		{ XX } },
     { "movZ",		{ Rm, Cm } },
   },
   {
-    /* OPC_EXT_41 */
+    /* OPC_EXT_0F21 */
     { "(bad)",		{ XX } },
     { "movZ",		{ Rm, Dm } },
   },
   {
-    /* OPC_EXT_42 */
+    /* OPC_EXT_0F22 */
     { "(bad)",		{ XX } },
     { "movZ",		{ Cm, Rm } },
   },
   {
-    /* OPC_EXT_43 */
+    /* OPC_EXT_0F23 */
     { "(bad)",		{ XX } },
     { "movZ",		{ Dm, Rm } },
   },
   {
-    /* OPC_EXT_44 */
-    { THREE_BYTE_SSE5_0F24 },
+    /* OPC_EXT_0F24 */
+    { THREE_BYTE_TABLE (THREE_BYTE_0F24) },
     { "movL",		{ Rd, Td } },
   },
   {
-    /* OPC_EXT_45 */
+    /* OPC_EXT_0F26 */
     { "(bad)",		{ XX } },
     { "movL",		{ Td, Rd } },
+  },
+  {
+    /* OPC_EXT_0FB2 */
+    { "lssS",		{ Gv, Mp } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0FB4 */
+    { "lfsS",		{ Gv, Mp } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0FB5 */
+    { "lgsS",		{ Gv, Mp } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0F01_REG_0 */
+    { X86_64_TABLE (X86_64_0F01_REG_0) },
+    { OPC_EXT_RM_TABLE (OPC_EXT_RM_0F01_REG_0) },
+  },
+  {
+    /* OPC_EXT_0F01_REG_1 */
+    { X86_64_TABLE (X86_64_0F01_REG_1) },
+    { OPC_EXT_RM_TABLE (OPC_EXT_RM_0F01_REG_1) },
+  },
+  {
+    /* OPC_EXT_0F01_REG_2 */
+    { X86_64_TABLE (X86_64_0F01_REG_2) },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0F01_REG_3 */
+    { X86_64_TABLE (X86_64_0F01_REG_3) },
+    { OPC_EXT_RM_TABLE (OPC_EXT_RM_0F01_REG_3) },
+  },
+  {
+    /* OPC_EXT_0F01_REG_7 */
+    { "invlpg",		{ Mb } },
+    { OPC_EXT_RM_TABLE (OPC_EXT_RM_0F01_REG_7) },
+  },
+  {
+    /* OPC_EXT_0F18_REG_0 */
+    { "prefetchnta",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0F18_REG_1 */
+    { "prefetcht0",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0F18_REG_2 */
+    { "prefetcht1",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0F18_REG_3 */
+    { "prefetcht2",	{ Mb } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0F71_REG_2 */
+    { "(bad)",		{ XX } },
+    { "psrlw",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_0F71_REG_4 */
+    { "(bad)",		{ XX } },
+    { "psraw",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_0F71_REG_6 */
+    { "(bad)",		{ XX } },
+    { "psllw",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_0F72_REG_2 */
+    { "(bad)",		{ XX } },
+    { "psrld",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_0F72_REG_4 */
+    { "(bad)",		{ XX } },
+    { "psrad",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_0F72_REG_6 */
+    { "(bad)",		{ XX } },
+    { "pslld",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_0F73_REG_2 */
+    { "(bad)",		{ XX } },
+    { "psrlq",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_0F73_REG_3 */
+    { "(bad)",		{ XX } },
+    { PREGRP (PREGRP_0F73_REG_3) },
+  },
+  {
+    /* OPC_EXT_0F73_REG_6 */
+    { "(bad)",		{ XX } },
+    { "psllq",		{ MS, Ib } },
+  },
+  {
+    /* OPC_EXT_0F73_REG_7 */
+    { "(bad)",		{ XX } },
+    { PREGRP (PREGRP_0F73_REG_7) },
+  },
+  {
+    /* OPC_EXT_0FAE_REG_0 */
+    { "fxsave",		{ M } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0FAE_REG_1 */
+    { "fxrstor",	{ M } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0FAE_REG_2 */
+    { "ldmxcsr",	{ Md } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0FAE_REG_3 */
+    { "stmxcsr",	{ Md } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0FAE_REG_5 */
+    { "(bad)",		{ XX } },
+    { OPC_EXT_RM_TABLE (OPC_EXT_RM_0FAE_REG_5) },
+  },
+  {
+    /* OPC_EXT_0FAE_REG_6 */
+    { "(bad)",		{ XX } },
+    { OPC_EXT_RM_TABLE (OPC_EXT_RM_0FAE_REG_6) },
+  },
+  {
+    /* OPC_EXT_0FAE_REG_7 */
+    { "clflush",	{ Mb } },
+    { OPC_EXT_RM_TABLE (OPC_EXT_RM_0FAE_REG_7) },
+  },
+  {
+    /* OPC_EXT_0FC7_REG_6 */
+    { PREGRP (PREGRP_0FC7_REG_6) },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0FC7_REG_7 */
+    { "vmptrst",	{ Mq } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_0F12_PREFIX_0 */
+    { "movlpX",		{ XM, EXq } },
+    { "movhlpX",	{ XM, EXq } },
+  },
+  {
+    /* OPC_EXT_0F16_PREFIX_0 */
+    { "movhpX",		{ XM, EXq } },
+    { "movlhpX",	{ XM, EXq } },
+  },
+  {
+    /* OPC_EXT_0FF0_PREFIX_3 */
+    { "lddqu",		{ XM, M } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_62_32BIT */
+    { "bound{S|}",	{ Gv, Ma } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_C4_32BIT */
+    { "lesS",		{ Gv, Mp } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_C5_32BIT */
+    { "ldsS",		{ Gv, Mp } },
+    { "(bad)",		{ XX } },
   },
 };
 
 static const struct dis386 opc_ext_rm_table[][8] = {
   {
-    /* OPC_EXT_RM_0 */
+    /* OPC_EXT_RM_0F01_REG_0 */
     { "(bad)",		{ XX } },
     { "vmcall",		{ Skip_MODRM } },
     { "vmlaunch",	{ Skip_MODRM } },
@@ -4687,7 +4727,7 @@ static const struct dis386 opc_ext_rm_table[][8] = {
     { "(bad)",		{ XX } },
   },
   {
-    /* OPC_EXT_RM_1 */
+    /* OPC_EXT_RM_0F01_REG_1 */
     { "monitor",	{ { OP_Monitor, 0 } } },
     { "mwait",		{ { OP_Mwait, 0 } } },
     { "(bad)",		{ XX } },
@@ -4698,40 +4738,18 @@ static const struct dis386 opc_ext_rm_table[][8] = {
     { "(bad)",		{ XX } },
   },
   {
-    /* OPC_EXT_RM_2 */
-    { "lfence",		{ Skip_MODRM } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    /* OPC_EXT_RM_0F01_REG_3 */
+    { "vmrun",		{ Skip_MODRM } },
+    { "vmmcall",	{ Skip_MODRM } },
+    { "vmload",		{ Skip_MODRM } },
+    { "vmsave",		{ Skip_MODRM } },
+    { "stgi",		{ Skip_MODRM } },
+    { "clgi",		{ Skip_MODRM } },
+    { "skinit",		{ Skip_MODRM } },
+    { "invlpga",	{ Skip_MODRM } },
   },
   {
-    /* OPC_EXT_RM_3 */
-    { "mfence",		{ Skip_MODRM } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_RM_4 */
-    { "sfence",		{ Skip_MODRM } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-  },
-  {
-    /* OPC_EXT_RM_5 */
+    /* OPC_EXT_RM_0F01_REG_7 */
     { "swapgs",		{ Skip_MODRM } },
     { "rdtscp",		{ Skip_MODRM } },
     { "(bad)",		{ XX } },
@@ -4742,15 +4760,37 @@ static const struct dis386 opc_ext_rm_table[][8] = {
     { "(bad)",		{ XX } },
   },
   {
-    /* OPC_EXT_RM_6 */
-    { "vmrun",		{ Skip_MODRM } },
-    { "vmmcall",	{ Skip_MODRM } },
-    { "vmload",		{ Skip_MODRM } },
-    { "vmsave",		{ Skip_MODRM } },
-    { "stgi",		{ Skip_MODRM } },
-    { "clgi",		{ Skip_MODRM } },
-    { "skinit",		{ Skip_MODRM } },
-    { "invlpga",	{ Skip_MODRM } },
+    /* OPC_EXT_RM_0FAE_REG_5 */
+    { "lfence",		{ Skip_MODRM } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_RM_0FAE_REG_6 */
+    { "mfence",		{ Skip_MODRM } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* OPC_EXT_RM_0FAE_REG_7 */
+    { "sfence",		{ Skip_MODRM } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
   },
 };
 
@@ -5014,7 +5054,7 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       dp = &grps[dp->op[1].bytemode][modrm.reg];
       break;
 
-    case USE_PREFIX_USER_TABLE:
+    case USE_PREFIX_TABLE:
       index = 0;
       used_prefixes |= (prefixes & PREFIX_REPZ);
       if (prefixes & PREFIX_REPZ)
@@ -5045,12 +5085,12 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       dp = &prefix_user_table[dp->op[1].bytemode][index];
       break;
 
-    case X86_64_SPECIAL:
+    case USE_X86_64_TABLE:
       index = address_mode == mode_64bit ? 1 : 0;
       dp = &x86_64_table[dp->op[1].bytemode][index];
       break;
 
-    case IS_3BYTE_OPCODE:
+    case USE_3BYTE_TABLE:
       FETCH_DATA (info, codep + 2);
       index = *codep++;
       dp = &three_byte_table[dp->op[1].bytemode][index];

@@ -1,3 +1,40 @@
+2007-09-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* 386-dis.c (USE_PREFIX_USER_TABLE): Renamed to ...
+	(USE_PREFIX_TABLE): This.
+	(X86_64_SPECIAL): Renamed to ...
+	(USE_X86_64_TABLE): This.
+	(IS_3BYTE_OPCODE): Renamed to ...
+	(USE_3BYTE_TABLE): This.
+	(GRPXXX): Removed.
+	(PREGRPXXX): Likewise.
+	(X86_64_XXX): Likewise.
+	(THREE_BYTE_XXX): Likewise.
+	(OPC_EXT_XXX): Likewise.
+	(OPC_EXT_RM_XXX): Likewise.
+	(DIS386): New.
+	(GRP): Likewise.
+	(PREGRP): Likewise.
+	(X86_64_TABLE): Likewise.
+	(THREE_BYTE_TABLE): Likewise.
+	(OPC_EXT_TABLE): Likewise.
+	(OPC_EXT_RM_TABLE): Likewise.
+	(GRP_XXX): Likewise.
+	(PREGRP_XXX): Likewise.
+	(X86_64_XXX): Likewise.
+	(THREE_BYTE_XXX): Likewise.
+	(OPC_EXT_XXX): Likewise.
+	(OPC_EXT_RM_XXX): Likewise.
+	(dis386): Updated.
+	(dis386_twobyte): Likewise.
+	(grps): Likewise.
+	(prefix_user_table): Likewise.
+	(x86_64_table): Likewise.
+	(three_byte_table): Likewise.
+	(opc_ext_table): Likewise.
+	(opc_ext_rm_table): Likewise.
+	(get_valid_dis386): Likewise.
+
 2007-09-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (dis386): Swap X86_64_27 with OPC_EXT_2.
