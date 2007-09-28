@@ -5628,7 +5628,7 @@ _frvfdpic_check_discarded_relocs (bfd *abfd, asection *sec,
 				  bfd_boolean *changed)
 {
   Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+  struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *erel;
 
   if ((sec->flags & SEC_RELOC) == 0
@@ -5637,9 +5637,6 @@ _frvfdpic_check_discarded_relocs (bfd *abfd, asection *sec,
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
-  if (!elf_bad_symtab (abfd))
-    sym_hashes_end -= symtab_hdr->sh_info;
 
   rel = elf_section_data (sec)->relocs;
 
@@ -6179,7 +6176,7 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
      const Elf_Internal_Rela *relocs;
 {
   Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+  struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   bfd *dynobj;
@@ -6190,9 +6187,6 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
-  if (!elf_bad_symtab (abfd))
-    sym_hashes_end -= symtab_hdr->sh_info;
 
   dynobj = elf_hash_table (info)->dynobj;
   rel_end = relocs + sec->reloc_count;

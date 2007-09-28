@@ -597,7 +597,6 @@ m32c_elf_check_relocs
 {
   Elf_Internal_Shdr *           symtab_hdr;
   struct elf_link_hash_entry ** sym_hashes;
-  struct elf_link_hash_entry ** sym_hashes_end;
   const Elf_Internal_Rela *     rel;
   const Elf_Internal_Rela *     rel_end;
   bfd_vma *local_plt_offsets;
@@ -613,10 +612,6 @@ m32c_elf_check_relocs
   splt = NULL;
   dynobj = elf_hash_table(info)->dynobj;
 
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof (Elf32_External_Sym);
-  if (!elf_bad_symtab (abfd))
-    sym_hashes_end -= symtab_hdr->sh_info;
- 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {

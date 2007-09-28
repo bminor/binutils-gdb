@@ -2443,7 +2443,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 {
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
-  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+  struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
@@ -2457,15 +2457,11 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof (Elf32_External_Sym);
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
   sgot = NULL;
   srelgot = NULL;
   sreloc = NULL;
-
-  if (!elf_bad_symtab (abfd))
-    sym_hashes_end -= symtab_hdr->sh_info;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)

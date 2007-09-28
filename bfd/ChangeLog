@@ -1,3 +1,31 @@
+2007-09-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-m10300.c (mn10300_elf_check_relocs): Delete dead code.
+	* elf32-arm.c (elf32_arm_check_relocs): Likewise.
+	* elf32-avr.c (elf32_avr_check_relocs): Likewise.
+	* elf32-bfin.c (bfinfdpic_check_relocs): Likewise.
+	* elf32-cris.c (cris_elf_check_relocs): Likewise.
+	* elf32-d10v.c (elf32_d10v_check_relocs): Likewise.
+	* elf32-dlx.c (elf32_dlx_check_relocs): Likewise.
+	* elf32-fr30.c (fr30_elf_check_relocs): Likewise.
+	* elf32-frv.c (_frvfdpic_check_discarded_relocs): Likewise.
+	(elf32_frv_check_relocs): Likewise.
+	* elf32-iq2000.c (iq2000_elf_check_relocs): Likewise.
+	* elf32-m32c.c (m32c_elf_check_relocs): Likewise.
+	* elf32-m32r.c (m32r_elf_check_relocs): Likewise.
+	* elf32-m68hc1x.c (elf32_m68hc11_check_relocs): Likewise.
+	* elf32-mcore.c (mcore_elf_check_relocs): Likewise.
+	* elf32-msp430.c (elf32_msp430_check_relocs): Likewise.
+	* elf32-mt.c (mt_elf_check_relocs): Likewise.
+	* elf32-openrisc.c (openrisc_elf_check_relocs): Likewise.
+	* elf32-sh.c (sh_elf_check_relocs): Likewise.
+	* elf64-mmix.c (mmix_elf_check_relocs): Likewise.
+	* elf64-sh64.c (sh_elf64_check_relocs): Likewise.
+	* elf32-score.c (_bfd_score_elf_check_relocs): Likewise.
+	(score_elf_local_relocation_p): Likewise.
+	(_bfd_score_elf_relocate_section): Likewise.
+	(score_elf_final_link_relocate): Likewise.
+
 2007-09-26  Jan Beulich  <jbeulich@novell.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Revert NULL pointer

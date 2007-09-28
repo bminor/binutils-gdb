@@ -1101,7 +1101,6 @@ score_elf_sort_dynamic_relocs (const void *arg1, const void *arg2)
 static bfd_boolean
 score_elf_local_relocation_p (bfd *input_bfd,
 			      const Elf_Internal_Rela *relocation,
-			      asection **local_sections,
 			      bfd_boolean check_forced)
 {
   unsigned long r_symndx;
@@ -1111,11 +1110,9 @@ score_elf_local_relocation_p (bfd *input_bfd,
 
   r_symndx = ELF32_R_SYM (relocation->r_info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
-  extsymoff = (elf_bad_symtab (input_bfd)) ? 0 : symtab_hdr->sh_info;
+  extsymoff = symtab_hdr->sh_info;
 
   if (r_symndx < extsymoff)
-    return TRUE;
-  if (elf_bad_symtab (input_bfd) && local_sections[r_symndx] != NULL)
     return TRUE;
 
   if (check_forced)
@@ -1845,7 +1842,6 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 			       const char *sym_name ATTRIBUTE_UNUSED,
 			       int sym_flags ATTRIBUTE_UNUSED,
 			       struct score_elf_link_hash_entry *h,
-	                       asection **local_sections,
                                bfd_boolean gp_disp_p)
 {
   unsigned long r_type;
@@ -1901,7 +1897,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
   r_symndx = ELF32_R_SYM (rel->r_info);
   r_type = ELF32_R_TYPE (rel->r_info);
   rel_addr = (input_section->output_section->vma + input_section->output_offset + rel->r_offset);
-  local_p = score_elf_local_relocation_p (input_bfd, rel, local_sections, TRUE);
+  local_p = score_elf_local_relocation_p (input_bfd, rel, TRUE);
 
   if (r_type == R_SCORE_GOT15)
     {
@@ -2120,8 +2116,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 
 	  /* The special case is when the symbol is forced to be local.  We need the
              full address in the GOT since no R_SCORE_GOT_LO16 relocation follows.  */
-	  forced = ! score_elf_local_relocation_p (input_bfd, rel,
-						   local_sections, FALSE);
+	  forced = ! score_elf_local_relocation_p (input_bfd, rel, FALSE);
 	  value = score_elf_got16_entry (output_bfd, input_bfd, info,
 					 symbol + addend, forced);
 	  if (value == MINUS_ONE)
@@ -2230,7 +2225,7 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
     }
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
-  extsymoff = (elf_bad_symtab (input_bfd)) ? 0 : symtab_hdr->sh_info;
+  extsymoff = symtab_hdr->sh_info;
   sym_hashes = elf_sym_hashes (input_bfd);
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -2427,7 +2422,7 @@ _bfd_score_elf_relocate_section (bfd *output_bfd,
                                          input_section, contents, rel, relocs,
                                          relocation, info, name,
                                          (h ? ELF_ST_TYPE ((unsigned int)h->root.root.type) :
-					 ELF_ST_TYPE ((unsigned int)sym->st_info)), h, local_sections,
+					 ELF_ST_TYPE ((unsigned int)sym->st_info)), h,
                                          gp_disp_p);
 
       if (r != bfd_reloc_ok)
@@ -2507,7 +2502,7 @@ _bfd_score_elf_check_relocs (bfd *abfd,
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  extsymoff = (elf_bad_symtab (abfd)) ? 0 : symtab_hdr->sh_info;
+  extsymoff = symtab_hdr->sh_info;
 
   name = bfd_get_section_name (abfd, sec);
 

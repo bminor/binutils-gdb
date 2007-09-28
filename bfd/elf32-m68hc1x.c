@@ -821,7 +821,6 @@ elf32_m68hc11_check_relocs (bfd *abfd, struct bfd_link_info *info,
 {
   Elf_Internal_Shdr *           symtab_hdr;
   struct elf_link_hash_entry ** sym_hashes;
-  struct elf_link_hash_entry ** sym_hashes_end;
   const Elf_Internal_Rela *     rel;
   const Elf_Internal_Rela *     rel_end;
 
@@ -830,10 +829,6 @@ elf32_m68hc11_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size / sizeof (Elf32_External_Sym);
-  if (!elf_bad_symtab (abfd))
-    sym_hashes_end -= symtab_hdr->sh_info;
-
   rel_end = relocs + sec->reloc_count;
 
   for (rel = relocs; rel < rel_end; rel++)
