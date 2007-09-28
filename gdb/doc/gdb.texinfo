@@ -3038,7 +3038,7 @@ your program.  There is nothing silly or meaningless about this.  When
 the breakpoints are conditional, this is even useful
 (@pxref{Conditions, ,Break Conditions}).
 
-It is possible that a breakpoint correspond to several locations 
+It is possible that a breakpoint corresponds to several locations
 in your program.  Examples of this situation are:
 
 @itemize @bullet
@@ -3066,7 +3066,7 @@ by one row for each breakpoint location.  The header row
 has @samp{<MULTIPLE>} in the address column.  The rows for
 individual locations contain the actual addresses for locations,
 and say what functions those locations are in.  The number
-column for a location has number in the format 
+column for a location has number in the format
 @var{breakpoint-number}.@var{location-number}.
 
 For example:
@@ -3089,11 +3089,11 @@ The shared library may be loaded and unloaded explicitly,
 and possibly repeatedly, as the program is executed.  To support
 this use case, @value{GDBN} updates breakpoint locations whenever
 any shared library is loaded or unloaded.  Typically, you would
-set a breakpoint in a shared library at the beginning of your 
+set a breakpoint in a shared library at the beginning of your
 debugging session, when the library is not loaded, and when the
 symbols from the library are not available.  When you try to set
 breakpoint, @value{GDBN} will ask you if you want to set
-a so called @dfn{pending breakpoint} --- breakpoint whose address 
+a so called @dfn{pending breakpoint} --- breakpoint whose address
 is not yet resolved.
 
 After the program is run, whenever a new shared library is loaded,
@@ -3146,7 +3146,7 @@ software breakpoints should be used, depending on whether the
 breakpoint address is read-only or read-write.  This applies to
 breakpoints set with the @code{break} command as well as to internal
 breakpoints set by commands like @code{next} and @code{finish}.  For
-breakpoints set with @code{hbreak}, @value{GDBN} will always use hardware 
+breakpoints set with @code{hbreak}, @value{GDBN} will always use hardware
 breakpoints.
 
 You can control this automatic behaviour with the following commands::
