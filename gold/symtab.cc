@@ -187,6 +187,39 @@ Sized_symbol<size>::init(const char* name, Value_type value, Size_type symsize,
   this->symsize_ = symsize;
 }
 
+// Return true if the final value of this symbol is known at link
+// time.
+
+bool
+Symbol::final_value_is_known() const
+{
+  // If we are not generating an executable, then no final values are
+  // known, since they will change at runtime.
+  if (!parameters->output_is_executable())
+    return false;
+
+  // If the symbol is not from an object file, then it is defined, and
+  // known.
+  if (this->source_ != FROM_OBJECT)
+    return true;
+
+  // If the symbol is from a dynamic object, then the final value is
+  // not known.
+  if (this->object()->is_dynamic())
+    return false;
+
+  // If the symbol is not undefined (it is defined or common), then
+  // the final value is known.
+  if (!this->is_undefined())
+    return true;
+
+  // If the symbol is undefined, then whether the final value is known
+  // depends on whether we are doing a static link.  If we are doing a
+  // dynamic link, then the final value could be filled in at runtime.
+  // This could reasonably be the case for a weak undefined symbol.
+  return parameters->doing_static_link();
+}
+
 // Class Symbol_table.
 
 Symbol_table::Symbol_table()

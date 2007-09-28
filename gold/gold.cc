@@ -160,6 +160,9 @@ queue_middle_tasks(const General_options& options,
 		   Layout* layout,
 		   Workqueue* workqueue)
 {
+  // Now we have seen all the input files.
+  set_parameters_doing_static_link(!input_objects->any_dynamic());
+
   // Define some sections and symbols needed for a dynamic link.  This
   // handles some cases we want to see before we read the relocs.
   layout->create_initial_dynamic_sections(input_objects, symtab);

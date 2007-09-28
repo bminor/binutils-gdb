@@ -56,6 +56,16 @@ class Parameters
   output_is_object() const
   { return this->output_file_type_ == OUTPUT_OBJECT; }
 
+  // Whether we are doing a static link--a link in which none of the
+  // input files are shared libraries.  This is only known after we
+  // have seen all the input files.
+  bool
+  doing_static_link() const
+  {
+    gold_assert(this->is_doing_static_link_valid_);
+    return this->doing_static_link_;
+  }
+
   // The size of the output file we are generating.  This should
   // return 32 or 64.
   int
@@ -78,6 +88,10 @@ class Parameters
   optimization_level() const
   { return this->optimization_level_; }
 
+  // Set whether we are doing a static link.
+  void
+  set_doing_static_link(bool doing_static_link);
+
   // Set the size and endianness.
   void
   set_size_and_endianness(int size, bool is_big_endian);
@@ -96,6 +110,10 @@ class Parameters
 
   // The type of the output file.
   Output_file_type output_file_type_;
+  // Whether the doing_static_link_ field is valid.
+  bool is_doing_static_link_valid_;
+  // Whether we are doing a static link.
+  bool doing_static_link_;
   // Whether the size_ and is_big_endian_ fields are valid.
   bool is_size_and_endian_valid_;
   // The size of the output file--32 or 64.
@@ -114,6 +132,9 @@ extern void initialize_parameters(const General_options*);
 
 // Set the size and endianness of the global parameters variable.
 extern void set_parameters_size_and_endianness(int size, bool is_big_endian);
+
+// Set whether we are doing a static link.
+extern void set_parameters_doing_static_link(bool doing_static_link);
 
 } // End namespace gold.
 

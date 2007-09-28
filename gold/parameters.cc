@@ -31,7 +31,8 @@ namespace gold
 // Initialize the parameters from the options.
 
 Parameters::Parameters(const General_options* options)
-  : is_size_and_endian_valid_(false), size_(0), is_big_endian_(false),
+  : is_doing_static_link_valid_(false), doing_static_link_(false),
+    is_size_and_endian_valid_(false), size_(0), is_big_endian_(false),
     optimization_level_(options->optimization_level())
 {
   if (options->is_shared())
@@ -40,6 +41,15 @@ Parameters::Parameters(const General_options* options)
     this->output_file_type_ = OUTPUT_OBJECT;
   else
     this->output_file_type_ = OUTPUT_EXECUTABLE;
+}
+
+// Set whether we are doing a static link.
+
+void
+Parameters::set_doing_static_link(bool doing_static_link)
+{
+  this->doing_static_link_ = doing_static_link;
+  this->is_doing_static_link_valid_ = true;
 }
 
 // Set the size and endianness.
@@ -75,6 +85,16 @@ initialize_parameters(const General_options* options)
 {
   parameters = static_parameters = new Parameters(options);
 }
+
+// Set whether we are doing a static link.
+
+void
+set_parameters_doing_static_link(bool doing_static_link)
+{
+  static_parameters->set_doing_static_link(doing_static_link);
+}
+
+// Set the size and endianness.
 
 void
 set_parameters_size_and_endianness(int size, bool is_big_endian)

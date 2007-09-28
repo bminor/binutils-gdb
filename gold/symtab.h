@@ -341,12 +341,7 @@ class Symbol
   // Return true if the final value of this symbol is known at link
   // time.
   bool
-  final_value_is_known() const
-  {
-    if (parameters->output_is_shared())
-      return false;
-    return this->source_ != FROM_OBJECT || !this->object()->is_dynamic();
-  }
+  final_value_is_known() const;
 
   // Return whether this is a defined symbol (not undefined or
   // common).
