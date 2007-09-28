@@ -3,6 +3,13 @@
 
 *** Changes since GDB 6.7
 
+* Pending breakpoints no longer change their number when their address
+  is resolved.
+
+* GDB now supports breakpoints with multiple locations,
+  including breakpoints on C++ constructors, inside C++ templates,
+  and in inlined functions.
+
 *** Changes in GDB 6.6
 
 * Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 

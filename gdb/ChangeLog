@@ -1,3 +1,8 @@
+2007-09-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* NEW: Mention pending breakpoint changes and
+	support for breakpoints at multiple locations.
+	
 2007-09-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-linux-tdep.c (arm_linux_software_single_step): New.

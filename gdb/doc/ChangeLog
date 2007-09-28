@@ -1,3 +1,9 @@
+2007-09-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (Setting Breakpoints): Revise
+	documentation for pending breakpoints.  Document
+	breakpoints with multiple locations.
+	
 2007-09-19  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (Miscellaneous gdb/mi Commands):
