@@ -192,6 +192,25 @@ private:
     elfcpp::Swap<valsize, big_endian>::writeval(wv, x);
   }
 
+  // Like rel(), but sign-extends the value to SIZE.
+  template<int valsize>
+  static inline void
+  signedrel(unsigned char* view,
+            const Sized_relobj<size, big_endian>* object,
+            const Symbol_value<size>* psymval)
+  {
+    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<size, big_endian>::Valtype Sizetype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype x = elfcpp::Swap<valsize, big_endian>::readval(wv);
+    // Fancy formula to sign-extend x to size.
+    const Sizetype mask = 1U << (sizeof(valsize) * 8 - 1);
+    Sizetype sign_extended_x = x;
+    sign_extended_x = (sign_extended_x ^ mask) - mask;
+    x = psymval->value(object, sign_extended_x);
+    elfcpp::Swap<valsize, big_endian>::writeval(wv, x);
+  }
+
   // Do a simple PC relative relocation with the addend in the section
   // contents.  VALSIZE is the size of the value.
   template<int valsize>
@@ -238,6 +257,13 @@ public:
        const Symbol_value<size>* psymval)
   { This::template rel<8>(view, object, psymval); }
 
+  // Do an 8-bit REL relocation, sign extending the addend to SIZE.
+  static inline void
+  rel8s(unsigned char* view,
+         const Sized_relobj<size, big_endian>* object,
+         const Symbol_value<size>* psymval)
+  { This::template signedrel<8>(view, object, psymval); }
+
   // Do a simple 8-bit PC relative relocation with the addend in the
   // section contents.
   static inline void
@@ -264,6 +290,13 @@ public:
 	const Symbol_value<size>* psymval)
   { This::template rel<16>(view, object, psymval); }
 
+  // Do a 16-bit REL relocation, sign extending the addend to SIZE.
+  static inline void
+  rel16s(unsigned char* view,
+         const Sized_relobj<size, big_endian>* object,
+         const Symbol_value<size>* psymval)
+  { This::template signedrel<16>(view, object, psymval); }
+
   // Do a simple 32-bit PC relative REL relocation with the addend in
   // the section contents.
   static inline void
@@ -289,6 +322,13 @@ public:
 	const Sized_relobj<size, big_endian>* object,
 	const Symbol_value<size>* psymval)
   { This::template rel<32>(view, object, psymval); }
+
+  // Do a 32-bit REL relocation, sign extending the addend to SIZE.
+  static inline void
+  rel32s(unsigned char* view,
+         const Sized_relobj<size, big_endian>* object,
+         const Symbol_value<size>* psymval)
+  { This::template signedrel<32>(view, object, psymval); }
 
   // Do a simple 32-bit PC relative REL relocation with the addend in
   // the section contents.
