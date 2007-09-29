@@ -21850,7 +21850,7 @@ OLD_LDFLAGS=$LDFLAGS
 OLD_LIBS=$LIBS
 CFLAGS="$CFLAGS -I${srcdir}/../include -I../bfd -I${srcdir}/../bfd"
 LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
-LIBS="$LIBS -lbfd -liberty"
+LIBS="$LIBS -lbfd -liberty $LIBINTL"
 echo "$as_me:$LINENO: checking for ELF support in BFD" >&5
 echo $ECHO_N "checking for ELF support in BFD... $ECHO_C" >&6
 if test "${gdb_cv_var_elf+set}" = set; then
