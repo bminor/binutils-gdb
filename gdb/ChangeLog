@@ -1,3 +1,8 @@
+2007-09-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.ac: Add $LIBINTL when testing libbfd.
+	* configure: Regenerated.
+
 2007-09-28  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* NEW: Mention pending breakpoint changes and

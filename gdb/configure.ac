@@ -1301,7 +1301,7 @@ OLD_LDFLAGS=$LDFLAGS
 OLD_LIBS=$LIBS
 CFLAGS="$CFLAGS -I${srcdir}/../include -I../bfd -I${srcdir}/../bfd"
 LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
-LIBS="$LIBS -lbfd -liberty"
+LIBS="$LIBS -lbfd -liberty $LIBINTL"
 AC_CACHE_CHECK([for ELF support in BFD], gdb_cv_var_elf,
 [AC_TRY_LINK(
 [#include <stdlib.h>
