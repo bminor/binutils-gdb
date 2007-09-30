@@ -1,3 +1,7 @@
+2007-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* 386-dis.c (prefix_table): Reformat comment.
+
 2007-09-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* 386-dis.c (USE_GROUPS): Renamed to ...

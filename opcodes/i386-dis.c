@@ -2553,7 +2553,7 @@ static const struct dis386 prefix_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
-  /*PREFIX_0FC7_REG_6 */
+  /* PREFIX_0FC7_REG_6 */
   {
     { "vmptrld",{ Mq } },
     { "vmxon",	{ Mq } },
