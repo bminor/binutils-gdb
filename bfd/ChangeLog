@@ -1,3 +1,30 @@
+2007-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (resolve_symbol): Handle symbols in SEC_MERGE
+	sections.  Don't test symbol st_shndx.  Don't bother with
+	bfd_link_hash_common symbols.  Print longs rather than ints
+	in debug messages.
+	(eval_symbol): Replace "sym" and "advanced" params with "symp".
+	Replace "addr" and "section_offset" params with "dot".  Don't
+	cast bfd_vma values to signed, cast them to bfd_signed_vma.
+	(bfd_elf_perform_complex_relocation): Delete "output_bfd", "info",
+	"local_syms" and "local_sections" params.  Add "relocation".
+	Delete code calculating relocation value.
+	(evaluate_complex_relocation_symbols): Delete function.  Fold into..
+	(elf_link_input_bfd): ..existing code examining relocs.
+	* elf-bfd.h (bfd_elf_perform_complex_relocation): Update prototype.
+	* elf32-mep.c (mep_elf_check_relocs): Delete function.
+	(mep_elf_gc_sweep_hook, mep_elf_gc_mark_hook): Likewise.
+	(mep_elf_object_p): Don't set elf_bad_symtab.
+	(elf_backend_check_relocs): Don't define.
+	(elf_backend_gc_mark_hook, elf_backend_gc_sweep_hook): Likewise.
+	(elf_backend_can_gc_sections, USE_RELA): Likwise.
+	(mep_elf_relocate_section): Move bfd_elf_perform_complex_relocation
+	call after we have calculated reloc value.  Delete local sym
+	debug code.  Use RELOC_FOR_GLOBAL_SYMBOL.  Delete addend
+	adjusting code..
+	(elf_backend_rela_normal): ..instead define this.
+
 2007-09-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-m10300.c (mn10300_elf_check_relocs): Delete dead code.

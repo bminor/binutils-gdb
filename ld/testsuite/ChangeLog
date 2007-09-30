@@ -1,3 +1,9 @@
+2007-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-selective/sel-dump.exp: Add am33, m88k, mep to xfails.
+	* ld-selective/selective.exp: Don't run for same target list
+	we xfail sel-dump.
+
 2007-09-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* ld-alpha/tlsbin.rd: Use [0-9]+ to match section header count and

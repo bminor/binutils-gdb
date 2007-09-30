@@ -402,48 +402,6 @@ mep_info_to_howto_rela
   r_type = ELF32_R_TYPE (dst->r_info);
   cache_ptr->howto = & mep_elf_howto_table [r_type];
 }
-
-/* Look through the relocs for a section during the first phase.
-   Since we don't do .gots or .plts, we just need to consider the
-   virtual table relocs for gc.  */
-
-static bfd_boolean
-mep_elf_check_relocs
-    (bfd *                     abfd,
-     struct bfd_link_info *    info,
-     asection *                sec,
-     const Elf_Internal_Rela * relocs)
-{
-  Elf_Internal_Shdr *           symtab_hdr;
-  struct elf_link_hash_entry ** sym_hashes;
-  struct elf_link_hash_entry ** sym_hashes_end;
-  const Elf_Internal_Rela *     rel;
-  const Elf_Internal_Rela *     rel_end;
-
-  if (info->relocatable)
-    return TRUE;
-
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + symtab_hdr->sh_size / sizeof (Elf32_External_Sym);
-  if (!elf_bad_symtab (abfd))
-    sym_hashes_end -= symtab_hdr->sh_info;
-
-  rel_end = relocs + sec->reloc_count;
-  for (rel = relocs; rel < rel_end; rel++)
-    {
-      struct elf_link_hash_entry *h;
-      unsigned long r_symndx;
-
-      r_symndx = ELF32_R_SYM (rel->r_info);
-      if (r_symndx < symtab_hdr->sh_info)
-        h = NULL;
-      else
-        h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-    }
-  return TRUE;
-}
-
 
 /* Relocate a MEP ELF section.
    There is some attempt to make this function usable for many architectures,
@@ -513,18 +471,7 @@ mep_elf_relocate_section
       int                          r_type;
 
       r_type = ELF32_R_TYPE (rel->r_info);
-
       r_symndx = ELF32_R_SYM (rel->r_info);
-
-      /* Is this a complex relocation?  */
-      if (!info->relocatable && ELF32_R_TYPE (rel->r_info) == R_RELC)
-	{
-	  bfd_elf_perform_complex_relocation (output_bfd, info,
-					      input_bfd, input_section, contents,
-					      rel, local_syms, local_sections);
-	  continue;
-	}
-
       howto  = mep_elf_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
@@ -539,56 +486,17 @@ mep_elf_relocate_section
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
-#if 0
-	  fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
-		   sec->name, name, sym->st_name,
-		   sec->output_section->vma, sec->output_offset,
-		   sym->st_value, rel->r_addend);
-#endif
 	}
       else
 	{
-	  relocation = 0;
-	  h = sym_hashes [r_symndx];
+	  bfd_boolean warned, unresolved_reloc;
 
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  RELOC_FOR_GLOBAL_SYMBOL(info, input_bfd, input_section, rel,
+				  r_symndx, symtab_hdr, sym_hashes,
+				  h, sec, relocation,
+				  unresolved_reloc, warned);
 
 	  name = h->root.root.string;
-
-	  if (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	    {
-	      sec = h->root.u.def.section;
-	      relocation = (h->root.u.def.value
-			    + sec->output_section->vma
-			    + sec->output_offset);
-#if 0
-	      fprintf (stderr,
-		       "defined: sec: %s, name: %s, value: %x + %x + %x gives: %x\n",
-		       sec->name, name, h->root.u.def.value,
-		       sec->output_section->vma, sec->output_offset, relocation);
-#endif
-	    }
-	  else if (h->root.type == bfd_link_hash_undefweak)
-	    {
-#if 0
-	      fprintf (stderr, "undefined: sec: %s, name: %s\n",
-		       sec->name, name);
-#endif
-	    }
-	  else if (!info->relocatable)
-	    {
-	      if (! ((*info->callbacks->undefined_symbol)
-		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset,
-		      (!info->shared && info->unresolved_syms_in_objects == RM_GENERATE_ERROR))))
-		return FALSE;
-#if 0
-	      fprintf (stderr, "unknown: name: %s\n", name);
-#endif
-	    }
 	}
 
       if (sec != NULL && elf_discarded_section (sec))
@@ -603,18 +511,15 @@ mep_elf_relocate_section
 	}
 
       if (info->relocatable)
-	{
-	  /* This is a relocatable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-	    rel->r_addend += sec->output_offset;
-	  continue;
-	}
+	continue;
 
       switch (r_type)
 	{
+	case R_RELC:
+	  bfd_elf_perform_complex_relocation (input_bfd, input_section,
+					      contents, rel, relocation);
+	  continue;
+
 	default:
 	  r = mep_final_link_relocate (howto, input_bfd, input_section,
 					 contents, rel, relocation);
@@ -675,63 +580,6 @@ mep_elf_relocate_section
 
   return TRUE;
 }
-
-
-/* Update the got entry reference counts for the section being
-   removed.  */
-
-static bfd_boolean
-mep_elf_gc_sweep_hook
-    (bfd *                     abfd ATTRIBUTE_UNUSED,
-     struct bfd_link_info *    info ATTRIBUTE_UNUSED,
-     asection *                sec ATTRIBUTE_UNUSED,
-     const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED)
-{
-  return TRUE;
-}
-
-/* Return the section that should be marked against GC for a given
-   relocation.  */
-
-static asection *
-mep_elf_gc_mark_hook
-    (asection *                   sec,
-     struct bfd_link_info *       info ATTRIBUTE_UNUSED,
-     Elf_Internal_Rela *          rel,
-     struct elf_link_hash_entry * h,
-     Elf_Internal_Sym *           sym)
-{
-  if (h != NULL)
-    {
-      switch (ELF32_R_TYPE (rel->r_info))
-	{
-	default:
-	  switch (h->root.type)
-	    {
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      return h->root.u.def.section;
-
-	    case bfd_link_hash_common:
-	      return h->root.u.c.p->section;
-
-	    default:
-	      break;
-	    }
-	}
-    }
-  else
-    {
-      if (!(elf_bad_symtab (sec->owner)
-	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-		&& sym->st_shndx != SHN_COMMON))
-	return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-    }
-
-  return NULL;
-}
-
 
 /* Function to set the ELF flag bits.  */
 
@@ -899,11 +747,6 @@ elf32_mep_machine (bfd * abfd)
 static bfd_boolean
 mep_elf_object_p (bfd * abfd)
 {
-  /* Irix 5 and 6 is broken.  Object file symbol tables are not always
-     sorted correctly such that local symbols preceed global symbols,
-     and the sh_info field in the symbol table is not always right.  */
-  /* This is needed for the RELC support code.  */
-  elf_bad_symtab (abfd) = TRUE;
   bfd_default_set_arch_mach (abfd, bfd_arch_mep, elf32_mep_machine (abfd));
   return TRUE;
 }
@@ -940,23 +783,17 @@ mep_elf_fake_sections (bfd *               abfd ATTRIBUTE_UNUSED,
 #define elf_info_to_howto_rel			NULL
 #define elf_info_to_howto			mep_info_to_howto_rela
 #define elf_backend_relocate_section		mep_elf_relocate_section
-#define elf_backend_gc_mark_hook		mep_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook		mep_elf_gc_sweep_hook
-#define elf_backend_check_relocs                mep_elf_check_relocs
 #define elf_backend_object_p		        mep_elf_object_p
 #define elf_backend_section_flags		mep_elf_section_flags
 #define elf_backend_fake_sections		mep_elf_fake_sections
 
-#define elf_backend_can_gc_sections		1
-
 #define bfd_elf32_bfd_reloc_type_lookup		mep_reloc_type_lookup
-#define bfd_elf32_bfd_reloc_name_lookup	mep_reloc_name_lookup
+#define bfd_elf32_bfd_reloc_name_lookup		mep_reloc_name_lookup
 #define bfd_elf32_bfd_set_private_flags		mep_elf_set_private_flags
 #define bfd_elf32_bfd_copy_private_bfd_data	mep_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	mep_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_print_private_bfd_data	mep_elf_print_private_bfd_data
 
-/* We use only the RELA entries.  */
-#define USE_RELA
+#define elf_backend_rela_normal			1
 
 #include "elf32-target.h"

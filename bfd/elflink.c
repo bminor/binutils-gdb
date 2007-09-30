@@ -7281,7 +7281,6 @@ resolve_symbol (const char *                  name,
   struct bfd_link_hash_entry *  global_entry;
   const char *                  candidate = NULL;
   Elf_Internal_Shdr *           symtab_hdr;
-  asection *                    sec = NULL;
   size_t                        i;
   
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
@@ -7289,7 +7288,6 @@ resolve_symbol (const char *                  name,
   for (i = 0; i < locsymcount; ++ i)
     {
       sym = isymbuf + i;
-      sec = finfo->sections [i];
 
       if (ELF_ST_BIND (sym->st_info) != STB_LOCAL)
 	continue;
@@ -7298,26 +7296,18 @@ resolve_symbol (const char *                  name,
 						   symtab_hdr->sh_link,
 						   sym->st_name);
 #ifdef DEBUG
-      printf ("Comparing string: '%s' vs. '%s' = 0x%x\n", 
-	      name, candidate, (unsigned int)sym->st_value);
+      printf ("Comparing string: '%s' vs. '%s' = 0x%lx\n",
+	      name, candidate, (unsigned long) sym->st_value);
 #endif
       if (candidate && strcmp (candidate, name) == 0)
 	{
-	  * result = sym->st_value;
+	  asection *sec = finfo->sections [i];
 
-	  if (sym->st_shndx > SHN_UNDEF && 
-	      sym->st_shndx < SHN_LORESERVE)
-	    {
+	  *result = _bfd_elf_rel_local_sym (input_bfd, sym, &sec, 0);
+	  *result += sec->output_offset + sec->output_section->vma;
 #ifdef DEBUG
-	      printf ("adjusting for sec '%s' @ 0x%x + 0x%x\n",
-		      sec->output_section->name, 
-		      (unsigned int)sec->output_section->vma, 
-		      (unsigned int)sec->output_offset);
-#endif
-	      * result += sec->output_offset + sec->output_section->vma;
-	    }
-#ifdef DEBUG
-	  printf ("Found symbol with effective value %8.8x\n", (unsigned int)* result);
+	  printf ("Found symbol with value %8.8lx\n",
+		  (unsigned long) *result);
 #endif
 	  return TRUE;
 	}
@@ -7335,24 +7325,12 @@ resolve_symbol (const char *                  name,
 	+ global_entry->u.def.section->output_section->vma 
 	+ global_entry->u.def.section->output_offset;
 #ifdef DEBUG
-      printf ("Found GLOBAL symbol '%s' with value %8.8x\n",
-	      global_entry->root.string, (unsigned int)*result);
+      printf ("Found GLOBAL symbol '%s' with value %8.8lx\n",
+	      global_entry->root.string, (unsigned long) *result);
 #endif
       return TRUE;
     } 
 
-  if (global_entry->type == bfd_link_hash_common)
-    {
-      *result = global_entry->u.def.value +
-	bfd_com_section_ptr->output_section->vma +
-	bfd_com_section_ptr->output_offset;
-#ifdef DEBUG
-      printf ("Found COMMON symbol '%s' with value %8.8x\n",
-	      global_entry->root.string, (unsigned int)*result);
-#endif
-      return TRUE;
-    }
-  
   return FALSE;
 }
 
@@ -7402,12 +7380,10 @@ undefined_reference (const char *  reftype,
 
 static bfd_boolean
 eval_symbol (bfd_vma *                     result,
-	     char *                        sym,
-	     char **                       advanced,
+	     const char **                 symp,
 	     bfd *                         input_bfd,
 	     struct elf_final_link_info *  finfo,
-	     bfd_vma                       addr,
-	     bfd_vma                       section_offset,
+	     bfd_vma                       dot,
 	     Elf_Internal_Sym *            isymbuf,
 	     size_t                        locsymcount,
 	     int                           signed_p)
@@ -7418,6 +7394,7 @@ eval_symbol (bfd_vma *                     result,
   bfd_vma       b;
   const int     bufsz = 4096;
   char          symbuf [bufsz];
+  const char *sym = *symp;
   const char *  symend;
   bfd_boolean   symbol_is_section = FALSE;
 
@@ -7433,21 +7410,21 @@ eval_symbol (bfd_vma *                     result,
   switch (* sym)
     {
     case '.':
-      * result = addr + section_offset;
-      * advanced = sym + 1;
+      *result = dot;
+      *symp = sym + 1;
       return TRUE;
 
     case '#':
-      ++ sym;
-      * result = strtoul (sym, advanced, 16);
+      ++sym;
+      *result = strtoul (sym, (char **) symp, 16);
       return TRUE;
 
     case 'S':
       symbol_is_section = TRUE;
     case 's':      
-      ++ sym;
-      symlen = strtol (sym, &sym, 10);
-      ++ sym; /* Skip the trailing ':'.  */
+      ++sym;
+      symlen = strtol (sym, (char **) symp, 10);
+      sym = *symp + 1; /* Skip the trailing ':'.  */
 
       if ((symend < sym) || ((symlen + 1) > bufsz))
 	{
@@ -7457,7 +7434,7 @@ eval_symbol (bfd_vma *                     result,
 
       memcpy (symbuf, sym, symlen);
       symbuf [symlen] = '\0';
-      * advanced = sym + symlen;
+      *symp = sym + symlen;
       
       /* Is it always possible, with complex symbols, that gas "mis-guessed" 
 	 the symbol as a section, or vice-versa. so we're pretty liberal in our
@@ -7496,15 +7473,14 @@ eval_symbol (bfd_vma *                     result,
       sym += strlen (#op);					\
       if (* sym == ':')						\
         ++ sym;							\
-      if (!eval_symbol (&a, sym, &sym, input_bfd, finfo, addr,	\
-			section_offset, isymbuf, locsymcount,	\
-			signed_p))				\
+      *symp = sym;						\
+      if (!eval_symbol (&a, symp, input_bfd, finfo, dot,	\
+			isymbuf, locsymcount, signed_p))	\
         return FALSE;						\
       if (signed_p)                                             \
-        * result = op ((signed)a);         			\
+	*result = op ((bfd_signed_vma) a);			\
       else                                                      \
         * result = op a;                                        \
-      * advanced = sym; 					\
       return TRUE;						\
     }
 
@@ -7514,20 +7490,18 @@ eval_symbol (bfd_vma *                     result,
       sym += strlen (#op);					\
       if (* sym == ':')						\
         ++ sym;							\
-      if (!eval_symbol (&a, sym, &sym, input_bfd, finfo, addr,	\
-			section_offset, isymbuf, locsymcount,	\
-			signed_p))				\
+      *symp = sym;						\
+      if (!eval_symbol (&a, symp, input_bfd, finfo, dot,	\
+			isymbuf, locsymcount, signed_p))	\
         return FALSE;						\
-      ++ sym;							\
-      if (!eval_symbol (&b, sym, &sym, input_bfd, finfo, addr,	\
-			section_offset, isymbuf, locsymcount,	\
-			signed_p))				\
+      ++*symp;							\
+      if (!eval_symbol (&b, symp, input_bfd, finfo, dot,	\
+			isymbuf, locsymcount, signed_p))	\
         return FALSE;						\
       if (signed_p)                                             \
-        * result = ((signed) a) op ((signed) b);	        \
+	*result = ((bfd_signed_vma) a) op ((bfd_signed_vma) b);	\
       else                                                      \
         * result = a op b;                                      \
-      * advanced = sym;						\
       return TRUE;						\
     }
 
@@ -7559,141 +7533,6 @@ eval_symbol (bfd_vma *                     result,
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
     }
-}
-
-/* Entry point to evaluator, called from elf_link_input_bfd.  */
-
-static bfd_boolean
-evaluate_complex_relocation_symbols (bfd *input_bfd,
-				     struct elf_final_link_info *finfo,
-				     Elf_Internal_Sym *isymbuf,
-				     size_t locsymcount)
-{
-  const struct elf_backend_data * bed;
-  Elf_Internal_Shdr *             symtab_hdr;
-  struct elf_link_hash_entry **   sym_hashes;
-  asection *                      reloc_sec;
-  bfd_boolean                     result = TRUE;
-
-  /* For each section, we're going to check and see if it has any
-     complex relocations, and we're going to evaluate any of them
-     we can.  */
-
-  if (finfo->info->relocatable)
-    return TRUE;
-
-  symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
-  sym_hashes = elf_sym_hashes (input_bfd);
-  bed = get_elf_backend_data (input_bfd);
-
-  for (reloc_sec = input_bfd->sections; reloc_sec; reloc_sec = reloc_sec->next)
-    {
-      Elf_Internal_Rela * internal_relocs;
-      unsigned long i;
-
-      /* This section was omitted from the link.  */
-      if (! reloc_sec->linker_mark)
-	continue;
-
-      /* Only process sections containing relocs.  */
-      if ((reloc_sec->flags & SEC_RELOC) == 0)
-	continue;
-
-      if (reloc_sec->reloc_count == 0)
-	continue;
-
-      /* Read in the relocs for this section.  */
-      internal_relocs
-	= _bfd_elf_link_read_relocs (input_bfd, reloc_sec, NULL,
-				     (Elf_Internal_Rela *) NULL,
-				     FALSE);
-      if (internal_relocs == NULL)
-	continue;
-
-      for (i = reloc_sec->reloc_count; i--;)
-	{
-	  Elf_Internal_Rela * rel;
-	  char * sym_name;
-	  bfd_vma index;
-	  Elf_Internal_Sym * sym;
-	  bfd_vma result;
-	  bfd_vma section_offset;
-	  bfd_vma addr;
-	  int signed_p = 0;
-
-	  rel = internal_relocs + i;
-	  section_offset = reloc_sec->output_section->vma
-	    + reloc_sec->output_offset;
-	  addr = rel->r_offset;
-
-	  index = ELF32_R_SYM (rel->r_info);
-	  if (bed->s->arch_size == 64)
-	    index >>= 24;
-
-	  if (index == STN_UNDEF)
-	    continue;
-
-	  if (index < locsymcount)
-	    {
-	      /* The symbol is local.  */
-	      sym = isymbuf + index;
-
-	      /* We're only processing STT_RELC or STT_SRELC type symbols.  */
-	      if ((ELF_ST_TYPE (sym->st_info) != STT_RELC) &&
-		  (ELF_ST_TYPE (sym->st_info) != STT_SRELC))
-		continue;
-
-	      sym_name = bfd_elf_string_from_elf_section
-		(input_bfd, symtab_hdr->sh_link, sym->st_name);
-
-	      signed_p = (ELF_ST_TYPE (sym->st_info) == STT_SRELC);
-	    }
-	  else
-	    {
-	      /* The symbol is global.  */
-	      struct elf_link_hash_entry * h;
-
-	      if (elf_bad_symtab (input_bfd))
-		continue;
-
-	      h = sym_hashes [index - locsymcount];
-	      while (   h->root.type == bfd_link_hash_indirect
-		     || h->root.type == bfd_link_hash_warning)
-		h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	      if (h->type != STT_RELC && h->type != STT_SRELC)
-		continue;
-
-	      signed_p = (h->type == STT_SRELC);
-	      sym_name = (char *) h->root.root.string;
-	    }
-#ifdef DEBUG
-	  printf ("Encountered a complex symbol!");
-	  printf (" (input_bfd %s, section %s, reloc %ld\n",
-		  input_bfd->filename, reloc_sec->name, i);
-	  printf (" symbol: idx  %8.8lx, name %s\n",
-		  index, sym_name);
-	  printf (" reloc : info %8.8lx, addr %8.8lx\n",
-		  rel->r_info, addr);
-	  printf (" Evaluating '%s' ...\n ", sym_name);
-#endif
-	  if (eval_symbol (& result, sym_name, & sym_name, input_bfd, 
-			   finfo, addr, section_offset, isymbuf, locsymcount,
-			   signed_p))
-	    /* Symbol evaluated OK.  Update to absolute value.  */
-	    set_symbol_value (input_bfd, isymbuf, locsymcount, index, result);
-
-	  else
-	    result = FALSE;
-	}
-
-      if (internal_relocs != elf_section_data (reloc_sec)->relocs)
-	free (internal_relocs);
-    }
-
-  /* If nothing went wrong, then we adjusted 
-     everything we wanted to adjust.  */
-  return result;
 }
 
 static void
@@ -7791,84 +7630,20 @@ decode_complex_addend
 }
 
 void
-bfd_elf_perform_complex_relocation
-    (bfd *                   output_bfd ATTRIBUTE_UNUSED,
-     struct bfd_link_info *  info,
-     bfd *                   input_bfd,
-     asection *              input_section,
-     bfd_byte *              contents,
-     Elf_Internal_Rela *     rel,
-     Elf_Internal_Sym *      local_syms,
-     asection **             local_sections)
+bfd_elf_perform_complex_relocation (bfd *input_bfd,
+				    asection *input_section,
+				    bfd_byte *contents,
+				    Elf_Internal_Rela *rel,
+				    bfd_vma relocation)
 {
-  const struct elf_backend_data * bed;
-  Elf_Internal_Shdr * symtab_hdr;
-  asection * sec;
-  bfd_vma relocation = 0, shift, x;
-  bfd_vma r_symndx;
-  bfd_vma mask;
-  unsigned long start, oplen, len, wordsz, 
-    chunksz, lsb0_p, signed_p, trunc_p;
+  bfd_vma shift, x, mask;
+  unsigned long start, oplen, len, wordsz, chunksz, lsb0_p, signed_p, trunc_p;
 
   /*  Perform this reloc, since it is complex.
       (this is not to say that it necessarily refers to a complex
       symbol; merely that it is a self-describing CGEN based reloc.
       i.e. the addend has the complete reloc information (bit start, end,
       word size, etc) encoded within it.).  */ 
-  r_symndx = ELF32_R_SYM (rel->r_info);
-  bed = get_elf_backend_data (input_bfd);
-  if (bed->s->arch_size == 64)
-    r_symndx >>= 24;
-
-#ifdef DEBUG
-  printf ("Performing complex relocation %ld...\n", r_symndx);
-#endif
-
-  symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
-  if (r_symndx < symtab_hdr->sh_info)
-    {
-      /* The symbol is local.  */
-      Elf_Internal_Sym * sym;
-
-      sym = local_syms + r_symndx;
-      sec = local_sections [r_symndx];
-      relocation = sym->st_value;
-      if (sym->st_shndx > SHN_UNDEF && 
-	  sym->st_shndx < SHN_LORESERVE)
-	relocation += (sec->output_offset +
-		       sec->output_section->vma);
-    }
-  else
-    {
-      /* The symbol is global.  */
-      struct elf_link_hash_entry **sym_hashes;
-      struct elf_link_hash_entry * h;
-
-      sym_hashes = elf_sym_hashes (input_bfd);
-      h = sym_hashes [r_symndx];
-
-      while (h->root.type == bfd_link_hash_indirect
-	     || h->root.type == bfd_link_hash_warning)
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-      if (h->root.type == bfd_link_hash_defined
-	  || h->root.type == bfd_link_hash_defweak)
-	{
-	  sec = h->root.u.def.section;
-	  relocation = h->root.u.def.value;
-
-	  if (! bfd_is_abs_section (sec))
-	    relocation += (sec->output_section->vma 
-			   + sec->output_offset); 
-	}
-      if (h->root.type == bfd_link_hash_undefined
-	  && !((*info->callbacks->undefined_symbol)
-	       (info, h->root.root.string, input_bfd,
-		input_section, rel->r_offset,
-		info->unresolved_syms_in_objects == RM_GENERATE_ERROR
-		|| ELF_ST_VISIBILITY (h->other))))
-	return;
-    }
 
   decode_complex_addend (& start, & oplen, & len, & wordsz, 
 			 & chunksz, & lsb0_p, & signed_p, 
@@ -9213,10 +8988,6 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	return FALSE;
     }
 
-  if (! evaluate_complex_relocation_symbols (input_bfd, finfo, isymbuf,
-					     locsymcount))
-    return FALSE;
-
   /* Relocate the contents of each section.  */
   sym_hashes = elf_sym_hashes (input_bfd);
   for (o = input_bfd->sections; o != NULL; o = o->next)
@@ -9258,8 +9029,10 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
       if ((o->flags & SEC_RELOC) != 0)
 	{
 	  Elf_Internal_Rela *internal_relocs;
+	  Elf_Internal_Rela *rel, *relend;
 	  bfd_vma r_type_mask;
 	  int r_sym_shift;
+	  int action_discarded;
 	  int ret;
 
 	  /* Get the swapped relocs.  */
@@ -9281,76 +9054,107 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	      r_sym_shift = 32;
 	    }
 
-	  /* Run through the relocs looking for any against symbols
-	     from discarded sections and section symbols from
-	     removed link-once sections.  Complain about relocs
-	     against discarded sections.  Zero relocs against removed
-	     link-once sections.  */
+	  action_discarded = -1;
 	  if (!elf_section_ignore_discarded_relocs (o))
+	    action_discarded = (*bed->action_discarded) (o);
+
+	  /* Run through the relocs evaluating complex reloc symbols and
+	     looking for relocs against symbols from discarded sections
+	     or section symbols from removed link-once sections.
+	     Complain about relocs against discarded sections.  Zero
+	     relocs against removed link-once sections.  */
+
+	  rel = internal_relocs;
+	  relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
+	  for ( ; rel < relend; rel++)
 	    {
-	      Elf_Internal_Rela *rel, *relend;
-	      unsigned int action = (*bed->action_discarded) (o);
+	      unsigned long r_symndx = rel->r_info >> r_sym_shift;
+	      unsigned int s_type;
+	      asection **ps, *sec;
+	      struct elf_link_hash_entry *h = NULL;
+	      const char *sym_name;
 
-	      rel = internal_relocs;
-	      relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
-	      for ( ; rel < relend; rel++)
+	      if (r_symndx == STN_UNDEF)
+		continue;
+
+	      if (r_symndx >= locsymcount
+		  || (elf_bad_symtab (input_bfd)
+		      && finfo->sections[r_symndx] == NULL))
 		{
-		  unsigned long r_symndx = rel->r_info >> r_sym_shift;
-		  asection **ps, *sec;
-		  struct elf_link_hash_entry *h = NULL;
-		  const char *sym_name;
+		  h = sym_hashes[r_symndx - extsymoff];
 
-		  if (r_symndx == STN_UNDEF)
-		    continue;
-
-		  if (r_symndx >= locsymcount
-		      || (elf_bad_symtab (input_bfd)
-			  && finfo->sections[r_symndx] == NULL))
+		  /* Badly formatted input files can contain relocs that
+		     reference non-existant symbols.  Check here so that
+		     we do not seg fault.  */
+		  if (h == NULL)
 		    {
-		      h = sym_hashes[r_symndx - extsymoff];
+		      char buffer [32];
 
-		      /* Badly formatted input files can contain relocs that
-			 reference non-existant symbols.  Check here so that
-			 we do not seg fault.  */
-		      if (h == NULL)
-			{
-			  char buffer [32];
-
-			  sprintf_vma (buffer, rel->r_info);
-			  (*_bfd_error_handler)
-			    (_("error: %B contains a reloc (0x%s) for section %A "
-			       "that references a non-existent global symbol"),
-			     input_bfd, o, buffer);
-			  bfd_set_error (bfd_error_bad_value);
-			  return FALSE;
-			}
-
-		      while (h->root.type == bfd_link_hash_indirect
-			     || h->root.type == bfd_link_hash_warning)
-			h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-		      if (h->root.type != bfd_link_hash_defined
-			  && h->root.type != bfd_link_hash_defweak)
-			continue;
-
-		      ps = &h->root.u.def.section;
-		      sym_name = h->root.root.string;
-		    }
-		  else
-		    {
-		      Elf_Internal_Sym *sym = isymbuf + r_symndx;
-		      ps = &finfo->sections[r_symndx];
-		      sym_name = bfd_elf_sym_name (input_bfd,
-						   symtab_hdr,
-						   sym, *ps);
+		      sprintf_vma (buffer, rel->r_info);
+		      (*_bfd_error_handler)
+			(_("error: %B contains a reloc (0x%s) for section %A "
+			   "that references a non-existent global symbol"),
+			 input_bfd, o, buffer);
+		      bfd_set_error (bfd_error_bad_value);
+		      return FALSE;
 		    }
 
+		  while (h->root.type == bfd_link_hash_indirect
+			 || h->root.type == bfd_link_hash_warning)
+		    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+		  s_type = h->type;
+
+		  ps = NULL;
+		  if (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak)
+		    ps = &h->root.u.def.section;
+
+		  sym_name = h->root.root.string;
+		}
+	      else
+		{
+		  Elf_Internal_Sym *sym = isymbuf + r_symndx;
+
+		  s_type = ELF_ST_TYPE (sym->st_info);
+		  ps = &finfo->sections[r_symndx];
+		  sym_name = bfd_elf_sym_name (input_bfd, symtab_hdr,
+					       sym, *ps);
+		}
+
+	      if (s_type == STT_RELC || s_type == STT_SRELC)
+		{
+		  bfd_vma val;
+		  bfd_vma dot = (rel->r_offset
+				 + o->output_offset + o->output_section->vma);
+#ifdef DEBUG
+		  printf ("Encountered a complex symbol!");
+		  printf (" (input_bfd %s, section %s, reloc %ld\n",
+			  input_bfd->filename, o->name, rel - internal_relocs);
+		  printf (" symbol: idx  %8.8lx, name %s\n",
+			  r_symndx, sym_name);
+		  printf (" reloc : info %8.8lx, addr %8.8lx\n",
+			  (unsigned long) rel->r_info,
+			  (unsigned long) rel->r_offset);
+#endif
+		  if (!eval_symbol (&val, &sym_name, input_bfd, finfo, dot,
+				    isymbuf, locsymcount, s_type == STT_SRELC))
+		    return FALSE;
+
+		  /* Symbol evaluated OK.  Update to absolute value.  */
+		  set_symbol_value (input_bfd, isymbuf, locsymcount,
+				    r_symndx, val);
+		  continue;
+		}
+
+	      if (action_discarded != -1 && ps != NULL)
+		{
 		  /* Complain if the definition comes from a
 		     discarded section.  */
 		  if ((sec = *ps) != NULL && elf_discarded_section (sec))
 		    {
 		      BFD_ASSERT (r_symndx != 0);
-		      if (action & COMPLAIN)
+		      if (action_discarded & COMPLAIN)
 			(*finfo->info->callbacks->einfo)
 			  (_("%X`%s' referenced in section `%A' of %B: "
 			     "defined in discarded section `%A' of %B\n"),
@@ -9362,7 +9166,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			 FIXME: This is quite broken.  Modifying the
 			 symbol here means we will be changing all later
 			 uses of the symbol, not just in this section.  */
-		      if (action & PRETEND)
+		      if (action_discarded & PRETEND)
 			{
 			  asection *kept;
 

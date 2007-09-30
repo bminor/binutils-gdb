@@ -27,8 +27,15 @@ if ![is_elf_format] {
     return
 }
 
-# Alpha and IA64 do not support selective linking
-if {[istarget "alpha*-*-*"] || [istarget "ia64-*-*"]} {
+# These targets do not support selective linking
+if {[istarget "alpha*-*-*"] || [istarget "am33*-*-*"] ||
+    [istarget "arc-*-*"] || [istarget "d30v-*-*"] ||
+    [istarget "dlx-*-*"] || [istarget "hppa*64*-*-*"] ||
+    [istarget "i370-*-*"] || [istarget "i860-*-*"] ||
+    [istarget "i960-*-*"] || [istarget "ia64-*-*"] ||
+    [istarget "m88*-*-*"] || [istarget "mn10200-*-*"] ||
+    [istarget "mep-*-*"] || [istarget "or32-*-*"] ||
+    [istarget "pj*-*-*"]} {
     return
 }
 

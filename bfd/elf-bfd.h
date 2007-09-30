@@ -1814,14 +1814,7 @@ extern bfd_boolean bfd_elf_match_symbols_in_sections
   (asection *, asection *, struct bfd_link_info *);
 
 extern void bfd_elf_perform_complex_relocation
-  (bfd *                   output_bfd ATTRIBUTE_UNUSED,
-   struct bfd_link_info *  info,
-   bfd *                   input_bfd,
-   asection *              input_section,
-   bfd_byte *              contents,
-   Elf_Internal_Rela *     rel,
-   Elf_Internal_Sym *      local_syms,
-   asection **             local_sections);
+  (bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, bfd_vma);
 
 extern bfd_boolean _bfd_elf_setup_sections
   (bfd *);
