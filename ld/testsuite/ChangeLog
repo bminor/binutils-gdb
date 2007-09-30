@@ -1,3 +1,8 @@
+2007-09-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* ld-selective/selective.exp: Set $compiler based on $testtype and
+	use that instead of $CC.
+
 2007-09-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-selective/sel-dump.exp: Add am33, m88k, mep to xfails.
