@@ -73,23 +73,28 @@ HFILES = \
 	target-select.h \
 	workqueue.h
 
-TARGETFILES = \
-	i386.cc
-
 YFILES = \
 	yyscript.y
 
 EXTRA_DIST = yyscript.c yyscript.h
 
+TARGETSOURCES = \
+	i386.cc
+
+ALL_TARGETOBJS = \
+	i386.$(OBJEXT)
+
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
 
-sources_var = main.cc $(TARGETFILES)
-deps_var = libgold.a $(LIBINTL_DEP)
-ldadd_var = libgold.a $(LIBINTL)
+sources_var = main.cc
+deps_var = $(TARGETOBJS) libgold.a $(LIBINTL_DEP)
+ldadd_var = $(TARGETOBJS) libgold.a $(LIBINTL)
 
 ld_new_SOURCES = $(sources_var)
 ld_new_DEPENDENCIES = $(deps_var) $(LIBOBJS)
 ld_new_LDADD = $(ldadd_var) $(LIBOBJS)
+
+EXTRA_ld_new_SOURCES = $(TARGETSOURCES)
 
 # Use an explicit dependency for the bison generated header file.
 script.$(OBJEXT): yyscript.h
@@ -113,7 +118,7 @@ install-exec-local: ld-new$(EXEEXT)
 # the cygnus option.
 install-data-local: install-info
 
-POTFILES= $(CCFILES) $(HFILES) $(TARGETFILES)
+POTFILES= $(CCFILES) $(HFILES) $(TARGETSOURCES)
 
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \

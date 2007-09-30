@@ -41,6 +41,8 @@ if test -n "$enable_targets"; then
 fi
 
 # See which specific instantiations we need.
+targetobjs=
+all_targets=
 for targ in $target $canon_targets; do
   targ_32_little=
   targ_32_big=
@@ -51,12 +53,19 @@ for targ in $target $canon_targets; do
     targ_32_big=yes
     targ_64_little=yes
     targ_64_big=yes
+    all_targets=yes
   else
     case "$targ" in
-    i?86-*) targ_32_little=yes ;;
-    x86_64-*) targ_64_little=yes ;;
+    i?86-*)
+      targ_32_little=yes
+      targetobjs="$targetobjs i386.\$(OBJEXT)"
+      ;;
+    x86_64-*)
+      targ_64_little=yes
+      targetobjs="$targetobjs x86_64.\$(OBJEXT)"
+      ;;
     *)
-      AC_MSG_ERROR("target $targ: unknown size and endianness")
+      AC_MSG_ERROR("unsupported target $targ")
       ;;
     esac
   fi
@@ -78,6 +87,13 @@ if test -n "$targ_64_big"; then
   AC_DEFINE(HAVE_TARGET_64_BIG, 1,
 	      [Define to support 64-bit big-endian targets])
 fi
+
+if test -n "$all_targets"; then
+  TARGETOBJS='$(ALL_TARGETOBJS)'
+else
+  TARGETOBJS="$targetobjs"
+fi
+AC_SUBST(TARGETOBJS)
 
 AC_PROG_CC
 AC_PROG_CXX
