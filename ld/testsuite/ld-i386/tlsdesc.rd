@@ -5,25 +5,25 @@
 #readelf: -Ssrl
 #target: i?86-*-*
 
-There are [0-9]+ section headers, starting at offset 0x.*:
+There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
   \[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
-  \[ 0\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
-  \[ 1\] \.hash +.*
-  \[ 2\] \.dynsym +.*
-  \[ 3\] \.dynstr +.*
-  \[ 4\] \.rel.dyn +.*
-  \[ 5\] \.rel.plt +.*
-  \[ 6\] \.text +.*
-  \[ 7\] \.tdata +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000060 00 WAT  0   0  1
-  \[ 8\] \.tbss +NOBITS +[0-9aa-f]+ [0-9a-f]+ 000020 00 WAT  0   0  1
-  \[ 9\] \.dynamic +.*
-  \[10\] \.got +.*
-  \[11\] \.got.plt +.*
-  \[12\] \.shstrtab +.*
-  \[13\] \.symtab +.*
-  \[14\] \.strtab +.*
+ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
+ +\[[ 0-9]+\] \.hash +.*
+ +\[[ 0-9]+\] \.dynsym +.*
+ +\[[ 0-9]+\] \.dynstr +.*
+ +\[[ 0-9]+\] \.rel.dyn +.*
+ +\[[ 0-9]+\] \.rel.plt +.*
+ +\[[ 0-9]+\] \.text +.*
+ +\[[ 0-9]+\] \.tdata +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000060 00 WAT  0   0  1
+ +\[[ 0-9]+\] \.tbss +NOBITS +[0-9aa-f]+ [0-9a-f]+ 000020 00 WAT  0   0  1
+ +\[[ 0-9]+\] \.dynamic +.*
+ +\[[ 0-9]+\] \.got +.*
+ +\[[ 0-9]+\] \.got.plt +.*
+ +\[[ 0-9]+\] \.shstrtab +.*
+ +\[[ 0-9]+\] \.symtab +.*
+ +\[[ 0-9]+\] \.strtab +.*
 Key to Flags:
 .*
 .*
@@ -78,7 +78,7 @@ Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 5 entries:
 [0-9a-f ]+R_386_TLS_DESC *
 [0-9a-f ]+R_386_TLS_DESC *
 
-Symbol table '.dynsym' contains [0-9]+ entries:
+Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: + Value  Size Type + Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +7 sg8
@@ -94,7 +94,7 @@ Symbol table '.dynsym' contains [0-9]+ entries:
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
 
-Symbol table '.symtab' contains 51 entries:
+Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +1 *

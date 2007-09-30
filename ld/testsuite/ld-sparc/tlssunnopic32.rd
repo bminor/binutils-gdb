@@ -9,22 +9,22 @@
 
 Section Headers:
  +\[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
- +\[ 0\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
- +\[ 1\] .hash +.*
- +\[ 2\] .dynsym +.*
- +\[ 3\] .dynstr +.*
- +\[ 4\] .rela.dyn +.*
- +\[ 5\] .text +PROGBITS +0+1000 0+1000 0+1000 0+ +AX +0 +0 4096
- +\[ 6\] .tbss +NOBITS +0+12000 0+2000 0+24 0+ WAT +0 +0 +4
- +\[ 7\] .dynamic +DYNAMIC +0+12000 0+2000 0+80 08 +WA +3 +0 +4
- +\[ 8\] .got +PROGBITS +0+12080 0+2080 0+1c 04 +WA +0 +0 +4
- +\[ 9\] .shstrtab +.*
- +\[10\] .symtab +.*
- +\[11\] .strtab +.*
+ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
+ +\[[ 0-9]+\] .hash +.*
+ +\[[ 0-9]+\] .dynsym +.*
+ +\[[ 0-9]+\] .dynstr +.*
+ +\[[ 0-9]+\] .rela.dyn +.*
+ +\[[ 0-9]+\] .text +PROGBITS +0+1000 0+1000 0+1000 0+ +AX +0 +0 4096
+ +\[[ 0-9]+\] .tbss +NOBITS +0+12000 0+2000 0+24 0+ WAT +0 +0 +4
+ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+12000 0+2000 0+80 08 +WA +3 +0 +4
+ +\[[ 0-9]+\] .got +PROGBITS +0+12080 0+2080 0+1c 04 +WA +0 +0 +4
+ +\[[ 0-9]+\] .shstrtab +.*
+ +\[[ 0-9]+\] .symtab +.*
+ +\[[ 0-9]+\] .strtab +.*
 #...
 Elf file type is DYN \(Shared object file\)
 Entry point 0x1000
-There are 4 program headers, starting at offset [0-9a-f]+
+There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz MemSiz +Flg Align
@@ -49,7 +49,7 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 12 entries:
 [0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+ +sg1 \+ 0
 [0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+ +sg2 \+ 0
 
-Symbol table '.dynsym' contains [0-9]+ entries:
+Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION LOCAL +DEFAULT +5 *
@@ -62,7 +62,7 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '.symtab' contains 27 entries:
+Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION LOCAL +DEFAULT +1 *

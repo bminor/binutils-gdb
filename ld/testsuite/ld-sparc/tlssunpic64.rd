@@ -5,30 +5,30 @@
 #readelf: -WSsrl
 #target: sparc*-*-*
 
-There are 15 section headers, starting at offset 0x[0-9a-f]+:
+There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
  +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
- +\[ 0\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
- +\[ 1\] .hash +.*
- +\[ 2\] .dynsym +.*
- +\[ 3\] .dynstr +.*
- +\[ 4\] .rela.dyn +.*
- +\[ 5\] .rela.plt +.*
- +\[ 6\] .text +PROGBITS +0+1000 0+1000 0+1000 0+ +AX +0 +0 4096
- +\[ 7\] .tdata +PROGBITS +0+102000 0+2000 0+60 0+ WAT +0 +0 +4
- +\[ 8\] .tbss +NOBITS +0+102060 0+2060 0+20 0+ WAT +0 +0 +4
- +\[ 9\] .dynamic +DYNAMIC +0+102060 0+2060 0+130 10 +WA +3 +0 +8
- +\[10\] .got +PROGBITS +0+102190 0+2190 0+98 08 +WA +0 +0 +8
- +\[11\] .plt +.*
- +\[12\] .shstrtab +.*
- +\[13\] .symtab +.*
- +\[14\] .strtab +.*
+ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
+ +\[[ 0-9]+\] .hash +.*
+ +\[[ 0-9]+\] .dynsym +.*
+ +\[[ 0-9]+\] .dynstr +.*
+ +\[[ 0-9]+\] .rela.dyn +.*
+ +\[[ 0-9]+\] .rela.plt +.*
+ +\[[ 0-9]+\] .text +PROGBITS +0+1000 0+1000 0+1000 0+ +AX +0 +0 4096
+ +\[[ 0-9]+\] .tdata +PROGBITS +0+102000 0+2000 0+60 0+ WAT +0 +0 +4
+ +\[[ 0-9]+\] .tbss +NOBITS +0+102060 0+2060 0+20 0+ WAT +0 +0 +4
+ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+102060 0+2060 0+130 10 +WA +3 +0 +8
+ +\[[ 0-9]+\] .got +PROGBITS +0+102190 0+2190 0+98 08 +WA +0 +0 +8
+ +\[[ 0-9]+\] .plt +.*
+ +\[[ 0-9]+\] .shstrtab +.*
+ +\[[ 0-9]+\] .symtab +.*
+ +\[[ 0-9]+\] .strtab +.*
 #...
 
 Elf file type is DYN \(Shared object file\)
 Entry point 0x1000
-There are 4 program headers, starting at offset [0-9]+
+There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
@@ -59,7 +59,7 @@ Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_SPARC_JMP_SLOT +0+ +__tls_get_addr \+ 0
 
-Symbol table '.dynsym' contains [0-9]+ entries:
+Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION LOCAL +DEFAULT +6 *
@@ -79,7 +79,7 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '.symtab' contains 52 entries:
+Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION LOCAL +DEFAULT +1 *

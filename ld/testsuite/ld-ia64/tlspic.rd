@@ -5,34 +5,34 @@
 #readelf: -WSsrl
 #target: ia64-*-*
 
-There are 18 section headers, starting at offset 0x[0-9a-f]+:
+There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
   \[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
-  \[ 0\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
-  \[ 1\] .hash +.*
-  \[ 2\] .dynsym +.*
-  \[ 3\] .dynstr +.*
-  \[ 4\] .rela.dyn +.*
-  \[ 5\] .rela.IA_64.pltof +.*
-  \[ 6\] .plt +.*
-  \[ 7\] .text +PROGBITS +0+1000 0+1000 0+110 00 +AX +0 +0 4096
-  \[ 8\] .IA_64.unwind_inf +.*
-  \[ 9\] .IA_64.unwind +.*
-  \[10\] .tdata +PROGBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+60 00 WAT +0 +0 +4
-  \[11\] .tbss +NOBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+20 00 WAT +0 +0 +1
-  \[12\] .dynamic +DYNAMIC +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+140 10 +WA +3 +0 +8
-  \[13\] .got +PROGBITS +0+112d8 0+12d8 0+50 00 WAp +0 +0 +8
-  \[14\] .IA_64.pltoff +.*
-  \[15\] .shstrtab +.*
-  \[16\] .symtab +.*
-  \[17\] .strtab +.*
+ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
+ +\[[ 0-9]+\] .hash +.*
+ +\[[ 0-9]+\] .dynsym +.*
+ +\[[ 0-9]+\] .dynstr +.*
+ +\[[ 0-9]+\] .rela.dyn +.*
+ +\[[ 0-9]+\] .rela.IA_64.pltof +.*
+ +\[[ 0-9]+\] .plt +.*
+ +\[[ 0-9]+\] .text +PROGBITS +0+1000 0+1000 0+110 00 +AX +0 +0 4096
+ +\[[ 0-9]+\] .IA_64.unwind_inf +.*
+ +\[[ 0-9]+\] .IA_64.unwind +.*
+ +\[[ 0-9]+\] .tdata +PROGBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+60 00 WAT +0 +0 +4
+ +\[[ 0-9]+\] .tbss +NOBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+20 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+140 10 +WA +3 +0 +8
+ +\[[ 0-9]+\] .got +PROGBITS +0+112d8 0+12d8 0+50 00 WAp +0 +0 +8
+ +\[[ 0-9]+\] .IA_64.pltoff +.*
+ +\[[ 0-9]+\] .shstrtab +.*
+ +\[[ 0-9]+\] .symtab +.*
+ +\[[ 0-9]+\] .strtab +.*
 Key to Flags:
 #...
 
 Elf file type is DYN \(Shared object file\)
 Entry point 0x1000
-There are 5 program headers, starting at offset [0-9]+
+There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
   Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
@@ -56,7 +56,7 @@ Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entries
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_IA64_IPLTLSB +0+ __tls_get_addr \+ 0
 
-Symbol table '.dynsym' contains [0-9]+ entries:
+Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* TLS +GLOBAL DEFAULT +10 sg8
@@ -73,7 +73,7 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '.symtab' contains 54 entries:
+Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION LOCAL +DEFAULT +1 *

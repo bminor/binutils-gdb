@@ -8,25 +8,25 @@
 
 Section Headers:
  +\[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
- +\[ 0\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
- +\[ 1\] .interp +.*
- +\[ 2\] .hash +.*
- +\[ 3\] .dynsym +.*
- +\[ 4\] .dynstr +.*
- +\[ 5\] .rela.dyn +.*
- +\[ 6\] .text +PROGBITS +0+11000 0+1000 0+1194 00 +AX +0 +0 4096
- +\[ 7\] .tdata +PROGBITS +0+22194 0+2194 0+1060 00 WAT +0 +0 +4
- +\[ 8\] .tbss +NOBITS +0+231f4 0+31f4 0+40 00 WAT +0 +0 +4
- +\[ 9\] .dynamic +DYNAMIC +0+231f4 0+31f4 0+80 08 +WA +4 +0 +4
- +\[10\] .got +PROGBITS +0+23274 0+3274 0+14 04 +WA +0 +0 +4
- +\[11\] .shstrtab +.*
- +\[12\] .symtab +.*
- +\[13\] .strtab +.*
+ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
+ +\[[ 0-9]+\] .interp +.*
+ +\[[ 0-9]+\] .hash +.*
+ +\[[ 0-9]+\] .dynsym +.*
+ +\[[ 0-9]+\] .dynstr +.*
+ +\[[ 0-9]+\] .rela.dyn +.*
+ +\[[ 0-9]+\] .text +PROGBITS +0+11000 0+1000 0+1194 00 +AX +0 +0 4096
+ +\[[ 0-9]+\] .tdata +PROGBITS +0+22194 0+2194 0+1060 00 WAT +0 +0 +4
+ +\[[ 0-9]+\] .tbss +NOBITS +0+231f4 0+31f4 0+40 00 WAT +0 +0 +4
+ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+231f4 0+31f4 0+80 08 +WA +4 +0 +4
+ +\[[ 0-9]+\] .got +PROGBITS +0+23274 0+3274 0+14 04 +WA +0 +0 +4
+ +\[[ 0-9]+\] .shstrtab +.*
+ +\[[ 0-9]+\] .symtab +.*
+ +\[[ 0-9]+\] .strtab +.*
 #...
 
 Elf file type is EXEC \(Executable file\)
 Entry point 0x12000
-There are 6 program headers, starting at offset [0-9]+
+There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz MemSiz +Flg Align
@@ -46,7 +46,7 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 4 entries:
 [0-9a-f ]+R_SPARC_TLS_TPOFF32 +00000000 +sG6 \+ 0
 [0-9a-f ]+R_SPARC_TLS_TPOFF32 +00000000 +sG1 \+ 0
 
-Symbol table '.dynsym' contains [0-9]+ entries:
+Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* TLS +GLOBAL DEFAULT +UND sG5
@@ -58,7 +58,7 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '.symtab' contains 64 entries:
+Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION LOCAL +DEFAULT +1 *

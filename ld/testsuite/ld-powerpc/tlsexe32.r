@@ -5,31 +5,31 @@
 #readelf: -WSsrl
 #target: powerpc*-*-*
 
-There are 16 section headers.*
+There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
  +\[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
- +\[ 0\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
- +\[ 1\] \.interp +.*
- +\[ 2\] \.hash +.*
- +\[ 3\] \.dynsym +.*
- +\[ 4\] \.dynstr +.*
- +\[ 5\] \.rela\.dyn +.*
- +\[ 6\] \.rela\.plt +.*
- +\[ 7\] \.text +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000070 00 +AX +0 +0 +1
- +\[ 8\] \.tdata +PROGBITS +[0-9a-f]+ [0-9a-f]+ 00001c 00 WAT +0 +0 +4
- +\[ 9\] \.tbss +NOBITS +[0-9a-f]+ [0-9a-f]+ 00001c 00 WAT +0 +0 +4
- +\[10\] \.dynamic +DYNAMIC +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 08 +WA +4 +0 +4
- +\[11\] \.got +PROGBITS +[0-9a-f]+ [0-9a-f]+ 00001c 04 WAX +0 +0 +4
- +\[12\] \.plt +NOBITS +.*
- +\[13\] \.shstrtab +STRTAB +.*
- +\[14\] \.symtab +SYMTAB +.*
- +\[15\] \.strtab +STRTAB +.*
+ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
+ +\[[ 0-9]+\] \.interp +.*
+ +\[[ 0-9]+\] \.hash +.*
+ +\[[ 0-9]+\] \.dynsym +.*
+ +\[[ 0-9]+\] \.dynstr +.*
+ +\[[ 0-9]+\] \.rela\.dyn +.*
+ +\[[ 0-9]+\] \.rela\.plt +.*
+ +\[[ 0-9]+\] \.text +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000070 00 +AX +0 +0 +1
+ +\[[ 0-9]+\] \.tdata +PROGBITS +[0-9a-f]+ [0-9a-f]+ 00001c 00 WAT +0 +0 +4
+ +\[[ 0-9]+\] \.tbss +NOBITS +[0-9a-f]+ [0-9a-f]+ 00001c 00 WAT +0 +0 +4
+ +\[[ 0-9]+\] \.dynamic +DYNAMIC +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 08 +WA +4 +0 +4
+ +\[[ 0-9]+\] \.got +PROGBITS +[0-9a-f]+ [0-9a-f]+ 00001c 04 WAX +0 +0 +4
+ +\[[ 0-9]+\] \.plt +NOBITS +.*
+ +\[[ 0-9]+\] \.shstrtab +STRTAB +.*
+ +\[[ 0-9]+\] \.symtab +SYMTAB +.*
+ +\[[ 0-9]+\] \.strtab +STRTAB +.*
 #...
 
 Elf file type is EXEC \(Executable file\)
 Entry point .*
-There are 6 program headers, starting at offset 52
+There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz MemSiz +Flg Align
@@ -70,7 +70,7 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '\.symtab' contains 37 entries:
+Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND 
 .* SECTION LOCAL +DEFAULT +1 

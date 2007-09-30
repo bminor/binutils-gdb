@@ -5,25 +5,25 @@
 #readelf: -WSsrl
 #target: x86_64-*-*
 
-There are 15 section headers, starting at offset 0x[0-9a-f]+:
+There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
   \[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
-  \[ 0\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
-  \[ 1\] .interp +.*
-  \[ 2\] .hash +.*
-  \[ 3\] .dynsym +.*
-  \[ 4\] .dynstr +.*
-  \[ 5\] .rela.dyn +.*
-  \[ 6\] .text +PROGBITS +0+401000 0+1000 0+1f6 00 +AX +0 +0 +4096
-  \[ 7\] .tdata +PROGBITS +0+6011f6 0+11f6 0+60 00 WAT +0 +0 +1
-  \[ 8\] .tbss +NOBITS +0+601256 0+1256 0+40 00 WAT +0 +0 +1
-  \[ 9\] .dynamic +DYNAMIC +0+601258 0+1258 0+100 10 +WA +4 +0 +8
-  \[10\] .got +PROGBITS +0+601358 0+1358 0+20 08 +WA +0 +0 +8
-  \[11\] .got.plt +PROGBITS +0+601378 0+1378 0+18 08 +WA +0 +0 +8
-  \[12\] .shstrtab +.*
-  \[13\] .symtab +.*
-  \[14\] .strtab +.*
+ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
+ +\[[ 0-9]+\] .interp +.*
+ +\[[ 0-9]+\] .hash +.*
+ +\[[ 0-9]+\] .dynsym +.*
+ +\[[ 0-9]+\] .dynstr +.*
+ +\[[ 0-9]+\] .rela.dyn +.*
+ +\[[ 0-9]+\] .text +PROGBITS +0+401000 0+1000 0+1f6 00 +AX +0 +0 +4096
+ +\[[ 0-9]+\] .tdata +PROGBITS +0+6011f6 0+11f6 0+60 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .tbss +NOBITS +0+601256 0+1256 0+40 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+601258 0+1258 0+100 10 +WA +4 +0 +8
+ +\[[ 0-9]+\] .got +PROGBITS +0+601358 0+1358 0+20 08 +WA +0 +0 +8
+ +\[[ 0-9]+\] .got.plt +PROGBITS +0+601378 0+1378 0+18 08 +WA +0 +0 +8
+ +\[[ 0-9]+\] .shstrtab +.*
+ +\[[ 0-9]+\] .symtab +.*
+ +\[[ 0-9]+\] .strtab +.*
 Key to Flags:
 .*
 .*
@@ -31,7 +31,7 @@ Key to Flags:
 
 Elf file type is EXEC \(Executable file\)
 Entry point 0x401108
-There are 6 program headers, starting at offset [0-9]+
+There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
   Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
@@ -59,7 +59,7 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 4 entries:
 0+601368  0+400000012 R_X86_64_TPOFF64 +0+ sG6 \+ 0
 0+601370  0+500000012 R_X86_64_TPOFF64 +0+ sG1 \+ 0
 
-Symbol table '.dynsym' contains 8 entries:
+Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG5
@@ -70,7 +70,7 @@ Symbol table '.dynsym' contains 8 entries:
  +[0-9]+: 0+[0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
  +[0-9]+: 0+[0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
 
-Symbol table '.symtab' contains 64 entries:
+Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +1 *

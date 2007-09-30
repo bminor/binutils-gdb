@@ -4,24 +4,24 @@
 #readelf: -WSsrl
 #target: x86_64-*-*
 
-There are [0-9]+ section headers, starting at offset 0x.*:
+There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
 
 Section Headers:
   \[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
-  \[ 0\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
-  \[ 1\] \.hash +.*
-  \[ 2\] \.dynsym +.*
-  \[ 3\] \.dynstr +.*
-  \[ 4\] \.rela.dyn +.*
-  \[ 5\] \.rela.plt +.*
-  \[ 6\] \.plt +.*
-  \[ 7\] \.text +.*
-  \[ 8\] \.dynamic +.*
-  \[ 9\] \.got +.*
-  \[10\] \.got.plt +.*
-  \[11\] \.shstrtab +.*
-  \[12\] \.symtab +.*
-  \[13\] \.strtab +.*
+ +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
+ +\[[ 0-9]+\] \.hash +.*
+ +\[[ 0-9]+\] \.dynsym +.*
+ +\[[ 0-9]+\] \.dynstr +.*
+ +\[[ 0-9]+\] \.rela.dyn +.*
+ +\[[ 0-9]+\] \.rela.plt +.*
+ +\[[ 0-9]+\] \.plt +.*
+ +\[[ 0-9]+\] \.text +.*
+ +\[[ 0-9]+\] \.dynamic +.*
+ +\[[ 0-9]+\] \.got +.*
+ +\[[ 0-9]+\] \.got.plt +.*
+ +\[[ 0-9]+\] \.shstrtab +.*
+ +\[[ 0-9]+\] \.symtab +.*
+ +\[[ 0-9]+\] \.strtab +.*
 Key to Flags:
 .*
 .*
@@ -60,7 +60,7 @@ Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 3 entries:
 [0-9a-f]+  0+a00000024 R_X86_64_TLSDESC +0+ sG1 \+ 0
 [0-9a-f]+  0+400000024 R_X86_64_TLSDESC +0+ sG2 \+ 0
 
-Symbol table '.dynsym' contains 13 entries:
+Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +7 *
@@ -76,7 +76,7 @@ Symbol table '.dynsym' contains 13 entries:
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _edata
  +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT  ABS _end
 
-Symbol table '.symtab' contains 24 entries:
+Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +1 *
