@@ -452,7 +452,7 @@ bfd_elf_link_mark_dynamic_symbol (struct bfd_link_info *info,
        && (h->type == STT_OBJECT
 	   || (sym != NULL
 	       && ELF_ST_TYPE (sym->st_info) == STT_OBJECT)))
-      || (d != NULL 
+      || (d != NULL
 	  && h->root.type == bfd_link_hash_new
 	  && (*d->match) (&d->head, NULL, h->root.root.string)))
     h->dynamic = 1;
@@ -501,7 +501,7 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
       break;
     case bfd_link_hash_indirect:
       /* We had a versioned symbol in a dynamic library.  We make the
-         the versioned symbol point to this one.  */
+	 the versioned symbol point to this one.  */
       bed = get_elf_backend_data (output_bfd);
       hv = h;
       while (hv->root.type == bfd_link_hash_indirect
@@ -4997,7 +4997,7 @@ struct hash_codes_info
   unsigned long *hashcodes;
   bfd_boolean error;
 };
-  
+
 /* This function will be called though elf_link_hash_traverse to store
    all hash value of the exported symbols in an array.  */
 
@@ -7203,7 +7203,7 @@ struct elf_outext_info
 
    Complex relocations are generalized, self-describing relocations.  The
    implementation of them consists of two parts: complex symbols, and the
-   relocations themselves. 
+   relocations themselves.
 
    The relocations are use a reserved elf-wide relocation type code (R_RELC
    external / BFD_RELOC_RELC internal) and an encoding of relocation field
@@ -7229,11 +7229,11 @@ struct elf_outext_info
    <unary-operator> := as in C, plus "0-" for unambiguous negation.  */
 
 static void
-set_symbol_value (bfd *                         bfd_with_globals,
-		  Elf_Internal_Sym *		isymbuf,
-		  size_t			locsymcount,
-		  size_t                        symidx,
-		  bfd_vma                       val)
+set_symbol_value (bfd *bfd_with_globals,
+		  Elf_Internal_Sym *isymbuf,
+		  size_t locsymcount,
+		  size_t symidx,
+		  bfd_vma val)
 {
   struct elf_link_hash_entry **sym_hashes;
   struct elf_link_hash_entry *h;
@@ -7269,20 +7269,20 @@ set_symbol_value (bfd *                         bfd_with_globals,
   h->root.u.def.section = bfd_abs_section_ptr;
 }
 
-static bfd_boolean 
-resolve_symbol (const char *                  name,
-		bfd *                         input_bfd,
-		struct elf_final_link_info *  finfo,
-		bfd_vma *                     result,
-		Elf_Internal_Sym *            isymbuf,
-		size_t                        locsymcount)
+static bfd_boolean
+resolve_symbol (const char *name,
+		bfd *input_bfd,
+		struct elf_final_link_info *finfo,
+		bfd_vma *result,
+		Elf_Internal_Sym *isymbuf,
+		size_t locsymcount)
 {
-  Elf_Internal_Sym *            sym;
-  struct bfd_link_hash_entry *  global_entry;
-  const char *                  candidate = NULL;
-  Elf_Internal_Shdr *           symtab_hdr;
-  size_t                        i;
-  
+  Elf_Internal_Sym *sym;
+  struct bfd_link_hash_entry *global_entry;
+  const char *candidate = NULL;
+  Elf_Internal_Shdr *symtab_hdr;
+  size_t i;
+
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
 
   for (i = 0; i < locsymcount; ++ i)
@@ -7314,35 +7314,36 @@ resolve_symbol (const char *                  name,
     }
 
   /* Hmm, haven't found it yet. perhaps it is a global.  */
-  global_entry = bfd_link_hash_lookup (finfo->info->hash, name, FALSE, FALSE, TRUE);
+  global_entry = bfd_link_hash_lookup (finfo->info->hash, name,
+				       FALSE, FALSE, TRUE);
   if (!global_entry)
     return FALSE;
-  
+
   if (global_entry->type == bfd_link_hash_defined
       || global_entry->type == bfd_link_hash_defweak)
     {
-      * result = global_entry->u.def.value 
-	+ global_entry->u.def.section->output_section->vma 
-	+ global_entry->u.def.section->output_offset;
+      *result = (global_entry->u.def.value
+		 + global_entry->u.def.section->output_section->vma
+		 + global_entry->u.def.section->output_offset);
 #ifdef DEBUG
       printf ("Found GLOBAL symbol '%s' with value %8.8lx\n",
 	      global_entry->root.string, (unsigned long) *result);
 #endif
       return TRUE;
-    } 
+    }
 
   return FALSE;
 }
 
 static bfd_boolean
-resolve_section (const char *  name,
-		 asection *    sections,
-		 bfd_vma *     result)
+resolve_section (const char *name,
+		 asection *sections,
+		 bfd_vma *result)
 {
-  asection *    curr;
-  unsigned int  len;
+  asection *curr;
+  unsigned int len;
 
-  for (curr = sections; curr; curr = curr->next)    
+  for (curr = sections; curr; curr = curr->next)
     if (strcmp (curr->name, name) == 0)
       {
 	*result = curr->vma;
@@ -7350,10 +7351,10 @@ resolve_section (const char *  name,
       }
 
   /* Hmm. still haven't found it. try pseudo-section names.  */
-  for (curr = sections; curr; curr = curr->next)    
+  for (curr = sections; curr; curr = curr->next)
     {
       len = strlen (curr->name);
-      if (len > strlen (name)) 
+      if (len > strlen (name))
 	continue;
 
       if (strncmp (curr->name, name, len) == 0)
@@ -7367,36 +7368,36 @@ resolve_section (const char *  name,
 	  /* Insert more pseudo-section names here, if you like.  */
 	}
     }
-  
+
   return FALSE;
 }
 
 static void
-undefined_reference (const char *  reftype,
-		     const char *  name)
+undefined_reference (const char *reftype, const char *name)
 {
-  _bfd_error_handler (_("undefined %s reference in complex symbol: %s"), reftype, name);
+  _bfd_error_handler (_("undefined %s reference in complex symbol: %s"),
+		      reftype, name);
 }
 
 static bfd_boolean
-eval_symbol (bfd_vma *                     result,
-	     const char **                 symp,
-	     bfd *                         input_bfd,
-	     struct elf_final_link_info *  finfo,
-	     bfd_vma                       dot,
-	     Elf_Internal_Sym *            isymbuf,
-	     size_t                        locsymcount,
-	     int                           signed_p)
+eval_symbol (bfd_vma *result,
+	     const char **symp,
+	     bfd *input_bfd,
+	     struct elf_final_link_info *finfo,
+	     bfd_vma dot,
+	     Elf_Internal_Sym *isymbuf,
+	     size_t locsymcount,
+	     int signed_p)
 {
-  int           len;
-  int           symlen;
-  bfd_vma       a;
-  bfd_vma       b;
-  const int     bufsz = 4096;
-  char          symbuf [bufsz];
+  int len;
+  int symlen;
+  bfd_vma a;
+  bfd_vma b;
+  const int bufsz = 4096;
+  char symbuf[bufsz];
   const char *sym = *symp;
-  const char *  symend;
-  bfd_boolean   symbol_is_section = FALSE;
+  const char *symend;
+  bfd_boolean symbol_is_section = FALSE;
 
   len = strlen (sym);
   symend = sym + len;
@@ -7406,7 +7407,7 @@ eval_symbol (bfd_vma *                     result,
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
     }
-  
+
   switch (* sym)
     {
     case '.':
@@ -7421,27 +7422,27 @@ eval_symbol (bfd_vma *                     result,
 
     case 'S':
       symbol_is_section = TRUE;
-    case 's':      
+    case 's':
       ++sym;
       symlen = strtol (sym, (char **) symp, 10);
       sym = *symp + 1; /* Skip the trailing ':'.  */
 
-      if ((symend < sym) || ((symlen + 1) > bufsz))
+      if (symend < sym || symlen + 1 > bufsz)
 	{
 	  bfd_set_error (bfd_error_invalid_operation);
 	  return FALSE;
 	}
 
       memcpy (symbuf, sym, symlen);
-      symbuf [symlen] = '\0';
+      symbuf[symlen] = '\0';
       *symp = sym + symlen;
-      
-      /* Is it always possible, with complex symbols, that gas "mis-guessed" 
+
+      /* Is it always possible, with complex symbols, that gas "mis-guessed"
 	 the symbol as a section, or vice-versa. so we're pretty liberal in our
 	 interpretation here; section means "try section first", not "must be a
 	 section", and likewise with symbol.  */
 
-      if (symbol_is_section) 
+      if (symbol_is_section)
 	{
 	  if (!resolve_section (symbuf, finfo->output_bfd->sections, result)
 	      && !resolve_symbol (symbuf, input_bfd, finfo, result,
@@ -7450,8 +7451,8 @@ eval_symbol (bfd_vma *                     result,
 	      undefined_reference ("section", symbuf);
 	      return FALSE;
 	    }
-	} 
-      else 
+	}
+      else
 	{
 	  if (!resolve_symbol (symbuf, input_bfd, finfo, result,
 			       isymbuf, locsymcount)
@@ -7464,23 +7465,23 @@ eval_symbol (bfd_vma *                     result,
 	}
 
       return TRUE;
-      
+
       /* All that remains are operators.  */
 
 #define UNARY_OP(op)						\
   if (strncmp (sym, #op, strlen (#op)) == 0)			\
     {								\
       sym += strlen (#op);					\
-      if (* sym == ':')						\
-        ++ sym;							\
+      if (*sym == ':')						\
+	++sym;							\
       *symp = sym;						\
       if (!eval_symbol (&a, symp, input_bfd, finfo, dot,	\
 			isymbuf, locsymcount, signed_p))	\
-        return FALSE;						\
-      if (signed_p)                                             \
+	return FALSE;						\
+      if (signed_p)						\
 	*result = op ((bfd_signed_vma) a);			\
-      else                                                      \
-        * result = op a;                                        \
+      else							\
+	*result = op a;						\
       return TRUE;						\
     }
 
@@ -7488,20 +7489,20 @@ eval_symbol (bfd_vma *                     result,
   if (strncmp (sym, #op, strlen (#op)) == 0)			\
     {								\
       sym += strlen (#op);					\
-      if (* sym == ':')						\
-        ++ sym;							\
+      if (*sym == ':')						\
+	++sym;							\
       *symp = sym;						\
       if (!eval_symbol (&a, symp, input_bfd, finfo, dot,	\
 			isymbuf, locsymcount, signed_p))	\
-        return FALSE;						\
+	return FALSE;						\
       ++*symp;							\
       if (!eval_symbol (&b, symp, input_bfd, finfo, dot,	\
 			isymbuf, locsymcount, signed_p))	\
-        return FALSE;						\
-      if (signed_p)                                             \
+	return FALSE;						\
+      if (signed_p)						\
 	*result = ((bfd_signed_vma) a) op ((bfd_signed_vma) b);	\
-      else                                                      \
-        * result = a op b;                                      \
+      else							\
+	*result = a op b;					\
       return TRUE;						\
     }
 
@@ -7536,15 +7537,15 @@ eval_symbol (bfd_vma *                     result,
 }
 
 static void
-put_value (bfd_vma        size,
-	   unsigned long  chunksz,
-	   bfd *          input_bfd,
-	   bfd_vma        x,
-	   bfd_byte *     location)
+put_value (bfd_vma size,
+	   unsigned long chunksz,
+	   bfd *input_bfd,
+	   bfd_vma x,
+	   bfd_byte *location)
 {
   location += (size - chunksz);
 
-  for (; size; size -= chunksz, location -= chunksz, x >>= (chunksz * 8)) 
+  for (; size; size -= chunksz, location -= chunksz, x >>= (chunksz * 8))
     {
       switch (chunksz)
 	{
@@ -7571,15 +7572,15 @@ put_value (bfd_vma        size,
     }
 }
 
-static bfd_vma 
-get_value (bfd_vma        size,
-	   unsigned long  chunksz,
-	   bfd *          input_bfd,
-	   bfd_byte *     location)
+static bfd_vma
+get_value (bfd_vma size,
+	   unsigned long chunksz,
+	   bfd *input_bfd,
+	   bfd_byte *location)
 {
   bfd_vma x = 0;
 
-  for (; size; size -= chunksz, location += chunksz) 
+  for (; size; size -= chunksz, location += chunksz)
     {
       switch (chunksz)
 	{
@@ -7607,17 +7608,16 @@ get_value (bfd_vma        size,
   return x;
 }
 
-static void 
-decode_complex_addend
-    (unsigned long * start,   /* in bits */
-     unsigned long * oplen,   /* in bits */
-     unsigned long * len,     /* in bits */
-     unsigned long * wordsz,  /* in bytes */
-     unsigned long * chunksz,  /* in bytes */
-     unsigned long * lsb0_p,
-     unsigned long * signed_p,
-     unsigned long * trunc_p,
-     unsigned long encoded)
+static void
+decode_complex_addend (unsigned long *start,   /* in bits */
+		       unsigned long *oplen,   /* in bits */
+		       unsigned long *len,     /* in bits */
+		       unsigned long *wordsz,  /* in bytes */
+		       unsigned long *chunksz, /* in bytes */
+		       unsigned long *lsb0_p,
+		       unsigned long *signed_p,
+		       unsigned long *trunc_p,
+		       unsigned long encoded)
 {
   * start     =  encoded        & 0x3F;
   * len       = (encoded >>  6) & 0x3F;
@@ -7643,11 +7643,11 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
       (this is not to say that it necessarily refers to a complex
       symbol; merely that it is a self-describing CGEN based reloc.
       i.e. the addend has the complete reloc information (bit start, end,
-      word size, etc) encoded within it.).  */ 
+      word size, etc) encoded within it.).  */
 
-  decode_complex_addend (& start, & oplen, & len, & wordsz, 
-			 & chunksz, & lsb0_p, & signed_p, 
-			 & trunc_p, rel->r_addend);
+  decode_complex_addend (&start, &oplen, &len, &wordsz,
+			 &chunksz, &lsb0_p, &signed_p,
+			 &trunc_p, rel->r_addend);
 
   mask = (((1L << (len - 1)) - 1) << 1) | 1;
 
@@ -7656,7 +7656,7 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
   else
     shift = (8 * wordsz) - (start + len);
 
-  x = get_value (wordsz, chunksz, input_bfd, contents + rel->r_offset);	  
+  x = get_value (wordsz, chunksz, input_bfd, contents + rel->r_offset);
 
 #ifdef DEBUG
   printf ("Doing complex reloc: "
@@ -7670,18 +7670,18 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
   if (! trunc_p)
     {
       /* Now do an overflow check.  */
-      if (bfd_check_overflow ((signed_p ? 
-			       complain_overflow_signed : 
-			       complain_overflow_unsigned),
-			      len, 0, (8 * wordsz), 
+      if (bfd_check_overflow ((signed_p
+			       ? complain_overflow_signed
+			       : complain_overflow_unsigned),
+			      len, 0, (8 * wordsz),
 			      relocation) == bfd_reloc_overflow)
-	(*_bfd_error_handler) 
+	(*_bfd_error_handler)
 	  ("%s (%s + 0x%lx): relocation overflow: 0x%lx %sdoes not fit "
-	   "within 0x%lx", 
+	   "within 0x%lx",
 	   input_bfd->filename, input_section->name, rel->r_offset,
 	   relocation, (signed_p ? "(signed) " : ""), mask);
     }
-	  
+
   /* Do the deed.  */
   x = (x & ~(mask << shift)) | ((relocation & mask) << shift);
 
@@ -7690,7 +7690,7 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  "         shifted mask: %8.8lx\n"
 	  " shifted/masked reloc: %8.8lx\n"
 	  "               result: %8.8lx\n",
-	  relocation, (mask << shift), 
+	  relocation, (mask << shift),
 	  ((relocation & mask) << shift), x);
 #endif
   put_value (wordsz, chunksz, input_bfd, x, contents + rel->r_offset);
@@ -8189,7 +8189,7 @@ check_dynsym (bfd *abfd, Elf_Internal_Sym *sym)
   if (sym->st_shndx > SHN_HIRESERVE)
     {
       /* The gABI doesn't support dynamic symbols in output sections
-         beyond 64k.  */
+	 beyond 64k.  */
       (*_bfd_error_handler)
 	(_("%B: Too many sections: %d (>= %d)"),
 	 abfd, bfd_count_sections (abfd), SHN_LORESERVE);
@@ -9917,7 +9917,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		 elf_link_input_bfd ignores this section.  */
 	      input_section->flags &= ~SEC_HAS_CONTENTS;
 	    }
-	    
+
 	  attr_size = bfd_elf_obj_attr_size (abfd);
 	  if (attr_size)
 	    {
@@ -10776,7 +10776,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      if (dyn.d_tag == DT_TEXTREL)
 		{
-		 info->callbacks->einfo 
+		 info->callbacks->einfo
 		    (_("%P: warning: creating a DT_TEXTREL in a shared object.\n"));
 		  break;
 		}
