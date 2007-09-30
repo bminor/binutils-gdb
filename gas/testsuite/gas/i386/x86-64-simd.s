@@ -41,10 +41,14 @@ _start:
 	cvtps2pi (%rax),%mm0
 	cvtsd2si (%rax),%eax
 	cvtsd2siq (%rax),%rax
+	cvttsd2si (%rax),%eax
+	cvttsd2siq (%rax),%rax
 	cvtsd2ss (%rax),%xmm0
 	cvtss2sd (%rax),%xmm0
-	cvtss2siq (%rax),%rax
 	cvtss2si (%rax),%eax
+	cvtss2siq (%rax),%rax
+	cvttss2si (%rax),%eax
+	cvttss2siq (%rax),%rax
 	divsd (%rax),%xmm0
 	divss (%rax),%xmm0
 	maxsd (%rax),%xmm0
@@ -85,5 +89,9 @@ _start:
 	.intel_syntax noprefix
 	cvtss2si eax,DWORD PTR [rax]
 	cvtss2si rax,DWORD PTR [rax]
+	cvttss2si eax,DWORD PTR [rax]
+	cvttss2si rax,DWORD PTR [rax]
 	cvtsd2si eax,QWORD PTR [rax]
 	cvtsd2si rax,QWORD PTR [rax]
+	cvttsd2si eax,QWORD PTR [rax]
+	cvttsd2si rax,QWORD PTR [rax]

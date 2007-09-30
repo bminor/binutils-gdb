@@ -1,3 +1,14 @@
+2007-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5080
+	* gas/i386/simd-intel.d: Updated.
+	* gas/i386/simd.d: Likewise.
+	* gas/i386/x86-64-simd-intel.d: Likewise.
+	* gas/i386/x86-64-simd.d: Likewise.
+
+	* gas/i386/simd.s: Add new tests for cvttsd2si and cvttss2si.
+	* gas/i386/x86-64-simd.s: Likewise.
+
 2007-09-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/5072

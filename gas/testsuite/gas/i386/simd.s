@@ -38,9 +38,11 @@ _start:
 	cvtpi2ps (%eax),%xmm0
 	cvtps2pi (%eax),%mm0
 	cvtsd2si (%eax),%eax
+	cvttsd2si (%eax),%eax
 	cvtsd2ss (%eax),%xmm0
 	cvtss2sd (%eax),%xmm0
 	cvtss2si (%eax),%eax
+	cvttss2si (%eax),%eax
 	divsd (%eax),%xmm0
 	divss (%eax),%xmm0
 	maxsd (%eax),%xmm0
@@ -80,4 +82,6 @@ _start:
 
 	.intel_syntax noprefix
 	cvtss2si eax,DWORD PTR [eax]
+	cvttss2si eax,DWORD PTR [eax]
 	cvtsd2si eax,QWORD PTR [eax]
+	cvttsd2si eax,QWORD PTR [eax]

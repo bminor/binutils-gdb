@@ -3686,11 +3686,12 @@ check_long_reg (void)
 		 || i.tm.operand_types[op].bitfield.acc))
       {
 	if (intel_syntax
-	    && i.tm.base_opcode == 0xf30f2d
+	    && (i.tm.base_opcode == 0xf30f2d
+		|| i.tm.base_opcode == 0xf30f2c)
 	    && !i.types[0].bitfield.regxmm)
 	  {
-	    /* cvtss2si converts DWORD memory to Reg64.  We want
-	       REX byte. */
+	    /* cvtss2si/cvttss2si convert DWORD memory to Reg64.  We
+	       want REX byte. */
 	    i.suffix = QWORD_MNEM_SUFFIX;
 	  }
 	else
@@ -3733,11 +3734,12 @@ check_qword_reg (void)
 	/* Prohibit these changes in the 64bit mode, since the
 	   lowering is more complicated.  */
 	if (intel_syntax
-	    && i.tm.base_opcode == 0xf20f2d
+	    && (i.tm.base_opcode == 0xf20f2d
+		|| i.tm.base_opcode == 0xf20f2c)
 	    && !i.types[0].bitfield.regxmm)
 	  {
-	    /* cvtsd2si converts QWORD memory to Reg32.  We don't want
-	       REX byte. */
+	    /* cvtsd2si/cvttsd2si convert QWORD memory to Reg32.  We
+	       don't want REX byte. */
 	    i.suffix = LONG_MNEM_SUFFIX;
 	  }
 	else

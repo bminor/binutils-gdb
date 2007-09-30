@@ -44,9 +44,11 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 2a 00             	cvtpi2ps \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	0f 2d 00             	cvtps2pi \(%eax\),%mm0
 [ 	]*[a-f0-9]+:	f2 0f 2d 00          	cvtsd2si \(%eax\),%eax
+[ 	]*[a-f0-9]+:	f2 0f 2c 00          	cvttsd2si \(%eax\),%eax
 [ 	]*[a-f0-9]+:	f2 0f 5a 00          	cvtsd2ss \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	f3 0f 5a 00          	cvtss2sd \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	f3 0f 2d 00          	cvtss2si \(%eax\),%eax
+[ 	]*[a-f0-9]+:	f3 0f 2c 00          	cvttss2si \(%eax\),%eax
 [ 	]*[a-f0-9]+:	f2 0f 5e 00          	divsd  \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	f3 0f 5e 00          	divss  \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	f2 0f 5f 00          	maxsd  \(%eax\),%xmm0
@@ -83,5 +85,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 38 35 00       	pmovzxdq \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 21 00 00    	insertps \$0x0,\(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	f3 0f 2d 00          	cvtss2si \(%eax\),%eax
+[ 	]*[a-f0-9]+:	f3 0f 2c 00          	cvttss2si \(%eax\),%eax
 [ 	]*[a-f0-9]+:	f2 0f 2d 00          	cvtsd2si \(%eax\),%eax
+[ 	]*[a-f0-9]+:	f2 0f 2c 00          	cvttsd2si \(%eax\),%eax
 #pass

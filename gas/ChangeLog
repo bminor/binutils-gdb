@@ -1,3 +1,9 @@
+2007-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5080
+	* config/tc-i386.c (check_long_reg): Also handle cvttss2si.
+	(check_qword_reg): Also handle cvttsd2si.
+
 2007-09-27  Kazu Hirata  <kazu@codesourcery.com>
 
 	* config/m68k-parse.h (m68k_register): Use MBO instead of MBB.
