@@ -479,8 +479,9 @@ fill_fpregset (const struct regcache *regcache,
 #define IA64_PSR_DD (1UL << 39)
 
 static void
-enable_watchpoints_in_psr (struct regcache *regcache)
+enable_watchpoints_in_psr (ptid_t ptid)
 {
+  struct regcache *regcache = get_thread_regcache (ptid);
   ULONGEST psr;
 
   regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr);
@@ -492,20 +493,7 @@ enable_watchpoints_in_psr (struct regcache *regcache)
     }
 }
 
-static long
-fetch_debug_register (ptid_t ptid, int idx)
-{
-  long val;
-  int tid;
-
-  tid = TIDGET (ptid);
-  if (tid == 0)
-    tid = PIDGET (ptid);
-
-  val = ptrace (PT_READ_U, tid, (PTRACE_TYPE_ARG3) (PT_DBR + 8 * idx), 0);
-
-  return val;
-}
+static long debug_registers[8];
 
 static void
 store_debug_register (ptid_t ptid, int idx, long val)
@@ -517,15 +505,6 @@ store_debug_register (ptid_t ptid, int idx, long val)
     tid = PIDGET (ptid);
 
   (void) ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) (PT_DBR + 8 * idx), val);
-}
-
-static void
-fetch_debug_register_pair (ptid_t ptid, int idx, long *dbr_addr, long *dbr_mask)
-{
-  if (dbr_addr)
-    *dbr_addr = fetch_debug_register (ptid, 2 * idx);
-  if (dbr_mask)
-    *dbr_mask = fetch_debug_register (ptid, 2 * idx + 1);
 }
 
 static void
@@ -553,7 +532,8 @@ is_power_of_2 (int val)
 static int
 ia64_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
 {
-  ptid_t ptid = inferior_ptid;
+  struct lwp_info *lp;
+  ptid_t ptid;
   int idx;
   long dbr_addr, dbr_mask;
   int max_watchpoints = 4;
@@ -563,7 +543,7 @@ ia64_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
 
   for (idx = 0; idx < max_watchpoints; idx++)
     {
-      fetch_debug_register_pair (ptid, idx, NULL, &dbr_mask);
+      dbr_mask = debug_registers[idx * 2 + 1];
       if ((dbr_mask & (0x3UL << 62)) == 0)
 	{
 	  /* Exit loop if both r and w bits clear */
@@ -592,8 +572,13 @@ ia64_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
       return -1;
     }
 
-  store_debug_register_pair (ptid, idx, &dbr_addr, &dbr_mask);
-  enable_watchpoints_in_psr (get_current_regcache ());
+  debug_registers[2 * idx] = dbr_addr;
+  debug_registers[2 * idx + 1] = dbr_mask;
+  ALL_LWPS (lp, ptid)
+    {
+      store_debug_register_pair (ptid, idx, &dbr_addr, &dbr_mask);
+      enable_watchpoints_in_psr (ptid);
+    }
 
   return 0;
 }
@@ -601,7 +586,6 @@ ia64_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
 static int
 ia64_linux_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
-  ptid_t ptid = inferior_ptid;
   int idx;
   long dbr_addr, dbr_mask;
   int max_watchpoints = 4;
@@ -611,36 +595,55 @@ ia64_linux_remove_watchpoint (CORE_ADDR addr, int len, int type)
 
   for (idx = 0; idx < max_watchpoints; idx++)
     {
-      fetch_debug_register_pair (ptid, idx, &dbr_addr, &dbr_mask);
+      dbr_addr = debug_registers[2 * idx];
+      dbr_mask = debug_registers[2 * idx + 1];
       if ((dbr_mask & (0x3UL << 62)) && addr == (CORE_ADDR) dbr_addr)
 	{
+	  struct lwp_info *lp;
+	  ptid_t ptid;
+
+	  debug_registers[2 * idx] = 0;
+	  debug_registers[2 * idx + 1] = 0;
 	  dbr_addr = 0;
 	  dbr_mask = 0;
-	  store_debug_register_pair (ptid, idx, &dbr_addr, &dbr_mask);
+
+	  ALL_LWPS (lp, ptid)
+	    store_debug_register_pair (ptid, idx, &dbr_addr, &dbr_mask);
+
 	  return 0;
 	}
     }
   return -1;
 }
 
+static void
+ia64_linux_new_thread (ptid_t ptid)
+{
+  int i, any;
+
+  any = 0;
+  for (i = 0; i < 8; i++)
+    {
+      if (debug_registers[i] != 0)
+	any = 1;
+      store_debug_register (ptid, i, debug_registers[i]);
+    }
+
+  if (any)
+    enable_watchpoints_in_psr (ptid);
+}
+
 static int
 ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 {
   CORE_ADDR psr;
-  int tid;
-  struct siginfo siginfo;
-  ptid_t ptid = inferior_ptid;
+  struct siginfo *siginfo_p;
   struct regcache *regcache = get_current_regcache ();
 
-  tid = TIDGET(ptid);
-  if (tid == 0)
-    tid = PIDGET (ptid);
-  
-  errno = 0;
-  ptrace (PTRACE_GETSIGINFO, tid, (PTRACE_TYPE_ARG3) 0, &siginfo);
+  siginfo_p = linux_nat_get_siginfo (inferior_ptid);
 
-  if (errno != 0 || siginfo.si_signo != SIGTRAP || 
-      (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
+  if (siginfo_p->si_signo != SIGTRAP
+      || (siginfo_p->si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return 0;
 
   regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr);
@@ -648,7 +651,7 @@ ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
                            for the next instruction */
   regcache_cooked_write_unsigned (regcache, IA64_PSR_REGNUM, psr);
 
-  *addr_p = (CORE_ADDR)siginfo.si_addr;
+  *addr_p = (CORE_ADDR)siginfo_p->si_addr;
   return 1;
 }
 
@@ -834,4 +837,5 @@ _initialize_ia64_linux_nat (void)
 
   /* Register the target.  */
   linux_nat_add_target (t);
+  linux_nat_set_new_thread (t, ia64_linux_new_thread);
 }

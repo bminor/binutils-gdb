@@ -1,4 +1,61 @@
 2007-09-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-nat.c (linux_nat_new_thread): New variable.
+	(linux_child_follow_fork): Set inferior_ptid to include LWP ID.  Use
+	linux_nat_switch_fork.
+	(lwp_list): Make public.
+	(add_lwp): Call linux_nat_new_thread.
+	(lin_lwp_attach_lwp, linux_nat_attach): Call add_lwp after stopping
+	the new thread.
+	(resume_callback): Clear lp->siginfo.  Remove unused variable.
+	(linux_nat_resume): Assert that the LWP list is already initialized.
+	Clear lp->siginfo.
+	(save_siginfo): New.
+	(stop_wait_callback, linux_nat_wait): Call it.
+	(linux_nat_set_new_thread, linux_nat_get_siginfo): New.
+	* linux-nat.h (struct lwp_info): Add siginfo.
+	(lwp_list, linux_nat_set_new_thread, linux_nat_get_siginfo): Declare.
+	(ALL_LWPS): Define.
+
+	* amd64-linux-nat.c (amd64_linux_dr): New.
+	(amd64_linux_dr_get): Take a PTID argument.  Correct typo.
+	(amd64_linux_dr_set): Take a PTID argument.
+	(amd64_linux_dr_set_control, amd64_linux_dr_set_addr): Use ALL_LWPS.
+	(amd64_linux_dr_reset_addr): Use amd64_linux_dr_set_addr.
+	(amd64_linux_dr_get_status): Pass inferior_ptid to amd64_linux_dr_get.
+	(amd64_linux_new_thread): New.
+	(_initialize_amd64_linux_nat): Call linux_nat_set_new_thread.
+	* i386-linux-nat.c (i386_linux_dr): New.
+	(i386_linux_dr_get, i386_linux_dr_set): Take a PTID argument.
+	(i386_linux_dr_set_control, i386_linux_dr_set_addr): Use ALL_LWPS.
+	(i386_linux_dr_reset_addr): Use i386_linux_dr_set_addr.
+	(i386_linux_dr_get_status): Pass inferior_ptid to i386_linux_dr_get.
+	(i386_linux_new_thread): New.
+	(i386_linux_resume): Remove unnecessary PID check.
+	(_initialize_i386_linux_nat): Call linux_nat_set_new_thread.
+	* ia64-linux-nat.c (enable_watchpoints_in_psr): Take PTID argument.
+	(fetch_debug_register, fetch_debug_register_pair): Delete.
+	(debug_registers): New.
+	(ia64_linux_insert_watchpoint, ia64_linux_remove_watchpoint): Use
+	ALL_LWPS and debug_registers.
+	(ia64_linux_new_thread): New.
+	(ia64_linux_stopped_data_address): Use linux_nat_get_siginfo.
+	(_initialize_ia64_linux_nat): Call linux_nat_set_new_thread.
+	* ppc-linux-nat.c (last_stopped_data_address): Delete.
+	(saved_dabr_value): New.
+	(ppc_linux_insert_watchpoint, ppc_linux_remove_watchpoint): Use
+	ALL_LWPS.
+	(ppc_linux_new_thread): New.
+	(ppc_linux_stopped_data_address): Use linux_nat_get_siginfo.
+	(ppc_linux_stopped_by_watchpoint): Call ppc_linux_stopped_data_address.
+	(_initialize_ppc_linux_nat): Call linux_nat_set_new_thread.
+	* s390-nat.c (s390_stopped_by_watchpoint): Clear the watchpoint status
+	after reading it.
+	(s390_fix_watch_points): Take a PTID argument.
+	(s390_insert_watchpoint, s390_remove_watchpoint): Use ALL_LWPS.
+	(_initialize_s390_nat): Call linux_nat_set_new_thread.
+
+2007-09-30  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Jeff Johnston  <jjohnstn@redhat.com>
 
 	* breakpoint.c (watchpoints_triggered): New.

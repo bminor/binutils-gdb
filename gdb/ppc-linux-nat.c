@@ -142,8 +142,6 @@ struct gdb_evrregset_t
    error.  */
 int have_ptrace_getvrregs = 1;
 
-static CORE_ADDR last_stopped_data_address = 0;
-
 /* Non-zero if our kernel may support the PTRACE_GETEVRREGS and
    PTRACE_SETEVRREGS requests, for reading and writing the SPE
    registers.  Zero if we've tried one of them and gotten an
@@ -805,13 +803,16 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
   return 1;
 }
 
+/* The cached DABR value, to install in new threads.  */
+static long saved_dabr_value;
+
 /* Set a watchpoint of type TYPE at address ADDR.  */
 static int
 ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
 {
-  int tid;
+  struct lwp_info *lp;
+  ptid_t ptid;
   long dabr_value;
-  ptid_t ptid = inferior_ptid;
 
   dabr_value = addr & ~7;
   switch (rw)
@@ -830,59 +831,53 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
       break;
     }
 
-  tid = TIDGET (ptid);
-  if (tid == 0)
-    tid = PIDGET (ptid);
-
-  return ptrace (PTRACE_SET_DEBUGREG, tid, 0, dabr_value);
+  ALL_LWPS (lp, ptid)
+    if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0, saved_dabr_value) < 0)
+      return -1;
+  saved_dabr_value = dabr_value;
+  return 0;
 }
 
 static int
 ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw)
 {
-  int tid;
-  ptid_t ptid = inferior_ptid;
+  struct lwp_info *lp;
+  ptid_t ptid;
+  long dabr_value = 0;
 
-  tid = TIDGET (ptid);
-  if (tid == 0)
-    tid = PIDGET (ptid);
+  saved_dabr_value = 0;
+  ALL_LWPS (lp, ptid)
+    if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0, saved_dabr_value) < 0)
+      return -1;
+  return 0;
+}
 
-  return ptrace (PTRACE_SET_DEBUGREG, tid, 0, 0);
+static void
+ppc_linux_new_thread (ptid_t ptid)
+{
+  ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0, saved_dabr_value);
 }
 
 static int
 ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
-  if (last_stopped_data_address)
-    {
-      *addr_p = last_stopped_data_address;
-      last_stopped_data_address = 0;
-      return 1;
-    }
-  return 0;
+  struct siginfo *siginfo_p;
+
+  siginfo_p = linux_nat_get_siginfo (inferior_ptid);
+
+  if (siginfo_p->si_signo != SIGTRAP
+      || (siginfo_p->si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
+    return 0;
+
+  *addr_p = (CORE_ADDR) siginfo_p->si_addr;
+  return 1;
 }
 
 static int
 ppc_linux_stopped_by_watchpoint (void)
 {
-  int tid;
-  struct siginfo siginfo;
-  ptid_t ptid = inferior_ptid;
-  CORE_ADDR *addr_p;
-
-  tid = TIDGET(ptid);
-  if (tid == 0)
-    tid = PIDGET (ptid);
-
-  errno = 0;
-  ptrace (PTRACE_GETSIGINFO, tid, (PTRACE_TYPE_ARG3) 0, &siginfo);
-
-  if (errno != 0 || siginfo.si_signo != SIGTRAP ||
-      (siginfo.si_code & 0xffff) != 0x0004)
-    return 0;
-
-  last_stopped_data_address = (uintptr_t) siginfo.si_addr;
-  return 1;
+  CORE_ADDR addr;
+  return ppc_linux_stopped_data_address (&current_target, &addr);
 }
 
 static void
@@ -969,4 +964,5 @@ _initialize_ppc_linux_nat (void)
 
   /* Register the target.  */
   linux_nat_add_target (t);
+  linux_nat_set_new_thread (t, ppc_linux_new_thread);
 }

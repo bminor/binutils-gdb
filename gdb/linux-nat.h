@@ -20,7 +20,11 @@
 
 #include "target.h"
 
-/* Structure describing an LWP.  */
+#include <signal.h>
+
+/* Structure describing an LWP.  This is public only for the purposes
+   of ALL_LWPS; target-specific code should generally not access it
+   directly.  */
 
 struct lwp_info
 {
@@ -54,6 +58,10 @@ struct lwp_info
   /* Non-zero if we were stepping this LWP.  */
   int step;
 
+  /* Non-zero si_signo if this LWP stopped with a trap.  si_addr may
+     be the address of a hardware watchpoint.  */
+  struct siginfo siginfo;
+
   /* If WAITSTATUS->KIND != TARGET_WAITKIND_SPURIOUS, the waitstatus
      for this LWP's last event.  This may correspond to STATUS above,
      or to a local variable in lin_lwp_wait.  */
@@ -62,6 +70,18 @@ struct lwp_info
   /* Next LWP in list.  */
   struct lwp_info *next;
 };
+
+/* The global list of LWPs, for ALL_LWPS.  Unlike the threads list,
+   there is always at least one LWP on the list while the GNU/Linux
+   native target is active.  */
+extern struct lwp_info *lwp_list;
+
+/* Iterate over the PTID each active thread (light-weight process).  There
+   must be at least one.  */
+#define ALL_LWPS(LP, PTID)						\
+  for ((LP) = lwp_list, (PTID) = (LP)->ptid;				\
+       (LP) != NULL;							\
+       (LP) = (LP)->next, (PTID) = (LP) ? (LP)->ptid : (PTID))
 
 /* Attempt to initialize libthread_db.  */
 void check_for_thread_db (void);
@@ -95,6 +115,12 @@ linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int));
    instead of calling add_target directly.  */
 void linux_nat_add_target (struct target_ops *);
 
+/* Register a method to call whenever a new thread is attached.  */
+void linux_nat_set_new_thread (struct target_ops *, void (*) (ptid_t));
+
 /* Update linux-nat internal state when changing from one fork
    to another.  */
 void linux_nat_switch_fork (ptid_t new_ptid);
+
+/* Return the saved siginfo associated with PTID.  */
+struct siginfo *linux_nat_get_siginfo (ptid_t ptid);

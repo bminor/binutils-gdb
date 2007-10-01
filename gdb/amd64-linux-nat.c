@@ -233,25 +233,27 @@ amd64_linux_store_inferior_registers (struct regcache *regcache, int regnum)
     }
 }
 
+/* Support for debug registers.  */
+
+static unsigned long amd64_linux_dr[DR_CONTROL + 1];
 
 static unsigned long
-amd64_linux_dr_get (int regnum)
+amd64_linux_dr_get (ptid_t ptid, int regnum)
 {
   int tid;
   unsigned long value;
 
-  /* FIXME: kettenis/2001-01-29: It's not clear what we should do with
-     multi-threaded processes here.  For now, pretend there is just
-     one thread.  */
-  tid = PIDGET (inferior_ptid);
+  tid = TIDGET (ptid);
+  if (tid == 0)
+    tid = PIDGET (ptid);
 
   /* FIXME: kettenis/2001-03-27: Calling perror_with_name if the
      ptrace call fails breaks debugging remote targets.  The correct
      way to fix this is to add the hardware breakpoint and watchpoint
-     stuff to the target vectore.  For now, just return zero if the
+     stuff to the target vector.  For now, just return zero if the
      ptrace call fails.  */
   errno = 0;
-  value = ptrace (PT_READ_U, tid,
+  value = ptrace (PTRACE_PEEKUSER, tid,
 		  offsetof (struct user, u_debugreg[regnum]), 0);
   if (errno != 0)
 #if 0
@@ -264,17 +266,17 @@ amd64_linux_dr_get (int regnum)
 }
 
 static void
-amd64_linux_dr_set (int regnum, unsigned long value)
+amd64_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 {
   int tid;
 
-  /* FIXME: kettenis/2001-01-29: It's not clear what we should do with
-     multi-threaded processes here.  For now, pretend there is just
-     one thread.  */
-  tid = PIDGET (inferior_ptid);
+  tid = TIDGET (ptid);
+  if (tid == 0)
+    tid = PIDGET (ptid);
 
   errno = 0;
-  ptrace (PT_WRITE_U, tid, offsetof (struct user, u_debugreg[regnum]), value);
+  ptrace (PTRACE_POKEUSER, tid,
+	  offsetof (struct user, u_debugreg[regnum]), value);
   if (errno != 0)
     perror_with_name (_("Couldn't write debug register"));
 }
@@ -282,29 +284,48 @@ amd64_linux_dr_set (int regnum, unsigned long value)
 void
 amd64_linux_dr_set_control (unsigned long control)
 {
-  amd64_linux_dr_set (DR_CONTROL, control);
+  struct lwp_info *lp;
+  ptid_t ptid;
+
+  amd64_linux_dr[DR_CONTROL] = control;
+  ALL_LWPS (lp, ptid)
+    amd64_linux_dr_set (ptid, DR_CONTROL, control);
 }
 
 void
 amd64_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
+  struct lwp_info *lp;
+  ptid_t ptid;
+
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 
-  amd64_linux_dr_set (DR_FIRSTADDR + regnum, addr);
+  amd64_linux_dr[DR_FIRSTADDR + regnum] = addr;
+  ALL_LWPS (lp, ptid)
+    amd64_linux_dr_set (ptid, DR_FIRSTADDR + regnum, addr);
 }
 
 void
 amd64_linux_dr_reset_addr (int regnum)
 {
-  gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
-
-  amd64_linux_dr_set (DR_FIRSTADDR + regnum, 0L);
+  amd64_linux_dr_set_addr (regnum, 0);
 }
 
 unsigned long
 amd64_linux_dr_get_status (void)
 {
-  return amd64_linux_dr_get (DR_STATUS);
+  return amd64_linux_dr_get (inferior_ptid, DR_STATUS);
+}
+
+static void
+amd64_linux_new_thread (ptid_t ptid)
+{
+  int i;
+
+  for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
+    amd64_linux_dr_set (ptid, i, amd64_linux_dr[i]);
+
+  amd64_linux_dr_set (ptid, DR_CONTROL, amd64_linux_dr[DR_CONTROL]);
 }
 
 
@@ -408,4 +429,5 @@ _initialize_amd64_linux_nat (void)
 
   /* Register the target.  */
   linux_nat_add_target (t);
+  linux_nat_set_new_thread (t, amd64_linux_new_thread);
 }

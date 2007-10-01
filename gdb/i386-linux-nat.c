@@ -579,16 +579,17 @@ i386_linux_store_inferior_registers (struct regcache *regcache, int regno)
 
 /* Support for debug registers.  */
 
+static unsigned long i386_linux_dr[DR_CONTROL + 1];
+
 static unsigned long
-i386_linux_dr_get (int regnum)
+i386_linux_dr_get (ptid_t ptid, int regnum)
 {
   int tid;
   unsigned long value;
 
-  /* FIXME: kettenis/2001-01-29: It's not clear what we should do with
-     multi-threaded processes here.  For now, pretend there is just
-     one thread.  */
-  tid = PIDGET (inferior_ptid);
+  tid = TIDGET (ptid);
+  if (tid == 0)
+    tid = PIDGET (ptid);
 
   /* FIXME: kettenis/2001-03-27: Calling perror_with_name if the
      ptrace call fails breaks debugging remote targets.  The correct
@@ -609,14 +610,13 @@ i386_linux_dr_get (int regnum)
 }
 
 static void
-i386_linux_dr_set (int regnum, unsigned long value)
+i386_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 {
   int tid;
 
-  /* FIXME: kettenis/2001-01-29: It's not clear what we should do with
-     multi-threaded processes here.  For now, pretend there is just
-     one thread.  */
-  tid = PIDGET (inferior_ptid);
+  tid = TIDGET (ptid);
+  if (tid == 0)
+    tid = PIDGET (ptid);
 
   errno = 0;
   ptrace (PTRACE_POKEUSER, tid,
@@ -628,29 +628,48 @@ i386_linux_dr_set (int regnum, unsigned long value)
 void
 i386_linux_dr_set_control (unsigned long control)
 {
-  i386_linux_dr_set (DR_CONTROL, control);
+  struct lwp_info *lp;
+  ptid_t ptid;
+
+  i386_linux_dr[DR_CONTROL] = control;
+  ALL_LWPS (lp, ptid)
+    i386_linux_dr_set (ptid, DR_CONTROL, control);
 }
 
 void
 i386_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
+  struct lwp_info *lp;
+  ptid_t ptid;
+
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 
-  i386_linux_dr_set (DR_FIRSTADDR + regnum, addr);
+  i386_linux_dr[DR_FIRSTADDR + regnum] = addr;
+  ALL_LWPS (lp, ptid)
+    i386_linux_dr_set (ptid, DR_FIRSTADDR + regnum, addr);
 }
 
 void
 i386_linux_dr_reset_addr (int regnum)
 {
-  gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
-
-  i386_linux_dr_set (DR_FIRSTADDR + regnum, 0L);
+  i386_linux_dr_set_addr (regnum, 0);
 }
 
 unsigned long
 i386_linux_dr_get_status (void)
 {
-  return i386_linux_dr_get (DR_STATUS);
+  return i386_linux_dr_get (inferior_ptid, DR_STATUS);
+}
+
+static void
+i386_linux_new_thread (ptid_t ptid)
+{
+  int i;
+
+  for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
+    i386_linux_dr_set (ptid, i, i386_linux_dr[i]);
+
+  i386_linux_dr_set (ptid, DR_CONTROL, i386_linux_dr[DR_CONTROL]);
 }
 
 
@@ -728,12 +747,6 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
   int pid = PIDGET (ptid);
 
   int request = PTRACE_CONT;
-
-  if (pid == -1)
-    /* Resume all threads.  */
-    /* I think this only gets used in the non-threaded case, where "resume
-       all threads" and "resume inferior_ptid" are the same.  */
-    pid = PIDGET (inferior_ptid);
 
   if (step)
     {
@@ -818,4 +831,5 @@ _initialize_i386_linux_nat (void)
 
   /* Register the target.  */
   linux_nat_add_target (t);
+  linux_nat_set_new_thread (t, i386_linux_new_thread);
 }

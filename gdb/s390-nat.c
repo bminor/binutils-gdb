@@ -252,6 +252,7 @@ s390_stopped_by_watchpoint (void)
 {
   per_lowcore_bits per_lowcore;
   ptrace_area parea;
+  int result;
 
   /* Speed up common case.  */
   if (!watch_base)
@@ -263,20 +264,34 @@ s390_stopped_by_watchpoint (void)
   if (ptrace (PTRACE_PEEKUSR_AREA, s390_inferior_tid (), &parea) < 0)
     perror_with_name (_("Couldn't retrieve watchpoint status"));
 
-  return per_lowcore.perc_storage_alteration == 1
-	 && per_lowcore.perc_store_real_address == 0;
+  result = (per_lowcore.perc_storage_alteration == 1
+	    && per_lowcore.perc_store_real_address == 0);
+
+  if (result)
+    {
+      /* Do not report this watchpoint again.  */
+      memset (&per_lowcore, 0, sizeof (per_lowcore));
+      if (ptrace (PTRACE_POKEUSR_AREA, s390_inferior_tid (), &parea) < 0)
+	perror_with_name (_("Couldn't clear watchpoint status"));
+    }
+
+  return result;
 }
 
 static void
-s390_fix_watch_points (void)
+s390_fix_watch_points (ptid_t ptid)
 {
-  int tid = s390_inferior_tid ();
+  int tid;
 
   per_struct per_info;
   ptrace_area parea;
 
   CORE_ADDR watch_lo_addr = (CORE_ADDR)-1, watch_hi_addr = 0;
   struct watch_area *area;
+
+  tid = TIDGET (ptid);
+  if (tid == 0)
+    tid = PIDGET (ptid);
 
   for (area = watch_base; area; area = area->next)
     {
@@ -310,7 +325,10 @@ s390_fix_watch_points (void)
 static int
 s390_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
+  struct lwp_info *lp;
+  ptid_t ptid;
   struct watch_area *area = xmalloc (sizeof (struct watch_area));
+
   if (!area)
     return -1; 
 
@@ -320,13 +338,16 @@ s390_insert_watchpoint (CORE_ADDR addr, int len, int type)
   area->next = watch_base;
   watch_base = area;
 
-  s390_fix_watch_points ();
+  ALL_LWPS (lp, ptid)
+    s390_fix_watch_points (ptid);
   return 0;
 }
 
 static int
 s390_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
+  struct lwp_info *lp;
+  ptid_t ptid;
   struct watch_area *area, **parea;
 
   for (parea = &watch_base; *parea; parea = &(*parea)->next)
@@ -345,7 +366,8 @@ s390_remove_watchpoint (CORE_ADDR addr, int len, int type)
   *parea = area->next;
   xfree (area);
 
-  s390_fix_watch_points ();
+  ALL_LWPS (lp, ptid)
+    s390_fix_watch_points (ptid);
   return 0;
 }
 
@@ -386,4 +408,5 @@ _initialize_s390_nat (void)
 
   /* Register the target.  */
   linux_nat_add_target (t);
+  linux_nat_set_new_thread (t, s390_fix_watch_points);
 }
