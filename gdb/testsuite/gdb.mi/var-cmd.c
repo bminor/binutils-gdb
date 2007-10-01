@@ -114,7 +114,7 @@ do_locals_tests ()
 {
   int linteger = 0;
   int *lpinteger = 0;
-  char lcharacter = 0;
+  char lcharacter[2] = { 0, 0 };
   char *lpcharacter = 0;
   long llong = 0;
   long *lplong = 0;
@@ -129,8 +129,8 @@ do_locals_tests ()
   /* Simple assignments */
   linteger = 1234;
   lpinteger = &linteger;
-  lcharacter = 'a';
-  lpcharacter = &lcharacter;
+  lcharacter[0] = 'a';
+  lpcharacter = lcharacter;
   llong = 2121L;
   lplong = &llong;
   lfloat = 2.1;
@@ -141,13 +141,13 @@ do_locals_tests ()
   lsimple.unsigned_integer = 255;
   lsimple.character = 'a';
   lsimple.signed_character = 21;
-  lsimple.char_ptr = &lcharacter;
+  lsimple.char_ptr = lcharacter;
   lpsimple = &lsimple;
   func = nothing;
 
   /* Check pointers */
   linteger = 4321;
-  lcharacter = 'b';
+  lcharacter[0] = 'b';
   llong = 1212L;
   lfloat = 1.2;
   ldouble = 5.498548281828172;

@@ -1,3 +1,9 @@
+2007-10-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.mi/var-cmd.c (do_locals_tests): Define lcharacter as a
+	two-char array.
+	* gdb.mi/mi-var-cmd.exp, gdb.mi/mi2-var-cmd.exp: Use lcharacter[0].
+
 2007-09-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.threads/watchthreads.c (thread_function): Sleep between
