@@ -199,7 +199,7 @@ class Target_i386 : public Sized_target<32, false>
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
 
   // Get the PLT section.
-  Output_data_plt_i386*
+  const Output_data_plt_i386*
   plt_section() const
   {
     gold_assert(this->plt_ != NULL);
@@ -369,8 +369,6 @@ Output_data_plt_i386::Output_data_plt_i386(Layout* layout,
   layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
 				  elfcpp::SHF_ALLOC, this->rel_);
 }
-
-// For some reason
 
 void
 Output_data_plt_i386::do_adjust_output_section(Output_section* os)

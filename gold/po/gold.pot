@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-10-01 14:30-0700\n"
+"POT-Creation-Date: 2007-10-01 16:41-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -270,54 +270,56 @@ msgstr ""
 msgid "%s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:751 i386.cc:912 i386.cc:1174 x86_64.cc:733 x86_64.cc:886
-#: x86_64.cc:1169
+#. TODO(csilvers): correct?
+#. TODO(csilvers): correct?
+#: i386.cc:749 i386.cc:910 i386.cc:1172 x86_64.cc:744 x86_64.cc:911
+#: x86_64.cc:1247
 #, c-format
 msgid "%s: %s: unexpected reloc %u in object file\n"
 msgstr ""
 
-#: i386.cc:788 i386.cc:808 x86_64.cc:767 x86_64.cc:788
+#: i386.cc:786 i386.cc:806 x86_64.cc:781 x86_64.cc:804
 #, c-format
 msgid "%s: %s: unsupported reloc %u against local symbol\n"
 msgstr ""
 
-#: i386.cc:948 i386.cc:969 x86_64.cc:920 x86_64.cc:942
+#: i386.cc:946 i386.cc:967 x86_64.cc:947 x86_64.cc:971
 #, c-format
 msgid "%s: %s: unsupported reloc %u against global symbol %s\n"
 msgstr ""
 
-#: i386.cc:992
+#: i386.cc:990
 #, c-format
 msgid "%s: %s: unsupported RELA reloc section\n"
 msgstr ""
 
-#: i386.cc:1082 x86_64.cc:1055
+#: i386.cc:1080 x86_64.cc:1084
 #, c-format
 msgid "%s: %s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:1206 i386.cc:1283 i386.cc:1294 x86_64.cc:1203 x86_64.cc:1281
-#: x86_64.cc:1290
+#: i386.cc:1204 i386.cc:1281 i386.cc:1292 x86_64.cc:1287 x86_64.cc:1365
+#: x86_64.cc:1374
 #, c-format
 msgid "%s: %s: unsupported reloc %u\n"
 msgstr ""
 
-#: i386.cc:1233 x86_64.cc:1231
+#: i386.cc:1231 x86_64.cc:1315
 #, c-format
 msgid "%s: %s: TLS reloc but no TLS segment\n"
 msgstr ""
 
-#: i386.cc:1268 x86_64.cc:1266
+#: i386.cc:1266 x86_64.cc:1350
 #, c-format
 msgid "%s: %s: unsupported reloc type %u\n"
 msgstr ""
 
-#: i386.cc:1477 x86_64.cc:1478
+#: i386.cc:1475 x86_64.cc:1562
 #, c-format
 msgid "%s: %s: TLS relocation out of range\n"
 msgstr ""
 
-#: i386.cc:1495 x86_64.cc:1496
+#: i386.cc:1493 x86_64.cc:1580
 #, c-format
 msgid "%s: %s: TLS relocation against invalid instruction\n"
 msgstr ""
@@ -725,7 +727,7 @@ msgstr ""
 msgid "%s: %s: undefined reference to '%s'\n"
 msgstr ""
 
-#: x86_64.cc:965
+#: x86_64.cc:994
 #, c-format
 msgid "%s: %s: unsupported REL reloc section\n"
 msgstr ""

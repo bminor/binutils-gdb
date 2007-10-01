@@ -1121,10 +1121,17 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_32:
+      // FIXME: we need to verify that value + addend fits into 32 bits:
+      //    uint64_t x = value + addend;
+      //    x == static_cast<uint64_t>(static_cast<uint32_t>(x))
+      // Likewise for other <=32-bit relocations (but see R_X86_64_32S).
       Relocate_functions<64, false>::rela32(view, object, psymval, addend);
       break;
 
     case elfcpp::R_X86_64_32S:
+      // FIXME: we need to verify that value + addend fits into 32 bits:
+      //    int64_t x = value + addend;   // note this quantity is signed!
+      //    x == static_cast<int64_t>(static_cast<int32_t>(x))
       Relocate_functions<64, false>::rela32(view, object, psymval, addend);
       break;
 
