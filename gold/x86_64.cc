@@ -58,8 +58,8 @@ class Output_data_plt_x86_64;
 class Target_x86_64 : public Sized_target<64, false>
 {
  public:
-  // In the x86_64 ABI, it says "The AMD64 ABI architectures uses only
-  // Elf64_Rela relocation entries with explicit addends."
+  // In the x86_64 ABI (p 68), it says "The AMD64 ABI architectures
+  // uses only Elf64_Rela relocation entries with explicit addends."
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, 64, false> Reloc_section;
 
   Target_x86_64()
@@ -696,6 +696,8 @@ Target_x86_64::Scan::local(const General_options&,
   switch (r_type)
     {
     case elfcpp::R_X86_64_NONE:
+    case elfcpp::R_386_GNU_VTINHERIT:
+    case elfcpp::R_386_GNU_VTENTRY:
       break;
 
     case elfcpp::R_X86_64_64:
@@ -714,8 +716,14 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_PC8:
       break;
 
-    case elfcpp::R_X86_64_GOTOFF64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPC32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOT64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTOFF64:
+    case elfcpp::R_X86_64_GOTPC64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPCREL64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPLT64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): correct?
       // We need a GOT section.
       target->got_section(symtab, layout);
       break;
@@ -729,21 +737,27 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_DTPMOD64:
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_DTPOFF32:
+    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_TLSDESC:
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
 	      program_name, object->name().c_str(), r_type);
       gold_exit(false);
       break;
 
 #if 0
-    case elfcpp::R_X86_64_TLS_IE:
-    case elfcpp::R_X86_64_TLS_GOTIE:
-    case elfcpp::R_X86_64_TLS_LE:
-    case elfcpp::R_X86_64_TLS_GD:
-    case elfcpp::R_X86_64_TLS_LDM:
-    case elfcpp::R_X86_64_TLS_LDO_64:
-    case elfcpp::R_X86_64_TLS_IE_64:
-    case elfcpp::R_X86_64_TLS_LE_64:
+    case elfcpp::R_X86_64_TLSGD:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSLD:  // TODO(csilvers): correct?
+
+    case elfcpp::R_386_TLS_IE:
+    case elfcpp::R_386_TLS_GOTIE:
+    case elfcpp::R_386_TLS_LE:
+    case elfcpp::R_386_TLS_GD:
+    case elfcpp::R_386_TLS_LDM:
+    case elfcpp::R_386_TLS_LDO_64:
+    case elfcpp::R_386_TLS_IE_64:
+    case elfcpp::R_386_TLS_LE_64:
       {
 	bool output_is_shared = parameters->output_is_shared();
 	r_type = Target_x86_64::optimize_tls_reloc(!output_is_shared,
@@ -772,17 +786,19 @@ Target_x86_64::Scan::local(const General_options&,
       break;
 #endif
 
-#if 0
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_PLT32:
-    case elfcpp::R_X86_64_TLS_GD_64:
-    case elfcpp::R_X86_64_TLS_GD_PUSH:
-    case elfcpp::R_X86_64_TLS_GD_CALL:
-    case elfcpp::R_X86_64_TLS_GD_POP:
-    case elfcpp::R_X86_64_TLS_LDM_64:
-    case elfcpp::R_X86_64_TLS_LDM_PUSH:
-    case elfcpp::R_X86_64_TLS_LDM_CALL:
-    case elfcpp::R_X86_64_TLS_LDM_POP:
+    case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
+#if 0
+    case elfcpp::R_386_TLS_GD_64:
+    case elfcpp::R_386_TLS_GD_PUSH:
+    case elfcpp::R_386_TLS_GD_CALL:
+    case elfcpp::R_386_TLS_GD_POP:
+    case elfcpp::R_386_TLS_LDM_64:
+    case elfcpp::R_386_TLS_LDM_PUSH:
+    case elfcpp::R_386_TLS_LDM_CALL:
+    case elfcpp::R_386_TLS_LDM_POP:
 #endif
     default:
       fprintf(stderr, _("%s: %s: unsupported reloc %u against local symbol\n"),
@@ -808,6 +824,8 @@ Target_x86_64::Scan::global(const General_options& options,
   switch (r_type)
     {
     case elfcpp::R_X86_64_NONE:
+    case elfcpp::R_386_GNU_VTINHERIT:
+    case elfcpp::R_386_GNU_VTENTRY:
       break;
 
     case elfcpp::R_X86_64_64:
@@ -865,57 +883,66 @@ Target_x86_64::Scan::global(const General_options& options,
       target->make_plt_entry(symtab, layout, gsym);
       break;
 
-    case elfcpp::R_X86_64_GOTOFF64:
-    case elfcpp::R_X86_64_GOTPC32:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPC32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOT64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTOFF64:
+    case elfcpp::R_X86_64_GOTPC64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPCREL64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPLT64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): correct?
       // We need a GOT section.
       target->got_section(symtab, layout);
       break;
 
-#if 0
     case elfcpp::R_X86_64_COPY:
     case elfcpp::R_X86_64_GLOB_DAT:
     case elfcpp::R_X86_64_JUMP_SLOT:
     case elfcpp::R_X86_64_RELATIVE:
-    case elfcpp::R_X86_64_TLS_TPOFF:
+    case elfcpp::R_X86_64_TPOFF64:
+    case elfcpp::R_X86_64_TPOFF32:
     case elfcpp::R_X86_64_DTPMOD64:
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_DTPOFF32:
-    case elfcpp::R_X86_64_TLS_TPOFF64:
-    case elfcpp::R_X86_64_TLS_DESC:
+    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSDESC:
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
 	      program_name, object->name().c_str(), r_type);
       gold_exit(false);
       break;
-#endif
 
 #if 0
-    case elfcpp::R_X86_64_TLS_IE:
-    case elfcpp::R_X86_64_TLS_GOTIE:
-    case elfcpp::R_X86_64_TLS_LE:
-    case elfcpp::R_X86_64_TLS_GD:
-    case elfcpp::R_X86_64_TLS_LDM:
-    case elfcpp::R_X86_64_TLS_LDO_64:
-    case elfcpp::R_X86_64_TLS_IE_64:
-    case elfcpp::R_X86_64_TLS_LE_64:
+    case elfcpp::R_X86_64_TLSGD:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSLD:  // TODO(csilvers): correct?
+
+    case elfcpp::R_386_TLS_IE:
+    case elfcpp::R_386_TLS_GOTIE:
+    case elfcpp::R_386_TLS_LE:
+    case elfcpp::R_386_TLS_GD:
+    case elfcpp::R_386_TLS_LDM:
+    case elfcpp::R_386_TLS_LDO_64:
+    case elfcpp::R_386_TLS_IE_64:
+    case elfcpp::R_386_TLS_LE_64:
       {
 	const bool is_final = gsym->final_value_is_known();
 	r_type = Target_x86_64::optimize_tls_reloc(is_final, r_type);
 	switch (r_type)
 	  {
-	  case elfcpp::R_X86_64_TLS_LE:
-	  case elfcpp::R_X86_64_TLS_LE_64:
+	  case elfcpp::R_386_TLS_LE:
+	  case elfcpp::R_386_TLS_LE_64:
 	    // FIXME: If generating a shared object, we need to copy
 	    // this relocation into the object.
 	    gold_assert(!parameters->output_is_shared());
 	    break;
 
-	  case elfcpp::R_X86_64_TLS_IE:
-	  case elfcpp::R_X86_64_TLS_GOTIE:
-	  case elfcpp::R_X86_64_TLS_GD:
-	  case elfcpp::R_X86_64_TLS_LDM:
-	  case elfcpp::R_X86_64_TLS_LDO_64:
-	  case elfcpp::R_X86_64_TLS_IE_64:
+	  case elfcpp::R_386_TLS_IE:
+	  case elfcpp::R_386_TLS_GOTIE:
+	  case elfcpp::R_386_TLS_GD:
+	  case elfcpp::R_386_TLS_LDM:
+	  case elfcpp::R_386_TLS_LDO_64:
+	  case elfcpp::R_386_TLS_IE_64:
 	    fprintf(stderr,
 		    _("%s: %s: unsupported reloc %u "
 		      "against global symbol %s\n"),
@@ -927,15 +954,17 @@ Target_x86_64::Scan::global(const General_options& options,
       break;
 #endif
 
+    case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
 #if 0
-    case elfcpp::R_X86_64_TLS_GD_64:
-    case elfcpp::R_X86_64_TLS_GD_PUSH:
-    case elfcpp::R_X86_64_TLS_GD_CALL:
-    case elfcpp::R_X86_64_TLS_GD_POP:
-    case elfcpp::R_X86_64_TLS_LDM_64:
-    case elfcpp::R_X86_64_TLS_LDM_PUSH:
-    case elfcpp::R_X86_64_TLS_LDM_CALL:
-    case elfcpp::R_X86_64_TLS_LDM_POP:
+    case elfcpp::R_386_TLS_GD_64:
+    case elfcpp::R_386_TLS_GD_PUSH:
+    case elfcpp::R_386_TLS_GD_CALL:
+    case elfcpp::R_386_TLS_GD_POP:
+    case elfcpp::R_386_TLS_LDM_64:
+    case elfcpp::R_386_TLS_LDM_PUSH:
+    case elfcpp::R_386_TLS_LDM_CALL:
+    case elfcpp::R_386_TLS_LDM_POP:
 #endif
     default:
       fprintf(stderr,
@@ -1078,6 +1107,8 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
   switch (r_type)
     {
     case elfcpp::R_X86_64_NONE:
+    case elfcpp::R_386_GNU_VTINHERIT:
+    case elfcpp::R_386_GNU_VTENTRY:
       break;
 
     case elfcpp::R_X86_64_64:
@@ -1090,12 +1121,10 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_32:
-      // FIXME: Needs error checking.
       Relocate_functions<64, false>::rela32(view, object, psymval, addend);
       break;
 
     case elfcpp::R_X86_64_32S:
-      // FIXME: Needs error checking.
       Relocate_functions<64, false>::rela32(view, object, psymval, addend);
       break;
 
@@ -1136,6 +1165,34 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       Relocate_functions<64, false>::rela32(view, gsym->got_offset(), addend);
       break;
 
+    case elfcpp::R_X86_64_GOTPC32:
+      {
+        gold_assert(gsym);
+	elfcpp::Elf_types<64>::Elf_Addr value;
+	value = target->got_section(NULL, NULL)->address();
+	Relocate_functions<64, false>::pcrela32(view, value, addend, address);
+      }
+      break;
+
+    case elfcpp::R_X86_64_GOT64:
+      // The ABI doc says "Like GOT64, but indicates a PLT entry is needed."
+      // Since we always add a PLT entry, this is equivalent.
+    case elfcpp::R_X86_64_GOTPLT64:  // TODO(csilvers): correct?
+      // Local GOT offsets not yet supported.
+      gold_assert(gsym);
+      gold_assert(gsym->has_got_offset());
+      Relocate_functions<64, false>::rela64(view, gsym->got_offset(), addend);
+      break;
+
+    case elfcpp::R_X86_64_GOTPC64:
+      {
+        gold_assert(gsym);
+	elfcpp::Elf_types<64>::Elf_Addr value;
+	value = target->got_section(NULL, NULL)->address();
+	Relocate_functions<64, false>::pcrela64(view, value, addend, address);
+      }
+      break;
+
     case elfcpp::R_X86_64_GOTOFF64:
       {
 	elfcpp::Elf_types<64>::Elf_Addr value;
@@ -1156,6 +1213,17 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       }
       break;
 
+    case elfcpp::R_X86_64_GOTPCREL64:
+      {
+        gold_assert(gsym);
+	elfcpp::Elf_types<64>::Elf_Addr value;
+        // FIXME(csilvers): this is probably totally wrong for G + GOT
+	value = (target->got_section(NULL, NULL)->address()
+                 + (gsym->has_got_offset() ? gsym->got_offset() : 0));
+	Relocate_functions<64, false>::pcrela64(view, value, addend, address);
+      }
+      break;
+
     case elfcpp::R_X86_64_COPY:
     case elfcpp::R_X86_64_GLOB_DAT:
     case elfcpp::R_X86_64_JUMP_SLOT:
@@ -1165,7 +1233,10 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_DTPMOD64:
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_DTPOFF32:
+    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_TLSDESC:
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
@@ -1174,14 +1245,17 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       break;
 
 #if 0
-    case elfcpp::R_X86_64_TLS_IE:
-    case elfcpp::R_X86_64_TLS_GOTIE:
-    case elfcpp::R_X86_64_TLS_LE:
-    case elfcpp::R_X86_64_TLS_GD:
-    case elfcpp::R_X86_64_TLS_LDM:
-    case elfcpp::R_X86_64_TLS_LDO_64:
-    case elfcpp::R_X86_64_TLS_IE_64:
-    case elfcpp::R_X86_64_TLS_LE_64:
+    case elfcpp::R_X86_64_TLSGD:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSLD:  // TODO(csilvers): correct?
+
+    case elfcpp::R_386_TLS_IE:
+    case elfcpp::R_386_TLS_GOTIE:
+    case elfcpp::R_386_TLS_LE:
+    case elfcpp::R_386_TLS_GD:
+    case elfcpp::R_386_TLS_LDM:
+    case elfcpp::R_386_TLS_LDO_64:
+    case elfcpp::R_386_TLS_IE_64:
+    case elfcpp::R_386_TLS_LE_64:
       this->relocate_tls(relinfo, relnum, rel, r_type, gsym, psymval, view,
 			 address, view_size);
       break;
@@ -1189,15 +1263,18 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       view_size++;      // this is to make view_size used
 #endif
 
+    case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): implement me!
 #if 0
-    case elfcpp::R_X86_64_TLS_GD_64:
-    case elfcpp::R_X86_64_TLS_GD_PUSH:
-    case elfcpp::R_X86_64_TLS_GD_CALL:
-    case elfcpp::R_X86_64_TLS_GD_POP:
-    case elfcpp::R_X86_64_TLS_LDM_64:
-    case elfcpp::R_X86_64_TLS_LDM_PUSH:
-    case elfcpp::R_X86_64_TLS_LDM_CALL:
-    case elfcpp::R_X86_64_TLS_LDM_POP:
+    case elfcpp::R_386_TLS_GD_64:
+    case elfcpp::R_386_TLS_GD_PUSH:
+    case elfcpp::R_386_TLS_GD_CALL:
+    case elfcpp::R_386_TLS_GD_POP:
+    case elfcpp::R_386_TLS_LDM_64:
+    case elfcpp::R_386_TLS_LDM_PUSH:
+    case elfcpp::R_386_TLS_LDM_CALL:
+    case elfcpp::R_386_TLS_LDM_POP:
 #endif
     default:
       fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
