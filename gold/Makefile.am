@@ -79,10 +79,10 @@ YFILES = \
 EXTRA_DIST = yyscript.c yyscript.h
 
 TARGETSOURCES = \
-	i386.cc
+	i386.cc x86_64.cc
 
 ALL_TARGETOBJS = \
-	i386.$(OBJEXT)
+	i386.$(OBJEXT) x86_64.$(OBJEXT)
 
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
 
