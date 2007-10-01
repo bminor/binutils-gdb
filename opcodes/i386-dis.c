@@ -670,7 +670,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define THREE_BYTE_0F38		(THREE_BYTE_0F25 + 1)
 #define THREE_BYTE_0F3A		(THREE_BYTE_0F38 + 1)
 #define THREE_BYTE_0F7A		(THREE_BYTE_0F3A + 1)
-#define THREE_BYTE_0FBA		(THREE_BYTE_0F7A + 1)
+#define THREE_BYTE_0F7B		(THREE_BYTE_0F7A + 1)
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
 
@@ -1152,7 +1152,7 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F78) },
   { PREFIX_TABLE (PREFIX_0F79) },
   { THREE_BYTE_TABLE (THREE_BYTE_0F7A) },
-  { THREE_BYTE_TABLE (THREE_BYTE_0FBA) },
+  { THREE_BYTE_TABLE (THREE_BYTE_0F7B) },
   { PREFIX_TABLE (PREFIX_0F7C) },
   { PREFIX_TABLE (PREFIX_0F7D) },
   { PREFIX_TABLE (PREFIX_0F7E) },
@@ -3897,7 +3897,7 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
   },
-  /* THREE_BYTE_SSE5_0F7A */
+  /* THREE_BYTE_0F7A */
   {
     /* 00 */
     { "(bad)",		{ XX } },
@@ -4188,7 +4188,7 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)", { XX } },
     { "(bad)", { XX } },
   },
-  /* THREE_BYTE_SSE5_0F7B */
+  /* THREE_BYTE_0F7B */
   {
     /* 00 */
     { "(bad)", { XX } },
