@@ -192,6 +192,34 @@ private:
     elfcpp::Swap<valsize, big_endian>::writeval(wv, x);
   }
 
+  // Do a simple relocation with the addend in the relocation.
+  // VALSIZE is the size of the value.
+  template<int valsize>
+  static inline void
+  rela(unsigned char* view,
+       typename elfcpp::Swap<valsize, big_endian>::Valtype value,
+       typename elfcpp::Swap<valsize, big_endian>::Valtype addend)
+  {
+    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    elfcpp::Swap<valsize, big_endian>::writeval(wv, value + addend);
+  }
+
+  // Do a simple relocation using a symbol value with the addend in
+  // the relocation.  VALSIZE is the size of the value.
+  template<int valsize>
+  static inline void
+  rela(unsigned char* view,
+       const Sized_relobj<size, big_endian>* object,
+       const Symbol_value<size>* psymval,
+       typename elfcpp::Swap<valsize, big_endian>::Valtype addend)
+  {
+    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype x = psymval->value(object, addend);
+    elfcpp::Swap<valsize, big_endian>::writeval(wv, x);
+  }
+
   // Like rel(), but sign-extends the value to SIZE.
   template<int valsize>
   static inline void
@@ -242,6 +270,36 @@ private:
     elfcpp::Swap<valsize, big_endian>::writeval(wv, x - address);
   }
 
+  // Do a simple PC relative relocation with the addend in the
+  // relocation.  VALSIZE is the size of the value.
+  template<int valsize>
+  static inline void
+  pcrela(unsigned char* view,
+	 typename elfcpp::Swap<valsize, big_endian>::Valtype value,
+	 typename elfcpp::Swap<valsize, big_endian>::Valtype addend,
+	 typename elfcpp::Elf_types<size>::Elf_Addr address)
+  {
+    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    elfcpp::Swap<valsize, big_endian>::writeval(wv, value + addend - address);
+  }
+
+  // Do a simple PC relative relocation with a Symbol_value with the
+  // addend in the relocation.  VALSIZE is the size of the value.
+  template<int valsize>
+  static inline void
+  pcrela(unsigned char* view,
+	 const Sized_relobj<size, big_endian>* object,
+	 const Symbol_value<size>* psymval,
+	 typename elfcpp::Swap<valsize, big_endian>::Valtype addend,
+	 typename elfcpp::Elf_types<size>::Elf_Addr address)
+  {
+    typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype x = psymval->value(object, addend);
+    elfcpp::Swap<valsize, big_endian>::writeval(wv, x - address);
+  }
+
   typedef Relocate_functions<size, big_endian> This;
 
 public:
@@ -256,6 +314,18 @@ public:
        const Sized_relobj<size, big_endian>* object,
        const Symbol_value<size>* psymval)
   { This::template rel<8>(view, object, psymval); }
+
+  // Do an 8-bit RELA relocation with the addend in the relocation.
+  static inline void
+  rel8a(unsigned char* view, unsigned char value, unsigned char addend)
+  { This::template rela<8>(view, value, addend); }
+
+  static inline void
+  rel8a(unsigned char* view,
+	const Sized_relobj<size, big_endian>* object,
+	const Symbol_value<size>* psymval,
+	unsigned char addend)
+  { This::template rela<8>(view, object, psymval, addend); }
 
   // Do an 8-bit REL relocation, sign extending the addend to SIZE.
   static inline void
@@ -278,6 +348,21 @@ public:
 	 typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This::template pcrel<8>(view, object, psymval, address); }
 
+  // Do a simple 8-bit PC relative RELA relocation with the addend in
+  // the reloc.
+  static inline void
+  pcrela8(unsigned char* view, unsigned char value, unsigned char addend,
+	  typename elfcpp::Elf_types<size>::Elf_Addr address)
+  { This::template pcrela<8>(view, value, addend, address); }
+
+  static inline void
+  pcrela8(unsigned char* view,
+	  const Sized_relobj<size, big_endian>* object,
+	  const Symbol_value<size>* psymval,
+	  unsigned char addend,
+	  typename elfcpp::Elf_types<size>::Elf_Addr address)
+  { This::template pcrela<8>(view, object, psymval, addend, address); }
+
   // Do a simple 16-bit REL relocation with the addend in the section
   // contents.
   static inline void
@@ -290,6 +375,18 @@ public:
 	const Symbol_value<size>* psymval)
   { This::template rel<16>(view, object, psymval); }
 
+  // Do an 16-bit RELA relocation with the addend in the relocation.
+  static inline void
+  rela16(unsigned char* view, elfcpp::Elf_Half value, elfcpp::Elf_Half addend)
+  { This::template rela<16>(view, value, addend); }
+
+  static inline void
+  rela16(unsigned char* view,
+	 const Sized_relobj<size, big_endian>* object,
+	 const Symbol_value<size>* psymval,
+	 elfcpp::Elf_Half addend)
+  { This::template rela<16>(view, object, psymval, addend); }
+
   // Do a 16-bit REL relocation, sign extending the addend to SIZE.
   static inline void
   rel16s(unsigned char* view,
@@ -297,10 +394,10 @@ public:
          const Symbol_value<size>* psymval)
   { This::template signedrel<16>(view, object, psymval); }
 
-  // Do a simple 32-bit PC relative REL relocation with the addend in
+  // Do a simple 16-bit PC relative REL relocation with the addend in
   // the section contents.
   static inline void
-  pcrel16(unsigned char* view, elfcpp::Elf_Word value,
+  pcrel16(unsigned char* view, elfcpp::Elf_Half value,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This::template pcrel<16>(view, value, address); }
 
@@ -310,6 +407,22 @@ public:
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This::template pcrel<16>(view, object, psymval, address); }
+
+  // Do a simple 16-bit PC relative RELA relocation with the addend in
+  // the reloc.
+  static inline void
+  pcrela16(unsigned char* view, elfcpp::Elf_Half value,
+	   elfcpp::Elf_Half addend,
+           typename elfcpp::Elf_types<size>::Elf_Addr address)
+  { This::template pcrela<16>(view, value, addend, address); }
+
+  static inline void
+  pcrela16(unsigned char* view,
+	   const Sized_relobj<size, big_endian>* object,
+	   const Symbol_value<size>* psymval,
+	   elfcpp::Elf_Half addend,
+	   typename elfcpp::Elf_types<size>::Elf_Addr address)
+  { This::template pcrela<16>(view, object, psymval, addend, address); }
 
   // Do a simple 32-bit REL relocation with the addend in the section
   // contents.
@@ -322,6 +435,18 @@ public:
 	const Sized_relobj<size, big_endian>* object,
 	const Symbol_value<size>* psymval)
   { This::template rel<32>(view, object, psymval); }
+
+  // Do an 32-bit RELA relocation with the addend in the relocation.
+  static inline void
+  rela32(unsigned char* view, elfcpp::Elf_Word value, elfcpp::Elf_Word addend)
+  { This::template rela<32>(view, value, addend); }
+
+  static inline void
+  rela32(unsigned char* view,
+	 const Sized_relobj<size, big_endian>* object,
+	 const Symbol_value<size>* psymval,
+	 elfcpp::Elf_Word addend)
+  { This::template rela<32>(view, object, psymval, addend); }
 
   // Do a 32-bit REL relocation, sign extending the addend to SIZE.
   static inline void
@@ -344,6 +469,22 @@ public:
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This::template pcrel<32>(view, object, psymval, address); }
 
+  // Do a simple 32-bit PC relative RELA relocation with the addend in
+  // the relocation.
+  static inline void
+  pcrela32(unsigned char* view, elfcpp::Elf_Word value,
+           elfcpp::Elf_Word addend,
+           typename elfcpp::Elf_types<size>::Elf_Addr address)
+  { This::template pcrela<32>(view, value, addend, address); }
+
+  static inline void
+  pcrela32(unsigned char* view,
+	   const Sized_relobj<size, big_endian>* object,
+	   const Symbol_value<size>* psymval,
+	   elfcpp::Elf_Word addend,
+	   typename elfcpp::Elf_types<size>::Elf_Addr address)
+  { This::template pcrela<32>(view, object, psymval, addend, address); }
+
   // Do a simple 64-bit REL relocation with the addend in the section
   // contents.
   static inline void
@@ -355,6 +496,19 @@ public:
 	const Sized_relobj<size, big_endian>* object,
 	const Symbol_value<size>* psymval)
   { This::template rel<64>(view, object, psymval); }
+
+  // Do a 64-bit RELA relocation with the addend in the relocation.
+  static inline void
+  rela64(unsigned char* view, elfcpp::Elf_Xword value,
+         elfcpp::Elf_Xword addend)
+  { This::template rela<64>(view, value, addend); }
+
+  static inline void
+  rela64(unsigned char* view,
+	 const Sized_relobj<size, big_endian>* object,
+	 const Symbol_value<size>* psymval,
+	 elfcpp::Elf_Xword addend)
+  { This::template rela<64>(view, object, psymval, addend); }
 
   // Do a simple 64-bit PC relative REL relocation with the addend in
   // the section contents.
@@ -369,6 +523,22 @@ public:
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This::template pcrel<64>(view, object, psymval, address); }
+
+  // Do a simple 64-bit PC relative RELA relocation with the addend in
+  // the relocation.
+  static inline void
+  pcrela64(unsigned char* view, elfcpp::Elf_Xword value,
+           elfcpp::Elf_Xword addend,
+           typename elfcpp::Elf_types<size>::Elf_Addr address)
+  { This::template pcrela<64>(view, value, addend, address); }
+
+  static inline void
+  pcrela64(unsigned char* view,
+	   const Sized_relobj<size, big_endian>* object,
+	   const Symbol_value<size>* psymval,
+	   elfcpp::Elf_Xword addend,
+	   typename elfcpp::Elf_types<size>::Elf_Addr address)
+  { This::template pcrela<64>(view, object, psymval, addend, address); }
 };
 
 // We try to avoid COPY relocations when possible.  A COPY relocation
