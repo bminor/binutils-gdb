@@ -434,6 +434,10 @@ extern void set_internalvar_component (struct internalvar *var,
 				       int bitpos, int bitsize,
 				       struct value *newvalue);
 
+extern struct internalvar *lookup_only_internalvar (char *name);
+
+extern struct internalvar *create_internalvar (char *name);
+
 extern struct internalvar *lookup_internalvar (char *name);
 
 extern int value_equal (struct value *arg1, struct value *arg2);

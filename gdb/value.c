@@ -742,10 +742,10 @@ init_if_undefined_command (char* args, int from_tty)
    normally include a dollar sign.
 
    If the specified internal variable does not exist,
-   one is created, with a void value.  */
+   the return value is NULL.  */
 
 struct internalvar *
-lookup_internalvar (char *name)
+lookup_only_internalvar (char *name)
 {
   struct internalvar *var;
 
@@ -753,6 +753,17 @@ lookup_internalvar (char *name)
     if (strcmp (var->name, name) == 0)
       return var;
 
+  return NULL;
+}
+
+
+/* Create an internal variable with name NAME and with a void value.
+   NAME should not normally include a dollar sign.  */
+
+struct internalvar *
+create_internalvar (char *name)
+{
+  struct internalvar *var;
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
   var->name = concat (name, (char *)NULL);
   var->value = allocate_value (builtin_type_void);
@@ -761,6 +772,25 @@ lookup_internalvar (char *name)
   var->next = internalvars;
   internalvars = var;
   return var;
+}
+
+
+/* Look up an internal variable with name NAME.  NAME should not
+   normally include a dollar sign.
+
+   If the specified internal variable does not exist,
+   one is created, with a void value.  */
+
+struct internalvar *
+lookup_internalvar (char *name)
+{
+  struct internalvar *var;
+
+  var = lookup_only_internalvar (name);
+  if (var)
+    return var;
+
+  return create_internalvar (name);
 }
 
 struct value *

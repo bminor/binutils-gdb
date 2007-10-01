@@ -469,6 +469,7 @@ write_dollar_variable (struct stoken str)
 {
   struct symbol *sym = NULL;
   struct minimal_symbol *msym = NULL;
+  struct internalvar *isym = NULL;
 
   /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
      and $$digits (equivalent to $<-digits> if you could type that). */
@@ -507,6 +508,17 @@ write_dollar_variable (struct stoken str)
   if (i >= 0)
     goto handle_register;
 
+  /* Any names starting with $ are probably debugger internal variables.  */
+
+  isym = lookup_only_internalvar (copy_name (str) + 1);
+  if (isym)
+    {
+      write_exp_elt_opcode (OP_INTERNALVAR);
+      write_exp_elt_intern (isym);
+      write_exp_elt_opcode (OP_INTERNALVAR);
+      return;
+    }
+
   /* On some systems, such as HP-UX and hppa-linux, certain system routines 
      have names beginning with $ or $$.  Check for those, first. */
 
@@ -529,10 +541,10 @@ write_dollar_variable (struct stoken str)
       return;
     }
 
-  /* Any other names starting in $ are debugger internal variables.  */
+  /* Any other names are assumed to be debugger internal variables.  */
 
   write_exp_elt_opcode (OP_INTERNALVAR);
-  write_exp_elt_intern (lookup_internalvar (copy_name (str) + 1));
+  write_exp_elt_intern (create_internalvar (copy_name (str) + 1));
   write_exp_elt_opcode (OP_INTERNALVAR);
   return;
 handle_last:

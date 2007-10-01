@@ -1,3 +1,14 @@
+2007-09-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* value.h (lookup_only_internalvar): New prototype.
+	(create_internalvar): Likewise.
+	* value.c (lookup_only_internalvar): New function.
+	(create_internalvar): Likewise.
+	(lookup_internalvar): Use new lookup_only_internalvar and
+	create_internalvar functions.
+	* parse.c (write_dollar_variable): Look up $ symbols in internal
+	table first rather than last.
+
 2007-09-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-nat.c (linux_nat_new_thread): New variable.
