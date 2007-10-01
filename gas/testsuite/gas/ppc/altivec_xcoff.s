@@ -1,6 +1,5 @@
 # PowerPC xcoff AltiVec tests
 #as: -mppc -maltivec
-	.machine	"ppc"
 	.csect .text[PR]
 	.csect main[DS]
 main:

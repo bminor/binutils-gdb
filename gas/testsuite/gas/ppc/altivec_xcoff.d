@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-0000000000000000 <.text>:
+(00000000)?00000000 <.text>:
    0:	7c 60 06 6c 	dss     3
    4:	7e 00 06 6c 	dssall
    8:	7c 25 22 ac 	dst     r5,r4,1

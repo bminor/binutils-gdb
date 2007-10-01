@@ -13,12 +13,12 @@ Disassembly of section .text:
    c:	24 46 00 3d 	bcel    2,4\*cr1\+eq,48 <.text\+0x48>
   10:	24 67 00 5a 	bcea    3,4\*cr1\+so,58 <.text\+0x58>
 			12: R_BA_16	.text
-  14:	24 88 00 7b 	bcela   4,4\*cr2,78 <.text\+0x78>
+  14:	24 88 00 7b 	bcela   4,4\*cr2\+lt,78 <.text\+0x78>
 			16: R_BA_16	.text
   18:	4c a9 00 22 	bclre   5,4\*cr2\+gt
   1c:	4c aa 00 23 	bclrel  5,4\*cr2\+eq
   20:	4d 0b 04 22 	bcctre  8,4\*cr2\+so
-  24:	4d 0c 04 23 	bcctrel 8,4\*cr3
+  24:	4d 0c 04 23 	bcctrel 8,4\*cr3\+lt
   28:	58 00 00 74 	be      9c <.text\+0x9c>
   2c:	58 00 00 89 	bel     b4 <.text\+0xb4>
   30:	58 00 00 f2 	bea     f0 <.text\+0xf0>
@@ -120,6 +120,6 @@ Disassembly of section .text:
  1a8:	7c aa 3a 86 	mfdcr   r5,234
  1ac:	7c e6 03 06 	mtdcrx  r6,r7
  1b0:	7d 10 6b 86 	mtdcr   432,r8
- 1b4:	7c 00 04 ac 	sync    
+ 1b4:	7c 00 04 ac 	msync
  1b8:	7c 09 55 ec 	dcba    r9,r10
- 1bc:	7c 00 06 ac 	eieio
+ 1bc:	7c 00 06 ac 	mbar    

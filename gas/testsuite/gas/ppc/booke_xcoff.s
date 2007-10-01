@@ -1,6 +1,5 @@
 # Motorola PowerPC BookE tests
-#as: -mppc32 -mbooke32
-	.machine	"ppc32"
+#as: -mbooke32
 	.csect .text[PR]
 	.csect main[DS]
 main:
@@ -12,10 +11,7 @@ main:
 	icbt	5, 8, 9	
 	mfapidi	5, 6
 	tlbivax	7, 8
-	tlbivaxe 9, 10	
 	tlbsx	11, 12
-	tlbsxe	13, 14
-	mcrxr64 5
 	rfci
 	wrtee	3
 	wrteei	1
