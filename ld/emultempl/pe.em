@@ -1891,6 +1891,10 @@ echo '  ; else if (!config.text_read_only) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn			>> e${EMULATION_NAME}.c
 echo '  ; else if (!config.magic_demand_paged) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xn			>> e${EMULATION_NAME}.c
+if test -n "$GENERATE_AUTO_IMPORT_SCRIPT" ; then
+echo '  ; else if (link_info.pei386_auto_import == 1) return'	>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xa			>> e${EMULATION_NAME}.c
+fi
 echo '  ; else return'					>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x			>> e${EMULATION_NAME}.c
 echo '; }'						>> e${EMULATION_NAME}.c

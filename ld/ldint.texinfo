@@ -237,7 +237,7 @@ If @code{SCRIPT_NAME} is set to @var{script}, @code{genscripts.sh} will
 invoke @file{scripttempl/@var{script}.sc}.
 
 The @file{genscripts.sh} script will invoke the @file{scripttempl}
-script 5 to 8 times.  Each time it will set the shell variable
+script 5 to 9 times.  Each time it will set the shell variable
 @code{LD_FLAG} to a different value.  When the linker is run, the
 options used will direct it to select a particular script.  (Script
 selection is controlled by the @code{get_script} emulation entry point;
@@ -292,6 +292,13 @@ this value if @code{GENERATE_COMBRELOC_SCRIPT} is defined in the
 The @file{emultempl} script must arrange to use this script at the
 appropriate time, normally when the linker is invoked with the @code{-shared
 -z combreloc} option.  The output has an extension of @file{.xsc}.
+@item auto_import
+The @file{scripttempl} script is only invoked with @code{LD_FLAG} set to
+this value if @code{GENERATE_AUTO_IMPORT_SCRIPT} is defined in the
+@file{emulparams} file.  The @file{emultempl} script must arrange to
+use this script at the appropriate time, normally when the linker is
+invoked with the @code{--enable-auto-import} option.  The output has
+an extension of @file{.xa}.
 @end table
 
 Besides the shell variables set by the @file{emulparams} script, and the

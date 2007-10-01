@@ -1,3 +1,20 @@
+2007-10-01  Nick Clifton  <nickc@redhat.com>
+
+	PR linker/4844
+	* genscript.sh: Add support for generating a .xa script for use
+	with the --auto-import option.
+	* ld.texinfo: Document the new behaviour of the --auto-import
+	option.
+	* ldint.texinfo: Document new script generation.
+	* emulparams/i386pe.sh (GENERATE_AUTO_IMPORT): Define.
+	* emulparams/i386pe_posix.sh (GENERATE_AUTO_IMPORT): Define.
+	* emulparams/i386pep.sh (GENERATE_AUTO_IMPORT): Define.
+	* emultemp/pe.em (..._get_script): Support the use of the auto
+	import script.
+	* scripttempl/pe.sc: Put the .rdata input sections into the .data
+	output section when creating an auto import script.
+	* scripttempl/pep.sc: Likewise.
+
 2007-09-26  Brian Watt  <bwatt@us.ibm.com>
 
 	* emultempl/spu_ovl.S: Add debug printf code.

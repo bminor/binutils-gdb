@@ -63,6 +63,7 @@
 #   sun3.xc      [used when the linker is invoked with "-z combreloc"]
 #   sun3.xsc     [used when the linker is invoked with "--shared"]
 #   sun3.xdc     [used when the linker is invoked with "-pie"]
+#   sun3.xa      [used when the linker is invoked with "--enable-auto-import"]
 #
 # It also produced the C source file:
 #
@@ -384,6 +385,16 @@ if test -n "$GENERATE_PIE_SCRIPT"; then
     unset RELRO_NOW
   fi
   unset CREATE_PIE
+fi
+
+if test -n "$GENERATE_AUTO_IMPORT_SCRIPT"; then
+  LD_FLAG=auto_import
+  DATA_ALIGNMENT=${DATA_ALIGNMENT_}
+  (
+    echo "/* Script for ld --enable-auto-import: Like the default script except read only data is placed into .data  */"
+    . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
+    . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+  ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xa
 fi
 
 case " $EMULATION_LIBPATH " in

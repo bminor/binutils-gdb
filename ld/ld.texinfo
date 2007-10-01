@@ -1568,15 +1568,15 @@ at link time. Searching @option{-rpath} in this way is only supported
 by native linkers and cross linkers which have been configured with
 the @option{--with-sysroot} option.
 @item
-On an ELF system, if the @option{-rpath} and @code{rpath-link} options
-were not used, search the contents of the environment variable
-@code{LD_RUN_PATH}. It is for the native linker only.
+On an ELF system, for native linkers, if the @option{-rpath} and
+@option{-rpath-link} options were not used, search the contents of the
+environment variable @code{LD_RUN_PATH}.
 @item
 On SunOS, if the @option{-rpath} option was not used, search any
 directories specified using @option{-L} options.
 @item
-For a native linker, the contents of the environment variable
-@code{LD_LIBRARY_PATH}.
+For a native linker, the search the contents of the environment
+variable @code{LD_LIBRARY_PATH}.
 @item
 For a native ELF linker, the directories in @code{DT_RUNPATH} or
 @code{DT_RPATH} of a shared library are searched for shared
@@ -2219,6 +2219,12 @@ building the import libraries with those DATA exports. Note: Use of the
 'auto-import' extension will cause the text section of the image file
 to be made writable. This does not conform to the PE-COFF format
 specification published by Microsoft.
+
+Note - use of the 'auto-import' extension will also cause read only
+data which would normally be placed into the .rdata section to be
+placed into the .data section instead.  This is in order to work
+around a problem with consts that is described here:
+http://www.cygwin.com/ml/cygwin/2004-09/msg01101.html
 
 Using 'auto-import' generally will 'just work' -- but sometimes you may
 see this message:
