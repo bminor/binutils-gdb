@@ -660,15 +660,26 @@ section is mostly irrelevant for software watchpoints.
 
 When the inferior stops, @value{GDBN} tries to establish, among other
 possible reasons, whether it stopped due to a watchpoint being hit.
-For a data-write watchpoint, it does so by evaluating, for each
-watchpoint, the expression whose value is being watched, and testing
-whether the watched value has changed.  For data-read and data-access
-watchpoints, @value{GDBN} needs the target to supply a primitive that
-returns the address of the data that was accessed or read (see the
-description of @code{target_stopped_data_address} below): if this
-primitive returns a valid address, @value{GDBN} infers that a
-watchpoint triggered if it watches an expression whose evaluation uses
-that address.
+It first uses @code{STOPPED_BY_WATCHPOINT} to see if any watchpoint
+was hit.  If not, all watchpoint checking is skipped.
+
+Then @value{GDBN} calls @code{target_stopped_data_address} exactly
+once.  This method returns the address of the watchpoint which
+triggered, if the target can determine it.  If the triggered address
+is available, @value{GDBN} compares the address returned by this
+method with each watched memory address in each active watchpoint.
+For data-read and data-access watchpoints, @value{GDBN} announces
+every watchpoint that watches the triggered address as being hit.
+For this reason, data-read and data-access watchpoints
+@emph{require} that the triggered address be available; if not, read
+and access watchpoints will never be considered hit.  For data-write
+watchpoints, if the triggered address is available, @value{GDBN}
+considers only those watchpoints which match that address;
+otherwise, @value{GDBN} considers all data-write watchpoints.  For
+each data-write watchpoint that @value{GDBN} considers, it evaluates
+the expression whose value is being watched, and tests whether the
+watched value has changed.  Watchpoints whose watched values have
+changed are announced as hit.
 
 @value{GDBN} uses several macros and primitives to support hardware
 watchpoints:
@@ -721,26 +732,40 @@ These two macros should return 0 for success, non-zero for failure.
 @item target_stopped_data_address (@var{addr_p})
 If the inferior has some watchpoint that triggered, place the address
 associated with the watchpoint at the location pointed to by
-@var{addr_p} and return non-zero.  Otherwise, return zero.  Note that
-this primitive is used by @value{GDBN} only on targets that support
-data-read or data-access type watchpoints, so targets that have
-support only for data-write watchpoints need not implement these
-primitives.
+@var{addr_p} and return non-zero.  Otherwise, return zero.  This
+is required for data-read and data-access watchpoints.  It is
+not required for data-write watchpoints, but @value{GDBN} uses
+it to improve handling of those also.
+
+@value{GDBN} will only call this method once per watchpoint stop,
+immediately after calling @code{STOPPED_BY_WATCHPOINT}.  If the
+target's watchpoint indication is sticky, i.e., stays set after
+resuming, this method should clear it.  For instance, the x86 debug
+control register has sticky triggered flags.
 
 @findex HAVE_STEPPABLE_WATCHPOINT
 @item HAVE_STEPPABLE_WATCHPOINT
 If defined to a non-zero value, it is not necessary to disable a
-watchpoint to step over it.
+watchpoint to step over it.    Like @code{gdbarch_have_nonsteppable_watchpoint},
+this is usually set when watchpoints trigger at the instruction
+which will perform an interesting read or write.  It should be
+set if there is a temporary disable bit which allows the processor
+to step over the interesting instruction without raising the
+watchpoint exception again.
 
 @findex gdbarch_have_nonsteppable_watchpoint 
 @item int gdbarch_have_nonsteppable_watchpoint (@var{gdbarch})
 If it returns a non-zero value, @value{GDBN} should disable a
-watchpoint to step the inferior over it.
+watchpoint to step the inferior over it.  This is usually set when
+watchpoints trigger at the instruction which will perform an
+interesting read or write.
 
 @findex HAVE_CONTINUABLE_WATCHPOINT
 @item HAVE_CONTINUABLE_WATCHPOINT
 If defined to a non-zero value, it is possible to continue the
-inferior after a watchpoint has been hit.
+inferior after a watchpoint has been hit.  This is usually set
+when watchpoints trigger at the instruction following an interesting
+read or write.
 
 @findex CANNOT_STEP_HW_WATCHPOINTS
 @item CANNOT_STEP_HW_WATCHPOINTS
@@ -762,6 +787,32 @@ the @var{wait_status} argument.
 determine for sure whether the inferior stopped due to a watchpoint,
 it could return non-zero ``just in case''.
 @end table
+
+@subsection Watchpoints and Threads
+@cindex watchpoints, with threads
+
+@value{GDBN} only supports process-wide watchpoints, which trigger
+in all threads.  @value{GDBN} uses the thread ID to make watchpoints
+act as if they were thread-specific, but it cannot set hardware
+watchpoints that only trigger in a specific thread.  Therefore, even
+if the target supports threads, per-thread debug registers, and
+watchpoints which only affect a single thread, it should set the
+per-thread debug registers for all threads to the same value.  On
+@sc{gnu}/Linux native targets, this is accomplished by using
+@code{ALL_LWPS} in @code{target_insert_watchpoint} and
+@code{target_remove_watchpoint} and by using
+@code{linux_set_new_thread} to register a handler for newly created
+threads.
+
+@value{GDBN}'s @sc{gnu}/Linux support only reports a single event
+at a time, although multiple events can trigger simultaneously for
+multi-threaded programs.  When multiple events occur, @file{linux-nat.c}
+queues subsequent events and returns them the next time the program
+is resumed.  This means that @code{STOPPED_BY_WATCHPOINT} and
+@code{target_stopped_data_address} only need to consult the current
+thread's state---the thread indicated by @code{inferior_ptid}.  If
+two threads have hit watchpoints simultaneously, those routines
+will be called a second time for the second thread.
 
 @subsection x86 Watchpoints
 @cindex x86 debug registers

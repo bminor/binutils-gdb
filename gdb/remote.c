@@ -5406,14 +5406,11 @@ remote_stopped_by_watchpoint (void)
     return remote_stopped_by_watchpoint_p;
 }
 
-extern int stepped_after_stopped_by_watchpoint;
-
 static int
 remote_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
   int rc = 0;
-  if (remote_stopped_by_watchpoint ()
-      || stepped_after_stopped_by_watchpoint)
+  if (remote_stopped_by_watchpoint ())
     {
       *addr_p = remote_watch_data_address;
       rc = 1;

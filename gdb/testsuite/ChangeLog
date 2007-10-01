@@ -1,3 +1,10 @@
+2007-09-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.threads/watchthreads.c (thread_function): Sleep between
+	iterations.
+	* gdb.threads/watchthreads.exp: Allow two watchpoints to trigger
+	at once for S/390.  Generate matching fails and passes.
+
 2007-09-27  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/var-cmd.c (do_children_tests): Initialize

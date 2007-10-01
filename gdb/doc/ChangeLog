@@ -1,3 +1,12 @@
+2007-09-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Setting Watchpoints): Adjust warning text about
+	multi-threaded watchpoints.
+	* gdbint.texinfo (Watchpoints): Describe how watchpoints are
+	checked.  Describe sticky notification.  Expand description
+	of steppable and continuable watchpoints.
+	(Watchpoints and Threads): New subsection.
+
 2007-09-28  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (Setting Breakpoints): Revise

@@ -1,3 +1,28 @@
+2007-09-30  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jeff Johnston  <jjohnstn@redhat.com>
+
+	* breakpoint.c (watchpoints_triggered): New.
+	(bpstat_stop_status): Remove STOPPED_BY_WATCHPOINT argument.
+	Check watchpoint_triggered instead.  Combine handling for software
+	and hardware watchpoints.  Do not use target_stopped_data_address
+	here.  Always check a watchpoint if its scope breakpoint triggers.
+	Do not stop for thread or overlay events.  Improve check for
+	triggered watchpoints without a value change.
+	(watch_command_1): Insert the scope breakpoint first.  Link the
+	scope breakpoint to the watchpoint.
+	* breakpoint.h (enum watchpoint_triggered): New.
+	(struct breakpoint): Add watchpoint_triggered.
+	(bpstat_stop_status): Update prototype.
+	(watchpoints_triggered): Declare.
+	* infrun.c (enum infwait_status): Add infwait_step_watch_state.
+	(stepped_after_stopped_by_watchpoint): Delete.
+	(handle_inferior_event): Make stepped_after_stopped_by_watchpoint
+	local.  Handle infwait_step_watch_state.  Update calls to
+	bpstat_stop_status.  Use watchpoints_triggered to check
+	watchpoints.
+	* remote.c (stepped_after_stopped_by_watchpoint): Remove extern.
+	(remote_stopped_data_address): Do not check it.
+
 2007-09-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.ac: Add $LIBINTL when testing libbfd.

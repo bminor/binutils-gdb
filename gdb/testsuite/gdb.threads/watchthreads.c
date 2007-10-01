@@ -56,7 +56,7 @@ void *thread_function(void *arg) {
     /* Don't run forever.  Run just short of it :)  */
     while (*myp > 0)
       {
-	(*myp) ++;  /* Loop increment.  */
+	(*myp) ++; usleep (1);  /* Loop increment.  */
       }
 
     pthread_exit(NULL);

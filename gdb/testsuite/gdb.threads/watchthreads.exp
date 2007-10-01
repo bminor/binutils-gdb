@@ -30,6 +30,10 @@ if [target_info exists gdb,no_hardware_watchpoints] {
     return 0;
 }
 
+proc target_no_stopped_data { } {
+    return [istarget s390*-*-*]
+}
+
 set testfile "watchthreads"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
@@ -61,20 +65,58 @@ gdb_test "watch args\[1\]" "Hardware watchpoint 3: args\\\[1\\\]"
 
 set init_line [expr [gdb_get_line_number "Init value"]+1]
 set inc_line [gdb_get_line_number "Loop increment"]
+set main_loc "main \\\(\\\) at .*watchthreads.c:$init_line"
+set thread0_loc "thread_function \\\(arg=0x0\\\) at .*watchthreads.c:$inc_line"
+set thread1_loc "thread_function \\\(arg=0x1\\\) at .*watchthreads.c:$inc_line"
 
 # Loop and continue to allow both watchpoints to be triggered.
 for {set i 0} {$i < 30} {incr i} {
+  set test_flag_0 0
+  set test_flag_1 0
   set test_flag 0
   gdb_test_multiple "continue" "threaded watch loop" {
-    -re "Hardware watchpoint 2: args\\\[0\\\].*Old value = 0.*New value = 1.*main \\\(\\\) at .*watchthreads.c:$init_line.*$gdb_prompt $"
-       { set args_0 1; set test_flag 1 }
-    -re "Hardware watchpoint 3: args\\\[1\\\].*Old value = 0.*New value = 1.*main \\\(\\\) at .*watchthreads.c:$init_line.*$gdb_prompt $"
-       { set args_1 1; set test_flag 1 }
-    -re "Hardware watchpoint 2: args\\\[0\\\].*Old value = $args_0.*New value = [expr $args_0+1].*in thread_function \\\(arg=0x0\\\) at .*watchthreads.c:$inc_line.*$gdb_prompt $"
-       { set args_0 [expr $args_0+1]; set test_flag 1 }
-    -re "Hardware watchpoint 3: args\\\[1\\\].*Old value = $args_1.*New value = [expr $args_1+1].*in thread_function \\\(arg=0x1\\\) at .*watchthreads.c:$inc_line.*$gdb_prompt $"
-       { set args_1 [expr $args_1+1]; set test_flag 1 }
+    -re "(.*Hardware watchpoint.*)$gdb_prompt $" {
+	# At least one hardware watchpoint was hit.  Check if both were.
+	set string $expect_out(1,string)
+
+	if [regexp "Hardware watchpoint 2: args\\\[0\\\]\[^\r\]*\r\[^\r\]*\r\[^\r\]*Old value = $args_0\[^\r\]*\r\[^\r\]*New value = [expr $args_0+1]\r" $string] {
+	    incr args_0
+	    incr test_flag_0
+	}
+	if [regexp "Hardware watchpoint 3: args\\\[1\\\]\[^\r\]*\r\[^\r\]*\r\[^\r\]*Old value = $args_1\[^\r\]*\r\[^\r\]*New value = [expr $args_1+1]\r" $string] {
+	    incr args_1
+	    incr test_flag_1
+	}
+
+	set expected_loc "bogus location"
+	if { $test_flag_0 == 1 && $test_flag_1 == 0 && $args_0 == 1 } {
+	    set expected_loc $main_loc
+	} elseif { $test_flag_0 == 0 && $test_flag_1 == 1 && $args_1 == 1 } {
+	    set expected_loc $main_loc
+	} elseif { $test_flag_0 == 1 && $test_flag_1 == 0 } {
+	    set expected_loc $thread0_loc
+	} elseif { $test_flag_0 == 0 && $test_flag_1 == 1 } {
+	    set expected_loc $thread1_loc
+	} elseif { $test_flag_0 + $test_flag_1 == 2 } {
+	    # On S/390, or any other system which can not report the
+	    # stopped data address, it is OK to report two watchpoints
+	    # at once in this test.  Make sure the reported location
+	    # corresponds to at least one of the watchpoints (and not,
+	    # e.g., __nptl_create_event).  On other systems, we should
+	    # report the two watchpoints serially.
+	    if { [target_no_stopped_data] } {
+		set expected_loc "($main_loc|$thread0_loc|$thread1_loc)"
+	    }
+	}
+
+	if [ regexp "$expected_loc" $string ] {
+	    set test_flag 1
+	} else {
+	    fail "threaded watch loop"
+	}
+    }
   }
+
   # If we fail above, don't bother continuing loop
   if { $test_flag == 0 } {
     set i 30;
@@ -120,7 +162,14 @@ if { $args_1 > 1 } {
 
 # Verify that all watchpoint hits are accounted for.
 set message "combination of threaded watchpoints = 30"
-if { [expr $args_0+$args_1] == 30 } {
+if { [target_no_stopped_data] } {
+    # See above.  If we allow two watchpoints to be hit at once, we
+    # may have more than 30 hits total.
+    set result [expr $args_0 + $args_1 >= 30]
+} else {
+    set result [expr $args_0 + $args_1 == 30]
+}
+if { $result } {
   pass $message 
 } else {
   fail $message 

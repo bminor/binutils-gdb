@@ -3346,20 +3346,13 @@ rerun the program, you will need to set all such watchpoints again.  One
 way of doing that would be to set a code breakpoint at the entry to the
 @code{main} function and when it breaks, set all the watchpoints.
 
-@quotation
 @cindex watchpoints and threads
 @cindex threads and watchpoints
-@emph{Warning:} In multi-thread programs, watchpoints have only limited
-usefulness.  With the current watchpoint implementation, @value{GDBN}
-can only watch the value of an expression @emph{in a single thread}.  If
-you are confident that the expression can only change due to the current
-thread's activity (and if you are also confident that no other thread
-can become current), then you can use watchpoints as usual.  However,
-@value{GDBN} may not notice when a non-current thread's activity changes
-the expression.
+In multi-threaded programs, watchpoints will detect changes to the
+watched expression from every thread.
 
-@c FIXME: this is almost identical to the previous paragraph.
-@emph{HP-UX Warning:} In multi-thread programs, software watchpoints
+@quotation
+@emph{Warning:} In multi-threaded programs, software watchpoints
 have only limited usefulness.  If @value{GDBN} creates a software
 watchpoint, it can only watch the value of an expression @emph{in a
 single thread}.  If you are confident that the expression can only

@@ -318,6 +318,19 @@ struct breakpoint_ops
   void (*print_mention) (struct breakpoint *);
 };
 
+enum watchpoint_triggered
+{
+  /* This watchpoint definitely did not trigger.  */
+  watch_triggered_no = 0,
+
+  /* Some hardware watchpoint triggered, and it might have been this
+     one, but we do not know which it was.  */
+  watch_triggered_unknown,
+
+  /* This hardware watchpoint definitely did trigger.  */
+  watch_triggered_yes  
+};
+
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint
    does set it to 0).  I implemented it because I thought it would be
@@ -395,6 +408,10 @@ struct breakpoint
        should be evaluated on the outermost frame.  */
     struct frame_id watchpoint_frame;
 
+    /* For hardware watchpoints, the triggered status according to the
+       hardware.  */
+    enum watchpoint_triggered watchpoint_triggered;
+
     /* Thread number for thread-specific breakpoint, or -1 if don't care */
     int thread;
 
@@ -459,8 +476,7 @@ extern void bpstat_clear (bpstat *);
    is part of the bpstat is copied as well.  */
 extern bpstat bpstat_copy (bpstat);
 
-extern bpstat bpstat_stop_status (CORE_ADDR pc, ptid_t ptid, 
-				  int stopped_by_watchpoint);
+extern bpstat bpstat_stop_status (CORE_ADDR pc, ptid_t ptid);
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
    breakpoint (a challenging task).  */
@@ -852,5 +868,9 @@ extern void remove_single_step_breakpoints (void);
    ways.  Please do not add more uses!  */
 extern void *deprecated_insert_raw_breakpoint (CORE_ADDR);
 extern int deprecated_remove_raw_breakpoint (void *);
+
+/* Check if any hardware watchpoints have triggered, according to the
+   target.  */
+int watchpoints_triggered (struct target_waitstatus *);
 
 #endif /* !defined (BREAKPOINT_H) */

@@ -2537,6 +2537,83 @@ bpstat_alloc (struct bp_location *bl, bpstat cbs /* Current "bs" value */ )
   return bs;
 }
 
+/* The target has stopped with waitstatus WS.  Check if any hardware
+   watchpoints have triggered, according to the target.  */
+
+int
+watchpoints_triggered (struct target_waitstatus *ws)
+{
+  int stopped_by_watchpoint = STOPPED_BY_WATCHPOINT (*ws);
+  CORE_ADDR addr;
+  struct breakpoint *b;
+
+  if (!stopped_by_watchpoint)
+    {
+      /* We were not stopped by a watchpoint.  Mark all watchpoints
+	 as not triggered.  */
+      ALL_BREAKPOINTS (b)
+	if (b->type == bp_hardware_watchpoint
+	    || b->type == bp_read_watchpoint
+	    || b->type == bp_access_watchpoint)
+	  b->watchpoint_triggered = watch_triggered_no;
+
+      return 0;
+    }
+
+  if (!target_stopped_data_address (&current_target, &addr))
+    {
+      /* We were stopped by a watchpoint, but we don't know where.
+	 Mark all watchpoints as unknown.  */
+      ALL_BREAKPOINTS (b)
+	if (b->type == bp_hardware_watchpoint
+	    || b->type == bp_read_watchpoint
+	    || b->type == bp_access_watchpoint)
+	  b->watchpoint_triggered = watch_triggered_unknown;
+
+      return stopped_by_watchpoint;
+    }
+
+  /* The target could report the data address.  Mark watchpoints
+     affected by this data address as triggered, and all others as not
+     triggered.  */
+
+  ALL_BREAKPOINTS (b)
+    if (b->type == bp_hardware_watchpoint
+	|| b->type == bp_read_watchpoint
+	|| b->type == bp_access_watchpoint)
+      {
+	struct value *v;
+
+	b->watchpoint_triggered = watch_triggered_no;
+	for (v = b->val_chain; v; v = value_next (v))
+	  {
+	    if (VALUE_LVAL (v) == lval_memory && ! value_lazy (v))
+	      {
+		struct type *vtype = check_typedef (value_type (v));
+
+		if (v == b->val_chain
+		    || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
+			&& TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
+		  {
+		    CORE_ADDR vaddr;
+
+		    vaddr = VALUE_ADDRESS (v) + value_offset (v);
+		    /* Exact match not required.  Within range is
+		       sufficient.  */
+		    if (addr >= vaddr
+			&& addr < vaddr + TYPE_LENGTH (value_type (v)))
+		      {
+			b->watchpoint_triggered = watch_triggered_yes;
+			break;
+		      }
+		  }
+	      }
+	  }
+      }
+
+  return 1;
+}
+
 /* Possible return values for watchpoint_check (this can't be an enum
    because of check_errors).  */
 /* The watchpoint has been deleted.  */
@@ -2655,11 +2732,9 @@ which its expression is valid.\n");
 }
 
 /* Get a bpstat associated with having just stopped at address
-   BP_ADDR in thread PTID.  STOPPED_BY_WATCHPOINT is 1 if the
-   target thinks we stopped due to a hardware watchpoint, 0 if we
-   know we did not trigger a hardware watchpoint, and -1 if we do not know.  */
+   BP_ADDR in thread PTID.
 
-/* Determine whether we stopped at a breakpoint, etc, or whether we
+   Determine whether we stopped at a breakpoint, etc, or whether we
    don't understand this stop.  Result is a chain of bpstat's such that:
 
    if we don't understand the stop, the result is a null pointer.
@@ -2674,7 +2749,7 @@ which its expression is valid.\n");
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
+bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 {
   struct breakpoint *b = NULL;
   struct bp_location *bl;
@@ -2712,16 +2787,17 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 	  continue;
       }
 
-    /* Continuable hardware watchpoints are treated as non-existent if the 
-       reason we stopped wasn't a hardware watchpoint (we didn't stop on 
-       some data address).  Otherwise gdb won't stop on a break instruction 
-       in the code (not from a breakpoint) when a hardware watchpoint has 
-       been defined.  */
+    /* Continuable hardware watchpoints are treated as non-existent if the
+       reason we stopped wasn't a hardware watchpoint (we didn't stop on
+       some data address).  Otherwise gdb won't stop on a break instruction
+       in the code (not from a breakpoint) when a hardware watchpoint has
+       been defined.  Also skip watchpoints which we know did not trigger
+       (did not match the data address).  */
 
     if ((b->type == bp_hardware_watchpoint
 	 || b->type == bp_read_watchpoint
 	 || b->type == bp_access_watchpoint)
-	&& !stopped_by_watchpoint)
+	&& b->watchpoint_triggered == watch_triggered_no)
       continue;
 
     if (b->type == bp_hardware_breakpoint)
@@ -2787,82 +2863,33 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
     bs->stop = 1;
     bs->print = 1;
 
-    if (b->type == bp_watchpoint ||
-	b->type == bp_hardware_watchpoint)
-      {
-	char *message = xstrprintf ("Error evaluating expression for watchpoint %d\n",
-				    b->number);
-	struct cleanup *cleanups = make_cleanup (xfree, message);
-	int e = catch_errors (watchpoint_check, bs, message, 
-			      RETURN_MASK_ALL);
-	do_cleanups (cleanups);
-	switch (e)
-	  {
-	  case WP_DELETED:
-	    /* We've already printed what needs to be printed.  */
-	    /* Actually this is superfluous, because by the time we
-               call print_it_typical() the wp will be already deleted,
-               and the function will return immediately. */
-	    bs->print_it = print_it_done;
-	    /* Stop.  */
-	    break;
-	  case WP_VALUE_CHANGED:
-	    /* Stop.  */
-	    ++(b->hit_count);
-	    break;
-	  case WP_VALUE_NOT_CHANGED:
-	    /* Don't stop.  */
-	    bs->print_it = print_it_noop;
-	    bs->stop = 0;
-	    continue;
-	  default:
-	    /* Can't happen.  */
-	    /* FALLTHROUGH */
-	  case 0:
-	    /* Error from catch_errors.  */
-	    printf_filtered (_("Watchpoint %d deleted.\n"), b->number);
-	    if (b->related_breakpoint)
-	      b->related_breakpoint->disposition = disp_del_at_next_stop;
-	    b->disposition = disp_del_at_next_stop;
-	    /* We've already printed what needs to be printed.  */
-	    bs->print_it = print_it_done;
-
-	    /* Stop.  */
-	    break;
-	  }
-      }
-    else if (b->type == bp_read_watchpoint || 
-	     b->type == bp_access_watchpoint)
+    if (b->type == bp_watchpoint
+	|| b->type == bp_read_watchpoint
+	|| b->type == bp_access_watchpoint
+	|| b->type == bp_hardware_watchpoint)
       {
 	CORE_ADDR addr;
 	struct value *v;
-	int found = 0;
+	int must_check_value = 0;
 
-	if (!target_stopped_data_address (&current_target, &addr))
-	  continue;
-	for (v = b->val_chain; v; v = value_next (v))
-	  {
-	    if (VALUE_LVAL (v) == lval_memory
-		&& ! value_lazy (v))
-	      {
-		struct type *vtype = check_typedef (value_type (v));
+ 	if (b->type == bp_watchpoint)
+	  /* For a software watchpoint, we must always check the
+	     watched value.  */
+	  must_check_value = 1;
+	else if (b->watchpoint_triggered == watch_triggered_yes)
+	  /* We have a hardware watchpoint (read, write, or access)
+	     and the target earlier reported an address watched by
+	     this watchpoint.  */
+	  must_check_value = 1;
+	else if (b->watchpoint_triggered == watch_triggered_unknown
+		 && b->type == bp_hardware_watchpoint)
+	  /* We were stopped by a hardware watchpoint, but the target could
+	     not report the data address.  We must check the watchpoint's
+	     value.  Access and read watchpoints are out of luck; without
+	     a data address, we can't figure it out.  */
+	  must_check_value = 1;
 
-		if (v == b->val_chain
-		    || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-			&& TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
-		  {
-		    CORE_ADDR vaddr;
-
-		    vaddr = VALUE_ADDRESS (v) + value_offset (v);
-		    /* Exact match not required.  Within range is
-                       sufficient.  */
-		    if (addr >= vaddr &&
-			addr < vaddr + TYPE_LENGTH (value_type (v)))
-		      found = 1;
-		  }
-	      }
-	  }
-	if (found)
+ 	if (must_check_value)
 	  {
 	    char *message = xstrprintf ("Error evaluating expression for watchpoint %d\n",
 					b->number);
@@ -2890,6 +2917,15 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 		++(b->hit_count);
 		break;
 	      case WP_VALUE_NOT_CHANGED:
+		if (b->type == bp_hardware_watchpoint
+		    || b->type == bp_watchpoint)
+		  {
+		    /* Don't stop: write watchpoints shouldn't fire if
+		       the value hasn't changed.  */
+		    bs->print_it = print_it_noop;
+		    bs->stop = 0;
+		    continue;
+		  }
 		/* Stop.  */
 		++(b->hit_count);
 		break;
@@ -2906,12 +2942,12 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 		break;
 	      }
 	  }
-	else	/* found == 0 */
+	else	/* must_check_value == 0 */
 	  {
-	    /* This is a case where some watchpoint(s) triggered,
-	       but not at the address of this watchpoint (FOUND
-	       was left zero).  So don't print anything for this
-	       watchpoint.  */
+	    /* This is a case where some watchpoint(s) triggered, but
+	       not at the address of this watchpoint, or else no
+	       watchpoint triggered after all.  So don't print
+	       anything for this watchpoint.  */
 	    bs->print_it = print_it_noop;
 	    bs->stop = 0;
             continue;
@@ -2932,6 +2968,13 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
     else
       {
 	int value_is_zero = 0;
+
+	/* If this is a scope breakpoint, mark the associated
+	   watchpoint as triggered so that we will handle the
+	   out-of-scope event.  We'll get to the watchpoint next
+	   iteration.  */
+	if (b->type == bp_watchpoint_scope)
+	  b->related_breakpoint->watchpoint_triggered = watch_triggered_yes;
 
 	if (bl->cond)
 	  {
@@ -2963,6 +3006,9 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 	    annotate_ignore_count_change ();
 	    bs->stop = 0;
 	  }
+	else if (b->type == bp_thread_event || b->type == bp_overlay_event)
+	  /* We do not stop for these.  */
+	  bs->stop = 0;
 	else
 	  {
 	    /* We will stop here */
@@ -2989,17 +3035,27 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
   bs->next = NULL;		/* Terminate the chain */
   bs = root_bs->next;		/* Re-grab the head of the chain */
 
-  /* The value of a hardware watchpoint hasn't changed, but the
-     intermediate memory locations we are watching may have.  */
-  if (bs && !bs->stop &&
-      (b->type == bp_hardware_watchpoint ||
-       b->type == bp_read_watchpoint ||
-       b->type == bp_access_watchpoint))
-    {
-      remove_breakpoints ();
-      insert_breakpoints ();
-    }
-  return bs;
+  /* If we aren't stopping, the value of some hardware watchpoint may
+     not have changed, but the intermediate memory locations we are
+     watching may have.  Don't bother if we're stopping; this will get
+     done later.  */
+  for (bs = root_bs->next; bs != NULL; bs = bs->next)
+    if (bs->stop)
+      break;
+
+  if (bs == NULL)
+    for (bs = root_bs->next; bs != NULL; bs = bs->next)
+      if (!bs->stop
+	  && (bs->breakpoint_at->owner->type == bp_hardware_watchpoint
+	      || bs->breakpoint_at->owner->type == bp_read_watchpoint
+	      || bs->breakpoint_at->owner->type == bp_access_watchpoint))
+	{
+	  remove_breakpoints ();
+	  insert_breakpoints ();
+	  break;
+	}
+
+  return root_bs->next;
 }
 
 /* Tell what to do about this bpstat.  */
@@ -5965,7 +6021,7 @@ stopat_command (char *arg, int from_tty)
 static void
 watch_command_1 (char *arg, int accessflag, int from_tty)
 {
-  struct breakpoint *b;
+  struct breakpoint *b, *scope_breakpoint = NULL;
   struct symtab_and_line sal;
   struct expression *exp;
   struct block *exp_valid_block;
@@ -6043,6 +6099,37 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   if (!mem_cnt || target_resources_ok <= 0)
     bp_type = bp_watchpoint;
 
+  frame = block_innermost_frame (exp_valid_block);
+  if (frame)
+    prev_frame = get_prev_frame (frame);
+  else
+    prev_frame = NULL;
+
+  /* If the expression is "local", then set up a "watchpoint scope"
+     breakpoint at the point where we've left the scope of the watchpoint
+     expression.  Create the scope breakpoint before the watchpoint, so
+     that we will encounter it first in bpstat_stop_status.  */
+  if (innermost_block && prev_frame)
+    {
+      scope_breakpoint = create_internal_breakpoint (get_frame_pc (prev_frame),
+						     bp_watchpoint_scope);
+
+      scope_breakpoint->enable_state = bp_enabled;
+
+      /* Automatically delete the breakpoint when it hits.  */
+      scope_breakpoint->disposition = disp_del;
+
+      /* Only break in the proper frame (help with recursion).  */
+      scope_breakpoint->frame_id = get_frame_id (prev_frame);
+
+      /* Set the address at which we will stop.  */
+      scope_breakpoint->loc->requested_address
+	= get_frame_pc (prev_frame);
+      scope_breakpoint->loc->address
+	= adjust_breakpoint_address (scope_breakpoint->loc->requested_address,
+				     scope_breakpoint->type);
+    }
+
   /* Now set up the breakpoint.  */
   b = set_raw_breakpoint (sal, bp_type);
   set_breakpoint_count (breakpoint_count + 1);
@@ -6058,48 +6145,19 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   else
     b->cond_string = 0;
 
-  frame = block_innermost_frame (exp_valid_block);
   if (frame)
-    {
-      prev_frame = get_prev_frame (frame);
-      b->watchpoint_frame = get_frame_id (frame);
-    }
+    b->watchpoint_frame = get_frame_id (frame);
   else
+    memset (&b->watchpoint_frame, 0, sizeof (b->watchpoint_frame));
+
+  if (scope_breakpoint != NULL)
     {
-      memset (&b->watchpoint_frame, 0, sizeof (b->watchpoint_frame));
+      /* The scope breakpoint is related to the watchpoint.  We will
+	 need to act on them together.  */
+      b->related_breakpoint = scope_breakpoint;
+      scope_breakpoint->related_breakpoint = b;
     }
 
-  /* If the expression is "local", then set up a "watchpoint scope"
-     breakpoint at the point where we've left the scope of the watchpoint
-     expression.  */
-  if (innermost_block)
-    {
-      if (prev_frame)
-	{
-	  struct breakpoint *scope_breakpoint;
-	  scope_breakpoint = create_internal_breakpoint (get_frame_pc (prev_frame),
-							 bp_watchpoint_scope);
-
-	  scope_breakpoint->enable_state = bp_enabled;
-
-	  /* Automatically delete the breakpoint when it hits.  */
-	  scope_breakpoint->disposition = disp_del;
-
-	  /* Only break in the proper frame (help with recursion).  */
-	  scope_breakpoint->frame_id = get_frame_id (prev_frame);
-
-	  /* Set the address at which we will stop.  */
-	  scope_breakpoint->loc->requested_address
-	    = get_frame_pc (prev_frame);
-	  scope_breakpoint->loc->address
-	    = adjust_breakpoint_address (scope_breakpoint->loc->requested_address,
-	                                 scope_breakpoint->type);
-
-	  /* The scope breakpoint is related to the watchpoint.  We
-	     will need to act on them together.  */
-	  b->related_breakpoint = scope_breakpoint;
-	}
-    }
   value_free_to_mark (mark);
   mention (b);
 }

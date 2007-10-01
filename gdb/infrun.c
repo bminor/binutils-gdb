@@ -881,6 +881,7 @@ enum infwait_states
 {
   infwait_normal_state,
   infwait_thread_hop_state,
+  infwait_step_watch_state,
   infwait_nonstep_watch_state
 };
 
@@ -1220,17 +1221,12 @@ adjust_pc_after_break (struct execution_control_state *ecs)
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
 
-int stepped_after_stopped_by_watchpoint;
-
 void
 handle_inferior_event (struct execution_control_state *ecs)
 {
-  /* NOTE: bje/2005-05-02: If you're looking at this code and thinking
-     that the variable stepped_after_stopped_by_watchpoint isn't used,
-     then you're wrong!  See remote.c:remote_stopped_data_address.  */
-
   int sw_single_step_trap_p = 0;
-  int stopped_by_watchpoint = -1;	/* Mark as unknown.  */
+  int stopped_by_watchpoint;
+  int stepped_after_stopped_by_watchpoint = 0;
 
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;
@@ -1250,7 +1246,14 @@ handle_inferior_event (struct execution_control_state *ecs)
     case infwait_normal_state:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: infwait_normal_state\n");
-      stepped_after_stopped_by_watchpoint = 0;
+      break;
+
+    case infwait_step_watch_state:
+      if (debug_infrun)
+        fprintf_unfiltered (gdb_stdlog,
+			    "infrun: infwait_step_watch_state\n");
+
+      stepped_after_stopped_by_watchpoint = 1;
       break;
 
     case infwait_nonstep_watch_state:
@@ -1435,7 +1438,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       stop_pc = read_pc ();
 
-      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid, 0);
+      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 
@@ -1483,7 +1486,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       ecs->saved_inferior_ptid = inferior_ptid;
       inferior_ptid = ecs->ptid;
 
-      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid, 0);
+      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
@@ -1796,24 +1799,20 @@ handle_inferior_event (struct execution_control_state *ecs)
       singlestep_breakpoints_inserted_p = 0;
     }
 
-  /* It may not be necessary to disable the watchpoint to stop over
-     it.  For example, the PA can (with some kernel cooperation)
-     single step over a watchpoint without disabling the watchpoint.  */
-  if (HAVE_STEPPABLE_WATCHPOINT && STOPPED_BY_WATCHPOINT (ecs->ws))
+  if (stepped_after_stopped_by_watchpoint)
+    stopped_by_watchpoint = 0;
+  else
+    stopped_by_watchpoint = watchpoints_triggered (&ecs->ws);
+
+  /* If necessary, step over this watchpoint.  We'll be back to display
+     it in a moment.  */
+  if (stopped_by_watchpoint
+      && (HAVE_STEPPABLE_WATCHPOINT
+	  || gdbarch_have_nonsteppable_watchpoint (current_gdbarch)))
     {
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog, "infrun: STOPPED_BY_WATCHPOINT\n");
-      resume (1, 0);
-      prepare_to_wait (ecs);
-      return;
-    }
 
-  /* It is far more common to need to disable a watchpoint to step
-     the inferior over it.  FIXME.  What else might a debug
-     register or page protection watchpoint scheme need here?  */
-  if (gdbarch_have_nonsteppable_watchpoint (current_gdbarch)
-      && STOPPED_BY_WATCHPOINT (ecs->ws))
-    {
       /* At this point, we are stopped at an instruction which has
          attempted to write to a piece of memory under control of
          a watchpoint.  The instruction hasn't actually executed
@@ -1823,30 +1822,30 @@ handle_inferior_event (struct execution_control_state *ecs)
 
          In order to make watchpoints work `right', we really need
          to complete the memory write, and then evaluate the
-         watchpoint expression.  The following code does that by
-         removing the watchpoint (actually, all watchpoints and
-         breakpoints), single-stepping the target, re-inserting
-         watchpoints, and then falling through to let normal
-         single-step processing handle proceed.  Since this
-         includes evaluating watchpoints, things will come to a
-         stop in the correct manner.  */
+         watchpoint expression.  We do this by single-stepping the
+	 target.
 
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: STOPPED_BY_WATCHPOINT\n");
-      remove_breakpoints ();
+	 It may not be necessary to disable the watchpoint to stop over
+	 it.  For example, the PA can (with some kernel cooperation)
+	 single step over a watchpoint without disabling the watchpoint.
+
+	 It is far more common to need to disable a watchpoint to step
+	 the inferior over it.  If we have non-steppable watchpoints,
+	 we must disable the current watchpoint; it's simplest to
+	 disable all watchpoints and breakpoints.  */
+	 
+      if (!HAVE_STEPPABLE_WATCHPOINT)
+	remove_breakpoints ();
       registers_changed ();
       target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);	/* Single step */
-
       ecs->waiton_ptid = ecs->ptid;
-      ecs->wp = &(ecs->ws);
-      ecs->infwait_state = infwait_nonstep_watch_state;
+      if (HAVE_STEPPABLE_WATCHPOINT)
+	ecs->infwait_state = infwait_step_watch_state;
+      else
+	ecs->infwait_state = infwait_nonstep_watch_state;
       prepare_to_wait (ecs);
       return;
     }
-
-  /* It may be possible to simply continue after a watchpoint.  */
-  if (HAVE_CONTINUABLE_WATCHPOINT)
-    stopped_by_watchpoint = STOPPED_BY_WATCHPOINT (ecs->ws);
 
   ecs->stop_func_start = 0;
   ecs->stop_func_end = 0;
@@ -1969,8 +1968,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       else
 	{
 	  /* See if there is a breakpoint at the current PC.  */
-	  stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid,
-					    stopped_by_watchpoint);
+	  stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
 	  /* Following in case break condition called a
 	     function.  */
