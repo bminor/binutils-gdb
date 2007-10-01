@@ -160,11 +160,11 @@ const inst cr16_instruction[] =
 /* Create a conditional branch instruction.  */
 #define  BRANCH_INST(NAME, OPC)                                       \
   /* opc4 c4 dispe9 */                                                \
-  {NAME,  1, OPC, 28, BRANCH_INS, {{cc,20}, {dispe9,16}}},            \
+  {NAME,  1, OPC, 28, BRANCH_INS | RELAXABLE, {{cc,20}, {dispe9,16}}},\
   /* opc4 c4 disps17 */                                               \
-  {NAME,  2, ((OPC<<4)+0x8), 24, BRANCH_INS, {{cc,20}, {disps17,0}}}, \
+  {NAME,  2, ((OPC<<4)+0x8), 24, BRANCH_INS | RELAXABLE, {{cc,20}, {disps17,0}}},\
   /* opc4 c4 disps25 */                                               \
-  {NAME,  3, (OPC<<4), 16 , BRANCH_INS, {{cc,4}, {disps25,16}}}
+  {NAME,  3, (OPC<<4), 16 , BRANCH_INS | RELAXABLE, {{cc,4}, {disps25,16}}}
 
   BRANCH_INST ("b", 0x1),
 

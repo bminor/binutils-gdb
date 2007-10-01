@@ -1,3 +1,8 @@
+2007-10-01  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* cr16-opc.c: Updated the branch on condition instructions with
+	RELAXABLE flag.
+
 2007-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* 386-dis.c (prefix_table): Reformat comment.

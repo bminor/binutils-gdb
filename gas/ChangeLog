@@ -1,3 +1,8 @@
+2007-10-01  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* config/tc-cr16.c: Replaced 'tabs' with white spaces and
+	added R_CR16_DISP8 as default reloc type for b<cc> instructions.
+
 2007-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/5080
