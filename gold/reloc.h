@@ -228,14 +228,20 @@ private:
             const Symbol_value<size>* psymval)
   {
     typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<valsize, big_endian>::Signed_valtype
+      Signed_valtype;
     typedef typename elfcpp::Swap<size, big_endian>::Valtype Sizetype;
+    typedef typename elfcpp::Swap<size, big_endian>::Signed_valtype
+      Signed_sizetype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype x = elfcpp::Swap<valsize, big_endian>::readval(wv);
-    // Fancy formula to sign-extend x to size.
-    const Sizetype mask = 1U << (sizeof(valsize) * 8 - 1);
-    Sizetype sign_extended_x = x;
-    sign_extended_x = (sign_extended_x ^ mask) - mask;
-    x = psymval->value(object, sign_extended_x);
+
+    // Sign extend the value.
+    Signed_valtype signed_x = static_cast<Signed_valtype>(x);
+    Signed_sizetype signed_extended_x = static_cast<Signed_sizetype>(signed_x);
+    Sizetype unsigned_extended_x = static_cast<Sizetype>(signed_extended_x);
+
+    x = psymval->value(object, unsigned_extended_x);
     elfcpp::Swap<valsize, big_endian>::writeval(wv, x);
   }
 
@@ -317,11 +323,11 @@ public:
 
   // Do an 8-bit RELA relocation with the addend in the relocation.
   static inline void
-  rel8a(unsigned char* view, unsigned char value, unsigned char addend)
+  rela8(unsigned char* view, unsigned char value, unsigned char addend)
   { This::template rela<8>(view, value, addend); }
 
   static inline void
-  rel8a(unsigned char* view,
+  rela8(unsigned char* view,
 	const Sized_relobj<size, big_endian>* object,
 	const Symbol_value<size>* psymval,
 	unsigned char addend)

@@ -53,8 +53,8 @@ struct Endian
 };
 
 // Valtype_base is a template based on size (8, 16, 32, 64) which
-// defines the type Valtype as the unsigned integer of the specified
-// size.
+// defines the type Valtype as the unsigned integer, and
+// Signed_valtype as the signed integer, of the specified size.
 
 template<int size>
 struct Valtype_base;
@@ -62,25 +62,29 @@ struct Valtype_base;
 template<>
 struct Valtype_base<8>
 {
-  typedef unsigned char Valtype;
+  typedef uint8_t Valtype;
+  typedef int8_t Signed_valtype;
 };
 
 template<>
 struct Valtype_base<16>
 {
   typedef uint16_t Valtype;
+  typedef int16_t Signed_valtype;
 };
 
 template<>
 struct Valtype_base<32>
 {
   typedef uint32_t Valtype;
+  typedef int32_t Signed_valtype;
 };
 
 template<>
 struct Valtype_base<64>
 {
   typedef uint64_t Valtype;
+  typedef int64_t Signed_valtype;
 };
 
 // Convert_endian is a template based on size and on whether the host
