@@ -1035,9 +1035,9 @@ Target_x86_64::do_finalize_sections(Layout* layout)
 	{
 	  const Output_data* od = this->rel_dyn_;
 	  odyn->add_section_address(elfcpp::DT_RELA, od);
-	  odyn->add_section_size(elfcpp::DT_RELSZ, od);
+	  odyn->add_section_size(elfcpp::DT_RELASZ, od);
 	  odyn->add_constant(elfcpp::DT_RELAENT,
-			     elfcpp::Elf_sizes<64>::rel_size);
+			     elfcpp::Elf_sizes<64>::rela_size);
 	}
 
       if (!parameters->output_is_shared())
