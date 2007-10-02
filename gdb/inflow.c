@@ -408,8 +408,6 @@ terminal_ours_1 (int output_only)
       result = fcntl (0, F_SETFL, tflags_ours);
       result = fcntl (0, F_SETFL, tflags_ours);
 #endif
-
-      result = result;		/* lint */
     }
 }
 

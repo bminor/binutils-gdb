@@ -1,5 +1,9 @@
 2007-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* inflow.c (terminal_ours_1): Remove useless line.
+
+2007-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* mips-tdep.c (mips_read_fp_register_double): Correct check for
 	odd FP registers.
 	(mips_print_fp_register): Correct check for even FP registers.
