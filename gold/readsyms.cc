@@ -52,7 +52,7 @@ Task::Is_runnable_type
 Read_symbols::is_runnable(Workqueue*)
 {
   if (this->input_argument_->is_file()
-      && this->input_argument_->file().is_lib()
+      && this->input_argument_->file().may_need_search()
       && this->dirpath_.token().is_blocked())
     return IS_BLOCKED;
 

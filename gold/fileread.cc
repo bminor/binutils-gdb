@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include "filenames.h"
 
 #include "options.h"
 #include "dirsearch.h"
@@ -371,21 +372,38 @@ Input_file::Input_file(const char* name, const unsigned char* contents,
   : file_()
 {
   this->input_argument_ =
-    new Input_file_argument(name, false, Position_dependent_options());
+    new Input_file_argument(name, false, "", Position_dependent_options());
   bool ok = file_.open(name, contents, size);
   gold_assert(ok);
 }
 
 // Open the file.
 
+// If the filename is not absolute, we assume it is in the current
+// directory *except* when:
+//    A) input_argument_->is_lib() is true; or
+//    B) input_argument_->extra_search_path() is not empty.
+// In both cases, we look in extra_search_path + library_path to find
+// the file location, rather than the current directory.
+
 void
 Input_file::open(const General_options& options, const Dirsearch& dirpath)
 {
   std::string name;
-  if (!this->input_argument_->is_lib())
+
+  // Case 1: name is an absolute file, just try to open it
+  // Case 2: name is relative but is_lib is false and extra_search_path
+  //         is empty
+  if (IS_ABSOLUTE_PATH (this->input_argument_->name())
+      || (!this->input_argument_->is_lib()
+	  && this->input_argument_->extra_search_path() == NULL))
     name = this->input_argument_->name();
-  else
+
+  // Case 3: is_lib is true
+  else if (this->input_argument_->is_lib())
     {
+      // We don't yet support extra_search_path with -l.
+      gold_assert(this->input_argument_->extra_search_path() == NULL);
       std::string n1("lib");
       n1 += this->input_argument_->name();
       std::string n2;
@@ -405,6 +423,31 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
 	}
     }
 
+  // Case 4: extra_search_path is not empty
+  else
+    {
+      gold_assert(this->input_argument_->extra_search_path() != NULL);
+
+      // First, check extra_search_path.
+      name = this->input_argument_->extra_search_path();
+      if (!IS_DIR_SEPARATOR (name[name.length() - 1]))
+        name += '/';
+      name += this->input_argument_->name();
+      struct stat dummy_stat;
+      if (::stat(name.c_str(), &dummy_stat) < 0)
+        {
+          // extra_search_path failed, so check the normal search-path.
+          name = dirpath.find(this->input_argument_->name(), "");
+          if (name.empty())
+            {
+              fprintf(stderr, _("%s: cannot find %s\n"), program_name,
+                      this->input_argument_->name());
+              gold_exit(false);
+            }
+        }
+    }
+
+  // Now that we've figured out where the file lives, try to open it.
   if (!this->file_.open(name))
     {
       fprintf(stderr, _("%s: cannot open %s: %s\n"), program_name,

@@ -244,13 +244,23 @@ class Position_dependent_options
 class Input_file_argument
 {
  public:
+  // name: file name or library name
+  // is_lib: true if name is a library name: that is, emits the leading
+  //         "lib" and trailing ".so"/".a" from the name
+  // extra_search_path: an extra directory to look for the file, prior
+  //         to checking the normal library search path.  If this is "",
+  //         then no extra directory is added.
+  // options: The position dependent options at this point in the
+  //         command line, such as --group.
   Input_file_argument()
-    : name_(), is_lib_(false), options_()
+    : name_(), is_lib_(false), extra_search_path_(""), options_()
   { }
 
   Input_file_argument(const char* name, bool is_lib,
+                      const char* extra_search_path,
 		      const Position_dependent_options& options)
-    : name_(name), is_lib_(is_lib), options_(options)
+    : name_(name), is_lib_(is_lib), extra_search_path_(extra_search_path),
+      options_(options)
   { }
 
   const char*
@@ -265,12 +275,27 @@ class Input_file_argument
   is_lib() const
   { return this->is_lib_; }
 
+  const char*
+  extra_search_path() const
+  {
+    return (this->extra_search_path_.empty()
+            ? NULL
+	    : this->extra_search_path_.c_str());
+  }
+
+  // Return whether this file may require a search using the -L
+  // options.
+  bool
+  may_need_search() const
+  { return this->is_lib_ || !this->extra_search_path_.empty(); }
+
  private:
   // We use std::string, not const char*, here for convenience when
   // using script files, so that we do not have to preserve the string
   // in that case.
   std::string name_;
   bool is_lib_;
+  std::string extra_search_path_;
   Position_dependent_options options_;
 };
 

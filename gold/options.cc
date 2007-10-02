@@ -285,6 +285,8 @@ options::Command_line_options::options[] =
 		NULL, ONE_DASH, &General_options::set_shared),
   GENERAL_NOARG('\0', "static", N_("Do not link against shared libraries"),
 		NULL, ONE_DASH, &General_options::set_static),
+  GENERAL_ARG('\0', "sysroot", N_("Currently ignored"), NULL, TWO_DASHES,
+	      &General_options::ignore),
   POSDEP_NOARG('\0', "as-needed",
 	       N_("Only set DT_NEEDED for dynamic libs if used"),
 	       NULL, TWO_DASHES, &Position_dependent_options::set_as_needed),
@@ -550,7 +552,7 @@ Command_line::apply_option(const options::One_option& opt,
 void
 Command_line::add_file(const char* name, bool is_lib)
 {
-  Input_file_argument file(name, is_lib, this->position_options_);
+  Input_file_argument file(name, is_lib, "", this->position_options_);
   this->inputs_.add_file(file);
 }
 
