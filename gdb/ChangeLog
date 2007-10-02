@@ -1,3 +1,8 @@
+2007-10-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_regset_from_core_section): Allow excess section
+	size to enable bi-arch generate-core-file support.
+
 2007-10-02  Markus Deuling  <deuling@de.ibm.com>
 
 	* spu-tdep.c (info_spu_signal_command): Fix output for SPU signal.
