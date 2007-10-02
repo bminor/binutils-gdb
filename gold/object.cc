@@ -502,7 +502,7 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
   const int sym_size = This::sym_size;
   size_t symcount = sd->symbols_size / sym_size;
-  if (symcount * sym_size != sd->symbols_size)
+  if (static_cast<off_t>(symcount * sym_size) != sd->symbols_size)
     {
       fprintf(stderr,
 	      _("%s: %s: size of symbols is not multiple of symbol size\n"),

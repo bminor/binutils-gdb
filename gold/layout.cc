@@ -891,7 +891,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
       off_t locsize = dyn_global_index * this->dynsym_section_->entsize();
       dynoff = this->dynsym_section_->offset() + locsize;
       dyncount = (this->dynsym_section_->data_size() - locsize) / symsize;
-      gold_assert(dyncount * symsize
+      gold_assert(static_cast<off_t>(dyncount * symsize)
 		  == this->dynsym_section_->data_size() - locsize);
     }
 

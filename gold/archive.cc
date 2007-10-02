@@ -334,7 +334,7 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
   off_t filesize = this->input_file_->file().filesize();
   while (true)
     {
-      if (filesize - off < sizeof(Archive_header))
+      if (filesize - off < static_cast<off_t>(sizeof(Archive_header)))
         {
           if (filesize != off)
             {
@@ -381,7 +381,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
   std::string n;
   this->read_header(off, &n);
 
-  size_t memoff = off + sizeof(Archive_header);
+  const off_t memoff = off + static_cast<off_t>(sizeof(Archive_header));
 
   // Read enough of the file to pick up the entire ELF header.
   unsigned char ehdr_buf[elfcpp::Elf_sizes<64>::ehdr_size];

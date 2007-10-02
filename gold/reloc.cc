@@ -231,7 +231,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 	}
 
       size_t reloc_count = sh_size / reloc_size;
-      if (reloc_count * reloc_size != sh_size)
+      if (static_cast<off_t>(reloc_count * reloc_size) != sh_size)
 	{
 	  fprintf(stderr, _("%s: %s: reloc section %u size %lu uneven"),
 		  program_name, this->name().c_str(), i,
@@ -478,7 +478,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
 	}
 
       size_t reloc_count = sh_size / reloc_size;
-      if (reloc_count * reloc_size != sh_size)
+      if (static_cast<off_t>(reloc_count * reloc_size) != sh_size)
 	{
 	  fprintf(stderr, _("%s: %s: reloc section %u size %lu uneven"),
 		  program_name, this->name().c_str(), i,
