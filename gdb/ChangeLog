@@ -1,3 +1,11 @@
+2007-10-02  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
+
+	* tui/tui-interp.c (tui_init): Initialize tui's SIGWINCH
+	signal handler.
+	* tui/tui-win.c (tui_initialize_win): New function for
+	initializing tui's SIGWINCH signal handler.
+	* tui/tui-win.h (tui_initialize_win): Declare.
+
 2007-10-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-linux-nat.c (ppc_linux_stopped_data_address): Cast

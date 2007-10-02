@@ -50,6 +50,8 @@
 #include <ctype.h>
 #include "readline/readline.h"
 
+#include <signal.h>
+
 /*******************************
 ** Static Local Decls
 ********************************/
@@ -813,6 +815,21 @@ tui_sigwinch_handler (int signal)
   tui_set_win_resized_to (TRUE);
 }
 
+/* Initializes SIGWINCH signal handler for the tui.  */
+void
+tui_initialize_win (void)
+{
+#ifdef SIGWINCH
+#ifdef HAVE_SIGACTION
+  struct sigaction old_winch;
+  memset (&old_winch, 0, sizeof (old_winch));
+  old_winch.sa_handler = &tui_sigwinch_handler;
+  sigaction (SIGWINCH, &old_winch, NULL);
+#else
+  signal (SIGWINCH, &tui_sigwinch_handler);
+#endif
+#endif
+}
 
 
 /*************************
