@@ -1,3 +1,11 @@
+2007-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mips-tdep.c (mips_read_fp_register_double): Correct check for
+	odd FP registers.
+	(mips_print_fp_register): Correct check for even FP registers.
+	(mips_virtual_frame_pointer): New function.
+	(mips_gdbarch_init): Call set_gdbarch_virtual_frame_pointer.
+
 2007-09-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* value.h (lookup_only_internalvar): New prototype.

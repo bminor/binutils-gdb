@@ -4060,7 +4060,9 @@ mips_read_fp_register_double (struct frame_info *frame, int regno,
     }
   else
     {
-      if ((regno - mips_regnum (current_gdbarch)->fp0) & 1)
+      int rawnum = regno % gdbarch_num_regs (current_gdbarch);
+
+      if ((rawnum - mips_regnum (current_gdbarch)->fp0) & 1)
 	internal_error (__FILE__, __LINE__,
 			_("mips_read_fp_register_double: bad access to "
 			"odd-numbered FP register"));
@@ -4114,7 +4116,7 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       else
 	fprintf_filtered (file, "%-17.9g", flt1);
 
-      if (regnum % 2 == 0)
+      if ((regnum - gdbarch_num_regs (current_gdbarch)) % 2 == 0)
 	{
 	  mips_read_fp_register_double (frame, regnum, raw_buffer);
 	  doub = unpack_double (mips_double_register_type (), raw_buffer,
@@ -4928,6 +4930,18 @@ mips_integer_to_address (struct gdbarch *gdbarch,
   return (CORE_ADDR) extract_signed_integer (buf, TYPE_LENGTH (type));
 }
 
+/* Dummy virtual frame pointer method.  This is no more or less accurate
+   than most other architectures; we just need to be explicit about it,
+   because the pseudo-register gdbarch_sp_regnum will otherwise lead to
+   an assertion failure.  */
+
+static void
+mips_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
+{
+  *reg = MIPS_SP_REGNUM;
+  *offset = 0;
+}
+
 static void
 mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
 {
@@ -5409,6 +5423,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_num_regs (gdbarch, num_regs);
     set_gdbarch_num_pseudo_regs (gdbarch, num_regs);
     set_gdbarch_register_name (gdbarch, mips_register_name);
+    set_gdbarch_virtual_frame_pointer (gdbarch, mips_virtual_frame_pointer);
     tdep->mips_processor_reg_names = reg_names;
     tdep->regnum = regnum;
   }
