@@ -112,6 +112,17 @@ AM_CONDITIONAL(NATIVE_LINKER,
   test "x$target_alias" = "x" -o "x$host_alias" = "x$target_alias")
 AM_CONDITIONAL(GCC, test "$GCC" = yes)
 
+dnl Some architectures do not support taking pointers of functions
+dnl defined in shared libraries except in -fPIC mode.  We need to
+dnl tell the unittest framework if we're compiling for one of those
+dnl targets, so it doesn't try to run the tests that do that.
+AM_CONDITIONAL(FN_PTRS_IN_SO_WITHOUT_PIC, [
+  case $target_cpu in
+    i?86) true;;
+    x86_64) false;;
+    *) true;;
+  esac])
+
 AM_BINUTILS_WARNINGS
 
 WARN_CXXFLAGS=`echo ${WARN_CFLAGS} | sed -e 's/-Wstrict-prototypes//' -e 's/-Wmissing-prototypes//'`

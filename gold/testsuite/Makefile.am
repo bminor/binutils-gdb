@@ -26,11 +26,6 @@ NATIVE_PROGS = \
 	two_file_same_shared_test \
 	two_file_separate_shared_12_test \
 	two_file_separate_shared_21_test \
-	two_file_shared_1_nonpic_test \
-	two_file_shared_2_nonpic_test \
-	two_file_same_shared_nonpic_test \
-	two_file_separate_shared_12_nonpic_test \
-	two_file_separate_shared_21_nonpic_test \
 	exception_test \
 	exception_static_test \
 	exception_shared_1_test \
@@ -38,6 +33,17 @@ NATIVE_PROGS = \
 	exception_same_shared_test \
 	exception_separate_shared_12_test \
 	exception_separate_shared_21_test
+
+if FN_PTRS_IN_SO_WITHOUT_PIC
+
+NATIVE_PROGS += \
+	two_file_shared_1_nonpic_test \
+	two_file_shared_2_nonpic_test \
+	two_file_same_shared_nonpic_test \
+	two_file_separate_shared_12_nonpic_test \
+	two_file_separate_shared_21_nonpic_test
+
+endif
 
 NATIVE_TESTING = \
 	basic_test \
@@ -128,8 +134,22 @@ two_file_separate_shared_21_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_separate_shared_21_test_LDADD = \
 	two_file_shared_2.so two_file_shared_1.so
 
-# FIXME: The nonpic tests will fail on platforms which can not put
-# non-PIC code into shared libraries; how should we handle this?
+two_file_test_1_pic.o: two_file_test_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+two_file_test_2_pic.o: two_file_test_2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+
+two_file_shared_1.so: two_file_test_1_pic.o
+	$(CXXLINK) -shared two_file_test_1_pic.o
+two_file_shared_2.so: two_file_test_2_pic.o
+	$(CXXLINK) -shared two_file_test_2_pic.o
+two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o
+	$(CXXLINK) -shared two_file_test_1_pic.o two_file_test_2_pic.o
+
+# The nonpic tests will fail on platforms which can not put non-PIC
+# code into shared libraries, so we just don't run them in that case.
+
+if FN_PTRS_IN_SO_WITHOUT_PIC
 
 two_file_shared_1_nonpic_test_SOURCES = \
 	two_file_test_2.cc two_file_test_main.cc
@@ -165,24 +185,14 @@ two_file_separate_shared_21_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_separate_shared_21_nonpic_test_LDADD = \
 	two_file_shared_2_nonpic.so two_file_shared_1_nonpic.so
 
-two_file_test_1_pic.o: two_file_test_1.cc
-	$(CXXCOMPILE) -c -fpic -o $@ $<
-two_file_test_2_pic.o: two_file_test_2.cc
-	$(CXXCOMPILE) -c -fpic -o $@ $<
-
-two_file_shared_1.so: two_file_test_1_pic.o
-	$(CXXLINK) -shared two_file_test_1_pic.o
-two_file_shared_2.so: two_file_test_2_pic.o
-	$(CXXLINK) -shared two_file_test_2_pic.o
-two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o
-	$(CXXLINK) -shared two_file_test_1_pic.o two_file_test_2_pic.o
-
 two_file_shared_1_nonpic.so: two_file_test_1.o
 	$(CXXLINK) -shared two_file_test_1.o
 two_file_shared_2_nonpic.so: two_file_test_2.o
 	$(CXXLINK) -shared two_file_test_2.o
 two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o
 	$(CXXLINK) -shared two_file_test_1.o two_file_test_2.o
+
+endif
 
 exception_test_SOURCES = \
 	exception_test_main.cc \

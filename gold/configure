@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar TARGETOBJS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB LN_S USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE NATIVE_LINKER_TRUE NATIVE_LINKER_FALSE GCC_TRUE GCC_FALSE WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CXXFLAGS LIBOBJS CXXCPP EGREP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar TARGETOBJS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB LN_S USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE NATIVE_LINKER_TRUE NATIVE_LINKER_FALSE GCC_TRUE GCC_FALSE FN_PTRS_IN_SO_WITHOUT_PIC_TRUE FN_PTRS_IN_SO_WITHOUT_PIC_FALSE WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CXXFLAGS LIBOBJS CXXCPP EGREP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4361,6 +4361,22 @@ fi
 
 
 
+
+if
+  case $target_cpu in
+    i?86) true;;
+    x86_64) false;;
+    *) true;;
+  esac; then
+  FN_PTRS_IN_SO_WITHOUT_PIC_TRUE=
+  FN_PTRS_IN_SO_WITHOUT_PIC_FALSE='#'
+else
+  FN_PTRS_IN_SO_WITHOUT_PIC_TRUE='#'
+  FN_PTRS_IN_SO_WITHOUT_PIC_FALSE=
+fi
+
+
+
 GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 
 # Check whether --enable-werror or --disable-werror was given.
@@ -5527,6 +5543,13 @@ echo "$as_me: error: conditional \"GCC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${FN_PTRS_IN_SO_WITHOUT_PIC_TRUE}" && test -z "${FN_PTRS_IN_SO_WITHOUT_PIC_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"FN_PTRS_IN_SO_WITHOUT_PIC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"FN_PTRS_IN_SO_WITHOUT_PIC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"MAINTAINER_MODE\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -6156,6 +6179,8 @@ s,@NATIVE_LINKER_TRUE@,$NATIVE_LINKER_TRUE,;t t
 s,@NATIVE_LINKER_FALSE@,$NATIVE_LINKER_FALSE,;t t
 s,@GCC_TRUE@,$GCC_TRUE,;t t
 s,@GCC_FALSE@,$GCC_FALSE,;t t
+s,@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@,$FN_PTRS_IN_SO_WITHOUT_PIC_TRUE,;t t
+s,@FN_PTRS_IN_SO_WITHOUT_PIC_FALSE@,$FN_PTRS_IN_SO_WITHOUT_PIC_FALSE,;t t
 s,@WARN_CFLAGS@,$WARN_CFLAGS,;t t
 s,@NO_WERROR@,$NO_WERROR,;t t
 s,@WARN_CXXFLAGS@,$WARN_CXXFLAGS,;t t
