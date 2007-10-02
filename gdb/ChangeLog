@@ -1,3 +1,8 @@
+2007-10-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_stopped_data_address): Cast
+	pointer to uintptr_t before casting to CORE_ADDR.
+
 2007-10-02  Markus Deuling  <deuling@de.ibm.com>
 
 	* linux-nat.c (PTRACE_GETSIGINFO): Add define.

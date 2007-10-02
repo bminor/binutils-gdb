@@ -869,7 +869,7 @@ ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
       || (siginfo_p->si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return 0;
 
-  *addr_p = (CORE_ADDR) siginfo_p->si_addr;
+  *addr_p = (CORE_ADDR) (uintptr_t) siginfo_p->si_addr;
   return 1;
 }
 
