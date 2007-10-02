@@ -1,3 +1,7 @@
+2007-10-02  Markus Deuling  <deuling@de.ibm.com>
+
+	* spu-tdep.c (info_spu_signal_command): Fix output for SPU signal.
+
 2007-09-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.ac: Add $LIBINTL when testing libbfd.

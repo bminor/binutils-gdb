@@ -1605,9 +1605,9 @@ info_spu_signal_command (char *args, int from_tty)
 	printf_filtered (_("Signal 1 not pending "));
 
       if (signal1_type)
-	printf_filtered (_("(Type Overwrite)\n"));
-      else
 	printf_filtered (_("(Type Or)\n"));
+      else
+	printf_filtered (_("(Type Overwrite)\n"));
 
       if (signal2_pending)
 	printf_filtered (_("Signal 2 control word 0x%s "), phex (signal2, 4));
@@ -1615,9 +1615,9 @@ info_spu_signal_command (char *args, int from_tty)
 	printf_filtered (_("Signal 2 not pending "));
 
       if (signal2_type)
-	printf_filtered (_("(Type Overwrite)\n"));
-      else
 	printf_filtered (_("(Type Or)\n"));
+      else
+	printf_filtered (_("(Type Overwrite)\n"));
     }
 
   do_cleanups (chain);
