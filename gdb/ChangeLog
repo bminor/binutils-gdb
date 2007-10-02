@@ -1,3 +1,7 @@
+2007-10-02  Markus Deuling  <deuling@de.ibm.com>
+
+	* linux-nat.c (PTRACE_GETSIGINFO): Add define.
+
 2007-10-02  Mark Mitchell  <mark@codesourcery.com>
 
 	* mingw-hdep.c (gdb_select): Stop helper threads before returning.

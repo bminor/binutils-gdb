@@ -84,6 +84,10 @@
 #define __WALL          0x40000000 /* Wait for any child.  */
 #endif
 
+#ifndef PTRACE_GETSIGINFO
+#define PTRACE_GETSIGINFO    0x4202
+#endif
+
 /* The single-threaded native GNU/Linux target_ops.  We save a pointer for
    the use of the multi-threaded target.  */
 static struct target_ops *linux_ops;
