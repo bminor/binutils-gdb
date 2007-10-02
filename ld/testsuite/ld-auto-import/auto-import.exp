@@ -25,43 +25,51 @@
  
 # Note: 
 # 
-# This test checks the "auto importing direct from a dll" functionality, 
-# which dramatically reduces the linking time for big libraries and applications 
-# by skipping creating/using import libraries. Instead it links directly to the 
-# related dll or to a symlinked dll for replacing regular import libraries. 
-# 
-# The test has 4 stages: 
-# 
-# 1. compile and link a test dll exporting some text and data symbols and a 
-#    standard import library
+# This script tests some auto-import functionality:
 #
-# 2. create a symbolic link to this dll to simulate a replaced import library. 
+#  A. "auto importing direct from a dll" functionality, which dramatically reduces the 
+#     linking time for big libraries and applications by skipping creating/using 
+#     import libraries. Instead it links directly to the related dll or to a symlinked 
+#     dll for replacing regular import libraries. The test has 6 stages: 
+#  
+#     1. compile and link a test dll exporting some text and data symbols and a 
+#     standard import library
 #
-# 3. compile and link a client application with the standard import library. 
-#    This should produce no errors. 
+#     2. create a symbolic link to this dll to simulate a replaced import library. 
 #
-# 4. compile and link a client application with the created dll. 
-#    This should also produce no errors. 
+#     3. compile and link a client application with the standard import library. 
+#     This should produce no errors. 
 #
-# 5. compile and link a client application using the "import library". 
-#    This should also produce no errors. 
+#     4. compile and link a client application with the created dll. 
+#     This should also produce no errors. 
 #
-# 6. compile and link a client application with auto-import disabled. 
-#    This should produce a linking error. 
+#     5. compile and link a client application using the "import library". 
+#     This should also produce no errors. 
+#
+#     6. compile and link a client application with auto-import disabled. 
+#     This should produce a linking error. 
+#
+# B. runtime check if there are no segfaults when importing const data variables 
+#
 
 # This test can only be run if ld generates native executables.
 if ![isnative] then {return}
 
-# This test can only be run on a couple of ELF platforms.
+# This test can only be run on a couple of platforms.
 # Square bracket expressions seem to confuse istarget.
 if { ![istarget *-pc-cygwin]    
      && ![istarget *-pc-mingw*] } {
     return
 }
 
+if [istarget *-pc-mingw*] {
+    # FIXME: Add support for this target.
+    unsupported "mingw currently not supported"
+}
+
 # No compiler, no test.
 if { [which $CC] == 0 } {
-    untested "Auto import test"
+    untested "Auto import test (compiler not found)"
     return
 }
 
@@ -97,10 +105,10 @@ proc ld_special_link { ld target objects } {
 
     if [string match "" $exec_output] then {
 	return 1
-    } else {
-	verbose -log "$exec_output"
-	return 0
     }
+
+    verbose -log "$exec_output"
+    return 0
 }
 
 set tmpdir tmpdir
@@ -111,53 +119,59 @@ if [istarget *-pc-cygwin] {
     set MYLIBS "-L/usr/lib -lcygwin -L/usr/lib/w32api -lkernel32"
     
     # Compile the dll.
-    if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/dll.c $tmpdir/dll.o ] {
+    if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/dll.c $tmpdir/dll.o] {
 	fail "compiling shared lib"
-    } elseif ![ld_special_link "$ld -shared --out-implib=$tmpdir/libstandard.dll.a" $tmpdir/dll.dll "$tmpdir/dll.o $MYLIBS" ] {
-	fail "linking shared lib"
-    } else {
-	# Create symbolic link.
-	catch "exec ln -fs dll.dll $tmpdir/libsymlinked_dll.dll.a" ln_catch
-	
-	# Compile and link the client program.
-	if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/client.c $tmpdir/client.o ] {
-	    fail "compiling client"
-	} else {
-	    # Check linking with import library.
-	    set msg "linking auto-import client using a standard import library"
-	    if [ld_special_link $ld $tmpdir/client.exe "--enable-auto-import /lib/crt0.o $tmpdir/client.o -L$tmpdir -lstandard $MYLIBS" ] {
-		pass $msg
-	    } else {
-		fail $msg 
-	    }
-
-	    # Check linking directly with dll.
-	    set msg "linking auto-import client using the dll"
-	    if [ld_special_link $ld $tmpdir/client.exe "--enable-auto-import /lib/crt0.o $tmpdir/client.o -L$tmpdir -ldll $MYLIBS" ] {
-		pass $msg
-	    } else {
-		fail $msg 
-	    }
-
-	    # Check linking with symlinked dll.
-	    set msg "linking auto-import client using symbolic linked dll"
-	    if [ld_special_link $ld $tmpdir/clientimport.exe "--enable-auto-import /lib/crt0.o $tmpdir/client.o -L$tmpdir -lsymlinked_dll $MYLIBS" ] {
-		pass $msg
-	    }	else {
-		fail $msg 
-	    }
-
-	    # Check linking with disabled auto-import, this must produce linking error.
-	    set msg "linking with disabled auto-import"
-	    if ![ld_special_link $ld $tmpdir/clientimport.exe "--disable-auto-import /lib/crt0.o $tmpdir/client.o -L$tmpdir -ldll $MYLIBS" ] {
-		pass $msg
-	    }	else {
-		fail $msg
-	    }
-	}
     }
-}
+    if ![ld_special_link "$CC -shared --enable-auto-import --out-implib=$tmpdir/libstandard.dll.a" $tmpdir/dll.dll "$tmpdir/dll.o $MYLIBS"] {
+	fail "linking shared lib"
+    }
 
-if [istarget *-pc-mingw*] {
-    unsupported "mingw currently not supported"
+    # Create symbolic link.
+    catch "exec ln -fs dll.dll $tmpdir/libsymlinked_dll.dll.a" ln_catch
+
+    # Compile and link the client program.
+    if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/client.c $tmpdir/client.o] {
+        fail "compiling client"
+    }
+
+    # Check linking with import library.
+    set msg "linking auto-import client using a standard import library"
+    if [ld_special_link $ld $tmpdir/client-linklib.exe "--enable-auto-import --enable-runtime-pseudo-reloc /lib/crt0.o $tmpdir/client.o -L$tmpdir -lstandard $MYLIBS"] {
+	pass $msg
+    } else {
+	fail $msg 
+    }
+
+    # Check linking directly with dll.
+    set msg "linking auto-import client using the dll"
+    if [ld_special_link $ld $tmpdir/client-linkdll.exe "--enable-auto-import --enable-runtime-pseudo-reloc /lib/crt0.o $tmpdir/client.o -L$tmpdir -ldll $MYLIBS"] {
+	pass $msg
+    } else {
+	fail $msg 
+    }
+
+    # Check linking with symlinked dll.
+    set msg "linking auto-import client using symbolic linked dll"
+    if [ld_special_link $ld $tmpdir/client-symlinkeddll.exe "--enable-auto-import --enable-runtime-pseudo-reloc /lib/crt0.o $tmpdir/client.o -L$tmpdir -lsymlinked_dll $MYLIBS"] {
+	pass $msg
+    } else {
+	fail $msg 
+    }
+
+    # Check linking with disabled auto-import, this must produce linking error.
+    set msg "linking with disabled auto-import"
+    if ![ld_special_link $ld $tmpdir/client-failed.exe "--disable-auto-import --enable-runtime-pseudo-reloc /lib/crt0.o $tmpdir/client.o -L$tmpdir -ldll $MYLIBS"] {
+	pass $msg
+    } else {
+	fail $msg
+    }
+
+    # Check that the app works - ie that there is output when the applications runs.
+    set msg "application runtime segfault check" 
+    catch "exec $tmpdir/client-linklib.exe" exec_output
+    if ![string match "" $exec_output] then {
+    	pass $msg
+    } else {
+    	fail $msg
+    }
 }
