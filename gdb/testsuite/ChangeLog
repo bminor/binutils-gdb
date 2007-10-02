@@ -1,3 +1,15 @@
+2007-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/classes.exp (do_tests): Always step to the line after the
+	call.
+	* gdb.mi/mi-simplerun.exp (test_controlled_execution): Allow finish
+	to return to the call.
+	* gdb.mi/mi2-simplerun.exp (test_controlled_execution): Likewise.
+	* gdb.mi/mi-return.exp (test_return_simple): Likewise.
+	* gdb.mi/mi2-return.exp (test_return_simple): Likewise.
+	* gdb.mi/mi-until.exp (test_until): Likewise.
+	* gdb.mi/mi2-until.exp (test_until): Likewise.
+
 2007-10-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.mi/var-cmd.c (do_locals_tests): Define lcharacter as a

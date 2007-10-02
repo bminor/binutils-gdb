@@ -581,7 +581,14 @@ proc do_tests {} {
 
     gdb_breakpoint enums2
     gdb_test "continue" ".*Breakpoint .* enums2.*" "continue to enums2(\\(\\)|)"
-    gdb_test "finish" "" ""
+    # Leave enums2.  Make sure we reach the next line, in case there
+    # are any more instructions to finish the function call.
+    gdb_test_multiple "finish" "" {
+	-re "enums2 \\(\\);.*$gdb_prompt $" {
+	    gdb_test "next" "" ""
+	}
+	-re "$gdb_prompt $" { }
+    }
     test_enums
 
     gdb_test "finish" "" ""

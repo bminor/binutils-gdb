@@ -113,7 +113,7 @@ proc test_until {} {
 
     send_gdb "444-exec-until until.c:25\n"
     gdb_expect {
-	-re "444\\^running\r\n${mi_gdb_prompt}444\\*stopped,reason=\"location-reached\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*until.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"24\"\}\r\n$mi_gdb_prompt$" {
+	-re "444\\^running\r\n${mi_gdb_prompt}444\\*stopped,reason=\"location-reached\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*until.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"(23|24)\"\}\r\n$mi_gdb_prompt$" {
 	    pass "until after current function"
 	}
 	timeout {

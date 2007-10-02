@@ -131,6 +131,7 @@ proc test_controlled_execution {} {
     set line_callee4_head         [gdb_get_line_number "callee4 ("]
     set line_callee4_body         [expr $line_callee4_head + 2]
     set line_callee3_head         [gdb_get_line_number "callee3 ("]
+    set line_callee3_call         [expr $line_callee3_head + 2]
     set line_callee3_close_brace  [expr $line_callee3_head + 3]
     set line_callee1_head         [gdb_get_line_number "callee1 ("]
     set line_callee1_body         [expr $line_callee1_head + 2]
@@ -163,7 +164,8 @@ proc test_controlled_execution {} {
     # FIXME: A string argument is not printed right; should be fixed and
     #        we should look for the right thing here.
     # NOTE: The ``.'' is part of ``gdb-result-var="$1"''
-    mi_finish_to "callee3" ".*" "basics.c" $line_callee3_close_brace ".1" "0" "exec-finish"
+    mi_finish_to "callee3" ".*" "basics.c" \
+	"($line_callee3_call|$line_callee3_close_brace)" ".1" "0" "exec-finish"
 }
 
 proc test_controlling_breakpoints {} {
