@@ -341,18 +341,161 @@ ser_windows_write_prim (struct serial *scb, const void *buf, size_t len)
   return bytes_written;
 }
 
+/* On Windows, gdb_select is implemented using WaitForMulpleObjects.
+   A "select thread" is created for each file descriptor.  These
+   threads looks for activity on the corresponding descriptor, using
+   whatever techniques are appropriate for the descriptor type.  When
+   that activity occurs, the thread signals an appropriate event,
+   which wakes up WaitForMultipleObjects.
+
+   Each select thread is in one of two states: stopped or started.
+   Select threads begin in the stopped state.  When gdb_select is
+   called, threads corresponding to the descriptors of interest are
+   started by calling a wait_handle function.  Each thread that
+   notices activity signals the appropriate event and then reenters
+   the stopped state.  Before gdb_select returns it calls the
+   wait_handle_done functions, which return the threads to the stopped
+   state.  */
+
+enum select_thread_state {
+  STS_STARTED,
+  STS_STOPPED
+};
+
 struct ser_console_state
 {
+  /* Signaled by the select thread to indicate that data is available
+     on the file descriptor.  */
   HANDLE read_event;
+  /* Signaled by the select thread to indicate that an exception has
+     occurred on the file descriptor.  */
   HANDLE except_event;
-
-  HANDLE start_select;
-  HANDLE stop_select;
-  HANDLE exit_select;
+  /* Signaled by the select thread to indicate that it has entered the
+     started state.  HAVE_STARTED and HAVE_STOPPED are never signaled
+     simultaneously.  */
+  HANDLE have_started;
+  /* Signaled by the select thread to indicate that it has stopped,
+     either because data is available (and READ_EVENT is signaled),
+     because an exception has occurred (and EXCEPT_EVENT is signaled),
+     or because STOP_SELECT was signaled.  */
   HANDLE have_stopped;
 
+  /* Signaled by the main program to tell the select thread to enter
+     the started state.  */
+  HANDLE start_select;
+  /* Signaled by the main program to tell the select thread to enter
+     the stopped state. */
+  HANDLE stop_select;
+  /* Signaled by the main program to tell the select thread to
+     exit.  */
+  HANDLE exit_select;
+
+  /* The handle for the select thread.  */
   HANDLE thread;
+  /* The state of the select thread.  This field is only accessed in
+     the main program, never by the select thread itself.  */
+  enum select_thread_state thread_state;
 };
+
+/* Called by a select thread to enter the stopped state.  This
+   function does not return until the thread has re-entered the
+   started state.  */
+static void
+select_thread_wait (struct ser_console_state *state)
+{
+  HANDLE wait_events[2];
+
+  /* There are two things that can wake us up: a request that we enter
+     the started state, or that we exit this thread.  */
+  wait_events[0] = state->start_select;
+  wait_events[1] = state->exit_select;
+  if (WaitForMultipleObjects (2, wait_events, FALSE, INFINITE) 
+      != WAIT_OBJECT_0)
+    /* Either the EXIT_SELECT event was signaled (requesting that the
+       thread exit) or an error has occurred.  In either case, we exit
+       the thread.  */
+    ExitThread (0);
+  
+  /* We are now in the started state.  */
+  SetEvent (state->have_started);
+}
+
+typedef DWORD WINAPI (*thread_fn_type)(void *);
+
+/* Create a new select thread for SCB executing THREAD_FN.  The STATE
+   will be filled in by this function before return.  */
+void
+create_select_thread (thread_fn_type thread_fn,
+		      struct serial *scb,
+		      struct ser_console_state *state)
+{
+  DWORD threadId;
+
+  /* Create all of the events.  These are all auto-reset events.  */
+  state->read_event = CreateEvent (NULL, FALSE, FALSE, NULL);
+  state->except_event = CreateEvent (NULL, FALSE, FALSE, NULL);
+  state->have_started = CreateEvent (NULL, FALSE, FALSE, NULL);
+  state->have_stopped = CreateEvent (NULL, FALSE, FALSE, NULL);
+  state->start_select = CreateEvent (NULL, FALSE, FALSE, NULL);
+  state->stop_select = CreateEvent (NULL, FALSE, FALSE, NULL);
+  state->exit_select = CreateEvent (NULL, FALSE, FALSE, NULL);
+
+  state->thread = CreateThread (NULL, 0, thread_fn, scb, 0, &threadId);
+  /* The thread begins in the stopped state.  */
+  state->thread_state = STS_STOPPED;
+}
+
+/* Destroy the select thread indicated by STATE.  */
+static void
+destroy_select_thread (struct ser_console_state *state)
+{
+  /* Ask the thread to exit.  */
+  SetEvent (state->exit_select);
+  /* Wait until it does.  */
+  WaitForSingleObject (state->thread, INFINITE);
+
+  /* Destroy the events.  */
+  CloseHandle (state->read_event);
+  CloseHandle (state->except_event);
+  CloseHandle (state->have_started);
+  CloseHandle (state->have_stopped);
+  CloseHandle (state->start_select);
+  CloseHandle (state->stop_select);
+  CloseHandle (state->exit_select);
+}
+
+/* Called by gdb_select to start the select thread indicated by STATE.
+   This function does not return until the thread has started.  */
+static void
+start_select_thread (struct ser_console_state *state)
+{
+  /* Ask the thread to start.  */
+  SetEvent (state->start_select);
+  /* Wait until it does.  */
+  WaitForSingleObject (state->have_started, INFINITE);
+  /* The thread is now started.  */
+  state->thread_state = STS_STARTED;
+}
+
+/* Called by gdb_select to stop the select thread indicated by STATE.
+   This function does not return until the thread has stopped.  */
+static void
+stop_select_thread (struct ser_console_state *state)
+{
+  /* If the thread is already in the stopped state, we have nothing to
+     do.  Some of the wait_handle functions avoid calling
+     start_select_thread if they notice activity on the relevant file
+     descriptors.  The wait_handle_done functions still call
+     stop_select_thread -- but it is already stopped.  */
+  if (state->thread_state != STS_STARTED)
+    return;
+  /* Ask the thread to stop.  */
+  SetEvent (state->stop_select);
+  /* Wait until it does.  */
+  WaitForSingleObject (state->have_stopped, INFINITE);
+  /* The thread is now stopped.  */
+  state->thread_state = STS_STOPPED;
+}
 
 static DWORD WINAPI
 console_select_thread (void *arg)
@@ -371,74 +514,69 @@ console_select_thread (void *arg)
       INPUT_RECORD record;
       DWORD n_records;
 
-      SetEvent (state->have_stopped);
+      select_thread_wait (state);
 
-      wait_events[0] = state->start_select;
-      wait_events[1] = state->exit_select;
-
-      if (WaitForMultipleObjects (2, wait_events, FALSE, INFINITE) != WAIT_OBJECT_0)
-	return 0;
-
-      ResetEvent (state->have_stopped);
-
-    retry:
-      wait_events[0] = state->stop_select;
-      wait_events[1] = h;
-
-      event_index = WaitForMultipleObjects (2, wait_events, FALSE, INFINITE);
-
-      if (event_index == WAIT_OBJECT_0
-	  || WaitForSingleObject (state->stop_select, 0) == WAIT_OBJECT_0)
-	continue;
-
-      if (event_index != WAIT_OBJECT_0 + 1)
+      while (1)
 	{
-	  /* Wait must have failed; assume an error has occured, e.g.
-	     the handle has been closed.  */
-	  SetEvent (state->except_event);
-	  continue;
-	}
+	  wait_events[0] = state->stop_select;
+	  wait_events[1] = h;
 
-      /* We've got a pending event on the console.  See if it's
-	 of interest.  */
-      if (!PeekConsoleInput (h, &record, 1, &n_records) || n_records != 1)
-	{
-	  /* Something went wrong.  Maybe the console is gone.  */
-	  SetEvent (state->except_event);
-	  continue;
-	}
+	  event_index = WaitForMultipleObjects (2, wait_events, FALSE, INFINITE);
 
-      if (record.EventType == KEY_EVENT && record.Event.KeyEvent.bKeyDown)
-	{
-	  WORD keycode = record.Event.KeyEvent.wVirtualKeyCode;
+	  if (event_index == WAIT_OBJECT_0
+	      || WaitForSingleObject (state->stop_select, 0) == WAIT_OBJECT_0)
+	    break;
 
-	  /* Ignore events containing only control keys.  We must
-	     recognize "enhanced" keys which we are interested in
-	     reading via getch, if they do not map to ASCII.  But we
-	     do not want to report input available for e.g. the
-	     control key alone.  */
-
-	  if (record.Event.KeyEvent.uChar.AsciiChar != 0
-	      || keycode == VK_PRIOR
-	      || keycode == VK_NEXT
-	      || keycode == VK_END
-	      || keycode == VK_HOME
-	      || keycode == VK_LEFT
-	      || keycode == VK_UP
-	      || keycode == VK_RIGHT
-	      || keycode == VK_DOWN
-	      || keycode == VK_INSERT
-	      || keycode == VK_DELETE)
+	  if (event_index != WAIT_OBJECT_0 + 1)
 	    {
-	      /* This is really a keypress.  */
-	      SetEvent (state->read_event);
-	      continue;
+	      /* Wait must have failed; assume an error has occured, e.g.
+		 the handle has been closed.  */
+	      SetEvent (state->except_event);
+	      break;
 	    }
+
+	  /* We've got a pending event on the console.  See if it's
+	     of interest.  */
+	  if (!PeekConsoleInput (h, &record, 1, &n_records) || n_records != 1)
+	    {
+	      /* Something went wrong.  Maybe the console is gone.  */
+	      SetEvent (state->except_event);
+	      break;
+	    }
+
+	  if (record.EventType == KEY_EVENT && record.Event.KeyEvent.bKeyDown)
+	    {
+	      WORD keycode = record.Event.KeyEvent.wVirtualKeyCode;
+
+	      /* Ignore events containing only control keys.  We must
+		 recognize "enhanced" keys which we are interested in
+		 reading via getch, if they do not map to ASCII.  But we
+		 do not want to report input available for e.g. the
+		 control key alone.  */
+
+	      if (record.Event.KeyEvent.uChar.AsciiChar != 0
+		  || keycode == VK_PRIOR
+		  || keycode == VK_NEXT
+		  || keycode == VK_END
+		  || keycode == VK_HOME
+		  || keycode == VK_LEFT
+		  || keycode == VK_UP
+		  || keycode == VK_RIGHT
+		  || keycode == VK_DOWN
+		  || keycode == VK_INSERT
+		  || keycode == VK_DELETE)
+		{
+		  /* This is really a keypress.  */
+		  SetEvent (state->read_event);
+		  break;
+		}
+	    }
+
+	  /* Otherwise discard it and wait again.  */
+	  ReadConsoleInput (h, &record, 1, &n_records);
 	}
 
-      /* Otherwise discard it and wait again.  */
-      ReadConsoleInput (h, &record, 1, &n_records);
-      goto retry;
+      SetEvent(state->have_stopped);
     }
 }
 
@@ -473,38 +611,32 @@ pipe_select_thread (void *arg)
 
   while (1)
     {
-      HANDLE wait_events[2];
       DWORD n_avail;
 
+      select_thread_wait (state);
+
+      /* Wait for something to happen on the pipe.  */
+      while (1)
+	{
+	  if (!PeekNamedPipe (h, NULL, 0, NULL, &n_avail, NULL))
+	    {
+	      SetEvent (state->except_event);
+	      break;
+	    }
+
+	  if (n_avail > 0)
+	    {
+	      SetEvent (state->read_event);
+	      break;
+	    }
+
+	  /* Delay 10ms before checking again, but allow the stop
+	     event to wake us.  */
+	  if (WaitForSingleObject (state->stop_select, 10) == WAIT_OBJECT_0)
+	    break;
+	}
+
       SetEvent (state->have_stopped);
-
-      wait_events[0] = state->start_select;
-      wait_events[1] = state->exit_select;
-
-      if (WaitForMultipleObjects (2, wait_events, FALSE, INFINITE) != WAIT_OBJECT_0)
-	return 0;
-
-      ResetEvent (state->have_stopped);
-
-    retry:
-      if (!PeekNamedPipe (h, NULL, 0, NULL, &n_avail, NULL))
-	{
-	  SetEvent (state->except_event);
-	  continue;
-	}
-
-      if (n_avail > 0)
-	{
-	  SetEvent (state->read_event);
-	  continue;
-	}
-
-      /* Delay 10ms before checking again, but allow the stop event
-	 to wake us.  */
-      if (WaitForSingleObject (state->stop_select, 10) == WAIT_OBJECT_0)
-	continue;
-
-      goto retry;
     }
 }
 
@@ -521,26 +653,14 @@ file_select_thread (void *arg)
 
   while (1)
     {
-      HANDLE wait_events[2];
-      DWORD n_avail;
-
-      SetEvent (state->have_stopped);
-
-      wait_events[0] = state->start_select;
-      wait_events[1] = state->exit_select;
-
-      if (WaitForMultipleObjects (2, wait_events, FALSE, INFINITE) != WAIT_OBJECT_0)
-	return 0;
-
-      ResetEvent (state->have_stopped);
+      select_thread_wait (state);
 
       if (SetFilePointer (h, 0, NULL, FILE_CURRENT) == INVALID_SET_FILE_POINTER)
-	{
-	  SetEvent (state->except_event);
-	  continue;
-	}
+	SetEvent (state->except_event);
+      else
+	SetEvent (state->read_event);
 
-      SetEvent (state->read_event);
+      SetEvent (state->have_stopped);
     }
 }
 
@@ -551,7 +671,7 @@ ser_console_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
 
   if (state == NULL)
     {
-      DWORD threadId;
+      thread_fn_type thread_fn;
       int is_tty;
 
       is_tty = isatty (scb->fd);
@@ -566,30 +686,14 @@ ser_console_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
       memset (state, 0, sizeof (struct ser_console_state));
       scb->state = state;
 
-      /* Create auto reset events to wake, stop, and exit the select
-	 thread.  */
-      state->start_select = CreateEvent (0, FALSE, FALSE, 0);
-      state->stop_select = CreateEvent (0, FALSE, FALSE, 0);
-      state->exit_select = CreateEvent (0, FALSE, FALSE, 0);
-
-      /* Create a manual reset event to signal whether the thread is
-	 stopped.  This must be manual reset, because we may wait on
-	 it multiple times without ever starting the thread.  */
-      state->have_stopped = CreateEvent (0, TRUE, FALSE, 0);
-
-      /* Create our own events to report read and exceptions separately.  */
-      state->read_event = CreateEvent (0, FALSE, FALSE, 0);
-      state->except_event = CreateEvent (0, FALSE, FALSE, 0);
-
       if (is_tty)
-	state->thread = CreateThread (NULL, 0, console_select_thread, scb, 0,
-				      &threadId);
+	thread_fn = console_select_thread;
       else if (fd_is_pipe (scb->fd))
-	state->thread = CreateThread (NULL, 0, pipe_select_thread, scb, 0,
-				      &threadId);
+	thread_fn = pipe_select_thread;
       else
-	state->thread = CreateThread (NULL, 0, file_select_thread, scb, 0,
-				      &threadId);
+	thread_fn = file_select_thread;
+
+      create_select_thread (thread_fn, scb, state);
     }
 
   *read = state->read_event;
@@ -612,7 +716,7 @@ ser_console_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
     }
 
   /* Otherwise, start the select thread.  */
-  SetEvent (state->start_select);
+  start_select_thread (state);
 }
 
 static void
@@ -623,8 +727,7 @@ ser_console_done_wait_handle (struct serial *scb)
   if (state == NULL)
     return;
 
-  SetEvent (state->stop_select);
-  WaitForSingleObject (state->have_stopped, INFINITE);
+  stop_select_thread (state);
 }
 
 static void
@@ -634,18 +737,7 @@ ser_console_close (struct serial *scb)
 
   if (scb->state)
     {
-      SetEvent (state->exit_select);
-
-      WaitForSingleObject (state->thread, INFINITE);
-
-      CloseHandle (state->start_select);
-      CloseHandle (state->stop_select);
-      CloseHandle (state->exit_select);
-      CloseHandle (state->have_stopped);
-
-      CloseHandle (state->read_event);
-      CloseHandle (state->except_event);
-
+      destroy_select_thread (state);
       xfree (scb->state);
     }
 }
@@ -703,19 +795,7 @@ free_pipe_state (struct pipe_state *ps)
   int saved_errno = errno;
 
   if (ps->wait.read_event != INVALID_HANDLE_VALUE)
-    {
-      SetEvent (ps->wait.exit_select);
-
-      WaitForSingleObject (ps->wait.thread, INFINITE);
-
-      CloseHandle (ps->wait.start_select);
-      CloseHandle (ps->wait.stop_select);
-      CloseHandle (ps->wait.exit_select);
-      CloseHandle (ps->wait.have_stopped);
-
-      CloseHandle (ps->wait.read_event);
-      CloseHandle (ps->wait.except_event);
-    }
+    destroy_select_thread (&ps->wait);
 
   /* Close the pipe to the child.  We must close the pipe before
      calling pex_free because pex_free will wait for the child to exit
@@ -870,28 +950,8 @@ pipe_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
 
   /* Have we allocated our events yet?  */
   if (ps->wait.read_event == INVALID_HANDLE_VALUE)
-    {
-      DWORD threadId;
-
-      /* Create auto reset events to wake, stop, and exit the select
-	 thread.  */
-      ps->wait.start_select = CreateEvent (0, FALSE, FALSE, 0);
-      ps->wait.stop_select = CreateEvent (0, FALSE, FALSE, 0);
-      ps->wait.exit_select = CreateEvent (0, FALSE, FALSE, 0);
-
-      /* Create a manual reset event to signal whether the thread is
-	 stopped.  This must be manual reset, because we may wait on
-	 it multiple times without ever starting the thread.  */
-      ps->wait.have_stopped = CreateEvent (0, TRUE, FALSE, 0);
-
-      /* Create our own events to report read and exceptions separately.
-	 The exception event is currently never used.  */
-      ps->wait.read_event = CreateEvent (0, FALSE, FALSE, 0);
-      ps->wait.except_event = CreateEvent (0, FALSE, FALSE, 0);
-
-      /* Start the select thread.  */
-      CreateThread (NULL, 0, pipe_select_thread, scb, 0, &threadId);
-    }
+    /* Start the thread.  */
+    create_select_thread (pipe_select_thread, scb, &ps->wait);
 
   *read = ps->wait.read_event;
   *except = ps->wait.except_event;
@@ -901,8 +961,7 @@ pipe_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
   ResetEvent (ps->wait.except_event);
   ResetEvent (ps->wait.stop_select);
 
-  /* Start the select thread.  */
-  SetEvent (ps->wait.start_select);
+  start_select_thread (&ps->wait);
 }
 
 static void
@@ -914,8 +973,7 @@ pipe_done_wait_handle (struct serial *scb)
   if (ps->wait.read_event == INVALID_HANDLE_VALUE)
     return;
 
-  SetEvent (ps->wait.stop_select);
-  WaitForSingleObject (ps->wait.have_stopped, INFINITE);
+  stop_select_thread (&ps->wait);
 }
 
 static int
@@ -931,24 +989,16 @@ pipe_avail (struct serial *scb, int fd)
 
 struct net_windows_state
 {
-  HANDLE read_event;
-  HANDLE except_event;
-
-  HANDLE start_select;
-  HANDLE stop_select;
-  HANDLE exit_select;
-  HANDLE have_stopped;
-
+  struct ser_console_state base;
+  
   HANDLE sock_event;
-
-  HANDLE thread;
 };
 
 static DWORD WINAPI
 net_windows_select_thread (void *arg)
 {
   struct serial *scb = arg;
-  struct net_windows_state *state, state_copy;
+  struct net_windows_state *state;
   int event_index;
 
   state = scb->state;
@@ -958,44 +1008,37 @@ net_windows_select_thread (void *arg)
       HANDLE wait_events[2];
       WSANETWORKEVENTS events;
 
-      SetEvent (state->have_stopped);
+      select_thread_wait (&state->base);
 
-      wait_events[0] = state->start_select;
-      wait_events[1] = state->exit_select;
-
-      if (WaitForMultipleObjects (2, wait_events, FALSE, INFINITE) != WAIT_OBJECT_0)
-	return 0;
-
-      ResetEvent (state->have_stopped);
-
-      wait_events[0] = state->stop_select;
+      wait_events[0] = state->base.stop_select;
       wait_events[1] = state->sock_event;
 
       event_index = WaitForMultipleObjects (2, wait_events, FALSE, INFINITE);
 
       if (event_index == WAIT_OBJECT_0
-	  || WaitForSingleObject (state->stop_select, 0) == WAIT_OBJECT_0)
-	continue;
-
-      if (event_index != WAIT_OBJECT_0 + 1)
+	  || WaitForSingleObject (state->base.stop_select, 0) == WAIT_OBJECT_0)
+	/* We have been requested to stop.  */
+	;
+      else if (event_index != WAIT_OBJECT_0 + 1)
+	/* Some error has occured.  Assume that this is an error
+	   condition.  */
+	SetEvent (state->base.except_event);
+      else
 	{
-	  /* Some error has occured.  Assume that this is an error
-	     condition.  */
-	  SetEvent (state->except_event);
-	  continue;
+	  /* Enumerate the internal network events, and reset the
+	     object that signalled us to catch the next event.  */
+	  WSAEnumNetworkEvents (scb->fd, state->sock_event, &events);
+	  
+	  gdb_assert (events.lNetworkEvents & (FD_READ | FD_CLOSE));
+	  
+	  if (events.lNetworkEvents & FD_READ)
+	    SetEvent (state->base.read_event);
+	  
+	  if (events.lNetworkEvents & FD_CLOSE)
+	    SetEvent (state->base.except_event);
 	}
 
-      /* Enumerate the internal network events, and reset the object that
-	 signalled us to catch the next event.  */
-      WSAEnumNetworkEvents (scb->fd, state->sock_event, &events);
-
-      gdb_assert (events.lNetworkEvents & (FD_READ | FD_CLOSE));
-
-      if (events.lNetworkEvents & FD_READ)
-	SetEvent (state->read_event);
-
-      if (events.lNetworkEvents & FD_CLOSE)
-	SetEvent (state->except_event);
+      SetEvent (state->base.have_stopped);
     }
 }
 
@@ -1005,12 +1048,12 @@ net_windows_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
   struct net_windows_state *state = scb->state;
 
   /* Start from a clean slate.  */
-  ResetEvent (state->read_event);
-  ResetEvent (state->except_event);
-  ResetEvent (state->stop_select);
+  ResetEvent (state->base.read_event);
+  ResetEvent (state->base.except_event);
+  ResetEvent (state->base.stop_select);
 
-  *read = state->read_event;
-  *except = state->except_event;
+  *read = state->base.read_event;
+  *except = state->base.except_event;
 
   /* Check any pending events.  This both avoids starting the thread
      unnecessarily, and handles stray FD_READ events (see below).  */
@@ -1042,7 +1085,7 @@ net_windows_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
 	  if (ioctlsocket (scb->fd, FIONREAD, &available) == 0
 	      && available > 0)
 	    {
-	      SetEvent (state->read_event);
+	      SetEvent (state->base.read_event);
 	      any = 1;
 	    }
 	  else
@@ -1056,7 +1099,7 @@ net_windows_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
 	 still valid, and it will not be resignalled.  */
       if (events.lNetworkEvents & FD_CLOSE)
 	{
-	  SetEvent (state->except_event);
+	  SetEvent (state->base.except_event);
 	  any = 1;
 	}
 
@@ -1065,8 +1108,7 @@ net_windows_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
 	return;
     }
 
-  /* Start the select thread.  */
-  SetEvent (state->start_select);
+  start_select_thread (&state->base);
 }
 
 static void
@@ -1074,8 +1116,7 @@ net_windows_done_wait_handle (struct serial *scb)
 {
   struct net_windows_state *state = scb->state;
 
-  SetEvent (state->stop_select);
-  WaitForSingleObject (state->have_stopped, INFINITE);
+  stop_select_thread (&state->base);
 }
 
 static int
@@ -1093,28 +1134,12 @@ net_windows_open (struct serial *scb, const char *name)
   memset (state, 0, sizeof (struct net_windows_state));
   scb->state = state;
 
-  /* Create auto reset events to wake, stop, and exit the select
-     thread.  */
-  state->start_select = CreateEvent (0, FALSE, FALSE, 0);
-  state->stop_select = CreateEvent (0, FALSE, FALSE, 0);
-  state->exit_select = CreateEvent (0, FALSE, FALSE, 0);
-
-  /* Create a manual reset event to signal whether the thread is
-     stopped.  This must be manual reset, because we may wait on
-     it multiple times without ever starting the thread.  */
-  state->have_stopped = CreateEvent (0, TRUE, FALSE, 0);
-
   /* Associate an event with the socket.  */
   state->sock_event = CreateEvent (0, TRUE, FALSE, 0);
   WSAEventSelect (scb->fd, state->sock_event, FD_READ | FD_CLOSE);
 
-  /* Create our own events to report read and close separately.  */
-  state->read_event = CreateEvent (0, FALSE, FALSE, 0);
-  state->except_event = CreateEvent (0, FALSE, FALSE, 0);
-
-  /* And finally start the select thread.  */
-  state->thread = CreateThread (NULL, 0, net_windows_select_thread, scb, 0,
-				&threadId);
+  /* Start the thread.  */
+  create_select_thread (net_windows_select_thread, scb, &state->base);
 
   return 0;
 }
@@ -1125,17 +1150,7 @@ net_windows_close (struct serial *scb)
 {
   struct net_windows_state *state = scb->state;
 
-  SetEvent (state->exit_select);
-  WaitForSingleObject (state->thread, INFINITE);
-
-  CloseHandle (state->read_event);
-  CloseHandle (state->except_event);
-
-  CloseHandle (state->start_select);
-  CloseHandle (state->stop_select);
-  CloseHandle (state->exit_select);
-  CloseHandle (state->have_stopped);
-
+  destroy_select_thread (&state->base);
   CloseHandle (state->sock_event);
 
   xfree (scb->state);

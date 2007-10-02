@@ -86,12 +86,18 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
   HANDLE h;
   DWORD event;
   DWORD num_handles;
+  /* SCBS contains serial control objects corresponding to file
+     descriptors in READFDS and WRITEFDS.  */
+  struct serial *scbs[MAXIMUM_WAIT_OBJECTS];
+  /* The number of valid entries in SCBS.  */
+  size_t num_scbs;
   int fd;
   int num_ready;
-  int indx;
+  size_t indx;
 
   num_ready = 0;
   num_handles = 0;
+  num_scbs = 0;
   for (fd = 0; fd < n; ++fd)
     {
       HANDLE read = NULL, except = NULL;
@@ -105,14 +111,16 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
       if ((!readfds || !FD_ISSET (fd, readfds))
 	  && (!exceptfds || !FD_ISSET (fd, exceptfds)))
 	continue;
-      h = (HANDLE) _get_osfhandle (fd);
 
       scb = serial_for_fd (fd);
       if (scb)
-	serial_wait_handle (scb, &read, &except);
+	{
+	  serial_wait_handle (scb, &read, &except);
+	  scbs[num_scbs++] = scb;
+	}
 
       if (read == NULL)
-	read = h;
+	read = (HANDLE) _get_osfhandle (fd);
       if (except == NULL)
 	{
 	  if (!never_handle)
@@ -154,6 +162,9 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
      mutexes, that should never occur.  */
   gdb_assert (!(WAIT_ABANDONED_0 <= event
 		&& event < WAIT_ABANDONED_0 + num_handles));
+  /* We no longer need the helper threads to check for activity.  */
+  for (indx = 0; indx < num_scbs; ++indx)
+    serial_done_wait_handle (scbs[indx]);
   if (event == WAIT_FAILED)
     return -1;
   if (event == WAIT_TIMEOUT)
@@ -164,7 +175,6 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
   for (fd = 0, indx = 0; fd < n; ++fd)
     {
       HANDLE fd_h;
-      struct serial *scb;
 
       if ((!readfds || !FD_ISSET (fd, readfds))
 	  && (!exceptfds || !FD_ISSET (fd, exceptfds)))
@@ -191,12 +201,6 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	  else
 	    num_ready++;
 	}
-
-      /* We created at least one event handle for this fd.  Let the
-	 device know we are finished with it.  */
-      scb = serial_for_fd (fd);
-      if (scb)
-	serial_done_wait_handle (scb);
     }
 
   return num_ready;
