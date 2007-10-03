@@ -1,5 +1,12 @@
 2007-10-03  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/5078
+	* config/tc-avr.c (avr_get_constant): Extend error message to
+	mention that the constant must be positive.
+
+2007-10-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-avr.c (avr_get_constant): 
 	PR gas/5089
 	* config/tc-arm.c (s_arm_unwind_handlerdata): Fix spelling typo.
 	PR gas/5090

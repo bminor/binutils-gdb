@@ -501,7 +501,7 @@ avr_get_constant (char *str, int max)
     as_bad (_("constant value required"));
 
   if (ex.X_add_number > max || ex.X_add_number < 0)
-    as_bad (_("number must be less than %d"), max + 1);
+    as_bad (_("number must be positive and less than %d"), max + 1);
 
   return ex.X_add_number;
 }
