@@ -57,8 +57,7 @@ class Test_framework
 
   // Cause the current test to fail.
   void
-  fail()
-  { ++this->current_fail_ = true; }
+  fail(const char* filename, int lineno);
 
   // Report an error from the current test.
   void
@@ -89,8 +88,8 @@ public:
 
   // Mark the test as failing.
   void
-  fail()
-  { this->tf_->fail(); }
+  fail(const char* filename, int lineno)
+  { this->tf_->fail(filename, lineno); }
 
   // Report an error.
   void
@@ -131,8 +130,13 @@ class Register_test
 
 // Check that a condition is true.  If it is false, report a failure.
 
-#define CHECK(cond) \
-  ((cond) ? 0 : (::gold_testsuite::Test_framework::report()->fail(), 0))
+#define CHECK(cond)							\
+  ((void)								\
+   ((cond)								\
+    ? 0									\
+    : (::gold_testsuite::Test_framework::report()->fail(__FILE__,	\
+							__LINE__),	\
+       0)))
 
 // Report an error during a test.
 

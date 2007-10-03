@@ -42,7 +42,7 @@ class Target_selector
   // Create a target selector for a specific machine number, size (32
   // or 64), and endianness.  The machine number can be EM_NONE to
   // test for any machine number.
-  Target_selector(int machine, int size, bool big_endian);
+  Target_selector(int machine, int size, bool is_big_endian);
 
   virtual ~Target_selector()
   { }
@@ -64,18 +64,18 @@ class Target_selector
 
   // Return the size this is looking for (32 or 64).
   int
-  size() const
+  get_size() const
   { return this->size_; }
 
   // Return the endianness this is looking for.
   bool
-  big_endian() const
-  { return this->big_endian_; }
+  is_big_endian() const
+  { return this->is_big_endian_; }
 
  private:
   int machine_;
   int size_;
-  bool big_endian_;
+  bool is_big_endian_;
   Target_selector* next_;
 };
 

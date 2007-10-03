@@ -61,13 +61,22 @@ Test_framework::run(const char *name, bool (*pfn)(Test_report*))
   this->testname_ = NULL;
 }
 
+// Report a failure.
+
+void
+Test_framework::fail(const char* filename, int lineno)
+{
+  printf("FAIL: %s: %s: %d\n", this->testname_, filename, lineno);
+  this->current_fail_ = true;
+}
+
 // Let a test report an error.
 
 void
 Test_framework::error(const char* message)
 {
   printf("ERROR: %s: %s\n", this->testname_, message);
-  this->fail();
+  this->current_fail_ = true;
 }
 
 // Register_test methods.

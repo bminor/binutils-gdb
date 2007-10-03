@@ -31,9 +31,18 @@ class Target;
 namespace gold_testsuite
 {
 
-extern gold::Target* target_test_pointer;
-extern const unsigned char test_file_1[];
-extern const unsigned int test_file_1_size;
+extern gold::Target* target_test_pointer_32_little;
+extern gold::Target* target_test_pointer_32_big;
+extern gold::Target* target_test_pointer_64_little;
+extern gold::Target* target_test_pointer_64_big;
+extern const unsigned char test_file_1_32_little[];
+extern const unsigned int test_file_1_size_32_little;
+extern const unsigned char test_file_1_32_big[];
+extern const unsigned int test_file_1_size_32_big;
+extern const unsigned char test_file_1_64_little[];
+extern const unsigned int test_file_1_size_64_little;
+extern const unsigned char test_file_1_64_big[];
+extern const unsigned int test_file_1_size_64_big;
 
 }; // End namespace gold_testsuite.
 

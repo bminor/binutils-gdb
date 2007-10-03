@@ -41,8 +41,8 @@ namespace gold
 // list.  This runs at global constructor time, so we want it to be
 // fast.
 
-Target_selector::Target_selector(int machine, int size, bool big_endian)
-  : machine_(machine), size_(size), big_endian_(big_endian)
+Target_selector::Target_selector(int machine, int size, bool is_big_endian)
+  : machine_(machine), size_(size), is_big_endian_(is_big_endian)
 {
   this->next_ = target_selectors;
   target_selectors = this;
@@ -51,15 +51,15 @@ Target_selector::Target_selector(int machine, int size, bool big_endian)
 // Find the target for an ELF file.
 
 extern Target*
-select_target(int machine, int size, bool big_endian, int osabi,
+select_target(int machine, int size, bool is_big_endian, int osabi,
 	      int abiversion)
 {
   for (Target_selector* p = target_selectors; p != NULL; p = p->next())
     {
       int pmach = p->machine();
       if ((pmach == machine || pmach == elfcpp::EM_NONE)
-	  && p->size() == size
-	  && p->big_endian() ? big_endian : !big_endian)
+	  && p->get_size() == size
+	  && (p->is_big_endian() ? is_big_endian : !is_big_endian))
 	{
 	  Target* ret = p->recognize(machine, osabi, abiversion);
 	  if (ret != NULL)
