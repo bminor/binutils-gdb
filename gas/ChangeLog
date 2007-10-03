@@ -1,3 +1,8 @@
+2007-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 4303
+	* stabs.c (aout_process_stab): Set BSF_DEBUGGING.
+
 2007-10-01  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* config/tc-cr16.c: Replaced 'tabs' with white spaces and

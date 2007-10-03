@@ -164,6 +164,8 @@ aout_process_stab (what, string, type, other, desc)
 
   symbol_append (symbol, symbol_lastP, &symbol_rootP, &symbol_lastP);
 
+  symbol_get_bfdsym (symbol)->flags |= BSF_DEBUGGING;
+
   S_SET_TYPE (symbol, type);
   S_SET_OTHER (symbol, other);
   S_SET_DESC (symbol, desc);
