@@ -86,6 +86,11 @@ class Target_x86_64 : public Sized_target<64, false>
   void
   do_finalize_sections(Layout*);
 
+  // Return the value to use for a dynamic which requires special
+  // treatment.
+  uint64_t
+  do_dynsym_value(const Symbol*) const;
+
   // Relocate a section.
   void
   relocate_section(const Relocate_info<64, false>*,
@@ -849,7 +854,19 @@ Target_x86_64::Scan::global(const General_options& options,
 	  // function, we make a PLT entry.  Otherwise we need to
 	  // either generate a COPY reloc or copy this reloc.
 	  if (gsym->type() == elfcpp::STT_FUNC)
-	    target->make_plt_entry(symtab, layout, gsym);
+	    {
+	      target->make_plt_entry(symtab, layout, gsym);
+
+	      // If this is not a PC relative reference, then we may
+	      // be taking the address of the function.  In that case
+	      // we need to set the entry in the dynamic symbol table
+	      // to the address of the PLT entry.
+	      if (r_type != elfcpp::R_X86_64_PC64
+		  && r_type != elfcpp::R_X86_64_PC32
+		  && r_type != elfcpp::R_X86_64_PC16
+		  && r_type != elfcpp::R_X86_64_PC8)
+		gsym->set_needs_dynsym_value();
+	    }
 	  else
 	    target->copy_reloc(&options, symtab, layout, object, data_shndx,
 			       gsym, reloc);
@@ -1606,6 +1623,18 @@ Target_x86_64::relocate_section(const Relocate_info<64, false>* relinfo,
     view,
     address,
     view_size);
+}
+
+// Return the value to use for a dynamic which requires special
+// treatment.  This is how we support equality comparisons of function
+// pointers across shared library boundaries, as described in the
+// processor specific ABI supplement.
+
+uint64_t
+Target_x86_64::do_dynsym_value(const Symbol* gsym) const
+{
+  gold_assert(gsym->is_from_dynobj() && gsym->has_plt_offset());
+  return this->plt_section()->address() + gsym->plt_offset();
 }
 
 // Return a string used to fill a code section with nops to take up
