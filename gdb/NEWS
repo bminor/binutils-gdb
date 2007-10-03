@@ -4,13 +4,13 @@
 *** Changes since GDB 6.7
 
 * Pending breakpoints no longer change their number when their address
-  is resolved.
+is resolved.
 
 * GDB now supports breakpoints with multiple locations,
-  including breakpoints on C++ constructors, inside C++ templates,
-  and in inlined functions.
+including breakpoints on C++ constructors, inside C++ templates,
+and in inlined functions.
 
-*** Changes in GDB 6.6
+*** Changes in GDB 6.7
 
 * Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 
 bfd, libiberty and opcodes, as revealed by static analysis donated by
@@ -45,7 +45,7 @@ as strings.
 
 * Target descriptions can now describe target-specific registers,
 for architectures which have implemented the support (currently
-only ARM and MIPS).
+only ARM, M68K, and MIPS).
 
 * GDB and the GDB remote stub, gdbserver, now support the XScale
 iWMMXt coprocessor.

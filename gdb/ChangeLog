@@ -1,5 +1,10 @@
 2007-10-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Use uniform spacing.  Correct version number for GDB 6.7
+	news.  Mention XML support for M68K in GDB 6.7.
+
+2007-10-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdbtypes.c (create_range_type): Do not set TYPE_FIELD_TYPE for the
 	bounds.
 	(init_vector_type): Use builtin_type_int32.
