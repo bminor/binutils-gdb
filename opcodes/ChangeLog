@@ -1,3 +1,7 @@
+2007-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Update SSE comments.
+
 2007-10-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (THREE_BYTE_0FBA): Renamed to ...

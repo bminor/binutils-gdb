@@ -1075,7 +1075,7 @@ punpckldq, 2, 0x660f62, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lS
 pxor, 2, 0xfef, None, 2, CpuMMX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegMMX, RegMMX }
 pxor, 2, 0x660fef, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 
-// PIII Katmai New Instructions / SIMD instructions.
+// SSE instructions.
 
 addps, 2, 0xf58, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 addss, 2, 0xf30f58, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -1180,7 +1180,7 @@ unpckhps, 2, 0xf15, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No
 unpcklps, 2, 0xf14, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 xorps, 2, 0xf57, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 
-// SSE-2 instructions.
+// SSE2 instructions.
 
 addpd, 2, 0x660f58, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 addsd, 2, 0xf20f58, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -1274,7 +1274,7 @@ psrldq, 2, 0x660f73, 0x3, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|N
 punpckhqdq, 2, 0x660f6d, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 punpcklqdq, 2, 0x660f6c, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 
-// SSE-3 instructions.
+// SSE3 instructions.
 
 addsubpd, 2, 0x660fd0, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 addsubps, 2, 0xf20fd0, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -1321,7 +1321,7 @@ vmwrite, 2, 0xf79, None, 2, CpuVMX|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|
 vmxoff, 0, 0xf01, 0xc4, 2, CpuVMX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { 0 }
 vmxon, 1, 0xf30fc7, 0x6, 2, CpuVMX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|NoRex64, { BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
-// Supplemental Streaming SIMD extensions 3 Instructions.
+// SSSE3 instructions.
 
 phaddw, 2, 0xf3801, None, 3, CpuSSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegMMX, RegMMX }
 phaddw, 2, 0x660f3801, None, 3, CpuSSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -1356,7 +1356,7 @@ pabsw, 2, 0x660f381d, None, 3, CpuSSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSu
 pabsd, 2, 0xf381e, None, 3, CpuSSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegMMX, RegMMX }
 pabsd, 2, 0x660f381e, None, 3, CpuSSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 
-// Streaming SIMD extensions 4.1 Instructions.
+// SSE4.1 instructions.
 
 blendpd, 3, 0x660f3a0d, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 blendps, 3, 0x660f3a0c, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -1410,7 +1410,7 @@ roundps, 3, 0x660f3a08, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_
 roundsd, 3, 0x660f3a0b, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|NoRex64, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 roundss, 3, 0x660f3a0a, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 
-// Streaming SIMD extensions 4.2 Instructions.
+// SSE4.2 instructions.
 
 pcmpgtq, 2, 0x660f3837, None, 3, CpuSSE4_2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pcmpestri, 3, 0x660f3a61, None, 3, CpuSSE4_2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
