@@ -7778,7 +7778,7 @@ dump_section_as_strings (Elf_Internal_Shdr *section, FILE *file)
 
       if (data < end)
 	{
-	  printf ("  [%6zx]  %s\n", data - start, data);
+	  printf ("  [%6tx]  %s\n", data - start, data);
 	  data += strlen (data);
 	  some_strings_shown = TRUE;
 	}
