@@ -705,8 +705,6 @@ create_range_type (struct type *result_type, struct type *index_type,
   memset (TYPE_FIELDS (result_type), 0, 2 * sizeof (struct field));
   TYPE_FIELD_BITPOS (result_type, 0) = low_bound;
   TYPE_FIELD_BITPOS (result_type, 1) = high_bound;
-  TYPE_FIELD_TYPE (result_type, 0) = builtin_type_int;	/* FIXME */
-  TYPE_FIELD_TYPE (result_type, 1) = builtin_type_int;	/* FIXME */
 
   if (low_bound >= 0)
     TYPE_FLAGS (result_type) |= TYPE_FLAG_UNSIGNED;
@@ -950,7 +948,7 @@ init_vector_type (struct type *elt_type, int n)
  
   array_type = create_array_type (0, elt_type,
 				  create_range_type (0, 
-						     builtin_type_int,
+						     builtin_type_int32,
 						     0, n-1));
   make_vector_type (array_type);
   return array_type;
