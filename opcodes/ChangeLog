@@ -1,5 +1,16 @@
 2007-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (OP_REG): Set add to 0 only when needed.
+	(OP_C): Likewise.
+	(OP_D): Likewise.
+	(OP_MMX): Likewise.
+	(OP_XMM): Likewise.
+	(OP_EM): Likewise.
+	(OP_MXC): Likewise.
+	(OP_EX): Likewise.
+
+2007-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-opc.tbl: Update SSE comments.
 
 2007-10-01  H.J. Lu  <hongjiu.lu@intel.com>

@@ -6896,10 +6896,12 @@ static void
 OP_REG (int code, int sizeflag)
 {
   const char *s;
-  int add = 0;
+  int add;
   USED_REX (REX_B);
   if (rex & REX_B)
     add = 8;
+  else
+    add = 0;
 
   switch (code)
     {
@@ -7372,7 +7374,7 @@ OP_DSreg (int code, int sizeflag)
 static void
 OP_C (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
-  int add = 0;
+  int add;
   if (rex & REX_R)
     {
       USED_REX (REX_R);
@@ -7384,6 +7386,8 @@ OP_C (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
       used_prefixes |= PREFIX_LOCK;
       add = 8;
     }
+  else
+    add = 0;
   sprintf (scratchbuf, "%%cr%d", modrm.reg + add);
   oappend (scratchbuf + intel_syntax);
 }
@@ -7391,10 +7395,12 @@ OP_C (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 static void
 OP_D (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
-  int add = 0;
+  int add;
   USED_REX (REX_R);
   if (rex & REX_R)
     add = 8;
+  else
+    add = 0;
   if (intel_syntax)
     sprintf (scratchbuf, "db%d", modrm.reg + add);
   else
@@ -7424,10 +7430,12 @@ OP_MMX (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
   used_prefixes |= (prefixes & PREFIX_DATA);
   if (prefixes & PREFIX_DATA)
     {
-      int add = 0;
+      int add;
       USED_REX (REX_R);
       if (rex & REX_R)
 	add = 8;
+      else
+	add = 0;
       sprintf (scratchbuf, "%%xmm%d", modrm.reg + add);
     }
   else
@@ -7438,10 +7446,12 @@ OP_MMX (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 static void
 OP_XMM (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
-  int add = 0;
+  int add;
   USED_REX (REX_R);
   if (rex & REX_R)
     add = 8;
+  else
+    add = 0;
   sprintf (scratchbuf, "%%xmm%d", modrm.reg + add);
   oappend (scratchbuf + intel_syntax);
 }
@@ -7466,11 +7476,13 @@ OP_EM (int bytemode, int sizeflag)
   used_prefixes |= (prefixes & PREFIX_DATA);
   if (prefixes & PREFIX_DATA)
     {
-      int add = 0;
+      int add;
 
       USED_REX (REX_B);
       if (rex & REX_B)
 	add = 8;
+      else
+	add = 0;
       sprintf (scratchbuf, "%%xmm%d", modrm.rm + add);
     }
   else
@@ -7516,7 +7528,7 @@ OP_MXC (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 static void
 OP_EX (int bytemode, int sizeflag)
 {
-  int add = 0;
+  int add;
   if (modrm.mod != 3)
     {
       OP_E (bytemode, sizeflag);
@@ -7525,6 +7537,8 @@ OP_EX (int bytemode, int sizeflag)
   USED_REX (REX_B);
   if (rex & REX_B)
     add = 8;
+  else
+    add = 0;
 
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
