@@ -3098,7 +3098,7 @@ s_arm_unwind_handlerdata (int ignored ATTRIBUTE_UNUSED)
 {
   demand_empty_rest_of_line ();
   if (unwind.table_entry)
-    as_bad (_("dupicate .handlerdata directive"));
+    as_bad (_("duplicate .handlerdata directive"));
 
   create_unwind_entry (1);
 }
@@ -14234,7 +14234,7 @@ md_assemble (char *str)
 	}
       else if (inst.cond != COND_ALWAYS && opcode->tencode != do_t_branch)
 	{
-	  as_bad (_("thumb conditional instrunction not in IT block"));
+	  as_bad (_("thumb conditional instruction not in IT block"));
 	  return;
 	}
 
