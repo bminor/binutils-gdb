@@ -621,8 +621,8 @@ Target_x86_64::copy_reloc(const General_options* options,
       // Add the COPY reloc.
       ssym->set_needs_dynsym_entry();
       Reloc_section* rel_dyn = this->rel_dyn_section(layout);
-      rel_dyn->add_global(ssym, elfcpp::R_X86_64_COPY, dynbss, offset,
-                          rel.get_r_addend());
+      // TODO(csilvers): should last arg here be rel.get_r_addend?
+      rel_dyn->add_global(ssym, elfcpp::R_X86_64_COPY, dynbss, offset, 0);
     }
 }
 
@@ -721,13 +721,9 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_PC8:
       break;
 
-    case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPC32:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOT64:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_GOTOFF64:
     case elfcpp::R_X86_64_GOTPC64:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTPCREL64:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTPLT64:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): correct?
       // We need a GOT section.
       target->got_section(symtab, layout);
@@ -791,7 +787,11 @@ Target_x86_64::Scan::local(const General_options&,
       break;
 #endif
 
+    case elfcpp::R_X86_64_GOT64:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_GOT32:
+    case elfcpp::R_X86_64_GOTPCREL64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPLT64:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_PLT32:
     case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
@@ -874,7 +874,11 @@ Target_x86_64::Scan::global(const General_options& options,
 
       break;
 
+    case elfcpp::R_X86_64_GOT64:
     case elfcpp::R_X86_64_GOT32:
+    case elfcpp::R_X86_64_GOTPCREL64:
+    case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPLT64:
       {
         // The symbol requires a GOT entry.
         Output_data_got<64, false>* got = target->got_section(symtab, layout);
@@ -886,7 +890,7 @@ Target_x86_64::Scan::global(const General_options& options,
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
                 rel_dyn->add_global(gsym, elfcpp::R_X86_64_GLOB_DAT, got,
-                                    gsym->got_offset(), reloc.get_r_addend());
+                                    gsym->got_offset(), 0);
               }
           }
       }
@@ -900,13 +904,9 @@ Target_x86_64::Scan::global(const General_options& options,
       target->make_plt_entry(symtab, layout, gsym);
       break;
 
-    case elfcpp::R_X86_64_GOTPCREL:
     case elfcpp::R_X86_64_GOTPC32:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOT64:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_GOTOFF64:
     case elfcpp::R_X86_64_GOTPC64:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTPCREL64:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTPLT64:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): correct?
       // We need a GOT section.
       target->got_section(symtab, layout);
@@ -1228,22 +1228,24 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
 
     case elfcpp::R_X86_64_GOTPCREL:
       {
+        // Local GOT offsets not yet supported.
         gold_assert(gsym);
+        gold_assert(gsym->has_got_offset());
 	elfcpp::Elf_types<64>::Elf_Addr value;
-        // FIXME(csilvers): this is probably totally wrong for G + GOT
 	value = (target->got_section(NULL, NULL)->address()
-                 + (gsym->has_got_offset() ? gsym->got_offset() : 0));
+                 + gsym->got_offset());
 	Relocate_functions<64, false>::pcrela32(view, value, addend, address);
       }
       break;
 
     case elfcpp::R_X86_64_GOTPCREL64:
       {
+        // Local GOT offsets not yet supported.
         gold_assert(gsym);
+        gold_assert(gsym->has_got_offset());
 	elfcpp::Elf_types<64>::Elf_Addr value;
-        // FIXME(csilvers): this is probably totally wrong for G + GOT
 	value = (target->got_section(NULL, NULL)->address()
-                 + (gsym->has_got_offset() ? gsym->got_offset() : 0));
+                 + gsym->got_offset());
 	Relocate_functions<64, false>::pcrela64(view, value, addend, address);
       }
       break;
