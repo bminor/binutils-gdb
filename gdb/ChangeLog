@@ -1,3 +1,7 @@
+2007-10-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Mention XML support for M68K in GDB 6.7.
+
 2007-10-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (s390_regset_from_core_section): Allow excess section
