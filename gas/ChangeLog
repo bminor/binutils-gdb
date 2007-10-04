@@ -1,3 +1,9 @@
+2007-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5109
+	* config/tc-i386.c (process_suffix): Clear QWORD suffix if it
+	is ignored in Intel mode.
+
 2007-10-04  Helge Deller  <deller@gmx.de>
 
 	* read.c (potable): Add string8, string16, string32 and string64.

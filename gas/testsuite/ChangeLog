@@ -1,3 +1,14 @@
+2007-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5109
+	* gas/i386/simd-intel.d: Updated.
+	* gas/i386/simd.d: Likewise.
+	* gas/i386/x86-64-simd-intel.d: Likewise.
+	* gas/i386/x86-64-simd.d: Likewise.
+
+	* gas/i386/simd.s: Add more tests.
+	* gas/i386/x86-64-simd.s: Likewise.
+
 2007-10-04  Helge Deller  <deller@gmx.de>
 
 	* gas/all/gas.exp: Include new test "strings".

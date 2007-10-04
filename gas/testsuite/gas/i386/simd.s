@@ -81,7 +81,81 @@ _start:
 	insertps $0x0,(%eax),%xmm0
 
 	.intel_syntax noprefix
-	cvtss2si eax,DWORD PTR [eax]
-	cvttss2si eax,DWORD PTR [eax]
-	cvtsd2si eax,QWORD PTR [eax]
-	cvttsd2si eax,QWORD PTR [eax]
+
+addsubps xmm1,XMMWORD PTR ds:0x12345678
+comisd xmm1,QWORD PTR ds:0x12345678
+comiss xmm1,DWORD PTR ds:0x12345678
+cvtdq2pd xmm1,QWORD PTR ds:0x12345678
+cvtpd2dq xmm1,XMMWORD PTR ds:0x12345678
+cvtps2pd xmm1,QWORD PTR ds:0x12345678
+cvttps2dq xmm1,XMMWORD PTR ds:0x12345678
+haddps xmm1,XMMWORD PTR ds:0x12345678
+movdqu XMMWORD PTR ds:0x12345678,xmm1
+movdqu xmm1,XMMWORD PTR ds:0x12345678
+movhpd QWORD PTR ds:0x12345678,xmm1
+movhpd xmm1,QWORD PTR ds:0x12345678
+movhps QWORD PTR ds:0x12345678,xmm1
+movhps xmm1,QWORD PTR ds:0x12345678
+movlpd QWORD PTR ds:0x12345678,xmm1
+movlpd xmm1,QWORD PTR ds:0x12345678
+movlps QWORD PTR ds:0x12345678,xmm1
+movlps xmm1,QWORD PTR ds:0x12345678
+movshdup xmm1,XMMWORD PTR ds:0x12345678
+movsldup xmm1,XMMWORD PTR ds:0x12345678
+pshufhw xmm1,XMMWORD PTR ds:0x12345678,0x90
+pshuflw xmm1,XMMWORD PTR ds:0x12345678,0x90
+punpcklbw mm1,DWORD PTR ds:0x12345678
+punpckldq mm1,DWORD PTR ds:0x12345678
+punpcklwd mm1,DWORD PTR ds:0x12345678
+punpcklbw xmm1,XMMWORD PTR ds:0x12345678
+punpckldq xmm1,XMMWORD PTR ds:0x12345678
+punpcklwd xmm1,XMMWORD PTR ds:0x12345678
+punpcklqdq xmm1,XMMWORD PTR ds:0x12345678
+ucomisd xmm1,QWORD PTR ds:0x12345678
+ucomiss xmm1,DWORD PTR ds:0x12345678
+cmpeqsd xmm0,QWORD PTR [eax]
+cmpeqss xmm0,DWORD PTR [eax]
+cvtpi2pd xmm0,QWORD PTR [eax]
+cvtpi2ps xmm0,QWORD PTR [eax]
+cvtps2pi mm0,QWORD PTR [eax]
+cvtsd2si eax,QWORD PTR [eax]
+cvttsd2si eax,QWORD PTR [eax]
+cvtsd2ss xmm0,QWORD PTR [eax]
+cvtss2sd xmm0,DWORD PTR [eax]
+cvtss2si eax,DWORD PTR [eax]
+cvttss2si eax,DWORD PTR [eax]
+divsd  xmm0,QWORD PTR [eax]
+divss  xmm0,DWORD PTR [eax]
+maxsd  xmm0,QWORD PTR [eax]
+maxss  xmm0,DWORD PTR [eax]
+minss  xmm0,DWORD PTR [eax]
+minss  xmm0,DWORD PTR [eax]
+movntsd QWORD PTR [eax],xmm0
+movntss DWORD PTR [eax],xmm0
+movsd  xmm0,QWORD PTR [eax]
+movsd  QWORD PTR [eax],xmm0
+movss  xmm0,DWORD PTR [eax]
+movss  DWORD PTR [eax],xmm0
+mulsd  xmm0,QWORD PTR [eax]
+mulss  xmm0,DWORD PTR [eax]
+rcpss  xmm0,DWORD PTR [eax]
+roundsd xmm0,QWORD PTR [eax],0x0
+roundss xmm0,DWORD PTR [eax],0x0
+rsqrtss xmm0,DWORD PTR [eax]
+sqrtsd xmm0,QWORD PTR [eax]
+sqrtss xmm0,DWORD PTR [eax]
+subsd  xmm0,QWORD PTR [eax]
+subss  xmm0,DWORD PTR [eax]
+pmovsxbw xmm0,QWORD PTR [eax]
+pmovsxbd xmm0,DWORD PTR [eax]
+pmovsxbq xmm0,WORD PTR [eax]
+pmovsxwd xmm0,QWORD PTR [eax]
+pmovsxwq xmm0,DWORD PTR [eax]
+pmovsxdq xmm0,QWORD PTR [eax]
+pmovzxbw xmm0,QWORD PTR [eax]
+pmovzxbd xmm0,DWORD PTR [eax]
+pmovzxbq xmm0,WORD PTR [eax]
+pmovzxwd xmm0,QWORD PTR [eax]
+pmovzxwq xmm0,DWORD PTR [eax]
+pmovzxdq xmm0,QWORD PTR [eax]
+insertps xmm0,DWORD PTR [eax],0x0

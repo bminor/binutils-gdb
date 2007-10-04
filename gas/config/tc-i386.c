@@ -3384,7 +3384,11 @@ process_suffix (void)
 	}
       else if (i.suffix == QWORD_MNEM_SUFFIX)
 	{
-	  if (!check_qword_reg ())
+	  if (intel_syntax
+	      && i.tm.opcode_modifier.ignoresize
+	      && i.tm.opcode_modifier.no_qsuf)
+	    i.suffix = 0;
+	  else if (!check_qword_reg ())
 	    return 0;
 	}
       else if (i.suffix == WORD_MNEM_SUFFIX)
