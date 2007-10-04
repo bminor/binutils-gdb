@@ -1,3 +1,9 @@
+2007-10-04  Nick Clifton  <nickc@redhat.com>
+
+	PR linker/5099
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Add missing
+	apostrophe to error message.
+
 2007-10-01  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* elf32-cr16.c: Fixed DISP8, DISP20 and IMM20 relocations at
