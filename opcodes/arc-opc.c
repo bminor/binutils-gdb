@@ -665,7 +665,7 @@ insert_offset (arc_insn insn,
 		 before we lose info about them.  */
 	      if ((insn & I(-1)) == I(1))
 		{
-		  *errmsg = _("to many shimms in load");
+		  *errmsg = _("too many shimms in load");
 		  goto out;
 		}
 	      if (limm_p && operand->flags & ARC_OPERAND_LOAD)

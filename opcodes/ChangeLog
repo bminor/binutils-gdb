@@ -1,3 +1,9 @@
+2007-10-04  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/5100
+	* arc-opc.c (insert_offset): Fix spelling mistake in error
+	message.
+
 2007-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_REG): Set add to 0 only when needed.
