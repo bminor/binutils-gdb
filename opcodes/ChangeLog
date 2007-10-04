@@ -1,3 +1,10 @@
+2007-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (MOD_0F12_PREFIX_0): Use "movlps" and "movhlps"
+	instead of "movlpX" and "movhlpX", respectively.
+	(MOD_0F16_PREFIX_0): Use "movhps" and "movlhps" instead of
+	"movhpX" and "movlhpX", respectively.
+
 2007-10-04  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (WIN32LDFLAGS): Rename to SHARED_LDFLAGS.

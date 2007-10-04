@@ -4684,13 +4684,13 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F12_PREFIX_0 */
-    { "movlpX",		{ XM, EXq } },
-    { "movhlpX",	{ XM, EXq } },
+    { "movlps",		{ XM, EXq } },
+    { "movhlps",	{ XM, EXq } },
   },
   {
     /* MOD_0F16_PREFIX_0 */
-    { "movhpX",		{ XM, EXq } },
-    { "movlhpX",	{ XM, EXq } },
+    { "movhps",		{ XM, EXq } },
+    { "movlhps",	{ XM, EXq } },
   },
   {
     /* MOD_0FF0_PREFIX_3 */
