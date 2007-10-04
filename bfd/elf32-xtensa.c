@@ -5121,7 +5121,6 @@ struct reloc_bfd_fix_struct
   bfd_vma src_offset;
   unsigned src_type;			/* Relocation type.  */
   
-  bfd *target_abfd;
   asection *target_sec;
   bfd_vma target_offset;
   bfd_boolean translated;
@@ -5134,7 +5133,6 @@ static reloc_bfd_fix *
 reloc_bfd_fix_init (asection *src_sec,
 		    bfd_vma src_offset,
 		    unsigned src_type,
-		    bfd *target_abfd,
 		    asection *target_sec,
 		    bfd_vma target_offset,
 		    bfd_boolean translated)
@@ -5145,7 +5143,6 @@ reloc_bfd_fix_init (asection *src_sec,
   fix->src_sec = src_sec;
   fix->src_offset = src_offset;
   fix->src_type = src_type;
-  fix->target_abfd = target_abfd;
   fix->target_sec = target_sec;
   fix->target_offset = target_offset;
   fix->translated = translated;
@@ -8231,7 +8228,7 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 	      addend_displacement =
 		new_reloc.target_offset + new_reloc.virtual_offset;
 
-	      fix = reloc_bfd_fix_init (sec, source_offset, r_type, 0,
+	      fix = reloc_bfd_fix_init (sec, source_offset, r_type,
 					r_reloc_get_section (&new_reloc),
 					addend_displacement, TRUE);
 	      add_fix (sec, fix);
@@ -8784,7 +8781,7 @@ move_literal (bfd *abfd,
 
       /* Currently, we cannot move relocations during a relocatable link.  */
       BFD_ASSERT (!link_info->relocatable);
-      fix = reloc_bfd_fix_init (sec, offset, r_type, r_rel->abfd,
+      fix = reloc_bfd_fix_init (sec, offset, r_type,
 				r_reloc_get_section (r_rel),
 				r_rel->target_offset + r_rel->virtual_offset,
 				FALSE);

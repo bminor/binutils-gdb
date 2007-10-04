@@ -1,3 +1,9 @@
+2007-10-04  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (reloc_bfd_fix_struct): Delete target_abfd field.
+	(reloc_bfd_fix_init): Remove target_abfd argument.
+	(relax_section, move_literal): Adjust calls to reloc_bfd_fix_init.
+
 2007-10-04  Nick Clifton  <nickc@redhat.com>
 
 	PR linker/5099
