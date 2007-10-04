@@ -1,3 +1,8 @@
+2007-10-04  Nick Clifton  <nickc@redhat.com>
+
+	PR linker/5097
+	* emultempl/armelf.em (arm_elf_finish): Fix spelling typo.
+
 2007-10-01  Nick Clifton  <nickc@redhat.com>
 
 	PR linker/4844
