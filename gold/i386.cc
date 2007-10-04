@@ -741,6 +741,8 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_GLOB_DAT:
     case elfcpp::R_386_JUMP_SLOT:
     case elfcpp::R_386_RELATIVE:
+      // These are outstanding tls relocs, which are unexpected when
+      // linking.
     case elfcpp::R_386_TLS_TPOFF:
     case elfcpp::R_386_TLS_DTPMOD32:
     case elfcpp::R_386_TLS_DTPOFF32:
@@ -751,6 +753,8 @@ Target_i386::Scan::local(const General_options&,
       gold_exit(false);
       break;
 
+      // These are initial tls relocs, which are expected when
+      // linking.
     case elfcpp::R_386_TLS_IE:
     case elfcpp::R_386_TLS_GOTIE:
     case elfcpp::R_386_TLS_LE:
@@ -902,6 +906,8 @@ Target_i386::Scan::global(const General_options& options,
     case elfcpp::R_386_GLOB_DAT:
     case elfcpp::R_386_JUMP_SLOT:
     case elfcpp::R_386_RELATIVE:
+      // These are outstanding tls relocs, which are unexpected when
+      // linking.
     case elfcpp::R_386_TLS_TPOFF:
     case elfcpp::R_386_TLS_DTPMOD32:
     case elfcpp::R_386_TLS_DTPOFF32:
@@ -912,6 +918,8 @@ Target_i386::Scan::global(const General_options& options,
       gold_exit(false);
       break;
 
+      // These are initial tls relocs, which are expected when
+      // linking.
     case elfcpp::R_386_TLS_IE:
     case elfcpp::R_386_TLS_GOTIE:
     case elfcpp::R_386_TLS_LE:
@@ -1164,6 +1172,8 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_GLOB_DAT:
     case elfcpp::R_386_JUMP_SLOT:
     case elfcpp::R_386_RELATIVE:
+      // These are outstanding tls relocs, which are unexpected when
+      // linking.
     case elfcpp::R_386_TLS_TPOFF:
     case elfcpp::R_386_TLS_DTPMOD32:
     case elfcpp::R_386_TLS_DTPOFF32:
@@ -1176,6 +1186,8 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       gold_exit(false);
       break;
 
+      // These are initial tls relocs, which are expected when
+      // linking.
     case elfcpp::R_386_TLS_IE:
     case elfcpp::R_386_TLS_GOTIE:
     case elfcpp::R_386_TLS_LE:
@@ -1440,7 +1452,8 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
     {
       Target_i386::Relocate::check_tls(relinfo, relnum, rel,
 				       (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
-      if (rel.get_r_offset() + 9 < view_size && view[9] == 0x90)
+      if (static_cast<off_t>(rel.get_r_offset() + 9) < view_size
+          && view[9] == 0x90)
 	{
 	  // There is a trailing nop.  Use the size byte subl.
 	  memcpy(view - 2, "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);

@@ -53,7 +53,11 @@ using namespace gold;
 class Output_data_plt_x86_64;
 
 // The x86_64 target class.
-// See the ABI at http://www.x86-64.org/documentation/abi.pdf
+// See the ABI at
+//   http://www.x86-64.org/documentation/abi.pdf
+// TLS info comes from
+//   http://people.redhat.com/drepper/tls.pdf
+//   http://ia32-abi.googlegroups.com/web/RFC-TLSDESC-x86.txt?gda=kWQJPEQAAACEfYQFX0dubPQ2NuO4whhjkR4HAp8tBMb_I0iuUeQslmG1qiJ7UbTIup-M2XPURDRiZJyPR4BqKR2agJ-5jfT5Ley2_-oiOJ4zLNAGCw24Bg
 
 class Target_x86_64 : public Sized_target<64, false>
 {
@@ -558,11 +562,11 @@ Target_x86_64::make_plt_entry(Symbol_table* symtab, Layout* layout,
 
 void
 Target_x86_64::copy_reloc(const General_options* options,
-			Symbol_table* symtab,
-			Layout* layout,
-			Sized_relobj<64, false>* object,
-			unsigned int data_shndx, Symbol* gsym,
-			const elfcpp::Rela<64, false>& rel)
+                          Symbol_table* symtab,
+                          Layout* layout,
+                          Sized_relobj<64, false>* object,
+                          unsigned int data_shndx, Symbol* gsym,
+                          const elfcpp::Rela<64, false>& rel)
 {
   Sized_symbol<64>* ssym;
   ssym = symtab->get_sized_symbol SELECT_SIZE_NAME(64) (gsym
@@ -621,7 +625,6 @@ Target_x86_64::copy_reloc(const General_options* options,
       // Add the COPY reloc.
       ssym->set_needs_dynsym_entry();
       Reloc_section* rel_dyn = this->rel_dyn_section(layout);
-      // TODO(csilvers): should last arg here be rel.get_r_addend?
       rel_dyn->add_global(ssym, elfcpp::R_X86_64_COPY, dynbss, offset, 0);
     }
 }
@@ -634,8 +637,6 @@ Target_x86_64::copy_reloc(const General_options* options,
 unsigned int
 Target_x86_64::optimize_tls_reloc(bool is_final, int r_type)
 {
-  return is_final ? r_type : 0;
-#if 0
   // If we are generating a shared library, then we can't do anything
   // in the linker.
   if (parameters->output_is_shared())
@@ -644,37 +645,32 @@ Target_x86_64::optimize_tls_reloc(bool is_final, int r_type)
   switch (r_type)
     {
     case elfcpp::R_X86_64_TLSGD:
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       // These are Global-Dynamic which permits fully general TLS
       // access.  Since we know that we are generating an executable,
       // we can convert this to Initial-Exec.  If we also know that
       // this is a local symbol, we can further switch to Local-Exec.
       if (is_final)
-	return elfcpp::R_X86_64_TLS_LE_64;
-      return elfcpp::R_X86_64_TLS_IE_64;
+	return elfcpp::R_X86_64_TPOFF32;
+      return elfcpp::R_X86_64_GOTTPOFF;     // used for Initial-exec
 
-    case elfcpp::R_X86_64_TLS_LDM:
+    case elfcpp::R_X86_64_TLSLD:
       // This is Local-Dynamic, which refers to a local symbol in the
       // dynamic TLS block.  Since we know that we generating an
       // executable, we can switch to Local-Exec.
-      return elfcpp::R_X86_64_TLS_LE_64;
+      return elfcpp::R_X86_64_TPOFF32;
 
-    case elfcpp::R_X86_64_TLS_LDO_64:
-      // Another type of Local-Dynamic relocation.
-      return elfcpp::R_X86_64_TLS_LE;
-
-    case elfcpp::R_X86_64_TLS_IE:
-    case elfcpp::R_X86_64_TLS_GOTIE:
-    case elfcpp::R_X86_64_TLS_IE_64:
+    case elfcpp::R_X86_64_GOTTPOFF:
       // These are Initial-Exec relocs which get the thread offset
       // from the GOT.  If we know that we are linking against the
       // local symbol, we can switch to Local-Exec, which links the
       // thread offset into the instruction.
       if (is_final)
-	return elfcpp::R_X86_64_TLS_LE_64;
+	return elfcpp::R_X86_64_TPOFF32;
       return r_type;
 
-    case elfcpp::R_X86_64_TLS_LE:
-    case elfcpp::R_X86_64_TLS_LE_64:
+    case elfcpp::R_X86_64_TPOFF32:
       // When we already have Local-Exec, there is nothing further we
       // can do.
       return r_type;
@@ -682,21 +678,20 @@ Target_x86_64::optimize_tls_reloc(bool is_final, int r_type)
     default:
       gold_unreachable();
     }
-#endif
 }
 
 // Scan a relocation for a local symbol.
 
 inline void
 Target_x86_64::Scan::local(const General_options&,
-			 Symbol_table* symtab,
-			 Layout* layout,
-			 Target_x86_64* target,
-			 Sized_relobj<64, false>* object,
-			 unsigned int,
-			 const elfcpp::Rela<64, false>&,
-			 unsigned int r_type,
-			 const elfcpp::Sym<64, false>&)
+                           Symbol_table* symtab,
+                           Layout* layout,
+                           Target_x86_64* target,
+                           Sized_relobj<64, false>* object,
+                           unsigned int,
+                           const elfcpp::Rela<64, false>&,
+                           unsigned int r_type,
+                           const elfcpp::Sym<64, false>&)
 {
   switch (r_type)
     {
@@ -733,51 +728,40 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_GLOB_DAT:
     case elfcpp::R_X86_64_JUMP_SLOT:
     case elfcpp::R_X86_64_RELATIVE:
+      // These are outstanding tls relocs, which are unexpected when linking
     case elfcpp::R_X86_64_TPOFF64:
-    case elfcpp::R_X86_64_TPOFF32:
     case elfcpp::R_X86_64_DTPMOD64:
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_DTPOFF32:
-    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_TLSDESC:
-    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
 	      program_name, object->name().c_str(), r_type);
       gold_exit(false);
       break;
 
-#if 0
+      // These are initial tls relocs, which are expected when linking
     case elfcpp::R_X86_64_TLSGD:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_TLSLD:  // TODO(csilvers): correct?
-
-    case elfcpp::R_386_TLS_IE:
-    case elfcpp::R_386_TLS_GOTIE:
-    case elfcpp::R_386_TLS_LE:
-    case elfcpp::R_386_TLS_GD:
-    case elfcpp::R_386_TLS_LDM:
-    case elfcpp::R_386_TLS_LDO_64:
-    case elfcpp::R_386_TLS_IE_64:
-    case elfcpp::R_386_TLS_LE_64:
+    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TPOFF32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       {
 	bool output_is_shared = parameters->output_is_shared();
-	r_type = Target_x86_64::optimize_tls_reloc(!output_is_shared,
-						 r_type);
+	r_type = Target_x86_64::optimize_tls_reloc(!output_is_shared, r_type);
 	switch (r_type)
 	  {
-	  case elfcpp::R_X86_64_TLS_LE:
-	  case elfcpp::R_X86_64_TLS_LE_64:
+          case elfcpp::R_X86_64_TPOFF32:     // Local-exec
 	    // FIXME: If generating a shared object, we need to copy
 	    // this relocation into the object.
 	    gold_assert(!output_is_shared);
 	    break;
 
-	  case elfcpp::R_X86_64_TLS_IE:
-	  case elfcpp::R_X86_64_TLS_GOTIE:
-	  case elfcpp::R_X86_64_TLS_GD:
-	  case elfcpp::R_X86_64_TLS_LDM:
-	  case elfcpp::R_X86_64_TLS_LDO_64:
-	  case elfcpp::R_X86_64_TLS_IE_64:
+          case elfcpp::R_X86_64_GOTTPOFF:       // Initial-exec
+          case elfcpp::R_X86_64_TLSGD:          // General Dynamic
+          case elfcpp::R_X86_64_TLSLD:          // Local Dynamic
+          case elfcpp::R_X86_64_GOTPC32_TLSDESC:
+          case elfcpp::R_X86_64_TLSDESC_CALL:
 	    fprintf(stderr,
 		    _("%s: %s: unsupported reloc %u against local symbol\n"),
 		    program_name, object->name().c_str(), r_type);
@@ -785,7 +769,6 @@ Target_x86_64::Scan::local(const General_options&,
 	  }
       }
       break;
-#endif
 
     case elfcpp::R_X86_64_GOT64:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_GOT32:
@@ -795,16 +778,6 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_PLT32:
     case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
-#if 0
-    case elfcpp::R_386_TLS_GD_64:
-    case elfcpp::R_386_TLS_GD_PUSH:
-    case elfcpp::R_386_TLS_GD_CALL:
-    case elfcpp::R_386_TLS_GD_POP:
-    case elfcpp::R_386_TLS_LDM_64:
-    case elfcpp::R_386_TLS_LDM_PUSH:
-    case elfcpp::R_386_TLS_LDM_CALL:
-    case elfcpp::R_386_TLS_LDM_POP:
-#endif
     default:
       fprintf(stderr, _("%s: %s: unsupported reloc %u against local symbol\n"),
 	      program_name, object->name().c_str(), r_type);
@@ -817,14 +790,14 @@ Target_x86_64::Scan::local(const General_options&,
 
 inline void
 Target_x86_64::Scan::global(const General_options& options,
-			  Symbol_table* symtab,
-			  Layout* layout,
-			  Target_x86_64* target,
-			  Sized_relobj<64, false>* object,
-			  unsigned int data_shndx,
-			  const elfcpp::Rela<64, false>& reloc,
-			  unsigned int r_type,
-			  Symbol* gsym)
+                            Symbol_table* symtab,
+                            Layout* layout,
+                            Target_x86_64* target,
+                            Sized_relobj<64, false>* object,
+                            unsigned int data_shndx,
+                            const elfcpp::Rela<64, false>& reloc,
+                            unsigned int r_type,
+                            Symbol* gsym)
 {
   switch (r_type)
     {
@@ -916,50 +889,40 @@ Target_x86_64::Scan::global(const General_options& options,
     case elfcpp::R_X86_64_GLOB_DAT:
     case elfcpp::R_X86_64_JUMP_SLOT:
     case elfcpp::R_X86_64_RELATIVE:
+      // These are outstanding tls relocs, which are unexpected when linking
     case elfcpp::R_X86_64_TPOFF64:
-    case elfcpp::R_X86_64_TPOFF32:
     case elfcpp::R_X86_64_DTPMOD64:
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_DTPOFF32:
-    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_TLSDESC:
-    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
 	      program_name, object->name().c_str(), r_type);
       gold_exit(false);
       break;
 
-#if 0
+      // These are initial tls relocs, which are expected for global()
     case elfcpp::R_X86_64_TLSGD:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_TLSLD:  // TODO(csilvers): correct?
-
-    case elfcpp::R_386_TLS_IE:
-    case elfcpp::R_386_TLS_GOTIE:
-    case elfcpp::R_386_TLS_LE:
-    case elfcpp::R_386_TLS_GD:
-    case elfcpp::R_386_TLS_LDM:
-    case elfcpp::R_386_TLS_LDO_64:
-    case elfcpp::R_386_TLS_IE_64:
-    case elfcpp::R_386_TLS_LE_64:
+    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TPOFF32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       {
 	const bool is_final = gsym->final_value_is_known();
 	r_type = Target_x86_64::optimize_tls_reloc(is_final, r_type);
 	switch (r_type)
 	  {
-	  case elfcpp::R_386_TLS_LE:
-	  case elfcpp::R_386_TLS_LE_64:
+          case elfcpp::R_X86_64_TPOFF32:     // Local-exec
 	    // FIXME: If generating a shared object, we need to copy
 	    // this relocation into the object.
 	    gold_assert(!parameters->output_is_shared());
 	    break;
 
-	  case elfcpp::R_386_TLS_IE:
-	  case elfcpp::R_386_TLS_GOTIE:
-	  case elfcpp::R_386_TLS_GD:
-	  case elfcpp::R_386_TLS_LDM:
-	  case elfcpp::R_386_TLS_LDO_64:
-	  case elfcpp::R_386_TLS_IE_64:
+          case elfcpp::R_X86_64_GOTTPOFF:       // Initial-exec
+          case elfcpp::R_X86_64_TLSGD:          // General Dynamic
+          case elfcpp::R_X86_64_TLSLD:          // Local Dynamic
+          case elfcpp::R_X86_64_GOTPC32_TLSDESC:
+          case elfcpp::R_X86_64_TLSDESC_CALL:
 	    fprintf(stderr,
 		    _("%s: %s: unsupported reloc %u "
 		      "against global symbol %s\n"),
@@ -969,20 +932,9 @@ Target_x86_64::Scan::global(const General_options& options,
 	  }
       }
       break;
-#endif
 
     case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
-#if 0
-    case elfcpp::R_386_TLS_GD_64:
-    case elfcpp::R_386_TLS_GD_PUSH:
-    case elfcpp::R_386_TLS_GD_CALL:
-    case elfcpp::R_386_TLS_GD_POP:
-    case elfcpp::R_386_TLS_LDM_64:
-    case elfcpp::R_386_TLS_LDM_PUSH:
-    case elfcpp::R_386_TLS_LDM_CALL:
-    case elfcpp::R_386_TLS_LDM_POP:
-#endif
     default:
       fprintf(stderr,
 	      _("%s: %s: unsupported reloc %u against global symbol %s\n"),
@@ -995,16 +947,16 @@ Target_x86_64::Scan::global(const General_options& options,
 
 void
 Target_x86_64::scan_relocs(const General_options& options,
-			 Symbol_table* symtab,
-			 Layout* layout,
-			 Sized_relobj<64, false>* object,
-			 unsigned int data_shndx,
-			 unsigned int sh_type,
-			 const unsigned char* prelocs,
-			 size_t reloc_count,
-			 size_t local_symbol_count,
-			 const unsigned char* plocal_symbols,
-			 Symbol** global_symbols)
+                           Symbol_table* symtab,
+                           Layout* layout,
+                           Sized_relobj<64, false>* object,
+                           unsigned int data_shndx,
+                           unsigned int sh_type,
+                           const unsigned char* prelocs,
+                           size_t reloc_count,
+                           size_t local_symbol_count,
+                           const unsigned char* plocal_symbols,
+                           Symbol** global_symbols)
 {
   if (sh_type == elfcpp::SHT_REL)
     {
@@ -1254,15 +1206,12 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_GLOB_DAT:
     case elfcpp::R_X86_64_JUMP_SLOT:
     case elfcpp::R_X86_64_RELATIVE:
+      // These are outstanding tls relocs, which are unexpected when linking
     case elfcpp::R_X86_64_TPOFF64:
-    case elfcpp::R_X86_64_TPOFF32:
     case elfcpp::R_X86_64_DTPMOD64:
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_DTPOFF32:
-    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_TLSDESC:
-    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
@@ -1270,38 +1219,20 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       gold_exit(false);
       break;
 
-#if 0
+      // These are initial tls relocs, which are expected when linking
     case elfcpp::R_X86_64_TLSGD:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_TLSLD:  // TODO(csilvers): correct?
-
-    case elfcpp::R_386_TLS_IE:
-    case elfcpp::R_386_TLS_GOTIE:
-    case elfcpp::R_386_TLS_LE:
-    case elfcpp::R_386_TLS_GD:
-    case elfcpp::R_386_TLS_LDM:
-    case elfcpp::R_386_TLS_LDO_64:
-    case elfcpp::R_386_TLS_IE_64:
-    case elfcpp::R_386_TLS_LE_64:
+    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TPOFF32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
       this->relocate_tls(relinfo, relnum, rel, r_type, gsym, psymval, view,
 			 address, view_size);
       break;
-#else
-      view_size++;      // this is to make view_size used
-#endif
 
     case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): implement me!
-#if 0
-    case elfcpp::R_386_TLS_GD_64:
-    case elfcpp::R_386_TLS_GD_PUSH:
-    case elfcpp::R_386_TLS_GD_CALL:
-    case elfcpp::R_386_TLS_GD_POP:
-    case elfcpp::R_386_TLS_LDM_64:
-    case elfcpp::R_386_TLS_LDM_PUSH:
-    case elfcpp::R_386_TLS_LDM_CALL:
-    case elfcpp::R_386_TLS_LDM_POP:
-#endif
     default:
       fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
 	      program_name,
@@ -1317,17 +1248,16 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
 // Perform a TLS relocation.
 
 inline void
-Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>*, // relinfo,
-                                      size_t , // relnum,
-                                      const elfcpp::Rela<64, false>& , // rel,
-                                      unsigned int , // r_type,
-                                      const Sized_symbol<64>* , // gsym,
-                                      const Symbol_value<64>* , // psymval,
-                                      unsigned char* , // view,
+Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
+                                      size_t relnum,
+                                      const elfcpp::Rela<64, false>& rel,
+                                      unsigned int r_type,
+                                      const Sized_symbol<64>* gsym,
+                                      const Symbol_value<64>* psymval,
+                                      unsigned char* view,
                                       elfcpp::Elf_types<64>::Elf_Addr,
-                                      off_t)// view_size)
+                                      off_t view_size)
 {
-#if 0
   Output_segment* tls_segment = relinfo->layout->tls_segment();
   if (tls_segment == NULL)
     {
@@ -1346,35 +1276,28 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>*, // relinf
     Target_x86_64::optimize_tls_reloc(is_final, r_type);
   switch (r_type)
     {
-    case elfcpp::R_X86_64_TLS_LE_64:
-      value = tls_segment->vaddr() + tls_segment->memsz() - value;
-      Relocate_functions<64, false>::rel64(view, value);
-      break;
-
-    case elfcpp::R_X86_64_TLS_LE:
+    case elfcpp::R_X86_64_TPOFF32:   // Local-exec reloc
       value = value - (tls_segment->vaddr() + tls_segment->memsz());
-      Relocate_functions<64, false>::rel64(view, value);
+      Relocate_functions<64, false>::rel32(view, value);
       break;
 
-    case elfcpp::R_X86_64_TLS_IE:
-    case elfcpp::R_X86_64_TLS_GOTIE:
-    case elfcpp::R_X86_64_TLS_IE_64:
-      if (opt_r_type == elfcpp::R_X86_64_TLS_LE_64)
+    case elfcpp::R_X86_64_GOTTPOFF:  // Initial-exec reloc
+      if (opt_r_type == elfcpp::R_X86_64_TPOFF32)
 	{
 	  Target_x86_64::Relocate::tls_ie_to_le(relinfo, relnum, tls_segment,
-					      rel, r_type, value, view,
-					      view_size);
+                                                rel, r_type, value, view,
+                                                view_size);
 	  break;
 	}
       fprintf(stderr, _("%s: %s: unsupported reloc type %u\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
-	      r_type);
+              program_name,
+              relinfo->location(relnum, rel.get_r_offset()).c_str(),
+              r_type);
       // gold_exit(false);
       break;
 
-    case elfcpp::R_X86_64_TLS_GD:
-      if (opt_r_type == elfcpp::R_X86_64_TLS_LE_64)
+    case elfcpp::R_X86_64_TLSGD:
+      if (opt_r_type == elfcpp::R_X86_64_TPOFF32)
 	{
 	  this->tls_gd_to_le(relinfo, relnum, tls_segment,
 			     rel, r_type, value, view,
@@ -1388,8 +1311,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>*, // relinf
       // gold_exit(false);
       break;
 
-    case elfcpp::R_X86_64_TLS_LDM:
-    case elfcpp::R_X86_64_TLS_LDO_64:
+    case elfcpp::R_X86_64_TLSLD:
       fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
@@ -1397,122 +1319,82 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>*, // relinf
       // gold_exit(false);
       break;
     }
-#endif
 }
 
 // Do a relocation in which we convert a TLS Initial-Exec to a
 // Local-Exec.
+// TODO(csilvers): verify this is right.
 
 inline void
-Target_x86_64::Relocate::tls_ie_to_le(const Relocate_info<64, false>* , // relinfo,
-				    size_t , // relnum,
-				    Output_segment* , // tls_segment,
-				    const elfcpp::Rela<64, false>& , // rel,
-				    unsigned int , // r_type,
-				    elfcpp::Elf_types<64>::Elf_Addr , // value,
-				    unsigned char* , // view,
-                                      off_t) // view_size)
+Target_x86_64::Relocate::tls_ie_to_le(const Relocate_info<64, false>* relinfo,
+                                      size_t relnum,
+                                      Output_segment* tls_segment,
+                                      const elfcpp::Rela<64, false>& rel,
+                                      unsigned int,
+                                      elfcpp::Elf_types<64>::Elf_Addr value,
+                                      unsigned char* view,
+                                      off_t view_size)
 {
-#if 0
   // We have to actually change the instructions, which means that we
   // need to examine the opcodes to figure out which instruction we
   // are looking at.
-  if (r_type == elfcpp::R_X86_64_TLS_IE)
+
+  // movl %gs:XX,%eax  ==>  movl $YY,%eax
+  // movl %gs:XX,%reg  ==>  movl $YY,%reg
+  // addl %gs:XX,%reg  ==>  addl $YY,%reg
+  Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, -1);
+  Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, 4);
+
+  unsigned char op1 = view[-1];
+  if (op1 == 0xa1)
     {
-      // movl %gs:XX,%eax  ==>  movl $YY,%eax
-      // movl %gs:XX,%reg  ==>  movl $YY,%reg
-      // addl %gs:XX,%reg  ==>  addl $YY,%reg
-      Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, -1);
-      Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, 4);
-
-      unsigned char op1 = view[-1];
-      if (op1 == 0xa1)
-	{
-	  // movl XX,%eax  ==>  movl $YY,%eax
-	  view[-1] = 0xb8;
-	}
-      else
-	{
-	  Target_x86_64::Relocate::check_range(relinfo, relnum, rel,
-					     view_size, -2);
-
-	  unsigned char op2 = view[-2];
-	  if (op2 == 0x8b)
-	    {
-	      // movl XX,%reg  ==>  movl $YY,%reg
-	      Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-					       (op1 & 0xc7) == 0x05);
-	      view[-2] = 0xc7;
-	      view[-1] = 0xc0 | ((op1 >> 3) & 7);
-	    }
-	  else if (op2 == 0x03)
-	    {
-	      // addl XX,%reg  ==>  addl $YY,%reg
-	      Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-					       (op1 & 0xc7) == 0x05);
-	      view[-2] = 0x81;
-	      view[-1] = 0xc0 | ((op1 >> 3) & 7);
-	    }
-	  else
-	    Target_x86_64::Relocate::check_tls(relinfo, relnum, rel, 0);
-	}
+      // movl XX,%eax  ==>  movl $YY,%eax
+      view[-1] = 0xb8;
     }
   else
     {
-      // subl %gs:XX(%reg1),%reg2  ==>  subl $YY,%reg2
-      // movl %gs:XX(%reg1),%reg2  ==>  movl $YY,%reg2
-      // addl %gs:XX(%reg1),%reg2  ==>  addl $YY,$reg2
-      Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, -2);
-      Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, 4);
+      Target_x86_64::Relocate::check_range(relinfo, relnum, rel,
+                                           view_size, -2);
 
-      unsigned char op1 = view[-1];
       unsigned char op2 = view[-2];
-      Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-				       (op1 & 0xc0) == 0x80 && (op1 & 7) != 4);
       if (op2 == 0x8b)
-	{
-	  // movl %gs:XX(%reg1),%reg2  ==>  movl $YY,%reg2
-	  view[-2] = 0xc7;
-	  view[-1] = 0xc0 | ((op1 >> 3) & 7);
-	}
-      else if (op2 == 0x2b)
-	{
-	  // subl %gs:XX(%reg1),%reg2  ==>  subl $YY,%reg2
-	  view[-2] = 0x81;
-	  view[-1] = 0xe8 | ((op1 >> 3) & 7);
-	}
+        {
+          // movl XX,%reg  ==>  movl $YY,%reg
+          Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
+                                             (op1 & 0xc7) == 0x05);
+          view[-2] = 0xc7;
+          view[-1] = 0xc0 | ((op1 >> 3) & 7);
+        }
       else if (op2 == 0x03)
-	{
-	  // addl %gs:XX(%reg1),%reg2  ==>  addl $YY,$reg2
-	  view[-2] = 0x81;
-	  view[-1] = 0xc0 | ((op1 >> 3) & 7);
-	}
+        {
+          // addl XX,%reg  ==>  addl $YY,%reg
+          Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
+                                             (op1 & 0xc7) == 0x05);
+          view[-2] = 0x81;
+          view[-1] = 0xc0 | ((op1 >> 3) & 7);
+        }
       else
-	Target_x86_64::Relocate::check_tls(relinfo, relnum, rel, 0);
+        Target_x86_64::Relocate::check_tls(relinfo, relnum, rel, 0);
     }
 
-  value = tls_segment->vaddr() + tls_segment->memsz() - value;
-  if (r_type == elfcpp::R_X86_64_TLS_IE || r_type == elfcpp::R_X86_64_TLS_GOTIE)
-    value = - value;
-
-  Relocate_functions<64, false>::rel64(view, value);
-#endif
+  value = value - (tls_segment->vaddr() + tls_segment->memsz());
+  Relocate_functions<64, false>::rel32(view, value);
 }
 
 // Do a relocation in which we convert a TLS Global-Dynamic to a
 // Local-Exec.
+// TODO(csilvers): verify this is right.
 
 inline void
-Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* , // relinfo,
-				    size_t , // relnum,
-				    Output_segment* , // tls_segment,
-				    const elfcpp::Rela<64, false>& , // rel,
-				    unsigned int,
-				    elfcpp::Elf_types<64>::Elf_Addr , // value,
-				    unsigned char* , // view,
-                                      off_t)// view_size)
+Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* relinfo,
+                                      size_t relnum,
+                                      Output_segment* tls_segment,
+                                      const elfcpp::Rela<64, false>& rel,
+                                      unsigned int,
+                                      elfcpp::Elf_types<64>::Elf_Addr value,
+                                      unsigned char* view,
+                                      off_t view_size)
 {
-#if 0
   // leal foo(,%reg,1),%eax; call ___tls_get_addr
   //  ==> movl %gs,0,%eax; subl $foo@tpoff,%eax
   // leal foo(%reg),%eax; call ___tls_get_addr
@@ -1525,9 +1407,9 @@ Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* , // relin
   unsigned char op2 = view[-2];
 
   Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-				   op2 == 0x8d || op2 == 0x04);
+                                     op2 == 0x8d || op2 == 0x04);
   Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-				   view[4] == 0xe8);
+                                     view[4] == 0xe8);
 
   int roff = 5;
 
@@ -1535,17 +1417,18 @@ Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* , // relin
     {
       Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, -3);
       Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-				       view[-3] == 0x8d);
+                                         view[-3] == 0x8d);
       Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-				       ((op1 & 0xc7) == 0x05
-					&& op1 != (4 << 3)));
+                                         ((op1 & 0xc7) == 0x05
+                                          && op1 != (4 << 3)));
       memcpy(view - 3, "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
     }
   else
     {
       Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-				       (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
-      if (rel.get_r_offset() + 9 < view_size && view[9] == 0x90)
+                                         (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
+      if (static_cast<off_t>(rel.get_r_offset() + 9) < view_size
+          && view[9] == 0x90)
 	{
 	  // There is a trailing nop.  Use the size byte subl.
 	  memcpy(view - 2, "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
@@ -1559,21 +1442,20 @@ Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* , // relin
     }
 
   value = tls_segment->vaddr() + tls_segment->memsz() - value;
-  Relocate_functions<64, false>::rel64(view + roff, value);
+  Relocate_functions<64, false>::rel32(view + roff, value);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
   // We can skip it.
   this->skip_call_tls_get_addr_ = true;
-#endif
 }
 
 // Check the range for a TLS relocation.
 
 inline void
 Target_x86_64::Relocate::check_range(const Relocate_info<64, false>* relinfo,
-				   size_t relnum,
-				   const elfcpp::Rela<64, false>& rel,
-				   off_t view_size, off_t off)
+                                     size_t relnum,
+                                     const elfcpp::Rela<64, false>& rel,
+                                     off_t view_size, off_t off)
 {
   off_t offset = rel.get_r_offset() + off;
   if (offset < 0 || offset > view_size)
@@ -1589,9 +1471,9 @@ Target_x86_64::Relocate::check_range(const Relocate_info<64, false>* relinfo,
 
 inline void
 Target_x86_64::Relocate::check_tls(const Relocate_info<64, false>* relinfo,
-				 size_t relnum,
-				 const elfcpp::Rela<64, false>& rel,
-				 bool valid)
+                                   size_t relnum,
+                                   const elfcpp::Rela<64, false>& rel,
+                                   bool valid)
 {
   if (!valid)
     {
@@ -1607,12 +1489,12 @@ Target_x86_64::Relocate::check_tls(const Relocate_info<64, false>* relinfo,
 
 void
 Target_x86_64::relocate_section(const Relocate_info<64, false>* relinfo,
-			      unsigned int sh_type,
-			      const unsigned char* prelocs,
-			      size_t reloc_count,
-			      unsigned char* view,
-			      elfcpp::Elf_types<64>::Elf_Addr address,
-			      off_t view_size)
+                                unsigned int sh_type,
+                                const unsigned char* prelocs,
+                                size_t reloc_count,
+                                unsigned char* view,
+                                elfcpp::Elf_types<64>::Elf_Addr address,
+                                off_t view_size)
 {
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
