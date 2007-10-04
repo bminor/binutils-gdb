@@ -1,3 +1,8 @@
+2007-10-04  David Daney  <ddaney@avtrex.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Mark lwxc1 as working on FP_S
+	registers.
+
 2007-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (MOD_0F12_PREFIX_0): Use "movlps" and "movhlps"

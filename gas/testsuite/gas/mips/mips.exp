@@ -775,4 +775,5 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "noreorder"
     run_dump_test "align"
+    run_dump_test "odd-float"
 }

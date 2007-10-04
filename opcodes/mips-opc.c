@@ -744,7 +744,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"fork",    "d,s,t",	0x7c000008, 0xfc0007ff, TRAP|WR_d|RD_s|RD_t,	0,		MT32	},
 {"lwu",     "t,o(b)",	0x9c000000, 0xfc000000,	LDD|RD_b|WR_t,		0,		I3	},
 {"lwu",     "t,A(b)",	0,    (int) M_LWU_AB,	INSN_MACRO,		0,		I3	},
-{"lwxc1",   "D,t(b)",	0x4c000000, 0xfc00f83f, LDD|WR_D|RD_t|RD_b|FP_D, 0,		I4|I33	},
+{"lwxc1",   "D,t(b)",	0x4c000000, 0xfc00f83f, LDD|WR_D|RD_t|RD_b|FP_S, 0,		I4|I33	},
 {"lwxs",    "d,t(b)",	0x70000088, 0xfc0007ff,	LDD|RD_b|RD_t|WR_d,	0,		SMT	},
 {"macc",    "d,s,t",	0x00000028, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d, 0,		N412    },
 {"macc",    "d,s,t",	0x00000158, 0xfc0007ff, RD_s|RD_t|WR_HILO|WR_d,	0,		N5      },

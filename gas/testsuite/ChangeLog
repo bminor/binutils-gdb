@@ -1,3 +1,8 @@
+2007-10-04  David Daney  <ddaney@avtrex.com>
+
+	* gas/mips/odd-float.d, gas/mips/odd-float.s: New test.
+	* gas/mips/mips.exp: Run it.
+
 2007-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/5109
