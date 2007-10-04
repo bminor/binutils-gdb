@@ -920,8 +920,20 @@ pe_find_data_imports (void)
 	      int nsyms, symsize, i;
 
 	      if (link_info.pei386_auto_import == -1)
-		info_msg (_("Info: resolving %s by linking to %s (auto-import)\n"),
-			  undef->root.string, buf);
+		{
+		  static bfd_boolean warned = FALSE;
+
+		  info_msg (_("Info: resolving %s by linking to %s (auto-import)\n"),
+			    undef->root.string, buf);
+
+		  /* PR linker/4844.  */
+		  if (! warned)
+		    {
+		      warned = TRUE;
+		      einfo (_("%P: warning: auto-importing has been activated without --enable-auto-import specified on the command line.\n\
+This should work unless it involves constant data structures referencing symbols from auto-imported DLLs."));
+		    }
+		}
 
 	      symsize = bfd_get_symtab_upper_bound (b);
 	      symbols = (asymbol **) xmalloc (symsize);

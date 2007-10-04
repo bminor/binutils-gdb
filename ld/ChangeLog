@@ -1,5 +1,11 @@
 2007-10-04  Nick Clifton  <nickc@redhat.com>
 
+	PR linker/4844
+	* emultempl/pep.em (pep_find_data_imports): Issue a warning
+	message if auto importing is triggered without
+	--enable-auto-import having been specified on the command line.
+	* emultempl/pe.em (pe_find_data_imports): Likewise.
+
 	PR linker/5097
 	* emultempl/armelf.em (arm_elf_finish): Fix spelling typo.
 
