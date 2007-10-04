@@ -1891,7 +1891,7 @@ gen_exp_file (void)
 		     ASM_RVA_BEFORE, exp->ordinal, ASM_RVA_AFTER);
 	}
 
-      fprintf (f,"%s Export Oridinal Table\n", ASM_C);
+      fprintf (f,"%s Export Ordinal Table\n", ASM_C);
       fprintf (f, "anords:\n");
       for (i = 0; (exp = d_exports_lexically[i]); i++)
 	{
@@ -2988,7 +2988,7 @@ process_duplicates (export_type **d_export_vec)
 	      if (a->ordinal != -1
 		  && b->ordinal != -1)
 		/* xgettext:c-format */
-		fatal (_("Error, duplicate EXPORT with oridinals: %s"),
+		fatal (_("Error, duplicate EXPORT with ordinals: %s"),
 		      a->name);
 
 	      /* Merge attributes.  */
