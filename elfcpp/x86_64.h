@@ -35,7 +35,13 @@
 namespace elfcpp
 {
 
-// Taken from http://www.x86-64.org/documentation/abi-0.98.pdf and elf.h
+// Documentation is taken from
+//   http://www.x86-64.org/documentation/abi-0.98.pdf
+//   elf.h
+// Documentation for the TLS relocs is taken from
+//   http://people.redhat.com/drepper/tls.pdf
+//   http://www.lsd.ic.unicamp.br/~oliva/writeups/TLS/RFC-TLSDESC-x86.txt
+
 enum
 {
   R_X86_64_NONE = 0,       // No reloc
