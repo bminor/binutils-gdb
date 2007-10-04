@@ -1,3 +1,13 @@
+2007-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/simd.s: Add tests for unpckhpd and unpckhps.
+	* gas/i386/x86-64-simd.s: Likewise.
+
+	* gas/i386/simd-intel.d: Updated.
+	* gas/i386/simd.d: Likewise.
+	* gas/i386/x86-64-simd-intel.d: Likewise.
+	* gas/i386/x86-64-simd.d: Likewise.
+
 2007-10-04  David Daney  <ddaney@avtrex.com>
 
 	* gas/mips/odd-float.d, gas/mips/odd-float.s: New test.

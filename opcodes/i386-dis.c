@@ -1036,8 +1036,8 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F11) },
   { PREFIX_TABLE (PREFIX_0F12) },
   { MOD_TABLE (MOD_0F13) },
-  { "unpcklpX",		{ XM, EXq } },
-  { "unpckhpX",		{ XM, EXq } },
+  { "unpcklpX",		{ XM, EXx } },
+  { "unpckhpX",		{ XM, EXx } },
   { PREFIX_TABLE (PREFIX_0F16) },
   { MOD_TABLE (MOD_0F17) },
   /* 18 */

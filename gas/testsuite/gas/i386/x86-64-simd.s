@@ -86,6 +86,11 @@ _start:
 	pmovzxdq (%rax),%xmm0
 	insertps $0x0,(%rax),%xmm0
 
+	unpckhpd (%rax),%xmm1
+	unpckhps (%rax),%xmm1
+	unpcklpd (%rax),%xmm1
+	unpcklps (%rax),%xmm1
+
 	.intel_syntax noprefix
 
 addsubps xmm1,XMMWORD PTR [rip+0x12345678]        
@@ -171,3 +176,7 @@ pmovzxwd xmm0,QWORD PTR [rax]
 pmovzxwq xmm0,DWORD PTR [rax]
 pmovzxdq xmm0,QWORD PTR [rax]
 insertps xmm0,DWORD PTR [rax],0x0
+unpckhpd xmm0,XMMWORD PTR [rax]
+unpckhps xmm0,XMMWORD PTR [rax]
+unpcklpd xmm0,XMMWORD PTR [rax]
+unpcklps xmm0,XMMWORD PTR [rax]

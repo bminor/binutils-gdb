@@ -84,6 +84,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 38 34 00       	pmovzxwq \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 38 35 00       	pmovzxdq \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 21 00 00    	insertps \$0x0,\(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	66 0f 15 08          	unpckhpd \(%eax\),%xmm1
+[ 	]*[a-f0-9]+:	0f 15 08             	unpckhps \(%eax\),%xmm1
+[ 	]*[a-f0-9]+:	66 0f 14 08          	unpcklpd \(%eax\),%xmm1
+[ 	]*[a-f0-9]+:	0f 14 08             	unpcklps \(%eax\),%xmm1
 [ 	]*[a-f0-9]+:	f2 0f d0 0d 78 56 34 12 	addsubps 0x12345678,%xmm1
 [ 	]*[a-f0-9]+:	66 0f 2f 0d 78 56 34 12 	comisd 0x12345678,%xmm1
 [ 	]*[a-f0-9]+:	0f 2f 0d 78 56 34 12 	comiss 0x12345678,%xmm1
@@ -161,4 +165,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 38 34 00       	pmovzxwq \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 38 35 00       	pmovzxdq \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 21 00 00    	insertps \$0x0,\(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	66 0f 15 00          	unpckhpd \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	0f 15 00             	unpckhps \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	66 0f 14 00          	unpcklpd \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	0f 14 00             	unpcklps \(%eax\),%xmm0
 #pass

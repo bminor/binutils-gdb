@@ -1,3 +1,8 @@
+2007-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (dis386_twobyte): Use EXx instead of EXq on
+	unpckhpX and unpckhpX.
+
 2007-10-04  David Daney  <ddaney@avtrex.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Mark lwxc1 as working on FP_S

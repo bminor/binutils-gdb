@@ -80,6 +80,11 @@ _start:
 	pmovzxdq (%eax),%xmm0
 	insertps $0x0,(%eax),%xmm0
 
+	unpckhpd (%eax),%xmm1
+	unpckhps (%eax),%xmm1
+	unpcklpd (%eax),%xmm1
+	unpcklps (%eax),%xmm1
+
 	.intel_syntax noprefix
 
 addsubps xmm1,XMMWORD PTR ds:0x12345678
@@ -159,3 +164,7 @@ pmovzxwd xmm0,QWORD PTR [eax]
 pmovzxwq xmm0,DWORD PTR [eax]
 pmovzxdq xmm0,QWORD PTR [eax]
 insertps xmm0,DWORD PTR [eax],0x0
+unpckhpd xmm0,XMMWORD PTR [eax]
+unpckhps xmm0,XMMWORD PTR [eax]
+unpcklpd xmm0,XMMWORD PTR [eax]
+unpcklps xmm0,XMMWORD PTR [eax]
