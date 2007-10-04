@@ -82,6 +82,12 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* System root for target files */
+#undef TARGET_SYSTEM_ROOT
+
+/* Whether the system root can be relocated */
+#undef TARGET_SYSTEM_ROOT_RELOCATABLE
+
 /* Version number of package */
 #undef VERSION
 

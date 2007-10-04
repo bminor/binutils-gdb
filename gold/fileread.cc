@@ -414,10 +414,10 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
 	  n2 = n1 + ".a";
 	  n1 += ".so";
 	}
-      name = dirpath.find(n1, n2);
+      name = dirpath.find(n1, n2, &this->is_in_sysroot_);
       if (name.empty())
 	{
-	  fprintf(stderr, _("%s: cannot find %s\n"), program_name,
+	  fprintf(stderr, _("%s: cannot find -l%s\n"), program_name,
 		  this->input_argument_->name());
 	  gold_exit(false);
 	}
@@ -437,7 +437,8 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
       if (::stat(name.c_str(), &dummy_stat) < 0)
         {
           // extra_search_path failed, so check the normal search-path.
-          name = dirpath.find(this->input_argument_->name(), "");
+          name = dirpath.find(this->input_argument_->name(), "",
+			      &this->is_in_sysroot_);
           if (name.empty())
             {
               fprintf(stderr, _("%s: cannot find %s\n"), program_name,

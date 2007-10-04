@@ -13,7 +13,10 @@ AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS)
 INCLUDES = -D_GNU_SOURCE \
 	-I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../elfcpp \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
+	-DBINDIR="\"$(bindir)\"" -DTOOLBINDIR="\"$(tooldir)/bin\"" \
 	@INCINTL@
+
+LIBIBERTY = ../libiberty/libiberty.a
 
 AM_YFLAGS = -d
 
@@ -87,8 +90,8 @@ ALL_TARGETOBJS = \
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
 
 sources_var = main.cc
-deps_var = $(TARGETOBJS) libgold.a $(LIBINTL_DEP)
-ldadd_var = $(TARGETOBJS) libgold.a $(LIBINTL)
+deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
+ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL)
 
 ld_new_SOURCES = $(sources_var)
 ld_new_DEPENDENCIES = $(deps_var) $(LIBOBJS)

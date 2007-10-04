@@ -211,43 +211,43 @@ Dir_cache_task::run(gold::Workqueue*)
 namespace gold
 {
 
-Dirsearch::Dirsearch()
-  : directories_(), token_()
-{
-}
-
 void
-Dirsearch::add(Workqueue* workqueue, const char* d)
+Dirsearch::initialize(Workqueue* workqueue,
+		      const General_options::Dir_list* directories)
 {
-  this->directories_.push_back(d);
-  this->token_.add_blocker();
-  workqueue->queue(new Dir_cache_task(d, this->token_));
-}
-
-void
-Dirsearch::add(Workqueue* workqueue, const General_options::Dir_list& list)
-{
-  for (General_options::Dir_list::const_iterator p = list.begin();
-       p != list.end();
+  this->directories_ = directories;
+  for (General_options::Dir_list::const_iterator p = directories->begin();
+       p != directories->end();
        ++p)
-    this->add(workqueue, *p);
+    {
+      this->token_.add_blocker();
+      workqueue->queue(new Dir_cache_task(p->name().c_str(), this->token_));
+    }
 }
 
 std::string
-Dirsearch::find(const std::string& n1, const std::string& n2) const
+Dirsearch::find(const std::string& n1, const std::string& n2,
+		bool *is_in_sysroot) const
 {
   gold_assert(!this->token_.is_blocked());
 
-  for (std::list<const char*>::const_iterator p = this->directories_.begin();
-       p != this->directories_.end();
+  for (General_options::Dir_list::const_iterator p =
+	 this->directories_->begin();
+       p != this->directories_->end();
        ++p)
     {
-      Dir_cache* pdc = caches.lookup(*p);
+      Dir_cache* pdc = caches.lookup(p->name().c_str());
       gold_assert(pdc != NULL);
       if (pdc->find(n1))
-	return std::string(*p) + '/' + n1;
+	{
+	  *is_in_sysroot = p->is_in_sysroot();
+	  return p->name() + '/' + n1;
+	}
       if (!n2.empty() && pdc->find(n2))
-	return std::string(*p) + '/' + n2;
+	{
+	  *is_in_sysroot = p->is_in_sysroot();
+	  return p->name() + '/' + n2;
+	}
     }
 
   return std::string();

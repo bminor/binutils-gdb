@@ -26,11 +26,13 @@
 #include <vector>
 #include <cstdio>
 #include <cstdlib>
+#include "filenames.h"
 
 #include "options.h"
 #include "fileread.h"
 #include "workqueue.h"
 #include "readsyms.h"
+#include "parameters.h"
 #include "yyscript.h"
 #include "script.h"
 #include "script-c.h"
@@ -827,10 +829,10 @@ class Parser_closure
  public:
   Parser_closure(const char* filename,
 		 const Position_dependent_options& posdep_options,
-		 bool in_group,
+		 bool in_group, bool is_in_sysroot,
 		 const Lex::Token_sequence* tokens)
     : filename_(filename), posdep_options_(posdep_options),
-      in_group_(in_group), tokens_(tokens),
+      in_group_(in_group), is_in_sysroot_(is_in_sysroot), tokens_(tokens),
       next_token_index_(0), inputs_(NULL)
   { }
 
@@ -849,6 +851,12 @@ class Parser_closure
   bool
   in_group() const
   { return this->in_group_; }
+
+  // Return whether this script was found using a directory in the
+  // sysroot.
+  bool
+  is_in_sysroot() const
+  { return this->is_in_sysroot_; }
 
   // Whether we are at the end of the token list.
   bool
@@ -886,6 +894,8 @@ class Parser_closure
   Position_dependent_options posdep_options_;
   // Whether we are currently in a --start-group/--end-group.
   bool in_group_;
+  // Whether the script was found in a sysrooted directory.
+  bool is_in_sysroot_;
 
   // The tokens to be returned by the lexer.
   const Lex::Token_sequence* tokens_;
@@ -915,6 +925,7 @@ read_input_script(Workqueue* workqueue, const General_options& options,
   Parser_closure closure(input_file->filename().c_str(),
 			 input_argument->file().options(),
 			 input_group != NULL,
+			 input_file->is_in_sysroot(),
 			 &lex.tokens());
 
   if (yyparse(&closure) != 0)
@@ -1166,14 +1177,39 @@ extern "C" void
 script_add_file(void* closurev, const char* name)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
-  // In addition to checking the normal library search path, we also
-  // want to check in the script-directory.
-  const char *slash = strrchr(closure->filename(), '/');
-  std::string script_directory(closure->filename(),
-                               slash ? slash - closure->filename() + 1 : 0);
-  Input_file_argument file(name, false,
-                           slash ? script_directory.c_str() : ".",
-                           closure->position_dependent_options());
+
+  // If this is an absolute path, and we found the script in the
+  // sysroot, then we want to prepend the sysroot to the file name.
+  // For example, this is how we handle a cross link to the x86_64
+  // libc.so, which refers to /lib/libc.so.6.
+  std::string name_string;
+  const char* extra_search_path = ".";
+  std::string script_directory;
+  if (IS_ABSOLUTE_PATH (name))
+    {
+      if (closure->is_in_sysroot())
+	{
+	  const std::string& sysroot(parameters->sysroot());
+	  gold_assert(!sysroot.empty());
+	  name_string = sysroot + name;
+	  name = name_string.c_str();
+	}
+    }
+  else
+    {
+      // In addition to checking the normal library search path, we
+      // also want to check in the script-directory.
+      const char *slash = strrchr(closure->filename(), '/');
+      if (slash != NULL)
+	{
+	  script_directory.assign(closure->filename(),
+				  slash - closure->filename() + 1);
+	  extra_search_path = script_directory.c_str();
+	}
+    }
+
+  Input_file_argument file(name, false, extra_search_path,
+			   closure->position_dependent_options());
   closure->inputs()->add_file(file);
 }
 

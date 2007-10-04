@@ -20,9 +20,13 @@
 // Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 // MA 02110-1301, USA.
 
-#include <iostream>
-
 #include "gold.h"
+
+#include <iostream>
+#include <sys/stat.h>
+#include "filenames.h"
+#include "libiberty.h"
+
 #include "options.h"
 
 namespace gold
@@ -216,6 +220,51 @@ help(int, char**, char*, gold::Command_line*)
   return 0;
 }
 
+// If the default sysroot is relocatable, try relocating it based on
+// the prefix FROM.
+
+char*
+get_relative_sysroot(const char* from)
+{
+  char* path = make_relative_prefix(gold::program_name, from,
+				    TARGET_SYSTEM_ROOT);
+  if (path != NULL)
+    {
+      struct stat s;
+      if (::stat(path, &s) == 0 && S_ISDIR(s.st_mode))
+	return path;
+      free(path);
+    }
+
+  return NULL;
+}
+
+// Return the default sysroot.  This is set by the --with-sysroot
+// option to configure.
+
+std::string
+get_default_sysroot()
+{
+  const char* sysroot = TARGET_SYSTEM_ROOT;
+  if (*sysroot == '\0')
+    return "";
+
+  if (TARGET_SYSTEM_ROOT_RELOCATABLE)
+    {
+      char* path = get_relative_sysroot (BINDIR);
+      if (path == NULL)
+	path = get_relative_sysroot (TOOLBINDIR);
+      if (path != NULL)
+	{
+	  std::string ret = path;
+	  free(path);
+	  return ret;
+	}
+    }
+
+  return sysroot;
+}
+
 } // End anonymous namespace.
 
 namespace gold
@@ -285,8 +334,8 @@ options::Command_line_options::options[] =
 		NULL, ONE_DASH, &General_options::set_shared),
   GENERAL_NOARG('\0', "static", N_("Do not link against shared libraries"),
 		NULL, ONE_DASH, &General_options::set_static),
-  GENERAL_ARG('\0', "sysroot", N_("Currently ignored"), NULL, TWO_DASHES,
-	      &General_options::ignore),
+  GENERAL_ARG('\0', "sysroot", N_("Set target system root directory"),
+	      N_("--sysroot DIR"), TWO_DASHES, &General_options::set_sysroot),
   POSDEP_NOARG('\0', "as-needed",
 	       N_("Only set DT_NEEDED for dynamic libs if used"),
 	       NULL, TWO_DASHES, &Position_dependent_options::set_as_needed),
@@ -321,7 +370,8 @@ General_options::General_options()
     rpath_(),
     rpath_link_(),
     is_shared_(false),
-    is_static_(false)
+    is_static_(false),
+    sysroot_()
 {
 }
 
@@ -332,6 +382,66 @@ Position_dependent_options::Position_dependent_options()
     as_needed_(false),
     include_whole_archive_(false)
 {
+}
+
+// Add the sysroot, if any, to the search paths.
+
+void
+General_options::add_sysroot()
+{
+  if (this->sysroot_.empty())
+    {
+      this->sysroot_ = get_default_sysroot();
+      if (this->sysroot_.empty())
+	return;
+    }
+
+  const char* sysroot = this->sysroot_.c_str();
+  char* canonical_sysroot = lrealpath(sysroot);
+
+  for (Dir_list::iterator p = this->search_path_.begin();
+       p != this->search_path_.end();
+       ++p)
+    p->add_sysroot(sysroot, canonical_sysroot);
+
+  free(canonical_sysroot);
+}
+
+// Search_directory methods.
+
+// This is called if we have a sysroot.  Apply the sysroot if
+// appropriate.  Record whether the directory is in the sysroot.
+
+void
+Search_directory::add_sysroot(const char* sysroot,
+			      const char* canonical_sysroot)
+{
+  gold_assert(*sysroot != '\0');
+  if (this->put_in_sysroot_)
+    {
+      if (!IS_DIR_SEPARATOR(this->name_[0])
+	  && !IS_DIR_SEPARATOR(sysroot[strlen(sysroot) - 1]))
+	this->name_ = '/' + this->name_;
+      this->name_ = sysroot + this->name_;
+      this->is_in_sysroot_ = true;
+    }
+  else
+    {
+      // Check whether this entry is in the sysroot.  To do this
+      // correctly, we need to use canonical names.  Otherwise we will
+      // get confused by the ../../.. paths that gcc tends to use.
+      char* canonical_name = lrealpath(this->name_.c_str());
+      int canonical_name_len = strlen(canonical_name);
+      int canonical_sysroot_len = strlen(canonical_sysroot);
+      if (canonical_name_len > canonical_sysroot_len
+	  && IS_DIR_SEPARATOR(canonical_name[canonical_sysroot_len]))
+	{
+	  canonical_name[canonical_sysroot_len] = '\0';
+	  if (FILENAME_CMP(canonical_name, canonical_sysroot) == 0)
+	    this->is_in_sysroot_ = true;
+	}
+      free(canonical_name);
+    }
 }
 
 // Input_arguments methods.
@@ -414,8 +524,12 @@ Command_line::process(int argc, char** argv)
       char first = opt[0];
       int skiparg = 0;
       char* arg = strchr(opt, '=');
+      bool argument_with_equals = arg != NULL;
       if (arg != NULL)
-	*arg = '\0';
+	{
+	  *arg = '\0';
+	  ++arg;
+	}
       else if (i + 1 < argc)
 	{
 	  arg = argv[i + 1];
@@ -438,6 +552,8 @@ Command_line::process(int argc, char** argv)
 		{
 		  if (!options[j].takes_argument())
 		    {
+		      if (argument_with_equals)
+			this->usage(_("unexpected argument"), argv[i]);
 		      arg = NULL;
 		      skiparg = 0;
 		    }
@@ -517,8 +633,10 @@ Command_line::process(int argc, char** argv)
     }
 
   // FIXME: We should only do this when configured in native mode.
-  this->options_.add_to_search_path("/lib");
-  this->options_.add_to_search_path("/usr/lib");
+  this->options_.add_to_search_path_with_sysroot("/lib");
+  this->options_.add_to_search_path_with_sysroot("/usr/lib");
+
+  this->options_.add_sysroot();
 }
 
 // Apply a command line option.

@@ -60,7 +60,9 @@ TESTS = object_unittest $(NATIVE_TESTING)
 check_LIBRARIES = libgoldtest.a
 libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 
-LDADD = libgoldtest.a ../libgold.a
+DEPENDENCIES = \
+	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
+LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL)
 
 check_PROGRAMS = object_unittest $(NATIVE_PROGS)
 

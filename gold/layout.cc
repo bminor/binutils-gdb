@@ -1309,18 +1309,18 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
            ++p)
         {
           if (rpath_val.empty())
-            rpath_val = *p;
+            rpath_val = p->name();
           else
             {
               // Eliminate duplicates.
               General_options::Dir_list::const_iterator q;
               for (q = rpath.begin(); q != p; ++q)
-                if (strcmp(*q, *p) == 0)
+		if (q->name() == p->name())
                   break;
               if (q == p)
                 {
                   rpath_val += ':';
-                  rpath_val += *p;
+                  rpath_val += p->name();
                 }
             }
         }

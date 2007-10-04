@@ -31,7 +31,8 @@ namespace gold
 // Initialize the parameters from the options.
 
 Parameters::Parameters(const General_options* options)
-  : is_doing_static_link_valid_(false), doing_static_link_(false),
+  : sysroot_(options->sysroot()),
+    is_doing_static_link_valid_(false), doing_static_link_(false),
     is_size_and_endian_valid_(false), size_(0), is_big_endian_(false),
     optimization_level_(options->optimization_level())
 {

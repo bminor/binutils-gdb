@@ -867,6 +867,11 @@ Optional Features:
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
 
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-sysroot=DIR    search for usr/lib et al within DIR
+
 Some influential environment variables:
   CC          C compiler command
   CFLAGS      C compiler flags
@@ -1840,6 +1845,44 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
           ac_config_headers="$ac_config_headers config.h:config.in"
+
+
+
+# Check whether --with-sysroot or --without-sysroot was given.
+if test "${with_sysroot+set}" = set; then
+  withval="$with_sysroot"
+  sysroot=$withval
+else
+  sysroot=no
+fi;
+
+if test "$sysroot" = "yes"; then
+  sysroot='${exec_prefix}/${target_alias}/sys-root'
+elif test "$sysroot" = "no"; then
+  sysroot=
+fi
+
+sysroot_relocatable=0
+if test -n "$sysroot"; then
+  case "sysroot" in
+    "${prefix}" | "${prefix}/"* | \
+    "${exec_prefix}" | "${exec_prefix}/"* | \
+    '${prefix}' | '${prefix}/'*| \
+    '${exec_prefix}' | '${exec_prefix}/'*)
+      sysroot_relocatable=1
+      ;;
+  esac
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define TARGET_SYSTEM_ROOT "$sysroot"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define TARGET_SYSTEM_ROOT_RELOCATABLE $sysroot_relocatable
+_ACEOF
 
 
 # Check whether --enable-targets or --disable-targets was given.

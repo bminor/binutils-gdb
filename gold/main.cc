@@ -65,7 +65,7 @@ main(int argc, char** argv)
 
   // Get the search path from the -L options.
   Dirsearch search_path;
-  search_path.add(&workqueue, command_line.options().search_path());
+  search_path.initialize(&workqueue, &command_line.options().search_path());
 
   // Queue up the first set of tasks.
   queue_initial_tasks(command_line.options(), search_path,

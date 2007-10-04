@@ -50,6 +50,50 @@ struct One_option;
 
 } // End namespace gold::options.
 
+// A directory to search.  For each directory we record whether it is
+// in the sysroot.  We need to know this so that, if a linker script
+// is found within the sysroot, we will apply the sysroot to any files
+// named by that script.
+
+class Search_directory
+{
+ public:
+  // We need a default constructor because we put this in a
+  // std::vector.
+  Search_directory()
+    : name_(NULL), put_in_sysroot_(false), is_in_sysroot_(false)
+  { }
+
+  // This is the usual constructor.
+  Search_directory(const char* name, bool put_in_sysroot)
+    : name_(name), put_in_sysroot_(put_in_sysroot), is_in_sysroot_(false)
+  { gold_assert(!this->name_.empty()); }
+
+  // This is called if we have a sysroot.  The sysroot is prefixed to
+  // any entries for which put_in_sysroot_ is true.  is_in_sysroot_ is
+  // set to true for any enries which are in the sysroot (this will
+  // naturally include any entries for which put_in_sysroot_ is true).
+  // SYSROOT is the sysroot, CANONICAL_SYSROOT is the result of
+  // passing SYSROOT to lrealpath.
+  void
+  add_sysroot(const char* sysroot, const char* canonical_sysroot);
+
+  // Get the directory name.
+  const std::string&
+  name() const
+  { return this->name_; }
+
+  // Return whether this directory is in the sysroot.
+  bool
+  is_in_sysroot() const
+  { return this->is_in_sysroot_; }
+
+ private:
+  std::string name_;
+  bool put_in_sysroot_;
+  bool is_in_sysroot_;
+};
+
 // The position independent options which apply to the whole link.
 // There are a lot of them.
 
@@ -69,7 +113,7 @@ class General_options
   { return this->dynamic_linker_; }
 
   // -L: Library search path.
-  typedef std::vector<const char*> Dir_list;
+  typedef std::vector<Search_directory> Dir_list;
 
   const Dir_list&
   search_path() const
@@ -115,6 +159,11 @@ class General_options
   is_static() const
   { return this->is_static_; }
 
+  // --sysroot: The system root of a cross-linker.
+  const std::string&
+  sysroot() const
+  { return this->sysroot_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -133,7 +182,11 @@ class General_options
 
   void
   add_to_search_path(const char* arg)
-  { this->search_path_.push_back(arg); }
+  { this->search_path_.push_back(Search_directory(arg, false)); }
+
+  void
+  add_to_search_path_with_sysroot(const char* arg)
+  { this->search_path_.push_back(Search_directory(arg, true)); }
 
   void
   set_optimization_level(const char* arg)
@@ -153,11 +206,11 @@ class General_options
 
   void
   add_to_rpath(const char* arg)
-  { this->rpath_.push_back(arg); }
+  { this->rpath_.push_back(Search_directory(arg, false)); }
 
   void
   add_to_rpath_link(const char* arg)
-  { this->rpath_link_.push_back(arg); }
+  { this->rpath_link_.push_back(Search_directory(arg, false)); }
 
   void
   set_shared()
@@ -168,8 +221,16 @@ class General_options
   { this->is_static_ = true; }
 
   void
+  set_sysroot(const char* arg)
+  { this->sysroot_ = arg; }
+
+  void
   ignore(const char*)
   { }
+
+  // Apply any sysroot to the directory lists.
+  void
+  add_sysroot();
 
   bool export_dynamic_;
   const char* dynamic_linker_;
@@ -182,6 +243,7 @@ class General_options
   Dir_list rpath_link_;
   bool is_shared_;
   bool is_static_;
+  std::string sysroot_;
 };
 
 // The current state of the position dependent options.
@@ -251,7 +313,7 @@ class Input_file_argument
   //         to checking the normal library search path.  If this is "",
   //         then no extra directory is added.
   // options: The position dependent options at this point in the
-  //         command line, such as --group.
+  //         command line, such as --whole-archive.
   Input_file_argument()
     : name_(), is_lib_(false), extra_search_path_(""), options_()
   { }

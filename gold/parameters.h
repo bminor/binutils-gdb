@@ -56,6 +56,12 @@ class Parameters
   output_is_object() const
   { return this->output_file_type_ == OUTPUT_OBJECT; }
 
+  // The target system root directory.  This is NULL if there isn't
+  // one.
+  const std::string&
+  sysroot() const
+  { return this->sysroot_; }
+
   // Whether we are doing a static link--a link in which none of the
   // input files are shared libraries.  This is only known after we
   // have seen all the input files.
@@ -110,6 +116,9 @@ class Parameters
 
   // The type of the output file.
   Output_file_type output_file_type_;
+  // The target system root directory.
+  std::string sysroot_;
+  
   // Whether the doing_static_link_ field is valid.
   bool is_doing_static_link_valid_;
   // Whether we are doing a static link.

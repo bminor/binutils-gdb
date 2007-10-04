@@ -10,6 +10,33 @@ AM_INIT_AUTOMAKE(gold, 0.1)
 
 AM_CONFIG_HEADER(config.h:config.in)
 
+AC_ARG_WITH(sysroot,
+[  --with-sysroot[=DIR]    search for usr/lib et al within DIR],
+[sysroot=$withval], [sysroot=no])
+
+if test "$sysroot" = "yes"; then
+  sysroot='${exec_prefix}/${target_alias}/sys-root'
+elif test "$sysroot" = "no"; then
+  sysroot=
+fi
+
+sysroot_relocatable=0
+if test -n "$sysroot"; then
+  case "sysroot" in
+    "${prefix}" | "${prefix}/"* | \
+    "${exec_prefix}" | "${exec_prefix}/"* | \
+    '${prefix}' | '${prefix}/'*| \
+    '${exec_prefix}' | '${exec_prefix}/'*)
+      sysroot_relocatable=1
+      ;;
+  esac
+fi
+
+AC_DEFINE_UNQUOTED(TARGET_SYSTEM_ROOT, "$sysroot",
+  [System root for target files])
+AC_DEFINE_UNQUOTED(TARGET_SYSTEM_ROOT_RELOCATABLE, $sysroot_relocatable,
+  [Whether the system root can be relocated])
+
 AC_ARG_ENABLE([targets],
 [  --enable-targets        alternative target configurations],
 [case "${enableval}" in

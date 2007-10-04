@@ -260,7 +260,7 @@ class Input_file
 {
  public:
   Input_file(const Input_file_argument* input_argument)
-    : input_argument_(input_argument), file_()
+    : input_argument_(input_argument), file_(), is_in_sysroot_(false)
   { }
 
   // Create an input file with the contents already provided.  This is
@@ -292,12 +292,21 @@ class Input_file
   file()
   { return this->file_; }
 
+  // Whether we found the file in a directory in the system root.
+  bool
+  is_in_sysroot() const
+  { return this->is_in_sysroot_; }
+
  private:
   Input_file(const Input_file&);
   Input_file& operator=(const Input_file&);
 
+  // The argument from the command line.
   const Input_file_argument* input_argument_;
+  // The file after we open it.
   File_read file_;
+  // Whether we found the file in a directory in the system root.
+  bool is_in_sysroot_;
 };
 
 } // end namespace gold
