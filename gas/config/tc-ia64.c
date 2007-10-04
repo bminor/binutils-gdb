@@ -5089,8 +5089,7 @@ dot_xfloat_cons (kind)
 }
 
 static void
-dot_xstringer (zero)
-     int zero;
+dot_xstringer (int zero)
 {
   cross_section (zero, stringer, 0);
 }
@@ -5527,8 +5526,8 @@ const pseudo_typeS md_pseudo_table[] =
     { "xreal8", dot_xfloat_cons, 'd' },
     { "xreal10", dot_xfloat_cons, 'x' },
     { "xreal16", dot_xfloat_cons, 'X' },
-    { "xstring", dot_xstringer, 0 },
-    { "xstringz", dot_xstringer, 1 },
+    { "xstring", dot_xstringer, 8 + 0 },
+    { "xstringz", dot_xstringer, 8 + 1 },
 
     /* unaligned versions:  */
     { "xdata2.ua", dot_xdata_ua, 2 },
@@ -5585,8 +5584,8 @@ pseudo_opcode[] =
     { "real8", stmt_float_cons, 'd' },
     { "real10", stmt_float_cons, 'x' },
     { "real16", stmt_float_cons, 'X' },
-    { "string", stringer, 0 },
-    { "stringz", stringer, 1 },
+    { "string", stringer, 8 + 0 },
+    { "stringz", stringer, 8 + 1 },
 
     /* unaligned versions:  */
     { "data2.ua", stmt_cons_ua, 2 },

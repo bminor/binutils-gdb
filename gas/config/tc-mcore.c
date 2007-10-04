@@ -411,8 +411,8 @@ const pseudo_typeS md_pseudo_table[] =
      occupy can be taken into account when deciding whether or not to
      dump the current literal pool.
      XXX - currently we do not cope with the .space and .dcb.d directives.  */
-  { "ascii",    mcore_stringer,       0 },
-  { "asciz",    mcore_stringer,       1 },
+  { "ascii",    mcore_stringer,       8 + 0 },
+  { "asciz",    mcore_stringer,       8 + 1 },
   { "byte",     mcore_cons,           1 },
   { "dc",       mcore_cons,           2 },
   { "dc.b",     mcore_cons,           1 },
@@ -430,7 +430,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "quad",     mcore_cons,           8 },
   { "short",    mcore_cons,           2 },
   { "single",   mcore_float_cons,    'f'},
-  { "string",   mcore_stringer,       1 },
+  { "string",   mcore_stringer,       8 + 1 },
   { "word",     mcore_cons,           2 },
   { "fill",     mcore_fill,           0 },
 

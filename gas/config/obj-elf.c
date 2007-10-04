@@ -1618,7 +1618,7 @@ obj_elf_ident (int ignore ATTRIBUTE_UNUSED)
     }
   else
     subseg_set (comment_section, 0);
-  stringer (1);
+  stringer (8 + 1);
   subseg_set (old_section, old_subsection);
 }
 

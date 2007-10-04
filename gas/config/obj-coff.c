@@ -497,7 +497,7 @@ obj_coff_ident (int ignore ATTRIBUTE_UNUSED)
   subseg_new (".comment", 0);
 #endif
 
-  stringer (1);
+  stringer (8 + 1);
   subseg_set (current_seg, current_subseg);
 }
 

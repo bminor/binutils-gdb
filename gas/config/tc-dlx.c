@@ -1276,7 +1276,7 @@ const pseudo_typeS
 dlx_pseudo_table[] =
 {
   /* Some additional ops that are used by gcc-dlx.  */
-  {"asciiz", stringer, 1},
+  {"asciiz", stringer, 8 + 1},
   {"half", cons, 2},
   {"dword", cons, 8},
   {"word", cons, 4},

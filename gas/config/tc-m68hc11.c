@@ -263,7 +263,7 @@ const pseudo_typeS md_pseudo_table[] = {
   /* The following pseudo-ops are supported for MRI compatibility.  */
   {"fcb", cons, 1},
   {"fdb", cons, 2},
-  {"fcc", stringer, 1},
+  {"fcc", stringer, 8 + 1},
   {"rmb", s_space, 0},
 
   /* Motorola ALIS.  */

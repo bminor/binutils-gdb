@@ -1,3 +1,25 @@
+2007-10-04  Helge Deller  <deller@gmx.de>
+
+	* read.c (potable): Add string8, string16, string32 and string64.
+	Add bit size for stringer function.
+	(stringer_append_char): New.
+	(stringer): Use stringer_append_char().
+	* config/obj-coff.c (obj_coff_ident): Add bit size for stringer function.
+	* config/obj-elf.c (obj_elf_ident): Likewise.
+	* config/tc-alpha.c (s_alpha_stringer): Likewise.
+	* config/tc-dlx.c (dlx_pseudo_table): Likewise.
+	* config/tc-hppa.c (pa_stringer): Likewise.
+	* config/tc-ia64.c (md_pseudo_table, pseudo_opcode): Likewise.
+	* config/tc-m68hc11.c (md_pseudo_table): Likewise.
+	* config/tc-mcore.c (md_pseudo_table): Likewise.
+	* config/tc-mips.c (mips_pseudo_table): Likewise.
+	* config/tc-spu.c (md_pseudo_table): Likewise.
+	* config/tc-s390.c (md_pseudo_table): Likewise. Replace '2' by '1'.
+	* doc/as.texinfo (ABORT): Fix identing.
+	(String): Document new string8, string16, string32, string64
+	functions.
+	* NEWS: Mention the new feature.
+
 2007-10-03  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/5078

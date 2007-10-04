@@ -3776,7 +3776,7 @@ Some machine configurations provide additional directives.
 @menu
 * Abort::                       @code{.abort}
 @ifset COFF
-* ABORT (COFF)::                       @code{.ABORT}
+* ABORT (COFF)::                @code{.ABORT}
 @end ifset
 
 * Align::                       @code{.align @var{abs-expr} , @var{abs-expr}}
@@ -3908,7 +3908,7 @@ Some machine configurations provide additional directives.
 * Stab::                        @code{.stabd, .stabn, .stabs}
 @end ifset
 
-* String::                      @code{.string "@var{str}"}
+* String::                      @code{.string "@var{str}"}, @code{.string8 "@var{str}"}, @code{.string16 "@var{str}"}, @code{.string32 "@var{str}"}, @code{.string64 "@var{str}"}
 * Struct::			@code{.struct @var{expression}}
 @ifset ELF
 * SubSection::                  @code{.subsection}
@@ -5932,15 +5932,38 @@ All five fields are specified.
 @c end     have-stabs
 
 @node String
-@section @code{.string} "@var{str}"
+@section @code{.string} "@var{str}", @code{.string8} "@var{str}", @code{.string16}
+"@var{str}", @code{.string32} "@var{str}", @code{.string64} "@var{str}" 
 
 @cindex string, copying to object file
+@cindex string8, copying to object file
+@cindex string16, copying to object file
+@cindex string32, copying to object file
+@cindex string64, copying to object file
 @cindex @code{string} directive
+@cindex @code{string8} directive
+@cindex @code{string16} directive
+@cindex @code{string32} directive
+@cindex @code{string64} directive
 
 Copy the characters in @var{str} to the object file.  You may specify more than
 one string to copy, separated by commas.  Unless otherwise specified for a
 particular machine, the assembler marks the end of each string with a 0 byte.
 You can use any of the escape sequences described in @ref{Strings,,Strings}.
+
+The variants @code{string16}, @code{string32} and @code{string64} differ from 
+the @code{string} pseudo opcode in that each 8-bit character from @var{str} is
+copied and expanded to 16, 32 or 64 bits respectively.  The expanded characters
+are stored in target endianness byte order.
+
+Example:
+@smallexample
+	.string32 "BYE"
+expands to:
+	.string   "B\0\0\0Y\0\0\0E\0\0\0"  /* On little endian targets.  */
+	.string   "\0\0\0B\0\0\0Y\0\0\0E"  /* On big endian targets.  */
+@end smallexample
+
 
 @node Struct
 @section @code{.struct @var{expression}}

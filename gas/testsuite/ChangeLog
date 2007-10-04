@@ -1,3 +1,9 @@
+2007-10-04  Helge Deller  <deller@gmx.de>
+
+	* gas/all/gas.exp: Include new test "strings".
+	* gas/all/string.s: New
+	* gas/all/string.d: New.
+
 2007-10-01  Tristan Gingold  <gingold@adacore.com>
 
 	* gas/ppc/altivec_xcoff.s: Do not use .machine pseudo-ops as it

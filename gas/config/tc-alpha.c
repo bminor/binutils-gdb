@@ -4527,7 +4527,7 @@ s_alpha_stringer (int terminate)
 {
   alpha_current_align = 0;
   alpha_insn_label = NULL;
-  stringer (terminate);
+  stringer (8 + terminate);
 }
 
 /* Hook the normal space processing to reset known alignment.  */

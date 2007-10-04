@@ -1109,7 +1109,7 @@ static const pseudo_typeS mips_pseudo_table[] =
 
   /* Relatively generic pseudo-ops that happen to be used on MIPS
      chips.  */
-  {"asciiz", stringer, 1},
+  {"asciiz", stringer, 8 + 1},
   {"bss", s_change_sec, 'b'},
   {"err", s_err, 0},
   {"half", s_cons, 1},

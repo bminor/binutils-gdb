@@ -8150,7 +8150,7 @@ pa_stringer (int append_zero)
 	    }
 	}
     }
-  stringer (append_zero);
+  stringer (8 + append_zero);
   pa_undefine_label ();
 }
 

@@ -91,7 +91,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"int", spu_cons, 4},
   {"long", spu_cons, 4},
   {"quad", spu_cons, 8},
-  {"string", stringer, 1},
+  {"string", stringer, 8 + 1},
   {"word", spu_cons, 4},
   /* Force set to be treated as an instruction.  */
   {"set", NULL, 0},

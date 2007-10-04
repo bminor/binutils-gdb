@@ -270,8 +270,8 @@ static const pseudo_typeS potable[] = {
   {"abort", s_abort, 0},
   {"align", s_align_ptwo, 0},
   {"altmacro", s_altmacro, 1},
-  {"ascii", stringer, 0},
-  {"asciz", stringer, 1},
+  {"ascii", stringer, 8+0},
+  {"asciz", stringer, 8+1},
   {"balign", s_align_bytes, 0},
   {"balignw", s_align_bytes, -2},
   {"balignl", s_align_bytes, -4},
@@ -416,7 +416,11 @@ static const pseudo_typeS potable[] = {
   {"stabd", s_stab, 'd'},
   {"stabn", s_stab, 'n'},
   {"stabs", s_stab, 's'},
-  {"string", stringer, 1},
+  {"string", stringer, 8+1},
+  {"string8", stringer, 8+1},
+  {"string16", stringer, 16+1},
+  {"string32", stringer, 32+1},
+  {"string64", stringer, 64+1},
   {"struct", s_struct, 0},
 /* tag  */
   {"text", s_text, 0},
@@ -4961,16 +4965,52 @@ s_leb128 (int sign)
   demand_empty_rest_of_line ();
 }
 
-/* We read 0 or more ',' separated, double-quoted strings.
+static void
+stringer_append_char (int c, int bitsize)
+{
+  if (!target_big_endian)
+    FRAG_APPEND_1_CHAR (c);
+
+  switch (bitsize)
+    {
+    case 64:
+      FRAG_APPEND_1_CHAR (0);
+      FRAG_APPEND_1_CHAR (0);
+      FRAG_APPEND_1_CHAR (0);
+      FRAG_APPEND_1_CHAR (0);
+      /* Fall through.  */
+    case 32:
+      FRAG_APPEND_1_CHAR (0);
+      FRAG_APPEND_1_CHAR (0);
+      /* Fall through.  */
+    case 16:
+      FRAG_APPEND_1_CHAR (0);
+      /* Fall through.  */
+    case 8:
+      break;
+    default:
+      /* Called with invalid bitsize argument.  */
+      abort ();
+      break;
+    }
+  if (target_big_endian)
+    FRAG_APPEND_1_CHAR (c);
+}
+
+/* Worker to do .ascii etc statements.
+   Reads 0 or more ',' separated, double-quoted strings.
    Caller should have checked need_pass_2 is FALSE because we don't
-   check it.  */
+   check it.
+   Checks for end-of-line.
+   BITS_APPENDZERO says how many bits are in a target char.
+   The bottom bit is set if a NUL char should be appended to the strings.  */
 
 void
-stringer (/* Worker to do .ascii etc statements.  */
-	  /* Checks end-of-line.  */
-	  register int append_zero	/* 0: don't append '\0', else 1.  */)
+stringer (int bits_appendzero)
 {
-  register unsigned int c;
+  const int bitsize = bits_appendzero & ~7;
+  const int append_zero = bits_appendzero & 1;
+  unsigned int c;
   char *start;
 
 #ifdef md_flush_pending_output
@@ -5008,14 +5048,13 @@ stringer (/* Worker to do .ascii etc statements.  */
 	case '\"':
 	  ++input_line_pointer;	/*->1st char of string.  */
 	  start = input_line_pointer;
+
 	  while (is_a_char (c = next_char_of_string ()))
-	    {
-	      FRAG_APPEND_1_CHAR (c);
-	    }
+	    stringer_append_char (c, bitsize);
+
 	  if (append_zero)
-	    {
-	      FRAG_APPEND_1_CHAR (0);
-	    }
+	    stringer_append_char (0, bitsize);
+
 	  know (input_line_pointer[-1] == '\"');
 
 #ifndef NO_LISTING
@@ -5042,11 +5081,10 @@ stringer (/* Worker to do .ascii etc statements.  */
 	case '<':
 	  input_line_pointer++;
 	  c = get_single_number ();
-	  FRAG_APPEND_1_CHAR (c);
+	  stringer_append_char (c, bitsize);
 	  if (*input_line_pointer != '>')
-	    {
-	      as_bad (_("expected <nn>"));
-	    }
+	    as_bad (_("expected <nn>"));
+
 	  input_line_pointer++;
 	  break;
 	case ',':
@@ -5058,7 +5096,7 @@ stringer (/* Worker to do .ascii etc statements.  */
     }
 
   demand_empty_rest_of_line ();
-}				/* stringer() */
+}
 
 /* FIXME-SOMEDAY: I had trouble here on characters with the
     high bits set.  We'll probably also have trouble with

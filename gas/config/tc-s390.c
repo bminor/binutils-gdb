@@ -95,7 +95,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "long",	s390_elf_cons,	4 },
   { "quad",     s390_elf_cons,  8 },
   { "ltorg",    s390_literals,  0 },
-  { "string",   stringer,       2 },
+  { "string",   stringer,       8 + 1 },
   { NULL,	NULL,		0 }
 };
 
