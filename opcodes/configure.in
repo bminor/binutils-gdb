@@ -97,19 +97,25 @@ AC_SUBST(cgendir)
 
 using_cgen=no
 
-# Horrible hacks to build DLLs on Windows.
-WIN32LDFLAGS=
-WIN32LIBADD=
-case "${host}" in
-*-*-cygwin*)
-  if test "$enable_shared" = "yes"; then
-    WIN32LDFLAGS="-no-undefined"
-    WIN32LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
-  fi
-  ;;
-esac
-AC_SUBST(WIN32LDFLAGS)
-AC_SUBST(WIN32LIBADD)
+# Horrible hacks to build DLLs on Windows and a shared library elsewhere.
+SHARED_LDFLAGS=
+SHARED_LIBADD=
+SHARED_DEPENDENCIES=
+if test "$enable_shared" = "yes"; then
+  case "${host}" in
+    *-*-cygwin*)
+      SHARED_LDFLAGS="-no-undefined"
+      SHARED_LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
+      ;;
+    *)
+      SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so"
+      SHARED_DEPENDENCIES="`pwd`/../bfd/.libs/libbfd.la"
+      ;;
+  esac
+fi
+AC_SUBST(SHARED_LDFLAGS)
+AC_SUBST(SHARED_LIBADD)
+AC_SUBST(SHARED_DEPENDENCIES)
 
 # target-specific stuff:
 

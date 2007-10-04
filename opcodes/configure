@@ -458,7 +458,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LIBTOOL SED EGREP FGREP GREP LD DUMPBIN ac_ct_DUMPBIN NM LN_S lt_ECHO CPP WARN_CFLAGS NO_WERROR MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE CC_FOR_BUILD EXEEXT_FOR_BUILD HDEFINES CGEN_MAINT_TRUE CGEN_MAINT_FALSE cgendir WIN32LDFLAGS WIN32LIBADD archdefs BFD_MACHINES LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LIBTOOL SED EGREP FGREP GREP LD DUMPBIN ac_ct_DUMPBIN NM LN_S lt_ECHO CPP WARN_CFLAGS NO_WERROR MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE CC_FOR_BUILD EXEEXT_FOR_BUILD HDEFINES CGEN_MAINT_TRUE CGEN_MAINT_FALSE cgendir SHARED_LDFLAGS SHARED_LIBADD SHARED_DEPENDENCIES archdefs BFD_MACHINES LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -11433,17 +11433,23 @@ fi
 
 using_cgen=no
 
-# Horrible hacks to build DLLs on Windows.
-WIN32LDFLAGS=
-WIN32LIBADD=
-case "${host}" in
-*-*-cygwin*)
-  if test "$enable_shared" = "yes"; then
-    WIN32LDFLAGS="-no-undefined"
-    WIN32LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
-  fi
-  ;;
-esac
+# Horrible hacks to build DLLs on Windows and a shared library elsewhere.
+SHARED_LDFLAGS=
+SHARED_LIBADD=
+SHARED_DEPENDENCIES=
+if test "$enable_shared" = "yes"; then
+  case "${host}" in
+    *-*-cygwin*)
+      SHARED_LDFLAGS="-no-undefined"
+      SHARED_LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
+      ;;
+    *)
+      SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so"
+      SHARED_DEPENDENCIES="`pwd`/../bfd/.libs/libbfd.la"
+      ;;
+  esac
+fi
+
 
 
 
@@ -12625,8 +12631,9 @@ s,@HDEFINES@,$HDEFINES,;t t
 s,@CGEN_MAINT_TRUE@,$CGEN_MAINT_TRUE,;t t
 s,@CGEN_MAINT_FALSE@,$CGEN_MAINT_FALSE,;t t
 s,@cgendir@,$cgendir,;t t
-s,@WIN32LDFLAGS@,$WIN32LDFLAGS,;t t
-s,@WIN32LIBADD@,$WIN32LIBADD,;t t
+s,@SHARED_LDFLAGS@,$SHARED_LDFLAGS,;t t
+s,@SHARED_LIBADD@,$SHARED_LIBADD,;t t
+s,@SHARED_DEPENDENCIES@,$SHARED_DEPENDENCIES,;t t
 s,@archdefs@,$archdefs,;t t
 s,@BFD_MACHINES@,$BFD_MACHINES,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t

@@ -367,10 +367,11 @@ libopcodes_la_SOURCES =  dis-buf.c disassemble.c dis-init.c
 # Unfortunately this causes libtool to add -L$(libdir), referring to the
 # planned install directory of libbfd.  This can cause us to pick up an
 # old version of libbfd, or to pick up libbfd for the wrong architecture
-# if host != build.
-libopcodes_la_DEPENDENCIES = $(OFILES)
-libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@
-libopcodes_la_LDFLAGS = -release `cat ../bfd/libtool-soversion` @WIN32LDFLAGS@
+# if host != build. So for building with shared libraries we use a
+# hardcoded path to libbfd.so instead of relying on the entries in libbfd.la.
+libopcodes_la_DEPENDENCIES = $(OFILES) @SHARED_DEPENDENCIES@
+libopcodes_la_LIBADD = $(OFILES) @SHARED_LIBADD@
+libopcodes_la_LDFLAGS = -release `cat ../bfd/libtool-soversion` @SHARED_LDFLAGS@
 
 # libtool will build .libs/libopcodes.a.  We create libopcodes.a in
 # the build directory so that we don't have to convert all the

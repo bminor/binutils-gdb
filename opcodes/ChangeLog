@@ -1,5 +1,17 @@
 2007-10-04  Nick Clifton  <nickc@redhat.com>
 
+	* configure.in (WIN32LDFLAGS): Rename to SHARED_LDFLAGS.
+	(WIN32LIBADD): Rename to SHARED_LIBADD
+	(SHARED_DEPENDENCIES): New exported variable.
+	(enable_shared): Add dependency upon libbfd.la for non-cygwin
+	based shared library builds.
+	* Makefile.am (libopcodes_la_DEPENDENCIES): Append
+	SHARED_DEPENDENCIES.
+	(libopcodes_la_LIBADD): Rename WIN32LIBADD to SHARED_LIBADD.
+	(libopcodes_la_LDFLAGS): Rename WIN32LDFLAGS to SHARED_LDFLAGS.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 	PR gas/5100
 	* arc-opc.c (insert_offset): Fix spelling mistake in error
 	message.
