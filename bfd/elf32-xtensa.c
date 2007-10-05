@@ -4780,20 +4780,45 @@ text_action_add_literal (text_action_list *l,
 }
 
 
-static bfd_vma 
-offset_with_removed_text (text_action_list *action_list, bfd_vma offset)
+/* Find the total offset adjustment for the relaxations specified by
+   text_actions, beginning from a particular starting action.  This is
+   typically used from offset_with_removed_text to search an entire list of
+   actions, but it may also be called directly when adjusting adjacent offsets
+   so that each search may begin where the previous one left off.  */
+
+static int
+removed_by_actions (text_action **p_start_action,
+		    bfd_vma offset,
+		    bfd_boolean before_fill)
 {
   text_action *r;
   int removed = 0;
 
-  for (r = action_list->head; r && r->offset <= offset; r = r->next)
+  r = *p_start_action;
+  while (r)
     {
-      if (r->offset < offset
-	  || (r->action == ta_fill && r->removed_bytes < 0))
-	removed += r->removed_bytes;
+      if (r->offset > offset)
+	break;
+
+      if (r->offset == offset
+	  && (before_fill || r->action != ta_fill || r->removed_bytes >= 0))
+	break;
+
+      removed += r->removed_bytes;
+
+      r = r->next;
     }
 
-  return (offset - removed);
+  *p_start_action = r;
+  return removed;
+}
+
+
+static bfd_vma 
+offset_with_removed_text (text_action_list *action_list, bfd_vma offset)
+{
+  text_action *r = action_list->head;
+  return offset - removed_by_actions (&r, offset, FALSE);
 }
 
 
@@ -4807,20 +4832,6 @@ action_list_count (text_action_list *action_list)
       count++;
     }
   return count;
-}
-
-
-static bfd_vma
-offset_with_removed_text_before_fill (text_action_list *action_list,
-				      bfd_vma offset)
-{
-  text_action *r;
-  int removed = 0;
-
-  for (r = action_list->head; r && r->offset < offset; r = r->next)
-    removed += r->removed_bytes;
-
-  return (offset - removed);
 }
 
 
@@ -8943,14 +8954,16 @@ relax_property_section (bfd *abfd,
 		  || target_relax_info->is_relaxable_asm_section ))
 	    {
 	      /* Translate the relocation's destination.  */
-	      bfd_vma new_offset, new_end_offset;
+	      bfd_vma old_offset = val.r_rel.target_offset;
+	      bfd_vma new_offset;
 	      long old_size, new_size;
-
-	      new_offset = offset_with_removed_text
-		(&target_relax_info->action_list, val.r_rel.target_offset);
+	      text_action *act = target_relax_info->action_list.head;
+	      new_offset = old_offset -
+		removed_by_actions (&act, old_offset, FALSE);
 
 	      /* Assert that we are not out of bounds.  */
 	      old_size = bfd_get_32 (abfd, size_p);
+	      new_size = old_size;
 
 	      if (old_size == 0)
 		{
@@ -8962,39 +8975,34 @@ relax_property_section (bfd *abfd,
 		     offset before or after the fill address depending
 		     on whether the expanding unreachable entry
 		     preceeds it.  */
-		  if (last_zfill_target_sec
-		      && last_zfill_target_sec == target_sec
-		      && last_zfill_target_offset == val.r_rel.target_offset)
-		    new_end_offset = new_offset;
-		  else
+		  if (last_zfill_target_sec == 0
+		      || last_zfill_target_sec != target_sec
+		      || last_zfill_target_offset != old_offset)
 		    {
-		      new_end_offset = new_offset;
-		      new_offset = offset_with_removed_text_before_fill
-			(&target_relax_info->action_list,
-			 val.r_rel.target_offset);
+		      bfd_vma new_end_offset = new_offset;
+
+		      /* Recompute the new_offset, but this time don't
+			 include any fill inserted by relaxation.  */
+		      act = target_relax_info->action_list.head;
+		      new_offset = old_offset -
+			removed_by_actions (&act, old_offset, TRUE);
 
 		      /* If it is not unreachable and we have not yet
 			 seen an unreachable at this address, place it
 			 before the fill address.  */
-		      if (!flags_p
-			  || (bfd_get_32 (abfd, flags_p)
-			      & XTENSA_PROP_UNREACHABLE) == 0)
-			new_end_offset = new_offset;
-		      else
+		      if (flags_p && (bfd_get_32 (abfd, flags_p)
+				      & XTENSA_PROP_UNREACHABLE) != 0)
 			{
+			  new_size = new_end_offset - new_offset;
+
 			  last_zfill_target_sec = target_sec;
-			  last_zfill_target_offset = val.r_rel.target_offset;
+			  last_zfill_target_offset = old_offset;
 			}
 		    }
 		}
 	      else
-		{
-		  new_end_offset = offset_with_removed_text_before_fill
-		    (&target_relax_info->action_list,
-		     val.r_rel.target_offset + old_size);
-		}
-
-	      new_size = new_end_offset - new_offset;
+		new_size -=
+		    removed_by_actions (&act, old_offset + old_size, TRUE);
 
 	      if (new_size != old_size)
 		{
@@ -9002,9 +9010,9 @@ relax_property_section (bfd *abfd,
 		  pin_contents (sec, contents);
 		}
 
-	      if (new_offset != val.r_rel.target_offset)
+	      if (new_offset != old_offset)
 		{
-		  bfd_vma diff = new_offset - val.r_rel.target_offset;
+		  bfd_vma diff = new_offset - old_offset;
 		  irel->r_addend += diff;
 		  pin_internal_relocs (sec, internal_relocs);
 		}
@@ -9257,19 +9265,14 @@ relax_section_symbols (bfd *abfd, asection *sec)
 
       if (isym->st_shndx == sec_shndx)
 	{
-	  bfd_vma new_address = offset_with_removed_text
-	    (&relax_info->action_list, isym->st_value);
-	  bfd_vma new_size = isym->st_size;
+	  text_action *act = relax_info->action_list.head;
+	  bfd_vma orig_addr = isym->st_value;
+
+	  isym->st_value -= removed_by_actions (&act, orig_addr, FALSE);
 
 	  if (ELF32_ST_TYPE (isym->st_info) == STT_FUNC)
-	    {
-	      bfd_vma new_end = offset_with_removed_text
-		(&relax_info->action_list, isym->st_value + isym->st_size);
-	      new_size = new_end - new_address;
-	    }
-
-	  isym->st_value = new_address;
-	  isym->st_size = new_size;
+	    isym->st_size -=
+	      removed_by_actions (&act, orig_addr + isym->st_size, FALSE);
 	}
     }
 
@@ -9287,20 +9290,15 @@ relax_section_symbols (bfd *abfd, asection *sec)
 	   || sym_hash->root.type == bfd_link_hash_defweak)
 	  && sym_hash->root.u.def.section == sec)
 	{
-	  bfd_vma new_address = offset_with_removed_text
-	    (&relax_info->action_list, sym_hash->root.u.def.value);
-	  bfd_vma new_size = sym_hash->size;
+	  text_action *act = relax_info->action_list.head;
+	  bfd_vma orig_addr = sym_hash->root.u.def.value;
+
+	  sym_hash->root.u.def.value -=
+	    removed_by_actions (&act, orig_addr, FALSE);
 
 	  if (sym_hash->type == STT_FUNC)
-	    {
-	      bfd_vma new_end = offset_with_removed_text
-		(&relax_info->action_list,
-		 sym_hash->root.u.def.value + sym_hash->size);
-	      new_size = new_end - new_address;
-	    }
-
-	  sym_hash->root.u.def.value = new_address;
-	  sym_hash->size = new_size;
+	    sym_hash->size -=
+	      removed_by_actions (&act, orig_addr + sym_hash->size, FALSE);
 	}
     }
 

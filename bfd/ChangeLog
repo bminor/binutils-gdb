@@ -1,3 +1,11 @@
+2007-10-05  Bob Wilson  <bob.wilson@acm.org>
+	
+	* elf32-xtensa.c (removed_by_actions): New.
+	(offset_with_removed_text): Reimplement using removed_by_actions.
+	(offset_with_removed_text_before_fill): Delete.
+	(relax_property_section): Use removed_by_actions.  Rearrange logic.
+	(relax_section_symbols): Likewise.
+	
 2007-10-04  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (reloc_bfd_fix_struct): Delete target_abfd field.
