@@ -1577,7 +1577,7 @@ static const struct dis386 reg_table[][8] = {
   /* REG_F6 */
   {
     { "testA",	{ Eb, Ib } },
-    { "(bad)",	{ Eb } },
+    { "(bad)",	{ XX } },
     { "notA",	{ Eb } },
     { "negA",	{ Eb } },
     { "mulA",	{ Eb } },	/* Don't print the implicit %al register,  */
@@ -1790,7 +1790,7 @@ static const struct dis386 prefix_table[][4] = {
     { MOD_TABLE (MOD_0F16_PREFIX_0) },
     { "movshdup", { XM, EXx } },
     { "movhpd",	{ XM, EXq } },
-    { "(bad)",	{ XM, EXq } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0F2A */
@@ -1853,16 +1853,16 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "rsqrtps",{ XM, EXx } },
     { "rsqrtss",{ XM, EXd } },
-    { "(bad)",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0F53 */
   {
     { "rcpps",	{ XM, EXx } },
     { "rcpss",	{ XM, EXd } },
-    { "(bad)",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0F58 */
@@ -1894,7 +1894,7 @@ static const struct dis386 prefix_table[][4] = {
     { "cvtdq2ps", { XM, EXx } },
     { "cvttps2dq", { XM, EXx } },
     { "cvtps2dq", { XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0F5C */
@@ -1955,18 +1955,18 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0F6C */
   {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
     { "punpcklqdq", { XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0F6D */
   {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
     { "punpckhqdq", { XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0F6F */
@@ -1974,7 +1974,7 @@ static const struct dis386 prefix_table[][4] = {
     { "movq",	{ MX, EM } },
     { "movdqu",	{ XM, EXx } },
     { "movdqa",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0F70 */
@@ -2003,16 +2003,16 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0F7C */
   {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
     { "haddpd",	{ XM, EXx } },
     { "haddps",	{ XM, EXx } },
   },
 
   /* PREFIX_0F7D */
   {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
     { "hsubpd",	{ XM, EXx } },
     { "hsubps",	{ XM, EXx } },
   },
@@ -2022,7 +2022,7 @@ static const struct dis386 prefix_table[][4] = {
     { "movK",	{ Edq, MX } },
     { "movq",	{ XM, EXq } },
     { "movK",	{ Edq, XM } },
-    { "(bad)",	{ Ed, XM } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0F7F */
@@ -2030,7 +2030,7 @@ static const struct dis386 prefix_table[][4] = {
     { "movq",	{ EM, MX } },
     { "movdqu",	{ EXx,  XM } },
     { "movdqa",	{ EXx,  XM } },
-    { "(bad)",	{ EXx,  XM } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0FB8 */
@@ -2059,15 +2059,15 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0FD0 */
   {
-    { "(bad)",	{ MX, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
     { "addsubpd", { XM, EXx } },
     { "addsubps", { XM, EXx } },
   },
 
   /* PREFIX_0FD6 */
   {
-    { "(bad)",	{ EXx,  XM } },
+    { "(bad)",	{ XX } },
     { "movq2dq",{ XM, MS } },
     { "movq",	{ EXq, XM } },
     { "movdq2q",{ MX, XS } },
@@ -2075,7 +2075,7 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0FE6 */
   {
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
     { "cvtdq2pd", { XM, EXq } },
     { "cvttpd2dq", { XM, EXx } },
     { "cvtpd2dq", { XM, EXx } },
@@ -2084,25 +2084,25 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0FE7 */
   {
     { "movntq",	{ EM, MX } },
-    { "(bad)",	{ EM, XM } },
+    { "(bad)",	{ XX } },
     { "movntdq",{ EM, XM } },
-    { "(bad)",	{ EM, XM } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0FF0 */
   {
-    { "(bad)",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
     { MOD_TABLE (MOD_0FF0_PREFIX_3) },
   },
 
   /* PREFIX_0FF7 */
   {
     { "maskmovq", { MX, MS } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
     { "maskmovdqu", { XM, XS } },
-    { "(bad)",	{ XM, EXx } },
+    { "(bad)",	{ XX } },
   },
 
   /* PREFIX_0F3810 */
