@@ -108,13 +108,13 @@
 #endif
 
 int
-yyparse PARAMS ((void));
+yyparse (void);
 
 static int
-yylex PARAMS ((void));
+yylex (void);
 
 void
-yyerror PARAMS ((char *));
+yyerror (char *);
 
 %}
 
@@ -151,7 +151,7 @@ yyerror PARAMS ((char *));
 %{
 /* YYSTYPE gets defined by %union.  */
 static int
-parse_number PARAMS ((char *, int, int, YYSTYPE *));
+parse_number (char *, int, int, YYSTYPE *);
 %}
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly

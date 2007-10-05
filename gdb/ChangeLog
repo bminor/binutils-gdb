@@ -1,3 +1,8 @@
+2007-10-03  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* objc-exp.y: ARI fix: remove 4 PARAMS. 
+
+
 2007-10-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Use uniform spacing.  Correct version number for GDB 6.7
