@@ -5848,7 +5848,7 @@ static bfd_boolean move_shared_literal
 static bfd_boolean relax_section (bfd *, asection *, struct bfd_link_info *);
 static bfd_boolean translate_section_fixes (asection *);
 static bfd_boolean translate_reloc_bfd_fix (reloc_bfd_fix *);
-static void translate_reloc (const r_reloc *, r_reloc *);
+static asection *translate_reloc (const r_reloc *, r_reloc *, asection *);
 static void shrink_dynamic_reloc_sections
   (struct bfd_link_info *, bfd *, asection *, Elf_Internal_Rela *);
 static bfd_boolean move_literal
@@ -8094,6 +8094,8 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 	  if (relax_info->is_relaxable_literal_section
 	      || relax_info->is_relaxable_asm_section)
 	    {
+	      pin_internal_relocs (sec, internal_relocs);
+
 	      if (r_type != R_XTENSA_NONE
 		  && find_removed_literal (&relax_info->removed_list,
 					   irel->r_offset))
@@ -8104,7 +8106,6 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 		  irel->r_info = ELF32_R_INFO (0, R_XTENSA_NONE);
 		  irel->r_offset = offset_with_removed_text
 		    (&relax_info->action_list, irel->r_offset);
-		  pin_internal_relocs (sec, internal_relocs);
 		  continue;
 		}
 
@@ -8156,10 +8157,7 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 		  || target_relax_info->is_relaxable_asm_section))
 	    {
 	      r_reloc new_reloc;
-	      reloc_bfd_fix *fix;
-	      bfd_vma addend_displacement;
-
-	      translate_reloc (&r_rel, &new_reloc);
+	      target_sec = translate_reloc (&r_rel, &new_reloc, target_sec);
 
 	      if (r_type == R_XTENSA_DIFF8
 		  || r_type == R_XTENSA_DIFF16
@@ -8226,21 +8224,32 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 
 		  pin_contents (sec, contents);
 		}
+	      else
+		{
+		  /* If the relocation still references a section in the same
+		     input file, modify the relocation directly instead of
+		     adding a "fix" record.  */
+		  if (target_sec->owner == abfd)
+		    {
+		      unsigned r_symndx = ELF32_R_SYM (new_reloc.rela.r_info);
+		      irel->r_info = ELF32_R_INFO (r_symndx, r_type);
+		      irel->r_addend = new_reloc.rela.r_addend;
+		      pin_internal_relocs (sec, internal_relocs);
+		    }
+		  else
+		    {
+		      bfd_vma addend_displacement;
+		      reloc_bfd_fix *fix;
 
-	      /* FIXME: If the relocation still references a section in
-		 the same input file, the relocation should be modified
-		 directly instead of adding a "fix" record.  */
-
-	      addend_displacement =
-		new_reloc.target_offset + new_reloc.virtual_offset;
-
-	      fix = reloc_bfd_fix_init (sec, source_offset, r_type,
-					r_reloc_get_section (&new_reloc),
-					addend_displacement, TRUE);
-	      add_fix (sec, fix);
+		      addend_displacement =
+			new_reloc.target_offset + new_reloc.virtual_offset;
+		      fix = reloc_bfd_fix_init (sec, source_offset, r_type,
+						target_sec,
+						addend_displacement, TRUE);
+		      add_fix (sec, fix);
+		    }
+		}
 	    }
-
-	  pin_internal_relocs (sec, internal_relocs);
 	}
     }
 
@@ -8573,26 +8582,22 @@ translate_reloc_bfd_fix (reloc_bfd_fix *fix)
 
 /* Fix up a relocation to take account of removed literals.  */
 
-static void
-translate_reloc (const r_reloc *orig_rel, r_reloc *new_rel)
+static asection *
+translate_reloc (const r_reloc *orig_rel, r_reloc *new_rel, asection *sec)
 {
-  asection *sec;
   xtensa_relax_info *relax_info;
   removed_literal *removed;
-  bfd_vma new_offset, target_offset, removed_bytes;
+  bfd_vma target_offset, base_offset;
+  text_action *act;
 
   *new_rel = *orig_rel;
 
   if (!r_reloc_is_defined (orig_rel))
-    return;
-  sec = r_reloc_get_section (orig_rel);
+    return sec ;
 
   relax_info = get_xtensa_relax_info (sec);
-  BFD_ASSERT (relax_info);
-
-  if (!relax_info->is_relaxable_literal_section
-      && !relax_info->is_relaxable_asm_section)
-    return;
+  BFD_ASSERT (relax_info && (relax_info->is_relaxable_literal_section
+			     || relax_info->is_relaxable_asm_section));
 
   target_offset = orig_rel->target_offset;
 
@@ -8623,19 +8628,37 @@ translate_reloc (const r_reloc *orig_rel, r_reloc *new_rel)
 	  if (!relax_info
 	      || (!relax_info->is_relaxable_literal_section
 		  && !relax_info->is_relaxable_asm_section))
-	    return;
+	    return sec;
 	}
       target_offset = new_rel->target_offset;
     }
 
-  /* ...and the target address may have been moved within its section.  */
-  new_offset = offset_with_removed_text (&relax_info->action_list,
-					 target_offset);
+  /* Find the base offset of the reloc symbol, excluding any addend from the
+     reloc or from the section contents (for a partial_inplace reloc).  Then
+     find the adjusted values of the offsets due to relaxation.  The base
+     offset is needed to determine the change to the reloc's addend; the reloc
+     addend should not be adjusted due to relaxations located before the base
+     offset.  */
 
-  /* Modify the offset and addend.  */
-  removed_bytes = target_offset - new_offset;
-  new_rel->target_offset = new_offset;
-  new_rel->rela.r_addend -= removed_bytes;
+  base_offset = r_reloc_get_target_offset (new_rel) - new_rel->rela.r_addend;
+  act = relax_info->action_list.head;
+  if (base_offset <= target_offset)
+    {
+      int base_removed = removed_by_actions (&act, base_offset, FALSE);
+      int addend_removed = removed_by_actions (&act, target_offset, FALSE);
+      new_rel->target_offset = target_offset - base_removed - addend_removed;
+      new_rel->rela.r_addend -= addend_removed;
+    }
+  else
+    {
+      /* Handle a negative addend.  The base offset comes first.  */
+      int tgt_removed = removed_by_actions (&act, target_offset, FALSE);
+      int addend_removed = removed_by_actions (&act, base_offset, FALSE);
+      new_rel->target_offset = target_offset - tgt_removed;
+      new_rel->rela.r_addend += addend_removed;
+    }
+
+  return sec;
 }
 
 

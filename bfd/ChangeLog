@@ -1,5 +1,19 @@
 2007-10-05  Bob Wilson  <bob.wilson@acm.org>
 	
+	* elf32-xtensa.c (relax_section): Call pin_internal_relocs when
+	changing a relocation's offset.  Adjust call to translate_reloc.  Do
+	not add a fix record for a DIFF reloc.  For other relocs, only add a
+	fix record if the translated target is in a different object file;
+	otherwise, just update the relocation.  Call pin_internal_relocs when
+	updating a reloc but not when adding a fix record.
+	(translate_reloc): Get the target section from a new argument, not
+	from the relocation.  Change check for relaxable sections to an
+	assertion.  Compute separate offset adjustments for the base symbol
+	and the addend, and set the new relocation's addend correctly.  Return
+	the new target section.
+	
+2007-10-05  Bob Wilson  <bob.wilson@acm.org>
+	
 	* elf32-xtensa.c (elf_xtensa_relocate_section): Remove updates of
 	r_type and howto after calling do_fix_for_relocateable_link and
 	do_fix_for_final_link.
