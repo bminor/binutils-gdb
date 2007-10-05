@@ -1,3 +1,8 @@
+2007-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_modrm_byte): Check the first 2 8bit
+	immediate operands directly for instructions with 4 operands.
+
 2007-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/5109

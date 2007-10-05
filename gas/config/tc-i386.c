@@ -4421,11 +4421,12 @@ build_modrm_byte (void)
 	    source = 0;
 	  break;
 	case 4:
-	  /* When there are 4 operands, the first two must be immediate
-	     operands. The source operand will be the 3rd one.  */
+	  /* When there are 4 operands, the first two must be 8bit
+	     immediate operands. The source operand will be the 3rd
+	     one.  */
 	  assert (i.imm_operands == 2
-		  && operand_type_check (i.types[0], imm)
-		  && operand_type_check (i.types[1], imm));
+		  && i.types[0].bitfield.imm8
+		  && i.types[1].bitfield.imm8);
 	  source = 2;
 	  break;
 	default:
