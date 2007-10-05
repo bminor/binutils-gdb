@@ -2134,7 +2134,8 @@ get_offsets (void)
 	do_sections = 0;
     }
 
-  free_symfile_segment_data (data);
+  if (data)
+    free_symfile_segment_data (data);
 
   if (do_sections)
     {
