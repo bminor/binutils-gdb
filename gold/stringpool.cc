@@ -111,7 +111,7 @@ Stringpool_template<Stringpool_char>::Stringpool_hash::operator()(
 	  const char* p = reinterpret_cast<const char*>(s);
 	  for (size_t i = 0; i < sizeof(Stringpool_char); ++i)
 	    {
-	      result &= (size_t) *p++;
+	      result ^= (size_t) *p++;
 	      result *= 1099511628211ULL;
 	    }
 	  ++s;
