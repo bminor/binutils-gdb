@@ -68,8 +68,10 @@
 #define CpuSVME		(CpuPadLock + 1)
 /* VMX Instructions required */
 #define CpuVMX		(CpuSVME + 1)
+/* SMX Instructions required */
+#define CpuSMX		(CpuVMX + 1)
 /* SSSE3 support required */
-#define CpuSSSE3	(CpuVMX + 1)
+#define CpuSSSE3	(CpuSMX + 1)
 /* SSE4a support required */
 #define CpuSSE4a	(CpuSSSE3 + 1)
 /* ABM New Instructions required */
@@ -123,6 +125,7 @@ typedef union i386_cpu_flags
       unsigned int cpupadlock:1;
       unsigned int cpusvme:1;
       unsigned int cpuvmx:1;
+      unsigned int cpusmx:1;
       unsigned int cpussse3:1;
       unsigned int cpusse4a:1;
       unsigned int cpuabm:1;

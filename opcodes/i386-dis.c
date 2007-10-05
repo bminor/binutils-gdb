@@ -1075,7 +1075,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "sysenter",		{ XX } },
   { "sysexit",		{ XX } },
   { "(bad)",		{ XX } },
-  { "(bad)",		{ XX } },
+  { "getsec",		{ XX } },
   /* 38 */
   { THREE_BYTE_TABLE (THREE_BYTE_0F38) },
   { "(bad)",		{ XX } },

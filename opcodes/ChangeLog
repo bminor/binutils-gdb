@@ -1,5 +1,19 @@
 2007-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (dis386_twobyte): Add getsec.
+
+	* i386-gen.c (cpu_flags): Add CpuSMX.
+
+	* i386-opc.h (CpuSMX): New.
+	(CpuSSSE3): Updated.
+	(i386_cpu_flags): Add cpusmx.
+
+	* i386-opc.tbl: Add getsec.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2007-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (reg_table): Use "{ XX }" on "(bad)".
 	(prefix_table): Likewise.
 

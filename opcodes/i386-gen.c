@@ -239,6 +239,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuPadLock),
   BITFIELD (CpuSVME),
   BITFIELD (CpuVMX),
+  BITFIELD (CpuSMX),
   BITFIELD (CpuABM),
   BITFIELD (CpuLM),
   BITFIELD (Cpu64),
