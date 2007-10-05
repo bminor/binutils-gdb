@@ -2095,7 +2095,6 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	      if (!do_fix_for_relocatable_link (rel, input_bfd, input_section,
 						contents))
 		return FALSE;
-	      r_type = ELF32_R_TYPE (rel->r_info);
 	    }
 
 	  if (r_type == R_XTENSA_ASM_SIMPLIFY)
@@ -2165,10 +2164,6 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	  /* Check if this references a section in another input file.  */
 	  do_fix_for_final_link (rel, input_bfd, input_section, contents,
 				 &relocation);
-
-	  /* Update some already cached values.  */
-	  r_type = ELF32_R_TYPE (rel->r_info);
-	  howto = &elf_howto_table[r_type];
 	}
 
       /* Sanity check the address.  */

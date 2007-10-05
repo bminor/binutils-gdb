@@ -1,5 +1,11 @@
 2007-10-05  Bob Wilson  <bob.wilson@acm.org>
 	
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Remove updates of
+	r_type and howto after calling do_fix_for_relocateable_link and
+	do_fix_for_final_link.
+	
+2007-10-05  Bob Wilson  <bob.wilson@acm.org>
+	
 	* elf32-xtensa.c (removed_by_actions): New.
 	(offset_with_removed_text): Reimplement using removed_by_actions.
 	(offset_with_removed_text_before_fill): Delete.
