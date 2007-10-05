@@ -1,7 +1,11 @@
+2007-10-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (get_offsets): Only call free_symfile_segment_data if
+	data was allocated.
+
 2007-10-03  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* objc-exp.y: ARI fix: remove 4 PARAMS. 
-
 
 2007-10-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
