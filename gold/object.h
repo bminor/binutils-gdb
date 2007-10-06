@@ -487,8 +487,8 @@ class Symbol_value
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Value;
 
   Symbol_value()
-    : output_symtab_index_(0), input_shndx_(0), needs_output_address_(false),
-      value_(0)
+    : output_symtab_index_(0), input_shndx_(0), is_section_symbol_(false),
+      needs_output_address_(false), value_(0)
   { }
 
   // Get the value of this symbol.  OBJECT is the object in which this
@@ -499,7 +499,8 @@ class Symbol_value
   {
     if (!this->needs_output_address_)
       return this->value_ + addend;
-    return object->local_value(this->input_shndx_, this->value_, addend);
+    return object->local_value(this->input_shndx_, this->value_,
+			       this->is_section_symbol_, addend);
   }
 
   // Set the value of this symbol in the output symbol table.
@@ -560,16 +561,23 @@ class Symbol_value
   set_input_shndx(unsigned int i)
   { this->input_shndx_ = i; }
 
+  // Record that this is a section symbol.
+  void
+  set_is_section_symbol()
+  { this->is_section_symbol_ = true; }
+
  private:
   // The index of this local symbol in the output symbol table.  This
   // will be -1 if the symbol should not go into the symbol table.
   unsigned int output_symtab_index_;
   // The section index in the input file in which this symbol is
   // defined.
-  unsigned int input_shndx_ : 31;
+  unsigned int input_shndx_ : 30;
+  // Whether this is a STT_SECTION symbol.
+  bool is_section_symbol_ : 1;
   // Whether getting the value of this symbol requires calling an
   // Output_section method.  For example, this will be true of a
-  // STT_SECTION symbol in a SHF_MERGE section.
+  // symbol in a SHF_MERGE section.
   bool needs_output_address_ : 1;
   // The value of the symbol.  If !needs_output_address_, this is the
   // value in the output file.  If needs_output_address_, this is the
@@ -660,10 +668,12 @@ class Sized_relobj : public Relobj
   }
 
   // Return the value of a local symbol define in input section SHNDX,
-  // with value VALUE, adding addend ADDEND.  This handles SHF_MERGE
-  // sections.
+  // with value VALUE, adding addend ADDEND.  IS_SECTION_SYMBOL
+  // indicates whether the symbol is a section symbol.  This handles
+  // SHF_MERGE sections.
   Address
-  local_value(unsigned int shndx, Address value, Address addend) const;
+  local_value(unsigned int shndx, Address value, bool is_section_symbol,
+	      Address addend) const;
 
  private:
   // For convenience.

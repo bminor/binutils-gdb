@@ -586,6 +586,9 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
       unsigned int shndx = sym.get_st_shndx();
       lv.set_input_shndx(shndx);
 
+      if (sym.get_st_type() == elfcpp::STT_SECTION)
+	lv.set_is_section_symbol();
+
       if (shndx >= elfcpp::SHN_LORESERVE)
 	{
 	  if (shndx == elfcpp::SHN_ABS)
@@ -660,12 +663,14 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 }
 
 // Return the value of a local symbol defined in input section SHNDX,
-// with value VALUE, adding addend ADDEND.  This handles SHF_MERGE
-// sections.
+// with value VALUE, adding addend ADDEND.  IS_SECTION_SYMBOL
+// indicates whether the symbol is a section symbol.  This handles
+// SHF_MERGE sections.
 template<int size, bool big_endian>
 typename elfcpp::Elf_types<size>::Elf_Addr
 Sized_relobj<size, big_endian>::local_value(unsigned int shndx,
 					    Address value,
+					    bool is_section_symbol,
 					    Address addend) const
 {
   const std::vector<Map_to_output>& mo(this->map_to_output());
@@ -673,7 +678,22 @@ Sized_relobj<size, big_endian>::local_value(unsigned int shndx,
   if (os == NULL)
     return addend;
   gold_assert(mo[shndx].offset == -1);
-  return os->output_address(this, shndx, value + addend);
+
+  // Do the mapping required by the output section.  If this is not a
+  // section symbol, then we want to map the symbol value, and then
+  // include the addend.  If this is a section symbol, then we need to
+  // include the addend to figure out where in the section we are,
+  // before we do the mapping.  This will do the right thing provided
+  // the assembler is careful to only convert a relocation in a merged
+  // section to a section symbol if there is a zero addend.  If the
+  // assembler does not do this, then in general we can't know what to
+  // do, because we can't distinguish the addend for the instruction
+  // format from the addend for the section offset.
+
+  if (is_section_symbol)
+    return os->output_address(this, shndx, value + addend);
+  else
+    return addend + os->output_address(this, shndx, value);
 }
 
 // Write out the local symbols.
