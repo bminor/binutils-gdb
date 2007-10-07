@@ -1,3 +1,9 @@
+2007-10-07  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* mips.igen (ll): Fix mask for WITH_TARGET_WORD_BITSIZE == 32.
+	(sc, swxc1): Likewise.  Also fix big-endian and reverse-endian
+	shifts for that case.
+
 2007-09-04  Nick Clifton  <nickc@redhat.com>
 
 	* interp.c (options enum): Add OPTION_INFO_MEMORY.

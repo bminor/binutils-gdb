@@ -2263,7 +2263,7 @@
 	  {
 	    unsigned64 memval = 0;
 	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
+	    unsigned64 mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
 	    unsigned int shift = 2;
 	    unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
 	    unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
@@ -3199,10 +3199,12 @@
 	  {
 	    unsigned64 memval = 0;
 	    unsigned64 memval1 = 0;
-	    unsigned64 mask = 0x7;
+	    unsigned64 mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+	    address_word reverseendian = (ReverseEndian ? (mask ^ AccessLength_WORD) : 0);
+	    address_word bigendiancpu = (BigEndianCPU ? (mask ^ AccessLength_WORD) : 0);
 	    unsigned int byte;
-	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
-	    byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
+	    paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
+	    byte = ((vaddr & mask) ^ bigendiancpu);
 	    memval = ((unsigned64) GPR[RT] << (8 * byte));
 	    if (LLBIT)
 	      {
@@ -5552,10 +5554,12 @@
     {
      unsigned64 memval = 0;
      unsigned64 memval1 = 0;
-     unsigned64 mask = 0x7;
+     unsigned64 mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+     address_word reverseendian = (ReverseEndian ? (mask ^ AccessLength_WORD) : 0);
+     address_word bigendiancpu = (BigEndianCPU ? (mask ^ AccessLength_WORD) : 0);
      unsigned int byte;
-     paddr = ((paddr & ~mask) | ((paddr & mask) ^ (ReverseEndian << 2)));
-     byte = ((vaddr & mask) ^ (BigEndianCPU << 2));
+     paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
+     byte = ((vaddr & mask) ^ bigendiancpu);
      memval = (((unsigned64)COP_SW(1,FS)) << (8 * byte));
       {
        StoreMemory(uncached,AccessLength_WORD,memval,memval1,paddr,vaddr,isREAL);
