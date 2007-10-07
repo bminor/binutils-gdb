@@ -207,6 +207,10 @@ extern void do_gold_unreachable(const char*, int, const char*)
 
 #define gold_assert(expr) ((void)(!(expr) ? gold_unreachable(), 0 : 0))
 
+// Print version information.
+extern void
+print_version(bool print_short);
+
 // Queue up the first set of tasks.
 extern void
 queue_initial_tasks(const General_options&,

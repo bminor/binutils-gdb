@@ -220,6 +220,16 @@ help(int, char**, char*, gold::Command_line*)
   return 0;
 }
 
+// Report version information.
+
+int
+version(int, char**, char* opt, gold::Command_line*)
+{
+  gold::print_version(opt[0] == 'v' && opt[1] == '\0');
+  gold::gold_exit(true);
+  return 0;
+}
+
 // If the default sysroot is relocatable, try relocating it based on
 // the prefix FROM.
 
@@ -351,7 +361,9 @@ options::Command_line_options::options[] =
                NULL, TWO_DASHES,
                &Position_dependent_options::clear_whole_archive),
   SPECIAL('\0', "help", N_("Report usage information"), NULL,
-	  TWO_DASHES, &help)
+	  TWO_DASHES, &help),
+  SPECIAL('v', "version", N_("Report version information"), NULL,
+	  TWO_DASHES, &version)
 };
 
 const int options::Command_line_options::options_size =

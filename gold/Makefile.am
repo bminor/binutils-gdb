@@ -46,6 +46,7 @@ CCFILES = \
 	symtab.cc \
 	stringpool.cc \
 	target-select.cc \
+	version.cc \
 	workqueue.cc
 
 HFILES = \

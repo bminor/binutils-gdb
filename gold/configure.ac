@@ -1,12 +1,13 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT
-AC_CONFIG_SRCDIR([gold.cc])
+
+AC_INIT(gold, 0.1)
+AC_CONFIG_SRCDIR(gold.cc)
 
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE(gold, 0.1)
+AM_INIT_AUTOMAKE
 
 AM_CONFIG_HEADER(config.h:config.in)
 

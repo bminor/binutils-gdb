@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-10-01 16:41-0700\n"
+"POT-Creation-Date: 2007-10-07 11:04-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -176,42 +176,47 @@ msgstr ""
 msgid "%s: symbol %s has undefined version %s\n"
 msgstr ""
 
-#: fileread.cc:48
+#: fileread.cc:49
 #, c-format
 msgid "%s: munmap failed: %s\n"
 msgstr ""
 
-#: fileread.cc:83
+#: fileread.cc:84
 #, c-format
 msgid "%s: warning: close(%s) failed: %s"
 msgstr ""
 
-#: fileread.cc:108
+#: fileread.cc:109
 #, c-format
 msgid "%s: %s: fstat failed: %s"
 msgstr ""
 
-#: fileread.cc:198
+#: fileread.cc:199
 #, c-format
 msgid "%s: %s: pread failed: %s\n"
 msgstr ""
 
-#: fileread.cc:205
+#: fileread.cc:206
 #, c-format
 msgid "%s: %s: file too short: read only %lld of %lld bytes at %lld\n"
 msgstr ""
 
-#: fileread.cc:283
+#: fileread.cc:284
 #, c-format
 msgid "%s: %s: mmap offset %lld size %lld failed: %s\n"
 msgstr ""
 
-#: fileread.cc:402
+#: fileread.cc:420
+#, c-format
+msgid "%s: cannot find -l%s\n"
+msgstr ""
+
+#: fileread.cc:444
 #, c-format
 msgid "%s: cannot find %s\n"
 msgstr ""
 
-#: fileread.cc:410
+#: fileread.cc:454
 #, c-format
 msgid "%s: cannot open %s: %s\n"
 msgstr ""
@@ -265,61 +270,64 @@ msgid "pthread_cond_signal failed"
 msgstr ""
 
 #. FIXME: This needs to specify the location somehow.
-#: i386.cc:130 x86_64.cc:137
+#: i386.cc:131 x86_64.cc:146
 #, c-format
 msgid "%s: missing expected TLS relocation\n"
 msgstr ""
 
-#. TODO(csilvers): correct?
-#. TODO(csilvers): correct?
-#: i386.cc:749 i386.cc:910 i386.cc:1172 x86_64.cc:744 x86_64.cc:911
-#: x86_64.cc:1247
+#: i386.cc:775 i386.cc:942 i386.cc:1210 x86_64.cc:737 x86_64.cc:898
+#: x86_64.cc:1215
 #, c-format
 msgid "%s: %s: unexpected reloc %u in object file\n"
 msgstr ""
 
-#: i386.cc:786 i386.cc:806 x86_64.cc:781 x86_64.cc:804
+#: i386.cc:816 i386.cc:836 x86_64.cc:766 x86_64.cc:782
 #, c-format
 msgid "%s: %s: unsupported reloc %u against local symbol\n"
 msgstr ""
 
-#: i386.cc:946 i386.cc:967 x86_64.cc:947 x86_64.cc:971
+#: i386.cc:982 i386.cc:1003 x86_64.cc:927 x86_64.cc:940
 #, c-format
 msgid "%s: %s: unsupported reloc %u against global symbol %s\n"
 msgstr ""
 
-#: i386.cc:990
+#: i386.cc:1026
 #, c-format
 msgid "%s: %s: unsupported RELA reloc section\n"
 msgstr ""
 
-#: i386.cc:1080 x86_64.cc:1084
+#: i386.cc:1116 x86_64.cc:1053
 #, c-format
 msgid "%s: %s: missing expected TLS relocation\n"
 msgstr ""
 
-#: i386.cc:1204 i386.cc:1281 i386.cc:1292 x86_64.cc:1287 x86_64.cc:1365
-#: x86_64.cc:1374
+#: i386.cc:1244 i386.cc:1321 i386.cc:1344 i386.cc:1367 x86_64.cc:1237
+#: x86_64.cc:1307 x86_64.cc:1315
 #, c-format
 msgid "%s: %s: unsupported reloc %u\n"
 msgstr ""
 
-#: i386.cc:1231 x86_64.cc:1315
+#: i386.cc:1271 x86_64.cc:1264
 #, c-format
 msgid "%s: %s: TLS reloc but no TLS segment\n"
 msgstr ""
 
-#: i386.cc:1266 x86_64.cc:1350
+#: i386.cc:1306 x86_64.cc:1292
 #, c-format
 msgid "%s: %s: unsupported reloc type %u\n"
 msgstr ""
 
-#: i386.cc:1475 x86_64.cc:1562
+#: i386.cc:1332
+#, c-format
+msgid "%s: %s: both SUN and GNU model TLS relocations\n"
+msgstr ""
+
+#: i386.cc:1584 x86_64.cc:1463
 #, c-format
 msgid "%s: %s: TLS relocation out of range\n"
 msgstr ""
 
-#: i386.cc:1493 x86_64.cc:1580
+#: i386.cc:1602 x86_64.cc:1481
 #, c-format
 msgid "%s: %s: TLS relocation against invalid instruction\n"
 msgstr ""
@@ -375,228 +383,244 @@ msgstr ""
 msgid "%s: %s: size of symbols is not multiple of symbol size\n"
 msgstr ""
 
-#: object.cc:597
+#: object.cc:600
 #, c-format
 msgid "%s: %s: unknown section index %u for local symbol %u\n"
 msgstr ""
 
-#: object.cc:608
+#: object.cc:611
 #, c-format
 msgid "%s: %s: local symbol %u section index %u out of range\n"
 msgstr ""
 
-#: object.cc:642
+#: object.cc:645
 #, c-format
 msgid "%s: %s: local symbol %u section name out of range: %u >= %u\n"
 msgstr ""
 
-#: object.cc:860
+#: object.cc:880
 #, c-format
 msgid "%s: %s: unsupported ELF file type %d\n"
 msgstr ""
 
-#: object.cc:879 object.cc:932 object.cc:967
+#: object.cc:899 object.cc:952 object.cc:987
 #, c-format
 msgid "%s: %s: ELF file too short\n"
 msgstr ""
 
-#: object.cc:888
+#: object.cc:908
 #, c-format
 msgid "%s: %s: invalid ELF version 0\n"
 msgstr ""
 
-#: object.cc:891
+#: object.cc:911
 #, c-format
 msgid "%s: %s: unsupported ELF version %d\n"
 msgstr ""
 
-#: object.cc:899
+#: object.cc:919
 #, c-format
 msgid "%s: %s: invalid ELF class 0\n"
 msgstr ""
 
-#: object.cc:906
+#: object.cc:926
 #, c-format
 msgid "%s: %s: unsupported ELF class %d\n"
 msgstr ""
 
-#: object.cc:914
+#: object.cc:934
 #, c-format
 msgid "%s: %s: invalid ELF data encoding\n"
 msgstr ""
 
-#: object.cc:921
+#: object.cc:941
 #, c-format
 msgid "%s: %s: unsupported ELF data encoding %d\n"
 msgstr ""
 
-#: object.cc:944
+#: object.cc:964
 #, c-format
 msgid "%s: %s: not configured to support 32-bit big-endian object\n"
 msgstr ""
 
-#: object.cc:957
+#: object.cc:977
 #, c-format
 msgid "%s: %s: not configured to support 32-bit little-endian object\n"
 msgstr ""
 
-#: object.cc:979
+#: object.cc:999
 #, c-format
 msgid "%s: %s: not configured to support 64-bit big-endian object\n"
 msgstr ""
 
-#: object.cc:992
+#: object.cc:1012
 #, c-format
 msgid "%s: %s: not configured to support 64-bit little-endian object\n"
 msgstr ""
 
-#: options.cc:135
+#: options.cc:139
 #, c-format
 msgid ""
 "Usage: %s [options] file...\n"
 "Options:\n"
 msgstr ""
 
-#: options.cc:250
+#: options.cc:309
 msgid "Search for library LIBNAME"
 msgstr ""
 
-#: options.cc:251
+#: options.cc:310
 msgid "-lLIBNAME, --library LIBNAME"
 msgstr ""
 
-#: options.cc:253
+#: options.cc:312
 msgid "Start a library search group"
 msgstr ""
 
-#: options.cc:255
+#: options.cc:314
 msgid "End a library search group"
 msgstr ""
 
-#: options.cc:257
+#: options.cc:316
 msgid "Export all dynamic symbols"
 msgstr ""
 
-#: options.cc:259
+#: options.cc:318
 msgid "Set dynamic linker path"
 msgstr ""
 
-#: options.cc:260
+#: options.cc:319
 msgid "-I PROGRAM, --dynamic-linker PROGRAM"
 msgstr ""
 
-#: options.cc:262
+#: options.cc:321
 msgid "Add directory to search path"
 msgstr ""
 
-#: options.cc:263
+#: options.cc:322
 msgid "-L DIR, --library-path DIR"
 msgstr ""
 
-#: options.cc:265
+#: options.cc:324
 msgid "Ignored for compatibility"
 msgstr ""
 
-#: options.cc:267
+#: options.cc:326
 msgid "Optimize output file size"
 msgstr ""
 
-#: options.cc:268
+#: options.cc:327
 msgid "-O level"
 msgstr ""
 
-#: options.cc:270
+#: options.cc:329
 msgid "Set output file name"
 msgstr ""
 
-#: options.cc:271
+#: options.cc:330
 msgid "-o FILE, --output FILE"
 msgstr ""
 
-#: options.cc:273
+#: options.cc:332
 msgid "Generate relocatable output"
 msgstr ""
 
-#: options.cc:275
+#: options.cc:334
 msgid "Add DIR to runtime search path"
 msgstr ""
 
-#: options.cc:276
+#: options.cc:335
 msgid "-R DIR, -rpath DIR"
 msgstr ""
 
-#: options.cc:278
+#: options.cc:337
 msgid "Create exception frame header"
 msgstr ""
 
-#: options.cc:281
+#: options.cc:340
 msgid "Add DIR to link time shared library search path"
 msgstr ""
 
-#: options.cc:282
+#: options.cc:341
 msgid "--rpath-link DIR"
 msgstr ""
 
-#: options.cc:284
+#: options.cc:343
 msgid "Generate shared library"
 msgstr ""
 
-#: options.cc:286
+#: options.cc:345
 msgid "Do not link against shared libraries"
 msgstr ""
 
-#: options.cc:289
+#: options.cc:347
+msgid "Set target system root directory"
+msgstr ""
+
+#: options.cc:348
+msgid "--sysroot DIR"
+msgstr ""
+
+#: options.cc:350
 msgid "Only set DT_NEEDED for dynamic libs if used"
 msgstr ""
 
-#: options.cc:292
+#: options.cc:353
 msgid "Always DT_NEEDED for dynamic libs (default)"
 msgstr ""
 
-#: options.cc:295
+#: options.cc:356
 msgid "Include all archive contents"
 msgstr ""
 
-#: options.cc:299
+#: options.cc:360
 msgid "Include only needed archive contents"
 msgstr ""
 
-#: options.cc:302
+#: options.cc:363
 msgid "Report usage information"
 msgstr ""
 
-#: options.cc:445 options.cc:496 options.cc:575
+#: options.cc:365
+msgid "Report version information"
+msgstr ""
+
+#: options.cc:568
+msgid "unexpected argument"
+msgstr ""
+
+#: options.cc:575 options.cc:626 options.cc:707
 msgid "missing argument"
 msgstr ""
 
-#: options.cc:458 options.cc:505
+#: options.cc:588 options.cc:635
 msgid "unknown option"
 msgstr ""
 
-#: options.cc:513
+#: options.cc:643
 #, c-format
 msgid "%s: missing group end"
 msgstr ""
 
-#: options.cc:588
+#: options.cc:720
 msgid "may not nest groups"
 msgstr ""
 
-#: options.cc:598
+#: options.cc:730
 msgid "group end without group start"
 msgstr ""
 
-#: options.cc:608
+#: options.cc:740
 #, c-format
 msgid "%s: use the --help option for usage information\n"
 msgstr ""
 
-#: options.cc:617 script.cc:1158
+#: options.cc:749 script.cc:1169
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr ""
 
-#: options.cc:626
+#: options.cc:758
 #, c-format
 msgid "%s: -%c: %s\n"
 msgstr ""
@@ -727,7 +751,22 @@ msgstr ""
 msgid "%s: %s: undefined reference to '%s'\n"
 msgstr ""
 
-#: x86_64.cc:994
+#. This output is intended to follow the GNU standards.
+#: version.cc:50
+#, c-format
+msgid "Copyright 2007 Free Software Foundation, Inc.\n"
+msgstr ""
+
+#: version.cc:51
+#, c-format
+msgid ""
+"This program is free software; you may redistribute it under the terms of\n"
+"the GNU General Public License version 3 or (at your option) a later "
+"version.\n"
+"This program has absolutely no warranty.\n"
+msgstr ""
+
+#: x86_64.cc:963
 #, c-format
 msgid "%s: %s: unsupported REL reloc section\n"
 msgstr ""
