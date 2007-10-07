@@ -44,6 +44,7 @@
 // 11 Pass function pointer from file 1 to file 2.
 // 12 Compare address of function for equality in both files.
 // 13 Compare address of inline function for equality in both files.
+// 14 Compare string constants in file 1 and file 2.
 
 #include "two_file_test.h"
 
@@ -165,4 +166,17 @@ bool
 t13()
 {
   return &f13i == f13();
+}
+
+// 14 Compare string constants in file 1 and file 2.
+
+bool
+t14()
+{
+  const char* s1 = TEST_STRING_CONSTANT;
+  const char* s2 = f14();
+  while (*s1 != '\0')
+    if (*s1++ != *s2++)
+      return false;
+  return *s2 == '\0';
 }

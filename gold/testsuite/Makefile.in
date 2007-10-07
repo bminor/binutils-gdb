@@ -77,6 +77,13 @@ check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_4)
 @NATIVE_LINKER_FALSE@two_file_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@two_file_static_test_DEPENDENCIES = libgoldtest.a \
+@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@two_file_static_test_DEPENDENCIES =  \
+@NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
+@NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@exception_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@exception_test_DEPENDENCIES = libgoldtest.a \
@@ -132,6 +139,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_static_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_1_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_test$(EXEEXT) \
@@ -232,6 +241,10 @@ am__tls_test_SOURCES_DIST = tls_test.cc tls_test_main.cc tls_test.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_main.$(OBJEXT)
 tls_test_OBJECTS = $(am_tls_test_OBJECTS)
+am__two_file_pic_test_SOURCES_DIST = two_file_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_pic_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
+two_file_pic_test_OBJECTS = $(am_two_file_pic_test_OBJECTS)
 am__two_file_same_shared_nonpic_test_SOURCES_DIST =  \
 	two_file_test_main.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_same_shared_nonpic_test_OBJECTS = two_file_test_main.$(OBJEXT)
@@ -288,6 +301,14 @@ am__two_file_shared_2_test_SOURCES_DIST = two_file_test_1.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_1.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
 two_file_shared_2_test_OBJECTS = $(am_two_file_shared_2_test_OBJECTS)
+am__two_file_static_test_SOURCES_DIST = two_file_test_1.cc \
+	two_file_test_2.cc two_file_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_static_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_1.$(OBJEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_2.$(OBJEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
+two_file_static_test_OBJECTS = $(am_two_file_static_test_OBJECTS)
+two_file_static_test_LDADD = $(LDADD)
 am__two_file_test_SOURCES_DIST = two_file_test_1.cc two_file_test_2.cc \
 	two_file_test_main.cc two_file_test.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_test_OBJECTS =  \
@@ -319,7 +340,7 @@ SOURCES = $(libgoldtest_a_SOURCES) $(constructor_static_test_SOURCES) \
 	$(object_unittest_SOURCES) $(tls_pic_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
 	$(tls_static_pic_test_SOURCES) $(tls_static_test_SOURCES) \
-	$(tls_test_SOURCES) \
+	$(tls_test_SOURCES) $(two_file_pic_test_SOURCES) \
 	$(two_file_same_shared_nonpic_test_SOURCES) \
 	$(two_file_same_shared_test_SOURCES) \
 	$(two_file_separate_shared_12_nonpic_test_SOURCES) \
@@ -329,7 +350,8 @@ SOURCES = $(libgoldtest_a_SOURCES) $(constructor_static_test_SOURCES) \
 	$(two_file_shared_1_nonpic_test_SOURCES) \
 	$(two_file_shared_1_test_SOURCES) \
 	$(two_file_shared_2_nonpic_test_SOURCES) \
-	$(two_file_shared_2_test_SOURCES) $(two_file_test_SOURCES)
+	$(two_file_shared_2_test_SOURCES) \
+	$(two_file_static_test_SOURCES) $(two_file_test_SOURCES)
 DIST_SOURCES = $(libgoldtest_a_SOURCES) \
 	$(am__constructor_static_test_SOURCES_DIST) \
 	$(am__constructor_test_SOURCES_DIST) \
@@ -346,6 +368,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) \
 	$(am__tls_static_pic_test_SOURCES_DIST) \
 	$(am__tls_static_test_SOURCES_DIST) \
 	$(am__tls_test_SOURCES_DIST) \
+	$(am__two_file_pic_test_SOURCES_DIST) \
 	$(am__two_file_same_shared_nonpic_test_SOURCES_DIST) \
 	$(am__two_file_same_shared_test_SOURCES_DIST) \
 	$(am__two_file_separate_shared_12_nonpic_test_SOURCES_DIST) \
@@ -356,6 +379,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) \
 	$(am__two_file_shared_1_test_SOURCES_DIST) \
 	$(am__two_file_shared_2_nonpic_test_SOURCES_DIST) \
 	$(am__two_file_shared_2_test_SOURCES_DIST) \
+	$(am__two_file_static_test_SOURCES_DIST) \
 	$(am__two_file_test_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
@@ -485,7 +509,11 @@ target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
 AUTOMAKE_OPTIONS = 
-AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS)
+
+# The two_file_test tests -fmerge-constants, so we simply always turn
+# it on.  This may need to be controlled by a configure option
+# eventually.
+AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS) -fmerge-constants
 INCLUDES = -D_GNU_SOURCE \
 	-I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../../include \
 	-I$(srcdir)/../../elfcpp \
@@ -495,6 +523,8 @@ INCLUDES = -D_GNU_SOURCE \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@NATIVE_PROGS = constructor_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_static_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_1_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_test \
@@ -538,6 +568,17 @@ object_unittest_SOURCES = object_unittest.cc
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_static_test_SOURCES = \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_1.cc two_file_test_2.cc two_file_test_main.cc
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_static_test_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_static_test_LDFLAGS = -Bgcctestdir/ -static
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_pic_test_SOURCES = two_file_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_pic_test_DEPENDENCIES = \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld two_file_test_1_pic.o two_file_test_2_pic.o
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_pic_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_pic_test_LDADD = two_file_test_1_pic.o two_file_test_2_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_test_SOURCES = two_file_test_2.cc two_file_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_test_DEPENDENCIES = gcctestdir/ld two_file_shared_1.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
@@ -765,6 +806,9 @@ tls_static_test$(EXEEXT): $(tls_static_test_OBJECTS) $(tls_static_test_DEPENDENC
 tls_test$(EXEEXT): $(tls_test_OBJECTS) $(tls_test_DEPENDENCIES) 
 	@rm -f tls_test$(EXEEXT)
 	$(CXXLINK) $(tls_test_LDFLAGS) $(tls_test_OBJECTS) $(tls_test_LDADD) $(LIBS)
+two_file_pic_test$(EXEEXT): $(two_file_pic_test_OBJECTS) $(two_file_pic_test_DEPENDENCIES) 
+	@rm -f two_file_pic_test$(EXEEXT)
+	$(CXXLINK) $(two_file_pic_test_LDFLAGS) $(two_file_pic_test_OBJECTS) $(two_file_pic_test_LDADD) $(LIBS)
 two_file_same_shared_nonpic_test$(EXEEXT): $(two_file_same_shared_nonpic_test_OBJECTS) $(two_file_same_shared_nonpic_test_DEPENDENCIES) 
 	@rm -f two_file_same_shared_nonpic_test$(EXEEXT)
 	$(CXXLINK) $(two_file_same_shared_nonpic_test_LDFLAGS) $(two_file_same_shared_nonpic_test_OBJECTS) $(two_file_same_shared_nonpic_test_LDADD) $(LIBS)
@@ -795,6 +839,9 @@ two_file_shared_2_nonpic_test$(EXEEXT): $(two_file_shared_2_nonpic_test_OBJECTS)
 two_file_shared_2_test$(EXEEXT): $(two_file_shared_2_test_OBJECTS) $(two_file_shared_2_test_DEPENDENCIES) 
 	@rm -f two_file_shared_2_test$(EXEEXT)
 	$(CXXLINK) $(two_file_shared_2_test_LDFLAGS) $(two_file_shared_2_test_OBJECTS) $(two_file_shared_2_test_LDADD) $(LIBS)
+two_file_static_test$(EXEEXT): $(two_file_static_test_OBJECTS) $(two_file_static_test_DEPENDENCIES) 
+	@rm -f two_file_static_test$(EXEEXT)
+	$(CXXLINK) $(two_file_static_test_LDFLAGS) $(two_file_static_test_OBJECTS) $(two_file_static_test_LDADD) $(LIBS)
 two_file_test$(EXEEXT): $(two_file_test_OBJECTS) $(two_file_test_DEPENDENCIES) 
 	@rm -f two_file_test$(EXEEXT)
 	$(CXXLINK) $(two_file_test_LDFLAGS) $(two_file_test_OBJECTS) $(two_file_test_LDADD) $(LIBS)

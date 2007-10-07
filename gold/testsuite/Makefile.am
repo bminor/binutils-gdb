@@ -6,7 +6,10 @@
 
 AUTOMAKE_OPTIONS =
 
-AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS)
+# The two_file_test tests -fmerge-constants, so we simply always turn
+# it on.  This may need to be controlled by a configure option
+# eventually.
+AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS) -fmerge-constants
 
 INCLUDES = -D_GNU_SOURCE \
 	-I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../../include \
@@ -21,6 +24,8 @@ NATIVE_PROGS = \
 	constructor_test \
 	constructor_static_test \
 	two_file_test \
+	two_file_static_test \
+	two_file_pic_test \
 	two_file_shared_1_test \
 	two_file_shared_2_test \
 	two_file_same_shared_test \
@@ -123,6 +128,17 @@ two_file_test_SOURCES = \
 	two_file_test.h
 two_file_test_DEPENDENCIES = gcctestdir/ld
 two_file_test_LDFLAGS = -Bgcctestdir/
+
+two_file_static_test_SOURCES = \
+	two_file_test_1.cc two_file_test_2.cc two_file_test_main.cc
+two_file_static_test_DEPENDENCIES = gcctestdir/ld
+two_file_static_test_LDFLAGS = -Bgcctestdir/ -static
+
+two_file_pic_test_SOURCES = two_file_test_main.cc
+two_file_pic_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_test_1_pic.o two_file_test_2_pic.o
+two_file_pic_test_LDFLAGS = -Bgcctestdir/
+two_file_pic_test_LDADD = two_file_test_1_pic.o two_file_test_2_pic.o
 
 two_file_shared_1_test_SOURCES = two_file_test_2.cc two_file_test_main.cc
 two_file_shared_1_test_DEPENDENCIES = gcctestdir/ld two_file_shared_1.so

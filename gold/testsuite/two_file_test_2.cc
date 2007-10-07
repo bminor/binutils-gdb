@@ -92,3 +92,11 @@ void
 {
   return &f13i;
 }
+
+// 14 Compare string constants in file 1 and file 2.
+
+const char*
+f14()
+{
+  return TEST_STRING_CONSTANT;
+}

@@ -59,3 +59,6 @@ extern bool (*f12())();
 extern bool t13();
 inline void f13i() { }
 extern void (*f13())();
+
+#define TEST_STRING_CONSTANT "test string constant"
+extern const char* f14();
