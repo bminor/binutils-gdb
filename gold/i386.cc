@@ -119,7 +119,8 @@ class Target_i386 : public Sized_target<32, false>
   {
    public:
     Relocate()
-      : skip_call_tls_get_addr_(false)
+      : skip_call_tls_get_addr_(false),
+	local_dynamic_type_(LOCAL_DYNAMIC_NONE)
     { }
 
     ~Relocate()
@@ -170,6 +171,15 @@ class Target_i386 : public Sized_target<32, false>
 		 unsigned char* view,
 		 off_t view_size);
 
+    // Do a TLS Local-Dynamic to Local-Exec transition.
+    inline void
+    tls_ld_to_le(const Relocate_info<32, false>*, size_t relnum,
+		 Output_segment* tls_segment,
+		 const elfcpp::Rel<32, false>&, unsigned int r_type,
+		 elfcpp::Elf_types<32>::Elf_Addr value,
+		 unsigned char* view,
+		 off_t view_size);
+
     // Check the range for a TLS relocation.
     static inline void
     check_range(const Relocate_info<32, false>*, size_t relnum,
@@ -180,9 +190,21 @@ class Target_i386 : public Sized_target<32, false>
     check_tls(const Relocate_info<32, false>*, size_t relnum,
 	      const elfcpp::Rel<32, false>&, bool);
 
+    // We need to keep track of which type of local dynamic relocation
+    // we have seen, so that we can optimize R_386_TLS_LDO_32 correctly.
+    enum Local_dynamic_type
+    {
+      LOCAL_DYNAMIC_NONE,
+      LOCAL_DYNAMIC_SUN,
+      LOCAL_DYNAMIC_GNU
+    };
+
     // This is set if we should skip the next reloc, which should be a
     // PLT32 reloc against ___tls_get_addr.
     bool skip_call_tls_get_addr_;
+    // The type of local dynamic relocation we have seen in the section
+    // being relocated, if any.
+    Local_dynamic_type local_dynamic_type_;
   };
 
   // Adjust TLS relocation type based on the options and whether this
@@ -673,7 +695,9 @@ Target_i386::optimize_tls_reloc(bool is_final, int r_type)
       return elfcpp::R_386_TLS_LE_32;
 
     case elfcpp::R_386_TLS_LDO_32:
-      // Another type of Local-Dynamic relocation.
+      // Another type of Local-Dynamic relocation.  We return a
+      // different value as we need to negate the thread segment
+      // offset.  FIXME: Returning reloc types makes no sense.
       return elfcpp::R_386_TLS_LE;
 
     case elfcpp::R_386_TLS_IE:
@@ -778,11 +802,13 @@ Target_i386::Scan::local(const General_options&,
 	    gold_assert(!output_is_shared);
 	    break;
 
+	  case elfcpp::R_386_TLS_LDM:
+	  case elfcpp::R_386_TLS_LDO_32:
+	    break;
+
 	  case elfcpp::R_386_TLS_IE:
 	  case elfcpp::R_386_TLS_GOTIE:
 	  case elfcpp::R_386_TLS_GD:
-	  case elfcpp::R_386_TLS_LDM:
-	  case elfcpp::R_386_TLS_LDO_32:
 	  case elfcpp::R_386_TLS_IE_32:
 	  case elfcpp::R_386_TLS_GOTDESC:
 	  case elfcpp::R_386_TLS_DESC_CALL:
@@ -942,11 +968,13 @@ Target_i386::Scan::global(const General_options& options,
 	    gold_assert(!parameters->output_is_shared());
 	    break;
 
+	  case elfcpp::R_386_TLS_LDM:
+	  case elfcpp::R_386_TLS_LDO_32:
+	    break;
+
 	  case elfcpp::R_386_TLS_IE:
 	  case elfcpp::R_386_TLS_GOTIE:
 	  case elfcpp::R_386_TLS_GD:
-	  case elfcpp::R_386_TLS_LDM:
-	  case elfcpp::R_386_TLS_LDO_32:
 	  case elfcpp::R_386_TLS_IE_32:
 	  case elfcpp::R_386_TLS_GOTDESC:
 	  case elfcpp::R_386_TLS_DESC_CALL:
@@ -1298,7 +1326,42 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_TLS_LDM:
+      if (this->local_dynamic_type_ == LOCAL_DYNAMIC_SUN)
+	{
+	  fprintf(stderr,
+		  _("%s: %s: both SUN and GNU model TLS relocations\n"),
+		  program_name,
+		  relinfo->location(relnum, rel.get_r_offset()).c_str());
+	  gold_exit(false);
+	}
+      this->local_dynamic_type_ = LOCAL_DYNAMIC_GNU;
+      if (opt_r_type == elfcpp::R_386_TLS_LE_32)
+	{
+	  this->tls_ld_to_le(relinfo, relnum, tls_segment, rel, r_type,
+			     value, view, view_size);
+	  break;
+	}
+      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
+	      program_name,
+	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
+	      r_type);
+      // gold_exit(false);
+      break;
+
     case elfcpp::R_386_TLS_LDO_32:
+      // This reloc can appear in debugging sections, in which case we
+      // won't see the TLS_LDM reloc.  The local_dynamic_type field
+      // tells us this.
+      if (opt_r_type == elfcpp::R_386_TLS_LDO_32
+	  || this->local_dynamic_type_ == LOCAL_DYNAMIC_NONE)
+	value = value - tls_segment->vaddr();
+      else if (this->local_dynamic_type_ == LOCAL_DYNAMIC_GNU)
+	value = value - (tls_segment->vaddr() + tls_segment->memsz());
+      else
+	value = tls_segment->vaddr() + tls_segment->memsz() - value;
+      Relocate_functions<32, false>::rel32(view, value);
+      break;
+
     case elfcpp::R_386_TLS_GOTDESC:
     case elfcpp::R_386_TLS_DESC_CALL:
       fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
@@ -1421,7 +1484,7 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
 				    off_t view_size)
 {
   // leal foo(,%reg,1),%eax; call ___tls_get_addr
-  //  ==> movl %gs,0,%eax; subl $foo@tpoff,%eax
+  //  ==> movl %gs:0,%eax; subl $foo@tpoff,%eax
   // leal foo(%reg),%eax; call ___tls_get_addr
   //  ==> movl %gs:0,%eax; subl $foo@tpoff,%eax
 
@@ -1468,6 +1531,39 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
 
   value = tls_segment->vaddr() + tls_segment->memsz() - value;
   Relocate_functions<32, false>::rel32(view + roff, value);
+
+  // The next reloc should be a PLT32 reloc against __tls_get_addr.
+  // We can skip it.
+  this->skip_call_tls_get_addr_ = true;
+}
+
+// Do a relocation in which we convert a TLS Local-Dynamic to a
+// Local-Exec.
+
+inline void
+Target_i386::Relocate::tls_ld_to_le(const Relocate_info<32, false>* relinfo,
+				    size_t relnum,
+				    Output_segment*,
+				    const elfcpp::Rel<32, false>& rel,
+				    unsigned int,
+				    elfcpp::Elf_types<32>::Elf_Addr,
+				    unsigned char* view,
+				    off_t view_size)
+{
+  // leal foo(%reg), %eax; call ___tls_get_addr
+  // ==> movl %gs:0,%eax; nop; leal 0(%esi,1),%esi
+
+  Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, -2);
+  Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, 9);
+
+  // FIXME: Does this test really always pass?
+  Target_i386::Relocate::check_tls(relinfo, relnum, rel,
+				   view[-2] == 0x8d && view[-1] == 0x83);
+
+  Target_i386::Relocate::check_tls(relinfo, relnum, rel,
+				   view[4] == 0xe8);
+
+  memcpy(view - 2, "\x65\xa1\0\0\0\0\x90\x8d\x74\x26\0", 11);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
   // We can skip it.
