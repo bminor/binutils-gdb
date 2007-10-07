@@ -150,6 +150,10 @@ AM_CONDITIONAL(FN_PTRS_IN_SO_WITHOUT_PIC, [
     *) true;;
   esac])
 
+dnl Test for __thread support.
+AC_COMPILE_IFELSE([__thread int i = 1;], [tls=yes], [tls=no])
+AM_CONDITIONAL(TLS, test "$tls" = "yes")
+
 AM_BINUTILS_WARNINGS
 
 WARN_CXXFLAGS=`echo ${WARN_CFLAGS} | sed -e 's/-Wstrict-prototypes//' -e 's/-Wmissing-prototypes//'`
