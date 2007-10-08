@@ -1,3 +1,7 @@
+2007-10-08  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
         * breakpoint.c (print_one_breakpoint_location): ARI fix: 
