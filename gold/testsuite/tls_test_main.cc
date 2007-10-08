@@ -24,6 +24,7 @@
 // more information.
 
 #include <cassert>
+#include <cstdio>
 #include <pthread.h>
 
 #include "tls_test.h"
@@ -43,6 +44,18 @@ Mutex_set mutexes2 = { PTHREAD_MUTEX_INITIALIZER,
 		       PTHREAD_MUTEX_INITIALIZER,
 		       PTHREAD_MUTEX_INITIALIZER } ;
 
+bool failed = false;
+
+void
+check(const char* name, bool val)
+{
+  if (!val)
+    {
+      fprintf(stderr, "Test %s failed\n", name);
+      failed = true;
+    }
+}
+
 // The body of the thread function.  This gets a lock on the first
 // mutex, runs the tests, and then unlocks the second mutex.  Then it
 // locks the third mutex, and the runs the verification test again.
@@ -57,15 +70,15 @@ thread_routine(void* arg)
   assert(err == 0);
 
   // Run the tests.
-  assert(t1());
-  assert(t2());
-  assert(t3());
-  assert(t4());
+  check("t1", t1());
+  check("t2", t2());
+  check("t3", t3());
+  check("t4", t4());
   f5b(f5a());
-  assert(t5());
+  check("t5", t5());
   f6b(f6a());
-  assert(t6());
-  assert(t7());
+  check("t6", t6());
+  check("t7", t7());
 
   // Unlock the second mutex.
   err = pthread_mutex_unlock(&pms->mutex2);
@@ -75,7 +88,7 @@ thread_routine(void* arg)
   err = pthread_mutex_lock(&pms->mutex3);
   assert(err == 0);
 
-  assert(t7());
+  check("t7", t7());
 
   return 0;
 }
@@ -142,5 +155,5 @@ main()
   assert(thread_val == 0);
 
   // All done.
-  return 0;
+  return failed ? 1 : 0;
 }
