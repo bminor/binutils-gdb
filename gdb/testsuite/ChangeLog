@@ -1,3 +1,12 @@
+2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (ALL_SUBDIRS): Add gdb.pascal.
+	* configure.ac (AC_OUTPUT): Add gdb.pascal/Makefile.
+	* configure: Regenerated.
+	* gdb.pascal/Makefile.in, gdb.pascal/hello.exp, gdb.pascal/hello.pas,
+	gdb.pascal/types.exp, lib/pascal.exp: New files.
+
 2007-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/classes.exp (do_tests): Always step to the line after the
