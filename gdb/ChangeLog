@@ -1,3 +1,9 @@
+2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* linux-fork.c: ARI fix: include "gdb_wait.h" instead of <sys/wait.h>.
+	Makefile.in (linux-fork.o): Add gdb_wait.h dependency. 
+
+
 2007-10-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (get_offsets): Only call free_symfile_segment_data if
