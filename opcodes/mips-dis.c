@@ -124,6 +124,30 @@ static const char * const mips_cp0_names_numeric[32] =
   "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
 };
 
+static const char * const mips_cp0_names_r3000[32] =
+{
+  "c0_index",     "c0_random",    "c0_entrylo",   "$3",
+  "c0_context",   "$5",           "$6",           "$7",
+  "c0_badvaddr",  "$9",           "c0_entryhi",   "$11",
+  "c0_sr",        "c0_cause",     "c0_epc",       "c0_prid",
+  "$16",          "$17",          "$18",          "$19",
+  "$20",          "$21",          "$22",          "$23",
+  "$24",          "$25",          "$26",          "$27",
+  "$28",          "$29",          "$30",          "$31",
+};
+
+static const char * const mips_cp0_names_r4000[32] =
+{
+  "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
+  "c0_context",   "c0_pagemask",  "c0_wired",     "$7",
+  "c0_badvaddr",  "c0_count",     "c0_entryhi",   "c0_compare",
+  "c0_sr",        "c0_cause",     "c0_epc",       "c0_prid",
+  "c0_config",    "c0_lladdr",    "c0_watchlo",   "c0_watchhi",
+  "c0_xcontext",  "$21",          "$22",          "$23",
+  "$24",          "$25",          "c0_ecc",       "c0_cacheerr",
+  "c0_taglo",     "c0_taghi",     "c0_errorepc",  "$31",
+};
+
 static const char * const mips_cp0_names_mips3264[32] =
 {
   "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
@@ -346,11 +370,11 @@ const struct mips_arch_choice mips_arch_choices[] =
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
 
   { "r3000",	1, bfd_mach_mips3000, CPU_R3000, ISA_MIPS1,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_r3000, NULL, 0, mips_hwr_names_numeric },
   { "r3900",	1, bfd_mach_mips3900, CPU_R3900, ISA_MIPS1,
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
   { "r4000",	1, bfd_mach_mips4000, CPU_R4000, ISA_MIPS3,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_r4000, NULL, 0, mips_hwr_names_numeric },
   { "r4010",	1, bfd_mach_mips4010, CPU_R4010, ISA_MIPS2,
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
   { "vr4100",	1, bfd_mach_mips4100, CPU_VR4100, ISA_MIPS3,
@@ -362,7 +386,7 @@ const struct mips_arch_choice mips_arch_choices[] =
   { "r4300",	1, bfd_mach_mips4300, CPU_R4300, ISA_MIPS3,
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
   { "r4400",	1, bfd_mach_mips4400, CPU_R4400, ISA_MIPS3,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_r4000, NULL, 0, mips_hwr_names_numeric },
   { "r4600",	1, bfd_mach_mips4600, CPU_R4600, ISA_MIPS3,
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
   { "r4650",	1, bfd_mach_mips4650, CPU_R4650, ISA_MIPS3,

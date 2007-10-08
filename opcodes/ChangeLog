@@ -1,3 +1,9 @@
+2007-10-08  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* opcodes/mips-dis.c (mips_cp0_names_r3000): New definition.
+	(mips_cp0_names_r4000): Likewise.
+	(mips_arch_choices): Link to the above as appropriate.
+
 2007-10-08  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (SHARED_DEPENDENCIES): Change non-cygwin dependency

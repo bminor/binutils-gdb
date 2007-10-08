@@ -696,6 +696,11 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "fpr-names-64"
 
     run_dump_test "cp0-names-numeric"
+    run_dump_test "cp0-names-r3000"
+    run_dump_test "cp0-names-r4000" \
+		  { { {name} {(r4000)} } { {objdump} {-M cp0-names=r4000} } }
+    run_dump_test "cp0-names-r4000" \
+		  { { {name} {(r4400)} } { {objdump} {-M cp0-names=r4400} } }
     run_dump_test "cp0-names-mips32"
     run_dump_test "cp0-names-mips32r2"
     run_dump_test "cp0-names-mips64"

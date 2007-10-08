@@ -1,4 +1,12 @@
-2007-10-01  Maciej W. Rozycki  <macro@linux-mips.org>
+2007-10-08  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/cp0-names-r3000.d: New test for R3000 CP0 symbolic
+	disassembly.
+	* gas/mips/cp0-names-r4000.d: New test for R4000/R4400 symbolic
+	CP0 disassembly.
+	* mips/mips.exp: Run the new tests.
+
+2007-10-08  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/at-1.d, gas/mips/at-2.l: New tests to check the ".set
 	at=REG" directive.
