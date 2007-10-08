@@ -1,3 +1,42 @@
+2007-10-08  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/5121 gas/5122 gas/5123
+	* Makefile.am (CFILES): Add cgen.c
+	(TARGET_CPU_CFILES): Add tc-iq2000.c, tc-maxq.c, tc-mt.c,
+	tc-tic4x.c and xtensa-relax.c.
+	(TARGET_CPU_HFILES): Add tc-iq2000.h, tc-maxq.h, tc-mt.h,
+	tc-tic4x.h and xtensa-relax.h.
+	(TARG_ENV_HFILES): Remove te-aux.h, te-delta.h, te-delt88.h,
+	te-ic960.h, te-linux.h.  Add te-aix5.h, te-armeabi.h,
+	te-freebsd.h, te-gnu.h, te-interix.h, te-vxworks.h.
+	(CONFIG_ATOF_CFILES): New variable.
+	(POTFILES): Add CONFIG_ATOF_CFILES to dependencies.  Fix typo with
+	dependency upon TARG_ENV_HFILES.
+	(DEPTC): Do not put "#include opcodes/<foo>-desc.h" into
+	cgen-desc.h when foo-desc.h does not exit.
+	Run make dep-am.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	PR gas/5124 gas/5125
+	* po/es.po: Regenerate.
+	* po/fr.po: Regenerate.
+	* po/gas.pot: Regenerate.
+	* po/rw.po: Regenerate.
+	* po/tr.po: Regenerate.
+	* config/obj-elf.c (obj_elf_vtable_inherit): Allow for translation
+	of error messages.
+	PR gas/5126
+	* config/obj-som.c: Likewise.
+	PR gas/5129
+	* config/tc-arc.c: Likewise.
+	PR gas/5131 gas/5132
+	* config/tc-arm.c: Likewise.
+	PR gas/5137
+	* config/tc-bfin.c: Likewise.
+	PR gas/5143
+	* config/tc-frv.c: Likewise.
+
 2007-10-08  Eric B. Weddington  <eweddington@cso.atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add new devices: ATtiny43U,

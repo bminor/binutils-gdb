@@ -246,7 +246,7 @@ bfin_pic_ptr (int nbytes)
 	  if (*input_line_pointer == ')')
 	    input_line_pointer++;
 	  else
-	    as_bad ("missing ')'");
+	    as_bad (_("missing ')'"));
 	}
       else
 	error ("missing funcdesc in picptr");
@@ -348,7 +348,7 @@ md_begin ()
 
   /* Set the default machine type. */
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_bfin, 0))
-    as_warn ("Could not set architecture and machine.");
+    as_warn (_("Could not set architecture and machine."));
 
   /* Ensure that lines can begin with '(', for multiple
      register stack pops. */
@@ -493,7 +493,7 @@ parse (char *line)
   state = yyparse ();
   if (state == SEMANTIC_ERROR)
     {
-      as_bad ("Parse failed.");
+      as_bad (_("Parse failed."));
       insn = 0;
     }
 
@@ -568,7 +568,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	break;
       if (value < -1024 || value > 1022)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-                      "pcrel too far BFD_RELOC_BFIN_10");
+                      _("pcrel too far BFD_RELOC_BFIN_10"));
 
       /* 11 bit offset even numbered, so we remove right bit.  */
       value = value >> 1;
@@ -584,7 +584,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	break;
 
       if (value < -4096 || value > 4094)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far BFD_RELOC_BFIN_12");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("pcrel too far BFD_RELOC_BFIN_12"));
       /* 13 bit offset even numbered, so we remove right bit.  */
       value = value >> 1;
       newval = md_chars_to_number (where, 2);
@@ -604,7 +604,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	break;
 
       if (value < -16777216 || value > 16777214)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far BFD_RELOC_BFIN_24");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("pcrel too far BFD_RELOC_BFIN_24"));
 
       /* 25 bit offset even numbered, so we remove right bit.  */
       value = value >> 1;
@@ -619,7 +619,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
       if (!value)
 	break;
       if (value < 4 || value > 30)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far BFD_RELOC_BFIN_5");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("pcrel too far BFD_RELOC_BFIN_5"));
       value = value >> 1;
       newval = md_chars_to_number (where, 1);
       newval = (newval & 0xf0) | (value & 0xf);
@@ -631,7 +631,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	break;
       value += 2;
       if (value < 4 || value > 2046)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "pcrel too far BFD_RELOC_BFIN_11_PCREL");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("pcrel too far BFD_RELOC_BFIN_11_PCREL"));
       /* 11 bit unsigned even, so we remove right bit.  */
       value = value >> 1;
       newval = md_chars_to_number (where, 2);
@@ -641,14 +641,14 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 
     case BFD_RELOC_8:
       if (value < -0x80 || value >= 0x7f)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "rel too far BFD_RELOC_8");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("rel too far BFD_RELOC_8"));
       md_number_to_chars (where, value, 1);
       break;
 
     case BFD_RELOC_BFIN_16_IMM:
     case BFD_RELOC_16:
       if (value < -0x8000 || value >= 0x7fff)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "rel too far BFD_RELOC_16");
+	as_bad_where (fixP->fx_file, fixP->fx_line, _("rel too far BFD_RELOC_16"));
       md_number_to_chars (where, value, 2);
       break;
 

@@ -1275,7 +1275,7 @@ obj_elf_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
 
   if (csym == NULL || symbol_get_frag (csym) == NULL)
     {
-      as_bad ("expected `%s' to have already been set for .vtable_inherit",
+      as_bad (_("expected `%s' to have already been set for .vtable_inherit"),
 	      cname);
       bad = 1;
     }
@@ -1285,7 +1285,7 @@ obj_elf_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("expected comma after name in .vtable_inherit");
+      as_bad (_("expected comma after name in .vtable_inherit"));
       ignore_rest_of_line ();
       return NULL;
     }
@@ -1345,7 +1345,7 @@ obj_elf_vtable_entry (int ignore ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("expected comma after name in .vtable_entry");
+      as_bad (_("expected comma after name in .vtable_entry"));
       ignore_rest_of_line ();
       return NULL;
     }

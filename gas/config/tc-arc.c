@@ -191,7 +191,7 @@ md_begin (void)
   target_big_endian = byte_order == BIG_ENDIAN;
 
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, arc_mach_type))
-    as_warn ("could not set architecture and machine");
+    as_warn (_("could not set architecture and machine"));
 
   /* This call is necessary because we need to initialize `arc_operand_map'
      which may be needed before we see the first insn.  */
@@ -209,10 +209,10 @@ init_opcode_tables (int mach)
   char *last;
 
   if ((arc_suffix_hash = hash_new ()) == NULL)
-    as_fatal ("virtual memory exhausted");
+    as_fatal (_("virtual memory exhausted"));
 
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
-    as_warn ("could not set architecture and machine");
+    as_warn (_("could not set architecture and machine"));
 
   /* This initializes a few things in arc-opc.c that we need.
      This must be called before the various arc_xxx_supported fns.  */
@@ -429,7 +429,7 @@ arc_extoper (int opertype)
 
   if (*input_line_pointer != ',')
     {
-      as_bad ("expected comma after operand name");
+      as_bad (_("expected comma after operand name"));
       ignore_rest_of_line ();
       free (name);
       return;
@@ -440,7 +440,7 @@ arc_extoper (int opertype)
 
   if (number < 0)
     {
-      as_bad ("negative operand number %d", number);
+      as_bad (_("negative operand number %d"), number);
       ignore_rest_of_line ();
       free (name);
       return;
@@ -452,7 +452,7 @@ arc_extoper (int opertype)
 
       if (*input_line_pointer != ',')
 	{
-	  as_bad ("expected comma after register-number");
+	  as_bad (_("expected comma after register-number"));
 	  ignore_rest_of_line ();
 	  free (name);
 	  return;
@@ -477,7 +477,7 @@ arc_extoper (int opertype)
 	    {
 	      if (strncmp (mode, "w", 1))
 		{
-		  as_bad ("invalid mode");
+		  as_bad (_("invalid mode"));
 		  ignore_rest_of_line ();
 		  free (name);
 		  return;
@@ -494,7 +494,7 @@ arc_extoper (int opertype)
 	{
 	  if (*input_line_pointer != ',')
 	    {
-	      as_bad ("expected comma after register-mode");
+	      as_bad (_("expected comma after register-mode"));
 	      ignore_rest_of_line ();
 	      free (name);
 	      return;
@@ -511,7 +511,7 @@ arc_extoper (int opertype)
 	    {
 	      if (strncmp (input_line_pointer, "can_shortcut", 12))
 		{
-		  as_bad ("shortcut designator invalid");
+		  as_bad (_("shortcut designator invalid"));
 		  ignore_rest_of_line ();
 		  free (name);
 		  return;
@@ -526,7 +526,7 @@ arc_extoper (int opertype)
 
   if ((opertype == 1) && number > 60)
     {
-      as_bad ("core register value (%d) too large", number);
+      as_bad (_("core register value (%d) too large"), number);
       ignore_rest_of_line ();
       free (name);
       return;
@@ -534,7 +534,7 @@ arc_extoper (int opertype)
 
   if ((opertype == 0) && number > 31)
     {
-      as_bad ("condition code value (%d) too large", number);
+      as_bad (_("condition code value (%d) too large"), number);
       ignore_rest_of_line ();
       free (name);
       return;
@@ -551,7 +551,7 @@ arc_extoper (int opertype)
 	    S_SET_VALUE (symbolP, (valueT) &ext_oper->operand);
 	  else
 	    {
-	      as_bad ("attempt to override symbol: %s", name);
+	      as_bad (_("attempt to override symbol: %s"), name);
 	      ignore_rest_of_line ();
 	      free (name);
 	      free (ext_oper);
@@ -622,7 +622,7 @@ arc_extoper (int opertype)
       strcpy (p, name);
       break;
     default:
-      as_bad ("invalid opertype");
+      as_bad (_("invalid opertype"));
       ignore_rest_of_line ();
       free (name);
       return;
@@ -667,7 +667,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
 
   if (*input_line_pointer != ',')
     {
-      as_bad ("expected comma after operand name");
+      as_bad (_("expected comma after operand name"));
       ignore_rest_of_line ();
       return;
     }
@@ -679,7 +679,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
 
   if (*input_line_pointer != ',')
     {
-      as_bad ("expected comma after opcode");
+      as_bad (_("expected comma after opcode"));
       ignore_rest_of_line ();
       return;
     }
@@ -689,7 +689,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
 
   if (subopcode < 0)
     {
-      as_bad ("negative subopcode %d", subopcode);
+      as_bad (_("negative subopcode %d"), subopcode);
       ignore_rest_of_line ();
       return;
     }
@@ -698,7 +698,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
     {
       if (3 != opcode)
 	{
-	  as_bad ("subcode value found when opcode not equal 0x03");
+	  as_bad (_("subcode value found when opcode not equal 0x03"));
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -706,7 +706,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
 	{
 	  if (subopcode < 0x09 || subopcode == 0x3f)
 	    {
-	      as_bad ("invalid subopcode %d", subopcode);
+	      as_bad (_("invalid subopcode %d"), subopcode);
 	      ignore_rest_of_line ();
 	      return;
 	    }
@@ -717,7 +717,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
 
   if (*input_line_pointer != ',')
     {
-      as_bad ("expected comma after subopcode");
+      as_bad (_("expected comma after subopcode"));
       ignore_rest_of_line ();
       return;
     }
@@ -736,7 +736,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
 
   if (-1 == suffixcode)
     {
-      as_bad ("invalid suffix class");
+      as_bad (_("invalid suffix class"));
       ignore_rest_of_line ();
       return;
     }
@@ -745,7 +745,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
 
   if (*input_line_pointer != ',')
     {
-      as_bad ("expected comma after suffix class");
+      as_bad (_("expected comma after suffix class"));
       ignore_rest_of_line ();
       return;
     }
@@ -764,14 +764,14 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
 
   if (0 == (SYNTAX_VALID & class))
     {
-      as_bad ("invalid syntax class");
+      as_bad (_("invalid syntax class"));
       ignore_rest_of_line ();
       return;
     }
 
   if ((0x3 == opcode) & (class & SYNTAX_3OP))
     {
-      as_bad ("opcode 0x3 and SYNTAX_3OP invalid");
+      as_bad (_("opcode 0x3 and SYNTAX_3OP invalid"));
       ignore_rest_of_line ();
       return;
     }
@@ -791,7 +791,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
       strcat (syntax, " ");
       break;
     default:
-      as_bad ("unknown suffix class");
+      as_bad (_("unknown suffix class"));
       ignore_rest_of_line ();
       return;
       break;
@@ -858,7 +858,7 @@ arc_common (int localScope)
 
   if (*input_line_pointer != ',')
     {
-      as_bad ("expected comma after symbol name");
+      as_bad (_("expected comma after symbol name"));
       ignore_rest_of_line ();
       return;
     }
@@ -868,7 +868,7 @@ arc_common (int localScope)
 
   if (size < 0)
     {
-      as_bad ("negative symbol length");
+      as_bad (_("negative symbol length"));
       ignore_rest_of_line ();
       return;
     }
@@ -879,14 +879,14 @@ arc_common (int localScope)
 
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
-      as_bad ("ignoring attempt to re-define symbol");
+      as_bad (_("ignoring attempt to re-define symbol"));
       ignore_rest_of_line ();
       return;
     }
   if (((int) S_GET_VALUE (symbolP) != 0) \
       && ((int) S_GET_VALUE (symbolP) != size))
     {
-      as_warn ("length of symbol \"%s\" already %ld, ignoring %d",
+      as_warn (_("length of symbol \"%s\" already %ld, ignoring %d"),
 	       S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
     }
   assert (symbolP->sy_frag == &zero_address_frag);
@@ -900,7 +900,7 @@ arc_common (int localScope)
       if (align < 0)
 	{
 	  align = 0;
-	  as_warn ("assuming symbol alignment of zero");
+	  as_warn (_("assuming symbol alignment of zero"));
 	}
     }
   else
@@ -967,7 +967,7 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
   /* If an instruction has already been seen, it's too late.  */
   if (cpu_tables_init_p)
     {
-      as_bad ("\".option\" directive must appear before any instructions");
+      as_bad (_("\".option\" directive must appear before any instructions"));
       ignore_rest_of_line ();
       return;
     }
@@ -977,7 +977,7 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
 
   if (mach_type_specified_p && mach != arc_mach_type)
     {
-      as_bad ("\".option\" directive conflicts with initial definition");
+      as_bad (_("\".option\" directive conflicts with initial definition"));
       ignore_rest_of_line ();
       return;
     }
@@ -985,17 +985,17 @@ arc_option (int ignore ATTRIBUTE_UNUSED)
     {
       /* The cpu may have been selected on the command line.  */
       if (mach != arc_mach_type)
-	as_warn ("\".option\" directive overrides command-line (default) value");
+	as_warn (_("\".option\" directive overrides command-line (default) value"));
       arc_mach_type = mach;
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_arc, mach))
-	as_fatal ("could not set architecture and machine");
+	as_fatal (_("could not set architecture and machine"));
       mach_type_specified_p = 1;
     }
   demand_empty_rest_of_line ();
   return;
 
  bad_cpu:
-  as_bad ("invalid identifier for \".option\"");
+  as_bad (_("invalid identifier for \".option\""));
   ignore_rest_of_line ();
 }
 
@@ -1117,7 +1117,7 @@ arc_code_symbol (expressionS *expressionP)
       expressionP->X_op_symbol = make_expr_symbol (&two);
     }
   else
-    as_bad ("expression too complex code symbol");
+    as_bad (_("expression too complex code symbol"));
 }
 
 /* Parse an operand that is machine-specific.
@@ -1144,7 +1144,7 @@ md_operand (expressionS *expressionP)
       expression (expressionP);
       if (*input_line_pointer != ')')
 	{
-	  as_bad ("missing ')' in %%-op");
+	  as_bad (_("missing ')' in %%-op"));
 	  return;
 	}
       ++input_line_pointer;
@@ -1345,7 +1345,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
       else
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			"unresolved expression that must be resolved");
+			_("unresolved expression that must be resolved"));
 	  fixP->fx_done = 1;
 	  return;
 	}
@@ -1399,7 +1399,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
-		    "internal error: can't export reloc type %d (`%s')",
+		    _("internal error: can't export reloc type %d (`%s')"),
 		    fixP->fx_r_type,
 		    bfd_get_reloc_code_name (fixP->fx_r_type));
       return NULL;
@@ -1531,7 +1531,7 @@ md_assemble (char *str)
 	    }
 	  operand = arc_operands + arc_operand_map[(int) *syn];
 	  if (operand->fmt == 0)
-	    as_fatal ("unknown syntax format character `%c'", *syn);
+	    as_fatal (_("unknown syntax format character `%c'"), *syn);
 
 	  if (operand->flags & ARC_OPERAND_FAKE)
 	    {
@@ -1669,7 +1669,7 @@ md_assemble (char *str)
 	      else
 		{
 		  if (num_suffixes == MAX_SUFFIXES)
-		    as_bad ("too many suffixes");
+		    as_bad (_("too many suffixes"));
 		  else
 		    insn_suffixes[num_suffixes++] = suffix;
 		}
@@ -1699,16 +1699,16 @@ md_assemble (char *str)
 	      input_line_pointer = hold;
 
 	      if (exp.X_op == O_illegal)
-		as_bad ("illegal operand");
+		as_bad (_("illegal operand"));
 	      else if (exp.X_op == O_absent)
-		as_bad ("missing operand");
+		as_bad (_("missing operand"));
 	      else if (exp.X_op == O_constant)
 		value = exp.X_add_number;
 	      else if (exp.X_op == O_register)
 		reg = (struct arc_operand_value *) exp.X_add_number;
 #define IS_REG_DEST_OPERAND(o) ((o) == 'a')
 	      else if (IS_REG_DEST_OPERAND (*syn))
-		as_bad ("symbol as destination register");
+		as_bad (_("symbol as destination register"));
 	      else
 		{
 		  if (!strncmp (str, "@h30", 4))
@@ -1718,7 +1718,7 @@ md_assemble (char *str)
 		    }
 		  /* We need to generate a fixup for this expression.  */
 		  if (fc >= MAX_FIXUPS)
-		    as_fatal ("too many fixups");
+		    as_fatal (_("too many fixups"));
 		  fixups[fc].exp = exp;
 		  /* We don't support shimm relocs. break here to force
 		     the assembler to output a limm.  */
@@ -1793,7 +1793,7 @@ md_assemble (char *str)
 	    ++str;
 
 	  if (!is_end_of_line[(unsigned char) *str])
-	    as_bad ("junk at end of line: `%s'", str);
+	    as_bad (_("junk at end of line: `%s'"), str);
 
 	  /* Is there a limm value?  */
 	  limm_p = arc_opcode_limm_p (&limm);
@@ -1832,10 +1832,10 @@ md_assemble (char *str)
 	       be legal, but let's warn the user anyway.  Ditto for 8 byte
 	       jumps with delay slots.  */
 	    if (in_delay_slot_p && limm_p)
-	      as_warn ("8 byte instruction in delay slot");
+	      as_warn (_("8 byte instruction in delay slot"));
 	    if (delay_slot_type != ARC_DELAY_NONE
 		&& limm_p && arc_insn_not_jl (insn)) /* except for jl  addr */
-	      as_warn ("8 byte jump instruction with delay slot");
+	      as_warn (_("8 byte jump instruction with delay slot"));
 	    in_delay_slot_p = (delay_slot_type != ARC_DELAY_NONE) && !limm_p;
 
 	    /* Warn when a conditional branch immediately follows a set of
@@ -1843,7 +1843,7 @@ md_assemble (char *str)
 	       insn that sets the condition codes uses a limm.  */
 	    if (cond_branch_p && conditional != 0 /* 0 = "always" */
 		&& prev_insn_needs_cc_nop_p && arc_mach_type == bfd_mach_arc_5)
-	      as_warn ("conditional branch follows set of flags");
+	      as_warn (_("conditional branch follows set of flags"));
 	    prev_insn_needs_cc_nop_p =
 	      /* FIXME: ??? not required:
 		 (delay_slot_type != ARC_DELAY_NONE) &&  */
@@ -1927,7 +1927,7 @@ md_assemble (char *str)
     }
 
   if (NULL == last_errmsg)
-    as_bad ("bad instruction `%s'", start);
+    as_bad (_("bad instruction `%s'"), start);
   else
     as_bad (last_errmsg);
 }

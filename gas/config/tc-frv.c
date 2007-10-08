@@ -404,7 +404,7 @@ md_parse_option (c, arg)
 
 	else
 	  {
-	    as_fatal ("Unknown cpu -mcpu=%s", arg);
+	    as_fatal (_("Unknown cpu -mcpu=%s"), arg);
 	    return 0;
 	  }
 
@@ -1700,7 +1700,7 @@ frv_pic_ptr (nbytes)
 	  if (*input_line_pointer == ')')
 	    input_line_pointer++;
 	  else
-	    as_bad ("missing ')'");
+	    as_bad (_("missing ')'"));
 	  reloc_type = BFD_RELOC_FRV_FUNCDESC;
 	}
       else if (strncasecmp (input_line_pointer, "tlsmoff(", 8) == 0)
@@ -1710,7 +1710,7 @@ frv_pic_ptr (nbytes)
 	  if (*input_line_pointer == ')')
 	    input_line_pointer++;
 	  else
-	    as_bad ("missing ')'");
+	    as_bad (_("missing ')'"));
 	  reloc_type = BFD_RELOC_FRV_TLSMOFF;
 	}
       else

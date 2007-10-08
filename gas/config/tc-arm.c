@@ -2430,7 +2430,7 @@ find_real_start (symbolS * symbolP)
 
   if (new_target == NULL)
     {
-      as_warn ("Failed to find real start of function: %s\n", name);
+      as_warn (_("Failed to find real start of function: %s\n"), name);
       new_target = symbolP;
     }
 
@@ -6003,7 +6003,7 @@ parse_operands (char *str, const unsigned char *pattern)
 	  break;
 
 	default:
-	  as_fatal ("unhandled operand code %d", upat[i]);
+	  as_fatal (_("unhandled operand code %d"), upat[i]);
 	}
 
       /* Various value-based sanity checks and shared operations.  We
@@ -6614,7 +6614,7 @@ do_barrier (void)
     {
       constraint ((inst.instruction & 0xf0) != 0x40
 		  && inst.operands[0].imm != 0xf,
-		  "bad barrier type");
+		  _("bad barrier type"));
       inst.instruction |= inst.operands[0].imm;
     }
   else
@@ -7012,8 +7012,8 @@ do_ldstt (void)
      reject [Rn,...].  */
   if (inst.operands[1].preind)
     {
-      constraint (inst.reloc.exp.X_op != O_constant ||
-		  inst.reloc.exp.X_add_number != 0,
+      constraint (inst.reloc.exp.X_op != O_constant
+		  || inst.reloc.exp.X_add_number != 0,
 		  _("this instruction requires a post-indexed address"));
 
       inst.operands[1].preind = 0;
@@ -7043,8 +7043,8 @@ do_ldsttv4 (void)
      reject [Rn,...].  */
   if (inst.operands[1].preind)
     {
-      constraint (inst.reloc.exp.X_op != O_constant ||
-		  inst.reloc.exp.X_add_number != 0,
+      constraint (inst.reloc.exp.X_op != O_constant
+		  || inst.reloc.exp.X_add_number != 0,
 		  _("this instruction requires a post-indexed address"));
 
       inst.operands[1].preind = 0;
@@ -8773,7 +8773,7 @@ do_t_barrier (void)
     {
       constraint ((inst.instruction & 0xf0) != 0x40
 		  && inst.operands[0].imm != 0xf,
-		  "bad barrier type");
+		  _("bad barrier type"));
       inst.instruction |= inst.operands[0].imm;
     }
   else
@@ -17309,7 +17309,7 @@ start_unwind_section (const segT text_seg, int idx)
       group_name = elf_group_name (text_seg);
       if (group_name == NULL)
 	{
-	  as_bad ("Group section `%s' has no group signature",
+	  as_bad (_("Group section `%s' has no group signature"),
 		  segment_name (text_seg));
 	  ignore_rest_of_line ();
 	  return;
@@ -17627,7 +17627,7 @@ md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
       if (!GOT_symbol)
 	{
 	  if (symbol_find (name))
-	    as_bad ("GOT already in the symbol table");
+	    as_bad (_("GOT already in the symbol table"));
 
 	  GOT_symbol = symbol_new (name, undefined_section,
 				   (valueT) 0, & zero_address_frag);
