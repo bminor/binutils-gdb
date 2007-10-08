@@ -2461,7 +2461,7 @@ hppa_stub_unwind_sniffer (struct frame_info *next_frame)
   if (pc == 0
       || (tdep->in_solib_call_trampoline != NULL
 	  && tdep->in_solib_call_trampoline (pc, NULL))
-      || gdbarch_in_solib_return_trampoline (current_gdbarch, pc, NULL))
+      || gdbarch_in_solib_return_trampoline (gdbarch, pc, NULL))
     return &hppa_stub_frame_unwind;
   return NULL;
 }
@@ -3195,9 +3195,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 static void
-hppa_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+hppa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   fprintf_unfiltered (file, "bytes_per_address = %d\n", 
                       tdep->bytes_per_address);

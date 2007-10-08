@@ -299,6 +299,7 @@ hppa_hpux_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 static CORE_ADDR
 hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   long orig_pc = pc;
   long prev_inst, curr_inst, loc;
   struct minimal_symbol *msym;
@@ -315,13 +316,13 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
          itself.  Bit 31 has meaning too, but only for MPE.  */
       if (pc & 0x2)
 	pc = (CORE_ADDR) read_memory_integer
-			   (pc & ~0x3, gdbarch_ptr_bit (current_gdbarch) / 8);
+			   (pc & ~0x3, gdbarch_ptr_bit (gdbarch) / 8);
     }
   if (pc == hppa_symbol_address("$$dyncall_external"))
     {
       pc = (CORE_ADDR) get_frame_register_unsigned (frame, 22);
       pc = (CORE_ADDR) read_memory_integer
-			 (pc & ~0x3, gdbarch_ptr_bit (current_gdbarch) / 8);
+			 (pc & ~0x3, gdbarch_ptr_bit (gdbarch) / 8);
     }
   else if (pc == hppa_symbol_address("_sr4export"))
     pc = (CORE_ADDR) get_frame_register_unsigned (frame, 22);
@@ -517,7 +518,7 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	{
 	  return (read_memory_integer
 		  (get_frame_register_unsigned (frame, HPPA_SP_REGNUM) - 24,
-		   gdbarch_ptr_bit (current_gdbarch) / 8)) & ~0x3;
+		   gdbarch_ptr_bit (gdbarch) / 8)) & ~0x3;
 	}
 
       /* What about be,n 0(sr0,%rp)?  It's just another way we return to
@@ -530,7 +531,7 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	     mtsp %r1,%sr0 if we want to do sanity checking.  */
 	  return (read_memory_integer
 		  (get_frame_register_unsigned (frame, HPPA_SP_REGNUM) - 24,
-		   gdbarch_ptr_bit (current_gdbarch) / 8)) & ~0x3;
+		   gdbarch_ptr_bit (gdbarch) / 8)) & ~0x3;
 	}
 
       /* Haven't found the branch yet, but we're still in the stub.
@@ -1422,6 +1423,7 @@ static void
 hppa_hpux_unwind_adjust_stub (struct frame_info *next_frame, CORE_ADDR base,
 			      struct trad_frame_saved_reg *saved_regs)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   int optimized, realreg;
   enum lval_type lval;
   CORE_ADDR addr;
@@ -1441,14 +1443,14 @@ hppa_hpux_unwind_adjust_stub (struct frame_info *next_frame, CORE_ADDR base,
   if (u && u->stub_unwind.stub_type == EXPORT)
     {
       stubpc = read_memory_integer
-		 (base - 24, gdbarch_ptr_bit (current_gdbarch) / 8);
+		 (base - 24, gdbarch_ptr_bit (gdbarch) / 8);
       trad_frame_set_value (saved_regs, HPPA_PCOQ_HEAD_REGNUM, stubpc);
     }
   else if (hppa_symbol_address ("__gcc_plt_call") 
            == get_pc_function_start (val))
     {
       stubpc = read_memory_integer
-		 (base - 8, gdbarch_ptr_bit (current_gdbarch) / 8);
+		 (base - 8, gdbarch_ptr_bit (gdbarch) / 8);
       trad_frame_set_value (saved_regs, HPPA_PCOQ_HEAD_REGNUM, stubpc);
     }
 }

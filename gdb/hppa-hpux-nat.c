@@ -87,6 +87,7 @@ hppa_hpux_save_state_offset (struct regcache *regcache, int regnum)
 static void
 hppa_hpux_fetch_register (struct regcache *regcache, int regnum)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -97,7 +98,7 @@ hppa_hpux_fetch_register (struct regcache *regcache, int regnum)
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = hppa_hpux_save_state_offset (regcache, regnum);
-  size = register_size (current_gdbarch, regnum);
+  size = register_size (gdbarch, regnum);
 
   gdb_assert (size == 4 || size == 8);
   buf = alloca (size);
@@ -108,7 +109,7 @@ hppa_hpux_fetch_register (struct regcache *regcache, int regnum)
 
     if (ttrace (TT_LWP_RUREGS, pid, lwp, addr, size, (uintptr_t)buf) == -1)
       error (_("Couldn't read register %s (#%d): %s"),
-	     gdbarch_register_name (current_gdbarch, regnum),
+	     gdbarch_register_name (gdbarch, regnum),
 	     regnum, safe_strerror (errno));
   }
 #else
@@ -122,7 +123,7 @@ hppa_hpux_fetch_register (struct regcache *regcache, int regnum)
 	buf[i] = ptrace (PT_RUREGS, pid, (PTRACE_TYPE_ARG3) addr, 0, 0);
 	if (errno != 0)
 	  error (_("Couldn't read register %s (#%d): %s"),
-		 gdbarch_register_name (current_gdbarch, regnum),
+		 gdbarch_register_name (gdbarch, regnum),
 		 regnum, safe_strerror (errno));
 
 	addr += sizeof (PTRACE_TYPE_RET);
@@ -145,7 +146,9 @@ static void
 hppa_hpux_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
+    for (regnum = 0;
+	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum++)
       hppa_hpux_fetch_register (regcache, regnum);
   else
     hppa_hpux_fetch_register (regcache, regnum);
@@ -156,7 +159,8 @@ hppa_hpux_fetch_inferior_registers (struct regcache *regcache, int regnum)
 static void
 hppa_hpux_store_register (struct regcache *regcache, int regnum)
 {
-  CORE_ADDR addr;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  CORE_ADDR addr
   size_t size;
   PTRACE_TYPE_RET *buf;
   pid_t pid;
@@ -165,7 +169,7 @@ hppa_hpux_store_register (struct regcache *regcache, int regnum)
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = hppa_hpux_save_state_offset (regcache, regnum);
-  size = register_size (current_gdbarch, regnum);
+  size = register_size (gdbarch, regnum);
 
   gdb_assert (size == 4 || size == 8);
   buf = alloca (size);
@@ -187,7 +191,7 @@ hppa_hpux_store_register (struct regcache *regcache, int regnum)
 
     if (ttrace (TT_LWP_WUREGS, pid, lwp, addr, size, (uintptr_t)buf) == -1)
       error (_("Couldn't write register %s (#%d): %s"),
-	     gdbarch_register_name (current_gdbarch, regnum),
+	     gdbarch_register_name (gdbarch, regnum),
 	     regnum, safe_strerror (errno));
   }
 #else
@@ -201,7 +205,7 @@ hppa_hpux_store_register (struct regcache *regcache, int regnum)
 	ptrace (PT_WUREGS, pid, (PTRACE_TYPE_ARG3) addr, buf[i], 0);
 	if (errno != 0)
 	  error (_("Couldn't write register %s (#%d): %s"),
-		 gdbarch_register_name (current_gdbarch, regnum),
+		 gdbarch_register_name (gdbarch, regnum),
 		 regnum, safe_strerror (errno));
 
 	addr += sizeof (PTRACE_TYPE_RET);
@@ -217,7 +221,9 @@ static void
 hppa_hpux_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
+    for (regnum = 0;
+	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum++)
       hppa_hpux_store_register (regcache, regnum);
   else
     hppa_hpux_store_register (regcache, regnum);

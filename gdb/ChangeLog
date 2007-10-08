@@ -1,5 +1,20 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* hppa-tdep.c (hppa_stub_unwind_sniffer, hppa_dump_tdep): Replace
+	current_gdbarch by gdbarch.
+	* hppa-linux-nat.c (fetch_register, store_register)
+	(hppa_linux_fetch_inferior_registers)
+	(hppa_linux_store_inferior_registers): Use get_regcache_arch or
+	get_frame_arch to get at the current architecture by regcache or by
+	frame, respectively.
+	* hppa-hpux-tdep.c (hppa_hpux_skip_trampoline_code
+	(hppa_hpux_unwind_adjust_stub): Likewise.
+	* hppa-hpux-nat.c (hppa_hpux_fetch_register, hppa_hpux_store_register)
+	(hppa_hpux_fetch_inferior_registers)
+	(hppa_hpux_store_inferior_registers): Likewise.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* cris-tdep.c (cris_sigcontext_addr, cris_sigtramp_frame_unwind_cache)
 	(cris_scan_prologue, crisv32_scan_prologue, find_step_target)
 	(cris_software_single_step, cris_supply_gregset): Use get_regcache_arch

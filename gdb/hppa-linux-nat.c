@@ -216,10 +216,11 @@ static const int greg_map[] =
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int tid;
   int val;
 
-  if (gdbarch_cannot_fetch_register (current_gdbarch, regno))
+  if (gdbarch_cannot_fetch_register (gdbarch, regno))
     {
       regcache_raw_supply (regcache, regno, NULL);
       return;
@@ -234,7 +235,7 @@ fetch_register (struct regcache *regcache, int regno)
   val = ptrace (PTRACE_PEEKUSER, tid, hppa_linux_register_addr (regno, 0), 0);
   if (errno != 0)
     error (_("Couldn't read register %s (#%d): %s."), 
-	   gdbarch_register_name (current_gdbarch, regno),
+	   gdbarch_register_name (gdbarch, regno),
 	   regno, safe_strerror (errno));
 
   regcache_raw_supply (regcache, regno, &val);
@@ -245,10 +246,11 @@ fetch_register (struct regcache *regcache, int regno)
 static void
 store_register (const struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int tid;
   int val;
 
-  if (gdbarch_cannot_store_register (current_gdbarch, regno))
+  if (gdbarch_cannot_store_register (gdbarch, regno))
     return;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -261,7 +263,7 @@ store_register (const struct regcache *regcache, int regno)
   ptrace (PTRACE_POKEUSER, tid, hppa_linux_register_addr (regno, 0), val);
   if (errno != 0)
     error (_("Couldn't write register %s (#%d): %s."),
-	   gdbarch_register_name (current_gdbarch, regno),
+	   gdbarch_register_name (gdbarch, regno),
 	   regno, safe_strerror (errno));
 }
 
@@ -274,7 +276,9 @@ hppa_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {
-      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
+      for (regno = 0;
+	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno++)
         fetch_register (regcache, regno);
     }
   else 
@@ -292,7 +296,9 @@ hppa_linux_store_inferior_registers (struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {
-      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
+      for (regno = 0;
+	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno++)
 	store_register (regcache, regno);
     }
   else
