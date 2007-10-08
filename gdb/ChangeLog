@@ -1,5 +1,18 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* ia64-tdep.c (ia64_pseudo_register_read, ia64_pseudo_register_write):
+	Replace current_gdbarch by gdbarch.
+	* ia64-tdep.c (ia64_frame_prev_register
+	(ia64_sigtramp_frame_prev_register)
+	(ia64_libunwind_frame_prev_register): Use get_regcache_arch or
+	get_frame_arch to get at the current architecture by regcache or by
+	frame, respectively.
+	* ia64-linux-nat.c (ia64_linux_fetch_register)
+	(ia64_linux_fetch_registers, ia64_linux_store_register)
+	(ia64_linux_store_registers): Likewise.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* hppa-tdep.c (hppa_stub_unwind_sniffer, hppa_dump_tdep): Replace
 	current_gdbarch by gdbarch.
 	* hppa-linux-nat.c (fetch_register, store_register)

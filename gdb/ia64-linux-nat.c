@@ -674,6 +674,7 @@ ia64_linux_can_use_hw_breakpoint (int type, int cnt, int othertype)
 static void
 ia64_linux_fetch_register (struct regcache *regcache, int regnum)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -693,7 +694,7 @@ ia64_linux_fetch_register (struct regcache *regcache, int regnum)
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = ia64_register_addr (regnum);
-  size = register_size (current_gdbarch, regnum);
+  size = register_size (gdbarch, regnum);
 
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
   buf = alloca (size);
@@ -705,7 +706,7 @@ ia64_linux_fetch_register (struct regcache *regcache, int regnum)
       buf[i] = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3)addr, 0);
       if (errno != 0)
 	error (_("Couldn't read register %s (#%d): %s."),
-	       gdbarch_register_name (current_gdbarch, regnum),
+	       gdbarch_register_name (gdbarch, regnum),
 	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
@@ -720,7 +721,9 @@ static void
 ia64_linux_fetch_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
+    for (regnum = 0;
+	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum++)
       ia64_linux_fetch_register (regcache, regnum);
   else
     ia64_linux_fetch_register (regcache, regnum);
@@ -731,6 +734,7 @@ ia64_linux_fetch_registers (struct regcache *regcache, int regnum)
 static void
 ia64_linux_store_register (const struct regcache *regcache, int regnum)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
@@ -747,7 +751,7 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = ia64_register_addr (regnum);
-  size = register_size (current_gdbarch, regnum);
+  size = register_size (gdbarch, regnum);
 
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
   buf = alloca (size);
@@ -760,7 +764,7 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
       ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3)addr, buf[i]);
       if (errno != 0)
 	error (_("Couldn't write register %s (#%d): %s."),
-	       gdbarch_register_name (current_gdbarch, regnum),
+	       gdbarch_register_name (gdbarch, regnum),
 	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
@@ -774,7 +778,9 @@ static void
 ia64_linux_store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
+    for (regnum = 0;
+	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum++)
       ia64_linux_store_register (regcache, regnum);
   else
     ia64_linux_store_register (regcache, regnum);
