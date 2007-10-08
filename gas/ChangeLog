@@ -1,3 +1,8 @@
+2007-10-08  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/5136
+	* config/tc-bfin.c (md_apply_fix): Fix error message.
+
 2007-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Check the first 2 8bit

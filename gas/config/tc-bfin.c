@@ -648,7 +648,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_BFIN_16_IMM:
     case BFD_RELOC_16:
       if (value < -0x8000 || value >= 0x7fff)
-	as_bad_where (fixP->fx_file, fixP->fx_line, "rel too far BFD_RELOC_8");
+	as_bad_where (fixP->fx_file, fixP->fx_line, "rel too far BFD_RELOC_16");
       md_number_to_chars (where, value, 2);
       break;
 
