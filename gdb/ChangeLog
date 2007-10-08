@@ -1,3 +1,11 @@
+2007-10-08  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	Revert:
+	2007-08-10  Michael Snyder  <msnyder@access-company.com>
+
+	* stabsread.c (read_huge_number): Attempt to compute value before
+	values that it depends on.
+
 2007-10-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (get_offsets): Only call free_symfile_segment_data if
