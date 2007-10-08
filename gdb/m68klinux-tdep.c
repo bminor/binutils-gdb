@@ -260,7 +260,7 @@ m68k_linux_sigtramp_frame_cache (struct frame_info *next_frame,
 {
   struct frame_id this_id;
   struct trad_frame_cache *cache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
   struct m68k_linux_sigtramp_info info;
   char buf[4];
   int i;

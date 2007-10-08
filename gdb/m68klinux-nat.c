@@ -115,6 +115,7 @@ int have_ptrace_getregs =
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
   char mess[128];		/* For messages */
@@ -122,9 +123,9 @@ fetch_register (struct regcache *regcache, int regno)
   char buf[MAX_REGISTER_SIZE];
   int tid;
 
-  if (gdbarch_cannot_fetch_register (current_gdbarch, regno))
+  if (gdbarch_cannot_fetch_register (gdbarch, regno))
     {
-      memset (buf, '\0', register_size (current_gdbarch, regno));	/* Supply zeroes */
+      memset (buf, '\0', register_size (gdbarch, regno)); /* Supply zeroes */
       regcache_raw_supply (regcache, regno, buf);
       return;
     }
@@ -135,7 +136,7 @@ fetch_register (struct regcache *regcache, int regno)
     tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
   regaddr = 4 * regmap[regno];
-  for (i = 0; i < register_size (current_gdbarch, regno);
+  for (i = 0; i < register_size (gdbarch, regno);
        i += sizeof (PTRACE_TYPE_RET))
     {
       errno = 0;
@@ -145,7 +146,7 @@ fetch_register (struct regcache *regcache, int regno)
       if (errno != 0)
 	{
 	  sprintf (mess, "reading register %s (#%d)", 
-		   gdbarch_register_name (current_gdbarch, regno), regno);
+		   gdbarch_register_name (gdbarch, regno), regno);
 	  perror_with_name (mess);
 	}
     }
@@ -165,7 +166,9 @@ old_fetch_inferior_registers (struct regcache *regcache, int regno)
     }
   else
     {
-      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
+      for (regno = 0;
+	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno++)
 	{
 	  fetch_register (regcache, regno);
 	}
@@ -177,6 +180,7 @@ old_fetch_inferior_registers (struct regcache *regcache, int regno)
 static void
 store_register (const struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = reg_regcache_arch (regcache);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
   char mess[128];		/* For messages */
@@ -184,7 +188,7 @@ store_register (const struct regcache *regcache, int regno)
   int tid;
   char buf[MAX_REGISTER_SIZE];
 
-  if (gdbarch_cannot_store_register (current_gdbarch, regno))
+  if (gdbarch_cannot_store_register (gdbarch, regno))
     return;
 
   /* Overload thread id onto process id */
@@ -198,7 +202,7 @@ store_register (const struct regcache *regcache, int regno)
   regcache_raw_collect (regcache, regno, buf);
 
   /* Store the local buffer into the inferior a chunk at the time. */
-  for (i = 0; i < register_size (current_gdbarch, regno);
+  for (i = 0; i < register_size (gdbarch, regno);
        i += sizeof (PTRACE_TYPE_RET))
     {
       errno = 0;
@@ -208,7 +212,7 @@ store_register (const struct regcache *regcache, int regno)
       if (errno != 0)
 	{
 	  sprintf (mess, "writing register %s (#%d)", 
-		   gdbarch_register_name (current_gdbarch, regno), regno);
+		   gdbarch_register_name (gdbarch, regno), regno);
 	  perror_with_name (mess);
 	}
     }
@@ -227,7 +231,9 @@ old_store_inferior_registers (const struct regcache *regcache, int regno)
     }
   else
     {
-      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
+      for (regno = 0;
+	   regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno++)
 	{
 	  store_register (regcache, regno);
 	}
@@ -241,17 +247,18 @@ old_store_inferior_registers (const struct regcache *regcache, int regno)
 void
 supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const elf_greg_t *regp = (const elf_greg_t *) gregsetp;
   int regi;
 
   for (regi = M68K_D0_REGNUM;
-       regi <= gdbarch_sp_regnum (current_gdbarch);
+       regi <= gdbarch_sp_regnum (gdbarch);
        regi++)
     regcache_raw_supply (regcache, regi, &regp[regmap[regi]]);
-  regcache_raw_supply (regcache, gdbarch_ps_regnum (current_gdbarch),
+  regcache_raw_supply (regcache, gdbarch_ps_regnum (gdbarch),
 		       &regp[PT_SR]);
   regcache_raw_supply (regcache,
-		       gdbarch_pc_regnum (current_gdbarch), &regp[PT_PC]);
+		       gdbarch_pc_regnum (gdbarch), &regp[PT_PC]);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -331,14 +338,14 @@ static void store_regs (const struct regcache *regcache, int tid, int regno) {}
 void
 supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int regi;
 
-  for (regi = gdbarch_fp0_regnum (current_gdbarch);
-       regi < gdbarch_fp0_regnum (current_gdbarch) + 8; regi++)
+  for (regi = gdbarch_fp0_regnum (gdbarch);
+       regi < gdbarch_fp0_regnum (gdbarch) + 8; regi++)
     regcache_raw_supply (regcache, regi,
 			 FPREG_ADDR (fpregsetp,
-				     regi - gdbarch_fp0_regnum
-					    (current_gdbarch)));
+				     regi - gdbarch_fp0_regnum (gdbarch)));
   regcache_raw_supply (regcache, M68K_FPC_REGNUM, &fpregsetp->fpcntl[0]);
   regcache_raw_supply (regcache, M68K_FPS_REGNUM, &fpregsetp->fpcntl[1]);
   regcache_raw_supply (regcache, M68K_FPI_REGNUM, &fpregsetp->fpcntl[2]);
@@ -352,16 +359,16 @@ void
 fill_fpregset (const struct regcache *regcache,
 	       elf_fpregset_t *fpregsetp, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int i;
 
   /* Fill in the floating-point registers.  */
-  for (i = gdbarch_fp0_regnum (current_gdbarch);
-       i < gdbarch_fp0_regnum (current_gdbarch) + 8; i++)
+  for (i = gdbarch_fp0_regnum (gdbarch);
+       i < gdbarch_fp0_regnum (gdbarch) + 8; i++)
     if (regno == -1 || regno == i)
       regcache_raw_collect (regcache, i,
 			    FPREG_ADDR (fpregsetp,
-				        i - gdbarch_fp0_regnum
-					    (current_gdbarch)));
+				        i - gdbarch_fp0_regnum (gdbarch)));
 
   /* Fill in the floating-point control registers.  */
   for (i = M68K_FPC_REGNUM; i <= M68K_FPI_REGNUM; i++)

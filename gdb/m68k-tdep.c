@@ -105,12 +105,12 @@ m68k_init_types (void)
 static struct type *
 m68k_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep->fpregs_present)
     {
-      if (regnum >= gdbarch_fp0_regnum (current_gdbarch)
-	  && regnum <= gdbarch_fp0_regnum (current_gdbarch) + 7)
+      if (regnum >= gdbarch_fp0_regnum (gdbarch)
+	  && regnum <= gdbarch_fp0_regnum (gdbarch) + 7)
 	{
 	  if (tdep->flavour == m68k_coldfire_flavour)
 	    return builtin_type (gdbarch)->builtin_double;
@@ -130,7 +130,7 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
 	return builtin_type_int0;
     }
 
-  if (regnum == gdbarch_pc_regnum (current_gdbarch))
+  if (regnum == gdbarch_pc_regnum (gdbarch))
     return builtin_type_void_func_ptr;
 
   if (regnum >= M68K_A0_REGNUM && regnum <= M68K_A0_REGNUM + 7)
@@ -182,7 +182,8 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, gdb_byte *to)
 {
   gdb_byte from[M68K_MAX_REGISTER_SIZE];
-  struct type *fpreg_type = register_type (current_gdbarch, M68K_FP0_REGNUM);
+  struct type *fpreg_type = register_type (get_frame_arch (frame),
+					   M68K_FP0_REGNUM);
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -206,7 +207,8 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const gdb_byte *from)
 {
   gdb_byte to[M68K_MAX_REGISTER_SIZE];
-  struct type *fpreg_type = register_type (current_gdbarch, M68K_FP0_REGNUM);
+  struct type *fpreg_type = register_type (get_frame_arch (frame),
+					   M68K_FP0_REGNUM);
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -284,12 +286,12 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
 {
   int len = TYPE_LENGTH (type);
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      struct type *fpreg_type = register_type 
-	(current_gdbarch, M68K_FP0_REGNUM);
+      struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
       regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
       convert_typed_floating (buf, fpreg_type, valbuf, type);
     }
@@ -325,12 +327,12 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
 			      const gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      struct type *fpreg_type = register_type 
-	(current_gdbarch, M68K_FP0_REGNUM);
+      struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
       gdb_byte buf[M68K_MAX_REGISTER_SIZE];
       convert_typed_floating (valbuf, type, buf, fpreg_type);
       regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
@@ -829,7 +831,7 @@ m68k_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   gdb_byte buf[8];
 
-  frame_unwind_register (next_frame, gdbarch_pc_regnum (current_gdbarch), buf);
+  frame_unwind_register (next_frame, gdbarch_pc_regnum (gdbarch), buf);
   return extract_typed_address (buf, builtin_type_void_func_ptr);
 }
 
@@ -944,7 +946,7 @@ m68k_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	{
 	  /* Read the value in from memory.  */
 	  read_memory (*addrp, valuep,
-		       register_size (current_gdbarch, regnum));
+		       register_size (get_frame_arch (next_frame), regnum));
 	}
       return;
     }
@@ -1010,6 +1012,7 @@ m68k_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   gdb_byte *buf;
   CORE_ADDR sp, jb_addr;
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
 
   if (tdep->jb_pc < 0)
@@ -1019,22 +1022,21 @@ m68k_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
       return 0;
     }
 
-  buf = alloca (gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT);
-  sp = get_frame_register_unsigned (frame, gdbarch_sp_regnum (current_gdbarch));
+  buf = alloca (gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
+  sp = get_frame_register_unsigned (frame, gdbarch_sp_regnum (gdbarch));
 
   if (target_read_memory (sp + SP_ARG0,	/* Offset of first arg on stack */
-			  buf,
-			  gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT))
+			  buf, gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT))
     return 0;
 
-  jb_addr = extract_unsigned_integer (buf, gdbarch_ptr_bit (current_gdbarch)
+  jb_addr = extract_unsigned_integer (buf, gdbarch_ptr_bit (gdbarch)
 					     / TARGET_CHAR_BIT);
 
   if (target_read_memory (jb_addr + tdep->jb_pc * tdep->jb_elt_size, buf,
-			  gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT))
+			  gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, gdbarch_ptr_bit (current_gdbarch)
+  *pc = extract_unsigned_integer (buf, gdbarch_ptr_bit (gdbarch)
 					 / TARGET_CHAR_BIT);
   return 1;
 }
@@ -1262,9 +1264,9 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 
 static void
-m68k_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+m68k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep == NULL)
     return;

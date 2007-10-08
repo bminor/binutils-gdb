@@ -1,5 +1,19 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* m68k-tdep.c (m68k_register_to_value, m68k_value_to_register)
+	(m68k_svr4_extract_return_value, m68k_svr4_store_return_value)
+	(m68k_frame_prev_register, m68k_get_longjmp_target): Use
+	get_regcache_arch or get_frame_arch to get at the current architecture
+	by regcache or by frame, respectively.
+	* m68klinux-tdep.c (m68k_linux_sigtramp_frame_cache): Likewise.
+	* m68klinux-nat.c (fetch_register, old_fetch_inferior_registers)
+	(store_register, old_store_inferior_registers, supply_gregset)
+	(supply_fpregset, fill_fpregset): Likewise.
+	* m68k-tdep.c (m68k_register_type, m68k_unwind_pc, m68k_dump_tdep):
+	Replace current_gdbarch by gdbarch.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* irix5-nat.c (supply_gregset, fill_gregset, supply_fpregset)
 	(fill_fpregset, fetch_core_registers): Use get_regcache_arch or
 	get_frame_arch to get at the current architecture by regcache or by
