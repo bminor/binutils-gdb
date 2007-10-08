@@ -235,7 +235,7 @@ read_reg (void *baton, int reg)
   int regnum;
   gdb_byte *buf;
 
-  regnum = gdbarch_dwarf2_reg_to_regnum (current_gdbarch, reg);
+  regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
 
   buf = alloca (register_size (gdbarch, regnum));
   frame_unwind_register (next_frame, regnum, buf);
@@ -338,9 +338,8 @@ execute_cfa_program (gdb_byte *insn_ptr, gdb_byte *insn_end,
 incomplete CFI data; DW_CFA_restore unspecified\n\
 register %s (#%d) at 0x%s"),
 		       gdbarch_register_name
-			 (current_gdbarch, gdbarch_dwarf2_reg_to_regnum
-					     (current_gdbarch, reg)),
-		       gdbarch_dwarf2_reg_to_regnum (current_gdbarch, reg),
+			 (gdbarch, gdbarch_dwarf2_reg_to_regnum (gdbarch, reg)),
+		       gdbarch_dwarf2_reg_to_regnum (gdbarch, reg),
 		       paddr (fs->pc));
 	}
       else
@@ -647,9 +646,9 @@ dwarf2_frame_default_init_reg (struct gdbarch *gdbarch, int regnum,
      (e.g. IBM S/390 and zSeries).  Those architectures should provide
      their own architecture-specific initialization function.  */
 
-  if (regnum == gdbarch_pc_regnum (current_gdbarch))
+  if (regnum == gdbarch_pc_regnum (gdbarch))
     reg->how = DWARF2_FRAME_REG_RA;
-  else if (regnum == gdbarch_sp_regnum (current_gdbarch))
+  else if (regnum == gdbarch_sp_regnum (gdbarch))
     reg->how = DWARF2_FRAME_REG_CFA;
 }
 
@@ -809,8 +808,8 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct cleanup *old_chain;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  const int num_regs = gdbarch_num_regs (current_gdbarch)
-		       + gdbarch_num_pseudo_regs (current_gdbarch);
+  const int num_regs = gdbarch_num_regs (gdbarch)
+		       + gdbarch_num_pseudo_regs (gdbarch);
   struct dwarf2_frame_cache *cache;
   struct dwarf2_frame_state *fs;
   struct dwarf2_fde *fde;
@@ -909,7 +908,7 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
     for (column = 0; column < fs->regs.num_regs; column++)
       {
 	/* Use the GDB register number as the destination index.  */
-	int regnum = gdbarch_dwarf2_reg_to_regnum (current_gdbarch, column);
+	int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, column);
 
 	/* If there's no corresponding GDB register, ignore it.  */
 	if (regnum < 0 || regnum >= num_regs)
@@ -1068,7 +1067,7 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *lvalp = lval_register;
       *addrp = 0;
       *realnump = gdbarch_dwarf2_reg_to_regnum
-		    (current_gdbarch, cache->reg[regnum].loc.reg);
+		    (gdbarch, cache->reg[regnum].loc.reg);
       if (valuep)
 	frame_unwind_register (next_frame, (*realnump), valuep);
       break;
@@ -1163,7 +1162,7 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
           CORE_ADDR pc = cache->reg[regnum].loc.offset;
 
           regnum = gdbarch_dwarf2_reg_to_regnum
-		     (current_gdbarch, cache->retaddr_reg.loc.reg);
+		     (gdbarch, cache->retaddr_reg.loc.reg);
           pc += frame_unwind_register_unsigned (next_frame, regnum);
           pack_long (valuep, register_type (gdbarch, regnum), pc);
         }

@@ -230,7 +230,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 	    {
 	      bfd_byte regval[MAX_REGISTER_SIZE];
 	      int gdb_regnum = gdbarch_dwarf2_reg_to_regnum
-				 (current_gdbarch, p->value);
+				 (arch, p->value);
 	      get_frame_register (frame, gdb_regnum, regval);
 	      memcpy (contents + offset, regval, p->size);
 	    }
@@ -245,7 +245,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
     {
       CORE_ADDR dwarf_regnum = dwarf_expr_fetch (ctx, 0);
       int gdb_regnum = gdbarch_dwarf2_reg_to_regnum
-			 (current_gdbarch, dwarf_regnum);
+			 (arch, dwarf_regnum);
       retval = value_from_register (SYMBOL_TYPE (var), gdb_regnum, frame);
     }
   else

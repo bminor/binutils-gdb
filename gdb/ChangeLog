@@ -1,5 +1,12 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* dwarf2-frame.c (read_reg, execute_cfa_program, dwarf2_frame_cache)
+	(dwarf2_frame_default_init_reg, dwarf2_frame_prev_register): Replace
+	current_gdbarch by gdbarch.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Likewise.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* regcache.c (init_regcache_descr, register_type, read_pc_pid)
 	(write_pc_pid, regcache_dump): Replace current_gdbarch by gdbarch.
 	* regcache.c (regcache_raw_write): Use get_regcache_arch or
