@@ -35,6 +35,7 @@
 #include "target.h"
 #include "target-reloc.h"
 #include "target-select.h"
+#include "tls.h"
 
 namespace
 {
@@ -112,6 +113,13 @@ class Target_i386 : public Sized_target<32, false>
 	   unsigned int data_shndx,
 	   const elfcpp::Rel<32, false>& reloc, unsigned int r_type,
 	   Symbol* gsym);
+
+    static void
+    unsupported_reloc_local(Sized_relobj<32, false>*, unsigned int r_type);
+
+    static void
+    unsupported_reloc_global(Sized_relobj<32, false>*, unsigned int r_type,
+			     Symbol*);
   };
 
   // The class which implements relocation.
@@ -180,16 +188,6 @@ class Target_i386 : public Sized_target<32, false>
 		 unsigned char* view,
 		 off_t view_size);
 
-    // Check the range for a TLS relocation.
-    static inline void
-    check_range(const Relocate_info<32, false>*, size_t relnum,
-		const elfcpp::Rel<32, false>&, off_t, off_t);
-
-    // Check the validity of a TLS relocation.  This is like assert.
-    static inline void
-    check_tls(const Relocate_info<32, false>*, size_t relnum,
-	      const elfcpp::Rel<32, false>&, bool);
-
     // We need to keep track of which type of local dynamic relocation
     // we have seen, so that we can optimize R_386_TLS_LDO_32 correctly.
     enum Local_dynamic_type
@@ -209,7 +207,7 @@ class Target_i386 : public Sized_target<32, false>
 
   // Adjust TLS relocation type based on the options and whether this
   // is a local symbol.
-  static unsigned int
+  static tls::Tls_optimization
   optimize_tls_reloc(bool is_final, int r_type);
 
   // Get the GOT section, creating it if necessary.
@@ -667,13 +665,13 @@ Target_i386::copy_reloc(const General_options* options,
 // symbol.  IS_FINAL is true if the final address of this symbol is
 // known at link time.
 
-unsigned int
+tls::Tls_optimization
 Target_i386::optimize_tls_reloc(bool is_final, int r_type)
 {
   // If we are generating a shared library, then we can't do anything
   // in the linker.
   if (parameters->output_is_shared())
-    return r_type;
+    return tls::TLSOPT_NONE;
 
   switch (r_type)
     {
@@ -685,20 +683,18 @@ Target_i386::optimize_tls_reloc(bool is_final, int r_type)
       // we can convert this to Initial-Exec.  If we also know that
       // this is a local symbol, we can further switch to Local-Exec.
       if (is_final)
-	return elfcpp::R_386_TLS_LE_32;
-      return elfcpp::R_386_TLS_IE_32;
+	return tls::TLSOPT_TO_LE;
+      return tls::TLSOPT_TO_IE;
 
     case elfcpp::R_386_TLS_LDM:
       // This is Local-Dynamic, which refers to a local symbol in the
       // dynamic TLS block.  Since we know that we generating an
       // executable, we can switch to Local-Exec.
-      return elfcpp::R_386_TLS_LE_32;
+      return tls::TLSOPT_TO_LE;
 
     case elfcpp::R_386_TLS_LDO_32:
-      // Another type of Local-Dynamic relocation.  We return a
-      // different value as we need to negate the thread segment
-      // offset.  FIXME: Returning reloc types makes no sense.
-      return elfcpp::R_386_TLS_LE;
+      // Another type of Local-Dynamic relocation.
+      return tls::TLSOPT_TO_LE;
 
     case elfcpp::R_386_TLS_IE:
     case elfcpp::R_386_TLS_GOTIE:
@@ -708,18 +704,28 @@ Target_i386::optimize_tls_reloc(bool is_final, int r_type)
       // local symbol, we can switch to Local-Exec, which links the
       // thread offset into the instruction.
       if (is_final)
-	return elfcpp::R_386_TLS_LE_32;
-      return r_type;
+	return tls::TLSOPT_TO_LE;
+      return tls::TLSOPT_NONE;
 
     case elfcpp::R_386_TLS_LE:
     case elfcpp::R_386_TLS_LE_32:
       // When we already have Local-Exec, there is nothing further we
       // can do.
-      return r_type;
+      return tls::TLSOPT_NONE;
 
     default:
       gold_unreachable();
     }
+}
+
+// Report an unsupported relocation against a local symbol.
+
+void
+Target_i386::Scan::unsupported_reloc_local(Sized_relobj<32, false>* object,
+					   unsigned int r_type)
+{
+  fprintf(stderr, _("%s: %s: unsupported reloc %u against local symbol\n"),
+	  program_name, object->name().c_str(), r_type);
 }
 
 // Scan a relocation for a local symbol.
@@ -761,12 +767,12 @@ Target_i386::Scan::local(const General_options&,
       target->got_section(symtab, layout);
       break;
 
+      // These are relocations which should only be seen by the
+      // dynamic linker, and should never be seen here.
     case elfcpp::R_386_COPY:
     case elfcpp::R_386_GLOB_DAT:
     case elfcpp::R_386_JUMP_SLOT:
     case elfcpp::R_386_RELATIVE:
-      // These are outstanding tls relocs, which are unexpected when
-      // linking.
     case elfcpp::R_386_TLS_TPOFF:
     case elfcpp::R_386_TLS_DTPMOD32:
     case elfcpp::R_386_TLS_DTPOFF32:
@@ -777,7 +783,7 @@ Target_i386::Scan::local(const General_options&,
       gold_exit(false);
       break;
 
-      // These are initial tls relocs, which are expected when
+      // These are initial TLS relocs, which are expected when
       // linking.
     case elfcpp::R_386_TLS_IE:
     case elfcpp::R_386_TLS_GOTIE:
@@ -791,8 +797,8 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_TLS_DESC_CALL:
       {
 	bool output_is_shared = parameters->output_is_shared();
-	r_type = Target_i386::optimize_tls_reloc(!output_is_shared,
-						 r_type);
+	const tls::Tls_optimization optimized_type
+            = Target_i386::optimize_tls_reloc(!output_is_shared, r_type);
 	switch (r_type)
 	  {
 	  case elfcpp::R_386_TLS_LE:
@@ -802,20 +808,36 @@ Target_i386::Scan::local(const General_options&,
 	    gold_assert(!output_is_shared);
 	    break;
 
+	  case elfcpp::R_386_TLS_IE:
+	  case elfcpp::R_386_TLS_IE_32:
+	  case elfcpp::R_386_TLS_GOTIE:
+	    // FIXME: If not relaxing to LE, we need to generate a
+	    // TPOFF or TPOFF32 reloc.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_local(object, r_type);
+	    break;
+
 	  case elfcpp::R_386_TLS_LDM:
+	    // FIXME: If not relaxing to LE, we need to generate a
+	    // DTPMOD32 reloc.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_local(object, r_type);
+	    break;
+
 	  case elfcpp::R_386_TLS_LDO_32:
 	    break;
 
-	  case elfcpp::R_386_TLS_IE:
-	  case elfcpp::R_386_TLS_GOTIE:
 	  case elfcpp::R_386_TLS_GD:
-	  case elfcpp::R_386_TLS_IE_32:
 	  case elfcpp::R_386_TLS_GOTDESC:
 	  case elfcpp::R_386_TLS_DESC_CALL:
-	    fprintf(stderr,
-		    _("%s: %s: unsupported reloc %u against local symbol\n"),
-		    program_name, object->name().c_str(), r_type);
+	    // FIXME: If not relaxing to LE, we need to generate
+	    // DTPMOD32 and DTPOFF32 relocs.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_local(object, r_type);
 	    break;
+
+	  default:
+	    gold_unreachable();
 	  }
       }
       break;
@@ -833,10 +855,21 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_TLS_LDM_POP:
     case elfcpp::R_386_USED_BY_INTEL_200:
     default:
-      fprintf(stderr, _("%s: %s: unsupported reloc %u against local symbol\n"),
-	      program_name, object->name().c_str(), r_type);
+      unsupported_reloc_local(object, r_type);
       break;
     }
+}
+
+// Report an unsupported relocation against a global symbol.
+
+void
+Target_i386::Scan::unsupported_reloc_global(Sized_relobj<32, false>* object,
+					    unsigned int r_type,
+					    Symbol* gsym)
+{
+  fprintf(stderr,
+	  _("%s: %s: unsupported reloc %u against global symbol %s\n"),
+	  program_name, object->name().c_str(), r_type, gsym->name());
 }
 
 // Scan a relocation for a global symbol.
@@ -928,12 +961,12 @@ Target_i386::Scan::global(const General_options& options,
       target->got_section(symtab, layout);
       break;
 
+      // These are relocations which should only be seen by the
+      // dynamic linker, and should never be seen here.
     case elfcpp::R_386_COPY:
     case elfcpp::R_386_GLOB_DAT:
     case elfcpp::R_386_JUMP_SLOT:
     case elfcpp::R_386_RELATIVE:
-      // These are outstanding tls relocs, which are unexpected when
-      // linking.
     case elfcpp::R_386_TLS_TPOFF:
     case elfcpp::R_386_TLS_DTPMOD32:
     case elfcpp::R_386_TLS_DTPOFF32:
@@ -958,7 +991,8 @@ Target_i386::Scan::global(const General_options& options,
     case elfcpp::R_386_TLS_DESC_CALL:
       {
 	const bool is_final = gsym->final_value_is_known();
-	r_type = Target_i386::optimize_tls_reloc(is_final, r_type);
+	const tls::Tls_optimization optimized_type
+            = Target_i386::optimize_tls_reloc(is_final, r_type);
 	switch (r_type)
 	  {
 	  case elfcpp::R_386_TLS_LE:
@@ -968,22 +1002,36 @@ Target_i386::Scan::global(const General_options& options,
 	    gold_assert(!parameters->output_is_shared());
 	    break;
 
+	  case elfcpp::R_386_TLS_IE:
+	  case elfcpp::R_386_TLS_IE_32:
+	  case elfcpp::R_386_TLS_GOTIE:
+	    // FIXME: If not relaxing to LE, we need to generate a
+	    // TPOFF or TPOFF32 reloc.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_global(object, r_type, gsym);
+	    break;
+
 	  case elfcpp::R_386_TLS_LDM:
+	    // FIXME: If not relaxing to LE, we need to generate a
+	    // DTPMOD32 reloc.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_global(object, r_type, gsym);
+	    break;
+
 	  case elfcpp::R_386_TLS_LDO_32:
 	    break;
 
-	  case elfcpp::R_386_TLS_IE:
-	  case elfcpp::R_386_TLS_GOTIE:
 	  case elfcpp::R_386_TLS_GD:
-	  case elfcpp::R_386_TLS_IE_32:
 	  case elfcpp::R_386_TLS_GOTDESC:
 	  case elfcpp::R_386_TLS_DESC_CALL:
-	    fprintf(stderr,
-		    _("%s: %s: unsupported reloc %u "
-		      "against global symbol %s\n"),
-		    program_name, object->name().c_str(), r_type,
-		    gsym->name());
+	    // FIXME: If not relaxing to LE, we need to generate
+	    // DTPMOD32 and DTPOFF32 relocs.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_global(object, r_type, gsym);
 	    break;
+
+	  default:
+	    gold_unreachable();
 	  }
       }
       break;
@@ -999,9 +1047,7 @@ Target_i386::Scan::global(const General_options& options,
     case elfcpp::R_386_TLS_LDM_POP:
     case elfcpp::R_386_USED_BY_INTEL_200:
     default:
-      fprintf(stderr,
-	      _("%s: %s: unsupported reloc %u against global symbol %s\n"),
-	      program_name, object->name().c_str(), r_type, gsym->name());
+      unsupported_reloc_global(object, r_type, gsym);
       break;
     }
 }
@@ -1279,8 +1325,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
   const bool is_final = (gsym == NULL
 			 ? !parameters->output_is_shared()
 			 : gsym->final_value_is_known());
-  const unsigned int opt_r_type =
-    Target_i386::optimize_tls_reloc(is_final, r_type);
+  const tls::Tls_optimization optimized_type
+      = Target_i386::optimize_tls_reloc(is_final, r_type);
   switch (r_type)
     {
     case elfcpp::R_386_TLS_LE_32:
@@ -1296,14 +1342,14 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_TLS_IE:
     case elfcpp::R_386_TLS_GOTIE:
     case elfcpp::R_386_TLS_IE_32:
-      if (opt_r_type == elfcpp::R_386_TLS_LE_32)
+      if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  Target_i386::Relocate::tls_ie_to_le(relinfo, relnum, tls_segment,
 					      rel, r_type, value, view,
 					      view_size);
 	  break;
 	}
-      fprintf(stderr, _("%s: %s: unsupported reloc type %u\n"),
+      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
 	      r_type);
@@ -1311,7 +1357,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_TLS_GD:
-      if (opt_r_type == elfcpp::R_386_TLS_LE_32)
+      if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  this->tls_gd_to_le(relinfo, relnum, tls_segment,
 			     rel, r_type, value, view,
@@ -1335,7 +1381,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	  gold_exit(false);
 	}
       this->local_dynamic_type_ = LOCAL_DYNAMIC_GNU;
-      if (opt_r_type == elfcpp::R_386_TLS_LE_32)
+      if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  this->tls_ld_to_le(relinfo, relnum, tls_segment, rel, r_type,
 			     value, view, view_size);
@@ -1352,7 +1398,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
       // This reloc can appear in debugging sections, in which case we
       // won't see the TLS_LDM reloc.  The local_dynamic_type field
       // tells us this.
-      if (opt_r_type == elfcpp::R_386_TLS_LDO_32
+      if (optimized_type != tls::TLSOPT_TO_LE
 	  || this->local_dynamic_type_ == LOCAL_DYNAMIC_NONE)
 	value = value - tls_segment->vaddr();
       else if (this->local_dynamic_type_ == LOCAL_DYNAMIC_GNU)
@@ -1394,8 +1440,8 @@ Target_i386::Relocate::tls_ie_to_le(const Relocate_info<32, false>* relinfo,
       // movl %gs:XX,%eax  ==>  movl $YY,%eax
       // movl %gs:XX,%reg  ==>  movl $YY,%reg
       // addl %gs:XX,%reg  ==>  addl $YY,%reg
-      Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, -1);
-      Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, 4);
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -1);
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 4);
 
       unsigned char op1 = view[-1];
       if (op1 == 0xa1)
@@ -1405,28 +1451,27 @@ Target_i386::Relocate::tls_ie_to_le(const Relocate_info<32, false>* relinfo,
 	}
       else
 	{
-	  Target_i386::Relocate::check_range(relinfo, relnum, rel,
-					     view_size, -2);
+	  tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
 
 	  unsigned char op2 = view[-2];
 	  if (op2 == 0x8b)
 	    {
 	      // movl XX,%reg  ==>  movl $YY,%reg
-	      Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-					       (op1 & 0xc7) == 0x05);
+	      tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                             (op1 & 0xc7) == 0x05);
 	      view[-2] = 0xc7;
 	      view[-1] = 0xc0 | ((op1 >> 3) & 7);
 	    }
 	  else if (op2 == 0x03)
 	    {
 	      // addl XX,%reg  ==>  addl $YY,%reg
-	      Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-					       (op1 & 0xc7) == 0x05);
+	      tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                             (op1 & 0xc7) == 0x05);
 	      view[-2] = 0x81;
 	      view[-1] = 0xc0 | ((op1 >> 3) & 7);
 	    }
 	  else
-	    Target_i386::Relocate::check_tls(relinfo, relnum, rel, 0);
+	    tls::check_tls(relinfo, relnum, rel.get_r_offset(), 0);
 	}
     }
   else
@@ -1434,13 +1479,13 @@ Target_i386::Relocate::tls_ie_to_le(const Relocate_info<32, false>* relinfo,
       // subl %gs:XX(%reg1),%reg2  ==>  subl $YY,%reg2
       // movl %gs:XX(%reg1),%reg2  ==>  movl $YY,%reg2
       // addl %gs:XX(%reg1),%reg2  ==>  addl $YY,$reg2
-      Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, -2);
-      Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, 4);
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 4);
 
       unsigned char op1 = view[-1];
       unsigned char op2 = view[-2];
-      Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-				       (op1 & 0xc0) == 0x80 && (op1 & 7) != 4);
+      tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                     (op1 & 0xc0) == 0x80 && (op1 & 7) != 4);
       if (op2 == 0x8b)
 	{
 	  // movl %gs:XX(%reg1),%reg2  ==>  movl $YY,%reg2
@@ -1460,7 +1505,7 @@ Target_i386::Relocate::tls_ie_to_le(const Relocate_info<32, false>* relinfo,
 	  view[-1] = 0xc0 | ((op1 >> 3) & 7);
 	}
       else
-	Target_i386::Relocate::check_tls(relinfo, relnum, rel, 0);
+	tls::check_tls(relinfo, relnum, rel.get_r_offset(), 0);
     }
 
   value = tls_segment->vaddr() + tls_segment->memsz() - value;
@@ -1488,33 +1533,30 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
   // leal foo(%reg),%eax; call ___tls_get_addr
   //  ==> movl %gs:0,%eax; subl $foo@tpoff,%eax
 
-  Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, -2);
-  Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, 9);
+  tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
+  tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 9);
 
   unsigned char op1 = view[-1];
   unsigned char op2 = view[-2];
 
-  Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-				   op2 == 0x8d || op2 == 0x04);
-  Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-				   view[4] == 0xe8);
+  tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                 op2 == 0x8d || op2 == 0x04);
+  tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[4] == 0xe8);
 
   int roff = 5;
 
   if (op2 == 0x04)
     {
-      Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, -3);
-      Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-				       view[-3] == 0x8d);
-      Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-				       ((op1 & 0xc7) == 0x05
-					&& op1 != (4 << 3)));
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -3);
+      tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[-3] == 0x8d);
+      tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                     ((op1 & 0xc7) == 0x05 && op1 != (4 << 3)));
       memcpy(view - 3, "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
     }
   else
     {
-      Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-				       (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
+      tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                     (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
       if (static_cast<off_t>(rel.get_r_offset() + 9) < view_size
           && view[9] == 0x90)
 	{
@@ -1553,57 +1595,20 @@ Target_i386::Relocate::tls_ld_to_le(const Relocate_info<32, false>* relinfo,
   // leal foo(%reg), %eax; call ___tls_get_addr
   // ==> movl %gs:0,%eax; nop; leal 0(%esi,1),%esi
 
-  Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, -2);
-  Target_i386::Relocate::check_range(relinfo, relnum, rel, view_size, 9);
+  tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
+  tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 9);
 
   // FIXME: Does this test really always pass?
-  Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-				   view[-2] == 0x8d && view[-1] == 0x83);
+  tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                 view[-2] == 0x8d && view[-1] == 0x83);
 
-  Target_i386::Relocate::check_tls(relinfo, relnum, rel,
-				   view[4] == 0xe8);
+  tls::check_tls(relinfo, relnum, rel.get_r_offset(), view[4] == 0xe8);
 
   memcpy(view - 2, "\x65\xa1\0\0\0\0\x90\x8d\x74\x26\0", 11);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
   // We can skip it.
   this->skip_call_tls_get_addr_ = true;
-}
-
-// Check the range for a TLS relocation.
-
-inline void
-Target_i386::Relocate::check_range(const Relocate_info<32, false>* relinfo,
-				   size_t relnum,
-				   const elfcpp::Rel<32, false>& rel,
-				   off_t view_size, off_t off)
-{
-  off_t offset = rel.get_r_offset() + off;
-  if (offset < 0 || offset > view_size)
-    {
-      fprintf(stderr, _("%s: %s: TLS relocation out of range\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str());
-      gold_exit(false);
-    }
-}
-
-// Check the validity of a TLS relocation.  This is like assert.
-
-inline void
-Target_i386::Relocate::check_tls(const Relocate_info<32, false>* relinfo,
-				 size_t relnum,
-				 const elfcpp::Rel<32, false>& rel,
-				 bool valid)
-{
-  if (!valid)
-    {
-      fprintf(stderr,
-	      _("%s: %s: TLS relocation against invalid instruction\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str());
-      gold_exit(false);
-    }
 }
 
 // Relocate section data.

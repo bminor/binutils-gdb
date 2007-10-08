@@ -46,6 +46,7 @@ target.h
 target-reloc.h
 target-select.cc
 target-select.h
+tls.h
 version.cc
 workqueue.cc
 workqueue.h

@@ -75,6 +75,7 @@ HFILES = \
 	target.h \
 	target-reloc.h \
 	target-select.h \
+	tls.h \
 	workqueue.h
 
 YFILES = \
