@@ -1,3 +1,8 @@
+2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* linux-fork.c: Move "gdb_wait.h" include back to the position of
+	<sys/wait.h> include before last commit.
+
 2007-10-08  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-tdep.c (mips32_next_pc): Fix a typo in BGTZL.

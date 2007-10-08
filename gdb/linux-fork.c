@@ -26,9 +26,9 @@
 #include "gdb_string.h"
 #include "linux-fork.h"
 #include "linux-nat.h"
-#include "gdb_wait.h"
 
 #include <sys/ptrace.h>
+#include "gdb_wait.h"
 #include <sys/param.h>
 #include <dirent.h>
 #include <ctype.h>
