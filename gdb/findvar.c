@@ -253,6 +253,7 @@ store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 struct value *
 value_of_register (int regnum, struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR addr;
   int optim;
   struct value *reg_val;
@@ -262,16 +263,16 @@ value_of_register (int regnum, struct frame_info *frame)
 
   /* User registers lie completely outside of the range of normal
      registers.  Catch them early so that the target never sees them.  */
-  if (regnum >= gdbarch_num_regs (current_gdbarch)
-		+ gdbarch_num_pseudo_regs (current_gdbarch))
+  if (regnum >= gdbarch_num_regs (gdbarch)
+		+ gdbarch_num_pseudo_regs (gdbarch))
     return value_of_user_reg (regnum, frame);
 
   frame_register (frame, regnum, &optim, &lval, &addr, &realnum, raw_buffer);
 
-  reg_val = allocate_value (register_type (current_gdbarch, regnum));
+  reg_val = allocate_value (register_type (gdbarch, regnum));
 
   memcpy (value_contents_raw (reg_val), raw_buffer,
-	  register_size (current_gdbarch, regnum));
+	  register_size (gdbarch, regnum));
   VALUE_LVAL (reg_val) = lval;
   VALUE_ADDRESS (reg_val) = addr;
   VALUE_REGNUM (reg_val) = regnum;
@@ -603,7 +604,7 @@ default_value_from_register (struct type *type, int regnum,
      an integral number of registers.  Otherwise, you need to do
      some fiddling with the last register copied here for little
      endian machines.  */
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
       && len < register_size (gdbarch, regnum))
     /* Big-endian, and we want less than full size.  */
     set_value_offset (value, register_size (gdbarch, regnum) - len);
@@ -622,7 +623,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   struct type *type1 = check_typedef (type);
   struct value *v;
 
-  if (gdbarch_convert_register_p (current_gdbarch, regnum, type1))
+  if (gdbarch_convert_register_p (gdbarch, regnum, type1))
     {
       /* The ISA/ABI need to something weird when obtaining the
          specified value from this register.  It might need to
@@ -635,7 +636,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       VALUE_LVAL (v) = lval_register;
       VALUE_FRAME_ID (v) = get_frame_id (frame);
       VALUE_REGNUM (v) = regnum;
-      gdbarch_register_to_value (current_gdbarch,
+      gdbarch_register_to_value (gdbarch,
 				 frame, regnum, type1, value_contents_raw (v));
     }
   else
@@ -682,6 +683,7 @@ address_from_register (struct type *type, int regnum, struct frame_info *frame)
 struct value *
 locate_var_value (struct symbol *var, struct frame_info *frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR addr = 0;
   struct type *type = SYMBOL_TYPE (var);
   struct value *lazy_value;
@@ -708,13 +710,13 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
     {
     case lval_register:
       gdb_assert (gdbarch_register_name
-		   (current_gdbarch, VALUE_REGNUM (lazy_value)) != NULL
+		   (gdbarch, VALUE_REGNUM (lazy_value)) != NULL
 		  && *gdbarch_register_name
-		    (current_gdbarch, VALUE_REGNUM (lazy_value)) != '\0');
+		    (gdbarch, VALUE_REGNUM (lazy_value)) != '\0');
       error (_("Address requested for identifier "
 	       "\"%s\" which is in register $%s"),
             SYMBOL_PRINT_NAME (var), 
-	    gdbarch_register_name (current_gdbarch, VALUE_REGNUM (lazy_value)));
+	    gdbarch_register_name (gdbarch, VALUE_REGNUM (lazy_value)));
       break;
 
     default:

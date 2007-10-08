@@ -1,3 +1,11 @@
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
+	* findvar.c (value_of_register, locate_var_value): Use
+	get_regcache_arch or get_frame_arch to get at the current architecture
+	by regcache or by frame, respectively.
+	* findvar.c (default_value_from_register, value_from_register): Replace
+	current_gdbarch by gdbarch.
+
 2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
         * config/i386/nm-i386.h (CHILD_POST_STARTUP_INFERIOR): ARI fix: Remove.
