@@ -1,5 +1,14 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* aix-thread.c (supply_gprs64, supply_fprs, supply_sprs64)
+	(supply_sprs32, fetch_regs_user_thread, fetch_regs_kernel_thread)
+	(fill_gprs64, fill_gprs32, fill_fprs, fill_sprs64, fill_sprs32)
+	(store_regs_user_thread, store_regs_kernel_thread): Use
+	get_regcache_arch or get_frame_arch to get at the current architecture
+	by regcache or by frame, respectively.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* sh64-tdep.c (sh64_push_dummy_call, sh64_register_type)
 	(sh64_pseudo_register_read, sh64_pseudo_register_write)
 	(sh64_do_fp_register, sh64_do_pseudo_register, sh64_do_register)
