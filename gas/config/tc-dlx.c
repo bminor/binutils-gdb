@@ -287,7 +287,7 @@ md_begin (void)
 
       if (retval != NULL)
 	{
-	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
+	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
 		   machine_opcodes[i].name, retval);
 	  lose = 1;
 	}
@@ -889,7 +889,7 @@ machine_ip (char *str)
 	}
 
       /* Types or values of args don't match.  */
-      as_bad ("Invalid operands");
+      as_bad (_("Invalid operands"));
       return;
     }
 }
@@ -1022,7 +1022,7 @@ md_atof (int type, char *litP, int *sizeP)
 
     default:
       *sizeP = 0;
-      return "Bad call to MD_ATOF()";
+      return _("Bad call to MD_ATOF()");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
@@ -1253,7 +1253,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
   if (reloc->howto == NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
-		    "internal error: can't export reloc type %d (`%s')",
+		    _("internal error: can't export reloc type %d (`%s')"),
 		    fixP->fx_r_type,
 		    bfd_get_reloc_code_name (fixP->fx_r_type));
       return NULL;

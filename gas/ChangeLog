@@ -41,6 +41,8 @@
 	* config/tc-bfin.c: Likewise.
 	PR gas/5143
 	* config/tc-frv.c: Likewise.
+	PR gas/5142
+	* config/tc-dlx.c: Likewise.
 
 2007-10-08  Eric B. Weddington  <eweddington@cso.atmel.com>
 
