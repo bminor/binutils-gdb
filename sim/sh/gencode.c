@@ -993,6 +993,7 @@ op tab[] =
     "L (0);",
   },
   { "n", "", "mov.l @(<disp>,PC),<REG_N>", "1101nnnni8p4....",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "MA (1);",
     "R[n] = RLAT ((PH2T (PC) & ~3) + 4 + i);",
     "L (n);",
@@ -1059,6 +1060,7 @@ op tab[] =
     "L (0);",
   },
   { "n", "", "mov.w @(<disp>,PC),<REG_N>", "1001nnnni8p2....",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "MA (1);",
     "R[n] = RSWAT (PH2T (PC + 4 + i));",
     "L (n);",
@@ -1120,6 +1122,7 @@ op tab[] =
   },
 
   { "0", "", "mova @(<disp>,PC),R0", "11000111i8p4....",
+    "RAISE_EXCEPTION_IF_IN_DELAY_SLOT ();",
     "R0 = ((i + 4 + PH2T (PC)) & ~0x3);",
   },
 

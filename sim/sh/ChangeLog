@@ -1,3 +1,8 @@
+2007-10-08  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gencode.c (tab): Add RAISE_EXCEPTION_IF_IN_DELAY_SLOT to the
+	definition of PC relative 'mov.l'/'mov.w' and also 'mova'.
+
 2007-03-02  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gencode.c (tab): Correct pre-decrement instructions when m == n.
