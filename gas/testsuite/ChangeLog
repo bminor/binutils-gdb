@@ -1,3 +1,13 @@
+2007-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run simd-suffix and x86-64-simd-suffix.
+
+	* gas/i386/simd-suffix.d: New.
+	* gas/i386/x86-64-simd-suffix.d: Likewise.
+
+	* gas/i386/x86-64-opcode.d: Updated.
+	* gas/i386/x86-64-simd.d: Likewise.
+
 2007-10-08  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/cp0-names-r3000.d: New test for R3000 CP0 symbolic

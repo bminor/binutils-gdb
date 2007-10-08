@@ -712,7 +712,8 @@ struct dis386 {
    'V' => print 'q' in 64bit mode and behave as 'S' otherwise
    'W' => print 'b', 'w' or 'l' ('d' in Intel mode)
    'X' => print 's', 'd' depending on data16 prefix (for XMM)
-   'Y' => 'q' if instruction has an REX 64bit overwrite prefix
+   'Y' => 'q' if instruction has an REX 64bit overwrite prefix and
+	  suffix_always is true.
    'Z' => print 'q' in 64bit mode and behave as 'L' otherwise
 
    Many of the above letters print nothing in Intel mode.  See "putop"
@@ -6170,7 +6171,7 @@ putop (const char *template, int sizeflag)
 	  used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'Y':
-	  if (intel_syntax)
+	  if (intel_syntax || !(sizeflag & SUFFIX_ALWAYS))
 	    break;
 	  if (rex & REX_W)
 	    {

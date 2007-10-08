@@ -1,3 +1,8 @@
+2007-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c: Updated comments for 'Y'.
+	(putop): Don't add 'q' for 'Y' if suffix_always isn't true.
+
 2007-10-08  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* opcodes/mips-dis.c (mips_cp0_names_r3000): New definition.
