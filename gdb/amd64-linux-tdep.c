@@ -154,7 +154,8 @@ amd64_linux_sigcontext_addr (struct frame_info *next_frame)
   CORE_ADDR sp;
   gdb_byte buf[8];
 
-  frame_unwind_register (next_frame, gdbarch_sp_regnum (current_gdbarch), buf);
+  frame_unwind_register (next_frame,
+			 gdbarch_sp_regnum (get_frame_arch (next_frame)), buf);
   sp = extract_unsigned_integer (buf, 8);
 
   /* The sigcontext structure is part of the user context.  A pointer

@@ -1,5 +1,14 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* amd64-tdep.c (amd64_frame_prev_register, amd64_sigtramp_frame_cache):
+	Use get_regcache_arch or get_frame_arch to get at the current
+	architecture by regcache or by frame, respectively.
+	* amd64-linux-tdep.c (amd64_linux_sigcontext_addr): Likewise.
+	* amd64-nat.c (amd64_supply_native_gregset)
+	(amd64_collect_native_gregset): Replace current_gdbarch by gdbarch.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* alpha-tdep.c (alpha_register_reggroup_p): Replace current_gdbarch by
 	gdbarch.
 	* alpha-linux-nat.c (alpha_linux_register_u_offset): Likewise.

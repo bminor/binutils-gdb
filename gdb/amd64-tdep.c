@@ -863,12 +863,13 @@ amd64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			   enum lval_type *lvalp, CORE_ADDR *addrp,
 			   int *realnump, gdb_byte *valuep)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct amd64_frame_cache *cache =
     amd64_frame_cache (next_frame, this_cache);
 
   gdb_assert (regnum >= 0);
 
-  if (regnum == gdbarch_sp_regnum (current_gdbarch) && cache->saved_sp)
+  if (regnum == gdbarch_sp_regnum (gdbarch) && cache->saved_sp)
     {
       *optimizedp = 0;
       *lvalp = not_lval;
@@ -892,7 +893,7 @@ amd64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	{
 	  /* Read the value in from memory.  */
 	  read_memory (*addrp, valuep,
-		       register_size (current_gdbarch, regnum));
+		       register_size (gdbarch, regnum));
 	}
       return;
     }
@@ -929,7 +930,7 @@ static struct amd64_frame_cache *
 amd64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct amd64_frame_cache *cache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
   CORE_ADDR addr;
   gdb_byte buf[8];
   int i;
