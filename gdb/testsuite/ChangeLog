@@ -1,3 +1,23 @@
+2007-10-09  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* gdb.base/whatis.c (v_long_long, v_signed_long_long)
+	(v_unsigned_long_long, v_long_long_array)
+	(v_signed_long_long_array, v_unsigned_long_long_array)
+	(slong_long_addr, a_slong_long_addr, v_long_long_pointer)
+	(v_signed_long_long_pointer, v_unsigned_long_long_pointer)
+	[!NO_LONG_LONG]: New.
+	(t_struct, v_struct2, t_union, v_union2) [!NO_LONG_LONG]: Add
+	v_long_long_member.
+
+	(v_long_long_func, v_signed_long_long_func)
+	(v_unsigned_long_long_func) [!NO_LONG_LONG]: New.
+	(main) [!NO_LONG_LONG]: Initialize long long variants.
+
+	* gdb.base/whatis.exp: If board file requests no_long_long, build
+	test with NO_LONG_LONG defined.  Test long long, signed long long,
+	and unsigned long long variants but only if board file doesn't
+	disable it.
+
 2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
             Daniel Jacobowitz  <dan@codesourcery.com>
 

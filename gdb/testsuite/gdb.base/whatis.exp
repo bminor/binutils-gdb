@@ -26,10 +26,16 @@ if $tracelevel {
 set prms_id 0
 set bug_id 0
 
+if [target_info exists no_long_long] {
+    set exec_opts [list debug additional_flags=-DNO_LONG_LONG]
+} else {
+    set exec_opts [list debug]
+}
+
 set testfile whatis
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $exec_opts] != "" } {
      untested whatis.exp
      return -1
 }
@@ -124,6 +130,13 @@ gdb_test "whatis v_unsigned_long" \
     "type = (unsigned long|long unsigned int)" \
     "whatis unsigned long"
 
+
+if ![target_info exists no_long_long] {
+    gdb_test "whatis v_unsigned_long_long" \
+	"type = (unsigned long long|long long unsigned int)" \
+	"whatis unsigned long long"
+}
+
 gdb_test "whatis v_float" \
     "type = float" \
     "whatis float"
@@ -188,6 +201,12 @@ gdb_test "whatis v_unsigned_long_array" \
     "type = (unsigned (int|long|long int)|long unsigned int) \\\[2\\\]" \
     "whatis unsigned long array"
 
+if ![target_info exists no_long_long] {
+    gdb_test "whatis v_unsigned_long_long_array" \
+	"type = (unsigned long long|long long unsigned int) \\\[2\\\]" \
+	"whatis unsigned long array"
+}
+
 gdb_test "whatis v_float_array" \
     "type = float \\\[2\\\]" \
     "whatis float array"
@@ -250,6 +269,20 @@ gdb_test "whatis v_signed_long_pointer" \
 gdb_test "whatis v_unsigned_long_pointer" \
     "type = (unsigned (int|long|long int)|long unsigned int) \\*" \
     "whatis unsigned long pointer"
+
+if ![target_info exists no_long_long] {
+    gdb_test "whatis v_long_long_pointer" \
+	"type = long long(| int) \\*" \
+	"whatis long long pointer"
+
+    gdb_test "whatis v_signed_long_long_pointer" \
+	"type = (signed |)long long(| int) \\*" \
+	"whatis signed long long pointer"
+
+    gdb_test "whatis v_unsigned_long_long_pointer" \
+	"type = (unsigned long long|long long unsigned int) \\*" \
+	"whatis unsigned long long pointer"
+}
 
 gdb_test "whatis v_float_pointer" \
     "type = float \\*" \
@@ -352,6 +385,20 @@ gdb_test "whatis v_signed_long_func" \
 gdb_test "whatis v_unsigned_long_func" \
     "type = (unsigned (int|long|long int)|long unsigned int) \\($void\\)" \
     "whatis unsigned long function"
+
+if ![target_info exists no_long_long] {
+    gdb_test "whatis v_long_long_func" \
+	"type = long long(| int) \\($void\\)" \
+	"whatis long long function"
+
+    gdb_test "whatis v_signed_long_long_func" \
+	"type = (signed |)long long(| int) \\($void\\)" \
+	"whatis signed long long function"
+
+    gdb_test "whatis v_unsigned_long_long_func" \
+	"type = (unsigned long long(| int)|long long unsigned int) \\($void\\)" \
+	"whatis unsigned long long function"
+}
 
 # Sun /bin/cc calls this a function returning double.
 if {!$gcc_compiled} then {setup_xfail "*-sun-sunos4*"}
