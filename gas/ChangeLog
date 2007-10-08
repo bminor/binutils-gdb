@@ -1,5 +1,10 @@
 2007-10-08  Nick Clifton  <nickc@redhat.com>
 
+	* doc/as.texinfo (Previous): Clarify explanation of the behaviour
+	of this pseudo-op and add a couple of examples.
+
+2007-10-08  Nick Clifton  <nickc@redhat.com>
+
 	PR gas/5121 gas/5122 gas/5123
 	* Makefile.am (CFILES): Add cgen.c
 	(TARGET_CPU_CFILES): Add tc-iq2000.c, tc-maxq.c, tc-mt.c,

@@ -5346,9 +5346,42 @@ This is one of the ELF section stack manipulation directives.  The others are
 (@pxref{PopSection}).
 
 This directive swaps the current section (and subsection) with most recently
-referenced section (and subsection) prior to this one.  Multiple
+referenced section/subsection pair prior to this one.  Multiple
 @code{.previous} directives in a row will flip between two sections (and their
-subsections).
+subsections).  For example:
+
+@smallexample
+.section A
+ .subsection 1
+  .word 0x1234
+ .subsection 2
+  .word 0x5678
+.previous
+ .word 0x9abc
+@end smallexample
+
+Will place 0x1234 and 0x9abc into subsection 1 and 0x5678 into subsection 2 of
+section A.  Whilst:
+
+@smallexample
+.section A
+.subsection 1
+  # Now in section A subsection 1
+  .word 0x1234
+.section B
+.subsection 0
+  # Now in section B subsection 0
+  .word 0x5678
+.subsection 1
+  # Now in section B subsection 1
+  .word 0x9abc
+.previous
+  # Now in section B subsection 0
+  .word 0xdef0
+@end smallexample
+
+Will place 0x1234 into section A, 0x5678 and 0xdef0 into subsection 0 of
+section B and 0x9abc into subsection 1 of section B.
 
 In terms of the section stack, this directive swaps the current section with
 the top section on the section stack.
