@@ -1,5 +1,12 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* irix5-nat.c (supply_gregset, fill_gregset, supply_fpregset)
+	(fill_fpregset, fetch_core_registers): Use get_regcache_arch or
+	get_frame_arch to get at the current architecture by regcache or by
+	frame, respectively.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* ia64-tdep.c (ia64_pseudo_register_read, ia64_pseudo_register_write):
 	Replace current_gdbarch by gdbarch.
 	* ia64-tdep.c (ia64_frame_prev_register
