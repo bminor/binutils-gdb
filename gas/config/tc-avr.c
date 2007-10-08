@@ -97,6 +97,8 @@ static struct mcu_type_s mcu_types[] =
   {"attiny25",   AVR_ISA_TINY2,   bfd_mach_avr2},
   {"attiny45",   AVR_ISA_TINY2,   bfd_mach_avr2},
   {"attiny85",   AVR_ISA_TINY2,   bfd_mach_avr2},
+  {"attiny43u",  AVR_ISA_TINY2,   bfd_mach_avr2},
+  {"attiny48",   AVR_ISA_TINY2,   bfd_mach_avr2},
   {"atmega603",  AVR_ISA_M603,    bfd_mach_avr3}, /* XXX -> m103 */
   {"atmega103",  AVR_ISA_M103,    bfd_mach_avr3},
   {"at43usb320", AVR_ISA_M103,    bfd_mach_avr3},
