@@ -3526,7 +3526,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (part_of_multiple)
     {
       char *formatted;
-      asprintf (&formatted, "%d.%d", b->number, loc_number);
+      formatted = xstrprintf ("%d.%d", b->number, loc_number);
       ui_out_field_string (uiout, "number", formatted);
       xfree (formatted);
     }

@@ -1,5 +1,10 @@
 2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+        * breakpoint.c (print_one_breakpoint_location): ARI fix: 
+	Replace asprintf by xstrprintf.
+
+2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* linux-fork.c: ARI fix: include "gdb_dirent.h" instead of <dirent.h>.
 	Makefile.in (linux-fork.o): Add gdb_dirent.h dependency. 
 
