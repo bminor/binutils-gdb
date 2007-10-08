@@ -765,6 +765,12 @@ windres_add_include_dir (const char *p)
 {
   struct include_dir *n, **pp;
 
+  /* Computing paths is often complicated and error prone.
+     The easiest way to check for mistakes is at the time
+     we add them to include_dirs.  */
+  assert (p != NULL);
+  assert (*p != '\0');
+
   n = xmalloc (sizeof *n);
   n->next = NULL;
   n->dir = (char * ) p;

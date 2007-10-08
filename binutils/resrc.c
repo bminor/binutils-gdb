@@ -441,30 +441,37 @@ read_rc_file (const char *filename, const char *preprocessor,
   /* Setup the default resource import path taken from input file.  */
   else if (strchr (filename, '/') != NULL || strchr (filename, '\\') != NULL)
     {
-      char *e, *c;
+      char *edit, *dir;
 
       if (filename[0] == '/'
 	  || filename[0] == '\\'
 	  || filename[1] == ':')
-	e = c = xstrdup (filename);
+        /* Absolute path.  */
+	edit = dir = xstrdup (filename);
       else
 	{
-	  e = c = xmalloc (strlen (filename) + 3);
-	  sprintf (c, "./%s", filename);
+	  /* Relative path.  */
+	  edit = dir = xmalloc (strlen (filename) + 3);
+	  sprintf (dir, "./%s", filename);
 	}
-      e += strlen (c);
-      while (e > c && (e[-1] != '\\' && e[-1] != '/'))
-	{
-	  --e;
-	  e[0] = 0;
-	}
-      /* Cut off trailing slash.  */
-      --e;
-      e[0] = 0;
-      while ((e = strchr (c, '\\')) != NULL)
-	*e = '/';
 
-      windres_add_include_dir (e);
+      /* Walk dir backwards stopping at the first directory separator.  */
+      edit += strlen (dir);
+      while (edit > dir && (edit[-1] != '\\' && edit[-1] != '/'))
+	{
+	  --edit;
+	  edit[0] = 0;
+	}
+
+      /* Cut off trailing slash.  */
+      --edit;
+      edit[0] = 0;
+
+      /* Convert all back slashes to forward slashes.  */
+      while ((edit = strchr (dir, '\\')) != NULL)
+	*edit = '/';
+
+      windres_add_include_dir (dir);
     }
 
   istream_type = (use_temp_file) ? ISTREAM_FILE : ISTREAM_PIPE;
@@ -588,7 +595,19 @@ close_input_stream (void)
   else
     {
       if (cpp_pipe != NULL)
-	pclose (cpp_pipe);
+        {
+	  int err;
+	  err = pclose (cpp_pipe);
+	  /* We are reading from a pipe, therefore we don't
+             know if cpp failed or succeeded until pclose.  */
+	  if (err != 0 || errno == ECHILD)
+	    {
+	      /* Since this is also run via xatexit, safeguard.  */
+	      cpp_pipe = NULL;
+	      cpp_temp_file = NULL;
+	      fatal (_("preprocessing failed."));
+	    }
+        }
     }
 
   /* Since this is also run via xatexit, safeguard.  */
