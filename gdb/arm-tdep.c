@@ -648,8 +648,10 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
  */
 
 static void
-arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cache)
+arm_scan_prologue (struct frame_info *next_frame,
+		   struct arm_prologue_cache *cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   int regno, sp_offset, fp_offset, ip_offset;
   CORE_ADDR prologue_start, prologue_end, current_pc;
   CORE_ADDR prev_pc = frame_pc_unwind (next_frame);
@@ -723,7 +725,7 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
       else
         {
           prologue_start = gdbarch_addr_bits_remove 
-			     (current_gdbarch, return_value) - 8;
+			     (gdbarch, return_value) - 8;
           prologue_end = prologue_start + 64;	/* See above.  */
         }
     }
@@ -832,14 +834,14 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
 	  sp_offset -= imm;
 	}
       else if ((insn & 0xffff7fff) == 0xed6d0103	/* stfe f?, [sp, -#c]! */
-	       && gdbarch_tdep (current_gdbarch)->have_fpa_registers)
+	       && gdbarch_tdep (gdbarch)->have_fpa_registers)
 	{
 	  sp_offset -= 12;
 	  regno = ARM_F0_REGNUM + ((insn >> 12) & 0x07);
 	  cache->saved_regs[regno].addr = sp_offset;
 	}
       else if ((insn & 0xffbf0fff) == 0xec2d0200	/* sfmfd f0, 4, [sp!] */
-	       && gdbarch_tdep (current_gdbarch)->have_fpa_registers)
+	       && gdbarch_tdep (gdbarch)->have_fpa_registers)
 	{
 	  int n_saved_fp_regs;
 	  unsigned int fp_start_reg, fp_bound_reg;
@@ -907,7 +909,7 @@ arm_make_prologue_cache (struct frame_info *next_frame)
 
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
-  for (reg = 0; reg < gdbarch_num_regs (current_gdbarch); reg++)
+  for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (next_frame)); reg++)
     if (trad_frame_addr_p (cache->saved_regs, reg))
       cache->saved_regs[reg].addr += cache->prev_sp;
 
@@ -1210,7 +1212,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       if (arm_debug)
 	fprintf_unfiltered (gdb_stdlog, "struct return in %s = 0x%s\n",
-			    gdbarch_register_name (current_gdbarch, argreg),
+			    gdbarch_register_name (gdbarch, argreg),
 			    paddr (struct_addr));
       regcache_cooked_write_unsigned (regcache, argreg, struct_addr);
       argreg++;
@@ -1287,13 +1289,13 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* The argument is being passed in a general purpose
 		 register.  */
 	      CORE_ADDR regval = extract_unsigned_integer (val, partial_len);
-	      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 		regval <<= (INT_REGISTER_SIZE - partial_len) * 8;
 	      if (arm_debug)
 		fprintf_unfiltered (gdb_stdlog, "arg %d in %s = 0x%s\n",
 				    argnum,
 				    gdbarch_register_name
-				      (current_gdbarch, argreg),
+				      (gdbarch, argreg),
 				    phex (regval, INT_REGISTER_SIZE));
 	      regcache_cooked_write_unsigned (regcache, argreg, regval);
 	      argreg++;
@@ -1611,6 +1613,7 @@ bitcount (unsigned long val)
 static CORE_ADDR
 thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
   unsigned short inst1 = read_memory_unsigned_integer (pc, 2);
   CORE_ADDR nextpc = pc + 2;		/* default is next instruction */
@@ -1625,7 +1628,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
       offset = bitcount (bits (inst1, 0, 7)) * INT_REGISTER_SIZE;
       sp = get_frame_register_unsigned (frame, ARM_SP_REGNUM);
       nextpc = (CORE_ADDR) read_memory_unsigned_integer (sp + offset, 4);
-      nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
+      nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
       if (nextpc == pc)
 	error (_("Infinite loop detected"));
     }
@@ -1656,7 +1659,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
       else
 	nextpc = get_frame_register_unsigned (frame, bits (inst1, 3, 6));
 
-      nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
+      nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
       if (nextpc == pc)
 	error (_("Infinite loop detected"));
     }
@@ -1667,6 +1670,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 CORE_ADDR
 arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   unsigned long pc_val;
   unsigned long this_instr;
   unsigned long status;
@@ -1731,7 +1735,7 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 		result = (rn == 15) ? pc_val + 8
 				    : get_frame_register_unsigned (frame, rn);
 		nextpc = (CORE_ADDR) gdbarch_addr_bits_remove
-				       (current_gdbarch, result);
+				       (gdbarch, result);
 
 		if (nextpc == pc)
 		  error (_("Infinite loop detected"));
@@ -1814,7 +1818,7 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 		break;
 	      }
 	    nextpc = (CORE_ADDR) gdbarch_addr_bits_remove
-				   (current_gdbarch, result);
+				   (gdbarch, result);
 
 	    if (nextpc == pc)
 	      error (_("Infinite loop detected"));
@@ -1858,7 +1862,7 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 		  nextpc = (CORE_ADDR) read_memory_integer ((CORE_ADDR) base,
 							    4);
 
-		  nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
+		  nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
 
 		  if (nextpc == pc)
 		    error (_("Infinite loop detected"));
@@ -1897,7 +1901,7 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 						       4);
 		  }
 		  nextpc = gdbarch_addr_bits_remove
-			     (current_gdbarch, nextpc);
+			     (gdbarch, nextpc);
 		  if (nextpc == pc)
 		    error (_("Infinite loop detected"));
 		}
@@ -1909,7 +1913,7 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	  {
 	    nextpc = BranchDest (pc, this_instr);
 
-	    nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
+	    nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
 	    if (nextpc == pc)
 	      error (_("Infinite loop detected"));
 	    break;
@@ -2066,7 +2070,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 {
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
-      switch (gdbarch_tdep (current_gdbarch)->fp_model)
+      switch (gdbarch_tdep (get_regcache_arch (regs))->fp_model)
 	{
 	case ARM_FLOAT_FPA:
 	  {
@@ -2255,7 +2259,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
     {
       char buf[MAX_REGISTER_SIZE];
 
-      switch (gdbarch_tdep (current_gdbarch)->fp_model)
+      switch (gdbarch_tdep (get_regcache_arch (regs))->fp_model)
 	{
 	case ARM_FLOAT_FPA:
 
@@ -3058,9 +3062,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 static void
-arm_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep == NULL)
     return;

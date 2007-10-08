@@ -1,5 +1,14 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* arm-tdep.c (arm_scan_prologue, arm_make_prologue_cache)
+	(thumb_get_next_pc, arm_get_next_pc, arm_extract_return_value)
+	(arm_store_return_value): Use get_regcache_arch or get_frame_arch to
+	get at the current architecture by regcache or by·frame, respectively.
+	(arm_push_dummy_call, arm_dump_tdep): Replace current_gdbarch by
+	gdbarch.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* amd64-tdep.c (amd64_frame_prev_register, amd64_sigtramp_frame_cache):
 	Use get_regcache_arch or get_frame_arch to get at the current
 	architecture by regcache or by frame, respectively.
