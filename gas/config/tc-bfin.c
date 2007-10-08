@@ -1178,7 +1178,7 @@ Expr_Node_Gen_Reloc_R (Expr_Node * head)
 	  note = conctcode (note1, conscode (note_reloc1 (gencode (0), op, BFD_ARELOC_BFIN_LOR, 0), NULL_CODE));
 	  break;
 	default:
-	  fprintf (stderr, "%s:%d:Unkonwn operator found for arithmetic" " relocation", __FILE__, __LINE__);
+	  fprintf (stderr, "%s:%d:Unknown operator found for arithmetic" " relocation", __FILE__, __LINE__);
 
 
 	}
@@ -1194,7 +1194,7 @@ Expr_Node_Gen_Reloc_R (Expr_Node * head)
 	  note = conctcode (note1, conscode (note_reloc1 (gencode (0), op, BFD_ARELOC_BFIN_COMP, 0), NULL_CODE));
 	  break;
 	default:
-	  fprintf (stderr, "%s:%d:Unkonwn operator found for arithmetic" " relocation", __FILE__, __LINE__);
+	  fprintf (stderr, "%s:%d:Unknown operator found for arithmetic" " relocation", __FILE__, __LINE__);
 	}
       break;
     default:

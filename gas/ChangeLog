@@ -2,6 +2,8 @@
 
 	PR gas/5136
 	* config/tc-bfin.c (md_apply_fix): Fix error message.
+	PR gas/5135
+	(Expr_Node_Gen_Reloc_R): Fix spelling typos in error messages.
 
 2007-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
