@@ -1,3 +1,17 @@
+2007-10-08  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (AT): Rename to...
+	(ATREG): ... this.
+	(AT): New definition.
+	(mips_set_options): Rename "noat" to "at"; change the type.
+	(mips_opts): Update accordingly.
+	(append_insn): Likewise.
+	(macro_build_ldst_constoffset): Likewise.
+	(load_address): Likewise.
+	(macro, macro2): Likewise.
+	(s_mipsset): Handle ".set at=REG".  Update handling of ".set at"
+	and ".set noat".
+
 2007-10-08  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo (Previous): Clarify explanation of the behaviour

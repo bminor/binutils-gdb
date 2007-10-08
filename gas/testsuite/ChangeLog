@@ -1,3 +1,10 @@
+2007-10-01  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/at-1.d, gas/mips/at-2.l: New tests to check the ".set
+	at=REG" directive.
+	* gas/mips/at-1.s, gas/mips/at-2.s: Sources for the new tests.
+	* gas/mips/mips.exp: Run the new tests.
+
 2007-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run smx.

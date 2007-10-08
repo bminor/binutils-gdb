@@ -89,7 +89,7 @@ static char *mips_regmask_frag;
 #endif
 
 #define ZERO 0
-#define AT  1
+#define ATREG 1
 #define TREG 24
 #define PIC_CALL_REG 25
 #define KT0 26
@@ -100,6 +100,8 @@ static char *mips_regmask_frag;
 #define RA  31
 
 #define ILLEGAL_REG (32)
+
+#define AT  mips_opts.at
 
 /* Allow override of standard little-endian ECOFF format.  */
 
@@ -203,9 +205,11 @@ struct mips_set_options
   /* Non-zero if we should not reorder instructions.  Changed by `.set
      reorder' and `.set noreorder'.  */
   int noreorder;
-  /* Non-zero if we should not permit the $at ($1) register to be used
-     in instructions.  Changed by `.set at' and `.set noat'.  */
-  int noat;
+  /* Non-zero if we should not permit the register designated "assembler
+     temporary" to be used in instructions.  The value is the register
+     number, normally $at ($1).  Changed by `.set at=REG', `.set noat'
+     (same as `.set at=$0') and `.set at' (same as `.set at=$1').  */
+  unsigned int at;
   /* Non-zero if we should warn when a macro instruction expands into
      more than one machine instruction.  Changed by `.set nomacro' and
      `.set macro'.  */
@@ -245,7 +249,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, 0, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
+  ISA_UNKNOWN, -1, -1, 0, -1, -1, -1, -1, 0, ATREG, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -2637,7 +2641,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	 .set noat if we use $at for PIC computations.  If it turns
 	 out that the branch was out-of-range, we'll get an error.  */
       && !mips_opts.warn_about_macros
-      && !(mips_opts.noat && mips_pic != NO_PIC)
+      && (mips_opts.at || mips_pic == NO_PIC)
       && !mips_opts.mips16)
     {
       relaxed_branch = TRUE;
@@ -3815,7 +3819,7 @@ macro_build_ldst_constoffset (expressionS *ep, const char *op,
       macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", AT, AT, breg);
       macro_build (ep, op, "t,o(b)", treg, BFD_RELOC_LO16, AT);
 
-      if (mips_opts.noat)
+      if (!mips_opts.at)
 	as_bad (_("Macro used $at after \".set noat\""));
     }
 }
@@ -4226,7 +4230,7 @@ load_address (int reg, expressionS *ep, int *used_at)
 	      relax_switch ();
 	    }
 
-	  if (*used_at == 0 && !mips_opts.noat)
+	  if (*used_at == 0 && mips_opts.at)
 	    {
 	      macro_build (ep, "lui", "t,u", reg, BFD_RELOC_MIPS_HIGHEST);
 	      macro_build (ep, "lui", "t,u", AT, BFD_RELOC_HI16_S);
@@ -4415,7 +4419,7 @@ load_address (int reg, expressionS *ep, int *used_at)
   else
     abort ();
 
-  if (mips_opts.noat && *used_at == 1)
+  if (!mips_opts.at && *used_at == 1)
     as_bad (_("Macro used $at after \".set noat\""));
 }
 
@@ -4524,8 +4528,8 @@ add_got_offset_hilo (int dest, expressionS *local, int tmp)
 static void
 macro (struct mips_cl_insn *ip)
 {
-  int treg, sreg, dreg, breg;
-  int tempreg;
+  unsigned int treg, sreg, dreg, breg;
+  unsigned int tempreg;
   int mask;
   int used_at = 0;
   expressionS expr1;
@@ -5288,7 +5292,7 @@ macro (struct mips_cl_insn *ip)
 	  break;
 	}
 
-      if (!mips_opts.noat && (treg == breg))
+      if (mips_opts.at && (treg == breg))
 	{
 	  tempreg = AT;
 	  used_at = 1;
@@ -5347,7 +5351,7 @@ macro (struct mips_cl_insn *ip)
 		  relax_switch ();
 		}
 
-	      if (used_at == 0 && !mips_opts.noat)
+	      if (used_at == 0 && mips_opts.at)
 		{
 		  macro_build (&offset_expr, "lui", "t,u",
 			       tempreg, BFD_RELOC_MIPS_HIGHEST);
@@ -6344,7 +6348,7 @@ macro (struct mips_cl_insn *ip)
 		  relax_switch ();
 		}
 
-	      if (used_at == 0 && !mips_opts.noat)
+	      if (used_at == 0 && mips_opts.at)
 		{
 		  macro_build (&offset_expr, "lui", "t,u", tempreg,
 			       BFD_RELOC_MIPS_HIGHEST);
@@ -7137,15 +7141,15 @@ macro (struct mips_cl_insn *ip)
       macro2 (ip);
       break;
     }
-  if (mips_opts.noat && used_at)
+  if (!mips_opts.at && used_at)
     as_bad (_("Macro used $at after \".set noat\""));
 }
 
 static void
 macro2 (struct mips_cl_insn *ip)
 {
-  int treg, sreg, dreg, breg;
-  int tempreg;
+  unsigned int treg, sreg, dreg, breg;
+  unsigned int tempreg;
   int mask;
   int used_at;
   expressionS expr1;
@@ -7928,7 +7932,7 @@ macro2 (struct mips_cl_insn *ip)
       as_bad (_("Macro %s not implemented yet"), ip->insn_mo->name);
       break;
     }
-  if (mips_opts.noat && used_at)
+  if (!mips_opts.at && used_at)
     as_bad (_("Macro used $at after \".set noat\""));
 }
 
@@ -9089,8 +9093,14 @@ do_msbd:
 	      else
 		{
 		  ok = reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno);
-		  if (regno == AT && ! mips_opts.noat)
-		    as_warn ("Used $at without \".set noat\"");
+		  if (regno == AT && mips_opts.at)
+		    {
+		      if (mips_opts.at == ATREG)
+			as_warn (_("used $at without \".set noat\""));
+		      else
+			as_warn (_("used $%u with \".set at=$%u\""),
+				 regno, mips_opts.at);
+		    }
 		}
 	      if (ok)
 		{
@@ -9983,8 +9993,14 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 
 		case 'X':
 		case 'Y':
-		  if (regno == AT && ! mips_opts.noat)
-		    as_warn (_("used $at without \".set noat\""));
+		  if (regno == AT && mips_opts.at)
+		    {
+		      if (mips_opts.at == ATREG)
+			as_warn (_("used $at without \".set noat\""));
+		      else
+			as_warn (_("used $%u with \".set at=$%u\""),
+				 regno, mips_opts.at);
+		    }
 		  break;
 
 		default:
@@ -12404,13 +12420,20 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
       if (!mips_opts.noreorder)
 	start_noreorder ();
     }
+  else if (strncmp (name, "at=", 3) == 0)
+    {
+      char *s = name + 3;
+
+      if (!reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &mips_opts.at))
+	as_bad (_("Unrecognized register name `%s'"), s);
+    }
   else if (strcmp (name, "at") == 0)
     {
-      mips_opts.noat = 0;
+      mips_opts.at = ATREG;
     }
   else if (strcmp (name, "noat") == 0)
     {
-      mips_opts.noat = 1;
+      mips_opts.at = ZERO;
     }
   else if (strcmp (name, "macro") == 0)
     {
