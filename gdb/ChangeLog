@@ -1,5 +1,13 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* remote.c (init_remote_state, fetch_register_using_p)
+	(process_g_packet, remote_fetch_registers, remote_prepare_to_store)
+	(store_register_using_P, store_registers_using_G)
+	(remote_store_registers): Use get_regcache_arch or get_frame_arch to
+	get at the current architecture by regcache or by frame, respectively.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* m68k-tdep.c (m68k_register_to_value, m68k_value_to_register)
 	(m68k_svr4_extract_return_value, m68k_svr4_store_return_value)
 	(m68k_frame_prev_register, m68k_get_longjmp_target): Use

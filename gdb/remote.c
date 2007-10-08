@@ -334,13 +334,13 @@ init_remote_state (struct gdbarch *gdbarch)
   /* Use the architecture to build a regnum<->pnum table, which will be
      1:1 unless a feature set specifies otherwise.  */
   rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch,
-				      gdbarch_num_regs (current_gdbarch),
+				      gdbarch_num_regs (gdbarch),
 				      struct packet_reg);
-  for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
+  for (regnum = 0; regnum < gdbarch_num_regs (gdbarch); regnum++)
     {
       struct packet_reg *r = &rsa->regs[regnum];
 
-      if (register_size (current_gdbarch, regnum) == 0)
+      if (register_size (gdbarch, regnum) == 0)
 	/* Do not try to fetch zero-sized (placeholder) registers.  */
 	r->pnum = -1;
       else
@@ -353,10 +353,10 @@ init_remote_state (struct gdbarch *gdbarch)
      with a remote protocol number, in order of ascending protocol
      number.  */
 
-  remote_regs = alloca (gdbarch_num_regs (current_gdbarch) 
-			* sizeof (struct packet_reg *));
+  remote_regs = alloca (gdbarch_num_regs (gdbarch)
+			  * sizeof (struct packet_reg *));
   for (num_remote_regs = 0, regnum = 0;
-       regnum < gdbarch_num_regs (current_gdbarch);
+       regnum < gdbarch_num_regs (gdbarch);
        regnum++)
     if (rsa->regs[regnum].pnum != -1)
       remote_regs[num_remote_regs++] = &rsa->regs[regnum];
@@ -368,7 +368,7 @@ init_remote_state (struct gdbarch *gdbarch)
     {
       remote_regs[regnum]->in_g_packet = 1;
       remote_regs[regnum]->offset = offset;
-      offset += register_size (current_gdbarch, remote_regs[regnum]->regnum);
+      offset += register_size (gdbarch, remote_regs[regnum]->regnum);
     }
 
   /* Record the maximum possible size of the g packet - it may turn out
@@ -3636,7 +3636,7 @@ fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
       return 0;
     case PACKET_ERROR:
       error (_("Could not fetch register \"%s\""),
-	     gdbarch_register_name (current_gdbarch, reg->regnum));
+	     gdbarch_register_name (get_regcache_arch (regcache), reg->regnum));
     }
 
   /* If this register is unfetchable, tell the regcache.  */
@@ -3700,6 +3700,7 @@ send_g_packet (void)
 static void
 process_g_packet (struct regcache *regcache)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i, buf_len;
@@ -3726,7 +3727,7 @@ process_g_packet (struct regcache *regcache)
     {
       rsa->sizeof_g_packet = buf_len / 2;
 
-      for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+      for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
 	{
 	  if (rsa->regs[i].pnum == -1)
 	    continue;
@@ -3764,7 +3765,7 @@ process_g_packet (struct regcache *regcache)
 
   {
     int i;
-    for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+    for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
       {
 	struct packet_reg *r = &rsa->regs[i];
 	if (r->in_g_packet)
@@ -3831,7 +3832,7 @@ remote_fetch_registers (struct regcache *regcache, int regnum)
 
   fetch_registers_using_g (regcache);
 
-  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+  for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
     if (!rsa->regs[i].in_g_packet)
       if (!fetch_register_using_p (regcache, &rsa->regs[i]))
 	{
@@ -3857,7 +3858,7 @@ remote_prepare_to_store (struct regcache *regcache)
     case PACKET_DISABLE:
     case PACKET_SUPPORT_UNKNOWN:
       /* Make sure all the necessary registers are cached.  */
-      for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+      for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
 	if (rsa->regs[i].in_g_packet)
 	  regcache_raw_read (regcache, rsa->regs[i].regnum, buf);
       break;
@@ -3872,6 +3873,7 @@ remote_prepare_to_store (struct regcache *regcache)
 static int
 store_register_using_P (const struct regcache *regcache, struct packet_reg *reg)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
   /* Try storing a single register.  */
@@ -3888,7 +3890,7 @@ store_register_using_P (const struct regcache *regcache, struct packet_reg *reg)
   xsnprintf (buf, get_remote_packet_size (), "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
   regcache_raw_collect (regcache, reg->regnum, regp);
-  bin2hex (regp, p, register_size (current_gdbarch, reg->regnum));
+  bin2hex (regp, p, register_size (gdbarch, reg->regnum));
   remote_send (&rs->buf, &rs->buf_size);
 
   switch (packet_ok (rs->buf, &remote_protocol_packets[PACKET_P]))
@@ -3897,7 +3899,7 @@ store_register_using_P (const struct regcache *regcache, struct packet_reg *reg)
       return 1;
     case PACKET_ERROR:
       error (_("Could not write register \"%s\""),
-	     gdbarch_register_name (current_gdbarch, reg->regnum));
+	     gdbarch_register_name (gdbarch, reg->regnum));
     case PACKET_UNKNOWN:
       return 0;
     default:
@@ -3922,7 +3924,7 @@ store_registers_using_G (const struct regcache *regcache)
     int i;
     regs = alloca (rsa->sizeof_g_packet);
     memset (regs, 0, rsa->sizeof_g_packet);
-    for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+    for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
       {
 	struct packet_reg *r = &rsa->regs[i];
 	if (r->in_g_packet)
@@ -3977,7 +3979,7 @@ remote_store_registers (struct regcache *regcache, int regnum)
 
   store_registers_using_G (regcache);
 
-  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+  for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
     if (!rsa->regs[i].in_g_packet)
       if (!store_register_using_P (regcache, &rsa->regs[i]))
 	/* See above for why we do not issue an error here.  */
