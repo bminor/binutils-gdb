@@ -1,8 +1,11 @@
 2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+        * config/i386/nm-i386.h (CHILD_POST_STARTUP_INFERIOR): ARI fix: Remove.
+
+2007-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* linux-fork.c: ARI fix: include "gdb_wait.h" instead of <sys/wait.h>.
 	Makefile.in (linux-fork.o): Add gdb_wait.h dependency. 
-
 
 2007-10-05  Daniel Jacobowitz  <dan@codesourcery.com>
 

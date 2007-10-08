@@ -110,10 +110,6 @@ extern int i386_stopped_by_watchpoint (void);
 #define target_remove_hw_breakpoint(bp_tgt) \
   i386_remove_hw_breakpoint (bp_tgt)
 
-/* child_post_startup_inferior used to
-   reset all debug registers by calling i386_cleanup_dregs ().  */ 
-#define CHILD_POST_STARTUP_INFERIOR
-
 #endif /* I386_USE_GENERIC_WATCHPOINTS */
 
 #endif /* NM_I386_H */
