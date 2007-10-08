@@ -1,7 +1,7 @@
 2007-10-08  Eric B. Weddington  <eweddington@cso.atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add new devices: ATtiny43U,
-	ATtiny48.
+	ATtiny48, AT90PWM216, AT90PWM316.
 	* doc/c-avr.texi: Document new devices.
 
 2007-10-08  Nick Clifton  <nickc@redhat.com>
