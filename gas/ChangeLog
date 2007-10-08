@@ -1,7 +1,9 @@
 2007-10-08  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/5133
-	* config/tc-arm.c (md_apply_fix): Correct error message
+	* config/tc-arm.c (md_apply_fix): Correct error message.
+	PR gas/5134	
+	* config/tc-arm.c (md_apply_fix): Likewise.
 	PR gas/5136
 	* config/tc-bfin.c (md_apply_fix): Fix error message.
 	PR gas/5135

@@ -18771,7 +18771,7 @@ md_apply_fix (fixS *	fixP,
 	    {
 	      if (value < -0x1000 || value > 0xffff)
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
-				_("offset too big"));
+				_("offset out of range"));
 	    }
 	  else if (fixP->fx_r_type == BFD_RELOC_ARM_MOVT
 		   || fixP->fx_r_type == BFD_RELOC_ARM_THUMB_MOVT)
