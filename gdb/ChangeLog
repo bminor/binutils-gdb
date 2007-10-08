@@ -1,5 +1,17 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* cris-tdep.c (cris_sigcontext_addr, cris_sigtramp_frame_unwind_cache)
+	(cris_scan_prologue, crisv32_scan_prologue, find_step_target)
+	(cris_software_single_step, cris_supply_gregset): Use get_regcache_arch
+	or get_frame_arch to get at the current architecture by regcache or by
+	frame, respectively.
+	* cris-tdep.c (crisv32_single_step_through_delay, cris_push_dummy_call)
+	(cris_unwind_pc, cris_unwind_sp, cris_register_type, cris_dump_tdep)
+	(crisv32_register_type, cris_dwarf2_frame_init_reg): Replace
+	current_gdbarch by gdbarch.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* arm-tdep.c (arm_scan_prologue, arm_make_prologue_cache)
 	(thumb_get_next_pc, arm_get_next_pc, arm_extract_return_value)
 	(arm_store_return_value): Use get_regcache_arch or get_frame_arch to
