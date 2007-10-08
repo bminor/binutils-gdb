@@ -1,3 +1,7 @@
+2007-10-08  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (mips32_next_pc): Fix a typo in BGTZL.
+
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
 	* aix-thread.c (supply_gprs64, supply_fprs, supply_sprs64)

@@ -1011,7 +1011,7 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	      goto neq_branch;
 	    case 2:		/* BLEZL */
 	      goto less_branch;
-	    case 3:		/* BGTZ */
+	    case 3:		/* BGTZL */
 	      goto greater_branch;
 	    default:
 	      pc += 4;
