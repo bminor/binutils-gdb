@@ -1,5 +1,17 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* sh-tdep.c (sh_push_dummy_call_fpu, sh_push_dummy_call_nofpu)
+	(sh_sh2a_register_type, sh_sh3e_register_type, sh_sh4_register_type)
+	(sh_register_reggroup_p, sh_dwarf2_frame_init_reg): Replace
+	current_gdbarch by gdbarch.
+	(sh_generic_show_regs, sh3_show_reg, sh2e_show_regs, sh2a_show_regs)
+	(sh2a_nofpu_show_regs, sh3e_show_regs, sh3_dsp_show_regs)
+	(sh4_show_regs, sh4_nofpu_show_regs, sh_dsp_show_regs, sh_frame_cache)
+	(sh_frame_prev_register, sh_unwind_sp, sh_unwind_pc): Use FRAME to
+	recognize current architecture.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* remote.c (init_remote_state, fetch_register_using_p)
 	(process_g_packet, remote_fetch_registers, remote_prepare_to_store)
 	(store_register_using_P, store_registers_using_G)
