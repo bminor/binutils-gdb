@@ -909,15 +909,11 @@ class Output_data_got : public Output_section_data
   bool
   add_global(Symbol* gsym);
 
-  // Add an entry for a local symbol to the GOT.  This returns the
-  // offset of the new entry from the start of the GOT.
-  unsigned int
-  add_local(Object* object, unsigned int sym_index)
-  {
-    this->entries_.push_back(Got_entry(object, sym_index));
-    this->set_got_size();
-    return this->last_got_offset();
-  }
+  // Add an entry for a local symbol to the GOT.  This returns true if
+  // this is a new GOT entry, false if the symbol already has a GOT
+  // entry.
+  bool
+  add_local(Sized_relobj<size, big_endian>* object, unsigned int sym_index);
 
   // Add a constant to the GOT.  This returns the offset of the new
   // entry from the start of the GOT.
@@ -949,7 +945,8 @@ class Output_data_got : public Output_section_data
     { this->u_.gsym = gsym; }
 
     // Create a local symbol entry.
-    Got_entry(Object* object, unsigned int local_sym_index)
+    Got_entry(Sized_relobj<size, big_endian>* object,
+              unsigned int local_sym_index)
       : local_sym_index_(local_sym_index)
     {
       gold_assert(local_sym_index != GSYM_CODE
@@ -977,7 +974,7 @@ class Output_data_got : public Output_section_data
     union
     {
       // For a local symbol, the object.
-      Object* object;
+      Sized_relobj<size, big_endian>* object;
       // For a global symbol, the symbol.
       Symbol* gsym;
       // For a constant, the constant.

@@ -679,7 +679,8 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
       break;
 
     default:
-      gold_unreachable();
+      val = this->u_.object->local_symbol_value(this->local_sym_index_);
+      break;
     }
 
   elfcpp::Swap<size, big_endian>::writeval(pov, val);
@@ -701,6 +702,24 @@ Output_data_got<size, big_endian>::add_global(Symbol* gsym)
   this->entries_.push_back(Got_entry(gsym));
   this->set_got_size();
   gsym->set_got_offset(this->last_got_offset());
+  return true;
+}
+
+// Add an entry for a local symbol to the GOT.  This returns true if
+// this is a new GOT entry, false if the symbol already has a GOT
+// entry.
+
+template<int size, bool big_endian>
+bool
+Output_data_got<size, big_endian>::add_local(
+    Sized_relobj<size, big_endian>* object,
+    unsigned int symndx)
+{
+  if (object->local_has_got_offset(symndx))
+    return false;
+  this->entries_.push_back(Got_entry(object, symndx));
+  this->set_got_size();
+  object->set_local_got_offset(symndx, this->last_got_offset());
   return true;
 }
 

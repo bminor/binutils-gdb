@@ -147,7 +147,8 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     output_local_symbol_count_(0),
     symbols_(NULL),
     local_symbol_offset_(0),
-    local_values_()
+    local_values_(),
+    local_got_offsets_()
 {
 }
 
@@ -660,6 +661,17 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
   this->output_local_symbol_count_ = count;
 
   return index;
+}
+
+// Return the value of the local symbol symndx.
+template<int size, bool big_endian>
+typename elfcpp::Elf_types<size>::Elf_Addr
+Sized_relobj<size, big_endian>::local_symbol_value(unsigned int symndx) const
+{
+  gold_assert(symndx < this->local_symbol_count_);
+  gold_assert(symndx < this->local_values_.size());
+  const Symbol_value<size>& lv(this->local_values_[symndx]);
+  return lv.value(this, 0);
 }
 
 // Return the value of a local symbol defined in input section SHNDX,

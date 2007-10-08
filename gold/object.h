@@ -612,6 +612,54 @@ class Sized_relobj : public Relobj
     return this->local_values_[sym].output_symtab_index();
   }
 
+  // Return the appropriate Sized_target structure.
+  Sized_target<size, big_endian>*
+  sized_target()
+  {
+    return this->Object::sized_target
+      SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
+          SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
+  }
+
+  // Return the value of the local symbol symndx.
+  Address
+  local_symbol_value(unsigned int symndx) const;
+
+  // Return the value of a local symbol defined in input section
+  // SHNDX, with value VALUE, adding addend ADDEND.  IS_SECTION_SYMBOL
+  // indicates whether the symbol is a section symbol.  This handles
+  // SHF_MERGE sections.
+  Address
+  local_value(unsigned int shndx, Address value, bool is_section_symbol,
+	      Address addend) const;
+
+  // Return whether the local symbol SYMNDX has a GOT offset.
+  bool
+  local_has_got_offset(unsigned int symndx) const
+  {
+    return (this->local_got_offsets_.find(symndx)
+            != this->local_got_offsets_.end());
+  }
+
+  // Return the GOT offset of the local symbol SYMNDX.
+  unsigned int
+  local_got_offset(unsigned int symndx) const
+  {
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    gold_assert(p != this->local_got_offsets_.end());
+    return p->second;
+  }
+
+  // Set the GOT offset of the local symbol SYMNDX to GOT_OFFSET.
+  void
+  set_local_got_offset(unsigned int symndx, unsigned int got_offset)
+  {
+    std::pair<Local_got_offsets::iterator, bool> ins =
+        this->local_got_offsets_.insert(std::make_pair(symndx, got_offset));
+    gold_assert(ins.second);
+  }
+
   // Read the symbols.
   void
   do_read_symbols(Read_symbols_data*);
@@ -657,23 +705,6 @@ class Sized_relobj : public Relobj
   uint64_t
   do_section_flags(unsigned int shndx)
   { return this->elf_file_.section_flags(shndx); }
-
-  // Return the appropriate Sized_target structure.
-  Sized_target<size, big_endian>*
-  sized_target()
-  {
-    return this->Object::sized_target
-      SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-          SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
-  }
-
-  // Return the value of a local symbol define in input section SHNDX,
-  // with value VALUE, adding addend ADDEND.  IS_SECTION_SYMBOL
-  // indicates whether the symbol is a section symbol.  This handles
-  // SHF_MERGE sections.
-  Address
-  local_value(unsigned int shndx, Address value, bool is_section_symbol,
-	      Address addend) const;
 
  private:
   // For convenience.
@@ -724,6 +755,9 @@ class Sized_relobj : public Relobj
   write_local_symbols(Output_file*,
 		      const Stringpool_template<char>*);
 
+  // The GOT offsets of local symbols.
+  typedef Unordered_map<unsigned int, unsigned int> Local_got_offsets;
+
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
   // Index of SHT_SYMTAB section.
@@ -738,6 +772,8 @@ class Sized_relobj : public Relobj
   off_t local_symbol_offset_;
   // Values of local symbols.
   Local_values local_values_;
+  // GOT offsets for local symbols, indexed by symbol number.
+  Local_got_offsets local_got_offsets_;
 };
 
 // A class to manage the list of all objects.
