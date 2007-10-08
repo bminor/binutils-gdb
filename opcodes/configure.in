@@ -109,7 +109,7 @@ if test "$enable_shared" = "yes"; then
       ;;
     *)
       SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so"
-      SHARED_DEPENDENCIES="`pwd`/../bfd/.libs/libbfd.la"
+      SHARED_DEPENDENCIES="../bfd/libbfd.la"
       ;;
   esac
 fi
