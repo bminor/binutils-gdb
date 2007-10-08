@@ -114,8 +114,8 @@ alpha_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   /* Filter out any registers eliminated, but whose regnum is 
      reserved for backward compatibility, e.g. the vfp.  */
-  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
-      || *gdbarch_register_name (current_gdbarch, regnum) == '\0')
+  if (gdbarch_register_name (gdbarch, regnum) == NULL
+      || *gdbarch_register_name (gdbarch, regnum) == '\0')
     return 0;
 
   if (group == all_reggroup)
@@ -763,7 +763,7 @@ alpha_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
   info = FRAME_OBSTACK_ZALLOC (struct alpha_sigtramp_unwind_cache);
   *this_prologue_cache = info;
 
-  tdep = gdbarch_tdep (current_gdbarch);
+  tdep = gdbarch_tdep (get_frame_arch (next_frame));
   info->sigcontext_addr = tdep->sigcontext_addr (next_frame);
 
   return info;
@@ -807,7 +807,7 @@ alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
   /* If we have dynamic signal trampolines, find their start.
      If we do not, then we must assume there is a symbol record
      that can provide the start address.  */
-  tdep = gdbarch_tdep (current_gdbarch);
+  tdep = gdbarch_tdep (get_frame_arch (next_frame));
   if (tdep->dynamic_sigtramp_offset)
     {
       int offset;
@@ -880,6 +880,7 @@ static const struct frame_unwind alpha_sigtramp_frame_unwind = {
 static const struct frame_unwind *
 alpha_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
@@ -889,14 +890,14 @@ alpha_sigtramp_frame_sniffer (struct frame_info *next_frame)
 
   /* We shouldn't even bother to try if the OSABI didn't register a
      sigcontext_addr handler or pc_in_sigtramp hander.  */
-  if (gdbarch_tdep (current_gdbarch)->sigcontext_addr == NULL)
+  if (gdbarch_tdep (gdbarch)->sigcontext_addr == NULL)
     return NULL;
-  if (gdbarch_tdep (current_gdbarch)->pc_in_sigtramp == NULL)
+  if (gdbarch_tdep (gdbarch)->pc_in_sigtramp == NULL)
     return NULL;
 
   /* Otherwise we should be in a signal frame.  */
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (gdbarch_tdep (current_gdbarch)->pc_in_sigtramp (pc, name))
+  if (gdbarch_tdep (gdbarch)->pc_in_sigtramp (pc, name))
     return &alpha_sigtramp_frame_unwind;
 
   return NULL;
@@ -1441,7 +1442,7 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
           case 0x33:              /* FBLE */
           case 0x32:              /* FBLT */
           case 0x35:              /* FBNE */
-            regno += gdbarch_fp0_regnum (current_gdbarch);
+            regno += gdbarch_fp0_regnum (get_frame_arch (frame));
 	}
       
       rav = get_frame_register_signed (frame, regno);

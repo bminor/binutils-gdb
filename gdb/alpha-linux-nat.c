@@ -84,14 +84,14 @@ fill_fpregset (const struct regcache *regcache,
 static CORE_ADDR
 alpha_linux_register_u_offset (struct gdbarch *gdbarch, int regno, int store_p)
 {
-  if (regno == gdbarch_pc_regnum (current_gdbarch))
+  if (regno == gdbarch_pc_regnum (gdbarch))
     return PC;
   if (regno == ALPHA_UNIQUE_REGNUM)
     return ALPHA_UNIQUE_PTRACE_ADDR;
-  if (regno < gdbarch_fp0_regnum (current_gdbarch))
+  if (regno < gdbarch_fp0_regnum (gdbarch))
     return GPR_BASE + regno;
   else
-    return FPR_BASE + regno - gdbarch_fp0_regnum (current_gdbarch);
+    return FPR_BASE + regno - gdbarch_fp0_regnum (gdbarch);
 }
 
 void _initialialize_alpha_linux_nat (void);

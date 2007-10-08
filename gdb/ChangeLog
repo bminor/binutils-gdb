@@ -1,5 +1,16 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* alpha-tdep.c (alpha_register_reggroup_p): Replace current_gdbarch by
+	gdbarch.
+	* alpha-linux-nat.c (alpha_linux_register_u_offset): Likewise.
+	(alpha_sigtramp_frame_unwind_cache, alpha_sigtramp_frame_this_id)
+	(alpha_sigtramp_frame_sniffer, alpha_next_pc): Use get_regcache_arch or
+	get_frame_arch to get at the current architecture by regcache or by 
+	frame, respectively.
+	* alpha-nat.c (fetch_osf_core_registers): Likewise.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* dwarf2-frame.c (read_reg, execute_cfa_program, dwarf2_frame_cache)
 	(dwarf2_frame_default_init_reg, dwarf2_frame_prev_register): Replace
 	current_gdbarch by gdbarch.
