@@ -3705,13 +3705,12 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
   int sign = 1;
   int sign_bit;
   long n = 0;
-  long sn = 0;
   int radix = 10;
   char overflow = 0;
   int nbits = 0;
   int c;
   long upper_limit;
-  int twos_complement_representation;
+  int twos_complement_representation = 0;
 
   if (*p == '-')
     {
@@ -3727,7 +3726,37 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
       p++;
     }
 
-  twos_complement_representation = radix == 8 && twos_complement_bits > 0;
+  /* Skip extra zeros.  */
+  while (*p == '0')
+    p++;
+
+  if (sign > 0 && radix == 8 && twos_complement_bits > 0)
+    {
+      /* Octal, possibly signed.  Check if we have enough chars for a
+	 negative number.  */
+
+      size_t len;
+      char *p1 = p;
+      while ((c = *p1) >= '0' && c < '8')
+	p1++;
+
+      len = p1 - p;
+      if (len > twos_complement_bits / 3
+	  || (twos_complement_bits % 3 == 0 && len == twos_complement_bits / 3))
+	{
+	  /* Ok, we have enough characters for a signed value, check
+	     for signness by testing if the sign bit is set.  */
+	  sign_bit = (twos_complement_bits % 3 + 2) % 3;
+	  c = *p - '0';
+	  if (c & (1 << sign_bit))
+	    {
+	      /* Definitely signed.  */
+	      twos_complement_representation = 1;
+	      sign = -1;
+	    }
+	}
+    }
+
   upper_limit = LONG_MAX / radix;
 
   while ((c = *p++) >= '0' && c < ('0' + radix))
@@ -3736,23 +3765,18 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
         {
           if (twos_complement_representation)
             {
-              /* Octal, signed, twos complement representation. In this case,
-                 sn is the signed value, n is the corresponding absolute
-                 value. signed_bit is the position of the sign bit in the
-                 first three bits.  */
-              if (sn == 0)
-                {
-                  sign_bit = (twos_complement_bits % 3 + 2) % 3;
-                  sn = c - '0' - ((2 * (c - '0')) | (2 << sign_bit));
-                }
+	      /* Octal, signed, twos complement representation.  In
+		 this case, n is the corresponding absolute value.  */
+	      if (n == 0)
+		{
+		  long sn = c - '0' - ((2 * (c - '0')) | (2 << sign_bit));
+		  n = -sn;
+		}
               else
                 {
-                  sn *= radix;
-                  sn += c - '0';
+                  n *= radix;
+                  n -= c - '0';
                 }
-
-              if (sn < 0)
-                n = -sn;
             }
           else
             {
@@ -3796,6 +3820,15 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
   else
     --p;
 
+  if (radix == 8 && twos_complement_bits > 0 && nbits > twos_complement_bits)
+    {
+      /* We were supposed to parse a number with maximum
+	 TWOS_COMPLEMENT_BITS bits, but something went wrong.  */
+      if (bits != NULL)
+	*bits = -1;
+      return 0;
+    }
+
   *pp = p;
   if (overflow)
     {
@@ -3809,8 +3842,9 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
 	}
 
       /* -0x7f is the same as 0x80.  So deal with it by adding one to
-         the number of bits.  */
-      if (sign == -1)
+         the number of bits.  Two's complement represention octals
+         can't have a '-' in front.  */
+      if (sign == -1 && !twos_complement_representation)
 	++nbits;
       if (bits)
 	*bits = nbits;
@@ -3819,10 +3853,7 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
     {
       if (bits)
 	*bits = 0;
-      if (twos_complement_representation)
-        return sn;
-      else
-        return n * sign;
+      return n * sign;
     }
   /* It's *BITS which has the interesting information.  */
   return 0;
@@ -3947,15 +3978,20 @@ read_range_type (char **pp, int typenums[2], int type_size,
 	return float_type;
     }
 
-  /* If the upper bound is -1, it must really be an unsigned int.  */
+  /* If the upper bound is -1, it must really be an unsigned integral.  */
 
   else if (n2 == 0 && n3 == -1)
     {
-      /* It is unsigned int or unsigned long.  */
-      /* GCC 2.3.3 uses this for long long too, but that is just a GDB 3.5
-         compatibility hack.  */
-      return init_type (TYPE_CODE_INT, 
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+      int bits = type_size;
+      if (bits <= 0)
+	{
+	  /* We don't know its size.  It is unsigned int or unsigned
+	     long.  GCC 2.3.3 uses this for long long too, but that is
+	     just a GDB 3.5 compatibility hack.  */
+	  bits = gdbarch_int_bit (current_gdbarch);
+	}
+
+      return init_type (TYPE_CODE_INT, bits / TARGET_CHAR_BIT,
 			TYPE_FLAG_UNSIGNED, NULL, objfile);
     }
 
