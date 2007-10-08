@@ -1,5 +1,17 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* sh64-tdep.c (sh64_push_dummy_call, sh64_register_type)
+	(sh64_pseudo_register_read, sh64_pseudo_register_write)
+	(sh64_do_fp_register, sh64_do_pseudo_register, sh64_do_register)
+	(sh64_print_register, sh64_media_print_registers_info)
+	(sh64_compact_print_registers_info, sh64_unwind_sp)
+	(sh64_unwind_pc): Replace current_gdbarch by gdbarch.
+	(sh64_show_media_regs, sh64_show_compact_regs, sh64_frame_cache)
+	(sh64_frame_prev_register): Use FRAME to recognize current
+	architecture.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* sh-tdep.c (sh_push_dummy_call_fpu, sh_push_dummy_call_nofpu)
 	(sh_sh2a_register_type, sh_sh3e_register_type, sh_sh4_register_type)
 	(sh_register_reggroup_p, sh_dwarf2_frame_init_reg): Replace
