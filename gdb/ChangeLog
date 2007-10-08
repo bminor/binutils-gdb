@@ -1,5 +1,13 @@
 2007-10-08  Markus Deuling  <deuling@de.ibm.com>
 
+	* regcache.c (init_regcache_descr, register_type, read_pc_pid)
+	(write_pc_pid, regcache_dump): Replace current_gdbarch by gdbarch.
+	* regcache.c (regcache_raw_write): Use get_regcache_arch or
+	get_frame_arch to get at the current architecture by regcache or by
+	frame, respectively.
+
+2007-10-08  Markus Deuling  <deuling@de.ibm.com>
+
 	* findvar.c (value_of_register, locate_var_value): Use
 	get_regcache_arch or get_frame_arch to get at the current architecture
 	by regcache or by frame, respectively.
