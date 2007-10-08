@@ -18732,7 +18732,7 @@ md_apply_fix (fixS *	fixP,
       newval = md_chars_to_number (buf, THUMB_SIZE);
       if (value < 0 || value > 255)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("invalid immediate: %ld is too large"),
+		      _("invalid immediate: %ld is out of range"),
 		      (long) value);
       newval |= value;
       md_number_to_chars (buf, newval, THUMB_SIZE);
