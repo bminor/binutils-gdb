@@ -2236,7 +2236,7 @@ linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(objc_lang_h) $(linespec_h) $(exceptions_h) $(language_h)
 linux-fork.o: linux-fork.c $(defs_h) $(inferior_h) $(regcache_h) $(gdbcmd_h) \
 	$(infcall_h) $(gdb_assert_h) $(gdb_string_h) $(linux_fork_h) \
-	$(linux_nat_h) $(gdb_wait_h)
+	$(linux_nat_h) $(gdb_wait_h) $(gdb_dirent_h)
 linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_wait_h) $(gdb_assert_h) $(linux_nat_h) $(gdbthread_h) \
 	$(gdbcmd_h) $(regcache_h) $(regset_h) $(inf_ptrace_h) $(auxv_h) \

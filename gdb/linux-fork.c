@@ -30,7 +30,7 @@
 #include <sys/ptrace.h>
 #include "gdb_wait.h"
 #include <sys/param.h>
-#include <dirent.h>
+#include "gdb_dirent.h"
 #include <ctype.h>
 
 struct fork_info *fork_list;
