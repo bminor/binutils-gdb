@@ -1,3 +1,12 @@
+2007-10-08  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* resrc.c (read_rc_file): Rename e to edit, and c to dir.
+	Pass dir to windres_add_include_dir.  Add comments.
+	(close_input_stream): Check pclose error, and call fatal if
+	the preprocessor failed.
+	* windres.c (windres_add_include_dir): Assert that p is non-NULL,
+	and not an empty string. 
+
 2007-10-04  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/5098
