@@ -1,3 +1,7 @@
+2007-10-09  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2007-10-09  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* stabsread.c (read_huge_number): Initialize local variable to 0.
