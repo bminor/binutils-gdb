@@ -1,3 +1,7 @@
+2007-10-09  Michael Snyder  <msnyder@specifix.com>
+
+	* MAINTAINERS: Update my email address.
+
 2007-10-09  Markus Deuling  <deuling@de.ibm.com>
 
 	* xtensa-tdep.c: Replace following current-gdbarch based macros by
