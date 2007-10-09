@@ -105,7 +105,7 @@ typedef struct
   xtensa_elf_greg_t ar[0];	/* variable size (per config).  */
 } xtensa_elf_gregset_t;
 
-#define SIZEOF_GREGSET (sizeof (xtensa_elf_gregset_t) + NUM_AREGS * 4)
+#define SIZEOF_GREGSET (sizeof (xtensa_elf_gregset_t) + gdbarch_tdep (current_gdbarch)->num_aregs * 4)
 #define XTENSA_ELF_NGREG (SIZEOF_GREGSET / sizeof(xtensa_elf_greg_t))
 
 
@@ -229,84 +229,10 @@ struct gdbarch_tdep
 };
 
 
-/* Define macros to access some of the gdbarch entries.  */
-#define XTENSA_TARGET_FLAGS \
-  (gdbarch_tdep (current_gdbarch)->target_flags)
-#define SPILL_LOCATION \
-  (gdbarch_tdep (current_gdbarch)->spill_location)
-#define SPILL_SIZE \
-  (gdbarch_tdep (current_gdbarch)->spill_size)
-#define CALL_ABI		\
-  (gdbarch_tdep (current_gdbarch)->call_abi)
-#define ISA_USE_WINDOWED_REGISTERS \
-  (gdbarch_tdep (current_gdbarch)->isa_use_windowed_registers)
-#define ISA_USE_DENSITY_INSTRUCTIONS \
-  (gdbarch_tdep (current_gdbarch)->isa_use_density_instructions)
-#define ISA_USE_EXCEPTIONS \
-  (gdbarch_tdep (current_gdbarch)->isa_use_exceptions)
-#define ISA_USE_EXT_L32R \
-  (gdbarch_tdep (current_gdbarch)->isa_use_ext_l32r)
-#define DEBUG_DATA_VADDR_TRAP_COUNT \
-  (gdbarch_tdep (current_gdbarch)->debug_data_vaddr_trap_count)
-#define DEBUG_INST_VADDR_TRAP_COUNT \
-  (gdbarch_tdep (current_gdbarch)->debug_inst_vaddr_trap_count)
-#define ISA_MAX_INSN_SIZE \
-  (gdbarch_tdep (current_gdbarch)->isa_max_insn_size)
-#define DEBUG_NUM_IBREAKS \
-  (gdbarch_tdep (current_gdbarch)->debug_num_ibreaks)
-#define DEBUG_NUM_DBREAKS \
-  (gdbarch_tdep (current_gdbarch)->debug_num_dbreaks)
-
-#define NUM_AREGS         (gdbarch_tdep (current_gdbarch)->num_aregs)
-#define WB_REGNUM         (gdbarch_tdep (current_gdbarch)->wb_regnum)
-#define WS_REGNUM         (gdbarch_tdep (current_gdbarch)->ws_regnum)
-#define LBEG_REGNUM       (gdbarch_tdep (current_gdbarch)->lbeg_regnum)
-#define LEND_REGNUM       (gdbarch_tdep (current_gdbarch)->lend_regnum)
-#define LCOUNT_REGNUM     (gdbarch_tdep (current_gdbarch)->lcount_regnum)
-#define SAR_REGNUM        (gdbarch_tdep (current_gdbarch)->sar_regnum)
-#define REGMAP            (gdbarch_tdep (current_gdbarch)->regmap)
-
-#define LITBASE_REGNUM    (gdbarch_tdep (current_gdbarch)->litbase_regnum)
-#define DEBUGCAUSE_REGNUM (gdbarch_tdep (current_gdbarch)->debugcause_regnum)
-#define EXCCAUSE_REGNUM   (gdbarch_tdep (current_gdbarch)->exccause_regnum)
-#define EXCVADDR_REGNUM   (gdbarch_tdep (current_gdbarch)->excvaddr_regnum)
-#define NUM_IBREAKS       (gdbarch_tdep (current_gdbarch)->num_ibreaks)
-#define REGMAP_BYTES      (gdbarch_tdep (current_gdbarch)->regmap_bytes)
-#define A0_BASE           (gdbarch_tdep (current_gdbarch)->a0_base)
-#define AR_BASE           (gdbarch_tdep (current_gdbarch)->ar_base)
-#define FP_ALIAS \
-  (gdbarch_num_regs (current_gdbarch) \
-   + gdbarch_num_pseudo_regs (current_gdbarch))
-#define CALL_ABI          (gdbarch_tdep (current_gdbarch)->call_abi)
-#define NUM_CONTEXTS      (gdbarch_tdep (current_gdbarch)->num_contexts)
-  
-#define FP_LAYOUT         (gdbarch_tdep (current_gdbarch)->fp_layout)
-#define FP_LAYOUT_BYTES   (gdbarch_tdep (current_gdbarch)->fp_layout_bytes)
-#define GREGMAP           (gdbarch_tdep (current_gdbarch)->gregmap)
-
-#define AREGS_MASK	  (NUM_AREGS - 1)
-#define WB_MASK		  (AREGS_MASK >> 2)
 #define WB_SHIFT	  2
 
 /* We assign fixed numbers to the registers of the "current" window 
    (i.e., relative to WB).  The registers get remapped via the reg_map 
    data structure to their corresponding register in the AR register 
    file (see xtensa-tdep.c).  */
-
-#define A0_REGNUM  (A0_BASE + 0)
-#define A1_REGNUM  (A0_BASE + 1)
-#define A2_REGNUM  (A0_BASE + 2)
-#define A3_REGNUM  (A0_BASE + 3)
-#define A4_REGNUM  (A0_BASE + 4)
-#define A5_REGNUM  (A0_BASE + 5)
-#define A6_REGNUM  (A0_BASE + 6)
-#define A7_REGNUM  (A0_BASE + 7)
-#define A8_REGNUM  (A0_BASE + 8)
-#define A9_REGNUM  (A0_BASE + 9)
-#define A10_REGNUM (A0_BASE + 10)
-#define A11_REGNUM (A0_BASE + 11)
-#define A12_REGNUM (A0_BASE + 12)
-#define A13_REGNUM (A0_BASE + 13)
-#define A14_REGNUM (A0_BASE + 14)
-#define A15_REGNUM (A0_BASE + 15)
 

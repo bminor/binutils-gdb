@@ -1,5 +1,62 @@
 2007-10-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* xtensa-tdep.c: Replace following current-gdbarch based macros by
+	their expression:
+	(xtensa_pseudo_register_read)
+	(xtensa_pseudo_register_write): XTENSA_TARGET_FLAGS.
+	(ARG_NOF, ARG_1ST, xtensa_extract_return_value)
+	(xtensa_store_return_value, xtensa_push_dummy_call): CALL_ABI.
+	(xtensa_pseudo_register_read)
+	(xtensa_pseudo_register_write): ISA_USE_WINDOWED_REGISTERS.
+	(xtensa_breakpoint_from_pc): ISA_USE_DENSITY_INSTRUCTIONS.
+	(xtensa_register_type, xtensa_supply_gregset, xtensa_frame_cache)
+	(xtensa_frame_prev_register): NUM_AREGS.
+	(xtensa_pseudo_register_read, xtensa_pseudo_register_write,
+	(xtensa_supply_gregset, xtensa_frame_cache, xtensa_frame_prev_register,
+	(xtensa_extract_return_value, xtensa_store_return_value): WB_REGNUM.
+	(xtensa_supply_gregset, xtensa_frame_cache)
+	(xtensa_frame_prev_register): WS_REGNUM.
+	(xtensa_supply_gregset): LBEG_REGNUM, LEND_REGNUM, LCOUNT_REGNUM,
+	SAR_REGNUM, EXCCAUSE_REGNUM, EXCVADDR_REGNUM
+	(xtensa_register_name, xtensa_register_type, xtensa_reg_to_regnum)
+	(xtensa_pseudo_register_read, xtensa_pseudo_register_write)
+	(xtensa_register_reggroup_p): REGMAP.
+	(call0_track_op): LITBASE_REGNUM.
+	(xtensa_register_type, xtensa_reg_to_regnum, call0_frame_cache):A0_BASE
+	(xtensa_supply_gregset, call0_frame_get_reg_at_entry)
+	(xtensa_frame_prev_register, AREG_NUMBER)
+	(xtensa_register_type): AR_BASE.
+	(xtensa_pseudo_register_read, xtensa_pseudo_register_write): FP_ALIAS.
+	(AREG_NUMBER): AREGS_MASK, WB_MASK, A0_REGNUM.
+	(ARG_1ST, xtensa_pseudo_register_read, xtensa_pseudo_register_write)
+	(xtensa_frame_cache, xtensa_frame_prev_register)
+	(xtensa_extract_return_value, xtensa_store_return_value)
+	(xtensa_push_dummy_call, call0_frame_cache): A0_REGNUM.
+	(xtensa_register_type, xtensa_pseudo_register_read, xtensa_frame_cache)
+	(xtensa_pseudo_register_write, xtensa_unwind_dummy_id)
+	(xtensa_frame_prev_register, xtensa_push_dummy_call)
+	(call0_frame_cache): A1_REGNUM.
+	(xtensa_extract_return_value, xtensa_store_return_value): A2_REGNUM.
+	(xtensa_push_dummy_call): A4_REGNUM.
+	(ARGS_FIRST_REG): A6_REGNUM.
+	(xtensa_pseudo_register_read, xtensa_pseudo_register_write)
+	(xtensa_frame_prev_register): A15_REGNUM.
+	* xtensa-tdep.h: Delete current_gdbarch based macros after replacing
+	them in the appropriate source file:
+	XTENSA_TARGET_FLAGS, SPILL_LOCATION, SPILL_SIZE, CALL_ABI, NUM_AREGS,
+	ISA_USE_WINDOWED_REGISTERS, ISA_USE_DENSITY_INSTRUCTIONS, WB_REGNUM,
+	ISA_USE_EXCEPTIONS, ISA_USE_EXT_L32R, DEBUG_DATA_VADDR_TRAP_COUNT,
+	DEBUG_INST_VADDR_TRAP_COUNT, ISA_MAX_INSN_SIZE, DEBUG_NUM_IBREAKS,
+	DEBUG_NUM_DBREAKS, WS_REGNUM, LBEG_REGNUM, LEND_REGNUM, SAR_REGNUM,
+	REGMAP, LITBASE_REGNUM, DEBUGCAUSE_REGNUM, EXCCAUSE_REGNUM, AR_BASE,
+	EXCVADDR_REGNUM, NUM_IBREAKS, REGMAP_BYTES, NUM_CONTEXTS, FP_ALIAS,
+	FP_LAYOUT, FP_LAYOUT_BYTES, GREGMAP, AREGS_MASK, WB_MASK, A0_REGNUM,
+	A1_REGNUM, A2_REGNUM, A3_REGNUM, A4_REGNUM, A5_REGNUM, A6_REGNUM,
+	A7_REGNUM, A8_REGNUM, A9_REGNUM, A10_REGNUM, A11_REGNUM, A12_REGNUM,
+	A13_REGNUM, A14_REGNUM, A15_REGNUM.
+
+2007-10-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* h8300-tdep.c (h8300_frame_cache): Use get_frame_arch to get at
 	the current architecture by frame_info.
 	(h8300_frame_prev_register
