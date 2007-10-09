@@ -2751,7 +2751,7 @@ symtab.o: symtab.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(filenames_h) $(objc_lang_h) $(ada_lang_h) $(hashtab_h) \
 	$(gdb_obstack_h) $(block_h) $(dictionary_h) $(gdb_string_h) \
 	$(gdb_stat_h) $(cp_abi_h) $(observer_h) $(gdb_assert_h) \
-	$(solist_h) $(ada_lang_h)
+	$(solist_h) $(p_lang_h)
 target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 	$(symtab_h) $(inferior_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_wait_h) $(dcache_h) $(regcache_h) $(gdb_assert_h) $(gdbcore_h) \

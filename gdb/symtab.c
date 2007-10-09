@@ -40,6 +40,7 @@
 #include "filenames.h"		/* for FILENAME_CMP */
 #include "objc-lang.h"
 #include "ada-lang.h"
+#include "p-lang.h"
 
 #include "hashtab.h"
 
@@ -4126,7 +4127,7 @@ set_main_name (const char *name)
 static void
 find_main_name (void)
 {
-  char *new_main_name;
+  const char *new_main_name;
 
   /* Try to see if the main procedure is in Ada.  */
   /* FIXME: brobecker/2005-03-07: Another way of doing this would
@@ -4145,6 +4146,13 @@ find_main_name (void)
      that order of call for these methods becomes important, which means
      a more complicated approach.  */
   new_main_name = ada_main_name ();
+  if (new_main_name != NULL)
+    { 
+      set_main_name (new_main_name);
+      return;
+    }
+
+  new_main_name = pascal_main_name ();
   if (new_main_name != NULL)
     { 
       set_main_name (new_main_name);

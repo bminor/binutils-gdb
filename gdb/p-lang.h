@@ -21,6 +21,9 @@
 
 struct value;
 
+/* Defined in p-lang.c */
+extern const char *pascal_main_name (void);
+
 extern int pascal_parse (void);	/* Defined in p-exp.y */
 
 extern void pascal_error (char *);	/* Defined in p-exp.y */

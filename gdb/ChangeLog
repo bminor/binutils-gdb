@@ -1,3 +1,13 @@
+2007-10-09  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+        * p-lang.h (pascal_main_name): Add declaration.
+        * p-lang.c (GPC_P_INITIALIZE, GPC_MAIN_PROGRAM_NAME_1)
+        (GPC_MAIN_PROGRAM_NAME_2): New constants.
+        (pascal_main_name): New function.
+        * symtab.c: Include p-lang.h.
+        (find_main_name): Add call to pascal_main_name.
+        * Makefile.in (symtab.o): Add dependency on p-lang.h.
+
 2007-10-09  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* stabsread.c (read_huge_number): Fix handling of octal
