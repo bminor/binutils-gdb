@@ -53,7 +53,7 @@ legacy_return_value (struct gdbarch *gdbarch, struct type *valtype,
 			|| TYPE_CODE (valtype) == TYPE_CODE_UNION
 			|| TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
 		       && gdbarch_deprecated_use_struct_convention
-			    (current_gdbarch, 0, valtype));
+			    (gdbarch, 0, valtype));
 
   if (writebuf != NULL)
     {
@@ -63,14 +63,13 @@ legacy_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	 structures.  Should not be called with such types.  */
       gdb_assert (TYPE_CODE (valtype) != TYPE_CODE_STRUCT
 		  && TYPE_CODE (valtype) != TYPE_CODE_UNION);
-      gdbarch_store_return_value (current_gdbarch, valtype, regcache, writebuf);
+      gdbarch_store_return_value (gdbarch, valtype, regcache, writebuf);
     }
 
   if (readbuf != NULL)
     {
       gdb_assert (!struct_return);
-      gdbarch_extract_return_value (current_gdbarch,
-				    valtype, regcache, readbuf);
+      gdbarch_extract_return_value (gdbarch, valtype, regcache, readbuf);
     }
 
   if (struct_return)

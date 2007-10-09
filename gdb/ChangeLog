@@ -1,5 +1,10 @@
 2007-10-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* arch-utils.c (legacy_return_value): Replace current_gdbarch by
+	gdbarch.
+
+2007-10-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* frame.c (frame_pc_unwind): Use get_frame_arch to get at the current
 	architecture by frame.
 	(frame_save_as_regcache, frame_register_unwind, get_prev_frame_1)
