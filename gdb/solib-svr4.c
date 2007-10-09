@@ -985,6 +985,7 @@ enable_break (void)
       char *buf;
       CORE_ADDR load_addr = 0;
       int load_addr_found = 0;
+      int loader_found_in_list = 0;
       struct so_list *so;
       bfd *tmp_bfd = NULL;
       struct target_ops *tmp_bfd_target;
@@ -1042,6 +1043,7 @@ enable_break (void)
 	  if (strcmp (buf, so->so_original_name) == 0)
 	    {
 	      load_addr_found = 1;
+	      loader_found_in_list = 1;
 	      load_addr = LM_ADDR_CHECK (so, tmp_bfd);
 	      break;
 	    }
@@ -1052,9 +1054,11 @@ enable_break (void)
 	 the current pc (which should point at the entry point for the
 	 dynamic linker) and subtracting the offset of the entry point.  */
       if (!load_addr_found)
+	load_addr = (read_pc ()
+		     - exec_entry_point (tmp_bfd, tmp_bfd_target));
+
+      if (!loader_found_in_list)
 	{
-	  load_addr = (read_pc ()
-		       - exec_entry_point (tmp_bfd, tmp_bfd_target));
 	  debug_loader_name = xstrdup (buf);
 	  debug_loader_offset_p = 1;
 	  debug_loader_offset = load_addr;
