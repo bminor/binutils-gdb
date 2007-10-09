@@ -55,4 +55,12 @@ This program has absolutely no warranty.\n"));
     }
 }
 
+// Return the version string.
+
+const char*
+get_version_string()
+{
+  return version_string;
+}
+
 } // End namespace gold.

@@ -211,6 +211,10 @@ extern void do_gold_unreachable(const char*, int, const char*)
 extern void
 print_version(bool print_short);
 
+// Get the version string.
+extern const char*
+get_version_string();
+
 // Queue up the first set of tasks.
 extern void
 queue_initial_tasks(const General_options&,

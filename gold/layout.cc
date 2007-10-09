@@ -521,6 +521,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   target->finalize_sections(this);
 
+  this->create_note_section();
+
   Output_segment* phdr_seg = NULL;
   if (input_objects->any_dynamic())
     {
@@ -604,6 +606,79 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   Output_data::layout_complete();
 
   return off;
+}
+
+// Create a .note section for an executable or shared library.  This
+// records the version of gold used to create the binary.
+
+void
+Layout::create_note_section()
+{
+  if (parameters->output_is_object())
+    return;
+
+  const int size = parameters->get_size();
+
+  // The contents of the .note section.
+  const char* name = "GNU";
+  std::string desc(std::string("gold ") + gold::get_version_string());
+  size_t namesz = strlen(name) + 1;
+  size_t aligned_namesz = align_address(namesz, size / 8);
+  size_t descsz = desc.length() + 1;
+  size_t aligned_descsz = align_address(descsz, size / 8);
+  const int note_type = 4;
+
+  size_t notesz = 3 * (size / 8) + aligned_namesz + aligned_descsz;
+
+  unsigned char buffer[128];
+  gold_assert(sizeof buffer >= notesz);
+  memset(buffer, 0, notesz);
+
+  bool is_big_endian = parameters->is_big_endian();
+
+  if (size == 32)
+    {
+      if (!is_big_endian)
+	{
+	  elfcpp::Swap<32, false>::writeval(buffer, namesz);
+	  elfcpp::Swap<32, false>::writeval(buffer + 4, descsz);
+	  elfcpp::Swap<32, false>::writeval(buffer + 8, note_type);
+	}
+      else
+	{
+	  elfcpp::Swap<32, true>::writeval(buffer, namesz);
+	  elfcpp::Swap<32, true>::writeval(buffer + 4, descsz);
+	  elfcpp::Swap<32, true>::writeval(buffer + 8, note_type);
+	}
+    }
+  else if (size == 64)
+    {
+      if (!is_big_endian)
+	{
+	  elfcpp::Swap<64, false>::writeval(buffer, namesz);
+	  elfcpp::Swap<64, false>::writeval(buffer + 8, descsz);
+	  elfcpp::Swap<64, false>::writeval(buffer + 16, note_type);
+	}
+      else
+	{
+	  elfcpp::Swap<64, true>::writeval(buffer, namesz);
+	  elfcpp::Swap<64, true>::writeval(buffer + 8, descsz);
+	  elfcpp::Swap<64, true>::writeval(buffer + 16, note_type);
+	}
+    }
+  else
+    gold_unreachable();
+
+  memcpy(buffer + 3 * (size / 8), name, namesz);
+  memcpy(buffer + 3 * (size / 8) + aligned_namesz, desc.data(), descsz);
+
+  const char* note_name = this->namepool_.add(".note", NULL);
+  Output_section* os = this->make_output_section(note_name,
+						 elfcpp::SHT_NOTE,
+						 0);
+  Output_section_data* posd = new Output_data_const(buffer, notesz,
+						    size / 8);
+  os->add_output_section_data(posd);
 }
 
 // Return whether SEG1 should be before SEG2 in the output file.  This

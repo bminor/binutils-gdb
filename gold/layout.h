@@ -213,6 +213,10 @@ class Layout
 		  const elfcpp::Shdr<size, big_endian>&,
 		  Output_section*, off_t*);
 
+  // Create a .note section for gold.
+  void
+  create_note_section();
+
   // Find the first read-only PT_LOAD segment, creating one if
   // necessary.
   Output_segment*
