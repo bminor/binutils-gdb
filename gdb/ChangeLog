@@ -1,5 +1,10 @@
 2007-10-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* dbug-rom.c (dbug_supply_register): Use get_regcache_arch to get at
+	the current architecture by regcache.
+
+2007-10-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* arch-utils.c (legacy_return_value): Replace current_gdbarch by
 	gdbarch.
 
