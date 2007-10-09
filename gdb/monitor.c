@@ -883,7 +883,9 @@ monitor_supply_register (struct regcache *regcache, int regno, char *valstr)
 
   /* supply register stores in target byte order, so swap here */
 
-  store_unsigned_integer (regbuf, register_size (current_gdbarch, regno), val);
+  store_unsigned_integer (regbuf,
+			  register_size (get_regcache_arch (regcache), regno),
+			  val);
 
   regcache_raw_supply (regcache, regno, regbuf);
 
@@ -1190,7 +1192,7 @@ monitor_fetch_register (struct regcache *regcache, int regno)
      spaces, but stop reading if something else is seen.  Some monitors
      like to drop leading zeros.  */
 
-  for (i = 0; i < register_size (current_gdbarch, regno) * 2; i++)
+  for (i = 0; i < register_size (get_regcache_arch (regcache), regno) * 2; i++)
     {
       int c;
       c = readchar (timeout);
@@ -1277,7 +1279,8 @@ monitor_fetch_registers (struct regcache *regcache, int regno)
 	  return;
 	}
 
-      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
+      for (regno = 0; regno < gdbarch_num_regs (get_regcache_arch (regcache));
+	   regno++)
 	monitor_fetch_register (regcache, regno);
     }
   else
@@ -1307,7 +1310,8 @@ monitor_store_register (struct regcache *regcache, int regno)
 
   regcache_cooked_read_unsigned (regcache, regno, &val);
   monitor_debug ("MON storeg %d %s\n", regno,
-		 phex (val, register_size (current_gdbarch, regno)));
+		 phex (val,
+		       register_size (get_regcache_arch (regcache), regno)));
 
   /* send the register deposit command */
 
@@ -1354,7 +1358,8 @@ monitor_store_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
+  for (regno = 0; regno < gdbarch_num_regs (get_regcache_arch (regcache));
+       regno++)
     monitor_store_register (regcache, regno);
 }
 

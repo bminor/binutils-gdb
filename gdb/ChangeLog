@@ -1,5 +1,11 @@
 2007-10-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* monitor.c (monitor_supply_register): Use get_regcache_arch to get at
+	the current architecture by regcache.
+	(monitor_store_register, monitor_store_registers): Likewise.
+
+2007-10-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* dbug-rom.c (dbug_supply_register): Use get_regcache_arch to get at
 	the current architecture by regcache.
 
