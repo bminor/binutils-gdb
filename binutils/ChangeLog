@@ -1,3 +1,9 @@
+2007-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4476
+	* readelf.c (print_dynamic_symbol): New.
+	(process_symbol_table): Handle DT_GNU_HASH for dynamic symbols.
+
 2007-10-08  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* resrc.c (read_rc_file): Rename e to edit, and c to dir.

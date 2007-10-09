@@ -7084,6 +7084,39 @@ get_dynamic_data (FILE *file, unsigned int number, unsigned int ent_size)
   return i_data;
 }
 
+static void
+print_dynamic_symbol (bfd_vma si, unsigned long hn)
+{
+  Elf_Internal_Sym *psym;
+  int n;
+
+  psym = dynamic_symbols + si;
+
+  n = print_vma (si, DEC_5);
+  if (n < 5)
+    fputs ("     " + n, stdout);
+  printf (" %3lu: ", hn);
+  print_vma (psym->st_value, LONG_HEX);
+  putchar (' ');
+  print_vma (psym->st_size, DEC_5);
+
+  printf ("  %6s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
+  printf (" %6s",  get_symbol_binding (ELF_ST_BIND (psym->st_info)));
+  printf (" %3s",  get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
+  /* Check to see if any other bits in the st_other field are set.
+     Note - displaying this information disrupts the layout of the
+     table being generated, but for the moment this case is very
+     rare.  */
+  if (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other))
+    printf (" [%s] ", get_symbol_other (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other)));
+  printf (" %3.3s ", get_symbol_index_type (psym->st_shndx));
+  if (VALID_DYNAMIC_NAME (psym->st_name))
+    print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
+  else
+    printf (" <corrupt: %14ld>", psym->st_name);
+  putchar ('\n');
+}
+
 /* Dump the symbol table.  */
 static int
 process_symbol_table (FILE *file)
@@ -7096,12 +7129,14 @@ process_symbol_table (FILE *file)
   bfd_vma ngnubuckets = 0;
   bfd_vma *gnubuckets = NULL;
   bfd_vma *gnuchains = NULL;
+  bfd_vma gnusymidx = 0;
 
   if (! do_syms && !do_histogram)
     return 1;
 
-  if (dynamic_info[DT_HASH] && ((do_using_dynamic && dynamic_strings != NULL)
-				|| do_histogram))
+  if (dynamic_info[DT_HASH]
+      && (do_histogram
+	  || (do_using_dynamic && dynamic_strings != NULL)))
     {
       unsigned char nb[8];
       unsigned char nc[8];
@@ -7145,53 +7180,156 @@ process_symbol_table (FILE *file)
 	return 0;
     }
 
-  if (do_syms
-      && dynamic_info[DT_HASH] && do_using_dynamic && dynamic_strings != NULL)
+  if (dynamic_info_DT_GNU_HASH
+      && (do_histogram
+	  || (do_using_dynamic && dynamic_strings != NULL)))
+    {
+      unsigned char nb[16];
+      bfd_vma i, maxchain = 0xffffffff, bitmaskwords;
+      bfd_vma buckets_vma;
+
+      if (fseek (file,
+		 (archive_file_offset
+		  + offset_from_vma (file, dynamic_info_DT_GNU_HASH,
+				     sizeof nb)),
+		 SEEK_SET))
+	{
+	  error (_("Unable to seek to start of dynamic information\n"));
+	  return 0;
+	}
+
+      if (fread (nb, 16, 1, file) != 1)
+	{
+	  error (_("Failed to read in number of buckets\n"));
+	  return 0;
+	}
+
+      ngnubuckets = byte_get (nb, 4);
+      gnusymidx = byte_get (nb + 4, 4);
+      bitmaskwords = byte_get (nb + 8, 4);
+      buckets_vma = dynamic_info_DT_GNU_HASH + 16;
+      if (is_32bit_elf)
+	buckets_vma += bitmaskwords * 4;
+      else
+	buckets_vma += bitmaskwords * 8;
+
+      if (fseek (file,
+		 (archive_file_offset
+		  + offset_from_vma (file, buckets_vma, 4)),
+		 SEEK_SET))
+	{
+	  error (_("Unable to seek to start of dynamic information\n"));
+	  return 0;
+	}
+
+      gnubuckets = get_dynamic_data (file, ngnubuckets, 4);
+
+      if (gnubuckets == NULL)
+	return 0;
+
+      for (i = 0; i < ngnubuckets; i++)
+	if (gnubuckets[i] != 0)
+	  {
+	    if (gnubuckets[i] < gnusymidx)
+	      return 0;
+
+	    if (maxchain == 0xffffffff || gnubuckets[i] > maxchain)
+	      maxchain = gnubuckets[i];
+	  }
+
+      if (maxchain == 0xffffffff)
+	return 0;
+
+      maxchain -= gnusymidx;
+
+      if (fseek (file,
+		 (archive_file_offset
+		  + offset_from_vma (file, buckets_vma
+					   + 4 * (ngnubuckets + maxchain), 4)),
+		 SEEK_SET))
+	{
+	  error (_("Unable to seek to start of dynamic information\n"));
+	  return 0;
+	}
+
+      do
+	{
+	  if (fread (nb, 4, 1, file) != 1)
+	    {
+	      error (_("Failed to determine last chain length\n"));
+	      return 0;
+	    }
+
+	  if (maxchain + 1 == 0)
+	    return 0;
+
+	  ++maxchain;
+	}
+      while ((byte_get (nb, 4) & 1) == 0);
+
+      if (fseek (file,
+		 (archive_file_offset
+		  + offset_from_vma (file, buckets_vma + 4 * ngnubuckets, 4)),
+		 SEEK_SET))
+	{
+	  error (_("Unable to seek to start of dynamic information\n"));
+	  return 0;
+	}
+
+      gnuchains = get_dynamic_data (file, maxchain, 4);
+
+      if (gnuchains == NULL)
+	return 0;
+    }
+
+  if ((dynamic_info[DT_HASH] || dynamic_info_DT_GNU_HASH)
+      && do_syms
+      && do_using_dynamic
+      && dynamic_strings != NULL)
     {
       unsigned long hn;
-      bfd_vma si;
 
-      printf (_("\nSymbol table for image:\n"));
-      if (is_32bit_elf)
-	printf (_("  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"));
-      else
-	printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"));
-
-      for (hn = 0; hn < nbuckets; hn++)
+      if (dynamic_info[DT_HASH])
 	{
-	  if (! buckets[hn])
-	    continue;
+	  bfd_vma si;
 
-	  for (si = buckets[hn]; si < nchains && si > 0; si = chains[si])
+	  printf (_("\nSymbol table for image:\n"));
+	  if (is_32bit_elf)
+	    printf (_("  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"));
+	  else
+	    printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"));
+
+	  for (hn = 0; hn < nbuckets; hn++)
 	    {
-	      Elf_Internal_Sym *psym;
-	      int n;
+	      if (! buckets[hn])
+		continue;
 
-	      psym = dynamic_symbols + si;
-
-	      n = print_vma (si, DEC_5);
-	      if (n < 5)
-		fputs ("     " + n, stdout);
-	      printf (" %3lu: ", hn);
-	      print_vma (psym->st_value, LONG_HEX);
-	      putchar (' ');
-	      print_vma (psym->st_size, DEC_5);
-
-	      printf ("  %6s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
-	      printf (" %6s",  get_symbol_binding (ELF_ST_BIND (psym->st_info)));
-	      printf (" %3s",  get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
-	      /* Check to see if any other bits in the st_other field are set.
-	         Note - displaying this information disrupts the layout of the
-	         table being generated, but for the moment this case is very rare.  */
-	      if (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other))
-		printf (" [%s] ", get_symbol_other (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other)));
-	      printf (" %3.3s ", get_symbol_index_type (psym->st_shndx));
-	      if (VALID_DYNAMIC_NAME (psym->st_name))
-		print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
-	      else
-		printf (" <corrupt: %14ld>", psym->st_name);
-	      putchar ('\n');
+	      for (si = buckets[hn]; si < nchains && si > 0; si = chains[si])
+		print_dynamic_symbol (si, hn);
 	    }
+	}
+
+      if (dynamic_info_DT_GNU_HASH)
+	{
+	  printf (_("\nSymbol table of `.gnu.hash' for image:\n"));
+	  if (is_32bit_elf)
+	    printf (_("  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"));
+	  else
+	    printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"));
+
+	  for (hn = 0; hn < ngnubuckets; ++hn)
+	    if (gnubuckets[hn] != 0)
+	      {
+		bfd_vma si = gnubuckets[hn];
+		bfd_vma off = si - gnusymidx;
+
+		do
+		  {
+		    print_dynamic_symbol (si, hn);
+		    si++;
+		  }
+		while ((gnuchains[off++] & 1) == 0);
+	      }
 	}
     }
   else if (do_syms && !do_using_dynamic)
@@ -7477,108 +7615,12 @@ process_symbol_table (FILE *file)
 
   if (do_histogram && dynamic_info_DT_GNU_HASH)
     {
-      unsigned char nb[16];
-      bfd_vma i, maxchain = 0xffffffff, symidx, bitmaskwords;
       unsigned long *lengths;
       unsigned long *counts;
       unsigned long hn;
       unsigned long maxlength = 0;
       unsigned long nzero_counts = 0;
       unsigned long nsyms = 0;
-      bfd_vma buckets_vma;
-
-      if (fseek (file,
-		 (archive_file_offset
-		  + offset_from_vma (file, dynamic_info_DT_GNU_HASH,
-				     sizeof nb)),
-		 SEEK_SET))
-	{
-	  error (_("Unable to seek to start of dynamic information\n"));
-	  return 0;
-	}
-
-      if (fread (nb, 16, 1, file) != 1)
-	{
-	  error (_("Failed to read in number of buckets\n"));
-	  return 0;
-	}
-
-      ngnubuckets = byte_get (nb, 4);
-      symidx = byte_get (nb + 4, 4);
-      bitmaskwords = byte_get (nb + 8, 4);
-      buckets_vma = dynamic_info_DT_GNU_HASH + 16;
-      if (is_32bit_elf)
-	buckets_vma += bitmaskwords * 4;
-      else
-	buckets_vma += bitmaskwords * 8;
-
-      if (fseek (file,
-		 (archive_file_offset
-		  + offset_from_vma (file, buckets_vma, 4)),
-		 SEEK_SET))
-	{
-	  error (_("Unable to seek to start of dynamic information\n"));
-	  return 0;
-	}
-
-      gnubuckets = get_dynamic_data (file, ngnubuckets, 4);
-
-      if (gnubuckets == NULL)
-	return 0;
-
-      for (i = 0; i < ngnubuckets; i++)
-	if (gnubuckets[i] != 0)
-	  {
-	    if (gnubuckets[i] < symidx)
-	      return 0;
-
-	    if (maxchain == 0xffffffff || gnubuckets[i] > maxchain)
-	      maxchain = gnubuckets[i];
-	  }
-
-      if (maxchain == 0xffffffff)
-	return 0;
-
-      maxchain -= symidx;
-
-      if (fseek (file,
-		 (archive_file_offset
-		  + offset_from_vma (file, buckets_vma
-					   + 4 * (ngnubuckets + maxchain), 4)),
-		 SEEK_SET))
-	{
-	  error (_("Unable to seek to start of dynamic information\n"));
-	  return 0;
-	}
-
-      do
-	{
-	  if (fread (nb, 4, 1, file) != 1)
-	    {
-	      error (_("Failed to determine last chain length\n"));
-	      return 0;
-	    }
-
-	  if (maxchain + 1 == 0)
-	    return 0;
-
-	  ++maxchain;
-	}
-      while ((byte_get (nb, 4) & 1) == 0);
-
-      if (fseek (file,
-		 (archive_file_offset
-		  + offset_from_vma (file, buckets_vma + 4 * ngnubuckets, 4)),
-		 SEEK_SET))
-	{
-	  error (_("Unable to seek to start of dynamic information\n"));
-	  return 0;
-	}
-
-      gnuchains = get_dynamic_data (file, maxchain, 4);
-
-      if (gnuchains == NULL)
-	return 0;
 
       lengths = calloc (ngnubuckets, sizeof (*lengths));
       if (lengths == NULL)
@@ -7596,7 +7638,7 @@ process_symbol_table (FILE *file)
 	  {
 	    bfd_vma off, length = 1;
 
-	    for (off = gnubuckets[hn] - symidx;
+	    for (off = gnubuckets[hn] - gnusymidx;
 		 (gnuchains[off] & 1) == 0; ++off)
 	      ++length;
 	    lengths[hn] = length;

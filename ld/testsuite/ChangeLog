@@ -1,3 +1,8 @@
+2007-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/4476
+	* ld-elf/hash.d: Check "-s -D" for readelf.
+
 2007-10-02  Ralf Habecker  <ralf.habacker@freenet.de>
 
 	PR linker/4844
