@@ -435,7 +435,7 @@ frame_pc_unwind (struct frame_info *this_frame)
 	/* A per-frame unwinder, prefer it.  */
 	pc = this_frame->unwind->prev_pc (this_frame->next,
 					  &this_frame->prologue_cache);
-      else if (gdbarch_unwind_pc_p (current_gdbarch))
+      else if (gdbarch_unwind_pc_p (get_frame_arch (this_frame)))
 	{
 	  /* The right way.  The `pure' way.  The one true way.  This
 	     method depends solely on the register-unwind code to
@@ -453,7 +453,7 @@ frame_pc_unwind (struct frame_info *this_frame)
 	     frame.  This is all in stark contrast to the old
 	     FRAME_SAVED_PC which would try to directly handle all the
 	     different ways that a PC could be unwound.  */
-	  pc = gdbarch_unwind_pc (current_gdbarch, this_frame);
+	  pc = gdbarch_unwind_pc (get_frame_arch (this_frame), this_frame);
 	}
       else
 	internal_error (__FILE__, __LINE__, _("No unwind_pc method"));
@@ -502,7 +502,7 @@ do_frame_register_read (void *src, int regnum, gdb_byte *buf)
 struct regcache *
 frame_save_as_regcache (struct frame_info *this_frame)
 {
-  struct regcache *regcache = regcache_xmalloc (current_gdbarch);
+  struct regcache *regcache = regcache_xmalloc (get_frame_arch (this_frame));
   struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
   regcache_save (regcache, do_frame_register_read, this_frame);
   discard_cleanups (cleanups);
@@ -601,7 +601,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 	  int i;
 	  const unsigned char *buf = bufferp;
 	  fprintf_unfiltered (gdb_stdlog, "[");
-	  for (i = 0; i < register_size (current_gdbarch, regnum); i++)
+	  for (i = 0; i < register_size (get_frame_arch (frame), regnum); i++)
 	    fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
 	  fprintf_unfiltered (gdb_stdlog, "]");
 	}
@@ -1135,8 +1135,10 @@ get_prev_frame_1 (struct frame_info *this_frame)
 {
   struct frame_info *prev_frame;
   struct frame_id this_id;
+  struct gdbarch *gdbarch;
 
   gdb_assert (this_frame != NULL);
+  gdbarch = get_frame_arch (this_frame);
 
   if (frame_debug)
     {
@@ -1227,7 +1229,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
      method set the same lval and location information as
      frame_register_unwind.  */
   if (this_frame->level > 0
-      && gdbarch_pc_regnum (current_gdbarch) >= 0
+      && gdbarch_pc_regnum (gdbarch) >= 0
       && get_frame_type (this_frame) == NORMAL_FRAME
       && get_frame_type (this_frame->next) == NORMAL_FRAME)
     {
@@ -1236,10 +1238,10 @@ get_prev_frame_1 (struct frame_info *this_frame)
       CORE_ADDR addr, naddr;
 
       frame_register_unwind_location (this_frame,
-				      gdbarch_pc_regnum (current_gdbarch),
+				      gdbarch_pc_regnum (gdbarch),
 				      &optimized, &lval, &addr, &realnum);
       frame_register_unwind_location (get_next_frame (this_frame),
-				      gdbarch_pc_regnum (current_gdbarch),
+				      gdbarch_pc_regnum (gdbarch),
 				      &optimized, &nlval, &naddr, &nrealnum);
 
       if ((lval == lval_memory && lval == nlval && addr == naddr)
@@ -1337,7 +1339,7 @@ inside_main_func (struct frame_info *this_frame)
     return 0;
   /* Make certain that the code, and not descriptor, address is
      returned.  */
-  maddr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+  maddr = gdbarch_convert_from_func_ptr_addr (get_frame_arch (this_frame),
 					      SYMBOL_VALUE_ADDRESS (msymbol),
 					      &current_target);
   return maddr == get_frame_func (this_frame);
@@ -1720,17 +1722,18 @@ get_frame_sp (struct frame_info *this_frame)
 CORE_ADDR
 frame_sp_unwind (struct frame_info *next_frame)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   /* Normality - an architecture that provides a way of obtaining any
      frame inner-most address.  */
-  if (gdbarch_unwind_sp_p (current_gdbarch))
-    return gdbarch_unwind_sp (current_gdbarch, next_frame);
+  if (gdbarch_unwind_sp_p (gdbarch))
+    return gdbarch_unwind_sp (gdbarch, next_frame);
   /* Now things are really are grim.  Hope that the value returned by
      the gdbarch_sp_regnum register is meaningful.  */
-  if (gdbarch_sp_regnum (current_gdbarch) >= 0)
+  if (gdbarch_sp_regnum (gdbarch) >= 0)
     {
       ULONGEST sp;
       frame_unwind_unsigned_register (next_frame,
-				      gdbarch_sp_regnum (current_gdbarch), &sp);
+				      gdbarch_sp_regnum (gdbarch), &sp);
       return sp;
     }
   internal_error (__FILE__, __LINE__, _("Missing unwind SP method"));
