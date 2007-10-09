@@ -149,7 +149,8 @@ gnu_fetch_registers (struct regcache *regcache, int regno)
       else
 	{
 	  proc_debug (thread, "fetching register %s",
-		      gdbarch_register_name (current_gdbarch, regno));
+		      gdbarch_register_name (get_regcache_arch (regcache),
+					     regno));
 
 	  regcache_raw_supply (regcache, regno,
 			       REG_ADDR (state, regno));
@@ -203,6 +204,7 @@ void
 gnu_store_registers (struct regcache *regcache, int regno)
 {
   struct proc *thread;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   /* Make sure we know about new threads.  */
   inf_update_procs (current_inferior);
@@ -243,11 +245,11 @@ gnu_store_registers (struct regcache *regcache, int regno)
 	    if ((thread->fetched_regs & (1 << check_regno))
 		&& memcpy (REG_ADDR (&old_state, check_regno),
 			   REG_ADDR (state, check_regno),
-			   register_size (current_gdbarch, check_regno)))
+			   register_size (gdbarch, check_regno)))
 	      /* Register CHECK_REGNO has changed!  Ack!  */
 	      {
 		warning (_("Register %s changed after the thread was aborted"),
-			 gdbarch_register_name (current_gdbarch, check_regno));
+			 gdbarch_register_name (gdbarch, check_regno));
 		if (regno >= 0 && regno != check_regno)
 		  /* Update GDB's copy of the register.  */
 		  regcache_raw_supply (regcache, check_regno,
@@ -270,7 +272,7 @@ gnu_store_registers (struct regcache *regcache, int regno)
       else
 	{
 	  proc_debug (thread, "storing register %s",
-		      gdbarch_register_name (current_gdbarch, regno));
+		      gdbarch_register_name (gdbarch, regno));
 
 	  gdb_assert (regcache_valid_p (regcache, regno));
 	  regcache_raw_collect (regcache, regno, REG_ADDR (state, regno));

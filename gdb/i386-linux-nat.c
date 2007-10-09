@@ -161,7 +161,7 @@ fetch_register (struct regcache *regcache, int regno)
   val = ptrace (PTRACE_PEEKUSER, tid, 4 * regmap[regno], 0);
   if (errno != 0)
     error (_("Couldn't read register %s (#%d): %s."), 
-	   gdbarch_register_name (current_gdbarch, regno),
+	   gdbarch_register_name (get_regcache_arch (regcache), regno),
 	   regno, safe_strerror (errno));
 
   regcache_raw_supply (regcache, regno, &val);
@@ -189,7 +189,7 @@ store_register (const struct regcache *regcache, int regno)
   ptrace (PTRACE_POKEUSER, tid, 4 * regmap[regno], val);
   if (errno != 0)
     error (_("Couldn't write register %s (#%d): %s."),
-	   gdbarch_register_name (current_gdbarch, regno),
+	   gdbarch_register_name (get_regcache_arch (regcache), regno),
 	   regno, safe_strerror (errno));
 }
 
@@ -209,7 +209,8 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
   for (i = 0; i < I386_NUM_GREGS; i++)
     regcache_raw_supply (regcache, i, regp + regmap[i]);
 
-  if (I386_LINUX_ORIG_EAX_REGNUM < gdbarch_num_regs (current_gdbarch))
+  if (I386_LINUX_ORIG_EAX_REGNUM
+	< gdbarch_num_regs (get_regcache_arch (regcache)))
     regcache_raw_supply (regcache, I386_LINUX_ORIG_EAX_REGNUM,
 			 regp + ORIG_EAX);
 }
@@ -230,7 +231,8 @@ fill_gregset (const struct regcache *regcache,
       regcache_raw_collect (regcache, i, regp + regmap[i]);
 
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
-      && I386_LINUX_ORIG_EAX_REGNUM < gdbarch_num_regs (current_gdbarch))
+      && I386_LINUX_ORIG_EAX_REGNUM
+	   < gdbarch_num_regs (get_regcache_arch (regcache)))
     regcache_raw_collect (regcache, I386_LINUX_ORIG_EAX_REGNUM,
 			  regp + ORIG_EAX);
 }
@@ -458,7 +460,7 @@ i386_linux_fetch_inferior_registers (struct regcache *regcache, int regno)
     {
       int i;
 
-      for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+      for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
 	if (regno == -1 || regno == i)
 	  fetch_register (regcache, i);
 
@@ -530,7 +532,7 @@ i386_linux_store_inferior_registers (struct regcache *regcache, int regno)
     {
       int i;
 
-      for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+      for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
 	if (regno == -1 || regno == i)
 	  store_register (regcache, i);
 
@@ -756,8 +758,8 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
 
       request = PTRACE_SINGLESTEP;
 
-      regcache_cooked_read_unsigned (regcache,
-				     gdbarch_pc_regnum (current_gdbarch), &pc);
+      regcache_cooked_read_unsigned
+	(regcache, gdbarch_pc_regnum (get_regcache_arch (regcache)), &pc);
 
       /* Returning from a signal trampoline is done by calling a
          special system call (sigreturn or rt_sigreturn, see

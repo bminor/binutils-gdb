@@ -912,7 +912,7 @@ i386_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   gdb_byte buf[8];
 
-  frame_unwind_register (next_frame, gdbarch_pc_regnum (current_gdbarch), buf);
+  frame_unwind_register (next_frame, gdbarch_pc_regnum (gdbarch), buf);
   return extract_typed_address (buf, builtin_type_void_func_ptr);
 }
 
@@ -1098,7 +1098,7 @@ i386_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	{
 	  /* Read the value in from memory.  */
 	  read_memory (*addrp, valuep,
-		       register_size (current_gdbarch, regnum));
+		       register_size (get_frame_arch (next_frame), regnum));
 	}
       return;
     }
@@ -1131,7 +1131,7 @@ static struct i386_frame_cache *
 i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct i386_frame_cache *cache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
   CORE_ADDR addr;
   gdb_byte buf[4];
 
@@ -1278,7 +1278,7 @@ i386_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 
   /* Don't use I386_ESP_REGNUM here, since this function is also used
      for AMD64.  */
-  get_frame_register (frame, gdbarch_sp_regnum (current_gdbarch), buf);
+  get_frame_register (frame, gdbarch_sp_regnum (get_frame_arch (frame)), buf);
   sp = extract_typed_address (buf, builtin_type_void_data_ptr);
   if (target_read_memory (sp + len, buf, len))
     return 0;
@@ -1384,8 +1384,8 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
     }
   else
     {
-      int low_size = register_size (current_gdbarch, LOW_RETURN_REGNUM);
-      int high_size = register_size (current_gdbarch, HIGH_RETURN_REGNUM);
+      int low_size = register_size (gdbarch, LOW_RETURN_REGNUM);
+      int high_size = register_size (gdbarch, HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
 	{
@@ -1456,8 +1456,8 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
     }
   else
     {
-      int low_size = register_size (current_gdbarch, LOW_RETURN_REGNUM);
-      int high_size = register_size (current_gdbarch, HIGH_RETURN_REGNUM);
+      int low_size = register_size (gdbarch, LOW_RETURN_REGNUM);
+      int high_size = register_size (gdbarch, HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
 	regcache_raw_write_part (regcache, LOW_RETURN_REGNUM, 0, len, valbuf);
@@ -1908,7 +1908,7 @@ i386_register_to_value (struct frame_info *frame, int regnum,
   while (len > 0)
     {
       gdb_assert (regnum != -1);
-      gdb_assert (register_size (current_gdbarch, regnum) == 4);
+      gdb_assert (register_size (get_frame_arch (frame), regnum) == 4);
 
       get_frame_register (frame, regnum, to);
       regnum = i386_next_regnum (regnum);
@@ -1939,7 +1939,7 @@ i386_value_to_register (struct frame_info *frame, int regnum,
   while (len > 0)
     {
       gdb_assert (regnum != -1);
-      gdb_assert (register_size (current_gdbarch, regnum) == 4);
+      gdb_assert (register_size (get_frame_arch (frame), regnum) == 4);
 
       put_frame_register (frame, regnum, from);
       regnum = i386_next_regnum (regnum);

@@ -81,10 +81,11 @@ nto_reg_offset (int regnum)
 static void
 i386nto_supply_gregset (struct regcache *regcache, char *gpregs)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if(tdep->gregset == NULL)
-    tdep->gregset = regset_alloc (current_gdbarch, i386_supply_gregset,
+    tdep->gregset = regset_alloc (gdbarch, i386_supply_gregset,
 				  i386_collect_gregset);
 
   gdb_assert (tdep->gregset_reg_offset == i386nto_gregset_reg_offset);

@@ -1,5 +1,22 @@
 2007-10-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* i386-linux-nat.c (fetch_register): Use get_regcache_arch to get at
+	the current architecture by regcache.
+	(store_register, supply_gregset, fill_gregset, i386_linux_resume)
+	(i386_linux_fetch_inferior_registers)
+	(i386_linux_store_inferior_registers): Likewise.
+	* i386gnu-nat.c (gnu_fetch_registers, gnu_store_registers): Likewise.
+	* i386-nto-tdep.c (i386nto_supply_gregset): Likewise.
+	* i386v4-nat.c (supply_fpregset, fill_fpregset): Likewise.
+	* i386-tdep.c (i386_unwind_pc): Replace current_gdbarch by gdbarch.
+	(i386_extract_return_value, i386_store_return_value): Likewise.
+	* i386-tdep.c (i386_frame_prev_register): Use get_frame_arch to get at
+	the current architecture by frame_info.
+	(i386_sigtramp_frame_cache, i386_get_longjmp_target)
+	(i386_register_to_value, i386_value_to_register): Likewise.
+
+2007-10-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* monitor.c (monitor_supply_register): Use get_regcache_arch to get at
 	the current architecture by regcache.
 	(monitor_store_register, monitor_store_registers): Likewise.
