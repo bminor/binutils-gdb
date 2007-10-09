@@ -397,8 +397,10 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
   if (IS_ABSOLUTE_PATH (this->input_argument_->name())
       || (!this->input_argument_->is_lib()
 	  && this->input_argument_->extra_search_path() == NULL))
-    name = this->input_argument_->name();
-
+    {
+      name = this->input_argument_->name();
+      this->found_name_ = name;
+    }
   // Case 3: is_lib is true
   else if (this->input_argument_->is_lib())
     {
@@ -421,8 +423,11 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
 		  this->input_argument_->name());
 	  gold_exit(false);
 	}
+      if (n2.empty() || name[name.length() - 1] == 'o')
+	this->found_name_ = n1;
+      else
+	this->found_name_ = n2;
     }
-
   // Case 4: extra_search_path is not empty
   else
     {
@@ -446,6 +451,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
               gold_exit(false);
             }
         }
+      this->found_name_ = this->input_argument_->name();
     }
 
   // Now that we've figured out where the file lives, try to open it.

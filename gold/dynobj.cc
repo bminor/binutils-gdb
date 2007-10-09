@@ -42,7 +42,7 @@ Dynobj::soname() const
 {
   if (!this->soname_.empty())
     return this->soname_.c_str();
-  return this->name().c_str();
+  return this->input_file()->found_name().c_str();
 }
 
 // Class Sized_dynobj.

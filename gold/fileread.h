@@ -260,7 +260,8 @@ class Input_file
 {
  public:
   Input_file(const Input_file_argument* input_argument)
-    : input_argument_(input_argument), file_(), is_in_sysroot_(false)
+    : input_argument_(input_argument), found_name_(), file_(),
+      is_in_sysroot_(false)
   { }
 
   // Create an input file with the contents already provided.  This is
@@ -272,15 +273,23 @@ class Input_file
   void
   open(const General_options&, const Dirsearch&);
 
-  // Return the name given by the user.
+  // Return the name given by the user.  For -lc this will return "c".
   const char*
   name() const
   { return this->input_argument_->name(); }
 
-  // Return the file name.
+  // Return the file name.  For -lc this will return something like
+  // "/usr/lib/libc.so".
   const std::string&
   filename() const
   { return this->file_.filename(); }
+
+  // Return the name under which we found the file, corresponding to
+  // the command line.  For -lc this will return something like
+  // "libc.so".
+  const std::string&
+  found_name() const
+  { return this->found_name_; }
 
   // Return the position dependent options.
   const Position_dependent_options&
@@ -303,6 +312,11 @@ class Input_file
 
   // The argument from the command line.
   const Input_file_argument* input_argument_;
+  // The name under which we opened the file.  This is like the name
+  // on the command line, but -lc turns into libc.so (or whatever).
+  // It only includes the full path if the path was on the command
+  // line.
+  std::string found_name_;
   // The file after we open it.
   File_read file_;
   // Whether we found the file in a directory in the system root.
