@@ -1,4 +1,8 @@
-2007/10/09  Pierre Muller  <muller@ics.u-strasbg.fr>
+2007-10-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.server/server-run.exp: Test for dynamic linker symbols.
+
+2007-10-09  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* lib/gdb.exp (gdb_run_cmd): Move comment outside
 	of gdb_expect call, to avoid interruption.

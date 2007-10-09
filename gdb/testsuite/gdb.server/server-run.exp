@@ -38,5 +38,12 @@ gdb_load $binfile
 gdbserver_run ""
 gdb_reinitialize_dir $srcdir/$subdir
 
+# We are now stopped at the program's entry point.  On targets which use
+# SVR4 dynamic linking, we should have automatically loaded symbols for
+# the dynamic linker.
+if { [istarget *-*-linux*] } {
+    gdb_test "info shared" "From.*To.*" "loaded dynamic linker"
+}
+
 gdb_breakpoint main
 gdb_test "continue" "Breakpoint.* main .*" "continue to main"

@@ -1,3 +1,8 @@
+2007-10-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib-svr4.c (enable_break): Add the dynamic linker also if
+	auxv succeeds.
+
 2007-10-09  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
 
 	* MAINTAINERS (Write After Approval): Add self.
