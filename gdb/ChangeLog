@@ -1,3 +1,7 @@
+2007-10-09  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* stabsread.c (read_huge_number): Initialize local variable to 0.
+
 2007-10-09  Pierre Muller  <muller@ics.u-strasbg.fr>
 
         * p-lang.h (pascal_main_name): Add declaration.

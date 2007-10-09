@@ -3703,7 +3703,7 @@ read_huge_number (char **pp, int end, int *bits, int twos_complement_bits)
 {
   char *p = *pp;
   int sign = 1;
-  int sign_bit;
+  int sign_bit = 0;
   long n = 0;
   int radix = 10;
   char overflow = 0;
