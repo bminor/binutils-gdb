@@ -473,7 +473,7 @@ h8300_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
-  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+  for (i = 0; i < gdbarch_num_regs (get_frame_arch (next_frame)); i++)
     if (cache->saved_regs[i] != -1)
       cache->saved_regs[i] = cache->base - cache->saved_regs[i];
 
@@ -500,6 +500,7 @@ h8300_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			   enum lval_type *lvalp, CORE_ADDR *addrp,
 			   int *realnump, gdb_byte *valuep)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct h8300_frame_cache *cache =
     h8300_frame_cache (next_frame, this_cache);
 
@@ -516,7 +517,7 @@ h8300_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       return;
     }
 
-  if (regnum < gdbarch_num_regs (current_gdbarch)
+  if (regnum < gdbarch_num_regs (gdbarch)
       && cache->saved_regs[regnum] != -1)
     {
       *optimizedp = 0;
@@ -524,7 +525,7 @@ h8300_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *addrp = cache->saved_regs[regnum];
       *realnump = -1;
       if (valuep)
-	read_memory (*addrp, valuep, register_size (current_gdbarch, regnum));
+	read_memory (*addrp, valuep, register_size (gdbarch, regnum));
       return;
     }
 
@@ -1013,7 +1014,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 
   fprintf_filtered (file, "%-14s ", name);
   if ((regno == E_PSEUDO_CCR_REGNUM) || \
-      (regno == E_PSEUDO_EXR_REGNUM && is_h8300smode (current_gdbarch)))
+      (regno == E_PSEUDO_EXR_REGNUM && is_h8300smode (gdbarch)))
     {
       fprintf_filtered (file, "0x%02x        ", (unsigned char) rval);
       print_longest (file, 'u', 1, rval);
@@ -1062,7 +1063,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
       if ((Z | (N ^ V)) == 1)
 	fprintf_filtered (file, "<= ");
     }
-  else if (regno == E_PSEUDO_EXR_REGNUM && is_h8300smode (current_gdbarch))
+  else if (regno == E_PSEUDO_EXR_REGNUM && is_h8300smode (gdbarch))
     {
       /* EXR register */
       unsigned char l = rval & 0xff;
@@ -1085,10 +1086,10 @@ h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	h8300_print_register (gdbarch, file, frame, regno);
       h8300_print_register (gdbarch, file, frame, E_PSEUDO_CCR_REGNUM);
       h8300_print_register (gdbarch, file, frame, E_PC_REGNUM);
-      if (is_h8300smode (current_gdbarch))
+      if (is_h8300smode (gdbarch))
 	{
 	  h8300_print_register (gdbarch, file, frame, E_PSEUDO_EXR_REGNUM);
-	  if (is_h8300sxmode (current_gdbarch))
+	  if (is_h8300sxmode (gdbarch))
 	    {
 	      h8300_print_register (gdbarch, file, frame, E_SBR_REGNUM);
 	      h8300_print_register (gdbarch, file, frame, E_VBR_REGNUM);
@@ -1111,7 +1112,7 @@ h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
       if (regno == E_CCR_REGNUM)
 	h8300_print_register (gdbarch, file, frame, E_PSEUDO_CCR_REGNUM);
       else if (regno == E_PSEUDO_EXR_REGNUM
-	       && is_h8300smode (current_gdbarch))
+	       && is_h8300smode (gdbarch))
 	h8300_print_register (gdbarch, file, frame, E_PSEUDO_EXR_REGNUM);
       else
 	h8300_print_register (gdbarch, file, frame, regno);
@@ -1121,8 +1122,8 @@ h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 static struct type *
 h8300_register_type (struct gdbarch *gdbarch, int regno)
 {
-  if (regno < 0 || regno >= gdbarch_num_regs (current_gdbarch)
-			    + gdbarch_num_pseudo_regs (current_gdbarch))
+  if (regno < 0 || regno >= gdbarch_num_regs (gdbarch)
+			    + gdbarch_num_pseudo_regs (gdbarch))
     internal_error (__FILE__, __LINE__,
 		    "h8300_register_type: illegal register number %d", regno);
   else
@@ -1139,7 +1140,7 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
 	    return builtin_type_uint8;
 	  else if (regno == E_PSEUDO_EXR_REGNUM)
 	    return builtin_type_uint8;
-	  else if (is_h8300hmode (current_gdbarch))
+	  else if (is_h8300hmode (gdbarch))
 	    return builtin_type_int32;
 	  else
 	    return builtin_type_int16;

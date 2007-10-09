@@ -1,5 +1,14 @@
 2007-10-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* h8300-tdep.c (h8300_frame_cache): Use get_frame_arch to get at
+	the current architecture by frame_info.
+	(h8300_frame_prev_register
+	(h8300_print_register): Replace current_gdbarch by gdbarch.
+	(h8300_print_registers_info, h8300_register_type)
+	(h8300_register_type): Likewise.
+
+2007-10-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* i386-linux-nat.c (fetch_register): Use get_regcache_arch to get at
 	the current architecture by regcache.
 	(store_register, supply_gregset, fill_gregset, i386_linux_resume)
