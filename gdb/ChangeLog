@@ -1,3 +1,8 @@
+2007-10-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* target.c (update_current_target): Call setup_target_debug.
+	(push_target): Do not call it here.
+
 2007-10-09  Michael Snyder  <msnyder@specifix.com>
 
 	* MAINTAINERS: Update my email address.

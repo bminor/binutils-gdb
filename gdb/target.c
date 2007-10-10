@@ -649,6 +649,9 @@ update_current_target (void)
      "current_target".  That way code looking for a non-inherited
      target method can quickly and simply find it.  */
   current_target.beneath = target_stack;
+
+  if (targetdebug)
+    setup_target_debug ();
 }
 
 /* Mark OPS as a running target.  This reverses the effect
@@ -751,9 +754,6 @@ push_target (struct target_ops *t)
   (*cur) = t;
 
   update_current_target ();
-
-  if (targetdebug)
-    setup_target_debug ();
 
   /* Not on top?  */
   return (t != target_stack);
