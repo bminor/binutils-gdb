@@ -338,7 +338,7 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
       long start;
 
       if (highest_offset == -1)
-	start = gdbarch_frame_args_skip (current_gdbarch);
+	start = gdbarch_frame_args_skip (get_frame_arch (frame));
       else
 	start = highest_offset;
 
@@ -836,6 +836,7 @@ frame_info (char *addr_exp, int from_tty)
   enum language funlang = language_unknown;
   const char *pc_regname;
   int selected_frame_p;
+  struct gdbarch *gdbarch;
 
   fi = parse_frame_specification_1 (addr_exp, "No stack.", &selected_frame_p);
 
@@ -855,6 +856,7 @@ frame_info (char *addr_exp, int from_tty)
     pc_regname = "pc";
 
   find_frame_sal (fi, &sal);
+  gdbarch = get_frame_arch (fi);
   func = get_frame_function (fi);
   /* FIXME: cagney/2002-11-28: Why bother?  Won't sal.symtab contain
      the same value?  */
@@ -975,14 +977,14 @@ frame_info (char *addr_exp, int from_tty)
 	deprecated_print_address_numeric (arg_list, 1, gdb_stdout);
 	printf_filtered (",");
 
-	if (!gdbarch_frame_num_args_p (current_gdbarch))
+	if (!gdbarch_frame_num_args_p (gdbarch))
 	  {
 	    numargs = -1;
 	    puts_filtered (" args: ");
 	  }
 	else
 	  {
-	    numargs = gdbarch_frame_num_args (current_gdbarch, fi);
+	    numargs = gdbarch_frame_num_args (gdbarch, fi);
 	    gdb_assert (numargs >= 0);
 	    if (numargs == 0)
 	      puts_filtered (" no args.");
@@ -1025,26 +1027,26 @@ frame_info (char *addr_exp, int from_tty)
        at one stage the frame cached the previous frame's SP instead
        of its address, hence it was easiest to just display the cached
        value.  */
-    if (gdbarch_sp_regnum (current_gdbarch) >= 0)
+    if (gdbarch_sp_regnum (gdbarch) >= 0)
       {
 	/* Find out the location of the saved stack pointer with out
            actually evaluating it.  */
-	frame_register_unwind (fi, gdbarch_sp_regnum (current_gdbarch),
+	frame_register_unwind (fi, gdbarch_sp_regnum (gdbarch),
 			       &optimized, &lval, &addr,
 			       &realnum, NULL);
 	if (!optimized && lval == not_lval)
 	  {
 	    gdb_byte value[MAX_REGISTER_SIZE];
 	    CORE_ADDR sp;
-	    frame_register_unwind (fi, gdbarch_sp_regnum (current_gdbarch),
+	    frame_register_unwind (fi, gdbarch_sp_regnum (gdbarch),
 				   &optimized, &lval, &addr,
 				   &realnum, value);
 	    /* NOTE: cagney/2003-05-22: This is assuming that the
                stack pointer was packed as an unsigned integer.  That
                may or may not be valid.  */
 	    sp = extract_unsigned_integer (value,
-					   register_size (current_gdbarch,
-					   gdbarch_sp_regnum (current_gdbarch)));
+					   register_size (gdbarch,
+					   gdbarch_sp_regnum (gdbarch)));
 	    printf_filtered (" Previous frame's sp is ");
 	    deprecated_print_address_numeric (sp, 1, gdb_stdout);
 	    printf_filtered ("\n");
@@ -1060,18 +1062,18 @@ frame_info (char *addr_exp, int from_tty)
 	else if (!optimized && lval == lval_register)
 	  {
 	    printf_filtered (" Previous frame's sp in %s\n",
-			     gdbarch_register_name (current_gdbarch, realnum));
+			     gdbarch_register_name (gdbarch, realnum));
 	    need_nl = 0;
 	  }
 	/* else keep quiet.  */
       }
 
     count = 0;
-    numregs = gdbarch_num_regs (current_gdbarch)
-	      + gdbarch_num_pseudo_regs (current_gdbarch);
+    numregs = gdbarch_num_regs (gdbarch)
+	      + gdbarch_num_pseudo_regs (gdbarch);
     for (i = 0; i < numregs; i++)
-      if (i != gdbarch_sp_regnum (current_gdbarch)
-	  && gdbarch_register_reggroup_p (current_gdbarch, i, all_reggroup))
+      if (i != gdbarch_sp_regnum (gdbarch)
+	  && gdbarch_register_reggroup_p (gdbarch, i, all_reggroup))
 	{
 	  /* Find out the location of the saved register without
              fetching the corresponding value.  */
@@ -1087,7 +1089,7 @@ frame_info (char *addr_exp, int from_tty)
 		puts_filtered (",");
 	      wrap_here (" ");
 	      printf_filtered (" %s at ",
-			       gdbarch_register_name (current_gdbarch, i));
+			       gdbarch_register_name (gdbarch, i));
 	      deprecated_print_address_numeric (addr, 1, gdb_stdout);
 	      count++;
 	    }
@@ -1854,10 +1856,10 @@ If you continue, the return value that you specified will be ignored.\n";
   if (return_value != NULL)
     {
       struct type *return_type = value_type (return_value);
-      gdb_assert (gdbarch_return_value (current_gdbarch, return_type,
-					NULL, NULL, NULL)
+      struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
+      gdb_assert (gdbarch_return_value (gdbarch, return_type, NULL, NULL, NULL)
 		  == RETURN_VALUE_REGISTER_CONVENTION);
-      gdbarch_return_value (current_gdbarch, return_type,
+      gdbarch_return_value (gdbarch, return_type,
 			    get_current_regcache (), NULL /*read*/,
 			    value_contents (return_value) /*write*/);
     }

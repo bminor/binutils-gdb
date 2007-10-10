@@ -1,5 +1,11 @@
 2007-10-10  Markus Deuling  <deuling@de.ibm.com>
 
+	* stack.c (print_frame_args, frame_info, return_command): Use
+	get_regcache_arch or get_frame_arch to get at the current architecture
+	by regcache or by frame, respectively.
+
+2007-10-10  Markus Deuling  <deuling@de.ibm.com>
+
 	* rs6000-nat.c (fetch_register, store_register)
 	(rs6000_fetch_inferior_registers, rs6000_store_inferior_registers): Use
 	get_regcache_arch to get at the current architecture by regcache.
