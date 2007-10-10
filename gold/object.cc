@@ -715,6 +715,9 @@ void
 Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 						    const Stringpool* sympool)
 {
+  if (parameters->strip_all())
+    return;
+
   gold_assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0)
     {

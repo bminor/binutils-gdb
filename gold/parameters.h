@@ -62,6 +62,16 @@ class Parameters
   sysroot() const
   { return this->sysroot_; }
 
+  // Whether to strip all symbols.
+  bool
+  strip_all() const
+  { return this->strip_ == STRIP_ALL; }
+
+  // Whether to strip debugging information.
+  bool
+  strip_debug() const
+  { return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG; }
+
   // Whether we are doing a static link--a link in which none of the
   // input files are shared libraries.  This is only known after we
   // have seen all the input files.
@@ -114,11 +124,24 @@ class Parameters
       OUTPUT_OBJECT
     };
 
+  // Which symbols to strip.
+  enum Strip
+  {
+    // Don't strip any symbols.
+    STRIP_NONE,
+    // Strip all symbols.
+    STRIP_ALL,
+    // Strip debugging information.
+    STRIP_DEBUG
+  };
+
   // The type of the output file.
   Output_file_type output_file_type_;
   // The target system root directory.
   std::string sysroot_;
-  
+  // Which symbols to strip.
+  Strip strip_;
+
   // Whether the doing_static_link_ field is valid.
   bool is_doing_static_link_valid_;
   // Whether we are doing a static link.

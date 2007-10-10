@@ -134,6 +134,16 @@ class General_options
   is_relocatable() const
   { return this->is_relocatable_; }
 
+  // -s: Strip all symbols.
+  bool
+  strip_all() const
+  { return this->strip_ == STRIP_ALL; }
+
+  // -S: Strip debugging information.
+  bool
+  strip_debug() const
+  { return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG; }
+
   // --eh-frame-hdr: Whether to generate an exception frame header.
   bool
   create_eh_frame_hdr() const
@@ -172,6 +182,17 @@ class General_options
   friend class Command_line;
   friend class options::Command_line_options;
 
+  // Which symbols to strip.
+  enum Strip
+  {
+    // Don't strip any symbols.
+    STRIP_NONE,
+    // Strip all symbols.
+    STRIP_ALL,
+    // Strip debugging information.
+    STRIP_DEBUG
+  };
+
   void
   set_export_dynamic()
   { this->export_dynamic_ = true; }
@@ -199,6 +220,14 @@ class General_options
   void
   set_relocatable()
   { this->is_relocatable_ = true; }
+
+  void
+  set_strip_all()
+  { this->strip_ = STRIP_ALL; }
+
+  void
+  set_strip_debug()
+  { this->strip_ = STRIP_DEBUG; }
 
   void
   set_create_eh_frame_hdr()
@@ -238,6 +267,7 @@ class General_options
   int optimization_level_;
   const char* output_file_name_;
   bool is_relocatable_;
+  Strip strip_;
   bool create_eh_frame_hdr_;
   Dir_list rpath_;
   Dir_list rpath_link_;

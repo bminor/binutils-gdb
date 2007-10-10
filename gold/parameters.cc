@@ -42,6 +42,13 @@ Parameters::Parameters(const General_options* options)
     this->output_file_type_ = OUTPUT_OBJECT;
   else
     this->output_file_type_ = OUTPUT_EXECUTABLE;
+
+  if (options->strip_all())
+    this->strip_ = STRIP_ALL;
+  else if (options->strip_debug())
+    this->strip_ = STRIP_DEBUG;
+  else
+    this->strip_ = STRIP_NONE;
 }
 
 // Set whether we are doing a static link.

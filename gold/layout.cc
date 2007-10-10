@@ -86,11 +86,19 @@ Layout::Hash_key::operator()(const Layout::Key& k) const
  return k.first + k.second.first + k.second.second;
 }
 
+// Return whether PREFIX is a prefix of STR.
+
+static inline bool
+is_prefix_of(const char* prefix, const char* str)
+{
+  return strncmp(prefix, str, strlen(prefix)) == 0;
+}
+
 // Whether to include this section in the link.
 
 template<int size, bool big_endian>
 bool
-Layout::include_section(Object*, const char*,
+Layout::include_section(Object*, const char* name,
 			const elfcpp::Shdr<size, big_endian>& shdr)
 {
   // Some section types are never linked.  Some are only linked when
@@ -111,8 +119,20 @@ Layout::include_section(Object*, const char*,
     case elfcpp::SHT_GROUP:
       return parameters->output_is_object();
 
+    case elfcpp::SHT_PROGBITS:
+      if (parameters->strip_debug()
+	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+	{
+	  // Debugging sections can only be recognized by name.
+	  if (is_prefix_of(".debug", name)
+	      || is_prefix_of(".gnu.linkonce.wi.", name)
+	      || is_prefix_of(".line", name)
+	      || is_prefix_of(".stab", name))
+	    return false;
+	}
+      return true;
+
     default:
-      // FIXME: Handle stripping debug sections here.
       return true;
     }
 }
@@ -973,32 +993,35 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
   off = symtab->finalize(local_symcount, off, dynoff, dyn_global_index,
 			 dyncount, &this->sympool_);
 
-  this->sympool_.set_string_offsets();
+  if (!parameters->strip_all())
+    {
+      this->sympool_.set_string_offsets();
 
-  const char* symtab_name = this->namepool_.add(".symtab", NULL);
-  Output_section* osymtab = this->make_output_section(symtab_name,
-						      elfcpp::SHT_SYMTAB,
-						      0);
-  this->symtab_section_ = osymtab;
+      const char* symtab_name = this->namepool_.add(".symtab", NULL);
+      Output_section* osymtab = this->make_output_section(symtab_name,
+							  elfcpp::SHT_SYMTAB,
+							  0);
+      this->symtab_section_ = osymtab;
 
-  Output_section_data* pos = new Output_data_space(off - startoff,
-						   align);
-  osymtab->add_output_section_data(pos);
+      Output_section_data* pos = new Output_data_space(off - startoff,
+						       align);
+      osymtab->add_output_section_data(pos);
 
-  const char* strtab_name = this->namepool_.add(".strtab", NULL);
-  Output_section* ostrtab = this->make_output_section(strtab_name,
-						      elfcpp::SHT_STRTAB,
-						      0);
+      const char* strtab_name = this->namepool_.add(".strtab", NULL);
+      Output_section* ostrtab = this->make_output_section(strtab_name,
+							  elfcpp::SHT_STRTAB,
+							  0);
 
-  Output_section_data* pstr = new Output_data_strtab(&this->sympool_);
-  ostrtab->add_output_section_data(pstr);
+      Output_section_data* pstr = new Output_data_strtab(&this->sympool_);
+      ostrtab->add_output_section_data(pstr);
 
-  osymtab->set_address(0, startoff);
-  osymtab->set_link_section(ostrtab);
-  osymtab->set_info(local_symcount);
-  osymtab->set_entsize(symsize);
+      osymtab->set_address(0, startoff);
+      osymtab->set_link_section(ostrtab);
+      osymtab->set_info(local_symcount);
+      osymtab->set_entsize(symsize);
 
-  *poff = off;
+      *poff = off;
+    }
 }
 
 // Create the .shstrtab section, which holds the names of the
@@ -1555,19 +1578,22 @@ Layout::add_comdat(const char* signature, bool group)
 void
 Layout::write_data(const Symbol_table* symtab, Output_file* of) const
 {
-  const Output_section* symtab_section = this->symtab_section_;
-  for (Section_list::const_iterator p = this->section_list_.begin();
-       p != this->section_list_.end();
-       ++p)
+  if (!parameters->strip_all())
     {
-      if ((*p)->needs_symtab_index())
+      const Output_section* symtab_section = this->symtab_section_;
+      for (Section_list::const_iterator p = this->section_list_.begin();
+	   p != this->section_list_.end();
+	   ++p)
 	{
-	  gold_assert(symtab_section != NULL);
-	  unsigned int index = (*p)->symtab_index();
-	  gold_assert(index > 0 && index != -1U);
-	  off_t off = (symtab_section->offset()
-		       + index * symtab_section->entsize());
-	  symtab->write_section_symbol(*p, of, off);
+	  if ((*p)->needs_symtab_index())
+	    {
+	      gold_assert(symtab_section != NULL);
+	      unsigned int index = (*p)->symtab_index();
+	      gold_assert(index > 0 && index != -1U);
+	      off_t off = (symtab_section->offset()
+			   + index * symtab_section->entsize());
+	      symtab->write_section_symbol(*p, of, off);
+	    }
 	}
     }
 

@@ -1316,10 +1316,16 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 	}
 
       sym->set_value(value);
-      sym->set_symtab_index(index);
-      pool->add(sym->name(), NULL);
-      ++index;
-      off += sym_size;
+
+      if (parameters->strip_all())
+	sym->set_symtab_index(-1U);
+      else
+	{
+	  sym->set_symtab_index(index);
+	  pool->add(sym->name(), NULL);
+	  ++index;
+	  off += sym_size;
+	}
     }
 
   this->output_count_ = index - orig_index;
