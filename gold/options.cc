@@ -654,7 +654,27 @@ Command_line::process(int argc, char** argv)
   this->options_.add_to_search_path_with_sysroot("/usr/lib");
 
   this->options_.add_sysroot();
+
+  // Ensure options don't contradict each other and are otherwise kosher.
+  this->normalize_options();
 }
+
+// Ensure options don't contradict each other and are otherwise kosher.
+
+void
+Command_line::normalize_options()
+{
+  // If the user specifies both -s and -r, convert the -s as -S.
+  // -r requires us to keep externally visible symbols!
+  if (this->options_.strip_all() && this->options_.is_relocatable())
+    {
+      // Clears the strip_all() status, replacing it with strip_debug().
+      this->options_.set_strip_debug();
+    }
+
+  // FIXME: we can/should be doing a lot more sanity checking here.
+}
+
 
 // Apply a command line option.
 

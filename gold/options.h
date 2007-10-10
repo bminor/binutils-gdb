@@ -225,6 +225,8 @@ class General_options
   set_strip_all()
   { this->strip_ = STRIP_ALL; }
 
+  // Note: normalize_options() depends on the fact that this turns off
+  // STRIP_ALL if it were already set.
   void
   set_strip_debug()
   { this->strip_ = STRIP_DEBUG; }
@@ -586,6 +588,11 @@ class Command_line
   // Add a file.
   void
   add_file(const char* name, bool is_lib);
+
+  // Examine the result of processing the command-line, and verify
+  // the flags do not contradict each other or are otherwise illegal.
+  void
+  normalize_options();
 
   General_options options_;
   Position_dependent_options position_options_;

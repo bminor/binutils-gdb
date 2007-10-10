@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-10-07 22:11-0700\n"
+"POT-Creation-Date: 2007-10-10 12:27-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -106,7 +106,7 @@ msgstr ""
 msgid "%s: %s: dynamic symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: dynobj.cc:390 object.cc:440
+#: dynobj.cc:390 object.cc:441
 #, c-format
 msgid "%s: %s: bad section name offset for section %u: %lu\n"
 msgstr ""
@@ -206,17 +206,17 @@ msgstr ""
 msgid "%s: %s: mmap offset %lld size %lld failed: %s\n"
 msgstr ""
 
-#: fileread.cc:420
+#: fileread.cc:422
 #, c-format
 msgid "%s: cannot find -l%s\n"
 msgstr ""
 
-#: fileread.cc:444
+#: fileread.cc:449
 #, c-format
 msgid "%s: cannot find %s\n"
 msgstr ""
 
-#: fileread.cc:454
+#: fileread.cc:460
 #, c-format
 msgid "%s: cannot open %s: %s\n"
 msgstr ""
@@ -317,13 +317,13 @@ msgstr ""
 msgid "%s: %s: both SUN and GNU model TLS relocations\n"
 msgstr ""
 
-#: merge.cc:247
+#: merge.cc:255
 #, c-format
 msgid ""
 "%s: %s: mergeable string section length not multiple of character size\n"
 msgstr ""
 
-#: merge.cc:264
+#: merge.cc:272
 #, c-format
 msgid "%s: %s: entry in mergeable string section not null terminated\n"
 msgstr ""
@@ -338,107 +338,107 @@ msgstr ""
 msgid "%s: %s: section name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:248
+#: object.cc:249
 #, c-format
 msgid "%s: %s: invalid symbol table name index: %u\n"
 msgstr ""
 
-#: object.cc:256
+#: object.cc:257
 #, c-format
 msgid "%s: %s: symbol table name section has wrong type: %u\n"
 msgstr ""
 
-#: object.cc:312
+#: object.cc:313
 #, c-format
 msgid "%s: %s: section group %u info %u out of range\n"
 msgstr ""
 
-#: object.cc:330
+#: object.cc:331
 #, c-format
 msgid "%s: %s: symbol %u name offset %u out of range\n"
 msgstr ""
 
-#: object.cc:364
+#: object.cc:365
 #, c-format
 msgid "%s: %s: section %u in section group %u out of range"
 msgstr ""
 
-#: object.cc:508
+#: object.cc:509
 #, c-format
 msgid "%s: %s: size of symbols is not multiple of symbol size\n"
 msgstr ""
 
-#: object.cc:600
+#: object.cc:601
 #, c-format
 msgid "%s: %s: unknown section index %u for local symbol %u\n"
 msgstr ""
 
-#: object.cc:611
+#: object.cc:612
 #, c-format
 msgid "%s: %s: local symbol %u section index %u out of range\n"
 msgstr ""
 
-#: object.cc:645
+#: object.cc:646
 #, c-format
 msgid "%s: %s: local symbol %u section name out of range: %u >= %u\n"
 msgstr ""
 
-#: object.cc:880
+#: object.cc:895
 #, c-format
 msgid "%s: %s: unsupported ELF file type %d\n"
 msgstr ""
 
-#: object.cc:899 object.cc:952 object.cc:987
+#: object.cc:914 object.cc:967 object.cc:1002
 #, c-format
 msgid "%s: %s: ELF file too short\n"
 msgstr ""
 
-#: object.cc:908
+#: object.cc:923
 #, c-format
 msgid "%s: %s: invalid ELF version 0\n"
 msgstr ""
 
-#: object.cc:911
+#: object.cc:926
 #, c-format
 msgid "%s: %s: unsupported ELF version %d\n"
 msgstr ""
 
-#: object.cc:919
+#: object.cc:934
 #, c-format
 msgid "%s: %s: invalid ELF class 0\n"
 msgstr ""
 
-#: object.cc:926
+#: object.cc:941
 #, c-format
 msgid "%s: %s: unsupported ELF class %d\n"
 msgstr ""
 
-#: object.cc:934
+#: object.cc:949
 #, c-format
 msgid "%s: %s: invalid ELF data encoding\n"
 msgstr ""
 
-#: object.cc:941
+#: object.cc:956
 #, c-format
 msgid "%s: %s: unsupported ELF data encoding %d\n"
 msgstr ""
 
-#: object.cc:964
+#: object.cc:979
 #, c-format
 msgid "%s: %s: not configured to support 32-bit big-endian object\n"
 msgstr ""
 
-#: object.cc:977
+#: object.cc:992
 #, c-format
 msgid "%s: %s: not configured to support 32-bit little-endian object\n"
 msgstr ""
 
-#: object.cc:999
+#: object.cc:1014
 #, c-format
 msgid "%s: %s: not configured to support 64-bit big-endian object\n"
 msgstr ""
 
-#: object.cc:1012
+#: object.cc:1027
 #, c-format
 msgid "%s: %s: not configured to support 64-bit little-endian object\n"
 msgstr ""
@@ -519,128 +519,136 @@ msgid "-R DIR, -rpath DIR"
 msgstr ""
 
 #: options.cc:337
-msgid "Create exception frame header"
+msgid "Strip all symbols"
 msgstr ""
 
-#: options.cc:340
-msgid "Add DIR to link time shared library search path"
+#: options.cc:339
+msgid "Strip debugging information"
 msgstr ""
 
 #: options.cc:341
-msgid "--rpath-link DIR"
+msgid "Create exception frame header"
 msgstr ""
 
-#: options.cc:343
-msgid "Generate shared library"
+#: options.cc:344
+msgid "Add DIR to link time shared library search path"
 msgstr ""
 
 #: options.cc:345
-msgid "Do not link against shared libraries"
+msgid "--rpath-link DIR"
 msgstr ""
 
 #: options.cc:347
+msgid "Generate shared library"
+msgstr ""
+
+#: options.cc:349
+msgid "Do not link against shared libraries"
+msgstr ""
+
+#: options.cc:351
 msgid "Set target system root directory"
 msgstr ""
 
-#: options.cc:348
+#: options.cc:352
 msgid "--sysroot DIR"
 msgstr ""
 
-#: options.cc:350
+#: options.cc:354
 msgid "Only set DT_NEEDED for dynamic libs if used"
 msgstr ""
 
-#: options.cc:353
+#: options.cc:357
 msgid "Always DT_NEEDED for dynamic libs (default)"
 msgstr ""
 
-#: options.cc:356
+#: options.cc:360
 msgid "Include all archive contents"
 msgstr ""
 
-#: options.cc:360
+#: options.cc:364
 msgid "Include only needed archive contents"
 msgstr ""
 
-#: options.cc:363
+#: options.cc:367
 msgid "Report usage information"
 msgstr ""
 
-#: options.cc:365
+#: options.cc:369
 msgid "Report version information"
 msgstr ""
 
-#: options.cc:568
+#: options.cc:573
 msgid "unexpected argument"
 msgstr ""
 
-#: options.cc:575 options.cc:626 options.cc:707
+#: options.cc:580 options.cc:631 options.cc:732
 msgid "missing argument"
 msgstr ""
 
-#: options.cc:588 options.cc:635
+#: options.cc:593 options.cc:640
 msgid "unknown option"
 msgstr ""
 
-#: options.cc:643
+#: options.cc:648
 #, c-format
 msgid "%s: missing group end"
 msgstr ""
 
-#: options.cc:720
+#: options.cc:745
 msgid "may not nest groups"
 msgstr ""
 
-#: options.cc:730
+#: options.cc:755
 msgid "group end without group start"
 msgstr ""
 
-#: options.cc:740
+#: options.cc:765
 #, c-format
 msgid "%s: use the --help option for usage information\n"
 msgstr ""
 
-#: options.cc:749 script.cc:1169
+#: options.cc:774 script.cc:1169
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr ""
 
-#: options.cc:758
+#: options.cc:783
 #, c-format
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: output.cc:1011
+#: output.cc:1031
 #, c-format
 msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
 msgstr ""
 
-#: output.cc:1660
+#: output.cc:1699
 #, c-format
 msgid "%s: %s: open: %s\n"
 msgstr ""
 
-#: output.cc:1669
+#: output.cc:1708
 #, c-format
 msgid "%s: %s: lseek: %s\n"
 msgstr ""
 
-#: output.cc:1676
+#: output.cc:1715
 #, c-format
 msgid "%s: %s: write: %s\n"
 msgstr ""
 
-#: output.cc:1686
+#: output.cc:1725
 #, c-format
 msgid "%s: %s: mmap: %s\n"
 msgstr ""
 
-#: output.cc:1700
+#: output.cc:1739
 #, c-format
 msgid "%s: %s: munmap: %s\n"
 msgstr ""
 
-#: output.cc:1708
+#: output.cc:1747
 #, c-format
 msgid "%s: %s: close: %s\n"
 msgstr ""
@@ -716,12 +724,12 @@ msgstr ""
 msgid "%s: %s: versym for symbol %zu has no name: %u\n"
 msgstr ""
 
-#: symtab.cc:1248 symtab.cc:1445
+#: symtab.cc:1248 symtab.cc:1451
 #, c-format
 msgid "%s: %s: unsupported symbol section 0x%x\n"
 msgstr ""
 
-#: symtab.cc:1665
+#: symtab.cc:1671
 #, c-format
 msgid "%s: %s: warning: %s\n"
 msgstr ""
