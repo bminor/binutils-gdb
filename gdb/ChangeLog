@@ -1,3 +1,7 @@
+2007-10-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* README: Update GDB version number to 6.7.
+
 2007-10-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* solib-svr4.c (enable_break): Add the dynamic linker also if
