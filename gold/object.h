@@ -130,6 +130,11 @@ class Object
   name() const
   { return this->name_; }
 
+  // Get the offset into the file.
+  off_t
+  offset() const
+  { return this->offset_; }
+
   // Return whether this is a dynamic object.
   bool
   is_dynamic() const
@@ -276,11 +281,6 @@ class Object
   Input_file*
   input_file() const
   { return this->input_file_; }
-
-  // Get the offset into the file.
-  off_t
-  offset() const
-  { return this->offset_; }
 
   // Get a view into the underlying file.
   const unsigned char*

@@ -40,7 +40,15 @@ Output_merge_base::Merge_key_less::operator()(const Merge_key& mk1,
   // matter.  We want to get consistent results across links so we
   // don't use pointer comparison.
   if (mk1.object != mk2.object)
-    return mk1.object->name() < mk2.object->name();
+    {
+      // Two different object files can have the same name: if foo.a
+      // includes both bar/qux.o and baz/qux.o, then both end up with
+      // the name foo.a(qux.o).  But it's impossible for two different
+      // object files to have both the same name and the same offset.
+      if (mk1.object->offset() != mk2.object->offset())
+        return mk1.object->offset() < mk2.object->offset();
+      return mk1.object->name() < mk2.object->name();
+    }
   if (mk1.shndx != mk2.shndx)
     return mk1.shndx < mk2.shndx;
   return mk1.offset < mk2.offset;
