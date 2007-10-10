@@ -1,5 +1,9 @@
 2007-10-10  Jim Blandy  <jimb@codesourcery.com>
 
+	* dwarf.c (process_debug_info): Line up section offsets of
+	attribute values with those of dies.
+	(read_and_display_attr): Reduce spacing here.
+
 	* dwarf.c (display_debug_lines): Print the offset of each line
 	number program header.
 

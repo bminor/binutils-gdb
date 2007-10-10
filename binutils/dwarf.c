@@ -1505,7 +1505,7 @@ read_and_display_attr (unsigned long attribute,
 		       int do_loc)
 {
   if (!do_loc)
-    printf ("     %-18s:", get_AT_name (attribute));
+    printf ("   %-18s:", get_AT_name (attribute));
   data = read_and_display_attr_value (attribute, form, data, cu_offset,
 				      pointer_size, offset_size,
 				      dwarf_version, debug_info_p,
@@ -1747,7 +1747,7 @@ process_debug_info (struct dwarf_section *section, void *file,
 	    {
 	      if (! do_loc)
 		/* Show the offset from where the tag was extracted.  */
-		printf ("  <%2lx>", (unsigned long)(tags - section_begin));
+		printf ("    <%2lx>", (unsigned long)(tags - section_begin));
 
 	      tags = read_and_display_attr (attr->attribute,
 					    attr->form,
