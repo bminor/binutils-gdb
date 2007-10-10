@@ -1,3 +1,69 @@
+2007-10-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (v_mode): Defined as previous one + 1.
+	(w_mode): Likewise.
+	(d_mode): Likewise.
+	(q_mode): Likewise.
+	(t_mode): Likewise.
+	(x_mode): Likewise.
+	(m_mode): Likewise.
+	(cond_jump_mode): Likewise.
+	(loop_jcxz_mode): Likewise.
+	(dq_mode): Likewise.
+	(dqw_mode): Likewise.
+	(f_mode): Likewise.
+	(const_1_mode): Likewise.
+	(stack_v_mode): Likewise.
+	(z_mode): Likewise.
+	(o_mode): Likewise.
+	(dqb_mode): Likewise.
+	(dqd_mode): Likewise.
+	(es_reg): Likewise.
+	(cs_reg): Likewise.
+	(ss_reg): Likewise.
+	(ds_reg): Likewise.
+	(fs_reg): Likewise.
+	(gs_reg): Likewise.
+	(eAX_reg): Likewise.
+	(eCX_reg): Likewise.
+	(eDX_reg): Likewise.
+	(eBX_reg): Likewise.
+	(eSP_reg): Likewise.
+	(eBP_reg): Likewise.
+	(eSI_reg): Likewise.
+	(eDI_reg): Likewise.
+	(al_reg): Likewise.
+	(cl_reg): Likewise.
+	(dl_reg): Likewise.
+	(bl_reg): Likewise.
+	(ah_reg): Likewise.
+	(ch_reg): Likewise.
+	(dh_reg): Likewise.
+	(bh_reg): Likewise.
+	(ax_reg): Likewise.
+	(cx_reg): Likewise.
+	(dx_reg): Likewise.
+	(bx_reg): Likewise.
+	(sp_reg): Likewise.
+	(bp_reg): Likewise.
+	(si_reg): Likewise.
+	(di_reg): Likewise.
+	(rAX_reg): Likewise.
+	(rCX_reg): Likewise.
+	(rDX_reg): Likewise.
+	(rBX_reg): Likewise.
+	(rSP_reg): Likewise.
+	(rBP_reg): Likewise.
+	(rSI_reg): Likewise.
+	(rDI_reg): Likewise.
+	(z_mode_ax_reg): Likewise.
+	(indir_dx_reg): Likewise.
+	(DREX_OC1): Updated.
+	(DREX_NO_OC0): Likewise.
+	(DREX_MASK): Likewise.
+	(MAX_BYTEMODE): New.  Issue an error if MAX_BYTEMODE is not
+	less than DREX_OC1.
+
 2007-10-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c: Updated comments for 'Y'.

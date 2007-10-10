@@ -361,76 +361,99 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define AFLAG 2
 #define DFLAG 1
 
-#define b_mode 1  /* byte operand */
-#define v_mode 2  /* operand size depends on prefixes */
-#define w_mode 3  /* word operand */
-#define d_mode 4  /* double word operand  */
-#define q_mode 5  /* quad word operand */
-#define t_mode 6  /* ten-byte operand */
-#define x_mode 7  /* 16-byte XMM operand */
-#define m_mode 8  /* d_mode in 32bit, q_mode in 64bit mode.  */
-#define cond_jump_mode 9
-#define loop_jcxz_mode 10
-#define dq_mode 11 /* operand size depends on REX prefixes.  */
-#define dqw_mode 12 /* registers like dq_mode, memory like w_mode.  */
-#define f_mode 13 /* 4- or 6-byte pointer operand */
-#define const_1_mode 14
-#define stack_v_mode 15 /* v_mode for stack-related opcodes.  */
-#define z_mode 16 /* non-quad operand size depends on prefixes */
-#define o_mode 17  /* 16-byte operand */
-#define dqb_mode 18 /* registers like dq_mode, memory like b_mode.  */
-#define dqd_mode 19 /* registers like dq_mode, memory like d_mode.  */
+/* byte operand */
+#define b_mode			1
+/* operand size depends on prefixes */
+#define v_mode 			(b_mode + 1)
+/* word operand */
+#define w_mode			(v_mode + 1)
+/* double word operand  */
+#define d_mode			(w_mode + 1)
+/* quad word operand */
+#define q_mode			(d_mode + 1)
+/* ten-byte operand */
+#define t_mode			(q_mode + 1)
+/* 16-byte XMM operand */
+#define x_mode			(t_mode + 1)
+/* d_mode in 32bit, q_mode in 64bit mode.  */
+#define m_mode			(x_mode + 1)
+#define cond_jump_mode		(m_mode + 1)
+#define loop_jcxz_mode		(cond_jump_mode + 1)
+/* operand size depends on REX prefixes.  */
+#define dq_mode			(loop_jcxz_mode + 1)
+/* registers like dq_mode, memory like w_mode.  */
+#define dqw_mode		(dq_mode + 1)
+/* 4- or 6-byte pointer operand */
+#define f_mode			(dqw_mode + 1)
+#define const_1_mode		(f_mode + 1)
+/* v_mode for stack-related opcodes.  */
+#define stack_v_mode		(const_1_mode + 1)
+/* non-quad operand size depends on prefixes */
+#define z_mode			(stack_v_mode + 1)
+/* 16-byte operand */
+#define o_mode			(z_mode + 1)
+/* registers like dq_mode, memory like b_mode.  */
+#define dqb_mode		(o_mode + 1)
+/* registers like dq_mode, memory like d_mode.  */
+#define dqd_mode		(dqb_mode + 1)
 
-/* Flags that are OR'ed into the bytemode field to pass extra information.  */
-#define DREX_OC1	0x4000	/* OC1 bit set */
-#define DREX_NO_OC0	0x2000	/* OC0 bit not used */
-#define DREX_MASK	0x6000	/* mask to delete */
+#define es_reg			(dqd_mode + 1)
+#define cs_reg			(es_reg + 1)
+#define ss_reg			(cs_reg + 1)
+#define ds_reg			(ss_reg + 1)
+#define fs_reg			(ds_reg + 1)
+#define gs_reg			(fs_reg + 1)
 
-#define es_reg 100
-#define cs_reg 101
-#define ss_reg 102
-#define ds_reg 103
-#define fs_reg 104
-#define gs_reg 105
+#define eAX_reg			(gs_reg + 1)
+#define eCX_reg			(eAX_reg + 1)
+#define eDX_reg			(eCX_reg + 1)
+#define eBX_reg			(eDX_reg + 1)
+#define eSP_reg			(eBX_reg + 1)
+#define eBP_reg			(eSP_reg + 1)
+#define eSI_reg			(eBP_reg + 1)
+#define eDI_reg			(eSI_reg + 1)
 
-#define eAX_reg 108
-#define eCX_reg 109
-#define eDX_reg 110
-#define eBX_reg 111
-#define eSP_reg 112
-#define eBP_reg 113
-#define eSI_reg 114
-#define eDI_reg 115
+#define al_reg			(eDI_reg + 1)
+#define cl_reg			(al_reg + 1)
+#define dl_reg			(cl_reg + 1)
+#define bl_reg			(dl_reg + 1)
+#define ah_reg			(bl_reg + 1)
+#define ch_reg			(ah_reg + 1)
+#define dh_reg			(ch_reg + 1)
+#define bh_reg			(dh_reg + 1)
 
-#define al_reg 116
-#define cl_reg 117
-#define dl_reg 118
-#define bl_reg 119
-#define ah_reg 120
-#define ch_reg 121
-#define dh_reg 122
-#define bh_reg 123
+#define ax_reg			(bh_reg + 1)
+#define cx_reg			(ax_reg + 1)
+#define dx_reg			(cx_reg + 1)
+#define bx_reg			(dx_reg + 1)
+#define sp_reg			(bx_reg + 1)
+#define bp_reg			(sp_reg + 1)
+#define si_reg			(bp_reg + 1)
+#define di_reg			(si_reg + 1)
 
-#define ax_reg 124
-#define cx_reg 125
-#define dx_reg 126
-#define bx_reg 127
-#define sp_reg 128
-#define bp_reg 129
-#define si_reg 130
-#define di_reg 131
+#define rAX_reg			(di_reg + 1)
+#define rCX_reg			(rAX_reg + 1)
+#define rDX_reg			(rCX_reg + 1)
+#define rBX_reg			(rDX_reg + 1)
+#define rSP_reg			(rBX_reg + 1)
+#define rBP_reg			(rSP_reg + 1)
+#define rSI_reg			(rBP_reg + 1)
+#define rDI_reg			(rSI_reg + 1)
 
-#define rAX_reg 132
-#define rCX_reg 133
-#define rDX_reg 134
-#define rBX_reg 135
-#define rSP_reg 136
-#define rBP_reg 137
-#define rSI_reg 138
-#define rDI_reg 139
+#define z_mode_ax_reg		(rDI_reg + 1)
+#define indir_dx_reg		(z_mode_ax_reg + 1)
 
-#define z_mode_ax_reg 149
-#define indir_dx_reg 150
+#define MAX_BYTEMODE	indir_dx_reg
+
+/* Flags that are OR'ed into the bytemode field to pass extra
+   information.  */
+#define DREX_OC1		0x10000	/* OC1 bit set */
+#define DREX_NO_OC0		0x20000	/* OC0 bit not used */
+#define DREX_MASK		0x40000	/* mask to delete */
+
+#if MAX_BYTEMODE >= DREX_OC1
+#error MAX_BYTEMODE must be less than DREX_OC1
+#endif
 
 #define FLOATCODE 1
 #define USE_REG_TABLE 2
