@@ -1,3 +1,17 @@
+2007-10-10  Markus Deuling  <deuling@de.ibm.com>
+
+	* xtensa-tdep.c (xtensa_register_type, xtensa_pseudo_register_read)
+	(xtensa_pseudo_register_write, xtensa_register_reggroup_p)
+	(xtensa_unwind_pc, xtensa_unwind_dummy_id, xtensa_push_dummy_call)
+	(xtensa_dump_tdep): Replace current_gdbarch by gdbarch.
+	(xtensa_register_write_masked, xtensa_register_read_masked)
+	(xtensa_supply_gregset, xtensa_store_return_value)
+	(xtensa_extract_return_value): Use get_regcache_arch to get at the
+	current architecture by regcache.
+	(xtensa_frame_cache, call0_frame_get_reg_at_entry, call0_frame_cache)
+	(xtensa_frame_prev_register): Use get_frame_arch to get at the current
+	architecture by frame_info.
+
 2007-10-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-tdep.c (struct arm_prologue_cache): Remove frameoffset.
