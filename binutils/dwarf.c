@@ -1821,11 +1821,13 @@ display_debug_lines (struct dwarf_section *section, void *file)
       unsigned char *standard_opcodes;
       unsigned char *end_of_sequence;
       unsigned char *hdrptr;
+      unsigned long hdroff;
       int initial_length_size;
       int offset_size;
       int i;
 
       hdrptr = data;
+      hdroff = hdrptr - start;
 
       /* Check the length of the block.  */
       info.li_length = byte_get (hdrptr, 4);
@@ -1878,6 +1880,7 @@ display_debug_lines (struct dwarf_section *section, void *file)
       info.li_line_base <<= 24;
       info.li_line_base >>= 24;
 
+      printf (_("  Offset:                      0x%lx\n"), hdroff);
       printf (_("  Length:                      %ld\n"), info.li_length);
       printf (_("  DWARF Version:               %d\n"), info.li_version);
       printf (_("  Prologue Length:             %d\n"), info.li_prologue_length);

@@ -1,3 +1,8 @@
+2007-10-10  Jim Blandy  <jimb@codesourcery.com>
+
+	* dwarf.c (display_debug_lines): Print the offset of each line
+	number program header.
+
 2007-10-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4476
