@@ -1682,14 +1682,14 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int ii;
   int len = 0;
   int argno;			/* current argument number */
   int argbytes;			/* current argument byte */
   gdb_byte tmp_buffer[50];
   int f_argno = 0;		/* current floating point argno */
-  int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
+  int wordsize = gdbarch_tdep (gdbarch)->wordsize;
   CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   struct value *arg = 0;
@@ -1700,7 +1700,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* The calling convention this function implements assumes the
      processor has floating-point registers.  We shouldn't be using it
      on PPC variants that lack them.  */
-  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+  gdb_assert (ppc_floating_point_unit_p (gdbarch));
 
   /* The first eight words of ther arguments are passed in registers.
      Copy them appropriately.  */
@@ -1738,7 +1738,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   for (argno = 0, argbytes = 0; argno < nargs && ii < 8; ++ii)
     {
-      int reg_size = register_size (current_gdbarch, ii + 3);
+      int reg_size = register_size (gdbarch, ii + 3);
 
       arg = args[argno];
       type = check_typedef (value_type (arg));
@@ -1785,7 +1785,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else
 	{
 	  /* Argument can fit in one register.  No problem.  */
-	  int adj = gdbarch_byte_order (current_gdbarch)
+	  int adj = gdbarch_byte_order (gdbarch)
 		    == BFD_ENDIAN_BIG ? reg_size - len : 0;
 	  gdb_byte word[MAX_REGISTER_SIZE];
 
@@ -1799,7 +1799,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 ran_out_of_registers_for_arguments:
 
   regcache_cooked_read_unsigned (regcache,
-				 gdbarch_sp_regnum (current_gdbarch),
+				 gdbarch_sp_regnum (gdbarch),
 				 &saved_sp);
 
   /* Location for 8 parameters are always reserved.  */
@@ -1843,7 +1843,7 @@ ran_out_of_registers_for_arguments:
          else.  */
 
       regcache_raw_write_signed (regcache,
-				 gdbarch_sp_regnum (current_gdbarch), sp);
+				 gdbarch_sp_regnum (gdbarch), sp);
 
       /* If the last argument copied into the registers didn't fit there 
          completely, push the rest of it into stack.  */
@@ -1890,7 +1890,7 @@ ran_out_of_registers_for_arguments:
      Not doing this can lead to conflicts with the kernel which thinks
      that it still has control over this not-yet-allocated stack
      region.  */
-  regcache_raw_write_signed (regcache, gdbarch_sp_regnum (current_gdbarch), sp);
+  regcache_raw_write_signed (regcache, gdbarch_sp_regnum (gdbarch), sp);
 
   /* Set back chain properly.  */
   store_unsigned_integer (tmp_buffer, wordsize, saved_sp);
@@ -1917,13 +1917,13 @@ rs6000_return_value (struct gdbarch *gdbarch, struct type *valtype,
 		     struct regcache *regcache, gdb_byte *readbuf,
 		     const gdb_byte *writebuf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte buf[8];
 
   /* The calling convention this function implements assumes the
      processor has floating-point registers.  We shouldn't be using it
      on PowerPC variants that lack them.  */
-  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+  gdb_assert (ppc_floating_point_unit_p (gdbarch));
 
   /* AltiVec extension: Functions that declare a vector data type as a
      return value place that return value in VR2.  */
@@ -2124,7 +2124,8 @@ rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	return 0;
     }
   ii = get_frame_register_unsigned (frame, 11);	/* r11 holds destination addr   */
-  pc = read_memory_addr (ii, gdbarch_tdep (current_gdbarch)->wordsize); /* (r11) value */
+  pc = read_memory_addr (ii,
+			 gdbarch_tdep (get_frame_arch (frame))->wordsize); /* (r11) value */
   return pc;
 }
 
@@ -2279,8 +2280,8 @@ rs6000_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   int vector_p;
   int general_p;
 
-  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
-      || *gdbarch_register_name (current_gdbarch, regnum) == '\0')
+  if (gdbarch_register_name (gdbarch, regnum) == NULL
+      || *gdbarch_register_name (gdbarch, regnum) == '\0')
     return 0;
   if (group == all_reggroup)
     return 1;
@@ -2314,7 +2315,7 @@ rs6000_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 	       || regnum == tdep->ppc_lr_regnum
 	       || regnum == tdep->ppc_ctr_regnum
 	       || regnum == tdep->ppc_xer_regnum
-	       || regnum == gdbarch_pc_regnum (current_gdbarch));
+	       || regnum == gdbarch_pc_regnum (gdbarch));
   if (group == general_reggroup)
     return general_p;
 
@@ -2343,7 +2344,7 @@ rs6000_register_to_value (struct frame_info *frame,
                           struct type *type,
                           gdb_byte *to)
 {
-  const struct reg *reg = gdbarch_tdep (current_gdbarch)->regs + regnum;
+  const struct reg *reg = gdbarch_tdep (get_frame_arch (frame))->regs + regnum;
   gdb_byte from[MAX_REGISTER_SIZE];
   
   gdb_assert (reg->fpr);
@@ -2359,7 +2360,7 @@ rs6000_value_to_register (struct frame_info *frame,
                           struct type *type,
                           const gdb_byte *from)
 {
-  const struct reg *reg = gdbarch_tdep (current_gdbarch)->regs + regnum;
+  const struct reg *reg = gdbarch_tdep (get_frame_arch (frame))->regs + regnum;
   gdb_byte to[MAX_REGISTER_SIZE];
 
   gdb_assert (reg->fpr);
@@ -2408,7 +2409,7 @@ e500_move_ev_register (void (*move) (struct regcache *regcache,
 
   reg_index = ev_reg - tdep->ppc_ev0_regnum;
 
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
     {
       move (regcache, tdep->ppc_ev0_upper_regnum + reg_index, byte_buffer);
       move (regcache, tdep->ppc_gp0_regnum + reg_index, byte_buffer + 4);
@@ -3224,14 +3225,14 @@ static CORE_ADDR
 rs6000_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   return frame_unwind_register_unsigned (next_frame,
-					 gdbarch_pc_regnum (current_gdbarch));
+					 gdbarch_pc_regnum (gdbarch));
 }
 
 static struct frame_id
 rs6000_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   return frame_id_build (frame_unwind_register_unsigned
-			 (next_frame, gdbarch_sp_regnum (current_gdbarch)),
+			 (next_frame, gdbarch_sp_regnum (gdbarch)),
 			frame_pc_unwind (next_frame));
 }
 
@@ -3270,7 +3271,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
      the mean time, the address of the prev frame is used as the
      base address of this frame.  */
   cache->base = frame_unwind_register_unsigned
-		(next_frame, gdbarch_sp_regnum (current_gdbarch));
+		(next_frame, gdbarch_sp_regnum (gdbarch));
 
   /* If the function appears to be frameless, check a couple of likely
      indicators that we have simply failed to find the frame setup.
@@ -3309,7 +3310,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
     cache->base = read_memory_addr (cache->base, wordsize);
 
   trad_frame_set_value (cache->saved_regs,
-			gdbarch_sp_regnum (current_gdbarch), cache->base);
+			gdbarch_sp_regnum (gdbarch), cache->base);
 
   /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr.
      All fpr's from saved_fpr to fp31 are saved.  */
@@ -3388,7 +3389,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (fdata.lr_offset != 0)
     cache->saved_regs[tdep->ppc_lr_regnum].addr = cache->base + fdata.lr_offset;
   /* The PC is found in the link register.  */
-  cache->saved_regs[gdbarch_pc_regnum (current_gdbarch)] =
+  cache->saved_regs[gdbarch_pc_regnum (gdbarch)] =
     cache->saved_regs[tdep->ppc_lr_regnum];
 
   /* If != 0, fdata.vrsave_offset is the offset from the frame that
@@ -3400,7 +3401,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
     /* If no alloca register used, then fi->frame is the value of the
        %sp for this frame, and it is good enough.  */
     cache->initial_sp = frame_unwind_register_unsigned
-			(next_frame, gdbarch_sp_regnum (current_gdbarch));
+			(next_frame, gdbarch_sp_regnum (gdbarch));
   else
     cache->initial_sp = frame_unwind_register_unsigned (next_frame,
 							fdata.alloca_reg);
@@ -3814,9 +3815,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 }
 
 static void
-rs6000_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+rs6000_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep == NULL)
     return;

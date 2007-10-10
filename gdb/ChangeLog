@@ -1,5 +1,19 @@
 2007-10-10  Markus Deuling  <deuling@de.ibm.com>
 
+	* rs6000-nat.c (fetch_register, store_register)
+	(rs6000_fetch_inferior_registers, rs6000_store_inferior_registers): Use
+	get_regcache_arch to get at the current architecture by regcache.
+
+	* rs6000-tdep.c (rs6000_push_dummy_call, rs6000_return_value)
+	(rs6000_register_reggroup_p, e500_move_ev_registe, rs6000_unwind_pc)
+	(rs6000_unwind_dummy_id, rs6000_frame_cache, rs6000_dump_tdep): Replace
+	current_gdbarch by gdbarch.
+	(rs6000_skip_trampoline_code, rs6000_register_to_value)
+	(rs6000_value_to_register): Use get_frame_arch to get at the current
+	architecture by frame_info.
+
+2007-10-10  Markus Deuling  <deuling@de.ibm.com>
+
 	* sparc-tdep.c (sparc_supply_rwindow, sparc_collect_rwindow): Use
 	get_regcache_arch to get at the current architecture by regcache.
 

@@ -211,6 +211,7 @@ rs6000_ptrace64 (int req, int id, long long addr, int data, void *buf)
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
 
@@ -226,7 +227,7 @@ fetch_register (struct regcache *regcache, int regno)
   /* Bogus register number. */
   else if (nr < 0)
     {
-      if (regno >= gdbarch_num_regs (current_gdbarch))
+      if (regno >= gdbarch_num_regs (gdbarch))
 	fprintf_unfiltered (gdb_stderr,
 			    "gdb error: register no %d not implemented.\n",
 			    regno);
@@ -244,7 +245,7 @@ fetch_register (struct regcache *regcache, int regno)
 	     even if the register is really only 32 bits. */
 	  long long buf;
 	  rs6000_ptrace64 (PT_READ_GPR, PIDGET (inferior_ptid), nr, 0, &buf);
-	  if (register_size (current_gdbarch, regno) == 8)
+	  if (register_size (gdbarch, regno) == 8)
 	    memcpy (addr, &buf, 8);
 	  else
 	    *addr = buf;
@@ -268,6 +269,7 @@ fetch_register (struct regcache *regcache, int regno)
 static void
 store_register (const struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int addr[MAX_REGISTER_SIZE];
   int nr, isfloat;
 
@@ -286,7 +288,7 @@ store_register (const struct regcache *regcache, int regno)
   /* Bogus register number. */
   else if (nr < 0)
     {
-      if (regno >= gdbarch_num_regs (current_gdbarch))
+      if (regno >= gdbarch_num_regs (gdbarch))
 	fprintf_unfiltered (gdb_stderr,
 			    "gdb error: register no %d not implemented.\n",
 			    regno);
@@ -295,7 +297,7 @@ store_register (const struct regcache *regcache, int regno)
   /* Fixed-point registers. */
   else
     {
-      if (regno == gdbarch_sp_regnum (current_gdbarch))
+      if (regno == gdbarch_sp_regnum (gdbarch))
 	/* Execute one dummy instruction (which is a breakpoint) in inferior
 	   process to give kernel a chance to do internal housekeeping.
 	   Otherwise the following ptrace(2) calls will mess up user stack
@@ -313,7 +315,7 @@ store_register (const struct regcache *regcache, int regno)
 	  /* PT_WRITE_GPR requires the buffer parameter to point to an 8-byte
 	     area, even if the register is really only 32 bits. */
 	  long long buf;
-	  if (register_size (current_gdbarch, regno) == 8)
+	  if (register_size (gdbarch, regno) == 8)
 	    memcpy (&buf, addr, 8);
 	  else
 	    buf = *addr;
@@ -334,12 +336,13 @@ store_register (const struct regcache *regcache, int regno)
 static void
 rs6000_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno != -1)
     fetch_register (regcache, regno);
 
   else
     {
-      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
       /* Read 32 general purpose registers.  */
       for (regno = tdep->ppc_gp0_regnum;
@@ -355,7 +358,7 @@ rs6000_fetch_inferior_registers (struct regcache *regcache, int regno)
           fetch_register (regcache, tdep->ppc_fp0_regnum + regno);
 
       /* Read special registers.  */
-      fetch_register (regcache, gdbarch_pc_regnum (current_gdbarch));
+      fetch_register (regcache, gdbarch_pc_regnum (gdbarch));
       fetch_register (regcache, tdep->ppc_ps_regnum);
       fetch_register (regcache, tdep->ppc_cr_regnum);
       fetch_register (regcache, tdep->ppc_lr_regnum);
@@ -375,12 +378,13 @@ rs6000_fetch_inferior_registers (struct regcache *regcache, int regno)
 static void
 rs6000_store_inferior_registers (struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (regno != -1)
     store_register (regcache, regno);
 
   else
     {
-      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
       /* Write general purpose registers first.  */
       for (regno = tdep->ppc_gp0_regnum;
@@ -396,7 +400,7 @@ rs6000_store_inferior_registers (struct regcache *regcache, int regno)
           store_register (regcache, tdep->ppc_fp0_regnum + regno);
 
       /* Write special registers.  */
-      store_register (regcache, gdbarch_pc_regnum (current_gdbarch));
+      store_register (regcache, gdbarch_pc_regnum (gdbarch));
       store_register (regcache, tdep->ppc_ps_regnum);
       store_register (regcache, tdep->ppc_cr_regnum);
       store_register (regcache, tdep->ppc_lr_regnum);
