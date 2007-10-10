@@ -1,5 +1,24 @@
 2007-10-10  Markus Deuling  <deuling@de.ibm.com>
 
+	* mips-tdep.c (mips_xfer_register): Use get_regcache_arch to get at the
+	current architecture by regcache.
+	(mips2_fp_compat, mips32_next_pc, mips16_scan_prologue)
+	(mips_insn16_frame_cache, mips32_scan_prologue, mips_insn32_frame_cache)
+	(mips_stub_frame_cache, mips_read_fp_register_single)
+	(mips_read_fp_register_double, mips_print_fp_register)
+	(mips_print_register, print_gp_register_row): Use get_frame_arch to get
+	at the current architecture by frame_info.
+	(mips_register_reggroup_p, mips_pseudo_register_read, mips_unwind_sp)
+	(mips_pseudo_register_write, mips_register_type, mips_unwind_pc)
+	(mips_unwind_dummy_id, mips_eabi_push_dummy_call)
+	(mips_n32n64_push_dummy_call, mips_n32n64_return_value)
+	(mips_o32_push_dummy_call, mips_o32_return_value)
+	(mips_o64_push_dummy_call, mips_o64_return_value)
+	(mips_print_registers_info, mips_dump_tdep): Replace current_gdbarch by
+	gdbarch.
+
+2007-10-10  Markus Deuling  <deuling@de.ibm.com>
+
 	* xtensa-tdep.c (xtensa_register_type, xtensa_pseudo_register_read)
 	(xtensa_pseudo_register_write, xtensa_register_reggroup_p)
 	(xtensa_unwind_pc, xtensa_unwind_dummy_id, xtensa_push_dummy_call)
