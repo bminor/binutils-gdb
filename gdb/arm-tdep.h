@@ -29,6 +29,7 @@ enum gdb_regnum {
   ARM_A1_REGNUM = 0,		/* first integer-like argument */
   ARM_A4_REGNUM = 3,		/* last integer-like argument */
   ARM_AP_REGNUM = 11,
+  ARM_IP_REGNUM = 12,
   ARM_SP_REGNUM = 13,		/* Contains address of top of stack */
   ARM_LR_REGNUM = 14,		/* address to return to from a function call */
   ARM_PC_REGNUM = 15,		/* Contains program counter */

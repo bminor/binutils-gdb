@@ -187,13 +187,11 @@ struct arm_prologue_cache
      to identify this frame.  */
   CORE_ADDR prev_sp;
 
-  /* The frame base for this frame is just prev_sp + frame offset -
-     frame size.  FRAMESIZE is the size of this stack frame, and
-     FRAMEOFFSET if the initial offset from the stack pointer (this
-     frame's stack pointer, not PREV_SP) to the frame base.  */
+  /* The frame base for this frame is just prev_sp - frame size.
+     FRAMESIZE is the distance from the frame pointer to the
+     initial stack pointer.  */
 
   int framesize;
-  int frameoffset;
 
   /* The register used to hold the frame pointer for this frame.  */
   int framereg;
@@ -292,7 +290,9 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	{
 	  int regno;
 	  int mask;
-	  int stop = 0;
+
+	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	    break;
 
 	  /* Bits 0-7 contain a mask for registers R0-R7.  Bit 8 says
 	     whether to save LR (R14).  */
@@ -302,19 +302,10 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	  for (regno = ARM_LR_REGNUM; regno >= 0; regno--)
 	    if (mask & (1 << regno))
 	      {
-		if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
-		  {
-		    stop = 1;
-		    break;
-		  }
-
 		regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
 						       -4);
 		pv_area_store (stack, regs[ARM_SP_REGNUM], 4, regs[regno]);
 	      }
-
-	  if (stop)
-	    break;
 	}
       else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
 						   sub sp, #simm */
@@ -369,9 +360,6 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
       do_cleanups (back_to);
       return start;
     }
-
-  /* frameoffset is unused for this unwinder.  */
-  cache->frameoffset = 0;
 
   if (pv_is_register (regs[ARM_FP_REGNUM], ARM_SP_REGNUM))
     {
@@ -652,14 +640,17 @@ arm_scan_prologue (struct frame_info *next_frame,
 		   struct arm_prologue_cache *cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  int regno, sp_offset, fp_offset, ip_offset;
+  int regno;
   CORE_ADDR prologue_start, prologue_end, current_pc;
   CORE_ADDR prev_pc = frame_pc_unwind (next_frame);
+  pv_t regs[ARM_FPS_REGNUM];
+  struct pv_area *stack;
+  struct cleanup *back_to;
+  CORE_ADDR offset;
 
   /* Assume there is no frame until proven otherwise.  */
   cache->framereg = ARM_SP_REGNUM;
   cache->framesize = 0;
-  cache->frameoffset = 0;
 
   /* Check for Thumb prologue.  */
   if (arm_pc_is_thumb (prev_pc))
@@ -754,7 +745,12 @@ arm_scan_prologue (struct frame_info *next_frame,
      in which case it is often (but not always) replaced by
      "str lr, [sp, #-4]!".  - Michael Snyder, 2002-04-23]  */
 
-  sp_offset = fp_offset = ip_offset = 0;
+  for (regno = 0; regno < ARM_FPS_REGNUM; regno++)
+    regs[regno] = pv_register (regno, 0);
+  stack = make_pv_area (ARM_SP_REGNUM);
+  back_to = make_cleanup_free_pv_area (stack);
+
+  regs[ARM_PC_REGNUM] = pv_unknown ();
 
   for (current_pc = prologue_start;
        current_pc < prologue_end;
@@ -764,7 +760,7 @@ arm_scan_prologue (struct frame_info *next_frame,
 
       if (insn == 0xe1a0c00d)		/* mov ip, sp */
 	{
-	  ip_offset = 0;
+	  regs[ARM_IP_REGNUM] = regs[ARM_SP_REGNUM];
 	  continue;
 	}
       else if ((insn & 0xfffff000) == 0xe28dc000) /* add ip, sp #n */
@@ -772,7 +768,7 @@ arm_scan_prologue (struct frame_info *next_frame,
 	  unsigned imm = insn & 0xff;                   /* immediate value */
 	  unsigned rot = (insn & 0xf00) >> 7;           /* rotate amount */
 	  imm = (imm >> rot) | (imm << (32 - rot));
-	  ip_offset = imm;
+	  regs[ARM_IP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], imm);
 	  continue;
 	}
       else if ((insn & 0xfffff000) == 0xe24dc000) /* sub ip, sp #n */
@@ -780,13 +776,15 @@ arm_scan_prologue (struct frame_info *next_frame,
 	  unsigned imm = insn & 0xff;                   /* immediate value */
 	  unsigned rot = (insn & 0xf00) >> 7;           /* rotate amount */
 	  imm = (imm >> rot) | (imm << (32 - rot));
-	  ip_offset = -imm;
+	  regs[ARM_IP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -imm);
 	  continue;
 	}
       else if (insn == 0xe52de004)	/* str lr, [sp, #-4]! */
 	{
-	  sp_offset -= 4;
-	  cache->saved_regs[ARM_LR_REGNUM].addr = sp_offset;
+	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	    break;
+	  regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -4);
+	  pv_area_store (stack, regs[ARM_SP_REGNUM], 4, regs[ARM_LR_REGNUM]);
 	  continue;
 	}
       else if ((insn & 0xffff0000) == 0xe92d0000)
@@ -796,12 +794,15 @@ arm_scan_prologue (struct frame_info *next_frame,
 	{
 	  int mask = insn & 0xffff;
 
+	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	    break;
+
 	  /* Calculate offsets of saved registers.  */
 	  for (regno = ARM_PC_REGNUM; regno >= 0; regno--)
 	    if (mask & (1 << regno))
 	      {
-		sp_offset -= 4;
-		cache->saved_regs[regno].addr = sp_offset;
+		regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -4);
+		pv_area_store (stack, regs[ARM_SP_REGNUM], 4, regs[regno]);
 	      }
 	}
       else if ((insn & 0xffffc000) == 0xe54b0000 ||	/* strb rx,[r11,#-n] */
@@ -823,28 +824,33 @@ arm_scan_prologue (struct frame_info *next_frame,
 	  unsigned imm = insn & 0xff;			/* immediate value */
 	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
 	  imm = (imm >> rot) | (imm << (32 - rot));
-	  fp_offset = -imm + ip_offset;
-	  cache->framereg = ARM_FP_REGNUM;
+	  regs[ARM_FP_REGNUM] = pv_add_constant (regs[ARM_IP_REGNUM], -imm);
 	}
       else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */
 	{
 	  unsigned imm = insn & 0xff;			/* immediate value */
 	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
 	  imm = (imm >> rot) | (imm << (32 - rot));
-	  sp_offset -= imm;
+	  regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -imm);
 	}
       else if ((insn & 0xffff7fff) == 0xed6d0103	/* stfe f?, [sp, -#c]! */
 	       && gdbarch_tdep (gdbarch)->have_fpa_registers)
 	{
-	  sp_offset -= 12;
+	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	    break;
+
+	  regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -12);
 	  regno = ARM_F0_REGNUM + ((insn >> 12) & 0x07);
-	  cache->saved_regs[regno].addr = sp_offset;
+	  pv_area_store (stack, regs[ARM_SP_REGNUM], 12, regs[regno]);
 	}
       else if ((insn & 0xffbf0fff) == 0xec2d0200	/* sfmfd f0, 4, [sp!] */
 	       && gdbarch_tdep (gdbarch)->have_fpa_registers)
 	{
 	  int n_saved_fp_regs;
 	  unsigned int fp_start_reg, fp_bound_reg;
+
+	  if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+	    break;
 
 	  if ((insn & 0x800) == 0x800)		/* N0 is set */
 	    {
@@ -865,8 +871,9 @@ arm_scan_prologue (struct frame_info *next_frame,
 	  fp_bound_reg = fp_start_reg + n_saved_fp_regs;
 	  for (; fp_start_reg < fp_bound_reg; fp_start_reg++)
 	    {
-	      sp_offset -= 12;
-	      cache->saved_regs[fp_start_reg++].addr = sp_offset;
+	      regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -12);
+	      pv_area_store (stack, regs[ARM_SP_REGNUM], 12,
+			     regs[fp_start_reg++]);
 	    }
 	}
       else if ((insn & 0xf0000000) != 0xe0000000)
@@ -879,14 +886,32 @@ arm_scan_prologue (struct frame_info *next_frame,
 	continue;
     }
 
-  /* The frame size is just the negative of the offset (from the
-     original SP) of the last thing thing we pushed on the stack. 
-     The frame offset is [new FP] - [new SP].  */
-  cache->framesize = -sp_offset;
-  if (cache->framereg == ARM_FP_REGNUM)
-    cache->frameoffset = fp_offset - sp_offset;
+  /* The frame size is just the distance from the frame register
+     to the original stack pointer.  */
+  if (pv_is_register (regs[ARM_FP_REGNUM], ARM_SP_REGNUM))
+    {
+      /* Frame pointer is fp.  */
+      cache->framereg = ARM_FP_REGNUM;
+      cache->framesize = -regs[ARM_FP_REGNUM].k;
+    }
+  else if (pv_is_register (regs[ARM_SP_REGNUM], ARM_SP_REGNUM))
+    {
+      /* Try the stack pointer... this is a bit desperate.  */
+      cache->framereg = ARM_SP_REGNUM;
+      cache->framesize = -regs[ARM_SP_REGNUM].k;
+    }
   else
-    cache->frameoffset = 0;
+    {
+      /* We're just out of luck.  We don't know where the frame is.  */
+      cache->framereg = -1;
+      cache->framesize = 0;
+    }
+
+  for (regno = 0; regno < ARM_FPS_REGNUM; regno++)
+    if (pv_area_find_reg (stack, gdbarch, regno, &offset))
+      cache->saved_regs[regno].addr = offset;
+
+  do_cleanups (back_to);
 }
 
 static struct arm_prologue_cache *
@@ -905,7 +930,7 @@ arm_make_prologue_cache (struct frame_info *next_frame)
   if (unwound_fp == 0)
     return cache;
 
-  cache->prev_sp = unwound_fp + cache->framesize - cache->frameoffset;
+  cache->prev_sp = unwound_fp + cache->framesize;
 
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
@@ -1057,7 +1082,7 @@ arm_normal_frame_base (struct frame_info *next_frame, void **this_cache)
     *this_cache = arm_make_prologue_cache (next_frame);
   cache = *this_cache;
 
-  return cache->prev_sp + cache->frameoffset - cache->framesize;
+  return cache->prev_sp - cache->framesize;
 }
 
 struct frame_base arm_normal_base = {

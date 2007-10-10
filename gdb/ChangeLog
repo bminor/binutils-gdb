@@ -1,5 +1,16 @@
 2007-10-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* arm-tdep.c (struct arm_prologue_cache): Remove frameoffset.
+	(thumb_analyze_prologue): Move pv_area_store_would_trash call
+	out of loop.  Do not set cache->frameoffset.
+	(arm_scan_prologue): Use prologue-value mechanism.  Do not set
+	frameoffset.  Simplify framesize.
+	(arm_make_prologue_cache, arm_normal_frame_base): Do not use
+	frameoffset.
+	* arm-tdep.h (enum gdb_regnum): Add ARM_IP_REGNUM.
+
+2007-10-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* target.c (update_current_target): Call setup_target_debug.
 	(push_target): Do not call it here.
 
