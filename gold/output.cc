@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <algorithm>
 
 #include "parameters.h"
@@ -1671,6 +1672,25 @@ void
 Output_file::open(off_t file_size)
 {
   this->file_size_ = file_size;
+
+  // Unlink the file first; otherwise the open() may fail if the file
+  // is busy (e.g. it's an executable that's currently being executed).
+  //
+  // However, the linker may be part of a system where a zero-length
+  // file is created for it to write to, with tight permissions (gcc
+  // 2.95 did something like this).  Unlinking the file would work
+  // around those permission controls, so we only unlink if the file
+  // has a non-zero size.  We also unlink only regular files to avoid
+  // trouble with directories/etc.
+  //
+  // If we fail, continue; this command is merely a best-effort attempt
+  // to improve the odds for open().
+
+  // FIXME: unlink the file if it's a symlink, even a symlink to a dir.
+  //        Or do we want to follow the symlink and unlink its target? 
+  struct stat s;
+  if (::stat(this->name_, &s) == 0 && s.st_size != 0 && S_ISREG(s.st_mode))
+    ::unlink(this->name_);
 
   int mode = parameters->output_is_object() ? 0666 : 0777;
   int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
