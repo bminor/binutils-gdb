@@ -142,17 +142,18 @@ mipsnbsd_regset_from_core_section (struct gdbarch *gdbarch,
 void
 mipsnbsd_supply_reg (struct regcache *regcache, const char *regs, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int i;
 
-  for (i = 0; i <= gdbarch_pc_regnum (current_gdbarch); i++)
+  for (i = 0; i <= gdbarch_pc_regnum (gdbarch); i++)
     {
       if (regno == i || regno == -1)
 	{
-	  if (gdbarch_cannot_fetch_register (current_gdbarch, i))
+	  if (gdbarch_cannot_fetch_register (gdbarch, i))
 	    regcache_raw_supply (regcache, i, NULL);
 	  else
             regcache_raw_supply (regcache, i,
-				 regs + (i * mips_isa_regsize (current_gdbarch)));
+				 regs + (i * mips_isa_regsize (gdbarch)));
         }
     }
 }
@@ -160,33 +161,35 @@ mipsnbsd_supply_reg (struct regcache *regcache, const char *regs, int regno)
 void
 mipsnbsd_fill_reg (const struct regcache *regcache, char *regs, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int i;
 
-  for (i = 0; i <= gdbarch_pc_regnum (current_gdbarch); i++)
+  for (i = 0; i <= gdbarch_pc_regnum (gdbarch); i++)
     if ((regno == i || regno == -1)
-	&& ! gdbarch_cannot_store_register (current_gdbarch, i))
+	&& ! gdbarch_cannot_store_register (gdbarch, i))
       regcache_raw_collect (regcache, i,
-			    regs + (i * mips_isa_regsize (current_gdbarch)));
+			    regs + (i * mips_isa_regsize (gdbarch)));
 }
 
 void
 mipsnbsd_supply_fpreg (struct regcache *regcache, const char *fpregs, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int i;
 
-  for (i = gdbarch_fp0_regnum (current_gdbarch);
-       i <= mips_regnum (current_gdbarch)->fp_implementation_revision;
+  for (i = gdbarch_fp0_regnum (gdbarch);
+       i <= mips_regnum (gdbarch)->fp_implementation_revision;
        i++)
     {
       if (regno == i || regno == -1)
 	{
-	  if (gdbarch_cannot_fetch_register (current_gdbarch, i))
+	  if (gdbarch_cannot_fetch_register (gdbarch, i))
 	    regcache_raw_supply (regcache, i, NULL);
 	  else
             regcache_raw_supply (regcache, i,
 				 fpregs 
-				 + ((i - gdbarch_fp0_regnum (current_gdbarch))
-				    * mips_isa_regsize (current_gdbarch)));
+				 + ((i - gdbarch_fp0_regnum (gdbarch))
+				    * mips_isa_regsize (gdbarch)));
 	}
     }
 }
@@ -194,17 +197,17 @@ mipsnbsd_supply_fpreg (struct regcache *regcache, const char *fpregs, int regno)
 void
 mipsnbsd_fill_fpreg (const struct regcache *regcache, char *fpregs, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int i;
 
-  for (i = gdbarch_fp0_regnum (current_gdbarch);
-       i <= mips_regnum (current_gdbarch)->fp_control_status;
+  for (i = gdbarch_fp0_regnum (gdbarch);
+       i <= mips_regnum (gdbarch)->fp_control_status;
        i++)
     if ((regno == i || regno == -1) 
-	&& ! gdbarch_cannot_store_register (current_gdbarch, i))
+	&& ! gdbarch_cannot_store_register (gdbarch, i))
       regcache_raw_collect (regcache, i,
-			    fpregs + ((i - gdbarch_fp0_regnum
-					     (current_gdbarch))
-			      * mips_isa_regsize (current_gdbarch)));
+			    fpregs + ((i - gdbarch_fp0_regnum (gdbarch))
+			      * mips_isa_regsize (gdbarch)));
 }
 
 /* Under NetBSD/mips, signal handler invocations can be identified by the
@@ -244,7 +247,7 @@ static LONGEST
 mipsnbsd_sigtramp_offset (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  const char *retcode = gdbarch_byte_order (current_gdbarch)
+  const char *retcode = gdbarch_byte_order (get_frame_arch (next_frame))
 			== BFD_ENDIAN_BIG ? sigtramp_retcode_mipseb :
 			sigtramp_retcode_mipsel;
   unsigned char ret[RETCODE_SIZE], w[4];

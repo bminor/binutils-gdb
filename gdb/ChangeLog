@@ -1,5 +1,41 @@
 2007-10-10  Markus Deuling  <deuling@de.ibm.com>
 
+	* remote-mips.c (mips_wait, mips_fetch_registers)
+	(mips_store_registers): Use get_regcache_arch to get at the
+	current architecture by regcache.
+
+	* mipsnbsd-tdep.c (mipsnbsd_supply_reg, mipsnbsd_fill_reg)
+	(mipsnbsd_supply_fpreg, mipsnbsd_fill_fpreg): Use get_regcache_arch to
+	get at the current architecture by regcache.
+	(mipsnbsd_sigtramp_offset): Use get_frame_arch to get at the current
+	architecture by frame_info.
+
+	* mipsnbsd-nat.c (mipsnbsd_fetch_inferior_registers)
+	(mipsnbsd_store_inferior_registers): Use get_regcache_arch to get at
+	the current architecture by regcache.
+
+	* mips-linux-tdep.c (mips_linux_get_longjmp_target)
+	(mips64_linux_get_longjmp_target, mips_linux_o32_sigframe_init)
+	(mips_linux_n32n64_sigframe_init): Use get_frame_arch to get at the
+	current architecture by frame_info.
+	(supply_32bit_reg, mips_supply_gregset, mips_fill_gregset)
+	(mips_supply_fpregset, mips_fill_fpregset, supply_64bit_reg)
+	(mips64_supply_gregset, mips64_fill_gregset, mips64_supply_fpregset)
+	(mips64_fill_fpregset, mips_linux_write_pc): Use get_regcache_arch to
+	get at the current architecture by regcache.
+
+	* mips-linux-nat.c (mips_linux_register_addr)
+	(mips64_linux_register_addr): Replace current_gdbarch by gdbarch.
+	(supply_gregset, fill_gregset, supply_fpregset, fill_fpregset)
+	(mips64_linux_regsets_fetch_registers)
+	(mips64_linux_regsets_store_registers): Use get_regcache_arch to get at
+	the current architecture by regcache.
+
+	* mips64obsd-tdep.c (mips64obsd_sigframe_init): Use get_frame_arch to
+	get at the current architecture by frame_info.
+
+2007-10-10  Markus Deuling  <deuling@de.ibm.com>
+
 	* mips-tdep.c (mips_xfer_register): Use get_regcache_arch to get at the
 	current architecture by regcache.
 	(mips2_fp_compat, mips32_next_pc, mips16_scan_prologue)

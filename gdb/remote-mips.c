@@ -1754,30 +1754,29 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
   if (nfields >= 3)
     {
       struct regcache *regcache = get_current_regcache ();
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
       char buf[MAX_REGISTER_SIZE];
 
       store_unsigned_integer (buf,
 			      register_size
-			        (current_gdbarch, gdbarch_pc_regnum
-						    (current_gdbarch)), rpc);
-      regcache_raw_supply (regcache, gdbarch_pc_regnum (current_gdbarch), buf);
+			        (gdbarch, gdbarch_pc_regnum (gdbarch)), rpc);
+      regcache_raw_supply (regcache, gdbarch_pc_regnum (gdbarch), buf);
 
       store_unsigned_integer
-	(buf, register_size (current_gdbarch,
-	 gdbarch_pc_regnum (current_gdbarch)), rfp);
+	(buf, register_size (gdbarch, gdbarch_pc_regnum (gdbarch)), rfp);
       regcache_raw_supply (regcache, 30, buf);	/* This register they are avoiding and so it is unnamed */
 
-      store_unsigned_integer (buf, register_size (current_gdbarch,
-			      gdbarch_sp_regnum (current_gdbarch)), rsp);
-      regcache_raw_supply (regcache, gdbarch_sp_regnum (current_gdbarch), buf);
+      store_unsigned_integer (buf, register_size (gdbarch,
+			      gdbarch_sp_regnum (gdbarch)), rsp);
+      regcache_raw_supply (regcache, gdbarch_sp_regnum (gdbarch), buf);
 
       store_unsigned_integer (buf,
-			      register_size (current_gdbarch,
+			      register_size (gdbarch,
 					     gdbarch_deprecated_fp_regnum
-					       (current_gdbarch)),
+					       (gdbarch)),
 			      0);
       regcache_raw_supply (regcache,
-			   gdbarch_deprecated_fp_regnum (current_gdbarch), buf);
+			   gdbarch_deprecated_fp_regnum (gdbarch), buf);
 
       if (nfields == 9)
 	{
@@ -1904,17 +1903,18 @@ mips_map_regno (int regno)
 static void
 mips_fetch_registers (struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   unsigned LONGEST val;
   int err;
 
   if (regno == -1)
     {
-      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
+      for (regno = 0; regno < gdbarch_num_regs (gdbarch); regno++)
 	mips_fetch_registers (regcache, regno);
       return;
     }
 
-  if (regno == gdbarch_deprecated_fp_regnum (current_gdbarch)
+  if (regno == gdbarch_deprecated_fp_regnum (gdbarch)
       || regno == MIPS_ZERO_REGNUM)
     /* gdbarch_deprecated_fp_regnum on the mips is a hack which is just
        supposed to read zero (see also mips-nat.c).  */
@@ -1948,7 +1948,7 @@ mips_fetch_registers (struct regcache *regcache, int regno)
 
     /* We got the number the register holds, but gdb expects to see a
        value in the target byte ordering.  */
-    store_unsigned_integer (buf, register_size (current_gdbarch, regno), val);
+    store_unsigned_integer (buf, register_size (gdbarch, regno), val);
     regcache_raw_supply (regcache, regno, buf);
   }
 }
@@ -1966,12 +1966,13 @@ mips_prepare_to_store (struct regcache *regcache)
 static void
 mips_store_registers (struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   ULONGEST val;
   int err;
 
   if (regno == -1)
     {
-      for (regno = 0; regno < gdbarch_num_regs (current_gdbarch); regno++)
+      for (regno = 0; regno < gdbarch_num_regs (gdbarch); regno++)
 	mips_store_registers (regcache, regno);
       return;
     }

@@ -91,30 +91,30 @@ mips64obsd_sigframe_init (const struct tramp_frame *self,
      fixed offset in the signal frame.  */
   sp = frame_unwind_register_signed (next_frame,
 				     MIPS_SP_REGNUM
-				     + gdbarch_num_regs (current_gdbarch));
+				     + gdbarch_num_regs (gdbarch));
   sigcontext_addr = sp + 32;
 
   /* PC.  */
   regnum = mips_regnum (gdbarch)->pc;
   trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (current_gdbarch),
+			   regnum + gdbarch_num_regs (gdbarch),
 			    sigcontext_addr + 16);
 
   /* GPRs.  */
   for (regnum = MIPS_AT_REGNUM, addr = sigcontext_addr + 32;
        regnum <= MIPS_RA_REGNUM; regnum++, addr += 8)
     trad_frame_set_reg_addr (cache,
-			     regnum + gdbarch_num_regs (current_gdbarch),
+			     regnum + gdbarch_num_regs (gdbarch),
 			     addr);
 
   /* HI and LO.  */
   regnum = mips_regnum (gdbarch)->lo;
   trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (current_gdbarch),
+			   regnum + gdbarch_num_regs (gdbarch),
 			   sigcontext_addr + 280);
   regnum = mips_regnum (gdbarch)->hi;
   trad_frame_set_reg_addr (cache,
-			   regnum + gdbarch_num_regs (current_gdbarch),
+			   regnum + gdbarch_num_regs (gdbarch),
 			   sigcontext_addr + 288);
 
   /* TODO: Handle the floating-point registers.  */

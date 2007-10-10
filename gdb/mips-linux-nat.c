@@ -60,7 +60,7 @@ mips_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
 {
   CORE_ADDR regaddr;
 
-  if (regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
+  if (regno < 0 || regno >= gdbarch_num_regs (gdbarch))
     error (_("Bogon register number %d."), regno);
 
   if (regno > MIPS_ZERO_REGNUM && regno < MIPS_ZERO_REGNUM + 32)
@@ -95,14 +95,14 @@ mips64_linux_register_addr (struct gdbarch *gdbarch, int regno, int store)
 {
   CORE_ADDR regaddr;
 
-  if (regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
+  if (regno < 0 || regno >= gdbarch_num_regs (gdbarch))
     error (_("Bogon register number %d."), regno);
 
   if (regno > MIPS_ZERO_REGNUM && regno < MIPS_ZERO_REGNUM + 32)
     regaddr = regno;
   else if ((regno >= mips_regnum (gdbarch)->fp0)
 	   && (regno < mips_regnum (gdbarch)->fp0 + 32))
-    regaddr = MIPS64_FPR_BASE + (regno - gdbarch_fp0_regnum (current_gdbarch));
+    regaddr = MIPS64_FPR_BASE + (regno - gdbarch_fp0_regnum (gdbarch));
   else if (regno == mips_regnum (gdbarch)->pc)
     regaddr = MIPS64_PC;
   else if (regno == mips_regnum (gdbarch)->cause)
@@ -147,7 +147,7 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 void
 supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
 {
-  if (mips_isa_regsize (current_gdbarch) == 4)
+  if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
     mips_supply_gregset (regcache, (const mips_elf_gregset_t *) gregsetp);
   else
     mips64_supply_gregset (regcache, (const mips64_elf_gregset_t *) gregsetp);
@@ -157,7 +157,7 @@ void
 fill_gregset (const struct regcache *regcache,
 	      gdb_gregset_t *gregsetp, int regno)
 {
-  if (mips_isa_regsize (current_gdbarch) == 4)
+  if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
     mips_fill_gregset (regcache, (mips_elf_gregset_t *) gregsetp, regno);
   else
     mips64_fill_gregset (regcache, (mips64_elf_gregset_t *) gregsetp, regno);
@@ -166,7 +166,7 @@ fill_gregset (const struct regcache *regcache,
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
-  if (mips_isa_regsize (current_gdbarch) == 4)
+  if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
     mips_supply_fpregset (regcache, (const mips_elf_fpregset_t *) fpregsetp);
   else
     mips64_supply_fpregset (regcache, (const mips64_elf_fpregset_t *) fpregsetp);
@@ -176,7 +176,7 @@ void
 fill_fpregset (const struct regcache *regcache,
 	       gdb_fpregset_t *fpregsetp, int regno)
 {
-  if (mips_isa_regsize (current_gdbarch) == 4)
+  if (mips_isa_regsize (get_regcache_arch (regcache)) == 4)
     mips_fill_fpregset (regcache, (mips_elf_fpregset_t *) fpregsetp, regno);
   else
     mips64_fill_fpregset (regcache, (mips64_elf_fpregset_t *) fpregsetp, regno);
@@ -189,15 +189,16 @@ fill_fpregset (const struct regcache *regcache,
 static void
 mips64_linux_regsets_fetch_registers (struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int is_fp;
   int tid;
 
-  if (regno >= mips_regnum (current_gdbarch)->fp0
-      && regno <= mips_regnum (current_gdbarch)->fp0 + 32)
+  if (regno >= mips_regnum (gdbarch)->fp0
+      && regno <= mips_regnum (gdbarch)->fp0 + 32)
     is_fp = 1;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+  else if (regno == mips_regnum (gdbarch)->fp_control_status)
     is_fp = 1;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+  else if (regno == mips_regnum (gdbarch)->fp_implementation_revision)
     is_fp = 1;
   else
     is_fp = 0;
@@ -250,15 +251,16 @@ mips64_linux_regsets_fetch_registers (struct regcache *regcache, int regno)
 static void
 mips64_linux_regsets_store_registers (const struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int is_fp;
   int tid;
 
-  if (regno >= mips_regnum (current_gdbarch)->fp0
-      && regno <= mips_regnum (current_gdbarch)->fp0 + 32)
+  if (regno >= mips_regnum (gdbarch)->fp0
+      && regno <= mips_regnum (gdbarch)->fp0 + 32)
     is_fp = 1;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+  else if (regno == mips_regnum (gdbarch)->fp_control_status)
     is_fp = 1;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+  else if (regno == mips_regnum (gdbarch)->fp_implementation_revision)
     is_fp = 1;
   else
     is_fp = 0;
