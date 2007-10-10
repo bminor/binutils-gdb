@@ -1,5 +1,19 @@
 2007-10-10  Markus Deuling  <deuling@de.ibm.com>
 
+	* sparc-tdep.c (sparc_supply_rwindow, sparc_collect_rwindow): Use
+	get_regcache_arch to get at the current architecture by regcache.
+
+	* sparc64-tdep.c (sparc64_supply_gregset, sparc64_collect_gregset)
+	(sparc64_supply_fpregset, sparc64_collect_fpregset): Use
+	get_regcache_arch to get at the current architecture by regcache.
+
+	* sparc64nbsd-nat. (sparc64nbsd_supply_gregset)
+	(sparc64nbsd_collect_gregset, sparc64nbsd_supply_fpregset)
+	(sparc64nbsd_collect_fpregset): Use get_regcache_arch to get at the
+	current architecture by regcache.
+
+2007-10-10  Markus Deuling  <deuling@de.ibm.com>
+
 	* remote-mips.c (mips_wait, mips_fetch_registers)
 	(mips_store_registers): Use get_regcache_arch to get at the
 	current architecture by regcache.

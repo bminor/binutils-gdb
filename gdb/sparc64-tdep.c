@@ -1170,7 +1170,7 @@ sparc64_supply_gregset (const struct sparc_gregset *gregset,
 			struct regcache *regcache,
 			int regnum, const void *gregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
   const gdb_byte *regs = gregs;
   int i;
 
@@ -1284,7 +1284,7 @@ sparc64_collect_gregset (const struct sparc_gregset *gregset,
 			 const struct regcache *regcache,
 			 int regnum, void *gregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
   gdb_byte *regs = gregs;
   int i;
 
@@ -1391,7 +1391,7 @@ void
 sparc64_supply_fpregset (struct regcache *regcache,
 			 int regnum, const void *fpregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
   const gdb_byte *regs = fpregs;
   int i;
 
@@ -1426,7 +1426,7 @@ void
 sparc64_collect_fpregset (const struct regcache *regcache,
 			  int regnum, void *fpregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
   gdb_byte *regs = fpregs;
   int i;
 

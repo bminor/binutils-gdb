@@ -1532,7 +1532,7 @@ sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
 
       /* Clear out the top half of the temporary buffer, and put the
 	 register value in the bottom half if we're in 64-bit mode.  */
-      if (gdbarch_ptr_bit (current_gdbarch) == 64)
+      if (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 64)
 	{
 	  memset (buf, 0, 4);
 	  offset = 4;
@@ -1599,7 +1599,7 @@ sparc_collect_rwindow (const struct regcache *regcache,
       sp &= 0xffffffffUL;
 
       /* Only use the bottom half if we're in 64-bit mode.  */
-      if (gdbarch_ptr_bit (current_gdbarch) == 64)
+      if (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 64)
 	offset = 4;
 
       for (i = SPARC_L0_REGNUM; i <= SPARC_I7_REGNUM; i++)

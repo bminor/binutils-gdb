@@ -34,7 +34,7 @@ sparc64nbsd_supply_gregset (const struct sparc_gregset *gregset,
 			    struct regcache *regcache,
 			    int regnum, const void *gregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
 
   if (sparc32)
     sparc32_supply_gregset (&sparc32nbsd_gregset, regcache, regnum, gregs);
@@ -47,7 +47,7 @@ sparc64nbsd_collect_gregset (const struct sparc_gregset *gregset,
 			     const struct regcache *regcache,
 			     int regnum, void *gregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
 
   if (sparc32)
     sparc32_collect_gregset (&sparc32nbsd_gregset, regcache, regnum, gregs);
@@ -59,7 +59,7 @@ static void
 sparc64nbsd_supply_fpregset (struct regcache *regcache,
 			     int regnum, const void *fpregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
 
   if (sparc32)
     sparc32_supply_fpregset (regcache, regnum, fpregs);
@@ -71,7 +71,7 @@ static void
 sparc64nbsd_collect_fpregset (const struct regcache *regcache,
 			      int regnum, void *fpregs)
 {
-  int sparc32 = (gdbarch_ptr_bit (current_gdbarch) == 32);
+  int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
 
   if (sparc32)
     sparc32_collect_fpregset (regcache, regnum, fpregs);
