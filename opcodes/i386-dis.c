@@ -364,7 +364,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 /* byte operand */
 #define b_mode			1
 /* operand size depends on prefixes */
-#define v_mode 			(b_mode + 1)
+#define v_mode			(b_mode + 1)
 /* word operand */
 #define w_mode			(v_mode + 1)
 /* double word operand  */
