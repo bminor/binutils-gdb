@@ -1,3 +1,9 @@
+2007-10-11  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-elf.c (obj_elf_section): When pushing a section, if
+	there is a comma then the following argument must be a subsection
+	number.
+
 2007-10-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/c-i386.texi: Update which instruction's operands are

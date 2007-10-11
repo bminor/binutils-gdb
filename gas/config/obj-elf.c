@@ -883,6 +883,7 @@ obj_elf_section (int push)
   int type, attr, dummy;
   int entsize;
   int linkonce;
+  subsegT new_subsection = -1;
 
 #ifndef TC_I370
   if (flag_mri)
@@ -921,7 +922,11 @@ obj_elf_section (int push)
       ++input_line_pointer;
       SKIP_WHITESPACE ();
 
-      if (*input_line_pointer == '"')
+      if (push)
+	{
+	  new_subsection = (subsegT) get_absolute_expression ();
+	}
+      else if (*input_line_pointer == '"')
 	{
 	  beg = demand_copy_C_string (&dummy);
 	  if (beg == NULL)
@@ -1030,6 +1035,9 @@ obj_elf_section (int push)
   demand_empty_rest_of_line ();
 
   obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push);
+
+  if (push && new_subsection != -1)
+    subseg_set (now_seg, new_subsection);
 }
 
 /* Change to the .data section.  */
@@ -1089,7 +1097,7 @@ obj_elf_struct (int i)
 static void
 obj_elf_subsection (int ignore ATTRIBUTE_UNUSED)
 {
-  register int temp;
+  int temp;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();

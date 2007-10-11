@@ -102,5 +102,6 @@ if { ([istarget "*-*-*elf*"]
     run_elf_list_test "section5" "" "-al" "-SW" "| grep \" \\\\.test\\\[0-9\\\]\""
     run_dump_test "struct" 
     run_dump_test "symver" 
-    run_elf_list_test "type" "" "" "-s" "| grep \"1 \\\[FONT\\\]\""
+    run_elf_list_test "type" "" "" "-s" "| grep \"1 \\\[FONTC\\\]\""
+    run_dump_test "section6" 
 }
