@@ -2145,10 +2145,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 }
 
 int
-md_estimate_size_before_relax (register fragS *fragP ATTRIBUTE_UNUSED,
-			       register segT segment_type ATTRIBUTE_UNUSED)
+md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
+			       segT segment_type ATTRIBUTE_UNUSED)
 {
-  printf (_("call tomd_estimate_size_before_relax \n"));
+  printf (_("call to md_estimate_size_before_relax \n"));
   abort ();
 }
 
@@ -2177,13 +2177,13 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
 	{
 	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			"Difference of symbols in different sections is not supported");
+			_("Difference of symbols in different sections is not supported"));
 	  return NULL;
 	}
     }
 
-  rel = (arelent *) xmalloc (sizeof (arelent));
-  rel->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  rel = xmalloc (sizeof (arelent));
+  rel->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
   rel->addend = fixp->fx_offset;
@@ -2193,7 +2193,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 #define DEBUG 0
 #if DEBUG
   fprintf (stderr, "%s\n", bfd_get_reloc_code_name (r_type));
-  fflush(stderr);
+  fflush (stderr);
 #endif
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
   if (rel->howto == NULL)
