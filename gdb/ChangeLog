@@ -1,3 +1,7 @@
+2007-10-11  Luis Machado  <luisgpm@br.ibm.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* buildsym.c (record_line): Remove empty lines followed by
