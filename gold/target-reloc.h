@@ -200,7 +200,7 @@ relocate_section(
 	  fprintf(stderr, _("%s: %s: undefined reference to '%s'\n"),
 		  program_name, relinfo->location(i, offset).c_str(),
 		  sym->name());
-	  // gold_exit(false);
+	  gold_exit(false);
 	}
 
       if (sym != NULL && sym->has_warning())

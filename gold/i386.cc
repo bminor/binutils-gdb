@@ -1291,7 +1291,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
 	      r_type);
-      // gold_exit(false);
+      gold_exit(false);
       break;
     }
 
@@ -1353,7 +1353,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
 	      r_type);
-      // gold_exit(false);
+      gold_exit(false);
       break;
 
     case elfcpp::R_386_TLS_GD:
@@ -1368,7 +1368,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
 	      r_type);
-      // gold_exit(false);
+      gold_exit(false);
       break;
 
     case elfcpp::R_386_TLS_LDM:
@@ -1391,7 +1391,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
 	      r_type);
-      // gold_exit(false);
+      gold_exit(false);
       break;
 
     case elfcpp::R_386_TLS_LDO_32:
@@ -1414,7 +1414,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
 	      r_type);
-      // gold_exit(false);
+      gold_exit(false);
       break;
     }
 }
