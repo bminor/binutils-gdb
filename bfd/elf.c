@@ -3358,13 +3358,12 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
     {
       /* We need a PT_DYNAMIC segment.  */
       ++segs;
+    }
 
-      if (info->relro)
-	{
-	  /* We need a PT_GNU_RELRO segment only when there is a
-	     PT_DYNAMIC segment.  */
-	  ++segs;
-	}
+  if (info->relro)
+    {
+      /* We need a PT_GNU_RELRO segment.  */
+      ++segs;
     }
 
   if (elf_tdata (abfd)->eh_frame_hdr)
@@ -3889,21 +3888,38 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  pm = &m->next;
 	}
 
-      if (dynsec != NULL && info->relro)
+      if (info->relro)
 	{
-	  /* We make a PT_GNU_RELRO segment only when there is a
-	     PT_DYNAMIC segment.  */
-	  amt = sizeof (struct elf_segment_map);
-	  m = bfd_zalloc (abfd, amt);
-	  if (m == NULL)
-	    goto error_return;
-	  m->next = NULL;
-	  m->p_type = PT_GNU_RELRO;
-	  m->p_flags = PF_R;
-	  m->p_flags_valid = 1;
+	  for (m = mfirst; m != NULL; m = m->next)
+	    {
+	      if (m->p_type == PT_LOAD)
+		{
+		  asection *last = m->sections[m->count - 1];
+		  bfd_vma vaddr = m->sections[0]->vma;
+		  bfd_vma filesz = last->vma - vaddr + last->size;
 
-	  *pm = m;
-	  pm = &m->next;
+		  if (vaddr < info->relro_end
+		      && vaddr >= info->relro_start
+		      && (vaddr + filesz) >= info->relro_end)
+		    break;
+		}
+	      }
+
+	  /* Make a PT_GNU_RELRO segment only when it isn't empty.  */
+	  if (m != NULL)
+	    {
+	      amt = sizeof (struct elf_segment_map);
+	      m = bfd_zalloc (abfd, amt);
+	      if (m == NULL)
+		goto error_return;
+	      m->next = NULL;
+	      m->p_type = PT_GNU_RELRO;
+	      m->p_flags = PF_R;
+	      m->p_flags_valid = 1;
+
+	      *pm = m;
+	      pm = &m->next;
+	    }
 	}
 
       free (sections);
