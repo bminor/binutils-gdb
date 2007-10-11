@@ -752,9 +752,34 @@ record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 		      * sizeof (struct linetable_entry))));
     }
 
+  pc = gdbarch_addr_bits_remove (current_gdbarch, pc);
+
+  /* Normally, we treat lines as unsorted.  But the end of sequence
+     marker is special.  We sort line markers at the same PC by line
+     number, so end of sequence markers (which have line == 0) appear
+     first.  This is right if the marker ends the previous function,
+     and there is no padding before the next function.  But it is
+     wrong if the previous line was empty and we are now marking a
+     switch to a different subfile.  We must leave the end of sequence
+     marker at the end of this group of lines, not sort the empty line
+     to after the marker.  The easiest way to accomplish this is to
+     delete any empty lines from our table, if they are followed by
+     end of sequence markers.  All we lose is the ability to set
+     breakpoints at some lines which contain no instructions
+     anyway.  */
+  if (line == 0 && subfile->line_vector->nitems > 0)
+    {
+      e = subfile->line_vector->item + subfile->line_vector->nitems - 1;
+      while (subfile->line_vector->nitems > 0 && e->pc == pc)
+	{
+	  e--;
+	  subfile->line_vector->nitems--;
+	}
+    }
+
   e = subfile->line_vector->item + subfile->line_vector->nitems++;
   e->line = line;
-  e->pc = gdbarch_addr_bits_remove (current_gdbarch, pc);
+  e->pc = pc;
 }
 
 /* Needed in order to sort line tables from IBM xcoff files.  Sigh!  */
