@@ -1,3 +1,7 @@
+2007-10-11  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Type): Fix typo: STT_FUNC not STT_FUNCTION.
+
 2007-10-08  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (AT): Rename to...

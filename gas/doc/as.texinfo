@@ -6191,21 +6191,35 @@ assemblers.
 The syntaxes supported are:
 
 @smallexample
-  .type <name> STT_FUNCTION
-  .type <name> STT_OBJECT
-
-  .type <name>,#function
-  .type <name>,#object
-
-  .type <name>,@@function
-  .type <name>,@@object
-
-  .type <name>,%function
-  .type <name>,%object
-  
-  .type <name>,"function"
-  .type <name>,"object"
+  .type <name> STT_<TYPE_IN_UPPER_CASE>
+  .type <name>,#<type>
+  .type <name>,@@<type>
+  .type <name>,%>type>
+  .type <name>,"<type>"
 @end smallexample
+
+The types supported are:
+
+@table @gcctabopt
+@item STT_FUNC
+@itemx function
+Mark the symbol as being a function name.
+
+@item STT_OBJECT
+@itemx object
+Mark the symbol as being a data object.
+
+@item STT_TLS
+@itemx tls_object
+Mark the symbol as being a thead-local data object.
+
+@item STT_COMMON
+@itemx common
+Mark the symbol as being a common data object.
+@end table
+
+Note: Some targets support extra types in addition to those listed above.
+
 @end ifset
 @end ifset
 
