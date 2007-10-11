@@ -32,6 +32,7 @@ alpha*)			gdb_target_cpu=alpha ;;
 am33_2.0*)              gdb_target_cpu=mn10300 ;;
 arm*)			gdb_target_cpu=arm ;;
 avr*)			gdb_target_cpu=avr ;;
+fido*)			gdb_target_cpu=m68k ;;
 hppa*)			gdb_target_cpu=pa ;;
 i[34567]86*)		gdb_target_cpu=i386 ;;
 m68hc11*|m6811*)	gdb_target_cpu=m68hc11 ;;
@@ -93,6 +94,8 @@ xscale-*-*)		gdb_target=embed
 avr-*-*)		gdb_target=avr ;;
 
 cris*)                  gdb_target=cris ;;
+
+fido-*-elf*)		gdb_target=monitor ;;
 
 frv-*-*)		gdb_target=frv ;;
 

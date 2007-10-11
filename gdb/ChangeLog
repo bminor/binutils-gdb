@@ -1,3 +1,7 @@
+2007-10-11  Kazu Hirata  <kazu@codesourcery.com>
+
+	* configure.tgt: Recognize fido-*-elf.
+
 2007-10-10  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 6.7 released.
