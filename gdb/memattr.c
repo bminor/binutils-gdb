@@ -65,7 +65,7 @@ static int target_mem_regions_valid;
 /* If this flag is set, gdb will assume that memory ranges not
    specified by the memory map have type MEM_NONE, and will
    emit errors on all accesses to that memory.  */
-static int inaccessible_by_default = 0;
+static int inaccessible_by_default = 1;
 
 static void
 show_inaccessible_by_default (struct ui_file *file, int from_tty,

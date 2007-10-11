@@ -1,3 +1,8 @@
+2007-10-11  Kazu Hirata  <kazu@codesourcery.com>
+
+	* memattr.c (inaccessible_by_default): Change the initial
+	value to 1.
+
 2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/2280

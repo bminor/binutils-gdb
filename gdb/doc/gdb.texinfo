@@ -7022,7 +7022,7 @@ explicitly described by the memory ranges as non-existent and refuse accesses
 to such memory.  The checks are only performed if there's at least one
 memory range defined.  If @code{off} is specified, make @value{GDBN}
 treat the memory not explicitly described by the memory ranges as RAM.
-The default value is @code{off}.
+The default value is @code{on}.
 @kindex show mem inaccessible-by-default
 @item show mem inaccessible-by-default
 Show the current handling of accesses to unknown memory.

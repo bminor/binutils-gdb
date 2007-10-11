@@ -1,3 +1,8 @@
+2007-10-11  Kazu Hirata  <kazu@codesourcery.com>
+
+	* gdb.texinfo: Mention that inaccessible-by-default is on by
+	default.
+
 2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (Target Conditionals): Remove VARIABLES_INSIDE_BLOCK.
