@@ -1,3 +1,8 @@
+2007-10-11  Kazu Hirata  <kazu@codesourcery.com>
+
+	* lib/gdb.exp (gdb_load_cmd): Print out $loadtimeout instead
+	of $timeout.
+
 2007-10-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.server/server-run.exp: Test for dynamic linker symbols.
