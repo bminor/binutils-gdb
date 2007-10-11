@@ -1,3 +1,8 @@
+2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/2280
+	* coffread.c (read_one_sym): Check for read errors.
+
 2007-10-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-nat.c (lin_lwp_attach_lwp): Use "Linux kernel 2.6.19"

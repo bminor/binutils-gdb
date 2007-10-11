@@ -1116,20 +1116,29 @@ read_one_sym (struct coff_symbol *cs,
 	      union internal_auxent *aux)
 {
   int i;
+  bfd_size_type bytes;
 
   cs->c_symnum = symnum;
-  bfd_bread (temp_sym, local_symesz, nlist_bfd_global);
+  bytes = bfd_bread (temp_sym, local_symesz, nlist_bfd_global);
+  if (bytes != local_symesz)
+    error ("%s: error reading symbols", current_objfile->name);
   bfd_coff_swap_sym_in (symfile_bfd, temp_sym, (char *) sym);
   cs->c_naux = sym->n_numaux & 0xff;
   if (cs->c_naux >= 1)
     {
-      bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
+      bytes  = bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
+      if (bytes != local_auxesz)
+	error ("%s: error reading symbols", current_objfile->name);
       bfd_coff_swap_aux_in (symfile_bfd, temp_aux, sym->n_type, sym->n_sclass,
 			    0, cs->c_naux, (char *) aux);
       /* If more than one aux entry, read past it (only the first aux
          is important). */
       for (i = 1; i < cs->c_naux; i++)
-	bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
+	{
+	  bytes = bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
+	  if (bytes != local_auxesz)
+	    error ("%s: error reading symbols", current_objfile->name);
+	}
     }
   cs->c_name = getsymname (sym);
   cs->c_value = sym->n_value;
