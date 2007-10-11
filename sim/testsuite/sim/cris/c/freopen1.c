@@ -1,7 +1,4 @@
-/* Check that basic freopen functionality works.
-#xfail: *-*-*
-   Currently doesn't work, because syscall.c:cb_syscall case
-   CB_SYS_write intercepts writes to fd 1 and 2.  */
+/* Check that basic freopen functionality works.  */
 
 #include <stdio.h>
 #include <stdlib.h>

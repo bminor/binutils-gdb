@@ -1,7 +1,7 @@
 2007-10-11  Jesper Nilsson  <jesper.nilsson@axis.com>
 
-	* callback.c (cb_is_stdin): Add.
-	* syscall.c (cb_syscall): Test for stdin, not just fd 0.
+	* callback.c (cb_is_stdin, cb_is_stdout, cb_is_stderr): Add functions.
+	* syscall.c (cb_syscall): Test for stdin/out/err, not just fd 0/1/2.
 
 2007-08-10  Nick Clifton  <nickc@redhat.com>
 

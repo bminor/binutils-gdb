@@ -344,12 +344,12 @@ cb_syscall (cb, sc)
 		errcode = EINVAL;
 		goto FinishSyscall;
 	      }
-	    if (fd == 1)
+	    if (cb_is_stdout(cb, fd))
 	      {
 		result = (int) (*cb->write_stdout) (cb, buf, bytes_read);
 		(*cb->flush_stdout) (cb);
 	      }
-	    else if (fd == 2)
+	    else if (cb_is_stderr(cb, fd))
 	      {
 		result = (int) (*cb->write_stderr) (cb, buf, bytes_read);
 		(*cb->flush_stderr) (cb);
