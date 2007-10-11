@@ -1,5 +1,10 @@
 2007-10-11  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/5155
+	* config/tc-msp430.c: Fix spelling typos.
+
+2007-10-11  Nick Clifton  <nickc@redhat.com>
+
 	* doc/as.texinfo (Type): Fix typo: STT_FUNC not STT_FUNCTION.
 
 2007-10-08  Maciej W. Rozycki  <macro@linux-mips.org>
