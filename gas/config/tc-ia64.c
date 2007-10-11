@@ -227,7 +227,7 @@ static struct
 
     /* If X_op is != O_absent, the registername for the instruction's
        qualifying predicate.  If NULL, p0 is assumed for instructions
-       that are predicatable.  */
+       that are predictable.  */
     expressionS qp;
 
     /* Optimize for which CPU.  */
@@ -743,7 +743,7 @@ static struct
   unw_rec_list *list;
   unw_rec_list *tail;
 
-  /* Any unwind entires that should be attached to the current slot
+  /* Any unwind entries that should be attached to the current slot
      that an insn is being constructed for.  */
   unw_rec_list *current_entry;
 
@@ -1079,12 +1079,12 @@ set_regstack (ins, locs, outs, rots)
   sof = ins + locs + outs;
   if (sof > 96)
     {
-      as_bad ("Size of frame exceeds maximum of 96 registers");
+      as_bad (_("Size of frame exceeds maximum of 96 registers"));
       return 0;
     }
   if (rots > sof)
     {
-      as_warn ("Size of rotating registers exceeds frame size");
+      as_warn (_("Size of rotating registers exceeds frame size"));
       return 0;
     }
   md.in.base = REG_GR + 32;
@@ -1179,7 +1179,7 @@ ia64_flush_insns ()
   subseg_set (saved_seg, saved_subseg);
 
   if (md.qp.X_op == O_register)
-    as_bad ("qualifying predicate not followed by instruction");
+    as_bad (_("qualifying predicate not followed by instruction"));
 }
 
 static void
@@ -1252,7 +1252,7 @@ output_R1_format (f, rtype, rlen)
   if (rtype == body)
     r = 1;
   else if (rtype != prologue)
-    as_bad ("record type is not valid");
+    as_bad (_("record type is not valid"));
 
   byte = UNW_R1 | (r << 5) | (rlen & 0x1f);
   (*f) (1, &byte, NULL);
@@ -1292,7 +1292,7 @@ output_R3_format (f, rtype, rlen)
   if (rtype == body)
     r = 1;
   else if (rtype != prologue)
-    as_bad ("record type is not valid");
+    as_bad (_("record type is not valid"));
   bytes[0] = (UNW_R3 | r);
   count = output_leb128 (bytes + 1, rlen, 0);
   (*f) (count + 1, bytes, NULL);
@@ -1369,7 +1369,7 @@ output_P3_format (f, rtype, reg)
       r = 11;
       break;
     default:
-      as_bad ("Invalid record type for P3 format.");
+      as_bad (_("Invalid record type for P3 format."));
     }
   bytes[0] = (UNW_P3 | (r >> 1));
   bytes[1] = (((r & 1) << 7) | reg);
@@ -1414,7 +1414,7 @@ output_P6_format (f, rtype, rmask)
   if (rtype == gr_mem)
     r = 1;
   else if (rtype != fr_mem)
-    as_bad ("Invalid record type for format P6");
+    as_bad (_("Invalid record type for format P6"));
   byte = (UNW_P6 | (r << 4) | (rmask & 0x0f));
   (*f) (1, &byte, NULL);
 }
@@ -1607,7 +1607,7 @@ output_B1_format (f, rtype, label)
   if (rtype == copy_state)
     r = 1;
   else if (rtype != label_state)
-    as_bad ("Invalid record type for format B1");
+    as_bad (_("Invalid record type for format B1"));
 
   byte = (UNW_B1 | (r << 5) | (label & 0x1f));
   (*f) (1, &byte, NULL);
@@ -1668,7 +1668,7 @@ output_B4_format (f, rtype, label)
   if (rtype == copy_state)
     r = 1;
   else if (rtype != label_state)
-    as_bad ("Invalid record type for format B1");
+    as_bad (_("Invalid record type for format B1"));
 
   bytes[0] = (UNW_B4 | (r << 3));
   count += output_leb128 (bytes + 1, label, 0);
@@ -1703,7 +1703,7 @@ output_X1_format (f, rtype, ab, reg, t, w1)
   if (rtype == spill_sprel)
     r = 1;
   else if (rtype != spill_psprel)
-    as_bad ("Invalid record type for format X1");
+    as_bad (_("Invalid record type for format X1"));
   bytes[1] = ((r << 7) | format_ab_reg (ab, reg));
   count += output_leb128 (bytes + 2, t, 0);
   count += output_leb128 (bytes + count, w1, 0);
@@ -1743,7 +1743,7 @@ output_X3_format (f, rtype, qp, ab, reg, t, w1)
   if (rtype == spill_sprel_p)
     r = 1;
   else if (rtype != spill_psprel_p)
-    as_bad ("Invalid record type for format X3");
+    as_bad (_("Invalid record type for format X3"));
   bytes[1] = ((r << 7) | (qp & 0x3f));
   bytes[2] = format_ab_reg (ab, reg);
   count += output_leb128 (bytes + 3, t, 0);
@@ -1779,7 +1779,7 @@ check_pending_save (void)
     {
       unw_rec_list *cur, *prev;
 
-      as_warn ("Previous .save incomplete");
+      as_warn (_("Previous .save incomplete"));
       for (cur = unwind.list, prev = NULL; cur; )
 	if (&cur->r.record.p == unwind.pending_saves)
 	  {
@@ -2656,7 +2656,7 @@ process_one_record (ptr, f)
 	}
       break;
     case spill_mask:
-      as_bad ("spill_mask record unimplemented.");
+      as_bad (_("spill_mask record unimplemented."));
       break;
     case priunat_when_gr:
     case priunat_when_mem:
@@ -2713,7 +2713,7 @@ process_one_record (ptr, f)
 			ptr->r.record.x.t);
       break;
     default:
-      as_bad ("record_type_not_valid");
+      as_bad (_("record_type_not_valid"));
       break;
     }
 }
@@ -2802,7 +2802,7 @@ set_imask (region, regmask, t, type)
     {
       if (i >= imask_size)
 	{
-	  as_bad ("Ignoring attempt to spill beyond end of region");
+	  as_bad (_("Ignoring attempt to spill beyond end of region"));
 	  return;
 	}
 
@@ -2862,7 +2862,7 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag, before_relax)
 	    break;
 
 	  case rs_space:
-	    as_fatal ("only constant space allocation is supported");
+	    as_fatal (_("Only constant space allocation is supported"));
 	    break;
 
 	  case rs_align:
@@ -2876,7 +2876,7 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag, before_relax)
 	  case rs_org:
 	    if (first_frag->fr_symbol)
 	      {
-		as_fatal ("only constant offsets are supported");
+		as_fatal (_("Only constant offsets are supported"));
 		break;
 	      }
 	  case rs_fill:
@@ -2899,7 +2899,7 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag, before_relax)
 	 It is too difficult to recover safely from this problem, so we just
 	 exit with an error.  */
       if (first_frag == NULL)
-	as_fatal ("Section switching in code is not supported.");
+	as_fatal (_("Section switching in code is not supported."));
     }
 
   /* Add in the used part of the last frag.  */
@@ -2944,7 +2944,7 @@ fixup_unw_records (list, before_relax)
   for (ptr = list; ptr; ptr = ptr->next)
     {
       if (ptr->slot_number == SLOT_NUM_NOT_SET)
-	as_bad (" Insn slot not set in unwind record.");
+	as_bad (_(" Insn slot not set in unwind record."));
       t = slot_index (ptr->slot_number, ptr->slot_frag,
 		      first_addr, first_frag, before_relax);
       switch (ptr->r.type)
@@ -3018,7 +3018,7 @@ fixup_unw_records (list, before_relax)
 	case frgr_mem:
 	  if (!region)
 	    {
-	      as_bad ("frgr_mem record before region record!");
+	      as_bad (_("frgr_mem record before region record!"));
 	      return;
 	    }
 	  region->r.record.r.mask.fr_mem |= ptr->r.record.p.frmask;
@@ -3029,7 +3029,7 @@ fixup_unw_records (list, before_relax)
 	case fr_mem:
 	  if (!region)
 	    {
-	      as_bad ("fr_mem record before region record!");
+	      as_bad (_("fr_mem record before region record!"));
 	      return;
 	    }
 	  region->r.record.r.mask.fr_mem |= ptr->r.record.p.frmask;
@@ -3038,7 +3038,7 @@ fixup_unw_records (list, before_relax)
 	case gr_mem:
 	  if (!region)
 	    {
-	      as_bad ("gr_mem record before region record!");
+	      as_bad (_("gr_mem record before region record!"));
 	      return;
 	    }
 	  region->r.record.r.mask.gr_mem |= ptr->r.record.p.grmask;
@@ -3047,7 +3047,7 @@ fixup_unw_records (list, before_relax)
 	case br_mem:
 	  if (!region)
 	    {
-	      as_bad ("br_mem record before region record!");
+	      as_bad (_("br_mem record before region record!"));
 	      return;
 	    }
 	  region->r.record.r.mask.br_mem |= ptr->r.record.p.brmask;
@@ -3057,7 +3057,7 @@ fixup_unw_records (list, before_relax)
 	case gr_gr:
 	  if (!region)
 	    {
-	      as_bad ("gr_gr record before region record!");
+	      as_bad (_("gr_gr record before region record!"));
 	      return;
 	    }
 	  set_imask (region, ptr->r.record.p.grmask, t, 2);
@@ -3065,7 +3065,7 @@ fixup_unw_records (list, before_relax)
 	case br_gr:
 	  if (!region)
 	    {
-	      as_bad ("br_gr record before region record!");
+	      as_bad (_("br_gr record before region record!"));
 	      return;
 	    }
 	  set_imask (region, ptr->r.record.p.brmask, t, 3);
@@ -3182,11 +3182,11 @@ parse_predicate_and_operand (e, qp, po)
   *qp = e->X_add_number - REG_P;
   if (e->X_op != O_register || *qp > 63)
     {
-      as_bad ("First operand to .%s must be a predicate", po);
+      as_bad (_("First operand to .%s must be a predicate"), po);
       *qp = 0;
     }
   else if (*qp == 0)
-    as_warn ("Pointless use of p0 as first operand to .%s", po);
+    as_warn (_("Pointless use of p0 as first operand to .%s"), po);
   if (sep == ',')
     sep = parse_operand (e, ',');
   else
@@ -3243,7 +3243,7 @@ convert_expr_to_ab_reg (e, ab, regp, po, n)
 	case REG_AR + AR_LC:	*regp = 10; break;
 
 	default:
-	  as_bad ("Operand %d to .%s must be a preserved register", n, po);
+	  as_bad (_("Operand %d to .%s must be a preserved register"), n, po);
 	  break;
 	}
     }
@@ -3280,7 +3280,7 @@ convert_expr_to_xy_reg (e, xy, regp, po, n)
       *regp = reg - REG_BR;
     }
   else
-    as_bad ("Operand %d to .%s must be a writable register", n, po);
+    as_bad (_("Operand %d to .%s must be a writable register"), n, po);
 }
 
 static void
@@ -3306,7 +3306,7 @@ dot_radix (dummy)
   ch = get_symbol_end ();
   ia64_canonicalize_symbol_name (radix);
   if (strcasecmp (radix, "C"))
-    as_bad ("Radix `%s' unsupported or invalid", radix);
+    as_bad (_("Radix `%s' unsupported or invalid"), radix);
   *input_line_pointer = ch;
   demand_empty_rest_of_line ();
 }
@@ -3337,12 +3337,12 @@ unwind_diagnostic (const char * region, const char *directive)
 {
   if (md.unwind_check == unwind_check_warning)
     {
-      as_warn (".%s outside of %s", directive, region);
+      as_warn (_(".%s outside of %s"), directive, region);
       return -1;
     }
   else
     {
-      as_bad (".%s outside of %s", directive, region);
+      as_bad (_(".%s outside of %s"), directive, region);
       ignore_rest_of_line ();
       return 0;
     }
@@ -3429,7 +3429,7 @@ add_unwind_entry (ptr, sep)
 	if (!warned)
 	  {
 	    warned = 1;
-	    as_warn ("Tags on unwind pseudo-ops aren't supported, yet");
+	    as_warn (_("Tags on unwind pseudo-ops aren't supported, yet"));
 	  }
       }
       *input_line_pointer = ch;
@@ -3452,7 +3452,7 @@ dot_fframe (dummy)
 
   if (e.X_op != O_constant)
     {
-      as_bad ("First operand to .fframe must be a constant");
+      as_bad (_("First operand to .fframe must be a constant"));
       e.X_add_number = 0;
     }
   add_unwind_entry (output_mem_stack_f (e.X_add_number), sep);
@@ -3473,7 +3473,7 @@ dot_vframe (dummy)
   reg = e.X_add_number - REG_GR;
   if (e.X_op != O_register || reg > 127)
     {
-      as_bad ("First operand to .vframe must be a general register");
+      as_bad (_("First operand to .vframe must be a general register"));
       reg = 0;
     }
   add_unwind_entry (output_mem_stack_v (), sep);
@@ -3481,7 +3481,7 @@ dot_vframe (dummy)
     add_unwind_entry (output_psp_gr (reg), NOT_A_CHAR);
   else if (reg != unwind.prologue_gr
 		  + (unsigned) popcount (unwind.prologue_mask & (-2 << 1)))
-    as_warn ("Operand of .vframe contradicts .prologue");
+    as_warn (_("Operand of .vframe contradicts .prologue"));
 }
 
 static void
@@ -3492,7 +3492,7 @@ dot_vframesp (psp)
   int sep;
 
   if (psp)
-    as_warn (".vframepsp is meaningless, assuming .vframesp was meant");
+    as_warn (_(".vframepsp is meaningless, assuming .vframesp was meant"));
 
   if (!in_prologue ("vframesp"))
     return;
@@ -3500,7 +3500,7 @@ dot_vframesp (psp)
   sep = parse_operand (&e, ',');
   if (e.X_op != O_constant)
     {
-      as_bad ("Operand to .vframesp must be a constant (sp-relative offset)");
+      as_bad (_("Operand to .vframesp must be a constant (sp-relative offset)"));
       e.X_add_number = 0;
     }
   add_unwind_entry (output_mem_stack_v (), sep);
@@ -3528,13 +3528,13 @@ dot_save (dummy)
   /* Make sure its a valid ar.xxx reg, OR its br0, aka 'rp'.  */
   if (e1.X_op != O_register)
     {
-      as_bad ("First operand to .save not a register");
+      as_bad (_("First operand to .save not a register"));
       reg1 = REG_PR; /* Anything valid is good here.  */
     }
   reg2 = e2.X_add_number - REG_GR;
   if (e2.X_op != O_register || reg2 > 127)
     {
-      as_bad ("Second operand to .save not a valid register");
+      as_bad (_("Second operand to .save not a valid register"));
       reg2 = 0;
     }
   switch (reg1)
@@ -3565,7 +3565,7 @@ dot_save (dummy)
 	add_unwind_entry (output_pfs_gr (reg2), NOT_A_CHAR);
       else if (reg2 != unwind.prologue_gr
 		       + (unsigned) popcount (unwind.prologue_mask & (-4 << 1)))
-	as_warn ("Second operand of .save contradicts .prologue");
+	as_warn (_("Second operand of .save contradicts .prologue"));
       break;
     case REG_AR + AR_LC:
       add_unwind_entry (output_lc_when (), sep);
@@ -3576,7 +3576,7 @@ dot_save (dummy)
       if (! (unwind.prologue_mask & 8))
 	add_unwind_entry (output_rp_gr (reg2), NOT_A_CHAR);
       else if (reg2 != unwind.prologue_gr)
-	as_warn ("Second operand of .save contradicts .prologue");
+	as_warn (_("Second operand of .save contradicts .prologue"));
       break;
     case REG_PR:
       add_unwind_entry (output_preds_when (), sep);
@@ -3584,14 +3584,14 @@ dot_save (dummy)
 	add_unwind_entry (output_preds_gr (reg2), NOT_A_CHAR);
       else if (reg2 != unwind.prologue_gr
 		       + (unsigned) popcount (unwind.prologue_mask & (-1 << 1)))
-	as_warn ("Second operand of .save contradicts .prologue");
+	as_warn (_("Second operand of .save contradicts .prologue"));
       break;
     case REG_PRIUNAT:
       add_unwind_entry (output_priunat_when_gr (), sep);
       add_unwind_entry (output_priunat_gr (reg2), NOT_A_CHAR);
       break;
     default:
-      as_bad ("First operand to .save not a valid register");
+      as_bad (_("First operand to .save not a valid register"));
       add_unwind_entry (NULL, sep);
       break;
     }
@@ -3610,7 +3610,7 @@ dot_restore (dummy)
 
   sep = parse_operand (&e1, ',');
   if (e1.X_op != O_register || e1.X_add_number != REG_GR + 12)
-    as_bad ("First operand to .restore must be stack pointer (sp)");
+    as_bad (_("First operand to .restore must be stack pointer (sp)"));
 
   if (sep == ',')
     {
@@ -3619,7 +3619,7 @@ dot_restore (dummy)
       sep = parse_operand (&e2, ',');
       if (e2.X_op != O_constant || e2.X_add_number < 0)
 	{
-	  as_bad ("Second operand to .restore must be a constant >= 0");
+	  as_bad (_("Second operand to .restore must be a constant >= 0"));
 	  e2.X_add_number = 0;
 	}
       ecount = e2.X_add_number;
@@ -3629,7 +3629,7 @@ dot_restore (dummy)
 
   if (ecount >= unwind.prologue_count)
     {
-      as_bad ("Epilogue count of %lu exceeds number of nested prologues (%u)",
+      as_bad (_("Epilogue count of %lu exceeds number of nested prologues (%u)"),
 	      ecount + 1, unwind.prologue_count);
       ecount = 0;
     }
@@ -3717,7 +3717,7 @@ start_unwind_section (const segT text_seg, int sec_index)
   text_name = sec_text_name;
   if (strncmp (text_name, "_info", 5) == 0)
     {
-      as_bad ("Illegal section name `%s' (causes unwind section name clash)",
+      as_bad (_("Illegal section name `%s' (causes unwind section name clash)"),
 	      text_name);
       ignore_rest_of_line ();
       return;
@@ -3753,7 +3753,7 @@ start_unwind_section (const segT text_seg, int sec_index)
 
       if (group_name == NULL)
 	{
-	  as_bad ("Group section `%s' has no group signature",
+	  as_bad (_("Group section `%s' has no group signature"),
 		  sec_text_name);
 	  ignore_rest_of_line ();
 	  return;
@@ -3911,7 +3911,7 @@ dot_altrp (dummy)
   reg = e.X_add_number - REG_BR;
   if (e.X_op != O_register || reg > 7)
     {
-      as_bad ("First operand to .altrp not a valid branch register");
+      as_bad (_("First operand to .altrp not a valid branch register"));
       reg = 0;
     }
   add_unwind_entry (output_rp_br (reg), 0);
@@ -3941,12 +3941,12 @@ dot_savemem (psprel)
   /* Make sure its a valid ar.xxx reg, OR its br0, aka 'rp'.  */
   if (e1.X_op != O_register)
     {
-      as_bad ("First operand to .%s not a register", po);
+      as_bad (_("First operand to .%s not a register"), po);
       reg1 = REG_PR; /* Anything valid is good here.  */
     }
   if (e2.X_op != O_constant)
     {
-      as_bad ("Second operand to .%s not a constant", po);
+      as_bad (_("Second operand to .%s not a constant"), po);
       val = 0;
     }
 
@@ -4013,7 +4013,7 @@ dot_savemem (psprel)
 			 : output_priunat_sprel) (val), NOT_A_CHAR);
       break;
     default:
-      as_bad ("First operand to .%s not a valid register", po);
+      as_bad (_("First operand to .%s not a valid register"), po);
       add_unwind_entry (NULL, sep);
       break;
     }
@@ -4037,7 +4037,7 @@ dot_saveg (dummy)
       || e.X_add_number <= 0
       || e.X_add_number > 0xf)
     {
-      as_bad ("First operand to .save.g must be a positive 4-bit constant");
+      as_bad (_("First operand to .save.g must be a positive 4-bit constant"));
       grmask = 0;
     }
 
@@ -4050,12 +4050,12 @@ dot_saveg (dummy)
       reg = e.X_add_number - REG_GR;
       if (e.X_op != O_register || reg > 127)
 	{
-	  as_bad ("Second operand to .save.g must be a general register");
+	  as_bad (_("Second operand to .save.g must be a general register"));
 	  reg = 0;
 	}
       else if (reg > 128U - n)
 	{
-	  as_bad ("Second operand to .save.g must be the first of %d general registers", n);
+	  as_bad (_("Second operand to .save.g must be the first of %d general registers"), n);
 	  reg = 0;
 	}
       add_unwind_entry (output_gr_gr (grmask, reg), 0);
@@ -4079,7 +4079,7 @@ dot_savef (dummy)
       || e.X_add_number <= 0
       || e.X_add_number > 0xfffff)
     {
-      as_bad ("Operand to .save.f must be a positive 20-bit constant");
+      as_bad (_("Operand to .save.f must be a positive 20-bit constant"));
       e.X_add_number = 0;
     }
   add_unwind_entry (output_fr_mem (e.X_add_number), 0);
@@ -4103,7 +4103,7 @@ dot_saveb (dummy)
       || e.X_add_number <= 0
       || e.X_add_number > 0x1f)
     {
-      as_bad ("First operand to .save.b must be a positive 5-bit constant");
+      as_bad (_("First operand to .save.b must be a positive 5-bit constant"));
       brmask = 0;
     }
 
@@ -4116,12 +4116,12 @@ dot_saveb (dummy)
       reg = e.X_add_number - REG_GR;
       if (e.X_op != O_register || reg > 127)
 	{
-	  as_bad ("Second operand to .save.b must be a general register");
+	  as_bad (_("Second operand to .save.b must be a general register"));
 	  reg = 0;
 	}
       else if (reg > 128U - n)
 	{
-	  as_bad ("Second operand to .save.b must be the first of %d general registers", n);
+	  as_bad (_("Second operand to .save.b must be the first of %d general registers"), n);
 	  reg = 0;
 	}
       add_unwind_entry (output_br_gr (brmask, reg), 0);
@@ -4148,7 +4148,7 @@ dot_savegf (dummy)
       || e1.X_add_number < 0
       || e1.X_add_number > 0xf)
     {
-      as_bad ("First operand to .save.gf must be a non-negative 4-bit constant");
+      as_bad (_("First operand to .save.gf must be a non-negative 4-bit constant"));
       e1.X_op = O_absent;
       e1.X_add_number = 0;
     }
@@ -4156,7 +4156,7 @@ dot_savegf (dummy)
       || e2.X_add_number < 0
       || e2.X_add_number > 0xfffff)
     {
-      as_bad ("Second operand to .save.gf must be a non-negative 20-bit constant");
+      as_bad (_("Second operand to .save.gf must be a non-negative 20-bit constant"));
       e2.X_op = O_absent;
       e2.X_add_number = 0;
     }
@@ -4164,7 +4164,7 @@ dot_savegf (dummy)
       && e2.X_op == O_constant
       && e1.X_add_number == 0
       && e2.X_add_number == 0)
-    as_bad ("Operands to .save.gf may not be both zero");
+    as_bad (_("Operands to .save.gf may not be both zero"));
 
   add_unwind_entry (output_frgr_mem (e1.X_add_number, e2.X_add_number), 0);
 }
@@ -4182,7 +4182,7 @@ dot_spill (dummy)
 
   if (e.X_op != O_constant)
     {
-      as_bad ("Operand to .spill must be a constant");
+      as_bad (_("Operand to .spill must be a constant"));
       e.X_add_number = 0;
     }
   add_unwind_entry (output_spill_base (e.X_add_number), 0);
@@ -4253,7 +4253,7 @@ dot_spillmem (psprel)
     e.X_op = O_absent;
   if (e.X_op != O_constant)
     {
-      as_bad ("Operand %d to .%s must be a constant", 2 + pred, po);
+      as_bad (_("Operand %d to .%s must be a constant"), 2 + pred, po);
       e.X_add_number = 0;
     }
 
@@ -4275,7 +4275,7 @@ get_saved_prologue_count (lbl)
   if (lpc != NULL)
     return lpc->prologue_count;
 
-  as_bad ("Missing .label_state %ld", lbl);
+  as_bad (_("Missing .label_state %ld"), lbl);
   return 1;
 }
 
@@ -4332,7 +4332,7 @@ dot_label_state (dummy)
     save_prologue_count (e.X_add_number, unwind.prologue_count);
   else
     {
-      as_bad ("Operand to .label_state must be a constant");
+      as_bad (_("Operand to .label_state must be a constant"));
       e.X_add_number = 0;
     }
   add_unwind_entry (output_label_state (e.X_add_number), 0);
@@ -4352,7 +4352,7 @@ dot_copy_state (dummy)
     unwind.prologue_count = get_saved_prologue_count (e.X_add_number);
   else
     {
-      as_bad ("Operand to .copy_state must be a constant");
+      as_bad (_("Operand to .copy_state must be a constant"));
       e.X_add_number = 0;
     }
   add_unwind_entry (output_copy_state (e.X_add_number), 0);
@@ -4376,13 +4376,13 @@ dot_unwabi (dummy)
 
   if (e1.X_op != O_constant)
     {
-      as_bad ("First operand to .unwabi must be a constant");
+      as_bad (_("First operand to .unwabi must be a constant"));
       e1.X_add_number = 0;
     }
 
   if (e2.X_op != O_constant)
     {
-      as_bad ("Second operand to .unwabi must be a constant");
+      as_bad (_("Second operand to .unwabi must be a constant"));
       e2.X_add_number = 0;
     }
 
@@ -4419,7 +4419,7 @@ dot_proc (dummy)
     {
       (md.unwind_check == unwind_check_warning
        ? as_warn
-       : as_bad) ("Missing .endp after previous .proc");
+       : as_bad) (_("Missing .endp after previous .proc"));
       while (unwind.proc_pending.next)
 	{
 	  pending = unwind.proc_pending.next;
@@ -4438,12 +4438,12 @@ dot_proc (dummy)
       c = get_symbol_end ();
       p = input_line_pointer;
       if (!*name)
-	as_bad ("Empty argument of .proc");
+	as_bad (_("Empty argument of .proc"));
       else
 	{
 	  sym = symbol_find_or_make (name);
 	  if (S_IS_DEFINED (sym))
-	    as_bad ("`%s' was already defined", name);
+	    as_bad (_("`%s' was already defined"), name);
 	  else if (!last_pending)
 	    {
 	      unwind.proc_pending.sym = sym;
@@ -4487,7 +4487,7 @@ dot_body (dummy)
   if (!in_procedure ("body"))
     return;
   if (!unwind.prologue && !unwind.body && unwind.insn)
-    as_warn ("Initial .body should precede any instructions");
+    as_warn (_("Initial .body should precede any instructions"));
   check_pending_save ();
 
   unwind.prologue = 0;
@@ -4507,12 +4507,12 @@ dot_prologue (dummy)
     return;
   if (unwind.prologue)
     {
-      as_bad (".prologue within prologue");
+      as_bad (_(".prologue within prologue"));
       ignore_rest_of_line ();
       return;
     }
   if (!unwind.body && unwind.insn)
-    as_warn ("Initial .prologue should precede any instructions");
+    as_warn (_("Initial .prologue should precede any instructions"));
 
   if (!is_it_end_of_statement ())
     {
@@ -4522,9 +4522,9 @@ dot_prologue (dummy)
       if (e.X_op != O_constant
 	  || e.X_add_number < 0
 	  || e.X_add_number > 0xf)
-	as_bad ("First operand to .prologue must be a positive 4-bit constant");
+	as_bad (_("First operand to .prologue must be a positive 4-bit constant"));
       else if (e.X_add_number == 0)
-	as_warn ("Pointless use of zero first operand to .prologue");
+	as_warn (_("Pointless use of zero first operand to .prologue"));
       else
 	mask = e.X_add_number;
 	n = popcount (mask);
@@ -4538,18 +4538,18 @@ dot_prologue (dummy)
 	  && e.X_add_number < 128)
 	{
 	  if (md.unwind_check == unwind_check_error)
-	    as_warn ("Using a constant as second operand to .prologue is deprecated");
+	    as_warn (_("Using a constant as second operand to .prologue is deprecated"));
 	  grsave = e.X_add_number;
 	}
       else if (e.X_op != O_register
 	       || (grsave = e.X_add_number - REG_GR) > 127)
 	{
-	  as_bad ("Second operand to .prologue must be a general register");
+	  as_bad (_("Second operand to .prologue must be a general register"));
 	  grsave = 0;
 	}
       else if (grsave > 128U - n)
 	{
-	  as_bad ("Second operand to .prologue must be the first of %d general registers", n);
+	  as_bad (_("Second operand to .prologue must be the first of %d general registers"), n);
 	  grsave = 0;
 	}
 
@@ -4662,7 +4662,7 @@ dot_endp (dummy)
 	  symbolS *sym = pending->sym;
 
 	  if (!S_IS_DEFINED (sym))
-	    as_bad ("`%s' was not defined within procedure", S_GET_NAME (sym));
+	    as_bad (_("`%s' was not defined within procedure"), S_GET_NAME (sym));
 	  else if (S_GET_SIZE (sym) == 0
 		   && symbol_get_obj (sym)->size == NULL)
 	    {
@@ -4700,7 +4700,7 @@ dot_endp (dummy)
       if (!*name)
 	(md.unwind_check == unwind_check_warning
 	 ? as_warn
-	 : as_bad) ("Empty argument of .endp");
+	 : as_bad) (_("Empty argument of .endp"));
       else
 	{
 	  symbolS *sym = symbol_find (name);
@@ -4714,7 +4714,7 @@ dot_endp (dummy)
 		}
 	    }
 	  if (!sym || !pending)
-	    as_warn ("`%s' was not specified with previous .proc", name);
+	    as_warn (_("`%s' was not specified with previous .proc"), name);
 	}
       *p = c;
       SKIP_WHITESPACE ();
@@ -4729,7 +4729,7 @@ dot_endp (dummy)
   if (unwind.proc_pending.sym
       && S_GET_NAME (unwind.proc_pending.sym)
       && strcmp (S_GET_NAME (unwind.proc_pending.sym), FAKE_LABEL_NAME))
-    as_warn ("`%s' should be an operand to this .endp",
+    as_warn (_("`%s' should be an operand to this .endp"),
 	     S_GET_NAME (unwind.proc_pending.sym));
   while (unwind.proc_pending.next)
     {
@@ -4772,7 +4772,7 @@ dot_regstk (dummy)
   return;
 
  err:
-  as_bad ("Comma expected");
+  as_bad (_("Comma expected"));
   ignore_rest_of_line ();
 }
 
@@ -4814,7 +4814,7 @@ dot_rot (type)
       SKIP_WHITESPACE ();
       if (*input_line_pointer != '[')
 	{
-	  as_bad ("Expected '['");
+	  as_bad (_("Expected '['"));
 	  goto err;
 	}
       ++input_line_pointer;	/* skip '[' */
@@ -4823,12 +4823,12 @@ dot_rot (type)
 
       if (*input_line_pointer++ != ']')
 	{
-	  as_bad ("Expected ']'");
+	  as_bad (_("Expected ']'"));
 	  goto err;
 	}
       if (num_regs <= 0)
 	{
-	  as_bad ("Number of elements must be positive");
+	  as_bad (_("Number of elements must be positive"));
 	  goto err;
 	}
       SKIP_WHITESPACE ();
@@ -4839,7 +4839,7 @@ dot_rot (type)
 	case DYNREG_GR:
 	  if (num_alloced > md.rot.num_regs)
 	    {
-	      as_bad ("Used more than the declared %d rotating registers",
+	      as_bad (_("Used more than the declared %d rotating registers"),
 		      md.rot.num_regs);
 	      goto err;
 	    }
@@ -4847,14 +4847,14 @@ dot_rot (type)
 	case DYNREG_FR:
 	  if (num_alloced > 96)
 	    {
-	      as_bad ("Used more than the available 96 rotating registers");
+	      as_bad (_("Used more than the available 96 rotating registers"));
 	      goto err;
 	    }
 	  break;
 	case DYNREG_PR:
 	  if (num_alloced > 48)
 	    {
-	      as_bad ("Used more than the available 48 rotating registers");
+	      as_bad (_("Used more than the available 48 rotating registers"));
 	      goto err;
 	    }
 	  break;
@@ -4882,7 +4882,7 @@ dot_rot (type)
 
       if (hash_insert (md.dynreg_hash, name, dr))
 	{
-	  as_bad ("Attempt to redefine register set `%s'", name);
+	  as_bad (_("Attempt to redefine register set `%s'"), name);
 	  obstack_free (&notes, name);
 	  goto err;
 	}
@@ -4950,7 +4950,7 @@ dot_psr (dummy)
       else if (strcmp (option, "abi64") == 0)
 	md.flags |= EF_IA_64_ABI64;
       else
-	as_bad ("Unknown psr option `%s'", option);
+	as_bad (_("Unknown psr option `%s'"), option);
       *input_line_pointer = ch;
 
       SKIP_WHITESPACE ();
@@ -5002,7 +5002,7 @@ cross_section (ref, cons, ua)
 
       if (input_line_pointer == start)
 	{
-	  as_bad ("Missing section name");
+	  as_bad (_("Missing section name"));
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -5012,7 +5012,7 @@ cross_section (ref, cons, ua)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("Comma expected after section name");
+      as_bad (_("Comma expected after section name"));
       ignore_rest_of_line ();
       return;
     }
@@ -5023,7 +5023,7 @@ cross_section (ref, cons, ua)
   section_count = bfd_count_sections(stdoutput);
   obj_elf_section (0);
   if (section_count != bfd_count_sections(stdoutput))
-    as_warn ("Creating sections with .xdataN/.xrealN/.xstringZ is deprecated.");
+    as_warn (_("Creating sections with .xdataN/.xrealN/.xstringZ is deprecated."));
   input_line_pointer = end;
   saved_auto_align = md.auto_align;
   if (ua)
@@ -6252,7 +6252,7 @@ parse_operands (idesc)
       end = strchr (input_line_pointer, '=');
       if (!end)
 	{
-	  as_bad ("Expected separator `='");
+	  as_bad (_("Expected separator `='"));
 	  return 0;
 	}
       input_line_pointer = end + 1;
@@ -6285,14 +6285,14 @@ parse_operands (idesc)
       if (sep == '=')
 	{
 	  if (num_outputs > 0)
-	    as_bad ("Duplicate equal sign (=) in instruction");
+	    as_bad (_("Duplicate equal sign (=) in instruction"));
 	  else
 	    num_outputs = i + 1;
 	}
     }
   if (sep != '\0')
     {
-      as_bad ("Illegal operand separator `%c'", sep);
+      as_bad (_("Illegal operand separator `%c'"), sep);
       return 0;
     }
 
@@ -6406,15 +6406,15 @@ parse_operands (idesc)
   if (!idesc)
     {
       if (expected_operand)
-	as_bad ("Operand %u of `%s' should be %s",
+	as_bad (_("Operand %u of `%s' should be %s"),
 		error_pos + 1, mnemonic,
 		elf64_ia64_operands[expected_operand].desc);
       else if (highest_unmatched_operand < 0 && !(highest_unmatched_operand & 1))
-	as_bad ("Wrong number of output operands");
+	as_bad (_("Wrong number of output operands"));
       else if (highest_unmatched_operand < 0 && !(highest_unmatched_operand & 2))
-	as_bad ("Wrong number of input operands");
+	as_bad (_("Wrong number of input operands"));
       else
-	as_bad ("Operand mismatch");
+	as_bad (_("Operand mismatch"));
       return 0;
     }
 
@@ -6496,10 +6496,10 @@ parse_operands (idesc)
 	case 0:
 	  break;
 	default:
-	  as_warn ("Invalid use of `%c%d' as output operand", reg_class, regno);
+	  as_warn (_("Invalid use of `%c%d' as output operand"), reg_class, regno);
 	  break;
 	case 'm':
-	  as_warn ("Invalid use of `r%d' as base update address operand", regno);
+	  as_warn (_("Invalid use of `r%d' as base update address operand"), regno);
 	  break;
 	}
     }
@@ -6523,20 +6523,20 @@ parse_operands (idesc)
       else
 	reg_class = 0;
       if (reg_class)
-	as_warn ("Invalid duplicate use of `%c%d'", reg_class, reg1);
+	as_warn (_("Invalid duplicate use of `%c%d'"), reg_class, reg1);
     }
   else if (((reg1 >= REG_FR && reg1 <= REG_FR + 31
 	     && reg2 >= REG_FR && reg2 <= REG_FR + 31)
 	    || (reg1 >= REG_FR + 32 && reg1 <= REG_FR + 127
 	     && reg2 >= REG_FR + 32 && reg2 <= REG_FR + 127))
 	   && ! ((reg1 ^ reg2) & 1))
-    as_warn ("Invalid simultaneous use of `f%d' and `f%d'",
+    as_warn (_("Invalid simultaneous use of `f%d' and `f%d'"),
 	     reg1 - REG_FR, reg2 - REG_FR);
   else if ((reg1 >= REG_FR && reg1 <= REG_FR + 31
 	    && reg2 >= REG_FR + 32 && reg2 <= REG_FR + 127)
 	   || (reg1 >= REG_FR + 32 && reg1 <= REG_FR + 127
 	    && reg2 >= REG_FR && reg2 <= REG_FR + 31))
-    as_warn ("Dangerous simultaneous use of `f%d' and `f%d'",
+    as_warn (_("Dangerous simultaneous use of `f%d' and `f%d'"),
 	     reg1 - REG_FR, reg2 - REG_FR);
   return idesc;
 }
@@ -6645,7 +6645,7 @@ build_insn (slot, insnp)
       err = (*odesc->insert) (odesc, val, &insn);
       if (err)
 	as_bad_where (slot->src_file, slot->src_line,
-		      "Bad operand value: %s", err);
+		      _("Bad operand value: %s"), err);
       if (idesc->flags & IA64_OPCODE_PSEUDO)
 	{
 	  if ((idesc->flags & IA64_OPCODE_F2_EQ_F3)
@@ -6788,7 +6788,7 @@ emit_one_bundle ()
 	  if (manual_bundling && !manual_bundling_off)
 	    {
 	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			    "`%s' must be last in bundle", idesc->name);
+			    _("`%s' must be last in bundle"), idesc->name);
 	      if (i < 2)
 		manual_bundling = -1; /* Suppress meaningless post-loop errors.  */
 	    }
@@ -6820,8 +6820,8 @@ emit_one_bundle ()
 
 	    default:
 	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			    "Internal error: don't know how to force %s to end"
-			    "of instruction group", idesc->name);
+			    _("Internal error: don't know how to force %s to end of instruction group"),
+			    idesc->name);
 	      required_slot = i;
 	      break;
 	    }
@@ -6833,7 +6833,7 @@ emit_one_bundle ()
 		      && (template ^ required_template) > 1)))
 	    {
 	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			    "`%s' must be last in instruction group",
+			    _("`%s' must be last in instruction group"),
 			    idesc->name);
 	      if (i < 2 && required_slot == 2 && !manual_bundling_off)
 		manual_bundling = -1; /* Suppress meaningless post-loop errors.  */
@@ -6863,7 +6863,7 @@ emit_one_bundle ()
 	  if (manual_bundling)
 	    {
 	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			  "Label must be first in a bundle");
+			    _("Label must be first in a bundle"));
 	      manual_bundling = -1; /* Suppress meaningless post-loop errors.  */
 	    }
 	  /* This insn must go into the first slot of a bundle.  */
@@ -6940,7 +6940,7 @@ emit_one_bundle ()
 		    case hint_b_ok:
 		      break;
 		    case hint_b_warning:
-		      as_warn ("hint in B unit may be treated as nop");
+		      as_warn (_("hint in B unit may be treated as nop"));
 		      break;
 		    case hint_b_error:
 		      /* When manual bundling is off and there is no
@@ -6951,7 +6951,7 @@ emit_one_bundle ()
 		      if (!manual_bundling && user_template < 0)
 			insn_unit = IA64_UNIT_I;
 		      else
-			as_bad ("hint in B unit can't be used");
+			as_bad (_("hint in B unit can't be used"));
 		      break;
 		    }
 		}
@@ -6965,7 +6965,7 @@ emit_one_bundle ()
 		insn_unit = IA64_UNIT_I;
 	    }
 	  else
-	    as_fatal ("emit_one_bundle: unexpected dynamic op");
+	    as_fatal (_("emit_one_bundle: unexpected dynamic op"));
 
 	  snprintf (mnemonic, sizeof (mnemonic), "%s.%c",
 		    idesc->name, "?imbfxx"[insn_unit]);
@@ -7088,7 +7088,7 @@ emit_one_bundle ()
   if (md.num_slots_in_use > 0 && last_slot < 0)
     {
       as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-		    "`%s' does not fit into %s template",
+		    _("`%s' does not fit into %s template"),
 		    idesc->name, ia64_templ_desc[template].name);
       /* Drop first insn so we don't livelock.  */
       --md.num_slots_in_use;
@@ -7103,7 +7103,7 @@ emit_one_bundle ()
 	{
 	  if (last_slot >= 2)
 	    as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			  "`%s' does not fit into bundle", idesc->name);
+			  _("`%s' does not fit into bundle"), idesc->name);
 	  else
 	    {
 	      const char *where;
@@ -7115,13 +7115,13 @@ emit_one_bundle ()
 	      else
 		where = "slot 3";
 	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			    "`%s' can't go in %s of %s template",
+			    _("`%s' can't go in %s of %s template"),
 			    idesc->name, where, ia64_templ_desc[template].name);
 	    }
 	}
       else
 	as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-		      "Missing '}' at end of file");
+		      _("Missing '}' at end of file"));
     }
 	
   know (md.num_slots_in_use < NUM_SLOTS);
@@ -7560,7 +7560,7 @@ md_begin ()
       err = hash_insert (md.pseudo_hash, pseudo_opcode[i].name,
 			 (void *) (pseudo_opcode + i));
       if (err)
-	as_fatal ("ia64.md_begin: can't hash `%s': %s",
+	as_fatal (_("ia64.md_begin: can't hash `%s': %s"),
 		  pseudo_opcode[i].name, err);
     }
 
@@ -7621,7 +7621,7 @@ md_begin ()
       err = hash_insert (md.const_hash, const_bits[i].name,
 			 (PTR) (const_bits + i));
       if (err)
-	as_fatal ("Inserting \"%s\" into constant hash table failed: %s",
+	as_fatal (_("Inserting \"%s\" into constant hash table failed: %s"),
 		  name, err);
     }
 
@@ -7744,7 +7744,7 @@ ia64_start_line ()
   }
 
   if (md.qp.X_op == O_register)
-    as_bad ("qualifying predicate not followed by instruction");
+    as_bad (_("qualifying predicate not followed by instruction"));
   md.qp.X_op = O_absent;
 
   if (ignore_input ())
@@ -7768,7 +7768,7 @@ ia64_start_line ()
   else if (input_line_pointer[-1] == '{')
     {
       if (md.manual_bundling)
-	as_warn ("Found '{' when manual bundling is already turned on");
+	as_warn (_("Found '{' when manual bundling is already turned on"));
       else
 	CURR_SLOT.manual_bundling_on = 1;
       md.manual_bundling = 1;
@@ -7787,7 +7787,7 @@ ia64_start_line ()
   else if (input_line_pointer[-1] == '}')
     {
       if (!md.manual_bundling)
-	as_warn ("Found '}' when manual bundling is off");
+	as_warn (_("Found '}' when manual bundling is off"));
       else
 	PREV_SLOT.manual_bundling_off = 1;
       md.manual_bundling = 0;
@@ -7815,17 +7815,17 @@ ia64_unrecognized_line (ch)
       expression_and_evaluate (&md.qp);
       if (*input_line_pointer++ != ')')
 	{
-	  as_bad ("Expected ')'");
+	  as_bad (_("Expected ')'"));
 	  return 0;
 	}
       if (md.qp.X_op != O_register)
 	{
-	  as_bad ("Qualifying predicate expected");
+	  as_bad (_("Qualifying predicate expected"));
 	  return 0;
 	}
       if (md.qp.X_add_number < REG_P || md.qp.X_add_number >= REG_P + 64)
 	{
-	  as_bad ("Predicate register expected");
+	  as_bad (_("Predicate register expected"));
 	  return 0;
 	}
       return 1;
@@ -7839,7 +7839,7 @@ ia64_unrecognized_line (ch)
 
 	if (md.qp.X_op == O_register)
 	  {
-	    as_bad ("Tag must come before qualifying predicate.");
+	    as_bad (_("Tag must come before qualifying predicate."));
 	    return 0;
 	  }
 
@@ -7869,7 +7869,7 @@ ia64_unrecognized_line (ch)
 	  {
 	    /* Put ':' back for error messages' sake.  */
 	    *input_line_pointer++ = ':';
-	    as_bad ("Expected ':'");
+	    as_bad (_("Expected ':'"));
 	    return 0;
 	  }
 
@@ -7880,12 +7880,12 @@ ia64_unrecognized_line (ch)
 	*input_line_pointer++ = ':';
 	if (*input_line_pointer++ != ']')
 	  {
-	    as_bad ("Expected ']'");
+	    as_bad (_("Expected ']'"));
 	    return 0;
 	  }
 	if (! tag)
 	  {
-	    as_bad ("Tag name expected");
+	    as_bad (_("Tag name expected"));
 	    return 0;
 	  }
 	return 1;
@@ -7992,12 +7992,12 @@ ia64_optimize_expr (l, op, r)
 	  /* Left side is a .rotX-allocated register.  */
 	  if (r->X_op != O_constant)
 	    {
-	      as_bad ("Rotating register index must be a non-negative constant");
+	      as_bad (_("Rotating register index must be a non-negative constant"));
 	      r->X_add_number = 0;
 	    }
 	  else if ((valueT) r->X_add_number >= num_regs)
 	    {
-	      as_bad ("Index out of range 0..%u", num_regs - 1);
+	      as_bad (_("Index out of range 0..%u"), num_regs - 1);
 	      r->X_add_number = 0;
 	    }
 	  l->X_add_number = (l->X_add_number & 0xffff) + r->X_add_number;
@@ -8009,7 +8009,7 @@ ia64_optimize_expr (l, op, r)
 	      || r->X_add_number < REG_GR
 	      || r->X_add_number > REG_GR + 127)
 	    {
-	      as_bad ("Indirect register index must be a general register");
+	      as_bad (_("Indirect register index must be a general register"));
 	      r->X_add_number = REG_GR;
 	    }
 	  l->X_op = O_index;
@@ -8018,7 +8018,7 @@ ia64_optimize_expr (l, op, r)
 	  return 1;
 	}
     }
-  as_bad ("Index can only be applied to rotating or indirect registers");
+  as_bad (_("Index can only be applied to rotating or indirect registers"));
   /* Fall back to some register use of which has as little as possible
      side effects, to minimize subsequent error messages.  */
   l->X_op = O_register;
@@ -8057,7 +8057,7 @@ ia64_parse_name (name, e, nextcharP)
 	  end = input_line_pointer;
 	  if (*nextcharP != '(')
 	    {
-	      as_bad ("Expected '('");
+	      as_bad (_("Expected '('"));
 	      break;
 	    }
 	  /* Skip '('.  */
@@ -8065,7 +8065,7 @@ ia64_parse_name (name, e, nextcharP)
 	  expression (e);
 	  if (*input_line_pointer != ')')
 	    {
-	      as_bad ("Missing ')'");
+	      as_bad (_("Missing ')'"));
 	      goto done;
 	    }
 	  /* Skip ')'.  */
@@ -8074,12 +8074,12 @@ ia64_parse_name (name, e, nextcharP)
 	    {
 	      if (e->X_op != O_pseudo_fixup)
 		{
-		  as_bad ("Not a symbolic expression");
+		  as_bad (_("Not a symbolic expression"));
 		  goto done;
 		}
 	      if (idx != FUNC_LT_RELATIVE)
 		{
-		  as_bad ("Illegal combination of relocation functions");
+		  as_bad (_("Illegal combination of relocation functions"));
 		  goto done;
 		}
 	      switch (S_GET_VALUE (e->X_op_symbol))
@@ -8093,7 +8093,7 @@ ia64_parse_name (name, e, nextcharP)
 		case FUNC_TP_RELATIVE:
 		  idx = FUNC_LT_TP_RELATIVE; break;
 		default:
-		  as_bad ("Illegal combination of relocation functions");
+		  as_bad (_("Illegal combination of relocation functions"));
 		  goto done;
 		}
 	    }
@@ -8182,9 +8182,9 @@ ia64_parse_name (name, e, nextcharP)
 	  if (regnum >= dr->num_regs)
 	    {
 	      if (!dr->num_regs)
-		as_bad ("No current frame");
+		as_bad (_("No current frame"));
 	      else
-		as_bad ("Register number out of range 0..%u",
+		as_bad (_("Register number out of range 0..%u"),
 			dr->num_regs - 1);
 	      regnum = 0;
 	    }
@@ -8223,10 +8223,10 @@ ia64_canonicalize_symbol_name (name)
   if (len <= 0)
     {
       if (full > 0)
-	as_bad ("Standalone `#' is illegal");
+	as_bad (_("Standalone `#' is illegal"));
     }
   else if (len < full - 1)
-    as_warn ("Redundant `#' suffix operators");
+    as_warn (_("Redundant `#' suffix operators"));
   name[len] = '\0';
   return name;
 }
@@ -8329,7 +8329,7 @@ depends_on (depind, idesc)
    cannot statically be determined, all source registers are marked used.
    12) This insn only reads the specified predicate register when that
    register is the PR[qp].
-   13) This reference to ld-c only applies to teh GR whose value is loaded
+   13) This reference to ld-c only applies to the GR whose value is loaded
    with data returned from memory, not the post-incremented address register.
    14) The RSE resource includes the implementation-specific RSE internal
    state resources.  At least one (and possibly more) of these resources are
@@ -10559,11 +10559,9 @@ check_dependencies (idesc)
 		{
 		  as_warn ("%s", msg);
 		  if (path < md.path)
-		    as_warn (_("Only the first path encountering the conflict "
-			       "is reported"));
+		    as_warn (_("Only the first path encountering the conflict is reported"));
 		  as_warn_where (rs->file, rs->line,
-				 _("This is the location of the "
-				   "conflicting usage"));
+				 _("This is the location of the conflicting usage"));
 		  /* Don't bother checking other paths, to avoid duplicating
 		     the same warning */
 		  break;
@@ -10828,7 +10826,7 @@ md_assemble (str)
   *input_line_pointer = ch;
   if (!idesc)
     {
-      as_bad ("Unknown opcode `%s'", mnemonic);
+      as_bad (_("Unknown opcode `%s'"), mnemonic);
       goto done;
     }
 
@@ -10906,7 +10904,7 @@ md_assemble (str)
 	  else if (ar_is_only_in_memory_unit (CURR_SLOT.opnd[rop].X_add_number))
 	    unit = 'm';
 	  if (unit != 'a' && unit != idesc->name [4])
-	    as_bad ("AR %d can only be accessed by %c-unit",
+	    as_bad (_("AR %d can only be accessed by %c-unit"),
 		    (int) (CURR_SLOT.opnd[rop].X_add_number - REG_AR),
 		    TOUPPER (unit));
 	}
@@ -10918,10 +10916,10 @@ md_assemble (str)
 	case hint_b_ok:
 	  break;
 	case hint_b_warning:
-	  as_warn ("hint.b may be treated as nop");
+	  as_warn (_("hint.b may be treated as nop"));
 	  break;
 	case hint_b_error:
-	  as_bad ("hint.b shouldn't be used");
+	  as_bad (_("hint.b shouldn't be used"));
 	  break;
 	}
     }
@@ -10960,7 +10958,7 @@ md_assemble (str)
 
   if ((flags & IA64_OPCODE_NO_PRED) != 0 && qp_regno != 0)
     {
-      as_bad ("`%s' cannot be predicated", idesc->name);
+      as_bad (_("`%s' cannot be predicated"), idesc->name);
       goto done;
     }
 
@@ -11033,7 +11031,7 @@ md_operand (e)
       expression_and_evaluate (e);
       if (*input_line_pointer != ']')
 	{
-	  as_bad ("Closing bracket missing");
+	  as_bad (_("Closing bracket missing"));
 	  goto err;
 	}
       else
@@ -11042,7 +11040,7 @@ md_operand (e)
 	      || e->X_add_number < REG_GR
 	      || e->X_add_number > REG_GR + 127)
 	    {
-	      as_bad ("Index must be a general register");
+	      as_bad (_("Index must be a general register"));
 	      e->X_add_number = REG_GR;
 	    }
 
@@ -11215,7 +11213,7 @@ ia64_cons_fix_new (f, where, nbytes, exp)
       /* FALLTHRU */
 
     default:
-      as_bad ("Unsupported fixup size %d", nbytes);
+      as_bad (_("Unsupported fixup size %d"), nbytes);
       ignore_rest_of_line ();
       return;
     }
@@ -11483,8 +11481,8 @@ ia64_gen_real_reloc_type (sym, r_type)
 	}
 
       /* This should be an error, but since previously there wasn't any
-	 diagnostic here, dont't make it fail because of this for now.  */
-      as_warn ("Cannot express %s%d%s relocation", type, width, suffix);
+	 diagnostic here, don't make it fail because of this for now.  */
+      as_warn (_("Cannot express %s%d%s relocation"), type, width, suffix);
       return r_type;
     }
 }
@@ -11504,7 +11502,7 @@ ia64_validate_fix (fix)
     case BFD_RELOC_IA64_LTOFF_FPTR64I:
       if (fix->fx_offset != 0)
 	as_bad_where (fix->fx_file, fix->fx_line,
-		      "No addend allowed in @fptr() relocation");
+		      _("No addend allowed in @fptr() relocation"));
       break;
     default:
       break;
@@ -11616,7 +11614,7 @@ md_apply_fix (fix, valP, seg)
 	  /* This must be a TAG13 or TAG13b operand.  There are no external
 	     relocs defined for them, so we must give an error.  */
 	  as_bad_where (fix->fx_file, fix->fx_line,
-			"%s must have a constant value",
+			_("%s must have a constant value"),
 			elf64_ia64_operands[fix->tc_fix_data.opnd].desc);
 	  fix->fx_done = 1;
 	  return;
@@ -11672,7 +11670,7 @@ tc_gen_reloc (sec, fixp)
   if (!reloc->howto)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    "Cannot represent %s relocation in object file",
+		    _("Cannot represent %s relocation in object file"),
 		    bfd_get_reloc_code_name (fixp->fx_r_type));
       free (reloc);
       return NULL;

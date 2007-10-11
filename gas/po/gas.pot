@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2007-10-11 15:13+0100\n"
+"POT-Creation-Date: 2007-10-11 15:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2748,7 +2748,7 @@ msgstr ""
 msgid "alignments greater than 32 bytes not supported in .text sections."
 msgstr ""
 
-#: config/tc-arm.c:17312
+#: config/tc-arm.c:17312 config/tc-ia64.c:3756
 #, c-format
 msgid "Group section `%s' has no group signature"
 msgstr ""
@@ -6105,16 +6105,399 @@ msgstr ""
 msgid "Bad .section directive: want a,o,s,w,x,M,S,G,T in string"
 msgstr ""
 
+#: config/tc-ia64.c:1082
+msgid "Size of frame exceeds maximum of 96 registers"
+msgstr ""
+
+#: config/tc-ia64.c:1087
+msgid "Size of rotating registers exceeds frame size"
+msgstr ""
+
 #: config/tc-ia64.c:1173
 msgid "Unwind directive not followed by an instruction."
 msgstr ""
 
-#: config/tc-ia64.c:5122
-msgid "Register name expected"
+#: config/tc-ia64.c:1182 config/tc-ia64.c:7747
+msgid "qualifying predicate not followed by instruction"
 msgstr ""
 
-#: config/tc-ia64.c:5127 config/tc-ia64.c:5440
+#: config/tc-ia64.c:1255 config/tc-ia64.c:1295
+msgid "record type is not valid"
+msgstr ""
+
+#: config/tc-ia64.c:1372
+msgid "Invalid record type for P3 format."
+msgstr ""
+
+#: config/tc-ia64.c:1417
+msgid "Invalid record type for format P6"
+msgstr ""
+
+#: config/tc-ia64.c:1610 config/tc-ia64.c:1671
+msgid "Invalid record type for format B1"
+msgstr ""
+
+#: config/tc-ia64.c:1706
+msgid "Invalid record type for format X1"
+msgstr ""
+
+#: config/tc-ia64.c:1746
+msgid "Invalid record type for format X3"
+msgstr ""
+
+#: config/tc-ia64.c:1782
+msgid "Previous .save incomplete"
+msgstr ""
+
+#: config/tc-ia64.c:2659
+msgid "spill_mask record unimplemented."
+msgstr ""
+
+#: config/tc-ia64.c:2716
+msgid "record_type_not_valid"
+msgstr ""
+
+#: config/tc-ia64.c:2805
+msgid "Ignoring attempt to spill beyond end of region"
+msgstr ""
+
+#: config/tc-ia64.c:2865
+msgid "Only constant space allocation is supported"
+msgstr ""
+
+#: config/tc-ia64.c:2879
+msgid "Only constant offsets are supported"
+msgstr ""
+
+#: config/tc-ia64.c:2902
+msgid "Section switching in code is not supported."
+msgstr ""
+
+#: config/tc-ia64.c:2947
+msgid " Insn slot not set in unwind record."
+msgstr ""
+
+#: config/tc-ia64.c:3021
+msgid "frgr_mem record before region record!"
+msgstr ""
+
+#: config/tc-ia64.c:3032
+msgid "fr_mem record before region record!"
+msgstr ""
+
+#: config/tc-ia64.c:3041
+msgid "gr_mem record before region record!"
+msgstr ""
+
+#: config/tc-ia64.c:3050
+msgid "br_mem record before region record!"
+msgstr ""
+
+#: config/tc-ia64.c:3060
+msgid "gr_gr record before region record!"
+msgstr ""
+
+#: config/tc-ia64.c:3068
+msgid "br_gr record before region record!"
+msgstr ""
+
+#: config/tc-ia64.c:3185
+#, c-format
+msgid "First operand to .%s must be a predicate"
+msgstr ""
+
+#: config/tc-ia64.c:3189
+#, c-format
+msgid "Pointless use of p0 as first operand to .%s"
+msgstr ""
+
+#: config/tc-ia64.c:3246
+#, c-format
+msgid "Operand %d to .%s must be a preserved register"
+msgstr ""
+
+#: config/tc-ia64.c:3283
+#, c-format
+msgid "Operand %d to .%s must be a writable register"
+msgstr ""
+
+#: config/tc-ia64.c:3309
+#, c-format
+msgid "Radix `%s' unsupported or invalid"
+msgstr ""
+
+#: config/tc-ia64.c:3340 config/tc-ia64.c:3345
+#, c-format
+msgid ".%s outside of %s"
+msgstr ""
+
+#: config/tc-ia64.c:3432
+msgid "Tags on unwind pseudo-ops aren't supported, yet"
+msgstr ""
+
+#: config/tc-ia64.c:3455
+msgid "First operand to .fframe must be a constant"
+msgstr ""
+
+#: config/tc-ia64.c:3476
+msgid "First operand to .vframe must be a general register"
+msgstr ""
+
+#: config/tc-ia64.c:3484
+msgid "Operand of .vframe contradicts .prologue"
+msgstr ""
+
+#: config/tc-ia64.c:3495
+msgid ".vframepsp is meaningless, assuming .vframesp was meant"
+msgstr ""
+
+#: config/tc-ia64.c:3503
+msgid "Operand to .vframesp must be a constant (sp-relative offset)"
+msgstr ""
+
+#: config/tc-ia64.c:3531
+msgid "First operand to .save not a register"
+msgstr ""
+
+#: config/tc-ia64.c:3537
+msgid "Second operand to .save not a valid register"
+msgstr ""
+
+#: config/tc-ia64.c:3568 config/tc-ia64.c:3579 config/tc-ia64.c:3587
+msgid "Second operand of .save contradicts .prologue"
+msgstr ""
+
+#: config/tc-ia64.c:3594
+msgid "First operand to .save not a valid register"
+msgstr ""
+
+#: config/tc-ia64.c:3613
+msgid "First operand to .restore must be stack pointer (sp)"
+msgstr ""
+
+#: config/tc-ia64.c:3622
+msgid "Second operand to .restore must be a constant >= 0"
+msgstr ""
+
+#: config/tc-ia64.c:3632
+#, c-format
+msgid "Epilogue count of %lu exceeds number of nested prologues (%u)"
+msgstr ""
+
+#: config/tc-ia64.c:3720
+#, c-format
+msgid "Illegal section name `%s' (causes unwind section name clash)"
+msgstr ""
+
+#: config/tc-ia64.c:3914
+msgid "First operand to .altrp not a valid branch register"
+msgstr ""
+
+#: config/tc-ia64.c:3944
+#, c-format
+msgid "First operand to .%s not a register"
+msgstr ""
+
+#: config/tc-ia64.c:3949
+#, c-format
+msgid "Second operand to .%s not a constant"
+msgstr ""
+
+#: config/tc-ia64.c:4016
+#, c-format
+msgid "First operand to .%s not a valid register"
+msgstr ""
+
+#: config/tc-ia64.c:4040
+msgid "First operand to .save.g must be a positive 4-bit constant"
+msgstr ""
+
+#: config/tc-ia64.c:4053
+msgid "Second operand to .save.g must be a general register"
+msgstr ""
+
+#: config/tc-ia64.c:4058
+#, c-format
+msgid "Second operand to .save.g must be the first of %d general registers"
+msgstr ""
+
+#: config/tc-ia64.c:4082
+msgid "Operand to .save.f must be a positive 20-bit constant"
+msgstr ""
+
+#: config/tc-ia64.c:4106
+msgid "First operand to .save.b must be a positive 5-bit constant"
+msgstr ""
+
+#: config/tc-ia64.c:4119
+msgid "Second operand to .save.b must be a general register"
+msgstr ""
+
+#: config/tc-ia64.c:4124
+#, c-format
+msgid "Second operand to .save.b must be the first of %d general registers"
+msgstr ""
+
+#: config/tc-ia64.c:4151
+msgid "First operand to .save.gf must be a non-negative 4-bit constant"
+msgstr ""
+
+#: config/tc-ia64.c:4159
+msgid "Second operand to .save.gf must be a non-negative 20-bit constant"
+msgstr ""
+
+#: config/tc-ia64.c:4167
+msgid "Operands to .save.gf may not be both zero"
+msgstr ""
+
+#: config/tc-ia64.c:4185
+msgid "Operand to .spill must be a constant"
+msgstr ""
+
+#: config/tc-ia64.c:4256
+#, c-format
+msgid "Operand %d to .%s must be a constant"
+msgstr ""
+
+#: config/tc-ia64.c:4278
+#, c-format
+msgid "Missing .label_state %ld"
+msgstr ""
+
+#: config/tc-ia64.c:4335
+msgid "Operand to .label_state must be a constant"
+msgstr ""
+
+#: config/tc-ia64.c:4355
+msgid "Operand to .copy_state must be a constant"
+msgstr ""
+
+#: config/tc-ia64.c:4379
+msgid "First operand to .unwabi must be a constant"
+msgstr ""
+
+#: config/tc-ia64.c:4385
+msgid "Second operand to .unwabi must be a constant"
+msgstr ""
+
+#: config/tc-ia64.c:4422
+msgid "Missing .endp after previous .proc"
+msgstr ""
+
+#: config/tc-ia64.c:4441
+msgid "Empty argument of .proc"
+msgstr ""
+
+#: config/tc-ia64.c:4446
+#, c-format
+msgid "`%s' was already defined"
+msgstr ""
+
+#: config/tc-ia64.c:4490
+msgid "Initial .body should precede any instructions"
+msgstr ""
+
+#: config/tc-ia64.c:4510
+msgid ".prologue within prologue"
+msgstr ""
+
+#: config/tc-ia64.c:4515
+msgid "Initial .prologue should precede any instructions"
+msgstr ""
+
+#: config/tc-ia64.c:4525
+msgid "First operand to .prologue must be a positive 4-bit constant"
+msgstr ""
+
+#: config/tc-ia64.c:4527
+msgid "Pointless use of zero first operand to .prologue"
+msgstr ""
+
+#: config/tc-ia64.c:4541
+msgid "Using a constant as second operand to .prologue is deprecated"
+msgstr ""
+
+#: config/tc-ia64.c:4547
+msgid "Second operand to .prologue must be a general register"
+msgstr ""
+
+#: config/tc-ia64.c:4552
+#, c-format
+msgid "Second operand to .prologue must be the first of %d general registers"
+msgstr ""
+
+#: config/tc-ia64.c:4665
+#, c-format
+msgid "`%s' was not defined within procedure"
+msgstr ""
+
+#: config/tc-ia64.c:4703
+msgid "Empty argument of .endp"
+msgstr ""
+
+#: config/tc-ia64.c:4717
+#, c-format
+msgid "`%s' was not specified with previous .proc"
+msgstr ""
+
+#: config/tc-ia64.c:4732
+#, c-format
+msgid "`%s' should be an operand to this .endp"
+msgstr ""
+
+#: config/tc-ia64.c:4775 config/tc-ia64.c:5127 config/tc-ia64.c:5440
 msgid "Comma expected"
+msgstr ""
+
+#: config/tc-ia64.c:4817
+msgid "Expected '['"
+msgstr ""
+
+#: config/tc-ia64.c:4826 config/tc-ia64.c:7883
+msgid "Expected ']'"
+msgstr ""
+
+#: config/tc-ia64.c:4831
+msgid "Number of elements must be positive"
+msgstr ""
+
+#: config/tc-ia64.c:4842
+#, c-format
+msgid "Used more than the declared %d rotating registers"
+msgstr ""
+
+#: config/tc-ia64.c:4850
+msgid "Used more than the available 96 rotating registers"
+msgstr ""
+
+#: config/tc-ia64.c:4857
+msgid "Used more than the available 48 rotating registers"
+msgstr ""
+
+#: config/tc-ia64.c:4885
+#, c-format
+msgid "Attempt to redefine register set `%s'"
+msgstr ""
+
+#: config/tc-ia64.c:4953
+#, c-format
+msgid "Unknown psr option `%s'"
+msgstr ""
+
+#: config/tc-ia64.c:5005
+msgid "Missing section name"
+msgstr ""
+
+#: config/tc-ia64.c:5015
+msgid "Comma expected after section name"
+msgstr ""
+
+#: config/tc-ia64.c:5026
+msgid "Creating sections with .xdataN/.xrealN/.xstringZ is deprecated."
+msgstr ""
+
+#: config/tc-ia64.c:5122
+msgid "Register name expected"
 msgstr ""
 
 #: config/tc-ia64.c:5135
@@ -6137,7 +6520,7 @@ msgstr ""
 msgid "Bad register range"
 msgstr ""
 
-#: config/tc-ia64.c:5330
+#: config/tc-ia64.c:5330 config/tc-ia64.c:7828
 msgid "Predicate register expected"
 msgstr ""
 
@@ -6178,14 +6561,124 @@ msgstr ""
 msgid "lower 16 bits of mask ignored"
 msgstr ""
 
+#: config/tc-ia64.c:6255
+msgid "Expected separator `='"
+msgstr ""
+
+#: config/tc-ia64.c:6288
+msgid "Duplicate equal sign (=) in instruction"
+msgstr ""
+
+#: config/tc-ia64.c:6295
+#, c-format
+msgid "Illegal operand separator `%c'"
+msgstr ""
+
+#: config/tc-ia64.c:6409
+#, c-format
+msgid "Operand %u of `%s' should be %s"
+msgstr ""
+
+#: config/tc-ia64.c:6413
+msgid "Wrong number of output operands"
+msgstr ""
+
+#: config/tc-ia64.c:6415
+msgid "Wrong number of input operands"
+msgstr ""
+
+#: config/tc-ia64.c:6417
+msgid "Operand mismatch"
+msgstr ""
+
+#: config/tc-ia64.c:6499
+#, c-format
+msgid "Invalid use of `%c%d' as output operand"
+msgstr ""
+
+#: config/tc-ia64.c:6502
+#, c-format
+msgid "Invalid use of `r%d' as base update address operand"
+msgstr ""
+
+#: config/tc-ia64.c:6526
+#, c-format
+msgid "Invalid duplicate use of `%c%d'"
+msgstr ""
+
+#: config/tc-ia64.c:6533
+#, c-format
+msgid "Invalid simultaneous use of `f%d' and `f%d'"
+msgstr ""
+
+#: config/tc-ia64.c:6539
+#, c-format
+msgid "Dangerous simultaneous use of `f%d' and `f%d'"
+msgstr ""
+
 #: config/tc-ia64.c:6585
 msgid "Value truncated to 62 bits"
+msgstr ""
+
+#: config/tc-ia64.c:6648
+#, c-format
+msgid "Bad operand value: %s"
 msgstr ""
 
 #. Give an error if a frag containing code is not aligned to a 16 byte
 #. boundary.
 #: config/tc-ia64.c:6723 config/tc-ia64.h:172
 msgid "instruction address is not a multiple of 16"
+msgstr ""
+
+#: config/tc-ia64.c:6791
+#, c-format
+msgid "`%s' must be last in bundle"
+msgstr ""
+
+#: config/tc-ia64.c:6823
+#, c-format
+msgid "Internal error: don't know how to force %s to end of instruction group"
+msgstr ""
+
+#: config/tc-ia64.c:6836
+#, c-format
+msgid "`%s' must be last in instruction group"
+msgstr ""
+
+#: config/tc-ia64.c:6866
+msgid "Label must be first in a bundle"
+msgstr ""
+
+#: config/tc-ia64.c:6943
+msgid "hint in B unit may be treated as nop"
+msgstr ""
+
+#: config/tc-ia64.c:6954
+msgid "hint in B unit can't be used"
+msgstr ""
+
+#: config/tc-ia64.c:6968
+msgid "emit_one_bundle: unexpected dynamic op"
+msgstr ""
+
+#: config/tc-ia64.c:7091
+#, c-format
+msgid "`%s' does not fit into %s template"
+msgstr ""
+
+#: config/tc-ia64.c:7106
+#, c-format
+msgid "`%s' does not fit into bundle"
+msgstr ""
+
+#: config/tc-ia64.c:7118
+#, c-format
+msgid "`%s' can't go in %s of %s template"
+msgstr ""
+
+#: config/tc-ia64.c:7124
+msgid "Missing '}' at end of file"
 msgstr ""
 
 #: config/tc-ia64.c:7273
@@ -6223,6 +6716,16 @@ msgstr ""
 msgid "--gstabs is not supported for ia64"
 msgstr ""
 
+#: config/tc-ia64.c:7563
+#, c-format
+msgid "ia64.md_begin: can't hash `%s': %s"
+msgstr ""
+
+#: config/tc-ia64.c:7624
+#, c-format
+msgid "Inserting \"%s\" into constant hash table failed: %s"
+msgstr ""
+
 #: config/tc-ia64.c:7636 config/tc-mips.c:1758
 msgid "Could not set architecture and machine"
 msgstr ""
@@ -6231,8 +6734,86 @@ msgstr ""
 msgid "Explicit stops are ignored in auto mode"
 msgstr ""
 
+#: config/tc-ia64.c:7771
+msgid "Found '{' when manual bundling is already turned on"
+msgstr ""
+
 #: config/tc-ia64.c:7784
 msgid "Found '{' after explicit switch to automatic mode"
+msgstr ""
+
+#: config/tc-ia64.c:7790
+msgid "Found '}' when manual bundling is off"
+msgstr ""
+
+#: config/tc-ia64.c:7818
+msgid "Expected ')'"
+msgstr ""
+
+#: config/tc-ia64.c:7823
+msgid "Qualifying predicate expected"
+msgstr ""
+
+#: config/tc-ia64.c:7842
+msgid "Tag must come before qualifying predicate."
+msgstr ""
+
+#: config/tc-ia64.c:7872
+msgid "Expected ':'"
+msgstr ""
+
+#: config/tc-ia64.c:7888
+msgid "Tag name expected"
+msgstr ""
+
+#: config/tc-ia64.c:7995
+msgid "Rotating register index must be a non-negative constant"
+msgstr ""
+
+#: config/tc-ia64.c:8000
+#, c-format
+msgid "Index out of range 0..%u"
+msgstr ""
+
+#: config/tc-ia64.c:8012
+msgid "Indirect register index must be a general register"
+msgstr ""
+
+#: config/tc-ia64.c:8021
+msgid "Index can only be applied to rotating or indirect registers"
+msgstr ""
+
+#: config/tc-ia64.c:8060
+msgid "Expected '('"
+msgstr ""
+
+#: config/tc-ia64.c:8068
+msgid "Missing ')'"
+msgstr ""
+
+#: config/tc-ia64.c:8077
+msgid "Not a symbolic expression"
+msgstr ""
+
+#: config/tc-ia64.c:8082 config/tc-ia64.c:8096
+msgid "Illegal combination of relocation functions"
+msgstr ""
+
+#: config/tc-ia64.c:8185
+msgid "No current frame"
+msgstr ""
+
+#: config/tc-ia64.c:8187
+#, c-format
+msgid "Register number out of range 0..%u"
+msgstr ""
+
+#: config/tc-ia64.c:8226
+msgid "Standalone `#' is illegal"
+msgstr ""
+
+#: config/tc-ia64.c:8229
+msgid "Redundant `#' suffix operators"
 msgstr ""
 
 #: config/tc-ia64.c:8389
@@ -6249,50 +6830,107 @@ msgstr ""
 msgid "Only the first path encountering the conflict is reported"
 msgstr ""
 
-#: config/tc-ia64.c:10565
+#: config/tc-ia64.c:10564
 msgid "This is the location of the conflicting usage"
 msgstr ""
 
-#: config/tc-ia64.c:11791
+#: config/tc-ia64.c:10829
+#, c-format
+msgid "Unknown opcode `%s'"
+msgstr ""
+
+#: config/tc-ia64.c:10907
+#, c-format
+msgid "AR %d can only be accessed by %c-unit"
+msgstr ""
+
+#: config/tc-ia64.c:10919
+msgid "hint.b may be treated as nop"
+msgstr ""
+
+#: config/tc-ia64.c:10922
+msgid "hint.b shouldn't be used"
+msgstr ""
+
+#: config/tc-ia64.c:10961
+#, c-format
+msgid "`%s' cannot be predicated"
+msgstr ""
+
+#: config/tc-ia64.c:11034
+msgid "Closing bracket missing"
+msgstr ""
+
+#: config/tc-ia64.c:11043
+msgid "Index must be a general register"
+msgstr ""
+
+#: config/tc-ia64.c:11216
+#, c-format
+msgid "Unsupported fixup size %d"
+msgstr ""
+
+#. This should be an error, but since previously there wasn't any
+#. diagnostic here, don't make it fail because of this for now.
+#: config/tc-ia64.c:11485
+#, c-format
+msgid "Cannot express %s%d%s relocation"
+msgstr ""
+
+#: config/tc-ia64.c:11505
+msgid "No addend allowed in @fptr() relocation"
+msgstr ""
+
+#: config/tc-ia64.c:11617
+#, c-format
+msgid "%s must have a constant value"
+msgstr ""
+
+#: config/tc-ia64.c:11673
+#, c-format
+msgid "Cannot represent %s relocation in object file"
+msgstr ""
+
+#: config/tc-ia64.c:11789
 msgid "Can't add stop bit to mark end of instruction group"
 msgstr ""
 
-#: config/tc-ia64.c:11891 config/tc-score.c:6398 read.c:1446 read.c:2417
+#: config/tc-ia64.c:11889 config/tc-score.c:6398 read.c:1446 read.c:2417
 #: read.c:3046 read.c:3379 read.c:3423
 msgid "expected symbol name"
 msgstr ""
 
-#: config/tc-ia64.c:11901 read.c:2427 read.c:3056 read.c:3407 stabs.c:468
+#: config/tc-ia64.c:11899 read.c:2427 read.c:3056 read.c:3407 stabs.c:468
 #, c-format
 msgid "expected comma after \"%s\""
 msgstr ""
 
-#: config/tc-ia64.c:11943
+#: config/tc-ia64.c:11941
 #, c-format
 msgid "`%s' is already the alias of %s `%s'"
 msgstr ""
 
-#: config/tc-ia64.c:11953
+#: config/tc-ia64.c:11951
 #, c-format
 msgid "%s `%s' already has an alias `%s'"
 msgstr ""
 
-#: config/tc-ia64.c:11964
+#: config/tc-ia64.c:11962
 #, c-format
 msgid "inserting \"%s\" into %s alias hash table failed: %s"
 msgstr ""
 
-#: config/tc-ia64.c:11972
+#: config/tc-ia64.c:11970
 #, c-format
 msgid "inserting \"%s\" into %s name hash table failed: %s"
 msgstr ""
 
-#: config/tc-ia64.c:11991
+#: config/tc-ia64.c:11989
 #, c-format
 msgid "symbol `%s' aliased to `%s' is not used"
 msgstr ""
 
-#: config/tc-ia64.c:12013
+#: config/tc-ia64.c:12011
 #, c-format
 msgid "section `%s' aliased to `%s' is not used"
 msgstr ""

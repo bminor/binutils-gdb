@@ -5,6 +5,11 @@
 
 2007-10-11  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/5161
+	* config/tc-ia64.c: Allow for translations of error and warning
+	messages.
+	* po/gas.pot: Regenerate.
+
 	PR gas/5158
 	* config/tc-h8300.c (tc_gen_reloc): Allow for translation of error
 	message.
