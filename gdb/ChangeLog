@@ -1,3 +1,9 @@
+2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Kazu Hirata  <kazu@codesourcery.com>
+
+	* breakpoint.c (do_enable_breakpoint): Delay enabling until after
+	checking watchpoint resources.
+
 2007-10-11  Kazu Hirata  <kazu@codesourcery.com>
 
 	* memattr.c (inaccessible_by_default): Change the initial

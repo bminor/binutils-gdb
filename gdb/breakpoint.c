@@ -8094,12 +8094,6 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 	error (_("Hardware breakpoints used exceeds limit."));
     }
 
-  if (bpt->enable_state != bp_permanent)
-    bpt->enable_state = bp_enabled;
-  bpt->disposition = disposition;
-  check_duplicates (bpt);
-  breakpoints_changed ();
-  
   if (bpt->type == bp_watchpoint || 
       bpt->type == bp_hardware_watchpoint ||
       bpt->type == bp_read_watchpoint || 
@@ -8117,13 +8111,13 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 	      printf_filtered (_("\
 Cannot enable watchpoint %d because the block in which its expression\n\
 is valid is not currently in scope.\n"), bpt->number);
-	      bpt->enable_state = bp_disabled;
 	      return;
 	    }
 	  select_frame (fr);
 	}
       
-      value_free (bpt->val);
+      if (bpt->val)
+	value_free (bpt->val);
       mark = value_mark ();
       bpt->val = evaluate_expression (bpt->exp);
       release_value (bpt->val);
@@ -8148,7 +8142,6 @@ is valid is not currently in scope.\n"), bpt->number);
 	      printf_filtered (_("\
 Cannot enable watchpoint %d because target watch resources\n\
 have been allocated for other watchpoints.\n"), bpt->number);
-	      bpt->enable_state = bp_disabled;
 	      value_free_to_mark (mark);
 	      return;
 	    }
@@ -8158,6 +8151,12 @@ have been allocated for other watchpoints.\n"), bpt->number);
       value_free_to_mark (mark);
     }
 
+  if (bpt->enable_state != bp_permanent)
+    bpt->enable_state = bp_enabled;
+  bpt->disposition = disposition;
+  check_duplicates (bpt);
+  breakpoints_changed ();
+  
   if (deprecated_modify_breakpoint_hook)
     deprecated_modify_breakpoint_hook (bpt);
   breakpoint_modify_event (bpt->number);
