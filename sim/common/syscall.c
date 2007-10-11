@@ -291,7 +291,7 @@ cb_syscall (cb, sc)
 
 	while (count > 0)
 	  {
-	    if (fd == 0)
+	    if (cb_is_stdin (cb, fd))
 	      result = (int) (*cb->read_stdin) (cb, buf,
 						(count < FILE_XFR_SIZE
 						 ? count : FILE_XFR_SIZE));

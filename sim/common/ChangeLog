@@ -1,3 +1,8 @@
+2007-10-11  Jesper Nilsson  <jesper.nilsson@axis.com>
+
+	* callback.c (cb_is_stdin): Add.
+	* syscall.c (cb_syscall): Test for stdin, not just fd 0.
+
 2007-08-10  Nick Clifton  <nickc@redhat.com>
 
 	* sim-memopt.c (memory_options): Mention that the
