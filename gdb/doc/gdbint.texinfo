@@ -4178,15 +4178,6 @@ This method has been deprecated in favour of @code{gdbarch_return_value}
 Convert a value of type @var{type} into the raw contents of a register.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
-@item VARIABLES_INSIDE_BLOCK (@var{desc}, @var{gcc_p})
-@findex VARIABLES_INSIDE_BLOCK
-For dbx-style debugging information, if the compiler puts variable
-declarations inside LBRAC/RBRAC blocks, this should be defined to be
-nonzero.  @var{desc} is the value of @code{n_desc} from the
-@code{N_RBRAC} symbol, and @var{gcc_p} is true if @value{GDBN} has noticed the
-presence of either the @code{GCC_COMPILED_SYMBOL} or the
-@code{GCC2_COMPILED_SYMBOL}.  By default, this is 0.
-
 @end table
 
 Motorola M68K target conditionals.

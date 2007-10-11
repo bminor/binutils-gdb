@@ -2794,38 +2794,19 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
       if (desc != new->depth)
 	lbrac_mismatch_complaint (symnum);
 
-      /* Some compilers put the variable decls inside of an
-         LBRAC/RBRAC block.  This macro should be nonzero if this is
-         true.  DESC is N_DESC from the N_RBRAC symbol.  GCC_P is true
-         if we've detected the GCC_COMPILED_SYMBOL or the
-         GCC2_COMPILED_SYMBOL.  */
-#if !defined (VARIABLES_INSIDE_BLOCK)
-#define VARIABLES_INSIDE_BLOCK(desc, gcc_p) 0
-#endif
-
-      /* Can only use new->locals as local symbols here if we're in
-         GCC or on a machine that puts them before the lbrack.  */
-      if (!VARIABLES_INSIDE_BLOCK (desc, processing_gcc_compilation))
+      if (local_symbols != NULL)
 	{
-	  if (local_symbols != NULL)
-	    {
-	      /* GCC development snapshots from March to December of
-		 2000 would output N_LSYM entries after N_LBRAC
-		 entries.  As a consequence, these symbols are simply
-		 discarded.  Complain if this is the case.  Note that
-		 there are some compilers which legitimately put local
-		 symbols within an LBRAC/RBRAC block; this complaint
-		 might also help sort out problems in which
-		 VARIABLES_INSIDE_BLOCK is incorrectly defined.  */
-	      complaint (&symfile_complaints, _("\
+	  /* GCC development snapshots from March to December of
+	     2000 would output N_LSYM entries after N_LBRAC
+	     entries.  As a consequence, these symbols are simply
+	     discarded.  Complain if this is the case.  */
+	  complaint (&symfile_complaints, _("\
 misplaced N_LBRAC entry; discarding local symbols which have \
 no enclosing block"));
-	    }
-	  local_symbols = new->locals;
 	}
+      local_symbols = new->locals;
 
-      if (context_stack_depth
-	  > !VARIABLES_INSIDE_BLOCK (desc, processing_gcc_compilation))
+      if (context_stack_depth > 1)
 	{
 	  /* This is not the outermost LBRAC...RBRAC pair in the
 	     function, its local symbols preceded it, and are the ones
@@ -2858,9 +2839,6 @@ no enclosing block"));
 	  within_function = 0;
 	}
 
-      if (VARIABLES_INSIDE_BLOCK (desc, processing_gcc_compilation))
-	/* Now pop locals of block just finished.  */
-	local_symbols = new->locals;
       break;
 
     case N_FN:

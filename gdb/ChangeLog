@@ -1,3 +1,11 @@
+2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dbxread.c (process_one_symbol): Remove VARIABLES_INSIDE_BLOCK
+	checks.
+	* config/arm/embed.mt, config/arm/linux.mt, config/arm/wince.mt: Do
+	not set DEPRECATED_TM_FILE.
+	* config/arm/tm-arm.h: Delete file.
+
 2007-10-11  Luis Machado  <luisgpm@br.ibm.com>
 
 	* MAINTAINERS (Write After Approval): Add self.
