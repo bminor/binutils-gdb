@@ -365,6 +365,8 @@ tracing			Michael Snyder		msnyder@specifix.com
 threads			Michael Snyder		msnyder@specifix.com
 			Mark Kettenis		kettenis@gnu.org
 language support
+  Ada			Joel Brobecker		brobecker@adacore.com
+			Paul Hilfinger		hilfinger@gnat.com
   C++			Daniel Jacobowitz	dan@debian.org
   Objective C support   Adam Fedor		fedor@gnu.org
 shared libs		Kevin Buettner		kevinb@redhat.com

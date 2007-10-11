@@ -1,5 +1,10 @@
 2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* MAINTAINERS (language support): List Joel and Paul as
+	Ada maintainers.
+
+2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dbxread.c (process_one_symbol): Remove VARIABLES_INSIDE_BLOCK
 	checks.
 	* config/arm/embed.mt, config/arm/linux.mt, config/arm/wince.mt: Do
