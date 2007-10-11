@@ -1,3 +1,8 @@
+2007-10-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-i386.texi: Update which instruction's operands are
+	swapped.
+
 2007-10-11  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/5155

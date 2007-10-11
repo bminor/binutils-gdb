@@ -178,9 +178,9 @@ operands are prefixed by @samp{*}; they are undelimited in Intel syntax.
 AT&T and Intel syntax use the opposite order for source and destination
 operands.  Intel @samp{add eax, 4} is @samp{addl $4, %eax}.  The
 @samp{source, dest} convention is maintained for compatibility with
-previous Unix assemblers.  Note that instructions with more than one
-source operand, such as the @samp{enter} instruction, do @emph{not} have
-reversed order.  @ref{i386-Bugs}.
+previous Unix assemblers.  Note that @samp{bound}, @samp{invlpga}, and
+instructions with 2 immediate operands, such as the @samp{enter}
+instruction, do @emph{not} have reversed order.  @ref{i386-Bugs}.
 
 @cindex mnemonic suffixes, i386
 @cindex sizes operands, i386
