@@ -902,7 +902,7 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
 	{
 	  /* If we fail to attach to the thread, issue a warning,
 	     but continue.  One way this can happen is if thread
-	     creation is interrupted; as of Linux 2.6.19, a kernel
+	     creation is interrupted; as of Linux kernel 2.6.19, a
 	     bug may place threads in the thread list and then fail
 	     to create them.  */
 	  warning (_("Can't attach %s: %s"), target_pid_to_str (ptid),
@@ -3212,7 +3212,7 @@ linux_xfer_partial (struct target_ops *ops, enum target_object object,
 			     offset, len);
 }
 
-/* Create a prototype generic Linux target.  The client can override
+/* Create a prototype generic GNU/Linux target.  The client can override
    it with local methods.  */
 
 static void

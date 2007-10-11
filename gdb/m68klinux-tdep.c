@@ -213,8 +213,8 @@ static int target_is_uclinux;
 static void
 m68k_linux_inferior_created (struct target_ops *objfile, int from_tty)
 {
-  /* Record that we will need to re-evaluate whether we are running on
-     a uClinux or normal Linux target (see m68k_linux_get_sigtramp_info).  */
+  /* Record that we will need to re-evaluate whether we are running on a
+     uClinux or normal GNU/Linux target (see m68k_linux_get_sigtramp_info).  */
   target_is_uclinux = -1;
 }
 
@@ -227,7 +227,7 @@ m68k_linux_get_sigtramp_info (struct frame_info *next_frame)
 
   if (target_is_uclinux == -1)
     {
-      /* Determine whether we are running on a uClinux or normal Linux
+      /* Determine whether we are running on a uClinux or normal GNU/Linux
          target so we can use the correct sigcontext layouts.  */
     
       CORE_ADDR dummy;

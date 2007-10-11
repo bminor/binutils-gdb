@@ -1,3 +1,12 @@
+2007-10-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linux-nat.c (lin_lwp_attach_lwp): Use "Linux kernel 2.6.19"
+	instead of "Linux 2.6.19" in comment.
+	(linux_xfer_partial): Use "GNU/Linux target" instead of 
+	"Linux target" in comment.
+	* m68klinux-tdep.c (m68k_linux_inferior_created): Likewise.
+	(m68k_linux_get_sigtramp_info): Likewise.
+
 2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS (language support): List Joel and Paul as
