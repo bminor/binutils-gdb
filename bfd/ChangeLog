@@ -1,3 +1,10 @@
+2007-09-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* format.c (bfd_check_format_matches): Record matching targets even
+	when "matching" is NULL to allow bfd_associated_vector matches.
+	Consolidate error return code.  Consolidate ok return code.  Always
+	restore original target and format on error.
+
 2007-08-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (RELEASE): Unset.
