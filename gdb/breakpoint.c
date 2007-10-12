@@ -5483,33 +5483,7 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
 {    
   int i;
   for (i = 0; i < sals->nelts; i++)
-    {
-      resolve_sal_pc (&sals->sals[i]);
-
-      /* It's possible for the PC to be nonzero, but still an illegal
-         value on some targets.
-
-         For example, on HP-UX if you start gdb, and before running the
-         inferior you try to set a breakpoint on a shared library function
-         "foo" where the inferior doesn't call "foo" directly but does
-         pass its address to another function call, then we do find a
-         minimal symbol for the "foo", but it's address is invalid.
-         (Appears to be an index into a table that the loader sets up
-         when the inferior is run.)
-
-         Give the target a chance to bless sals.sals[i].pc before we
-         try to make a breakpoint for it. */
-#ifdef DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE
-      if (DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE (sals->sals[i].pc))
-	{
-	  if (address == NULL)
-	    error (_("Cannot break without a running program."));
-	  else
-	    error (_("Cannot break on %s without a running program."), 
-		   address);
-	}
-#endif
-    }
+    resolve_sal_pc (&sals->sals[i]);
 }
 
 static void

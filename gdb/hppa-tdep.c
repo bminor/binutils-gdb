@@ -68,10 +68,6 @@ const struct objfile_data *hppa_objfile_priv_data = NULL;
 #define UNWIND_ENTRY_SIZE 16
 #define STUB_UNWIND_ENTRY_SIZE 8
 
-/* FIXME: brobecker 2002-11-07: We will likely be able to make the
-   following functions static, once we hppa is partially multiarched.  */
-int hppa_pc_requires_run_before_use (CORE_ADDR pc);
-
 /* Routines to extract various sized constants out of hppa 
    instructions. */
 
@@ -2610,34 +2606,6 @@ unwind_command (char *exp, int from_tty)
 	    printf_unfiltered ("unknown (%d)\n", u->stub_unwind.stub_type);
 	}
     }
-}
-
-int
-hppa_pc_requires_run_before_use (CORE_ADDR pc)
-{
-  /* Sometimes we may pluck out a minimal symbol that has a negative address.
-  
-     An example of this occurs when an a.out is linked against a foo.sl.
-     The foo.sl defines a global bar(), and the a.out declares a signature
-     for bar().  However, the a.out doesn't directly call bar(), but passes
-     its address in another call.
-  
-     If you have this scenario and attempt to "break bar" before running,
-     gdb will find a minimal symbol for bar() in the a.out.  But that
-     symbol's address will be negative.  What this appears to denote is
-     an index backwards from the base of the procedure linkage table (PLT)
-     into the data linkage table (DLT), the end of which is contiguous
-     with the start of the PLT.  This is clearly not a valid address for
-     us to set a breakpoint on.
-  
-     Note that one must be careful in how one checks for a negative address.
-     0xc0000000 is a legitimate address of something in a shared text
-     segment, for example.  Since I don't know what the possible range
-     is of these "really, truly negative" addresses that come from the
-     minimal symbols, I'm resorting to the gross hack of checking the
-     top byte of the address for all 1's.  Sigh.  */
-
-  return (!target_has_stack && (pc & 0xFF000000) == 0xFF000000);
 }
 
 /* Return the GDB type object for the "standard" data type of data in

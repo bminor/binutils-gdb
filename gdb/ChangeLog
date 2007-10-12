@@ -1,5 +1,17 @@
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* breakpoint.c (breakpoint_sals_to_pc): Do not check for
+	DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE.
+
+	* config/pa/tm-hppa.h: Delete file.
+	* config/pa/hppa64.mt: Do not set DEPRECATED_TM_FILE.
+	* config/pa/hppahpux.mt: Likewise.
+	* config/pa/hppa.mt: Likewise.
+	* config/pa/linux.mt: Likewise.
+	* hppa-tdep.c (hppa_pc_requires_run_before_use): Delete.
+
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/arm/nm-nbsdaout.h: Remove file.
 	* config/nm-nbsdaout.h: Likewise.
 	* config/nm-nbsd.h: Likewise.
