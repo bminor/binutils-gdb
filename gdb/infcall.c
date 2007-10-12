@@ -583,44 +583,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
 	if (param_type != NULL && language_pass_by_reference (param_type))
 	  args[i] = value_addr (args[i]);
-
-	/* elz: this code is to handle the case in which the function
-	   to be called has a pointer to function as parameter and the
-	   corresponding actual argument is the address of a function
-	   and not a pointer to function variable.  In aCC compiled
-	   code, the calls through pointers to functions (in the body
-	   of the function called by hand) are made via
-	   $$dyncall_external which requires some registers setting,
-	   this is taken care of if we call via a function pointer
-	   variable, but not via a function address.  In cc this is
-	   not a problem. */
-
-	if (using_gcc == 0)
-	  {
-	    if (param_type != NULL && TYPE_CODE (ftype) != TYPE_CODE_METHOD)
-	      {
-		/* if this parameter is a pointer to function.  */
-		if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
-		  if (TYPE_CODE (TYPE_TARGET_TYPE (param_type)) == TYPE_CODE_FUNC)
-		    /* elz: FIXME here should go the test about the
-		       compiler used to compile the target. We want to
-		       issue the error message only if the compiler
-		       used was HP's aCC.  If we used HP's cc, then
-		       there is no problem and no need to return at
-		       this point.  */
-		    /* Go see if the actual parameter is a variable of
-		       type pointer to function or just a function.  */
-		    if (VALUE_LVAL (args[i]) == not_lval)
-		      {
-			char *arg_name;
-			/* NOTE: cagney/2005-01-02: THIS IS BOGUS.  */
-			if (find_pc_partial_function ((CORE_ADDR) value_contents (args[i])[0], &arg_name, NULL, NULL))
-			  error (_("\
-You cannot use function <%s> as argument. \n\
-You must use a pointer to function type variable. Command ignored."), arg_name);
-		      }
-	      }
-	  }
       }
   }
 

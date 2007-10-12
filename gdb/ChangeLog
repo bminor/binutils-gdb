@@ -1,5 +1,10 @@
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* infcall.c (call_function_by_hand): Remove special handling
+	for HP aCC compiled code.
+
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* cris-tdep.c (cris_push_dummy_call): Support arguments passed by
 	reference.  Fix endianness bugs.
 	(cris_reg_struct_has_address): Remove.
