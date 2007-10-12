@@ -1,5 +1,10 @@
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* infcmd.c (print_return_value): Remove STRUCT_RETURN argument.
+	(finish_command_continuation, finish_command): Adapt callers.
+
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* infcall.c (call_function_by_hand): Remove special handling
 	for HP aCC compiled code.
 

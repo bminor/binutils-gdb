@@ -66,7 +66,7 @@ void interrupt_target_command (char *args, int from_tty);
 
 static void nofp_registers_info (char *, int);
 
-static void print_return_value (int struct_return, struct type *value_type);
+static void print_return_value (struct type *value_type);
 
 static void finish_command_continuation (struct continuation_arg *);
 
@@ -1160,7 +1160,7 @@ advance_command (char *arg, int from_tty)
 /* Print the result of a function at the end of a 'finish' command.  */
 
 static void
-print_return_value (int struct_return, struct type *value_type)
+print_return_value (struct type *value_type)
 {
   struct gdbarch *gdbarch = current_gdbarch;
   struct cleanup *old_chain;
@@ -1240,25 +1240,14 @@ finish_command_continuation (struct continuation_arg *arg)
       && function != NULL)
     {
       struct type *value_type;
-      int struct_return;
-      int gcc_compiled;
 
       value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
       if (!value_type)
 	internal_error (__FILE__, __LINE__,
 			_("finish_command: function has no target type"));
 
-      if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
-	{
-	  do_exec_cleanups (cleanups);
-	  return;
-	}
-
-      CHECK_TYPEDEF (value_type);
-      gcc_compiled = BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function));
-      struct_return = using_struct_return (value_type, gcc_compiled);
-
-      print_return_value (struct_return, value_type); 
+      if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
+	print_return_value (value_type); 
     }
 
   do_exec_cleanups (cleanups);
@@ -1363,23 +1352,14 @@ finish_command (char *arg, int from_tty)
 	  && function != NULL)
 	{
 	  struct type *value_type;
-	  int struct_return;
-	  int gcc_compiled;
 
 	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
 	  if (!value_type)
 	    internal_error (__FILE__, __LINE__,
 			    _("finish_command: function has no target type"));
 
-	  /* FIXME: Shouldn't we do the cleanups before returning?  */
-	  if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
-	    return;
-
-	  CHECK_TYPEDEF (value_type);
-	  gcc_compiled = BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function));
-	  struct_return = using_struct_return (value_type, gcc_compiled);
-
-	  print_return_value (struct_return, value_type); 
+	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
+	    print_return_value (value_type); 
 	}
 
       do_cleanups (old_chain);
