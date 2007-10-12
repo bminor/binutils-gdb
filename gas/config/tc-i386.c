@@ -4232,6 +4232,8 @@ process_operands (void)
 
   if (i.tm.opcode_modifier.firstxmm0)
     {
+      unsigned int j;
+
       /* The first operand is implicit and must be xmm0.  */
       assert (i.reg_operands && UINTS_EQUAL (i.types[0], regxmm));
       if (i.op[0].regs->reg_num != 0)
@@ -4244,17 +4246,19 @@ process_operands (void)
 		    i.tm.name, register_prefix);
 	  return 0;
 	}
-      i.op[0] = i.op[1];
-      i.op[1] = i.op[2];
-      i.types[0] = i.types[1];
-      i.types[1] = i.types[2];
+
+      for (j = 1; j < i.operands; j++)
+	{
+	  i.op[j - 1] = i.op[j];
+	  i.types[j - 1] = i.types[j];
+
+	  /* We need to adjust fields in i.tm since they are used by
+	     build_modrm_byte.  */
+	  i.tm.operand_types [j - 1] = i.tm.operand_types [j];
+	}
+
       i.operands--;
       i.reg_operands--;
-
-      /* We need to adjust fields in i.tm since they are used by
-	 build_modrm_byte.  */
-      i.tm.operand_types [0] = i.tm.operand_types [1];
-      i.tm.operand_types [1] = i.tm.operand_types [2];
       i.tm.operands--;
     }
   else if (i.tm.opcode_modifier.regkludge)
