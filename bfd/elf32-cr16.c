@@ -1337,7 +1337,7 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
 
               /* Verify it's a arithmetic ADDD or MOVD instruction.
                  For ADDD and MOVD only, convert to IMM32 -> IMM20.  */
-              if (((code & 0xfff0) != 0x0070) || ((code & 0xfff0) != 0x0020))
+              if (((code & 0xfff0) == 0x0070) || ((code & 0xfff0) == 0x0020))
                 is_add_mov = 1;
 
               if (is_add_mov)

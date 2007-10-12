@@ -255,7 +255,7 @@ const pseudo_typeS md_pseudo_table[] =
 const relax_typeS md_relax_table[] =
 {
   /* bCC  */
-  {0xfa, -0x100, 2, 1},                 /*  8 */
+  {0x7f, -0x80, 2, 1},                  /*  8 */
   {0xfffe, -0x10000, 4, 2},             /* 16 */
   {0xfffffe, -0x1000000, 6, 0},         /* 24 */
 };

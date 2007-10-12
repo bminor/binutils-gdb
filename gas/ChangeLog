@@ -1,3 +1,8 @@
+2007-10-12  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* config/tc-cr16.c: Update the md_relax_table for 1 word b<cc>
+	instruction range information.
+
 2007-10-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/as.texinfo (Object Attributes): New chapter.
