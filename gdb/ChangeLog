@@ -1,5 +1,11 @@
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* config/arm/nm-nbsdaout.h: Remove file.
+	* config/nm-nbsdaout.h: Likewise.
+	* config/nm-nbsd.h: Likewise.
+
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* block.h (struct block): Remove "gcc_compile_flag" member.
 	(BLOCK_GCC_COMPILED): Remove.
 	* block.c (allocate_block): Do not clear BLOCK_GCC_COMPILED.
