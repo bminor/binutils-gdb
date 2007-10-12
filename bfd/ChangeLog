@@ -1,3 +1,7 @@
+2007-10-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elfcore_grok_prxfpreg): Fix comment typo.
+
 2007-10-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (get_program_header_size): Always add a PT_GNU_RELRO

@@ -7436,7 +7436,7 @@ elfcore_grok_prfpreg (bfd *abfd, Elf_Internal_Note *note)
 }
 
 /* Linux dumps the Intel SSE regs in a note named "LINUX" with a note
-   type of 5 (NT_PRXFPREG).  Just include the whole note's contents
+   type of NT_PRXFPREG.  Just include the whole note's contents
    literally.  */
 
 static bfd_boolean
