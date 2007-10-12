@@ -1093,7 +1093,7 @@ hppa_hpux_find_dummy_bpaddr (CORE_ADDR addr)
 
 static CORE_ADDR
 hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
-			   CORE_ADDR funcaddr, int using_gcc,
+			   CORE_ADDR funcaddr,
 			   struct value **args, int nargs,
 			   struct type *value_type,
 			   CORE_ADDR *real_pc, CORE_ADDR *bp_addr,

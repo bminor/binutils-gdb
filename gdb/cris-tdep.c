@@ -868,7 +868,7 @@ cris_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 
 static CORE_ADDR
 cris_push_dummy_code (struct gdbarch *gdbarch,
-                      CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
+                      CORE_ADDR sp, CORE_ADDR funaddr,
                       struct value **args, int nargs,
                       struct type *value_type,
                       CORE_ADDR *real_pc, CORE_ADDR *bp_addr,

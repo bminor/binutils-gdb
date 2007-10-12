@@ -95,25 +95,12 @@ struct block
     cplus_specific;
   }
   language_specific;
-
-  /* Version of GCC used to compile the function corresponding
-     to this block, or 0 if not compiled with GCC.  When possible,
-     GCC should be compatible with the native compiler, or if that
-     is not feasible, the differences should be fixed during symbol
-     reading.  As of 16 Apr 93, this flag is never used to distinguish
-     between gcc2 and the native compiler.
-
-     If there is no function corresponding to this block, this meaning
-     of this flag is undefined.  */
-
-  unsigned char gcc_compile_flag;
 };
 
 #define BLOCK_START(bl)		(bl)->startaddr
 #define BLOCK_END(bl)		(bl)->endaddr
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
-#define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 #define BLOCK_DICT(bl)		(bl)->dict
 #define BLOCK_NAMESPACE(bl)   (bl)->language_specific.cplus_specific.namespace
 

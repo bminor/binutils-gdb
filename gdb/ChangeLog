@@ -1,5 +1,28 @@
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* block.h (struct block): Remove "gcc_compile_flag" member.
+	(BLOCK_GCC_COMPILED): Remove.
+	* block.c (allocate_block): Do not clear BLOCK_GCC_COMPILED.
+	* buildsym.c (finish_block): Do not set it.
+	* symmisc.c (dump_symtab_1): Do not dump it.
+
+	* value.h (using_struct_return): Remove "gcc_p" argument.
+	* value.c (using_struct_return): Likewise.
+	* eval.c (evaluate_subexp_standard): Adapt callers.
+	* infcall.c (call_function_by_hand): Likewise.
+	* stack.c (return_command): Likewise.
+	* sparc-tdep.c (sparc32_push_dummy_code): Likewise.
+
+	* gdbarch.sh (push_dummy_code): Remove "using_gcc" parameter.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* cris-tdep.c (cris_push_dummy_code): Adapt prototype.
+	* hppa-hpux-tdep.c (hppa_hpux_push_dummy_code): Likewise.
+	* sparc-tdep.c (sparc32_push_dummy_code): Likewise.
+	* infcall.c (generic_push_dummy_code, push_dummy_code): Likewise.
+	(push_dummy_code, call_function_by_hand): Adapt callers.
+
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* infcmd.c (print_return_value): Remove STRUCT_RETURN argument.
 	(finish_command_continuation, finish_command): Adapt callers.
 

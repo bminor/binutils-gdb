@@ -1805,7 +1805,7 @@ A structure or union return type is not supported by this architecture.\n\
 If you continue, the return value that you specified will be ignored.\n";
 	  return_value = NULL;
 	}
-      else if (using_struct_return (return_type, 0))
+      else if (using_struct_return (return_type))
 	{
 	  query_prefix = "\
 The location at which to store the function's return value is unknown.\n\

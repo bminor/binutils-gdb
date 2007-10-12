@@ -1709,11 +1709,10 @@ generic_use_struct_convention (int gcc_p, struct type *value_type)
 
 /* Return true if the function returning the specified type is using
    the convention of returning structures in memory (passing in the
-   address as a hidden first parameter).  GCC_P is nonzero if compiled
-   with GCC.  */
+   address as a hidden first parameter).  */
 
 int
-using_struct_return (struct type *value_type, int gcc_p)
+using_struct_return (struct type *value_type)
 {
   enum type_code code = TYPE_CODE (value_type);
 

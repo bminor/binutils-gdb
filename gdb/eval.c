@@ -760,7 +760,6 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	CORE_ADDR selector = 0;
 
-	int using_gcc = 0;
 	int struct_return = 0;
 	int sub_no_side = 0;
 
@@ -912,9 +911,6 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	    b = block_for_pc (funaddr);
 
-	    /* If compiled without -g, assume GCC 2.  */
-	    using_gcc = (b == NULL ? 2 : BLOCK_GCC_COMPILED (b));
-
 	    CHECK_TYPEDEF (value_type);
 	  
 	    if ((value_type == NULL) 
@@ -924,11 +920,11 @@ evaluate_subexp_standard (struct type *expect_type,
 		  value_type = expect_type;
 	      }
 
-	    struct_return = using_struct_return (value_type, using_gcc);
+	    struct_return = using_struct_return (value_type);
 	  }
 	else if (expect_type != NULL)
 	  {
-	    struct_return = using_struct_return (check_typedef (expect_type), using_gcc);
+	    struct_return = using_struct_return (check_typedef (expect_type));
 	  }
 	
 	/* Found a function symbol.  Now we will substitute its

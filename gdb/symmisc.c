@@ -508,8 +508,6 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 				SYMBOL_DEMANGLED_NAME (BLOCK_FUNCTION (b)));
 		}
 	    }
-	  if (BLOCK_GCC_COMPILED (b))
-	    fprintf_filtered (outfile, ", compiled with gcc%d", BLOCK_GCC_COMPILED (b));
 	  fprintf_filtered (outfile, "\n");
 	  /* Now print each symbol in this block (in no particular order, if
 	     we're using a hashtable).  */

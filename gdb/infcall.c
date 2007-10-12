@@ -260,7 +260,7 @@ breakpoint_auto_delete_contents (void *arg)
 
 static CORE_ADDR
 generic_push_dummy_code (struct gdbarch *gdbarch,
-			 CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
+			 CORE_ADDR sp, CORE_ADDR funaddr,
 			 struct value **args, int nargs,
 			 struct type *value_type,
 			 CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
@@ -300,18 +300,18 @@ generic_push_dummy_code (struct gdbarch *gdbarch,
 
 static CORE_ADDR
 push_dummy_code (struct gdbarch *gdbarch,
-		 CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
+		 CORE_ADDR sp, CORE_ADDR funaddr,
 		 struct value **args, int nargs,
 		 struct type *value_type,
 		 CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
 		 struct regcache *regcache)
 {
   if (gdbarch_push_dummy_code_p (gdbarch))
-    return gdbarch_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
+    return gdbarch_push_dummy_code (gdbarch, sp, funaddr,
 				    args, nargs, value_type, real_pc, bp_addr,
 				    regcache);
   else    
-    return generic_push_dummy_code (gdbarch, sp, funaddr, using_gcc,
+    return generic_push_dummy_code (gdbarch, sp, funaddr,
 				    args, nargs, value_type, real_pc, bp_addr,
 				    regcache);
 }
@@ -347,7 +347,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct inferior_status *inf_status;
   struct cleanup *inf_status_cleanup;
   CORE_ADDR funaddr;
-  int using_gcc;		/* Set to version of gcc in use, or zero if not gcc */
   CORE_ADDR real_pc;
   struct type *ftype = check_typedef (value_type (function));
   CORE_ADDR bp_addr;
@@ -455,12 +454,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   funaddr = find_function_addr (function, &values_type);
   CHECK_TYPEDEF (values_type);
 
-  {
-    struct block *b = block_for_pc (funaddr);
-    /* If compiled without -g, assume GCC 2.  */
-    using_gcc = (b == NULL ? 2 : BLOCK_GCC_COMPILED (b));
-  }
-
   /* Are we returning a value using a structure return (passing a
      hidden argument pointing to storage) or a normal value return?
      There are two cases: language-mandated structure return and
@@ -482,7 +475,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     }
   else
     {
-      struct_return = using_struct_return (values_type, using_gcc);
+      struct_return = using_struct_return (values_type);
       target_values_type = values_type;
     }
 
@@ -503,7 +496,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       if (gdbarch_inner_than (current_gdbarch, 1, 2))
 	{
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
-				using_gcc, args, nargs, target_values_type,
+				args, nargs, target_values_type,
 				&real_pc, &bp_addr, get_current_regcache ());
 	  dummy_addr = sp;
 	}
@@ -511,7 +504,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	{
 	  dummy_addr = sp;
 	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
-				using_gcc, args, nargs, target_values_type,
+				args, nargs, target_values_type,
 				&real_pc, &bp_addr, get_current_regcache ());
 	}
       break;

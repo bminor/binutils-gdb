@@ -378,7 +378,7 @@ sparc32_pseudo_register_write (struct gdbarch *gdbarch,
 
 static CORE_ADDR
 sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
-			 CORE_ADDR funcaddr, int using_gcc,
+			 CORE_ADDR funcaddr,
 			 struct value **args, int nargs,
 			 struct type *value_type,
 			 CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
@@ -387,7 +387,7 @@ sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
   *bp_addr = sp - 4;
   *real_pc = funcaddr;
 
-  if (using_struct_return (value_type, using_gcc))
+  if (using_struct_return (value_type))
     {
       gdb_byte buf[4];
 
