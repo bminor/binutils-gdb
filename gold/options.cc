@@ -348,6 +348,8 @@ options::Command_line_options::options[] =
 		NULL, ONE_DASH, &General_options::set_shared),
   GENERAL_NOARG('\0', "static", N_("Do not link against shared libraries"),
 		NULL, ONE_DASH, &General_options::set_static),
+  GENERAL_NOARG('\0', "stats", N_("Print resource usage statistics"),
+		NULL, TWO_DASHES, &General_options::set_stats),
   GENERAL_ARG('\0', "sysroot", N_("Set target system root directory"),
 	      N_("--sysroot DIR"), TWO_DASHES, &General_options::set_sysroot),
   POSDEP_NOARG('\0', "as-needed",
@@ -388,6 +390,7 @@ General_options::General_options()
     rpath_link_(),
     is_shared_(false),
     is_static_(false),
+    print_stats_(false),
     sysroot_()
 {
 }

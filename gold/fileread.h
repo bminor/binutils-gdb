@@ -46,7 +46,7 @@ class File_read
  public:
   File_read()
     : name_(), descriptor_(-1), size_(0), lock_count_(0), views_(),
-      saved_views_(), contents_(NULL)
+      saved_views_(), contents_(NULL), mapped_bytes_(0)
   { }
 
   ~File_read();
@@ -109,10 +109,26 @@ class File_read
   File_view*
   get_lasting_view(off_t start, off_t size, bool cache);
 
+  // Dump statistical information to stderr.
+  static void
+  print_stats();
+
  private:
   // This class may not be copied.
   File_read(const File_read&);
   File_read& operator=(const File_read&);
+
+  // Total bytes mapped into memory during the link.  This variable is
+  // only accessed from the main thread, when unlocking the object.
+  static unsigned long long total_mapped_bytes;
+
+  // Current number of bytes mapped into memory during the link.  This
+  // variable is only accessed from the main thread.
+  static unsigned long long current_mapped_bytes;
+
+  // High water mark of bytes mapped into memory during the link.
+  // This variable is only accessed from the main thread.
+  static unsigned long long maximum_mapped_bytes;
 
   // A view into the file.
   class View
@@ -167,6 +183,7 @@ class File_read
     bool mapped_;
   };
 
+  friend class View;
   friend class File_view;
 
   // Find a view into the file.
@@ -219,6 +236,10 @@ class File_read
   Saved_views saved_views_;
   // Specified file contents.  Used only for testing purposes.
   const unsigned char* contents_;
+  // Total amount of space mapped into memory.  This is only changed
+  // while the file is locked.  When we unlock the file, we transfer
+  // the total to total_mapped_bytes, and reset this to zero.
+  size_t mapped_bytes_;
 };
 
 // A view of file data that persists even when the file is unlocked.

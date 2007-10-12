@@ -137,6 +137,11 @@ class Layout
   off_t
   finalize(const Input_objects*, Symbol_table*);
 
+  // Return the size of the output file.
+  off_t
+  output_file_size() const
+  { return this->output_file_size_; }
+
   // Return the TLS segment.  This will return NULL if there isn't
   // one.
   Output_segment*
@@ -368,6 +373,8 @@ class Layout
   Output_data_dynamic* dynamic_data_;
   // The exception frame section.
   Output_section* eh_frame_section_;
+  // The size of the output file.
+  off_t output_file_size_;
 };
 
 // This task handles writing out data which is not part of a section

@@ -169,6 +169,11 @@ class General_options
   is_static() const
   { return this->is_static_; }
 
+  // --statis: Print resource usage statistics.
+  bool
+  print_stats() const
+  { return this->print_stats_; }
+
   // --sysroot: The system root of a cross-linker.
   const std::string&
   sysroot() const
@@ -252,6 +257,10 @@ class General_options
   { this->is_static_ = true; }
 
   void
+  set_stats()
+  { this->print_stats_ = true; }
+
+  void
   set_sysroot(const char* arg)
   { this->sysroot_ = arg; }
 
@@ -275,6 +284,7 @@ class General_options
   Dir_list rpath_link_;
   bool is_shared_;
   bool is_static_;
+  bool print_stats_;
   std::string sysroot_;
 };
 

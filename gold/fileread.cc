@@ -48,6 +48,8 @@ File_read::View::~View()
       if (::munmap(const_cast<unsigned char*>(this->data_), this->size_) != 0)
         fprintf(stderr, _("%s: munmap failed: %s\n"),
                 program_name, strerror(errno));
+
+      File_read::current_mapped_bytes -= this->size_;
     }
 }
 
@@ -71,6 +73,11 @@ File_read::View::is_locked()
 }
 
 // Class File_read.
+
+// The File_read static variables.
+unsigned long long File_read::total_mapped_bytes;
+unsigned long long File_read::current_mapped_bytes;
+unsigned long long File_read::maximum_mapped_bytes;
 
 // The File_read class is designed to support file descriptor caching,
 // but this is not currently implemented.
@@ -146,7 +153,15 @@ File_read::unlock()
   gold_assert(this->lock_count_ > 0);
   --this->lock_count_;
   if (this->lock_count_ == 0)
-    this->clear_views(false);
+    {
+      File_read::total_mapped_bytes += this->mapped_bytes_;
+      File_read::current_mapped_bytes += this->mapped_bytes_;
+      this->mapped_bytes_ = 0;
+      if (File_read::current_mapped_bytes > File_read::maximum_mapped_bytes)
+	File_read::maximum_mapped_bytes = File_read::current_mapped_bytes;
+
+      this->clear_views(false);
+    }
 }
 
 bool
@@ -289,6 +304,8 @@ File_read::find_or_make_view(off_t start, off_t size, bool cache)
           gold_exit(false);
         }
 
+      this->mapped_bytes_ += psize;
+
       const unsigned char* pbytes = static_cast<const unsigned char*>(p);
       v = new File_read::View(poff, psize, pbytes, cache, true);
     }
@@ -353,6 +370,17 @@ File_read::clear_views(bool destroying)
 	  ++p;
 	}
     }
+}
+
+// Print statistical information to stderr.  This is used for --stats.
+
+void
+File_read::print_stats()
+{
+  fprintf(stderr, _("%s: total bytes mapped for read: %llu\n"),
+	  program_name, File_read::total_mapped_bytes);
+  fprintf(stderr, _("%s: maximum bytes mapped for read at one time: %llu\n"),
+	  program_name, File_read::maximum_mapped_bytes);
 }
 
 // Class File_view.

@@ -171,6 +171,7 @@ AC_LANG_PUSH(C++)
 
 AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
+AC_CHECK_FUNCS(mallinfo)
 
 dnl Test whether the compiler can specify a member templates to call.
 AC_COMPILE_IFELSE([

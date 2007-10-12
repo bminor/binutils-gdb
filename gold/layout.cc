@@ -67,7 +67,7 @@ Layout::Layout(const General_options& options)
     unattached_section_list_(), special_output_list_(),
     tls_segment_(NULL), symtab_section_(NULL),
     dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL),
-    eh_frame_section_(NULL)
+    eh_frame_section_(NULL), output_file_size_(-1)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -624,6 +624,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Now we know exactly where everything goes in the output file.
   Output_data::layout_complete();
+
+  this->output_file_size_ = off;
 
   return off;
 }

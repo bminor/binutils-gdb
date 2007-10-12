@@ -22,6 +22,11 @@
 
 #include "gold.h"
 
+#ifdef HAVE_MALLINFO
+#include <malloc.h>
+#endif
+#include "libiberty.h"
+
 #include "options.h"
 #include "parameters.h"
 #include "dirsearch.h"
@@ -49,6 +54,11 @@ main(int argc, char** argv)
   // Handle the command line options.
   Command_line command_line;
   command_line.process(argc - 1, argv + 1);
+
+  long start_time = 0;
+  if (command_line.options().print_stats())
+    start_time = get_run_time();
+
   initialize_parameters(&command_line.options());
 
   // The work queue.
@@ -74,6 +84,21 @@ main(int argc, char** argv)
 
   // Run the main task processing loop.
   workqueue.process();
+
+  if (command_line.options().print_stats())
+    {
+      long run_time = get_run_time() - start_time;
+      fprintf(stderr, _("%s: total run time: %ld.%06ld seconds\n"),
+	      program_name, run_time / 1000000, run_time % 1000000);
+#ifdef HAVE_MALLINFO
+      struct mallinfo m = mallinfo();
+      fprintf(stderr, _("%s: total space allocated by malloc: %d bytes\n"),
+	      program_name, m.arena);
+#endif
+      File_read::print_stats();
+      fprintf(stderr, _("%s: output file size: %lld bytes\n"),
+	      program_name, static_cast<long long>(layout.output_file_size()));
+    }
 
   gold_exit(true);
 }
