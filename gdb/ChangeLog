@@ -1,3 +1,10 @@
+2007-10-12  Jim Blandy  <jimb@codesourcery.com>
+
+	* serial.h (struct serial_ops): Document read_prim to return zero
+	at EOF.
+	* ser-base.c (do_ser_base_readchar): Return SERIAL_EOF when
+	read_prim returns zero, not SERIAL_TIMEOUT.
+
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* alpha-mdebug-tdep.c: Include "gdb_string.h".

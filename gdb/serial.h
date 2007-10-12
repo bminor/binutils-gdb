@@ -244,7 +244,7 @@ struct serial_ops
        interesting.  */
     void (*async) (struct serial *scb, int async_p);
     /* Perform a low-level read operation, reading (at most) COUNT
-       bytes into SCB->BUF.  */
+       bytes into SCB->BUF.  Return zero at end of file.  */
     int (*read_prim)(struct serial *scb, size_t count);
     /* Perform a low-level write operation, writing (at most) COUNT
        bytes from BUF.  */

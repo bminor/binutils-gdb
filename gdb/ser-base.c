@@ -279,9 +279,7 @@ do_ser_base_readchar (struct serial *scb, int timeout)
   if (status <= 0)
     {
       if (status == 0)
-	/* 0 chars means timeout.  (We may need to distinguish between EOF
-	   & timeouts someday.)  */
-	return SERIAL_TIMEOUT;	
+        return SERIAL_EOF;
       else
 	/* Got an error from read.  */
 	return SERIAL_ERROR;	
