@@ -1,5 +1,12 @@
 2007-09-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* opncls.c (find_separate_debug_file): Ensure bfd_set_error has
+	been called on all error return paths.
+	(bfd_fill_in_gnu_debuglink_section): Use bfd_malloc, not malloc.
+	Clear padding after filename
+
+2007-09-14  Alan Modra  <amodra@bigpond.net.au>
+
 	* format.c (bfd_check_format_matches): Record matching targets even
 	when "matching" is NULL to allow bfd_associated_vector matches.
 	Consolidate error return code.  Consolidate ok return code.  Always
