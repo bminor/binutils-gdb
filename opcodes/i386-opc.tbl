@@ -1365,9 +1365,9 @@ pabsd, 2, 0x660f381e, None, 3, CpuSSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSu
 
 blendpd, 3, 0x660f3a0d, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 blendps, 3, 0x660f3a0c, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-blendvpd, 3, 0x660f3815, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|RegKludge, { RegXMM, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+blendvpd, 3, 0x660f3815, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|FirstXmm0, { RegXMM, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 blendvpd, 2, 0x660f3815, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-blendvps, 3, 0x660f3814, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|RegKludge, { RegXMM, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+blendvps, 3, 0x660f3814, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|FirstXmm0, { RegXMM, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 blendvps, 2, 0x660f3814, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 dppd, 3, 0x660f3a41, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 dpps, 3, 0x660f3a40, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -1376,7 +1376,7 @@ insertps, 3, 0x660f3a21, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No
 movntdqa, 2, 0x660f382a, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM }
 mpsadbw, 3, 0x660f3a42, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 packusdw, 2, 0x660f382b, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-pblendvb, 3, 0x660f3810, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|RegKludge, { RegXMM, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+pblendvb, 3, 0x660f3810, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|FirstXmm0, { RegXMM, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pblendvb, 2, 0x660f3810, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pblendw, 3, 0x660f3a0e, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pcmpeqq, 2, 0x660f3829, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }

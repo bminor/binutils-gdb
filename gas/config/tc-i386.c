@@ -4230,57 +4230,52 @@ process_operands (void)
       || i.tm.opcode_modifier.drexc)
     process_drex ();
 
-  /* The imul $imm, %reg instruction is converted into
-     imul $imm, %reg, %reg, and the clr %reg instruction
-     is converted into xor %reg, %reg.  */
-  if (i.tm.opcode_modifier.regkludge)
+  if (i.tm.opcode_modifier.firstxmm0)
     {
-       if (i.tm.cpu_flags.bitfield.cpusse4_1)
-	 {
-	   /* The first operand in instruction blendvpd, blendvps and
-	      pblendvb in SSE4.1 is implicit and must be xmm0.  */
-	   assert (i.operands == 3
-		   && i.reg_operands >= 2
-		   && UINTS_EQUAL (i.types[0], regxmm));
-	   if (i.op[0].regs->reg_num != 0)
-	     {
-	       if (intel_syntax)
-		 as_bad (_("the last operand of `%s' must be `%sxmm0'"),
-			 i.tm.name, register_prefix);
-	       else
-		 as_bad (_("the first operand of `%s' must be `%sxmm0'"),
-			 i.tm.name, register_prefix);
-	       return 0;
-	     }
-	   i.op[0] = i.op[1];
-	   i.op[1] = i.op[2];
-	   i.types[0] = i.types[1];
-	   i.types[1] = i.types[2];
-	   i.operands--;
-	   i.reg_operands--;
+      /* The first operand is implicit and must be xmm0.  */
+      assert (i.reg_operands && UINTS_EQUAL (i.types[0], regxmm));
+      if (i.op[0].regs->reg_num != 0)
+	{
+	  if (intel_syntax)
+	    as_bad (_("the last operand of `%s' must be `%sxmm0'"),
+		    i.tm.name, register_prefix);
+	  else
+	    as_bad (_("the first operand of `%s' must be `%sxmm0'"),
+		    i.tm.name, register_prefix);
+	  return 0;
+	}
+      i.op[0] = i.op[1];
+      i.op[1] = i.op[2];
+      i.types[0] = i.types[1];
+      i.types[1] = i.types[2];
+      i.operands--;
+      i.reg_operands--;
 
-	   /* We need to adjust fields in i.tm since they are used by
-	      build_modrm_byte.  */
-	   i.tm.operand_types [0] = i.tm.operand_types [1];
-	   i.tm.operand_types [1] = i.tm.operand_types [2];
-	   i.tm.operands--;
-	 }
-       else
-	 {
-	   unsigned int first_reg_op;
-	   
-	   if (operand_type_check (i.types[0], reg))
-	     first_reg_op = 0;
-	   else
-	     first_reg_op = 1;
-	   /* Pretend we saw the extra register operand.  */
-	   assert (i.reg_operands == 1
-		   && i.op[first_reg_op + 1].regs == 0);
-	   i.op[first_reg_op + 1].regs = i.op[first_reg_op].regs;
-	   i.types[first_reg_op + 1] = i.types[first_reg_op];
-	   i.operands++;
-	   i.reg_operands++;
-	 }
+      /* We need to adjust fields in i.tm since they are used by
+	 build_modrm_byte.  */
+      i.tm.operand_types [0] = i.tm.operand_types [1];
+      i.tm.operand_types [1] = i.tm.operand_types [2];
+      i.tm.operands--;
+    }
+  else if (i.tm.opcode_modifier.regkludge)
+    {
+      /* The imul $imm, %reg instruction is converted into
+	 imul $imm, %reg, %reg, and the clr %reg instruction
+	 is converted into xor %reg, %reg.  */
+
+      unsigned int first_reg_op;
+
+      if (operand_type_check (i.types[0], reg))
+	first_reg_op = 0;
+      else
+	first_reg_op = 1;
+      /* Pretend we saw the extra register operand.  */
+      assert (i.reg_operands == 1
+	      && i.op[first_reg_op + 1].regs == 0);
+      i.op[first_reg_op + 1].regs = i.op[first_reg_op].regs;
+      i.types[first_reg_op + 1] = i.types[first_reg_op];
+      i.operands++;
+      i.reg_operands++;
     }
 
   if (i.tm.opcode_modifier.shortform)

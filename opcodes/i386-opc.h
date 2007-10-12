@@ -195,8 +195,10 @@ typedef union i386_cpu_flags
 /* fake an extra reg operand for clr, imul and special register
    processing for some instructions.  */
 #define RegKludge		(IsString + 1)
+/* The first operand must be xmm0 */
+#define FirstXmm0		(RegKludge + 1)
 /* opcode is a prefix */
-#define IsPrefix		(RegKludge + 1)
+#define IsPrefix		(FirstXmm0 + 1)
 /* instruction has extension in 8 bit imm */
 #define ImmExt			(IsPrefix + 1)
 /* instruction don't need Rex64 prefix.  */
@@ -240,6 +242,7 @@ typedef struct i386_opcode_modifier
   unsigned int fwait:1;
   unsigned int isstring:1;
   unsigned int regkludge:1;
+  unsigned int firstxmm0:1;
   unsigned int isprefix:1;
   unsigned int immext:1;
   unsigned int norex64:1;

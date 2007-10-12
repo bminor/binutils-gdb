@@ -1,4 +1,10 @@
-2007-10-09  Eric B. Weddington  <eweddington@cso.atmel.com>
+2007-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (process_operands): Check the firstxmm0
+	field in opcode_modifier for instruction with a implicit
+	xmm0 as the first operand.
+
+2007-10-12  Eric B. Weddington  <eweddington@cso.atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add new devices: AT90PWM2B,
 	AT90PWM3B.

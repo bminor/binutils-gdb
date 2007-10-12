@@ -276,6 +276,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (FWait),
   BITFIELD (IsString),
   BITFIELD (RegKludge),
+  BITFIELD (FirstXmm0),
   BITFIELD (IsPrefix),
   BITFIELD (ImmExt),
   BITFIELD (NoRex64),

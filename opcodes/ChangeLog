@@ -1,5 +1,18 @@
 2007-10-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (opcode_modifiers): Add FirstXmm0.
+
+	* i386-opc.h (FirstXmm0): New.
+	(IsPrefix): Updated.
+	(i386_opcode_modifier): Add firstxmm0.
+
+	* i386-opc.tbl (blendvpd): Replace RegKludge with FirstXmm0.
+	(blendvps): Likewise.
+	(pblendvb): Likewise.
+	* i386-tbl.h: Regenerated.
+
+2007-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (prefix_table): Reformat pblendvb and blendvps.
 
 2007-10-10  H.J. Lu  <hongjiu.lu@intel.com>
