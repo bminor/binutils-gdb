@@ -624,61 +624,6 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
       }
   }
 
-  if (gdbarch_deprecated_reg_struct_has_addr_p (current_gdbarch))
-    {
-      int i;
-      /* This is a machine like the sparc, where we may need to pass a
-	 pointer to the structure, not the structure itself.  */
-      for (i = nargs - 1; i >= 0; i--)
-	{
-	  struct type *arg_type = check_typedef (value_type (args[i]));
-	  if ((TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
-	       || TYPE_CODE (arg_type) == TYPE_CODE_UNION
-	       || TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
-	       || TYPE_CODE (arg_type) == TYPE_CODE_STRING
-	       || TYPE_CODE (arg_type) == TYPE_CODE_BITSTRING
-	       || TYPE_CODE (arg_type) == TYPE_CODE_SET
-	       || (TYPE_CODE (arg_type) == TYPE_CODE_FLT
-		   && TYPE_LENGTH (arg_type) > 8)
-	       )
-	      && gdbarch_deprecated_reg_struct_has_addr
-		   (current_gdbarch, using_gcc, arg_type))
-	    {
-	      CORE_ADDR addr;
-	      int len;		/*  = TYPE_LENGTH (arg_type); */
-	      int aligned_len;
-	      arg_type = check_typedef (value_enclosing_type (args[i]));
-	      len = TYPE_LENGTH (arg_type);
-
-	      aligned_len = len;
-	      if (gdbarch_inner_than (current_gdbarch, 1, 2))
-		{
-		  /* stack grows downward */
-		  sp -= aligned_len;
-		  /* ... so the address of the thing we push is the
-		     stack pointer after we push it.  */
-		  addr = sp;
-		}
-	      else
-		{
-		  /* The stack grows up, so the address of the thing
-		     we push is the stack pointer before we push it.  */
-		  addr = sp;
-		  sp += aligned_len;
-		}
-	      /* Push the structure.  */
-	      write_memory (addr, value_contents_all (args[i]), len);
-	      /* The value we're going to pass is the address of the
-		 thing we just pushed.  */
-	      /*args[i] = value_from_longest (lookup_pointer_type (values_type),
-		(LONGEST) addr); */
-	      args[i] = value_from_pointer (lookup_pointer_type (arg_type),
-					    addr);
-	    }
-	}
-    }
-
-
   /* Reserve space for the return structure to be written on the
      stack, if necessary.  Make certain that the value is correctly
      aligned. */

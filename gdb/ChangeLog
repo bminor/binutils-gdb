@@ -1,3 +1,16 @@
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* cris-tdep.c (cris_push_dummy_call): Support arguments passed by
+	reference.  Fix endianness bugs.
+	(cris_reg_struct_has_address): Remove.
+	(cris_gdbarch_init): Remove set_gdbarch_deprecated_reg_struct_has_addr
+	and set_gdbarch_deprecated_use_struct_convention calls.
+
+	* gdbarch.sh (deprecated_reg_struct_has_addr): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* infcall.c (call_function_by_hand): Remove handling of
+	deprecated_reg_struct_has_addr.
+
 2007-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Kazu Hirata  <kazu@codesourcery.com>
 

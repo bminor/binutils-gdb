@@ -3889,13 +3889,9 @@ This should only need to be defined if @code{gdbarch_read_pc} and
 
 @item int gdbarch_stabs_argument_has_addr (@var{gdbarch}, @var{type})
 @findex gdbarch_stabs_argument_has_addr
-@findex DEPRECATED_REG_STRUCT_HAS_ADDR
 @anchor{gdbarch_stabs_argument_has_addr} Define this function to return
 nonzero if a function argument of type @var{type} is passed by reference
 instead of value.
-
-This method replaces @code{DEPRECATED_REG_STRUCT_HAS_ADDR}
-(@pxref{DEPRECATED_REG_STRUCT_HAS_ADDR}).
 
 @item PROCESS_LINENUMBER_HOOK
 @findex PROCESS_LINENUMBER_HOOK
@@ -3943,14 +3939,6 @@ This method replaces @w{@code{gdbarch_call_dummy_location (@var{gdbarch})}} and
 @findex gdbarch_register_name
 Return the name of register @var{regnr} as a string.  May return @code{NULL}
 to indicate that @var{regnr} is not a valid register.
-
-@item DEPRECATED_REG_STRUCT_HAS_ADDR (@var{gcc_p}, @var{type})
-@findex DEPRECATED_REG_STRUCT_HAS_ADDR
-@anchor{DEPRECATED_REG_STRUCT_HAS_ADDR}Define this to return 1 if the
-given type will be passed by pointer rather than directly.
-
-This method has been replaced by @code{gdbarch_stabs_argument_has_addr}
-(@pxref{gdbarch_stabs_argument_has_addr}).
 
 @item SAVE_DUMMY_FRAME_TOS (@var{sp})
 @findex SAVE_DUMMY_FRAME_TOS

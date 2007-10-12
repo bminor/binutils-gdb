@@ -938,8 +938,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
           /* Data passed by value.  Fits in available register(s).  */
           for (i = 0; i < reg_demand; i++)
             {
-              regcache_cooked_write_unsigned (regcache, argreg, 
-					      *(unsigned long *) val);
+              regcache_cooked_write (regcache, argreg, val);
               argreg++;
               val += 4;
             }
@@ -952,8 +951,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
             {
               if (argreg <= ARG4_REGNUM)
                 {
-		  regcache_cooked_write_unsigned (regcache, argreg, 
-						  *(unsigned long *) val);
+		  regcache_cooked_write (regcache, argreg, val);
                   argreg++;
                   val += 4;
                 }
@@ -968,8 +966,22 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
         }
       else if (len > (2 * 4))
         {
-	  /* FIXME */
-	  internal_error (__FILE__, __LINE__, _("We don't do this"));
+	  /* Data passed by reference.  Push copy of data onto stack
+	     and pass pointer to this copy as argument.  */
+	  sp = (sp - len) & ~3;
+	  write_memory (sp, val, len);
+
+	  if (argreg <= ARG4_REGNUM)
+	    {
+	      regcache_cooked_write_unsigned (regcache, argreg, sp);
+	      argreg++;
+	    }
+	  else
+	    {
+	      gdb_byte buf[4];
+	      store_unsigned_integer (buf, 4, sp);
+	      si = push_stack_item (si, buf, 4);
+	    }
         }
       else
         {
@@ -1929,18 +1941,6 @@ cris_return_value (struct gdbarch *gdbarch, struct type *type,
     cris_store_return_value (type, regcache, writebuf);
 
   return RETURN_VALUE_REGISTER_CONVENTION;
-}
-
-/* Returns 1 if the given type will be passed by pointer rather than 
-   directly.  */
-
-/* In the CRIS ABI, arguments shorter than or equal to 64 bits are passed
-   by value.  */
-
-static int 
-cris_reg_struct_has_addr (int gcc_p, struct type *type)
-{ 
-  return (TYPE_LENGTH (type) > 8);
 }
 
 /* Calculates a value that measures how good inst_args constraints an 
@@ -4120,9 +4120,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   set_gdbarch_return_value (gdbarch, cris_return_value);
-  set_gdbarch_deprecated_reg_struct_has_addr (gdbarch, 
-					      cris_reg_struct_has_addr);
-  set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
 
   set_gdbarch_sp_regnum (gdbarch, 14);
   

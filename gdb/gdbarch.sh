@@ -546,9 +546,6 @@ M::CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame
 F::int:frame_num_args:struct frame_info *frame:frame
 #
 M::CORE_ADDR:frame_align:CORE_ADDR address:address
-# deprecated_reg_struct_has_addr has been replaced by
-# stabs_argument_has_addr.
-F::int:deprecated_reg_struct_has_addr:int gcc_p, struct type *type:gcc_p, type
 m::int:stabs_argument_has_addr:struct type *type:type::default_stabs_argument_has_addr::0
 v::int:frame_red_zone_size
 #

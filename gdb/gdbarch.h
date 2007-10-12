@@ -469,15 +469,6 @@ typedef CORE_ADDR (gdbarch_frame_align_ftype) (struct gdbarch *gdbarch, CORE_ADD
 extern CORE_ADDR gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address);
 extern void set_gdbarch_frame_align (struct gdbarch *gdbarch, gdbarch_frame_align_ftype *frame_align);
 
-/* deprecated_reg_struct_has_addr has been replaced by
-   stabs_argument_has_addr. */
-
-extern int gdbarch_deprecated_reg_struct_has_addr_p (struct gdbarch *gdbarch);
-
-typedef int (gdbarch_deprecated_reg_struct_has_addr_ftype) (int gcc_p, struct type *type);
-extern int gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch, int gcc_p, struct type *type);
-extern void set_gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_deprecated_reg_struct_has_addr_ftype *deprecated_reg_struct_has_addr);
-
 typedef int (gdbarch_stabs_argument_has_addr_ftype) (struct gdbarch *gdbarch, struct type *type);
 extern int gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type);
 extern void set_gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, gdbarch_stabs_argument_has_addr_ftype *stabs_argument_has_addr);
