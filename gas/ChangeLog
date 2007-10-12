@@ -1,3 +1,9 @@
+2007-10-09  Eric B. Weddington  <eweddington@cso.atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add new devices: AT90PWM2B,
+	AT90PWM3B.
+	* doc/c-avr.texi: Document new devices.
+
 2007-10-12  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* config/tc-cr16.c: Update the md_relax_table for 1 word b<cc>

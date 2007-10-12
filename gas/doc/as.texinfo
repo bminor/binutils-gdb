@@ -3895,7 +3895,7 @@ Some machine configurations provide additional directives.
 * Scl::                         @code{.scl @var{class}}
 @end ifset
 @ifset COFF-ELF
-* Section::                     @code{.section @var{name}}
+* Section::                     @code{.section @var{name}[, @var{flags}]}
 @end ifset
 
 * Set::                         @code{.set @var{symbol}, @var{expression}}
