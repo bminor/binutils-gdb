@@ -25,6 +25,7 @@
 #include "gdbcore.h"
 #include "block.h"
 #include "gdb_assert.h"
+#include "gdb_string.h"
 
 #include "alpha-tdep.h"
 #include "mdebugread.h"
@@ -95,11 +96,12 @@ find_proc_desc (CORE_ADDR pc)
   struct block *b = block_for_pc (pc);
   struct mdebug_extra_func_info *proc_desc = NULL;
   struct symbol *sym = NULL;
+  char *sh_name = NULL;
 
   if (b)
     {
       CORE_ADDR startaddr;
-      find_pc_partial_function (pc, NULL, &startaddr, NULL);
+      find_pc_partial_function (pc, &sh_name, &startaddr, NULL);
 
       if (startaddr > BLOCK_START (b))
 	/* This is the "pathological" case referred to in a comment in
@@ -113,6 +115,16 @@ find_proc_desc (CORE_ADDR pc)
   if (sym)
     {
       proc_desc = (struct mdebug_extra_func_info *) SYMBOL_VALUE (sym);
+
+      /* Correct incorrect setjmp procedure descriptor from the library
+         to make backtrace through setjmp work.  */
+      if (proc_desc->pdr.pcreg == 0
+	  && strcmp (sh_name, "setjmp") == 0)
+	{
+	  proc_desc->pdr.pcreg = ALPHA_RA_REGNUM;
+	  proc_desc->pdr.regmask = 0x80000000;
+	  proc_desc->pdr.regoffset = -4;
+	}
 
       /* If we never found a PDR for this function in symbol reading,
 	 then examine prologues to find the information.  */

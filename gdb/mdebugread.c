@@ -1942,21 +1942,6 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
          To work around these problems, we replace e->pdr.adr with
          the start address of the function.  */
       e->pdr.adr = BLOCK_START (b);
-
-      /* Correct incorrect setjmp procedure descriptor from the library
-         to make backtrace through setjmp work.  */
-      if (e->pdr.pcreg == 0
-	  && strcmp (sh_name, "setjmp") == 0)
-	{
-	  complaint (&symfile_complaints, _("fixing bad setjmp PDR from libc"));
-#ifdef RA_REGNUM
-	  e->pdr.pcreg = RA_REGNUM;
-#else
-	  e->pdr.pcreg = 0;
-#endif
-	  e->pdr.regmask = 0x80000000;
-	  e->pdr.regoffset = -4;
-	}
     }
 
   /* It would be reasonable that functions that have been compiled

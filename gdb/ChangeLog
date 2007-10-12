@@ -1,5 +1,18 @@
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* alpha-mdebug-tdep.c: Include "gdb_string.h".
+	(find_proc_desc): Add fix-up code for setjmp procedure descriptor.
+	* mdebugread.c (parse_procedure): Remove setjmp fix-up code.
+	* Makefile.in (alpha-mdebug-tdep.o): Update dependencies.
+
+	* config/alpha/alpha.mt (DEPRECATED_TM_FILE): Remove.
+	* config/alpha/alpha-linux.mt (DEPRECATED_TM_FILE): Remove.
+	* config/alpha/alpha-osf1.mt (DEPRECATED_TM_FILE): Remove.
+	* config/alpha/fbsd.mt (DEPRECATED_TM_FILE): Remove.
+	* config/alpha/tm-alpha.h: Remove file.
+
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* breakpoint.c (breakpoint_sals_to_pc): Do not check for
 	DEPRECATED_PC_REQUIRES_RUN_BEFORE_USE.
 
