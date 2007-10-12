@@ -1,3 +1,7 @@
+2007-10-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-srec/srec.exp: Define __stack_chk_fail sym.
+
 2007-10-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4476
