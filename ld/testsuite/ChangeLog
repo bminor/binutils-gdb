@@ -1,3 +1,11 @@
+2007-10-12  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-mips-elf/multi-got-hidden-1.d,
+	ld-mips-elf/multi-got-hidden-1.s,
+	ld-mips-elf/multi-got-hidden-2.d,
+	ld-mips-elf/multi-got-hidden-2.s: New.
+	* ld-mips-elf/mips-elf.exp: Run multi-got-hidden tests.
+
 2007-10-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-srec/srec.exp: Define __stack_chk_fail sym.
