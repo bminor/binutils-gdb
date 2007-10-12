@@ -2133,7 +2133,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pblendvb", {XM, EXx, XMM0 } },
+    { "pblendvb", { XM, EXx, XMM0 } },
     { "(bad)",	{ XX } },
   },
 
@@ -2141,7 +2141,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "blendvps", {XM, EXx, XMM0 } },
+    { "blendvps", { XM, EXx, XMM0 } },
     { "(bad)",	{ XX } },
   },
 
