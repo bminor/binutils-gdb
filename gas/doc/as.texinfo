@@ -189,6 +189,9 @@ section entitled ``GNU Free Documentation License''.
 * Symbols::                     Symbols
 * Expressions::                 Expressions
 * Pseudo Ops::                  Assembler Directives
+@ifset ELF
+* Object Attributes::           Object Attributes
+@end ifset
 * Machine Dependencies::        Machine Dependent Features
 * Reporting Bugs::              Reporting Bugs
 * Acknowledgements::            Who Did What
@@ -3828,6 +3831,7 @@ Some machine configurations provide additional directives.
 * Func::                        @code{.func}  
 * Global::                      @code{.global @var{symbol}}, @code{.globl @var{symbol}}
 @ifset ELF
+* Gnu_attribute::               @code{.gnu_attribute @var{tag},@var{value}}
 * Hidden::                      @code{.hidden @var{names}}
 @end ifset
 
@@ -4254,9 +4258,9 @@ state machine to @var{value}, which must be an unsigned integer.
 
 @end table
 
-@section @code{.loc_mark_blocks @var{enable}}
-@cindex @code{loc_mark_blocks} directive
-The @code{.loc_mark_blocks} directive makes the assembler emit an entry
+@section @code{.loc_mark_labels @var{enable}}
+@cindex @code{loc_mark_labels} directive
+The @code{.loc_mark_labels} directive makes the assembler emit an entry
 to the @code{.debug_line} line number matrix with the @code{basic_block}
 register in the state machine set whenever a code label is seen.
 The @var{enable} argument should be either 1 or 0, to enable or disable
@@ -4582,6 +4586,10 @@ partial programs.  You may need the HPPA-only @code{.EXPORT} directive as well.
 @end ifset
 
 @ifset ELF
+@node Gnu_attribute
+@section @code{.gnu_attribute @var{tag},@var{value}}
+Record a @sc{gnu} object attribute for this file.  @xref{Object Attributes}.
+
 @node Hidden
 @section @code{.hidden @var{names}}
 
@@ -6392,6 +6400,140 @@ They are included for compatibility with older assemblers.
 @item .abort
 @item .line
 @end table
+
+@ifset ELF
+@node Object Attributes
+@chapter Object Attributes
+@cindex object attributes
+
+@command{@value{AS}} assembles source files written for a specific architecture
+into object files for that architecture.  But not all object files are alike.
+Many architectures support incompatible variations.  For instance, floating
+point arguments might be passed in floating point registers if the object file
+requires hardware floating point support---or floating point arguments might be
+passed in integer registers if the object file supports processors with no
+hardware floating point unit.  Or, if two objects are built for different
+generations of the same architecture, the combination may require the
+newer generation at run-time.
+
+This information is useful during and after linking.  At link time,
+@command{@value{LD}} can warn about incompatible object files.  After link
+time, tools like @command{gdb} can use it to process the linked file
+correctly.
+
+Compatibility information is recorded as a series of object attributes.  Each
+attribute has a @dfn{vendor}, @dfn{tag}, and @dfn{value}.  The vendor is a
+string, and indicates who sets the meaning of the tag.  The tag is an integer,
+and indicates what property the attribute describes.  The value may be a string
+or an integer, and indicates how the property affects this object.  Missing
+attributes are the same as attributes with a zero value or empty string value.
+
+Object attributes were developed as part of the ABI for the ARM Architecture.
+The file format is documented in @cite{ELF for the ARM Architecture}.
+
+@menu
+* GNU Object Attributes::               @sc{gnu} Object Attributes
+* Defining New Object Attributes::      Defining New Object Attributes
+@end menu
+
+@node GNU Object Attributes
+@section @sc{gnu} Object Attributes
+
+The @code{.gnu_attribute} directive records an object attribute
+with vendor @samp{gnu}.
+
+Except for @samp{Tag_compatibility}, which has both an integer and a string for
+its value, @sc{gnu} attributes have a string value if the tag number is odd and
+an integer value if the tag number is even.  The second bit (@code{@var{tag} &
+2} is set for architecture-independent attributes and clear for
+architecture-dependent ones.
+
+@subsection Common @sc{gnu} attributes
+
+These attributes are valid on all architectures.
+
+@table @r
+@item Tag_compatibility (32)
+The compatibility attribute takes an integer flag value and a vendor name.  If
+the flag value is 0, the file is compatible with other toolchains.  If it is 1,
+then the file is only compatible with the named toolchain.  If it is greater
+than 1, the file can only be processed by other toolchains under some private
+arrangement indicated by the flag value and the vendor name.
+@end table
+
+@subsection MIPS Attributes
+
+@table @r
+@item Tag_GNU_MIPS_ABI_FP (4)
+The floating-point ABI used by this object file.  The value will be:
+
+@itemize @bullet
+@item
+0 for files not affected by the floating-point ABI.
+@item
+1 for files using the hardware floating-point with a standard double-precision
+FPU.
+@item
+2 for files using the hardware floating-point ABI with a single-precision FPU.
+@item
+3 for files using the software floating-point ABI.
+@end itemize
+@end table
+
+@subsection PowerPC Attributes
+
+@table @r
+@item Tag_GNU_Power_ABI_FP (4)
+The floating-point ABI used by this object file.  The value will be:
+
+@itemize @bullet
+@item
+0 for files not affected by the floating-point ABI.
+@item
+1 for files using the hardware floating-point ABI.
+@item
+2 for files using the software floating-point ABI.
+@end itemize
+
+@item Tag_GNU_Power_ABI_Vector (8)
+The vector ABI used by this object file.  The value will be:
+
+@itemize @bullet
+@item
+0 for files not affected by the vector ABI.
+@item
+1 for files using general purpose registers to pass vectors.
+@item
+2 for files using AltiVec registers to pass vectors.
+@item
+3 for files using SPE registers to pass vectors.
+@end itemize
+@end table
+
+@node Defining New Object Attributes
+@section Defining New Object Attributes
+
+If you want to define a new @sc{gnu} object attribute, here are the places you
+will need to modify.  New attributes should be discussed on the @samp{binutils}
+mailing list.
+
+@itemize @bullet
+@item
+This manual, which is the official register of attributes.
+@item
+The header for your architecture @file{include/elf}, to define the tag.
+@item
+The @file{bfd} support file for your architecture, to merge the attribute
+and issue any appropriate link warnings.
+@item
+Test cases in @file{ld/testsuite} for merging and link warnings.
+@item
+@file{binutils/readelf.c} to display your attribute.
+@item
+GCC, if you want the compiler to mark the attribute automatically.
+@end itemize
+
+@end ifset
 
 @ifset GENERIC
 @node Machine Dependencies

@@ -1,3 +1,9 @@
+2007-10-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/as.texinfo (Object Attributes): New chapter.
+	(Pseudo Ops): Document .gnu_attribute.
+	(LNS directives): Correct .loc_mark_labels documentation.
+
 2007-10-11  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-elf.c (obj_elf_section): When pushing a section, if
