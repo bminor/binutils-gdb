@@ -872,7 +872,7 @@ class Symbol_table
   // Canonicalize a symbol name for use in the hash table.
   const char*
   canonicalize_name(const char* name)
-  { return this->namepool_.add(name, NULL); }
+  { return this->namepool_.add(name, true, NULL); }
 
   // Possibly issue a warning for a reference to SYM at LOCATION which
   // is in OBJ.

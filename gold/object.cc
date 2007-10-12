@@ -652,7 +652,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 	}
 
       const char* name = pnames + sym.get_st_name();
-      pool->add(name, NULL);
+      pool->add(name, true, NULL);
       lv.set_output_symtab_index(index);
       ++index;
       ++count;

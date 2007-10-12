@@ -36,7 +36,7 @@ namespace gold
 template<typename Stringpool_char>
 Stringpool_template<Stringpool_char>::Stringpool_template()
   : string_set_(), strings_(), strtab_size_(0), next_index_(1),
-    zero_null_(true)
+    next_uncopied_key_(-1), zero_null_(true)
 {
 }
 
@@ -205,7 +205,8 @@ Stringpool_template<Stringpool_char>::add_string(const Stringpool_char* s,
 
 template<typename Stringpool_char>
 const Stringpool_char*
-Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, Key* pkey)
+Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, bool copy,
+                                          Key* pkey)
 {
   // FIXME: This will look up the entry twice in the hash table.  The
   // problem is that we can't insert S before we canonicalize it.  I
@@ -222,7 +223,15 @@ Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, Key* pkey)
     }
 
   Key k;
-  const Stringpool_char* ret = this->add_string(s, &k);
+  const Stringpool_char* ret;
+  if (copy)
+    ret = this->add_string(s, &k);
+  else
+    {
+      ret = s;
+      k = this->next_uncopied_key_;
+      --this->next_uncopied_key_;
+    }
 
   const off_t ozero = 0;
   std::pair<const Stringpool_char*, Val> element(ret,
@@ -241,13 +250,14 @@ Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, Key* pkey)
 
 template<typename Stringpool_char>
 const Stringpool_char*
-Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, size_t len,
-				 Key* pkey)
+Stringpool_template<Stringpool_char>::add_prefix(const Stringpool_char* s,
+                                                 size_t len,
+                                                 Key* pkey)
 {
   // FIXME: This implementation should be rewritten when we rewrite
   // the hash table to avoid copying.
   std::basic_string<Stringpool_char> st(s, len);
-  return this->add(st, pkey);
+  return this->add(st.c_str(), true, pkey);
 }
 
 template<typename Stringpool_char>

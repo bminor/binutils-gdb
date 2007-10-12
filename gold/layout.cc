@@ -220,7 +220,7 @@ Layout::layout(Relobj* object, unsigned int shndx, const char* name,
 
   // Canonicalize the section name.
   Stringpool::Key name_key;
-  name = this->namepool_.add(name, len, &name_key);
+  name = this->namepool_.add_prefix(name, len, &name_key);
 
   // Find the output section.  The output section is selected based on
   // the section name, type, and flags.
@@ -265,6 +265,7 @@ Layout::layout_eh_frame(Relobj* object,
 	{
 	  Stringpool::Key hdr_name_key;
 	  const char* hdr_name = this->namepool_.add(".eh_frame_hdr",
+                                                     false,
 						     &hdr_name_key);
 	  Output_section* hdr_os =
 	    this->get_output_section(hdr_name, hdr_name_key,
@@ -295,7 +296,7 @@ Layout::add_output_section_data(const char* name, elfcpp::Elf_Word type,
 {
   // Canonicalize the name.
   Stringpool::Key name_key;
-  name = this->namepool_.add(name, &name_key);
+  name = this->namepool_.add(name, true, &name_key);
 
   Output_section* os = this->get_output_section(name, name_key, type, flags);
   os->add_output_section_data(posd);
@@ -413,7 +414,7 @@ Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
   if (!input_objects->any_dynamic())
     return;
 
-  const char* dynamic_name = this->namepool_.add(".dynamic", NULL);
+  const char* dynamic_name = this->namepool_.add(".dynamic", false, NULL);
   this->dynamic_section_ = this->make_output_section(dynamic_name,
 						     elfcpp::SHT_DYNAMIC,
 						     (elfcpp::SHF_ALLOC
@@ -694,7 +695,7 @@ Layout::create_note_section()
   memcpy(buffer + 3 * (size / 8), name, namesz);
   memcpy(buffer + 3 * (size / 8) + aligned_namesz, desc.data(), descsz);
 
-  const char* note_name = this->namepool_.add(".note", NULL);
+  const char* note_name = this->namepool_.add(".note", false, NULL);
   Output_section* os = this->make_output_section(note_name,
 						 elfcpp::SHT_NOTE,
 						 0);
@@ -999,7 +1000,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
     {
       this->sympool_.set_string_offsets();
 
-      const char* symtab_name = this->namepool_.add(".symtab", NULL);
+      const char* symtab_name = this->namepool_.add(".symtab", false, NULL);
       Output_section* osymtab = this->make_output_section(symtab_name,
 							  elfcpp::SHT_SYMTAB,
 							  0);
@@ -1009,7 +1010,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 						       align);
       osymtab->add_output_section_data(pos);
 
-      const char* strtab_name = this->namepool_.add(".strtab", NULL);
+      const char* strtab_name = this->namepool_.add(".strtab", false, NULL);
       Output_section* ostrtab = this->make_output_section(strtab_name,
 							  elfcpp::SHT_STRTAB,
 							  0);
@@ -1036,7 +1037,7 @@ Layout::create_shstrtab()
   // FIXME: We don't need to create a .shstrtab section if we are
   // stripping everything.
 
-  const char* name = this->namepool_.add(".shstrtab", NULL);
+  const char* name = this->namepool_.add(".shstrtab", false, NULL);
 
   this->namepool_.set_string_offsets();
 
@@ -1128,7 +1129,7 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
 
   // Create the dynamic symbol table section.
 
-  const char* dynsym_name = this->namepool_.add(".dynsym", NULL);
+  const char* dynsym_name = this->namepool_.add(".dynsym", false, NULL);
   Output_section* dynsym = this->make_output_section(dynsym_name,
 						     elfcpp::SHT_DYNSYM,
 						     elfcpp::SHF_ALLOC);
@@ -1149,7 +1150,7 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
 
   // Create the dynamic string table section.
 
-  const char* dynstr_name = this->namepool_.add(".dynstr", NULL);
+  const char* dynstr_name = this->namepool_.add(".dynstr", false, NULL);
   Output_section* dynstr = this->make_output_section(dynstr_name,
 						     elfcpp::SHT_STRTAB,
 						     elfcpp::SHF_ALLOC);
@@ -1174,7 +1175,7 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
   Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
 				&phash, &hashlen);
 
-  const char* hash_name = this->namepool_.add(".hash", NULL);
+  const char* hash_name = this->namepool_.add(".hash", false, NULL);
   Output_section* hashsec = this->make_output_section(hash_name,
 						      elfcpp::SHT_HASH,
 						      elfcpp::SHF_ALLOC);
@@ -1266,7 +1267,7 @@ Layout::sized_create_version_sections(
     const Output_section* dynstr
     ACCEPT_SIZE_ENDIAN)
 {
-  const char* vname = this->namepool_.add(".gnu.version", NULL);
+  const char* vname = this->namepool_.add(".gnu.version", false, NULL);
   Output_section* vsec = this->make_output_section(vname,
 						   elfcpp::SHT_GNU_versym,
 						   elfcpp::SHF_ALLOC);
@@ -1288,7 +1289,7 @@ Layout::sized_create_version_sections(
 
   if (versions->any_defs())
     {
-      const char* vdname = this->namepool_.add(".gnu.version_d", NULL);
+      const char* vdname = this->namepool_.add(".gnu.version_d", false, NULL);
       Output_section *vdsec;
       vdsec = this->make_output_section(vdname, elfcpp::SHT_GNU_verdef,
 					elfcpp::SHF_ALLOC);
@@ -1314,7 +1315,7 @@ Layout::sized_create_version_sections(
 
   if (versions->any_needs())
     {
-      const char* vnname = this->namepool_.add(".gnu.version_r", NULL);
+      const char* vnname = this->namepool_.add(".gnu.version_r", false, NULL);
       Output_section* vnsec;
       vnsec = this->make_output_section(vnname, elfcpp::SHT_GNU_verneed,
 					elfcpp::SHF_ALLOC);
@@ -1355,7 +1356,7 @@ Layout::create_interp(const Target* target)
 
   Output_section_data* odata = new Output_data_const(interp, len, 1);
 
-  const char* interp_name = this->namepool_.add(".interp", NULL);
+  const char* interp_name = this->namepool_.add(".interp", false, NULL);
   Output_section* osec = this->make_output_section(interp_name,
 						   elfcpp::SHT_PROGBITS,
 						   elfcpp::SHF_ALLOC);

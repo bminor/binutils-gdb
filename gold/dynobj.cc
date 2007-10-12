@@ -1250,7 +1250,7 @@ Versions::record_version(const General_options* options,
   gold_assert(sym->version() != NULL);
 
   Stringpool::Key version_key;
-  const char* version = dynpool->add(sym->version(), &version_key);
+  const char* version = dynpool->add(sym->version(), false, &version_key);
 
   if (!sym->is_from_dynobj())
     {
@@ -1326,7 +1326,7 @@ Versions::add_need(Stringpool* dynpool, const char* filename, const char* name,
 		   Stringpool::Key name_key)
 {
   Stringpool::Key filename_key;
-  filename = dynpool->add(filename, &filename_key);
+  filename = dynpool->add(filename, true, &filename_key);
 
   Key k(name_key, filename_key);
   Version_base* const vbnull = NULL;

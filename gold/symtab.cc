@@ -547,14 +547,14 @@ Symbol_table::add_from_relobj(
       if (ver == NULL)
 	{
 	  Stringpool::Key name_key;
-	  name = this->namepool_.add(name, &name_key);
+	  name = this->namepool_.add(name, true, &name_key);
 	  res = this->add_from_object(relobj, name, name_key, NULL, 0,
 				      false, *psym);
 	}
       else
 	{
 	  Stringpool::Key name_key;
-	  name = this->namepool_.add(name, ver - name, &name_key);
+	  name = this->namepool_.add_prefix(name, ver - name, &name_key);
 
 	  bool def = false;
 	  ++ver;
@@ -565,7 +565,7 @@ Symbol_table::add_from_relobj(
 	    }
 
 	  Stringpool::Key ver_key;
-	  ver = this->namepool_.add(ver, &ver_key);
+	  ver = this->namepool_.add(ver, true, &ver_key);
 
 	  res = this->add_from_object(relobj, name, name_key, ver, ver_key,
 				      def, *psym);
@@ -625,7 +625,7 @@ Symbol_table::add_from_dynobj(
       if (versym == NULL)
 	{
 	  Stringpool::Key name_key;
-	  name = this->namepool_.add(name, &name_key);
+	  name = this->namepool_.add(name, true, &name_key);
 	  this->add_from_object(dynobj, name, name_key, NULL, 0,
 				false, sym);
 	  continue;
@@ -654,7 +654,7 @@ Symbol_table::add_from_dynobj(
 
       // At this point we are definitely going to add this symbol.
       Stringpool::Key name_key;
-      name = this->namepool_.add(name, &name_key);
+      name = this->namepool_.add(name, true, &name_key);
 
       if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL)
           || v == static_cast<unsigned int>(elfcpp::VER_NDX_GLOBAL))
@@ -681,7 +681,7 @@ Symbol_table::add_from_dynobj(
 	}
 
       Stringpool::Key version_key;
-      version = this->namepool_.add(version, &version_key);
+      version = this->namepool_.add(version, true, &version_key);
 
       // If this is an absolute symbol, and the version name and
       // symbol name are the same, then this is the version definition
@@ -731,11 +731,11 @@ Symbol_table::define_special_symbol(const Target* target, const char** pname,
     {
       // Canonicalize NAME and VERSION.
       Stringpool::Key name_key;
-      *pname = this->namepool_.add(*pname, &name_key);
+      *pname = this->namepool_.add(*pname, true, &name_key);
 
       Stringpool::Key version_key = 0;
       if (*pversion != NULL)
-	*pversion = this->namepool_.add(*pversion, &version_key);
+	*pversion = this->namepool_.add(*pversion, true, &version_key);
 
       Symbol* const snull = NULL;
       std::pair<typename Symbol_table_type::iterator, bool> ins =
@@ -1138,7 +1138,7 @@ Symbol_table::set_dynsym_indexes(const General_options* options,
 	  sym->set_dynsym_index(index);
 	  ++index;
 	  syms->push_back(sym);
-	  dynpool->add(sym->name(), NULL);
+	  dynpool->add(sym->name(), false, NULL);
 
 	  // Record any version information.
 	  if (sym->version() != NULL)
@@ -1322,7 +1322,7 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
       else
 	{
 	  sym->set_symtab_index(index);
-	  pool->add(sym->name(), NULL);
+	  pool->add(sym->name(), false, NULL);
 	  ++index;
 	  off += sym_size;
 	}

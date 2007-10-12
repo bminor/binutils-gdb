@@ -47,8 +47,9 @@ class Output_file;
 // string pointer so that repeated runs of the linker will generate
 // precisely the same output.
 
-// When you add a string to a Stringpool, Stringpool will make a copy
-// of it.  Thus there is no need to keep a copy elsewhere.
+// When you add a string to a Stringpool, Stringpool will optionally
+// make a copy of it.  Thus there is no requirement to keep a copy
+// elsewhere.
 
 // A Stringpool can be turned into a string table, a sequential series
 // of null terminated strings.  The first string may optionally be a
@@ -91,19 +92,15 @@ class Stringpool_template
   { this->zero_null_ = false; }
 
   // Add the string S to the pool.  This returns a canonical permanent
-  // pointer to the string in the pool.  If PKEY is not NULL, this
-  // sets *PKEY to the key for the string.
+  // pointer to the string in the pool.  If COPY is true, the string
+  // is copied into permanent storage.  If PKEY is not NULL, this sets
+  // *PKEY to the key for the string.
   const Stringpool_char*
-  add(const Stringpool_char* s, Key* pkey);
-
-  // Add the string S to the pool.
-  const Stringpool_char*
-  add(const std::basic_string<Stringpool_char>& s, Key* pkey)
-  { return this->add(s.c_str(), pkey); }
+  add(const Stringpool_char* s, bool copy, Key* pkey);
 
   // Add the prefix of length LEN of string S to the pool.
   const Stringpool_char*
-  add(const Stringpool_char* s, size_t len, Key* pkey);
+  add_prefix(const Stringpool_char* s, size_t len, Key* pkey);
 
   // If the string S is present in the pool, return the canonical
   // string pointer.  Otherwise, return NULL.  If PKEY is not NULL,
@@ -232,6 +229,8 @@ class Stringpool_template
   off_t strtab_size_;
   // Next Stringdata index.
   unsigned int next_index_;
+  // Next key value for a string we don't copy.
+  int next_uncopied_key_;
   // Whether to reserve offset 0 to hold the null string.
   bool zero_null_;
 };

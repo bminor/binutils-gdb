@@ -276,7 +276,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 	    }
 	}
 
-      const Char_type* str = this->stringpool_.add(p, NULL);
+      const Char_type* str = this->stringpool_.add(p, true, NULL);
 
       this->merged_strings_.push_back(Merged_string(object, shndx, i, str));
 

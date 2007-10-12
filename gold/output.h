@@ -1041,7 +1041,7 @@ class Output_data_dynamic : public Output_section_data
   // Add a new dynamic entry with a string.
   void
   add_string(elfcpp::DT tag, const char* str)
-  { this->add_entry(Dynamic_entry(tag, this->pool_->add(str, NULL))); }
+  { this->add_entry(Dynamic_entry(tag, this->pool_->add(str, true, NULL))); }
 
   void
   add_string(elfcpp::DT tag, const std::string& str)
