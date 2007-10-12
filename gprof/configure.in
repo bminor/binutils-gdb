@@ -44,6 +44,9 @@ if test $gprof_cv_decl_getopt_unistd_h = yes; then
 	    [Is the prototype for getopt in <unistd.h> in the expected format?])
 fi
 
+# Some systems have fabs only in -lm, not in -lc.
+AC_SEARCH_LIBS(fabs, m)
+
 AM_BINUTILS_WARNINGS
 
 dnl Required by html and install-html

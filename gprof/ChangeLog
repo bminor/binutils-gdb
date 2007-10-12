@@ -1,3 +1,9 @@
+2007-10-12  Michael Haubenwallner  <haubi@gentoo.org>
+
+	PR gprof/5147
+	* configure.in: Add check for fabs() being in libm.
+	* configure: Regenerate.
+
 2007-09-25  Robert Norton  <rnorton@broadcom.com>
 
 	* cg_print.c (sort_members): Include the final member on the list
