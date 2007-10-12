@@ -51,7 +51,7 @@ DEF_VEC_P(lm_info_p);
 
 #if !defined(HAVE_LIBEXPAT)
 
-static VEC(lm_info_p)
+static VEC(lm_info_p) *
 solib_target_parse_libraries (const char *library)
 {
   static int have_warned;
