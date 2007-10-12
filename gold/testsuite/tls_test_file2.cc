@@ -1,4 +1,4 @@
-// tls_test.h -- test TLS variables for gold, header file  -*- C++ -*-
+// tls_test.cc -- test TLS variables for gold
 
 // Copyright 2006, 2007 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
@@ -20,27 +20,8 @@
 // Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 // MA 02110-1301, USA.
 
-// This is the header file for the TLS test.  See tls_test.cc for more
-// information.
+// This is the definition of a thread-local variable in another file.
 
-extern bool t1();
-extern bool t2();
-extern bool t3();
-extern bool t4();
-
-extern int* f5a();
-extern void f5b(int*);
-extern bool t5();
-
-extern int* f6a();
-extern void f6b(int*);
-extern bool t6();
-
-extern bool t8();
-extern bool t9();
-
-extern int* f10a();
-extern void f10b(int*);
-extern bool t10();
-
-extern bool t_last();
+__thread int o1;
+__thread int o2 = 2;
+__thread int o3;

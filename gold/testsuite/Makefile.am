@@ -287,25 +287,25 @@ exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o
 
 if TLS
 
-tls_test_SOURCES = tls_test.cc tls_test_main.cc tls_test.h
+tls_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc tls_test.h
 tls_test_DEPENDENCIES = gcctestdir/ld
 tls_test_LDFLAGS = -Bgcctestdir/
 tls_test_LDADD = -lpthread
 
 tls_pic_test_SOURCES = tls_test_main.cc
-tls_pic_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o
+tls_pic_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_file2_pic.o
 tls_pic_test_LDFLAGS = -Bgcctestdir/
-tls_pic_test_LDADD = tls_test_pic.o -lpthread
+tls_pic_test_LDADD = tls_test_pic.o tls_test_file2_pic.o -lpthread
 
-tls_static_test_SOURCES = tls_test.cc tls_test_main.cc
+tls_static_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc
 tls_static_test_DEPENDENCIES = gcctestdir/ld
 tls_static_test_LDFLAGS = -Bgcctestdir/ -static
 tls_static_test_LDADD = -lpthread
 
 tls_static_pic_test_SOURCES = tls_test_main.cc
-tls_static_pic_test_DEPENDENCIES = gcctestdir/ld
+tls_static_pic_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_file2_pic.o
 tls_static_pic_test_LDFLAGS = -Bgcctestdir/ -static
-tls_static_pic_test_LDADD = tls_test_pic.o -lpthread
+tls_static_pic_test_LDADD = tls_test_pic.o tls_test_file2_pic.o -lpthread
 
 tls_shared_test_SOURCES = tls_test_main.cc
 tls_shared_test_DEPENDENCIES = gcctestdir/ld tls_test_shared.so
@@ -315,8 +315,11 @@ tls_shared_test_LDADD = tls_test_shared.so -lpthread
 tls_test_pic.o: tls_test.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
-tls_test_shared.so: tls_test_pic.o
-	$(CXXLINK) -shared tls_test_pic.o
+tls_test_file2_pic.o: tls_test_file2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+
+tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o
+	$(CXXLINK) -shared tls_test_pic.o tls_test_file2_pic.o
 
 if FN_PTRS_IN_SO_WITHOUT_PIC
 
@@ -325,8 +328,8 @@ tls_shared_nonpic_test_DEPENDENCIES = gcctestdir/ld tls_test_shared_nonpic.so
 tls_shared_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 tls_shared_nonpic_test_LDADD = tls_test_shared_nonpic.so -lpthread
 
-tls_test_shared_nonpic.so: tls_test.o
-	$(CXXLINK) -shared tls_test.o
+tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o
+	$(CXXLINK) -shared tls_test.o tls_test_file2.o
 
 endif
 

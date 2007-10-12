@@ -78,7 +78,11 @@ thread_routine(void* arg)
   check("t5", t5());
   f6b(f6a());
   check("t6", t6());
-  check("t7", t7());
+  check("t8", t8());
+  check("t9", t9());
+  f10b(f10a());
+  check("t10", t10());
+  check("t_last", t_last());
 
   // Unlock the second mutex.
   err = pthread_mutex_unlock(&pms->mutex2);
@@ -88,7 +92,7 @@ thread_routine(void* arg)
   err = pthread_mutex_lock(&pms->mutex3);
   assert(err == 0);
 
-  check("t7", t7());
+  check("t_last", t_last());
 
   return 0;
 }

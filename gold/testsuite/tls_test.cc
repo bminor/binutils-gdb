@@ -38,7 +38,11 @@
 // 4  Access to an initialized static thread variable.
 // 5  Taking the address of a global thread variable.
 // 6  Taking the address of a static thread variable.
-// 7  Verify that the above tests left the variables set correctly.
+// 8  Like test 1, but with the thread variable defined in another file.
+// 9  Like test 3, but with the thread variable defined in another file.
+// 10 Like test 5, but with the thread variable defined in another file.
+// last  Verify that the above tests left the variables set correctly.
+
 
 #include "tls_test.h"
 
@@ -48,6 +52,11 @@ __thread int v3 = 3;
 static __thread int v4 = 4;
 __thread int v5;
 static __thread int v6;
+
+// These variables are defined in tls_test_file2.cc
+extern __thread int o1;
+extern __thread int o2;
+extern __thread int o3;
 
 bool
 t1()
@@ -105,7 +114,7 @@ t5()
   return v5 == 50;
 }
 
-// For test 5 the main function calls f6b(f6a()), then calls t6().
+// For test 6 the main function calls f6b(f6a()), then calls t6().
 
 int*
 f6a()
@@ -125,13 +134,56 @@ t6()
   return v6 == 60;
 }
 
+// The slot for t7() is unused.
+
 bool
-t7()
+t8()
+{
+  if (o1 != 0)
+    return false;
+  o1 = 10;
+  return true;
+}
+
+bool
+t9()
+{
+  if (o2 != 2)
+    return false;
+  o2 = 20;
+  return true;
+}
+
+// For test 10 the main function calls f10b(f10a()), then calls t10().
+
+int*
+f10a()
+{
+  return &o3;
+}
+
+void
+f10b(int* p)
+{
+  *p = 30;
+}
+
+bool
+t10()
+{
+  return o3 == 30;
+}
+
+bool
+t_last()
 {
   return (v1 == 10
 	  && v2 == 20
 	  && v3 == 30
 	  && v4 == 40
 	  && v5 == 50
-	  && v6 == 60);
+	  && v6 == 60
+          && o1 == 10
+          && o2 == 20
+          && o3 == 30);
 }
