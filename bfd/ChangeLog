@@ -1,3 +1,9 @@
+2007-10-12  Nick Clifton  <nickc@redhat.com>
+
+	PR 5160
+	* elflink.c (eval_symbol): Remove bufsz variable and use
+	sizeof(symbuf) where necessary.
+
 2007-10-12  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* elf32-cr16.c (elf32_cr16_relax_section): Fix condition check typo.

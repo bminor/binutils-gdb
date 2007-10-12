@@ -7389,12 +7389,11 @@ eval_symbol (bfd_vma *result,
 	     size_t locsymcount,
 	     int signed_p)
 {
-  int len;
-  int symlen;
+  size_t len;
+  size_t symlen;
   bfd_vma a;
   bfd_vma b;
-  const int bufsz = 4096;
-  char symbuf[bufsz];
+  char symbuf[4096];
   const char *sym = *symp;
   const char *symend;
   bfd_boolean symbol_is_section = FALSE;
@@ -7402,7 +7401,7 @@ eval_symbol (bfd_vma *result,
   len = strlen (sym);
   symend = sym + len;
 
-  if (len < 1 || len > bufsz)
+  if (len < 1 || len > sizeof (symbuf))
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
@@ -7427,7 +7426,7 @@ eval_symbol (bfd_vma *result,
       symlen = strtol (sym, (char **) symp, 10);
       sym = *symp + 1; /* Skip the trailing ':'.  */
 
-      if (symend < sym || symlen + 1 > bufsz)
+      if (symend < sym || symlen + 1 > sizeof (symbuf))
 	{
 	  bfd_set_error (bfd_error_invalid_operation);
 	  return FALSE;
