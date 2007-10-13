@@ -498,20 +498,7 @@ M::CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 # should take the type/value of the function to be called and not the
 # return type.  This is left as an exercise for the reader.
 
-# NOTE: cagney/2004-06-13: The function stack.c:return_command uses
-# the predicate with default hack to avoid calling store_return_value
-# (via legacy_return_value), when a small struct is involved.
-
-M::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:valtype, regcache, readbuf, writebuf::legacy_return_value
-
-# The deprecated methods extract_return_value, store_return_value,
-# DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and
-# deprecated_use_struct_convention have all been folded into
-# RETURN_VALUE.
-
-f::void:extract_return_value:struct type *type, struct regcache *regcache, gdb_byte *valbuf:type, regcache, valbuf:0
-f::void:store_return_value:struct type *type, struct regcache *regcache, const gdb_byte *valbuf:type, regcache, valbuf:0
-f::int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type::generic_use_struct_convention::0
+M::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:valtype, regcache, readbuf, writebuf
 
 f::CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 f::int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0

@@ -422,12 +422,6 @@ char *ldirname (const char *filename);
 
 extern void set_demangling_style (char *);
 
-/* From tm.h */
-
-struct type;
-typedef int (use_struct_convention_fn) (int gcc_p, struct type * value_type);
-extern use_struct_convention_fn generic_use_struct_convention;
-
 
 /* Annotation stuff.  */
 

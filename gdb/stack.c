@@ -1789,22 +1789,6 @@ return_command (char *retval_exp, int from_tty)
            is discarded, side effects such as "return i++" still
            occur.  */
 	return_value = NULL;
-      /* FIXME: cagney/2004-01-17: If the architecture implements both
-         return_value and extract_returned_value_address, should allow
-         "return" to work - don't set return_value to NULL.  */
-      else if (!gdbarch_return_value_p (current_gdbarch)
-	       && (TYPE_CODE (return_type) == TYPE_CODE_STRUCT
-		   || TYPE_CODE (return_type) == TYPE_CODE_UNION))
-	{
-	  /* NOTE: cagney/2003-10-20: Compatibility hack for legacy
-	     code.  Old architectures don't expect gdbarch_store_return_value
-	     to be called with with a small struct that needs to be
-	     stored in registers.  Don't start doing it now.  */
-	  query_prefix = "\
-A structure or union return type is not supported by this architecture.\n\
-If you continue, the return value that you specified will be ignored.\n";
-	  return_value = NULL;
-	}
       else if (using_struct_return (return_type))
 	{
 	  query_prefix = "\

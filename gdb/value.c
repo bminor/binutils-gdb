@@ -1681,32 +1681,6 @@ coerce_enum (struct value *arg)
 }
 
 
-/* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   gdbarch_extract_return_value?  GCC_P is true if compiled with gcc and TYPE
-   is the type (which is known to be struct, union or array).
-
-   On most machines, the struct convention is used unless we are
-   using gcc and the type is of a special size.  */
-/* As of about 31 Mar 93, GCC was changed to be compatible with the
-   native compiler.  GCC 2.3.3 was the last release that did it the
-   old way.  Since gcc2_compiled was not changed, we have no
-   way to correctly win in all cases, so we just do the right thing
-   for gcc1 and for gcc2 after this change.  Thus it loses for gcc
-   2.0-2.3.3.  This is somewhat unfortunate, but changing gcc2_compiled
-   would cause more chaos than dealing with some struct returns being
-   handled wrong.  */
-/* NOTE: cagney/2004-06-13: Deleted check for "gcc_p".  GCC 1.x is
-   dead.  */
-
-int
-generic_use_struct_convention (int gcc_p, struct type *value_type)
-{
-  return !(TYPE_LENGTH (value_type) == 1
-	   || TYPE_LENGTH (value_type) == 2
-	   || TYPE_LENGTH (value_type) == 4
-	   || TYPE_LENGTH (value_type) == 8);
-}
-
 /* Return true if the function returning the specified type is using
    the convention of returning structures in memory (passing in the
    address as a hidden first parameter).  */

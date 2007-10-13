@@ -1,5 +1,11 @@
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbint.texi (Target Conditionals): Remove documentation
+	of and references to DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS,
+	gdbarch_extract_return_value, and gdbarch_store_return_value.
+
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbint.texi (Target Conditionals): Remove documentation of
 	and references to DEPRECATED_REG_STRUCT_HAS_ADDR.
 

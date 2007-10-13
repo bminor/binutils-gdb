@@ -3515,28 +3515,6 @@ If not defined, no conversion will be performed.
 Convert ECOFF register number  @var{ecoff_regnr} into @value{GDBN} regnum.  If
 not defined, no conversion will be performed.
 
-@item void gdbarch_extract_return_value (@var{gdbarch}, @var{type}, @var{regbuf}, @var{valbuf})
-@findex gdbarch_extract_return_value
-Define this to extract a function's return value of type @var{type} from
-the raw register state @var{regbuf} and copy that, in virtual format,
-into @var{valbuf}.
- 
-This method has been deprecated in favour of @code{gdbarch_return_value}
-(@pxref{gdbarch_return_value}).
-
-@item DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(@var{regbuf})
-@findex DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
-@anchor{DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS}
-When defined, extract from the array @var{regbuf} (containing the raw
-register state) the @code{CORE_ADDR} at which a function should return
-its structure value.
-
-@xref{gdbarch_return_value}.
-
-@item DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P()
-@findex DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P
-Predicate for @code{DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS}.
-
 @item DEPRECATED_FP_REGNUM
 @findex DEPRECATED_FP_REGNUM
 If the virtual frame pointer is kept in a register, then define this
@@ -3974,9 +3952,6 @@ non-@code{NULL}, also copy the return value from @var{regcache} into
 @var{readbuf} (@var{regcache} contains a copy of the registers from the
 just returned function).
 
-@xref{DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS}, for a description of how
-return-values that use the struct convention are handled.
-
 @emph{Maintainer note: This method replaces separate predicate, extract,
 store methods.  By having only one method, the logic needed to determine
 the return-value convention need only be implemented in one place.  If
@@ -4027,15 +4002,6 @@ there is no such register.
 @findex gdbarch_stab_reg_to_regnum
 Use this function to convert stab register @var{stab_regnr} into @value{GDBN}
 regnum.  If not defined, no conversion will be done.
-
-@item void gdbarch_store_return_value (@var{gdbarch}, @var{type}, @var{regcache}, @var{valbuf})
-@findex gdbarch_store_return_value
-A function that writes the function return value, found in
-@var{valbuf}, into the @var{regcache}.  @var{type} is the type of the
-value that is to be returned.
-
-This method has been deprecated in favour of @code{gdbarch_return_value}
-(@pxref{gdbarch_return_value}).
 
 @item SYMBOL_RELOADING_DEFAULT
 @findex SYMBOL_RELOADING_DEFAULT

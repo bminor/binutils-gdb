@@ -36,47 +36,6 @@
 
 #include "floatformat.h"
 
-int
-always_use_struct_convention (int gcc_p, struct type *value_type)
-{
-  return 1;
-}
-
-enum return_value_convention
-legacy_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		     struct regcache *regcache, gdb_byte *readbuf,
-		     const gdb_byte *writebuf)
-{
-  /* NOTE: cagney/2004-06-13: The gcc_p parameter to
-     USE_STRUCT_CONVENTION isn't used.  */
-  int struct_return = ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-			|| TYPE_CODE (valtype) == TYPE_CODE_UNION
-			|| TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
-		       && gdbarch_deprecated_use_struct_convention
-			    (gdbarch, 0, valtype));
-
-  if (writebuf != NULL)
-    {
-      gdb_assert (!struct_return);
-      /* NOTE: cagney/2004-06-13: See stack.c:return_command.  Old
-	 architectures don't expect store_return_value to handle small
-	 structures.  Should not be called with such types.  */
-      gdb_assert (TYPE_CODE (valtype) != TYPE_CODE_STRUCT
-		  && TYPE_CODE (valtype) != TYPE_CODE_UNION);
-      gdbarch_store_return_value (gdbarch, valtype, regcache, writebuf);
-    }
-
-  if (readbuf != NULL)
-    {
-      gdb_assert (!struct_return);
-      gdbarch_extract_return_value (gdbarch, valtype, regcache, readbuf);
-    }
-
-  if (struct_return)
-    return RETURN_VALUE_STRUCT_CONVENTION;
-  else
-    return RETURN_VALUE_REGISTER_CONVENTION;
-}
 
 int
 legacy_register_sim_regno (int regnum)

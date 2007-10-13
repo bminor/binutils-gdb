@@ -30,19 +30,6 @@ struct gdbarch_info;
 /* gdbarch trace variable */
 extern int gdbarch_debug;
 
-/* An implementation of return_value that props up architectures still
-   using USE_STRUCT_RETURN, gdbarch_extract_return_value and
-   store_return_value.  See also the hacks in "stack.c".  */
-enum return_value_convention legacy_return_value (struct gdbarch *gdbarch,
-						  struct type *valtype,
-						  struct regcache *regcache,
-						  gdb_byte *readbuf,
-						  const gdb_byte *writebuf);
-
-/* To return any structure or union type by value, store it at the
-   address passed as an invisible first argument to the function.  */
-extern gdbarch_deprecated_use_struct_convention_ftype always_use_struct_convention;
-
 /* The only possible cases for inner_than. */
 extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);

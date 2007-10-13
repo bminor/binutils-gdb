@@ -182,9 +182,6 @@ struct gdbarch
   gdbarch_address_to_pointer_ftype *address_to_pointer;
   gdbarch_integer_to_address_ftype *integer_to_address;
   gdbarch_return_value_ftype *return_value;
-  gdbarch_extract_return_value_ftype *extract_return_value;
-  gdbarch_store_return_value_ftype *store_return_value;
-  gdbarch_deprecated_use_struct_convention_ftype *deprecated_use_struct_convention;
   gdbarch_skip_prologue_ftype *skip_prologue;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
@@ -304,9 +301,6 @@ struct gdbarch startup_gdbarch =
   0,  /* address_to_pointer */
   0,  /* integer_to_address */
   0,  /* return_value */
-  0,  /* extract_return_value */
-  0,  /* store_return_value */
-  0,  /* deprecated_use_struct_convention */
   0,  /* skip_prologue */
   0,  /* inner_than */
   0,  /* breakpoint_from_pc */
@@ -420,8 +414,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->value_from_register = default_value_from_register;
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
-  current_gdbarch->return_value = legacy_return_value;
-  current_gdbarch->deprecated_use_struct_convention = generic_use_struct_convention;
   current_gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   current_gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   current_gdbarch->remote_register_number = default_remote_register_number;
@@ -550,7 +542,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */
   /* Skip verify of return_value, has predicate */
-  /* Skip verify of deprecated_use_struct_convention, invalid_p == 0 */
   if (current_gdbarch->skip_prologue == 0)
     fprintf_unfiltered (log, "\n\tskip_prologue");
   if (current_gdbarch->inner_than == 0)
@@ -735,9 +726,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: deprecated_function_start_offset = 0x%s\n",
                       paddr_nz (current_gdbarch->deprecated_function_start_offset));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_use_struct_convention = <0x%lx>\n",
-                      (long) current_gdbarch->deprecated_use_struct_convention);
-  fprintf_unfiltered (file,
                       "gdbarch_dump: double_bit = %s\n",
                       paddr_d (current_gdbarch->double_bit));
   fprintf_unfiltered (file,
@@ -755,9 +743,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: elf_make_msymbol_special = <0x%lx>\n",
                       (long) current_gdbarch->elf_make_msymbol_special);
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: extract_return_value = <0x%lx>\n",
-                      (long) current_gdbarch->extract_return_value);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_fetch_pointer_argument_p() = %d\n",
                       gdbarch_fetch_pointer_argument_p (current_gdbarch));
@@ -998,9 +983,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: stabs_argument_has_addr = <0x%lx>\n",
                       (long) current_gdbarch->stabs_argument_has_addr);
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: store_return_value = <0x%lx>\n",
-                      (long) current_gdbarch->store_return_value);
   fprintf_unfiltered (file,
                       "gdbarch_dump: target_desc = %s\n",
                       paddr_d ((long) current_gdbarch->target_desc));
@@ -2046,7 +2028,7 @@ int
 gdbarch_return_value_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->return_value != legacy_return_value;
+  return gdbarch->return_value != NULL;
 }
 
 enum return_value_convention
@@ -2054,7 +2036,6 @@ gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regc
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->return_value != NULL);
-  /* Do not check predicate: gdbarch->return_value != legacy_return_value, allow call.  */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_return_value called\n");
   return gdbarch->return_value (gdbarch, valtype, regcache, readbuf, writebuf);
@@ -2065,57 +2046,6 @@ set_gdbarch_return_value (struct gdbarch *gdbarch,
                           gdbarch_return_value_ftype return_value)
 {
   gdbarch->return_value = return_value;
-}
-
-void
-gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, gdb_byte *valbuf)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->extract_return_value != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_extract_return_value called\n");
-  gdbarch->extract_return_value (type, regcache, valbuf);
-}
-
-void
-set_gdbarch_extract_return_value (struct gdbarch *gdbarch,
-                                  gdbarch_extract_return_value_ftype extract_return_value)
-{
-  gdbarch->extract_return_value = extract_return_value;
-}
-
-void
-gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, const gdb_byte *valbuf)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->store_return_value != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_store_return_value called\n");
-  gdbarch->store_return_value (type, regcache, valbuf);
-}
-
-void
-set_gdbarch_store_return_value (struct gdbarch *gdbarch,
-                                gdbarch_store_return_value_ftype store_return_value)
-{
-  gdbarch->store_return_value = store_return_value;
-}
-
-int
-gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_use_struct_convention != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_use_struct_convention called\n");
-  return gdbarch->deprecated_use_struct_convention (gcc_p, value_type);
-}
-
-void
-set_gdbarch_deprecated_use_struct_convention (struct gdbarch *gdbarch,
-                                              gdbarch_deprecated_use_struct_convention_ftype deprecated_use_struct_convention)
-{
-  gdbarch->deprecated_use_struct_convention = deprecated_use_struct_convention;
 }
 
 CORE_ADDR

@@ -1,5 +1,21 @@
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (deprecated_use_struct_convention): Remove.
+	(extract_return_value, store_return_value): Remove.
+	(return_value): Remove default implementation.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* stack.c (return_command): Remove compatibility hack.
+	* arch-utils.c (legacy_return_value): Remove.
+	* arch-utils.h (legacy_return_value): Likewise.
+
+	* arch-utils.c (always_use_struct_convention): Remove.
+	* arch-utils.h (always_use_struct_convention): Likewise.
+	* value.c (generic_use_struct_convention): Remove.
+	* defs.h (generic_use_struct_convention): Likewise.
+
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* avr-tdep.c (avr_return_value): New function.
 	(avr_gdbarch_init): Call set_gdbarch_return_value instead of
 	set_gdbarch_extract_return_value.
