@@ -302,11 +302,11 @@ static int u_offsets[] =
   };
 
 static CORE_ADDR
-ia64_register_addr (int regno)
+ia64_register_addr (struct gdbarch *gdbarch, int regno)
 {
   CORE_ADDR addr;
 
-  if (regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
+  if (regno < 0 || regno >= gdbarch_num_regs (gdbarch))
     error (_("Invalid register number %d."), regno);
 
   if (u_offsets[regno] == -1)
@@ -318,15 +318,15 @@ ia64_register_addr (int regno)
 }
 
 static int
-ia64_cannot_fetch_register (int regno)
+ia64_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
   return regno < 0
-	 || regno >= gdbarch_num_regs (current_gdbarch)
+	 || regno >= gdbarch_num_regs (gdbarch)
 	 || u_offsets[regno] == -1;
 }
 
 static int
-ia64_cannot_store_register (int regno)
+ia64_cannot_store_register (struct gdbarch *gdbarch, int regno)
 {
   /* Rationale behind not permitting stores to bspstore...
   
@@ -358,7 +358,7 @@ ia64_cannot_store_register (int regno)
      back.)  */
 
   return regno < 0
-	 || regno >= gdbarch_num_regs (current_gdbarch)
+	 || regno >= gdbarch_num_regs (gdbarch)
 	 || u_offsets[regno] == -1
          || regno == IA64_BSPSTORE_REGNUM;
 }
@@ -680,7 +680,7 @@ ia64_linux_fetch_register (struct regcache *regcache, int regnum)
   PTRACE_TYPE_RET *buf;
   int pid, i;
 
-  if (ia64_cannot_fetch_register (regnum))
+  if (ia64_cannot_fetch_register (gdbarch, regnum))
     {
       regcache_raw_supply (regcache, regnum, NULL);
       return;
@@ -693,7 +693,7 @@ ia64_linux_fetch_register (struct regcache *regcache, int regnum)
     pid = ptid_get_pid (inferior_ptid);
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = ia64_register_addr (regnum);
+  addr = ia64_register_addr (gdbarch, regnum);
   size = register_size (gdbarch, regnum);
 
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
@@ -740,7 +740,7 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
   PTRACE_TYPE_RET *buf;
   int pid, i;
 
-  if (ia64_cannot_store_register (regnum))
+  if (ia64_cannot_store_register (gdbarch, regnum))
     return;
 
   /* Cater for systems like GNU/Linux, that implement threads as
@@ -750,7 +750,7 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
     pid = ptid_get_pid (inferior_ptid);
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = ia64_register_addr (regnum);
+  addr = ia64_register_addr (gdbarch, regnum);
   size = register_size (gdbarch, regnum);
 
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);

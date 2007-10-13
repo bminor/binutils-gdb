@@ -274,9 +274,6 @@ struct ia64_frame_cache
 
 };
 
-#define SIGCONTEXT_REGISTER_ADDRESS \
-  (gdbarch_tdep (current_gdbarch)->sigcontext_register_address)
-
 int
 ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
@@ -1909,41 +1906,44 @@ ia64_frame_sniffer (struct frame_info *next_frame)
 /* Signal trampolines.  */
 
 static void
-ia64_sigtramp_frame_init_saved_regs (struct ia64_frame_cache *cache)
+ia64_sigtramp_frame_init_saved_regs (struct frame_info *next_frame,
+				     struct ia64_frame_cache *cache)
 {
-  if (SIGCONTEXT_REGISTER_ADDRESS)
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
+
+  if (tdep->sigcontext_register_address)
     {
       int regno;
 
       cache->saved_regs[IA64_VRAP_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_IP_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_IP_REGNUM);
       cache->saved_regs[IA64_CFM_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_CFM_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_CFM_REGNUM);
       cache->saved_regs[IA64_PSR_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_PSR_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_PSR_REGNUM);
       cache->saved_regs[IA64_BSP_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_BSP_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_BSP_REGNUM);
       cache->saved_regs[IA64_RNAT_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_RNAT_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_RNAT_REGNUM);
       cache->saved_regs[IA64_CCV_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_CCV_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_CCV_REGNUM);
       cache->saved_regs[IA64_UNAT_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_UNAT_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_UNAT_REGNUM);
       cache->saved_regs[IA64_FPSR_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_FPSR_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_FPSR_REGNUM);
       cache->saved_regs[IA64_PFS_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_PFS_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_PFS_REGNUM);
       cache->saved_regs[IA64_LC_REGNUM] = 
-	SIGCONTEXT_REGISTER_ADDRESS (cache->base, IA64_LC_REGNUM);
+	tdep->sigcontext_register_address (cache->base, IA64_LC_REGNUM);
       for (regno = IA64_GR1_REGNUM; regno <= IA64_GR31_REGNUM; regno++)
 	cache->saved_regs[regno] =
-	  SIGCONTEXT_REGISTER_ADDRESS (cache->base, regno);
+	  tdep->sigcontext_register_address (cache->base, regno);
       for (regno = IA64_BR0_REGNUM; regno <= IA64_BR7_REGNUM; regno++)
 	cache->saved_regs[regno] =
-	  SIGCONTEXT_REGISTER_ADDRESS (cache->base, regno);
+	  tdep->sigcontext_register_address (cache->base, regno);
       for (regno = IA64_FR2_REGNUM; regno <= IA64_FR31_REGNUM; regno++)
 	cache->saved_regs[regno] =
-	  SIGCONTEXT_REGISTER_ADDRESS (cache->base, regno);
+	  tdep->sigcontext_register_address (cache->base, regno);
     }
 }
 
@@ -1972,7 +1972,7 @@ ia64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->cfm = extract_unsigned_integer (buf, 8);
   cache->sof = cache->cfm & 0x7f;
 
-  ia64_sigtramp_frame_init_saved_regs (cache);
+  ia64_sigtramp_frame_init_saved_regs (next_frame, cache);
 
   *this_cache = cache;
   return cache;

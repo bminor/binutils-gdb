@@ -1,5 +1,17 @@
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ia64-linux-nat.c (ia64_register_addr): Add gdbarch parameter,
+	replacing use of global current_gdbarch.
+	(ia64_cannot_fetch_register, ia64_cannot_store_register): Likewise.
+	(ia64_linux_fetch_register, ia64_linux_store_register): Update callers.
+
+	* ia64-tdep.c (SIGCONTEXT_REGISTER_ADDRESS): Remove macro.
+	(ia64_sigtramp_frame_init_saved_regs): Add next_frame parameter,
+	replace uses of SIGCONTEXT_REGISTER_ADDRESS.
+	(ia64_sigtramp_frame_cache): Update caller.
+
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (deprecated_use_struct_convention): Remove.
 	(extract_return_value, store_return_value): Remove.
 	(return_value): Remove default implementation.
