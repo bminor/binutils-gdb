@@ -1,3 +1,8 @@
+2007-10-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-target.c (solib_target_parse_libraries)
+	[HAVEHAVE_LIBEXPAT not defined]: Fix thinko in return type.
+
 2007-10-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 6.7.0.20071010-cvs.
