@@ -827,6 +827,44 @@ avr_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
+/* Determine, for architecture GDBARCH, how a return value of TYPE
+   should be returned.  If it is supposed to be returned in registers,
+   and READBUF is non-zero, read the appropriate value from REGCACHE,
+   and copy it into READBUF.  If WRITEBUF is non-zero, write the value
+   from WRITEBUF into REGCACHE.  */
+
+enum return_value_convention
+avr_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		  struct regcache *regcache, gdb_byte *readbuf,
+		  const gdb_byte *writebuf)
+{
+  int struct_return = ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+			|| TYPE_CODE (valtype) == TYPE_CODE_UNION
+			|| TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+		       && !(TYPE_LENGTH (valtype) == 1
+			    || TYPE_LENGTH (valtype) == 2
+			    || TYPE_LENGTH (valtype) == 4
+			    || TYPE_LENGTH (valtype) == 8));
+
+  if (writebuf != NULL)
+    {
+      gdb_assert (!struct_return);
+      error (_("Cannot store return value."));
+    }
+
+  if (readbuf != NULL)
+    {
+      gdb_assert (!struct_return);
+      avr_extract_return_value (valtype, regcache, readbuf);
+    }
+
+  if (struct_return)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else
+    return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
+
 /* Put here the code to store, into fi->saved_regs, the addresses of
    the saved registers of frame described by FRAME_INFO.  This
    includes special registers such as pc and fp saved in special ways
@@ -1271,7 +1309,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, avr_register_name);
   set_gdbarch_register_type (gdbarch, avr_register_type);
 
-  set_gdbarch_extract_return_value (gdbarch, avr_extract_return_value);
+  set_gdbarch_return_value (gdbarch, avr_return_value);
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
   set_gdbarch_push_dummy_call (gdbarch, avr_push_dummy_call);

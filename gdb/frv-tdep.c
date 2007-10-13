@@ -1247,6 +1247,33 @@ frv_store_return_value (struct type *type, struct regcache *regcache,
                     _("Don't know how to return a %d-byte value."), len);
 }
 
+enum return_value_convention
+frv_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		  struct regcache *regcache, gdb_byte *readbuf,
+		  const gdb_byte *writebuf)
+{
+  int struct_return = TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+		      || TYPE_CODE (valtype) == TYPE_CODE_UNION
+		      || TYPE_CODE (valtype) == TYPE_CODE_ARRAY;
+
+  if (writebuf != NULL)
+    {
+      gdb_assert (!struct_return);
+      frv_store_return_value (valtype, regcache, writebuf);
+    }
+
+  if (readbuf != NULL)
+    {
+      gdb_assert (!struct_return);
+      frv_extract_return_value (valtype, regcache, readbuf);
+    }
+
+  if (struct_return)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else
+    return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
 
 /* Hardware watchpoint / breakpoint support for the FR500
    and FR400.  */
@@ -1488,10 +1515,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_adjust_breakpoint_address
     (gdbarch, frv_adjust_breakpoint_address);
 
-  set_gdbarch_deprecated_use_struct_convention (gdbarch, always_use_struct_convention);
-  set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);
-
-  set_gdbarch_store_return_value (gdbarch, frv_store_return_value);
+  set_gdbarch_return_value (gdbarch, frv_return_value);
 
   /* Frame stuff.  */
   set_gdbarch_unwind_pc (gdbarch, frv_unwind_pc);

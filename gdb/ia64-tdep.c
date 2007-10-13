@@ -2929,13 +2929,17 @@ static struct libunwind_descr ia64_libunwind_descr =
 
 #endif /* HAVE_LIBUNWIND_IA64_H  */
 
-/* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   gdbarch_extract_return_value?  GCC_P is true if compiled with gcc and TYPE
-   is the type (which is known to be struct, union or array).  */
-int
-ia64_use_struct_convention (int gcc_p, struct type *type)
+static int
+ia64_use_struct_convention (struct type *type)
 {
   struct type *float_elt_type;
+
+  /* Don't use the struct convention for anything but structure,
+     union, or array types.  */
+  if (!(TYPE_CODE (type) == TYPE_CODE_STRUCT
+	|| TYPE_CODE (type) == TYPE_CODE_UNION
+	|| TYPE_CODE (type) == TYPE_CODE_ARRAY))
+    return 0;
 
   /* HFAs are structures (or arrays) consisting entirely of floating
      point values of the same length.  Up to 8 of these are returned
@@ -2951,7 +2955,7 @@ ia64_use_struct_convention (int gcc_p, struct type *type)
   return TYPE_LENGTH (type) > 32;
 }
 
-void
+static void
 ia64_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
@@ -3001,6 +3005,80 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
+static void
+ia64_store_return_value (struct type *type, struct regcache *regcache, 
+			 const gdb_byte *valbuf)
+{
+  struct type *float_elt_type;
+
+  float_elt_type = is_float_or_hfa_type (type);
+  if (float_elt_type != NULL)
+    {
+      char to[MAX_REGISTER_SIZE];
+      int offset = 0;
+      int regnum = IA64_FR8_REGNUM;
+      int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
+
+      while (n-- > 0)
+	{
+	  convert_typed_floating ((char *)valbuf + offset, float_elt_type,
+				  to, builtin_type_ia64_ext);
+	  regcache_cooked_write (regcache, regnum, to);
+	  offset += TYPE_LENGTH (float_elt_type);
+	  regnum++;
+	}
+    }
+  else
+    {
+      ULONGEST val;
+      int offset = 0;
+      int regnum = IA64_GR8_REGNUM;
+      int reglen = TYPE_LENGTH (register_type (get_regcache_arch (regcache),
+					       IA64_GR8_REGNUM));
+      int n = TYPE_LENGTH (type) / reglen;
+      int m = TYPE_LENGTH (type) % reglen;
+
+      while (n-- > 0)
+	{
+	  ULONGEST val;
+	  memcpy (&val, (char *)valbuf + offset, reglen);
+	  regcache_cooked_write_unsigned (regcache, regnum, val);
+	  offset += reglen;
+	  regnum++;
+	}
+
+      if (m)
+	{
+	  memcpy (&val, (char *)valbuf + offset, m);
+          regcache_cooked_write_unsigned (regcache, regnum, val);
+	}
+    }
+}
+  
+static enum return_value_convention
+ia64_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		   struct regcache *regcache, gdb_byte *readbuf,
+		   const gdb_byte *writebuf)
+{
+  int struct_return = ia64_use_struct_convention (valtype);
+
+  if (writebuf != NULL)
+    {
+      gdb_assert (!struct_return);
+      ia64_store_return_value (valtype, regcache, writebuf);
+    }
+
+  if (readbuf != NULL)
+    {
+      gdb_assert (!struct_return);
+      ia64_extract_return_value (valtype, regcache, readbuf);
+    }
+
+  if (struct_return)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else
+    return RETURN_VALUE_REGISTER_CONVENTION;
+}
 
 static int
 is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
@@ -3462,21 +3540,6 @@ ia64_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
   return pc;
 }
 
-static void
-ia64_store_return_value (struct type *type, struct regcache *regcache, 
-			const gdb_byte *valbuf)
-{
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    {
-      char to[MAX_REGISTER_SIZE];
-      convert_typed_floating (valbuf, type, to, builtin_type_ia64_ext);
-      regcache_cooked_write (regcache, IA64_FR8_REGNUM, (void *)to);
-      target_store_registers (regcache, IA64_FR8_REGNUM);
-    }
-  else
-    regcache_cooked_write (regcache, IA64_GR8_REGNUM, valbuf);
-}
-
 static int
 ia64_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 {
@@ -3544,10 +3607,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, ia64_skip_prologue);
 
-  set_gdbarch_deprecated_use_struct_convention (gdbarch, ia64_use_struct_convention);
-  set_gdbarch_extract_return_value (gdbarch, ia64_extract_return_value);
-
-  set_gdbarch_store_return_value (gdbarch, ia64_store_return_value);
+  set_gdbarch_return_value (gdbarch, ia64_return_value);
 
   set_gdbarch_memory_insert_breakpoint (gdbarch, ia64_memory_insert_breakpoint);
   set_gdbarch_memory_remove_breakpoint (gdbarch, ia64_memory_remove_breakpoint);

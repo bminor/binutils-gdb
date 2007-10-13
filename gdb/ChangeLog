@@ -1,3 +1,23 @@
+2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* avr-tdep.c (avr_return_value): New function.
+	(avr_gdbarch_init): Call set_gdbarch_return_value instead of
+	set_gdbarch_extract_return_value.
+
+	* fvr-tdep.c (frv_return_value): New function.
+	(frv_gdbarch_init): Call set_gdbarch_return_value instead of
+	set_gdbarch_extract_return_value, set_gdbarch_store_return_value,
+	and set_gdbarch_deprecated_use_struct_convention.
+
+	* ia64-tdep.c (ia64_use_struct_convention): Make static.
+	Add check for structure, union, or array types.
+	(ia64_extract_return_value): Make static.
+	(ia64_store_return_value): Make static.  Support multi-word values.
+	(ia64_return_value): New function.
+	(ia64_gdbarch_init): Call set_gdbarch_return_value instead of
+	set_gdbarch_extract_return_value, set_gdbarch_store_return_value,
+	and set_gdbarch_deprecated_use_struct_convention.
+
 2007-10-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib-target.c (solib_target_parse_libraries)
