@@ -45,6 +45,9 @@ using namespace gold;
 class Output_data_plt_i386;
 
 // The i386 target class.
+// TLS info comes from
+//   http://people.redhat.com/drepper/tls.pdf
+//   http://www.lsd.ic.unicamp.br/~oliva/writeups/TLS/RFC-TLSDESC-x86.txt
 
 class Target_i386 : public Sized_target<32, false>
 {
@@ -170,7 +173,7 @@ class Target_i386 : public Sized_target<32, false>
 		 unsigned char* view,
 		 off_t view_size);
 
-    // Do a TLS Global-Dynamic to Local-Exec transition.
+    // Do a TLS General-Dynamic to Local-Exec transition.
     inline void
     tls_gd_to_le(const Relocate_info<32, false>*, size_t relnum,
 		 Output_segment* tls_segment,
@@ -678,7 +681,7 @@ Target_i386::optimize_tls_reloc(bool is_final, int r_type)
     case elfcpp::R_386_TLS_GD:
     case elfcpp::R_386_TLS_GOTDESC:
     case elfcpp::R_386_TLS_DESC_CALL:
-      // These are Global-Dynamic which permits fully general TLS
+      // These are General-Dynamic which permits fully general TLS
       // access.  Since we know that we are generating an executable,
       // we can convert this to Initial-Exec.  If we also know that
       // this is a local symbol, we can further switch to Local-Exec.
@@ -1515,7 +1518,7 @@ Target_i386::Relocate::tls_ie_to_le(const Relocate_info<32, false>* relinfo,
   Relocate_functions<32, false>::rel32(view, value);
 }
 
-// Do a relocation in which we convert a TLS Global-Dynamic to a
+// Do a relocation in which we convert a TLS General-Dynamic to a
 // Local-Exec.
 
 inline void

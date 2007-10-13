@@ -44,6 +44,7 @@
 #include "target.h"
 #include "target-reloc.h"
 #include "target-select.h"
+#include "tls.h"
 
 namespace
 {
@@ -128,6 +129,13 @@ class Target_x86_64 : public Sized_target<64, false>
 	   unsigned int data_shndx,
 	   const elfcpp::Rela<64, false>& reloc, unsigned int r_type,
 	   Symbol* gsym);
+
+    static void
+    unsupported_reloc_local(Sized_relobj<64, false>*, unsigned int r_type);
+
+    static void
+    unsupported_reloc_global(Sized_relobj<64, false>*, unsigned int r_type,
+			     Symbol*);
   };
 
   // The class which implements relocation.
@@ -177,7 +185,7 @@ class Target_x86_64 : public Sized_target<64, false>
 		 unsigned char* view,
 		 off_t view_size);
 
-    // Do a TLS Global-Dynamic to Local-Exec transition.
+    // Do a TLS General-Dynamic to Local-Exec transition.
     inline void
     tls_gd_to_le(const Relocate_info<64, false>*, size_t relnum,
 		 Output_segment* tls_segment,
@@ -203,7 +211,7 @@ class Target_x86_64 : public Sized_target<64, false>
 
   // Adjust TLS relocation type based on the options and whether this
   // is a local symbol.
-  static unsigned int
+  static tls::Tls_optimization
   optimize_tls_reloc(bool is_final, int r_type);
 
   // Get the GOT section, creating it if necessary.
@@ -634,40 +642,37 @@ Target_x86_64::copy_reloc(const General_options* options,
 // symbol.  IS_FINAL is true if the final address of this symbol is
 // known at link time.
 
-unsigned int
+tls::Tls_optimization
 Target_x86_64::optimize_tls_reloc(bool is_final, int r_type)
 {
   // If we are generating a shared library, then we can't do anything
   // in the linker.
   if (parameters->output_is_shared())
-    return r_type;
+    return tls::TLSOPT_NONE;
 
   switch (r_type)
     {
     case elfcpp::R_X86_64_TLSGD:
-    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
-      // These are Global-Dynamic which permits fully general TLS
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:
+    case elfcpp::R_X86_64_TLSDESC_CALL:
+      // These are General-Dynamic which permits fully general TLS
       // access.  Since we know that we are generating an executable,
       // we can convert this to Initial-Exec.  If we also know that
       // this is a local symbol, we can further switch to Local-Exec.
       if (is_final)
-	return elfcpp::R_X86_64_TPOFF32;
-      return elfcpp::R_X86_64_GOTTPOFF;     // used for Initial-exec
+	return tls::TLSOPT_TO_LE;
+      return tls::TLSOPT_TO_IE;
 
     case elfcpp::R_X86_64_TLSLD:
       // This is Local-Dynamic, which refers to a local symbol in the
       // dynamic TLS block.  Since we know that we generating an
       // executable, we can switch to Local-Exec.
-      return elfcpp::R_X86_64_TPOFF32;
+      return tls::TLSOPT_TO_LE;
 
     case elfcpp::R_X86_64_DTPOFF32:
-      // Another Local-Dynamic reloc.
-      return elfcpp::R_X86_64_TPOFF32;
-
     case elfcpp::R_X86_64_DTPOFF64:
       // Another Local-Dynamic reloc.
-      return elfcpp::R_X86_64_TPOFF64;
+      return tls::TLSOPT_TO_LE;
 
     case elfcpp::R_X86_64_GOTTPOFF:
       // These are Initial-Exec relocs which get the thread offset
@@ -675,17 +680,27 @@ Target_x86_64::optimize_tls_reloc(bool is_final, int r_type)
       // local symbol, we can switch to Local-Exec, which links the
       // thread offset into the instruction.
       if (is_final)
-	return elfcpp::R_X86_64_TPOFF32;
-      return r_type;
+	return tls::TLSOPT_TO_LE;
+      return tls::TLSOPT_NONE;
 
     case elfcpp::R_X86_64_TPOFF32:
       // When we already have Local-Exec, there is nothing further we
       // can do.
-      return r_type;
+      return tls::TLSOPT_NONE;
 
     default:
       gold_unreachable();
     }
+}
+
+// Report an unsupported relocation against a local symbol.
+
+void
+Target_x86_64::Scan::unsupported_reloc_local(Sized_relobj<64, false>* object,
+                                             unsigned int r_type)
+{
+  fprintf(stderr, _("%s: %s: unsupported reloc %u against local symbol\n"),
+	  program_name, object->name().c_str(), r_type);
 }
 
 // Scan a relocation for a local symbol.
@@ -768,39 +783,54 @@ Target_x86_64::Scan::local(const General_options&,
       break;
 
       // These are initial tls relocs, which are expected when linking
-    case elfcpp::R_X86_64_TLSGD:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSLD:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TPOFF32:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSGD:
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:
+    case elfcpp::R_X86_64_TLSDESC_CALL:
+    case elfcpp::R_X86_64_TLSLD:
+    case elfcpp::R_X86_64_GOTTPOFF:
+    case elfcpp::R_X86_64_TPOFF32:
     case elfcpp::R_X86_64_DTPOFF32:
     case elfcpp::R_X86_64_DTPOFF64:
       {
 	bool output_is_shared = parameters->output_is_shared();
-	r_type = Target_x86_64::optimize_tls_reloc(!output_is_shared, r_type);
+	const tls::Tls_optimization optimized_type
+            = Target_x86_64::optimize_tls_reloc(!output_is_shared, r_type);
 	switch (r_type)
 	  {
           case elfcpp::R_X86_64_TPOFF32:     // Local-exec
-          case elfcpp::R_X86_64_TPOFF64:
 	    // FIXME: If generating a shared object, we need to copy
 	    // this relocation into the object.
 	    gold_assert(!output_is_shared);
 	    break;
 
-          case elfcpp::R_X86_64_DTPOFF32:
-          case elfcpp::R_X86_64_DTPOFF64:
+          case elfcpp::R_X86_64_GOTTPOFF:    // Initial-exec
+            // FIXME: If not relaxing to LE, we need to generate a
+            // TPOFF64 reloc.
+            if (optimized_type != tls::TLSOPT_TO_LE)
+              unsupported_reloc_local(object, r_type);
             break;
 
-          case elfcpp::R_X86_64_GOTTPOFF:       // Initial-exec
-          case elfcpp::R_X86_64_TLSGD:          // General Dynamic
-          case elfcpp::R_X86_64_TLSLD:          // Local Dynamic
+          case elfcpp::R_X86_64_TLSLD:       // Local-dynamic
+          case elfcpp::R_X86_64_DTPOFF32:
+          case elfcpp::R_X86_64_DTPOFF64:
+	    // FIXME: If not relaxing to LE, we need to generate a
+	    // DTPMOD64 reloc.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_local(object, r_type);
+	    break;
+
+
+          case elfcpp::R_X86_64_TLSGD:       // General-dynamic
           case elfcpp::R_X86_64_GOTPC32_TLSDESC:
           case elfcpp::R_X86_64_TLSDESC_CALL:
-	    fprintf(stderr,
-		    _("%s: %s: unsupported reloc %u against local symbol\n"),
-		    program_name, object->name().c_str(), r_type);
+	    // FIXME: If not relaxing to LE, we need to generate
+	    // DTPMOD64 and DTPOFF64 relocs.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_local(object, r_type);
 	    break;
+
+          default:
+            gold_unreachable();
 	  }
       }
       break;
@@ -816,6 +846,18 @@ Target_x86_64::Scan::local(const General_options&,
     }
 }
 
+
+// Report an unsupported relocation against a global symbol.
+
+void
+Target_x86_64::Scan::unsupported_reloc_global(Sized_relobj<64, false>* object,
+                                              unsigned int r_type,
+                                              Symbol* gsym)
+{
+  fprintf(stderr,
+	  _("%s: %s: unsupported reloc %u against global symbol %s\n"),
+	  program_name, object->name().c_str(), r_type, gsym->name());
+}
 
 // Scan a relocation for a global symbol.
 
@@ -930,45 +972,57 @@ Target_x86_64::Scan::global(const General_options& options,
       break;
 
       // These are initial tls relocs, which are expected for global()
-    case elfcpp::R_X86_64_TLSGD:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSLD:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TPOFF32:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSGD:
+    case elfcpp::R_X86_64_TLSLD:
+    case elfcpp::R_X86_64_GOTTPOFF:
+    case elfcpp::R_X86_64_TPOFF32:
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:
+    case elfcpp::R_X86_64_TLSDESC_CALL:
     case elfcpp::R_X86_64_DTPOFF32:
     case elfcpp::R_X86_64_DTPOFF64:
       {
 	const bool is_final = gsym->final_value_is_known();
-	r_type = Target_x86_64::optimize_tls_reloc(is_final, r_type);
+	const tls::Tls_optimization optimized_type
+            = Target_x86_64::optimize_tls_reloc(is_final, r_type);
 	switch (r_type)
 	  {
           case elfcpp::R_X86_64_TPOFF32:     // Local-exec
-          case elfcpp::R_X86_64_TPOFF64:
 	    // FIXME: If generating a shared object, we need to copy
 	    // this relocation into the object.
-	    gold_assert(!parameters->output_is_shared());
+	    gold_assert(is_final);
 	    break;
 
-          case elfcpp::R_X86_64_DTPOFF32:
-          case elfcpp::R_X86_64_DTPOFF64:
+          case elfcpp::R_X86_64_GOTTPOFF:    // Initial-exec
+            // FIXME: If not relaxing to LE, we need to generate a
+            // TPOFF64 reloc.
+            if (optimized_type != tls::TLSOPT_TO_LE)
+              unsupported_reloc_global(object, r_type, gsym);
             break;
 
-          case elfcpp::R_X86_64_GOTTPOFF:       // Initial-exec
-          case elfcpp::R_X86_64_TLSGD:          // General Dynamic
-          case elfcpp::R_X86_64_TLSLD:          // Local Dynamic
+          case elfcpp::R_X86_64_TLSLD:       // Local-dynamic
+          case elfcpp::R_X86_64_DTPOFF32:
+          case elfcpp::R_X86_64_DTPOFF64:
+	    // FIXME: If not relaxing to LE, we need to generate a
+	    // DTPMOD64 reloc.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_global(object, r_type, gsym);
+	    break;
+
+
+          case elfcpp::R_X86_64_TLSGD:       // General-dynamic
           case elfcpp::R_X86_64_GOTPC32_TLSDESC:
           case elfcpp::R_X86_64_TLSDESC_CALL:
-	    fprintf(stderr,
-		    _("%s: %s: unsupported reloc %u "
-		      "against global symbol %s\n"),
-		    program_name, object->name().c_str(), r_type,
-		    gsym->name());
+	    // FIXME: If not relaxing to LE, we need to generate
+	    // DTPMOD64 and DTPOFF64, or TLSDESC, relocs.
+	    if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_global(object, r_type, gsym);
 	    break;
+
+          default:
+            gold_unreachable();
 	  }
       }
       break;
-
     case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
     default:
@@ -1272,12 +1326,12 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       break;
 
       // These are initial tls relocs, which are expected when linking
-    case elfcpp::R_X86_64_TLSGD:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSLD:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTTPOFF:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TPOFF32:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_TLSDESC_CALL:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_TLSGD:
+    case elfcpp::R_X86_64_TLSLD:
+    case elfcpp::R_X86_64_GOTTPOFF:
+    case elfcpp::R_X86_64_TPOFF32:
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:
+    case elfcpp::R_X86_64_TLSDESC_CALL:
     case elfcpp::R_X86_64_DTPOFF32:
     case elfcpp::R_X86_64_DTPOFF64:
       this->relocate_tls(relinfo, relnum, rela, r_type, gsym, psymval, view,
@@ -1326,8 +1380,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
   const bool is_final = (gsym == NULL
 			 ? !parameters->output_is_shared()
 			 : gsym->final_value_is_known());
-  const unsigned int opt_r_type =
-    Target_x86_64::optimize_tls_reloc(is_final, r_type);
+  const tls::Tls_optimization optimized_type
+      = Target_x86_64::optimize_tls_reloc(is_final, r_type);
   switch (r_type)
     {
     case elfcpp::R_X86_64_TPOFF32:   // Local-exec reloc
@@ -1336,7 +1390,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_GOTTPOFF:  // Initial-exec reloc
-      if (opt_r_type == elfcpp::R_X86_64_TPOFF32)
+      if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  Target_x86_64::Relocate::tls_ie_to_le(relinfo, relnum, tls_segment,
                                                 rel, r_type, value, view,
@@ -1351,7 +1405,9 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_TLSGD:
-      if (opt_r_type == elfcpp::R_X86_64_TPOFF32)
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:
+    case elfcpp::R_X86_64_TLSDESC_CALL:
+      if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  this->tls_gd_to_le(relinfo, relnum, tls_segment,
 			     rel, r_type, value, view,
@@ -1366,6 +1422,10 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_TLSLD:
+      if (optimized_type == tls::TLSOPT_TO_LE)
+        {
+          // FIXME: implement ld_to_le
+        }
       fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
 	      program_name,
 	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
@@ -1374,7 +1434,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_DTPOFF32:
-      if (opt_r_type == elfcpp::R_X86_64_TPOFF32)
+      if (optimized_type == tls::TLSOPT_TO_LE)
         value = value - (tls_segment->vaddr() + tls_segment->memsz());
       else
         value = value - tls_segment->vaddr();
@@ -1382,7 +1442,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_DTPOFF64:
-      if (opt_r_type == elfcpp::R_X86_64_TPOFF64)
+      if (optimized_type == tls::TLSOPT_TO_LE)
         value = value - (tls_segment->vaddr() + tls_segment->memsz());
       else
         value = value - tls_segment->vaddr();
@@ -1393,7 +1453,6 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 
 // Do a relocation in which we convert a TLS Initial-Exec to a
 // Local-Exec.
-// TODO(csilvers): verify this is right.
 
 inline void
 Target_x86_64::Relocate::tls_ie_to_le(const Relocate_info<64, false>* relinfo,
@@ -1448,9 +1507,8 @@ Target_x86_64::Relocate::tls_ie_to_le(const Relocate_info<64, false>* relinfo,
   Relocate_functions<64, false>::rela32(view, value, 0);
 }
 
-// Do a relocation in which we convert a TLS Global-Dynamic to a
+// Do a relocation in which we convert a TLS General-Dynamic to a
 // Local-Exec.
-// TODO(csilvers): verify this is right.
 
 inline void
 Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* relinfo,
