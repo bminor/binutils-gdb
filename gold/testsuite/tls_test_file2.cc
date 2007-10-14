@@ -21,7 +21,10 @@
 // MA 02110-1301, USA.
 
 // This is the definition of a thread-local variable in another file.
+// See tls_test.cc for more information.
+
+#include "tls_test.h"
 
 __thread int o1;
-__thread int o2 = 2;
+__thread int o2 = -2;
 __thread int o3;

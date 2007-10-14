@@ -29,6 +29,23 @@
 
 #include "tls_test.h"
 
+// We make these macros so the assert() will give useful line-numbers.
+#define safe_lock(muptr)			\
+  do						\
+    {						\
+      int err = pthread_mutex_lock(muptr);	\
+      assert(err == 0);				\
+    }						\
+  while (0)
+
+#define safe_unlock(muptr)			\
+  do						\
+    {						\
+      int err = pthread_mutex_unlock(muptr);	\
+      assert(err == 0);				\
+    }						\
+  while (0)
+
 struct Mutex_set
 {
   pthread_mutex_t mutex1;
@@ -66,8 +83,8 @@ thread_routine(void* arg)
   Mutex_set* pms = static_cast<Mutex_set*>(arg);
 
   // Lock the first mutex.
-  int err = pthread_mutex_lock(&pms->mutex1);
-  assert(err == 0);
+  if (pms)
+    safe_lock(&pms->mutex1);
 
   // Run the tests.
   check("t1", t1());
@@ -85,12 +102,12 @@ thread_routine(void* arg)
   check("t_last", t_last());
 
   // Unlock the second mutex.
-  err = pthread_mutex_unlock(&pms->mutex2);
-  assert(err == 0);
+  if (pms)
+    safe_unlock(&pms->mutex2);
 
   // Lock the third mutex.
-  err = pthread_mutex_lock(&pms->mutex3);
-  assert(err == 0);
+  if (pms)
+    safe_lock(&pms->mutex3);
 
   check("t_last", t_last());
 
@@ -102,25 +119,23 @@ thread_routine(void* arg)
 int
 main()
 {
+  // First, as a sanity check, run through the tests in the "main" thread.
+  thread_routine(0);
+
   // Set up the mutex locks.  We want the first thread to start right
   // away, tell us when it is done with the first part, and wait for
   // us to release it.  We want the second thread to wait to start,
   // tell us when it is done with the first part, and wait for us to
   // release it.
-  int err = pthread_mutex_lock(&mutexes1.mutex2);
-  assert(err == 0);
-  err = pthread_mutex_lock(&mutexes1.mutex3);
-  assert(err == 0);
+  safe_lock(&mutexes1.mutex2);
+  safe_lock(&mutexes1.mutex3);
 
-  err = pthread_mutex_lock(&mutexes2.mutex1);
-  assert(err == 0);
-  err = pthread_mutex_lock(&mutexes2.mutex2);
-  assert(err == 0);
-  err = pthread_mutex_lock(&mutexes2.mutex3);
-  assert(err == 0);
+  safe_lock(&mutexes2.mutex1);
+  safe_lock(&mutexes2.mutex2);
+  safe_lock(&mutexes2.mutex3);
 
   pthread_t thread1;
-  err = pthread_create(&thread1, NULL, thread_routine, &mutexes1);
+  int err = pthread_create(&thread1, NULL, thread_routine, &mutexes1);
   assert(err == 0);
 
   pthread_t thread2;
@@ -128,20 +143,16 @@ main()
   assert(err == 0);
 
   // Wait for the first thread to complete the first part.
-  err = pthread_mutex_lock(&mutexes1.mutex2);
-  assert(err == 0);
+  safe_lock(&mutexes1.mutex2);
 
   // Tell the second thread to start.
-  err = pthread_mutex_unlock(&mutexes2.mutex1);
-  assert(err == 0);
+  safe_unlock(&mutexes2.mutex1);
 
   // Wait for the second thread to complete the first part.
-  err = pthread_mutex_lock(&mutexes2.mutex2);
-  assert(err == 0);
+  safe_lock(&mutexes2.mutex2);
 
   // Tell the first thread to continue and finish.
-  err = pthread_mutex_unlock(&mutexes1.mutex3);
-  assert(err == 0);
+  safe_unlock(&mutexes1.mutex3);
 
   // Wait for the first thread to finish.
   void* thread_val;
@@ -150,8 +161,7 @@ main()
   assert(thread_val == 0);
 
   // Tell the second thread to continue and finish.
-  err = pthread_mutex_unlock(&mutexes2.mutex3);
-  assert(err == 0);
+  safe_unlock(&mutexes2.mutex3);
 
   // Wait for the second thread to finish.
   err = pthread_join(thread2, &thread_val);

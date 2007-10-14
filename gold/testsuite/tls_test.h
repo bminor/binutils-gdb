@@ -44,3 +44,8 @@ extern void f10b(int*);
 extern bool t10();
 
 extern bool t_last();
+
+// These variables are defined in tls_test_file2.cc
+extern __thread int o1;
+extern __thread int o2;
+extern __thread int o3;

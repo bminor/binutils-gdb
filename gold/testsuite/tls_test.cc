@@ -44,7 +44,19 @@
 // last  Verify that the above tests left the variables set correctly.
 
 
+#include <cstdio>
 #include "tls_test.h"
+
+#define CHECK_EQ_OR_RETURN(var, expected)				\
+  do									\
+    {									\
+      if ((var) != (expected))						\
+	{								\
+	  printf(#var ": expected %d, found %d\n", expected, var);	\
+	  return false;							\
+	}								\
+    }									\
+  while (0)
 
 __thread int v1;
 static __thread int v2;
@@ -53,16 +65,10 @@ static __thread int v4 = 4;
 __thread int v5;
 static __thread int v6;
 
-// These variables are defined in tls_test_file2.cc
-extern __thread int o1;
-extern __thread int o2;
-extern __thread int o3;
-
 bool
 t1()
 {
-  if (v1 != 0)
-    return false;
+  CHECK_EQ_OR_RETURN(v1, 0);
   v1 = 10;
   return true;
 }
@@ -70,8 +76,7 @@ t1()
 bool
 t2()
 {
-  if (v2 != 0)
-    return false;
+  CHECK_EQ_OR_RETURN(v2, 0);
   v2 = 20;
   return true;
 }
@@ -79,8 +84,7 @@ t2()
 bool
 t3()
 {
-  if (v3 != 3)
-    return false;
+  CHECK_EQ_OR_RETURN(v3, 3);
   v3 = 30;
   return true;
 }
@@ -88,8 +92,7 @@ t3()
 bool
 t4()
 {
-  if (v4 != 4)
-    return false;
+  CHECK_EQ_OR_RETURN(v4, 4);
   v4 = 40;
   return true;
 }
@@ -111,7 +114,8 @@ f5b(int* p)
 bool
 t5()
 {
-  return v5 == 50;
+  CHECK_EQ_OR_RETURN(v5, 50);
+  return true;
 }
 
 // For test 6 the main function calls f6b(f6a()), then calls t6().
@@ -131,7 +135,8 @@ f6b(int* p)
 bool
 t6()
 {
-  return v6 == 60;
+  CHECK_EQ_OR_RETURN(v6, 60);
+  return true;
 }
 
 // The slot for t7() is unused.
@@ -139,18 +144,16 @@ t6()
 bool
 t8()
 {
-  if (o1 != 0)
-    return false;
-  o1 = 10;
+  CHECK_EQ_OR_RETURN(o1, 0);
+  o1 = -10;
   return true;
 }
 
 bool
 t9()
 {
-  if (o2 != 2)
-    return false;
-  o2 = 20;
+  CHECK_EQ_OR_RETURN(o2, -2);
+  o2 = -20;
   return true;
 }
 
@@ -165,25 +168,27 @@ f10a()
 void
 f10b(int* p)
 {
-  *p = 30;
+  *p = -30;
 }
 
 bool
 t10()
 {
-  return o3 == 30;
+  CHECK_EQ_OR_RETURN(o3, -30);
+  return true;
 }
 
 bool
 t_last()
 {
-  return (v1 == 10
-	  && v2 == 20
-	  && v3 == 30
-	  && v4 == 40
-	  && v5 == 50
-	  && v6 == 60
-          && o1 == 10
-          && o2 == 20
-          && o3 == 30);
+  CHECK_EQ_OR_RETURN(v1, 10);
+  CHECK_EQ_OR_RETURN(v2, 20);
+  CHECK_EQ_OR_RETURN(v3, 30);
+  CHECK_EQ_OR_RETURN(v4, 40);
+  CHECK_EQ_OR_RETURN(v5, 50);
+  CHECK_EQ_OR_RETURN(v6, 60);
+  CHECK_EQ_OR_RETURN(o1, -10);
+  CHECK_EQ_OR_RETURN(o2, -20);
+  CHECK_EQ_OR_RETURN(o3, -30);
+  return true;
 }
