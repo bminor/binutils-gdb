@@ -290,8 +290,9 @@ class Input_file
   // method.
   Input_file(const char* name, const unsigned char* contents, off_t size);
 
-  // Open the file.
-  void
+  // Open the file.  If the open fails, this will report an error and
+  // return false.
+  bool
   open(const General_options&, const Dirsearch&);
 
   // Return the name given by the user.  For -lc this will return "c".

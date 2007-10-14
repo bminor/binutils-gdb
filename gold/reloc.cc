@@ -187,9 +187,9 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       unsigned int shndx = shdr.get_sh_info();
       if (shndx >= shnum)
 	{
-	  fprintf(stderr, _("%s: %s: relocation section %u has bad info %u\n"),
-		  program_name, this->name().c_str(), i, shndx);
-	  gold_exit(false);
+	  this->error(_("relocation section %u has bad info %u"),
+		      i, shndx);
+	  continue;
 	}
 
       if (!this->is_section_included(shndx))
@@ -205,11 +205,10 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 
       if (shdr.get_sh_link() != this->symtab_shndx_)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: relocation section %u uses unexpected "
-		    "symbol table %u\n"),
-		  program_name, this->name().c_str(), i, shdr.get_sh_link());
-	  gold_exit(false);
+	  this->error(_("relocation section %u uses unexpected "
+			"symbol table %u"),
+		      i, shdr.get_sh_link());
+	  continue;
 	}
 
       off_t sh_size = shdr.get_sh_size();
@@ -221,22 +220,18 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 	reloc_size = elfcpp::Elf_sizes<size>::rela_size;
       if (reloc_size != shdr.get_sh_entsize())
 	{
-	  fprintf(stderr,
-		  _("%s: %s: unexpected entsize for reloc section %u: "
-		    "%lu != %u"),
-		  program_name, this->name().c_str(), i,
-		  static_cast<unsigned long>(shdr.get_sh_entsize()),
-		  reloc_size);
-	  gold_exit(false);
+	  this->error(_("unexpected entsize for reloc section %u: %lu != %u"),
+		      i, static_cast<unsigned long>(shdr.get_sh_entsize()),
+		      reloc_size);
+	  continue;
 	}
 
       size_t reloc_count = sh_size / reloc_size;
       if (static_cast<off_t>(reloc_count * reloc_size) != sh_size)
 	{
-	  fprintf(stderr, _("%s: %s: reloc section %u size %lu uneven"),
-		  program_name, this->name().c_str(), i,
-		  static_cast<unsigned long>(sh_size));
-	  gold_exit(false);
+	  this->error(_("reloc section %u size %lu uneven"),
+		      i, static_cast<unsigned long>(sh_size));
+	  continue;
 	}
 
       rd->relocs.push_back(Section_relocs());
@@ -433,9 +428,9 @@ Sized_relobj<size, big_endian>::relocate_sections(
       unsigned int index = shdr.get_sh_info();
       if (index >= this->shnum())
 	{
-	  fprintf(stderr, _("%s: %s: relocation section %u has bad info %u\n"),
-		  program_name, this->name().c_str(), i, index);
-	  gold_exit(false);
+	  this->error(_("relocation section %u has bad info %u"),
+		      i, index);
+	  continue;
 	}
 
       if (!this->is_section_included(index))
@@ -449,11 +444,10 @@ Sized_relobj<size, big_endian>::relocate_sections(
 
       if (shdr.get_sh_link() != this->symtab_shndx_)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: relocation section %u uses unexpected "
-		    "symbol table %u\n"),
-		  program_name, this->name().c_str(), i, shdr.get_sh_link());
-	  gold_exit(false);
+	  gold_error(_("relocation section %u uses unexpected "
+		       "symbol table %u"),
+		     i, shdr.get_sh_link());
+	  continue;
 	}
 
       off_t sh_size = shdr.get_sh_size();
@@ -468,22 +462,18 @@ Sized_relobj<size, big_endian>::relocate_sections(
 
       if (reloc_size != shdr.get_sh_entsize())
 	{
-	  fprintf(stderr,
-		  _("%s: %s: unexpected entsize for reloc section %u: "
-		    "%lu != %u"),
-		  program_name, this->name().c_str(), i,
-		  static_cast<unsigned long>(shdr.get_sh_entsize()),
+	  gold_error(_("unexpected entsize for reloc section %u: %lu != %u"),
+		     i, static_cast<unsigned long>(shdr.get_sh_entsize()),
 		  reloc_size);
-	  gold_exit(false);
+	  continue;
 	}
 
       size_t reloc_count = sh_size / reloc_size;
       if (static_cast<off_t>(reloc_count * reloc_size) != sh_size)
 	{
-	  fprintf(stderr, _("%s: %s: reloc section %u size %lu uneven"),
-		  program_name, this->name().c_str(), i,
-		  static_cast<unsigned long>(sh_size));
-	  gold_exit(false);
+	  gold_error(_("reloc section %u size %lu uneven"),
+		     i, static_cast<unsigned long>(sh_size));
+	  continue;
 	}
 
       relinfo.reloc_shndx = i;

@@ -139,9 +139,7 @@ class Target_i386 : public Sized_target<32, false>
       if (this->skip_call_tls_get_addr_)
 	{
 	  // FIXME: This needs to specify the location somehow.
-	  fprintf(stderr, _("%s: missing expected TLS relocation\n"),
-		  program_name);
-	  gold_exit(false);
+	  gold_error(_("missing expected TLS relocation"));
 	}
     }
 
@@ -727,8 +725,8 @@ void
 Target_i386::Scan::unsupported_reloc_local(Sized_relobj<32, false>* object,
 					   unsigned int r_type)
 {
-  fprintf(stderr, _("%s: %s: unsupported reloc %u against local symbol\n"),
-	  program_name, object->name().c_str(), r_type);
+  gold_error(_("%s: unsupported reloc %u against local symbol"),
+	     object->name().c_str(), r_type);
 }
 
 // Scan a relocation for a local symbol.
@@ -781,9 +779,8 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_TLS_DTPOFF32:
     case elfcpp::R_386_TLS_TPOFF32:
     case elfcpp::R_386_TLS_DESC:
-      fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
-	      program_name, object->name().c_str(), r_type);
-      gold_exit(false);
+      gold_error(_("%s: unexpected reloc %u in object file\n"),
+		 object->name().c_str(), r_type);
       break;
 
       // These are initial TLS relocs, which are expected when
@@ -870,9 +867,8 @@ Target_i386::Scan::unsupported_reloc_global(Sized_relobj<32, false>* object,
 					    unsigned int r_type,
 					    Symbol* gsym)
 {
-  fprintf(stderr,
-	  _("%s: %s: unsupported reloc %u against global symbol %s\n"),
-	  program_name, object->name().c_str(), r_type, gsym->name());
+  gold_error(_("%s: unsupported reloc %u against global symbol %s"),
+	     object->name().c_str(), r_type, gsym->name());
 }
 
 // Scan a relocation for a global symbol.
@@ -975,9 +971,8 @@ Target_i386::Scan::global(const General_options& options,
     case elfcpp::R_386_TLS_DTPOFF32:
     case elfcpp::R_386_TLS_TPOFF32:
     case elfcpp::R_386_TLS_DESC:
-      fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
-	      program_name, object->name().c_str(), r_type);
-      gold_exit(false);
+      gold_error(_("%s: unexpected reloc %u in object file"),
+		 object->name().c_str(), r_type);
       break;
 
       // These are initial tls relocs, which are expected when
@@ -1072,9 +1067,9 @@ Target_i386::scan_relocs(const General_options& options,
 {
   if (sh_type == elfcpp::SHT_RELA)
     {
-      fprintf(stderr, _("%s: %s: unsupported RELA reloc section\n"),
-	      program_name, object->name().c_str());
-      gold_exit(false);
+      gold_error(_("%s: unsupported RELA reloc section"),
+		 object->name().c_str());
+      return;
     }
 
   gold::scan_relocs<32, false, Target_i386, elfcpp::SHT_REL,
@@ -1161,16 +1156,13 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       if (r_type != elfcpp::R_386_PLT32
 	  || gsym == NULL
 	  || strcmp(gsym->name(), "___tls_get_addr") != 0)
+	gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			       _("missing expected TLS relocation"));
+      else
 	{
-	  fprintf(stderr, _("%s: %s: missing expected TLS relocation\n"),
-		  program_name,
-		  relinfo->location(relnum, rel.get_r_offset()).c_str());
-	  gold_exit(false);
+	  this->skip_call_tls_get_addr_ = false;
+	  return false;
 	}
-
-      this->skip_call_tls_get_addr_ = false;
-
-      return false;
     }
 
   // Pick the value to use for symbols defined in shared objects.
@@ -1256,11 +1248,9 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_TLS_DTPOFF32:
     case elfcpp::R_386_TLS_TPOFF32:
     case elfcpp::R_386_TLS_DESC:
-      fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unexpected reloc %u in object file"),
+			     r_type);
       break;
 
       // These are initial tls relocs, which are expected when
@@ -1290,11 +1280,9 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_TLS_LDM_POP:
     case elfcpp::R_386_USED_BY_INTEL_200:
     default:
-      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unsupported reloc %u"),
+			     r_type);
       break;
     }
 
@@ -1317,10 +1305,9 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
   Output_segment* tls_segment = relinfo->layout->tls_segment();
   if (tls_segment == NULL)
     {
-      fprintf(stderr, _("%s: %s: TLS reloc but no TLS segment\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str());
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("TLS reloc but no TLS segment"));
+      return;
     }
 
   elfcpp::Elf_types<32>::Elf_Addr value = psymval->value(relinfo->object, 0);
@@ -1352,11 +1339,9 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 					      view_size);
 	  break;
 	}
-      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unsupported reloc %u"),
+			     r_type);
       break;
 
     case elfcpp::R_386_TLS_GD:
@@ -1367,21 +1352,18 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 			     view_size);
 	  break;
 	}
-      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unsupported reloc %u"),
+			     r_type);
       break;
 
     case elfcpp::R_386_TLS_LDM:
       if (this->local_dynamic_type_ == LOCAL_DYNAMIC_SUN)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: both SUN and GNU model TLS relocations\n"),
-		  program_name,
-		  relinfo->location(relnum, rel.get_r_offset()).c_str());
-	  gold_exit(false);
+	  gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+				 _("both SUN and GNU model "
+				   "TLS relocations"));
+	  break;
 	}
       this->local_dynamic_type_ = LOCAL_DYNAMIC_GNU;
       if (optimized_type == tls::TLSOPT_TO_LE)
@@ -1390,11 +1372,9 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 			     value, view, view_size);
 	  break;
 	}
-      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unsupported reloc %u"),
+			     r_type);
       break;
 
     case elfcpp::R_386_TLS_LDO_32:
@@ -1413,11 +1393,9 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 
     case elfcpp::R_386_TLS_GOTDESC:
     case elfcpp::R_386_TLS_DESC_CALL:
-      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unsupported reloc %u"),
+			     r_type);
       break;
     }
 }

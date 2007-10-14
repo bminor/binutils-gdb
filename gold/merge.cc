@@ -169,7 +169,7 @@ Output_merge_data::add_constant(const unsigned char* p)
 	this->alc_ *= 2;
       this->p_ = static_cast<unsigned char*>(realloc(this->p_, this->alc_));
       if (this->p_ == NULL)
-	gold_fatal("out of memory", true);
+	gold_nomem();
     }
 
   memcpy(this->p_ + this->len_, p, entsize);
@@ -251,11 +251,9 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
   if (len % sizeof(Char_type) != 0)
     {
-      fprintf(stderr,
-	      _("%s: %s: mergeable string section length not multiple of "
-		"character size\n"),
-	      program_name, object->name().c_str());
-      gold_exit(false);
+      object->error(_("mergeable string section length not multiple of "
+		      "character size"));
+      return false;
     }
   len /= sizeof(Char_type);
 
@@ -268,11 +266,9 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 	  ++plen;
 	  if (i + plen >= len)
 	    {
-	      fprintf(stderr,
-		      _("%s: %s: entry in mergeable string section "
-			"not null terminated\n"),
-		      program_name, object->name().c_str());
-	      gold_exit(false);
+	      object->error(_("entry in mergeable string section "
+			      "not null terminated"));
+	      break;
 	    }
 	}
 

@@ -30,6 +30,7 @@ CCFILES = \
 	dirsearch.cc \
 	dynobj.cc \
 	ehframe.cc \
+	errors.cc \
 	fileread.cc \
 	gold.cc \
 	gold-threads.cc \
@@ -56,6 +57,7 @@ HFILES = \
 	dirsearch.h \
 	dynobj.h \
 	ehframe.h \
+	errors.h \
 	fileread.h \
 	gold.h \
 	gold-threads.h \

@@ -233,7 +233,7 @@ class Object
 
   // Report an error.
   void
-  error(const char* format, ...) ATTRIBUTE_PRINTF_2;
+  error(const char* format, ...) const ATTRIBUTE_PRINTF_2;
 
   // A location in the file.
   struct Location

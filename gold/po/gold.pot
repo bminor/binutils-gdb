@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-10-10 12:27-0700\n"
+"POT-Creation-Date: 2007-10-13 23:40-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,213 +16,247 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: archive.cc:89
+#: archive.cc:88
 #, c-format
-msgid "%s: %s: no archive symbol table (run ranlib)\n"
+msgid "%s: no archive symbol table (run ranlib)"
 msgstr ""
 
-#: archive.cc:144
+#: archive.cc:138
 #, c-format
-msgid "%s: %s: bad archive symbol table names\n"
+msgid "%s: bad archive symbol table names"
 msgstr ""
 
-#: archive.cc:176
+#: archive.cc:168
 #, c-format
-msgid "%s; %s: malformed archive header at %ld\n"
+msgid "%s: malformed archive header at %zu"
 msgstr ""
 
-#: archive.cc:197
+#: archive.cc:188
 #, c-format
-msgid "%s: %s: malformed archive header size at %ld\n"
+msgid "%s: malformed archive header size at %zu"
 msgstr ""
 
-#: archive.cc:209
+#: archive.cc:199
 #, c-format
-msgid "%s: %s: malformed archive header name at %ld\n"
+msgid "%s: malformed archive header name at %zu\n"
 msgstr ""
 
-#: archive.cc:235
+#: archive.cc:224
 #, c-format
-msgid "%s: %s: bad extended name index at %ld\n"
+msgid "%s: bad extended name index at %zu"
 msgstr ""
 
-#: archive.cc:246
+#: archive.cc:234
 #, c-format
-msgid "%s: %s: bad extended name entry at header %ld\n"
+msgid "%s: bad extended name entry at header %zu"
 msgstr ""
 
-#: archive.cc:341
+#: archive.cc:327
 #, c-format
-msgid "%s: %s: short archive header at %ld\n"
+msgid "%s: short archive header at %zu"
 msgstr ""
 
-#: archive.cc:396 archive.cc:411
+#: archive.cc:378 archive.cc:392
 #, c-format
-msgid "%s: %s: member at %ld is not an ELF object"
+msgid "%s: member at %zu is not an ELF object"
 msgstr ""
 
-#: dirsearch.cc:70
+#: dirsearch.cc:68
 #, c-format
-msgid "can not read directory %s"
+msgid "%s: can not read directory: %s"
 msgstr ""
 
-#: dynobj.cc:130
+#: dynobj.cc:128
 #, c-format
-msgid "%s: %s: unexpected duplicate type %u section: %u, %u\n"
+msgid "unexpected duplicate type %u section: %u, %u"
 msgstr ""
 
-#: dynobj.cc:171
+#: dynobj.cc:164
 #, c-format
-msgid "%s: %s: unexpected link in section %u header: %u != %u\n"
+msgid "unexpected link in section %u header: %u != %u"
 msgstr ""
 
-#: dynobj.cc:210
+#: dynobj.cc:199
 #, c-format
-msgid "%s: %s: DYNAMIC section %u link out of range: %u\n"
+msgid "DYNAMIC section %u link out of range: %u"
 msgstr ""
 
-#: dynobj.cc:220
+#: dynobj.cc:207
 #, c-format
-msgid "%s: %s: DYNAMIC section %u link %u is not a strtab\n"
+msgid "DYNAMIC section %u link %u is not a strtab"
+msgstr ""
+
+#: dynobj.cc:227
+#, c-format
+msgid "DT_SONAME value out of range: %lld >= %lld"
 msgstr ""
 
 #: dynobj.cc:242
-#, c-format
-msgid "%s: %s: DT_SONAME value out of range: %lld >= %lld\n"
+msgid "missing DT_NULL in dynamic segment"
 msgstr ""
 
-#: dynobj.cc:259
+#: dynobj.cc:285
 #, c-format
-msgid "%s: %s: missing DT_NULL in dynamic segment\n"
+msgid "invalid dynamic symbol table name index: %u"
 msgstr ""
 
-#: dynobj.cc:307
+#: dynobj.cc:292
 #, c-format
-msgid "%s: %s: invalid dynamic symbol table name index: %u\n"
+msgid "dynamic symbol table name section has wrong type: %u"
 msgstr ""
 
-#: dynobj.cc:315
+#: dynobj.cc:365 object.cc:428
 #, c-format
-msgid "%s: %s: dynamic symbol table name section has wrong type: %u\n"
+msgid "bad section name offset for section %u: %lu"
 msgstr ""
 
-#: dynobj.cc:390 object.cc:441
+#: dynobj.cc:394
 #, c-format
-msgid "%s: %s: bad section name offset for section %u: %lu\n"
+msgid "duplicate definition for version %u"
 msgstr ""
 
-#: dynobj.cc:421
+#: dynobj.cc:423
 #, c-format
-msgid "%s: %s: duplicate definition for version %u\n"
+msgid "unexpected verdef version %u"
 msgstr ""
 
-#: dynobj.cc:453
+#: dynobj.cc:439
 #, c-format
-msgid "%s: %s: unexpected verdef version %u\n"
+msgid "verdef vd_cnt field too small: %u"
 msgstr ""
 
-#: dynobj.cc:469
+#: dynobj.cc:446
 #, c-format
-msgid "%s: %s: verdef vd_cnt field too small: %u\n"
+msgid "verdef vd_aux field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:478
+#: dynobj.cc:456
 #, c-format
-msgid "%s: %s: verdef vd_aux field out of range: %u\n"
+msgid "verdaux vda_name field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:490
+#: dynobj.cc:465
 #, c-format
-msgid "%s: %s: verdaux vda_name field out of range: %u\n"
+msgid "verdef vd_next field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:501
+#: dynobj.cc:498
 #, c-format
-msgid "%s: %s: verdef vd_next field out of range: %u\n"
+msgid "unexpected verneed version %u"
 msgstr ""
 
-#: dynobj.cc:535
+#: dynobj.cc:507
 #, c-format
-msgid "%s: %s: unexpected verneed version %u\n"
+msgid "verneed vn_aux field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:546
+#: dynobj.cc:520
 #, c-format
-msgid "%s: %s: verneed vn_aux field out of range: %u\n"
+msgid "vernaux vna_name field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:561
+#: dynobj.cc:531
 #, c-format
-msgid "%s: %s: vernaux vna_name field out of range: %u\n"
+msgid "verneed vna_next field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:574
+#: dynobj.cc:542
 #, c-format
-msgid "%s: %s: verneed vna_next field out of range: %u\n"
+msgid "verneed vn_next field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:587
-#, c-format
-msgid "%s: %s: verneed vn_next field out of range: %u\n"
+#: dynobj.cc:588
+msgid "size of dynamic symbols is not multiple of symbol size"
 msgstr ""
 
-#: dynobj.cc:635
+#: dynobj.cc:1253
 #, c-format
-msgid "%s: %s: size of dynamic symbols is not multiple of symbol size\n"
+msgid "symbol %s has undefined version %s"
 msgstr ""
 
-#: dynobj.cc:1302
+#: errors.cc:77
 #, c-format
-msgid "%s: symbol %s has undefined version %s\n"
+msgid "%s: warning: "
+msgstr ""
+
+#: errors.cc:112
+#, c-format
+msgid "%s: %s: warning: "
+msgstr ""
+
+#: errors.cc:136
+#, c-format
+msgid "%s: %s: undefined reference to '%s'\n"
 msgstr ""
 
 #: fileread.cc:49
 #, c-format
-msgid "%s: munmap failed: %s\n"
+msgid "munmap failed: %s"
 msgstr ""
 
-#: fileread.cc:84
+#: fileread.cc:90
 #, c-format
-msgid "%s: warning: close(%s) failed: %s"
+msgid "close of %s failed: %s"
 msgstr ""
 
-#: fileread.cc:109
+#: fileread.cc:114
 #, c-format
-msgid "%s: %s: fstat failed: %s"
+msgid "%s: fstat failed: %s"
 msgstr ""
 
-#: fileread.cc:199
+#: fileread.cc:210
 #, c-format
-msgid "%s: %s: pread failed: %s\n"
+msgid "%s: pread failed: %s"
 msgstr ""
 
-#: fileread.cc:206
+#: fileread.cc:216
 #, c-format
-msgid "%s: %s: file too short: read only %lld of %lld bytes at %lld\n"
+msgid "%s: file too short: read only %lld of %lld bytes at %lld"
 msgstr ""
 
-#: fileread.cc:284
+#: fileread.cc:292
 #, c-format
-msgid "%s: %s: mmap offset %lld size %lld failed: %s\n"
+msgid "%s: mmap offset %lld size %lld failed: %s"
 msgstr ""
 
-#: fileread.cc:422
+#: fileread.cc:371
 #, c-format
-msgid "%s: cannot find -l%s\n"
+msgid "%s: total bytes mapped for read: %llu\n"
 msgstr ""
 
-#: fileread.cc:449
+#: fileread.cc:373
 #, c-format
-msgid "%s: cannot find %s\n"
+msgid "%s: maximum bytes mapped for read at one time: %llu\n"
 msgstr ""
 
-#: fileread.cc:460
+#: fileread.cc:441
 #, c-format
-msgid "%s: cannot open %s: %s\n"
+msgid "cannot find -l%s\n"
 msgstr ""
 
-#: gold.cc:126
+#: fileread.cc:468
+#, c-format
+msgid "cannot find %s\n"
+msgstr ""
+
+#: fileread.cc:479
+#, c-format
+msgid "cannot open %s: %s\n"
+msgstr ""
+
+#: gold.cc:72
+#, c-format
+msgid "%s: internal error in %s, at %s:%d\n"
+msgstr ""
+
+#: gold.cc:118
 msgid "no input files"
+msgstr ""
+
+#. We print out just the first .so we see; there may be others.
+#: gold.cc:161
+#, c-format
+msgid "cannot mix -static with dynamic object %s"
 msgstr ""
 
 #: gold-threads.cc:66
@@ -270,177 +304,185 @@ msgid "pthread_cond_signal failed"
 msgstr ""
 
 #. FIXME: This needs to specify the location somehow.
-#: i386.cc:139 x86_64.cc:146
-#, c-format
-msgid "%s: missing expected TLS relocation\n"
+#: i386.cc:142 i386.cc:1160 x86_64.cc:1138
+msgid "missing expected TLS relocation"
 msgstr ""
 
-#: i386.cc:727 x86_64.cc:766 x86_64.cc:782
+#: i386.cc:728 x86_64.cc:700 x86_64.cc:840
 #, c-format
-msgid "%s: %s: unsupported reloc %u against local symbol\n"
+msgid "%s: unsupported reloc %u against local symbol"
 msgstr ""
 
-#: i386.cc:781 i386.cc:975 i386.cc:1256 x86_64.cc:737 x86_64.cc:898
-#: x86_64.cc:1215
+#: i386.cc:782
 #, c-format
-msgid "%s: %s: unexpected reloc %u in object file\n"
+msgid "%s: unexpected reloc %u in object file\n"
 msgstr ""
 
-#: i386.cc:871 x86_64.cc:927 x86_64.cc:940
+#: i386.cc:870 x86_64.cc:854 x86_64.cc:1024
 #, c-format
-msgid "%s: %s: unsupported reloc %u against global symbol %s\n"
+msgid "%s: unsupported reloc %u against global symbol %s"
 msgstr ""
 
-#: i386.cc:1072
+#: i386.cc:974 x86_64.cc:778 x86_64.cc:965
 #, c-format
-msgid "%s: %s: unsupported RELA reloc section\n"
+msgid "%s: unexpected reloc %u in object file"
 msgstr ""
 
-#: i386.cc:1162 x86_64.cc:1053
+#: i386.cc:1070
 #, c-format
-msgid "%s: %s: missing expected TLS relocation\n"
+msgid "%s: unsupported RELA reloc section"
 msgstr ""
 
-#: i386.cc:1290 i386.cc:1352 i386.cc:1367 i386.cc:1390 i386.cc:1413
-#: x86_64.cc:1237 x86_64.cc:1307 x86_64.cc:1315
+#: i386.cc:1252 x86_64.cc:1315
 #, c-format
-msgid "%s: %s: unsupported reloc %u\n"
+msgid "unexpected reloc %u in object file"
 msgstr ""
 
-#: i386.cc:1317 x86_64.cc:1264
+#: i386.cc:1284 i386.cc:1343 i386.cc:1356 i386.cc:1376 i386.cc:1397
+#: x86_64.cc:1337 x86_64.cc:1404 x86_64.cc:1413
 #, c-format
-msgid "%s: %s: TLS reloc but no TLS segment\n"
+msgid "unsupported reloc %u"
 msgstr ""
 
-#: i386.cc:1378
-#, c-format
-msgid "%s: %s: both SUN and GNU model TLS relocations\n"
+#: i386.cc:1309 x86_64.cc:1362
+msgid "TLS reloc but no TLS segment"
 msgstr ""
 
-#: merge.cc:255
-#, c-format
-msgid ""
-"%s: %s: mergeable string section length not multiple of character size\n"
+#: i386.cc:1364
+msgid "both SUN and GNU model TLS relocations"
 msgstr ""
 
-#: merge.cc:272
-#, c-format
-msgid "%s: %s: entry in mergeable string section not null terminated\n"
+#: merge.cc:254
+msgid "mergeable string section length not multiple of character size"
 msgstr ""
 
-#: object.cc:50
-#, c-format
-msgid "%s: %s: unsupported ELF machine number %d\n"
+#: merge.cc:269
+msgid "entry in mergeable string section not null terminated"
 msgstr ""
 
-#: object.cc:106
+#: object.cc:49
 #, c-format
-msgid "%s: %s: section name section has wrong type: %u\n"
+msgid "%s: unsupported ELF machine number %d"
+msgstr ""
+
+#: object.cc:67
+#, c-format
+msgid "%s: %s"
+msgstr ""
+
+#: object.cc:102
+#, c-format
+msgid "section name section has wrong type: %u"
+msgstr ""
+
+#: object.cc:243
+#, c-format
+msgid "invalid symbol table name index: %u"
 msgstr ""
 
 #: object.cc:249
 #, c-format
-msgid "%s: %s: invalid symbol table name index: %u\n"
+msgid "symbol table name section has wrong type: %u"
 msgstr ""
 
-#: object.cc:257
+#: object.cc:304
 #, c-format
-msgid "%s: %s: symbol table name section has wrong type: %u\n"
+msgid "section group %u info %u out of range"
 msgstr ""
 
-#: object.cc:313
+#: object.cc:322
 #, c-format
-msgid "%s: %s: section group %u info %u out of range\n"
+msgid "symbol %u name offset %u out of range"
 msgstr ""
 
-#: object.cc:331
+#: object.cc:354
 #, c-format
-msgid "%s: %s: symbol %u name offset %u out of range\n"
+msgid "section %u in section group %u out of range"
 msgstr ""
 
-#: object.cc:365
-#, c-format
-msgid "%s: %s: section %u in section group %u out of range"
+#: object.cc:494
+msgid "size of symbols is not multiple of symbol size"
 msgstr ""
 
-#: object.cc:509
+#. FIXME: Handle SHN_XINDEX.
+#: object.cc:584
 #, c-format
-msgid "%s: %s: size of symbols is not multiple of symbol size\n"
+msgid "unknown section index %u for local symbol %u"
 msgstr ""
 
-#: object.cc:601
+#: object.cc:593
 #, c-format
-msgid "%s: %s: unknown section index %u for local symbol %u\n"
+msgid "local symbol %u section index %u out of range"
 msgstr ""
 
-#: object.cc:612
+#: object.cc:625
 #, c-format
-msgid "%s: %s: local symbol %u section index %u out of range\n"
+msgid "local symbol %u section name out of range: %u >= %u"
 msgstr ""
 
-#: object.cc:646
+#: object.cc:805
 #, c-format
-msgid "%s: %s: local symbol %u section name out of range: %u >= %u\n"
+msgid "%s: incompatible target"
 msgstr ""
 
-#: object.cc:895
+#: object.cc:872
 #, c-format
-msgid "%s: %s: unsupported ELF file type %d\n"
+msgid "%s: unsupported ELF file type %d"
 msgstr ""
 
-#: object.cc:914 object.cc:967 object.cc:1002
+#: object.cc:891 object.cc:937 object.cc:971
 #, c-format
-msgid "%s: %s: ELF file too short\n"
+msgid "%s: ELF file too short"
 msgstr ""
 
-#: object.cc:923
+#: object.cc:899
 #, c-format
-msgid "%s: %s: invalid ELF version 0\n"
+msgid "%s: invalid ELF version 0"
 msgstr ""
 
-#: object.cc:926
+#: object.cc:901
 #, c-format
-msgid "%s: %s: unsupported ELF version %d\n"
+msgid "%s: unsupported ELF version %d"
 msgstr ""
 
-#: object.cc:934
+#: object.cc:908
 #, c-format
-msgid "%s: %s: invalid ELF class 0\n"
+msgid "%s: invalid ELF class 0"
 msgstr ""
 
-#: object.cc:941
+#: object.cc:914
 #, c-format
-msgid "%s: %s: unsupported ELF class %d\n"
+msgid "%s: unsupported ELF class %d"
 msgstr ""
 
-#: object.cc:949
+#: object.cc:921
 #, c-format
-msgid "%s: %s: invalid ELF data encoding\n"
+msgid "%s: invalid ELF data encoding"
 msgstr ""
 
-#: object.cc:956
+#: object.cc:927
 #, c-format
-msgid "%s: %s: unsupported ELF data encoding %d\n"
+msgid "%s: unsupported ELF data encoding %d"
 msgstr ""
 
-#: object.cc:979
+#: object.cc:947
 #, c-format
-msgid "%s: %s: not configured to support 32-bit big-endian object\n"
+msgid "%s: not configured to support 32-bit big-endian object"
 msgstr ""
 
-#: object.cc:992
+#: object.cc:960
 #, c-format
-msgid "%s: %s: not configured to support 32-bit little-endian object\n"
+msgid "%s: not configured to support 32-bit little-endian object"
 msgstr ""
 
-#: object.cc:1014
+#: object.cc:981
 #, c-format
-msgid "%s: %s: not configured to support 64-bit big-endian object\n"
+msgid "%s: not configured to support 64-bit big-endian object"
 msgstr ""
 
-#: object.cc:1027
+#: object.cc:994
 #, c-format
-msgid "%s: %s: not configured to support 64-bit little-endian object\n"
+msgid "%s: not configured to support 64-bit little-endian object"
 msgstr ""
 
 #: options.cc:139
@@ -547,211 +589,214 @@ msgid "Do not link against shared libraries"
 msgstr ""
 
 #: options.cc:351
+msgid "Print resource usage statistics"
+msgstr ""
+
+#: options.cc:353
 msgid "Set target system root directory"
 msgstr ""
 
-#: options.cc:352
+#: options.cc:354
 msgid "--sysroot DIR"
 msgstr ""
 
-#: options.cc:354
+#: options.cc:356
 msgid "Only set DT_NEEDED for dynamic libs if used"
 msgstr ""
 
-#: options.cc:357
+#: options.cc:359
 msgid "Always DT_NEEDED for dynamic libs (default)"
 msgstr ""
 
-#: options.cc:360
+#: options.cc:362
 msgid "Include all archive contents"
 msgstr ""
 
-#: options.cc:364
+#: options.cc:366
 msgid "Include only needed archive contents"
 msgstr ""
 
-#: options.cc:367
+#: options.cc:369
 msgid "Report usage information"
 msgstr ""
 
-#: options.cc:369
+#: options.cc:371
 msgid "Report version information"
 msgstr ""
 
-#: options.cc:573
+#: options.cc:576
 msgid "unexpected argument"
 msgstr ""
 
-#: options.cc:580 options.cc:631 options.cc:732
+#: options.cc:583 options.cc:634 options.cc:735
 msgid "missing argument"
 msgstr ""
 
-#: options.cc:593 options.cc:640
+#: options.cc:596 options.cc:643
 msgid "unknown option"
 msgstr ""
 
-#: options.cc:648
+#: options.cc:651
 #, c-format
 msgid "%s: missing group end"
 msgstr ""
 
-#: options.cc:745
+#: options.cc:748
 msgid "may not nest groups"
 msgstr ""
 
-#: options.cc:755
+#: options.cc:758
 msgid "group end without group start"
 msgstr ""
 
-#: options.cc:765
+#: options.cc:768
 #, c-format
 msgid "%s: use the --help option for usage information\n"
 msgstr ""
 
-#: options.cc:774 script.cc:1169
+#: options.cc:777
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr ""
 
-#: options.cc:783
+#: options.cc:786
 #, c-format
 msgid "%s: -%c: %s\n"
 msgstr ""
 
 #: output.cc:1031
 #, c-format
-msgid "%s: %s: invalid alignment %lu for section \"%s\"\n"
+msgid "invalid alignment %lu for section \"%s\""
 msgstr ""
 
-#: output.cc:1699
+#: output.cc:1697
 #, c-format
-msgid "%s: %s: open: %s\n"
+msgid "%s: open: %s"
 msgstr ""
 
-#: output.cc:1708
+#: output.cc:1702
 #, c-format
-msgid "%s: %s: lseek: %s\n"
+msgid "%s: lseek: %s"
 msgstr ""
 
-#: output.cc:1715
+#: output.cc:1705
 #, c-format
-msgid "%s: %s: write: %s\n"
+msgid "%s: write: %s"
+msgstr ""
+
+#: output.cc:1711
+#, c-format
+msgid "%s: mmap: %s"
+msgstr ""
+
+#: output.cc:1721
+#, c-format
+msgid "%s: munmap: %s\n"
 msgstr ""
 
 #: output.cc:1725
 #, c-format
-msgid "%s: %s: mmap: %s\n"
+msgid "%s: close: %s"
 msgstr ""
 
-#: output.cc:1739
+#: readsyms.cc:94
 #, c-format
-msgid "%s: %s: munmap: %s\n"
+msgid "%s: file is empty"
 msgstr ""
 
-#: output.cc:1747
+#: readsyms.cc:129
 #, c-format
-msgid "%s: %s: close: %s\n"
-msgstr ""
-
-#: readsyms.cc:93
-#, c-format
-msgid "%s: %s: file is empty\n"
-msgstr ""
-
-#: readsyms.cc:127
-#, c-format
-msgid "%s: %s: ordinary object found in input group\n"
+msgid "%s: ordinary object found in input group"
 msgstr ""
 
 #. Here we have to handle any other input file types we need.
-#: readsyms.cc:175
+#: readsyms.cc:177
 #, c-format
-msgid "%s: %s: not an object or archive\n"
+msgid "%s: not an object or archive"
 msgstr ""
 
-#: reloc.cc:190 reloc.cc:436
+#: reloc.cc:190 reloc.cc:431
 #, c-format
-msgid "%s: %s: relocation section %u has bad info %u\n"
+msgid "relocation section %u has bad info %u"
 msgstr ""
 
-#: reloc.cc:209 reloc.cc:453
+#: reloc.cc:208 reloc.cc:447
 #, c-format
-msgid "%s: %s: relocation section %u uses unexpected symbol table %u\n"
+msgid "relocation section %u uses unexpected symbol table %u"
 msgstr ""
 
-#: reloc.cc:225 reloc.cc:472
+#: reloc.cc:223 reloc.cc:465
 #, c-format
-msgid "%s: %s: unexpected entsize for reloc section %u: %lu != %u"
+msgid "unexpected entsize for reloc section %u: %lu != %u"
 msgstr ""
 
-#: reloc.cc:236 reloc.cc:483
+#: reloc.cc:232 reloc.cc:474
 #, c-format
-msgid "%s: %s: reloc section %u size %lu uneven"
+msgid "reloc section %u size %lu uneven"
 msgstr ""
 
-#: resolve.cc:137
+#: resolve.cc:136
 #, c-format
-msgid "%s: %s: invalid STB_LOCAL symbol %s in external symbols\n"
+msgid "%s: invalid STB_LOCAL symbol %s in external symbols"
 msgstr ""
 
-#: resolve.cc:143
+#: resolve.cc:142
 #, c-format
-msgid "%s: %s: unsupported symbol binding %d for symbol %s\n"
+msgid "%s: unsupported symbol binding %d for symbol %s"
 msgstr ""
 
-#: symtab.cc:518
+#. Two definitions of the same symbol.
+#. FIXME: Report locations.
+#: resolve.cc:280
 #, c-format
-msgid "%s: %s: bad global symbol name offset %u at %lu\n"
+msgid "multiple definition of %s\n"
 msgstr ""
 
-#: symtab.cc:597
+#: script.cc:1169
 #, c-format
-msgid "%s: %s: too few symbol versions\n"
+msgid "%s: %s\n"
 msgstr ""
 
-#: symtab.cc:617
+#: symtab.cc:517
 #, c-format
-msgid "%s: %s: bad symbol name offset %u at %lu\n"
+msgid "bad global symbol name offset %u at %zu"
 msgstr ""
 
-#: symtab.cc:670
-#, c-format
-msgid "%s: %s: versym for symbol %zu out of range: %u\n"
+#: symtab.cc:595
+msgid "too few symbol versions"
 msgstr ""
 
-#: symtab.cc:678
+#: symtab.cc:614
 #, c-format
-msgid "%s: %s: versym for symbol %zu has no name: %u\n"
+msgid "bad symbol name offset %u at %zu"
 msgstr ""
 
-#: symtab.cc:1248 symtab.cc:1451
+#: symtab.cc:665
 #, c-format
-msgid "%s: %s: unsupported symbol section 0x%x\n"
+msgid "versym for symbol %zu out of range: %u"
 msgstr ""
 
-#: symtab.cc:1671
+#: symtab.cc:672
 #, c-format
-msgid "%s: %s: warning: %s\n"
+msgid "versym for symbol %zu has no name: %u"
 msgstr ""
 
-#: target-reloc.h:190
+#: symtab.cc:1241 symtab.cc:1444
 #, c-format
-msgid "%s: %s: reloc has bad offset %zu\n"
+msgid "%s: unsupported symbol section 0x%x"
 msgstr ""
 
-#: target-reloc.h:200
+#: target-reloc.h:191
 #, c-format
-msgid "%s: %s: undefined reference to '%s'\n"
+msgid "reloc has bad offset %zu"
 msgstr ""
 
-#: tls.h:58 x86_64.cc:1463
-#, c-format
-msgid "%s: %s: TLS relocation out of range\n"
+#: tls.h:58 x86_64.cc:1538
+msgid "TLS relocation out of range"
 msgstr ""
 
-#: tls.h:77 x86_64.cc:1481
-#, c-format
-msgid "%s: %s: TLS relocation against invalid instruction\n"
+#: tls.h:72 x86_64.cc:1551
+msgid "TLS relocation against invalid instruction"
 msgstr ""
 
 #. This output is intended to follow the GNU standards.
@@ -769,12 +814,17 @@ msgid ""
 "This program has absolutely no warranty.\n"
 msgstr ""
 
-#: x86_64.cc:963
-#, c-format
-msgid "%s: %s: unsupported REL reloc section\n"
+#. FIXME: This needs to specify the location somehow.
+#: x86_64.cc:154
+msgid "missing expected TLS relocation\n"
 msgstr ""
 
-#: x86_64.cc:1292
+#: x86_64.cc:1047
 #, c-format
-msgid "%s: %s: unsupported reloc type %u\n"
+msgid "%s: unsupported REL reloc section"
+msgstr ""
+
+#: x86_64.cc:1389
+#, c-format
+msgid "unsupported reloc type %u"
 msgstr ""

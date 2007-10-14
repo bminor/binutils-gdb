@@ -125,13 +125,8 @@ Sized_dynobj<size, big_endian>::find_dynsym_sections(
 	continue;
 
       if (*pi != -1U)
-	{
-	  fprintf(stderr,
-		  _("%s: %s: unexpected duplicate type %u section: %u, %u\n"),
-		  program_name, this->name().c_str(), shdr.get_sh_type(),
-		  *pi, i);
-	  gold_exit(false);
-	}
+	this->error(_("unexpected duplicate type %u section: %u, %u"),
+		    shdr.get_sh_type(), *pi, i);
 
       *pi = i;
     }
@@ -166,13 +161,8 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
   gold_assert(shdr.get_sh_type() == type);
 
   if (shdr.get_sh_link() != link)
-    {
-      fprintf(stderr,
-	      _("%s: %s: unexpected link in section %u header: %u != %u\n"),
-	      program_name, this->name().c_str(), shndx,
-	      shdr.get_sh_link(), link);
-      gold_exit(false);
-    }
+    this->error(_("unexpected link in section %u header: %u != %u"),
+	        shndx, shdr.get_sh_link(), link);
 
   *view = this->get_lasting_view(shdr.get_sh_offset(), shdr.get_sh_size(),
 				 false);
@@ -206,21 +196,17 @@ Sized_dynobj<size, big_endian>::set_soname(const unsigned char* pshdrs,
     {
       if (link >= this->shnum())
 	{
-	  fprintf(stderr,
-		  _("%s: %s: DYNAMIC section %u link out of range: %u\n"),
-		  program_name, this->name().c_str(),
-		  dynamic_shndx, link);
-	  gold_exit(false);
+	  this->error(_("DYNAMIC section %u link out of range: %u"),
+		      dynamic_shndx, link);
+	  return;
 	}
 
       typename This::Shdr strtabshdr(pshdrs + link * This::shdr_size);
       if (strtabshdr.get_sh_type() != elfcpp::SHT_STRTAB)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: DYNAMIC section %u link %u is not a strtab\n"),
-		  program_name, this->name().c_str(),
-		  dynamic_shndx, link);
-	  gold_exit(false);
+	  this->error(_("DYNAMIC section %u link %u is not a strtab"),
+		      dynamic_shndx, link);
+	  return;
 	}
 
       strtab_size = strtabshdr.get_sh_size();
@@ -238,13 +224,10 @@ Sized_dynobj<size, big_endian>::set_soname(const unsigned char* pshdrs,
 	  off_t val = dyn.get_d_val();
 	  if (val >= strtab_size)
 	    {
-	      fprintf(stderr,
-		      _("%s: %s: DT_SONAME value out of range: "
-			"%lld >= %lld\n"),
-		      program_name, this->name().c_str(),
-		      static_cast<long long>(val),
-		      static_cast<long long>(strtab_size));
-	      gold_exit(false);
+	      this->error(_("DT_SONAME value out of range: %lld >= %lld"),
+			 static_cast<long long>(val),
+			 static_cast<long long>(strtab_size));
+	      return;
 	    }
 
 	  const char* strtab = reinterpret_cast<const char*>(strtabu);
@@ -256,9 +239,7 @@ Sized_dynobj<size, big_endian>::set_soname(const unsigned char* pshdrs,
 	return;
     }
 
-  fprintf(stderr, _("%s: %s: missing DT_NULL in dynamic segment\n"),
-	  program_name, this->name().c_str());
-  gold_exit(false);
+  this->error(_("missing DT_NULL in dynamic segment"));
 }
 
 // Read the symbols and sections from a dynamic object.  We read the
@@ -282,14 +263,12 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   unsigned int strtab_shndx = -1U;
 
-  if (dynsym_shndx == -1U)
-    {
-      sd->symbols = NULL;
-      sd->symbols_size = 0;
-      sd->symbol_names = NULL;
-      sd->symbol_names_size = 0;
-    }
-  else
+  sd->symbols = NULL;
+  sd->symbols_size = 0;
+  sd->symbol_names = NULL;
+  sd->symbol_names_size = 0;
+
+  if (dynsym_shndx != -1U)
     {
       // Get the dynamic symbols.
       typename This::Shdr dynsymshdr(pshdrs + dynsym_shndx * This::shdr_size);
@@ -303,20 +282,17 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
       strtab_shndx = dynsymshdr.get_sh_link();
       if (strtab_shndx >= this->shnum())
 	{
-	  fprintf(stderr,
-		  _("%s: %s: invalid dynamic symbol table name index: %u\n"),
-		  program_name, this->name().c_str(), strtab_shndx);
-	  gold_exit(false);
+	  this->error(_("invalid dynamic symbol table name index: %u"),
+		      strtab_shndx);
+	  return;
 	}
       typename This::Shdr strtabshdr(pshdrs + strtab_shndx * This::shdr_size);
       if (strtabshdr.get_sh_type() != elfcpp::SHT_STRTAB)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: dynamic symbol table name section "
-		    "has wrong type: %u\n"),
-		  program_name, this->name().c_str(),
-		  static_cast<unsigned int>(strtabshdr.get_sh_type()));
-	  gold_exit(false);
+	  this->error(_("dynamic symbol table name section "
+			"has wrong type: %u"),
+		      static_cast<unsigned int>(strtabshdr.get_sh_type()));
+	  return;
 	}
 
       sd->symbol_names = this->get_lasting_view(strtabshdr.get_sh_offset(),
@@ -386,11 +362,9 @@ Sized_dynobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
       if (shdr.get_sh_name() >= sd->section_names_size)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: bad section name offset for section %u: %lu\n"),
-		  program_name, this->name().c_str(), i,
-		  static_cast<unsigned long>(shdr.get_sh_name()));
-	  gold_exit(false);
+	  this->error(_("bad section name offset for section %u: %lu"),
+		      i, static_cast<unsigned long>(shdr.get_sh_name()));
+	  return;
 	}
 
       const char* name = pnames + shdr.get_sh_name();
@@ -417,11 +391,7 @@ Sized_dynobj<size, big_endian>::set_version_map(
   if (ndx >= version_map->size())
     version_map->resize(ndx + 1);
   if ((*version_map)[ndx] != NULL)
-    {
-      fprintf(stderr, _("%s: %s: duplicate definition for version %u\n"),
-	      program_name, this->name().c_str(), ndx);
-      gold_exit(false);
-    }
+    this->error(_("duplicate definition for version %u"), ndx);
   (*version_map)[ndx] = name;
 }
 
@@ -450,9 +420,9 @@ Sized_dynobj<size, big_endian>::make_verdef_map(
 
       if (verdef.get_vd_version() != elfcpp::VER_DEF_CURRENT)
 	{
-	  fprintf(stderr, _("%s: %s: unexpected verdef version %u\n"),
-		  program_name, this->name().c_str(), verdef.get_vd_version());
-	  gold_exit(false);
+	  this->error(_("unexpected verdef version %u"),
+		      verdef.get_vd_version());
+	  return;
 	}
 
       const unsigned int vd_ndx = verdef.get_vd_ndx();
@@ -466,18 +436,15 @@ Sized_dynobj<size, big_endian>::make_verdef_map(
       const unsigned int vd_cnt = verdef.get_vd_cnt();
       if (vd_cnt < 1)
 	{
-	  fprintf(stderr, _("%s: %s: verdef vd_cnt field too small: %u\n"),
-		  program_name, this->name().c_str(), vd_cnt);
-	  gold_exit(false);
+	  this->error(_("verdef vd_cnt field too small: %u"), vd_cnt);
+	  return;
 	}
 
       const unsigned int vd_aux = verdef.get_vd_aux();
       if ((p - pverdef) + vd_aux >= verdef_size)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: verdef vd_aux field out of range: %u\n"),
-		  program_name, this->name().c_str(), vd_aux);
-	  gold_exit(false);
+	  this->error(_("verdef vd_aux field out of range: %u"), vd_aux);
+	  return;
 	}
 
       const unsigned char* pvda = p + vd_aux;
@@ -486,10 +453,8 @@ Sized_dynobj<size, big_endian>::make_verdef_map(
       const unsigned int vda_name = verdaux.get_vda_name();
       if (vda_name >= names_size)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: verdaux vda_name field out of range: %u\n"),
-		  program_name, this->name().c_str(), vda_name);
-	  gold_exit(false);
+	  this->error(_("verdaux vda_name field out of range: %u"), vda_name);
+	  return;
 	}
 
       this->set_version_map(version_map, vd_ndx, names + vda_name);
@@ -497,10 +462,8 @@ Sized_dynobj<size, big_endian>::make_verdef_map(
       const unsigned int vd_next = verdef.get_vd_next();
       if ((p - pverdef) + vd_next >= verdef_size)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: verdef vd_next field out of range: %u\n"),
-		  program_name, this->name().c_str(), vd_next);
-	  gold_exit(false);
+	  this->error(_("verdef vd_next field out of range: %u"), vd_next);
+	  return;
 	}
 
       p += vd_next;
@@ -532,20 +495,17 @@ Sized_dynobj<size, big_endian>::make_verneed_map(
 
       if (verneed.get_vn_version() != elfcpp::VER_NEED_CURRENT)
 	{
-	  fprintf(stderr, _("%s: %s: unexpected verneed version %u\n"),
-		  program_name, this->name().c_str(),
-		  verneed.get_vn_version());
-	  gold_exit(false);
+	  this->error(_("unexpected verneed version %u"),
+		      verneed.get_vn_version());
+	  return;
 	}
 
       const unsigned int vn_aux = verneed.get_vn_aux();
 
       if ((p - pverneed) + vn_aux >= verneed_size)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: verneed vn_aux field out of range: %u\n"),
-		  program_name, this->name().c_str(), vn_aux);
-	  gold_exit(false);
+	  this->error(_("verneed vn_aux field out of range: %u"), vn_aux);
+	  return;
 	}
 
       const unsigned int vn_cnt = verneed.get_vn_cnt();
@@ -557,11 +517,9 @@ Sized_dynobj<size, big_endian>::make_verneed_map(
 	  const unsigned int vna_name = vernaux.get_vna_name();
 	  if (vna_name >= names_size)
 	    {
-	      fprintf(stderr,
-		      _("%s: %s: vernaux vna_name field "
-			"out of range: %u\n"),
-		      program_name, this->name().c_str(), vna_name);
-	      gold_exit(false);
+	      this->error(_("vernaux vna_name field out of range: %u"),
+			  vna_name);
+	      return;
 	    }
 
 	  this->set_version_map(version_map, vernaux.get_vna_other(),
@@ -570,11 +528,9 @@ Sized_dynobj<size, big_endian>::make_verneed_map(
 	  const unsigned int vna_next = vernaux.get_vna_next();
 	  if ((pvna - pverneed) + vna_next >= verneed_size)
 	    {
-	      fprintf(stderr,
-		      _("%s: %s: verneed vna_next field "
-			"out of range: %u\n"),
-		      program_name, this->name().c_str(), vna_next);
-	      gold_exit(false);
+	      this->error(_("verneed vna_next field out of range: %u"),
+			  vna_next);
+	      return;
 	    }
 
 	  pvna += vna_next;
@@ -583,10 +539,8 @@ Sized_dynobj<size, big_endian>::make_verneed_map(
       const unsigned int vn_next = verneed.get_vn_next();
       if ((p - pverneed) + vn_next >= verneed_size)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: verneed vn_next field out of range: %u\n"),
-		  program_name, this->name().c_str(), vn_next);
-	  gold_exit(false);
+	  this->error(_("verneed vn_next field out of range: %u"), vn_next);
+	  return;
 	}
 
       p += vn_next;
@@ -631,11 +585,8 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   const size_t symcount = sd->symbols_size / sym_size;
   if (static_cast<off_t>(symcount * sym_size) != sd->symbols_size)
     {
-      fprintf(stderr,
-	      _("%s: %s: size of dynamic symbols is not "
-		"multiple of symbol size\n"),
-	      program_name, this->name().c_str());
-      gold_exit(false);
+      this->error(_("size of dynamic symbols is not multiple of symbol size"));
+      return;
     }
 
   Version_map version_map;
@@ -1299,9 +1250,9 @@ Versions::add_def(const General_options* options, const Symbol* sym,
       // in the version script.
       if (parameters->output_is_shared())
 	{
-	  fprintf(stderr, _("%s: symbol %s has undefined version %s\n"),
-		  program_name, sym->name(), version);
-	  gold_exit(false);
+	  gold_error(_("symbol %s has undefined version %s"),
+		     sym->name(), version);
+	  return;
 	}
 
       // If this is the first version we are defining, first define

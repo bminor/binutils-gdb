@@ -29,6 +29,7 @@
 
 #include "options.h"
 #include "parameters.h"
+#include "errors.h"
 #include "dirsearch.h"
 #include "workqueue.h"
 #include "object.h"
@@ -51,6 +52,8 @@ main(int argc, char** argv)
 
   program_name = argv[0];
 
+  Errors errors(program_name);
+
   // Handle the command line options.
   Command_line command_line;
   command_line.process(argc - 1, argv + 1);
@@ -59,7 +62,7 @@ main(int argc, char** argv)
   if (command_line.options().print_stats())
     start_time = get_run_time();
 
-  initialize_parameters(&command_line.options());
+  initialize_parameters(&command_line.options(), &errors);
 
   // The work queue.
   Workqueue workqueue(command_line.options());
@@ -100,5 +103,5 @@ main(int argc, char** argv)
 	      program_name, static_cast<long long>(layout.output_file_size()));
     }
 
-  gold_exit(true);
+  gold_exit(errors.error_count() == 0);
 }

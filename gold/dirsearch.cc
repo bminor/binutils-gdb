@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include <cerrno>
+#include <cstring>
 #include <sys/types.h>
 #include <dirent.h>
 
@@ -63,13 +64,10 @@ Dir_cache::read_files()
   if (d == NULL)
     {
       // We ignore directories which do not exist.
-      if (errno == ENOENT)
-	return;
-
-      char *s = NULL;
-      if (asprintf(&s, _("can not read directory %s"), this->dirname_) < 0)
-	gold::gold_nomem();
-      gold::gold_fatal(s, true);
+      if (errno != ENOENT)
+	gold::gold_error(_("%s: can not read directory: %s"),
+			 this->dirname_, strerror(errno));
+      return;
     }
 
   dirent* de;
@@ -77,7 +75,8 @@ Dir_cache::read_files()
     this->files_.insert(std::string(de->d_name));
 
   if (closedir(d) != 0)
-    gold::gold_fatal("closedir failed", true);
+    gold::gold_warning("%s: closedir failed: %s", this->dirname_,
+		       strerror(errno));
 }
 
 bool

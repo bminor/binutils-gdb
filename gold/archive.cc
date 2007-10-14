@@ -78,20 +78,15 @@ Archive::setup()
   // The first member of the archive should be the symbol table.
   std::string armap_name;
   off_t armap_size = this->read_header(sarmag, &armap_name);
-  off_t off;
+  off_t off = sarmag;
   if (armap_name.empty())
     {
       this->read_armap(sarmag + sizeof(Archive_header), armap_size);
       off = sarmag + sizeof(Archive_header) + armap_size;
     }
   else if (!this->input_file_->options().include_whole_archive())
-    {
-      fprintf(stderr, _("%s: %s: no archive symbol table (run ranlib)\n"),
-	      program_name, this->name().c_str());
-      gold_exit(false);
-    }
-  else
-    off = sarmag;
+    gold_error(_("%s: no archive symbol table (run ranlib)"),
+	       this->name().c_str());
 
   // See if there is an extended name table.
   if ((off & 1) != 0)
@@ -140,11 +135,8 @@ Archive::read_armap(off_t start, off_t size)
     }
 
   if (reinterpret_cast<const unsigned char*>(pnames) - p > size)
-    {
-      fprintf(stderr, _("%s: %s: bad archive symbol table names\n"),
-	      program_name, this->name().c_str());
-      gold_exit(false);
-    }
+    gold_error(_("%s: bad archive symbol table names"),
+	       this->name().c_str());
 
   // This array keeps track of which symbols are for archive elements
   // which we have already included in the link.
@@ -173,10 +165,9 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 {
   if (memcmp(hdr->ar_fmag, arfmag, sizeof arfmag) != 0)
     {
-      fprintf(stderr, _("%s; %s: malformed archive header at %ld\n"),
-	      program_name, this->name().c_str(),
-	      static_cast<long>(off));
-      gold_exit(false);
+      gold_error(_("%s: malformed archive header at %zu"),
+		 this->name().c_str(), static_cast<size_t>(off));
+      return this->input_file_->file().filesize() - off;
     }
 
   const int size_string_size = sizeof hdr->ar_size;
@@ -194,10 +185,9 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
       || member_size < 0
       || (member_size == LONG_MAX && errno == ERANGE))
     {
-      fprintf(stderr, _("%s: %s: malformed archive header size at %ld\n"),
-	      program_name, this->name().c_str(),
-	      static_cast<long>(off));
-      gold_exit(false);
+      gold_error(_("%s: malformed archive header size at %zu"),
+		 this->name().c_str(), static_cast<size_t>(off));
+      return this->input_file_->file().filesize() - off;
     }
 
   if (hdr->ar_name[0] != '/')
@@ -206,10 +196,9 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
       if (name_end == NULL
 	  || name_end - hdr->ar_name >= static_cast<int>(sizeof hdr->ar_name))
 	{
-	  fprintf(stderr, _("%s: %s: malformed archive header name at %ld\n"),
-		  program_name, this->name().c_str(),
-		  static_cast<long>(off));
-	  gold_exit(false);
+	  gold_error(_("%s: malformed archive header name at %zu\n"),
+		     this->name().c_str(), static_cast<size_t>(off));
+	  return this->input_file_->file().filesize() - off;
 	}
       pname->assign(hdr->ar_name, name_end - hdr->ar_name);
     }
@@ -232,10 +221,9 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 	  || (x == LONG_MAX && errno == ERANGE)
 	  || static_cast<size_t>(x) >= this->extended_names_.size())
 	{
-	  fprintf(stderr, _("%s: %s: bad extended name index at %ld\n"),
-		  program_name, this->name().c_str(),
-		  static_cast<long>(off));
-	  gold_exit(false);
+	  gold_error(_("%s: bad extended name index at %zu"),
+		     this->name().c_str(), static_cast<size_t>(off));
+	  return this->input_file_->file().filesize() - off;
 	}
 
       const char* name = this->extended_names_.data() + x;
@@ -243,10 +231,9 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
       if (static_cast<size_t>(name_end - name) > this->extended_names_.size()
 	  || name_end[1] != '\n')
 	{
-	  fprintf(stderr, _("%s: %s: bad extended name entry at header %ld\n"),
-		  program_name, this->name().c_str(),
-		  static_cast<long>(off));
-	  gold_exit(false);
+	  gold_error(_("%s: bad extended name entry at header %zu"),
+		     this->name().c_str(), static_cast<size_t>(off));
+	  return this->input_file_->file().filesize() - off;
 	}
       pname->assign(name, name_end - name);
     }
@@ -337,13 +324,8 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
       if (filesize - off < static_cast<off_t>(sizeof(Archive_header)))
         {
           if (filesize != off)
-            {
-              fprintf(stderr, _("%s: %s: short archive header at %ld\n"),
-                      program_name, this->name().c_str(),
-                      static_cast<long>(off));
-              gold_exit(false);
-            }
-
+	    gold_error(_("%s: short archive header at %zu"),
+		       this->name().c_str(), static_cast<size_t>(off));
           break;
         }
 
@@ -393,10 +375,9 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   if (read_size < 4)
     {
-      fprintf(stderr, _("%s: %s: member at %ld is not an ELF object"),
-	      program_name, this->name().c_str(),
-	      static_cast<long>(off));
-      gold_exit(false);
+      gold_error(_("%s: member at %zu is not an ELF object"),
+		 this->name().c_str(), static_cast<size_t>(off));
+      return;
     }
 
   this->input_file_->file().read(memoff, read_size, ehdr_buf);
@@ -408,10 +389,9 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
     };
   if (memcmp(ehdr_buf, elfmagic, 4) != 0)
     {
-      fprintf(stderr, _("%s: %s: member at %ld is not an ELF object"),
-	      program_name, this->name().c_str(),
-	      static_cast<long>(off));
-      gold_exit(false);
+      gold_error(_("%s: member at %zu is not an ELF object"),
+		 this->name().c_str(), static_cast<size_t>(off));
+      return;
     }
 
   Object* obj = make_elf_object((std::string(this->input_file_->filename())

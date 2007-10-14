@@ -133,17 +133,17 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       break;
 
     case elfcpp::STB_LOCAL:
-      fprintf(stderr,
-	      _("%s: %s: invalid STB_LOCAL symbol %s in external symbols\n"),
-	      program_name, object->name().c_str(), to->name());
-      gold_exit(false);
+      gold_error(_("%s: invalid STB_LOCAL symbol %s in external symbols"),
+		 object->name().c_str(), to->name());
+      frombits = global_flag;
+      break;
 
     default:
-      fprintf(stderr,
-	      _("%s: %s: unsupported symbol binding %d for symbol %s\n"),
-	      program_name, object->name().c_str(),
-	      static_cast<int>(sym.get_st_bind()), to->name());
-      gold_exit(false);
+      gold_error(_("%s: unsupported symbol binding %d for symbol %s"),
+		 object->name().c_str(),
+		 static_cast<int>(sym.get_st_bind()), to->name());
+      frombits = global_flag;
+      break;
     }
 
   if (!object->is_dynamic())
@@ -276,9 +276,8 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
     {
     case DEF * 16 + DEF:
       // Two definitions of the same symbol.
-      fprintf(stderr, _("%s: multiple definition of %s\n"),
-	      program_name, to->name());
-      // FIXME: Report locations.  Record that we have seen an error.
+      // FIXME: Report locations.
+      gold_error(_("multiple definition of %s\n"), to->name());
       return false;
 
     case WEAK_DEF * 16 + DEF:

@@ -82,7 +82,8 @@ Read_symbols::run(Workqueue* workqueue)
     }
 
   Input_file* input_file = new Input_file(&this->input_argument_->file());
-  input_file->open(this->options_, this->dirpath_);
+  if (!input_file->open(this->options_, this->dirpath_))
+    return;
 
   // Read enough of the file to pick up the entire ELF header.
 
@@ -90,9 +91,9 @@ Read_symbols::run(Workqueue* workqueue)
 
   if (filesize == 0)
     {
-      fprintf(stderr, _("%s: %s: file is empty\n"),
-	      program_name, input_file->file().filename().c_str());
-      gold_exit(false);
+      gold_error(_("%s: file is empty"),
+		 input_file->file().filename().c_str());
+      return;
     }
 
   unsigned char ehdr_buf[elfcpp::Elf_sizes<64>::ehdr_size];
@@ -116,6 +117,8 @@ Read_symbols::run(Workqueue* workqueue)
 
 	  Object* obj = make_elf_object(input_file->filename(),
 					input_file, 0, ehdr_buf, read_size);
+	  if (obj == NULL)
+	    return;
 
 	  // We don't have a way to record a non-archive in an input
 	  // group.  If this is an ordinary object file, we can't
@@ -123,10 +126,9 @@ Read_symbols::run(Workqueue* workqueue)
 	  // object, then including it a second time changes nothing.
 	  if (this->input_group_ != NULL && !obj->is_dynamic())
 	    {
-	      fprintf(stderr,
-		      _("%s: %s: ordinary object found in input group\n"),
-		      program_name, input_file->name());
-	      gold_exit(false);
+	      gold_error(_("%s: ordinary object found in input group"),
+			 input_file->name());
+	      return;
 	    }
 
 	  Read_symbols_data* sd = new Read_symbols_data;
@@ -172,9 +174,8 @@ Read_symbols::run(Workqueue* workqueue)
     return;
 
   // Here we have to handle any other input file types we need.
-  fprintf(stderr, _("%s: %s: not an object or archive\n"),
-	  program_name, input_file->file().filename().c_str());
-  gold_exit(false);
+  gold_error(_("%s: not an object or archive"),
+	     input_file->file().filename().c_str());
 }
 
 // Handle a group.  We need to walk through the arguments over and

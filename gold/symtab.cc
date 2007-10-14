@@ -514,11 +514,9 @@ Symbol_table::add_from_relobj(
       unsigned int st_name = psym->get_st_name();
       if (st_name >= sym_name_size)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: bad global symbol name offset %u at %lu\n"),
-		  program_name, relobj->name().c_str(), st_name,
-		  static_cast<unsigned long>(i));
-	  gold_exit(false);
+	  relobj->error(_("bad global symbol name offset %u at %zu"),
+			st_name, i);
+	  continue;
 	}
 
       const char* name = sym_names + st_name;
@@ -594,9 +592,8 @@ Symbol_table::add_from_dynobj(
 
   if (versym != NULL && versym_size / 2 < count)
     {
-      fprintf(stderr, _("%s: %s: too few symbol versions\n"),
-	      program_name, dynobj->name().c_str());
-      gold_exit(false);
+      dynobj->error(_("too few symbol versions"));
+      return;
     }
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
@@ -614,10 +611,9 @@ Symbol_table::add_from_dynobj(
       unsigned int st_name = sym.get_st_name();
       if (st_name >= sym_name_size)
 	{
-	  fprintf(stderr, _("%s: %s: bad symbol name offset %u at %lu\n"),
-		  program_name, dynobj->name().c_str(), st_name,
-		  static_cast<unsigned long>(i));
-	  gold_exit(false);
+	  dynobj->error(_("bad symbol name offset %u at %zu"),
+			st_name, i);
+	  continue;
 	}
 
       const char* name = sym_names + st_name;
@@ -666,18 +662,15 @@ Symbol_table::add_from_dynobj(
 
       if (v >= version_map->size())
 	{
-	  fprintf(stderr,
-		  _("%s: %s: versym for symbol %zu out of range: %u\n"),
-		  program_name, dynobj->name().c_str(), i, v);
-	  gold_exit(false);
+	  dynobj->error(_("versym for symbol %zu out of range: %u"), i, v);
+	  continue;
 	}
 
       const char* version = (*version_map)[v];
       if (version == NULL)
 	{
-	  fprintf(stderr, _("%s: %s: versym for symbol %zu has no name: %u\n"),
-		  program_name, dynobj->name().c_str(), i, v);
-	  gold_exit(false);
+	  dynobj->error(_("versym for symbol %zu has no name: %u"), i, v);
+	  continue;
 	}
 
       Stringpool::Key version_key;
@@ -1245,9 +1238,9 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 	    if (shndx >= elfcpp::SHN_LORESERVE
 		&& shndx != elfcpp::SHN_ABS)
 	      {
-		fprintf(stderr, _("%s: %s: unsupported symbol section 0x%x\n"),
-			program_name, sym->name(), shndx);
-		gold_exit(false);
+		gold_error(_("%s: unsupported symbol section 0x%x"),
+			   sym->name(), shndx);
+		shndx = elfcpp::SHN_UNDEF;
 	      }
 
 	    Object* symobj = sym->object();
@@ -1448,28 +1441,31 @@ Symbol_table::sized_write_globals(const Target* target,
 	    if (in_shndx >= elfcpp::SHN_LORESERVE
 		&& in_shndx != elfcpp::SHN_ABS)
 	      {
-		fprintf(stderr, _("%s: %s: unsupported symbol section 0x%x\n"),
-			program_name, sym->name(), in_shndx);
-		gold_exit(false);
+		gold_error(_("%s: unsupported symbol section 0x%x"),
+			   sym->name(), in_shndx);
+		shndx = in_shndx;
 	      }
-
-	    Object* symobj = sym->object();
-	    if (symobj->is_dynamic())
-	      {
-		if (sym->needs_dynsym_value())
-		  value = target->dynsym_value(sym);
-		shndx = elfcpp::SHN_UNDEF;
-	      }
-	    else if (in_shndx == elfcpp::SHN_UNDEF
-		     || in_shndx == elfcpp::SHN_ABS)
-	      shndx = in_shndx;
 	    else
 	      {
-		Relobj* relobj = static_cast<Relobj*>(symobj);
-		off_t secoff;
-		Output_section* os = relobj->output_section(in_shndx, &secoff);
-		gold_assert(os != NULL);
-		shndx = os->out_shndx();
+		Object* symobj = sym->object();
+		if (symobj->is_dynamic())
+		  {
+		    if (sym->needs_dynsym_value())
+		      value = target->dynsym_value(sym);
+		    shndx = elfcpp::SHN_UNDEF;
+		  }
+		else if (in_shndx == elfcpp::SHN_UNDEF
+			 || in_shndx == elfcpp::SHN_ABS)
+		  shndx = in_shndx;
+		else
+		  {
+		    Relobj* relobj = static_cast<Relobj*>(symobj);
+		    off_t secoff;
+		    Output_section* os = relobj->output_section(in_shndx,
+								&secoff);
+		    gold_assert(os != NULL);
+		    shndx = os->out_shndx();
+		  }
 	      }
 	  }
 	  break;
@@ -1662,14 +1658,17 @@ Warnings::note_warnings(Symbol_table* symtab)
 // Issue a warning.  This is called when we see a relocation against a
 // symbol for which has a warning.
 
+template<int size, bool big_endian>
 void
-Warnings::issue_warning(const Symbol* sym, const std::string& location) const
+Warnings::issue_warning(const Symbol* sym,
+			const Relocate_info<size, big_endian>* relinfo,
+			size_t relnum, off_t reloffset) const
 {
   gold_assert(sym->has_warning());
   Warning_table::const_iterator p = this->warnings_.find(sym->name());
   gold_assert(p != this->warnings_.end());
-  fprintf(stderr, _("%s: %s: warning: %s\n"), program_name, location.c_str(),
-	  p->second.text.c_str());
+  gold_warning_at_location(relinfo, relnum, reloffset,
+			   "%s", p->second.text.c_str());
 }
 
 // Instantiate the templates we need.  We could use the configure
@@ -1779,5 +1778,38 @@ Symbol_table::add_from_dynobj<64, true>(
     size_t versym_size,
     const std::vector<const char*>* version_map);
 #endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+Warnings::issue_warning<32, false>(const Symbol* sym,
+				   const Relocate_info<32, false>* relinfo,
+				   size_t relnum, off_t reloffset) const;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+Warnings::issue_warning<32, true>(const Symbol* sym,
+				  const Relocate_info<32, true>* relinfo,
+				  size_t relnum, off_t reloffset) const;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+Warnings::issue_warning<64, false>(const Symbol* sym,
+				   const Relocate_info<64, false>* relinfo,
+				   size_t relnum, off_t reloffset) const;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Warnings::issue_warning<64, true>(const Symbol* sym,
+				  const Relocate_info<64, true>* relinfo,
+				  size_t relnum, off_t reloffset) const;
+#endif
+
 
 } // End namespace gold.

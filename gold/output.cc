@@ -1028,10 +1028,9 @@ Output_section::add_input_section(Relobj* object, unsigned int shndx,
   elfcpp::Elf_Xword addralign = shdr.get_sh_addralign();
   if ((addralign & (addralign - 1)) != 0)
     {
-      fprintf(stderr, _("%s: %s: invalid alignment %lu for section \"%s\"\n"),
-	      program_name, object->name().c_str(),
-	      static_cast<unsigned long>(addralign), secname);
-      gold_exit(false);
+      object->error(_("invalid alignment %lu for section \"%s\""),
+		    static_cast<unsigned long>(addralign), secname);
+      addralign = 1;
     }
 
   if (addralign > this->addralign_)
@@ -1695,37 +1694,21 @@ Output_file::open(off_t file_size)
   int mode = parameters->output_is_object() ? 0666 : 0777;
   int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
   if (o < 0)
-    {
-      fprintf(stderr, _("%s: %s: open: %s\n"),
-	      program_name, this->name_, strerror(errno));
-      gold_exit(false);
-    }
+    gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));
   this->o_ = o;
 
   // Write out one byte to make the file the right size.
   if (::lseek(o, file_size - 1, SEEK_SET) < 0)
-    {
-      fprintf(stderr, _("%s: %s: lseek: %s\n"),
-	      program_name, this->name_, strerror(errno));
-      gold_exit(false);
-    }
+    gold_fatal(_("%s: lseek: %s"), this->name_, strerror(errno));
   char b = 0;
   if (::write(o, &b, 1) != 1)
-    {
-      fprintf(stderr, _("%s: %s: write: %s\n"),
-	      program_name, this->name_, strerror(errno));
-      gold_exit(false);
-    }
+    gold_fatal(_("%s: write: %s"), this->name_, strerror(errno));
 
   // Map the file into memory.
   void* base = ::mmap(NULL, file_size, PROT_READ | PROT_WRITE,
 		      MAP_SHARED, o, 0);
   if (base == MAP_FAILED)
-    {
-      fprintf(stderr, _("%s: %s: mmap: %s\n"),
-	      program_name, this->name_, strerror(errno));
-      gold_exit(false);
-    }
+    gold_fatal(_("%s: mmap: %s"), this->name_, strerror(errno));
   this->base_ = static_cast<unsigned char*>(base);
 }
 
@@ -1735,19 +1718,11 @@ void
 Output_file::close()
 {
   if (::munmap(this->base_, this->file_size_) < 0)
-    {
-      fprintf(stderr, _("%s: %s: munmap: %s\n"),
-	      program_name, this->name_, strerror(errno));
-      gold_exit(false);
-    }
+    gold_error(_("%s: munmap: %s\n"), this->name_, strerror(errno));
   this->base_ = NULL;
 
   if (::close(this->o_) < 0)
-    {
-      fprintf(stderr, _("%s: %s: close: %s\n"),
-	      program_name, this->name_, strerror(errno));
-      gold_exit(false);
-    }
+    gold_error(_("%s: close: %s"), this->name_, strerror(errno));
   this->o_ = -1;
 }
 

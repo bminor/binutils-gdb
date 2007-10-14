@@ -27,6 +27,7 @@ namespace gold
 {
 
 class General_options;
+class Errors;
 
 // Here we define the Parameters class which simply holds simple
 // general parameters which apply to the entire link.  We use a global
@@ -39,7 +40,17 @@ class General_options;
 class Parameters
 {
  public:
-  Parameters(const General_options*);
+  Parameters(const General_options*, Errors*);
+
+  // Return the error object.
+  Errors*
+  errors() const
+  { return this->errors_; }
+
+  // Return the output file name.
+  const char*
+  output_file_name() const
+  { return this->output_file_name_; }
 
   // Whether we are generating a regular executable.
   bool
@@ -135,6 +146,11 @@ class Parameters
     STRIP_DEBUG
   };
 
+  // A pointer to the error handling object.
+  Errors* errors_;
+
+  // The output file name.
+  const char* output_file_name_;
   // The type of the output file.
   Output_file_type output_file_type_;
   // The target system root directory.
@@ -160,7 +176,7 @@ class Parameters
 extern const Parameters* parameters;
 
 // Initialize the global variable.
-extern void initialize_parameters(const General_options*);
+extern void initialize_parameters(const General_options*, Errors*);
 
 // Set the size and endianness of the global parameters variable.
 extern void set_parameters_size_and_endianness(int size, bool is_big_endian);

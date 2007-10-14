@@ -728,9 +728,11 @@ class Warnings
   void
   note_warnings(Symbol_table* symtab);
 
-  // Issue a warning for a reference to SYM at LOCATION.
+  // Issue a warning for a reference to SYM at RELINFO's location.
+  template<int size, bool big_endian>
   void
-  issue_warning(const Symbol* sym, const std::string& location) const;
+  issue_warning(const Symbol* sym, const Relocate_info<size, big_endian>*,
+		size_t relnum, off_t reloffset) const;
 
  private:
   Warnings(const Warnings&);
@@ -876,9 +878,12 @@ class Symbol_table
 
   // Possibly issue a warning for a reference to SYM at LOCATION which
   // is in OBJ.
+  template<int size, bool big_endian>
   void
-  issue_warning(const Symbol* sym, const std::string& location) const
-  { this->warnings_.issue_warning(sym, location); }
+  issue_warning(const Symbol* sym,
+		const Relocate_info<size, big_endian>* relinfo,
+		size_t relnum, off_t reloffset) const
+  { this->warnings_.issue_warning(sym, relinfo, relnum, reloffset); }
 
   // Set the dynamic symbol indexes.  INDEX is the index of the first
   // global dynamic symbol.  Pointers to the symbols are stored into

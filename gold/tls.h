@@ -54,12 +54,8 @@ check_range(const Relocate_info<size, big_endian>* relinfo,
 {
   off_t offset = rel_offset + off;
   if (offset < 0 || offset > view_size)
-    {
-      fprintf(stderr, _("%s: %s: TLS relocation out of range\n"),
-	      program_name,
-	      relinfo->location(relnum, rel_offset).c_str());
-      gold_exit(false);
-    }
+    gold_error_at_location(relinfo, relnum, rel_offset,
+			   _("TLS relocation out of range"));
 }
 
 // Check the validity of a TLS relocation.  This is like assert.
@@ -72,13 +68,8 @@ check_tls(const Relocate_info<size, big_endian>* relinfo,
           bool valid)
 {
   if (!valid)
-    {
-      fprintf(stderr,
-	      _("%s: %s: TLS relocation against invalid instruction\n"),
-	      program_name,
-	      relinfo->location(relnum, rel_offset).c_str());
-      gold_exit(false);
-    }
+    gold_error_at_location(relinfo, relnum, rel_offset,
+			   _("TLS relocation against invalid instruction"));
 }
 
 

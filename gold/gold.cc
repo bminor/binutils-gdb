@@ -26,6 +26,7 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
+#include "libiberty.h"
 
 #include "options.h"
 #include "workqueue.h"
@@ -46,18 +47,9 @@ const char* program_name;
 void
 gold_exit(bool status)
 {
+  if (!status && parameters != NULL)
+    unlink_if_ordinary(parameters->output_file_name());
   exit(status ? EXIT_SUCCESS : EXIT_FAILURE);
-}
-
-void
-gold_fatal(const char* msg, bool perrno)
-{
-  fprintf(stderr, "%s: ", program_name);
-  if (perrno)
-    perror(msg);
-  else
-    fprintf(stderr, "%s\n", msg);
-  gold_exit(false);
 }
 
 void
@@ -123,7 +115,7 @@ queue_initial_tasks(const General_options& options,
 		    Symbol_table* symtab, Layout* layout)
 {
   if (cmdline.begin() == cmdline.end())
-    gold_fatal(_("no input files"), false);
+    gold_fatal(_("no input files"));
 
   // Read the input files.  We have to add the symbols to the symbol
   // table in order.  We do this by creating a separate blocker for
@@ -166,9 +158,8 @@ queue_middle_tasks(const General_options& options,
   if (!doing_static_link && options.is_static())
     {
       // We print out just the first .so we see; there may be others.
-      fprintf(stderr, _("%s: cannot mix -static with dynamic object %s\n"),
-              program_name, (*input_objects->dynobj_begin())->name().c_str());
-      gold_exit(false);
+      gold_error(_("cannot mix -static with dynamic object %s"),
+		 (*input_objects->dynobj_begin())->name().c_str());
     }
 
   // Define some sections and symbols needed for a dynamic link.  This

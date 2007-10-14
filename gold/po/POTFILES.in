@@ -10,6 +10,8 @@ dynobj.cc
 dynobj.h
 ehframe.cc
 ehframe.h
+errors.cc
+errors.h
 fileread.cc
 fileread.h
 gold.cc

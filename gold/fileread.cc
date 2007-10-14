@@ -46,8 +46,7 @@ File_read::View::~View()
   else
     {
       if (::munmap(const_cast<unsigned char*>(this->data_), this->size_) != 0)
-        fprintf(stderr, _("%s: munmap failed: %s\n"),
-                program_name, strerror(errno));
+        gold_warning(_("munmap failed: %s"), strerror(errno));
 
       File_read::current_mapped_bytes -= this->size_;
     }
@@ -88,8 +87,8 @@ File_read::~File_read()
   if (this->descriptor_ >= 0)
     {
       if (close(this->descriptor_) < 0)
-	fprintf(stderr, _("%s: warning: close(%s) failed: %s"),
-		program_name, this->name_.c_str(), strerror(errno));
+	gold_warning(_("close of %s failed: %s"),
+		     this->name_.c_str(), strerror(errno));
       this->descriptor_ = -1;
     }
   this->name_.clear();
@@ -112,11 +111,8 @@ File_read::open(const std::string& name)
     {
       struct stat s;
       if (::fstat(this->descriptor_, &s) < 0)
-	{
-	  fprintf(stderr, _("%s: %s: fstat failed: %s"), program_name,
-		  this->name_.c_str(), strerror(errno));
-	  gold_exit(false);
-	}
+	gold_error(_("%s: fstat failed: %s"),
+		   this->name_.c_str(), strerror(errno));
       this->size_ = s.st_size;
     }
 
@@ -211,19 +207,17 @@ File_read::do_read(off_t start, off_t size, void* p)
 
       if (bytes < 0)
 	{
-	  fprintf(stderr, _("%s: %s: pread failed: %s\n"),
-		  program_name, this->filename().c_str(), strerror(errno));
-	  gold_exit(false);
+	  gold_fatal(_("%s: pread failed: %s"),
+		     this->filename().c_str(), strerror(errno));
+	  return;
 	}
     }
 
-  fprintf(stderr,
-	  _("%s: %s: file too short: read only %lld of %lld bytes at %lld\n"),
-	  program_name, this->filename().c_str(),
-	  static_cast<long long>(bytes),
-	  static_cast<long long>(size),
-	  static_cast<long long>(start));
-  gold_exit(false);
+  gold_fatal(_("%s: file too short: read only %lld of %lld bytes at %lld"),
+	     this->filename().c_str(),
+	     static_cast<long long>(bytes),
+	     static_cast<long long>(size),
+	     static_cast<long long>(start));
 }
 
 // Read data from the file.
@@ -295,14 +289,11 @@ File_read::find_or_make_view(off_t start, off_t size, bool cache)
       void* p = ::mmap(NULL, psize, PROT_READ, MAP_SHARED,
                        this->descriptor_, poff);
       if (p == MAP_FAILED)
-        {
-          fprintf(stderr, _("%s: %s: mmap offset %lld size %lld failed: %s\n"),
-                  program_name, this->filename().c_str(),
-                  static_cast<long long>(poff),
-                  static_cast<long long>(psize),
-                  strerror(errno));
-          gold_exit(false);
-        }
+	gold_fatal(_("%s: mmap offset %lld size %lld failed: %s"),
+		   this->filename().c_str(),
+		   static_cast<long long>(poff),
+		   static_cast<long long>(psize),
+		   strerror(errno));
 
       this->mapped_bytes_ += psize;
 
@@ -414,7 +405,7 @@ Input_file::Input_file(const char* name, const unsigned char* contents,
 // In both cases, we look in extra_search_path + library_path to find
 // the file location, rather than the current directory.
 
-void
+bool
 Input_file::open(const General_options& options, const Dirsearch& dirpath)
 {
   std::string name;
@@ -447,9 +438,9 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
       name = dirpath.find(n1, n2, &this->is_in_sysroot_);
       if (name.empty())
 	{
-	  fprintf(stderr, _("%s: cannot find -l%s\n"), program_name,
-		  this->input_argument_->name());
-	  gold_exit(false);
+	  gold_error(_("cannot find -l%s\n"),
+		     this->input_argument_->name());
+	  return false;
 	}
       if (n2.empty() || name[name.length() - 1] == 'o')
 	this->found_name_ = n1;
@@ -474,9 +465,9 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
 			      &this->is_in_sysroot_);
           if (name.empty())
             {
-              fprintf(stderr, _("%s: cannot find %s\n"), program_name,
-                      this->input_argument_->name());
-              gold_exit(false);
+              gold_error(_("cannot find %s\n"),
+			 this->input_argument_->name());
+	      return false;
             }
         }
       this->found_name_ = this->input_argument_->name();
@@ -485,10 +476,12 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
   // Now that we've figured out where the file lives, try to open it.
   if (!this->file_.open(name))
     {
-      fprintf(stderr, _("%s: cannot open %s: %s\n"), program_name,
-	      name.c_str(), strerror(errno));
-      gold_exit(false);
+      gold_error(_("cannot open %s: %s\n"),
+		 name.c_str(), strerror(errno));
+      return false;
     }
+
+  return true;
 }
 
 } // End namespace gold.

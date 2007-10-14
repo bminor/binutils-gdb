@@ -171,10 +171,13 @@ class Command_line;
 class Input_argument_list;
 class Dirsearch;
 class Input_objects;
+class Symbol;
 class Symbol_table;
 class Layout;
 class Workqueue;
 class Output_file;
+template<int size, bool big_endian>
+struct Relocate_info;
 
 // The name of the program as used in error messages.
 extern const char* program_name;
@@ -184,11 +187,42 @@ extern const char* program_name;
 extern void
 gold_exit(bool status) ATTRIBUTE_NORETURN;
 
-// This function is called to emit an unexpected error message and a
-// newline, and then exit with failure.  If PERRNO is true, it reports
-// the error in errno.
+// This function is called to emit an error message and then
+// immediately exit with failure.
 extern void
-gold_fatal(const char* msg, bool perrno) ATTRIBUTE_NORETURN;
+gold_fatal(const char* format, ...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF_1;
+
+// This function is called to issue an error.  This will cause gold to
+// eventually exit with failure.
+extern void
+gold_error(const char* msg, ...) ATTRIBUTE_PRINTF_1;
+
+// This function is called to issue a warning.
+extern void
+gold_warning(const char* msg, ...) ATTRIBUTE_PRINTF_1;
+
+// This function is called to issue an error at the location of a
+// reloc.
+template<int size, bool big_endian>
+extern void
+gold_error_at_location(const Relocate_info<size, big_endian>*,
+		       size_t, off_t, const char* format, ...)
+  ATTRIBUTE_PRINTF_4;
+
+// This function is called to issue a warning at the location of a
+// reloc.
+template<int size, bool big_endian>
+extern void
+gold_warning_at_location(const Relocate_info<size, big_endian>*,
+			 size_t, off_t, const char* format, ...)
+  ATTRIBUTE_PRINTF_4;
+
+// This function is called to report an undefined symbol.
+template<int size, bool big_endian>
+extern void
+gold_undefined_symbol(const Symbol*,
+		      const Relocate_info<size, big_endian>*,
+		      size_t, off_t);
 
 // This is function is called in some cases if we run out of memory.
 extern void

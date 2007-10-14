@@ -46,28 +46,26 @@ Object::set_target(int machine, int size, bool big_endian, int osabi,
 {
   Target* target = select_target(machine, size, big_endian, osabi, abiversion);
   if (target == NULL)
-    {
-      fprintf(stderr, _("%s: %s: unsupported ELF machine number %d\n"),
-	      program_name, this->name().c_str(), machine);
-      gold_exit(false);
-    }
+    gold_fatal(_("%s: unsupported ELF machine number %d"),
+	       this->name().c_str(), machine);
   this->target_ = target;
 }
 
-// Report an error for the elfcpp::Elf_file interface.
+// Report an error for this object file.  This is used by the
+// elfcpp::Elf_file interface, and also called by the Object code
+// itself.
 
 void
-Object::error(const char* format, ...)
+Object::error(const char* format, ...) const
 {
   va_list args;
-
-  fprintf(stderr, "%s: %s: ", program_name, this->name().c_str());
   va_start(args, format);
-  vfprintf(stderr, format, args);
+  char* buf = NULL;
+  if (vasprintf(&buf, format, args) < 0)
+    gold_nomem();
   va_end(args);
-  putc('\n', stderr);
-
-  gold_exit(false);
+  gold_error(_("%s: %s"), this->name().c_str(), buf);
+  free(buf);
 }
 
 // Return a view of the contents of a section.
@@ -101,13 +99,8 @@ Object::read_section_data(elfcpp::Elf_file<size, big_endian, Object>* elf_file,
   typename elfcpp::Shdr<size, big_endian> shdrnames(pshdrnames);
 
   if (shdrnames.get_sh_type() != elfcpp::SHT_STRTAB)
-    {
-      fprintf(stderr,
-	      _("%s: %s: section name section has wrong type: %u\n"),
-	      program_name, this->name().c_str(),
-	      static_cast<unsigned int>(shdrnames.get_sh_type()));
-      gold_exit(false);
-    }
+    this->error(_("section name section has wrong type: %u"),
+		static_cast<unsigned int>(shdrnames.get_sh_type()));
 
   sd->section_names_size = shdrnames.get_sh_size();
   sd->section_names = this->get_lasting_view(shdrnames.get_sh_offset(),
@@ -216,13 +209,14 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   this->find_symtab(pshdrs);
 
+  sd->symbols = NULL;
+  sd->symbols_size = 0;
+  sd->symbol_names = NULL;
+  sd->symbol_names_size = 0;
+
   if (this->symtab_shndx_ == 0)
     {
       // No symbol table.  Weird but legal.
-      sd->symbols = NULL;
-      sd->symbols_size = 0;
-      sd->symbol_names = NULL;
-      sd->symbol_names_size = 0;
       return;
     }
 
@@ -246,18 +240,15 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   unsigned int strtab_shndx = symtabshdr.get_sh_link();
   if (strtab_shndx >= this->shnum())
     {
-      fprintf(stderr, _("%s: %s: invalid symbol table name index: %u\n"),
-	      program_name, this->name().c_str(), strtab_shndx);
-      gold_exit(false);
+      this->error(_("invalid symbol table name index: %u"), strtab_shndx);
+      return;
     }
   typename This::Shdr strtabshdr(pshdrs + strtab_shndx * This::shdr_size);
   if (strtabshdr.get_sh_type() != elfcpp::SHT_STRTAB)
     {
-      fprintf(stderr,
-	      _("%s: %s: symbol table name section has wrong type: %u\n"),
-	      program_name, this->name().c_str(),
-	      static_cast<unsigned int>(strtabshdr.get_sh_type()));
-      gold_exit(false);
+      this->error(_("symbol table name section has wrong type: %u"),
+		  static_cast<unsigned int>(strtabshdr.get_sh_type()));
+      return;
     }
 
   // Read the symbol names.
@@ -310,9 +301,9 @@ Sized_relobj<size, big_endian>::include_section_group(
   // Read the symbol table entry.
   if (shdr.get_sh_info() >= symshdr.get_sh_size() / This::sym_size)
     {
-      fprintf(stderr, _("%s: %s: section group %u info %u out of range\n"),
-	      program_name, this->name().c_str(), index, shdr.get_sh_info());
-      gold_exit(false);
+      this->error(_("section group %u info %u out of range"),
+		  index, shdr.get_sh_info());
+      return false;
     }
   off_t symoff = symshdr.get_sh_offset() + shdr.get_sh_info() * This::sym_size;
   const unsigned char* psym = this->get_view(symoff, This::sym_size, true);
@@ -328,10 +319,9 @@ Sized_relobj<size, big_endian>::include_section_group(
   // Get the section group signature.
   if (sym.get_st_name() >= symnamelen)
     {
-      fprintf(stderr, _("%s: %s: symbol %u name offset %u out of range\n"),
-	      program_name, this->name().c_str(), shdr.get_sh_info(),
-	      sym.get_st_name());
-      gold_exit(false);
+      this->error(_("symbol %u name offset %u out of range"),
+		  shdr.get_sh_info(), sym.get_st_name());
+      return false;
     }
 
   const char* signature = psymnames + sym.get_st_name();
@@ -361,11 +351,9 @@ Sized_relobj<size, big_endian>::include_section_group(
 	elfcpp::Swap<32, big_endian>::readval(pword + i);
       if (secnum >= this->shnum())
 	{
-	  fprintf(stderr,
-		  _("%s: %s: section %u in section group %u out of range"),
-		  program_name, this->name().c_str(), secnum,
-		  index);
-	  gold_exit(false);
+	  this->error(_("section %u in section group %u out of range"),
+		      secnum, index);
+	  continue;
 	}
       (*omit)[secnum] = true;
     }
@@ -437,11 +425,9 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
       if (shdr.get_sh_name() >= sd->section_names_size)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: bad section name offset for section %u: %lu\n"),
-		  program_name, this->name().c_str(), i,
-		  static_cast<unsigned long>(shdr.get_sh_name()));
-	  gold_exit(false);
+	  this->error(_("bad section name offset for section %u: %lu"),
+		      i, static_cast<unsigned long>(shdr.get_sh_name()));
+	  return;
 	}
 
       const char* name = pnames + shdr.get_sh_name();
@@ -505,10 +491,8 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   size_t symcount = sd->symbols_size / sym_size;
   if (static_cast<off_t>(symcount * sym_size) != sd->symbols_size)
     {
-      fprintf(stderr,
-	      _("%s: %s: size of symbols is not multiple of symbol size\n"),
-	      program_name, this->name().c_str());
-      gold_exit(false);
+      this->error(_("size of symbols is not multiple of symbol size"));
+      return;
     }
 
   this->symbols_ = new Symbol*[symcount];
@@ -597,22 +581,18 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 	  else
 	    {
 	      // FIXME: Handle SHN_XINDEX.
-	      fprintf(stderr,
-		      _("%s: %s: unknown section index %u "
-			"for local symbol %u\n"),
-		      program_name, this->name().c_str(), shndx, i);
-	      gold_exit(false);
+	      this->error(_("unknown section index %u for local symbol %u"),
+			  shndx, i);
+	      lv.set_output_value(0);
 	    }
 	}
       else
 	{
 	  if (shndx >= shnum)
 	    {
-	      fprintf(stderr,
-		      _("%s: %s: local symbol %u section index %u "
-			"out of range\n"),
-		      program_name, this->name().c_str(), i, shndx);
-	      gold_exit(false);
+	      this->error(_("local symbol %u section index %u out of range"),
+			  i, shndx);
+	      shndx = 0;
 	    }
 
 	  Output_section* os = mo[shndx].output_section;
@@ -642,13 +622,11 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 
       if (sym.get_st_name() >= strtab_size)
 	{
-	  fprintf(stderr,
-		  _("%s: %s: local symbol %u section name "
-		    "out of range: %u >= %u\n"),
-		  program_name, this->name().c_str(),
-		  i, sym.get_st_name(),
-		  static_cast<unsigned int>(strtab_size));
-	  gold_exit(false);
+	  this->error(_("local symbol %u section name out of range: %u >= %u"),
+		      i, sym.get_st_name(),
+		      static_cast<unsigned int>(strtab_size));
+	  lv.set_no_output_symtab_entry();
+	  continue;
 	}
 
       const char* name = pnames + sym.get_st_name();
@@ -824,9 +802,8 @@ Input_objects::add_object(Object* obj)
     this->target_ = target;
   else if (this->target_ != target)
     {
-      fprintf(stderr, _("%s: %s: incompatible target\n"),
-	      program_name, obj->name().c_str());
-      gold_exit(false);
+      gold_error(_("%s: incompatible target"), obj->name().c_str());
+      return false;
     }
 
   set_parameters_size_and_endianness(target->get_size(),
@@ -892,9 +869,9 @@ make_elf_sized_object(const std::string& name, Input_file* input_file,
     }
   else
     {
-      fprintf(stderr, _("%s: %s: unsupported ELF file type %d\n"),
-	      program_name, name.c_str(), et);
-      gold_exit(false);
+      gold_error(_("%s: unsupported ELF file type %d"),
+		 name.c_str(), et);
+      return NULL;
     }
 }
 
@@ -911,51 +888,44 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 {
   if (bytes < elfcpp::EI_NIDENT)
     {
-      fprintf(stderr, _("%s: %s: ELF file too short\n"),
-	      program_name, name.c_str());
-      gold_exit(false);
+      gold_error(_("%s: ELF file too short"), name.c_str());
+      return NULL;
     }
 
   int v = p[elfcpp::EI_VERSION];
   if (v != elfcpp::EV_CURRENT)
     {
       if (v == elfcpp::EV_NONE)
-	fprintf(stderr, _("%s: %s: invalid ELF version 0\n"),
-		program_name, name.c_str());
+	gold_error(_("%s: invalid ELF version 0"), name.c_str());
       else
-	fprintf(stderr, _("%s: %s: unsupported ELF version %d\n"),
-		program_name, name.c_str(), v);
-      gold_exit(false);
+	gold_error(_("%s: unsupported ELF version %d"), name.c_str(), v);
+      return NULL;
     }
 
   int c = p[elfcpp::EI_CLASS];
   if (c == elfcpp::ELFCLASSNONE)
     {
-      fprintf(stderr, _("%s: %s: invalid ELF class 0\n"),
-	      program_name, name.c_str());
-      gold_exit(false);
+      gold_error(_("%s: invalid ELF class 0"), name.c_str());
+      return NULL;
     }
   else if (c != elfcpp::ELFCLASS32
 	   && c != elfcpp::ELFCLASS64)
     {
-      fprintf(stderr, _("%s: %s: unsupported ELF class %d\n"),
-	      program_name, name.c_str(), c);
-      gold_exit(false);
+      gold_error(_("%s: unsupported ELF class %d"), name.c_str(), c);
+      return NULL;
     }
 
   int d = p[elfcpp::EI_DATA];
   if (d == elfcpp::ELFDATANONE)
     {
-      fprintf(stderr, _("%s: %s: invalid ELF data encoding\n"),
-	      program_name, name.c_str());
-      gold_exit(false);
+      gold_error(_("%s: invalid ELF data encoding"), name.c_str());
+      return NULL;
     }
   else if (d != elfcpp::ELFDATA2LSB
 	   && d != elfcpp::ELFDATA2MSB)
     {
-      fprintf(stderr, _("%s: %s: unsupported ELF data encoding %d\n"),
-	      program_name, name.c_str(), d);
-      gold_exit(false);
+      gold_error(_("%s: unsupported ELF data encoding %d"), name.c_str(), d);
+      return NULL;
     }
 
   bool big_endian = d == elfcpp::ELFDATA2MSB;
@@ -964,9 +934,8 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
     {
       if (bytes < elfcpp::Elf_sizes<32>::ehdr_size)
 	{
-	  fprintf(stderr, _("%s: %s: ELF file too short\n"),
-		  program_name, name.c_str());
-	  gold_exit(false);
+	  gold_error(_("%s: ELF file too short"), name.c_str());
+	  return NULL;
 	}
       if (big_endian)
 	{
@@ -975,10 +944,10 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	  return make_elf_sized_object<32, true>(name, input_file,
 						 offset, ehdr);
 #else
-          fprintf(stderr,
-                  _("%s: %s: not configured to support 32-bit big-endian object\n"),
-                  program_name, name.c_str());
-          gold_exit(false);
+          gold_error(_("%s: not configured to support "
+		       "32-bit big-endian object"),
+		     name.c_str());
+	  return NULL;
 #endif
 	}
       else
@@ -988,10 +957,10 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	  return make_elf_sized_object<32, false>(name, input_file,
 						  offset, ehdr);
 #else
-          fprintf(stderr,
-                  _("%s: %s: not configured to support 32-bit little-endian object\n"),
-                  program_name, name.c_str());
-          gold_exit(false);
+          gold_error(_("%s: not configured to support "
+		       "32-bit little-endian object"),
+		     name.c_str());
+	  return NULL;
 #endif
 	}
     }
@@ -999,9 +968,8 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
     {
       if (bytes < elfcpp::Elf_sizes<32>::ehdr_size)
 	{
-	  fprintf(stderr, _("%s: %s: ELF file too short\n"),
-		  program_name, name.c_str());
-	  gold_exit(false);
+	  gold_error(_("%s: ELF file too short"), name.c_str());
+	  return NULL;
 	}
       if (big_endian)
 	{
@@ -1010,10 +978,10 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	  return make_elf_sized_object<64, true>(name, input_file,
 						 offset, ehdr);
 #else
-          fprintf(stderr,
-                  _("%s: %s: not configured to support 64-bit big-endian object\n"),
-                  program_name, name.c_str());
-          gold_exit(false);
+          gold_error(_("%s: not configured to support "
+		       "64-bit big-endian object"),
+		     name.c_str());
+	  return NULL;
 #endif
 	}
       else
@@ -1023,10 +991,10 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 	  return make_elf_sized_object<64, false>(name, input_file,
 						  offset, ehdr);
 #else
-          fprintf(stderr,
-                  _("%s: %s: not configured to support 64-bit little-endian object\n"),
-                  program_name, name.c_str());
-          gold_exit(false);
+          gold_error(_("%s: not configured to support "
+		       "64-bit little-endian object"),
+		     name.c_str());
+	  return NULL;
 #endif
 	}
     }

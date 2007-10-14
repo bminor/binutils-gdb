@@ -187,24 +187,19 @@ relocate_section(
 
       if (offset < 0 || offset >= view_size)
 	{
-	  fprintf(stderr, _("%s: %s: reloc has bad offset %zu\n"),
-		  program_name, relinfo->location(i, offset).c_str(),
-		  static_cast<size_t>(offset));
-	  gold_exit(false);
+	  gold_error_at_location(relinfo, i, offset,
+				 _("reloc has bad offset %zu"),
+				 static_cast<size_t>(offset));
+	  continue;
 	}
 
       if (sym != NULL
 	  && sym->is_undefined()
 	  && sym->binding() != elfcpp::STB_WEAK)
-	{
-	  fprintf(stderr, _("%s: %s: undefined reference to '%s'\n"),
-		  program_name, relinfo->location(i, offset).c_str(),
-		  sym->name());
-	  gold_exit(false);
-	}
+	gold_undefined_symbol(sym, relinfo, i, offset);
 
       if (sym != NULL && sym->has_warning())
-	relinfo->symtab->issue_warning(sym, relinfo->location(i, offset));
+	relinfo->symtab->issue_warning(sym, relinfo, i, offset);
     }
 }
 

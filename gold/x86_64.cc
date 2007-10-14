@@ -151,9 +151,7 @@ class Target_x86_64 : public Sized_target<64, false>
       if (this->skip_call_tls_get_addr_)
 	{
 	  // FIXME: This needs to specify the location somehow.
-	  fprintf(stderr, _("%s: missing expected TLS relocation\n"),
-		  program_name);
-	  gold_exit(false);
+	  gold_error(_("missing expected TLS relocation\n"));
 	}
     }
 
@@ -699,8 +697,8 @@ void
 Target_x86_64::Scan::unsupported_reloc_local(Sized_relobj<64, false>* object,
                                              unsigned int r_type)
 {
-  fprintf(stderr, _("%s: %s: unsupported reloc %u against local symbol\n"),
-	  program_name, object->name().c_str(), r_type);
+  gold_error(_("%s: unsupported reloc %u against local symbol"),
+	     object->name().c_str(), r_type);
 }
 
 // Scan a relocation for a local symbol.
@@ -777,9 +775,8 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_TPOFF64:
     case elfcpp::R_X86_64_DTPMOD64:
     case elfcpp::R_X86_64_TLSDESC:
-      fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
-	      program_name, object->name().c_str(), r_type);
-      gold_exit(false);
+      gold_error(_("%s: unexpected reloc %u in object file"),
+		 object->name().c_str(), r_type);
       break;
 
       // These are initial tls relocs, which are expected when linking
@@ -840,8 +837,8 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
     default:
-      fprintf(stderr, _("%s: %s: unsupported reloc %u against local symbol\n"),
-	      program_name, object->name().c_str(), r_type);
+      gold_error(_("%s: unsupported reloc %u against local symbol"),
+		 object->name().c_str(), r_type);
       break;
     }
 }
@@ -854,9 +851,8 @@ Target_x86_64::Scan::unsupported_reloc_global(Sized_relobj<64, false>* object,
                                               unsigned int r_type,
                                               Symbol* gsym)
 {
-  fprintf(stderr,
-	  _("%s: %s: unsupported reloc %u against global symbol %s\n"),
-	  program_name, object->name().c_str(), r_type, gsym->name());
+  gold_error(_("%s: unsupported reloc %u against global symbol %s"),
+	     object->name().c_str(), r_type, gsym->name());
 }
 
 // Scan a relocation for a global symbol.
@@ -966,9 +962,8 @@ Target_x86_64::Scan::global(const General_options& options,
     case elfcpp::R_X86_64_TPOFF64:
     case elfcpp::R_X86_64_DTPMOD64:
     case elfcpp::R_X86_64_TLSDESC:
-      fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
-	      program_name, object->name().c_str(), r_type);
-      gold_exit(false);
+      gold_error(_("%s: unexpected reloc %u in object file"),
+		 object->name().c_str(), r_type);
       break;
 
       // These are initial tls relocs, which are expected for global()
@@ -1026,9 +1021,8 @@ Target_x86_64::Scan::global(const General_options& options,
     case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
     default:
-      fprintf(stderr,
-	      _("%s: %s: unsupported reloc %u against global symbol %s\n"),
-	      program_name, object->name().c_str(), r_type, gsym->name());
+      gold_error(_("%s: unsupported reloc %u against global symbol %s"),
+		 object->name().c_str(), r_type, gsym->name());
       break;
     }
 }
@@ -1050,9 +1044,9 @@ Target_x86_64::scan_relocs(const General_options& options,
 {
   if (sh_type == elfcpp::SHT_REL)
     {
-      fprintf(stderr, _("%s: %s: unsupported REL reloc section\n"),
-	      program_name, object->name().c_str());
-      gold_exit(false);
+      gold_error(_("%s: unsupported REL reloc section"),
+		 object->name().c_str());
+      return;
     }
 
   gold::scan_relocs<64, false, Target_x86_64, elfcpp::SHT_RELA,
@@ -1140,15 +1134,14 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
 	  || gsym == NULL
 	  || strcmp(gsym->name(), "__tls_get_addr") != 0)
 	{
-	  fprintf(stderr, _("%s: %s: missing expected TLS relocation\n"),
-		  program_name,
-		  relinfo->location(relnum, rela.get_r_offset()).c_str());
-	  gold_exit(false);
+	  gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+				 _("missing expected TLS relocation"));
 	}
-
-      this->skip_call_tls_get_addr_ = false;
-
-      return false;
+      else
+	{
+	  this->skip_call_tls_get_addr_ = false;
+	  return false;
+	}
     }
 
   // Pick the value to use for symbols defined in shared objects.
@@ -1318,11 +1311,9 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_TPOFF64:
     case elfcpp::R_X86_64_DTPMOD64:
     case elfcpp::R_X86_64_TLSDESC:
-      fprintf(stderr, _("%s: %s: unexpected reloc %u in object file\n"),
-	      program_name,
-	      relinfo->location(relnum, rela.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+			     _("unexpected reloc %u in object file"),
+			     r_type);
       break;
 
       // These are initial tls relocs, which are expected when linking
@@ -1342,11 +1333,9 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): implement me!
     default:
-      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
-	      program_name,
-	      relinfo->location(relnum, rela.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+			     _("unsupported reloc %u"),
+			     r_type);
       break;
     }
 
@@ -1369,10 +1358,9 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
   Output_segment* tls_segment = relinfo->layout->tls_segment();
   if (tls_segment == NULL)
     {
-      fprintf(stderr, _("%s: %s: TLS reloc but no TLS segment\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str());
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("TLS reloc but no TLS segment"));
+      return;
     }
 
   elfcpp::Elf_types<64>::Elf_Addr value = psymval->value(relinfo->object, 0);
@@ -1397,11 +1385,9 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
                                                 view_size);
 	  break;
 	}
-      fprintf(stderr, _("%s: %s: unsupported reloc type %u\n"),
-              program_name,
-              relinfo->location(relnum, rel.get_r_offset()).c_str(),
-              r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unsupported reloc type %u"),
+			     r_type);
       break;
 
     case elfcpp::R_X86_64_TLSGD:
@@ -1414,11 +1400,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 			     view_size);
 	  break;
 	}
-      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unsupported reloc %u"), r_type);
       break;
 
     case elfcpp::R_X86_64_TLSLD:
@@ -1426,11 +1409,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
         {
           // FIXME: implement ld_to_le
         }
-      fprintf(stderr, _("%s: %s: unsupported reloc %u\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str(),
-	      r_type);
-      gold_exit(false);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("unsupported reloc %u"), r_type);
       break;
 
     case elfcpp::R_X86_64_DTPOFF32:
@@ -1554,12 +1534,8 @@ Target_x86_64::Relocate::check_range(const Relocate_info<64, false>* relinfo,
 {
   off_t offset = rel.get_r_offset() + off;
   if (offset < 0 || offset > view_size)
-    {
-      fprintf(stderr, _("%s: %s: TLS relocation out of range\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str());
-      gold_exit(false);
-    }
+    gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			   _("TLS relocation out of range"));
 }
 
 // Check the validity of a TLS relocation.  This is like assert.
@@ -1571,13 +1547,8 @@ Target_x86_64::Relocate::check_tls(const Relocate_info<64, false>* relinfo,
                                    bool valid)
 {
   if (!valid)
-    {
-      fprintf(stderr,
-	      _("%s: %s: TLS relocation against invalid instruction\n"),
-	      program_name,
-	      relinfo->location(relnum, rel.get_r_offset()).c_str());
-      gold_exit(false);
-    }
+    gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			   _("TLS relocation against invalid instruction"));
 }
 
 // Relocate section data.
