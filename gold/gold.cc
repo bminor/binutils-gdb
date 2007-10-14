@@ -161,7 +161,15 @@ queue_middle_tasks(const General_options& options,
 		   Workqueue* workqueue)
 {
   // Now we have seen all the input files.
-  set_parameters_doing_static_link(!input_objects->any_dynamic());
+  const bool doing_static_link = !input_objects->any_dynamic();
+  set_parameters_doing_static_link(doing_static_link);
+  if (!doing_static_link && options.is_static())
+    {
+      // We print out just the first .so we see; there may be others.
+      fprintf(stderr, _("%s: cannot mix -static with dynamic object %s\n"),
+              program_name, (*input_objects->dynobj_begin())->name().c_str());
+      gold_exit(false);
+    }
 
   // Define some sections and symbols needed for a dynamic link.  This
   // handles some cases we want to see before we read the relocs.
