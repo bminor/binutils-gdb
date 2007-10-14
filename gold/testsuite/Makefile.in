@@ -52,14 +52,16 @@ target_triplet = @target@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_2 = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_static_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_static_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test
 
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_3 = \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_3 = \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test
+
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_4 = \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_nonpic_test
 
-check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_4)
+check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_5)
 @GCC_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a \
@@ -131,11 +133,11 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_2 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_static_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_static_pic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test$(EXEEXT)
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_3 = tls_shared_nonpic_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_4 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__EXEEXT_3 = tls_static_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test$(EXEEXT)
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_4 = tls_shared_nonpic_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_5 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test$(EXEEXT) \
@@ -154,7 +156,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_12_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__EXEEXT_1) $(am__EXEEXT_2) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__EXEEXT_3)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__EXEEXT_3) $(am__EXEEXT_4)
 am__constructor_static_test_SOURCES_DIST = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_constructor_static_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test.$(OBJEXT)
@@ -457,6 +459,8 @@ POSUB = @POSUB@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STATIC_TLS_FALSE = @STATIC_TLS_FALSE@
+STATIC_TLS_TRUE = @STATIC_TLS_TRUE@
 STRIP = @STRIP@
 TARGETOBJS = @TARGETOBJS@
 TLS_FALSE = @TLS_FALSE@
@@ -542,7 +546,7 @@ INCLUDES = -D_GNU_SOURCE \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_12_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__append_1) $(am__append_2) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__append_3)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__append_3) $(am__append_4)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@NATIVE_TESTING = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test \

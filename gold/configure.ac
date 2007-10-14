@@ -152,8 +152,25 @@ AM_CONDITIONAL(FN_PTRS_IN_SO_WITHOUT_PIC, [
   esac])
 
 dnl Test for __thread support.
-AC_COMPILE_IFELSE([__thread int i = 1;], [tls=yes], [tls=no])
-AM_CONDITIONAL(TLS, test "$tls" = "yes")
+AC_CACHE_CHECK([for thread support], [gold_cv_c_thread],
+[AC_COMPILE_IFELSE([__thread int i = 1;],
+[gold_cv_c_thread=yes], [gold_cv_c_thread=no])])
+
+AM_CONDITIONAL(TLS, test "$gold_cv_c_thread" = "yes")
+
+dnl On GNU/Linux TLS in static programs only works when using glibc
+dnl 2.4 or later.
+AC_CACHE_CHECK([for glibc >= 2.4], [gold_cv_lib_glibc24],
+[AC_COMPILE_IFELSE([
+#include <features.h>
+#if !defined __GLIBC__
+error
+#elif __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 4)
+error
+#endif
+], [gold_cv_lib_glibc24=yes], [gold_cv_lib_glibc24=no])])
+
+AM_CONDITIONAL(STATIC_TLS, test "$gold_cv_lib_glibc24" = "yes")
 
 AM_BINUTILS_WARNINGS
 
@@ -174,12 +191,17 @@ AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_FUNCS(mallinfo)
 
 dnl Test whether the compiler can specify a member templates to call.
-AC_COMPILE_IFELSE([
+AC_CACHE_CHECK([template member calls], [gold_cv_c_membertemplates],
+[AC_COMPILE_IFELSE([
 class c { public: template<int i> void fn(); };
 template<int i> void foo(c cv) { cv.fn<i>(); }
 template void foo<1>(c cv);],
-[AC_DEFINE(HAVE_MEMBER_TEMPLATE_SPECIFICATIONS, [],
-  [Whether the C++ compiler can call a template member with no arguments])])
+[gold_cv_c_membertemplates=yes], [gold_cv_c_membertemplates=no])])
+
+if test "$gold_cv_c_membertemplates" = "yes"; then
+  AC_DEFINE(HAVE_MEMBER_TEMPLATE_SPECIFICATIONS, [],
+    [Whether the C++ compiler can call a template member with no arguments])
+fi
 
 AC_LANG_POP(C++)
 

@@ -55,9 +55,15 @@ if TLS
 NATIVE_PROGS += \
 	tls_test \
 	tls_pic_test \
-	tls_static_test \
-	tls_static_pic_test \
 	tls_shared_test
+
+if STATIC_TLS
+
+NATIVE_PROGS += \
+	tls_static_test \
+	tls_static_pic_test
+
+endif
 
 if FN_PTRS_IN_SO_WITHOUT_PIC
 
