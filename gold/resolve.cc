@@ -277,7 +277,7 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
     case DEF * 16 + DEF:
       // Two definitions of the same symbol.
       // FIXME: Report locations.
-      gold_error(_("multiple definition of %s\n"), to->name());
+      gold_error(_("multiple definition of %s"), to->name());
       return false;
 
     case WEAK_DEF * 16 + DEF:
