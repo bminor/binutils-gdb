@@ -640,7 +640,22 @@ Layout::create_note_section()
   if (parameters->output_is_object())
     return;
 
+  // Authorities all agree that the values in a .note field should
+  // be aligned on 4-byte boundaries for 32-bit binaries.  However,
+  // they differ on what the alignment is for 64-bit binaries.
+  // The GABI says unambiguously they take 8-byte alignment:
+  //    http://sco.com/developers/gabi/latest/ch5.pheader.html#note_section
+  // Other documentation says alignment should always be 4 bytes:
+  //    http://www.netbsd.org/docs/kernel/elf-notes.html#note-format
+  // GNU ld and GNU readelf both support the latter (at least as of
+  // version 2.16.91), and glibc always generates the latter for
+  // .note.ABI-tag (as of version 1.6), so that's the one we go with
+  // here.
+#ifdef GABI_FORMAT_FOR_DOTNOTE_SECTION   // this is not defined by default
   const int size = parameters->get_size();
+#else
+  const int size = 32;
+#endif
 
   // The contents of the .note section.
   const char* name = "GNU";
