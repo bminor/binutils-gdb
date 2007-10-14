@@ -170,4 +170,4 @@ extern void set_parameters_doing_static_link(bool doing_static_link);
 
 } // End namespace gold.
 
-#endif // !defined(GOLD_PARAMATERS_H)
+#endif // !defined(GOLD_PARAMETERS_H)
