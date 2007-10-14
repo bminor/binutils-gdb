@@ -276,7 +276,7 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
     {
     case DEF * 16 + DEF:
       // Two definitions of the same symbol.
-      fprintf(stderr, "%s: multiple definition of %s\n",
+      fprintf(stderr, _("%s: multiple definition of %s\n"),
 	      program_name, to->name());
       // FIXME: Report locations.  Record that we have seen an error.
       return false;

@@ -77,7 +77,7 @@ gold_nomem()
 void
 do_gold_unreachable(const char* filename, int lineno, const char* function)
 {
-  fprintf(stderr, "%s: internal error in %s, at %s:%d\n",
+  fprintf(stderr, _("%s: internal error in %s, at %s:%d\n"),
 	  program_name, function, filename, lineno);
   gold_exit(false);
 }

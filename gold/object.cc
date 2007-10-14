@@ -824,7 +824,7 @@ Input_objects::add_object(Object* obj)
     this->target_ = target;
   else if (this->target_ != target)
     {
-      fprintf(stderr, "%s: %s: incompatible target\n",
+      fprintf(stderr, _("%s: %s: incompatible target\n"),
 	      program_name, obj->name().c_str());
       gold_exit(false);
     }
