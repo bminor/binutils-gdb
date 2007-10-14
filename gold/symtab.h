@@ -944,7 +944,7 @@ class Symbol_table
   // Whether we should override a symbol, based on flags in
   // resolve.cc.
   static bool
-  should_override(const Symbol*, unsigned int, bool*);
+  should_override(const Symbol*, unsigned int, Object*, bool*);
 
   // Whether we should override a symbol with a special symbol which
   // is automatically defined by the linker.

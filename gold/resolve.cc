@@ -170,7 +170,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     }
 
   bool adjust_common_sizes;
-  if (Symbol_table::should_override(to, frombits, &adjust_common_sizes))
+  if (Symbol_table::should_override(to, frombits, object,
+				    &adjust_common_sizes))
     {
       typename Sized_symbol<size>::Size_type tosize = to->symsize();
 
@@ -195,7 +196,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 
 bool
 Symbol_table::should_override(const Symbol* to, unsigned int frombits,
-                              bool* adjust_common_sizes)
+                              Object* object, bool* adjust_common_sizes)
 {
   *adjust_common_sizes = false;
 
@@ -276,8 +277,14 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
     {
     case DEF * 16 + DEF:
       // Two definitions of the same symbol.
-      // FIXME: Report locations.
-      gold_error(_("multiple definition of %s"), to->name());
+      // FIXME: Do a better job of reporting locations.
+      gold_error(_("%s: multiple definition of %s"),
+		 object != NULL ? object->name().c_str() : _("command line"),
+		 to->name());
+      gold_error(_("%s: previous definition here"),
+		 (to->source() == Symbol::FROM_OBJECT
+		  ? to->object()->name().c_str()
+		  : _("command line")));
       return false;
 
     case WEAK_DEF * 16 + DEF:
@@ -573,7 +580,8 @@ Symbol_table::should_override_with_special(const Symbol* to)
 {
   bool adjust_common_sizes;
   unsigned int frombits = global_flag | regular_flag | def_flag;
-  bool ret = Symbol_table::should_override(to, frombits, &adjust_common_sizes);
+  bool ret = Symbol_table::should_override(to, frombits, NULL,
+					   &adjust_common_sizes);
   gold_assert(!adjust_common_sizes);
   return ret;
 }
