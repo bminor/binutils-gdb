@@ -59,6 +59,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->is_target_special_ = false;
   this->is_def_ = false;
   this->is_forwarder_ = false;
+  this->has_alias_ = false;
   this->needs_dynsym_entry_ = false;
   this->in_reg_ = false;
   this->in_dyn_ = false;
@@ -319,7 +320,7 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
   esym.put_st_info(from->binding(), from->type());
   esym.put_st_other(from->visibility(), from->nonvis());
   esym.put_st_shndx(from->shndx());
-  Symbol_table::resolve(to, esym.sym(), from->object(), version);
+  this->resolve(to, esym.sym(), from->object(), version);
   if (from->in_reg())
     to->set_in_reg();
   if (from->in_dyn())
@@ -350,7 +351,7 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
 // forwarders.
 
 template<int size, bool big_endian>
-Symbol*
+Sized_symbol<size>*
 Symbol_table::add_from_object(Object* object,
 			      const char *name,
 			      Stringpool::Key name_key,
@@ -392,7 +393,7 @@ Symbol_table::add_from_object(Object* object,
       was_undefined = ret->is_undefined();
       was_common = ret->is_common();
 
-      Symbol_table::resolve(ret, sym, object, version);
+      this->resolve(ret, sym, object, version);
 
       if (def)
 	{
@@ -432,7 +433,7 @@ Symbol_table::add_from_object(Object* object,
 	  ret = this->get_sized_symbol SELECT_SIZE_NAME(size) (
               insdef.first->second
               SELECT_SIZE(size));
-	  Symbol_table::resolve(ret, sym, object, version);
+	  this->resolve(ret, sym, object, version);
 	  ins.first->second = ret;
 	}
       else
@@ -541,7 +542,7 @@ Symbol_table::add_from_relobj(
       // this is the default version.
       const char* ver = strchr(name, '@');
 
-      Symbol* res;
+      Sized_symbol<size>* res;
       if (ver == NULL)
 	{
 	  Stringpool::Key name_key;
@@ -598,6 +599,16 @@ Symbol_table::add_from_dynobj(
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
 
+  // We keep a list of all STT_OBJECT symbols, so that we can resolve
+  // weak aliases.  This is necessary because if the dynamic object
+  // provides the same variable under two names, one of which is a
+  // weak definition, and the regular object refers to the weak
+  // definition, we have to put both the weak definition and the
+  // strong definition into the dynamic symbol table.  Given a weak
+  // definition, the only way that we can find the corresponding
+  // strong definition, if any, is to search the symbol table.
+  std::vector<Sized_symbol<size>*> object_symbols;
+
   const unsigned char* p = syms;
   const unsigned char* vs = versym;
   for (size_t i = 0; i < count; ++i, p += sym_size, vs += 2)
@@ -618,79 +629,172 @@ Symbol_table::add_from_dynobj(
 
       const char* name = sym_names + st_name;
 
+      Sized_symbol<size>* res;
+
       if (versym == NULL)
 	{
 	  Stringpool::Key name_key;
 	  name = this->namepool_.add(name, true, &name_key);
-	  this->add_from_object(dynobj, name, name_key, NULL, 0,
-				false, sym);
-	  continue;
+	  res = this->add_from_object(dynobj, name, name_key, NULL, 0,
+				      false, sym);
 	}
-
-      // Read the version information.
-
-      unsigned int v = elfcpp::Swap<16, big_endian>::readval(vs);
-
-      bool hidden = (v & elfcpp::VERSYM_HIDDEN) != 0;
-      v &= elfcpp::VERSYM_VERSION;
-
-      // The Sun documentation says that V can be VER_NDX_LOCAL, or
-      // VER_NDX_GLOBAL, or a version index.  The meaning of
-      // VER_NDX_LOCAL is defined as "Symbol has local scope."  The
-      // old GNU linker will happily generate VER_NDX_LOCAL for an
-      // undefined symbol.  I don't know what the Sun linker will
-      // generate.
-
-      if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL)
-          && sym.get_st_shndx() != elfcpp::SHN_UNDEF)
+      else
 	{
-	  // This symbol should not be visible outside the object.
-	  continue;
+	  // Read the version information.
+
+	  unsigned int v = elfcpp::Swap<16, big_endian>::readval(vs);
+
+	  bool hidden = (v & elfcpp::VERSYM_HIDDEN) != 0;
+	  v &= elfcpp::VERSYM_VERSION;
+
+	  // The Sun documentation says that V can be VER_NDX_LOCAL,
+	  // or VER_NDX_GLOBAL, or a version index.  The meaning of
+	  // VER_NDX_LOCAL is defined as "Symbol has local scope."
+	  // The old GNU linker will happily generate VER_NDX_LOCAL
+	  // for an undefined symbol.  I don't know what the Sun
+	  // linker will generate.
+
+	  if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL)
+	      && sym.get_st_shndx() != elfcpp::SHN_UNDEF)
+	    {
+	      // This symbol should not be visible outside the object.
+	      continue;
+	    }
+
+	  // At this point we are definitely going to add this symbol.
+	  Stringpool::Key name_key;
+	  name = this->namepool_.add(name, true, &name_key);
+
+	  if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL)
+	      || v == static_cast<unsigned int>(elfcpp::VER_NDX_GLOBAL))
+	    {
+	      // This symbol does not have a version.
+	      res = this->add_from_object(dynobj, name, name_key, NULL, 0,
+					  false, sym);
+	    }
+	  else
+	    {
+	      if (v >= version_map->size())
+		{
+		  dynobj->error(_("versym for symbol %zu out of range: %u"),
+				i, v);
+		  continue;
+		}
+
+	      const char* version = (*version_map)[v];
+	      if (version == NULL)
+		{
+		  dynobj->error(_("versym for symbol %zu has no name: %u"),
+				i, v);
+		  continue;
+		}
+
+	      Stringpool::Key version_key;
+	      version = this->namepool_.add(version, true, &version_key);
+
+	      // If this is an absolute symbol, and the version name
+	      // and symbol name are the same, then this is the
+	      // version definition symbol.  These symbols exist to
+	      // support using -u to pull in particular versions.  We
+	      // do not want to record a version for them.
+	      if (sym.get_st_shndx() == elfcpp::SHN_ABS
+		  && name_key == version_key)
+		res = this->add_from_object(dynobj, name, name_key, NULL, 0,
+					    false, sym);
+	      else
+		{
+		  const bool def = (!hidden
+				    && (sym.get_st_shndx()
+					!= elfcpp::SHN_UNDEF));
+		  res = this->add_from_object(dynobj, name, name_key, version,
+					      version_key, def, sym);
+		}
+	    }
 	}
 
-      // At this point we are definitely going to add this symbol.
-      Stringpool::Key name_key;
-      name = this->namepool_.add(name, true, &name_key);
+      if (sym.get_st_shndx() != elfcpp::SHN_UNDEF
+	  && sym.get_st_type() == elfcpp::STT_OBJECT)
+	object_symbols.push_back(res);
+    }
 
-      if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL)
-          || v == static_cast<unsigned int>(elfcpp::VER_NDX_GLOBAL))
+  this->record_weak_aliases(&object_symbols);
+}
+
+// This is used to sort weak aliases.  We sort them first by section
+// index, then by offset, then by weak ahead of strong.
+
+template<int size>
+class Weak_alias_sorter
+{
+ public:
+  bool operator()(const Sized_symbol<size>*, const Sized_symbol<size>*) const;
+};
+
+template<int size>
+bool
+Weak_alias_sorter<size>::operator()(const Sized_symbol<size>* s1,
+				    const Sized_symbol<size>* s2) const
+{
+  if (s1->shndx() != s2->shndx())
+    return s1->shndx() < s2->shndx();
+  if (s1->value() != s2->value())
+    return s1->value() < s2->value();
+  if (s1->binding() != s2->binding())
+    {
+      if (s1->binding() == elfcpp::STB_WEAK)
+	return true;
+      if (s2->binding() == elfcpp::STB_WEAK)
+	return false;
+    }
+  return std::string(s1->name()) < std::string(s2->name());
+}
+
+// SYMBOLS is a list of object symbols from a dynamic object.  Look
+// for any weak aliases, and record them so that if we add the weak
+// alias to the dynamic symbol table, we also add the corresponding
+// strong symbol.
+
+template<int size>
+void
+Symbol_table::record_weak_aliases(std::vector<Sized_symbol<size>*>* symbols)
+{
+  // Sort the vector by section index, then by offset, then by weak
+  // ahead of strong.
+  std::sort(symbols->begin(), symbols->end(), Weak_alias_sorter<size>());
+
+  // Walk through the vector.  For each weak definition, record
+  // aliases.
+  for (typename std::vector<Sized_symbol<size>*>::const_iterator p =
+	 symbols->begin();
+       p != symbols->end();
+       ++p)
+    {
+      if ((*p)->binding() != elfcpp::STB_WEAK)
+	continue;
+
+      // Build a circular list of weak aliases.  Each symbol points to
+      // the next one in the circular list.
+
+      Sized_symbol<size>* from_sym = *p;
+      typename std::vector<Sized_symbol<size>*>::const_iterator q;
+      for (q = p + 1; q != symbols->end(); ++q)
 	{
-	  // This symbol does not have a version.
-	  this->add_from_object(dynobj, name, name_key, NULL, 0, false, sym);
-	  continue;
+	  if ((*q)->shndx() != from_sym->shndx()
+	      || (*q)->value() != from_sym->value())
+	    break;
+
+	  this->weak_aliases_[from_sym] = *q;
+	  from_sym->set_has_alias();
+	  from_sym = *q;
 	}
 
-      if (v >= version_map->size())
+      if (from_sym != *p)
 	{
-	  dynobj->error(_("versym for symbol %zu out of range: %u"), i, v);
-	  continue;
+	  this->weak_aliases_[from_sym] = *p;
+	  from_sym->set_has_alias();
 	}
 
-      const char* version = (*version_map)[v];
-      if (version == NULL)
-	{
-	  dynobj->error(_("versym for symbol %zu has no name: %u"), i, v);
-	  continue;
-	}
-
-      Stringpool::Key version_key;
-      version = this->namepool_.add(version, true, &version_key);
-
-      // If this is an absolute symbol, and the version name and
-      // symbol name are the same, then this is the version definition
-      // symbol.  These symbols exist to support using -u to pull in
-      // particular versions.  We do not want to record a version for
-      // them.
-      if (sym.get_st_shndx() == elfcpp::SHN_ABS && name_key == version_key)
-	{
-	  this->add_from_object(dynobj, name, name_key, NULL, 0, false, sym);
-	  continue;
-	}
-
-      const bool def = !hidden && sym.get_st_shndx() != elfcpp::SHN_UNDEF;
-
-      this->add_from_object(dynobj, name, name_key, version, version_key,
-			    def, sym);
+      p = q - 1;
     }
 }
 
@@ -868,7 +972,7 @@ Symbol_table::do_define_in_output_data(
 
   if (oldsym != NULL
       && Symbol_table::should_override_with_special(oldsym))
-    oldsym->override_with_special(sym);
+    this->override_with_special(oldsym, sym);
 
   return sym;
 }
@@ -962,7 +1066,7 @@ Symbol_table::do_define_in_output_segment(
 
   if (oldsym != NULL
       && Symbol_table::should_override_with_special(oldsym))
-    oldsym->override_with_special(sym);
+    this->override_with_special(oldsym, sym);
 
   return sym;
 }
@@ -1049,7 +1153,7 @@ Symbol_table::do_define_as_constant(
 
   if (oldsym != NULL
       && Symbol_table::should_override_with_special(oldsym))
-    oldsym->override_with_special(sym);
+    this->override_with_special(oldsym, sym);
 
   return sym;
 }

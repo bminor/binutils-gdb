@@ -71,6 +71,35 @@ Sized_symbol<size>::override(const elfcpp::Sym<size, big_endian>& sym,
   this->symsize_ = sym.get_st_size();
 }
 
+// Override TOSYM with symbol FROMSYM, defined in OBJECT, with version
+// VERSION.  This handles all aliases of TOSYM.
+
+template<int size, bool big_endian>
+void
+Symbol_table::override(Sized_symbol<size>* tosym,
+		       const elfcpp::Sym<size, big_endian>& fromsym,
+		       Object* object, const char* version)
+{
+  tosym->override(fromsym, object, version);
+  if (tosym->has_alias())
+    {
+      Symbol* sym = this->weak_aliases_[tosym];
+      gold_assert(sym != NULL);
+      Sized_symbol<size>* ssym;
+      ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (sym
+							    SELECT_SIZE(size));
+      do
+	{
+	  ssym->override(fromsym, object, version);
+	  sym = this->weak_aliases_[ssym];
+	  gold_assert(sym != NULL);
+	  ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (
+						sym SELECT_SIZE(size));
+	}
+      while (ssym != tosym);
+    }
+}
+
 // The resolve functions build a little code for each symbol.
 // Bit 0: 0 for global, 1 for weak.
 // Bit 1: 0 for regular object, 1 for shared object
@@ -175,7 +204,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     {
       typename Sized_symbol<size>::Size_type tosize = to->symsize();
 
-      to->override(sym, object, version);
+      this->override(to, sym, object, version);
 
       if (adjust_common_sizes && tosize > to->symsize())
         to->set_symsize(tosize);
@@ -636,6 +665,34 @@ Sized_symbol<size>::override_with_special(const Sized_symbol<size>* from)
   this->symsize_ = from->symsize_;
 }
 
+// Override TOSYM with the special symbol FROMSYM.  This handles all
+// aliases of TOSYM.
+
+template<int size>
+void
+Symbol_table::override_with_special(Sized_symbol<size>* tosym,
+				    const Sized_symbol<size>* fromsym)
+{
+  tosym->override_with_special(fromsym);
+  if (tosym->has_alias())
+    {
+      Symbol* sym = this->weak_aliases_[tosym];
+      gold_assert(sym != NULL);
+      Sized_symbol<size>* ssym;
+      ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (sym
+							    SELECT_SIZE(size));
+      do
+	{
+	  ssym->override_with_special(fromsym);
+	  sym = this->weak_aliases_[ssym];
+	  gold_assert(sym != NULL);
+	  ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (
+						sym SELECT_SIZE(size));
+	}
+      while (ssym != tosym);
+    }
+}
+
 // Instantiate the templates we need.  We could use the configure
 // script to restrict this to only the ones needed for implemented
 // targets.
@@ -683,13 +740,15 @@ Symbol_table::resolve<64, true>(
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
 template
 void
-Sized_symbol<32>::override_with_special(const Sized_symbol<32>*);
+Symbol_table::override_with_special<32>(Sized_symbol<32>*,
+					const Sized_symbol<32>*);
 #endif
 
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
 template
 void
-Sized_symbol<64>::override_with_special(const Sized_symbol<64>*);
+Symbol_table::override_with_special<64>(Sized_symbol<64>*,
+					const Sized_symbol<64>*);
 #endif
 
 } // End namespace gold.

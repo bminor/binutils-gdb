@@ -195,6 +195,17 @@ class Symbol
   set_forwarder()
   { this->is_forwarder_ = true; }
 
+  // Return whether this symbol has an alias in the weak aliases table
+  // in Symbol_table.
+  bool
+  has_alias() const
+  { return this->has_alias_; }
+
+  // Mark this symbol as having an alias.
+  void
+  set_has_alias()
+  { this->has_alias_ = true; }
+
   // Return whether this symbol needs an entry in the dynamic symbol
   // table.
   bool
@@ -528,6 +539,9 @@ class Symbol
   // It forwards to the symbol found in the forwarders_ map of
   // Symbol_table.
   bool is_forwarder_ : 1;
+  // True if the symbol has an alias in the weak_aliases table in
+  // Symbol_table.
+  bool has_alias_ : 1;
   // True if this symbol needs to be in the dynamic symbol table.
   bool needs_dynsym_entry_ : 1;
   // True if we've seen this symbol in a regular object.
@@ -924,20 +938,20 @@ class Symbol_table
 
   // Add a symbol.
   template<int size, bool big_endian>
-  Symbol*
+  Sized_symbol<size>*
   add_from_object(Object*, const char *name, Stringpool::Key name_key,
 		  const char *version, Stringpool::Key version_key,
 		  bool def, const elfcpp::Sym<size, big_endian>& sym);
 
   // Resolve symbols.
   template<int size, bool big_endian>
-  static void
+  void
   resolve(Sized_symbol<size>* to,
 	  const elfcpp::Sym<size, big_endian>& sym,
 	  Object*, const char* version);
 
   template<int size, bool big_endian>
-  static void
+  void
   resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
           const char* version ACCEPT_SIZE_ENDIAN);
 
@@ -946,10 +960,28 @@ class Symbol_table
   static bool
   should_override(const Symbol*, unsigned int, Object*, bool*);
 
+  // Override a symbol.
+  template<int size, bool big_endian>
+  void
+  override(Sized_symbol<size>* tosym,
+	   const elfcpp::Sym<size, big_endian>& fromsym,
+	   Object* object, const char* version);
+
   // Whether we should override a symbol with a special symbol which
   // is automatically defined by the linker.
   static bool
   should_override_with_special(const Symbol*);
+
+  // Override a symbol with a special symbol.
+  template<int size>
+  void
+  override_with_special(Sized_symbol<size>* tosym,
+			const Sized_symbol<size>* fromsym);
+
+  // Record all weak alias sets for a dynamic object.
+  template<int size>
+  void
+  record_weak_aliases(std::vector<Sized_symbol<size>*>*);
 
   // Define a special symbol.
   template<int size, bool big_endian>
@@ -1076,6 +1108,10 @@ class Symbol_table
 
   // Forwarding symbols.
   Unordered_map<const Symbol*, Symbol*> forwarders_;
+
+  // Weak aliases.  A symbol in this list points to the next alias.
+  // The aliases point to each other in a circular list.
+  Unordered_map<Symbol*, Symbol*> weak_aliases_;
 
   // We don't expect there to be very many common symbols, so we keep
   // a list of them.  When we find a common symbol we add it to this
