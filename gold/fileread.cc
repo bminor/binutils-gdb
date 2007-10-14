@@ -438,7 +438,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
       name = dirpath.find(n1, n2, &this->is_in_sysroot_);
       if (name.empty())
 	{
-	  gold_error(_("cannot find -l%s\n"),
+	  gold_error(_("cannot find -l%s"),
 		     this->input_argument_->name());
 	  return false;
 	}
@@ -465,7 +465,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
 			      &this->is_in_sysroot_);
           if (name.empty())
             {
-              gold_error(_("cannot find %s\n"),
+              gold_error(_("cannot find %s"),
 			 this->input_argument_->name());
 	      return false;
             }
@@ -476,7 +476,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
   // Now that we've figured out where the file lives, try to open it.
   if (!this->file_.open(name))
     {
-      gold_error(_("cannot open %s: %s\n"),
+      gold_error(_("cannot open %s: %s"),
 		 name.c_str(), strerror(errno));
       return false;
     }

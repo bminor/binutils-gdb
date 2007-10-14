@@ -196,7 +196,7 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
       if (name_end == NULL
 	  || name_end - hdr->ar_name >= static_cast<int>(sizeof hdr->ar_name))
 	{
-	  gold_error(_("%s: malformed archive header name at %zu\n"),
+	  gold_error(_("%s: malformed archive header name at %zu"),
 		     this->name().c_str(), static_cast<size_t>(off));
 	  return this->input_file_->file().filesize() - off;
 	}

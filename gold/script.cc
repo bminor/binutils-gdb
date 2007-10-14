@@ -1166,7 +1166,7 @@ yyerror(void* closurev, const char* message)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
 
-  gold_error(_("%s: %s\n"), closure->filename(), message);
+  gold_error(_("%s: %s"), closure->filename(), message);
 }
 
 // Called by the bison parser to add a file to the link.

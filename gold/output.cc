@@ -1718,7 +1718,7 @@ void
 Output_file::close()
 {
   if (::munmap(this->base_, this->file_size_) < 0)
-    gold_error(_("%s: munmap: %s\n"), this->name_, strerror(errno));
+    gold_error(_("%s: munmap: %s"), this->name_, strerror(errno));
   this->base_ = NULL;
 
   if (::close(this->o_) < 0)

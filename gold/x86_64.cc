@@ -151,7 +151,7 @@ class Target_x86_64 : public Sized_target<64, false>
       if (this->skip_call_tls_get_addr_)
 	{
 	  // FIXME: This needs to specify the location somehow.
-	  gold_error(_("missing expected TLS relocation\n"));
+	  gold_error(_("missing expected TLS relocation"));
 	}
     }
 

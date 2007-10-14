@@ -779,7 +779,7 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_TLS_DTPOFF32:
     case elfcpp::R_386_TLS_TPOFF32:
     case elfcpp::R_386_TLS_DESC:
-      gold_error(_("%s: unexpected reloc %u in object file\n"),
+      gold_error(_("%s: unexpected reloc %u in object file"),
 		 object->name().c_str(), r_type);
       break;
 
