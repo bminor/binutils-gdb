@@ -1,5 +1,16 @@
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* features/rs6000/powerpc-32.c, features/rs6000/powerpc-403.c,
+	features/rs6000/powerpc-403gc.c, features/rs6000/powerpc-505.c,
+	features/rs6000/powerpc-601.c, features/rs6000/powerpc-602.c,
+	features/rs6000/powerpc-603.c, features/rs6000/powerpc-604.c,
+	features/rs6000/powerpc-64.c, features/rs6000/powerpc-7400.c,
+	features/rs6000/powerpc-750.c, features/rs6000/powerpc-860.c,
+	features/rs6000/powerpc-e500.c,	features/rs6000/rs6000.c: New
+	generated files.
+
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* features/rs6000/power-altivec.xml, features/rs6000/power-core.xml,
 	features/rs6000/power-fpu.xml, features/rs6000/power-oea.xml,
 	features/rs6000/power-spe.xml, features/rs6000/power64-core.xml: New
