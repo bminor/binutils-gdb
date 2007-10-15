@@ -28,17 +28,21 @@
 #include "gdb/remote-sim.h"
 #include "gdb/sim-ppc.h"
 
-/* Return the name of the register whose number is REGNUM, or zero if
-   REGNUM is an invalid register number.  */
-
-static const char *
-regnum2spr (int spr)
+/* Return the register name for the supplied SPR if any, or NULL if
+   none.  */
+const char *
+sim_spr_register_name (int spr)
 {
   if (spr_is_valid (spr))
     return spr_name (spr);
   else
     return NULL;
 }
+
+#define regnum2spr(SPR) sim_spr_register_name (SPR)
+
+/* Return the name of the register whose number is REGNUM, or zero if
+   REGNUM is an invalid register number.  */
 
 static const char *
 regnum2name (int regnum)

@@ -3074,7 +3074,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   if (tdesc_data)
-    tdesc_use_registers (gdbarch, tdesc_data);
+    tdesc_use_registers (gdbarch, info.target_desc, tdesc_data);
 
   /* Add standard register aliases.  We add aliases even for those
      nanes which are used by the current architecture - it's simpler,

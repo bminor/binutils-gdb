@@ -1,5 +1,77 @@
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Document target described register support for PowerPC.
+	* ppc-tdep.h: Remove ppc_spr constants.
+	(struct gdbarch_tdep): Remove regs, ppc_sr0_regnum, and
+	ppc_builtin_type_vec128 members.
+	(PPC_R0_REGNUM, PPC_F0_REGNUM, PPC_PC_REGNUM, PPC_MSR_REGNUM)
+	(PPC_CR_REGNUM, PPC_LR_REGNUM, PPC_CTR_REGNUM, PPC_XER_REGNUM)
+	(PPC_FPSCR_REGNUM, PPC_MQ_REGNUM, PPC_SPE_UPPER_GP0_REGNUM)
+	(PPC_SPE_ACC_REGNUM, PPC_SPE_FSCR_REGNUM, PPC_VR0_REGNUM)
+	(PPC_VSCR_REGNUM, PPC_VRSAVE_REGNUM, PPC_NUM_REGS): New constants.
+	* rs6000-tdep.c: Include preparsed descriptions.
+	(init_sim_regno_table): Do not iterate over pseudo registers.
+	Look up segment registers by name.  Use sim_spr_register_name
+	for SPRs.
+	(rs6000_register_sim_regno): Call init_sim_regno_table here.
+	(rs6000_builtin_type_vec128): Delete.
+	(rs6000_register_name): Only handle SPE pseudo registers and upper
+	halves.  Call tdesc_register_name for everything else.
+	(rs6000_register_type): Delete.  Replace with...
+	(rs6000_pseudo_register_type): ...this new function.  Only handle
+	SPE pseudo registers.
+	(rs6000_register_reggroup_p): Delete.  Replace with...
+	(rs6000_pseudo_register_reggroup_p): ...this new function.  Only
+	handle SPE pseudo registers.
+	(rs6000_convert_register_p): Use ppc_fp0_regnum instead of
+	"struct reg".
+	(rs6000_register_to_value, rs6000_value_to_register): Remove check
+	of reg->fpr.
+	(e500_register_reggroup_p): Delete.
+	(STR, R, R4, R8, R16, F, P8, R32, R64, R0, A4, S, S4, SN4, S64)
+	(COMMON_UISA_REGS, PPC_UISA_SPRS, PPC_UISA_NOFP_SPRS)
+	(PPC_SEGMENT_REGS, PPC_OEA_SPRS, PPC_ALTIVEC_REGS, PPC_SPE_GP_REGS)
+	(PPC_SPE_UPPER_GP_REGS, PPC_EV_PSEUDO_REGS): Delete macros.
+	(registers_powerpc, registers_403, registers_403GC, registers_505)
+	(registers_860, registers_601, registers_602, registers_603)
+	(registers_604, registers_750, registers_7400, registers_e500): Delete
+	variables.
+	(struct variant): Delete nregs, npregs, num_tot_regs, and regs.  Add
+	tdesc.
+	(tot_num_registers, num_registers, num_pseudo_registers): Delete.
+	(variants): Delete outdated comment.  Use standard target descriptions
+	instead of "struct reg" arrays.
+	(init_variants): Delete.
+	(rs6000_gdbarch_init): Do not guess word size from the BFD
+	architecture if we have a target description.  Select a variant
+	before creating a new architecture.  Use the variant's target
+	description if the target did not define a register layout.
+	Validate target-supplied registers.  Reject mismatches.  Use
+	fixed register numbers and new constants instead of magic
+	numbers.  Call set_gdbarch_ps_regnum.  Call tdesc_use_registers.
+	(_initialize_rs6000_tdep): Initialize the preparsed target
+	descriptions.
+	* target-descriptions.c (tdesc_predefined_types): Add int128 and
+	uint128.
+	(tdesc_find_register_early): New function.
+	(tdesc_numbered_register): Use it.
+	(tdesc_register_size): New function.
+	(tdesc_use_registers): Take a target_desc argument.  Do not use
+	gdbarch_target_desc.
+	* target-descriptions.h (tdesc_use_registers): Update prototype
+	and comment.
+	(tdesc_register_size): New prototype.
+	* Makefile.in (powerpc_32_c, powerpc_403_c, powerpc_403gc_c)
+	(powerpc_505_c, powerpc_601_c, powerpc_602_c, powerpc_603_c)
+	(powerpc_604_c, powerpc_64_c, powerpc_7400_c, powerpc_750_c)
+	(powerpc_860_c, powerpc_e500_c, rs6000_c): New macros.
+	(rs6000-tdep.o): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update call to tdesc_use_registers.
+	* m68k-tdep.c (m68k_gdbarch_init): Likewise.
+	* mips-tdep.c (mips_gdbarch_init): Likewise.
+
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* features/rs6000/powerpc-32.c, features/rs6000/powerpc-403.c,
 	features/rs6000/powerpc-403gc.c, features/rs6000/powerpc-505.c,
 	features/rs6000/powerpc-601.c, features/rs6000/powerpc-602.c,

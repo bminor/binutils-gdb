@@ -1,3 +1,8 @@
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb-sim.c (regnum2spr): Rename to...
+	(sim_spr_register_name): ... this.  Make global.
+
 2007-09-04  Jerome Guitton  <guitton@adacore.com>
 
 	* sim/ppc/emul_bugapi.c (emul_bugapi_create): quote the file

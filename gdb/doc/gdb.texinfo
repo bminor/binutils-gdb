@@ -26102,12 +26102,14 @@ types.  The currently supported types are:
 @itemx int16
 @itemx int32
 @itemx int64
+@itemx int128
 Signed integer types holding the specified number of bits.
 
 @item uint8
 @itemx uint16
 @itemx uint32
 @itemx uint64
+@itemx uint128
 Unsigned integer types holding the specified number of bits.
 
 @item code_ptr
@@ -26225,6 +26227,29 @@ This feature is optional.  If present, it should contain registers
 @samp{fp0} through @samp{fp7}, @samp{fpcontrol}, @samp{fpstatus} and
 @samp{fpiaddr}.
 @end table
+
+@subsection PowerPC Features
+@cindex target descriptions, PowerPC features
+
+The @samp{org.gnu.gdb.power.core} feature is required for PowerPC
+targets.  It should contain registers @samp{r0} through @samp{r31},
+@samp{pc}, @samp{msr}, @samp{cr}, @samp{lr}, @samp{ctr}, and
+@samp{xer}.  They may be 32-bit or 64-bit depending on the target.
+
+The @samp{org.gnu.gdb.power.fpu} feature is optional.  It should
+contain registers @samp{f0} through @samp{f31} and @samp{fpscr}.
+
+The @samp{org.gnu.gdb.power.altivec} feature is optional.  It should
+contain registers @samp{vr0} through @samp{vr31}, @samp{vscr},
+and @samp{vrsave}.
+
+The @samp{org.gnu.gdb.power.spe} feature is optional.  It should
+contain registers @samp{ev0h} through @samp{ev31h}, @samp{acc}, and
+@samp{spefscr}.  SPE targets should provide 32-bit registers in
+@samp{org.gnu.gdb.power.core} and provide the upper halves in
+@samp{ev0h} through @samp{ev31h}.  @value{GDBN} will combine
+these to present registers @samp{ev0} through @samp{ev31} to the
+user.
 
 @include gpl.texi
 

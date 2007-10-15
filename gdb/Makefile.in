@@ -888,6 +888,20 @@ features_headers = $(defs_h) $(gdbtypes_h) $(target_descriptions_h)
 arm_with_iwmmxt_c = $(srcdir)/features/arm-with-iwmmxt.c $(features_headers)
 mips_linux_c = $(srcdir)/features/mips-linux.c $(features_headers)
 mips64_linux_c = $(srcdir)/features/mips64-linux.c $(features_headers)
+powerpc_32_c = $(srcdir)/features/rs6000/powerpc-32.c $(features_headers)
+powerpc_403_c = $(srcdir)/features/rs6000/powerpc-403.c $(features_headers)
+powerpc_403gc_c = $(srcdir)/features/rs6000/powerpc-403gc.c $(features_headers)
+powerpc_505_c = $(srcdir)/features/rs6000/powerpc-505.c $(features_headers)
+powerpc_601_c = $(srcdir)/features/rs6000/powerpc-601.c $(features_headers)
+powerpc_602_c = $(srcdir)/features/rs6000/powerpc-602.c $(features_headers)
+powerpc_603_c = $(srcdir)/features/rs6000/powerpc-603.c $(features_headers)
+powerpc_604_c = $(srcdir)/features/rs6000/powerpc-604.c $(features_headers)
+powerpc_64_c = $(srcdir)/features/rs6000/powerpc-64.c $(features_headers)
+powerpc_7400_c = $(srcdir)/features/rs6000/powerpc-7400.c $(features_headers)
+powerpc_750_c = $(srcdir)/features/rs6000/powerpc-750.c $(features_headers)
+powerpc_860_c = $(srcdir)/features/rs6000/powerpc-860.c $(features_headers)
+powerpc_e500_c = $(srcdir)/features/rs6000/powerpc-e500.c $(features_headers)
+rs6000_c = $(srcdir)/features/rs6000/rs6000.c $(features_headers)
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -2543,7 +2557,12 @@ rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(reggroups_h) $(libbfd_h) $(coff_internal_h) $(libcoff_h) \
 	$(coff_xcoff_h) $(libxcoff_h) $(elf_bfd_h) $(solib_svr4_h) \
 	$(ppc_tdep_h) $(gdb_assert_h) $(dis_asm_h) $(trad_frame_h) \
-	$(frame_unwind_h) $(frame_base_h) $(rs6000_tdep_h) $(dwarf2_frame_h)
+	$(frame_unwind_h) $(frame_base_h) $(rs6000_tdep_h) $(dwarf2_frame_h) \
+	$(target_descriptions) $(user_regs_h) \
+	$(powerpc_32_c) $(powerpc_403_c) $(powerpc_403gc_c) $(powerpc_505_c) \
+	$(powerpc_601_c) $(powerpc_602_c) $(powerpc_603_c) $(powerpc_604_c) \
+	$(powerpc_64_c) $(powerpc_7400_c) $(powerpc_750_c) $(powerpc_860_c) \
+	$(powerpc_e500_c) $(rs6000_c)
 rs6000-aix-tdep.o: rs6000-aix-tdep.c $(defs_h) $(gdb_string_h) $(osabi_h) \
 	$(regcache_h) $(regset_h) $(rs6000_tdep_h) $(ppc_tdep_h)
 s390-nat.o: s390-nat.c $(defs_h) $(regcache_h) $(inferior_h) \

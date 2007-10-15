@@ -5649,7 +5649,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdesc_data)
     {
       set_tdesc_pseudo_register_type (gdbarch, mips_pseudo_register_type);
-      tdesc_use_registers (gdbarch, tdesc_data);
+      tdesc_use_registers (gdbarch, info.target_desc, tdesc_data);
 
       /* Override the normal target description methods to handle our
 	 dual real and pseudo registers.  */

@@ -352,10 +352,12 @@ static struct
     { "int16", &builtin_type_int16 },
     { "int32", &builtin_type_int32 },
     { "int64", &builtin_type_int64 },
+    { "int128", &builtin_type_int128 },
     { "uint8", &builtin_type_uint8 },
     { "uint16", &builtin_type_uint16 },
     { "uint32", &builtin_type_uint32 },
     { "uint64", &builtin_type_uint64 },
+    { "uint128", &builtin_type_uint128 },
     { "ieee_single", &builtin_type_ieee_single },
     { "ieee_double", &builtin_type_ieee_double },
     { "arm_fpa_ext", &builtin_type_arm_ext }
@@ -421,10 +423,9 @@ tdesc_data_cleanup (void *data_untyped)
 
 /* Search FEATURE for a register named NAME.  */
 
-int
-tdesc_numbered_register (const struct tdesc_feature *feature,
-			 struct tdesc_arch_data *data,
-			 int regno, const char *name)
+static struct tdesc_reg *
+tdesc_find_register_early (const struct tdesc_feature *feature,
+			   const char *name)
 {
   int ixr;
   struct tdesc_reg *reg;
@@ -433,18 +434,32 @@ tdesc_numbered_register (const struct tdesc_feature *feature,
        VEC_iterate (tdesc_reg_p, feature->registers, ixr, reg);
        ixr++)
     if (strcasecmp (reg->name, name) == 0)
-      {
-	/* Make sure the vector includes a REGNO'th element.  */
-	while (regno >= VEC_length (tdesc_reg_p, data->registers))
-	  VEC_safe_push (tdesc_reg_p, data->registers, NULL);
-	VEC_replace (tdesc_reg_p, data->registers, regno, reg);
-	return 1;
-      }
+      return reg;
 
-  return 0;
+  return NULL;
 }
 
-/* Search FEATURE for a register whose name is in NAMES.  */
+/* Search FEATURE for a register named NAME.  Assign REGNO to it.  */
+
+int
+tdesc_numbered_register (const struct tdesc_feature *feature,
+			 struct tdesc_arch_data *data,
+			 int regno, const char *name)
+{
+  struct tdesc_reg *reg = tdesc_find_register_early (feature, name);
+
+  if (reg == NULL)
+    return 0;
+
+  /* Make sure the vector includes a REGNO'th element.  */
+  while (regno >= VEC_length (tdesc_reg_p, data->registers))
+    VEC_safe_push (tdesc_reg_p, data->registers, NULL);
+  VEC_replace (tdesc_reg_p, data->registers, regno, reg);
+  return 1;
+}
+
+/* Search FEATURE for a register whose name is in NAMES and assign
+   REGNO to it.  */
 
 int
 tdesc_numbered_register_choices (const struct tdesc_feature *feature,
@@ -458,6 +473,19 @@ tdesc_numbered_register_choices (const struct tdesc_feature *feature,
       return 1;
 
   return 0;
+}
+
+/* Search FEATURE for a register named NAME, and return its size in
+   bits.  The register must exist.  */
+
+int
+tdesc_register_size (const struct tdesc_feature *feature,
+		     const char *name)
+{
+  struct tdesc_reg *reg = tdesc_find_register_early (feature, name);
+
+  gdb_assert (reg != NULL);
+  return reg->bitsize;
 }
 
 /* Look up a register by its GDB internal register number.  */
@@ -682,17 +710,15 @@ set_tdesc_pseudo_register_reggroup_p
 
 void
 tdesc_use_registers (struct gdbarch *gdbarch,
+		     const struct target_desc *target_desc,
 		     struct tdesc_arch_data *early_data)
 {
   int num_regs = gdbarch_num_regs (gdbarch);
   int i, ixf, ixr;
-  const struct target_desc *target_desc;
   struct tdesc_feature *feature;
   struct tdesc_reg *reg;
   struct tdesc_arch_data *data;
   htab_t reg_hash;
-
-  target_desc = gdbarch_target_desc (gdbarch);
 
   /* We can't use the description for registers if it doesn't describe
      any.  This function should only be called after validating

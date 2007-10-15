@@ -1257,7 +1257,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_sniffer (gdbarch, m68k_frame_sniffer);
 
   if (tdesc_data)
-    tdesc_use_registers (gdbarch, tdesc_data);
+    tdesc_use_registers (gdbarch, info.target_desc, tdesc_data);
 
   return gdbarch;
 }

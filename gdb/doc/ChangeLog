@@ -1,5 +1,11 @@
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.texinfo (Predefined Target Types): Add int128
+	and uint128.
+	(Standard Target Features): Add PowerPC features.
+
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.texinfo (Maintenance Commands): Document "maint print c-tdesc".
 
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>

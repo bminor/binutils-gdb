@@ -24,6 +24,7 @@ gdb_start
 # architecture, or the description will be rejected.
 
 set core-regs ""
+set regdir ""
 switch -glob -- [istarget] {
     "*arm-*-*" {
         set core-regs {arm-core.xml}
@@ -33,6 +34,10 @@ switch -glob -- [istarget] {
     }
     "mips*-*-*" {
 	set core-regs {mips-cpu.xml mips-cp0.xml mips-fpu.xml}
+    }
+    "powerpc*-*-*" {
+	set regdir "rs6000/"
+	set core-regs {power-core.xml}
     }
 }
 
@@ -60,7 +65,7 @@ gdb_test "set tdesc file $srcdir/$subdir/single-reg.xml" \
 # will be found by <xi:include>.
 foreach src ${core-regs} {
     file delete "$src"
-    file copy "$srcdir/../features/$src" "$src"
+    file copy "$srcdir/../features/$regdir$src" "$src"
 }
 
 # Similarly, we need to copy files under test into the objdir.

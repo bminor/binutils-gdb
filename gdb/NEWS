@@ -10,6 +10,8 @@ is resolved.
 including breakpoints on C++ constructors, inside C++ templates,
 and in inlined functions.
 
+* Target descriptions can now describe registers for PowerPC.
+
 *** Changes in GDB 6.7
 
 * Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 

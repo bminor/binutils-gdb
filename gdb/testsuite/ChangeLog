@@ -1,4 +1,8 @@
-2007/10/15  Pierre Muller  <muller@ics.u-strasbg.fr>
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.xml/tdesc-regs.exp: Add PowerPC support.
+
+2007-10-15  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.base/sigstep.c (main): Add checks for
 	return values for setitimer call.
