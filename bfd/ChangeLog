@@ -1,3 +1,14 @@
+2007-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-arm.c (arm_emit_base_file_entry): Check fwrite return value.
+	Return status.  Adjust callers.
+	* coff-mcore.c (mcore_emit_base_file_entry): Likewise.
+	* coff-ppc.c (write_base_file_entry): New function.
+	(coff_ppc_relocate_section): Use it.
+	* elf32-arm.c (find_thumb_glue): Check asprintf return status.
+	(find_arm_glue): Likewise.
+	* vms-misc.c (_bfd_vms_output_flush): Check fwrite return value.
+
 2007-10-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 5160

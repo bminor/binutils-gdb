@@ -2520,9 +2520,10 @@ find_thumb_glue (struct bfd_link_info *link_info,
   hash = elf_link_hash_lookup
     (&(hash_table)->root, tmp_name, FALSE, FALSE, TRUE);
 
-  if (hash == NULL)
-    asprintf (error_message, _("unable to find THUMB glue '%s' for '%s'"),
-	      tmp_name, name);
+  if (hash == NULL
+      && asprintf (error_message, _("unable to find THUMB glue '%s' for '%s'"),
+		   tmp_name, name) == -1)
+    *error_message = (char *) bfd_errmsg (bfd_error_system_call);
 
   free (tmp_name);
 
@@ -2553,9 +2554,10 @@ find_arm_glue (struct bfd_link_info *link_info,
   myh = elf_link_hash_lookup
     (&(hash_table)->root, tmp_name, FALSE, FALSE, TRUE);
 
-  if (myh == NULL)
-    asprintf (error_message, _("unable to find ARM glue '%s' for '%s'"),
-	      tmp_name, name);
+  if (myh == NULL
+      && asprintf (error_message, _("unable to find ARM glue '%s' for '%s'"),
+		   tmp_name, name) == -1)
+    *error_message = (char *) bfd_errmsg (bfd_error_system_call);
 
   free (tmp_name);
 

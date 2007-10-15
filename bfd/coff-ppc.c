@@ -982,6 +982,18 @@ static bfd_boolean in_reloc_p(abfd, howto)
       && (howto->type != IMAGE_REL_PPC_TOCREL16_DEFN) ;
 }
 
+static bfd_boolean
+write_base_file_entry (bfd *obfd, struct bfd_link_info *info, bfd_vma addr)
+{
+  if (coff_data (obfd)->pe)
+     addr -= pe_data (obfd)->pe_opthdr.ImageBase;
+  if (fwrite (&addr, sizeof (addr), 1, (FILE *) info->base_file) == 1)
+    return TRUE;
+
+  bfd_set_error (bfd_error_system_call);
+  return FALSE;
+}
+
 /* The reloc processing routine for the optimized COFF linker.  */
 
 static bfd_boolean
@@ -1237,10 +1249,8 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		bfd_vma addr = (toc_section->output_section->vma
 				+ toc_section->output_offset + our_toc_offset);
 
-		if (coff_data (output_bfd)->pe)
-		  addr -= pe_data(output_bfd)->pe_opthdr.ImageBase;
-
-		fwrite (&addr, 1,4, (FILE *) info->base_file);
+		if (!write_base_file_entry (output_bfd, info, addr))
+		  return FALSE;
 	      }
 
 	    /* FIXME: this test is conservative.  */
@@ -1453,15 +1463,13 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* Relocation to a symbol in a section which
 		 isn't absolute - we output the address here
 		 to a file.  */
-	      bfd_vma addr = rel->r_vaddr
-		- input_section->vma
-		+ input_section->output_offset
-		  + input_section->output_section->vma;
+	      bfd_vma addr = (rel->r_vaddr
+			      - input_section->vma
+			      + input_section->output_offset
+			      + input_section->output_section->vma);
 
-	      if (coff_data (output_bfd)->pe)
-		addr -= pe_data (output_bfd)->pe_opthdr.ImageBase;
-
-	      fwrite (&addr, 1,4, (FILE *) info->base_file);
+	      if (!write_base_file_entry (output_bfd, info, addr))
+		return FALSE;
 	    }
 	}
 

@@ -691,12 +691,17 @@ _bfd_vms_output_flush (bfd * abfd)
 
   if (PRIV (push_level) == 0)
     {
+      if (0
 #ifndef VMS
-	/* Write length first, see FF_FOREIGN in the input routines.  */
-      fwrite (PRIV (output_buf) + 2, 2, 1, (FILE *) abfd->iostream);
+	  /* Write length first, see FF_FOREIGN in the input routines.  */
+	  || fwrite (PRIV (output_buf) + 2, 2, 1,
+		     (FILE *) abfd->iostream) != 1
 #endif
-      fwrite (PRIV (output_buf), (size_t) real_size, 1,
-	      (FILE *) abfd->iostream);
+	  || (real_size != 0
+	      && fwrite (PRIV (output_buf), (size_t) real_size, 1,
+			 (FILE *) abfd->iostream) != 1))
+	/* FIXME: Return error status.  */
+	abort ();
 
       PRIV (output_size) = 0;
     }

@@ -939,21 +939,24 @@ coff_arm_link_hash_table_create (bfd * abfd)
   return & ret->root.root;
 }
 
-static void
+static bfd_boolean
 arm_emit_base_file_entry (struct bfd_link_info *info,
 			  bfd *output_bfd,
 			  asection *input_section,
 			  bfd_vma reloc_offset)
 {
-  bfd_vma addr = reloc_offset
-                - input_section->vma
-                + input_section->output_offset
-                  + input_section->output_section->vma;
+  bfd_vma addr = (reloc_offset
+		  - input_section->vma
+		  + input_section->output_offset
+		  + input_section->output_section->vma);
 
   if (coff_data (output_bfd)->pe)
      addr -= pe_data (output_bfd)->pe_opthdr.ImageBase;
-  fwrite (& addr, 1, sizeof (addr), (FILE *) info->base_file);
+  if (fwrite (&addr, sizeof (addr), 1, (FILE *) info->base_file) == 1)
+    return TRUE;
 
+  bfd_set_error (bfd_error_system_call);
+  return FALSE;
 }
 
 #ifndef ARM_WINCE
@@ -1381,10 +1384,10 @@ coff_arm_relocate_section (bfd *output_bfd,
 			  bfd_put_32 (output_bfd, h_val | a2t3_func_addr_insn,
 				      s->contents + my_offset + 8);
 
-                          if (info->base_file)
-                            arm_emit_base_file_entry (info, output_bfd, s,
-                                                      my_offset + 8);
-
+                          if (info->base_file
+			      && !arm_emit_base_file_entry (info, output_bfd,
+							    s, my_offset + 8))
+			    return FALSE;
 			}
 
 		      BFD_ASSERT (my_offset <= globals->arm_glue_size);
@@ -1486,9 +1489,11 @@ coff_arm_relocate_section (bfd *output_bfd,
 			      bfd_put_32 (output_bfd, h_val,
 					  s->contents + my_offset + 16);
 
-                              if (info->base_file)
-                                arm_emit_base_file_entry (info, output_bfd, s,
-							  my_offset + 16);
+                              if (info->base_file
+				  && !arm_emit_base_file_entry (info,
+								output_bfd, s,
+								my_offset + 16))
+				return FALSE;
 			    }
 			  else
 			    {
@@ -1572,13 +1577,13 @@ coff_arm_relocate_section (bfd *output_bfd,
 	    }
 	}
 
-      if (info->base_file)
-	{
-	  /* Emit a reloc if the backend thinks it needs it.  */
-	  if (sym && pe_data(output_bfd)->in_reloc_p(output_bfd, howto))
-            arm_emit_base_file_entry (info, output_bfd, input_section,
-				      rel->r_vaddr);
-	}
+      /* Emit a reloc if the backend thinks it needs it.  */
+      if (info->base_file
+	  && sym
+	  && pe_data(output_bfd)->in_reloc_p(output_bfd, howto)
+	  && !arm_emit_base_file_entry (info, output_bfd, input_section,
+					rel->r_vaddr))
+	return FALSE;
 
       if (done)
 	rstat = bfd_reloc_ok;

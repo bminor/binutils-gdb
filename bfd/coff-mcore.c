@@ -51,8 +51,6 @@ static reloc_howto_type *coff_mcore_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *,
 	   bfd_vma *));
-static void mcore_emit_base_file_entry
-  PARAMS ((struct bfd_link_info *, bfd *, asection *, bfd_vma));
 static bfd_boolean in_reloc_p PARAMS ((bfd *, reloc_howto_type *));
 
 /* The NT loader points the toc register to &toc + 32768, in order to
@@ -221,12 +219,11 @@ mcore_hash_table;
 
 /* Add an entry to the base file.  */
 
-static void
-mcore_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
-      struct bfd_link_info * info;
-      bfd *                  output_bfd;
-      asection *             input_section;
-      bfd_vma                reloc_offset;
+static bfd_boolean
+mcore_emit_base_file_entry (struct bfd_link_info *info,
+			    bfd *output_bfd,
+			    asection *input_section,
+			    bfd_vma reloc_offset)
 {
   bfd_vma addr = reloc_offset
                  - input_section->vma
@@ -236,7 +233,11 @@ mcore_emit_base_file_entry (info, output_bfd, input_section, reloc_offset)
   if (coff_data (output_bfd)->pe)
      addr -= pe_data (output_bfd)->pe_opthdr.ImageBase;
 
-  fwrite (&addr, 1, sizeof (addr), (FILE *) info->base_file);
+  if (fwrite (&addr, sizeof (addr), 1, (FILE *) info->base_file) == 1)
+    return TRUE;
+
+  bfd_set_error (bfd_error_system_call);
+  return FALSE;
 }
 
 static bfd_reloc_status_type
@@ -522,12 +523,13 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
-      if (info->base_file)
-	{
-	  /* Emit a reloc if the backend thinks it needs it.  */
-	  if (sym && pe_data (output_bfd)->in_reloc_p (output_bfd, howto))
-            mcore_emit_base_file_entry (info, output_bfd, input_section, rel->r_vaddr);
-	}
+      /* Emit a reloc if the backend thinks it needs it.  */
+      if (info->base_file
+	  && sym
+	  && pe_data (output_bfd)->in_reloc_p (output_bfd, howto)
+	  && !mcore_emit_base_file_entry (info, output_bfd, input_section,
+					  rel->r_vaddr))
+	return FALSE;
 
       switch (rstat)
 	{
