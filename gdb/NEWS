@@ -12,6 +12,9 @@ and in inlined functions.
 
 * Target descriptions can now describe registers for PowerPC.
 
+* The GDB remote stub, gdbserver, now supports the AltiVec and SPE
+registers on PowerPC targets.
+
 *** Changes in GDB 6.7
 
 * Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 

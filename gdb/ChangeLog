@@ -1,5 +1,9 @@
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Mention gdbserver PowerPC improvements.
+
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* features/Makefile (WHICH): Add PowerPC register definitions.
 	(rs6000/powerpc-32-expedite, rs6000/powerpc-e500-expedite)
 	(rs6000/powerpc-64-expedite): New macros.
