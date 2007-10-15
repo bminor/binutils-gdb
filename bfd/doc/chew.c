@@ -120,6 +120,7 @@ static void overwrite_string (string_type *, string_type *);
 static void catbuf (string_type *, char *, unsigned int);
 static void cattext (string_type *, char *);
 static void catstr (string_type *, string_type *);
+static void die (char *);
 #endif
 
 static void
@@ -162,7 +163,9 @@ write_buffer (buffer, f)
      string_type *buffer;
      FILE *f;
 {
-  fwrite (buffer->ptr, buffer->write_idx, 1, f);
+  if (buffer->write_idx != 0
+      && fwrite (buffer->ptr, buffer->write_idx, 1, f) != 1)
+    die ("cannot write output");
 }
 
 static void
