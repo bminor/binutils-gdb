@@ -1,3 +1,8 @@
+2007-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* mcore-dis.c (print_insn_mcore): Protect "fprintf" var against
+	macro expansion.
+
 2007-10-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Add FirstXmm0.
