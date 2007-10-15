@@ -192,15 +192,14 @@ class Target_x86_64 : public Sized_target<64, false>
 		 unsigned char* view,
 		 off_t view_size);
 
-    // Check the range for a TLS relocation.
-    static inline void
-    check_range(const Relocate_info<64, false>*, size_t relnum,
-		const elfcpp::Rela<64, false>&, off_t, off_t);
-
-    // Check the validity of a TLS relocation.  This is like assert.
-    static inline void
-    check_tls(const Relocate_info<64, false>*, size_t relnum,
-	      const elfcpp::Rela<64, false>&, bool);
+    // Do a TLS Local-Dynamic to Local-Exec transition.
+    inline void
+    tls_ld_to_le(const Relocate_info<64, false>*, size_t relnum,
+		 Output_segment* tls_segment,
+		 const elfcpp::Rela<64, false>&, unsigned int r_type,
+		 elfcpp::Elf_types<64>::Elf_Addr value,
+		 unsigned char* view,
+		 off_t view_size);
 
     // This is set if we should skip the next reloc, which should be a
     // PLT32 reloc against ___tls_get_addr.
@@ -572,7 +571,7 @@ Target_x86_64::copy_reloc(const General_options* options,
                           Layout* layout,
                           Sized_relobj<64, false>* object,
                           unsigned int data_shndx, Symbol* gsym,
-                          const elfcpp::Rela<64, false>& rel)
+                          const elfcpp::Rela<64, false>& rela)
 {
   Sized_symbol<64>* ssym;
   ssym = symtab->get_sized_symbol SELECT_SIZE_NAME(64) (gsym
@@ -586,7 +585,7 @@ Target_x86_64::copy_reloc(const General_options* options,
       // symbol, then we will emit the relocation.
       if (this->copy_relocs_ == NULL)
 	this->copy_relocs_ = new Copy_relocs<64, false>();
-      this->copy_relocs_->save(ssym, object, data_shndx, rel);
+      this->copy_relocs_->save(ssym, object, data_shndx, rela);
     }
   else
     {
@@ -1347,7 +1346,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
 inline void
 Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
                                       size_t relnum,
-                                      const elfcpp::Rela<64, false>& rel,
+                                      const elfcpp::Rela<64, false>& rela,
                                       unsigned int r_type,
                                       const Sized_symbol<64>* gsym,
                                       const Symbol_value<64>* psymval,
@@ -1358,7 +1357,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
   Output_segment* tls_segment = relinfo->layout->tls_segment();
   if (tls_segment == NULL)
     {
-      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("TLS reloc but no TLS segment"));
       return;
     }
@@ -1381,11 +1380,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  Target_x86_64::Relocate::tls_ie_to_le(relinfo, relnum, tls_segment,
-                                                rel, r_type, value, view,
+                                                rela, r_type, value, view,
                                                 view_size);
 	  break;
 	}
-      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unsupported reloc type %u"),
 			     r_type);
       break;
@@ -1396,20 +1395,22 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  this->tls_gd_to_le(relinfo, relnum, tls_segment,
-			     rel, r_type, value, view,
+			     rela, r_type, value, view,
 			     view_size);
 	  break;
 	}
-      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unsupported reloc %u"), r_type);
       break;
 
     case elfcpp::R_X86_64_TLSLD:
       if (optimized_type == tls::TLSOPT_TO_LE)
         {
-          // FIXME: implement ld_to_le
+	  this->tls_ld_to_le(relinfo, relnum, tls_segment, rela, r_type,
+			     value, view, view_size);
+	  break;
         }
-      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unsupported reloc %u"), r_type);
       break;
 
@@ -1438,7 +1439,7 @@ inline void
 Target_x86_64::Relocate::tls_ie_to_le(const Relocate_info<64, false>* relinfo,
                                       size_t relnum,
                                       Output_segment* tls_segment,
-                                      const elfcpp::Rela<64, false>& rel,
+                                      const elfcpp::Rela<64, false>& rela,
                                       unsigned int,
                                       elfcpp::Elf_types<64>::Elf_Addr value,
                                       unsigned char* view,
@@ -1450,8 +1451,8 @@ Target_x86_64::Relocate::tls_ie_to_le(const Relocate_info<64, false>* relinfo,
   // movq foo@gottpoff(%rip),%reg  ==>  movq $YY,%reg
   // addq foo@gottpoff(%rip),%reg  ==>  addq $YY,%reg
 
-  Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, -3);
-  Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, 4);
+  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
+  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 4);
 
   unsigned char op1 = view[-3];
   unsigned char op2 = view[-2];
@@ -1494,7 +1495,7 @@ inline void
 Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* relinfo,
                                       size_t relnum,
                                       Output_segment* tls_segment,
-                                      const elfcpp::Rela<64, false>& rel,
+                                      const elfcpp::Rela<64, false>& rela,
                                       unsigned int,
                                       elfcpp::Elf_types<64>::Elf_Addr value,
                                       unsigned char* view,
@@ -1504,15 +1505,13 @@ Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* relinfo,
   // .word 0x6666; rex64; call __tls_get_addr
   // ==> movq %fs:0,%rax; leaq x@tpoff(%rax),%rax
 
-  Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, -4);
-  Target_x86_64::Relocate::check_range(relinfo, relnum, rel, view_size, 12);
+  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -4);
+  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 12);
 
-  Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-                                     (memcmp(view - 4, "\x66\x48\x8d\x3d", 4)
-                                      == 0));
-  Target_x86_64::Relocate::check_tls(relinfo, relnum, rel,
-                                     (memcmp(view + 4, "\x66\x66\x48\xe8", 4)
-                                      == 0));
+  tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+                 (memcmp(view - 4, "\x66\x48\x8d\x3d", 4) == 0));
+  tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+                 (memcmp(view + 4, "\x66\x66\x48\xe8", 4) == 0));
 
   memcpy(view - 4, "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0\0", 16);
 
@@ -1524,31 +1523,33 @@ Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* relinfo,
   this->skip_call_tls_get_addr_ = true;
 }
 
-// Check the range for a TLS relocation.
-
 inline void
-Target_x86_64::Relocate::check_range(const Relocate_info<64, false>* relinfo,
-                                     size_t relnum,
-                                     const elfcpp::Rela<64, false>& rel,
-                                     off_t view_size, off_t off)
+Target_x86_64::Relocate::tls_ld_to_le(const Relocate_info<64, false>* relinfo,
+                                      size_t relnum,
+                                      Output_segment*,
+                                      const elfcpp::Rela<64, false>& rela,
+                                      unsigned int,
+                                      elfcpp::Elf_types<64>::Elf_Addr,
+                                      unsigned char* view,
+                                      off_t view_size)
 {
-  off_t offset = rel.get_r_offset() + off;
-  if (offset < 0 || offset > view_size)
-    gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
-			   _("TLS relocation out of range"));
-}
+  // leaq foo@tlsld(%rip),%rdi; call __tls_get_addr@plt;
+  // ... leq foo@dtpoff(%rax),%reg
+  // ==> .word 0x6666; .byte 0x66; movq %fs:0,%rax ... leaq x@tpoff(%rax),%rdx
 
-// Check the validity of a TLS relocation.  This is like assert.
+  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
+  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 9);
 
-inline void
-Target_x86_64::Relocate::check_tls(const Relocate_info<64, false>* relinfo,
-                                   size_t relnum,
-                                   const elfcpp::Rela<64, false>& rel,
-                                   bool valid)
-{
-  if (!valid)
-    gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
-			   _("TLS relocation against invalid instruction"));
+  tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+                 view[-3] == 0x48 && view[-2] == 0x8d && view[-1] == 0x3d);
+
+  tls::check_tls(relinfo, relnum, rela.get_r_offset(), view[4] == 0xe8);
+
+  memcpy(view - 3, "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0\0", 12);
+
+  // The next reloc should be a PLT32 reloc against __tls_get_addr.
+  // We can skip it.
+  this->skip_call_tls_get_addr_ = true;
 }
 
 // Relocate section data.
