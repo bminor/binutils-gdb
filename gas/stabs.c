@@ -669,8 +669,9 @@ stabs_generate_asm_func (const char *funcname, const char *startlabname)
     }
 
   as_where (&file, &lineno);
-  asprintf (&buf, "\"%s:F1\",%d,0,%d,%s",
-	    funcname, N_FUN, lineno + 1, startlabname);
+  if (asprintf (&buf, "\"%s:F1\",%d,0,%d,%s",
+		funcname, N_FUN, lineno + 1, startlabname) == -1)
+    as_fatal ("%s", xstrerror (errno));
   input_line_pointer = buf;
   s_stab ('s');
   free (buf);
@@ -695,7 +696,8 @@ stabs_generate_asm_endfunc (const char *funcname ATTRIBUTE_UNUSED,
   ++label_count;
   colon (sym);
 
-  asprintf (&buf, "\"\",%d,0,0,%s-%s", N_FUN, sym, startlabname);
+  if (asprintf (&buf, "\"\",%d,0,0,%s-%s", N_FUN, sym, startlabname) == -1)
+    as_fatal ("%s", xstrerror (errno));
   input_line_pointer = buf;
   s_stab ('s');
   free (buf);
