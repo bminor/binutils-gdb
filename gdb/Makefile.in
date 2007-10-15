@@ -406,8 +406,7 @@ RUNTESTFLAGS=
 
 # XML files to build in to GDB.
 XMLFILES = $(srcdir)/features/gdb-target.dtd $(srcdir)/features/xinclude.dtd \
-	$(srcdir)/features/library-list.dtd \
-	$(TDEP_XML)
+	$(srcdir)/features/library-list.dtd
 
 # This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
 # interface to the serial port.  Hopefully if get ported to OS/2, VMS,
@@ -883,6 +882,12 @@ tui_windata_h = $(srcdir)/tui/tui-windata.h $(tui_data_h)
 tui_wingeneral_h = $(srcdir)/tui/tui-wingeneral.h
 tui_win_h = $(srcdir)/tui/tui-win.h $(tui_data_h)
 tui_winsource_h = $(srcdir)/tui/tui-winsource.h $(tui_data_h)
+
+# gdb/features preparsed descriptions
+features_headers = $(defs_h) $(gdbtypes_h) $(target_descriptions_h)
+arm_with_iwmmxt_c = $(srcdir)/features/arm-with-iwmmxt.c $(features_headers)
+mips_linux_c = $(srcdir)/features/mips-linux.c $(features_headers)
+mips64_linux_c = $(srcdir)/features/mips64-linux.c $(features_headers)
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -1802,7 +1807,7 @@ arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(gregset_h) \
 	$(target_h) $(linux_nat_h) $(gdb_proc_service_h) $(arm_linux_tdep_h) \
-	$(target_descriptions_h) $(xml_support_h)
+	$(target_descriptions_h) $(arm_with_iwmmxt_c)
 arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
 	$(gdbtypes_h) $(floatformat_h) $(gdbcore_h) $(frame_h) $(regcache_h) \
 	$(doublest_h) $(solib_svr4_h) $(osabi_h) $(arm_tdep_h) \
@@ -2361,7 +2366,7 @@ mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) $(osabi_h) $(elf_bfd_h)
 mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h) $(target_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_proc_service_h) $(gregset_h) \
 	$(mips_linux_tdep_h) $(inferior_h) $(target_descriptions_h) \
-	$(xml_support_h)
+	$(mips_linux_c) $(mips64_linux_c)
 mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(mips_tdep_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(frame_h) $(regcache_h) $(trad_frame_h) \

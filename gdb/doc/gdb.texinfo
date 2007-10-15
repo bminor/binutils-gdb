@@ -22589,6 +22589,12 @@ checksum.
 Print the entire architecture configuration.  The optional argument
 @var{file} names the file where the output goes.
 
+@kindex maint print c-tdesc
+@item maint print c-tdesc
+Print the current target description (@pxref{Target Descriptions}) as
+a C source file.  The created source file can be used in @value{GDBN}
+when an XML parser is not available to parse the description.
+
 @kindex maint print dummy-frames
 @item maint print dummy-frames
 Prints the contents of @value{GDBN}'s internal dummy-frame stack.

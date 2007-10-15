@@ -26,13 +26,15 @@
 #include "linux-nat.h"
 #include "mips-linux-tdep.h"
 #include "target-descriptions.h"
-#include "xml-support.h"
 
 #include "gdb_proc_service.h"
 #include "gregset.h"
 
 #include <sgidefs.h>
 #include <sys/ptrace.h>
+
+#include "features/mips-linux.c"
+#include "features/mips64-linux.c"
 
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 25
@@ -342,34 +344,15 @@ mips_linux_register_u_offset (struct gdbarch *gdbarch, int regno, int store_p)
     return mips_linux_register_addr (gdbarch, regno, store_p);
 }
 
-static LONGEST (*super_xfer_partial) (struct target_ops *, enum target_object,
-				      const char *, gdb_byte *, const gdb_byte *,
-				      ULONGEST, LONGEST);
-
-static LONGEST
-mips_linux_xfer_partial (struct target_ops *ops,
-			 enum target_object object,
-			 const char *annex,
-			 gdb_byte *readbuf, const gdb_byte *writebuf,
-			 ULONGEST offset, LONGEST len)
+static const struct target_desc *
+mips_linux_read_description (struct target_ops *ops)
 {
-  if (object == TARGET_OBJECT_AVAILABLE_FEATURES)
-    {
-      if (annex != NULL && strcmp (annex, "target.xml") == 0)
-	{
-	  /* Report that target registers are a size we know for sure
-	     that we can get from ptrace.  */
-	  if (_MIPS_SIM == _ABIO32)
-	    annex = "mips-linux.xml";
-	  else
-	    annex = "mips64-linux.xml";
-	}
-
-      return xml_builtin_xfer_partial (annex, readbuf, writebuf, offset, len);
-    }
-
-  return super_xfer_partial (ops, object, annex, readbuf, writebuf,
-			     offset, len);
+  /* Report that target registers are a size we know for sure
+     that we can get from ptrace.  */
+  if (_MIPS_SIM == _ABIO32)
+    return tdesc_mips_linux;
+  else
+    return tdesc_mips64_linux;
 }
 
 void _initialize_mips_linux_nat (void);
@@ -385,9 +368,11 @@ _initialize_mips_linux_nat (void)
   t->to_fetch_registers = mips64_linux_fetch_registers;
   t->to_store_registers = mips64_linux_store_registers;
 
-  /* Override the default to_xfer_partial.  */
-  super_xfer_partial = t->to_xfer_partial;
-  t->to_xfer_partial = mips_linux_xfer_partial;
+  t->to_read_description = mips_linux_read_description;
 
   linux_nat_add_target (t);
+
+  /* Initialize the standard target descriptions.  */
+  initialize_tdesc_mips_linux ();
+  initialize_tdesc_mips64_linux ();
 }

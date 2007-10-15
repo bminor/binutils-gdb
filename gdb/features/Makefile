@@ -25,6 +25,12 @@
 # affected XML files is changed, and the results should be kept in the
 # GDB repository.
 
+# It can also update the C files in the features directory from their
+# XML master copies.  This relies on a GDB linked with expat and
+# configured for the correct architecture, so the files are again kept
+# in the GDB repository.  To generate C files:
+#   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
+
 WHICH = arm-with-iwmmxt mips-linux mips64-linux
 
 # Record which registers should be sent to GDB by default after stop.
@@ -36,6 +42,10 @@ XSLTPROC = xsltproc
 outdir = ../regformats
 OUTPUTS = $(patsubst %,$(outdir)/%.dat,$(WHICH))
 
+XMLTOC =
+CFILES = $(patsubst %.xml,%.c,$(XMLTOC))
+GDB = false
+
 all: $(OUTPUTS)
 
 $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
@@ -46,6 +56,12 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	  $(XSLTPROC) sort-regs.xsl - | \
 	  $(XSLTPROC) gdbserver-regs.xsl - >> $(outdir)/$*.tmp
 	sh ../../move-if-change $(outdir)/$*.tmp $(outdir)/$*.dat
+
+cfiles: $(CFILES)
+%.c: %.xml
+	$(GDB) -nx -q -batch \
+	  -ex "set tdesc filename $<" -ex 'maint print c-tdesc' > $@.tmp
+	sh ../../move-if-change $@.tmp $@
 
 # Other dependencies.
 $(outdir)/arm-with-iwmmxt.dat: arm-core.xml xscale-iwmmxt.xml

@@ -1,3 +1,33 @@
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* target-descriptions.c (tdesc_predefined_types): New.
+	(tdesc_named_type): Use it.
+	(tdesc_type_id, maint_print_c_tdesc_cmd): New functions.
+	(_intialize_target_descriptions): Register "maint print c-tdesc".
+	* features/Makefile (XMLTOC, CFILES, GDB): New macros.
+	(cfiles, %.c): New rules.
+	* features/arm-with-iwmmxt.c, features/mips-linux.c,
+	features/mips64-linux.c: New generated files.
+
+	* arm-linux-nat.c: Include preparsed description instead of
+	"xml-support.h".
+	(super_xfer_partial, arm_linux_xfer_partial): Remove.
+	(arm_linux_read_description): New function.
+	(_initialize_arm_linux_nat): Set to_read_description instead of
+	to_xfer_partial.  Initialize preparsed description.
+	* config/arm/linux.mh (TDEP_XML): Delete.
+	* mips-linux-nat.c: Include preparsed descriptions instead of
+	"xml-support.h".
+	(super_xfer_partial, mips_linux_xfer_partial): Remove.
+	(mips_linux_read_description): New function.
+	(_initialize_mips_linux_nat): Set to_read_description instead of
+	to_xfer_partial.  Initialize preparsed description.
+	* config/mips/linux.mh (TDEP_XML): Delete.
+	* Makefile.in (XMLFILES): Remove $(TDEP_XML).
+	(features_headers, arm_with_iwmmxt_c, mips_linux_c)
+	(mips64_linux_c): New macros.
+	(arm-linux-nat.o, mips-linux-nat.o): Update.
+
 2007-10-15  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* cp-abi.c (set_cp_abi_as_auto_default): ARI fix:

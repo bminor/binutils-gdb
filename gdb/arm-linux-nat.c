@@ -25,7 +25,6 @@
 #include "target.h"
 #include "linux-nat.h"
 #include "target-descriptions.h"
-#include "xml-support.h"
 
 #include "arm-tdep.h"
 #include "arm-linux-tdep.h"
@@ -40,6 +39,8 @@
 
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
+
+#include "features/arm-with-iwmmxt.c"
 
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 22
@@ -571,42 +572,23 @@ get_linux_version (unsigned int *vmajor,
   return ((*vmajor << 16) | (*vminor << 8) | *vrelease);
 }
 
-static LONGEST (*super_xfer_partial) (struct target_ops *, enum target_object,
-				      const char *, gdb_byte *, const gdb_byte *,
-				      ULONGEST, LONGEST);
-
-static LONGEST
-arm_linux_xfer_partial (struct target_ops *ops,
-			 enum target_object object,
-			 const char *annex,
-			 gdb_byte *readbuf, const gdb_byte *writebuf,
-			 ULONGEST offset, LONGEST len)
+static const struct target_desc *
+arm_linux_read_description (struct target_ops *ops)
 {
-  if (object == TARGET_OBJECT_AVAILABLE_FEATURES)
-    {
-      if (annex != NULL && strcmp (annex, "target.xml") == 0)
-	{
-	  int ret;
-	  char regbuf[IWMMXT_REGS_SIZE];
+  int ret;
+  char regbuf[IWMMXT_REGS_SIZE];
 
-	  ret = ptrace (PTRACE_GETWMMXREGS, GET_THREAD_ID (inferior_ptid),
-			0, regbuf);
-	  if (ret < 0)
-	    arm_linux_has_wmmx_registers = 0;
-	  else
-	    arm_linux_has_wmmx_registers = 1;
+  ret = ptrace (PTRACE_GETWMMXREGS, GET_THREAD_ID (inferior_ptid),
+		0, regbuf);
+  if (ret < 0)
+    arm_linux_has_wmmx_registers = 0;
+  else
+    arm_linux_has_wmmx_registers = 1;
 
-	  if (arm_linux_has_wmmx_registers)
-	    annex = "arm-with-iwmmxt.xml";
-	  else
-	    return -1;
-	}
-
-      return xml_builtin_xfer_partial (annex, readbuf, writebuf, offset, len);
-    }
-
-  return super_xfer_partial (ops, object, annex, readbuf, writebuf,
-			     offset, len);
+  if (arm_linux_has_wmmx_registers)
+    return tdesc_arm_with_iwmmxt;
+  else
+    return NULL;
 }
 
 void _initialize_arm_linux_nat (void);
@@ -625,10 +607,11 @@ _initialize_arm_linux_nat (void)
   t->to_fetch_registers = arm_linux_fetch_inferior_registers;
   t->to_store_registers = arm_linux_store_inferior_registers;
 
-  /* Override the default to_xfer_partial.  */
-  super_xfer_partial = t->to_xfer_partial;
-  t->to_xfer_partial = arm_linux_xfer_partial;
+  t->to_read_description = arm_linux_read_description;
 
   /* Register the target.  */
   linux_nat_add_target (t);
+
+  /* Initialize the standard target descriptions.  */
+  initialize_tdesc_arm_with_iwmmxt ();
 }
