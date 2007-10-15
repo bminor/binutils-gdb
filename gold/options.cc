@@ -215,7 +215,7 @@ help(int, char**, char*, gold::Command_line*)
       std::puts(options[i].doc);
     }
 
-  ::exit(true);
+  ::exit(0);
 
   return 0;
 }
@@ -226,7 +226,7 @@ int
 version(int, char**, char* opt, gold::Command_line*)
 {
   gold::print_version(opt[0] == 'v' && opt[1] == '\0');
-  ::exit(true);
+  ::exit(0);
   return 0;
 }
 
@@ -767,7 +767,7 @@ Command_line::usage()
   fprintf(stderr,
 	  _("%s: use the --help option for usage information\n"),
 	  program_name);
-  ::exit(false);
+  ::exit(1);
 }
 
 void
