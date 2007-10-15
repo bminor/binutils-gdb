@@ -21,6 +21,7 @@
 #include <string.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <errno.h>
 
 static volatile int done;
 
@@ -39,9 +40,11 @@ enum {
   itimer_virtual = ITIMER_VIRTUAL
 } itimer = ITIMER_VIRTUAL;
 
+int
 main ()
 {
 
+  int res;
   /* Set up the signal handler.  */
   memset (&action, 0, sizeof (action));
   action.sa_handler = handler;
@@ -59,9 +62,21 @@ main ()
       /* Set up a one-off timer.  A timer, rather than SIGSEGV, is
 	 used as after a timer handler finishes the interrupted code
 	 can safely resume.  */
-      setitimer (itimer, &itime, NULL);
+      res = setitimer (itimer, &itime, NULL);
+      if (res == -1)
+	{
+	  printf ("First call to setitimer failed, errno = %d\r\n",errno);
+	  itimer = ITIMER_REAL;
+	  res = setitimer (itimer, &itime, NULL);
+	  if (res == -1)
+	    {
+	      printf ("Second call to setitimer failed, errno = %d\r\n",errno);
+	      return 1;
+	    }
+	}
       /* Wait.  */
       while (!done);
       done = 0;
     }
+  return 0;
 }

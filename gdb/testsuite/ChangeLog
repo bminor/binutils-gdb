@@ -1,3 +1,10 @@
+2007/10/15  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/sigstep.c (main): Add checks for
+	return values for setitimer call.
+	Call setitimer again with itimer = ITIMER_REAL
+	if first call to setitimer fails.
+
 2007-10-11  Kazu Hirata  <kazu@codesourcery.com>
 
 	* lib/gdb.exp (gdb_load_cmd): Print out $loadtimeout instead
