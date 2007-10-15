@@ -1130,14 +1130,17 @@ static void
 print_line (struct print_file_list *p, unsigned int line)
 {
   const char *l;
+  size_t len;
  
   --line; 
   if (line >= p->maxline)
     return;
   l = p->linemap [line];
-  fwrite (l, 1, strcspn (l, "\n\r"), stdout);
-  putchar ('\n');
-} 
+  /* Test fwrite return value to quiet glibc warning.  */
+  len = strcspn (l, "\n\r");
+  if (len == 0 || fwrite (l, len, 1, stdout) == 1)
+    putchar ('\n');
+}
 
 /* Print a range of source code lines. */
 

@@ -176,7 +176,9 @@ checksum (FILE *file, unsigned char *ptr, int size, int code)
 
   /* Glue on a checksum too.  */
   ptr[bytes] = ~sum;
-  fwrite (ptr, bytes + 1, 1, file);
+  if (fwrite (ptr, bytes + 1, 1, file) != 1)
+    /* FIXME: Return error status.  */
+    abort ();
 }
 
 
@@ -299,7 +301,10 @@ wr_tr (void)
       0x03,			/* RL */
       0xfd,			/* CS */
     };
-  fwrite (b, 1, sizeof (b), file);
+
+  if (fwrite (b, sizeof (b), 1, file) != 1)
+    /* FIXME: Return error status.  */
+    abort ();
 }
 
 static void
@@ -1452,7 +1457,10 @@ wr_cs (void)
     0x00,			/* dot */
     0xDE			/* CS */
   };
-  fwrite (b, 1, sizeof (b), file);
+
+  if (fwrite (b, sizeof (b), 1, file) != 1)
+    /* FIXME: Return error status.  */
+    abort ();
 }
 
 /* Write out the SC records for a unit.  Create an SC

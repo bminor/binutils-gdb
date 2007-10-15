@@ -1,3 +1,10 @@
+2007-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (print_line): Check fwrite return value.
+	* srconv.c (checksum, wr_tr, wr_cs): Likewise.
+	* sysdump.c (fillup): Return zero on getc or fread EOF.  Return count
+	read.
+
 2007-10-10  Jim Blandy  <jimb@codesourcery.com>
 
 	* dwarf.c (process_debug_info): Line up section offsets of
