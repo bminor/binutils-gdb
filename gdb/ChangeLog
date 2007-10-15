@@ -1,3 +1,9 @@
+2007-10-15  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* cp-abi.c (set_cp_abi_as_auto_default): ARI fix:
+	Replace xasprintf by xstrprintf.
+	symfile-mem.c (add_vsyscall_page): Ditto.
+
 2007-10-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ia64-linux-nat.c (ia64_register_addr): Add gdbarch parameter,

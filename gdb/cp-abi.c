@@ -193,10 +193,10 @@ set_cp_abi_as_auto_default (const char *short_name)
   auto_cp_abi = *abi;
 
   auto_cp_abi.shortname = "auto";
-  xasprintf (&new_longname, "currently \"%s\"", abi->shortname);
+  new_longname = xstrprintf ("currently \"%s\"", abi->shortname);
   auto_cp_abi.longname = new_longname;
 
-  xasprintf (&new_doc, "Automatically selected; currently \"%s\"",
+  new_doc = xstrprintf ("Automatically selected; currently \"%s\"",
 	     abi->shortname);
   auto_cp_abi.doc = new_doc;
 
