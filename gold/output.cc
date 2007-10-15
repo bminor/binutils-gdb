@@ -29,6 +29,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <algorithm>
+#include "libiberty.h"   // for unlink_if_ordinary()
 
 #include "parameters.h"
 #include "object.h"
@@ -1685,11 +1686,9 @@ Output_file::open(off_t file_size)
   // If we fail, continue; this command is merely a best-effort attempt
   // to improve the odds for open().
 
-  // FIXME: unlink the file if it's a symlink, even a symlink to a dir.
-  //        Or do we want to follow the symlink and unlink its target? 
   struct stat s;
-  if (::stat(this->name_, &s) == 0 && s.st_size != 0 && S_ISREG(s.st_mode))
-    ::unlink(this->name_);
+  if (::stat(this->name_, &s) == 0 && s.st_size != 0)
+    unlink_if_ordinary(this->name_);
 
   int mode = parameters->output_is_object() ? 0666 : 0777;
   int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
