@@ -1,5 +1,21 @@
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* features/rs6000/power-altivec.xml, features/rs6000/power-core.xml,
+	features/rs6000/power-fpu.xml, features/rs6000/power-oea.xml,
+	features/rs6000/power-spe.xml, features/rs6000/power64-core.xml: New
+	feature descriptions for standard PowerPC register sets.
+
+	* features/rs6000/powerpc-32.xml, features/rs6000/powerpc-403.xml,
+	features/rs6000/powerpc-403gc.xml, features/rs6000/powerpc-505.xml,
+	features/rs6000/powerpc-601.xml, features/rs6000/powerpc-602.xml,
+	features/rs6000/powerpc-603.xml, features/rs6000/powerpc-604.xml,
+	features/rs6000/powerpc-64.xml, features/rs6000/powerpc-7400.xml,
+	features/rs6000/powerpc-750.xml, features/rs6000/powerpc-860.xml,
+	features/rs6000/powerpc-e500.xml, features/rs6000/rs6000.xml: New
+	target descriptions for PowerPC processors.
+
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* target-descriptions.c (tdesc_predefined_types): New.
 	(tdesc_named_type): Use it.
 	(tdesc_type_id, maint_print_c_tdesc_cmd): New functions.
