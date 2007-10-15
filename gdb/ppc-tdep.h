@@ -227,4 +227,6 @@ enum {
 /* Estimate for the maximum number of instrctions in a function epilogue.  */
 #define PPC_MAX_EPILOGUE_INSTRUCTIONS  52
 
+extern struct target_desc *tdesc_powerpc_e500;
+
 #endif /* ppc-tdep.h */

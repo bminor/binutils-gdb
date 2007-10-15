@@ -1,5 +1,11 @@
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* ppc-linux-nat.c (ppc_linux_read_description): New.
+	(_initialize_ppc_linux_nat): Set to_read_description.
+	* ppc-tdep.h (tdesc_powerpc_e500): Declare.
+
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* NEWS: Document target described register support for PowerPC.
 	* ppc-tdep.h: Remove ppc_spr constants.
 	(struct gdbarch_tdep): Remove regs, ppc_sr0_regnum, and

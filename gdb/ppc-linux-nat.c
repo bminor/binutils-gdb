@@ -940,6 +940,33 @@ fill_fpregset (const struct regcache *regcache,
 			fpregsetp, sizeof (*fpregsetp));
 }
 
+static const struct target_desc *
+ppc_linux_read_description (struct target_ops *ops)
+{
+  if (have_ptrace_getsetevrregs)
+    {
+      struct gdb_evrregset_t evrregset;
+      int tid = TIDGET (inferior_ptid);
+
+      if (tid == 0)
+	tid = PIDGET (inferior_ptid);
+
+      if (ptrace (PTRACE_GETEVRREGS, tid, 0, &evrregset) >= 0)
+        return tdesc_powerpc_e500;
+      else
+        {
+          /* EIO means that the PTRACE_GETEVRREGS request isn't supported.  */
+          if (errno == EIO)
+	    return NULL;
+	  else
+            /* Anything else needs to be reported.  */
+            perror_with_name (_("Unable to fetch SPE registers"));
+	}
+    }
+
+  return NULL;
+}
+
 void _initialize_ppc_linux_nat (void);
 
 void
@@ -961,6 +988,8 @@ _initialize_ppc_linux_nat (void)
   t->to_remove_watchpoint = ppc_linux_remove_watchpoint;
   t->to_stopped_by_watchpoint = ppc_linux_stopped_by_watchpoint;
   t->to_stopped_data_address = ppc_linux_stopped_data_address;
+
+  t->to_read_description = ppc_linux_read_description;
 
   /* Register the target.  */
   linux_nat_add_target (t);
