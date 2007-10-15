@@ -99,17 +99,38 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
-  powerpc64-*-linux*)	srv_regobj=reg-ppc64.o
-			srv_tgtobj="linux-low.o linux-ppc64-low.o"
+  powerpc64-*-linux*)	srv_tgtobj="linux-low.o linux-ppc64-low.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
+			if test $gdb_cv_ppc_altivec = yes; then
+			  srv_regobj=powerpc-64.o
+			  srv_xmltarget=rs6000/powerpc-64.xml
+			  srv_xmlfiles="rs6000/power-altivec.xml"
+			  srv_xmlfiles="$srv_xmlfiles rs6000/power64-core.xml"
+			  srv_xmlfiles="$srv_xmlfiles rs6000/power-fpu.xml"
+			else
+			  srv_regobj=reg-ppc64.o
+			fi
 			;;
-  powerpc-*-linux*)	srv_regobj=reg-ppc.o
-			srv_tgtobj="linux-low.o linux-ppc-low.o"
+  powerpc-*-linux*)	srv_tgtobj="linux-low.o linux-ppc-low.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
+			if test $gdb_cv_ppc_altivec = yes; then
+			  srv_regobj=powerpc-32.o
+			  srv_xmltarget=rs6000/powerpc-32.xml
+			  srv_xmlfiles="rs6000/power-altivec.xml"
+			  srv_xmlfiles="$srv_xmlfiles rs6000/power-core.xml"
+			  srv_xmlfiles="$srv_xmlfiles rs6000/power-fpu.xml"
+			elif test $gdb_cv_ppc_spe = yes; then
+			  srv_regobj=powerpc-e500.o
+			  srv_xmltarget=rs6000/powerpc-e500.xml
+			  srv_xmlfiles="rs6000/power-spe.xml"
+			  srv_xmlfiles="$srv_xmlfiles rs6000/power-core.xml"
+			else
+			  srv_regobj=reg-ppc.o
+			fi
 			;;
   s390-*-linux*)	srv_regobj=reg-s390.o
 			srv_tgtobj="linux-low.o linux-s390-low.o"

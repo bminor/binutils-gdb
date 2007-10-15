@@ -1,5 +1,14 @@
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* features/Makefile (WHICH): Add PowerPC register definitions.
+	(rs6000/powerpc-32-expedite, rs6000/powerpc-e500-expedite)
+	(rs6000/powerpc-64-expedite): New macros.
+	($(outdir)/%.dat): Handle subdirectories.
+	* regformats/rs6000/powerpc-32.dat, regformats/rs6000/powerpc-64.dat,
+	regformats/rs6000/powerpc-e500.dat: New generated files.
+
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* ppc-linux-nat.c (ppc_linux_read_description): New.
 	(_initialize_ppc_linux_nat): Set to_read_description.
 	* ppc-tdep.h (tdesc_powerpc_e500): Declare.

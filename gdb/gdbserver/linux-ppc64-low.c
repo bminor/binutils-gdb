@@ -109,7 +109,54 @@ static void ppc_fill_gregset (void *buf)
     collect_register (i, (char *) buf + ppc_regmap[i]);
 }
 
+#ifdef __ALTIVEC__
+
+#ifndef PTRACE_GETVRREGS
+#define PTRACE_GETVRREGS 18
+#define PTRACE_SETVRREGS 19
+#endif
+
+#define SIZEOF_VRREGS 33*16+4
+
+static void
+ppc_fill_vrregset (void *buf)
+{
+  int i, base;
+  char *regset = buf;
+
+  base = find_regno ("vr0");
+  for (i = 0; i < 32; i++)
+    collect_register (base + i, &regset[i * 16]);
+
+  collect_register_by_name ("vscr", &regset[32 * 16 + 12]);
+  collect_register_by_name ("vrsave", &regset[33 * 16]);
+}
+
+static void
+ppc_store_vrregset (const void *buf)
+{
+  int i, base;
+  const char *regset = buf;
+
+  base = find_regno ("vr0");
+  for (i = 0; i < 32; i++)
+    supply_register (base + i, &regset[i * 16]);
+
+  supply_register_by_name ("vscr", &regset[32 * 16 + 12]);
+  supply_register_by_name ("vrsave", &regset[33 * 16]);
+}
+
+#endif /* __ALTIVEC__ */
+
 struct regset_info target_regsets[] = {
+  /* List the extra register sets before GENERAL_REGS.  That way we will
+     fetch them every time, but still fall back to PTRACE_PEEKUSER for the
+     general registers.  Some kernels support these, but not the newer
+     PPC_PTRACE_GETREGS.  */
+#ifdef __ALTIVEC__
+  { PTRACE_GETVRREGS, PTRACE_SETVRREGS, SIZEOF_VRREGS, EXTENDED_REGS,
+    ppc_fill_vrregset, ppc_store_vrregset },
+#endif
   { 0, 0, 0, GENERAL_REGS, ppc_fill_gregset, NULL },
   { 0, 0, -1, -1, NULL, NULL }
 };

@@ -31,12 +31,16 @@
 # in the GDB repository.  To generate C files:
 #   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
 
-WHICH = arm-with-iwmmxt mips-linux mips64-linux
+WHICH = arm-with-iwmmxt mips-linux mips64-linux \
+	rs6000/powerpc-32 rs6000/powerpc-e500 rs6000/powerpc-64
 
 # Record which registers should be sent to GDB by default after stop.
 arm-with-iwmmxt-expedite = r11,sp,pc
 mips-linux-expedite = r29,pc
 mips64-linux-expedite = r29,pc
+rs6000/powerpc-32-expedite = r1,pc
+rs6000/powerpc-e500-expedite = r1,pc
+rs6000/powerpc-64-expedite = r1,pc
 
 XSLTPROC = xsltproc
 outdir = ../regformats
@@ -50,9 +54,9 @@ all: $(OUTPUTS)
 
 $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	echo "# DO NOT EDIT: generated from $<" > $(outdir)/$*.tmp
-	echo "name:`echo $* | sed 's/-/_/g'`" >> $(outdir)/$*.tmp
+	echo "name:`echo $(notdir $*) | sed 's/-/_/g'`" >> $(outdir)/$*.tmp
 	echo "expedite:$($*-expedite)" >> $(outdir)/$*.tmp
-	$(XSLTPROC) --xinclude number-regs.xsl $< | \
+	$(XSLTPROC) --path "$(PWD)" --xinclude number-regs.xsl $< | \
 	  $(XSLTPROC) sort-regs.xsl - | \
 	  $(XSLTPROC) gdbserver-regs.xsl - >> $(outdir)/$*.tmp
 	sh ../../move-if-change $(outdir)/$*.tmp $(outdir)/$*.dat

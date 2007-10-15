@@ -219,6 +219,7 @@ clean:
 	rm -f reg-ppc.c reg-sh.c reg-spu.c reg-x86-64.c reg-i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c
 	rm -f arm-with-iwmmxt.c mips-linux.c mips64-linux.c
+	rm -f powerpc-32.c powerpc-64.c powerpc-e500.c
 	rm -f xml-builtin.c stamp-xml target.xml
 
 maintainer-clean realclean distclean: clean
@@ -356,6 +357,15 @@ reg-ppc.c : $(srcdir)/../regformats/reg-ppc.dat $(regdat_sh)
 reg-ppc64.o : reg-ppc64.c $(regdef_h)
 reg-ppc64.c : $(srcdir)/../regformats/reg-ppc64.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-ppc64.dat reg-ppc64.c
+powerpc-32.o : powerpc-32.c $(regdef_h)
+powerpc-32.c : $(srcdir)/../regformats/rs6000/powerpc-32.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32.dat powerpc-32.c
+powerpc-e500.o : powerpc-e500.c $(regdef_h)
+powerpc-e500.c : $(srcdir)/../regformats/rs6000/powerpc-e500.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-e500.dat powerpc-e500.c
+powerpc-64.o : powerpc-64.c $(regdef_h)
+powerpc-64.c : $(srcdir)/../regformats/rs6000/powerpc-64.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-64.dat powerpc-64.c
 reg-s390.o : reg-s390.c $(regdef_h)
 reg-s390.c : $(srcdir)/../regformats/reg-s390.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-s390.dat reg-s390.c

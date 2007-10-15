@@ -1,3 +1,24 @@
+2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (clean): Remove new files.
+	(powerpc-32.o, powerpc-32.c, powerpc-e500.o, powerpc-e500.c)
+	(powerpc-64.o, powerpc-64.c): New rules.
+	* configure.srv: Use alternate register sets for powerpc64-*-linux*
+	with AltiVec, powerpc-*-linux* with AltiVec, and powerpc-*-linux*
+	with SPE.
+	* linux-ppc-low.c (ppc_regmap): Do not fetch the FP registers for
+	SPE targets.
+	(ppc_cannot_store_register): Do not check for FPSCR for SPE targets.
+	(PTRACE_GETVRREGS, PTRACE_SETVRREGS, SIZEOF_VRREGS, ppc_fill_vrregset)
+	(ppc_store_vrregset, PTRACE_GETEVRREGS, PTRACE_SETEVRREGS)
+	(struct gdb_evrregset_t, ppc_fill_evrregset, ppc_store_evrregset): New.
+	(target_regsets): Add AltiVec and SPE register sets.
+	* configure.ac: Check for AltiVec and SPE.
+	* linux-ppc64-low.c (PTRACE_GETVRREGS, PTRACE_SETVRREGS, SIZEOF_VRREGS)
+	(ppc_fill_vrregset, ppc_store_vrregset): New.
+	(target_regsets): Add AltiVec register set.
+	* configure: Regenerated.
+
 2007-09-19  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (O_LARGEFILE): Define.

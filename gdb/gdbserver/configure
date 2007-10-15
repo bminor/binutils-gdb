@@ -3567,6 +3567,70 @@ fi
 echo "$as_me:$LINENO: result: $gdb_cv_arm_iwmmxt" >&5
 echo "${ECHO_T}$gdb_cv_arm_iwmmxt" >&6
     ;;
+  powerpc*-*-*)
+    echo "$as_me:$LINENO: checking if Altivec is selected" >&5
+echo $ECHO_N "checking if Altivec is selected... $ECHO_C" >&6
+if test "${gdb_cv_ppc_altivec+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  save_CPPFLAGS="$CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS $CFLAGS"
+                    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#ifdef __ALTIVEC__
+got it
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "got it" >/dev/null 2>&1; then
+  gdb_cv_ppc_altivec=yes
+else
+  gdb_cv_ppc_altivec=no
+fi
+rm -f conftest*
+
+                    CPPFLAGS="$save_CPPFLAGS"
+fi
+echo "$as_me:$LINENO: result: $gdb_cv_ppc_altivec" >&5
+echo "${ECHO_T}$gdb_cv_ppc_altivec" >&6
+    echo "$as_me:$LINENO: checking if SPE is selected" >&5
+echo $ECHO_N "checking if SPE is selected... $ECHO_C" >&6
+if test "${gdb_cv_ppc_spe+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  save_CPPFLAGS="$CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS $CFLAGS"
+                    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#ifdef __SPE__
+got it
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "got it" >/dev/null 2>&1; then
+  gdb_cv_ppc_spe=yes
+else
+  gdb_cv_ppc_spe=no
+fi
+rm -f conftest*
+
+                    CPPFLAGS="$save_CPPFLAGS"
+fi
+echo "$as_me:$LINENO: result: $gdb_cv_ppc_spe" >&5
+echo "${ECHO_T}$gdb_cv_ppc_spe" >&6
+    ;;
 esac
 
 . ${srcdir}/configure.srv

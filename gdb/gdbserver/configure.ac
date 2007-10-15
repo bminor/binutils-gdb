@@ -81,6 +81,28 @@ got it
 				[gdb_cv_arm_iwmmxt=no])
 		   CPPFLAGS="$save_CPPFLAGS"])
     ;;
+  powerpc*-*-*)
+    AC_CACHE_CHECK([if Altivec is selected], [gdb_cv_ppc_altivec],
+      	           [save_CPPFLAGS="$CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS $CFLAGS"
+                    AC_EGREP_CPP([got it], [
+#ifdef __ALTIVEC__
+got it
+#endif
+                 ], [gdb_cv_ppc_altivec=yes],
+                    [gdb_cv_ppc_altivec=no])
+                    CPPFLAGS="$save_CPPFLAGS"])
+    AC_CACHE_CHECK([if SPE is selected], [gdb_cv_ppc_spe],
+      	           [save_CPPFLAGS="$CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS $CFLAGS"
+                    AC_EGREP_CPP([got it], [
+#ifdef __SPE__
+got it
+#endif
+                 ], [gdb_cv_ppc_spe=yes],
+                    [gdb_cv_ppc_spe=no])
+                    CPPFLAGS="$save_CPPFLAGS"])
+    ;;
 esac
 
 . ${srcdir}/configure.srv
