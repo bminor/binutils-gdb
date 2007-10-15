@@ -974,29 +974,6 @@ rs6000_software_single_step (struct frame_info *frame)
 }
 
 
-/* return pc value after skipping a function prologue and also return
-   information about a function frame.
-
-   in struct rs6000_framedata fdata:
-   - frameless is TRUE, if function does not have a frame.
-   - nosavedpc is TRUE, if function does not save %pc value in its frame.
-   - offset is the initial size of this stack frame --- the amount by
-   which we decrement the sp to allocate the frame.
-   - saved_gpr is the number of the first saved gpr.
-   - saved_fpr is the number of the first saved fpr.
-   - saved_vr is the number of the first saved vr.
-   - saved_ev is the number of the first saved ev.
-   - alloca_reg is the number of the register used for alloca() handling.
-   Otherwise -1.
-   - gpr_offset is the offset of the first saved gpr from the previous frame.
-   - fpr_offset is the offset of the first saved fpr from the previous frame.
-   - vr_offset is the offset of the first saved vr from the previous frame.
-   - ev_offset is the offset of the first saved ev from the previous frame.
-   - lr_offset is the offset of the saved lr
-   - cr_offset is the offset of the saved cr
-   - vrsave_offset is the offset of the saved vrsave register
- */
-
 #define SIGNED_SHORT(x) 						\
   ((sizeof (short) == 2)						\
    ? ((int)(short)(x))							\
@@ -1107,6 +1084,29 @@ bl_to_blrl_insn_p (CORE_ADDR pc, int insn)
 
   return 0;
 }
+
+/* return pc value after skipping a function prologue and also return
+   information about a function frame.
+
+   in struct rs6000_framedata fdata:
+   - frameless is TRUE, if function does not have a frame.
+   - nosavedpc is TRUE, if function does not save %pc value in its frame.
+   - offset is the initial size of this stack frame --- the amount by
+   which we decrement the sp to allocate the frame.
+   - saved_gpr is the number of the first saved gpr.
+   - saved_fpr is the number of the first saved fpr.
+   - saved_vr is the number of the first saved vr.
+   - saved_ev is the number of the first saved ev.
+   - alloca_reg is the number of the register used for alloca() handling.
+   Otherwise -1.
+   - gpr_offset is the offset of the first saved gpr from the previous frame.
+   - fpr_offset is the offset of the first saved fpr from the previous frame.
+   - vr_offset is the offset of the first saved vr from the previous frame.
+   - ev_offset is the offset of the first saved ev from the previous frame.
+   - lr_offset is the offset of the saved lr
+   - cr_offset is the offset of the saved cr
+   - vrsave_offset is the offset of the saved vrsave register
+ */
 
 static CORE_ADDR
 skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
