@@ -1161,6 +1161,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 		  fputs_unfiltered ("^error,msg=\"", raw_stdout);
 		  fputstr_unfiltered (mi_error_message, '"', raw_stdout);
 		  xfree (mi_error_message);
+		  mi_error_message = NULL;
 		  fputs_unfiltered ("\"\n", raw_stdout);
 		}
 	      mi_out_rewind (uiout);
@@ -1213,6 +1214,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 		    fputs_unfiltered ("^error,msg=\"", raw_stdout);
 		    fputstr_unfiltered (mi_error_message, '"', raw_stdout);
 		    xfree (mi_error_message);
+		    mi_error_message = NULL;
 		    fputs_unfiltered ("\"\n", raw_stdout);
 		  }
 		mi_out_rewind (uiout);

@@ -1,3 +1,8 @@
+2007-10-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mi/mi-main.c (captured_mi_execute_command): Clear mi_error_message
+	after freeing it.
+
 2007-10-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* m32r-tdep.c (decode_prologue): Sign extend offset for
