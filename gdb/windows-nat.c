@@ -22,8 +22,6 @@
 
 /* Originally by Steve Chamberlain, sac@cygnus.com */
 
-/* We assume we're being built with and will be used for cygwin.  */
-
 #include "defs.h"
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
@@ -40,7 +38,9 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <imagehlp.h>
+#ifdef __CYGWIN__
 #include <sys/cygwin.h>
+#endif
 #include <signal.h>
 
 #include "buildsym.h"
@@ -64,9 +64,11 @@
 
 static struct target_ops win32_ops;
 
+#ifdef __CYGWIN__
 /* The starting and ending address of the cygwin1.dll text segment. */
 static bfd_vma cygwin_load_start;
 static bfd_vma cygwin_load_end;
+#endif
 
 static int have_saved_context;	/* True if we've saved context from a cygwin signal. */
 static CONTEXT saved_context;	/* Containes the saved context from a cygwin signal. */
@@ -81,7 +83,6 @@ enum
     CONTEXT_DEBUGGER = (CONTEXT_FULL | CONTEXT_FLOATING_POINT)
   };
 #endif
-#include <sys/procfs.h>
 #include <psapi.h>
 
 #define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_DEBUG_REGISTERS \
@@ -142,7 +143,9 @@ static int saw_create;
 
 /* User options. */
 static int new_console = 0;
+#ifdef __CYGWIN__
 static int cygwin_exceptions = 0;
+#endif
 static int new_group = 1;
 static int debug_exec = 0;		/* show execution */
 static int debug_events = 0;		/* show events from kernel */
@@ -637,9 +640,11 @@ win32_make_so (const char *name, DWORD load_addr)
   so = XZALLOC (struct so_list);
   so->lm_info = (struct lm_info *) xmalloc (sizeof (struct lm_info));
   so->lm_info->load_addr = load_addr;
-  cygwin_conv_to_posix_path (buf, so->so_name);
   strcpy (so->so_original_name, name);
-
+#ifndef __CYGWIN__
+  strcpy (so->so_name, buf);
+#else
+  cygwin_conv_to_posix_path (buf, so->so_name);
   /* Record cygwin1.dll .text start/end.  */
   p = strchr (so->so_name, '\0') - (sizeof ("/cygwin1.dll") - 1);
   if (p >= so->so_name && strcasecmp (p, "/cygwin1.dll") == 0)
@@ -670,6 +675,7 @@ win32_make_so (const char *name, DWORD load_addr)
 
       bfd_close (abfd);
     }
+#endif
 
   return so;
 }
@@ -819,7 +825,9 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
     /* nothing to do */;
   else if (strncmp (s, _CYGWIN_SIGNAL_STRING, sizeof (_CYGWIN_SIGNAL_STRING) - 1) != 0)
     {
+#ifdef __CYGWIN__
       if (strncmp (s, "cYg", 3) != 0)
+#endif
 	warning (("%s"), s);
     }
 #ifdef __COPY_CONTEXT_SIZE
@@ -997,6 +1005,7 @@ handle_exception (struct target_waitstatus *ourstatus)
     case EXCEPTION_ACCESS_VIOLATION:
       DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_ACCESS_VIOLATION");
       ourstatus->value.sig = TARGET_SIGNAL_SEGV;
+#ifdef __CYGWIN__
       {
 	/* See if the access violation happened within the cygwin DLL itself.  Cygwin uses
 	   a kind of exception handling to deal with passed-in invalid addresses. gdb
@@ -1011,6 +1020,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 		&& strncmp (fn, "KERNEL32!IsBad", strlen ("KERNEL32!IsBad")) == 0))
 	  return 0;
       }
+#endif
       break;
     case STATUS_STACK_OVERFLOW:
       DEBUG_EXCEPTION_SIMPLE ("STATUS_STACK_OVERFLOW");
@@ -1472,7 +1482,9 @@ do_initial_win32_stuff (DWORD pid)
   debug_registers_used = 0;
   for (i = 0; i < sizeof (dr) / sizeof (dr[0]); i++)
     dr[i] = 0;
+#ifdef __CYGWIN__
   cygwin_load_start = cygwin_load_end = 0;
+#endif
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
   push_target (&win32_ops);
@@ -1625,6 +1637,7 @@ win32_attach (char *args, int from_tty)
   ok = DebugActiveProcess (pid);
   saw_create = 0;
 
+#ifdef __CYGWIN__
   if (!ok)
     {
       /* Try fall back to Cygwin pid */
@@ -1632,10 +1645,11 @@ win32_attach (char *args, int from_tty)
 
       if (pid > 0)
 	ok = DebugActiveProcess (pid);
+  }
+#endif
 
-      if (!ok)
-	error (_("Can't attach to process."));
-    }
+  if (!ok)
+    error (_("Can't attach to process."));
 
   if (has_detach_ability ())
     DebugSetProcessKillOnExit (FALSE);
@@ -1697,10 +1711,12 @@ win32_pid_to_exec_file (int pid)
   /* Try to find the process path using the Cygwin internal process list
      pid isn't a valid pid, unfortunately.  Use current_event.dwProcessId
      instead.  */
-  /* TODO: Also find native Windows processes using CW_GETPINFO_FULL.  */
 
   static char path[MAX_PATH + 1];
   char *path_ptr = NULL;
+
+#ifdef __CYGWIN__
+  /* TODO: Also find native Windows processes using CW_GETPINFO_FULL.  */
   int cpid;
   struct external_pinfo *pinfo;
 
@@ -1718,6 +1734,8 @@ win32_pid_to_exec_file (int pid)
        }
     }
   cygwin_internal (CW_UNLOCK_PINFO);
+#endif
+
   return path_ptr;
 }
 
@@ -1764,6 +1782,7 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
   memset (&si, 0, sizeof (si));
   si.cb = sizeof (si);
 
+#ifdef __CYGWIN__
   if (!useshell)
     {
       flags = DEBUG_ONLY_THIS_PROCESS;
@@ -1784,6 +1803,10 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
       toexec = shell;
       flags = DEBUG_PROCESS;
     }
+#else
+  toexec = exec_file;
+  flags = DEBUG_ONLY_THIS_PROCESS;
+#endif
 
   if (new_group)
     flags |= CREATE_NEW_PROCESS_GROUP;
@@ -1798,6 +1821,7 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
   strcat (args, " ");
   strcat (args, allargs);
 
+#ifdef __CYGWIN__
   /* Prepare the environment vars for CreateProcess.  */
   cygwin_internal (CW_SYNC_WINENV);
 
@@ -1821,6 +1845,7 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
 	  dup2 (tty, 2);
 	}
     }
+#endif
 
   win32_init_thread_list ();
   ret = CreateProcess (0,
@@ -1833,6 +1858,8 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
 		       NULL,	/* current directory */
 		       &si,
 		       &pi);
+
+#ifdef __CYGWIN__
   if (tty >= 0)
     {
       close (tty);
@@ -1843,6 +1870,7 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
       close (ostdout);
       close (ostderr);
     }
+#endif
 
   if (!ret)
     error (_("Error creating process %s, (error %d)."),
@@ -1951,7 +1979,7 @@ win32_close (int x)
 
 /* Convert pid to printable format. */
 static char *
-cygwin_pid_to_str (ptid_t ptid)
+win32_pid_to_str (ptid_t ptid)
 {
   static char buf[80];
   int pid = PIDGET (ptid);
@@ -2055,7 +2083,7 @@ init_win32_ops (void)
   win32_ops.to_mourn_inferior = win32_mourn_inferior;
   win32_ops.to_can_run = win32_can_run;
   win32_ops.to_thread_alive = win32_win32_thread_alive;
-  win32_ops.to_pid_to_str = cygwin_pid_to_str;
+  win32_ops.to_pid_to_str = win32_pid_to_str;
   win32_ops.to_stop = win32_stop;
   win32_ops.to_stratum = process_stratum;
   win32_ops.to_has_all_memory = 1;
@@ -2086,6 +2114,7 @@ _initialize_win32_nat (void)
 
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
 
+#ifdef __CYGWIN__
   add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\
 Set use of shell to start subprocess."), _("\
 Show use of shell to start subprocess."), NULL,
@@ -2099,6 +2128,7 @@ Show whether gdb breaks on exceptions in the Cygwin DLL itself."), NULL,
 			   NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
+#endif
 
   add_setshow_boolean_cmd ("new-console", class_support, &new_console, _("\
 Set creation of new console when creating child process."), _("\

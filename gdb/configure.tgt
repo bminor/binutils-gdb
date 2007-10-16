@@ -120,7 +120,7 @@ i[34567]86-*-gnu*)	gdb_target=i386gnu ;;
 i[34567]86-*-cygwin*)	gdb_target=cygwin
 			build_gdbserver=yes
 			;;
-i[34567]86-*-mingw32*)	gdb_target=i386
+i[34567]86-*-mingw32*)	gdb_target=mingw
 			build_gdbserver=yes
 			;;
 i[34567]86-*-*)		gdb_target=i386 ;;

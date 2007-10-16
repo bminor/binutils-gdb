@@ -1,3 +1,25 @@
+2007-10-16  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* config/i386/mingw.mh, config/i386/mingw.mt: New files.
+	* configure.tgt	(i[34567]86-*-mingw32*): Set gdb_target = mingw.
+	* win32-nat.c: Only include cygwin.h on Cygwin host.  Don't
+	include procfs.h.
+	(cygwin_load_start, cygwin_load_end, cygwin_exceptions): Disable
+	if not building on Cygwin.
+	(win32_make_so, handle_output_debug_string, handle_exception)
+	(do_initial_win32_stuff): Wrap Cygwin specific code in __CYGWIN__.
+	(win32_attach): Only fallback to Cygwin pids if building on
+	Cygwin.
+	(win32_pid_to_exec_file): Disable Cygwin specific code, if not
+	building on Cygwin.
+	(win32_create_inferior): Disable starting the inferior through a
+	shell, environment var processing and tty handling if not building
+	on Cygwin.
+	(cygwin_pid_to_str): Rename to ...
+	(win32_pid_to_str): ... this.
+	(init_win32_ops): Update use of win32_pid_to_str.  Disable "shell"
+	and "cygwin-exceptions" commands if not building on Cygwin.
+
 2007-10-16  Gaius Mulley  <gaius@glam.ac.uk>
 
         * doc/gdb.texinfo:  Add TSIZE definition, removed
