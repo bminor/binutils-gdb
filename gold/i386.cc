@@ -737,8 +737,8 @@ Target_i386::Scan::local(const General_options&,
 			 Layout* layout,
 			 Target_i386* target,
 			 Sized_relobj<32, false>* object,
-			 unsigned int,
-			 const elfcpp::Rel<32, false>&,
+			 unsigned int data_shndx,
+			 const elfcpp::Rel<32, false>& reloc,
 			 unsigned int r_type,
 			 const elfcpp::Sym<32, false>&)
 {
@@ -766,6 +766,25 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_GOTPC:
       // We need a GOT section.
       target->got_section(symtab, layout);
+      break;
+
+    case elfcpp::R_386_GOT32:
+      {
+        // The symbol requires a GOT entry.
+        Output_data_got<32, false>* got = target->got_section(symtab, layout);
+        unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+        if (got->add_local(object, r_sym))
+          {
+            // If we are generating a shared object, we need to add a
+            // dynamic RELATIVE relocation for this symbol.
+            if (parameters->output_is_shared())
+              {
+                Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+                rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
+                                   data_shndx, reloc.get_r_offset());
+              }
+          }
+      }
       break;
 
       // These are relocations which should only be seen by the
@@ -842,7 +861,6 @@ Target_i386::Scan::local(const General_options&,
       }
       break;
 
-    case elfcpp::R_386_GOT32:
     case elfcpp::R_386_PLT32:
     case elfcpp::R_386_32PLT:
     case elfcpp::R_386_TLS_GD_32:
@@ -1176,6 +1194,29 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 
   const Sized_relobj<32, false>* object = relinfo->object;
 
+  // Get the GOT offset if needed.
+  bool have_got_offset = false;
+  unsigned int got_offset = 0;
+  switch (r_type)
+    {
+    case elfcpp::R_386_GOT32:
+      if (gsym != NULL)
+        {
+          gold_assert(gsym->has_got_offset());
+          got_offset = gsym->got_offset();
+        }
+      else
+        {
+          unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
+          got_offset = object->local_got_offset(r_sym);
+        }
+      have_got_offset = true;
+      break;
+
+    default:
+      break;
+    }
+
   switch (r_type)
     {
     case elfcpp::R_386_NONE:
@@ -1214,10 +1255,8 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_GOT32:
-      // Local GOT offsets not yet supported.
-      gold_assert(gsym);
-      gold_assert(gsym->has_got_offset());
-      Relocate_functions<32, false>::rel32(view, gsym->got_offset());
+      gold_assert(have_got_offset);
+      Relocate_functions<32, false>::rel32(view, got_offset);
       break;
 
     case elfcpp::R_386_GOTOFF:

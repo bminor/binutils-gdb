@@ -1181,7 +1181,6 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
     default:
       break;
     }
-  
 
   switch (r_type)
     {
