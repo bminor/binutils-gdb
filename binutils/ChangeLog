@@ -1,3 +1,9 @@
+2007-10-16  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/binutils.texi (objcopy, strip): Replace hyphens with em-dashes.
+	(objdump, strip, c++filt): Correct punctuation for "e.g." and "i.e."
+	and change to spell out "for example" in two places.
+
 2007-10-16  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Build windows tools for --enable-targets=all.

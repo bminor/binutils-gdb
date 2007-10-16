@@ -1515,7 +1515,7 @@ stripped executable.
 to add a link to the debugging info into the stripped executable.
 @end enumerate
 
-Note - the choice of @code{.dbg} as an extension for the debug info
+Note---the choice of @code{.dbg} as an extension for the debug info
 file is arbitrary.  Also the @code{--only-keep-debug} step is
 optional.  You could instead do this:
 
@@ -1530,7 +1530,7 @@ i.e., the file pointed to by the @option{--add-gnu-debuglink} can be the
 full executable.  It does not have to be a file created by the
 @option{--only-keep-debug} switch.
 
-Note - this switch is only intended for use on fully linked files.  It
+Note---this switch is only intended for use on fully linked files.  It
 does not make sense to use it on object files where the debugging
 information may be incomplete.  Besides the gnu_debuglink feature
 currently only supports the presence of one filename containing
@@ -2017,7 +2017,7 @@ The flag characters are divided into 7 groups as follows:
 @itemx g
 @itemx !
 The symbol is local (l), global (g), neither (a space) or both (!).  A
-symbol can be neither local or global for a variety of reasons, eg
+symbol can be neither local or global for a variety of reasons, e.g.,
 because it is used for debugging, but it is probably an indication of
 a bug if it is ever both local and global.
 
@@ -2526,22 +2526,22 @@ stripped executable.
 to add a link to the debugging info into the stripped executable.
 @end enumerate
 
-Note - the choice of @code{.dbg} as an extension for the debug info
+Note---the choice of @code{.dbg} as an extension for the debug info
 file is arbitrary.  Also the @code{--only-keep-debug} step is
 optional.  You could instead do this:
 
 @enumerate
 @item Link the executable as normal.
-@item Copy @code{foo} to  @code{foo.full}
+@item Copy @code{foo} to @code{foo.full}
 @item Run @code{strip --strip-debug foo}
 @item Run @code{objcopy --add-gnu-debuglink=foo.full foo}
 @end enumerate
 
-ie the file pointed to by the @option{--add-gnu-debuglink} can be the
+i.e., the file pointed to by the @option{--add-gnu-debuglink} can be the
 full executable.  It does not have to be a file created by the
 @option{--only-keep-debug} switch.
 
-Note - this switch is only intended for use on fully linked files.  It
+Note---this switch is only intended for use on fully linked files.  It
 does not make sense to use it on object files where the debugging
 information may be incomplete.  Besides the gnu_debuglink feature
 currently only supports the presence of one filename containing
@@ -2641,11 +2641,11 @@ name which makes it invalid).  This command however will work:
 echo _Z1fv, | c++filt -n
 @end smallexample
 
-and will display ``f(),'' ie the demangled name followed by a
+and will display ``f(),'', i.e., the demangled name followed by a
 trailing comma.  This behaviour is because when the names are read
 from the standard input it is expected that they might be part of an
 assembler source file where there might be extra, extraneous
-characters trailing after a mangled name.  eg:
+characters trailing after a mangled name.  For example:
 
 @smallexample
     .type   _Z1fv, @@function
@@ -2681,7 +2681,7 @@ the function's parameters.
 @itemx --types
 Attempt to demangle types as well as function names.  This is disabled
 by default since mangled types are normally only used internally in
-the compiler, and they can be confused with non-mangled names.  eg
+the compiler, and they can be confused with non-mangled names.  For example,
 a function called ``a'' treated as a mangled type name would be
 demangled to ``signed char''.
 
