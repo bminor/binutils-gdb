@@ -1,5 +1,11 @@
 2007-10-16  Bob Wilson  <bob.wilson@acm.org>
 
+	* elf32-xtensa.c (elf_xtensa_discard_info_for_section): Remove
+	unnecessary size variables.  Set sec->rawsize.
+	(relax_section, relax_property_section): Likewise.
+	
+2007-10-16  Bob Wilson  <bob.wilson@acm.org>
+
 	* section.c (struct bfd_section): Clarify comment for rawsize field.
 	* bfd-in2.h: Regenerate.
 	

@@ -2841,7 +2841,6 @@ elf_xtensa_discard_info_for_section (bfd *abfd,
 				     asection *sec)
 {
   bfd_byte *contents;
-  bfd_vma section_size;
   bfd_vma offset, actual_offset;
   bfd_size_type removed_bytes = 0;
   bfd_size_type entry_size;
@@ -2855,8 +2854,7 @@ elf_xtensa_discard_info_for_section (bfd *abfd,
   else
     entry_size = 8;
 
-  section_size = sec->size;
-  if (section_size == 0 || section_size % entry_size != 0)
+  if (sec->size == 0 || sec->size % entry_size != 0)
     return FALSE;
 
   contents = retrieve_contents (abfd, sec, info->keep_memory);
@@ -2878,7 +2876,7 @@ elf_xtensa_discard_info_for_section (bfd *abfd,
   cookie->rel = cookie->rels;
   cookie->relend = cookie->rels + sec->reloc_count;
 
-  for (offset = 0; offset < section_size; offset += entry_size)
+  for (offset = 0; offset < sec->size; offset += entry_size)
     {
       actual_offset = offset - removed_bytes;
 
@@ -2902,10 +2900,10 @@ elf_xtensa_discard_info_for_section (bfd *abfd,
 	      if (ELF32_R_TYPE (cookie->rel->r_info) != R_XTENSA_NONE)
 		{
 		  /* Shift the contents up.  */
-		  if (offset + entry_size < section_size)
+		  if (offset + entry_size < sec->size)
 		    memmove (&contents[actual_offset],
 			     &contents[actual_offset + entry_size],
-			     section_size - offset - entry_size);
+			     sec->size - offset - entry_size);
 		  removed_bytes += entry_size;
 		}
 
@@ -2939,13 +2937,15 @@ elf_xtensa_discard_info_for_section (bfd *abfd,
 	}
 
       /* Clear the removed bytes.  */
-      memset (&contents[section_size - removed_bytes], 0, removed_bytes);
+      memset (&contents[sec->size - removed_bytes], 0, removed_bytes);
 
       pin_contents (sec, contents);
       pin_internal_relocs (sec, cookie->rels);
 
       /* Shrink size.  */
-      sec->size = section_size - removed_bytes;
+      if (sec->rawsize == 0)
+	sec->rawsize = sec->size;
+      sec->size -= removed_bytes;
 
       if (xtensa_is_littable_section (sec))
 	{
@@ -8261,12 +8261,11 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 	 of move, copy and fill records.  Use the move, copy and
 	 fill records to perform the actions once.  */
 
-      bfd_size_type size = sec->size;
       int removed = 0;
       bfd_size_type final_size, copy_size, orig_insn_size;
       bfd_byte *scratch = NULL;
       bfd_byte *dup_contents = NULL;
-      bfd_size_type orig_size = size;
+      bfd_size_type orig_size = sec->size;
       bfd_vma orig_dot = 0;
       bfd_vma orig_dot_copied = 0; /* Byte copied already from
 					    orig dot in physical memory.  */
@@ -8420,7 +8419,6 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 	      break;
 	    }
 
-	  size -= action->removed_bytes;
 	  removed += action->removed_bytes;
 	  BFD_ASSERT (dup_dot <= final_size);
 	  BFD_ASSERT (orig_dot <= orig_size);
@@ -8461,6 +8459,8 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
       free (scratch);
       pin_contents (sec, contents);
 
+      if (sec->rawsize == 0)
+	sec->rawsize = sec->size;
       sec->size = final_size;
     }
 
@@ -9049,7 +9049,6 @@ relax_property_section (bfd *abfd,
       Elf_Internal_Rela *irel, *next_rel, *rel_end;
       int removed_bytes = 0;
       bfd_vma offset;
-      bfd_vma section_size;
       flagword predef_flags;
 
       predef_flags = xtensa_get_property_predef_flags (sec);
@@ -9065,10 +9064,9 @@ relax_property_section (bfd *abfd,
       next_rel = internal_relocs;
       rel_end = internal_relocs + sec->reloc_count;
 
-      section_size = sec->size;
-      BFD_ASSERT (section_size % entry_size == 0);
+      BFD_ASSERT (sec->size % entry_size == 0);
 
-      for (offset = 0; offset < section_size; offset += entry_size)
+      for (offset = 0; offset < sec->size; offset += entry_size)
 	{
 	  Elf_Internal_Rela *offset_rel, *extra_rel;
 	  bfd_vma bytes_to_remove, size, actual_offset;
@@ -9214,10 +9212,10 @@ relax_property_section (bfd *abfd,
 	  if (bytes_to_remove != 0)
 	    {
 	      removed_bytes += bytes_to_remove;
-	      if (offset + bytes_to_remove < section_size)
+	      if (offset + bytes_to_remove < sec->size)
 		memmove (&contents[actual_offset],
 			 &contents[actual_offset + bytes_to_remove],
-			 section_size - offset - bytes_to_remove);
+			 sec->size - offset - bytes_to_remove);
 	    }
 	}
 
@@ -9228,9 +9226,11 @@ relax_property_section (bfd *abfd,
 	    irel->r_offset -= removed_bytes;
 
 	  /* Clear the removed bytes.  */
-	  memset (&contents[section_size - removed_bytes], 0, removed_bytes);
+	  memset (&contents[sec->size - removed_bytes], 0, removed_bytes);
 
-	  sec->size = section_size - removed_bytes;
+	  if (sec->rawsize == 0)
+	    sec->rawsize = sec->size;
+	  sec->size -= removed_bytes;
 
 	  if (xtensa_is_littable_section (sec))
 	    {
