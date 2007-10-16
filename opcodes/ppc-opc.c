@@ -492,13 +492,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define VS VD
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_VR },
 
-  /* The SIMM field in a VX form instruction.  */
+  /* The SIMM field in a VX form instruction, and TE in Z form.  */
 #define SIMM VD + 1
+#define TE SIMM
   { 0x1f, 16, NULL, NULL, PPC_OPERAND_SIGNED},
 
-  /* The UIMM field in a VX form instruction, and TE in Z form.  */
+  /* The UIMM field in a VX form instruction.  */
 #define UIMM SIMM + 1
-#define TE UIMM
   { 0x1f, 16, NULL, NULL, 0 },
 
   /* The SHB field in a VA form instruction.  */
@@ -4495,9 +4495,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "fnmadds", A(59,31,0), A_MASK,	PPC,		{ FRT,FRA,FRC,FRB } },
 { "fnmadds.",A(59,31,1), A_MASK,	PPC,		{ FRT,FRA,FRC,FRB } },
 
-{ "psq_st",  OP(60),    OP_MASK,        PPCPS,          { FRS, PSD, RA, PSW, PSQ } },
-{ "psq_stu", OP(61),    OP_MASK,        PPCPS,          { FRS, PSD, RA, PSW, PSQ } },
-
 { "dmul",    XRC(59,34,0), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 { "dmul.",   XRC(59,34,1), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 
@@ -4560,6 +4557,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "diex.",   XRC(59,866,1), X_MASK,	POWER6,		{ FRT, FRA, FRB } },
 
 { "stfq",    OP(60),	OP_MASK,	POWER2,		{ FRS, D, RA } },
+
+{ "psq_st",  OP(60),    OP_MASK,        PPCPS,          { FRS, PSD, RA, PSW, PSQ } },
+{ "psq_stu", OP(61),    OP_MASK,        PPCPS,          { FRS, PSD, RA, PSW, PSQ } },
 
 { "stfqu",   OP(61),	OP_MASK,	POWER2,		{ FRS, D, RA } },
 

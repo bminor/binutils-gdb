@@ -1,3 +1,9 @@
+2007-10-15  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (TE): Correct signedness.
+	(powerpc_opcodes): Sort psq_st and psq_stu according to major
+	opcode number.
+
 2007-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (dis386_twobyte): Reformat.

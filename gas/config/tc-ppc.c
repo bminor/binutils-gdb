@@ -1249,6 +1249,7 @@ ppc_setup_opcodes (void)
   const struct powerpc_macro *macro;
   const struct powerpc_macro *macro_end;
   bfd_boolean bad_insn = FALSE;
+  unsigned long prev_opcode = 0;
 
   if (ppc_hash != NULL)
     hash_die (ppc_hash);
@@ -1296,6 +1297,17 @@ ppc_setup_opcodes (void)
 	{
 	  const unsigned char *o;
 	  unsigned long omask = op->mask;
+	  unsigned long major_opcode = PPC_OP (op->opcode);
+
+	  /* The major opcodes had better be sorted.  Code in the disassembler
+	     assumes the insns are sorted according to major opcode.  */
+	  if (major_opcode < prev_opcode)
+	    {
+	      as_bad (_("major opcode is not sorted for %s"),
+		      op->name);
+	      bad_insn = TRUE;
+	    }
+	  prev_opcode = major_opcode;
 
 	  /* The mask had better not trim off opcode bits.  */
 	  if ((op->opcode & omask) != op->opcode)

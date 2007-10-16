@@ -1,3 +1,8 @@
+2007-10-15  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (ppc_setup_opcodes): Verify instructions are sorted
+	according to major opcode number.
+
 2007-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (do_s_func): Check asprintf return status.
