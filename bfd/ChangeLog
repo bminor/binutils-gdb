@@ -1,5 +1,10 @@
 2007-10-16  Bob Wilson  <bob.wilson@acm.org>
 
+	* section.c (struct bfd_section): Clarify comment for rawsize field.
+	* bfd-in2.h: Regenerate.
+	
+2007-10-16  Bob Wilson  <bob.wilson@acm.org>
+
 	* elflink.c (_bfd_elf_check_kept_section): Use the section rawsize
 	values if they are set.
 	
