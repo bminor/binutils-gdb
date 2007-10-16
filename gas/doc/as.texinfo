@@ -1185,6 +1185,10 @@ Enable or disable all assembler transformations of Xtensa instructions.
 The default is @option{--transform};
 @option{--no-transform} should be used only in the rare cases when the
 instructions must be exactly as specified in the assembly source.
+
+@item --rename-section @var{oldname}=@var{newname}
+When generating output sections, rename the @var{oldname} section to
+@var{newname}.
 @end table
 @end ifset
 

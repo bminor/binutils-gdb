@@ -1,3 +1,7 @@
+2007-10-16  Bob Wilson  <bob.wilson@acm.org>
+	
+	* doc/as.texinfo (Overview): Add Xtensa --rename-section option.
+	
 2007-10-16  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-elf.c (obj_elf_type): Accept "common" as a valid
