@@ -1,5 +1,15 @@
 2007-10-16  Nick Clifton  <nickc@redhat.com>
 
+	PR 5146
+	* configure.in (AC_CHECK_HEADERS): Add alloca.h
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* som.c: Replace alloca-conf.h inclusion with code recommended in
+	autoconf documentation.
+	* elf64-hppa.c: Likewise.
+
+2007-10-16  Nick Clifton  <nickc@redhat.com>
+
 	* configure.in (--enable-elf-stt-common): New configure
 	option.  If enabled then the tools can generate symbols with
 	the ELF STT_COMMON type.

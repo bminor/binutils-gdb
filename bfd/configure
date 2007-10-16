@@ -10531,14 +10531,11 @@ echo "$as_me: error: bad value ${enableval} for ELF STT_COMMON option" >&2;}
  esac
 else
   # We have to choose a default behaviour.  For native builds we could
-# test whether the loader supports the STT_COMMON type.  For cross
-# toolchains we default to assuming that they are not supported.
-if test "$cross_compiling" != yes; then
+# test whether the loader supports the STT_COMMON type, but that would
+# mean that built binaries could not be exported to older systems where
+# the loader does not support it. So by default we always choose to
+# disable this feature.
   want_elf_stt_common=false
- else
- # XXX FIXME: Add code to test the loader here.
-  want_elf_stt_common=false
- fi
 fi; if test $want_elf_stt_common = true; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -10546,7 +10543,6 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 fi
-
 
 
 
@@ -12548,7 +12544,8 @@ fi
 
 
 
-for ac_header in stddef.h string.h strings.h stdlib.h time.h unistd.h
+
+for ac_header in alloca.h stddef.h string.h strings.h stdlib.h time.h unistd.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
