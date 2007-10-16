@@ -17,7 +17,11 @@ INCLUDES = -D_GNU_SOURCE \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
+TESTS = object_unittest
+check_SCRIPTS = 
+
 if GCC
+
 if NATIVE_LINKER
 
 NATIVE_PROGS = \
@@ -37,7 +41,8 @@ NATIVE_PROGS = \
 	exception_shared_2_test \
 	exception_same_shared_test \
 	exception_separate_shared_12_test \
-	exception_separate_shared_21_test
+	exception_separate_shared_21_test \
+	weak_test
 
 if FN_PTRS_IN_SO_WITHOUT_PIC
 
@@ -83,7 +88,7 @@ NATIVE_TESTING = \
 endif
 endif
 
-TESTS = object_unittest $(NATIVE_TESTING)
+TESTS += $(NATIVE_TESTING)
 
 check_LIBRARIES = libgoldtest.a
 libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
@@ -97,6 +102,7 @@ check_PROGRAMS = object_unittest $(NATIVE_PROGS)
 object_unittest_SOURCES = object_unittest.cc
 
 if GCC
+
 if NATIVE_LINKER
 
 gcctestdir/ld: ../ld-new
@@ -290,6 +296,9 @@ exception_shared_2.so: exception_test_2_pic.o
 	$(CXXLINK) -shared exception_test_2_pic.o
 exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o
 	$(CXXLINK) -shared exception_test_1_pic.o exception_test_2_pic.o
+
+weak_test_SOURCES = weak_test.cc
+weak_test_LDFLAGS = -Bgcctestdir/
 
 if TLS
 
