@@ -817,7 +817,11 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
   // Find the PT_LOAD segments, and set their addresses and offsets
   // and their section's addresses and offsets.
-  uint64_t addr = target->text_segment_address();
+  uint64_t addr;
+  if (options_.user_set_text_segment_address())
+    addr = options_.text_segment_address();
+  else
+    addr = target->default_text_segment_address();
   off_t off = 0;
   bool was_readonly = false;
   for (Segment_list::iterator p = this->segment_list_.begin();

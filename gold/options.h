@@ -169,7 +169,7 @@ class General_options
   is_static() const
   { return this->is_static_; }
 
-  // --statis: Print resource usage statistics.
+  // --stats: Print resource usage statistics.
   bool
   print_stats() const
   { return this->print_stats_; }
@@ -178,6 +178,16 @@ class General_options
   const std::string&
   sysroot() const
   { return this->sysroot_; }
+
+  // -Ttext: The address of the .text section
+  uint64_t
+  text_segment_address() const
+  { return this->text_segment_address_; }
+
+  // Whether -Ttext was used.
+  bool
+  user_set_text_segment_address() const
+  { return this->text_segment_address_ != -1U; }
 
  private:
   // Don't copy this structure.
@@ -265,6 +275,20 @@ class General_options
   { this->sysroot_ = arg; }
 
   void
+  set_text_segment_address(const char* arg)
+  {
+    char* endptr;
+    this->text_segment_address_ = strtoull(arg, &endptr, 0);
+    if (*endptr != '\0'
+	|| this->text_segment_address_ == -1U)
+      {
+        fprintf(stderr, _("%s: invalid argument to -Ttext: %s\n"),
+                program_name, arg);
+        ::exit(1);
+      }
+  }
+
+  void
   ignore(const char*)
   { }
 
@@ -286,6 +310,7 @@ class General_options
   bool is_static_;
   bool print_stats_;
   std::string sysroot_;
+  uint64_t text_segment_address_;
 };
 
 // The current state of the position dependent options.

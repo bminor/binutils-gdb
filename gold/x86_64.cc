@@ -264,7 +264,7 @@ const Target::Target_info Target_x86_64::x86_64_info =
   false,		// has_resolve
   true,			// has_code_fill
   "/lib/ld64.so.1",     // program interpreter
-  0x400000,		// text_segment_address
+  0x400000,		// default_text_segment_address
   0x1000,		// abi_pagesize
   0x1000		// common_pagesize
 };

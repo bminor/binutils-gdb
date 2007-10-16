@@ -95,8 +95,8 @@ class Target
 
   // Return the default address to use for the text segment.
   uint64_t
-  text_segment_address() const
-  { return this->pti_->text_segment_address; }
+  default_text_segment_address() const
+  { return this->pti_->default_text_segment_address; }
 
   // Return the ABI specified page size.
   uint64_t
@@ -149,7 +149,7 @@ class Target
     // The default dynamic linker name.
     const char* dynamic_linker;
     // The default text segment address.
-    uint64_t text_segment_address;
+    uint64_t default_text_segment_address;
     // The ABI specified page size.
     uint64_t abi_pagesize;
     // The common page size used by actual implementations.

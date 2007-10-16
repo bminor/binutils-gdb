@@ -264,7 +264,7 @@ const Target::Target_info Target_i386::i386_info =
   false,		// has_resolve
   true,			// has_code_fill
   "/usr/lib/libc.so.1",	// dynamic_linker
-  0x08048000,		// text_segment_address
+  0x08048000,		// default_text_segment_address
   0x1000,		// abi_pagesize
   0x1000		// common_pagesize
 };
