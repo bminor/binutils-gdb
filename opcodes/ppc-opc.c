@@ -4680,7 +4680,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "dscliq.", ZRC(63,66,1), Z_MASK,	POWER6,		{ FRT, FRA, SH16 } },
 
 { "dquaiq",  ZRC(63,67,0), Z2_MASK,	POWER6,		{ TE,  FRT, FRB, RMC } },
-{ "dquaiq.", ZRC(63,67,1), Z2_MASK,	POWER6,		{ FRT, FRA, FRB, RMC } },
+{ "dquaiq.", ZRC(63,67,1), Z2_MASK,	POWER6,		{ TE,  FRT, FRB, RMC } },
 
 { "mtfsb0",  XRC(63,70,0), XRARB_MASK,	COM,		{ BT } },
 { "mtfsb0.", XRC(63,70,1), XRARB_MASK,	COM,		{ BT } },

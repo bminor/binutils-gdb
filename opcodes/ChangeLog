@@ -1,5 +1,10 @@
 2007-10-15  Peter Bergner  <bergner@vnet.ibm.com>
 
+	* ppc-opc.c (powerpc_opcodes): Fix the first two operands of
+	dquaiq. to use the TE and FRT macros.
+
+2007-10-15  Peter Bergner  <bergner@vnet.ibm.com>
+
 	* ppc-opc.c (TE): Correct signedness.
 	(powerpc_opcodes): Sort psq_st and psq_stu according to major
 	opcode number.
