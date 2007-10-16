@@ -53,6 +53,8 @@ static void m2_short_set (struct type *type, struct ui_file *stream,
 			  int show, int level);
 static int m2_long_set (struct type *type, struct ui_file *stream,
 			int show, int level);
+static int m2_unbounded_array (struct type *type, struct ui_file *stream,
+			       int show, int level);
 static void m2_record_fields (struct type *type, struct ui_file *stream,
 			      int show, int level);
 static void m2_unknown (const char *s, struct type *type,
@@ -60,6 +62,7 @@ static void m2_unknown (const char *s, struct type *type,
 
 int m2_is_long_set (struct type *type);
 int m2_is_long_set_of_type (struct type *type, struct type **of_type);
+int m2_is_unbounded_array (struct type *type);
 
 
 void
@@ -88,7 +91,8 @@ m2_print_type (struct type *type, char *varstring, struct ui_file *stream,
       break;
 
     case TYPE_CODE_STRUCT:
-      if (m2_long_set (type, stream, show, level))
+      if (m2_long_set (type, stream, show, level)
+	  || m2_unbounded_array (type, stream, show, level))
 	break;
       m2_record_fields (type, stream, show, level);
       break;
@@ -150,9 +154,7 @@ m2_print_type (struct type *type, char *varstring, struct ui_file *stream,
     }
 }
 
-/*
- *  m2_type_name - if a, type, has a name then print it.
- */
+/* m2_type_name - if a, type, has a name then print it.  */
 
 void
 m2_type_name (struct type *type, struct ui_file *stream)
@@ -161,9 +163,7 @@ m2_type_name (struct type *type, struct ui_file *stream)
     fputs_filtered (TYPE_NAME (type), stream);
 }
 
-/*
- *  m2_range - displays a Modula-2 subrange type.
- */
+/* m2_range - displays a Modula-2 subrange type.  */
 
 void
 m2_range (struct type *type, struct ui_file *stream, int show,
@@ -195,9 +195,7 @@ m2_typedef (struct type *type, struct ui_file *stream, int show,
   m2_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level);
 }
 
-/*
- *  m2_array - prints out a Modula-2 ARRAY ... OF type
- */
+/* m2_array - prints out a Modula-2 ARRAY ... OF type.  */
 
 static void m2_array (struct type *type, struct ui_file *stream,
 		      int show, int level)
@@ -324,9 +322,8 @@ m2_is_long_set (struct type *type)
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
 
-      /*
-       *  check if all fields of the RECORD are consecutive sets
-       */
+      /* check if all fields of the RECORD are consecutive sets.  */
+
       len = TYPE_NFIELDS (type);
       for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	{
@@ -348,12 +345,10 @@ m2_is_long_set (struct type *type)
   return 0;
 }
 
-/*
- *  m2_get_discrete_bounds - a wrapper for get_discrete_bounds which
- *                           understands that CHARs might be signed.
- *                           This should be integrated into gdbtypes.c
- *                           inside get_discrete_bounds.
- */
+/* m2_get_discrete_bounds - a wrapper for get_discrete_bounds which
+                            understands that CHARs might be signed.
+                            This should be integrated into gdbtypes.c
+                            inside get_discrete_bounds.  */
 
 int
 m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
@@ -377,11 +372,9 @@ m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
     }
 }
 
-/*
- *  m2_is_long_set_of_type - returns TRUE if the long set was declared as
- *                           SET OF <oftype> of_type is assigned to the
- *                           subtype.
- */
+/* m2_is_long_set_of_type - returns TRUE if the long set was declared as
+                            SET OF <oftype> of_type is assigned to the
+                            subtype.  */
 
 int
 m2_is_long_set_of_type (struct type *type, struct type **of_type)
@@ -472,12 +465,60 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level)
   return 0;
 }
 
+/* m2_is_unbounded_array - returns TRUE if, type, should be regarded
+                           as a Modula-2 unbounded ARRAY type.  */
+
+int
+m2_is_unbounded_array (struct type *type)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+    {
+      /*
+       *  check if we have a structure with exactly two fields named
+       *  _m2_contents and _m2_high.  It also checks to see if the
+       *  type of _m2_contents is a pointer.  The TYPE_TARGET_TYPE
+       *  of the pointer determines the unbounded ARRAY OF type.
+       */
+      if (TYPE_NFIELDS (type) != 2)
+	return 0;
+      if (strcmp (TYPE_FIELD_NAME (type, 0), "_m2_contents") != 0)
+	return 0;
+      if (strcmp (TYPE_FIELD_NAME (type, 1), "_m2_high") != 0)
+	return 0;
+      if (TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) != TYPE_CODE_PTR)
+	return 0;
+      return 1;
+    }
+  return 0;
+}
+
+/* m2_unbounded_array - if the struct type matches a Modula-2 unbounded
+                        parameter type then display the type as an
+                        ARRAY OF type.  Returns TRUE if an unbounded
+                        array type was detected.  */
+
+static int
+m2_unbounded_array (struct type *type, struct ui_file *stream, int show,
+		    int level)
+{
+  if (m2_is_unbounded_array (type))
+    {
+      if (show > 0)
+	{
+	  fputs_filtered ("ARRAY OF ", stream);
+	  m2_print_type (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 0)),
+			 "", stream, 0, level);
+	}
+      return 1;
+    }
+  return 0;
+}
+
 void
 m2_record_fields (struct type *type, struct ui_file *stream, int show,
 		  int level)
 {
-  /* Print the tag if it exists. 
-   */
+  /* Print the tag if it exists.  */
   if (TYPE_TAG_NAME (type) != NULL)
     {
       if (strncmp (TYPE_TAG_NAME (type), "$$", 2) != 0)

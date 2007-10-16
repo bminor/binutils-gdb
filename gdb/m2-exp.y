@@ -174,6 +174,7 @@ static struct block *modblock=0;
 %token <sval> TYPENAME
 
 %token SIZE CAP ORD HIGH ABS MIN_FUNC MAX_FUNC FLOAT_FUNC VAL CHR ODD TRUNC
+%token TSIZE
 %token INC DEC INCL EXCL
 
 /* The GDB scope operator */
@@ -288,6 +289,10 @@ exp	:	TRUNC '(' exp ')'
 			{ write_exp_elt_opcode (UNOP_TRUNC); }
 	;
 
+exp	:	TSIZE '(' exp ')'
+			{ write_exp_elt_opcode (UNOP_SIZEOF); }
+	;
+
 exp	:	SIZE exp       %prec UNARY
 			{ write_exp_elt_opcode (UNOP_SIZEOF); }
 	;
@@ -352,6 +357,10 @@ exp     :       exp '['
 			  write_exp_elt_longcst ((LONGEST) end_arglist());
 			  write_exp_elt_opcode (MULTI_SUBSCRIPT); }
         ;
+
+exp	:	exp '[' exp ']'
+			{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
+	;
 
 exp	:	exp '('
 			/* This is to save the value of arglist_len
@@ -809,6 +818,7 @@ static struct keyword keytab[] =
     {"SIZE",  SIZE       },
     {"FLOAT", FLOAT_FUNC },
     {"TRUNC", TRUNC	 },
+    {"TSIZE", SIZE       },
 };
 
 

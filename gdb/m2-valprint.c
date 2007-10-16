@@ -33,6 +33,12 @@
 int print_unpacked_pointer (struct type *type,
 			    CORE_ADDR address, CORE_ADDR addr,
 			    int format, struct ui_file *stream);
+static void
+m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
+			 int embedded_offset, CORE_ADDR address,
+			 struct ui_file *stream, int format,
+			 enum val_prettyprint pretty,
+			 int deref_ref, int recurse, int len);
 
 
 /* Print function pointer with inferior address ADDRESS onto stdio
@@ -56,9 +62,8 @@ print_function_pointer_address (CORE_ADDR address, struct ui_file *stream)
   print_address_demangle (func_addr, stream, demangle);
 }
 
-/*
- *  get_long_set_bounds - assigns the bounds of the long set to low and high.
- */
+/* get_long_set_bounds - assigns the bounds of the long set to low and
+                         high.  */
 
 int
 get_long_set_bounds (struct type *type, LONGEST *low, LONGEST *high)
@@ -176,6 +181,36 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+static void
+m2_print_unbounded_array (struct type *type, const gdb_byte *valaddr,
+			  int embedded_offset, CORE_ADDR address,
+			  struct ui_file *stream, int format,
+			  int deref_ref, enum val_prettyprint pretty,
+			  int recurse)
+{
+  struct type *content_type;
+  CORE_ADDR addr;
+  LONGEST len;
+  struct value *val;
+
+  CHECK_TYPEDEF (type);
+  content_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 0));
+
+  addr = unpack_pointer (TYPE_FIELD_TYPE (type, 0),
+			 (TYPE_FIELD_BITPOS (type, 0) / 8) +
+			 valaddr + embedded_offset);
+
+  val = value_at_lazy (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 0)),
+		       addr);
+  len = unpack_field_as_long (type, valaddr + embedded_offset, 1);
+
+  fprintf_filtered (stream, "{");  
+  m2_print_array_contents (value_type (val), value_contents(val),
+			   value_embedded_offset (val), addr, stream,
+			   format, deref_ref, pretty, recurse, len);
+  fprintf_filtered (stream, ", HIGH = %d}", (int) len);
+}
+
 int
 print_unpacked_pointer (struct type *type,
 			CORE_ADDR address, CORE_ADDR addr,
@@ -207,7 +242,8 @@ print_unpacked_pointer (struct type *type,
 }
 
 static void
-print_variable_at_address (struct type *type, const gdb_byte *valaddr,
+print_variable_at_address (struct type *type,
+			   const gdb_byte *valaddr,
 			   struct ui_file *stream, int format,
 			   int deref_ref, int recurse,
 			   enum val_prettyprint pretty)
@@ -232,6 +268,47 @@ print_variable_at_address (struct type *type, const gdb_byte *valaddr,
   else
     fputs_filtered ("???", stream);
 }
+
+
+/* m2_print_array_contents - prints out the contents of an
+                             array up to a max_print values.
+                             It prints arrays of char as a string
+                             and all other data types as comma
+                             separated values.  */
+
+static void
+m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
+			 int embedded_offset, CORE_ADDR address,
+			 struct ui_file *stream, int format,
+			 enum val_prettyprint pretty,
+			 int deref_ref, int recurse, int len)
+{
+  int eltlen;
+  CHECK_TYPEDEF (type);
+
+  if (TYPE_LENGTH (type) > 0)
+    {
+      eltlen = TYPE_LENGTH (type);
+      if (prettyprint_arrays)
+	print_spaces_filtered (2 + 2 * recurse, stream);
+      /* For an array of chars, print with string syntax.  */
+      if (eltlen == 1 &&
+	  ((TYPE_CODE (type) == TYPE_CODE_INT)
+	   || ((current_language->la_language == language_m2)
+	       && (TYPE_CODE (type) == TYPE_CODE_CHAR)))
+	  && (format == 0 || format == 's'))
+	val_print_string (address, len+1, eltlen, stream);
+      else
+	{
+	  fprintf_filtered (stream, "{");
+	  val_print_array_elements (type, valaddr + embedded_offset,
+				    address, stream, format,
+				    deref_ref, recurse, pretty, 0);
+	  fprintf_filtered (stream, "}");
+	}
+    }
+}
+
 
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
    the inferior at address ADDRESS, onto stdio stream STREAM according to
@@ -364,6 +441,10 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       if (m2_is_long_set (type))
 	m2_print_long_set (type, valaddr, embedded_offset, address,
 			   stream, format, pretty);
+      else if (m2_is_unbounded_array (type))
+	m2_print_unbounded_array (type, valaddr, embedded_offset,
+				  address, stream, format, deref_ref,
+				  pretty, recurse);
       else
 	cp_print_value_fields (type, type, valaddr, embedded_offset,
 			       address, stream, format,

@@ -9979,6 +9979,9 @@ Returns the size of its argument.  @var{x} can be a variable or a type.
 @item TRUNC(@var{r})
 Returns the integral part of @var{r}.
 
+@item TSIZE(@var{x})
+Returns the size of its argument.  @var{x} can be a variable or a type.
+
 @item VAL(@var{t},@var{i})
 Returns the member of the type @var{t} whose ordinal value is @var{i}.
 @end table
@@ -10109,7 +10112,7 @@ ARRAY [-10..10] OF CHAR
 Note that the array handling is not yet complete and although the type
 is printed correctly, expression handling still assumes that all
 arrays have a lower bound of zero and not @code{-10} as in the example
-above.  Unbounded arrays are also not yet recognized in @value{GDBN}.
+above.
 
 Here are some more type related Modula-2 examples:
 

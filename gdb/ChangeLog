@@ -1,3 +1,20 @@
+2007-10-16  Gaius Mulley  <gaius@glam.ac.uk>
+
+        * doc/gdb.texinfo:  Add TSIZE definition, removed
+	statement about unbounded arrays being unimplemented.
+	* m2-valprint.c (m2_print_array_contents):  New function.
+	(m2_print_unbounded_array):  New function.
+	(m2_print_array_contents):  New function.
+	* m2-typeprint.c (m2_unbounded_array):  New function.
+	(m2_is_unbounded_array):  New function.
+	(m2_print_type):  Test for unbounded array when walking
+	across structs.
+	* m2-lang.h:  Added extern m2_is_unbounded_array.
+	* m2-lang.c (evaluate_subexp_modula2):  New function.
+	(exp_descriptor_modula2):  New structure.
+	(m2_language_defn):  Use exp_descriptor_modula2.
+	* m2-exp.y:  Added TSIZE and binary subscript.
+
 2007-10-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mi/mi-main.c (captured_mi_execute_command): Clear mi_error_message

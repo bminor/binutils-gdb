@@ -37,8 +37,7 @@ static void m2_emit_char (int, struct ui_file *, int);
    string whose delimiter is QUOTER.  Note that that format for printing
    characters and strings is language specific.
    FIXME:  This is a copy of the same function from c-exp.y.  It should
-   be replaced with a true Modula version.
- */
+   be replaced with a true Modula version.  */
 
 static void
 m2_emit_char (int c, struct ui_file *stream, int quoter)
@@ -87,7 +86,7 @@ m2_emit_char (int c, struct ui_file *stream, int quoter)
 }
 
 /* FIXME:  This is a copy of the same function from c-exp.y.  It should
-   be replaced with a true Modula version. */
+   be replaced with a true Modula version.  */
 
 static void
 m2_printchar (int c, struct ui_file *stream)
@@ -102,7 +101,7 @@ m2_printchar (int c, struct ui_file *stream)
    are printed as appropriate.  Print ellipses at the end if we
    had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.
    FIXME:  This is a copy of the same function from c-exp.y.  It should
-   be replaced with a true Modula version. */
+   be replaced with a true Modula version.  */
 
 static void
 m2_printstr (struct ui_file *stream, const gdb_byte *string,
@@ -187,9 +186,100 @@ m2_printstr (struct ui_file *stream, const gdb_byte *string,
     fputs_filtered ("...", stream);
 }
 
+static struct value *
+evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
+			 int *pos, enum noside noside)
+{
+  enum exp_opcode op = exp->elts[*pos].opcode;
+  struct value *arg1;
+  struct value *arg2;
+  struct type *type;
+  switch (op)
+    {
+    case UNOP_HIGH:
+      (*pos)++;
+      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
+
+      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+	return arg1;
+      else
+	{
+	  arg1 = coerce_ref (arg1);
+	  type = check_typedef (value_type (arg1));
+
+	  if (m2_is_unbounded_array (type))
+	    {
+	      struct value *temp = arg1;
+	      type = TYPE_FIELD_TYPE (type, 1);
+	      /* i18n: Do not translate the "_m2_high" part!  */
+	      arg1 = value_struct_elt (&temp, NULL, "_m2_high", NULL,
+				       _("unbounded structure "
+					 "missing _m2_high field"));
+	  
+	      if (value_type (arg1) != type)
+		arg1 = value_cast (type, arg1);
+	    }
+	}
+      return arg1;
+
+    case BINOP_SUBSCRIPT:
+      (*pos)++;
+      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
+      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      /* If the user attempts to subscript something that is not an
+         array or pointer type (like a plain int variable for example),
+         then report this as an error.  */
+
+      arg1 = coerce_ref (arg1);
+      type = check_typedef (value_type (arg1));
+
+      if (m2_is_unbounded_array (type))
+	{
+	  struct value *temp = arg1;
+	  type = TYPE_FIELD_TYPE (type, 0);
+	  if (type == NULL || (TYPE_CODE (type) != TYPE_CODE_PTR)) {
+	    warning (_("internal error: unbounded array structure is unknown"));
+	    return evaluate_subexp_standard (expect_type, exp, pos, noside);
+	  }
+	  /* i18n: Do not translate the "_m2_contents" part!  */
+	  arg1 = value_struct_elt (&temp, NULL, "_m2_contents", NULL,
+				   _("unbounded structure "
+				     "missing _m2_contents field"));
+	  
+	  if (value_type (arg1) != type)
+	    arg1 = value_cast (type, arg1);
+
+	  type = check_typedef (value_type (arg1));
+	  return value_ind (value_add (arg1, arg2));
+	}
+      else
+	if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
+	  {
+	    if (TYPE_NAME (type))
+	      error (_("cannot subscript something of type `%s'"),
+		     TYPE_NAME (type));
+	    else
+	      error (_("cannot subscript requested type"));
+	  }
+
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+      else
+	return value_subscript (arg1, arg2);
+
+    default:
+      return evaluate_subexp_standard (expect_type, exp, pos, noside);
+    }
+
+ nosideret:
+  return value_from_longest (builtin_type_long, (LONGEST) 1);
+}
+
 /* FIXME:  This is a copy of c_create_fundamental_type(), before
    all the non-C types were stripped from it.  Needs to be fixed
-   by an experienced Modula programmer. */
+   by an experienced Modula programmer.  */
 
 static struct type *
 m2_create_fundamental_type (struct objfile *objfile, int typeid)
@@ -202,7 +292,7 @@ m2_create_fundamental_type (struct objfile *objfile, int typeid)
       /* FIXME:  For now, if we are asked to produce a type not in this
          language, create the equivalent of a C integer type with the
          name "<?type?>".  When all the dust settles from the type
-         reconstruction work, this should probably become an error. */
+         reconstruction work, this should probably become an error.  */
       type = init_type (TYPE_CODE_INT,
 			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
 			0, "<?type?>", objfile);
@@ -426,6 +516,15 @@ m2_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_bool;
 }
 
+const struct exp_descriptor exp_descriptor_modula2 = 
+{
+  print_subexp_standard,
+  operator_length_standard,
+  op_name_standard,
+  dump_subexp_body_standard,
+  evaluate_subexp_modula2
+};
+
 const struct language_defn m2_language_defn =
 {
   "modula-2",
@@ -435,7 +534,7 @@ const struct language_defn m2_language_defn =
   type_check_on,
   case_sensitive_on,
   array_row_major,
-  &exp_descriptor_standard,
+  &exp_descriptor_modula2,
   m2_parse,			/* parser */
   m2_error,			/* parser error function */
   null_post_parser,
