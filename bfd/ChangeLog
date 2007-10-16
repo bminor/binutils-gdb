@@ -1,3 +1,8 @@
+2007-10-16  Bob Wilson  <bob.wilson@acm.org>
+
+	* elflink.c (_bfd_elf_check_kept_section): Use the section rawsize
+	values if they are set.
+	
 2007-10-16  Nick Clifton  <nickc@redhat.com>
 
 	PR 5146

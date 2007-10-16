@@ -8786,7 +8786,9 @@ _bfd_elf_check_kept_section (asection *sec, struct bfd_link_info *info)
     {
       if ((kept->flags & SEC_GROUP) != 0)
 	kept = match_group_member (sec, kept, info);
-      if (kept != NULL && sec->size != kept->size)
+      if (kept != NULL
+	  && ((sec->rawsize != 0 ? sec->rawsize : sec->size)
+	      != (kept->rawsize != 0 ? kept->rawsize : kept->size)))
 	kept = NULL;
       sec->kept_section = kept;
     }
