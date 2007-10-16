@@ -303,6 +303,7 @@ Symbol table '\.symtab' contains 134 entries:
    133: 00000000     0 <processor specific>: 13 GLOBAL DEFAULT  UND unresolved8
 
 Hex dump of section '\.text':
+.*
   0x00000000 6ff0fff0 6ff0fff0 cc0000a0 cc000140 .*
   0x00000010 cc000140 cc000140 cc000280 cc0001e0 .*
   0x00000020 cc0000a0 cc0000a0 cc000280 cc000140 .*
@@ -319,6 +320,7 @@ Hex dump of section '\.text':
   0x000000d0 6ff0fff0                            .*
 
 Hex dump of section '\.data':
+.*
   0x00000000 00000000 00000000 00000008 00000000 .*
   0x00000010 00000000 00000000 00000000 00000000 .*
   0x00000020 00000028 00000000 00000000 00000000 .*

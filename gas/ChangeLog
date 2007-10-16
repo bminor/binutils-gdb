@@ -1,3 +1,10 @@
+2007-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-elf.c (obj_elf_type): Accept "common" as a valid
+	symbol type.
+	* doc/as.texinfo (.type): Document the types accepted by the
+	type pseudo op, including "common".
+
 2007-10-15  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (ppc_setup_opcodes): Verify instructions are sorted

@@ -16,3 +16,5 @@ tls_object:
         .size   notype,1
 notype:
 	.byte	0x0
+	.comm	common, 1
+	.type   common,STT_COMMON

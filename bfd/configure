@@ -1012,6 +1012,7 @@ Optional Features:
   --enable-targets        alternative target configurations
   --enable-commonbfdlib   build shared BFD/opcodes/libiberty library
   --enable-secureplt      Default to creating read-only plt entries
+  --enable-elf-stt-common Allow the generation of ELF symbols with the STT_COMMON type
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --enable-maintainer-mode  enable make rules and dependencies not useful
@@ -4665,13 +4666,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4668: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4669: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4671: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4672: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4674: output\"" >&5)
+  (eval echo "\"\$as_me:4675: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5726,7 +5727,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5729 "configure"' > conftest.$ac_ext
+  echo '#line 5730 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6826,11 +6827,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6829: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6830: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6833: \$? = $ac_status" >&5
+   echo "$as_me:6834: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7148,11 +7149,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7151: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7152: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7155: \$? = $ac_status" >&5
+   echo "$as_me:7156: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7253,11 +7254,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7256: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7257: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7260: \$? = $ac_status" >&5
+   echo "$as_me:7261: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7308,11 +7309,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7311: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7312: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7315: \$? = $ac_status" >&5
+   echo "$as_me:7316: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10105,7 +10106,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10108 "configure"
+#line 10109 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10205,7 +10206,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10208 "configure"
+#line 10209 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10449,7 +10450,8 @@ echo "$as_me: error: bad value ${enableval} for 64-bit-bfd option" >&2;}
 esac
 else
   want64=false
-fi; # Check whether --enable-targets or --disable-targets was given.
+fi;
+# Check whether --enable-targets or --disable-targets was given.
 if test "${enable_targets+set}" = set; then
   enableval="$enable_targets"
   case "${enableval}" in
@@ -10460,7 +10462,8 @@ echo "$as_me: error: enable-targets option must specify target names or 'all'" >
   no)       enable_targets= ;;
   *)        enable_targets=$enableval ;;
 esac
-fi; # Check whether --enable-commonbfdlib or --disable-commonbfdlib was given.
+fi;
+# Check whether --enable-commonbfdlib or --disable-commonbfdlib was given.
 if test "${enable_commonbfdlib+set}" = set; then
   enableval="$enable_commonbfdlib"
   case "${enableval}" in
@@ -10471,6 +10474,7 @@ echo "$as_me: error: bad value ${enableval} for BFD commonbfdlib option" >&2;}
    { (exit 1); exit 1; }; } ;;
 esac
 fi;
+
 # Check whether --with-mmap or --without-mmap was given.
 if test "${with_mmap+set}" = set; then
   withval="$with_mmap"
@@ -10506,12 +10510,42 @@ fi
 
 DEBUGDIR=${libdir}/debug
 
-
 # Check whether --with-separate-debug-dir or --without-separate-debug-dir was given.
 if test "${with_separate_debug_dir+set}" = set; then
   withval="$with_separate_debug_dir"
   DEBUGDIR="${withval}"
 fi;
+
+
+# Check to see if we should allow the generation of
+# symbols with the ELF standard's STT_COMMON type.
+# Check whether --enable-elf-stt-common or --disable-elf-stt-common was given.
+if test "${enable_elf_stt_common+set}" = set; then
+  enableval="$enable_elf_stt_common"
+  case "${enableval}" in
+  yes) want_elf_stt_common=true ;;
+  no)  want_elf_stt_common=false ;;
+  *)   { { echo "$as_me:$LINENO: error: bad value ${enableval} for ELF STT_COMMON option" >&5
+echo "$as_me: error: bad value ${enableval} for ELF STT_COMMON option" >&2;}
+   { (exit 1); exit 1; }; } ;;
+ esac
+else
+  # We have to choose a default behaviour.  For native builds we could
+# test whether the loader supports the STT_COMMON type.  For cross
+# toolchains we default to assuming that they are not supported.
+if test "$cross_compiling" != yes; then
+  want_elf_stt_common=false
+ else
+ # XXX FIXME: Add code to test the loader here.
+  want_elf_stt_common=false
+ fi
+fi; if test $want_elf_stt_common = true; then
+
+cat >>confdefs.h <<\_ACEOF
+#define USE_STT_COMMON 1
+_ACEOF
+
+fi
 
 
 

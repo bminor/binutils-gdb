@@ -1,7 +1,4 @@
 	.data
-	.string 	"str8"
-
-	.balign 16
 	.string8	"strnew8"
 
 	.balign 16

@@ -1587,6 +1587,33 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
   else if (strcmp (typename, "notype") == 0
 	   || strcmp (typename, "STT_NOTYPE") == 0)
     ;
+  else if (strcmp (typename, "common") == 0
+	   || strcmp (typename, "STT_COMMON") == 0)
+    {
+      type = BSF_OBJECT;
+
+      if (! S_IS_COMMON (sym))
+	{
+	  if (S_IS_VOLATILE (sym))
+	    {
+	      sym = symbol_clone (sym, 1);
+	      S_SET_SEGMENT (sym, bfd_com_section_ptr);
+	      S_SET_VALUE (sym, 0);
+	      S_SET_EXTERNAL (sym);
+	      symbol_set_frag (sym, &zero_address_frag);
+	      S_CLEAR_VOLATILE (sym);
+	    }
+	  else if (S_IS_DEFINED (sym) || symbol_equated_p (sym))
+	    as_bad (_("symbol '%s' is already defined"), S_GET_NAME (sym));
+	  else
+	    {
+	      /* FIXME: Is it safe to just change the section ?  */
+	      S_SET_SEGMENT (sym, bfd_com_section_ptr);
+	      S_SET_VALUE (sym, 0);
+	      S_SET_EXTERNAL (sym);
+	    }
+	}
+    }
 #ifdef md_elf_symbol_type
   else if ((type = md_elf_symbol_type (typename, sym, elfsym)) != -1)
     ;

@@ -53,12 +53,11 @@ proc dump_common1 { testname } {
     global exec_output
     global READELF
 
-    send_log "$READELF -s tmpdir/common1.o | grep foo\n"
-    set exec_output [run_host_cmd "readelf" "-s tmpdir/common1.o | grep foo"]
+    send_log "$READELF --syms tmpdir/common1.o | grep foo\n"
+    set exec_output [run_host_cmd "readelf" "--syms tmpdir/common1.o | grep foo"]
 
-    if { ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+)4(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(PRC\\\[0xff03\\\]|COM|SCOM)(\[ 	\]+)_?foo2" $exec_output]
- 	 || ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0-9\]+)(\[ 	\]+)21(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)_?foo1" $exec_output] } {
-	send_log "$exec_output\n"
+    if {   ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+)4(\[ 	\]+)(COMMON|OBJECT)(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(PRC\\\[0xff03\\\]|COM|SCOM)(\[ 	\]+)_?foo2" $exec_output]
+	|| ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0-9\]+)(\[ 	\]+)21(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)_?foo1" $exec_output] } {
 	verbose $exec_output
 	fail $testname
 	return 0
@@ -67,7 +66,49 @@ proc dump_common1 { testname } {
     return 1
 }
 
-if { ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/common1a.c tmpdir/common1a.o]
+proc stt_common_test { options testname } {
+    global exec_output
+    global READELF
+    global ld
+
+    set options "$options tmpdir/common1a.o"
+
+    if { ! [ld_simple_link $ld tmpdir/common.exe $options] } {
+      unresolved $testname
+      return 0
+    }
+
+    send_log "$READELF --syms tmpdir/common.exe | grep foo\n"
+    set exec_output [run_host_cmd "readelf" "--syms tmpdir/common.exe | grep foo"]
+
+    if {![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0-9\]+)(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)COMMON(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)_?foo2" $exec_output] } {
+	fail $testname
+	return 0
+    }
+
+    pass $testname
+    return 1
+}
+
+# Check to see if the assembler is generating symbols with the STT_COMMON type.
+proc assembler_generates_commons {} {
+    global exec_output
+    global READELF
+
+    verbose "Check to see if STT_COMMON symbols are being generated:"
+    set exec_output [run_host_cmd "readelf" "--syms tmpdir/common1a.o | grep foo"]
+
+    if { ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+).(\[ 	\]+)COMMON(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(PRC\\\[0xff03\\\]|COM|SCOM)(\[ 	\]+)_?foo2" $exec_output] } {
+	verbose "STT_COMMON not generated"
+	return 0
+    }
+
+    verbose "STT_COMMON's are generated"
+    return 1
+}
+
+
+if {   ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/common1a.c tmpdir/common1a.o]
     || ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/common1b.c tmpdir/common1b.o] } {
     unresolved $test1
     return
@@ -90,7 +131,6 @@ if {[istarget mips*-*-*]} {
         pass $test1w1
     }
 } else {
-    pass $test1w1
     if { ![regexp "Warning: alignment (\[0-9\]+) of symbol \`_?foo1\' in tmpdir/common1b.o is smaller than 64 in tmpdir/common1a.o" $link_output]
          || ![regexp "Warning: size of symbol \`_?foo1\' changed from 2 in tmpdir/common1a.o to 21 in tmpdir/common1b.o" $link_output] } {
         fail $test1w1
@@ -117,3 +157,16 @@ if { ![regexp "Warning: alignment (\[0-9\]+) of symbol \`_?foo1\' in tmpdir/comm
 if { [dump_common1 $test1c2] } {
     pass $test1c2
 }
+
+#
+# The following tests are for when we are generating STT_COMMON symbols only.
+#
+
+if { ![assembler_generates_commons] } {
+    return
+}
+
+stt_common_test "-static -e 0" "static link of common symbols"
+stt_common_test "-shared"      "shared link of common symbols"
+stt_common_test "-pie"         "position independent link of common symbols"
+

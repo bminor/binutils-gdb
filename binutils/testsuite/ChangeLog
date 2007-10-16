@@ -1,3 +1,10 @@
+2007-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/readelf.ss: Accept COMMON in readelf's output.
+	* binutils-all/readelf.ss-64: Likewise.
+	* binutils-all/readelf.ss-mips: Likewise.
+	* binutils-all/readelf.ss-tmips: Likewise.
+	
 2007-08-30  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/dumptest.s: New test file.

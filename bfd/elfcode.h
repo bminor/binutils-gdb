@@ -1323,6 +1323,10 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	    case STT_FUNC:
 	      sym->symbol.flags |= BSF_FUNCTION;
 	      break;
+	    case STT_COMMON:
+	      /* FIXME: Do we have to put the size field into the value field
+		 as we do with symbols in SHN_COMMON sections (see above) ?  */
+	      /* Fall through.  */
 	    case STT_OBJECT:
 	      sym->symbol.flags |= BSF_OBJECT;
 	      break;

@@ -1,3 +1,15 @@
+2007-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (--enable-elf-stt-common): New configure
+	option.  If enabled then the tools can generate symbols with
+	the ELF STT_COMMON type.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* elf.c (swap_out_syms): If USE_STT_COMMON is defined then set
+	the type of emitted common symbols to STT_COMMON.
+	* elfcode.h (elf_slurp_symbol_table): Accept STT_COMMON symbol
+	types.
+	
 2007-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-arm.c (arm_emit_base_file_entry): Check fwrite return value.

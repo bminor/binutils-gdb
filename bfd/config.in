@@ -285,6 +285,9 @@
 /* Define if we should default to creating read-only plt entries */
 #undef USE_SECUREPLT
 
+/* Define if we may generate symbols with ELF's STT_COMMON type */
+#undef USE_STT_COMMON
+
 /* Version number of package */
 #undef VERSION
 

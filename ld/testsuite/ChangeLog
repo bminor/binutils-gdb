@@ -1,3 +1,8 @@
+2007-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* lf-elfcomm/elfcomm.exp: Add tests of STT_COMMON symbol
+	generation.
+
 2007-10-12  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-mips-elf/multi-got-hidden-1.d,
