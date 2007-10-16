@@ -349,7 +349,7 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
       if ((insn >> 8) == 0x4f)	/* addi sp, xx */
 	/* add 8 bit sign-extended offset */
 	{
-	  int stack_adjust = (gdb_byte) (insn & 0xff);
+	  int stack_adjust = (signed char) (insn & 0xff);
 
 	  /* there are probably two of these stack adjustments:
 	     1) A negative one in the prologue, and
@@ -578,7 +578,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
       else if ((op & 0xff00) == 0x4f00)
 	{
 	  /* addi sp, xx */
-	  int n = (gdb_byte) (op & 0xff);
+	  int n = (signed char) (op & 0xff);
 	  info->sp_offset += n;
 	}
       else if (op == 0x1d8f)

@@ -1,3 +1,9 @@
+2007-10-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* m32r-tdep.c (decode_prologue): Sign extend offset for
+	"addi sp, xx" case.
+	(m32r_frame_unwind_cache): Likewise.
+
 2007-10-15  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* rs6000-tdep.c (skip_prologue): Restore comment with
