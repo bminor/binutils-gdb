@@ -220,6 +220,11 @@ class Symbol
   set_needs_dynsym_entry()
   { this->needs_dynsym_entry_ = true; }
 
+  // Return whether this symbol should be added to the dynamic symbol
+  // table.
+  bool
+  should_add_dynsym_entry() const;
+
   // Return whether this symbol has been seen in a regular object.
   bool
   in_reg() const
@@ -393,6 +398,16 @@ class Symbol
   {
     return (this->visibility_ == elfcpp::STV_DEFAULT
             || this->visibility_ == elfcpp::STV_PROTECTED);
+  }
+
+  // Return true if this symbol can be preempted by a definition in
+  // another link unit.
+  bool
+  is_preemptible() const
+  {
+    return (this->visibility_ != elfcpp::STV_INTERNAL
+            && this->visibility_ != elfcpp::STV_HIDDEN
+            && this->visibility_ != elfcpp::STV_PROTECTED);
   }
 
   // Return whether there should be a warning for references to this

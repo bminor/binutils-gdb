@@ -401,9 +401,10 @@ Output_file_header::do_sized_write(Output_file* of)
   oehdr.put_e_ident(e_ident);
 
   elfcpp::ET e_type;
-  // FIXME: ET_DYN.
   if (parameters->output_is_object())
     e_type = elfcpp::ET_REL;
+  else if (parameters->output_is_shared())
+    e_type = elfcpp::ET_DYN;
   else
     e_type = elfcpp::ET_EXEC;
   oehdr.put_e_type(e_type);
@@ -529,6 +530,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
 	index = this->u1_.os->dynsym_index();
       else
 	index = this->u1_.os->symtab_index();
+      break;
+
+    case 0:
+      // Relocations without symbols use a symbol index of 0.
+      index = 0;
       break;
 
     default:

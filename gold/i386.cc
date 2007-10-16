@@ -752,9 +752,18 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_32:
     case elfcpp::R_386_16:
     case elfcpp::R_386_8:
-      // FIXME: If we are generating a shared object we need to copy
-      // this relocation into the object.
-      gold_assert(!parameters->output_is_shared());
+      // If building a shared library (or a position-independent
+      // executable), we need to create a dynamic relocation for
+      // this location. The relocation applied at link time will
+      // apply the link-time value, so we flag the location with
+      // an R_386_RELATIVE relocation so the dynamic loader can
+      // relocate it easily.
+      if (parameters->output_is_position_independent())
+        {
+          Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+          rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE, data_shndx,
+                             reloc.get_r_offset());
+        }
       break;
 
     case elfcpp::R_386_PC32:
@@ -777,7 +786,7 @@ Target_i386::Scan::local(const General_options&,
           {
             // If we are generating a shared object, we need to add a
             // dynamic RELATIVE relocation for this symbol.
-            if (parameters->output_is_shared())
+            if (parameters->output_is_position_independent())
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
                 rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
@@ -915,17 +924,17 @@ Target_i386::Scan::global(const General_options& options,
     case elfcpp::R_386_PC16:
     case elfcpp::R_386_8:
     case elfcpp::R_386_PC8:
-      // FIXME: If we are generating a shared object we may need to
-      // copy this relocation into the object.  If this symbol is
-      // defined in a shared object, we may need to copy this
-      // relocation in order to avoid a COPY relocation.
-      gold_assert(!parameters->output_is_shared());
-
-      if (gsym->is_from_dynobj())
+      if (gsym->is_from_dynobj()
+          || (parameters->output_is_shared()
+              && gsym->is_preemptible()))
 	{
-	  // This symbol is defined in a dynamic object.  If it is a
+	  // (a) This symbol is defined in a dynamic object.  If it is a
 	  // function, we make a PLT entry.  Otherwise we need to
 	  // either generate a COPY reloc or copy this reloc.
+	  // (b) We are building a shared object and this symbol is
+	  // preemptible. If it is a function, we make a PLT entry.
+	  // Otherwise, we copy the reloc. We do not make COPY relocs
+	  // in shared objects.
 	  if (gsym->type() == elfcpp::STT_FUNC)
 	    {
 	      target->make_plt_entry(symtab, layout, gsym);
@@ -936,8 +945,15 @@ Target_i386::Scan::global(const General_options& options,
 	      // to the address of the PLT entry.
 	      if (r_type != elfcpp::R_386_PC32
 		  && r_type != elfcpp::R_386_PC16
-		  && r_type != elfcpp::R_386_PC8)
+		  && r_type != elfcpp::R_386_PC8
+		  && gsym->is_from_dynobj())
 		gsym->set_needs_dynsym_value();
+	    }
+	  else if (parameters->output_is_shared())
+	    {
+              Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+              rel_dyn->add_global(gsym, r_type, object, data_shndx, 
+                                  reloc.get_r_offset());
 	    }
 	  else
 	    target->copy_reloc(&options, symtab, layout, object, data_shndx,
@@ -968,6 +984,13 @@ Target_i386::Scan::global(const General_options& options,
       // If the symbol is fully resolved, this is just a PC32 reloc.
       // Otherwise we need a PLT entry.
       if (gsym->final_value_is_known())
+	break;
+      // If building a shared library, we can also skip the PLT entry
+      // if the symbol is defined in the output file and is protected
+      // or hidden.
+      if (gsym->is_defined()
+          && !gsym->is_from_dynobj()
+          && !gsym->is_preemptible())
 	break;
       target->make_plt_entry(symtab, layout, gsym);
       break;
@@ -1185,7 +1208,11 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 
   // Pick the value to use for symbols defined in shared objects.
   Symbol_value<32> symval;
-  if (gsym != NULL && gsym->is_from_dynobj() && gsym->has_plt_offset())
+  if (gsym != NULL
+      && (gsym->is_from_dynobj()
+          || (parameters->output_is_shared()
+              && gsym->is_preemptible()))
+      && gsym->has_plt_offset())
     {
       symval.set_output_value(target->plt_section()->address()
 			      + gsym->plt_offset());
@@ -1250,7 +1277,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 
     case elfcpp::R_386_PLT32:
       gold_assert(gsym->has_plt_offset()
-		  || gsym->final_value_is_known());
+                 || gsym->final_value_is_known());
       Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       break;
 
@@ -1352,7 +1379,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
   elfcpp::Elf_types<32>::Elf_Addr value = psymval->value(relinfo->object, 0);
 
   const bool is_final = (gsym == NULL
-			 ? !parameters->output_is_shared()
+			 ? !parameters->output_is_position_independent()
 			 : gsym->final_value_is_known());
   const tls::Tls_optimization optimized_type
       = Target_i386::optimize_tls_reloc(is_final, r_type);

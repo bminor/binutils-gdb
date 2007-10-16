@@ -411,7 +411,7 @@ void
 Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
 					Symbol_table* symtab)
 {
-  if (!input_objects->any_dynamic())
+  if (parameters->doing_static_link())
     return;
 
   const char* dynamic_name = this->namepool_.add(".dynamic", false, NULL);
@@ -545,7 +545,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   this->create_note_section();
 
   Output_segment* phdr_seg = NULL;
-  if (input_objects->any_dynamic())
+  if (!parameters->doing_static_link())
     {
       // There was a dynamic object in the link.  We need to create
       // some information for the dynamic linker.

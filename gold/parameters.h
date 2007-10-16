@@ -67,6 +67,14 @@ class Parameters
   output_is_object() const
   { return this->output_file_type_ == OUTPUT_OBJECT; }
 
+  // Whether we are generating position-independent output.
+  // This is the case when generating either a shared library
+  // or a regular executable with the --pic-executable option.
+  // FIXME: support --pic-executable
+  bool
+  output_is_position_independent() const
+  { return output_is_shared(); }
+
   // The target system root directory.  This is NULL if there isn't
   // one.
   const std::string&
@@ -114,6 +122,11 @@ class Parameters
   int
   optimization_level() const
   { return this->optimization_level_; }
+
+  // Whether the -E/--export-dynamic flag is set.
+  bool
+  export_dynamic() const
+  { return this->export_dynamic_; }
 
   // Set whether we are doing a static link.
   void
@@ -170,6 +183,8 @@ class Parameters
   bool is_big_endian_;
   // The optimization level.
   int optimization_level_;
+  // Whether the -E/--export-dynamic flag is set.
+  bool export_dynamic_;
 };
 
 // This is a global variable.

@@ -188,6 +188,27 @@ Sized_symbol<size>::init(const char* name, Value_type value, Size_type symsize,
   this->symsize_ = symsize;
 }
 
+// Return true if this symbol should be added to the dynamic symbol
+// table.
+
+inline bool
+Symbol::should_add_dynsym_entry() const
+{
+  // If the symbol is used by a dynamic relocation, we need to add it.
+  if (this->needs_dynsym_entry())
+    return true;
+
+  // If exporting all symbols or building a shared library,
+  // and the symbol is defined in a regular object and is
+  // externally visible, we need to add it.
+  if ((parameters->export_dynamic() || parameters->output_is_shared())
+      && !this->is_from_dynobj()
+      && this->is_externally_visible())
+    return true;
+
+  return false;
+}
+
 // Return true if the final value of this symbol is known at link
 // time.
 
@@ -1225,10 +1246,7 @@ Symbol_table::set_dynsym_indexes(const General_options* options,
       // some symbols appear more than once in the symbol table, with
       // and without a version.
 
-      if (!sym->needs_dynsym_entry()
-          && (!options->export_dynamic()
-              || !sym->in_reg()
-              || !sym->is_externally_visible()))
+      if (!sym->should_add_dynsym_entry())
 	sym->set_dynsym_index(-1U);
       else if (!sym->has_dynsym_index())
 	{

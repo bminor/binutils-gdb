@@ -32,10 +32,10 @@ namespace gold
 {
 
 // This function implements the generic part of reloc scanning.  This
-// is an inline function which takes a class whose operator()
-// implements the machine specific part of scanning.  We do it this
-// way to avoidmaking a function call for each relocation, and to
-// avoid repeating the generic code for each target.
+// is an inline function which takes a class whose member functions
+// local() and global() implement the machine specific part of scanning.
+// We do it this way to avoidmaking a function call for each relocation,
+// and to avoid repeating the generic code for each target.
 
 template<int size, bool big_endian, typename Target_type, int sh_type,
 	 typename Scan>
@@ -195,7 +195,8 @@ relocate_section(
 
       if (sym != NULL
 	  && sym->is_undefined()
-	  && sym->binding() != elfcpp::STB_WEAK)
+	  && sym->binding() != elfcpp::STB_WEAK
+	  && !parameters->output_is_shared())
 	gold_undefined_symbol(sym, relinfo, i, offset);
 
       if (sym != NULL && sym->has_warning())

@@ -35,7 +35,8 @@ Parameters::Parameters(const General_options* options, Errors* errors)
     sysroot_(options->sysroot()),
     is_doing_static_link_valid_(false), doing_static_link_(false),
     is_size_and_endian_valid_(false), size_(0), is_big_endian_(false),
-    optimization_level_(options->optimization_level())
+    optimization_level_(options->optimization_level()),
+    export_dynamic_(options->export_dynamic())
 {
   if (options->is_shared())
     this->output_file_type_ = OUTPUT_SHARED;
