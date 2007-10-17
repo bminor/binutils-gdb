@@ -1,3 +1,8 @@
+2007-10-17  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* m68k-opc.c (m68k_opcodes): Correct move sr and ccr masks for
+	coldfire.
+
 2007-10-15  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes): Fix the first two operands of

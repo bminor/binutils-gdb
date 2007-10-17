@@ -1593,10 +1593,10 @@ const struct m68k_opcode m68k_opcodes[] =
 {"movew", 2,	one(0041300),	one(0177700), "Cs$s", m68010up },
 {"movew", 2,	one(0041300),	one(0177770), "CsDs", mcfisa_a },
 {"movew", 2,	one(0042300),	one(0177700), ";wCd", m68000up },
-{"movew", 2,	one(0042300),	one(0177700), "DsCd", mcfisa_a },
+{"movew", 2,	one(0042300),	one(0177770), "DsCd", mcfisa_a },
 {"movew", 4,	one(0042374),	one(0177777), "#wCd", mcfisa_a },
 {"movew", 2,	one(0043300),	one(0177700), ";wSd", m68000up },
-{"movew", 2,	one(0043300),	one(0177700), "DsSd", mcfisa_a },
+{"movew", 2,	one(0043300),	one(0177770), "DsSd", mcfisa_a },
 {"movew", 4,	one(0043374),	one(0177777), "#wSd", mcfisa_a },
 
 {"movel", 2,	one(0070000),	one(0170400), "MsDd", m68000up | mcfisa_a },

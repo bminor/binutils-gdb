@@ -1,3 +1,9 @@
+2007-10-17  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/m68k/mcf-movsr.s: New.
+	* gas/m68k/mcf-movsr.d: New.
+	* gas/m68k/all.exp: Add mcf-movsr test.
+
 2007-10-16  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/elf.exp: Accept COMMON in readelf's output.
