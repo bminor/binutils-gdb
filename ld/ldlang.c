@@ -4120,7 +4120,8 @@ sort_sections_by_lma (const void *arg1, const void *arg2)
 
 /* Check to see if any allocated sections overlap with other allocated
    sections.  This can happen if a linker script specifies the output
-   section addresses of the two sections.  */
+   section addresses of the two sections.  Also check whether any memory
+   region has overflowed.  */
 
 static void
 lang_check_section_addresses (void)
@@ -4133,6 +4134,7 @@ lang_check_section_addresses (void)
   bfd_vma os_start;
   bfd_vma os_end;
   bfd_size_type amt;
+  lang_memory_region_type *m;
 
   if (bfd_count_sections (output_bfd) <= 1)
     return;
@@ -4181,6 +4183,20 @@ lang_check_section_addresses (void)
     }
 
   free (sections);
+
+  /* If any memory region has overflowed, report by how much.
+     We do not issue this diagnostic for regions that had sections
+     explicitly placed outside their bounds; os_region_check's
+     diagnostics are adequate for that case.
+
+     FIXME: It is conceivable that m->current - (m->origin + m->length)
+     might overflow a 32-bit integer.  There is, alas, no way to print
+     a bfd_vma quantity in decimal.  */
+  for (m = lang_memory_region_list; m; m = m->next)
+    if (m->had_full_message)
+      einfo (_("%X%P: region %s overflowed by %ld bytes\n"),
+	     m->name, (long)(m->current - (m->origin + m->length)));
+
 }
 
 /* Make sure the new address is within the region.  We explicitly permit the
@@ -4208,15 +4224,15 @@ os_region_check (lang_output_section_statement_type *os,
 		 os->bfd_section->name,
 		 region->name);
 	}
-      else
+      else if (!region->had_full_message)
 	{
-	  einfo (_("%X%P: region %s is full (%B section %s)\n"),
-		 region->name,
+	  region->had_full_message = TRUE;
+
+	  einfo (_("%X%P: %B section %s will not fit in region %s\n"),
 		 os->bfd_section->owner,
-		 os->bfd_section->name);
+		 os->bfd_section->name,
+		 region->name);
 	}
-      /* Reset the region pointer.  */
-      region->current = region->origin;
     }
 }
 

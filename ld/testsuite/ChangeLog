@@ -1,3 +1,19 @@
+2007-10-17  Zack Weinberg  <zack@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Mark Shinwell  <shinwell@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-scripts/rgn-over.exp: New driver.
+	* ld-scripts/rgn-over.s: New file.
+	* ld-scripts/rgn-over1.d, ld-scripts/rgn-over1.t,
+	ld-scripts/rgn-over2.d, ld-scripts/rgn-over2.t,
+	ld-scripts/rgn-over3.d, ld-scripts/rgn-over3.t,
+	ld-scripts/rgn-over4.d, ld-scripts/rgn-over4.t,
+	ld-scripts/rgn-over5.d, ld-scripts/rgn-over5.t,
+	ld-scripts/rgn-over6.d, ld-scripts/rgn-over6.t,
+	ld-scripts/rgn-over7.d, ld-scripts/rgn-over7.t:
+	New test cases.
+
 2007-10-16  Nick Clifton  <nickc@redhat.com>
 
 	* lf-elfcomm/elfcomm.exp: Add tests of STT_COMMON symbol
