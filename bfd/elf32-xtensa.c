@@ -8150,8 +8150,56 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 	     we may need to change the relocation's target offset.  */
 
 	  target_sec = r_reloc_get_section (&r_rel);
-	  target_relax_info = get_xtensa_relax_info (target_sec);
 
+	  /* For a reference to a discarded section from a DWARF section,
+	     i.e., where action_discarded is PRETEND, the symbol will
+	     eventually be modified to refer to the kept section (at least if
+	     the kept and discarded sections are the same size).  Anticipate
+	     that here and adjust things accordingly.  */
+	  if (! elf_xtensa_ignore_discarded_relocs (sec)
+	      && elf_xtensa_action_discarded (sec) == PRETEND
+	      && sec->sec_info_type != ELF_INFO_TYPE_STABS
+	      && target_sec != NULL
+	      && elf_discarded_section (target_sec))
+	    {
+	      /* It would be natural to call _bfd_elf_check_kept_section
+		 here, but it's not exported from elflink.c.  It's also a
+		 fairly expensive check.  Adjusting the relocations to the
+		 discarded section is fairly harmless; it will only adjust
+		 some addends and difference values.  If it turns out that
+		 _bfd_elf_check_kept_section fails later, it won't matter,
+		 so just compare the section names to find the right group
+		 member.  */
+	      asection *kept = target_sec->kept_section;
+	      if (kept != NULL)
+		{
+		  if ((kept->flags & SEC_GROUP) != 0)
+		    {
+		      asection *first = elf_next_in_group (kept);
+		      asection *s = first;
+
+		      kept = NULL;
+		      while (s != NULL)
+			{
+			  if (strcmp (s->name, target_sec->name) == 0)
+			    {
+			      kept = s;
+			      break;
+			    }
+			  s = elf_next_in_group (s);
+			  if (s == first)
+			    break;
+			}
+		    }
+		}
+	      if (kept != NULL
+		  && ((target_sec->rawsize != 0
+		       ? target_sec->rawsize : target_sec->size)
+		      == (kept->rawsize != 0 ? kept->rawsize : kept->size)))
+		target_sec = kept;
+	    }
+
+	  target_relax_info = get_xtensa_relax_info (target_sec);
 	  if (target_relax_info
 	      && (target_relax_info->is_relaxable_literal_section
 		  || target_relax_info->is_relaxable_asm_section))

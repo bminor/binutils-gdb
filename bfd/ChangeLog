@@ -1,5 +1,10 @@
 2007-10-16  Bob Wilson  <bob.wilson@acm.org>
 
+	* elf32-xtensa.c (relax_section): Check for a reference to a discarded
+	DWARF section and anticipate its replacement with the kept section.
+	
+2007-10-16  Bob Wilson  <bob.wilson@acm.org>
+
 	* elf32-xtensa.c (elf_xtensa_discard_info_for_section): Remove
 	unnecessary size variables.  Set sec->rawsize.
 	(relax_section, relax_property_section): Likewise.
