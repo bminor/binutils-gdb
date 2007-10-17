@@ -1,3 +1,9 @@
+2007-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbint.texinfo (Target Conditionals): Use
+	frame_unwind_register_unsigned in examples instead of
+	frame_unwind_unsigned_register.
+
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Predefined Target Types): Add int128

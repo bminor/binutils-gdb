@@ -934,7 +934,7 @@ mn10300_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST pc;
 
-  frame_unwind_unsigned_register (next_frame, E_PC_REGNUM, &pc);
+  pc = frame_unwind_register_unsigned (next_frame, E_PC_REGNUM);
   return pc;
 }
 
@@ -943,7 +943,7 @@ mn10300_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST sp;
 
-  frame_unwind_unsigned_register (next_frame, E_SP_REGNUM, &sp);
+  sp = frame_unwind_register_unsigned (next_frame, E_SP_REGNUM);
   return sp;
 }
 

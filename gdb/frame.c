@@ -678,17 +678,6 @@ get_frame_register_unsigned (struct frame_info *frame, int regnum)
 }
 
 void
-frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
-				ULONGEST *val)
-{
-  gdb_byte buf[MAX_REGISTER_SIZE];
-  frame_unwind_register (frame, regnum, buf);
-  (*val) = extract_unsigned_integer (buf,
-				     register_size (get_frame_arch (frame),
-						    regnum));
-}
-
-void
 put_frame_register (struct frame_info *frame, int regnum,
 		    const gdb_byte *buf)
 {
@@ -1730,12 +1719,8 @@ frame_sp_unwind (struct frame_info *next_frame)
   /* Now things are really are grim.  Hope that the value returned by
      the gdbarch_sp_regnum register is meaningful.  */
   if (gdbarch_sp_regnum (gdbarch) >= 0)
-    {
-      ULONGEST sp;
-      frame_unwind_unsigned_register (next_frame,
-				      gdbarch_sp_regnum (gdbarch), &sp);
-      return sp;
-    }
+    return frame_unwind_register_unsigned (next_frame,
+					   gdbarch_sp_regnum (gdbarch));
   internal_error (__FILE__, __LINE__, _("Missing unwind SP method"));
 }
 

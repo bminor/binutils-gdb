@@ -763,8 +763,7 @@ m68hc11_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST pc;
 
-  frame_unwind_unsigned_register (next_frame, gdbarch_pc_regnum (gdbarch),
-                                  &pc);
+  pc = frame_unwind_register_unsigned (next_frame, gdbarch_pc_regnum (gdbarch));
   return pc;
 }
 
@@ -799,7 +798,7 @@ m68hc11_frame_unwind_cache (struct frame_info *next_frame,
   /* The SP was moved to the FP.  This indicates that a new frame
      was created.  Get THIS frame's FP value by unwinding it from
      the next frame.  */
-  frame_unwind_unsigned_register (next_frame, SOFT_FP_REGNUM, &this_base);
+  this_base = frame_unwind_register_unsigned (next_frame, SOFT_FP_REGNUM);
   if (this_base == 0)
     {
       info->base = 0;
@@ -815,7 +814,7 @@ m68hc11_frame_unwind_cache (struct frame_info *next_frame,
   if (info->sp_offset != (CORE_ADDR) -1)
     {
       info->saved_regs[HARD_PC_REGNUM].addr = info->sp_offset;
-      frame_unwind_unsigned_register (next_frame, HARD_SP_REGNUM, &this_base);
+      this_base = frame_unwind_register_unsigned (next_frame, HARD_SP_REGNUM);
       prev_sp = this_base + info->sp_offset + 2;
       this_base += STACK_CORRECTION;
     }
@@ -980,7 +979,7 @@ static CORE_ADDR
 m68hc11_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST sp;
-  frame_unwind_unsigned_register (next_frame, HARD_SP_REGNUM, &sp);
+  sp = frame_unwind_register_unsigned (next_frame, HARD_SP_REGNUM);
   return sp;
 }
 
@@ -995,7 +994,7 @@ m68hc11_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   ULONGEST tos;
   CORE_ADDR pc = frame_pc_unwind (next_frame);
 
-  frame_unwind_unsigned_register (next_frame, SOFT_FP_REGNUM, &tos);
+  tos = frame_unwind_register_unsigned (next_frame, SOFT_FP_REGNUM);
   tos += 2;
   return frame_id_build (tos, pc);
 }

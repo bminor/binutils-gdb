@@ -1,3 +1,14 @@
+2007-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (frame_unwind_unsigned_register): Delete.
+	(frame_sp_unwind): Use frame_unwind_register_unsigned instead.
+	* frame.h (frame_unwind_unsigned_register): Delete prototype.
+
+	* alpha-linux-tdep.c, alpha-mdebug-tdep.c, alpha-tdep.c,
+	avr-tdep.c, cris-tdep.c, frv-tdep.c, m68hc11-tdep.c, mn10300-tdep.c,
+	mt-tdep.c: Replace frame_unwind_unsigned_register with
+	frame_unwind_register_unsigned.
+
 2007-10-16  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* config/i386/mingw.mh, config/i386/mingw.mt: New files.

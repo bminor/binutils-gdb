@@ -476,10 +476,6 @@ extern ULONGEST get_frame_register_unsigned (struct frame_info *frame,
 					     int regnum);
 
 
-/* Use frame_unwind_register_signed.  */
-extern void frame_unwind_unsigned_register (struct frame_info *frame,
-					    int regnum, ULONGEST *val);
-
 /* Get the value of the register that belongs to this FRAME.  This
    function is a wrapper to the call sequence ``frame_register_unwind
    (get_next_frame (FRAME))''.  As per frame_register_unwind(), if

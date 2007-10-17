@@ -204,7 +204,7 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *next_frame,
   info->saved_regs = frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
 
   /* The VFP of the frame is at FRAME_REG+FRAME_OFFSET.  */
-  frame_unwind_unsigned_register (next_frame, PROC_FRAME_REG (proc_desc), &vfp);
+  vfp = frame_unwind_register_unsigned (next_frame, PROC_FRAME_REG (proc_desc));
   vfp += PROC_FRAME_OFFSET (info->proc_desc);
   info->vfp = vfp;
 

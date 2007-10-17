@@ -895,8 +895,8 @@ mt_frame_unwind_cache (struct frame_info *next_frame,
   /* Grab the frame-relative values of SP and FP, needed below. 
      The frame_saved_register function will find them on the
      stack or in the registers as appropriate.  */
-  frame_unwind_unsigned_register (next_frame, MT_SP_REGNUM, &sp);
-  frame_unwind_unsigned_register (next_frame, MT_FP_REGNUM, &fp);
+  sp = frame_unwind_register_unsigned (next_frame, MT_SP_REGNUM);
+  fp = frame_unwind_register_unsigned (next_frame, MT_FP_REGNUM);
 
   start_addr = frame_func_unwind (next_frame, NORMAL_FRAME);
 
@@ -1012,7 +1012,7 @@ mt_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST pc;
 
-  frame_unwind_unsigned_register (next_frame, MT_PC_REGNUM, &pc);
+  pc = frame_unwind_register_unsigned (next_frame, MT_PC_REGNUM);
   return pc;
 }
 
@@ -1021,7 +1021,7 @@ mt_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST sp;
 
-  frame_unwind_unsigned_register (next_frame, MT_SP_REGNUM, &sp);
+  sp = frame_unwind_register_unsigned (next_frame, MT_SP_REGNUM);
   return sp;
 }
 

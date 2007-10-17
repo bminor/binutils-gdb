@@ -1151,7 +1151,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
     return_reg = ALPHA_RA_REGNUM;
   info->return_reg = return_reg;
 
-  frame_unwind_unsigned_register (next_frame, frame_reg, &val);
+  val = frame_unwind_register_unsigned (next_frame, frame_reg);
   info->vfp = val + frame_size;
 
   /* Convert offsets to absolute addresses.  See above about adding
@@ -1278,7 +1278,7 @@ static struct frame_id
 alpha_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST base;
-  frame_unwind_unsigned_register (next_frame, ALPHA_SP_REGNUM, &base);
+  base = frame_unwind_register_unsigned (next_frame, ALPHA_SP_REGNUM);
   return frame_id_build (base, frame_pc_unwind (next_frame));
 }
 
@@ -1286,7 +1286,7 @@ static CORE_ADDR
 alpha_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST pc;
-  frame_unwind_unsigned_register (next_frame, ALPHA_PC_REGNUM, &pc);
+  pc = frame_unwind_register_unsigned (next_frame, ALPHA_PC_REGNUM);
   return pc;
 }
 

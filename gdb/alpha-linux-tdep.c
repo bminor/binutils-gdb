@@ -105,7 +105,7 @@ alpha_linux_sigcontext_addr (struct frame_info *next_frame)
   long off;
 
   pc = frame_pc_unwind (next_frame);
-  frame_unwind_unsigned_register (next_frame, ALPHA_SP_REGNUM, &sp);
+  sp = frame_unwind_register_unsigned (next_frame, ALPHA_SP_REGNUM);
 
   off = alpha_linux_sigtramp_offset (pc);
   gdb_assert (off >= 0);

@@ -904,8 +904,8 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
       /* The SP was moved to the FP.  This indicates that a new frame
          was created.  Get THIS frame's FP value by unwinding it from
          the next frame.  */
-      frame_unwind_unsigned_register (next_frame, AVR_FP_REGNUM, &this_base);
-      frame_unwind_unsigned_register (next_frame, AVR_FP_REGNUM+1, &high_base);
+      this_base = frame_unwind_register_unsigned (next_frame, AVR_FP_REGNUM);
+      high_base = frame_unwind_register_unsigned (next_frame, AVR_FP_REGNUM+1);
       this_base += (high_base << 8);
       
       /* The FP points at the last saved register.  Adjust the FP back
@@ -916,7 +916,7 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
     {
       /* Assume that the FP is this frame's SP but with that pushed
          stack space added back.  */
-      frame_unwind_unsigned_register (next_frame, AVR_SP_REGNUM, &this_base);
+      this_base = frame_unwind_register_unsigned (next_frame, AVR_SP_REGNUM);
       prev_sp = this_base + info->size;
     }
 
@@ -954,7 +954,7 @@ avr_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST pc;
 
-  frame_unwind_unsigned_register (next_frame, AVR_PC_REGNUM, &pc);
+  pc = frame_unwind_register_unsigned (next_frame, AVR_PC_REGNUM);
 
   return avr_make_iaddr (pc);
 }
@@ -964,7 +964,7 @@ avr_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST sp;
 
-  frame_unwind_unsigned_register (next_frame, AVR_SP_REGNUM, &sp);
+  sp = frame_unwind_register_unsigned (next_frame, AVR_SP_REGNUM);
 
   return avr_make_saddr (sp);
 }
@@ -1095,7 +1095,7 @@ avr_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST base;
 
-  frame_unwind_unsigned_register (next_frame, AVR_SP_REGNUM, &base);
+  base = frame_unwind_register_unsigned (next_frame, AVR_SP_REGNUM);
   return frame_id_build (avr_make_saddr (base), frame_pc_unwind (next_frame));
 }
 

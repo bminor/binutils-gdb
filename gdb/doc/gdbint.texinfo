@@ -3611,7 +3611,7 @@ is typically no more than:
 
 @smallexample
 ULONGEST pc;
-pc = frame_unwind_unsigned_register (next_frame, S390_PC_REGNUM);
+pc = frame_unwind_register_unsigned (next_frame, S390_PC_REGNUM);
 return gdbarch_addr_bits_remove (gdbarch, pc);
 @end smallexample
 
@@ -3628,7 +3628,7 @@ is typically no more than:
 
 @smallexample
 ULONGEST sp;
-sp = frame_unwind_unsigned_register (next_frame, S390_SP_REGNUM);
+sp = frame_unwind_register_unsigned (next_frame, S390_SP_REGNUM);
 return gdbarch_addr_bits_remove (gdbarch, sp);
 @end smallexample
 

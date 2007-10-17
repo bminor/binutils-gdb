@@ -1338,8 +1338,7 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *next_frame,
       /* The SP was moved to the FP.  This indicates that a new frame
          was created.  Get THIS frame's FP value by unwinding it from
          the next frame.  */
-      frame_unwind_unsigned_register (next_frame, CRIS_FP_REGNUM, 
-				      &this_base);
+      this_base = frame_unwind_register_unsigned (next_frame, CRIS_FP_REGNUM);
       info->base = this_base;
       info->saved_regs[CRIS_FP_REGNUM].addr = info->base;
   
@@ -1352,8 +1351,8 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *next_frame,
       ULONGEST this_base;      
       /* Assume that the FP is this frame's SP but with that pushed
          stack space added back.  */
-      frame_unwind_unsigned_register (next_frame, gdbarch_sp_regnum (gdbarch),
-				      &this_base);
+      this_base = frame_unwind_register_unsigned (next_frame,
+						  gdbarch_sp_regnum (gdbarch));
       info->base = this_base;
       info->prev_sp = info->base + info->size;
     }
@@ -1424,8 +1423,8 @@ crisv32_scan_prologue (CORE_ADDR pc, struct frame_info *next_frame,
     }
 
   /* The SP is assumed to be unaltered.  */
-  frame_unwind_unsigned_register (next_frame, gdbarch_sp_regnum (gdbarch),
-				  &this_base);
+  this_base = frame_unwind_register_unsigned (next_frame,
+					      gdbarch_sp_regnum (gdbarch));
   info->base = this_base;
   info->prev_sp = this_base;
       
@@ -1470,8 +1469,8 @@ static CORE_ADDR
 cris_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST pc;
-  frame_unwind_unsigned_register (next_frame,
-				  gdbarch_pc_regnum (gdbarch), &pc);
+  pc = frame_unwind_register_unsigned (next_frame,
+				       gdbarch_pc_regnum (gdbarch));
   return pc;
 }
 
@@ -1479,8 +1478,8 @@ static CORE_ADDR
 cris_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST sp;
-  frame_unwind_unsigned_register (next_frame,
-				  gdbarch_sp_regnum (gdbarch), &sp);
+  sp = frame_unwind_register_unsigned (next_frame,
+				       gdbarch_sp_regnum (gdbarch));
   return sp;
 }
 

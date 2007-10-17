@@ -938,9 +938,9 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
          because instructions may save relative to the SP, but we need
          their addresses relative to the FP.  */
       if (fp_set)
-	  frame_unwind_unsigned_register (next_frame, fp_regnum, &this_base);
+	this_base = frame_unwind_register_unsigned (next_frame, fp_regnum);
       else
-	  frame_unwind_unsigned_register (next_frame, sp_regnum, &this_base);
+	this_base = frame_unwind_register_unsigned (next_frame, sp_regnum);
 
       for (i = 0; i < 64; i++)
 	if (gr_saved[i])
