@@ -47,7 +47,7 @@ class Task;
 class Workqueue;
 
 // Some tasks require access to shared data structures, such as the
-// symbol table.  Some tasks must be executed in a particular error,
+// symbol table.  Some tasks must be executed in a particular order,
 // such as reading input file symbol tables--if we see foo.o -llib, we
 // have to read the symbols for foo.o before we read the ones for
 // -llib.  To implement this safely and efficiently, we use tokens.
@@ -390,6 +390,10 @@ class Workqueue
   // A complete set of blocking tasks has completed.
   void
   cleared_blocker();
+
+  // Set the thread count.
+  void
+  set_thread_count(int);
 
  private:
   // This class can not be copied.

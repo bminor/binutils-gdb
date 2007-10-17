@@ -17,6 +17,10 @@ INCLUDES = -D_GNU_SOURCE \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
+if THREADS
+THREADSLIB = -lpthread
+endif
+
 TESTS = object_unittest
 check_SCRIPTS = 
 
@@ -95,7 +99,8 @@ libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 
 DEPENDENCIES = \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
-LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL)
+LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
+	$(THREADSLIB)
 
 check_PROGRAMS = object_unittest $(NATIVE_PROGS)
 

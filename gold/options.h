@@ -189,6 +189,26 @@ class General_options
   user_set_text_segment_address() const
   { return this->text_segment_address_ != -1U; }
 
+  // --threads: Whether to use threads.
+  bool
+  threads() const
+  { return this->threads_; }
+
+  // --thread-count-initial: Threads to use in initial pass.
+  int
+  thread_count_initial() const
+  { return this->thread_count_initial_; }
+
+  // --thread-count-middle: Threads to use in middle pass.
+  int
+  thread_count_middle() const
+  { return this->thread_count_middle_; }
+
+  // --thread-count-final: Threads to use in final pass.
+  int
+  thread_count_final() const
+  { return this->thread_count_final_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -288,6 +308,49 @@ class General_options
       }
   }
 
+  int
+  parse_thread_count(const char* arg)
+  {
+    char* endptr;
+    int count = strtol(arg, &endptr, 0);
+    if (*endptr != '\0' || count < 0)
+      {
+	fprintf(stderr, _("%s: invalid thread count: %s\n"),
+		program_name, arg);
+	::exit(1);
+      }
+    return count;
+  }
+
+  void
+  set_threads()
+  { this->threads_ = true; }
+
+  void
+  clear_threads()
+  { this->threads_ = false; }
+
+  void
+  set_thread_count(const char* arg)
+  {
+    int count = this->parse_thread_count(arg);
+    this->thread_count_initial_ = count;
+    this->thread_count_middle_ = count;
+    this->thread_count_final_ = count;
+  }
+
+  void
+  set_thread_count_initial(const char* arg)
+  { this->thread_count_initial_ = this->parse_thread_count(arg); }
+
+  void
+  set_thread_count_middle(const char* arg)
+  { this->thread_count_initial_ = this->parse_thread_count(arg); }
+
+  void
+  set_thread_count_final(const char* arg)
+  { this->thread_count_initial_ = this->parse_thread_count(arg); }
+
   void
   ignore(const char*)
   { }
@@ -311,6 +374,10 @@ class General_options
   bool print_stats_;
   std::string sysroot_;
   uint64_t text_segment_address_;
+  bool threads_;
+  int thread_count_initial_;
+  int thread_count_middle_;
+  int thread_count_final_;
 };
 
 // The current state of the position dependent options.
@@ -543,6 +610,11 @@ class Input_arguments
   in_group() const
   { return this->in_group_; }
 
+  // The number of entries in the list.
+  int
+  size() const
+  { return this->input_argument_list_.size(); }
+
   // Iterators to iterate over the list of input files.
 
   const_iterator
@@ -593,6 +665,11 @@ class Command_line
   const General_options&
   options() const
   { return this->options_; }
+
+  // The number of input files.
+  int
+  number_of_input_files() const
+  { return this->inputs_.size(); }
 
   // Iterators to iterate over the list of input files.
 

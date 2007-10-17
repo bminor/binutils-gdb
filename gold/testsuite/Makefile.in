@@ -63,40 +63,49 @@ target_triplet = @target@
 
 check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_5)
 @GCC_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1)
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@constructor_static_test_DEPENDENCIES = libgoldtest.a \
 @GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@constructor_static_test_DEPENDENCIES =  \
 @NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
 @NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@two_file_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1)
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@two_file_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@two_file_static_test_DEPENDENCIES = libgoldtest.a \
 @GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@two_file_static_test_DEPENDENCIES =  \
 @NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
 @NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@exception_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1)
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@exception_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@exception_static_test_DEPENDENCIES = libgoldtest.a \
 @GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@exception_static_test_DEPENDENCIES =  \
 @NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
 @NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@tls_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@tls_test_DEPENDENCIES =
@@ -221,7 +230,8 @@ am_object_unittest_OBJECTS = object_unittest.$(OBJEXT)
 object_unittest_OBJECTS = $(am_object_unittest_OBJECTS)
 object_unittest_LDADD = $(LDADD)
 object_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1)
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__tls_pic_test_SOURCES_DIST = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_pic_test_OBJECTS = tls_test_main.$(OBJEXT)
 tls_pic_test_OBJECTS = $(am_tls_pic_test_OBJECTS)
@@ -330,7 +340,8 @@ am__weak_test_SOURCES_DIST = weak_test.cc
 weak_test_OBJECTS = $(am_weak_test_OBJECTS)
 weak_test_LDADD = $(LDADD)
 weak_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1)
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -473,6 +484,8 @@ STATIC_TLS_FALSE = @STATIC_TLS_FALSE@
 STATIC_TLS_TRUE = @STATIC_TLS_TRUE@
 STRIP = @STRIP@
 TARGETOBJS = @TARGETOBJS@
+THREADS_FALSE = @THREADS_FALSE@
+THREADS_TRUE = @THREADS_TRUE@
 TLS_FALSE = @TLS_FALSE@
 TLS_TRUE = @TLS_TRUE@
 USE_NLS = @USE_NLS@
@@ -538,6 +551,7 @@ INCLUDES = -D_GNU_SOURCE \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
+@THREADS_TRUE@THREADSLIB = -lpthread
 TESTS = object_unittest $(NATIVE_TESTING)
 check_SCRIPTS = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@NATIVE_PROGS = constructor_test \
@@ -572,7 +586,9 @@ libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 DEPENDENCIES = \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
 
-LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL)
+LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
+	$(THREADSLIB)
+
 object_unittest_SOURCES = object_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_SOURCES = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_DEPENDENCIES = gcctestdir/ld

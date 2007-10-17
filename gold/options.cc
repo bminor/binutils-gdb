@@ -357,6 +357,25 @@ options::Command_line_options::options[] =
   GENERAL_ARG('\0', "Ttext", N_("Set the address of the .text section"),
               N_("-Ttext ADDRESS"), ONE_DASH,
               &General_options::set_text_segment_address),
+  GENERAL_NOARG('\0', "threads", N_("Run the linker multi-threaded"),
+		NULL, TWO_DASHES, &General_options::set_threads),
+  GENERAL_NOARG('\0', "no-threads", N_("Do not run the linker multi-threaded"),
+		NULL, TWO_DASHES, &General_options::clear_threads),
+  GENERAL_ARG('\0', "thread-count", N_("Number of threads to use"),
+	      N_("--thread-count COUNT"), TWO_DASHES,
+	      &General_options::set_thread_count),
+  GENERAL_ARG('\0', "thread-count-initial",
+	      N_("Number of threads to use in initial pass"),
+	      N_("--thread-count-initial COUNT"), TWO_DASHES,
+	      &General_options::set_thread_count_initial),
+  GENERAL_ARG('\0', "thread-count-middle",
+	      N_("Number of threads to use in middle pass"),
+	      N_("--thread-count-middle COUNT"), TWO_DASHES,
+	      &General_options::set_thread_count_middle),
+  GENERAL_ARG('\0', "thread-count-final",
+	      N_("Number of threads to use in final pass"),
+	      N_("--thread-count-final COUNT"), TWO_DASHES,
+	      &General_options::set_thread_count_final),
   POSDEP_NOARG('\0', "whole-archive",
                N_("Include all archive contents"),
                NULL, TWO_DASHES,
@@ -395,7 +414,11 @@ General_options::General_options()
     is_static_(false),
     print_stats_(false),
     sysroot_(),
-    text_segment_address_(-1U)   // -1 indicates value not set by user
+    text_segment_address_(-1U),   // -1 indicates value not set by user
+    threads_(false),
+    thread_count_initial_(0),
+    thread_count_middle_(0),
+    thread_count_final_(0)
 {
 }
 

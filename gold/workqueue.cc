@@ -22,6 +22,10 @@
 
 #include "gold.h"
 
+#ifdef ENABLE_THREADS
+#include <pthread.h>
+#endif
+
 #include "workqueue.h"
 
 namespace gold
@@ -153,7 +157,13 @@ class Workqueue_runner
   { }
 
   // Run a task.  This is always called in the main thread.
-  virtual void run(Task*, Task_locker*) = 0;
+  virtual void
+  run(Task*, Task_locker*) = 0;
+
+  // Set the number of threads to use.  This is ignored when not using
+  // threads.
+  virtual void
+  set_thread_count(int) = 0;
 
  protected:
   // This is called by an implementation when a task is completed.
@@ -178,7 +188,11 @@ class Workqueue_runner_single : public Workqueue_runner
   ~Workqueue_runner_single()
   { }
 
-  void run(Task*, Task_locker*);
+  void
+  run(Task*, Task_locker*);
+
+  void
+  set_thread_count(int);
 };
 
 void
@@ -188,9 +202,15 @@ Workqueue_runner_single::run(Task* t, Task_locker* tl)
   this->completed(t, tl);
 }
 
+void
+Workqueue_runner_single::set_thread_count(int thread_count)
+{
+  gold_assert(thread_count > 0);
+}
+
 // Workqueue methods.
 
-Workqueue::Workqueue(const General_options&)
+Workqueue::Workqueue(const General_options& options)
   : tasks_lock_(),
     tasks_(),
     completed_lock_(),
@@ -199,9 +219,14 @@ Workqueue::Workqueue(const General_options&)
     completed_condvar_(this->completed_lock_),
     cleared_blockers_(0)
 {
-  // At some point we will select the specific implementation of
-  // Workqueue_runner to use based on the command line options.
-  this->runner_ = new Workqueue_runner_single(this);
+  bool threads = options.threads();
+#ifndef ENABLE_THREADS
+  threads = false;
+#endif
+  if (!threads)
+    this->runner_ = new Workqueue_runner_single(this);
+  else
+    gold_unreachable();
 }
 
 Workqueue::~Workqueue()
@@ -419,6 +444,15 @@ void
 Workqueue::cleared_blocker()
 {
   ++this->cleared_blockers_;
+}
+
+// Set the number of threads to use for the workqueue, if we are using
+// threads.
+
+void
+Workqueue::set_thread_count(int threads)
+{
+  this->runner_->set_thread_count(threads);
 }
 
 } // End namespace gold.

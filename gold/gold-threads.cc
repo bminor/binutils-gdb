@@ -22,6 +22,9 @@
 
 #include "gold.h"
 
+#include <cerrno>
+#include <cstring>
+
 #ifdef ENABLE_THREADS
 #include <pthread.h>
 #endif
@@ -63,37 +66,37 @@ Lock_impl::Lock_impl()
 {
   pthread_mutexattr_t attr;
   if (pthread_mutexattr_init(&attr) != 0)
-    gold_fatal(_("pthead_mutextattr_init failed"), true);
+    gold_fatal(_("pthead_mutextattr_init failed: %s"), strerror(errno));
 #ifdef PTHREAD_MUTEXT_ADAPTIVE_NP
   if (pthread_mutextattr_settype(&attr, PTHREAD_MUTEX_ADAPTIVE_NP) != 0)
-    gold_fatal(_("pthread_mutextattr_settype failed"), true);
+    gold_fatal(_("pthread_mutextattr_settype failed: %s"), strerror(errno));
 #endif
 
   if (pthread_mutex_init (&this->mutex_, &attr) != 0)
-    gold_fatal(_("pthread_mutex_init failed"), true);
+    gold_fatal(_("pthread_mutex_init failed: %s"), strerror(errno));
 
   if (pthread_mutexattr_destroy(&attr) != 0)
-    gold_fatal(_("pthread_mutexattr_destroy failed"), true);
+    gold_fatal(_("pthread_mutexattr_destroy failed: %s"), strerror(errno));
 }
 
 Lock_impl::~Lock_impl()
 {
   if (pthread_mutex_destroy(&this->mutex_) != 0)
-    gold_fatal(_("pthread_mutex_destroy failed"), true);
+    gold_fatal(_("pthread_mutex_destroy failed: %s"), strerror(errno));
 }
 
 void
 Lock_impl::acquire()
 {
   if (pthread_mutex_lock(&this->mutex_) != 0)
-    gold_fatal(_("pthread_mutex_lock failed"), true);
+    gold_fatal(_("pthread_mutex_lock failed: %s"), strerror(errno));
 }
 
 void
 Lock_impl::release()
 {
   if (pthread_mutex_unlock(&this->mutex_) != 0)
-    gold_fatal(_("pthread_mutex_unlock failed"), true);
+    gold_fatal(_("pthread_mutex_unlock failed: %s"), strerror(errno));
 }
 
 #else // !defined(ENABLE_THREADS)
@@ -174,27 +177,27 @@ class Condvar_impl
 Condvar_impl::Condvar_impl()
 {
   if (pthread_cond_init(&this->cond_, NULL) != 0)
-    gold_fatal(_("pthread_cond_init failed"), true);
+    gold_fatal(_("pthread_cond_init failed: %s"), strerror(errno));
 }
 
 Condvar_impl::~Condvar_impl()
 {
   if (pthread_cond_destroy(&this->cond_) != 0)
-    gold_fatal(_("pthread_cond_destroy failed"), true);
+    gold_fatal(_("pthread_cond_destroy failed: %s"), strerror(errno));
 }
 
 void
 Condvar_impl::wait(Lock_impl* li)
 {
   if (pthread_cond_wait(&this->cond_, &li->mutex_) != 0)
-    gold_fatal(_("pthread_cond_wait failed"), true);
+    gold_fatal(_("pthread_cond_wait failed: %s"), strerror(errno));
 }
 
 void
 Condvar_impl::signal()
 {
   if (pthread_cond_signal(&this->cond_) != 0)
-    gold_fatal(_("pthread_cond_signal failed"), true);
+    gold_fatal(_("pthread_cond_signal failed: %s"), strerror(errno));
 }
 
 #else // !defined(ENABLE_THREADS)

@@ -828,6 +828,11 @@ class Input_objects
   any_dynamic() const
   { return !this->dynobj_list_.empty(); }
 
+  // Return the number of input objects.
+  int
+  number_of_input_objects() const
+  { return this->relobj_list_.size() + this->dynobj_list_.size(); }
+
  private:
   Input_objects(const Input_objects&);
   Input_objects& operator=(const Input_objects&);

@@ -18,6 +18,10 @@ INCLUDES = -D_GNU_SOURCE \
 
 LIBIBERTY = ../libiberty/libiberty.a
 
+if THREADS
+THREADSLIB = -lpthread
+endif
+
 AM_YFLAGS = -d
 
 noinst_PROGRAMS = ld-new
@@ -95,7 +99,7 @@ libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
 
 sources_var = main.cc
 deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
-ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL)
+ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL) $(THREADSLIB)
 
 ld_new_SOURCES = $(sources_var)
 ld_new_DEPENDENCIES = $(deps_var) $(LIBOBJS)

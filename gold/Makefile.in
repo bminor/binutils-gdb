@@ -91,7 +91,8 @@ ld_new_OBJECTS = $(am_ld_new_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = ../libiberty/libiberty.a
 am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1) libgold.a \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__DEPENDENCIES_4 = @LIBOBJS@
 am__ld1_SOURCES_DIST = main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ld1_OBJECTS = $(am__objects_4)
@@ -210,6 +211,8 @@ STATIC_TLS_FALSE = @STATIC_TLS_FALSE@
 STATIC_TLS_TRUE = @STATIC_TLS_TRUE@
 STRIP = @STRIP@
 TARGETOBJS = @TARGETOBJS@
+THREADS_FALSE = @THREADS_FALSE@
+THREADS_TRUE = @THREADS_TRUE@
 TLS_FALSE = @TLS_FALSE@
 TLS_TRUE = @TLS_TRUE@
 USE_NLS = @USE_NLS@
@@ -275,6 +278,7 @@ INCLUDES = -D_GNU_SOURCE \
 	@INCINTL@
 
 LIBIBERTY = ../libiberty/libiberty.a
+@THREADS_TRUE@THREADSLIB = -lpthread
 AM_YFLAGS = -d
 noinst_LIBRARIES = libgold.a
 CCFILES = \
@@ -347,7 +351,7 @@ ALL_TARGETOBJS = \
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
 sources_var = main.cc
 deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
-ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL)
+ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL) $(THREADSLIB)
 ld_new_SOURCES = $(sources_var)
 ld_new_DEPENDENCIES = $(deps_var) $(LIBOBJS)
 ld_new_LDADD = $(ldadd_var) $(LIBOBJS)

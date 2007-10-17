@@ -38,6 +38,21 @@ AC_DEFINE_UNQUOTED(TARGET_SYSTEM_ROOT, "$sysroot",
 AC_DEFINE_UNQUOTED(TARGET_SYSTEM_ROOT_RELOCATABLE, $sysroot_relocatable,
   [Whether the system root can be relocated])
 
+dnl For now threads are a configure time option.
+AC_ARG_ENABLE([threads],
+[  --enable-threads        multi-threaded linking],
+[case "${enableval}" in
+  yes | "") threads=yes ;;
+  no) threads=no ;;
+  *) threads=yes ;;
+ esac],
+[threads=no])
+if test "$threads" = "yes"; then
+  AC_DEFINE(ENABLE_THREADS, 1,
+	    [Define to do multi-threaded linking])
+fi
+AM_CONDITIONAL(THREADS, test "$threads" = "yes")
+
 AC_ARG_ENABLE([targets],
 [  --enable-targets        alternative target configurations],
 [case "${enableval}" in

@@ -114,6 +114,15 @@ queue_initial_tasks(const General_options& options,
 		    Workqueue* workqueue, Input_objects* input_objects,
 		    Symbol_table* symtab, Layout* layout)
 {
+  int thread_count = options.thread_count_initial();
+  if (thread_count == 0)
+    {
+      thread_count = cmdline.number_of_input_files();
+      if (thread_count == 0)
+	thread_count = 1;
+    }
+  workqueue->set_thread_count(thread_count);
+
   if (cmdline.begin() == cmdline.end())
     gold_fatal(_("no input files"));
 
@@ -152,6 +161,15 @@ queue_middle_tasks(const General_options& options,
 		   Layout* layout,
 		   Workqueue* workqueue)
 {
+  int thread_count = options.thread_count_middle();
+  if (thread_count == 0)
+    {
+      thread_count = input_objects->number_of_input_objects();
+      if (thread_count == 0)
+	thread_count = 1;
+    }
+  workqueue->set_thread_count(thread_count);
+
   // Now we have seen all the input files.
   const bool doing_static_link = (!input_objects->any_dynamic()
 				  && !parameters->output_is_shared());
@@ -228,6 +246,15 @@ queue_final_tasks(const General_options& options,
 		  Workqueue* workqueue,
 		  Output_file* of)
 {
+  int thread_count = options.thread_count_final();
+  if (thread_count == 0)
+    {
+      thread_count = input_objects->number_of_input_objects();
+      if (thread_count == 0)
+	thread_count = 1;
+    }
+  workqueue->set_thread_count(thread_count);
+
   // Use a blocker to block the final cleanup task.
   Task_token* final_blocker = new Task_token();
 
