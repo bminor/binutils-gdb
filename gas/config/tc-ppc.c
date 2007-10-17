@@ -5220,58 +5220,10 @@ ppc_frob_section (asection *sec)
 
 #endif /* OBJ_XCOFF */
 
-/* Turn a string in input_line_pointer into a floating point constant
-   of type TYPE, and store the appropriate bytes in *LITP.  The number
-   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
-   returned, or NULL on OK.  */
-
 char *
 md_atof (int type, char *litp, int *sizep)
 {
-  int prec;
-  LITTLENUM_TYPE words[4];
-  char *t;
-  int i;
-
-  switch (type)
-    {
-    case 'f':
-      prec = 2;
-      break;
-
-    case 'd':
-      prec = 4;
-      break;
-
-    default:
-      *sizep = 0;
-      return _("bad call to md_atof");
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-
-  *sizep = prec * 2;
-
-  if (target_big_endian)
-    {
-      for (i = 0; i < prec; i++)
-	{
-	  md_number_to_chars (litp, (valueT) words[i], 2);
-	  litp += 2;
-	}
-    }
-  else
-    {
-      for (i = prec - 1; i >= 0; i--)
-	{
-	  md_number_to_chars (litp, (valueT) words[i], 2);
-	  litp += 2;
-	}
-    }
-
-  return NULL;
+  return ieee_md_atof (type, litp, sizep, target_big_endian);
 }
 
 /* Write a value out to the object file, using the appropriate

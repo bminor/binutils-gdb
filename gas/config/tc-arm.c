@@ -906,30 +906,30 @@ md_atof (int type, char * litP, int * sizeP)
 
     case 'x':
     case 'X':
-      prec = 6;
+      prec = 5;
       break;
 
     case 'p':
     case 'P':
-      prec = 6;
+      prec = 5;
       break;
 
     default:
       *sizeP = 0;
-      return _("bad call to MD_ATOF()");
+      return _("Unrecognized or unsupported floating point constant");
     }
 
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
     input_line_pointer = t;
-  *sizeP = prec * 2;
+  *sizeP = prec * sizeof (LITTLENUM_TYPE);
 
   if (target_big_endian)
     {
       for (i = 0; i < prec; i++)
 	{
-	  md_number_to_chars (litP, (valueT) words[i], 2);
-	  litP += 2;
+	  md_number_to_chars (litP, (valueT) words[i], sizeof (LITTLENUM_TYPE));
+	  litP += sizeof (LITTLENUM_TYPE);
 	}
     }
   else
@@ -937,21 +937,23 @@ md_atof (int type, char * litP, int * sizeP)
       if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_endian_pure))
 	for (i = prec - 1; i >= 0; i--)
 	  {
-	    md_number_to_chars (litP, (valueT) words[i], 2);
-	    litP += 2;
+	    md_number_to_chars (litP, (valueT) words[i], sizeof (LITTLENUM_TYPE));
+	    litP += sizeof (LITTLENUM_TYPE);
 	  }
       else
 	/* For a 4 byte float the order of elements in `words' is 1 0.
 	   For an 8 byte float the order is 1 0 3 2.  */
 	for (i = 0; i < prec; i += 2)
 	  {
-	    md_number_to_chars (litP, (valueT) words[i + 1], 2);
-	    md_number_to_chars (litP + 2, (valueT) words[i], 2);
-	    litP += 4;
+	    md_number_to_chars (litP, (valueT) words[i + 1],
+				sizeof (LITTLENUM_TYPE));
+	    md_number_to_chars (litP + sizeof (LITTLENUM_TYPE),
+				(valueT) words[i], sizeof (LITTLENUM_TYPE));
+	    litP += 2 * sizeof (LITTLENUM_TYPE);
 	  }
     }
 
-  return 0;
+  return NULL;
 }
 
 /* We handle all bad expressions here, so that we can report the faulty

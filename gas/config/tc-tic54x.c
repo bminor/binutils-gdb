@@ -5383,30 +5383,11 @@ tic54x_parse_name (name, exp)
 }
 
 char *
-md_atof (type, literalP, sizeP)
-     int type;
-     char *literalP;
-     int *sizeP;
+md_atof (int type, char *literalP, int *sizeP)
 {
-#define MAX_LITTLENUMS 2
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE *word;
-  /* Only one precision on the c54x.  */
-  int prec = 2;
-  char *t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-  *sizeP = 4;
-
   /* Target data is little-endian, but floats are stored
      big-"word"ian.  ugh.  */
-  for (word = words; prec--;)
-    {
-      md_number_to_chars (literalP, (long) (*word++), sizeof (LITTLENUM_TYPE));
-      literalP += sizeof (LITTLENUM_TYPE);
-    }
-
-  return 0;
+  return ieee_md_atof (type, literalP, sizeP, TRUE);
 }
 
 arelent *

@@ -958,6 +958,7 @@ i370_dc (int unused ATTRIBUTE_UNUSED)
       emit_expr (&exp, nbytes);
       break;
     case 'E':  /* 32-bit */
+      type = 'f';
     case 'D':  /* 64-bit */
       md_atof (type, tmp, &nbytes);
       p = frag_more (nbytes);
@@ -2355,53 +2356,12 @@ i370_tc (int ignore ATTRIBUTE_UNUSED)
     }
 }
 
-/* Turn a string in input_line_pointer into a floating point constant
-   of type TYPE, and store the appropriate bytes in *LITP.  The number
-   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
-   returned, or NULL on OK.  */
-
 char *
 md_atof (int type, char *litp, int *sizep)
 {
-  int prec;
-  LITTLENUM_TYPE words[4];
-  char *t;
-  int i;
-
-  switch (type)
-    {
-    case 'f':
-    case 'E':
-      type = 'f';
-      prec = 2;
-      break;
-
-    case 'd':
-    case 'D':
-      type = 'd';
-      prec = 4;
-      break;
-
-    default:
-      *sizep = 0;
-      return "bad call to md_atof";
-    }
-
   /* 360/370/390 have two float formats: an old, funky 360 single-precision
-   * format, and the ieee format.  Support only the ieee format.  */
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-
-  *sizep = prec * 2;
-
-  for (i = 0; i < prec; i++)
-    {
-      md_number_to_chars (litp, (valueT) words[i], 2);
-      litp += 2;
-    }
-
-  return NULL;
+     format, and the ieee format.  Support only the ieee format.  */
+  return ieee_md_atof (type, litp, sizep, TRUE);
 }
 
 /* Write a value out to the object file, using the appropriate

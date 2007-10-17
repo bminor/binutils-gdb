@@ -3297,7 +3297,7 @@ s_float_space (int float_type)
 
       err = md_atof (float_type, temp, &flen);
       know (flen <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
-      know (flen > 0);
+      know (err != NULL || flen > 0);
       if (err)
 	{
 	  as_bad (_("bad floating literal: %s"), err);
@@ -4602,7 +4602,7 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
 	{
 	  err = md_atof (float_type, temp, &length);
 	  know (length <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
-	  know (length > 0);
+	  know (err != NULL || length > 0);
 	  if (err)
 	    {
 	      as_bad (_("bad floating literal: %s"), err);

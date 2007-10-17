@@ -1144,17 +1144,25 @@ simple macro.
 @cindex md_atof
 This function is called to convert an ASCII string into a floating point value
 in format used by the CPU.  It takes three arguments.  The first is @var{type}
-which is a byte describing the type of floating point number to be created.
-Possible values are @var{'f'} or @var{'s'} for single precision, @var{'d'} or
-@var{'r'} for double precision and @var{'x'} or @var{'p'} for extended
-precision.  Either lower or upper case versions of these letters can be used.
+which is a byte describing the type of floating point number to be created.  It
+is one of the characters defined in the @xref{FLT_CHARS} macro.  Possible
+values are @var{'f'} or @var{'s'} for single precision, @var{'d'} or @var{'r'}
+for double precision and @var{'x'} or @var{'p'} for extended precision.  Either
+lower or upper case versions of these letters can be used.  Note: some targets
+do not support all of these types, and some targets may also support other
+types not mentioned here.
 
 The second parameter is @var{litP} which is a pointer to a byte array where the
-converted value should be stored.  The third argument is @var{sizeP}, which is
-a pointer to a integer that should be filled in with the number of
-@var{LITTLENUM}s emitted into the byte array.  (@var{LITTLENUM} is defined in
-gas/bignum.h).  The function should return NULL upon success or an error string
-upon failure.
+converted value should be stored.  The value is converted into LITTLENUMs and
+is stored in the target's endian-ness order.  (@var{LITTLENUM} is defined in
+gas/bignum.h).  Single precision values occupy 2 littlenums.  Double precision
+values occupy 4 littlenums and extended precision values occupy either 5 or 6
+littlenums, depending upon the target.
+
+The third argument is @var{sizeP}, which is a pointer to a integer that should
+be filled in with the number of chars emitted into the byte array.
+
+The function should return NULL upon success or an error string upon failure.
 
 @item TC_LARGEST_EXPONENT_IS_NORMAL
 @cindex TC_LARGEST_EXPONENT_IS_NORMAL (@var{precision})

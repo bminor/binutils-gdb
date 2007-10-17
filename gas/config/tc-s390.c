@@ -1769,50 +1769,10 @@ s390_literals (ignore)
   lpe_count = 0;
 }
 
-/* Turn a string in input_line_pointer into a floating point constant
-   of type type, and store the appropriate bytes in *litp.  The number
-   of LITTLENUMS emitted is stored in *sizep .  An error message is
-   returned, or NULL on OK.  */
-
 char *
-md_atof (type, litp, sizep)
-     int type;
-     char *litp;
-     int *sizep;
+md_atof (int type, char *litp, int *sizep)
 {
-  int prec;
-  LITTLENUM_TYPE words[4];
-  char *t;
-  int i;
-
-  switch (type)
-    {
-    case 'f':
-      prec = 2;
-      break;
-
-    case 'd':
-      prec = 4;
-      break;
-
-    default:
-      *sizep = 0;
-      return "bad call to md_atof";
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-
-  *sizep = prec * 2;
-
-  for (i = 0; i < prec; i++)
-    {
-      md_number_to_chars (litp, (valueT) words[i], 2);
-      litp += 2;
-    }
-
-  return NULL;
+  return ieee_md_atof (type, litp, sizep, TRUE);
 }
 
 /* Align a section (I don't know why this is machine dependent).  */

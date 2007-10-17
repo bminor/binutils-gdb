@@ -534,6 +534,8 @@ void   as_bad_value_out_of_range (char *, offsetT, offsetT, offsetT, char *, uns
 void   print_version_id (void);
 char * app_push (void);
 char * atof_ieee (char *, int, LITTLENUM_TYPE *);
+char * ieee_md_atof (int, char *, int *, bfd_boolean);
+char * vax_md_atof (int, char *, int *);
 char * input_scrub_include_file (char *, char *);
 void   input_scrub_insert_line (const char *);
 void   input_scrub_insert_file (char *);

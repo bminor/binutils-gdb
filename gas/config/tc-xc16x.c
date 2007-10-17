@@ -218,59 +218,10 @@ md_parse_option (int c ATTRIBUTE_UNUSED,
   return 0;
 }
 
-/* Turn a string in input_line_pointer into a floating point constant
-   of type TYPE, and store the appropriate bytes in *LITP.  The number
-   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
-   returned, or NULL on OK.  */
-
-/* Equal to MAX_PRECISION in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
-
 char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  int i;
-  int prec;
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  char *t;
-
-  switch (type)
-    {
-    case 'f':
-    case 'F':
-    case 's':
-    case 'S':
-      prec = 2;
-      break;
-
-    case 'd':
-    case 'D':
-    case 'r':
-    case 'R':
-      prec = 4;
-      break;
-
-      /* FIXME: Some targets allow other format chars for bigger sizes
-         here.  */
-
-    default:
-      *sizeP = 0;
-      return _("Bad call to md_atof()");
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-  *sizeP = prec * sizeof (LITTLENUM_TYPE);
-
-   for (i = prec - 1; i >= 0; i--)
-     {
-       md_number_to_chars (litP, (valueT) words[i],
-			   sizeof (LITTLENUM_TYPE));
-       litP += sizeof (LITTLENUM_TYPE);
-     }
-
-  return NULL;
+  return ieee_md_atof (type, litP, sizeP, FALSE);
 }
 
 valueT

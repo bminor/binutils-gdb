@@ -1,3 +1,73 @@
+2007-10-17  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/5173
+	* as.h (ieee_md_atof, vax_md_atof): New prototypes.
+	* read.c (s_float_space): Allow a zero length return from md_atof
+	if the error message has been set.
+	(float_cons): Likewise.
+	* config/atof-ieee.c (ieee_md_atof): New function.  Performs the
+	md_atof() function in a generic way for IEEE using targets.
+	* config/atof-vax.c (md_atof): Rename to vax_md_atof.  Use the
+	same error message as ieee_md_atof.
+	* tc-alpha.c (md_atof): Use ieee_md_atof.  Remove #define of vax_md_atof.
+	* tc-arc.c (md_atof): Use ieee_md_atof.
+	* tc-arm.c (md_atof): Use sizeof (LITTLENUM_TYPE) instead of the
+	constant 2.  Use a precision of 5 for the 'x' and 'p' types.
+	* tc-avr.c (md_atof): Use ieee_md_atof.
+	* tc-bfin.c (md_atof): Use ieee_md_atof.
+	* tc-cr16.c (md_atof): Use ieee_md_atof.
+	* tc-crx.c (md_atof): Use ieee_md_atof.
+	* tc-d10v.c (md_atof): Use ieee_md_atof.
+	* tc-d30v.c (md_atof): Use ieee_md_atof.
+	* tc-dlx.c (md_atof): Use ieee_md_atof.
+	* tc-fr30.c (md_atof): Use ieee_md_atof.
+	* tc-frv.c (md_atof): Use ieee_md_atof.
+	* tc-h8300.c (md_atof): Use ieee_md_atof.
+	* tc-hppa.c (md_atof): Use ieee_md_atof.
+	* tc-i370.c (md_atof): Use ieee_md_atof.
+	(i370_dc): Convert the 'E' type to 'f' before calling md_atof.
+	* tc-i386.c (md_atof): Use ieee_md_atof.
+	* tc-i860.c (md_atof): Use ieee_md_atof.
+	* tc-i960.c (md_atof): Use ieee_md_atof.
+	* tc-ia64.c (md_atof): Use the same error message as ieee_md_atof.
+	* tc-ip2k.c (md_atof): Use ieee_md_atof.
+	* tc-iq2000.c (md_atof): Use ieee_md_atof.
+	* tc-m32c.c (md_atof): Use ieee_md_atof.
+	* tc-m32r.c (md_atof): Use ieee_md_atof.
+	* tc-m68hc11.c (md_atof): Use ieee_md_atof.
+	* tc-m68k.c (md_atof): Use ieee_md_atof.
+	* tc-maxq.c (md_atof): Use ieee_md_atof.
+	* tc-mcore.c (md_atof): Use ieee_md_atof.
+	* tc-mep.c (md_atof): Use ieee_md_atof.
+	* tc-mips.c (md_atof): Use ieee_md_atof.
+	* tc-mmix.c (md_atof): Use ieee_md_atof.
+	* tc-mn10200.c (md_atof): Use ieee_md_atof.
+	* tc-mn10300.c (md_atof): Use ieee_md_atof.
+	* tc-msp430.c (md_atof): Use ieee_md_atof.
+	* tc-mt.c (md_atof): Use ieee_md_atof.
+	* tc-ns32k.c (md_atof): Use ieee_md_atof.
+	* tc-openrisc.c (md_atof): Use ieee_md_atof.
+	* tc-or32.c (md_atof): Use ieee_md_atof.
+	* tc-pdp11.c (md_atof): New function.  Call vax_md_atof.
+	* tc-pj.c (md_atof): Use ieee_md_atof.
+	* tc-ppc.c (md_atof): Use ieee_md_atof.
+	* tc-s390.c (md_atof): Use ieee_md_atof.
+	* tc-score.c (md_atof): Use ieee_md_atof.
+	* tc-sh.c (md_atof): Use ieee_md_atof.
+	* tc-sparc.c (md_atof): Use ieee_md_atof.
+	* tc-spu.c (md_atof): Use ieee_md_atof.
+	* tc-tic30.c (md_atof): Use the same error message as ieee_md_atof.
+	* tc-tic4x.c (md_atof): Use the same error message as ieee_md_atof.
+	* tc-tic54.c (md_atof): Use ieee_md_atof.
+	* tc-v850.c (md_atof): Use ieee_md_atof.
+	* tc-vax.c (md_atof): New function.  Call vax_md_atof.
+	* tc-xc16x.c (md_atof): Use ieee_md_atof.
+	* tc-xstormy16.c (md_atof): Use ieee_md_atof.
+	* tc-xtensa.c (md_atof): Use ieee_md_atof.
+	* tc-z8k.c (md_atof): Use ieee_md_atof.
+	* doc/internals.texi: Update description of md_atof function.
+	* po/gas.pot: Regenerate.
+
 2007-10-16  Bob Wilson  <bob.wilson@acm.org>
 	
 	* doc/as.texinfo (Overview): Add Xtensa --rename-section option.

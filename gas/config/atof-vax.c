@@ -389,9 +389,9 @@ flonum_gen2vax (int format_letter,	/* One of 'd' 'f' 'g' 'h'.  */
 #define MAXIMUM_NUMBER_OF_LITTLENUMS  8 	/* For .hfloats.  */
 
 char *
-md_atof (int what_statement_type,
-	 char *literalP,
-	 int *sizeP)
+vax_md_atof (int what_statement_type,
+	     char *literalP,
+	     int *sizeP)
 {
   LITTLENUM_TYPE words[MAXIMUM_NUMBER_OF_LITTLENUMS];
   char kind_of_float;
@@ -447,5 +447,5 @@ md_atof (int what_statement_type,
     number_of_chars = 0;
 
   *sizeP = number_of_chars;
-  return kind_of_float ? NULL : _("Bad call to md_atof()");
+  return kind_of_float ? NULL : _("Unrecognized or unsupported floating point constant");
 }

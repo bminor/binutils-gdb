@@ -3405,3 +3405,9 @@ vax_cons_fix_new (fragS *frag, int where, unsigned int nbytes, expressionS *exp)
   fix_new_exp (frag, where, (int) nbytes, exp, 0, r);
   vax_cons_special_reloc = NULL;
 }
+
+char *
+md_atof (int type, char * litP, int * sizeP)
+{
+  return vax_md_atof (type, litP, sizeP);
+}

@@ -1913,9 +1913,6 @@ md_begin (void)
   freeptr_static = (char *) malloc (PRIVATE_SIZE);
 }
 
-/* Must be equal to MAX_PRECISON in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
-
 /* Turn the string pointed to by litP into a floating point constant
    of type TYPE, and emit the appropriate bytes.  The number of
    LITTLENUMS emitted is stored in *SIZEP.  An error message is
@@ -1924,38 +1921,7 @@ md_begin (void)
 char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  int prec;
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE *wordP;
-  char *t;
-
-  switch (type)
-    {
-    case 'f':
-      prec = 2;
-      break;
-
-    case 'd':
-      prec = 4;
-      break;
-    default:
-      *sizeP = 0;
-      return _("Bad call to MD_ATOF()");
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-
-  *sizeP = prec * sizeof (LITTLENUM_TYPE);
-
-  for (wordP = words + prec; prec--;)
-    {
-      md_number_to_chars (litP, (long) (*--wordP), sizeof (LITTLENUM_TYPE));
-      litP += sizeof (LITTLENUM_TYPE);
-    }
-
-  return 0;
+  return ieee_md_atof (type, litP, sizeP, FALSE);
 }
 
 int

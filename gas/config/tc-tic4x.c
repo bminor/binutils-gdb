@@ -2660,14 +2660,11 @@ tic4x_cleanup ()
 
 /* Turn a string in input_line_pointer into a floating point constant
    of type type, and store the appropriate bytes in *litP.  The number
-   of LITTLENUMS emitted is stored in *sizeP.  An error message is
+   of chars emitted is stored in *sizeP.  An error message is
    returned, or NULL on OK.  */
 
 char *
-md_atof (type, litP, sizeP)
-     int type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   int ieee;
@@ -2677,36 +2674,36 @@ md_atof (type, litP, sizeP)
 
   switch (type)
     {
-    case 's':			/* .single */
+    case 's':		/* .single  */
     case 'S':
       ieee = 0;
       prec = 1;
       break;
 
-    case 'd':			/* .double */
+    case 'd':		/* .double  */
     case 'D':
-    case 'f':			/* .float or .single */
+    case 'f':		/* .float  */
     case 'F':
       ieee = 0;
-      prec = 2;			/* 1 32-bit word */
+      prec = 2;		/* 1 32-bit word */
       break;
 
-    case 'i':			/* .ieee */
+    case 'i':		/* .ieee */
     case 'I':
       prec = 2;
       ieee = 1;
-      type = 'f';  /* Rewrite type to be usable by atof_ieee() */
+      type = 'f';  /* Rewrite type to be usable by atof_ieee().  */
       break;
 
-    case 'e':			/* .ldouble */
+    case 'e':		/* .ldouble */
     case 'E':
-      prec = 4;			/* 2 32-bit words */
+      prec = 4;		/* 2 32-bit words */
       ieee = 0;
       break;
 
     default:
       *sizeP = 0;
-      return "Bad call to md_atof()";
+      return _("Unrecognized or unsupported floating point constant");
     }
 
   if (ieee)
@@ -2721,10 +2718,10 @@ md_atof (type, litP, sizeP)
      little endian byte order.  */
   /* SES: However it is required to put the words (32-bits) out in the
      correct order, hence we write 2 and 2 littlenums in little endian
-     order, while we keep the original order on successive words. */
-  for(wordP = words; wordP<(words+prec) ; wordP+=2)
+     order, while we keep the original order on successive words.  */
+  for (wordP = words; wordP<(words+prec) ; wordP+=2)
     {
-      if (wordP<(words+prec-1)) /* Dump wordP[1] (if we have one) */
+      if (wordP < (words + prec - 1)) /* Dump wordP[1] (if we have one).  */
         {
           md_number_to_chars (litP, (valueT) (wordP[1]),
                               sizeof (LITTLENUM_TYPE));
@@ -2736,7 +2733,7 @@ md_atof (type, litP, sizeP)
                           sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return 0;
+  return NULL;
 }
 
 void 

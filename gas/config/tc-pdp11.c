@@ -1451,3 +1451,9 @@ pseudo_even (int c ATTRIBUTE_UNUSED)
   frag_align (alignment, 0, 1);
   record_alignment (now_seg, alignment);
 }
+
+char *
+md_atof (int type, char * litP, int * sizeP)
+{
+  return vax_md_atof (type, litP, sizeP);
+}

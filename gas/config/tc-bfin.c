@@ -690,59 +690,10 @@ md_section_align (segment, size)
 }
 
 
-/* Turn a string in input_line_pointer into a floating point
-   constant of type type, and store the appropriate bytes in
-   *litP.  The number of LITTLENUMS emitted is stored in *sizeP.
-   An error message is returned, or NULL on OK.  */
-
-/* Equal to MAX_PRECISION in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
-
 char *
-md_atof (type, litP, sizeP)
-     char   type;
-     char * litP;
-     int *  sizeP;
+md_atof (int type, char * litP, int * sizeP)
 {
-  int              prec;
-  LITTLENUM_TYPE   words [MAX_LITTLENUMS];
-  LITTLENUM_TYPE   *wordP;
-  char *           t;
-
-  switch (type)
-    {
-    case 'f':
-    case 'F':
-      prec = 2;
-      break;
-
-    case 'd':
-    case 'D':
-      prec = 4;
-      break;
-
-   /* FIXME: Some targets allow other format chars for bigger sizes here.  */
-
-    default:
-      *sizeP = 0;
-      return _("Bad call to md_atof()");
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-  *sizeP = prec * sizeof (LITTLENUM_TYPE);
-
-  *sizeP = prec * sizeof (LITTLENUM_TYPE);
-  /* This loops outputs the LITTLENUMs in REVERSE order; in accord with
-     the littleendianness of the processor.  */
-  for (wordP = words + prec - 1; prec--;)
-    {
-      md_number_to_chars (litP, (valueT) (*wordP--), sizeof (LITTLENUM_TYPE));
-      litP += sizeof (LITTLENUM_TYPE);
-    }
-
-  return 0;
+  return ieee_md_atof (type, litP, sizeP, FALSE);
 }
 
 

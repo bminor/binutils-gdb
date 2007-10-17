@@ -6790,58 +6790,12 @@ md_apply_fix (fixP, valP, seg)
   md_number_to_chars (p, value, fixP->fx_size);
 }
 
-#define MAX_LITTLENUMS 6
-
-/* Turn the string pointed to by litP into a floating point constant
-   of type TYPE, and emit the appropriate bytes.  The number of
-   LITTLENUMS emitted is stored in *SIZEP.  An error message is
-   returned, or NULL on OK.  */
-
 char *
-md_atof (type, litP, sizeP)
-     int type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
-  int prec;
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE *wordP;
-  char *t;
-
-  switch (type)
-    {
-    case 'f':
-    case 'F':
-      prec = 2;
-      break;
-
-    case 'd':
-    case 'D':
-      prec = 4;
-      break;
-
-    case 'x':
-    case 'X':
-      prec = 5;
-      break;
-
-    default:
-      *sizeP = 0;
-      return _("Bad call to md_atof ()");
-    }
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-
-  *sizeP = prec * sizeof (LITTLENUM_TYPE);
-  /* This loops outputs the LITTLENUMs in REVERSE order; in accord with
-     the bigendian 386.  */
-  for (wordP = words + prec - 1; prec--;)
-    {
-      md_number_to_chars (litP, (valueT) (*wordP--), sizeof (LITTLENUM_TYPE));
-      litP += sizeof (LITTLENUM_TYPE);
-    }
-  return 0;
+  /* This outputs the LITTLENUMs in REVERSE order;
+     in accord with the bigendian 386.  */
+  return ieee_md_atof (type, litP, sizeP, FALSE);
 }
 
 static char output_invalid_buf[sizeof (unsigned char) * 2 + 6];

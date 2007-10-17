@@ -181,11 +181,6 @@ struct score_it dependency_vector[SCORE7_PIPELINE];
 /* Relax will need some padding for alignment.  */
 #define RELAX_PAD_BYTE 3
 
-/* Number of littlenums required to hold an extended precision number.  For md_atof.  */
-#define NUM_FLOAT_VALS 8
-#define MAX_LITTLENUMS 6
-LITTLENUM_TYPE fp_values[NUM_FLOAT_VALS][MAX_LITTLENUMS];
-
 /* Structure for a hash table entry for a register.  */
 struct reg_entry
 {
@@ -4704,75 +4699,10 @@ md_chars_to_number (char *buf, int n)
   return result;
 }
 
-/* Turn a string in input_line_pointer into a floating point constant
-   of type TYPE, and store the appropriate bytes in *LITP.  The number
-   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
-   returned, or NULL on OK.
-
-   Note that fp constants aren't represent in the normal way on the ARM.
-   In big endian mode, things are as expected.  However, in little endian
-   mode fp constants are big-endian word-wise, and little-endian byte-wise
-   within the words.  For example, (double) 1.1 in big endian mode is
-   the byte sequence 3f f1 99 99 99 99 99 9a, and in little endian mode is
-   the byte sequence 99 99 f1 3f 9a 99 99 99.  */
-
 char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  int prec;
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  char *t;
-  int i;
-
-  switch (type)
-    {
-    case 'f':
-    case 'F':
-    case 's':
-    case 'S':
-      prec = 2;
-      break;
-    case 'd':
-    case 'D':
-    case 'r':
-    case 'R':
-      prec = 4;
-      break;
-    case 'x':
-    case 'X':
-    case 'p':
-    case 'P':
-      prec = 6;
-      break;
-    default:
-      *sizeP = 0;
-      return _("bad call to MD_ATOF()");
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-  *sizeP = prec * 2;
-
-  if (target_big_endian)
-    {
-      for (i = 0; i < prec; i++)
-        {
-          md_number_to_chars (litP, (valueT) words[i], 2);
-          litP += 2;
-        }
-    }
-  else
-    {
-      for (i = 0; i < prec; i += 2)
-        {
-          md_number_to_chars (litP, (valueT) words[i + 1], 2);
-          md_number_to_chars (litP + 2, (valueT) words[i], 2);
-          litP += 4;
-        }
-    }
-
-  return 0;
+  return ieee_md_atof (type, litP, sizeP, target_big_endian);
 }
 
 /* Return true if the given symbol should be considered local for PIC.  */

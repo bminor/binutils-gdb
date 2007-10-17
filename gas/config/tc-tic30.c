@@ -1258,7 +1258,7 @@ md_atof (int what_statement_type,
 
     default:
       *sizeP = 0;
-      return "Bad call to MD_ATOF()";
+      return _("Unrecognized or unsupported floating point constant");
     }
 
   if (float_value == 0.0)
@@ -1349,7 +1349,7 @@ md_atof (int what_statement_type,
     }
   md_number_to_chars (literalP, value, prec);
   *sizeP = prec;
-  return 0;
+  return NULL;
 }
 
 void

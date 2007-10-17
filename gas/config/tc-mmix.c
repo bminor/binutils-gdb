@@ -2239,42 +2239,14 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  int prec;
-  LITTLENUM_TYPE words[4];
-  char *t;
-  int i;
-
-  switch (type)
-    {
-      /* FIXME: Having 'f' in mmix_flt_chars (and here) makes it
-	 problematic to also have a forward reference in an expression.
-	 The testsuite wants it, and it's customary.
-	 We'll deal with the real problems when they come; we share the
-	 problem with most other ports.  */
-    case 'f':
-    case 'r':
-      prec = 2;
-      break;
-    case 'd':
-      prec = 4;
-      break;
-    default:
-      *sizeP = 0;
-      return _("bad call to md_atof");
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-
-  *sizeP = prec * 2;
-
-  for (i = 0; i < prec; i++)
-    {
-      md_number_to_chars (litP, (valueT) words[i], 2);
-      litP += 2;
-    }
-  return NULL;
+  if (type == 'r')
+    type = 'f';
+  /* FIXME: Having 'f' in mmix_flt_chars (and here) makes it
+     problematic to also have a forward reference in an expression.
+     The testsuite wants it, and it's customary.
+     We'll deal with the real problems when they come; we share the
+     problem with most other ports.  */
+  return ieee_md_atof (type, litP, sizeP, TRUE);
 }
 
 /* Convert variable-sized frags into one or more fixups.  */

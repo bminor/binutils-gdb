@@ -5020,64 +5020,24 @@ md_section_align (segT seg, valueT size)
    of LITTLENUMS emitted is stored in *SIZEP.  An error message is
    returned, or NULL on OK.  */
 
-/* Equal to MAX_PRECISION in atof-ieee.c.  */
-#define MAX_LITTLENUMS 6
-
-extern char *vax_md_atof (int, char *, int *);
-
 char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  int prec;
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE *wordP;
-  char *t;
+  extern char *vax_md_atof (int, char *, int *);
 
   switch (type)
     {
       /* VAX floats.  */
     case 'G':
-      /* VAX md_atof doesn't like "G" for some reason.  */
+      /* vax_md_atof() doesn't like "G" for some reason.  */
       type = 'g';
     case 'F':
     case 'D':
       return vax_md_atof (type, litP, sizeP);
 
-      /* IEEE floats.  */
-    case 'f':
-      prec = 2;
-      break;
-
-    case 'd':
-      prec = 4;
-      break;
-
-    case 'x':
-    case 'X':
-      prec = 6;
-      break;
-
-    case 'p':
-    case 'P':
-      prec = 6;
-      break;
-
     default:
-      *sizeP = 0;
-      return _("Bad call to MD_ATOF()");
+      return ieee_md_atof (type, litP, sizeP, FALSE);
     }
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-  *sizeP = prec * sizeof (LITTLENUM_TYPE);
-
-  for (wordP = words + prec - 1; prec--;)
-    {
-      md_number_to_chars (litP, (long) (*wordP--), sizeof (LITTLENUM_TYPE));
-      litP += sizeof (LITTLENUM_TYPE);
-    }
-
-  return 0;
 }
 
 /* Take care of the target-specific command-line options.  */
@@ -5709,5 +5669,4 @@ alpha_frob_file_before_adjust (void)
 /* The Alpha has support for some VAX floating point types, as well as for
    IEEE floating point.  We consider IEEE to be the primary floating point
    format, and sneak in the VAX floating point support here.  */
-#define md_atof vax_md_atof
 #include "config/atof-vax.c"

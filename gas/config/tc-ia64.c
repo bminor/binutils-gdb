@@ -11686,10 +11686,7 @@ tc_gen_reloc (sec, fixp)
 #define MAX_LITTLENUMS 5
 
 char *
-md_atof (type, lit, size)
-     int type;
-     char *lit;
-     int *size;
+md_atof (int type, char *lit, int *size)
 {
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   char *t;
@@ -11721,7 +11718,7 @@ md_atof (type, lit, size)
 
     default:
       *size = 0;
-      return "Bad call to MD_ATOF()";
+      return _("Unrecognized or unsupported floating point constant");
     }
   t = atof_ieee (input_line_pointer, type, words);
   if (t)
@@ -11738,7 +11735,7 @@ md_atof (type, lit, size)
   else
     *size = prec * sizeof (LITTLENUM_TYPE);
 
-  return 0;
+  return NULL;
 }
 
 /* Handle ia64 specific semantics of the align directive.  */

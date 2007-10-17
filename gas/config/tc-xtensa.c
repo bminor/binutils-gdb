@@ -5738,43 +5738,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  int prec;
-  LITTLENUM_TYPE words[4];
-  char *t;
-  int i;
-
-  switch (type)
-    {
-    case 'f':
-      prec = 2;
-      break;
-
-    case 'd':
-      prec = 4;
-      break;
-
-    default:
-      *sizeP = 0;
-      return "bad call to md_atof";
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-
-  *sizeP = prec * 2;
-
-  for (i = prec - 1; i >= 0; i--)
-    {
-      int idx = i;
-      if (target_big_endian)
-	idx = (prec - 1 - i);
-
-      md_number_to_chars (litP, (valueT) words[idx], 2);
-      litP += 2;
-    }
-
-  return NULL;
+  return ieee_md_atof (type, litP, sizeP, target_big_endian);
 }
 
 

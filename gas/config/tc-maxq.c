@@ -379,51 +379,13 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
   return 0;
 }
 
-/* Equal to MAX_PRECISION in atof-ieee.c */
-#define MAX_LITTLENUMS 6
-
-/* Turn a string in input_line_pointer into a floating point constant of type 
-   TYPE, and store the appropriate bytes in *LITP.  The number of LITTLENUMS
-   emitted is stored in *SIZEP.  An error message is returned, or NULL on OK.  */
-
 char *
 md_atof (int type, char * litP, int * sizeP)
 {
-  int prec;
-  LITTLENUM_TYPE words[4];
-  char *t;
-  int i;
-
-  switch (type)
-    {
-    case 'f':
-      prec = 2;
-      break;
-
-    case 'd':
-      prec = 2;
-      /* The size of Double has been changed to 2 words ie 32 bits.  */
-      /* prec = 4; */
-      break;
-
-    default:
-      *sizeP = 0;
-      return _("bad call to md_atof");
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-
-  *sizeP = prec * 2;
-
-  for (i = prec - 1; i >= 0; i--)
-    {
-      md_number_to_chars (litP, (valueT) words[i], 2);
-      litP += 2;
-    }
-
-  return NULL;
+  if (type == 'd')
+    /* The size of Double has been changed to 2 words ie 32 bits.  */
+    type = 'f';
+  return ieee_md_atof (type, litP, sizeP, FALSE);
 }
 
 void

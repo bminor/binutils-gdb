@@ -1710,67 +1710,10 @@ md_number_to_chars (char *buf,
   number_to_chars_littleendian (buf, value, n);
 }
 
-#define MAX_LITTLENUMS	6
-#define LNUM_SIZE	sizeof (LITTLENUM_TYPE)
-
-/* md_atof:	convert ascii to floating point
-
-   Turn a string at input_line_pointer into a floating point constant of type
-   'type', and store the appropriate bytes at *litP.  The number of LITTLENUMS
-   emitted is returned at 'sizeP'.  An error message is returned, or a pointer
-   to an empty message if OK.
-
-   Note we call the i386 floating point routine, rather than complicating
-   things with more files or symbolic links.  */
-
 char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  LITTLENUM_TYPE *wordP;
-  int prec;
-  char *t;
-
-  switch (type)
-    {
-    case 'f':
-    case 'F':
-      prec = 2;
-      break;
-
-    case 'd':
-    case 'D':
-      prec = 4;
-      break;
-
-    case 't':
-    case 'T':
-      prec = 5;
-      type = 'x';		/* That's what atof_ieee() understands.  */
-      break;
-
-    default:
-      *sizeP = 0;
-      return _("Bad call to md_atof()");
-    }
-
-  t = atof_ieee (input_line_pointer, type, words);
-  if (t)
-    input_line_pointer = t;
-
-  *sizeP = prec * LNUM_SIZE;
-
-  /* Output the LITTLENUMs in REVERSE order in accord with i80960
-     word-order.  (Dunno why atof_ieee doesn't do it in the right
-     order in the first place -- probably because it's a hack of
-     atof_m68k.)  */
-  for (wordP = words + prec - 1; prec--;)
-    {
-      md_number_to_chars (litP, (long) (*wordP--), LNUM_SIZE);
-      litP += sizeof (LITTLENUM_TYPE);
-    }
-
-  return 0;
+  return ieee_md_atof (type, litP, sizeP, FALSE);
 }
 
 static void
