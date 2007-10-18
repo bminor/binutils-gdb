@@ -3211,7 +3211,7 @@ pa_ip (char *str)
       return;
     }
 
-  /* Look up the opcode in the has table.  */
+  /* Look up the opcode in the hash table.  */
   if ((insn = (struct pa_opcode *) hash_find (op_hash, str)) == NULL)
     {
       as_bad ("Unknown opcode: `%s'", str);
@@ -6166,7 +6166,7 @@ pa_data (int unused ATTRIBUTE_UNUSED)
 }
 
 /* This is different than the standard GAS s_comm(). On HP9000/800 machines,
-   the .comm pseudo-op has the following symtax:
+   the .comm pseudo-op has the following syntax:
 
    <label> .comm <length>
 

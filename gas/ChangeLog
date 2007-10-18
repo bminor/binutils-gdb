@@ -1,3 +1,8 @@
+2007-10-18  Carlos O'Donell  <carlos@systemhalted.org>
+
+	* config/tc-hppa.c (pa_ip): Fix comment typo.
+	(pa_comm): Likewise.
+
 2007-10-18  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/5172
