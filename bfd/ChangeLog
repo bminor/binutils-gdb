@@ -1,3 +1,24 @@
+2007-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/4424
+	* config.bfd (targ_selvecs): Add bfd_elf64_alpha_vec for
+	alpha/FreeBSD.  Add bfd_elf64_sparc_vec for sparc64/FreeBSD.
+	Add bfd_elf32_i386_vec and bfd_efi_app_ia32_vec for i386/FreeBSD.
+	(targ64_selvecs): Set for i386/FreeBSD.
+	* elf-bfd.h (elf_backend_data): Add relocs_compatible.
+	(_bfd_elf_default_relocs_compatible): Declare.
+	(_bfd_elf_relocs_compatible): Declare.
+	* elfxx-target.h (elf_backend_relocs_compatible): Define.
+	(elfNN_bed): Init new relocs_compatible field.
+	* elflink.c (_bfd_elf_default_relocs_compatible): New function.
+	(_bfd_elf_relocs_compatible): New function.
+	(elf_link_add_object_symbols): Call bed->relocs_compatible.
+	* elf32-i386.c (elf_backend_relocs_compatible): Define.
+	* elf64-alpha.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+
 2007-10-16  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (relax_section): Check for a reference to a discarded
