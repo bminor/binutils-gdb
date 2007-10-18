@@ -343,12 +343,12 @@ msymbol_is_special (struct minimal_symbol *msym)
    things accordingly.  */
 
 static void
-mips_xfer_register (struct regcache *regcache, int reg_num, int length,
+mips_xfer_register (struct gdbarch *gdbarch, struct regcache *regcache,
+		    int reg_num, int length,
 		    enum bfd_endian endian, gdb_byte *in,
 		    const gdb_byte *out, int buf_offset)
 {
   int reg_offset = 0;
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   gdb_assert (reg_num >= gdbarch_num_regs (gdbarch));
   /* Need to transfer the left or right part of the register, based on
@@ -3110,12 +3110,12 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 	 eight bytes with the lower memory address are in $f0.  */
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $f0 and $f2\n");
-      mips_xfer_register (regcache,
+      mips_xfer_register (gdbarch, regcache,
 			  gdbarch_num_regs (gdbarch)
 			  + mips_regnum (gdbarch)->fp0,
 			  8, gdbarch_byte_order (gdbarch),
 			  readbuf, writebuf, 0);
-      mips_xfer_register (regcache,
+      mips_xfer_register (gdbarch, regcache,
 			  gdbarch_num_regs (gdbarch)
 			  + mips_regnum (gdbarch)->fp0 + 2,
 			  8, gdbarch_byte_order (gdbarch),
@@ -3129,7 +3129,7 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
       /* A single or double floating-point value that fits in FP0.  */
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
-      mips_xfer_register (regcache,
+      mips_xfer_register (gdbarch, regcache,
 			  gdbarch_num_regs (gdbarch)
 			  + mips_regnum (gdbarch)->fp0,
 			  TYPE_LENGTH (type),
@@ -3163,8 +3163,8 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return float struct+%d\n",
 				offset);
-	  mips_xfer_register (regcache, gdbarch_num_regs (gdbarch)
-					+ regnum,
+	  mips_xfer_register (gdbarch, regcache,
+			      gdbarch_num_regs (gdbarch) + regnum,
 			      TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
 			      gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, offset);
@@ -3189,7 +3189,8 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return struct+%d:%d in $%d\n",
 				offset, xfer, regnum);
-	  mips_xfer_register (regcache, gdbarch_num_regs (gdbarch) + regnum,
+	  mips_xfer_register (gdbarch, regcache,
+			      gdbarch_num_regs (gdbarch) + regnum,
 			      xfer, BFD_ENDIAN_UNKNOWN, readbuf, writebuf,
 			      offset);
 	}
@@ -3211,7 +3212,8 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return scalar+%d:%d in $%d\n",
 				offset, xfer, regnum);
-	  mips_xfer_register (regcache, gdbarch_num_regs (gdbarch) + regnum,
+	  mips_xfer_register (gdbarch, regcache,
+			      gdbarch_num_regs (gdbarch) + regnum,
 			      xfer, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, offset);
 	}
@@ -3543,7 +3545,7 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
          least significant part of FP0.  */
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
-      mips_xfer_register (regcache,
+      mips_xfer_register (gdbarch, regcache,
 			  gdbarch_num_regs (gdbarch)
 			    + mips_regnum (gdbarch)->fp0,
 			  TYPE_LENGTH (type),
@@ -3562,24 +3564,24 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
       switch (gdbarch_byte_order (gdbarch))
 	{
 	case BFD_ENDIAN_LITTLE:
-	  mips_xfer_register (regcache,
+	  mips_xfer_register (gdbarch, regcache,
 			      gdbarch_num_regs (gdbarch)
 				+ mips_regnum (gdbarch)->fp0 +
 			      0, 4, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, 0);
-	  mips_xfer_register (regcache,
+	  mips_xfer_register (gdbarch, regcache,
 			      gdbarch_num_regs (gdbarch)
 				+ mips_regnum (gdbarch)->fp0 + 1,
 			      4, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, 4);
 	  break;
 	case BFD_ENDIAN_BIG:
-	  mips_xfer_register (regcache,
+	  mips_xfer_register (gdbarch, regcache,
 			      gdbarch_num_regs (gdbarch)
 				+ mips_regnum (gdbarch)->fp0 + 1,
 			      4, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, 0);
-	  mips_xfer_register (regcache,
+	  mips_xfer_register (gdbarch, regcache,
 			      gdbarch_num_regs (gdbarch)
 				+ mips_regnum (gdbarch)->fp0 + 0,
 			      4, gdbarch_byte_order (gdbarch),
@@ -3618,8 +3620,8 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return float struct+%d\n",
 				offset);
-	  mips_xfer_register (regcache, gdbarch_num_regs (gdbarch)
-					+ regnum,
+	  mips_xfer_register (gdbarch, regcache,
+			      gdbarch_num_regs (gdbarch) + regnum,
 			      TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
 			      gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, offset);
@@ -3646,8 +3648,8 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return struct+%d:%d in $%d\n",
 				offset, xfer, regnum);
-	  mips_xfer_register (regcache, gdbarch_num_regs (gdbarch)
-					+ regnum, xfer,
+	  mips_xfer_register (gdbarch, regcache,
+			      gdbarch_num_regs (gdbarch) + regnum, xfer,
 			      BFD_ENDIAN_UNKNOWN, readbuf, writebuf, offset);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -3670,8 +3672,8 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return scalar+%d:%d in $%d\n",
 				offset, xfer, regnum);
-	  mips_xfer_register (regcache, gdbarch_num_regs (gdbarch)
-					+ regnum, xfer,
+	  mips_xfer_register (gdbarch, regcache,
+			      gdbarch_num_regs (gdbarch) + regnum, xfer,
 			      gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, offset);
 	}
@@ -3931,7 +3933,7 @@ mips_o64_return_value (struct gdbarch *gdbarch,
          part of FP0.  */
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
-      mips_xfer_register (regcache,
+      mips_xfer_register (gdbarch, regcache,
 			  gdbarch_num_regs (gdbarch)
 			    + mips_regnum (gdbarch)->fp0,
 			  TYPE_LENGTH (type),
@@ -3955,7 +3957,8 @@ mips_o64_return_value (struct gdbarch *gdbarch,
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return scalar+%d:%d in $%d\n",
 				offset, xfer, regnum);
-	  mips_xfer_register (regcache, gdbarch_num_regs (gdbarch) + regnum,
+	  mips_xfer_register (gdbarch, regcache,
+			      gdbarch_num_regs (gdbarch) + regnum,
 			      xfer, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, offset);
 	}

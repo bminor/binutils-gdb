@@ -1,3 +1,9 @@
+2007-10-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mips-tdep.c (mips_xfer_register): Take a gdbarch argument.
+	(mips_n32n64_return_value, mips_o32_return_value)
+	(mips_o64_return_value): Update calls to mips_xfer_register.
+
 2007-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* frame.c (frame_unwind_unsigned_register): Delete.
