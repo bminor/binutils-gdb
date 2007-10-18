@@ -1137,17 +1137,18 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 					uint64_t flags, uint64_t entsize,
 					uint64_t addralign)
 {
-  // We only merge constants if the alignment is not more than the
-  // entry size.  This could be handled, but it's unusual.
-  if (addralign > entsize)
+  bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
+
+  // We only merge strings if the alignment is not more than the
+  // character size.  This could be handled, but it's unusual.
+  if (is_string && addralign > entsize)
     return false;
 
-  bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
   Input_section_list::iterator p;
   for (p = this->input_sections_.begin();
        p != this->input_sections_.end();
        ++p)
-    if (p->is_merge_section(is_string, entsize))
+    if (p->is_merge_section(is_string, entsize, addralign))
       break;
 
   // We handle the actual constant merging in Output_merge_data or
@@ -1158,13 +1159,13 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
     {
       Output_section_data* posd;
       if (!is_string)
-	posd = new Output_merge_data(entsize);
+	posd = new Output_merge_data(entsize, addralign);
       else if (entsize == 1)
-	posd = new Output_merge_string<char>();
+	posd = new Output_merge_string<char>(addralign);
       else if (entsize == 2)
-	posd = new Output_merge_string<uint16_t>();
+	posd = new Output_merge_string<uint16_t>(addralign);
       else if (entsize == 4)
-	posd = new Output_merge_string<uint32_t>();
+	posd = new Output_merge_string<uint32_t>(addralign);
       else
 	return false;
 

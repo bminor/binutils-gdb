@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include <cstdlib>
+#include <algorithm>
 
 #include "merge.h"
 
@@ -161,10 +162,11 @@ void
 Output_merge_data::add_constant(const unsigned char* p)
 {
   uint64_t entsize = this->entsize();
-  if (this->len_ + entsize > this->alc_)
+  uint64_t addsize = std::max(entsize, this->addralign());
+  if (this->len_ + addsize > this->alc_)
     {
       if (this->alc_ == 0)
-	this->alc_ = 128 * entsize;
+	this->alc_ = 128 * addsize;
       else
 	this->alc_ *= 2;
       this->p_ = static_cast<unsigned char*>(realloc(this->p_, this->alc_));
@@ -173,7 +175,9 @@ Output_merge_data::add_constant(const unsigned char* p)
     }
 
   memcpy(this->p_ + this->len_, p, entsize);
-  this->len_ += entsize;
+  if (addsize > entsize)
+    memset(this->p_ + this->len_ + entsize, 0, addsize - entsize);
+  this->len_ += addsize;
 }
 
 // Add the input section SHNDX in OBJECT to a merged output section

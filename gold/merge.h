@@ -37,8 +37,8 @@ namespace gold
 class Output_merge_base : public Output_section_data
 {
  public:
-  Output_merge_base(uint64_t entsize)
-    : Output_section_data(1), merge_map_(), entsize_(entsize)
+  Output_merge_base(uint64_t entsize, uint64_t addralign)
+    : Output_section_data(addralign), merge_map_(), entsize_(entsize)
   { }
 
   // Return the output address for an input address.
@@ -90,8 +90,8 @@ class Output_merge_base : public Output_section_data
 class Output_merge_data : public Output_merge_base
 {
  public:
-  Output_merge_data(uint64_t entsize)
-    : Output_merge_base(entsize), p_(NULL), len_(0), alc_(0),
+  Output_merge_data(uint64_t entsize, uint64_t addralign)
+    : Output_merge_base(entsize, addralign), p_(NULL), len_(0), alc_(0),
       hashtable_(128, Merge_data_hash(this), Merge_data_eq(this))
   { }
 
@@ -188,9 +188,13 @@ template<typename Char_type>
 class Output_merge_string : public Output_merge_base
 {
  public:
-  Output_merge_string()
-    : Output_merge_base(sizeof(Char_type)), stringpool_(), merged_strings_()
-  { this->stringpool_.set_no_zero_null(); }
+  Output_merge_string(uint64_t addralign)
+    : Output_merge_base(sizeof(Char_type), addralign), stringpool_(),
+      merged_strings_()
+  {
+    gold_assert(addralign <= sizeof(Char_type));
+    this->stringpool_.set_no_zero_null();
+  }
 
   // Add an input section.
   bool

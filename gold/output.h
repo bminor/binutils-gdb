@@ -1436,12 +1436,14 @@ class Output_section : public Output_data
     // Return whether this is a merge section which matches the
     // parameters.
     bool
-    is_merge_section(bool is_string, uint64_t entsize) const
+    is_merge_section(bool is_string, uint64_t entsize,
+                     uint64_t addralign) const
     {
       return (this->shndx_ == (is_string
 			       ? MERGE_STRING_SECTION_CODE
 			       : MERGE_DATA_SECTION_CODE)
-	      && this->u1_.entsize == entsize);
+	      && this->u1_.entsize == entsize
+              && this->addralign() == addralign);
     }
 
     // Set the output section.
