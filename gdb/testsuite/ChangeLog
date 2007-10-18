@@ -1,3 +1,7 @@
+2007-10-18  Michael Snyder  <msnyder@specifix.com>
+
+	* gdb.base/dbx.exp: Add missing "-re " operator.
+
 2007-10-16  Gaius Mulley  <gaius@glam.ac.uk>
 
 	* configure.ac: Added gdb.modula2/Makefile to AC_OUTPUT.

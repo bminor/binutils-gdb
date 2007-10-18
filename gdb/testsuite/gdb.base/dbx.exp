@@ -290,7 +290,7 @@ proc test_assign { } {
     send_gdb "assign first=1\n"
     gdb_expect {
       -re "No symbol \"first\" in current context.*$" { fail "assign first" }
-      "$gdb_prompt $" { pass "assign first" }
+      -re "$gdb_prompt $" { pass "assign first" }
       timeout { fail "assign first (timeout)" }
     }
     gdb_test "print first" ".1 = 1"
