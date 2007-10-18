@@ -2178,7 +2178,7 @@ m68k_ip (char *instring)
 
 	      the_ins.error = buf;
 	      /* Make sure there's a NUL at the end of the buffer -- strncpy
-		 won't write one when it runs out of buffer */
+		 won't write one when it runs out of buffer.  */
 	      buf[space] = 0;
 #define APPEND(STRING) \
   (strncpy (buf, STRING, space), len = strlen (buf), buf += len, space -= len)
@@ -2187,37 +2187,41 @@ m68k_ip (char *instring)
 	      switch (ok_arch)
 		{
 		case mcfisa_a:
-		  APPEND (_("ColdFire ISA_A"));
+		  APPEND ("ColdFire ISA_A");
 		  break;
 		case mcfhwdiv:
-		  APPEND (_("ColdFire hardware divide"));
+		  APPEND ("ColdFire ");
+		  APPEND (_("hardware divide"));
 		  break;
 		case mcfisa_aa:
-		  APPEND (_("ColdFire ISA_A+"));
+		  APPEND ("ColdFire ISA_A+");
 		  break;
 		case mcfisa_b:
-		  APPEND (_("ColdFire ISA_B"));
+		  APPEND ("ColdFire ISA_B");
 		  break;
 		case mcfisa_c:
-		  APPEND (_("ColdFire ISA_C"));
+		  APPEND ("ColdFire ISA_C");
 		  break;
 		case cfloat:
-		  APPEND (_("ColdFire fpu"));
+		  APPEND ("ColdFire fpu");
 		  break;
 		case mfloat:
-		  APPEND (_("M68K fpu"));
+		  APPEND ("M68K fpu");
 		  break;
 		case mmmu:
-		  APPEND (_("M68K mmu"));
+		  APPEND ("M68K mmu");
 		  break;
 		case m68020up:
-		  APPEND (_("68020 or higher"));
+		  APPEND ("68020 ");
+		  APPEND (_("or higher"));
 		  break;
 		case m68000up:
-		  APPEND (_("68000 or higher"));
+		  APPEND ("68000 ");
+		  APPEND (_("or higher"));
 		  break;
 		case m68010up:
-		  APPEND (_("68010 or higher"));
+		  APPEND ("68010 ");
+		  APPEND (_("or higher"));
 		  break;
 		default:
 		  paren = 0;
@@ -2261,7 +2265,7 @@ m68k_ip (char *instring)
 #undef APPEND
 	      if (!space)
 		{
-		  /* we ran out of space, so replace the end of the list
+		  /* We ran out of space, so replace the end of the list
 		     with ellipsis.  */
 		  buf -= 4;
 		  while (*buf != ' ')

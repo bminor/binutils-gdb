@@ -1031,7 +1031,7 @@ int
 md_estimate_size_before_relax (register fragS *fragP ATTRIBUTE_UNUSED,
 			       segT segtype ATTRIBUTE_UNUSED)
 {
-  as_fatal (_("i860_estimate_size_before_relax\n"));
+  as_fatal (_("relaxation not supported\n"));
 }
 
 #ifdef DEBUG_I860

@@ -1,10 +1,22 @@
 2007-10-18  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/5172
+	* config/tc-arc.c (md_estimate_size_before_relax): Change error
+	message.
+	(md_convert_frag): Just call abort.
+	* config/tc-i860.c (md_estimate_size_before_relax): Change error
+	message.
+	* config/tc-i860.h (md_convert_frag): Just call abort.
+	* config/tc-ip2k.c (md_estimate_size_before_relax): Change error
+	message.
+	(md_convert_frag): Just call abort.
+	* config/tc-m68k.c (m68k_ip): Do not attempt translation of
+	architecture names.
 	PR gas/5174
 	* config/tc-arm.c: Fix formatting and spelling errors.
 	PR gas/5175
 	* config/tc-xc16x.c: Fix formatting and internationalization.
-	* gas.pot: Regenerate.
+	* po/gas.pot: Regenerate.
 
 2007-10-17  Nick Clifton  <nickc@redhat.com>
 

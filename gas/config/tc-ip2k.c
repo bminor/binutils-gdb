@@ -246,7 +246,7 @@ int
 md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED,
 			       segT    segment ATTRIBUTE_UNUSED)
 {
-  as_fatal (_("md_estimate_size_before_relax\n"));
+  as_fatal (_("relaxation not supported\n"));
   return 1;
 } 
 
@@ -269,12 +269,9 @@ md_convert_frag (bfd   * abfd  ATTRIBUTE_UNUSED,
 /* Functions concerning relocs.  */
 
 long
-md_pcrel_from (fixS *fixP)
+md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
 {
-  as_fatal (_("md_pcrel_from\n"));
-
-  /* Return the address of the delay slot. */
-  return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
+  abort ();
 }
 
 

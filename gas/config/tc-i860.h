@@ -73,7 +73,7 @@ extern int target_big_endian;
 #define LOCAL_LABELS_FB		1
 #define LISTING_HEADER		"GAS for i860"
 
-#define md_convert_frag(b,s,f)  as_fatal (_("i860_convert_frag\n"));
+#define md_convert_frag(b,s,f)  abort ()
 
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0

@@ -1033,7 +1033,7 @@ int
 md_estimate_size_before_relax (fragS *fragp ATTRIBUTE_UNUSED,
 			       asection *seg ATTRIBUTE_UNUSED)
 {
-  as_fatal (_("md_estimate_size_before_relax\n"));
+  as_fatal (_("relaxation not supported\n"));
   return 1;
 }
 
@@ -1044,7 +1044,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 		 asection *sec ATTRIBUTE_UNUSED,
 		 fragS *fragp ATTRIBUTE_UNUSED)
 {
-  as_fatal (_("md_convert_frag\n"));
+  abort ();
 }
 
 static void

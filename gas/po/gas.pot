@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2007-10-18 12:49+0100\n"
+"POT-Creation-Date: 2007-10-18 13:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -435,7 +435,7 @@ msgstr ""
 #. * We have a GROSS internal error.
 #. * This should never happen.
 #.
-#: atof-generic.c:417 config/tc-m68k.c:3391
+#: atof-generic.c:417 config/tc-m68k.c:3395
 msgid "failed sanity check"
 msgstr ""
 
@@ -1486,12 +1486,8 @@ msgstr ""
 msgid "invalid identifier for \".option\""
 msgstr ""
 
-#: config/tc-arc.c:1036 config/tc-ip2k.c:249 config/tc-mt.c:348
-msgid "md_estimate_size_before_relax\n"
-msgstr ""
-
-#: config/tc-arc.c:1047
-msgid "md_convert_frag\n"
+#: config/tc-arc.c:1036 config/tc-i860.c:1034 config/tc-ip2k.c:249
+msgid "relaxation not supported\n"
 msgstr ""
 
 #: config/tc-arc.c:1080
@@ -3559,7 +3555,7 @@ msgid "Virtual memory exhausted"
 msgstr ""
 
 #: config/tc-cr16.c:751 config/tc-crx.c:571 config/tc-crx.c:589
-#: config/tc-i386.c:1640 config/tc-i386.c:1662 config/tc-m68k.c:4461
+#: config/tc-i386.c:1640 config/tc-i386.c:1662 config/tc-m68k.c:4465
 #: config/tc-maxq.c:2865
 #, c-format
 msgid "Internal Error:  Can't hash %s: %s"
@@ -5827,8 +5823,8 @@ msgstr ""
 msgid "Defective assembler.  No assembly attempted."
 msgstr ""
 
-#: config/tc-i860.c:393 config/tc-i860.c:938 config/tc-m68k.c:3726
-#: config/tc-m68k.c:3758 config/tc-sparc.c:2711
+#: config/tc-i860.c:393 config/tc-i860.c:938 config/tc-m68k.c:3730
+#: config/tc-m68k.c:3762 config/tc-sparc.c:2711
 msgid "failed sanity check."
 msgstr ""
 
@@ -5868,10 +5864,6 @@ msgstr ""
 #: config/tc-i860.c:980
 #, c-format
 msgid "Prefix 'd.' invalid for instruction `%s'"
-msgstr ""
-
-#: config/tc-i860.c:1034
-msgid "i860_estimate_size_before_relax\n"
 msgstr ""
 
 #: config/tc-i860.c:1133
@@ -5923,10 +5915,6 @@ msgstr ""
 #: config/tc-i860.c:1400
 #, c-format
 msgid "Unrecognized fix-up (0x%08lx)"
-msgstr ""
-
-#: config/tc-i860.h:76
-msgid "i860_convert_frag\n"
 msgstr ""
 
 #: config/tc-i960.c:486
@@ -6924,10 +6912,6 @@ msgstr ""
 msgid "  -mip2022ext            permit extended IP2022 insn\n"
 msgstr ""
 
-#: config/tc-ip2k.c:274
-msgid "md_pcrel_from\n"
-msgstr ""
-
 #: config/tc-iq2000.c:364
 #, c-format
 msgid "the yielding instruction %s may not be in a delay slot."
@@ -7625,407 +7609,371 @@ msgstr ""
 msgid "invalid instruction for this architecture; needs "
 msgstr ""
 
-#: config/tc-m68k.c:2190
-msgid "ColdFire ISA_A"
+#: config/tc-m68k.c:2194
+msgid "hardware divide"
 msgstr ""
 
-#: config/tc-m68k.c:2193
-msgid "ColdFire hardware divide"
+#: config/tc-m68k.c:2216 config/tc-m68k.c:2220 config/tc-m68k.c:2224
+msgid "or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2196
-msgid "ColdFire ISA_A+"
-msgstr ""
-
-#: config/tc-m68k.c:2199
-msgid "ColdFire ISA_B"
-msgstr ""
-
-#: config/tc-m68k.c:2202
-msgid "ColdFire ISA_C"
-msgstr ""
-
-#: config/tc-m68k.c:2205
-msgid "ColdFire fpu"
-msgstr ""
-
-#: config/tc-m68k.c:2208
-msgid "M68K fpu"
-msgstr ""
-
-#: config/tc-m68k.c:2211
-msgid "M68K mmu"
-msgstr ""
-
-#: config/tc-m68k.c:2214
-msgid "68020 or higher"
-msgstr ""
-
-#: config/tc-m68k.c:2217
-msgid "68000 or higher"
-msgstr ""
-
-#: config/tc-m68k.c:2220
-msgid "68010 or higher"
-msgstr ""
-
-#: config/tc-m68k.c:2273
+#: config/tc-m68k.c:2277
 msgid "operands mismatch"
 msgstr ""
 
-#: config/tc-m68k.c:2337 config/tc-m68k.c:2343 config/tc-m68k.c:2349
+#: config/tc-m68k.c:2341 config/tc-m68k.c:2347 config/tc-m68k.c:2353
 #: config/tc-mmix.c:2459 config/tc-mmix.c:2483
 msgid "operand out of range"
 msgstr ""
 
-#: config/tc-m68k.c:2406
+#: config/tc-m68k.c:2410
 #, c-format
 msgid "Bignum too big for %c format; truncated"
 msgstr ""
 
-#: config/tc-m68k.c:2483
+#: config/tc-m68k.c:2487
 msgid "displacement too large for this architecture; needs 68020 or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2594
+#: config/tc-m68k.c:2598
 msgid ""
 "scale factor invalid on this architecture; needs cpu32 or 68020 or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2599
+#: config/tc-m68k.c:2603
 msgid "invalid index size for coldfire"
 msgstr ""
 
-#: config/tc-m68k.c:2652
+#: config/tc-m68k.c:2656
 msgid "Forcing byte displacement"
 msgstr ""
 
-#: config/tc-m68k.c:2654
+#: config/tc-m68k.c:2658
 msgid "byte displacement out of range"
 msgstr ""
 
-#: config/tc-m68k.c:2702 config/tc-m68k.c:2740
+#: config/tc-m68k.c:2706 config/tc-m68k.c:2744
 msgid "invalid operand mode for this architecture; needs 68020 or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2726 config/tc-m68k.c:2760
+#: config/tc-m68k.c:2730 config/tc-m68k.c:2764
 msgid ":b not permitted; defaulting to :w"
 msgstr ""
 
-#: config/tc-m68k.c:2837
+#: config/tc-m68k.c:2841
 msgid "unsupported byte value; use a different suffix"
 msgstr ""
 
-#: config/tc-m68k.c:2852
+#: config/tc-m68k.c:2856
 msgid "unknown/incorrect operand"
 msgstr ""
 
-#: config/tc-m68k.c:2895 config/tc-m68k.c:2903 config/tc-m68k.c:2910
-#: config/tc-m68k.c:2917
+#: config/tc-m68k.c:2899 config/tc-m68k.c:2907 config/tc-m68k.c:2914
+#: config/tc-m68k.c:2921
 msgid "out of range"
 msgstr ""
 
-#: config/tc-m68k.c:2990
+#: config/tc-m68k.c:2994
 msgid "Can't use long branches on this architecture"
 msgstr ""
 
-#: config/tc-m68k.c:3096
+#: config/tc-m68k.c:3100
 msgid "Expression out of range, using 0"
 msgstr ""
 
-#: config/tc-m68k.c:3287 config/tc-m68k.c:3303
+#: config/tc-m68k.c:3291 config/tc-m68k.c:3307
 msgid "Floating point register in register list"
 msgstr ""
 
-#: config/tc-m68k.c:3293
+#: config/tc-m68k.c:3297
 msgid "Wrong register in floating-point reglist"
 msgstr ""
 
-#: config/tc-m68k.c:3309
+#: config/tc-m68k.c:3313
 msgid "incorrect register in reglist"
 msgstr ""
 
-#: config/tc-m68k.c:3315
+#: config/tc-m68k.c:3319
 msgid "wrong register in floating-point reglist"
 msgstr ""
 
 #. ERROR.
-#: config/tc-m68k.c:3788
+#: config/tc-m68k.c:3792
 msgid "Extra )"
 msgstr ""
 
 #. ERROR.
-#: config/tc-m68k.c:3799
+#: config/tc-m68k.c:3803
 msgid "Missing )"
 msgstr ""
 
-#: config/tc-m68k.c:3816
+#: config/tc-m68k.c:3820
 msgid "Missing operand"
 msgstr ""
 
-#: config/tc-m68k.c:4134
+#: config/tc-m68k.c:4138
 #, c-format
 msgid "unrecognized default cpu `%s'"
 msgstr ""
 
-#: config/tc-m68k.c:4188
+#: config/tc-m68k.c:4192
 #, c-format
 msgid "%s -- statement `%s' ignored"
 msgstr ""
 
-#: config/tc-m68k.c:4237
+#: config/tc-m68k.c:4241
 #, c-format
 msgid "Don't know how to figure width of %c in md_assemble()"
 msgstr ""
 
-#: config/tc-m68k.c:4406
+#: config/tc-m68k.c:4410
 #, c-format
 msgid "Internal Error:  Can't allocate m68k_sorted_opcodes of size %d"
 msgstr ""
 
-#: config/tc-m68k.c:4471 config/tc-m68k.c:4510
+#: config/tc-m68k.c:4475 config/tc-m68k.c:4514
 #, c-format
 msgid "Internal Error: Can't find %s in hash table"
 msgstr ""
 
-#: config/tc-m68k.c:4474 config/tc-m68k.c:4513
+#: config/tc-m68k.c:4478 config/tc-m68k.c:4517
 #, c-format
 msgid "Internal Error: Can't hash %s: %s"
 msgstr ""
 
-#: config/tc-m68k.c:4638
+#: config/tc-m68k.c:4642
 #, c-format
 msgid "text label `%s' aligned to odd boundary"
 msgstr ""
 
-#: config/tc-m68k.c:4785
+#: config/tc-m68k.c:4789
 #, c-format
 msgid "value %ld out of range"
 msgstr ""
 
-#: config/tc-m68k.c:4799
+#: config/tc-m68k.c:4803
 msgid "invalid byte branch offset"
 msgstr ""
 
-#: config/tc-m68k.c:4836
+#: config/tc-m68k.c:4840
 msgid "short branch with zero offset: use :w"
 msgstr ""
 
-#: config/tc-m68k.c:4880
+#: config/tc-m68k.c:4884
 msgid "Conversion of PC relative BSR to absolute JSR"
 msgstr ""
 
-#: config/tc-m68k.c:4891
+#: config/tc-m68k.c:4895
 msgid "Conversion of PC relative branch to absolute jump"
 msgstr ""
 
-#: config/tc-m68k.c:4908 config/tc-m68k.c:4969
+#: config/tc-m68k.c:4912 config/tc-m68k.c:4973
 msgid "Conversion of PC relative conditional branch to absolute jump"
 msgstr ""
 
-#: config/tc-m68k.c:4949
+#: config/tc-m68k.c:4953
 msgid "Conversion of DBcc to absolute jump"
 msgstr ""
 
-#: config/tc-m68k.c:5033
+#: config/tc-m68k.c:5037
 msgid "Conversion of PC relative displacement to absolute"
 msgstr ""
 
-#: config/tc-m68k.c:5246
+#: config/tc-m68k.c:5250
 msgid "Tried to convert PC relative branch to absolute jump"
 msgstr ""
 
-#: config/tc-m68k.c:5291 config/tc-m68k.c:5302 config/tc-m68k.c:5346
+#: config/tc-m68k.c:5295 config/tc-m68k.c:5306 config/tc-m68k.c:5350
 msgid "expression out of range: defaulting to 1"
 msgstr ""
 
-#: config/tc-m68k.c:5338
+#: config/tc-m68k.c:5342
 msgid "expression out of range: defaulting to 0"
 msgstr ""
 
-#: config/tc-m68k.c:5379 config/tc-m68k.c:5391
+#: config/tc-m68k.c:5383 config/tc-m68k.c:5395
 #, c-format
 msgid "Can't deal with expression; defaulting to %ld"
 msgstr ""
 
-#: config/tc-m68k.c:5405
+#: config/tc-m68k.c:5409
 msgid "expression doesn't fit in BYTE"
 msgstr ""
 
-#: config/tc-m68k.c:5409
+#: config/tc-m68k.c:5413
 msgid "expression doesn't fit in WORD"
 msgstr ""
 
-#: config/tc-m68k.c:5496
+#: config/tc-m68k.c:5500
 #, c-format
 msgid "%s: unrecognized processor name"
 msgstr ""
 
-#: config/tc-m68k.c:5557
+#: config/tc-m68k.c:5561
 msgid "bad coprocessor id"
 msgstr ""
 
-#: config/tc-m68k.c:5563
+#: config/tc-m68k.c:5567
 msgid "unrecognized fopt option"
 msgstr ""
 
-#: config/tc-m68k.c:5696
+#: config/tc-m68k.c:5700
 #, c-format
 msgid "option `%s' may not be negated"
 msgstr ""
 
-#: config/tc-m68k.c:5707
+#: config/tc-m68k.c:5711
 #, c-format
 msgid "option `%s' not recognized"
 msgstr ""
 
-#: config/tc-m68k.c:5736
+#: config/tc-m68k.c:5740
 msgid "bad format of OPT NEST=depth"
 msgstr ""
 
-#: config/tc-m68k.c:5792
+#: config/tc-m68k.c:5796
 msgid "missing label"
 msgstr ""
 
-#: config/tc-m68k.c:5816 config/tc-m68k.c:5845
+#: config/tc-m68k.c:5820 config/tc-m68k.c:5849
 msgid "bad register list"
 msgstr ""
 
-#: config/tc-m68k.c:5818
+#: config/tc-m68k.c:5822
 #, c-format
 msgid "bad register list: %s"
 msgstr ""
 
-#: config/tc-m68k.c:5916
+#: config/tc-m68k.c:5920
 msgid "restore without save"
 msgstr ""
 
-#: config/tc-m68k.c:6070 config/tc-m68k.c:6440
+#: config/tc-m68k.c:6074 config/tc-m68k.c:6444
 msgid "syntax error in structured control directive"
 msgstr ""
 
-#: config/tc-m68k.c:6115
+#: config/tc-m68k.c:6119
 msgid "missing condition code in structured control directive"
 msgstr ""
 
-#: config/tc-m68k.c:6186
+#: config/tc-m68k.c:6190
 #, c-format
 msgid ""
 "Condition <%c%c> in structured control directive can not be encoded correctly"
 msgstr ""
 
-#: config/tc-m68k.c:6482
+#: config/tc-m68k.c:6486
 msgid "missing then"
 msgstr ""
 
-#: config/tc-m68k.c:6563
+#: config/tc-m68k.c:6567
 msgid "else without matching if"
 msgstr ""
 
-#: config/tc-m68k.c:6596
+#: config/tc-m68k.c:6600
 msgid "endi without matching if"
 msgstr ""
 
-#: config/tc-m68k.c:6636
+#: config/tc-m68k.c:6640
 msgid "break outside of structured loop"
 msgstr ""
 
-#: config/tc-m68k.c:6674
+#: config/tc-m68k.c:6678
 msgid "next outside of structured loop"
 msgstr ""
 
-#: config/tc-m68k.c:6725
+#: config/tc-m68k.c:6729
 msgid "missing ="
 msgstr ""
 
-#: config/tc-m68k.c:6763
+#: config/tc-m68k.c:6767
 msgid "missing to or downto"
 msgstr ""
 
-#: config/tc-m68k.c:6799 config/tc-m68k.c:6833 config/tc-m68k.c:7047
+#: config/tc-m68k.c:6803 config/tc-m68k.c:6837 config/tc-m68k.c:7051
 msgid "missing do"
 msgstr ""
 
-#: config/tc-m68k.c:6934
+#: config/tc-m68k.c:6938
 msgid "endf without for"
 msgstr ""
 
-#: config/tc-m68k.c:6988
+#: config/tc-m68k.c:6992
 msgid "until without repeat"
 msgstr ""
 
-#: config/tc-m68k.c:7082
+#: config/tc-m68k.c:7086
 msgid "endw without while"
 msgstr ""
 
-#: config/tc-m68k.c:7115 config/tc-m68k.c:7143
+#: config/tc-m68k.c:7119 config/tc-m68k.c:7147
 msgid "already assembled instructions"
 msgstr ""
 
-#: config/tc-m68k.c:7220
+#: config/tc-m68k.c:7224
 #, c-format
 msgid "`%s' is deprecated, use `%s'"
 msgstr ""
 
-#: config/tc-m68k.c:7239
+#: config/tc-m68k.c:7243
 #, c-format
 msgid "cpu `%s' unrecognized"
 msgstr ""
 
-#: config/tc-m68k.c:7245
+#: config/tc-m68k.c:7249
 #, c-format
 msgid "already selected `%s' processor"
 msgstr ""
 
-#: config/tc-m68k.c:7265
+#: config/tc-m68k.c:7269
 #, c-format
 msgid "architecture `%s' unrecognized"
 msgstr ""
 
-#: config/tc-m68k.c:7271
+#: config/tc-m68k.c:7275
 #, c-format
 msgid "already selected `%s' architecture"
 msgstr ""
 
-#: config/tc-m68k.c:7294
+#: config/tc-m68k.c:7298
 #, c-format
 msgid "extension `%s' unrecognized"
 msgstr ""
 
-#: config/tc-m68k.c:7412
+#: config/tc-m68k.c:7416
 #, c-format
 msgid "option `-A%s' is deprecated: use `-%s'"
 msgstr ""
 
-#: config/tc-m68k.c:7445
+#: config/tc-m68k.c:7449
 msgid "architecture features both enabled and disabled"
 msgstr ""
 
-#: config/tc-m68k.c:7472
+#: config/tc-m68k.c:7476
 msgid "selected processor does not have all features of selected architecture"
 msgstr ""
 
-#: config/tc-m68k.c:7481
+#: config/tc-m68k.c:7485
 msgid "m68k and cf features both selected"
 msgstr ""
 
-#: config/tc-m68k.c:7493
+#: config/tc-m68k.c:7497
 msgid "68040 and 68851 specified; mmu instructions may assemble incorrectly"
 msgstr ""
 
-#: config/tc-m68k.c:7527
+#: config/tc-m68k.c:7531
 #, c-format
 msgid ""
 "-march=<arch>\t\tset architecture\n"
 "-mcpu=<cpu>\t\tset cpu [default %s]\n"
 msgstr ""
 
-#: config/tc-m68k.c:7532
+#: config/tc-m68k.c:7536
 #, c-format
 msgid "-m[no-]%-16s enable/disable%s architecture extension\n"
 msgstr ""
 
-#: config/tc-m68k.c:7538
+#: config/tc-m68k.c:7542
 #, c-format
 msgid ""
 "-l\t\t\tuse 1 word for refs to undefined symbols [default 2]\n"
@@ -8041,32 +7989,32 @@ msgid ""
 "--disp-size-default-32\tdisplacement with unknown size is 32 bits (default)\n"
 msgstr ""
 
-#: config/tc-m68k.c:7552
+#: config/tc-m68k.c:7556
 #, c-format
 msgid "Architecture variants are: "
 msgstr ""
 
-#: config/tc-m68k.c:7561
+#: config/tc-m68k.c:7565
 #, c-format
 msgid "Processor variants are: "
 msgstr ""
 
-#: config/tc-m68k.c:7568 config/tc-xtensa.c:6009
+#: config/tc-m68k.c:7572 config/tc-xtensa.c:6009
 #, c-format
 msgid "\n"
 msgstr ""
 
-#: config/tc-m68k.c:7599
+#: config/tc-m68k.c:7603
 #, c-format
 msgid "Error %s in %s\n"
 msgstr ""
 
-#: config/tc-m68k.c:7603
+#: config/tc-m68k.c:7607
 #, c-format
 msgid "Opcode(%d.%s): "
 msgstr ""
 
-#: config/tc-m68k.c:7763
+#: config/tc-m68k.c:7767
 msgid "Not a defined coldfire architecture"
 msgstr ""
 
@@ -9866,6 +9814,10 @@ msgstr ""
 msgid ""
 "conditional branch or jal insn's operand references R%ld of previous "
 "arithmetic or logic insn."
+msgstr ""
+
+#: config/tc-mt.c:348
+msgid "md_estimate_size_before_relax\n"
 msgstr ""
 
 #: config/tc-ns32k.c:439
