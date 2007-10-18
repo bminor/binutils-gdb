@@ -32,7 +32,7 @@ namespace gold
 
 Parameters::Parameters(const General_options* options, Errors* errors)
   : errors_(errors), output_file_name_(options->output_file_name()),
-    sysroot_(options->sysroot()),
+    sysroot_(options->sysroot()), symbolic_(options->symbolic()),
     is_doing_static_link_valid_(false), doing_static_link_(false),
     is_size_and_endian_valid_(false), size_(0), is_big_endian_(false),
     optimization_level_(options->optimization_level()),

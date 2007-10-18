@@ -407,7 +407,8 @@ class Symbol
   {
     return (this->visibility_ != elfcpp::STV_INTERNAL
             && this->visibility_ != elfcpp::STV_HIDDEN
-            && this->visibility_ != elfcpp::STV_PROTECTED);
+            && this->visibility_ != elfcpp::STV_PROTECTED
+	    && !parameters->symbolic());
   }
 
   // Return whether there should be a warning for references to this

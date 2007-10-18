@@ -91,6 +91,12 @@ class Parameters
   strip_debug() const
   { return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG; }
 
+  // Whether we are doing a symbolic link, in which all defined
+  // symbols are bound locally.
+  bool
+  symbolic() const
+  { return this->symbolic_; }
+
   // Whether we are doing a static link--a link in which none of the
   // input files are shared libraries.  This is only known after we
   // have seen all the input files.
@@ -170,6 +176,8 @@ class Parameters
   std::string sysroot_;
   // Which symbols to strip.
   Strip strip_;
+  // Whether we are doing a symbolic link.
+  bool symbolic_;
 
   // Whether the doing_static_link_ field is valid.
   bool is_doing_static_link_valid_;

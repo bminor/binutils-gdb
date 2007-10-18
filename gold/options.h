@@ -144,6 +144,11 @@ class General_options
   strip_debug() const
   { return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG; }
 
+  // -Bsymbolic: bind defined symbols locally.
+  bool
+  symbolic() const
+  { return this->symbolic_; }
+
   // --eh-frame-hdr: Whether to generate an exception frame header.
   bool
   create_eh_frame_hdr() const
@@ -267,6 +272,10 @@ class General_options
   { this->strip_ = STRIP_DEBUG; }
 
   void
+  set_symbolic()
+  { this->symbolic_ = true; }
+
+  void
   set_create_eh_frame_hdr()
   { this->create_eh_frame_hdr_ = true; }
 
@@ -366,6 +375,7 @@ class General_options
   const char* output_file_name_;
   bool is_relocatable_;
   Strip strip_;
+  bool symbolic_;
   bool create_eh_frame_hdr_;
   Dir_list rpath_;
   Dir_list rpath_link_;
