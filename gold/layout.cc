@@ -1514,40 +1514,67 @@ Layout::output_section_name(const char* name, size_t* plen)
       return Layout::linkonce_output_name(name, plen);
     }
 
-  // If the section name has no '.', or only an initial '.', we use
-  // the name unchanged (i.e., ".text" is unchanged).
+  // gcc 4.3 generates the following sorts of section names when it
+  // needs a section name specific to a function:
+  //   .text.FN
+  //   .rodata.FN
+  //   .sdata2.FN
+  //   .data.FN
+  //   .data.rel.FN
+  //   .data.rel.local.FN
+  //   .data.rel.ro.FN
+  //   .data.rel.ro.local.FN
+  //   .sdata.FN
+  //   .bss.FN
+  //   .sbss.FN
+  //   .tdata.FN
+  //   .tbss.FN
 
-  // Otherwise, if the section name does not include ".rel", we drop
-  // the last '.'  and everything that follows (i.e., ".text.XXX"
-  // becomes ".text").
+  // The GNU linker maps all of those to the part before the .FN,
+  // except that .data.rel.local.FN is mapped to .data, and
+  // .data.rel.ro.local.FN is mapped to .data.rel.ro.  The sections
+  // beginning with .data.rel.ro.local are grouped together.
 
-  // Otherwise, if the section name has zero or one '.' after the
-  // ".rel", we use the name unchanged (i.e., ".rel.text" is
-  // unchanged).
+  // For an anonymous namespace, the string FN can contain a '.'.
 
-  // Otherwise, we drop the last '.' and everything that follows
-  // (i.e., ".rel.text.XXX" becomes ".rel.text").
+  // Also of interest: .rodata.strN.N, .rodata.cstN, both of which the
+  // GNU linker maps to .rodata.
+
+  // The .data.rel.ro sections enable a security feature triggered by
+  // the -z relro option.  Section which need to be relocated at
+  // program startup time but which may be readonly after startup are
+  // grouped into .data.rel.ro.  They are then put into a PT_GNU_RELRO
+  // segment.  The dynamic linker will make that segment writable,
+  // perform relocations, and then make it read-only.  FIXME: We do
+  // not yet implement this optimization.
+
+  // It is hard to handle this in a principled way.
+
+  // These are the rules we follow:
+
+  // If the section name has no initial '.', or no dot other than an
+  // initial '.', we use the name unchanged (i.e., "mysection" and
+  // ".text" are unchanged).
+
+  // If the name starts with ".data.rel.ro" we use ".data.rel.ro".
+
+  // Otherwise, we drop the second '.' and everything that comes after
+  // it (i.e., ".text.XXX" becomes ".text").
 
   const char* s = name;
-  if (*s == '.')
-    ++s;
+  if (*s != '.')
+    return name;
+  ++s;
   const char* sdot = strchr(s, '.');
   if (sdot == NULL)
     return name;
 
-  const char* srel = strstr(s, ".rel");
-  if (srel == NULL)
+  const char* const data_rel_ro = ".data.rel.ro";
+  if (strncmp(name, data_rel_ro, strlen(data_rel_ro)) == 0)
     {
-      *plen = sdot - name;
-      return name;
+      *plen = strlen(data_rel_ro);
+      return data_rel_ro;
     }
-
-  sdot = strchr(srel + 1, '.');
-  if (sdot == NULL)
-    return name;
-  sdot = strchr(sdot + 1, '.');
-  if (sdot == NULL)
-    return name;
 
   *plen = sdot - name;
   return name;
