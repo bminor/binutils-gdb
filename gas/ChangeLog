@@ -1,3 +1,9 @@
+2007-10-18  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/5175
+	* config/tc-xc16x.c: Fix formatting and internationalization.
+	* gas.pot: Regenerate.
+
 2007-10-17  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/5173

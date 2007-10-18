@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2007-10-17 17:39+0100\n"
+"POT-Creation-Date: 2007-10-18 11:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4793,12 +4793,12 @@ msgstr ""
 msgid "call to md_convert_frag \n"
 msgstr ""
 
-#: config/tc-h8300.c:2099
+#: config/tc-h8300.c:2099 config/tc-xc16x.c:244
 #, c-format
 msgid "call to md_estimate_size_before_relax \n"
 msgstr ""
 
-#: config/tc-h8300.c:2128
+#: config/tc-h8300.c:2128 config/tc-xc16x.c:285
 msgid "Difference of symbols in different sections is not supported"
 msgstr ""
 
@@ -12692,11 +12692,6 @@ msgstr ""
 #: config/tc-xc16x.c:211
 #, c-format
 msgid " XC16X specific command line options:\n"
-msgstr ""
-
-#: config/tc-xc16x.c:244
-#, c-format
-msgid "call tomd_estimate_size_before_relax \n"
 msgstr ""
 
 #: config/tc-xstormy16.c:78

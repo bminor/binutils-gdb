@@ -189,7 +189,7 @@ md_cgen_lookup_reloc (const CGEN_INSN *insn ATTRIBUTE_UNUSED,
       fixP->fx_where += 2;
       return BFD_RELOC_XC16X_SOF;
 
-    default : /* avoid -Wall warning */
+    default : /* Avoid -Wall warning.  */
       break;
     }
 
@@ -241,7 +241,7 @@ int
 md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
 			       segT segment_type ATTRIBUTE_UNUSED)
 {
-  printf (_("call tomd_estimate_size_before_relax \n"));
+  printf (_("call to md_estimate_size_before_relax \n"));
   abort ();
 }
 
@@ -282,7 +282,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
 	{
 	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			"Difference of symbols in different sections is not supported");
+			_("Difference of symbols in different sections is not supported"));
 	  return NULL;
 	}
     }
@@ -298,7 +298,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 #define DEBUG 0
 #if DEBUG
   fprintf (stderr, "%s\n", bfd_get_reloc_code_name (r_type));
-  fflush(stderr);
+  fflush (stderr);
 #endif
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
@@ -316,7 +316,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
-  if(!strstr (seg->name,".debug"))
+  if (!strstr (seg->name,".debug"))
     {
       if (*valP < 128)
 	*valP /= 2;
@@ -340,5 +340,3 @@ md_convert_frag (bfd *headers ATTRIBUTE_UNUSED,
   printf (_("call to md_convert_frag \n"));
   abort ();
 }
-
-
