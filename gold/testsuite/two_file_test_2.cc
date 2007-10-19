@@ -100,3 +100,11 @@ f14()
 {
   return TEST_STRING_CONSTANT;
 }
+
+// 15 Compare wide string constants in file 1 and file 2.
+
+const wchar_t*
+f15()
+{
+  return TEST_WIDE_STRING_CONSTANT;
+}

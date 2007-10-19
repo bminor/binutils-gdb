@@ -180,3 +180,16 @@ t14()
       return false;
   return *s2 == '\0';
 }
+
+// 15 Compare wide string constants in file 1 and file 2.
+
+bool
+t15()
+{
+  const wchar_t* s1 = TEST_WIDE_STRING_CONSTANT;
+  const wchar_t* s2 = f15();
+  while (*s1 != '\0')
+    if (*s1++ != *s2++)
+      return false;
+  return *s2 == '\0';
+}
