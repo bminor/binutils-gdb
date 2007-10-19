@@ -1,3 +1,9 @@
+2007-10-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_parse_name): Skip leading '%'.
+	(md_assemble): When parsing PPC_OPERAND_CR, add '%' to set of
+	chars that can start a name.
+
 2007-10-18  Carlos O'Donell  <carlos@systemhalted.org>
 
 	* config/tc-hppa.c (pa_ip): Fix comment typo.

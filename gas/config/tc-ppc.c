@@ -684,6 +684,8 @@ ppc_parse_name (const char *name, expressionS *expr)
   if (! cr_operand)
     return 0;
 
+  if (*name == '%')
+    ++name;
   val = reg_name_search (cr_names, sizeof cr_names / sizeof cr_names[0],
 			 name);
   if (val < 0)
@@ -2454,10 +2456,16 @@ md_assemble (char *str)
 	{
 	  if (! register_name (&ex))
 	    {
+	      char save_lex = lex_type['%'];
+
 	      if ((operand->flags & PPC_OPERAND_CR) != 0)
-		cr_operand = TRUE;
+		{
+		  cr_operand = TRUE;
+		  lex_type['%'] |= LEX_BEGIN_NAME;
+		}
 	      expression (&ex);
 	      cr_operand = FALSE;
+	      lex_type['%'] = save_lex;
 	    }
 	}
 
