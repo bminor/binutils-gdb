@@ -259,16 +259,17 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 		      "character size"));
       return false;
     }
-  len /= sizeof(Char_type);
 
+  // The index I is in bytes, not characters.
   off_t i = 0;
   while (i < len)
     {
       off_t plen = 0;
       for (const Char_type* pl = p; *pl != 0; ++pl)
 	{
+          // The length PLEN is in characters, not bytes.
 	  ++plen;
-	  if (i + plen >= len)
+	  if (i + plen * sizeof(Char_type) >= len)
 	    {
 	      object->error(_("entry in mergeable string section "
 			      "not null terminated"));
@@ -281,7 +282,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
       this->merged_strings_.push_back(Merged_string(object, shndx, i, str));
 
       p += plen + 1;
-      i += plen + 1;
+      i += (plen + 1) * sizeof(Char_type);
     }
 
   return true;
