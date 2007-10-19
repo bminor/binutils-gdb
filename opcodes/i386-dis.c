@@ -2565,7 +2565,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "psrldq",	{ MS, Ib } },
+    { "psrldq",	{ XS, Ib } },
     { "(bad)",	{ XX } },
   },
 
@@ -2573,7 +2573,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "pslldq",	{ MS, Ib } },
+    { "pslldq",	{ XS, Ib } },
     { "(bad)",	{ XX } },
   },
 

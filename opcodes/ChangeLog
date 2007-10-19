@@ -1,3 +1,7 @@
+2007-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (prefix_table): Use XS on psrldq and pslldq.
+
 2007-10-17  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* m68k-opc.c (m68k_opcodes): Correct move sr and ccr masks for
