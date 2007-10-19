@@ -42,7 +42,7 @@ compare_new ()
 
 
 # Format of the input table
-read="class macro returntype function formal actual staticdefault predefault postdefault invalid_p print garbage_at_eol"
+read="class returntype function formal actual staticdefault predefault postdefault invalid_p print garbage_at_eol"
 
 do_read ()
 {
@@ -90,29 +90,6 @@ EOF
 		fi
 	    done
 
-	    FUNCTION=`echo ${function} | tr '[a-z]' '[A-Z]'`
-	    if test "x${macro}" = "x="
-	    then
-	        # Provide a UCASE version of function (for when there isn't MACRO)
-		macro="${FUNCTION}"
-	    elif test "${macro}" = "${FUNCTION}"
-	    then
-		echo "${function}: Specify = for macro field" 1>&2
-		kill $$
-		exit 1
-	    fi
-
-	    # Check that macro definition wasn't supplied for multi-arch
-	    case "${class}" in
-		[mM] )
-                    if test "${macro}" != ""
-		    then
-			echo "Error: Function ${function} multi-arch yet macro ${macro} supplied" 1>&2
-			kill $$
-			exit 1
-		    fi
-	    esac
-	    
 	    case "${class}" in
 		m ) staticdefault="${predefault}" ;;
 		M ) staticdefault="0" ;;
@@ -245,12 +222,6 @@ do
         # M -> multi-arch function + predicate
 	#   hiding a multi-arch function + predicate to test function validity
 
-    macro ) : ;;
-
-	# The name of the legacy C macro by which this method can be
-	# accessed.  If empty, no macro is defined.  If "=", a macro
-	# formed from the upper-case function name is used.
-
     returntype ) : ;;
 
 	# For functions, the return type; for variables, the data type
@@ -365,26 +336,26 @@ function_list ()
 {
   # See below (DOCO) for description of each field
   cat <<EOF
-i::const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_arch_struct::::gdbarch_bfd_arch_info (current_gdbarch)->printable_name
+i:const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_arch_struct::::gdbarch_bfd_arch_info (current_gdbarch)->printable_name
 #
-i::int:byte_order:::BFD_ENDIAN_BIG
+i:int:byte_order:::BFD_ENDIAN_BIG
 #
-i::enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
+i:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
 #
-i::const struct target_desc *:target_desc:::::::paddr_d ((long) current_gdbarch->target_desc)
+i:const struct target_desc *:target_desc:::::::paddr_d ((long) current_gdbarch->target_desc)
 # Number of bits in a char or unsigned char for the target machine.
 # Just like CHAR_BIT in <limits.h> but describes the target machine.
 # v:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
 #
 # Number of bits in a short or unsigned short for the target machine.
-v::int:short_bit:::8 * sizeof (short):2*TARGET_CHAR_BIT::0
+v:int:short_bit:::8 * sizeof (short):2*TARGET_CHAR_BIT::0
 # Number of bits in an int or unsigned int for the target machine.
-v::int:int_bit:::8 * sizeof (int):4*TARGET_CHAR_BIT::0
+v:int:int_bit:::8 * sizeof (int):4*TARGET_CHAR_BIT::0
 # Number of bits in a long or unsigned long for the target machine.
-v::int:long_bit:::8 * sizeof (long):4*TARGET_CHAR_BIT::0
+v:int:long_bit:::8 * sizeof (long):4*TARGET_CHAR_BIT::0
 # Number of bits in a long long or unsigned long long for the target
 # machine.
-v::int:long_long_bit:::8 * sizeof (LONGEST):2*current_gdbarch->long_bit::0
+v:int:long_long_bit:::8 * sizeof (LONGEST):2*current_gdbarch->long_bit::0
 
 # The ABI default bit-size and format for "float", "double", and "long
 # double".  These bit/format pairs should eventually be combined into
@@ -392,12 +363,12 @@ v::int:long_long_bit:::8 * sizeof (LONGEST):2*current_gdbarch->long_bit::0
 # Each format describes both the big and little endian layouts (if
 # useful).
 
-v::int:float_bit:::8 * sizeof (float):4*TARGET_CHAR_BIT::0
-v::const struct floatformat **:float_format:::::floatformats_ieee_single::pformat (current_gdbarch->float_format)
-v::int:double_bit:::8 * sizeof (double):8*TARGET_CHAR_BIT::0
-v::const struct floatformat **:double_format:::::floatformats_ieee_double::pformat (current_gdbarch->double_format)
-v::int:long_double_bit:::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
-v::const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (current_gdbarch->long_double_format)
+v:int:float_bit:::8 * sizeof (float):4*TARGET_CHAR_BIT::0
+v:const struct floatformat **:float_format:::::floatformats_ieee_single::pformat (current_gdbarch->float_format)
+v:int:double_bit:::8 * sizeof (double):8*TARGET_CHAR_BIT::0
+v:const struct floatformat **:double_format:::::floatformats_ieee_double::pformat (current_gdbarch->double_format)
+v:int:long_double_bit:::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
+v:const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (current_gdbarch->long_double_format)
 
 # For most targets, a pointer on the target and its representation as an
 # address in GDB have the same size and "look the same".  For such a
@@ -409,104 +380,104 @@ v::const struct floatformat **:long_double_format:::::floatformats_ieee_double::
 # as well.
 #
 # ptr_bit is the size of a pointer on the target
-v::int:ptr_bit:::8 * sizeof (void*):current_gdbarch->int_bit::0
+v:int:ptr_bit:::8 * sizeof (void*):current_gdbarch->int_bit::0
 # addr_bit is the size of a target address as represented in gdb
-v::int:addr_bit:::8 * sizeof (void*):0:gdbarch_ptr_bit (current_gdbarch):
+v:int:addr_bit:::8 * sizeof (void*):0:gdbarch_ptr_bit (current_gdbarch):
 #
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
-v::int:char_signed:::1:-1:1
+v:int:char_signed:::1:-1:1
 #
-F::CORE_ADDR:read_pc:struct regcache *regcache:regcache
-F::void:write_pc:struct regcache *regcache, CORE_ADDR val:regcache, val
+F:CORE_ADDR:read_pc:struct regcache *regcache:regcache
+F:void:write_pc:struct regcache *regcache, CORE_ADDR val:regcache, val
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
 # whole scheme for dealing with "frames" and "frame pointers" needs a
 # serious shakedown.
-f::void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset:0:legacy_virtual_frame_pointer::0
+f:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset:0:legacy_virtual_frame_pointer::0
 #
-M::void:pseudo_register_read:struct regcache *regcache, int cookednum, gdb_byte *buf:regcache, cookednum, buf
-M::void:pseudo_register_write:struct regcache *regcache, int cookednum, const gdb_byte *buf:regcache, cookednum, buf
+M:void:pseudo_register_read:struct regcache *regcache, int cookednum, gdb_byte *buf:regcache, cookednum, buf
+M:void:pseudo_register_write:struct regcache *regcache, int cookednum, const gdb_byte *buf:regcache, cookednum, buf
 #
-v::int:num_regs:::0:-1
+v:int:num_regs:::0:-1
 # This macro gives the number of pseudo-registers that live in the
 # register namespace but do not get fetched or stored on the target.
 # These pseudo-registers may be aliases for other registers,
 # combinations of other registers, or they may be computed by GDB.
-v::int:num_pseudo_regs:::0:0::0
+v:int:num_pseudo_regs:::0:0::0
 
 # GDB's standard (or well known) register numbers.  These can map onto
 # a real register or a pseudo (computed) register or not be defined at
 # all (-1).
 # gdbarch_sp_regnum will hopefully be replaced by UNWIND_SP.
-v::int:sp_regnum:::-1:-1::0
-v::int:pc_regnum:::-1:-1::0
-v::int:ps_regnum:::-1:-1::0
-v::int:fp0_regnum:::0:-1::0
+v:int:sp_regnum:::-1:-1::0
+v:int:pc_regnum:::-1:-1::0
+v:int:ps_regnum:::-1:-1::0
+v:int:fp0_regnum:::0:-1::0
 # Convert stab register number (from \`r\' declaration) to a gdb REGNUM.
-f::int:stab_reg_to_regnum:int stab_regnr:stab_regnr::no_op_reg_to_regnum::0
+f:int:stab_reg_to_regnum:int stab_regnr:stab_regnr::no_op_reg_to_regnum::0
 # Provide a default mapping from a ecoff register number to a gdb REGNUM.
-f::int:ecoff_reg_to_regnum:int ecoff_regnr:ecoff_regnr::no_op_reg_to_regnum::0
+f:int:ecoff_reg_to_regnum:int ecoff_regnr:ecoff_regnr::no_op_reg_to_regnum::0
 # Provide a default mapping from a DWARF register number to a gdb REGNUM.
-f::int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr::no_op_reg_to_regnum::0
+f:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr::no_op_reg_to_regnum::0
 # Convert from an sdb register number to an internal gdb register number.
-f::int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr::no_op_reg_to_regnum::0
-f::int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr::no_op_reg_to_regnum::0
-f::const char *:register_name:int regnr:regnr
+f:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr::no_op_reg_to_regnum::0
+f:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr::no_op_reg_to_regnum::0
+f:const char *:register_name:int regnr:regnr
 
 # Return the type of a register specified by the architecture.  Only
 # the register cache should call this function directly; others should
 # use "register_type".
-M::struct type *:register_type:int reg_nr:reg_nr
+M:struct type *:register_type:int reg_nr:reg_nr
 
 # See gdbint.texinfo, and PUSH_DUMMY_CALL.
-M::struct frame_id:unwind_dummy_id:struct frame_info *info:info
+M:struct frame_id:unwind_dummy_id:struct frame_info *info:info
 # Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
 # deprecated_fp_regnum.
-v::int:deprecated_fp_regnum:::-1:-1::0
+v:int:deprecated_fp_regnum:::-1:-1::0
 
 # See gdbint.texinfo.  See infcall.c.
-M::CORE_ADDR:push_dummy_call:struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:function, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
-v::int:call_dummy_location::::AT_ENTRY_POINT::0
-M::CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr, struct regcache *regcache:sp, funaddr, args, nargs, value_type, real_pc, bp_addr, regcache
+M:CORE_ADDR:push_dummy_call:struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:function, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
+v:int:call_dummy_location::::AT_ENTRY_POINT::0
+M:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr, struct regcache *regcache:sp, funaddr, args, nargs, value_type, real_pc, bp_addr, regcache
 
-m::void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all::default_print_registers_info::0
-M::void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
-M::void:print_vector_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
+m:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all::default_print_registers_info::0
+M:void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
+M:void:print_vector_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
 # MAP a GDB RAW register number onto a simulator register number.  See
 # also include/...-sim.h.
-f::int:register_sim_regno:int reg_nr:reg_nr::legacy_register_sim_regno::0
-f::int:cannot_fetch_register:int regnum:regnum::cannot_register_not::0
-f::int:cannot_store_register:int regnum:regnum::cannot_register_not::0
+f:int:register_sim_regno:int reg_nr:reg_nr::legacy_register_sim_regno::0
+f:int:cannot_fetch_register:int regnum:regnum::cannot_register_not::0
+f:int:cannot_store_register:int regnum:regnum::cannot_register_not::0
 # setjmp/longjmp support.
-F::int:get_longjmp_target:struct frame_info *frame, CORE_ADDR *pc:frame, pc
+F:int:get_longjmp_target:struct frame_info *frame, CORE_ADDR *pc:frame, pc
 #
-v::int:believe_pcc_promotion:::::::
+v:int:believe_pcc_promotion:::::::
 #
-f::int:convert_register_p:int regnum, struct type *type:regnum, type:0:generic_convert_register_p::0
-f::void:register_to_value:struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf:frame, regnum, type, buf:0
-f::void:value_to_register:struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf:frame, regnum, type, buf:0
+f:int:convert_register_p:int regnum, struct type *type:regnum, type:0:generic_convert_register_p::0
+f:void:register_to_value:struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf:frame, regnum, type, buf:0
+f:void:value_to_register:struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf:frame, regnum, type, buf:0
 # Construct a value representing the contents of register REGNUM in
 # frame FRAME, interpreted as type TYPE.  The routine needs to
 # allocate and return a struct value with all value attributes
 # (but not the value contents) filled in.
-f::struct value *:value_from_register:struct type *type, int regnum, struct frame_info *frame:type, regnum, frame::default_value_from_register::0
+f:struct value *:value_from_register:struct type *type, int regnum, struct frame_info *frame:type, regnum, frame::default_value_from_register::0
 #
-f::CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf::unsigned_pointer_to_address::0
-f::void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
-M::CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
+f:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf::unsigned_pointer_to_address::0
+f:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
+M:CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 
 # It has been suggested that this, well actually its predecessor,
 # should take the type/value of the function to be called and not the
 # return type.  This is left as an exercise for the reader.
 
-M::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:valtype, regcache, readbuf, writebuf
+M:enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:valtype, regcache, readbuf, writebuf
 
-f::CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
-f::int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
-f::const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
-M::CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
-f::int:memory_insert_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_insert_breakpoint::0
-f::int:memory_remove_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_remove_breakpoint::0
-v::CORE_ADDR:decr_pc_after_break:::0:::0
+f:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
+f:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
+f:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
+M:CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
+f:int:memory_insert_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_insert_breakpoint::0
+f:int:memory_remove_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_remove_breakpoint::0
+v:CORE_ADDR:decr_pc_after_break:::0:::0
 
 # A function can be addressed by either it's "pointer" (possibly a
 # descriptor address) or "entry point" (first executable instruction).
@@ -516,27 +487,27 @@ v::CORE_ADDR:decr_pc_after_break:::0:::0
 # corresponds to the "function pointer" and the function's start
 # corresponds to the "function entry point" - and hence is redundant.
 
-v::CORE_ADDR:deprecated_function_start_offset:::0:::0
+v:CORE_ADDR:deprecated_function_start_offset:::0:::0
 
 # Return the remote protocol register number associated with this
 # register.  Normally the identity mapping.
-m::int:remote_register_number:int regno:regno::default_remote_register_number::0
+m:int:remote_register_number:int regno:regno::default_remote_register_number::0
 
 # Fetch the target specific address used to represent a load module.
-F::CORE_ADDR:fetch_tls_load_module_address:struct objfile *objfile:objfile
+F:CORE_ADDR:fetch_tls_load_module_address:struct objfile *objfile:objfile
 #
-v::CORE_ADDR:frame_args_skip:::0:::0
-M::CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame
-M::CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame
+v:CORE_ADDR:frame_args_skip:::0:::0
+M:CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame
+M:CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame
 # DEPRECATED_FRAME_LOCALS_ADDRESS as been replaced by the per-frame
 # frame-base.  Enable frame-base before frame-unwind.
-F::int:frame_num_args:struct frame_info *frame:frame
+F:int:frame_num_args:struct frame_info *frame:frame
 #
-M::CORE_ADDR:frame_align:CORE_ADDR address:address
-m::int:stabs_argument_has_addr:struct type *type:type::default_stabs_argument_has_addr::0
-v::int:frame_red_zone_size
+M:CORE_ADDR:frame_align:CORE_ADDR address:address
+m:int:stabs_argument_has_addr:struct type *type:type::default_stabs_argument_has_addr::0
+v:int:frame_red_zone_size
 #
-m::CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr, struct target_ops *targ:addr, targ::convert_from_func_ptr_addr_identity::0
+m:CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr, struct target_ops *targ:addr, targ::convert_from_func_ptr_addr_identity::0
 # On some machines there are bits in addresses which are not really
 # part of the address, but are used by the kernel, the hardware, etc.
 # for special purposes.  gdbarch_addr_bits_remove takes out any such bits so
@@ -546,10 +517,10 @@ m::CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr, struct target_ops *targ:
 # being a few stray bits in the PC which would mislead us, not as some
 # sort of generic thing to handle alignment or segmentation (it's
 # possible it should be in TARGET_READ_PC instead).
-f::CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
+f:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
 # It is not at all clear why gdbarch_smash_text_address is not folded into
 # gdbarch_addr_bits_remove.
-f::CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
+f:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
 
 # FIXME/cagney/2001-01-18: This should be split in two.  A target method that
 # indicates if the target needs software single step.  An ISA method to
@@ -564,23 +535,23 @@ f::CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
 #
 # A return value of 1 means that the software_single_step breakpoints 
 # were inserted; 0 means they were not.
-F::int:software_single_step:struct frame_info *frame:frame
+F:int:software_single_step:struct frame_info *frame:frame
 
 # Return non-zero if the processor is executing a delay slot and a
 # further single-step is needed before the instruction finishes.
-M::int:single_step_through_delay:struct frame_info *frame:frame
+M:int:single_step_through_delay:struct frame_info *frame:frame
 # FIXME: cagney/2003-08-28: Need to find a better way of selecting the
 # disassembler.  Perhaps objdump can handle it?
-f::int:print_insn:bfd_vma vma, struct disassemble_info *info:vma, info::0:
-f::CORE_ADDR:skip_trampoline_code:struct frame_info *frame, CORE_ADDR pc:frame, pc::generic_skip_trampoline_code::0
+f:int:print_insn:bfd_vma vma, struct disassemble_info *info:vma, info::0:
+f:CORE_ADDR:skip_trampoline_code:struct frame_info *frame, CORE_ADDR pc:frame, pc::generic_skip_trampoline_code::0
 
 
 # If IN_SOLIB_DYNSYM_RESOLVE_CODE returns true, and SKIP_SOLIB_RESOLVER
 # evaluates non-zero, this is the address where the debugger will place
 # a step-resume breakpoint to get us past the dynamic linker.
-m::CORE_ADDR:skip_solib_resolver:CORE_ADDR pc:pc::generic_skip_solib_resolver::0
+m:CORE_ADDR:skip_solib_resolver:CORE_ADDR pc:pc::generic_skip_solib_resolver::0
 # Some systems also have trampoline code for returning from shared libs.
-f::int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name::generic_in_solib_return_trampoline::0
+f:int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name::generic_in_solib_return_trampoline::0
 
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
@@ -591,7 +562,7 @@ f::int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name::generic_in_
 # already been invalidated regardless of the value of addr.  Targets
 # which don't suffer from that problem could just let this functionality
 # untouched.
-m::int:in_function_epilogue_p:CORE_ADDR addr:addr:0:generic_in_function_epilogue_p::0
+m:int:in_function_epilogue_p:CORE_ADDR addr:addr:0:generic_in_function_epilogue_p::0
 # Given a vector of command-line arguments, return a newly allocated
 # string which, when passed to the create_inferior function, will be
 # parsed (on Unix systems, by the shell) to yield the same vector.
@@ -600,49 +571,49 @@ m::int:in_function_epilogue_p:CORE_ADDR addr:addr:0:generic_in_function_epilogue
 # command-line arguments.
 # ARGC is the number of elements in the vector.
 # ARGV is an array of strings, one per argument.
-m::char *:construct_inferior_arguments:int argc, char **argv:argc, argv::construct_inferior_arguments::0
-f::void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym::default_elf_make_msymbol_special::0
-f::void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym::default_coff_make_msymbol_special::0
-v::const char *:name_of_malloc:::"malloc":"malloc"::0:current_gdbarch->name_of_malloc
-v::int:cannot_step_breakpoint:::0:0::0
-v::int:have_nonsteppable_watchpoint:::0:0::0
-F::int:address_class_type_flags:int byte_size, int dwarf2_addr_class:byte_size, dwarf2_addr_class
-M::const char *:address_class_type_flags_to_name:int type_flags:type_flags
-M::int:address_class_name_to_type_flags:const char *name, int *type_flags_ptr:name, type_flags_ptr
+m:char *:construct_inferior_arguments:int argc, char **argv:argc, argv::construct_inferior_arguments::0
+f:void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym::default_elf_make_msymbol_special::0
+f:void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym::default_coff_make_msymbol_special::0
+v:const char *:name_of_malloc:::"malloc":"malloc"::0:current_gdbarch->name_of_malloc
+v:int:cannot_step_breakpoint:::0:0::0
+v:int:have_nonsteppable_watchpoint:::0:0::0
+F:int:address_class_type_flags:int byte_size, int dwarf2_addr_class:byte_size, dwarf2_addr_class
+M:const char *:address_class_type_flags_to_name:int type_flags:type_flags
+M:int:address_class_name_to_type_flags:const char *name, int *type_flags_ptr:name, type_flags_ptr
 # Is a register in a group
-m::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup::default_register_reggroup_p::0
+m:int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup::default_register_reggroup_p::0
 # Fetch the pointer to the ith function argument.
-F::CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
+F:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type
 
 # Return the appropriate register set for a core file section with
 # name SECT_NAME and size SECT_SIZE.
-M::const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
+M:const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
 
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
 # core file into buffer READBUF with length LEN.
-M::LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
+M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
 
 # If the elements of C++ vtables are in-place function descriptors rather
 # than normal function pointers (which may point to code or a descriptor),
 # set this to one.
-v::int:vtable_function_descriptors:::0:0::0
+v:int:vtable_function_descriptors:::0:0::0
 
 # Set if the least significant bit of the delta is used instead of the least
 # significant bit of the pfn for pointers to virtual member functions.
-v::int:vbit_in_delta:::0:0::0
+v:int:vbit_in_delta:::0:0::0
 
 # Advance PC to next instruction in order to skip a permanent breakpoint.
-F::void:skip_permanent_breakpoint:struct regcache *regcache:regcache
+F:void:skip_permanent_breakpoint:struct regcache *regcache:regcache
 
 # Refresh overlay mapped state for section OSECT.
-F::void:overlay_update:struct obj_section *osect:osect
+F:void:overlay_update:struct obj_section *osect:osect
 
-M::const struct target_desc *:core_read_description:struct target_ops *target, bfd *abfd:target, abfd
+M:const struct target_desc *:core_read_description:struct target_ops *target, bfd *abfd:target, abfd
 
 # Handle special encoding of static variables in stabs debug info.
-F::char *:static_transform_name:char *name:name
+F:char *:static_transform_name:char *name:name
 # Set if the address in N_SO or N_FUN stabs may be zero.
-v::int:sofun_address_maybe_missing:::0:0::0
+v:int:sofun_address_maybe_missing:::0:0::0
 EOF
 }
 
@@ -768,15 +739,6 @@ do
 	printf "\n"
 	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	printf "/* set_gdbarch_${function}() - not applicable - pre-initialized. */\n"
-	if test -n "${macro}"
-	then
-	    printf "#if !defined (GDB_TM_FILE) && defined (${macro})\n"
-	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
-	    printf "#endif\n"
-	    printf "#if !defined (${macro})\n"
-	    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	    printf "#endif\n"
-	fi
     fi
 done
 
@@ -796,42 +758,14 @@ do
 
     if class_is_predicate_p
     then
-	if test -n "${macro}"
-	then
-	    printf "\n"
-	    printf "#if defined (${macro})\n"
-	    printf "/* Legacy for systems yet to multi-arch ${macro} */\n"
-	    printf "#if !defined (${macro}_P)\n"
-	    printf "#define ${macro}_P() (1)\n"
-	    printf "#endif\n"
-	    printf "#endif\n"
-	fi
 	printf "\n"
 	printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
-	if test -n "${macro}"
-	then
-	    printf "#if !defined (GDB_TM_FILE) && defined (${macro}_P)\n"
-	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
-	    printf "#endif\n"
-	    printf "#if !defined (${macro}_P)\n"
-	    printf "#define ${macro}_P() (gdbarch_${function}_p (current_gdbarch))\n"
-	    printf "#endif\n"
-	fi
     fi
     if class_is_variable_p
     then
 	printf "\n"
 	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});\n"
-	if test -n "${macro}"
-	then
-	    printf "#if !defined (GDB_TM_FILE) && defined (${macro})\n"
-	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
-	    printf "#endif\n"
-	    printf "#if !defined (${macro})\n"
-	    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	    printf "#endif\n"
-	fi
     fi
     if class_is_function_p
     then
@@ -852,32 +786,6 @@ do
 	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});\n"
 	fi
 	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});\n"
-	if test -n "${macro}"
-	then
-	    printf "#if !defined (GDB_TM_FILE) && defined (${macro})\n"
-	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
-	    printf "#endif\n"
-	    if [ "x${actual}" = "x" ]
-	    then
-		d="#define ${macro}() (gdbarch_${function} (current_gdbarch))"
-	    elif [ "x${actual}" = "x-" ]
-	    then
-		d="#define ${macro} (gdbarch_${function} (current_gdbarch))"
-	    else
-		d="#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))"
-	    fi
-	    printf "#if !defined (${macro})\n"
-	    if [ "x${actual}" = "x" ]
-	    then
-		printf "#define ${macro}() (gdbarch_${function} (current_gdbarch))\n"
-	    elif [ "x${actual}" = "x-" ]
-	    then
-		printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	    else
-		printf "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))\n"
-	    fi
-	    printf "#endif\n"
-	fi
     fi
 done
 
@@ -1478,40 +1386,14 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: GDB_TM_FILE = %s\\n",
                       gdb_tm_file);
 EOF
-function_list | sort -t: -k 4 | while do_read
+function_list | sort -t: -k 3 | while do_read
 do
     # First the predicate
     if class_is_predicate_p
     then
-	if test -n "${macro}"
-	then
-	    printf "#ifdef ${macro}_P\n"
-	    printf "  fprintf_unfiltered (file,\n"
-	    printf "                      \"gdbarch_dump: %%s # %%s\\\\n\",\n"
-	    printf "                      \"${macro}_P()\",\n"
-	    printf "                      XSTRING (${macro}_P ()));\n"
-	    printf "#endif\n"
-	fi
 	printf "  fprintf_unfiltered (file,\n"
 	printf "                      \"gdbarch_dump: gdbarch_${function}_p() = %%d\\\\n\",\n"
 	printf "                      gdbarch_${function}_p (current_gdbarch));\n"
-    fi
-    # Print the macro definition.
-    if test -n "${macro}"
-    then
-	printf "#ifdef ${macro}\n"
-	if class_is_function_p
-	then
-	    printf "  fprintf_unfiltered (file,\n"
-	    printf "                      \"gdbarch_dump: %%s # %%s\\\\n\",\n"
-	    printf "                      \"${macro}(${actual})\",\n"
-	    printf "                      XSTRING (${macro} (${actual})));\n"
-	else
-	    printf "  fprintf_unfiltered (file,\n"
-	    printf "                      \"gdbarch_dump: ${macro} # %%s\\\\n\",\n"
-	    printf "                      XSTRING (${macro}));\n"
-	fi
-	printf "#endif\n"
     fi
     # Print the corresponding value.
     if class_is_function_p

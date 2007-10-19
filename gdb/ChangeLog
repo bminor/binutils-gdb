@@ -1,5 +1,11 @@
 2007-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh: Remove "macro" column of input table.  Remove handling
+	of "macro" column throughout the file.  Remove (empty) "macro" entry
+	of all gdbarch functions.
+
+2007-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (sofun_address_maybe_missing): New gdbarch variable.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* dbxread.c (find_stab_function_addr): Define unconditionally.
