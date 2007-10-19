@@ -1,3 +1,7 @@
+2007-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* elf-m10300.c: Convert to ISO C.
+
 2007-10-18  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 

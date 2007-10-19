@@ -24,6 +24,7 @@
 #include "subsegs.h"
 #include "opcode/mn10300.h"
 #include "dwarf2dbg.h"
+#include "libiberty.h"
 
 /* Structure to hold information about predefined registers.  */
 struct reg_name
@@ -59,7 +60,7 @@ const relax_typeS md_relax_table[] =
      are because the branch instruction is translated into a jump
      instruction that is now +2 or +3 bytes further on in memory, and the
      correct size of jump instruction must be selected.  */
-  /* bCC relaxing  */
+  /* bCC relaxing.  */
   {0x7f, -0x80, 2, 1},
   {0x7fff + 2, -0x8000 + 2, 5, 2},
   {0x7fffffff, -0x80000000, 7, 0},
@@ -69,41 +70,25 @@ const relax_typeS md_relax_table[] =
   {0x7fff + 3, -0x8000 + 3, 6, 5},
   {0x7fffffff, -0x80000000, 8, 0},
 
-  /* call relaxing  */
+  /* call relaxing.  */
   {0x7fff, -0x8000, 5, 7},
   {0x7fffffff, -0x80000000, 7, 0},
 
-  /* calls relaxing  */
+  /* calls relaxing.  */
   {0x7fff, -0x8000, 4, 9},
   {0x7fffffff, -0x80000000, 6, 0},
 
-  /* jmp relaxing  */
+  /* jmp relaxing.  */
   {0x7f, -0x80, 2, 11},
   {0x7fff, -0x8000, 3, 12},
   {0x7fffffff, -0x80000000, 5, 0},
 
-  /* fbCC relaxing  */
+  /* fbCC relaxing.  */
   {0x7f, -0x80, 3, 14},
   {0x7fff + 3, -0x8000 + 3, 6, 15},
   {0x7fffffff, -0x80000000, 8, 0},
 
 };
-
-/* Local functions.  */
-static void mn10300_insert_operand PARAMS ((unsigned long *, unsigned long *,
-					    const struct mn10300_operand *,
-					    offsetT, char *, unsigned,
-					    unsigned));
-static unsigned long check_operand PARAMS ((unsigned long,
-					    const struct mn10300_operand *,
-					    offsetT));
-static int reg_name_search PARAMS ((const struct reg_name *, int, const char *));
-static bfd_boolean data_register_name PARAMS ((expressionS *expressionP));
-static bfd_boolean address_register_name PARAMS ((expressionS *expressionP));
-static bfd_boolean other_register_name PARAMS ((expressionS *expressionP));
-static bfd_boolean r_register_name PARAMS ((expressionS *expressionP));
-static bfd_boolean xr_register_name PARAMS ((expressionS *expressionP));
-static void set_arch_mach PARAMS ((int));
 
 /*  Set linkrelax here to avoid fixups in most sections.  */
 int linkrelax = 1;
@@ -111,7 +96,8 @@ int linkrelax = 1;
 static int current_machine;
 
 /* Fixups.  */
-#define MAX_INSN_FIXUPS (5)
+#define MAX_INSN_FIXUPS 5
+
 struct mn10300_fixup
 {
   expressionS exp;
@@ -126,24 +112,17 @@ static int fc;
 int mn10300_reg_operands[MN10300_MAX_OPERANDS];
 
 const char *md_shortopts = "";
-struct option md_longopts[] = {
+
+struct option md_longopts[] =
+{
   {NULL, no_argument, NULL, 0}
 };
+
 size_t md_longopts_size = sizeof (md_longopts);
 
-/* The target specific pseudo-ops which we support.  */
-const pseudo_typeS md_pseudo_table[] =
-{
-  { "am30",	set_arch_mach,		AM30 },
-  { "am33",	set_arch_mach,		AM33 },
-  { "am33_2",	(void (*) PARAMS ((int))) set_arch_mach, AM33_2 },
-  { "mn10300",	set_arch_mach,		MN103 },
-  {NULL, 0, 0}
-};
-
 #define HAVE_AM33_2 (current_machine == AM33_2)
-#define HAVE_AM33 (current_machine == AM33 || HAVE_AM33_2)
-#define HAVE_AM30 (current_machine == AM30)
+#define HAVE_AM33   (current_machine == AM33 || HAVE_AM33_2)
+#define HAVE_AM30   (current_machine == AM30)
 
 /* Opcode hash table.  */
 static struct hash_control *mn10300_hash;
@@ -156,8 +135,6 @@ static const struct reg_name data_registers[] =
   { "d2", 2 },
   { "d3", 3 },
 };
-#define DATA_REG_NAME_CNT				\
-  (sizeof (data_registers) / sizeof (struct reg_name))
 
 static const struct reg_name address_registers[] =
 {
@@ -166,9 +143,6 @@ static const struct reg_name address_registers[] =
   { "a2", 2 },
   { "a3", 3 },
 };
-
-#define ADDRESS_REG_NAME_CNT					\
-  (sizeof (address_registers) / sizeof (struct reg_name))
 
 static const struct reg_name r_registers[] =
 {
@@ -214,9 +188,6 @@ static const struct reg_name r_registers[] =
   { "r9", 9 },
 };
 
-#define R_REG_NAME_CNT					\
-  (sizeof (r_registers) / sizeof (struct reg_name))
-
 static const struct reg_name xr_registers[] =
 {
   { "mcrh", 2 },
@@ -241,26 +212,6 @@ static const struct reg_name xr_registers[] =
   { "xr8", 8 },
   { "xr9", 9 },
 };
-
-#define XR_REG_NAME_CNT					\
-  (sizeof (xr_registers) / sizeof (struct reg_name))
-
-/* We abuse the `value' field, that would be otherwise unused, to
-   encode the architecture on which (access to) the register was
-   introduced.  FIXME: we should probably warn when we encounter a
-   register name when assembling for an architecture that doesn't
-   support it, before parsing it as a symbol name.  */
-static const struct reg_name other_registers[] =
-{
-  { "epsw", AM33 },
-  { "mdr", 0 },
-  { "pc", AM33 },
-  { "psw", 0 },
-  { "sp", 0 },
-};
-
-#define OTHER_REG_NAME_CNT				\
-  (sizeof (other_registers) / sizeof (struct reg_name))
 
 static const struct reg_name float_registers[] =
 {
@@ -298,9 +249,6 @@ static const struct reg_name float_registers[] =
   { "fs9",   9 },
 };
 
-#define FLOAT_REG_NAME_CNT \
-  (sizeof (float_registers) / sizeof (struct reg_name))
-
 static const struct reg_name double_registers[] =
 {
   { "fd0",   0 },
@@ -321,28 +269,40 @@ static const struct reg_name double_registers[] =
   { "fd8",   8 },
 };
 
-#define DOUBLE_REG_NAME_CNT \
-  (sizeof (double_registers) / sizeof (struct reg_name))
+/* We abuse the `value' field, that would be otherwise unused, to
+   encode the architecture on which (access to) the register was
+   introduced.  FIXME: we should probably warn when we encounter a
+   register name when assembling for an architecture that doesn't
+   support it, before parsing it as a symbol name.  */
+static const struct reg_name other_registers[] =
+{
+  { "epsw", AM33 },
+  { "mdr", 0 },
+  { "pc", AM33 },
+  { "psw", 0 },
+  { "sp", 0 },
+};
 
+#define OTHER_REG_NAME_CNT	ARRAY_SIZE (other_registers)
 
-/* reg_name_search does a binary search of the given register table
-   to see if "name" is a valid regiter name.  Returns the register
-   number from the array on success, or -1 on failure.  */
+/* Perform a binary search of the given register table REGS to see
+   if NAME is a valid regiter name.  Returns the register number from
+   the array on success, or -1 on failure.  */
 
 static int
-reg_name_search (regs, regcount, name)
-     const struct reg_name *regs;
-     int regcount;
-     const char *name;
+reg_name_search (const struct reg_name *regs,
+		 int regcount,
+		 const char *name)
 {
-  int middle, low, high;
-  int cmp;
+  int low, high;
 
   low = 0;
   high = regcount - 1;
 
   do
     {
+      int cmp, middle;
+
       middle = (low + high) / 2;
       cmp = strcasecmp (name, regs[middle].name);
       if (cmp < 0)
@@ -353,23 +313,22 @@ reg_name_search (regs, regcount, name)
 	return regs[middle].value;
     }
   while (low <= high);
+
   return -1;
 }
 
-/* Summary of register_name().
- *
- * in: Input_line_pointer points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.
- */
+/* Looks at the current position in the input line to see if it is
+   the name of a register in TABLE.  If it is, then the name is
+   converted into an expression returned in EXPRESSIONP (with X_op
+   set to O_register and X_add_number set to the register number), the
+   input pointer is left pointing at the first non-blank character after
+   the name and the function returns TRUE.  Otherwise the input pointer
+   is left alone and the function returns FALSE.  */
 
 static bfd_boolean
-r_register_name (expressionP)
-     expressionS *expressionP;
+get_register_name (expressionS *           expressionP,
+		   const struct reg_name * table,
+		   size_t                  table_length)
 {
   int reg_number;
   char *name;
@@ -380,7 +339,7 @@ r_register_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (r_registers, R_REG_NAME_CNT, name);
+  reg_number = reg_name_search (table, table_length, name);
 
   /* Put back the delimiting char.  */
   *input_line_pointer = c;
@@ -403,161 +362,45 @@ r_register_name (expressionP)
   return FALSE;
 }
 
-/* Summary of register_name().
- *
- * in: Input_line_pointer points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.
- */
-
 static bfd_boolean
-xr_register_name (expressionP)
-     expressionS *expressionP;
+r_register_name (expressionS *expressionP)
 {
-  int reg_number;
-  char *name;
-  char *start;
-  char c;
-
-  /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
-  reg_number = reg_name_search (xr_registers, XR_REG_NAME_CNT, name);
-
-  /* Put back the delimiting char.  */
-  *input_line_pointer = c;
-
-  /* Look to see if it's in the register table.  */
-  if (reg_number >= 0)
-    {
-      expressionP->X_op = O_register;
-      expressionP->X_add_number = reg_number;
-
-      /* Make the rest nice.  */
-      expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-
-      return TRUE;
-    }
-
-  /* Reset the line as if we had not done anything.  */
-  input_line_pointer = start;
-  return FALSE;
+  return get_register_name (expressionP, r_registers, ARRAY_SIZE (r_registers));
 }
 
-/* Summary of register_name().
- *
- * in: Input_line_pointer points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.
- */
 
 static bfd_boolean
-data_register_name (expressionP)
-     expressionS *expressionP;
+xr_register_name (expressionS *expressionP)
 {
-  int reg_number;
-  char *name;
-  char *start;
-  char c;
-
-  /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
-  reg_number = reg_name_search (data_registers, DATA_REG_NAME_CNT, name);
-
-  /* Put back the delimiting char.  */
-  *input_line_pointer = c;
-
-  /* Look to see if it's in the register table.  */
-  if (reg_number >= 0)
-    {
-      expressionP->X_op = O_register;
-      expressionP->X_add_number = reg_number;
-
-      /* Make the rest nice.  */
-      expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-
-      return TRUE;
-    }
-
-  /* Reset the line as if we had not done anything.  */
-  input_line_pointer = start;
-  return FALSE;
+  return get_register_name (expressionP, xr_registers, ARRAY_SIZE (xr_registers));
 }
 
-/* Summary of register_name().
- *
- * in: Input_line_pointer points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.
- */
-
 static bfd_boolean
-address_register_name (expressionP)
-     expressionS *expressionP;
+data_register_name (expressionS *expressionP)
 {
-  int reg_number;
-  char *name;
-  char *start;
-  char c;
-
-  /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
-  reg_number = reg_name_search (address_registers, ADDRESS_REG_NAME_CNT, name);
-
-  /* Put back the delimiting char.  */
-  *input_line_pointer = c;
-
-  /* Look to see if it's in the register table.  */
-  if (reg_number >= 0)
-    {
-      expressionP->X_op = O_register;
-      expressionP->X_add_number = reg_number;
-
-      /* Make the rest nice.  */
-      expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-
-      return TRUE;
-    }
-
-  /* Reset the line as if we had not done anything.  */
-  input_line_pointer = start;
-  return FALSE;
+  return get_register_name (expressionP, data_registers, ARRAY_SIZE (data_registers));
 }
 
-/* Summary of register_name().
- *
- * in: Input_line_pointer points to 1st char of operand.
- *
- * out: An expressionS.
- *	The operand may have been a register: in this case, X_op == O_register,
- *	X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in
- *	its original state.
- */
+static bfd_boolean
+address_register_name (expressionS *expressionP)
+{
+  return get_register_name (expressionP, address_registers, ARRAY_SIZE (address_registers));
+}
 
 static bfd_boolean
-other_register_name (expressionP)
-     expressionS *expressionP;
+float_register_name (expressionS *expressionP)
+{
+  return get_register_name (expressionP, float_registers, ARRAY_SIZE (float_registers));
+}
+
+static bfd_boolean
+double_register_name (expressionS *expressionP)
+{
+  return get_register_name (expressionP, double_registers, ARRAY_SIZE (double_registers));
+}
+
+static bfd_boolean
+other_register_name (expressionS *expressionP)
 {
   int reg_number;
   char *name;
@@ -568,7 +411,7 @@ other_register_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (other_registers, OTHER_REG_NAME_CNT, name);
+  reg_number = reg_name_search (other_registers, ARRAY_SIZE (other_registers), name);
 
   /* Put back the delimiting char.  */
   *input_line_pointer = c;
@@ -592,120 +435,21 @@ other_register_name (expressionP)
   return FALSE;
 }
 
-static bfd_boolean double_register_name PARAMS ((expressionS *));
-static bfd_boolean float_register_name  PARAMS ((expressionS *));
-
-/* Summary of float_register_name:
-
-   in: Input_line_pointer points to 1st char of operand.
-
-   out: A expressionS.
-  	The operand may have been a register: in this case, X_op == O_register,
-  	X_add_number is set to the register number, and truth is returned.
-  	Input_line_pointer->(next non-blank) char after operand, or is in
-  	its original state.  */
-
-static bfd_boolean
-float_register_name (expressionP)
-     expressionS *expressionP;
-{
-  int reg_number;
-  char *name;
-  char *start;
-  char c;
-
-  /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
-  reg_number = reg_name_search (float_registers, FLOAT_REG_NAME_CNT, name);
-
-  /* Put back the delimiting char.  */
-  * input_line_pointer = c;
-
-  /* Look to see if it's in the register table.  */
-  if (reg_number >= 0)
-    {
-      expressionP->X_op = O_register;
-      expressionP->X_add_number = reg_number;
-
-      /* Make the rest nice.  */
-      expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-
-      return TRUE;
-    }
-
-  /* Reset the line as if we had not done anything.  */
-  input_line_pointer = start;
-  return FALSE;
-}
-
-/* Summary of double_register_name:
-
-   in: Input_line_pointer points to 1st char of operand.
-
-   out: A expressionS.
-  	The operand may have been a register: in this case, X_op == O_register,
-  	X_add_number is set to the register number, and truth is returned.
-  	Input_line_pointer->(next non-blank) char after operand, or is in
-  	its original state.  */
-
-static bfd_boolean
-double_register_name (expressionP)
-     expressionS *expressionP;
-{
-  int reg_number;
-  char *name;
-  char *start;
-  char c;
-
-  /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-
-  c = get_symbol_end ();
-  reg_number = reg_name_search (double_registers, DOUBLE_REG_NAME_CNT, name);
-
-  /* Put back the delimiting char.  */
-  * input_line_pointer = c;
-
-  /* Look to see if it's in the register table.  */
-  if (reg_number >= 0)
-    {
-      expressionP->X_op = O_register;
-      expressionP->X_add_number = reg_number;
-
-      /* Make the rest nice.  */
-      expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-
-      return TRUE;
-    }
-
-  /* Reset the line as if we had not done anything.  */
-  input_line_pointer = start;
-  return FALSE;
-}
-
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   fprintf (stream, _("MN10300 assembler options:\n\
 none yet\n"));
 }
 
 int
-md_parse_option (c, arg)
-     int c ATTRIBUTE_UNUSED;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -717,10 +461,9 @@ md_atof (int type, char *litp, int *sizep)
 }
 
 void
-md_convert_frag (abfd, sec, fragP)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     fragS *fragP;
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
+		 asection *sec,
+		 fragS *fragP)
 {
   static unsigned long label_count = 0;
   char buf[40];
@@ -1149,19 +892,18 @@ md_convert_frag (abfd, sec, fragP)
 }
 
 valueT
-md_section_align (seg, addr)
-     asection *seg;
-     valueT addr;
+md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
+
   return ((addr + (1 << align) - 1) & (-1 << align));
 }
 
 void
-md_begin ()
+md_begin (void)
 {
   char *prev_name = "";
-  register const struct mn10300_opcode *op;
+  const struct mn10300_opcode *op;
 
   mn10300_hash = hash_new ();
 
@@ -1197,12 +939,8 @@ md_begin ()
 
 static symbolS *GOT_symbol;
 
-static inline int mn10300_check_fixup PARAMS ((struct mn10300_fixup *));
-static inline int mn10300_PIC_related_p PARAMS ((symbolS *));
-
 static inline int
-mn10300_PIC_related_p (sym)
-     symbolS *sym;
+mn10300_PIC_related_p (symbolS *sym)
 {
   expressionS *exp;
 
@@ -1220,8 +958,7 @@ mn10300_PIC_related_p (sym)
 }
 
 static inline int
-mn10300_check_fixup (fixup)
-     struct mn10300_fixup *fixup;
+mn10300_check_fixup (struct mn10300_fixup *fixup)
 {
   expressionS *exp = &fixup->exp;
 
@@ -1267,10 +1004,7 @@ mn10300_check_fixup (fixup)
 }
 
 void
-mn10300_cons_fix_new (frag, off, size, exp)
-     fragS *frag;
-     int off, size;
-     expressionS *exp;
+mn10300_cons_fix_new (fragS *frag, int off, int size, expressionS *exp)
 {
   struct mn10300_fixup fixup;
 
@@ -1329,9 +1063,162 @@ mn10300_cons_fix_new (frag, off, size, exp)
   fix_new_exp (frag, off, size, &fixup.exp, 0, fixup.reloc);
 }
 
+static bfd_boolean
+check_operand (const struct mn10300_operand *operand,
+	       offsetT val)
+{
+  /* No need to check 32bit operands for a bit.  Note that
+     MN10300_OPERAND_SPLIT is an implicit 32bit operand.  */
+  if (operand->bits != 32
+      && (operand->flags & MN10300_OPERAND_SPLIT) == 0)
+    {
+      long min, max;
+      offsetT test;
+      int bits;
+
+      bits = operand->bits;
+      if (operand->flags & MN10300_OPERAND_24BIT)
+	bits = 24;
+
+      if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
+	{
+	  max = (1 << (bits - 1)) - 1;
+	  min = - (1 << (bits - 1));
+	}
+      else
+	{
+	  max = (1 << bits) - 1;
+	  min = 0;
+	}
+
+      test = val;
+
+      if (test < (offsetT) min || test > (offsetT) max)
+	return FALSE;
+    }
+  return TRUE;
+}
+
+/* Insert an operand value into an instruction.  */
+
+static void
+mn10300_insert_operand (unsigned long *insnp,
+			unsigned long *extensionp,
+			const struct mn10300_operand *operand,
+			offsetT val,
+			char *file,
+			unsigned int line,
+			unsigned int shift)
+{
+  /* No need to check 32bit operands for a bit.  Note that
+     MN10300_OPERAND_SPLIT is an implicit 32bit operand.  */
+  if (operand->bits != 32
+      && (operand->flags & MN10300_OPERAND_SPLIT) == 0)
+    {
+      long min, max;
+      offsetT test;
+      int bits;
+
+      bits = operand->bits;
+      if (operand->flags & MN10300_OPERAND_24BIT)
+	bits = 24;
+
+      if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
+	{
+	  max = (1 << (bits - 1)) - 1;
+	  min = - (1 << (bits - 1));
+	}
+      else
+	{
+	  max = (1 << bits) - 1;
+	  min = 0;
+	}
+
+      test = val;
+
+      if (test < (offsetT) min || test > (offsetT) max)
+	as_warn_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
+    }
+
+  if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
+    {
+      *insnp |= (val >> (32 - operand->bits)) & ((1 << operand->bits) - 1);
+      *extensionp |= ((val & ((1 << (32 - operand->bits)) - 1))
+		      << operand->shift);
+    }
+  else if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
+    {
+      *insnp |= (val >> (24 - operand->bits)) & ((1 << operand->bits) - 1);
+      *extensionp |= ((val & ((1 << (24 - operand->bits)) - 1))
+		      << operand->shift);
+    }
+  else if ((operand->flags & (MN10300_OPERAND_FSREG | MN10300_OPERAND_FDREG)))
+    {
+      /* See devo/opcodes/m10300-opc.c just before #define FSM0 for an
+         explanation of these variables.  Note that FMT-implied shifts
+        are not taken into account for FP registers.  */
+      unsigned long mask_low, mask_high;
+      int shl_low, shr_high, shl_high;
+
+      switch (operand->bits)
+	{
+	case 5:
+	  /* Handle regular FP registers.  */
+	  if (operand->shift >= 0)
+	    {
+	      /* This is an `m' register.  */
+	      shl_low = operand->shift;
+	      shl_high = 8 + (8 & shl_low) + (shl_low & 4) / 4;
+	    }
+	  else
+	    {
+	      /* This is an `n' register.  */
+	      shl_low = -operand->shift;
+	      shl_high = shl_low / 4;
+	    }
+
+	  mask_low = 0x0f;
+	  mask_high = 0x10;
+	  shr_high = 4;
+	  break;
+
+	case 3:
+	  /* Handle accumulators.  */
+	  shl_low = -operand->shift;
+	  shl_high = 0;
+	  mask_low = 0x03;
+	  mask_high = 0x04;
+	  shr_high = 2;
+	  break;
+
+	default:
+	  abort ();
+	}
+      *insnp |= ((((val & mask_high) >> shr_high) << shl_high)
+		 | ((val & mask_low) << shl_low));
+    }
+  else if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
+    {
+      *insnp |= (((long) val & ((1 << operand->bits) - 1))
+		 << (operand->shift + shift));
+
+      if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
+	*insnp |= (((long) val & ((1 << operand->bits) - 1))
+		   << (operand->shift + shift + operand->bits));
+    }
+  else
+    {
+      *extensionp |= (((long) val & ((1 << operand->bits) - 1))
+		      << (operand->shift + shift));
+
+      if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
+	*extensionp |= (((long) val & ((1 << operand->bits) - 1))
+			<< (operand->shift + shift + operand->bits));
+    }
+}
+
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   char *s;
   struct mn10300_opcode *opcode;
@@ -1717,8 +1604,8 @@ md_assemble (str)
 		    }
 		}
 	      input_line_pointer++;
-              mn10300_insert_operand (&insn, &extension, operand,
-                                      value, (char *) NULL, 0, 0);
+              mn10300_insert_operand (& insn, & extension, operand,
+                                      value, NULL, 0, 0);
 	      goto keep_going;
 
 	    }
@@ -1815,8 +1702,8 @@ md_assemble (str)
 		else
 		  extra_shift = 0;
 
-		mn10300_insert_operand (&insn, &extension, operand,
-					ex.X_add_number, (char *) NULL,
+		mn10300_insert_operand (& insn, & extension, operand,
+					ex.X_add_number, NULL,
 					0, extra_shift);
 
 		/* And note the register number in the register array.  */
@@ -1830,16 +1717,15 @@ md_assemble (str)
 		 then promote it (ie this opcode does not match).  */
 	      if (operand->flags
 		  & (MN10300_OPERAND_PROMOTE | MN10300_OPERAND_RELAX)
-		  && !check_operand (insn, operand, ex.X_add_number))
+		  && !check_operand (operand, ex.X_add_number))
 		{
 		  input_line_pointer = hold;
 		  str = hold;
 		  goto error;
 		}
 
-	      mn10300_insert_operand (&insn, &extension, operand,
-				      ex.X_add_number, (char *) NULL,
-				      0, 0);
+	      mn10300_insert_operand (& insn, & extension, operand,
+				      ex.X_add_number, NULL, 0, 0);
 	      break;
 
 	    default:
@@ -1870,7 +1756,6 @@ keep_going:
 
 	  while (*str == ' ' || *str == ',')
 	    ++str;
-
 	}
 
       /* Make sure we used all the operands!  */
@@ -2262,15 +2147,13 @@ keep_going:
    then it is done here.  */
 
 arelent *
-tc_gen_reloc (seg, fixp)
-     asection *seg ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
-  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc = xmalloc (sizeof (arelent));
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
-  if (reloc->howto == (reloc_howto_type *) NULL)
+  if (reloc->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("reloc %d not supported by object file format"),
@@ -2283,7 +2166,7 @@ tc_gen_reloc (seg, fixp)
       && S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
     {
       fixp->fx_offset -= S_GET_VALUE (fixp->fx_subsy);
-      fixp->fx_subsy = 0;
+      fixp->fx_subsy = NULL;
     }
 
   if (fixp->fx_addsy && fixp->fx_subsy)
@@ -2297,7 +2180,7 @@ tc_gen_reloc (seg, fixp)
 	 to a constant.  */
       if (S_GET_SEGMENT (fixp->fx_subsy) == seg)
 	{
-	  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+	  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
 	  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	  reloc->addend = (reloc->address - S_GET_VALUE (fixp->fx_subsy)
 			   + fixp->fx_offset);
@@ -2375,7 +2258,7 @@ tc_gen_reloc (seg, fixp)
     }
   else
     {
-      reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->addend = fixp->fx_offset;
     }
@@ -2383,9 +2266,7 @@ tc_gen_reloc (seg, fixp)
 }
 
 int
-md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp;
-     asection *seg;
+md_estimate_size_before_relax (fragS *fragp, asection *seg)
 {
   if (fragp->fr_subtype == 6
       && (!S_IS_DEFINED (fragp->fr_symbol)
@@ -2409,10 +2290,9 @@ md_estimate_size_before_relax (fragp, seg)
 }
 
 long
-md_pcrel_from (fixp)
-     fixS *fixp;
+md_pcrel_from (fixS *fixp)
 {
-  if (fixp->fx_addsy != (symbolS *) NULL && !S_IS_DEFINED (fixp->fx_addsy))
+  if (fixp->fx_addsy != NULL && !S_IS_DEFINED (fixp->fx_addsy))
     {
       /* The symbol is undefined.  Let the linker figure it out.  */
       return 0;
@@ -2421,10 +2301,7 @@ md_pcrel_from (fixp)
 }
 
 void
-md_apply_fix (fixP, valP, seg)
-     fixS * fixP;
-     valueT * valP;
-     segT seg;
+md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 {
   char * fixpos = fixP->fx_where + fixP->fx_frag->fr_literal;
   int size = 0;
@@ -2446,7 +2323,7 @@ md_apply_fix (fixP, valP, seg)
      *valuep, and must use fx_offset instead.  However, if the reloc
      is PC relative, we do want to use *valuep since it includes the
      result of md_pcrel_from.  */
-  if (fixP->fx_addsy != (symbolS *) NULL && ! fixP->fx_pcrel)
+  if (fixP->fx_addsy != NULL && ! fixP->fx_pcrel)
     value = fixP->fx_offset;
 
   /* If the fix is relative to a symbol which is not defined, or not
@@ -2498,197 +2375,36 @@ md_apply_fix (fixP, valP, seg)
    adjusted.  */
 
 bfd_boolean
-mn10300_fix_adjustable (fixp)
-     struct fix *fixp;
+mn10300_fix_adjustable (struct fix *fixp)
 {
   if (TC_FORCE_RELOCATION_LOCAL (fixp))
-    return 0;
+    return FALSE;
 
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return 0;
+    return FALSE;
 
   /* Do not adjust relocations involving symbols in code sections,
      because it breaks linker relaxations.  This could be fixed in the
      linker, but this fix is simpler, and it pretty much only affects
      object size a little bit.  */
   if (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_CODE)
-    return 0;
+    return FALSE;
 
   /* Likewise, do not adjust symbols that won't be merged, or debug
      symbols, because they too break relaxation.  We do want to adjust
      other mergable symbols, like .rodata, because code relaxations
      need section-relative symbols to properly relax them.  */
   if (! (S_GET_SEGMENT(fixp->fx_addsy)->flags & SEC_MERGE))
-    return 0;
+    return FALSE;
   if (strncmp (S_GET_SEGMENT (fixp->fx_addsy)->name, ".debug", 6) == 0)
-    return 0;
+    return FALSE;
 
-  return 1;
-}
-
-/* Insert an operand value into an instruction.  */
-
-static void
-mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
-     unsigned long *insnp;
-     unsigned long *extensionp;
-     const struct mn10300_operand *operand;
-     offsetT val;
-     char *file;
-     unsigned int line;
-     unsigned int shift;
-{
-  /* No need to check 32bit operands for a bit.  Note that
-     MN10300_OPERAND_SPLIT is an implicit 32bit operand.  */
-  if (operand->bits != 32
-      && (operand->flags & MN10300_OPERAND_SPLIT) == 0)
-    {
-      long min, max;
-      offsetT test;
-      int bits;
-
-      bits = operand->bits;
-      if (operand->flags & MN10300_OPERAND_24BIT)
-	bits = 24;
-
-      if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
-	{
-	  max = (1 << (bits - 1)) - 1;
-	  min = - (1 << (bits - 1));
-	}
-      else
-	{
-	  max = (1 << bits) - 1;
-	  min = 0;
-	}
-
-      test = val;
-
-      if (test < (offsetT) min || test > (offsetT) max)
-	as_warn_value_out_of_range (_("operand"), test, (offsetT) min, (offsetT) max, file, line);
-    }
-
-  if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
-    {
-      *insnp |= (val >> (32 - operand->bits)) & ((1 << operand->bits) - 1);
-      *extensionp |= ((val & ((1 << (32 - operand->bits)) - 1))
-		      << operand->shift);
-    }
-  else if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
-    {
-      *insnp |= (val >> (24 - operand->bits)) & ((1 << operand->bits) - 1);
-      *extensionp |= ((val & ((1 << (24 - operand->bits)) - 1))
-		      << operand->shift);
-    }
-  else if ((operand->flags & (MN10300_OPERAND_FSREG | MN10300_OPERAND_FDREG)))
-    {
-      /* See devo/opcodes/m10300-opc.c just before #define FSM0 for an
-         explanation of these variables.  Note that FMT-implied shifts
-        are not taken into account for FP registers.  */
-      unsigned long mask_low, mask_high;
-      int shl_low, shr_high, shl_high;
-
-      switch (operand->bits)
-	{
-	case 5:
-	  /* Handle regular FP registers.  */
-	  if (operand->shift >= 0)
-	    {
-	      /* This is an `m' register.  */
-	      shl_low = operand->shift;
-	      shl_high = 8 + (8 & shl_low) + (shl_low & 4) / 4;
-	    }
-	  else
-	    {
-	      /* This is an `n' register.  */
-	      shl_low = -operand->shift;
-	      shl_high = shl_low / 4;
-	    }
-
-	  mask_low = 0x0f;
-	  mask_high = 0x10;
-	  shr_high = 4;
-	  break;
-
-	case 3:
-	  /* Handle accumulators.  */
-	  shl_low = -operand->shift;
-	  shl_high = 0;
-	  mask_low = 0x03;
-	  mask_high = 0x04;
-	  shr_high = 2;
-	  break;
-
-	default:
-	  abort ();
-	}
-      *insnp |= ((((val & mask_high) >> shr_high) << shl_high)
-		 | ((val & mask_low) << shl_low));
-    }
-  else if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
-    {
-      *insnp |= (((long) val & ((1 << operand->bits) - 1))
-		 << (operand->shift + shift));
-
-      if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
-	*insnp |= (((long) val & ((1 << operand->bits) - 1))
-		   << (operand->shift + shift + operand->bits));
-    }
-  else
-    {
-      *extensionp |= (((long) val & ((1 << operand->bits) - 1))
-		      << (operand->shift + shift));
-
-      if ((operand->flags & MN10300_OPERAND_REPEATED) != 0)
-	*extensionp |= (((long) val & ((1 << operand->bits) - 1))
-			<< (operand->shift + shift + operand->bits));
-    }
-}
-
-static unsigned long
-check_operand (insn, operand, val)
-     unsigned long insn ATTRIBUTE_UNUSED;
-     const struct mn10300_operand *operand;
-     offsetT val;
-{
-  /* No need to check 32bit operands for a bit.  Note that
-     MN10300_OPERAND_SPLIT is an implicit 32bit operand.  */
-  if (operand->bits != 32
-      && (operand->flags & MN10300_OPERAND_SPLIT) == 0)
-    {
-      long min, max;
-      offsetT test;
-      int bits;
-
-      bits = operand->bits;
-      if (operand->flags & MN10300_OPERAND_24BIT)
-	bits = 24;
-
-      if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
-	{
-	  max = (1 << (bits - 1)) - 1;
-	  min = - (1 << (bits - 1));
-	}
-      else
-	{
-	  max = (1 << bits) - 1;
-	  min = 0;
-	}
-
-      test = val;
-
-      if (test < (offsetT) min || test > (offsetT) max)
-	return 0;
-      else
-	return 1;
-    }
-  return 1;
+  return TRUE;
 }
 
 static void
-set_arch_mach (mach)
-     int mach;
+set_arch_mach (int mach)
 {
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_mn10300, mach))
     as_warn (_("could not set architecture and machine"));
@@ -2696,11 +2412,8 @@ set_arch_mach (mach)
   current_machine = mach;
 }
 
-static inline char * mn10300_end_of_match PARAMS ((char *, char *));
-
 static inline char *
-mn10300_end_of_match (cont, what)
-     char *cont, *what;
+mn10300_end_of_match (char *cont, char *what)
 {
   int len = strlen (what);
 
@@ -2712,11 +2425,10 @@ mn10300_end_of_match (cont, what)
 }  
 
 int
-mn10300_parse_name (name, exprP, mode, nextcharP)
-     char const *name;
-     expressionS *exprP;
-     enum expr_mode mode;
-     char *nextcharP;
+mn10300_parse_name (char const *name,
+		    expressionS *exprP,
+		    enum expr_mode mode,
+		    char *nextcharP)
 {
   char *next = input_line_pointer;
   char *next_end;
@@ -2780,3 +2492,13 @@ mn10300_parse_name (name, exprP, mode, nextcharP)
 
   return 1;
 }
+
+/* The target specific pseudo-ops which we support.  */
+const pseudo_typeS md_pseudo_table[] =
+{
+  { "am30",	set_arch_mach,	AM30 },
+  { "am33",	set_arch_mach,	AM33 },
+  { "am33_2",	set_arch_mach,	AM33_2 },
+  { "mn10300",	set_arch_mach,	MN103 },
+  {NULL, 0, 0}
+};
