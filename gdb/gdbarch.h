@@ -672,6 +672,11 @@ typedef char * (gdbarch_static_transform_name_ftype) (char *name);
 extern char * gdbarch_static_transform_name (struct gdbarch *gdbarch, char *name);
 extern void set_gdbarch_static_transform_name (struct gdbarch *gdbarch, gdbarch_static_transform_name_ftype *static_transform_name);
 
+/* Set if the address in N_SO or N_FUN stabs may be zero. */
+
+extern int gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch);
+extern void set_gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch, int sofun_address_maybe_missing);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

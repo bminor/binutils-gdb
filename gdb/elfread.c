@@ -213,10 +213,8 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
   /* If filesym is nonzero, it points to a file symbol, but we haven't
      seen any section info for it yet.  */
   asymbol *filesym = 0;
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
   /* Name of filesym, as saved on the objfile_obstack.  */
   char *filesymname = obsavestring ("", 0, &objfile->objfile_obstack);
-#endif
   struct dbx_symfile_info *dbx = objfile->deprecated_sym_stab_info;
   int stripped = (bfd_get_symcount (objfile->obfd) == 0);
 
@@ -258,10 +256,8 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
 	  msym = record_minimal_symbol
 	    ((char *) sym->name, symaddr,
 	     mst_solib_trampoline, sym->section, objfile);
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	  if (msym != NULL)
 	    msym->filename = filesymname;
-#endif
 	  continue;
 	}
 
@@ -281,11 +277,9 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
 	      sectinfo = NULL;
 	    }
 	  filesym = sym;
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	  filesymname =
 	    obsavestring ((char *) filesym->name, strlen (filesym->name),
 			  &objfile->objfile_obstack);
-#endif
 	}
       else if (sym->flags & BSF_SECTION_SYM)
 	continue;
@@ -476,10 +470,8 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
 	      unsigned long size = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
 	      MSYMBOL_SIZE(msym) = size;
 	    }
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	  if (msym != NULL)
 	    msym->filename = filesymname;
-#endif
 	  gdbarch_elf_make_msymbol_special (current_gdbarch, sym, msym);
 	}
     }

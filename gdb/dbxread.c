@@ -1116,7 +1116,6 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
   do_cleanups (back_to);
 }
 
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 static CORE_ADDR
 find_stab_function_addr (char *namestring, char *filename,
 			 struct objfile *objfile)
@@ -1160,7 +1159,6 @@ find_stab_function_addr (char *namestring, char *filename,
 
   return msym == NULL ? 0 : SYMBOL_VALUE_ADDRESS (msym);
 }
-#endif /* SOFUN_ADDRESS_MAYBE_MISSING */
 
 static void
 function_outside_compilation_unit_complaint (const char *arg1)
@@ -1463,21 +1461,19 @@ read_dbx_symtab (struct objfile *objfile)
 
 	    prev_textlow_not_set = textlow_not_set;
 
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	    /* A zero value is probably an indication for the SunPRO 3.0
 	       compiler. end_psymtab explicitly tests for zero, so
 	       don't relocate it.  */
 
-	    if (nlist.n_value == 0)
+	    if (nlist.n_value == 0
+		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
 	      {
 		textlow_not_set = 1;
 		valu = 0;
 	      }
 	    else
 	      textlow_not_set = 0;
-#else
-	    textlow_not_set = 0;
-#endif
+
 	    past_first_source_file = 1;
 
 	    if (prev_so_symnum != symnum - 1)
@@ -1832,11 +1828,11 @@ read_dbx_symtab (struct objfile *objfile)
 				       SECT_OFF_TEXT (objfile));
 	    /* Kludges for ELF/STABS with Sun ACC */
 	    last_function_name = namestring;
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	    /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
 	       value for the bottom of the text seg in those cases. */
 	    if (nlist.n_value == ANOFFSET (objfile->section_offsets, 
-					   SECT_OFF_TEXT (objfile)))
+					   SECT_OFF_TEXT (objfile))
+		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
 	      {
 		CORE_ADDR minsym_valu = 
 		  find_stab_function_addr (namestring, 
@@ -1850,12 +1846,12 @@ read_dbx_symtab (struct objfile *objfile)
 		if (minsym_valu != 0)
 		  nlist.n_value = minsym_valu;
 	      }
-	    if (pst && textlow_not_set)
+	    if (pst && textlow_not_set
+		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
 	      {
 		pst->textlow = nlist.n_value;
 		textlow_not_set = 0;
 	      }
-#endif
 	    /* End kludge.  */
 
 	    /* Keep track of the start of the last function so we
@@ -1900,11 +1896,11 @@ read_dbx_symtab (struct objfile *objfile)
 				       SECT_OFF_TEXT (objfile));
 	    /* Kludges for ELF/STABS with Sun ACC */
 	    last_function_name = namestring;
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	    /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
 	       value for the bottom of the text seg in those cases. */
 	    if (nlist.n_value == ANOFFSET (objfile->section_offsets, 
-					   SECT_OFF_TEXT (objfile)))
+					   SECT_OFF_TEXT (objfile))
+		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
 	      {
 		CORE_ADDR minsym_valu = 
 		  find_stab_function_addr (namestring, 
@@ -1918,12 +1914,12 @@ read_dbx_symtab (struct objfile *objfile)
 		if (minsym_valu != 0)
 		  nlist.n_value = minsym_valu;
 	      }
-	    if (pst && textlow_not_set)
+	    if (pst && textlow_not_set
+		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
 	      {
 		pst->textlow = nlist.n_value;
 		textlow_not_set = 0;
 	      }
-#endif
 	    /* End kludge.  */
 
 	    /* Keep track of the start of the last function so we
@@ -2049,12 +2045,11 @@ read_dbx_symtab (struct objfile *objfile)
 	  continue;
 
 	  case N_ENDM:
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	  /* Solaris 2 end of module, finish current partial symbol table.
 	     end_psymtab will set pst->texthigh to the proper value, which
 	     is necessary if a module compiled without debugging info
 	     follows this module.  */
-	  if (pst)
+	  if (pst && gdbarch_sofun_address_maybe_missing (current_gdbarch))
 	  {
 	    end_psymtab (pst, psymtab_include_list, includes_used,
 			 symnum * symbol_size,
@@ -2064,7 +2059,6 @@ read_dbx_symtab (struct objfile *objfile)
 	    includes_used = 0;
 	    dependencies_used = 0;
 	  }
-#endif
 	  continue;
 
 	  case N_RBRAC:
@@ -2186,7 +2180,6 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
     LDSYMLEN (pst) = capping_symbol_offset - LDSYMOFF (pst);
   pst->texthigh = capping_text;
 
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
   /* Under Solaris, the N_SO symbols always have a value of 0,
      instead of the usual address of the .o file.  Therefore,
      we have to do some tricks to fill in texthigh and textlow.
@@ -2202,7 +2195,8 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
      a reliable texthigh by taking the address plus size of the
      last function in the file.  */
 
-  if (pst->texthigh == 0 && last_function_name)
+  if (pst->texthigh == 0 && last_function_name
+      && gdbarch_sofun_address_maybe_missing (current_gdbarch))
     {
       char *p;
       int n;
@@ -2233,8 +2227,10 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
       last_function_name = NULL;
     }
 
+  if (!gdbarch_sofun_address_maybe_missing (current_gdbarch))
+    ;
   /* this test will be true if the last .o file is only data */
-  if (textlow_not_set)
+  else if (textlow_not_set)
     pst->textlow = pst->texthigh;
   else
     {
@@ -2259,7 +2255,6 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
     }
 
   /* End of kludge for patching Solaris textlow and texthigh.  */
-#endif /* SOFUN_ADDRESS_MAYBE_MISSING.  */
 
   pst->n_global_syms =
     objfile->global_psymbols.next - (objfile->global_psymbols.list + pst->globals_offset);
@@ -3081,12 +3076,12 @@ no enclosing block"));
 	    case 'F':
 	      function_stab_type = type;
 
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	      /* Deal with the SunPRO 3.0 compiler which omits the
 	         address from N_FUN symbols.  */
 	      if (type == N_FUN
 		  && valu == ANOFFSET (section_offsets,
-				       SECT_OFF_TEXT (objfile)))
+				       SECT_OFF_TEXT (objfile))
+		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
 		{
 		  CORE_ADDR minsym_valu = 
 		    find_stab_function_addr (name, last_source_file, objfile);
@@ -3100,7 +3095,6 @@ no enclosing block"));
 		  if (minsym_valu != 0)
 		    valu = minsym_valu;
 		}
-#endif
 
 	      if (block_address_function_relative)
 		/* For Solaris 2 compilers, the block addresses and

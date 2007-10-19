@@ -2844,21 +2844,20 @@ parse_partial_symbols (struct objfile *objfile)
 
 		      prev_textlow_not_set = textlow_not_set;
 
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 		      /* A zero value is probably an indication for the SunPRO 3.0
 			 compiler. end_psymtab explicitly tests for zero, so
 			 don't relocate it.  */
 
-		      if (sh.value == 0)
+		      if (sh.value == 0
+			  && gdbarch_sofun_address_maybe_missing
+			      (current_gdbarch))
 			{
 			  textlow_not_set = 1;
 			  valu = 0;
 			}
 		      else
 			textlow_not_set = 0;
-#else
-		      textlow_not_set = 0;
-#endif
+
 		      past_first_source_file = 1;
 
 		      if (prev_so_symnum != symnum - 1)
@@ -3225,19 +3224,19 @@ parse_partial_symbols (struct objfile *objfile)
 		    continue;
 
 		  case N_ENDM:
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
 		    /* Solaris 2 end of module, finish current partial
 		       symbol table.  END_PSYMTAB will set
 		       pst->texthigh to the proper value, which is
 		       necessary if a module compiled without
 		       debugging info follows this module.  */
-		    if (pst)
+		    if (pst
+			&& gdbarch_sofun_address_maybe_missing
+			     (current_gdbarch))
 		      {
 			pst = (struct partial_symtab *) 0;
 			includes_used = 0;
 			dependencies_used = 0;
 		      }
-#endif
 		    continue;
 
 		  case N_RBRAC:

@@ -109,6 +109,10 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Solaris is SVR4-based.  */
   i386_svr4_init_abi (info, gdbarch);
 
+  /* The SunPRO compiler puts out 0 instead of the address in N_SO symbols,
+     and for SunPRO 3.0, N_FUN symbols too.  */
+  set_gdbarch_sofun_address_maybe_missing (gdbarch, 1);
+
   /* Handle SunPRO encoding of static symbols.  */
   set_gdbarch_static_transform_name (gdbarch, i386_sol2_static_transform_name);
 

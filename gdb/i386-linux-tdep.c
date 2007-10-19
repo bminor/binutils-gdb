@@ -429,6 +429,10 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_reg_offset = i386_linux_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (i386_linux_sc_reg_offset);
 
+  /* N_FUN symbols in shared libaries have 0 for their values and need
+     to be relocated. */
+  set_gdbarch_sofun_address_maybe_missing (gdbarch, 1);
+
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_solib_svr4_fetch_link_map_offsets

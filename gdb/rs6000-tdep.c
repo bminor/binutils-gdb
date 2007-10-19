@@ -3371,6 +3371,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);
 
+  /* The value of symbols of type N_SO and N_FUN maybe null when
+     it shouldn't be. */
+  set_gdbarch_sofun_address_maybe_missing (gdbarch, 1);
+
   /* Handles single stepping of atomic sequences.  */
   set_gdbarch_software_single_step (gdbarch, deal_with_atomic_sequence);
   

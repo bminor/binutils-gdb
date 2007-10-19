@@ -345,10 +345,8 @@ struct minimal_symbol
 
   unsigned long size;
 
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
   /* Which source file is this symbol in?  Only relevant for mst_file_*.  */
   char *filename;
-#endif
 
   /* Classification type for this minimal symbol.  */
 

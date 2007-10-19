@@ -1,5 +1,45 @@
 2007-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (sofun_address_maybe_missing): New gdbarch variable.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* dbxread.c (find_stab_function_addr): Define unconditionally.
+	(read_dbx_symtab): Use gdbarch_sofun_address_maybe_missing
+	instead of SOFUN_ADDRESS_MAYBE_MISSING.
+	(end_psymtab): Likewise.
+	(process_one_symbol): Likewise.
+	* mdebugread.c (parse_partial_symbols): Likewise.
+
+	* symtab.h (struct minimal_symbol): Always define "filename" member.
+	* elfread.c (elf_symtab_read): Use msym->filename unconditionally.
+	* minsyms.c (lookup_minimal_symbol): Likewise.
+	* symmisc.c (dump_msymbols): Likewise.
+
+	* config/i386/i386sol2.mt (DEPRECATED_TM_FILE): Remove.
+	* config/i386/linux.mt (DEPRECATED_TM_FILE): Remove.
+	* config/i386/tm-i386sol2.h: Remove file.
+	* config/i386/tm-linux.h: Remove file.
+	* i386-linux-tdep.c (i386_linux_init_abi): Add call to
+	set_gdbarch_sofun_address_maybe_missing.
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Likewise.
+
+	* config/powerpc/linux.mt (DEPRECATED_TM_FILE): Remove.
+	* config/powerpc/nbsd.mt (DEPRECATED_TM_FILE): Remove.
+	* config/powerpc/obsd.mt (DEPRECATED_TM_FILE): Remove.
+	* config/powerpc/ppc-eabi.mt (DEPRECATED_TM_FILE): Remove.
+	* config/powerpc/ppc-sim.mt (DEPRECATED_TM_FILE): Remove.
+	* config/powerpc/tm-ppc-eabi.h: Remove file.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Add call to
+	set_gdbarch_sofun_address_maybe_missing.
+
+	* config/sparc/sol2-64.mt (DEPRECATED_TM_FILE): Remove.
+	* config/sparc/sol2.mt (DEPRECATED_TM_FILE): Remove.
+	* config/sparc/tm-sol2.h: Remove file.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Add call to
+	set_gdbarch_sofun_address_maybe_missing.
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Likewise.
+
+2007-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (static_transform_name): New gdbarch callback.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* dbxread.c (read_dbx_symtab): Use gdbarch_static_transform_name

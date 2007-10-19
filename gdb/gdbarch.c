@@ -228,6 +228,7 @@ struct gdbarch
   gdbarch_overlay_update_ftype *overlay_update;
   gdbarch_core_read_description_ftype *core_read_description;
   gdbarch_static_transform_name_ftype *static_transform_name;
+  int sofun_address_maybe_missing;
 };
 
 
@@ -348,6 +349,7 @@ struct gdbarch startup_gdbarch =
   0,  /* overlay_update */
   0,  /* core_read_description */
   0,  /* static_transform_name */
+  0,  /* sofun_address_maybe_missing */
   /* startup_gdbarch() */
 };
 
@@ -593,6 +595,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of overlay_update, has predicate */
   /* Skip verify of core_read_description, has predicate */
   /* Skip verify of static_transform_name, has predicate */
+  /* Skip verify of sofun_address_maybe_missing, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -977,6 +980,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: software_single_step = <0x%lx>\n",
                       (long) current_gdbarch->software_single_step);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: sofun_address_maybe_missing = %s\n",
+                      paddr_d (current_gdbarch->sofun_address_maybe_missing));
   fprintf_unfiltered (file,
                       "gdbarch_dump: sp_regnum = %s\n",
                       paddr_d (current_gdbarch->sp_regnum));
@@ -2962,6 +2968,23 @@ set_gdbarch_static_transform_name (struct gdbarch *gdbarch,
                                    gdbarch_static_transform_name_ftype static_transform_name)
 {
   gdbarch->static_transform_name = static_transform_name;
+}
+
+int
+gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of sofun_address_maybe_missing, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_sofun_address_maybe_missing called\n");
+  return gdbarch->sofun_address_maybe_missing;
+}
+
+void
+set_gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch,
+                                         int sofun_address_maybe_missing)
+{
+  gdbarch->sofun_address_maybe_missing = sofun_address_maybe_missing;
 }
 
 

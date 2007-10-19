@@ -356,10 +356,8 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	{
 	  fprintf_filtered (outfile, "  %s", SYMBOL_DEMANGLED_NAME (msymbol));
 	}
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
       if (msymbol->filename)
 	fprintf_filtered (outfile, "  %s", msymbol->filename);
-#endif
       fputs_filtered ("\n", outfile);
     }
   if (objfile->minimal_symbol_count != index)

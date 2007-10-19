@@ -1,3 +1,10 @@
+2007-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.texi (Target Conditionals): Remove documentation of
+	SOFUN_ADDRESS_MAYBE_MISSING, replaced by ...
+	(Compiler Characteristics): ... documentation of
+	set_gdbarch_sofun_address_maybe_missing.
+
 2007-10-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (Target Conditionals): Use
