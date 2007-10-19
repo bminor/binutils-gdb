@@ -2361,6 +2361,12 @@ ENUM
   BFD_RELOC_MN10300_RELATIVE
 ENUMDOC
   Adjust by program base.
+ENUM
+  BFD_RELOC_MN10300_SYM_DIFF
+ENUMDOC
+  Together with another reloc targeted at the same location,
+  allows for a value that is the difference of two symbols
+  in the same section.
 COMMENT
 
 ENUM

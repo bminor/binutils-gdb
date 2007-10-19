@@ -446,6 +446,30 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+
+  EMPTY_HOWTO (24),
+  EMPTY_HOWTO (25),
+  EMPTY_HOWTO (26),
+  EMPTY_HOWTO (27),
+  EMPTY_HOWTO (28),
+  EMPTY_HOWTO (29),
+  EMPTY_HOWTO (30),
+  EMPTY_HOWTO (31),
+  EMPTY_HOWTO (32),
+  
+  HOWTO (R_MN10300_SYM_DIFF,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 NULL, 			/* special handler.  */
+	 "R_MN10300_SYM_DIFF",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE)			/* pcrel_offset */
 };
 
 struct mn10300_reloc_map
@@ -480,6 +504,7 @@ static const struct mn10300_reloc_map mn10300_reloc_map[] =
   { BFD_RELOC_MN10300_GLOB_DAT, R_MN10300_GLOB_DAT },
   { BFD_RELOC_MN10300_JMP_SLOT, R_MN10300_JMP_SLOT },
   { BFD_RELOC_MN10300_RELATIVE, R_MN10300_RELATIVE },
+  { BFD_RELOC_MN10300_SYM_DIFF, R_MN10300_SYM_DIFF }
 };
 
 /* Create the GOT section.  */
@@ -619,6 +644,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 			  asection *sec,
 			  const Elf_Internal_Rela *relocs)
 {
+  bfd_boolean sym_diff_reloc_seen;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
@@ -642,6 +668,7 @@ mn10300_elf_check_relocs (bfd *abfd,
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
   rel_end = relocs + sec->reloc_count;
+  sym_diff_reloc_seen = FALSE;
 
   for (rel = relocs; rel < rel_end; rel++)
     {
@@ -814,53 +841,98 @@ mn10300_elf_check_relocs (bfd *abfd,
 	    h->non_got_ref = 1;
 	  break;
 
+	case R_MN10300_SYM_DIFF:
+	  sym_diff_reloc_seen = TRUE;
+	  break;
+
 	case R_MN10300_32:
 	  if (h != NULL)
 	    h->non_got_ref = 1;
 
-	  /* If we are creating a shared library, then we need to copy
-	     the reloc into the shared library.  */
+	  /* If we are creating a shared library, then we
+	     need to copy the reloc into the shared library.  */
 	  if (info->shared
-	      && (sec->flags & SEC_ALLOC) != 0)
+	      && (sec->flags & SEC_ALLOC) != 0
+	      /* Do not generate a dynamic reloc for a
+		 reloc associated with a SYM_DIFF operation.  */
+	      && ! sym_diff_reloc_seen)
 	    {
-	      /* When creating a shared object, we must copy these
-		 reloc types into the output file.  We create a reloc
-		 section in dynobj and make room for this reloc.  */
-	      if (sreloc == NULL)
+	      asection * sym_section = NULL;
+
+	      /* Find the section containing the
+		 symbol involved in the relocation.  */
+	      if (h == NULL)
 		{
-		  const char * name;
+		  Elf_Internal_Sym * isymbuf;
+		  Elf_Internal_Sym * isym;
 
-		  name = (bfd_elf_string_from_elf_section
-			  (abfd,
-			   elf_elfheader (abfd)->e_shstrndx,
-			   elf_section_data (sec)->rel_hdr.sh_name));
-		  if (name == NULL)
-		    return FALSE;
-
-		  BFD_ASSERT (CONST_STRNEQ (name, ".rela")
-			      && streq (bfd_get_section_name (abfd, sec), name + 5));
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
-		  if (sreloc == NULL)
+		  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+		  if (isymbuf == NULL)
+		    isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+						    symtab_hdr->sh_info, 0,
+						    NULL, NULL, NULL);
+		  if (isymbuf)
 		    {
-		      flagword flags;
-
-		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-		      if ((sec->flags & SEC_ALLOC) != 0)
-			flags |= SEC_ALLOC | SEC_LOAD;
-		      sreloc = bfd_make_section_with_flags (dynobj, name, flags);
-		      if (sreloc == NULL
-			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-			return FALSE;
+		      isym = isymbuf + r_symndx;
+		      /* All we care about is whether this local symbol is absolute.  */
+		      if (isym->st_shndx == SHN_ABS)
+			sym_section = bfd_abs_section_ptr;
 		    }
 		}
+	      else
+		{
+		  if (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak)
+		    sym_section = h->root.u.def.section;
+		}
 
-	      sreloc->size += sizeof (Elf32_External_Rela);
+	      /* If the symbol is absolute then the relocation can
+		 be resolved during linking and there is no need for
+		 a dynamic reloc.  */
+	      if (sym_section != bfd_abs_section_ptr)
+		{
+		  /* When creating a shared object, we must copy these
+		     reloc types into the output file.  We create a reloc
+		     section in dynobj and make room for this reloc.  */
+		  if (sreloc == NULL)
+		    {
+		      const char * name;
+
+		      name = (bfd_elf_string_from_elf_section
+			      (abfd,
+			       elf_elfheader (abfd)->e_shstrndx,
+			       elf_section_data (sec)->rel_hdr.sh_name));
+		      if (name == NULL)
+			return FALSE;
+
+		      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
+				  && streq (bfd_get_section_name (abfd, sec), name + 5));
+
+		      sreloc = bfd_get_section_by_name (dynobj, name);
+		      if (sreloc == NULL)
+			{
+			  flagword flags;
+
+			  flags = (SEC_HAS_CONTENTS | SEC_READONLY
+			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+			  if ((sec->flags & SEC_ALLOC) != 0)
+			    flags |= SEC_ALLOC | SEC_LOAD;
+			  sreloc = bfd_make_section_with_flags (dynobj, name, flags);
+			  if (sreloc == NULL
+			      || ! bfd_set_section_alignment (dynobj, sreloc, 2))
+			    return FALSE;
+			}
+		    }
+
+		  sreloc->size += sizeof (Elf32_External_Rela);
+		}
 	    }
 
 	  break;
 	}
+
+      if (ELF32_R_TYPE (rel->r_info) != R_MN10300_SYM_DIFF)
+	sym_diff_reloc_seen = FALSE;
     }
 
   return TRUE;
@@ -904,6 +976,9 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 				 asection *sym_sec ATTRIBUTE_UNUSED,
 				 int is_local ATTRIBUTE_UNUSED)
 {
+  static asection *  sym_diff_section;
+  static bfd_vma     sym_diff_value;
+  bfd_boolean is_sym_diff_reloc;
   unsigned long r_type = howto->type;
   bfd_byte * hit_data = contents + offset;
   bfd *      dynobj;
@@ -937,13 +1012,54 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 	return bfd_reloc_dangerous;
     }
 
+  is_sym_diff_reloc = FALSE;
+  if (sym_diff_section != NULL)
+    {
+      BFD_ASSERT (sym_diff_section == input_section);
+
+      switch (r_type)
+	{
+	case R_MN10300_32:
+	case R_MN10300_24:
+	case R_MN10300_16:
+	case R_MN10300_8:
+	  value -= sym_diff_value;
+	  sym_diff_section = NULL;
+	  is_sym_diff_reloc = TRUE;
+	  break;
+
+	default:
+	  sym_diff_section = NULL;
+	  break;
+	}
+    }
+
   switch (r_type)
     {
+    case R_MN10300_SYM_DIFF:
+      BFD_ASSERT (addend == 0);
+      /* Cache the input section and value.
+	 The offset is unreliable, since relaxation may
+	 have reduced the following reloc's offset.  */
+      sym_diff_section = input_section;
+      sym_diff_value = value;
+      return bfd_reloc_ok;
+
     case R_MN10300_NONE:
       return bfd_reloc_ok;
 
     case R_MN10300_32:
       if (info->shared
+	  /* Do not generate relocs when an R_MN10300_32 has been used
+	     with an R_MN10300_SYM_DIFF to compute a difference of two
+	     symbols.  */
+	  && is_sym_diff_reloc == FALSE
+	  /* Also, do not generate a reloc when the symbol associated
+	     with the R_MN10300_32 reloc is absolute - there is no
+	     need for a run time computation in this case.  */
+	  && sym_sec != bfd_abs_section_ptr
+	  /* If the section is not going to be allocated at load time
+	     then there is no need to generate relocs for it.  */
 	  && (input_section->flags & SEC_ALLOC) != 0)
 	{
 	  Elf_Internal_Rela outrel;
@@ -1370,6 +1486,10 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 		      && elf_hash_table (info)->dynamic_sections_created
 		      && !SYMBOL_REFERENCES_LOCAL (info, hh))
 		  || (r_type == R_MN10300_32
+		      /* _32 relocs in executables force _COPY relocs,
+			 such that the address of the symbol ends up
+			 being local.  */
+		      && !info->executable		      
 		      && !SYMBOL_REFERENCES_LOCAL (info, hh)
 		      && ((input_section->flags & SEC_ALLOC) != 0
 			  /* DWARF will emit R_MN10300_32 relocations
@@ -1551,7 +1671,7 @@ static bfd_boolean
 elf32_mn10300_count_hash_table_entries (struct bfd_hash_entry *gen_entry ATTRIBUTE_UNUSED,
 					void * in_args)
 {
-  int *count = (int *)in_args;
+  int *count = (int *) in_args;
 
   (*count) ++;
   return TRUE;
@@ -1576,9 +1696,9 @@ static int
 sort_by_value (const void *va, const void *vb)
 {
   struct elf32_mn10300_link_hash_entry *a
-    = *(struct elf32_mn10300_link_hash_entry **)va;
+    = *(struct elf32_mn10300_link_hash_entry **) va;
   struct elf32_mn10300_link_hash_entry *b
-    = *(struct elf32_mn10300_link_hash_entry **)vb;
+    = *(struct elf32_mn10300_link_hash_entry **) vb;
 
   return a->value - b->value;
 }
@@ -1735,8 +1855,14 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
     {
       if (isym->st_shndx == sec_shndx
 	  && isym->st_value > addr
-	  && isym->st_value < toaddr)
+	  && isym->st_value <= toaddr)
 	isym->st_value -= count;
+      /* Adjust the function symbol's size as well.  */
+      else if (isym->st_shndx == sec_shndx
+	       && ELF_ST_TYPE (isym->st_info) == STT_FUNC
+	       && isym->st_value + isym->st_size > addr
+	       && isym->st_value + isym->st_size <= toaddr)
+	isym->st_size -= count;
     }
 
   /* Now adjust the global symbols defined in this section.  */
@@ -1752,8 +1878,15 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
 	   || sym_hash->root.type == bfd_link_hash_defweak)
 	  && sym_hash->root.u.def.section == sec
 	  && sym_hash->root.u.def.value > addr
-	  && sym_hash->root.u.def.value < toaddr)
+	  && sym_hash->root.u.def.value <= toaddr)
 	sym_hash->root.u.def.value -= count;
+      /* Adjust the function symbol's size as well.  */
+      else if (sym_hash->root.type == bfd_link_hash_defined
+	       && sym_hash->root.u.def.section == sec
+	       && sym_hash->type == STT_FUNC
+	       && sym_hash->root.u.def.value + sym_hash->size > addr
+	       && sym_hash->root.u.def.value + sym_hash->size <= toaddr)
+	sym_hash->size -= count;
     }
 
   return TRUE;
@@ -1981,7 +2114,7 @@ mn10300_elf_relax_section (bfd *abfd,
 			     local symbol in the global hash table.  */
 			  amt = strlen (sym_name) + 10;
 			  new_name = bfd_malloc (amt);
-			  if (new_name == 0)
+			  if (new_name == NULL)
 			    goto error_return;
 
 			  sprintf (new_name, "%s_%08x", sym_name, sym_sec->id);
@@ -2090,7 +2223,7 @@ mn10300_elf_relax_section (bfd *abfd,
 			     local symbol in the global hash table.  */
 			  amt = strlen (sym_name) + 10;
 			  new_name = bfd_malloc (amt);
-			  if (new_name == 0)
+			  if (new_name == NULL)
 			    goto error_return;
 
 			  sprintf (new_name, "%s_%08x", sym_name, sym_sec->id);
@@ -2302,7 +2435,7 @@ mn10300_elf_relax_section (bfd *abfd,
 		     local symbol in the global hash table.  */
 		  amt = strlen (sym_name) + 10;
 		  new_name = bfd_malloc (amt);
-		  if (new_name == 0)
+		  if (new_name == NULL)
 		    goto error_return;
 		  sprintf (new_name, "%s_%08x", sym_name, sym_sec->id);
 		  sym_name = new_name;
@@ -2514,7 +2647,6 @@ mn10300_elf_relax_section (bfd *abfd,
 	  asection *sym_sec = NULL;
 	  const char *sym_name;
 	  char *new_name;
-	  bfd_vma saved_addend;
 
 	  /* A local symbol.  */
 	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
@@ -2535,22 +2667,22 @@ mn10300_elf_relax_section (bfd *abfd,
 	      && ELF_ST_TYPE (isym->st_info) == STT_SECTION
 	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
 	    {
+	      bfd_vma saved_addend;
+
 	      saved_addend = irel->r_addend;
-	      symval = _bfd_elf_rela_local_sym (abfd, isym, &sym_sec, irel);
+	      symval = _bfd_elf_rela_local_sym (abfd, isym, & sym_sec, irel);
 	      symval += irel->r_addend;
 	      irel->r_addend = saved_addend;
 	    }
 	  else
-	    {
-	      symval = (isym->st_value
-			+ sym_sec->output_section->vma
-			+ sym_sec->output_offset);
-	    }
+	    symval = (isym->st_value
+		      + sym_sec->output_section->vma
+		      + sym_sec->output_offset);
 
 	  /* Tack on an ID so we can uniquely identify this
 	     local symbol in the global hash table.  */
 	  new_name = bfd_malloc ((bfd_size_type) strlen (sym_name) + 10);
-	  if (new_name == 0)
+	  if (new_name == NULL)
 	    goto error_return;
 	  sprintf (new_name, "%s_%08x", sym_name, sym_sec->id);
 	  sym_name = new_name;
@@ -2574,6 +2706,10 @@ mn10300_elf_relax_section (bfd *abfd,
 	    /* This appears to be a reference to an undefined
 	       symbol.  Just ignore it--it will be caught by the
 	       regular reloc processing.  */
+	    continue;
+
+	  /* Check for a reference to a discarded symbol and ignore it.  */
+	  if (h->root.root.u.def.section->output_section == NULL)
 	    continue;
 
 	  symval = (h->root.root.u.def.value
@@ -3284,7 +3420,7 @@ mn10300_elf_relax_section (bfd *abfd,
 		  case 0x93:
 		    /* sp-based offsets are zero-extended.  */
 		    if (code >= 0x90 && code <= 0x93
-			&& (long)value < 0)
+			&& (long) value < 0)
 		      continue;
 
 		    /* Note that we've changed the relocation contents, etc.  */
@@ -3341,7 +3477,7 @@ mn10300_elf_relax_section (bfd *abfd,
 
 		    /* mov imm16, an zero-extends the immediate.  */
 		    if (code == 0xdc
-			&& (long)value < 0)
+			&& (long) value < 0)
 		      continue;
 
 		    /* Note that we've changed the relocation contents, etc.  */
@@ -3422,12 +3558,12 @@ mn10300_elf_relax_section (bfd *abfd,
 		  case 0xe3:
 		    /* cmp imm16, an zero-extends the immediate.  */
 		    if (code == 0xdc
-			&& (long)value < 0)
+			&& (long) value < 0)
 		      continue;
 
 		    /* So do sp-based offsets.  */
 		    if (code >= 0xb0 && code <= 0xb3
-			&& (long)value < 0)
+			&& (long) value < 0)
 		      continue;
 
 		    /* Note that we've changed the relocation contents, etc.  */

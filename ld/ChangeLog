@@ -1,3 +1,7 @@
+2007-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Add support for am34-linux-gnu target.
+
 2007-10-17  Zack Weinberg  <zack@codesourcery.com>
 
 	* ldlang.c (lang_check_section_addresses): Also report size of

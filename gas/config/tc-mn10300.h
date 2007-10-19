@@ -98,13 +98,21 @@ void mn10300_cons_fix_new PARAMS ((fragS *, int, int, expressionS *));
 
 #define md_number_to_chars number_to_chars_littleendian
 
-/* Don't bother to adjust relocs.  */
-/* #define tc_fix_adjustable(FIX) 0 */
 #define tc_fix_adjustable(FIX) mn10300_fix_adjustable (FIX)
-extern bfd_boolean mn10300_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean mn10300_fix_adjustable (struct fix *);
 
 /* We do relaxing in the assembler as well as the linker.  */
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 1
+
+/* The difference between same-section symbols may be affected by linker
+   relaxation, so do not resolve such expressions in the assembler.  */
+#define md_allow_local_subtract(l,r,s) mn10300_allow_local_subtract (l, r, s)
+extern bfd_boolean mn10300_allow_local_subtract (expressionS *, expressionS *, segT);
+
+#define RELOC_EXPANSION_POSSIBLE
+#define MAX_RELOC_EXPANSION 2
+
+#define TC_FRAG_TYPE bfd_boolean

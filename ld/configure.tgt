@@ -400,6 +400,7 @@ mips*-*-sysv4*)         targ_emul=elf32btsmip
 mmix-*-*)		targ_emul=mmo
 			targ_extra_emuls=elf64mmix
 			;;
+am34-*-linux*)		targ_emul=elf32am33lin ;;
 am33_2.0-*-linux*)	targ_emul=elf32am33lin ;;
 mn10200-*-*)		targ_emul=mn10200 ;;
 mn10300-*-*)		targ_emul=mn10300

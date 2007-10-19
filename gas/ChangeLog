@@ -1,3 +1,24 @@
+2007-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* expr.c (expr): Test md_allow_local_subtract (if defined) before
+	allowing the evaluation of an expression involving two symbols
+	defined in the same section.
+	* doc/internals.texi (md_allow_local_subtract): Document the new
+	macro.
+	* config/tc-mn10300.h (md_allow_local_subtract): Define.
+	(RELAX_EXPANSION_POSSIBLE): Define.
+	(MAX_RELOC_EXPANSION): Define.
+	(TC_FRAG_TYPE): Define.
+	* config/tc-mn10300.c (md_assemble): Mark fragments as containing code.
+	(tc_gen_reloc): Return an array of relocs.  If necessary generate
+	two relocs to handle an expressions involving the difference of
+	two symbols.
+	(mn10300_fix_adjustable): Do not test TC_FORCE_RELOCATION_LOCAL
+	when then fixup is not pc-relative.
+	(mn10300_allow_local_subtract): New function.  Determine when it
+	is safe to compute the difference between two symbols at assemble
+	time.
+
 2007-10-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_parse_name): Skip leading '%'.

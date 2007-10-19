@@ -1046,6 +1046,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MN10300_GLOB_DAT",
   "BFD_RELOC_MN10300_JMP_SLOT",
   "BFD_RELOC_MN10300_RELATIVE",
+  "BFD_RELOC_MN10300_SYM_DIFF",
 
   "BFD_RELOC_386_GOT32",
   "BFD_RELOC_386_PLT32",

@@ -1738,6 +1738,9 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	       && right.X_op == O_symbol
 	       && resultP->X_op == O_symbol
 	       && retval == rightseg
+#ifdef md_allow_local_subtract
+	       && md_allow_local_subtract (resultP, & right, rightseg)
+#endif
 	       && (SEG_NORMAL (rightseg)
 		   || right.X_add_symbol == resultP->X_add_symbol)
 	       && frag_offset_fixed_p (symbol_get_frag (resultP->X_add_symbol),

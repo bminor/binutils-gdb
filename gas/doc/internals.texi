@@ -1535,6 +1535,18 @@ The function should return the debug format that is preferred by the CPU
 backend.  This format will be used when generating assembler specific debug
 information.
 
+@item md_allow_local_subtract (@var{left}, @var{right}, @var{section})
+If defined, GAS will call this macro when evaluating an expression which is the
+difference of two symbols defined in the same section.  It takes three
+arguments: @code{expressioS * @var{left}} which is the symbolic expression on
+the left hand side of the subtraction operation, @code{expressionS *
+@var{right}} which is the symbolic expression on the right hand side of the
+subtraction, and @code{segT @var{section}} which is the section containing the two
+symbols.  The macro should return a non-zero value if the expression should be
+evaluated.  Targets which implement link time relaxation which may change the
+position of the two symbols relative to each other should ensure that this
+macro returns zero in situations where this can occur.
+
 @end table
 
 @node Object format backend

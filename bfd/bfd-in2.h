@@ -2774,6 +2774,11 @@ in the instruction.  */
 /* Adjust by program base.  */
   BFD_RELOC_MN10300_RELATIVE,
 
+/* Together with another reloc targeted at the same location,
+allows for a value that is the difference of two symbols
+in the same section.  */
+  BFD_RELOC_MN10300_SYM_DIFF,
+
 
 /* i386/elf relocations  */
   BFD_RELOC_386_GOT32,

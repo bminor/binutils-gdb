@@ -71,6 +71,7 @@ esac
 targ_cpu=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
 case "${targ_cpu}" in
 alpha*)		 targ_archs=bfd_alpha_arch ;;
+am34*|am33_2.0*) targ_archs=bfd_mn10300_arch ;;
 arm*)		 targ_archs=bfd_arm_arch ;;
 bfin*)		 targ_archs=bfd_bfin_arch ;;
 c30*)		 targ_archs=bfd_tic30_arch ;;
@@ -107,7 +108,6 @@ xscale*)	 targ_archs=bfd_arm_arch ;;
 xtensa*)	 targ_archs=bfd_xtensa_arch ;;
 z80|r800)	 targ_archs=bfd_z80_arch ;;
 z8k*)		 targ_archs=bfd_z8k_arch ;;
-am33_2.0)	 targ_archs=bfd_mn10300_arch ;;
 *)		 targ_archs=bfd_${targ_cpu}_arch ;;
 esac
 
@@ -197,9 +197,10 @@ case "${targ}" in
     ;;
 #endif /* BFD64 */
 
-  am33_2.0-*-linux*)
+  am34-*-linux* | am33_2.0-*-linux*)
     targ_defvec=bfd_elf32_am33lin_vec
     ;;
+
   arc-*-elf*)
     targ_defvec=bfd_elf32_littlearc_vec
     targ_selvecs=bfd_elf32_bigarc_vec

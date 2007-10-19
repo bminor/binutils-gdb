@@ -2141,15 +2141,21 @@ keep_going:
 
       dwarf2_emit_insn (size);
     }
+
+  /* Label this frag as one that contains instructions.  */
+  frag_now->tc_frag_data = TRUE;
 }
 
 /* If while processing a fixup, a reloc really needs to be created
    then it is done here.  */
 
-arelent *
+arelent **
 tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
+  static arelent * no_relocs = NULL;
+  static arelent * relocs[MAX_RELOC_EXPANSION + 1];
   arelent *reloc;
+
   reloc = xmalloc (sizeof (arelent));
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
@@ -2158,9 +2164,13 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("reloc %d not supported by object file format"),
 		    (int) fixp->fx_r_type);
-      return NULL;
+      free (reloc);
+      return & no_relocs;
     }
+
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  relocs[0] = reloc;
+  relocs[1] = NULL;
 
   if (fixp->fx_subsy
       && S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
@@ -2173,44 +2183,33 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
     {
       reloc->sym_ptr_ptr = NULL;
 
-      /* If we got a difference between two symbols, and the
-	 subtracted symbol is in the current section, use a
-	 PC-relative relocation.  If both symbols are in the same
-	 section, the difference would have already been simplified
-	 to a constant.  */
+      /* If we have a difference between two (non-absolute) symbols we must
+	 generate two relocs (one for each symbol) and allow the linker to
+	 resolve them - relaxation may change the distances between symbols,
+	 even local symbols defined in the same segment.  */
       if (S_GET_SEGMENT (fixp->fx_subsy) == seg)
 	{
+	  arelent * reloc2 = xmalloc (sizeof * reloc);
+
+	  relocs[0] = reloc2;
+	  relocs[1] = reloc;
+
+	  reloc2->address = reloc->address;
+	  reloc2->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_MN10300_SYM_DIFF);
+	  reloc2->addend = - S_GET_VALUE (fixp->fx_subsy);
+	  reloc2->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+	  *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
+
+	  reloc->addend = fixp->fx_offset; 
+	  if (S_GET_SEGMENT (fixp->fx_addsy) == absolute_section)
+	    reloc->addend += S_GET_VALUE (fixp->fx_addsy);
+
 	  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
 	  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
-	  reloc->addend = (reloc->address - S_GET_VALUE (fixp->fx_subsy)
-			   + fixp->fx_offset);
 
-	  switch (fixp->fx_r_type)
-	    {
-	    case BFD_RELOC_8:
-	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
-						    BFD_RELOC_8_PCREL);
-	      return reloc;
-
-	    case BFD_RELOC_16:
-	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
-						    BFD_RELOC_16_PCREL);
-	      return reloc;
-
-	    case BFD_RELOC_24:
-	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
-						    BFD_RELOC_24_PCREL);
-	      return reloc;
-
-	    case BFD_RELOC_32:
-	      reloc->howto = bfd_reloc_type_lookup (stdoutput,
-						    BFD_RELOC_32_PCREL);
-	      return reloc;
-
-	    default:
-	      /* Try to compute the absolute value below.  */
-	      break;
-	    }
+	  fixp->fx_pcrel = 0;
+	  fixp->fx_done = 1;
+	  return relocs;
 	}
 
       if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
@@ -2247,14 +2246,14 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	    default:
 	      reloc->sym_ptr_ptr
 		= (asymbol **) bfd_abs_section_ptr->symbol_ptr_ptr;
-	      return reloc;
+	      return relocs;
 	    }
 	}
 
       if (reloc->sym_ptr_ptr)
 	free (reloc->sym_ptr_ptr);
       free (reloc);
-      return NULL;
+      return & no_relocs;
     }
   else
     {
@@ -2262,7 +2261,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->addend = fixp->fx_offset;
     }
-  return reloc;
+  return relocs;
 }
 
 int
@@ -2377,11 +2376,14 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 bfd_boolean
 mn10300_fix_adjustable (struct fix *fixp)
 {
-  if (TC_FORCE_RELOCATION_LOCAL (fixp))
-    return FALSE;
-
-  if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+  if (fixp->fx_pcrel)
+    {
+      if (TC_FORCE_RELOCATION_LOCAL (fixp))
+	return FALSE;
+    }
+  /* Non-relative relocs can (and must) be adjusted if they do
+     not meet the criteria below, or the generic criteria.  */
+  else if (TC_FORCE_RELOCATION (fixp))
     return FALSE;
 
   /* Do not adjust relocations involving symbols in code sections,
@@ -2395,8 +2397,9 @@ mn10300_fix_adjustable (struct fix *fixp)
      symbols, because they too break relaxation.  We do want to adjust
      other mergable symbols, like .rodata, because code relaxations
      need section-relative symbols to properly relax them.  */
-  if (! (S_GET_SEGMENT(fixp->fx_addsy)->flags & SEC_MERGE))
+  if (! (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE))
     return FALSE;
+
   if (strncmp (S_GET_SEGMENT (fixp->fx_addsy)->name, ".debug", 6) == 0)
     return FALSE;
 
@@ -2502,3 +2505,60 @@ const pseudo_typeS md_pseudo_table[] =
   { "mn10300",	set_arch_mach,	MN103 },
   {NULL, 0, 0}
 };
+
+/* Returns FALSE if there is some mn10300 specific reason why the
+   subtraction of two same-section symbols cannot be computed by
+   the assembler.  */
+
+bfd_boolean
+mn10300_allow_local_subtract (expressionS * left, expressionS * right, segT section)
+{
+  bfd_boolean result;
+  fragS * left_frag;
+  fragS * right_frag;
+  fragS * frag;
+
+  /* If we are not performing linker relaxation then we have nothing
+     to worry about.  */
+  if (linkrelax == 0)
+    return TRUE;
+
+  /* If the symbols are not in a code section then they are OK.  */
+  if ((section->flags & SEC_CODE) == 0)
+    return TRUE;
+
+  /* Otherwise we have to scan the fragments between the two symbols.
+     If any instructions are found then we have to assume that linker
+     relaxation may change their size and so we must delay resolving
+     the subtraction until the final link.  */
+  left_frag = symbol_get_frag (left->X_add_symbol);
+  right_frag = symbol_get_frag (right->X_add_symbol);
+
+  if (left_frag == right_frag)
+    return ! left_frag->tc_frag_data;
+
+  result = TRUE;
+  for (frag = left_frag; frag != NULL; frag = frag->fr_next)
+    {
+      if (frag->tc_frag_data)
+	result = FALSE;
+      if (frag == right_frag)
+	break;
+    }
+
+  if (frag == NULL)
+    for (frag = right_frag; frag != NULL; frag = frag->fr_next)
+      {
+	if (frag->tc_frag_data)
+	  result = FALSE;
+	if (frag == left_frag)
+	  break;
+      }
+
+  if (frag == NULL)
+    /* The two symbols are on disjoint fragment chains
+       - we cannot possibly compute their difference.  */
+    return FALSE;
+
+  return result;
+}

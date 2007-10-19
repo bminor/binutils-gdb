@@ -1,5 +1,24 @@
 2007-10-19  Nick Clifton  <nickc@redhat.com>
 
+	* config.bfd: Recognise am34-linux-gnu target.
+	* reloc.c: Add BFD_RELOC_MN10300_SYM_DIFF relocation.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf-m10300.c (elf_mn10300_howto): Add R_MN10300_SYM_DIFF.
+	(mn10300_reloc_map): Likewise.
+	(mn10300_elf_check_relocs): Do not create dynamic relocs for
+	symbol differences or relocations against absolute symbols.
+	(mn10300_elf_final_link_relocate): Likewise.
+	Handle R_MN10300_SYM_DIFF relocs. 
+	(mn10300_elf_relocate_section): Fix for creating local copys of
+	dynamic relocs.
+	(mn10300_elf_relax_delete_bytes): Adjust symbols at the end of the
+	region.  Adjust the size of function symbols.
+	(mn10300_elf_relax_section): Ignore symbols that are in discarded
+	sections.
+
+2007-10-19  Nick Clifton  <nickc@redhat.com>
+
 	* elf-m10300.c: Convert to ISO C.
 
 2007-10-18  H.J. Lu  <hongjiu.lu@intel.com>
