@@ -664,11 +664,11 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  /* This was an anonymous type that was never fixed up.  */
 	  goto normal;
 
-#ifdef STATIC_TRANSFORM_NAME
 	case 'X':
 	  /* SunPRO (3.0 at least) static variable encoding.  */
-	  goto normal;
-#endif
+	  if (gdbarch_static_transform_name_p (current_gdbarch))
+	    goto normal;
+	  /* ... fall through ... */
 
 	default:
 	  complaint (&symfile_complaints, _("Unknown C++ symbol name `%s'"),
@@ -1096,18 +1096,21 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
-#ifdef STATIC_TRANSFORM_NAME
-      if (IS_STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym)))
+      if (gdbarch_static_transform_name_p (current_gdbarch)
+	  && gdbarch_static_transform_name (current_gdbarch,
+					    DEPRECATED_SYMBOL_NAME (sym))
+	     != DEPRECATED_SYMBOL_NAME (sym))
 	{
 	  struct minimal_symbol *msym;
 	  msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, objfile);
 	  if (msym != NULL)
 	    {
-	      DEPRECATED_SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym));
+	      DEPRECATED_SYMBOL_NAME (sym) = gdbarch_static_transform_name
+					       (current_gdbarch,	
+						DEPRECATED_SYMBOL_NAME (sym));
 	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}
-#endif
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &file_symbols);
       break;
@@ -1276,18 +1279,21 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
-#ifdef STATIC_TRANSFORM_NAME
-      if (IS_STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym)))
+      if (gdbarch_static_transform_name_p (current_gdbarch)
+	  && gdbarch_static_transform_name (current_gdbarch,
+					    DEPRECATED_SYMBOL_NAME (sym))
+	     != DEPRECATED_SYMBOL_NAME (sym))
 	{
 	  struct minimal_symbol *msym;
 	  msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, objfile);
 	  if (msym != NULL)
 	    {
-	      DEPRECATED_SYMBOL_NAME (sym) = STATIC_TRANSFORM_NAME (DEPRECATED_SYMBOL_NAME (sym));
+	      DEPRECATED_SYMBOL_NAME (sym) = gdbarch_static_transform_name
+					       (current_gdbarch,	
+						DEPRECATED_SYMBOL_NAME (sym));
 	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
 	    }
 	}
-#endif
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	add_symbol_to_list (sym, &local_symbols);
       break;

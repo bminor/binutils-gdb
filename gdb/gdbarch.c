@@ -227,6 +227,7 @@ struct gdbarch
   gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint;
   gdbarch_overlay_update_ftype *overlay_update;
   gdbarch_core_read_description_ftype *core_read_description;
+  gdbarch_static_transform_name_ftype *static_transform_name;
 };
 
 
@@ -346,6 +347,7 @@ struct gdbarch startup_gdbarch =
   0,  /* skip_permanent_breakpoint */
   0,  /* overlay_update */
   0,  /* core_read_description */
+  0,  /* static_transform_name */
   /* startup_gdbarch() */
 };
 
@@ -590,6 +592,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of skip_permanent_breakpoint, has predicate */
   /* Skip verify of overlay_update, has predicate */
   /* Skip verify of core_read_description, has predicate */
+  /* Skip verify of static_transform_name, has predicate */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -983,6 +986,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: stabs_argument_has_addr = <0x%lx>\n",
                       (long) current_gdbarch->stabs_argument_has_addr);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_static_transform_name_p() = %d\n",
+                      gdbarch_static_transform_name_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: static_transform_name = <0x%lx>\n",
+                      (long) current_gdbarch->static_transform_name);
   fprintf_unfiltered (file,
                       "gdbarch_dump: target_desc = %s\n",
                       paddr_d ((long) current_gdbarch->target_desc));
@@ -2929,6 +2938,30 @@ set_gdbarch_core_read_description (struct gdbarch *gdbarch,
                                    gdbarch_core_read_description_ftype core_read_description)
 {
   gdbarch->core_read_description = core_read_description;
+}
+
+int
+gdbarch_static_transform_name_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->static_transform_name != NULL;
+}
+
+char *
+gdbarch_static_transform_name (struct gdbarch *gdbarch, char *name)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->static_transform_name != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_static_transform_name called\n");
+  return gdbarch->static_transform_name (name);
+}
+
+void
+set_gdbarch_static_transform_name (struct gdbarch *gdbarch,
+                                   gdbarch_static_transform_name_ftype static_transform_name)
+{
+  gdbarch->static_transform_name = static_transform_name;
 }
 
 

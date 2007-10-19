@@ -2999,9 +2999,11 @@ parse_partial_symbols (struct objfile *objfile)
 		      {
 		      case 'S':
 			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
-#ifdef STATIC_TRANSFORM_NAME
-			namestring = STATIC_TRANSFORM_NAME (namestring);
-#endif
+
+			if (gdbarch_static_transform_name_p (current_gdbarch))
+			  namestring = gdbarch_static_transform_name
+					 (current_gdbarch, namestring);
+
 			add_psymbol_to_list (namestring, p - namestring,
 					     VAR_DOMAIN, LOC_STATIC,
 					     &objfile->static_psymbols,

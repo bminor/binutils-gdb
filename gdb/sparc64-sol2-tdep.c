@@ -157,6 +157,11 @@ sparc64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   sparc64_init_abi (info, gdbarch);
 
+  /* The Sun compilers also do "globalization"; see the comment in
+     sparc_sol2_static_transform_name for more information.  */
+  set_gdbarch_static_transform_name
+    (gdbarch, sparc_sol2_static_transform_name);
+
   /* Solaris has SVR4-style shared libraries...  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_gdbarch_skip_solib_resolver (gdbarch, sol2_skip_solib_resolver);

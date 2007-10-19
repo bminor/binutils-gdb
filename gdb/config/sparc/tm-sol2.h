@@ -26,12 +26,4 @@
    too.  */
 #define SOFUN_ADDRESS_MAYBE_MISSING
 
-/* The Sun compilers also do "globalization"; see the comment in
-   sparc-tdep.c for more information.  */
-extern char *sparc_stabs_unglobalize_name (char *name);
-#define STATIC_TRANSFORM_NAME(name) \
-  sparc_stabs_unglobalize_name (name)
-#define IS_STATIC_TRANSFORM_NAME(name) \
-  ((name) != sparc_stabs_unglobalize_name (name))
-
 #endif /* tm-sol2.h */

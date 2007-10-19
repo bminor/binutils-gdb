@@ -1680,9 +1680,11 @@ read_dbx_symtab (struct objfile *objfile)
 	  {
 	  case 'S':
 	    nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
-#ifdef STATIC_TRANSFORM_NAME
-	    namestring = STATIC_TRANSFORM_NAME (namestring);
-#endif
+
+	    if (gdbarch_static_transform_name_p (current_gdbarch))
+	      namestring = gdbarch_static_transform_name
+			     (current_gdbarch, namestring);
+
 	    add_psymbol_to_list (namestring, p - namestring,
 				 VAR_DOMAIN, LOC_STATIC,
 				 &objfile->static_psymbols,

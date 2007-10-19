@@ -1,3 +1,27 @@
+2007-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (static_transform_name): New gdbarch callback.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* dbxread.c (read_dbx_symtab): Use gdbarch_static_transform_name
+	instead of STATIC_TRANSFORM_NAME.
+	* mdebugread.c (parse_partial_symbols): Likewise.
+	* stabsread.c (define_symbol): Likewise.
+	* xcoffread.c (scan_xcoff_symtab): Likewise.
+
+	* config/i368/tm-i386sol2.h (STATIC_TRANSFORM_NAME): Remove.
+	(IS_STATIC_TRANSFORM_NAME): Remove.
+	* i386-tdep.c (sunpro_static_transform_name): Remove, move to ...
+	* i386-sol2-tdep.c (i386_sol2_static_transform_name): ... here.
+	(i386_sol2_init_abi): Install it.
+
+	* config/sparc/tm-sol2.h (STATIC_TRANSFORM_NAME): Remove.
+	(IS_STATIC_TRANSFORM_NAME): Remove.
+	* sparc-tdep.c (sparc_stabs_unglobalize_name): Remove, move to ...
+	* sparc-sol2-tdep.c (sparc_sol2_static_transform_name): ... here.
+	(sparc32_sol2_init_abi): Install it.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Likewise.
+	* sparc-tdep.h (sparc_sol2_static_transform_name): Add prototype.
+
 2007-10-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mips-tdep.c (mips_xfer_register): Take a gdbarch argument.

@@ -638,6 +638,9 @@ F::void:skip_permanent_breakpoint:struct regcache *regcache:regcache
 F::void:overlay_update:struct obj_section *osect:osect
 
 M::const struct target_desc *:core_read_description:struct target_ops *target, bfd *abfd:target, abfd
+
+# Handle special encoding of static variables in stabs debug info.
+F::char *:static_transform_name:char *name:name
 EOF
 }
 

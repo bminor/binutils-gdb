@@ -2067,32 +2067,6 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 
-#ifdef STATIC_TRANSFORM_NAME
-/* SunPRO encodes the static variables.  This is not related to C++
-   mangling, it is done for C too.  */
-
-char *
-sunpro_static_transform_name (char *name)
-{
-  char *p;
-  if (IS_STATIC_TRANSFORM_NAME (name))
-    {
-      /* For file-local statics there will be a period, a bunch of
-         junk (the contents of which match a string given in the
-         N_OPT), a period and the name.  For function-local statics
-         there will be a bunch of junk (which seems to change the
-         second character from 'A' to 'B'), a period, the name of the
-         function, and the name.  So just skip everything before the
-         last period.  */
-      p = strrchr (name, '.');
-      if (p != NULL)
-	name = p + 1;
-    }
-  return name;
-}
-#endif /* STATIC_TRANSFORM_NAME */
-
-
 /* Stuff for WIN32 PE style DLL's but is pretty generic really.  */
 
 CORE_ADDR

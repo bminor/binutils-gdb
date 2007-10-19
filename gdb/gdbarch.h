@@ -664,6 +664,14 @@ typedef const struct target_desc * (gdbarch_core_read_description_ftype) (struct
 extern const struct target_desc * gdbarch_core_read_description (struct gdbarch *gdbarch, struct target_ops *target, bfd *abfd);
 extern void set_gdbarch_core_read_description (struct gdbarch *gdbarch, gdbarch_core_read_description_ftype *core_read_description);
 
+/* Handle special encoding of static variables in stabs debug info. */
+
+extern int gdbarch_static_transform_name_p (struct gdbarch *gdbarch);
+
+typedef char * (gdbarch_static_transform_name_ftype) (char *name);
+extern char * gdbarch_static_transform_name (struct gdbarch *gdbarch, char *name);
+extern void set_gdbarch_static_transform_name (struct gdbarch *gdbarch, gdbarch_static_transform_name_ftype *static_transform_name);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 
