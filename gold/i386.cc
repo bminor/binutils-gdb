@@ -771,6 +771,11 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_PC8:
       break;
 
+    case elfcpp::R_386_PLT32:
+      // Since we know this is a local symbol, we can handle this as a
+      // PC32 reloc.
+      break;
+
     case elfcpp::R_386_GOTOFF:
     case elfcpp::R_386_GOTPC:
       // We need a GOT section.
@@ -870,7 +875,6 @@ Target_i386::Scan::local(const General_options&,
       }
       break;
 
-    case elfcpp::R_386_PLT32:
     case elfcpp::R_386_32PLT:
     case elfcpp::R_386_TLS_GD_32:
     case elfcpp::R_386_TLS_GD_PUSH:
@@ -1276,8 +1280,9 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_PLT32:
-      gold_assert(gsym->has_plt_offset()
-                 || gsym->final_value_is_known());
+      gold_assert(gsym == NULL
+		  || gsym->has_plt_offset()
+		  || gsym->final_value_is_known());
       Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       break;
 
