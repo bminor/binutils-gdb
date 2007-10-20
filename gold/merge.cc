@@ -269,7 +269,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 	{
           // The length PLEN is in characters, not bytes.
 	  ++plen;
-	  if (i + plen * sizeof(Char_type) >= len)
+	  if (i + plen * static_cast<off_t>(sizeof(Char_type)) >= len)
 	    {
 	      object->error(_("entry in mergeable string section "
 			      "not null terminated"));
