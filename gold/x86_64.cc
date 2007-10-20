@@ -736,6 +736,11 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_PC8:
       break;
 
+    case elfcpp::R_X86_64_PLT32:
+      // Since we know this is a local symbol, we can handle this as a
+      // PC32 reloc.
+      break;
+
     case elfcpp::R_X86_64_GOTPC32:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_GOTOFF64:
     case elfcpp::R_X86_64_GOTPC64:  // TODO(csilvers): correct?
@@ -832,7 +837,6 @@ Target_x86_64::Scan::local(const General_options&,
       break;
 
     case elfcpp::R_X86_64_GOTPLT64:
-    case elfcpp::R_X86_64_PLT32:
     case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
     case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
     default:
@@ -1237,7 +1241,8 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_PLT32:
-      gold_assert(gsym->has_plt_offset()
+      gold_assert(gsym == NULL
+                  || gsym->has_plt_offset()
 		  || gsym->final_value_is_known());
       Relocate_functions<64, false>::pcrela32(view, object, psymval, addend,
                                               address);
