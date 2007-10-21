@@ -2947,6 +2947,68 @@ rs6000_frame_base_sniffer (struct frame_info *next_frame)
   return &rs6000_frame_base;
 }
 
+/* DWARF-2 frame support.  Used to handle the detection of
+  clobbered registers during function calls.  */
+
+static void
+ppc_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+			    struct dwarf2_frame_state_reg *reg,
+			    struct frame_info *next_frame)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* PPC32 and PPC64 ABI's are the same regarding volatile and
+     non-volatile registers.  We will use the same code for both.  */
+
+  /* Call-saved GP registers.  */
+  if ((regnum >= tdep->ppc_gp0_regnum + 14
+      && regnum <= tdep->ppc_gp0_regnum + 31)
+      || (regnum == tdep->ppc_gp0_regnum + 1))
+    reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+
+  /* Call-clobbered GP registers.  */
+  if ((regnum >= tdep->ppc_gp0_regnum + 3
+      && regnum <= tdep->ppc_gp0_regnum + 12)
+      || (regnum == tdep->ppc_gp0_regnum))
+    reg->how = DWARF2_FRAME_REG_UNDEFINED;
+
+  /* Deal with FP registers, if supported.  */
+  if (tdep->ppc_fp0_regnum >= 0)
+    {
+      /* Call-saved FP registers.  */
+      if ((regnum >= tdep->ppc_fp0_regnum + 14
+	  && regnum <= tdep->ppc_fp0_regnum + 31))
+	reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+
+      /* Call-clobbered FP registers.  */
+      if ((regnum >= tdep->ppc_fp0_regnum
+	  && regnum <= tdep->ppc_fp0_regnum + 13))
+	reg->how = DWARF2_FRAME_REG_UNDEFINED;
+    }
+
+  /* Deal with ALTIVEC registers, if supported.  */
+  if (tdep->ppc_vr0_regnum > 0 && tdep->ppc_vrsave_regnum > 0)
+    {
+      /* Call-saved Altivec registers.  */
+      if ((regnum >= tdep->ppc_vr0_regnum + 20
+	  && regnum <= tdep->ppc_vr0_regnum + 31)
+	  || regnum == tdep->ppc_vrsave_regnum)
+	reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+
+      /* Call-clobbered Altivec registers.  */
+      if ((regnum >= tdep->ppc_vr0_regnum
+	  && regnum <= tdep->ppc_vr0_regnum + 19))
+	reg->how = DWARF2_FRAME_REG_UNDEFINED;
+    }
+
+  /* Handle PC register and Stack Pointer correctly.  */
+  if (regnum == gdbarch_pc_regnum (current_gdbarch))
+    reg->how = DWARF2_FRAME_REG_RA;
+  else if (regnum == gdbarch_sp_regnum (current_gdbarch))
+    reg->how = DWARF2_FRAME_REG_CFA;
+}
+
+
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.
@@ -3409,6 +3471,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in the DWARF CFI frame unwinder.  */
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   dwarf2_frame_set_adjust_regnum (gdbarch, rs6000_adjust_frame_regnum);
+
+  /* Frame handling.  */
+  dwarf2_frame_set_init_reg (gdbarch, ppc_dwarf2_frame_init_reg);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

@@ -1,3 +1,9 @@
+2007-10-21  Luis Machado  <luisgpm@br.ibm.com>
+
+	* rs6000-tdep.c (ppc_dwarf2_frame_init_reg): New function.
+	* (rs6000_gdbarch_init): Install ppc_dwarf2_frame_init_reg as
+	default dwarf2_frame_set_init_reg function.
+		
 2007-10-21  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* NEWS: Mention native MinGW configuration.
