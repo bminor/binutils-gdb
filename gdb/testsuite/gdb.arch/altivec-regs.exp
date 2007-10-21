@@ -48,7 +48,7 @@ if [get_compiler_info $binfile] {
 }
 
 if [test_compiler_info gcc*] {
-    set compile_flags "$compile_flags additional_flags=-maltivec"
+    set compile_flags "$compile_flags additional_flags=-maltivec additional_flags=-mabi=altivec"
 } elseif [test_compiler_info xlc*] {
     set compile_flags "$compile_flags additional_flags=-qaltivec"
 } else {

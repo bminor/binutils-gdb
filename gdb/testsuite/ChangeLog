@@ -1,5 +1,11 @@
 2007-10-21  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.arch/altivec-abi.exp (compile_flags): Use -mabi=altivec when
+	compiling test case with GCC.
+	* gdb.arch/altivec-regs.exp (compile_flags): Likewise.
+
+2007-10-21  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.arch/altivec-regs.exp (decimal_vector): Adjust for output
 	format changes.
 
