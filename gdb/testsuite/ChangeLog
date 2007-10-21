@@ -1,3 +1,8 @@
+2007-10-21  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.arch/altivec-regs.exp (decimal_vector): Adjust for output
+	format changes.
+
 2007-10-18  Michael Snyder  <msnyder@specifix.com>
 
 	* gdb.base/dbx.exp: Add missing "-re " operator.
