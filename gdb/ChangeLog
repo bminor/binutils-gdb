@@ -1,3 +1,7 @@
+2007-10-21  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* NEWS: Mention native MinGW configuration.
+
 2007-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh: Remove "macro" column of input table.  Remove handling

@@ -3,6 +3,9 @@
 
 *** Changes since GDB 6.7
 
+* GDB can now be built as a native debugger for debugging Windows x86
+(mingw32) Portable Executable (PE) programs.
+
 * Pending breakpoints no longer change their number when their address
 is resolved.
 
