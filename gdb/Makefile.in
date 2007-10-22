@@ -1931,7 +1931,7 @@ cp-namespace.o: cp-namespace.c $(defs_h) $(cp_support_h) $(gdb_obstack_h) \
 cp-support.o: cp-support.c $(defs_h) $(cp_support_h) $(gdb_string_h) \
 	$(demangle_h) $(gdb_assert_h) $(gdbcmd_h) $(dictionary_h) \
 	$(objfiles_h) $(frame_h) $(symtab_h) $(block_h) $(complaints_h) \
-	$(gdbtypes_h)
+	$(gdbtypes_h) $(safe_ctype_h)
 cp-valprint.o: cp-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(command_h) $(gdbcmd_h) \
 	$(demangle_h) $(annotate_h) $(gdb_string_h) $(c_lang_h) $(target_h) \

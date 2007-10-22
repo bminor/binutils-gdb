@@ -19,7 +19,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <ctype.h>
 #include "cp-support.h"
 #include "gdb_string.h"
 #include "demangle.h"
@@ -32,6 +31,8 @@
 #include "block.h"
 #include "complaints.h"
 #include "gdbtypes.h"
+
+#include "safe-ctype.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
@@ -68,30 +69,63 @@ struct cmd_list_element *maint_cplus_cmd_list = NULL;
 static void maint_cplus_command (char *arg, int from_tty);
 static void first_component_command (char *arg, int from_tty);
 
-/* Return the canonicalized form of STRING, or NULL if STRING can not be
-   parsed.  The return value is allocated via xmalloc.
+/* Return 1 if STRING is clearly already in canonical form.  This
+   function is conservative; things which it does not recognize are
+   assumed to be non-canonical, and the parser will sort them out
+   afterwards.  This speeds up the critical path for alphanumeric
+   identifiers.  */
 
-   drow/2005-03-07: Should we also return NULL for things that trivially do
-   not require any change?  e.g. simple identifiers.  This could be more
-   efficient.  */
+static int
+cp_already_canonical (const char *string)
+{
+  /* Identifier start character [a-zA-Z_].  */
+  if (!ISIDST (string[0]))
+    return 0;
+
+  /* These are the only two identifiers which canonicalize to other
+     than themselves or an error: unsigned -> unsigned int and
+     signed -> int.  */
+  if (string[0] == 'u' && strcmp (&string[1], "nsigned") == 0)
+    return 0;
+  else if (string[0] == 's' && strcmp (&string[1], "igned") == 0)
+    return 0;
+
+  /* Identifier character [a-zA-Z0-9_].  */
+  while (ISIDNUM (string[1]))
+    string++;
+
+  if (string[1] == '\0')
+    return 1;
+  else
+    return 0;
+}
+
+/* Parse STRING and convert it to canonical form.  If parsing fails,
+   or if STRING is already canonical, return NULL.  Otherwise return
+   the canonical form.  The return value is allocated via xmalloc.  */
 
 char *
 cp_canonicalize_string (const char *string)
 {
-  void *storage;
   struct demangle_component *ret_comp;
+  unsigned int estimated_len;
   char *ret;
-  int len = strlen (string);
 
-  len = len + len / 8;
+  if (cp_already_canonical (string))
+    return NULL;
 
-  ret_comp = cp_demangled_name_to_comp (string, &storage, NULL);
+  ret_comp = cp_demangled_name_to_comp (string, NULL);
   if (ret_comp == NULL)
     return NULL;
 
-  ret = cp_comp_to_string (ret_comp, len);
+  estimated_len = strlen (string) * 2;
+  ret = cp_comp_to_string (ret_comp, estimated_len);
 
-  xfree (storage);
+  if (strcmp (string, ret) == 0)
+    {
+      xfree (ret);
+      return NULL;
+    }
 
   return ret;
 }
@@ -128,7 +162,7 @@ mangled_name_to_comp (const char *mangled_name, int options,
    return NULL;
   
   /* If we could demangle the name, parse it to build the component tree.  */
-  ret = cp_demangled_name_to_comp (demangled_name, memory, NULL);
+  ret = cp_demangled_name_to_comp (demangled_name, NULL);
 
   if (ret == NULL)
     {
@@ -321,12 +355,11 @@ method_name_from_physname (const char *physname)
 char *
 cp_func_name (const char *full_name)
 {
-  void *storage;
   char *ret;
   struct demangle_component *ret_comp;
   int done;
 
-  ret_comp = cp_demangled_name_to_comp (full_name, &storage, NULL);
+  ret_comp = cp_demangled_name_to_comp (full_name, NULL);
   if (!ret_comp)
     return NULL;
 
@@ -336,7 +369,6 @@ cp_func_name (const char *full_name)
   if (ret_comp != NULL)
     ret = cp_comp_to_string (ret_comp, 10);
 
-  xfree (storage);
   return ret;
 }
 
@@ -349,13 +381,12 @@ remove_params (const char *demangled_name)
 {
   int done = 0;
   struct demangle_component *ret_comp;
-  void *storage;
   char *ret = NULL;
 
   if (demangled_name == NULL)
     return NULL;
 
-  ret_comp = cp_demangled_name_to_comp (demangled_name, &storage, NULL);
+  ret_comp = cp_demangled_name_to_comp (demangled_name, NULL);
   if (ret_comp == NULL)
     return NULL;
 
@@ -381,7 +412,6 @@ remove_params (const char *demangled_name)
   if (ret_comp->type == DEMANGLE_COMPONENT_TYPED_NAME)
     ret = cp_comp_to_string (d_left (ret_comp), 10);
 
-  xfree (storage);
   return ret;
 }
 
@@ -511,7 +541,7 @@ cp_find_first_component_aux (const char *name, int permissive)
 	      && strncmp (name + index, "operator", LENGTH_OF_OPERATOR) == 0)
 	    {
 	      index += LENGTH_OF_OPERATOR;
-	      while (isspace(name[index]))
+	      while (ISSPACE(name[index]))
 		++index;
 	      switch (name[index])
 		{

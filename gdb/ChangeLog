@@ -1,3 +1,24 @@
+2007-10-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cp-support.c: Include "safe-ctype.h".
+	(cp_already_canonical): New function.
+	(cp_canonicalize_string): Use it.  Return NULL for already canonical
+	strings.
+	(mangled_name_to_comp): Update call to cp_demangled_name_to_comp.
+	(cp_func_name, remove_params): Likewise.
+	(cp_find_first_component_aux): Use ISSPACE.
+	* cp-support.h (cp_demangled_name_to_comp): Correct comment.  Remove
+	MEMORY_P argument.
+	* cp-name-parser.y (ALLOC_CHUNK): Define.
+	(struct demangle_info): Add PREV and NEXT.  Increase the size of
+	COMPS.
+	(d_grab): Convert to a function.
+	(allocate_info): Rewrite.
+	(cp_demangled_name_to_comp): Remove MEMORY argument.  Do not use
+	strlen.  Update call to allocate_info.  Do not free it on failure.
+	(main): Update calls to cp_demangled_name_to_comp.
+	* Makefile.in (cp-support.o): Update.
+
 2007-10-22  Markus Deuling  <deuling@de.ibm.com>
 
 	* std-regs.c (value_of_builtin_frame_fp_reg)
