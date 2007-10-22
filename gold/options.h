@@ -397,8 +397,8 @@ class Position_dependent_options
  public:
   Position_dependent_options();
 
-  // -Bstatic: Whether we are searching for a static archive rather
-  // than a shared object.
+  // -Bdynamic/-Bstatic: Whether we are searching for a static archive
+  // -rather than a shared object.
   bool
   do_static_search() const
   { return this->do_static_search_; }
