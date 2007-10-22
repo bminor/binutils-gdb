@@ -82,6 +82,10 @@ class Read_symbols : public Task
   void
   do_group(Workqueue*);
 
+  // Open and identify the file.
+  bool
+  do_read_symbols(Workqueue*);
+
   const General_options& options_;
   Input_objects* input_objects_;
   Symbol_table* symtab_;

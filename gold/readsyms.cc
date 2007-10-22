@@ -36,6 +36,47 @@
 namespace gold
 {
 
+// If we fail to open the object, then we won't create an Add_symbols
+// task.  However, we still need to unblock the token, or else the
+// link won't proceed to generate more error messages.  We can only
+// unblock tokens in the main thread, so we need a dummy task to do
+// that.  The dummy task has to maintain the right sequence of blocks,
+// so we need both this_blocker and next_blocker.
+
+class Unblock_token : public Task
+{
+ public:
+  Unblock_token(Task_token* this_blocker, Task_token* next_blocker)
+    : this_blocker_(this_blocker), next_blocker_(next_blocker)
+  { }
+
+  ~Unblock_token()
+  {
+    if (this->this_blocker_ != NULL)
+      delete this->this_blocker_;
+  }
+
+  Is_runnable_type
+  is_runnable(Workqueue*)
+  {
+    if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
+      return IS_BLOCKED;
+    return IS_RUNNABLE;
+  }
+
+  Task_locker*
+  locks(Workqueue* workqueue)
+  { return new Task_locker_block(*this->next_blocker_, workqueue); }
+
+  void
+  run(Workqueue*)
+  { }
+
+ private:
+  Task_token* this_blocker_;
+  Task_token* next_blocker_;
+};
+
 // Class read_symbols.
 
 Read_symbols::~Read_symbols()
@@ -68,22 +109,34 @@ Read_symbols::locks(Workqueue*)
   return NULL;
 }
 
-// Run a Read_symbols task.  This is where we actually read the
-// symbols and relocations.
+// Run a Read_symbols task.
 
 void
 Read_symbols::run(Workqueue* workqueue)
+{
+  // If we didn't queue a new task, then we need to explicitly unblock
+  // the token.
+  if (!this->do_read_symbols(workqueue))
+    workqueue->queue_front(new Unblock_token(this->this_blocker_,
+					     this->next_blocker_));
+}
+
+// Open the file and read the symbols.  Return true if a new task was
+// queued, false if that could not happen due to some error.
+
+bool
+Read_symbols::do_read_symbols(Workqueue* workqueue)
 {
   if (this->input_argument_->is_group())
     {
       gold_assert(this->input_group_ == NULL);
       this->do_group(workqueue);
-      return;
+      return true;
     }
 
   Input_file* input_file = new Input_file(&this->input_argument_->file());
   if (!input_file->open(this->options_, this->dirpath_))
-    return;
+    return false;
 
   // Read enough of the file to pick up the entire ELF header.
 
@@ -93,7 +146,7 @@ Read_symbols::run(Workqueue* workqueue)
     {
       gold_error(_("%s: file is empty"),
 		 input_file->file().filename().c_str());
-      return;
+      return false;
     }
 
   unsigned char ehdr_buf[elfcpp::Elf_sizes<64>::ehdr_size];
@@ -118,7 +171,7 @@ Read_symbols::run(Workqueue* workqueue)
 	  Object* obj = make_elf_object(input_file->filename(),
 					input_file, 0, ehdr_buf, read_size);
 	  if (obj == NULL)
-	    return;
+	    return false;
 
 	  // We don't have a way to record a non-archive in an input
 	  // group.  If this is an ordinary object file, we can't
@@ -128,7 +181,7 @@ Read_symbols::run(Workqueue* workqueue)
 	    {
 	      gold_error(_("%s: ordinary object found in input group"),
 			 input_file->name());
-	      return;
+	      return false;
 	    }
 
 	  Read_symbols_data* sd = new Read_symbols_data;
@@ -142,7 +195,7 @@ Read_symbols::run(Workqueue* workqueue)
 	  // Opening the file locked it, so now we need to unlock it.
 	  input_file->file().unlock();
 
-	  return;
+	  return true;
 	}
     }
 
@@ -161,7 +214,7 @@ Read_symbols::run(Workqueue* workqueue)
 						   this->input_group_,
 						   this->this_blocker_,
 						   this->next_blocker_));
-	  return;
+	  return true;
 	}
     }
 
@@ -171,11 +224,13 @@ Read_symbols::run(Workqueue* workqueue)
 			this->input_group_, this->input_argument_, input_file,
 			ehdr_buf, read_size, this->this_blocker_,
 			this->next_blocker_))
-    return;
+    return true;
 
   // Here we have to handle any other input file types we need.
   gold_error(_("%s: not an object or archive"),
 	     input_file->file().filename().c_str());
+
+  return false;
 }
 
 // Handle a group.  We need to walk through the arguments over and
