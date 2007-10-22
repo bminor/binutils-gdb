@@ -1,3 +1,7 @@
+2007-10-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* hppa-hpux-nat.c (hppa_hpux_store_register): Add missing semi-colon.
+
 2007-10-21  Luis Machado  <luisgpm@br.ibm.com>
 
 	* rs6000-tdep.c (ppc_dwarf2_frame_init_reg): New function.

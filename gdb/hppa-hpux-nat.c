@@ -160,7 +160,7 @@ static void
 hppa_hpux_store_register (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  CORE_ADDR addr
+  CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
   pid_t pid;
