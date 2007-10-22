@@ -1183,7 +1183,7 @@ print_return_value (struct type *value_type)
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
-      gdbarch_return_value (current_gdbarch, value_type, stop_registers,
+      gdbarch_return_value (gdbarch, value_type, stop_registers,
 			    value_contents_raw (value), NULL);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
@@ -1577,8 +1577,8 @@ default_print_registers_info (struct gdbarch *gdbarch,
 			      int regnum, int print_all)
 {
   int i;
-  const int numregs = gdbarch_num_regs (current_gdbarch)
-		      + gdbarch_num_pseudo_regs (current_gdbarch);
+  const int numregs = gdbarch_num_regs (gdbarch)
+		      + gdbarch_num_pseudo_regs (gdbarch);
   gdb_byte buffer[MAX_REGISTER_SIZE];
 
   for (i = 0; i < numregs; i++)
@@ -1606,13 +1606,13 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
       /* If the register name is empty, it is undefined for this
          processor, so don't display anything.  */
-      if (gdbarch_register_name (current_gdbarch, i) == NULL
-	  || *(gdbarch_register_name (current_gdbarch, i)) == '\0')
+      if (gdbarch_register_name (gdbarch, i) == NULL
+	  || *(gdbarch_register_name (gdbarch, i)) == '\0')
 	continue;
 
-      fputs_filtered (gdbarch_register_name (current_gdbarch, i), file);
+      fputs_filtered (gdbarch_register_name (gdbarch, i), file);
       print_spaces_filtered (15 - strlen (gdbarch_register_name
-					  (current_gdbarch, i)), file);
+					  (gdbarch, i)), file);
 
       /* Get the data in raw format.  */
       if (! frame_register_read (frame, i, buffer))
@@ -1623,21 +1623,21 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
       /* If virtual format is floating, print it that way, and in raw
          hex.  */
-      if (TYPE_CODE (register_type (current_gdbarch, i)) == TYPE_CODE_FLT)
+      if (TYPE_CODE (register_type (gdbarch, i)) == TYPE_CODE_FLT)
 	{
 	  int j;
 
-	  val_print (register_type (current_gdbarch, i), buffer, 0, 0,
+	  val_print (register_type (gdbarch, i), buffer, 0, 0,
 		     file, 0, 1, 0, Val_pretty_default);
 
 	  fprintf_filtered (file, "\t(raw 0x");
-	  for (j = 0; j < register_size (current_gdbarch, i); j++)
+	  for (j = 0; j < register_size (gdbarch, i); j++)
 	    {
 	      int idx;
-	      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 		idx = j;
 	      else
-		idx = register_size (current_gdbarch, i) - 1 - j;
+		idx = register_size (gdbarch, i) - 1 - j;
 	      fprintf_filtered (file, "%02x", (unsigned char) buffer[idx]);
 	    }
 	  fprintf_filtered (file, ")");
@@ -1645,14 +1645,14 @@ default_print_registers_info (struct gdbarch *gdbarch,
       else
 	{
 	  /* Print the register in hex.  */
-	  val_print (register_type (current_gdbarch, i), buffer, 0, 0,
+	  val_print (register_type (gdbarch, i), buffer, 0, 0,
 		     file, 'x', 1, 0, Val_pretty_default);
           /* If not a vector register, print it also according to its
              natural format.  */
-	  if (TYPE_VECTOR (register_type (current_gdbarch, i)) == 0)
+	  if (TYPE_VECTOR (register_type (gdbarch, i)) == 0)
 	    {
 	      fprintf_filtered (file, "\t");
-	      val_print (register_type (current_gdbarch, i), buffer, 0, 0,
+	      val_print (register_type (gdbarch, i), buffer, 0, 0,
 			 file, 0, 1, 0, Val_pretty_default);
 	    }
 	}
@@ -1665,16 +1665,18 @@ void
 registers_info (char *addr_exp, int fpregs)
 {
   struct frame_info *frame;
+  struct gdbarch *gdbarch;
   int regnum, numregs;
   char *end;
 
   if (!target_has_registers)
     error (_("The program has no registers now."));
   frame = get_selected_frame (NULL);
+  gdbarch = get_frame_arch (frame);
 
   if (!addr_exp)
     {
-      gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
+      gdbarch_print_registers_info (gdbarch, gdb_stdout,
 				    frame, -1, fpregs);
       return;
     }
@@ -1712,7 +1714,7 @@ registers_info (char *addr_exp, int fpregs)
 					       start, end - start);
 	if (regnum >= 0)
 	  {
-	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
+	    gdbarch_print_registers_info (gdbarch, gdb_stdout,
 					  frame, regnum, fpregs);
 	    continue;
 	  }
@@ -1724,10 +1726,10 @@ registers_info (char *addr_exp, int fpregs)
 	int regnum = strtol (start, &endptr, 0);
 	if (endptr == end
 	    && regnum >= 0
-	    && regnum < gdbarch_num_regs (current_gdbarch)
-			+ gdbarch_num_pseudo_regs (current_gdbarch))
+	    && regnum < gdbarch_num_regs (gdbarch)
+			+ gdbarch_num_pseudo_regs (gdbarch))
 	  {
-	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
+	    gdbarch_print_registers_info (gdbarch, gdb_stdout,
 					  frame, regnum, fpregs);
 	    continue;
 	  }
@@ -1736,9 +1738,9 @@ registers_info (char *addr_exp, int fpregs)
       /* A register group?  */
       {
 	struct reggroup *group;
-	for (group = reggroup_next (current_gdbarch, NULL);
+	for (group = reggroup_next (gdbarch, NULL);
 	     group != NULL;
-	     group = reggroup_next (current_gdbarch, group))
+	     group = reggroup_next (gdbarch, group))
 	  {
 	    /* Don't bother with a length check.  Should the user
 	       enter a short register group name, go with the first
@@ -1750,13 +1752,12 @@ registers_info (char *addr_exp, int fpregs)
 	  {
 	    int regnum;
 	    for (regnum = 0;
-		 regnum < gdbarch_num_regs (current_gdbarch)
-			  + gdbarch_num_pseudo_regs (current_gdbarch);
+		 regnum < gdbarch_num_regs (gdbarch)
+			  + gdbarch_num_pseudo_regs (gdbarch);
 		 regnum++)
 	      {
-		if (gdbarch_register_reggroup_p (current_gdbarch, regnum,
-						 group))
-		  gdbarch_print_registers_info (current_gdbarch,
+		if (gdbarch_register_reggroup_p (gdbarch, regnum, group))
+		  gdbarch_print_registers_info (gdbarch,
 						gdb_stdout, frame,
 						regnum, fpregs);
 	      }
@@ -1793,8 +1794,8 @@ print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
       int printed_something = 0;
 
       for (regnum = 0;
-	   regnum < gdbarch_num_regs (current_gdbarch)
-		    + gdbarch_num_pseudo_regs (current_gdbarch);
+	   regnum < gdbarch_num_regs (gdbarch)
+		    + gdbarch_num_pseudo_regs (gdbarch);
 	   regnum++)
 	{
 	  if (gdbarch_register_reggroup_p (gdbarch, regnum, vector_reggroup))
@@ -2013,8 +2014,8 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
       int printed_something = 0;
 
       for (regnum = 0;
-	   regnum < gdbarch_num_regs (current_gdbarch)
-		    + gdbarch_num_pseudo_regs (current_gdbarch);
+	   regnum < gdbarch_num_regs (gdbarch)
+		    + gdbarch_num_pseudo_regs (gdbarch);
 	   regnum++)
 	{
 	  if (gdbarch_register_reggroup_p (gdbarch, regnum, float_reggroup))

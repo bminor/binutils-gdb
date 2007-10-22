@@ -1,5 +1,13 @@
 2007-10-22  Markus Deuling  <deuling@de.ibm.com>
 
+	* infcmd.c (default_print_registers_info, print_return_value)
+	(print_vector_info, print_float_info): Replace current_gdbarch by
+	gdbarch.
+	(registers_info): Use get_frame_arch to get at the current 
+	architecture by frame_info.
+
+2007-10-22  Markus Deuling  <deuling@de.ibm.com>
+
 	* i387-tdep.c (i387_collect_fsave, i387_collect_fxsave): Use
 	get_regcache_arch to get at the current architecture by regcache.
 
