@@ -2801,6 +2801,8 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   lowpc += baseaddr;
   highpc += baseaddr;
 
+  /* Find the filename.  Do not use dwarf2_name here, since the filename
+     is not a source language identifier.  */
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr)
     {
@@ -3410,9 +3412,9 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	}
 
       /* Get name of field.  */
-      attr = dwarf2_attr (die, DW_AT_name, cu);
-      if (attr && DW_STRING (attr))
-	fieldname = DW_STRING (attr);
+      fieldname = dwarf2_name (die, cu);
+      if (fieldname == NULL)
+	fieldname = "";
 
       /* The name is already allocated along with this objfile, so we don't
 	 need to duplicate it for the type.  */
@@ -3438,10 +3440,8 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       char *physname;
 
       /* Get name of field.  */
-      attr = dwarf2_attr (die, DW_AT_name, cu);
-      if (attr && DW_STRING (attr))
-	fieldname = DW_STRING (attr);
-      else
+      fieldname = dwarf2_name (die, cu);
+      if (fieldname == NULL)
 	return;
 
       /* Get physical name.  */
@@ -3571,10 +3571,8 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   struct nextfnfield *new_fnfield;
 
   /* Get name of member function.  */
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr && DW_STRING (attr))
-    fieldname = DW_STRING (attr);
-  else
+  fieldname = dwarf2_name (die, cu);
+  if (fieldname == NULL)
     return;
 
   /* Get the mangled name.  */
@@ -3839,6 +3837,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
   const char *previous_prefix = processing_current_prefix;
   struct cleanup *back_to = NULL;
+  char *name;
 
   if (die->type)
     return;
@@ -3848,8 +3847,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 
   type = alloc_type (objfile);
   INIT_CPLUS_SPECIFIC (type);
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr && DW_STRING (attr))
+  name = dwarf2_name (die, cu);
+  if (name != NULL)
     {
       if (cu->language == language_cplus
 	  || cu->language == language_java)
@@ -3865,7 +3864,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  /* The name is already allocated along with this objfile, so
 	     we don't need to duplicate it for the type.  */
-	  TYPE_TAG_NAME (type) = DW_STRING (attr);
+	  TYPE_TAG_NAME (type) = name;
 	}
     }
 
@@ -4067,6 +4066,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->objfile;
   struct type *type;
   struct attribute *attr;
+  char *name;
 
   if (die->type)
     return;
@@ -4074,11 +4074,9 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   type = alloc_type (objfile);
 
   TYPE_CODE (type) = TYPE_CODE_ENUM;
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr && DW_STRING (attr))
+  name = dwarf2_name (die, cu);
+  if (name != NULL)
     {
-      char *name = DW_STRING (attr);
-
       if (processing_has_namespace_info)
 	{
 	  TYPE_TAG_NAME (type) = typename_concat (&objfile->objfile_obstack,
@@ -4177,10 +4175,10 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->objfile;
   struct die_info *child_die;
   struct field *fields;
-  struct attribute *attr;
   struct symbol *sym;
   int num_fields;
   int unsigned_enum = 1;
+  char *name;
 
   num_fields = 0;
   fields = NULL;
@@ -4195,8 +4193,8 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	  else
 	    {
-	      attr = dwarf2_attr (child_die, DW_AT_name, cu);
-	      if (attr)
+	      name = dwarf2_name (child_die, cu);
+	      if (name)
 		{
 		  sym = new_symbol (child_die, die->type, cu);
 		  if (SYMBOL_VALUE (sym) < 0)
@@ -4254,6 +4252,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
   int ndim = 0;
   struct cleanup *back_to;
+  char *name;
 
   /* Return if we've already decoded this type. */
   if (die->type)
@@ -4327,9 +4326,9 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr)
     make_vector_type (type);
 
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr && DW_STRING (attr))
-    TYPE_NAME (type) = DW_STRING (attr);
+  name = dwarf2_name (die, cu);
+  if (name)
+    TYPE_NAME (type) = name;
   
   do_cleanups (back_to);
 
@@ -4810,11 +4809,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 
   if (!die->type)
     {
-      attr = dwarf2_attr (die, DW_AT_name, cu);
-      if (attr && DW_STRING (attr))
-	{
-	  name = DW_STRING (attr);
-	}
+      name = dwarf2_name (die, cu);
       set_die_type (die, init_type (TYPE_CODE_TYPEDEF, 0,
 				    TYPE_FLAG_TARGET_STUB, name, objfile),
 		    cu);
@@ -4832,6 +4827,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
   struct attribute *attr;
   int encoding = 0, size = 0;
+  char *name;
 
   /* If we've already decoded this die, this is a no-op. */
   if (die->type)
@@ -4849,8 +4845,8 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       size = DW_UNSND (attr);
     }
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr && DW_STRING (attr))
+  name = dwarf2_name (die, cu);
+  if (name)
     {
       enum type_code code = TYPE_CODE_INT;
       int type_flags = 0;
@@ -4891,7 +4887,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 		     dwarf_type_encoding_name (encoding));
 	  break;
 	}
-      type = init_type (code, size, type_flags, DW_STRING (attr), objfile);
+      type = init_type (code, size, type_flags, name, objfile);
       if (encoding == DW_ATE_address)
 	TYPE_TARGET_TYPE (type) = dwarf2_fundamental_type (objfile, FT_VOID,
 							   cu);
@@ -4925,6 +4921,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
   int low = 0;
   int high = -1;
+  char *name;
   
   /* If we have already decoded this die, then nothing more to do.  */
   if (die->type)
@@ -4977,9 +4974,9 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   range_type = create_range_type (NULL, base_type, low, high);
 
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (attr && DW_STRING (attr))
-    TYPE_NAME (range_type) = DW_STRING (attr);
+  name = dwarf2_name (die, cu);
+  if (name)
+    TYPE_NAME (range_type) = name;
   
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
@@ -4992,15 +4989,13 @@ static void
 read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct type *type;
-  struct attribute *attr;
 
   if (die->type)
     return;
 
   /* For now, we only support the C meaning of an unspecified type: void.  */
 
-  attr = dwarf2_attr (die, DW_AT_name, cu);
-  type = init_type (TYPE_CODE_VOID, 0, 0, attr ? DW_STRING (attr) : "",
+  type = init_type (TYPE_CODE_VOID, 0, 0, dwarf2_name (die, cu),
 		    cu->objfile);
 
   set_die_type (die, type, cu);

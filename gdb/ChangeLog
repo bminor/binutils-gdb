@@ -1,5 +1,13 @@
 2007-10-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (read_file_scope): Add a comment.
+	(dwarf2_add_field, dwarf2_add_member_fn, read_structure_type)
+	(read_enumeration_type, process_enumeration_scope, read_array_type)
+	(read_typedef, read_base_type, read_subrange_type)
+	(read_unspecified_type): Use dwarf2_name.
+
+2007-10-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* coffread.c (coff_symfile_finish): Call dwarf2_free_objfile.
 	* dwarf2read.c (dwarf2_free_objfile): New.
 	* elfread.c (elf_symfile_finish): Call dwarf2_free_objfile.
