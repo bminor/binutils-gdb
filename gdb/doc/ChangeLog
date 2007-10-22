@@ -1,3 +1,9 @@
+2007-10-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.texi (Compiler Characteristics): Move documentation
+	of set_gdbarch_sofun_address_maybe_missing back to ...
+	(Target Conditionals): ... here to fix build break.
+
 2007-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.texi (Target Conditionals): Remove documentation of

@@ -3264,38 +3264,6 @@ See @file{mips-tdep.c}.  It does not do what you want.
 @node Compiler Characteristics
 @section Compiler Characteristics
 
-@item set_gdbarch_sofun_address_maybe_missing (@var{gdbarch}, @var{set})
-@findex set_gdbarch_sofun_address_maybe_missing
-Somebody clever observed that, the more actual addresses you have in the
-debug information, the more time the linker has to spend relocating
-them.  So whenever there's some other way the debugger could find the
-address it needs, you should omit it from the debug info, to make
-linking faster.
-
-Calling @code{set_gdbarch_sofun_address_maybe_missing} with a non-zero
-argument @var{set} indicates that a particular set of hacks of this sort
-are in use, affecting @code{N_SO} and @code{N_FUN} entries in stabs-format
-debugging information.  @code{N_SO} stabs mark the beginning and ending
-addresses of compilation units in the text segment.  @code{N_FUN} stabs
-mark the starts and ends of functions.
-
-In this case, @value{GDBN} assumes two things:
-
-@itemize @bullet
-@item
-@code{N_FUN} stabs have an address of zero.  Instead of using those
-addresses, you should find the address where the function starts by
-taking the function name from the stab, and then looking that up in the
-minsyms (the linker/assembler symbol table).  In other words, the stab
-has the name, and the linker/assembler symbol table is the only place
-that carries the address.
-
-@item
-@code{N_SO} stabs have an address of zero, too.  You just look at the
-@code{N_FUN} stabs that appear before and after the @code{N_SO} stab, and
-guess the starting and ending addresses of the compilation unit from them.
-@end itemize
-
 @node Target Conditionals
 @section Target Conditionals
 
@@ -3856,6 +3824,38 @@ A function that inserts or removes (depending on
 @var{insert_breakpoints_p}) breakpoints at each possible destinations of
 the next instruction. See @file{sparc-tdep.c} and @file{rs6000-tdep.c}
 for examples.
+
+@item set_gdbarch_sofun_address_maybe_missing (@var{gdbarch}, @var{set})
+@findex set_gdbarch_sofun_address_maybe_missing
+Somebody clever observed that, the more actual addresses you have in the
+debug information, the more time the linker has to spend relocating
+them.  So whenever there's some other way the debugger could find the
+address it needs, you should omit it from the debug info, to make
+linking faster.
+
+Calling @code{set_gdbarch_sofun_address_maybe_missing} with a non-zero
+argument @var{set} indicates that a particular set of hacks of this sort
+are in use, affecting @code{N_SO} and @code{N_FUN} entries in stabs-format
+debugging information.  @code{N_SO} stabs mark the beginning and ending
+addresses of compilation units in the text segment.  @code{N_FUN} stabs
+mark the starts and ends of functions.
+
+In this case, @value{GDBN} assumes two things:
+
+@itemize @bullet
+@item
+@code{N_FUN} stabs have an address of zero.  Instead of using those
+addresses, you should find the address where the function starts by
+taking the function name from the stab, and then looking that up in the
+minsyms (the linker/assembler symbol table).  In other words, the stab
+has the name, and the linker/assembler symbol table is the only place
+that carries the address.
+
+@item
+@code{N_SO} stabs have an address of zero, too.  You just look at the
+@code{N_FUN} stabs that appear before and after the @code{N_SO} stab, and
+guess the starting and ending addresses of the compilation unit from them.
+@end itemize
 
 @item int gdbarch_pc_regnum (@var{gdbarch})
 @findex gdbarch_pc_regnum
