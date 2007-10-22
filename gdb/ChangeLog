@@ -1,5 +1,10 @@
 2007-10-22  Markus Deuling  <deuling@de.ibm.com>
 
+	* i387-tdep.c (i387_collect_fsave, i387_collect_fxsave): Use
+	get_regcache_arch to get at the current architecture by regcache.
+
+2007-10-22  Markus Deuling  <deuling@de.ibm.com>
+
 	* target.c (debug_print_register): Use get_regcache_arch to get at the
 	current architecture by regcache. 
 
