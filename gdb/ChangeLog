@@ -1,3 +1,10 @@
+2007-10-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* coffread.c (coff_symfile_finish): Call dwarf2_free_objfile.
+	* dwarf2read.c (dwarf2_free_objfile): New.
+	* elfread.c (elf_symfile_finish): Call dwarf2_free_objfile.
+	* symfile.h (dwarf2_free_objfile): Declare.
+
 2007-10-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* hppa-hpux-nat.c (hppa_hpux_store_register): Add missing semi-colon.

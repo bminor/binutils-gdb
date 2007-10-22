@@ -709,6 +709,8 @@ elf_symfile_finish (struct objfile *objfile)
     {
       xfree (objfile->deprecated_sym_stab_info);
     }
+
+  dwarf2_free_objfile (objfile);
 }
 
 /* ELF specific initialization routine for reading symbols.

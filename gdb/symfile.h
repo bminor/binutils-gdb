@@ -365,6 +365,8 @@ extern int dwarf2_has_info (struct objfile *);
 extern void dwarf2_build_psymtabs (struct objfile *, int);
 extern void dwarf2_build_frame_info (struct objfile *);
 
+void dwarf2_free_objfile (struct objfile *);
+
 /* From mdebugread.c */
 
 /* Hack to force structures to exist before use in parameter list.  */

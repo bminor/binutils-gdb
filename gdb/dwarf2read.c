@@ -9964,6 +9964,22 @@ free_one_cached_comp_unit (void *target_cu)
     }
 }
 
+/* Release all extra memory associated with OBJFILE.  */
+
+void
+dwarf2_free_objfile (struct objfile *objfile)
+{
+  dwarf2_per_objfile = objfile_data (objfile, dwarf2_objfile_data_key);
+
+  if (dwarf2_per_objfile == NULL)
+    return;
+
+  /* Cached DIE trees use xmalloc and the comp_unit_obstack.  */
+  free_cached_comp_units (NULL);
+
+  /* Everything else should be on the objfile obstack.  */
+}
+
 /* A pair of DIE offset and GDB type pointer.  We store these
    in a hash table separate from the DIEs, and preserve them
    when the DIEs are flushed out of cache.  */
