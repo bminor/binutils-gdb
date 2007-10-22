@@ -2165,18 +2165,19 @@ static void
 debug_print_register (const char * func,
 		      struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   fprintf_unfiltered (gdb_stdlog, "%s ", func);
-  if (regno >= 0 && regno < gdbarch_num_regs (current_gdbarch)
-			    + gdbarch_num_pseudo_regs (current_gdbarch)
-      && gdbarch_register_name (current_gdbarch, regno) != NULL
-      && gdbarch_register_name (current_gdbarch, regno)[0] != '\0')
-    fprintf_unfiltered (gdb_stdlog, "(%s)", gdbarch_register_name
-					      (current_gdbarch, regno));
+  if (regno >= 0 && regno < gdbarch_num_regs (gdbarch)
+			    + gdbarch_num_pseudo_regs (gdbarch)
+      && gdbarch_register_name (gdbarch, regno) != NULL
+      && gdbarch_register_name (gdbarch, regno)[0] != '\0')
+    fprintf_unfiltered (gdb_stdlog, "(%s)",
+			gdbarch_register_name (gdbarch, regno));
   else
     fprintf_unfiltered (gdb_stdlog, "(%d)", regno);
   if (regno >= 0)
     {
-      int i, size = register_size (current_gdbarch, regno);
+      int i, size = register_size (gdbarch, regno);
       unsigned char buf[MAX_REGISTER_SIZE];
       regcache_cooked_read (regcache, regno, buf);
       fprintf_unfiltered (gdb_stdlog, " = ");

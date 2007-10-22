@@ -1,3 +1,8 @@
+2007-10-22  Markus Deuling  <deuling@de.ibm.com>
+
+	* target.c (debug_print_register): Use get_regcache_arch to get at the
+	current architecture by regcache. 
+
 2007-10-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (read_file_scope): Add a comment.
