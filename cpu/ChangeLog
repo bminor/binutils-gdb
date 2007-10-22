@@ -1,3 +1,8 @@
+2007-10-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris.cpu (movs, movu): Use result of extension operation when
+	updating flags.
+
 2007-07-04  Nick Clifton  <nickc@redhat.com>
 
 	* cris.cpu: Update copyright notice to refer to GPLv3.
