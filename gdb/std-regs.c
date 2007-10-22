@@ -30,14 +30,15 @@
 static struct value *
 value_of_builtin_frame_fp_reg (struct frame_info *frame, const void *baton)
 {
-  if (gdbarch_deprecated_fp_regnum (current_gdbarch) >= 0)
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  if (gdbarch_deprecated_fp_regnum (gdbarch) >= 0)
     /* NOTE: cagney/2003-04-24: Since the mere presence of "fp" in the
        register name table overrides this built-in $fp register, there
        is no real reason for this gdbarch_deprecated_fp_regnum trickery here.
        An architecture wanting to implement "$fp" as alias for a raw
        register can do so by adding "fp" to register name table (mind
        you, doing this is probably a dangerous thing).  */
-    return value_of_register (gdbarch_deprecated_fp_regnum (current_gdbarch),
+    return value_of_register (gdbarch_deprecated_fp_regnum (gdbarch),
 			      frame);
   else
     {
@@ -46,7 +47,7 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame, const void *baton)
       if (frame == NULL)
 	memset (buf, 0, TYPE_LENGTH (value_type (val)));
       else
-	gdbarch_address_to_pointer (current_gdbarch, builtin_type_void_data_ptr,
+	gdbarch_address_to_pointer (gdbarch, builtin_type_void_data_ptr,
 				    buf, get_frame_base_address (frame));
       return val;
     }
@@ -55,8 +56,9 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame, const void *baton)
 static struct value *
 value_of_builtin_frame_pc_reg (struct frame_info *frame, const void *baton)
 {
-  if (gdbarch_pc_regnum (current_gdbarch) >= 0)
-    return value_of_register (gdbarch_pc_regnum (current_gdbarch), frame);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  if (gdbarch_pc_regnum (gdbarch) >= 0)
+    return value_of_register (gdbarch_pc_regnum (gdbarch), frame);
   else
     {
       struct value *val = allocate_value (builtin_type_void_data_ptr);
@@ -64,8 +66,8 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame, const void *baton)
       if (frame == NULL)
 	memset (buf, 0, TYPE_LENGTH (value_type (val)));
       else
-	gdbarch_address_to_pointer (current_gdbarch, builtin_type_void_data_ptr,
-				     buf, get_frame_pc (frame));
+	gdbarch_address_to_pointer (gdbarch, builtin_type_void_data_ptr,
+				    buf, get_frame_pc (frame));
       return val;
     }
 }
@@ -73,16 +75,18 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame, const void *baton)
 static struct value *
 value_of_builtin_frame_sp_reg (struct frame_info *frame, const void *baton)
 {
-  if (gdbarch_sp_regnum (current_gdbarch) >= 0)
-    return value_of_register (gdbarch_sp_regnum (current_gdbarch), frame);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  if (gdbarch_sp_regnum (gdbarch) >= 0)
+    return value_of_register (gdbarch_sp_regnum (gdbarch), frame);
   error (_("Standard register ``$sp'' is not available for this target"));
 }
 
 static struct value *
 value_of_builtin_frame_ps_reg (struct frame_info *frame, const void *baton)
 {
-  if (gdbarch_ps_regnum (current_gdbarch) >= 0)
-    return value_of_register (gdbarch_ps_regnum (current_gdbarch), frame);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  if (gdbarch_ps_regnum (gdbarch) >= 0)
+    return value_of_register (gdbarch_ps_regnum (gdbarch), frame);
   error (_("Standard register ``$ps'' is not available for this target"));
 }
 

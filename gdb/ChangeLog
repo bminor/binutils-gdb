@@ -1,5 +1,12 @@
 2007-10-22  Markus Deuling  <deuling@de.ibm.com>
 
+	* std-regs.c (value_of_builtin_frame_fp_reg)
+	value_of_builtin_frame_pc_reg, value_of_builtin_frame_sp_reg)
+	value_of_builtin_frame_ps_reg): Use get_frame_arch to get at the
+	current architecture by frame_info.
+
+2007-10-22  Markus Deuling  <deuling@de.ibm.com>
+
 	* reggroups.c (default_register_reggroup_p): Replace current_gdbarch
 	by gdbarch.
 
