@@ -545,9 +545,9 @@ command_loop (void)
 	  long space_now = lim - lim_at_start;
 	  long space_diff = space_now - space_at_cmd_start;
 
-	  printf_unfiltered (_("Space used: %ld (%c%ld for this command)\n"),
+	  printf_unfiltered (_("Space used: %ld (%s%ld for this command)\n"),
 			     space_now,
-			     (space_diff >= 0 ? '+' : '-'),
+			     (space_diff >= 0 ? "+" : ""),
 			     space_diff);
 #endif
 	}

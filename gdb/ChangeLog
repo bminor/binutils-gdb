@@ -1,5 +1,9 @@
 2007-10-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* top.c (command_loop): Fix output for shrinkage.
+
+2007-10-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* cp-name-parser.y (exp1): Add & ( var ) as a reference expression.
 	(exp): Remove and document function-like casts.
 
