@@ -422,6 +422,17 @@ class Symbol
   set_has_warning()
   { this->has_warning_ = true; }
 
+  // Return whether this symbol is defined by a COPY reloc from a
+  // dynamic object.
+  bool
+  is_copied_from_dynobj() const
+  { return this->is_copied_from_dynobj_; }
+
+  // Mark this symbol as defined by a COPY reloc.
+  void
+  set_is_copied_from_dynobj()
+  { this->is_copied_from_dynobj_ = true; }
+
  protected:
   // Instances of this class should always be created at a specific
   // size.
@@ -573,6 +584,9 @@ class Symbol
   bool needs_dynsym_value_ : 1;
   // True if there is a warning for this symbol.
   bool has_warning_ : 1;
+  // True if we are using a COPY reloc for this symbol, so that the
+  // real definition lives in a dynamic object.
+  bool is_copied_from_dynobj_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
@@ -870,6 +884,14 @@ class Symbol_table
   define_symbols(const Layout*, const Target*, int count,
 		 const Define_symbol_in_segment*);  
 
+  // Define SYM using a COPY reloc.  POSD is the Output_data where the
+  // symbol should be defined--typically a .dyn.bss section.  VALUE is
+  // the offset within POSD.
+  template<int size>
+  void
+  define_with_copy_reloc(const Target*, Sized_symbol<size>* sym,
+			 Output_data* posd, uint64_t value);
+
   // Look up a symbol.
   Symbol*
   lookup(const char*, const char* version = NULL) const;
@@ -914,6 +936,11 @@ class Symbol_table
 		const Relocate_info<size, big_endian>* relinfo,
 		size_t relnum, off_t reloffset) const
   { this->warnings_.issue_warning(sym, relinfo, relnum, reloffset); }
+
+  // SYM is defined using a COPY reloc.  Return the dynamic object
+  // where the original definition was found.
+  Dynobj*
+  get_copy_source(const Symbol* sym) const;
 
   // Set the dynamic symbol indexes.  INDEX is the index of the first
   // global dynamic symbol.  Pointers to the symbols are stored into
@@ -1089,55 +1116,52 @@ class Symbol_table
 			Symbol_table_eq> Symbol_table_type;
 
   // The type of the list of common symbols.
-
   typedef std::vector<Symbol*> Commons_type;
+
+  // A map from symbols with COPY relocs to the dynamic objects where
+  // they are defined.
+  typedef Unordered_map<const Symbol*, Dynobj*> Copied_symbol_dynobjs;
 
   // We increment this every time we see a new undefined symbol, for
   // use in archive groups.
   int saw_undefined_;
-
   // The index of the first global symbol in the output file.
   unsigned int first_global_index_;
-
   // The file offset within the output symtab section where we should
   // write the table.
   off_t offset_;
-
   // The number of global symbols we want to write out.
   size_t output_count_;
-
   // The file offset of the global dynamic symbols, or 0 if none.
   off_t dynamic_offset_;
-
   // The index of the first global dynamic symbol.
   unsigned int first_dynamic_global_index_;
-
   // The number of global dynamic symbols, or 0 if none.
   off_t dynamic_count_;
-
   // The symbol hash table.
   Symbol_table_type table_;
-
   // A pool of symbol names.  This is used for all global symbols.
   // Entries in the hash table point into this pool.
   Stringpool namepool_;
-
   // Forwarding symbols.
   Unordered_map<const Symbol*, Symbol*> forwarders_;
-
   // Weak aliases.  A symbol in this list points to the next alias.
   // The aliases point to each other in a circular list.
   Unordered_map<Symbol*, Symbol*> weak_aliases_;
-
   // We don't expect there to be very many common symbols, so we keep
   // a list of them.  When we find a common symbol we add it to this
   // list.  It is possible that by the time we process the list the
   // symbol is no longer a common symbol.  It may also have become a
   // forwarder.
   Commons_type commons_;
-
   // Manage symbol warnings.
   Warnings warnings_;
+  // When we emit a COPY reloc for a symbol, we define it in an
+  // Output_data.  When it's time to emit version information for it,
+  // we need to know the dynamic object in which we found the original
+  // definition.  This maps symbols with COPY relocs to the dynamic
+  // object where they were defined.
+  Copied_symbol_dynobjs copied_symbol_dynobjs_;
 };
 
 // We inline get_sized_symbol for efficiency.

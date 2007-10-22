@@ -257,6 +257,7 @@ class Layout
   // Create the version sections.
   void
   create_version_sections(const Versions*,
+			  const Symbol_table*,
 			  unsigned int local_symcount,
 			  const std::vector<Symbol*>& dynamic_symbols,
 			  const Output_section* dynstr);
@@ -264,6 +265,7 @@ class Layout
   template<int size, bool big_endian>
   void
   sized_create_version_sections(const Versions* versions,
+				const Symbol_table*,
 				unsigned int local_symcount,
 				const std::vector<Symbol*>& dynamic_symbols,
 				const Output_section* dynstr

@@ -621,14 +621,9 @@ Target_x86_64::copy_reloc(const General_options* options,
       off_t offset = dynbss_size;
       dynbss->set_space_size(dynbss_size + symsize);
 
-      // Define the symbol in the .dynbss section.
-      symtab->define_in_output_data(this, ssym->name(), ssym->version(),
-				    dynbss, offset, symsize, ssym->type(),
-				    ssym->binding(), ssym->visibility(),
-				    ssym->nonvis(), false, false);
+      symtab->define_with_copy_reloc(this, ssym, dynbss, offset);
 
       // Add the COPY reloc.
-      ssym->set_needs_dynsym_entry();
       Reloc_section* rela_dyn = this->rela_dyn_section(layout);
       rela_dyn->add_global(ssym, elfcpp::R_X86_64_COPY, dynbss, offset, 0);
     }

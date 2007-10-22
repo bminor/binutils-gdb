@@ -1190,11 +1190,28 @@ Versions::~Versions()
     delete *p;
 }
 
+// Return the dynamic object which a symbol refers to.
+
+Dynobj*
+Versions::get_dynobj_for_sym(const Symbol_table* symtab,
+			     const Symbol* sym) const
+{
+  if (sym->is_copied_from_dynobj())
+    return symtab->get_copy_source(sym);
+  else
+    {
+      Object* object = sym->object();
+      gold_assert(object->is_dynamic());
+      return static_cast<Dynobj*>(object);
+    }
+}
+
 // Record version information for a symbol going into the dynamic
 // symbol table.
 
 void
 Versions::record_version(const General_options* options,
+			 const Symbol_table* symtab,
 			 Stringpool* dynpool, const Symbol* sym)
 {
   gold_assert(!this->is_finalized_);
@@ -1203,7 +1220,7 @@ Versions::record_version(const General_options* options,
   Stringpool::Key version_key;
   const char* version = dynpool->add(sym->version(), false, &version_key);
 
-  if (!sym->is_from_dynobj())
+  if (!sym->is_from_dynobj() && !sym->is_copied_from_dynobj())
     {
       if (parameters->output_is_shared())
         this->add_def(options, sym, version, version_key);
@@ -1211,11 +1228,7 @@ Versions::record_version(const General_options* options,
   else
     {
       // This is a version reference.
-
-      Object* object = sym->object();
-      gold_assert(object->is_dynamic());
-      Dynobj* dynobj = static_cast<Dynobj*>(object);
-
+      Dynobj* dynobj = this->get_dynobj_for_sym(symtab, sym);
       this->add_need(dynpool, dynobj->soname(), version, version_key);
     }
 }
@@ -1375,14 +1388,15 @@ Versions::finalize(const Target* target, Symbol_table* symtab,
 // pointers.
 
 unsigned int
-Versions::version_index(const Stringpool* dynpool, const Symbol* sym) const
+Versions::version_index(const Symbol_table* symtab, const Stringpool* dynpool,
+			const Symbol* sym) const
 {
   Stringpool::Key version_key;
   const char* version = dynpool->find(sym->version(), &version_key);
   gold_assert(version != NULL);
 
   Key k;
-  if (!sym->is_from_dynobj())
+  if (!sym->is_from_dynobj() && !sym->is_copied_from_dynobj())
     {
       if (!parameters->output_is_shared())
         return elfcpp::VER_NDX_GLOBAL;
@@ -1390,9 +1404,7 @@ Versions::version_index(const Stringpool* dynpool, const Symbol* sym) const
     }
   else
     {
-      Object* object = sym->object();
-      gold_assert(object->is_dynamic());
-      Dynobj* dynobj = static_cast<Dynobj*>(object);
+      Dynobj* dynobj = this->get_dynobj_for_sym(symtab, sym);
 
       Stringpool::Key filename_key;
       const char* filename = dynpool->find(dynobj->soname(), &filename_key);
@@ -1412,7 +1424,8 @@ Versions::version_index(const Stringpool* dynpool, const Symbol* sym) const
 
 template<int size, bool big_endian>
 void
-Versions::symbol_section_contents(const Stringpool* dynpool,
+Versions::symbol_section_contents(const Symbol_table* symtab,
+				  const Stringpool* dynpool,
 				  unsigned int local_symcount,
 				  const std::vector<Symbol*>& syms,
 				  unsigned char** pp,
@@ -1437,7 +1450,7 @@ Versions::symbol_section_contents(const Stringpool* dynpool,
       if (version == NULL)
 	version_index = elfcpp::VER_NDX_GLOBAL;
       else
-	version_index = this->version_index(dynpool, *p);
+	version_index = this->version_index(symtab, dynpool, *p);
       elfcpp::Swap<16, big_endian>::writeval(pbuf + (*p)->dynsym_index() * 2,
 					     version_index);
     }
@@ -1561,6 +1574,7 @@ class Sized_dynobj<64, true>;
 template
 void
 Versions::symbol_section_contents<32, false>(
+    const Symbol_table*,
     const Stringpool*,
     unsigned int,
     const std::vector<Symbol*>&,
@@ -1573,6 +1587,7 @@ Versions::symbol_section_contents<32, false>(
 template
 void
 Versions::symbol_section_contents<32, true>(
+    const Symbol_table*,
     const Stringpool*,
     unsigned int,
     const std::vector<Symbol*>&,
@@ -1585,6 +1600,7 @@ Versions::symbol_section_contents<32, true>(
 template
 void
 Versions::symbol_section_contents<64, false>(
+    const Symbol_table*,
     const Stringpool*,
     unsigned int,
     const std::vector<Symbol*>&,
@@ -1597,6 +1613,7 @@ Versions::symbol_section_contents<64, false>(
 template
 void
 Versions::symbol_section_contents<64, true>(
+    const Symbol_table*,
     const Stringpool*,
     unsigned int,
     const std::vector<Symbol*>&,

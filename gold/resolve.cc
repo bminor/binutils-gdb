@@ -620,6 +620,8 @@ Symbol_table::should_override_with_special(const Symbol* to)
 void
 Symbol::override_base_with_special(const Symbol* from)
 {
+  gold_assert(this->name_ == from->name_ || this->has_alias());
+
   this->source_ = from->source_;
   switch (from->source_)
     {
@@ -652,6 +654,20 @@ Symbol::override_base_with_special(const Symbol* from)
 
   // Special symbols are always considered to be regular symbols.
   this->in_reg_ = true;
+
+  if (from->needs_dynsym_entry_)
+    this->needs_dynsym_entry_ = true;
+  if (from->needs_dynsym_value_)
+    this->needs_dynsym_value_ = true;
+
+  // We shouldn't see these flags.  If we do, we need to handle them
+  // somehow.
+  gold_assert(!from->is_target_special_ || this->is_target_special_);
+  gold_assert(!from->is_forwarder_);
+  gold_assert(!from->has_got_offset_);
+  gold_assert(!from->has_plt_offset_);
+  gold_assert(!from->has_warning_);
+  gold_assert(!from->is_copied_from_dynobj_);
 }
 
 // Override a symbol with a special symbol.

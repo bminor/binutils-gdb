@@ -578,7 +578,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
       // Create the version sections.  We can't do this until the
       // dynamic string table is complete.
-      this->create_version_sections(&versions, local_dynamic_count,
+      this->create_version_sections(&versions, symtab, local_dynamic_count,
 				    dynamic_symbols, dynstr);
     }
 
@@ -1214,6 +1214,7 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
 
 void
 Layout::create_version_sections(const Versions* versions,
+				const Symbol_table* symtab,
 				unsigned int local_symcount,
 				const std::vector<Symbol*>& dynamic_symbols,
 				const Output_section* dynstr)
@@ -1228,7 +1229,7 @@ Layout::create_version_sections(const Versions* versions,
 #ifdef HAVE_TARGET_32_BIG
           this->sized_create_version_sections
               SELECT_SIZE_ENDIAN_NAME(32, true)(
-                  versions, local_symcount, dynamic_symbols, dynstr
+		  versions, symtab, local_symcount, dynamic_symbols, dynstr
                   SELECT_SIZE_ENDIAN(32, true));
 #else
           gold_unreachable();
@@ -1239,7 +1240,7 @@ Layout::create_version_sections(const Versions* versions,
 #ifdef HAVE_TARGET_32_LITTLE
           this->sized_create_version_sections
               SELECT_SIZE_ENDIAN_NAME(32, false)(
-                  versions, local_symcount, dynamic_symbols, dynstr
+		  versions, symtab, local_symcount, dynamic_symbols, dynstr
                   SELECT_SIZE_ENDIAN(32, false));
 #else
           gold_unreachable();
@@ -1253,7 +1254,7 @@ Layout::create_version_sections(const Versions* versions,
 #ifdef HAVE_TARGET_64_BIG
           this->sized_create_version_sections
               SELECT_SIZE_ENDIAN_NAME(64, true)(
-                  versions, local_symcount, dynamic_symbols, dynstr
+                  versions, symtab, local_symcount, dynamic_symbols, dynstr
                   SELECT_SIZE_ENDIAN(64, true));
 #else
           gold_unreachable();
@@ -1264,7 +1265,7 @@ Layout::create_version_sections(const Versions* versions,
 #ifdef HAVE_TARGET_64_LITTLE
           this->sized_create_version_sections
               SELECT_SIZE_ENDIAN_NAME(64, false)(
-                  versions, local_symcount, dynamic_symbols, dynstr
+                  versions, symtab, local_symcount, dynamic_symbols, dynstr
                   SELECT_SIZE_ENDIAN(64, false));
 #else
           gold_unreachable();
@@ -1281,6 +1282,7 @@ template<int size, bool big_endian>
 void
 Layout::sized_create_version_sections(
     const Versions* versions,
+    const Symbol_table* symtab,
     unsigned int local_symcount,
     const std::vector<Symbol*>& dynamic_symbols,
     const Output_section* dynstr
@@ -1294,7 +1296,7 @@ Layout::sized_create_version_sections(
   unsigned char* vbuf;
   unsigned int vsize;
   versions->symbol_section_contents SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
-      &this->dynpool_, local_symcount, dynamic_symbols, &vbuf, &vsize
+      symtab, &this->dynpool_, local_symcount, dynamic_symbols, &vbuf, &vsize
       SELECT_SIZE_ENDIAN(size, big_endian));
 
   Output_section_data* vdata = new Output_data_const_buffer(vbuf, vsize, 2);

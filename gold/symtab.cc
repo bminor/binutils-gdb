@@ -66,6 +66,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->has_got_offset_ = false;
   this->has_plt_offset_ = false;
   this->has_warning_ = false;
+  this->is_copied_from_dynobj_ = false;
 }
 
 // Initialize the fields in the base class Symbol for SYM in OBJECT.
@@ -1223,6 +1224,70 @@ Symbol_table::define_symbols(const Layout* layout, const Target* target,
     }
 }
 
+// Define CSYM using a COPY reloc.  POSD is the Output_data where the
+// symbol should be defined--typically a .dyn.bss section.  VALUE is
+// the offset within POSD.
+
+template<int size>
+void
+Symbol_table::define_with_copy_reloc(const Target* target,
+				     Sized_symbol<size>* csym,
+				     Output_data* posd, uint64_t value)
+{
+  gold_assert(csym->is_from_dynobj());
+  gold_assert(!csym->is_copied_from_dynobj());
+  Object* object = csym->object();
+  gold_assert(object->is_dynamic());
+  Dynobj* dynobj = static_cast<Dynobj*>(object);
+
+  // Our copied variable has to override any variable in a shared
+  // library.
+  elfcpp::STB binding = csym->binding();
+  if (binding == elfcpp::STB_WEAK)
+    binding = elfcpp::STB_GLOBAL;
+
+  this->define_in_output_data(target, csym->name(), csym->version(),
+			      posd, value, csym->symsize(),
+			      csym->type(), binding,
+			      csym->visibility(), csym->nonvis(),
+			      false, false);
+
+  csym->set_is_copied_from_dynobj();
+  csym->set_needs_dynsym_entry();
+
+  this->copied_symbol_dynobjs_[csym] = dynobj;
+
+  // We have now defined all aliases, but we have not entered them all
+  // in the copied_symbol_dynobjs_ map.
+  if (csym->has_alias())
+    {
+      Symbol* sym = csym;
+      while (true)
+	{
+	  sym = this->weak_aliases_[sym];
+	  if (sym == csym)
+	    break;
+	  gold_assert(sym->output_data() == posd);
+
+	  sym->set_is_copied_from_dynobj();
+	  this->copied_symbol_dynobjs_[sym] = dynobj;
+	}
+    }
+}
+
+// SYM is defined using a COPY reloc.  Return the dynamic object where
+// the original definition was found.
+
+Dynobj*
+Symbol_table::get_copy_source(const Symbol* sym) const
+{
+  gold_assert(sym->is_copied_from_dynobj());
+  Copied_symbol_dynobjs::const_iterator p =
+    this->copied_symbol_dynobjs_.find(sym);
+  gold_assert(p != this->copied_symbol_dynobjs_.end());
+  return p->second;
+}
+
 // Set the dynamic symbol indexes.  INDEX is the index of the first
 // global dynamic symbol.  Pointers to the symbols are stored into the
 // vector SYMS.  The names are added to DYNPOOL.  This returns an
@@ -1257,7 +1322,7 @@ Symbol_table::set_dynsym_indexes(const General_options* options,
 
 	  // Record any version information.
 	  if (sym->version() != NULL)
-	    versions->record_version(options, dynpool, sym);
+	    versions->record_version(options, this, dynpool, sym);
 	}
     }
 
@@ -1901,6 +1966,22 @@ Symbol_table::add_from_dynobj<64, true>(
     const std::vector<const char*>* version_map);
 #endif
 
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+template
+void
+Symbol_table::define_with_copy_reloc<32>(const Target* target,
+					 Sized_symbol<32>* sym,
+					 Output_data* posd, uint64_t value);
+#endif
+
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+template
+void
+Symbol_table::define_with_copy_reloc<64>(const Target* target,
+					 Sized_symbol<64>* sym,
+					 Output_data* posd, uint64_t value);
+#endif
+
 #ifdef HAVE_TARGET_32_LITTLE
 template
 void
@@ -1932,6 +2013,5 @@ Warnings::issue_warning<64, true>(const Symbol* sym,
 				  const Relocate_info<64, true>* relinfo,
 				  size_t relnum, off_t reloffset) const;
 #endif
-
 
 } // End namespace gold.

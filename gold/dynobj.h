@@ -411,7 +411,8 @@ class Versions
   // SYM is going into the dynamic symbol table and has a version.
   // Record the appropriate version information.
   void
-  record_version(const General_options*, Stringpool*, const Symbol* sym);
+  record_version(const General_options*, const Symbol_table* symtab,
+		 Stringpool*, const Symbol* sym);
 
   // Set the version indexes.  DYNSYM_INDEX is the index we should use
   // for the next dynamic symbol.  We add new dynamic symbols to SYMS
@@ -434,7 +435,8 @@ class Versions
   // version section (.gnu.version).
   template<int size, bool big_endian>
   void
-  symbol_section_contents(const Stringpool*, unsigned int local_symcount,
+  symbol_section_contents(const Symbol_table*, const Stringpool*,
+			  unsigned int local_symcount,
 			  const std::vector<Symbol*>& syms,
 			  unsigned char**, unsigned int*
                           ACCEPT_SIZE_ENDIAN) const;
@@ -472,9 +474,14 @@ class Versions
   add_need(Stringpool*, const char* filename, const char* name,
 	   Stringpool::Key);
 
+  // Get the dynamic object to use for SYM.
+  Dynobj*
+  get_dynobj_for_sym(const Symbol_table*, const Symbol* sym) const;
+
   // Return the version index to use for SYM.
   unsigned int
-  version_index(const Stringpool*, const Symbol* sym) const;
+  version_index(const Symbol_table*, const Stringpool*,
+		const Symbol* sym) const;
 
   // We keep a hash table mapping canonicalized name/version pairs to
   // a version base.
