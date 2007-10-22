@@ -1011,6 +1011,8 @@ exp1	:	exp '>' exp
    in parentheses.  */
 exp1	:	'&' start
 		{ $$ = fill_comp (DEMANGLE_COMPONENT_UNARY, make_operator ("&", 1), $2); }
+	|	'&' '(' start ')'
+		{ $$ = fill_comp (DEMANGLE_COMPONENT_UNARY, make_operator ("&", 1), $3); }
 	;
 
 /* Expressions, not including the comma operator.  */
@@ -1066,18 +1068,13 @@ exp	:	REINTERPRET_CAST '<' type '>' '(' exp1 ')' %prec UNARY
 		}
 	;
 
-/* Another form of C++-style cast.  "type ( exp1 )" is not allowed (it's too
-   ambiguous), but "name ( exp1 )" is.  Because we don't need to support
-   function types, we can handle this unambiguously (the use of typespec_2
-   prevents a silly, harmless conflict with qualifiers_opt).  This does not
-   appear in demangler output so it's not a great loss if we need to
-   disable it.  */
-exp	:	typespec_2 '(' exp1 ')' %prec UNARY
-		{ $$ = fill_comp (DEMANGLE_COMPONENT_UNARY,
-				    fill_comp (DEMANGLE_COMPONENT_CAST, $1, NULL),
-				    $3);
-		}
-	;
+/* Another form of C++-style cast is "type ( exp1 )".  This creates too many
+   conflicts to support.  For a while we supported the simpler
+   "typespec_2 ( exp1 )", but that conflicts with "& ( start )" as a
+   reference, deep within the wilderness of abstract declarators:
+   Qux<int(&(*))> vs Qux<int(&(var))>, a shift-reduce conflict at the
+   innermost left parenthesis.  So we do not support function-like casts.
+   Fortunately they never appear in demangler output.  */
 
 /* TO INVESTIGATE: ._0 style anonymous names; anonymous namespaces */
 
