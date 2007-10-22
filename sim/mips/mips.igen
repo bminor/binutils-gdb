@@ -4144,7 +4144,6 @@
 *mipsIII:
 *mipsIV:
 *mips32:
-*mips32r2:
 *vr4100:
 *vr5000:
 *r3900:
@@ -4152,6 +4151,13 @@
   /* None of these ISAs support Paired Single, so just fall back to
      the single/double check.  */
   if ((fmt != fmt_single) && (fmt != fmt_double))
+    SignalException (ReservedInstruction, insn);
+}
+
+:function:::void:check_fmt_p:int fmt, instruction_word insn
+*mips32r2:
+{
+  if ((fmt != fmt_single) && (fmt != fmt_double) && (fmt != fmt_ps))
     SignalException (ReservedInstruction, insn);
 }
 
@@ -4309,7 +4315,7 @@
 }
 
 
-010011,5.RS,5.FT,5.FS,5.FD,011,110:COP1X:64,f::ALNV.PS
+010011,5.RS,5.FT,5.FS,5.FD,011,110:COP1X:32,f::ALNV.PS
 "alnv.ps f<FD>, f<FS>, f<FT>, r<RS>"
 *mipsV:
 *mips32r2:
@@ -4427,7 +4433,7 @@
 }
 
 
-010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001010:COP1:64,f::CEIL.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001010:COP1:32,f::CEIL.L.fmt
 "ceil.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
@@ -4587,7 +4593,7 @@
 }
 
 
-010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,100101:COP1:64,f::CVT.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,100101:COP1:32,f::CVT.L.fmt
 "cvt.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
@@ -4608,7 +4614,7 @@
 }
 
 
-010001,10,000,5.FT,5.FS,5.FD,100110:COP1:64,f::CVT.PS.S
+010001,10,000,5.FT,5.FS,5.FD,100110:COP1:32,f::CVT.PS.S
 "cvt.ps.s f<FD>, f<FS>, f<FT>"
 *mipsV:
 *mips32r2:
@@ -4649,7 +4655,7 @@
 }
 
 
-010001,10,110,00000,5.FS,5.FD,101000:COP1:64,f::CVT.S.PL
+010001,10,110,00000,5.FS,5.FD,101000:COP1:32,f::CVT.S.PL
 "cvt.s.pl f<FD>, f<FS>"
 *mipsV:
 *mips32r2:
@@ -4662,7 +4668,7 @@
 }
 
 
-010001,10,110,00000,5.FS,5.FD,100000:COP1:64,f::CVT.S.PU
+010001,10,110,00000,5.FS,5.FD,100000:COP1:32,f::CVT.S.PU
 "cvt.s.pu f<FD>, f<FS>"
 *mipsV:
 *mips32r2:
@@ -4799,7 +4805,7 @@
 }
 
 
-010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001011:COP1:64,f::FLOOR.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001011:COP1:32,f::FLOOR.L.fmt
 "floor.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
@@ -4866,11 +4872,19 @@
 }
 
 
+010011,5.BASE,5.INDEX,5.0,5.FD,000001:COP1X:32,f::LDXC1
+"ldxc1 f<FD>, r<INDEX>(r<BASE>)"
+*mips32r2:
+{
+  check_fpu (SD_);
+  COP_LD (1, FD, do_load_double (SD_, GPR[BASE], GPR[INDEX]));
+}
+
+
 010011,5.BASE,5.INDEX,5.0,5.FD,000001:COP1X:64,f::LDXC1
 "ldxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *mipsV:
-*mips32r2:
 *mips64:
 *mips64r2:
 *vr5000:
@@ -4881,10 +4895,26 @@
 }
 
 
+010011,5.BASE,5.INDEX,5.0,5.FD,000101:COP1X:32,f::LUXC1
+"luxc1 f<FD>, r<INDEX>(r<BASE>)"
+*mips32r2:
+{
+  address_word base = GPR[BASE];
+  address_word index = GPR[INDEX];
+  address_word vaddr = base + index;
+  check_fpu (SD_);
+  if (SizeFGR () != 64)
+    Unpredictable ();
+  /* Arrange for the bottom 3 bits of (base + index) to be 0.  */
+  if ((vaddr & 0x7) != 0)
+    index -= (vaddr & 0x7);
+  COP_LD (1, FD, do_load_double (SD_, base, index));
+}
+
+
 010011,5.BASE,5.INDEX,5.0,5.FD,000101:COP1X:64,f::LUXC1
 "luxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsV:
-*mips32r2:
 *mips64:
 *mips64r2:
 {
@@ -4893,6 +4923,8 @@
   address_word vaddr = base + index;
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
+  if (SizeFGR () != 64)
+    Unpredictable ();
   /* Arrange for the bottom 3 bits of (base + index) to be 0.  */
   if ((vaddr & 0x7) != 0)
     index -= (vaddr & 0x7);
@@ -4920,7 +4952,7 @@
 }
 
 
-010011,5.BASE,5.INDEX,5.0,5.FD,000000:COP1X:64,f::LWXC1
+010011,5.BASE,5.INDEX,5.0,5.FD,000000:COP1X:32,f::LWXC1
 "lwxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *mipsV:
@@ -4936,7 +4968,7 @@
 
 
 
-010011,5.FR,5.FT,5.FS,5.FD,100,3.FMT!2!3!4!5!7:COP1X:64,f::MADD.fmt
+010011,5.FR,5.FT,5.FS,5.FD,100,3.FMT!2!3!4!5!7:COP1X:32,f::MADD.fmt
 "madd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
@@ -5101,7 +5133,7 @@
 }
 
 
-010011,5.FR,5.FT,5.FS,5.FD,101,3.FMT!2!3!4!5!7:COP1X:64,f::MSUB.fmt
+010011,5.FR,5.FT,5.FS,5.FD,101,3.FMT!2!3!4!5!7:COP1X:32,f::MSUB.fmt
 "msub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
@@ -5194,7 +5226,7 @@
 }
 
 
-010011,5.FR,5.FT,5.FS,5.FD,110,3.FMT!2!3!4!5!7:COP1X:64,f::NMADD.fmt
+010011,5.FR,5.FT,5.FS,5.FD,110,3.FMT!2!3!4!5!7:COP1X:32,f::NMADD.fmt
 "nmadd.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
@@ -5212,7 +5244,7 @@
 }
 
 
-010011,5.FR,5.FT,5.FS,5.FD,111,3.FMT!2!3!4!5!7:COP1X:64,f::NMSUB.fmt
+010011,5.FR,5.FT,5.FS,5.FD,111,3.FMT!2!3!4!5!7:COP1X:32,f::NMSUB.fmt
 "nmsub.%s<FMT> f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
 *mipsV:
@@ -5230,7 +5262,7 @@
 }
 
 
-010001,10,110,5.FT,5.FS,5.FD,101100:COP1:64,f::PLL.PS
+010001,10,110,5.FT,5.FS,5.FD,101100:COP1:32,f::PLL.PS
 "pll.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
 *mips32r2:
@@ -5244,7 +5276,7 @@
 }
 
 
-010001,10,110,5.FT,5.FS,5.FD,101101:COP1:64,f::PLU.PS
+010001,10,110,5.FT,5.FS,5.FD,101101:COP1:32,f::PLU.PS
 "plu.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
 *mips32r2:
@@ -5258,7 +5290,7 @@
 }
 
 
-010011,5.BASE,5.INDEX,5.HINT,00000,001111:COP1X:64::PREFX
+010011,5.BASE,5.INDEX,5.HINT,00000,001111:COP1X:32::PREFX
 "prefx <HINT>, r<INDEX>(r<BASE>)"
 *mipsIV:
 *mipsV:
@@ -5279,7 +5311,7 @@
 }
 
 
-010001,10,110,5.FT,5.FS,5.FD,101110:COP1:64,f::PUL.PS
+010001,10,110,5.FT,5.FS,5.FD,101110:COP1:32,f::PUL.PS
 "pul.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
 *mips32r2:
@@ -5293,7 +5325,7 @@
 }
 
 
-010001,10,110,5.FT,5.FS,5.FD,101111:COP1:64,f::PUU.PS
+010001,10,110,5.FT,5.FS,5.FD,101111:COP1:32,f::PUU.PS
 "puu.ps f<FD>, f<FS>, f<FT>"
 *mipsV:
 *mips32r2:
@@ -5322,7 +5354,7 @@
 }
 
 
-010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001000:COP1:64,f::ROUND.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001000:COP1:32,f::ROUND.L.fmt
 "round.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
@@ -5404,6 +5436,15 @@
 }
 
 
+010011,5.BASE,5.INDEX,5.FS,00000001001:COP1X:32,f::SDXC1
+"sdxc1 f<FS>, r<INDEX>(r<BASE>)"
+*mips32r2
+{
+  check_fpu (SD_);
+  do_store_double (SD_, GPR[BASE], GPR[INDEX], COP_SD (1, FS));
+}
+
+
 010011,5.BASE,5.INDEX,5.FS,00000001001:COP1X:64,f::SDXC1
 "sdxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsIV:
@@ -5418,18 +5459,36 @@
 }
 
 
+010011,5.BASE,5.INDEX,5.FS,00000,001101:COP1X:32,f::SUXC1
+"suxc1 f<FS>, r<INDEX>(r<BASE>)"
+*mips32r2:
+{
+  address_word base = GPR[BASE];
+  address_word index = GPR[INDEX];
+  address_word vaddr = base + index;
+  check_fpu (SD_);
+  if (SizeFGR () != 64)
+    Unpredictable ();
+  /* Arrange for the bottom 3 bits of (base + index) to be 0.  */
+  if ((vaddr & 0x7) != 0)
+    index -= (vaddr & 0x7);
+  do_store_double (SD_, base, index, COP_SD (1, FS));
+}
+
+
 010011,5.BASE,5.INDEX,5.FS,00000,001101:COP1X:64,f::SUXC1
 "suxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsV:
 *mips64:
 *mips64r2:
 {
-  unsigned64 v;
   address_word base = GPR[BASE];
   address_word index = GPR[INDEX];
   address_word vaddr = base + index;
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
+  if (SizeFGR () != 64)
+    Unpredictable ();
   /* Arrange for the bottom 3 bits of (base + index) to be 0.  */
   if ((vaddr & 0x7) != 0)
     index -= (vaddr & 0x7);
@@ -5570,7 +5629,7 @@
 }
 
 
-010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001001:COP1:64,f::TRUNC.L.fmt
+010001,10,3.FMT!2!3!4!5!6!7,00000,5.FS,5.FD,001001:COP1:32,f::TRUNC.L.fmt
 "trunc.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:

@@ -1,3 +1,19 @@
+2007-10-22  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* mips.igen (check_fmt_p): Provide a separate mips32r2 definition
+	that unconditionally allows fmt_ps.
+	(ALNV.PS, CEIL.L.fmt, CVT.L.fmt, CVT.PS.S, CVT.S.PL, CVT.S.PU)
+	(FLOOR.L.fmt, LWXC1, MADD.fmt, MSUB.fmt, NMADD.fmt, NMSUB.fmt)
+	(PLL.PS, PLU.PS, PUL.PS, PUU.PS, ROUND.L.fmt, TRUNC.L.fmt): Change
+	filter from 64,f to 32,f.
+	(PREFX): Change filter from 64 to 32.
+	(LDXC1, LUXC1): Provide separate mips32r2 implementations
+	that use do_load_double instead of do_load.  Make both LUXC1
+	versions unpredictable if SizeFGR () != 64.
+	(SDXC1, SUXC1): Extend to mips32r2, using do_store_double
+	instead of do_store.  Remove unused variable.  Make both SUXC1
+	versions unpredictable if SizeFGR () != 64.
+
 2007-10-07  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* mips.igen (ll): Fix mask for WITH_TARGET_WORD_BITSIZE == 32.
