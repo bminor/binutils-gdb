@@ -43,8 +43,8 @@ x:
 
  moveq 0,r5
  bdap 2,r10
- test_move_cc 0 0 0 0
  movu.b [r3],r5
+ test_move_cc 0 0 0 0
  dumpr3 ; aa
 
  move.d 0x42435567,r8

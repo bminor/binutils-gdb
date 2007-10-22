@@ -13,12 +13,12 @@
 
  moveq 0,r3
  move.b 0x94,r3
- test_move_cc 0 0 0 0
+ test_move_cc 1 0 0 0
  dumpr3
 
  moveq -1,r3
  move.w 0x4321,r3
- test_move_cc 1 0 0 0
+ test_move_cc 0 0 0 0
  dumpr3
 
  moveq 0,r3

@@ -205,13 +205,13 @@
  move.d 0x5a67f19f,r3
  moveq 12,r4
  asr.b r4,r3
- test_move_cc 0 0 0 0
+ test_move_cc 1 0 0 0
  dumpr3 ; 5a67f1ff
 
  move.d 0x5a67f19f,r3
  moveq 4,r4
  asr.b r4,r3
- test_move_cc 0 0 0 0
+ test_move_cc 1 0 0 0
  dumpr3 ; 5a67f1f9
 
  move.d 0x5a67f19f,r3

@@ -127,7 +127,7 @@
  moveq -1,r3
  moveq 31,r4
  lsr.w r4,r3
- test_move_cc 0 0 0 0
+ test_move_cc 0 1 0 0
  dumpr3 ; ffff0000
 
  moveq -1,r3

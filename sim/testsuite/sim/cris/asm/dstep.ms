@@ -30,7 +30,7 @@
  move.d 0x5432f789,r4
  move.d 0x78134452,r3
  dstep r4,r3
- test_move_cc 0 0 0 0
+ test_move_cc 1 0 0 0
  dumpr3 ; 9bf3911b
 
  move.d 0xffff,r3

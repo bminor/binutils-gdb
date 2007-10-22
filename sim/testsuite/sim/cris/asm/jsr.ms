@@ -41,7 +41,8 @@ x:
  nop
  quit
 
-8:
+; Can't use local label 8 or 9, as they're used by test_move_cc.
+y:
  move srp,r3
  sub.d 7b,r3
  dumpr3
@@ -78,7 +79,7 @@ x:
  move srp,r3
  sub.d 7b,r3
  dumpr3
- jump 8b
+ jump y
  .if ..asm.arch.cris.v32
  nop
  .endif

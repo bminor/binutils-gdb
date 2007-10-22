@@ -277,7 +277,13 @@ _start:
 
 	.macro test_move_cc N Z V C
 	.if ..asm.arch.cris.v32
+	; V and C aren't affected on v32, so to re-use the test-cases,
+	; we fake them cleared.  There's a separate test, nonvcv32.ms
+	; covering this omission.
 	clearf vc
+	test_cc \N \Z 0 0
+	.else
+	test_cc \N \Z \V \C
 	.endif
 	.endm
 

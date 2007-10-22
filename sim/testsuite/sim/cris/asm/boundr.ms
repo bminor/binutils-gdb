@@ -24,7 +24,7 @@
  moveq -1,r4
  move.d r4,r3
  bound.d r4,r3
- test_move_cc 0 0 0 0
+ test_move_cc 1 0 0 0
  dumpr3 ; ffffffff
 
  move.d 0x5432f789,r4

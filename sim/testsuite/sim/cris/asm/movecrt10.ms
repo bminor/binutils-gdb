@@ -1,6 +1,6 @@
 #mach: crisv10
 #output: ffffff42\n94\nffff4321\n9234\n76543210\n76540000\n
-#output: Basic clock cycles, total @: 22\n
+#output: Basic clock cycles, total @: 82\n
 #output: Memory source stall cycles: 0\n
 #output: Memory read-after-write stall cycles: 0\n
 #output: Movem source stall cycles: 0\n

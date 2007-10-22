@@ -1,3 +1,23 @@
+2007-10-22  Edgar E. Iglesias <edgar@axis.com>
+	    Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/asm/testutils.inc (test_move_cc): Add missing call to
+	test_cc.
+	* sim/cris/asm/asr.ms: Correct expected condition code flags.
+	* sim/cris/asm/boundr.ms: Ditto.
+	* sim/cris/asm/dstep.ms: Ditto.
+	* sim/cris/asm/lsr.ms: Ditto.
+	* sim/cris/asm/movecr.ms: Ditto.
+	* sim/cris/asm/mover.ms: Ditto.
+	* sim/cris/asm/neg.ms: Ditto.  Use test_cc, not test_move_cc.
+	* sim/cris/asm/op3.ms: Check the condition code flags after the insn
+	under test.
+	* sim/cris/asm/movecrt10.ms: Update expected number of simulated
+	cycles.
+	* sim/cris/asm/movecrt32.ms: Ditto.
+	* sim/cris/asm/jsr.ms: Don't use local label 8.
+	* sim/cris/asm/nonvcv32.ms: New test.
+
 2007-10-11  Jesper Nilsson  <jesper.nilsson@axis.com>
 
 	* sim/cris/c/freopen2.c: Added testcase.

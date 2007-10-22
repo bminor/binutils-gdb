@@ -8,7 +8,7 @@
  moveq -30,r3
  moveq 5,r4
  move.b r4,r3
- test_move_cc 1 0 0 0
+ test_move_cc 0 0 0 0
  dumpr3
 
  move.w r4,r3
