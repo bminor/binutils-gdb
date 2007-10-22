@@ -1,5 +1,10 @@
 2007-10-22  Markus Deuling  <deuling@de.ibm.com>
 
+	* reggroups.c (default_register_reggroup_p): Replace current_gdbarch
+	by gdbarch.
+
+2007-10-22  Markus Deuling  <deuling@de.ibm.com>
+
 	* infcmd.c (default_print_registers_info, print_return_value)
 	(print_vector_info, print_float_info): Replace current_gdbarch by
 	gdbarch.

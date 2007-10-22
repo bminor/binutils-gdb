@@ -157,16 +157,14 @@ default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   int float_p;
   int raw_p;
 
-  if (gdbarch_register_name (current_gdbarch, regnum) == NULL
-      || *gdbarch_register_name (current_gdbarch, regnum) == '\0')
+  if (gdbarch_register_name (gdbarch, regnum) == NULL
+      || *gdbarch_register_name (gdbarch, regnum) == '\0')
     return 0;
   if (group == all_reggroup)
     return 1;
   vector_p = TYPE_VECTOR (register_type (gdbarch, regnum));
   float_p = TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT;
-  /* FIXME: cagney/2003-04-13: Can't yet use gdbarch_num_regs
-     (gdbarch), as not all architectures are multi-arch.  */
-  raw_p = regnum < gdbarch_num_regs (current_gdbarch);
+  raw_p = regnum < gdbarch_num_regs (gdbarch);
   if (group == float_reggroup)
     return float_p;
   if (group == vector_reggroup)
