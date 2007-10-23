@@ -1,3 +1,9 @@
+2007-10-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/2336
+	* configure.ac: Modify $LIBINTL before the BFD check.
+	* configure: Regenerated.
+
 2007-10-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* buildsym.c (free_pending_blocks): Remove commented-out code.
