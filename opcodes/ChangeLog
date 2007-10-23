@@ -1,3 +1,11 @@
+2007-10-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_SIMD_Suffix): Renamed to ...
+	(CMP_Fixup): This.  Rewrite.
+	(OPSIMD): Renamed to ...
+	(CMP): This. Updated.
+	(prefix_table): Update PREFIX_0FC2 entry.
+
 2007-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (prefix_table): Reordered by opcode.

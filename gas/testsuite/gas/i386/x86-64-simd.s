@@ -91,6 +91,11 @@ _start:
 	unpcklpd (%rax),%xmm1
 	unpcklps (%rax),%xmm1
 
+cmpss	$0x10,%xmm7,%xmm6
+cmpss	$0x10,(%rax),%xmm7
+cmpsd	$0x10,%xmm7,%xmm6
+cmpsd	$0x10,(%rax),%xmm7
+
 	.intel_syntax noprefix
 
 addsubps xmm1,XMMWORD PTR [rip+0x12345678]        
@@ -180,3 +185,7 @@ unpckhpd xmm0,XMMWORD PTR [rax]
 unpckhps xmm0,XMMWORD PTR [rax]
 unpcklpd xmm0,XMMWORD PTR [rax]
 unpcklps xmm0,XMMWORD PTR [rax]
+cmpss  xmm6,xmm7,0x10
+cmpss  xmm7,DWORD PTR [rax],0x10
+cmpsd  xmm6,xmm7,0x10
+cmpsd  xmm7,QWORD PTR [rax],0x10

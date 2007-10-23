@@ -85,6 +85,11 @@ _start:
 	unpcklpd (%eax),%xmm1
 	unpcklps (%eax),%xmm1
 
+cmpss	$0x10,%xmm7,%xmm6
+cmpss	$0x10,(%eax),%xmm7
+cmpsd	$0x10,%xmm7,%xmm6
+cmpsd	$0x10,(%eax),%xmm7
+
 	.intel_syntax noprefix
 
 addsubps xmm1,XMMWORD PTR ds:0x12345678
@@ -168,3 +173,7 @@ unpckhpd xmm0,XMMWORD PTR [eax]
 unpckhps xmm0,XMMWORD PTR [eax]
 unpcklpd xmm0,XMMWORD PTR [eax]
 unpcklps xmm0,XMMWORD PTR [eax]
+cmpss  xmm6,xmm7,0x10
+cmpss  xmm7,DWORD PTR [eax],0x10
+cmpsd  xmm6,xmm7,0x10
+cmpsd  xmm7,QWORD PTR [eax],0x10

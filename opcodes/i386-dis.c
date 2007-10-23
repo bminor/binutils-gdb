@@ -95,7 +95,7 @@ static void OP_Mwait (int, int);
 static void NOP_Fixup1 (int, int);
 static void NOP_Fixup2 (int, int);
 static void OP_3DNowSuffix (int, int);
-static void OP_SIMD_Suffix (int, int);
+static void CMP_Fixup (int, int);
 static void BadOp (void);
 static void REP_Fixup (int, int);
 static void CMPXCHG8B_Fixup (int, int);
@@ -340,7 +340,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EMCq { OP_EMC, q_mode }
 #define MXC { OP_MXC, 0 }
 #define OPSUF { OP_3DNowSuffix, 0 }
-#define OPSIMD { OP_SIMD_Suffix, 0 }
+#define CMP { CMP_Fixup, 0 }
 #define XMM0 { XMM_Fixup, 0 }
 
 /* Used handle "rep" prefix for string instructions.  */
@@ -2091,10 +2091,10 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0FC2 */
   {
-    { "", { XM, EXx, OPSIMD } },	/* See OP_SIMD_SUFFIX.  */
-    { "", { XM, EXd, OPSIMD } },
-    { "", { XM, EXx, OPSIMD } },
-    { "", { XM, EXq, OPSIMD } },
+    { "cmpps",	{ XM, EXx, CMP } },
+    { "cmpss",	{ XM, EXd, CMP } },
+    { "cmppd",	{ XM, EXx, CMP } },
+    { "cmpsd",	{ XM, EXq, CMP } },
   },
 
   /* PREFIX_0FC7_REG_6 */
@@ -7737,42 +7737,28 @@ static const char *simd_cmp_op[] = {
 };
 
 static void
-OP_SIMD_Suffix (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+CMP_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   unsigned int cmp_type;
 
   FETCH_DATA (the_info, codep + 1);
-  obufp = obuf + strlen (obuf);
   cmp_type = *codep++ & 0xff;
   if (cmp_type < 8)
     {
-      char suffix1 = 'p', suffix2 = 's';
-      used_prefixes |= (prefixes & PREFIX_REPZ);
-      if (prefixes & PREFIX_REPZ)
-	suffix1 = 's';
-      else
-	{
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	  if (prefixes & PREFIX_DATA)
-	    suffix2 = 'd';
-	  else
-	    {
-	      used_prefixes |= (prefixes & PREFIX_REPNZ);
-	      if (prefixes & PREFIX_REPNZ)
-		suffix1 = 's', suffix2 = 'd';
-	    }
-	}
-      sprintf (scratchbuf, "cmp%s%c%c",
-	       simd_cmp_op[cmp_type], suffix1, suffix2);
-      used_prefixes |= (prefixes & PREFIX_REPZ);
-      oappend (scratchbuf);
+      char suffix [3];
+      char *p = obuf + strlen (obuf) - 2;
+      suffix[0] = p[0];
+      suffix[1] = p[1];
+      suffix[2] = '\0';
+      sprintf (p, "%s%s", simd_cmp_op[cmp_type], suffix);
     }
   else
     {
-      /* We have a bad extension byte.  Clean up.  */
-      op_out[0][0] = '\0';
-      op_out[1][0] = '\0';
-      BadOp ();
+      /* We have a reserved extension byte.  Output it directly.  */
+      scratchbuf[0] = '$';
+      print_operand_value (scratchbuf + 1, 1, cmp_type);
+      oappend (scratchbuf + intel_syntax);
+      scratchbuf[0] = '\0';
     }
 }
 

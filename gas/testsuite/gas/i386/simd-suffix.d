@@ -89,6 +89,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 15 08             	unpckhps \(%eax\),%xmm1
 [ 	]*[a-f0-9]+:	66 0f 14 08          	unpcklpd \(%eax\),%xmm1
 [ 	]*[a-f0-9]+:	0f 14 08             	unpcklps \(%eax\),%xmm1
+[ 	]*[a-f0-9]+:	f3 0f c2 f7 10       	cmpss  \$0x10,%xmm7,%xmm6
+[ 	]*[a-f0-9]+:	f3 0f c2 38 10       	cmpss  \$0x10,\(%eax\),%xmm7
+[ 	]*[a-f0-9]+:	f2 0f c2 f7 10       	cmpsd  \$0x10,%xmm7,%xmm6
+[ 	]*[a-f0-9]+:	f2 0f c2 38 10       	cmpsd  \$0x10,\(%eax\),%xmm7
 [ 	]*[a-f0-9]+:	f2 0f d0 0d 78 56 34 12 	addsubps 0x12345678,%xmm1
 [ 	]*[a-f0-9]+:	66 0f 2f 0d 78 56 34 12 	comisd 0x12345678,%xmm1
 [ 	]*[a-f0-9]+:	0f 2f 0d 78 56 34 12 	comiss 0x12345678,%xmm1
@@ -170,4 +174,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 15 00             	unpckhps \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 14 00          	unpcklpd \(%eax\),%xmm0
 [ 	]*[a-f0-9]+:	0f 14 00             	unpcklps \(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f c2 f7 10       	cmpss  \$0x10,%xmm7,%xmm6
+[ 	]*[a-f0-9]+:	f3 0f c2 38 10       	cmpss  \$0x10,\(%eax\),%xmm7
+[ 	]*[a-f0-9]+:	f2 0f c2 f7 10       	cmpsd  \$0x10,%xmm7,%xmm6
+[ 	]*[a-f0-9]+:	f2 0f c2 38 10       	cmpsd  \$0x10,\(%eax\),%xmm7
 #pass

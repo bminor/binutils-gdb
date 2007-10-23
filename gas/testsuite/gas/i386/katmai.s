@@ -157,10 +157,6 @@ foo:
  prefetcht1	(%edx)
  prefetcht2	(%ecx)
 
-# A SIMD instruction with a bad extension byte
-.byte 0x2E,0x0F,0xC2,0x0A,0x08
- nop
- nop
 # A bad sfence modrm byte
 .byte 0x65,0x0F,0xAE,0xff
 # Pad out to good alignment
