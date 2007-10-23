@@ -198,17 +198,8 @@ really_free_pendings (void *dummy)
 void
 free_pending_blocks (void)
 {
-#if 0				/* Now we make the links in the
-				   objfile_obstack, so don't free
-				   them.  */
-  struct pending_block *bnext, *bnext1;
-
-  for (bnext = pending_blocks; bnext; bnext = bnext1)
-    {
-      bnext1 = bnext->next;
-      xfree ((void *) bnext);
-    }
-#endif
+  /* The links are made in the objfile_obstack, so we only need to
+     reset PENDING_BLOCKS.  */
   pending_blocks = NULL;
 }
 
@@ -493,17 +484,7 @@ make_blockvector (struct objfile *objfile)
       BLOCKVECTOR_BLOCK (blockvector, --i) = next->block;
     }
 
-#if 0				/* Now we make the links in the
-				   obstack, so don't free them.  */
-  /* Now free the links of the list, and empty the list.  */
-
-  for (next = pending_blocks; next; next = next1)
-    {
-      next1 = next->next;
-      xfree (next);
-    }
-#endif
-  pending_blocks = NULL;
+  free_pending_blocks ();
 
 #if 1				/* FIXME, shut this off after a while
 				   to speed up symbol reading.  */
@@ -976,14 +957,6 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	    {
 	      linetablesize = sizeof (struct linetable) +
 	        subfile->line_vector->nitems * sizeof (struct linetable_entry);
-#if 0
-	      /* I think this is artifact from before it went on the
-	         obstack. I doubt we'll need the memory between now
-	         and when we free it later in this function.  */
-	      /* First, shrink the linetable to make more memory.  */
-	      subfile->line_vector = (struct linetable *)
-		xrealloc ((char *) subfile->line_vector, linetablesize);
-#endif
 
 	      /* Like the pending blocks, the line table may be
 	         scrambled in reordered executables.  Sort it if
