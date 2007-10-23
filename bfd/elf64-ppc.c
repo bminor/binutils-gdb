@@ -8387,49 +8387,57 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       bfd_put_64 (htab->brlt->owner, off,
 		  htab->brlt->contents + br_entry->offset);
 
-      if (htab->relbrlt != NULL)
+      if (br_entry->iter == htab->stub_iteration)
 	{
-	  /* Create a reloc for the branch lookup table entry.  */
-	  Elf_Internal_Rela rela;
-	  bfd_byte *rl;
+	  br_entry->iter = 0;
 
-	  rela.r_offset = (br_entry->offset
-			   + htab->brlt->output_offset
-			   + htab->brlt->output_section->vma);
-	  rela.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
-	  rela.r_addend = off;
-
-	  rl = htab->relbrlt->contents;
-	  rl += htab->relbrlt->reloc_count++ * sizeof (Elf64_External_Rela);
-	  bfd_elf64_swap_reloca_out (htab->relbrlt->owner, &rela, rl);
-	}
-      else if (info->emitrelocations)
-	{
-	  Elf_Internal_Rela *relocs, *r;
-	  struct bfd_elf_section_data *elfsec_data;
-
-	  elfsec_data = elf_section_data (htab->brlt);
-	  relocs = elfsec_data->relocs;
-	  if (relocs == NULL)
+	  if (htab->relbrlt != NULL)
 	    {
-	      bfd_size_type relsize;
-	      relsize = htab->brlt->reloc_count * sizeof (*relocs);
-	      relocs = bfd_alloc (htab->brlt->owner, relsize);
-	      if (relocs == NULL)
-		return FALSE;
-	      elfsec_data->relocs = relocs;
-	      elfsec_data->rel_hdr.sh_size = (stub_entry->stub_sec->reloc_count
-					      * sizeof (Elf64_External_Rela));
-	      elfsec_data->rel_hdr.sh_entsize = sizeof (Elf64_External_Rela);
-	      htab->brlt->reloc_count = 0;
+	      /* Create a reloc for the branch lookup table entry.  */
+	      Elf_Internal_Rela rela;
+	      bfd_byte *rl;
+
+	      rela.r_offset = (br_entry->offset
+			       + htab->brlt->output_offset
+			       + htab->brlt->output_section->vma);
+	      rela.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
+	      rela.r_addend = off;
+
+	      rl = htab->relbrlt->contents;
+	      rl += (htab->relbrlt->reloc_count++
+		     * sizeof (Elf64_External_Rela));
+	      bfd_elf64_swap_reloca_out (htab->relbrlt->owner, &rela, rl);
 	    }
-	  r = relocs + htab->brlt->reloc_count;
-	  htab->brlt->reloc_count += 1;
-	  r->r_offset = (br_entry->offset
-			 + htab->brlt->output_offset
-			 + htab->brlt->output_section->vma);
-	  r->r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
-	  r->r_addend = off;
+	  else if (info->emitrelocations)
+	    {
+	      Elf_Internal_Rela *relocs, *r;
+	      struct bfd_elf_section_data *elfsec_data;
+
+	      elfsec_data = elf_section_data (htab->brlt);
+	      relocs = elfsec_data->relocs;
+	      if (relocs == NULL)
+		{
+		  bfd_size_type relsize;
+		  relsize = htab->brlt->reloc_count * sizeof (*relocs);
+		  relocs = bfd_alloc (htab->brlt->owner, relsize);
+		  if (relocs == NULL)
+		    return FALSE;
+		  elfsec_data->relocs = relocs;
+		  elfsec_data->rel_hdr.sh_size
+		    = (stub_entry->stub_sec->reloc_count
+		       * sizeof (Elf64_External_Rela));
+		  elfsec_data->rel_hdr.sh_entsize
+		    = sizeof (Elf64_External_Rela);
+		  htab->brlt->reloc_count = 0;
+		}
+	      r = relocs + htab->brlt->reloc_count;
+	      htab->brlt->reloc_count += 1;
+	      r->r_offset = (br_entry->offset
+			     + htab->brlt->output_offset
+			     + htab->brlt->output_section->vma);
+	      r->r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
+	      r->r_addend = off;
+	    }
 	}
 
       off = (br_entry->offset
@@ -8865,11 +8873,6 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
   if (isec->output_section == NULL)
     return 0;
 
-  /* Hack for linux kernel.  .fixup contains branches, but only back to
-     the function that hit an exception.  */
-  if (strcmp (isec->name, ".fixup") == 0)
-    return 0;
-
   if (isec->reloc_count == 0)
     return 0;
 
@@ -9074,8 +9077,13 @@ ppc64_elf_next_input_section (struct bfd_link_info *info, asection *isec)
       /* If a code section has a function that uses the TOC then we need
 	 to use the right TOC (obviously).  Also, make sure that .opd gets
 	 the correct TOC value for R_PPC64_TOC relocs that don't have or
-	 can't find their function symbol (shouldn't ever happen now).  */
-      if (isec->has_toc_reloc || (isec->flags & SEC_CODE) == 0)
+	 can't find their function symbol (shouldn't ever happen now).
+	 Also specially treat .fixup for the linux kernel.  .fixup
+	 contains branches, but only back to the function that hit an
+	 exception.  */
+      if (isec->has_toc_reloc
+	  || (isec->flags & SEC_CODE) == 0
+	  || strcmp (isec->name, ".fixup") == 0)
 	{
 	  if (elf_gp (isec->owner) != 0)
 	    htab->toc_curr = elf_gp (isec->owner);
