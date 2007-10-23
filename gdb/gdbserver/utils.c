@@ -78,7 +78,7 @@ fatal (const char *string,...)
 {
   va_list args;
   va_start (args, string);
-  fprintf (stderr, "gdb: ");
+  fprintf (stderr, "gdbserver: ");
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");
   va_end (args);
@@ -91,7 +91,7 @@ warning (const char *string,...)
 {
   va_list args;
   va_start (args, string);
-  fprintf (stderr, "gdb: ");
+  fprintf (stderr, "gdbserver: ");
   vfprintf (stderr, string, args);
   fprintf (stderr, "\n");
   va_end (args);

@@ -81,14 +81,12 @@ extern struct linux_target_ops the_low_target;
 #define get_thread_process(thr) (get_process (inferior_target_data (thr)))
 #define get_process_thread(proc) ((struct thread_info *) \
 				  find_inferior_id (&all_threads, \
-				  get_process (proc)->tid))
+				  get_process (proc)->lwpid))
 
 struct process_info
 {
   struct inferior_list_entry head;
-  int thread_known;
   unsigned long lwpid;
-  unsigned long tid;
 
   /* If this flag is set, the next SIGSTOP will be ignored (the
      process will be immediately resumed).  This means that either we
@@ -104,10 +102,6 @@ struct process_info
 
   /* When stopped is set, the last wait status recorded for this process.  */
   int last_status;
-
-  /* If this flag is set, we have sent a SIGSTOP to this process and are
-     waiting for it to stop.  */
-  int sigstop_sent;
 
   /* If this flag is set, STATUS_PENDING is a waitstatus that has not yet
      been reported.  */
@@ -135,16 +129,19 @@ struct process_info
 
   struct thread_resume *resume;
 
+  int thread_known;
+  unsigned long tid;
 #ifdef HAVE_THREAD_DB_H
-  /* The thread handle, used for e.g. TLS access.  */
+  /* The thread handle, used for e.g. TLS access.  Only valid if
+     THREAD_KNOWN is set.  */
   td_thrhandle_t th;
 #endif
 };
 
 extern struct inferior_list all_processes;
 
-void linux_attach_lwp (unsigned long pid, unsigned long tid);
+void linux_attach_lwp (unsigned long pid);
 
-int thread_db_init (void);
+int thread_db_init (int use_events);
 int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);

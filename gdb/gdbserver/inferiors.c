@@ -65,21 +65,6 @@ for_each_inferior (struct inferior_list *list,
     }
 }
 
-/* When debugging a single-threaded program, the threads list (such as
-   it is) is indexed by PID.  When debugging a multi-threaded program,
-   we index by TID.  This ugly routine replaces the
-   first-debugged-thread's PID with its TID.  */
-
-void
-change_inferior_id (struct inferior_list *list,
-		    unsigned long new_id)
-{
-  if (list->head != list->tail)
-    error ("tried to change thread ID after multiple threads are created");
-
-  list->head->id = new_id;
-}
-
 void
 remove_inferior (struct inferior_list *list,
 		 struct inferior_list_entry *entry)
@@ -317,4 +302,33 @@ clear_inferiors (void)
 
   clear_list (&all_threads);
   clear_list (&all_dlls);
+}
+
+/* Two utility functions for a truly degenerate inferior_list: a simple
+   PID listing.  */
+
+void
+add_pid_to_list (struct inferior_list *list, unsigned long pid)
+{
+  struct inferior_list_entry *new_entry;
+
+  new_entry = malloc (sizeof (struct inferior_list_entry));
+  new_entry->id = pid;
+  add_inferior_to_list (list, new_entry);
+}
+
+int
+pull_pid_from_list (struct inferior_list *list, unsigned long pid)
+{
+  struct inferior_list_entry *new_entry;
+
+  new_entry = find_inferior_id (list, pid);
+  if (new_entry == NULL)
+    return 0;
+  else
+    {
+      remove_inferior (list, new_entry);
+      free (new_entry);
+      return 1;
+    }
 }

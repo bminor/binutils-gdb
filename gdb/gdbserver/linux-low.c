@@ -44,26 +44,67 @@
 #define O_LARGEFILE 0
 #endif
 
+/* If the system headers did not provide the constants, hard-code the normal
+   values.  */
+#ifndef PTRACE_EVENT_FORK
+
+#define PTRACE_SETOPTIONS	0x4200
+#define PTRACE_GETEVENTMSG	0x4201
+
+/* options set using PTRACE_SETOPTIONS */
+#define PTRACE_O_TRACESYSGOOD	0x00000001
+#define PTRACE_O_TRACEFORK	0x00000002
+#define PTRACE_O_TRACEVFORK	0x00000004
+#define PTRACE_O_TRACECLONE	0x00000008
+#define PTRACE_O_TRACEEXEC	0x00000010
+#define PTRACE_O_TRACEVFORKDONE	0x00000020
+#define PTRACE_O_TRACEEXIT	0x00000040
+
+/* Wait extended result codes for the above trace options.  */
+#define PTRACE_EVENT_FORK	1
+#define PTRACE_EVENT_VFORK	2
+#define PTRACE_EVENT_CLONE	3
+#define PTRACE_EVENT_EXEC	4
+#define PTRACE_EVENT_VFORK_DONE	5
+#define PTRACE_EVENT_EXIT	6
+
+#endif /* PTRACE_EVENT_FORK */
+
+/* We can't always assume that this flag is available, but all systems
+   with the ptrace event handlers also have __WALL, so it's safe to use
+   in some contexts.  */
+#ifndef __WALL
+#define __WALL          0x40000000 /* Wait for any child.  */
+#endif
+
 #ifdef __UCLIBC__
 #if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
 #define HAS_NOMMU
 #endif
 #endif
 
-/* ``all_threads'' is keyed by the LWP ID - it should be the thread ID instead,
-   however.  This requires changing the ID in place when we go from !using_threads
-   to using_threads, immediately.
+/* ``all_threads'' is keyed by the LWP ID, which we use as the GDB protocol
+   representation of the thread ID.
 
    ``all_processes'' is keyed by the process ID - which on Linux is (presently)
    the same as the LWP ID.  */
 
 struct inferior_list all_processes;
 
+/* A list of all unknown processes which receive stop signals.  Some other
+   process will presumably claim each of these as forked children
+   momentarily.  */
+
+struct inferior_list stopped_pids;
+
 /* FIXME this is a bit of a hack, and could be removed.  */
 int stopping_threads;
 
 /* FIXME make into a target method?  */
-int using_threads;
+int using_threads = 1;
+static int thread_db_active;
+
+static int must_set_ptrace_flags;
 
 static void linux_resume_one_process (struct inferior_list_entry *entry,
 				      int step, int signal, siginfo_t *info);
@@ -71,6 +112,7 @@ static void linux_resume (struct thread_resume *resume_info);
 static void stop_all_processes (void);
 static int linux_wait_for_event (struct thread_info *child);
 static int check_removed_breakpoint (struct process_info *event_child);
+static void *add_process (unsigned long pid);
 
 struct pending_signals
 {
@@ -90,6 +132,56 @@ static int use_regsets_p = 1;
 
 /* FIXME: Delete eventually.  */
 #define inferior_pid (pid_of (get_thread_process (current_inferior)))
+
+static void
+handle_extended_wait (struct process_info *event_child, int wstat)
+{
+  int event = wstat >> 16;
+  struct process_info *new_process;
+
+  if (event == PTRACE_EVENT_CLONE)
+    {
+      unsigned long new_pid;
+      int ret, status;
+
+      ptrace (PTRACE_GETEVENTMSG, inferior_pid, 0, &new_pid);
+
+      /* If we haven't already seen the new PID stop, wait for it now.  */
+      if (! pull_pid_from_list (&stopped_pids, new_pid))
+	{
+	  /* The new child has a pending SIGSTOP.  We can't affect it until it
+	     hits the SIGSTOP, but we're already attached.  */
+
+	  do {
+	    ret = waitpid (new_pid, &status, __WALL);
+	  } while (ret == -1 && errno == EINTR);
+
+	  if (ret == -1)
+	    perror_with_name ("waiting for new child");
+	  else if (ret != new_pid)
+	    warning ("wait returned unexpected PID %d", ret);
+	  else if (!WIFSTOPPED (status) || WSTOPSIG (status) != SIGSTOP)
+	    warning ("wait returned unexpected status 0x%x", status);
+	}
+
+      ptrace (PTRACE_SETOPTIONS, new_pid, 0, PTRACE_O_TRACECLONE);
+
+      new_process = (struct process_info *) add_process (new_pid);
+      add_thread (new_pid, new_process, new_pid);
+      new_thread_notify (thread_id_to_gdb_id (new_process->lwpid));
+
+      if (stopping_threads)
+	new_process->stopped = 1;
+      else
+	ptrace (PTRACE_CONT, new_pid, 0, 0);
+
+      /* Always resume the current thread.  If we are stopping
+	 threads, it will have a pending SIGSTOP; we may as well
+	 collect it now.  */
+      linux_resume_one_process (&event_child->head,
+				event_child->stepping, 0, NULL);
+    }
+}
 
 /* This function should only be called if the process got a SIGTRAP.
    The SIGTRAP could mean several things.
@@ -133,9 +225,6 @@ add_process (unsigned long pid)
   memset (process, 0, sizeof (*process));
 
   process->head.id = pid;
-
-  /* Default to tid == lwpid == pid.  */
-  process->tid = pid;
   process->lwpid = pid;
 
   add_inferior_to_list (&all_processes, &process->head);
@@ -180,6 +269,7 @@ linux_create_inferior (char *program, char **allargs)
 
   new_process = add_process (pid);
   add_thread (pid, new_process, pid);
+  must_set_ptrace_flags = 1;
 
   return pid;
 }
@@ -187,7 +277,7 @@ linux_create_inferior (char *program, char **allargs)
 /* Attach to an inferior process.  */
 
 void
-linux_attach_lwp (unsigned long pid, unsigned long tid)
+linux_attach_lwp (unsigned long pid)
 {
   struct process_info *new_process;
 
@@ -198,13 +288,16 @@ linux_attach_lwp (unsigned long pid, unsigned long tid)
       fflush (stderr);
 
       /* If we fail to attach to an LWP, just return.  */
-      if (!using_threads)
+      if (all_threads.head == NULL)
 	_exit (0177);
       return;
     }
 
+  ptrace (PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACECLONE);
+
   new_process = (struct process_info *) add_process (pid);
-  add_thread (tid, new_process, pid);
+  add_thread (pid, new_process, pid);
+  new_thread_notify (thread_id_to_gdb_id (new_process->lwpid));
 
   /* The next time we wait for this LWP we'll see a SIGSTOP as PTRACE_ATTACH
      brings it to a halt.  We should ignore that SIGSTOP and resume the process
@@ -225,7 +318,7 @@ linux_attach (unsigned long pid)
 {
   struct process_info *process;
 
-  linux_attach_lwp (pid, pid);
+  linux_attach_lwp (pid);
 
   /* Don't ignore the initial SIGSTOP if we just attached to this process.
      It will be collected by wait shortly.  */
@@ -338,9 +431,9 @@ linux_join (void)
 
 /* Return nonzero if the given thread is still alive.  */
 static int
-linux_thread_alive (unsigned long tid)
+linux_thread_alive (unsigned long lwpid)
 {
-  if (find_inferior_id (&all_threads, tid) != NULL)
+  if (find_inferior_id (&all_threads, lwpid) != NULL)
     return 1;
   else
     return 0;
@@ -440,6 +533,7 @@ linux_wait_for_process (struct process_info **childp, int *wstatp)
   if (*childp != NULL)
     to_wait_for = (*childp)->lwpid;
 
+retry:
   while (1)
     {
       ret = waitpid (to_wait_for, wstatp, WNOHANG);
@@ -474,6 +568,18 @@ linux_wait_for_process (struct process_info **childp, int *wstatp)
   if (to_wait_for == -1)
     *childp = (struct process_info *) find_inferior_id (&all_processes, ret);
 
+  /* If we didn't find a process, one of two things presumably happened:
+     - A process we started and then detached from has exited.  Ignore it.
+     - A process we are controlling has forked and the new child's stop
+     was reported to us by the kernel.  Save its PID.  */
+  if (*childp == NULL && WIFSTOPPED (*wstatp))
+    {
+      add_pid_to_list (&stopped_pids, ret);
+      goto retry;
+    }
+  else if (*childp == NULL)
+    goto retry;
+
   (*childp)->stopped = 1;
   (*childp)->pending_is_breakpoint = 0;
 
@@ -483,7 +589,7 @@ linux_wait_for_process (struct process_info **childp, int *wstatp)
       && WIFSTOPPED (*wstatp))
     {
       current_inferior = (struct thread_info *)
-	find_inferior_id (&all_threads, (*childp)->tid);
+	find_inferior_id (&all_threads, (*childp)->lwpid);
       /* For testing only; i386_stop_pc prints out a diagnostic.  */
       if (the_low_target.get_pc != NULL)
 	get_stop_pc ();
@@ -548,20 +654,19 @@ linux_wait_for_event (struct thread_info *child)
 	error ("event from unknown child");
 
       current_inferior = (struct thread_info *)
-	find_inferior_id (&all_threads, event_child->tid);
+	find_inferior_id (&all_threads, event_child->lwpid);
 
       /* Check for thread exit.  */
-      if (using_threads && ! WIFSTOPPED (wstat))
+      if (! WIFSTOPPED (wstat))
 	{
 	  if (debug_threads)
-	    fprintf (stderr, "Thread %ld (LWP %ld) exiting\n",
-		     event_child->tid, event_child->head.id);
+	    fprintf (stderr, "LWP %ld exiting\n", event_child->head.id);
 
 	  /* If the last thread is exiting, just return.  */
 	  if (all_threads.head == all_threads.tail)
 	    return wstat;
 
-	  dead_thread_notify (event_child->tid);
+	  dead_thread_notify (thread_id_to_gdb_id (event_child->lwpid));
 
 	  remove_inferior (&all_processes, &event_child->head);
 	  free (event_child);
@@ -577,8 +682,7 @@ linux_wait_for_event (struct thread_info *child)
 	  continue;
 	}
 
-      if (using_threads
-	  && WIFSTOPPED (wstat)
+      if (WIFSTOPPED (wstat)
 	  && WSTOPSIG (wstat) == SIGSTOP
 	  && event_child->stop_expected)
 	{
@@ -587,6 +691,13 @@ linux_wait_for_event (struct thread_info *child)
 	  event_child->stop_expected = 0;
 	  linux_resume_one_process (&event_child->head,
 				    event_child->stepping, 0, NULL);
+	  continue;
+	}
+
+      if (WIFSTOPPED (wstat) && WSTOPSIG (wstat) == SIGTRAP
+	  && wstat >> 16 != 0)
+	{
+	  handle_extended_wait (event_child, wstat);
 	  continue;
 	}
 
@@ -601,18 +712,20 @@ linux_wait_for_event (struct thread_info *child)
 	 thread library?  */
       if (WIFSTOPPED (wstat)
 	  && !event_child->stepping
-	  && ((using_threads && (WSTOPSIG (wstat) == __SIGRTMIN
-				 || WSTOPSIG (wstat) == __SIGRTMIN + 1))
-	      || (pass_signals[target_signal_from_host (WSTOPSIG (wstat))]
-		  && (WSTOPSIG (wstat) != SIGSTOP
-		      || !event_child->sigstop_sent))))
+	  && (
+#ifdef USE_THREAD_DB
+	      (thread_db_active && (WSTOPSIG (wstat) == __SIGRTMIN
+				    || WSTOPSIG (wstat) == __SIGRTMIN + 1))
+	      ||
+#endif
+	      (pass_signals[target_signal_from_host (WSTOPSIG (wstat))]
+	       && (WSTOPSIG (wstat) != SIGSTOP || !stopping_threads))))
 	{
 	  siginfo_t info, *info_p;
 
 	  if (debug_threads)
-	    fprintf (stderr, "Ignored signal %d for %ld (LWP %ld).\n",
-		     WSTOPSIG (wstat), event_child->tid,
-		     event_child->head.id);
+	    fprintf (stderr, "Ignored signal %d for LWP %ld.\n",
+		     WSTOPSIG (wstat), event_child->head.id);
 
 	  if (ptrace (PTRACE_GETSIGINFO, event_child->lwpid, 0, &info) == 0)
 	    info_p = &info;
@@ -769,6 +882,12 @@ retry:
   stop_all_processes ();
   disable_async_io ();
 
+  if (must_set_ptrace_flags)
+    {
+      ptrace (PTRACE_SETOPTIONS, inferior_pid, 0, PTRACE_O_TRACECLONE);
+      must_set_ptrace_flags = 0;
+    }
+
   /* If we are waiting for a particular child, and it exited,
      linux_wait_for_event will return its exit status.  Similarly if
      the last child exited.  If this is not the last child, however,
@@ -863,7 +982,6 @@ send_sigstop (struct inferior_list_entry *entry)
     fprintf (stderr, "Sending sigstop to process %ld\n", process->head.id);
 
   kill_lwp (process->head.id, SIGSTOP);
-  process->sigstop_sent = 1;
 }
 
 static void
@@ -880,7 +998,7 @@ wait_for_sigstop (struct inferior_list_entry *entry)
   saved_inferior = current_inferior;
   saved_tid = ((struct inferior_list_entry *) saved_inferior)->id;
   thread = (struct thread_info *) find_inferior_id (&all_threads,
-						    process->tid);
+						    process->lwpid);
   wstat = linux_wait_for_event (thread);
 
   /* If we stopped with a non-SIGSTOP signal, save it for later
@@ -890,9 +1008,8 @@ wait_for_sigstop (struct inferior_list_entry *entry)
       && WSTOPSIG (wstat) != SIGSTOP)
     {
       if (debug_threads)
-	fprintf (stderr, "Process %ld (thread %ld) "
-		 "stopped with non-sigstop status %06x\n",
-		 process->lwpid, process->tid, wstat);
+	fprintf (stderr, "LWP %ld stopped with non-sigstop status %06x\n",
+		 process->lwpid, wstat);
       process->status_pending_p = 1;
       process->status_pending = wstat;
       process->stop_expected = 1;
@@ -1593,14 +1710,127 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
   return 0;
 }
 
+static int linux_supports_tracefork_flag;
+
+/* A helper function for linux_test_for_tracefork, called after fork ().  */
+
+static void
+linux_tracefork_child (void)
+{
+  ptrace (PTRACE_TRACEME, 0, 0, 0);
+  kill (getpid (), SIGSTOP);
+  fork ();
+  _exit (0);
+}
+
+/* Wrapper function for waitpid which handles EINTR.  */
+
+static int
+my_waitpid (int pid, int *status, int flags)
+{
+  int ret;
+  do
+    {
+      ret = waitpid (pid, status, flags);
+    }
+  while (ret == -1 && errno == EINTR);
+
+  return ret;
+}
+
+/* Determine if PTRACE_O_TRACEFORK can be used to follow fork events.  Make
+   sure that we can enable the option, and that it had the desired
+   effect.  */
+
+static void
+linux_test_for_tracefork (void)
+{
+  int child_pid, ret, status;
+  long second_pid;
+
+  linux_supports_tracefork_flag = 0;
+
+  child_pid = fork ();
+  if (child_pid == -1)
+    perror_with_name ("fork");
+
+  if (child_pid == 0)
+    linux_tracefork_child ();
+
+  ret = my_waitpid (child_pid, &status, 0);
+  if (ret == -1)
+    perror_with_name ("waitpid");
+  else if (ret != child_pid)
+    error ("linux_test_for_tracefork: waitpid: unexpected result %d.", ret);
+  if (! WIFSTOPPED (status))
+    error ("linux_test_for_tracefork: waitpid: unexpected status %d.", status);
+
+  ret = ptrace (PTRACE_SETOPTIONS, child_pid, 0, PTRACE_O_TRACEFORK);
+  if (ret != 0)
+    {
+      ret = ptrace (PTRACE_KILL, child_pid, 0, 0);
+      if (ret != 0)
+	{
+	  warning ("linux_test_for_tracefork: failed to kill child");
+	  return;
+	}
+
+      ret = my_waitpid (child_pid, &status, 0);
+      if (ret != child_pid)
+	warning ("linux_test_for_tracefork: failed to wait for killed child");
+      else if (!WIFSIGNALED (status))
+	warning ("linux_test_for_tracefork: unexpected wait status 0x%x from "
+		 "killed child", status);
+
+      return;
+    }
+
+  ret = ptrace (PTRACE_CONT, child_pid, 0, 0);
+  if (ret != 0)
+    warning ("linux_test_for_tracefork: failed to resume child");
+
+  ret = my_waitpid (child_pid, &status, 0);
+
+  if (ret == child_pid && WIFSTOPPED (status)
+      && status >> 16 == PTRACE_EVENT_FORK)
+    {
+      second_pid = 0;
+      ret = ptrace (PTRACE_GETEVENTMSG, child_pid, 0, &second_pid);
+      if (ret == 0 && second_pid != 0)
+	{
+	  int second_status;
+
+	  linux_supports_tracefork_flag = 1;
+	  my_waitpid (second_pid, &second_status, 0);
+	  ret = ptrace (PTRACE_KILL, second_pid, 0, 0);
+	  if (ret != 0)
+	    warning ("linux_test_for_tracefork: failed to kill second child");
+	  my_waitpid (second_pid, &status, 0);
+	}
+    }
+  else
+    warning ("linux_test_for_tracefork: unexpected result from waitpid "
+	     "(%d, status 0x%x)", ret, status);
+
+  do
+    {
+      ret = ptrace (PTRACE_KILL, child_pid, 0, 0);
+      if (ret != 0)
+	warning ("linux_test_for_tracefork: failed to kill child");
+      my_waitpid (child_pid, &status, 0);
+    }
+  while (WIFSTOPPED (status));
+}
+
+
 static void
 linux_look_up_symbols (void)
 {
 #ifdef USE_THREAD_DB
-  if (using_threads)
+  if (thread_db_active)
     return;
 
-  using_threads = thread_db_init ();
+  thread_db_active = thread_db_init (!linux_supports_tracefork_flag);
 #endif
 }
 
@@ -1782,10 +2012,11 @@ linux_init_signals ()
 void
 initialize_low (void)
 {
-  using_threads = 0;
+  thread_db_active = 0;
   set_target_ops (&linux_target_ops);
   set_breakpoint_data (the_low_target.breakpoint,
 		       the_low_target.breakpoint_len);
   init_registers ();
   linux_init_signals ();
+  linux_test_for_tracefork ();
 }

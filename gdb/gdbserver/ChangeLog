@@ -1,3 +1,47 @@
+2007-10-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* inferiors.c (change_inferior_id): Delete.
+	(add_pid_to_list, pull_pid_from_list): New.
+	* linux-low.c (PTRACE_SETOPTIONS, PTRACE_GETEVENTMSG)
+	(PTRACE_O_TRACESYSGOOD, PTRACE_O_TRACEFORK, PTRACE_O_TRACEVFORK)
+	(PTRACE_O_TRACECLONE, PTRACE_O_TRACEEXEC, PTRACE_O_TRACEVFORKDONE)
+	(PTRACE_O_TRACEEXIT, PTRACE_EVENT_FORK, PTRACE_EVENT_VFORK)
+	(PTRACE_EVENT_CLONE, PTRACE_EVENT_EXEC, PTRACE_EVENT_VFORK_DONE)
+	(PTRACE_EVENT_EXIT, __WALL): Provide default definitions.
+	(stopped_pids, thread_db_active, must_set_ptrace_flags): New variables.
+	(using_threads): Always set to 1.
+	(handle_extended_wait): New.
+	(add_process): Do not set TID.
+	(linux_create_inferior): Set must_set_ptrace_flags.
+	(linux_attach_lwp): Remove TID argument.  Do not check using_threads.
+	Use PTRACE_SETOPTIONS.  Call new_thread_notify.  Update all callers.
+	(linux_thread_alive): Rename TID argument to LWPID.
+	(linux_wait_for_process): Handle unknown processes.  Do not use TID.
+	(linux_wait_for_event): Do not use TID or check using_threads.  Update
+	call to dead_thread_notify.  Call handle_extended_wait.
+	(linux_create_inferior): Use PTRACE_SETOPTIONS.
+	(send_sigstop): Delete sigstop_sent.
+	(wait_for_sigstop): Avoid TID.
+	(linux_supports_tracefork_flag, linux_tracefork_child, my_waitpid)
+	(linux_test_for_tracefork): New.
+	(linux_lookup_signals): Use thread_db_active and
+	linux_supports_tracefork_flag.
+	(initialize_low): Use thread_db_active and linux_test_for_tracefork.
+	* linux-low.h (get_process_thread): Avoid TID.
+	(struct process_ifo): Move thread_known and tid to the end.  Remove
+	sigstop_sent.
+	(linux_attach_lwp, thread_db_init): Update prototypes.
+	* server.h (change_inferior_id): Delete prototype.
+	(add_pid_to_list, pull_pid_from_list): New prototypes.
+	* thread-db.c (thread_db_use_events): New.
+	(find_first_thread): Rename to...
+	(find_one_thread): ...this.  Update callers and messages.  Do not
+	call fatal.  Check thread_db_use_events.  Do not call
+	change_inferior_id or new_thread_notify.
+	(maybe_attach_thread): Update.  Do not call new_thread_notify.
+	(thread_db_init): Set thread_db_use_events.  Check use_events.
+	* utils.c (fatal, warning): Correct message prefix.
+
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (clean): Remove new files.
