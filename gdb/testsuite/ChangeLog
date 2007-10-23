@@ -1,3 +1,7 @@
+2007-10-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.threads/multi-create.c, gdb.threads/multi-create.exp: New.
+
 2007-10-21  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.arch/altivec-abi.exp (compile_flags): Use -mabi=altivec when
