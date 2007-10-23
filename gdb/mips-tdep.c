@@ -2297,6 +2297,111 @@ mips_addr_bits_remove (CORE_ADDR addr)
     return addr;
 }
 
+/* Instructions used during single-stepping of atomic sequences.  */
+#define LL_OPCODE 0x30
+#define LLD_OPCODE 0x34
+#define SC_OPCODE 0x38
+#define SCD_OPCODE 0x3c
+
+/* Checks for an atomic sequence of instructions beginning with a LL/LLD
+   instruction and ending with a SC/SCD instruction.  If such a sequence
+   is found, attempt to step through it.  A breakpoint is placed at the end of 
+   the sequence.  */
+
+static int
+deal_with_atomic_sequence (CORE_ADDR pc)
+{
+  CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR loc = pc;
+  CORE_ADDR branch_bp; /* Breakpoint at branch instruction's destination.  */
+  unsigned long insn;
+  int insn_count;
+  int index;
+  int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
+  const int atomic_sequence_length = 16; /* Instruction sequence length.  */
+
+  if (pc & 0x01)
+    return 0;
+
+  insn = mips_fetch_instruction (loc);
+  /* Assume all atomic sequences start with a ll/lld instruction.  */
+  if (itype_op (insn) != LL_OPCODE && itype_op (insn) != LLD_OPCODE)
+    return 0;
+
+  /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
+     instructions.  */
+  for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
+    {
+      int is_branch = 0;
+      loc += MIPS_INSN32_SIZE;
+      insn = mips_fetch_instruction (loc);
+
+      /* Assume that there is at most one branch in the atomic
+	 sequence.  If a branch is found, put a breakpoint in its
+	 destination address.  */
+      switch (itype_op (insn))
+	{
+	case 0: /* SPECIAL */
+	  if (rtype_funct (insn) >> 1 == 4) /* JR, JALR */
+	    return 0; /* fallback to the standard single-step code. */
+	  break;
+	case 1: /* REGIMM */
+	  is_branch = ((itype_rt (insn) & 0xc0) == 0); /* B{LT,GE}Z* */
+	  break;
+	case 2: /* J */
+	case 3: /* JAL */
+	  return 0; /* fallback to the standard single-step code. */
+	case 4: /* BEQ */
+	case 5: /* BNE */
+	case 6: /* BLEZ */
+	case 7: /* BGTZ */
+	case 20: /* BEQL */
+	case 21: /* BNEL */
+	case 22: /* BLEZL */
+	case 23: /* BGTTL */
+	  is_branch = 1;
+	  break;
+	case 17: /* COP1 */
+	case 18: /* COP2 */
+	case 19: /* COP3 */
+	  is_branch = (itype_rs (insn) == 8); /* BCzF, BCzFL, BCzT, BCzTL */
+	  break;
+	}
+      if (is_branch)
+	{
+	  branch_bp = loc + mips32_relative_offset (insn) + 4;
+	  if (last_breakpoint >= 1)
+	    return 0; /* More than one branch found, fallback to the
+			 standard single-step code.  */
+	  breaks[1] = branch_bp;
+	  last_breakpoint++;
+	}
+
+      if (itype_op (insn) == SC_OPCODE || itype_op (insn) == SCD_OPCODE)
+	break;
+    }
+
+  /* Assume that the atomic sequence ends with a sc/scd instruction.  */
+  if (itype_op (insn) != SC_OPCODE && itype_op (insn) != SCD_OPCODE)
+    return 0;
+
+  loc += MIPS_INSN32_SIZE;
+
+  /* Insert a breakpoint right after the end of the atomic sequence.  */
+  breaks[0] = loc;
+
+  /* Check for duplicated breakpoints.  Check also for a breakpoint
+     placed (branch instruction's destination) in the atomic sequence */
+  if (last_breakpoint && pc <= breaks[1] && breaks[1] <= breaks[0])
+    last_breakpoint = 0;
+
+  /* Effectively inserts the breakpoints.  */
+  for (index = 0; index <= last_breakpoint; index++)
+      insert_single_step_breakpoint (breaks[index]);
+
+  return 1;
+}
+
 /* mips_software_single_step() is called just before we want to resume
    the inferior, if we want to single-step it but there is no hardware
    or kernel single-step support (MIPS on GNU/Linux for example).  We find
@@ -2308,6 +2413,9 @@ mips_software_single_step (struct frame_info *frame)
   CORE_ADDR pc, next_pc;
 
   pc = get_frame_pc (frame);
+  if (deal_with_atomic_sequence (pc))
+    return 1;
+
   next_pc = mips_next_pc (frame, pc);
 
   insert_single_step_breakpoint (next_pc);

@@ -1,3 +1,9 @@
+2007-10-23  Atsushi Nemoto  <anemo@mba.ocn.ne.jp>
+
+	* mips-tdep.c (LL_OPCODE, LLD_OPCODE, SC_OPCODE, SCD_OPCODE): Define.
+	(deal_with_atomic_sequence): New.
+	(mips_software_single_step): Use it.
+
 2007-10-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/2336
