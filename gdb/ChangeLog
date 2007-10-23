@@ -1,3 +1,9 @@
+2007-10-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/2336
+	* configure.ac: Modify $LIBINTL before the BFD check.
+	* configure: Regenerated.
+
 2007-10-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mi/mi-main.c (captured_mi_execute_command): Clear mi_error_message
