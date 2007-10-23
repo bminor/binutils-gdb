@@ -1294,8 +1294,7 @@ Symbol_table::get_copy_source(const Symbol* sym) const
 // updated dynamic symbol index.
 
 unsigned int
-Symbol_table::set_dynsym_indexes(const General_options* options,
-				 const Target* target,
+Symbol_table::set_dynsym_indexes(const Target* target,
 				 unsigned int index,
 				 std::vector<Symbol*>* syms,
 				 Stringpool* dynpool,
@@ -1322,7 +1321,7 @@ Symbol_table::set_dynsym_indexes(const General_options* options,
 
 	  // Record any version information.
 	  if (sym->version() != NULL)
-	    versions->record_version(options, this, dynpool, sym);
+	    versions->record_version(this, dynpool, sym);
 	}
     }
 

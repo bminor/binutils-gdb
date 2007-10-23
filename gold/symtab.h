@@ -947,7 +947,7 @@ class Symbol_table
   // the vector.  The names are stored into the Stringpool.  This
   // returns an updated dynamic symbol index.
   unsigned int
-  set_dynsym_indexes(const General_options*, const Target*, unsigned int index,
+  set_dynsym_indexes(const Target*, unsigned int index,
 		     std::vector<Symbol*>*, Stringpool*, Versions*);
 
   // Finalize the symbol table after we have set the final addresses

@@ -1210,8 +1210,7 @@ Versions::get_dynobj_for_sym(const Symbol_table* symtab,
 // symbol table.
 
 void
-Versions::record_version(const General_options* options,
-			 const Symbol_table* symtab,
+Versions::record_version(const Symbol_table* symtab,
 			 Stringpool* dynpool, const Symbol* sym)
 {
   gold_assert(!this->is_finalized_);
@@ -1223,7 +1222,7 @@ Versions::record_version(const General_options* options,
   if (!sym->is_from_dynobj() && !sym->is_copied_from_dynobj())
     {
       if (parameters->output_is_shared())
-        this->add_def(options, sym, version, version_key);
+        this->add_def(sym, version, version_key);
     }
   else
     {
@@ -1236,8 +1235,8 @@ Versions::record_version(const General_options* options,
 // We've found a symbol SYM defined in version VERSION.
 
 void
-Versions::add_def(const General_options* options, const Symbol* sym,
-		  const char* version, Stringpool::Key version_key)
+Versions::add_def(const Symbol* sym, const char* version,
+		  Stringpool::Key version_key)
 {
   Key k(version_key, 0);
   Version_base* const vbnull = NULL;
@@ -1271,7 +1270,7 @@ Versions::add_def(const General_options* options, const Symbol* sym,
       // If this is the first version we are defining, first define
       // the base version.  FIXME: Should use soname here when
       // creating a shared object.
-      Verdef* vdbase = new Verdef(options->output_file_name(), true, false,
+      Verdef* vdbase = new Verdef(parameters->output_file_name(), true, false,
 				  true);
       this->defs_.push_back(vdbase);
 

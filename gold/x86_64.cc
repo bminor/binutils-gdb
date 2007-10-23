@@ -263,6 +263,7 @@ const Target::Target_info Target_x86_64::x86_64_info =
   false,		// has_make_symbol
   false,		// has_resolve
   true,			// has_code_fill
+  true,			// is_default_stack_executable
   "/lib/ld64.so.1",     // program interpreter
   0x400000,		// default_text_segment_address
   0x1000,		// abi_pagesize

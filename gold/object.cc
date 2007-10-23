@@ -427,6 +427,11 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   std::vector<Map_to_output>& map_sections(this->map_to_output());
   map_sections.resize(shnum);
 
+  // Whether we've seen a .note.GNU-stack section.
+  bool seen_gnu_stack = false;
+  // The flags of a .note.GNU-stack section.
+  uint64_t gnu_stack_flags = 0;
+
   // Keep track of which sections to omit.
   std::vector<bool> omit(shnum, false);
 
@@ -449,6 +454,16 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	{
 	  if (!parameters->output_is_object())
 	    omit[i] = true;
+	}
+
+      // The .note.GNU-stack section is special.  It gives the
+      // protection flags that this object file requires for the stack
+      // in memory.
+      if (strcmp(name, ".note.GNU-stack") == 0)
+	{
+	  seen_gnu_stack = true;
+	  gnu_stack_flags |= shdr.get_sh_flags();
+	  omit[i] = true;
 	}
 
       bool discard = omit[i];
@@ -480,6 +495,8 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       map_sections[i].output_section = os;
       map_sections[i].offset = offset;
     }
+
+  layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags);
 
   delete sd->section_headers;
   sd->section_headers = NULL;

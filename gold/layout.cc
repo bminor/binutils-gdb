@@ -67,7 +67,10 @@ Layout::Layout(const General_options& options)
     unattached_section_list_(), special_output_list_(),
     tls_segment_(NULL), symtab_section_(NULL),
     dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL),
-    eh_frame_section_(NULL), output_file_size_(-1)
+    eh_frame_section_(NULL), output_file_size_(-1),
+    input_requires_executable_stack_(false),
+    input_with_gnu_stack_note_(false),
+    input_without_gnu_stack_note_(false)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -404,6 +407,27 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
   return os;
 }
 
+// Handle the .note.GNU-stack section at layout time.  SEEN_GNU_STACK
+// is whether we saw a .note.GNU-stack section in the object file.
+// GNU_STACK_FLAGS is the section flags.  The flags give the
+// protection required for stack memory.  We record this in an
+// executable as a PT_GNU_STACK segment.  If an object file does not
+// have a .note.GNU-stack segment, we must assume that it is an old
+// object.  On some targets that will force an executable stack.
+
+void
+Layout::layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags)
+{
+  if (!seen_gnu_stack)
+    this->input_without_gnu_stack_note_ = true;
+  else
+    {
+      this->input_with_gnu_stack_note_ = true;
+      if ((gnu_stack_flags & elfcpp::SHF_EXECINSTR) != 0)
+	this->input_requires_executable_stack_ = true;
+    }
+}
+
 // Create the dynamic sections which are needed before we read the
 // relocs.
 
@@ -542,7 +566,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   target->finalize_sections(this);
 
-  this->create_note_section();
+  this->create_gold_note();
+  this->create_executable_stack_info(target);
 
   Output_segment* phdr_seg = NULL;
   if (!parameters->doing_static_link())
@@ -635,7 +660,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 // records the version of gold used to create the binary.
 
 void
-Layout::create_note_section()
+Layout::create_gold_note()
 {
   if (parameters->output_is_object())
     return;
@@ -651,7 +676,7 @@ Layout::create_note_section()
   // version 2.16.91), and glibc always generates the latter for
   // .note.ABI-tag (as of version 1.6), so that's the one we go with
   // here.
-#ifdef GABI_FORMAT_FOR_DOTNOTE_SECTION   // this is not defined by default
+#ifdef GABI_FORMAT_FOR_DOTNOTE_SECTION   // This is not defined by default.
   const int size = parameters->get_size();
 #else
   const int size = 32;
@@ -717,6 +742,54 @@ Layout::create_note_section()
   Output_section_data* posd = new Output_data_const(buffer, notesz,
 						    size / 8);
   os->add_output_section_data(posd);
+}
+
+// Record whether the stack should be executable.  This can be set
+// from the command line using the -z execstack or -z noexecstack
+// options.  Otherwise, if any input file has a .note.GNU-stack
+// section with the SHF_EXECINSTR flag set, the stack should be
+// executable.  Otherwise, if at least one input file a
+// .note.GNU-stack section, and some input file has no .note.GNU-stack
+// section, we use the target default for whether the stack should be
+// executable.  Otherwise, we don't generate a stack note.  When
+// generating a object file, we create a .note.GNU-stack section with
+// the appropriate marking.  When generating an executable or shared
+// library, we create a PT_GNU_STACK segment.
+
+void
+Layout::create_executable_stack_info(const Target* target)
+{
+  bool is_stack_executable;
+  if (this->options_.is_execstack_set())
+    is_stack_executable = this->options_.is_stack_executable();
+  else if (!this->input_with_gnu_stack_note_)
+    return;
+  else
+    {
+      if (this->input_requires_executable_stack_)
+	is_stack_executable = true;
+      else if (this->input_without_gnu_stack_note_)
+	is_stack_executable = target->is_default_stack_executable();
+      else
+	is_stack_executable = false;
+    }
+
+  if (parameters->output_is_object())
+    {
+      const char* name = this->namepool_.add(".note.GNU-stack", false, NULL);
+      elfcpp::Elf_Xword flags = 0;
+      if (is_stack_executable)
+	flags |= elfcpp::SHF_EXECINSTR;
+      this->make_output_section(name, elfcpp::SHT_PROGBITS, flags);
+    }
+  else
+    {
+      int flags = elfcpp::PF_R | elfcpp::PF_W;
+      if (is_stack_executable)
+	flags |= elfcpp::PF_X;
+      Output_segment* oseg = new Output_segment(elfcpp::PT_GNU_STACK, flags);
+      this->segment_list_.push_back(oseg);
+    }
 }
 
 // Return whether SEG1 should be before SEG2 in the output file.  This
@@ -1126,9 +1199,8 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
 
   // FIXME: We have to tell set_dynsym_indexes whether the
   // -E/--export-dynamic option was used.
-  index = symtab->set_dynsym_indexes(&this->options_, target, index,
-				     pdynamic_symbols, &this->dynpool_,
-				     pversions);
+  index = symtab->set_dynsym_indexes(target, index, pdynamic_symbols,
+				     &this->dynpool_, pversions);
 
   int symsize;
   unsigned int align;

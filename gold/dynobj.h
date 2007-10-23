@@ -411,8 +411,7 @@ class Versions
   // SYM is going into the dynamic symbol table and has a version.
   // Record the appropriate version information.
   void
-  record_version(const General_options*, const Symbol_table* symtab,
-		 Stringpool*, const Symbol* sym);
+  record_version(const Symbol_table* symtab, Stringpool*, const Symbol* sym);
 
   // Set the version indexes.  DYNSYM_INDEX is the index we should use
   // for the next dynamic symbol.  We add new dynamic symbols to SYMS
@@ -466,8 +465,7 @@ class Versions
 
   // Handle a symbol SYM defined with version VERSION.
   void
-  add_def(const General_options*, const Symbol* sym, const char* version,
-	  Stringpool::Key);
+  add_def(const Symbol* sym, const char* version, Stringpool::Key);
 
   // Add a reference to version NAME in file FILENAME.
   void

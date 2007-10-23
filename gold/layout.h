@@ -94,6 +94,13 @@ class Layout
   layout(Relobj *object, unsigned int shndx, const char* name,
 	 const elfcpp::Shdr<size, big_endian>& shdr, off_t* offset);
 
+  // Handle a GNU stack note.  This is called once per input object
+  // file.  SEEN_GNU_STACK is true if the object file has a
+  // .note.GNU-stack section.  GNU_STACK_FLAGS is the section flags
+  // from that section if there was one.
+  void
+  layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags);
+
   // Add an Output_section_data to the layout.  This is used for
   // special sections like the GOT section.
   void
@@ -220,7 +227,11 @@ class Layout
 
   // Create a .note section for gold.
   void
-  create_note_section();
+  create_gold_note();
+
+  // Record whether the stack must be executable.
+  void
+  create_executable_stack_info(const Target*);
 
   // Find the first read-only PT_LOAD segment, creating one if
   // necessary.
@@ -377,6 +388,15 @@ class Layout
   Output_section* eh_frame_section_;
   // The size of the output file.
   off_t output_file_size_;
+  // Whether we have seen an object file marked to require an
+  // executable stack.
+  bool input_requires_executable_stack_;
+  // Whether we have seen at least one object file with an executable
+  // stack marker.
+  bool input_with_gnu_stack_note_;
+  // Whether we have seen at least one object file without an
+  // executable stack marker.
+  bool input_without_gnu_stack_note_;
 };
 
 // This task handles writing out data which is not part of a section

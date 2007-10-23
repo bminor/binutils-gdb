@@ -108,6 +108,14 @@ class Target
   common_pagesize() const
   { return this->pti_->common_pagesize; }
 
+  // If we see some object files with .note.GNU-stack sections, and
+  // some objects files without them, this returns whether we should
+  // consider the object files without them to imply that the stack
+  // should be executable.
+  bool
+  is_default_stack_executable() const
+  { return this->pti_->is_default_stack_executable; }
+
   // This is called to tell the target to complete any sections it is
   // handling.  After this all sections must have their final size.
   void
@@ -146,6 +154,9 @@ class Target
     bool has_resolve;
     // Whether this target has a specific code fill function.
     bool has_code_fill;
+    // Whether an object file with no .note.GNU-stack sections implies
+    // that the stack should be executable.
+    bool is_default_stack_executable;
     // The default dynamic linker name.
     const char* dynamic_linker;
     // The default text segment address.

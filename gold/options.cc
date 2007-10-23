@@ -93,11 +93,24 @@ struct options::One_option
   { return this->general_arg != NULL || this->dependent_arg != NULL; }
 };
 
+// We have a separate table for -z options.
+
+struct options::One_z_option
+{
+  // The name of the option.
+  const char* name;
+
+  // The member function in General_options called to record it.
+  void (General_options::*set)();
+};
+
 class options::Command_line_options
 {
  public:
   static const One_option options[];
   static const int options_size;
+  static const One_z_option z_options[];
+  static const int z_options_size;
 };
 
 } // End namespace gold.
@@ -394,6 +407,14 @@ options::Command_line_options::options[] =
                N_("Include only needed archive contents"),
                NULL, TWO_DASHES,
                &Position_dependent_options::clear_whole_archive),
+
+  GENERAL_ARG('z', NULL,
+	      N_("Subcommands as follows:\n\
+    -z execstack              Mark output as requiring executable stack\n\
+    -z noexecstack            Mark output as not requiring executable stack"),
+	      N_("-z SUBCOMMAND"), ONE_DASH,
+	      &General_options::handle_z_option),
+
   SPECIAL('(', "start-group", N_("Start a library search group"), NULL,
 	  TWO_DASHES, &start_group),
   SPECIAL(')', "end-group", N_("End a library search group"), NULL,
@@ -406,6 +427,18 @@ options::Command_line_options::options[] =
 
 const int options::Command_line_options::options_size =
   sizeof (options) / sizeof (options[0]);
+
+// The -z options.
+
+const options::One_z_option
+options::Command_line_options::z_options[] =
+{
+  { "execstack", &General_options::set_execstack },
+  { "noexecstack", &General_options::set_noexecstack },
+};
+
+const int options::Command_line_options::z_options_size =
+  sizeof(z_options) / sizeof(z_options[0]);
 
 // The default values for the general options.
 
@@ -429,7 +462,8 @@ General_options::General_options()
     threads_(false),
     thread_count_initial_(0),
     thread_count_middle_(0),
-    thread_count_final_(0)
+    thread_count_final_(0),
+    execstack_(EXECSTACK_FROM_INPUT)
 {
 }
 
@@ -440,6 +474,28 @@ Position_dependent_options::Position_dependent_options()
     as_needed_(false),
     include_whole_archive_(false)
 {
+}
+
+// Handle the -z option.
+
+void
+General_options::handle_z_option(const char* arg)
+{
+  const int z_options_size = options::Command_line_options::z_options_size;
+  const gold::options::One_z_option* z_options =
+    gold::options::Command_line_options::z_options;
+  for (int i = 0; i < z_options_size; ++i)
+    {
+      if (strcmp(arg, z_options[i].name) == 0)
+	{
+	  (this->*(z_options[i].set))();
+	  return;
+	}
+    }
+
+  fprintf(stderr, _("%s: unrecognized -z subcommand: %s\n"),
+	  program_name, arg);
+  ::exit(1);
 }
 
 // Add the sysroot, if any, to the search paths.
@@ -686,7 +742,7 @@ Command_line::process(int argc, char** argv)
 
   if (this->inputs_.in_group())
     {
-      fprintf(stderr, _("%s: missing group end"), program_name);
+      fprintf(stderr, _("%s: missing group end\n"), program_name);
       this->usage();
     }
 

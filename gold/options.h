@@ -47,6 +47,7 @@ namespace options {
 
 class Command_line_options;
 struct One_option;
+struct One_z_option;
 
 } // End namespace gold::options.
 
@@ -214,6 +215,15 @@ class General_options
   thread_count_final() const
   { return this->thread_count_final_; }
 
+  // -z execstack, -z noexecstack
+  bool
+  is_execstack_set() const
+  { return this->execstack_ != EXECSTACK_FROM_INPUT; }
+
+  bool
+  is_stack_executable() const
+  { return this->execstack_ == EXECSTACK_YES; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -231,6 +241,17 @@ class General_options
     STRIP_ALL,
     // Strip debugging information.
     STRIP_DEBUG
+  };
+
+  // Whether to mark the stack as executable.
+  enum Execstack
+  {
+    // Not set on command line.
+    EXECSTACK_FROM_INPUT,
+    // Mark the stack as executable.
+    EXECSTACK_YES,
+    // Mark the stack as not executable.
+    EXECSTACK_NO
   };
 
   void
@@ -364,6 +385,18 @@ class General_options
   ignore(const char*)
   { }
 
+  void
+  set_execstack()
+  { this->execstack_ = EXECSTACK_YES; }
+
+  void
+  set_noexecstack()
+  { this->execstack_ = EXECSTACK_NO; }
+
+  // Handle the -z option.
+  void
+  handle_z_option(const char*);
+
   // Apply any sysroot to the directory lists.
   void
   add_sysroot();
@@ -388,6 +421,7 @@ class General_options
   int thread_count_initial_;
   int thread_count_middle_;
   int thread_count_final_;
+  Execstack execstack_;
 };
 
 // The current state of the position dependent options.
