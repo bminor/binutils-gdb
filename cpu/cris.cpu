@@ -2033,9 +2033,10 @@
  (.pmacro
   (BW)
   (sequence
-    ((BW newval))
-    (set newval Rs)
-    (set Rd (ext SI newval))
+    ((BW tmpops) (SI newval))
+    (set tmpops Rs)
+    (set newval (ext SI tmpops))
+    (set Rd newval)
     (setf-move SI newval)))
 )
 
@@ -2060,9 +2061,10 @@
  (.pmacro
   (BW)
   (sequence
-    ((BW newval))
-    (set newval Rs)
-    (set Rd (zext SI newval))
+    ((BW tmpops) (SI newval))
+    (set tmpops Rs)
+    (set newval (zext SI tmpops))
+    (set Rd newval)
     (setf-move SI newval)))
 )
 
