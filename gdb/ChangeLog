@@ -1,5 +1,14 @@
 2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* solib-svr4.c (set_solib_svr4_fetch_link_map_offsets): Call
+	set_solib_ops to install SVR4 operations.
+	(_initialize_svr4_solib): Do not set current_target_so_ops.
+
+	* config/i386/i386gnu.mh (NATDEPFILES): Move solib.o, solib-svr4.o ...
+	* config/i386/i386gnu.mt (TDEPFILES): ... to here.
+
+2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* solib-svr4.c (legacy_svr4_fetch_link_map_offsets_hook): Remove.
 	(solib_svr4_init): Initialize fetch_link_map_offsets to NULL.
 	* solib-svr4.h (legacy_svr4_fetch_link_map_offsets_hook): Remove.

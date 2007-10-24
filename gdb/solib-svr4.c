@@ -1449,7 +1449,7 @@ solib_svr4_init (struct obstack *obstack)
 }
 
 /* Set the architecture-specific `struct link_map_offsets' fetcher for
-   GDBARCH to FLMO.  */
+   GDBARCH to FLMO.  Also, install SVR4 solib_ops into GDBARCH.  */
 
 void
 set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
@@ -1458,6 +1458,8 @@ set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
   struct solib_svr4_ops *ops = gdbarch_data (gdbarch, solib_svr4_data);
 
   ops->fetch_link_map_offsets = flmo;
+
+  set_solib_ops (gdbarch, &svr4_so_ops);
 }
 
 /* Fetch a link_map_offsets structure using the architecture-specific
@@ -1583,7 +1585,4 @@ _initialize_svr4_solib (void)
   svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
   svr4_so_ops.in_dynsym_resolve_code = svr4_in_dynsym_resolve_code;
   svr4_so_ops.lookup_lib_global_symbol = elf_lookup_lib_symbol;
-
-  /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
-  current_target_so_ops = &svr4_so_ops;
 }
