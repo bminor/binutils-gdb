@@ -200,7 +200,8 @@ alpha_sts (void *out, const void *in)
 static int
 alpha_convert_register_p (int regno, struct type *type)
 {
-  return (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31);
+  return (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31
+	  && TYPE_LENGTH (type) != 8);
 }
 
 static void
@@ -214,9 +215,6 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
     {
     case 4:
       alpha_sts (out, in);
-      break;
-    case 8:
-      memcpy (out, in, 8);
       break;
     default:
       error (_("Cannot retrieve value from floating point register"));
@@ -233,9 +231,6 @@ alpha_value_to_register (struct frame_info *frame, int regnum,
     {
     case 4:
       alpha_lds (out, in);
-      break;
-    case 8:
-      memcpy (out, in, 8);
       break;
     default:
       error (_("Cannot store value in floating point register"));

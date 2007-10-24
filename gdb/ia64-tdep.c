@@ -920,7 +920,8 @@ ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static int
 ia64_convert_register_p (int regno, struct type *type)
 {
-  return (regno >= IA64_FR0_REGNUM && regno <= IA64_FR127_REGNUM);
+  return (regno >= IA64_FR0_REGNUM && regno <= IA64_FR127_REGNUM
+	  && type != builtin_type_ia64_ext);
 }
 
 static void
@@ -3564,12 +3565,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->sigcontext_register_address = 0;
   tdep->pc_in_sigtramp = 0;
 
-  /* Define the ia64 floating-point format to gdb.  */
-  builtin_type_ia64_ext =
-    init_type (TYPE_CODE_FLT, 128 / 8,
-               0, "builtin_type_ia64_ext", NULL);
-  TYPE_FLOATFORMAT (builtin_type_ia64_ext) = floatformats_ia64_ext;
-
   /* According to the ia64 specs, instructions that store long double
      floats in memory use a long-double format different than that
      used in the floating registers.  The memory format matches the
@@ -3652,5 +3647,11 @@ extern initialize_file_ftype _initialize_ia64_tdep; /* -Wmissing-prototypes */
 void
 _initialize_ia64_tdep (void)
 {
+  /* Define the ia64 floating-point format to gdb.  */
+  builtin_type_ia64_ext =
+    init_type (TYPE_CODE_FLT, 128 / 8,
+               0, "builtin_type_ia64_ext", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ia64_ext) = floatformats_ia64_ext;
+
   gdbarch_register (bfd_arch_ia64, ia64_gdbarch_init, NULL);
 }

@@ -1,12 +1,18 @@
+2007-10-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbint.texinfo (Register and Memory Data, Target Conditionals):
+	Document that gdbarch_convert_register_p should return zero for no-op
+	conversions.
+
 2007-10-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
-	* gdbarch.texi (Compiler Characteristics): Move documentation
+	* gdbint.texi (Compiler Characteristics): Move documentation
 	of set_gdbarch_sofun_address_maybe_missing back to ...
 	(Target Conditionals): ... here to fix build break.
 
 2007-10-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
-	* gdbarch.texi (Target Conditionals): Remove documentation of
+	* gdbint.texi (Target Conditionals): Remove documentation of
 	SOFUN_ADDRESS_MAYBE_MISSING, replaced by ...
 	(Compiler Characteristics): ... documentation of
 	set_gdbarch_sofun_address_maybe_missing.

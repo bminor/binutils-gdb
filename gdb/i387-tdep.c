@@ -285,6 +285,25 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 }
 
 
+/* Return nonzero if a value of type TYPE stored in register REGNUM
+   needs any special handling.  */
+
+int
+i387_convert_register_p (int regnum, struct type *type)
+{
+  if (i386_fp_regnum_p (regnum))
+    {
+      /* Floating point registers must be converted unless we are
+	 accessing them in their hardware type.  */
+      if (type == builtin_type_i387_ext)
+	return 0;
+      else
+	return 1;
+    }
+
+  return 0;
+}
+
 /* Read a value of type TYPE from register REGNUM in frame FRAME, and
    return its contents in TO.  */
 
@@ -304,8 +323,7 @@ i387_register_to_value (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
-     the extended floating-point format used by the FPU.  */
+  /* Convert to TYPE.  */
   get_frame_register (frame, regnum, from);
   convert_typed_floating (from, builtin_type_i387_ext, to, type);
 }
@@ -329,8 +347,7 @@ i387_value_to_register (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
-     to the extended floating-point format used by the FPU.  */
+  /* Convert from TYPE.  */
   convert_typed_floating (from, type, to, builtin_type_i387_ext);
   put_frame_register (frame, regnum, to);
 }

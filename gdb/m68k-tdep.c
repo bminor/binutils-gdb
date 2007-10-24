@@ -171,7 +171,8 @@ m68k_convert_register_p (int regnum, struct type *type)
 {
   if (!gdbarch_tdep (current_gdbarch)->fpregs_present)
     return 0;
-  return (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FP0_REGNUM + 7);
+  return (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FP0_REGNUM + 7
+	  && type != builtin_type_m68881_ext);
 }
 
 /* Read a value of type TYPE from register REGNUM in frame FRAME, and
@@ -193,8 +194,7 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
-     the extended floating-point format used by the FPU.  */
+  /* Convert to TYPE.  */
   get_frame_register (frame, regnum, from);
   convert_typed_floating (from, fpreg_type, to, type);
 }
@@ -218,8 +218,7 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
-     to the extended floating-point format used by the FPU.  */
+  /* Convert from TYPE.  */
   convert_typed_floating (from, type, to, fpreg_type);
   put_frame_register (frame, regnum, to);
 }

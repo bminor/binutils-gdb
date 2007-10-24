@@ -1880,7 +1880,7 @@ i386_convert_register_p (int regnum, struct type *type)
 	return 1;
     }
 
-  return i386_fp_regnum_p (regnum);
+  return i387_convert_register_p (regnum, type);
 }
 
 /* Read a value of type TYPE from register REGNUM in frame FRAME, and

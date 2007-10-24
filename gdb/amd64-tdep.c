@@ -200,14 +200,6 @@ amd64_dwarf_reg_to_regnum (int reg)
   return regnum;
 }
 
-/* Return nonzero if a value of type TYPE stored in register REGNUM
-   needs any special handling.  */
-
-static int
-amd64_convert_register_p (int regnum, struct type *type)
-{
-  return i386_fp_regnum_p (regnum);
-}
 
 
 /* Register classes as defined in the psABI.  */
@@ -1155,7 +1147,7 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_frame_align (gdbarch, amd64_frame_align);
   set_gdbarch_frame_red_zone_size (gdbarch, 128);
 
-  set_gdbarch_convert_register_p (gdbarch, amd64_convert_register_p);
+  set_gdbarch_convert_register_p (gdbarch, i387_convert_register_p);
   set_gdbarch_register_to_value (gdbarch, i387_register_to_value);
   set_gdbarch_value_to_register (gdbarch, i387_value_to_register);
 

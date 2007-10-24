@@ -3226,6 +3226,9 @@ when stored in memory.
 
 When non-zero, the macros @code{gdbarch_register_to_value} and
 @code{value_to_register} are used to perform any necessary conversion.
+
+This function should return zero for the register's native type, when
+no conversion is necessary.
 @end deftypefun
 
 @deftypefun void gdbarch_register_to_value (struct gdbarch *@var{gdbarch}, int @var{reg}, struct type *@var{type}, char *@var{from}, char *@var{to})
@@ -3462,8 +3465,8 @@ default so that @value{GDBN} will assume that all registers may be written.
 
 @item int gdbarch_convert_register_p (@var{gdbarch}, @var{regnum}, struct type *@var{type})
 @findex gdbarch_convert_register_p
-Return non-zero if register @var{regnum} can represent data values in a
-non-standard form.
+Return non-zero if register @var{regnum} represents data values of type
+@var{type} in a non-standard form.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
 @item CORE_ADDR gdbarch_decr_pc_after_break (@var{gdbarch})

@@ -55,6 +55,11 @@ extern void i387_print_float_info (struct gdbarch *gdbarch,
 				   struct frame_info *frame,
 				   const char *args);
 
+/* Return nonzero if a value of type TYPE stored in register REGNUM
+   needs any special handling.  */
+
+extern int i387_convert_register_p (int regnum, struct type *type);
+
 /* Read a value of type TYPE from register REGNUM in frame FRAME, and
    return its contents in TO.  */
 

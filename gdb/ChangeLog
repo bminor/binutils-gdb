@@ -1,3 +1,23 @@
+2007-10-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* amd64-tdep.c (amd64_convert_register_p): Delete.
+	(amd64_init_abi): Use i387_convert_register_p.
+	* alpha-tdep.c (alpha_convert_register_p): Return zero for
+	eight byte types.
+	(alpha_register_to_value, alpha_value_to_register): Do not handle
+	eight byte types.
+	* i386-tdep.c (i386_convert_register_p): Use i387_convert_register_p.
+	* i387-tdep.c (i387_convert_register_p): New.
+	(i387_register_to_value, i387_value_to_register): Update comments.
+	* i387-tdep.h (i387_convert_register_p): Declare.
+	* ia64-tdep.c (ia64_convert_register_p): Return zero for
+	builtin_type_ia64_ext.
+	(ia64_gdbarch_init): Do not initialize builtin_type_ia64_ext here.
+	(_initialize_ia64_tdep): Initialize builtin_type_ia64_ext here.
+	* m68k-tdep.c (m68k_convert_register_p): Return zero for
+	builtin_type_m68881_ext.
+	(m68k_register_to_value, m68k_value_to_register): Update comments.
+
 2007-10-24  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* target-memory.c (claim_memory): Propagate baton for split memory
