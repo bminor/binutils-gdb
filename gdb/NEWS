@@ -18,6 +18,9 @@ and in inlined functions.
 * The GDB remote stub, gdbserver, now supports the AltiVec and SPE
 registers on PowerPC targets.
 
+* The GDB remote stub, gdbserver, now supports thread debugging on GNU/Linux
+targets even when the libthread_db library is not available.
+
 *** Changes in GDB 6.7
 
 * Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 

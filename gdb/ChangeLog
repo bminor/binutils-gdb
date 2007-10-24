@@ -1,5 +1,9 @@
 2007-10-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Mention gdbserver support for non-libthread_db operation.
+
+2007-10-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* amd64-tdep.c (amd64_convert_register_p): Delete.
 	(amd64_init_abi): Use i387_convert_register_p.
 	* alpha-tdep.c (alpha_convert_register_p): Return zero for
