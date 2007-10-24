@@ -11795,8 +11795,12 @@ as arguments.  @value{GDBN} always converts the file name to an absolute file
 name and remembers it that way.
 
 @cindex shared libraries
-@value{GDBN} supports GNU/Linux, MS-Windows, HP-UX, SunOS, SVr4, Irix,
+@anchor{Shared Libraries}
+@value{GDBN} supports @sc{gnu}/Linux, MS-Windows, HP-UX, SunOS, SVr4, Irix,
 and IBM RS/6000 AIX shared libraries.
+
+On MS-Windows @value{GDBN} must be linked with the Expat library to support
+shared libraries.  @xref{Expat}.
 
 @value{GDBN} automatically loads symbol definitions from shared libraries
 when you use the @code{run} command, or when you examine a core file.
@@ -22176,8 +22180,18 @@ The @file{configure} script will search for this library in several
 standard locations; if it is installed in an unusual path, you can
 use the @option{--with-libexpat-prefix} option to specify its location.
 
-Expat is used for remote protocol memory maps (@pxref{Memory Map Format})
-and for target descriptions (@pxref{Target Descriptions}).
+Expat is used for:
+
+@itemize @bullet
+@item
+Remote protocol memory maps (@pxref{Memory Map Format})
+@item
+Target descriptions (@pxref{Target Descriptions})
+@item
+Remote shared library lists (@pxref{Library List Format})
+@item
+MS-Windows shared libraries (@pxref{Shared Libraries})
+@end itemize
 
 @end table
 
@@ -25698,6 +25712,9 @@ where the library was loaded in memory.  The segment bases are start
 addresses, not relocation offsets; they do not depend on the library's
 link-time base addresses.
 
+@value{GDBN} must be linked with the Expat library to support XML
+library lists.  @xref{Expat}.
+
 A simple memory map, with one loaded library relocated by a single
 offset, looks like this:
 
@@ -25731,7 +25748,12 @@ memory map.
 
 The memory map is obtained using the @samp{qXfer:memory-map:read}
 (@pxref{qXfer memory map read}) packet and is an XML document that
-lists memory regions.  The top-level structure of the document is shown below:
+lists memory regions.
+
+@value{GDBN} must be linked with the Expat library to support XML
+memory maps.  @xref{Expat}.
+
+The top-level structure of the document is shown below:
 
 @smallexample
 <?xml version="1.0"?>
@@ -25841,8 +25863,8 @@ actually describe its own features.  This lets @value{GDBN} support
 processor variants it has never seen before --- to the extent that the
 descriptions are accurate, and that @value{GDBN} understands them.
 
-@value{GDBN} must be compiled with Expat support to support XML target
-descriptions.  @xref{Expat}.
+@value{GDBN} must be linked with the Expat library to support XML
+target descriptions.  @xref{Expat}.
 
 @menu
 * Retrieving Descriptions::         How descriptions are fetched from a target.
