@@ -48,6 +48,7 @@ i370-dis.c
 i370-opc.c
 i386-dis.c
 i386-gen.c
+i386-init.h
 i386-opc.c
 i386-opc.h
 i386-tbl.h
