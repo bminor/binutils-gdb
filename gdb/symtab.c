@@ -2281,11 +2281,19 @@ find_line_symtab (struct symtab *symtab, int line, int *index, int *exact_match)
 
       struct objfile *objfile;
       struct symtab *s;
+      struct partial_symtab *p;
 
       if (best_index >= 0)
 	best = best_linetable->item[best_index].line;
       else
 	best = 0;
+
+      ALL_PSYMTABS (objfile, p)
+      {
+        if (strcmp (symtab->filename, p->filename) != 0)
+          continue;
+        PSYMTAB_TO_SYMTAB (p);
+      }
 
       ALL_SYMTABS (objfile, s)
       {

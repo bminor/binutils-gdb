@@ -1,3 +1,8 @@
+2007-10-24  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
+
+	* symtab.c (find_line_symtab): scan through psymtabs
+	when exact_match is zero.
+
 2007-10-23  Atsushi Nemoto  <anemo@mba.ocn.ne.jp>
 
 	* mips-tdep.c (LL_OPCODE, LLD_OPCODE, SC_OPCODE, SCD_OPCODE): Define.
