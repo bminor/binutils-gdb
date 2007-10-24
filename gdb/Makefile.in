@@ -2157,7 +2157,8 @@ i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
 i386-nto-tdep.o: i386-nto-tdep.c $(defs_h) $(frame_h) $(osabi_h) \
 	$(regcache_h) $(target_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(i386_tdep_h) $(i387_tdep_h) $(nto_tdep_h) $(solib_svr4_h)
+	$(i386_tdep_h) $(i387_tdep_h) $(nto_tdep_h) $(solib_h) \
+	$(solib_svr4_h)
 i386obsd-nat.o: i386obsd-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(target_h) $(i386_tdep_h) $(i386bsd_nat_h) $(bsd_kvm_h)
 i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \

@@ -1,5 +1,15 @@
 2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* i386-nto-tdep.c: Include "solib.h".
+	(i386nto_init_abi): Use set_solib_ops instead of overwriting
+	current_target_so_ops members.
+	* solist.h (TARGET_SO_RELOCATE_SECTION_ADDRESSES): Remove.
+	(TARGET_SO_FIND_AND_OPEN_SOLIB): Remove.
+	(TARGET_SO_IN_DYNSYM_RESOLVE_CODE): Remove.
+	* Makefile.in: Update dependencies.
+
+2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* arm-wince-tdep.c: Include "solib.h" and "solib-target.h".
 	(arm_wince_init_abi): Call set_solib_ops.
 	* i386-cygwin-tdep.c: Include "solib.h" and "solib-target.h".
