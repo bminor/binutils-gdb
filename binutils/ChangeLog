@@ -1,3 +1,8 @@
+2007-10-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* strings.c (print_strings): Don't use %L, use %ll in printf
+	format strings.
+
 2007-10-24  Tristan Gingold  <gingold@adacore.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 
