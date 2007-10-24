@@ -11,7 +11,7 @@ AUTOMAKE_OPTIONS =
 # eventually.
 AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS) -fmerge-constants
 
-INCLUDES = -D_GNU_SOURCE \
+INCLUDES = \
 	-I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../../include \
 	-I$(srcdir)/../../elfcpp \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \

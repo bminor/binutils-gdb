@@ -10,7 +10,7 @@ ACLOCAL_AMFLAGS = -I ../bfd -I ../config
 
 AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS)
 
-INCLUDES = -D_GNU_SOURCE \
+INCLUDES = \
 	-I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../elfcpp \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	-DBINDIR="\"$(bindir)\"" -DTOOLBINDIR="\"$(tooldir)/bin\"" \

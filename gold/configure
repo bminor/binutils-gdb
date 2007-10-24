@@ -3810,6 +3810,14 @@ else
 echo "${ECHO_T}no, using $LN_S" >&6
 fi
 
+
+
+cat >>confdefs.h <<\_ACEOF
+#define _GNU_SOURCE 1
+_ACEOF
+
+
+
 # If we haven't got the data from the intl directory,
 # assume NLS is disabled.
 USE_NLS=no
