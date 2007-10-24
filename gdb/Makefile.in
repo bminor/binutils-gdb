@@ -2138,7 +2138,8 @@ i386fbsd-tdep.o: i386fbsd-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
 i386gnu-nat.o: i386gnu-nat.c $(defs_h) $(inferior_h) $(floatformat_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(i386_tdep_h) \
 	$(gnu_nat_h) $(i387_tdep_h) $(gregset_h)
-i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(osabi_h) $(i386_tdep_h)
+i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(osabi_h) $(solib_svr4_h) \
+	$(i386_tdep_h)
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gregset_h) $(i387_tdep_h) $(i386_tdep_h) $(i386_linux_tdep_h) \
@@ -2637,7 +2638,6 @@ solib-frv.o: solib-frv.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 solib-irix.o: solib-irix.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdbcore_h) $(target_h) $(inferior_h) $(solist_h) \
 	$(solib_h) $(solib_irix_h)
-solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) $(solib_svr4_h)
 solib-null.o: solib-null.c $(defs_h) $(solist_h)
 solib-osf.o: solib-osf.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(target_h) $(inferior_h) $(solist_h)

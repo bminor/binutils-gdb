@@ -46,10 +46,6 @@
 static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
 
-/* This hook is set to a function that provides native link map
-   offsets if the code in solib-legacy.c is linked in.  */
-struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook) (void);
-
 /* Link map info to include in an allocated so_list entry */
 
 struct lm_info
@@ -1448,7 +1444,7 @@ solib_svr4_init (struct obstack *obstack)
   struct solib_svr4_ops *ops;
 
   ops = OBSTACK_ZALLOC (obstack, struct solib_svr4_ops);
-  ops->fetch_link_map_offsets = legacy_svr4_fetch_link_map_offsets_hook;
+  ops->fetch_link_map_offsets = NULL;
   return ops;
 }
 

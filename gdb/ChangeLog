@@ -1,5 +1,28 @@
 2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* solib-svr4.c (legacy_svr4_fetch_link_map_offsets_hook): Remove.
+	(solib_svr4_init): Initialize fetch_link_map_offsets to NULL.
+	* solib-svr4.h (legacy_svr4_fetch_link_map_offsets_hook): Remove.
+	* solib-legacy.c: Remove file.
+
+	* config/alpha/alpha-linux.mt (TDEPFILES): Remove solib-legacy.o.
+	* config/arm/linux.mt (TDEPFILES): Likewise.
+	* config/i386/i386gnu.mh (NATDEPFILES): Likewise.
+	* config/ia64/linux.mt (TDEPFILES): Likewise.
+	* config/m32r/linux.mt (TDEPFILES): Likewise.
+	* config/powerpc/linux.mt (TDEPFILES): Likewise.
+	* config/s390/s390.mt (TDEPFILES): Likewise.
+
+	* alpha-linux-tdep.c (alpha_linux_init_abi): Call
+	set_solib_svr4_fetch_link_map_offsets.
+	* i386gnu-tdep.c (i386gnu_init_abi): Likewise.
+	* ia64-linux-tdep.c (ia64_linux_init_abi): Likewise.
+
+	* i386gnu-tdep.c: Include "solib-svr4.h".
+	* Makefile.in: Update dependencies.
+
+2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* i386-nto-tdep.c: Include "solib.h".
 	(i386nto_init_abi): Use set_solib_ops instead of overwriting
 	current_target_so_ops members.
