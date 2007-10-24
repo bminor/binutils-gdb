@@ -1,5 +1,10 @@
 2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* solib.c (solib_global_lookup): Use solib_ops instead of global
+	current_target_so_ops.
+
+2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/frv/frv.mt (DEPRECATED_TM_FILE): Remove.
 	* config/frv-tm-frv.h: Delete file.
 

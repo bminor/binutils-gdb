@@ -985,10 +985,11 @@ solib_global_lookup (const struct objfile *objfile,
 		     const domain_enum domain,
 		     struct symtab **symtab)
 {
-  if (current_target_so_ops->lookup_lib_global_symbol != NULL)
-    return current_target_so_ops->lookup_lib_global_symbol (objfile,
-				name, linkage_name, domain, symtab);
+  struct target_so_ops *ops = solib_ops (current_gdbarch);
 
+  if (ops->lookup_lib_global_symbol != NULL)
+    return ops->lookup_lib_global_symbol (objfile, name, linkage_name,
+					  domain, symtab);
   return NULL;
 }
 
