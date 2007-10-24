@@ -1,3 +1,8 @@
+2007-10-24  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* target-memory.c (claim_memory): Propagate baton for split memory
+	requests.
+
 2007-10-24  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	PR gdb/2341
