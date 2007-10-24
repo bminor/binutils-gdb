@@ -1,5 +1,11 @@
 2007-10-24  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2007-10-24  Alan Modra  <amodra@bigpond.net.au>
+
 	* strings.c (print_strings): Don't use %L, use %ll in printf
 	format strings.
 

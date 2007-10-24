@@ -19,6 +19,7 @@ dlltool.c
 dlltool.h
 dllwrap.c
 dwarf.c
+dwarf.h
 emul_aix.c
 emul_vanilla.c
 filemode.c
@@ -53,7 +54,10 @@ srconv.c
 stabs.c
 stabs.c
 strings.c
+sysdep.h
 sysdump.c
+unwind-ia64.c
+unwind-ia64.h
 version.c
 windint.h
 windmc.c
