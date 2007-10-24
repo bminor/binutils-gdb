@@ -113,6 +113,9 @@
 /* Define if ELF support should be included. */
 #undef HAVE_ELF
 
+/* Define to 1 if you have the <elf_hp.h> header file. */
+#undef HAVE_ELF_HP_H
+
 /* Define to 1 if your system has the etext variable. */
 #undef HAVE_ETEXT
 

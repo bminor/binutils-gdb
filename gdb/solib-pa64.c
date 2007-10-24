@@ -39,12 +39,14 @@
 
 #include "hppa-tdep.h"
 #include "solist.h"
+#include "solib.h"
 #include "solib-pa64.h"
 
 #undef SOLIB_PA64_DBG
 
-/* If we are building for a SOM-only target, then we don't need this.  */
-#ifndef PA_SOM_ONLY
+/* We can build this file only when running natively on 64-bit HP/UX.
+   We check for that by checking for the elf_hp.h header file.  */
+#ifdef HAVE_ELF_HP_H
 
 /* FIXME: kettenis/20041213: These includes should be eliminated.  */
 #include <dlfcn.h>
@@ -657,9 +659,10 @@ _initialize_pa64_solib (void)
   memset (&dld_cache, 0, sizeof (dld_cache));
 }
 
-void pa64_solib_select (struct gdbarch_tdep *tdep)
+void pa64_solib_select (struct gdbarch *gdbarch)
 {
-  current_target_so_ops = &pa64_so_ops;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  set_solib_ops (gdbarch, &pa64_so_ops);
 
   tdep->solib_thread_start_addr = pa64_solib_thread_start_addr;
   tdep->solib_get_got_by_pc = pa64_solib_get_got_by_pc;
@@ -667,7 +670,7 @@ void pa64_solib_select (struct gdbarch_tdep *tdep)
   tdep->solib_get_text_base = pa64_solib_get_text_base;
 }
 
-#else /* PA_SOM_ONLY */
+#else /* HAVE_ELF_HP_H */
 
 extern initialize_file_ftype _initialize_pa64_solib; /* -Wmissing-prototypes */
 
@@ -676,7 +679,7 @@ _initialize_pa64_solib (void)
 {
 }
 
-void pa64_solib_select (struct gdbarch_tdep *tdep)
+void pa64_solib_select (struct gdbarch *gdbarch)
 {
   /* For a SOM-only target, there is no pa64 solib support.  This is needed
      for hppa-hpux-tdep.c to build.  */

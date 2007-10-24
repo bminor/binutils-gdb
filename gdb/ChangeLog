@@ -1,5 +1,31 @@
 2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.tgt: Remove hppa*64*-*-hpux11* special case.
+	* config/pa/hppa64.mt: Delete file.
+	* config/pa/hppahpux.mt (MT_CFLAGS): Remove.
+	(TDEPFILES): Move somread.o to ...
+	* config/pa/hpux.mh (NATDEPFILES): ... here.
+
+	* configure.ac: Add check for elf_hp.h header.
+	Search libdl and libxpdl for dlgetmodinfo.
+	* config.in, configure: Regenerate.
+	* solib-pa64.c: Conditionalize compilation on #ifdef HAVE_ELF_HP_H
+	instead of #ifndef PA_SOM_ONLY.  Include "solib.h".
+	(pa64_solib_select): Take gdbarch instead of tdep argument.  Call
+	set_solib_ops instead of modifying current_target_so_ops.
+	* solib-pa64.h (pa64_solib_select): Update prototype.
+	* solib-som.c: Remove include of "som.h".  Include "solib.h".
+	(som_solib_select): Take gdbarch instead of tdep argument.  Call
+	set_solib_ops instead of modifying current_target_so_ops.
+	* solib-som.h (som_solib_select): Update prototype.
+	* hppa-hpux-tdep.c (hppa_hpux_som_init_abi): Pass gdbarch instead
+	of tdep to som_solib_select call.
+	(hppa_hpux_elf_init_abi): Pass gdbarch instead of tdep to
+	pa64_solib_select call.
+	* Makefile.in: Update dependencies.
+
+2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* frv-tdep.c: Include "solib.h".
 	(frv_gdbarch_init): Call set_solib_ops.
 	* frv-tdep.h (struct target_so_ops): Add forward reference.

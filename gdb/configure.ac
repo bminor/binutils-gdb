@@ -319,6 +319,9 @@ AC_SEARCH_LIBS(socketpair, socket)
 # a situation.
 AC_SEARCH_LIBS(waddstr, [ncurses cursesX curses])
 
+# On HP/UX we may need libxpdl for dlgetmodinfo (used by solib-pa64.c).
+AC_SEARCH_LIBS(dlgetmodinfo, [dl xpdl])
+
 # Since GDB uses Readline, we need termcap functionality.  In many
 # cases this will be provided by the curses library, but some systems
 # have a seperate termcap library, or no curses library at all.
@@ -456,6 +459,9 @@ AC_CHECK_HEADERS(term.h, [], [],
 # include <curses.h>
 #endif
 ])
+
+# Check for HP/UX 64-bit shared library support
+AC_CHECK_HEADERS(elf_hp.h)
 
 # FIXME: kettenis/20030102: In most cases we include these
 # unconditionally, so what's the point in checking these?

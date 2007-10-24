@@ -2637,10 +2637,10 @@ solib-osf.o: solib-osf.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(target_h) $(inferior_h) $(solist_h)
 solib-pa64.o: solib-pa64.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(gdbcore_h) $(target_h) $(inferior_h) $(hppa_tdep_h) \
-	$(solist_h) $(solib_pa64_h)
-solib-som.o: solib-som.c $(defs_h) $(som_h) $(symtab_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(target_h) $(inferior_h) \
-	$(hppa_tdep_h) $(solist_h)
+	$(solist_h) $(solib_h) $(solib_pa64_h)
+solib-som.o: solib-som.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
+	$(objfiles_h) $(gdbcore_h) $(target_h) $(inferior_h) \
+	$(hppa_tdep_h) $(solist_h) $(solib_h)
 solib-sunos.o: solib-sunos.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
 	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(inferior_h) $(solist_h) \
 	$(bcache_h) $(regcache_h)

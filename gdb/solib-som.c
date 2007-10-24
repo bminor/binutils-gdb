@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "som.h"
 #include "symtab.h"
 #include "bfd.h"
 #include "symfile.h"
@@ -29,6 +28,7 @@
 
 #include "hppa-tdep.h"
 #include "solist.h"
+#include "solib.h"
 
 #undef SOLIB_SOM_DBG 
 
@@ -759,9 +759,10 @@ _initialize_som_solib (void)
   som_so_ops.in_dynsym_resolve_code = som_in_dynsym_resolve_code;
 }
 
-void som_solib_select (struct gdbarch_tdep *tdep)
+void som_solib_select (struct gdbarch *gdbarch)
 {
-  current_target_so_ops = &som_so_ops;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  set_solib_ops (gdbarch, &som_so_ops);
 
   tdep->solib_thread_start_addr = som_solib_thread_start_addr;
   tdep->solib_get_got_by_pc = som_solib_get_got_by_pc;

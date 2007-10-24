@@ -22,9 +22,9 @@
 
 struct objfile;
 struct section_offsets;
-struct gdbarch_tdep;
+struct gdbarch;
 
-void som_solib_select (struct gdbarch_tdep *tdep);
+void som_solib_select (struct gdbarch *gdbarch);
 
 int som_solib_section_offsets (struct objfile *objfile,
 			       struct section_offsets *offsets);

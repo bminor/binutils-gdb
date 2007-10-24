@@ -1496,7 +1496,7 @@ hppa_hpux_som_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->find_global_pointer = hppa32_hpux_find_global_pointer;
 
   hppa_hpux_init_abi (info, gdbarch);
-  som_solib_select (tdep);
+  som_solib_select (gdbarch);
 }
 
 static void
@@ -1508,7 +1508,7 @@ hppa_hpux_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->find_global_pointer = hppa64_hpux_find_global_pointer;
 
   hppa_hpux_init_abi (info, gdbarch);
-  pa64_solib_select (tdep);
+  pa64_solib_select (gdbarch);
 }
 
 static enum gdb_osabi

@@ -101,7 +101,6 @@ frv-*-*)		gdb_target=frv ;;
 
 h8300-*-*)		gdb_target=h8300 ;;
 
-hppa*64*-*-hpux11*)	gdb_target=hppa64 ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-linux*)		gdb_target=linux ;;
 hppa*-*-openbsd*)	gdb_target=obsd ;;

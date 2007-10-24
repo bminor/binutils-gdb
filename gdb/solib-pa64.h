@@ -20,6 +20,6 @@
 #ifndef SOLIB_PA64_H
 #define SOLIB_PA64_H
 
-void pa64_solib_select (struct gdbarch_tdep *tdep);
+void pa64_solib_select (struct gdbarch *gdbarch);
 
 #endif
