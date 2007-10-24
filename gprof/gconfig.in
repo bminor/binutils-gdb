@@ -70,3 +70,8 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
