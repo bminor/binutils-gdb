@@ -160,7 +160,7 @@ handle_extended_wait (struct process_info *event_child, int wstat)
 	    perror_with_name ("waiting for new child");
 	  else if (ret != new_pid)
 	    warning ("wait returned unexpected PID %d", ret);
-	  else if (!WIFSTOPPED (status) || WSTOPSIG (status) != SIGSTOP)
+	  else if (!WIFSTOPPED (status))
 	    warning ("wait returned unexpected status 0x%x", status);
 	}
 
@@ -170,10 +170,30 @@ handle_extended_wait (struct process_info *event_child, int wstat)
       add_thread (new_pid, new_process, new_pid);
       new_thread_notify (thread_id_to_gdb_id (new_process->lwpid));
 
-      if (stopping_threads)
-	new_process->stopped = 1;
+      /* Normally we will get the pending SIGSTOP.  But in some cases
+	 we might get another signal delivered to the group first.
+         If we do, be sure not to lose it.  */
+      if (WSTOPSIG (status) == SIGSTOP)
+	{
+	  if (stopping_threads)
+	    new_process->stopped = 1;
+	  else
+	    ptrace (PTRACE_CONT, new_pid, 0, 0);
+	}
       else
-	ptrace (PTRACE_CONT, new_pid, 0, 0);
+	{
+	  new_process->stop_expected = 1;
+	  if (stopping_threads)
+	    {
+	      new_process->stopped = 1;
+	      new_process->status_pending_p = 1;
+	      new_process->status_pending = status;
+	    }
+	  else
+	    /* Pass the signal on.  This is what GDB does - except
+	       shouldn't we really report it instead?  */
+	    ptrace (PTRACE_CONT, new_pid, 0, WSTOPSIG (status));
+	}
 
       /* Always resume the current thread.  If we are stopping
 	 threads, it will have a pending SIGSTOP; we may as well
