@@ -33,6 +33,9 @@
 #include "inferior.h"
 
 #include "solist.h"
+#include "solib.h"
+#include "solib-irix.h"
+
 
 /* Link map info to include in an allocate so_list entry.  Unlike some
    of the other solib backends, this (Irix) backend chooses to decode
@@ -705,7 +708,7 @@ irix_in_dynsym_resolve_code (CORE_ADDR pc)
   return 0;
 }
 
-static struct target_so_ops irix_so_ops;
+struct target_so_ops irix_so_ops;
 
 void
 _initialize_irix_solib (void)
@@ -718,7 +721,4 @@ _initialize_irix_solib (void)
   irix_so_ops.current_sos = irix_current_sos;
   irix_so_ops.open_symbol_file_object = irix_open_symbol_file_object;
   irix_so_ops.in_dynsym_resolve_code = irix_in_dynsym_resolve_code;
-
-  /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
-  current_target_so_ops = &irix_so_ops;
 }

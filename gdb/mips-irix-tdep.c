@@ -20,6 +20,9 @@
 
 #include "defs.h"
 #include "osabi.h"
+#include "gdb_string.h"
+#include "solib.h"
+#include "solib-irix.h"
 
 #include "elf-bfd.h"
 
@@ -78,6 +81,7 @@ static void
 mips_irix_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
 {
+  set_solib_ops (gdbarch, &irix_so_ops);
 }
 
 void

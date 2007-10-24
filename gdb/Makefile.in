@@ -802,6 +802,7 @@ sh_tdep_h = sh-tdep.h
 sim_regno_h = sim-regno.h
 sol2_tdep_h = sol2-tdep.h
 solib_h = solib.h
+solib_irix_h = solib-irix.h
 solib_pa64_h = solib-pa64.h
 solib_som_h = solib-som.h
 solib_svr4_h = solib-svr4.h
@@ -2377,7 +2378,8 @@ mips64obsd-nat.o: mips64obsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 mips64obsd-tdep.o: mips64obsd-tdep.c $(defs_h) $(osabi_h) $(regcache_h) \
 	$(regset_h) $(trad_frame_h) $(tramp_frame_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(mips_tdep_h) $(solib_svr4_h)
-mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) $(osabi_h) $(elf_bfd_h)
+mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
+	$(solib_h) $(solib_irix_h) $(elf_bfd_h)
 mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h) $(target_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_proc_service_h) $(gregset_h) \
 	$(mips_linux_tdep_h) $(inferior_h) $(target_descriptions_h) \
@@ -2630,7 +2632,8 @@ solib-frv.o: solib-frv.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(gdbcore_h) $(solist_h) $(frv_tdep_h) $(objfiles_h) $(symtab_h) \
 	$(language_h) $(command_h) $(gdbcmd_h) $(elf_frv_h) $(solib_h)
 solib-irix.o: solib-irix.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
-	$(objfiles_h) $(gdbcore_h) $(target_h) $(inferior_h) $(solist_h)
+	$(objfiles_h) $(gdbcore_h) $(target_h) $(inferior_h) $(solist_h) \
+	$(solib_h) $(solib_irix_h)
 solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) $(solib_svr4_h)
 solib-null.o: solib-null.c $(defs_h) $(solist_h)
 solib-osf.o: solib-osf.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \

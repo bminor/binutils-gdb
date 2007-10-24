@@ -1,5 +1,15 @@
 2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mips-irix-tdep.c: Include "gdb_string.h", "solib.h", "solib-irix.h".
+	(mips_irix_init_abi): Call set_solib_ops.
+	* solib-irix.c: Include "solib.h" and "solib-irix.h".
+	(irix_so_ops): Make global.
+	(_initialize_irix_solib): Do not set current_target_so_ops.
+	* solib-irix.h: New file.
+	* Makefile.in: Update dependencies.
+
+2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.tgt: Remove hppa*64*-*-hpux11* special case.
 	* config/pa/hppa64.mt: Delete file.
 	* config/pa/hppahpux.mt (MT_CFLAGS): Remove.
