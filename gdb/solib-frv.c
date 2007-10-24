@@ -1272,7 +1272,7 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
   return 0;
 }
 
-static struct target_so_ops frv_so_ops;
+struct target_so_ops frv_so_ops;
 
 void
 _initialize_frv_solib (void)
@@ -1285,9 +1285,6 @@ _initialize_frv_solib (void)
   frv_so_ops.current_sos = frv_current_sos;
   frv_so_ops.open_symbol_file_object = open_symbol_file_object;
   frv_so_ops.in_dynsym_resolve_code = frv_in_dynsym_resolve_code;
-
-  /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
-  current_target_so_ops = &frv_so_ops;
 
   /* Debug this file's internals.  */
   add_setshow_zinteger_cmd ("solib-frv", class_maintenance,

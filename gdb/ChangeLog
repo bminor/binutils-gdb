@@ -1,5 +1,15 @@
 2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* frv-tdep.c: Include "solib.h".
+	(frv_gdbarch_init): Call set_solib_ops.
+	* frv-tdep.h (struct target_so_ops): Add forward reference.
+	(frv_so_ops): Add extern declaration.
+	* solib-frv.c (frv_so_ops): Make global.
+	(_initialize_frv_solib): Do not set current_target_so_ops.
+	* Makefile.in: Update dependencies.
+
+2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* solib.c (solib_global_lookup): Use solib_ops instead of global
 	current_target_so_ops.
 

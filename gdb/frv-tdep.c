@@ -37,6 +37,7 @@
 #include "elf/frv.h"
 #include "osabi.h"
 #include "infcall.h"
+#include "solib.h"
 #include "frv-tdep.h"
 
 extern void _initialize_frv_tdep (void);
@@ -1562,6 +1563,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (frv_abi (gdbarch) == FRV_ABI_FDPIC)
     set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 					    frv_convert_from_func_ptr_addr);
+
+  set_solib_ops (gdbarch, &frv_so_ops);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
