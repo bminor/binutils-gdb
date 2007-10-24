@@ -1,3 +1,9 @@
+2007-10-24  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	PR gdb/2341
+	* sol-thread.c (sol_thread_fetch_registers): Work around gcc 3.4
+	alias warning bug.
+
 2007-10-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/2336
