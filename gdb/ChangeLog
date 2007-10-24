@@ -1,5 +1,17 @@
 2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* arm-wince-tdep.c: Include "solib.h" and "solib-target.h".
+	(arm_wince_init_abi): Call set_solib_ops.
+	* i386-cygwin-tdep.c: Include "solib.h" and "solib-target.h".
+	(i386_cygwin_init_abi): Call set_solib_ops.
+	* solib-target.c: Include "solib-target.h".
+	(solib_target_so_ops): Make global.
+	(_initialize_solib_target): Do not set current_target_so_ops.
+	* solib-target.h: New file.
+	* Makefile.in: Update dependencies.
+
+2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mips-irix-tdep.c: Include "gdb_string.h", "solib.h", "solib-irix.h".
 	(mips_irix_init_abi): Call set_solib_ops.
 	* solib-irix.c: Include "solib.h" and "solib-irix.h".

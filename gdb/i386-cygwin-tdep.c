@@ -26,6 +26,8 @@
 #include "gdb_obstack.h"
 #include "xml-support.h"
 #include "gdbcore.h"
+#include "solib.h"
+#include "solib-target.h"
 
 /* Core file support.  */
 
@@ -230,6 +232,8 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_reg_offset = i386_win32_gregset_reg_offset;
   tdep->gregset_num_regs = ARRAY_SIZE (i386_win32_gregset_reg_offset);
   tdep->sizeof_gregset = I386_WIN32_SIZEOF_GREGSET;
+
+  set_solib_ops (gdbarch, &solib_target_so_ops);
 
   /* Core file support.  */
   set_gdbarch_regset_from_core_section

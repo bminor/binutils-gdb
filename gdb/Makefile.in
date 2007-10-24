@@ -806,6 +806,7 @@ solib_irix_h = solib-irix.h
 solib_pa64_h = solib-pa64.h
 solib_som_h = solib-som.h
 solib_svr4_h = solib-svr4.h
+solib_target_h = solib-target.h
 solist_h = solist.h $(symtab_h)
 source_h = source.h
 sparc64_tdep_h = sparc64-tdep.h $(sparc_tdep_h)
@@ -1846,7 +1847,8 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(dwarf2_frame_h) $(gdbtypes_h) $(prologue_value_h) \
 	$(target_descriptions_h) $(user_regs_h)
 arm-wince-tdep.o: arm-wince-tdep.c $(defs_h) $(osabi_h) \
-	$(gdbcore_h) $(target_h) $(gdb_string_h) $(arm_tdep_h)
+	$(gdbcore_h) $(target_h) $(solib_h) $(solib_target_h) \
+	$(gdb_string_h) $(arm_tdep_h)
 auxv.o: auxv.c $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) \
 	$(inferior_h) $(valprint_h) $(gdb_assert_h) $(auxv_h) \
 	$(elf_common_h)
@@ -2126,7 +2128,7 @@ i386bsd-tdep.o: i386bsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) $(i386_tdep_h)
 i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
 	$(i386_tdep_h) $(regset_h) $(gdb_obstack_h) $(xml_support_h) \
-	$(gdbcore_h) $(i386_cygwin_tdep_h)
+	$(gdbcore_h) $(solib_h) $(solib_target_h) $(i386_cygwin_tdep_h)
 i386fbsd-nat.o: i386fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(target_h) $(fbsd_nat_h) $(i386_tdep_h) $(i386bsd_nat_h) \
 	$(bsd_kvm_h)
@@ -2654,7 +2656,7 @@ solib-svr4.o: solib-svr4.c $(defs_h) $(elf_external_h) $(elf_common_h) \
 	$(exec_h) $(auxv_h)
 solib-target.o: solib-target.c $(defs_h) $(objfiles_h) $(solist_h) \
 	$(symtab_h) $(symfile_h) $(target_h) $(vec_h) $(xml_support_h) \
-	$(gdb_string_h)
+	$(solib_target_h) $(gdb_string_h)
 sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(inferior_h) $(gdb_stat_h) $(gdbcmd_h) $(gdbcore_h) $(regcache_h) \
 	$(solib_h) $(symfile_h) $(observer_h) $(gdb_string_h) $(gregset_h)

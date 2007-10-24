@@ -25,6 +25,7 @@
 #include "symfile.h"
 #include "target.h"
 #include "vec.h"
+#include "solib-target.h"
 
 #include "gdb_string.h"
 
@@ -359,7 +360,7 @@ solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
   return in_plt_section (pc, NULL);
 }
 
-static struct target_so_ops solib_target_so_ops;
+struct target_so_ops solib_target_so_ops;
 
 extern initialize_file_ftype _initialize_solib_target; /* -Wmissing-prototypes */
 
@@ -379,6 +380,4 @@ _initialize_solib_target (void)
     = solib_target_open_symbol_file_object;
   solib_target_so_ops.in_dynsym_resolve_code
     = solib_target_in_dynsym_resolve_code;
-
-  current_target_so_ops = &solib_target_so_ops;
 }
