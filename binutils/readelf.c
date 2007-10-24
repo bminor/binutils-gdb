@@ -3530,6 +3530,11 @@ process_program_headers (FILE *file)
 	  if (dynamic_addr)
 	    error (_("more than one dynamic segment\n"));
 
+	  /* By default, assume that the .dynamic section is the first
+	     section in the DYNAMIC segment.  */
+	  dynamic_addr = segment->p_offset;
+	  dynamic_size = segment->p_filesz;
+
 	  /* Try to locate the .dynamic section. If there is
 	     a section header table, we can easily locate it.  */
 	  if (section_headers != NULL)
@@ -3544,23 +3549,21 @@ process_program_headers (FILE *file)
 		}
 
 	      if (sec->sh_type == SHT_NOBITS)
-		break;
+		{
+		  dynamic_size = 0;
+		  break;
+		}
 
 	      dynamic_addr = sec->sh_offset;
 	      dynamic_size = sec->sh_size;
 
 	      if (dynamic_addr < segment->p_offset
 		  || dynamic_addr > segment->p_offset + segment->p_filesz)
-		warn (_("the .dynamic section is not contained within the dynamic segment\n"));
+		warn (_("the .dynamic section is not contained"
+			" within the dynamic segment\n"));
 	      else if (dynamic_addr > segment->p_offset)
-		warn (_("the .dynamic section is not the first section in the dynamic segment.\n"));
-	    }
-	  else
-	    {
-	      /* Otherwise, we can only assume that the .dynamic
-		 section is the first section in the DYNAMIC segment.  */
-	      dynamic_addr = segment->p_offset;
-	      dynamic_size = segment->p_filesz;
+		warn (_("the .dynamic section is not the first section"
+			" in the dynamic segment.\n"));
 	    }
 	  break;
 

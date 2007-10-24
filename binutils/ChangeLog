@@ -1,3 +1,9 @@
+2007-10-24  Tristan Gingold  <gingold@adacore.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (process_program_headers): Use dynamic segment unless
+	dynamic section is found.
+
 2007-10-16  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/binutils.texi (objcopy, strip): Replace hyphens with em-dashes.
