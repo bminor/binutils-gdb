@@ -1,3 +1,12 @@
+2007-10-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (INCLUDES, DEP_INCLUDES): Remove -D_GNU_SOURCE.
+	Run "make dep-am".
+	* configure.in: Invoke AC_GNU_SOURCE.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2007-10-19  Nick Clifton  <nickc@redhat.com>
 
 	* expr.c (expr): Test md_allow_local_subtract (if defined) before

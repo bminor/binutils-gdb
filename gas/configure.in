@@ -596,6 +596,7 @@ AC_DEFINE_UNQUOTED(TARGET_VENDOR,	"${target_vendor}", [Target vendor.])
 AC_DEFINE_UNQUOTED(TARGET_OS,		"${target_os}",    [Target OS.])
 
 AC_PROG_CC
+AC_GNU_SOURCE
 
 AC_PROG_YACC
 AM_PROG_LEX
