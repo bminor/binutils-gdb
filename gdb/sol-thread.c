@@ -484,6 +484,9 @@ sol_thread_fetch_registers (struct regcache *regcache, int regnum)
   td_err_e val;
   prgregset_t gregset;
   prfpregset_t fpregset;
+  gdb_gregset_t *gregset_p = &gregset;
+  gdb_fpregset_t *fpregset_p = &fpregset;
+
 #if 0
   int xregsize;
   caddr_t xregset;
@@ -530,8 +533,8 @@ sol_thread_fetch_registers (struct regcache *regcache, int regnum)
      calling the td routines because the td routines call ps_lget*
      which affect the values stored in the registers array.  */
 
-  supply_gregset (regcache, (const gdb_gregset_t *) &gregset);
-  supply_fpregset (regcache, (const gdb_fpregset_t *) &fpregset);
+  supply_gregset (regcache, (const gdb_gregset_t *) gregset_p);
+  supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset_p);
 
 #if 0
   /* FIXME: libthread_db doesn't seem to handle this right.  */
