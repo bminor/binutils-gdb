@@ -1,3 +1,8 @@
+2007-10-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/frv/frv.mt (DEPRECATED_TM_FILE): Remove.
+	* config/frv-tm-frv.h: Delete file.
+
 2007-10-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention gdbserver support for non-libthread_db operation.
