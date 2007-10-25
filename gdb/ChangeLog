@@ -14,6 +14,12 @@
 	* configure.ac: Modify $LIBINTL before the BFD check.
 	* configure: Regenerated.
 
+2007-10-21  Luis Machado  <luisgpm@br.ibm.com>
+
+	* rs6000-tdep.c (ppc_dwarf2_frame_init_reg): New function.
+	* (rs6000_gdbarch_init): Install ppc_dwarf2_frame_init_reg as
+	default dwarf2_frame_set_init_reg function.
+		
 2007-10-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mi/mi-main.c (captured_mi_execute_command): Clear mi_error_message
