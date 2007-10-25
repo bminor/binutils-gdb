@@ -1,3 +1,7 @@
+2007-10-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Document status of hppa64-hpux support.
+
 2007-10-24  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	PR gdb/2341
