@@ -1,3 +1,13 @@
+2007-10-15  Wu Zhou  <woodzltc@cn.ibm.com> 
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.base/dfp-exprs.exp: new file adding tests for Decimal
+	Floating Point expressions.
+	* gdb.base/dfp-test.exp: new file adding tests for Decimal
+	Floating Point variables.
+	* gdb.base/dfp-test.c: new file containing program with Decimal
+	Floating variables, used by gdb.base/dfp-test.exp.
+
 2007-10-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.threads/multi-create.c, gdb.threads/multi-create.exp: New.
