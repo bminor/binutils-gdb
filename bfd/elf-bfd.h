@@ -2009,6 +2009,8 @@ extern char *elfcore_write_prfpreg
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_prxfpreg
   (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_vmx
+  (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_lwpstatus
   (bfd *, char *, int *, long, int, const void *);
 

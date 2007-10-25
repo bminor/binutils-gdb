@@ -1,3 +1,10 @@
+2007-10-25  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
+
+	* elf.c (elfcore_grok_ppc_vmx): New function.
+	(elfcore_grok_note): Handle NT_PPC_VMX.
+	(elfcore_write_ppc_vmx): New function.
+	* elf-bfd.h (elfcore_write_ppc_vmx): Declare.
+
 2007-10-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
