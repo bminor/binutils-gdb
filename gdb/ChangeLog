@@ -1,3 +1,13 @@
+2007-10-25  David Ung  <davidu@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	PR exp/1926
+	* infcmd.c (registers_info): Check for a user register before
+	calling target's gdbarch_print_registers_info().  If found to be
+	so, extract the implicit value of user register and call
+	print_scalar_formatted().
+	* Makefile.in: (infcmd.o): Add $(user_regs_h).
+
 2007-10-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Document status of hppa64-hpux support.

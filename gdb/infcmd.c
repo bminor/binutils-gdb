@@ -47,6 +47,7 @@
 #include "gdb_assert.h"
 #include "observer.h"
 #include "target-descriptions.h"
+#include "user-regs.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -1705,21 +1706,35 @@ registers_info (char *addr_exp, int fpregs)
       while ((*addr_exp) != '\0' && !isspace ((*addr_exp)))
 	addr_exp++;
       end = addr_exp;
-      
+
       /* Figure out what we've found and display it.  */
 
       /* A register name?  */
       {
-	int regnum = frame_map_name_to_regnum (frame,
-					       start, end - start);
+	int regnum = frame_map_name_to_regnum (frame, start, end - start);
 	if (regnum >= 0)
 	  {
-	    gdbarch_print_registers_info (gdbarch, gdb_stdout,
-					  frame, regnum, fpregs);
+	    /* User registers lie completely outside of the range of
+	       normal registers.  Catch them early so that the target
+	       never sees them.  */
+	    if (regnum >= gdbarch_num_regs (gdbarch)
+			  + gdbarch_num_pseudo_regs (gdbarch))
+	      {
+		struct value *val = value_of_user_reg (regnum, frame);
+
+		printf_filtered ("%s: ", start);
+		print_scalar_formatted (value_contents (val),
+					check_typedef (value_type (val)),
+					'x', 0, gdb_stdout);
+		printf_filtered ("\n");
+	      }
+	    else
+	      gdbarch_print_registers_info (gdbarch, gdb_stdout,
+					    frame, regnum, fpregs);
 	    continue;
 	  }
       }
-	
+
       /* A register number?  (how portable is this one?).  */
       {
 	char *endptr;
