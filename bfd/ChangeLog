@@ -1,3 +1,9 @@
+2007-10-25  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	PR gdb/2339
+	* bfd-in.h (STRING_COMMA_LEN): Don't handle NULL STR case.
+	* bfd-in2.h: Regenerate.
+
 2007-09-04  Michael Snyder  <msnyder@access-company.com>
 
 	* elf32-bfin.c (howto_table): Cut and paste error?  
