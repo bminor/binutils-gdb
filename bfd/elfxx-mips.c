@@ -9325,7 +9325,7 @@ _bfd_mips_elf_additional_program_headers (bfd *abfd,
 
 bfd_boolean
 _bfd_mips_elf_modify_segment_map (bfd *abfd,
-				  struct bfd_link_info *info ATTRIBUTE_UNUSED)
+				  struct bfd_link_info *info)
 {
   asection *s;
   struct elf_segment_map *m, **pm;
@@ -9550,8 +9550,12 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
      header instead, and avoid the need to move any sections.
      There is a long tradition of allocating spare dynamic tags,
      so allocating a spare program header seems like a natural
-     extension.  */
-  if (!SGI_COMPAT (abfd)
+     extension.
+
+     If INFO is NULL, we may be copying an already prelinked binary
+     with objcopy or strip, so do not add this header.  */
+  if (info != NULL
+      && !SGI_COMPAT (abfd)
       && bfd_get_section_by_name (abfd, ".dynamic"))
     {
       for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL; pm = &(*pm)->next)

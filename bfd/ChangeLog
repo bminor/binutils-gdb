@@ -1,3 +1,8 @@
+2007-10-25  Joseph Myers  <joseph@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Do not add
+	PT_NULL header when not linking.
+
 2007-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf.c (assign_file_positions_for_load_sections): Trust
