@@ -1,3 +1,8 @@
+2007-10-25  Doug Evans  <dje@google.com>
+
+	* gdb.cp/mb-ctor.exp: Check skip_cplus_tests.
+	* gdb.cp/mb-templates.exp: Check skip_cplus_tests.
+
 2007-10-15  Wu Zhou  <woodzltc@cn.ibm.com> 
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
