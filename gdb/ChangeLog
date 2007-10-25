@@ -1,5 +1,10 @@
 2007-10-25  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* memory-map.c (parse_memory_map): Don't use an empty struct
+	initializer.
+
+2007-10-25  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* signals/signals.c (signals): Update pointer to enum
 	target_signal declaration.
 
