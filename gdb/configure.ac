@@ -502,6 +502,7 @@ AC_CHECK_TYPES(uintptr_t, [], [], [#include <stdint.h>])
 
 AC_C_CONST
 AC_C_INLINE
+AC_C_BIGENDIAN
 
 # ------------------------------ #
 # Checks for library functions.  #

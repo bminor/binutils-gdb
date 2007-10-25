@@ -1,3 +1,27 @@
+2007-10-25  Wu Zhou  <woodzltc@cn.ibm.com> 
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* Makefile.in (LIBDECNUMBER_DIR, LIBDECNUMBER, LIBDECNUMBER_SRC
+	LIBDECNUMBER_CFLAGS): New macros for libdecnumber.
+	(INTERNAL_CFLAGS_BASE): Add LIBDECNUMBER_CFLAGS in.
+	(INSTALLED_LIBS): Add -ldecnumber in.
+	(CLIBS): Add LIBDECNUMBER in.
+	(decimal128_h, decimal64_h, decimal32_h): New macros for decimal
+	headers.
+	(dfp_h): New macros for decimal floating point.
+	(dfp.o): New target.
+	(COMMON_OBS): Add dfp.o in.
+	(c-exp.o): Add dfp_h as dependency.
+	(valprint.o): Add dfp_h as dependency.
+	(value.o): Add dfp_h as dependency.
+	* dfp.h: New header file for decimal floating point support in
+	GDB.
+	* dfp.c: New source file for decimal floating point support in
+	GDB.  Implement decimal_from_string and decimal_to_string based
+	on libdecnumber API.
+	* configure.ac: Add AC_C_BIGENDIAN test.
+	* config.in, configure: Regenerate.
+
 2007-10-25  David Ung  <davidu@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 

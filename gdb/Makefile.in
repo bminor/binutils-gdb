@@ -125,6 +125,12 @@ BFD = $(BFD_DIR)/libbfd.a
 BFD_SRC = $(srcdir)/$(BFD_DIR)
 BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
 
+# Where is the decnumber library?  Typically in ../libdecnumber.
+LIBDECNUMBER_DIR = ../libdecnumber
+LIBDECNUMBER = $(LIBDECNUMBER_DIR)/libdecnumber.a
+LIBDECNUMBER_SRC = $(srcdir)/$(LIBDECNUMBER_DIR)
+LIBDECNUMBER_CFLAGS = -I$(LIBDECNUMBER_DIR) -I$(LIBDECNUMBER_SRC)
+
 # Where is the READLINE library?  Typically in ../readline.
 READLINE_DIR = ../readline
 READLINE_SRC = $(srcdir)/$(READLINE_DIR)
@@ -358,7 +364,7 @@ CXXFLAGS = -g -O
 INTERNAL_CFLAGS_BASE = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
-	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
+	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
 	$(INTL_CFLAGS) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS)
 INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
@@ -381,10 +387,10 @@ INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_
 # LIBIBERTY appears twice on purpose.
 # If you have the Cygnus libraries installed,
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
-INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty \
+INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty -ldecnumber \
 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
 	-lintl -liberty
-CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) \
+CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
 	$(LIBICONV) $(LIBEXPAT) \
 	$(LIBIBERTY) $(WIN32LIBS)
@@ -623,6 +629,10 @@ safe_ctype_h =  $(INCLUDE_DIR)/safe-ctype.h
 hashtab_h =	$(INCLUDE_DIR)/hashtab.h
 filenames_h =	$(INCLUDE_DIR)/filenames.h
 
+decimal128_h = $(LIBDECNUMBER_DIR)/dpd/decimal128.h
+decimal64_h = $(LIBDECNUMBER_DIR)/dpd/decimal64.h
+decimal32_h = $(LIBDECNUMBER_DIR)/dpd/decimal32.h
+
 #
 # $BUILD/ headers
 #
@@ -689,6 +699,7 @@ dictionary_h = dictionary.h
 disasm_h = disasm.h
 doublest_h = doublest.h $(floatformat_h)
 dummy_frame_h = dummy-frame.h
+dfp_h = dfp.h
 dwarf2expr_h = dwarf2expr.h
 dwarf2_frame_h = dwarf2-frame.h
 dwarf2loc_h = dwarf2loc.h
@@ -959,7 +970,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	auxv.o \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
-	charset.o disasm.o dummy-frame.o \
+	charset.o disasm.o dummy-frame.o dfp.o \
 	source.o value.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	block.o symtab.o symfile.o symmisc.o linespec.o dictionary.o \
 	infcall.o \
@@ -1893,7 +1904,7 @@ buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(cp_support_h) $(dictionary_h) $(buildsym_h) $(stabsread_h)
 c-exp.o: c-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 	$(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) $(symfile_h) \
-	$(objfiles_h) $(charset_h) $(block_h) $(cp_support_h)
+	$(objfiles_h) $(charset_h) $(block_h) $(cp_support_h) $(dfp_h)
 charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) $(gdb_assert_h) \
 	$(gdb_string_h)
 c-lang.o: c-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
@@ -1976,6 +1987,7 @@ dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h) $(gdb_assert_h) \
 dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
 	$(frame_h) $(inferior_h) $(gdb_assert_h) $(frame_unwind_h) \
 	$(command_h) $(gdbcmd_h) $(gdb_string_h)
+dfp.o: dfp.c $(defs_h) $(dfp_h) $(decimal128_h) $(decimal64_h) $(decimal32_h)
 dwarf2expr.o: dwarf2expr.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(value_h) \
 	$(gdbcore_h) $(elf_dwarf2_h) $(dwarf2expr_h)
 dwarf2-frame.o: dwarf2-frame.c $(defs_h) $(dwarf2expr_h) $(elf_dwarf2_h) \
@@ -2847,11 +2859,11 @@ valops.o: valops.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(value_h) $(frame_h) \
 valprint.o: valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(language_h) \
 	$(annotate_h) $(valprint_h) $(floatformat_h) $(doublest_h) \
-	$(exceptions_h)
+	$(exceptions_h) $(dfp_h)
 value.o: value.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h) $(command_h) $(gdbcmd_h) $(target_h) \
 	$(language_h) $(demangle_h) $(doublest_h) \
-	$(gdb_assert_h) $(regcache_h) $(block_h)
+	$(gdb_assert_h) $(regcache_h) $(block_h) $(dfp_h)
 varobj.o: varobj.c $(defs_h) $(exceptions_h) $(value_h) $(expression_h) \
 	$(frame_h) $(language_h) $(wrapper_h) $(gdbcmd_h) $(block_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(varobj_h) $(vec_h)
