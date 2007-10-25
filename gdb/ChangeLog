@@ -1,6 +1,31 @@
 2007-10-25  Wu Zhou  <woodzltc@cn.ibm.com> 
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	* c-exp.y (YYSTYPE): Add typed_val_decfloat for decimal
+	floating point in YYSTYPE union.
+	(DECFLOAT) Add token and expression element handling code.
+	(parse_number): Parse DFP constants, which end with suffix 'df',
+	'dd' or 'dl'.  Return DECFLOAT.
+	* eval.c (evaluate_subexp_standard): Call value_from_decfloat to
+	handle OP_DECFLOAT.
+	* expression.h (enum exp_opcode): Add an opcode (OP_DECFLOAT)
+	for DFP constants.
+	(union exp_element): Add decfloatconst to represent DFP
+	elements, which is 16 bytes by default.
+	* parse.c (write_exp_elt_decfloatcst): New function to write a
+	decimal float const into the expression.
+	(operator_length_standard): Set operator length for OP_DECFLOAT
+	to 4.
+	* parser-defs.h (write_exp_elt_decfloatcst): Prototype.
+	* valarith.c (value_neg): Add code to handle the negation
+	operation of DFP values.
+	* value.c (value_from_decfloat): New function to get the value
+	from a decimal floating point.
+	* value.h (value_from_decfloat): Prototype.
+
+2007-10-25  Wu Zhou  <woodzltc@cn.ibm.com> 
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	* c-lang.c (c_create_fundamental_type): Create fundamental
 	types for DFP.
 	* c-typeprint.c (c_type_print_varspec_prefix): Add

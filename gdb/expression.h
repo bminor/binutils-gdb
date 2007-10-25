@@ -328,6 +328,11 @@ enum exp_opcode
     /* A F90 array range operator (for "exp:exp", "exp:", ":exp" and ":").  */
     OP_F90_RANGE,
 
+    /* OP_DECFLOAT is followed by a type pointer in the next exp_element
+       and a dec long constant value in the following exp_element.
+       Then comes another OP_DECFLOAT.  */
+    OP_DECFLOAT,
+
      /* First extension operator.  Individual language modules define
         extra operators they need as constants with values 
         OP_LANGUAGE_SPECIFIC0 + k, for k >= 0, using a separate 
@@ -355,6 +360,7 @@ union exp_element
     struct symbol *symbol;
     LONGEST longconst;
     DOUBLEST doubleconst;
+    gdb_byte decfloatconst[16];
     /* Really sizeof (union exp_element) characters (or less for the last
        element of a string).  */
     char string;

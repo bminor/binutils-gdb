@@ -119,6 +119,8 @@ extern void write_exp_elt_longcst (LONGEST);
 
 extern void write_exp_elt_dblcst (DOUBLEST);
 
+extern void write_exp_elt_decfloatcst (gdb_byte *);
+
 extern void write_exp_elt_type (struct type *);
 
 extern void write_exp_elt_intern (struct internalvar *);

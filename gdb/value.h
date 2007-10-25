@@ -280,6 +280,9 @@ extern void pack_long (gdb_byte *buf, struct type *type, LONGEST num);
 extern struct value *value_from_longest (struct type *type, LONGEST num);
 extern struct value *value_from_pointer (struct type *type, CORE_ADDR addr);
 extern struct value *value_from_double (struct type *type, DOUBLEST num);
+extern struct value *value_from_decfloat (struct type *expect_type,
+					  struct type *type,
+					  gdb_byte decbytes[16]);
 extern struct value *value_from_string (char *string);
 
 extern struct value *value_at (struct type *type, CORE_ADDR addr);

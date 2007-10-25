@@ -34,6 +34,7 @@
 #include "gdb_assert.h"
 #include "regcache.h"
 #include "block.h"
+#include "dfp.h"
 
 /* Prototypes for exported functions. */
 
@@ -1638,6 +1639,27 @@ value_from_double (struct type *type, DOUBLEST num)
   else
     error (_("Unexpected type encountered for floating constant."));
 
+  return val;
+}
+
+struct value *
+value_from_decfloat (struct type *expect_type, struct type *type,
+		      gdb_byte decbytes[16])
+{
+  struct value *val = allocate_value (type);
+  int len = TYPE_LENGTH (type);
+
+  if (expect_type)
+    {
+      int expect_len = TYPE_LENGTH (expect_type);
+      char decstr[128];
+      int real_len;
+
+      decimal_to_string (decbytes, len, decstr);
+      decimal_from_string (decbytes, expect_len, decstr);
+    }
+
+  memcpy (value_contents_raw (val), decbytes, len);
   return val;
 }
 

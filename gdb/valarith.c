@@ -1376,6 +1376,23 @@ value_neg (struct value *arg1)
 
   type = check_typedef (value_type (arg1));
 
+  if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+    {
+      struct value *val = allocate_value (result_type);
+      int len = TYPE_LENGTH (type);
+      gdb_byte decbytes[16];  /* a decfloat is at most 128 bits long */
+
+      memcpy(decbytes, value_contents(arg1), len);
+
+      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+	decbytes[len-1] = decbytes[len - 1] | 0x80;
+      else
+	decbytes[0] = decbytes[0] | 0x80;
+
+      memcpy (value_contents_raw (val), decbytes, len);
+      return val;
+    }
+
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     return value_from_double (result_type, -value_as_double (arg1));
   else if (is_integral_type (type))

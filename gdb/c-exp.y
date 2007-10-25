@@ -52,6 +52,7 @@ Boston, MA 02110-1301, USA.  */
 #include "charset.h"
 #include "block.h"
 #include "cp-support.h"
+#include "dfp.h"
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
@@ -130,6 +131,10 @@ void yyerror (char *);
       DOUBLEST dval;
       struct type *type;
     } typed_val_float;
+    struct {
+      gdb_byte val[16];
+      struct type *type;
+    } typed_val_decfloat;
     struct symbol *sym;
     struct type *tval;
     struct stoken sval;
@@ -162,6 +167,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 %token <typed_val_int> INT
 %token <typed_val_float> FLOAT
+%token <typed_val_decfloat> DECFLOAT
 
 /* Both NAME and TYPENAME tokens represent symbols in the input,
    and both convey their data as strings.
@@ -494,6 +500,13 @@ exp	:	FLOAT
 			  write_exp_elt_type ($1.type);
 			  write_exp_elt_dblcst ($1.dval);
 			  write_exp_elt_opcode (OP_DOUBLE); }
+	;
+
+exp	:	DECFLOAT
+			{ write_exp_elt_opcode (OP_DECFLOAT);
+			  write_exp_elt_type ($1.type);
+			  write_exp_elt_decfloatcst ($1.val);
+			  write_exp_elt_opcode (OP_DECFLOAT); }
 	;
 
 exp	:	variable
@@ -1077,6 +1090,40 @@ parse_number (p, len, parsed_float, putithere)
       char saved_char = p[len];
 
       p[len] = 0;	/* null-terminate the token */
+
+      /* If it ends at "df", "dd" or "dl", take it as type of decimal floating
+         point.  Return DECFLOAT.  */
+
+      if (p[len - 2] == 'd' && p[len - 1] == 'f')
+	{
+	  p[len - 2] = '\0';
+	  putithere->typed_val_decfloat.type
+	    = builtin_type (current_gdbarch)->builtin_decfloat;
+	  decimal_from_string (putithere->typed_val_decfloat.val, 4, p);
+	  p[len] = saved_char;
+	  return (DECFLOAT);
+	}
+
+      if (p[len - 2] == 'd' && p[len - 1] == 'd')
+	{
+	  p[len - 2] = '\0';
+	  putithere->typed_val_decfloat.type
+	    = builtin_type (current_gdbarch)->builtin_decdouble;
+	  decimal_from_string (putithere->typed_val_decfloat.val, 8, p);
+	  p[len] = saved_char;
+	  return (DECFLOAT);
+	}
+
+      if (p[len - 2] == 'd' && p[len - 1] == 'l')
+	{
+	  p[len - 2] = '\0';
+	  putithere->typed_val_decfloat.type
+	    = builtin_type (current_gdbarch)->builtin_declong;
+	  decimal_from_string (putithere->typed_val_decfloat.val, 16, p);
+	  p[len] = saved_char;
+	  return (DECFLOAT);
+	}
+
       num = sscanf (p, DOUBLEST_SCAN_FORMAT "%s",
 		    &putithere->typed_val_float.dval, s);
       p[len] = saved_char;	/* restore the input stream */

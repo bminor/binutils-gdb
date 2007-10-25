@@ -456,6 +456,11 @@ evaluate_subexp_standard (struct type *expect_type,
       return value_from_double (exp->elts[pc + 1].type,
 				exp->elts[pc + 2].doubleconst);
 
+    case OP_DECFLOAT:
+      (*pos) += 3;
+      return value_from_decfloat (expect_type, exp->elts[pc + 1].type,
+				exp->elts[pc + 2].decfloatconst);
+
     case OP_VAR_VALUE:
       (*pos) += 3;
       if (noside == EVAL_SKIP)

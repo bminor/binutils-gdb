@@ -248,6 +248,18 @@ write_exp_elt_dblcst (DOUBLEST expelt)
 }
 
 void
+write_exp_elt_decfloatcst (gdb_byte expelt[16])
+{
+  union exp_element tmp;
+  int index;
+
+  for (index = 0; index < 16; index++)
+    tmp.decfloatconst[index] = expelt[index];
+
+  write_exp_elt (tmp);
+}
+
+void
 write_exp_elt_type (struct type *expelt)
 {
   union exp_element tmp;
@@ -718,6 +730,7 @@ operator_length_standard (struct expression *expr, int endpos,
 
     case OP_LONG:
     case OP_DOUBLE:
+    case OP_DECFLOAT:
     case OP_VAR_VALUE:
       oplen = 4;
       break;
