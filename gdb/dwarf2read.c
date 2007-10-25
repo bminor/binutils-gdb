@@ -5619,6 +5619,25 @@ read_partial_die (struct partial_die_info *part_die,
         case DW_AT_byte_size:
           part_die->has_byte_size = 1;
           break;
+	case DW_AT_calling_convention:
+	  /* DWARF doesn't provide a way to identify a program's source-level
+	     entry point.  DW_AT_calling_convention attributes are only meant
+	     to describe functions' calling conventions.
+
+	     However, because it's a necessary piece of information in
+	     Fortran, and because DW_CC_program is the only piece of debugging
+	     information whose definition refers to a 'main program' at all,
+	     several compilers have begun marking Fortran main programs with
+	     DW_CC_program --- even when those functions use the standard
+	     calling conventions.
+
+	     So until DWARF specifies a way to provide this information and
+	     compilers pick up the new representation, we'll support this
+	     practice.  */
+	  if (DW_UNSND (&attr) == DW_CC_program
+	      && cu->language == language_fortran)
+	    set_main_name (part_die->name);
+	  break;
 	default:
 	  break;
 	}

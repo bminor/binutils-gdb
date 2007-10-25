@@ -1,3 +1,10 @@
+2007-10-25  Wu Zhou  <woodzltc@cn.ibm.com>
+	    Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
+	    Jim Blandy  <jimb@codesourcery.com>
+
+	* dwarf2read.c (read_partial_die): check the value
+	of DW_AT_calling_convention in Fortran programs.
+
 2007-10-25  Wu Zhou  <woodzltc@cn.ibm.com> 
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
