@@ -21,6 +21,11 @@ registers on PowerPC targets.
 * The GDB remote stub, gdbserver, now supports thread debugging on GNU/Linux
 targets even when the libthread_db library is not available.
 
+* hppa*64*-*-hpux11* target broken
+  The debugger is unable to start a program and fails with the following
+  error: "Error trying to get information about dynamic linker".
+  The gdb-6.7 release is also affected.
+
 *** Changes in GDB 6.7
 
 * Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 
