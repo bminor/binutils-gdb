@@ -180,7 +180,7 @@ parse_memory_map (const char *memory_map)
   struct gdb_xml_parser *parser;
   VEC(mem_region_s) *result = NULL;
   struct cleanup *before_deleting_result, *back_to;
-  struct memory_map_parsing_data data = {};
+  struct memory_map_parsing_data data = { NULL };
 
   back_to = make_cleanup (null_cleanup, NULL);
   parser = gdb_xml_create_parser_and_cleanup (_("target memory map"),
