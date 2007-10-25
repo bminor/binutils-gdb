@@ -1,3 +1,7 @@
+2007-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-thread-db.c (check_for_thread_db): Only print if info_verbose.
+
 2007-10-25  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* memory-map.c (parse_memory_map): Don't use an empty struct

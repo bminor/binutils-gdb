@@ -608,8 +608,9 @@ check_for_thread_db (void)
 	/* Paranoid - don't let a NULL path slip through.  */
 	library = LIBTHREAD_DB_SO;
 
-      printf_unfiltered (_("Using host libthread_db library \"%s\".\n"),
-			 library);
+      if (info_verbose)
+	printf_unfiltered (_("Using host libthread_db library \"%s\".\n"),
+			   library);
       already_loaded = 1;
     }
 
