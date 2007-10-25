@@ -195,7 +195,7 @@ static const autofilter_entry_type autofilter_symbollist_generic[] =
   /* Runtime pseudo-reloc.  */
   { STRING_COMMA_LEN ("_pei386_runtime_relocator") },
   { STRING_COMMA_LEN ("do_pseudo_reloc") },
-  { STRING_COMMA_LEN (NULL) }
+  { NULL, 0 }
 };
 
 static const autofilter_entry_type autofilter_symbollist_i386[] =
@@ -231,7 +231,7 @@ static const autofilter_entry_type autofilter_symbollist_i386[] =
   { STRING_COMMA_LEN ("_impure_ptr") },
   { STRING_COMMA_LEN ("_fmode") },
   { STRING_COMMA_LEN ("environ") },
-  { STRING_COMMA_LEN (NULL) }
+  { NULL, 0 }
 };
 
 #define PE_ARCH_i386	 1
@@ -321,7 +321,7 @@ static const autofilter_entry_type autofilter_liblist[] =
   { STRING_COMMA_LEN ("libsupc++") },
   { STRING_COMMA_LEN ("libobjc") },
   { STRING_COMMA_LEN ("libgcj") },
-  { STRING_COMMA_LEN (NULL) }
+  { NULL, 0 }
 };
 
 static const autofilter_entry_type autofilter_objlist[] =
@@ -336,7 +336,7 @@ static const autofilter_entry_type autofilter_objlist[] =
   { STRING_COMMA_LEN ("gcrt2.o") },
   { STRING_COMMA_LEN ("crtbegin.o") },
   { STRING_COMMA_LEN ("crtend.o") },
-  { STRING_COMMA_LEN (NULL) }
+  { NULL, 0 }
 };
 
 static const autofilter_entry_type autofilter_symbolprefixlist[] =
@@ -350,13 +350,13 @@ static const autofilter_entry_type autofilter_symbolprefixlist[] =
   { STRING_COMMA_LEN ("_nm_") },
   /* Don't export symbols specifying internal DLL layout.  */
   { STRING_COMMA_LEN ("_head_") },
-  { STRING_COMMA_LEN (NULL) }
+  { NULL, 0 }
 };
 
 static const autofilter_entry_type autofilter_symbolsuffixlist[] =
 {
   { STRING_COMMA_LEN ("_iname") },
-  { STRING_COMMA_LEN (NULL) }
+  { NULL, 0 }
 };
 
 #define U(str) (pe_details->underscored ? "_" str : str)
