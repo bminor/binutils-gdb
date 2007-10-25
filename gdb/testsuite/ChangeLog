@@ -1,3 +1,12 @@
+2007-10-25  Luis Machado  <luisgpm@br.ibm.com>
+
+	* gdb.opt/clobbered-registers-O2.c: New testcase source file.
+	* gdb.opt/clobbered-registers-O2.exp: New testcase expect file.
+	* gdb.opt/Makefile.in: New makefile.
+	* Makefile.in: Create new directory "gdb.opt".
+	* configure.ac: Add "gdb.opt" directory.
+	* configure: Regenerated.
+			
 2007-10-25  Doug Evans  <dje@google.com>
 
 	* gdb.cp/mb-ctor.exp: Check skip_cplus_tests.
