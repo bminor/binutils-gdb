@@ -3506,6 +3506,21 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 	       0,
 	       "bool", (struct objfile *) NULL);
 
+  /* The following three are about decimal floating point types, which
+     are 32-bits, 64-bits and 128-bits respectively.  */
+  builtin_type->builtin_decfloat
+    = init_type (TYPE_CODE_DECFLOAT, 32 / 8,
+	        0,
+	       "decimal float", (struct objfile *) NULL);
+  builtin_type->builtin_decdouble
+    = init_type (TYPE_CODE_DECFLOAT, 64 / 8,
+	       0,
+	       "decimal double", (struct objfile *) NULL);
+  builtin_type->builtin_declong
+    = init_type (TYPE_CODE_DECFLOAT, 128 / 8,
+	       0,
+	       "decimal long double", (struct objfile *) NULL);
+
   /* Pointer/Address types.  */
 
   /* NOTE: on some targets, addresses and pointers are not necessarily

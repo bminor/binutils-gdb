@@ -33,6 +33,7 @@
 #include "floatformat.h"
 #include "doublest.h"
 #include "exceptions.h"
+#include "dfp.h"
 
 #include <errno.h>
 
@@ -503,6 +504,18 @@ print_floating (const gdb_byte *valaddr, struct type *type,
        doubles.  */
     fprintf_filtered (stream, "%.17g", (double) doub);
 #endif
+}
+
+void
+print_decimal_floating (const gdb_byte *valaddr, struct type *type,
+			struct ui_file *stream)
+{
+  char decstr[MAX_DECIMAL_STRING];
+  unsigned len = TYPE_LENGTH (type);
+
+  decimal_to_string (valaddr, len, decstr);
+  fputs_filtered (decstr, stream);
+  return;
 }
 
 void

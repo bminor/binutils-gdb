@@ -492,6 +492,9 @@ extern void print_longest (struct ui_file *stream, int format,
 extern void print_floating (const gdb_byte *valaddr, struct type *type,
 			    struct ui_file *stream);
 
+extern void print_decimal_floating (const gdb_byte *valaddr, struct type *type,
+				    struct ui_file *stream);
+
 extern int value_print (struct value *val, struct ui_file *stream, int format,
 			enum val_prettyprint pretty);
 

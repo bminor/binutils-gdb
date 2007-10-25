@@ -1,6 +1,33 @@
 2007-10-25  Wu Zhou  <woodzltc@cn.ibm.com> 
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	* c-lang.c (c_create_fundamental_type): Create fundamental
+	types for DFP.
+	* c-typeprint.c (c_type_print_varspec_prefix): Add
+	TYPE_CODE_DECFLOAT to no prefix needed case.
+	(c_type_print_varspec_suffix): Add TYPE_CODE_DECFLOAT to no
+	suffix needed case.
+	* c-valprint.c (c_val_print): Call print_decimal_floating to
+	print DFP values.
+	* dwarf2read.c (read_base_type): Read DW_ATE_decimal_float
+	attribute code and return TYPE_CODE_DECFLOAT.
+	(dwarf_base_type): Set dwarf2_fundamental_type for DFP values.
+	* gdbtypes.c (gdbtypes_post_init): Initialize builtin_decfloat,
+	builtin_decdouble and builtin_declong. 
+	* gdbtypes.h (enum type_code): Add TYPE_CODE_DECFLOAT as a
+	type code for DFP.
+	(FT_DECFLOAT, FT_DBL_PREC_DECFLOAT, FT_EXT_PREC_DECFLOAT): New
+	types, for decimal floating point.
+	(FT_NUM_MEMBERS):  Increment, new types added.
+	(struct builtin_type): Add builtin_decfloat, builtin_decdouble
+	and builtin_declong.
+	* valprint.c (print_decimal_floating): New function to print DFP
+	values.
+	* value.h (print_decimal_floating): Prototype.
+
+2007-10-25  Wu Zhou  <woodzltc@cn.ibm.com> 
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	* Makefile.in (LIBDECNUMBER_DIR, LIBDECNUMBER, LIBDECNUMBER_SRC
 	LIBDECNUMBER_CFLAGS): New macros for libdecnumber.
 	(INTERNAL_CFLAGS_BASE): Add LIBDECNUMBER_CFLAGS in.

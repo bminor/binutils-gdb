@@ -325,6 +325,21 @@ c_create_fundamental_type (struct objfile *objfile, int typeid)
 			  / TARGET_CHAR_BIT,
 			0, "long double", objfile);
       break;
+    case FT_DECFLOAT:
+      type = init_type (TYPE_CODE_DECFLOAT,
+			32 / 8,
+			0, "decimal float", objfile);
+      break;
+    case FT_DBL_PREC_DECFLOAT:
+      type = init_type (TYPE_CODE_DECFLOAT,
+			64 / 8,
+			0, "decimal double", objfile);
+      break;
+    case FT_EXT_PREC_DECFLOAT:
+      type = init_type (TYPE_CODE_DECFLOAT,
+			128 / 8,
+			0, "decimal long double", objfile);
+      break;
     case FT_COMPLEX:
       type = init_type (TYPE_CODE_FLT,
 			2 * gdbarch_float_bit (current_gdbarch)

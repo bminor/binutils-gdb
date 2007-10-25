@@ -65,7 +65,12 @@ struct block;
 #define FT_UNSIGNED_BYTE	27
 #define FT_TEMPLATE_ARG		28
 
-#define FT_NUM_MEMBERS		29	/* Highest FT_* above, plus one. */
+/* The following three fundamental types are for decimal floating point.  */
+#define FT_DECFLOAT		29
+#define FT_DBL_PREC_DECFLOAT	30
+#define FT_EXT_PREC_DECFLOAT	31
+
+#define FT_NUM_MEMBERS		32	/* Highest FT_* above, plus one. */
 
 /* Some macros for char-based bitfields.  */
 
@@ -169,7 +174,9 @@ enum type_code
     TYPE_CODE_TEMPLATE,		/* C++ template */
     TYPE_CODE_TEMPLATE_ARG,	/* C++ template arg */
 
-    TYPE_CODE_NAMESPACE		/* C++ namespace.  */
+    TYPE_CODE_NAMESPACE,	/* C++ namespace.  */
+
+    TYPE_CODE_DECFLOAT		/* Decimal floating point.  */
   };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an
@@ -1041,6 +1048,9 @@ struct builtin_type
   struct type *builtin_bool;
   struct type *builtin_long_long;
   struct type *builtin_unsigned_long_long;
+  struct type *builtin_decfloat;
+  struct type *builtin_decdouble;
+  struct type *builtin_declong;
 };
 
 /* Return the type table for the specified architecture.  */

@@ -474,6 +474,13 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	}
       break;
 
+    case TYPE_CODE_DECFLOAT:
+      if (format)
+	print_scalar_formatted (valaddr + embedded_offset, type, format, 0, stream);
+      else
+	print_decimal_floating (valaddr + embedded_offset, type, stream);
+      break;
+
     case TYPE_CODE_VOID:
       fprintf_filtered (stream, "void");
       break;

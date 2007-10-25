@@ -4865,6 +4865,9 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	case DW_ATE_complex_float:
 	  code = TYPE_CODE_COMPLEX;
 	  break;
+	case DW_ATE_decimal_float:
+	  code = TYPE_CODE_DECFLOAT;
+	  break;
 	case DW_ATE_float:
 	  code = TYPE_CODE_FLT;
 	  break;
@@ -7750,6 +7753,14 @@ dwarf_base_type (int encoding, int size, struct dwarf2_cu *cu)
 	{
 	  type = dwarf2_fundamental_type (objfile, FT_FLOAT, cu);
 	}
+      return type;
+    case DW_ATE_decimal_float:
+      if (size == 16)
+	type = dwarf2_fundamental_type (objfile, FT_DBL_PREC_DECFLOAT, cu);
+      else if (size == 8)
+	type = dwarf2_fundamental_type (objfile, FT_EXT_PREC_DECFLOAT, cu);
+      else
+	type = dwarf2_fundamental_type (objfile, FT_DECFLOAT, cu);
       return type;
     case DW_ATE_signed:
       switch (size)
