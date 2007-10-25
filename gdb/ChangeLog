@@ -1,3 +1,8 @@
+2007-10-25  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* signals/signals.c (signals): Update pointer to enum
+	target_signal declaration.
+
 2007-10-25  Wu Zhou  <woodzltc@cn.ibm.com>
 	    Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
 	    Jim Blandy  <jimb@codesourcery.com>

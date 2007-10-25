@@ -45,7 +45,7 @@
 #endif
 
 /* This table must match in order and size the signals in enum target_signal
-   in target.h.  */
+   in src/include/gdb/signals.h.  */
 /* *INDENT-OFF* */
 static struct {
   char *name;
