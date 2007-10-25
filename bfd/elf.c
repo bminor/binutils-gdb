@@ -4082,10 +4082,10 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
 	  p->p_align = maxpagesize;
 	}
-      else if (m->count == 0)
-	p->p_align = 1 << bed->s->log_file_align;
       else if (m->p_align_valid)
 	p->p_align = m->p_align;
+      else if (m->count == 0)
+	p->p_align = 1 << bed->s->log_file_align;
       else
 	p->p_align = 0;
 
@@ -5562,10 +5562,6 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       Elf_Internal_Shdr *this_hdr;
       asection *first_section = NULL;
       asection *lowest_section = NULL;
-
-      /* FIXME: Do we need to copy PT_NULL segment?  */
-      if (segment->p_type == PT_NULL)
-	continue;
 
       /* Compute how many sections are in this segment.  */
       for (section = ibfd->sections, section_count = 0;

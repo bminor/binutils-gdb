@@ -1,3 +1,9 @@
+2007-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Trust
+	p_align_valid.
+	(copy_elf_program_header): Copy PT_NULL segments.
+
 2007-09-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* opncls.c (find_separate_debug_file): Ensure bfd_set_error has
