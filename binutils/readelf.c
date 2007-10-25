@@ -9283,6 +9283,8 @@ get_note_type (unsigned e_type)
 	return _("NT_TASKSTRUCT (task structure)");
       case NT_PRXFPREG:
 	return _("NT_PRXFPREG (user_xfpregs structure)");
+      case NT_PPC_VMX:
+	return _("NT_PPC_VMX (ppc Altivec registers)");
       case NT_PSTATUS:
 	return _("NT_PSTATUS (pstatus structure)");
       case NT_FPREGS:
