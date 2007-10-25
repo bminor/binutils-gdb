@@ -3603,8 +3603,8 @@ ppc_elf_check_relocs (bfd *abfd,
 static bfd_boolean
 ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 {
-  obj_attribute *in_attr;
-  obj_attribute *out_attr;
+  obj_attribute *in_attr, *in_attrs;
+  obj_attribute *out_attr, *out_attrs;
 
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
     {
@@ -3618,33 +3618,84 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
       return TRUE;
     }
 
+  in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
+  out_attrs = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+
   /* Check for conflicting Tag_GNU_Power_ABI_FP attributes and merge
      non-conflicting ones.  */
-  in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
-  out_attr = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
-  if (in_attr[Tag_GNU_Power_ABI_FP].i != out_attr[Tag_GNU_Power_ABI_FP].i)
+  in_attr = &in_attrs[Tag_GNU_Power_ABI_FP];
+  out_attr = &out_attrs[Tag_GNU_Power_ABI_FP];
+  if (in_attr->i != out_attr->i)
     {
-      out_attr[Tag_GNU_Power_ABI_FP].type = 1;
-      if (out_attr[Tag_GNU_Power_ABI_FP].i == 0)
-	out_attr[Tag_GNU_Power_ABI_FP].i = in_attr[Tag_GNU_Power_ABI_FP].i;
-      else if (in_attr[Tag_GNU_Power_ABI_FP].i == 0)
+      out_attr->type = 1;
+      if (out_attr->i == 0)
+	out_attr->i = in_attr->i;
+      else if (in_attr->i == 0)
 	;
-      else if (out_attr[Tag_GNU_Power_ABI_FP].i == 1
-	       && in_attr[Tag_GNU_Power_ABI_FP].i == 2)
+      else if (out_attr->i == 1 && in_attr->i == 2)
 	_bfd_error_handler
 	  (_("Warning: %B uses hard float, %B uses soft float"), obfd, ibfd);
-      else if (out_attr[Tag_GNU_Power_ABI_FP].i == 2
-	       && in_attr[Tag_GNU_Power_ABI_FP].i == 1)
+      else if (out_attr->i == 2 && in_attr->i == 1)
 	_bfd_error_handler
 	  (_("Warning: %B uses hard float, %B uses soft float"), ibfd, obfd);
-      else if (in_attr[Tag_GNU_Power_ABI_FP].i > 2)
+      else if (in_attr->i > 2)
 	_bfd_error_handler
 	  (_("Warning: %B uses unknown floating point ABI %d"), ibfd,
-	   in_attr[Tag_GNU_Power_ABI_FP].i);
+	   in_attr->i);
       else
 	_bfd_error_handler
 	  (_("Warning: %B uses unknown floating point ABI %d"), obfd,
-	   out_attr[Tag_GNU_Power_ABI_FP].i);
+	   out_attr->i);
+    }
+
+  /* Check for conflicting Tag_GNU_Power_ABI_Vector attributes and
+     merge non-conflicting ones.  */
+  in_attr = &in_attrs[Tag_GNU_Power_ABI_Vector];
+  out_attr = &out_attrs[Tag_GNU_Power_ABI_Vector];
+  if (in_attr->i != out_attr->i)
+    {
+      const char *in_abi = NULL, *out_abi = NULL;
+
+      switch (in_attr->i)
+	{
+	case 1: in_abi = "generic"; break;
+	case 2: in_abi = "AltiVec"; break;
+	case 3: in_abi = "SPE"; break;
+	}
+
+      switch (out_attr->i)
+	{
+	case 1: out_abi = "generic"; break;
+	case 2: out_abi = "AltiVec"; break;
+	case 3: out_abi = "SPE"; break;
+	}
+
+      out_attr->type = 1;
+      if (out_attr->i == 0)
+	out_attr->i = in_attr->i;
+      else if (in_attr->i == 0)
+	;
+      /* For now, allow generic to transition to AltiVec or SPE
+	 without a warning.  If GCC marked files with their stack
+	 alignment and used don't-care markings for files which are
+	 not affected by the vector ABI, we could warn about this
+	 case too.  */
+      else if (out_attr->i == 1)
+	out_attr->i = in_attr->i;
+      else if (in_attr->i == 1)
+	;
+      else if (in_abi == NULL)
+	_bfd_error_handler
+	  (_("Warning: %B uses unknown vector ABI %d"), ibfd,
+	   in_attr->i);
+      else if (out_abi == NULL)
+	_bfd_error_handler
+	  (_("Warning: %B uses unknown vector ABI %d"), obfd,
+	   in_attr->i);
+      else
+	_bfd_error_handler
+	  (_("Warning: %B uses vector ABI \"%s\", %B uses \"%s\""),
+	   ibfd, obfd, in_abi, out_abi);
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */

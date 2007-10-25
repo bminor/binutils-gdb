@@ -1,3 +1,8 @@
+2007-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* readelf.c (display_power_gnu_attribute): Add support for
+	Tag_GNU_Power_ABI_Vector.
+
 2007-10-25  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
 
 	* readelf.c (get_note_type): Handle NT_PPC_VMX.

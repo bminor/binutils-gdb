@@ -1,3 +1,10 @@
+2007-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-powerpc/attr-gnu-8-1.s, ld-powerpc/attr-gnu-8-11.d,
+	ld-powerpc/attr-gnu-8-2.s, ld-powerpc/attr-gnu-8-23.d,
+	ld-powerpc/attr-gnu-8-3.s, ld-powerpc/attr-gnu-8-31.d: New.
+	* ld-powerpc/powerpc.exp: Run new tests.
+
 2007-10-19  Nick Clifton  <nickc@redhat.com>
 
 	* ld-mn10300: New test directory.

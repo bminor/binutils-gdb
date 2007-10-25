@@ -8553,6 +8553,32 @@ display_power_gnu_attribute (unsigned char *p, int tag)
       return p;
    }
 
+  if (tag == Tag_GNU_Power_ABI_Vector)
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_GNU_Power_ABI_Vector: ");
+      switch (val)
+	{
+	case 0:
+	  printf ("Any\n");
+	  break;
+	case 1:
+	  printf ("Generic\n");
+	  break;
+	case 2:
+	  printf ("AltiVec\n");
+	  break;
+	case 3:
+	  printf ("SPE\n");
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+   }
+
   if (tag & 1)
     type = 1; /* String.  */
   else

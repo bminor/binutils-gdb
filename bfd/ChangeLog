@@ -1,3 +1,8 @@
+2007-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_merge_obj_attributes): Add support for
+	Tag_GNU_Power_ABI_Vector.
+
 2007-10-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Do not add
