@@ -1,3 +1,8 @@
+2007-10-26  Jim Blandy  <jimb@codesourcery.com>
+
+	* ax-general.c (gen_traced_pop, gen_int_literal)
+	(gen_usual_arithmetic): Check for typedefs.
+
 2007-10-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* parse.c (prefixify_expression): Minor reformatting.

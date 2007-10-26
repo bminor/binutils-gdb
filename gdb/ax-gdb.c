@@ -319,7 +319,7 @@ gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
 
       case axs_lvalue_memory:
 	{
-	  int length = TYPE_LENGTH (value->type);
+	  int length = TYPE_LENGTH (check_typedef (value->type));
 
 	  /* There's no point in trying to use a trace_quick bytecode
 	     here, since "trace_quick SIZE pop" is three bytes, whereas
@@ -650,7 +650,7 @@ gen_int_literal (struct agent_expr *ax, struct axs_value *value, LONGEST k,
 {
   ax_const_l (ax, k);
   value->kind = axs_rvalue;
-  value->type = type;
+  value->type = check_typedef (type);
 }
 
 
@@ -854,7 +854,7 @@ gen_usual_arithmetic (struct agent_expr *ax, struct axs_value *value1,
 	  ax_simple (ax, aop_swap);
 	}
 
-      value1->type = value2->type = target;
+      value1->type = value2->type = check_typedef (target);
     }
 }
 
