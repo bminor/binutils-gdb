@@ -151,6 +151,13 @@
 %token TRUNCATE
 %token VERSIONK		/* VERSION */
 
+/* Keywords, part 2.  These are keywords that are unique to gold,
+   and not present in the old GNU linker.  As before, unless the
+   comments say otherwise, the keyword is recognized as the token
+   name in upper case. */
+
+%token OPTION
+
 %%
 
 file_list:
@@ -164,6 +171,8 @@ file_cmd:
 	    { script_start_group(closure); }
 	  '(' input_list ')'
 	    { script_end_group(closure); }
+        | OPTION '(' STRING ')'
+            { script_parse_option(closure, $3); }
 	;
 
 input_list:

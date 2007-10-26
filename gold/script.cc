@@ -1045,6 +1045,7 @@ Keyword_to_parsecode::keyword_parsecodes_[] =
   { "NOLOAD", NOLOAD },
   { "ONLY_IF_RO", ONLY_IF_RO },
   { "ONLY_IF_RW", ONLY_IF_RW },
+  { "OPTION", OPTION },
   { "ORIGIN", ORIGIN },
   { "OUTPUT", OUTPUT },
   { "OUTPUT_ARCH", OUTPUT_ARCH },
@@ -1256,4 +1257,13 @@ script_end_as_needed(void* closurev)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   closure->position_dependent_options().clear_as_needed();
+}
+
+// Called by the bison parser to parse an OPTION.
+
+extern "C" void
+script_parse_option(void* closurev, const char* option)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  printf("%s: Saw option %s\n", closure->filename(), option);  //!!
 }
