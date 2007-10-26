@@ -1,3 +1,19 @@
+2007-10-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (MOD_0F2B_PREFIX_0...MOD_0F2B_PREFIX_3): New.
+	(MOD_0F51): Likewise.
+	(MOD_0FD7): Likewise.
+	(MOD_0FE7_PREFIX_2): Likewise.
+	(MOD_0F382A_PREFIX_2): Likewise.
+	(MOD_0F71_REG_2): Updated.
+	(MOD_0FF0_PREFIX_3): Likewise.
+	(MOD_62_32BIT): Likewise.
+	(dis386_twobyte): Use MOD_0F51 and  MOD_0FD7.
+	(prefix_table): Use MOD_0F2B_PREFIX_0...MOD_0F2B_PREFIX_3,
+	MOD_0FE7_PREFIX_2 and MOD_0F382A_PREFIX_2.
+	(mod_table): Add MOD_0F2B_PREFIX_0...MOD_0F2B_PREFIX_3,
+	MOD_0F51, MOD_0FD7 and MOD_0F382A_PREFIX_2.
+
 2007-10-26  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (print_insn): Check for a symtab that exists but is

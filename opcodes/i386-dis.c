@@ -522,7 +522,12 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define MOD_0F23		(MOD_0F22 + 1)
 #define MOD_0F24		(MOD_0F23 + 1)
 #define MOD_0F26		(MOD_0F24 + 1)
-#define MOD_0F71_REG_2		(MOD_0F26 + 1)
+#define MOD_0F2B_PREFIX_0	(MOD_0F26 + 1)
+#define MOD_0F2B_PREFIX_1	(MOD_0F2B_PREFIX_0 + 1)
+#define MOD_0F2B_PREFIX_2	(MOD_0F2B_PREFIX_1 + 1)
+#define MOD_0F2B_PREFIX_3	(MOD_0F2B_PREFIX_2 + 1)
+#define MOD_0F51		(MOD_0F2B_PREFIX_3 + 1)
+#define MOD_0F71_REG_2		(MOD_0F51 + 1)
 #define MOD_0F71_REG_4		(MOD_0F71_REG_2 + 1)
 #define MOD_0F71_REG_6		(MOD_0F71_REG_4 + 1)
 #define MOD_0F72_REG_2		(MOD_0F71_REG_6 + 1)
@@ -544,8 +549,11 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define MOD_0FB5		(MOD_0FB4 + 1)
 #define MOD_0FC7_REG_6		(MOD_0FB5 + 1)
 #define MOD_0FC7_REG_7		(MOD_0FC7_REG_6 + 1)
-#define MOD_0FF0_PREFIX_3	(MOD_0FC7_REG_7 + 1)
-#define MOD_62_32BIT		(MOD_0FF0_PREFIX_3 + 1)
+#define MOD_0FD7		(MOD_0FC7_REG_7 + 1)
+#define MOD_0FE7_PREFIX_2	(MOD_0FD7 + 1)
+#define MOD_0FF0_PREFIX_3	(MOD_0FE7_PREFIX_2 + 1)
+#define MOD_0F382A_PREFIX_2	(MOD_0FF0_PREFIX_3 + 1)
+#define MOD_62_32BIT		(MOD_0F382A_PREFIX_2 + 1)
 #define MOD_C4_32BIT		(MOD_62_32BIT + 1)
 #define MOD_C5_32BIT		(MOD_C4_32BIT + 1)
 
@@ -1128,7 +1136,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "cmovle",		{ Gv, Ev } },
   { "cmovg",		{ Gv, Ev } },
   /* 50 */
-  { "movmskpX",		{ Gdq, XS } },
+  { MOD_TABLE (MOD_0F51) },
   { PREFIX_TABLE (PREFIX_0F51) },
   { PREFIX_TABLE (PREFIX_0F52) },
   { PREFIX_TABLE (PREFIX_0F53) },
@@ -1279,7 +1287,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "paddq",		{ MX, EM } },
   { "pmullw",		{ MX, EM } },
   { PREFIX_TABLE (PREFIX_0FD6) },
-  { "pmovmskb",		{ Gdq, MS } },
+  { MOD_TABLE (MOD_0FD7) },
   /* d8 */
   { "psubusb",		{ MX, EM } },
   { "psubusw",		{ MX, EM } },
@@ -1827,10 +1835,10 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0F2B */
   {
-    {"movntps", { Ev, XM } },
-    {"movntss", { Ed, XM } },
-    {"movntpd", { Ev, XM } },
-    {"movntsd", { Eq, XM } },
+    { MOD_TABLE (MOD_0F2B_PREFIX_0) },
+    { MOD_TABLE (MOD_0F2B_PREFIX_1) },
+    { MOD_TABLE (MOD_0F2B_PREFIX_2) },
+    { MOD_TABLE (MOD_0F2B_PREFIX_3) },
   },
 
   /* PREFIX_0F2C */
@@ -2133,7 +2141,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "movntq",	{ EM, MX } },
     { "(bad)",	{ XX } },
-    { "movntdq",{ EM, XM } },
+    { MOD_TABLE (MOD_0FE7_PREFIX_2) },
     { "(bad)",	{ XX } },
   },
 
@@ -2253,7 +2261,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "movntdqa", { XM, EM } },
+    { MOD_TABLE (MOD_0F382A_PREFIX_2) },
     { "(bad)",	{ XX } },
   },
 
@@ -4607,6 +4615,31 @@ static const struct dis386 mod_table[][2] = {
     { "movL",		{ Td, Rd } },
   },
   {
+    /* MOD_0F2B_PREFIX_0 */
+    {"movntps",		{ Ev, XM } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* MOD_0F2B_PREFIX_1 */
+    {"movntss",		{ Ed, XM } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* MOD_0F2B_PREFIX_2 */
+    {"movntpd",		{ Ev, XM } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* MOD_0F2B_PREFIX_3 */
+    {"movntsd",		{ Eq, XM } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* MOD_0F51 */
+    { "(bad)",		{ XX } },
+    { "movmskpX",	{ Gdq, XS } },
+  },
+  {
     /* MOD_0F71_REG_2 */
     { "(bad)",		{ XX } },
     { "psrlw",		{ MS, Ib } },
@@ -4717,8 +4750,23 @@ static const struct dis386 mod_table[][2] = {
     { "(bad)",		{ XX } },
   },
   {
+    /* MOD_0FD7 */
+    { "(bad)",		{ XX } },
+    { "pmovmskb",	{ Gdq, MS } },
+  },
+  {
+    /* MOD_0FE7_PREFIX_2 */
+    { "movntdq",	{ EM, XM } },
+    { "(bad)",		{ XX } },
+  },
+  {
     /* MOD_0FF0_PREFIX_3 */
     { "lddqu",		{ XM, M } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* MOD_0F382A_PREFIX_2 */
+    { "movntdqa",	{ XM, EM } },
     { "(bad)",		{ XX } },
   },
   {
