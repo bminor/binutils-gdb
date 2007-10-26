@@ -114,17 +114,13 @@ queue_initial_tasks(const General_options& options,
 		    Workqueue* workqueue, Input_objects* input_objects,
 		    Symbol_table* symtab, Layout* layout)
 {
-  int thread_count = options.thread_count_initial();
-  if (thread_count == 0)
-    {
-      thread_count = cmdline.number_of_input_files();
-      if (thread_count == 0)
-	thread_count = 1;
-    }
-  workqueue->set_thread_count(thread_count);
-
   if (cmdline.begin() == cmdline.end())
     gold_fatal(_("no input files"));
+
+  int thread_count = options.thread_count_initial();
+  if (thread_count == 0)
+    thread_count = cmdline.number_of_input_files();
+  workqueue->set_thread_count(thread_count);
 
   // Read the input files.  We have to add the symbols to the symbol
   // table in order.  We do this by creating a separate blocker for
@@ -170,11 +166,7 @@ queue_middle_tasks(const General_options& options,
 
   int thread_count = options.thread_count_middle();
   if (thread_count == 0)
-    {
-      thread_count = input_objects->number_of_input_objects();
-      if (thread_count == 0)
-	thread_count = 1;
-    }
+    thread_count = input_objects->number_of_input_objects();
   workqueue->set_thread_count(thread_count);
 
   // Now we have seen all the input files.
@@ -255,11 +247,7 @@ queue_final_tasks(const General_options& options,
 {
   int thread_count = options.thread_count_final();
   if (thread_count == 0)
-    {
-      thread_count = input_objects->number_of_input_objects();
-      if (thread_count == 0)
-	thread_count = 1;
-    }
+    thread_count = input_objects->number_of_input_objects();
   workqueue->set_thread_count(thread_count);
 
   // Use a blocker to block the final cleanup task.
