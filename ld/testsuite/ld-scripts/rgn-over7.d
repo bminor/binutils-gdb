@@ -33,3 +33,4 @@ Linker\s+script\s+and\s+memory\s+map
  \*\(\*\)
 LOAD\s+.*?
 OUTPUT\(.*?\)
+#pass

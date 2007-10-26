@@ -1,3 +1,13 @@
+2007-10-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/rgn-over1.d: Accept extra LOAD at end of map file.
+	* ld-scripts/rgn-over2.d: Likewise.
+	* ld-scripts/rgn-over3.d: Likewise.
+	* ld-scripts/rgn-over4.d: Likewise.
+	* ld-scripts/rgn-over5.d: Likewise.
+	* ld-scripts/rgn-over6.d: Likewise.
+	* ld-scripts/rgn-over7.d: Likewise.
+
 2007-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-powerpc/attr-gnu-8-1.s, ld-powerpc/attr-gnu-8-11.d,
