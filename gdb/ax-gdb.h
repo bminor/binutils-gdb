@@ -91,11 +91,6 @@ struct axs_value
 
 /* Translating GDB expressions into agent expressions.  */
 
-/* Given a GDB expression EXPR, translate it into the agent bytecode,
-   and return it.  FLAGS are from enum expr_to_agent_flags.  */
-extern struct agent_expr *expr_to_agent (struct expression *EXPR,
-					 struct axs_value *VALUE);
-
 /* Given a GDB expression EXPR denoting an lvalue in memory, produce a
    string of agent bytecode which will leave its address and size on
    the top of stack.  Return the agent expression.  */
