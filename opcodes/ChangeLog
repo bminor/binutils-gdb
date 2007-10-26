@@ -1,3 +1,8 @@
+2007-10-26  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c (print_insn): Check for a symtab that exists but is
+	empty.
+
 2007-10-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/POTFILES.in: Regenerate.
