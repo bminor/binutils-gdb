@@ -161,6 +161,13 @@ queue_middle_tasks(const General_options& options,
 		   Layout* layout,
 		   Workqueue* workqueue)
 {
+  if (input_objects->number_of_input_objects() == 0)
+    {
+      // We had some input files, but we weren't able to open any of
+      // them.
+      gold_fatal(_("no input files"));
+    }
+
   int thread_count = options.thread_count_middle();
   if (thread_count == 0)
     {
