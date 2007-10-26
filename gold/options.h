@@ -317,6 +317,14 @@ class General_options
   { this->is_static_ = true; }
 
   void
+  set_script(const char* arg)
+  {
+    fprintf(stderr, _("%s: cannot parse %s: -T/--script not yet supported\n"),
+            program_name, arg);
+    ::exit(1);
+  }
+
+  void
   set_stats()
   { this->print_stats_ = true; }
 
