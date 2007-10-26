@@ -661,8 +661,7 @@ copy_name (struct stoken token)
 static void
 prefixify_expression (struct expression *expr)
 {
-  int len =
-  sizeof (struct expression) + EXP_ELEM_TO_BYTES (expr->nelts);
+  int len = sizeof (struct expression) + EXP_ELEM_TO_BYTES (expr->nelts);
   struct expression *temp;
   int inpos = expr->nelts, outpos = 0;
 

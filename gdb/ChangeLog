@@ -1,3 +1,7 @@
+2007-10-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* parse.c (prefixify_expression): Minor reformatting.
+
 2007-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* version.in: Use dot instead of dash.
