@@ -1,5 +1,8 @@
 2007-10-26  Jim Blandy  <jimb@codesourcery.com>
 
+	* ax-gdb.c (gen_cast): Remove redundant assignment to
+	value->type.  Doc fix.
+
 	* ax-general.c (gen_traced_pop, gen_int_literal)
 	(gen_usual_arithmetic): Check for typedefs.
 

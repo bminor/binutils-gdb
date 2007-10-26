@@ -905,9 +905,8 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
       /* We don't have to worry about the size of the value, because
          all our integral values are fully sign-extended, and when
          casting pointers we can do anything we like.  Is there any
-         way for us to actually know what GCC actually does with a
-         cast like this?  */
-      value->type = type;
+         way for us to know what GCC actually does with a cast like
+         this?  */
       break;
 
     case TYPE_CODE_INT:
