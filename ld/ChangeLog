@@ -1,3 +1,9 @@
+2007-10-26  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 5215
+	* genscripts.sh: Move bash script to..
+	* genscrba.sh: ..here.
+
 2007-10-25  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* pe-dll.c (autofilter_symbollist_generic)
@@ -45,7 +51,7 @@
 2007-10-01  Nick Clifton  <nickc@redhat.com>
 
 	PR linker/4844
-	* genscript.sh: Add support for generating a .xa script for use
+	* genscripts.sh: Add support for generating a .xa script for use
 	with the --auto-import option.
 	* ld.texinfo: Document the new behaviour of the --auto-import
 	option.
