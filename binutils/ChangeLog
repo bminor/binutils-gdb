@@ -1,3 +1,11 @@
+2007-10-26  Karl Berry  <karl@freefriends.org>
+
+	* doc/binutils.texi: Move top stuff to the top.
+	Use @direntry/@dircategory, format entries to play nicely with
+	others.
+	Avoid duplicate copying strings.
+	Don't misspell "Texinfo".
+
 2007-10-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* readelf.c (display_power_gnu_attribute): Add support for
