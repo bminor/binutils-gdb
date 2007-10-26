@@ -1,3 +1,7 @@
+2007-10-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/windres/windres.exp: Don't xfail.
+
 2007-10-16  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/readelf.ss: Accept COMMON in readelf's output.

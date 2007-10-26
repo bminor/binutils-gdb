@@ -23,15 +23,6 @@ if {![istarget "i*86-*-*"] && ![istarget "x86_64-*-mingw*"] } {
     return
 }
 
-if {![istarget "i*86-*-*pe*"] \
-    && ![istarget "i*86-*-cygwin*"] \
-    && ![istarget "i*86-*-mingw32*"] \
-    && ![istarget "x86_64-*-mingw*"] } {
-    set target_xfail "yes"
-} else {
-    set target_xfail "no"
-}
-
 if {![info exists WINDRES]} then {
     return
 }
@@ -44,7 +35,6 @@ set wr "$WINDRES --include-dir $srcdir/$subdir"
 
 if [file exists "$srcdir/../../winsup/w32api/include"] {
     set wr "$wr --include-dir $srcdir/../../winsup/w32api/include"
-    set target_xfail "no"
 } else {
     send_log "\nWarning: Assuming windres can find the win32 headers\n\n"
 }
@@ -76,10 +66,6 @@ foreach res $res_list {
 	    setup_xfail $sys
 	    continue
 	}
-    }
-
-    if { "$broot" != "bmpalign" && "$target_xfail" == "yes" } {
-	setup_xfail *-*
     }
 
     verbose "$wr -J rc -O res $res tmpdir/$broot.res" 1
@@ -114,10 +100,6 @@ foreach res $res_list {
     }
     if { $done != 0 } {
 	continue
-    }
-
-    if { "$broot" != "bmpalign" && "$target_xfail" == "yes" } {
-	setup_xfail *-*
     }
 
     verbose "$OBJDUMP -b binary -s tmpdir/$broot.res > tmpdir/$broot.dump" 1
