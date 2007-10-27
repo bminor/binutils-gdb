@@ -91,11 +91,6 @@ struct axs_value
 
 /* Translating GDB expressions into agent expressions.  */
 
-/* Given a GDB expression EXPR denoting an lvalue in memory, produce a
-   string of agent bytecode which will leave its address and size on
-   the top of stack.  Return the agent expression.  */
-extern struct agent_expr *expr_to_address_and_size (struct expression *EXPR);
-
 /* Given a GDB expression EXPR, return bytecode to trace its value.
    The result will use the `trace' and `trace_quick' bytecodes to
    record the value of all memory touched by the expression, and leave

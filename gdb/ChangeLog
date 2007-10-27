@@ -1,5 +1,8 @@
 2007-10-26  Jim Blandy  <jimb@codesourcery.com>
 
+	* ax-gdb.h (expr_to_address_and_size): Delete declaration for
+	deleted function.
+
 	* tracepoint.c (tracepoint_operation): Report the deletion event
 	after we have unlinked the tracepoint from the list, and use the
 	proper tracepoint number.
