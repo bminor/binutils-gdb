@@ -30,14 +30,27 @@ namespace gold
 
 // Initialize the parameters from the options.
 
-Parameters::Parameters(const General_options* options, Errors* errors)
-  : errors_(errors), output_file_name_(options->output_file_name()),
-    sysroot_(options->sysroot()), symbolic_(options->symbolic()),
+Parameters::Parameters(Errors* errors)
+  : errors_(errors), output_file_name_(NULL),
+    output_file_type_(OUTPUT_INVALID), sysroot_(),
+    strip_(STRIP_INVALID), symbolic_(false),
+    optimization_level_(0), export_dynamic_(false),
     is_doing_static_link_valid_(false), doing_static_link_(false),
-    is_size_and_endian_valid_(false), size_(0), is_big_endian_(false),
-    optimization_level_(options->optimization_level()),
-    export_dynamic_(options->export_dynamic())
+    is_size_and_endian_valid_(false), size_(0), is_big_endian_(false)
 {
+}
+
+// Set fields from the command line options.
+
+void
+Parameters::set_from_options(const General_options* options)
+{
+  this->output_file_name_ = options->output_file_name();
+  this->sysroot_ = options->sysroot();
+  this->symbolic_ = options->symbolic();
+  this->optimization_level_ = options->optimization_level();
+  this->export_dynamic_ = options->export_dynamic();
+
   if (options->is_shared())
     this->output_file_type_ = OUTPUT_SHARED;
   else if (options->is_relocatable())
@@ -51,6 +64,8 @@ Parameters::Parameters(const General_options* options, Errors* errors)
     this->strip_ = STRIP_DEBUG;
   else
     this->strip_ = STRIP_NONE;
+
+  this->options_valid_ = true;
 }
 
 // Set whether we are doing a static link.
@@ -91,9 +106,17 @@ const Parameters* parameters;
 // Initialize the global variable.
 
 void
-initialize_parameters(const General_options* options, Errors* errors)
+initialize_parameters(Errors* errors)
 {
-  parameters = static_parameters = new Parameters(options, errors);
+  parameters = static_parameters = new Parameters(errors);
+}
+
+// Set values from the options.
+
+void
+set_parameters_from_options(const General_options* options)
+{
+  static_parameters->set_from_options(options);
 }
 
 // Set whether we are doing a static link.

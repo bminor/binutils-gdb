@@ -69,7 +69,8 @@ struct options::One_option
   // be 0 if this function changes *argv.  ARG points to the location
   // in *ARGV where the option starts, which may be helpful for a
   // short option.
-  int (*special)(int argc, char** argv, char *arg, Command_line*);
+  int (*special)(int argc, char** argv, char *arg, bool long_option,
+		 Command_line*);
 
   // If this is a position independent option which does not take an
   // argument, this is the member function to call to record it.
@@ -121,15 +122,32 @@ namespace
 // Handle the special -l option, which adds an input file.
 
 int
-library(int argc, char** argv, char* arg, gold::Command_line* cmdline)
+library(int argc, char** argv, char* arg, bool long_option,
+	gold::Command_line* cmdline)
 {
-  return cmdline->process_l_option(argc, argv, arg);
+  return cmdline->process_l_option(argc, argv, arg, long_option);
+}
+
+// Handle the special -T/--script option, which reads a linker script.
+
+int
+invoke_script(int argc, char** argv, char* arg, bool long_option,
+	      gold::Command_line* cmdline)
+{
+  int ret;
+  const char* script_name = cmdline->get_special_argument("script", argc, argv,
+							  arg, long_option,
+							  &ret);
+  if (!read_commandline_script(script_name, cmdline))
+    gold::gold_error(_("%s: unable to parse script file %s\n"),
+		     gold::program_name, arg);
+  return ret;
 }
 
 // Handle the special --start-group option.
 
 int
-start_group(int, char**, char* arg, gold::Command_line* cmdline)
+start_group(int, char**, char* arg, bool, gold::Command_line* cmdline)
 {
   cmdline->start_group(arg);
   return 1;
@@ -138,7 +156,7 @@ start_group(int, char**, char* arg, gold::Command_line* cmdline)
 // Handle the special --end-group option.
 
 int
-end_group(int, char**, char* arg, gold::Command_line* cmdline)
+end_group(int, char**, char* arg, bool, gold::Command_line* cmdline)
 {
   cmdline->end_group(arg);
   return 1;
@@ -147,7 +165,7 @@ end_group(int, char**, char* arg, gold::Command_line* cmdline)
 // Report usage information for ld --help, and exit.
 
 int
-help(int, char**, char*, gold::Command_line*)
+help(int, char**, char*, bool, gold::Command_line*)
 {
   printf(_("Usage: %s [options] file...\nOptions:\n"), gold::program_name);
 
@@ -236,7 +254,7 @@ help(int, char**, char*, gold::Command_line*)
 // Report version information.
 
 int
-version(int, char**, char* opt, gold::Command_line*)
+version(int, char**, char* opt, bool, gold::Command_line*)
 {
   gold::print_version(opt[0] == 'v' && opt[1] == '\0');
   ::exit(0);
@@ -377,9 +395,9 @@ options::Command_line_options::options[] =
 		NULL, TWO_DASHES, &General_options::set_stats),
   GENERAL_ARG('\0', "sysroot", N_("Set target system root directory"),
 	      N_("--sysroot DIR"), TWO_DASHES, &General_options::set_sysroot),
-  GENERAL_ARG('T', "script", N_("Read linker script"),
-              N_("-T FILE, --script FILE"), TWO_DASHES,
-              &General_options::set_script),
+  SPECIAL('T', "script", N_("Read linker script"),
+	  N_("-T FILE, --script FILE"), TWO_DASHES,
+	  &invoke_script),
   GENERAL_ARG('\0', "Ttext", N_("Set the address of the .text section"),
               N_("-Ttext ADDRESS"), ONE_DASH,
               &General_options::set_text_segment_address),
@@ -664,7 +682,12 @@ Command_line::process(int argc, char** argv)
 	      && strcmp(opt, options[j].long_option) == 0)
 	    {
 	      if (options[j].special)
-		i += options[j].special(argc - 1, argv + i, opt, this);
+		{
+		  // Restore the '=' we clobbered above.
+		  if (arg != NULL && skiparg == 0)
+		    arg[-1] = '=';
+		  i += options[j].special(argc - i, argv + i, opt, true, this);
+		}
 	      else
 		{
 		  if (!options[j].takes_argument())
@@ -709,7 +732,8 @@ Command_line::process(int argc, char** argv)
 		    {
 		      // Undo the argument skip done above.
 		      --i;
-		      i += options[j].special(argc - i, argv + i, s, this);
+		      i += options[j].special(argc - i, argv + i, s, false,
+					      this);
 		      done = true;
 		    }
 		  else
@@ -757,6 +781,49 @@ Command_line::process(int argc, char** argv)
 
   // Ensure options don't contradict each other and are otherwise kosher.
   this->normalize_options();
+}
+
+// Extract an option argument for a special option.  LONGNAME is the
+// long name of the option.  This sets *PRET to the return value for
+// the special function handler to skip to the next option.
+
+const char*
+Command_line::get_special_argument(const char* longname, int argc, char** argv,
+				   const char* arg, bool long_option,
+				   int *pret)
+{
+  if (long_option)
+    {
+      size_t longlen = strlen(longname);
+      gold_assert(strncmp(arg, longname, longlen) == 0);
+      arg += longlen;
+      if (*arg == '=')
+	{
+	  *pret = 1;
+	  return arg + 1;
+	}
+      else if (argc > 1)
+	{
+	  gold_assert(*arg == '\0');
+	  *pret = 2;
+	  return argv[1];
+	}
+    }
+  else
+    {
+      if (arg[1] != '\0')
+	{
+	  *pret = 1;
+	  return arg + 1;
+	}
+      else if (argc > 1)
+	{
+	  *pret = 2;
+	  return argv[1];
+	}
+    }
+
+  this->usage(_("missing argument"), arg);
 }
 
 // Ensure options don't contradict each other and are otherwise kosher.
@@ -814,25 +881,13 @@ Command_line::add_file(const char* name, bool is_lib)
 // Handle the -l option, which requires special treatment.
 
 int
-Command_line::process_l_option(int argc, char** argv, char* arg)
+Command_line::process_l_option(int argc, char** argv, char* arg,
+			       bool long_option)
 {
   int ret;
-  const char* libname;
-  if (arg[1] != '\0')
-    {
-      ret = 1;
-      libname = arg + 1;
-    }
-  else if (argc > 1)
-    {
-      ret = 2;
-      libname = argv[argc + 1];
-    }
-  else
-    this->usage(_("missing argument"), arg);
-
+  const char* libname = this->get_special_argument("library", argc, argv, arg,
+						   long_option, &ret);
   this->add_file(libname, true);
-
   return ret;
 }
 

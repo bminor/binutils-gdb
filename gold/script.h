@@ -34,12 +34,15 @@ namespace gold
 {
 
 class General_options;
+class Command_line;
 class Symbol_table;
 class Layout;
+class Input_argument;
 class Input_objects;
 class Input_group;
 class Input_file;
 class Task_token;
+class Workqueue;
 
 // FILE was found as an argument on the command line, but was not
 // recognized as an ELF file.  Try to read it as a script.  We've
@@ -53,6 +56,12 @@ read_input_script(Workqueue*, const General_options&, Symbol_table*, Layout*,
 		  const Input_argument*, Input_file*, const unsigned char* p,
 		  off_t bytes, Task_token* this_blocker,
 		  Task_token* next_blocker);
+
+// FILE was found as an argument to --script (-T).
+// Read it as a script, and execute its contents immediately.
+
+bool
+read_commandline_script(const char* filename, Command_line*);
 
 } // End namespace gold.
 

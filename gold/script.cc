@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include "filenames.h"
 
+#include "dirsearch.h"
 #include "options.h"
 #include "fileread.h"
 #include "workqueue.h"
@@ -931,6 +932,10 @@ read_input_script(Workqueue* workqueue, const General_options& options,
   if (yyparse(&closure) != 0)
     return false;
 
+  // If this routine was called from the main thread rather than a
+  // work queue -- as it is for the --script option -- then our
+  // work here is done.
+
   // THIS_BLOCKER must be clear before we may add anything to the
   // symbol table.  We are responsible for unblocking NEXT_BLOCKER
   // when we are done.  We are responsible for deleting THIS_BLOCKER
@@ -963,6 +968,46 @@ read_input_script(Workqueue* workqueue, const General_options& options,
       this_blocker = nb;
     }
 
+  return true;
+}
+
+// FILENAME was found as an argument to --script (-T).
+// Read it as a script, and execute its contents immediately.
+
+bool
+read_commandline_script(const char* filename, Command_line* cmdline)
+{
+  // We don't need to use the real directory search path here:
+  // FILENAME was specified on the command line, and we don't want to
+  // search for it.
+  Dirsearch dirsearch;
+
+  Input_file_argument input_argument(filename, false, "",
+				     cmdline->position_dependent_options());
+  Input_file input_file(&input_argument);
+  if (!input_file.open(cmdline->options(), dirsearch))
+    return false;
+
+  Lex lex(&input_file);
+  if (lex.tokenize().is_invalid())
+    {
+      // Opening the file locked it, so now we need to unlock it.
+      input_file.file().unlock();
+      return false;
+    }
+
+  Parser_closure closure(filename,
+			 cmdline->position_dependent_options(),
+			 false,
+			 input_file.is_in_sysroot(),
+			 &lex.tokens());
+  if (yyparse(&closure) != 0)
+    {
+      input_file.file().unlock();
+      return false;
+    }
+
+  input_file.file().unlock();
   return true;
 }
 

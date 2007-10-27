@@ -40,7 +40,7 @@ class Errors;
 class Parameters
 {
  public:
-  Parameters(const General_options*, Errors*);
+  Parameters(Errors*);
 
   // Return the error object.
   Errors*
@@ -50,22 +50,34 @@ class Parameters
   // Return the output file name.
   const char*
   output_file_name() const
-  { return this->output_file_name_; }
+  {
+    gold_assert(this->options_valid_);
+    return this->output_file_name_;
+  }
 
   // Whether we are generating a regular executable.
   bool
   output_is_executable() const
-  { return this->output_file_type_ == OUTPUT_EXECUTABLE; }
+  {
+    gold_assert(this->output_file_type_ != OUTPUT_INVALID);
+    return this->output_file_type_ == OUTPUT_EXECUTABLE;
+  }
 
   // Whether we are generating a shared library.
   bool
   output_is_shared() const
-  { return this->output_file_type_ == OUTPUT_SHARED; }
+  {
+    gold_assert(this->output_file_type_ != OUTPUT_INVALID);
+    return this->output_file_type_ == OUTPUT_SHARED;
+  }
 
   // Whether we are generating an object file.
   bool
   output_is_object() const
-  { return this->output_file_type_ == OUTPUT_OBJECT; }
+  {
+    gold_assert(this->output_file_type_ != OUTPUT_INVALID);
+    return this->output_file_type_ == OUTPUT_OBJECT;
+  }
 
   // Whether we are generating position-independent output.
   // This is the case when generating either a shared library
@@ -79,23 +91,51 @@ class Parameters
   // one.
   const std::string&
   sysroot() const
-  { return this->sysroot_; }
+  {
+    gold_assert(this->options_valid_);
+    return this->sysroot_;
+  }
 
   // Whether to strip all symbols.
   bool
   strip_all() const
-  { return this->strip_ == STRIP_ALL; }
+  {
+    gold_assert(this->strip_ != STRIP_INVALID);
+    return this->strip_ == STRIP_ALL;
+  }
 
   // Whether to strip debugging information.
   bool
   strip_debug() const
-  { return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG; }
+  {
+    gold_assert(this->strip_ != STRIP_INVALID);
+    return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG;
+  }
 
   // Whether we are doing a symbolic link, in which all defined
   // symbols are bound locally.
   bool
   symbolic() const
-  { return this->symbolic_; }
+  {
+    gold_assert(this->options_valid_);
+    return this->symbolic_;
+  }
+
+  // The general linker optimization level.
+  int
+  optimization_level() const
+  {
+    gold_assert(this->options_valid_);
+    return this->optimization_level_;
+  }
+
+  // Whether the -E/--export-dynamic flag is set.
+  bool
+  export_dynamic() const
+  {
+    gold_assert(this->options_valid_);
+    return this->export_dynamic_;
+  }
 
   // Whether we are doing a static link--a link in which none of the
   // input files are shared libraries.  This is only known after we
@@ -124,15 +164,9 @@ class Parameters
     return this->is_big_endian_;
   }
 
-  // The general linker optimization level.
-  int
-  optimization_level() const
-  { return this->optimization_level_; }
-
-  // Whether the -E/--export-dynamic flag is set.
-  bool
-  export_dynamic() const
-  { return this->export_dynamic_; }
+  // Set values recorded from options.
+  void
+  set_from_options(const General_options*);
 
   // Set whether we are doing a static link.
   void
@@ -146,6 +180,8 @@ class Parameters
   // The types of output files.
   enum Output_file_type
     {
+      // Uninitialized.
+      OUTPUT_INVALID,
       // Generating executable.
       OUTPUT_EXECUTABLE,
       // Generating shared library.
@@ -157,6 +193,8 @@ class Parameters
   // Which symbols to strip.
   enum Strip
   {
+    // Uninitialize.
+    STRIP_INVALID,
     // Don't strip any symbols.
     STRIP_NONE,
     // Strip all symbols.
@@ -168,6 +206,8 @@ class Parameters
   // A pointer to the error handling object.
   Errors* errors_;
 
+  // Whether the fields set from the options are valid.
+  bool options_valid_;
   // The output file name.
   const char* output_file_name_;
   // The type of the output file.
@@ -178,6 +218,10 @@ class Parameters
   Strip strip_;
   // Whether we are doing a symbolic link.
   bool symbolic_;
+  // The optimization level.
+  int optimization_level_;
+  // Whether the -E/--export-dynamic flag is set.
+  bool export_dynamic_;
 
   // Whether the doing_static_link_ field is valid.
   bool is_doing_static_link_valid_;
@@ -189,17 +233,16 @@ class Parameters
   int size_;
   // Whether the output file is big endian.
   bool is_big_endian_;
-  // The optimization level.
-  int optimization_level_;
-  // Whether the -E/--export-dynamic flag is set.
-  bool export_dynamic_;
 };
 
 // This is a global variable.
 extern const Parameters* parameters;
 
 // Initialize the global variable.
-extern void initialize_parameters(const General_options*, Errors*);
+extern void initialize_parameters(Errors*);
+
+// Set the options.
+extern void set_parameters_from_options(const General_options*);
 
 // Set the size and endianness of the global parameters variable.
 extern void set_parameters_size_and_endianness(int size, bool is_big_endian);

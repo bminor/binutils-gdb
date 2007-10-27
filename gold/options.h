@@ -37,11 +37,14 @@
 #include <string>
 #include <vector>
 
+#include "script.h"
+
 namespace gold
 {
 
 class Command_line;
 class Input_file_group;
+class Position_dependent_options;
 
 namespace options {
 
@@ -315,14 +318,6 @@ class General_options
   void
   set_static()
   { this->is_static_ = true; }
-
-  void
-  set_script(const char* arg)
-  {
-    fprintf(stderr, _("%s: cannot parse %s: -T/--script not yet supported\n"),
-            program_name, arg);
-    ::exit(1);
-  }
 
   void
   set_stats()
@@ -703,7 +698,7 @@ class Command_line
 
   // Handle a -l option.
   int
-  process_l_option(int, char**, char*);
+  process_l_option(int, char**, char*, bool);
 
   // Handle a --start-group option.
   void
@@ -713,10 +708,21 @@ class Command_line
   void
   end_group(const char* arg);
 
+  // Get an option argument--a helper function for special processing.
+  const char*
+  get_special_argument(const char* longname, int argc, char** argv,
+		       const char* arg, bool long_option,
+		       int *pret);
+
   // Get the general options.
   const General_options&
   options() const
   { return this->options_; }
+
+  // Get the position dependent options.
+  const Position_dependent_options&
+  position_dependent_options() const
+  { return this->position_options_; }
 
   // The number of input files.
   int
