@@ -1,3 +1,11 @@
+2007-10-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5221
+	* gas/elf/elf.exp: Run section7.
+
+	* gas/elf/section7.d: New.
+	* gas/elf/section7.s: Likewise.
+
 2007-10-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/katmai.s: Remove cmpps opcode test.

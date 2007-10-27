@@ -5468,7 +5468,7 @@ expanded.  @xref{Macro}.
 
 @ifset ELF
 @node PushSection
-@section @code{.pushsection @var{name} , @var{subsection}}
+@section @code{.pushsection @var{name} [, @var{subsection}] [, "@var{flags}"[, @@@var{type}[,@var{arguments}]]]}
 
 @cindex @code{pushsection} directive
 @cindex Section Stack
@@ -5479,7 +5479,9 @@ This is one of the ELF section stack manipulation directives.  The others are
 
 This directive pushes the current section (and subsection) onto the
 top of the section stack, and then replaces the current section and
-subsection with @code{name} and @code{subsection}.
+subsection with @code{name} and @code{subsection}. The optional
+@code{flags}, @code{type} and @code{arguments} are treated the same
+as in the @code{.section} (@pxref{Section}) directive.
 @end ifset
 
 @node Quad

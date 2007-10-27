@@ -922,11 +922,23 @@ obj_elf_section (int push)
       ++input_line_pointer;
       SKIP_WHITESPACE ();
 
-      if (push)
+      if (push && ISDIGIT (*input_line_pointer))
 	{
+	  /* .pushsection has an optional subsection.  */
 	  new_subsection = (subsegT) get_absolute_expression ();
+
+	  SKIP_WHITESPACE ();
+
+	  /* Stop if we don't see a comma.  */
+	  if (*input_line_pointer != ',')
+	    goto done;
+
+	  /* Skip the comma.  */
+	  ++input_line_pointer;
+	  SKIP_WHITESPACE ();
 	}
-      else if (*input_line_pointer == '"')
+
+      if (*input_line_pointer == '"')
 	{
 	  beg = demand_copy_C_string (&dummy);
 	  if (beg == NULL)
@@ -1032,6 +1044,7 @@ obj_elf_section (int push)
 	}
     }
 
+done:
   demand_empty_rest_of_line ();
 
   obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push);

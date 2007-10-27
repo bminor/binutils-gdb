@@ -104,4 +104,5 @@ if { ([istarget "*-*-*elf*"]
     run_dump_test "symver" 
     run_elf_list_test "type" "" "" "-s" "| grep \"1 \\\[FONTC\\\]\""
     run_dump_test "section6" 
+    run_dump_test "section7" 
 }
