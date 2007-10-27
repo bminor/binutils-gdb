@@ -1,5 +1,9 @@
 2007-10-26  Jim Blandy  <jimb@codesourcery.com>
 
+	* tracepoint.c (tracepoint_operation): Report the deletion event
+	after we have unlinked the tracepoint from the list, and use the
+	proper tracepoint number.
+
 	* ax-gdb.c (expr_to_agent): Delete unused function.
 	(expr_to_address_and_size): Delete #if 0'd function.
 	* ax-gdb.h (expr_to_agent): Delete declaration.

@@ -583,10 +583,11 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
       ALL_TRACEPOINTS (t2)
 	if (t2->next == t)
 	{
-	  tracepoint_delete_event (t2->number);
 	  t2->next = t->next;
 	  break;
 	}
+
+      tracepoint_delete_event (t->number);
 
       if (t->addr_string)
 	xfree (t->addr_string);
