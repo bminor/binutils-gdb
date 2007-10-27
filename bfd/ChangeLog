@@ -1,3 +1,9 @@
+2007-10-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_sort_hash_table_f): Handle forced
+	local symbols specially.
+	(mips_elf_set_global_got_offset): Skip forced local symbols.
+
 2007-10-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Do not add
