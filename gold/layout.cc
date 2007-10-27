@@ -633,15 +633,20 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   // they contain.
   off_t off = this->set_segment_offsets(target, load_seg, &shndx);
 
+  // Set the file offsets of all the data sections not associated with
+  // segments. This makes sure that debug sections have their offsets
+  // before symbols are finalized.
+  off = this->set_section_offsets(off, &shndx, true);
+
   // Create the symbol table sections.
   this->create_symtab_sections(input_objects, symtab, &off);
 
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();
 
-  // Set the file offsets of all the sections not associated with
+  // Set the file offsets of all the non-data sections not associated with
   // segments.
-  off = this->set_section_offsets(off, &shndx);
+  off = this->set_section_offsets(off, &shndx, false);
 
   // Create the section table header.
   Output_section_headers* oshdrs = this->create_shdrs(&off);
@@ -986,12 +991,18 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 // segment.
 
 off_t
-Layout::set_section_offsets(off_t off, unsigned int* pshndx)
+Layout::set_section_offsets(off_t off,
+                            unsigned int* pshndx,
+                            bool do_bits_sections)
 {
   for (Section_list::iterator p = this->unattached_section_list_.begin();
        p != this->unattached_section_list_.end();
        ++p)
     {
+      bool is_bits_section = ((*p)->type() == elfcpp::SHT_PROGBITS
+                              || (*p)->type() == elfcpp::SHT_NOBITS);
+      if (is_bits_section != do_bits_sections)
+        continue;
       (*p)->set_out_shndx(*pshndx);
       ++*pshndx;
       if ((*p)->offset() != -1)
