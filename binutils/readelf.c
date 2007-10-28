@@ -846,6 +846,36 @@ slurp_rel_relocs (FILE *file,
   return 1;
 }
 
+/* Returns the reloc type extracted from the reloc info field.  */
+
+static unsigned int
+get_reloc_type (bfd_vma reloc_info)
+{
+  if (is_32bit_elf)
+    return ELF32_R_TYPE (reloc_info);
+
+  switch (elf_header.e_machine)
+    {
+    case EM_MIPS:
+      /* Note: We assume that reloc_info has already been adjusted for us.  */
+      return ELF64_MIPS_R_TYPE (reloc_info);
+
+    case EM_SPARCV9:
+      return ELF64_R_TYPE_ID (reloc_info);
+
+    default:
+      return ELF64_R_TYPE (reloc_info);
+    }
+}
+
+/* Return the symbol index extracted from the reloc info field.  */
+
+static bfd_vma
+get_reloc_symindex (bfd_vma reloc_info)
+{
+  return is_32bit_elf ? ELF32_R_SYM (reloc_info) : ELF64_R_SYM (reloc_info);
+}
+
 /* Display the contents of the relocation data found at the specified
    offset.  */
 
@@ -915,53 +945,36 @@ dump_relocations (FILE *file,
   for (i = 0; i < rel_size; i++)
     {
       const char *rtype;
-      const char *rtype2 = NULL;
-      const char *rtype3 = NULL;
       bfd_vma offset;
       bfd_vma info;
       bfd_vma symtab_index;
       bfd_vma type;
-      bfd_vma type2 = 0;
-      bfd_vma type3 = 0;
 
       offset = rels[i].r_offset;
       info   = rels[i].r_info;
 
-      if (is_32bit_elf)
-	{
-	  type         = ELF32_R_TYPE (info);
-	  symtab_index = ELF32_R_SYM  (info);
-	}
-      else
-	{
-	  /* The #ifdef BFD64 below is to prevent a compile time warning.
-	     We know that if we do not have a 64 bit data type that we
-	     will never execute this code anyway.  */
+      /* The #ifdef BFD64 below is to prevent a compile time warning.
+	 We know that if we do not have a 64 bit data type that we
+	 will never execute this code anyway.  */
 #ifdef BFD64
-	  if (elf_header.e_machine == EM_MIPS)
-	    {
-	      /* In little-endian objects, r_info isn't really a 64-bit
-		 little-endian value: it has a 32-bit little-endian
-		 symbol index followed by four individual byte fields.
-		 Reorder INFO accordingly.  */
-	      if (elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
-		info = (((info & 0xffffffff) << 32)
-			| ((info >> 56) & 0xff)
-			| ((info >> 40) & 0xff00)
-			| ((info >> 24) & 0xff0000)
-			| ((info >> 8) & 0xff000000));
-	      type  = ELF64_MIPS_R_TYPE (info);
-	      type2 = ELF64_MIPS_R_TYPE2 (info);
-	      type3 = ELF64_MIPS_R_TYPE3 (info);
-	    }
-	  else if (elf_header.e_machine == EM_SPARCV9)
-	    type = ELF64_R_TYPE_ID (info);
-	  else
-	    type = ELF64_R_TYPE (info);
-
-	  symtab_index = ELF64_R_SYM  (info);
-#endif
+      if (!is_32bit_elf
+	  && elf_header.e_machine == EM_MIPS
+	  && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
+	{
+	  /* In little-endian objects, r_info isn't really a 64-bit
+	     little-endian value: it has a 32-bit little-endian
+	     symbol index followed by four individual byte fields.
+	     Reorder INFO accordingly.  */
+	  info = (((info & 0xffffffff) << 32)
+		  | ((info >> 56) & 0xff)
+		  | ((info >> 40) & 0xff00)
+		  | ((info >> 24) & 0xff0000)
+		  | ((info >> 8) & 0xff000000));
 	}
+#endif /* BFD64 */
+
+      type = get_reloc_type (info);
+      symtab_index = get_reloc_symindex  (info);
 
       if (is_32bit_elf)
 	{
@@ -1103,11 +1116,6 @@ dump_relocations (FILE *file,
 	case EM_MIPS:
 	case EM_MIPS_RS3_LE:
 	  rtype = elf_mips_reloc_type (type);
-	  if (!is_32bit_elf)
-	    {
-	      rtype2 = elf_mips_reloc_type (type2);
-	      rtype3 = elf_mips_reloc_type (type3);
-	    }
 	  break;
 
 	case EM_ALPHA:
@@ -1329,8 +1337,14 @@ dump_relocations (FILE *file,
 
       putchar ('\n');
 
+#ifdef BFD64
       if (! is_32bit_elf && elf_header.e_machine == EM_MIPS)
 	{
+	  bfd_vma type2 = ELF64_MIPS_R_TYPE2 (info);
+	  bfd_vma type3 = ELF64_MIPS_R_TYPE3 (info);
+	  const char *rtype2 = elf_mips_reloc_type (type2);
+	  const char *rtype3 = elf_mips_reloc_type (type3);
+
 	  printf ("                    Type2: ");
 
 	  if (rtype2 == NULL)
@@ -1349,6 +1363,7 @@ dump_relocations (FILE *file,
 
 	  putchar ('\n');
 	}
+#endif /* BFD64 */
     }
 
   free (rels);
@@ -5036,16 +5051,8 @@ slurp_ia64_unwind_table (FILE *file,
 
       for (rp = rela; rp < rela + nrelas; ++rp)
 	{
-	  if (is_32bit_elf)
-	    {
-	      relname = elf_ia64_reloc_type (ELF32_R_TYPE (rp->r_info));
-	      sym = aux->symtab + ELF32_R_SYM (rp->r_info);
-	    }
-	  else
-	    {
-	      relname = elf_ia64_reloc_type (ELF64_R_TYPE (rp->r_info));
-	      sym = aux->symtab + ELF64_R_SYM (rp->r_info);
-	    }
+	  relname = elf_ia64_reloc_type (get_reloc_type (rp->r_info));
+	  sym = aux->symtab + get_reloc_symindex (rp->r_info);
 
 	  if (! const_strneq (relname, "R_IA64_SEGREL"))
 	    {
@@ -5448,16 +5455,8 @@ slurp_hppa_unwind_table (FILE *file,
 
       for (rp = rela; rp < rela + nrelas; ++rp)
 	{
-	  if (is_32bit_elf)
-	    {
-	      relname = elf_hppa_reloc_type (ELF32_R_TYPE (rp->r_info));
-	      sym = aux->symtab + ELF32_R_SYM (rp->r_info);
-	    }
-	  else
-	    {
-	      relname = elf_hppa_reloc_type (ELF64_R_TYPE (rp->r_info));
-	      sym = aux->symtab + ELF64_R_SYM (rp->r_info);
-	    }
+	  relname = elf_hppa_reloc_type (get_reloc_type (rp->r_info));
+	  sym = aux->symtab + get_reloc_symindex (rp->r_info);
 
 	  /* R_PARISC_SEGREL32 or R_PARISC_SEGREL64.  */
 	  if (! const_strneq (relname, "R_PARISC_SEGREL"))
@@ -7931,40 +7930,210 @@ dump_section_as_bytes (Elf_Internal_Shdr *section, FILE *file)
   return 1;
 }
 
-/* Return the number of bytes affected by a given reloc.
-   This information is architecture and reloc dependent.
-   Returns 4 by default, although this is not always correct.
-   It should return 0 if a decision cannot be made.
-   FIXME: This is not the correct way to solve this problem.
-   The proper way is to have target specific reloc sizing functions
-   created by the reloc-macros.h header, in the same way that it
-   already creates the reloc naming functions.  */
+/* Returns TRUE iff RELOC_TYPE is a 32-bit absolute RELA relocation used in
+   DWARF debug sections.  This is a target specific test.  Note - we do not
+   go through the whole including-target-headers-multiple-times route, (as
+   we have already done with <elf/h8.h>) because this would become very
+   messy and even then this function would have to contain target specific
+   information (the names of the relocs instead of their numeric values).
+   FIXME: This is not the correct way to solve this problem.  The proper way
+   is to have target specific reloc sizing and typing functions created by
+   the reloc-macros.h header, in the same way that it already creates the
+   reloc naming functions.  */
 
-static unsigned int
-get_reloc_size (Elf_Internal_Rela * reloc)
+static bfd_boolean
+is_32bit_abs_reloc (unsigned int reloc_type)
 {
   switch (elf_header.e_machine)
     {
+    case EM_68K:
+      return reloc_type == 1; /* R_68K_32.  */
+    case EM_860:
+      return reloc_type == 1; /* R_860_32.  */
+    case EM_ALPHA:
+      return reloc_type == 1; /* XXX Is this right ?  */
+    case EM_AVR_OLD: 
+    case EM_AVR:
+      return reloc_type == 1;
+    case EM_BLACKFIN:
+      return reloc_type == 0x12; /* R_byte4_data.  */
+    case EM_CRIS:
+      return reloc_type == 3; /* R_CRIS_32.  */
+    case EM_CR16:
+      return reloc_type == 3; /* R_CR16_NUM32.  */
+    case EM_CRX:
+      return reloc_type == 15; /* R_CRX_NUM32.  */
+    case EM_CYGNUS_FRV:
+      return reloc_type == 1;
+    case EM_CYGNUS_D30V:
+    case EM_D30V:
+      return reloc_type == 12; /* R_D30V_32_NORMAL.  */
+    case EM_CYGNUS_FR30:
+    case EM_FR30:
+      return reloc_type == 3; /* R_FR30_32.  */
     case EM_H8S:
     case EM_H8_300:
     case EM_H8_300H:
-    case EM_H8_500:
-      switch (ELF32_R_TYPE (reloc->r_info))
-	{
-	  /* PR gas/3800 - without this information we do not correctly
-	     decode the debug information generated by the h8300 assembler.  */
-	case R_H8_DIR16:
-	  return 2;
-	default:
-	  return 4;
-	}
+      return reloc_type == 1; /* R_H8_DIR32.  */
+    case EM_IP2K_OLD:
+    case EM_IP2K:
+      return reloc_type == 2; /* R_IP2K_32.  */
+    case EM_IQ2000:
+      return reloc_type == 2; /* R_IQ2000_32.  */
+    case EM_M32C:
+      return reloc_type == 3; /* R_M32C_32.  */
+    case EM_M32R:
+      return reloc_type == 34; /* R_M32R_32_RELA.  */
+    case EM_MCORE:
+      return reloc_type == 1; /* R_MCORE_ADDR32.  */
+    case EM_CYGNUS_MEP:
+      return reloc_type == 4; /* R_MEP_32.  */
+    case EM_MIPS:
+      return reloc_type == 2; /* R_MIPS_32.  */
+    case EM_MMIX:
+      return reloc_type == 4; /* R_MMIX_32.  */
+    case EM_CYGNUS_MN10200:
+    case EM_MN10200:
+      return reloc_type == 1; /* R_MN10200_32.  */
+    case EM_CYGNUS_MN10300:
+    case EM_MN10300:
+      return reloc_type == 1; /* R_MN10300_32.  */
+    case EM_MSP430_OLD:
+    case EM_MSP430:
+      return reloc_type == 1; /* R_MSP43_32.  */
+    case EM_MT:
+      return reloc_type == 2; /* R_MT_32.  */
+    case EM_PARISC:
+      return reloc_type == 1; /* R_PARISC_DIR32.  */
+    case EM_PJ:
+    case EM_PJ_OLD:
+      return reloc_type == 1; /* R_PJ_DATA_DIR32.  */
+    case EM_PPC64:
+      return reloc_type == 1; /* R_PPC64_ADDR32.  */
+    case EM_PPC:
+      return reloc_type == 1; /* R_PPC_ADDR32.  */
+    case EM_S370:
+      return reloc_type == 1; /* R_I370_ADDR31.  */
+    case EM_S390_OLD:
+    case EM_S390:
+      return reloc_type == 4; /* R_S390_32.  */
+    case EM_SH:
+      return reloc_type == 1; /* R_SH_DIR32.  */
+    case EM_SPARC32PLUS:
+    case EM_SPARCV9:
+    case EM_SPARC:
+      return reloc_type == 3 /* R_SPARC_32.  */
+	|| reloc_type == 23; /* R_SPARC_UA32.  */
+    case EM_CYGNUS_V850:
+    case EM_V850:
+      return reloc_type == 6; /* R_V850_ABS32.  */
+    case EM_VAX:
+      return reloc_type == 1; /* R_VAX_32.  */
+    case EM_X86_64:
+      return reloc_type == 10; /* R_X86_64_32.  */
+    case EM_XSTORMY16:
+      return reloc_type == 1; /* R_XSTROMY16_32.  */
+    case EM_XTENSA_OLD:
+    case EM_XTENSA:
+      return reloc_type == 1; /* R_XTENSA_32.  */
+
+    case EM_ALTERA_NIOS2:
+      /* Fall through (what reloc type is used ?).  */
+    case EM_NIOS32:
+    case EM_IA_64:
+      /* Fall through (what reloc type is used ?).  */
     default:
-      /* FIXME: We need to extend this switch statement to cope with other
-	 architecture's relocs.  (When those relocs are used against debug
-	 sections, and when their size is not 4).  But see the multiple
-	 inclusions of <elf/h8.h> for an example of the hoops that we need
-	 to jump through in order to obtain the reloc numbers.  */
-      return 4;
+      error (_("Missing knowledge of 32-bit reloc types used in DWARF sections of machine number %d\n"),
+	     elf_header.e_machine);
+      abort ();
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 32-bit pc-relative RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_32bit_pcrel_reloc (unsigned int reloc_type)
+{
+  switch (elf_header.e_machine)
+    {
+    case EM_68K:
+      return reloc_type == 4; /* R_68K_PC32.  */
+    case EM_ALPHA:
+      return reloc_type == 10; /* R_ALPHA_SREL32.  */
+    case EM_PARISC:
+      return reloc_type == 0; /* R_PARISC_NONE.  *//* FIXME: This reloc is generated, but it may be a bug.  */
+    case EM_PPC:
+      return reloc_type == 26; /* R_PPC_REL32.  */
+    case EM_PPC64:
+      return reloc_type == 26;  /* R_PPC64_REL32.  */
+    case EM_S390_OLD:
+    case EM_S390:
+      return reloc_type == 5; /* R_390_PC32.  */
+    case EM_SH:
+      return reloc_type == 2; /* R_SH_REL32.  */
+    case EM_SPARC32PLUS:
+    case EM_SPARCV9:
+    case EM_SPARC:
+      return reloc_type == 6; /* R_SPARC_DISP32.  */
+    case EM_X86_64:
+      return reloc_type == 2; /* R_X86_64_PC32.  */
+    default:
+      /* Do not abort or issue an error message here.  Not all targets use
+	 pc-relative 32-bit relocs in their DWARF debug information and we
+	 have already tested for target coverage in is_32bit_abs_reloc.  A
+	 more helpful warning message will be generated by debug_apply_rela_addends
+	 anyway, so just return.  */
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 64-bit absolute RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_64bit_abs_reloc (unsigned int reloc_type)
+{
+  switch (elf_header.e_machine)
+    {
+    case EM_ALPHA:
+      return reloc_type == 2; /* R_ALPHA_REFQUAD.  */
+    case EM_PPC64:
+      return reloc_type == 38; /* R_PPC64_ADDR64.  */
+    case EM_SPARC32PLUS:
+    case EM_SPARCV9:
+    case EM_SPARC:
+      return reloc_type == 54; /* R_SPARC_UA64.  */
+    case EM_X86_64:
+      return reloc_type == 1; /* R_X86_64_64.  */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 16-bit absolute RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_16bit_abs_reloc (unsigned int reloc_type)
+{
+  switch (elf_header.e_machine)
+    {
+    case EM_AVR_OLD:
+    case EM_AVR:
+      return reloc_type == 4; /* R_AVR_16.  */
+    case EM_H8S:
+    case EM_H8_300:
+    case EM_H8_300H:
+      return reloc_type == R_H8_DIR16;
+    case EM_IP2K_OLD:
+    case EM_IP2K:
+      return reloc_type == 1; /* R_IP2K_16.  */
+    case EM_MSP430_OLD:
+    case EM_MSP430:
+      return reloc_type == 5; /* R_MSP430_16_BYTE.  */
+    default:
+      return FALSE;
     }
 }
 
@@ -8011,15 +8180,36 @@ debug_apply_rela_addends (void *file,
 
       for (rp = rela; rp < rela + nrelas; ++rp)
 	{
-	  unsigned char *loc;
+	  unsigned int reloc_type;
 	  unsigned int reloc_size;
+	  unsigned char *loc;
 
-	  reloc_size = get_reloc_size (rp);
-	  if (reloc_size == 0)
+	  /* In MIPS little-endian objects, r_info isn't really a
+	     64-bit little-endian value: it has a 32-bit little-endian
+	     symbol index followed by four individual byte fields.
+	     Reorder INFO accordingly.  */
+	  if (!is_32bit_elf
+	      && elf_header.e_machine == EM_MIPS
+	      && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
+	    rp->r_info = (((rp->r_info & 0xffffffff) << 32)
+			  | ((rp->r_info >> 56) & 0xff)
+			  | ((rp->r_info >> 40) & 0xff00)
+			  | ((rp->r_info >> 24) & 0xff0000)
+			  | ((rp->r_info >> 8) & 0xff000000));
+
+	  sym = symtab + get_reloc_symindex (rp->r_info);
+	  reloc_type = get_reloc_type (rp->r_info);
+	  if (is_32bit_abs_reloc (reloc_type)
+	      || is_32bit_pcrel_reloc (reloc_type))
+	    reloc_size = 4;
+	  else if (is_64bit_abs_reloc (reloc_type))
+	    reloc_size = 8;
+	  else if (is_16bit_abs_reloc (reloc_type))
+	    reloc_size = 2;
+	  else
 	    {
-	      warn (_("skipping relocation of unknown size against offset 0x%lx in section %s\n"),
-		    (unsigned long) rp->r_offset,
-		    SECTION_NAME (section));
+	      warn (_("skipping unsupported reloc type %d in section .rela%s\n"),
+		    reloc_type, SECTION_NAME (section));
 	      continue;
 	    }
 
@@ -8032,56 +8222,31 @@ debug_apply_rela_addends (void *file,
 	      continue;
 	    }
 
-	  if (is_32bit_elf)
+	  if (sym != symtab
+	      && ELF_ST_TYPE (sym->st_info) != STT_SECTION
+	      /* Relocations against symbols without type can happen.
+		 Gcc -feliminate-dwarf2-dups may generate symbols
+		 without type for debug info.  */
+	      && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
+	      /* Relocations against object symbols can happen,
+		 eg when referencing a global array.  For an
+		 example of this see the _clz.o binary in libgcc.a.  */
+	      && ELF_ST_TYPE (sym->st_info) != STT_OBJECT)
 	    {
-	      sym = symtab + ELF32_R_SYM (rp->r_info);
-
-	      if (ELF32_R_SYM (rp->r_info) != 0
-		  && ELF32_ST_TYPE (sym->st_info) != STT_SECTION
-		  /* Relocations against symbols without type can happen.
-		     Gcc -feliminate-dwarf2-dups may generate symbols
-		     without type for debug info.  */
-		  && ELF32_ST_TYPE (sym->st_info) != STT_NOTYPE
-		  /* Relocations against object symbols can happen,
-		     eg when referencing a global array.  For an
-		     example of this see the _clz.o binary in libgcc.a.  */
-		  && ELF32_ST_TYPE (sym->st_info) != STT_OBJECT)
-		{
-		  warn (_("skipping unexpected symbol type %s in relocation in section .rela%s\n"),
-			get_symbol_type (ELF32_ST_TYPE (sym->st_info)),
-			SECTION_NAME (section));
-		  continue;
-		}
+	      warn (_("skipping unexpected symbol type %s in relocation in section .rela%s\n"),
+		    get_symbol_type (ELF_ST_TYPE (sym->st_info)),
+		    SECTION_NAME (section));
+	      continue;
 	    }
+
+	  if (is_32bit_pcrel_reloc (reloc_type))
+	    /* FIXME: Not sure how to apply a pc-rel reloc yet.
+	       I think that it ought to be:
+	       (rp->r_addend + sym->st_value) - rp->r_offset
+	       but this breaks GAS CFI tests...  */
+	    byte_put (loc, (rp->r_addend + sym->st_value) /*- rp->r_offset*/, reloc_size);
 	  else
-	    {
-	      /* In MIPS little-endian objects, r_info isn't really a
-		 64-bit little-endian value: it has a 32-bit little-endian
-		 symbol index followed by four individual byte fields.
-		 Reorder INFO accordingly.  */
-	      if (elf_header.e_machine == EM_MIPS
-		  && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
-		rp->r_info = (((rp->r_info & 0xffffffff) << 32)
-			      | ((rp->r_info >> 56) & 0xff)
-			      | ((rp->r_info >> 40) & 0xff00)
-			      | ((rp->r_info >> 24) & 0xff0000)
-			      | ((rp->r_info >> 8) & 0xff000000));
-
-	      sym = symtab + ELF64_R_SYM (rp->r_info);
-
-	      if (ELF64_R_SYM (rp->r_info) != 0
-		  && ELF64_ST_TYPE (sym->st_info) != STT_SECTION
-		  && ELF64_ST_TYPE (sym->st_info) != STT_NOTYPE
-		  && ELF64_ST_TYPE (sym->st_info) != STT_OBJECT)
-		{
-		  warn (_("skipping unexpected symbol type %s in relocation in section .rela.%s\n"),
-			get_symbol_type (ELF64_ST_TYPE (sym->st_info)),
-			SECTION_NAME (section));
-		  continue;
-		}
-	    }
-
-	  byte_put (loc, rp->r_addend, reloc_size);
+	    byte_put (loc, rp->r_addend + sym->st_value, reloc_size);
 	}
 
       free (symtab);

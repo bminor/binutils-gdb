@@ -1,3 +1,26 @@
+2007-10-28  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (process_debug_info): Check for corrupt lengths.
+	* readelf.c (get_reloc_type): New function.  Returns the reloc
+	number extracted from the info field of a reloc.
+	(get_reloc_symindex): New function.  Returns the symbol index
+	extracted from the info field of a reloc.
+	(dump_relocations): Use the new functions.
+	(slurp_ia64_unwind_table): Use the new functions.
+	(slurp_hppa_unwind_table): Use the new functions.
+	(dump_section_as_bytes): Use the new functions.
+	(get_reloc_size): Delete function.
+	(is_32bit_abs_reloc): New function.  Determines if a given reloc
+	type is a 32-bit absolute relocation.
+	(is_32bit_pcrel_reloc): New function.  Like is_32bit_abs_reloc but
+	for pc-relative relocations.
+	(is_64bit_abs_reloc): New function.  Like is_32bit_abs_reloc but
+	for 64-bit absolute relocations.
+	(is_16bit_abs_reloc): New function.  Like is_32bit_abs_reloc but
+	for 32-bit absolute relocations.
+	(debug_apply_rela_addends): Use the new functions.  Skip and warn
+	about any unrecognised relocations.
+
 2007-10-26  Karl Berry  <karl@freefriends.org>
 
 	* doc/binutils.texi: Move top stuff to the top.

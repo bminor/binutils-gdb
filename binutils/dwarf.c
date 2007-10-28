@@ -1551,6 +1551,15 @@ process_debug_info (struct dwarf_section *section, void *file,
 	    }
 	  else
 	    section_begin += length + 4;
+
+	  /* Negative values are illegal, they may even cause infinite
+	     looping.  This can happen if we can't accurately apply
+	     relocations to an object file.  */
+	  if ((signed long) length <= 0)
+	    {
+	      warn (_("Corrupt unit length (%lx) found in section %s\n"), length, section->name);
+	      return 0;
+	    }
 	}
 
       if (num_units == 0)
