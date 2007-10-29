@@ -73,6 +73,10 @@ int spe_register_p (int regno);
    floating-point registers (f0 --- f31 and fpscr).  */
 int ppc_floating_point_unit_p (struct gdbarch *gdbarch);
 
+/* Return non-zero if the architecture described by GDBARCH has
+   Altivec registers (vr0 --- vr31, vrsave and vscr).  */
+int ppc_altivec_support_p (struct gdbarch *gdbarch);
+
 /* Register set description.  */
 
 struct ppc_reg_offsets
@@ -116,6 +120,14 @@ extern void ppc_supply_fpregset (const struct regset *regset,
 				 struct regcache *regcache,
 				 int regnum, const void *fpregs, size_t len);
 
+/* Supply register REGNUM in the Altivec register set REGSET
+   from the buffer specified by VRREGS and LEN to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+extern void ppc_supply_vrregset (const struct regset *regset,
+				 struct regcache *regcache,
+				 int regnum, const void *vrregs, size_t len);
+
 /* Collect register REGNUM in the general-purpose register set
    REGSET. from register cache REGCACHE into the buffer specified by
    GREGS and LEN.  If REGNUM is -1, do this for all registers in
@@ -133,6 +145,15 @@ extern void ppc_collect_gregset (const struct regset *regset,
 extern void ppc_collect_fpregset (const struct regset *regset,
 				  const struct regcache *regcache,
 				  int regnum, void *fpregs, size_t len);
+
+/* Collect register REGNUM in the Altivec register set
+   REGSET from register cache REGCACHE into the buffer specified by
+   VRREGS and LEN.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+extern void ppc_collect_vrregset (const struct regset *regset,
+				  const struct regcache *regcache,
+				  int regnum, void *vrregs, size_t len);
 
 /* Private data that this module attaches to struct gdbarch. */
 

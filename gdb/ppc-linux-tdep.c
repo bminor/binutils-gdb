@@ -650,8 +650,8 @@ static const struct ppc_reg_offsets ppc32_linux_reg_offsets =
 
     /* AltiVec registers.  */
     /* .vr0_offset = */ 0,
-    /* .vrsave_offset = */ 512,
-    /* .vscr_offset = */ 512 + 12
+    /* .vscr_offset = */ 512 + 12,
+    /* .vrsave_offset = */ 528
   };
 
 static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
@@ -675,8 +675,8 @@ static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
 
     /* AltiVec registers.  */
     /* .vr0_offset = */ 0,
-    /* .vrsave_offset = */ 528,
-    /* .vscr_offset = */ 512 + 12
+    /* .vscr_offset = */ 512 + 12,
+    /* .vrsave_offset = */ 528
   };
 
 static const struct regset ppc32_linux_gregset = {
@@ -697,6 +697,13 @@ static const struct regset ppc32_linux_fpregset = {
   &ppc32_linux_reg_offsets,
   ppc_supply_fpregset,
   ppc_collect_fpregset,
+  NULL
+};
+
+static const struct regset ppc32_linux_vrregset = {
+  &ppc32_linux_reg_offsets,
+  ppc_supply_vrregset,
+  ppc_collect_vrregset,
   NULL
 };
 
@@ -726,6 +733,8 @@ ppc_linux_regset_from_core_section (struct gdbarch *core_arch,
     }
   if (strcmp (sect_name, ".reg2") == 0)
     return &ppc32_linux_fpregset;
+  if (strcmp (sect_name, ".reg-ppc-vmx") == 0)
+    return &ppc32_linux_vrregset;
   return NULL;
 }
 

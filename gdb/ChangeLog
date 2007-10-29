@@ -1,3 +1,20 @@
+2007-10-29  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
+
+	* ppc-linux-tdep.c (ppc32_linux_reg_offsets): Corrected
+	swapped offsets and VRSAVE offset.
+	(ppc64_linux_reg_offsets): Corrected swapped offsets.
+	(ppc32_linux_vrregset): Added.
+	(ppc_linux_regset_from_core_section): Added support for
+	.reg-ppc-vmx section.
+	* ppc-tdep.h (ppc_altivec_support_p): Declare.
+	(ppc_supply_vrregset): Declare.
+	(ppc_collect_vrregset): Declare.
+	* rs6000-tdep.c (ppc_altivec_support_p): Added.
+	(ppc_supply_vrregset): Added.
+	(ppc_collect_vrregset): Added.
+	* corelow.c (get_core_registers): Added support for
+	.reg-ppc-vmx section.
+
 2007-10-29  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 6.7.1 released.
