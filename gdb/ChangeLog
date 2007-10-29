@@ -1,3 +1,7 @@
+2007-10-29  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 6.7.1 released.
+
 2007-10-26  Jim Blandy  <jimb@codesourcery.com>
 
 	* ax-gdb.h (expr_to_address_and_size): Delete declaration for
