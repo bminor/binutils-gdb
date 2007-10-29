@@ -7975,6 +7975,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_H8_300:
     case EM_H8_300H:
       return reloc_type == 1; /* R_H8_DIR32.  */
+    case EM_IA_64:
+      return reloc_type == 0x65; /* R_IA64_SECREL32LSB.  */
     case EM_IP2K_OLD:
     case EM_IP2K:
       return reloc_type == 2; /* R_IP2K_32.  */
@@ -8040,7 +8042,6 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_ALTERA_NIOS2:
       /* Fall through (what reloc type is used ?).  */
     case EM_NIOS32:
-    case EM_IA_64:
       /* Fall through (what reloc type is used ?).  */
     default:
       error (_("Missing knowledge of 32-bit reloc types used in DWARF sections of machine number %d\n"),
@@ -8098,6 +8099,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
     {
     case EM_ALPHA:
       return reloc_type == 2; /* R_ALPHA_REFQUAD.  */
+    case EM_IA_64:
+      return reloc_type == 0x27; /* R_IA64_DIR64LSB.  */
     case EM_PPC64:
       return reloc_type == 38; /* R_PPC64_ADDR64.  */
     case EM_SPARC32PLUS:

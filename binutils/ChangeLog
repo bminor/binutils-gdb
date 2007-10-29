@@ -1,3 +1,9 @@
+2007-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (is_32bit_abs_reloc): Add knowledge of reloc used by
+	IA64.
+	(is_64bit_abs_reloc): Likewise.
+
 2007-10-28  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (process_debug_info): Check for corrupt lengths.
