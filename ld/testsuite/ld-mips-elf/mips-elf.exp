@@ -68,6 +68,8 @@ run_dump_test "branch-misc-1"
 if { $linux_gnu } {
     run_dump_test "multi-got-1"
     run_dump_test "multi-got-no-shared"
+    run_dump_test "multi-got-hidden-1"
+    run_dump_test "multi-got-hidden-2"
 }
 
 if $has_newabi {
