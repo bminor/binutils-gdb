@@ -932,10 +932,6 @@ read_input_script(Workqueue* workqueue, const General_options& options,
   if (yyparse(&closure) != 0)
     return false;
 
-  // If this routine was called from the main thread rather than a
-  // work queue -- as it is for the --script option -- then our
-  // work here is done.
-
   // THIS_BLOCKER must be clear before we may add anything to the
   // symbol table.  We are responsible for unblocking NEXT_BLOCKER
   // when we are done.  We are responsible for deleting THIS_BLOCKER
