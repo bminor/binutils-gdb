@@ -737,10 +737,10 @@ Target_x86_64::Scan::local(const General_options&,
       // PC32 reloc.
       break;
 
-    case elfcpp::R_X86_64_GOTPC32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPC32:
     case elfcpp::R_X86_64_GOTOFF64:
-    case elfcpp::R_X86_64_GOTPC64:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPC64:
+    case elfcpp::R_X86_64_PLTOFF64:
       // We need a GOT section.
       target->got_section(symtab, layout);
       break;
@@ -832,8 +832,8 @@ Target_x86_64::Scan::local(const General_options&,
       break;
 
     case elfcpp::R_X86_64_GOTPLT64:
-    case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_SIZE32:
+    case elfcpp::R_X86_64_SIZE64:
     default:
       gold_error(_("%s: unsupported reloc %u against local symbol"),
 		 object->name().c_str(), r_type);
@@ -944,10 +944,10 @@ Target_x86_64::Scan::global(const General_options& options,
       target->make_plt_entry(symtab, layout, gsym);
       break;
 
-    case elfcpp::R_X86_64_GOTPC32:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPC32:
     case elfcpp::R_X86_64_GOTOFF64:
-    case elfcpp::R_X86_64_GOTPC64:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPC64:
+    case elfcpp::R_X86_64_PLTOFF64:
       // We need a GOT section.
       target->got_section(symtab, layout);
       break;
@@ -1015,8 +1015,9 @@ Target_x86_64::Scan::global(const General_options& options,
 	  }
       }
       break;
-    case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
+
+    case elfcpp::R_X86_64_SIZE32:
+    case elfcpp::R_X86_64_SIZE64:
     default:
       gold_error(_("%s: unsupported reloc %u against global symbol %s"),
 		 object->name().c_str(), r_type, gsym->name());
@@ -1259,7 +1260,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_GOT64:
       // The ABI doc says "Like GOT64, but indicates a PLT entry is needed."
       // Since we always add a PLT entry, this is equivalent.
-    case elfcpp::R_X86_64_GOTPLT64:  // TODO(csilvers): correct?
+    case elfcpp::R_X86_64_GOTPLT64:
       gold_assert(have_got_offset);
       Relocate_functions<64, false>::rela64(view, got_offset, addend);
       break;
@@ -1326,9 +1327,9 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
 			 address, view_size);
       break;
 
-    case elfcpp::R_X86_64_SIZE32:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_SIZE64:  // TODO(csilvers): correct?
-    case elfcpp::R_X86_64_PLTOFF64:  // TODO(csilvers): implement me!
+    case elfcpp::R_X86_64_SIZE32:
+    case elfcpp::R_X86_64_SIZE64:
+    case elfcpp::R_X86_64_PLTOFF64:  // FIXME: implement me!
     default:
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unsupported reloc %u"),
