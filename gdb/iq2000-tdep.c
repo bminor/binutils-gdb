@@ -417,7 +417,8 @@ iq2000_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *addrp = cache->saved_regs[regnum];
       *realnump = -1;
       if (valuep)
-        read_memory (*addrp, valuep, register_size (current_gdbarch, regnum));
+        read_memory (*addrp, valuep,
+		     register_size (get_frame_arch (next_frame), regnum));
       return;
     }
 

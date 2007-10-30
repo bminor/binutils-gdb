@@ -1,5 +1,10 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* iq2000-tdep.c (iq2000_frame_prev_register): Use get_frame_arch to get
+	at the current architecture by frame_info.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* inf-child.c (inf_child_fetch_inferior_registers): Use 
 	get_regcache_arch to get at the current architecture by regcache.
 
