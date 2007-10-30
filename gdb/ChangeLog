@@ -1,5 +1,11 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* hpux-thread.c (hpux_thread_fetch_registers)
+	(hpux_thread_store_registers): Use get_regcache_arch to get at the
+	current architecture by regcache.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* hppa-tdep.c (hppa_frame_cache): Use get_frame_arch to get at the
 	current architecture by frame_info.
 
