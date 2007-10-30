@@ -116,8 +116,10 @@ if $tracelevel {
 set testfile "dfp-test"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug"] != "" } {
-    untested "Couldn't compile ${srcfile}"
+# Try to compile the test case.  If we can't, assume the
+# toolchain does not yet provide DFP support and bail out.
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {quiet debug}] != "" } {
+    verbose "Skipping DFP tests."
     return -1
 }
 

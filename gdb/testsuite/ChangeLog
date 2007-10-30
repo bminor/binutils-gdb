@@ -1,3 +1,8 @@
+2007-10-30  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/dfp-test.exp: Fail gracefully if toolchain does not
+	provide DFP support.
+
 2007-10-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.arch/altivec-abi.exp: Run multiple times for GCC on GNU/Linux.
