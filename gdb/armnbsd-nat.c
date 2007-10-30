@@ -50,7 +50,7 @@ arm_supply_gregset (struct regcache *regcache, struct reg *gregset)
   regcache_raw_supply (regcache, ARM_LR_REGNUM,
 		       (char *) &gregset->r_lr);
   /* This is ok: we're running native...  */
-  r_pc = gdbarch_addr_bits_remove (current_gdbarch, gregset->r_pc);
+  r_pc = gdbarch_addr_bits_remove (get_regcache_arch (regcache), gregset->r_pc);
   regcache_raw_supply (regcache, ARM_PC_REGNUM, (char *) &r_pc);
 
   if (arm_apcs_32)
@@ -104,7 +104,8 @@ fetch_register (struct regcache *regcache, int regno)
     case ARM_PC_REGNUM:
       /* This is ok: we're running native... */
       inferior_registers.r_pc = gdbarch_addr_bits_remove
-				  (current_gdbarch, inferior_registers.r_pc);
+				  (get_regcache_arch (regcache),
+				   inferior_registers.r_pc);
       regcache_raw_supply (regcache, ARM_PC_REGNUM,
 			   (char *) &inferior_registers.r_pc);
       break;
@@ -213,6 +214,7 @@ armnbsd_fetch_registers (struct regcache *regcache, int regno)
 static void
 store_register (const struct regcache *regcache, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct reg inferior_registers;
   int ret;
 
@@ -248,10 +250,9 @@ store_register (const struct regcache *regcache, int regno)
 	  regcache_raw_collect (regcache, ARM_PC_REGNUM,
 				(char *) &pc_val);
 	  
-	  pc_val = gdbarch_addr_bits_remove (current_gdbarch, pc_val);
+	  pc_val = gdbarch_addr_bits_remove (gdbarch, pc_val);
 	  inferior_registers.r_pc ^= gdbarch_addr_bits_remove
-				       (current_gdbarch,
-					inferior_registers.r_pc);
+				       (gdbarch, inferior_registers.r_pc);
 	  inferior_registers.r_pc |= pc_val;
 	}
       break;
@@ -267,10 +268,9 @@ store_register (const struct regcache *regcache, int regno)
 	  regcache_raw_collect (regcache, ARM_PS_REGNUM,
 				(char *) &psr_val);
 
-	  psr_val ^= gdbarch_addr_bits_remove (current_gdbarch, psr_val);
+	  psr_val ^= gdbarch_addr_bits_remove (gdbarch, psr_val);
 	  inferior_registers.r_pc = gdbarch_addr_bits_remove
-				      (current_gdbarch,
-				       inferior_registers.r_pc);
+				      (gdbarch, inferior_registers.r_pc);
 	  inferior_registers.r_pc |= psr_val;
 	}
       break;
@@ -291,6 +291,7 @@ store_register (const struct regcache *regcache, int regno)
 static void
 store_regs (const struct regcache *regcache)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct reg inferior_registers;
   int ret;
   int regno;
@@ -322,8 +323,8 @@ store_regs (const struct regcache *regcache)
       regcache_raw_collect (regcache, ARM_PS_REGNUM,
 			    (char *) &psr_val);
 	  
-      pc_val = gdbarch_addr_bits_remove (current_gdbarch, pc_val);
-      psr_val ^= gdbarch_addr_bits_remove (current_gdbarch, psr_val);
+      pc_val = gdbarch_addr_bits_remove (gdbarch, pc_val);
+      psr_val ^= gdbarch_addr_bits_remove (gdbarch, psr_val);
 
       inferior_registers.r_pc = pc_val | psr_val;
     }
