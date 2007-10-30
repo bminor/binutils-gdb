@@ -3427,8 +3427,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       (TYPE_FLAG_NOSIGN
-                | (gdbarch_char_signed (current_gdbarch) ? 
-		   0 : TYPE_FLAG_UNSIGNED)),
+                | (gdbarch_char_signed (gdbarch) ? 0 : TYPE_FLAG_UNSIGNED)),
 	       "char", (struct objfile *) NULL);
   builtin_type->builtin_true_char =
     init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
@@ -3448,38 +3447,38 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 	       "unsigned char", (struct objfile *) NULL);
   builtin_type->builtin_short =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_short_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "short", (struct objfile *) NULL);
   builtin_type->builtin_unsigned_short =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_short_bit (gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED, "unsigned short", 
 	       (struct objfile *) NULL);
   builtin_type->builtin_int =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "int", (struct objfile *) NULL);
   builtin_type->builtin_unsigned_int =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED, "unsigned int", 
 	       (struct objfile *) NULL);
   builtin_type->builtin_long =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "long", (struct objfile *) NULL);
   builtin_type->builtin_unsigned_long =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED, "unsigned long", 
 	       (struct objfile *) NULL);
   builtin_type->builtin_long_long =
     init_type (TYPE_CODE_INT,
-	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_long_long_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "long long", (struct objfile *) NULL);
   builtin_type->builtin_unsigned_long_long =
     init_type (TYPE_CODE_INT,
-	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_long_long_bit (gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED, "unsigned long long", 
 	       (struct objfile *) NULL);
   builtin_type->builtin_float
@@ -3556,7 +3555,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
   builtin_type->builtin_core_addr =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_addr_bit (current_gdbarch) / 8,
+	       gdbarch_addr_bit (gdbarch) / 8,
 	       TYPE_FLAG_UNSIGNED,
 	       "__CORE_ADDR", (struct objfile *) NULL);
 
