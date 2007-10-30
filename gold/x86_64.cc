@@ -289,7 +289,6 @@ Target_x86_64::got_section(Symbol_table* symtab, Layout* layout)
       // create another set of data in the .got section.  Note that we
       // always create a PLT if we create a GOT, although the PLT
       // might be empty.
-      // TODO(csilvers): do we really need an alignment of 8?
       this->got_plt_ = new Output_data_space(8);
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 				      elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
@@ -382,7 +381,6 @@ class Output_data_plt_x86_64 : public Output_section_data
 
 Output_data_plt_x86_64::Output_data_plt_x86_64(Layout* layout,
                                                Output_data_space* got_plt)
-    // TODO(csilvers): do we really need an alignment of 8?
   : Output_section_data(8), got_plt_(got_plt), count_(0)
 {
   this->rel_ = new Reloc_section();
@@ -743,12 +741,15 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_PLTOFF64:
       // We need a GOT section.
       target->got_section(symtab, layout);
+      // For PLTOFF64, we'd normally want a PLT section, but since we
+      // know this is a local symbol, no PLT is needed.
       break;
 
     case elfcpp::R_X86_64_GOT64:
     case elfcpp::R_X86_64_GOT32:
     case elfcpp::R_X86_64_GOTPCREL64:
     case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPLT64:
       {
         // The symbol requires a GOT entry.
         Output_data_got<64, false>* got = target->got_section(symtab, layout);
@@ -764,6 +765,8 @@ Target_x86_64::Scan::local(const General_options&,
                                     data_shndx, reloc.get_r_offset(), 0);
               }
           }
+        // For GOTPLT64, we'd normally want a PLT section, but since
+        // we know this is a local symbol, no PLT is needed.
       }
       break;
 
@@ -831,7 +834,6 @@ Target_x86_64::Scan::local(const General_options&,
       }
       break;
 
-    case elfcpp::R_X86_64_GOTPLT64:
     case elfcpp::R_X86_64_SIZE32:
     case elfcpp::R_X86_64_SIZE64:
     default:
@@ -933,6 +935,11 @@ Target_x86_64::Scan::global(const General_options& options,
                                      gsym->got_offset(), 0);
               }
           }
+        // For GOTPLT64, we also need a PLT entry (but only if the
+        // symbol is not fully resolved).
+        if (r_type == elfcpp::R_X86_64_GOTPLT64
+            && !gsym->final_value_is_known())
+          target->make_plt_entry(symtab, layout, gsym);
       }
       break;
 
@@ -950,6 +957,11 @@ Target_x86_64::Scan::global(const General_options& options,
     case elfcpp::R_X86_64_PLTOFF64:
       // We need a GOT section.
       target->got_section(symtab, layout);
+      // For PLTOFF64, we also need a PLT entry (but only if the
+      // symbol is not fully resolved).
+      if (r_type == elfcpp::R_X86_64_PLTOFF64
+	  && !gsym->final_value_is_known())
+	target->make_plt_entry(symtab, layout, gsym);
       break;
 
     case elfcpp::R_X86_64_COPY:
@@ -1239,9 +1251,23 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       gold_assert(gsym == NULL
                   || gsym->has_plt_offset()
 		  || gsym->final_value_is_known());
+      // Note: while this code looks the same as for R_X86_64_PC32, it
+      // behaves differently because psymval was set to point to
+      // the PLT entry, rather than the symbol, in Scan::global().
       Relocate_functions<64, false>::pcrela32(view, object, psymval, addend,
                                               address);
       break;
+
+    case elfcpp::R_X86_64_PLTOFF64:
+      {
+        gold_assert(gsym);
+        gold_assert(gsym->has_plt_offset()
+                    || gsym->final_value_is_known());
+	elfcpp::Elf_types<64>::Elf_Addr got_address;
+	got_address = target->got_section(NULL, NULL)->address();
+        Relocate_functions<64, false>::pcrela64(view, object, psymval, addend,
+                                                - got_address);
+      }
 
     case elfcpp::R_X86_64_GOT32:
       gold_assert(have_got_offset);
@@ -1329,7 +1355,6 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
 
     case elfcpp::R_X86_64_SIZE32:
     case elfcpp::R_X86_64_SIZE64:
-    case elfcpp::R_X86_64_PLTOFF64:  // FIXME: implement me!
     default:
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unsupported reloc %u"),
