@@ -1719,7 +1719,7 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	  nextpc = BranchDest (pc, this_instr);
 	  nextpc |= bit (this_instr, 24) << 1;
 
-	  nextpc = gdbarch_addr_bits_remove (current_gdbarch, nextpc);
+	  nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
 	  if (nextpc == pc)
 	    error (_("Infinite loop detected"));
 	  break;

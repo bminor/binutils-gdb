@@ -1,5 +1,9 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* arm-tdep.c (arm_get_next_pc): Replace current_gdbarch by gdbarch.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* armnbsd-nat.c (arm_supply_gregset, fetch_register, store_register)
 	(store_regs): Use get_regcache_arch to get at the current architecture
 	by regcache.
