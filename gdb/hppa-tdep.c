@@ -1809,6 +1809,7 @@ struct hppa_frame_cache
 static struct hppa_frame_cache *
 hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct hppa_frame_cache *cache;
   long saved_gr_mask;
   long saved_fr_mask;
@@ -2102,7 +2103,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	       saved.  The entry SP value is saved at this frame's SP
 	       address.  */
             cache->base = read_memory_integer
-			    (this_sp, gdbarch_ptr_bit (current_gdbarch) / 8);
+			    (this_sp, gdbarch_ptr_bit (gdbarch) / 8);
 
 	    if (hppa_debug)
 	      fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [saved]",
@@ -2181,7 +2182,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   {
     /* Convert all the offsets into addresses.  */
     int reg;
-    for (reg = 0; reg < gdbarch_num_regs (current_gdbarch); reg++)
+    for (reg = 0; reg < gdbarch_num_regs (gdbarch); reg++)
       {
 	if (trad_frame_addr_p (cache->saved_regs, reg))
 	  cache->saved_regs[reg].addr += cache->base;
@@ -2189,10 +2190,8 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   }
 
   {
-    struct gdbarch *gdbarch;
     struct gdbarch_tdep *tdep;
 
-    gdbarch = get_frame_arch (next_frame);
     tdep = gdbarch_tdep (gdbarch);
 
     if (tdep->unwind_adjust_stub)
