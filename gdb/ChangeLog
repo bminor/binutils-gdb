@@ -1,5 +1,10 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* arm-linux-tdep.c (arm_linux_supply_gregset): Use get_regcache_arch
+	to get at the current architecture by regcache.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* alphabsd-nat.c (alphabsd_fetch_inferior_registers)
 	(alphabsd_store_inferior_registers): Use get_regcache_arch to get at
 	the current architecture by regcache.

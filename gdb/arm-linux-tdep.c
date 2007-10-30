@@ -392,7 +392,7 @@ arm_linux_supply_gregset (const struct regset *regset,
       reg_pc = extract_unsigned_integer (gregs
 					 + INT_REGISTER_SIZE * ARM_PC_REGNUM,
 					 INT_REGISTER_SIZE);
-      reg_pc = gdbarch_addr_bits_remove (current_gdbarch, reg_pc);
+      reg_pc = gdbarch_addr_bits_remove (get_regcache_arch (regcache), reg_pc);
       store_unsigned_integer (pc_buf, INT_REGISTER_SIZE, reg_pc);
       regcache_raw_supply (regcache, ARM_PC_REGNUM, pc_buf);
     }
