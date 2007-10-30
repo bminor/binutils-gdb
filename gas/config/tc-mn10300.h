@@ -66,6 +66,7 @@ void mn10300_cons_fix_new PARAMS ((fragS *, int, int, expressionS *));
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEC)	\
   (((SEC)->flags & SEC_CODE) != 0		\
    || ! SEG_NORMAL (SEC)			\
+   || (FIX)->fx_r_type == BFD_RELOC_MN10300_ALIGN \
    || TC_FORCE_RELOCATION (FIX))
 
 /* We validate subtract arguments within tc_gen_reloc(), so don't
@@ -116,3 +117,6 @@ extern bfd_boolean mn10300_allow_local_subtract (expressionS *, expressionS *, s
 #define MAX_RELOC_EXPANSION 2
 
 #define TC_FRAG_TYPE bfd_boolean
+
+#define HANDLE_ALIGN(frag) mn10300_handle_align (frag)
+extern void mn10300_handle_align (fragS *);

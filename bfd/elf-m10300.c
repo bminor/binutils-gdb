@@ -469,6 +469,20 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_MN10300_ALIGN,	/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 NULL, 			/* special handler.  */
+	 "R_MN10300_ALIGN",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
 	 FALSE)			/* pcrel_offset */
 };
 
@@ -504,7 +518,8 @@ static const struct mn10300_reloc_map mn10300_reloc_map[] =
   { BFD_RELOC_MN10300_GLOB_DAT, R_MN10300_GLOB_DAT },
   { BFD_RELOC_MN10300_JMP_SLOT, R_MN10300_JMP_SLOT },
   { BFD_RELOC_MN10300_RELATIVE, R_MN10300_RELATIVE },
-  { BFD_RELOC_MN10300_SYM_DIFF, R_MN10300_SYM_DIFF }
+  { BFD_RELOC_MN10300_SYM_DIFF, R_MN10300_SYM_DIFF },
+  { BFD_RELOC_MN10300_ALIGN, R_MN10300_ALIGN }
 };
 
 /* Create the GOT section.  */
@@ -1045,6 +1060,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
       sym_diff_value = value;
       return bfd_reloc_ok;
 
+    case R_MN10300_ALIGN:
     case R_MN10300_NONE:
       return bfd_reloc_ok;
 
@@ -1825,19 +1841,54 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
 
   contents = elf_section_data (sec)->this_hdr.contents;
 
-  /* The deletion must stop at the next ALIGN reloc for an aligment
-     power larger than the number of bytes we are deleting.  */
-
   irelalign = NULL;
   toaddr = sec->size;
 
   irel = elf_section_data (sec)->relocs;
   irelend = irel + sec->reloc_count;
 
+  /* If there is an align reloc at the end of the section ignore it.
+     GAS creates these relocs for reasons of its own, and they just
+     serve to keep the section artifically inflated.  */
+  if (ELF32_R_TYPE ((irelend - 1)->r_info) == (int) R_MN10300_ALIGN)
+    --irelend;
+      
+  /* The deletion must stop at the next ALIGN reloc for an aligment
+     power larger than the number of bytes we are deleting.  */
+  for (; irel < irelend; irel++)
+    if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_ALIGN
+	&& irel->r_offset > addr
+	&& irel->r_offset < toaddr
+	&& count < (1 << irel->r_addend))
+      {
+	irelalign = irel;
+	toaddr = irel->r_offset;
+	break;
+      }
+
   /* Actually delete the bytes.  */
   memmove (contents + addr, contents + addr + count,
 	   (size_t) (toaddr - addr - count));
-  sec->size -= count;
+
+  /* Adjust the section's size if we are shrinking it, or else
+     pad the bytes between the end of the shrunken region and
+     the start of the next region with NOP codes.  */
+  if (irelalign == NULL)
+    {
+      sec->size -= count;
+      /* Include symbols at the end of the section, but
+	 not at the end of a sub-region of the section.  */
+      toaddr ++;
+    }
+  else
+    {
+      int i;
+
+#define NOP_OPCODE 0xcb
+
+      for (i = 0; i < count; i ++)
+	bfd_put_8 (abfd, (bfd_vma) NOP_OPCODE, contents + toaddr - count + i);
+    }
 
   /* Adjust all the relocs.  */
   for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
@@ -1855,13 +1906,13 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
     {
       if (isym->st_shndx == sec_shndx
 	  && isym->st_value > addr
-	  && isym->st_value <= toaddr)
+	  && isym->st_value < toaddr)
 	isym->st_value -= count;
       /* Adjust the function symbol's size as well.  */
       else if (isym->st_shndx == sec_shndx
 	       && ELF_ST_TYPE (isym->st_info) == STT_FUNC
 	       && isym->st_value + isym->st_size > addr
-	       && isym->st_value + isym->st_size <= toaddr)
+	       && isym->st_value + isym->st_size < toaddr)
 	isym->st_size -= count;
     }
 
@@ -1878,14 +1929,14 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
 	   || sym_hash->root.type == bfd_link_hash_defweak)
 	  && sym_hash->root.u.def.section == sec
 	  && sym_hash->root.u.def.value > addr
-	  && sym_hash->root.u.def.value <= toaddr)
+	  && sym_hash->root.u.def.value < toaddr)
 	sym_hash->root.u.def.value -= count;
       /* Adjust the function symbol's size as well.  */
       else if (sym_hash->root.type == bfd_link_hash_defined
 	       && sym_hash->root.u.def.section == sec
 	       && sym_hash->type == STT_FUNC
 	       && sym_hash->root.u.def.value + sym_hash->size > addr
-	       && sym_hash->root.u.def.value + sym_hash->size <= toaddr)
+	       && sym_hash->root.u.def.value + sym_hash->size < toaddr)
 	sym_hash->size -= count;
     }
 

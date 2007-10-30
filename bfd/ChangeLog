@@ -1,3 +1,12 @@
+2007-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* reloc.c (BFD_RELOC_MN10300_ALIGN): Add.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regnerate.
+	* elf-m10300.h: Handle R_MN10300_ALIGN relocs.
+	(mn10300_elf_relax_delete_bytes): Honour R_MN10300_ALIGN relocs.
+	Re-fix off by one error in comparisons.
+  
 2007-10-25  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* bfd-in.h (STRING_COMMA_LEN): Don't handle NULL STR case.

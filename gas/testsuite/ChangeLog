@@ -1,3 +1,7 @@
+2007-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/gas.exp: Do not run diff1.s test for mn10300.
+
 2007-10-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/5221

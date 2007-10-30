@@ -2778,6 +2778,11 @@ allows for a value that is the difference of two symbols
 in the same section.  */
   BFD_RELOC_MN10300_SYM_DIFF,
 
+/* The addend of this reloc is an alignment power that must
+be honoured at the offset's location, regardless of linker
+relaxation.  */
+  BFD_RELOC_MN10300_ALIGN,
+
 
 /* i386/elf relocations  */
   BFD_RELOC_386_GOT32,

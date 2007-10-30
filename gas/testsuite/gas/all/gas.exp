@@ -34,7 +34,12 @@ if { ![istarget cris-*-*] && ![istarget crisv32-*-*]
 
 # This test is meaningless for the PA; the difference of two undefined
 # symbols is something that is (and must be) supported on the PA.
-if ![istarget hppa*-*-*] then {
+#
+# The MN10300 port supports link time relaxation which in turn allows
+# for link time resolution of the differneces of two symbols which are
+# undefined at assembly time.  Hence this test will not pass for the
+# MN10300.
+if { ![istarget hppa*-*-*] && ![istarget mn10300-*-*] && ![istarget am3*-*-*] } then {
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
 }
 

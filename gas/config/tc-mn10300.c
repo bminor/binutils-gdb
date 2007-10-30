@@ -2181,13 +2181,18 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 
   if (fixp->fx_addsy && fixp->fx_subsy)
     {
+      asection *asec, *ssec;
+
+      asec = S_GET_SEGMENT (fixp->fx_addsy);
+      ssec = S_GET_SEGMENT (fixp->fx_subsy);
+
       reloc->sym_ptr_ptr = NULL;
 
       /* If we have a difference between two (non-absolute) symbols we must
 	 generate two relocs (one for each symbol) and allow the linker to
 	 resolve them - relaxation may change the distances between symbols,
-	 even local symbols defined in the same segment.  */
-      if (S_GET_SEGMENT (fixp->fx_subsy) == seg)
+	 even local symbols defined in the same section.  */
+      if (ssec != absolute_section || asec != absolute_section)
 	{
 	  arelent * reloc2 = xmalloc (sizeof * reloc);
 
@@ -2201,7 +2206,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	  *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 
 	  reloc->addend = fixp->fx_offset; 
-	  if (S_GET_SEGMENT (fixp->fx_addsy) == absolute_section)
+	  if (asec == absolute_section)
 	    reloc->addend += S_GET_VALUE (fixp->fx_addsy);
 
 	  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
@@ -2210,13 +2215,6 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	  fixp->fx_pcrel = 0;
 	  fixp->fx_done = 1;
 	  return relocs;
-	}
-
-      if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
-	  || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
-	{
-	  as_bad_where (fixp->fx_file, fixp->fx_line,
-			"Difference of symbols in different sections is not supported");
 	}
       else
 	{
@@ -2248,12 +2246,12 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 		= (asymbol **) bfd_abs_section_ptr->symbol_ptr_ptr;
 	      return relocs;
 	    }
-	}
 
-      if (reloc->sym_ptr_ptr)
-	free (reloc->sym_ptr_ptr);
-      free (reloc);
-      return & no_relocs;
+	  if (reloc->sym_ptr_ptr)
+	    free (reloc->sym_ptr_ptr);
+	  free (reloc);
+	  return & no_relocs;
+	}
     }
   else
     {
@@ -2357,6 +2355,10 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
       fixP->fx_done = 0;
       return;
 
+    case BFD_RELOC_MN10300_ALIGN:
+      fixP->fx_done = 1;
+      return;
+      
     case BFD_RELOC_NONE:
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -2561,4 +2563,30 @@ mn10300_allow_local_subtract (expressionS * left, expressionS * right, segT sect
     return FALSE;
 
   return result;
+}
+
+/* When relaxing, we need to output a reloc for any .align directive
+   that requests alignment to a two byte boundary or larger.  */
+
+void
+mn10300_handle_align (fragS *frag)
+{
+  if (! linkrelax)
+    return;
+
+  if ((frag->fr_type == rs_align
+       || frag->fr_type == rs_align_code)
+      && frag->fr_address + frag->fr_fix > 0
+      && frag->fr_offset > 1
+      && now_seg != bss_section
+      /* Do not create relocs for the merging sections - such
+	 relocs will prevent the contents from being merged.  */
+      && (bfd_get_section_flags (now_seg->owner, now_seg) & SEC_MERGE) == 0)
+    /* Create a new fixup to record the alignment request.  The symbol is
+       irrelevent but must be present so we use the absolute section symbol.
+       The offset from the symbol is used to record the power-of-two alignment
+       value.  The size is set to 0 because the frag may already be aligned,
+       thus causing cvt_frag_to_fill to reduce the size of the frag to zero.  */
+    fix_new (frag, frag->fr_fix, 0, & abs_symbol, frag->fr_offset, FALSE,
+	     BFD_RELOC_MN10300_ALIGN);
 }

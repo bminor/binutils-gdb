@@ -1,3 +1,15 @@
+2007-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* ld-mn10300/mn10300.exp: Run new tests.  Skip i126256 test if
+	a compiler is not available.
+	* ld-mn10300/i112045-3.s: New test.
+	* ld-mn10300/i112045-3.d: Expected disassembly.
+	* ld-mn10300/i135409.s: Rename to i135409-1.s.
+	* ld-mn10300/i135409.d: Rename to i135409-1.d
+	* ld-mn10300/i135409-2.s: New test.
+	* ld-mn10300/i135409-2.d: Expected symbol table.
+        * ld-mn10300/i36434.d: Adjust expected disassembly.
+
 2007-10-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/rgn-over1.d: Accept extra LOAD at end of map file.

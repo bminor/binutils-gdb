@@ -22,17 +22,17 @@ if {!([istarget "am3*-*-*"]) && !([istarget "mn10300*-*-*"]) } {
 
 # Set up a list as described in ld-lib.exp
 
-set am33_tests {
+set mn10300_tests {
     {
 	"am33 string merging"
-	"--relax -Ttext 0x8000000"
+	"-relax -Ttext 0x8000074"
 	""
 	{ "i36434.s" "i36434-2.s" }
 	{ {objdump -dz i36434.d} }
 	"i36434.x"
     }
     {
-	"difference of two symbols"
+	"difference of two same-section symbols"
 	"-Ttext 0"
 	""
 	{ "i112045-1.s" }
@@ -40,20 +40,45 @@ set am33_tests {
 	"i112045-1.x"
     }
     {
-	"(shared) difference of two symbols"
+	"difference of two same-section symbols where the difference is held in another section"
+	"-relax -Ttext 100"
+	""
+	{ "i112045-3.s" }
+	{ {objdump -D i112045-3.d} }
+	"i112045-3.x"
+    }
+    {
+	"adjustment of symbols due to relaxation"
+	"-Tdata 1f -Ttext 0 -relax"
+	""
+	{ "i135409-1.s" }
+	{ {readelf --syms i135409-1.d} }
+	"i135409-1.x"
+    }
+    {
+	"adjustment of symbols due to relaxation (with alignment directives)"
+	"-Tdata 1f -Ttext 0 -relax"
+	""
+	{ "i135409-2.s" }
+	{ {readelf --syms i135409-2.d} }
+	"i135409-2.x"
+    }
+}
+
+run_ld_link_tests $mn10300_tests
+
+if {!([istarget "am3*-*-*"])} {
+    return
+}
+
+set am33_tests {
+    {
+	"difference of two same-section symbols (in a shared library)"
 	"-shared"
 	""
 	{ "i112045-2.s" }
 	{ {objdump -R i112045-2.d} }
 	"i112045-2.x"
-    }
-    {
-	"adjustment of symbols due to relaxation"
-	"-Tdata 1f -relax"
-	""
-	{ "i135409.s" }
-	{ {readelf --syms i135409.d } }
-	"i135409.x"
     }
 }
 
@@ -66,7 +91,11 @@ proc i126256-test { } {
     global subdir
 
     set tmpdir tmpdir
-    set testname "Issue 126256 - seg fault whilst linking one shared library into another when relaxation is enabled."
+    set testname "Seg fault whilst linking one shared library into another when relaxation is enabled."
+
+    if {![is_remote host] && [which $CC] == 0} then {
+	return
+    }
 
     if { ![ld_compile "$CC -mrelax -fPIC" $srcdir/$subdir/i126256-1.c $tmpdir/i126256-1.o] } {
 	unresolved $testname

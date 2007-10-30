@@ -1,5 +1,17 @@
 2007-10-30  Nick Clifton  <nickc@redhat.com>
 
+	* config/tc-mn10300.c (tc_gen_reloc): Fix test that decides when
+	sym_diff relocs should be generated.
+	(md_apply_fix): Skip R_MN10300_ALIGN relocs.
+	(mn10300_fix_adjustable): Do not adjust R_MN10300_ALIGN relocs.
+	(mn10300_handle_align): New function.  Generate R_MN10300_ALIGN
+	relocs to record alignment requests.
+	* config/tc-mn10300.h (TC_FORCE_RELOCATION_SUB_SAME): Also force
+	R_MN10300_ALIGN relocs.
+	(HANDLE_ALIGN): Define.  Call mn10300_handle_align.
+
+2007-10-30  Nick Clifton  <nickc@redhat.com>
+
 	* doc/as.texinfo (Section): Replace "subsegment" with
 	"subsection".
 
