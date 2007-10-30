@@ -617,15 +617,16 @@ static CORE_ADDR (*inf_ptrace_register_u_offset)(struct gdbarch *, int, int);
 static void
 inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
   int pid, i;
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = inf_ptrace_register_u_offset (current_gdbarch, regnum, 0);
+  addr = inf_ptrace_register_u_offset (gdbarch, regnum, 0);
   if (addr == (CORE_ADDR)-1
-      || gdbarch_cannot_fetch_register (current_gdbarch, regnum))
+      || gdbarch_cannot_fetch_register (gdbarch, regnum))
     {
       regcache_raw_supply (regcache, regnum, NULL);
       return;
@@ -637,7 +638,7 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
   if (pid == 0)
     pid = ptid_get_pid (inferior_ptid);
 
-  size = register_size (current_gdbarch, regnum);
+  size = register_size (gdbarch, regnum);
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
   buf = alloca (size);
 
@@ -648,7 +649,7 @@ inf_ptrace_fetch_register (struct regcache *regcache, int regnum)
       buf[i] = ptrace (PT_READ_U, pid, (PTRACE_TYPE_ARG3)(uintptr_t)addr, 0);
       if (errno != 0)
 	error (_("Couldn't read register %s (#%d): %s."),
-	       gdbarch_register_name (current_gdbarch, regnum),
+	       gdbarch_register_name (gdbarch, regnum),
 	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
@@ -663,7 +664,9 @@ static void
 inf_ptrace_fetch_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
+    for (regnum = 0;
+	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum++)
       inf_ptrace_fetch_register (regcache, regnum);
   else
     inf_ptrace_fetch_register (regcache, regnum);
@@ -674,15 +677,16 @@ inf_ptrace_fetch_registers (struct regcache *regcache, int regnum)
 static void
 inf_ptrace_store_register (const struct regcache *regcache, int regnum)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR addr;
   size_t size;
   PTRACE_TYPE_RET *buf;
   int pid, i;
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
-  addr = inf_ptrace_register_u_offset (current_gdbarch, regnum, 1);
+  addr = inf_ptrace_register_u_offset (gdbarch, regnum, 1);
   if (addr == (CORE_ADDR)-1 
-      || gdbarch_cannot_store_register (current_gdbarch, regnum))
+      || gdbarch_cannot_store_register (gdbarch, regnum))
     return;
 
   /* Cater for systems like GNU/Linux, that implement threads as
@@ -691,7 +695,7 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
   if (pid == 0)
     pid = ptid_get_pid (inferior_ptid);
 
-  size = register_size (current_gdbarch, regnum);
+  size = register_size (gdbarch, regnum);
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
   buf = alloca (size);
 
@@ -703,7 +707,7 @@ inf_ptrace_store_register (const struct regcache *regcache, int regnum)
       ptrace (PT_WRITE_U, pid, (PTRACE_TYPE_ARG3)(uintptr_t)addr, buf[i]);
       if (errno != 0)
 	error (_("Couldn't write register %s (#%d): %s."),
-	       gdbarch_register_name (current_gdbarch, regnum),
+	       gdbarch_register_name (gdbarch, regnum),
 	       regnum, safe_strerror (errno));
 
       addr += sizeof (PTRACE_TYPE_RET);
@@ -717,7 +721,9 @@ void
 inf_ptrace_store_registers (struct regcache *regcache, int regnum)
 {
   if (regnum == -1)
-    for (regnum = 0; regnum < gdbarch_num_regs (current_gdbarch); regnum++)
+    for (regnum = 0;
+	 regnum < gdbarch_num_regs (get_regcache_arch (regcache));
+	 regnum++)
       inf_ptrace_store_register (regcache, regnum);
   else
     inf_ptrace_store_register (regcache, regnum);
