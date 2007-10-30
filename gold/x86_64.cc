@@ -1265,8 +1265,8 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
                     || gsym->final_value_is_known());
 	elfcpp::Elf_types<64>::Elf_Addr got_address;
 	got_address = target->got_section(NULL, NULL)->address();
-        Relocate_functions<64, false>::pcrela64(view, object, psymval, addend,
-                                                - got_address);
+	Relocate_functions<64, false>::rela64(view, object, psymval,
+					      addend - got_address);
       }
 
     case elfcpp::R_X86_64_GOT32:
