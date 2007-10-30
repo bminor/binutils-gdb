@@ -136,6 +136,7 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
   unw_regnum_t uw_sp_regnum;
   struct libunwind_frame_cache *cache;
   struct libunwind_descr *descr;
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   int i, ret;
 
   if (*this_cache)
@@ -161,10 +162,10 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
      the current frame rather than the top.  We then use the  unw_step function to 
      move the libunwind cursor back one frame.  We can later use this cursor to find previous 
      registers via the unw_get_reg interface which will invoke libunwind's special logic.  */
-  descr = libunwind_descr (get_frame_arch (next_frame));
+  descr = libunwind_descr (gdbarch);
   acc = descr->accessors;
   as =  unw_create_addr_space_p (acc,
-				 gdbarch_byte_order (current_gdbarch)
+				 gdbarch_byte_order (gdbarch)
 				 == BFD_ENDIAN_BIG
 				 ? __BIG_ENDIAN
 				 : __LITTLE_ENDIAN);
@@ -177,7 +178,7 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
     }
 
   /* To get base address, get sp from previous frame.  */
-  uw_sp_regnum = descr->gdb2uw (gdbarch_sp_regnum (current_gdbarch));
+  uw_sp_regnum = descr->gdb2uw (gdbarch_sp_regnum (gdbarch));
   ret = unw_get_reg_p (&cache->cursor, uw_sp_regnum, &fp);
   if (ret < 0)
     {
@@ -226,6 +227,7 @@ libunwind_frame_sniffer (struct frame_info *next_frame)
   unw_accessors_t *acc;
   unw_addr_space_t as;
   struct libunwind_descr *descr;
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   int i, ret;
 
   /* To test for libunwind unwind support, initialize a cursor to the current frame and try to back
@@ -233,10 +235,10 @@ libunwind_frame_sniffer (struct frame_info *next_frame)
      If libunwind returns success for this operation, it means that it has found sufficient
      libunwind unwinding information to do so.  */
 
-  descr = libunwind_descr (get_frame_arch (next_frame));
+  descr = libunwind_descr (gdbarch);
   acc = descr->accessors;
   as =  unw_create_addr_space_p (acc,
-				 gdbarch_byte_order (current_gdbarch)
+				 gdbarch_byte_order (gdbarch)
 				 == BFD_ENDIAN_BIG
 				 ? __BIG_ENDIAN
 				 : __LITTLE_ENDIAN);
@@ -283,6 +285,7 @@ libunwind_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 {
   struct libunwind_frame_cache *cache =
     libunwind_frame_cache (next_frame, this_cache);
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
 
   void *ptr;
   unw_cursor_t *c;
@@ -311,7 +314,7 @@ libunwind_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   *realnump = -1;
 
   if (valuep)
-    memset (valuep, 0, register_size (current_gdbarch, regnum));
+    memset (valuep, 0, register_size (gdbarch, regnum));
 
   if (uw_regnum < 0)
     return;
@@ -334,7 +337,7 @@ libunwind_frame_prev_register (struct frame_info *next_frame, void **this_cache,
     return;
 
   if (valuep)
-    memcpy (valuep, ptr, register_size (current_gdbarch, regnum));
+    memcpy (valuep, ptr, register_size (gdbarch, regnum));
 
   if (unw_get_saveloc_p (&cache->cursor, uw_regnum, &sl) < 0)
     return;
@@ -386,6 +389,7 @@ libunwind_sigtramp_frame_sniffer (struct frame_info *next_frame)
   unw_accessors_t *acc;
   unw_addr_space_t as;
   struct libunwind_descr *descr;
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   int i, ret;
 
   /* To test for libunwind unwind support, initialize a cursor to the
@@ -395,10 +399,10 @@ libunwind_sigtramp_frame_sniffer (struct frame_info *next_frame)
      has found sufficient libunwind unwinding information to do
      so.  */
 
-  descr = libunwind_descr (get_frame_arch (next_frame));
+  descr = libunwind_descr (gdbarch);
   acc = descr->accessors;
   as =  unw_create_addr_space_p (acc,
-				 gdbarch_byte_order (current_gdbarch)
+				 gdbarch_byte_order (gdbarch)
 				 == BFD_ENDIAN_BIG
 				 ? __BIG_ENDIAN
 				 : __LITTLE_ENDIAN);
@@ -443,7 +447,7 @@ libunwind_get_reg_special (struct gdbarch *gdbarch, struct regcache *regcache,
   descr = libunwind_descr (gdbarch);
   acc = descr->special_accessors;
   as =  unw_create_addr_space_p (acc,
-				 gdbarch_byte_order (current_gdbarch)
+				 gdbarch_byte_order (gdbarch)
 				 == BFD_ENDIAN_BIG
 				 ? __BIG_ENDIAN
 				 : __LITTLE_ENDIAN);
@@ -474,7 +478,7 @@ libunwind_get_reg_special (struct gdbarch *gdbarch, struct regcache *regcache,
     return -1;
 
   if (buf)
-    memcpy (buf, ptr, register_size (current_gdbarch, regnum));
+    memcpy (buf, ptr, register_size (gdbarch, regnum));
 
   return 0;
 }

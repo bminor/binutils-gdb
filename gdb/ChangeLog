@@ -1,5 +1,13 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* libunwind-frame.c (libunwind_frame_sniffer)
+	libunwind_frame_prev_register, libunwind_sigtramp_frame_sniffer)
+	(libunwind_frame_cache): Use get_frame_arch to get at the current
+	architecture by frame_info.
+	(libunwind_get_reg_special): Replace current_gdbarch by gdbarch.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* iq2000-tdep.c (iq2000_frame_prev_register): Use get_frame_arch to get
 	at the current architecture by frame_info.
 
