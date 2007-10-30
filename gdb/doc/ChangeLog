@@ -1,3 +1,8 @@
+2007-10-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (PowerPC): Document "set powerpc vector-abi" and "set
+	powerpc soft-float".
+
 2007-10-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Files): Correct formatting.  Mention Expat

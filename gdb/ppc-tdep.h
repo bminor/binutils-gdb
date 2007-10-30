@@ -157,9 +157,24 @@ extern void ppc_collect_vrregset (const struct regset *regset,
 
 /* Private data that this module attaches to struct gdbarch. */
 
+/* Vector ABI used by the inferior.  */
+enum powerpc_vector_abi
+{
+  POWERPC_VEC_AUTO,
+  POWERPC_VEC_GENERIC,
+  POWERPC_VEC_ALTIVEC,
+  POWERPC_VEC_SPE,
+  POWERPC_VEC_LAST
+};
+
 struct gdbarch_tdep
   {
-    int wordsize;              /* size in bytes of fixed-point word */
+    int wordsize;		/* Size in bytes of fixed-point word.  */
+    int soft_float;		/* Avoid FP registers for arguments?  */
+
+    /* How to pass vector arguments.  Never set to AUTO or LAST.  */
+    enum powerpc_vector_abi vector_abi;
+
     int ppc_gp0_regnum;		/* GPR register 0 */
     int ppc_toc_regnum;		/* TOC register */
     int ppc_ps_regnum;	        /* Processor (or machine) status (%msr) */

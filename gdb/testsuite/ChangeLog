@@ -1,3 +1,9 @@
+2007-10-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.arch/altivec-abi.exp: Run multiple times for GCC on GNU/Linux.
+	Test "set powerpc vector-abi".  Skip auto-detection tests for old
+	toolchains.
+
 2007-10-30  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* lib/gdb.exp, gdb.base/sepdebug.exp: Replace usage of eq and ne

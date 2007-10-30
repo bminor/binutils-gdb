@@ -604,6 +604,7 @@ elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
 elf_frv_h =	$(INCLUDE_DIR)/elf/frv.h $(elf_reloc_macros_h)
 elf_m32c_h =    $(INCLUDE_DIR)/elf/m32c.h $(elf_reloc_macros_h)
 elf_mep_h =     $(INCLUDE_DIR)/elf/mep.h $(elf_reloc_macros_h)
+elf_ppc_h =     $(INCLUDE_DIR)/elf/ppc.h $(elf_reloc_macros_h)
 libaout_h =	$(BFD_SRC)/libaout.h
 libiberty_h =	$(INCLUDE_DIR)/libiberty.h
 libbfd_h =	$(BFD_SRC)/libbfd.h
@@ -2578,7 +2579,7 @@ rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(coff_xcoff_h) $(libxcoff_h) $(elf_bfd_h) $(solib_svr4_h) \
 	$(ppc_tdep_h) $(gdb_assert_h) $(dis_asm_h) $(trad_frame_h) \
 	$(frame_unwind_h) $(frame_base_h) $(rs6000_tdep_h) $(dwarf2_frame_h) \
-	$(target_descriptions) $(user_regs_h) \
+	$(target_descriptions) $(user_regs_h) $(elf_ppc_h) \
 	$(powerpc_32_c) $(powerpc_403_c) $(powerpc_403gc_c) $(powerpc_505_c) \
 	$(powerpc_601_c) $(powerpc_602_c) $(powerpc_603_c) $(powerpc_604_c) \
 	$(powerpc_64_c) $(powerpc_7400_c) $(powerpc_750_c) $(powerpc_860_c) \

@@ -1,3 +1,25 @@
+2007-10-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Check the selected
+	soft float and vector ABIs.  Support the generic vector ABI for
+	AltiVec types.
+	(do_ppc_sysv_return_value): Likewise.  Correct argument types and
+	casts.
+	(ppc64_sysv_abi_push_dummy_call): Assert that floating point is
+	supported.
+	* ppc-tdep.h (enum powerpc_vector_abi): New.
+	(struct gdbarch_tdep): Add soft_float and vector_abi.
+	* rs6000-tdep.c (setpowerpccmdlist, showpowerpccmdlist)
+	(powerpc_soft_float_global, powerpc_vector_strings)
+	(powerpc_vector_abi_global, powerpc_vector_abi_string): New.
+	(rs6000_gdbarch_init): Check for soft-float and vector ABI markings.
+	(set_powerpc_command, show_powerpc_command, powerpc_set_soft_float)
+	(powerpc_set_vector_abi): New.
+	(_initialize_rs6000_tdep): Register "set powerpc" and "show powerpc"
+	commands.
+	* Makefile.in (elf_ppc_h): New.
+	(rs6000-tdep.o): Update.
+
 2007-10-29  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
 
 	* ppc-linux-tdep.c (ppc32_linux_reg_offsets): Corrected

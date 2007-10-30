@@ -49,6 +49,7 @@
 #include "libxcoff.h"
 
 #include "elf-bfd.h"
+#include "elf/ppc.h"
 
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
@@ -76,6 +77,27 @@
 #include "features/rs6000/powerpc-860.c"
 #include "features/rs6000/powerpc-e500.c"
 #include "features/rs6000/rs6000.c"
+
+/* The list of available "set powerpc ..." and "show powerpc ..."
+   commands.  */
+static struct cmd_list_element *setpowerpccmdlist = NULL;
+static struct cmd_list_element *showpowerpccmdlist = NULL;
+
+static enum auto_boolean powerpc_soft_float_global = AUTO_BOOLEAN_AUTO;
+
+/* The vector ABI to use.  Keep this in sync with powerpc_vector_abi.  */
+static const char *powerpc_vector_strings[] =
+{
+  "auto",
+  "generic",
+  "altivec",
+  "spe",
+  NULL
+};
+
+/* A variable that can be configured by the user.  */
+static enum powerpc_vector_abi powerpc_vector_abi_global = POWERPC_VEC_AUTO;
+static const char *powerpc_vector_abi_string = "auto";
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
@@ -3145,6 +3167,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bfd abfd;
   int sysv_abi;
   asection *sect;
+  enum auto_boolean soft_float_flag = powerpc_soft_float_global;
+  int soft_float;
+  enum powerpc_vector_abi vector_abi = powerpc_vector_abi_global;
   int have_fpu = 1, have_spe = 0, have_mq = 0, have_altivec = 0;
   int tdesc_wordsize = -1;
   const struct target_desc *tdesc = info.target_desc;
@@ -3417,6 +3442,76 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return NULL;
     }
 
+#ifdef HAVE_ELF
+  if (soft_float_flag == AUTO_BOOLEAN_AUTO && from_elf_exec)
+    {
+      switch (bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
+					Tag_GNU_Power_ABI_FP))
+	{
+	case 1:
+	  soft_float_flag = AUTO_BOOLEAN_FALSE;
+	  break;
+	case 2:
+	  soft_float_flag = AUTO_BOOLEAN_TRUE;
+	  break;
+	default:
+	  break;
+	}
+    }
+
+  if (vector_abi == POWERPC_VEC_AUTO && from_elf_exec)
+    {
+      switch (bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_GNU,
+					Tag_GNU_Power_ABI_Vector))
+	{
+	case 1:
+	  vector_abi = POWERPC_VEC_GENERIC;
+	  break;
+	case 2:
+	  vector_abi = POWERPC_VEC_ALTIVEC;
+	  break;
+	case 3:
+	  vector_abi = POWERPC_VEC_SPE;
+	  break;
+	default:
+	  break;
+	}
+    }
+#endif
+
+  if (soft_float_flag == AUTO_BOOLEAN_TRUE)
+    soft_float = 1;
+  else if (soft_float_flag == AUTO_BOOLEAN_FALSE)
+    soft_float = 0;
+  else
+    soft_float = !have_fpu;
+
+  /* If we have a hard float binary or setting but no floating point
+     registers, downgrade to soft float anyway.  We're still somewhat
+     useful in this scenario.  */
+  if (!soft_float && !have_fpu)
+    soft_float = 1;
+
+  /* Similarly for vector registers.  */
+  if (vector_abi == POWERPC_VEC_ALTIVEC && !have_altivec)
+    vector_abi = POWERPC_VEC_GENERIC;
+
+  if (vector_abi == POWERPC_VEC_SPE && !have_spe)
+    vector_abi = POWERPC_VEC_GENERIC;
+
+  if (vector_abi == POWERPC_VEC_AUTO)
+    {
+      if (have_altivec)
+	vector_abi = POWERPC_VEC_ALTIVEC;
+      else if (have_spe)
+	vector_abi = POWERPC_VEC_SPE;
+      else
+	vector_abi = POWERPC_VEC_GENERIC;
+    }
+
+  /* Do not limit the vector ABI based on available hardware, since we
+     do not yet know what hardware we'll decide we have.  Yuck!  FIXME!  */
+
   /* Find a candidate among extant architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
@@ -3426,6 +3521,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
          meaningful, because 64-bit CPUs can run in 32-bit mode.  So, perform
          separate word size check.  */
       tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->soft_float != soft_float)
+	continue;
+      if (tdep && tdep->vector_abi != vector_abi)
+	continue;
       if (tdep && tdep->wordsize == wordsize)
 	{
 	  if (tdesc_data != NULL)
@@ -3444,6 +3543,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep = XCALLOC (1, struct gdbarch_tdep);
   tdep->wordsize = wordsize;
+  tdep->soft_float = soft_float;
+  tdep->vector_abi = vector_abi;
 
   gdbarch = gdbarch_alloc (&info, tdep);
 
@@ -3643,6 +3744,61 @@ rs6000_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   /* FIXME: Dump gdbarch_tdep.  */
 }
 
+/* PowerPC-specific commands.  */
+
+static void
+set_powerpc_command (char *args, int from_tty)
+{
+  printf_unfiltered (_("\
+\"set powerpc\" must be followed by an appropriate subcommand.\n"));
+  help_list (setpowerpccmdlist, "set powerpc ", all_commands, gdb_stdout);
+}
+
+static void
+show_powerpc_command (char *args, int from_tty)
+{
+  cmd_show_list (showpowerpccmdlist, from_tty, "");
+}
+
+static void
+powerpc_set_soft_float (char *args, int from_tty,
+			struct cmd_list_element *c)
+{
+  struct gdbarch_info info;
+
+  /* Update the architecture.  */
+  gdbarch_info_init (&info);
+  if (!gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, "could not update architecture");
+}
+
+static void
+powerpc_set_vector_abi (char *args, int from_tty,
+			struct cmd_list_element *c)
+{
+  struct gdbarch_info info;
+  enum powerpc_vector_abi vector_abi;
+
+  for (vector_abi = POWERPC_VEC_AUTO;
+       vector_abi != POWERPC_VEC_LAST;
+       vector_abi++)
+    if (strcmp (powerpc_vector_abi_string,
+		powerpc_vector_strings[vector_abi]) == 0)
+      {
+	powerpc_vector_abi_global = vector_abi;
+	break;
+      }
+
+  if (vector_abi == POWERPC_VEC_LAST)
+    internal_error (__FILE__, __LINE__, _("Invalid vector ABI accepted: %s."),
+		    powerpc_vector_abi_string);
+
+  /* Update the architecture.  */
+  gdbarch_info_init (&info);
+  if (!gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, "could not update architecture");
+}
+
 /* Initialization code.  */
 
 extern initialize_file_ftype _initialize_rs6000_tdep; /* -Wmissing-prototypes */
@@ -3668,4 +3824,30 @@ _initialize_rs6000_tdep (void)
   initialize_tdesc_powerpc_860 ();
   initialize_tdesc_powerpc_e500 ();
   initialize_tdesc_rs6000 ();
+
+  /* Add root prefix command for all "set powerpc"/"show powerpc"
+     commands.  */
+  add_prefix_cmd ("powerpc", no_class, set_powerpc_command,
+		  _("Various PowerPC-specific commands."),
+		  &setpowerpccmdlist, "set powerpc ", 0, &setlist);
+
+  add_prefix_cmd ("powerpc", no_class, show_powerpc_command,
+		  _("Various PowerPC-specific commands."),
+		  &showpowerpccmdlist, "show powerpc ", 0, &showlist);
+
+  /* Add a command to allow the user to force the ABI.  */
+  add_setshow_auto_boolean_cmd ("soft-float", class_support,
+				&powerpc_soft_float_global,
+				_("Set whether to use a soft-float ABI."),
+				_("Show whether to use a soft-float ABI."),
+				NULL,
+				powerpc_set_soft_float, NULL,
+				&setpowerpccmdlist, &showpowerpccmdlist);
+
+  add_setshow_enum_cmd ("vector-abi", class_support, powerpc_vector_strings,
+			&powerpc_vector_abi_string,
+			_("Set the vector ABI."),
+			_("Show the vector ABI."),
+			NULL, powerpc_set_vector_abi, NULL,
+			&setpowerpccmdlist, &showpowerpccmdlist);
 }

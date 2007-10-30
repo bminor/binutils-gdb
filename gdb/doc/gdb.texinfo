@@ -14937,7 +14937,25 @@ Set suspend trace mode.
 @node PowerPC
 @subsection PowerPC
 
+@value{GDBN} provides the following PowerPC-specific commands:
+
 @table @code
+@kindex set powerpc
+@item set powerpc soft-float
+@itemx show powerpc soft-float
+Force @value{GDBN} to use (or not use) a software floating point calling
+convention.  By default, @value{GDBN} selects the calling convention based
+on the selected architecture and the provided executable file.
+
+@item set powerpc vector-abi
+@itemx show powerpc vector-abi
+Force @value{GDBN} to use the specified calling convention for vector
+arguments and return values.  The valid options are @samp{auto};
+@samp{generic}, to avoid vector registers even if they are present;
+@samp{altivec}, to use AltiVec registers; and @samp{spe} to use SPE
+registers.  By default, @value{GDBN} selects the calling convention
+based on the selected architecture and the provided executable file.
+
 @kindex target dink32
 @item target dink32 @var{dev}
 DINK32 ROM monitor.
@@ -14955,7 +14973,7 @@ SDS monitor, running on a PowerPC board (such as Motorola's ADS).
 
 @cindex SDS protocol
 The following commands specific to the SDS protocol are supported
-by@value{GDBN}:
+by @value{GDBN}:
 
 @table @code
 @item set sdstimeout @var{nsec}
