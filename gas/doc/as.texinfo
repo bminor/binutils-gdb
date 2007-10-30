@@ -5598,7 +5598,7 @@ ways:
 
 @smallexample
 .section @var{name}[, "@var{flags}"]
-.section @var{name}[, @var{subsegment}]
+.section @var{name}[, @var{subsection}]
 @end smallexample
 
 If the optional argument is quoted, it is taken as flags to use for the
@@ -5629,7 +5629,7 @@ from the section, rather than adding them, so if they are used on their own it
 will be as if no flags had been specified at all.
 
 If the optional argument to the @code{.section} directive is not quoted, it is
-taken as a subsegment number (@pxref{Sub-Sections}).
+taken as a subsection number (@pxref{Sub-Sections}).
 @end ifset
 
 @ifset ELF

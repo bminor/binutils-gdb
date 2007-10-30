@@ -1,3 +1,8 @@
+2007-10-30  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Section): Replace "subsegment" with
+	"subsection".
+
 2007-10-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/5221
