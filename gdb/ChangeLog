@@ -1,5 +1,10 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* frv-linux-tdep.c (frv_linux_sigtramp_frame_cache): Use get_frame_arch
+	to get at the current architecture by frame_info.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* f-lang.c (build_fortran_types): Replace current_gdbarch by gdbarch.
 
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
