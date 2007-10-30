@@ -395,12 +395,13 @@ options::Command_line_options::options[] =
 		NULL, TWO_DASHES, &General_options::set_stats),
   GENERAL_ARG('\0', "sysroot", N_("Set target system root directory"),
 	      N_("--sysroot DIR"), TWO_DASHES, &General_options::set_sysroot),
-  SPECIAL('T', "script", N_("Read linker script"),
-	  N_("-T FILE, --script FILE"), TWO_DASHES,
-	  &invoke_script),
   GENERAL_ARG('\0', "Ttext", N_("Set the address of the .text section"),
               N_("-Ttext ADDRESS"), ONE_DASH,
               &General_options::set_text_segment_address),
+  // This must come after -Ttext since it's a prefix of it.
+  SPECIAL('T', "script", N_("Read linker script"),
+	  N_("-T FILE, --script FILE"), TWO_DASHES,
+	  &invoke_script),
   GENERAL_NOARG('\0', "threads", N_("Run the linker multi-threaded"),
 		NULL, TWO_DASHES, &General_options::set_threads),
   GENERAL_NOARG('\0', "no-threads", N_("Do not run the linker multi-threaded"),
@@ -623,149 +624,160 @@ Command_line::Command_line()
 {
 }
 
-// Process the command line options.
+// Process the command line options.  For process_one_option,
+// i is the index of argv to process next, and the return value
+// is the index of the next option to process (i+1 or i+2, or argc
+// to indicate processing is done).  no_more_options is set to true
+// if (and when) "--" is seen as an option.
+
+int
+Command_line::process_one_option(int argc, char** argv, int i,
+                                 bool* no_more_options)
+{
+  const int options_size = options::Command_line_options::options_size;
+  const options::One_option* options = options::Command_line_options::options;
+  gold_assert(i < argc);
+
+  if (argv[i][0] != '-' || *no_more_options)
+    {
+      this->add_file(argv[i], false);
+      return i + 1;
+    }
+
+  // Option starting with '-'.
+  int dashes = 1;
+  if (argv[i][1] == '-')
+    {
+      dashes = 2;
+      if (argv[i][2] == '\0')
+        {
+          *no_more_options = true;
+          return i + 1;
+        }
+    }
+
+  // Look for a long option match.
+  char* opt = argv[i] + dashes;
+  char first = opt[0];
+  int skiparg = 0;
+  char* arg = strchr(opt, '=');
+  bool argument_with_equals = arg != NULL;
+  if (arg != NULL)
+    {
+      *arg = '\0';
+      ++arg;
+    }
+  else if (i + 1 < argc)
+    {
+      arg = argv[i + 1];
+      skiparg = 1;
+    }
+
+  int j;
+  for (j = 0; j < options_size; ++j)
+    {
+      if (options[j].long_option != NULL
+          && (dashes == 2
+    	  || (options[j].dash
+    	      != options::One_option::EXACTLY_TWO_DASHES))
+          && first == options[j].long_option[0]
+          && strcmp(opt, options[j].long_option) == 0)
+        {
+          if (options[j].special)
+    	    {
+    	      // Restore the '=' we clobbered above.
+    	      if (arg != NULL && skiparg == 0)
+    	        arg[-1] = '=';
+    	      i += options[j].special(argc - i, argv + i, opt, true, this);
+    	    }
+          else
+    	    {
+    	      if (!options[j].takes_argument())
+    	        {
+    	          if (argument_with_equals)
+    	    	    this->usage(_("unexpected argument"), argv[i]);
+    	          arg = NULL;
+    	          skiparg = 0;
+    	        }
+    	      else
+    	        {
+    	          if (arg == NULL)
+    	    	    this->usage(_("missing argument"), argv[i]);
+    	        }
+    	      this->apply_option(options[j], arg);
+    	      i += skiparg + 1;
+    	    }
+          break;
+        }
+    }
+  if (j < options_size)
+    return i;
+
+  // If we saw two dashes, we needed to have seen a long option.
+  if (dashes == 2)
+    this->usage(_("unknown option"), argv[i]);
+
+  // Look for a short option match.  There may be more than one
+  // short option in a given argument.
+  bool done = false;
+  char* s = argv[i] + 1;
+  ++i;
+  while (*s != '\0' && !done)
+    {
+      char opt = *s;
+      int j;
+      for (j = 0; j < options_size; ++j)
+        {
+          if (options[j].short_option == opt)
+    	    {
+    	      if (options[j].special)
+    	        {
+    	          // Undo the argument skip done above.
+    	          --i;
+    	          i += options[j].special(argc - i, argv + i, s, false,
+                                          this);
+    	          done = true;
+    	        }
+    	      else
+    	        {
+    	          arg = NULL;
+    	          if (options[j].takes_argument())
+    	    	    {
+    	    	      if (s[1] != '\0')
+    	    	        {
+    	    	          arg = s + 1;
+    	    	          done = true;
+    	    	        }
+    	    	      else if (i < argc)
+    	    	        {
+    	    	          arg = argv[i];
+    	    	          ++i;
+    	    	        }
+    	    	      else
+    	    	        this->usage(_("missing argument"), opt);
+    	    	    }
+    	          this->apply_option(options[j], arg);
+    	        }
+    	      break;
+    	    }
+        }
+
+      if (j >= options_size)
+        this->usage(_("unknown option"), *s);
+
+      ++s;
+    }
+  return i;
+}
+
 
 void
 Command_line::process(int argc, char** argv)
 {
-  const int options_size = options::Command_line_options::options_size;
-  const options::One_option* options =
-    options::Command_line_options::options;
   bool no_more_options = false;
   int i = 0;
   while (i < argc)
-    {
-      if (argv[i][0] != '-' || no_more_options)
-	{
-	  this->add_file(argv[i], false);
-	  ++i;
-	  continue;
-	}
-
-      // Option starting with '-'.
-      int dashes = 1;
-      if (argv[i][1] == '-')
-	{
-	  dashes = 2;
-	  if (argv[i][2] == '\0')
-	    {
-	      no_more_options = true;
-	      continue;
-	    }
-	}
-
-      // Look for a long option match.
-      char* opt = argv[i] + dashes;
-      char first = opt[0];
-      int skiparg = 0;
-      char* arg = strchr(opt, '=');
-      bool argument_with_equals = arg != NULL;
-      if (arg != NULL)
-	{
-	  *arg = '\0';
-	  ++arg;
-	}
-      else if (i + 1 < argc)
-	{
-	  arg = argv[i + 1];
-	  skiparg = 1;
-	}
-
-      int j;
-      for (j = 0; j < options_size; ++j)
-	{
-	  if (options[j].long_option != NULL
-	      && (dashes == 2
-		  || (options[j].dash
-		      != options::One_option::EXACTLY_TWO_DASHES))
-	      && first == options[j].long_option[0]
-	      && strcmp(opt, options[j].long_option) == 0)
-	    {
-	      if (options[j].special)
-		{
-		  // Restore the '=' we clobbered above.
-		  if (arg != NULL && skiparg == 0)
-		    arg[-1] = '=';
-		  i += options[j].special(argc - i, argv + i, opt, true, this);
-		}
-	      else
-		{
-		  if (!options[j].takes_argument())
-		    {
-		      if (argument_with_equals)
-			this->usage(_("unexpected argument"), argv[i]);
-		      arg = NULL;
-		      skiparg = 0;
-		    }
-		  else
-		    {
-		      if (arg == NULL)
-			this->usage(_("missing argument"), argv[i]);
-		    }
-		  this->apply_option(options[j], arg);
-		  i += skiparg + 1;
-		}
-	      break;
-	    }
-	}
-      if (j < options_size)
-	continue;
-
-      // If we saw two dashes, we need to see a long option.
-      if (dashes == 2)
-	this->usage(_("unknown option"), argv[i]);
-
-      // Look for a short option match.  There may be more than one
-      // short option in a given argument.
-      bool done = false;
-      char* s = argv[i] + 1;
-      ++i;
-      while (*s != '\0' && !done)
-	{
-	  char opt = *s;
-	  int j;
-	  for (j = 0; j < options_size; ++j)
-	    {
-	      if (options[j].short_option == opt)
-		{
-		  if (options[j].special)
-		    {
-		      // Undo the argument skip done above.
-		      --i;
-		      i += options[j].special(argc - i, argv + i, s, false,
-					      this);
-		      done = true;
-		    }
-		  else
-		    {
-		      arg = NULL;
-		      if (options[j].takes_argument())
-			{
-			  if (s[1] != '\0')
-			    {
-			      arg = s + 1;
-			      done = true;
-			    }
-			  else if (i < argc)
-			    {
-			      arg = argv[i];
-			      ++i;
-			    }
-			  else
-			    this->usage(_("missing argument"), opt);
-			}
-		      this->apply_option(options[j], arg);
-		    }
-		  break;
-		}
-	    }
-
-	  if (j >= options_size)
-	    this->usage(_("unknown option"), *s);
-
-	  ++s;
-	}
-    }
+    i = process_one_option(argc, argv, i, &no_more_options);
 
   if (this->inputs_.in_group())
     {

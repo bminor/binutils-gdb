@@ -696,6 +696,11 @@ class Command_line
   void
   process(int argc, char** argv);
 
+  // Process one command-line option.  This takes the index of argv to
+  // process, and returns the index for the next option.
+  int
+  process_one_option(int argc, char** argv, int i, bool* no_more_options);
+
   // Handle a -l option.
   int
   process_l_option(int, char**, char*, bool);

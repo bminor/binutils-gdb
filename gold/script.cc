@@ -831,9 +831,11 @@ class Parser_closure
   Parser_closure(const char* filename,
 		 const Position_dependent_options& posdep_options,
 		 bool in_group, bool is_in_sysroot,
+                 Command_line* command_line,
 		 const Lex::Token_sequence* tokens)
     : filename_(filename), posdep_options_(posdep_options),
-      in_group_(in_group), is_in_sysroot_(is_in_sysroot), tokens_(tokens),
+      in_group_(in_group), is_in_sysroot_(is_in_sysroot),
+      command_line_(command_line), tokens_(tokens),
       next_token_index_(0), inputs_(NULL)
   { }
 
@@ -858,6 +860,12 @@ class Parser_closure
   bool
   is_in_sysroot() const
   { return this->is_in_sysroot_; }
+
+  // Returns the Command_line structure passed in at constructor time.
+  // This value may be NULL.  The caller may modify this, which modifies
+  // the passed-in Command_line object (not a copy).
+  Command_line* command_line()
+  { return this->command_line_; }
 
   // Whether we are at the end of the token list.
   bool
@@ -897,6 +905,8 @@ class Parser_closure
   bool in_group_;
   // Whether the script was found in a sysrooted directory.
   bool is_in_sysroot_;
+  // May be NULL if the user chooses not to pass one in.
+  Command_line* command_line_;
 
   // The tokens to be returned by the lexer.
   const Lex::Token_sequence* tokens_;
@@ -927,6 +937,7 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 			 input_argument->file().options(),
 			 input_group != NULL,
 			 input_file->is_in_sysroot(),
+                         NULL,
 			 &lex.tokens());
 
   if (yyparse(&closure) != 0)
@@ -973,9 +984,8 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 bool
 read_commandline_script(const char* filename, Command_line* cmdline)
 {
-  // We don't need to use the real directory search path here:
-  // FILENAME was specified on the command line, and we don't want to
-  // search for it.
+  // TODO: if filename is a relative filename, search for it manually
+  // using "." + cmdline->options()->search_path() -- not dirsearch.
   Dirsearch dirsearch;
 
   Input_file_argument input_argument(filename, false, "",
@@ -996,6 +1006,7 @@ read_commandline_script(const char* filename, Command_line* cmdline)
 			 cmdline->position_dependent_options(),
 			 false,
 			 input_file.is_in_sysroot(),
+                         cmdline,
 			 &lex.tokens());
   if (yyparse(&closure) != 0)
     {
@@ -1306,5 +1317,22 @@ extern "C" void
 script_parse_option(void* closurev, const char* option)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
-  printf("%s: Saw option %s\n", closure->filename(), option);  //!!
+  // We treat the option as a single command-line option, even if
+  // it has internal whitespace.
+  if (closure->command_line() == NULL)
+    {
+      // There are some options that we could handle here--e.g.,
+      // -lLIBRARY.  Should we bother?
+      gold_warning(_("%s: Ignoring command OPTION; OPTION is only valid"
+		     " for scripts specified via -T"),
+		   closure->filename());
+    }
+  else
+    {
+      bool past_a_double_dash_option = false;
+      char* mutable_option = strdup(option);
+      closure->command_line()->process_one_option(1, &mutable_option, 0,
+                                                  &past_a_double_dash_option);
+      free(mutable_option);
+    }
 }
