@@ -23,7 +23,7 @@ if $tracelevel then {
 
 set testfile "sepsymtab"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/${testfile}${EXEEXT}
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	  executable {debug}] != "" } {

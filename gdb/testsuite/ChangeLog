@@ -1,3 +1,8 @@
+2007-10-30  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* gdb.base/sepdebug.exp (binfile): Add ${EXEEXT}.
+	* gdb.base/sepsymtab.exp (binfile): Add ${EXEEXT}.
+
 2007-10-25  Luis Machado  <luisgpm@br.ibm.com>
 
 	* gdb.opt/clobbered-registers-O2.c: New testcase source file.

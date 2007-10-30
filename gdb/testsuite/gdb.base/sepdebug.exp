@@ -41,7 +41,7 @@ set bug_id 0
 
 set testfile "sepdebug"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/${testfile}${EXEEXT}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
     untested sepdebug.exp
