@@ -530,45 +530,45 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   builtin_f_type->builtin_integer_s2 =
     init_type (TYPE_CODE_INT,
-	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_short_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "integer*2", (struct objfile *) NULL);
 
   builtin_f_type->builtin_logical_s2 =
     init_type (TYPE_CODE_BOOL,
-	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_short_bit (gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED, "logical*2", (struct objfile *) NULL);
 
   builtin_f_type->builtin_integer =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "integer", (struct objfile *) NULL);
 
   builtin_f_type->builtin_logical =
     init_type (TYPE_CODE_BOOL, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED, "logical*4", (struct objfile *) NULL);
 
   builtin_f_type->builtin_real =
     init_type (TYPE_CODE_FLT,
-	       gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_float_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "real", (struct objfile *) NULL);
 
   builtin_f_type->builtin_real_s8 =
     init_type (TYPE_CODE_FLT,
-	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "real*8", (struct objfile *) NULL);
 
   builtin_f_type->builtin_real_s16 =
     init_type (TYPE_CODE_FLT,
-	       gdbarch_long_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_long_double_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "real*16", (struct objfile *) NULL);
 
   builtin_f_type->builtin_complex_s8 =
     init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       2 * gdbarch_float_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "complex*8", (struct objfile *) NULL);
   TYPE_TARGET_TYPE (builtin_f_type->builtin_complex_s8)
@@ -576,7 +576,7 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   builtin_f_type->builtin_complex_s16 =
     init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       2 * gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "complex*16", (struct objfile *) NULL);
   TYPE_TARGET_TYPE (builtin_f_type->builtin_complex_s16)
@@ -587,7 +587,7 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   builtin_f_type->builtin_complex_s32 =
     init_type (TYPE_CODE_COMPLEX,
-	       2 * gdbarch_long_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       2 * gdbarch_long_double_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "complex*32", (struct objfile *) NULL);
   TYPE_TARGET_TYPE (builtin_f_type->builtin_complex_s32)

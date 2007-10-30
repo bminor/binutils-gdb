@@ -1,5 +1,9 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* f-lang.c (build_fortran_types): Replace current_gdbarch by gdbarch.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* core-regset.c (fetch_core_registers): Use get_regcache_arch to get at
 	the current architecture by regcache.
 
