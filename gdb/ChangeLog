@@ -1,3 +1,8 @@
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
+	* ada-lang.c (ada_language_arch_info): Replace current_gdbarch by
+	gdbarch.
+
 2007-10-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Check the selected

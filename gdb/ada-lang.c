@@ -10327,24 +10327,24 @@ enum ada_primitive_types {
 };
 
 static void
-ada_language_arch_info (struct gdbarch *current_gdbarch,
+ada_language_arch_info (struct gdbarch *gdbarch,
 			struct language_arch_info *lai)
 {
-  const struct builtin_type *builtin = builtin_type (current_gdbarch);
+  const struct builtin_type *builtin = builtin_type (gdbarch);
   lai->primitive_type_vector
-    = GDBARCH_OBSTACK_CALLOC (current_gdbarch, nr_ada_primitive_types + 1,
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_ada_primitive_types + 1,
 			      struct type *);
   lai->primitive_type_vector [ada_primitive_type_int] =
     init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "integer", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_long] =
     init_type (TYPE_CODE_INT,
-	       gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "long_integer", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_short] =
     init_type (TYPE_CODE_INT,
-	       gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_short_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "short_integer", (struct objfile *) NULL);
   lai->string_char_type = 
     lai->primitive_type_vector [ada_primitive_type_char] =
@@ -10352,27 +10352,27 @@ ada_language_arch_info (struct gdbarch *current_gdbarch,
                0, "character", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_float] =
     init_type (TYPE_CODE_FLT,
-	       gdbarch_float_bit (current_gdbarch)/ TARGET_CHAR_BIT,
+	       gdbarch_float_bit (gdbarch)/ TARGET_CHAR_BIT,
                0, "float", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_double] =
     init_type (TYPE_CODE_FLT,
-	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT,
                0, "long_float", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_long_long] =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_long_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_long_long_bit (gdbarch) / TARGET_CHAR_BIT,
                0, "long_long_integer", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_long_double] =
     init_type (TYPE_CODE_FLT,
-	       gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_double_bit (gdbarch) / TARGET_CHAR_BIT,
                0, "long_long_float", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_natural] =
     init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "natural", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_positive] =
     init_type (TYPE_CODE_INT,
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "positive", (struct objfile *) NULL);
   lai->primitive_type_vector [ada_primitive_type_void] = builtin->builtin_void;
 
