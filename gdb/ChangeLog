@@ -1,5 +1,11 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* go32-nat.c (fetch_register, go32_fetch_registers, store_register)
+	(go32_store_registers): Use get_regcache_arch to get at the current
+	architecture by regcache.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbtypes.c (gdbtypes_post_init): Replace current_gdbarch by gdbarch.
 
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
