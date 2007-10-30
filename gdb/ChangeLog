@@ -1,5 +1,10 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* avr-tdep.c (avr_frame_unwind_cache, avr_frame_prev_register): Use
+	get_frame_arch to get at the current architecture by frame_info.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* arm-tdep.c (arm_get_next_pc): Replace current_gdbarch by gdbarch.
 
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
