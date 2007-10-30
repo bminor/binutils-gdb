@@ -1,5 +1,10 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* corelow.c (get_core_registers): Use get_regcache_arch to get at the
+	current architecture by regcache.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* bsd-uthread.c (bsd_uthread_fetch_registers)
 	(bsd_uthread_store_registers): Use get_regcache_arch to get at the
 	current architecture by regcache.

@@ -503,7 +503,7 @@ get_core_registers (struct regcache *regcache, int regno)
   			     ".reg-ppc-vmx", 3, "ppc Altivec", 0);
 
   /* Supply dummy value for all registers not found in the core.  */
-  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+  for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
     if (!regcache_valid_p (regcache, i))
       regcache_raw_supply (regcache, i, NULL);
 }
