@@ -1,5 +1,10 @@
 2007-10-30  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* lib/gdb.exp, gdb.base/sepdebug.exp: Replace usage of eq and ne
+	with [string compare].
+
+2007-10-30  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* gdb.base/sepdebug.exp (binfile): Add ${EXEEXT}.
 	* gdb.base/sepsymtab.exp (binfile): Add ${EXEEXT}.
 

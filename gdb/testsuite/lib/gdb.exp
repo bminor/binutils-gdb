@@ -2505,7 +2505,7 @@ proc build_id_debug_filename_get { exec } {
     set data [read $fi]
     close $fi
     file delete $tmp
-    if {$data eq ""} {
+    if ![string compare $data ""] then {
 	return ""
     }
     # Convert it to hex.

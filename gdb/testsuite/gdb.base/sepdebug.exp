@@ -955,7 +955,7 @@ test_different_dir debuglink "${objdir}/${subdir}" 0
 # NT_GNU_BUILD_ID / .note.gnu.build-id test:
 
 set build_id_debug_filename [build_id_debug_filename_get $binfile]
-if {$build_id_debug_filename eq ""} {
+if ![string compare $build_id_debug_filename ""] then {
     unsupported "build-id is not supported by the compiler"
 
     # Spare debug files may confuse testsuite runs in the future.
@@ -964,10 +964,10 @@ if {$build_id_debug_filename eq ""} {
     set build_id_debugself_filename [build_id_debug_filename_get $debugfile]
     set test "build-id support by binutils"
     set xfail 0
-    if {$build_id_debugself_filename eq ""} {
+    if ![string compare $build_id_debugself_filename ""] then {
 	unsupported $test
 	set xfail 1
-    } elseif {$build_id_debugself_filename ne $build_id_debug_filename} {
+    } elseif {[string compare $build_id_debugself_filename $build_id_debug_filename] != 0} then {
 	fail $test
     } else {
 	pass $test
