@@ -1,5 +1,11 @@
 2007-10-30  Markus Deuling  <deuling@de.ibm.com>
 
+	* bsd-uthread.c (bsd_uthread_fetch_registers)
+	(bsd_uthread_store_registers): Use get_regcache_arch to get at the
+	current architecture by regcache.
+
+2007-10-30  Markus Deuling  <deuling@de.ibm.com>
+
 	* avr-tdep.c (avr_frame_unwind_cache, avr_frame_prev_register): Use
 	get_frame_arch to get at the current architecture by frame_info.
 

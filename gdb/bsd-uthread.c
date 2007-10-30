@@ -266,7 +266,7 @@ bsd_uthread_mourn_inferior (void)
 static void
 bsd_uthread_fetch_registers (struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct bsd_uthread_ops *ops = gdbarch_data (gdbarch, bsd_uthread_data);
   CORE_ADDR addr = ptid_get_tid (inferior_ptid);
   CORE_ADDR active_addr;
@@ -292,7 +292,7 @@ bsd_uthread_fetch_registers (struct regcache *regcache, int regnum)
 static void
 bsd_uthread_store_registers (struct regcache *regcache, int regnum)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct bsd_uthread_ops *ops = gdbarch_data (gdbarch, bsd_uthread_data);
   CORE_ADDR addr = ptid_get_tid (inferior_ptid);
   CORE_ADDR active_addr;
