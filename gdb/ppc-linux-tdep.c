@@ -57,10 +57,10 @@ ppc_linux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   char symname[1024];
   struct minimal_symbol *msymbol;
 
-  /* Find the section pc is in; return if not in .plt */
+  /* Find the section pc is in; if not in .plt, try the default method.  */
   sect = find_pc_section (pc);
   if (!sect || strcmp (sect->the_bfd_section->name, ".plt") != 0)
-    return 0;
+    return find_solib_trampoline_target (frame, pc);
 
   objfile = sect->objfile;
 
