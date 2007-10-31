@@ -68,7 +68,6 @@ static struct mcu_type_s mcu_types[] =
   {"avr5",       AVR_ISA_ALL,     bfd_mach_avr5},
   {"avr6",       AVR_ISA_ALL,     bfd_mach_avr6},
   {"at90s1200",  AVR_ISA_1200,    bfd_mach_avr1},
-  {"attiny10",   AVR_ISA_TINY1,   bfd_mach_avr1}, /* XXX -> tn11 */
   {"attiny11",   AVR_ISA_TINY1,   bfd_mach_avr1},
   {"attiny12",   AVR_ISA_TINY1,   bfd_mach_avr1},
   {"attiny15",   AVR_ISA_TINY1,   bfd_mach_avr1},
@@ -99,15 +98,12 @@ static struct mcu_type_s mcu_types[] =
   {"attiny85",   AVR_ISA_TINY2,   bfd_mach_avr2},
   {"attiny43u",  AVR_ISA_TINY2,   bfd_mach_avr2},
   {"attiny48",   AVR_ISA_TINY2,   bfd_mach_avr2},
-  {"atmega603",  AVR_ISA_M603,    bfd_mach_avr3}, /* XXX -> m103 */
   {"atmega103",  AVR_ISA_M103,    bfd_mach_avr3},
   {"at43usb320", AVR_ISA_M103,    bfd_mach_avr3},
   {"at43usb355", AVR_ISA_M603,    bfd_mach_avr3},
   {"at76c711",   AVR_ISA_M603,    bfd_mach_avr3},
   {"atmega48",   AVR_ISA_PWMx,    bfd_mach_avr4},
   {"atmega8",    AVR_ISA_M8,      bfd_mach_avr4},
-  {"atmega83",   AVR_ISA_M8,      bfd_mach_avr4}, /* XXX -> m8535 */
-  {"atmega85",   AVR_ISA_M8,      bfd_mach_avr4}, /* XXX -> m8 */
   {"atmega88",   AVR_ISA_PWMx,    bfd_mach_avr4},
   {"atmega8515", AVR_ISA_M8,      bfd_mach_avr4},
   {"atmega8535", AVR_ISA_M8,      bfd_mach_avr4},
@@ -332,8 +328,8 @@ md_show_usage (FILE *stream)
 	"                   [avr-name] can be:\n"
 	"                   avr1 - AT90S1200, ATtiny1x, ATtiny28\n"
 	"                   avr2 - AT90S2xxx, AT90S4xxx, AT90S8xxx, ATtiny22\n"
-	"                   avr3 - ATmega103, ATmega603\n"
-	"                   avr4 - ATmega83, ATmega85\n"
+	"                   avr3 - ATmega103\n"
+	"                   avr4 - ATmega8, ATmega88\n"
 	"                   avr5 - ATmega161, ATmega163, ATmega32, AT94K\n"
 	"                   or immediate microcontroller name.\n"));
   fprintf (stream,

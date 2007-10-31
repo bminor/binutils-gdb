@@ -1,3 +1,9 @@
+2007-10-31  Eric B. Weddington  <eweddington@cso.atmel.com>
+
+	* config/tc-avr.c (mcu_types): Remove devices that were never produced:
+	attiny10, atmega83, atmega85, atmega603.
+	* doc/c-avr.texi: Likewise.
+
 2007-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mn10300.c (tc_gen_reloc): Fix test that decides when

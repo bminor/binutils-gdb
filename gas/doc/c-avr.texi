@@ -33,7 +33,7 @@
 Specify ATMEL AVR instruction set or MCU type.
 
 Instruction set avr1 is for the minimal AVR core, not supported by the C
-compiler, only for assembler programs (MCU types: at90s1200, attiny10,
+compiler, only for assembler programs (MCU types: at90s1200,
 attiny11, attiny12, attiny15, attiny28).
 
 Instruction set avr2 (default) is for the classic AVR core with up to
@@ -44,11 +44,11 @@ attiny261, attiny461, attiny861, attiny24, attiny44, attiny84, attiny25,
 attiny45, attiny85, attiny43u, attiny48).
 
 Instruction set avr3 is for the classic AVR core with up to 128K program
-memory space (MCU types: atmega103, atmega603, at43usb320, at43usb355,
+memory space (MCU types: atmega103, at43usb320, at43usb355,
 at76c711).
 
 Instruction set avr4 is for the enhanced AVR core with up to 8K program
-memory space (MCU types: atmega48, atmega8, atmega83, atmega85, atmega88,
+memory space (MCU types: atmega48, atmega8, atmega88,
 atmega8515, atmega8535, atmega8hva, at90pwm1, at90pwm2, at90pwm2b,
 at90pwm3, at90pwm3b).
 
