@@ -1,3 +1,7 @@
+2007-10-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (debug_apply_rela_addends): Clarify FIXME.
+
 2007-10-29  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (is_32bit_abs_reloc): Add knowledge of reloc used by

@@ -8242,14 +8242,13 @@ debug_apply_rela_addends (void *file,
 	      continue;
 	    }
 
-	  if (is_32bit_pcrel_reloc (reloc_type))
-	    /* FIXME: Not sure how to apply a pc-rel reloc yet.
-	       I think that it ought to be:
-	       (rp->r_addend + sym->st_value) - rp->r_offset
-	       but this breaks GAS CFI tests...  */
-	    byte_put (loc, (rp->r_addend + sym->st_value) /*- rp->r_offset*/, reloc_size);
-	  else
-	    byte_put (loc, rp->r_addend + sym->st_value, reloc_size);
+	  /* FIXME.  We apply pcrel relocs as if they were absolute,
+	     ie. without subtracting the pc.  This is to suit
+	     display_debug_frames which does not add the pc even
+	     though it ought to for DW_EH_PE_pcrel FDEs.  Removing
+	     the hack in display_debug_frames will require that we
+	     apply rel relocs too.  */
+	  byte_put (loc, rp->r_addend + sym->st_value, reloc_size);
 	}
 
       free (symtab);
