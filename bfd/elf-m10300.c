@@ -1847,24 +1847,27 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
   irel = elf_section_data (sec)->relocs;
   irelend = irel + sec->reloc_count;
 
-  /* If there is an align reloc at the end of the section ignore it.
-     GAS creates these relocs for reasons of its own, and they just
-     serve to keep the section artifically inflated.  */
-  if (ELF32_R_TYPE ((irelend - 1)->r_info) == (int) R_MN10300_ALIGN)
-    --irelend;
+  if (sec->reloc_count > 0)
+    {
+      /* If there is an align reloc at the end of the section ignore it.
+	 GAS creates these relocs for reasons of its own, and they just
+	 serve to keep the section artifically inflated.  */
+      if (ELF32_R_TYPE ((irelend - 1)->r_info) == (int) R_MN10300_ALIGN)
+	--irelend;
       
-  /* The deletion must stop at the next ALIGN reloc for an aligment
-     power larger than the number of bytes we are deleting.  */
-  for (; irel < irelend; irel++)
-    if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_ALIGN
-	&& irel->r_offset > addr
-	&& irel->r_offset < toaddr
-	&& count < (1 << irel->r_addend))
-      {
-	irelalign = irel;
-	toaddr = irel->r_offset;
-	break;
-      }
+      /* The deletion must stop at the next ALIGN reloc for an aligment
+	 power larger than the number of bytes we are deleting.  */
+      for (; irel < irelend; irel++)
+	if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_ALIGN
+	    && irel->r_offset > addr
+	    && irel->r_offset < toaddr
+	    && count < (1 << irel->r_addend))
+	  {
+	    irelalign = irel;
+	    toaddr = irel->r_offset;
+	    break;
+	  }
+    }
 
   /* Actually delete the bytes.  */
   memmove (contents + addr, contents + addr + count,
