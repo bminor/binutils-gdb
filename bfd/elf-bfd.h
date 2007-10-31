@@ -1814,9 +1814,6 @@ extern bfd_boolean _bfd_elf_dynamic_symbol_p
 extern bfd_boolean _bfd_elf_symbol_refs_local_p
   (struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean);
 
-extern bfd_boolean bfd_elf_match_symbols_in_sections
-  (asection *, asection *, struct bfd_link_info *);
-
 extern void bfd_elf_perform_complex_relocation
   (bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, bfd_vma);
 

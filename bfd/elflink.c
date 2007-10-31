@@ -6923,7 +6923,7 @@ elf_create_symbuf (bfd_size_type symcount, Elf_Internal_Sym *isymbuf)
 /* Check if 2 sections define the same set of local and global
    symbols.  */
 
-bfd_boolean
+static bfd_boolean
 bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 				   struct bfd_link_info *info)
 {
@@ -6942,13 +6942,6 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
   bfd1 = sec1->owner;
   bfd2 = sec2->owner;
 
-  /* If both are .gnu.linkonce sections, they have to have the same
-     section name.  */
-  if (CONST_STRNEQ (sec1->name, ".gnu.linkonce")
-      && CONST_STRNEQ (sec2->name, ".gnu.linkonce"))
-    return strcmp (sec1->name + sizeof ".gnu.linkonce",
-		   sec2->name + sizeof ".gnu.linkonce") == 0;
-
   /* Both sections have to be in ELF.  */
   if (bfd_get_flavour (bfd1) != bfd_target_elf_flavour
       || bfd_get_flavour (bfd2) != bfd_target_elf_flavour)
@@ -6956,15 +6949,6 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 
   if (elf_section_type (sec1) != elf_section_type (sec2))
     return FALSE;
-
-  if ((elf_section_flags (sec1) & SHF_GROUP) != 0
-      && (elf_section_flags (sec2) & SHF_GROUP) != 0)
-    {
-      /* If both are members of section groups, they have to have the
-	 same group name.  */
-      if (strcmp (elf_group_name (sec1), elf_group_name (sec2)) != 0)
-	return FALSE;
-    }
 
   shndx1 = _bfd_elf_section_from_bfd_section (bfd1, sec1);
   shndx2 = _bfd_elf_section_from_bfd_section (bfd2, sec2);

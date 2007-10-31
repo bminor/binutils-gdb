@@ -1,3 +1,9 @@
+2007-10-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (bfd_elf_match_symbols_in_sections): Don't declare.
+	* elflink.c (bfd_elf_match_symbols_in_sections): Make static.
+	Remove section name comparisons.
+
 2007-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* reloc.c (BFD_RELOC_MN10300_ALIGN): Add.
