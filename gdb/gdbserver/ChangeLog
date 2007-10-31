@@ -1,3 +1,7 @@
+2007-10-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in: Use $(SHELL) instead of "sh" to call regdat.sh.
+
 2007-10-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (handle_extended_wait): Handle unexpected signals.

@@ -320,69 +320,69 @@ spu-low.o: spu-low.c $(server_h)
 
 reg-arm.o : reg-arm.c $(regdef_h)
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
 arm-with-iwmmxt.o : arm-with-iwmmxt.c $(regdef_h)
 arm-with-iwmmxt.c : $(srcdir)/../regformats/arm-with-iwmmxt.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/arm-with-iwmmxt.dat arm-with-iwmmxt.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-iwmmxt.dat arm-with-iwmmxt.c
 reg-cris.o : reg-cris.c $(regdef_h)
 reg-cris.c : $(srcdir)/../regformats/reg-cris.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-cris.dat reg-cris.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-cris.dat reg-cris.c
 reg-crisv32.o : reg-crisv32.c $(regdef_h)
 reg-crisv32.c : $(srcdir)/../regformats/reg-crisv32.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-crisv32.dat reg-crisv32.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-crisv32.dat reg-crisv32.c
 reg-i386.o : reg-i386.c $(regdef_h)
 reg-i386.c : $(srcdir)/../regformats/reg-i386.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-i386.dat reg-i386.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-i386.dat reg-i386.c
 reg-i386-linux.o : reg-i386-linux.c $(regdef_h)
 reg-i386-linux.c : $(srcdir)/../regformats/reg-i386-linux.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-i386-linux.dat reg-i386-linux.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-i386-linux.dat reg-i386-linux.c
 reg-ia64.o : reg-ia64.c $(regdef_h)
 reg-ia64.c : $(srcdir)/../regformats/reg-ia64.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c
 reg-m32r.o : reg-m32r.c $(regdef_h)
 reg-m32r.c : $(srcdir)/../regformats/reg-m32r.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-m32r.dat reg-m32r.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-m32r.dat reg-m32r.c
 reg-m68k.o : reg-m68k.c $(regdef_h)
 reg-m68k.c : $(srcdir)/../regformats/reg-m68k.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-m68k.dat reg-m68k.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-m68k.dat reg-m68k.c
 mips-linux.o : mips-linux.c $(regdef_h)
 mips-linux.c : $(srcdir)/../regformats/mips-linux.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/mips-linux.dat mips-linux.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips-linux.dat mips-linux.c
 mips64-linux.o : mips64-linux.c $(regdef_h)
 mips64-linux.c : $(srcdir)/../regformats/mips64-linux.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/mips64-linux.dat mips64-linux.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips64-linux.dat mips64-linux.c
 reg-ppc.o : reg-ppc.c $(regdef_h)
 reg-ppc.c : $(srcdir)/../regformats/reg-ppc.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-ppc.dat reg-ppc.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ppc.dat reg-ppc.c
 reg-ppc64.o : reg-ppc64.c $(regdef_h)
 reg-ppc64.c : $(srcdir)/../regformats/reg-ppc64.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-ppc64.dat reg-ppc64.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ppc64.dat reg-ppc64.c
 powerpc-32.o : powerpc-32.c $(regdef_h)
 powerpc-32.c : $(srcdir)/../regformats/rs6000/powerpc-32.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32.dat powerpc-32.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32.dat powerpc-32.c
 powerpc-e500.o : powerpc-e500.c $(regdef_h)
 powerpc-e500.c : $(srcdir)/../regformats/rs6000/powerpc-e500.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-e500.dat powerpc-e500.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-e500.dat powerpc-e500.c
 powerpc-64.o : powerpc-64.c $(regdef_h)
 powerpc-64.c : $(srcdir)/../regformats/rs6000/powerpc-64.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-64.dat powerpc-64.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-64.dat powerpc-64.c
 reg-s390.o : reg-s390.c $(regdef_h)
 reg-s390.c : $(srcdir)/../regformats/reg-s390.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-s390.dat reg-s390.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-s390.dat reg-s390.c
 reg-s390x.o : reg-s390x.c $(regdef_h)
 reg-s390x.c : $(srcdir)/../regformats/reg-s390x.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-s390x.dat reg-s390x.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-s390x.dat reg-s390x.c
 reg-sh.o : reg-sh.c $(regdef_h)
 reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c
 reg-spu.o : reg-spu.c $(regdef_h)
 reg-spu.c : $(srcdir)/../regformats/reg-spu.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-spu.dat reg-spu.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-spu.dat reg-spu.c
 reg-x86-64.o : reg-x86-64.c $(regdef_h)
 reg-x86-64.c : $(srcdir)/../regformats/reg-x86-64.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-x86-64.dat reg-x86-64.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-x86-64.dat reg-x86-64.c
 reg-x86-64-linux.o : reg-x86-64-linux.c $(regdef_h)
 reg-x86-64-linux.c : $(srcdir)/../regformats/reg-x86-64-linux.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-x86-64-linux.dat reg-x86-64-linux.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-x86-64-linux.dat reg-x86-64-linux.c
 
 # This is the end of "Makefile.in".
