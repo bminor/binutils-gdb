@@ -1,3 +1,13 @@
+2007-10-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (USE_REG_TABLE): Defined as the previous one + 1.
+	(USE_REG_TABLE): Likewise.
+	(USE_MOD_TABLE): Likewise.
+	(USE_RM_TABLE): Likewise.
+	(USE_PREFIX_TABLE): Likewise.
+	(USE_X86_64_TABLE): Likewise.
+	(USE_3BYTE_TABLE): Likewise.
+
 2007-10-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (MOD_0F2B_PREFIX_0...MOD_0F2B_PREFIX_3): New.

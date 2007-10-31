@@ -455,13 +455,13 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #error MAX_BYTEMODE must be less than DREX_OC1
 #endif
 
-#define FLOATCODE 1
-#define USE_REG_TABLE 2
-#define USE_MOD_TABLE 3
-#define USE_RM_TABLE 4
-#define USE_PREFIX_TABLE 5
-#define USE_X86_64_TABLE 6
-#define USE_3BYTE_TABLE 7
+#define FLOATCODE		1
+#define USE_REG_TABLE		(FLOATCODE + 1)
+#define USE_MOD_TABLE		(USE_REG_TABLE + 1)
+#define USE_RM_TABLE		(USE_MOD_TABLE + 1)
+#define USE_PREFIX_TABLE	(USE_RM_TABLE + 1)
+#define USE_X86_64_TABLE	(USE_PREFIX_TABLE + 1)
+#define USE_3BYTE_TABLE		(USE_X86_64_TABLE + 1)
 
 #define FLOAT			NULL, { { NULL, FLOATCODE } }
 
