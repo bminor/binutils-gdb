@@ -8277,7 +8277,7 @@ debug_apply_relocations (void *file,
 	    {
 	      warn (_("skipping unexpected symbol type %s in %ld'th relocation in section %s\n"),
 		    get_symbol_type (ELF_ST_TYPE (sym->st_info)),
-		    rp - relocs,
+		    (long int)(rp - relocs),
 		    SECTION_NAME (relsec));
 	      continue;
 	    }
