@@ -1,3 +1,8 @@
+2007-10-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elfread.c (elf_symtab_read): When constructing a solib trampoline
+	minimal symbol from an undefined dynamic symbol, use proper section.
+
 2007-10-31  Markus Deuling  <deuling@de.ibm.com>
 
 	* arm-linux-nat.c (fetch_register, fetch_regs): Use get_regcache_arch

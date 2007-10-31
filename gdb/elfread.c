@@ -240,6 +240,8 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
 	  && (sym->flags & BSF_FUNCTION))
 	{
 	  struct minimal_symbol *msym;
+	  bfd *abfd = objfile->obfd;
+	  asection *sect; 
 
 	  /* Symbol is a reference to a function defined in
 	     a shared library.
@@ -252,10 +254,28 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
 	  symaddr = sym->value;
 	  if (symaddr == 0)
 	    continue;
-	  symaddr += offset;
+
+	  /* sym->section is the undefined section.  However, we want to
+	     record the section where the PLT stub resides with the
+	     minimal symbol.  Search the section table for the one that
+	     covers the stub's address.  */
+	  for (sect = abfd->sections; sect != NULL; sect = sect->next)
+	    {
+	      if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
+		continue;
+
+	      if (symaddr >= bfd_get_section_vma (abfd, sect)
+		  && symaddr < bfd_get_section_vma (abfd, sect)
+			       + bfd_get_section_size (sect))
+		break;
+	    }
+	  if (!sect)
+	    continue;
+
+	  symaddr += ANOFFSET (objfile->section_offsets, sect->index);
+
 	  msym = record_minimal_symbol
-	    ((char *) sym->name, symaddr,
-	     mst_solib_trampoline, sym->section, objfile);
+	    ((char *) sym->name, symaddr, mst_solib_trampoline, sect, objfile);
 	  if (msym != NULL)
 	    msym->filename = filesymname;
 	  continue;
