@@ -92,7 +92,6 @@ extern dwarf_vma byte_get_little_endian (unsigned char *, int);
 extern dwarf_vma byte_get_big_endian (unsigned char *, int);
 
 extern dwarf_vma eh_addr_size;
-extern int is_relocatable;
 
 extern int do_debug_info;
 extern int do_debug_abbrevs;

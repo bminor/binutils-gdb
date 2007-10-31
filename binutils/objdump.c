@@ -171,6 +171,8 @@ static bfd_size_type stab_size;
 
 static char *strtab;
 static bfd_size_type stabstr_size;
+
+static bfd_boolean is_relocatable = FALSE;
 
 static void
 usage (FILE *stream, int status)

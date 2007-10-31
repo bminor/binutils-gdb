@@ -36,7 +36,6 @@ static unsigned int num_debug_info_entries = 0;
 static debug_info *debug_information = NULL;
 
 dwarf_vma eh_addr_size;
-int is_relocatable;
 
 int do_debug_info;
 int do_debug_abbrevs;
@@ -3184,11 +3183,7 @@ display_debug_frames (struct dwarf_section *section,
 	    encoded_ptr_size = size_of_encoded_value (fc->fde_encoding);
 
 	  fc->pc_begin = get_encoded_value (start, fc->fde_encoding);
-	  if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel
-	      /* Don't adjust for relocatable file since there's
-		 invariably a pcrel reloc here, which we haven't
-		 applied.  */
-	      && !is_relocatable)
+	  if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
 	    fc->pc_begin += section->address + (start - section_start);
 	  start += encoded_ptr_size;
 	  fc->pc_range = byte_get (start, encoded_ptr_size);
@@ -3391,8 +3386,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_set_loc:
 	      vma = get_encoded_value (start, fc->fde_encoding);
-	      if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel
-		  && !is_relocatable)
+	      if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel)
 		vma += section->address + (start - section_start);
 	      start += encoded_ptr_size;
 	      if (do_debug_frames_interp)

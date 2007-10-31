@@ -1,3 +1,19 @@
+2007-10-31  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (is_relocatable): Remove definition.
+	(display_debug_frames): Remove check in is_relocatable.
+	* dwarf.h (is_relocatable): Remove declaration.
+	* objdump.c (is_relocatable): New static definition.
+	* readelf.c (dump_relocations): Make the function void.
+	(is_32bit_abs_reloc): Add support for x86, Arc, Arm, D10V, Dlx,
+	OR32 and Score.
+	(is_32bit_pcrel_reloc): Add support for x86 and Arm.
+	(is_16bit_abs_reloc): Add support for D10V.
+	(debug_apply_rela_addends): Rename to debug_apply_relocations.
+	Add code to support rel relocations.
+	(load_debug_section): Fix call to debug_apply_relocations.
+	(get_file_header): Remove setting of is_relocatable.
+
 2007-10-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (debug_apply_rela_addends): Clarify FIXME.

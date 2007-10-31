@@ -1,3 +1,8 @@
+2007-10-31  Nick Clifton  <nickc@redhat.com>
+
+	* gas/cfi/cfi-common-6.d: Allow for possible relocation of the
+	.debug.eh_frame section.
+
 2007-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* gas/all/gas.exp: Do not run diff1.s test for mn10300.
