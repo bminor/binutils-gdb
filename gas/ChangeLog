@@ -1,5 +1,10 @@
 2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.h (LONG_DOUBLE_MNEM_SUFFIX): Use a non-ascii
+	letter.
+
+2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (process_suffix): Check addrprefixop0 to
 	see if the address size override prefix changes the size of the
 	first operand. 

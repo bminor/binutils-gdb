@@ -122,8 +122,9 @@ extern const char *i386_comment_chars;
 #define SHORT_MNEM_SUFFIX 's'
 #define LONG_MNEM_SUFFIX  'l'
 #define QWORD_MNEM_SUFFIX  'q'
-/* Intel Syntax */
-#define LONG_DOUBLE_MNEM_SUFFIX 'x'
+/* Intel Syntax.  Use a non-ascii letter since since it never appears
+   in instructions.  */
+#define LONG_DOUBLE_MNEM_SUFFIX '\1'
 
 #define END_OF_INSN '\0'
 
