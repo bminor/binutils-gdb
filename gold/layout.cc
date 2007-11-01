@@ -591,7 +591,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
       // Create the .interp section to hold the name of the
       // interpreter, and put it in a PT_INTERP segment.
-      this->create_interp(target);
+      if (!parameters->output_is_shared())
+        this->create_interp(target);
 
       // Finish the .dynamic section to hold the dynamic data, and put
       // it in a PT_DYNAMIC segment.

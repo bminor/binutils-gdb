@@ -110,6 +110,14 @@ class Target_x86_64 : public Sized_target<64, false>
   std::string
   do_code_fill(off_t length);
 
+  // Return the size of the GOT section.
+  off_t
+  got_size()
+  {
+    gold_assert(this->got_ != NULL);
+    return this->got_->data_size();
+  }
+
  private:
   // The class which scans relocations.
   struct Scan
@@ -214,6 +222,14 @@ class Target_x86_64 : public Sized_target<64, false>
   // Get the GOT section, creating it if necessary.
   Output_data_got<64, false>*
   got_section(Symbol_table*, Layout*);
+
+  // Get the GOT PLT section.
+  Output_data_space*
+  got_plt_section() const
+  {
+    gold_assert(this->got_plt_ != NULL);
+    return this->got_plt_;
+  }
 
   // Create a PLT entry for a global symbol.
   void
@@ -719,9 +735,21 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_32S:
     case elfcpp::R_X86_64_16:
     case elfcpp::R_X86_64_8:
-      // FIXME: If we are generating a shared object we need to copy
-      // this relocation into the object.
-      gold_assert(!parameters->output_is_shared());
+      // If building a shared library (or a position-independent
+      // executable), we need to create a dynamic relocation for
+      // this location. The relocation applied at link time will
+      // apply the link-time value, so we flag the location with
+      // an R_386_RELATIVE relocation so the dynamic loader can
+      // relocate it easily.
+      if (parameters->output_is_position_independent())
+        {
+	  // FIXME: R_X86_64_RELATIVE assumes a 64-bit relocation.
+	  gold_assert(r_type == elfcpp::R_X86_64_64);
+
+          Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+          rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
+                              data_shndx, reloc.get_r_offset(), 0);
+        }
       break;
 
     case elfcpp::R_X86_64_PC64:
@@ -758,8 +786,11 @@ Target_x86_64::Scan::local(const General_options&,
           {
             // If we are generating a shared object, we need to add a
             // dynamic RELATIVE relocation for this symbol.
-            if (parameters->output_is_shared())
+            if (parameters->output_is_position_independent())
               {
+		// FIXME: R_X86_64_RELATIVE assumes a 64-bit relocation.
+		gold_assert(r_type != elfcpp::R_X86_64_GOT32);
+
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
                 rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
                                     data_shndx, reloc.get_r_offset(), 0);
@@ -884,36 +915,63 @@ Target_x86_64::Scan::global(const General_options& options,
     case elfcpp::R_X86_64_PC16:
     case elfcpp::R_X86_64_8:
     case elfcpp::R_X86_64_PC8:
-      // FIXME: If we are generating a shared object we may need to
-      // copy this relocation into the object.  If this symbol is
-      // defined in a shared object, we may need to copy this
-      // relocation in order to avoid a COPY relocation.
-      gold_assert(!parameters->output_is_shared());
+      {
+        bool is_pcrel = (r_type == elfcpp::R_X86_64_PC64
+		         || r_type == elfcpp::R_X86_64_PC32
+		         || r_type == elfcpp::R_X86_64_PC16
+		         || r_type == elfcpp::R_X86_64_PC8);
 
-      if (gsym->is_from_dynobj())
-	{
-	  // This symbol is defined in a dynamic object.  If it is a
-	  // function, we make a PLT entry.  Otherwise we need to
-	  // either generate a COPY reloc or copy this reloc.
-	  if (gsym->type() == elfcpp::STT_FUNC)
-	    {
-	      target->make_plt_entry(symtab, layout, gsym);
+        if (gsym->is_from_dynobj()
+            || (parameters->output_is_shared()
+                && gsym->is_preemptible()))
+	  {
+	    // (a) This symbol is defined in a dynamic object.  If it is a
+	    // function, we make a PLT entry.  Otherwise we need to
+	    // either generate a COPY reloc or copy this reloc.
+	    // (b) We are building a shared object and this symbol is
+	    // preemptible. If it is a function, we make a PLT entry.
+	    // Otherwise, we copy the reloc.
+	    if (gsym->type() == elfcpp::STT_FUNC)
+	      {
+	        target->make_plt_entry(symtab, layout, gsym);
 
-	      // If this is not a PC relative reference, then we may
-	      // be taking the address of the function.  In that case
-	      // we need to set the entry in the dynamic symbol table
-	      // to the address of the PLT entry.
-	      if (r_type != elfcpp::R_X86_64_PC64
-		  && r_type != elfcpp::R_X86_64_PC32
-		  && r_type != elfcpp::R_X86_64_PC16
-		  && r_type != elfcpp::R_X86_64_PC8)
-		gsym->set_needs_dynsym_value();
-	    }
-	  else
-	    target->copy_reloc(&options, symtab, layout, object, data_shndx,
-			       gsym, reloc);
+	        // If this is not a PC relative reference, then we may
+	        // be taking the address of the function.  In that case
+	        // we need to set the entry in the dynamic symbol table
+	        // to the address of the PLT entry. We will also need to
+	        // create a dynamic relocation.
+	        if (!is_pcrel)
+		  {
+		    if (gsym->is_from_dynobj())
+		      gsym->set_needs_dynsym_value();
+                    if (parameters->output_is_position_independent())
+                      {
+			// FIXME: R_X86_64_RELATIVE assumes a 64-bit
+			// relocation.
+			gold_assert(r_type == elfcpp::R_X86_64_64);
+
+                        Reloc_section* rela_dyn =
+                          target->rela_dyn_section(layout);
+                        rela_dyn->add_local(object, 0,
+                                            elfcpp::R_X86_64_RELATIVE,
+                                            data_shndx,
+                                            reloc.get_r_offset(), 0);
+                      }
+		  }
+	      }
+	    else if (parameters->output_is_shared())
+	      {
+	        // We do not make COPY relocs in shared objects.
+                Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+                rela_dyn->add_global(gsym, r_type, object, data_shndx, 
+                                     reloc.get_r_offset(),
+                                     reloc.get_r_addend());
+	      }
+	    else
+	      target->copy_reloc(&options, symtab, layout, object, data_shndx,
+			         gsym, reloc);
+	  }
 	}
-
       break;
 
     case elfcpp::R_X86_64_GOT64:
@@ -947,6 +1005,13 @@ Target_x86_64::Scan::global(const General_options& options,
       // If the symbol is fully resolved, this is just a PC32 reloc.
       // Otherwise we need a PLT entry.
       if (gsym->final_value_is_known())
+	break;
+      // If building a shared library, we can also skip the PLT entry
+      // if the symbol is defined in the output file and is protected
+      // or hidden.
+      if (gsym->is_defined()
+          && !gsym->is_from_dynobj()
+          && !gsym->is_preemptible())
 	break;
       target->make_plt_entry(symtab, layout, gsym);
       break;
@@ -1156,7 +1221,11 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
 
   // Pick the value to use for symbols defined in shared objects.
   Symbol_value<64> symval;
-  if (gsym != NULL && gsym->is_from_dynobj() && gsym->has_plt_offset())
+  if (gsym != NULL
+      && (gsym->is_from_dynobj()
+          || (parameters->output_is_shared()
+              && gsym->is_preemptible()))
+      && gsym->has_plt_offset())
     {
       symval.set_output_value(target->plt_section()->address()
 			      + gsym->plt_offset());
@@ -1167,6 +1236,9 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
   const elfcpp::Elf_Xword addend = rela.get_r_addend();
 
   // Get the GOT offset if needed.
+  // The GOT pointer points to the end of the GOT section.
+  // We need to subtract the size of the GOT section to get
+  // the actual offset to use in the relocation.
   bool have_got_offset = false;
   unsigned int got_offset = 0;
   switch (r_type)
@@ -1179,12 +1251,12 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       if (gsym != NULL)
         {
           gold_assert(gsym->has_got_offset());
-          got_offset = gsym->got_offset();
+          got_offset = gsym->got_offset() - target->got_size();
         }
       else
         {
           unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
-          got_offset = object->local_got_offset(r_sym);
+          got_offset = object->local_got_offset(r_sym) - target->got_size();
         }
       have_got_offset = true;
       break;
@@ -1278,7 +1350,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       {
         gold_assert(gsym);
 	elfcpp::Elf_types<64>::Elf_Addr value;
-	value = target->got_section(NULL, NULL)->address();
+	value = target->got_plt_section()->address();
 	Relocate_functions<64, false>::pcrela32(view, value, addend, address);
       }
       break;
@@ -1295,7 +1367,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       {
         gold_assert(gsym);
 	elfcpp::Elf_types<64>::Elf_Addr value;
-	value = target->got_section(NULL, NULL)->address();
+	value = target->got_plt_section()->address();
 	Relocate_functions<64, false>::pcrela64(view, value, addend, address);
       }
       break;
@@ -1304,7 +1376,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       {
 	elfcpp::Elf_types<64>::Elf_Addr value;
 	value = (psymval->value(object, 0)
-		 - target->got_section(NULL, NULL)->address());
+		 - target->got_plt_section()->address());
 	Relocate_functions<64, false>::rela64(view, value, addend);
       }
       break;
@@ -1313,7 +1385,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       {
         gold_assert(have_got_offset);
         elfcpp::Elf_types<64>::Elf_Addr value;
-        value = target->got_section(NULL, NULL)->address() + got_offset;
+        value = target->got_plt_section()->address() + got_offset;
         Relocate_functions<64, false>::pcrela32(view, value, addend, address);
       }
       break;
@@ -1322,7 +1394,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       {
         gold_assert(have_got_offset);
         elfcpp::Elf_types<64>::Elf_Addr value;
-        value = target->got_section(NULL, NULL)->address() + got_offset;
+        value = target->got_plt_section()->address() + got_offset;
         Relocate_functions<64, false>::pcrela64(view, value, addend, address);
       }
       break;
@@ -1389,7 +1461,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
   elfcpp::Elf_types<64>::Elf_Addr value = psymval->value(relinfo->object, 0);
 
   const bool is_final = (gsym == NULL
-			 ? !parameters->output_is_shared()
+			 ? !parameters->output_is_position_independent()
 			 : gsym->final_value_is_known());
   const tls::Tls_optimization optimized_type
       = Target_x86_64::optimize_tls_reloc(is_final, r_type);
