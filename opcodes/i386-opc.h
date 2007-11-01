@@ -186,10 +186,10 @@ typedef union i386_cpu_flags
 #define No_sSuf			(No_lSuf + 1)
 /* q suffix on instruction illegal */
 #define No_qSuf			(No_sSuf + 1)
-/* x suffix on instruction illegal */
-#define No_xSuf			(No_qSuf + 1)
+/* long double suffix on instruction illegal */
+#define No_ldSuf		(No_qSuf + 1)
 /* instruction needs FWAIT */
-#define FWait			(No_xSuf + 1)
+#define FWait			(No_ldSuf + 1)
 /* quick test for string instructions */
 #define IsString		(FWait + 1)
 /* fake an extra reg operand for clr, imul and special register
@@ -246,7 +246,7 @@ typedef struct i386_opcode_modifier
   unsigned int no_lsuf:1;
   unsigned int no_ssuf:1;
   unsigned int no_qsuf:1;
-  unsigned int no_xsuf:1;
+  unsigned int no_ldsuf:1;
   unsigned int fwait:1;
   unsigned int isstring:1;
   unsigned int regkludge:1;

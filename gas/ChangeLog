@@ -1,5 +1,11 @@
 2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (md_assemble): Replace no_xsuf with
+	no_ldsuf.
+	(match_template): Likewise.
+
+2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.h (LONG_DOUBLE_MNEM_SUFFIX): Use a non-ascii
 	letter.
 

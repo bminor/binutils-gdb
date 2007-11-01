@@ -1,5 +1,15 @@
 2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (opcode_modifiers): Replace No_xSuf with
+	No_ldSuf.
+	* i386-opc.tbl: Likewise.
+
+	* i386-opc.h (No_xSuf): Renamed to ...
+	(No_ldSuf): This.
+	(FWait): Updated.
+
+2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Add ByteOkIntel, ToDword,
 	ToQword and AddrPrefixOp0.
 

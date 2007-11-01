@@ -2201,7 +2201,7 @@ md_assemble (line)
 		  || !i.tm.opcode_modifier.no_wsuf
 		  || !i.tm.opcode_modifier.no_lsuf
 		  || !i.tm.opcode_modifier.no_ssuf
-		  || !i.tm.opcode_modifier.no_xsuf
+		  || !i.tm.opcode_modifier.no_ldsuf
 		  || !i.tm.opcode_modifier.no_qsuf))
 	    as_bad (_("ambiguous operand size for `%s'"), i.tm.name);
 
@@ -3000,7 +3000,7 @@ match_template (void)
   else if (i.suffix == QWORD_MNEM_SUFFIX)
     suffix_check.no_qsuf = 1;
   else if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
-    suffix_check.no_xsuf = 1;
+    suffix_check.no_ldsuf = 1;
 
   for (t = current_templates->start; t < current_templates->end; t++)
     {
@@ -3016,7 +3016,7 @@ match_template (void)
 	   || (t->opcode_modifier.no_lsuf & suffix_check.no_lsuf)
 	   || (t->opcode_modifier.no_ssuf & suffix_check.no_ssuf)
 	   || (t->opcode_modifier.no_qsuf & suffix_check.no_qsuf)
-	   || (t->opcode_modifier.no_xsuf & suffix_check.no_xsuf))
+	   || (t->opcode_modifier.no_ldsuf & suffix_check.no_ldsuf))
 	  && !(intel_syntax && t->opcode_modifier.ignoresize))
 	continue;
 
