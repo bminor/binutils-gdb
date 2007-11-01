@@ -1,3 +1,7 @@
+2007-11-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-elf/merge3.d, ld-elf/merge3.s: New.
+
 2007-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* ld-mn10300/mn10300.exp: Run new tests.  Skip i126256 test if

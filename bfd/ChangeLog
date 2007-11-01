@@ -1,3 +1,13 @@
+2007-11-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* merge.c (sec_merge_hash_lookup): Add parameter sec_end.  Check
+	for unterminated strings.  All callers changed.
+	(record_section): Add parameter abfd.  Give error message for
+	unterminated strings.
+	(_bfd_merge_sections): Update call to record_section.
+	(_bfd_write_merged_section, _bfd_merged_section_offset): Handle
+	NULL secinfo from merge failures.
+
 2007-10-31  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relax_delete_bytes): Do not look for

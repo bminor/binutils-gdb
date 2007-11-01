@@ -133,6 +133,7 @@ sec_merge_hash_newfunc (struct bfd_hash_entry *entry,
 
 static struct sec_merge_hash_entry *
 sec_merge_hash_lookup (struct sec_merge_hash *table, const char *string,
+		       const unsigned char *sec_end,
 		       unsigned int alignment, bfd_boolean create)
 {
   register const unsigned char *s;
@@ -154,6 +155,8 @@ sec_merge_hash_lookup (struct sec_merge_hash *table, const char *string,
 	      hash += c + (c << 17);
 	      hash ^= hash >> 2;
 	      ++len;
+	      if (sec_end && s >= sec_end)
+		return NULL;
 	    }
 	  hash += len + (len << 17);
 	}
@@ -161,6 +164,8 @@ sec_merge_hash_lookup (struct sec_merge_hash *table, const char *string,
 	{
 	  for (;;)
 	    {
+	      if (sec_end && s + table->entsize > sec_end)
+		return NULL;
 	      for (i = 0; i < table->entsize; ++i)
 		if (s[i] != '\0')
 		  break;
@@ -264,7 +269,9 @@ sec_merge_add (struct sec_merge_hash *tab, const char *str,
 {
   register struct sec_merge_hash_entry *entry;
 
-  entry = sec_merge_hash_lookup (tab, str, alignment, TRUE);
+  entry = sec_merge_hash_lookup (tab, str,
+				 secinfo->contents + secinfo->sec->size,
+				 alignment, TRUE);
   if (entry == NULL)
     return NULL;
 
@@ -436,7 +443,8 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
 
 /* Record one section into the hash table.  */
 static bfd_boolean
-record_section (struct sec_merge_info *sinfo,
+record_section (bfd *abfd,
+		struct sec_merge_info *sinfo,
 		struct sec_merge_sec_info *secinfo)
 {
   asection *sec = secinfo->sec;
@@ -513,6 +521,10 @@ record_section (struct sec_merge_info *sinfo,
   return TRUE;
 
 error_return:
+  if (bfd_get_error () != bfd_error_no_memory)
+    (*_bfd_error_handler)
+      (_("%B: unterminated string in section `%A' marked for merging"),
+       abfd, sec);
   for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
     *secinfo->psecinfo = NULL;
   return FALSE;
@@ -695,7 +707,7 @@ alloc_failure:
    with _bfd_merge_section.  */
 
 bfd_boolean
-_bfd_merge_sections (bfd *abfd ATTRIBUTE_UNUSED,
+_bfd_merge_sections (bfd *abfd,
 		     struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		     void *xsinfo,
 		     void (*remove_hook) (bfd *, asection *))
@@ -722,7 +734,7 @@ _bfd_merge_sections (bfd *abfd ATTRIBUTE_UNUSED,
 	    if (remove_hook)
 	      (*remove_hook) (abfd, secinfo->sec);
 	  }
-	else if (! record_section (sinfo, secinfo))
+	else if (! record_section (abfd, sinfo, secinfo))
 	  break;
 
       if (secinfo)
@@ -779,6 +791,9 @@ _bfd_write_merged_section (bfd *output_bfd, asection *sec, void *psecinfo)
 
   secinfo = (struct sec_merge_sec_info *) psecinfo;
 
+  if (!secinfo)
+    return FALSE;
+
   if (secinfo->first_str == NULL)
     return TRUE;
 
@@ -806,6 +821,9 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
   asection *sec = *psec;
 
   secinfo = (struct sec_merge_sec_info *) psecinfo;
+
+  if (!secinfo)
+    return 0;
 
   if (offset >= sec->rawsize)
     {
@@ -849,7 +867,7 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
     {
       p = secinfo->contents + (offset / sec->entsize) * sec->entsize;
     }
-  entry = sec_merge_hash_lookup (secinfo->htab, (char *) p, 0, FALSE);
+  entry = sec_merge_hash_lookup (secinfo->htab, (char *) p, NULL, 0, FALSE);
   if (!entry)
     {
       if (! secinfo->htab->strings)
