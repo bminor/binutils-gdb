@@ -1732,14 +1732,20 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 
 static int linux_supports_tracefork_flag;
 
-/* A helper function for linux_test_for_tracefork, called after fork ().  */
+/* Helper functions for linux_test_for_tracefork, called via clone ().  */
 
-static void
-linux_tracefork_child (void)
+static int
+linux_tracefork_grandchild (void *arg)
+{
+  _exit (0);
+}
+
+static int
+linux_tracefork_child (void *arg)
 {
   ptrace (PTRACE_TRACEME, 0, 0, 0);
   kill (getpid (), SIGSTOP);
-  fork ();
+  clone (linux_tracefork_grandchild, arg, CLONE_VM | SIGCHLD, NULL);
   _exit (0);
 }
 
@@ -1767,15 +1773,15 @@ linux_test_for_tracefork (void)
 {
   int child_pid, ret, status;
   long second_pid;
+  char *stack = malloc (8192);
 
   linux_supports_tracefork_flag = 0;
 
-  child_pid = fork ();
+  /* Use CLONE_VM instead of fork, to support uClinux (no MMU).  */
+  child_pid = clone (linux_tracefork_child, stack + 2048,
+		     CLONE_VM | SIGCHLD, stack + 6144);
   if (child_pid == -1)
-    perror_with_name ("fork");
-
-  if (child_pid == 0)
-    linux_tracefork_child ();
+    perror_with_name ("clone");
 
   ret = my_waitpid (child_pid, &status, 0);
   if (ret == -1)
@@ -1840,6 +1846,8 @@ linux_test_for_tracefork (void)
       my_waitpid (child_pid, &status, 0);
     }
   while (WIFSTOPPED (status));
+
+  free (stack);
 }
 
 

@@ -1,3 +1,9 @@
+2007-11-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (linux_tracefork_grandchild): New.
+	(linux_tracefork_child): Use clone.
+	(linux_test_for_tracefork): Use clone; allocate and free a stack.
+
 2007-10-31  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in: Use $(SHELL) instead of "sh" to call regdat.sh.
