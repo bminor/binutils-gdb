@@ -1,3 +1,7 @@
+2007-11-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/arg-reference.exp, gdb.cp/arg-reference.c: New files.
+
 2007-10-30  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/dfp-test.exp: Fail gracefully if toolchain does not
