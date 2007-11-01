@@ -197,8 +197,16 @@ typedef union i386_cpu_flags
 #define RegKludge		(IsString + 1)
 /* The first operand must be xmm0 */
 #define FirstXmm0		(RegKludge + 1)
+/* BYTE is OK in Intel syntax. */
+#define ByteOkIntel		(FirstXmm0 + 1)
+/* Convert to DWORD */
+#define ToDword			(ByteOkIntel + 1)
+/* Convert to QWORD */
+#define ToQword			(ToDword + 1)
+/* Address prefix changes operand 0 */
+#define AddrPrefixOp0		(ToQword + 1)
 /* opcode is a prefix */
-#define IsPrefix		(FirstXmm0 + 1)
+#define IsPrefix		(AddrPrefixOp0 + 1)
 /* instruction has extension in 8 bit imm */
 #define ImmExt			(IsPrefix + 1)
 /* instruction don't need Rex64 prefix.  */
@@ -243,6 +251,10 @@ typedef struct i386_opcode_modifier
   unsigned int isstring:1;
   unsigned int regkludge:1;
   unsigned int firstxmm0:1;
+  unsigned int byteokintel:1;
+  unsigned int todword:1;
+  unsigned int toqword:1;
+  unsigned int addrprefixop0:1;
   unsigned int isprefix:1;
   unsigned int immext:1;
   unsigned int norex64:1;

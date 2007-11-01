@@ -1,3 +1,14 @@
+2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (process_suffix): Check addrprefixop0 to
+	see if the address size override prefix changes the size of the
+	first operand. 
+	(check_byte_reg): Don't warn if byteokintel is set.
+	(check_long_reg): Set i.suffix to QWORD_MNEM_SUFFIX if toqword
+	is set.
+	(check_qword_reg): Set i.suffix to LONG_MNEM_SUFFIX if todword
+	is set.
+
 2007-10-31  Eric B. Weddington  <eweddington@cso.atmel.com>
 
 	* config/tc-avr.c (mcu_types): Remove devices that were never produced:

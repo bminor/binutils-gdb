@@ -1,3 +1,29 @@
+2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Add ByteOkIntel, ToDword,
+	ToQword and AddrPrefixOp0.
+
+	* i386-opc.h (ByteOkIntel): New.
+	(ToDword): Likewise.
+	(ToQword): Likewise.
+	(AddrPrefixOp0): Likewise.
+	(IsPrefix): Updated.
+	(i386_opcode_modifier): Add byteokintel, todword, toqword
+	and addrprefixop0.
+
+	* i386-opc.tbl (cvtss2si): Add ToQword.
+	(cvttss2si): Likewise.
+	(cvtsd2si): Add ToDword.
+	(cvttsd2si): Likewise.
+	(monitor): Add AddrPrefixOp0.
+	(invlpga): Likewise.
+	(vmload): Likewise.
+	(vmrun): Likewise.
+	(vmsave): Likewise.
+	(pextrb): Add ByteOkIntel.
+	(pinsrb): Likewise.
+	* i386-tbl.h: Regenerated.
+
 2007-10-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (USE_REG_TABLE): Defined as the previous one + 1.

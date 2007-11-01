@@ -193,5 +193,40 @@ cmpxchg16b (%rax)
 .intel_syntax noprefix
 cmpxchg16b oword ptr [rax]
 
+.att_syntax
+	movsx	(%rax), %edx
+	movsx	(%rax), %rdx
+	movsx	(%rax), %dx
+	movsbl	(%rax), %edx
+	movsbq	(%rax), %rdx
+	movsbw	(%rax), %dx
+	movswl	(%rax), %edx
+	movswq	(%rax), %rdx
+
+	movzx	(%rax), %edx
+	movzx	(%rax), %rdx
+	movzx	(%rax), %dx
+	movzb	(%rax), %edx
+	movzb	(%rax), %rdx
+	movzb	(%rax), %dx
+	movzbl	(%rax), %edx
+	movzbq	(%rax), %rdx
+	movzbw	(%rax), %dx
+	movzwl	(%rax), %edx
+	movzwq	(%rax), %rdx
+
+	.intel_syntax noprefix
+	movsx	edx,BYTE PTR [rax]
+	movsx	rdx,BYTE PTR [rax]
+	movsx	dx,BYTE PTR [rax]
+	movsx	edx,WORD PTR [rax]
+	movsx	rdx,WORD PTR [rax]
+
+	movzx	edx,BYTE PTR [rax]
+	movzx	rdx,BYTE PTR [rax]
+	movzx	dx,BYTE PTR [rax]
+	movzx	edx,WORD PTR [rax]
+	movzx	rdx,WORD PTR [rax]
+
 # Get a good alignment.
  .p2align	4,0

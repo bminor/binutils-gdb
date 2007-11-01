@@ -1103,9 +1103,9 @@ comiss, 2, 0xf2f, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_s
 cvtpi2ps, 2, 0xf2a, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegMMX, RegXMM }
 cvtps2pi, 2, 0xf2d, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegMMX }
 cvtsi2ss, 2, 0xf30f2a, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_xSuf, { Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM }
-cvtss2si, 2, 0xf30f2d, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, Reg32|Reg64 }
+cvtss2si, 2, 0xf30f2d, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_xSuf|ToQword, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, Reg32|Reg64 }
 cvttps2pi, 2, 0xf2c, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegMMX }
-cvttss2si, 2, 0xf30f2c, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, Reg32|Reg64 }
+cvttss2si, 2, 0xf30f2c, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_xSuf|ToQword, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, Reg32|Reg64 }
 divps, 2, 0xf5e, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 divss, 2, 0xf30f5e, None, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 ldmxcsr, 1, 0xfae, 0x2, 2, CpuSSE, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S }
@@ -1250,11 +1250,11 @@ cvtpd2pi, 2, 0x660f2d, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSu
 cvtpd2ps, 2, 0x660f5a, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 cvtps2pd, 2, 0xf5a, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 cvtps2dq, 2, 0x660f5b, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-cvtsd2si, 2, 0xf20f2d, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, Reg32|Reg64 }
+cvtsd2si, 2, 0xf20f2d, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_xSuf|ToDword, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, Reg32|Reg64 }
 cvtsd2ss, 2, 0xf20f5a, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 cvtss2sd, 2, 0xf30f5a, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 cvttpd2pi, 2, 0x660f2c, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegMMX }
-cvttsd2si, 2, 0xf20f2c, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, Reg32|Reg64 }
+cvttsd2si, 2, 0xf20f2c, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_xSuf|ToDword, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, Reg32|Reg64 }
 cvttpd2dq, 2, 0x660fe6, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 cvttps2dq, 2, 0xf30f5b, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 maskmovdqu, 2, 0x660ff7, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { RegXMM, RegXMM }
@@ -1293,9 +1293,9 @@ monitor, 0, 0xf01, 0xc8, 2, CpuSSE3, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_
 // address size override prefix can be used to overrride the AX size in
 // all modes.
 // Need to ensure only "monitor %eax/%ax,%ecx,%edx" is accepted.
-monitor, 3, 0xf01, 0xc8, 2, CpuSSE3|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { Reg16|Reg32, Reg32, Reg32 }
+monitor, 3, 0xf01, 0xc8, 2, CpuSSE3|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|AddrPrefixOp0, { Reg16|Reg32, Reg32, Reg32 }
 // Need to ensure only "monitor %rax/%eax,%rcx,%rdx" is accepted.
-monitor, 3, 0xf01, 0xc8, 2, CpuSSE3|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|NoRex64, { Reg32|Reg64, Reg64, Reg64 }
+monitor, 3, 0xf01, 0xc8, 2, CpuSSE3|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64, Reg64, Reg64 }
 movddup, 2, 0xf20f12, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 movshdup, 2, 0xf30f16, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 movsldup, 2, 0xf30f12, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -1380,11 +1380,11 @@ pblendvb, 3, 0x660f3810, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No
 pblendvb, 2, 0x660f3810, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pblendw, 3, 0x660f3a0e, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pcmpeqq, 2, 0x660f3829, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-pextrb, 3, 0x660f3a14, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, RegXMM, Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+pextrb, 3, 0x660f3a14, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ByteOkIntel, { Imm8, RegXMM, Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 pextrd, 3, 0x660f3a16, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, RegXMM, Reg32|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 pextrq, 3, 0x660f3a16, None, 3, CpuSSE4_1|Cpu64, Modrm|Size64|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, RegXMM, Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 phminposuw, 2, 0x660f3841, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-pinsrb, 3, 0x660f3a20, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM }
+pinsrb, 3, 0x660f3a20, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ByteOkIntel, { Imm8, Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM }
 pinsrd, 3, 0x660f3a22, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, Reg32|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM }
 pinsrq, 3, 0x660f3a22, None, 3, CpuSSE4_1|Cpu64, Modrm|Size64|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { Imm8, Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM }
 pmaxsb, 2, 0x660f383c, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -1469,21 +1469,21 @@ rdtscp, 0, 0xf01, 0xf9, 2, CpuSledgehammer, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_q
 clgi, 0, 0xf01, 0xdd, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { 0 }
 invlpga, 0, 0xf01, 0xdf, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { 0 }
 // FIXME: Need to ensure only "invlpga %[re]ax,%ecx" is accepted.
-invlpga, 2, 0xf01, 0xdf, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|NoRex64, { Reg32|Reg64, Reg32 }
+invlpga, 2, 0xf01, 0xdf, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64, Reg32 }
 skinit, 0, 0xf01, 0xde, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { 0 }
 // FIXME: Need to ensure only "skinit %eax" is accepted.
 skinit, 1, 0xf01, 0xde, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { Reg32 }
 stgi, 0, 0xf01, 0xdc, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { 0 }
 vmload, 0, 0xf01, 0xda, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { 0 }
 // FIXME: Need to ensure only "vmload %[re]ax" is accepted.
-vmload, 1, 0xf01, 0xda, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|NoRex64, { Reg32|Reg64 }
+vmload, 1, 0xf01, 0xda, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64 }
 vmmcall, 0, 0xf01, 0xd9, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { 0 }
 vmrun, 0, 0xf01, 0xd8, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { 0 }
 // FIXME: Need to ensure only "vmrun %[re]ax" is accepted.
-vmrun, 1, 0xf01, 0xd8, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|NoRex64, { Reg32|Reg64 }
+vmrun, 1, 0xf01, 0xd8, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64 }
 vmsave, 0, 0xf01, 0xdb, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt, { 0 }
 // FIXME: Need to ensure only "vmsave %[re]ax" is accepted.
-vmsave, 1, 0xf01, 0xdb, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|NoRex64, { Reg32|Reg64 }
+vmsave, 1, 0xf01, 0xdb, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_xSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64 }
 
 
 // SSE4a instructions

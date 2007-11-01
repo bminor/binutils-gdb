@@ -3492,17 +3492,10 @@ process_suffix (void)
       /* Now select between word & dword operations via the operand
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
-      if (i.tm.base_opcode == 0x0f01
-	   && (i.tm.extension_opcode == 0xc8
-	       || i.tm.extension_opcode == 0xd8
-	       || i.tm.extension_opcode == 0xda
-	       || i.tm.extension_opcode == 0xdb
-	       || i.tm.extension_opcode == 0xdf))
+      if (i.tm.opcode_modifier.addrprefixop0)
 	{
-	  /* monitor in SSE3 is a very special case. The default size
-	     of AX is the size of mode. The address size override
-	     prefix will change the size of AX.  It is also true for
-	     invlpga, vmload, vmrun and vmsave in SVME.  */
+	  /* The address size override prefix changes the size of the
+	     first operand.  */
 	  if ((flag_code == CODE_32BIT
 	       && i.op->regs[0].reg_type.bitfield.reg16)
 	      || (flag_code != CODE_32BIT
@@ -3569,16 +3562,8 @@ check_byte_reg (void)
       if (i.types[op].bitfield.reg8)
 	continue;
 
-      /* movzx, movsx, pextrb and pinsrb should not generate this
-	 warning.  */
-      if (intel_syntax
-	  && (i.tm.base_opcode == 0xfb7
-	      || i.tm.base_opcode == 0xfb6
-	      || i.tm.base_opcode == 0x63
-	      || i.tm.base_opcode == 0xfbe
-	      || i.tm.base_opcode == 0xfbf
-	      || i.tm.base_opcode == 0x660f3a14
-	      || i.tm.base_opcode == 0x660f3a20))
+      /* Don't generate this warning if not needed.  */
+      if (intel_syntax && i.tm.opcode_modifier.byteokintel)
 	continue;
 
       /* crc32 doesn't generate this warning.  */
@@ -3690,12 +3675,10 @@ check_long_reg (void)
 		 || i.tm.operand_types[op].bitfield.acc))
       {
 	if (intel_syntax
-	    && (i.tm.base_opcode == 0xf30f2d
-		|| i.tm.base_opcode == 0xf30f2c)
+	    && i.tm.opcode_modifier.toqword
 	    && !i.types[0].bitfield.regxmm)
 	  {
-	    /* cvtss2si/cvttss2si convert DWORD memory to Reg64.  We
-	       want REX byte. */
+	    /* Convert to QWORD.  We want REX byte. */
 	    i.suffix = QWORD_MNEM_SUFFIX;
 	  }
 	else
@@ -3738,12 +3721,10 @@ check_qword_reg (void)
 	/* Prohibit these changes in the 64bit mode, since the
 	   lowering is more complicated.  */
 	if (intel_syntax
-	    && (i.tm.base_opcode == 0xf20f2d
-		|| i.tm.base_opcode == 0xf20f2c)
+	    && i.tm.opcode_modifier.todword
 	    && !i.types[0].bitfield.regxmm)
 	  {
-	    /* cvtsd2si/cvttsd2si convert QWORD memory to Reg32.  We
-	       don't want REX byte. */
+	    /* Convert to DWORD.  We don't want REX byte. */
 	    i.suffix = LONG_MNEM_SUFFIX;
 	  }
 	else
