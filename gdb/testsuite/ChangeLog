@@ -1,3 +1,19 @@
+2007-11-02  Doug Evans  <dje@google.com>
+
+	* gdb.disasm/t01_mov.s: Remove carriage returns.
+	* gdb.disasm/t02_mova.s: Ditto.
+	* gdb.disasm/t03_add.s: Ditto.
+	* gdb.disasm/t04_sub.s: Ditto.
+	* gdb.disasm/t05_cmp.s: Ditto.
+	* gdb.disasm/t06_ari2.s: Ditto.
+	* gdb.disasm/t07_ari3.s: Ditto.
+	* gdb.disasm/t08_or.s: Ditto.
+	* gdb.disasm/t09_xor.s: Ditto.
+	* gdb.disasm/t10_and.s: Ditto.
+	* gdb.disasm/t11_logs.s: Ditto.
+	* gdb.disasm/t12_bit.s: Ditto.
+	* gdb.disasm/t13_otr.s: Ditto.
+
 2007-11-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/arg-reference.exp, gdb.cp/arg-reference.c: New files.
