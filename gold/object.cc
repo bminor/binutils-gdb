@@ -27,6 +27,7 @@
 #include <cstdarg>
 
 #include "target-select.h"
+#include "dwarf_reader.h"
 #include "layout.h"
 #include "output.h"
 #include "symtab.h"
@@ -844,7 +845,7 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
       else if (sym.get_st_shndx() == shndx
                && static_cast<off_t>(sym.get_st_value()) <= offset
                && (static_cast<off_t>(sym.get_st_value() + sym.get_st_size())
-                   >= offset))
+                   > offset))
         {
           if (sym.get_st_name() > names_size)
 	    info->enclosing_symbol_name = "(invalid)";
@@ -907,25 +908,54 @@ template<int size, bool big_endian>
 std::string
 Relocate_info<size, big_endian>::location(size_t, off_t offset) const
 {
-  // FIXME: We would like to print the following:
-  // /tmp/foo.o: in function 'fn':foo.c:12: undefined reference to 'xxx'
-  // We're missing line numbers.
+  // See if we can get line-number information from debugging sections.
+  std::string filename;
+  std::string file_and_lineno;   // Better than filename-only, if available.
+  for (unsigned int shndx = 0; shndx < this->object->shnum(); ++shndx)
+    if (this->object->section_name(shndx) == ".debug_line")
+      {
+        off_t debuglines_size;
+        const unsigned char* debuglines = this->object->section_contents(
+            shndx, &debuglines_size, false);
+        if (debuglines)
+          {
+            Dwarf_line_info line_info(debuglines, debuglines_size);
+            line_info.read_line_mappings<size, big_endian>();
+            file_and_lineno = line_info.addr2line(this->data_shndx, offset);
+          }
+        break;
+      }
+
   std::string ret(this->object->name());
   ret += ':';
   Symbol_location_info info;
   if (this->object->get_symbol_location_info(this->data_shndx, offset, &info))
     {
       ret += " in function ";
+      // We could demangle this name before printing, but we don't
+      // bother because gcc runs linker output through a demangle
+      // filter itself.  The only advantage to demangling here is if
+      // someone might call ld directly, rather than via gcc.  If we
+      // did want to demangle, cplus_demangle() is in libiberty.
       ret += info.enclosing_symbol_name;
       ret += ":";
-      ret += info.source_file;
+      filename = info.source_file;
     }
-  ret += "(";
-  ret += this->object->section_name(this->data_shndx);
-  char buf[100];
-  // Offsets into sections have to be positive.
-  snprintf(buf, sizeof(buf), "+0x%lx)", static_cast<long>(offset));
-  ret += buf;
+
+  if (!file_and_lineno.empty())
+    ret += file_and_lineno;
+  else
+    {
+      if (!filename.empty())
+        ret += filename;
+      ret += "(";
+      ret += this->object->section_name(this->data_shndx);
+      char buf[100];
+      // Offsets into sections have to be positive.
+      snprintf(buf, sizeof(buf), "+0x%lx", static_cast<long>(offset));
+      ret += buf;
+      ret += ")";
+    }
   return ret;
 }
 

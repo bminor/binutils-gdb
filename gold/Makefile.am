@@ -33,6 +33,7 @@ CCFILES = \
 	defstd.cc \
 	dirsearch.cc \
 	dynobj.cc \
+	dwarf_reader.cc \
 	ehframe.cc \
 	errors.cc \
 	fileread.cc \
@@ -60,6 +61,7 @@ HFILES = \
 	defstd.h \
 	dirsearch.h \
 	dynobj.h \
+	dwarf_reader.h \
 	ehframe.h \
 	errors.h \
 	fileread.h \

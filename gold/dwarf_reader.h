@@ -1,0 +1,150 @@
+// dwarf_reader.h -- parse dwarf2/3 debug information for gold  -*- C++ -*-
+
+// Copyright 2007 Free Software Foundation, Inc.
+// Written by Ian Lance Taylor <iant@google.com>.
+
+// This file is part of gold.
+
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+// MA 02110-1301, USA.
+
+#ifndef GOLD_DWARF_READER_H
+#define GOLD_DWARF_READER_H
+
+#include <vector>
+
+#include "elfcpp_swap.h"
+#include "dwarf.h"
+
+namespace gold
+{
+
+struct LineStateMachine;
+
+// This class is used to read the line information from the debugging
+// section of an object file.
+
+class Dwarf_line_info
+{
+ public:
+  // Initializes a .debug_line reader. Buffer and buffer length point
+  // to the beginning and length of the line information to read.
+  // Reader is a ByteReader class that has the endianness set
+  // properly.
+  Dwarf_line_info(const unsigned char* buffer, off_t buffer_length)
+    : buffer_(buffer), buffer_end_(buffer + buffer_length),
+      directories_(1), files_(1)
+  { }
+
+  // Start processing line info, and populates the offset_map_.
+  template<int size, bool big_endian>
+  void
+  read_line_mappings()
+  {
+    while (buffer_ < buffer_end_)
+      {
+        const unsigned char* lineptr = buffer_;
+        lineptr = this->read_header_prolog<size, big_endian>(lineptr);
+        lineptr = this->read_header_tables(lineptr);
+        lineptr = this->read_lines(size, big_endian, lineptr);
+        buffer_ = lineptr;
+      }
+    finalize_line_number_map();
+  }
+
+  // Given a section number and an offset, returns the associated
+  // file and line-number, as a string: "file:lineno".  If unable
+  // to do the mapping, returns the empty string.  You must call
+  // read_line_mappings() before calling this function.
+  std::string
+  addr2line(unsigned int shndx, off_t offset);
+
+ private:
+  // Reads the DWARF2/3 header for this line info.  Each takes as input
+  // a starting buffer position, and returns the ending position.
+  template<int size, bool big_endian>
+  const unsigned char*
+  read_header_prolog(const unsigned char* lineptr);
+
+  const unsigned char*
+  read_header_tables(const unsigned char* lineptr);
+
+  // Reads the DWARF2/3 line information.
+  const unsigned char*
+  read_lines(int size, bool big_endian, const unsigned char* lineptr);
+
+  // Process a single line info opcode at START using the state
+  // machine at LSM.  Return true if we should define a line using the
+  // current state of the line state machine.  Place the length of the
+  // opcode in LEN.
+  bool
+  process_one_opcode(int size, bool big_endian,
+                     const unsigned char* start,
+                     struct LineStateMachine* lsm, size_t* len);
+
+  // Called after all line number have been read, to ready
+  // line_number_map_ for calls to addr2line().
+  void
+  finalize_line_number_map();
+
+  // A DWARF2/3 line info header.  This is not the same size as in the
+  // actual file, as the one in the file may have a 32 bit or 64 bit
+  // lengths.
+
+  struct Dwarf_line_infoHeader
+  {
+    off_t total_length;
+    int version;
+    off_t prologue_length;
+    int min_insn_length; // insn stands for instructin
+    bool default_is_stmt; // stmt stands for statement
+    signed char line_base;
+    int line_range;
+    unsigned char opcode_base;
+    std::vector<unsigned char> std_opcode_lengths;
+    int offset_size;
+  } header_;
+
+  // buffer is the buffer for our line info, starting at exactly where
+  // the line info to read is.
+  const unsigned char* buffer_;
+  const unsigned char* const buffer_end_;
+
+  // Holds the directories and files as we see them.
+  std::vector<std::string> directories_;
+  // The first part is an index into directories_, the second the filename.
+  std::vector< std::pair<int, std::string> > files_;
+
+  // We can't do better than to keep the offsets in a sorted vector.
+  // Here, offset is the key, and file_num/line_num is the value.
+  struct Offset_to_lineno_entry
+  {
+    off_t offset;
+    int file_num;    // a pointer into files_
+    int line_num;
+    // Offsets are unique within a section, so that's a sufficient sort key.
+    bool operator<(const Offset_to_lineno_entry& that) const
+    { return this->offset < that.offset; }
+  };
+  // We have a vector of offset->lineno entries for every input section.
+  typedef Unordered_map<unsigned int, std::vector<Offset_to_lineno_entry> >
+  Lineno_map;
+
+  Lineno_map line_number_map_;
+};
+
+} // End namespace gold.
+
+#endif // !defined(GOLD_DWARF_READER_H)

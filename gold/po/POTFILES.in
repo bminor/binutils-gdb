@@ -6,6 +6,8 @@ defstd.cc
 defstd.h
 dirsearch.cc
 dirsearch.h
+dwarf_reader.cc
+dwarf_reader.h
 dynobj.cc
 dynobj.h
 ehframe.cc

@@ -35,16 +35,6 @@
 namespace elfcpp
 {
 
-typedef unsigned char Dwarf_uint8;
-typedef signed char Dwarf_int8;
-typedef uint16_t Dwarf_uint16;
-typedef int16_t Dwarf_int16;
-typedef uint32_t Dwarf_uint32;
-typedef int32_t Dwarf_int32;
-typedef uint64_t Dwarf_uint64;
-typedef int64_t Dwarf_int64;
-
-
 // DWARF2 codes.
 
 enum DW_TAG
