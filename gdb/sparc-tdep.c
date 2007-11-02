@@ -271,7 +271,7 @@ static const char *sparc32_pseudo_register_names[] =
 /* Return the name of register REGNUM.  */
 
 static const char *
-sparc32_register_name (int regnum)
+sparc32_register_name (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= 0 && regnum < SPARC32_NUM_REGS)
     return sparc32_register_names[regnum];

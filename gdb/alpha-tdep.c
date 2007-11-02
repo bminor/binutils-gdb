@@ -54,7 +54,7 @@
    compatibility with existing remote alpha targets.  */
 
 static const char *
-alpha_register_name (int regno)
+alpha_register_name (struct gdbarch *gdbarch, int regno)
 {
   static const char * const register_names[] =
   {
@@ -80,14 +80,14 @@ static int
 alpha_cannot_fetch_register (int regno)
 {
   return (regno == ALPHA_ZERO_REGNUM
-          || strlen (alpha_register_name (regno)) == 0);
+          || strlen (alpha_register_name (current_gdbarch, regno)) == 0);
 }
 
 static int
 alpha_cannot_store_register (int regno)
 {
   return (regno == ALPHA_ZERO_REGNUM
-          || strlen (alpha_register_name (regno)) == 0);
+          || strlen (alpha_register_name (current_gdbarch, regno)) == 0);
 }
 
 static struct type *

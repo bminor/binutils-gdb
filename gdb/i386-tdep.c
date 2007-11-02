@@ -152,9 +152,9 @@ i386_fpc_regnum_p (int regnum)
 /* Return the name of register REGNUM.  */
 
 const char *
-i386_register_name (int regnum)
+i386_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  if (i386_mmx_regnum_p (current_gdbarch, regnum))
+  if (i386_mmx_regnum_p (gdbarch, regnum))
     return i386_mmx_names[regnum - I387_MM0_REGNUM];
 
   if (regnum >= 0 && regnum < i386_num_register_names)
@@ -1750,7 +1750,7 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
     return i386_sse_type (gdbarch);
 
 #define I387_ST0_REGNUM I386_ST0_REGNUM
-#define I387_NUM_XMM_REGS (gdbarch_tdep (current_gdbarch)->num_xmm_regs)
+#define I387_NUM_XMM_REGS (gdbarch_tdep (gdbarch)->num_xmm_regs)
 
   if (regnum == I387_MXCSR_REGNUM)
     return i386_mxcsr_type;

@@ -40,7 +40,7 @@
 /* Return the name of register REGNUM.  */
 
 static const char *
-vax_register_name (int regnum)
+vax_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static char *register_names[] =
   {

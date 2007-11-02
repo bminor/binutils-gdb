@@ -227,9 +227,9 @@ make_types (struct gdbarch *arch)
 /* Register set.  */
 
 static const char *
-m32c_register_name (int num)
+m32c_register_name (struct gdbarch *gdbarch, int num)
 {
-  return gdbarch_tdep (current_gdbarch)->regs[num].name;
+  return gdbarch_tdep (gdbarch)->regs[num].name;
 }
 
 

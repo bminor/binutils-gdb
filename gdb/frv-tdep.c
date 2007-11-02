@@ -278,7 +278,7 @@ set_variant_scratch_registers (struct gdbarch_tdep *var)
 }
 
 static const char *
-frv_register_name (int reg)
+frv_register_name (struct gdbarch *gdbarch, int reg)
 {
   if (reg < 0)
     return "?toosmall?";

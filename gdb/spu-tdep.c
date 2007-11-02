@@ -94,7 +94,7 @@ static struct cmd_list_element *infospucmdlist = NULL;
 /* Registers.  */
 
 static const char *
-spu_register_name (int reg_nr)
+spu_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = 
     {

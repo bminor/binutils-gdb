@@ -154,7 +154,7 @@ static const char *m68k_register_names[] = {
    Returns the name of the standard m68k register regnum. */
 
 static const char *
-m68k_register_name (int regnum)
+m68k_register_name (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum < 0 || regnum >= ARRAY_SIZE (m68k_register_names))
     internal_error (__FILE__, __LINE__,

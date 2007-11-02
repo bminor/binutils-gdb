@@ -421,7 +421,7 @@ f:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr::no_op_reg_to_regnum::0
 # Convert from an sdb register number to an internal gdb register number.
 f:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr::no_op_reg_to_regnum::0
 f:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr::no_op_reg_to_regnum::0
-f:const char *:register_name:int regnr:regnr
+m:const char *:register_name:int regnr:regnr::0
 
 # Return the type of a register specified by the architecture.  Only
 # the register cache should call this function directly; others should

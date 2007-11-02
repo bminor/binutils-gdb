@@ -1,3 +1,99 @@
+2007-11-02  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (register_name): Add gdbarch parameter.
+	* gdbarch.{c,h}: Regenerate.
+
+	* target-descriptions.c (tdesc_register_name): Add gdbarch parameter.
+	(tdesc_register_name): Replace current_gdbarch by gdbarch.
+	* target-descriptions.h (tdesc_register_name): Add gdbarch parameter.
+
+	* xstormy16-tdep.c (xstormy16_register_name): Add gdbarch parameter.
+	* vax-tdep.c (vax_register_name): Add gdbarch parameter.
+	* spu-tdep.c (spu_register_name): Add gdbarch parameter.
+	* s390-tdep.c (s390_register_name): Add gdbarch parameter.
+	* mt-tdep.c (mt_register_name): Add gdbarch parameter.
+	(mt_registers_info): Replace current_gdbarch by gdbarch.
+	(mt_register_reggroup_p): Add gdbarch to mt_register_name call.
+	* mips-tdep.c (mips_register_name): Add gdbarch parameter. Replace
+	current_gdbarch by gdbarch.
+	(mips_register_name): Add gdbarch to tdesc_register_name call.
+	* mep-tdep.c (mep_register_name): Add gdbarch parameter. Replace
+	current_gdbarch by gdbarch.
+	(mep_register_reggroup_p): Add gdbarch to mep_register_name call.
+	* m32c-tdep.c (m32c_register_name): Add gdbarch parameter. Replace
+	current_gdbarch by gdbarch.
+	* m88k-tdep.c (m88k_register_name): Add gdbarch parameter.
+	* m68k-tdep.c (m68k_register_name): Add gdbarch parameter.
+	* m32r-tdep.c (m32r_register_name): Add gdbarch parameter.
+	(m32r_frame_unwind_cache): Use get_frame_arch to get at the current
+	architecture by frame_info.
+	* iq2000-tdep.c (iq2000_register_name): Add gdbarch parameter.
+	* ia64-tdep.c (ia64_register_name): Add gdbarch parameter.
+	* hppa-tdep.c (hppa32_register_name, hppa64_register_name): Add gdbarch
+	parameter.
+	* h8300-tdep.c (h8300_register_name, h8300s_register_name)
+	(h8300sx_register_name): Add gdbarch parameter.
+	* cris-tdep.c (cris_register_name, crisv32_register_name): Add
+	gdbarch parameter. Replace current_gdbarch by gdbarch.
+	(cris_gdbarch_init): Replace current_gdbarch by gdbarch (comment).
+	* avr-tdep.c (avr_register_name): Add gdbarch parameter.
+	* arm-tdep.c (arm_register_name): Add gdbarch paramete
+	* amd64-tdep.c (amd64_register_name): Add gdbarch parameter. Update
+	caller.
+	* amd64-tdep.h (amd64_register_name): Add gdbarch parameter.
+	* amd64-linux-tdep.c (amd64_linux_register_name): Add gdbarch parameter.
+	* alpha-tdep.c (alpha_register_name): Add gdbarch parameter.
+	(alpha_cannot_fetch_register, alpha_cannot_store_register): Update call
+	of alpha_register_name.
+	* frv-tdep.c (frv_register_name): Add gdbarch parameter.
+	* i386-tdep.c (i386_register_name): Add gdbarch parameter. Replace
+	current_gdbarch by gdbarch.
+	(i386_register_type): Replace ?current_gdbarch by gdbarch.
+	* i386-tdep.h (i386_register_name): Add gdbarch parameter.
+	* i386-linux-tdep.c (i386_linux_register_name): Add gdbarch parameter.
+
+	* m68hc11-tdep.c (m68hc11_register_name): Add gdbarch parameter.
+	(m68hc11_register_reggroup_p): Add gdbarch to call of
+	m68hc11_register_name.
+	* mn10300-tdep.c (mn10300_generic_register_name, am33_register_name)
+	(am33_2_register_name): Add gdbarch parameter.
+	(mn10300_frame_unwind_cache): Use get_frame_arch to get at the current
+	architecture by frame_info.
+	(mn10300_dump_tdep): Replace current_gdbarch by gdbarch.
+	* rs6000-tdep.c (rs6000_register_name): Add gdbarch parameter. Replace
+	current_gdbarch by gdbarch.
+	* score-tdep.c (score_register_name): Add gdbarch parameter.
+	(score_return_value, score_push_dummy_call): Replace current_gdbarch
+	by gdbarch.
+	* sh64-tdep.c (sh64_register_name): Add gdbarch parameter.
+	(sh64_compact_reg_base_num, sh64_register_convert_to_virtual)
+	(sh64_register_convert_to_raw, sh64_fv_reg_base_num)
+	(sh64_dr_reg_base_num, sh64_fpp_reg_base_num): Add gdbarch parameter
+	and update caller. Replace current_gdbarch by gdbarch.
+	(sh64_extract_return_value, sh64_store_return_value): Use
+	get_regcache_arch to get at the current architecture by regcache.
+	* sh-tdep.c (sh_sh_register_name, sh_sh3_register_name)
+	(sh_sh3e_register_name, sh_sh2e_register_name, sh_sh2a_register_name)
+	(sh_sh2a_nofpu_register_name, sh_sh_dsp_register_name)
+	(sh_sh3_dsp_register_name, sh_sh4_register_name)
+	(sh_sh4_nofpu_register_name, sh_sh4al_dsp_register_name): Add gdbarch
+	parameter.
+	(fv_reg_base_num, dr_reg_base_num, sh_justify_value_in_reg)
+	(sh_next_flt_argreg): Add gdbarch parameter and update caller. Replace
+	current_gdbarch by gdbarch.
+	(sh_extract_return_value_fpu, sh_store_return_value_fpu): Use
+	get_regcache_arch to get at the current architecture by regcache.
+	* sparc-tdep.c (sparc32_register_name): Add gdbarch parameter.
+	* sparc64-tdep.c (sparc64_register_name): Add gdbarch parameter.
+	* v850-tdep.c (v850_register_name, v850e_register_name): Add gdbarch
+	parameter.
+	(v850_unwind_sp, v850_unwind_pc): Replace current_gdbarch by gdbarch.
+	* xtensa-tdep.c (xtensa_register_name): Add gdbarch parameter. Replace
+	current_gdbarch by gdbarch.
+	(xtensa_pseudo_register_read, xtensa_pseudo_register_write)
+	(xtensa_frame_prev_register): Add gdbarch parameter to
+	xtensa_register_name call.
+
 2007-10-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-linux-tdep.c (ppc_linux_skip_trampoline_code): Fall back to

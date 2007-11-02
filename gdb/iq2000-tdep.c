@@ -118,7 +118,7 @@ iq2000_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
    Returns the name of the iq2000 register number N.  */
 
 static const char *
-iq2000_register_name (int regnum)
+iq2000_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static const char * names[E_NUM_REGS] =
     {

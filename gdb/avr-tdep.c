@@ -188,7 +188,7 @@ struct gdbarch_tdep
 /* Lookup the name of a register given it's number. */
 
 static const char *
-avr_register_name (int regnum)
+avr_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",

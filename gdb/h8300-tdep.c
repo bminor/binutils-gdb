@@ -947,7 +947,7 @@ h8300h_return_value (struct gdbarch *gdbarch, struct type *type,
 static struct cmd_list_element *setmachinelist;
 
 static const char *
-h8300_register_name (int regno)
+h8300_register_name (struct gdbarch *gdbarch, int regno)
 {
   /* The register names change depending on which h8300 processor
      type is selected. */
@@ -965,7 +965,7 @@ h8300_register_name (int regno)
 }
 
 static const char *
-h8300s_register_name (int regno)
+h8300s_register_name (struct gdbarch *gdbarch, int regno)
 {
   static char *register_names[] = {
     "er0", "er1", "er2", "er3", "er4", "er5", "er6",
@@ -983,7 +983,7 @@ h8300s_register_name (int regno)
 }
 
 static const char *
-h8300sx_register_name (int regno)
+h8300sx_register_name (struct gdbarch *gdbarch, int regno)
 {
   static char *register_names[] = {
     "er0", "er1", "er2", "er3", "er4", "er5", "er6",

@@ -73,7 +73,7 @@ static const char *amd64_register_names[] =
 /* Return the name of register REGNUM.  */
 
 const char *
-amd64_register_name (int regnum)
+amd64_register_name (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= 0 && regnum < AMD64_NUM_REGS)
     return amd64_register_names[regnum];

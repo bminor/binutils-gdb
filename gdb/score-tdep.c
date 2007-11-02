@@ -284,7 +284,7 @@ score_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static const char *
-score_register_name (int regnum)
+score_register_name (struct gdbarch *gdbarch, int regnum)
 {
   const char *score_register_names[] = {
     "r0",  "r1",  "r2",  "r3",  "r4",  "r5",  "r6",  "r7",
@@ -433,7 +433,7 @@ score_return_value (struct gdbarch *gdbarch, struct type *type,
           if (offset + xfer > TYPE_LENGTH (type))
             xfer = TYPE_LENGTH (type) - offset;
           score_xfer_register (regcache, regnum, xfer,
-			       gdbarch_byte_order (current_gdbarch),
+			       gdbarch_byte_order (gdbarch),
                                readbuf, writebuf, offset);
         }
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -543,7 +543,7 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
          Where X is a hole.  */
 
-      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
           && (typecode == TYPE_CODE_STRUCT
               || typecode == TYPE_CODE_UNION)
           && argreg > SCORE_LAST_ARG_REGNUM
@@ -557,7 +557,7 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
           /* The last part of a arg should shift left when
              gdbarch_byte_order is BFD_ENDIAN_BIG.  */
-          if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
+          if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
               && arg_last_part_p == 1
               && (typecode == TYPE_CODE_STRUCT
                   || typecode == TYPE_CODE_UNION))

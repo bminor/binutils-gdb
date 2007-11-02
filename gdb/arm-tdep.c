@@ -2596,7 +2596,7 @@ set_disassembly_style_sfunc (char *args, int from_tty,
 
 /* Return the ARM register name corresponding to register I.  */
 static const char *
-arm_register_name (int i)
+arm_register_name (struct gdbarch *gdbarch, int i)
 {
   if (i >= ARRAY_SIZE (arm_register_names))
     /* These registers are only supported on targets which supply

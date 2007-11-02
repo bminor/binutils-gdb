@@ -139,7 +139,7 @@ struct pifsr		/* Info about one saved register.  */
 };
 
 static const char *
-v850_register_name (int regnum)
+v850_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static const char *v850_reg_names[] =
   { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", 
@@ -158,7 +158,7 @@ v850_register_name (int regnum)
 }
 
 static const char *
-v850e_register_name (int regnum)
+v850e_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static const char *v850e_reg_names[] =
   {
@@ -939,14 +939,14 @@ static CORE_ADDR
 v850_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   return frame_unwind_register_unsigned (next_frame,
-					 gdbarch_sp_regnum (current_gdbarch));
+					 gdbarch_sp_regnum (gdbarch));
 } 
 
 static CORE_ADDR
 v850_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   return frame_unwind_register_unsigned (next_frame,
-					 gdbarch_pc_regnum (current_gdbarch));
+					 gdbarch_pc_regnum (gdbarch));
 }
 
 static struct frame_id

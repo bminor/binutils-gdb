@@ -205,12 +205,12 @@ static int amd64_linux_sc_reg_offset[] =
 /* Replacement register functions which know about %orig_rax.  */
 
 static const char *
-amd64_linux_register_name (int reg)
+amd64_linux_register_name (struct gdbarch *gdbarch, int reg)
 {
   if (reg == AMD64_LINUX_ORIG_RAX_REGNUM)
     return "orig_rax";
 
-  return amd64_register_name (reg);
+  return amd64_register_name (gdbarch, reg);
 }
 
 static struct type *

@@ -38,13 +38,13 @@
 /* Return the name of register REG.  */
 
 static const char *
-i386_linux_register_name (int reg)
+i386_linux_register_name (struct gdbarch *gdbarch, int reg)
 {
   /* Deal with the extra "orig_eax" pseudo register.  */
   if (reg == I386_LINUX_ORIG_EAX_REGNUM)
     return "orig_eax";
 
-  return i386_register_name (reg);
+  return i386_register_name (gdbarch, reg);
 }
 
 /* Return non-zero, when the register is in the corresponding register

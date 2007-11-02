@@ -1778,7 +1778,7 @@ cris_special_register_name (int regno)
 }
 
 static const char *
-cris_register_name (int regno)
+cris_register_name (struct gdbarch *gdbarch, int regno)
 {
   static char *cris_genreg_names[] =
   { "r0",  "r1",  "r2",  "r3", \
@@ -1791,7 +1791,7 @@ cris_register_name (int regno)
       /* General register.  */
       return cris_genreg_names[regno];
     }
-  else if (regno >= NUM_GENREGS && regno < gdbarch_num_regs (current_gdbarch))
+  else if (regno >= NUM_GENREGS && regno < gdbarch_num_regs (gdbarch))
     {
       return cris_special_register_name (regno);
     }
@@ -1803,7 +1803,7 @@ cris_register_name (int regno)
 }
 
 static const char *
-crisv32_register_name (int regno)
+crisv32_register_name (struct gdbarch *gdbarch, int regno)
 {
   static char *crisv32_genreg_names[] =
     { "r0",  "r1",  "r2",  "r3", \
@@ -1828,7 +1828,7 @@ crisv32_register_name (int regno)
     {
       return cris_special_register_name (regno);
     }
-  else if (regno == gdbarch_pc_regnum (current_gdbarch))
+  else if (regno == gdbarch_pc_regnum (gdbarch))
     {
       return "pc";
     }
@@ -4133,7 +4133,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* The total amount of space needed to store (in an array called registers)
      GDB's copy of the machine's register state.  Note: We can not use
-     cris_register_size at this point, since it relies on current_gdbarch
+     cris_register_size at this point, since it relies on gdbarch
      being set.  */
   switch (tdep->cris_version)
     {

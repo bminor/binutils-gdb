@@ -527,6 +527,8 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of dwarf_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
+  if (current_gdbarch->register_name == 0)
+    fprintf_unfiltered (log, "\n\tregister_name");
   /* Skip verify of register_type, has predicate */
   /* Skip verify of unwind_dummy_id, has predicate */
   /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
@@ -1617,7 +1619,7 @@ gdbarch_register_name (struct gdbarch *gdbarch, int regnr)
   gdb_assert (gdbarch->register_name != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_name called\n");
-  return gdbarch->register_name (regnr);
+  return gdbarch->register_name (gdbarch, regnr);
 }
 
 void

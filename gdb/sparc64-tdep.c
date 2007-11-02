@@ -225,7 +225,7 @@ static const char *sparc64_pseudo_register_names[] =
 /* Return the name of register REGNUM.  */
 
 static const char *
-sparc64_register_name (int regnum)
+sparc64_register_name (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= 0 && regnum < SPARC64_NUM_REGS)
     return sparc64_register_names[regnum];

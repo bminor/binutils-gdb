@@ -140,7 +140,7 @@ enum mt_gdb_regnums
 /* Return name of register number specified by REGNUM.  */
 
 static const char *
-mt_register_name (int regnum)
+mt_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static const char *const register_names[] = {
     /* CPU regs.  */
@@ -311,7 +311,7 @@ mt_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (group == all_reggroup)
     return (regnum >= 0
 	    && regnum < MT_NUM_REGS + MT_NUM_PSEUDO_REGS
-	    && mt_register_name (regnum)[0] != '\0');
+	    && mt_register_name (gdbarch, regnum)[0] != '\0');
 
   if (group == general_reggroup)
     return (regnum >= MT_R0_REGNUM && regnum <= MT_R15_REGNUM);
@@ -619,8 +619,8 @@ mt_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 
 static void
 mt_registers_info (struct gdbarch *gdbarch,
-		    struct ui_file *file,
-		    struct frame_info *frame, int regnum, int all)
+		   struct ui_file *file,
+		   struct frame_info *frame, int regnum, int all)
 {
   if (regnum == -1)
     {
@@ -660,9 +660,9 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  frame_register_read (frame, regnum, buff);
 
 	  fputs_filtered (gdbarch_register_name
-			  (current_gdbarch, regnum), file);
+			  (gdbarch, regnum), file);
 	  print_spaces_filtered (15 - strlen (gdbarch_register_name
-					        (current_gdbarch, regnum)),
+					        (gdbarch, regnum)),
 				 file);
 	  fputs_filtered ("0x", file);
 
@@ -684,10 +684,10 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  frame_register_read (frame, MT_COPRO_REGNUM, buf);
 	  /* And print.  */
 	  regnum = MT_COPRO_PSEUDOREG_REGNUM;
-	  fputs_filtered (gdbarch_register_name (current_gdbarch, regnum),
+	  fputs_filtered (gdbarch_register_name (gdbarch, regnum),
 			  file);
 	  print_spaces_filtered (15 - strlen (gdbarch_register_name
-					        (current_gdbarch, regnum)),
+					        (gdbarch, regnum)),
 				 file);
 	  val_print (register_type (gdbarch, regnum), buf,
 		     0, 0, file, 0, 1, 0, Val_no_prettyprint);
@@ -717,10 +717,10 @@ mt_registers_info (struct gdbarch *gdbarch,
 
 	  /* And print.  */
 	  regnum = MT_MAC_PSEUDOREG_REGNUM;
-	  fputs_filtered (gdbarch_register_name (current_gdbarch, regnum),
+	  fputs_filtered (gdbarch_register_name (gdbarch, regnum),
 			  file);
 	  print_spaces_filtered (15 - strlen (gdbarch_register_name
-					      (current_gdbarch, regnum)),
+					      (gdbarch, regnum)),
 				 file);
 	  fputs_filtered ("0x", file);
 	  print_longest (file, 'x', 0, newmac);

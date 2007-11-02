@@ -493,9 +493,9 @@ static const char *mips_irix_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
 
 /* Return the name of the register corresponding to REGNO.  */
 static const char *
-mips_register_name (int regno)
+mips_register_name (struct gdbarch *gdbarch, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* GPR names for all ABIs other than n32/n64.  */
   static char *mips_gpr_names[] = {
     "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3",
@@ -512,12 +512,12 @@ mips_register_name (int regno)
     "t8", "t9", "k0", "k1", "gp", "sp", "s8", "ra"
   };
 
-  enum mips_abi abi = mips_abi (current_gdbarch);
+  enum mips_abi abi = mips_abi (gdbarch);
 
   /* Map [gdbarch_num_regs .. 2*gdbarch_num_regs) onto the raw registers, 
      but then don't make the raw register names visible.  */
-  int rawnum = regno % gdbarch_num_regs (current_gdbarch);
-  if (regno < gdbarch_num_regs (current_gdbarch))
+  int rawnum = regno % gdbarch_num_regs (gdbarch);
+  if (regno < gdbarch_num_regs (gdbarch))
     return "";
 
   /* The MIPS integer registers are always mapped from 0 to 31.  The
@@ -530,9 +530,9 @@ mips_register_name (int regno)
       else
 	return mips_gpr_names[rawnum];
     }
-  else if (tdesc_has_registers (gdbarch_target_desc (current_gdbarch)))
-    return tdesc_register_name (rawnum);
-  else if (32 <= rawnum && rawnum < gdbarch_num_regs (current_gdbarch))
+  else if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    return tdesc_register_name (gdbarch, rawnum);
+  else if (32 <= rawnum && rawnum < gdbarch_num_regs (gdbarch))
     {
       gdb_assert (rawnum - 32 < NUM_MIPS_PROCESSOR_REGS);
       return tdep->mips_processor_reg_names[rawnum - 32];

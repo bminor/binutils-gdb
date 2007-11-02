@@ -507,21 +507,20 @@ tdesc_find_register (struct gdbarch *gdbarch, int regno)
    from an architecture-provided pseudo_register_name method.  */
 
 const char *
-tdesc_register_name (int regno)
+tdesc_register_name (struct gdbarch *gdbarch, int regno)
 {
-  struct tdesc_reg *reg = tdesc_find_register (current_gdbarch, regno);
-  int num_regs = gdbarch_num_regs (current_gdbarch);
-  int num_pseudo_regs = gdbarch_num_pseudo_regs (current_gdbarch);
+  struct tdesc_reg *reg = tdesc_find_register (gdbarch, regno);
+  int num_regs = gdbarch_num_regs (gdbarch);
+  int num_pseudo_regs = gdbarch_num_pseudo_regs (gdbarch);
 
   if (reg != NULL)
     return reg->name;
 
   if (regno >= num_regs && regno < num_regs + num_pseudo_regs)
     {
-      struct tdesc_arch_data *data = gdbarch_data (current_gdbarch,
-						   tdesc_data);
+      struct tdesc_arch_data *data = gdbarch_data (gdbarch, tdesc_data);
       gdb_assert (data->pseudo_register_name != NULL);
-      return data->pseudo_register_name (regno);
+      return data->pseudo_register_name (gdbarch, regno);
     }
 
   return "";

@@ -168,7 +168,7 @@ extern struct type *i386_sse_type (struct gdbarch *gdbarch);
 extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
 
 /* Return the name of register REGNUM.  */
-extern char const *i386_register_name (int regnum);
+extern char const *i386_register_name (struct gdbarch * gdbarch, int regnum);
 
 /* Return non-zero if REGNUM is a member of the specified group.  */
 extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,

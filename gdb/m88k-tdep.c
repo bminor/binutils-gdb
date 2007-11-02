@@ -49,7 +49,7 @@ m88k_fetch_instruction (CORE_ADDR pc)
 /* Return the name of register REGNUM.  */
 
 static const char *
-m88k_register_name (int regnum)
+m88k_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static char *register_names[] =
   {

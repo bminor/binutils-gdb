@@ -219,7 +219,7 @@ register_name (int reg, char **regs, long sizeof_regs)
 }
 
 static const char *
-mn10300_generic_register_name (int reg)
+mn10300_generic_register_name (struct gdbarch *gdbarch, int reg)
 {
   static char *regs[] =
   { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
@@ -232,7 +232,7 @@ mn10300_generic_register_name (int reg)
 
 
 static const char *
-am33_register_name (int reg)
+am33_register_name (struct gdbarch *gdbarch, int reg)
 {
   static char *regs[] =
   { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
@@ -244,7 +244,7 @@ am33_register_name (int reg)
 }
 
 static const char *
-am33_2_register_name (int reg)
+am33_2_register_name (struct gdbarch *gdbarch, int reg)
 {
   static char *regs[] =
   {
@@ -843,7 +843,7 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
     return (*this_prologue_cache);
 
   cache = trad_frame_cache_zalloc (next_frame);
-  pc = gdbarch_unwind_pc (current_gdbarch, next_frame);
+  pc = gdbarch_unwind_pc (get_frame_arch (next_frame), next_frame);
   mn10300_analyze_prologue (next_frame, (void **) &cache, pc);
   if (find_pc_partial_function (pc, NULL, &start, &end))
     trad_frame_set_id (cache, 
@@ -1179,9 +1179,9 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 /* Dump out the mn10300 specific architecture information. */
 
 static void
-mn10300_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+mn10300_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   fprintf_unfiltered (file, "mn10300_dump_tdep: am33_mode = %d\n",
 		      tdep->am33_mode);
 }

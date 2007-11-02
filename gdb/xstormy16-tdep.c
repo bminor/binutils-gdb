@@ -104,7 +104,7 @@ enum
    Returns the name of the standard Xstormy16 register N.  */
 
 static const char *
-xstormy16_register_name (int regnum)
+xstormy16_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",

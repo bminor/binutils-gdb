@@ -212,7 +212,7 @@ char *m32r_register_names[] = {
 };
 
 static const char *
-m32r_register_name (int reg_nr)
+m32r_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr < 0)
     return NULL;
@@ -623,7 +623,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 
   /* Adjust all the saved registers so that they contain addresses and
      not offsets.  */
-  for (i = 0; i < gdbarch_num_regs (current_gdbarch) - 1; i++)
+  for (i = 0; i < gdbarch_num_regs (get_frame_arch (next_frame)) - 1; i++)
     if (trad_frame_addr_p (info->saved_regs, i))
       info->saved_regs[i].addr = (info->prev_sp + info->saved_regs[i].addr);
 

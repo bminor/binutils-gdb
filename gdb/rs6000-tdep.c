@@ -2355,9 +2355,9 @@ regsize (const struct reg *reg, int wordsize)
    is an anonymous register.  */
 
 static const char *
-rs6000_register_name (int regno)
+rs6000_register_name (struct gdbarch *gdbarch, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* The upper half "registers" have names in the XML description,
      but we present only the low GPRs and the full 64-bit registers
@@ -2381,7 +2381,7 @@ rs6000_register_name (int regno)
       return spe_regnames[regno - tdep->ppc_ev0_regnum];
     }
 
-  return tdesc_register_name (regno);
+  return tdesc_register_name (gdbarch, regno);
 }
 
 /* Return the GDB type object for the "standard" data type of data in

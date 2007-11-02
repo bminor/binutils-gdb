@@ -181,12 +181,12 @@ extract_call_winsize (CORE_ADDR pc)
 
 /* Returns the name of a register.  */
 static const char *
-xtensa_register_name (int regnum)
+xtensa_register_name (struct gdbarch *gdbarch, int regnum)
 {
   /* Return the name stored in the register map.  */
-  if (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch)
-			      + gdbarch_num_pseudo_regs (current_gdbarch))
-    return gdbarch_tdep (current_gdbarch)->regmap[regnum].name;
+  if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch)
+			      + gdbarch_num_pseudo_regs (gdbarch))
+    return gdbarch_tdep (gdbarch)->regmap[regnum].name;
 
   internal_error (__FILE__, __LINE__, _("invalid register %d"), regnum);
   return 0;
@@ -500,7 +500,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
 			     gdb_byte *buffer)
 {
   DEBUGTRACE ("xtensa_pseudo_register_read (... regnum = %d (%s) ...)\n",
-	      regnum, xtensa_register_name (regnum));
+	      regnum, xtensa_register_name (gdbarch, regnum));
 
   if (regnum == gdbarch_num_regs (gdbarch)
 		+ gdbarch_num_pseudo_regs (gdbarch))
@@ -536,7 +536,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
 	  if ((flags & xtTargetFlagsNonVisibleRegs) == 0)
 	    {
 	      warning (_("cannot read register %s"),
-		       xtensa_register_name (regnum));
+		       xtensa_register_name (gdbarch, regnum));
 	      return;
 	    }
 	}
@@ -584,7 +584,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 			      const gdb_byte *buffer)
 {
   DEBUGTRACE ("xtensa_pseudo_register_write (... regnum = %d (%s) ...)\n",
-	      regnum, xtensa_register_name (regnum));
+	      regnum, xtensa_register_name (gdbarch, regnum));
 
   if (regnum == gdbarch_num_regs (gdbarch)
 		+ gdbarch_num_pseudo_regs (gdbarch))
@@ -624,7 +624,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 	  if ((flags & xtTargetFlagsNonVisibleRegs) == 0)
 	    {
 	      warning (_("cannot write register %s"),
-		       xtensa_register_name (regnum));
+		       xtensa_register_name (gdbarch, regnum));
 	      return;
 	    }
 	}
@@ -1248,7 +1248,7 @@ xtensa_frame_prev_register (struct frame_info *next_frame,
 	      "*this 0x%08x, regnum %d (%s), ...)\n",
 	      (unsigned int) next_frame,
 	      *this_cache ? (unsigned int) *this_cache : 0, regnum,
-	      xtensa_register_name (regnum));
+	      xtensa_register_name (gdbarch, regnum));
 
   if (regnum ==gdbarch_pc_regnum (gdbarch))
     saved_reg = cache->ra;

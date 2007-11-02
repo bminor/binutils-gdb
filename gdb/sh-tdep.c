@@ -74,7 +74,7 @@ struct sh_frame_cache
 };
 
 static const char *
-sh_sh_register_name (int reg_nr)
+sh_sh_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -96,7 +96,7 @@ sh_sh_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh3_register_name (int reg_nr)
+sh_sh3_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -118,7 +118,7 @@ sh_sh3_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh3e_register_name (int reg_nr)
+sh_sh3e_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -140,7 +140,7 @@ sh_sh3e_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh2e_register_name (int reg_nr)
+sh_sh2e_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -162,7 +162,7 @@ sh_sh2e_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh2a_register_name (int reg_nr)
+sh_sh2a_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     /* general registers 0-15 */
@@ -202,7 +202,7 @@ sh_sh2a_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh2a_nofpu_register_name (int reg_nr)
+sh_sh2a_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     /* general registers 0-15 */
@@ -242,7 +242,7 @@ sh_sh2a_nofpu_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh_dsp_register_name (int reg_nr)
+sh_sh_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -264,7 +264,7 @@ sh_sh_dsp_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh3_dsp_register_name (int reg_nr)
+sh_sh3_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -287,7 +287,7 @@ sh_sh3_dsp_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh4_register_name (int reg_nr)
+sh_sh4_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     /* general registers 0-15 */
@@ -324,7 +324,7 @@ sh_sh4_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh4_nofpu_register_name (int reg_nr)
+sh_sh4_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     /* general registers 0-15 */
@@ -359,7 +359,7 @@ sh_sh4_nofpu_register_name (int reg_nr)
 }
 
 static const char *
-sh_sh4al_dsp_register_name (int reg_nr)
+sh_sh4al_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   static char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -873,7 +873,7 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
 
 /* Helper function to justify value in register according to endianess. */
 static char *
-sh_justify_value_in_reg (struct value *val, int len)
+sh_justify_value_in_reg (struct gdbarch *gdbarch, struct value *val, int len)
 {
   static char valbuf[4];
 
@@ -881,7 +881,7 @@ sh_justify_value_in_reg (struct value *val, int len)
   if (len < 4)
     {
       /* value gets right-justified in the register or stack word */
-      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	memcpy (valbuf + (4 - len), (char *) value_contents (val), len);
       else
 	memcpy (valbuf, (char *) value_contents (val), len);
@@ -924,7 +924,7 @@ sh_init_flt_argreg (void)
    29) the parity of the register number is preserved, which is important
    for the double register passing test (see the "argreg & 1" test below). */
 static int
-sh_next_flt_argreg (int len)
+sh_next_flt_argreg (struct gdbarch *gdbarch, int len)
 {
   int argreg;
 
@@ -954,7 +954,7 @@ sh_next_flt_argreg (int len)
       /* Also mark the next register as used. */
       flt_argreg_array[argreg + 1] = 1;
     }
-  else if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+  else if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
     {
       /* In little endian, gcc passes floats like this: f5, f4, f7, f6, ... */
       if (!flt_argreg_array[argreg + 1])
@@ -1053,7 +1053,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
     {
       type = value_type (args[argnum]);
       len = TYPE_LENGTH (type);
-      val = sh_justify_value_in_reg (args[argnum], len);
+      val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
       /* Some decisions have to be made how various types are handled.
          This also differs in different ABIs. */
@@ -1062,7 +1062,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
       /* Find out the next register to use for a floating point value. */
       treat_as_flt = sh_treat_as_flt_p (type);
       if (treat_as_flt)
-	flt_argreg = sh_next_flt_argreg (len);
+	flt_argreg = sh_next_flt_argreg (gdbarch, len);
       /* In contrast to non-FPU CPUs, arguments are never split between
 	 registers and stack.  If an argument doesn't fit in the remaining
 	 registers it's always pushed entirely on the stack.  */
@@ -1160,7 +1160,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
     {
       type = value_type (args[argnum]);
       len = TYPE_LENGTH (type);
-      val = sh_justify_value_in_reg (args[argnum], len);
+      val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
       while (len > 0)
 	{
@@ -1230,12 +1230,13 @@ static void
 sh_extract_return_value_fpu (struct type *type, struct regcache *regcache,
 			     void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (sh_treat_as_flt_p (type))
     {
       int len = TYPE_LENGTH (type);
-      int i, regnum = gdbarch_fp0_regnum (current_gdbarch);
+      int i, regnum = gdbarch_fp0_regnum (gdbarch);
       for (i = 0; i < len; i += 4)
-	if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
 	  regcache_raw_read (regcache, regnum++, (char *) valbuf + len - 4 - i);
 	else
 	  regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
@@ -1274,12 +1275,13 @@ static void
 sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
 			   const void *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   if (sh_treat_as_flt_p (type))
     {
       int len = TYPE_LENGTH (type);
-      int i, regnum = gdbarch_fp0_regnum (current_gdbarch);
+      int i, regnum = gdbarch_fp0_regnum (gdbarch);
       for (i = 0; i < len; i += 4)
-	if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
 	  regcache_raw_write (regcache, regnum++,
 			      (char *) valbuf + len - 4 - i);
 	else
@@ -2177,22 +2179,22 @@ sh_register_convert_to_raw (struct type *type, int regnum,
 
 /* For vectors of 4 floating point registers. */
 static int
-fv_reg_base_num (int fv_regnum)
+fv_reg_base_num (struct gdbarch *gdbarch, int fv_regnum)
 {
   int fp_regnum;
 
-  fp_regnum = gdbarch_fp0_regnum (current_gdbarch)
+  fp_regnum = gdbarch_fp0_regnum (gdbarch)
 	      + (fv_regnum - FV0_REGNUM) * 4;
   return fp_regnum;
 }
 
 /* For double precision floating point registers, i.e 2 fp regs.*/
 static int
-dr_reg_base_num (int dr_regnum)
+dr_reg_base_num (struct gdbarch *gdbarch, int dr_regnum)
 {
   int fp_regnum;
 
-  fp_regnum = gdbarch_fp0_regnum (current_gdbarch)
+  fp_regnum = gdbarch_fp0_regnum (gdbarch)
 	      + (dr_regnum - DR0_REGNUM) * 2;
   return fp_regnum;
 }
@@ -2209,7 +2211,7 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   else
   if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
-      base_regnum = dr_reg_base_num (reg_nr);
+      base_regnum = dr_reg_base_num (gdbarch, reg_nr);
 
       /* Build the value in the provided buffer. */
       /* Read the real regs for which this one is an alias.  */
@@ -2225,7 +2227,7 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     }
   else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
     {
-      base_regnum = fv_reg_base_num (reg_nr);
+      base_regnum = fv_reg_base_num (gdbarch, reg_nr);
 
       /* Read the real regs for which this one is an alias.  */
       for (portion = 0; portion < 4; portion++)
@@ -2257,7 +2259,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     }
   else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
-      base_regnum = dr_reg_base_num (reg_nr);
+      base_regnum = dr_reg_base_num (gdbarch, reg_nr);
 
       /* We must pay attention to the endiannes. */
       sh_register_convert_to_raw (register_type (gdbarch, reg_nr),
@@ -2272,7 +2274,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     }
   else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
     {
-      base_regnum = fv_reg_base_num (reg_nr);
+      base_regnum = fv_reg_base_num (gdbarch, reg_nr);
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 4; portion++)

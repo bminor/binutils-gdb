@@ -298,7 +298,7 @@ ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 }
 
 static const char *
-ia64_register_name (int reg)
+ia64_register_name (struct gdbarch *gdbarch, int reg)
 {
   return ia64_register_names[reg];
 }

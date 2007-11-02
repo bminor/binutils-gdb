@@ -365,7 +365,7 @@ m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
 }
 
 static const char *
-m68hc11_register_name (int reg_nr)
+m68hc11_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == M68HC12_HARD_PC_REGNUM && USE_PAGE_REGISTER)
     return "pc";
@@ -1395,13 +1395,14 @@ m68hc11_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
                    || regnum == SOFT_TMP_REGNUM
                    || regnum == SOFT_ZS_REGNUM
                    || regnum == SOFT_XY_REGNUM)
-                  && m68hc11_register_name (regnum)));
+                  && m68hc11_register_name (gdbarch, regnum)));
     }
 
   /* Group to identify gcc soft registers (d1..dN).  */
   if (group == m68hc11_soft_reggroup)
     {
-      return regnum >= SOFT_D1_REGNUM && m68hc11_register_name (regnum);
+      return regnum >= SOFT_D1_REGNUM
+	     && m68hc11_register_name (gdbarch, regnum);
     }
 
   if (group == m68hc11_hard_reggroup)

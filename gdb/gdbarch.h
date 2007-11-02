@@ -232,7 +232,7 @@ typedef int (gdbarch_dwarf2_reg_to_regnum_ftype) (int dwarf2_regnr);
 extern int gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2_regnr);
 extern void set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum);
 
-typedef const char * (gdbarch_register_name_ftype) (int regnr);
+typedef const char * (gdbarch_register_name_ftype) (struct gdbarch *gdbarch, int regnr);
 extern const char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);
 extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register_name_ftype *register_name);
 

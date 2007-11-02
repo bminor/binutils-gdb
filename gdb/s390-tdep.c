@@ -65,7 +65,7 @@ struct gdbarch_tdep
 
 /* Return the name of register REGNUM.  */
 static const char *
-s390_register_name (int regnum)
+s390_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static const char *register_names[S390_NUM_TOTAL_REGS] =
     {

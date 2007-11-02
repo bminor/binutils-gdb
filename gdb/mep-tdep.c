@@ -928,9 +928,9 @@ current_ccr_names ()
 
 
 static const char *
-mep_register_name (int regnr)
+mep_register_name (struct gdbarch *gdbarch, int regnr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);  
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);  
 
   /* General-purpose registers.  */
   static const char *gpr_names[] = {
@@ -1031,7 +1031,7 @@ mep_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   /* Filter reserved or unused register numbers.  */
   {
-    const char *name = mep_register_name (regnum);
+    const char *name = mep_register_name (gdbarch, regnum);
 
     if (! name || name[0] == '\0')
       return 0;

@@ -65,7 +65,7 @@ extern void amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 /* Functions from amd64-tdep.c which may be needed on architectures
    with extra registers.  */
 
-extern const char *amd64_register_name (int regnum);
+extern const char *amd64_register_name (struct gdbarch *gdbarch, int regnum);
 extern struct type *amd64_register_type (struct gdbarch *gdbarch, int regnum);
 
 /* Fill register REGNUM in REGCACHE with the appropriate

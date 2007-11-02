@@ -581,7 +581,7 @@ hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 /* Return the name of a register.  */
 
 static const char *
-hppa32_register_name (int i)
+hppa32_register_name (struct gdbarch *gdbarch, int i)
 {
   static char *names[] = {
     "flags",  "r1",      "rp",     "r3",
@@ -624,7 +624,7 @@ hppa32_register_name (int i)
 }
 
 static const char *
-hppa64_register_name (int i)
+hppa64_register_name (struct gdbarch *gdbarch, int i)
 {
   static char *names[] = {
     "flags",  "r1",      "rp",     "r3",
