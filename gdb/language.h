@@ -148,13 +148,6 @@ struct language_defn
 
     enum language la_language;
 
-    /* Its builtin types.  This is a vector ended by a NULL pointer.  These
-       types can be specified by name in parsing types in expressions,
-       regardless of whether the program being debugged actually defines
-       such a type.  */
-
-    struct type **const *la_builtin_type_vector;
-
     /* Default range checking */
 
     enum range_check la_range_check;
@@ -263,9 +256,6 @@ struct language_defn
 
     /* Index to use for extracting the first element of a string. */
     char string_lower_bound;
-
-    /* Type of elements of strings. */
-    struct type **string_char_type;
 
     /* The list of characters forming word boundaries.  */
     char *(*la_word_break_characters) (void);

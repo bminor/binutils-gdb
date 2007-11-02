@@ -474,7 +474,6 @@ const struct language_defn f_language_defn =
 {
   "fortran",
   language_fortran,
-  NULL,
   range_check_on,
   type_check_on,
   case_sensitive_off,
@@ -499,7 +498,6 @@ const struct language_defn f_language_defn =
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   f_language_arch_info,
   default_print_array_index,

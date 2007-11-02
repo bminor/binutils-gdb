@@ -1179,7 +1179,6 @@ const struct language_defn unknown_language_defn =
 {
   "unknown",
   language_unknown,
-  NULL,
   range_check_off,
   type_check_off,
   array_row_major,
@@ -1204,7 +1203,6 @@ const struct language_defn unknown_language_defn =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
@@ -1217,7 +1215,6 @@ const struct language_defn auto_language_defn =
 {
   "auto",
   language_auto,
-  NULL,
   range_check_off,
   type_check_off,
   array_row_major,
@@ -1242,7 +1239,6 @@ const struct language_defn auto_language_defn =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
@@ -1254,7 +1250,6 @@ const struct language_defn local_language_defn =
 {
   "local",
   language_auto,
-  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -1279,7 +1274,6 @@ const struct language_defn local_language_defn =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   unknown_language_arch_info,	/* la_language_arch_info.  */
   default_print_array_index,
@@ -1321,10 +1315,7 @@ language_string_char_type (const struct language_defn *la,
 {
   struct language_gdbarch *ld = gdbarch_data (gdbarch,
 					      language_gdbarch_data);
-  if (ld->arch_info[la->la_language].string_char_type != NULL)
-    return ld->arch_info[la->la_language].string_char_type;
-  else
-    return (*la->string_char_type);
+  return ld->arch_info[la->la_language].string_char_type;
 }
 
 struct type *
@@ -1334,25 +1325,13 @@ language_lookup_primitive_type_by_name (const struct language_defn *la,
 {
   struct language_gdbarch *ld = gdbarch_data (gdbarch,
 					      language_gdbarch_data);
-  if (ld->arch_info[la->la_language].primitive_type_vector != NULL)
+  struct type *const *p;
+  for (p = ld->arch_info[la->la_language].primitive_type_vector;
+       (*p) != NULL;
+       p++)
     {
-      struct type *const *p;
-      for (p = ld->arch_info[la->la_language].primitive_type_vector;
-	   (*p) != NULL;
-	   p++)
-	{
-	  if (strcmp (TYPE_NAME (*p), name) == 0)
-	    return (*p);
-	}
-    }
-  else
-    {
-      struct type **const *p;
-      for (p = current_language->la_builtin_type_vector; *p != NULL; p++)
-	{
-	  if (strcmp (TYPE_NAME (**p), name) == 0)
-	    return (**p);
-	}
+      if (strcmp (TYPE_NAME (*p), name) == 0)
+	return (*p);
     }
   return (NULL);
 }

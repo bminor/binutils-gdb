@@ -10411,7 +10411,6 @@ static const struct exp_descriptor ada_exp_descriptor = {
 const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
   language_ada,
-  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,            /* Yes, Ada is case-insensitive, but
@@ -10437,7 +10436,6 @@ const struct language_defn ada_language_defn = {
   ada_op_print_tab,             /* expression operators for printing */
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
-  NULL,
   ada_get_gdb_completer_word_break_characters,
   ada_language_arch_info,
   ada_print_array_index,

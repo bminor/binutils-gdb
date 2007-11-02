@@ -1,3 +1,24 @@
+2007-11-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* language.h (struct language_defn): Remove la_builtin_type_vector
+	and string_char_type members.
+	* language.c (language_string_char_type): No longer consult
+	la->string_char_type.
+	(language_lookup_primitive_type_by_name): No longer consult
+	current_language->la_builtin_type_vector.
+
+	* language.c (unknown_language_defn, auto_language_defn,
+	local_language_defn): Adapt initializer.
+	* ada-lang.c (ada_language_defn): Likewise.
+	* c-lang.c (c_language_defn, cplus_language_defn, asm_language_defn,
+	minimal_language_defn): Likewise.
+	* f-lang.c (f_language_defn): Likewise.
+	* jv-lang.c (java_language_defn): Likewise.
+	* m2-lang.c (m2_language_defn): Likewise.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* p-lang.c (pascal_language_defn): Likewise.
+	* scm-lang.c (scm_language_defn): Likewise.
+
 2007-11-02  Markus Deuling  <deuling@de.ibm.com>
 
 	* frame.c (frame_id_inner): Add gdbarch parameter. Replace

@@ -592,7 +592,6 @@ const struct language_defn c_language_defn =
 {
   "c",				/* Language name */
   language_c,
-  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -617,7 +616,6 @@ const struct language_defn c_language_defn =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   c_language_arch_info,
   default_print_array_index,
@@ -698,7 +696,6 @@ const struct language_defn cplus_language_defn =
 {
   "c++",			/* Language name */
   language_cplus,
-  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -723,7 +720,6 @@ const struct language_defn cplus_language_defn =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   cplus_language_arch_info,
   default_print_array_index,
@@ -735,7 +731,6 @@ const struct language_defn asm_language_defn =
 {
   "asm",			/* Language name */
   language_asm,
-  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -760,7 +755,6 @@ const struct language_defn asm_language_defn =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   c_language_arch_info, /* FIXME: la_language_arch_info.  */
   default_print_array_index,
@@ -777,7 +771,6 @@ const struct language_defn minimal_language_defn =
 {
   "minimal",			/* Language name */
   language_minimal,
-  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -802,7 +795,6 @@ const struct language_defn minimal_language_defn =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   c_language_arch_info,
   default_print_array_index,

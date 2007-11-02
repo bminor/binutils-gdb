@@ -546,7 +546,6 @@ const struct language_defn pascal_language_defn =
 {
   "pascal",			/* Language name */
   language_pascal,
-  NULL,
   range_check_on,
   type_check_on,
   case_sensitive_on,
@@ -571,7 +570,6 @@ const struct language_defn pascal_language_defn =
   pascal_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   pascal_language_arch_info,
   default_print_array_index,

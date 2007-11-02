@@ -529,7 +529,6 @@ const struct language_defn m2_language_defn =
 {
   "modula-2",
   language_m2,
-  NULL,
   range_check_on,
   type_check_on,
   case_sensitive_on,
@@ -554,7 +553,6 @@ const struct language_defn m2_language_defn =
   m2_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   m2_language_arch_info,
   default_print_array_index,

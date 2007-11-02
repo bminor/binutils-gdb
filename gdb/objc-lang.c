@@ -639,7 +639,6 @@ static const struct op_print objc_op_print_tab[] =
 const struct language_defn objc_language_defn = {
   "objective-c",		/* Language name */
   language_objc,
-  NULL,
   range_check_off,
   type_check_off,
   case_sensitive_on,
@@ -664,7 +663,6 @@ const struct language_defn objc_language_defn = {
   objc_op_print_tab,		/* Expression operators for printing */
   1,				/* C-style arrays */
   0,				/* String lower bound */
-  NULL,
   default_word_break_characters,
   c_language_arch_info,
   default_print_array_index,
