@@ -76,6 +76,15 @@ struct Read_symbols_data
   unsigned int verneed_info;
 };
 
+// Information used to print error messages.
+
+struct Symbol_location_info
+{
+  std::string source_file;
+  std::string enclosing_symbol_name;
+  int line_number;
+};
+
 // Data about a single relocation section.  This is read in
 // read_relocs and processed in scan_relocs.
 
@@ -188,6 +197,11 @@ class Object
   section_flags(unsigned int shndx)
   { return this->do_section_flags(shndx); }
 
+  // Return the section link field given a section index.
+  unsigned int
+  section_link(unsigned int shndx)
+  { return this->do_section_link(shndx); }
+
   // Read the symbol information.
   void
   read_symbols(Read_symbols_data* sd)
@@ -276,6 +290,10 @@ class Object
   // Get section flags--implemented by child class.
   virtual uint64_t
   do_section_flags(unsigned int shndx) = 0;
+
+  // Get section link field--implemented by child class.
+  virtual unsigned int
+  do_section_link(unsigned int shndx) = 0;
 
   // Get the file.
   Input_file*
@@ -660,6 +678,13 @@ class Sized_relobj : public Relobj
     gold_assert(ins.second);
   }
 
+  // Return the name of the symbol that spans the given offset in the
+  // specified section in this object.  This is used only for error
+  // messages and is not particularly efficient.
+  bool
+  get_symbol_location_info(unsigned int shndx, off_t offset,
+			   Symbol_location_info* info);
+
   // Read the symbols.
   void
   do_read_symbols(Read_symbols_data*);
@@ -705,6 +730,11 @@ class Sized_relobj : public Relobj
   uint64_t
   do_section_flags(unsigned int shndx)
   { return this->elf_file_.section_flags(shndx); }
+
+  // Return the section link field.
+  unsigned int
+  do_section_link(unsigned int shndx)
+  { return this->elf_file_.section_link(shndx); }
 
  private:
   // For convenience.

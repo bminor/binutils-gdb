@@ -801,6 +801,62 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
   of->write_output_view(this->local_symbol_offset_, output_size, oview);
 }
 
+// Set *INFO to symbolic information about the offset OFFSET in the
+// section SHNDX.  Return true if we found something, false if we
+// found nothing.
+
+template<int size, bool big_endian>
+bool
+Sized_relobj<size, big_endian>::get_symbol_location_info(
+    unsigned int shndx,
+    off_t offset,
+    Symbol_location_info* info)
+{
+  if (this->symtab_shndx_ == 0)
+    return false;
+
+  off_t symbols_size;
+  const unsigned char* symbols = this->section_contents(this->symtab_shndx_,
+							&symbols_size,
+							false);
+
+  unsigned int symbol_names_shndx = this->section_link(this->symtab_shndx_);
+  off_t names_size;
+  const unsigned char* symbol_names_u =
+    this->section_contents(symbol_names_shndx, &names_size, false);
+  const char* symbol_names = reinterpret_cast<const char*>(symbol_names_u);
+
+  const int sym_size = This::sym_size;
+  const size_t count = symbols_size / sym_size;
+
+  const unsigned char* p = symbols;
+  for (size_t i = 0; i < count; ++i, p += sym_size)
+    {
+      elfcpp::Sym<size, big_endian> sym(p);
+
+      if (sym.get_st_type() == elfcpp::STT_FILE)
+	{
+	  if (sym.get_st_name() >= names_size)
+	    info->source_file = "(invalid)";
+	  else
+	    info->source_file = symbol_names + sym.get_st_name();
+	}
+      else if (sym.get_st_shndx() == shndx
+               && static_cast<off_t>(sym.get_st_value()) <= offset
+               && (static_cast<off_t>(sym.get_st_value() + sym.get_st_size())
+                   >= offset))
+        {
+          if (sym.get_st_name() > names_size)
+	    info->enclosing_symbol_name = "(invalid)";
+	  else
+	    info->enclosing_symbol_name = symbol_names + sym.get_st_name();
+	  return true;
+        }
+    }
+
+  return false;
+}
+
 // Input_objects methods.
 
 // Add a regular relocatable object to the list.  Return false if this
@@ -849,21 +905,27 @@ Input_objects::add_object(Object* obj)
 
 template<int size, bool big_endian>
 std::string
-Relocate_info<size, big_endian>::location(size_t relnum, off_t) const
+Relocate_info<size, big_endian>::location(size_t, off_t offset) const
 {
+  // FIXME: We would like to print the following:
+  // /tmp/foo.o: in function 'fn':foo.c:12: undefined reference to 'xxx'
+  // We're missing line numbers.
   std::string ret(this->object->name());
-  ret += ": reloc ";
+  ret += ':';
+  Symbol_location_info info;
+  if (this->object->get_symbol_location_info(this->data_shndx, offset, &info))
+    {
+      ret += " in function ";
+      ret += info.enclosing_symbol_name;
+      ret += ":";
+      ret += info.source_file;
+    }
+  ret += "(";
+  ret += this->object->section_name(this->data_shndx);
   char buf[100];
-  snprintf(buf, sizeof buf, "%zu", relnum);
+  // Offsets into sections have to be positive.
+  snprintf(buf, sizeof(buf), "+0x%lx)", static_cast<long>(offset));
   ret += buf;
-  ret += " in reloc section ";
-  snprintf(buf, sizeof buf, "%u", this->reloc_shndx);
-  ret += buf;
-  ret += " (" + this->object->section_name(this->reloc_shndx);
-  ret += ") for section ";
-  snprintf(buf, sizeof buf, "%u", this->data_shndx);
-  ret += buf;
-  ret += " (" + this->object->section_name(this->data_shndx) + ")";
   return ret;
 }
 
