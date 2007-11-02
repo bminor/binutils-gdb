@@ -34,6 +34,7 @@
 
 // Documentation for the TLS relocs is taken from
 //   http://people.redhat.com/drepper/tls.pdf
+//   http://www.lsd.ic.unicamp.br/~oliva/writeups/TLS/RFC-TLSDESC-x86.txt
 
 namespace elfcpp
 {
@@ -80,9 +81,10 @@ enum
   R_386_TLS_DTPMOD32 = 35,  // Outstanding General/Local Dynamic reloc, sun+gnu
   R_386_TLS_DTPOFF32 = 36,  // Outstanding General Dynamic reloc, sun+gnu
   R_386_TLS_TPOFF32 = 37,   // Outstanding Initial Exec reloc, sun-style
-  R_386_TLS_GOTDESC = 39,
-  R_386_TLS_DESC_CALL = 40,
-  R_386_TLS_DESC = 41,
+  R_386_TLS_GOTDESC = 39,   // GOT offset for TLS descriptor
+  R_386_TLS_DESC_CALL = 40, // Marker of call through TLS desc for relaxation
+  R_386_TLS_DESC = 41,      // TLS descriptor containing pointer to code and
+                            // to argument, returning TLS offset for symbol
   // Used by Intel.
   R_386_USED_BY_INTEL_200 = 200,
   // GNU vtable garbage collection extensions.

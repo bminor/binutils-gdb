@@ -35,6 +35,16 @@
 namespace elfcpp
 {
 
+typedef unsigned char Dwarf_uint8;
+typedef signed char Dwarf_int8;
+typedef uint16_t Dwarf_uint16;
+typedef int16_t Dwarf_int16;
+typedef uint32_t Dwarf_uint32;
+typedef int32_t Dwarf_int32;
+typedef uint64_t Dwarf_uint64;
+typedef int64_t Dwarf_int64;
+
+
 // DWARF2 codes.
 
 enum DW_TAG
@@ -148,6 +158,233 @@ enum DW_EH_PE
   DW_EH_PE_aligned = 0x50,
 
   DW_EH_PE_indirect = 0x80
+};
+
+// Line number opcodes.
+
+enum DW_LINE_OPS
+{
+  DW_LNS_extended_op = 0,
+  DW_LNS_copy = 1,
+  DW_LNS_advance_pc = 2,
+  DW_LNS_advance_line = 3,
+  DW_LNS_set_file = 4,
+  DW_LNS_set_column = 5,
+  DW_LNS_negate_stmt = 6,
+  DW_LNS_set_basic_block = 7,
+  DW_LNS_const_add_pc = 8,
+  DW_LNS_fixed_advance_pc = 9,
+  // DWARF 3.
+  DW_LNS_set_prologue_end = 10,
+  DW_LNS_set_epilogue_begin = 11,
+  DW_LNS_set_isa = 12
+};
+
+// Line number extended opcodes.
+
+enum DW_LINE_EXTENDED_OPS
+{
+  DW_LNE_end_sequence = 1,
+  DW_LNE_set_address = 2,
+  DW_LNE_define_file = 3,
+  // HP extensions.
+  DW_LNE_HP_negate_is_UV_update      = 0x11,
+  DW_LNE_HP_push_context             = 0x12,
+  DW_LNE_HP_pop_context              = 0x13,
+  DW_LNE_HP_set_file_line_column     = 0x14,
+  DW_LNE_HP_set_routine_name         = 0x15,
+  DW_LNE_HP_set_sequence             = 0x16,
+  DW_LNE_HP_negate_post_semantics    = 0x17,
+  DW_LNE_HP_negate_function_exit     = 0x18,
+  DW_LNE_HP_negate_front_end_logical = 0x19,
+  DW_LNE_HP_define_proc              = 0x20
+};
+
+// Type encoding names and codes
+
+enum DW_ENCODING
+{
+  DW_ATE_address                     =0x1,
+  DW_ATE_boolean                     =0x2,
+  DW_ATE_complex_float               =0x3,
+  DW_ATE_float                       =0x4,
+  DW_ATE_signed                      =0x5,
+  DW_ATE_signed_char                 =0x6,
+  DW_ATE_unsigned                    =0x7,
+  DW_ATE_unsigned_char               =0x8,
+  // DWARF3/DWARF3f
+  DW_ATE_imaginary_float             =0x9,
+  DW_ATE_packed_decimal              =0xa,
+  DW_ATE_numeric_string              =0xb,
+  DW_ATE_edited                      =0xc,
+  DW_ATE_signed_fixed                =0xd,
+  DW_ATE_unsigned_fixed              =0xe,
+  DW_ATE_decimal_float               =0xf,
+  DW_ATE_lo_user                     =0x80,
+  DW_ATE_hi_user                     =0xff
+};
+
+// Location virtual machine opcodes
+
+enum DW_OP
+{
+  DW_OP_addr                         =0x03,
+  DW_OP_deref                        =0x06,
+  DW_OP_const1u                      =0x08,
+  DW_OP_const1s                      =0x09,
+  DW_OP_const2u                      =0x0a,
+  DW_OP_const2s                      =0x0b,
+  DW_OP_const4u                      =0x0c,
+  DW_OP_const4s                      =0x0d,
+  DW_OP_const8u                      =0x0e,
+  DW_OP_const8s                      =0x0f,
+  DW_OP_constu                       =0x10,
+  DW_OP_consts                       =0x11,
+  DW_OP_dup                          =0x12,
+  DW_OP_drop                         =0x13,
+  DW_OP_over                         =0x14,
+  DW_OP_pick                         =0x15,
+  DW_OP_swap                         =0x16,
+  DW_OP_rot                          =0x17,
+  DW_OP_xderef                       =0x18,
+  DW_OP_abs                          =0x19,
+  DW_OP_and                          =0x1a,
+  DW_OP_div                          =0x1b,
+  DW_OP_minus                        =0x1c,
+  DW_OP_mod                          =0x1d,
+  DW_OP_mul                          =0x1e,
+  DW_OP_neg                          =0x1f,
+  DW_OP_not                          =0x20,
+  DW_OP_or                           =0x21,
+  DW_OP_plus                         =0x22,
+  DW_OP_plus_uconst                  =0x23,
+  DW_OP_shl                          =0x24,
+  DW_OP_shr                          =0x25,
+  DW_OP_shra                         =0x26,
+  DW_OP_xor                          =0x27,
+  DW_OP_bra                          =0x28,
+  DW_OP_eq                           =0x29,
+  DW_OP_ge                           =0x2a,
+  DW_OP_gt                           =0x2b,
+  DW_OP_le                           =0x2c,
+  DW_OP_lt                           =0x2d,
+  DW_OP_ne                           =0x2e,
+  DW_OP_skip                         =0x2f,
+  DW_OP_lit0                         =0x30,
+  DW_OP_lit1                         =0x31,
+  DW_OP_lit2                         =0x32,
+  DW_OP_lit3                         =0x33,
+  DW_OP_lit4                         =0x34,
+  DW_OP_lit5                         =0x35,
+  DW_OP_lit6                         =0x36,
+  DW_OP_lit7                         =0x37,
+  DW_OP_lit8                         =0x38,
+  DW_OP_lit9                         =0x39,
+  DW_OP_lit10                        =0x3a,
+  DW_OP_lit11                        =0x3b,
+  DW_OP_lit12                        =0x3c,
+  DW_OP_lit13                        =0x3d,
+  DW_OP_lit14                        =0x3e,
+  DW_OP_lit15                        =0x3f,
+  DW_OP_lit16                        =0x40,
+  DW_OP_lit17                        =0x41,
+  DW_OP_lit18                        =0x42,
+  DW_OP_lit19                        =0x43,
+  DW_OP_lit20                        =0x44,
+  DW_OP_lit21                        =0x45,
+  DW_OP_lit22                        =0x46,
+  DW_OP_lit23                        =0x47,
+  DW_OP_lit24                        =0x48,
+  DW_OP_lit25                        =0x49,
+  DW_OP_lit26                        =0x4a,
+  DW_OP_lit27                        =0x4b,
+  DW_OP_lit28                        =0x4c,
+  DW_OP_lit29                        =0x4d,
+  DW_OP_lit30                        =0x4e,
+  DW_OP_lit31                        =0x4f,
+  DW_OP_reg0                         =0x50,
+  DW_OP_reg1                         =0x51,
+  DW_OP_reg2                         =0x52,
+  DW_OP_reg3                         =0x53,
+  DW_OP_reg4                         =0x54,
+  DW_OP_reg5                         =0x55,
+  DW_OP_reg6                         =0x56,
+  DW_OP_reg7                         =0x57,
+  DW_OP_reg8                         =0x58,
+  DW_OP_reg9                         =0x59,
+  DW_OP_reg10                        =0x5a,
+  DW_OP_reg11                        =0x5b,
+  DW_OP_reg12                        =0x5c,
+  DW_OP_reg13                        =0x5d,
+  DW_OP_reg14                        =0x5e,
+  DW_OP_reg15                        =0x5f,
+  DW_OP_reg16                        =0x60,
+  DW_OP_reg17                        =0x61,
+  DW_OP_reg18                        =0x62,
+  DW_OP_reg19                        =0x63,
+  DW_OP_reg20                        =0x64,
+  DW_OP_reg21                        =0x65,
+  DW_OP_reg22                        =0x66,
+  DW_OP_reg23                        =0x67,
+  DW_OP_reg24                        =0x68,
+  DW_OP_reg25                        =0x69,
+  DW_OP_reg26                        =0x6a,
+  DW_OP_reg27                        =0x6b,
+  DW_OP_reg28                        =0x6c,
+  DW_OP_reg29                        =0x6d,
+  DW_OP_reg30                        =0x6e,
+  DW_OP_reg31                        =0x6f,
+  DW_OP_breg0                        =0x70,
+  DW_OP_breg1                        =0x71,
+  DW_OP_breg2                        =0x72,
+  DW_OP_breg3                        =0x73,
+  DW_OP_breg4                        =0x74,
+  DW_OP_breg5                        =0x75,
+  DW_OP_breg6                        =0x76,
+  DW_OP_breg7                        =0x77,
+  DW_OP_breg8                        =0x78,
+  DW_OP_breg9                        =0x79,
+  DW_OP_breg10                       =0x7a,
+  DW_OP_breg11                       =0x7b,
+  DW_OP_breg12                       =0x7c,
+  DW_OP_breg13                       =0x7d,
+  DW_OP_breg14                       =0x7e,
+  DW_OP_breg15                       =0x7f,
+  DW_OP_breg16                       =0x80,
+  DW_OP_breg17                       =0x81,
+  DW_OP_breg18                       =0x82,
+  DW_OP_breg19                       =0x83,
+  DW_OP_breg20                       =0x84,
+  DW_OP_breg21                       =0x85,
+  DW_OP_breg22                       =0x86,
+  DW_OP_breg23                       =0x87,
+  DW_OP_breg24                       =0x88,
+  DW_OP_breg25                       =0x89,
+  DW_OP_breg26                       =0x8a,
+  DW_OP_breg27                       =0x8b,
+  DW_OP_breg28                       =0x8c,
+  DW_OP_breg29                       =0x8d,
+  DW_OP_breg30                       =0x8e,
+  DW_OP_breg31                       =0x8f,
+  DW_OP_regX                         =0x90,
+  DW_OP_fbreg                        =0x91,
+  DW_OP_bregX                        =0x92,
+  DW_OP_piece                        =0x93,
+  DW_OP_deref_size                   =0x94,
+  DW_OP_xderef_size                  =0x95,
+  DW_OP_nop                          =0x96,
+  // DWARF3/DWARF3f
+  DW_OP_push_object_address          =0x97,
+  DW_OP_call2                        =0x98,
+  DW_OP_call4                        =0x99,
+  DW_OP_call_ref                     =0x9a,
+  DW_OP_form_tls_address             =0x9b,
+  DW_OP_call_frame_cfa               =0x9c,
+  DW_OP_bit_piece                    =0x9d,
+  DW_OP_lo_user                      =0xe0,
+  DW_OP_hi_user                      =0xff,  
+  // GNU extensions
+  DW_OP_GNU_push_tls_address         =0xe0
 };
 
 } // End namespace elfcpp.
