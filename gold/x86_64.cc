@@ -743,12 +743,17 @@ Target_x86_64::Scan::local(const General_options&,
       // relocate it easily.
       if (parameters->output_is_position_independent())
         {
-	  // FIXME: R_X86_64_RELATIVE assumes a 64-bit relocation.
-	  gold_assert(r_type == elfcpp::R_X86_64_64);
-
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-          rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                              data_shndx, reloc.get_r_offset(), 0);
+          if (r_type == elfcpp::R_X86_64_64)
+            rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
+                                data_shndx, reloc.get_r_offset(), 0);
+          else
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
+              rela_dyn->add_local(object, r_sym, r_type, data_shndx,
+                                  reloc.get_r_offset(),
+                                  reloc.get_r_addend());
+            }
         }
       break;
 
@@ -946,16 +951,11 @@ Target_x86_64::Scan::global(const General_options& options,
 		      gsym->set_needs_dynsym_value();
                     if (parameters->output_is_position_independent())
                       {
-			// FIXME: R_X86_64_RELATIVE assumes a 64-bit
-			// relocation.
-			gold_assert(r_type == elfcpp::R_X86_64_64);
-
                         Reloc_section* rela_dyn =
                           target->rela_dyn_section(layout);
-                        rela_dyn->add_local(object, 0,
-                                            elfcpp::R_X86_64_RELATIVE,
-                                            data_shndx,
-                                            reloc.get_r_offset(), 0);
+                        rela_dyn->add_global(gsym, r_type, object, data_shndx, 
+                                            reloc.get_r_offset(),
+                                            reloc.get_r_addend());
                       }
 		  }
 	      }
@@ -971,6 +971,21 @@ Target_x86_64::Scan::global(const General_options& options,
 	      target->copy_reloc(&options, symtab, layout, object, data_shndx,
 			         gsym, reloc);
 	  }
+        else if (!is_pcrel && parameters->output_is_position_independent())
+          {
+            // This is not a PC-relative reference, so we need to generate
+            // a dynamic relocation. At this point, we know the symbol
+            // is not preemptible, so we can use the RELATIVE relocation.
+            Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+            if (r_type == elfcpp::R_X86_64_64)
+              rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
+                                  data_shndx,
+                                  reloc.get_r_offset(), 0);
+            else
+              rela_dyn->add_global(gsym, r_type, object, data_shndx, 
+                                   reloc.get_r_offset(),
+                                   reloc.get_r_addend());
+          }
 	}
       break;
 

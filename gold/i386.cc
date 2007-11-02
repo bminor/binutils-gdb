@@ -151,6 +151,12 @@ class Target_i386 : public Sized_target<32, false>
 	}
     }
 
+    // Return whether the static relocation needs to be applied.
+    inline bool
+    should_apply_static_reloc(const Sized_symbol<32>* gsym,
+                              bool is_pcrel,
+                              bool is_32bit);
+
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
     inline bool
@@ -772,12 +778,16 @@ Target_i386::Scan::local(const General_options&,
       // relocate it easily.
       if (parameters->output_is_position_independent())
         {
-	  // FIXME: R_386_RELATIVE only works for a 32-bit relocation.
-	  gold_assert(r_type != elfcpp::R_386_16 && r_type != elfcpp::R_386_8);
-
           Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-          rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE, data_shndx,
-                             reloc.get_r_offset());
+          if (r_type == elfcpp::R_386_32)
+            rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE, data_shndx,
+                               reloc.get_r_offset());
+          else
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+              rel_dyn->add_local(object, r_sym, r_type, data_shndx,
+                                 reloc.get_r_offset());
+            }
         }
       break;
 
@@ -973,15 +983,10 @@ Target_i386::Scan::global(const General_options& options,
 		      gsym->set_needs_dynsym_value();
                     if (parameters->output_is_position_independent())
                       {
-			// FIXME: If this is an 8-bit or 16-bit
-			// relocation, R_386_RELATIVE won't work.
-			gold_assert(r_type != elfcpp::R_386_16
-				    && r_type != elfcpp::R_386_8);
-
                         Reloc_section* rel_dyn =
                           target->rel_dyn_section(layout);
-                        rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
-                                           data_shndx, reloc.get_r_offset());
+                        rel_dyn->add_global(gsym, r_type, object, data_shndx, 
+                                            reloc.get_r_offset());
                       }
 		  }
 	      }
@@ -998,16 +1003,16 @@ Target_i386::Scan::global(const General_options& options,
 	  }
         else if (!is_pcrel && parameters->output_is_position_independent())
           {
-	    // FIXME: If this is an 8-bit or 16-bit relocation,
-	    // R_386_RELATIVE won't work.
-	    gold_assert(r_type != elfcpp::R_386_16
-			&& r_type != elfcpp::R_386_8);
-
             // This is not a PC-relative reference, so we need to generate
-            // a dynamic relocation.
+            // a dynamic relocation. At this point, we know the symbol
+            // is not preemptible, so we can use the RELATIVE relocation.
             Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-            rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE, data_shndx,
-                               reloc.get_r_offset());
+            if (r_type == elfcpp::R_386_32)
+              rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE, data_shndx,
+                                 reloc.get_r_offset());
+            else
+              rel_dyn->add_global(gsym, r_type, object, data_shndx, 
+                                  reloc.get_r_offset());
           }
       }
       break;
@@ -1228,6 +1233,46 @@ Target_i386::do_finalize_sections(Layout* layout)
   this->copy_relocs_ = NULL;
 }
 
+// Return whether a direct absolute static relocation needs to be applied.
+// In cases where Scan::local() or Scan::global() has created
+// a dynamic relocation other than R_386_RELATIVE, the addend
+// of the relocation is carried in the data, and we must not
+// apply the static relocation.
+
+inline bool
+Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
+                                                 bool is_pcrel,
+                                                 bool is_32bit)
+{
+  // For local symbols, return FALSE if a non-RELATIVE dynamic
+  // relocation was created; return TRUE otherwise.
+  if (gsym == NULL)
+    return (!parameters->output_is_position_independent() || is_32bit);
+
+  // For global symbols, mimic the logic in Scan::global()
+  // to decide whether a non-RELATIVE dynamic relocation was
+  // created.
+  // FIXME: This is ugly. Try to refactor this logic so it can be
+  // shared by Scan::global() and Relocate::relocate().
+  if (gsym->is_from_dynobj()
+      || (parameters->output_is_shared()
+          && gsym->is_preemptible()))
+    {
+      if (gsym->type() == elfcpp::STT_FUNC)
+	{
+	  if (!is_pcrel && parameters->output_is_position_independent())
+            return false;
+	}
+      else
+	return false;
+    }
+  else if (!is_pcrel && parameters->output_is_position_independent())
+    return is_32bit;
+
+  // For all other cases, return TRUE 
+  return true;
+}
+
 // Perform a relocation.
 
 inline bool
@@ -1305,27 +1350,33 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_32:
-      Relocate_functions<32, false>::rel32(view, object, psymval);
+      if (should_apply_static_reloc(gsym, false, true))
+        Relocate_functions<32, false>::rel32(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC32:
-      Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
+      if (should_apply_static_reloc(gsym, true, true))
+        Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_16:
-      Relocate_functions<32, false>::rel16(view, object, psymval);
+      if (should_apply_static_reloc(gsym, false, false))
+        Relocate_functions<32, false>::rel16(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC16:
-      Relocate_functions<32, false>::pcrel16(view, object, psymval, address);
+      if (should_apply_static_reloc(gsym, true, false))
+        Relocate_functions<32, false>::pcrel16(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_8:
-      Relocate_functions<32, false>::rel8(view, object, psymval);
+      if (should_apply_static_reloc(gsym, false, false))
+        Relocate_functions<32, false>::rel8(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC8:
-      Relocate_functions<32, false>::pcrel8(view, object, psymval, address);
+      if (should_apply_static_reloc(gsym, true, false))
+        Relocate_functions<32, false>::pcrel8(view, object, psymval, address);
       break;
 
     case elfcpp::R_386_PLT32:
