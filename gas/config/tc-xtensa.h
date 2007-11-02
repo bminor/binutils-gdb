@@ -275,6 +275,7 @@ typedef struct xtensa_symfield_type
 {
   unsigned int is_loop_target : 1;
   unsigned int is_branch_target : 1;
+  symbolS *next_expr_symbol;
 } xtensa_symfield_type;
 
 
@@ -338,6 +339,7 @@ extern char *xtensa_section_rename (char *);
 #define tc_fix_adjustable(fix)		xtensa_fix_adjustable (fix)
 #define tc_frob_label(sym)		xtensa_frob_label (sym)
 #define tc_unrecognized_line(ch)	xtensa_unrecognized_line (ch)
+#define tc_symbol_new_hook(sym)		xtensa_symbol_new_hook (sym)
 #define md_do_align(a,b,c,d,e)		xtensa_flush_pending_output ()
 #define md_elf_section_change_hook	xtensa_elf_section_change_hook
 #define md_end				xtensa_end

@@ -1,3 +1,11 @@
+2007-11-01  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (xtensa_symbol_new_hook): New.
+	(xtensa_mark_difference_of_two_symbols): New.
+	(xtensa_post_relax_hook): Call xtensa_mark_difference_of_two_symbols.
+	* config/tc-xtensa.h (xtensa_symfield_type): Add next_expr_symbol.
+	(tc_symbol_new_hook): Define.
+
 2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Replace no_xsuf with

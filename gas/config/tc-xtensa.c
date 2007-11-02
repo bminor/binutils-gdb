@@ -5599,6 +5599,22 @@ xtensa_fix_adjustable (fixS *fixP)
 }
 
 
+/* tc_symbol_new_hook */
+
+symbolS *expr_symbols = NULL;
+
+void 
+xtensa_symbol_new_hook (symbolS *sym)
+{
+  if (S_GET_SEGMENT (sym) == expr_section)
+    {
+      symbol_get_tc (sym)->next_expr_symbol = expr_symbols;
+      expr_symbols = sym;
+    }
+}
+
+
+
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
@@ -6943,6 +6959,7 @@ static void xtensa_cleanup_align_frags (void);
 static void xtensa_fix_target_frags (void);
 static void xtensa_mark_narrow_branches (void);
 static void xtensa_mark_zcl_first_insns (void);
+static void xtensa_mark_difference_of_two_symbols (void);
 static void xtensa_fix_a0_b_retw_frags (void);
 static void xtensa_fix_b_j_loop_end_frags (void);
 static void xtensa_fix_close_loop_end_frags (void);
@@ -7203,6 +7220,55 @@ xtensa_mark_zcl_first_insns (void)
 	      }
 	  }
       }
+}
+
+
+/* Some difference-of-symbols expressions make it out to the linker.  Some 
+   don't.  If one does, then the linker can optimize between the two labels.
+   If it doesn't, then the linker shouldn't.  */
+
+static void
+xtensa_mark_difference_of_two_symbols (void)
+{
+  symbolS *expr_sym;
+
+  for (expr_sym = expr_symbols; expr_sym; 
+       expr_sym = symbol_get_tc (expr_sym)->next_expr_symbol)
+    {
+      expressionS *expr = symbol_get_value_expression (expr_sym);
+
+      if (expr->X_op == O_subtract)
+	{
+	  symbolS *left = expr->X_add_symbol;
+	  symbolS *right = expr->X_op_symbol;
+	  
+	  /* Difference of two symbols not in the same section
+	     are handled with relocations in the linker.  */
+	  if (S_GET_SEGMENT (left) == S_GET_SEGMENT (right))
+	    {
+	      fragS *start;
+	      fragS *end;
+
+	      if (symbol_get_frag (left)->fr_address 
+		  <= symbol_get_frag (right)->fr_address)
+		{
+		  start = symbol_get_frag (left);
+		  end = symbol_get_frag (right);
+		}
+	      else
+		{
+		  start = symbol_get_frag (right);
+		  end = symbol_get_frag (left);
+		}
+	      do 
+		{
+		  start->tc_frag_data.is_no_transform = 1;
+		  start = start->fr_next;
+		}
+	      while (start && start->fr_address < end->fr_address);
+	    }
+	}
+    }
 }
 
 
@@ -10208,6 +10274,7 @@ xtensa_post_relax_hook (void)
 
   xtensa_find_unmarked_state_frags ();
   xtensa_mark_frags_for_org ();
+  xtensa_mark_difference_of_two_symbols ();
 
   xtensa_create_property_segments (get_frag_is_literal,
 				   NULL,
