@@ -87,6 +87,7 @@ void
 dummy_frame_push (struct regcache *caller_regcache,
 		  const struct frame_id *dummy_id)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (caller_regcache);
   struct dummy_frame *dummy_frame;
 
   /* Check to see if there are stale dummy frames, perhaps left over
@@ -95,7 +96,7 @@ dummy_frame_push (struct regcache *caller_regcache,
   dummy_frame = dummy_frame_stack;
   while (dummy_frame)
     /* FIXME: cagney/2004-08-02: Should just test IDs.  */
-    if (frame_id_inner (dummy_frame->id, (*dummy_id)))
+    if (frame_id_inner (gdbarch, dummy_frame->id, (*dummy_id)))
       /* Stale -- destroy!  */
       {
 	dummy_frame_stack = dummy_frame->next;

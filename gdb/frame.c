@@ -369,7 +369,7 @@ frame_id_eq (struct frame_id l, struct frame_id r)
 }
 
 int
-frame_id_inner (struct frame_id l, struct frame_id r)
+frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
 {
   int inner;
   if (!l.stack_addr_p || !r.stack_addr_p)
@@ -380,7 +380,7 @@ frame_id_inner (struct frame_id l, struct frame_id r)
        comment in "frame.h", there is some fuzz here.  Frameless
        functions are not strictly inner than (same .stack but
        different .code and/or .special address).  */
-    inner = gdbarch_inner_than (current_gdbarch, l.stack_addr, r.stack_addr);
+    inner = gdbarch_inner_than (gdbarch, l.stack_addr, r.stack_addr);
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "{ frame_id_inner (l=");
@@ -410,7 +410,7 @@ frame_find_by_id (struct frame_id id)
       if (frame_id_eq (id, this))
 	/* An exact match.  */
 	return frame;
-      if (frame_id_inner (id, this))
+      if (frame_id_inner (get_frame_arch (frame), id, this))
 	/* Gone to far.  */
 	return NULL;
       /* Either we're not yet gone far enough out along the frame
@@ -1175,7 +1175,8 @@ get_prev_frame_1 (struct frame_info *this_frame)
      go backwards) and sentinel frames (the test is meaningless).  */
   if (this_frame->next->level >= 0
       && this_frame->next->unwind->type != SIGTRAMP_FRAME
-      && frame_id_inner (this_id, get_frame_id (this_frame->next)))
+      && frame_id_inner (get_frame_arch (this_frame), this_id,
+			 get_frame_id (this_frame->next)))
     {
       if (frame_debug)
 	{

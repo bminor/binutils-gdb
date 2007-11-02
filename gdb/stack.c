@@ -1824,7 +1824,9 @@ If you continue, the return value that you specified will be ignored.\n";
     struct frame_id selected_id = get_frame_id (get_selected_frame (NULL));
     while (!frame_id_eq (selected_id, get_frame_id (get_current_frame ())))
       {
-	if (frame_id_inner (selected_id, get_frame_id (get_current_frame ())))
+	struct frame_info *frame = get_current_frame ();
+	if (frame_id_inner (get_frame_arch (frame), selected_id,
+			    get_frame_id (frame)))
 	  /* Caught in the safety net, oops!  We've gone way past the
              selected frame.  */
 	  error (_("Problem while popping stack frames (corrupt stack?)"));

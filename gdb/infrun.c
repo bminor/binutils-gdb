@@ -2726,8 +2726,10 @@ process_event_stop_test:
      function.  Fortunately, those days are nearly upon us.  */
 #endif
   {
-    struct frame_id current_frame = get_frame_id (get_current_frame ());
-    if (!(frame_id_inner (current_frame, step_frame_id)))
+    struct frame_info *frame = get_current_frame ();
+    struct frame_id current_frame = get_frame_id (frame);
+    if (!(frame_id_inner (get_frame_arch (frame), current_frame,
+			  step_frame_id)))
       step_frame_id = current_frame;
   }
 

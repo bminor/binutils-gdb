@@ -1,5 +1,18 @@
 2007-11-02  Markus Deuling  <deuling@de.ibm.com>
 
+	* frame.c (frame_id_inner): Add gdbarch parameter. Replace
+	current_gdbarch by gdbarch.
+	(frame_find_by_id, get_prev_frame_1): Use get_frame_arch to get at the
+	current architecture by frame_info.
+	* frame.h (frame_id_inner): Add gdbarch parameter.
+	* stack.c (return_command): Use get_frame_arch to get at the current
+	architecture by frame_info. Update call of frame_id_inner.
+	* infrun.c (handle_inferior_event): Likewise.
+	* dummy-frame.c (dummy_frame_push):  Use get_regcache_arch to get at the
+	current architecture by regcache. Update call of frame_id_inner.
+
+2007-11-02  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (register_name): Add gdbarch parameter.
 	* gdbarch.{c,h}: Regenerate.
 

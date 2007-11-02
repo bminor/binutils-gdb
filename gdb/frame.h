@@ -175,7 +175,8 @@ extern int frame_id_eq (struct frame_id l, struct frame_id r);
 /* Returns non-zero when L is strictly inner-than R (they have
    different frame .bases).  Neither L, nor R can be `null'.  See note
    above about frameless functions.  */
-extern int frame_id_inner (struct frame_id l, struct frame_id r);
+extern int frame_id_inner (struct gdbarch *gdbarch, struct frame_id l,
+			   struct frame_id r);
 
 /* Write the internal representation of a frame ID on the specified
    stream.  */
