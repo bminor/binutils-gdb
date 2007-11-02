@@ -1,5 +1,33 @@
 2007-11-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (struct cplus_struct_type): Remove runtime_ptr member.
+	(TYPE_RUNTIME_PTR, TYPE_VTABLE, TYPE_HAS_VTABLE,
+	TYPE_PRIMARY_BASE, TYPE_VIRTUAL_BASE_LIST): Remove macros.
+	(HP_ACC_VFUNC_START, HP_ACC_VBASE_START, HP_ACC_TYPEINFO_OFFSET,
+	HP_ACC_TOP_OFFSET_OFFSET): Likewise.
+	(has_vtable, primary_base_class, virtual_base_list_length,
+	virtual_base_list_length_skip_primaries, virtual_base_index,
+	virtual_base_index_skip_primaries, class_index_in_primary_list,
+	count_virtual_fns): Remove prototypes.
+	* gdbtypes.c (has_vtable, primary_base_class, current_vbase_list,
+	virtual_base_list_aux, virtual_base_list, virtual_base_list_length,
+	virtual_base_list_length_skip_primaries, virtual_base_index,
+	virtual_base_index_skip_primaries, class_index_in_primary_list,
+	count_virtual_fns): Remove.
+
+	* cp-valprint.c (cp_print_hpacc_virtual_table_entries): Remove.
+	(hpacc_vtbl_ptr_name, hpacc_vtbl_ptr_type_name): Remove.
+	(cp_print_value_fields): Remove support for HP aCC vtables.
+	(cp_print_value): Likewise.
+	* c-typeprint.c (c_type_print_base): Likewise.
+
+	* value.h (find_rt_vbase_offset): Remove prototype.
+	* valops.c (find_rt_vbase_offset): Remove.
+	(search_struct_method): Remove support for HP aCC vtables.
+	(find_method_list): Likewise.
+
+2007-11-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* language.h (struct language_defn): Remove la_builtin_type_vector
 	and string_char_type members.
 	* language.c (language_string_char_type): No longer consult

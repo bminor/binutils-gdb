@@ -547,9 +547,6 @@ extern struct value *value_slice (struct value *, int, int);
 extern struct value *value_literal_complex (struct value *, struct value *,
 					    struct type *);
 
-extern void find_rt_vbase_offset (struct type *, struct type *,
-				  const gdb_byte *, int, int *, int *);
-
 extern struct value *find_function_in_inferior (const char *);
 
 extern struct value *value_allocate_space_in_inferior (int);

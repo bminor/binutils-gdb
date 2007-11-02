@@ -834,11 +834,6 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    {
 	      QUIT;
 	      /* Don't print out virtual function table.  */
-	      /* HP ANSI C++ case */
-	      if (TYPE_HAS_VTABLE (type)
-		  && (strncmp (TYPE_FIELD_NAME (type, i), "__vfp", 5) == 0))
-		continue;
-	      /* Other compilers */
 	      if (strncmp (TYPE_FIELD_NAME (type, i), "_vptr", 5) == 0
 		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
 		continue;

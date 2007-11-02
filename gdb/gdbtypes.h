@@ -761,32 +761,6 @@ struct cplus_struct_type
     short ninstantiations;
     struct type **instantiations;
 
-    /* The following points to information relevant to the runtime model
-     * of the compiler.
-     * Currently being used only for HP's ANSI C++ compiler.
-     * (This type may have to be changed/enhanced for other compilers.)
-     *
-     * RUNTIME_PTR is NULL if there is no runtime information (currently
-     * this means the type was not compiled by HP aCC).
-     *
-     * Fields in structure pointed to:
-     * ->HAS_VTABLE : 0 => no virtual table, 1 => vtable present
-     * 
-     * ->PRIMARY_BASE points to the first non-virtual base class that has
-     * a virtual table.
-     *
-     * ->VIRTUAL_BASE_LIST points to a list of struct type * pointers that
-     * point to the type information for all virtual bases among this type's
-     * ancestors.
-     */
-    struct runtime_info
-      {
-	short has_vtable;
-	struct type *primary_base;
-	struct type **virtual_base_list;
-      }
-     *runtime_ptr;
-
     /* Pointer to information about enclosing scope, if this is a
      * local type.  If it is not a local type, this is NULL
      */
@@ -974,12 +948,6 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_FN_FIELD_VOFFSET(thisfn, n) ((thisfn)[n].voffset-2)
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
 #define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
-
-#define TYPE_RUNTIME_PTR(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->runtime_ptr)
-#define TYPE_VTABLE(thistype) (TYPE_RUNTIME_PTR(thistype)->has_vtable)
-#define TYPE_HAS_VTABLE(thistype) (TYPE_RUNTIME_PTR(thistype) && TYPE_VTABLE(thistype))
-#define TYPE_PRIMARY_BASE(thistype) (TYPE_RUNTIME_PTR(thistype)->primary_base)
-#define TYPE_VIRTUAL_BASE_LIST(thistype) (TYPE_RUNTIME_PTR(thistype)->virtual_base_list)
 
 #define TYPE_LOCALTYPE_PTR(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr)
 #define TYPE_LOCALTYPE_FILE(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr->file)
@@ -1357,46 +1325,6 @@ extern int get_destructor_fn_field (struct type *, int *, int *);
 extern int get_discrete_bounds (struct type *, LONGEST *, LONGEST *);
 
 extern int is_ancestor (struct type *, struct type *);
-
-extern int has_vtable (struct type *);
-
-extern struct type *primary_base_class (struct type *);
-
-extern int virtual_base_list_length (struct type *);
-extern int virtual_base_list_length_skip_primaries (struct type *);
-
-extern int virtual_base_index (struct type *, struct type *);
-extern int virtual_base_index_skip_primaries (struct type *, struct type *);
-
-
-extern int class_index_in_primary_list (struct type *);
-
-extern int count_virtual_fns (struct type *);
-
-/* Constants for HP/Taligent ANSI C++ runtime model */
-
-/* Where virtual function entries begin in the
- * virtual table, in the non-RRBC vtable format.
- * First 4 are the metavtable pointer, top offset,
- * typeinfo pointer, and dup base info pointer */
-#define HP_ACC_VFUNC_START        4
-
-/* (Negative) Offset where virtual base offset entries begin 
- * in the virtual table. Skips over metavtable pointer and
- * the self-offset entry. 
- * NOTE: NEGATE THIS BEFORE USING! The virtual base offsets
- * appear before the address point of the vtable (the slot
- * pointed to by the object's vtable pointer), i.e. at lower
- * addresses than the vtable pointer. */
-#define HP_ACC_VBASE_START        2
-
-/* (Positive) Offset where the pointer to the typeinfo
- * object is present in the virtual table */
-#define HP_ACC_TYPEINFO_OFFSET    2
-
-/* (Positive) Offset where the ``top offset'' entry of
- * the virtual table is */
-#define HP_ACC_TOP_OFFSET_OFFSET  1
 
 /* Overload resolution */
 

@@ -1346,100 +1346,6 @@ search_struct_field (char *name, struct value *arg1, int offset,
   return NULL;
 }
 
-
-/* Return the offset (in bytes) of the virtual base of type BASETYPE
- * in an object pointed to by VALADDR (on the host), assumed to be of
- * type TYPE.  OFFSET is number of bytes beyond start of ARG to start
- * looking (in case VALADDR is the contents of an enclosing object).
- *
- * This routine recurses on the primary base of the derived class
- * because the virtual base entries of the primary base appear before
- * the other virtual base entries.
- *
- * If the virtual base is not found, a negative integer is returned.
- * The magnitude of the negative integer is the number of entries in
- * the virtual table to skip over (entries corresponding to various
- * ancestral classes in the chain of primary bases).
- *
- * Important: This assumes the HP / Taligent C++ runtime conventions.
- * Use baseclass_offset() instead to deal with g++ conventions.  */
-
-void
-find_rt_vbase_offset (struct type *type, struct type *basetype,
-		      const gdb_byte *valaddr, int offset, 
-		      int *boffset_p, int *skip_p)
-{
-  int boffset;			/* Offset of virtual base.  */
-  int index;			/* Displacement to use in virtual
-				   table.  */
-  int skip;
-
-  struct value *vp;
-  CORE_ADDR vtbl;		/* The virtual table pointer.  */
-  struct type *pbc;		/* The primary base class.  */
-
-  /* Look for the virtual base recursively in the primary base, first.
-   * This is because the derived class object and its primary base
-   * subobject share the primary virtual table.  */
-
-  boffset = 0;
-  pbc = TYPE_PRIMARY_BASE (type);
-  if (pbc)
-    {
-      find_rt_vbase_offset (pbc, basetype, valaddr,
-			    offset, &boffset, &skip);
-      if (skip < 0)
-	{
-	  *boffset_p = boffset;
-	  *skip_p = -1;
-	  return;
-	}
-    }
-  else
-    skip = 0;
-
-
-  /* Find the index of the virtual base according to HP/Taligent
-     runtime spec.  (Depth-first, left-to-right.)  */
-  index = virtual_base_index_skip_primaries (basetype, type);
-
-  if (index < 0)
-    {
-      *skip_p = skip + virtual_base_list_length_skip_primaries (type);
-      *boffset_p = 0;
-      return;
-    }
-
-  /* pai: FIXME -- 32x64 possible problem.  */
-  /* First word (4 bytes) in object layout is the vtable pointer.  */
-  vtbl = *(CORE_ADDR *) (valaddr + offset);
-
-  /* Before the constructor is invoked, things are usually zero'd
-     out.  */
-  if (vtbl == 0)
-    error (_("Couldn't find virtual table -- object may not be constructed yet."));
-
-
-  /* Find virtual base's offset -- jump over entries for primary base
-   * ancestors, then use the index computed above.  But also adjust by
-   * HP_ACC_VBASE_START for the vtable slots before the start of the
-   * virtual base entries.  Offset is negative -- virtual base entries
-   * appear _before_ the address point of the virtual table.  */
-
-  /* pai: FIXME -- 32x64 problem, if word = 8 bytes, change multiplier
-     & use long type */
-
-  /* epstein : FIXME -- added param for overlay section. May not be
-     correct.  */
-  vp = value_at (builtin_type_int, 
-		 vtbl + 4 * (-skip - index - HP_ACC_VBASE_START));
-  boffset = value_as_long (vp);
-  *skip_p = -1;
-  *boffset_p = boffset;
-  return;
-}
-
-
 /* Helper function used by value_struct_elt to recurse through
    baseclasses.  Look for a field NAME in ARG1. Adjust the address of
    ARG1 by OFFSET bytes, and search in it assuming it has (class) type
@@ -1516,47 +1422,30 @@ search_struct_method (char *name, struct value **arg1p,
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
-	  if (TYPE_HAS_VTABLE (type))
+	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
+	  const gdb_byte *base_valaddr;
+
+	  /* The virtual base class pointer might have been
+	     clobbered by the user program. Make sure that it
+	    still points to a valid memory location.  */
+
+	  if (offset < 0 || offset >= TYPE_LENGTH (type))
 	    {
-	      /* HP aCC compiled type, search for virtual base offset
-	         according to HP/Taligent runtime spec.  */
-	      int skip;
-	      find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
-				    value_contents_all (*arg1p),
-				    offset + value_embedded_offset (*arg1p),
-				    &base_offset, &skip);
-	      if (skip >= 0)
-		error (_("Virtual base class offset not found in vtable"));
+	      gdb_byte *tmp = alloca (TYPE_LENGTH (baseclass));
+	      if (target_read_memory (VALUE_ADDRESS (*arg1p)
+				      + value_offset (*arg1p) + offset,
+				      tmp, TYPE_LENGTH (baseclass)) != 0)
+		error (_("virtual baseclass botch"));
+	      base_valaddr = tmp;
 	    }
 	  else
-	    {
-	      struct type *baseclass = 
-		check_typedef (TYPE_BASECLASS (type, i));
-	      const gdb_byte *base_valaddr;
+	    base_valaddr = value_contents (*arg1p) + offset;
 
-	      /* The virtual base class pointer might have been
-	         clobbered by the user program. Make sure that it
-	         still points to a valid memory location.  */
-
-	      if (offset < 0 || offset >= TYPE_LENGTH (type))
-		{
-		  gdb_byte *tmp = alloca (TYPE_LENGTH (baseclass));
-		  if (target_read_memory (VALUE_ADDRESS (*arg1p)
-					  + value_offset (*arg1p) + offset,
-					  tmp, TYPE_LENGTH (baseclass)) != 0)
-		    error (_("virtual baseclass botch"));
-		  base_valaddr = tmp;
-		}
-	      else
-		base_valaddr = value_contents (*arg1p) + offset;
-
-	      base_offset =
-		baseclass_offset (type, i, base_valaddr,
-				  VALUE_ADDRESS (*arg1p)
-				  + value_offset (*arg1p) + offset);
-	      if (base_offset == -1)
-		error (_("virtual baseclass botch"));
-	    }
+	  base_offset = baseclass_offset (type, i, base_valaddr,
+					  VALUE_ADDRESS (*arg1p)
+					  + value_offset (*arg1p) + offset);
+	  if (base_offset == -1)
+	    error (_("virtual baseclass botch"));
 	}
       else
 	{
@@ -1756,29 +1645,12 @@ find_method_list (struct value **argp, char *method,
       int base_offset;
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
-	  if (TYPE_HAS_VTABLE (type))
-	    {
-	      /* HP aCC compiled type, search for virtual base offset
-	       * according to HP/Taligent runtime spec.  */
-	      int skip;
-	      find_rt_vbase_offset (type, TYPE_BASECLASS (type, i),
-				    value_contents_all (*argp),
-				    offset + value_embedded_offset (*argp),
-				    &base_offset, &skip);
-	      if (skip >= 0)
-		error (_("Virtual base class offset not found in vtable"));
-	    }
-	  else
-	    {
-	      /* probably g++ runtime model */
-	      base_offset = value_offset (*argp) + offset;
-	      base_offset =
-		baseclass_offset (type, i,
-				  value_contents (*argp) + base_offset,
-				  VALUE_ADDRESS (*argp) + base_offset);
-	      if (base_offset == -1)
-		error (_("virtual baseclass botch"));
-	    }
+	  base_offset = value_offset (*argp) + offset;
+	  base_offset = baseclass_offset (type, i,
+					  value_contents (*argp) + base_offset,
+					  VALUE_ADDRESS (*argp) + base_offset);
+	  if (base_offset == -1)
+	    error (_("virtual baseclass botch"));
 	}
       else /* Non-virtual base, simply use bit position from debug
 	      info.  */
