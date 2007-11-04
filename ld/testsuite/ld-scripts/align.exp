@@ -32,17 +32,11 @@ if ![ld_assemble $as $srcdir/$subdir/align.s tmpdir/align.o] {
     return
 }
 
-# Doesn't work on PECOFF, appears to be a genuine bug.
 # mingw on x86_64 targets need to set the image base to 0 to avoid auto image-basing.
 global LDFLAGS
 set saved_LDFLAGS "$LDFLAGS"
 if [istarget "x86_64-*-mingw*"] then {
   set LDFLAGS "$LDFLAGS --image-base 0"
-} else {
-  if [is_pecoff_format] {
-  global target_triplet
-  setup_xfail $target_triplet
-  }
 }
 
 if ![ld_simple_link $ld tmpdir/align "$LDFLAGS -T $srcdir/$subdir/align.t tmpdir/align.o"] {

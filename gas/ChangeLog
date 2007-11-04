@@ -1,3 +1,9 @@
+2007-11-05  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* read.c (ALIGN_LIMIT): Rename to ...
+	(TC_ALIGN_LIMIT): Guard against prior definition.
+	* config/tc-i386.h (TC_ALIGN_LIMIT)[TE_PE]: Define.
+
 2007-11-01  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (xtensa_symbol_new_hook): New.

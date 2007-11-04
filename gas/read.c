@@ -1276,13 +1276,14 @@ do_align (int n, char *fill, int len, int max)
    (in bytes).  A negative ARG is the negative of the length of the
    fill pattern.  BYTES_P is non-zero if the alignment value should be
    interpreted as the byte boundary, rather than the power of 2.  */
-
-#define ALIGN_LIMIT (stdoutput->arch_info->bits_per_address - 1)
+#ifndef TC_ALIGN_LIMIT
+#define TC_ALIGN_LIMIT (stdoutput->arch_info->bits_per_address - 1)
+#endif
 
 static void
 s_align (int arg, int bytes_p)
 {
-  unsigned int align_limit = ALIGN_LIMIT;
+  unsigned int align_limit = TC_ALIGN_LIMIT;
   unsigned int align;
   char *stop = NULL;
   char stopc = 0;

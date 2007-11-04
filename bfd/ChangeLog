@@ -1,3 +1,9 @@
+2007-11-05  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* pe-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Let .data, .text
+	 and .bss section use the default.
+	* pei-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Likewise.
+
 2007-11-01  Joseph Myers  <joseph@codesourcery.com>
 
 	* merge.c (sec_merge_hash_lookup): Add parameter sec_end.  Check

@@ -19,9 +19,9 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-# Only ELF targets record section alignment.
+# Only ELF and PE-COFF targets record section alignment.
 
-if ![is_elf_format] {
+if {![is_elf_format] && ![is_pecoff_format]} {
     return
 }
 
