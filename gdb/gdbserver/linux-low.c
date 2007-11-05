@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/syscall.h>
+#include <sched.h>
 
 #ifndef PTRACE_GETSIGINFO
 # define PTRACE_GETSIGINFO 0x4202
