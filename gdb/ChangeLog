@@ -1,3 +1,20 @@
+2007-11-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* features/rs6000/power-core.xml: Use uint32 as register type.
+	* features/rs6000/power64-core.xml: Use uint64/uint32 as register type.
+	* features/rs6000/powerpc-32.c: Regenerate.
+	* features/rs6000/powerpc-403.c: Regenerate.
+	* features/rs6000/powerpc-403gc.c: Regenerate.
+	* features/rs6000/powerpc-505.c: Regenerate.
+	* features/rs6000/powerpc-602.c: Regenerate.
+	* features/rs6000/powerpc-603.c: Regenerate.
+	* features/rs6000/powerpc-604.c: Regenerate.
+	* features/rs6000/powerpc-64.c: Regenerate.
+	* features/rs6000/powerpc-7400.c: Regenerate.
+	* features/rs6000/powerpc-750.c: Regenerate.
+	* features/rs6000/powerpc-860.c: Regenerate.
+	* features/rs6000/powerpc-e500.c: Regenerate.
+
 2007-11-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (set_raw_breakpoint_without_location): Make static.
