@@ -1,3 +1,12 @@
+2007-11-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* merge.c (sec_merge_hash_lookup): Revert last change.
+	(record_section): Likewise.
+	(_bfd_merge_sections): Likewise.
+	(_bfd_merged_section_offset): Properly handle NULL secinfo.
+	(_bfd_add_merge_section): Allocate extra space for a zero
+	terminator on SEC_STRINGS sections.
+
 2007-11-05  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* pe-i386.c (COFF_SECTION_ALIGNMENT_ENTRIES): Let .data, .text
