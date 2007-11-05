@@ -848,8 +848,6 @@ extern int ep_is_catchpoint (struct breakpoint *);
    such as a library load or unload. */
 extern int ep_is_shlib_catchpoint (struct breakpoint *);
 
-extern struct breakpoint *set_breakpoint_sal (struct symtab_and_line);
-
 /* Enable breakpoints and delete when hit.  Called with ARG == NULL
    deletes all breakpoints. */
 extern void delete_command (char *arg, int from_tty);

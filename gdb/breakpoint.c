@@ -6982,19 +6982,6 @@ catch_command_1 (char *arg, int tempflag, int from_tty)
     }
 }
 
-/* Used by the gui, could be made a worker for other things. */
-
-struct breakpoint *
-set_breakpoint_sal (struct symtab_and_line sal)
-{
-  struct breakpoint *b;
-  b = set_raw_breakpoint (sal, bp_breakpoint);
-  set_breakpoint_count (breakpoint_count + 1);
-  b->number = breakpoint_count;
-  b->thread = -1;
-  return b;
-}
-
 static void
 catch_command (char *arg, int from_tty)
 {

@@ -1,5 +1,10 @@
 2007-11-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* breakpoint.h (set_breakpoint_sal): Remove declaration.
+	* breakpoint.c (set_breakpoint_sal): Delete.
+
+2007-11-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* buildsym.c (finish_block): Remove "#if 1"/"#endif" brackets.
 	(make_blockvector): Likewise. Remove FIXME comment.
 
