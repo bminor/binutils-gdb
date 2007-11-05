@@ -4319,7 +4319,7 @@ static void free_bp_location (struct bp_location *loc)
 /* Helper to set_raw_breakpoint below.  Creates a breakpoint
    that has type BPTYPE and has no locations as yet.  */
 
-struct breakpoint *
+static struct breakpoint *
 set_raw_breakpoint_without_location (enum bptype bptype)
 {
   struct breakpoint *b, *b1;

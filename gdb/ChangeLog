@@ -1,5 +1,9 @@
 2007-11-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* breakpoint.c (set_raw_breakpoint_without_location): Make static.
+
+2007-11-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* breakpoint.h (create_solib_load_event_breakpoint)
 	(create_solib_unload_event_breakpoint)
 	(create_fork_event_catchpoint, create_vfork_event_catchpoint)
