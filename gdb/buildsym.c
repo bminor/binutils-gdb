@@ -351,7 +351,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
     }
   *listhead = NULL;
 
-#if 1
   /* Check to be sure that the blocks have an end address that is
      greater than starting address */
 
@@ -372,7 +371,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
       /* Better than nothing */
       BLOCK_END (block) = BLOCK_START (block);
     }
-#endif
 
   /* Install this block as the superblock of all blocks made since the
      start of this scope that don't have superblocks yet.  */
@@ -384,7 +382,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
     {
       if (BLOCK_SUPERBLOCK (pblock->block) == NULL)
 	{
-#if 1
 	  /* Check to be sure the blocks are nested as we receive
 	     them. If the compiler/assembler/linker work, this just
 	     burns a small amount of time.
@@ -416,7 +413,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      if (BLOCK_END (pblock->block) > BLOCK_END (block))
 		BLOCK_END (pblock->block) = BLOCK_END (block);
 	    }
-#endif
 	  BLOCK_SUPERBLOCK (pblock->block) = block;
 	}
       opblock = pblock;
@@ -486,11 +482,9 @@ make_blockvector (struct objfile *objfile)
 
   free_pending_blocks ();
 
-#if 1				/* FIXME, shut this off after a while
-				   to speed up symbol reading.  */
   /* Some compilers output blocks in the wrong order, but we depend on
      their being in the right order so we can binary search. Check the
-     order and moan about it.  FIXME.  */
+     order and moan about it.  */
   if (BLOCKVECTOR_NBLOCKS (blockvector) > 1)
     {
       for (i = 1; i < BLOCKVECTOR_NBLOCKS (blockvector); i++)
@@ -506,7 +500,6 @@ make_blockvector (struct objfile *objfile)
 	    }
 	}
     }
-#endif
 
   return (blockvector);
 }

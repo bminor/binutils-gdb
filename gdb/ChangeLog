@@ -1,3 +1,8 @@
+2007-11-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* buildsym.c (finish_block): Remove "#if 1"/"#endif" brackets.
+	(make_blockvector): Likewise. Remove FIXME comment.
+
 2007-11-05  Luis Machado  <luisgpm@br.ibm.com>
 
 	* printcmd.c: (printf_command): Add support for new DFP
