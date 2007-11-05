@@ -1,5 +1,16 @@
 2007-11-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* breakpoint.h (create_solib_load_event_breakpoint)
+	(create_solib_unload_event_breakpoint)
+	(create_fork_event_catchpoint, create_vfork_event_catchpoint)
+	(create_exec_event_catchpoint): Delete declaration.
+	* breakpoint.c (create_solib_load_event_breakpoint)
+	(solib_load_unload_1, create_solib_unload_event_breakpoint): Delete.
+	(create_fork_event_catchpoint, create_vfork_event_catchpoint)
+	(create_exec_event_catchpoint): Make static.
+
+2007-11-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* breakpoint.h (set_breakpoint_sal): Remove declaration.
 	* breakpoint.c (set_breakpoint_sal): Delete.
 

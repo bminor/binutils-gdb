@@ -169,11 +169,6 @@ static void awatch_command (char *, int);
 
 static void do_enable_breakpoint (struct breakpoint *, enum bpdisp);
 
-static void solib_load_unload_1 (char *hookname,
-				 int tempflag,
-				 char *dll_pathname,
-				 char *cond_string, enum bptype bp_kind);
-
 static void create_fork_vfork_event_catchpoint (int tempflag,
 						char *cond_string,
 						enum bptype bp_kind);
@@ -4702,98 +4697,6 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 }
 
 static void
-solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
-		     char *cond_string, enum bptype bp_kind)
-{
-  struct breakpoint *b;
-  struct symtabs_and_lines sals;
-  struct cleanup *old_chain;
-  struct cleanup *canonical_strings_chain = NULL;
-  char *addr_start = hookname;
-  char *addr_end = NULL;
-  char **canonical = (char **) NULL;
-  int thread = -1;		/* All threads. */
-
-  /* Set a breakpoint on the specified hook.  */
-  sals = decode_line_1 (&hookname, 1, (struct symtab *) NULL, 
-			0, &canonical, NULL);
-  addr_end = hookname;
-
-  if (sals.nelts == 0)
-    {
-      warning (_("Unable to set a breakpoint on dynamic linker callback.\n"
-		 "Suggest linking with /opt/langtools/lib/end.o.\n"
-		 "GDB will be unable to track shl_load/shl_unload calls."));
-      return;
-    }
-  if (sals.nelts != 1)
-    {
-      warning (_("Unable to set unique breakpoint on dynamic linker callback.\n"
-		 "GDB will be unable to track shl_load/shl_unload calls."));
-      return;
-    }
-
-  /* Make sure that all storage allocated in decode_line_1 gets freed
-     in case the following errors out.  */
-  old_chain = make_cleanup (xfree, sals.sals);
-  if (canonical != (char **) NULL)
-    {
-      make_cleanup (xfree, canonical);
-      canonical_strings_chain = make_cleanup (null_cleanup, 0);
-      if (canonical[0] != NULL)
-	make_cleanup (xfree, canonical[0]);
-    }
-
-  resolve_sal_pc (&sals.sals[0]);
-
-  /* Remove the canonical strings from the cleanup, they are needed below.  */
-  if (canonical != (char **) NULL)
-    discard_cleanups (canonical_strings_chain);
-
-  b = set_raw_breakpoint (sals.sals[0], bp_kind);
-  set_breakpoint_count (breakpoint_count + 1);
-  b->number = breakpoint_count;
-  b->cond_string = (cond_string == NULL) ? 
-    NULL : savestring (cond_string, strlen (cond_string));
-  b->thread = thread;
-
-  if (canonical != (char **) NULL && canonical[0] != NULL)
-    b->addr_string = canonical[0];
-  else if (addr_start)
-    b->addr_string = savestring (addr_start, addr_end - addr_start);
-
-  b->enable_state = bp_enabled;
-  b->disposition = tempflag ? disp_del : disp_donttouch;
-
-  if (dll_pathname == NULL)
-    b->dll_pathname = NULL;
-  else
-    {
-      b->dll_pathname = (char *) xmalloc (strlen (dll_pathname) + 1);
-      strcpy (b->dll_pathname, dll_pathname);
-    }
-
-  mention (b);
-  do_cleanups (old_chain);
-}
-
-void
-create_solib_load_event_breakpoint (char *hookname, int tempflag,
-				    char *dll_pathname, char *cond_string)
-{
-  solib_load_unload_1 (hookname, tempflag, dll_pathname, 
-		       cond_string, bp_catch_load);
-}
-
-void
-create_solib_unload_event_breakpoint (char *hookname, int tempflag,
-				      char *dll_pathname, char *cond_string)
-{
-  solib_load_unload_1 (hookname, tempflag, dll_pathname, 
-		       cond_string, bp_catch_unload);
-}
-
-static void
 create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
 				    enum bptype bp_kind)
 {
@@ -4820,19 +4723,19 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
   mention (b);
 }
 
-void
+static void
 create_fork_event_catchpoint (int tempflag, char *cond_string)
 {
   create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_catch_fork);
 }
 
-void
+static void
 create_vfork_event_catchpoint (int tempflag, char *cond_string)
 {
   create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_catch_vfork);
 }
 
-void
+static void
 create_exec_event_catchpoint (int tempflag, char *cond_string)
 {
   struct symtab_and_line sal;

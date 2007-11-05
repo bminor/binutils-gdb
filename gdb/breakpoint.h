@@ -829,17 +829,6 @@ extern void remove_thread_event_breakpoints (void);
 
 extern void disable_breakpoints_in_shlibs (void);
 
-extern void create_solib_load_event_breakpoint (char *, int, char *, char *);
-
-extern void create_solib_unload_event_breakpoint (char *, int,
-						  char *, char *);
-
-extern void create_fork_event_catchpoint (int, char *);
-
-extern void create_vfork_event_catchpoint (int, char *);
-
-extern void create_exec_event_catchpoint (int, char *);
-
 /* This function returns TRUE if ep is a catchpoint. */
 extern int ep_is_catchpoint (struct breakpoint *);
 
