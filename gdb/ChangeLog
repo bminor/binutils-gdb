@@ -1,3 +1,10 @@
+2007-11-05  Luis Machado  <luisgpm@br.ibm.com>
+
+	* printcmd.c: (printf_command): Add support for new DFP
+	modifiers %H, %D and %DD.
+	* configure.ac: Add check for DECFLOAT printf support.
+	* configure: Regenerated.
+
 2007-11-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbtypes.h (struct cplus_struct_type): Remove runtime_ptr member.

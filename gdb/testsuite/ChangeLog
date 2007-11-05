@@ -1,3 +1,8 @@
+2007-11-05  Luis Machado  <luisgpm@br.ibm.com>
+
+	* gdb.base/printcmds.exp: New function
+	test_printf_with_dfp.
+
 2007-11-02  Doug Evans  <dje@google.com>
 
 	* gdb.disasm/t01_mov.s: Remove carriage returns.

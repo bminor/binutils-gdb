@@ -928,6 +928,25 @@ if test $gdb_cv_printf_has_long_long = yes; then
             [Define to 1 if the "%ll" format works to print long longs.])
 fi
 
+# Check if the compiler and runtime support printing decfloats.
+
+AC_CACHE_CHECK([for decfloat support in printf],
+               gdb_cv_printf_has_decfloat,
+               [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+[[char buf[64];
+  _Decimal32 d32 = 1.2345df;
+  _Decimal64 d64 = 1.2345dd;
+  _Decimal128 d128 = 1.2345dl;
+  sprintf (buf, "Decimal32: %H\nDecimal64: %D\nDecimal128: %DD", d32, d64, d128);
+  return (strcmp ("Decimal32: 1.2345\nDecimal64: 1.2345\nDecimal128: 1.2345", buf));]])],
+                              gdb_cv_printf_has_decfloat=yes,
+                              gdb_cv_printf_has_decfloat=no,
+                              gdb_cv_printf_has_decfloat=no)])
+if test $gdb_cv_printf_has_decfloat = yes; then
+  AC_DEFINE(PRINTF_HAS_DECFLOAT, 1,
+            [Define to 1 if the "%H, %D and %DD" formats work to print decfloats.])
+fi
+
 # Check if the compiler supports the `long double' type.  We can't use
 # AC_C_LONG_DOUBLE because that one does additional checks on the
 # constants defined in <float.h> that fail on some systems,

@@ -16557,6 +16557,34 @@ sequences, such as @code{\n}, @samp{\t}, @samp{\\}, @samp{\"},
 @samp{\a}, and @samp{\f}, that consist of backslash followed by a
 single character.  Octal and hexadecimal escape sequences are not
 supported.
+
+Additionally, @code{printf} supports conversion specifications for DFP
+(@dfn{Decimal Floating Point}) types using the following conversion
+letters:
+
+@itemize @bullet
+@item
+@samp{H} for printing @code{Decimal32} types.
+
+@item
+@samp{D} for printing @code{Decimal64} types.
+
+@item
+@samp{DD} for printing @code{Decimal128} types.
+@end itemize
+
+If the underlying @code{C} implementation used to build @value{GDBN} has
+support for the three conversion letters for DFP types, other modifiers
+such as width and precision will also be available for @value{GDB} to use.
+
+In case there is no such @code{C} support, no additional modifiers will be
+available and the value will be printed in the standard way.
+
+Here's an example of printing DFP types using the above conversion letters:
+@smallexample
+printf "D32: %H - D64: %D - D128: %DD\n",1.2345df,1.2E10dd,1.2E1dl
+@end smallexample
+
 @end table
 
 @node Interpreters

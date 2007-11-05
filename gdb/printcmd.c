@@ -41,6 +41,7 @@
 #include "gdb_assert.h"
 #include "block.h"
 #include "disasm.h"
+#include "dfp.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et.al.   */
@@ -1819,7 +1820,7 @@ printf_command (char *arg, int from_tty)
     enum argclass
       {
 	int_arg, long_arg, long_long_arg, ptr_arg, string_arg,
-	double_arg, long_double_arg
+	double_arg, long_double_arg, decfloat_arg
       };
     enum argclass *argclass;
     enum argclass this_argclass;
@@ -1926,6 +1927,34 @@ printf_command (char *arg, int from_tty)
 
 	      if (seen_big_l)
 		bad = 1;
+	      break;
+
+	    /* DFP Decimal32 types.  */
+	    case 'H':
+	      this_argclass = decfloat_arg;
+
+#ifndef PRINTF_HAS_DECFLOAT
+              if (lcount || seen_h || seen_big_l)
+                bad = 1;
+              if (seen_prec || seen_zero || seen_space || seen_plus)
+                bad = 1;
+#endif
+	      break;
+
+	    /* DFP Decimal64 and Decimal128 types.  */
+	    case 'D':
+	      this_argclass = decfloat_arg;
+
+#ifndef PRINTF_HAS_DECFLOAT
+              if (lcount || seen_h || seen_big_l)
+                bad = 1;
+              if (seen_prec || seen_zero || seen_space || seen_plus)
+                bad = 1;
+#endif
+	      /* Check for a Decimal128.  */
+	      if (*(f + 1) == 'D')
+		f++;
+
 	      break;
 
 	    case 'c':
@@ -2094,6 +2123,55 @@ printf_command (char *arg, int from_tty)
 	      printf_filtered (current_substring, val);
 	      break;
 	    }
+
+	  /* Handles decimal floating point values.  */
+	  case decfloat_arg:
+	    {
+	      char *eos;
+	      char decstr[128];
+	      unsigned int dfp_len = TYPE_LENGTH (value_type (val_args[i]));
+	      unsigned char *dfp_value_ptr = (unsigned char *) value_contents_all (val_args[i])
+                                      + value_offset (val_args[i]);
+
+#if defined (PRINTF_HAS_DECFLOAT)
+	      printf_filtered (current_substring, dfp_value_ptr);
+#else
+	      if (TYPE_CODE (value_type (val_args[i])) != TYPE_CODE_DECFLOAT)
+		error (_("Cannot convert parameter to decfloat."));
+
+	      /* As a workaround until vasprintf has native support for DFP
+		 we convert the DFP values to string and print them using
+		 the %s format specifier.  */
+	      decimal_to_string (dfp_value_ptr, dfp_len, decstr);
+
+	      /* Points to the end of the string so that we can go back
+		 and check for DFP format specifiers.  */
+	      eos = current_substring + strlen (current_substring);
+
+	      /* Replace %H, %D and %DD with %s's.  */
+	      while (*--eos != '%')
+		if (*eos == 'D' && *(eos - 1) == 'D')
+		  {
+		    *(eos - 1) = 's';
+
+		    /* If we've found a %DD format specifier we need to go
+		       through the whole string pulling back one character
+		       since this format specifier has two chars.  */
+		    while (eos < last_arg)
+		      {
+			*eos = *(eos + 1);
+			eos++;
+		      }
+		  }
+		else if (*eos == 'D' || *eos == 'H')
+		  *eos = 's';
+
+	      /* Print the DFP value.  */
+	      printf_filtered (current_substring, decstr);
+	      break;
+#endif
+	    }
+
 	  case ptr_arg:
 	    {
 	      /* We avoid the host's %p because pointers are too

@@ -21362,6 +21362,69 @@ _ACEOF
 
 fi
 
+# Check if the compiler and runtime support printing decfloats.
+
+echo "$as_me:$LINENO: checking for decfloat support in printf" >&5
+echo $ECHO_N "checking for decfloat support in printf... $ECHO_C" >&6
+if test "${gdb_cv_printf_has_decfloat+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$cross_compiling" = yes; then
+  gdb_cv_printf_has_decfloat=no
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+char buf[64];
+  _Decimal32 d32 = 1.2345df;
+  _Decimal64 d64 = 1.2345dd;
+  _Decimal128 d128 = 1.2345dl;
+  sprintf (buf, "Decimal32: %H\nDecimal64: %D\nDecimal128: %DD", d32, d64, d128);
+  return (strcmp ("Decimal32: 1.2345\nDecimal64: 1.2345\nDecimal128: 1.2345", buf));
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  gdb_cv_printf_has_decfloat=yes
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+gdb_cv_printf_has_decfloat=no
+fi
+rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+fi
+echo "$as_me:$LINENO: result: $gdb_cv_printf_has_decfloat" >&5
+echo "${ECHO_T}$gdb_cv_printf_has_decfloat" >&6
+if test $gdb_cv_printf_has_decfloat = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define PRINTF_HAS_DECFLOAT 1
+_ACEOF
+
+fi
+
 # Check if the compiler supports the `long double' type.  We can't use
 # AC_C_LONG_DOUBLE because that one does additional checks on the
 # constants defined in <float.h> that fail on some systems,
