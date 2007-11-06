@@ -1,5 +1,15 @@
 2007-11-06  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_check_relocs): Don't refcount tlsld_got here..
+	(ppc64_elf_gc_sweep_hook): ..or here..
+	(ppc64_elf_tls_optimize): ..or here.  Make two passes through the
+	relocs, ensuring that tls_get_addr calls follow gd and ld relocs.
+	(allocate_dynrelocs): Refcount tlsld_got here.
+	(ppc64_elf_size_dynamic_sections): Allocate local got and call
+	allocate_dynrelocs before allocating tlsld_got.
+	(ppc64_elf_relocate_section): Remove check that a tls_get_addr
+	call follows gd and ld relocs.
+
 	* elf32-ppc.c (ppc_elf_check_relocs): Don't refcount tlsld_got here..
 	(ppc_elf_gc_sweep_hook): ..or here..
 	(ppc_elf_tls_optimize): ..or here.  Make two passes through the

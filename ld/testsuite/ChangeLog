@@ -1,5 +1,8 @@
 2007-11-06  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld-powerpc/tlsso.d: Update for changed got alloc order.
+	* ld-powerpc/tlsso.r: Likewise.
+
 	* ld-powerpc/tlsso32.d: Update for changed got alloc order.
 
 2007-11-05  Alan Modra  <amodra@bigpond.net.au>
