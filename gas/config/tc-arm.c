@@ -7202,10 +7202,14 @@ do_mull (void)
   inst.instruction |= inst.operands[2].reg;
   inst.instruction |= inst.operands[3].reg << 8;
 
-  /* rdhi, rdlo and rm must all be different.  */
-  if (inst.operands[0].reg == inst.operands[1].reg
-      || inst.operands[0].reg == inst.operands[2].reg
+  /* rdhi and rdlo must be different.  */
+  if (inst.operands[0].reg == inst.operands[1].reg)
+    as_tsktsk (_("rdhi and rdlo must be different"));
+
+  /* rdhi, rdlo and rm must all be different before armv6.  */
+  if ((inst.operands[0].reg == inst.operands[2].reg
       || inst.operands[1].reg == inst.operands[2].reg)
+      && !ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6))
     as_tsktsk (_("rdhi, rdlo and rm must all be different"));
 }
 

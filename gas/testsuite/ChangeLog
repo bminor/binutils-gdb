@@ -1,3 +1,8 @@
+2007-11-06  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/mul-overlap.s: Add umull and smlal.
+	* gas/arm/mul-overlap.l: Update expected results.
+
 2007-11-06  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/elf.exp: Disable ehopt test for mn10300.
