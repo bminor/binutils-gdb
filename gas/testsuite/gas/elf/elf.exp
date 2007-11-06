@@ -73,7 +73,12 @@ if { ([istarget "*-*-*elf*"]
 	    set target_machine -armelf
 	}
     }
-    run_dump_test "ehopt0"
+
+    # The MN10300 port disables the assembler's call frame optimization
+    # because it interfers with link time relaxation of function prologues.
+    if (![istarget "mn10300-*-*"] && ![istarget "am3*-*-*"]} then {    
+      run_dump_test "ehopt0"
+    }
     run_dump_test "group0a" 
     run_dump_test "group0b" 
     run_dump_test "group1a" 

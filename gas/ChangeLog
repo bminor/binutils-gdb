@@ -1,3 +1,10 @@
+2007-11-06  Nick Clifton  <nickc@redhat.com>
+
+	* ehopt.c (check_eh_frame): If md_allow_eh_opt is defined, invoke
+	it to see if the optimizations should be applied.
+	* config/tc-mn10300.h (md_allow_eh_opt): Define.  Only allow call
+	frame optimization if linker relaxation is not enabled.
+
 2007-11-05  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* read.c (ALIGN_LIMIT): Rename to ...

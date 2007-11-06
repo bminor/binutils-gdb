@@ -1547,6 +1547,11 @@ evaluated.  Targets which implement link time relaxation which may change the
 position of the two symbols relative to each other should ensure that this
 macro returns zero in situations where this can occur.
 
+@item md_allow_eh_opt
+If defined, GAS will check this macro before performing any optimizations on
+the DWARF call frame debug information that is emitted.  Targets which
+implement link time relaxation may need to define this macro and set it to zero
+if it is possible to change the size of a function's prologue.
 @end table
 
 @node Object format backend

@@ -1,3 +1,7 @@
+2007-11-06  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/elf.exp: Disable ehopt test for mn10300.
+
 2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.d: New.

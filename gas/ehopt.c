@@ -275,6 +275,11 @@ check_eh_frame (expressionS *exp, unsigned int *pnbytes)
   if (flag_traditional_format)
     return 0;
 
+#ifdef md_allow_eh_opt
+  if (! md_allow_eh_opt)
+    return 0;
+#endif
+
   /* Select the proper section data.  */
   if (strcmp (segment_name (now_seg), ".eh_frame") == 0)
     d = &eh_frame_data;

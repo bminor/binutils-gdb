@@ -120,3 +120,8 @@ extern bfd_boolean mn10300_allow_local_subtract (expressionS *, expressionS *, s
 
 #define HANDLE_ALIGN(frag) mn10300_handle_align (frag)
 extern void mn10300_handle_align (fragS *);
+
+/* Only allow call frame debug info optimization when linker relaxation is
+   not enabled as otherwise we could generate the DWARF directives without
+   the relocs necessary to patch them up.  */
+#define md_allow_eh_opt (linkrelax == 0)
