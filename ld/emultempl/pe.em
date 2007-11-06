@@ -286,6 +286,8 @@ static definfo init[] =
   D(ImageBase,"__image_base__", NT_EXE_IMAGE_BASE),
 #define DLLOFF 1
   {&dll, sizeof(dll), 0, "__dll__", 0},
+#define MSIMAGEBASEOFF	2
+  D(ImageBase, U ("__ImageBase"), NT_EXE_IMAGE_BASE),
   D(SectionAlignment,"__section_alignment__", PE_DEF_SECTION_ALIGNMENT),
   D(FileAlignment,"__file_alignment__", PE_DEF_FILE_ALIGNMENT),
   D(MajorOperatingSystemVersion,"__major_os_version__", 4),
@@ -374,6 +376,8 @@ set_pe_name (char *name, long val)
 	{
 	  init[i].value = val;
 	  init[i].inited = 1;
+	  if (strcmp (name,"__image_base__") == 0)
+	    set_pe_name (U ("__ImageBase"), val);
 	  return;
 	}
     }
@@ -708,6 +712,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
 #endif
       else
 	init[IMAGEBASEOFF].value = NT_EXE_IMAGE_BASE;
+      init[MSIMAGEBASEOFF].value = init[IMAGEBASEOFF].value;
     }
 
   /* Don't do any symbol assignments if this is a relocatable link.  */

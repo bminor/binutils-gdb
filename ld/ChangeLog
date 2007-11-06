@@ -1,3 +1,11 @@
+2007-11-06  Kai Tietz  <kai.tietz@onevision.com>
+
+	* emultempl/pe.em: (init): Add __ImageBase symbol.
+	(MSIMAGEBASEOFF): New.
+	(set_pe_name): Keep __image_base and __ImageBase value synch.
+	(_set_symbols): Likewise.
+	* emultempl/pep.em: Likewise.
+
 2007-10-26  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 5215

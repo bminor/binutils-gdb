@@ -260,7 +260,7 @@ static definfo init[] =
 #define DLLOFF 1
   {&dll, sizeof(dll), 0, "__dll__", 0},
 #define MSIMAGEBASEOFF	2
-  D(ImageBase,"__ImageBase", NT_EXE_IMAGE_BASE),
+  D(ImageBase,"___ImageBase", NT_EXE_IMAGE_BASE),
   D(SectionAlignment,"__section_alignment__", PE_DEF_SECTION_ALIGNMENT),
   D(FileAlignment,"__file_alignment__", PE_DEF_FILE_ALIGNMENT),
   D(MajorOperatingSystemVersion,"__major_os_version__", 4),
@@ -343,7 +343,7 @@ set_pep_name (char *name, long val)
 	  init[i].value = val;
 	  init[i].inited = 1;
 	  if (strcmp (name,"__image_base__") == 0)
-	    set_pep_name ("__ImageBase", val);
+	    set_pep_name ("___ImageBase", val);
 	  return;
 	}
     }
