@@ -1,3 +1,9 @@
+2007-11-06  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes): Remove the dcffix and dcffix. opcodes
+	which are not included in the "Preliminary Decimal Floating-Point
+	Architecture" document.
+
 2007-11-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Replace No_xSuf with

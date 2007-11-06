@@ -4547,9 +4547,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "drsp",    XRC(59,770,0), X_MASK,	POWER6,		{ FRT, FRB } },
 { "drsp.",   XRC(59,770,1), X_MASK,	POWER6,		{ FRT, FRB } },
 
-{ "dcffix",  XRC(59,802,0), X_MASK,	POWER6,		{ FRT, FRB } },
-{ "dcffix.", XRC(59,802,1), X_MASK,	POWER6,		{ FRT, FRB } },
-
 { "denbcd",  XRC(59,834,0), X_MASK,	POWER6,		{ S, FRT, FRB } },
 { "denbcd.", XRC(59,834,1), X_MASK,	POWER6,		{ S, FRT, FRB } },
 
