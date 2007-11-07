@@ -50,12 +50,12 @@
    we have to fix up the 64-bit registers we get from the kernel
    to make them look like 32-bit registers.  */
 #ifdef __s390x__
-#define SUBOFF(i) \
-	((gdbarch_ptr_bit (current_gdbarch) == 32 \
+#define SUBOFF(gdbarch, i) \
+	((gdbarch_ptr_bit (gdbarch) == 32 \
 	  && ((i) == S390_PSWA_REGNUM \
 	      || ((i) >= S390_R0_REGNUM && (i) <= S390_R15_REGNUM)))? 4 : 0)
 #else
-#define SUBOFF(i) 0
+#define SUBOFF(gdbarch, i) 0
 #endif
 
 
@@ -64,11 +64,13 @@
 void
 supply_gregset (struct regcache *regcache, const gregset_t *regp)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int i;
   for (i = 0; i < S390_NUM_REGS; i++)
     if (regmap_gregset[i] != -1)
       regcache_raw_supply (regcache, i, 
-			   (const char *)regp + regmap_gregset[i] + SUBOFF (i));
+			   (const char *)regp + regmap_gregset[i]
+			     + SUBOFF (gdbarch, i));
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -77,12 +79,14 @@ supply_gregset (struct regcache *regcache, const gregset_t *regp)
 void
 fill_gregset (const struct regcache *regcache, gregset_t *regp, int regno)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int i;
   for (i = 0; i < S390_NUM_REGS; i++)
     if (regmap_gregset[i] != -1)
       if (regno == -1 || regno == i)
 	regcache_raw_collect (regcache, i, 
-			      (char *)regp + regmap_gregset[i] + SUBOFF (i));
+			      (char *)regp + regmap_gregset[i]
+				+ SUBOFF (gdbarch, i));
 }
 
 /* Fill GDB's register array with the floating-point register values

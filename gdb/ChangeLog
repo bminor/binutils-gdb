@@ -1,5 +1,11 @@
 2007-11-07  Markus Deuling  <deuling@de.ibm.com>
 
+	* s390-nat.c (supply_gregset, fill_gregset): Use get_regcache_arch to
+	get at the current architecture by regcache.
+	(SUBOFF): Add gdbarch to macro definition.
+
+2007-11-07  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (breakpoint_from_pc): Add gdbarch parameter.
 	* gdbarch.{c,h}: Regenerate.
 
