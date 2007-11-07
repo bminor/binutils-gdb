@@ -1678,9 +1678,9 @@ const struct m68k_opcode m68k_opcodes[] =
 {"msacw", 4,  	two(0xa000, 0x0300), two(0xf1b0, 0x0900), "uMumMh", mcfmac },
 {"msacw", 4,  	two(0xa000, 0x0100), two(0xf1b0, 0x0f00), "uMum", mcfmac },
 
-{"msacw", 4,  	two(0xa000, 0x0100), two(0xf100, 0x0900), "uMumiI4/RneG", mcfemac },/* Ry,Rx,SF,<ea>,accX.  */
-{"msacw", 4,  	two(0xa000, 0x0300), two(0xf100, 0x0900), "uMumMh4/RneG", mcfemac },/* Ry,Rx,+1/-1,<ea>,accX.  */
-{"msacw", 4,  	two(0xa000, 0x0100), two(0xf100, 0x0f00), "uMum4/RneG", mcfemac },/* Ry,Rx,<ea>,accX.  */
+{"msacw", 4,  	two(0xa000, 0x0100), two(0xf100, 0x0900), "uNuoiI4/RneG", mcfemac },/* Ry,Rx,SF,<ea>,accX.  */
+{"msacw", 4,  	two(0xa000, 0x0300), two(0xf100, 0x0900), "uNuoMh4/RneG", mcfemac },/* Ry,Rx,+1/-1,<ea>,accX.  */
+{"msacw", 4,  	two(0xa000, 0x0100), two(0xf100, 0x0f00), "uNuo4/RneG", mcfemac },/* Ry,Rx,<ea>,accX.  */
 {"msacw", 4,  	two(0xa000, 0x0100), two(0xf130, 0x0900), "uMumiIeH", mcfemac },/* Ry,Rx,SF,accX.  */
 {"msacw", 4,  	two(0xa000, 0x0300), two(0xf130, 0x0900), "uMumMheH", mcfemac },/* Ry,Rx,+1/-1,accX.  */
 {"msacw", 4,  	two(0xa000, 0x0100), two(0xf130, 0x0f00), "uMumeH", mcfemac }, /* Ry,Rx,accX.  */
