@@ -118,7 +118,8 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
 
 template<int size, bool big_endian>
 const unsigned char*
-Dwarf_line_info::read_header_prolog(const unsigned char* lineptr)
+Dwarf_line_info<size, big_endian>::read_header_prolog(
+    const unsigned char* lineptr)
 {
   uint32_t initial_length = elfcpp::Swap<32, big_endian>::readval(lineptr);
   lineptr += 4;
@@ -176,8 +177,10 @@ Dwarf_line_info::read_header_prolog(const unsigned char* lineptr)
 // The header for a debug_line section is mildly complicated, because
 // the line info is very tightly encoded.
 
+template<int size, bool big_endian>
 const unsigned char*
-Dwarf_line_info::read_header_tables(const unsigned char* lineptr)
+Dwarf_line_info<size, big_endian>::read_header_tables(
+    const unsigned char* lineptr)
 {
   // It is legal for the directory entry table to be empty.
   if (*lineptr)
@@ -231,11 +234,10 @@ Dwarf_line_info::read_header_tables(const unsigned char* lineptr)
 // simpler) code, but would bloat the binary.  Speed isn't important
 // here.
 
+template<int size, bool big_endian>
 bool
-Dwarf_line_info::process_one_opcode(int size, bool big_endian,
-                                    const unsigned char* start,
-                                    struct LineStateMachine* lsm,
-                                    size_t* len)
+Dwarf_line_info<size, big_endian>::process_one_opcode(
+    const unsigned char* start, struct LineStateMachine* lsm, size_t* len)
 {
   size_t oplen = 0;
   size_t templen;
@@ -312,10 +314,7 @@ Dwarf_line_info::process_one_opcode(int size, bool big_endian,
     case elfcpp::DW_LNS_fixed_advance_pc:
       {
         int advance_address;
-        if (big_endian)
-          advance_address = elfcpp::Swap<16, true>::readval(start);
-        else
-          advance_address = elfcpp::Swap<16, false>::readval(start);
+        advance_address = elfcpp::Swap<16, big_endian>::readval(start);
         oplen += 2;
         lsm->address += advance_address;
       }
@@ -349,16 +348,7 @@ Dwarf_line_info::process_one_opcode(int size, bool big_endian,
 
           case elfcpp::DW_LNE_set_address:
             // FIXME: modify the address based on the reloc
-            if (size == 32 && big_endian == false)
-              lsm->address = elfcpp::Swap<32, false>::readval(start);
-            else if (size == 32 && big_endian == true)
-              lsm->address = elfcpp::Swap<32, true>::readval(start);
-            else if (size == 64 && big_endian == false)
-              lsm->address = elfcpp::Swap<64, false>::readval(start);
-            else if (size == 64 && big_endian == true)
-              lsm->address = elfcpp::Swap<64, true>::readval(start);
-            else
-              gold_assert(false);  // We need to implement more cases, then.
+            lsm->address = elfcpp::Swap<size, big_endian>::readval(start);
             // FIXME: set lsm->shndx from the reloc
             lsm->shndx = 1;
             break;
@@ -408,9 +398,9 @@ Dwarf_line_info::process_one_opcode(int size, bool big_endian,
 // Read the debug information at LINEPTR and store it in the line
 // number map.
 
+template<int size, bool big_endian>
 unsigned const char*
-Dwarf_line_info::read_lines(int size, bool big_endian,
-                            unsigned const char* lineptr)
+Dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr)
 {
   struct LineStateMachine lsm;
 
@@ -431,8 +421,7 @@ Dwarf_line_info::read_lines(int size, bool big_endian,
       while (!lsm.end_sequence)
         {
           size_t oplength;
-          bool add_line = this->process_one_opcode(size, big_endian,
-                                                   lineptr, &lsm, &oplength);
+          bool add_line = this->process_one_opcode(lineptr, &lsm, &oplength);
           if (add_line)
             {
               Offset_to_lineno_entry entry
@@ -446,12 +435,21 @@ Dwarf_line_info::read_lines(int size, bool big_endian,
   return lengthstart + header_.total_length;
 }
 
-// Called after all line numbers have been read.
-
+template<int size, bool big_endian>
 void
-Dwarf_line_info::finalize_line_number_map()
+Dwarf_line_info<size, big_endian>::read_line_mappings()
 {
-  for (Lineno_map::iterator it = line_number_map_.begin();
+  while (buffer_ < buffer_end_)
+    {
+      const unsigned char* lineptr = buffer_;
+      lineptr = this->read_header_prolog(lineptr);
+      lineptr = this->read_header_tables(lineptr);
+      lineptr = this->read_lines(lineptr);
+      buffer_ = lineptr;
+    }
+
+  // Sort the lines numbers, so addr2line can use binary search.
+  for (typename Lineno_map::iterator it = line_number_map_.begin();
        it != line_number_map_.end();
        ++it)
     // Each vector needs to be sorted by offset.
@@ -460,12 +458,13 @@ Dwarf_line_info::finalize_line_number_map()
 
 // Return a string for a file name and line number.
 
+template<int size, bool big_endian>
 std::string
-Dwarf_line_info::addr2line(unsigned int shndx, off_t offset)
+Dwarf_line_info<size, big_endian>::addr2line(unsigned int shndx, off_t offset)
 {
   const Offset_to_lineno_entry lookup_key = { offset, 0, 0 };
   std::vector<Offset_to_lineno_entry>& offsets = line_number_map_[shndx];
-  std::vector<Offset_to_lineno_entry>::const_iterator it
+  typename std::vector<Offset_to_lineno_entry>::const_iterator it
       = std::lower_bound(offsets.begin(), offsets.end(), lookup_key);
 
   // If we found an exact match, great, otherwise find the last entry
@@ -504,26 +503,22 @@ Dwarf_line_info::addr2line(unsigned int shndx, off_t offset)
 
 #ifdef HAVE_TARGET_32_LITTLE
 template
-const unsigned char*
-Dwarf_line_info::read_header_prolog<32, false>(const unsigned char* lineptr);
+class Dwarf_line_info<32, false>;
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
 template
-const unsigned char*
-Dwarf_line_info::read_header_prolog<32, true>(const unsigned char* lineptr);
+class Dwarf_line_info<32, true>;
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
 template
-const unsigned char*
-Dwarf_line_info::read_header_prolog<64, false>(const unsigned char* lineptr);
+class Dwarf_line_info<64, false>;
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
 template
-const unsigned char*
-Dwarf_line_info::read_header_prolog<64, true>(const unsigned char* lineptr);
+class Dwarf_line_info<64, true>;
 #endif
 
 } // End namespace gold.

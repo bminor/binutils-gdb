@@ -919,8 +919,9 @@ Relocate_info<size, big_endian>::location(size_t, off_t offset) const
             shndx, &debuglines_size, false);
         if (debuglines)
           {
-            Dwarf_line_info line_info(debuglines, debuglines_size);
-            line_info.read_line_mappings<size, big_endian>();
+            Dwarf_line_info<size, big_endian> line_info(debuglines,
+							debuglines_size);
+            line_info.read_line_mappings();
             file_and_lineno = line_info.addr2line(this->data_shndx, offset);
           }
         break;

@@ -36,6 +36,7 @@ struct LineStateMachine;
 // This class is used to read the line information from the debugging
 // section of an object file.
 
+template<int size, bool big_endian>
 class Dwarf_line_info
 {
  public:
@@ -49,20 +50,8 @@ class Dwarf_line_info
   { }
 
   // Start processing line info, and populates the offset_map_.
-  template<int size, bool big_endian>
   void
-  read_line_mappings()
-  {
-    while (buffer_ < buffer_end_)
-      {
-        const unsigned char* lineptr = buffer_;
-        lineptr = this->read_header_prolog<size, big_endian>(lineptr);
-        lineptr = this->read_header_tables(lineptr);
-        lineptr = this->read_lines(size, big_endian, lineptr);
-        buffer_ = lineptr;
-      }
-    finalize_line_number_map();
-  }
+  read_line_mappings();
 
   // Given a section number and an offset, returns the associated
   // file and line-number, as a string: "file:lineno".  If unable
@@ -74,7 +63,6 @@ class Dwarf_line_info
  private:
   // Reads the DWARF2/3 header for this line info.  Each takes as input
   // a starting buffer position, and returns the ending position.
-  template<int size, bool big_endian>
   const unsigned char*
   read_header_prolog(const unsigned char* lineptr);
 
@@ -83,21 +71,15 @@ class Dwarf_line_info
 
   // Reads the DWARF2/3 line information.
   const unsigned char*
-  read_lines(int size, bool big_endian, const unsigned char* lineptr);
+  read_lines(const unsigned char* lineptr);
 
   // Process a single line info opcode at START using the state
   // machine at LSM.  Return true if we should define a line using the
   // current state of the line state machine.  Place the length of the
   // opcode in LEN.
   bool
-  process_one_opcode(int size, bool big_endian,
-                     const unsigned char* start,
+  process_one_opcode(const unsigned char* start,
                      struct LineStateMachine* lsm, size_t* len);
-
-  // Called after all line number have been read, to ready
-  // line_number_map_ for calls to addr2line().
-  void
-  finalize_line_number_map();
 
   // A DWARF2/3 line info header.  This is not the same size as in the
   // actual file, as the one in the file may have a 32 bit or 64 bit
