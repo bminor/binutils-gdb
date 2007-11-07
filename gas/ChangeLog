@@ -1,3 +1,8 @@
+2007-11-07  Eric B. Weddington  <eweddington@cso.atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add ATtiny88 device.
+	* doc/c-avr.texi: Likewise.
+
 2007-11-07  Anatoly Sokolov <aesok@post.ru>
 
 	* config/tc-avr.c (mcu_types): Add new devices: ATmega48P, ATmega88P,
