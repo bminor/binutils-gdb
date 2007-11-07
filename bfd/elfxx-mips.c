@@ -5672,7 +5672,15 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
     }
   else if (CONST_STRNEQ (name, ".debug_"))
-    hdr->sh_type = SHT_MIPS_DWARF;
+    {
+      hdr->sh_type = SHT_MIPS_DWARF;
+
+      /* Irix facilities such as libexc expect a single .debug_frame
+	 per executable, the system ones have NOSTRIP set and the linker
+	 doesn't merge sections with different flags so ...  */
+      if (SGI_COMPAT (abfd) && CONST_STRNEQ (name, ".debug_frame"))
+	hdr->sh_flags |= SHF_MIPS_NOSTRIP;
+    }
   else if (strcmp (name, ".MIPS.symlib") == 0)
     {
       hdr->sh_type = SHT_MIPS_SYMBOL_LIB;
