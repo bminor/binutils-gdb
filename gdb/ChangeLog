@@ -1,3 +1,11 @@
+2007-11-07  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Fix crash when a variable object being deleted
+	has any of its children deleted previously.
+	
+	* varobj.c (delete_variable_1): Don't recurse
+	into deleted children.
+	
 2007-11-07  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbarch.sh (legacy_virtual_frame_pointer): Add gdbarch parameter.
