@@ -313,10 +313,15 @@ class Layout
   off_t
   set_segment_offsets(const Target*, Output_segment*, unsigned int* pshndx);
 
-  // Set the final file offsets and section indexes of all the
-  // sections not associated with a segment.
+  // Set the final file offsets of all the sections not associated
+  // with a segment.
   off_t
-  set_section_offsets(off_t, unsigned int *pshndx, bool do_bits_sections);
+  set_section_offsets(off_t, bool do_bits_sections);
+
+  // Set the final section indexes of all the sections not associated
+  // with a segment.  Returns the next unused index.
+  unsigned int
+  set_section_indexes(unsigned int pshndx);
 
   // Return whether SEG1 comes before SEG2 in the output file.
   static bool

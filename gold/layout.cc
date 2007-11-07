@@ -637,7 +637,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   // Set the file offsets of all the data sections not associated with
   // segments. This makes sure that debug sections have their offsets
   // before symbols are finalized.
-  off = this->set_section_offsets(off, &shndx, true);
+  off = this->set_section_offsets(off, true);
 
   // Create the symbol table sections.
   this->create_symtab_sections(input_objects, symtab, &off);
@@ -647,7 +647,10 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Set the file offsets of all the non-data sections not associated with
   // segments.
-  off = this->set_section_offsets(off, &shndx, false);
+  off = this->set_section_offsets(off, false);
+
+  // Now that all sections have been created, set the section indexes.
+  shndx = this->set_section_indexes(shndx);
 
   // Create the section table header.
   Output_section_headers* oshdrs = this->create_shdrs(&off);
@@ -993,7 +996,6 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 off_t
 Layout::set_section_offsets(off_t off,
-                            unsigned int* pshndx,
                             bool do_bits_sections)
 {
   for (Section_list::iterator p = this->unattached_section_list_.begin();
@@ -1004,8 +1006,6 @@ Layout::set_section_offsets(off_t off,
                               || (*p)->type() == elfcpp::SHT_NOBITS);
       if (is_bits_section != do_bits_sections)
         continue;
-      (*p)->set_out_shndx(*pshndx);
-      ++*pshndx;
       if ((*p)->offset() != -1)
 	continue;
       off = align_address(off, (*p)->addralign());
@@ -1013,6 +1013,22 @@ Layout::set_section_offsets(off_t off,
       off += (*p)->data_size();
     }
   return off;
+}
+
+// Set the section indexes of all the sections not associated with a
+// segment.
+
+unsigned int
+Layout::set_section_indexes(unsigned int shndx)
+{
+  for (Section_list::iterator p = this->unattached_section_list_.begin();
+       p != this->unattached_section_list_.end();
+       ++p)
+    {
+      (*p)->set_out_shndx(shndx);
+      ++shndx;
+    }
+  return shndx;
 }
 
 // Create the symbol table sections.  Here we also set the final
