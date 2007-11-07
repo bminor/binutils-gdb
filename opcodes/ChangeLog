@@ -1,3 +1,8 @@
+2007-11-07  David O'Brien  <obrien@FreeBSD.org>
+
+	* arm-dis.c (arm_opcodes): Remove superflous escapes of percent
+	operators.
+
 2007-11-06  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes): Remove the dcffix and dcffix. opcodes
