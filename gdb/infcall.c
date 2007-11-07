@@ -354,6 +354,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct cleanup *caller_regcache_cleanup;
   struct frame_id dummy_id;
   struct cleanup *args_cleanup;
+  struct frame_info *frame;
+  struct gdbarch *gdbarch;
 
   if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
     ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
@@ -361,14 +363,17 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   if (!target_has_execution)
     noprocess ();
 
-  if (!gdbarch_push_dummy_call_p (current_gdbarch))
+  frame = get_current_frame ();
+  gdbarch = get_frame_arch (frame);
+
+  if (!gdbarch_push_dummy_call_p (gdbarch))
     error (_("This target does not support function calls"));
 
   /* Create a cleanup chain that contains the retbuf (buffer
      containing the register values).  This chain is create BEFORE the
      inf_status chain so that the inferior status can cleaned up
      (restored or discarded) without having the retbuf freed.  */
-  retbuf = regcache_xmalloc (current_gdbarch);
+  retbuf = regcache_xmalloc (gdbarch);
   retbuf_cleanup = make_cleanup_regcache_xfree (retbuf);
 
   /* A cleanup for the inferior status.  Create this AFTER the retbuf
@@ -381,26 +386,26 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
      callee returns.  To allow nested calls the registers are (further
      down) pushed onto a dummy frame stack.  Include a cleanup (which
      is tossed once the regcache has been pushed).  */
-  caller_regcache = frame_save_as_regcache (get_current_frame ());
+  caller_regcache = frame_save_as_regcache (frame);
   caller_regcache_cleanup = make_cleanup_regcache_xfree (caller_regcache);
 
   /* Ensure that the initial SP is correctly aligned.  */
   {
-    CORE_ADDR old_sp = get_frame_sp (get_current_frame ());
-    if (gdbarch_frame_align_p (current_gdbarch))
+    CORE_ADDR old_sp = get_frame_sp (frame);
+    if (gdbarch_frame_align_p (gdbarch))
       {
-	sp = gdbarch_frame_align (current_gdbarch, old_sp);
+	sp = gdbarch_frame_align (gdbarch, old_sp);
 	/* NOTE: cagney/2003-08-13: Skip the "red zone".  For some
 	   ABIs, a function can use memory beyond the inner most stack
 	   address.  AMD64 called that region the "red zone".  Skip at
 	   least the "red zone" size before allocating any space on
 	   the stack.  */
-	if (gdbarch_inner_than (current_gdbarch, 1, 2))
-	  sp -= gdbarch_frame_red_zone_size (current_gdbarch);
+	if (gdbarch_inner_than (gdbarch, 1, 2))
+	  sp -= gdbarch_frame_red_zone_size (gdbarch);
 	else
-	  sp += gdbarch_frame_red_zone_size (current_gdbarch);
+	  sp += gdbarch_frame_red_zone_size (gdbarch);
 	/* Still aligned?  */
-	gdb_assert (sp == gdbarch_frame_align (current_gdbarch, sp));
+	gdb_assert (sp == gdbarch_frame_align (gdbarch, sp));
 	/* NOTE: cagney/2002-09-18:
 	   
 	   On a RISC architecture, a void parameterless generic dummy
@@ -423,16 +428,16 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	   to pay :-).  */
 	if (sp == old_sp)
 	  {
-	    if (gdbarch_inner_than (current_gdbarch, 1, 2))
+	    if (gdbarch_inner_than (gdbarch, 1, 2))
 	      /* Stack grows down.  */
-	      sp = gdbarch_frame_align (current_gdbarch, old_sp - 1);
+	      sp = gdbarch_frame_align (gdbarch, old_sp - 1);
 	    else
 	      /* Stack grows up.  */
-	      sp = gdbarch_frame_align (current_gdbarch, old_sp + 1);
+	      sp = gdbarch_frame_align (gdbarch, old_sp + 1);
 	  }
-	gdb_assert ((gdbarch_inner_than (current_gdbarch, 1, 2)
+	gdb_assert ((gdbarch_inner_than (gdbarch, 1, 2)
 		    && sp <= old_sp)
-		    || (gdbarch_inner_than (current_gdbarch, 2, 1)
+		    || (gdbarch_inner_than (gdbarch, 2, 1)
 		       && sp >= old_sp));
       }
     else
@@ -488,14 +493,14 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   /* The actual breakpoint (at BP_ADDR) is inserted separatly so there
      is no need to write that out.  */
 
-  switch (gdbarch_call_dummy_location (current_gdbarch))
+  switch (gdbarch_call_dummy_location (gdbarch))
     {
     case ON_STACK:
       /* "dummy_addr" is here just to keep old targets happy.  New
 	 targets return that same information via "sp" and "bp_addr".  */
-      if (gdbarch_inner_than (current_gdbarch, 1, 2))
+      if (gdbarch_inner_than (gdbarch, 1, 2))
 	{
-	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
+	  sp = push_dummy_code (gdbarch, sp, funaddr,
 				args, nargs, target_values_type,
 				&real_pc, &bp_addr, get_current_regcache ());
 	  dummy_addr = sp;
@@ -503,7 +508,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       else
 	{
 	  dummy_addr = sp;
-	  sp = push_dummy_code (current_gdbarch, sp, funaddr,
+	  sp = push_dummy_code (gdbarch, sp, funaddr,
 				args, nargs, target_values_type,
 				&real_pc, &bp_addr, get_current_regcache ());
 	}
@@ -513,7 +518,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       dummy_addr = entry_point_address ();
       /* Make certain that the address points at real code, and not a
          function descriptor.  */
-      dummy_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+      dummy_addr = gdbarch_convert_from_func_ptr_addr (gdbarch,
 						       dummy_addr,
 						       &current_target);
       /* A call dummy always consists of just a single breakpoint, so
@@ -536,7 +541,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	  dummy_addr = entry_point_address ();
 	/* Make certain that the address points at real code, and not
 	   a function descriptor.  */
-	dummy_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+	dummy_addr = gdbarch_convert_from_func_ptr_addr (gdbarch,
 							 dummy_addr,
 							 &current_target);
 	/* A call dummy always consists of just a single breakpoint,
@@ -586,25 +591,25 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   if (struct_return || lang_struct_return)
     {
       int len = TYPE_LENGTH (values_type);
-      if (gdbarch_inner_than (current_gdbarch, 1, 2))
+      if (gdbarch_inner_than (gdbarch, 1, 2))
 	{
 	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
              making space for the return value.  */
 	  sp -= len;
-	  if (gdbarch_frame_align_p (current_gdbarch))
-	    sp = gdbarch_frame_align (current_gdbarch, sp);
+	  if (gdbarch_frame_align_p (gdbarch))
+	    sp = gdbarch_frame_align (gdbarch, sp);
 	  struct_addr = sp;
 	}
       else
 	{
 	  /* Stack grows upward.  Align the frame, allocate space, and
              then again, re-align the frame??? */
-	  if (gdbarch_frame_align_p (current_gdbarch))
-	    sp = gdbarch_frame_align (current_gdbarch, sp);
+	  if (gdbarch_frame_align_p (gdbarch))
+	    sp = gdbarch_frame_align (gdbarch, sp);
 	  struct_addr = sp;
 	  sp += len;
-	  if (gdbarch_frame_align_p (current_gdbarch))
-	    sp = gdbarch_frame_align (current_gdbarch, sp);
+	  if (gdbarch_frame_align_p (gdbarch))
+	    sp = gdbarch_frame_align (gdbarch, sp);
 	}
     }
 
@@ -627,8 +632,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   /* Create the dummy stack frame.  Pass in the call dummy address as,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
-  sp = gdbarch_push_dummy_call (current_gdbarch, function,
-				get_current_regcache (), bp_addr, nargs, args,
+  sp = gdbarch_push_dummy_call (gdbarch, function, get_current_regcache (),
+				bp_addr, nargs, args,
 				sp, struct_return, struct_addr);
 
   do_cleanups (args_cleanup);
@@ -834,15 +839,14 @@ the function call)."), name);
       }
     else
       {
-	struct gdbarch *arch = current_gdbarch;
-
-	switch (gdbarch_return_value (arch, target_values_type, NULL, NULL, NULL))
+	switch (gdbarch_return_value (gdbarch, target_values_type,
+				      NULL, NULL, NULL))
 	  {
 	  case RETURN_VALUE_REGISTER_CONVENTION:
 	  case RETURN_VALUE_ABI_RETURNS_ADDRESS:
 	  case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
 	    retval = allocate_value (values_type);
-	    gdbarch_return_value (current_gdbarch, values_type, retbuf,
+	    gdbarch_return_value (gdbarch, values_type, retbuf,
 				  value_contents_raw (retval), NULL);
 	    break;
 	  case RETURN_VALUE_STRUCT_CONVENTION:

@@ -1,5 +1,10 @@
 2007-11-07  Markus Deuling  <deuling@de.ibm.com>
 
+	* infcall.c (call_function_by_hand): Use get_frame_arch to get at the
+	current architecture by frame_info.
+
+2007-11-07  Markus Deuling  <deuling@de.ibm.com>
+
 	* xtensa-tdep.h (SIZEOF_GREGSET, XTENSA_ELF_NGREG) Remove.
 
 2007-11-07  Markus Deuling  <deuling@de.ibm.com>
