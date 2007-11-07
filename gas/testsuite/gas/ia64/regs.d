@@ -2146,157 +2146,157 @@ Disassembly of section \.text:
     2c80:	09 00 00 00 01 00 	\[MMI\]       nop\.m 0x0
     2c86:	00 00 00 02 00 20 	            nop\.m 0x0
     2c8c:	00 10 ca 00       	            mov\.i r1=ar\.ec;;
-    2c90:	1d 08 00 00 24 04 	\[MFB\]       mov r1=cr0
+    2c90:	1d 08 00 00 24 04 	\[MFB\]       mov r1=cr\.dcr
     2c96:	00 00 00 02 00 00 	            nop\.f 0x0
     2c9c:	00 00 00 20       	            nop\.b 0x0;;
-    2ca0:	1d 08 00 02 24 04 	\[MFB\]       mov r1=cr1
+    2ca0:	1d 08 00 02 24 04 	\[MFB\]       mov r1=cr\.itm
     2ca6:	00 00 00 02 00 00 	            nop\.f 0x0
     2cac:	00 00 00 20       	            nop\.b 0x0;;
-    2cb0:	1d 08 00 04 24 04 	\[MFB\]       mov r1=cr2
+    2cb0:	1d 08 00 04 24 04 	\[MFB\]       mov r1=cr\.iva
     2cb6:	00 00 00 02 00 00 	            nop\.f 0x0
     2cbc:	00 00 00 20       	            nop\.b 0x0;;
-    2cc0:	1d 08 00 10 24 04 	\[MFB\]       mov r1=cr8
+    2cc0:	1d 08 00 10 24 04 	\[MFB\]       mov r1=cr\.pta
     2cc6:	00 00 00 02 00 00 	            nop\.f 0x0
     2ccc:	00 00 00 20       	            nop\.b 0x0;;
     2cd0:	1d 08 00 12 24 04 	\[MFB\]       mov r1=cr9
     2cd6:	00 00 00 02 00 00 	            nop\.f 0x0
     2cdc:	00 00 00 20       	            nop\.b 0x0;;
-    2ce0:	1d 08 00 20 24 04 	\[MFB\]       mov r1=cr16
+    2ce0:	1d 08 00 20 24 04 	\[MFB\]       mov r1=cr\.ipsr
     2ce6:	00 00 00 02 00 00 	            nop\.f 0x0
     2cec:	00 00 00 20       	            nop\.b 0x0;;
-    2cf0:	1d 08 00 22 24 04 	\[MFB\]       mov r1=cr17
+    2cf0:	1d 08 00 22 24 04 	\[MFB\]       mov r1=cr\.isr
     2cf6:	00 00 00 02 00 00 	            nop\.f 0x0
     2cfc:	00 00 00 20       	            nop\.b 0x0;;
-    2d00:	1d 08 00 26 24 04 	\[MFB\]       mov r1=cr19
+    2d00:	1d 08 00 26 24 04 	\[MFB\]       mov r1=cr\.iip
     2d06:	00 00 00 02 00 00 	            nop\.f 0x0
     2d0c:	00 00 00 20       	            nop\.b 0x0;;
-    2d10:	1d 08 00 28 24 04 	\[MFB\]       mov r1=cr20
+    2d10:	1d 08 00 28 24 04 	\[MFB\]       mov r1=cr\.ifa
     2d16:	00 00 00 02 00 00 	            nop\.f 0x0
     2d1c:	00 00 00 20       	            nop\.b 0x0;;
-    2d20:	1d 08 00 2a 24 04 	\[MFB\]       mov r1=cr21
+    2d20:	1d 08 00 2a 24 04 	\[MFB\]       mov r1=cr\.itir
     2d26:	00 00 00 02 00 00 	            nop\.f 0x0
     2d2c:	00 00 00 20       	            nop\.b 0x0;;
-    2d30:	1d 08 00 2c 24 04 	\[MFB\]       mov r1=cr22
+    2d30:	1d 08 00 2c 24 04 	\[MFB\]       mov r1=cr\.iipa
     2d36:	00 00 00 02 00 00 	            nop\.f 0x0
     2d3c:	00 00 00 20       	            nop\.b 0x0;;
-    2d40:	1d 08 00 2e 24 04 	\[MFB\]       mov r1=cr23
+    2d40:	1d 08 00 2e 24 04 	\[MFB\]       mov r1=cr\.ifs
     2d46:	00 00 00 02 00 00 	            nop\.f 0x0
     2d4c:	00 00 00 20       	            nop\.b 0x0;;
-    2d50:	1d 08 00 30 24 04 	\[MFB\]       mov r1=cr24
+    2d50:	1d 08 00 30 24 04 	\[MFB\]       mov r1=cr\.iim
     2d56:	00 00 00 02 00 00 	            nop\.f 0x0
     2d5c:	00 00 00 20       	            nop\.b 0x0;;
-    2d60:	1d 08 00 32 24 04 	\[MFB\]       mov r1=cr25
+    2d60:	1d 08 00 32 24 04 	\[MFB\]       mov r1=cr\.iha
     2d66:	00 00 00 02 00 00 	            nop\.f 0x0
     2d6c:	00 00 00 20       	            nop\.b 0x0;;
-    2d70:	1d 08 00 80 24 04 	\[MFB\]       mov r1=cr64
+    2d70:	1d 08 00 80 24 04 	\[MFB\]       mov r1=cr\.lid
     2d76:	00 00 00 02 00 00 	            nop\.f 0x0
     2d7c:	00 00 00 20       	            nop\.b 0x0;;
-    2d80:	1d 08 00 82 24 04 	\[MFB\]       mov r1=cr65
+    2d80:	1d 08 00 82 24 04 	\[MFB\]       mov r1=cr\.ivr
     2d86:	00 00 00 02 00 00 	            nop\.f 0x0
     2d8c:	00 00 00 20       	            nop\.b 0x0;;
-    2d90:	1d 08 00 84 24 04 	\[MFB\]       mov r1=cr66
+    2d90:	1d 08 00 84 24 04 	\[MFB\]       mov r1=cr\.tpr
     2d96:	00 00 00 02 00 00 	            nop\.f 0x0
     2d9c:	00 00 00 20       	            nop\.b 0x0;;
-    2da0:	1d 08 00 86 24 04 	\[MFB\]       mov r1=cr67
+    2da0:	1d 08 00 86 24 04 	\[MFB\]       mov r1=cr\.eoi
     2da6:	00 00 00 02 00 00 	            nop\.f 0x0
     2dac:	00 00 00 20       	            nop\.b 0x0;;
-    2db0:	1d 08 00 88 24 04 	\[MFB\]       mov r1=cr68
+    2db0:	1d 08 00 88 24 04 	\[MFB\]       mov r1=cr\.irr0
     2db6:	00 00 00 02 00 00 	            nop\.f 0x0
     2dbc:	00 00 00 20       	            nop\.b 0x0;;
-    2dc0:	1d 08 00 8a 24 04 	\[MFB\]       mov r1=cr69
+    2dc0:	1d 08 00 8a 24 04 	\[MFB\]       mov r1=cr\.irr1
     2dc6:	00 00 00 02 00 00 	            nop\.f 0x0
     2dcc:	00 00 00 20       	            nop\.b 0x0;;
-    2dd0:	1d 08 00 8c 24 04 	\[MFB\]       mov r1=cr70
+    2dd0:	1d 08 00 8c 24 04 	\[MFB\]       mov r1=cr\.irr2
     2dd6:	00 00 00 02 00 00 	            nop\.f 0x0
     2ddc:	00 00 00 20       	            nop\.b 0x0;;
-    2de0:	1d 08 00 8e 24 04 	\[MFB\]       mov r1=cr71
+    2de0:	1d 08 00 8e 24 04 	\[MFB\]       mov r1=cr\.irr3
     2de6:	00 00 00 02 00 00 	            nop\.f 0x0
     2dec:	00 00 00 20       	            nop\.b 0x0;;
-    2df0:	1d 08 00 90 24 04 	\[MFB\]       mov r1=cr72
+    2df0:	1d 08 00 90 24 04 	\[MFB\]       mov r1=cr\.itv
     2df6:	00 00 00 02 00 00 	            nop\.f 0x0
     2dfc:	00 00 00 20       	            nop\.b 0x0;;
-    2e00:	1d 08 00 92 24 04 	\[MFB\]       mov r1=cr73
+    2e00:	1d 08 00 92 24 04 	\[MFB\]       mov r1=cr\.pmv
     2e06:	00 00 00 02 00 00 	            nop\.f 0x0
     2e0c:	00 00 00 20       	            nop\.b 0x0;;
-    2e10:	1d 08 00 94 24 04 	\[MFB\]       mov r1=cr74
+    2e10:	1d 08 00 94 24 04 	\[MFB\]       mov r1=cr\.cmcv
     2e16:	00 00 00 02 00 00 	            nop\.f 0x0
     2e1c:	00 00 00 20       	            nop\.b 0x0;;
-    2e20:	1d 08 00 a0 24 04 	\[MFB\]       mov r1=cr80
+    2e20:	1d 08 00 a0 24 04 	\[MFB\]       mov r1=cr\.lrr0
     2e26:	00 00 00 02 00 00 	            nop\.f 0x0
     2e2c:	00 00 00 20       	            nop\.b 0x0;;
-    2e30:	1d 08 00 a2 24 04 	\[MFB\]       mov r1=cr81
+    2e30:	1d 08 00 a2 24 04 	\[MFB\]       mov r1=cr\.lrr1
     2e36:	00 00 00 02 00 00 	            nop\.f 0x0
     2e3c:	00 00 00 20       	            nop\.b 0x0;;
-    2e40:	1d 08 00 00 24 04 	\[MFB\]       mov r1=cr0
+    2e40:	1d 08 00 00 24 04 	\[MFB\]       mov r1=cr\.dcr
     2e46:	00 00 00 02 00 00 	            nop\.f 0x0
     2e4c:	00 00 00 20       	            nop\.b 0x0;;
-    2e50:	1d 08 00 02 24 04 	\[MFB\]       mov r1=cr1
+    2e50:	1d 08 00 02 24 04 	\[MFB\]       mov r1=cr\.itm
     2e56:	00 00 00 02 00 00 	            nop\.f 0x0
     2e5c:	00 00 00 20       	            nop\.b 0x0;;
-    2e60:	1d 08 00 04 24 04 	\[MFB\]       mov r1=cr2
+    2e60:	1d 08 00 04 24 04 	\[MFB\]       mov r1=cr\.iva
     2e66:	00 00 00 02 00 00 	            nop\.f 0x0
     2e6c:	00 00 00 20       	            nop\.b 0x0;;
-    2e70:	1d 08 00 10 24 04 	\[MFB\]       mov r1=cr8
+    2e70:	1d 08 00 10 24 04 	\[MFB\]       mov r1=cr\.pta
     2e76:	00 00 00 02 00 00 	            nop\.f 0x0
     2e7c:	00 00 00 20       	            nop\.b 0x0;;
-    2e80:	1d 08 00 20 24 04 	\[MFB\]       mov r1=cr16
+    2e80:	1d 08 00 20 24 04 	\[MFB\]       mov r1=cr\.ipsr
     2e86:	00 00 00 02 00 00 	            nop\.f 0x0
     2e8c:	00 00 00 20       	            nop\.b 0x0;;
-    2e90:	1d 08 00 22 24 04 	\[MFB\]       mov r1=cr17
+    2e90:	1d 08 00 22 24 04 	\[MFB\]       mov r1=cr\.isr
     2e96:	00 00 00 02 00 00 	            nop\.f 0x0
     2e9c:	00 00 00 20       	            nop\.b 0x0;;
-    2ea0:	1d 08 00 26 24 04 	\[MFB\]       mov r1=cr19
+    2ea0:	1d 08 00 26 24 04 	\[MFB\]       mov r1=cr\.iip
     2ea6:	00 00 00 02 00 00 	            nop\.f 0x0
     2eac:	00 00 00 20       	            nop\.b 0x0;;
-    2eb0:	1d 08 00 2c 24 04 	\[MFB\]       mov r1=cr22
+    2eb0:	1d 08 00 2c 24 04 	\[MFB\]       mov r1=cr\.iipa
     2eb6:	00 00 00 02 00 00 	            nop\.f 0x0
     2ebc:	00 00 00 20       	            nop\.b 0x0;;
-    2ec0:	1d 08 00 2e 24 04 	\[MFB\]       mov r1=cr23
+    2ec0:	1d 08 00 2e 24 04 	\[MFB\]       mov r1=cr\.ifs
     2ec6:	00 00 00 02 00 00 	            nop\.f 0x0
     2ecc:	00 00 00 20       	            nop\.b 0x0;;
-    2ed0:	1d 08 00 30 24 04 	\[MFB\]       mov r1=cr24
+    2ed0:	1d 08 00 30 24 04 	\[MFB\]       mov r1=cr\.iim
     2ed6:	00 00 00 02 00 00 	            nop\.f 0x0
     2edc:	00 00 00 20       	            nop\.b 0x0;;
-    2ee0:	1d 08 00 32 24 04 	\[MFB\]       mov r1=cr25
+    2ee0:	1d 08 00 32 24 04 	\[MFB\]       mov r1=cr\.iha
     2ee6:	00 00 00 02 00 00 	            nop\.f 0x0
     2eec:	00 00 00 20       	            nop\.b 0x0;;
-    2ef0:	1d 08 00 80 24 04 	\[MFB\]       mov r1=cr64
+    2ef0:	1d 08 00 80 24 04 	\[MFB\]       mov r1=cr\.lid
     2ef6:	00 00 00 02 00 00 	            nop\.f 0x0
     2efc:	00 00 00 20       	            nop\.b 0x0;;
-    2f00:	1d 08 00 82 24 04 	\[MFB\]       mov r1=cr65
+    2f00:	1d 08 00 82 24 04 	\[MFB\]       mov r1=cr\.ivr
     2f06:	00 00 00 02 00 00 	            nop\.f 0x0
     2f0c:	00 00 00 20       	            nop\.b 0x0;;
-    2f10:	1d 08 00 84 24 04 	\[MFB\]       mov r1=cr66
+    2f10:	1d 08 00 84 24 04 	\[MFB\]       mov r1=cr\.tpr
     2f16:	00 00 00 02 00 00 	            nop\.f 0x0
     2f1c:	00 00 00 20       	            nop\.b 0x0;;
-    2f20:	1d 08 00 86 24 04 	\[MFB\]       mov r1=cr67
+    2f20:	1d 08 00 86 24 04 	\[MFB\]       mov r1=cr\.eoi
     2f26:	00 00 00 02 00 00 	            nop\.f 0x0
     2f2c:	00 00 00 20       	            nop\.b 0x0;;
-    2f30:	1d 08 00 88 24 04 	\[MFB\]       mov r1=cr68
+    2f30:	1d 08 00 88 24 04 	\[MFB\]       mov r1=cr\.irr0
     2f36:	00 00 00 02 00 00 	            nop\.f 0x0
     2f3c:	00 00 00 20       	            nop\.b 0x0;;
-    2f40:	1d 08 00 8a 24 04 	\[MFB\]       mov r1=cr69
+    2f40:	1d 08 00 8a 24 04 	\[MFB\]       mov r1=cr\.irr1
     2f46:	00 00 00 02 00 00 	            nop\.f 0x0
     2f4c:	00 00 00 20       	            nop\.b 0x0;;
-    2f50:	1d 08 00 8c 24 04 	\[MFB\]       mov r1=cr70
+    2f50:	1d 08 00 8c 24 04 	\[MFB\]       mov r1=cr\.irr2
     2f56:	00 00 00 02 00 00 	            nop\.f 0x0
     2f5c:	00 00 00 20       	            nop\.b 0x0;;
-    2f60:	1d 08 00 8e 24 04 	\[MFB\]       mov r1=cr71
+    2f60:	1d 08 00 8e 24 04 	\[MFB\]       mov r1=cr\.irr3
     2f66:	00 00 00 02 00 00 	            nop\.f 0x0
     2f6c:	00 00 00 20       	            nop\.b 0x0;;
-    2f70:	1d 08 00 90 24 04 	\[MFB\]       mov r1=cr72
+    2f70:	1d 08 00 90 24 04 	\[MFB\]       mov r1=cr\.itv
     2f76:	00 00 00 02 00 00 	            nop\.f 0x0
     2f7c:	00 00 00 20       	            nop\.b 0x0;;
-    2f80:	1d 08 00 92 24 04 	\[MFB\]       mov r1=cr73
+    2f80:	1d 08 00 92 24 04 	\[MFB\]       mov r1=cr\.pmv
     2f86:	00 00 00 02 00 00 	            nop\.f 0x0
     2f8c:	00 00 00 20       	            nop\.b 0x0;;
-    2f90:	1d 08 00 a0 24 04 	\[MFB\]       mov r1=cr80
+    2f90:	1d 08 00 a0 24 04 	\[MFB\]       mov r1=cr\.lrr0
     2f96:	00 00 00 02 00 00 	            nop\.f 0x0
     2f9c:	00 00 00 20       	            nop\.b 0x0;;
-    2fa0:	1d 08 00 a2 24 04 	\[MFB\]       mov r1=cr81
+    2fa0:	1d 08 00 a2 24 04 	\[MFB\]       mov r1=cr\.lrr1
     2fa6:	00 00 00 02 00 00 	            nop\.f 0x0
     2fac:	00 00 00 20       	            nop\.b 0x0;;
-    2fb0:	1d 08 00 94 24 04 	\[MFB\]       mov r1=cr74
+    2fb0:	1d 08 00 94 24 04 	\[MFB\]       mov r1=cr\.cmcv
     2fb6:	00 00 00 02 00 00 	            nop\.f 0x0
     2fbc:	00 00 00 20       	            nop\.b 0x0;;
     2fc0:	1d 08 00 00 25 04 	\[MFB\]       mov r1=psr

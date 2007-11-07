@@ -1,3 +1,8 @@
+2007-11-07  Tristan Gingold  <gingold@adacore.com>
+
+	* ia64-dis.c (print_insn_ia64): Generate symbolic names for cr
+	registers instead of register number.
+
 2007-11-07  David O'Brien  <obrien@FreeBSD.org>
 
 	* arm-dis.c (arm_opcodes): Remove superflous escapes of percent

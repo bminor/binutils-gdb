@@ -1,5 +1,10 @@
 2007-11-07  Tristan Gingold  <gingold@adacore.com>
 
+	* ia64-dis.c (print_insn_ia64): Generate symbolic names for cr
+	registers instead of register number.
+
+2007-11-07  Tristan Gingold  <gingold@adacore.com>
+
 	* gas/elf/elf.exp (run_elf_list_test): Fix typo.
 
 2007-11-07  Tristan Gingold  <gingold@adacore.com>
