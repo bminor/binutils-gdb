@@ -965,12 +965,13 @@ branch_dest (struct frame_info *frame, int opcode, int instr,
 /* Sequence of bytes for breakpoint instruction.  */
 
 const static unsigned char *
-rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
+rs6000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
+			   int *bp_size)
 {
   static unsigned char big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
   static unsigned char little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
   *bp_size = 4;
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     return big_breakpoint;
   else
     return little_breakpoint;
@@ -1079,7 +1080,8 @@ rs6000_software_single_step (struct frame_info *frame)
 {
   CORE_ADDR dummy;
   int breakp_sz;
-  const gdb_byte *breakp = rs6000_breakpoint_from_pc (&dummy, &breakp_sz);
+  const gdb_byte *breakp
+    = rs6000_breakpoint_from_pc (get_frame_arch (frame), &dummy, &breakp_sz);
   int ii, insn;
   CORE_ADDR loc;
   CORE_ADDR breaks[2];

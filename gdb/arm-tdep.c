@@ -2068,9 +2068,9 @@ static const char arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
    breakpoint should be inserted.  */
 
 static const unsigned char *
-arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+arm_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (arm_pc_is_thumb (*pcptr))
     {

@@ -599,7 +599,7 @@ alpha_return_in_memory_always (struct type *type)
 }
 
 static const gdb_byte *
-alpha_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+alpha_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
 {
   static const gdb_byte break_insn[] = { 0x80, 0, 0, 0 }; /* call_pal bpt */
 

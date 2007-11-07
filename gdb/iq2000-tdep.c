@@ -490,7 +490,8 @@ static const struct frame_base iq2000_frame_base = {
 };
 
 static const unsigned char *
-iq2000_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+iq2000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
+			   int *lenptr)
 {
   static const unsigned char big_breakpoint[] = { 0x00, 0x00, 0x00, 0x0d };
   static const unsigned char little_breakpoint[] = { 0x0d, 0x00, 0x00, 0x00 };
@@ -500,9 +501,8 @@ iq2000_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 	   (long) *pcptr);
 
   *lenptr = 4;
-  return (gdbarch_byte_order (current_gdbarch)
-	  == BFD_ENDIAN_BIG) ? big_breakpoint
-					       : little_breakpoint;
+  return (gdbarch_byte_order (gdbarch)
+	  == BFD_ENDIAN_BIG) ? big_breakpoint : little_breakpoint;
 }
 
 /* Target function return value methods: */

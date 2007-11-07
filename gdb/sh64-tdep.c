@@ -252,7 +252,7 @@ pc_is_isa32 (bfd_vma memaddr)
 }
 
 static const unsigned char *
-sh64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+sh64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   /* The BRK instruction for shmedia is 
      01101111 11110101 11111111 11110000
@@ -264,7 +264,7 @@ sh64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
      which translates in big endian mode to 0x0, 0x3b
      and in little endian mode to 0x3b, 0x0*/
 
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       if (pc_is_isa32 (*pcptr))
 	{

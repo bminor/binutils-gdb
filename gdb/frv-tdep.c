@@ -416,7 +416,7 @@ frv_register_sim_regno (int reg)
 }
 
 static const unsigned char *
-frv_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenp)
+frv_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenp)
 {
   static unsigned char breakpoint[] = {0xc0, 0x70, 0x00, 0x01};
   *lenp = sizeof (breakpoint);

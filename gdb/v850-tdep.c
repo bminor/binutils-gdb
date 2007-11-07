@@ -804,7 +804,7 @@ v850_return_value (struct gdbarch *gdbarch, struct type *type,
 }
 
 const static unsigned char *
-v850_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+v850_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0x85, 0x05 };
   *lenptr = sizeof (breakpoint);

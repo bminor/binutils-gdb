@@ -528,7 +528,7 @@ sparc32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
    location for inserting the breakpoint.  */
    
 static const gdb_byte *
-sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+sparc_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
 {
   static const gdb_byte break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
 

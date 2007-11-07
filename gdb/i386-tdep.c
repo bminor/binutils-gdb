@@ -278,7 +278,7 @@ static const char *disassembly_flavor = att_flavor;
    This function is 64-bit safe.  */
 
 static const gdb_byte *
-i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+i386_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
 {
   static gdb_byte break_insn[] = { 0xcc }; /* int 3 */
 

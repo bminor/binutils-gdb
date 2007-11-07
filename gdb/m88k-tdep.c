@@ -101,7 +101,7 @@ m88k_addr_bits_remove (CORE_ADDR addr)
    location for inserting the breakpoint.  */
    
 static const gdb_byte *
-m88k_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+m88k_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
 {
   /* tb 0,r0,511 */
   static gdb_byte break_insn[] = { 0xf0, 0x00, 0xd1, 0xff };

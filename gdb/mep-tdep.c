@@ -1913,7 +1913,7 @@ mep_skip_prologue (CORE_ADDR pc)
 /* Breakpoints.  */
 
 static const unsigned char *
-mep_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
+mep_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0x70, 0x32 };
   *lenptr = sizeof (breakpoint);

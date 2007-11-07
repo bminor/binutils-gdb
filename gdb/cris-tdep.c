@@ -1490,7 +1490,7 @@ cris_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
    the breakpoint should be inserted.  */
 
 static const unsigned char *
-cris_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+cris_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char break8_insn[] = {0x38, 0xe9};
   static unsigned char break15_insn[] = {0x3f, 0xe9};

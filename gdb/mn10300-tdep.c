@@ -288,7 +288,8 @@ mn10300_write_pc (struct regcache *regcache, CORE_ADDR val)
    one, so we defined it ourselves.  */
 
 const static unsigned char *
-mn10300_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
+mn10300_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
+			    int *bp_size)
 {
   static char breakpoint[] = {0xff};
   *bp_size = 1;

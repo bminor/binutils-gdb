@@ -321,7 +321,8 @@ score_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 }
 
 static const gdb_byte *
-score_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+score_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
+			  int *lenptr)
 {
   gdb_byte buf[SCORE_INSTLEN] = { 0 };
   int ret;
@@ -334,7 +335,7 @@ score_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
     }
   raw = extract_unsigned_integer (buf, SCORE_INSTLEN);
 
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       if (!(raw & 0x80008000))
         {

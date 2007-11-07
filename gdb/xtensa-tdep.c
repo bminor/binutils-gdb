@@ -1788,7 +1788,8 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 #define DENSITY_LITTLE_BREAKPOINT { 0x2d, 0xf0 }
 
 static const unsigned char *
-xtensa_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+xtensa_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
+			   int *lenptr)
 {
   static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
   static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
@@ -1797,9 +1798,9 @@ xtensa_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
   DEBUGTRACE ("xtensa_breakpoint_from_pc (pc = 0x%08x)\n", (int) *pcptr);
 
-  if (gdbarch_tdep (current_gdbarch)->isa_use_density_instructions)
+  if (gdbarch_tdep (gdbarch)->isa_use_density_instructions)
     {
-      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	{
 	  *lenptr = sizeof (density_big_breakpoint);
 	  return density_big_breakpoint;
@@ -1812,7 +1813,7 @@ xtensa_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
     }
   else
     {
-      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	{
 	  *lenptr = sizeof (big_breakpoint);
 	  return big_breakpoint;

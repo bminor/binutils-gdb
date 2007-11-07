@@ -387,10 +387,11 @@ m68hc11_register_name (struct gdbarch *gdbarch, int reg_nr)
 }
 
 static const unsigned char *
-m68hc11_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+m68hc11_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
+			    int *lenptr)
 {
   static unsigned char breakpoint[] = {0x0};
-  
+
   *lenptr = sizeof (breakpoint);
   return breakpoint;
 }

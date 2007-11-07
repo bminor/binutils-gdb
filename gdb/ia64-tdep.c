@@ -620,7 +620,7 @@ ia64_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
 /* We don't really want to use this, but remote.c needs to call it in order
    to figure out if Z-packets are supported or not.  Oh, well. */
 const unsigned char *
-ia64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+ia64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] =
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };

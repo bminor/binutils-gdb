@@ -4800,9 +4800,9 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
    should be inserted.  */
 
 static const gdb_byte *
-mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+mips_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       if (mips_pc_is_mips16 (*pcptr))
 	{

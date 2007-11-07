@@ -1193,7 +1193,8 @@ h8300s_dbg_reg_to_regnum (int regno)
 }
 
 const static unsigned char *
-h8300_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+h8300_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
+			  int *lenptr)
 {
   /*static unsigned char breakpoint[] = { 0x7A, 0xFF }; *//* ??? */
   static unsigned char breakpoint[] = { 0x01, 0x80 };	/* Sleep */

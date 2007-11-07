@@ -473,7 +473,7 @@ M:enum return_value_convention:return_value:struct type *valtype, struct regcach
 
 f:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 f:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
-f:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
+m:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
 M:CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
 f:int:memory_insert_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_insert_breakpoint::0
 f:int:memory_remove_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_remove_breakpoint::0

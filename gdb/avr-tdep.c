@@ -788,7 +788,7 @@ avr_skip_prologue (CORE_ADDR pc)
    only target, this shouldn't be a problem (I hope). TRoth/2003-05-14  */
 
 static const unsigned char *
-avr_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
+avr_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
 {
     static unsigned char avr_break_insn [] = { 0x98, 0x95 };
     *lenptr = sizeof (avr_break_insn);

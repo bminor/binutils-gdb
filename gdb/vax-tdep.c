@@ -255,7 +255,7 @@ vax_return_value (struct gdbarch *gdbarch, struct type *type,
    location for inserting the breakpoint.  */
    
 static const gdb_byte *
-vax_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+vax_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
 {
   static gdb_byte break_insn[] = { 3 };
 

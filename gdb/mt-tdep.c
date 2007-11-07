@@ -451,13 +451,14 @@ mt_skip_prologue (CORE_ADDR pc)
    The BP for ms2 is defined as 0x69000000 (illegal)  */
 
 static const gdb_byte *
-mt_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
+mt_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
+		       int *bp_size)
 {
   static gdb_byte ms1_breakpoint[] = { 0x68, 0, 0, 0 };
   static gdb_byte ms2_breakpoint[] = { 0x69, 0, 0, 0 };
 
   *bp_size = 4;
-  if (gdbarch_bfd_arch_info (current_gdbarch)->mach == bfd_mach_ms2)
+  if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
     return ms2_breakpoint;
   
   return ms1_breakpoint;

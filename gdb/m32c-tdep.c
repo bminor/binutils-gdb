@@ -976,7 +976,7 @@ make_regs (struct gdbarch *arch)
 /* Breakpoints.  */
 
 static const unsigned char *
-m32c_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+m32c_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
 {
   static unsigned char break_insn[] = { 0x00 };	/* brk */
 

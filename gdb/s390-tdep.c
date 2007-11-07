@@ -2256,7 +2256,7 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
 /* Breakpoints.  */
 
 static const gdb_byte *
-s390_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+s390_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   static const gdb_byte breakpoint[] = { 0x0, 0x1 };
 

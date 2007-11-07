@@ -2106,7 +2106,7 @@ gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenp
   gdb_assert (gdbarch->breakpoint_from_pc != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_breakpoint_from_pc called\n");
-  return gdbarch->breakpoint_from_pc (pcptr, lenptr);
+  return gdbarch->breakpoint_from_pc (gdbarch, pcptr, lenptr);
 }
 
 void

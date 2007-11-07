@@ -490,7 +490,8 @@ xstormy16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 const static unsigned char *
-xstormy16_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+xstormy16_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
+			      int *lenptr)
 {
   static unsigned char breakpoint[] = { 0x06, 0x0 };
   *lenptr = sizeof (breakpoint);

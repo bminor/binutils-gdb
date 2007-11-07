@@ -166,14 +166,14 @@ m32r_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
 }
 
 static const gdb_byte *
-m32r_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+m32r_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   static gdb_byte be_bp_entry[] = { 0x10, 0xf1, 0x70, 0x00 };	/* dpt -> nop */
   static gdb_byte le_bp_entry[] = { 0x00, 0x70, 0xf1, 0x10 };	/* dpt -> nop */
   gdb_byte *bp;
 
   /* Determine appropriate breakpoint.  */
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       if ((*pcptr & 3) == 0)
 	{

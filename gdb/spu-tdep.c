@@ -1247,7 +1247,7 @@ spu_return_value (struct gdbarch *gdbarch, struct type *type,
 /* Breakpoints.  */
 
 static const gdb_byte *
-spu_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
+spu_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
 {
   static const gdb_byte breakpoint[] = { 0x00, 0x00, 0x3f, 0xff };
 

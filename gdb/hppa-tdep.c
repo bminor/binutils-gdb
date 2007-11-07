@@ -571,7 +571,7 @@ hppa_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 static const unsigned char *
-hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+hppa_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
 {
   static const unsigned char breakpoint[] = {0x00, 0x01, 0x00, 0x04};
   (*len) = sizeof (breakpoint);
