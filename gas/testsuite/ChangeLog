@@ -1,5 +1,9 @@
 2007-11-07  Tristan Gingold  <gingold@adacore.com>
 
+	* gas/elf/elf.exp (run_elf_list_test): Fix typo.
+
+2007-11-07  Tristan Gingold  <gingold@adacore.com>
+
         * gas/ppc/test1xcoff32.d: Updated to match RTOC bug fix.
 
 2007-11-06  Paul Brook  <paul@codesourcery.com>
