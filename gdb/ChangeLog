@@ -1,5 +1,12 @@
 2007-11-07  Markus Deuling  <deuling@de.ibm.com>
 
+	* frv-tdep.c (frv_register_name, frv_check_watch_resources): Replace
+	macro CURRENT_VARIANT by its expression.
+	(CURRENT_VARIANT): Remove.
+	(frv_check_watch_resources): Add gdbarch parameter.
+
+2007-11-07  Markus Deuling  <deuling@de.ibm.com>
+
 	* MAINTAINERS (Write After Approval): Add self.
 
 2007-11-05  Ulrich Weigand  <uweigand@de.ibm.com>

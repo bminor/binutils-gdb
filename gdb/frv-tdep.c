@@ -91,8 +91,6 @@ struct gdbarch_tdep
   char **register_names;
 };
 
-#define CURRENT_VARIANT (gdbarch_tdep (current_gdbarch))
-
 /* Return the FR-V ABI associated with GDBARCH.  */
 enum frv_abi
 frv_abi (struct gdbarch *gdbarch)
@@ -285,7 +283,7 @@ frv_register_name (struct gdbarch *gdbarch, int reg)
   if (reg >= frv_num_regs + frv_num_pseudo_regs)
     return "?toolarge?";
 
-  return CURRENT_VARIANT->register_names[reg];
+  return gdbarch_tdep (gdbarch)->register_names[reg];
 }
 
 
@@ -1280,9 +1278,9 @@ frv_return_value (struct gdbarch *gdbarch, struct type *valtype,
    and FR400.  */
 
 int
-frv_check_watch_resources (int type, int cnt, int ot)
+frv_check_watch_resources (struct gdbarch *gdbarch, int type, int cnt, int ot)
 {
-  struct gdbarch_tdep *var = CURRENT_VARIANT;
+  struct gdbarch_tdep *var = gdbarch_tdep (gdbarch);
 
   /* Watchpoints not supported on simulator.  */
   if (strcmp (target_shortname, "sim") == 0)
