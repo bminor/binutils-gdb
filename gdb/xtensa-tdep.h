@@ -105,9 +105,6 @@ typedef struct
   xtensa_elf_greg_t ar[0];	/* variable size (per config).  */
 } xtensa_elf_gregset_t;
 
-#define SIZEOF_GREGSET (sizeof (xtensa_elf_gregset_t) + gdbarch_tdep (current_gdbarch)->num_aregs * 4)
-#define XTENSA_ELF_NGREG (SIZEOF_GREGSET / sizeof(xtensa_elf_greg_t))
-
 
 /*  Mask.  */
 

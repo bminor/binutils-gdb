@@ -1,5 +1,9 @@
 2007-11-07  Markus Deuling  <deuling@de.ibm.com>
 
+	* xtensa-tdep.h (SIZEOF_GREGSET, XTENSA_ELF_NGREG) Remove.
+
+2007-11-07  Markus Deuling  <deuling@de.ibm.com>
+
 	* s390-nat.c (supply_gregset, fill_gregset): Use get_regcache_arch to
 	get at the current architecture by regcache.
 	(SUBOFF): Add gdbarch to macro definition.
