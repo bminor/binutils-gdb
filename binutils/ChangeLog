@@ -1,3 +1,10 @@
+2007-11-07  Karl Berry  <karl@gnu.org>
+
+	* doc/binutils.texi: Update to FDL 1.2.
+	(Top): consistent punctuation in menu entries.
+	(Index): Rename from Binutils Index.
+	* doc/fdl.texi: Update from http://www.gnu.org/licenses/fdl.texi.
+
 2007-10-31  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (is_relocatable): Remove definition.

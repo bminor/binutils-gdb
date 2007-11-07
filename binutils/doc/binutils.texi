@@ -14,7 +14,7 @@ Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1
+under the terms of the GNU Free Documentation License, Version 1.2
 or any later version published by the Free Software Foundation;
 with no Invariant Sections, with no Front-Cover Texts, and with no
 Back-Cover Texts.  A copy of the license is included in the
@@ -142,7 +142,7 @@ section entitled ``GNU Free Documentation License''.
 * objcopy::			Copy and translate object files
 * objdump::                     Display information from object files
 * ranlib::                      Generate index to archive contents
-* readelf::			Display the contents of ELF format files.
+* readelf::                     Display the contents of ELF format files
 * size::                        List section sizes and total size
 * strings::                     List printable strings from files
 * strip::                       Discard symbols
@@ -154,10 +154,10 @@ section entitled ``GNU Free Documentation License''.
 * windmc::			Generator for Windows message resources
 * dlltool::			Create files needed to build and use DLLs
 * Common Options::              Command-line options for all utilities
-* Selecting The Target System:: How these utilities determine the target.
+* Selecting the Target System:: How these utilities determine the target
 * Reporting Bugs::              Reporting Bugs
 * GNU Free Documentation License::  GNU Free Documentation License
-* Binutils Index::                       Binutils Index
+* Index::                       Index
 @end menu
 
 @node ar
@@ -3863,7 +3863,7 @@ Display the version number of the program.
 @end table
 @c man end
 
-@node Selecting The Target System
+@node Selecting the Target System
 @chapter Selecting the Target System
 
 You can specify two aspects of the target system to the @sc{gnu}
@@ -4219,10 +4219,13 @@ Such guesses are usually wrong.  Even we cannot guess right about such
 things without first using the debugger to find the facts.
 @end itemize
 
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+ 
 @include fdl.texi
 
-@node Binutils Index
-@unnumbered Binutils Index
+@node Index
+@unnumbered Index
 
 @printindex cp
 
