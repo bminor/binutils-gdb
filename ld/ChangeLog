@@ -1,3 +1,8 @@
+2007-11-07  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* emulparams/vxworks.sh (OTHER_READONLY_SECTIONS,
+	OTHER_READWRITE_SECTIONS): Add TLS sections.
+
 2007-11-06  Kai Tietz  <kai.tietz@onevision.com>
 
 	* emultempl/pe.em: (init): Add __ImageBase symbol.
