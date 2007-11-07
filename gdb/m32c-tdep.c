@@ -2525,7 +2525,7 @@ m32c_m16c_pointer_to_address (struct type *type, const gdb_byte *buf)
 }
 
 void
-m32c_virtual_frame_pointer (CORE_ADDR pc,
+m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
 			    int *frame_regnum,
 			    LONGEST *frame_offset)
 {
@@ -2534,12 +2534,12 @@ m32c_virtual_frame_pointer (CORE_ADDR pc,
   struct m32c_prologue p;
 
   struct regcache *regcache = get_current_regcache ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   
   if (!find_pc_partial_function (pc, &name, &func_addr, &func_end))
     internal_error (__FILE__, __LINE__, _("No virtual frame pointer available"));
 
-  m32c_analyze_prologue (current_gdbarch, func_addr, pc, &p);
+  m32c_analyze_prologue (gdbarch, func_addr, pc, &p);
   switch (p.kind)
     {
     case prologue_with_frame_ptr:
@@ -2556,7 +2556,7 @@ m32c_virtual_frame_pointer (CORE_ADDR pc,
       break;
     }
   /* Sanity check */
-  if (*frame_regnum > gdbarch_num_regs (current_gdbarch))
+  if (*frame_regnum > gdbarch_num_regs (gdbarch))
     internal_error (__FILE__, __LINE__, _("No virtual frame pointer available"));
 }
 

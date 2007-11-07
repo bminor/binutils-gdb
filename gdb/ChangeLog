@@ -1,5 +1,15 @@
 2007-11-07  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (legacy_virtual_frame_pointer): Add gdbarch parameter.
+	* gdbarch.{c,h}: Regenerate.
+	* arch-utils.c (legacy_virtual_frame_pointer): Add gdbarch parameter.
+	Replace current_gdbarch by gdbarch.
+	* m32c-tdep.c (m32c_virtual_frame_pointer): Likewise.
+	* mips-tdep.c (mips_virtual_frame_pointer): Likewise.
+	* spu-tdep.c (spu_virtual_frame_pointer): Likewise.
+
+2007-11-07  Markus Deuling  <deuling@de.ibm.com>
+
 	* shnbsd-tdep.c (shnbsd_supply_gregset, shnbsd_collect_gregset): Use
 	get_regcache_arch to get at the current architecture by regcache.
 	* xstormy16-tdep.c (xstormy16_frame_prev_register): Use get_frame_arch

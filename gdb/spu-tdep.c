@@ -708,7 +708,8 @@ spu_skip_prologue (CORE_ADDR pc)
 
 /* Return the frame pointer in use at address PC.  */
 static void
-spu_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
+spu_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
+			   int *reg, LONGEST *offset)
 {
   struct spu_prologue_data data;
   spu_analyze_prologue (pc, (CORE_ADDR)-1, &data);

@@ -135,7 +135,8 @@ cannot_register_not (int regnum)
    raw.  */
 
 void
-legacy_virtual_frame_pointer (CORE_ADDR pc,
+legacy_virtual_frame_pointer (struct gdbarch *gdbarch, 
+			      CORE_ADDR pc,
 			      int *frame_regnum,
 			      LONGEST *frame_offset)
 {
@@ -144,14 +145,14 @@ legacy_virtual_frame_pointer (CORE_ADDR pc,
      register and an offset can determine this.  I think it should
      instead generate a byte code expression as that would work better
      with things like Dwarf2's CFI.  */
-  if (gdbarch_deprecated_fp_regnum (current_gdbarch) >= 0
-      && gdbarch_deprecated_fp_regnum (current_gdbarch)
-	   < gdbarch_num_regs (current_gdbarch))
-    *frame_regnum = gdbarch_deprecated_fp_regnum (current_gdbarch);
-  else if (gdbarch_sp_regnum (current_gdbarch) >= 0
-	   && gdbarch_sp_regnum (current_gdbarch)
-	        < gdbarch_num_regs (current_gdbarch))
-    *frame_regnum = gdbarch_sp_regnum (current_gdbarch);
+  if (gdbarch_deprecated_fp_regnum (gdbarch) >= 0
+      && gdbarch_deprecated_fp_regnum (gdbarch)
+	   < gdbarch_num_regs (gdbarch))
+    *frame_regnum = gdbarch_deprecated_fp_regnum (gdbarch);
+  else if (gdbarch_sp_regnum (gdbarch) >= 0
+	   && gdbarch_sp_regnum (gdbarch)
+	        < gdbarch_num_regs (gdbarch))
+    *frame_regnum = gdbarch_sp_regnum (gdbarch);
   else
     /* Should this be an internal error?  I guess so, it is reflecting
        an architectural limitation in the current design.  */

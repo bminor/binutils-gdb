@@ -160,7 +160,7 @@ extern void set_gdbarch_write_pc (struct gdbarch *gdbarch, gdbarch_write_pc_ftyp
    whole scheme for dealing with "frames" and "frame pointers" needs a
    serious shakedown. */
 
-typedef void (gdbarch_virtual_frame_pointer_ftype) (CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset);
+typedef void (gdbarch_virtual_frame_pointer_ftype) (struct gdbarch *gdbarch, CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset);
 extern void gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset);
 extern void set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer);
 

@@ -266,7 +266,7 @@ struct gdbarch startup_gdbarch =
   1,  /* char_signed */
   0,  /* read_pc */
   0,  /* write_pc */
-  0,  /* virtual_frame_pointer */
+  legacy_virtual_frame_pointer,  /* virtual_frame_pointer */
   0,  /* pseudo_register_read */
   0,  /* pseudo_register_write */
   0,  /* num_regs */
@@ -1366,7 +1366,7 @@ gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc, int *frame
   gdb_assert (gdbarch->virtual_frame_pointer != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_virtual_frame_pointer called\n");
-  gdbarch->virtual_frame_pointer (pc, frame_regnum, frame_offset);
+  gdbarch->virtual_frame_pointer (gdbarch, pc, frame_regnum, frame_offset);
 }
 
 void

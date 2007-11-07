@@ -5040,7 +5040,8 @@ mips_integer_to_address (struct gdbarch *gdbarch,
    an assertion failure.  */
 
 static void
-mips_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
+mips_virtual_frame_pointer (struct gdbarch *gdbarch, 
+			    CORE_ADDR pc, int *reg, LONGEST *offset)
 {
   *reg = MIPS_SP_REGNUM;
   *offset = 0;

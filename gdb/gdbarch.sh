@@ -392,7 +392,7 @@ F:void:write_pc:struct regcache *regcache, CORE_ADDR val:regcache, val
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
 # whole scheme for dealing with "frames" and "frame pointers" needs a
 # serious shakedown.
-f:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset:0:legacy_virtual_frame_pointer::0
+m:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset:0:legacy_virtual_frame_pointer::0
 #
 M:void:pseudo_register_read:struct regcache *regcache, int cookednum, gdb_byte *buf:regcache, cookednum, buf
 M:void:pseudo_register_write:struct regcache *regcache, int cookednum, const gdb_byte *buf:regcache, cookednum, buf
