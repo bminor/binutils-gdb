@@ -1,3 +1,9 @@
+2007-11-07  Anatoly Sokolov <aesok@post.ru>
+
+	* config/tc-avr.c (mcu_types): Add new devices: ATmega48P, ATmega88P,
+	ATmega168P, Atmega328P
+	* doc/c-avr.texi: Document new devices.
+
 2007-11-07  Tristan Gingold  <gingold@adacore.com>
 
         * config/tc-ppc.c (md_apply_fix): For PPC_TOC16 on XCOFF, uses offset
