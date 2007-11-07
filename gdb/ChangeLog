@@ -1,3 +1,7 @@
+2007-11-07  Markus Deuling  <deuling@de.ibm.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2007-11-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* features/rs6000/power-core.xml: Use uint32 as register type.
