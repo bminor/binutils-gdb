@@ -6059,10 +6059,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 #ifdef TE_PE
       fixP->fx_addnumber = 0;
 #else
-      /* We want to use the offset within the data segment of the
-	 symbol, not the actual VMA of the symbol.  */
+      /* We want to use the offset within the toc, not the actual VMA
+	 of the symbol.  */
       fixP->fx_addnumber =
-	- bfd_get_section_vma (stdoutput, S_GET_SEGMENT (fixP->fx_addsy));
+	- bfd_get_section_vma (stdoutput, S_GET_SEGMENT (fixP->fx_addsy))
+	- S_GET_VALUE (ppc_toc_csect);
 #endif
     }
 #endif

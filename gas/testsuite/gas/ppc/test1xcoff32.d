@@ -76,17 +76,17 @@ Disassembly of section \.text:
   24:	80 63 00 08 	l       r3,8\(r3\)
 
 0+0028 <reference_via_toc>:
-  28:	80 62 00 0c 	l       r3,12\(r2\)
+  28:	80 62 00 00 	l       r3,0\(r2\)
 			2a: R_TOC	ignored0\+0xf+ff8c
-  2c:	80 62 00 10 	l       r3,16\(r2\)
+  2c:	80 62 00 04 	l       r3,4\(r2\)
 			2e: R_TOC	ignored1\+0xf+ff88
-  30:	80 62 00 14 	l       r3,20\(r2\)
+  30:	80 62 00 08 	l       r3,8\(r2\)
 			32: R_TOC	ignored2\+0xf+ff84
-  34:	80 62 00 18 	l       r3,24\(r2\)
+  34:	80 62 00 0c 	l       r3,12\(r2\)
 			36: R_TOC	ignored3\+0xf+ff80
-  38:	80 62 00 1c 	l       r3,28\(r2\)
+  38:	80 62 00 10 	l       r3,16\(r2\)
 			3a: R_TOC	ignored4\+0xf+ff7c
-  3c:	80 62 00 20 	l       r3,32\(r2\)
+  3c:	80 62 00 14 	l       r3,20\(r2\)
 			3e: R_TOC	ignored5\+0xf+ff78
 
 0+0040 <subtract_symbols>:
@@ -101,7 +101,7 @@ Disassembly of section \.text:
 0+005c <load_addresses>:
   5c:	38 60 00 00 	lil     r3,0
   60:	38 60 00 04 	lil     r3,4
-  64:	38 62 00 24 	cal     r3,36\(r2\)
+  64:	38 62 00 18 	cal     r3,24\(r2\)
 			66: R_TOC	ignored6\+0xf+ff74
 Disassembly of section \.data:
 
