@@ -866,6 +866,15 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
 bool
 Input_objects::add_object(Object* obj)
 {
+  Target* target = obj->target();
+  if (this->target_ == NULL)
+    this->target_ = target;
+  else if (this->target_ != target)
+    {
+      gold_error(_("%s: incompatible target"), obj->name().c_str());
+      return false;
+    }
+
   if (!obj->is_dynamic())
     this->relobj_list_.push_back(static_cast<Relobj*>(obj));
   else
@@ -882,15 +891,6 @@ Input_objects::add_object(Object* obj)
 	}
 
       this->dynobj_list_.push_back(dynobj);
-    }
-
-  Target* target = obj->target();
-  if (this->target_ == NULL)
-    this->target_ = target;
-  else if (this->target_ != target)
-    {
-      gold_error(_("%s: incompatible target"), obj->name().c_str());
-      return false;
     }
 
   set_parameters_size_and_endianness(target->get_size(),

@@ -399,12 +399,19 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 				this->input_file_, memoff, ehdr_buf,
 				read_size);
 
-  input_objects->add_object(obj);
+  if (input_objects->add_object(obj))
+    {
+      Read_symbols_data sd;
+      obj->read_symbols(&sd);
+      obj->layout(symtab, layout, &sd);
+      obj->add_symbols(symtab, &sd);
+    }
+  else
+    {
+      // FIXME: We need to close the descriptor here.
+      delete obj;
+    }
 
-  Read_symbols_data sd;
-  obj->read_symbols(&sd);
-  obj->layout(symtab, layout, &sd);
-  obj->add_symbols(symtab, &sd);
 }
 
 // Add_archive_symbols methods.
