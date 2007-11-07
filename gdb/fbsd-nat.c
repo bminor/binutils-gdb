@@ -143,8 +143,8 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
 char *
 fbsd_make_corefile_notes (bfd *obfd, int *note_size)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
   const struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   gregset_t gregs;
   fpregset_t fpregs;
   char *note_data = NULL;

@@ -1,5 +1,20 @@
 2007-11-07  Markus Deuling  <deuling@de.ibm.com>
 
+	* shnbsd-tdep.c (shnbsd_supply_gregset, shnbsd_collect_gregset): Use
+	get_regcache_arch to get at the current architecture by regcache.
+	* xstormy16-tdep.c (xstormy16_frame_prev_register): Use get_frame_arch
+	to get at the current architecture by frame_info.
+	* fbsd-nat.c (fbsd_make_corefile_notes): Use get_regcache_arch to get
+	at the current architecture by regcache.
+	* gnu-v3-abi.c (gnuv3_skip_trampoline): Use get_frame_arch to get at
+	the current architecture by frame_info.
+	(build_gdb_vtable_type): Replace current_gdbarch by gdbarch.
+	* aix-thread.c (special_register_p): Add gdbarch as parameter.
+	(fetch_regs_kernel_thread, store_regs_kernel_thread): Add gdbarch to
+	caller of special_register_p.
+
+2007-11-07  Markus Deuling  <deuling@de.ibm.com>
+
 	* infcall.c (call_function_by_hand): Use get_frame_arch to get at the
 	current architecture by frame_info.
 

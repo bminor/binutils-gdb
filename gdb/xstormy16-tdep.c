@@ -706,7 +706,7 @@ xstormy16_frame_prev_register (struct frame_info *next_frame,
         {
           /* Read the value in from memory.  */
           read_memory (*addrp, valuep,
-                       register_size (current_gdbarch, regnum));
+                       register_size (get_frame_arch (next_frame), regnum));
         }
       return;
     }

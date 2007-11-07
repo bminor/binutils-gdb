@@ -98,9 +98,7 @@ enum {
    described above, laid out appropriately for ARCH.
 
    We use this function as the gdbarch per-architecture data
-   initialization function.  We assume that the gdbarch framework
-   calls the per-architecture data initialization functions after it
-   sets current_gdbarch to the new architecture.  */
+   initialization function.  */
 static void *
 build_gdb_vtable_type (struct gdbarch *arch)
 {
@@ -116,7 +114,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
   /* ARCH can't give us the true ptrdiff_t type, so we guess.  */
   struct type *ptrdiff_type
     = init_type (TYPE_CODE_INT,
-		 gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT, 0,
+		 gdbarch_ptr_bit (arch) / TARGET_CHAR_BIT, 0,
                  "ptrdiff_t", 0);
 
   /* We assume no padding is necessary, since GDB doesn't know
@@ -680,12 +678,12 @@ static CORE_ADDR
 gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
 {
   CORE_ADDR real_stop_pc, method_stop_pc;
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   struct minimal_symbol *thunk_sym, *fn_sym;
   struct obj_section *section;
   char *thunk_name, *fn_name;
   
-  real_stop_pc = gdbarch_skip_trampoline_code
-		   (current_gdbarch, frame, stop_pc);
+  real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
   if (real_stop_pc == 0)
     real_stop_pc = stop_pc;
 
@@ -709,7 +707,7 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
 
   method_stop_pc = SYMBOL_VALUE_ADDRESS (fn_sym);
   real_stop_pc = gdbarch_skip_trampoline_code
-		   (current_gdbarch, frame, method_stop_pc);
+		   (gdbarch, frame, method_stop_pc);
   if (real_stop_pc == 0)
     real_stop_pc = method_stop_pc;
 

@@ -1060,11 +1060,11 @@ supply_fprs (struct regcache *regcache, double *vals)
 
 /* Predicate to test whether given register number is a "special" register.  */
 static int
-special_register_p (int regno)
+special_register_p (struct gdbarch *gdbarch, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  return regno == gdbarch_pc_regnum (current_gdbarch)
+  return regno == gdbarch_pc_regnum (gdbarch)
       || regno == tdep->ppc_ps_regnum
       || regno == tdep->ppc_cr_regnum
       || regno == tdep->ppc_lr_regnum
@@ -1237,7 +1237,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
 
   /* Special-purpose registers.  */
 
-  if (regno == -1 || special_register_p (regno))
+  if (regno == -1 || special_register_p (gdbarch, regno))
     {
       if (arch64)
 	{
@@ -1554,7 +1554,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 
   /* Special-purpose registers.  */
 
-  if (regno == -1 || special_register_p (regno))
+  if (regno == -1 || special_register_p (gdbarch, regno))
     {
       if (arch64)
 	{
