@@ -1183,12 +1183,18 @@ class Output_section : public Output_data
   // Return the section index in the output file.
   unsigned int
   do_out_shndx() const
-  { return this->out_shndx_; }
+  {
+    gold_assert(this->out_shndx_ != -1U);
+    return this->out_shndx_;
+  }
 
   // Set the output section index.
   void
   do_set_out_shndx(unsigned int shndx)
-  { this->out_shndx_ = shndx; }
+  {
+    gold_assert(this->out_shndx_ == -1U);
+    this->out_shndx_ = shndx;
+  }
 
   // Return the entsize field.
   uint64_t
