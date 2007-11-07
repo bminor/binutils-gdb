@@ -35,14 +35,37 @@ namespace gold
 
 // Class Dynobj.
 
+// Sets up the default soname_ to use, in the (rare) cases we never
+// see a DT_SONAME entry.
+
+Dynobj::Dynobj(const std::string& name, Input_file* input_file, off_t offset)
+  : Object(name, input_file, true, offset)
+{
+  // This will be overridden by a DT_SONAME entry, hopefully.  But if
+  // we never see a DT_SONAME entry, our rule is to use the dynamic
+  // object's filename.  The only exception is when the dynamic object
+  // is part of an archive (so the filename is the archive's
+  // filename).  In that case, we use just the dynobj's name-in-archive.
+  this->soname_ = this->input_file()->found_name();
+  if (this->offset() != 0)
+    {
+      std::string::size_type open_paren = this->name().find('(');
+      std::string::size_type close_paren = this->name().find(')');
+      if (open_paren != std::string::npos && close_paren != std::string::npos)
+	{
+	  // It's an archive, and name() is of the form 'foo.a(bar.so)'.
+	  this->soname_ = this->name().substr(open_paren + 1,
+					      close_paren - (open_paren + 1));
+	}
+    }
+}
+
 // Return the string to use in a DT_NEEDED entry.
 
 const char*
 Dynobj::soname() const
 {
-  if (!this->soname_.empty())
-    return this->soname_.c_str();
-  return this->input_file()->found_name().c_str();
+  return this->soname_.c_str();
 }
 
 // Class Sized_dynobj.

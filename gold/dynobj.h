@@ -39,9 +39,7 @@ class General_options;
 class Dynobj : public Object
 {
  public:
-  Dynobj(const std::string& name, Input_file* input_file, off_t offset = 0)
-    : Object(name, input_file, true, offset), soname_()
-  { }
+  Dynobj(const std::string& name, Input_file* input_file, off_t offset = 0);
 
   // Return the name to use in a DT_NEEDED entry for this object.
   const char*
