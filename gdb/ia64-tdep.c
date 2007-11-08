@@ -329,7 +329,7 @@ floatformat_valid (const struct floatformat *fmt, const void *from)
 const struct floatformat floatformat_ia64_ext =
 {
   floatformat_little, 82, 0, 1, 17, 65535, 0x1ffff, 18, 64,
-  floatformat_intbit_yes, "floatformat_ia64_ext", floatformat_valid
+  floatformat_intbit_yes, "floatformat_ia64_ext", floatformat_valid, NULL
 };
 
 const struct floatformat *floatformats_ia64_ext[2] =

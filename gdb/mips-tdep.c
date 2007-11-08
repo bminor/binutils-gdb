@@ -199,38 +199,6 @@ struct gdbarch_tdep
   int register_size;
 };
 
-static int
-n32n64_floatformat_always_valid (const struct floatformat *fmt,
-                                 const void *from)
-{
-  return 1;
-}
-
-/* FIXME: brobecker/2004-08-08: Long Double values are 128 bit long.
-   They are implemented as a pair of 64bit doubles where the high
-   part holds the result of the operation rounded to double, and
-   the low double holds the difference between the exact result and
-   the rounded result.  So "high" + "low" contains the result with
-   added precision.  Unfortunately, the floatformat structure used
-   by GDB is not powerful enough to describe this format.  As a temporary
-   measure, we define a 128bit floatformat that only uses the high part.
-   We lose a bit of precision but that's probably the best we can do
-   for now with the current infrastructure.  */
-
-static const struct floatformat floatformat_n32n64_long_double_big =
-{
-  floatformat_big, 128, 0, 1, 11, 1023, 2047, 12, 52,
-  floatformat_intbit_no,
-  "floatformat_n32n64_long_double_big",
-  n32n64_floatformat_always_valid
-};
-
-static const struct floatformat *floatformats_n32n64_long[BFD_ENDIAN_UNKNOWN] =
-{
-  &floatformat_n32n64_long_double_big,
-  &floatformat_n32n64_long_double_big
-};
-
 const struct mips_regnum *
 mips_regnum (struct gdbarch *gdbarch)
 {
@@ -5585,7 +5553,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_long_double_bit (gdbarch, 128);
-      set_gdbarch_long_double_format (gdbarch, floatformats_n32n64_long);
+      set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
       break;
     case MIPS_ABI_N64:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
@@ -5597,7 +5565,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_long_double_bit (gdbarch, 128);
-      set_gdbarch_long_double_format (gdbarch, floatformats_n32n64_long);
+      set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
       break;
     default:
       internal_error (__FILE__, __LINE__, _("unknown ABI in switch"));

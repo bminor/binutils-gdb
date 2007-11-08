@@ -1099,6 +1099,7 @@ extern const struct floatformat *floatformats_ia64_spill[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ia64_quad[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_vax_f[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_vax_d[BFD_ENDIAN_UNKNOWN];
+extern const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN];
 
 extern struct type *builtin_type_ieee_single;
 extern struct type *builtin_type_ieee_double;

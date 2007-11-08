@@ -896,15 +896,13 @@ ppc_linux_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* NOTE: jimb/2004-03-26: The System V ABI PowerPC Processor
-     Supplement says that long doubles are sixteen bytes long.
-     However, as one of the known warts of its ABI, PPC GNU/Linux uses
-     eight-byte long doubles.  GCC only recently got 128-bit long
-     double support on PPC, so it may be changing soon.  The
-     Linux[sic] Standards Base says that programs that use 'long
-     double' on PPC GNU/Linux are non-conformant.  */
-  /* NOTE: cagney/2005-01-25: True for both 32- and 64-bit.  */
-  set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
+  /* PPC GNU/Linux uses either 64-bit or 128-bit long doubles; where
+     128-bit, they are IBM long double, not IEEE quad long double as
+     in the System V ABI PowerPC Processor Supplement.  We can safely
+     let them default to 128-bit, since the debug info will give the
+     size of type actually used in each case.  */
+  set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
 
   /* Handle PPC GNU/Linux 64-bit function pointers (which are really
      function descriptors) and 32-bit secure PLT entries.  */

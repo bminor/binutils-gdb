@@ -1,3 +1,25 @@
+2007-11-07  Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbtypes.c (floatformats_ibm_long_double): New.
+	* gdbtypes.h (floatformats_ibm_long_double): Declare.
+	* ia64-tdep.c (floatformat_ia64_ext): Update for addition of
+	split_half field.
+	* mips-tdep.c (n32n64_floatformat_always_valid,
+	floatformat_n32n64_long_double_big, floatformats_n32n64_long):
+	Remove.
+	(mips_gdbarch_init): Use floatformats_ibm_long_double instead of
+	floatformats_n32n64_long.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Use 128-bit IBM long
+	double.
+	* doublest.c (convert_floatformat_to_doublest,
+	convert_doublest_to_floatformat): Handle split floating-point
+	formats.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Handle IBM long
+	double arguments.
+	(ppc64_sysv_abi_push_dummy_call): Likewise.
+	(do_ppc_sysv_return_value): Handle IBM long double return.
+
 2007-11-07  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Fix crash when a variable object being deleted

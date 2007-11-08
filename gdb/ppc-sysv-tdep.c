@@ -53,6 +53,8 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argspace = 0;		/* 0 is an initial wrong guess.  */
   int write_pass;
 
+  gdb_assert (tdep->wordsize == 4);
+
   regcache_cooked_read_unsigned (regcache,
 				 gdbarch_sp_regnum (current_gdbarch),
 				 &saved_sp);
@@ -141,6 +143,35 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  argoffset += 8;
 		}
 	    }
+	  else if (TYPE_CODE (type) == TYPE_CODE_FLT
+		   && len == 16
+		   && !tdep->soft_float
+		   && (gdbarch_long_double_format (current_gdbarch)
+		       == floatformats_ibm_long_double))
+	    {
+	      /* IBM long double passed in two FP registers if
+		 available, otherwise 8-byte aligned stack.  */
+	      if (freg <= 7)
+		{
+		  if (write_pass)
+		    {
+		      regcache_cooked_write (regcache,
+					     tdep->ppc_fp0_regnum + freg,
+					     val);
+		      regcache_cooked_write (regcache,
+					     tdep->ppc_fp0_regnum + freg + 1,
+					     val + 8);
+		    }
+		  freg += 2;
+		}
+	      else
+		{
+		  argoffset = align_up (argoffset, 8);
+		  if (write_pass)
+		    write_memory (sp + argoffset, val, len);
+		  argoffset += 16;
+		}
+	    }
 	  else if (len == 8
 		   && (TYPE_CODE (type) == TYPE_CODE_INT	/* long long */
 		       || TYPE_CODE (type) == TYPE_CODE_FLT))	/* double */
@@ -159,13 +190,6 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    write_memory (sp + argoffset, val, len);
 		  argoffset += 8;
 		}
-	      else if (tdep->wordsize == 8)
-		{
-		  if (write_pass)
-		    regcache_cooked_write (regcache,
-					   tdep->ppc_gp0_regnum + greg, val);
-		  greg += 1;
-		}
 	      else
 		{
 		  /* Must start on an odd register - r3/r4 etc.  */
@@ -181,6 +205,41 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 					     val + 4);
 		    }
 		  greg += 2;
+		}
+	    }
+	  else if (len == 16 && TYPE_CODE (type) == TYPE_CODE_FLT
+		   && (gdbarch_long_double_format (current_gdbarch)
+		       == floatformats_ibm_long_double))
+	    {
+	      /* Soft-float IBM long double passed in four consecutive
+		 registers, or on the stack.  The registers are not
+		 necessarily odd/even pairs.  */
+	      if (greg > 7)
+		{
+		  greg = 11;
+		  argoffset = align_up (argoffset, 8);
+		  if (write_pass)
+		    write_memory (sp + argoffset, val, len);
+		  argoffset += 16;
+		}
+	      else
+		{
+		  if (write_pass)
+		    {
+		      regcache_cooked_write (regcache,
+					     tdep->ppc_gp0_regnum + greg + 0,
+					     val + 0);
+		      regcache_cooked_write (regcache,
+					     tdep->ppc_gp0_regnum + greg + 1,
+					     val + 4);
+		      regcache_cooked_write (regcache,
+					     tdep->ppc_gp0_regnum + greg + 2,
+					     val + 8);
+		      regcache_cooked_write (regcache,
+					     tdep->ppc_gp0_regnum + greg + 3,
+					     val + 12);
+		    }
+		  greg += 4;
 		}
 	    }
 	  else if (len == 16
@@ -373,6 +432,55 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	  struct type *regtype = register_type (gdbarch, tdep->ppc_fp0_regnum);
 	  convert_typed_floating (writebuf, type, regval, regtype);
 	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  if (TYPE_CODE (type) == TYPE_CODE_FLT
+      && TYPE_LENGTH (type) == 16
+      && !tdep->soft_float
+      && (gdbarch_long_double_format (current_gdbarch)
+	  == floatformats_ibm_long_double))
+    {
+      /* IBM long double stored in f1 and f2.  */
+      if (readbuf)
+	{
+	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, readbuf);
+	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 2,
+				readbuf + 8);
+	}
+      if (writebuf)
+	{
+	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, writebuf);
+	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 2,
+				 writebuf + 8);
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  if (TYPE_CODE (type) == TYPE_CODE_FLT
+      && TYPE_LENGTH (type) == 16
+      && (gdbarch_long_double_format (current_gdbarch)
+	  == floatformats_ibm_long_double))
+    {
+      /* Soft-float IBM long double stored in r3, r4, r5, r6.  */
+      if (readbuf)
+	{
+	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, readbuf);
+	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 4,
+				readbuf + 4);
+	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 5,
+				readbuf + 8);
+	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 6,
+				readbuf + 12);
+	}
+      if (writebuf)
+	{
+	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3, writebuf);
+	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 4,
+				 writebuf + 4);
+	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 5,
+				 writebuf + 8);
+	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 6,
+				 writebuf + 12);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -766,6 +874,41 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      /* Always consume parameter stack space.  */
 	      freg++;
 	      greg++;
+	      gparam = align_up (gparam + TYPE_LENGTH (type), tdep->wordsize);
+	    }
+	  else if (TYPE_CODE (type) == TYPE_CODE_FLT
+		   && TYPE_LENGTH (type) == 16
+		   && (gdbarch_long_double_format (current_gdbarch)
+		       == floatformats_ibm_long_double))
+	    {
+	      /* IBM long double stored in two doublewords of the
+		 parameter save area and corresponding registers.  */
+	      if (write_pass)
+		{
+		  if (!tdep->soft_float && freg <= 13)
+		    {
+		      regcache_cooked_write (regcache,
+                                             tdep->ppc_fp0_regnum + freg,
+					     val);
+		      if (freg <= 12)
+			regcache_cooked_write (regcache,
+					       tdep->ppc_fp0_regnum + freg + 1,
+					       val + 8);
+		    }
+		  if (greg <= 10)
+		    {
+		      regcache_cooked_write (regcache,
+					     tdep->ppc_gp0_regnum + greg,
+					     val);
+		      if (greg <= 9)
+			regcache_cooked_write (regcache,
+					       tdep->ppc_gp0_regnum + greg + 1,
+					       val + 8);
+		    }
+		  write_memory (gparam, val, TYPE_LENGTH (type));
+		}
+	      freg += 2;
+	      greg += 2;
 	      gparam = align_up (gparam + TYPE_LENGTH (type), tdep->wordsize);
 	    }
 	  else if (TYPE_LENGTH (type) == 16 && TYPE_VECTOR (type)

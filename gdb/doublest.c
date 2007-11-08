@@ -200,6 +200,24 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
   if (order != fmt->byteorder)
     ufrom = newfrom;
 
+  if (fmt->split_half)
+    {
+      double dtop, dbot;
+      floatformat_to_double (fmt->split_half, ufrom, &dtop);
+      /* Preserve the sign of 0, which is the sign of the top
+	 half.  */
+      if (dtop == 0.0)
+	{
+	  *to = (DOUBLEST) dtop;
+	  return;
+	}
+      floatformat_to_double (fmt->split_half,
+			     ufrom + fmt->totalsize / FLOATFORMAT_CHAR_BIT / 2,
+			     &dbot);
+      *to = (DOUBLEST) dtop + (DOUBLEST) dbot;
+      return;
+    }
+
   exponent = get_field (ufrom, order, fmt->totalsize, fmt->exp_start,
 			fmt->exp_len);
   /* Note that if exponent indicates a NaN, we can't really do anything useful
@@ -392,6 +410,30 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
   memcpy (&dfrom, from, sizeof (dfrom));
   memset (uto, 0, (fmt->totalsize + FLOATFORMAT_CHAR_BIT - 1) 
                     / FLOATFORMAT_CHAR_BIT);
+
+  if (fmt->split_half)
+    {
+      /* Use static volatile to ensure that any excess precision is
+	 removed via storing in memory, and so the top half really is
+	 the result of converting to double.  */
+      static volatile double dtop, dbot;
+      double dtopnv, dbotnv;
+      dtop = (double) dfrom;
+      /* If the rounded top half is Inf, the bottom must be 0 not NaN
+	 or Inf.  */
+      if (dtop + dtop == dtop && dtop != 0.0)
+	dbot = 0.0;
+      else
+	dbot = (double) (dfrom - (DOUBLEST) dtop);
+      dtopnv = dtop;
+      dbotnv = dbot;
+      floatformat_from_double (fmt->split_half, &dtopnv, uto);
+      floatformat_from_double (fmt->split_half, &dbotnv,
+			       (uto
+				+ fmt->totalsize / FLOATFORMAT_CHAR_BIT / 2));
+      return;
+    }
+
   if (dfrom == 0)
     return;			/* Result is zero */
   if (dfrom != dfrom)		/* Result is NaN */
