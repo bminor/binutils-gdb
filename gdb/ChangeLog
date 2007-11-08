@@ -1,6 +1,14 @@
 2007-11-07  Joseph Myers  <joseph@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Right-align
+	struct values smaller than one doubleword; left-align those
+	larger.  Pass structs containing a single floating-point value in
+	registers.
+
+2007-11-07  Joseph Myers  <joseph@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdbtypes.c (floatformats_ibm_long_double): New.
 	* gdbtypes.h (floatformats_ibm_long_double): Declare.
 	* ia64-tdep.c (floatformat_ia64_ext): Update for addition of

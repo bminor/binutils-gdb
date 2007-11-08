@@ -977,22 +977,17 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      if (len > tdep->wordsize)
 			len = tdep->wordsize;
 		      memset (regval, 0, sizeof regval);
-		      /* WARNING: cagney/2003-09-21: As best I can
-		         tell, the ABI specifies that the value should
-		         be left aligned.  Unfortunately, GCC doesn't
-		         do this - it instead right aligns even sized
-		         values and puts odd sized values on the
-		         stack.  Work around that by putting both a
-		         left and right aligned value into the
-		         register (hopefully no one notices :-^).
-		         Arrrgh!  */
-		      /* Left aligned (8 byte values such as pointers
-		         fill the buffer).  */
-		      memcpy (regval, val + byte, len);
-		      /* Right aligned (but only if even).  */
-		      if (len == 1 || len == 2 || len == 4)
+		      /* The ABI (version 1.9) specifies that values
+			 smaller than one doubleword are right-aligned
+			 and those larger are left-aligned.  GCC
+			 versions before 3.4 implemented this
+			 incorrectly; see
+			 <http://gcc.gnu.org/gcc-3.4/powerpc-abi.html>.  */
+		      if (byte == 0)
 			memcpy (regval + tdep->wordsize - len,
 				val + byte, len);
+		      else
+			memcpy (regval, val + byte, len);
 		      regcache_cooked_write (regcache, greg, regval);
 		    }
 		  greg++;
@@ -1006,11 +1001,57 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		   value to memory.  Fortunately, doing this
 		   simplifies the code.  */
 		write_memory (gparam, val, TYPE_LENGTH (type));
-	      if (write_pass)
-		/* WARNING: cagney/2004-06-20: It appears that GCC
-		   likes to put structures containing a single
-		   floating-point member in an FP register instead of
-		   general general purpose.  */
+	      if (freg <= 13
+		  && TYPE_CODE (type) == TYPE_CODE_STRUCT
+		  && TYPE_NFIELDS (type) == 1
+		  && TYPE_LENGTH (type) <= 16)
+		{
+		  /* The ABI (version 1.9) specifies that structs
+		     containing a single floating-point value, at any
+		     level of nesting of single-member structs, are
+		     passed in floating-point registers.  */
+		  while (TYPE_CODE (type) == TYPE_CODE_STRUCT
+			 && TYPE_NFIELDS (type) == 1)
+		    type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+		  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+		    {
+		      if (TYPE_LENGTH (type) <= 8)
+			{
+			  if (write_pass)
+			    {
+			      gdb_byte regval[MAX_REGISTER_SIZE];
+			      struct type *regtype
+				= register_type (gdbarch,
+						 tdep->ppc_fp0_regnum);
+			      convert_typed_floating (val, type, regval,
+						      regtype);
+			      regcache_cooked_write (regcache,
+						     (tdep->ppc_fp0_regnum
+						      + freg),
+						     regval);
+			    }
+			  freg++;
+			}
+		      else if (TYPE_LENGTH (type) == 16
+			       && (gdbarch_long_double_format (current_gdbarch)
+				   == floatformats_ibm_long_double))
+			{
+			  if (write_pass)
+			    {
+			      regcache_cooked_write (regcache,
+						     (tdep->ppc_fp0_regnum
+						      + freg),
+						     val);
+			      if (freg <= 12)
+				regcache_cooked_write (regcache,
+						       (tdep->ppc_fp0_regnum
+							+ freg + 1),
+						       val + 8);
+			    }
+			  freg += 2;
+			}
+		    }
+		}
 	      /* Always consume parameter stack space.  */
 	      gparam = align_up (gparam + TYPE_LENGTH (type), tdep->wordsize);
 	    }
