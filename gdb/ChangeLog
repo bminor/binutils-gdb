@@ -1,3 +1,18 @@
+2007-11-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* breakpoint.c (break_command_1): Remove
+	pending_bp parameter.
+	(create_breakpoint): Likewise.
+	(create_breakpoints): Likewise. Adjust call to
+	create_breakpoint.
+	(break_command_1): Likewise. Adjust call to
+	create_breakpoints.
+	(do_captured_breakpoint): Adjust call to
+	create_breakpoints.
+	(break_command, tbreak_command, hbreak_command)
+	(stopin_command, stopat_command): Adjust call
+	to break_command_1.
+			
 2007-11-07  Joseph Myers  <joseph@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

@@ -90,7 +90,7 @@ static void watch_command (char *, int);
 
 static int can_use_hardware_watchpoint (struct value *);
 
-static int break_command_1 (char *, int, int, struct breakpoint *);
+static int break_command_1 (char *, int, int);
 
 static void mention (struct breakpoint *);
 
@@ -5065,17 +5065,13 @@ add_location_to_breakpoint (struct breakpoint *b, enum bptype bptype,
 
 /* Create a breakpoint with SAL as location.  Use ADDR_STRING
    as textual description of the location, and COND_STRING
-   as condition expression.
-
-   The paramter PENDING_BP is same as for the
-   create_breakpoints function.  */
+   as condition expression.  */
 
 static void
 create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 		   char *cond_string,
 		   enum bptype type, enum bpdisp disposition,
-		   int thread, int ignore_count, int from_tty,
-		   struct breakpoint *pending_bp)
+		   int thread, int ignore_count, int from_tty)
 {
   struct breakpoint *b = NULL;
   int i;
@@ -5124,12 +5120,7 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 	  char *arg = b->cond_string;
 	  loc->cond = parse_exp_1 (&arg, block_for_pc (loc->address), 0);
 	  if (*arg)
-	    {
-	      if (pending_bp)
-		error (_("Junk at end of pending breakpoint condition expression"));
-	      else
-		error (_("Garbage %s follows condition"), arg);
-	    }
+              error (_("Garbage %s follows condition"), arg);
 	}
     }   
 
@@ -5274,11 +5265,6 @@ expand_line_sal_maybe (struct symtab_and_line sal)
    separate conditions for different overloaded functions, so
    we take just a single condition string.
    
-   The parameter PENDING_BP points to a pending breakpoint that is
-   the basis of the breakpoints currently being created.  The pending
-   breakpoint may contain a separate condition string or commands
-   that were added after the initial pending breakpoint was created.
-
    NOTE: If the function succeeds, the caller is expected to cleanup
    the arrays ADDR_STRING, COND_STRING, and SALS (but not the
    array contents).  If the function fails (error() is called), the
@@ -5289,8 +5275,7 @@ static void
 create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 		    char *cond_string,
 		    enum bptype type, enum bpdisp disposition,
-		    int thread, int ignore_count, int from_tty,
-		    struct breakpoint *pending_bp)
+		    int thread, int ignore_count, int from_tty)
 {
   int i;
   for (i = 0; i < sals.nelts; ++i)
@@ -5300,8 +5285,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 
       create_breakpoint (expanded, addr_string[i],
 			 cond_string, type, disposition,
-			 thread, ignore_count, from_tty,
-			 pending_bp);
+			 thread, ignore_count, from_tty);
     }
 }
 
@@ -5453,13 +5437,10 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
 
 /* Set a breakpoint according to ARG (function, linenum or *address)
    flag: first bit  : 0 non-temporary, 1 temporary.
-   second bit : 0 normal breakpoint, 1 hardware breakpoint. 
-
-   PENDING_BP is non-NULL when this function is being called to resolve
-   a pending breakpoint.  */
+   second bit : 0 normal breakpoint, 1 hardware breakpoint.  */
 
 static int
-break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_bp)
+break_command_1 (char *arg, int flag, int from_tty)
 {
   struct gdb_exception e;
   int tempflag, hardwareflag;
@@ -5504,10 +5485,6 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
       switch (e.error)
 	{
 	case NOT_FOUND_ERROR:
-	  /* If called to resolve pending breakpoint, just return
-	     error code.  */
-	  if (pending_bp)
-	    return e.reason;
 
 	  exception_print (gdb_stderr, e);
 
@@ -5591,8 +5568,7 @@ break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_b
 			  hardwareflag ? bp_hardware_breakpoint 
 			  : bp_breakpoint,
 			  tempflag ? disp_del : disp_donttouch,
-			  thread, ignore_count, from_tty,
-			  pending_bp);
+			  thread, ignore_count, from_tty);
     }
   else
     {
@@ -5714,8 +5690,7 @@ do_captured_breakpoint (struct ui_out *uiout, void *data)
   create_breakpoints (sals, addr_string, args->condition,
 		      args->hardwareflag ? bp_hardware_breakpoint : bp_breakpoint,
 		      args->tempflag ? disp_del : disp_donttouch,
-		      args->thread, args->ignore_count, 0/*from-tty*/, 
-		      NULL/*pending_bp*/);
+		      args->thread, args->ignore_count, 0/*from-tty*/);
 
   /* That's it. Discard the cleanups for data inserted into the
      breakpoint. */
@@ -5798,25 +5773,25 @@ resolve_sal_pc (struct symtab_and_line *sal)
 void
 break_command (char *arg, int from_tty)
 {
-  break_command_1 (arg, 0, from_tty, NULL);
+  break_command_1 (arg, 0, from_tty);
 }
 
 void
 tbreak_command (char *arg, int from_tty)
 {
-  break_command_1 (arg, BP_TEMPFLAG, from_tty, NULL);
+  break_command_1 (arg, BP_TEMPFLAG, from_tty);
 }
 
 static void
 hbreak_command (char *arg, int from_tty)
 {
-  break_command_1 (arg, BP_HARDWAREFLAG, from_tty, NULL);
+  break_command_1 (arg, BP_HARDWAREFLAG, from_tty);
 }
 
 static void
 thbreak_command (char *arg, int from_tty)
 {
-  break_command_1 (arg, (BP_TEMPFLAG | BP_HARDWAREFLAG), from_tty, NULL);
+  break_command_1 (arg, (BP_TEMPFLAG | BP_HARDWAREFLAG), from_tty);
 }
 
 static void
@@ -5857,7 +5832,7 @@ stopin_command (char *arg, int from_tty)
   if (badInput)
     printf_filtered (_("Usage: stop in <function | address>\n"));
   else
-    break_command_1 (arg, 0, from_tty, NULL);
+    break_command_1 (arg, 0, from_tty);
 }
 
 static void
@@ -5889,7 +5864,7 @@ stopat_command (char *arg, int from_tty)
   if (badInput)
     printf_filtered (_("Usage: stop at <line>\n"));
   else
-    break_command_1 (arg, 0, from_tty, NULL);
+    break_command_1 (arg, 0, from_tty);
 }
 
 /* accessflag:  hw_write:  watch write, 
