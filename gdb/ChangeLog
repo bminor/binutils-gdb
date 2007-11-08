@@ -1,3 +1,7 @@
+2007-11-08  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* gdb_string.h: Include <strings.h>.
+
 2007-11-08  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* breakpoint.c (break_command_1): Remove
