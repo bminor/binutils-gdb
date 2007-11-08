@@ -33,3 +33,6 @@ bfd_boolean elf_vxworks_emit_relocs
 void elf_vxworks_final_write_processing (bfd *, bfd_boolean);
 bfd_boolean elf_vxworks_create_dynamic_sections
   (bfd *, struct bfd_link_info *, asection **);
+bfd_boolean elf_vxworks_add_dynamic_entries (bfd *, struct bfd_link_info *);
+bfd_boolean elf_vxworks_finish_dynamic_entry (bfd *, Elf_Internal_Dyn *);
+

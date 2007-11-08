@@ -25,6 +25,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf-vxworks.h"
+#include "elf/vxworks.h"
 
 /* Return true if symbol NAME, as defined by ABFD, is one of the special
    __GOTT_BASE__ or __GOTT_INDEX__ symbols.  */
@@ -225,3 +226,69 @@ elf_vxworks_final_write_processing (bfd *abfd,
   if (sec)
     d->this_hdr.sh_info = elf_section_data (sec)->this_idx;
 }
+
+/* Add the dynamic entries required by VxWorks.  These point to the
+   tls sections.  */
+
+bfd_boolean
+elf_vxworks_add_dynamic_entries (bfd *output_bfd, struct bfd_link_info *info)
+{
+  if (bfd_get_section_by_name (output_bfd, ".tls_data"))
+    {
+      if (!_bfd_elf_add_dynamic_entry (info, DT_VX_WRS_TLS_DATA_START, 0)
+	  || !_bfd_elf_add_dynamic_entry (info, DT_VX_WRS_TLS_DATA_SIZE, 0)
+	  || !_bfd_elf_add_dynamic_entry (info, DT_VX_WRS_TLS_DATA_ALIGN, 0))
+	return FALSE;
+    }
+  if (bfd_get_section_by_name (output_bfd, ".tls_vars"))
+    {
+      if (!_bfd_elf_add_dynamic_entry (info, DT_VX_WRS_TLS_VARS_START, 0)
+	  || !_bfd_elf_add_dynamic_entry (info, DT_VX_WRS_TLS_VARS_SIZE, 0))
+	return FALSE;
+    }
+  return TRUE;
+}
+
+/* If *DYN is one of the VxWorks-specific dynamic entries, then fill
+   in the value now  and return TRUE.  Otherwise return FALSE.  */
+
+bfd_boolean
+elf_vxworks_finish_dynamic_entry (bfd *output_bfd, Elf_Internal_Dyn *dyn)
+{
+  asection *sec;
+  
+  switch (dyn->d_tag)
+    {
+    default:
+      return FALSE;
+      
+    case DT_VX_WRS_TLS_DATA_START:
+      sec = bfd_get_section_by_name (output_bfd, ".tls_data");
+      dyn->d_un.d_ptr = sec->vma;
+      break;
+      
+    case DT_VX_WRS_TLS_DATA_SIZE:
+      sec = bfd_get_section_by_name (output_bfd, ".tls_data");
+      dyn->d_un.d_val = sec->size;
+      break;
+      
+    case DT_VX_WRS_TLS_DATA_ALIGN:
+      sec = bfd_get_section_by_name (output_bfd, ".tls_data");
+      dyn->d_un.d_val
+	= (bfd_size_type)1 << bfd_get_section_alignment (abfd, sec);
+      break;
+      
+    case DT_VX_WRS_TLS_VARS_START:
+      sec = bfd_get_section_by_name (output_bfd, ".tls_vars");
+      dyn->d_un.d_ptr = sec->vma;
+      break;
+      
+    case DT_VX_WRS_TLS_VARS_SIZE:
+      sec = bfd_get_section_by_name (output_bfd, ".tls_vars");
+      dyn->d_un.d_val = sec->size;
+      break;
+    }
+  return TRUE;
+}
+
+
