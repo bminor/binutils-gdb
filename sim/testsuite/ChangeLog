@@ -1,3 +1,8 @@
+2007-11-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/asm/x0-v10.ms, sim/cris/asm/x0-v32.ms: Tweak
+	stack-pointer match pattern for 4K host environment.
+
 2007-10-22  Edgar E. Iglesias <edgar@axis.com>
 	    Hans-Peter Nilsson  <hp@axis.com>
 
