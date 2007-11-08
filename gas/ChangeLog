@@ -1,3 +1,7 @@
+2007-11-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (relaxable_section): Check for .eh_frame.
+
 2007-11-07  Eric B. Weddington  <eweddington@cso.atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add ATtiny88 device.

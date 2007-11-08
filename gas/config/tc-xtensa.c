@@ -4728,7 +4728,8 @@ xtensa_set_frag_assembly_state (fragS *fragP)
 static bfd_boolean
 relaxable_section (asection *sec)
 {
-  return (sec->flags & SEC_DEBUGGING) == 0;
+  return ((sec->flags & SEC_DEBUGGING) == 0
+	  && strcmp (sec->name, ".eh_frame") != 0);
 }
 
 
