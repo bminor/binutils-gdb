@@ -8723,6 +8723,9 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return FALSE;
 	}
+      if (htab->vxworks_p
+	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
+	return FALSE;
     }
 #undef add_dynamic_entry
 
@@ -9065,6 +9068,9 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	      unsigned int type;
 
 	    default:
+	      if (htab->vxworks_p
+		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
+		bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_HASH:

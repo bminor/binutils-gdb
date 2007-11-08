@@ -5188,7 +5188,10 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return FALSE;
 	}
-    }
+      if (htab->is_vxworks
+	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
+	return FALSE;
+   }
 #undef add_dynamic_entry
 
   return TRUE;
@@ -7353,6 +7356,9 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      continue;
 
 	    default:
+	      if (htab->is_vxworks
+		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
+		break;
 	      continue;
 	    }
 

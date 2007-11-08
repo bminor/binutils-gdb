@@ -1,3 +1,8 @@
+2007-11-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-vxworks/tls-2.d: New.
+	* ld-vxworks/tls-2.s: New.
+
 2007-11-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-vxworks/tls-1.d: New.

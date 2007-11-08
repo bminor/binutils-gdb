@@ -2396,6 +2396,9 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 		eht->dynsymcount++;
 	      }
 	}
+      if (htab->is_vxworks
+	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
+	return FALSE;
     }
 #undef add_dynamic_entry
 
@@ -3846,6 +3849,9 @@ sparc_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
 	      bed->s->swap_dyn_out (output_bfd, &dyn, dyncon);
 	    }
 	}
+      else if (htab->is_vxworks
+	       && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
+	bed->s->swap_dyn_out (output_bfd, &dyn, dyncon);
       else if (abi_64_p && dyn.d_tag == DT_SPARC_REGISTER)
 	{
 	  if (stt_regidx == -1)

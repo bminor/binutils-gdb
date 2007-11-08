@@ -7674,6 +7674,9 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	      && !MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_OPTIONS, 0))
 	    return FALSE;
 	}
+      if (htab->is_vxworks
+	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
+	return FALSE;
     }
 
   return TRUE;
@@ -8901,6 +8904,9 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	    default:
 	      swap_out_p = FALSE;
+	      if (htab->is_vxworks
+		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
+		swap_out_p = TRUE;
 	      break;
 	    }
 

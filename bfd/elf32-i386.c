@@ -2374,6 +2374,9 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		return FALSE;
 	    }
 	}
+      if (htab->is_vxworks
+	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
+	return FALSE;
     }
 #undef add_dynamic_entry
 
@@ -3796,6 +3799,9 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	  switch (dyn.d_tag)
 	    {
 	    default:
+	      if (htab->is_vxworks
+		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
+		break;
 	      continue;
 
 	    case DT_PLTGOT:

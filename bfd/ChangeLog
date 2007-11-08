@@ -1,3 +1,27 @@
+2007-11-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf-vxworks.h (elf_vxworks_add_dynamic_entries): Declare.
+	(elf_vxworks_finish_dynamic_entry): Declare.
+	* elf-vxworks.c: Include elf/vxworks.h.
+	(elf_vxworks_add_dynamic_entries): New.
+	(elf_vxworks_finish_dynamic_entry): New.
+	* Makefile.am (elf-vxworks.lo): Add dependency.
+	* Makefile.in (elf-vxworks.lo): Add dependency.
+	* elf32-i386.c (elf_i386_size_dynamic_sections,
+	elf_i386_finish_dynamic_sections): Call
+	elf_vxworks_add_dynamic_entries and
+	elf_vxworks_finish_dynamic_entry.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections,
+	ppc_elf_finish_dynamic_sections): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections,
+	sparc_finish_dyn): Likewise.
+	* elf32-sh.c (sh_elf_size_dynamic_sections,
+	sh_elf_finish_dynamic_sections): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections,
+	_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	* elf32-arm.c (elf32_arm_size_dynamic_sections,
+	elf32_arm_finish_dynamic_sections): Likewise.
+
 2007-11-07  Olivier Hainque  <hainque@adacore.com>
 
 	* bfd/elfxx-mips.c (_bfd_mips_elf_fake_sections): Force

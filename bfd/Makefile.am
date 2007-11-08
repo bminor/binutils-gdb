@@ -1580,7 +1580,7 @@ elf-eh-frame.lo: elf-eh-frame.c $(INCDIR)/filenames.h \
 elf-vxworks.lo: elf-vxworks.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  elf-vxworks.h
+  $(INCDIR)/elf/vxworks.h elf-vxworks.h
 epoc-pe-arm.lo: epoc-pe-arm.c pe-arm.c $(INCDIR)/filenames.h \
   coff-arm.c $(INCDIR)/hashtab.h $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
