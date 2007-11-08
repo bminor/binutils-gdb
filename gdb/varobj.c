@@ -1295,6 +1295,8 @@ delete_variable_1 (struct cpstack **resultp, int *delcountp,
   for (i = 0; i < VEC_length (varobj_p, var->children); ++i)
     {   
       varobj_p child = VEC_index (varobj_p, var->children, i);
+      if (!child)
+	continue;
       if (!remove_from_parent_p)
 	child->parent = NULL;
       delete_variable_1 (resultp, delcountp, child, 0, only_children_p);

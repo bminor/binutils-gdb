@@ -1227,7 +1227,9 @@ mi_gdb_test "-var-update *" \
 	"\\^done,changelist=\\\[\{name=\"psnp->ptrs.0.next.next.long_ptr\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
 	"update all vars psnp->next->next->long_ptr (and 2.long_ptr) changed"
 
+mi_prepare_inline_tests $srcfile
 
+mi_run_inline_test child_deletion
 
 
 mi_gdb_exit

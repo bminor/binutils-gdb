@@ -1,3 +1,11 @@
+2007-11-08  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	Fix crash when a variable object being deleted
+ 	has any of its children deleted previously.
+
+	* varobj.c (delete_variable_1): Don't recurse
+	into deleted children.
+ 	
 2007-10-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 6.7.1.20071029-cvs.

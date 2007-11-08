@@ -1,3 +1,8 @@
+2007-11-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-var-child.c (do_child_deletion): New.
+	* gdb.mi/mi-var-child.exp: Run child_deletion tests.
+
 2007-10-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.server/server-run.exp: Test for dynamic linker symbols.
