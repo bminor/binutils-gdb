@@ -1,5 +1,10 @@
 2007-11-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* stack.c (print_this_frame_argument_p): Handle arguments passed
+	by reference properly.
+
+2007-11-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* stack.c (print_frame_arguments_choices): New static global.
 	(print_frame_arguments): Likewise.
 	(print_this_frame_argument_p): New function.

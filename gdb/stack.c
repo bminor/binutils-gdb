@@ -179,6 +179,8 @@ print_this_frame_argument_p (struct symbol *sym)
      print the non-scalar ones.  */
 
   type = CHECK_TYPEDEF (SYMBOL_TYPE (sym));
+  while (TYPE_CODE (type) == TYPE_CODE_REF)
+    type = CHECK_TYPEDEF (TYPE_TARGET_TYPE (type));
   switch (TYPE_CODE (type))
     {
       case TYPE_CODE_ARRAY:
