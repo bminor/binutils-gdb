@@ -162,7 +162,8 @@ legacy_virtual_frame_pointer (struct gdbarch *gdbarch,
 
 
 int
-generic_convert_register_p (int regnum, struct type *type)
+generic_convert_register_p (struct gdbarch *gdbarch, int regnum,
+			    struct type *type)
 {
   return 0;
 }

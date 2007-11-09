@@ -73,7 +73,8 @@ extern int generic_in_solib_return_trampoline (CORE_ADDR pc, char *name);
 extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
 
 /* By default, registers are not convertible.  */
-extern int generic_convert_register_p (int regnum, struct type *type);
+extern int generic_convert_register_p (struct gdbarch *gdbarch, int regnum,
+				       struct type *type);
 
 extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
 					    struct type *type);

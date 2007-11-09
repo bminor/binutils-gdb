@@ -1,5 +1,10 @@
 2007-11-09  Markus Deuling  <deuling@de.ibm.com>
 
+	* arch-utils.c (generic_convert_register_p): Add gdbarch as parameter.
+	* arch-utils.h (generic_convert_register_p): Likewise.
+
+2007-11-09  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (convert_register_p): Add gdbarch as parameter.
 	* ia64-tdep.c (ia64_convert_register_p): Likewise.
 	* i387-tdep.c (i387_convert_register_p): Likewise.
