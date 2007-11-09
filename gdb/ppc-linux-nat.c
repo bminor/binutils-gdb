@@ -831,10 +831,12 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
       break;
     }
 
+  saved_dabr_value = dabr_value;
+
   ALL_LWPS (lp, ptid)
     if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0, saved_dabr_value) < 0)
       return -1;
-  saved_dabr_value = dabr_value;
+
   return 0;
 }
 

@@ -1,3 +1,8 @@
+2007-11-09  Luis Machado  <luisgpm@br.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_insert_watchpoint): Move
+	saved_dabr_value assignment to the correct position.
+		
 2007-11-09  Markus Deuling  <deuling@de.ibm.com>
 
 	* arch-utils.c (generic_convert_register_p): Add gdbarch as parameter.
