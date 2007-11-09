@@ -108,7 +108,7 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
   lsm->address = 0;
   lsm->line_num = 1;
   lsm->column_num = 0;
-  lsm->shndx = -1;
+  lsm->shndx = -1U;
   lsm->is_stmt = default_is_stmt;
   lsm->basic_block = false;
   lsm->end_sequence = false;
