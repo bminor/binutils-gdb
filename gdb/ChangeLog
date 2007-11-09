@@ -1,3 +1,9 @@
+2007-11-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Add missing
+	register number to map.  Adjust warning check and error/warning
+	return value code to match expectations of this function's callers.
+
 2007-11-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* stack.c (print_this_frame_argument_p): Handle arguments passed
