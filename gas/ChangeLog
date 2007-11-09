@@ -1,3 +1,7 @@
+2007-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (match_template): Re-order suffix check.
+
 2007-11-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (relaxable_section): Check for .eh_frame.
@@ -9,14 +13,14 @@
 
 2007-11-07  Anatoly Sokolov <aesok@post.ru>
 
-	* config/tc-avr.c (mcu_types): Add new devices: ATmega48P, ATmega88P,
-	ATmega168P, Atmega328P
+	* config/tc-avr.c (mcu_types): Add new devices: ATmega48P,
+	ATmega88P, ATmega168P, Atmega328P
 	* doc/c-avr.texi: Document new devices.
 
 2007-11-07  Tristan Gingold  <gingold@adacore.com>
 
-        * config/tc-ppc.c (md_apply_fix): For PPC_TOC16 on XCOFF, uses offset
-        within the TOC instead of the VMA.
+	* config/tc-ppc.c (md_apply_fix): For PPC_TOC16 on XCOFF, uses
+	offset within the TOC instead of the VMA.
 
 2007-11-06  Paul Brook  <paul@codesourcery.com>
 

@@ -3011,13 +3011,13 @@ match_template (void)
 	continue;
 
       /* Check the suffix, except for some instructions in intel mode.  */
-      if (((t->opcode_modifier.no_bsuf & suffix_check.no_bsuf)
-	   || (t->opcode_modifier.no_wsuf & suffix_check.no_wsuf)
-	   || (t->opcode_modifier.no_lsuf & suffix_check.no_lsuf)
-	   || (t->opcode_modifier.no_ssuf & suffix_check.no_ssuf)
-	   || (t->opcode_modifier.no_qsuf & suffix_check.no_qsuf)
-	   || (t->opcode_modifier.no_ldsuf & suffix_check.no_ldsuf))
-	  && !(intel_syntax && t->opcode_modifier.ignoresize))
+      if ((!intel_syntax || !t->opcode_modifier.ignoresize)
+	  && ((t->opcode_modifier.no_bsuf && suffix_check.no_bsuf)
+	      || (t->opcode_modifier.no_wsuf && suffix_check.no_wsuf)
+	      || (t->opcode_modifier.no_lsuf && suffix_check.no_lsuf)
+	      || (t->opcode_modifier.no_ssuf && suffix_check.no_ssuf)
+	      || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf)
+	      || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf)))
 	continue;
 
       for (j = 0; j < MAX_OPERANDS; j++)
