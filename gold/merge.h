@@ -31,36 +31,36 @@
 namespace gold
 {
 
-// A general class for SHF_MERGE data, to hold functions shared by
-// fixed-size constant data and string data.
+// This class manages mappings from input sections to offsets in an
+// output section.  This is used where input sections are merged.
 
-class Output_merge_base : public Output_section_data
+class Merge_map
 {
  public:
-  Output_merge_base(uint64_t entsize, uint64_t addralign)
-    : Output_section_data(addralign), merge_map_(), entsize_(entsize)
+  Merge_map()
+    : merge_map_()
   { }
 
-  // Return the output address for an input address.
-  bool
-  do_output_address(const Relobj* object, unsigned int shndx, off_t offset,
-		    uint64_t output_section_address, uint64_t* poutput) const;
-
- protected:
-  // Return the entry size.
-  uint64_t
-  entsize() const
-  { return this->entsize_; }
-
-  // Add a mapping from an OFFSET in input section SHNDX in object
-  // OBJECT to an OUTPUT_OFFSET in the output section.
+  // Add a mapping for the bytes from OFFSET to OFFSET + LENGTH in the
+  // input section SHNDX in object OBJECT to OUTPUT_OFFSET in the
+  // output section.  An OUTPUT_OFFSET of -1 means that the bytes are
+  // discarded.
   void
-  add_mapping(Relobj* object, unsigned int shndx, off_t offset,
+  add_mapping(Relobj* object, unsigned int shndx, off_t offset, off_t length,
 	      off_t output_offset);
 
+  // Return the output offset for an input address.  The input address
+  // is at offset OFFSET in section SHNDX in OBJECT.  This sets
+  // *OUTPUT_OFFSET to the offset in the output section; this will be
+  // -1 if the bytes are not being copied to the output.  This returns
+  // true if the mapping is known, false otherwise.
+  bool
+  get_output_offset(const Relobj* object, unsigned int shndx, off_t offset,
+		    off_t *output_offset) const;
+
  private:
-  // We build a mapping from OBJECT/SHNDX/OFFSET to an offset in the
-  // output section.
+  // We build a mapping from OBJECT/SHNDX/OFFSET to an offset and
+  // length in the output section.
   struct Merge_key
   {
     const Relobj* object;
@@ -74,12 +74,53 @@ class Output_merge_base : public Output_section_data
     operator()(const Merge_key&, const Merge_key&) const;
   };
 
-  typedef std::map<Merge_key, off_t, Merge_key_less> Merge_map;
+  struct Merge_value
+  {
+    off_t length;
+    off_t output_offset;
+  };
+
+  typedef std::map<Merge_key, Merge_value, Merge_key_less> Merge_mapping;
 
   // A mapping from input object/section/offset to offset in output
   // section.
-  Merge_map merge_map_;
+  Merge_mapping merge_map_;
+};
 
+// A general class for SHF_MERGE data, to hold functions shared by
+// fixed-size constant data and string data.
+
+class Output_merge_base : public Output_section_data
+{
+ public:
+  Output_merge_base(uint64_t entsize, uint64_t addralign)
+    : Output_section_data(addralign), merge_map_(), entsize_(entsize)
+  { }
+
+  // Return the output offset for an input offset.
+  bool
+  do_output_offset(const Relobj* object, unsigned int shndx, off_t offset,
+		   off_t* poutput) const;
+
+ protected:
+  // Return the entry size.
+  uint64_t
+  entsize() const
+  { return this->entsize_; }
+
+  // Add a mapping from an OFFSET in input section SHNDX in object
+  // OBJECT to an OUTPUT_OFFSET in the output section.
+  void
+  add_mapping(Relobj* object, unsigned int shndx, off_t offset,
+	      off_t length, off_t output_offset)
+  {
+    this->merge_map_.add_mapping(object, shndx, offset, length, output_offset);
+  }
+
+ private:
+  // A mapping from input object/section/offset to offset in output
+  // section.
+  Merge_map merge_map_;
   // The entry size.  For fixed-size constants, this is the size of
   // the constants.  For strings, this is the size of a character.
   uint64_t entsize_;
@@ -221,10 +262,13 @@ class Output_merge_string : public Output_merge_base
     off_t offset;
     // The string itself, a pointer into a Stringpool.
     const Char_type* string;
+    // The length of the string in bytes, including the null terminator.
+    size_t length;
 
     Merged_string(Relobj *objecta, unsigned int shndxa, off_t offseta,
-		  const Char_type* stringa)
-      : object(objecta), shndx(shndxa), offset(offseta), string(stringa)
+		  const Char_type* stringa, size_t lengtha)
+      : object(objecta), shndx(shndxa), offset(offseta), string(stringa),
+	length(lengtha)
     { }
   };
 

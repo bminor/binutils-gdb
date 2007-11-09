@@ -46,14 +46,15 @@ class Target_test : public Sized_target<size, big_endian>
   void
   scan_relocs(const General_options&, Symbol_table*, Layout*,
 	      Sized_relobj<size, big_endian>*, unsigned int,
-	      unsigned int, const unsigned char*, size_t, size_t,
-	      const unsigned char*, Symbol**)
+	      unsigned int, const unsigned char*, size_t, Output_section*,
+	      bool, size_t, const unsigned char*)
   { ERROR("call to Target_test::scan_relocs"); }
 
   void
   relocate_section(const Relocate_info<size, big_endian>*, unsigned int,
-		   const unsigned char*, size_t, unsigned char*,
-		   typename elfcpp::Elf_types<size>::Elf_Addr, off_t)
+		   const unsigned char*, size_t, Output_section*, bool,
+		   unsigned char*, typename elfcpp::Elf_types<size>::Elf_Addr,
+		   off_t)
   { ERROR("call to Target_test::relocate_section"); }
 
   static const Target::Target_info test_target_info;

@@ -833,7 +833,7 @@ class Symbol_table
   add_from_relobj(Sized_relobj<size, big_endian>* relobj,
 		  const unsigned char* syms, size_t count,
 		  const char* sym_names, size_t sym_name_size,
-		  Symbol** sympointers);
+		  typename Sized_relobj<size, big_endian>::Symbols*);
 
   // Add COUNT dynamic symbols from the dynamic object DYNOBJ to the
   // symbol table.  SYMS is the symbols.  SYM_NAMES is their names.

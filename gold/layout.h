@@ -45,6 +45,7 @@ class Output_section_headers;
 class Output_segment;
 class Output_data;
 class Output_data_dynamic;
+class Eh_frame;
 class Target;
 
 // This task function handles mapping the input sections to output
@@ -87,12 +88,37 @@ class Layout
 
   // Given an input section SHNDX, named NAME, with data in SHDR, from
   // the object file OBJECT, return the output section where this
-  // input section should go.  Set *OFFSET to the offset within the
-  // output section.
+  // input section should go.  RELOC_SHNDX is the index of a
+  // relocation section which applies to this section, or 0 if none,
+  // or -1U if more than one.  RELOC_TYPE is the type of the
+  // relocation section if there is one.  Set *OFFSET to the offset
+  // within the output section.
   template<int size, bool big_endian>
   Output_section*
-  layout(Relobj *object, unsigned int shndx, const char* name,
-	 const elfcpp::Shdr<size, big_endian>& shdr, off_t* offset);
+  layout(Sized_relobj<size, big_endian> *object, unsigned int shndx,
+	 const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
+	 unsigned int reloc_shndx, unsigned int reloc_type, off_t* offset);
+
+  // Like layout, only for exception frame sections.  OBJECT is an
+  // object file.  SYMBOLS is the contents of the symbol table
+  // section, with size SYMBOLS_SIZE.  SYMBOL_NAMES is the contents of
+  // the symbol name section, with size SYMBOL_NAMES_SIZE.  SHNDX is a
+  // .eh_frame section in OBJECT.  SHDR is the section header.
+  // RELOC_SHNDX is the index of a relocation section which applies to
+  // this section, or 0 if none, or -1U if more than one.  RELOC_TYPE
+  // is the type of the relocation section if there is one.  This
+  // returns the output section, and sets *OFFSET to the offset.
+  template<int size, bool big_endian>
+  Output_section*
+  layout_eh_frame(Sized_relobj<size, big_endian>* object,
+		  const unsigned char* symbols,
+		  off_t symbols_size,
+		  const unsigned char* symbol_names,
+		  off_t symbol_names_size,
+		  unsigned int shndx,
+		  const elfcpp::Shdr<size, big_endian>& shdr,
+		  unsigned int reloc_shndx, unsigned int reloc_type,
+		  off_t* offset);
 
   // Handle a GNU stack note.  This is called once per input object
   // file.  SEEN_GNU_STACK is true if the object file has a
@@ -176,10 +202,19 @@ class Layout
   dynamic_data() const
   { return this->dynamic_data_; }
 
+  // Write out the output sections.
+  void
+  write_output_sections(Output_file* of) const;
+
   // Write out data not associated with an input file or the symbol
   // table.
   void
   write_data(const Symbol_table*, Output_file*) const;
+
+  // Write out output sections which can not be written until all the
+  // input sections are complete.
+  void
+  write_sections_after_input_sections(Output_file* of) const;
 
   // Return an output section named NAME, or NULL if there is none.
   Output_section*
@@ -217,13 +252,6 @@ class Layout
   };
   static const Linkonce_mapping linkonce_mapping[];
   static const int linkonce_mapping_count;
-
-  // Handle an exception frame section.
-  template<int size, bool big_endian>
-  void
-  layout_eh_frame(Relobj*, unsigned int, const char*,
-		  const elfcpp::Shdr<size, big_endian>&,
-		  Output_section*, off_t*);
 
   // Create a .note section for gold.
   void
@@ -285,7 +313,7 @@ class Layout
   // Return whether to include this section in the link.
   template<int size, bool big_endian>
   bool
-  include_section(Object* object, const char* name,
+  include_section(Sized_relobj<size, big_endian>* object, const char* name,
 		  const elfcpp::Shdr<size, big_endian>&);
 
   // Return the output section name to use given an input section
@@ -389,8 +417,12 @@ class Layout
   Output_section* dynamic_section_;
   // The dynamic data which goes into dynamic_section_.
   Output_data_dynamic* dynamic_data_;
-  // The exception frame section.
+  // The exception frame output section if there is one.
   Output_section* eh_frame_section_;
+  // The exception frame data for eh_frame_section_.
+  Eh_frame* eh_frame_data_;
+  // The exception frame header output section if there is one.
+  Output_section* eh_frame_hdr_section_;
   // The size of the output file.
   off_t output_file_size_;
   // Whether we have seen an object file marked to require an
@@ -402,6 +434,42 @@ class Layout
   // Whether we have seen at least one object file without an
   // executable stack marker.
   bool input_without_gnu_stack_note_;
+};
+
+// This task handles writing out data in output sections which is not
+// part of an input section, or which requires special handling.  When
+// this is done, it unblocks both output_sections_blocker and
+// final_blocker.
+
+class Write_sections_task : public Task
+{
+ public:
+  Write_sections_task(const Layout* layout, Output_file* of,
+		      Task_token* output_sections_blocker,
+		      Task_token* final_blocker)
+    : layout_(layout), of_(of),
+      output_sections_blocker_(output_sections_blocker),
+      final_blocker_(final_blocker)
+  { }
+
+  // The standard Task methods.
+
+  Is_runnable_type
+  is_runnable(Workqueue*);
+
+  Task_locker*
+  locks(Workqueue*);
+
+  void
+  run(Workqueue*);
+
+ private:
+  class Write_sections_locker;
+
+  const Layout* layout_;
+  Output_file* of_;
+  Task_token* output_sections_blocker_;
+  Task_token* final_blocker_;
 };
 
 // This task handles writing out data which is not part of a section
@@ -462,6 +530,42 @@ class Write_symbols_task : public Task
   const Stringpool* sympool_;
   const Stringpool* dynpool_;
   Output_file* of_;
+  Task_token* final_blocker_;
+};
+
+// This task handles writing out data in output sections which can't
+// be written out until all the input sections have been handled.
+// This is for sections whose contents is based on the contents of
+// other output sections.
+
+class Write_after_input_sections_task : public Task
+{
+ public:
+  Write_after_input_sections_task(const Layout* layout, Output_file* of,
+				  Task_token* input_sections_blocker,
+				  Task_token* final_blocker)
+    : layout_(layout), of_(of),
+      input_sections_blocker_(input_sections_blocker),
+      final_blocker_(final_blocker)
+  { }
+
+  // The standard Task methods.
+
+  Is_runnable_type
+  is_runnable(Workqueue*);
+
+  Task_locker*
+  locks(Workqueue*);
+
+  void
+  run(Workqueue*);
+
+ private:
+  class Write_sections_locker;
+
+  const Layout* layout_;
+  Output_file* of_;
+  Task_token* input_sections_blocker_;
   Task_token* final_blocker_;
 };
 

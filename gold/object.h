@@ -57,6 +57,10 @@ struct Read_symbols_data
   File_view* symbols;
   // Size of symbol data in bytes.
   off_t symbols_size;
+  // Offset of external symbols within symbol data.  This structure
+  // sometimes contains only external symbols, in which case this will
+  // be zero.  Sometimes it contains all symbols.
+  off_t external_symbols_offset;
   // Symbol names.
   File_view* symbol_names;
   // Size of symbol name data in bytes.
@@ -100,6 +104,10 @@ struct Section_relocs
   unsigned int sh_type;
   // Number of reloc entries.
   size_t reloc_count;
+  // Output section.
+  Output_section* output_section;
+  // Whether this section has special handling for offsets.
+  bool needs_special_offset_handling;
 };
 
 // Relocations in an object file.  This is read in read_relocs and
@@ -197,6 +205,11 @@ class Object
   section_flags(unsigned int shndx)
   { return this->do_section_flags(shndx); }
 
+  // Return the section type given a section index.
+  unsigned int
+  section_type(unsigned int shndx)
+  { return this->do_section_type(shndx); }
+
   // Return the section link field given a section index.
   unsigned int
   section_link(unsigned int shndx)
@@ -290,6 +303,10 @@ class Object
   // Get section flags--implemented by child class.
   virtual uint64_t
   do_section_flags(unsigned int shndx) = 0;
+
+  // Get section type--implemented by child class.
+  virtual unsigned int
+  do_section_type(unsigned int shndx) = 0;
 
   // Get section link field--implemented by child class.
   virtual unsigned int
@@ -421,9 +438,21 @@ class Relobj : public Object
     return this->map_to_output_[shndx].output_section != NULL;
   }
 
+  // Return whether an input section requires special
+  // handling--whether it is not simply mapped from the input file to
+  // the output file.
+  bool
+  is_section_specially_mapped(unsigned int shndx) const
+  {
+    gold_assert(shndx < this->map_to_output_.size());
+    return (this->map_to_output_[shndx].output_section != NULL
+	    && this->map_to_output_[shndx].offset == -1);
+  }
+
   // Given a section index, return the corresponding Output_section
   // (which will be NULL if the section is not included in the link)
-  // and set *POFF to the offset within that section.
+  // and set *POFF to the offset within that section.  *POFF will be
+  // set to -1 if the section requires special handling.
   inline Output_section*
   output_section(unsigned int shndx, off_t* poff) const;
 
@@ -434,6 +463,14 @@ class Relobj : public Object
     gold_assert(shndx < this->map_to_output_.size());
     this->map_to_output_[shndx].offset = off;
   }
+
+  // Return true if we need to wait for output sections to be written
+  // before we can apply relocations.  This is true if the object has
+  // any relocations for sections which require special handling, such
+  // as the exception frame section.
+  bool
+  relocs_must_follow_section_writes()
+  { return this->relocs_must_follow_section_writes_; }
 
  protected:
   // What we need to know to map an input section to an output
@@ -478,9 +515,18 @@ class Relobj : public Object
   map_to_output() const
   { return this->map_to_output_; }
 
+  // Record that we must wait for the output sections to be written
+  // before applying relocations.
+  void
+  set_relocs_must_follow_section_writes()
+  { this->relocs_must_follow_section_writes_ = true; }
+
  private:
   // Mapping from input sections to output section.
   std::vector<Map_to_output> map_to_output_;
+  // Whether we need to wait for output sections to be written before
+  // we can apply relocations.
+  bool relocs_must_follow_section_writes_;
 };
 
 // Implement Object::output_section inline for efficiency.
@@ -495,8 +541,8 @@ Relobj::output_section(unsigned int shndx, off_t* poff) const
 
 // This POD class is holds the value of a symbol.  This is used for
 // local symbols, and for all symbols during relocation processing.
-// In order to process relocs we need to be able to handle SHF_MERGE
-// sections correctly.
+// For special sections, such as SHF_MERGE sections, this calls a
+// function to get the final symbol value.
 
 template<int size>
 class Symbol_value
@@ -577,7 +623,10 @@ class Symbol_value
   // Set the index of the input section in the input file.
   void
   set_input_shndx(unsigned int i)
-  { this->input_shndx_ = i; }
+  {
+    this->input_shndx_ = i;
+    gold_assert(this->input_shndx_ == i);
+  }
 
   // Record that this is a section symbol.
   void
@@ -610,6 +659,7 @@ class Sized_relobj : public Relobj
 {
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+  typedef std::vector<Symbol*> Symbols;
   typedef std::vector<Symbol_value<size> > Local_values;
 
   Sized_relobj(const std::string& name, Input_file* input_file, off_t offset,
@@ -620,6 +670,41 @@ class Sized_relobj : public Relobj
   // Set up the object file based on the ELF header.
   void
   setup(const typename elfcpp::Ehdr<size, big_endian>&);
+
+  // Return the number of local symbols.
+  unsigned int
+  local_symbol_count() const
+  { return this->local_symbol_count_; }
+
+  // If SYM is the index of a global symbol in the object file's
+  // symbol table, return the Symbol object.  Otherwise, return NULL.
+  Symbol*
+  global_symbol(unsigned int sym) const
+  {
+    if (sym >= this->local_symbol_count_)
+      {
+	gold_assert(sym - this->local_symbol_count_ < this->symbols_.size());
+	return this->symbols_[sym - this->local_symbol_count_];
+      }
+    return NULL;
+  }
+
+  // Return the section index of symbol SYM.  Set *VALUE to its value
+  // in the object file.  Note that for a symbol which is not defined
+  // in this object file, this will set *VALUE to 0 and return
+  // SHN_UNDEF; it will not return the final value of the symbol in
+  // the link.
+  unsigned int
+  symbol_section_and_value(unsigned int sym, Address* value);
+
+  // Return a pointer to the Symbol_value structure which holds the
+  // value of a local symbol.
+  const Symbol_value<size>*
+  local_symbol(unsigned int sym) const
+  {
+    gold_assert(sym < this->local_values_.size());
+    return &this->local_values_[sym];
+  }
 
   // Return the index of local symbol SYM in the ordinary symbol
   // table.  A value of -1U means that the symbol is not being output.
@@ -731,6 +816,11 @@ class Sized_relobj : public Relobj
   do_section_flags(unsigned int shndx)
   { return this->elf_file_.section_flags(shndx); }
 
+  // Return section type.
+  unsigned int
+  do_section_type(unsigned int shndx)
+  { return this->elf_file_.section_type(shndx); }
+
   // Return the section link field.
   unsigned int
   do_section_link(unsigned int shndx)
@@ -747,6 +837,17 @@ class Sized_relobj : public Relobj
   // Find the SHT_SYMTAB section, given the section headers.
   void
   find_symtab(const unsigned char* pshdrs);
+
+  // Return whether SHDR has the right flags for a GNU style exception
+  // frame section.
+  bool
+  check_eh_frame_flags(const elfcpp::Shdr<size, big_endian>* shdr) const;
+
+  // Return whether there is a section named .eh_frame which might be
+  // a GNU style exception frame section.
+  bool
+  find_eh_frame(const unsigned char* pshdrs, const char* names,
+		off_t names_size) const;
 
   // Whether to include a section group in the link.
   bool
@@ -766,6 +867,7 @@ class Sized_relobj : public Relobj
     typename elfcpp::Elf_types<size>::Elf_Addr address;
     off_t offset;
     off_t view_size;
+    bool is_input_output_view;
   };
 
   typedef std::vector<View_size> Views;
@@ -797,13 +899,15 @@ class Sized_relobj : public Relobj
   // The number of local symbols which go into the output file.
   unsigned int output_local_symbol_count_;
   // The entries in the symbol table for the external symbols.
-  Symbol** symbols_;
+  Symbols symbols_;
   // File offset for local symbols.
   off_t local_symbol_offset_;
   // Values of local symbols.
   Local_values local_values_;
   // GOT offsets for local symbols, indexed by symbol number.
   Local_got_offsets local_got_offsets_;
+  // Whether this object has a GNU style .eh_frame section.
+  bool has_eh_frame_;
 };
 
 // A class to manage the list of all objects.
@@ -891,12 +995,6 @@ struct Relocate_info
   const Layout* layout;
   // Object being relocated.
   Sized_relobj<size, big_endian>* object;
-  // Number of local symbols.
-  unsigned int local_symbol_count;
-  // Values of local symbols.
-  const typename Sized_relobj<size, big_endian>::Local_values* local_values;
-  // Global symbols.
-  const Symbol* const * symbols;
   // Section index of relocation section.
   unsigned int reloc_shndx;
   // Section index of section being relocated.

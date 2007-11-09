@@ -139,10 +139,11 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     symtab_shndx_(-1U),
     local_symbol_count_(0),
     output_local_symbol_count_(0),
-    symbols_(NULL),
+    symbols_(),
     local_symbol_offset_(0),
     local_values_(),
-    local_got_offsets_()
+    local_got_offsets_(),
+    has_eh_frame_(false)
 {
 }
 
@@ -198,6 +199,50 @@ Sized_relobj<size, big_endian>::find_symtab(const unsigned char* pshdrs)
     }
 }
 
+// Return whether SHDR has the right type and flags to be a GNU
+// .eh_frame section.
+
+template<int size, bool big_endian>
+bool
+Sized_relobj<size, big_endian>::check_eh_frame_flags(
+    const elfcpp::Shdr<size, big_endian>* shdr) const
+{
+  return (shdr->get_sh_size() > 0
+	  && shdr->get_sh_type() == elfcpp::SHT_PROGBITS
+	  && shdr->get_sh_flags() == elfcpp::SHF_ALLOC);
+}
+
+// Return whether there is a GNU .eh_frame section, given the section
+// headers and the section names.
+
+template<int size, bool big_endian>
+bool
+Sized_relobj<size, big_endian>::find_eh_frame(const unsigned char* pshdrs,
+					      const char* names,
+					      off_t names_size) const
+{
+  const unsigned int shnum = this->shnum();
+  const unsigned char* p = pshdrs + This::shdr_size;
+  for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
+    {
+      typename This::Shdr shdr(p);
+      if (this->check_eh_frame_flags(&shdr))
+	{
+	  if (shdr.get_sh_name() >= names_size)
+	    {
+	      this->error(_("bad section name offset for section %u: %lu"),
+			  i, static_cast<unsigned long>(shdr.get_sh_name()));
+	      continue;
+	    }
+
+	  const char* name = names + shdr.get_sh_name();
+	  if (strcmp(name, ".eh_frame") == 0)
+	    return true;
+	}
+    }
+  return false;
+}
+
 // Read the sections and symbols from an object file.
 
 template<int size, bool big_endian>
@@ -210,8 +255,14 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   this->find_symtab(pshdrs);
 
+  const unsigned char* namesu = sd->section_names->data();
+  const char* names = reinterpret_cast<const char*>(namesu);
+  if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
+    this->has_eh_frame_ = true;
+
   sd->symbols = NULL;
   sd->symbols_size = 0;
+  sd->external_symbols_offset = 0;
   sd->symbol_names = NULL;
   sd->symbol_names_size = 0;
 
@@ -226,16 +277,26 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 				 + this->symtab_shndx_ * This::shdr_size);
   gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
-  // We only need the external symbols.
+  // If this object has a .eh_frame section, we need all the symbols.
+  // Otherwise we only need the external symbols.  While it would be
+  // simpler to just always read all the symbols, I've seen object
+  // files with well over 2000 local symbols, which for a 64-bit
+  // object file format is over 5 pages that we don't need to read
+  // now.
+
   const int sym_size = This::sym_size;
   const unsigned int loccount = symtabshdr.get_sh_info();
   this->local_symbol_count_ = loccount;
   off_t locsize = loccount * sym_size;
-  off_t extoff = symtabshdr.get_sh_offset() + locsize;
-  off_t extsize = symtabshdr.get_sh_size() - locsize;
+  off_t dataoff = symtabshdr.get_sh_offset();
+  off_t datasize = symtabshdr.get_sh_size();
+  off_t extoff = dataoff + locsize;
+  off_t extsize = datasize - locsize;
 
-  // Read the symbol table.
-  File_view* fvsymtab = this->get_lasting_view(extoff, extsize, false);
+  off_t readoff = this->has_eh_frame_ ? dataoff : extoff;
+  off_t readsize = this->has_eh_frame_ ? datasize : extsize;
+
+  File_view* fvsymtab = this->get_lasting_view(readoff, readsize, false);
 
   // Read the section header for the symbol names.
   unsigned int strtab_shndx = symtabshdr.get_sh_link();
@@ -257,9 +318,34 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 					       strtabshdr.get_sh_size(), true);
 
   sd->symbols = fvsymtab;
-  sd->symbols_size = extsize;
+  sd->symbols_size = readsize;
+  sd->external_symbols_offset = this->has_eh_frame_ ? locsize : 0;
   sd->symbol_names = fvstrtab;
   sd->symbol_names_size = strtabshdr.get_sh_size();
+}
+
+// Return the section index of symbol SYM.  Set *VALUE to its value in
+// the object file.  Note that for a symbol which is not defined in
+// this object file, this will set *VALUE to 0 and return SHN_UNDEF;
+// it will not return the final value of the symbol in the link.
+
+template<int size, bool big_endian>
+unsigned int
+Sized_relobj<size, big_endian>::symbol_section_and_value(unsigned int sym,
+							 Address* value)
+{
+  off_t symbols_size;
+  const unsigned char* symbols = this->section_contents(this->symtab_shndx_,
+							&symbols_size,
+							false);
+
+  const size_t count = symbols_size / This::sym_size;
+  gold_assert(sym < count);
+
+  elfcpp::Sym<size, big_endian> elfsym(symbols + sym * This::sym_size);
+  *value = elfsym.get_st_value();
+  // FIXME: Handle SHN_XINDEX.
+  return elfsym.get_st_shndx();
 }
 
 // Return whether to include a section group in the link.  LAYOUT is
@@ -425,6 +511,38 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   const unsigned char* pnamesu = sd->section_names->data();
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
+  // For each section, record the index of the reloc section if any.
+  // Use 0 to mean that there is no reloc section, -1U to mean that
+  // there is more than one.
+  std::vector<unsigned int> reloc_shndx(shnum, 0);
+  std::vector<unsigned int> reloc_type(shnum, elfcpp::SHT_NULL);
+  // Skip the first, dummy, section.
+  pshdrs += This::shdr_size;
+  for (unsigned int i = 1; i < shnum; ++i, pshdrs += This::shdr_size)
+    {
+      typename This::Shdr shdr(pshdrs);
+
+      unsigned int sh_type = shdr.get_sh_type();
+      if (sh_type == elfcpp::SHT_REL || sh_type == elfcpp::SHT_RELA)
+	{
+	  unsigned int target_shndx = shdr.get_sh_info();
+	  if (target_shndx == 0 || target_shndx >= shnum)
+	    {
+	      this->error(_("relocation section %u has bad info %u"),
+			  i, target_shndx);
+	      continue;
+	    }
+
+	  if (reloc_shndx[target_shndx] != 0)
+	    reloc_shndx[target_shndx] = -1U;
+	  else
+	    {
+	      reloc_shndx[target_shndx] = i;
+	      reloc_type[target_shndx] = sh_type;
+	    }
+	}
+    }
+
   std::vector<Map_to_output>& map_sections(this->map_to_output());
   map_sections.resize(shnum);
 
@@ -436,8 +554,11 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   // Keep track of which sections to omit.
   std::vector<bool> omit(shnum, false);
 
+  // Keep track of .eh_frame sections.
+  std::vector<unsigned int> eh_frame_sections;
+
   // Skip the first, dummy, section.
-  pshdrs += This::shdr_size;
+  pshdrs = sd->section_headers->data() + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, pshdrs += This::shdr_size)
     {
       typename This::Shdr shdr(pshdrs);
@@ -490,14 +611,69 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	  continue;
 	}
 
+      // The .eh_frame section is special.  It holds exception frame
+      // information that we need to read in order to generate the
+      // exception frame header.  We process these after all the other
+      // sections so that the exception frame reader can reliably
+      // determine which sections are being discarded, and discard the
+      // corresponding information.
+      if (!parameters->output_is_object()
+	  && strcmp(name, ".eh_frame") == 0
+	  && this->check_eh_frame_flags(&shdr))
+	{
+	  eh_frame_sections.push_back(i);
+	  continue;
+	}
+
       off_t offset;
-      Output_section* os = layout->layout(this, i, name, shdr, &offset);
+      Output_section* os = layout->layout(this, i, name, shdr,
+					  reloc_shndx[i], reloc_type[i],
+					  &offset);
 
       map_sections[i].output_section = os;
       map_sections[i].offset = offset;
+
+      // If this section requires special handling, and if there are
+      // relocs that apply to it, then we must do the special handling
+      // before we apply the relocs.
+      if (offset == -1 && reloc_shndx[i] != 0)
+	this->set_relocs_must_follow_section_writes();
     }
 
   layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags);
+
+  // Handle the .eh_frame sections at the end.
+  for (std::vector<unsigned int>::const_iterator p = eh_frame_sections.begin();
+       p != eh_frame_sections.end();
+       ++p)
+    {
+      gold_assert(this->has_eh_frame_);
+      gold_assert(sd->external_symbols_offset != 0);
+
+      unsigned int i = *p;
+      const unsigned char *pshdr;
+      pshdr = sd->section_headers->data() + i * This::shdr_size;
+      typename This::Shdr shdr(pshdr);
+
+      off_t offset;
+      Output_section* os = layout->layout_eh_frame(this,
+						   sd->symbols->data(),
+						   sd->symbols_size,
+						   sd->symbol_names->data(),
+						   sd->symbol_names_size,
+						   i, shdr,
+						   reloc_shndx[i],
+						   reloc_type[i],
+						   &offset);
+      map_sections[i].output_section = os;
+      map_sections[i].offset = offset;
+
+      // If this section requires special handling, and if there are
+      // relocs that apply to it, then we must do the special handling
+      // before we apply the relocs.
+      if (offset == -1 && reloc_shndx[i] != 0)
+	this->set_relocs_must_follow_section_writes();
+    }
 
   delete sd->section_headers;
   sd->section_headers = NULL;
@@ -519,19 +695,23 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
     }
 
   const int sym_size = This::sym_size;
-  size_t symcount = sd->symbols_size / sym_size;
-  if (static_cast<off_t>(symcount * sym_size) != sd->symbols_size)
+  size_t symcount = ((sd->symbols_size - sd->external_symbols_offset)
+		     / sym_size);
+  if (static_cast<off_t>(symcount * sym_size)
+      != sd->symbols_size - sd->external_symbols_offset)
     {
       this->error(_("size of symbols is not multiple of symbol size"));
       return;
     }
 
-  this->symbols_ = new Symbol*[symcount];
+  this->symbols_.resize(symcount);
 
   const char* sym_names =
     reinterpret_cast<const char*>(sd->symbol_names->data());
-  symtab->add_from_relobj(this, sd->symbols->data(), symcount, sym_names,
-			  sd->symbol_names_size, this->symbols_);
+  symtab->add_from_relobj(this,
+			  sd->symbols->data() + sd->external_symbols_offset,
+			  symcount, sym_names, sd->symbol_names_size,
+			  &this->symbols_);
 
   delete sd->symbols;
   sd->symbols = NULL;

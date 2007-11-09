@@ -288,6 +288,7 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   sd->symbols = NULL;
   sd->symbols_size = 0;
+  sd->external_symbols_offset = 0;
   sd->symbol_names = NULL;
   sd->symbol_names_size = 0;
 
@@ -606,6 +607,7 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
   const int sym_size = This::sym_size;
   const size_t symcount = sd->symbols_size / sym_size;
+  gold_assert(sd->external_symbols_offset == 0);
   if (static_cast<off_t>(symcount * sym_size) != sd->symbols_size)
     {
       this->error(_("size of dynamic symbols is not multiple of symbol size"));

@@ -129,9 +129,12 @@ class Relocate_task : public Task
  public:
   Relocate_task(const General_options& options, const Symbol_table* symtab,
 		const Layout* layout, Relobj* object, Output_file* of,
-		Task_token* final_blocker)
+		Task_token* input_sections_blocker,
+		Task_token* output_sections_blocker, Task_token* final_blocker)
     : options_(options), symtab_(symtab), layout_(layout), object_(object),
-      of_(of), final_blocker_(final_blocker)
+      of_(of), input_sections_blocker_(input_sections_blocker),
+      output_sections_blocker_(output_sections_blocker),
+      final_blocker_(final_blocker)
   { }
 
   // The standard Task methods.
@@ -153,6 +156,8 @@ class Relocate_task : public Task
   const Layout* layout_;
   Relobj* object_;
   Output_file* of_;
+  Task_token* input_sections_blocker_;
+  Task_token* output_sections_blocker_;
   Task_token* final_blocker_;
 };
 
@@ -592,6 +597,55 @@ class Copy_relocs
 
   // The list of relocs we are saving.
   Copy_reloc_entries entries_;
+};
+
+// Track relocations while reading a section.  This lets you ask for
+// the relocation at a certain offset, and see how relocs occur
+// between points of interest.
+
+template<int size, bool big_endian>
+class Track_relocs
+{
+ public:
+  Track_relocs()
+    : object_(NULL), prelocs_(NULL), len_(0), pos_(0), reloc_size_(0)
+  { }
+
+  // Initialize the Track_relocs object.  OBJECT is the object holding
+  // the reloc section, RELOC_SHNDX is the section index of the reloc
+  // section, and RELOC_TYPE is the type of the reloc section
+  // (elfcpp::SHT_REL or elfcpp::SHT_RELA).  This returns false if
+  // something went wrong.
+  bool
+  initialize(Sized_relobj<size, big_endian>* object, unsigned int reloc_shndx,
+	     unsigned int reloc_type);
+
+  // Return the offset in the data section to which the next reloc
+  // applies.  THis returns -1 if there is no next reloc.
+  off_t
+  next_offset() const;
+
+  // Return the symbol index of the next reloc.  This returns -1U if
+  // there is no next reloc.
+  unsigned int
+  next_symndx() const;
+
+  // Advance to OFFSET within the data section, and return the number
+  // of relocs which would be skipped.
+  int
+  advance(off_t offset);
+
+ private:
+  // The object file.
+  Sized_relobj<size, big_endian>* object_;
+  // The contents of the reloc section.
+  const unsigned char* prelocs_;
+  // The length of the reloc section.
+  off_t len_;
+  // Our current position in the reloc section.
+  off_t pos_;
+  // The size of the relocs in the section.
+  int reloc_size_;
 };
 
 } // End namespace gold.

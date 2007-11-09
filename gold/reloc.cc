@@ -116,34 +116,44 @@ Scan_relocs::run(Workqueue*)
 
 // Relocate_task methods.
 
-// These tasks are always runnable.
+// We may have to wait for the output sections to be written.
 
 Task::Is_runnable_type
 Relocate_task::is_runnable(Workqueue*)
 {
+  if (this->object_->relocs_must_follow_section_writes()
+      && this->output_sections_blocker_->is_blocked())
+    return IS_BLOCKED;
+
   return IS_RUNNABLE;
 }
 
 // We want to lock the file while we run.  We want to unblock
-// FINAL_BLOCKER when we are done.
+// INPUT_SECTIONS_BLOCKER and FINAL_BLOCKER when we are done.
 
 class Relocate_task::Relocate_locker : public Task_locker
 {
  public:
-  Relocate_locker(Task_token& token, Workqueue* workqueue,
+  Relocate_locker(Task_token& input_sections_blocker,
+		  Task_token& final_blocker, Workqueue* workqueue,
 		  Object* object)
-    : blocker_(token, workqueue), objlock_(*object)
+    : input_sections_blocker_(input_sections_blocker, workqueue),
+      final_blocker_(final_blocker, workqueue),
+      objlock_(*object)
   { }
 
  private:
-  Task_locker_block blocker_;
+  Task_block_token input_sections_blocker_;
+  Task_block_token final_blocker_;
   Task_locker_obj<Object> objlock_;
 };
 
 Task_locker*
 Relocate_task::locks(Workqueue* workqueue)
 {
-  return new Relocate_locker(*this->final_blocker_, workqueue,
+  return new Relocate_locker(*this->input_sections_blocker_,
+			     *this->final_blocker_,
+			     workqueue,
 			     this->object_);
 }
 
@@ -171,6 +181,8 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 
   rd->relocs.reserve(shnum / 2);
 
+  std::vector<Map_to_output>& map_sections(this->map_to_output());
+
   const unsigned char *pshdrs = this->get_view(this->elf_file_.shoff(),
 					       shnum * This::shdr_size,
 					       true);
@@ -192,7 +204,8 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 	  continue;
 	}
 
-      if (!this->is_section_included(shndx))
+      Output_section* os = map_sections[shndx].output_section;
+      if (os == NULL)
 	continue;
 
       // We are scanning relocations in order to fill out the GOT and
@@ -242,6 +255,8 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 					   true);
       sr.sh_type = sh_type;
       sr.reloc_count = reloc_count;
+      sr.output_section = os;
+      sr.needs_special_offset_handling = map_sections[shndx].offset == -1;
     }
 
   // Read the local symbols.
@@ -286,9 +301,9 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
     {
       target->scan_relocs(options, symtab, layout, this, p->data_shndx,
 			  p->sh_type, p->contents->data(), p->reloc_count,
+			  p->output_section, p->needs_special_offset_handling,
 			  this->local_symbol_count_,
-			  local_symbols,
-			  this->symbols_);
+			  local_symbols);
       delete p->contents;
       p->contents = NULL;
     }
@@ -333,8 +348,14 @@ Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
   for (unsigned int i = 1; i < shnum; ++i)
     {
       if (views[i].view != NULL)
-	of->write_output_view(views[i].offset, views[i].view_size,
-			      views[i].view);
+	{
+	  if (views[i].is_input_output_view)
+	    of->write_input_output_view(views[i].offset, views[i].view_size,
+					views[i].view);
+	  else
+	    of->write_output_view(views[i].offset, views[i].view_size,
+				  views[i].view);
+	}
     }
 
   // Write out the local symbols.
@@ -361,34 +382,52 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
       pvs->view = NULL;
 
-      if (map_sections[i].offset == -1)
-	continue;
-
       const Output_section* os = map_sections[i].output_section;
       if (os == NULL)
 	continue;
+      off_t output_offset = map_sections[i].offset;
 
       typename This::Shdr shdr(p);
 
       if (shdr.get_sh_type() == elfcpp::SHT_NOBITS)
 	continue;
 
-      off_t start = os->offset() + map_sections[i].offset;
-      off_t sh_size = shdr.get_sh_size();
+      off_t view_start;
+      off_t view_size;
+      if (output_offset != -1)
+	{
+	  view_start = os->offset() + output_offset;
+	  view_size = shdr.get_sh_size();
+	}
+      else
+	{
+	  view_start = os->offset();
+	  view_size = os->data_size();
+	}
 
-      if (sh_size == 0)
+      if (view_size == 0)
 	continue;
 
-      gold_assert(map_sections[i].offset >= 0
-		  && map_sections[i].offset + sh_size <= os->data_size());
+      gold_assert(output_offset == -1
+		  || (output_offset >= 0
+		      && output_offset + view_size <= os->data_size()));
 
-      unsigned char* view = of->get_output_view(start, sh_size);
-      this->read(shdr.get_sh_offset(), sh_size, view);
+      unsigned char* view;
+      if (output_offset == -1)
+	view = of->get_input_output_view(view_start, view_size);
+      else
+	{
+	  view = of->get_output_view(view_start, view_size);
+	  this->read(shdr.get_sh_offset(), view_size, view);
+	}
 
       pvs->view = view;
-      pvs->address = os->address() + map_sections[i].offset;
-      pvs->offset = start;
-      pvs->view_size = sh_size;
+      pvs->address = os->address();
+      if (output_offset != -1)
+	pvs->address += output_offset;
+      pvs->offset = view_start;
+      pvs->view_size = view_size;
+      pvs->is_input_output_view = output_offset == -1;
     }
 }
 
@@ -407,14 +446,13 @@ Sized_relobj<size, big_endian>::relocate_sections(
   unsigned int shnum = this->shnum();
   Sized_target<size, big_endian>* target = this->sized_target();
 
+  std::vector<Map_to_output>& map_sections(this->map_to_output());
+
   Relocate_info<size, big_endian> relinfo;
   relinfo.options = &options;
   relinfo.symtab = symtab;
   relinfo.layout = layout;
   relinfo.object = this;
-  relinfo.local_symbol_count = this->local_symbol_count_;
-  relinfo.local_values = &this->local_values_;
-  relinfo.symbols = this->symbols_;
 
   const unsigned char* p = pshdrs + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
@@ -433,12 +471,14 @@ Sized_relobj<size, big_endian>::relocate_sections(
 	  continue;
 	}
 
-      if (!this->is_section_included(index))
+      Output_section* os = map_sections[index].output_section;
+      if (os == NULL)
 	{
 	  // This relocation section is against a section which we
 	  // discarded.
 	  continue;
 	}
+      off_t output_offset = map_sections[index].offset;
 
       gold_assert((*pviews)[index].view != NULL);
 
@@ -464,7 +504,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
 	{
 	  gold_error(_("unexpected entsize for reloc section %u: %lu != %u"),
 		     i, static_cast<unsigned long>(shdr.get_sh_entsize()),
-		  reloc_size);
+		     reloc_size);
 	  continue;
 	}
 
@@ -482,6 +522,8 @@ Sized_relobj<size, big_endian>::relocate_sections(
 			       sh_type,
 			       prelocs,
 			       reloc_count,
+			       os,
+			       output_offset == -1,
 			       (*pviews)[index].view,
 			       (*pviews)[index].address,
 			       (*pviews)[index].view_size);
@@ -619,6 +661,104 @@ Copy_relocs<size, big_endian>::emit(
       if (p->should_emit())
 	p->emit(reloc_data);
     }
+}
+
+// Track_relocs methods.
+
+// Initialize the class to track the relocs.  This gets the object,
+// the reloc section index, and the type of the relocs.  This returns
+// false if something goes wrong.
+
+template<int size, bool big_endian>
+bool
+Track_relocs<size, big_endian>::initialize(
+    Sized_relobj<size, big_endian>* object,
+    unsigned int reloc_shndx,
+    unsigned int reloc_type)
+{
+  this->object_ = object;
+
+  // If RELOC_SHNDX is -1U, it means there is more than one reloc
+  // section for the .eh_frame section.  We can't handle that case.
+  if (reloc_shndx == -1U)
+    return false;
+
+  // If RELOC_SHNDX is 0, there is no reloc section.
+  if (reloc_shndx == 0)
+    return true;
+
+  // Get the contents of the reloc section.
+  this->prelocs_ = object->section_contents(reloc_shndx, &this->len_, false);
+
+  if (reloc_type == elfcpp::SHT_REL)
+    this->reloc_size_ = elfcpp::Elf_sizes<size>::rel_size;
+  else if (reloc_type == elfcpp::SHT_RELA)
+    this->reloc_size_ = elfcpp::Elf_sizes<size>::rela_size;
+  else
+    gold_unreachable();
+
+  if (this->len_ % this->reloc_size_ != 0)
+    {
+      object->error(_("reloc section size %zu is not a multiple of "
+		      "reloc size %d\n"),
+		    static_cast<size_t>(this->len_),
+		    this->reloc_size_);
+      return false;
+    }
+
+  return true;
+}
+
+// Return the offset of the next reloc, or -1 if there isn't one.
+
+template<int size, bool big_endian>
+off_t
+Track_relocs<size, big_endian>::next_offset() const
+{
+  if (this->pos_ >= this->len_)
+    return -1;
+
+  // Rel and Rela start out the same, so we can always use Rel to find
+  // the r_offset value.
+  elfcpp::Rel<size, big_endian> rel(this->prelocs_ + this->pos_);
+  return rel.get_r_offset();
+}
+
+// Return the index of the symbol referenced by the next reloc, or -1U
+// if there aren't any more relocs.
+
+template<int size, bool big_endian>
+unsigned int
+Track_relocs<size, big_endian>::next_symndx() const
+{
+  if (this->pos_ >= this->len_)
+    return -1U;
+
+  // Rel and Rela start out the same, so we can use Rel to find the
+  // symbol index.
+  elfcpp::Rel<size, big_endian> rel(this->prelocs_ + this->pos_);
+  return elfcpp::elf_r_sym<size>(rel.get_r_info());
+}
+
+// Advance to the next reloc whose r_offset is greater than or equal
+// to OFFSET.  Return the number of relocs we skip.
+
+template<int size, bool big_endian>
+int
+Track_relocs<size, big_endian>::advance(off_t offset)
+{
+  int ret = 0;
+  while (this->pos_ < this->len_)
+    {
+      // Rel and Rela start out the same, so we can always use Rel to
+      // find the r_offset value.
+      elfcpp::Rel<size, big_endian> rel(this->prelocs_ + this->pos_);
+      if (static_cast<off_t>(rel.get_r_offset()) >= offset)
+	break;
+      ++ret;
+      this->pos_ += this->reloc_size_;
+    }
+  return ret;
 }
 
 // Instantiate the templates we need.  We could use the configure
@@ -794,6 +934,26 @@ template
 void
 Copy_relocs<64, true>::emit<elfcpp::SHT_RELA>(
     Output_data_reloc<elfcpp::SHT_RELA, true, 64, true>*);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+class Track_relocs<32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Track_relocs<32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Track_relocs<64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Track_relocs<64, true>;
 #endif
 
 } // End namespace gold.

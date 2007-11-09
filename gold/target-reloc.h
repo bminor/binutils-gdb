@@ -24,7 +24,6 @@
 #define GOLD_TARGET_RELOC_H
 
 #include "elfcpp.h"
-#include "object.h"
 #include "symtab.h"
 #include "reloc-types.h"
 
@@ -49,9 +48,10 @@ scan_relocs(
     unsigned int data_shndx,
     const unsigned char* prelocs,
     size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
     size_t local_count,
-    const unsigned char* plocal_syms,
-    Symbol** global_syms)
+    const unsigned char* plocal_syms)
 {
   typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
@@ -61,6 +61,11 @@ scan_relocs(
   for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
     {
       Reltype reloc(prelocs);
+
+      if (needs_special_offset_handling
+	  && !output_section->is_input_address_mapped(object, data_shndx,
+						      reloc.get_r_offset()))
+	continue;
 
       typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
       unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
@@ -99,7 +104,7 @@ scan_relocs(
 	}
       else
 	{
-	  Symbol* gsym = global_syms[r_sym - local_count];
+	  Symbol* gsym = object->global_symbol(r_sym);
 	  gold_assert(gsym != NULL);
 	  if (gsym->is_forwarder())
 	    gsym = symtab->resolve_forwards(gsym);
@@ -122,8 +127,14 @@ scan_relocs(
 // RELOCATE implements operator() to do a relocation.
 
 // PRELOCS points to the relocation data.  RELOC_COUNT is the number
-// of relocs.  VIEW is the section data, VIEW_ADDRESS is its memory
-// address, and VIEW_SIZE is the size.
+// of relocs.  OUTPUT_SECTION is the output section.
+// NEEDS_SPECIAL_OFFSET_HANDLING is true if input offsets need to be
+// mapped to output offsets.
+
+// VIEW is the section data, VIEW_ADDRESS is its memory address, and
+// VIEW_SIZE is the size.  These refer to the input section, unless
+// NEEDS_SPECIAL_OFFSET_HANDLING is true, in which case they refer to
+// the output section.
 
 template<int size, bool big_endian, typename Target_type, int sh_type,
 	 typename Relocate>
@@ -133,6 +144,8 @@ relocate_section(
     Target_type* target,
     const unsigned char* prelocs,
     size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,
     off_t view_size)
@@ -141,16 +154,23 @@ relocate_section(
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
   Relocate relocate;
 
-  unsigned int local_count = relinfo->local_symbol_count;
-  const typename Sized_relobj<size, big_endian>::Local_values* local_values =
-    relinfo->local_values;
-  const Symbol* const * global_syms = relinfo->symbols;
+  Sized_relobj<size, big_endian>* object = relinfo->object;
+  unsigned int local_count = object->local_symbol_count();
 
   for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
     {
       Reltype reloc(prelocs);
 
       off_t offset = reloc.get_r_offset();
+
+      if (needs_special_offset_handling)
+	{
+	  offset = output_section->output_offset(relinfo->object,
+						 relinfo->data_shndx,
+						 offset);
+	  if (offset == -1)
+	    continue;
+	}
 
       typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
       unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
@@ -163,11 +183,11 @@ relocate_section(
       if (r_sym < local_count)
 	{
 	  sym = NULL;
-	  psymval = &(*local_values)[r_sym];
+	  psymval = object->local_symbol(r_sym);
 	}
       else
 	{
-	  const Symbol* gsym = global_syms[r_sym - local_count];
+	  const Symbol* gsym = object->global_symbol(r_sym);
 	  gold_assert(gsym != NULL);
 	  if (gsym->is_forwarder())
 	    gsym = relinfo->symtab->resolve_forwards(gsym);

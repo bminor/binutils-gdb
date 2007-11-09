@@ -63,10 +63,18 @@ Output_data::set_address(uint64_t addr, off_t off)
   this->do_set_address(addr, off);
 }
 
+// Return the default alignment for the target size.
+
+uint64_t
+Output_data::default_alignment()
+{
+  return Output_data::default_alignment_for_size(parameters->get_size());
+}
+
 // Return the default alignment for a size--32 or 64.
 
 uint64_t
-Output_data::default_alignment(int size)
+Output_data::default_alignment_for_size(int size)
 {
   if (size == 32)
     return 4;
@@ -569,7 +577,14 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
       Output_section* os = this->u2_.relobj->output_section(this->shndx_,
 							    &off);
       gold_assert(os != NULL);
-      address += os->address() + off;
+      if (off != -1)
+	address += os->address() + off;
+      else
+	{
+	  address = os->output_address(this->u2_.relobj, this->shndx_,
+				       address);
+	  gold_assert(address != -1U);
+	}
     }
   else if (this->u2_.od != NULL)
     address += this->u2_.od->address();
@@ -941,27 +956,25 @@ Output_section::Input_section::set_address(uint64_t addr, off_t off,
     this->u2_.posd->set_address(addr, off);
 }
 
-// Try to turn an input address into an output address.
+// Try to turn an input offset into an output offset.
 
 bool
-Output_section::Input_section::output_address(const Relobj* object,
-					      unsigned int shndx,
-					      off_t offset,
-					      uint64_t output_section_address,
-					      uint64_t *poutput) const
+Output_section::Input_section::output_offset(const Relobj* object,
+					     unsigned int shndx,
+					     off_t offset,
+					     off_t *poutput) const
 {
   if (!this->is_input_section())
-    return this->u2_.posd->output_address(object, shndx, offset,
-					  output_section_address, poutput);
+    return this->u2_.posd->output_offset(object, shndx, offset, poutput);
   else
     {
-      if (this->shndx_ != shndx
-	  || this->u2_.object != object)
+      if (this->shndx_ != shndx || this->u2_.object != object)
 	return false;
       off_t output_offset;
       Output_section* os = object->output_section(shndx, &output_offset);
       gold_assert(os != NULL);
-      *poutput = output_section_address + output_offset + offset;
+      gold_assert(output_offset != -1);
+      *poutput = output_offset + offset;
       return true;
     }
 }
@@ -1001,7 +1014,8 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     needs_symtab_index_(false),
     needs_dynsym_index_(false),
     should_link_to_symtab_(false),
-    should_link_to_dynsym_(false)
+    should_link_to_dynsym_(false),
+    after_input_sections_(false)
 {
 }
 
@@ -1021,16 +1035,22 @@ Output_section::set_entsize(uint64_t v)
 }
 
 // Add the input section SHNDX, with header SHDR, named SECNAME, in
-// OBJECT, to the Output_section.  Return the offset of the input
-// section within the output section.  We don't always keep track of
-// input sections for an Output_section.  Instead, each Object keeps
-// track of the Output_section for each of its input sections.
+// OBJECT, to the Output_section.  RELOC_SHNDX is the index of a
+// relocation section which applies to this section, or 0 if none, or
+// -1U if more than one.  Return the offset of the input section
+// within the output section.  Return -1 if the input section will
+// receive special handling.  In the normal case we don't always keep
+// track of input sections for an Output_section.  Instead, each
+// Object keeps track of the Output_section for each of its input
+// sections.
 
 template<int size, bool big_endian>
 off_t
-Output_section::add_input_section(Relobj* object, unsigned int shndx,
+Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
+				  unsigned int shndx,
 				  const char* secname,
-				  const elfcpp::Shdr<size, big_endian>& shdr)
+				  const elfcpp::Shdr<size, big_endian>& shdr,
+				  unsigned int reloc_shndx)
 {
   elfcpp::Elf_Xword addralign = shdr.get_sh_addralign();
   if ((addralign & (addralign - 1)) != 0)
@@ -1044,15 +1064,17 @@ Output_section::add_input_section(Relobj* object, unsigned int shndx,
     this->addralign_ = addralign;
 
   // If this is a SHF_MERGE section, we pass all the input sections to
-  // a Output_data_merge.
-  if ((shdr.get_sh_flags() & elfcpp::SHF_MERGE) != 0)
+  // a Output_data_merge.  We don't try to handle relocations for such
+  // a section.
+  if ((shdr.get_sh_flags() & elfcpp::SHF_MERGE) != 0
+      && reloc_shndx == 0)
     {
       if (this->add_merge_input_section(object, shndx, shdr.get_sh_flags(),
 					shdr.get_sh_entsize(),
 					addralign))
 	{
 	  // Tell the relocation routines that they need to call the
-	  // output_address method to determine the final address.
+	  // output_offset method to determine the final address.
 	  return -1;
 	}
     }
@@ -1176,6 +1198,57 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
   return true;
 }
 
+// Given an address OFFSET relative to the start of input section
+// SHNDX in OBJECT, return whether this address is being included in
+// the final link.  This should only be called if SHNDX in OBJECT has
+// a special mapping.
+
+bool
+Output_section::is_input_address_mapped(const Relobj* object,
+					unsigned int shndx,
+					off_t offset) const
+{
+  gold_assert(object->is_section_specially_mapped(shndx));
+
+  for (Input_section_list::const_iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      off_t output_offset;
+      if (p->output_offset(object, shndx, offset, &output_offset))
+	return output_offset != -1;
+    }
+
+  // By default we assume that the address is mapped.  This should
+  // only be called after we have passed all sections to Layout.  At
+  // that point we should know what we are discarding.
+  return true;
+}
+
+// Given an address OFFSET relative to the start of input section
+// SHNDX in object OBJECT, return the output offset relative to the
+// start of the section.  This should only be called if SHNDX in
+// OBJECT has a special mapping.
+
+off_t
+Output_section::output_offset(const Relobj* object, unsigned int shndx,
+			      off_t offset) const
+{
+  gold_assert(object->is_section_specially_mapped(shndx));
+  // This can only be called meaningfully when layout is complete.
+  gold_assert(Output_data::is_layout_complete());
+
+  for (Input_section_list::const_iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      off_t output_offset;
+      if (p->output_offset(object, shndx, offset, &output_offset))
+	return output_offset;
+    }
+  gold_unreachable();
+}
+
 // Return the output virtual address of OFFSET relative to the start
 // of input section SHNDX in object OBJECT.
 
@@ -1183,15 +1256,23 @@ uint64_t
 Output_section::output_address(const Relobj* object, unsigned int shndx,
 			       off_t offset) const
 {
+  gold_assert(object->is_section_specially_mapped(shndx));
+  // This can only be called meaningfully when layout is complete.
+  gold_assert(Output_data::is_layout_complete());
+
   uint64_t addr = this->address() + this->first_input_offset_;
   for (Input_section_list::const_iterator p = this->input_sections_.begin();
        p != this->input_sections_.end();
        ++p)
     {
       addr = align_address(addr, p->addralign());
-      uint64_t output;
-      if (p->output_address(object, shndx, offset, addr, &output))
-	return output;
+      off_t output_offset;
+      if (p->output_offset(object, shndx, offset, &output_offset))
+	{
+	  if (output_offset == -1)
+	    return -1U;
+	  return addr + output_offset;
+	}
       addr += p->data_size();
     }
 
@@ -1739,40 +1820,44 @@ Output_file::close()
 template
 off_t
 Output_section::add_input_section<32, false>(
-    Relobj* object,
+    Sized_relobj<32, false>* object,
     unsigned int shndx,
     const char* secname,
-    const elfcpp::Shdr<32, false>& shdr);
+    const elfcpp::Shdr<32, false>& shdr,
+    unsigned int reloc_shndx);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
 template
 off_t
 Output_section::add_input_section<32, true>(
-    Relobj* object,
+    Sized_relobj<32, true>* object,
     unsigned int shndx,
     const char* secname,
-    const elfcpp::Shdr<32, true>& shdr);
+    const elfcpp::Shdr<32, true>& shdr,
+    unsigned int reloc_shndx);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
 template
 off_t
 Output_section::add_input_section<64, false>(
-    Relobj* object,
+    Sized_relobj<64, false>* object,
     unsigned int shndx,
     const char* secname,
-    const elfcpp::Shdr<64, false>& shdr);
+    const elfcpp::Shdr<64, false>& shdr,
+    unsigned int reloc_shndx);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
 template
 off_t
 Output_section::add_input_section<64, true>(
-    Relobj* object,
+    Sized_relobj<64, true>* object,
     unsigned int shndx,
     const char* secname,
-    const elfcpp::Shdr<64, true>& shdr);
+    const elfcpp::Shdr<64, true>& shdr,
+    unsigned int reloc_shndx);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

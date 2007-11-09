@@ -43,11 +43,12 @@ class Object;
 template<int size, bool big_endian>
 class Sized_relobj;
 template<int size, bool big_endian>
-struct Relocate_info;
+class Relocate_info;
 class Symbol;
 template<int size>
 class Sized_symbol;
 class Symbol_table;
+class Output_section;
 
 // The abstract class for target specific handling.
 
@@ -228,9 +229,11 @@ class Sized_target : public Target
   // relocs apply to.  SH_TYPE is the type of the relocation section,
   // SHT_REL or SHT_RELA.  PRELOCS points to the relocation data.
   // RELOC_COUNT is the number of relocs.  LOCAL_SYMBOL_COUNT is the
-  // number of local symbols.  PLOCAL_SYMBOLS points to the local
-  // symbol data from OBJECT.  GLOBAL_SYMBOLS is the array of pointers
-  // to the global symbol table from OBJECT.
+  // number of local symbols.  OUTPUT_SECTION is the output section.
+  // NEEDS_SPECIAL_OFFSET_HANDLING is true if offsets to the output
+  // sections are not mapped as usual.  PLOCAL_SYMBOLS points to the
+  // local symbol data from OBJECT.  GLOBAL_SYMBOLS is the array of
+  // pointers to the global symbol table from OBJECT.
   virtual void
   scan_relocs(const General_options& options,
 	      Symbol_table* symtab,
@@ -240,21 +243,29 @@ class Sized_target : public Target
 	      unsigned int sh_type,
 	      const unsigned char* prelocs,
 	      size_t reloc_count,
+	      Output_section* output_section,
+	      bool needs_special_offset_handling,
 	      size_t local_symbol_count,
-	      const unsigned char* plocal_symbols,
-	      Symbol** global_symbols) = 0;
+	      const unsigned char* plocal_symbols) = 0;
 
   // Relocate section data.  SH_TYPE is the type of the relocation
   // section, SHT_REL or SHT_RELA.  PRELOCS points to the relocation
-  // information.  RELOC_COUNT is the number of relocs.  VIEW is a
-  // view into the output file holding the section contents,
-  // VIEW_ADDRESS is the virtual address of the view, and VIEW_SIZE is
-  // the size of the view.
+  // information.  RELOC_COUNT is the number of relocs.
+  // OUTPUT_SECTION is the output section.
+  // NEEDS_SPECIAL_OFFSET_HANDLING is true if offsets must be mapped
+  // to correspond to the output section.  VIEW is a view into the
+  // output file holding the section contents, VIEW_ADDRESS is the
+  // virtual address of the view, and VIEW_SIZE is the size of the
+  // view.  If NEEDS_SPECIAL_OFFSET_HANDLING is true, the VIEW_xx
+  // parameters refer to the complete output section data, not just
+  // the input section data.
   virtual void
   relocate_section(const Relocate_info<size, big_endian>*,
 		   unsigned int sh_type,
 		   const unsigned char* prelocs,
 		   size_t reloc_count,
+		   Output_section* output_section,
+		   bool needs_special_offset_handling,
 		   unsigned char* view,
 		   typename elfcpp::Elf_types<size>::Elf_Addr view_address,
 		   off_t view_size) = 0;

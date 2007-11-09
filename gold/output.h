@@ -29,7 +29,6 @@
 #include "elfcpp.h"
 #include "layout.h"
 #include "reloc-types.h"
-#include "parameters.h"
 
 namespace gold
 {
@@ -124,6 +123,11 @@ class Output_data
   layout_complete()
   { Output_data::sizes_are_fixed = true; }
 
+  // Used to check that layout has been done.
+  static bool
+  is_layout_complete()
+  { return Output_data::sizes_are_fixed; }
+
  protected:
   // Functions that child classes may or in some cases must implement.
 
@@ -179,9 +183,13 @@ class Output_data
     this->data_size_ = data_size;
   }
 
-  // Return default alignment for a size--32 or 64.
+  // Return default alignment for the target size.
   static uint64_t
-  default_alignment(int size);
+  default_alignment();
+
+  // Return default alignment for a specified size--32 or 64.
+  static uint64_t
+  default_alignment_for_size(int size);
 
  private:
   Output_data(const Output_data&);
@@ -216,7 +224,7 @@ class Output_section_headers : public Output_data
   // Return the required alignment.
   uint64_t
   do_addralign() const
-  { return Output_data::default_alignment(parameters->get_size()); }
+  { return Output_data::default_alignment(); }
 
  private:
   // Write the data to the file with the right size and endianness.
@@ -244,7 +252,7 @@ class Output_segment_headers : public Output_data
   // Return the required alignment.
   uint64_t
   do_addralign() const
-  { return Output_data::default_alignment(parameters->get_size()); }
+  { return Output_data::default_alignment(); }
 
  private:
   // Write the data to the file with the right size and endianness.
@@ -276,7 +284,7 @@ class Output_file_header : public Output_data
   // Return the required alignment.
   uint64_t
   do_addralign() const
-  { return Output_data::default_alignment(parameters->get_size()); }
+  { return Output_data::default_alignment(); }
 
   // Set the address and offset--we only implement this for error
   // checking.
@@ -330,17 +338,14 @@ class Output_section_data : public Output_data
 
   // Given an input OBJECT, an input section index SHNDX within that
   // object, and an OFFSET relative to the start of that input
-  // section, return whether or not the output address is known.
-  // OUTPUT_SECTION_ADDRESS is the address of the output section which
-  // this is a part of.  If this function returns true, it sets
-  // *POUTPUT to the output address.
+  // section, return whether or not the corresponding offset within
+  // the output section is known.  If this function returns true, it
+  // sets *POUTPUT to the output offset.  The value -1 indicates that
+  // this input offset is being discarded.
   virtual bool
-  output_address(const Relobj* object, unsigned int shndx, off_t offset,
-		 uint64_t output_section_address, uint64_t *poutput) const
-  {
-    return this->do_output_address(object, shndx, offset,
-				   output_section_address, poutput);
-  }
+  output_offset(const Relobj* object, unsigned int shndx, off_t offset,
+		off_t *poutput) const
+  { return this->do_output_offset(object, shndx, offset, poutput); }
 
  protected:
   // The child class must implement do_write.
@@ -357,10 +362,9 @@ class Output_section_data : public Output_data
   do_add_input_section(Relobj*, unsigned int)
   { gold_unreachable(); }
 
-  // The child class may implement output_address.
+  // The child class may implement output_offset.
   virtual bool
-  do_output_address(const Relobj*, unsigned int, off_t, uint64_t,
-		    uint64_t*) const
+  do_output_offset(const Relobj*, unsigned int, off_t, off_t*) const
   { return false; }
 
   // Return the required alignment.
@@ -736,7 +740,7 @@ class Output_data_reloc_base : public Output_section_data
 
   // Construct the section.
   Output_data_reloc_base()
-    : Output_section_data(Output_data::default_alignment(size))
+    : Output_section_data(Output_data::default_alignment_for_size(size))
   { }
 
   // Write out the data.
@@ -901,7 +905,8 @@ class Output_data_got : public Output_section_data
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Valtype;
 
   Output_data_got()
-    : Output_section_data(Output_data::default_alignment(size)), entries_()
+    : Output_section_data(Output_data::default_alignment_for_size(size)),
+      entries_()
   { }
 
   // Add an entry for a global symbol to the GOT.  Return true if this
@@ -1013,8 +1018,7 @@ class Output_data_dynamic : public Output_section_data
 {
  public:
   Output_data_dynamic(Stringpool* pool)
-    : Output_section_data(Output_data::default_alignment(
-			   parameters->get_size())),
+    : Output_section_data(Output_data::default_alignment()),
       entries_(), pool_(pool)
   { }
 
@@ -1155,11 +1159,15 @@ class Output_section : public Output_data
   virtual ~Output_section();
 
   // Add a new input section SHNDX, named NAME, with header SHDR, from
-  // object OBJECT.  Return the offset within the output section.
+  // object OBJECT.  RELOC_SHNDX is the index of a relocation section
+  // which applies to this section, or 0 if none, or -1U if more than
+  // one.  Return the offset within the output section.
   template<int size, bool big_endian>
   off_t
-  add_input_section(Relobj* object, unsigned int shndx, const char *name,
-		    const elfcpp::Shdr<size, big_endian>& shdr);
+  add_input_section(Sized_relobj<size, big_endian>* object, unsigned int shndx,
+		    const char *name,
+		    const elfcpp::Shdr<size, big_endian>& shdr,
+		    unsigned int reloc_shndx);
 
   // Add generated data POSD to this output section.
   void
@@ -1326,6 +1334,29 @@ class Output_section : public Output_data
     this->dynsym_index_ = index;
   }
 
+  // Return whether this section should be written after all the input
+  // sections are complete.
+  bool
+  after_input_sections() const
+  { return this->after_input_sections_; }
+
+  // Record that this section should be written after all the input
+  // sections are complete.
+  void
+  set_after_input_sections()
+  { this->after_input_sections_ = true; }
+
+  // Return whether the offset OFFSET in the input section SHNDX in
+  // object OBJECT is being included in the link.
+  bool
+  is_input_address_mapped(const Relobj* object, unsigned int shndx,
+			  off_t offset) const;
+
+  // Return the offset within the output section of OFFSET relative to
+  // the start of input section SHNDX in object OBJECT.
+  off_t
+  output_offset(const Relobj* object, unsigned int shndx, off_t offset) const;
+
   // Return the output virtual address of OFFSET relative to the start
   // of input section SHNDX in object OBJECT.
   uint64_t
@@ -1477,13 +1508,12 @@ class Output_section : public Output_data
 
     // Given an input OBJECT, an input section index SHNDX within that
     // object, and an OFFSET relative to the start of that input
-    // section, return whether or not the output address is known.
-    // OUTPUT_SECTION_ADDRESS is the address of the output section
-    // which this is a part of.  If this function returns true, it
-    // sets *POUTPUT to the output address.
+    // section, return whether or not the output offset is known.  If
+    // this function returns true, it sets *POUTPUT to the output
+    // offset.
     bool
-    output_address(const Relobj* object, unsigned int shndx, off_t offset,
-		   uint64_t output_section_address, uint64_t *poutput) const;
+    output_offset(const Relobj* object, unsigned int shndx, off_t offset,
+		  off_t *poutput) const;
 
     // Write out the data.  This does nothing for an input section.
     void
@@ -1648,6 +1678,9 @@ class Output_section : public Output_data
   // Whether the link field of this output section should point to the
   // dynamic symbol table.
   bool should_link_to_dynsym_ : 1;
+  // Whether this section should be written after all the input
+  // sections are complete.
+  bool after_input_sections_ : 1;
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
@@ -1845,6 +1878,28 @@ class Output_file
   // buffer to the file, passing in the offset and the size.
   void
   write_output_view(off_t, off_t, unsigned char*)
+  { }
+
+  // Get a read/write buffer.  This is used when we want to write part
+  // of the file, read it in, and write it again.
+  unsigned char*
+  get_input_output_view(off_t start, off_t size)
+  { return this->get_output_view(start, size); }
+
+  // Write a read/write buffer back to the file.
+  void
+  write_input_output_view(off_t, off_t, unsigned char*)
+  { }
+
+  // Get a read buffer.  This is used when we just want to read part
+  // of the file back it in.
+  const unsigned char*
+  get_input_view(off_t start, off_t size)
+  { return this->get_output_view(start, size); }
+
+  // Release a read bfufer.
+  void
+  free_input_view(off_t, off_t, const unsigned char*)
   { }
 
  private:

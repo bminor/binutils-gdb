@@ -30,12 +30,14 @@
 namespace gold
 {
 
+// Class Merge_map::Merge_key_less.
+
 // Sort the entries in a merge mapping.  The key is an input object, a
 // section index in that object, and an offset in that section.
 
 bool
-Output_merge_base::Merge_key_less::operator()(const Merge_key& mk1,
-					      const Merge_key& mk2) const
+Merge_map::Merge_key_less::operator()(const Merge_key& mk1,
+				      const Merge_key& mk2) const
 {
   // The order of different objects and different sections doesn't
   // matter.  We want to get consistent results across links so we
@@ -55,43 +57,44 @@ Output_merge_base::Merge_key_less::operator()(const Merge_key& mk1,
   return mk1.offset < mk2.offset;
 }
 
-// Add a mapping from an OFFSET in input section SHNDX in object
-// OBJECT to an OUTPUT_OFFSET in a merged output section.  This
-// manages the mapping used to resolve relocations against merged
-// sections.
+// Class Merge_map.
+
+// Add a mapping for the bytes from OFFSET to OFFSET + LENGTH in input
+// section SHNDX in object OBJECT to an OUTPUT_OFFSET in a merged
+// output section.
 
 void
-Output_merge_base::add_mapping(Relobj* object, unsigned int shndx,
-			       off_t offset, off_t output_offset)
+Merge_map::add_mapping(Relobj* object, unsigned int shndx,
+		       off_t offset, off_t length, off_t output_offset)
 {
   Merge_key mk;
   mk.object = object;
   mk.shndx = shndx;
   mk.offset = offset;
-  std::pair<Merge_map::iterator, bool> ins =
-    this->merge_map_.insert(std::make_pair(mk, output_offset));
+
+  Merge_value mv;
+  mv.length = length;
+  mv.output_offset = output_offset;
+
+  std::pair<Merge_mapping::iterator, bool> ins =
+    this->merge_map_.insert(std::make_pair(mk, mv));
   gold_assert(ins.second);
 }
 
-// Return the output address for an input address.  The input address
-// is at offset OFFSET in section SHNDX in OBJECT.
-// OUTPUT_SECTION_ADDRESS is the address of the output section.  If we
-// know the address, set *POUTPUT and return true.  Otherwise return
-// false.
+// Return the output offset for an input address.  The input address
+// is at offset OFFSET in section SHNDX in OBJECT.  This sets
+// *OUTPUT_OFFSET to the offset in the output section.  This returns
+// true if the mapping is known, false otherwise.
 
 bool
-Output_merge_base::do_output_address(const Relobj* object, unsigned int shndx,
-				     off_t offset,
-				     uint64_t output_section_address,
-				     uint64_t* poutput) const
+Merge_map::get_output_offset(const Relobj* object, unsigned int shndx,
+			     off_t offset, off_t* output_offset) const
 {
-  gold_assert(output_section_address == this->address());
-
   Merge_key mk;
   mk.object = object;
   mk.shndx = shndx;
   mk.offset = offset;
-  Merge_map::const_iterator p = this->merge_map_.lower_bound(mk);
+  Merge_mapping::const_iterator p = this->merge_map_.lower_bound(mk);
 
   // If MK is not in the map, lower_bound returns the next iterator
   // larger than it.
@@ -108,11 +111,31 @@ Output_merge_base::do_output_address(const Relobj* object, unsigned int shndx,
   if (p->first.object != object || p->first.shndx != shndx)
     return false;
 
-  // Any input section is fully mapped: we don't need to know the size
-  // of the range starting at P->FIRST.OFFSET.
-  *poutput = output_section_address + p->second + (offset - p->first.offset);
+  if (offset - p->first.offset >= p->second.length)
+    return false;
+
+  *output_offset = p->second.output_offset;
+  if (*output_offset != -1)
+    *output_offset += (offset - p->first.offset);
   return true;
 }
+
+// Class Output_merge_base.
+
+// Return the output offset for an input offset.  The input address is
+// at offset OFFSET in section SHNDX in OBJECT.  If we know the
+// offset, set *POUTPUT and return true.  Otherwise return false.
+
+bool
+Output_merge_base::do_output_offset(const Relobj* object,
+				    unsigned int shndx,
+				    off_t offset,
+				    off_t* poutput) const
+{
+  return this->merge_map_.get_output_offset(object, shndx, offset, poutput);
+}
+
+// Class Output_merge_data.
 
 // Compute the hash code for a fixed-size constant.
 
@@ -214,7 +237,7 @@ Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
 	}
 
       // Record the offset of this constant in the output section.
-      this->add_mapping(object, shndx, i, k);
+      this->add_mapping(object, shndx, i, entsize, k);
     }
 
   return true;
@@ -240,6 +263,8 @@ Output_merge_data::do_write(Output_file* of)
 {
   of->write(this->offset(), this->p_, this->len_);
 }
+
+// Class Output_merge_string.
 
 // Add an input section to a merged string section.
 
@@ -279,10 +304,12 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
       const Char_type* str = this->stringpool_.add(p, true, NULL);
 
-      this->merged_strings_.push_back(Merged_string(object, shndx, i, str));
+      off_t bytelen_with_null = (plen + 1) * sizeof(Char_type);
+      this->merged_strings_.push_back(Merged_string(object, shndx, i, str,
+						    bytelen_with_null));
 
       p += plen + 1;
-      i += (plen + 1) * sizeof(Char_type);
+      i += bytelen_with_null;
     }
 
   return true;
@@ -302,7 +329,7 @@ Output_merge_string<Char_type>::do_set_address(uint64_t, off_t)
 	 this->merged_strings_.begin();
        p != this->merged_strings_.end();
        ++p)
-    this->add_mapping(p->object, p->shndx, p->offset,
+    this->add_mapping(p->object, p->shndx, p->offset, p->length,
 		      this->stringpool_.get_offset(p->string));
 
   this->set_data_size(this->stringpool_.get_strtab_size());

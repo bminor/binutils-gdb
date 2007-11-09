@@ -83,9 +83,10 @@ class Target_x86_64 : public Sized_target<64, false>
 	      unsigned int sh_type,
 	      const unsigned char* prelocs,
 	      size_t reloc_count,
+	      Output_section* output_section,
+	      bool needs_special_offset_handling,
 	      size_t local_symbol_count,
-	      const unsigned char* plocal_symbols,
-	      Symbol** global_symbols);
+	      const unsigned char* plocal_symbols);
 
   // Finalize the sections.
   void
@@ -102,6 +103,8 @@ class Target_x86_64 : public Sized_target<64, false>
 		   unsigned int sh_type,
 		   const unsigned char* prelocs,
 		   size_t reloc_count,
+		   Output_section* output_section,
+		   bool needs_special_offset_handling,
 		   unsigned char* view,
 		   elfcpp::Elf_types<64>::Elf_Addr view_address,
 		   off_t view_size);
@@ -1128,9 +1131,10 @@ Target_x86_64::scan_relocs(const General_options& options,
                            unsigned int sh_type,
                            const unsigned char* prelocs,
                            size_t reloc_count,
+			   Output_section* output_section,
+			   bool needs_special_offset_handling,
                            size_t local_symbol_count,
-                           const unsigned char* plocal_symbols,
-                           Symbol** global_symbols)
+                           const unsigned char* plocal_symbols)
 {
   if (sh_type == elfcpp::SHT_REL)
     {
@@ -1149,9 +1153,10 @@ Target_x86_64::scan_relocs(const General_options& options,
     data_shndx,
     prelocs,
     reloc_count,
+    output_section,
+    needs_special_offset_handling,
     local_symbol_count,
-    plocal_symbols,
-    global_symbols);
+    plocal_symbols);
 }
 
 // Finalize the sections.
@@ -1670,6 +1675,8 @@ Target_x86_64::relocate_section(const Relocate_info<64, false>* relinfo,
                                 unsigned int sh_type,
                                 const unsigned char* prelocs,
                                 size_t reloc_count,
+				Output_section* output_section,
+				bool needs_special_offset_handling,
                                 unsigned char* view,
                                 elfcpp::Elf_types<64>::Elf_Addr address,
                                 off_t view_size)
@@ -1682,6 +1689,8 @@ Target_x86_64::relocate_section(const Relocate_info<64, false>* relinfo,
     this,
     prelocs,
     reloc_count,
+    output_section,
+    needs_special_offset_handling,
     view,
     address,
     view_size);

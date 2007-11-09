@@ -521,7 +521,7 @@ Symbol_table::add_from_relobj(
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
-    Symbol** sympointers)
+    typename Sized_relobj<size, big_endian>::Symbols* sympointers)
 {
   gold_assert(size == relobj->target()->get_size());
   gold_assert(size == parameters->get_size());
@@ -592,7 +592,7 @@ Symbol_table::add_from_relobj(
 				      def, *psym);
 	}
 
-      *sympointers++ = res;
+      (*sympointers)[i] = res;
     }
 }
 
@@ -1870,7 +1870,7 @@ Symbol_table::add_from_relobj<32, false>(
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
-    Symbol** sympointers);
+    Sized_relobj<32, true>::Symbols* sympointers);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -1882,7 +1882,7 @@ Symbol_table::add_from_relobj<32, true>(
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
-    Symbol** sympointers);
+    Sized_relobj<32, false>::Symbols* sympointers);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -1894,7 +1894,7 @@ Symbol_table::add_from_relobj<64, false>(
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
-    Symbol** sympointers);
+    Sized_relobj<64, true>::Symbols* sympointers);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -1906,7 +1906,7 @@ Symbol_table::add_from_relobj<64, true>(
     size_t count,
     const char* sym_names,
     size_t sym_name_size,
-    Symbol** sympointers);
+    Sized_relobj<64, false>::Symbols* sympointers);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

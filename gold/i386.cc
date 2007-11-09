@@ -70,9 +70,10 @@ class Target_i386 : public Sized_target<32, false>
 	      unsigned int sh_type,
 	      const unsigned char* prelocs,
 	      size_t reloc_count,
+	      Output_section* output_section,
+	      bool needs_special_offset_handling,
 	      size_t local_symbol_count,
-	      const unsigned char* plocal_symbols,
-	      Symbol** global_symbols);
+	      const unsigned char* plocal_symbols);
 
   // Finalize the sections.
   void
@@ -89,6 +90,8 @@ class Target_i386 : public Sized_target<32, false>
 		   unsigned int sh_type,
 		   const unsigned char* prelocs,
 		   size_t reloc_count,
+		   Output_section* output_section,
+		   bool needs_special_offset_handling,
 		   unsigned char* view,
 		   elfcpp::Elf_types<32>::Elf_Addr view_address,
 		   off_t view_size);
@@ -1157,9 +1160,10 @@ Target_i386::scan_relocs(const General_options& options,
 			 unsigned int sh_type,
 			 const unsigned char* prelocs,
 			 size_t reloc_count,
+			 Output_section* output_section,
+			 bool needs_special_offset_handling,
 			 size_t local_symbol_count,
-			 const unsigned char* plocal_symbols,
-			 Symbol** global_symbols)
+			 const unsigned char* plocal_symbols)
 {
   if (sh_type == elfcpp::SHT_RELA)
     {
@@ -1178,9 +1182,10 @@ Target_i386::scan_relocs(const General_options& options,
     data_shndx,
     prelocs,
     reloc_count,
+    output_section,
+    needs_special_offset_handling,
     local_symbol_count,
-    plocal_symbols,
-    global_symbols);
+    plocal_symbols);
 }
 
 // Finalize the sections.
@@ -1770,6 +1775,8 @@ Target_i386::relocate_section(const Relocate_info<32, false>* relinfo,
 			      unsigned int sh_type,
 			      const unsigned char* prelocs,
 			      size_t reloc_count,
+			      Output_section* output_section,
+			      bool needs_special_offset_handling,
 			      unsigned char* view,
 			      elfcpp::Elf_types<32>::Elf_Addr address,
 			      off_t view_size)
@@ -1782,6 +1789,8 @@ Target_i386::relocate_section(const Relocate_info<32, false>* relinfo,
     this,
     prelocs,
     reloc_count,
+    output_section,
+    needs_special_offset_handling,
     view,
     address,
     view_size);

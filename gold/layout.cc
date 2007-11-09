@@ -101,7 +101,7 @@ is_prefix_of(const char* prefix, const char* str)
 
 template<int size, bool big_endian>
 bool
-Layout::include_section(Object*, const char* name,
+Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
 			const elfcpp::Shdr<size, big_endian>& shdr)
 {
   // Some section types are never linked.  Some are only linked when
@@ -202,13 +202,20 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
 }
 
 // Return the output section to use for input section SHNDX, with name
-// NAME, with header HEADER, from object OBJECT.  Set *OFF to the
-// offset of this input section without the output section.
+// NAME, with header HEADER, from object OBJECT.  RELOC_SHNDX is the
+// index of a relocation section which applies to this section, or 0
+// if none, or -1U if more than one.  RELOC_TYPE is the type of the
+// relocation section if there is one.  Set *OFF to the offset of this
+// input section without the output section.  Return NULL if the
+// section should be discarded.  Set *OFF to -1 if the section
+// contents should not be written directly to the output file, but
+// will instead receive special handling.
 
 template<int size, bool big_endian>
 Output_section*
-Layout::layout(Relobj* object, unsigned int shndx, const char* name,
-	       const elfcpp::Shdr<size, big_endian>& shdr, off_t* off)
+Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
+	       const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
+	       unsigned int reloc_shndx, unsigned int, off_t* off)
 {
   if (!this->include_section(object, name, shdr))
     return NULL;
@@ -231,38 +238,44 @@ Layout::layout(Relobj* object, unsigned int shndx, const char* name,
 						shdr.get_sh_type(),
 						shdr.get_sh_flags());
 
-  // Special GNU handling of sections named .eh_frame.
-  if (!parameters->output_is_object()
-      && strcmp(name, ".eh_frame") == 0
-      && shdr.get_sh_size() > 0
-      && shdr.get_sh_type() == elfcpp::SHT_PROGBITS
-      && shdr.get_sh_flags() == elfcpp::SHF_ALLOC)
-    {
-      this->layout_eh_frame(object, shndx, name, shdr, os, off);
-      return os;
-    }
-
   // FIXME: Handle SHF_LINK_ORDER somewhere.
 
-  *off = os->add_input_section(object, shndx, name, shdr);
+  *off = os->add_input_section(object, shndx, name, shdr, reloc_shndx);
 
   return os;
 }
 
-// Special GNU handling of sections named .eh_frame.  They will
-// normally hold exception frame data.
+// Special GNU handling of sections name .eh_frame.  They will
+// normally hold exception frame data as defined by the C++ ABI
+// (http://codesourcery.com/cxx-abi/).
 
 template<int size, bool big_endian>
-void
-Layout::layout_eh_frame(Relobj* object,
+Output_section*
+Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
+			const unsigned char* symbols,
+			off_t symbols_size,
+			const unsigned char* symbol_names,
+			off_t symbol_names_size,
 			unsigned int shndx,
-			const char* name,
 			const elfcpp::Shdr<size, big_endian>& shdr,
-			Output_section* os, off_t* off)
+			unsigned int reloc_shndx, unsigned int reloc_type,
+			off_t* off)
 {
+  gold_assert(shdr.get_sh_type() == elfcpp::SHT_PROGBITS);
+  gold_assert(shdr.get_sh_flags() == elfcpp::SHF_ALLOC);
+
+  Stringpool::Key name_key;
+  const char* name = this->namepool_.add(".eh_frame", false, &name_key);
+
+  Output_section* os = this->get_output_section(name, name_key,
+						elfcpp::SHT_PROGBITS,
+						elfcpp::SHF_ALLOC);
+
   if (this->eh_frame_section_ == NULL)
     {
       this->eh_frame_section_ = os;
+      this->eh_frame_data_ = new Eh_frame();
+      os->add_output_section_data(this->eh_frame_data_);
 
       if (this->options_.create_eh_frame_hdr())
 	{
@@ -275,19 +288,39 @@ Layout::layout_eh_frame(Relobj* object,
 				     elfcpp::SHT_PROGBITS,
 				     elfcpp::SHF_ALLOC);
 
-	  Eh_frame_hdr* hdr_posd = new Eh_frame_hdr(os);
+	  Eh_frame_hdr* hdr_posd = new Eh_frame_hdr(os, this->eh_frame_data_);
 	  hdr_os->add_output_section_data(hdr_posd);
+
+	  hdr_os->set_after_input_sections();
 
 	  Output_segment* hdr_oseg =
 	    new Output_segment(elfcpp::PT_GNU_EH_FRAME, elfcpp::PF_R);
 	  this->segment_list_.push_back(hdr_oseg);
 	  hdr_oseg->add_output_section(hdr_os, elfcpp::PF_R);
+
+	  this->eh_frame_data_->set_eh_frame_hdr(hdr_posd);
 	}
     }
 
   gold_assert(this->eh_frame_section_ == os);
 
-  *off = os->add_input_section(object, shndx, name, shdr);
+  if (this->eh_frame_data_->add_ehframe_input_section(object,
+						      symbols,
+						      symbols_size,
+						      symbol_names,
+						      symbol_names_size,
+						      shndx,
+						      reloc_shndx,
+						      reloc_type))
+    *off = -1;
+  else
+    {
+      // We couldn't handle this .eh_frame section for some reason.
+      // Add it as a normal section.
+      *off = os->add_input_section(object, shndx, name, shdr, reloc_shndx);
+    }
+
+  return os;
 }
 
 // Add POSD to an output section using NAME, TYPE, and FLAGS.
@@ -1724,6 +1757,22 @@ Layout::add_comdat(const char* signature, bool group)
     }
 }
 
+// Write out the Output_sections.  Most won't have anything to write,
+// since most of the data will come from input sections which are
+// handled elsewhere.  But some Output_sections do have Output_data.
+
+void
+Layout::write_output_sections(Output_file* of) const
+{
+  for (Section_list::const_iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      if (!(*p)->after_input_sections())
+	(*p)->write(of);
+    }
+}
+
 // Write out data not associated with a section or the symbol table.
 
 void
@@ -1764,20 +1813,70 @@ Layout::write_data(const Symbol_table* symtab, Output_file* of) const
 	}
     }
 
-  // Write out the Output_sections.  Most won't have anything to
-  // write, since most of the data will come from input sections which
-  // are handled elsewhere.  But some Output_sections do have
-  // Output_data.
-  for (Section_list::const_iterator p = this->section_list_.begin();
-       p != this->section_list_.end();
-       ++p)
-    (*p)->write(of);
-
   // Write out the Output_data which are not in an Output_section.
   for (Data_list::const_iterator p = this->special_output_list_.begin();
        p != this->special_output_list_.end();
        ++p)
     (*p)->write(of);
+}
+
+// Write out the Output_sections which can only be written after the
+// input sections are complete.
+
+void
+Layout::write_sections_after_input_sections(Output_file* of) const
+{
+  for (Section_list::const_iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      if ((*p)->after_input_sections())
+	(*p)->write(of);
+    }
+}
+
+// Write_sections_task methods.
+
+// We can always run this task.
+
+Task::Is_runnable_type
+Write_sections_task::is_runnable(Workqueue*)
+{
+  return IS_RUNNABLE;
+}
+
+// We need to unlock both OUTPUT_SECTIONS_BLOCKER and FINAL_BLOCKER
+// when finished.
+
+class Write_sections_task::Write_sections_locker : public Task_locker
+{
+ public:
+  Write_sections_locker(Task_token& output_sections_blocker,
+			Task_token& final_blocker,
+			Workqueue* workqueue)
+    : output_sections_block_(output_sections_blocker, workqueue),
+      final_block_(final_blocker, workqueue)
+  { }
+
+ private:
+  Task_block_token output_sections_block_;
+  Task_block_token final_block_;
+};
+
+Task_locker*
+Write_sections_task::locks(Workqueue* workqueue)
+{
+  return new Write_sections_locker(*this->output_sections_blocker_,
+				   *this->final_blocker_,
+				   workqueue);
+}
+
+// Run the task--write out the data.
+
+void
+Write_sections_task::run(Workqueue*)
+{
+  this->layout_->write_output_sections(this->of_);
 }
 
 // Write_data_task methods.
@@ -1833,6 +1932,34 @@ Write_symbols_task::run(Workqueue*)
 			       this->of_);
 }
 
+// Write_after_input_sections_task methods.
+
+// We can only run this task after the input sections have completed.
+
+Task::Is_runnable_type
+Write_after_input_sections_task::is_runnable(Workqueue*)
+{
+  if (this->input_sections_blocker_->is_blocked())
+    return IS_BLOCKED;
+  return IS_RUNNABLE;
+}
+
+// We need to unlock FINAL_BLOCKER when finished.
+
+Task_locker*
+Write_after_input_sections_task::locks(Workqueue* workqueue)
+{
+  return new Task_locker_block(*this->final_blocker_, workqueue);
+}
+
+// Run the task.
+
+void
+Write_after_input_sections_task::run(Workqueue*)
+{
+  this->layout_->write_sections_after_input_sections(this->of_);
+}
+
 // Close_task_runner methods.
 
 // Run the task--close the file.
@@ -1849,30 +1976,97 @@ Close_task_runner::run(Workqueue*)
 #ifdef HAVE_TARGET_32_LITTLE
 template
 Output_section*
-Layout::layout<32, false>(Relobj* object, unsigned int shndx, const char* name,
-			  const elfcpp::Shdr<32, false>& shdr, off_t*);
+Layout::layout<32, false>(Sized_relobj<32, false>* object, unsigned int shndx,
+			  const char* name,
+			  const elfcpp::Shdr<32, false>& shdr,
+			  unsigned int, unsigned int, off_t*);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
 template
 Output_section*
-Layout::layout<32, true>(Relobj* object, unsigned int shndx, const char* name,
-			 const elfcpp::Shdr<32, true>& shdr, off_t*);
+Layout::layout<32, true>(Sized_relobj<32, true>* object, unsigned int shndx,
+			 const char* name,
+			 const elfcpp::Shdr<32, true>& shdr,
+			 unsigned int, unsigned int, off_t*);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
 template
 Output_section*
-Layout::layout<64, false>(Relobj* object, unsigned int shndx, const char* name,
-			  const elfcpp::Shdr<64, false>& shdr, off_t*);
+Layout::layout<64, false>(Sized_relobj<64, false>* object, unsigned int shndx,
+			  const char* name,
+			  const elfcpp::Shdr<64, false>& shdr,
+			  unsigned int, unsigned int, off_t*);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
 template
 Output_section*
-Layout::layout<64, true>(Relobj* object, unsigned int shndx, const char* name,
-			 const elfcpp::Shdr<64, true>& shdr, off_t*);
+Layout::layout<64, true>(Sized_relobj<64, true>* object, unsigned int shndx,
+			 const char* name,
+			 const elfcpp::Shdr<64, true>& shdr,
+			 unsigned int, unsigned int, off_t*);
 #endif
 
+#ifdef HAVE_TARGET_32_LITTLE
+template
+Output_section*
+Layout::layout_eh_frame<32, false>(Sized_relobj<32, false>* object,
+				   const unsigned char* symbols,
+				   off_t symbols_size,
+				   const unsigned char* symbol_names,
+				   off_t symbol_names_size,
+				   unsigned int shndx,
+				   const elfcpp::Shdr<32, false>& shdr,
+				   unsigned int reloc_shndx,
+				   unsigned int reloc_type,
+				   off_t* off);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+Output_section*
+Layout::layout_eh_frame<32, true>(Sized_relobj<32, true>* object,
+				   const unsigned char* symbols,
+				   off_t symbols_size,
+				  const unsigned char* symbol_names,
+				  off_t symbol_names_size,
+				  unsigned int shndx,
+				  const elfcpp::Shdr<32, true>& shdr,
+				  unsigned int reloc_shndx,
+				  unsigned int reloc_type,
+				  off_t* off);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+Output_section*
+Layout::layout_eh_frame<64, false>(Sized_relobj<64, false>* object,
+				   const unsigned char* symbols,
+				   off_t symbols_size,
+				   const unsigned char* symbol_names,
+				   off_t symbol_names_size,
+				   unsigned int shndx,
+				   const elfcpp::Shdr<64, false>& shdr,
+				   unsigned int reloc_shndx,
+				   unsigned int reloc_type,
+				   off_t* off);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+Output_section*
+Layout::layout_eh_frame<64, true>(Sized_relobj<64, true>* object,
+				   const unsigned char* symbols,
+				   off_t symbols_size,
+				  const unsigned char* symbol_names,
+				  off_t symbol_names_size,
+				  unsigned int shndx,
+				  const elfcpp::Shdr<64, true>& shdr,
+				  unsigned int reloc_shndx,
+				  unsigned int reloc_type,
+				  off_t* off);
+#endif
 
 } // End namespace gold.

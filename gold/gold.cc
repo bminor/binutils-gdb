@@ -250,6 +250,14 @@ queue_final_tasks(const General_options& options,
     thread_count = input_objects->number_of_input_objects();
   workqueue->set_thread_count(thread_count);
 
+  // Use a blocker to wait until all the input sections have been
+  // written out.
+  Task_token* input_sections_blocker = new Task_token();
+
+  // Use a blocker to block any objects which have to wait for the
+  // output sections to complete before they can apply relocations.
+  Task_token* output_sections_blocker = new Task_token();
+
   // Use a blocker to block the final cleanup task.
   Task_token* final_blocker = new Task_token();
 
@@ -259,8 +267,11 @@ queue_final_tasks(const General_options& options,
        p != input_objects->relobj_end();
        ++p)
     {
+      input_sections_blocker->add_blocker();
       final_blocker->add_blocker();
       workqueue->queue(new Relocate_task(options, symtab, layout, *p, of,
+					 input_sections_blocker,
+					 output_sections_blocker,
 					 final_blocker));
     }
 
@@ -273,9 +284,22 @@ queue_final_tasks(const General_options& options,
 					  of,
 					  final_blocker));
 
+  // Queue a task to write out the output sections.
+  output_sections_blocker->add_blocker();
+  final_blocker->add_blocker();
+  workqueue->queue(new Write_sections_task(layout, of, output_sections_blocker,
+					   final_blocker));
+
   // Queue a task to write out everything else.
   final_blocker->add_blocker();
   workqueue->queue(new Write_data_task(layout, symtab, of, final_blocker));
+
+  // Queue a task to write out the output sections which depend on
+  // input sections.
+  final_blocker->add_blocker();
+  workqueue->queue(new Write_after_input_sections_task(layout, of,
+						       input_sections_blocker,
+						       final_blocker));
 
   // Queue a task to close the output file.  This will be blocked by
   // FINAL_BLOCKER.
