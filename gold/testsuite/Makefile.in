@@ -1169,9 +1169,9 @@ uninstall-am: uninstall-info-am
 
 
 @GCC_TRUE@debug_msg.o: debug_msg.cc
-@GCC_TRUE@	$(CXXCOMPILE) -O0 -c -w -o $@ $(srcdir)/debug_msg.cc
+@GCC_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
 @GCC_TRUE@debug_msg.err: debug_msg.o
-@GCC_TRUE@	if $(CXXLINK) -Bgcctestdir/ -o debug_msg debug_msg.o 2>debug_msg.err; \
+@GCC_TRUE@	if $(CXXLINK) -Bgcctestdir/ -o debug_msg debug_msg.o 2>$@; \
 @GCC_TRUE@	then \
 @GCC_TRUE@	  echo 2>&1 "Link of debug_msg.o should have failed"; \
 @GCC_TRUE@	  exit 1; \

@@ -115,9 +115,9 @@ object_unittest_SOURCES = object_unittest.cc
 if GCC
 
 debug_msg.o: debug_msg.cc
-	$(CXXCOMPILE) -O0 -c -w -o $@ $(srcdir)/debug_msg.cc
+	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
 debug_msg.err: debug_msg.o
-	if $(CXXLINK) -Bgcctestdir/ -o debug_msg debug_msg.o 2>debug_msg.err; \
+	if $(CXXLINK) -Bgcctestdir/ -o debug_msg debug_msg.o 2>$@; \
 	then \
 	  echo 2>&1 "Link of debug_msg.o should have failed"; \
 	  exit 1; \
