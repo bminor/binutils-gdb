@@ -143,6 +143,11 @@ class Elf_file
   Elf_Word
   section_link(unsigned int shndx);
 
+  // Return the info field of section SHNDX.
+  Elf_Word
+  section_info(unsigned int shndx);
+
+
  private:
   // Shared constructor code.
   void
@@ -346,6 +351,25 @@ Elf_file<size, big_endian, File>::section_link(unsigned int shndx)
 
   Ef_shdr shdr(v.data());
   return shdr.get_sh_link();
+}
+
+// Return the sh_info field of section SHNDX.
+
+template<int size, bool big_endian, typename File>
+Elf_Word
+Elf_file<size, big_endian, File>::section_info(unsigned int shndx)
+{
+  File* const file = this->file_;
+
+  if (shndx >= this->shnum())
+    file->error(_("section_info: bad shndx %u >= %u"),
+		shndx, this->shnum());
+
+  typename File::View v(file->view(this->section_header_offset(shndx),
+				   This::shdr_size));
+
+  Ef_shdr shdr(v.data());
+  return shdr.get_sh_info();
 }
 
 } // End namespace elfcpp.
