@@ -144,8 +144,7 @@ elf_vxworks_link_output_symbol_hook (struct bfd_link_info *info
   return TRUE;
 }
 
-
-/* Copy relocations into the output file.  Fixes up relocations againt PLT
+/* Copy relocations into the output file.  Fixes up relocations against PLT
    entries, then calls the generic routine.  */
 
 bfd_boolean
@@ -156,49 +155,55 @@ elf_vxworks_emit_relocs (bfd *output_bfd,
 			 struct elf_link_hash_entry **rel_hash)
 {
   const struct elf_backend_data *bed;
-  Elf_Internal_Rela *irela;
-  Elf_Internal_Rela *irelaend;
   int j;
 
   bed = get_elf_backend_data (output_bfd);
 
-  irela = internal_relocs;
-  irelaend = irela + (NUM_SHDR_ENTRIES (input_rel_hdr)
-		      * bed->s->int_rels_per_ext_rel);
-  while (irela < irelaend)
+  if (output_bfd->flags & (DYNAMIC|EXEC_P))
     {
-      if ((output_bfd->flags & (DYNAMIC|EXEC_P))
-	  && *rel_hash
-	  && (*rel_hash)->def_dynamic
-	  && !(*rel_hash)->def_regular
-	  && ((*rel_hash)->root.type == bfd_link_hash_defined
-	      || (*rel_hash)->root.type == bfd_link_hash_defweak)
-	  && (*rel_hash)->root.u.def.section->output_section != NULL)
-	{
-	  /* This is a relocation from an executable or shared library
-	     against a symbol in a different shared library.  We are
-	     creating a definition in the output file but it does not come
-	     from any of our normal (.o) files. ie. a PLT stub.
-	     Normally this would be a relocation against against SHN_UNDEF
-	     with the VMA of the PLT stub.  This upsets the VxWorks loader.
-	     Convert it to a section-relative relocation.
-	     This gets some other symbols (for instance .dynbss),
-	     but is conservatively correct.  */
-	  for (j = 0; j < bed->s->int_rels_per_ext_rel; j++)
-	    {
-	      asection *sec = (*rel_hash)->root.u.def.section;
-	      int this_idx = sec->output_section->target_index;
+      Elf_Internal_Rela *irela;
+      Elf_Internal_Rela *irelaend;
+      struct elf_link_hash_entry **hash_ptr;
 
-	      irela[j].r_info = ELF32_R_INFO (this_idx,
-		  ELF32_R_TYPE (irela[j].r_info));
-	      irela[j].r_addend += (*rel_hash)->root.u.def.value;
-	      irela[j].r_addend += sec->output_offset;
+      for (irela = internal_relocs,
+	     irelaend = irela + (NUM_SHDR_ENTRIES (input_rel_hdr)
+				 * bed->s->int_rels_per_ext_rel),
+	     hash_ptr = rel_hash;
+	   irela < irelaend;
+	   irela += bed->s->int_rels_per_ext_rel,
+	     hash_ptr++)
+	{
+	  if (*hash_ptr
+	      && (*hash_ptr)->def_dynamic
+	      && !(*hash_ptr)->def_regular
+	      && ((*hash_ptr)->root.type == bfd_link_hash_defined
+		  || (*hash_ptr)->root.type == bfd_link_hash_defweak)
+	      && (*hash_ptr)->root.u.def.section->output_section != NULL)
+	    {
+	      /* This is a relocation from an executable or shared
+	         library against a symbol in a different shared
+	         library.  We are creating a definition in the output
+	         file but it does not come from any of our normal (.o)
+	         files. ie. a PLT stub.  Normally this would be a
+	         relocation against against SHN_UNDEF with the VMA of
+	         the PLT stub.  This upsets the VxWorks loader.
+	         Convert it to a section-relative relocation.  This
+	         gets some other symbols (for instance .dynbss), but
+	         is conservatively correct.  */
+	      for (j = 0; j < bed->s->int_rels_per_ext_rel; j++)
+		{
+		  asection *sec = (*hash_ptr)->root.u.def.section;
+		  int this_idx = sec->output_section->target_index;
+		  
+		  irela[j].r_info
+		    = ELF32_R_INFO (this_idx, ELF32_R_TYPE (irela[j].r_info));
+		  irela[j].r_addend += (*hash_ptr)->root.u.def.value;
+		  irela[j].r_addend += sec->output_offset;
+		}
+	      /* Stop the generic routine adjusting this entry.  */
+	      *hash_ptr = NULL;
 	    }
-	  /* Stop the generic routine adjusting this entry.  */
-	  *rel_hash = NULL;
 	}
-      irela += bed->s->int_rels_per_ext_rel;
-      rel_hash++;
     }
   return _bfd_elf_link_output_relocs (output_bfd, input_section,
 				      input_rel_hdr, internal_relocs,
