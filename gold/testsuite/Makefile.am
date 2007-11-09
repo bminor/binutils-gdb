@@ -21,10 +21,16 @@ if THREADS
 THREADSLIB = -lpthread
 endif
 
+check_SCRIPTS = debug_msg.sh
+check_DATA =
+
 TESTS = object_unittest
-check_SCRIPTS = 
 
 if GCC
+
+TESTS += debug_msg.sh
+
+check_DATA += debug_msg.err
 
 if NATIVE_LINKER
 
@@ -107,6 +113,15 @@ check_PROGRAMS = object_unittest $(NATIVE_PROGS)
 object_unittest_SOURCES = object_unittest.cc
 
 if GCC
+
+debug_msg.o: debug_msg.cc
+	$(CXXCOMPILE) -O0 -c -w -o $@ $(srcdir)/debug_msg.cc
+debug_msg.err: debug_msg.o
+	if $(CXXLINK) -Bgcctestdir/ -o debug_msg debug_msg.o 2>debug_msg.err; \
+	then \
+	  echo 2>&1 "Link of debug_msg.o should have failed"; \
+	  exit 1; \
+	fi
 
 if NATIVE_LINKER
 
