@@ -50,6 +50,13 @@
 
 void (*deprecated_selected_frame_level_changed_hook) (int);
 
+/* The possible choices of "set print frame-arguments, and the value
+   of this setting.  */
+
+static const char *print_frame_arguments_choices[] =
+  {"all", "scalars", "none", NULL};
+static const char *print_frame_arguments = "all";
+
 /* Prototypes for local functions. */
 
 static void print_frame_local_vars (struct frame_info *, int,
@@ -145,6 +152,44 @@ print_frame_nameless_args (struct frame_info *frame, long start, int num,
       fprintf_filtered (stream, "%ld", arg_value);
       first = 0;
       start += sizeof (int);
+    }
+}
+
+/* Return non-zero if the debugger should print the value of the provided
+   symbol parameter (SYM).  */
+
+static int
+print_this_frame_argument_p (struct symbol *sym)
+{
+  struct type *type;
+  
+  /* If the user asked to print no argument at all, then obviously
+     do not print this argument.  */
+
+  if (strcmp (print_frame_arguments, "none") == 0)
+    return 0;
+
+  /* If the user asked to print all arguments, then we should print
+     that one.  */
+
+  if (strcmp (print_frame_arguments, "all") == 0)
+    return 1;
+
+  /* The user asked to print only the scalar arguments, so do not
+     print the non-scalar ones.  */
+
+  type = CHECK_TYPEDEF (SYMBOL_TYPE (sym));
+  switch (TYPE_CODE (type))
+    {
+      case TYPE_CODE_ARRAY:
+      case TYPE_CODE_STRUCT:
+      case TYPE_CODE_UNION:
+      case TYPE_CODE_SET:
+      case TYPE_CODE_STRING:
+      case TYPE_CODE_BITSTRING:
+        return 0;
+      default:
+        return 1;
     }
 }
 
@@ -304,23 +349,30 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	  annotate_arg_name_end ();
 	  ui_out_text (uiout, "=");
 
-	  /* Avoid value_print because it will deref ref parameters.
-	     We just want to print their addresses.  Print ??? for
-	     args whose address we do not know.  We pass 2 as
-	     "recurse" to val_print because our standard indentation
-	     here is 4 spaces, and val_print indents 2 for each
-	     recurse.  */
-	  val = read_var_value (sym, frame);
+          if (print_this_frame_argument_p (sym))
+            {
+	      /* Avoid value_print because it will deref ref parameters.
+		 We just want to print their addresses.  Print ??? for
+		 args whose address we do not know.  We pass 2 as
+		 "recurse" to val_print because our standard indentation
+		 here is 4 spaces, and val_print indents 2 for each
+		 recurse.  */
+	      val = read_var_value (sym, frame);
 
-	  annotate_arg_value (val == NULL ? NULL : value_type (val));
+	      annotate_arg_value (val == NULL ? NULL : value_type (val));
 
-	  if (val)
-	    {
-	      common_val_print (val, stb->stream, 0, 0, 2, Val_no_prettyprint);
-	      ui_out_field_stream (uiout, "value", stb);
-	    }
-	  else
-	    ui_out_text (uiout, "???");
+	      if (val)
+	        {
+		  common_val_print (val, stb->stream, 0, 0, 2,
+				    Val_no_prettyprint);
+		  ui_out_field_stream (uiout, "value", stb);
+	        }
+	      else
+		ui_out_text (uiout, "???");
+            }
+          else
+            ui_out_text (uiout, "...");
+
 
 	  /* Invoke ui_out_tuple_end.  */
 	  do_cleanups (list_chain);
@@ -2038,6 +2090,12 @@ Usage: func <name>\n"));
 
   add_info ("catch", catch_info,
 	    _("Exceptions that can be caught in the current stack frame."));
+
+  add_setshow_enum_cmd ("frame-arguments", class_stack,
+			print_frame_arguments_choices, &print_frame_arguments,
+			_("Set printing of non-scalar frame arguments"),
+			_("Show printing of non-scalar frame arguments"),
+			NULL, NULL, NULL, &setprintlist, &showprintlist);
 
 #if 0
   add_cmd ("backtrace-limit", class_stack, set_backtrace_limit_command, _(\

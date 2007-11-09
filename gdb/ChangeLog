@@ -1,3 +1,11 @@
+2007-11-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* stack.c (print_frame_arguments_choices): New static global.
+	(print_frame_arguments): Likewise.
+	(print_this_frame_argument_p): New function.
+	(print_frame_args): Print the argument value only when appropriate.
+	(_initialize_task): Add new "set/show print frame-arguments" command.
+
 2007-11-09  Luis Machado  <luisgpm@br.ibm.com>
 
 	* ppc-linux-nat.c (ppc_linux_insert_watchpoint): Move
