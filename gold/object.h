@@ -215,6 +215,11 @@ class Object
   section_link(unsigned int shndx)
   { return this->do_section_link(shndx); }
 
+  // Return the section info field given a section index.
+  unsigned int
+  section_info(unsigned int shndx)
+  { return this->do_section_info(shndx); }
+
   // Read the symbol information.
   void
   read_symbols(Read_symbols_data* sd)
@@ -311,6 +316,10 @@ class Object
   // Get section link field--implemented by child class.
   virtual unsigned int
   do_section_link(unsigned int shndx) = 0;
+
+  // Get section info field--implemented by child class.
+  virtual unsigned int
+  do_section_info(unsigned int shndx) = 0;
 
   // Get the file.
   Input_file*
@@ -825,6 +834,11 @@ class Sized_relobj : public Relobj
   unsigned int
   do_section_link(unsigned int shndx)
   { return this->elf_file_.section_link(shndx); }
+
+  // Return the section info field.
+  unsigned int
+  do_section_info(unsigned int shndx)
+  { return this->elf_file_.section_info(shndx); }
 
  private:
   // For convenience.

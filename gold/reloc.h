@@ -25,6 +25,7 @@
 
 #include <byteswap.h>
 
+#include "elfcpp.h"
 #include "workqueue.h"
 
 namespace gold

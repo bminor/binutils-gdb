@@ -31,6 +31,7 @@
 #include "layout.h"
 #include "output.h"
 #include "symtab.h"
+#include "reloc.h"
 #include "object.h"
 #include "dynobj.h"
 
@@ -1091,21 +1092,58 @@ Relocate_info<size, big_endian>::location(size_t, off_t offset) const
   // See if we can get line-number information from debugging sections.
   std::string filename;
   std::string file_and_lineno;   // Better than filename-only, if available.
-  for (unsigned int shndx = 0; shndx < this->object->shnum(); ++shndx)
-    if (this->object->section_name(shndx) == ".debug_line")
+
+  // The line-number information is in the ".debug_line" section.
+  unsigned int debug_shndx;
+  off_t debuglines_size;
+  const unsigned char* debuglines = NULL;
+  for (debug_shndx = 0; debug_shndx < this->object->shnum(); ++debug_shndx)
+    if (this->object->section_name(debug_shndx) == ".debug_line")
       {
-        off_t debuglines_size;
-        const unsigned char* debuglines = this->object->section_contents(
-            shndx, &debuglines_size, false);
-        if (debuglines)
-          {
-            Dwarf_line_info<size, big_endian> line_info(debuglines,
-							debuglines_size);
-            line_info.read_line_mappings();
-            file_and_lineno = line_info.addr2line(this->data_shndx, offset);
-          }
+        debuglines = this->object->section_contents(
+            debug_shndx, &debuglines_size, false);
         break;
       }
+
+  // Find the relocation section for ".debug_line".
+  Track_relocs<size, big_endian> track_relocs;
+  bool got_relocs;
+  for (unsigned int reloc_shndx = 0;
+       reloc_shndx < this->object->shnum();
+       ++reloc_shndx)
+    {
+      unsigned int reloc_sh_type = this->object->section_type(reloc_shndx);
+      if ((reloc_sh_type == elfcpp::SHT_REL
+	   || reloc_sh_type == elfcpp::SHT_RELA)
+	  && this->object->section_info(reloc_shndx) == debug_shndx)
+	{
+	  got_relocs = track_relocs.initialize(this->object, reloc_shndx,
+					       reloc_sh_type);
+	  break;
+	}
+    }
+
+  // Finally, we need the symtab section to interpret the relocs.
+  unsigned int symtab_shndx;
+  off_t symtab_size;
+  const unsigned char* symtab = NULL;
+  for (symtab_shndx = 0; symtab_shndx < this->object->shnum(); ++symtab_shndx)
+    if (this->object->section_type(symtab_shndx) == elfcpp::SHT_SYMTAB)
+      {
+        symtab = this->object->section_contents(
+            symtab_shndx, &symtab_size, false);
+        break;
+      }
+
+  // If we got all three sections we need, we can try to read debug info.
+  if (debuglines != NULL && got_relocs && symtab != NULL)
+    {
+      Dwarf_line_info<size, big_endian> line_info(debuglines, debuglines_size,
+						  &track_relocs,
+                                                  symtab, symtab_size);
+      line_info.read_line_mappings();
+      file_and_lineno = line_info.addr2line(this->data_shndx, offset);
+    }
 
   std::string ret(this->object->name());
   ret += ':';

@@ -24,6 +24,7 @@
 
 #include "elfcpp_swap.h"
 #include "dwarf.h"
+#include "reloc.h"
 #include "dwarf_reader.h"
 
 namespace {
@@ -347,12 +348,25 @@ Dwarf_line_info<size, big_endian>::process_one_opcode(
             return true;
 
           case elfcpp::DW_LNE_set_address:
-            // FIXME: modify the address based on the reloc
-            lsm->address = elfcpp::Swap<size, big_endian>::readval(start);
-            // FIXME: set lsm->shndx from the reloc
-            lsm->shndx = 1;
-            break;
-
+            {
+              typename Reloc_map::const_iterator it
+                  = reloc_map_.find(start - this->buffer_);
+              if (it != reloc_map_.end())
+                {
+                  // value + addend.
+                  lsm->address =
+		    (elfcpp::Swap<size, big_endian>::readval(start)
+		     + it->second.second);
+                  lsm->shndx = it->second.first;
+                }
+              else
+                {
+                  // Every set_address should have an associated
+                  // relocation.
+                  this->data_valid_ = false;
+                }
+              break;
+            }                
           case elfcpp::DW_LNE_define_file:
             {
               const char* filename  = reinterpret_cast<const char*>(start);
@@ -435,17 +449,55 @@ Dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr)
   return lengthstart + header_.total_length;
 }
 
+// Looks in the symtab to see what section a symbol is in.
+
+template<int size, bool big_endian>
+unsigned int
+Dwarf_line_info<size, big_endian>::symbol_section(
+    unsigned int sym,
+    typename elfcpp::Elf_types<size>::Elf_Addr* value)
+{
+  const int symsize = elfcpp::Elf_sizes<size>::sym_size;
+  gold_assert(this->symtab_buffer_ + sym * symsize < this->symtab_buffer_end_);
+  elfcpp::Sym<size, big_endian> elfsym(this->symtab_buffer_ + sym * symsize);
+  *value = elfsym.get_st_value();
+  return elfsym.get_st_shndx();
+}
+
+// Read the relocations into a Reloc_map.
+
+template<int size, bool big_endian>
+void
+Dwarf_line_info<size, big_endian>::read_relocs()
+{
+  if (this->symtab_buffer_ == NULL)
+    return;
+
+  typename elfcpp::Elf_types<size>::Elf_Addr value;
+  off_t reloc_offset;
+  while ((reloc_offset = this->track_relocs_->next_offset()) != -1)
+    {
+      const unsigned int sym = this->track_relocs_->next_symndx();
+      const unsigned int shndx = this->symbol_section(sym, &value);
+      this->reloc_map_[reloc_offset] = std::make_pair(shndx, value);
+      this->track_relocs_->advance(reloc_offset + 1);
+    }
+}
+
+// Read the line number info.
+
 template<int size, bool big_endian>
 void
 Dwarf_line_info<size, big_endian>::read_line_mappings()
 {
-  while (buffer_ < buffer_end_)
+  read_relocs();
+  while (this->buffer_ < this->buffer_end_)
     {
-      const unsigned char* lineptr = buffer_;
+      const unsigned char* lineptr = this->buffer_;
       lineptr = this->read_header_prolog(lineptr);
       lineptr = this->read_header_tables(lineptr);
       lineptr = this->read_lines(lineptr);
-      buffer_ = lineptr;
+      this->buffer_ = lineptr;
     }
 
   // Sort the lines numbers, so addr2line can use binary search.
@@ -453,7 +505,7 @@ Dwarf_line_info<size, big_endian>::read_line_mappings()
        it != line_number_map_.end();
        ++it)
     // Each vector needs to be sorted by offset.
-    sort(it->second.begin(), it->second.end());
+    std::sort(it->second.begin(), it->second.end());
 }
 
 // Return a string for a file name and line number.
@@ -462,8 +514,14 @@ template<int size, bool big_endian>
 std::string
 Dwarf_line_info<size, big_endian>::addr2line(unsigned int shndx, off_t offset)
 {
+  if (this->data_valid_ == false)
+    return "";
+
   const Offset_to_lineno_entry lookup_key = { offset, 0, 0 };
-  std::vector<Offset_to_lineno_entry>& offsets = line_number_map_[shndx];
+  std::vector<Offset_to_lineno_entry>& offsets = this->line_number_map_[shndx];
+  if (offsets.empty())
+    return "";
+
   typename std::vector<Offset_to_lineno_entry>::const_iterator it
       = std::lower_bound(offsets.begin(), offsets.end(), lookup_key);
 

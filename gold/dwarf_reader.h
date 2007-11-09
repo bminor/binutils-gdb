@@ -24,13 +24,17 @@
 #define GOLD_DWARF_READER_H
 
 #include <vector>
+#include <map>
 
+#include "elfcpp.h"
 #include "elfcpp_swap.h"
 #include "dwarf.h"
 
 namespace gold
 {
 
+template<int size, bool big_endian>
+class Track_relocs;
 struct LineStateMachine;
 
 // This class is used to read the line information from the debugging
@@ -44,8 +48,15 @@ class Dwarf_line_info
   // to the beginning and length of the line information to read.
   // Reader is a ByteReader class that has the endianness set
   // properly.
-  Dwarf_line_info(const unsigned char* buffer, off_t buffer_length)
-    : buffer_(buffer), buffer_end_(buffer + buffer_length),
+  Dwarf_line_info(const unsigned char* buffer, off_t buffer_length,
+		  Track_relocs<size, big_endian>* track_relocs,
+                  const unsigned char* symtab_buffer,
+                  off_t symtab_buffer_length)
+    : data_valid_(true),
+      buffer_(buffer), buffer_end_(buffer + buffer_length),
+      track_relocs_(track_relocs),
+      symtab_buffer_(symtab_buffer),
+      symtab_buffer_end_(symtab_buffer + symtab_buffer_length),
       directories_(1), files_(1)
   { }
 
@@ -61,6 +72,16 @@ class Dwarf_line_info
   addr2line(unsigned int shndx, off_t offset);
 
  private:
+  // Reads the relocation section associated with .debug_line and
+  // stores relocation information in reloc_map_.
+  void
+  read_relocs();
+
+  // Looks in the symtab to see what section a symbol is in.
+  unsigned int
+  symbol_section(unsigned int sym,
+                 typename elfcpp::Elf_types<size>::Elf_Addr* value);
+
   // Reads the DWARF2/3 header for this line info.  Each takes as input
   // a starting buffer position, and returns the ending position.
   const unsigned char*
@@ -80,6 +101,11 @@ class Dwarf_line_info
   bool
   process_one_opcode(const unsigned char* start,
                      struct LineStateMachine* lsm, size_t* len);
+
+  // If we saw anything amiss while parsing, we set this to false.
+  // Then addr2line will always fail (rather than return possibly-
+  // corrupt data).
+  bool data_valid_;
 
   // A DWARF2/3 line info header.  This is not the same size as in the
   // actual file, as the one in the file may have a 32 bit or 64 bit
@@ -104,10 +130,25 @@ class Dwarf_line_info
   const unsigned char* buffer_;
   const unsigned char* const buffer_end_;
 
+  // This has relocations that point into buffer.
+  Track_relocs<size, big_endian>* track_relocs_;
+
+  // This is used to figure out what section to apply a relocation to.
+  const unsigned char* const symtab_buffer_;
+  const unsigned char* const symtab_buffer_end_;
+
   // Holds the directories and files as we see them.
   std::vector<std::string> directories_;
   // The first part is an index into directories_, the second the filename.
   std::vector< std::pair<int, std::string> > files_;
+
+  // A map from offset of the relocation target to the shndx and
+  // addend for the relocation.
+  typedef std::map<typename elfcpp::Elf_types<size>::Elf_Addr,
+                   std::pair<unsigned int,
+                             typename elfcpp::Elf_types<size>::Elf_Swxword> >
+  Reloc_map;
+  Reloc_map reloc_map_;
 
   // We can't do better than to keep the offsets in a sorted vector.
   // Here, offset is the key, and file_num/line_num is the value.

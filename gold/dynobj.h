@@ -156,6 +156,11 @@ class Sized_dynobj : public Dynobj
   do_section_link(unsigned int shndx)
   { return this->elf_file_.section_link(shndx); }
 
+  // Return the section link field.
+  unsigned int
+  do_section_info(unsigned int shndx)
+  { return this->elf_file_.section_info(shndx); }
+
  private:
   // For convenience.
   typedef Sized_dynobj<size, big_endian> This;
