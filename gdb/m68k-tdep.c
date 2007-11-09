@@ -168,9 +168,9 @@ m68k_register_name (struct gdbarch *gdbarch, int regnum)
    needs any special handling.  */
 
 static int
-m68k_convert_register_p (int regnum, struct type *type)
+m68k_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
 {
-  if (!gdbarch_tdep (current_gdbarch)->fpregs_present)
+  if (!gdbarch_tdep (gdbarch)->fpregs_present)
     return 0;
   return (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FP0_REGNUM + 7
 	  && type != builtin_type_m68881_ext);

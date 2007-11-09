@@ -660,14 +660,14 @@ set_mips64_transfers_32bit_regs (char *args, int from_tty,
 /* Convert to/from a register and the corresponding memory value.  */
 
 static int
-mips_convert_register_p (int regnum, struct type *type)
+mips_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
 {
-  return (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG
-	  && register_size (current_gdbarch, regnum) == 4
-	  && (regnum % gdbarch_num_regs (current_gdbarch))
-		>= mips_regnum (current_gdbarch)->fp0
-	  && (regnum % gdbarch_num_regs (current_gdbarch))
-		< mips_regnum (current_gdbarch)->fp0 + 32
+  return (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
+	  && register_size (gdbarch, regnum) == 4
+	  && (regnum % gdbarch_num_regs (gdbarch))
+		>= mips_regnum (gdbarch)->fp0
+	  && (regnum % gdbarch_num_regs (gdbarch))
+		< mips_regnum (gdbarch)->fp0 + 32
 	  && TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8);
 }
 

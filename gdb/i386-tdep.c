@@ -1857,7 +1857,7 @@ i386_next_regnum (int regnum)
    needs any special handling.  */
 
 static int
-i386_convert_register_p (int regnum, struct type *type)
+i386_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
 {
   int len = TYPE_LENGTH (type);
 
@@ -1880,7 +1880,7 @@ i386_convert_register_p (int regnum, struct type *type)
 	return 1;
     }
 
-  return i387_convert_register_p (regnum, type);
+  return i387_convert_register_p (gdbarch, regnum, type);
 }
 
 /* Read a value of type TYPE from register REGNUM in frame FRAME, and

@@ -918,7 +918,7 @@ ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
    and the special ia64 floating point register format.  */
 
 static int
-ia64_convert_register_p (int regno, struct type *type)
+ia64_convert_register_p (struct gdbarch *gdbarch, int regno, struct type *type)
 {
   return (regno >= IA64_FR0_REGNUM && regno <= IA64_FR127_REGNUM
 	  && type != builtin_type_ia64_ext);

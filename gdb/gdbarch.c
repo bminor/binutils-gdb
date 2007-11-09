@@ -295,7 +295,7 @@ struct gdbarch startup_gdbarch =
   0,  /* cannot_store_register */
   0,  /* get_longjmp_target */
   0,  /* believe_pcc_promotion */
-  0,  /* convert_register_p */
+  generic_convert_register_p,  /* convert_register_p */
   0,  /* register_to_value */
   0,  /* value_to_register */
   0,  /* value_from_register */
@@ -1922,7 +1922,7 @@ gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *ty
   gdb_assert (gdbarch->convert_register_p != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_convert_register_p called\n");
-  return gdbarch->convert_register_p (regnum, type);
+  return gdbarch->convert_register_p (gdbarch, regnum, type);
 }
 
 void

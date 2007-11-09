@@ -1,3 +1,18 @@
+2007-11-09  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (convert_register_p): Add gdbarch as parameter.
+	* ia64-tdep.c (ia64_convert_register_p): Likewise.
+	* i387-tdep.c (i387_convert_register_p): Likewise.
+	* i387-tdep.h (i387_convert_register_p): Likewise.
+	* alpha-tdep.c (alpha_convert_register_p): Likewise.
+	* gdbarch.{c,h}: Regenerate.
+
+	* rs6000-tdep.c (rs6000_convert_register_p): Add gdbarch as parameter.
+	Replace current_gdbarch by gdbarch.
+	* mips-tdep.c (mips_convert_register_p): Likewise.
+	* m68k-tdep.c (m68k_convert_register_p): Likewise.
+	* i386-tdep.c (i386_convert_register_p): Likewise.
+
 2007-11-08  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* gdb_string.h: Include <strings.h>.

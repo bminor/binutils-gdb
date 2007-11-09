@@ -2424,9 +2424,10 @@ rs6000_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    double, we need a conversion if the memory format is float.  */
 
 static int
-rs6000_convert_register_p (int regnum, struct type *type)
+rs6000_convert_register_p (struct gdbarch *gdbarch, int regnum,
+			   struct type *type)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   return (tdep->ppc_fp0_regnum >= 0
 	  && regnum >= tdep->ppc_fp0_regnum

@@ -289,7 +289,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
    needs any special handling.  */
 
 int
-i387_convert_register_p (int regnum, struct type *type)
+i387_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
 {
   if (i386_fp_regnum_p (regnum))
     {

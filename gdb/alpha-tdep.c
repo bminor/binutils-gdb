@@ -198,7 +198,7 @@ alpha_sts (void *out, const void *in)
    registers is different. */
 
 static int
-alpha_convert_register_p (int regno, struct type *type)
+alpha_convert_register_p (struct gdbarch *gdbarch, int regno, struct type *type)
 {
   return (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31
 	  && TYPE_LENGTH (type) != 8);
