@@ -408,7 +408,73 @@ class Symbol
     return (this->visibility_ != elfcpp::STV_INTERNAL
             && this->visibility_ != elfcpp::STV_HIDDEN
             && this->visibility_ != elfcpp::STV_PROTECTED
+            && parameters->output_is_shared()
 	    && !parameters->symbolic());
+  }
+
+  // Return true if this symbol is a function that needs a PLT entry.
+  // If the symbol is defined in a dynamic object or if it is subject
+  // to pre-emption, we need to make a PLT entry.
+  bool
+  needs_plt_entry() const
+  {
+    return (this->type() == elfcpp::STT_FUNC
+            && (this->is_from_dynobj() || this->is_preemptible()));
+  }
+
+  // Given a direct absolute or pc-relative static relocation against
+  // the global symbol, this function returns whether a dynamic relocation
+  // is needed.
+
+  bool
+  needs_dynamic_reloc(bool is_absolute_ref, bool is_function_call) const
+  {
+    // An absolute reference within a position-independent output file
+    // will need a dynamic relocaion.
+    if (is_absolute_ref && parameters->output_is_position_independent())
+      return true;
+
+    // A function call that can branch to a local PLT entry does not need
+    // a dynamic relocation.
+    if (is_function_call && this->has_plt_offset())
+      return false;
+
+    // A reference to any PLT entry in a non-position-independent executable
+    // does not need a dynamic relocation.
+    if (!parameters->output_is_position_independent()
+        && this->has_plt_offset())
+      return false;
+
+    // A reference to a symbol defined in a dynamic object or to a
+    // symbol that is preemptible will need a dynamic relocation.
+    if (this->is_from_dynobj() || this->is_preemptible())
+      return true;
+
+    // For all other cases, return FALSE.
+    return false;
+  }
+
+  // Given a direct absolute static relocation against
+  // the global symbol, where a dynamic relocation is needed, this
+  // function returns whether a relative dynamic relocation can be used.
+  // The caller must determine separately whether the static relocation
+  // is compatible with a relative relocation.
+
+  bool
+  can_use_relative_reloc(bool is_function_call) const
+  {
+    // A function call that can branch to a local PLT entry can
+    // use a RELATIVE relocation.
+    if (is_function_call && this->has_plt_offset())
+      return true;
+
+    // A reference to a symbol defined in a dynamic object or to a
+    // symbol that is preemptible can not use a RELATIVE relocaiton.
+    if (this->is_from_dynobj() || this->is_preemptible())
+      return false;
+
+    // For all other cases, return TRUE.
+    return true;
   }
 
   // Return whether there should be a warning for references to this
@@ -432,6 +498,19 @@ class Symbol
   void
   set_is_copied_from_dynobj()
   { this->is_copied_from_dynobj_ = true; }
+
+  // Mark this symbol as needing its value written to the GOT even when
+  // the value is subject to dynamic relocation (e.g., when the target
+  // uses a RELATIVE relocation for the GOT entry).
+  void
+  set_needs_value_in_got()
+  { this->needs_value_in_got_ = true; }
+
+  // Return whether this symbol needs its value written to the GOT even
+  // when the value is subject to dynamic relocation.
+  bool
+  needs_value_in_got() const
+  { return this->needs_value_in_got_; }
 
  protected:
   // Instances of this class should always be created at a specific
@@ -587,6 +666,9 @@ class Symbol
   // True if we are using a COPY reloc for this symbol, so that the
   // real definition lives in a dynamic object.
   bool is_copied_from_dynobj_ : 1;
+  // True if the static value should be written to the GOT even
+  // when the final value is subject to dynamic relocation.
+  bool needs_value_in_got_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template

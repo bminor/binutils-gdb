@@ -250,6 +250,17 @@ class Target_x86_64 : public Sized_target<64, false>
   Reloc_section*
   rela_dyn_section(Layout*);
 
+  // Return true if the symbol may need a COPY relocation.
+  // References from an executable object to non-function symbols
+  // defined in a dynamic object may need a COPY relocation.
+  bool
+  may_need_copy_reloc(Symbol* gsym)
+  {
+    return (!parameters->output_is_shared()
+            && gsym->is_from_dynobj()
+            && gsym->type() != elfcpp::STT_FUNC);
+  }
+
   // Copy a relocation against a global symbol.
   void
   copy_reloc(const General_options*, Symbol_table*, Layout*,
@@ -734,6 +745,20 @@ Target_x86_64::Scan::local(const General_options&,
       break;
 
     case elfcpp::R_X86_64_64:
+      // If building a shared library (or a position-independent
+      // executable), we need to create a dynamic relocation for
+      // this location. The relocation applied at link time will
+      // apply the link-time value, so we flag the location with
+      // an R_386_RELATIVE relocation so the dynamic loader can
+      // relocate it easily.
+      if (parameters->output_is_position_independent())
+        {
+          Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+          rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
+                              data_shndx, reloc.get_r_offset(), 0);
+        }
+      break;
+
     case elfcpp::R_X86_64_32:
     case elfcpp::R_X86_64_32S:
     case elfcpp::R_X86_64_16:
@@ -747,16 +772,10 @@ Target_x86_64::Scan::local(const General_options&,
       if (parameters->output_is_position_independent())
         {
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-          if (r_type == elfcpp::R_X86_64_64)
-            rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                                data_shndx, reloc.get_r_offset(), 0);
-          else
-            {
-              unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-              rela_dyn->add_local(object, r_sym, r_type, data_shndx,
-                                  reloc.get_r_offset(),
-                                  reloc.get_r_addend());
-            }
+          unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
+          rela_dyn->add_local(object, r_sym, r_type, data_shndx,
+                              reloc.get_r_offset(),
+                              reloc.get_r_addend());
         }
       break;
 
@@ -915,81 +934,75 @@ Target_x86_64::Scan::global(const General_options& options,
       break;
 
     case elfcpp::R_X86_64_64:
-    case elfcpp::R_X86_64_PC64:
     case elfcpp::R_X86_64_32:
     case elfcpp::R_X86_64_32S:
-    case elfcpp::R_X86_64_PC32:
     case elfcpp::R_X86_64_16:
-    case elfcpp::R_X86_64_PC16:
     case elfcpp::R_X86_64_8:
-    case elfcpp::R_X86_64_PC8:
       {
-        bool is_pcrel = (r_type == elfcpp::R_X86_64_PC64
-		         || r_type == elfcpp::R_X86_64_PC32
-		         || r_type == elfcpp::R_X86_64_PC16
-		         || r_type == elfcpp::R_X86_64_PC8);
-
-        if (gsym->is_from_dynobj()
-            || (parameters->output_is_shared()
-                && gsym->is_preemptible()))
-	  {
-	    // (a) This symbol is defined in a dynamic object.  If it is a
-	    // function, we make a PLT entry.  Otherwise we need to
-	    // either generate a COPY reloc or copy this reloc.
-	    // (b) We are building a shared object and this symbol is
-	    // preemptible. If it is a function, we make a PLT entry.
-	    // Otherwise, we copy the reloc.
-	    if (gsym->type() == elfcpp::STT_FUNC)
-	      {
-	        target->make_plt_entry(symtab, layout, gsym);
-
-	        // If this is not a PC relative reference, then we may
-	        // be taking the address of the function.  In that case
-	        // we need to set the entry in the dynamic symbol table
-	        // to the address of the PLT entry. We will also need to
-	        // create a dynamic relocation.
-	        if (!is_pcrel)
-		  {
-		    if (gsym->is_from_dynobj())
-		      gsym->set_needs_dynsym_value();
-                    if (parameters->output_is_position_independent())
-                      {
-                        Reloc_section* rela_dyn =
-                          target->rela_dyn_section(layout);
-                        rela_dyn->add_global(gsym, r_type, object, data_shndx, 
-                                            reloc.get_r_offset(),
-                                            reloc.get_r_addend());
-                      }
-		  }
-	      }
-	    else if (parameters->output_is_shared())
-	      {
-	        // We do not make COPY relocs in shared objects.
+        // Make a PLT entry if necessary.
+        if (gsym->needs_plt_entry())
+          {
+            target->make_plt_entry(symtab, layout, gsym);
+            // Since this is not a PC-relative relocation, we may be
+            // taking the address of a function. In that case we need to
+            // set the entry in the dynamic symbol table to the address of
+            // the PLT entry.
+            if (gsym->is_from_dynobj())
+              gsym->set_needs_dynsym_value();
+          }
+        // Make a dynamic relocation if necessary.
+        if (gsym->needs_dynamic_reloc(true, false))
+          {
+            if (target->may_need_copy_reloc(gsym))
+              {
+                target->copy_reloc(&options, symtab, layout, object, data_shndx,
+                                   gsym, reloc);
+              }
+            else if (r_type == elfcpp::R_X86_64_64
+                     && gsym->can_use_relative_reloc(false))
+              {
+                Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+                rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
+                                    data_shndx,
+                                    reloc.get_r_offset(), 0);
+              }
+            else
+              {
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
                 rela_dyn->add_global(gsym, r_type, object, data_shndx, 
                                      reloc.get_r_offset(),
                                      reloc.get_r_addend());
-	      }
-	    else
-	      target->copy_reloc(&options, symtab, layout, object, data_shndx,
-			         gsym, reloc);
-	  }
-        else if (!is_pcrel && parameters->output_is_position_independent())
-          {
-            // This is not a PC-relative reference, so we need to generate
-            // a dynamic relocation. At this point, we know the symbol
-            // is not preemptible, so we can use the RELATIVE relocation.
-            Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-            if (r_type == elfcpp::R_X86_64_64)
-              rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                                  data_shndx,
-                                  reloc.get_r_offset(), 0);
-            else
-              rela_dyn->add_global(gsym, r_type, object, data_shndx, 
-                                   reloc.get_r_offset(),
-                                   reloc.get_r_addend());
+              }
           }
-	}
+      }
+      break;
+
+    case elfcpp::R_X86_64_PC64:
+    case elfcpp::R_X86_64_PC32:
+    case elfcpp::R_X86_64_PC16:
+    case elfcpp::R_X86_64_PC8:
+      {
+        // Make a PLT entry if necessary.
+        if (gsym->needs_plt_entry())
+          target->make_plt_entry(symtab, layout, gsym);
+        // Make a dynamic relocation if necessary.
+        bool is_function_call = (gsym->type() == elfcpp::STT_FUNC);
+        if (gsym->needs_dynamic_reloc(true, is_function_call))
+          {
+            if (target->may_need_copy_reloc(gsym))
+              {
+                target->copy_reloc(&options, symtab, layout, object, data_shndx,
+                                   gsym, reloc);
+              }
+            else
+              {
+                Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+                rela_dyn->add_global(gsym, r_type, object, data_shndx, 
+                                     reloc.get_r_offset(),
+                                     reloc.get_r_addend());
+              }
+          }
+      }
       break;
 
     case elfcpp::R_X86_64_GOT64:
@@ -1007,8 +1020,16 @@ Target_x86_64::Scan::global(const General_options& options,
             if (!gsym->final_value_is_known())
               {
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-                rela_dyn->add_global(gsym, elfcpp::R_X86_64_GLOB_DAT, got,
-                                     gsym->got_offset(), 0);
+                if (gsym->is_preemptible())
+                  rela_dyn->add_global(gsym, elfcpp::R_X86_64_GLOB_DAT, got,
+                                       gsym->got_offset(), 0);
+                else
+                  {
+                    rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
+                                        got, gsym->got_offset(), 0);
+                    // Make sure we write the link-time value to the GOT.
+                    gsym->set_needs_value_in_got();
+                  }
               }
           }
         // For GOTPLT64, we also need a PLT entry (but only if the

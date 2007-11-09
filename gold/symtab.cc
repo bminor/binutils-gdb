@@ -67,6 +67,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->has_plt_offset_ = false;
   this->has_warning_ = false;
   this->is_copied_from_dynobj_ = false;
+  this->needs_value_in_got_ = false;
 }
 
 // Initialize the fields in the base class Symbol for SYM in OBJECT.

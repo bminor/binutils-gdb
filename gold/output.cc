@@ -684,8 +684,11 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 	// If the symbol is resolved locally, we need to write out its
 	// value.  Otherwise we just write zero.  The target code is
 	// responsible for creating a relocation entry to fill in the
-	// value at runtime.
-	if (gsym->final_value_is_known())
+	// value at runtime. For non-preemptible symbols in a shared
+	// library, the target will need to record whether or not the
+	// value should be written (e.g., it may use a RELATIVE
+	// relocation type).
+	if (gsym->final_value_is_known() || gsym->needs_value_in_got())
 	  {
 	    Sized_symbol<size>* sgsym;
 	    // This cast is a bit ugly.  We don't want to put a
