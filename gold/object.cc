@@ -1107,7 +1107,7 @@ Relocate_info<size, big_endian>::location(size_t, off_t offset) const
 
   // Find the relocation section for ".debug_line".
   Track_relocs<size, big_endian> track_relocs;
-  bool got_relocs;
+  bool got_relocs = false;
   for (unsigned int reloc_shndx = 0;
        reloc_shndx < this->object->shnum();
        ++reloc_shndx)

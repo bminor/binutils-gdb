@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-11-08 22:56-0800\n"
+"POT-Creation-Date: 2007-11-09 15:55-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,7 +105,7 @@ msgstr ""
 msgid "dynamic symbol table name section has wrong type: %u"
 msgstr ""
 
-#: dynobj.cc:389 object.cc:233 object.cc:568
+#: dynobj.cc:389 object.cc:234 object.cc:569
 #, c-format
 msgid "bad section name offset for section %u: %lu"
 msgstr ""
@@ -317,46 +317,46 @@ msgid "pthread_cond_signal failed: %s"
 msgstr ""
 
 #. FIXME: This needs to specify the location somehow.
-#: i386.cc:153 i386.cc:1301 x86_64.cc:165 x86_64.cc:1233
+#: i386.cc:153 i386.cc:1310 x86_64.cc:165 x86_64.cc:1254
 msgid "missing expected TLS relocation"
 msgstr ""
 
-#: i386.cc:749 x86_64.cc:712 x86_64.cc:879
+#: i386.cc:761 x86_64.cc:723 x86_64.cc:898
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr ""
 
-#: i386.cc:843 i386.cc:1073 x86_64.cc:820 x86_64.cc:1058
+#: i386.cc:862 i386.cc:1096 x86_64.cc:839 x86_64.cc:1079
 #, c-format
 msgid "%s: unexpected reloc %u in object file"
 msgstr ""
 
-#: i386.cc:929 x86_64.cc:893 x86_64.cc:1117
+#: i386.cc:948 x86_64.cc:912 x86_64.cc:1138
 #, c-format
 msgid "%s: unsupported reloc %u against global symbol %s"
 msgstr ""
 
-#: i386.cc:1170
+#: i386.cc:1193
 #, c-format
 msgid "%s: unsupported RELA reloc section"
 msgstr ""
 
-#: i386.cc:1428 x86_64.cc:1431
+#: i386.cc:1449 x86_64.cc:1452
 #, c-format
 msgid "unexpected reloc %u in object file"
 msgstr ""
 
-#: i386.cc:1460 i386.cc:1507 i386.cc:1514 i386.cc:1534 i386.cc:1563
-#: x86_64.cc:1452 x86_64.cc:1501 x86_64.cc:1512
+#: i386.cc:1481 i386.cc:1528 i386.cc:1535 i386.cc:1555 i386.cc:1584
+#: x86_64.cc:1473 x86_64.cc:1522 x86_64.cc:1533
 #, c-format
 msgid "unsupported reloc %u"
 msgstr ""
 
-#: i386.cc:1485 x86_64.cc:1477
+#: i386.cc:1506 x86_64.cc:1498
 msgid "TLS reloc but no TLS segment"
 msgstr ""
 
-#: i386.cc:1522
+#: i386.cc:1543
 msgid "both SUN and GNU model TLS relocations"
 msgstr ""
 
@@ -368,132 +368,132 @@ msgstr ""
 msgid "entry in mergeable string section not null terminated"
 msgstr ""
 
-#: object.cc:50
+#: object.cc:51
 #, c-format
 msgid "%s: unsupported ELF machine number %d"
 msgstr ""
 
-#: object.cc:68 script.cc:1222
+#: object.cc:69 script.cc:1222
 #, c-format
 msgid "%s: %s"
 msgstr ""
 
-#: object.cc:103
+#: object.cc:104
 #, c-format
 msgid "section name section has wrong type: %u"
 msgstr ""
 
-#: object.cc:305
+#: object.cc:306
 #, c-format
 msgid "invalid symbol table name index: %u"
 msgstr ""
 
-#: object.cc:311
+#: object.cc:312
 #, c-format
 msgid "symbol table name section has wrong type: %u"
 msgstr ""
 
-#: object.cc:391
+#: object.cc:392
 #, c-format
 msgid "section group %u info %u out of range"
 msgstr ""
 
-#: object.cc:409
+#: object.cc:410
 #, c-format
 msgid "symbol %u name offset %u out of range"
 msgstr ""
 
-#: object.cc:441
+#: object.cc:442
 #, c-format
 msgid "section %u in section group %u out of range"
 msgstr ""
 
-#: object.cc:531 reloc.cc:202 reloc.cc:469
+#: object.cc:532 reloc.cc:202 reloc.cc:469
 #, c-format
 msgid "relocation section %u has bad info %u"
 msgstr ""
 
-#: object.cc:703
+#: object.cc:704
 msgid "size of symbols is not multiple of symbol size"
 msgstr ""
 
 #. FIXME: Handle SHN_XINDEX.
-#: object.cc:795
+#: object.cc:796
 #, c-format
 msgid "unknown section index %u for local symbol %u"
 msgstr ""
 
-#: object.cc:804
+#: object.cc:805
 #, c-format
 msgid "local symbol %u section index %u out of range"
 msgstr ""
 
-#: object.cc:836
+#: object.cc:837
 #, c-format
 msgid "local symbol %u section name out of range: %u >= %u"
 msgstr ""
 
-#: object.cc:1054
+#: object.cc:1055
 #, c-format
 msgid "%s: incompatible target"
 msgstr ""
 
-#: object.cc:1175
+#: object.cc:1213
 #, c-format
 msgid "%s: unsupported ELF file type %d"
 msgstr ""
 
-#: object.cc:1194 object.cc:1240 object.cc:1274
+#: object.cc:1232 object.cc:1278 object.cc:1312
 #, c-format
 msgid "%s: ELF file too short"
 msgstr ""
 
-#: object.cc:1202
+#: object.cc:1240
 #, c-format
 msgid "%s: invalid ELF version 0"
 msgstr ""
 
-#: object.cc:1204
+#: object.cc:1242
 #, c-format
 msgid "%s: unsupported ELF version %d"
 msgstr ""
 
-#: object.cc:1211
+#: object.cc:1249
 #, c-format
 msgid "%s: invalid ELF class 0"
 msgstr ""
 
-#: object.cc:1217
+#: object.cc:1255
 #, c-format
 msgid "%s: unsupported ELF class %d"
 msgstr ""
 
-#: object.cc:1224
+#: object.cc:1262
 #, c-format
 msgid "%s: invalid ELF data encoding"
 msgstr ""
 
-#: object.cc:1230
+#: object.cc:1268
 #, c-format
 msgid "%s: unsupported ELF data encoding %d"
 msgstr ""
 
-#: object.cc:1250
+#: object.cc:1288
 #, c-format
 msgid "%s: not configured to support 32-bit big-endian object"
 msgstr ""
 
-#: object.cc:1263
+#: object.cc:1301
 #, c-format
 msgid "%s: not configured to support 32-bit little-endian object"
 msgstr ""
 
-#: object.cc:1284
+#: object.cc:1322
 #, c-format
 msgid "%s: not configured to support 64-bit big-endian object"
 msgstr ""
 
-#: object.cc:1297
+#: object.cc:1335
 #, c-format
 msgid "%s: not configured to support 64-bit little-endian object"
 msgstr ""
@@ -777,37 +777,37 @@ msgstr ""
 msgid "%s: invalid thread count: %s\n"
 msgstr ""
 
-#: output.cc:1058
+#: output.cc:1061
 #, c-format
 msgid "invalid alignment %lu for section \"%s\""
 msgstr ""
 
-#: output.cc:1784
+#: output.cc:1787
 #, c-format
 msgid "%s: open: %s"
 msgstr ""
 
-#: output.cc:1789
+#: output.cc:1792
 #, c-format
 msgid "%s: lseek: %s"
 msgstr ""
 
-#: output.cc:1792
+#: output.cc:1795
 #, c-format
 msgid "%s: write: %s"
 msgstr ""
 
-#: output.cc:1798
+#: output.cc:1801
 #, c-format
 msgid "%s: mmap: %s"
 msgstr ""
 
-#: output.cc:1808
+#: output.cc:1811
 #, c-format
 msgid "%s: munmap: %s"
 msgstr ""
 
-#: output.cc:1812
+#: output.cc:1815
 #, c-format
 msgid "%s: close: %s"
 msgstr ""
@@ -883,31 +883,31 @@ msgid ""
 "T"
 msgstr ""
 
-#: symtab.cc:540
+#: symtab.cc:541
 #, c-format
 msgid "bad global symbol name offset %u at %zu"
 msgstr ""
 
-#: symtab.cc:618
+#: symtab.cc:619
 msgid "too few symbol versions"
 msgstr ""
 
-#: symtab.cc:647
+#: symtab.cc:648
 #, c-format
 msgid "bad symbol name offset %u at %zu"
 msgstr ""
 
-#: symtab.cc:701
+#: symtab.cc:702
 #, c-format
 msgid "versym for symbol %zu out of range: %u"
 msgstr ""
 
-#: symtab.cc:709
+#: symtab.cc:710
 #, c-format
 msgid "versym for symbol %zu has no name: %u"
 msgstr ""
 
-#: symtab.cc:1427 symtab.cc:1630
+#: symtab.cc:1428 symtab.cc:1631
 #, c-format
 msgid "%s: unsupported symbol section 0x%x"
 msgstr ""
@@ -940,12 +940,12 @@ msgid ""
 "This program has absolutely no warranty.\n"
 msgstr ""
 
-#: x86_64.cc:1141
+#: x86_64.cc:1162
 #, c-format
 msgid "%s: unsupported REL reloc section"
 msgstr ""
 
-#: x86_64.cc:1540
+#: x86_64.cc:1561
 #, c-format
 msgid "unsupported reloc type %u"
 msgstr ""
