@@ -8678,7 +8678,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
   names = (char *) (s + count);
   p = relplt->relocation;
   n = 0;
-  for (i = 0; i < count; i++, s++, p++)
+  for (i = 0; i < count; i++, p++)
     {
       size_t len;
       bfd_vma addr;
@@ -8695,12 +8695,13 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
       s->section = plt;
       s->value = addr - plt->vma;
       s->name = names;
+      s->udata.p = NULL;
       len = strlen ((*p->sym_ptr_ptr)->name);
       memcpy (names, (*p->sym_ptr_ptr)->name, len);
       names += len;
       memcpy (names, "@plt", sizeof ("@plt"));
       names += sizeof ("@plt");
-      ++n;
+      ++s, ++n;
     }
 
   return n;

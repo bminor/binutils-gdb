@@ -1,3 +1,8 @@
+2007-11-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elf_get_synthetic_symtab): Only bump the symbol
+        pointer when we have a valid symbol.  Init udata.p to NULL.
+
 2007-11-09  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf-vxworks.c (elf_vxworks_emit_relocs): Don't clobber
