@@ -1263,6 +1263,7 @@ pe_bfd_object_p (bfd * abfd)
   struct external_PEI_IMAGE_hdr image_hdr;
   file_ptr offset;
   const bfd_target *target;
+  struct bfd_preserve preserve;
 
   /* Detect if this a Microsoft Import Library Format element.  */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
@@ -1327,6 +1328,10 @@ pe_bfd_object_p (bfd * abfd)
       return NULL;
     }
 
+  preserve.marker = NULL;
+  if (! bfd_preserve_save (abfd, &preserve))
+    return NULL;
+
   target = coff_object_p (abfd);
   if (target)
     {
@@ -1344,7 +1349,10 @@ pe_bfd_object_p (bfd * abfd)
 
       /* Don't check PE vs. EFI if arch is unknown.  */
       if (arch == arch_type_unknown)
-	return target;
+	{
+	  bfd_preserve_finish (abfd, &preserve);
+	  return target;
+	}
 
       for (target_ptr = bfd_target_vector; *target_ptr != NULL;
 	   target_ptr++)
@@ -1361,8 +1369,10 @@ pe_bfd_object_p (bfd * abfd)
 
 	      if (efi)
 		{
+no_match:
 		  /* TARGET_PTR is an EFI backend.  Don't match
 		     TARGET with a EFI file.  */
+		  bfd_preserve_restore (abfd, &preserve);
 		  bfd_set_error (bfd_error_wrong_format);
 		  return NULL;
 		}
@@ -1377,12 +1387,15 @@ pe_bfd_object_p (bfd * abfd)
 		{
 		  /* TARGET_PTR is a PE backend.  Don't match
 		     TARGET with a PE file.  */
-		  bfd_set_error (bfd_error_wrong_format);
-		  return NULL;
+		  goto no_match;
 		}
 	    }
 	}
+
+      bfd_preserve_finish (abfd, &preserve);
     }
+  else
+    bfd_preserve_restore (abfd, &preserve);
 
   return target;
 }

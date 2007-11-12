@@ -1,7 +1,13 @@
+2007-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/5299
+	* peicode.h (pe_bfd_object_p): Save and restore previous bfd
+	state when calling coff_object_p.
+
 2007-11-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_get_synthetic_symtab): Only bump the symbol
-        pointer when we have a valid symbol.  Init udata.p to NULL.
+	pointer when we have a valid symbol.  Init udata.p to NULL.
 
 2007-11-09  Nathan Sidwell  <nathan@codesourcery.com>
 
