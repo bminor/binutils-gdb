@@ -1,3 +1,20 @@
+2007-11-12  Markus Deuling  <deuling@de.ibm.com>
+
+	* xtensa-tdep.c (ARG_1ST): Replace ARGS_FIRST_REG by its expression.
+	(ARGS_FIRST_REG): Remove.
+	(areg_numer): New function.
+	(xtensa_pseudo_register_read, xtensa_frame_prev_register)
+	(xtensa_extract_return_value, xtensa_store_return_value)
+	(xtensa_frame_cache): Replace AREG_NUMBER by areg_number.
+	(AREG_NUMBER): Remove.
+	(XTENSA_IS_ENTRY, ARG_NOF, ARG_1ST): Add gdbarch as parameter.
+	(xtensa_frame_cache): Update use of XTENSA_IS_ENTRY.
+	(xtensa_push_dummy_call): Update use of ARG_NOF.
+	(extract_call_winsize): Add gdbarch as parameter. Replace
+	current_gdbarch by gdbarch.
+	(xtensa_extract_return_value, xtensa_store_return_value): Update call
+	of extract_call_winsize.
+
 2007-11-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add entry for new set/show print frame-args command.

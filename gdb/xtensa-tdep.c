@@ -78,7 +78,6 @@ static int xtensa_debug_level = 0;
 
 /* On Windowed ABI, we use a6 through a11 for passing arguments
    to a function called by GDB because CALL4 is used.  */
-#define ARGS_FIRST_REG		gdbarch_tdep (current_gdbarch)->a0_base + 6
 #define ARGS_NUM_REGS		6
 #define REGISTER_SIZE		4
 
@@ -89,21 +88,14 @@ static int xtensa_debug_level = 0;
 #define CALLINC(ps)		(((ps) & PS_CALLINC_MASK) >> PS_CALLINC_SHIFT)
 #define WINSIZE(ra)		(4 * (( (ra) >> 30) & 0x3))
 
-
-/* Convert a live Ax register number to the corresponding Areg number.  */
-#define AREG_NUMBER(r, wb) \
-  ((((r) - (gdbarch_tdep (current_gdbarch)->a0_base + 0) + (((wb) \
-  & ((gdbarch_tdep (current_gdbarch)->num_aregs - 1) >> 2)) << WB_SHIFT)) & \
-  (gdbarch_tdep (current_gdbarch)->num_aregs - 1)) \
-  + gdbarch_tdep (current_gdbarch)->ar_base)
-
 /* ABI-independent macros.  */
-#define ARG_NOF	    (gdbarch_tdep (current_gdbarch)->call_abi \
-		      == CallAbiCall0Only ? C0_NARGS : (ARGS_NUM_REGS))
-#define ARG_1ST	    (gdbarch_tdep (current_gdbarch)->call_abi \
-		      == CallAbiCall0Only \
-		    ? (gdbarch_tdep (current_gdbarch)->a0_base + 0) + C0_ARGS \
-		      : (ARGS_FIRST_REG))
+#define ARG_NOF(gdbarch) \
+  (gdbarch_tdep (gdbarch)->call_abi \
+   == CallAbiCall0Only ? C0_NARGS : (ARGS_NUM_REGS))
+#define ARG_1ST(gdbarch) \
+  (gdbarch_tdep (gdbarch)->call_abi  == CallAbiCall0Only \
+   ? (gdbarch_tdep (gdbarch)->a0_base + 0) + C0_ARGS \
+   : (gdbarch_tdep (gdbarch)->a0_base + 6))
 
 extern struct gdbarch_tdep *xtensa_config_tdep (struct gdbarch_info *);
 extern int xtensa_config_byte_order (struct gdbarch_info *);
@@ -112,8 +104,8 @@ extern int xtensa_config_byte_order (struct gdbarch_info *);
 /* XTENSA_IS_ENTRY tests whether the first byte of an instruction
    indicates that the instruction is an ENTRY instruction.  */
 
-#define XTENSA_IS_ENTRY(op1) \
-  ((gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG) \
+#define XTENSA_IS_ENTRY(gdbarch, op1) \
+  ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG) \
    ? ((op1) == 0x6c) : ((op1) == 0x36))
 
 #define XTENSA_ENTRY_LENGTH	3
@@ -124,6 +116,20 @@ extern int xtensa_config_byte_order (struct gdbarch_info *);
 
 #define PS_WOE			(1<<18)
 #define PS_EXC			(1<<4)
+
+/* Convert a live Ax register number to the corresponding Areg number.  */
+static int
+areg_number (struct gdbarch *gdbarch, int regnum, ULONGEST wb)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int areg;
+
+  areg = regnum - tdep->a0_base;
+  areg += (wb & ((tdep->num_aregs - 1) >> 2)) << WB_SHIFT;
+  areg &= tdep->num_aregs - 1;
+
+  return areg + tdep->ar_base;
+}
 
 static inline int
 windowing_enabled (CORE_ADDR ps)
@@ -143,7 +149,7 @@ windowing_enabled (CORE_ADDR ps)
    method to call the inferior function.  */
 
 static int
-extract_call_winsize (CORE_ADDR pc)
+extract_call_winsize (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   int winsize = 4;
   int insn;
@@ -163,7 +169,7 @@ extract_call_winsize (CORE_ADDR pc)
        call{0,4,8,12}   0101 || {00,01,10,11} || OFFSET
        callx{0,4,8,12}  0000 || {00,01,10,11} || 11 || OFFSET.  */
 
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
     {
       if (((insn & 0xf) == 0x5) || ((insn & 0xcf) == 0xc0))
 	winsize = (insn & 0x30) >> 2;   /* 0, 4, 8, 12.  */
@@ -514,7 +520,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
       gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
 
       regcache_raw_read (regcache, gdbarch_tdep (gdbarch)->wb_regnum, buf);
-      regnum = AREG_NUMBER (regnum, extract_unsigned_integer (buf, 4));
+      regnum = areg_number (gdbarch, regnum, extract_unsigned_integer (buf, 4));
     }
 
   /* We can always read non-pseudo registers.  */
@@ -600,7 +606,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 
       regcache_raw_read (regcache,
 			 gdbarch_tdep (gdbarch)->wb_regnum, buf);
-      regnum = AREG_NUMBER (regnum, extract_unsigned_integer (buf, 4));
+      regnum = areg_number (gdbarch, regnum, extract_unsigned_integer (buf, 4));
     }
 
   /* We can always write 'core' registers.
@@ -1061,7 +1067,7 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
       ps = frame_unwind_register_unsigned (next_frame, ps_regnum);
 
       op1 = read_memory_integer (pc, 1);
-      if (XTENSA_IS_ENTRY (op1))
+      if (XTENSA_IS_ENTRY (gdbarch, op1))
 	{
 	  int callinc = CALLINC (ps);
 	  ra = frame_unwind_register_unsigned
@@ -1135,8 +1141,8 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	  else
 	    {
 	      /* Read caller's frame SP directly from the previous window.  */
-	      int regnum = AREG_NUMBER
-			     (gdbarch_tdep (gdbarch)->a0_base + 1,
+	      int regnum = areg_number
+			     (gdbarch, gdbarch_tdep (gdbarch)->a0_base + 1,
 			      cache->wd.wb);
 
 	      cache->prev_sp = xtensa_read_register (regnum);
@@ -1290,7 +1296,7 @@ xtensa_frame_prev_register (struct frame_info *next_frame,
       /* Convert A-register numbers to AR-register numbers.  */
       if (regnum >= gdbarch_tdep (gdbarch)->a0_base + 0
           && regnum <= gdbarch_tdep (gdbarch)->a0_base + 15)
-	regnum = AREG_NUMBER (regnum, cache->wd.wb);
+	regnum = areg_number (gdbarch, regnum, cache->wd.wb);
 
       /* Check if AR-register has been saved to stack.  */
       if (regnum >= gdbarch_tdep (gdbarch)->ar_base
@@ -1417,7 +1423,7 @@ xtensa_extract_return_value (struct type *type,
     {
       /* First, we have to find the caller window in the register file.  */
       regcache_raw_read_unsigned (regcache, gdbarch_pc_regnum (gdbarch), &pc);
-      callsize = extract_call_winsize (pc);
+      callsize = extract_call_winsize (gdbarch, pc);
 
       /* On Xtensa, we can return up to 4 words (or 2 for call12).  */
       if (len > (callsize > 8 ? 8 : 16))
@@ -1428,7 +1434,8 @@ xtensa_extract_return_value (struct type *type,
 	 register (A2) in the caller window.  */
       regcache_raw_read_unsigned
 	(regcache, gdbarch_tdep (gdbarch)->wb_regnum, &wb);
-      areg = AREG_NUMBER(gdbarch_tdep (gdbarch)->a0_base + 2 + callsize, wb);
+      areg = areg_number (gdbarch,
+			  gdbarch_tdep (gdbarch)->a0_base + 2 + callsize, wb);
     }
   else
     {
@@ -1471,13 +1478,14 @@ xtensa_store_return_value (struct type *type,
       regcache_raw_read_unsigned 
 	(regcache, gdbarch_tdep (gdbarch)->wb_regnum, &wb);
       regcache_raw_read_unsigned (regcache, gdbarch_pc_regnum (gdbarch), &pc);
-      callsize = extract_call_winsize (pc);
+      callsize = extract_call_winsize (gdbarch, pc);
 
       if (len > (callsize > 8 ? 8 : 16))
 	internal_error (__FILE__, __LINE__,
 			_("unimplemented for this length: %d"),
 			TYPE_LENGTH (type));
-      areg = AREG_NUMBER (gdbarch_tdep (gdbarch)->a0_base + 2 + callsize, wb);
+      areg = areg_number (gdbarch,
+			  gdbarch_tdep (gdbarch)->a0_base + 2 + callsize, wb);
 
       DEBUGTRACE ("[xtensa_store_return_value] callsize %d wb %d\n",
               callsize, (int) wb);
@@ -1658,7 +1666,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
       size = (size + info->align - 1) & ~(info->align - 1);
       onstack_size = (onstack_size + info->align - 1) & ~(info->align - 1);
 
-      if (size + info->length > REGISTER_SIZE * ARG_NOF)
+      if (size + info->length > REGISTER_SIZE * ARG_NOF (gdbarch))
 	{
 	  info->onstack = 1;
 	  info->u.offset = onstack_size;
@@ -1667,7 +1675,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
       else
 	{
 	  info->onstack = 0;
-	  info->u.regno = ARG_1ST + size / REGISTER_SIZE;
+	  info->u.regno = ARG_1ST (gdbarch) + size / REGISTER_SIZE;
 	}
       size += info->length;
     }
@@ -1688,7 +1696,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
   if (struct_return)
     {
       store_unsigned_integer (buf, REGISTER_SIZE, struct_addr);
-      regcache_cooked_write (regcache, ARG_1ST, buf);
+      regcache_cooked_write (regcache, ARG_1ST (gdbarch), buf);
     }
 
   for (i = 0; i < nargs; i++)
