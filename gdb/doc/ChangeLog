@@ -1,4 +1,4 @@
-2007-11-10  Joel Brobecker  <brobecker@adacore.com>
+2007-11-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Print Settings): Add documentation for "set/show
 	print frame-arguments".
