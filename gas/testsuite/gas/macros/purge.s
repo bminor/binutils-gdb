@@ -25,18 +25,3 @@
 	macro2
  .purgem MACRO1
  .purgem macro2
-
- .irpc a,ABCDEFGHIJKLMNOPQRSTUVWXYZ
-  .irpc b,ABCDEFGHIJKLMNOPQRSTUVWXYZ
-   .irpc c,ABCDEFGHIJKLMNOPQRSTUVWXYZ
-    .irpc d,ABCDEFGHIJKLMNOPQRSTUVWXYZ
-     .macro _\a\b\c\d arg1=0, arg2=0
-      .if \arg1 + \arg2
-       .purgem _\a\b\c\d
-      .endif
-     .endm
-	_\a\b\c\d 1, 2
-    .endr
-   .endr
-  .endr
- .endr

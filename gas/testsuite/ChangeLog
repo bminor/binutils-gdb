@@ -1,3 +1,7 @@
+2007-11-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/macros/purge.s: Delete irpc loops.
+
 2007-11-12  Tristan Gingold  <gingold@adacore.com>
 
 	* gas/ppc/regnames.d: New.
@@ -15,7 +19,7 @@
 
 2007-11-07  Tristan Gingold  <gingold@adacore.com>
 
-        * gas/ppc/test1xcoff32.d: Updated to match RTOC bug fix.
+	* gas/ppc/test1xcoff32.d: Updated to match RTOC bug fix.
 
 2007-11-06  Paul Brook  <paul@codesourcery.com>
 
@@ -749,7 +753,7 @@
 	* gas/m68k/mcf-trap.d: Allow for alternative trap mnemonics.
 	* gas/m68k/br-isab.d: Fix name of test.
 	* gas/m68k/br-isac.d: Fix name of test.
-	
+
 2007-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/4502
@@ -870,7 +874,7 @@
 	* gas/arm/thumb.d: White space cleanup.
 	* gas/arm/thumb2_relax.d: Likewise.
 	* gas/arm/thumb32.d: Likewise.
-	
+
 2007-04-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/m68k/ctrl-1.d, gas/m68k/ctrl-1.s: New.
