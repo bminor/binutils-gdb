@@ -29,6 +29,7 @@
 #include "elfcpp.h"
 #include "elfcpp_swap.h"
 #include "dwarf.h"
+#include "reloc.h"
 
 namespace gold
 {
@@ -44,25 +45,8 @@ template<int size, bool big_endian>
 class Dwarf_line_info
 {
  public:
-  // Initializes a .debug_line reader. Buffer and buffer length point
-  // to the beginning and length of the line information to read.
-  // Reader is a ByteReader class that has the endianness set
-  // properly.
-  Dwarf_line_info(const unsigned char* buffer, off_t buffer_length,
-		  Track_relocs<size, big_endian>* track_relocs,
-                  const unsigned char* symtab_buffer,
-                  off_t symtab_buffer_length)
-    : data_valid_(true),
-      buffer_(buffer), buffer_end_(buffer + buffer_length),
-      track_relocs_(track_relocs),
-      symtab_buffer_(symtab_buffer),
-      symtab_buffer_end_(symtab_buffer + symtab_buffer_length),
-      directories_(1), files_(1)
-  { }
-
-  // Start processing line info, and populates the offset_map_.
-  void
-  read_line_mappings();
+  // Initializes a .debug_line reader for a given object file.
+  Dwarf_line_info(Sized_relobj<size, big_endian>* object);
 
   // Given a section number and an offset, returns the associated
   // file and line-number, as a string: "file:lineno".  If unable
@@ -72,6 +56,10 @@ class Dwarf_line_info
   addr2line(unsigned int shndx, off_t offset);
 
  private:
+  // Start processing line info, and populates the offset_map_.
+  void
+  read_line_mappings();
+
   // Reads the relocation section associated with .debug_line and
   // stores relocation information in reloc_map_.
   void
@@ -128,14 +116,14 @@ class Dwarf_line_info
   // buffer is the buffer for our line info, starting at exactly where
   // the line info to read is.
   const unsigned char* buffer_;
-  const unsigned char* const buffer_end_;
+  const unsigned char* buffer_end_;
 
   // This has relocations that point into buffer.
-  Track_relocs<size, big_endian>* track_relocs_;
+  Track_relocs<size, big_endian> track_relocs_;
 
   // This is used to figure out what section to apply a relocation to.
-  const unsigned char* const symtab_buffer_;
-  const unsigned char* const symtab_buffer_end_;
+  const unsigned char* symtab_buffer_;
+  const unsigned char* symtab_buffer_end_;
 
   // Holds the directories and files as we see them.
   std::vector<std::string> directories_;

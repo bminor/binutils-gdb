@@ -24,6 +24,7 @@
 
 #include "elfcpp_swap.h"
 #include "dwarf.h"
+#include "object.h"
 #include "reloc.h"
 #include "dwarf_reader.h"
 
@@ -113,6 +114,72 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
   lsm->is_stmt = default_is_stmt;
   lsm->basic_block = false;
   lsm->end_sequence = false;
+}
+
+template<int size, bool big_endian>
+Dwarf_line_info<size, big_endian>::Dwarf_line_info(
+  Sized_relobj<size, big_endian>* object)
+  : data_valid_(true), buffer_(NULL), symtab_buffer_(NULL),
+    directories_(1), files_(1)
+{
+  unsigned int debug_shndx;
+  for (debug_shndx = 0; debug_shndx < object->shnum(); ++debug_shndx)
+    if (object->section_name(debug_shndx) == ".debug_line")
+      {
+        off_t buffer_size;
+        this->buffer_ = object->section_contents(
+            debug_shndx, &buffer_size, false);
+        this->buffer_end_ = this->buffer_ + buffer_size;
+        break;
+      }
+  if (this->buffer_ == NULL)
+    {
+      this->data_valid_ = false;
+      return;
+    }
+
+  // Find the relocation section for ".debug_line".
+  bool got_relocs = false;
+  for (unsigned int reloc_shndx = 0;
+       reloc_shndx < object->shnum();
+       ++reloc_shndx)
+    {
+      unsigned int reloc_sh_type = object->section_type(reloc_shndx);
+      if ((reloc_sh_type == elfcpp::SHT_REL
+	   || reloc_sh_type == elfcpp::SHT_RELA)
+	  && object->section_info(reloc_shndx) == debug_shndx)
+	{
+	  got_relocs = this->track_relocs_.initialize(object, reloc_shndx,
+                                                      reloc_sh_type);
+	  break;
+	}
+    }
+  if (!got_relocs)
+    {
+      this->data_valid_ = false;
+      return;
+    }
+
+  // Finally, we need the symtab section to interpret the relocs.
+  unsigned int symtab_shndx;
+  for (symtab_shndx = 0; symtab_shndx < object->shnum(); ++symtab_shndx)
+    if (object->section_type(symtab_shndx) == elfcpp::SHT_SYMTAB)
+      {
+        off_t symtab_size;
+        this->symtab_buffer_ = object->section_contents(
+            symtab_shndx, &symtab_size, false);
+        this->symtab_buffer_end_ = this->symtab_buffer_ + symtab_size;
+        break;
+      }
+  if (this->symtab_buffer_ == NULL)
+    {
+      this->data_valid_ = false;
+      return;
+    }
+
+  // Now that we have successfully read all the data, parse the debug
+  // info.
+  this->read_line_mappings();
 }
 
 // Read the DWARF header.
@@ -366,7 +433,7 @@ Dwarf_line_info<size, big_endian>::process_one_opcode(
                   this->data_valid_ = false;
                 }
               break;
-            }                
+            }
           case elfcpp::DW_LNE_define_file:
             {
               const char* filename  = reinterpret_cast<const char*>(start);
@@ -475,12 +542,12 @@ Dwarf_line_info<size, big_endian>::read_relocs()
 
   typename elfcpp::Elf_types<size>::Elf_Addr value;
   off_t reloc_offset;
-  while ((reloc_offset = this->track_relocs_->next_offset()) != -1)
+  while ((reloc_offset = this->track_relocs_.next_offset()) != -1)
     {
-      const unsigned int sym = this->track_relocs_->next_symndx();
+      const unsigned int sym = this->track_relocs_.next_symndx();
       const unsigned int shndx = this->symbol_section(sym, &value);
       this->reloc_map_[reloc_offset] = std::make_pair(shndx, value);
-      this->track_relocs_->advance(reloc_offset + 1);
+      this->track_relocs_.advance(reloc_offset + 1);
     }
 }
 
@@ -490,6 +557,9 @@ template<int size, bool big_endian>
 void
 Dwarf_line_info<size, big_endian>::read_line_mappings()
 {
+  if (this->data_valid_ == false)
+    return;
+
   read_relocs();
   while (this->buffer_ < this->buffer_end_)
     {
