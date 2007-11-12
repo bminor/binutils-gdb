@@ -1,3 +1,10 @@
+2007-11-12  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/5269
+	* config/tc-frv.c (md_show_usage): Rewrite usage description to
+	make it easier to translate.
+	* gas/po/gas.pot: Regenerate.
+
 2007-11-12  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ppc.c (md_assemble): If -mregnames, when parsing

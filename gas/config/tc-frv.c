@@ -455,32 +455,31 @@ md_parse_option (c, arg)
 }
 
 void
-md_show_usage (stream)
-  FILE * stream;
+md_show_usage (FILE * stream)
 {
   fprintf (stream, _("FRV specific command line options:\n"));
-  fprintf (stream, _("-G n         Data >= n bytes is in small data area\n"));
-  fprintf (stream, _("-mgpr-32     Note 32 gprs are used\n"));
-  fprintf (stream, _("-mgpr-64     Note 64 gprs are used\n"));
-  fprintf (stream, _("-mfpr-32     Note 32 fprs are used\n"));
-  fprintf (stream, _("-mfpr-64     Note 64 fprs are used\n"));
-  fprintf (stream, _("-msoft-float Note software fp is used\n"));
-  fprintf (stream, _("-mdword      Note stack is aligned to a 8 byte boundary\n"));
-  fprintf (stream, _("-mno-dword   Note stack is aligned to a 4 byte boundary\n"));
-  fprintf (stream, _("-mdouble     Note fp double insns are used\n"));
-  fprintf (stream, _("-mmedia      Note media insns are used\n"));
-  fprintf (stream, _("-mmuladd     Note multiply add/subtract insns are used\n"));
-  fprintf (stream, _("-mpack       Note instructions are packed\n"));
-  fprintf (stream, _("-mno-pack    Do not allow instructions to be packed\n"));
-  fprintf (stream, _("-mpic        Note small position independent code\n"));
-  fprintf (stream, _("-mPIC        Note large position independent code\n"));
-  fprintf (stream, _("-mlibrary-pic Compile library for large position indepedent code\n"));
-  fprintf (stream, _("-mfdpic      Assemble for the FDPIC ABI\n"));
-  fprintf (stream, _("-mnopic      Disable -mpic, -mPIC, -mlibrary-pic and -mfdpic\n"));
+  fprintf (stream, _("-G n            Put data <= n bytes in the small data area\n"));
+  fprintf (stream, _("-mgpr-32        Mark generated file as only using 32 GPRs\n"));
+  fprintf (stream, _("-mgpr-64        Mark generated file as using all 64 GPRs\n"));
+  fprintf (stream, _("-mfpr-32        Mark generated file as only using 32 FPRs\n"));
+  fprintf (stream, _("-mfpr-64        Mark generated file as using all 64 FPRs\n"));
+  fprintf (stream, _("-msoft-float    Mark generated file as using software FP\n"));
+  fprintf (stream, _("-mdword         Mark generated file as using a 8-byte stack alignment\n"));
+  fprintf (stream, _("-mno-dword      Mark generated file as using a 4-byte stack alignment\n"));
+  fprintf (stream, _("-mdouble        Mark generated file as using double precision FP insns\n"));
+  fprintf (stream, _("-mmedia         Mark generated file as using media insns\n"));
+  fprintf (stream, _("-mmuladd        Mark generated file as using multiply add/subtract insns\n"));
+  fprintf (stream, _("-mpack          Allow instructions to be packed\n"));
+  fprintf (stream, _("-mno-pack       Do not allow instructions to be packed\n"));
+  fprintf (stream, _("-mpic           Mark generated file as using small position independent code\n"));
+  fprintf (stream, _("-mPIC           Mark generated file as using large position independent code\n"));
+  fprintf (stream, _("-mlibrary-pic   Mark generated file as using position indepedent code for libraries\n"));
+  fprintf (stream, _("-mfdpic         Assemble for the FDPIC ABI\n"));
+  fprintf (stream, _("-mnopic         Disable -mpic, -mPIC, -mlibrary-pic and -mfdpic\n"));
   fprintf (stream, _("-mcpu={fr500|fr550|fr400|fr405|fr450|fr300|frv|simple|tomcat}\n"));
-  fprintf (stream, _("             Record the cpu type\n"));
-  fprintf (stream, _("-mtomcat-stats Print out stats for tomcat workarounds\n"));
-  fprintf (stream, _("-mtomcat-debug Debug tomcat workarounds\n"));
+  fprintf (stream, _("                Record the cpu type\n"));
+  fprintf (stream, _("-mtomcat-stats  Print out stats for tomcat workarounds\n"));
+  fprintf (stream, _("-mtomcat-debug  Debug tomcat workarounds\n"));
 } 
 
 
