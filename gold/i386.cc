@@ -1046,9 +1046,10 @@ Target_i386::Scan::global(const General_options& options,
             if (!gsym->final_value_is_known())
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-                if (gsym->is_preemptible())
-                    rel_dyn->add_global(gsym, elfcpp::R_386_GLOB_DAT, got,
-                                        gsym->got_offset());
+                if (gsym->is_from_dynobj()
+		    || gsym->is_preemptible())
+		  rel_dyn->add_global(gsym, elfcpp::R_386_GLOB_DAT, got,
+				      gsym->got_offset());
                 else
                   {
                     rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,

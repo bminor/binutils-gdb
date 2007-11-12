@@ -1020,7 +1020,8 @@ Target_x86_64::Scan::global(const General_options& options,
             if (!gsym->final_value_is_known())
               {
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-                if (gsym->is_preemptible())
+                if (gsym->is_from_dynobj()
+		    || gsym->is_preemptible())
                   rela_dyn->add_global(gsym, elfcpp::R_X86_64_GLOB_DAT, got,
                                        gsym->got_offset(), 0);
                 else

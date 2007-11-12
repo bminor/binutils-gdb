@@ -405,6 +405,10 @@ class Symbol
   bool
   is_preemptible() const
   {
+    // It doesn't make sense to ask whether a symbol defined in
+    // another object is preemptible.
+    gold_assert(!this->is_from_dynobj());
+
     return (this->visibility_ != elfcpp::STV_INTERNAL
             && this->visibility_ != elfcpp::STV_HIDDEN
             && this->visibility_ != elfcpp::STV_PROTECTED
