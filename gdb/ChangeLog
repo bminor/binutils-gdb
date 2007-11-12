@@ -1,3 +1,7 @@
+2007-11-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Add entry for new set/show print frame-args command.
+
 2007-11-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Add missing

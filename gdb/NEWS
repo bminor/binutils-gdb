@@ -3,6 +3,13 @@
 
 *** Changes since GDB 6.7
 
+* New commands
+
+set print frame-arguments (all|scalars|none)
+show print frame-arguments
+  The value of this variable can be changed to control which argument
+  values should be printed by the debugger when displaying a frame.
+
 * GDB can now be built as a native debugger for debugging Windows x86
 (mingw32) Portable Executable (PE) programs.
 
