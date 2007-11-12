@@ -46,7 +46,7 @@ class Dwarf_line_info
 {
  public:
   // Initializes a .debug_line reader for a given object file.
-  Dwarf_line_info(Sized_relobj<size, big_endian>* object);
+  Dwarf_line_info(Object* object);
 
   // Given a section number and an offset, returns the associated
   // file and line-number, as a string: "file:lineno".  If unable

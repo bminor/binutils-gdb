@@ -117,9 +117,8 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
 }
 
 template<int size, bool big_endian>
-Dwarf_line_info<size, big_endian>::Dwarf_line_info(
-  Sized_relobj<size, big_endian>* object)
-  : data_valid_(true), buffer_(NULL), symtab_buffer_(NULL),
+Dwarf_line_info<size, big_endian>::Dwarf_line_info(Object* object)
+  : data_valid_(false), buffer_(NULL), symtab_buffer_(NULL),
     directories_(1), files_(1)
 {
   unsigned int debug_shndx;
@@ -133,10 +132,7 @@ Dwarf_line_info<size, big_endian>::Dwarf_line_info(
         break;
       }
   if (this->buffer_ == NULL)
-    {
-      this->data_valid_ = false;
-      return;
-    }
+    return;
 
   // Find the relocation section for ".debug_line".
   bool got_relocs = false;
@@ -155,10 +151,7 @@ Dwarf_line_info<size, big_endian>::Dwarf_line_info(
 	}
     }
   if (!got_relocs)
-    {
-      this->data_valid_ = false;
-      return;
-    }
+    return;
 
   // Finally, we need the symtab section to interpret the relocs.
   unsigned int symtab_shndx;
@@ -172,13 +165,11 @@ Dwarf_line_info<size, big_endian>::Dwarf_line_info(
         break;
       }
   if (this->symtab_buffer_ == NULL)
-    {
-      this->data_valid_ = false;
-      return;
-    }
+    return;
 
   // Now that we have successfully read all the data, parse the debug
   // info.
+  this->data_valid_ = true;
   this->read_line_mappings();
 }
 
@@ -557,8 +548,7 @@ template<int size, bool big_endian>
 void
 Dwarf_line_info<size, big_endian>::read_line_mappings()
 {
-  if (this->data_valid_ == false)
-    return;
+  gold_assert(this->data_valid_ == true);
 
   read_relocs();
   while (this->buffer_ < this->buffer_end_)
