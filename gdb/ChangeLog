@@ -1,5 +1,15 @@
 2007-11-12  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (gdbarch_alloc): Replace current_gdbarch by gdbarch. Remove
+	obsolete comment.
+	(verify_gdbarch, gdbarch_dump): Likewise.
+	(do_read): Update comment.
+	(addr_bit, bfd_arch_info, target_desc, long_long_bit, floatformat)
+	(ptr_bit, name_of_malloc): Replace current_gdbarch by gdbarch.
+	* gdbarch.{c,h}: Regenerate.
+
+2007-11-12  Markus Deuling  <deuling@de.ibm.com>
+
 	* xtensa-tdep.c (ARG_1ST): Replace ARGS_FIRST_REG by its expression.
 	(ARGS_FIRST_REG): Remove.
 	(areg_numer): New function.

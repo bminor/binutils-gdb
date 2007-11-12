@@ -292,7 +292,7 @@ do
 
 	# You cannot specify both a zero INVALID_P and a POSTDEFAULT.
 
-	# Variable declarations can refer to ``current_gdbarch'' which
+	# Variable declarations can refer to ``gdbarch'' which
 	# will contain the current architecture.  Care should be
 	# taken.
 
@@ -336,13 +336,13 @@ function_list ()
 {
   # See below (DOCO) for description of each field
   cat <<EOF
-i:const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_arch_struct::::gdbarch_bfd_arch_info (current_gdbarch)->printable_name
+i:const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_arch_struct::::gdbarch_bfd_arch_info (gdbarch)->printable_name
 #
 i:int:byte_order:::BFD_ENDIAN_BIG
 #
 i:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
 #
-i:const struct target_desc *:target_desc:::::::paddr_d ((long) current_gdbarch->target_desc)
+i:const struct target_desc *:target_desc:::::::paddr_d ((long) gdbarch->target_desc)
 # Number of bits in a char or unsigned char for the target machine.
 # Just like CHAR_BIT in <limits.h> but describes the target machine.
 # v:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
@@ -355,7 +355,7 @@ v:int:int_bit:::8 * sizeof (int):4*TARGET_CHAR_BIT::0
 v:int:long_bit:::8 * sizeof (long):4*TARGET_CHAR_BIT::0
 # Number of bits in a long long or unsigned long long for the target
 # machine.
-v:int:long_long_bit:::8 * sizeof (LONGEST):2*current_gdbarch->long_bit::0
+v:int:long_long_bit:::8 * sizeof (LONGEST):2*gdbarch->long_bit::0
 
 # The ABI default bit-size and format for "float", "double", and "long
 # double".  These bit/format pairs should eventually be combined into
@@ -364,11 +364,11 @@ v:int:long_long_bit:::8 * sizeof (LONGEST):2*current_gdbarch->long_bit::0
 # useful).
 
 v:int:float_bit:::8 * sizeof (float):4*TARGET_CHAR_BIT::0
-v:const struct floatformat **:float_format:::::floatformats_ieee_single::pformat (current_gdbarch->float_format)
+v:const struct floatformat **:float_format:::::floatformats_ieee_single::pformat (gdbarch->float_format)
 v:int:double_bit:::8 * sizeof (double):8*TARGET_CHAR_BIT::0
-v:const struct floatformat **:double_format:::::floatformats_ieee_double::pformat (current_gdbarch->double_format)
+v:const struct floatformat **:double_format:::::floatformats_ieee_double::pformat (gdbarch->double_format)
 v:int:long_double_bit:::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
-v:const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (current_gdbarch->long_double_format)
+v:const struct floatformat **:long_double_format:::::floatformats_ieee_double::pformat (gdbarch->long_double_format)
 
 # For most targets, a pointer on the target and its representation as an
 # address in GDB have the same size and "look the same".  For such a
@@ -380,9 +380,9 @@ v:const struct floatformat **:long_double_format:::::floatformats_ieee_double::p
 # as well.
 #
 # ptr_bit is the size of a pointer on the target
-v:int:ptr_bit:::8 * sizeof (void*):current_gdbarch->int_bit::0
+v:int:ptr_bit:::8 * sizeof (void*):gdbarch->int_bit::0
 # addr_bit is the size of a target address as represented in gdb
-v:int:addr_bit:::8 * sizeof (void*):0:gdbarch_ptr_bit (current_gdbarch):
+v:int:addr_bit:::8 * sizeof (void*):0:gdbarch_ptr_bit (gdbarch):
 #
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
 v:int:char_signed:::1:-1:1
@@ -574,7 +574,7 @@ m:int:in_function_epilogue_p:CORE_ADDR addr:addr:0:generic_in_function_epilogue_
 m:char *:construct_inferior_arguments:int argc, char **argv:argc, argv::construct_inferior_arguments::0
 f:void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym::default_elf_make_msymbol_special::0
 f:void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym::default_coff_make_msymbol_special::0
-v:const char *:name_of_malloc:::"malloc":"malloc"::0:current_gdbarch->name_of_malloc
+v:const char *:name_of_malloc:::"malloc":"malloc"::0:gdbarch->name_of_malloc
 v:int:cannot_step_breakpoint:::0:0::0
 v:int:have_nonsteppable_watchpoint:::0:0::0
 F:int:address_class_type_flags:int byte_size, int dwarf2_addr_class:byte_size, dwarf2_addr_class
@@ -1196,32 +1196,26 @@ struct gdbarch *
 gdbarch_alloc (const struct gdbarch_info *info,
                struct gdbarch_tdep *tdep)
 {
-  /* NOTE: The new architecture variable is named \`\`current_gdbarch''
-     so that macros such as TARGET_ARCHITECTURE, when expanded, refer to
-     the current local architecture and not the previous global
-     architecture.  This ensures that the new architectures initial
-     values are not influenced by the previous architecture.  Once
-     everything is parameterised with gdbarch, this will go away.  */
-  struct gdbarch *current_gdbarch;
+  struct gdbarch *gdbarch;
 
   /* Create an obstack for allocating all the per-architecture memory,
      then use that to allocate the architecture vector.  */
   struct obstack *obstack = XMALLOC (struct obstack);
   obstack_init (obstack);
-  current_gdbarch = obstack_alloc (obstack, sizeof (*current_gdbarch));
-  memset (current_gdbarch, 0, sizeof (*current_gdbarch));
-  current_gdbarch->obstack = obstack;
+  gdbarch = obstack_alloc (obstack, sizeof (*gdbarch));
+  memset (gdbarch, 0, sizeof (*gdbarch));
+  gdbarch->obstack = obstack;
 
-  alloc_gdbarch_data (current_gdbarch);
+  alloc_gdbarch_data (gdbarch);
 
-  current_gdbarch->tdep = tdep;
+  gdbarch->tdep = tdep;
 EOF
 printf "\n"
 function_list | while do_read
 do
     if class_is_info_p
     then
-	printf "  current_gdbarch->${function} = info->${function};\n"
+	printf "  gdbarch->${function} = info->${function};\n"
     fi
 done
 printf "\n"
@@ -1232,14 +1226,14 @@ do
     then
 	if [ -n "${predefault}" -a "x${predefault}" != "x0" ]
 	then
-	  printf "  current_gdbarch->${function} = ${predefault};\n"
+	  printf "  gdbarch->${function} = ${predefault};\n"
 	fi
     fi
 done
 cat <<EOF
   /* gdbarch_alloc() */
 
-  return current_gdbarch;
+  return gdbarch;
 }
 EOF
 
@@ -1282,14 +1276,8 @@ cat <<EOF
 
 /* Ensure that all values in a GDBARCH are reasonable.  */
 
-/* NOTE/WARNING: The parameter is called \`\`current_gdbarch'' so that it
-   just happens to match the global variable \`\`current_gdbarch''.  That
-   way macros refering to that variable get the local and not the global
-   version - ulgh.  Once everything is parameterised with gdbarch, this
-   will go away. */
-
 static void
-verify_gdbarch (struct gdbarch *current_gdbarch)
+verify_gdbarch (struct gdbarch *gdbarch)
 {
   struct ui_file *log;
   struct cleanup *cleanups;
@@ -1298,9 +1286,9 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   log = mem_fileopen ();
   cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
-  if (current_gdbarch->byte_order == BFD_ENDIAN_UNKNOWN)
+  if (gdbarch->byte_order == BFD_ENDIAN_UNKNOWN)
     fprintf_unfiltered (log, "\n\tbyte-order");
-  if (current_gdbarch->bfd_arch_info == NULL)
+  if (gdbarch->bfd_arch_info == NULL)
     fprintf_unfiltered (log, "\n\tbfd_arch_info");
   /* Check those that need to be defined for the given multi-arch level. */
 EOF
@@ -1318,22 +1306,22 @@ do
  	elif [ -n "${invalid_p}" -a -n "${postdefault}" ]
 	then
 	    printf "  if (${invalid_p})\n"
-	    printf "    current_gdbarch->${function} = ${postdefault};\n"
+	    printf "    gdbarch->${function} = ${postdefault};\n"
 	elif [ -n "${predefault}" -a -n "${postdefault}" ]
 	then
-	    printf "  if (current_gdbarch->${function} == ${predefault})\n"
-	    printf "    current_gdbarch->${function} = ${postdefault};\n"
+	    printf "  if (gdbarch->${function} == ${predefault})\n"
+	    printf "    gdbarch->${function} = ${postdefault};\n"
 	elif [ -n "${postdefault}" ]
 	then
-	    printf "  if (current_gdbarch->${function} == 0)\n"
-	    printf "    current_gdbarch->${function} = ${postdefault};\n"
+	    printf "  if (gdbarch->${function} == 0)\n"
+	    printf "    gdbarch->${function} = ${postdefault};\n"
 	elif [ -n "${invalid_p}" ]
 	then
 	    printf "  if (${invalid_p})\n"
 	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
 	elif [ -n "${predefault}" ]
 	then
-	    printf "  if (current_gdbarch->${function} == ${predefault})\n"
+	    printf "  if (gdbarch->${function} == ${predefault})\n"
 	    printf "    fprintf_unfiltered (log, \"\\\\n\\\\t${function}\");\n"
 	fi
     fi
@@ -1355,14 +1343,8 @@ printf "\n"
 cat <<EOF
 /* Print out the details of the current architecture. */
 
-/* NOTE/WARNING: The parameter is called \`\`current_gdbarch'' so that it
-   just happens to match the global variable \`\`current_gdbarch''.  That
-   way macros refering to that variable get the local and not the global
-   version - ulgh.  Once everything is parameterised with gdbarch, this
-   will go away. */
-
 void
-gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
+gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 {
   const char *gdb_xm_file = "<not-defined>";
   const char *gdb_nm_file = "<not-defined>";
@@ -1393,24 +1375,24 @@ do
     then
 	printf "  fprintf_unfiltered (file,\n"
 	printf "                      \"gdbarch_dump: gdbarch_${function}_p() = %%d\\\\n\",\n"
-	printf "                      gdbarch_${function}_p (current_gdbarch));\n"
+	printf "                      gdbarch_${function}_p (gdbarch));\n"
     fi
     # Print the corresponding value.
     if class_is_function_p
     then
 	printf "  fprintf_unfiltered (file,\n"
 	printf "                      \"gdbarch_dump: ${function} = <0x%%lx>\\\\n\",\n"
-	printf "                      (long) current_gdbarch->${function});\n"
+	printf "                      (long) gdbarch->${function});\n"
     else
 	# It is a variable
 	case "${print}:${returntype}" in
 	    :CORE_ADDR )
 		fmt="0x%s"
-		print="paddr_nz (current_gdbarch->${function})"
+		print="paddr_nz (gdbarch->${function})"
 		;;
 	    :* )
 	        fmt="%s"
-		print="paddr_d (current_gdbarch->${function})"
+		print="paddr_d (gdbarch->${function})"
 		;;
 	    * )
 	        fmt="%s"
@@ -1422,8 +1404,8 @@ do
     fi
 done
 cat <<EOF
-  if (current_gdbarch->dump_tdep != NULL)
-    current_gdbarch->dump_tdep (current_gdbarch, file);
+  if (gdbarch->dump_tdep != NULL)
+    gdbarch->dump_tdep (gdbarch, file);
 }
 EOF
 
