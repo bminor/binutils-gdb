@@ -1,3 +1,9 @@
+2007-11-12  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-ppc.c (md_assemble): If -mregnames, when parsing
+	PPC_OPERAND_CR always parse as expression to allow register name
+	followed by an expression.
+
 2007-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Re-order suffix check.

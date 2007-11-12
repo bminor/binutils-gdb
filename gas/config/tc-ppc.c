@@ -2454,7 +2454,8 @@ md_assemble (char *str)
       else
 #endif		/* TE_PE */
 	{
-	  if (! register_name (&ex))
+	  if ((reg_names_p && (operand->flags & PPC_OPERAND_CR) != 0)
+	      || !register_name (&ex))
 	    {
 	      char save_lex = lex_type['%'];
 
