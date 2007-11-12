@@ -1,3 +1,8 @@
+2007-11-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Print Settings): Add documentation for "set/show
+	print frame-arguments".
+
 2007-11-05  Luis Machado  <luisgpm@br.ibm.com>
 
 	* gdb.texinfo: Update printf command's description.

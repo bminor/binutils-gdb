@@ -6240,6 +6240,51 @@ Setting  @var{number-of-elements} to zero means that the printing is unlimited.
 Display the number of elements of a large array that @value{GDBN} will print.
 If the number is 0, then the printing is unlimited.
 
+@item set print frame-arguments @var{value}
+@cindex printing frame argument values
+@cindex print all frame argument values
+@cindex print frame argument values for scalars only
+@cindex do not print frame argument values
+This command allows to control how the values of arguments are printed
+when the debugger prints a frame (@pxref{Frames}).  The possible
+values are:
+
+@table @code
+@item all
+The values of all arguments are printed.  This is the default.
+
+@item scalars
+Print the value of an argument only if it is a scalar.  The value of more
+complex arguments such as arrays, structures, unions, etc, is replaced
+by @code{@dots{}}.  Here is an example where only scalar arguments are shown:
+
+@smallexample
+#1  0x08048361 in call_me (i=3, s=@dots{}, ss=0xbf8d508c, u=@dots{}, e=green)
+  at frame-args.c:23
+@end smallexample
+
+@item none
+None of the argument values are printed.  Instead, the value of each argument
+is replaced by @code{@dots{}}.  In this case, the example above now becomes:
+
+@smallexample
+#1  0x08048361 in call_me (i=@dots{}, s=@dots{}, ss=@dots{}, u=@dots{}, e=@dots{})
+  at frame-args.c:23
+@end smallexample
+@end table
+
+By default, all argument values are always printed.  But this command
+can be useful in several cases.  For instance, it can be used to reduce
+the amount of information printed in each frame, making the backtrace
+more readable.  Also, this command can be used to improve performance
+when displaying Ada frames, because the computation of large arguments
+can sometimes be CPU-intensive, especiallly in large applications.
+Setting @code{print frame-arguments} to @code{scalars} or @code{none}
+avoids this computation, thus speeding up the display of each Ada frame.
+
+@item show print frame-arguments
+Show how the value of arguments should be displayed when printing a frame.
+
 @item set print repeats
 @cindex repeated array elements
 Set the threshold for suppressing display of repeated array
