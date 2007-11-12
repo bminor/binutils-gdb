@@ -1,3 +1,9 @@
+2007-11-12  Tristan Gingold  <gingold@adacore.com>
+
+	* gas/ppc/regnames.d: New.
+	* gas/ppc/regnames.s: Likewise.
+	* gas/ppc/ppc.exp: Run it.
+
 2007-11-07  Tristan Gingold  <gingold@adacore.com>
 
 	* ia64-dis.c (print_insn_ia64): Generate symbolic names for cr
