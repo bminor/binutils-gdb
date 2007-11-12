@@ -672,12 +672,10 @@ Copy_relocs<size, big_endian>::emit(
 template<int size, bool big_endian>
 bool
 Track_relocs<size, big_endian>::initialize(
-    Sized_relobj<size, big_endian>* object,
+    Object* object,
     unsigned int reloc_shndx,
     unsigned int reloc_type)
 {
-  this->object_ = object;
-
   // If RELOC_SHNDX is -1U, it means there is more than one reloc
   // section for the .eh_frame section.  We can't handle that case.
   if (reloc_shndx == -1U)

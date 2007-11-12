@@ -32,6 +32,7 @@ namespace gold
 {
 
 class General_options;
+class Object;
 class Relobj;
 class Read_relocs_data;
 class Symbol;
@@ -609,7 +610,7 @@ class Track_relocs
 {
  public:
   Track_relocs()
-    : object_(NULL), prelocs_(NULL), len_(0), pos_(0), reloc_size_(0)
+    : prelocs_(NULL), len_(0), pos_(0), reloc_size_(0)
   { }
 
   // Initialize the Track_relocs object.  OBJECT is the object holding
@@ -618,7 +619,7 @@ class Track_relocs
   // (elfcpp::SHT_REL or elfcpp::SHT_RELA).  This returns false if
   // something went wrong.
   bool
-  initialize(Sized_relobj<size, big_endian>* object, unsigned int reloc_shndx,
+  initialize(Object* object, unsigned int reloc_shndx,
 	     unsigned int reloc_type);
 
   // Return the offset in the data section to which the next reloc
@@ -637,9 +638,7 @@ class Track_relocs
   advance(off_t offset);
 
  private:
-  // The object file.
-  Sized_relobj<size, big_endian>* object_;
-  // The contents of the reloc section.
+  // The contents of the input object's reloc section.
   const unsigned char* prelocs_;
   // The length of the reloc section.
   off_t len_;
