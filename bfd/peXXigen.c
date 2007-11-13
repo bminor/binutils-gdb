@@ -1987,13 +1987,22 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
 bfd_boolean
 _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 {
+  pe_data_type *ipe, *ope;
+
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_coff_flavour
       || obfd->xvec->flavour != bfd_target_coff_flavour)
     return TRUE;
 
-  pe_data (obfd)->pe_opthdr = pe_data (ibfd)->pe_opthdr;
-  pe_data (obfd)->dll = pe_data (ibfd)->dll;
+  ipe = pe_data (ibfd);
+  ope = pe_data (obfd);
+ 
+  ope->pe_opthdr = ipe->pe_opthdr;
+  ope->dll = ipe->dll;
+
+  /* Don't copy input subsystem if output is different from input.  */
+  if (obfd->xvec != ibfd->xvec)
+    ope->pe_opthdr.Subsystem = IMAGE_SUBSYSTEM_UNKNOWN;
 
   /* For strip: if we removed .reloc, we'll make a real mess of things
      if we don't remove this entry as well.  */

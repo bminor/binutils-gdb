@@ -1,3 +1,9 @@
+2007-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/5307
+	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Don't
+	copy input subsystem if output is different from input.
+
 2007-11-13  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_final_link_relocate): Prevent the
