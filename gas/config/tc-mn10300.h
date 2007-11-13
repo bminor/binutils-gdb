@@ -26,8 +26,8 @@
 #define DIFF_EXPR_OK
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
 
-#define TC_FORCE_RELOCATION(FIX)			\
-  (generic_force_reloc (FIX))
+#define TC_FORCE_RELOCATION(FIX) mn10300_force_relocation (FIX)
+extern bfd_boolean mn10300_force_relocation (struct fix *);
 
 #define TC_FORCE_RELOCATION_LOCAL(FIX)			\
   (!(FIX)->fx_pcrel					\
@@ -36,14 +36,13 @@
    || (FIX)->fx_r_type == BFD_RELOC_32_GOT_PCREL	\
    || TC_FORCE_RELOCATION (FIX))
 
-#define md_parse_name(name, exprP, mode, nextcharP) \
-    mn10300_parse_name ((name), (exprP), (mode), (nextcharP))
-int mn10300_parse_name PARAMS ((char const *, expressionS *,
-				enum expr_mode, char *));
+#define md_parse_name(NAME, EXPRP, MODE, NEXTCHARP) \
+    mn10300_parse_name ((NAME), (EXPRP), (MODE), (NEXTCHARP))
+int mn10300_parse_name (char const *, expressionS *, enum expr_mode, char *);
 
 #define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP) \
      mn10300_cons_fix_new ((FRAG), (OFF), (LEN), (EXP))
-void mn10300_cons_fix_new PARAMS ((fragS *, int, int, expressionS *));
+void mn10300_cons_fix_new (fragS *, int, int, expressionS *);
 
 /* This is used to construct expressions out of @GOTOFF, @PLT and @GOT
    symbols.  The relocation type is stored in X_md.  */

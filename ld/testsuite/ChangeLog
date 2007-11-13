@@ -1,3 +1,11 @@
+2007-11-13  Nick Clifton  <nickc@redhat.com>
+
+	* ld-mn10300/i127740.s: New test: Checks relaxation and alignment.
+	* ld-mn10300/i127740.d: New file: Expected disassembly.
+	* ld-mn10300/i135409-3.s: New test: Check symbols inside a relaxed region.
+	* ld-mn10300/i135409-3.d: New file: Expected disassembly.
+	* ld-mn10300/mn10300.exp: Run new tests.
+
 2007-11-08  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-vxworks/tls-2.d: New.

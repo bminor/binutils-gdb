@@ -1,3 +1,15 @@
+2007-11-13  Nick Clifton  <nickc@redhat.com>
+
+	* elf-m10300.c (mn10300_elf_final_link_relocate): Prevent the
+	accidental termination of DWARF location list entries.
+	(mn10300_elf_relax_delete_bytes): Stop deletion if an align reloc
+	is encountered that is larger than or not a mutliple of the number
+	of bytes being deleted.
+	When adjusting symbols, any symbols inside the region being
+	deleted must be moved to the end of the region.
+	Move align relocs forward if there is room for them after the
+	deletion of the region.
+
 2007-11-13  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 5233

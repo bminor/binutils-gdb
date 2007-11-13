@@ -48,6 +48,14 @@ set mn10300_tests {
 	"i112045-3.x"
     }
     {
+	"relaxation and alignment directives"
+	"-relax -Ttext 100"
+	""
+	{ "i127740.s" }
+	{ {objdump -d i127740.d} }
+	"i127740.x"
+    }
+    {
 	"adjustment of symbols due to relaxation"
 	"-Tdata 1f -Ttext 0 -relax"
 	""
@@ -62,6 +70,14 @@ set mn10300_tests {
 	{ "i135409-2.s" }
 	{ {readelf --syms i135409-2.d} }
 	"i135409-2.x"
+    }
+    {
+	"adjustment of symbols due to relaxation (with a symbol in the deleted region)"
+	"-Tdata 1f -Ttext 0 -relax"
+	""
+	{ "i135409-3.s" }
+	{ {objdump -d i135409-3.d} }
+	"i135409-3.x"
     }
 }
 

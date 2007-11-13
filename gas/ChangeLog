@@ -1,3 +1,10 @@
+2007-11-13  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-mn10300.c (mn10300_force_relocation): Force a reloc to
+	be generated for alignment fixups.
+	* config/tc-mn10300.h (TC_FORCE_RELOCATION): Call
+	mn10300_force_relocation.
+
 2007-11-12  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/5269

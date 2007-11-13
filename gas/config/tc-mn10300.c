@@ -2571,11 +2571,9 @@ mn10300_allow_local_subtract (expressionS * left, expressionS * right, segT sect
 void
 mn10300_handle_align (fragS *frag)
 {
-  if (! linkrelax)
-    return;
-
-  if ((frag->fr_type == rs_align
-       || frag->fr_type == rs_align_code)
+  if (linkrelax
+      && (frag->fr_type == rs_align
+	  || frag->fr_type == rs_align_code)
       && frag->fr_address + frag->fr_fix > 0
       && frag->fr_offset > 1
       && now_seg != bss_section
@@ -2589,4 +2587,15 @@ mn10300_handle_align (fragS *frag)
        thus causing cvt_frag_to_fill to reduce the size of the frag to zero.  */
     fix_new (frag, frag->fr_fix, 0, & abs_symbol, frag->fr_offset, FALSE,
 	     BFD_RELOC_MN10300_ALIGN);
+}
+
+bfd_boolean
+mn10300_force_relocation (struct fix * fixp)
+{
+  if (linkrelax
+      && (fixp->fx_pcrel
+	  || fixp->fx_r_type == BFD_RELOC_MN10300_ALIGN))
+    return TRUE;
+
+  return generic_force_reloc (fixp);
 }

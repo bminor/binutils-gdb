@@ -1039,6 +1039,17 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 	case R_MN10300_16:
 	case R_MN10300_8:
 	  value -= sym_diff_value;
+	  /* If we are computing a 32-bit value for the location lists
+	     and the result is 0 then we add one to the value.  A zero
+	     value can result because of linker relaxation deleteing
+	     prologue instructions and using a value of 1 (for the begin
+	     and end offsets in the location list entry) results in a
+	     nul entry which does not prevent the following entries from
+	     being parsed.  */
+	  if (r_type == R_MN10300_32
+	      && value == 0
+	      && strcmp (input_section->name, ".debug_loc") == 0)
+	    value = 1;
 	  sym_diff_section = NULL;
 	  is_sym_diff_reloc = TRUE;
 	  break;
@@ -1856,17 +1867,23 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
 	--irelend;
       
       /* The deletion must stop at the next ALIGN reloc for an aligment
-	 power larger than the number of bytes we are deleting.  */
+	 power larger than, or not a multiple of, the number of bytes we
+	 are deleting.  */
       for (; irel < irelend; irel++)
-	if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_ALIGN
-	    && irel->r_offset > addr
-	    && irel->r_offset < toaddr
-	    && count < (1 << irel->r_addend))
-	  {
-	    irelalign = irel;
-	    toaddr = irel->r_offset;
-	    break;
-	  }
+	{
+	  int alignment = 1 << irel->r_addend;
+
+	  if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_ALIGN
+	      && irel->r_offset > addr
+	      && irel->r_offset < toaddr
+	      && (count < alignment
+		  || alignment % count != 0))
+	    {
+	      irelalign = irel;
+	      toaddr = irel->r_offset;
+	      break;
+	    }
+	}
     }
 
   /* Actually delete the bytes.  */
@@ -1898,11 +1915,17 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
     {
       /* Get the new reloc address.  */
       if ((irel->r_offset > addr
-	   && irel->r_offset < toaddr))
+	   && irel->r_offset < toaddr)
+	  || (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_ALIGN
+	      && irel->r_offset == toaddr))
 	irel->r_offset -= count;
     }
 
-  /* Adjust the local symbols defined in this section.  */
+  /* Adjust the local symbols in the section, reducing their value
+     by the number of bytes deleted.  Note - symbols within the deleted
+     region are moved to the address of the start of the region, which
+     actually means that they will address the byte beyond the end of
+     the region once the deletion has been completed.  */
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
   for (isymend = isym + symtab_hdr->sh_info; isym < isymend; isym++)
@@ -1910,7 +1933,12 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
       if (isym->st_shndx == sec_shndx
 	  && isym->st_value > addr
 	  && isym->st_value < toaddr)
-	isym->st_value -= count;
+	{
+	  if (isym->st_value < addr + count)
+	    isym->st_value = addr;
+	  else
+	    isym->st_value -= count;
+	}
       /* Adjust the function symbol's size as well.  */
       else if (isym->st_shndx == sec_shndx
 	       && ELF_ST_TYPE (isym->st_info) == STT_FUNC
@@ -1933,7 +1961,12 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
 	  && sym_hash->root.u.def.section == sec
 	  && sym_hash->root.u.def.value > addr
 	  && sym_hash->root.u.def.value < toaddr)
-	sym_hash->root.u.def.value -= count;
+	{
+	  if (sym_hash->root.u.def.value < addr + count)
+	    sym_hash->root.u.def.value = addr;
+	  else
+	    sym_hash->root.u.def.value -= count;
+	}
       /* Adjust the function symbol's size as well.  */
       else if (sym_hash->root.type == bfd_link_hash_defined
 	       && sym_hash->root.u.def.section == sec
@@ -1941,6 +1974,26 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
 	       && sym_hash->root.u.def.value + sym_hash->size > addr
 	       && sym_hash->root.u.def.value + sym_hash->size < toaddr)
 	sym_hash->size -= count;
+    }
+
+  /* See if we can move the ALIGN reloc forward.
+     We have adjusted r_offset for it already.  */
+  if (irelalign != NULL)
+    {
+      bfd_vma alignto, alignaddr;
+
+      if ((int) irelalign->r_addend > 0)
+	{
+	  /* This is the old address.  */
+	  alignto = BFD_ALIGN (toaddr, 1 << irelalign->r_addend);
+	  /* This is where the align points to now.  */
+	  alignaddr = BFD_ALIGN (irelalign->r_offset,
+				 1 << irelalign->r_addend);
+	  if (alignaddr < alignto)
+	    /* Tail recursion.  */
+	    return mn10300_elf_relax_delete_bytes (abfd, sec, alignaddr,
+						   (int) (alignto - alignaddr));
+	}
     }
 
   return TRUE;
