@@ -119,14 +119,76 @@ static const unsigned int def_flag = 0 << def_undef_or_common_shift;
 static const unsigned int undef_flag = 1 << def_undef_or_common_shift;
 static const unsigned int common_flag = 2 << def_undef_or_common_shift;
 
+// This convenience function combines all the flags based on facts
+// about the symbol.
+
+static unsigned int
+symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
+	       unsigned int shndx, elfcpp::STT type)
+{
+  unsigned int bits;
+
+  switch (binding)
+    {
+    case elfcpp::STB_GLOBAL:
+      bits = global_flag;
+      break;
+
+    case elfcpp::STB_WEAK:
+      bits = weak_flag;
+      break;
+
+    case elfcpp::STB_LOCAL:
+      // We should only see externally visible symbols in the symbol
+      // table.
+      gold_error(_("invalid STB_LOCAL symbol in external symbols"));
+      bits = global_flag;
+
+    default:
+      // Any target which wants to handle STB_LOOS, etc., needs to
+      // define a resolve method.
+      gold_error(_("unsupported symbol binding"));
+      bits = global_flag;
+    }
+
+  if (is_dynamic)
+    bits |= dynamic_flag;
+  else
+    bits |= regular_flag;
+
+  switch (shndx)
+    {
+    case elfcpp::SHN_UNDEF:
+      bits |= undef_flag;
+      break;
+
+    case elfcpp::SHN_COMMON:
+      bits |= common_flag;
+      break;
+
+    default:
+      if (type == elfcpp::STT_COMMON)
+	bits |= common_flag;
+      else
+        bits |= def_flag;
+      break;
+    }
+
+  return bits;
+}
+
 // Resolve a symbol.  This is called the second and subsequent times
-// we see a symbol.  TO is the pre-existing symbol.  SYM is the new
-// symbol, seen in OBJECT.  VERSION of the version of SYM.
+// we see a symbol.  TO is the pre-existing symbol.  ORIG_SYM is the
+// new symbol, seen in OBJECT.  SYM is almost always identical to
+// ORIG_SYM, but may be munged (for instance, if we determine the
+// symbol is in a to-be-discarded section, we'll set sym's shndx to
+// UNDEFINED).  VERSION of the version of SYM.
 
 template<int size, bool big_endian>
 void
 Symbol_table::resolve(Sized_symbol<size>* to,
 		      const elfcpp::Sym<size, big_endian>& sym,
+		      const elfcpp::Sym<size, big_endian>& orig_sym,
 		      Object* object, const char* version)
 {
   if (object->target()->has_resolve())
@@ -150,53 +212,10 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       to->set_in_dyn();
     }
 
-  unsigned int frombits;
-  switch (sym.get_st_bind())
-    {
-    case elfcpp::STB_GLOBAL:
-      frombits = global_flag;
-      break;
-
-    case elfcpp::STB_WEAK:
-      frombits = weak_flag;
-      break;
-
-    case elfcpp::STB_LOCAL:
-      gold_error(_("%s: invalid STB_LOCAL symbol %s in external symbols"),
-		 object->name().c_str(), to->name());
-      frombits = global_flag;
-      break;
-
-    default:
-      gold_error(_("%s: unsupported symbol binding %d for symbol %s"),
-		 object->name().c_str(),
-		 static_cast<int>(sym.get_st_bind()), to->name());
-      frombits = global_flag;
-      break;
-    }
-
-  if (!object->is_dynamic())
-    frombits |= regular_flag;
-  else
-    frombits |= dynamic_flag;
-
-  switch (sym.get_st_shndx())
-    {
-    case elfcpp::SHN_UNDEF:
-      frombits |= undef_flag;
-      break;
-
-    case elfcpp::SHN_COMMON:
-      frombits |= common_flag;
-      break;
-
-    default:
-      if (sym.get_st_type() == elfcpp::STT_COMMON)
-	frombits |= common_flag;
-      else
-        frombits |= def_flag;
-      break;
-    }
+  unsigned int frombits = symbol_to_bits(sym.get_st_bind(),
+                                         object->is_dynamic(),
+                                         sym.get_st_shndx(),
+                                         sym.get_st_type());
 
   bool adjust_common_sizes;
   if (Symbol_table::should_override(to, frombits, object,
@@ -214,6 +233,34 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       if (adjust_common_sizes && sym.get_st_size() > to->symsize())
         to->set_symsize(sym.get_st_size());
     }
+
+  // A new weak undefined reference, merging with an old weak
+  // reference, could be a One Definition Rule (ODR) violation --
+  // especially if the types or sizes of the references differ.  We'll
+  // store such pairs and look them up later to make sure they
+  // actually refer to the same lines of code.  (Note: not all ODR
+  // violations can be found this way, and not everything this finds
+  // is an ODR violation.  But it's helpful to warn about.)
+  // We use orig_sym here because we want the symbol exactly as it
+  // appears in the object file, not munged via our future processing.
+  if (orig_sym.get_st_bind() == elfcpp::STB_WEAK
+      && to->binding() == elfcpp::STB_WEAK
+      && orig_sym.get_st_shndx() != elfcpp::SHN_UNDEF
+      && to->shndx() != elfcpp::SHN_UNDEF
+      && orig_sym.get_st_size() != 0    // Ignore weird 0-sized symbols.
+      && to->symsize() != 0
+      && (orig_sym.get_st_type() != to->type()
+          || orig_sym.get_st_size() != to->symsize())
+      // C does not have a concept of ODR, so we only need to do this
+      // on C++ symbols.  These have (mangled) names starting with _Z.
+      && to->name()[0] == '_' && to->name()[1] == 'Z')
+    {
+      Symbol_location from_location
+          = { object, orig_sym.get_st_shndx(), orig_sym.get_st_value() };
+      Symbol_location to_location = { to->object(), to->shndx(), to->value() };
+      this->candidate_odr_violations_[to->name()].insert(from_location);
+      this->candidate_odr_violations_[to->name()].insert(to_location);
+    }
 }
 
 // Handle the core of symbol resolution.  This is called with the
@@ -229,51 +276,11 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 {
   *adjust_common_sizes = false;
 
-  unsigned int tobits;
-  switch (to->binding())
-    {
-    case elfcpp::STB_GLOBAL:
-      tobits = global_flag;
-      break;
-
-    case elfcpp::STB_WEAK:
-      tobits = weak_flag;
-      break;
-
-    case elfcpp::STB_LOCAL:
-      // We should only see externally visible symbols in the symbol
-      // table.
-      gold_unreachable();
-
-    default:
-      // Any target which wants to handle STB_LOOS, etc., needs to
-      // define a resolve method.
-      gold_unreachable();
-    }
-
-  if (to->source() == Symbol::FROM_OBJECT
-      && to->object()->is_dynamic())
-    tobits |= dynamic_flag;
-  else
-    tobits |= regular_flag;
-
-  switch (to->shndx())
-    {
-    case elfcpp::SHN_UNDEF:
-      tobits |= undef_flag;
-      break;
-
-    case elfcpp::SHN_COMMON:
-      tobits |= common_flag;
-      break;
-
-    default:
-      if (to->type() == elfcpp::STT_COMMON)
-	tobits |= common_flag;
-      else
-        tobits |= def_flag;
-      break;
-    }
+  unsigned int tobits = symbol_to_bits(to->binding(),
+                                       (to->source() == Symbol::FROM_OBJECT
+                                        && to->object()->is_dynamic()),
+                                       to->shndx(),
+                                       to->type());
 
   // FIXME: Warn if either but not both of TO and SYM are STT_TLS.
 
@@ -719,6 +726,7 @@ void
 Symbol_table::resolve<32, false>(
     Sized_symbol<32>* to,
     const elfcpp::Sym<32, false>& sym,
+    const elfcpp::Sym<32, false>& orig_sym,
     Object* object,
     const char* version);
 #endif
@@ -729,6 +737,7 @@ void
 Symbol_table::resolve<32, true>(
     Sized_symbol<32>* to,
     const elfcpp::Sym<32, true>& sym,
+    const elfcpp::Sym<32, true>& orig_sym,
     Object* object,
     const char* version);
 #endif
@@ -739,6 +748,7 @@ void
 Symbol_table::resolve<64, false>(
     Sized_symbol<64>* to,
     const elfcpp::Sym<64, false>& sym,
+    const elfcpp::Sym<64, false>& orig_sym,
     Object* object,
     const char* version);
 #endif
@@ -749,6 +759,7 @@ void
 Symbol_table::resolve<64, true>(
     Sized_symbol<64>* to,
     const elfcpp::Sym<64, true>& sym,
+    const elfcpp::Sym<64, true>& orig_sym,
     Object* object,
     const char* version);
 #endif

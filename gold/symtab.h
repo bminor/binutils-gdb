@@ -895,7 +895,7 @@ class Warnings
   };
 
   // A mapping from warning symbol names (canonicalized in
-  // Symbol_table's namepool_ field) to 
+  // Symbol_table's namepool_ field) to warning information.
   typedef Unordered_map<const char*, Warning_location> Warning_table;
 
   Warning_table warnings_;
@@ -968,7 +968,7 @@ class Symbol_table
   // Define a set of symbols in output segments.
   void
   define_symbols(const Layout*, const Target*, int count,
-		 const Define_symbol_in_segment*);  
+		 const Define_symbol_in_segment*);
 
   // Define SYM using a COPY reloc.  POSD is the Output_data where the
   // symbol should be defined--typically a .dyn.bss section.  VALUE is
@@ -1023,6 +1023,11 @@ class Symbol_table
 		size_t relnum, off_t reloffset) const
   { this->warnings_.issue_warning(sym, relinfo, relnum, reloffset); }
 
+  // Check candidate_odr_violations_ to find symbols with the same name
+  // but apparently different definitions (different source-file/line-no).
+  void
+  detect_odr_violations() const;
+
   // SYM is defined using a COPY reloc.  Return the dynamic object
   // where the original definition was found.
   Dynobj*
@@ -1070,13 +1075,15 @@ class Symbol_table
   Sized_symbol<size>*
   add_from_object(Object*, const char *name, Stringpool::Key name_key,
 		  const char *version, Stringpool::Key version_key,
-		  bool def, const elfcpp::Sym<size, big_endian>& sym);
+		  bool def, const elfcpp::Sym<size, big_endian>& sym,
+                  const elfcpp::Sym<size, big_endian>& orig_sym);
 
   // Resolve symbols.
   template<int size, bool big_endian>
   void
   resolve(Sized_symbol<size>* to,
 	  const elfcpp::Sym<size, big_endian>& sym,
+	  const elfcpp::Sym<size, big_endian>& orig_sym,
 	  Object*, const char* version);
 
   template<int size, bool big_endian>
@@ -1157,6 +1164,11 @@ class Symbol_table
   void
   do_allocate_commons(const General_options&, Layout*);
 
+  // Implement detect_odr_violations.
+  template<int size, bool big_endian>
+  void
+  sized_detect_odr_violations() const;
+
   // Finalize symbols specialized for size.
   template<int size>
   off_t
@@ -1208,6 +1220,33 @@ class Symbol_table
   // they are defined.
   typedef Unordered_map<const Symbol*, Dynobj*> Copied_symbol_dynobjs;
 
+  // A map from symbol name (as a pointer into the namepool) to all
+  // the locations the symbols is (weakly) defined (and certain other
+  // conditions are met).  This map will be used later to detect
+  // possible One Definition Rule (ODR) violations.
+  struct Symbol_location
+  {
+    Object* object;         // Object where the symbol is defined.
+    unsigned int shndx;     // Section-in-object where the symbol is defined.
+    off_t offset;           // Offset-in-section where the symbol is defined.
+    bool operator==(const Symbol_location& that) const
+    {
+      return (this->object == that.object
+              && this->shndx == that.shndx
+              && this->offset == that.offset);
+    }
+  };
+
+  struct Symbol_location_hash
+  {
+    size_t operator()(const Symbol_location& loc) const
+    { return reinterpret_cast<uintptr_t>(loc.object) ^ loc.offset ^ loc.shndx; }
+  };
+
+  typedef Unordered_map<const char*,
+                        Unordered_set<Symbol_location, Symbol_location_hash> >
+  Odr_map;
+
   // We increment this every time we see a new undefined symbol, for
   // use in archive groups.
   int saw_undefined_;
@@ -1242,6 +1281,9 @@ class Symbol_table
   Commons_type commons_;
   // Manage symbol warnings.
   Warnings warnings_;
+  // Manage potential One Definition Rule (ODR) violations.
+  Odr_map candidate_odr_violations_;
+
   // When we emit a COPY reloc for a symbol, we define it in an
   // Output_data.  When it's time to emit version information for it,
   // we need to know the dynamic object in which we found the original

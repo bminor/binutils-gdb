@@ -23,10 +23,12 @@
 #include "gold.h"
 
 #include <stdint.h>
+#include <set>
 #include <string>
 #include <utility>
 
 #include "object.h"
+#include "dwarf_reader.h"
 #include "dynobj.h"
 #include "output.h"
 #include "target.h"
@@ -343,7 +345,7 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
   esym.put_st_info(from->binding(), from->type());
   esym.put_st_other(from->visibility(), from->nonvis());
   esym.put_st_shndx(from->shndx());
-  this->resolve(to, esym.sym(), from->object(), version);
+  this->resolve(to, esym.sym(), esym.sym(), from->object(), version);
   if (from->in_reg())
     to->set_in_reg();
   if (from->in_dyn())
@@ -372,6 +374,11 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
 // object file as a forwarder, and record it in the forwarders_ map.
 // Note that entries in the hash table will never be marked as
 // forwarders.
+//
+// SYM and ORIG_SYM are almost always the same.  ORIG_SYM is the
+// symbol exactly as it existed in the input file.  SYM is usually
+// that as well, but can be modified, for instance if we determine
+// it's in a to-be-discarded section.
 
 template<int size, bool big_endian>
 Sized_symbol<size>*
@@ -381,7 +388,8 @@ Symbol_table::add_from_object(Object* object,
 			      const char *version,
 			      Stringpool::Key version_key,
 			      bool def,
-			      const elfcpp::Sym<size, big_endian>& sym)
+			      const elfcpp::Sym<size, big_endian>& sym,
+			      const elfcpp::Sym<size, big_endian>& orig_sym)
 {
   Symbol* const snull = NULL;
   std::pair<typename Symbol_table_type::iterator, bool> ins =
@@ -416,7 +424,7 @@ Symbol_table::add_from_object(Object* object,
       was_undefined = ret->is_undefined();
       was_common = ret->is_common();
 
-      this->resolve(ret, sym, object, version);
+      this->resolve(ret, sym, orig_sym, object, version);
 
       if (def)
 	{
@@ -456,7 +464,7 @@ Symbol_table::add_from_object(Object* object,
 	  ret = this->get_sized_symbol SELECT_SIZE_NAME(size) (
               insdef.first->second
               SELECT_SIZE(size));
-	  this->resolve(ret, sym, object, version);
+	  this->resolve(ret, sym, orig_sym, object, version);
 	  ins.first->second = ret;
 	}
       else
@@ -571,7 +579,7 @@ Symbol_table::add_from_relobj(
 	  Stringpool::Key name_key;
 	  name = this->namepool_.add(name, true, &name_key);
 	  res = this->add_from_object(relobj, name, name_key, NULL, 0,
-				      false, *psym);
+				      false, *psym, sym);
 	}
       else
 	{
@@ -590,7 +598,7 @@ Symbol_table::add_from_relobj(
 	  ver = this->namepool_.add(ver, true, &ver_key);
 
 	  res = this->add_from_object(relobj, name, name_key, ver, ver_key,
-				      def, *psym);
+				      def, *psym, sym);
 	}
 
       (*sympointers)[i] = res;
@@ -659,7 +667,7 @@ Symbol_table::add_from_dynobj(
 	  Stringpool::Key name_key;
 	  name = this->namepool_.add(name, true, &name_key);
 	  res = this->add_from_object(dynobj, name, name_key, NULL, 0,
-				      false, sym);
+				      false, sym, sym);
 	}
       else
 	{
@@ -693,7 +701,7 @@ Symbol_table::add_from_dynobj(
 	    {
 	      // This symbol does not have a version.
 	      res = this->add_from_object(dynobj, name, name_key, NULL, 0,
-					  false, sym);
+					  false, sym, sym);
 	    }
 	  else
 	    {
@@ -723,14 +731,14 @@ Symbol_table::add_from_dynobj(
 	      if (sym.get_st_shndx() == elfcpp::SHN_ABS
 		  && name_key == version_key)
 		res = this->add_from_object(dynobj, name, name_key, NULL, 0,
-					    false, sym);
+					    false, sym, sym);
 	      else
 		{
 		  const bool def = (!hidden
 				    && (sym.get_st_shndx()
 					!= elfcpp::SHN_UNDEF));
 		  res = this->add_from_object(dynobj, name, name_key, version,
-					      version_key, def, sym);
+					      version_key, def, sym, sym);
 		}
 	    }
 	}
@@ -1792,6 +1800,97 @@ Symbol_table::sized_write_section_symbol(const Output_section* os,
   osym.put_st_shndx(os->out_shndx());
 
   of->write_output_view(offset, sym_size, pov);
+}
+
+// Check candidate_odr_violations_ to find symbols with the same name
+// but apparently different definitions (different source-file/line-no).
+
+void
+Symbol_table::detect_odr_violations() const
+{
+  if (parameters->get_size() == 32)
+    {
+      if (!parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_32_LITTLE
+	  this->sized_detect_odr_violations<32, false>();
+#else
+	  gold_unreachable();
+#endif
+	}
+      else
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  this->sized_detect_odr_violations<32, true>();
+#else
+	  gold_unreachable();
+#endif
+	}
+    }
+  else if (parameters->get_size() == 64)
+    {
+      if (!parameters->is_big_endian())
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  this->sized_detect_odr_violations<64, false>();
+#else
+	  gold_unreachable();
+#endif
+	}
+      else
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  this->sized_detect_odr_violations<64, true>();
+#else
+	  gold_unreachable();
+#endif
+	}
+    }
+  else
+    gold_unreachable();
+}
+
+// Implement detect_odr_violations.
+
+template<int size, bool big_endian>
+void
+Symbol_table::sized_detect_odr_violations() const
+{
+  for (Odr_map::const_iterator it = candidate_odr_violations_.begin();
+       it != candidate_odr_violations_.end();
+       ++it)
+    {
+      const char* symbol_name = it->first;
+      // We use a sorted set so the output is deterministic.
+      std::set<std::string> line_nums;
+
+      Unordered_set<Symbol_location, Symbol_location_hash>::const_iterator
+	locs;
+      for (locs = it->second.begin(); locs != it->second.end(); ++locs)
+        {
+	  // We need to lock the object in order to read it.  This
+	  // means that we can not run inside a Task.  If we want to
+	  // run this in a Task for better performance, we will need
+	  // one Task for object, plus appropriate locking to ensure
+	  // that we don't conflict with other uses of the object.
+          locs->object->lock();
+          Dwarf_line_info<size, big_endian> line_info(locs->object);
+          locs->object->unlock();
+          std::string lineno = line_info.addr2line(locs->shndx, locs->offset);
+          if (!lineno.empty())
+            line_nums.insert(lineno);
+        }
+
+      if (line_nums.size() > 1)
+        {
+          gold_warning(_("symbol %s defined in multiple places "
+			 "(possible ODR violation):"), symbol_name);
+          for (std::set<std::string>::const_iterator it2 = line_nums.begin();
+               it2 != line_nums.end();
+               ++it2)
+            fprintf(stderr, "  %s\n", it2->c_str());
+        }
+    }
 }
 
 // Warnings functions.

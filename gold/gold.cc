@@ -180,6 +180,10 @@ queue_middle_tasks(const General_options& options,
 		 (*input_objects->dynobj_begin())->name().c_str());
     }
 
+  // See if any of the input definitions violate the One Definition Rule.
+  // TODO: if this is too slow, do this as a task, rather than inline.
+  symtab->detect_odr_violations();
+
   // Define some sections and symbols needed for a dynamic link.  This
   // handles some cases we want to see before we read the relocs.
   layout->create_initial_dynamic_sections(input_objects, symtab);
