@@ -119,7 +119,7 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
 template<int size, bool big_endian>
 Dwarf_line_info<size, big_endian>::Dwarf_line_info(Object* object)
   : data_valid_(false), buffer_(NULL), symtab_buffer_(NULL),
-    directories_(1), files_(1)
+    directories_(), files_(), current_header_index_(-1)
 {
   unsigned int debug_shndx;
   for (debug_shndx = 0; debug_shndx < object->shnum(); ++debug_shndx)
@@ -135,6 +135,7 @@ Dwarf_line_info<size, big_endian>::Dwarf_line_info(Object* object)
     return;
 
   // Find the relocation section for ".debug_line".
+  // We expect these for relobjs (.o's) but not dynobjs (.so's).
   bool got_relocs = false;
   for (unsigned int reloc_shndx = 0;
        reloc_shndx < object->shnum();
@@ -150,22 +151,21 @@ Dwarf_line_info<size, big_endian>::Dwarf_line_info(Object* object)
 	  break;
 	}
     }
-  if (!got_relocs)
-    return;
 
   // Finally, we need the symtab section to interpret the relocs.
-  unsigned int symtab_shndx;
-  for (symtab_shndx = 0; symtab_shndx < object->shnum(); ++symtab_shndx)
-    if (object->section_type(symtab_shndx) == elfcpp::SHT_SYMTAB)
-      {
-        off_t symtab_size;
-        this->symtab_buffer_ = object->section_contents(
-            symtab_shndx, &symtab_size, false);
-        this->symtab_buffer_end_ = this->symtab_buffer_ + symtab_size;
-        break;
-      }
-  if (this->symtab_buffer_ == NULL)
-    return;
+  if (got_relocs)
+    {
+      unsigned int symtab_shndx;
+      for (symtab_shndx = 0; symtab_shndx < object->shnum(); ++symtab_shndx)
+        if (object->section_type(symtab_shndx) == elfcpp::SHT_SYMTAB)
+          {
+            this->symtab_buffer_ = object->section_contents(
+                symtab_shndx, &this->symtab_buffer_size_, false);
+            break;
+          }
+      if (this->symtab_buffer_ == NULL)
+        return;
+    }
 
   // Now that we have successfully read all the data, parse the debug
   // info.
@@ -241,16 +241,29 @@ const unsigned char*
 Dwarf_line_info<size, big_endian>::read_header_tables(
     const unsigned char* lineptr)
 {
+  ++this->current_header_index_;
+
+  // Create a new directories_ entry and a new files_ entry for our new
+  // header.  We initialize each with a single empty element, because
+  // dwarf indexes directory and filenames starting at 1.
+  gold_assert(static_cast<int>(this->directories_.size())
+	      == this->current_header_index_);
+  gold_assert(static_cast<int>(this->files_.size())
+	      == this->current_header_index_);
+  this->directories_.push_back(std::vector<std::string>(1));
+  this->files_.push_back(std::vector<std::pair<int, std::string> >(1));
+
   // It is legal for the directory entry table to be empty.
   if (*lineptr)
     {
       int dirindex = 1;
       while (*lineptr)
         {
-          const unsigned char* dirname = lineptr;
-          gold_assert(dirindex == static_cast<int>(directories_.size()));
-          directories_.push_back(reinterpret_cast<const char*>(dirname));
-          lineptr += directories_.back().size() + 1;
+	  const char* dirname = reinterpret_cast<const char*>(lineptr);
+          gold_assert(dirindex
+		      == static_cast<int>(this->directories_.back().size()));
+          this->directories_.back().push_back(dirname);
+          lineptr += this->directories_.back().back().size() + 1;
           dirindex++;
         }
     }
@@ -267,9 +280,11 @@ Dwarf_line_info<size, big_endian>::read_header_tables(
           lineptr += strlen(filename) + 1;
 
           uint64_t dirindex = read_unsigned_LEB_128(lineptr, &len);
-          if (dirindex >= directories_.size())
-            dirindex = 0;
           lineptr += len;
+
+          if (dirindex >= this->directories_.back().size())
+            dirindex = 0;
+	  int dirindexi = static_cast<int>(dirindex);
 
           read_unsigned_LEB_128(lineptr, &len);   // mod_time
           lineptr += len;
@@ -277,8 +292,9 @@ Dwarf_line_info<size, big_endian>::read_header_tables(
           read_unsigned_LEB_128(lineptr, &len);   // filelength
           lineptr += len;
 
-          gold_assert(fileindex == static_cast<int>(files_.size()));
-          files_.push_back(std::pair<int, std::string>(dirindex, filename));
+          gold_assert(fileindex
+		      == static_cast<int>(this->files_.back().size()));
+          this->files_.back().push_back(std::make_pair(dirindexi, filename));
           fileindex++;
         }
     }
@@ -407,21 +423,21 @@ Dwarf_line_info<size, big_endian>::process_one_opcode(
 
           case elfcpp::DW_LNE_set_address:
             {
+              lsm->address = elfcpp::Swap<size, big_endian>::readval(start);
               typename Reloc_map::const_iterator it
                   = reloc_map_.find(start - this->buffer_);
               if (it != reloc_map_.end())
                 {
                   // value + addend.
-                  lsm->address =
-		    (elfcpp::Swap<size, big_endian>::readval(start)
-		     + it->second.second);
+                  lsm->address += it->second.second;
                   lsm->shndx = it->second.first;
                 }
               else
                 {
-                  // Every set_address should have an associated
-                  // relocation.
-                  this->data_valid_ = false;
+                  // If we're a normal .o file, with relocs, every
+                  // set_address should have an associated relocation.
+		  if (this->input_is_relobj())
+                    this->data_valid_ = false;
                 }
               break;
             }
@@ -432,9 +448,11 @@ Dwarf_line_info<size, big_endian>::process_one_opcode(
               start += templen;
 
               uint64_t dirindex = read_unsigned_LEB_128(start, &templen);
-              if (dirindex >= directories_.size())
-                dirindex = 0;
               oplen += templen;
+
+              if (dirindex >= this->directories_.back().size())
+                dirindex = 0;
+	      int dirindexi = static_cast<int>(dirindex);
 
               read_unsigned_LEB_128(start, &templen);   // mod_time
               oplen += templen;
@@ -442,7 +460,7 @@ Dwarf_line_info<size, big_endian>::process_one_opcode(
               read_unsigned_LEB_128(start, &templen);   // filelength
               oplen += templen;
 
-              files_.push_back(std::pair<int, std::string>(dirindex,
+              this->files_.back().push_back(std::make_pair(dirindexi,
 							   filename));
             }
             break;
@@ -497,7 +515,8 @@ Dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr)
           if (add_line)
             {
               Offset_to_lineno_entry entry
-                  = { lsm.address, lsm.file_num, lsm.line_num };
+                  = { lsm.address, this->current_header_index_,
+                      lsm.file_num, lsm.line_num };
               line_number_map_[lsm.shndx].push_back(entry);
             }
           lineptr += oplength;
@@ -516,7 +535,7 @@ Dwarf_line_info<size, big_endian>::symbol_section(
     typename elfcpp::Elf_types<size>::Elf_Addr* value)
 {
   const int symsize = elfcpp::Elf_sizes<size>::sym_size;
-  gold_assert(this->symtab_buffer_ + sym * symsize < this->symtab_buffer_end_);
+  gold_assert(sym * symsize < this->symtab_buffer_size_);
   elfcpp::Sym<size, big_endian> elfsym(this->symtab_buffer_ + sym * symsize);
   *value = elfsym.get_st_value();
   return elfsym.get_st_shndx();
@@ -568,6 +587,21 @@ Dwarf_line_info<size, big_endian>::read_line_mappings()
     std::sort(it->second.begin(), it->second.end());
 }
 
+// Some processing depends on whether the input is a .o file or not.
+// For instance, .o files have relocs, and have .debug_lines
+// information on a per section basis.  .so files, on the other hand,
+// lack relocs, and offsets are unique, so we can ignore the section
+// information.
+
+template<int size, bool big_endian>
+bool
+Dwarf_line_info<size, big_endian>::input_is_relobj()
+{
+  // Only .o files have relocs and the symtab buffer that goes with them.
+  return this->symtab_buffer_ != NULL;
+}
+
+
 // Return a string for a file name and line number.
 
 template<int size, bool big_endian>
@@ -577,19 +611,26 @@ Dwarf_line_info<size, big_endian>::addr2line(unsigned int shndx, off_t offset)
   if (this->data_valid_ == false)
     return "";
 
-  const Offset_to_lineno_entry lookup_key = { offset, 0, 0 };
-  std::vector<Offset_to_lineno_entry>& offsets = this->line_number_map_[shndx];
-  if (offsets.empty())
+  const Offset_to_lineno_entry lookup_key = { offset, 0, 0, 0 };
+  const std::vector<Offset_to_lineno_entry>* offsets;
+  // If we do not have reloc information, then our input is a .so or
+  // some similar data structure where all the information is held in
+  // the offset.  In that case, we ignore the input shndx.
+  if (this->input_is_relobj())
+    offsets = &this->line_number_map_[shndx];
+  else
+    offsets = &this->line_number_map_[-1U];
+  if (offsets->empty())
     return "";
 
   typename std::vector<Offset_to_lineno_entry>::const_iterator it
-      = std::lower_bound(offsets.begin(), offsets.end(), lookup_key);
+      = std::lower_bound(offsets->begin(), offsets->end(), lookup_key);
 
   // If we found an exact match, great, otherwise find the last entry
   // before the passed-in offset.
   if (it->offset > offset)
     {
-      if (it == offsets.begin())
+      if (it == offsets->begin())
         return "";
       --it;
       gold_assert(it->offset < offset);
@@ -597,11 +638,20 @@ Dwarf_line_info<size, big_endian>::addr2line(unsigned int shndx, off_t offset)
 
   // Convert the file_num + line_num into a string.
   std::string ret;
-  gold_assert(it->file_num < static_cast<int>(files_.size()));
-  const std::pair<int, std::string>& filename_pair = files_[it->file_num];
-  gold_assert(filename_pair.first < static_cast<int>(directories_.size()));
-  const std::string& dirname = directories_[filename_pair.first];
+
+  gold_assert(it->header_num < static_cast<int>(this->files_.size()));
+  gold_assert(it->file_num
+	      < static_cast<int>(this->files_[it->header_num].size()));
+  const std::pair<int, std::string>& filename_pair
+      = this->files_[it->header_num][it->file_num];
   const std::string& filename = filename_pair.second;
+
+  gold_assert(it->header_num < static_cast<int>(this->directories_.size()));
+  gold_assert(filename_pair.first
+              < static_cast<int>(this->directories_[it->header_num].size()));
+  const std::string& dirname
+      = this->directories_[it->header_num][filename_pair.first];
+
   if (!dirname.empty())
     {
       ret += dirname;

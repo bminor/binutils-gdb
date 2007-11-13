@@ -90,6 +90,10 @@ class Dwarf_line_info
   process_one_opcode(const unsigned char* start,
                      struct LineStateMachine* lsm, size_t* len);
 
+  // Some parts of processing differ depending on whether the input
+  // was a .o file or not.
+  bool input_is_relobj();
+
   // If we saw anything amiss while parsing, we set this to false.
   // Then addr2line will always fail (rather than return possibly-
   // corrupt data).
@@ -123,15 +127,20 @@ class Dwarf_line_info
 
   // This is used to figure out what section to apply a relocation to.
   const unsigned char* symtab_buffer_;
-  const unsigned char* symtab_buffer_end_;
+  off_t symtab_buffer_size_;
 
-  // Holds the directories and files as we see them.
-  std::vector<std::string> directories_;
+  // Holds the directories and files as we see them.  We have an array
+  // of directory-lists, one for each .o file we're reading (usually
+  // there will just be one, but there may be more if input is a .so).
+  std::vector<std::vector<std::string> > directories_;
   // The first part is an index into directories_, the second the filename.
-  std::vector< std::pair<int, std::string> > files_;
+  std::vector<std::vector< std::pair<int, std::string> > > files_;
 
-  // A map from offset of the relocation target to the shndx and
-  // addend for the relocation.
+  // An index into the current directories_ and files_ vectors.
+  int current_header_index_;
+
+  // A sorted map from offset of the relocation target to the shndx
+  // and addend for the relocation.
   typedef std::map<typename elfcpp::Elf_types<size>::Elf_Addr,
                    std::pair<unsigned int,
                              typename elfcpp::Elf_types<size>::Elf_Swxword> >
@@ -143,8 +152,9 @@ class Dwarf_line_info
   struct Offset_to_lineno_entry
   {
     off_t offset;
+    int header_num;  // which file-list to use (i.e. which .o file are we in)
     int file_num;    // a pointer into files_
-    int line_num;
+    int line_num;    // the line number in the source file
     // Offsets are unique within a section, so that's a sufficient sort key.
     bool operator<(const Offset_to_lineno_entry& that) const
     { return this->offset < that.offset; }
