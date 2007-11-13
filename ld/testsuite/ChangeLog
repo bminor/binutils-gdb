@@ -1,3 +1,10 @@
+2007-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/5233
+	* ld-elf/flags1.d: New.
+	* ld-elf/flags1.ld: Likewise.
+	* ld-elf/flags1.s: Likewise.
+
 2007-11-13  Nick Clifton  <nickc@redhat.com>
 
 	* ld-mn10300/i127740.s: New test: Checks relaxation and alignment.
@@ -99,7 +106,7 @@
 
 2007-10-16  Nick Clifton  <nickc@redhat.com>
 
-	* lf-elfcomm/elfcomm.exp: Add tests of STT_COMMON symbol
+	* ld-elfcomm/elfcomm.exp: Add tests of STT_COMMON symbol
 	generation.
 
 2007-10-12  Joseph Myers  <joseph@codesourcery.com>
