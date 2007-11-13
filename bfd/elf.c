@@ -5144,7 +5144,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	   : segment->p_vaddr != section->vma)				\
        || (strcmp (bfd_get_section_name (ibfd, section), ".dynamic")	\
 	   == 0))							\
-   && ! section->segment_mark)
+   && !section->segment_mark)
 
 /* If the output section of a section in the input segment is NULL,
    it is removed from the corresponding output segment.   */
@@ -5202,12 +5202,12 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	}
 
       /* Determine if this segment overlaps any previous segments.  */
-      for (j = 0, segment2 = elf_tdata (ibfd)->phdr; j < i; j++, segment2 ++)
+      for (j = 0, segment2 = elf_tdata (ibfd)->phdr; j < i; j++, segment2++)
 	{
 	  bfd_signed_vma extra_length;
 
 	  if (segment2->p_type != PT_LOAD
-	      || ! SEGMENT_OVERLAPS (segment, segment2))
+	      || !SEGMENT_OVERLAPS (segment, segment2))
 	    continue;
 
 	  /* Merge the two segments together.  */
@@ -5215,13 +5215,12 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	    {
 	      /* Extend SEGMENT2 to include SEGMENT and then delete
 		 SEGMENT.  */
-	      extra_length =
-		SEGMENT_END (segment, segment->p_vaddr)
-		- SEGMENT_END (segment2, segment2->p_vaddr);
+	      extra_length = (SEGMENT_END (segment, segment->p_vaddr)
+			      - SEGMENT_END (segment2, segment2->p_vaddr));
 
 	      if (extra_length > 0)
 		{
-		  segment2->p_memsz  += extra_length;
+		  segment2->p_memsz += extra_length;
 		  segment2->p_filesz += extra_length;
 		}
 
@@ -5236,13 +5235,12 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	    {
 	      /* Extend SEGMENT to include SEGMENT2 and then delete
 		 SEGMENT2.  */
-	      extra_length =
-		SEGMENT_END (segment2, segment2->p_vaddr)
-		- SEGMENT_END (segment, segment->p_vaddr);
+	      extra_length = (SEGMENT_END (segment2, segment2->p_vaddr)
+			      - SEGMENT_END (segment, segment->p_vaddr));
 
 	      if (extra_length > 0)
 		{
-		  segment->p_memsz  += extra_length;
+		  segment->p_memsz += extra_length;
 		  segment->p_filesz += extra_length;
 		}
 
@@ -5254,17 +5252,19 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
   /* The second scan attempts to assign sections to segments.  */
   for (i = 0, segment = elf_tdata (ibfd)->phdr;
        i < num_segments;
-       i ++, segment ++)
+       i++, segment++)
     {
-      unsigned int  section_count;
-      asection **   sections;
-      asection *    output_section;
-      unsigned int  isec;
-      bfd_vma       matching_lma;
-      bfd_vma       suggested_lma;
-      unsigned int  j;
+      unsigned int section_count;
+      asection **sections;
+      asection *output_section;
+      unsigned int isec;
+      bfd_vma matching_lma;
+      bfd_vma suggested_lma;
+      unsigned int j;
       bfd_size_type amt;
-      asection *    first_section;
+      asection *first_section;
+      bfd_boolean first_matching_lma;
+      bfd_boolean first_suggested_lma;
 
       if (segment->p_type == PT_NULL)
 	continue;
@@ -5296,9 +5296,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 
       /* Initialise the fields of the segment map.  Default to
 	 using the physical address of the segment in the input BFD.  */
-      map->next          = NULL;
-      map->p_type        = segment->p_type;
-      map->p_flags       = segment->p_flags;
+      map->next = NULL;
+      map->p_type = segment->p_type;
+      map->p_flags = segment->p_flags;
       map->p_flags_valid = 1;
 
       /* If the first section in the input segment is removed, there is
@@ -5314,10 +5314,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	 and if it contains the program headers themselves.  */
       map->includes_filehdr = (segment->p_offset == 0
 			       && segment->p_filesz >= iehdr->e_ehsize);
-
       map->includes_phdrs = 0;
 
-      if (! phdr_included || segment->p_type != PT_LOAD)
+      if (!phdr_included || segment->p_type != PT_LOAD)
 	{
 	  map->includes_phdrs =
 	    (segment->p_offset <= (bfd_vma) iehdr->e_phoff
@@ -5336,9 +5335,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	     something.  They are allowed by the ELF spec however, so only
 	     a warning is produced.  */
 	  if (segment->p_type == PT_LOAD)
-	    (*_bfd_error_handler)
-	      (_("%B: warning: Empty loadable segment detected, is this intentional ?\n"),
-	       ibfd);
+	    (*_bfd_error_handler) (_("%B: warning: Empty loadable segment"
+				     " detected, is this intentional ?\n"),
+				   ibfd);
 
 	  map->count = 0;
 	  *pointer_to_map = map;
@@ -5390,6 +5389,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       isec = 0;
       matching_lma = 0;
       suggested_lma = 0;
+      first_matching_lma = TRUE;
+      first_suggested_lma = TRUE;
 
       for (j = 0, section = ibfd->sections;
 	   section != NULL;
@@ -5399,7 +5400,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	    {
 	      output_section = section->output_section;
 
-	      sections[j ++] = section;
+	      sections[j++] = section;
 
 	      /* The Solaris native linker always sets p_paddr to 0.
 		 We try to catch that case here, and set it to the
@@ -5407,36 +5408,42 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		 p_paddr be left as zero.  */
 	      if (segment->p_paddr == 0
 		  && segment->p_vaddr != 0
-		  && (! bed->want_p_paddr_set_to_zero)
+		  && !bed->want_p_paddr_set_to_zero
 		  && isec == 0
 		  && output_section->lma != 0
-		  && (output_section->vma == (segment->p_vaddr
-					      + (map->includes_filehdr
-						 ? iehdr->e_ehsize
-						 : 0)
-					      + (map->includes_phdrs
-						 ? (iehdr->e_phnum
-						    * iehdr->e_phentsize)
-						 : 0))))
+		  && output_section->vma == (segment->p_vaddr
+					     + (map->includes_filehdr
+						? iehdr->e_ehsize
+						: 0)
+					     + (map->includes_phdrs
+						? (iehdr->e_phnum
+						   * iehdr->e_phentsize)
+						: 0)))
 		map->p_paddr = segment->p_vaddr;
 
 	      /* Match up the physical address of the segment with the
 		 LMA address of the output section.  */
 	      if (IS_CONTAINED_BY_LMA (output_section, segment, map->p_paddr)
 		  || IS_COREFILE_NOTE (segment, section)
-		  || (bed->want_p_paddr_set_to_zero &&
-		      IS_CONTAINED_BY_VMA (output_section, segment)))
+		  || (bed->want_p_paddr_set_to_zero
+		      && IS_CONTAINED_BY_VMA (output_section, segment)))
 		{
-		  if (matching_lma == 0 || output_section->lma < matching_lma)
-		    matching_lma = output_section->lma;
+		  if (first_matching_lma || output_section->lma < matching_lma)
+		    {
+		      matching_lma = output_section->lma;
+		      first_matching_lma = FALSE;
+		    }
 
 		  /* We assume that if the section fits within the segment
 		     then it does not overlap any other section within that
 		     segment.  */
-		  map->sections[isec ++] = output_section;
+		  map->sections[isec++] = output_section;
 		}
-	      else if (suggested_lma == 0)
-		suggested_lma = output_section->lma;
+	      else if (first_suggested_lma)
+		{
+		  suggested_lma = output_section->lma;
+		  first_suggested_lma = FALSE;
+		}
 	    }
 	}
 
@@ -5466,7 +5473,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	}
       else
 	{
-	  if (matching_lma != 0)
+	  if (!first_matching_lma)
 	    {
 	      /* At least one section fits inside the current segment.
 		 Keep it, but modify its physical address to match the
@@ -5512,6 +5519,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	{
 	  map->count = 0;
 	  suggested_lma = 0;
+	  first_suggested_lma = TRUE;
 
 	  /* Fill the current segment with sections that fit.  */
 	  for (j = 0; j < section_count; j++)
@@ -5533,17 +5541,17 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		      /* If the first section in a segment does not start at
 			 the beginning of the segment, then something is
 			 wrong.  */
-		      if (output_section->lma !=
-			  (map->p_paddr
-			   + (map->includes_filehdr ? iehdr->e_ehsize : 0)
-			   + (map->includes_phdrs
-			      ? iehdr->e_phnum * iehdr->e_phentsize
-			      : 0)))
+		      if (output_section->lma
+			  != (map->p_paddr
+			      + (map->includes_filehdr ? iehdr->e_ehsize : 0)
+			      + (map->includes_phdrs
+				 ? iehdr->e_phnum * iehdr->e_phentsize
+				 : 0)))
 			abort ();
 		    }
 		  else
 		    {
-		      asection * prev_sec;
+		      asection *prev_sec;
 
 		      prev_sec = map->sections[map->count - 1];
 
@@ -5553,11 +5561,14 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		      if ((BFD_ALIGN (prev_sec->lma + prev_sec->size,
 				      maxpagesize)
 			   < BFD_ALIGN (output_section->lma, maxpagesize))
-			  || ((prev_sec->lma + prev_sec->size)
+			  || (prev_sec->lma + prev_sec->size
 			      > output_section->lma))
 			{
-			  if (suggested_lma == 0)
-			    suggested_lma = output_section->lma;
+			  if (first_suggested_lma)
+			    {
+			      suggested_lma = output_section->lma;
+			      first_suggested_lma = FALSE;
+			    }
 
 			  continue;
 			}
@@ -5568,8 +5579,11 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		  sections[j] = NULL;
 		  section->segment_mark = TRUE;
 		}
-	      else if (suggested_lma == 0)
-		suggested_lma = output_section->lma;
+	      else if (first_suggested_lma)
+		{
+		  suggested_lma = output_section->lma;
+		  first_suggested_lma = FALSE;
+		}
 	    }
 
 	  BFD_ASSERT (map->count > 0);
@@ -5595,14 +5609,14 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	      /* Initialise the fields of the segment map.  Set the physical
 		 physical address to the LMA of the first section that has
 		 not yet been assigned.  */
-	      map->next             = NULL;
-	      map->p_type           = segment->p_type;
-	      map->p_flags          = segment->p_flags;
-	      map->p_flags_valid    = 1;
-	      map->p_paddr          = suggested_lma;
-	      map->p_paddr_valid    = 1;
+	      map->next = NULL;
+	      map->p_type = segment->p_type;
+	      map->p_flags = segment->p_flags;
+	      map->p_flags_valid = 1;
+	      map->p_paddr = suggested_lma;
+	      map->p_paddr_valid = 1;
 	      map->includes_filehdr = 0;
-	      map->includes_phdrs   = 0;
+	      map->includes_phdrs = 0;
 	    }
 	}
       while (isec < section_count);

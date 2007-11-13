@@ -1,3 +1,10 @@
+2007-11-13  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 5233
+	* elf.c (rewrite_elf_program_header): Formatting.  Add
+	first_matching_lma and first_suggested_lma booleans and use
+	instead of testing matching_lma and suggested_lma for zero.
+
 2007-11-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/5299
