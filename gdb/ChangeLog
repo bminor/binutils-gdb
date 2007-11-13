@@ -1,3 +1,7 @@
+2007-11-13  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* tui/tui-data.c (tui_prev_win): Guard against NULL.
+
 2007-11-12  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbarch.sh (gdbarch_alloc): Replace current_gdbarch by gdbarch. Remove

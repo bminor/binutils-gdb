@@ -370,7 +370,8 @@ tui_prev_win (struct tui_win_info *cur_win)
     type = cur_win->generic.type - 1;
   while (type != cur_win->generic.type && (prev == NULL))
     {
-      if (tui_win_list[type]->generic.is_visible)
+      if (tui_win_list[type]
+	  && tui_win_list[type]->generic.is_visible)
 	prev = tui_win_list[type];
       else
 	{
