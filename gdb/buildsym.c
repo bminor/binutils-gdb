@@ -507,7 +507,7 @@ make_blockvector (struct objfile *objfile)
 /* Start recording information about source code that came from an
    included (or otherwise merged-in) source file with a different
    name.  NAME is the name of the file (cannot be NULL), DIRNAME is
-   the directory in which it resides (or NULL if not known).  */
+   the directory in which the file was compiled (or NULL if not known).  */
 
 void
 start_subfile (char *name, char *dirname)
@@ -778,12 +778,15 @@ compare_line_numbers (const void *ln1p, const void *ln2p)
 /* Start a new symtab for a new source file.  Called, for example,
    when a stabs symbol of type N_SO is seen, or when a DWARF
    TAG_compile_unit DIE is seen.  It indicates the start of data for
-   one original source file.  */
+   one original source file.
+
+   NAME is the name of the file (cannot be NULL).  DIRNAME is the directory in
+   which the file was compiled (or NULL if not known).  START_ADDR is the
+   lowest address of objects in the file (or 0 if not known).  */
 
 void
 start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
 {
-
   last_source_file = name;
   last_source_start_addr = start_addr;
   file_symbols = NULL;
