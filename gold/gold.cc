@@ -186,7 +186,7 @@ queue_middle_tasks(const General_options& options,
 
   // See if any of the input definitions violate the One Definition Rule.
   // TODO: if this is too slow, do this as a task, rather than inline.
-  symtab->detect_odr_violations();
+  symtab->detect_odr_violations(options.output_file_name());
 
   // Define some sections and symbols needed for a dynamic link.  This
   // handles some cases we want to see before we read the relocs.

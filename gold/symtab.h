@@ -1027,7 +1027,7 @@ class Symbol_table
   // Check candidate_odr_violations_ to find symbols with the same name
   // but apparently different definitions (different source-file/line-no).
   void
-  detect_odr_violations() const;
+  detect_odr_violations(const char* output_file_name) const;
 
   // SYM is defined using a COPY reloc.  Return the dynamic object
   // where the original definition was found.

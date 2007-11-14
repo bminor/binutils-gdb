@@ -1852,7 +1852,7 @@ Symbol_table::sized_write_section_symbol(const Output_section* os,
 // but apparently different definitions (different source-file/line-no).
 
 void
-Symbol_table::detect_odr_violations() const
+Symbol_table::detect_odr_violations(const char* output_file_name) const
 {
   for (Odr_map::const_iterator it = candidate_odr_violations_.begin();
        it != candidate_odr_violations_.end();
@@ -1881,8 +1881,9 @@ Symbol_table::detect_odr_violations() const
 
       if (line_nums.size() > 1)
         {
-          gold_warning(_("symbol %s defined in multiple places "
-			 "(possible ODR violation):"), symbol_name);
+          gold_warning(_("while linking %s: symbol %s defined in multiple "
+                         "places (possible ODR violation):"),
+                       output_file_name, symbol_name);
           for (std::set<std::string>::const_iterator it2 = line_nums.begin();
                it2 != line_nums.end();
                ++it2)
