@@ -14,11 +14,11 @@ Disassembly of section \.text:
 # Any order would be acceptable, but it must match the .got dump.
 #
 00080c00 <\.text>:
-   80c00:	8f848030 	lw	a0,-32720\(gp\)
-   80c04:	8f84803c 	lw	a0,-32708\(gp\)
-   80c08:	8f848034 	lw	a0,-32716\(gp\)
-   80c0c:	8f848038 	lw	a0,-32712\(gp\)
-   80c10:	8f848030 	lw	a0,-32720\(gp\)
-   80c14:	8f84803c 	lw	a0,-32708\(gp\)
-   80c18:	8f848034 	lw	a0,-32716\(gp\)
-   80c1c:	8f848038 	lw	a0,-32712\(gp\)
+   80c00:	8f84801c 	lw	a0,-32740\(gp\)
+   80c04:	8f848028 	lw	a0,-32728\(gp\)
+   80c08:	8f848020 	lw	a0,-32736\(gp\)
+   80c0c:	8f848024 	lw	a0,-32732\(gp\)
+   80c10:	8f84801c 	lw	a0,-32740\(gp\)
+   80c14:	8f848028 	lw	a0,-32728\(gp\)
+   80c18:	8f848020 	lw	a0,-32736\(gp\)
+   80c1c:	8f848024 	lw	a0,-32732\(gp\)

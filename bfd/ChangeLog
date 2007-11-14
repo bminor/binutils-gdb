@@ -1,3 +1,39 @@
+2007-11-14  Richard Sandiford  <richard@codesourcery.com>
+
+	* elfxx-mips.c (mips_got_page_range): New structure.
+	(mips_got_page_entry): Likewise.
+	(mips_got_info): Add page_gotno and got_page_entries fields.
+	(mips_elf_got_per_bfd_arg): Add max_pages field.  Delete
+	primary_count and current_count fields.
+	(mips_got_page_entry_hash, mips_got_page_entry_eq): New functions.
+	(mips_elf_pages_for_range, mips_elf_record_got_page_entry): Likewise.
+	(mips_elf_get_got_for_bfd): New function, split out from
+	mips_elf_make_got_per_bfd.  Initialize the page_gotno and
+	got_page_entries fields when creating a new GOT structure.
+	(mips_elf_make_got_pages_per_bfd): New function.
+	(mips_elf_merge_got_with): New function, split out from
+	mips_elf_make_got_per_bfd.  Merge page entries as well as
+	non-page entries.  Use the minimum of max_pages and the sum
+	of the page_gotnos to estimate the number of page entries.
+	(mips_elf_merge_gots): Use the minimum of max_pages and the
+	bfd's page_gotno to estimate the number of page entries.
+	Use the above functions.
+	(mips_elf_multi_got): Add page entries as well as non-page entries
+	to the individual per-bfd GOTs.  Initialize got_per_bfd_arg.max_pages.
+	Initialize the page_gotno and got_page_entries fields when creating
+	a new primary GOT.  Use the minimum of pages and page_gotno when
+	adding the number of pages entries to local_gotno.
+	(mips_elf_create_got_section): Initialize the page_gotno and
+	got_page_entries fields of the GOT structure.
+	(mips_elf_rel_relocation_p, mips_elf_read_rel_addend)
+	(mips_elf_add_lo16_rel_addend, mips_elf_get_section_contents): New
+	functions, split out from...
+	(_bfd_mips_elf_relocate_section): ...here.
+	(_bfd_mips_elf_check_relocs): Record GOT page entries too.
+	(_bfd_mips_relax_section): Use mips_elf_get_section_contents.
+	(_bfd_mips_elf_always_size_sections): Use the smaller of the
+	loadable_size- and page_gotno-derived estimates.
+
 2007-11-14  Thiemo Seufer  <ths@mips.com>
 
 	* elfxx-mips.c (mips_elf_merge_obj_attributes): Prevent

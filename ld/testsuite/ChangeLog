@@ -1,3 +1,27 @@
+2007-11-14  Richard Sandiford  <richard@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-mips-elf/got-page-1.d, ld-mips-elf/got-page-1.s,
+	* ld-mips-elf/got-page-2.d, ld-mips-elf/got-page-2.s,
+	* ld-mips-elf/got-page-3.d, ld-mips-elf/got-page-3a.s,
+	* ld-mips-elf/got-page-3b.s, ld-mips-elf/got-page-3c.s,
+	* ld-mips-elf/got-page-1.ld: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+	* ld-mips-elf/multi-got-1.d, ld-mips-elf/multi-got-no-shared.d,
+	* ld-mips-elf/tls-hidden2-got.d, ld-mips-elf/tls-hidden2.d,
+	* ld-mips-elf/tls-hidden3.d, ld-mips-elf/tls-hidden3.got,
+	* ld-mips-elf/tls-hidden3.r, ld-mips-elf/tls-hidden4.got,
+	* ld-mips-elf/tls-hidden4.r, ld-mips-elf/tls-multi-got-1.d,
+	* ld-mips-elf/tls-multi-got-1.got, ld-mips-elf/tls-multi-got-1.r,
+	* ld-mips-elf/tlsbin-o32.d, ld-mips-elf/tlsbin-o32.got,
+	* ld-mips-elf/tlsdyn-o32-1.d, ld-mips-elf/tlsdyn-o32-1.got,
+	* ld-mips-elf/tlsdyn-o32-2.d, ld-mips-elf/tlsdyn-o32-2.got,
+	* ld-mips-elf/tlsdyn-o32-3.d, ld-mips-elf/tlsdyn-o32-3.got,
+	* ld-mips-elf/tlsdyn-o32.d, ld-mips-elf/tlsdyn-o32.got,
+	* ld-mips-elf/tlslib-o32-hidden.got, ld-mips-elf/tlslib-o32-ver.got,
+	* ld-mips-elf/tlslib-o32.d, ld-mips-elf/tlslib-o32.got: Update for
+	GOT allocation changes.
+
 2007-11-14  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-elf/flags1.d: Generalize regexp for section size.

@@ -15,7 +15,8 @@ Contents of section \.got:
 # entry for each symbol.
 #
 #...
- 1c4080 0000abc8 0000abcc 0000abc0 0000abc4  .*
+ 1c4010 00000000 00000000 0000abc8 0000abcc  .*
+ 1c4020 0000abc0 0000abc4 00000000 80000000  .*
 #
 # Likewise, but the order of the entries in this GOT is:
 #
@@ -24,5 +25,4 @@ Contents of section \.got:
 #     foo0
 #     foo1
 #...
- 1d00c0 00000000 00000000 00000000 0000abcc  .*
- 1d00d0 0000abc8 0000abc0 0000abc4           .*
+ 1d0030 0000abcc 0000abc8 0000abc0 0000abc4  .*

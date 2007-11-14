@@ -19,6 +19,5 @@
 # Any order would be acceptable, but it must match the .d dump.
 #
 Contents of section \.got:
- 90000 00000000 80000000 00000000 00000000  .*
- 90010 00000000 00000000 00000000 00000000  .*
- 90020 0000abc0 0000abc8 0000abcc 0000abc4  .*
+ 90000 00000000 80000000 00000000 0000abc0  .*
+ 90010 0000abc8 0000abcc 0000abc4           .*

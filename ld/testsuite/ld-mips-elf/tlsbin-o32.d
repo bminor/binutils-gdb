@@ -10,14 +10,14 @@ Disassembly of section .text:
   4000e0:	afbe0008 	sw	s8,8\(sp\)
   4000e4:	03a0f021 	move	s8,sp
   4000e8:	afbc0000 	sw	gp,0\(sp\)
-  4000ec:	8f99802c 	lw	t9,-32724\(gp\)
-  4000f0:	2784803c 	addiu	a0,gp,-32708
+  4000ec:	8f998018 	lw	t9,-32744\(gp\)
+  4000f0:	27848028 	addiu	a0,gp,-32728
   4000f4:	0320f809 	jalr	t9
   4000f8:	00000000 	nop
   4000fc:	8fdc0000 	lw	gp,0\(s8\)
   400100:	00000000 	nop
-  400104:	8f99802c 	lw	t9,-32724\(gp\)
-  400108:	27848034 	addiu	a0,gp,-32716
+  400104:	8f998018 	lw	t9,-32744\(gp\)
+  400108:	27848020 	addiu	a0,gp,-32736
   40010c:	0320f809 	jalr	t9
   400110:	00000000 	nop
   400114:	8fdc0000 	lw	gp,0\(s8\)
@@ -26,7 +26,7 @@ Disassembly of section .text:
   400120:	24638000 	addiu	v1,v1,-32768
   400124:	00621821 	addu	v1,v1,v0
   400128:	7c02283b 	rdhwr	v0,\$5
-  40012c:	8f838030 	lw	v1,-32720\(gp\)
+  40012c:	8f83801c 	lw	v1,-32740\(gp\)
   400130:	00000000 	nop
   400134:	00621821 	addu	v1,v1,v0
   400138:	7c02283b 	rdhwr	v0,\$5
