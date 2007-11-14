@@ -137,6 +137,13 @@ class Target
   code_fill(off_t length)
   { return this->do_code_fill(length); }
 
+  // Return whether SYM is a special symbol which is known to be
+  // defined.  This is used to avoid inappropriate warnings about
+  // undefined symbols.
+  bool
+  is_always_defined(Symbol* sym) const
+  { return this->do_is_always_defined(sym); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -187,6 +194,12 @@ class Target
   virtual std::string
   do_code_fill(off_t)
   { gold_unreachable(); }
+
+  // Virtual function which may be implemented by the child class if
+  // needed.
+  virtual bool
+  do_is_always_defined(Symbol*) const
+  { return false; }
 
  private:
   Target(const Target&);

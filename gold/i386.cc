@@ -84,6 +84,11 @@ class Target_i386 : public Sized_target<32, false>
   uint64_t
   do_dynsym_value(const Symbol*) const;
 
+  // Return whether SYM is always defined.
+  bool
+  do_is_always_defined(Symbol* sym) const
+  { return strcmp(sym->name(), "___tls_get_addr") == 0; }
+
   // Relocate a section.
   void
   relocate_section(const Relocate_info<32, false>*,

@@ -1610,7 +1610,8 @@ Symbol_table::sized_write_globals(const Target* target,
           && sym->object()->is_dynamic()
           && sym->shndx() == elfcpp::SHN_UNDEF
 	  && sym->binding() != elfcpp::STB_WEAK
-	  && !parameters->allow_shlib_undefined())
+	  && !parameters->allow_shlib_undefined()
+	  && !target->is_always_defined(sym))
 	{
 	  // A very ugly cast.
 	  Dynobj* dynobj = static_cast<Dynobj*>(sym->object());
