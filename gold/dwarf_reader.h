@@ -72,15 +72,11 @@ class Dwarf_line_info
 };
 
 template<int size, bool big_endian>
-class Sized_dwarf_line_info
+class Sized_dwarf_line_info : public Dwarf_line_info
 {
  public:
   // Initializes a .debug_line reader for a given object file.
   Sized_dwarf_line_info(Object* object);
-
-  std::string
-  addr2line(unsigned int shndx, off_t offset)
-  { return do_addr2line(shndx, offset); }
 
  private:
   std::string

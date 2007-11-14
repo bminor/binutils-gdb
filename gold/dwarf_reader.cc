@@ -630,7 +630,7 @@ Sized_dwarf_line_info<size, big_endian>::do_addr2line(unsigned int shndx,
 
   // If we found an exact match, great, otherwise find the last entry
   // before the passed-in offset.
-  if (it->offset > offset)
+  if (it == offsets->end() || it->offset > offset)
     {
       if (it == offsets->begin())
         return "";
@@ -672,10 +672,6 @@ Sized_dwarf_line_info<size, big_endian>::do_addr2line(unsigned int shndx,
 }
 
 // Dwarf_line_info routines.
-
-// Note: this routine instantiates the appropriate
-// Sized_dwarf_line_info templates for this config, so we don't have
-// to have a separte instantiation section for them.
 
 std::string
 Dwarf_line_info::one_addr2line(Object* object,
