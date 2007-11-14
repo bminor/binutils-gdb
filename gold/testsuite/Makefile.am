@@ -32,9 +32,10 @@ if NATIVE_LINKER
 
 TESTS += debug_msg.sh
 
-# TESTS += undef_symbol.sh
+check_DATA += debug_msg.err
 
-check_DATA += debug_msg.err undef_symbol.err
+# TESTS += undef_symbol.sh
+# check_DATA +=undef_symbol.err
 
 NATIVE_PROGS = \
 	constructor_test \
