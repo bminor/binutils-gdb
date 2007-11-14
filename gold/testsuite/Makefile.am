@@ -134,6 +134,7 @@ debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
 	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
 	then \
 	  echo 1>&2 "Link of debug_msg.o should have failed"; \
+	  rm -f $@; \
 	  exit 1; \
 	fi
 
@@ -146,6 +147,7 @@ undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
 	@if $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so 2>$@; \
 	then \
 	  echo 1>&2 "Link of undef_symbol_test should have failed"; \
+	  rm -f $@; \
 	  exit 1; \
 	fi
 

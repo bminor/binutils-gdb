@@ -1220,6 +1220,7 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of debug_msg.o should have failed"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
 
@@ -1232,6 +1233,7 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so 2>$@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of undef_symbol_test should have failed"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
 
