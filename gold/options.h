@@ -153,6 +153,11 @@ class General_options
   symbolic() const
   { return this->symbolic_; }
 
+  // --detect-odr-violations: Whether to search for One Defn Rule violations.
+  bool
+  detect_odr_violations() const
+  { return this->detect_odr_violations_; }
+
   // --eh-frame-hdr: Whether to generate an exception frame header.
   bool
   create_eh_frame_hdr() const
@@ -300,6 +305,10 @@ class General_options
   { this->symbolic_ = true; }
 
   void
+  set_detect_odr_violations()
+  { this->detect_odr_violations_ = true; }
+
+  void
   set_create_eh_frame_hdr()
   { this->create_eh_frame_hdr_ = true; }
 
@@ -412,6 +421,7 @@ class General_options
   bool is_relocatable_;
   Strip strip_;
   bool symbolic_;
+  bool detect_odr_violations_;
   bool create_eh_frame_hdr_;
   Dir_list rpath_;
   Dir_list rpath_link_;

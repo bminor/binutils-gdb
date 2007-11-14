@@ -121,6 +121,14 @@ class Parameters
     return this->symbolic_;
   }
 
+  // Whether we should try to detect violations of the One Definition Rule.
+  bool
+  detect_odr_violations() const
+  {
+    gold_assert(this->options_valid_);
+    return this->detect_odr_violations_;
+  }
+
   // The general linker optimization level.
   int
   optimization_level() const
@@ -218,6 +226,8 @@ class Parameters
   Strip strip_;
   // Whether we are doing a symbolic link.
   bool symbolic_;
+  // Whether we try to detect One Definition Rule violations.
+  bool detect_odr_violations_;
   // The optimization level.
   int optimization_level_;
   // Whether the -E/--export-dynamic flag is set.

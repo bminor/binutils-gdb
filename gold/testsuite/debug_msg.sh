@@ -55,4 +55,9 @@ check "debug_msg.o: in function int testfn<double>(double):${srcdir}/debug_msg.c
 check "debug_msg.o: in function int testfn<double>(double):${srcdir}/debug_msg.cc:44: undefined reference to 'undef_fn2()'"
 check "debug_msg.o: in function int testfn<double>(double):${srcdir}/debug_msg.cc:45: undefined reference to 'undef_int'"
 
+# Check we detected the ODR (One Definition Rule) violation.
+check "warning: symbol Ordering::operator()(int, int) *defined in multiple places (possible ODR violation):"
+check "odr_violation1.cc:5"
+check "odr_violation2.cc:5"
+
 exit 0

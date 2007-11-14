@@ -1808,54 +1808,6 @@ Symbol_table::sized_write_section_symbol(const Output_section* os,
 void
 Symbol_table::detect_odr_violations() const
 {
-  if (parameters->get_size() == 32)
-    {
-      if (!parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_32_LITTLE
-	  this->sized_detect_odr_violations<32, false>();
-#else
-	  gold_unreachable();
-#endif
-	}
-      else
-	{
-#ifdef HAVE_TARGET_32_BIG
-	  this->sized_detect_odr_violations<32, true>();
-#else
-	  gold_unreachable();
-#endif
-	}
-    }
-  else if (parameters->get_size() == 64)
-    {
-      if (!parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_64_LITTLE
-	  this->sized_detect_odr_violations<64, false>();
-#else
-	  gold_unreachable();
-#endif
-	}
-      else
-	{
-#ifdef HAVE_TARGET_64_BIG
-	  this->sized_detect_odr_violations<64, true>();
-#else
-	  gold_unreachable();
-#endif
-	}
-    }
-  else
-    gold_unreachable();
-}
-
-// Implement detect_odr_violations.
-
-template<int size, bool big_endian>
-void
-Symbol_table::sized_detect_odr_violations() const
-{
   for (Odr_map::const_iterator it = candidate_odr_violations_.begin();
        it != candidate_odr_violations_.end();
        ++it)
@@ -1874,9 +1826,9 @@ Symbol_table::sized_detect_odr_violations() const
 	  // one Task for object, plus appropriate locking to ensure
 	  // that we don't conflict with other uses of the object.
           locs->object->lock();
-          Dwarf_line_info<size, big_endian> line_info(locs->object);
+          std::string lineno = Dwarf_line_info::one_addr2line(
+              locs->object, locs->shndx, locs->offset);
           locs->object->unlock();
-          std::string lineno = line_info.addr2line(locs->shndx, locs->offset);
           if (!lineno.empty())
             line_nums.insert(lineno);
         }

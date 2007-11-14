@@ -41,21 +41,51 @@ struct LineStateMachine;
 // This class is used to read the line information from the debugging
 // section of an object file.
 
-template<int size, bool big_endian>
 class Dwarf_line_info
 {
  public:
-  // Initializes a .debug_line reader for a given object file.
-  Dwarf_line_info(Object* object);
+  Dwarf_line_info()
+  { }
+
+  virtual
+  ~Dwarf_line_info()
+  { }
 
   // Given a section number and an offset, returns the associated
   // file and line-number, as a string: "file:lineno".  If unable
   // to do the mapping, returns the empty string.  You must call
   // read_line_mappings() before calling this function.
   std::string
-  addr2line(unsigned int shndx, off_t offset);
+  addr2line(unsigned int shndx, off_t offset)
+  { return do_addr2line(shndx, offset); }
+
+  // A helper function for a single addr2line lookup.  It uses
+  // parameters() to figure out the size and endianness.  This is less
+  // efficient than using the templatized size and endianness, so only
+  // call this from an un-templatized context.
+  static std::string
+  one_addr2line(Object* object, unsigned int shndx, off_t offset);
 
  private:
+  virtual std::string
+  do_addr2line(unsigned int shndx, off_t offset) = 0;
+};
+
+template<int size, bool big_endian>
+class Sized_dwarf_line_info
+{
+ public:
+  // Initializes a .debug_line reader for a given object file.
+  Sized_dwarf_line_info(Object* object);
+
+  std::string
+  addr2line(unsigned int shndx, off_t offset)
+  { return do_addr2line(shndx, offset); }
+
+ private:
+  std::string
+  do_addr2line(unsigned int shndx, off_t offset);
+
   // Start processing line info, and populates the offset_map_.
   void
   read_line_mappings();

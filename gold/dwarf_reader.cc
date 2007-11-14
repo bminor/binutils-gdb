@@ -25,6 +25,7 @@
 #include "elfcpp_swap.h"
 #include "dwarf.h"
 #include "object.h"
+#include "parameters.h"
 #include "reloc.h"
 #include "dwarf_reader.h"
 
@@ -117,7 +118,7 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
 }
 
 template<int size, bool big_endian>
-Dwarf_line_info<size, big_endian>::Dwarf_line_info(Object* object)
+Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object)
   : data_valid_(false), buffer_(NULL), symtab_buffer_(NULL),
     directories_(), files_(), current_header_index_(-1)
 {
@@ -177,7 +178,7 @@ Dwarf_line_info<size, big_endian>::Dwarf_line_info(Object* object)
 
 template<int size, bool big_endian>
 const unsigned char*
-Dwarf_line_info<size, big_endian>::read_header_prolog(
+Sized_dwarf_line_info<size, big_endian>::read_header_prolog(
     const unsigned char* lineptr)
 {
   uint32_t initial_length = elfcpp::Swap<32, big_endian>::readval(lineptr);
@@ -238,7 +239,7 @@ Dwarf_line_info<size, big_endian>::read_header_prolog(
 
 template<int size, bool big_endian>
 const unsigned char*
-Dwarf_line_info<size, big_endian>::read_header_tables(
+Sized_dwarf_line_info<size, big_endian>::read_header_tables(
     const unsigned char* lineptr)
 {
   ++this->current_header_index_;
@@ -311,7 +312,7 @@ Dwarf_line_info<size, big_endian>::read_header_tables(
 
 template<int size, bool big_endian>
 bool
-Dwarf_line_info<size, big_endian>::process_one_opcode(
+Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
     const unsigned char* start, struct LineStateMachine* lsm, size_t* len)
 {
   size_t oplen = 0;
@@ -490,7 +491,7 @@ Dwarf_line_info<size, big_endian>::process_one_opcode(
 
 template<int size, bool big_endian>
 unsigned const char*
-Dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr)
+Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr)
 {
   struct LineStateMachine lsm;
 
@@ -530,7 +531,7 @@ Dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr)
 
 template<int size, bool big_endian>
 unsigned int
-Dwarf_line_info<size, big_endian>::symbol_section(
+Sized_dwarf_line_info<size, big_endian>::symbol_section(
     unsigned int sym,
     typename elfcpp::Elf_types<size>::Elf_Addr* value)
 {
@@ -545,7 +546,7 @@ Dwarf_line_info<size, big_endian>::symbol_section(
 
 template<int size, bool big_endian>
 void
-Dwarf_line_info<size, big_endian>::read_relocs()
+Sized_dwarf_line_info<size, big_endian>::read_relocs()
 {
   if (this->symtab_buffer_ == NULL)
     return;
@@ -565,7 +566,7 @@ Dwarf_line_info<size, big_endian>::read_relocs()
 
 template<int size, bool big_endian>
 void
-Dwarf_line_info<size, big_endian>::read_line_mappings()
+Sized_dwarf_line_info<size, big_endian>::read_line_mappings()
 {
   gold_assert(this->data_valid_ == true);
 
@@ -595,7 +596,7 @@ Dwarf_line_info<size, big_endian>::read_line_mappings()
 
 template<int size, bool big_endian>
 bool
-Dwarf_line_info<size, big_endian>::input_is_relobj()
+Sized_dwarf_line_info<size, big_endian>::input_is_relobj()
 {
   // Only .o files have relocs and the symtab buffer that goes with them.
   return this->symtab_buffer_ != NULL;
@@ -606,7 +607,8 @@ Dwarf_line_info<size, big_endian>::input_is_relobj()
 
 template<int size, bool big_endian>
 std::string
-Dwarf_line_info<size, big_endian>::addr2line(unsigned int shndx, off_t offset)
+Sized_dwarf_line_info<size, big_endian>::do_addr2line(unsigned int shndx,
+                                                      off_t offset)
 {
   if (this->data_valid_ == false)
     return "";
@@ -669,24 +671,62 @@ Dwarf_line_info<size, big_endian>::addr2line(unsigned int shndx, off_t offset)
   return ret;
 }
 
+// Dwarf_line_info routines.
+
+// Note: this routine instantiates the appropriate
+// Sized_dwarf_line_info templates for this config, so we don't have
+// to have a separte instantiation section for them.
+
+std::string
+Dwarf_line_info::one_addr2line(Object* object,
+                               unsigned int shndx, off_t offset)
+{
+  if (parameters->get_size() == 32 && !parameters->is_big_endian())
+#ifdef HAVE_TARGET_32_LITTLE
+    return Sized_dwarf_line_info<32, false>(object).addr2line(shndx, offset);
+#else
+    gold_unreachable();
+#endif
+  else if (parameters->get_size() == 32 && parameters->is_big_endian())
+#ifdef HAVE_TARGET_32_BIG
+    return Sized_dwarf_line_info<32, true>(object).addr2line(shndx, offset);
+#else
+    gold_unreachable();
+#endif
+  else if (parameters->get_size() == 64 && !parameters->is_big_endian())
+#ifdef HAVE_TARGET_64_LITTLE
+    return Sized_dwarf_line_info<64, false>(object).addr2line(shndx, offset);
+#else
+    gold_unreachable();
+#endif
+  else if (parameters->get_size() == 64 && parameters->is_big_endian())
+#ifdef HAVE_TARGET_64_BIT
+    return Sized_dwarf_line_info<64, true>(object).addr2line(shndx, offset);
+#else
+    gold_unreachable();
+#endif
+  else
+    gold_unreachable();
+}
+
 #ifdef HAVE_TARGET_32_LITTLE
 template
-class Dwarf_line_info<32, false>;
+class Sized_dwarf_line_info<32, false>;
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
 template
-class Dwarf_line_info<32, true>;
+class Sized_dwarf_line_info<32, true>;
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
 template
-class Dwarf_line_info<64, false>;
+class Sized_dwarf_line_info<64, false>;
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
 template
-class Dwarf_line_info<64, true>;
+class Sized_dwarf_line_info<64, true>;
 #endif
 
 } // End namespace gold.

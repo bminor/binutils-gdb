@@ -55,6 +55,10 @@ class Derived : public Base
   virtual void virtfn() { undef_fn2(); }
 };
 
+// This tests One Definition Rule (ODR) violations.
+void SortAscending(int array[], int size);   // in odr_violation1.cc
+void SortDescending(int array[], int size);  // in odr_violation2.cc
+
 int main()
 {
   testfn(5);
@@ -62,6 +66,14 @@ int main()
 
   Base b;
   Derived d;
+
+  int kInput1[] = {1, 6, 9, 7, 3, 4, 2, 10, 5, 8};
+  int kSize1 = sizeof(kInput1) / sizeof(int);
+  SortAscending(kInput1, kSize1);
+
+  int kInput2[] = {1, 6, 9, 7, 3, 4, 2, 10, 5, 8};
+  int kSize2 = sizeof(kInput2) / sizeof(int);
+  SortDescending(kInput2, kSize2);
 
   return 0;
 }

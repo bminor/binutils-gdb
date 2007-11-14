@@ -243,7 +243,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   // is an ODR violation.  But it's helpful to warn about.)
   // We use orig_sym here because we want the symbol exactly as it
   // appears in the object file, not munged via our future processing.
-  if (orig_sym.get_st_bind() == elfcpp::STB_WEAK
+  if (parameters->detect_odr_violations()
+      && orig_sym.get_st_bind() == elfcpp::STB_WEAK
       && to->binding() == elfcpp::STB_WEAK
       && orig_sym.get_st_shndx() != elfcpp::SHN_UNDEF
       && to->shndx() != elfcpp::SHN_UNDEF

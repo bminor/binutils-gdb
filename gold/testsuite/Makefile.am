@@ -118,8 +118,12 @@ if GCC
 
 debug_msg.o: debug_msg.cc
 	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
-debug_msg.err: debug_msg.o
-	if $(CXXLINK) -Bgcctestdir/ -o debug_msg debug_msg.o 2>$@; \
+odr_violation1.o: odr_violation1.cc
+	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2.o: odr_violation2.cc
+	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o
+	if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
 	then \
 	  echo 2>&1 "Link of debug_msg.o should have failed"; \
 	  exit 1; \
