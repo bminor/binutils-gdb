@@ -39,7 +39,9 @@ namespace gold
 // see a DT_SONAME entry.
 
 Dynobj::Dynobj(const std::string& name, Input_file* input_file, off_t offset)
-  : Object(name, input_file, true, offset)
+  : Object(name, input_file, true, offset),
+    needed_(),
+    unknown_needed_(UNKNOWN_NEEDED_UNSET)
 {
   // This will be overridden by a DT_SONAME entry, hopefully.  But if
   // we never see a DT_SONAME entry, our rule is to use the dynamic
@@ -58,14 +60,6 @@ Dynobj::Dynobj(const std::string& name, Input_file* input_file, off_t offset)
 					      close_paren - (open_paren + 1));
 	}
     }
-}
-
-// Return the string to use in a DT_NEEDED entry.
-
-const char*
-Dynobj::soname() const
-{
-  return this->soname_.c_str();
 }
 
 // Class Sized_dynobj.
@@ -193,19 +187,20 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
   *view_info = shdr.get_sh_info();
 }
 
-// Set the soname field if this shared object has a DT_SONAME tag.
-// PSHDRS points to the section headers.  DYNAMIC_SHNDX is the section
-// index of the SHT_DYNAMIC section.  STRTAB_SHNDX, STRTAB, and
-// STRTAB_SIZE are the section index and contents of a string table
-// which may be the one associated with the SHT_DYNAMIC section.
+// Read the dynamic tags.  Set the soname field if this shared object
+// has a DT_SONAME tag.  Record the DT_NEEDED tags.  PSHDRS points to
+// the section headers.  DYNAMIC_SHNDX is the section index of the
+// SHT_DYNAMIC section.  STRTAB_SHNDX, STRTAB, and STRTAB_SIZE are the
+// section index and contents of a string table which may be the one
+// associated with the SHT_DYNAMIC section.
 
 template<int size, bool big_endian>
 void
-Sized_dynobj<size, big_endian>::set_soname(const unsigned char* pshdrs,
-					   unsigned int dynamic_shndx,
-					   unsigned int strtab_shndx,
-					   const unsigned char* strtabu,
-					   off_t strtab_size)
+Sized_dynobj<size, big_endian>::read_dynamic(const unsigned char* pshdrs,
+					     unsigned int dynamic_shndx,
+					     unsigned int strtab_shndx,
+					     const unsigned char* strtabu,
+					     off_t strtab_size)
 {
   typename This::Shdr dynamicshdr(pshdrs + dynamic_shndx * This::shdr_size);
   gold_assert(dynamicshdr.get_sh_type() == elfcpp::SHT_DYNAMIC);
@@ -236,30 +231,48 @@ Sized_dynobj<size, big_endian>::set_soname(const unsigned char* pshdrs,
       strtabu = this->get_view(strtabshdr.get_sh_offset(), strtab_size, false);
     }
 
+  const char* const strtab = reinterpret_cast<const char*>(strtabu);
+
   for (const unsigned char* p = pdynamic;
        p < pdynamic + dynamic_size;
        p += This::dyn_size)
     {
       typename This::Dyn dyn(p);
 
-      if (dyn.get_d_tag() == elfcpp::DT_SONAME)
+      switch (dyn.get_d_tag())
 	{
-	  off_t val = dyn.get_d_val();
-	  if (val >= strtab_size)
-	    {
-	      this->error(_("DT_SONAME value out of range: %lld >= %lld"),
-			 static_cast<long long>(val),
-			 static_cast<long long>(strtab_size));
-	      return;
-	    }
-
-	  const char* strtab = reinterpret_cast<const char*>(strtabu);
-	  this->set_soname_string(strtab + val);
+	case elfcpp::DT_NULL:
+	  // We should always see DT_NULL at the end of the dynamic
+	  // tags.
 	  return;
-	}
 
-      if (dyn.get_d_tag() == elfcpp::DT_NULL)
-	return;
+	case elfcpp::DT_SONAME:
+	  {
+	    off_t val = dyn.get_d_val();
+	    if (val >= strtab_size)
+	      this->error(_("DT_SONAME value out of range: %lld >= %lld"),
+			  static_cast<long long>(val),
+			  static_cast<long long>(strtab_size));
+	    else
+	      this->set_soname_string(strtab + val);
+	  }
+	  break;
+
+	case elfcpp::DT_NEEDED:
+	  {
+	    off_t val = dyn.get_d_val();
+	    if (val >= strtab_size)
+	      this->error(_("DT_NEEDED value out of range: %lld >= %lld"),
+			  static_cast<long long>(val),
+			  static_cast<long long>(strtab_size));
+	    else
+	      this->add_needed(strtab + val);
+	  }
+	  break;
+
+	default:
+	  break;
+	}
     }
 
   this->error(_("missing DT_NULL in dynamic segment"));
@@ -346,15 +359,15 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
     }
 
   // Read the SHT_DYNAMIC section to find whether this shared object
-  // has a DT_SONAME tag.  This doesn't really have anything to do
-  // with reading the symbols, but this is a convenient place to do
-  // it.
+  // has a DT_SONAME tag and to record any DT_NEEDED tags.  This
+  // doesn't really have anything to do with reading the symbols, but
+  // this is a convenient place to do it.
   if (dynamic_shndx != -1U)
-    this->set_soname(pshdrs, dynamic_shndx, strtab_shndx,
-		     (sd->symbol_names == NULL
-		      ? NULL
-		      : sd->symbol_names->data()),
-		     sd->symbol_names_size);
+    this->read_dynamic(pshdrs, dynamic_shndx, strtab_shndx,
+		       (sd->symbol_names == NULL
+			? NULL
+			: sd->symbol_names->data()),
+		       sd->symbol_names_size);
 }
 
 // Lay out the input sections for a dynamic object.  We don't want to

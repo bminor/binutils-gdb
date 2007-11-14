@@ -39,11 +39,38 @@ class General_options;
 class Dynobj : public Object
 {
  public:
+  // We keep a list of all the DT_NEEDED entries we find.
+  typedef std::vector<std::string> Needed;
+
   Dynobj(const std::string& name, Input_file* input_file, off_t offset = 0);
 
   // Return the name to use in a DT_NEEDED entry for this object.
   const char*
-  soname() const;
+  soname() const
+  { return this->soname_.c_str(); }
+
+  // Return the list of DT_NEEDED strings.
+  const Needed&
+  needed() const
+  { return this->needed_; }
+
+  // Return whether this dynamic object has any DT_NEEDED entries
+  // which were not seen during the link.
+  bool
+  has_unknown_needed_entries() const
+  {
+    gold_assert(this->unknown_needed_ != UNKNOWN_NEEDED_UNSET);
+    return this->unknown_needed_ == UNKNOWN_NEEDED_TRUE;
+  }
+
+  // Set whether this dynamic object has any DT_NEEDED entries which
+  // were not seen during the link.
+  void
+  set_has_unknown_needed_entries(bool set)
+  {
+    gold_assert(this->unknown_needed_ == UNKNOWN_NEEDED_UNSET);
+    this->unknown_needed_ = set ? UNKNOWN_NEEDED_TRUE : UNKNOWN_NEEDED_FALSE;
+  }
 
   // Compute the ELF hash code for a string.
   static uint32_t
@@ -74,6 +101,11 @@ class Dynobj : public Object
   set_soname_string(const char* s)
   { this->soname_.assign(s); }
 
+  // Add an entry to the list of DT_NEEDED strings.
+  void
+  add_needed(const char* s)
+  { this->needed_.push_back(std::string(s)); }
+
  private:
   // Compute the GNU hash code for a string.
   static uint32_t
@@ -101,8 +133,21 @@ class Dynobj : public Object
 			      unsigned char** pphash,
 			      unsigned int* phashlen);
 
+  // Values for the has_unknown_needed_entries_ field.
+  enum Unknown_needed
+  {
+    UNKNOWN_NEEDED_UNSET,
+    UNKNOWN_NEEDED_TRUE,
+    UNKNOWN_NEEDED_FALSE
+  };
+
   // The DT_SONAME name, if any.
   std::string soname_;
+  // The list of DT_NEEDED entries.
+  Needed needed_;
+  // Whether this dynamic object has any DT_NEEDED entries not seen
+  // during the link.
+  Unknown_needed unknown_needed_;
 };
 
 // A dynamic object, size and endian specific version.
@@ -187,12 +232,11 @@ class Sized_dynobj : public Dynobj
 		      File_view** view, off_t* view_size,
 		      unsigned int* view_info);
 
-  // Set the SONAME from the SHT_DYNAMIC section at DYNAMIC_SHNDX.
-  // The STRTAB parameters may have the relevant string table.
+  // Read the dynamic tags.
   void
-  set_soname(const unsigned char* pshdrs, unsigned int dynamic_shndx,
-	     unsigned int strtab_shndx, const unsigned char* strtabu,
-	     off_t strtab_size);
+  read_dynamic(const unsigned char* pshdrs, unsigned int dynamic_shndx,
+	       unsigned int strtab_shndx, const unsigned char* strtabu,
+	       off_t strtab_size);
 
   // Mapping from version number to version name.
   typedef std::vector<const char*> Version_map;

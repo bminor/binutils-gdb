@@ -337,6 +337,14 @@ namespace gold
 const options::One_option
 options::Command_line_options::options[] =
 {
+  GENERAL_NOARG('\0', "allow-shlib-undefined",
+		N_("Allow unresolved references in shared libraries"),
+		NULL, TWO_DASHES,
+		&General_options::set_allow_shlib_undefined),
+  GENERAL_NOARG('\0', "no-allow-shlib-undefined",
+		N_("Do not allow unresolved references in shared libraries"),
+		NULL, TWO_DASHES,
+		&General_options::set_no_allow_shlib_undefined),
   POSDEP_NOARG('\0', "as-needed",
 	       N_("Only set DT_NEEDED for dynamic libs if used"),
 	       NULL, TWO_DASHES, &Position_dependent_options::set_as_needed),
@@ -475,6 +483,7 @@ General_options::General_options()
     output_file_name_("a.out"),
     is_relocatable_(false),
     strip_(STRIP_NONE),
+    allow_shlib_undefined_(false),
     symbolic_(false),
     detect_odr_violations_(false),
     create_eh_frame_hdr_(false),

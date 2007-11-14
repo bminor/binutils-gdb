@@ -951,6 +951,11 @@ class Input_objects
   target() const
   { return this->target_; }
 
+  // For each dynamic object, check whether we've seen all of its
+  // explicit dependencies.
+  void
+  check_dynamic_dependencies() const;
+
   // Iterate over all regular objects.
 
   Relobj_iterator

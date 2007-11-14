@@ -148,6 +148,12 @@ class General_options
   strip_debug() const
   { return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG; }
 
+  // --allow-shlib-undefined: do not warn about unresolved symbols in
+  // --shared libraries.
+  bool
+  allow_shlib_undefined() const
+  { return this->allow_shlib_undefined_; }
+
   // -Bsymbolic: bind defined symbols locally.
   bool
   symbolic() const
@@ -301,6 +307,14 @@ class General_options
   { this->strip_ = STRIP_DEBUG; }
 
   void
+  set_allow_shlib_undefined()
+  { this->allow_shlib_undefined_ = true; }
+
+  void
+  set_no_allow_shlib_undefined()
+  { this->allow_shlib_undefined_ = false; }
+
+  void
   set_symbolic()
   { this->symbolic_ = true; }
 
@@ -420,6 +434,7 @@ class General_options
   const char* output_file_name_;
   bool is_relocatable_;
   Strip strip_;
+  bool allow_shlib_undefined_;
   bool symbolic_;
   bool detect_odr_violations_;
   bool create_eh_frame_hdr_;

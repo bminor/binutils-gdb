@@ -1080,6 +1080,32 @@ Input_objects::add_object(Object* obj)
   return true;
 }
 
+// For each dynamic object, record whether we've seen all of its
+// explicit dependencies.
+
+void
+Input_objects::check_dynamic_dependencies() const
+{
+  for (Dynobj_list::const_iterator p = this->dynobj_list_.begin();
+       p != this->dynobj_list_.end();
+       ++p)
+    {
+      const Dynobj::Needed& needed((*p)->needed());
+      bool found_all = true;
+      for (Dynobj::Needed::const_iterator pneeded = needed.begin();
+	   pneeded != needed.end();
+	   ++pneeded)
+	{
+	  if (this->sonames_.find(*pneeded) == this->sonames_.end())
+	    {
+	      found_all = false;
+	      break;
+	    }
+	}
+      (*p)->set_has_unknown_needed_entries(!found_all);
+    }
+}
+
 // Relocate_info methods.
 
 // Return a string describing the location of a relocation.  This is

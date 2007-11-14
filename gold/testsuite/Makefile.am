@@ -28,11 +28,11 @@ TESTS = object_unittest
 
 if GCC
 
-TESTS += debug_msg.sh
-
-check_DATA += debug_msg.err
-
 if NATIVE_LINKER
+
+TESTS += debug_msg.sh undef_symbol.sh
+
+check_DATA += debug_msg.err undef_symbol.err
 
 NATIVE_PROGS = \
 	constructor_test \
@@ -116,25 +116,38 @@ object_unittest_SOURCES = object_unittest.cc
 
 if GCC
 
-debug_msg.o: debug_msg.cc
-	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
-odr_violation1.o: odr_violation1.cc
-	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation1.cc
-odr_violation2.o: odr_violation2.cc
-	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation2.cc
-debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o
-	if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
-	then \
-	  echo 2>&1 "Link of debug_msg.o should have failed"; \
-	  exit 1; \
-	fi
-
 if NATIVE_LINKER
 
 gcctestdir/ld: ../ld-new
 	test -d gcctestdir || mkdir -p gcctestdir
 	rm -f gcctestdir/ld
 	(cd gcctestdir && $(LN_S) ../../ld-new ld)
+
+debug_msg.o: debug_msg.cc
+	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1.o: odr_violation1.cc
+	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2.o: odr_violation2.cc
+	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg.o should have failed"; \
+	  exit 1; \
+	fi
+
+undef_symbol.o: undef_symbol.cc
+	$(CXXCOMPILE) -O0 -g -c -fPIC $<
+undef_symbol.so: undef_symbol.o
+	$(CXXLINK) -shared undef_symbol.o
+undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so 2>$@; \
+	then \
+	  echo 1>&2 "Link of undef_symbol_test should have failed"; \
+	  exit 1; \
+	fi
 
 # Override the default CXXFLAGS--we don't want any optimization
 basic_test.o: basic_test.cc

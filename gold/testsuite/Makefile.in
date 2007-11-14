@@ -42,8 +42,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-@GCC_TRUE@am__append_1 = debug_msg.sh
-@GCC_TRUE@am__append_2 = debug_msg.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = debug_msg.sh undef_symbol.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = debug_msg.err undef_symbol.err
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_1_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_nonpic_test \
@@ -1204,23 +1204,36 @@ uninstall-am: uninstall-info-am
 	tags uninstall uninstall-am uninstall-info-am
 
 
-@GCC_TRUE@debug_msg.o: debug_msg.cc
-@GCC_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
-@GCC_TRUE@odr_violation1.o: odr_violation1.cc
-@GCC_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation1.cc
-@GCC_TRUE@odr_violation2.o: odr_violation2.cc
-@GCC_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation2.cc
-@GCC_TRUE@debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o
-@GCC_TRUE@	if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
-@GCC_TRUE@	then \
-@GCC_TRUE@	  echo 2>&1 "Link of debug_msg.o should have failed"; \
-@GCC_TRUE@	  exit 1; \
-@GCC_TRUE@	fi
-
 @GCC_TRUE@@NATIVE_LINKER_TRUE@gcctestdir/ld: ../ld-new
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d gcctestdir || mkdir -p gcctestdir
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	(cd gcctestdir && $(LN_S) ../../ld-new ld)
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg.o: debug_msg.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation1.o: odr_violation1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation2.o: odr_violation2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o "2>$@"
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of debug_msg.o should have failed"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@undef_symbol.o: undef_symbol.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -fPIC $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@undef_symbol.so: undef_symbol.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared undef_symbol.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so "2>$@"
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so 2>$@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of undef_symbol_test should have failed"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
 
 # Override the default CXXFLAGS--we don't want any optimization
 @GCC_TRUE@@NATIVE_LINKER_TRUE@basic_test.o: basic_test.cc

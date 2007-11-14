@@ -112,6 +112,14 @@ class Parameters
     return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG;
   }
 
+  // Whether to permit unresolved references from shared libraries.
+  bool
+  allow_shlib_undefined() const
+  {
+    gold_assert(this->options_valid_);
+    return this->allow_shlib_undefined_;
+  }
+
   // Whether we are doing a symbolic link, in which all defined
   // symbols are bound locally.
   bool
@@ -224,6 +232,8 @@ class Parameters
   std::string sysroot_;
   // Which symbols to strip.
   Strip strip_;
+  // Whether to allow undefined references from shared libraries.
+  bool allow_shlib_undefined_;
   // Whether we are doing a symbolic link.
   bool symbolic_;
   // Whether we try to detect One Definition Rule violations.

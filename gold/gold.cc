@@ -180,6 +180,10 @@ queue_middle_tasks(const General_options& options,
 		 (*input_objects->dynobj_begin())->name().c_str());
     }
 
+  // For each dynamic object, record whether we've seen all the
+  // dynamic objects that it depends upon.
+  input_objects->check_dynamic_dependencies();
+
   // See if any of the input definitions violate the One Definition Rule.
   // TODO: if this is too slow, do this as a task, rather than inline.
   symtab->detect_odr_violations();

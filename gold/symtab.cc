@@ -1599,6 +1599,26 @@ Symbol_table::sized_write_globals(const Target* target,
     {
       Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
 
+      // Optionally check for unresolved symbols in shared libraries.
+      // This is controlled by the --allow-shlib-undefined option.  We
+      // only warn about libraries for which we have seen all the
+      // DT_NEEDED entries.  We don't try to track down DT_NEEDED
+      // entries which were not seen in this link.  If we didn't see a
+      // DT_NEEDED entry, we aren't going to be able to reliably
+      // report whether the symbol is undefined.
+      if (sym->source() == Symbol::FROM_OBJECT
+          && sym->object()->is_dynamic()
+          && sym->shndx() == elfcpp::SHN_UNDEF
+	  && sym->binding() != elfcpp::STB_WEAK
+	  && !parameters->allow_shlib_undefined())
+	{
+	  // A very ugly cast.
+	  Dynobj* dynobj = static_cast<Dynobj*>(sym->object());
+	  if (!dynobj->has_unknown_needed_entries())
+	    gold_error(_("%s: undefined reference to '%s'"),
+		       sym->object()->name().c_str(), sym->name());
+	}
+
       unsigned int sym_index = sym->symtab_index();
       unsigned int dynsym_index;
       if (dynamic_view == NULL)
