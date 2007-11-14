@@ -113,6 +113,11 @@ class Target_x86_64 : public Sized_target<64, false>
   std::string
   do_code_fill(off_t length);
 
+  // Return whether SYM is defined by the ABI.
+  bool
+  do_is_defined_by_abi(Symbol* sym) const
+  { return strcmp(sym->name(), "__tls_get_addr") == 0; }
+
   // Return the size of the GOT section.
   off_t
   got_size()

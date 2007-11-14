@@ -1524,7 +1524,8 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 // Write out the global symbols.
 
 void
-Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
+Symbol_table::write_globals(const Input_objects* input_objects,
+			    const Stringpool* sympool,
 			    const Stringpool* dynpool, Output_file* of) const
 {
   if (parameters->get_size() == 32)
@@ -1532,7 +1533,8 @@ Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
       if (parameters->is_big_endian())
 	{
 #ifdef HAVE_TARGET_32_BIG
-	  this->sized_write_globals<32, true>(target, sympool, dynpool, of);
+	  this->sized_write_globals<32, true>(input_objects, sympool,
+					      dynpool, of);
 #else
 	  gold_unreachable();
 #endif
@@ -1540,7 +1542,8 @@ Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
       else
 	{
 #ifdef HAVE_TARGET_32_LITTLE
-	  this->sized_write_globals<32, false>(target, sympool, dynpool, of);
+	  this->sized_write_globals<32, false>(input_objects, sympool,
+					       dynpool, of);
 #else
 	  gold_unreachable();
 #endif
@@ -1551,7 +1554,8 @@ Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
       if (parameters->is_big_endian())
 	{
 #ifdef HAVE_TARGET_64_BIG
-	  this->sized_write_globals<64, true>(target, sympool, dynpool, of);
+	  this->sized_write_globals<64, true>(input_objects, sympool,
+					      dynpool, of);
 #else
 	  gold_unreachable();
 #endif
@@ -1559,7 +1563,8 @@ Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
       else
 	{
 #ifdef HAVE_TARGET_64_LITTLE
-	  this->sized_write_globals<64, false>(target, sympool, dynpool, of);
+	  this->sized_write_globals<64, false>(input_objects, sympool,
+					       dynpool, of);
 #else
 	  gold_unreachable();
 #endif
@@ -1573,11 +1578,13 @@ Symbol_table::write_globals(const Target* target, const Stringpool* sympool,
 
 template<int size, bool big_endian>
 void
-Symbol_table::sized_write_globals(const Target* target,
+Symbol_table::sized_write_globals(const Input_objects* input_objects,
 				  const Stringpool* sympool,
 				  const Stringpool* dynpool,
 				  Output_file* of) const
 {
+  const Target* const target = input_objects->target();
+
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   unsigned int index = this->first_global_index_;
   const off_t oview_size = this->output_count_ * sym_size;
@@ -1599,25 +1606,8 @@ Symbol_table::sized_write_globals(const Target* target,
     {
       Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
 
-      // Optionally check for unresolved symbols in shared libraries.
-      // This is controlled by the --allow-shlib-undefined option.  We
-      // only warn about libraries for which we have seen all the
-      // DT_NEEDED entries.  We don't try to track down DT_NEEDED
-      // entries which were not seen in this link.  If we didn't see a
-      // DT_NEEDED entry, we aren't going to be able to reliably
-      // report whether the symbol is undefined.
-      if (sym->source() == Symbol::FROM_OBJECT
-          && sym->object()->is_dynamic()
-          && sym->shndx() == elfcpp::SHN_UNDEF
-	  && sym->binding() != elfcpp::STB_WEAK
-	  && !parameters->allow_shlib_undefined())
-	{
-	  // A very ugly cast.
-	  Dynobj* dynobj = static_cast<Dynobj*>(sym->object());
-	  if (!dynobj->has_unknown_needed_entries())
-	    gold_error(_("%s: undefined reference to '%s'"),
-		       sym->object()->name().c_str(), sym->name());
-	}
+      // Possibly warn about unresolved symbols in shared libraries.
+      this->warn_about_undefined_dynobj_symbol(input_objects, sym);
 
       unsigned int sym_index = sym->symtab_index();
       unsigned int dynsym_index;
@@ -1747,6 +1737,42 @@ Symbol_table::sized_write_symbol(
   osym.put_st_info(elfcpp::elf_st_info(sym->binding(), sym->type()));
   osym.put_st_other(elfcpp::elf_st_other(sym->visibility(), sym->nonvis()));
   osym.put_st_shndx(shndx);
+}
+
+// Check for unresolved symbols in shared libraries.  This is
+// controlled by the --allow-shlib-undefined option.
+
+// We only warn about libraries for which we have seen all the
+// DT_NEEDED entries.  We don't try to track down DT_NEEDED entries
+// which were not seen in this link.  If we didn't see a DT_NEEDED
+// entry, we aren't going to be able to reliably report whether the
+// symbol is undefined.
+
+// We also don't warn about libraries found in the system library
+// directory (the directory were we find libc.so); we assume that
+// those libraries are OK.  This heuristic avoids problems in
+// GNU/Linux, in which -ldl can have undefined references satisfied by
+// ld-linux.so.
+
+inline void
+Symbol_table::warn_about_undefined_dynobj_symbol(
+    const Input_objects* input_objects,
+    Symbol* sym) const
+{
+  if (sym->source() == Symbol::FROM_OBJECT
+      && sym->object()->is_dynamic()
+      && sym->shndx() == elfcpp::SHN_UNDEF
+      && sym->binding() != elfcpp::STB_WEAK
+      && !parameters->allow_shlib_undefined()
+      && !input_objects->target()->is_defined_by_abi(sym)
+      && !input_objects->found_in_system_library_directory(sym->object()))
+    {
+      // A very ugly cast.
+      Dynobj* dynobj = static_cast<Dynobj*>(sym->object());
+      if (!dynobj->has_unknown_needed_entries())
+	gold_error(_("%s: undefined reference to '%s'"),
+		   sym->object()->name().c_str(), sym->name());
+    }
 }
 
 // Write out a section symbol.  Return the update offset.

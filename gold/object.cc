@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cstring>
 #include <cstdarg>
+#include "libiberty.h"
 
 #include "target-select.h"
 #include "dwarf_reader.h"
@@ -1062,9 +1063,10 @@ Input_objects::add_object(Object* obj)
     {
       // See if this is a duplicate SONAME.
       Dynobj* dynobj = static_cast<Dynobj*>(obj);
+      const char* soname = dynobj->soname();
 
       std::pair<Unordered_set<std::string>::iterator, bool> ins =
-	this->sonames_.insert(dynobj->soname());
+	this->sonames_.insert(soname);
       if (!ins.second)
 	{
 	  // We have already seen a dynamic object with this soname.
@@ -1072,12 +1074,36 @@ Input_objects::add_object(Object* obj)
 	}
 
       this->dynobj_list_.push_back(dynobj);
+
+      // If this is -lc, remember the directory in which we found it.
+      // We use this when issuing warnings about undefined symbols: as
+      // a heuristic, we don't warn about system libraries found in
+      // the same directory as -lc.
+      if (strncmp(soname, "libc.so", 7) == 0)
+	{
+	  const char* object_name = dynobj->name().c_str();
+	  const char* base = lbasename(object_name);
+	  if (base != object_name)
+	    this->system_library_directory_.assign(object_name,
+						   base - 1 - object_name);
+	}
     }
 
   set_parameters_size_and_endianness(target->get_size(),
 				     target->is_big_endian());
 
   return true;
+}
+
+// Return whether an object was found in the system library directory.
+
+bool
+Input_objects::found_in_system_library_directory(const Object* object) const
+{
+  return (!this->system_library_directory_.empty()
+	  && object->name().compare(0,
+				    this->system_library_directory_.size(),
+				    this->system_library_directory_) == 0);
 }
 
 // For each dynamic object, record whether we've seen all of its

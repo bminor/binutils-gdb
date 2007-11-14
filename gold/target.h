@@ -137,6 +137,12 @@ class Target
   code_fill(off_t length)
   { return this->do_code_fill(length); }
 
+  // Return whether SYM is known to be defined by the ABI.  This is
+  // used to avoid inappropriate warnings about undefined symbols.
+  bool
+  is_defined_by_abi(Symbol* sym) const
+  { return this->do_is_defined_by_abi(sym); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -187,6 +193,11 @@ class Target
   virtual std::string
   do_code_fill(off_t)
   { gold_unreachable(); }
+
+  // Virtual function which may be implemented by the child class.
+  virtual bool
+  do_is_defined_by_abi(Symbol*) const
+  { return false; }
 
  private:
   Target(const Target&);

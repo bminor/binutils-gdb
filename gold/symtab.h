@@ -46,6 +46,7 @@ class Dynobj;
 template<int size, bool big_endian>
 class Sized_dynobj;
 class Versions;
+class Input_objects;
 class Output_data;
 class Output_section;
 class Output_segment;
@@ -1055,7 +1056,7 @@ class Symbol_table
 
   // Write out the global symbols.
   void
-  write_globals(const Target*, const Stringpool*, const Stringpool*,
+  write_globals(const Input_objects*, const Stringpool*, const Stringpool*,
 		Output_file*) const;
 
   // Write out a section symbol.  Return the updated offset.
@@ -1177,8 +1178,8 @@ class Symbol_table
   // Write globals specialized for size and endianness.
   template<int size, bool big_endian>
   void
-  sized_write_globals(const Target*, const Stringpool*, const Stringpool*,
-		      Output_file*) const;
+  sized_write_globals(const Input_objects*, const Stringpool*,
+		      const Stringpool*, Output_file*) const;
 
   // Write out a symbol to P.
   template<int size, bool big_endian>
@@ -1188,6 +1189,10 @@ class Symbol_table
 		     unsigned int shndx,
 		     const Stringpool*, unsigned char* p
                      ACCEPT_SIZE_ENDIAN) const;
+
+  // Possibly warn about an undefined symbol from a dynamic object.
+  void
+  warn_about_undefined_dynobj_symbol(const Input_objects*, Symbol*) const;
 
   // Write out a section symbol, specialized for size and endianness.
   template<int size, bool big_endian>

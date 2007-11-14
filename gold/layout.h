@@ -506,11 +506,12 @@ class Write_data_task : public Task
 class Write_symbols_task : public Task
 {
  public:
-  Write_symbols_task(const Symbol_table* symtab, const Target* target,
+  Write_symbols_task(const Symbol_table* symtab,
+		     const Input_objects* input_objects,
 		     const Stringpool* sympool, const Stringpool* dynpool,
 		     Output_file* of, Task_token* final_blocker)
-    : symtab_(symtab), target_(target), sympool_(sympool), dynpool_(dynpool),
-      of_(of), final_blocker_(final_blocker)
+    : symtab_(symtab), input_objects_(input_objects), sympool_(sympool),
+      dynpool_(dynpool), of_(of), final_blocker_(final_blocker)
   { }
 
   // The standard Task methods.
@@ -526,7 +527,7 @@ class Write_symbols_task : public Task
 
  private:
   const Symbol_table* symtab_;
-  const Target* target_;
+  const Input_objects* input_objects_;
   const Stringpool* sympool_;
   const Stringpool* dynpool_;
   Output_file* of_;

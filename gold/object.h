@@ -930,7 +930,8 @@ class Input_objects
 {
  public:
   Input_objects()
-    : relobj_list_(), dynobj_list_(), target_(NULL), sonames_()
+    : relobj_list_(), dynobj_list_(), target_(NULL), sonames_(),
+      system_library_directory_()
   { }
 
   // The type of the list of input relocateable objects.
@@ -955,6 +956,11 @@ class Input_objects
   // explicit dependencies.
   void
   check_dynamic_dependencies() const;
+
+  // Return whether an object was found in the system library
+  // directory.
+  bool
+  found_in_system_library_directory(const Object*) const;
 
   // Iterate over all regular objects.
 
@@ -998,6 +1004,8 @@ class Input_objects
   Target* target_;
   // SONAMEs that we have seen.
   Unordered_set<std::string> sonames_;
+  // The directory in which we find the libc.so.
+  std::string system_library_directory_;
 };
 
 // Some of the information we pass to the relocation routines.  We

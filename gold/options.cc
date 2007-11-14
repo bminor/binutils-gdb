@@ -483,7 +483,7 @@ General_options::General_options()
     output_file_name_("a.out"),
     is_relocatable_(false),
     strip_(STRIP_NONE),
-    allow_shlib_undefined_(true),
+    allow_shlib_undefined_(false),
     symbolic_(false),
     detect_odr_violations_(false),
     create_eh_frame_hdr_(false),

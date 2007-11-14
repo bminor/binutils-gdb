@@ -1928,8 +1928,8 @@ Write_symbols_task::locks(Workqueue* workqueue)
 void
 Write_symbols_task::run(Workqueue*)
 {
-  this->symtab_->write_globals(this->target_, this->sympool_, this->dynpool_,
-			       this->of_);
+  this->symtab_->write_globals(this->input_objects_, this->sympool_,
+			       this->dynpool_, this->of_);
 }
 
 // Write_after_input_sections_task methods.
