@@ -127,6 +127,7 @@
 	mov.i r1 = ar.unat
 	mov.i r1 = ar.fpsr
 	mov.i r1 = ar.itc
+	mov.i r1 = ar.ruc
 
 // AR PFS, LC and EC can be accessed only by I unit.
 	mov.m r1 = ar.pfs

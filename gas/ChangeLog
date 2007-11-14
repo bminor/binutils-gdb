@@ -1,3 +1,9 @@
+2007-11-14  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-ia64.c (AR_RUC): Defined.
+	(ar): Add "ar.ruc".
+	(specify_resource): Handle AR_RUC like AR_ITC.
+
 2007-11-13  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mn10300.c (mn10300_force_relocation): Force a reloc to

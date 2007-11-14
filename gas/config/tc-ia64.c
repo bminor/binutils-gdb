@@ -366,6 +366,7 @@ static unsigned char le_nop_stop[16] =
 #define AR_UNAT		36
 #define AR_FPSR		40
 #define AR_ITC		44
+#define AR_RUC		45
 #define AR_PFS		64
 #define AR_LC		65
 #define AR_EC		66
@@ -389,8 +390,8 @@ ar[] =
     {"ar.fir",		AR_FIR},	{"ar.fdr",	AR_FDR},
     {"ar.ccv",		AR_CCV},	{"ar.unat",	AR_UNAT},
     {"ar.fpsr",		AR_FPSR},	{"ar.itc",	AR_ITC},
-    {"ar.pfs",		AR_PFS},	{"ar.lc",	AR_LC},
-    {"ar.ec",		AR_EC},
+    {"ar.ruc",		AR_RUC},	{"ar.pfs",	AR_PFS},
+    {"ar.lc",		AR_LC},		{"ar.ec",	AR_EC},
   };
 
 /* control registers:  */
@@ -9256,9 +9257,9 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 			    CURR_SLOT.opnd[index].X_add_number - REG_AR;
 
 			  if (regno == AR_ITC
+			      || regno == AR_RUC
 			      || (index == 0
-				  && (regno == AR_ITC
-				      || regno == AR_RSC
+				  && (regno == AR_RSC
 				      || (regno >= AR_K0
 					  && regno <= AR_K7))))
 			    {

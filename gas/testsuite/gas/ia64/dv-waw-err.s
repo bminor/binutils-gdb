@@ -84,6 +84,11 @@
 	mov	ar.itc = r1
 	;;
 
+// AR[RUC]
+	mov	ar.ruc = r1
+	mov	ar.ruc = r1
+	;;
+
 // AR[K]
 	mov	ar.k2 = r3
 	mov	ar.k2 = r3

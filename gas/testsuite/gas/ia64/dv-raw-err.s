@@ -75,6 +75,11 @@
 	mov	r2 = ar.itc
 	;;
 
+// AR[RUC]
+	mov	ar.ruc = r1
+	mov	r2 = ar.ruc
+	;;
+
 // AR[K]
 	mov	ar.k1 = r3
 	br.ia.sptk	b0
@@ -395,6 +400,12 @@
 	mov	ar.itc = r3
 	;;
 	epc
+	mov	r2 = ar.ruc
+	;;
+	epc
+	mov	ar.ruc = r3
+	;;
+	epc
 	mov	ar.rsc = r4
 	;;
 	epc
@@ -510,6 +521,9 @@
 // PSR.si
 	rsm	(1<<23)
 	mov	r1 = ar.itc
+	;;
+	rsm	(1<<23)
+	mov	r1 = ar.ruc
 	;;
 	ssm	(1<<23)
 	mov	r1 = ar.ec	// no DV here

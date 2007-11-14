@@ -714,8 +714,8 @@ _start:
 //	{ .mmi; nop.m 0; mov r1 = ar41 ;; }		// reserved
 //	{ .mmi; nop.m 0; mov r1 = ar42 ;; }		// reserved
 //	{ .mmi; nop.m 0; mov r1 = ar43 ;; }		// reserved
-//	{ .mmi; nop.m 0; mov r1 = ar44 ;; }		// reserved
-//	{ .mmi; nop.m 0; mov r1 = ar45 ;; }		// reserved
+	{ .mmi; nop.m 0; mov r1 = ar44 ;; }
+	{ .mmi; nop.m 0; mov r1 = ar45 ;; }
 //	{ .mmi; nop.m 0; mov r1 = ar46 ;; }		// reserved
 //	{ .mmi; nop.m 0; mov r1 = ar47 ;; }		// reserved
 	{ .mmi; nop.m 0; mov r1 = ar48 ;; }
@@ -816,6 +816,7 @@ _start:
 	{ .mmi; nop.m 0; mov r1 = ar.unat ;; }
 	{ .mmi; nop.m 0; mov r1 = ar.fpsr ;; }
 	{ .mmi; nop.m 0; mov r1 = ar.itc ;; }
+	{ .mmi; nop.m 0; mov r1 = ar.ruc ;; }
 	{ .mmi; nop.m 0; mov r1 = ar.pfs ;; }
 	{ .mmi; nop.m 0; mov r1 = ar.lc ;; }
 	{ .mmi; nop.m 0; mov r1 = ar.ec ;; }

@@ -32,9 +32,10 @@ AR[PFS];	br.call, brl.call;	br.call, brl.call;	none
 AR[PFS];	br.call, brl.call;	IC:mov-to-AR-PFS;	impliedF
 AR[RNAT];	alloc, flushrs, loadrs, IC:mov-to-AR-RNAT, IC:mov-to-AR-BSPSTORE;	alloc, flushrs, loadrs, IC:mov-to-AR-RNAT, IC:mov-to-AR-BSPSTORE;	impliedF
 AR[RSC];	IC:mov-to-AR-RSC;	IC:mov-to-AR-RSC;	impliedF
+AR[RUC];	IC:mov-to-AR-RUC;	IC:mov-to-AR-RUC;	impliedF
 AR[SSD];	IC:mov-to-AR-SSD;	IC:mov-to-AR-SSD;	impliedF
 AR[UNAT]{%}, % in 0 - 63;	IC:mov-to-AR-UNAT, st8.spill;	IC:mov-to-AR-UNAT, st8.spill;	impliedF
-AR%, % in 8-15, 20, 22-23, 31, 33-35, 37-39, 41-43, 45-47, 67-111;	IC:none;	IC:none;	none
+AR%, % in 8-15, 20, 22-23, 31, 33-35, 37-39, 41-43, 46-47, 67-111;	IC:none;	IC:none;	none
 AR%, % in 48 - 63, 112-127;	IC:mov-to-AR-ig+1;	IC:mov-to-AR-ig+1;	impliedF
 BR%, % in 0 - 7;	br.call+1, brl.call+1;	IC:mov-to-BR+1;	impliedF
 BR%, % in 0 - 7;	IC:mov-to-BR+1;	IC:mov-to-BR+1;	impliedF

@@ -1296,6 +1296,8 @@ lookup_regindex (const char *name, int specifier)
         return 32;
       else if (strstr (name, "[ITC]"))
         return 44;
+      else if (strstr (name, "[RUC]"))
+        return 45;
       else if (strstr (name, "[PFS]"))
         return 64;
       else if (strstr (name, "[LC]"))

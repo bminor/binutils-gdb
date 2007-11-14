@@ -119,6 +119,7 @@
 .*:127: Error: AR 36 can only be accessed by M-unit
 .*:128: Error: AR 40 can only be accessed by M-unit
 .*:129: Error: AR 44 can only be accessed by M-unit
-.*:132: Error: AR 64 can only be accessed by I-unit
-.*:133: Error: AR 65 can only be accessed by I-unit
-.*:134: Error: AR 66 can only be accessed by I-unit
+.*:130: Error: AR 45 can only be accessed by M-unit
+.*:133: Error: AR 64 can only be accessed by I-unit
+.*:134: Error: AR 65 can only be accessed by I-unit
+.*:135: Error: AR 66 can only be accessed by I-unit

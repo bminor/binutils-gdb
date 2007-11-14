@@ -1,3 +1,16 @@
+2007-11-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/dv-raw-err.s: Add tests for ar.ruc.
+	* gas/ia64/dv-waw-err.s: Likewise.
+	* gas/ia64/invalid-ar.s: Likewise.
+
+	* gas/ia64/regs.s: Add tests for ar.ruc and ar44.
+
+	* gas/ia64/dv-raw-err.l: Updated.
+	* gas/ia64/dv-waw-err.l: Likewise.
+	* gas/ia64/invalid-ar.l: Likewise.
+	* gas/ia64/regs.d: Likewise.
+
 2007-11-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/macros/purge.s: Delete irpc loops.
