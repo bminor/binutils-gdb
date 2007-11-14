@@ -920,6 +920,19 @@ class Output_data_got : public Output_section_data
   bool
   add_local(Sized_relobj<size, big_endian>* object, unsigned int sym_index);
 
+  // Add an entry (or pair of entries) for a global TLS symbol to the GOT.
+  // Return true if this is a new GOT entry, false if the symbol was
+  // already in the GOT.
+  bool
+  add_global_tls(Symbol* gsym, bool need_pair);
+
+  // Add an entry (or pair of entries) for a local TLS symbol to the GOT.
+  // This returns true if this is a new GOT entry, false if the symbol
+  // already has a GOT entry.
+  bool
+  add_local_tls(Sized_relobj<size, big_endian>* object,
+		unsigned int sym_index, bool need_pair);
+
   // Add a constant to the GOT.  This returns the offset of the new
   // entry from the start of the GOT.
   unsigned int

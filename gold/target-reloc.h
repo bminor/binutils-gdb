@@ -100,7 +100,7 @@ scan_relocs(
 	    }
 
 	  scan.local(options, symtab, layout, target, object, data_shndx,
-		     reloc, r_type, lsym);
+		     output_section, reloc, r_type, lsym);
 	}
       else
 	{
@@ -110,7 +110,7 @@ scan_relocs(
 	    gsym = symtab->resolve_forwards(gsym);
 
 	  scan.global(options, symtab, layout, target, object, data_shndx,
-		      reloc, r_type, gsym);
+		      output_section, reloc, r_type, gsym);
 	}
     }
 }

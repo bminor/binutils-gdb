@@ -743,9 +743,56 @@ Output_data_got<size, big_endian>::add_local(
 {
   if (object->local_has_got_offset(symndx))
     return false;
+
   this->entries_.push_back(Got_entry(object, symndx));
   this->set_got_size();
   object->set_local_got_offset(symndx, this->last_got_offset());
+  return true;
+}
+
+// Add an entry (or a pair of entries) for a global TLS symbol to the GOT.
+// In a pair of entries, the first value in the pair will be used for the
+// module index, and the second value will be used for the dtv-relative
+// offset. This returns true if this is a new GOT entry, false if the symbol
+// already has a GOT entry.
+
+template<int size, bool big_endian>
+bool
+Output_data_got<size, big_endian>::add_global_tls(Symbol* gsym,
+						  bool need_pair)
+{
+  if (gsym->has_tls_got_offset(need_pair))
+    return false;
+
+  this->entries_.push_back(Got_entry(gsym));
+  gsym->set_tls_got_offset(this->last_got_offset(), need_pair);
+  if (need_pair)
+    this->entries_.push_back(Got_entry(gsym));
+  this->set_got_size();
+  return true;
+}
+
+// Add an entry (or a pair of entries) for a local TLS symbol to the GOT.
+// In a pair of entries, the first value in the pair will be used for the
+// module index, and the second value will be used for the dtv-relative
+// offset. This returns true if this is a new GOT entry, false if the symbol
+// already has a GOT entry.
+
+template<int size, bool big_endian>
+bool
+Output_data_got<size, big_endian>::add_local_tls(
+    Sized_relobj<size, big_endian>* object,
+    unsigned int symndx,
+    bool need_pair)
+{
+  if (object->local_has_tls_got_offset(symndx, need_pair))
+    return false;
+
+  this->entries_.push_back(Got_entry(object, symndx));
+  object->set_local_tls_got_offset(symndx, this->last_got_offset(), need_pair);
+  if (need_pair)
+    this->entries_.push_back(Got_entry(object, symndx));
+  this->set_got_size();
   return true;
 }
 
@@ -1432,8 +1479,12 @@ Output_segment::add_output_section(Output_section* os,
   // SHF_TLS sections.  An SHF_TLS/SHT_NOBITS section is a special
   // case: we group the SHF_TLS/SHT_NOBITS sections right after the
   // SHF_TLS/SHT_PROGBITS sections.  This lets us set up PT_TLS
-  // correctly.
-  if ((os->flags() & elfcpp::SHF_TLS) != 0 && !this->output_data_.empty())
+  // correctly.  SHF_TLS sections get added to both a PT_LOAD segment
+  // and the PT_TLS segment -- we do this grouping only for the
+  // PT_LOAD segment.
+  if (this->type_ != elfcpp::PT_TLS
+      && (os->flags() & elfcpp::SHF_TLS) != 0
+      && !this->output_data_.empty())
     {
       pdl = &this->output_data_;
       bool nobits = os->type() == elfcpp::SHT_NOBITS;

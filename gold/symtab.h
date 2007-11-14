@@ -299,6 +299,7 @@ class Symbol
   { return this->dynsym_index_ != 0; }
 
   // Return whether this symbol has an entry in the GOT section.
+  // For a TLS symbol, this GOT entry will hold its tp-relative offset.
   bool
   has_got_offset() const
   { return this->has_got_offset_; }
@@ -317,6 +318,35 @@ class Symbol
   {
     this->has_got_offset_ = true;
     this->got_offset_ = got_offset;
+  }
+
+  // Return whether this TLS symbol has an entry in the GOT section for
+  // its module index or, if NEED_PAIR is true, has a pair of entries
+  // for its module index and dtv-relative offset.
+  bool
+  has_tls_got_offset(bool need_pair) const
+  {
+    return (this->has_tls_mod_got_offset_
+            && (!need_pair || this->has_tls_pair_got_offset_));
+  }
+
+  // Return the offset into the GOT section for this symbol's TLS module
+  // index or, if NEED_PAIR is true, for the pair of entries for the
+  // module index and dtv-relative offset.
+  unsigned int
+  tls_got_offset(bool need_pair) const
+  {
+    gold_assert(this->has_tls_got_offset(need_pair));
+    return this->tls_mod_got_offset_;
+  }
+
+  // Set the GOT offset of this symbol.
+  void
+  set_tls_got_offset(unsigned int got_offset, bool have_pair)
+  {
+    this->has_tls_mod_got_offset_ = true;
+    this->has_tls_pair_got_offset_ = have_pair;
+    this->tls_mod_got_offset_ = got_offset;
   }
 
   // Return whether this symbol has an entry in the PLT section.
@@ -620,7 +650,17 @@ class Symbol
 
   // If this symbol has an entry in the GOT section (has_got_offset_
   // is true), this is the offset from the start of the GOT section.
+  // For a TLS symbol, if has_tls_tpoff_got_offset_ is true, this
+  // serves as the GOT offset for the GOT entry that holds its
+  // TP-relative offset.
   unsigned int got_offset_;
+
+  // If this is a TLS symbol and has an entry in the GOT section
+  // for a module index or a pair of entries (module index,
+  // dtv-relative offset), these are the offsets from the start
+  // of the GOT section.
+  unsigned int tls_mod_got_offset_;
+  unsigned int tls_pair_got_offset_;
 
   // If this symbol has an entry in the PLT section (has_plt_offset_
   // is true), then this is the offset from the start of the PLT
@@ -660,7 +700,14 @@ class Symbol
   // True if we've seen this symbol in a dynamic object.
   bool in_dyn_ : 1;
   // True if the symbol has an entry in the GOT section.
+  // For a TLS symbol, this GOT entry will hold its tp-relative offset.
   bool has_got_offset_ : 1;
+  // True if the symbol has an entry in the GOT section for its
+  // module index.
+  bool has_tls_mod_got_offset_ : 1;
+  // True if the symbol has a pair of entries in the GOT section for its
+  // module index and dtv-relative offset.
+  bool has_tls_pair_got_offset_ : 1;
   // True if the symbol has an entry in the PLT section.
   bool has_plt_offset_ : 1;
   // True if this is a dynamic symbol which needs a special value in

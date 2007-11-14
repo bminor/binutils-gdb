@@ -135,6 +135,7 @@ class Target_x86_64 : public Sized_target<64, false>
 	  Layout* layout, Target_x86_64* target,
 	  Sized_relobj<64, false>* object,
 	  unsigned int data_shndx,
+	  Output_section* output_section,
 	  const elfcpp::Rela<64, false>& reloc, unsigned int r_type,
 	  const elfcpp::Sym<64, false>& lsym);
 
@@ -143,6 +144,7 @@ class Target_x86_64 : public Sized_target<64, false>
 	   Layout* layout, Target_x86_64* target,
 	   Sized_relobj<64, false>* object,
 	   unsigned int data_shndx,
+	   Output_section* output_section,
 	   const elfcpp::Rela<64, false>& reloc, unsigned int r_type,
 	   Symbol* gsym);
 
@@ -738,6 +740,7 @@ Target_x86_64::Scan::local(const General_options&,
                            Target_x86_64* target,
                            Sized_relobj<64, false>* object,
                            unsigned int data_shndx,
+                           Output_section*,
                            const elfcpp::Rela<64, false>& reloc,
                            unsigned int r_type,
                            const elfcpp::Sym<64, false>&)
@@ -927,6 +930,7 @@ Target_x86_64::Scan::global(const General_options& options,
                             Target_x86_64* target,
                             Sized_relobj<64, false>* object,
                             unsigned int data_shndx,
+                            Output_section*,
                             const elfcpp::Rela<64, false>& reloc,
                             unsigned int r_type,
                             Symbol* gsym)

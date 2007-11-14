@@ -170,6 +170,11 @@ class Layout
   off_t
   finalize(const Input_objects*, Symbol_table*);
 
+  // Record that we have seen a relocation in the text section.
+  void
+  set_have_textrel()
+  { this->have_textrel_ = true; }
+
   // Return the size of the output file.
   off_t
   output_file_size() const
@@ -434,6 +439,8 @@ class Layout
   // Whether we have seen at least one object file without an
   // executable stack marker.
   bool input_without_gnu_stack_note_;
+  // Whether we have seen a relocation in the text section.
+  bool have_textrel_;
 };
 
 // This task handles writing out data in output sections which is not
