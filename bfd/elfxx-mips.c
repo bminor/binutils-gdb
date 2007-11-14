@@ -11073,6 +11073,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 		_bfd_error_handler
 		  (_("Warning: %B uses -msingle-float, %B uses -mdouble-float"),
 		   obfd, ibfd);
+		break;
 
 	      case 3:
 		_bfd_error_handler
@@ -11092,6 +11093,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 		_bfd_error_handler
 		  (_("Warning: %B uses -msingle-float, %B uses -mdouble-float"),
 		   ibfd, obfd);
+		break;
 
 	      case 3:
 		_bfd_error_handler
