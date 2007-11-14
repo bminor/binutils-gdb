@@ -30,7 +30,9 @@ if GCC
 
 if NATIVE_LINKER
 
-TESTS += debug_msg.sh undef_symbol.sh
+TESTS += debug_msg.sh
+
+# TESTS += undef_symbol.sh
 
 check_DATA += debug_msg.err undef_symbol.err
 

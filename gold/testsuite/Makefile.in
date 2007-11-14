@@ -42,7 +42,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = debug_msg.sh undef_symbol.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = debug_msg.sh
+
+# TESTS += undef_symbol.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = debug_msg.err undef_symbol.err
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_1_nonpic_test \
