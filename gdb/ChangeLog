@@ -1,3 +1,11 @@
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elfread.c (ST_REGULAR, ST_DYNAMIC, ST_SYNTHETIC): New defines.
+	(elf_symtab_read): Rename DYNAMIC argument to TYPE.  Do not access
+	ELF-private symbol data when processing synthetic symbols.  Use
+	udata.p to get at size of ppc64 synthetic 'dot' symbols.
+	(elf_symfile_read): Pass TYPE argument to elf_symtab_read.
+
 2007-11-15  Doug Evans  <dje@google.com>
 
 	* buildsym.h (subfiles): Move ...

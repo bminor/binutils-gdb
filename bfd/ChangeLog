@@ -1,3 +1,8 @@
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Set udata.p of
+	synthetic symbol to point to the ELF symbol it was derived from.
+
 2007-11-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 5328

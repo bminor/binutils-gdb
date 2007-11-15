@@ -2959,6 +2959,9 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	      len = strlen (syms[i]->name);
 	      memcpy (names, syms[i]->name, len + 1);
 	      names += len + 1;
+	      /* Have udata.p point back to the original symbol this
+		 synthetic symbol was derived from.  */
+	      s->udata.p = syms[i];
 	      s++;
 	    }
 	}
@@ -3046,6 +3049,9 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	      len = strlen (syms[i]->name);
 	      memcpy (names, syms[i]->name, len + 1);
 	      names += len + 1;
+	      /* Have udata.p point back to the original symbol this
+		 synthetic symbol was derived from.  */
+	      s->udata.p = syms[i];
 	      s++;
 	    }
 	}
