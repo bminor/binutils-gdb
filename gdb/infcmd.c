@@ -1887,11 +1887,7 @@ attach_command (char *args, int from_tty)
      (gdb) attach 4712
      Cannot access memory at address 0xdeadbeef
   */
-#ifdef CLEAR_SOLIB
-      CLEAR_SOLIB ();
-#else
-      clear_solib ();
-#endif
+  clear_solib ();
 
   target_attach (args, from_tty);
 

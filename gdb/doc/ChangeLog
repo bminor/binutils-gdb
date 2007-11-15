@@ -1,3 +1,8 @@
+2007-11-15  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdbint.texinfo (Native Conditionals): Remove
+	mention of CLEAR_SOLIB.
+	
 2007-11-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Print Settings): Add documentation for "set/show

@@ -199,11 +199,7 @@ core_close (int quitting)
 
       /* Clear out solib state while the bfd is still open. See
          comments in clear_solib in solib.c. */
-#ifdef CLEAR_SOLIB
-      CLEAR_SOLIB ();
-#else
       clear_solib ();
-#endif
 
       name = bfd_get_filename (core_bfd);
       if (!bfd_close (core_bfd))
