@@ -22,6 +22,7 @@
 
 #include "frame.h"
 #include "value.h"
+#include "vec.h"
 
 #include "gdb-events.h"
 
@@ -457,6 +458,9 @@ struct breakpoint
        the condition in.  */
     int condition_not_parsed;
   };
+
+typedef struct breakpoint *breakpoint_p;
+DEF_VEC_P(breakpoint_p);
 
 /* The following stuff is an abstract data type "bpstat" ("breakpoint
    status").  This provides the ability to determine whether we have

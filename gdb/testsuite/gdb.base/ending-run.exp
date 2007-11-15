@@ -69,7 +69,7 @@ gdb_test "b ending-run.c:31" ".*Breakpoint 3.*ending-run.c, line 31.*"
 gdb_run_cmd
 gdb_test "" ".*Breakpoint.*1.*callee.*13.*" "run"
 
-gdb_test "cle" ".*Deleted breakpoints 2 1.*" "clear worked"
+gdb_test "cle" ".*Deleted breakpoints 1 2.*" "clear worked"
 send_gdb "i b\n"
 gdb_expect {
     -re ".* breakpoint .* breakpoint .*$gdb_prompt $" { 
@@ -95,7 +95,7 @@ gdb_expect {
     -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
         set line_eight $expect_out(1,string)
         gdb_test "b 13" ".*Breakpoint.*6.*"
-        gdb_test "cle *$line_eight" ".*Deleted breakpoints 6 4.*" "Clear 2 by address"
+        gdb_test "cle *$line_eight" ".*Deleted breakpoints 4 6.*" "Clear 2 by address"
     }
     -re ".*$gdb_prompt $" {
         fail "need to fix test for new compile outcome"
@@ -109,7 +109,7 @@ gdb_expect {
         gdb_test "b ending-run.c:14" ".*Breakpoint 7.*ending-run.c, line 14.*"
         gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint 8.*" "Breakpoint 7 at *ending-run.c:14"
         gdb_test "c" ".*Breakpoint.*7.*callee.*14.*"
-        gdb_test "cle" ".*Deleted breakpoints 8 7.*" "Clear 2 by default"
+        gdb_test "cle" ".*Deleted breakpoints 7 8.*" "Clear 2 by default"
     }
     -re ".*$gdb_prompt $" {
         fail "need to fix test for new compile outcome"

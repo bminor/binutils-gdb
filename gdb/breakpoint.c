@@ -6878,7 +6878,9 @@ tcatch_command (char *arg, int from_tty)
 static void
 clear_command (char *arg, int from_tty)
 {
-  struct breakpoint *b, *tmp, *prev, *found;
+  struct breakpoint *b;
+  VEC(breakpoint_p) *found = 0;
+  int ix;
   int default_match;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -6945,11 +6947,10 @@ clear_command (char *arg, int from_tty)
          1              0             <can't happen> */
 
       sal = sals.sals[i];
-      prev = NULL;
 
-      /* Find all matching breakpoints, remove them from the
-	 breakpoint chain, and add them to the 'found' chain.  */
-      ALL_BREAKPOINTS_SAFE (b, tmp)
+      /* Find all matching breakpoints and add them to
+	 'found'.  */
+      ALL_BREAKPOINTS (b)
 	{
 	  int match = 0;
 	  /* Are we going to delete b? */
@@ -6980,30 +6981,11 @@ clear_command (char *arg, int from_tty)
 	    }
 
 	  if (match)
-	    {
-	      /* Remove it from breakpoint_chain...  */
-	      if (b == breakpoint_chain)
-		{
-		  /* b is at the head of the list */
-		  breakpoint_chain = b->next;
-		}
-	      else
-		{
-		  prev->next = b->next;
-		}
-	      /* And add it to 'found' chain.  */
-	      b->next = found;
-	      found = b;
-	    }
-	  else
-	    {
-	      /* Keep b, and keep a pointer to it.  */
-	      prev = b;
-	    }
+	    VEC_safe_push(breakpoint_p, found, b);
 	}
     }
   /* Now go thru the 'found' chain and delete them.  */
-  if (found == 0)
+  if (VEC_empty(breakpoint_p, found))
     {
       if (arg)
 	error (_("No breakpoint at %s."), arg);
@@ -7011,23 +6993,22 @@ clear_command (char *arg, int from_tty)
 	error (_("No breakpoint at this line."));
     }
 
-  if (found->next)
+  if (VEC_length(breakpoint_p, found) > 1)
     from_tty = 1;		/* Always report if deleted more than one */
   if (from_tty)
     {
-      if (!found->next)
+      if (VEC_length(breakpoint_p, found) == 1)
 	printf_unfiltered (_("Deleted breakpoint "));
       else
 	printf_unfiltered (_("Deleted breakpoints "));
     }
   breakpoints_changed ();
-  while (found)
+
+  for (ix = 0; VEC_iterate(breakpoint_p, found, ix, b); ix++)
     {
       if (from_tty)
-	printf_unfiltered ("%d ", found->number);
-      tmp = found->next;
-      delete_breakpoint (found);
-      found = tmp;
+	printf_unfiltered ("%d ", b->number);
+      delete_breakpoint (b);
     }
   if (from_tty)
     putchar_unfiltered ('\n');
