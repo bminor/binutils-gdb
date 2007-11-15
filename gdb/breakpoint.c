@@ -109,7 +109,7 @@ static void breakpoints_info (char *, int);
 
 static void breakpoint_1 (int, int);
 
-static bpstat bpstat_alloc (struct bp_location *, bpstat);
+static bpstat bpstat_alloc (const struct bp_location *, bpstat);
 
 static int breakpoint_cond_eval (void *);
 
@@ -705,7 +705,7 @@ int
 read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr, unsigned len)
 {
   int status;
-  struct bp_location *b;
+  const struct bp_location *b;
   CORE_ADDR bp_addr = 0;
   int bp_size = 0;
 
@@ -1733,7 +1733,7 @@ breakpoint_init_inferior (enum inf_context context)
 enum breakpoint_here
 breakpoint_here_p (CORE_ADDR pc)
 {
-  struct bp_location *bpt;
+  const struct bp_location *bpt;
   int any_breakpoint_here = 0;
 
   ALL_BP_LOCATIONS (bpt)
@@ -1768,7 +1768,7 @@ breakpoint_here_p (CORE_ADDR pc)
 int
 breakpoint_inserted_here_p (CORE_ADDR pc)
 {
-  struct bp_location *bpt;
+  const struct bp_location *bpt;
 
   ALL_BP_LOCATIONS (bpt)
     {
@@ -1801,7 +1801,7 @@ breakpoint_inserted_here_p (CORE_ADDR pc)
 int
 software_breakpoint_inserted_here_p (CORE_ADDR pc)
 {
-  struct bp_location *bpt;
+  const struct bp_location *bpt;
   int any_breakpoint_here = 0;
 
   ALL_BP_LOCATIONS (bpt)
@@ -1834,7 +1834,7 @@ software_breakpoint_inserted_here_p (CORE_ADDR pc)
 int
 breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 {
-  struct bp_location *bpt;
+  const struct bp_location *bpt;
   int thread;
 
   thread = pid_to_thread_id (ptid);
@@ -2159,7 +2159,7 @@ print_it_typical (bpstat bs)
 {
   struct cleanup *old_chain, *ui_out_chain;
   struct breakpoint *b;
-  struct bp_location *bl;
+  const struct bp_location *bl;
   struct ui_stream *stb;
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -2440,7 +2440,7 @@ print_bp_stop_message (bpstat bs)
 
     case print_it_normal:
       {
-	struct bp_location *bl = bs->breakpoint_at;
+	const struct bp_location *bl = bs->breakpoint_at;
 	struct breakpoint *b = bl ? bl->owner : NULL;
 	
 	/* Normal case.  Call the breakpoint's print_it method, or
@@ -2520,7 +2520,7 @@ breakpoint_cond_eval (void *exp)
 /* Allocate a new bpstat and chain it to the current one.  */
 
 static bpstat
-bpstat_alloc (struct bp_location *bl, bpstat cbs /* Current "bs" value */ )
+bpstat_alloc (const struct bp_location *bl, bpstat cbs /* Current "bs" value */ )
 {
   bpstat bs;
 
@@ -2749,7 +2749,7 @@ bpstat
 bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 {
   struct breakpoint *b = NULL;
-  struct bp_location *bl;
+  const struct bp_location *bl;
   /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
   int real_breakpoint = 0;
   /* Root of the chain of bpstat's */
@@ -3336,7 +3336,7 @@ bpstat_should_step (void)
 int
 bpstat_have_active_hw_watchpoints (void)
 {
-  struct bp_location *bpt;
+  const struct bp_location *bpt;
   ALL_BP_LOCATIONS (bpt)
     if (breakpoint_enabled (bpt->owner)
 	&& bpt->inserted

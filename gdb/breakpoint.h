@@ -642,7 +642,7 @@ struct bpstats
        place, and a bpstat reflects the fact that both have been hit.  */
     bpstat next;
     /* Breakpoint that we are at.  */
-    struct bp_location *breakpoint_at;
+    const struct bp_location *breakpoint_at;
     /* Commands left to be done.  */
     struct command_line *commands;
     /* Old value associated with a watchpoint.  */
