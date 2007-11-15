@@ -961,7 +961,7 @@ arm_prologue_this_id (struct frame_info *next_frame,
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (func <= LOWEST_PC)
+  if (func <= gdbarch_tdep (get_frame_arch (next_frame))->lowest_pc)
     return;
 
   /* If we've hit a wall, stop.  */

@@ -1,3 +1,10 @@
+2007-11-15  Markus Deuling  <deuling@de.ibm.com>
+
+	* arm-tdep.c (arm_prologue_this_id): Replace LOWEST_PC by its
+	expression and use get_frame_arch to replace current_gdbarch by frame's
+	architecture.
+	* arm-tdep.h (LOWEST_PC): Remove
+
 2007-11-15  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Apply const qualifier to some users of bp_location.
