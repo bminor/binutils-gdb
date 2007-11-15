@@ -148,6 +148,12 @@ class General_options
   strip_debug() const
   { return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG; }
 
+  // -Sgdb: strip only debugging information that's not used by
+  //         gdb (at least, for gdb versions <= 6.7).
+  bool
+  strip_debug_gdb() const
+  { return this->strip_debug() || this->strip_ == STRIP_DEBUG_UNUSED_BY_GDB; }
+
   // --allow-shlib-undefined: do not warn about unresolved symbols in
   // --shared libraries.
   bool
@@ -259,7 +265,9 @@ class General_options
     // Strip all symbols.
     STRIP_ALL,
     // Strip debugging information.
-    STRIP_DEBUG
+    STRIP_DEBUG,
+    // Strip debugging information that's not used by gdb (at least <= 6.7)
+    STRIP_DEBUG_UNUSED_BY_GDB
   };
 
   // Whether to mark the stack as executable.
@@ -310,6 +318,10 @@ class General_options
   void
   set_strip_debug()
   { this->strip_ = STRIP_DEBUG; }
+
+  void
+  set_strip_debug_gdb()
+  { this->strip_ = STRIP_DEBUG_UNUSED_BY_GDB; }
 
   void
   set_allow_shlib_undefined()

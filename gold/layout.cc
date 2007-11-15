@@ -98,6 +98,33 @@ is_prefix_of(const char* prefix, const char* str)
   return strncmp(prefix, str, strlen(prefix)) == 0;
 }
 
+// Returns whether the given section is in the list of
+// debug-sections-used-by-some-version-of-gdb.  Currently,
+// we've checked versions of gdb up to and including 6.7.1.
+
+static const char* gdb_sections[] =
+{ ".debug_abbrev",
+  // ".debug_aranges",   // not used by gdb as of 6.7.1
+  ".debug_frame",
+  ".debug_info",
+  ".debug_line",
+  ".debug_loc",
+  ".debug_macinfo",
+  // ".debug_pubnames",  // not used by gdb as of 6.7.1
+  ".debug_ranges",
+  ".debug_str",
+};
+
+static inline bool
+is_gdb_debug_section(const char* str)
+{
+  // We can do this faster: binary search or a hashtable.  But why bother?
+  for (size_t i = 0; i < sizeof(gdb_sections)/sizeof(*gdb_sections); ++i)
+    if (strcmp(str, gdb_sections[i]) == 0)
+      return true;
+  return false;
+}
+
 // Whether to include this section in the link.
 
 template<int size, bool big_endian>
@@ -132,6 +159,14 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
 	      || is_prefix_of(".gnu.linkonce.wi.", name)
 	      || is_prefix_of(".line", name)
 	      || is_prefix_of(".stab", name))
+	    return false;
+	}
+      if (parameters->strip_debug_gdb()
+	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+	{
+	  // Debugging sections can only be recognized by name.
+	  if (is_prefix_of(".debug", name)
+              && !is_gdb_debug_section(name))
 	    return false;
 	}
       return true;

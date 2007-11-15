@@ -112,6 +112,14 @@ class Parameters
     return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG;
   }
 
+  // Whether to strip debugging information that's not used by gdb.
+  bool
+  strip_debug_gdb() const
+  {
+    gold_assert(this->strip_ != STRIP_INVALID);
+    return this->strip_debug() || this->strip_ == STRIP_DEBUG_UNUSED_BY_GDB;
+  }
+
   // Whether to permit unresolved references from shared libraries.
   bool
   allow_shlib_undefined() const
@@ -221,7 +229,9 @@ class Parameters
     // Strip all symbols.
     STRIP_ALL,
     // Strip debugging information.
-    STRIP_DEBUG
+    STRIP_DEBUG,
+    // Strip debugging information that's not used by gdb (at least <= 6.7)
+    STRIP_DEBUG_UNUSED_BY_GDB
   };
 
   // A pointer to the error handling object.

@@ -66,6 +66,8 @@ Parameters::set_from_options(const General_options* options)
     this->strip_ = STRIP_ALL;
   else if (options->strip_debug())
     this->strip_ = STRIP_DEBUG;
+  else if (options->strip_debug_gdb())
+    this->strip_ = STRIP_DEBUG_UNUSED_BY_GDB;
   else
     this->strip_ = STRIP_NONE;
 

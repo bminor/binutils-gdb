@@ -402,6 +402,11 @@ options::Command_line_options::options[] =
               &General_options::add_to_rpath_link),
   GENERAL_NOARG('s', "strip-all", N_("Strip all symbols"), NULL,
 		TWO_DASHES, &General_options::set_strip_all),
+  GENERAL_NOARG('\0', "strip-debug-gdb",
+                N_("Strip debug symbols that are unused by gdb "
+                   "(at least versions <= 6.7)"),
+		NULL, TWO_DASHES, &General_options::set_strip_debug_gdb),
+  // This must come after -Sdebug since it's a prefix of it.
   GENERAL_NOARG('S', "strip-debug", N_("Strip debugging information"), NULL,
 		TWO_DASHES, &General_options::set_strip_debug),
   GENERAL_NOARG('\0', "shared", N_("Generate shared library"),
