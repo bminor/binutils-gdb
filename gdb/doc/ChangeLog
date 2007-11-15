@@ -1,3 +1,7 @@
+2007-11-15  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Symbols): Update output of "maint info symtabs".
+
 2007-11-15  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdbint.texinfo (Native Conditionals): Remove

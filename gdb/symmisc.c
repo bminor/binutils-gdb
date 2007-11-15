@@ -1039,6 +1039,8 @@ maintenance_info_symtabs (char *regexp, int from_tty)
             printf_filtered ("    blockvector ((struct blockvector *) %p)%s\n",
                              symtab->blockvector,
                              symtab->primary ? " (primary)" : "");
+            printf_filtered ("    linetable ((struct linetable *) %p)\n",
+                             symtab->linetable);
             printf_filtered ("    debugformat %s\n", symtab->debugformat);
             printf_filtered ("  }\n");
           }

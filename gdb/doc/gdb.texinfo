@@ -11174,6 +11174,7 @@ line 1574.
     dirname (null)
     fullname (null)
     blockvector ((struct blockvector *) 0x86c1bd0) (primary)
+    linetable ((struct linetable *) 0x8370fa0)
     debugformat DWARF 2
   @}
 @}

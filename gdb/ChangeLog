@@ -1,3 +1,7 @@
+2007-11-15  Doug Evans  <dje@google.com>
+
+	* symmisc.c (maintenance_info_symtabs): Print linetable info.
+
 2007-11-15  Markus Deuling  <deuling@de.ibm.com>
 
 	* mipsnbsd-tdep.h (SIZEOF_STRUCT_REG, SIZEOF_STRUCT_FPREG): Remove
