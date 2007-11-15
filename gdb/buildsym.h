@@ -71,8 +71,6 @@ struct subfile
     struct symtab *symtab;
   };
 
-EXTERN struct subfile *subfiles;
-
 EXTERN struct subfile *current_subfile;
 
 /* Global variable which, when set, indicates that we are processing a

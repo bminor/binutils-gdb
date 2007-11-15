@@ -55,6 +55,10 @@
 
 #include "stabsread.h"
 
+/* List of subfiles.  */
+
+static struct subfile *subfiles;
+
 /* List of free `struct pending' structures for reuse.  */
 
 static struct pending *free_pendings;

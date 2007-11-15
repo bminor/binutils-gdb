@@ -1,5 +1,8 @@
 2007-11-15  Doug Evans  <dje@google.com>
 
+	* buildsym.h (subfiles): Move ...
+	* buildsym.c (subfiles): ... to here and make static.
+
 	* symmisc.c (maintenance_info_symtabs): Print linetable info.
 
 2007-11-15  Markus Deuling  <deuling@de.ibm.com>
