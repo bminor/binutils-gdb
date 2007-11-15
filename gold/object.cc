@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cstring>
 #include <cstdarg>
+#include "demangle.h"
 #include "libiberty.h"
 
 #include "target-select.h"
@@ -1032,7 +1033,20 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
           if (sym.get_st_name() > names_size)
 	    info->enclosing_symbol_name = "(invalid)";
 	  else
-	    info->enclosing_symbol_name = symbol_names + sym.get_st_name();
+            {
+              info->enclosing_symbol_name = symbol_names + sym.get_st_name();
+              if (parameters->demangle())
+                {
+                  char* demangled_name = cplus_demangle(
+                      info->enclosing_symbol_name.c_str(),
+                      DMGL_ANSI | DMGL_PARAMS);
+                  if (demangled_name != NULL)
+                    {
+                      info->enclosing_symbol_name.assign(demangled_name);
+                      free(demangled_name);
+                    }
+                }
+            }
 	  return true;
         }
     }
@@ -1155,11 +1169,6 @@ Relocate_info<size, big_endian>::location(size_t, off_t offset) const
   if (this->object->get_symbol_location_info(this->data_shndx, offset, &info))
     {
       ret += " in function ";
-      // We could demangle this name before printing, but we don't
-      // bother because gcc runs linker output through a demangle
-      // filter itself.  The only advantage to demangling here is if
-      // someone might call ld directly, rather than via gcc.  If we
-      // did want to demangle, cplus_demangle() is in libiberty.
       ret += info.enclosing_symbol_name;
       ret += ":";
       filename = info.source_file;

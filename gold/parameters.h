@@ -129,6 +129,11 @@ class Parameters
     return this->symbolic_;
   }
 
+  // Whether we should demangle C++ symbols in our log messages.
+  bool
+  demangle() const
+  { return this->demangle_; }
+
   // Whether we should try to detect violations of the One Definition Rule.
   bool
   detect_odr_violations() const
@@ -236,6 +241,8 @@ class Parameters
   bool allow_shlib_undefined_;
   // Whether we are doing a symbolic link.
   bool symbolic_;
+  // Whether we should demangle C++ symbols in our log messages.
+  bool demangle_;
   // Whether we try to detect One Definition Rule violations.
   bool detect_odr_violations_;
   // The optimization level.

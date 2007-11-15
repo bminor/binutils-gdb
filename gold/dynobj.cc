@@ -1301,7 +1301,7 @@ Versions::add_def(const Symbol* sym, const char* version,
       if (parameters->output_is_shared())
 	{
 	  gold_error(_("symbol %s has undefined version %s"),
-		     sym->name(), version);
+		     sym->demangled_name().c_str(), version);
 	  return;
 	}
 

@@ -1019,7 +1019,7 @@ Target_i386::Scan::unsupported_reloc_global(Sized_relobj<32, false>* object,
 					    Symbol* gsym)
 {
   gold_error(_("%s: unsupported reloc %u against global symbol %s"),
-	     object->name().c_str(), r_type, gsym->name());
+	     object->name().c_str(), r_type, gsym->demangled_name().c_str());
 }
 
 // Scan a relocation for a global symbol.

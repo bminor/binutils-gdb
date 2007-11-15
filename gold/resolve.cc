@@ -256,11 +256,11 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       // on C++ symbols.  These have (mangled) names starting with _Z.
       && to->name()[0] == '_' && to->name()[1] == 'Z')
     {
-      Symbol_location from_location
+      Symbol_location fromloc
           = { object, orig_sym.get_st_shndx(), orig_sym.get_st_value() };
-      Symbol_location to_location = { to->object(), to->shndx(), to->value() };
-      this->candidate_odr_violations_[to->name()].insert(from_location);
-      this->candidate_odr_violations_[to->name()].insert(to_location);
+      Symbol_location toloc = { to->object(), to->shndx(), to->value() };
+      this->candidate_odr_violations_[to->name()].insert(fromloc);
+      this->candidate_odr_violations_[to->name()].insert(toloc);
     }
 }
 
@@ -317,7 +317,7 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
       // FIXME: Do a better job of reporting locations.
       gold_error(_("%s: multiple definition of %s"),
 		 object != NULL ? object->name().c_str() : _("command line"),
-		 to->name());
+		 to->demangled_name().c_str());
       gold_error(_("%s: previous definition here"),
 		 (to->source() == Symbol::FROM_OBJECT
 		  ? to->object()->name().c_str()

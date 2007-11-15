@@ -34,7 +34,7 @@ Parameters::Parameters(Errors* errors)
   : errors_(errors), output_file_name_(NULL),
     output_file_type_(OUTPUT_INVALID), sysroot_(),
     strip_(STRIP_INVALID), allow_shlib_undefined_(false),
-    symbolic_(false), detect_odr_violations_(false),
+    symbolic_(false), demangle_(false), detect_odr_violations_(false),
     optimization_level_(0), export_dynamic_(false),
     is_doing_static_link_valid_(false), doing_static_link_(false),
     is_size_and_endian_valid_(false), size_(0), is_big_endian_(false)
@@ -50,6 +50,7 @@ Parameters::set_from_options(const General_options* options)
   this->sysroot_ = options->sysroot();
   this->allow_shlib_undefined_ = options->allow_shlib_undefined();
   this->symbolic_ = options->symbolic();
+  this->demangle_ = options->demangle();
   this->detect_odr_violations_ = options->detect_odr_violations();
   this->optimization_level_ = options->optimization_level();
   this->export_dynamic_ = options->export_dynamic();

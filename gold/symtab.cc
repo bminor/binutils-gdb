@@ -26,6 +26,7 @@
 #include <set>
 #include <string>
 #include <utility>
+#include "demangle.h"
 
 #include "object.h"
 #include "dwarf_reader.h"
@@ -70,6 +71,32 @@ Symbol::init_fields(const char* name, const char* version,
   this->has_warning_ = false;
   this->is_copied_from_dynobj_ = false;
   this->needs_value_in_got_ = false;
+}
+
+// Return the demangled version of the symbol's name, but only
+// if the --demangle flag was set.
+
+static std::string
+demangle(const char* name)
+{
+  // cplus_demangle allocates memory for the result it returns,
+  // and returns NULL if the name is already demangled.
+  char* demangled_name = cplus_demangle(name, DMGL_ANSI | DMGL_PARAMS);
+  if (demangled_name == NULL)
+    return name;
+
+  std::string retval(demangled_name);
+  free(demangled_name);
+  return retval;
+}
+
+std::string
+Symbol::demangled_name() const
+{
+  if (parameters->demangle())
+    return demangle(name());
+  else
+    return name();
 }
 
 // Initialize the fields in the base class Symbol for SYM in OBJECT.
@@ -1434,7 +1461,7 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 		&& shndx != elfcpp::SHN_ABS)
 	      {
 		gold_error(_("%s: unsupported symbol section 0x%x"),
-			   sym->name(), shndx);
+			   sym->demangled_name().c_str(), shndx);
 		shndx = elfcpp::SHN_UNDEF;
 	      }
 
@@ -1647,7 +1674,7 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 		&& in_shndx != elfcpp::SHN_ABS)
 	      {
 		gold_error(_("%s: unsupported symbol section 0x%x"),
-			   sym->name(), in_shndx);
+			   sym->demangled_name().c_str(), in_shndx);
 		shndx = in_shndx;
 	      }
 	    else
@@ -1771,7 +1798,8 @@ Symbol_table::warn_about_undefined_dynobj_symbol(
       Dynobj* dynobj = static_cast<Dynobj*>(sym->object());
       if (!dynobj->has_unknown_needed_entries())
 	gold_error(_("%s: undefined reference to '%s'"),
-		   sym->object()->name().c_str(), sym->name());
+		   sym->object()->name().c_str(),
+                   sym->demangled_name().c_str());
     }
 }
 
@@ -1883,7 +1911,7 @@ Symbol_table::detect_odr_violations(const char* output_file_name) const
         {
           gold_warning(_("while linking %s: symbol %s defined in multiple "
                          "places (possible ODR violation):"),
-                       output_file_name, symbol_name);
+                       output_file_name, demangle(symbol_name).c_str());
           for (std::set<std::string>::const_iterator it2 = line_nums.begin();
                it2 != line_nums.end();
                ++it2)

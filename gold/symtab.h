@@ -98,6 +98,13 @@ class Symbol
   name() const
   { return this->name_; }
 
+  // Return the (ANSI) demangled version of the name, if
+  // parameters.demangle() is true.  Otherwise, return the name.  This
+  // is intended to be used only for logging errors, so it's not
+  // super-efficient.
+  std::string
+  demangled_name() const;
+
   // Return the symbol version.  This will return NULL for an
   // unversioned symbol.
   const char*

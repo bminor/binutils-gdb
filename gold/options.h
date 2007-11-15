@@ -159,6 +159,11 @@ class General_options
   symbolic() const
   { return this->symbolic_; }
 
+  // --demangle: demangle C++ symbols in our log messages.
+  bool
+  demangle() const
+  { return this->demangle_; }
+
   // --detect-odr-violations: Whether to search for One Defn Rule violations.
   bool
   detect_odr_violations() const
@@ -319,6 +324,14 @@ class General_options
   { this->symbolic_ = true; }
 
   void
+  set_demangle()
+  { this->demangle_ = true; }
+
+  void
+  clear_demangle()
+  { this->demangle_ = false; }
+
+  void
   set_detect_odr_violations()
   { this->detect_odr_violations_ = true; }
 
@@ -436,6 +449,7 @@ class General_options
   Strip strip_;
   bool allow_shlib_undefined_;
   bool symbolic_;
+  bool demangle_;
   bool detect_odr_violations_;
   bool create_eh_frame_hdr_;
   Dir_list rpath_;

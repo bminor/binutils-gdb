@@ -135,7 +135,7 @@ Errors::undefined_symbol(const Symbol* sym,
   }
   fprintf(stderr, _("%s: %s: undefined reference to '%s'\n"),
 	  this->program_name_, relinfo->location(relnum, reloffset).c_str(),
-	  sym->name());
+	  sym->demangled_name().c_str());
 }
 
 

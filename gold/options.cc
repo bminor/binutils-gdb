@@ -22,6 +22,7 @@
 
 #include "gold.h"
 
+#include <cstdlib>
 #include <iostream>
 #include <sys/stat.h>
 #include "filenames.h"
@@ -361,6 +362,11 @@ options::Command_line_options::options[] =
 	       &Position_dependent_options::set_static_search),
   GENERAL_NOARG('\0', "Bsymbolic", N_("Bind defined symbols locally"),
 		NULL, ONE_DASH, &General_options::set_symbolic),
+  GENERAL_NOARG('\0', "demangle", N_("Demangle C++ symbols in log messages"),
+                NULL, TWO_DASHES, &General_options::set_demangle),
+  GENERAL_NOARG('\0', "no-demangle",
+		N_("Do not demangle C++ symbols in log messages"),
+                NULL, TWO_DASHES, &General_options::clear_demangle),
   GENERAL_NOARG('\0', "detect-odr-violations",
                 N_("Try to detect violations of the One Definition Rule"),
                 NULL, TWO_DASHES, &General_options::set_detect_odr_violations),
@@ -500,6 +506,12 @@ General_options::General_options()
     thread_count_final_(0),
     execstack_(EXECSTACK_FROM_INPUT)
 {
+  // We initialize demangle_ based on the environment variable
+  // COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
+  // output of the linker, unless COLLECT_NO_DEMANGLE is set in the
+  // environment.  Acting the same way here lets us provide the same
+  // interface by default.
+  this->demangle_ = getenv("COLLECT_NO_DEMANGLE") == NULL;
 }
 
 // The default values for the position dependent options.
