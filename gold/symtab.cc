@@ -1890,9 +1890,10 @@ Symbol_table::detect_odr_violations(const char* output_file_name) const
       // We use a sorted set so the output is deterministic.
       std::set<std::string> line_nums;
 
-      Unordered_set<Symbol_location, Symbol_location_hash>::const_iterator
-	locs;
-      for (locs = it->second.begin(); locs != it->second.end(); ++locs)
+      for (Unordered_set<Symbol_location, Symbol_location_hash>::const_iterator
+               locs = it->second.begin();
+           locs != it->second.end();
+           ++locs)
         {
 	  // We need to lock the object in order to read it.  This
 	  // means that we can not run inside a Task.  If we want to
