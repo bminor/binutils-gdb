@@ -1175,19 +1175,19 @@ separate_debug_file_exists (const char *name, const unsigned long crc)
 {
   static unsigned char buffer [8 * 1024];
   unsigned long file_crc = 0;
-  int fd;
+  FILE *f;
   bfd_size_type count;
 
   BFD_ASSERT (name);
 
-  fd = open (name, O_RDONLY);
-  if (fd < 0)
+  f = real_fopen (name, FOPEN_RB);
+  if (f == NULL)
     return FALSE;
 
-  while ((count = read (fd, buffer, sizeof (buffer))) > 0)
+  while ((count = fread (buffer, 1, sizeof (buffer), f)) > 0)
     file_crc = bfd_calc_gnu_debuglink_crc32 (file_crc, buffer, count);
 
-  close (fd);
+  fclose (f);
 
   return crc == file_crc;
 }

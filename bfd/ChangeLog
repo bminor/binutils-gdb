@@ -1,3 +1,9 @@
+2007-11-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 5328
+	* opncls.c (separate_debug_file_exists): Use fopen/fread
+	rather than open/read and open in binary mode.
+
 2007-11-14  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (mips_got_page_range): New structure.
@@ -561,9 +567,9 @@
 	(read_rangelist): Change interface to accept a callback and data to
 	allow caller to select the action peformed on a new range list read.
 	(scan_unit_for_symbols): Use new interface of read_rangelist.
-	(parse_comp_unit): Create an arange set for each new comp unit.  Use new
-	interface of read_rangelist.  Replace call to arange_add with that to
-	dwarf2_comp_unit_arange_add.
+	(parse_comp_unit): Create an arange set for each new comp unit.
+	Use new interface of read_rangelist.  Replace call to arange_add
+	with that to dwarf2_comp_unit_arange_add.
 	(comp_unit_contains_address): Replace sequential search with a call to
 	arange_set_lookup_address, which can handles large set efficiently.
 	(stash_copy_local_aranges, stash_maybe_enable_arange_set,
