@@ -86,11 +86,7 @@ struct target_so_ops *current_target_so_ops;
 
 static struct so_list *so_list_head;	/* List of known shared objects */
 
-static int solib_cleanup_queued = 0;	/* make_run_cleanup called */
-
 /* Local function prototypes */
-
-static void do_clear_solib (void *);
 
 /* If non-empty, this is a search path for loading non-absolute shared library
    symbol files.  This takes precedence over the environment variables PATH
@@ -506,15 +502,6 @@ update_solib_list (int from_tty, struct target_ops *target)
 		  "Error reading attached process's symbol file.\n",
 		  RETURN_MASK_ALL);
 
-  /* Since this function might actually add some elements to the
-     so_list_head list, arrange for it to be cleaned up when
-     appropriate.  */
-  if (!solib_cleanup_queued)
-    {
-      make_run_cleanup (do_clear_solib, NULL);
-      solib_cleanup_queued = 1;
-    }
-
   /* GDB and the inferior's dynamic linker each maintain their own
      list of currently loaded shared objects; we want to bring the
      former in sync with the latter.  Scan both lists, seeing which
@@ -866,13 +853,6 @@ clear_solib (void)
   ops->clear_solib ();
 }
 
-static void
-do_clear_solib (void *dummy)
-{
-  solib_cleanup_queued = 0;
-  clear_solib ();
-}
-
 /* GLOBAL FUNCTION
 
    solib_create_inferior_hook -- shared library startup support
@@ -955,7 +935,7 @@ void
 no_shared_libraries (char *ignored, int from_tty)
 {
   objfile_purge_solibs ();
-  do_clear_solib (NULL);
+  clear_solib ();
 }
 
 static void

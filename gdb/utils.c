@@ -96,7 +96,6 @@ static void set_width (void);
 
 static struct cleanup *cleanup_chain;	/* cleaned up after a failed command */
 static struct cleanup *final_cleanup_chain;	/* cleaned up when gdb exits */
-static struct cleanup *run_cleanup_chain;	/* cleaned up on each 'run' */
 static struct cleanup *exec_cleanup_chain;	/* cleaned up on each execution command */
 /* cleaned up on each error from within an execution command */
 static struct cleanup *exec_error_cleanup_chain;
@@ -210,12 +209,6 @@ make_final_cleanup (make_cleanup_ftype *function, void *arg)
 }
 
 struct cleanup *
-make_run_cleanup (make_cleanup_ftype *function, void *arg)
-{
-  return make_my_cleanup (&run_cleanup_chain, function, arg);
-}
-
-struct cleanup *
 make_exec_cleanup (make_cleanup_ftype *function, void *arg)
 {
   return make_my_cleanup (&exec_cleanup_chain, function, arg);
@@ -321,12 +314,6 @@ void
 do_final_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&final_cleanup_chain, old_chain);
-}
-
-void
-do_run_cleanups (struct cleanup *old_chain)
-{
-  do_my_cleanups (&run_cleanup_chain, old_chain);
 }
 
 void

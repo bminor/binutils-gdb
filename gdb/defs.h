@@ -347,7 +347,6 @@ extern char *safe_strerror (int);
 
 extern void do_cleanups (struct cleanup *);
 extern void do_final_cleanups (struct cleanup *);
-extern void do_run_cleanups (struct cleanup *);
 extern void do_exec_cleanups (struct cleanup *);
 extern void do_exec_error_cleanups (struct cleanup *);
 
@@ -382,8 +381,6 @@ extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,
 					make_cleanup_ftype *, void *);
-
-extern struct cleanup *make_run_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_exec_cleanup (make_cleanup_ftype *, void *);
 extern struct cleanup *make_exec_error_cleanup (make_cleanup_ftype *, void *);

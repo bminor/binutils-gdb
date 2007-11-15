@@ -482,7 +482,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   /* Purge old solib objfiles. */
   objfile_purge_solibs ();
 
-  do_run_cleanups (NULL);
+  clear_solib ();
 
   /* The comment here used to read, "The exec file is re-read every
      time we do a generic_mourn_inferior, so we just have to worry

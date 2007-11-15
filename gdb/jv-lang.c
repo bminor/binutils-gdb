@@ -1133,25 +1133,3 @@ _initialize_java_language (void)
 
   add_language (&java_language_defn);
 }
-
-/* Cleanup code that should be run on every "run".
-   We should use make_run_cleanup to have this be called.
-   But will that mess up values in value histry?  FIXME */
-
-extern void java_rerun_cleanup (void);
-void
-java_rerun_cleanup (void)
-{
-  if (class_symtab != NULL)
-    {
-      free_symtab (class_symtab);	/* ??? */
-      class_symtab = NULL;
-    }
-  if (dynamics_objfile != NULL)
-    {
-      free_objfile (dynamics_objfile);
-      dynamics_objfile = NULL;
-    }
-
-  java_object_type = NULL;
-}
