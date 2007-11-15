@@ -200,6 +200,8 @@ static int single_step_breakpoint_inserted_here_p (CORE_ADDR pc);
 
 static void free_bp_location (struct bp_location *loc);
 
+static void mark_breakpoints_out (void);
+
 /* Prototypes for exported functions. */
 
 /* If FALSE, gdb will not use hardware support for watchpoints, even
@@ -1650,7 +1652,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 
 /* Clear the "inserted" flag in all breakpoints.  */
 
-void
+static void
 mark_breakpoints_out (void)
 {
   struct bp_location *bpt;

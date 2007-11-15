@@ -701,8 +701,6 @@ extern void set_ignore_count (int, int, int);
 
 extern void set_default_breakpoint (int, CORE_ADDR, struct symtab *, int);
 
-extern void mark_breakpoints_out (void);
-
 extern void breakpoint_init_inferior (enum inf_context);
 
 extern struct cleanup *make_cleanup_delete_breakpoint (struct breakpoint *);
