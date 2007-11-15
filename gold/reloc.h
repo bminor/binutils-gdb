@@ -37,6 +37,7 @@ class Relobj;
 class Read_relocs_data;
 class Symbol;
 class Layout;
+class Output_section;
 
 template<int size>
 class Sized_symbol;
@@ -539,12 +540,12 @@ class Copy_relocs
   // index of the section to which the reloc is being applied.
   void
   save(Symbol* sym, Relobj*, unsigned int shndx,
-       const elfcpp::Rel<size, big_endian>&);
+       Output_section* output_section, const elfcpp::Rel<size, big_endian>&);
 
   // Save a Rela against SYM for possible emission later.
   void
   save(Symbol* sym, Relobj*, unsigned int shndx,
-       const elfcpp::Rela<size, big_endian>&);
+       Output_section* output_section, const elfcpp::Rela<size, big_endian>&);
 
   // Return whether there are any relocs to emit.  This also discards
   // entries which need not be emitted.
@@ -567,9 +568,11 @@ class Copy_relocs
    public:
     Copy_reloc_entry(Symbol* sym, unsigned int reloc_type,
 		     Relobj* relobj, unsigned int shndx,
+		     Output_section* output_section,
 		     Address address, Addend addend)
       : sym_(sym), reloc_type_(reloc_type), relobj_(relobj),
-	shndx_(shndx), address_(address), addend_(addend)
+	shndx_(shndx), output_section_(output_section),
+	address_(address), addend_(addend)
     { }
 
     // Return whether we should emit this reloc.  If we should not
@@ -590,6 +593,7 @@ class Copy_relocs
     unsigned int reloc_type_;
     Relobj* relobj_;
     unsigned int shndx_;
+    Output_section* output_section_;
     Address address_;
     Addend addend_;
   };

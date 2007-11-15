@@ -288,7 +288,7 @@ class Target_i386 : public Sized_target<32, false>
   void
   copy_reloc(const General_options*, Symbol_table*, Layout*,
 	     Sized_relobj<32, false>*, unsigned int,
-	     Symbol*, const elfcpp::Rel<32, false>&);
+	     Output_section*, Symbol*, const elfcpp::Rel<32, false>&);
 
   // Information about this specific target which we pass to the
   // general Target structure.
@@ -652,7 +652,9 @@ Target_i386::copy_reloc(const General_options* options,
 			Symbol_table* symtab,
 			Layout* layout,
 			Sized_relobj<32, false>* object,
-			unsigned int data_shndx, Symbol* gsym,
+			unsigned int data_shndx,
+			Output_section* output_section,
+			Symbol* gsym,
 			const elfcpp::Rel<32, false>& rel)
 {
   Sized_symbol<32>* ssym;
@@ -667,7 +669,7 @@ Target_i386::copy_reloc(const General_options* options,
       // symbol, then we will emit the relocation.
       if (this->copy_relocs_ == NULL)
 	this->copy_relocs_ = new Copy_relocs<32, false>();
-      this->copy_relocs_->save(ssym, object, data_shndx, rel);
+      this->copy_relocs_->save(ssym, object, data_shndx, output_section, rel);
     }
   else
     {
@@ -809,10 +811,8 @@ Target_i386::Scan::local(const General_options&,
       if (parameters->output_is_position_independent())
         {
           Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-          rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE, data_shndx,
-                             reloc.get_r_offset());
-          if (!output_section->is_section_flag_set(elfcpp::SHF_WRITE))
-	    layout->set_have_textrel();
+          rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE, output_section,
+                             data_shndx, reloc.get_r_offset());
         }
       break;
 
@@ -827,10 +827,8 @@ Target_i386::Scan::local(const General_options&,
         {
           Reloc_section* rel_dyn = target->rel_dyn_section(layout);
           unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
-          rel_dyn->add_local(object, r_sym, r_type, data_shndx,
+          rel_dyn->add_local(object, r_sym, r_type, output_section, data_shndx,
                              reloc.get_r_offset());
-          if (!output_section->is_section_flag_set(elfcpp::SHF_WRITE))
-	    layout->set_have_textrel();
         }
       break;
 
@@ -863,9 +861,8 @@ Target_i386::Scan::local(const General_options&,
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
                 rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
-                                   data_shndx, reloc.get_r_offset());
-                if (!output_section->is_section_flag_set(elfcpp::SHF_WRITE))
-		  layout->set_have_textrel();
+                                   output_section, data_shndx,
+                                   reloc.get_r_offset());
               }
           }
       }
@@ -1064,24 +1061,21 @@ Target_i386::Scan::global(const General_options& options,
             if (target->may_need_copy_reloc(gsym))
               {
 	        target->copy_reloc(&options, symtab, layout, object,
-	                           data_shndx, gsym, reloc);
+	                           data_shndx, output_section, gsym, reloc);
               }
             else if (r_type == elfcpp::R_386_32
                      && gsym->can_use_relative_reloc(false))
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
                 rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
-                                   data_shndx, reloc.get_r_offset());
-                if (!output_section->is_section_flag_set(elfcpp::SHF_WRITE))
-		  layout->set_have_textrel();
+                                   output_section, data_shndx,
+                                   reloc.get_r_offset());
               }
             else
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-                rel_dyn->add_global(gsym, r_type, object, data_shndx, 
-                                    reloc.get_r_offset());
-                if (!output_section->is_section_flag_set(elfcpp::SHF_WRITE))
-		  layout->set_have_textrel();
+                rel_dyn->add_global(gsym, r_type, output_section, object,
+                                    data_shndx, reloc.get_r_offset());
               }
           }
       }
@@ -1101,15 +1095,13 @@ Target_i386::Scan::global(const General_options& options,
             if (target->may_need_copy_reloc(gsym))
               {
 	        target->copy_reloc(&options, symtab, layout, object,
-	                           data_shndx, gsym, reloc);
+	                           data_shndx, output_section, gsym, reloc);
               }
             else
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-                rel_dyn->add_global(gsym, r_type, object, data_shndx, 
-                                    reloc.get_r_offset());
-                if (!output_section->is_section_flag_set(elfcpp::SHF_WRITE))
-		  layout->set_have_textrel();
+                rel_dyn->add_global(gsym, r_type, output_section, object,
+                                    data_shndx, reloc.get_r_offset());
               }
           }
       }

@@ -50,7 +50,8 @@ class Output_data
 {
  public:
   explicit Output_data(off_t data_size = 0)
-    : address_(0), data_size_(data_size), offset_(-1)
+    : address_(0), data_size_(data_size), offset_(-1),
+      dynamic_reloc_count_(0)
   { }
 
   virtual
@@ -127,6 +128,16 @@ class Output_data
   static bool
   is_layout_complete()
   { return Output_data::sizes_are_fixed; }
+
+  // Count the number of dynamic relocations applied to this section.
+  void
+  add_dynamic_reloc()
+  { ++this->dynamic_reloc_count_; }
+
+  // Return the number of dynamic relocations applied to this section.
+  unsigned int
+  dynamic_reloc_count() const
+  { return this->dynamic_reloc_count_; }
 
  protected:
   // Functions that child classes may or in some cases must implement.
@@ -205,6 +216,8 @@ class Output_data
   off_t data_size_;
   // Offset within file.
   off_t offset_;
+  // Count of dynamic relocations applied to this section.
+  unsigned int dynamic_reloc_count_;
 };
 
 // Output the section headers.
@@ -754,10 +767,11 @@ class Output_data_reloc_base : public Output_section_data
 
   // Add a relocation entry.
   void
-  add(const Output_reloc_type& reloc)
+  add(Output_data *od, const Output_reloc_type& reloc)
   {
     this->relocs_.push_back(reloc);
     this->set_data_size(this->relocs_.size() * reloc_size);
+    od->add_dynamic_reloc();
   }
 
  private:
@@ -793,12 +807,12 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 
   void
   add_global(Symbol* gsym, unsigned int type, Output_data* od, Address address)
-  { this->add(Output_reloc_type(gsym, type, od, address)); }
+  { this->add(od, Output_reloc_type(gsym, type, od, address)); }
 
   void
-  add_global(Symbol* gsym, unsigned int type, Relobj* relobj,
+  add_global(Symbol* gsym, unsigned int type, Output_data* od, Relobj* relobj,
 	     unsigned int shndx, Address address)
-  { this->add(Output_reloc_type(gsym, type, relobj, shndx, address)); }
+  { this->add(od, Output_reloc_type(gsym, type, relobj, shndx, address)); }
 
   // Add a reloc against a local symbol.
 
@@ -806,27 +820,30 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   add_local(Sized_relobj<size, big_endian>* relobj,
 	    unsigned int local_sym_index, unsigned int type,
 	    Output_data* od, Address address)
-  { this->add(Output_reloc_type(relobj, local_sym_index, type, od, address)); }
+  { this->add(od, Output_reloc_type(relobj, local_sym_index, type, od,
+                                    address)); }
 
   void
   add_local(Sized_relobj<size, big_endian>* relobj,
 	    unsigned int local_sym_index, unsigned int type,
-	    unsigned int shndx, Address address)
-  { this->add(Output_reloc_type(relobj, local_sym_index, type, shndx,
-				address)); }
+	    Output_data* od, unsigned int shndx, Address address)
+  { this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
+				    address)); }
 
 
   // A reloc against the STT_SECTION symbol of an output section.
+  // OS is the Output_section that the relocation refers to; OD is
+  // the Output_data object being relocated.
 
   void
   add_output_section(Output_section* os, unsigned int type,
 		     Output_data* od, Address address)
-  { this->add(Output_reloc_type(os, type, od, address)); }
+  { this->add(od, Output_reloc_type(os, type, od, address)); }
 
   void
-  add_output_section(Output_section* os, unsigned int type,
+  add_output_section(Output_section* os, unsigned int type, Output_data* od,
 		     Relobj* relobj, unsigned int shndx, Address address)
-  { this->add(Output_reloc_type(os, type, relobj, shndx, address)); }
+  { this->add(od, Output_reloc_type(os, type, relobj, shndx, address)); }
 };
 
 // The SHT_RELA version of Output_data_reloc.
@@ -853,12 +870,14 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   void
   add_global(Symbol* gsym, unsigned int type, Output_data* od,
 	     Address address, Addend addend)
-  { this->add(Output_reloc_type(gsym, type, od, address, addend)); }
+  { this->add(od, Output_reloc_type(gsym, type, od, address, addend)); }
 
   void
-  add_global(Symbol* gsym, unsigned int type, Relobj* relobj,
-	     unsigned int shndx, Address address, Addend addend)
-  { this->add(Output_reloc_type(gsym, type, relobj, shndx, address, addend)); }
+  add_global(Symbol* gsym, unsigned int type, Output_data* od, Relobj* relobj,
+	     unsigned int shndx, Address address,
+	     Addend addend)
+  { this->add(od, Output_reloc_type(gsym, type, relobj, shndx, address,
+                                    addend)); }
 
   // Add a reloc against a local symbol.
 
@@ -867,17 +886,18 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 	    unsigned int local_sym_index, unsigned int type,
 	    Output_data* od, Address address, Addend addend)
   {
-    this->add(Output_reloc_type(relobj, local_sym_index, type, od, address,
-				addend));
+    this->add(od, Output_reloc_type(relobj, local_sym_index, type, od, address,
+				    addend));
   }
 
   void
   add_local(Sized_relobj<size, big_endian>* relobj,
 	    unsigned int local_sym_index, unsigned int type,
-	    unsigned int shndx, Address address, Addend addend)
+	    Output_data* od, unsigned int shndx, Address address,
+	    Addend addend)
   {
-    this->add(Output_reloc_type(relobj, local_sym_index, type, shndx, address,
-				addend));
+    this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
+                                    address, addend));
   }
 
   // A reloc against the STT_SECTION symbol of an output section.
@@ -885,12 +905,13 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   void
   add_output_section(Output_section* os, unsigned int type, Output_data* od,
 		     Address address, Addend addend)
-  { this->add(Output_reloc_type(os, type, od, address, addend)); }
+  { this->add(os, Output_reloc_type(os, type, od, address, addend)); }
 
   void
   add_output_section(Output_section* os, unsigned int type, Relobj* relobj,
 		     unsigned int shndx, Address address, Addend addend)
-  { this->add(Output_reloc_type(os, type, relobj, shndx, address, addend)); }
+  { this->add(os, Output_reloc_type(os, type, relobj, shndx, address,
+                                    addend)); }
 };
 
 // Output_data_got is used to manage a GOT.  Each entry in the GOT is
@@ -1755,6 +1776,10 @@ class Output_segment
   void
   add_initial_output_data(Output_data*);
 
+  // Return the number of dynamic relocations applied to this segment.
+  unsigned int
+  dynamic_reloc_count() const;
+
   // Set the address of the segment to ADDR and the offset to *POFF
   // (aligned if necessary), and set the addresses and offsets of all
   // contained output sections accordingly.  Set the section indexes
@@ -1816,6 +1841,10 @@ class Output_segment
   // Return the number of Output_sections in an Output_data_list.
   unsigned int
   output_section_count_list(const Output_data_list*) const;
+
+  // Return the number of dynamic relocs in an Output_data_list.
+  unsigned int
+  dynamic_reloc_count_list(const Output_data_list*) const;
 
   // Write the section headers in the list into V.
   template<int size, bool big_endian>

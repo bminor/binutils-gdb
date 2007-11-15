@@ -70,8 +70,7 @@ Layout::Layout(const General_options& options)
     eh_frame_section_(NULL), output_file_size_(-1),
     input_requires_executable_stack_(false),
     input_with_gnu_stack_note_(false),
-    input_without_gnu_stack_note_(false),
-    have_textrel_(false)
+    input_without_gnu_stack_note_(false)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -1618,13 +1617,27 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
 
       odyn->add_string(elfcpp::DT_RPATH, rpath_val);
     }
-    
-    // Add a DT_FLAGS entry. We add it even if no flags are set so that
-    // post-link tools can easily modify these flags if desired.
-    unsigned int flags = 0;
-    if (this->have_textrel_)
-      flags |= elfcpp::DF_TEXTREL;
-    odyn->add_constant(elfcpp::DT_FLAGS, flags);
+
+  // Look for text segments that have dynamic relocations.
+  bool have_textrel = false;
+  for (Segment_list::const_iterator p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    {
+      if (((*p)->flags() & elfcpp::PF_W) == 0
+	  && (*p)->dynamic_reloc_count() > 0)
+	{
+	  have_textrel = true;
+	  break;
+	}
+    }
+
+  // Add a DT_FLAGS entry. We add it even if no flags are set so that
+  // post-link tools can easily modify these flags if desired.
+  unsigned int flags = 0;
+  if (have_textrel)
+    flags |= elfcpp::DF_TEXTREL;
+  odyn->add_constant(elfcpp::DT_FLAGS, flags);
 }
 
 // The mapping of .gnu.linkonce section names to real section names.

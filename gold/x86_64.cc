@@ -272,7 +272,7 @@ class Target_x86_64 : public Sized_target<64, false>
   void
   copy_reloc(const General_options*, Symbol_table*, Layout*,
 	     Sized_relobj<64, false>*, unsigned int,
-	     Symbol*, const elfcpp::Rela<64, false>&);
+	     Output_section*, Symbol*, const elfcpp::Rela<64, false>&);
 
   // Information about this specific target which we pass to the
   // general Target structure.
@@ -606,7 +606,9 @@ Target_x86_64::copy_reloc(const General_options* options,
                           Symbol_table* symtab,
                           Layout* layout,
                           Sized_relobj<64, false>* object,
-                          unsigned int data_shndx, Symbol* gsym,
+                          unsigned int data_shndx,
+                          Output_section* output_section,
+                          Symbol* gsym,
                           const elfcpp::Rela<64, false>& rela)
 {
   Sized_symbol<64>* ssym;
@@ -621,7 +623,7 @@ Target_x86_64::copy_reloc(const General_options* options,
       // symbol, then we will emit the relocation.
       if (this->copy_relocs_ == NULL)
 	this->copy_relocs_ = new Copy_relocs<64, false>();
-      this->copy_relocs_->save(ssym, object, data_shndx, rela);
+      this->copy_relocs_->save(ssym, object, data_shndx, output_section, rela);
     }
   else
     {
@@ -740,7 +742,7 @@ Target_x86_64::Scan::local(const General_options&,
                            Target_x86_64* target,
                            Sized_relobj<64, false>* object,
                            unsigned int data_shndx,
-                           Output_section*,
+                           Output_section* output_section,
                            const elfcpp::Rela<64, false>& reloc,
                            unsigned int r_type,
                            const elfcpp::Sym<64, false>&)
@@ -763,7 +765,8 @@ Target_x86_64::Scan::local(const General_options&,
         {
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
           rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                              data_shndx, reloc.get_r_offset(), 0);
+                              output_section, data_shndx,
+                              reloc.get_r_offset(), 0);
         }
       break;
 
@@ -781,8 +784,8 @@ Target_x86_64::Scan::local(const General_options&,
         {
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
           unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-          rela_dyn->add_local(object, r_sym, r_type, data_shndx,
-                              reloc.get_r_offset(),
+          rela_dyn->add_local(object, r_sym, r_type, output_section,
+                              data_shndx, reloc.get_r_offset(),
                               reloc.get_r_addend());
         }
       break;
@@ -828,7 +831,8 @@ Target_x86_64::Scan::local(const General_options&,
 
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
                 rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                                    data_shndx, reloc.get_r_offset(), 0);
+                                    output_section, data_shndx,
+                                    reloc.get_r_offset(), 0);
               }
           }
         // For GOTPLT64, we'd normally want a PLT section, but since
@@ -930,7 +934,7 @@ Target_x86_64::Scan::global(const General_options& options,
                             Target_x86_64* target,
                             Sized_relobj<64, false>* object,
                             unsigned int data_shndx,
-                            Output_section*,
+                            Output_section* output_section,
                             const elfcpp::Rela<64, false>& reloc,
                             unsigned int r_type,
                             Symbol* gsym)
@@ -965,21 +969,21 @@ Target_x86_64::Scan::global(const General_options& options,
             if (target->may_need_copy_reloc(gsym))
               {
                 target->copy_reloc(&options, symtab, layout, object, data_shndx,
-                                   gsym, reloc);
+                                   output_section, gsym, reloc);
               }
             else if (r_type == elfcpp::R_X86_64_64
                      && gsym->can_use_relative_reloc(false))
               {
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
                 rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                                    data_shndx,
+                                    output_section, data_shndx,
                                     reloc.get_r_offset(), 0);
               }
             else
               {
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-                rela_dyn->add_global(gsym, r_type, object, data_shndx, 
-                                     reloc.get_r_offset(),
+                rela_dyn->add_global(gsym, r_type, output_section, object,
+                                     data_shndx, reloc.get_r_offset(),
                                      reloc.get_r_addend());
               }
           }
@@ -1001,13 +1005,13 @@ Target_x86_64::Scan::global(const General_options& options,
             if (target->may_need_copy_reloc(gsym))
               {
                 target->copy_reloc(&options, symtab, layout, object, data_shndx,
-                                   gsym, reloc);
+                                   output_section, gsym, reloc);
               }
             else
               {
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-                rela_dyn->add_global(gsym, r_type, object, data_shndx, 
-                                     reloc.get_r_offset(),
+                rela_dyn->add_global(gsym, r_type, output_section, object,
+                                     data_shndx, reloc.get_r_offset(),
                                      reloc.get_r_addend());
               }
           }

@@ -1580,6 +1580,28 @@ Output_segment::maximum_alignment(const Output_data_list* pdl)
   return ret;
 }
 
+// Return the number of dynamic relocs applied to this segment.
+
+unsigned int
+Output_segment::dynamic_reloc_count() const
+{
+  return (this->dynamic_reloc_count_list(&this->output_data_)
+	  + this->dynamic_reloc_count_list(&this->output_bss_));
+}
+
+// Return the number of dynamic relocs applied to an Output_data_list.
+
+unsigned int
+Output_segment::dynamic_reloc_count_list(const Output_data_list* pdl) const
+{
+  unsigned int count = 0;
+  for (Output_data_list::const_iterator p = pdl->begin();
+       p != pdl->end();
+       ++p)
+    count += (*p)->dynamic_reloc_count();
+  return count;
+}
+
 // Set the section addresses for an Output_segment.  ADDR is the
 // address and *POFF is the file offset.  Set the section indexes
 // starting with *PSHNDX.  Return the address of the immediately
