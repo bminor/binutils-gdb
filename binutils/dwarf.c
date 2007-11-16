@@ -270,8 +270,47 @@ process_extended_line_op (unsigned char *data, int is_stmt)
       printf (_("%s\n\n"), name);
       break;
 
+    /* HP extensions.  */
+    case DW_LNE_HP_negate_is_UV_update:
+      printf ("DW_LNE_HP_negate_is_UV_update");
+      break;
+    case DW_LNE_HP_push_context:
+      printf ("DW_LNE_HP_push_context");
+      break;
+    case DW_LNE_HP_pop_context:
+      printf ("DW_LNE_HP_pop_context");
+      break;
+    case DW_LNE_HP_set_file_line_column:
+      printf ("DW_LNE_HP_set_file_line_column");
+      break;
+    case DW_LNE_HP_set_routine_name:
+      printf ("DW_LNE_HP_set_routine_name");
+      break;
+    case DW_LNE_HP_set_sequence:
+      printf ("DW_LNE_HP_set_sequence");
+      break;
+    case DW_LNE_HP_negate_post_semantics:
+      printf ("DW_LNE_HP_negate_post_semantics");
+      break;
+    case DW_LNE_HP_negate_function_exit:
+      printf ("DW_LNE_HP_negate_function_exit");
+      break;
+    case DW_LNE_HP_negate_front_end_logical:
+      printf ("DW_LNE_HP_negate_front_end_logical");
+      break;
+    case DW_LNE_HP_define_proc:
+      printf ("DW_LNE_HP_define_proc");
+      break;
+      
     default:
-      printf (_("UNKNOWN: length %d\n"), len - bytes_read);
+      if (op_code >= DW_LNE_lo_user
+	  /* The test against DW_LNW_hi_user is redundant due to
+	     the limited range of the unsigned char data type used
+	     for op_code.  */
+	  /*&& op_code <= DW_LNE_hi_user*/)
+	printf (_("user defined: length %d\n"), len - bytes_read);
+      else
+	printf (_("UNKNOWN: length %d\n"), len - bytes_read);
       break;
     }
 
@@ -892,15 +931,58 @@ decode_location_expression (unsigned char * data,
 	  data += 4;
 	  break;
 	case DW_OP_call_ref:
-	  printf ("DW_OP_call_ref");
+	  /* XXX: Strictly speaking for 64-bit DWARF3 files
+	     this ought to be an 8-byte wide computation.  */
+	  printf ("DW_OP_call_ref: <%lx>", (long) byte_get (data, 4) + cu_offset);
+	  data += 4;
 	  break;
 	case DW_OP_form_tls_address:
 	  printf ("DW_OP_form_tls_address");
 	  break;
+	case DW_OP_call_frame_cfa:
+	  printf ("DW_OP_call_frame_cfa");
+	  break;
+	case DW_OP_bit_piece:
+	  printf ("DW_OP_bit_piece: ");
+	  printf ("size: %lu ", read_leb128 (data, &bytes_read, 0));
+	  data += bytes_read;
+	  printf ("offset: %lu ", read_leb128 (data, &bytes_read, 0));
+	  data += bytes_read;
+	  break;
 
 	  /* GNU extensions.  */
 	case DW_OP_GNU_push_tls_address:
-	  printf ("DW_OP_GNU_push_tls_address");
+	  printf ("DW_OP_GNU_push_tls_address or DW_OP_HP_unknown");
+	  break;
+	case DW_OP_GNU_uninit:
+	  printf ("DW_OP_GNU_uninit");
+	  /* FIXME: Is there data associated with this OP ?  */
+	  break;
+
+	  /* HP extensions.  */
+	case DW_OP_HP_is_value:
+	  printf ("DW_OP_HP_is_value");
+	  /* FIXME: Is there data associated with this OP ?  */
+	  break;
+	case DW_OP_HP_fltconst4:
+	  printf ("DW_OP_HP_fltconst4");
+	  /* FIXME: Is there data associated with this OP ?  */
+	  break;
+	case DW_OP_HP_fltconst8:
+	  printf ("DW_OP_HP_fltconst8");
+	  /* FIXME: Is there data associated with this OP ?  */
+	  break;
+	case DW_OP_HP_mod_range:
+	  printf ("DW_OP_HP_mod_range");
+	  /* FIXME: Is there data associated with this OP ?  */
+	  break;
+	case DW_OP_HP_unmod_range:
+	  printf ("DW_OP_HP_unmod_range");
+	  /* FIXME: Is there data associated with this OP ?  */
+	  break;
+	case DW_OP_HP_tls:
+	  printf ("DW_OP_HP_tls");
+	  /* FIXME: Is there data associated with this OP ?  */
 	  break;
 
 	default:
@@ -1123,15 +1205,14 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_AT_frame_base:
 	  have_frame_base = 1;
 	case DW_AT_location:
+	case DW_AT_string_length:
+	case DW_AT_return_addr:
 	case DW_AT_data_member_location:
 	case DW_AT_vtable_elem_location:
-	case DW_AT_allocated:
-	case DW_AT_associated:
-	case DW_AT_data_location:
-	case DW_AT_stride:
-	case DW_AT_upper_bound:
-	case DW_AT_lower_bound:
-	  if (form == DW_FORM_data4 || form == DW_FORM_data8)
+	case DW_AT_segment:
+	case DW_AT_static_link:
+	case DW_AT_use_location:
+    	  if (form == DW_FORM_data4 || form == DW_FORM_data8)
 	    {
 	      /* Process location list.  */
 	      unsigned int max = debug_info_p->max_loc_offsets;
@@ -1153,7 +1234,7 @@ read_and_display_attr_value (unsigned long attribute,
 	      debug_info_p->num_loc_offsets++;
 	    }
 	  break;
-	
+
 	case DW_AT_low_pc:
 	  if (need_base_address)
 	    debug_info_p->base_address = uvalue;
@@ -1262,9 +1343,24 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_ATE_signed_char:	printf ("(signed char)"); break;
 	case DW_ATE_unsigned:		printf ("(unsigned)"); break;
 	case DW_ATE_unsigned_char:	printf ("(unsigned char)"); break;
-	  /* DWARF 2.1 value.  */
+	  /* DWARF 2.1 values:  */
 	case DW_ATE_imaginary_float:	printf ("(imaginary float)"); break;
 	case DW_ATE_decimal_float:	printf ("(decimal float)"); break;
+	  /* DWARF 3 values:  */
+	case DW_ATE_packed_decimal:	printf ("(packed_decimal)"); break;
+	case DW_ATE_numeric_string:	printf ("(numeric_string)"); break;
+	case DW_ATE_edited:		printf ("(edited)"); break;
+	case DW_ATE_signed_fixed:	printf ("(signed_fixed)"); break;
+	case DW_ATE_unsigned_fixed:	printf ("(unsigned_fixed)"); break;
+	  /* HP extensions:  */
+	case DW_ATE_HP_float80:		printf ("(HP_float80)"); break;
+	case DW_ATE_HP_complex_float80:	printf ("(HP_complex_float80)"); break;
+	case DW_ATE_HP_float128:	printf ("(HP_float128)"); break;
+	case DW_ATE_HP_complex_float128:printf ("(HP_complex_float128)"); break;
+	case DW_ATE_HP_floathpintel:	printf ("(HP_floathpintel)"); break;
+	case DW_ATE_HP_imaginary_float80:	printf ("(HP_imaginary_float80)"); break;
+	case DW_ATE_HP_imaginary_float128:	printf ("(HP_imaginary_float128)"); break;
+
 	default:
 	  if (uvalue >= DW_ATE_lo_user
 	      && uvalue <= DW_ATE_hi_user)
@@ -1345,14 +1441,22 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_AT_frame_base:
       have_frame_base = 1;
     case DW_AT_location:
+    case DW_AT_string_length:
+    case DW_AT_return_addr:
     case DW_AT_data_member_location:
     case DW_AT_vtable_elem_location:
+    case DW_AT_segment:
+    case DW_AT_static_link:
+    case DW_AT_use_location:
+      if (form == DW_FORM_data4 || form == DW_FORM_data8)
+	printf (_("(location list)"));
+      /* Fall through.  */
     case DW_AT_allocated:
     case DW_AT_associated:
     case DW_AT_data_location:
     case DW_AT_stride:
     case DW_AT_upper_bound:
-    case DW_AT_lower_bound:
+    case DW_AT_lower_bound:      
       if (block_start)
 	{
 	  int need_frame_base;
@@ -1366,9 +1470,6 @@ read_and_display_attr_value (unsigned long attribute,
 	  if (need_frame_base && !have_frame_base)
 	    printf (_(" [without DW_AT_frame_base]"));
 	}
-      else if (form == DW_FORM_data4 || form == DW_FORM_data8)
-	printf (_("(location list)"));
-
       break;
 
     default:
@@ -1458,19 +1559,52 @@ get_AT_name (unsigned long attribute)
     case DW_AT_call_column:		return "DW_AT_call_column";
     case DW_AT_call_file:		return "DW_AT_call_file";
     case DW_AT_call_line:		return "DW_AT_call_line";
-      /* SGI/MIPS extensions.  */
-    case DW_AT_MIPS_fde:		return "DW_AT_MIPS_fde";
-    case DW_AT_MIPS_loop_begin:		return "DW_AT_MIPS_loop_begin";
-    case DW_AT_MIPS_tail_loop_begin:	return "DW_AT_MIPS_tail_loop_begin";
-    case DW_AT_MIPS_epilog_begin:	return "DW_AT_MIPS_epilog_begin";
-    case DW_AT_MIPS_loop_unroll_factor: return "DW_AT_MIPS_loop_unroll_factor";
-    case DW_AT_MIPS_software_pipeline_depth:
-      return "DW_AT_MIPS_software_pipeline_depth";
-    case DW_AT_MIPS_linkage_name:	return "DW_AT_MIPS_linkage_name";
-    case DW_AT_MIPS_stride:		return "DW_AT_MIPS_stride";
-    case DW_AT_MIPS_abstract_name:	return "DW_AT_MIPS_abstract_name";
-    case DW_AT_MIPS_clone_origin:	return "DW_AT_MIPS_clone_origin";
-    case DW_AT_MIPS_has_inlines:	return "DW_AT_MIPS_has_inlines";
+    case DW_AT_description:		return "DW_AT_description";
+    case DW_AT_binary_scale:		return "DW_AT_binary_scale";
+    case DW_AT_decimal_scale:		return "DW_AT_decimal_scale";
+    case DW_AT_small:			return "DW_AT_small";
+    case DW_AT_decimal_sign:		return "DW_AT_decimal_sign";
+    case DW_AT_digit_count:		return "DW_AT_digit_count";
+    case DW_AT_picture_string:		return "DW_AT_picture_string";
+    case DW_AT_mutable:			return "DW_AT_mutable";
+    case DW_AT_threads_scaled:		return "DW_AT_threads_scaled";
+    case DW_AT_explicit:		return "DW_AT_explicit";
+    case DW_AT_object_pointer:		return "DW_AT_object_pointer";
+    case DW_AT_endianity:		return "DW_AT_endianity";
+    case DW_AT_elemental:		return "DW_AT_elemental";
+    case DW_AT_pure:			return "DW_AT_pure";
+    case DW_AT_recursive:		return "DW_AT_recursive";
+
+      /* HP and SGI/MIPS extensions.  */
+    case DW_AT_MIPS_loop_begin:			return "DW_AT_MIPS_loop_begin";
+    case DW_AT_MIPS_tail_loop_begin:		return "DW_AT_MIPS_tail_loop_begin";
+    case DW_AT_MIPS_epilog_begin:		return "DW_AT_MIPS_epilog_begin";
+    case DW_AT_MIPS_loop_unroll_factor: 	return "DW_AT_MIPS_loop_unroll_factor";
+    case DW_AT_MIPS_software_pipeline_depth: 	return "DW_AT_MIPS_software_pipeline_depth";
+    case DW_AT_MIPS_linkage_name:		return "DW_AT_MIPS_linkage_name";
+    case DW_AT_MIPS_stride:			return "DW_AT_MIPS_stride";
+    case DW_AT_MIPS_abstract_name:		return "DW_AT_MIPS_abstract_name";
+    case DW_AT_MIPS_clone_origin:		return "DW_AT_MIPS_clone_origin";
+    case DW_AT_MIPS_has_inlines:		return "DW_AT_MIPS_has_inlines";
+
+      /* HP Extensions.  */
+    case DW_AT_HP_block_index:			return "DW_AT_HP_block_index";      
+    case DW_AT_HP_actuals_stmt_list:		return "DW_AT_HP_actuals_stmt_list";
+    case DW_AT_HP_proc_per_section:		return "DW_AT_HP_proc_per_section";
+    case DW_AT_HP_raw_data_ptr:			return "DW_AT_HP_raw_data_ptr";
+    case DW_AT_HP_pass_by_reference:		return "DW_AT_HP_pass_by_reference";
+    case DW_AT_HP_opt_level:			return "DW_AT_HP_opt_level";
+    case DW_AT_HP_prof_version_id:		return "DW_AT_HP_prof_version_id";
+    case DW_AT_HP_opt_flags:			return "DW_AT_HP_opt_flags";
+    case DW_AT_HP_cold_region_low_pc:		return "DW_AT_HP_cold_region_low_pc";
+    case DW_AT_HP_cold_region_high_pc:		return "DW_AT_HP_cold_region_high_pc";
+    case DW_AT_HP_all_variables_modifiable:	return "DW_AT_HP_all_variables_modifiable";
+    case DW_AT_HP_linkage_name:			return "DW_AT_HP_linkage_name";
+    case DW_AT_HP_prof_flags:			return "DW_AT_HP_prof_flags";
+
+      /* One value is shared by the MIPS and HP extensions:  */
+    case DW_AT_MIPS_fde:			return "DW_AT_MIPS_fde or DW_AT_HP_unmodifiable";
+      
       /* GNU extensions.  */
     case DW_AT_sf_names:		return "DW_AT_sf_names";
     case DW_AT_src_info:		return "DW_AT_src_info";
@@ -1479,8 +1613,15 @@ get_AT_name (unsigned long attribute)
     case DW_AT_body_begin:		return "DW_AT_body_begin";
     case DW_AT_body_end:		return "DW_AT_body_end";
     case DW_AT_GNU_vector:		return "DW_AT_GNU_vector";
+
       /* UPC extension.  */
     case DW_AT_upc_threads_scaled:	return "DW_AT_upc_threads_scaled";
+
+    /* PGI (STMicroelectronics) extensions.  */
+    case DW_AT_PGI_lbase:		return "DW_AT_PGI_lbase";
+    case DW_AT_PGI_soffset:		return "DW_AT_PGI_soffset";
+    case DW_AT_PGI_lstride:		return "DW_AT_PGI_lstride";
+
     default:
       {
 	static char buffer[100];

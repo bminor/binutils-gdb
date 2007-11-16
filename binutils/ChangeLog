@@ -1,3 +1,19 @@
+2007-11-16  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (process_extended_line_op): Add cases for HP extensions
+	to the line ops.  Mention if an unknown op code is in the user
+	defined range.
+	(decode_location_expression): Add cases for HP extensions, the
+	DW_OP_GNU_uninit extension and the DW_OP_call_frame_cfa and
+	DW_OP_bit_piece DWARF3 operators.
+	(read_and_display_attr): Correct list of attributes which can
+	reference a location list.
+	(read_and_display_attr_value): Add cases for DWARF3 values and HP
+	extensions.
+	Correct list of attributes which can reference a location list.
+	(get_AT_name): Add cases for DWARF3 values and HP and PGI
+	extensions.
+
 2007-11-07  Karl Berry  <karl@gnu.org>
 
 	* doc/binutils.texi: Update to FDL 1.2.
