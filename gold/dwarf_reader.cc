@@ -418,6 +418,10 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
         switch (extended_op)
           {
           case elfcpp::DW_LNE_end_sequence:
+            // This means that the current byte is the one immediately
+            // after a set of instructions.  Record the current line
+            // for up to one less than the current address.
+            lsm->address -= 1;
             lsm->end_sequence = true;
             *len = oplen;
             return true;
