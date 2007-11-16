@@ -147,6 +147,7 @@ static struct mcu_type_s mcu_types[] =
   {"atmega128",  AVR_ISA_M128,    bfd_mach_avr5},
   {"atmega1280", AVR_ISA_M128,    bfd_mach_avr5},
   {"atmega1281", AVR_ISA_M128,    bfd_mach_avr5},
+  {"atmega1284p",AVR_ISA_M128,    bfd_mach_avr5},
   {"atmega645",  AVR_ISA_M323,    bfd_mach_avr5},
   {"atmega649",  AVR_ISA_M323,    bfd_mach_avr5},
   {"atmega6450", AVR_ISA_M323,    bfd_mach_avr5},

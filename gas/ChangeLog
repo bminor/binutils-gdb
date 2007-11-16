@@ -1,3 +1,8 @@
+2007-11-16  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add ATmega1284P device.
+	* doc/c-avr.texi: Likewise.
+
 2007-11-14  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ia64.c (AR_RUC): Defined.
