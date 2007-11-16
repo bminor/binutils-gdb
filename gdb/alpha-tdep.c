@@ -77,17 +77,17 @@ alpha_register_name (struct gdbarch *gdbarch, int regno)
 }
 
 static int
-alpha_cannot_fetch_register (int regno)
+alpha_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
   return (regno == ALPHA_ZERO_REGNUM
-          || strlen (alpha_register_name (current_gdbarch, regno)) == 0);
+          || strlen (alpha_register_name (gdbarch, regno)) == 0);
 }
 
 static int
-alpha_cannot_store_register (int regno)
+alpha_cannot_store_register (struct gdbarch *gdbarch, int regno)
 {
   return (regno == ALPHA_ZERO_REGNUM
-          || strlen (alpha_register_name (current_gdbarch, regno)) == 0);
+          || strlen (alpha_register_name (gdbarch, regno)) == 0);
 }
 
 static struct type *

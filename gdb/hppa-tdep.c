@@ -2632,7 +2632,7 @@ hppa64_register_type (struct gdbarch *gdbarch, int regnum)
    through ptrace/ttrace.  */
 
 static int
-hppa32_cannot_store_register (int regnum)
+hppa32_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 {
   return (regnum == 0
           || regnum == HPPA_PCSQ_HEAD_REGNUM
@@ -2641,17 +2641,17 @@ hppa32_cannot_store_register (int regnum)
 }
 
 static int
-hppa32_cannot_fetch_register (int regnum)
+hppa32_cannot_fetch_register (struct gdbarch *gdbarch, int regnum)
 {
   /* cr26 and cr27 are readable (but not writable) from userspace.  */
   if (regnum == HPPA_CR26_REGNUM || regnum == HPPA_CR27_REGNUM)
     return 0;
   else
-    return hppa32_cannot_store_register (regnum);
+    return hppa32_cannot_store_register (gdbarch, regnum);
 }
 
 static int
-hppa64_cannot_store_register (int regnum)
+hppa64_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 {
   return (regnum == 0
           || regnum == HPPA_PCSQ_HEAD_REGNUM
@@ -2660,13 +2660,13 @@ hppa64_cannot_store_register (int regnum)
 }
 
 static int
-hppa64_cannot_fetch_register (int regnum)
+hppa64_cannot_fetch_register (struct gdbarch *gdbarch, int regnum)
 {
   /* cr26 and cr27 are readable (but not writable) from userspace.  */
   if (regnum == HPPA_CR26_REGNUM || regnum == HPPA_CR27_REGNUM)
     return 0;
   else
-    return hppa64_cannot_store_register (regnum);
+    return hppa64_cannot_store_register (gdbarch, regnum);
 }
 
 static CORE_ADDR

@@ -309,17 +309,17 @@ mipsnbsd_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 }
 
 static int
-mipsnbsd_cannot_fetch_register (int regno)
+mipsnbsd_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
   return (regno == MIPS_ZERO_REGNUM
-	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision);
+	  || regno == mips_regnum (gdbarch)->fp_implementation_revision);
 }
 
 static int
-mipsnbsd_cannot_store_register (int regno)
+mipsnbsd_cannot_store_register (struct gdbarch *gdbarch, int regno)
 {
   return (regno == MIPS_ZERO_REGNUM
-	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision);
+	  || regno == mips_regnum (gdbarch)->fp_implementation_revision);
 }
 
 /* Shared library support.  */

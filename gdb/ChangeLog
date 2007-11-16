@@ -1,5 +1,25 @@
 2007-11-16  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (cannot_fetch_register, cannot_store_register): Add gdbarch
+	as parameter.
+	* gdbarch.{c,h}: Regenerate.
+
+	* alpha-tdep.c (alpha_cannot_fetch_register)
+	(alpha_cannot_store_register): Add gdbarch as parameter. Replace 
+	current_gdbarch by gdbarch.
+	* cris-tdep.c (cris_cannot_fetch_register, cris_cannot_store_register)
+	(crisv32_cannot_fetch_register)
+	(crisv32_cannot_store_register): Likewise.
+	* arch-utils.c (cannot_register_not): Likewise.
+	* arch-utils.h (cannot_register_not): Likewise.
+	* hppa-tdep.c (hppa32_cannot_store_register)
+	(hppa32_cannot_store_register, hppa64_cannot_store_register)
+	(hppa64_cannot_fetch_register): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_cannot_fetch_register)
+	(mipsnbsd_cannot_store_register): Likewise.
+
+2007-11-16  Markus Deuling  <deuling@de.ibm.com>
+
 	* m32r-rom.c (m32r_supply_register): Use get_regcache_arch to get at
 	the current architecture by regcache.
 	* ppcnbsd-nat.c (ppcnbsd_supply_pcb): Likewise.

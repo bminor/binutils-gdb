@@ -291,8 +291,8 @@ struct gdbarch startup_gdbarch =
   0,  /* print_float_info */
   0,  /* print_vector_info */
   0,  /* register_sim_regno */
-  0,  /* cannot_fetch_register */
-  0,  /* cannot_store_register */
+  cannot_register_not,  /* cannot_fetch_register */
+  cannot_register_not,  /* cannot_store_register */
   0,  /* get_longjmp_target */
   0,  /* believe_pcc_promotion */
   generic_convert_register_p,  /* convert_register_p */
@@ -1830,7 +1830,7 @@ gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int regnum)
   gdb_assert (gdbarch->cannot_fetch_register != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_cannot_fetch_register called\n");
-  return gdbarch->cannot_fetch_register (regnum);
+  return gdbarch->cannot_fetch_register (gdbarch, regnum);
 }
 
 void
@@ -1847,7 +1847,7 @@ gdbarch_cannot_store_register (struct gdbarch *gdbarch, int regnum)
   gdb_assert (gdbarch->cannot_store_register != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_cannot_store_register called\n");
-  return gdbarch->cannot_store_register (regnum);
+  return gdbarch->cannot_store_register (gdbarch, regnum);
 }
 
 void

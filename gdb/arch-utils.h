@@ -54,7 +54,7 @@ void default_coff_make_msymbol_special (int val, struct minimal_symbol *msym);
 /* Version of cannot_fetch_register() / cannot_store_register() that
    always fails. */
 
-int cannot_register_not (int regnum);
+int cannot_register_not (struct gdbarch *gdbarch, int regnum);
 
 /* Legacy version of target_virtual_frame_pointer().  Assumes that
    there is an gdbarch_deprecated_fp_regnum and that it is the same, cooked or

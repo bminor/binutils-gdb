@@ -300,11 +300,11 @@ typedef int (gdbarch_register_sim_regno_ftype) (int reg_nr);
 extern int gdbarch_register_sim_regno (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_sim_regno (struct gdbarch *gdbarch, gdbarch_register_sim_regno_ftype *register_sim_regno);
 
-typedef int (gdbarch_cannot_fetch_register_ftype) (int regnum);
+typedef int (gdbarch_cannot_fetch_register_ftype) (struct gdbarch *gdbarch, int regnum);
 extern int gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int regnum);
 extern void set_gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, gdbarch_cannot_fetch_register_ftype *cannot_fetch_register);
 
-typedef int (gdbarch_cannot_store_register_ftype) (int regnum);
+typedef int (gdbarch_cannot_store_register_ftype) (struct gdbarch *gdbarch, int regnum);
 extern int gdbarch_cannot_store_register (struct gdbarch *gdbarch, int regnum);
 extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_cannot_store_register_ftype *cannot_store_register);
 

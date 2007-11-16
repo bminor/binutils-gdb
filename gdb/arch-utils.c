@@ -125,7 +125,7 @@ default_coff_make_msymbol_special (int val, struct minimal_symbol *msym)
 }
 
 int
-cannot_register_not (int regnum)
+cannot_register_not (struct gdbarch *gdbarch, int regnum)
 {
   return 0;
 }

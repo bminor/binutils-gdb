@@ -1590,9 +1590,9 @@ cris_register_size (int regno)
    for unimplemented (size 0) and non-existant registers.  */
 
 static int
-cris_cannot_fetch_register (int regno)
+cris_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
-  return ((regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
+  return ((regno < 0 || regno >= gdbarch_num_regs (gdbarch))
           || (cris_register_size (regno) == 0));
 }
 
@@ -1600,7 +1600,7 @@ cris_cannot_fetch_register (int regno)
    reasons.  */
 
 static int
-cris_cannot_store_register (int regno)
+cris_cannot_store_register (struct gdbarch *gdbarch, int regno)
 {
   /* There are three kinds of registers we refuse to write to.
      1. Those that not implemented.
@@ -1609,7 +1609,7 @@ cris_cannot_store_register (int regno)
   */
 
   if (regno < 0
-      || regno >= gdbarch_num_regs (current_gdbarch)
+      || regno >= gdbarch_num_regs (gdbarch)
       || cris_register_size (regno) == 0)
     /* Not implemented.  */
     return 1;
@@ -1632,9 +1632,9 @@ cris_cannot_store_register (int regno)
    for unimplemented (size 0) and non-existant registers.  */
 
 static int
-crisv32_cannot_fetch_register (int regno)
+crisv32_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
-  return ((regno < 0 || regno >= gdbarch_num_regs (current_gdbarch))
+  return ((regno < 0 || regno >= gdbarch_num_regs (gdbarch))
           || (cris_register_size (regno) == 0));
 }
 
@@ -1642,7 +1642,7 @@ crisv32_cannot_fetch_register (int regno)
    reasons.  */
 
 static int
-crisv32_cannot_store_register (int regno)
+crisv32_cannot_store_register (struct gdbarch *gdbarch, int regno)
 {
   /* There are three kinds of registers we refuse to write to.
      1. Those that not implemented.
@@ -1651,7 +1651,7 @@ crisv32_cannot_store_register (int regno)
   */
 
   if (regno < 0
-      || regno >= gdbarch_num_regs (current_gdbarch)
+      || regno >= gdbarch_num_regs (gdbarch)
       || cris_register_size (regno) == 0)
     /* Not implemented.  */
     return 1;
