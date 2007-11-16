@@ -1,3 +1,8 @@
+2007-11-16  Nick Clifton  <nickc@redhat.com>
+
+	* ld-mn10300/mn10300.exp: Fix the start address of the .bss
+	section for the i1127740.s test.
+
 2007-11-14  Richard Sandiford  <richard@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 

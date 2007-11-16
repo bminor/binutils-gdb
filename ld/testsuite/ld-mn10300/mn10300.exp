@@ -49,7 +49,7 @@ set mn10300_tests {
     }
     {
 	"relaxation and alignment directives"
-	"-relax -Ttext 100"
+	"-relax -Ttext 100 -Tbss 300"
 	""
 	{ "i127740.s" }
 	{ {objdump -d i127740.d} }

@@ -1,3 +1,8 @@
+2007-11-16  Nick Clifton  <nickc@redhat.com>
+
+	* elf-m10300.c (mn10300_elf_check_relocs): Fix memory leak and
+	check that bfd_elf_get_elf_syms is only called once.
+
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Set udata.p of

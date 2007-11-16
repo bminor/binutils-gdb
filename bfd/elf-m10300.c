@@ -661,6 +661,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 {
   bfd_boolean sym_diff_reloc_seen;
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Sym * isymbuf = NULL;
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
@@ -669,6 +670,7 @@ mn10300_elf_check_relocs (bfd *abfd,
   asection * sgot;
   asection * srelgot;
   asection * sreloc;
+  bfd_boolean result = FALSE;
 
   sgot    = NULL;
   srelgot = NULL;
@@ -678,6 +680,7 @@ mn10300_elf_check_relocs (bfd *abfd,
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
   sym_hashes = elf_sym_hashes (abfd);
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -689,6 +692,7 @@ mn10300_elf_check_relocs (bfd *abfd,
     {
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
+      unsigned int r_type;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
@@ -701,10 +705,12 @@ mn10300_elf_check_relocs (bfd *abfd,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
+      r_type = ELF32_R_TYPE (rel->r_info);
+
       /* Some relocs require a global offset table.  */
       if (dynobj == NULL)
 	{
-	  switch (ELF32_R_TYPE (rel->r_info))
+	  switch (r_type)
 	    {
 	    case R_MN10300_GOT32:
 	    case R_MN10300_GOT24:
@@ -716,7 +722,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 	    case R_MN10300_GOTPC16:
 	      elf_hash_table (info)->dynobj = dynobj = abfd;
 	      if (! _bfd_mn10300_elf_create_got_section (dynobj, info))
-		return FALSE;
+		goto fail;
 	      break;
 
 	    default:
@@ -724,13 +730,13 @@ mn10300_elf_check_relocs (bfd *abfd,
 	    }
 	}
 
-      switch (ELF32_R_TYPE (rel->r_info))
+      switch (r_type)
 	{
 	/* This relocation describes the C++ object vtable hierarchy.
 	   Reconstruct it for later use during GC.  */
 	case R_MN10300_GNU_VTINHERIT:
 	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return FALSE;
+	    goto fail;
 	  break;
 
 	/* This relocation describes which C++ vtable entries are actually
@@ -739,8 +745,9 @@ mn10300_elf_check_relocs (bfd *abfd,
 	  BFD_ASSERT (h != NULL);
 	  if (h != NULL
 	      && !bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-	    return FALSE;
+	    goto fail;
 	  break;
+
 	case R_MN10300_GOT32:
 	case R_MN10300_GOT24:
 	case R_MN10300_GOT16:
@@ -768,7 +775,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 							  | SEC_READONLY));
 		  if (srelgot == NULL
 		      || ! bfd_set_section_alignment (dynobj, srelgot, 2))
-		    return FALSE;
+		    goto fail;
 		}
 	    }
 
@@ -784,7 +791,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 	      if (h->dynindx == -1)
 		{
 		  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-		    return FALSE;
+		    goto fail;
 		}
 
 	      srelgot->size += sizeof (Elf32_External_Rela);
@@ -802,7 +809,8 @@ mn10300_elf_check_relocs (bfd *abfd,
 		  local_got_offsets = bfd_alloc (abfd, size);
 
 		  if (local_got_offsets == NULL)
-		    return FALSE;
+		    goto fail;
+
 		  elf_local_got_offsets (abfd) = local_got_offsets;
 
 		  for (i = 0; i < symtab_hdr->sh_info; i++)
@@ -878,10 +886,8 @@ mn10300_elf_check_relocs (bfd *abfd,
 		 symbol involved in the relocation.  */
 	      if (h == NULL)
 		{
-		  Elf_Internal_Sym * isymbuf;
 		  Elf_Internal_Sym * isym;
 
-		  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
 		  if (isymbuf == NULL)
 		    isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
 						    symtab_hdr->sh_info, 0,
@@ -918,7 +924,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 			       elf_elfheader (abfd)->e_shstrndx,
 			       elf_section_data (sec)->rel_hdr.sh_name));
 		      if (name == NULL)
-			return FALSE;
+			goto fail;
 
 		      BFD_ASSERT (CONST_STRNEQ (name, ".rela")
 				  && streq (bfd_get_section_name (abfd, sec), name + 5));
@@ -935,7 +941,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 			  sreloc = bfd_make_section_with_flags (dynobj, name, flags);
 			  if (sreloc == NULL
 			      || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-			    return FALSE;
+			    goto fail;
 			}
 		    }
 
@@ -950,7 +956,12 @@ mn10300_elf_check_relocs (bfd *abfd,
 	sym_diff_reloc_seen = FALSE;
     }
 
-  return TRUE;
+  result = TRUE;
+ fail:
+  if (isymbuf != NULL)
+    free (isymbuf);
+
+  return result;
 }
 
 /* Return the section that should be marked against GC for a given
