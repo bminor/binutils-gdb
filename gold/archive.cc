@@ -75,6 +75,13 @@ const char Archive::arfmag[2] = { '`', '\n' };
 void
 Archive::setup()
 {
+  // We need to ignore empty archives.
+  if (this->input_file_->file().filesize() == sarmag)
+    {
+      this->input_file_->file().unlock();
+      return;
+    }
+
   // The first member of the archive should be the symbol table.
   std::string armap_name;
   off_t armap_size = this->read_header(sarmag, &armap_name);
