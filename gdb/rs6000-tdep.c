@@ -3145,9 +3145,9 @@ ppc_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     }
 
   /* Handle PC register and Stack Pointer correctly.  */
-  if (regnum == gdbarch_pc_regnum (current_gdbarch))
+  if (regnum == gdbarch_pc_regnum (gdbarch))
     reg->how = DWARF2_FRAME_REG_RA;
-  else if (regnum == gdbarch_sp_regnum (current_gdbarch))
+  else if (regnum == gdbarch_sp_regnum (gdbarch))
     reg->how = DWARF2_FRAME_REG_CFA;
 }
 

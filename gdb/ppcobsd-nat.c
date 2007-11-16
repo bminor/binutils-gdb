@@ -148,7 +148,8 @@ ppcobsd_store_registers (struct regcache *regcache, int regnum)
 static int
 ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct switchframe sf;
   struct callframe cf;
   int i, regnum;
@@ -167,14 +168,14 @@ ppcobsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
     return 0;
 
   read_memory (pcb->pcb_sp, (gdb_byte *)&sf, sizeof sf);
-  regcache_raw_supply (regcache, gdbarch_sp_regnum (current_gdbarch), &sf.sp);
+  regcache_raw_supply (regcache, gdbarch_sp_regnum (gdbarch), &sf.sp);
   regcache_raw_supply (regcache, tdep->ppc_cr_regnum, &sf.cr);
   regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + 2, &sf.fixreg2);
   for (i = 0, regnum = tdep->ppc_gp0_regnum + 13; i < 19; i++, regnum++)
     regcache_raw_supply (regcache, regnum, &sf.fixreg[i]);
 
   read_memory (sf.sp, (gdb_byte *)&cf, sizeof cf);
-  regcache_raw_supply (regcache, gdbarch_pc_regnum (current_gdbarch), &cf.lr);
+  regcache_raw_supply (regcache, gdbarch_pc_regnum (gdbarch), &cf.lr);
   regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + 30, &cf.r30);
   regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + 31, &cf.r31);
 

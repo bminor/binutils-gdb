@@ -400,7 +400,7 @@ do_win32_fetch_inferior_registers (struct regcache *regcache, int r)
     regcache_raw_supply (regcache, r, context_offset);
   else
     {
-      for (r = 0; r < gdbarch_num_regs (current_gdbarch); r++)
+      for (r = 0; r < gdbarch_num_regs (get_regcache_arch (regcache)); r++)
 	do_win32_fetch_inferior_registers (regcache, r);
     }
 
@@ -427,7 +427,7 @@ do_win32_store_inferior_registers (const struct regcache *regcache, int r)
 			  ((char *) &current_thread->context) + mappings[r]);
   else
     {
-      for (r = 0; r < gdbarch_num_regs (current_gdbarch); r++)
+      for (r = 0; r < gdbarch_num_regs (get_regcache_arch (regcache)); r++)
 	do_win32_store_inferior_registers (regcache, r);
     }
 }

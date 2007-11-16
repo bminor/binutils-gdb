@@ -1,3 +1,41 @@
+2007-11-16  Markus Deuling  <deuling@de.ibm.com>
+
+	* m32r-rom.c (m32r_supply_register): Use get_regcache_arch to get at
+	the current architecture by regcache.
+	* ppcnbsd-nat.c (ppcnbsd_supply_pcb): Likewise.
+	* ppc-linux-nat.c (fetch_altivec_register, fetch_spe_register)
+	(fetch_register, supply_vrregset, fetch_ppc_registers)
+	(store_altivec_register, store_spe_register, store_register)
+	(fill_vrregset, store_ppc_registers): Likewise.
+	* ppcobsd-nat.c (ppcobsd_supply_pcb): Likewise.
+	* win32-nat.c (do_win32_fetch_inferior_registers)
+	(do_win32_store_inferior_registers): Likewise.
+	* procfs.c (procfs_fetch_registers, procfs_store_registers): Likewise.
+	* remote-m32r-sdi.c (m32r_fetch_registers)
+	(m32r_store_registers): Likewise.
+	* remote-sim.c (gdbsim_fetch_register, gdbsim_store_register): Likewise.
+
+	* trad-frame.c (trad_frame_alloc_saved_regs): Replace current_gdbarch by
+	gdbarch.
+	* user-regs.c (user_reg_map_name_to_regnum): Likewise.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call)
+	(do_ppc_sysv_return_value, ppc64_sysv_abi_push_dummy_call)
+	(ppc64_sysv_abi_return_value): Likewise.
+	* m32c-tdep.c (m32c_register_reggroup_p): Likewise.
+	* m2-lang.c (build_m2_types): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_sigtramp_cache
+	* ppcnbsd-tdep.c (ppcnbsd_sigtramp_cache_init): Likewise.
+	* ppcobsd-tdep.c (ppcobsd_sigtramp_frame_cache): Likewise.
+	* rs6000-tdep.c (ppc_dwarf2_frame_init_reg): Likewise.
+
+	* m68hc11-tdep.c (m68hc11_frame_unwind_cache): Use get_frame_arch to
+	get at the current architecture by frame_info.
+	* gcore.c (derive_stack_segment): Likewise.
+
+	* shnbsd-nat.c (GETREGS_SUPPLIES): Add gdbarch parameter.
+	(shnbsd_fetch_inferior_registers, shnbsd_store_inferior_registers): Add
+	gdbarch to GETREGS_SUPPLIES call.
+
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elfread.c (ST_REGULAR, ST_DYNAMIC, ST_SYNTHETIC): New defines.

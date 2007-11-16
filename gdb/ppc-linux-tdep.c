@@ -753,7 +753,7 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   base = frame_unwind_register_unsigned (next_frame,
-					 gdbarch_sp_regnum (current_gdbarch));
+					 gdbarch_sp_regnum (gdbarch));
   if (bias > 0 && frame_pc_unwind (next_frame) != func)
     /* See below, some signal trampolines increment the stack as their
        first instruction, need to compensate for that.  */
@@ -773,7 +773,7 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame,
       trad_frame_set_reg_addr (this_cache, regnum, gpregs + i * tdep->wordsize);
     }
   trad_frame_set_reg_addr (this_cache,
-			   gdbarch_pc_regnum (current_gdbarch),
+			   gdbarch_pc_regnum (gdbarch),
 			   gpregs + 32 * tdep->wordsize);
   trad_frame_set_reg_addr (this_cache, tdep->ppc_ctr_regnum,
 			   gpregs + 35 * tdep->wordsize);
@@ -789,7 +789,7 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame,
       /* Floating point registers.  */
       for (i = 0; i < 32; i++)
 	{
-	  int regnum = i + gdbarch_fp0_regnum (current_gdbarch);
+	  int regnum = i + gdbarch_fp0_regnum (gdbarch);
 	  trad_frame_set_reg_addr (this_cache, regnum,
 				   fpregs + i * tdep->wordsize);
 	}

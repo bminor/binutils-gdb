@@ -213,6 +213,7 @@ m32r_supply_register (struct regcache *regcache, char *regname,
 {
   int regno;
   int num_regs = sizeof (m32r_regnames) / sizeof (m32r_regnames[0]);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   for (regno = 0; regno < num_regs; regno++)
     if (strncmp (regname, m32r_regnames[regno], regnamelen) == 0)
@@ -275,10 +276,10 @@ m32r_supply_register (struct regcache *regcache, char *regname,
 
 	  if (regno == SPI_REGNUM && !stackmode)	/* SP == SPI */
 	    monitor_supply_register (regcache,
-				     gdbarch_sp_regnum (current_gdbarch), val);
+				     gdbarch_sp_regnum (gdbarch), val);
 	  else if (regno == SPU_REGNUM && stackmode)	/* SP == SPU */
 	    monitor_supply_register (regcache,
-				     gdbarch_sp_regnum (current_gdbarch), val);
+				     gdbarch_sp_regnum (gdbarch), val);
 	}
     }
 }

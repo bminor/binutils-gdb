@@ -227,8 +227,9 @@ fetch_altivec_register (struct regcache *regcache, int tid, int regno)
   int ret;
   int offset = 0;
   gdb_vrregset_t regs;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  int vrregsize = register_size (current_gdbarch, tdep->ppc_vr0_regnum);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int vrregsize = register_size (gdbarch, tdep->ppc_vr0_regnum);
 
   ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
   if (ret < 0)
@@ -246,7 +247,7 @@ fetch_altivec_register (struct regcache *regcache, int tid, int regno)
      vector.  VRSAVE is at the end of the array in a 4 bytes slot, so
      there is no need to define an offset for it.  */
   if (regno == (tdep->ppc_vrsave_regnum - 1))
-    offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
+    offset = vrregsize - register_size (gdbarch, tdep->ppc_vrsave_regnum);
   
   regcache_raw_supply (regcache, regno,
 		       regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
@@ -289,15 +290,16 @@ get_spe_registers (int tid, struct gdb_evrregset_t *evrregset)
 static void
 fetch_spe_register (struct regcache *regcache, int tid, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct gdb_evrregset_t evrregs;
 
   gdb_assert (sizeof (evrregs.evr[0])
-              == register_size (current_gdbarch, tdep->ppc_ev0_upper_regnum));
+              == register_size (gdbarch, tdep->ppc_ev0_upper_regnum));
   gdb_assert (sizeof (evrregs.acc)
-              == register_size (current_gdbarch, tdep->ppc_acc_regnum));
+              == register_size (gdbarch, tdep->ppc_acc_regnum));
   gdb_assert (sizeof (evrregs.spefscr)
-              == register_size (current_gdbarch, tdep->ppc_spefscr_regnum));
+              == register_size (gdbarch, tdep->ppc_spefscr_regnum));
 
   get_spe_registers (tid, &evrregs);
 
@@ -327,7 +329,8 @@ fetch_spe_register (struct regcache *regcache, int tid, int regno)
 static void
 fetch_register (struct regcache *regcache, int tid, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
   int bytes_transferred;
@@ -357,7 +360,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
 
   if (regaddr == -1)
     {
-      memset (buf, '\0', register_size (current_gdbarch, regno));   /* Supply zeroes */
+      memset (buf, '\0', register_size (gdbarch, regno));   /* Supply zeroes */
       regcache_raw_supply (regcache, regno, buf);
       return;
     }
@@ -366,7 +369,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
      32-bit platform, 64-bit floating-point registers will require two
      transfers.  */
   for (bytes_transferred = 0;
-       bytes_transferred < register_size (current_gdbarch, regno);
+       bytes_transferred < register_size (gdbarch, regno);
        bytes_transferred += sizeof (long))
     {
       errno = 0;
@@ -377,7 +380,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
 	{
           char message[128];
 	  sprintf (message, "reading register %s (#%d)", 
-		   gdbarch_register_name (current_gdbarch, regno), regno);
+		   gdbarch_register_name (gdbarch, regno), regno);
 	  perror_with_name (message);
 	}
     }
@@ -385,34 +388,34 @@ fetch_register (struct regcache *regcache, int tid, int regno)
   /* Now supply the register.  Keep in mind that the regcache's idea
      of the register's size may not be a multiple of sizeof
      (long).  */
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
     {
       /* Little-endian values are always found at the left end of the
          bytes transferred.  */
       regcache_raw_supply (regcache, regno, buf);
     }
-  else if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  else if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       /* Big-endian values are found at the right end of the bytes
          transferred.  */
-      size_t padding = (bytes_transferred
-                        - register_size (current_gdbarch, regno));
+      size_t padding = (bytes_transferred - register_size (gdbarch, regno));
       regcache_raw_supply (regcache, regno, buf + padding);
     }
   else 
     internal_error (__FILE__, __LINE__,
                     _("fetch_register: unexpected byte order: %d"),
-                    gdbarch_byte_order (current_gdbarch));
+                    gdbarch_byte_order (gdbarch));
 }
 
 static void
 supply_vrregset (struct regcache *regcache, gdb_vrregset_t *vrregsetp)
 {
   int i;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int num_of_vrregs = tdep->ppc_vrsave_regnum - tdep->ppc_vr0_regnum + 1;
-  int vrregsize = register_size (current_gdbarch, tdep->ppc_vr0_regnum);
-  int offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
+  int vrregsize = register_size (gdbarch, tdep->ppc_vr0_regnum);
+  int offset = vrregsize - register_size (gdbarch, tdep->ppc_vrsave_regnum);
 
   for (i = 0; i < num_of_vrregs; i++)
     {
@@ -452,14 +455,15 @@ static void
 fetch_ppc_registers (struct regcache *regcache, int tid)
 {
   int i;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   for (i = 0; i < ppc_num_gprs; i++)
     fetch_register (regcache, tid, tdep->ppc_gp0_regnum + i);
   if (tdep->ppc_fp0_regnum >= 0)
     for (i = 0; i < ppc_num_fprs; i++)
       fetch_register (regcache, tid, tdep->ppc_fp0_regnum + i);
-  fetch_register (regcache, tid, gdbarch_pc_regnum (current_gdbarch));
+  fetch_register (regcache, tid, gdbarch_pc_regnum (gdbarch));
   if (tdep->ppc_ps_regnum != -1)
     fetch_register (regcache, tid, tdep->ppc_ps_regnum);
   if (tdep->ppc_cr_regnum != -1)
@@ -507,8 +511,9 @@ store_altivec_register (const struct regcache *regcache, int tid, int regno)
   int ret;
   int offset = 0;
   gdb_vrregset_t regs;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  int vrregsize = register_size (current_gdbarch, tdep->ppc_vr0_regnum);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int vrregsize = register_size (gdbarch, tdep->ppc_vr0_regnum);
 
   ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
   if (ret < 0)
@@ -524,7 +529,7 @@ store_altivec_register (const struct regcache *regcache, int tid, int regno)
   /* VSCR is fetched as a 16 bytes quantity, but it is really 4 bytes
      long on the hardware.  */
   if (regno == (tdep->ppc_vrsave_regnum - 1))
-    offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
+    offset = vrregsize - register_size (gdbarch, tdep->ppc_vrsave_regnum);
 
   regcache_raw_collect (regcache, regno,
 			regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
@@ -569,15 +574,16 @@ set_spe_registers (int tid, struct gdb_evrregset_t *evrregset)
 static void
 store_spe_register (const struct regcache *regcache, int tid, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct gdb_evrregset_t evrregs;
 
   gdb_assert (sizeof (evrregs.evr[0])
-              == register_size (current_gdbarch, tdep->ppc_ev0_upper_regnum));
+              == register_size (gdbarch, tdep->ppc_ev0_upper_regnum));
   gdb_assert (sizeof (evrregs.acc)
-              == register_size (current_gdbarch, tdep->ppc_acc_regnum));
+              == register_size (gdbarch, tdep->ppc_acc_regnum));
   gdb_assert (sizeof (evrregs.spefscr)
-              == register_size (current_gdbarch, tdep->ppc_spefscr_regnum));
+              == register_size (gdbarch, tdep->ppc_spefscr_regnum));
 
   if (regno == -1)
     /* Since we're going to write out every register, the code below
@@ -623,7 +629,8 @@ store_spe_register (const struct regcache *regcache, int tid, int regno)
 static void
 store_register (const struct regcache *regcache, int tid, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
   int i;
@@ -648,18 +655,16 @@ store_register (const struct regcache *regcache, int tid, int regno)
      idea of the register's size may not be a multiple of sizeof
      (long).  */
   memset (buf, 0, sizeof buf);
-  bytes_to_transfer = align_up (register_size (current_gdbarch, regno),
-                                sizeof (long));
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+  bytes_to_transfer = align_up (register_size (gdbarch, regno), sizeof (long));
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
     {
       /* Little-endian values always sit at the left end of the buffer.  */
       regcache_raw_collect (regcache, regno, buf);
     }
-  else if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  else if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       /* Big-endian values sit at the right end of the buffer.  */
-      size_t padding = (bytes_to_transfer
-                        - register_size (current_gdbarch, regno));
+      size_t padding = (bytes_to_transfer - register_size (gdbarch, regno));
       regcache_raw_collect (regcache, regno, buf + padding);
     }
 
@@ -681,7 +686,7 @@ store_register (const struct regcache *regcache, int tid, int regno)
 	{
           char message[128];
 	  sprintf (message, "writing register %s (#%d)", 
-		   gdbarch_register_name (current_gdbarch, regno), regno);
+		   gdbarch_register_name (gdbarch, regno), regno);
 	  perror_with_name (message);
 	}
     }
@@ -691,10 +696,11 @@ static void
 fill_vrregset (const struct regcache *regcache, gdb_vrregset_t *vrregsetp)
 {
   int i;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int num_of_vrregs = tdep->ppc_vrsave_regnum - tdep->ppc_vr0_regnum + 1;
-  int vrregsize = register_size (current_gdbarch, tdep->ppc_vr0_regnum);
-  int offset = vrregsize - register_size (current_gdbarch, tdep->ppc_vrsave_regnum);
+  int vrregsize = register_size (gdbarch, tdep->ppc_vr0_regnum);
+  int offset = vrregsize - register_size (gdbarch, tdep->ppc_vrsave_regnum);
 
   for (i = 0; i < num_of_vrregs; i++)
     {
@@ -736,14 +742,15 @@ static void
 store_ppc_registers (const struct regcache *regcache, int tid)
 {
   int i;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   
   for (i = 0; i < ppc_num_gprs; i++)
     store_register (regcache, tid, tdep->ppc_gp0_regnum + i);
   if (tdep->ppc_fp0_regnum >= 0)
     for (i = 0; i < ppc_num_fprs; i++)
       store_register (regcache, tid, tdep->ppc_fp0_regnum + i);
-  store_register (regcache, tid, gdbarch_pc_regnum (current_gdbarch));
+  store_register (regcache, tid, gdbarch_pc_regnum (gdbarch));
   if (tdep->ppc_ps_regnum != -1)
     store_register (regcache, tid, tdep->ppc_ps_regnum);
   if (tdep->ppc_cr_regnum != -1)

@@ -265,7 +265,7 @@ int
 m32c_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct m32c_reg *reg = &tdep->regs[regnum];
 
   /* The anonymous raw registers aren't in any groups.  */

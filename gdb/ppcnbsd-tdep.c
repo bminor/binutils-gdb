@@ -114,7 +114,7 @@ ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
   int i;
 
   base = frame_unwind_register_unsigned (next_frame,
-					 gdbarch_sp_regnum (current_gdbarch));
+					 gdbarch_sp_regnum (gdbarch));
   if (self == &ppcnbsd2_sigtramp)
     addr = base + 0x10 + 2 * tdep->wordsize;
   else
@@ -132,8 +132,7 @@ ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
   addr += tdep->wordsize;
   trad_frame_set_reg_addr (this_cache, tdep->ppc_ctr_regnum, addr);
   addr += tdep->wordsize;
-  trad_frame_set_reg_addr (this_cache,
-			   gdbarch_pc_regnum (current_gdbarch),
+  trad_frame_set_reg_addr (this_cache, gdbarch_pc_regnum (gdbarch),
 			   addr); /* SRR0? */
   addr += tdep->wordsize;
 

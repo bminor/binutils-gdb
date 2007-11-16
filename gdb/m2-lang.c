@@ -568,17 +568,17 @@ build_m2_types (struct gdbarch *gdbarch)
 
   /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
   builtin_m2_type->builtin_int =
-    init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+    init_type (TYPE_CODE_INT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0, "INTEGER", (struct objfile *) NULL);
   builtin_m2_type->builtin_card =
     init_type (TYPE_CODE_INT, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "CARDINAL", (struct objfile *) NULL);
   builtin_m2_type->builtin_real =
     init_type (TYPE_CODE_FLT,
-	       gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_float_bit (gdbarch) / TARGET_CHAR_BIT,
 	       0,
 	       "REAL", (struct objfile *) NULL);
   builtin_m2_type->builtin_char =
@@ -587,7 +587,7 @@ build_m2_types (struct gdbarch *gdbarch)
 	       "CHAR", (struct objfile *) NULL);
   builtin_m2_type->builtin_bool =
     init_type (TYPE_CODE_BOOL, 
-	       gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
+	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "BOOLEAN", (struct objfile *) NULL);
 

@@ -146,7 +146,8 @@ ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 {
   struct switchframe sf;
   struct callframe cf;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
 
   /* The stack pointer shouldn't be zero.  */
@@ -167,7 +168,7 @@ ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   read_memory(cf.sp, (gdb_byte *)&cf, sizeof(cf));
   regcache_raw_supply (regcache, tdep->ppc_lr_regnum, &cf.lr);
-  regcache_raw_supply (regcache, gdbarch_pc_regnum (current_gdbarch), &cf.lr);
+  regcache_raw_supply (regcache, gdbarch_pc_regnum (gdbarch), &cf.lr);
 
   return 1;
 }

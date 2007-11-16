@@ -33,16 +33,16 @@
 
 
 /* Determine if PT_GETREGS fetches this register. */
-#define GETREGS_SUPPLIES(regno) \
+#define GETREGS_SUPPLIES(gdbarch, regno) \
   (((regno) >= R0_REGNUM && (regno) <= (R0_REGNUM + 15)) \
-|| (regno) == gdbarch_pc_regnum (current_gdbarch) || (regno) == PR_REGNUM \
+|| (regno) == gdbarch_pc_regnum (gdbarch) || (regno) == PR_REGNUM \
 || (regno) == MACH_REGNUM || (regno) == MACL_REGNUM \
 || (regno) == SR_REGNUM)
 
 static void
 shnbsd_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
-  if (regno == -1 || GETREGS_SUPPLIES (regno))
+  if (regno == -1 || GETREGS_SUPPLIES (get_regcache_arch (regcache), regno))
     {
       struct reg inferior_registers;
 
@@ -60,7 +60,7 @@ shnbsd_fetch_inferior_registers (struct regcache *regcache, int regno)
 static void
 shnbsd_store_inferior_registers (struct regcache *regcache, int regno)
 {
-  if (regno == -1 || GETREGS_SUPPLIES (regno))
+  if (regno == -1 || GETREGS_SUPPLIES (get_regcache_arch (regcache), regno))
     {
       struct reg inferior_registers;
 

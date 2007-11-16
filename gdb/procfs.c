@@ -3687,6 +3687,7 @@ procfs_fetch_registers (struct regcache *regcache, int regnum)
   procinfo *pi;
   int pid = PIDGET (inferior_ptid);
   int tid = TIDGET (inferior_ptid);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   /* First look up procinfo for the main process.  */
   pi = find_procinfo_or_die (pid, 0);
@@ -3707,13 +3708,13 @@ procfs_fetch_registers (struct regcache *regcache, int regnum)
 
   supply_gregset (regcache, (const gdb_gregset_t *) gregs);
 
-  if (gdbarch_fp0_regnum (current_gdbarch) >= 0) /* Do we have an FPU?  */
+  if (gdbarch_fp0_regnum (gdbarch) >= 0) /* Do we have an FPU?  */
     {
       gdb_fpregset_t *fpregs;
 
-      if ((regnum >= 0 && regnum < gdbarch_fp0_regnum (current_gdbarch))
-	  || regnum == gdbarch_pc_regnum (current_gdbarch)
-	  || regnum == gdbarch_sp_regnum (current_gdbarch))
+      if ((regnum >= 0 && regnum < gdbarch_fp0_regnum (gdbarch))
+	  || regnum == gdbarch_pc_regnum (gdbarch)
+	  || regnum == gdbarch_sp_regnum (gdbarch))
 	return;			/* Not a floating point register.  */
 
       fpregs = proc_get_fpregs (pi);
@@ -3752,6 +3753,7 @@ procfs_store_registers (struct regcache *regcache, int regnum)
   procinfo *pi;
   int pid = PIDGET (inferior_ptid);
   int tid = TIDGET (inferior_ptid);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   /* First find procinfo for main process.  */
   pi = find_procinfo_or_die (pid, 0);
@@ -3774,13 +3776,13 @@ procfs_store_registers (struct regcache *regcache, int regnum)
   if (!proc_set_gregs (pi))
     proc_error (pi, "store_registers, set_gregs", __LINE__);
 
-  if (gdbarch_fp0_regnum (current_gdbarch) >= 0) /* Do we have an FPU?  */
+  if (gdbarch_fp0_regnum (gdbarch) >= 0) /* Do we have an FPU?  */
     {
       gdb_fpregset_t *fpregs;
 
-      if ((regnum >= 0 && regnum < gdbarch_fp0_regnum (current_gdbarch))
-	  || regnum == gdbarch_pc_regnum (current_gdbarch)
-	  || regnum == gdbarch_sp_regnum (current_gdbarch))
+      if ((regnum >= 0 && regnum < gdbarch_fp0_regnum (gdbarch))
+	  || regnum == gdbarch_pc_regnum (gdbarch)
+	  || regnum == gdbarch_sp_regnum (gdbarch))
 	return;			/* Not a floating point register.  */
 
       fpregs = proc_get_fpregs (pi);

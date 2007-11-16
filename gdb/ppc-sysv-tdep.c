@@ -48,15 +48,14 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			      int nargs, struct value **args, CORE_ADDR sp,
 			      int struct_return, CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   ULONGEST saved_sp;
   int argspace = 0;		/* 0 is an initial wrong guess.  */
   int write_pass;
 
   gdb_assert (tdep->wordsize == 4);
 
-  regcache_cooked_read_unsigned (regcache,
-				 gdbarch_sp_regnum (current_gdbarch),
+  regcache_cooked_read_unsigned (regcache, gdbarch_sp_regnum (gdbarch),
 				 &saved_sp);
 
   /* Go through the argument list twice.
@@ -146,7 +145,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  else if (TYPE_CODE (type) == TYPE_CODE_FLT
 		   && len == 16
 		   && !tdep->soft_float
-		   && (gdbarch_long_double_format (current_gdbarch)
+		   && (gdbarch_long_double_format (gdbarch)
 		       == floatformats_ibm_long_double))
 	    {
 	      /* IBM long double passed in two FP registers if
@@ -208,7 +207,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		}
 	    }
 	  else if (len == 16 && TYPE_CODE (type) == TYPE_CODE_FLT
-		   && (gdbarch_long_double_format (current_gdbarch)
+		   && (gdbarch_long_double_format (gdbarch)
 		       == floatformats_ibm_long_double))
 	    {
 	      /* Soft-float IBM long double passed in four consecutive
@@ -375,8 +374,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Update %sp.   */
-  regcache_cooked_write_signed (regcache,
-				gdbarch_sp_regnum (current_gdbarch), sp);
+  regcache_cooked_write_signed (regcache, gdbarch_sp_regnum (gdbarch), sp);
 
   /* Write the backchain (it occupies WORDSIZED bytes).  */
   write_memory_signed_integer (sp, tdep->wordsize, saved_sp);
@@ -438,8 +436,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
   if (TYPE_CODE (type) == TYPE_CODE_FLT
       && TYPE_LENGTH (type) == 16
       && !tdep->soft_float
-      && (gdbarch_long_double_format (current_gdbarch)
-	  == floatformats_ibm_long_double))
+      && (gdbarch_long_double_format (gdbarch) == floatformats_ibm_long_double))
     {
       /* IBM long double stored in f1 and f2.  */
       if (readbuf)
@@ -458,8 +455,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
     }
   if (TYPE_CODE (type) == TYPE_CODE_FLT
       && TYPE_LENGTH (type) == 16
-      && (gdbarch_long_double_format (current_gdbarch)
-	  == floatformats_ibm_long_double))
+      && (gdbarch_long_double_format (gdbarch) == floatformats_ibm_long_double))
     {
       /* Soft-float IBM long double stored in r3, r4, r5, r6.  */
       if (readbuf)
@@ -736,7 +732,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				int struct_return, CORE_ADDR struct_addr)
 {
   CORE_ADDR func_addr = find_function_addr (function, NULL);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   ULONGEST back_chain;
   /* See for-loop comment below.  */
   int write_pass;
@@ -763,8 +759,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* By this stage in the proceedings, SP has been decremented by "red
      zone size" + "struct return size".  Fetch the stack-pointer from
      before this and use that as the BACK_CHAIN.  */
-  regcache_cooked_read_unsigned (regcache,
-				 gdbarch_sp_regnum (current_gdbarch),
+  regcache_cooked_read_unsigned (regcache, gdbarch_sp_regnum (gdbarch),
 				 &back_chain);
 
   /* Go through the argument list twice.
@@ -878,7 +873,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	  else if (TYPE_CODE (type) == TYPE_CODE_FLT
 		   && TYPE_LENGTH (type) == 16
-		   && (gdbarch_long_double_format (current_gdbarch)
+		   && (gdbarch_long_double_format (gdbarch)
 		       == floatformats_ibm_long_double))
 	    {
 	      /* IBM long double stored in two doublewords of the
@@ -1033,7 +1028,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			  freg++;
 			}
 		      else if (TYPE_LENGTH (type) == 16
-			       && (gdbarch_long_double_format (current_gdbarch)
+			       && (gdbarch_long_double_format (gdbarch)
 				   == floatformats_ibm_long_double))
 			{
 			  if (write_pass)
@@ -1071,8 +1066,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Update %sp.   */
-  regcache_cooked_write_signed (regcache,
-				gdbarch_sp_regnum (current_gdbarch), sp);
+  regcache_cooked_write_signed (regcache, gdbarch_sp_regnum (gdbarch), sp);
 
   /* Write the backchain (it occupies WORDSIZED bytes).  */
   write_memory_signed_integer (sp, tdep->wordsize, back_chain);
@@ -1231,7 +1225,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	    {
 	      gdb_byte regval[MAX_REGISTER_SIZE];
 	      struct type *regtype =
-		register_type (current_gdbarch, tdep->ppc_fp0_regnum);
+		register_type (gdbarch, tdep->ppc_fp0_regnum);
 	      if (writebuf != NULL)
 		{
 		  convert_typed_floating ((const bfd_byte *) writebuf +
