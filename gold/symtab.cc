@@ -79,6 +79,9 @@ Symbol::init_fields(const char* name, const char* version,
 static std::string
 demangle(const char* name)
 {
+  if (!parameters->demangle())
+    return name;
+
   // cplus_demangle allocates memory for the result it returns,
   // and returns NULL if the name is already demangled.
   char* demangled_name = cplus_demangle(name, DMGL_ANSI | DMGL_PARAMS);
@@ -93,10 +96,7 @@ demangle(const char* name)
 std::string
 Symbol::demangled_name() const
 {
-  if (parameters->demangle())
-    return demangle(name());
-  else
-    return name();
+  return demangle(this->name());
 }
 
 // Initialize the fields in the base class Symbol for SYM in OBJECT.
@@ -1876,6 +1876,34 @@ Symbol_table::sized_write_section_symbol(const Output_section* os,
   of->write_output_view(offset, sym_size, pov);
 }
 
+// We check for ODR violations by looking for symbols with the same
+// name for which the debugging information reports that they were
+// defined in different source locations.  When comparing the source
+// location, we consider instances with the same base filename and
+// line number to be the same.  This is because different object
+// files/shared libraries can include the same header file using
+// different paths, and we don't want to report an ODR violation in
+// that case.
+
+// This struct is used to compare line information, as returned by
+// Dwarf_line_info::one_addr2line.  It imlements a < comparison
+// operator used with std::set.
+
+struct Odr_violation_compare
+{
+  bool
+  operator()(const std::string& s1, const std::string& s2) const
+  {
+    std::string::size_type pos1 = s1.rfind('/');
+    std::string::size_type pos2 = s2.rfind('/');
+    if (pos1 == std::string::npos
+	|| pos2 == std::string::npos)
+      return s1 < s2;
+    return s1.compare(pos1, std::string::npos,
+		      s2, pos2, std::string::npos) < 0;
+  }
+};
+
 // Check candidate_odr_violations_ to find symbols with the same name
 // but apparently different definitions (different source-file/line-no).
 
@@ -1888,7 +1916,7 @@ Symbol_table::detect_odr_violations(const char* output_file_name) const
     {
       const char* symbol_name = it->first;
       // We use a sorted set so the output is deterministic.
-      std::set<std::string> line_nums;
+      std::set<std::string, Odr_violation_compare> line_nums;
 
       for (Unordered_set<Symbol_location, Symbol_location_hash>::const_iterator
                locs = it->second.begin();
