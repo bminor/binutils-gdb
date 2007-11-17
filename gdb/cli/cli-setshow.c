@@ -242,16 +242,22 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    /* if no argument was supplied, print an informative error message */
 	    if (arg == NULL)
 	      {
-		char msg[1024];
-		strcpy (msg, "Requires an argument. Valid arguments are ");
+		char *msg;
+		int msg_len = 0;
+		for (i = 0; c->enums[i]; i++)
+		  msg_len += strlen (c->enums[i]) + 2;
+
+		msg = xmalloc (msg_len);
+		*msg = '\0';
+		make_cleanup (xfree, msg);
+		
 		for (i = 0; c->enums[i]; i++)
 		  {
 		    if (i != 0)
 		      strcat (msg, ", ");
 		    strcat (msg, c->enums[i]);
 		  }
-		strcat (msg, ".");
-		error (("%s"), msg);
+		error (_("Requires an argument. Valid arguments are %s."), msg);
 	      }
 
 	    p = strchr (arg, ' ');
