@@ -1,1 +1,0 @@
-TDEPFILES= alpha-tdep.o

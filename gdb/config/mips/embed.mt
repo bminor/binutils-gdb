@@ -1,1 +1,0 @@
-TDEPFILES= mips-tdep.o

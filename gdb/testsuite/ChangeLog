@@ -1,3 +1,8 @@
+2007-11-17  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* Makefile.in (Makefile): Do not depend on target_makefile_frag.
+	(target_cpu): Remove.
+
 2007-10-15  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.base/ending-run.exp: Expect the list of cleared

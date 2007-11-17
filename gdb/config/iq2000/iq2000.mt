@@ -1,1 +1,0 @@
-TDEPFILES= iq2000-tdep.o

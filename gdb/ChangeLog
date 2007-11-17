@@ -1,5 +1,110 @@
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* config/alpha/alpha-linux.mt: Remove file.
+	* config/alpha/alpha.mt: Remove file.
+	* config/alpha/alpha-osf1.mt: Remove file.
+	* config/alpha/fbsd.mt: Remove file.
+	* config/alpha/nbsd.mt: Remove file.
+	* config/alpha/obsd.mt: Remove file.
+	* config/arm/embed.mt: Remove file.
+	* config/arm/linux.mt: Remove file.
+	* config/arm/nbsd.mt: Remove file.
+	* config/arm/obsd.mt: Remove file.
+	* config/arm/wince.mt: Remove file.
+	* config/avr/avr.mt: Remove file.
+	* config/cris/cris.mt: Remove file.
+	* config/frv/frv.mt: Remove file.
+	* config/h8300/h8300.mt: Remove file.
+	* config/i386/cygwin.mt: Remove file.
+	* config/i386/fbsd64.mt: Remove file.
+	* config/i386/fbsd.mt: Remove file.
+	* config/i386/i386gnu.mt: Remove file.
+	* config/i386/i386.mt: Remove file.
+	* config/i386/i386sol2.mt: Remove file.
+	* config/i386/linux64.mt: Remove file.
+	* config/i386/linux.mt: Remove file.
+	* config/i386/mingw.mt: Remove file.
+	* config/i386/nbsd64.mt: Remove file.
+	* config/i386/nbsd.mt: Remove file.
+	* config/i386/nto.mt: Remove file.
+	* config/i386/obsd64.mt: Remove file.
+	* config/i386/obsd.mt: Remove file.
+	* config/i386/sol2-64.mt: Remove file.
+	* config/ia64/ia64.mt: Remove file.
+	* config/ia64/linux.mt: Remove file.
+	* config/iq2000/iq2000.mt: Remove file.
+	* config/m32c/m32c.mt: Remove file.
+	* config/m32r/linux.mt: Remove file.
+	* config/m32r/m32r.mt: Remove file.
+	* config/m68hc11/m68hc11.mt: Remove file.
+	* config/m68k/linux.mt: Remove file.
+	* config/m68k/monitor.mt: Remove file.
+	* config/m68k/nbsd.mt: Remove file.
+	* config/m68k/obsd.mt: Remove file.
+	* config/m88k/obsd.mt: Remove file.
+	* config/mep/mep.mt: Remove file.
+	* config/mips/embed.mt: Remove file.
+	* config/mips/irix5.mt: Remove file.
+	* config/mips/irix6.mt: Remove file.
+	* config/mips/linux.mt: Remove file.
+	* config/mips/nbsd.mt: Remove file.
+	* config/mips/obsd64.mt: Remove file.
+	* config/mn10300/linux.mt: Remove file.
+	* config/mn10300/mn10300.mt: Remove file.
+	* config/mt/mt.mt: Remove file.
+	* config/pa/hppahpux.mt: Remove file.
+	* config/pa/hppa.mt: Remove file.
+	* config/pa/linux.mt: Remove file.
+	* config/pa/obsd.mt: Remove file.
+	* config/powerpc/aix.mt: Remove file.
+	* config/powerpc/linux.mt: Remove file.
+	* config/powerpc/nbsd.mt: Remove file.
+	* config/powerpc/obsd.mt: Remove file.
+	* config/powerpc/ppc-eabi.mt: Remove file.
+	* config/s390/s390.mt: Remove file.
+	* config/score/embed.mt: Remove file.
+	* config/sh/embed.mt: Remove file.
+	* config/sh/linux.mt: Remove file.
+	* config/sh/nbsd.mt: Remove file.
+	* config/sh/obsd.mt: Remove file.
+	* config/sh/sh64.mt: Remove file.
+	* config/sparc/embed.mt: Remove file.
+	* config/sparc/fbsd.mt: Remove file.
+	* config/sparc/linux64.mt: Remove file.
+	* config/sparc/linux.mt: Remove file.
+	* config/sparc/nbsd64.mt: Remove file.
+	* config/sparc/nbsd.mt: Remove file.
+	* config/sparc/obsd64.mt: Remove file.
+	* config/sparc/obsd.mt: Remove file.
+	* config/sparc/sol2-64.mt: Remove file.
+	* config/sparc/sol2.mt: Remove file.
+	* config/sparc/sparc64.mt: Remove file.
+	* config/sparc/sparc.mt: Remove file.
+	* config/spu/spu.mt: Remove file.
+	* config/v850/v850.mt: Remove file.
+	* config/vax/nbsd.mt: Remove file.
+	* config/vax/obsd.mt: Remove file.
+	* config/vax/vax.mt: Remove file.
+	* config/xstormy16/xstormy16.mt: Remove file.
+	* config/xtensa/xtensa.mt: Remove file.
+
+	* configure.tgt (gdb_target_cpu): Remove.  Do not set anywhere.
+	(gdb_target): Likewise.
+	(gdb_target_obs): Document.  Set for every target to contents
+	of TDEPFILES in former .mt makefile fragment.
+
+	* configure.ac (TARGET_OBS): Define.
+	(target_makefile_frag, gdb_target_cpu): Do not define.
+	* configure: Regenerate.
+
+	* Makefile.in (MT_FLAGS): Remove.
+	(GLOBAL_CFLAGS): Update.
+	(TARGET_OBS): Substitute from configure.
+	(DEPFILES): Remove TDEPFILES, add TARGET_OBS.
+	(@target_makefile_frag@): Remove.
+
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/arm/embed.mt (SIM_OBS, SIM): Remove.
 	* config/avr/avr.mt (SIM_OBS, SIM): Remove.
 	* config/frv/frv.mt (SIM_OBS, SIM): Remove.

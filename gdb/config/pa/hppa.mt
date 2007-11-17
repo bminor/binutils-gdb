@@ -1,1 +1,0 @@
-TDEPFILES= hppa-tdep.o

@@ -121,6 +121,9 @@ if test "x$targ_defvec" != x; then
     [Define to BFD's default target vector. ])
 fi
 
+TARGET_OBS="${gdb_target_obs}"
+AC_SUBST(TARGET_OBS)
+
 AC_ARG_PROGRAM
 
 # The CLI cannot be disabled yet, but may be in the future.
@@ -1557,14 +1560,7 @@ else
   host_makefile_frag=/dev/null
 fi
 
-target_makefile_frag=${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt
-if test ! -f ${target_makefile_frag}; then
-  AC_MSG_ERROR("*** Gdb does not support target ${target}")
-fi
-frags="$frags $target_makefile_frag"
-
 AC_SUBST_FILE(host_makefile_frag)
-AC_SUBST_FILE(target_makefile_frag)
 AC_SUBST(frags)
 
 changequote(,)dnl
@@ -1661,7 +1657,6 @@ esac
 ],
 [
 gdb_host_cpu=$gdb_host_cpu
-gdb_target_cpu=$gdb_target_cpu
 nativefile=$nativefile
 ])
 
