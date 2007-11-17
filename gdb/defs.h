@@ -795,14 +795,6 @@ typedef struct ptid ptid_t;
 
 
 
-/* Optional host machine definition.  Pure autoconf targets will not
-   need a "xm.h" file.  This will be a symlink to one of the xm-*.h
-   files, built by the `configure' script.  */
-
-#ifdef GDB_XM_FILE
-#include "xm.h"
-#endif
-
 /* Optional native machine support.  Non-native (and possibly pure
    multi-arch) targets do not need a "nm.h" file.  This will be a
    symlink to one of the nm-*.h files, built by the `configure'
@@ -810,14 +802,6 @@ typedef struct ptid ptid_t;
 
 #ifdef GDB_NM_FILE
 #include "nm.h"
-#endif
-
-/* Optional target machine definition.  Pure multi-arch configurations
-   do not need a "tm.h" file.  This will be a symlink to one of the
-   tm-*.h files, built by the `configure' script.  */
-
-#ifdef GDB_TM_FILE
-#include "tm.h"
 #endif
 
 /* Assume that fopen accepts the letter "b" in the mode string.

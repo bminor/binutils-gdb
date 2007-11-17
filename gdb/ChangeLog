@@ -1,3 +1,21 @@
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.ac (hostfile, targetfile): Remove.
+	(GDB_XM_FILE, GDB_TM_FILE): Do not define.
+	(xm_h, tm_h): Likewise.
+	(DEPRECATED_TM_FILE, XM_FILE): Do not substitute into Makefile.
+	* configure, config.in: Regenerate.
+
+	* Makefile.in (xm_h, tm_h): Remove.  Update dependencies.
+	(TAGS): Do not consider DEPRECATED_TM_FILE or XM_FILE.
+	(clean, local-maintainer-clean): Do not remove xm.h or tm.h.
+	* defs.h: Do not include "xm.h" or "tm.h".
+
+	* gdbarch.sh (verify_gdbarch): Do not dump GDB_XM_FILE or GDB_TM_FILE.
+	* gdbarch.c: Regenerate.
+
+	* config/score/embed.mt: Remove obsolete comment.
+
 2007-11-16  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbarch.sh (cannot_fetch_register, cannot_store_register): Add gdbarch

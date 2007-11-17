@@ -1567,14 +1567,6 @@ AC_SUBST_FILE(target_makefile_frag)
 AC_SUBST(frags)
 
 changequote(,)dnl
-hostfile=`sed -n '
-s/XM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-' ${host_makefile_frag}`
-
-targetfile=`sed -n '
-s/^[ 	]*DEPRECATED_TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-' ${target_makefile_frag}`
-
 if test "${gdb_native}" = "yes"; then
 # We pick this up from the host configuration file (.mh) because we
 # do not have a native configuration Makefile fragment.
@@ -1612,40 +1604,11 @@ if test "$gdb_native" = "yes"; then
   fi
 fi
 
-# If hostfile (XM_FILE) and/or targetfile (DEPRECATED_TM_FILE) and/or
-# nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
+# If nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
 # to an empty version.
 
 files=
 links=
-
-rm -f xm.h
-xm_h=""
-if test "${hostfile}" != ""; then
-    xm_h=xm.h
-    case "${hostfile}" in
-      xm-*.h ) GDB_XM_FILE="config/${gdb_host_cpu}/${hostfile}" ;;
-      * ) GDB_XM_FILE="${hostfile}"
-    esac
-    files="${files} ${GDB_XM_FILE}"
-    links="${links} xm.h"
-    AC_DEFINE_UNQUOTED(GDB_XM_FILE, "${GDB_XM_FILE}", [hostfile])
-fi
-AC_SUBST(xm_h)
-
-rm -f tm.h
-tm_h=""
-if test "${targetfile}" != ""; then
-    tm_h=tm.h
-    case "${targetfile}" in
-      tm-*.h ) GDB_TM_FILE="config/${gdb_target_cpu}/${targetfile}" ;;
-      * ) GDB_TM_FILE="${targetfile}"
-    esac
-    files="${files} ${GDB_TM_FILE}"
-    links="${links} tm.h"
-    AC_DEFINE_UNQUOTED(GDB_TM_FILE, "${GDB_TM_FILE}", [targetfile])
-fi
-AC_SUBST(tm_h)
 
 rm -f nm.h
 nm_h=""
@@ -1685,9 +1648,7 @@ dnl provided by makefile fragments.
 dnl
 
 changequote(,)dnl
-sed -e '/^DEPRECATED_TM_FILE[ 	]*=/s,^DEPRECATED_TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,
-/^XM_FILE[ 	]*=/s,^XM_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,
-/^NAT_FILE[ 	]*=/s,^NAT_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,' <Makefile >Makefile.tmp
+sed -e '/^NAT_FILE[ 	]*=/s,^NAT_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,' <Makefile >Makefile.tmp
 mv -f Makefile.tmp Makefile
 changequote([,])dnl
 

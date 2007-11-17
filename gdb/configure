@@ -313,7 +313,7 @@ ac_includes_default="\
 ac_subdirs_all="$ac_subdirs_all gdbtk"
 ac_subdirs_all="$ac_subdirs_all multi-ice"
 ac_subdirs_all="$ac_subdirs_all gdbserver"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT localedir PACKAGE subdirs AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S RANLIB ac_ct_RANLIB YACC AR ac_ct_AR DLLTOOL ac_ct_DLLTOOL WINDRES ac_ct_WINDRES MIG ac_ct_MIG READLINE READLINE_DEPS READLINE_CFLAGS HAVE_LIBEXPAT LIBEXPAT LTLIBEXPAT ALLOCA CONFIG_LDFLAGS TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS WERROR_CFLAGS SER_HARDWIRE WIN32LIBS LIBGUI GUI_CFLAGS_X WIN32LDAPP TCL_VERSION TCL_MAJOR_VERSION TCL_MINOR_VERSION TCL_CC TCL_DEFS TCL_SHLIB_CFLAGS TCL_SHLIB_LD TCL_SHLIB_LD_LIBS TCL_SHLIB_SUFFIX TCL_DL_LIBS TCL_LD_FLAGS TCL_LD_SEARCH_FLAGS TCL_CC_SEARCH_FLAGS TCL_COMPAT_OBJS TCL_RANLIB TCL_BUILD_LIB_SPEC TCL_LIB_SPEC TCL_LIB_VERSIONS_OK TK_VERSION TK_DEFS TK_BUILD_INCLUDES TK_XINCLUDES TK_XLIBSW TK_BUILD_LIB_SPEC TK_LIB_SPEC TCLHDIR TKHDIR ITCLHDIR ITKHDIR ITCL_VERSION ITCL_DEFS ITCL_BUILD_INCLUDES ITCL_BUILD_LIB_SPEC ITCL_LIB_SPEC ITK_VERSION ITK_DEFS ITK_BUILD_INCLUDES ITK_BUILD_LIB_SPEC ITK_LIB_SPEC X_CFLAGS X_LDFLAGS X_LIBS TCL_DEPS TK_DEPS ITCLLIB ITCL_DEPS ITKLIB ITK_DEPS GDBTKLIBS GDBTK_CFLAGS GDBTK_SRC_DIR IGNORE_SIM IGNORE_SIM_OBS ENABLE_CFLAGS PROFILE_CFLAGS CONFIG_OBS CONFIG_DEPS CONFIG_SRCS CONFIG_ALL CONFIG_CLEAN CONFIG_INSTALL CONFIG_UNINSTALL target_subdir frags xm_h tm_h nm_h LIBICONV LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT localedir PACKAGE subdirs AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S RANLIB ac_ct_RANLIB YACC AR ac_ct_AR DLLTOOL ac_ct_DLLTOOL WINDRES ac_ct_WINDRES MIG ac_ct_MIG READLINE READLINE_DEPS READLINE_CFLAGS HAVE_LIBEXPAT LIBEXPAT LTLIBEXPAT ALLOCA CONFIG_LDFLAGS TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS WERROR_CFLAGS SER_HARDWIRE WIN32LIBS LIBGUI GUI_CFLAGS_X WIN32LDAPP TCL_VERSION TCL_MAJOR_VERSION TCL_MINOR_VERSION TCL_CC TCL_DEFS TCL_SHLIB_CFLAGS TCL_SHLIB_LD TCL_SHLIB_LD_LIBS TCL_SHLIB_SUFFIX TCL_DL_LIBS TCL_LD_FLAGS TCL_LD_SEARCH_FLAGS TCL_CC_SEARCH_FLAGS TCL_COMPAT_OBJS TCL_RANLIB TCL_BUILD_LIB_SPEC TCL_LIB_SPEC TCL_LIB_VERSIONS_OK TK_VERSION TK_DEFS TK_BUILD_INCLUDES TK_XINCLUDES TK_XLIBSW TK_BUILD_LIB_SPEC TK_LIB_SPEC TCLHDIR TKHDIR ITCLHDIR ITKHDIR ITCL_VERSION ITCL_DEFS ITCL_BUILD_INCLUDES ITCL_BUILD_LIB_SPEC ITCL_LIB_SPEC ITK_VERSION ITK_DEFS ITK_BUILD_INCLUDES ITK_BUILD_LIB_SPEC ITK_LIB_SPEC X_CFLAGS X_LDFLAGS X_LIBS TCL_DEPS TK_DEPS ITCLLIB ITCL_DEPS ITKLIB ITK_DEPS GDBTKLIBS GDBTK_CFLAGS GDBTK_SRC_DIR IGNORE_SIM IGNORE_SIM_OBS ENABLE_CFLAGS PROFILE_CFLAGS CONFIG_OBS CONFIG_DEPS CONFIG_SRCS CONFIG_ALL CONFIG_CLEAN CONFIG_INSTALL CONFIG_UNINSTALL target_subdir frags nm_h LIBICONV LIBOBJS LTLIBOBJS'
 ac_subst_files='host_makefile_frag target_makefile_frag'
 
 # Initialize some variables set by options.
@@ -23986,14 +23986,6 @@ frags="$frags $target_makefile_frag"
 
 
 
-hostfile=`sed -n '
-s/XM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-' ${host_makefile_frag}`
-
-targetfile=`sed -n '
-s/^[ 	]*DEPRECATED_TM_FILE[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-' ${target_makefile_frag}`
-
 if test "${gdb_native}" = "yes"; then
 # We pick this up from the host configuration file (.mh) because we
 # do not have a native configuration Makefile fragment.
@@ -24047,48 +24039,11 @@ echo "${ECHO_T}no" >&6
   fi
 fi
 
-# If hostfile (XM_FILE) and/or targetfile (DEPRECATED_TM_FILE) and/or
-# nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
+# If nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
 # to an empty version.
 
 files=
 links=
-
-rm -f xm.h
-xm_h=""
-if test "${hostfile}" != ""; then
-    xm_h=xm.h
-    case "${hostfile}" in
-      xm-*.h ) GDB_XM_FILE="config/${gdb_host_cpu}/${hostfile}" ;;
-      * ) GDB_XM_FILE="${hostfile}"
-    esac
-    files="${files} ${GDB_XM_FILE}"
-    links="${links} xm.h"
-
-cat >>confdefs.h <<_ACEOF
-#define GDB_XM_FILE "${GDB_XM_FILE}"
-_ACEOF
-
-fi
-
-
-rm -f tm.h
-tm_h=""
-if test "${targetfile}" != ""; then
-    tm_h=tm.h
-    case "${targetfile}" in
-      tm-*.h ) GDB_TM_FILE="config/${gdb_target_cpu}/${targetfile}" ;;
-      * ) GDB_TM_FILE="${targetfile}"
-    esac
-    files="${files} ${GDB_TM_FILE}"
-    links="${links} tm.h"
-
-cat >>confdefs.h <<_ACEOF
-#define GDB_TM_FILE "${GDB_TM_FILE}"
-_ACEOF
-
-fi
-
 
 rm -f nm.h
 nm_h=""
@@ -25142,8 +25097,6 @@ s,@CONFIG_INSTALL@,$CONFIG_INSTALL,;t t
 s,@CONFIG_UNINSTALL@,$CONFIG_UNINSTALL,;t t
 s,@target_subdir@,$target_subdir,;t t
 s,@frags@,$frags,;t t
-s,@xm_h@,$xm_h,;t t
-s,@tm_h@,$tm_h,;t t
 s,@nm_h@,$nm_h,;t t
 s,@LIBICONV@,$LIBICONV,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
@@ -26195,9 +26148,7 @@ fi
  ;;
     default )
 
-sed -e '/^DEPRECATED_TM_FILE[ 	]*=/s,^DEPRECATED_TM_FILE[ 	]*=[ 	]*,&config/'"${gdb_target_cpu}"'/,
-/^XM_FILE[ 	]*=/s,^XM_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,
-/^NAT_FILE[ 	]*=/s,^NAT_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,' <Makefile >Makefile.tmp
+sed -e '/^NAT_FILE[ 	]*=/s,^NAT_FILE[ 	]*=[ 	]*,&config/'"${gdb_host_cpu}"'/,' <Makefile >Makefile.tmp
 mv -f Makefile.tmp Makefile
 
 

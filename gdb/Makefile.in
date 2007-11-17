@@ -653,8 +653,6 @@ process_reply_S_h = process_reply_S.h
 # config/ headers
 #
 
-xm_h =		@xm_h@
-tm_h =		@tm_h@
 nm_h =		@nm_h@
 
 #
@@ -694,7 +692,7 @@ cp_abi_h = cp-abi.h
 cp_support_h = cp-support.h $(symtab_h)
 dcache_h = dcache.h
 defs_h = defs.h $(config_h) $(ansidecl_h) $(gdb_locale_h) $(gdb_signals_h) \
-	$(libiberty_h) $(bfd_h) $(ui_file_h) $(xm_h) $(nm_h) $(tm_h) \
+	$(libiberty_h) $(bfd_h) $(ui_file_h) $(nm_h) \
 	$(fopen_bin_h) $(gdbarch_h)
 dictionary_h = dictionary.h
 disasm_h = disasm.h
@@ -1299,9 +1297,7 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 
 TAGS: $(DEPFILES) $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 	@echo Making TAGS
-	@etags $(srcdir)/$(DEPRECATED_TM_FILE) \
-	  $(srcdir)/$(XM_FILE) \
-	  $(srcdir)/$(NAT_FILE) \
+	@etags $(srcdir)/$(NAT_FILE) \
 	`(for i in $(DEPFILES) $(TAGFILES_NO_SRCDIR); do \
 		echo $(srcdir)/$$i ; \
 	done ; for i in $(TAGFILES_WITH_SRCDIR); do \
@@ -1335,7 +1331,7 @@ distclean: clean
 	rm -f gdbserver/config.status gdbserver/config.log
 	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
 	rm -f gdbserver/Makefile gdbserver/config.cache
-	rm -f nm.h tm.h xm.h config.status config.h stamp-h .gdbinit
+	rm -f nm.h config.status config.h stamp-h .gdbinit
 	rm -f gdb_stdint.h
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
@@ -1355,7 +1351,7 @@ local-maintainer-clean:
 		f-exp.c m2-exp.c p-exp.c
 	rm -f TAGS $(INFOFILES)
 	rm -f $(YYFILES)
-	rm -f nm.h tm.h xm.h config.status
+	rm -f nm.h config.status
 
 do-maintainer-clean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=maintainer-clean "DODIRS=$(SUBDIRS)" \

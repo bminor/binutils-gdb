@@ -45,12 +45,6 @@
 /* Define to the default OS ABI for this configuration. */
 #undef GDB_OSABI_DEFAULT
 
-/* targetfile */
-#undef GDB_TM_FILE
-
-/* hostfile */
-#undef GDB_XM_FILE
-
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
