@@ -6483,6 +6483,10 @@ FPU.
 2 for files using the hardware floating-point ABI with a single-precision FPU.
 @item
 3 for files using the software floating-point ABI.
+@item
+4 for files using the hardware floating-point ABI with 64-bit wide
+double-precision floating-point registers and 32-bit wide general
+purpose registers.
 @end itemize
 @end table
 

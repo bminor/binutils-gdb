@@ -11325,11 +11325,11 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	out_attr[Tag_GNU_MIPS_ABI_FP].i = in_attr[Tag_GNU_MIPS_ABI_FP].i;
       else if (in_attr[Tag_GNU_MIPS_ABI_FP].i == 0)
 	;
-      else if (in_attr[Tag_GNU_MIPS_ABI_FP].i > 3)
+      else if (in_attr[Tag_GNU_MIPS_ABI_FP].i > 4)
 	_bfd_error_handler
 	  (_("Warning: %B uses unknown floating point ABI %d"), ibfd,
 	   in_attr[Tag_GNU_MIPS_ABI_FP].i);
-      else if (out_attr[Tag_GNU_MIPS_ABI_FP].i > 3)
+      else if (out_attr[Tag_GNU_MIPS_ABI_FP].i > 4)
 	_bfd_error_handler
 	  (_("Warning: %B uses unknown floating point ABI %d"), obfd,
 	   out_attr[Tag_GNU_MIPS_ABI_FP].i);
@@ -11348,6 +11348,12 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	      case 3:
 		_bfd_error_handler
 		  (_("Warning: %B uses hard float, %B uses soft float"),
+		   obfd, ibfd);
+		break;
+
+	      case 4:
+		_bfd_error_handler
+		  (_("Warning: %B uses -msingle-float, %B uses -mips32r2 -mfp64"),
 		   obfd, ibfd);
 		break;
 
@@ -11371,6 +11377,12 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 		   obfd, ibfd);
 		break;
 
+	      case 4:
+		_bfd_error_handler
+		  (_("Warning: %B uses -mdouble-float, %B uses -mips32r2 -mfp64"),
+		   obfd, ibfd);
+		break;
+
 	      default:
 		abort ();
 	      }
@@ -11381,9 +11393,36 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	      {
 	      case 1:
 	      case 2:
+	      case 4:
 		_bfd_error_handler
 		  (_("Warning: %B uses hard float, %B uses soft float"),
 		   ibfd, obfd);
+		break;
+
+	      default:
+		abort ();
+	      }
+	    break;
+
+	  case 4:
+	    switch (in_attr[Tag_GNU_MIPS_ABI_FP].i)
+	      {
+	      case 1:
+		_bfd_error_handler
+		  (_("Warning: %B uses -msingle-float, %B uses -mips32r2 -mfp64"),
+		   ibfd, obfd);
+		break;
+
+	      case 2:
+		_bfd_error_handler
+		  (_("Warning: %B uses -mdouble-float, %B uses -mips32r2 -mfp64"),
+		   ibfd, obfd);
+		break;
+
+	      case 3:
+		_bfd_error_handler
+		  (_("Warning: %B uses hard float, %B uses soft float"),
+		   obfd, ibfd);
 		break;
 
 	      default:

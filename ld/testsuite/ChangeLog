@@ -1,3 +1,17 @@
+2007-11-17  Thiemo Seufer  <ths@mips.com>
+
+	* ld-mips-elf/attr-gnu-4-14.d, ld-mips-elf/attr-gnu-4-41.d:
+	Adjust warning message for -mfp64 flag.
+	* ld-mips-elf/attr-gnu-4-5.s, ld-mips-elf/attr-gnu-4-04.d,
+	ld-mips-elf/attr-gnu-4-51.d, ld-mips-elf/attr-gnu-4-05.d,
+	ld-mips-elf/attr-gnu-4-15.d, ld-mips-elf/attr-gnu-4-24.d,
+	ld-mips-elf/attr-gnu-4-25.d, ld-mips-elf/attr-gnu-4-34.d,
+	ld-mips-elf/attr-gnu-4-35.d, ld-mips-elf/attr-gnu-4-42.d,
+	ld-mips-elf/attr-gnu-4-43.d, ld-mips-elf/attr-gnu-4-44.d,
+	ld-mips-elf/attr-gnu-4-45.d, ld-mips-elf/attr-gnu-4-40.d,
+	ld-mips-elf/attr-gnu-4-14.d: New testcases files.
+	* ld-mips-elf/mips-elf.exp: Run new testcases.
+
 2007-11-16  Nick Clifton  <nickc@redhat.com>
 
 	* ld-mn10300/mn10300.exp: Fix the start address of the .bss

@@ -2,5 +2,5 @@
 #source: attr-gnu-4-4.s
 #as: -EB -32
 #ld: -r -melf32btsmip
-#warning: Warning: .* uses unknown floating point ABI 4
+#warning: Warning: .* uses -msingle-float, .* uses -mips32r2 -mfp64
 #target: mips*-*-*

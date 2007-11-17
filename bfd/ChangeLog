@@ -1,3 +1,8 @@
+2007-11-17  Thiemo Seufer  <ths@mips.com>
+
+	* elfxx-mips.c (mips_elf_merge_obj_attributes): Handle -mips32r2
+	-mfp64 attribute.
+
 2007-11-16  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_check_relocs): Fix memory leak and

@@ -8833,6 +8833,9 @@ display_mips_gnu_attribute (unsigned char *p, int tag)
 	case 3:
 	  printf ("Soft float\n");
 	  break;
+	case 4:
+	  printf ("64-bit float (-mips32r2 -mfp64)\n");
+	  break;
 	default:
 	  printf ("??? (%d)\n", val);
 	  break;

@@ -1,3 +1,8 @@
+2007-11-17  Thiemo Seufer  <ths@mips.com>
+
+	* readelf.c (display_mips_gnu_attribute): Recognize -mips32r2 -mfp64
+	objects.
+
 2007-11-16  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (process_extended_line_op): Add cases for HP extensions
