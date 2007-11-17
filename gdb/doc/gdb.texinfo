@@ -2992,7 +2992,7 @@ Whether the breakpoint is marked to be disabled or deleted when hit.
 @item Enabled or Disabled
 Enabled breakpoints are marked with @samp{y}.  @samp{n} marks breakpoints
 that are not enabled.  An optional @samp{(p)} suffix marks pending
-breakpoints --- breakpoints for which address is either not yet
+breakpoints---breakpoints for which address is either not yet
 resolved, pending load of a shared library, or for which address was
 in a shared library that was since unloaded.  Such breakpoint won't
 fire until a shared library that has the symbol or line referred by
@@ -3001,7 +3001,7 @@ breakpoint is loaded.  See below for details.
 Where the breakpoint is in your program, as a memory address.  For a
 pending breakpoint whose address is not yet known,  this field will
 contain @samp{<PENDING>}.  A breakpoint with several locations will
-have @samp{<MULTIPLE>} in this field --- see below for details.
+have @samp{<MULTIPLE>} in this field---see below for details.
 @item What
 Where the breakpoint is in the source for your program, as a file and
 line number.  For a pending breakpoint, the original string passed to
@@ -3060,16 +3060,16 @@ several places where that function is inlined.
 In all those cases, @value{GDBN} will insert a breakpoint at all
 the relevant locations.
 
-A breakpoint with multiple locations is displayed in the
-breakpoint table using several rows --- one header row, followed
-by one row for each breakpoint location.  The header row
-has @samp{<MULTIPLE>} in the address column.  The rows for
-individual locations contain the actual addresses for locations,
-and say what functions those locations are in.  The number
-column for a location has number in the format
+A breakpoint with multiple locations is displayed in the breakpoint
+table using several rows---one header row, followed by one row for
+each breakpoint location.  The header row has @samp{<MULTIPLE>} in the
+address column.  The rows for individual locations contain the actual
+addresses for locations, and show the functions to which those
+locations belong.  The number column for a location is of the form
 @var{breakpoint-number}.@var{location-number}.
 
 For example:
+
 @smallexample
 Num     Type           Disp Enb  Address    What
 1       breakpoint     keep y    <MULTIPLE>
@@ -3081,11 +3081,17 @@ Num     Type           Disp Enb  Address    What
 
 Each location can be individually enabled or disabled by passing
 @var{breakpoint-number}.@var{location-number} as argument to the
-@code{enable} and @code{disable} commands.
+@code{enable} and @code{disable} commands.  Note that you cannot
+delete the individual locations from the list, you can only delete the
+entire list of locations that be long to their parent breakpoint (with
+the @kbd{delete @var{num}} command, where @var{num} is the number of
+the parent breakpoint, 1 in the above example).  Disabling or enabling
+the parent breakpoint (@pxref{Disabling}) affects all of the locations
+that belong to that breakpoint.
 
 @cindex pending breakpoints
 It's quite common to have a breakpoint inside a shared library.
-The shared library may be loaded and unloaded explicitly,
+Shared libraries can be loaded and unloaded explicitly,
 and possibly repeatedly, as the program is executed.  To support
 this use case, @value{GDBN} updates breakpoint locations whenever
 any shared library is loaded or unloaded.  Typically, you would
@@ -3093,7 +3099,7 @@ set a breakpoint in a shared library at the beginning of your
 debugging session, when the library is not loaded, and when the
 symbols from the library are not available.  When you try to set
 breakpoint, @value{GDBN} will ask you if you want to set
-a so called @dfn{pending breakpoint} --- breakpoint whose address
+a so called @dfn{pending breakpoint}---breakpoint whose address
 is not yet resolved.
 
 After the program is run, whenever a new shared library is loaded,
@@ -3544,6 +3550,9 @@ or more breakpoint numbers as arguments.  Use @code{info break} or
 @code{info watch} to print a list of breakpoints, watchpoints, and
 catchpoints if you do not know which numbers to use.
 
+Disabling and enabling a breakpoint that has multiple locations
+affects all of its locations.
+
 A breakpoint, watchpoint, or catchpoint can have any of four different
 states of enablement:
 
@@ -3808,8 +3817,8 @@ single function name
 to be defined several times, for application in different contexts.
 This is called @dfn{overloading}.  When a function name is overloaded,
 @samp{break @var{function}} is not enough to tell @value{GDBN} where you want
-a breakpoint.  If you realize this is a problem, you can use
-something like @samp{break @var{function}(@var{types})} to specify which
+a breakpoint.  You can use explicit signature of the function, as in
+@samp{break @var{function}(@var{types})}, to specify which
 particular version of the function you want.  Otherwise, @value{GDBN} offers
 you a menu of numbered choices for different possible breakpoints, and
 waits for your selection with the prompt @samp{>}.  The first two
@@ -16621,7 +16630,7 @@ letters:
 
 If the underlying @code{C} implementation used to build @value{GDBN} has
 support for the three conversion letters for DFP types, other modifiers
-such as width and precision will also be available for @value{GDB} to use.
+such as width and precision will also be available for @value{GDBN} to use.
 
 In case there is no such @code{C} support, no additional modifiers will be
 available and the value will be printed in the standard way.

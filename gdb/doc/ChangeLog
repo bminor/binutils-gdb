@@ -1,3 +1,10 @@
+2007-11-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Set Breaks, Disabling): Clarify behavior of
+	breakpoints with multiple locations.
+	(Breakpoint Menus): Improve wording.
+	(Output): Fix last change.
+
 2007-11-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* Makefile.in (Makefile): Do not depend on target_makefile_frag.
@@ -18,7 +25,7 @@
 
 2007-11-05  Luis Machado  <luisgpm@br.ibm.com>
 
-	* gdb.texinfo: Update printf command's description.
+	* gdb.texinfo (Output): Update printf command's description.
 
 2007-10-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
