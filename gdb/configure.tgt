@@ -7,7 +7,7 @@
 #  gdb_osabi		default OS ABI to use with target
 #  build_gdbserver	set to "yes" if gdbserver supports target
 
-case $target in
+case $targ in
  d10v-*-* | \
  hppa*-*-hiux* | \
  i[34567]86-ncr-* | \
@@ -19,7 +19,7 @@ case $target in
  rs6000-*-lynxos* | \
  sh*-*-pe | \
  null)
-    echo "*** Configuration $target is obsolete." >&2
+    echo "*** Configuration $targ is obsolete." >&2
     echo "*** Support has been REMOVED." >&2
     exit 1
     ;;
@@ -27,7 +27,7 @@ esac
 
 # map target info into gdb names.
 
-case "${target}" in
+case "${targ}" in
 
 alpha*-*-osf*)
 	# Target: Little-endian Alpha running OSF/1
@@ -521,7 +521,7 @@ esac
 
 # map target onto default OS ABI
 
-case "${target}" in
+case "${targ}" in
 *-*-freebsd*)	gdb_osabi=GDB_OSABI_FREEBSD_ELF ;;
 *-*-linux*)	gdb_osabi=GDB_OSABI_LINUX ;;
 *-*-nto*)	gdb_osabi=GDB_OSABI_QNXNTO ;;

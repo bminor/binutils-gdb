@@ -91,6 +91,16 @@ esac
 
 AC_CONFIG_SUBDIRS(doc testsuite)
 
+# Check whether to support alternative target configurations
+AC_ARG_ENABLE(targets,
+[  --enable-targets        alternative target configurations],
+[case "${enableval}" in
+  yes | "") AC_ERROR(enable-targets option must specify target names or 'all')
+            ;;
+  no)       enable_targets= ;;
+  *)        enable_targets=$enableval ;;
+esac])
+
 # Provide defaults for some variables set by the per-host and per-target
 # configuration.
 gdb_host_obs=posix-hdep.o
@@ -103,7 +113,49 @@ fi
 
 . $srcdir/configure.host
 
-. $srcdir/configure.tgt
+# Accumulate some settings from configure.tgt over all enabled targets
+
+TARGET_OBS=
+all_targets=
+
+for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
+do
+  if test "$targ_alias" = "all"; then
+    all_targets=true
+  else
+    # Canonicalize the secondary target names.
+    result=`$ac_config_sub $targ_alias 2>/dev/null`
+    if test -n "$result"; then
+        targ=$result
+    else
+        targ=$targ_alias
+    fi
+
+    . ${srcdir}/configure.tgt
+
+    # Target-specific object files
+    for i in ${gdb_target_obs}; do
+        case " $TARGET_OBS " in
+        *" ${i} "*) ;;
+        *)
+          TARGET_OBS="$TARGET_OBS ${i}"
+          ;;
+        esac
+    done
+  fi
+done
+
+if test x${all_targets} = xtrue; then
+  TARGET_OBS='$(ALL_TARGET_OBS)'
+fi
+
+AC_SUBST(TARGET_OBS)
+
+# For other settings, only the main target counts.
+gdb_sim=
+gdb_osabi=
+build_gdbserver=
+targ=$target; . ${srcdir}/configure.tgt
 
 # Fetch the default architecture and default target vector from BFD.
 targ=$target; . $srcdir/../bfd/config.bfd
@@ -120,9 +172,6 @@ if test "x$targ_defvec" != x; then
   AC_DEFINE_UNQUOTED(DEFAULT_BFD_VEC, $targ_defvec,
     [Define to BFD's default target vector. ])
 fi
-
-TARGET_OBS="${gdb_target_obs}"
-AC_SUBST(TARGET_OBS)
 
 AC_ARG_PROGRAM
 

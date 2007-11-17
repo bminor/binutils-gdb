@@ -33,6 +33,11 @@ targets even when the libthread_db library is not available.
   error: "Error trying to get information about dynamic linker".
   The gdb-6.7 release is also affected.
 
+* GDB now supports the --enable-targets= configure option to allow
+building a single GDB executable that supports multiple remote
+target architectures.
+
+
 *** Changes in GDB 6.7
 
 * Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 

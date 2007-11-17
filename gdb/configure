@@ -860,6 +860,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
+  --enable-targets        alternative target configurations
   --disable-gdbcli        disable command-line interface (CLI)
   --disable-gdbmi         disable machine-interface (MI)
   --enable-tui            enable full-screen terminal user interface (TUI)
@@ -3080,6 +3081,20 @@ esac
 subdirs="$subdirs doc testsuite"
 
 
+# Check whether to support alternative target configurations
+# Check whether --enable-targets or --disable-targets was given.
+if test "${enable_targets+set}" = set; then
+  enableval="$enable_targets"
+  case "${enableval}" in
+  yes | "") { { echo "$as_me:$LINENO: error: enable-targets option must specify target names or 'all'" >&5
+echo "$as_me: error: enable-targets option must specify target names or 'all'" >&2;}
+   { (exit 1); exit 1; }; }
+            ;;
+  no)       enable_targets= ;;
+  *)        enable_targets=$enableval ;;
+esac
+fi;
+
 # Provide defaults for some variables set by the per-host and per-target
 # configuration.
 gdb_host_obs=posix-hdep.o
@@ -3092,7 +3107,49 @@ fi
 
 . $srcdir/configure.host
 
-. $srcdir/configure.tgt
+# Accumulate some settings from configure.tgt over all enabled targets
+
+TARGET_OBS=
+all_targets=
+
+for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
+do
+  if test "$targ_alias" = "all"; then
+    all_targets=true
+  else
+    # Canonicalize the secondary target names.
+    result=`$ac_config_sub $targ_alias 2>/dev/null`
+    if test -n "$result"; then
+        targ=$result
+    else
+        targ=$targ_alias
+    fi
+
+    . ${srcdir}/configure.tgt
+
+    # Target-specific object files
+    for i in ${gdb_target_obs}; do
+        case " $TARGET_OBS " in
+        *" ${i} "*) ;;
+        *)
+          TARGET_OBS="$TARGET_OBS ${i}"
+          ;;
+        esac
+    done
+  fi
+done
+
+if test x${all_targets} = xtrue; then
+  TARGET_OBS='$(ALL_TARGET_OBS)'
+fi
+
+
+
+# For other settings, only the main target counts.
+gdb_sim=
+gdb_osabi=
+build_gdbserver=
+targ=$target; . ${srcdir}/configure.tgt
 
 # Fetch the default architecture and default target vector from BFD.
 targ=$target; . $srcdir/../bfd/config.bfd
@@ -3115,9 +3172,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 fi
-
-TARGET_OBS="${gdb_target_obs}"
-
 
 test "$program_prefix" != NONE &&
   program_transform_name="s,^,$program_prefix,;$program_transform_name"

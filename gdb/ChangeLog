@@ -1,5 +1,16 @@
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.ac (--enable-targets): New configure option.
+	Collect gdb_target_obs of multiple targets into TARGET_OBS.
+	Call configure.tgt multiple times, using $targ as operand.
+	* configure.tgt: Operate on $targ instead of $target.
+	* configure: Regenerate.
+	* Makefile.in (ALL_TARGET_OBS): Define.
+
+	* NEWS: Mention --enable-targets option.
+
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mips-tdep.c (show_mipsfpu_command): Do not crash if called when
 	current architecture is not MIPS.
 

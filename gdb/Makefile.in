@@ -431,6 +431,62 @@ SIM_OBS = @SIM_OBS@
 # Target-dependent object files.
 TARGET_OBS = @TARGET_OBS@
 
+# All target-dependent objects files (used with --enable-targets=all).
+ALL_TARGET_OBS = \
+	alphabsd-tdep.o alphafbsd-tdep.o alpha-linux-tdep.o alpha-mdebug-tdep.o \
+	alphanbsd-tdep.o alphaobsd-tdep.o alpha-osf1-tdep.o alpha-tdep.o \
+	amd64fbsd-tdep.o amd64-linux-tdep.o amd64nbsd-tdep.o amd64obsd-tdep.o \
+	amd64-sol2-tdep.o amd64-tdep.o \
+	armbsd-tdep.o arm-linux-tdep.o armnbsd-tdep.o armobsd-tdep.o \
+	arm-tdep.o arm-wince-tdep.o \
+	avr-tdep.o \
+	cris-tdep.o \
+	frv-linux-tdep.o frv-tdep.o \
+	h8300-tdep.o \
+	hppabsd-tdep.o hppa-hpux-tdep.o hppa-linux-tdep.o hppa-tdep.o \
+	i386bsd-tdep.o i386-cygwin-tdep.o i386fbsd-tdep.o i386gnu-tdep.o \
+	i386-linux-tdep.o i386nbsd-tdep.o i386-nto-tdep.o i386obsd-tdep.o \
+	i386-sol2-tdep.o i386-tdep.o i387-tdep.o \
+	ia64-linux-tdep.o ia64-tdep.o \
+	iq2000-tdep.o \
+	m32c-tdep.o \
+	m32r-linux-tdep.o m32r-tdep.o \
+	m68hc11-tdep.o \
+	m68kbsd-tdep.o m68klinux-tdep.o m68k-tdep.o \
+	m88k-tdep.o \
+	mep-tdep.o \
+	mips64obsd-tdep.o mips-irix-tdep.o mips-linux-tdep.o \
+	mipsnbsd-tdep.o mips-tdep.o \
+	mn10300-linux-tdep.o mn10300-tdep.o \
+	mt-tdep.o \
+	nto-tdep.o \
+	ppc-linux-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o ppc-sysv-tdep.o \
+	rs6000-aix-tdep.o rs6000-tdep.o \
+	s390-tdep.o \
+	score-tdep.o \
+	sh64-tdep.o sh-linux-tdep.o shnbsd-tdep.o sh-tdep.o \
+	sparc64fbsd-tdep.o sparc64-linux-tdep.o sparc64nbsd-tdep.o \
+	sparc64obsd-tdep.o sparc64-sol2-tdep.o sparc64-tdep.o \
+	sparc-linux-tdep.o sparcnbsd-tdep.o sparcobsd-tdep.o \
+	sparc-sol2-tdep.o sparc-tdep.o \
+	spu-tdep.o \
+	v850-tdep.o \
+	vaxnbsd-tdep.o vaxobsd-tdep.o vax-tdep.o \
+	xstormy16-tdep.o \
+	xtensa-config.o xtensa-tdep.o \
+	glibc-tdep.o \
+	bsd-uthread.o \
+	nbsd-tdep.o obsd-tdep.o \
+	sol2-tdep.o \
+	solib.o solib-frv.o solib-irix.o solib-svr4.o solib-target.o \
+	solib-som.o solib-pa64.o \
+	dbug-rom.o dink32-rom.o ppcbug-rom.o m32r-rom.o dsrec.o monitor.o \
+	remote-m32r-sdi.o \
+	xcoffread.o \
+	prologue-value.o \
+	symfile-mem.o \
+	corelow.o
+
 # Host-dependent makefile fragment comes in here.
 @host_makefile_frag@
 # End of host-dependent makefile fragment
