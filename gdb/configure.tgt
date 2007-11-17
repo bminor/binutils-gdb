@@ -4,6 +4,8 @@
 # This file sets the following shell variables:
 #  gdb_target_cpu	generic name of CPU
 #  gdb_target		name of GDB target definition to use
+#  gdb_osabi		default OS ABI to use with target
+#  build_gdbserver	set to "yes" if gdbserver supports target
 
 case $target in
  d10v-*-* | \
@@ -58,18 +60,14 @@ esac
 
 case "${target}" in
 
-x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
-	gdb_target=fbsd64
-	;;
-*-*-freebsd* | *-*-kfreebsd*-gnu)
-	gdb_target=fbsd
-	;;
-
 alpha*-*-osf*)
 	gdb_target=alpha-osf1
 	;;
 alpha*-*-linux*)
 	gdb_target=alpha-linux
+	;;
+alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
+	gdb_target=fbsd
 	;;
 alpha*-*-netbsd* | alpha*-*-knetbsd*-gnu)
 	gdb_target=nbsd
@@ -100,13 +98,8 @@ arm*-*-netbsd* | arm*-*-knetbsd*-gnu)
 arm*-*-openbsd*)
 	gdb_target=obsd
 	;;
-arm*-*-* | thumb*-*-* | strongarm*-*-*)
+arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
 	gdb_target=embed
-	build_rdi_share=yes
-	;;
-xscale-*-*)
-	gdb_target=embed
-	build_rdi_share=yes
 	;;
 
 avr-*-*)
@@ -115,10 +108,6 @@ avr-*-*)
 
 cris*)
 	gdb_target=cris
-	;;
-
-fido-*-elf*)
-	gdb_target=monitor
 	;;
 
 frv-*-*)
@@ -142,6 +131,9 @@ hppa*-*-*)
 	gdb_target=hppa
 	;;
 
+i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
+	gdb_target=fbsd
+	;;
 i[34567]86-*-netbsd* | i[34567]86-*-knetbsd*-gnu)
 	gdb_target=nbsd
 	;;
@@ -204,16 +196,8 @@ m68hc11*-*-*|m6811*-*-*)
 	gdb_target=m68hc11
 	;;
 
-m68*-*-aout*)
-	gdb_target=monitor
-	;;
-m68*-*-coff*)
-	gdb_target=monitor
-	;;
-m68*-*-elf*)
-	gdb_target=monitor
-	;;
-m68*-*-rtems*)
+m68*-*-aout* | m68*-*-coff* | m68*-*-elf* | m68*-*-rtems* | m68*-*-uclinux* | \
+fido-*-elf*)
 	gdb_target=monitor
 	;;
 m68*-*-linux*)
@@ -225,9 +209,6 @@ m68*-*-netbsd* | m68*-*-knetbsd*-gnu)
 	;;
 m68*-*-openbsd*)
 	gdb_target=obsd
-	;;
-m68*-*-uclinux*)
-	gdb_target=monitor
 	;;
 
 m88*-*-openbsd*)
@@ -275,11 +256,7 @@ powerpc-*-openbsd*)
 powerpc-*-aix* | rs6000-*-*)
 	gdb_target=aix
 	;;
-powerpc-*-linux*)
-	gdb_target=linux
-	build_gdbserver=yes
-	;;
-powerpc64-*-linux*)
+powerpc-*-linux* | powerpc64-*-linux*)
 	gdb_target=linux
 	build_gdbserver=yes
 	;;
@@ -300,12 +277,6 @@ score-*-*)
 	gdb_target=embed
 	;;
 
-sh-*-coff*)
-	gdb_target=embed
-	;;
-sh-*-elf*)
-	gdb_target=embed
-	;;
 # FIXME should that be sh*-*-linux*, perhaps?
 sh-*-linux*)
 	gdb_target=linux
@@ -329,6 +300,9 @@ sparc-*-linux*)
 	;;
 sparc64-*-linux*)
 	gdb_target=linux64
+	;;
+sparc*-*-freebsd* | sparc*-*-kfreebsd*-gnu)
+	gdb_target=fbsd
 	;;
 sparc-*-netbsd* | sparc-*-knetbsd*-gnu)
 	gdb_target=nbsd
@@ -384,6 +358,9 @@ vax-*-*)
 x86_64-*-linux*)
 	gdb_target=linux64
 	build_gdbserver=yes
+	;;
+x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
+	gdb_target=fbsd64
 	;;
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
 	gdb_target=nbsd64

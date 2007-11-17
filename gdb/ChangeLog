@@ -1,5 +1,23 @@
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.tgt (gdb_osabi, build_gdbserver): Comment variables.
+	(arm*-*-*): Do not set obsolete build_rdi_share variable.
+
+	(*-*-freebsd* | *-*-kfreebsd*-gnu): Remove generic case, replace by ...
+	(alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
+	(i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
+	(sparc*-*-freebsd* | sparc*-*-kfreebsd*-gnu): ... specific cases.
+	(x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu): Re-sort.
+
+	(xscale-*-*): Merge into arm*-*-* case.
+	(fido-*-elf*): Merge into m68*-*-elf* case.
+	(m68*-*-aout*, m68*-*-coff*, m68*-*-elf*, m68*-*-rtems*,
+	m68*-*-uclinux*): Merge cases.
+	(powerpc-*-linux*, powerpc64-*-linux*): Merge cases.
+	(sh-*-coff*, sh-*-elf*): Merge into sh* case. 
+
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.tgt: Reformat main case statement.
 
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
