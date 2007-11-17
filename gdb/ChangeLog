@@ -1,5 +1,9 @@
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.tgt: Reformat main case statement.
+
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.ac (hostfile, targetfile): Remove.
 	(GDB_XM_FILE, GDB_TM_FILE): Do not define.
 	(xm_h, tm_h): Likewise.

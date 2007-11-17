@@ -59,190 +59,342 @@ esac
 case "${target}" in
 
 x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
-			gdb_target=fbsd64 ;;
+	gdb_target=fbsd64
+	;;
 *-*-freebsd* | *-*-kfreebsd*-gnu)
-			gdb_target=fbsd	;;
+	gdb_target=fbsd
+	;;
 
-alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
-alpha*-*-linux*)	gdb_target=alpha-linux ;;
+alpha*-*-osf*)
+	gdb_target=alpha-osf1
+	;;
+alpha*-*-linux*)
+	gdb_target=alpha-linux
+	;;
 alpha*-*-netbsd* | alpha*-*-knetbsd*-gnu)
-			gdb_target=nbsd ;;
-alpha*-*-openbsd*)	gdb_target=obsd ;;
-alpha*-*-*)		gdb_target=alpha ;;
+	gdb_target=nbsd
+	;;
+alpha*-*-openbsd*)
+	gdb_target=obsd
+	;;
+alpha*-*-*)
+	gdb_target=alpha
+	;;
 
 # mn10300 / am33 liunux
-am33_2.0*-*-linux*)	gdb_target=linux ;;
+am33_2.0*-*-linux*)
+	gdb_target=linux
+	;;
 
 arm*-wince-pe | arm*-*-mingw32ce*)
-			gdb_target=wince
-			build_gdbserver=yes
-			;;
-arm*-*-linux*)		gdb_target=linux
-			build_gdbserver=yes
-			;;
+	gdb_target=wince
+	build_gdbserver=yes
+	;;
+arm*-*-linux*)
+	gdb_target=linux
+	build_gdbserver=yes
+	;;
 arm*-*-netbsd* | arm*-*-knetbsd*-gnu)
-			gdb_target=nbsd ;;
-arm*-*-openbsd*)	gdb_target=obsd ;;
+	gdb_target=nbsd
+	;;
+arm*-*-openbsd*)
+	gdb_target=obsd
+	;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
-			gdb_target=embed
-			build_rdi_share=yes
-                        ;;
-xscale-*-*)		gdb_target=embed
-			build_rdi_share=yes
-                        ;;
+	gdb_target=embed
+	build_rdi_share=yes
+	;;
+xscale-*-*)
+	gdb_target=embed
+	build_rdi_share=yes
+	;;
 
-avr-*-*)		gdb_target=avr ;;
+avr-*-*)
+	gdb_target=avr
+	;;
 
-cris*)                  gdb_target=cris ;;
+cris*)
+	gdb_target=cris
+	;;
 
-fido-*-elf*)		gdb_target=monitor ;;
+fido-*-elf*)
+	gdb_target=monitor
+	;;
 
-frv-*-*)		gdb_target=frv ;;
+frv-*-*)
+	gdb_target=frv
+	;;
 
-h8300-*-*)		gdb_target=h8300 ;;
+h8300-*-*)
+	gdb_target=h8300
+	;;
 
-hppa*-*-hpux*)		gdb_target=hppahpux ;;
-hppa*-*-linux*)		gdb_target=linux ;;
-hppa*-*-openbsd*)	gdb_target=obsd ;;
-hppa*-*-*)		gdb_target=hppa ;;
+hppa*-*-hpux*)
+	gdb_target=hppahpux
+	;;
+hppa*-*-linux*)
+	gdb_target=linux
+	;;
+hppa*-*-openbsd*)
+	gdb_target=obsd
+	;;
+hppa*-*-*)
+	gdb_target=hppa
+	;;
 
 i[34567]86-*-netbsd* | i[34567]86-*-knetbsd*-gnu)
-			gdb_target=nbsd ;;
-i[34567]86-*-openbsd*)	gdb_target=obsd ;;
-i[34567]86-*-nto*)	gdb_target=nto ;;
-i[34567]86-*-solaris2.1[0-9]*)	gdb_target=sol2-64 ;;
-i[34567]86-*-solaris*)	gdb_target=i386sol2 ;;
-i[34567]86-*-linux*)	gdb_target=linux
-			build_gdbserver=yes
-			;;
-i[34567]86-*-gnu*)	gdb_target=i386gnu ;;
-i[34567]86-*-cygwin*)	gdb_target=cygwin
-			build_gdbserver=yes
-			;;
-i[34567]86-*-mingw32*)	gdb_target=mingw
-			build_gdbserver=yes
-			;;
-i[34567]86-*-*)		gdb_target=i386 ;;
+	gdb_target=nbsd
+	;;
+i[34567]86-*-openbsd*)
+	gdb_target=obsd
+	;;
+i[34567]86-*-nto*)
+	gdb_target=nto
+	;;
+i[34567]86-*-solaris2.1[0-9]*)
+	gdb_target=sol2-64
+	;;
+i[34567]86-*-solaris*)
+	gdb_target=i386sol2
+	;;
+i[34567]86-*-linux*)
+	gdb_target=linux
+	build_gdbserver=yes
+	;;
+i[34567]86-*-gnu*)
+	gdb_target=i386gnu
+	;;
+i[34567]86-*-cygwin*)
+	gdb_target=cygwin
+	build_gdbserver=yes
+	;;
+i[34567]86-*-mingw32*)
+	gdb_target=mingw
+	build_gdbserver=yes
+	;;
+i[34567]86-*-*)
+	gdb_target=i386
+	;;
 
-ia64-*-linux*)		gdb_target=linux
-			build_gdbserver=yes
-			;;
-ia64*-*-*)		gdb_target=ia64 ;;
+ia64-*-linux*)
+	gdb_target=linux
+	build_gdbserver=yes
+	;;
+ia64*-*-*)
+	gdb_target=ia64
+	;;
 
-iq2000-*-*)		gdb_target=iq2000 ;;
+iq2000-*-*)
+	gdb_target=iq2000
+	;;
 
-m32c-*-*)		gdb_target=m32c ;;
+m32c-*-*)
+	gdb_target=m32c
+	;;
 
-m32r*-*-linux*)		gdb_target=linux
-			build_gdbserver=yes
-			;;
-m32r*-*-*)		gdb_target=m32r ;;
+m32r*-*-linux*)
+	gdb_target=linux
+	build_gdbserver=yes
+	;;
+m32r*-*-*)
+	gdb_target=m32r
+	;;
 
-m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
+m68hc11*-*-*|m6811*-*-*)
+	gdb_target=m68hc11
+	;;
 
-m68*-*-aout*)		gdb_target=monitor ;;
-m68*-*-coff*)		gdb_target=monitor ;;
-m68*-*-elf*)		gdb_target=monitor ;;
-m68*-*-rtems*)		gdb_target=monitor ;;
-m68*-*-linux*)		gdb_target=linux
-			build_gdbserver=yes
-			;;
+m68*-*-aout*)
+	gdb_target=monitor
+	;;
+m68*-*-coff*)
+	gdb_target=monitor
+	;;
+m68*-*-elf*)
+	gdb_target=monitor
+	;;
+m68*-*-rtems*)
+	gdb_target=monitor
+	;;
+m68*-*-linux*)
+	gdb_target=linux
+	build_gdbserver=yes
+	;;
 m68*-*-netbsd* | m68*-*-knetbsd*-gnu)
-			gdb_target=nbsd ;;
-m68*-*-openbsd*)	gdb_target=obsd ;;
-m68*-*-uclinux*)	gdb_target=monitor ;;
+	gdb_target=nbsd
+	;;
+m68*-*-openbsd*)
+	gdb_target=obsd
+	;;
+m68*-*-uclinux*)
+	gdb_target=monitor
+	;;
 
-m88*-*-openbsd*)	gdb_target=obsd ;;
+m88*-*-openbsd*)
+	gdb_target=obsd
+	;;
 
-mep-*-*)		gdb_target=mep ;;
+mep-*-*)
+	gdb_target=mep
+	;;
 
-mips*-sgi-irix5*)	gdb_target=irix5 ;;
-mips*-sgi-irix6*)	gdb_target=irix6 ;;
-mips*-*-linux*)		gdb_target=linux
-			build_gdbserver=yes
-			;;
+mips*-sgi-irix5*)
+	gdb_target=irix5
+	;;
+mips*-sgi-irix6*)
+	gdb_target=irix6
+	;;
+mips*-*-linux*)
+	gdb_target=linux
+	build_gdbserver=yes
+	;;
 mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
-			gdb_target=nbsd ;;
-mips64*-*-openbsd*)	gdb_target=obsd64 ;;
-mips*-*-*)		gdb_target=embed ;;
+	gdb_target=nbsd
+	;;
+mips64*-*-openbsd*)
+	gdb_target=obsd64
+	;;
+mips*-*-*)
+	gdb_target=embed
+	;;
 
-mn10300-*-*)		gdb_target=mn10300 ;;
+mn10300-*-*)
+	gdb_target=mn10300
+	;;
 
-mt-*-*)			gdb_target=mt ;;
+mt-*-*)
+	gdb_target=mt
+	;;
 
 powerpc-*-netbsd* | powerpc-*-knetbsd*-gnu)
-			gdb_target=nbsd ;;
-powerpc-*-openbsd*)	gdb_target=obsd ;;
+	gdb_target=nbsd
+	;;
+powerpc-*-openbsd*)
+	gdb_target=obsd
+	;;
 powerpc-*-aix* | rs6000-*-*)
-			gdb_target=aix ;;
-powerpc-*-linux*)	gdb_target=linux
-			build_gdbserver=yes
-			;;
-powerpc64-*-linux*)	gdb_target=linux
-			build_gdbserver=yes
-			;;
-powerpc*-*-*)		if test -f ../sim/ppc/Makefile; then
-			  gdb_target=ppc-sim
-			else
-			  gdb_target=ppc-eabi
-			fi ;;
+	gdb_target=aix
+	;;
+powerpc-*-linux*)
+	gdb_target=linux
+	build_gdbserver=yes
+	;;
+powerpc64-*-linux*)
+	gdb_target=linux
+	build_gdbserver=yes
+	;;
+powerpc*-*-*)
+	if test -f ../sim/ppc/Makefile; then
+	  gdb_target=ppc-sim
+	else
+	  gdb_target=ppc-eabi
+	fi
+	;;
 
-s390*-*-*)		gdb_target=s390
-			build_gdbserver=yes
-			;;
+s390*-*-*)
+	gdb_target=s390
+	build_gdbserver=yes
+	;;
 
-score-*-*)		gdb_target=embed ;;
-sh-*-coff*)		gdb_target=embed ;;
-sh-*-elf*)		gdb_target=embed ;;
+score-*-*)
+	gdb_target=embed
+	;;
+
+sh-*-coff*)
+	gdb_target=embed
+	;;
+sh-*-elf*)
+	gdb_target=embed
+	;;
 # FIXME should that be sh*-*-linux*, perhaps?
-sh-*-linux*)		gdb_target=linux
-			build_gdbserver=yes
-			;;
+sh-*-linux*)
+	gdb_target=linux
+	build_gdbserver=yes
+	;;
 sh*-*-netbsdelf* | sh*-*-knetbsd*-gnu)
-			gdb_target=nbsd ;;
-sh*-*-openbsd*)		gdb_target=obsd ;;
-sh64-*-elf*)		gdb_target=sh64 ;;
-sh*)			gdb_target=embed ;;
+	gdb_target=nbsd
+	;;
+sh*-*-openbsd*)
+	gdb_target=obsd
+	;;
+sh64-*-elf*)
+	gdb_target=sh64
+	;;
+sh*)
+	gdb_target=embed
+	;;
 
-sparc-*-linux*)		gdb_target=linux ;;
-sparc64-*-linux*)	gdb_target=linux64 ;;
+sparc-*-linux*)
+	gdb_target=linux
+	;;
+sparc64-*-linux*)
+	gdb_target=linux64
+	;;
 sparc-*-netbsd* | sparc-*-knetbsd*-gnu)
-			gdb_target=nbsd ;;
+	gdb_target=nbsd
+	;;
 sparc64-*-netbsd* | sparc64-*-knetbsd*-gnu)
-			gdb_target=nbsd64 ;;
-sparc-*-openbsd*)	gdb_target=obsd ;;
-sparc64-*-openbsd*)	gdb_target=obsd64 ;;
+	gdb_target=nbsd64
+	;;
+sparc-*-openbsd*)
+	gdb_target=obsd
+	;;
+sparc64-*-openbsd*)
+	gdb_target=obsd64
+	;;
 sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
-			gdb_target=sol2
-			;;
+	gdb_target=sol2
+	;;
 sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
-			gdb_target=sol2-64
-			;;
-sparc-*-rtems*)		gdb_target=embed ;;
-sparc-*-*)		gdb_target=sparc ;;
-sparc64-*-*)		gdb_target=sparc64 ;;
+	gdb_target=sol2-64
+	;;
+sparc-*-rtems*)
+	gdb_target=embed
+	;;
+sparc-*-*)
+	gdb_target=sparc
+	;;
+sparc64-*-*)
+	gdb_target=sparc64
+	;;
 
-spu*-*-*)		gdb_target=spu
-			build_gdbserver=yes
-			;;
+spu*-*-*)
+	gdb_target=spu
+	build_gdbserver=yes
+	;;
 
-xstormy16-*-*)          gdb_target=xstormy16 ;;
+xstormy16-*-*)
+	gdb_target=xstormy16
+	;;
 
-v850*-*-elf)		gdb_target=v850 ;;
+v850*-*-elf)
+	gdb_target=v850
+	;;
 
 vax-*-netbsd* | vax-*-knetbsd*-gnu)
-			gdb_target=nbsd ;;
-vax-*-openbsd*)		gdb_target=obsd ;;
-vax-*-*)		gdb_target=vax ;;
+	gdb_target=nbsd
+	;;
+vax-*-openbsd*)
+	gdb_target=obsd
+	;;
+vax-*-*)
+	gdb_target=vax
+	;;
 
-x86_64-*-linux*)	gdb_target=linux64
-			build_gdbserver=yes
-			;;
+x86_64-*-linux*)
+	gdb_target=linux64
+	build_gdbserver=yes
+	;;
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
-			gdb_target=nbsd64 ;;
-x86_64-*-openbsd*)	gdb_target=obsd64 ;;
+	gdb_target=nbsd64
+	;;
+x86_64-*-openbsd*)
+	gdb_target=obsd64
+	;;
 
-xtensa*)		gdb_target=xtensa ;;
+xtensa*)
+	gdb_target=xtensa
+	;;
 
 esac
 
