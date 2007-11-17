@@ -4611,6 +4611,15 @@ static void
 show_mipsfpu_command (char *args, int from_tty)
 {
   char *fpu;
+
+  if (gdbarch_bfd_arch_info (current_gdbarch)->arch != bfd_arch_mips)
+    {
+      printf_unfiltered
+	("The MIPS floating-point coprocessor is unknown "
+	 "because the current architecture is not MIPS.\n");
+      return;
+    }
+
   switch (MIPS_FPU_TYPE)
     {
     case MIPS_FPU_SINGLE:

@@ -1,5 +1,10 @@
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mips-tdep.c (show_mipsfpu_command): Do not crash if called when
+	current architecture is not MIPS.
+
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* cli/cli-setshow.c (do_setshow_command): Use dynamically sized buffer
 	to construct error message if no argument was supplied.
 
