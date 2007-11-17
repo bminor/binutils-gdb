@@ -56,41 +56,6 @@ static int i386nbsd_r_reg_offset[] =
   15 * 4			/* %gs */
 };
 
-static void
-i386nbsd_aout_supply_regset (const struct regset *regset,
-			     struct regcache *regcache, int regnum,
-			     const void *regs, size_t len)
-{
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
-
-  gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE);
-
-  i386_supply_gregset (regset, regcache, regnum, regs, tdep->sizeof_gregset);
-  i387_supply_fsave (regcache, regnum, (char *) regs + tdep->sizeof_gregset);
-}
-
-static const struct regset *
-i386nbsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
-					const char *sect_name,
-					size_t sect_size)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* NetBSD a.out core dumps don't use seperate register sets for the
-     general-purpose and floating-point registers.  */
-
-  if (strcmp (sect_name, ".reg") == 0
-      && sect_size >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE)
-    {
-      if (tdep->gregset == NULL)
-        tdep->gregset =
-	  regset_alloc (gdbarch, i386nbsd_aout_supply_regset, NULL);
-      return tdep->gregset;
-    }
-
-  return NULL;
-}
-
 /* Under NetBSD/i386, signal handler invocations can be identified by the
    designated code sequence that is used to return from a signal handler.
    In particular, the return address of a signal handler points to the
@@ -242,18 +207,6 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = ARRAY_SIZE (i386nbsd_sc_reg_offset);
 }
 
-/* NetBSD a.out.  */
-
-static void
-i386nbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  i386nbsd_init_abi (info, gdbarch);
-
-  /* NetBSD a.out has a single register set.  */
-  set_gdbarch_regset_from_core_section
-    (gdbarch, i386nbsd_aout_regset_from_core_section);
-}
-
 /* NetBSD ELF.  */
 
 static void
@@ -278,8 +231,6 @@ i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 void
 _initialize_i386nbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETBSD_AOUT,
-			  i386nbsdaout_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETBSD_ELF,
 			  i386nbsdelf_init_abi);
 }

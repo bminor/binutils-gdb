@@ -26,13 +26,6 @@
 
 #include "gdb_string.h"
 
-/* NetBSD a.out.  */
-
-static void
-vaxnbsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-}
-
 /* NetBSD ELF.  */
 
 static void
@@ -50,8 +43,6 @@ void _initialize_vaxnbsd_tdep (void);
 void
 _initialize_vaxnbsd_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_vax, 0, GDB_OSABI_NETBSD_AOUT,
-			  vaxnbsd_aout_init_abi);
   gdbarch_register_osabi (bfd_arch_vax, 0, GDB_OSABI_NETBSD_ELF,
 			  vaxnbsd_elf_init_abi);
 }

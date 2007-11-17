@@ -1,5 +1,15 @@
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* i386nbsd-tdep.c (i386nbsd_aout_supply_regset): Remove.
+	(i386nbsd_aout_regset_from_core_section): Likewise.
+	(i386nbsd_aout_init_abi): Likewise.
+	(_initialize_i386nbsd_tdep): Do not register i386nbsd_aout_init_abi.
+
+	* vaxnbsd-tdep.c (vaxnbsd_aout_init_abi): Remove.
+	(_initialize_vaxnbsd_tdep): Do not register vaxnbsd_aout_init_abi.
+
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* amd64fsdb-tdep.c (amd64fbsd_sigtramp_start_addr): Use ULL suffix.
 	(amd64fbsd_sigtramp_end_addr): Likewise.
 
