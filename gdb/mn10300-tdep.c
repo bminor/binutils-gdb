@@ -839,13 +839,16 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
 {
   struct trad_frame_cache *cache;
   CORE_ADDR pc, start, end;
+  void *cache_p;
 
   if (*this_prologue_cache)
     return (*this_prologue_cache);
 
-  cache = trad_frame_cache_zalloc (next_frame);
+  cache_p = trad_frame_cache_zalloc (next_frame);
   pc = gdbarch_unwind_pc (get_frame_arch (next_frame), next_frame);
-  mn10300_analyze_prologue (next_frame, (void **) &cache, pc);
+  mn10300_analyze_prologue (next_frame, &cache_p, pc);
+  cache = cache_p;
+
   if (find_pc_partial_function (pc, NULL, &start, &end))
     trad_frame_set_id (cache, 
 		       frame_id_build (trad_frame_get_this_base (cache), 

@@ -264,9 +264,8 @@ LM_ADDR (struct so_list *so)
 {
   struct link_map_offsets *lmo = nto_fetch_link_map_offsets ();
 
-  return (CORE_ADDR) extract_signed_integer (so->lm_info->lm +
-					     lmo->l_addr_offset,
-					     lmo->l_addr_size);
+  return extract_typed_address (so->lm_info->lm + lmo->l_addr_offset,
+                                builtin_type_void_data_ptr);
 }
 
 static CORE_ADDR

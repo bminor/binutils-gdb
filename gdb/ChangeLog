@@ -1,5 +1,41 @@
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* amd64fsdb-tdep.c (amd64fbsd_sigtramp_start_addr): Use ULL suffix.
+	(amd64fbsd_sigtramp_end_addr): Likewise.
+
+	* iq2000-tdep.c (iq2000_pointer_to_address): Fix argument type.
+	(iq2000_address_to_pointer): Likewise.
+	(iq2000_frame_prev_register): Likewise.
+	(iq2000_extract_return_value): Use regcache_cooked_read_unsigned
+	instead of regcache_cooked_read into CORE_ADDR variable.
+	(iq2000_return_value): Fix argument types.
+
+	* m32r-rom.c (m32r_load_section): Fix printf argument type.
+	(m32r_load): Likewise.
+
+	* m68kbsd-tdep.c: Include "gdbtypes.h".
+	* Makefile.in: Update dependencies.
+
+	* mn10300-tdep.c (mn10300_frame_unwind_cache): Fix aliasing violation.
+
+	* nto-tdep.c (LM_ADDR): Do not refer to no-longer-existing
+	lmo->l_addr_size element.
+
+	* remote-m32r-sdi.c (m32r_xfer_memory): Use paddr to print address.
+	(m32r_insert_breakpoint): Likewise.
+	(m32r_remove_breakpoint): Likewise.
+	(m32r_insert_watchpoint): Likewise.
+	(m32r_remove_watchpoint): Likewise.
+	(m32r_load): Fix printf argument type.
+
+	* xtensa-tdep.c (xtensa_regset_from_core_section): Fix printf
+	argument type.
+	(xtensa_frame_this_id): Do not cast pointers to "int" for output.
+	(xtensa_frame_prev_register): Likewise.
+	(xtensa_push_dummy_call): Likewise.
+
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* config/alpha/alpha-linux.mt: Remove file.
 	* config/alpha/alpha.mt: Remove file.
 	* config/alpha/alpha-osf1.mt: Remove file.

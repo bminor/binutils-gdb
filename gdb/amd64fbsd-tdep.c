@@ -86,8 +86,8 @@ static int amd64fbsd_r_reg_offset[] =
 };
 
 /* Location of the signal trampoline.  */
-CORE_ADDR amd64fbsd_sigtramp_start_addr = 0x7fffffffffc0;
-CORE_ADDR amd64fbsd_sigtramp_end_addr = 0x7fffffffffe0;
+CORE_ADDR amd64fbsd_sigtramp_start_addr = 0x7fffffffffc0ULL;
+CORE_ADDR amd64fbsd_sigtramp_end_addr = 0x7fffffffffe0ULL;
 
 /* From <machine/signal.h>.  */
 int amd64fbsd_sc_reg_offset[] =

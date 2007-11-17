@@ -2322,8 +2322,8 @@ m68kbsd-nat.o: m68kbsd-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(bsd_kvm_h)
 m68kbsd-tdep.o: m68kbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(osabi_h) $(regcache_h) $(regset_h) $(trad_frame_h) \
-	$(tramp_frame_h) $(gdb_assert_h) $(gdb_string_h) $(m68k_tdep_h) \
-	$(solib_svr4_h)
+	$(tramp_frame_h) $(gdbtypes_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(m68k_tdep_h) $(solib_svr4_h)
 m68klinux-nat.o: m68klinux-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(language_h) $(gdbcore_h) $(gdb_string_h) $(regcache_h) \
 	$(m68k_tdep_h) $(gdb_stat_h) $(floatformat_h) $(target_h) \

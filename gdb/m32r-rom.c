@@ -85,7 +85,8 @@ m32r_load_section (bfd *abfd, asection *s, void *obj)
       *data_count += section_size;
 
       printf_filtered ("Loading section %s, size 0x%lx lma ",
-		       bfd_section_name (abfd, s), section_size);
+		       bfd_section_name (abfd, s),
+		       (unsigned long) section_size);
       deprecated_print_address_numeric (section_base, 1, gdb_stdout);
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);
@@ -167,7 +168,8 @@ m32r_load (char *filename, int from_tty)
     }
 #endif
   gettimeofday (&end_time, NULL);
-  printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
+  printf_filtered ("Start address 0x%lx\n",
+		   (unsigned long) bfd_get_start_address (abfd));
   print_transfer_performance (gdb_stdout, data_count, 0, &start_time,
 			      &end_time);
 
@@ -523,14 +525,16 @@ m32r_upload_command (char *args, int from_tty)
 	    data_count += section_size;
 
 	    printf_filtered ("Loading section %s, size 0x%lx lma ",
-			     bfd_section_name (abfd, s), section_size);
+			     bfd_section_name (abfd, s),
+			     (unsigned long) section_size);
 	    deprecated_print_address_numeric (section_base, 1, gdb_stdout);
 	    printf_filtered ("\n");
 	    gdb_flush (gdb_stdout);
 	  }
       /* Finally, make the PC point at the start address */
       write_pc (bfd_get_start_address (abfd));
-      printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
+      printf_filtered ("Start address 0x%lx\n", 
+		       (unsigned long) bfd_get_start_address (abfd));
       print_transfer_performance (gdb_stdout, data_count, 0, &start_time,
 				  &end_time);
     }

@@ -25,6 +25,7 @@
 #include "regset.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
+#include "gdbtypes.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
