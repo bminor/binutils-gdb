@@ -305,7 +305,7 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
   return k1.first == k2.first && k1.second == k2.second;
 }
 
-// Make TO a symbol which forwards to FROM.  
+// Make TO a symbol which forwards to FROM.
 
 void
 Symbol_table::make_forwarder(Symbol* from, Symbol* to)
@@ -1938,7 +1938,7 @@ Symbol_table::detect_odr_violations(const char* output_file_name) const
 
       if (line_nums.size() > 1)
         {
-          gold_warning(_("while linking %s: symbol %s defined in multiple "
+          gold_warning(_("while linking %s: symbol '%s' defined in multiple "
                          "places (possible ODR violation):"),
                        output_file_name, demangle(symbol_name).c_str());
           for (std::set<std::string>::const_iterator it2 = line_nums.begin();
