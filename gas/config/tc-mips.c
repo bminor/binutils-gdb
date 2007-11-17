@@ -11013,7 +11013,11 @@ md_parse_option (int c, char *arg)
       break;
 
     case 'O':
-      if (arg && arg[0] == '0')
+      if (arg == NULL)
+	mips_optimize = 1;
+      else if (arg[0] == '0')
+	mips_optimize = 0;
+      else if (arg[0] == '1')
 	mips_optimize = 1;
       else
 	mips_optimize = 2;

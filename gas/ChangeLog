@@ -1,5 +1,10 @@
 2007-11-17  Thiemo Seufer  <ths@mips.com>
 
+	* config/tc-mips.c (md_parse_option): Match mips_optimize to the -O
+	option supplied, but still keep mips_optimize == 2 as default value.
+
+2007-11-17  Thiemo Seufer  <ths@mips.com>
+
 	* doc/as.texinfo: Document the new attribute value.
 
 2007-11-16  Eric B. Weddington  <eric.weddington@atmel.com>
