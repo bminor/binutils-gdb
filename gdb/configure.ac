@@ -1490,7 +1490,7 @@ if test x"$enable_tui" = xyes; then
 fi
 
 # Unlike the sim directory, whether a simulator is linked is controlled by 
-# presence of a SIM= and a SIM_OBS= definition in the target '.mt' file.  
+# presence of a gdb_sim definition in the target configure.tgt entry.  
 # This code just checks for a few cases where we'd like to ignore those
 # definitions, even when they're present in the '.mt' file.  These cases
 # are when --disable-sim is specified, or if the simulator directory is
@@ -1511,16 +1511,17 @@ if test ! -d "${srcdir}/../sim"; then
   ignore_sim=true
 fi
 
-if test "${ignore_sim}" = "true"; then
-    IGNORE_SIM="SIM="
-    IGNORE_SIM_OBS="SIM_OBS="
-else
-    IGNORE_SIM=""
-    IGNORE_SIM_OBS=""
+SIM=
+SIM_OBS=
+if test "${ignore_sim}" = "false"; then
+  if test x"${gdb_sim}" != x ; then
+    SIM="${gdb_sim}"
+    SIM_OBS="remote-sim.o"
     AC_DEFINE(WITH_SIM, 1, [Define if the simulator is being linked in.])
+  fi
 fi
-AC_SUBST(IGNORE_SIM)
-AC_SUBST(IGNORE_SIM_OBS)
+AC_SUBST(SIM)
+AC_SUBST(SIM_OBS)
 
 AC_SUBST(ENABLE_CFLAGS)
 AC_SUBST(PROFILE_CFLAGS)

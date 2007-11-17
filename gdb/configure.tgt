@@ -4,6 +4,7 @@
 # This file sets the following shell variables:
 #  gdb_target_cpu	generic name of CPU
 #  gdb_target		name of GDB target definition to use
+#  gdb_sim		simulator library for target
 #  gdb_osabi		default OS ABI to use with target
 #  build_gdbserver	set to "yes" if gdbserver supports target
 
@@ -100,10 +101,15 @@ arm*-*-openbsd*)
 	;;
 arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
 	gdb_target=embed
+	gdb_sim=../sim/arm/libsim.a
 	;;
 
 avr-*-*)
 	gdb_target=avr
+	# There is no simulator provided with gdb (yet).
+	# See <http://savannah.gnu.org/projects/simulavr/>
+	# for the simulator used during development of avr
+	# support for gdb.
 	;;
 
 cris*)
@@ -112,10 +118,12 @@ cris*)
 
 frv-*-*)
 	gdb_target=frv
+	gdb_sim=../sim/frv/libsim.a
 	;;
 
 h8300-*-*)
 	gdb_target=h8300
+	gdb_sim=../sim/h8300/libsim.a
 	;;
 
 hppa*-*-hpux*)
@@ -178,22 +186,29 @@ ia64*-*-*)
 
 iq2000-*-*)
 	gdb_target=iq2000
+	gdb_sim=../sim/iq2000/libsim.a
 	;;
 
 m32c-*-*)
 	gdb_target=m32c
+	# There may also be a SID / CGEN simulator for this,
+	# but we do have DJ Delorie's mini-sim.
+	gdb_sim=../sim/m32c/libsim.a
 	;;
 
 m32r*-*-linux*)
 	gdb_target=linux
+	gdb_sim=../sim/m32r/libsim.a
 	build_gdbserver=yes
 	;;
 m32r*-*-*)
 	gdb_target=m32r
+	gdb_sim=../sim/m32r/libsim.a
 	;;
 
 m68hc11*-*-*|m6811*-*-*)
 	gdb_target=m68hc11
+	gdb_sim=../sim/m68hc11/libsim.a
 	;;
 
 m68*-*-aout* | m68*-*-coff* | m68*-*-elf* | m68*-*-rtems* | m68*-*-uclinux* | \
@@ -227,20 +242,24 @@ mips*-sgi-irix6*)
 	;;
 mips*-*-linux*)
 	gdb_target=linux
+	gdb_sim=../sim/mips/libsim.a
 	build_gdbserver=yes
 	;;
 mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 	gdb_target=nbsd
+	gdb_sim=../sim/mips/libsim.a
 	;;
 mips64*-*-openbsd*)
 	gdb_target=obsd64
 	;;
 mips*-*-*)
 	gdb_target=embed
+	gdb_sim=../sim/mips/libsim.a
 	;;
 
 mn10300-*-*)
 	gdb_target=mn10300
+	gdb_sim=../sim/mn10300/libsim.a
 	;;
 
 mt-*-*)
@@ -249,6 +268,7 @@ mt-*-*)
 
 powerpc-*-netbsd* | powerpc-*-knetbsd*-gnu)
 	gdb_target=nbsd
+	gdb_sim=../sim/ppc/libsim.a
 	;;
 powerpc-*-openbsd*)
 	gdb_target=obsd
@@ -258,13 +278,13 @@ powerpc-*-aix* | rs6000-*-*)
 	;;
 powerpc-*-linux* | powerpc64-*-linux*)
 	gdb_target=linux
+	gdb_sim=../sim/ppc/libsim.a
 	build_gdbserver=yes
 	;;
 powerpc*-*-*)
+	gdb_target=ppc-eabi
 	if test -f ../sim/ppc/Makefile; then
-	  gdb_target=ppc-sim
-	else
-	  gdb_target=ppc-eabi
+	  gdb_sim=../sim/ppc/libsim.a
 	fi
 	;;
 
@@ -280,19 +300,23 @@ score-*-*)
 # FIXME should that be sh*-*-linux*, perhaps?
 sh-*-linux*)
 	gdb_target=linux
+	gdb_sim=../sim/sh/libsim.a
 	build_gdbserver=yes
 	;;
 sh*-*-netbsdelf* | sh*-*-knetbsd*-gnu)
 	gdb_target=nbsd
+	gdb_sim=../sim/sh/libsim.a
 	;;
 sh*-*-openbsd*)
 	gdb_target=obsd
 	;;
 sh64-*-elf*)
 	gdb_target=sh64
+	gdb_sim=../sim/sh64/libsim.a
 	;;
 sh*)
 	gdb_target=embed
+	gdb_sim=../sim/sh/libsim.a
 	;;
 
 sparc-*-linux*)
@@ -324,6 +348,7 @@ sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
 	;;
 sparc-*-rtems*)
 	gdb_target=embed
+	gdb_sim=../sim/erc32/libsim.a
 	;;
 sparc-*-*)
 	gdb_target=sparc
@@ -339,10 +364,12 @@ spu*-*-*)
 
 xstormy16-*-*)
 	gdb_target=xstormy16
+	# No simulator libraries are needed -- target uses SID.
 	;;
 
 v850*-*-elf)
 	gdb_target=v850
+	gdb_sim=../sim/v850/libsim.a
 	;;
 
 vax-*-netbsd* | vax-*-knetbsd*-gnu)

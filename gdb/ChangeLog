@@ -1,5 +1,62 @@
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* config/arm/embed.mt (SIM_OBS, SIM): Remove.
+	* config/avr/avr.mt (SIM_OBS, SIM): Remove.
+	* config/frv/frv.mt (SIM_OBS, SIM): Remove.
+	* config/h8300/h8300.mt (SIM_OBS, SIM): Remove.
+	* config/iq2000/iq2000.mt (SIM_OBS, SIM): Remove.
+	* config/m32c/m32c.mt (SIM_OBS, SIM): Remove.
+	* config/m32r/linux.mt (SIM_OBS, SIM): Remove.
+	* config/m32r/m32r.mt (SIM_OBS, SIM): Remove.
+	* config/m68hc11/m68hc11.mt (SIM_OBS, SIM): Remove.
+	* config/mips/embed.mt (SIM_OBS, SIM): Remove.
+	* config/mips/linux.mt (SIM_OBS, SIM): Remove.
+	* config/mips/nbsd.mt (SIM_OBS, SIM): Remove.
+	* config/mn10300/mn10300.mt (SIM_OBS, SIM): Remove.
+	* config/powerpc/linux.mt (SIM_OBS, SIM): Remove.
+	* config/powerpc/nbsd.mt (SIM_OBS, SIM): Remove.
+	* config/powerpc/ppc-sim.mt: Remove file.
+	* config/sh/embed.mt (SIM_OBS, SIM): Remove.
+	* config/sh/linux.mt (SIM_OBS, SIM): Remove.
+	* config/sh/nbsd.mt (SIM_OBS, SIM): Remove.
+	* config/sh/sh64.mt (SIM_OBS, SIM): Remove.
+	* config/sparc/embed.mt (SIM_OBS, SIM): Remove.
+	* config/v850/v850.mt (SIM_OBS, SIM): Remove.
+	* config/xstormy16/xstormy16.mt (SIM_OBS, SIM): Remove.
+
+	* configure.tgt (gdb_sim): Document variable.
+	(arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*): Set it.
+	(avr-*-*): Likewise.
+	(frv-*-*): Likewise.
+	(h8300-*-*): Likewise.
+	(iq2000-*-*): Likewise.
+	(m32c-*-*): Likewise.
+	(m32r*-*-linux*): Likewise.
+	(m32r*-*-*): Likewise.
+	(m68hc11*-*-*|m6811*-*-*): Likewise.
+	(mips*-*-*): Likewise.
+	(mips*-*-linux*): Likewise.
+	(mips*-*-netbsd* | mips*-*-knetbsd*-gnu): Likewise.
+	(mn10300-*-*): Likewise.
+	(powerpc-*-linux* | powerpc64-*-linux*): Likewise.
+	(powerpc-*-netbsd* | powerpc-*-knetbsd*-gnu): Likewise.
+	(powerpc*-*-*): Use ppc-eabi target.  Conditionally set gdb_sim.
+	(sh*): Set gdb_sim.
+	(sh-*-linux*): Likewise.
+	(sh*-*-netbsdelf* | sh*-*-knetbsd*-gnu): Likewise.
+	(sh64-*-elf*): Likewise.
+	(sparc-*-rtems*): Likewise.
+	(v850*-*-elf): Likewise.
+	(xstormy16-*-*): Likewise.
+
+	* configure.ac (IGNORE_SIM, IGNORE_SIM_OBS): Do not set.
+	(SIM, SIM_OBS): Set depending on ${ignore_sim} and ${gdb_sim}.
+	* configure: Regenerate.
+	* Makefile.in (SIM, SIM_OBS): Substitute from configure.
+	(@IGNORE_SIM@, @IGNORE_SIM_OBS@): Remove.
+
+2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.tgt (gdb_osabi, build_gdbserver): Comment variables.
 	(arm*-*-*): Do not set obsolete build_rdi_share variable.
 
