@@ -3083,7 +3083,7 @@ Each location can be individually enabled or disabled by passing
 @var{breakpoint-number}.@var{location-number} as argument to the
 @code{enable} and @code{disable} commands.  Note that you cannot
 delete the individual locations from the list, you can only delete the
-entire list of locations that be long to their parent breakpoint (with
+entire list of locations that belong to their parent breakpoint (with
 the @kbd{delete @var{num}} command, where @var{num} is the number of
 the parent breakpoint, 1 in the above example).  Disabling or enabling
 the parent breakpoint (@pxref{Disabling}) affects all of the locations
