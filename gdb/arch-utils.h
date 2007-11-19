@@ -89,7 +89,7 @@ int default_remote_register_number (struct gdbarch *gdbarch,
    (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
    name.  */
 
-extern int legacy_register_sim_regno (int regnum);
+extern int legacy_register_sim_regno (struct gdbarch *gdbarch, int regnum);
 
 /* Return the selected byte order, or BFD_ENDIAN_UNKNOWN if no byte
    order was explicitly selected.  */

@@ -1462,10 +1462,10 @@ arm_dwarf_reg_to_regnum (int reg)
 
 /* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
 static int
-arm_register_sim_regno (int regnum)
+arm_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 {
   int reg = regnum;
-  gdb_assert (reg >= 0 && reg < gdbarch_num_regs (current_gdbarch));
+  gdb_assert (reg >= 0 && reg < gdbarch_num_regs (gdbarch));
 
   if (regnum >= ARM_WR0_REGNUM && regnum <= ARM_WR15_REGNUM)
     return regnum - ARM_WR0_REGNUM + SIM_ARM_IWMMXT_COP0R0_REGNUM;

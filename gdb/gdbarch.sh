@@ -444,7 +444,7 @@ M:void:print_float_info:struct ui_file *file, struct frame_info *frame, const ch
 M:void:print_vector_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
 # MAP a GDB RAW register number onto a simulator register number.  See
 # also include/...-sim.h.
-f:int:register_sim_regno:int reg_nr:reg_nr::legacy_register_sim_regno::0
+m:int:register_sim_regno:int reg_nr:reg_nr::legacy_register_sim_regno::0
 m:int:cannot_fetch_register:int regnum:regnum::cannot_register_not::0
 m:int:cannot_store_register:int regnum:regnum::cannot_register_not::0
 # setjmp/longjmp support.

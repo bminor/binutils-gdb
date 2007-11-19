@@ -342,17 +342,17 @@ init_sim_regno_table (struct gdbarch *arch)
 /* Given a GDB register number REG, return the corresponding SIM
    register number.  */
 static int
-rs6000_register_sim_regno (int reg)
+rs6000_register_sim_regno (struct gdbarch *gdbarch, int reg)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int sim_regno;
 
   if (tdep->sim_regno == NULL)
-    init_sim_regno_table (current_gdbarch);
+    init_sim_regno_table (gdbarch);
 
   gdb_assert (0 <= reg 
-	      && reg <= gdbarch_num_regs (current_gdbarch)
-			+ gdbarch_num_pseudo_regs (current_gdbarch));
+	      && reg <= gdbarch_num_regs (gdbarch)
+			+ gdbarch_num_pseudo_regs (gdbarch));
   sim_regno = tdep->sim_regno[reg];
 
   if (sim_regno >= 0)

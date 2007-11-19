@@ -296,7 +296,7 @@ extern void set_gdbarch_print_vector_info (struct gdbarch *gdbarch, gdbarch_prin
 /* MAP a GDB RAW register number onto a simulator register number.  See
    also include/...-sim.h. */
 
-typedef int (gdbarch_register_sim_regno_ftype) (int reg_nr);
+typedef int (gdbarch_register_sim_regno_ftype) (struct gdbarch *gdbarch, int reg_nr);
 extern int gdbarch_register_sim_regno (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_sim_regno (struct gdbarch *gdbarch, gdbarch_register_sim_regno_ftype *register_sim_regno);
 

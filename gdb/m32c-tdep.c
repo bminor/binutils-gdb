@@ -241,9 +241,9 @@ m32c_register_type (struct gdbarch *arch, int reg_nr)
 
 
 static int
-m32c_register_sim_regno (int reg_nr)
+m32c_register_sim_regno (struct gdbarch *gdbarch, int reg_nr)
 {
-  return gdbarch_tdep (current_gdbarch)->regs[reg_nr].sim_num;
+  return gdbarch_tdep (gdbarch)->regs[reg_nr].sim_num;
 }
 
 

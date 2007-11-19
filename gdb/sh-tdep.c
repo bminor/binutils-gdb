@@ -2286,10 +2286,10 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 }
 
 static int
-sh_dsp_register_sim_regno (int nr)
+sh_dsp_register_sim_regno (struct gdbarch *gdbarch, int nr)
 {
-  if (legacy_register_sim_regno (nr) < 0)
-    return legacy_register_sim_regno (nr);
+  if (legacy_register_sim_regno (gdbarch, nr) < 0)
+    return legacy_register_sim_regno (gdbarch, nr);
   if (nr >= DSR_REGNUM && nr <= Y1_REGNUM)
     return nr - DSR_REGNUM + SIM_SH_DSR_REGNUM;
   if (nr == MOD_REGNUM)
@@ -2304,7 +2304,7 @@ sh_dsp_register_sim_regno (int nr)
 }
 
 static int
-sh_sh2a_register_sim_regno (int nr)
+sh_sh2a_register_sim_regno (struct gdbarch *gdbarch, int nr)
 {
   switch (nr)
     {
@@ -2329,7 +2329,7 @@ sh_sh2a_register_sim_regno (int nr)
       default:
         break;
     }
-  return legacy_register_sim_regno (nr);
+  return legacy_register_sim_regno (gdbarch, nr);
 }
 
 /* Set up the register unwinding such that call-clobbered registers are

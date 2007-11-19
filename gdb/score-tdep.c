@@ -305,7 +305,7 @@ score_register_name (struct gdbarch *gdbarch, int regnum)
 }
 
 static int
-score_register_sim_regno (int regnum)
+score_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < SCORE_NUM_REGS);
   return regnum;

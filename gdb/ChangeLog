@@ -1,3 +1,23 @@
+2007-11-19  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (register_sim_regno): Add gdbarch as parameter.
+	* gdbarch.{c,h}: Regenerate.
+
+	* arch-utils.h (legacy_register_sim_regno): Add gdbarch as parameter.
+	* score-tdep.c (score_register_sim_regno): Likewise.
+	* sim-regno.h (one2one_register_sim_regno): Likewise.
+
+	* arch-utils.c (legacy_register_sim_regno): Add gdbarch as parameter.
+	Replace current_gdbarch by gdbarch. 
+	* sh-tdep.c (sh_sh2a_register_sim_regno)
+	(sh_dsp_register_sim_regno): Likewise.
+	* rs6000-tdep.c (rs6000_register_sim_regno): Likewise.
+	* mips-tdep.c (mips_register_sim_regno): Likewise.
+	* m32c-tdep.c (m32c_register_sim_regno): Likewise.
+	* frv-tdep.c (frv_register_sim_regno): Likewise.
+	* arm-tdep.c (arm_register_sim_regno): Likewise.
+	* remote-sim.c (one2one_register_sim_regno): Likewise.
+
 2007-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.ac (--enable-targets): New configure option.

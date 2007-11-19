@@ -349,7 +349,7 @@ frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 }
 
 static int
-frv_register_sim_regno (int reg)
+frv_register_sim_regno (struct gdbarch *gdbarch, int reg)
 {
   static const int spr_map[] =
     {
@@ -393,7 +393,7 @@ frv_register_sim_regno (int reg)
       H_SPR_FNER1,		/* fner1_regnum */
     };
 
-  gdb_assert (reg >= 0 && reg < gdbarch_num_regs (current_gdbarch));
+  gdb_assert (reg >= 0 && reg < gdbarch_num_regs (gdbarch));
 
   if (first_gpr_regnum <= reg && reg <= last_gpr_regnum)
     return reg - first_gpr_regnum + SIM_FRV_GR0_REGNUM;

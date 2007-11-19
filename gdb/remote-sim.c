@@ -269,10 +269,10 @@ gdb_os_error (host_callback * p, const char *format,...)
 }
 
 int
-one2one_register_sim_regno (int regnum)
+one2one_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 {
   /* Only makes sense to supply raw registers.  */
-  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch));
+  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch));
   return regnum;
 }
 

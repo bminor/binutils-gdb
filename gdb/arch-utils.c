@@ -38,16 +38,16 @@
 
 
 int
-legacy_register_sim_regno (int regnum)
+legacy_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 {
   /* Only makes sense to supply raw registers.  */
-  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch));
+  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch));
   /* NOTE: cagney/2002-05-13: The old code did it this way and it is
      suspected that some GDB/SIM combinations may rely on this
      behavour.  The default should be one2one_register_sim_regno
      (below).  */
-  if (gdbarch_register_name (current_gdbarch, regnum) != NULL
-      && gdbarch_register_name (current_gdbarch, regnum)[0] != '\0')
+  if (gdbarch_register_name (gdbarch, regnum) != NULL
+      && gdbarch_register_name (gdbarch, regnum)[0] != '\0')
     return regnum;
   else
     return LEGACY_SIM_REGNO_IGNORE;

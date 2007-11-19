@@ -4982,19 +4982,17 @@ mips_dwarf_dwarf2_ecoff_reg_to_regnum (int num)
 }
 
 static int
-mips_register_sim_regno (int regnum)
+mips_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 {
   /* Only makes sense to supply raw registers.  */
-  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (current_gdbarch));
+  gdb_assert (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch));
   /* FIXME: cagney/2002-05-13: Need to look at the pseudo register to
      decide if it is valid.  Should instead define a standard sim/gdb
      register numbering scheme.  */
-  if (gdbarch_register_name (current_gdbarch,
-			     gdbarch_num_regs
-			       (current_gdbarch) + regnum) != NULL
-      && gdbarch_register_name (current_gdbarch,
-			        gdbarch_num_regs
-				  (current_gdbarch) + regnum)[0] != '\0')
+  if (gdbarch_register_name (gdbarch,
+			     gdbarch_num_regs (gdbarch) + regnum) != NULL
+      && gdbarch_register_name (gdbarch,
+			        gdbarch_num_regs (gdbarch) + regnum)[0] != '\0')
     return regnum;
   else
     return LEGACY_SIM_REGNO_IGNORE;

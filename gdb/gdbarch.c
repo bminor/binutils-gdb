@@ -290,7 +290,7 @@ struct gdbarch startup_gdbarch =
   default_print_registers_info,  /* print_registers_info */
   0,  /* print_float_info */
   0,  /* print_vector_info */
-  0,  /* register_sim_regno */
+  legacy_register_sim_regno,  /* register_sim_regno */
   cannot_register_not,  /* cannot_fetch_register */
   cannot_register_not,  /* cannot_store_register */
   0,  /* get_longjmp_target */
@@ -1799,7 +1799,7 @@ gdbarch_register_sim_regno (struct gdbarch *gdbarch, int reg_nr)
   gdb_assert (gdbarch->register_sim_regno != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_sim_regno called\n");
-  return gdbarch->register_sim_regno (reg_nr);
+  return gdbarch->register_sim_regno (gdbarch, reg_nr);
 }
 
 void
