@@ -1,4 +1,18 @@
 2007-11-19  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/xtensa-istack.h (tinsn_struct): Replace linenum field
+	with loc_directive_seen and debug_line.
+	* config/tc-xtensa.c: Include xtensa-istack.h after dwarf2dbg.h.
+	(xg_build_to_insn): Copy the new fields instead of linenum.
+	(xg_build_token_insn): Likewise.  Abort on INSTR_LABEL_DEF and move
+	common code out of the switch.
+	(md_assemble): Set new tinsn fields from DWARF information.  Call
+	dwarf2_consume_line_info.
+	(xg_assemble_vliw_tokens): Update the code to select the "best" line
+	number to use new information.  Call dwarf2_gen_line_info instead
+	of dwarf2_emit_insn.
+	
+2007-11-19  Bob Wilson  <bob.wilson@acm.org>
 	
 	* dwarf2dbg.h (dwarf2_loc_directive_seen): New.
 	* dwarf2dbg.c (loc_directive_seen): Make external and rename to...

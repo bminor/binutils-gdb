@@ -25,8 +25,8 @@
 #include "tc-xtensa.h"
 #include "subsegs.h"
 #include "xtensa-relax.h"
-#include "xtensa-istack.h"
 #include "dwarf2dbg.h"
+#include "xtensa-istack.h"
 #include "struc-symbol.h"
 #include "xtensa-config.h"
 
@@ -3288,7 +3288,8 @@ xg_build_to_insn (TInsn *targ, TInsn *insn, BuildInstr *bi)
   symbolS *sym;
 
   tinsn_init (targ);
-  targ->linenum = insn->linenum;
+  targ->debug_line = insn->debug_line;
+  targ->loc_directive_seen = insn->loc_directive_seen;
   switch (bi->typ)
     {
     case INSTR_INSTR:
@@ -3766,19 +3767,17 @@ xg_build_token_insn (BuildInstr *instr_spec, TInsn *old_insn, TInsn *new_insn)
     case INSTR_INSTR:
       new_insn->insn_type = ITYPE_INSN;
       new_insn->opcode = instr_spec->opcode;
-      new_insn->is_specific_opcode = FALSE;
-      new_insn->linenum = old_insn->linenum;
       break;
     case INSTR_LITERAL_DEF:
       new_insn->insn_type = ITYPE_LITERAL;
       new_insn->opcode = XTENSA_UNDEFINED;
-      new_insn->is_specific_opcode = FALSE;
-      new_insn->linenum = old_insn->linenum;
       break;
     case INSTR_LABEL_DEF:
-      as_bad (_("INSTR_LABEL_DEF not supported yet"));
-      break;
+      abort ();
     }
+  new_insn->is_specific_opcode = FALSE;
+  new_insn->debug_line = old_insn->debug_line;
+  new_insn->loc_directive_seen = old_insn->loc_directive_seen;
 
   for (b_op = instr_spec->ops; b_op != NULL; b_op = b_op->next)
     {
@@ -5235,7 +5234,7 @@ void
 md_assemble (char *str)
 {
   xtensa_isa isa = xtensa_default_isa;
-  char *opname, *file_name;
+  char *opname;
   unsigned opnamelen;
   bfd_boolean has_underbar = FALSE;
   char *arg_strings[MAX_INSN_ARGS];
@@ -5324,11 +5323,12 @@ md_assemble (char *str)
       return;
     }
 
-  /* A FLIX bundle may be spread across multiple input lines.  We want to
-     report the first such line in the debug information.  Record the line
-     number for each TInsn (assume the file name doesn't change), so the
-     first line can be found later.  */
-  as_where (&file_name, &orig_insn.linenum);
+  /* Record the line number for each TInsn, because a FLIX bundle may be
+     spread across multiple input lines and individual instructions may be
+     moved around in some cases.  */
+  orig_insn.loc_directive_seen = dwarf2_loc_directive_seen;
+  dwarf2_where (&orig_insn.debug_line);
+  dwarf2_consume_line_info ();
 
   xg_add_branch_and_loop_targets (&orig_insn);
 
@@ -6691,15 +6691,15 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
   bfd_boolean is_jump = FALSE;
   bfd_boolean is_branch = FALSE;
   xtensa_isa isa = xtensa_default_isa;
-  int i;
   int insn_size;
   int extra_space;
   char *f = NULL;
   int slot;
-  unsigned current_line, best_linenum;
-  char *current_file;
+  struct dwarf2_line_info debug_line;
+  bfd_boolean loc_directive_seen = FALSE;
+  TInsn *tinsn;
 
-  best_linenum = UINT_MAX;
+  memset (&debug_line, 0, sizeof (struct dwarf2_line_info));
 
   if (generating_literals)
     {
@@ -6754,15 +6754,22 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
       xtensa_set_frag_assembly_state (frag_now);
     }
 
-  for (i = 0; i < vinsn->num_slots; i++)
+  for (slot = 0; slot < vinsn->num_slots; slot++)
     {
+      tinsn = &vinsn->slots[slot];
+
       /* See if the instruction implies an aligned section.  */
-      if (xtensa_opcode_is_loop (isa, vinsn->slots[i].opcode) == 1)
+      if (xtensa_opcode_is_loop (isa, tinsn->opcode) == 1)
 	record_alignment (now_seg, 2);
 
-      /* Also determine the best line number for debug info.  */
-      best_linenum = vinsn->slots[i].linenum < best_linenum
-	? vinsn->slots[i].linenum : best_linenum;
+      /* Determine the best line number for debug info.  */
+      if ((tinsn->loc_directive_seen || !loc_directive_seen)
+	  && (tinsn->debug_line.filenum != debug_line.filenum
+	      || tinsn->debug_line.line < debug_line.line
+	      || tinsn->debug_line.column < debug_line.column))
+	debug_line = tinsn->debug_line;
+      if (tinsn->loc_directive_seen)
+	loc_directive_seen = TRUE;
     }
 
   /* Special cases for instructions that force an alignment... */
@@ -6833,16 +6840,13 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 
   xtensa_insnbuf_to_chars (isa, vinsn->insnbuf, (unsigned char *) f, 0);
 
-  /* Temporarily set the logical line number to the one we want to appear
-     in the debug information.  */
-  as_where (&current_file, &current_line);
-  new_logical_line (current_file, best_linenum);
-  dwarf2_emit_insn (insn_size + extra_space);
-  new_logical_line (current_file, current_line);
+  if (debug_type == DEBUG_DWARF2 || loc_directive_seen)
+    dwarf2_gen_line_info (frag_now_fix () - (insn_size + extra_space),
+			  &debug_line);
 
   for (slot = 0; slot < vinsn->num_slots; slot++)
     {
-      TInsn *tinsn = &vinsn->slots[slot];
+      tinsn = &vinsn->slots[slot];
       frag_now->tc_frag_data.slot_subtypes[slot] = tinsn->subtype;
       frag_now->tc_frag_data.slot_symbols[slot] = tinsn->symbol;
       frag_now->tc_frag_data.slot_offsets[slot] = tinsn->offset;

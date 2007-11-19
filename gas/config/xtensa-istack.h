@@ -46,7 +46,8 @@ typedef struct tinsn_struct
   bfd_boolean keep_wide;
   int ntok;
   expressionS tok[MAX_INSN_ARGS];
-  unsigned linenum;
+  bfd_boolean loc_directive_seen;
+  struct dwarf2_line_info debug_line;
 
   /* Filled out by relaxation_requirements:  */
   enum xtensa_relax_statesE subtype;
