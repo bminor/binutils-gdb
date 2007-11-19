@@ -173,7 +173,7 @@ static unsigned int dirs_allocated;
 
 /* TRUE when we've seen a .loc directive recently.  Used to avoid
    doing work when there's nothing to do.  */
-static bfd_boolean loc_directive_seen;
+bfd_boolean dwarf2_loc_directive_seen;
 
 /* TRUE when we're supposed to set the basic block mark whenever a
    label is seen.  */
@@ -365,7 +365,7 @@ dwarf2_emit_insn (int size)
 {
   struct dwarf2_line_info loc;
 
-  if (loc_directive_seen)
+  if (dwarf2_loc_directive_seen)
     {
       /* Use the last location established by a .loc directive, not
 	 the value returned by dwarf2_where().  That calls as_where()
@@ -394,7 +394,7 @@ dwarf2_consume_line_info (void)
   /* Unless we generate DWARF2 debugging information for each
      assembler line, we only emit one line symbol for one LOC.  */
   if (debug_type != DEBUG_DWARF2)
-    loc_directive_seen = FALSE;
+    dwarf2_loc_directive_seen = FALSE;
 
   current.flags &= ~(DWARF2_FLAG_BASIC_BLOCK
 		     | DWARF2_FLAG_PROLOGUE_END
@@ -576,7 +576,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 
   /* If we see two .loc directives in a row, force the first one to be
      output now.  */
-  if (loc_directive_seen && debug_type != DEBUG_DWARF2)
+  if (dwarf2_loc_directive_seen && debug_type != DEBUG_DWARF2)
     dwarf2_emit_insn (0);
 
   filenum = get_absolute_expression ();
@@ -685,7 +685,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
-  loc_directive_seen = TRUE;
+  dwarf2_loc_directive_seen = TRUE;
 }
 
 void

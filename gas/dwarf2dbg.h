@@ -79,6 +79,10 @@ extern void dwarf2_consume_line_info (void);
 /* Should be called for each code label.  */
 extern void dwarf2_emit_label (symbolS *);
 
+/* True when we've seen a .loc directive recently.  Used to avoid
+   doing work when there's nothing to do.  */
+bfd_boolean dwarf2_loc_directive_seen;
+
 /* True when we're supposed to set the basic block mark whenever a label
    is seen.  Unless the target is doing Something Weird, just call 
    dwarf2_emit_label.  */

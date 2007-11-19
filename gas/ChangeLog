@@ -1,5 +1,13 @@
 2007-11-19  Bob Wilson  <bob.wilson@acm.org>
 	
+	* dwarf2dbg.h (dwarf2_loc_directive_seen): New.
+	* dwarf2dbg.c (loc_directive_seen): Make external and rename to...
+	(dwarf2_loc_directive_seen): ...this.
+	(dwarf2_emit_insn, dwarf2_consume_line_info)
+	(dwarf2_emit_label, dwarf2_directive_loc): Use new name.
+	
+2007-11-19  Bob Wilson  <bob.wilson@acm.org>
+	
 	* dwarf2dbg.c (dwarf2_emit_label): Use dwarf2_consume_line_info.
 	
 2007-11-19  Bob Wilson  <bob.wilson@acm.org>
