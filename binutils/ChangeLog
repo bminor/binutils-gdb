@@ -1,3 +1,9 @@
+2007-11-19  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (is_32bit_abs_reloc): Add support for NIOS relocs.
+	(is_64bit_abs_reloc): Add support for HPPA relocs.
+	(is_16bit_abs_reloc): Add support for NIOS relocs.
+
 2007-11-17  Thiemo Seufer  <ths@mips.com>
 
 	* readelf.c (display_mips_gnu_attribute): Recognize -mips32r2 -mfp64

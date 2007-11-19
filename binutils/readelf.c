@@ -8013,6 +8013,9 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_MSP43_32.  */
     case EM_MT:
       return reloc_type == 2; /* R_MT_32.  */
+    case EM_ALTERA_NIOS2:
+    case EM_NIOS32:
+      return reloc_type == 1; /* R_NIOS_32.  */
     case EM_OPENRISC:
     case EM_OR32:
       return reloc_type == 1; /* R_OR32_32.  */
@@ -8052,10 +8055,6 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_XTENSA:
       return reloc_type == 1; /* R_XTENSA_32.  */
 
-    case EM_ALTERA_NIOS2:
-      /* Fall through (what reloc type is used ?).  */
-    case EM_NIOS32:
-      /* Fall through (what reloc type is used ?).  */
     default:
       error (_("Missing knowledge of 32-bit reloc types used in DWARF sections of machine number %d\n"),
 	     elf_header.e_machine);
@@ -8073,30 +8072,30 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
     {
     case EM_386:
     case EM_486:
-      return reloc_type == 2; /* R_386_PC32.  */
+      return reloc_type == 2;  /* R_386_PC32.  */
     case EM_68K:
-      return reloc_type == 4; /* R_68K_PC32.  */
+      return reloc_type == 4;  /* R_68K_PC32.  */
     case EM_ALPHA:
       return reloc_type == 10; /* R_ALPHA_SREL32.  */
     case EM_ARM:
-      return reloc_type == 3; /* R_ARM_REL32 */
+      return reloc_type == 3;  /* R_ARM_REL32 */
     case EM_PARISC:
-      return reloc_type == 0; /* R_PARISC_NONE.  *//* FIXME: This reloc is generated, but it may be a bug.  */
+      return reloc_type == 0;  /* R_PARISC_NONE.  *//* FIXME: This reloc is generated, but it may be a bug.  */
     case EM_PPC:
       return reloc_type == 26; /* R_PPC_REL32.  */
     case EM_PPC64:
-      return reloc_type == 26;  /* R_PPC64_REL32.  */
+      return reloc_type == 26; /* R_PPC64_REL32.  */
     case EM_S390_OLD:
     case EM_S390:
-      return reloc_type == 5; /* R_390_PC32.  */
+      return reloc_type == 5;  /* R_390_PC32.  */
     case EM_SH:
-      return reloc_type == 2; /* R_SH_REL32.  */
+      return reloc_type == 2;  /* R_SH_REL32.  */
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
     case EM_SPARC:
-      return reloc_type == 6; /* R_SPARC_DISP32.  */
+      return reloc_type == 6;  /* R_SPARC_DISP32.  */
     case EM_X86_64:
-      return reloc_type == 2; /* R_X86_64_PC32.  */
+      return reloc_type == 2;  /* R_X86_64_PC32.  */
     default:
       /* Do not abort or issue an error message here.  Not all targets use
 	 pc-relative 32-bit relocs in their DWARF debug information and we
@@ -8119,6 +8118,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 2; /* R_ALPHA_REFQUAD.  */
     case EM_IA_64:
       return reloc_type == 0x27; /* R_IA64_DIR64LSB.  */
+    case EM_PARISC:
+      return reloc_type == 80; /* R_PARISC_DIR64.  */
     case EM_PPC64:
       return reloc_type == 38; /* R_PPC64_ADDR64.  */
     case EM_SPARC32PLUS:
@@ -8156,6 +8157,9 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_MSP430_OLD:
     case EM_MSP430:
       return reloc_type == 5; /* R_MSP430_16_BYTE.  */
+    case EM_ALTERA_NIOS2:
+    case EM_NIOS32:
+      return reloc_type == 9; /* R_NIOS_16.  */
     default:
       return FALSE;
     }
