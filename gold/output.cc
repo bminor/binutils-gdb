@@ -1113,13 +1113,20 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
   if (addralign > this->addralign_)
     this->addralign_ = addralign;
 
+  typename elfcpp::Elf_types<size>::Elf_WXword sh_flags = shdr.get_sh_flags();
+
+  // .debug_str is a mergeable string section, but is not always so
+  // marked by compilers.  Mark manually here so we can optimize.
+  if (strcmp(secname, ".debug_str") == 0)
+    sh_flags |= (elfcpp::SHF_MERGE | elfcpp::SHF_STRINGS);
+
   // If this is a SHF_MERGE section, we pass all the input sections to
   // a Output_data_merge.  We don't try to handle relocations for such
   // a section.
-  if ((shdr.get_sh_flags() & elfcpp::SHF_MERGE) != 0
+  if ((sh_flags & elfcpp::SHF_MERGE) != 0
       && reloc_shndx == 0)
     {
-      if (this->add_merge_input_section(object, shndx, shdr.get_sh_flags(),
+      if (this->add_merge_input_section(object, shndx, sh_flags,
 					shdr.get_sh_entsize(),
 					addralign))
 	{
@@ -1134,7 +1141,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
                                                   addralign);
 
   if (aligned_offset_in_section > offset_in_section
-      && (shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) != 0
+      && (sh_flags & elfcpp::SHF_EXECINSTR) != 0
       && object->target()->has_code_fill())
     {
       // We need to add some fill data.  Using fill_list_ when
