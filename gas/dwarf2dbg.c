@@ -419,17 +419,11 @@ dwarf2_emit_label (symbolS *label)
   if (debug_type == DEBUG_DWARF2)
     dwarf2_where (&loc);
   else
-    {
-      loc = current;
-      loc_directive_seen = FALSE;
-    }
+    loc = current;
 
   loc.flags |= DWARF2_FLAG_BASIC_BLOCK;
 
-  current.flags &= ~(DWARF2_FLAG_BASIC_BLOCK
-		     | DWARF2_FLAG_PROLOGUE_END
-		     | DWARF2_FLAG_EPILOGUE_BEGIN);
-
+  dwarf2_consume_line_info ();
   dwarf2_gen_line_info_1 (label, &loc);
 }
 

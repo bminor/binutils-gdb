@@ -1,5 +1,9 @@
 2007-11-19  Bob Wilson  <bob.wilson@acm.org>
 	
+	* dwarf2dbg.c (dwarf2_emit_label): Use dwarf2_consume_line_info.
+	
+2007-11-19  Bob Wilson  <bob.wilson@acm.org>
+	
 	* dwarf2dbg.c (dwarf2_consume_line_info): New.
 	(dwarf2_emit_insn): Use it here.
 	(dwarf2_directive_loc): Fix check for consecutive .loc directives
