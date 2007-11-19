@@ -373,11 +373,6 @@ dwarf2_emit_insn (int size)
 	or the physical input file name (foo.s) and not the file name
 	specified in the most recent .loc directive (eg foo.h).  */
       loc = current;
-
-      /* Unless we generate DWARF2 debugging information for each
-	 assembler line, we only emit one line symbol for one LOC.  */
-      if (debug_type != DEBUG_DWARF2)
-	loc_directive_seen = FALSE;
     }
   else if (debug_type != DEBUG_DWARF2)
     return;
@@ -385,6 +380,21 @@ dwarf2_emit_insn (int size)
     dwarf2_where (&loc);
 
   dwarf2_gen_line_info (frag_now_fix () - size, &loc);
+  dwarf2_consume_line_info ();
+}
+
+/* Called after the current line information has been either used with
+   dwarf2_gen_line_info or saved with a machine instruction for later use.
+   This resets the state of the line number information to reflect that
+   it has been used.  */
+
+void
+dwarf2_consume_line_info (void)
+{
+  /* Unless we generate DWARF2 debugging information for each
+     assembler line, we only emit one line symbol for one LOC.  */
+  if (debug_type != DEBUG_DWARF2)
+    loc_directive_seen = FALSE;
 
   current.flags &= ~(DWARF2_FLAG_BASIC_BLOCK
 		     | DWARF2_FLAG_PROLOGUE_END
@@ -572,7 +582,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 
   /* If we see two .loc directives in a row, force the first one to be
      output now.  */
-  if (loc_directive_seen)
+  if (loc_directive_seen && debug_type != DEBUG_DWARF2)
     dwarf2_emit_insn (0);
 
   filenum = get_absolute_expression ();

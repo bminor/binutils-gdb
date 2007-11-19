@@ -1132,6 +1132,7 @@ ia64_flush_insns ()
       dwarf2_where (&CURR_SLOT.debug_line);
       CURR_SLOT.debug_line.flags |= DWARF2_FLAG_BASIC_BLOCK;
       dwarf2_gen_line_info (frag_now_fix (), &CURR_SLOT.debug_line);
+      dwarf2_consume_line_info ();
     }
   CURR_SLOT.label_fixups = 0;
 
@@ -10968,6 +10969,7 @@ md_assemble (str)
   CURR_SLOT.idesc = idesc;
   as_where (&CURR_SLOT.src_file, &CURR_SLOT.src_line);
   dwarf2_where (&CURR_SLOT.debug_line);
+  dwarf2_consume_line_info ();
 
   /* Add unwind entries, if there are any.  */
   if (unwind.current_entry)

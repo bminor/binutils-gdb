@@ -1,3 +1,8 @@
+2007-11-19  Bob Wilson  <bob.wilson@acm.org>
+	
+	* gas/lns/lns.exp: Run lns-common-1 with alternate source for ia64.
+	* gas/lns/lns-common-1-ia64.s: New file.
+	
 2007-11-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/dv-raw-err.s: Add tests for ar.ruc.

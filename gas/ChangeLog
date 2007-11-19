@@ -1,3 +1,13 @@
+2007-11-19  Bob Wilson  <bob.wilson@acm.org>
+	
+	* dwarf2dbg.c (dwarf2_consume_line_info): New.
+	(dwarf2_emit_insn): Use it here.
+	(dwarf2_directive_loc): Fix check for consecutive .loc directives
+	when debug_type is DEBUG_DWARF2.
+	* dwarf2dbg.h (dwarf2_consume_line_info): New prototype.
+	* config/tc-ia64.c (ia64_flush_insns): Call dwarf2_consume_line_info.
+	(md_assemble): Likewise.
+	
 2007-11-17  Thiemo Seufer  <ths@mips.com>
 
 	* config/tc-mips.c (md_parse_option): Match mips_optimize to the -O

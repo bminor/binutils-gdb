@@ -13,7 +13,6 @@ run_dump_test "lns-duplicate"
 # information (d10v).
 if {
         ![istarget d10v-*-*]
-     && ![istarget ia64*-*-*]
      && ![istarget i370-*-*]
      && ![istarget i960-*-*]
      && ![istarget mcore-*-*]
@@ -23,6 +22,8 @@ if {
     # Use alternate file for targets using DW_LNS_fixed_advance_pc opcodes.
     if { [istarget xtensa-*-*] } {
       run_dump_test "lns-common-1-alt"
+    } elseif { [istarget ia64*-*-*] } {
+      run_dump_test "lns-common-1" { { source "lns-common-1-ia64.s" } }
     } else {
       run_dump_test "lns-common-1"
     }
