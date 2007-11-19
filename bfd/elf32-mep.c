@@ -513,18 +513,12 @@ mep_elf_relocate_section
       if (info->relocatable)
 	continue;
 
-      switch (r_type)
-	{
-	case R_RELC:
-	  bfd_elf_perform_complex_relocation (input_bfd, input_section,
-					      contents, rel, relocation);
-	  continue;
-
-	default:
-	  r = mep_final_link_relocate (howto, input_bfd, input_section,
-					 contents, rel, relocation);
-	  break;
-	}
+      if (r_type == R_RELC)
+	r = bfd_elf_perform_complex_relocation (input_bfd, input_section,
+						contents, rel, relocation);
+      else
+	r = mep_final_link_relocate (howto, input_bfd, input_section,
+				     contents, rel, relocation);
 
       if (r != bfd_reloc_ok)
 	{

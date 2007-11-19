@@ -7646,15 +7646,16 @@ decode_complex_addend (unsigned long *start,   /* in bits */
   * trunc_p   = (encoded >> 29) & 1;
 }
 
-void
+bfd_reloc_status_type
 bfd_elf_perform_complex_relocation (bfd *input_bfd,
-				    asection *input_section,
+				    asection *input_section ATTRIBUTE_UNUSED,
 				    bfd_byte *contents,
 				    Elf_Internal_Rela *rel,
 				    bfd_vma relocation)
 {
   bfd_vma shift, x, mask;
   unsigned long start, oplen, len, wordsz, chunksz, lsb0_p, signed_p, trunc_p;
+  bfd_reloc_status_type r;
 
   /*  Perform this reloc, since it is complex.
       (this is not to say that it necessarily refers to a complex
@@ -7684,20 +7685,14 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  oplen, x, mask,  relocation);
 #endif
 
+  r = bfd_reloc_ok;
   if (! trunc_p)
-    {
-      /* Now do an overflow check.  */
-      if (bfd_check_overflow ((signed_p
-			       ? complain_overflow_signed
-			       : complain_overflow_unsigned),
-			      len, 0, (8 * wordsz),
-			      relocation) == bfd_reloc_overflow)
-	(*_bfd_error_handler)
-	  ("%s (%s + 0x%lx): relocation overflow: 0x%lx %sdoes not fit "
-	   "within 0x%lx",
-	   input_bfd->filename, input_section->name, rel->r_offset,
-	   relocation, (signed_p ? "(signed) " : ""), mask);
-    }
+    /* Now do an overflow check.  */
+    r = bfd_check_overflow ((signed_p
+			     ? complain_overflow_signed
+			     : complain_overflow_unsigned),
+			    len, 0, (8 * wordsz),
+			    relocation);
 
   /* Do the deed.  */
   x = (x & ~(mask << shift)) | ((relocation & mask) << shift);
@@ -7711,6 +7706,7 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  ((relocation & mask) << shift), x);
 #endif
   put_value (wordsz, chunksz, input_bfd, x, contents + rel->r_offset);
+  return r;
 }
 
 /* When performing a relocatable link, the input relocations are

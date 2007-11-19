@@ -1,3 +1,11 @@
+2007-11-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (bfd_elf_perform_complex_relocation): Update prototype.
+	* elflink.c (bfd_elf_perform_complex_relocation): Return status.
+	Don't print reloc overflow message.
+	* elf32-mep.c (mep_elf_relocate_section): Handle status from
+	bfd_elf_perform_complex_relocation.
+
 2007-11-17  Thiemo Seufer  <ths@mips.com>
 
 	* elfxx-mips.c (mips_elf_merge_obj_attributes): Handle -mips32r2
