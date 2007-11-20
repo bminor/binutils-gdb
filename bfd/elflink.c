@@ -8536,10 +8536,15 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 		sym.st_value += input_sec->output_section->vma;
 		if (h->type == STT_TLS)
 		  {
-		    /* STT_TLS symbols are relative to PT_TLS segment
-		       base.  */
-		    BFD_ASSERT (elf_hash_table (finfo->info)->tls_sec != NULL);
-		    sym.st_value -= elf_hash_table (finfo->info)->tls_sec->vma;
+		    asection *tls_sec = elf_hash_table (finfo->info)->tls_sec;
+		    if (tls_sec != NULL)
+		      sym.st_value -= tls_sec->vma;
+		    else
+		      {
+			/* The TLS section may have been garbage collected.  */
+			BFD_ASSERT (finfo->info->gc_sections
+				    && !input_sec->gc_mark);
+		      }
 		  }
 	      }
 	  }

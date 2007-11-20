@@ -1,3 +1,14 @@
+2007-11-20  Nick Clifton  <nickc@redhat.com>
+
+	* lib/ld-lib.exp (check_gc_sections_available): New proc, based
+	on the version in gcc/testsuite/lib/target-supports.exp.
+	* ld-elf/elf.exp: Use check_gc_sections_available.
+
+2007-11-20  Tristan Gingold  <gingold@adacore.com>
+
+	* ld-elf/tls_gc.s: New test.
+	* ld-elf/elf.exp: Add tls_gc test.
+
 2007-11-17  Thiemo Seufer  <ths@mips.com>
 
 	* ld-mips-elf/attr-gnu-4-14.d, ld-mips-elf/attr-gnu-4-41.d:

@@ -1535,3 +1535,45 @@ proc run_cc_link_tests { ldtests } {
 	}
     }
 }
+
+# Returns true if --gc-sections is supported on the target.
+
+proc check_gc_sections_available { } {
+    global gc_sections_available_saved
+    global ld
+    
+    if {![info exists gc_sections_available_saved]} {
+	# Some targets don't support gc-sections despite whatever's
+	# advertised by ld's options.
+	if { [istarget alpha*-*-*]
+	     || [istarget ia64-*-*] } {
+	    set gc_sections_available_saved 0
+	    return 0
+	}
+
+	# elf2flt uses -q (--emit-relocs), which is incompatible with
+	# --gc-sections.
+	if { [board_info target exists ldflags]
+	     && [regexp " -elf2flt\[ =\]" " [board_info target ldflags] "] } {
+	    set gc_sections_available_saved 0
+	    return 0
+	}
+
+	# VxWorks kernel modules are relocatable objects linked with -r,
+	# while RTP executables are linked with -q (--emit-relocs).
+	# Both of these options are incompatible with --gc-sections.
+	if { [istarget *-*-vxworks*] } {
+	    set gc_sections_available_saved 0
+	    return 0
+	}
+
+	# Check if the ld used by gcc supports --gc-sections.
+	set ld_output [remote_exec host $ld "--help"]
+	if { [ string first "--gc-sections" $ld_output ] >= 0 } {
+	    set gc_sections_available_saved 1
+	} else {
+	    set gc_sections_available_saved 0
+	}
+    }
+    return $gc_sections_available_saved
+}
