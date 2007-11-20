@@ -221,8 +221,6 @@ static struct value *value_of_root (struct varobj **var_handle, int *);
 
 static struct value *value_of_child (struct varobj *parent, int index);
 
-static int variable_editable (struct varobj *var);
-
 static char *my_value_of_variable (struct varobj *var);
 
 static char *value_get_print_value (struct value *value,
@@ -248,8 +246,6 @@ static struct value *c_value_of_child (struct varobj *parent, int index);
 
 static struct type *c_type_of_child (struct varobj *parent, int index);
 
-static int c_variable_editable (struct varobj *var);
-
 static char *c_value_of_variable (struct varobj *var);
 
 /* C++ implementation */
@@ -270,8 +266,6 @@ static struct value *cplus_value_of_child (struct varobj *parent, int index);
 
 static struct type *cplus_type_of_child (struct varobj *parent, int index);
 
-static int cplus_variable_editable (struct varobj *var);
-
 static char *cplus_value_of_variable (struct varobj *var);
 
 /* Java implementation */
@@ -289,8 +283,6 @@ static struct value *java_value_of_root (struct varobj **var_handle);
 static struct value *java_value_of_child (struct varobj *parent, int index);
 
 static struct type *java_type_of_child (struct varobj *parent, int index);
-
-static int java_variable_editable (struct varobj *var);
 
 static char *java_value_of_variable (struct varobj *var);
 
@@ -324,9 +316,6 @@ struct language_specific
   /* The type of the INDEX'th child of PARENT. */
   struct type *(*type_of_child) (struct varobj * parent, int index);
 
-  /* Is VAR editable? */
-  int (*variable_editable) (struct varobj * var);
-
   /* The current value of VAR. */
   char *(*value_of_variable) (struct varobj * var);
 };
@@ -343,7 +332,6 @@ static struct language_specific languages[vlang_end] = {
    c_value_of_root,
    c_value_of_child,
    c_type_of_child,
-   c_variable_editable,
    c_value_of_variable}
   ,
   /* C */
@@ -356,7 +344,6 @@ static struct language_specific languages[vlang_end] = {
    c_value_of_root,
    c_value_of_child,
    c_type_of_child,
-   c_variable_editable,
    c_value_of_variable}
   ,
   /* C++ */
@@ -369,7 +356,6 @@ static struct language_specific languages[vlang_end] = {
    cplus_value_of_root,
    cplus_value_of_child,
    cplus_type_of_child,
-   cplus_variable_editable,
    cplus_value_of_variable}
   ,
   /* Java */
@@ -382,7 +368,6 @@ static struct language_specific languages[vlang_end] = {
    java_value_of_root,
    java_value_of_child,
    java_type_of_child,
-   java_variable_editable,
    java_value_of_variable}
 };
 
@@ -523,7 +508,7 @@ varobj_create (char *objname,
 	  select_frame (fi);
 	}
 
-      /* We definitively need to catch errors here.
+      /* We definitely need to catch errors here.
          If evaluate_expression succeeds we got the value we wanted.
          But if it fails, we still go on with a call to evaluate_type()  */
       if (!gdb_evaluate_expression (var->root->exp, &value))
@@ -856,7 +841,7 @@ varobj_get_attributes (struct varobj *var)
 {
   int attributes = 0;
 
-  if (var->root->is_valid && variable_editable (var))
+  if (varobj_editable_p (var))
     /* FIXME: define masks for attributes */
     attributes |= 0x00000001;	/* Editable */
 
@@ -886,55 +871,51 @@ varobj_set_value (struct varobj *var, char *expression)
   struct expression *exp;
   struct value *value;
   int saved_input_radix = input_radix;
+  char *s = expression;
+  int i;
 
-  if (var->value != NULL && variable_editable (var))
+  gdb_assert (varobj_editable_p (var));
+
+  input_radix = 10;		/* ALWAYS reset to decimal temporarily */
+  exp = parse_exp_1 (&s, 0, 0);
+  if (!gdb_evaluate_expression (exp, &value))
     {
-      char *s = expression;
-      int i;
-
-      input_radix = 10;		/* ALWAYS reset to decimal temporarily */
-      exp = parse_exp_1 (&s, 0, 0);
-      if (!gdb_evaluate_expression (exp, &value))
-	{
-	  /* We cannot proceed without a valid expression. */
-	  xfree (exp);
-	  return 0;
-	}
-
-      /* All types that are editable must also be changeable.  */
-      gdb_assert (varobj_value_is_changeable_p (var));
-
-      /* The value of a changeable variable object must not be lazy.  */
-      gdb_assert (!value_lazy (var->value));
-
-      /* Need to coerce the input.  We want to check if the
-	 value of the variable object will be different
-	 after assignment, and the first thing value_assign
-	 does is coerce the input.
-	 For example, if we are assigning an array to a pointer variable we
-	 should compare the pointer with the the array's address, not with the
-	 array's content.  */
-      value = coerce_array (value);
-
-      /* The new value may be lazy.  gdb_value_assign, or 
-	 rather value_contents, will take care of this.
-	 If fetching of the new value will fail, gdb_value_assign
-	 with catch the exception.  */
-      if (!gdb_value_assign (var->value, value, &val))
-	return 0;
-     
-      /* If the value has changed, record it, so that next -var-update can
-	 report this change.  If a variable had a value of '1', we've set it
-	 to '333' and then set again to '1', when -var-update will report this
-	 variable as changed -- because the first assignment has set the
-	 'updated' flag.  There's no need to optimize that, because return value
-	 of -var-update should be considered an approximation.  */
-      var->updated = install_new_value (var, val, 0 /* Compare values. */);
-      input_radix = saved_input_radix;
-      return 1;
+      /* We cannot proceed without a valid expression. */
+      xfree (exp);
+      return 0;
     }
 
-  return 0;
+  /* All types that are editable must also be changeable.  */
+  gdb_assert (varobj_value_is_changeable_p (var));
+
+  /* The value of a changeable variable object must not be lazy.  */
+  gdb_assert (!value_lazy (var->value));
+
+  /* Need to coerce the input.  We want to check if the
+     value of the variable object will be different
+     after assignment, and the first thing value_assign
+     does is coerce the input.
+     For example, if we are assigning an array to a pointer variable we
+     should compare the pointer with the the array's address, not with the
+     array's content.  */
+  value = coerce_array (value);
+
+  /* The new value may be lazy.  gdb_value_assign, or 
+     rather value_contents, will take care of this.
+     If fetching of the new value will fail, gdb_value_assign
+     with catch the exception.  */
+  if (!gdb_value_assign (var->value, value, &val))
+    return 0;
+     
+  /* If the value has changed, record it, so that next -var-update can
+     report this change.  If a variable had a value of '1', we've set it
+     to '333' and then set again to '1', when -var-update will report this
+     variable as changed -- because the first assignment has set the
+     'updated' flag.  There's no need to optimize that, because return value
+     of -var-update should be considered an approximation.  */
+  var->updated = install_new_value (var, val, 0 /* Compare values. */);
+  input_radix = saved_input_radix;
+  return 1;
 }
 
 /* Returns a malloc'ed list with all root variable objects */
@@ -1803,14 +1784,6 @@ value_of_child (struct varobj *parent, int index)
   return value;
 }
 
-/* Is this variable editable? Use the variable's type to make
-   this determination. */
-static int
-variable_editable (struct varobj *var)
-{
-  return (*var->root->lang->variable_editable) (var);
-}
-
 /* GDB already has a command called "value_of_variable". Sigh. */
 static char *
 my_value_of_variable (struct varobj *var)
@@ -1840,6 +1813,33 @@ value_get_print_value (struct value *value, enum varobj_display_formats format)
 
   do_cleanups (old_chain);
   return thevalue;
+}
+
+int
+varobj_editable_p (struct varobj *var)
+{
+  struct type *type;
+  struct value *value;
+
+  if (!(var->root->is_valid && var->value && VALUE_LVAL (var->value)))
+    return 0;
+
+  type = get_value_type (var);
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_METHOD:
+      return 0;
+      break;
+
+    default:
+      return 1;
+      break;
+    }
 }
 
 /* Return non-zero if changes in value of VAR
@@ -2214,25 +2214,6 @@ c_type_of_child (struct varobj *parent, int index)
   return type;
 }
 
-static int
-c_variable_editable (struct varobj *var)
-{
-  switch (TYPE_CODE (get_value_type (var)))
-    {
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_ARRAY:
-    case TYPE_CODE_FUNC:
-    case TYPE_CODE_METHOD:
-      return 0;
-      break;
-
-    default:
-      return 1;
-      break;
-    }
-}
-
 static char *
 c_value_of_variable (struct varobj *var)
 {
@@ -2604,15 +2585,6 @@ cplus_type_of_child (struct varobj *parent, int index)
   return type;
 }
 
-static int
-cplus_variable_editable (struct varobj *var)
-{
-  if (CPLUS_FAKE_CHILD (var))
-    return 0;
-
-  return c_variable_editable (var);
-}
-
 static char *
 cplus_value_of_variable (struct varobj *var)
 {
@@ -2694,12 +2666,6 @@ static struct type *
 java_type_of_child (struct varobj *parent, int index)
 {
   return cplus_type_of_child (parent, index);
-}
-
-static int
-java_variable_editable (struct varobj *var)
-{
-  return cplus_variable_editable (var);
 }
 
 static char *
