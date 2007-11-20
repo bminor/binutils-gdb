@@ -114,4 +114,6 @@ extern int varobj_update (struct varobj **varp, struct varobj ***changelist,
 
 extern void varobj_invalidate (void);
 
+extern int varobj_editable_p (struct varobj *var);
+
 #endif /* VAROBJ_H */
