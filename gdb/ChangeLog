@@ -1,3 +1,9 @@
+2007-11-20  David Ung  <davidu@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (mips16_scan_prologue): Handle the MIPS16e SAVE
+	instruction.
+
 2007-11-20  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* infrun.c (resume): Clarify logic that

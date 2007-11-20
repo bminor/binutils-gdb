@@ -1500,6 +1500,7 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   unsigned short prev_inst = 0;	/* saved copy of previous instruction */
   unsigned inst = 0;		/* current instruction */
   unsigned entry_inst = 0;	/* the entry instruction */
+  unsigned save_inst = 0;	/* the save instruction */
   int reg, offset;
 
   int extend_bytes = 0;
@@ -1603,6 +1604,12 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       else if ((inst & 0xf81f) == 0xe809
                && (inst & 0x700) != 0x700)	/* entry */
 	entry_inst = inst;	/* save for later processing */
+      else if ((inst & 0xff80) == 0x6480)	/* save */
+	{
+	  save_inst = inst;	/* save for later processing */
+	  if (prev_extend_bytes)		/* extend */
+	    save_inst |= prev_inst << 16;
+	}
       else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
 	cur_pc += MIPS_INSN16_SIZE;	/* 32-bit instruction */
       else if ((inst & 0xff1c) == 0x6704)	/* move reg,$a0-$a3 */
@@ -1655,6 +1662,101 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 
       /* Check if the s0 and s1 registers were pushed on the stack.  */
       for (reg = 16; reg < sreg_count + 16; reg++)
+	{
+	  set_reg_offset (this_cache, reg, sp + offset);
+	  offset -= mips_abi_regsize (gdbarch);
+	}
+    }
+
+  /* The SAVE instruction is similar to ENTRY, except that defined by the
+     MIPS16e ASE of the MIPS Architecture.  Unlike with ENTRY though, the
+     size of the frame is specified as an immediate field of instruction
+     and an extended variation exists which lets additional registers and
+     frame space to be specified.  The instruction always treats registers
+     as 32-bit so its usefulness for 64-bit ABIs is questionable.  */
+  if (save_inst != 0 && mips_abi_regsize (gdbarch) == 4)
+    {
+      static int args_table[16] = {
+	0, 0, 0, 0, 1, 1, 1, 1,
+	2, 2, 2, 0, 3, 3, 4, -1,
+      };
+      static int astatic_table[16] = {
+	0, 1, 2, 3, 0, 1, 2, 3,
+	0, 1, 2, 4, 0, 1, 0, -1,
+      };
+      int aregs = (save_inst >> 16) & 0xf;
+      int xsregs = (save_inst >> 24) & 0x7;
+      int args = args_table[aregs];
+      int astatic = astatic_table[aregs];
+      long frame_size;
+
+      if (args < 0)
+	{
+	  warning (_("Invalid number of argument registers encoded in SAVE."));
+	  args = 0;
+	}
+      if (astatic < 0)
+	{
+	  warning (_("Invalid number of static registers encoded in SAVE."));
+	  astatic = 0;
+	}
+
+      /* For standard SAVE the frame size of 0 means 128.  */
+      frame_size = ((save_inst >> 16) & 0xf0) | (save_inst & 0xf);
+      if (frame_size == 0 && (save_inst >> 16) == 0)
+	frame_size = 16;
+      frame_size *= 8;
+      frame_offset += frame_size;
+
+      /* Now we can calculate what the SP must have been at the
+         start of the function prologue.  */
+      sp += frame_offset;
+
+      /* Check if A0-A3 were saved in the caller's argument save area.  */
+      for (reg = MIPS_A0_REGNUM, offset = 0; reg < args + 4; reg++)
+	{
+	  set_reg_offset (this_cache, reg, sp + offset);
+	  offset += mips_abi_regsize (gdbarch);
+	}
+
+      offset = -4;
+
+      /* Check if the RA register was pushed on the stack.  */
+      if (save_inst & 0x40)
+	{
+	  set_reg_offset (this_cache, MIPS_RA_REGNUM, sp + offset);
+	  offset -= mips_abi_regsize (gdbarch);
+	}
+
+      /* Check if the S8 register was pushed on the stack.  */
+      if (xsregs > 6)
+	{
+	  set_reg_offset (this_cache, 30, sp + offset);
+	  offset -= mips_abi_regsize (gdbarch);
+	  xsregs--;
+	}
+      /* Check if S2-S7 were pushed on the stack.  */
+      for (reg = 18 + xsregs - 1; reg > 18 - 1; reg--)
+	{
+	  set_reg_offset (this_cache, reg, sp + offset);
+	  offset -= mips_abi_regsize (gdbarch);
+	}
+
+      /* Check if the S1 register was pushed on the stack.  */
+      if (save_inst & 0x10)
+	{
+	  set_reg_offset (this_cache, 17, sp + offset);
+	  offset -= mips_abi_regsize (gdbarch);
+	}
+      /* Check if the S0 register was pushed on the stack.  */
+      if (save_inst & 0x20)
+	{
+	  set_reg_offset (this_cache, 16, sp + offset);
+	  offset -= mips_abi_regsize (gdbarch);
+	}
+
+      /* Check if A0-A3 were pushed on the stack.  */
+      for (reg = MIPS_A0_REGNUM + 3; reg > MIPS_A0_REGNUM + 3 - astatic; reg--)
 	{
 	  set_reg_offset (this_cache, reg, sp + offset);
 	  offset -= mips_abi_regsize (gdbarch);
