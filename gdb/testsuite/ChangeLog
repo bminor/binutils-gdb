@@ -1,3 +1,9 @@
+2007-11-21  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi2-var-child.exp, gdb.mi/mi-var-child.exp: Variables
+	objects of pointers that can't be dereferenced are now
+	"noneditable".
+
 2007-11-17  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* Makefile.in (Makefile): Do not depend on target_makefile_frag.
