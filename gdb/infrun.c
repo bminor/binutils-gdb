@@ -583,15 +583,41 @@ a command like `return' or `jump' to continue execution."));
 
       resume_ptid = RESUME_ALL;	/* Default */
 
-      if ((step || singlestep_breakpoints_inserted_p)
-	  && (stepping_past_singlestep_breakpoint
-	      || (!breakpoints_inserted && breakpoint_here_p (read_pc ()))))
-	{
-	  /* Stepping past a breakpoint without inserting breakpoints.
-	     Make sure only the current thread gets to step, so that
-	     other threads don't sneak past breakpoints while they are
-	     not inserted. */
+      /* If STEP is set, it's a request to use hardware stepping
+	 facilities.  But in that case, we should never
+	 use singlestep breakpoint.  */
+      gdb_assert (!(singlestep_breakpoints_inserted_p && step));
 
+      if (singlestep_breakpoints_inserted_p
+	  && stepping_past_singlestep_breakpoint)
+	{
+	  /* The situation here is as follows.  In thread T1 we wanted to
+	     single-step.  Lacking hardware single-stepping we've
+	     set breakpoint at the PC of the next instruction -- call it
+	     P.  After resuming, we've hit that breakpoint in thread T2.
+	     Now we've removed original breakpoint, inserted breakpoint
+	     at P+1, and try to step to advance T2 past breakpoint.
+	     We need to step only T2, as if T1 is allowed to freely run,
+	     it can run past P, and if other threads are allowed to run,
+	     they can hit breakpoint at P+1, and nested hits of single-step
+	     breakpoints is not something we'd want -- that's complicated
+	     to support, and has no value.  */
+	  resume_ptid = inferior_ptid;
+	}
+
+      if (step && breakpoint_here_p (read_pc ())
+	  && !breakpoint_inserted_here_p (read_pc ()))
+	{
+	  /* We're stepping, have breakpoint at PC, and it's 
+	     not inserted.  Most likely, proceed has noticed that
+	     we have breakpoint and tries to single-step over it,
+	     so that it's not hit.  In which case, we need to
+	     single-step only this thread, and keep others stopped,
+	     as they can miss this breakpoint if allowed to run.  
+
+	     The current code either has all breakpoints inserted, 
+	     or all removed, so if we let other threads run,
+	     we can actually miss any breakpoint, not the one at PC.  */
 	  resume_ptid = inferior_ptid;
 	}
 
