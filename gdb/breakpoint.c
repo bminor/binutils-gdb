@@ -5589,8 +5589,6 @@ break_command_1 (char *arg, int flag, int from_tty)
       b->cond_string = cond_string;
       b->ignore_count = ignore_count;
       b->disposition = tempflag ? disp_del : disp_donttouch;
-      b->from_tty = from_tty;
-      b->flag = flag;
       b->condition_not_parsed = 1;
       mention (b);
     }
@@ -6696,7 +6694,6 @@ create_ada_exception_breakpoint (struct symtab_and_line sal,
   b->exp_string = exp_string;
   b->thread = -1;
   b->ops = ops;
-  b->from_tty = from_tty;
 
   mention (b);
 }

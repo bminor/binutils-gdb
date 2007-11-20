@@ -445,14 +445,6 @@ struct breakpoint
     /* Methods associated with this breakpoint.  */
     struct breakpoint_ops *ops;
 
-    /* Was breakpoint issued from a tty?  Saved for the use of pending breakpoints.  */
-    int from_tty;
-
-    /* Flag value for pending breakpoint.
-       first bit  : 0 non-temporary, 1 temporary.
-       second bit : 0 normal breakpoint, 1 hardware breakpoint. */
-    int flag;
-
     /* Is breakpoint's condition not yet parsed because we found
        no location initially so had no context to parse
        the condition in.  */

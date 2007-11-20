@@ -1,3 +1,13 @@
+2007-11-20  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Remove unused breakpoint fields.
+	* breakpoint.h (struct breakpoint): Remove
+	from_tty and flag fields.
+	* breakpoint.c (break_command_1): Don't set
+	from_tty and flag field set of breakpoint.
+	(create_ada_exception_breakpoint): Don't set
+	the from_tty field.
+
 2007-11-20  David Ung  <davidu@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 
