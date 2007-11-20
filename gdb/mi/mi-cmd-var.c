@@ -511,8 +511,7 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
   if (var == NULL)
     error (_("mi_cmd_var_assign: Variable object not found"));
 
-  /* FIXME: define masks for attributes */
-  if (!(varobj_get_attributes (var) & 0x00000001))
+  if (!varobj_editable_p (var))
     error (_("mi_cmd_var_assign: Variable object is not editable"));
 
   expression = xstrdup (argv[1]);
