@@ -4661,7 +4661,7 @@ disable_breakpoints_in_shlibs (void)
 /* Disable any breakpoints that are in in an unloaded shared library.  Only
    apply to enabled breakpoints, disabled ones can just stay disabled.  */
 
-void
+static void
 disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 {
   struct bp_location *loc;
