@@ -1114,11 +1114,15 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
     this->addralign_ = addralign;
 
   typename elfcpp::Elf_types<size>::Elf_WXword sh_flags = shdr.get_sh_flags();
+  uint64_t entsize = shdr.get_sh_entsize();
 
   // .debug_str is a mergeable string section, but is not always so
   // marked by compilers.  Mark manually here so we can optimize.
   if (strcmp(secname, ".debug_str") == 0)
-    sh_flags |= (elfcpp::SHF_MERGE | elfcpp::SHF_STRINGS);
+    {
+      sh_flags |= (elfcpp::SHF_MERGE | elfcpp::SHF_STRINGS);
+      entsize = 1;
+    }
 
   // If this is a SHF_MERGE section, we pass all the input sections to
   // a Output_data_merge.  We don't try to handle relocations for such
@@ -1127,8 +1131,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
       && reloc_shndx == 0)
     {
       if (this->add_merge_input_section(object, shndx, sh_flags,
-					shdr.get_sh_entsize(),
-					addralign))
+					entsize, addralign))
 	{
 	  // Tell the relocation routines that they need to call the
 	  // output_offset method to determine the final address.
