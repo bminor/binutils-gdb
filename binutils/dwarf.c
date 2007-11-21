@@ -2624,6 +2624,10 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	    }
 	}
     }
+
+  if (start < section_end)
+    warn (_("There are %ld unused bytes at the end of section %s\n"),
+	  section_end - start, section->name);
   return 1;
 }
 

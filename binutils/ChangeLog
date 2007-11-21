@@ -1,3 +1,9 @@
+2007-11-20  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_loc): Issue a warning if there are bytes
+	at the end of the .debug_loc section which are not referenced by
+	any attribute in the .debug_info section.
+
 2007-11-19  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (is_32bit_abs_reloc): Add support for NIOS relocs.
