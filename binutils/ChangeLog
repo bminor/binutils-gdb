@@ -1,3 +1,8 @@
+2007-11-21  Hans-Peter Nilsson  <hp@axis.com>
+
+	* dwarf.c (display_debug_loc): Cast section_end - start to long
+	for output format.
+
 2007-11-20  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (display_debug_loc): Issue a warning if there are bytes
