@@ -1,3 +1,8 @@
+2007-11-21  Nick Clifton  <nickc@redhat.com>
+
+	* elf-m10300.c (mn10300_elf_relax_section): Allow for alignment
+	relocs when computing whether instructions can be relaxed.
+
 2007-11-16  Tristan Gingold  <gingold@adacore.com>
 
 	* elflink.c (elf_link_output_extsym): Weaken assertion: if

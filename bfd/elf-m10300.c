@@ -2105,6 +2105,7 @@ mn10300_elf_relax_section (bfd *abfd,
   Elf_Internal_Sym *isymbuf = NULL;
   struct elf32_mn10300_link_hash_table *hash_table;
   asection *section = sec;
+  bfd_vma align_gap_adjustment;
 
   /* Assume nothing changes.  */
   *again = FALSE;
@@ -2718,6 +2719,33 @@ mn10300_elf_relax_section (bfd *abfd,
   if (internal_relocs == NULL)
     goto error_return;
 
+  /* Scan for worst case alignment gap changes.  Note that this logic
+     is not ideal; what we should do is run this scan for every
+     opcode/address range and adjust accordingly, but that's
+     expensive.  Worst case is that for an alignment of N bytes, we
+     move by 2*N-N-1 bytes, assuming we have aligns of 1, 2, 4, 8, etc
+     all before it.  Plus, this still doesn't cover cross-section
+     jumps with section alignment.  */
+  irelend = internal_relocs + sec->reloc_count;
+  align_gap_adjustment = 0;
+  for (irel = internal_relocs; irel < irelend; irel++)
+    {
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_ALIGN)
+	{
+	  bfd_vma adj = 1 << irel->r_addend;
+	  bfd_vma aend = irel->r_offset;
+
+	  aend = BFD_ALIGN (aend, 1 << irel->r_addend);
+	  adj = 2*adj - adj - 1;
+
+	  /* Record the biggest adjustmnet.  Skip any alignment at the
+	     end of our section.  */
+	  if (align_gap_adjustment < adj
+	      && aend < sec->output_section->vma + sec->output_offset + sec->size)
+	    align_gap_adjustment = adj;
+	}
+    }
+
   /* Walk through them looking for relaxing opportunities.  */
   irelend = internal_relocs + sec->reloc_count;
   for (irel = internal_relocs; irel < irelend; irel++)
@@ -2933,7 +2961,10 @@ mn10300_elf_relax_section (bfd *abfd,
 	  /* See if the value will fit in 16 bits, note the high value is
 	     0x7fff + 2 as the target will be two bytes closer if we are
 	     able to relax.  */
-	  if ((long) value < 0x8001 && (long) value > -0x8000)
+	  /* Account for jumps across alignment boundaries using
+	     align_gap_adjustment.  */
+	  if (value < 0x8001 - align_gap_adjustment
+	      && ((bfd_signed_vma) value > -0x8000 + (bfd_signed_vma) align_gap_adjustment))
 	    {
 	      unsigned char code;
 

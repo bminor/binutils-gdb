@@ -79,6 +79,14 @@ set mn10300_tests {
 	{ {objdump -d i135409-3.d} }
 	"i135409-3.x"
     }
+    {
+	"adjusting a 16 bit branch"
+	"-Ti135409-4.t -relax"
+	""
+	{ "i135409-4.s" }
+	{ {objdump -d i135409-4.d} }
+	"i135409-4.x"
+    }
 }
 
 run_ld_link_tests $mn10300_tests

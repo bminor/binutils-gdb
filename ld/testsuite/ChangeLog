@@ -1,3 +1,11 @@
+2007-11-21  Nick Clifton  <nickc@redhat.com>
+
+	* ld-mn10300/i135409-4.s: New test case.  Check for relaxation to
+	a 16-bit jump instruction.
+	* ld-mn10300/i135409-4.t: Linker script for the new test.
+	* ld-mn10300/i135409-4.d: Expected disassembly of new test.
+	* ld-mn10300/mn10300.exp: Run the new test.
+
 2007-11-20  Nick Clifton  <nickc@redhat.com>
 
 	* lib/ld-lib.exp (check_gc_sections_available): New proc, based
