@@ -409,11 +409,12 @@ static int
 print_args_stub (void *args)
 {
   struct print_args_args *p = args;
+  struct gdbarch *gdbarch = get_frame_arch (p->frame);
   int numargs;
 
-  if (gdbarch_frame_num_args_p (current_gdbarch))
+  if (gdbarch_frame_num_args_p (gdbarch))
     {
-      numargs = gdbarch_frame_num_args (current_gdbarch, p->frame);
+      numargs = gdbarch_frame_num_args (gdbarch, p->frame);
       gdb_assert (numargs >= 0);
     }
   else
@@ -893,15 +894,15 @@ frame_info (char *addr_exp, int from_tty)
   struct gdbarch *gdbarch;
 
   fi = parse_frame_specification_1 (addr_exp, "No stack.", &selected_frame_p);
+  gdbarch = get_frame_arch (fi);
 
   /* Name of the value returned by get_frame_pc().  Per comments, "pc"
      is not a good name.  */
-  if (gdbarch_pc_regnum (current_gdbarch) >= 0)
+  if (gdbarch_pc_regnum (gdbarch) >= 0)
     /* OK, this is weird.  The gdbarch_pc_regnum hardware register's value can
        easily not match that of the internal value returned by
        get_frame_pc().  */
-    pc_regname = gdbarch_register_name (current_gdbarch,
-					gdbarch_pc_regnum (current_gdbarch));
+    pc_regname = gdbarch_register_name (gdbarch, gdbarch_pc_regnum (gdbarch));
   else
     /* But then, this is weird to.  Even without gdbarch_pc_regnum, an
        architectures will often have a hardware register called "pc",
@@ -910,7 +911,6 @@ frame_info (char *addr_exp, int from_tty)
     pc_regname = "pc";
 
   find_frame_sal (fi, &sal);
-  gdbarch = get_frame_arch (fi);
   func = get_frame_function (fi);
   /* FIXME: cagney/2002-11-28: Why bother?  Won't sal.symtab contain
      the same value?  */

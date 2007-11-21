@@ -1,3 +1,9 @@
+2007-11-21  Markus Deuling  <deuling@de.ibm.com>
+
+	* stack.c (print_args_stub): Use get_frame_arch to get at the current
+	architecture and replace current_gdbarch.
+	(frame_info): Likewise.
+
 2007-11-21  Nick Roberts  <nickrob@snap.net.nz>
 
 	* varobj.c (c_variable_editable, cplus_variable_editable)
