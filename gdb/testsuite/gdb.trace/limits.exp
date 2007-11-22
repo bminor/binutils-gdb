@@ -275,7 +275,7 @@ proc gdb_trace_limits_tests { } {
     # detect that this test cannot be run on this target!
 
     if { ![gdb_target_supports_trace] } then { 
-	pass "Current target does not supporst trace"
+	pass "Current target does not support trace"
 	return 1;
     }
 
