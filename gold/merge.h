@@ -70,7 +70,7 @@ class Merge_map
 
   struct Merge_key_less
   {
-    bool
+    inline bool
     operator()(const Merge_key&, const Merge_key&) const;
   };
 

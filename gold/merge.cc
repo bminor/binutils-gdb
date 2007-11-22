@@ -35,7 +35,7 @@ namespace gold
 // Sort the entries in a merge mapping.  The key is an input object, a
 // section index in that object, and an offset in that section.
 
-bool
+inline bool
 Merge_map::Merge_key_less::operator()(const Merge_key& mk1,
 				      const Merge_key& mk2) const
 {
