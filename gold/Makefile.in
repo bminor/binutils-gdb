@@ -78,7 +78,8 @@ am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) defstd.$(OBJEXT) \
 	output.$(OBJEXT) parameters.$(OBJEXT) readsyms.$(OBJEXT) \
 	reloc.$(OBJEXT) resolve.$(OBJEXT) script.$(OBJEXT) \
 	symtab.$(OBJEXT) stringpool.$(OBJEXT) target-select.$(OBJEXT) \
-	version.$(OBJEXT) workqueue.$(OBJEXT)
+	version.$(OBJEXT) workqueue.$(OBJEXT) \
+	workqueue-threads.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
 am_libgold_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
@@ -307,7 +308,8 @@ CCFILES = \
 	stringpool.cc \
 	target-select.cc \
 	version.cc \
-	workqueue.cc
+	workqueue.cc \
+	workqueue-threads.cc
 
 HFILES = \
 	archive.h \
@@ -338,7 +340,8 @@ HFILES = \
 	target-reloc.h \
 	target-select.h \
 	tls.h \
-	workqueue.h
+	workqueue.h \
+	workqueue-internal.h
 
 YFILES = \
 	yyscript.y
@@ -487,6 +490,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symtab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/target-select.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workqueue-threads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workqueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/x86_64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/yyscript.Po@am__quote@

@@ -158,7 +158,7 @@ Dir_caches::lookup(const char* dirname) const
 
 // The caches.
 
-Dir_caches caches;
+Dir_caches* caches;
 
 // A Task to read the directory.
 
@@ -169,11 +169,18 @@ class Dir_cache_task : public gold::Task
     : dir_(dir), token_(token)
   { }
 
-  Is_runnable_type is_runnable(gold::Workqueue*);
+  Is_runnable_type
+  is_runnable(gold::Workqueue*);
 
-  gold::Task_locker* locks(gold::Workqueue*);
+  gold::Task_locker*
+  locks(gold::Workqueue*);
 
-  void run(gold::Workqueue*);
+  void
+  run(gold::Workqueue*);
+
+  std::string
+  get_name() const
+  { return std::string("Dir_cache_task ") + this->dir_; }
 
  private:
   const char* dir_;
@@ -202,7 +209,7 @@ Dir_cache_task::locks(gold::Workqueue* workqueue)
 void
 Dir_cache_task::run(gold::Workqueue*)
 {
-  caches.add(this->dir_);
+  caches->add(this->dir_);
 }
 
 }
@@ -214,6 +221,8 @@ void
 Dirsearch::initialize(Workqueue* workqueue,
 		      const General_options::Dir_list* directories)
 {
+  gold_assert(caches == NULL);
+  caches = new Dir_caches;
   this->directories_ = directories;
   for (General_options::Dir_list::const_iterator p = directories->begin();
        p != directories->end();
@@ -235,7 +244,7 @@ Dirsearch::find(const std::string& n1, const std::string& n2,
        p != this->directories_->end();
        ++p)
     {
-      Dir_cache* pdc = caches.lookup(p->name().c_str());
+      Dir_cache* pdc = caches->lookup(p->name().c_str());
       gold_assert(pdc != NULL);
       if (pdc->find(n1))
 	{

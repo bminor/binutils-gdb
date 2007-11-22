@@ -815,6 +815,10 @@ class Script_unblock : public Task
   run(Workqueue*)
   { }
 
+  std::string
+  get_name() const
+  { return "Script_unblock"; }
+
  private:
   Task_token* this_blocker_;
   Task_token* next_blocker_;

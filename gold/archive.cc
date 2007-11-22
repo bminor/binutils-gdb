@@ -475,6 +475,7 @@ Add_archive_symbols::run(Workqueue*)
     {
       // We no longer need to know about this archive.
       delete this->archive_;
+      this->archive_ = NULL;
     }
 }
 

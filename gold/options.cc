@@ -28,6 +28,7 @@
 #include "filenames.h"
 #include "libiberty.h"
 
+#include "debug.h"
 #include "options.h"
 
 namespace gold
@@ -106,6 +107,17 @@ struct options::One_z_option
   void (General_options::*set)();
 };
 
+// We have a separate table for --debug options.
+
+struct options::One_debug_option
+{
+  // The name of the option.
+  const char* name;
+
+  // The flags to turn on.
+  unsigned int debug_flags;
+};
+
 class options::Command_line_options
 {
  public:
@@ -113,6 +125,8 @@ class options::Command_line_options
   static const int options_size;
   static const One_z_option z_options[];
   static const int z_options_size;
+  static const One_debug_option debug_options[];
+  static const int debug_options_size;
 };
 
 } // End namespace gold.
@@ -247,7 +261,7 @@ help(int, char**, char*, bool, gold::Command_line*)
       std::puts(options[i].doc);
     }
 
-  ::exit(0);
+  ::exit(EXIT_SUCCESS);
 
   return 0;
 }
@@ -258,7 +272,7 @@ int
 version(int, char**, char* opt, bool, gold::Command_line*)
 {
   gold::print_version(opt[0] == 'v' && opt[1] == '\0');
-  ::exit(0);
+  ::exit(EXIT_SUCCESS);
   return 0;
 }
 
@@ -466,7 +480,10 @@ options::Command_line_options::options[] =
   SPECIAL('\0', "help", N_("Report usage information"), NULL,
 	  TWO_DASHES, &help),
   SPECIAL('v', "version", N_("Report version information"), NULL,
-	  TWO_DASHES, &version)
+	  TWO_DASHES, &version),
+  GENERAL_ARG('\0', "debug", N_("Turn on debugging (all,task)"),
+	      N_("--debug=TYPE"), TWO_DASHES,
+	      &General_options::handle_debug_option)
 };
 
 const int options::Command_line_options::options_size =
@@ -483,6 +500,18 @@ options::Command_line_options::z_options[] =
 
 const int options::Command_line_options::z_options_size =
   sizeof(z_options) / sizeof(z_options[0]);
+
+// The --debug options.
+
+const options::One_debug_option
+options::Command_line_options::debug_options[] =
+{
+  { "all", DEBUG_ALL },
+  { "task", DEBUG_TASK },
+};
+
+const int options::Command_line_options::debug_options_size =
+  sizeof(debug_options) / sizeof(debug_options[0]);
 
 // The default values for the general options.
 
@@ -509,7 +538,8 @@ General_options::General_options()
     thread_count_initial_(0),
     thread_count_middle_(0),
     thread_count_final_(0),
-    execstack_(EXECSTACK_FROM_INPUT)
+    execstack_(EXECSTACK_FROM_INPUT),
+    debug_(0)
 {
   // We initialize demangle_ based on the environment variable
   // COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
@@ -547,7 +577,30 @@ General_options::handle_z_option(const char* arg)
 
   fprintf(stderr, _("%s: unrecognized -z subcommand: %s\n"),
 	  program_name, arg);
-  ::exit(1);
+  ::exit(EXIT_FAILURE);
+}
+
+// Handle the --debug option.
+
+void
+General_options::handle_debug_option(const char* arg)
+{
+  const int debug_options_size =
+    options::Command_line_options::debug_options_size;
+  const gold::options::One_debug_option* debug_options =
+    options::Command_line_options::debug_options;
+  for (int i = 0; i < debug_options_size; ++i)
+    {
+      if (strcmp(arg, debug_options[i].name) == 0)
+	{
+	  this->set_debug(debug_options[i].debug_flags);
+	  return;
+	}
+    }
+
+  fprintf(stderr, _("%s: unrecognized --debug subcommand: %s\n"),
+	  program_name, arg);
+  ::exit(EXIT_FAILURE);
 }
 
 // Add the sysroot, if any, to the search paths.
@@ -961,7 +1014,7 @@ Command_line::usage()
   fprintf(stderr,
 	  _("%s: use the --help option for usage information\n"),
 	  program_name);
-  ::exit(1);
+  ::exit(EXIT_FAILURE);
 }
 
 void

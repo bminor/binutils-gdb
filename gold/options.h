@@ -46,11 +46,13 @@ class Command_line;
 class Input_file_group;
 class Position_dependent_options;
 
-namespace options {
+namespace options
+{
 
 class Command_line_options;
 struct One_option;
 struct One_z_option;
+struct One_debug_option;
 
 } // End namespace gold::options.
 
@@ -249,6 +251,11 @@ class General_options
   is_stack_executable() const
   { return this->execstack_ == EXECSTACK_YES; }
 
+  // --debug
+  unsigned int
+  debug() const
+  { return this->debug_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -444,9 +451,17 @@ class General_options
   set_noexecstack()
   { this->execstack_ = EXECSTACK_NO; }
 
+  void
+  set_debug(unsigned int flags)
+  { this->debug_ = flags; }
+
   // Handle the -z option.
   void
   handle_z_option(const char*);
+
+  // Handle the --debug option.
+  void
+  handle_debug_option(const char*);
 
   // Apply any sysroot to the directory lists.
   void
@@ -476,6 +491,7 @@ class General_options
   int thread_count_middle_;
   int thread_count_final_;
   Execstack execstack_;
+  unsigned int debug_;
 };
 
 // The current state of the position dependent options.

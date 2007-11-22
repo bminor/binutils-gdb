@@ -54,6 +54,10 @@ class Allocate_commons_task : public Task
   void
   run(Workqueue*);
 
+  std::string
+  get_name() const
+  { return "Allocate_commons_task"; }
+
  private:
   class Allocate_commons_locker;
 

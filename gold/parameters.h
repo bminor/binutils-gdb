@@ -47,6 +47,14 @@ class Parameters
   errors() const
   { return this->errors_; }
 
+  // Whether to use threads.
+  bool
+  threads() const
+  {
+    gold_assert(this->options_valid_);
+    return this->threads_;
+  }
+
   // Return the output file name.
   const char*
   output_file_name() const
@@ -166,6 +174,15 @@ class Parameters
     return this->export_dynamic_;
   }
 
+  // Return the debug flags.  These are the flags for which we should
+  // report internal debugging information.
+  unsigned int
+  debug() const
+  {
+    gold_assert(this->options_valid_);
+    return this->debug_;
+  }
+
   // Whether we are doing a static link--a link in which none of the
   // input files are shared libraries.  This is only known after we
   // have seen all the input files.
@@ -239,6 +256,8 @@ class Parameters
 
   // Whether the fields set from the options are valid.
   bool options_valid_;
+  // Whether to use threads.
+  bool threads_;
   // The output file name.
   const char* output_file_name_;
   // The type of the output file.
@@ -259,6 +278,8 @@ class Parameters
   int optimization_level_;
   // Whether the -E/--export-dynamic flag is set.
   bool export_dynamic_;
+  // The debug flags.
+  unsigned int debug_;
 
   // Whether the doing_static_link_ field is valid.
   bool is_doing_static_link_valid_;
@@ -286,6 +307,13 @@ extern void set_parameters_size_and_endianness(int size, bool is_big_endian);
 
 // Set whether we are doing a static link.
 extern void set_parameters_doing_static_link(bool doing_static_link);
+
+// Return whether we are doing a particular debugging type.  The
+// argument is one of the flags from debug.h.
+
+inline bool
+is_debugging_enabled(unsigned int type)
+{ return (parameters->debug() & type) != 0; }
 
 } // End namespace gold.
 

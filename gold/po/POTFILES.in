@@ -54,4 +54,6 @@ tls.h
 version.cc
 workqueue.cc
 workqueue.h
+workqueue-internal.h
+workqueue-threads.cc
 x86_64.cc

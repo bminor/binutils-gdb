@@ -34,8 +34,26 @@
 namespace gold
 {
 
-class Lock_impl;
 class Condvar;
+
+// The interface for the implementation of a Lock.
+
+class Lock_impl
+{
+ public:
+  Lock_impl()
+  { }
+
+  virtual
+  ~Lock_impl()
+  { }
+
+  virtual void
+  acquire() = 0;
+
+  virtual void
+  release() = 0;
+};
 
 // A simple lock class.
 
@@ -43,15 +61,18 @@ class Lock
 {
  public:
   Lock();
+
   ~Lock();
 
   // Acquire the lock.
   void
-  acquire();
+  acquire()
+  { this->lock_->acquire(); }
 
   // Release the lock.
   void
-  release();
+  release()
+  { this->lock_->release(); }
 
  private:
   // This class can not be copied.
@@ -86,7 +107,27 @@ class Hold_lock
   Lock& lock_;
 };
 
-class Condvar_impl;
+// The interface for the implementation of a condition variable.
+
+class Condvar_impl
+{
+ public:
+  Condvar_impl()
+  { }
+
+  virtual
+  ~Condvar_impl()
+  { }
+
+  virtual void
+  wait(Lock_impl*) = 0;
+
+  virtual void
+  signal() = 0;
+
+  virtual void
+  broadcast() = 0;
+};
 
 // A simple condition variable class.  It is always associated with a
 // specific lock.
@@ -100,12 +141,22 @@ class Condvar
   // Wait for the condition variable to be signalled.  This should
   // only be called when the lock is held.
   void
-  wait();
+  wait()
+  { this->condvar_->wait(this->lock_.get_impl()); }
 
-  // Signal the condition variable.  This should only be called when
-  // the lock is held.
+  // Signal the condition variable--wake up at least one thread
+  // waiting on the condition variable.  This should only be called
+  // when the lock is held.
   void
-  signal();
+  signal()
+  { this->condvar_->signal(); }
+
+  // Broadcast the condition variable--wake up all threads waiting on
+  // the condition variable.  This should only be called when the lock
+  // is held.
+  void
+  broadcast()
+  { this->condvar_->broadcast(); }
 
  private:
   // This class can not be copied.

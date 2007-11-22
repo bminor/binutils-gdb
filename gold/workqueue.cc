@@ -22,11 +22,9 @@
 
 #include "gold.h"
 
-#ifdef ENABLE_THREADS
-#include <pthread.h>
-#endif
-
+#include "debug.h"
 #include "workqueue.h"
+#include "workqueue-internal.h"
 
 namespace gold
 {
@@ -145,38 +143,6 @@ Task_block_token::~Task_block_token()
     }
 }
 
-// The Workqueue_runner abstract class.
-
-class Workqueue_runner
-{
- public:
-  Workqueue_runner(Workqueue* workqueue)
-    : workqueue_(workqueue)
-  { }
-  virtual ~Workqueue_runner()
-  { }
-
-  // Run a task.  This is always called in the main thread.
-  virtual void
-  run(Task*, Task_locker*) = 0;
-
-  // Set the number of threads to use.  This is ignored when not using
-  // threads.
-  virtual void
-  set_thread_count(int) = 0;
-
- protected:
-  // This is called by an implementation when a task is completed.
-  void completed(Task* t, Task_locker* tl)
-  { this->workqueue_->completed(t, tl); }
-
-  Workqueue* get_workqueue() const
-  { return this->workqueue_; }
-
- private:
-  Workqueue* workqueue_;
-};
-
 // The simple single-threaded implementation of Workqueue_runner.
 
 class Workqueue_runner_single : public Workqueue_runner
@@ -212,12 +178,15 @@ Workqueue_runner_single::set_thread_count(int thread_count)
 
 Workqueue::Workqueue(const General_options& options)
   : tasks_lock_(),
+    first_tasks_(),
     tasks_(),
     completed_lock_(),
     completed_(),
     running_(0),
+    queued_(0),
     completed_condvar_(this->completed_lock_),
-    cleared_blockers_(0)
+    cleared_blockers_(0),
+    desired_thread_count_(1)
 {
   bool threads = options.threads();
 #ifndef ENABLE_THREADS
@@ -226,11 +195,18 @@ Workqueue::Workqueue(const General_options& options)
   if (!threads)
     this->runner_ = new Workqueue_runner_single(this);
   else
-    gold_unreachable();
+    {
+#ifdef ENABLE_THREADS
+      this->runner_ = new Workqueue_runner_threadpool(this);
+#else
+      gold_unreachable();
+#endif
+    }
 }
 
 Workqueue::~Workqueue()
 {
+  gold_assert(this->first_tasks_.empty());
   gold_assert(this->tasks_.empty());
   gold_assert(this->completed_.empty());
   gold_assert(this->running_ == 0);
@@ -241,8 +217,14 @@ Workqueue::~Workqueue()
 void
 Workqueue::queue(Task* t)
 {
-  Hold_lock hl(this->tasks_lock_);
-  this->tasks_.push_back(t);
+  {
+    Hold_lock hl(this->tasks_lock_);
+    this->tasks_.push_back(t);
+  }
+  {
+    Hold_lock hl(this->completed_lock_);
+    ++this->queued_;
+  }
 }
 
 // Add a task to the front of the queue.
@@ -250,8 +232,14 @@ Workqueue::queue(Task* t)
 void
 Workqueue::queue_front(Task* t)
 {
-  Hold_lock hl(this->tasks_lock_);
-  this->tasks_.push_front(t);
+  {
+    Hold_lock hl(this->tasks_lock_);
+    this->first_tasks_.push_front(t);
+  }
+  {
+    Hold_lock hl(this->completed_lock_);
+    ++this->queued_;
+  }
 }
 
 // Clear the list of completed tasks.  Return whether we cleared
@@ -277,48 +265,36 @@ Workqueue::clear_completed()
 // a blocker.
 
 Task*
-Workqueue::find_runnable(Task_list& tasks, bool* all_blocked)
+Workqueue::find_runnable(Task_list* tasks, bool* all_blocked)
 {
-  Task* tlast = tasks.back();
+  Task* tlast = tasks->back();
   *all_blocked = true;
-  while (true)
+  Task* t;
+  do
     {
-      Task* t = tasks.front();
-      tasks.pop_front();
+      t = tasks->front();
+      tasks->pop_front();
 
       Task::Is_runnable_type is_runnable = t->is_runnable(this);
       if (is_runnable == Task::IS_RUNNABLE)
-	return t;
+	{
+	  {
+	    Hold_lock hl(this->completed_lock_);
+	    --this->queued_;
+	  }
+
+	  return t;
+	}
 
       if (is_runnable != Task::IS_BLOCKED)
 	*all_blocked = false;
 
-      tasks.push_back(t);
-
-      if (t == tlast)
-	{
-	  // We couldn't find any runnable task.  If there are any
-	  // completed tasks, free their locks and try again.
-
-	  {
-	    Hold_lock hl2(this->completed_lock_);
-
-	    if (!this->clear_completed())
-	      {
-		// There had better be some tasks running, or we will
-		// never find a runnable task.
-		gold_assert(this->running_ > 0);
-
-		// We couldn't find any runnable tasks, and we
-		// couldn't release any locks.
-		return NULL;
-	      }
-	  }
-
-	  // We're going around again, so recompute ALL_BLOCKED.
-	  *all_blocked = true;
-	}
+      tasks->push_back(t);
     }
+  while (t != tlast);
+
+  // We couldn't find any runnable task.
+  return NULL;
 }
 
 // Process all the tasks on the workqueue.  This is the main loop in
@@ -334,28 +310,56 @@ Workqueue::process()
       bool empty;
       bool all_blocked;
 
+      // Don't start more tasks than desired.
+      {
+	Hold_lock hl(this->completed_lock_);
+
+	this->clear_completed();
+	while (this->running_ >= this->desired_thread_count_)
+	  {
+	    this->completed_condvar_.wait();
+	    this->clear_completed();
+	  }
+      }
+
       {
 	Hold_lock hl(this->tasks_lock_);
 
-	if (this->tasks_.empty())
+	bool first_empty;
+	bool all_blocked_first;
+	if (this->first_tasks_.empty())
 	  {
 	    t = NULL;
 	    empty = true;
-	    all_blocked = false;
+	    first_empty = true;
+	    all_blocked_first = false;
 	  }
 	else
 	  {
-	    t = this->find_runnable(this->tasks_, &all_blocked);
+	    t = this->find_runnable(&this->first_tasks_, &all_blocked_first);
 	    empty = false;
+	    first_empty = false;
+	  }
+
+	if (t == NULL)
+	  {
+	    if (this->tasks_.empty())
+	      all_blocked = false;
+	    else
+	      {
+		t = this->find_runnable(&this->tasks_, &all_blocked);
+		if (!first_empty && !all_blocked_first)
+		  all_blocked = false;
+		empty = false;
+	      }
 	  }
       }
 
       // If T != NULL, it is a task we can run.
       // If T == NULL && empty, then there are no tasks waiting to
-      // be run at this level.
+      // be run.
       // If T == NULL && !empty, then there tasks waiting to be
-      // run at this level, but they are waiting for something to
-      // unlock.
+      // run, but they are waiting for something to unlock.
 
       if (t != NULL)
 	this->run(t);
@@ -371,10 +375,16 @@ Workqueue::process()
 	    if (all_blocked)
 	      {
 		this->cleared_blockers_ = 0;
+		int queued = this->queued_;
 		this->clear_completed();
-		while (this->cleared_blockers_ == 0)
+		while (this->cleared_blockers_ == 0
+		       && queued == this->queued_)
 		  {
-		    gold_assert(this->running_ > 0);
+		    if (this->running_ <= 0)
+		      {
+			this->show_queued_tasks();
+			gold_unreachable();
+		      }
 		    this->completed_condvar_.wait();
 		    this->clear_completed();
 		  }
@@ -416,7 +426,12 @@ Workqueue::process()
 void
 Workqueue::run(Task* t)
 {
-  ++this->running_;
+  gold_debug(DEBUG_TASK, "starting  task %s", t->name().c_str());
+
+  {
+    Hold_lock hl(this->completed_lock_);
+    ++this->running_;
+  }
   this->runner_->run(t, t->locks(this));
 }
 
@@ -427,6 +442,8 @@ Workqueue::run(Task* t)
 void
 Workqueue::completed(Task* t, Task_locker* tl)
 {
+  gold_debug(DEBUG_TASK, "completed task %s", t->name().c_str());
+
   {
     Hold_lock hl(this->completed_lock_);
     gold_assert(this->running_ > 0);
@@ -434,6 +451,7 @@ Workqueue::completed(Task* t, Task_locker* tl)
     this->completed_.push_back(tl);
     this->completed_condvar_.signal();
   }
+
   delete t;
 }
 
@@ -452,7 +470,40 @@ Workqueue::cleared_blocker()
 void
 Workqueue::set_thread_count(int threads)
 {
+  gold_assert(threads > 0);
+  this->desired_thread_count_ = threads;
   this->runner_->set_thread_count(threads);
+}
+
+// Dump the list of queued tasks and their current state, for
+// debugging purposes.
+
+void
+Workqueue::show_queued_tasks()
+{
+  fprintf(stderr, _("gold task queue:\n"));
+  Hold_lock hl(this->tasks_lock_);
+  for (Task_list::const_iterator p = this->tasks_.begin();
+       p != this->tasks_.end();
+       ++p)
+    {
+      fprintf(stderr, "  %s ", (*p)->name().c_str());
+      switch ((*p)->is_runnable(this))
+	{
+	case Task::IS_RUNNABLE:
+	  fprintf(stderr, "runnable");
+	  break;
+	case Task::IS_BLOCKED:
+	  fprintf(stderr, "blocked");
+	  break;
+	case Task::IS_LOCKED:
+	  fprintf(stderr, "locked");
+	  break;
+	default:
+	  gold_unreachable();
+	}
+      putc('\n', stderr);
+    }
 }
 
 } // End namespace gold.

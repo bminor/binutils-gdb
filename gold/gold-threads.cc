@@ -22,25 +22,63 @@
 
 #include "gold.h"
 
-#include <cerrno>
 #include <cstring>
 
 #ifdef ENABLE_THREADS
 #include <pthread.h>
 #endif
 
+#include "parameters.h"
 #include "gold-threads.h"
 
 namespace gold
 {
 
-// Class Lock_impl. 
+class Condvar_impl_nothreads;
 
-class Lock_impl
+// The non-threaded version of Lock_impl.
+
+class Lock_impl_nothreads : public Lock_impl
 {
  public:
-  Lock_impl();
-  ~Lock_impl();
+  Lock_impl_nothreads()
+    : acquired_(false)
+  { }
+
+  ~Lock_impl_nothreads()
+  { gold_assert(!this->acquired_); }
+
+  void
+  acquire()
+  {
+    gold_assert(!this->acquired_);
+    this->acquired_ = true;
+  }
+
+  void
+  release()
+  {
+    gold_assert(this->acquired_);
+    this->acquired_ = false;
+  }
+
+ private:
+  friend class Condvar_impl_nothreads;
+
+  bool acquired_;
+};
+
+#ifdef ENABLE_THREADS
+
+class Condvar_impl_threads;
+
+// The threaded version of Lock_impl.
+
+class Lock_impl_threads : public Lock_impl
+{
+ public:
+  Lock_impl_threads();
+  ~Lock_impl_threads();
 
   void acquire();
 
@@ -48,90 +86,74 @@ class Lock_impl
 
 private:
   // This class can not be copied.
-  Lock_impl(const Lock_impl&);
-  Lock_impl& operator=(const Lock_impl&);
+  Lock_impl_threads(const Lock_impl_threads&);
+  Lock_impl_threads& operator=(const Lock_impl_threads&);
 
-  friend class Condvar_impl;
+  friend class Condvar_impl_threads;
 
-#ifdef ENABLE_THREADS
   pthread_mutex_t mutex_;
-#else
-  bool acquired_;
-#endif
 };
 
-#ifdef ENABLE_THREADS
-
-Lock_impl::Lock_impl()
+Lock_impl_threads::Lock_impl_threads()
 {
   pthread_mutexattr_t attr;
-  if (pthread_mutexattr_init(&attr) != 0)
-    gold_fatal(_("pthead_mutextattr_init failed: %s"), strerror(errno));
+  int err = pthread_mutexattr_init(&attr);
+  if (err != 0)
+    gold_fatal(_("pthead_mutextattr_init failed: %s"), strerror(err));
 #ifdef PTHREAD_MUTEXT_ADAPTIVE_NP
-  if (pthread_mutextattr_settype(&attr, PTHREAD_MUTEX_ADAPTIVE_NP) != 0)
-    gold_fatal(_("pthread_mutextattr_settype failed: %s"), strerror(errno));
+  err = pthread_mutextattr_settype(&attr, PTHREAD_MUTEX_ADAPTIVE_NP);
+  if (err != 0)
+    gold_fatal(_("pthread_mutextattr_settype failed: %s"), strerror(err));
 #endif
 
-  if (pthread_mutex_init (&this->mutex_, &attr) != 0)
-    gold_fatal(_("pthread_mutex_init failed: %s"), strerror(errno));
+  err = pthread_mutex_init (&this->mutex_, &attr);
+  if (err != 0)
+    gold_fatal(_("pthread_mutex_init failed: %s"), strerror(err));
 
-  if (pthread_mutexattr_destroy(&attr) != 0)
-    gold_fatal(_("pthread_mutexattr_destroy failed: %s"), strerror(errno));
+  err = pthread_mutexattr_destroy(&attr);
+  if (err != 0)
+    gold_fatal(_("pthread_mutexattr_destroy failed: %s"), strerror(err));
 }
 
-Lock_impl::~Lock_impl()
+Lock_impl_threads::~Lock_impl_threads()
 {
-  if (pthread_mutex_destroy(&this->mutex_) != 0)
-    gold_fatal(_("pthread_mutex_destroy failed: %s"), strerror(errno));
+  int err = pthread_mutex_destroy(&this->mutex_);
+  if (err != 0)
+    gold_fatal(_("pthread_mutex_destroy failed: %s"), strerror(err));
 }
 
 void
-Lock_impl::acquire()
+Lock_impl_threads::acquire()
 {
-  if (pthread_mutex_lock(&this->mutex_) != 0)
-    gold_fatal(_("pthread_mutex_lock failed: %s"), strerror(errno));
+  int err = pthread_mutex_lock(&this->mutex_);
+  if (err != 0)
+    gold_fatal(_("pthread_mutex_lock failed: %s"), strerror(err));
 }
 
 void
-Lock_impl::release()
+Lock_impl_threads::release()
 {
-  if (pthread_mutex_unlock(&this->mutex_) != 0)
-    gold_fatal(_("pthread_mutex_unlock failed: %s"), strerror(errno));
+  int err = pthread_mutex_unlock(&this->mutex_);
+  if (err != 0)
+    gold_fatal(_("pthread_mutex_unlock failed: %s"), strerror(err));
 }
 
-#else // !defined(ENABLE_THREADS)
+#endif // defined(ENABLE_THREADS)
 
-Lock_impl::Lock_impl()
-  : acquired_(false)
-{
-}
-
-Lock_impl::~Lock_impl()
-{
-  gold_assert(!this->acquired_);
-}
-
-void
-Lock_impl::acquire()
-{
-  gold_assert(!this->acquired_);
-  this->acquired_ = true;
-}
-
-void
-Lock_impl::release()
-{
-  gold_assert(this->acquired_);
-  this->acquired_ = false;
-}
-
-#endif // !defined(ENABLE_THREADS)
-
-// Methods for Lock class.
+// Class Lock.
 
 Lock::Lock()
 {
-  this->lock_ = new Lock_impl;
+  if (!parameters->threads())
+    this->lock_ = new Lock_impl_nothreads;
+  else
+    {
+#ifdef ENABLE_THREADS
+      this->lock_ = new Lock_impl_threads;
+#else
+      gold_unreachable();
+#endif
+    }
 }
 
 Lock::~Lock()
@@ -139,113 +161,118 @@ Lock::~Lock()
   delete this->lock_;
 }
 
-void
-Lock::acquire()
-{
-  this->lock_->acquire();
-}
+// The non-threaded version of Condvar_impl.
 
-void
-Lock::release()
-{
-  this->lock_->release();
-}
-
-// Class Condvar_impl.
-
-class Condvar_impl
+class Condvar_impl_nothreads : public Condvar_impl
 {
  public:
-  Condvar_impl();
-  ~Condvar_impl();
+  Condvar_impl_nothreads()
+  { }
 
-  void wait(Lock_impl*);
-  void signal();
+  ~Condvar_impl_nothreads()
+  { }
 
- private:
-  // This class can not be copied.
-  Condvar_impl(const Condvar_impl&);
-  Condvar_impl& operator=(const Condvar_impl&);
+  void
+  wait(Lock_impl* li)
+  { gold_assert(static_cast<Lock_impl_nothreads*>(li)->acquired_); }
 
-#ifdef ENABLE_THREADS
-  pthread_cond_t cond_;
-#endif
+  void
+  signal()
+  { }
+
+  void
+  broadcast()
+  { }
 };
 
 #ifdef ENABLE_THREADS
 
-Condvar_impl::Condvar_impl()
+// The threaded version of Condvar_impl.
+
+class Condvar_impl_threads : public Condvar_impl
 {
-  if (pthread_cond_init(&this->cond_, NULL) != 0)
-    gold_fatal(_("pthread_cond_init failed: %s"), strerror(errno));
+ public:
+  Condvar_impl_threads();
+  ~Condvar_impl_threads();
+
+  void
+  wait(Lock_impl*);
+
+  void
+  signal();
+
+  void
+  broadcast();
+
+ private:
+  // This class can not be copied.
+  Condvar_impl_threads(const Condvar_impl_threads&);
+  Condvar_impl_threads& operator=(const Condvar_impl_threads&);
+
+  pthread_cond_t cond_;
+};
+
+Condvar_impl_threads::Condvar_impl_threads()
+{
+  int err = pthread_cond_init(&this->cond_, NULL);
+  if (err != 0)
+    gold_fatal(_("pthread_cond_init failed: %s"), strerror(err));
 }
 
-Condvar_impl::~Condvar_impl()
+Condvar_impl_threads::~Condvar_impl_threads()
 {
-  if (pthread_cond_destroy(&this->cond_) != 0)
-    gold_fatal(_("pthread_cond_destroy failed: %s"), strerror(errno));
-}
-
-void
-Condvar_impl::wait(Lock_impl* li)
-{
-  if (pthread_cond_wait(&this->cond_, &li->mutex_) != 0)
-    gold_fatal(_("pthread_cond_wait failed: %s"), strerror(errno));
-}
-
-void
-Condvar_impl::signal()
-{
-  if (pthread_cond_signal(&this->cond_) != 0)
-    gold_fatal(_("pthread_cond_signal failed: %s"), strerror(errno));
-}
-
-#else // !defined(ENABLE_THREADS)
-
-Condvar_impl::Condvar_impl()
-{
-}
-
-Condvar_impl::~Condvar_impl()
-{
-}
-
-void
-Condvar_impl::wait(Lock_impl* li)
-{
-  gold_assert(li->acquired_);
+  int err = pthread_cond_destroy(&this->cond_);
+  if (err != 0)
+    gold_fatal(_("pthread_cond_destroy failed: %s"), strerror(err));
 }
 
 void
-Condvar_impl::signal()
+Condvar_impl_threads::wait(Lock_impl* li)
 {
+  Lock_impl_threads* lit = static_cast<Lock_impl_threads*>(li);
+  int err = pthread_cond_wait(&this->cond_, &lit->mutex_);
+  if (err != 0)
+    gold_fatal(_("pthread_cond_wait failed: %s"), strerror(err));
 }
 
-#endif // !defined(ENABLE_THREADS)
+void
+Condvar_impl_threads::signal()
+{
+  int err = pthread_cond_signal(&this->cond_);
+  if (err != 0)
+    gold_fatal(_("pthread_cond_signal failed: %s"), strerror(err));
+}
+
+void
+Condvar_impl_threads::broadcast()
+{
+  int err = pthread_cond_broadcast(&this->cond_);
+  if (err != 0)
+    gold_fatal(_("pthread_cond_broadcast failed: %s"), strerror(err));
+}
+
+#endif // defined(ENABLE_THREADS)
 
 // Methods for Condvar class.
 
 Condvar::Condvar(Lock& lock)
   : lock_(lock)
 {
-  this->condvar_ = new Condvar_impl;
+  if (!parameters->threads())
+    this->condvar_ = new Condvar_impl_nothreads;
+  else
+    {
+#ifdef ENABLE_THREADS
+      this->condvar_ = new Condvar_impl_threads;
+#else
+      gold_unreachable();
+#endif
+    }
 }
 
 Condvar::~Condvar()
 {
   delete this->condvar_;
-}
-
-void
-Condvar::wait()
-{
-  this->condvar_->wait(this->lock_.get_impl());
-}
-
-void
-Condvar::signal()
-{
-  this->condvar_->signal();
 }
 
 } // End namespace gold.

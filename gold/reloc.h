@@ -78,6 +78,9 @@ class Read_relocs : public Task
   void
   run(Workqueue*);
 
+  std::string
+  get_name() const;
+
  private:
   const General_options& options_;
   Symbol_table* symtab_;
@@ -112,6 +115,9 @@ class Scan_relocs : public Task
 
   void
   run(Workqueue*);
+
+  std::string
+  get_name() const;
 
  private:
   class Scan_relocs_locker;
@@ -150,6 +156,9 @@ class Relocate_task : public Task
 
   void
   run(Workqueue*);
+
+  std::string
+  get_name() const;
 
  private:
   class Relocate_locker;

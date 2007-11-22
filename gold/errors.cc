@@ -39,9 +39,18 @@ namespace gold
 const int Errors::max_undefined_error_report;
 
 Errors::Errors(const char* program_name)
-  : program_name_(program_name), lock_(), error_count_(0), warning_count_(0),
-    undefined_symbols_()
+  : program_name_(program_name), lock_(NULL), error_count_(0),
+    warning_count_(0), undefined_symbols_()
 {
+}
+
+// Initialize the lock_ field.
+
+void
+Errors::initialize_lock()
+{
+  if (this->lock_ == NULL)
+    this->lock_ = new Lock;
 }
 
 // Report a fatal error.
@@ -63,8 +72,10 @@ Errors::error(const char* format, va_list args)
   fprintf(stderr, "%s: ", this->program_name_);
   vfprintf(stderr, format, args);
   fputc('\n', stderr);
+
+  this->initialize_lock();
   {
-    Hold_lock h(this->lock_);
+    Hold_lock h(*this->lock_);
     ++this->error_count_;
   }
 }
@@ -77,8 +88,10 @@ Errors::warning(const char* format, va_list args)
   fprintf(stderr, _("%s: warning: "), this->program_name_);
   vfprintf(stderr, format, args);
   fputc('\n', stderr);
+
+  this->initialize_lock();
   {
-    Hold_lock h(this->lock_);
+    Hold_lock h(*this->lock_);
     ++this->warning_count_;
   }
 }
@@ -95,8 +108,10 @@ Errors::error_at_location(const Relocate_info<size, big_endian>* relinfo,
 	  relinfo->location(relnum, reloffset).c_str());
   vfprintf(stderr, format, args);
   fputc('\n', stderr);
+
+  this->initialize_lock();
   {
-    Hold_lock h(this->lock_);
+    Hold_lock h(*this->lock_);
     ++this->error_count_;
   }
 }
@@ -113,8 +128,10 @@ Errors::warning_at_location(const Relocate_info<size, big_endian>* relinfo,
 	  relinfo->location(relnum, reloffset).c_str());
   vfprintf(stderr, format, args);
   fputc('\n', stderr);
+
+  this->initialize_lock();
   {
-    Hold_lock h(this->lock_);
+    Hold_lock h(*this->lock_);
     ++this->warning_count_;
   }
 }
@@ -127,8 +144,9 @@ Errors::undefined_symbol(const Symbol* sym,
 			 const Relocate_info<size, big_endian>* relinfo,
 			 size_t relnum, off_t reloffset)
 {
+  this->initialize_lock();
   {
-    Hold_lock h(this->lock_);
+    Hold_lock h(*this->lock_);
     if (++this->undefined_symbols_[sym] >= max_undefined_error_report)
       return;
     ++this->error_count_;
@@ -138,6 +156,20 @@ Errors::undefined_symbol(const Symbol* sym,
 	  sym->demangled_name().c_str());
 }
 
+// Issue a debugging message.
+
+void
+Errors::debug(const char* format, ...)
+{
+  fprintf(stderr, _("%s: "), this->program_name_);
+
+  va_list args;
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+
+  fputc('\n', stderr);
+}
 
 // The functions which the rest of the code actually calls.
 

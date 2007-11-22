@@ -598,6 +598,11 @@ class Symbol
   void
   override_base_with_special(const Symbol* from);
 
+  // Allocate a common symbol by giving it a location in the output
+  // file.
+  void
+  allocate_base_common(Output_data*);
+
  private:
   Symbol(const Symbol&);
   Symbol& operator=(const Symbol&);
@@ -797,6 +802,11 @@ class Sized_symbol : public Symbol
   void
   set_value(Value_type value)
   { this->value_ = value; }
+
+  // Allocate a common symbol by giving it a location in the output
+  // file.
+  void
+  allocate_common(Output_data*, Value_type value);
 
  private:
   Sized_symbol(const Sized_symbol&);

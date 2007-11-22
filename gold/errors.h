@@ -80,6 +80,10 @@ class Errors
 		   const Relocate_info<size, big_endian>* relinfo,
 		   size_t relnum, off_t reloffset);
 
+  // Report a debugging message.
+  void
+  debug(const char* format, ...) ATTRIBUTE_PRINTF_2;
+
   // Return the number of errors.
   int
   error_count() const
@@ -89,6 +93,12 @@ class Errors
   Errors(const Errors&);
   Errors& operator=(const Errors&);
 
+  // Initialize the lock.  We don't do this in the constructor because
+  // lock initialization wants to know whether we are using threads or
+  // not.
+  void
+  initialize_lock();
+
   // The number of times we report an undefined symbol.
   static const int max_undefined_error_report = 5;
 
@@ -96,7 +106,7 @@ class Errors
   const char* program_name_;
   // This class can be accessed from multiple threads.  This lock is
   // used to control access to the data structures.
-  Lock lock_;
+  Lock* lock_;
   // Numbers of errors reported.
   int error_count_;
   // Number of warnings reported.

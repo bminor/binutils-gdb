@@ -159,6 +159,17 @@ Symbol::init_base(const char* name, elfcpp::STT type,
   this->in_reg_ = true;
 }
 
+// Allocate a common symbol in the base.
+
+void
+Symbol::allocate_base_common(Output_data* od)
+{
+  gold_assert(this->is_common());
+  this->source_ = IN_OUTPUT_DATA;
+  this->u_.in_output_data.output_data = od;
+  this->u_.in_output_data.offset_is_from_end = false;
+}
+
 // Initialize the fields in Sized_symbol for SYM in OBJECT.
 
 template<int size>
@@ -217,6 +228,16 @@ Sized_symbol<size>::init(const char* name, Value_type value, Size_type symsize,
   this->init_base(name, type, binding, visibility, nonvis);
   this->value_ = value;
   this->symsize_ = symsize;
+}
+
+// Allocate a common symbol.
+
+template<int size>
+void
+Sized_symbol<size>::allocate_common(Output_data* od, Value_type value)
+{
+  this->allocate_base_common(od);
+  this->value_ = value;
 }
 
 // Return true if this symbol should be added to the dynamic symbol
@@ -2016,6 +2037,18 @@ Warnings::issue_warning(const Symbol* sym,
 // Instantiate the templates we need.  We could use the configure
 // script to restrict this to only the ones needed for implemented
 // targets.
+
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+template
+void
+Sized_symbol<32>::allocate_common(Output_data*, Value_type);
+#endif
+
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+template
+void
+Sized_symbol<64>::allocate_common(Output_data*, Value_type);
+#endif
 
 #ifdef HAVE_TARGET_32_LITTLE
 template

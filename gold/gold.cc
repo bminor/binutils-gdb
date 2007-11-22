@@ -143,7 +143,8 @@ queue_initial_tasks(const General_options& options,
 						       input_objects,
 						       symtab,
 						       layout),
-				     this_blocker));
+				     this_blocker,
+				     "Task_function Middle_runner"));
 }
 
 // Queue up the middle set of tasks.  These are the tasks which run
@@ -239,7 +240,8 @@ queue_middle_tasks(const General_options& options,
 							    input_objects,
 							    symtab,
 							    layout),
-				     blocker));
+				     blocker,
+				     "Task_function Layout_task_runner"));
 }
 
 // Queue up the final set of tasks.  This is called at the end of
@@ -312,7 +314,8 @@ queue_final_tasks(const General_options& options,
   // Queue a task to close the output file.  This will be blocked by
   // FINAL_BLOCKER.
   workqueue->queue(new Task_function(new Close_task_runner(of),
-				     final_blocker));
+				     final_blocker,
+				     "Task_function Close_task_runner"));
 }
 
 } // End namespace gold.

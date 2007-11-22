@@ -53,7 +53,8 @@ CCFILES = \
 	stringpool.cc \
 	target-select.cc \
 	version.cc \
-	workqueue.cc
+	workqueue.cc \
+	workqueue-threads.cc
 
 HFILES = \
 	archive.h \
@@ -84,7 +85,8 @@ HFILES = \
 	target-reloc.h \
 	target-select.h \
 	tls.h \
-	workqueue.h
+	workqueue.h \
+	workqueue-internal.h
 
 YFILES = \
 	yyscript.y

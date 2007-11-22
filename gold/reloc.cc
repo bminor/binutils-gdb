@@ -63,6 +63,14 @@ Read_relocs::run(Workqueue* workqueue)
 					 this->symtab_lock_, this->blocker_));
 }
 
+// Return a debugging name for the task.
+
+std::string
+Read_relocs::get_name() const
+{
+  return "Read_relocs " + this->object_->name();
+}
+
 // Scan_relocs methods.
 
 // These tasks scan the relocations read by Read_relocs and mark up
@@ -114,6 +122,14 @@ Scan_relocs::run(Workqueue*)
   this->rd_ = NULL;
 }
 
+// Return a debugging name for the task.
+
+std::string
+Scan_relocs::get_name() const
+{
+  return "Scan_relocs " + this->object_->name();
+}
+
 // Relocate_task methods.
 
 // We may have to wait for the output sections to be written.
@@ -124,6 +140,9 @@ Relocate_task::is_runnable(Workqueue*)
   if (this->object_->relocs_must_follow_section_writes()
       && this->output_sections_blocker_->is_blocked())
     return IS_BLOCKED;
+
+  if (this->object_->is_locked())
+    return IS_LOCKED;
 
   return IS_RUNNABLE;
 }
@@ -164,6 +183,14 @@ Relocate_task::run(Workqueue*)
 {
   this->object_->relocate(this->options_, this->symtab_, this->layout_,
 			  this->of_);
+}
+
+// Return a debugging name for the task.
+
+std::string
+Relocate_task::get_name() const
+{
+  return "Relocate_task " + this->object_->name();
 }
 
 // Read the relocs and local symbols from the object file and store

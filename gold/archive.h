@@ -187,6 +187,14 @@ class Add_archive_symbols : public Task
   void
   run(Workqueue*);
 
+  std::string
+  get_name() const
+  {
+    if (this->archive_ == NULL)
+      return "Add_archive_symbols";
+    return "Add_archive_symbols " + this->archive_->file().filename();
+  }
+
  private:
   class Add_archive_symbols_locker;
 

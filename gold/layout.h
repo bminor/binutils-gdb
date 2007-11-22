@@ -463,6 +463,10 @@ class Write_sections_task : public Task
   void
   run(Workqueue*);
 
+  std::string
+  get_name() const
+  { return "Write_sections_task"; }
+
  private:
   class Write_sections_locker;
 
@@ -494,6 +498,10 @@ class Write_data_task : public Task
   void
   run(Workqueue*);
 
+  std::string
+  get_name() const
+  { return "Write_data_task"; }
+
  private:
   const Layout* layout_;
   const Symbol_table* symtab_;
@@ -524,6 +532,10 @@ class Write_symbols_task : public Task
 
   void
   run(Workqueue*);
+
+  std::string
+  get_name() const
+  { return "Write_symbols_task"; }
 
  private:
   const Symbol_table* symtab_;
@@ -560,6 +572,10 @@ class Write_after_input_sections_task : public Task
 
   void
   run(Workqueue*);
+
+  std::string
+  get_name() const
+  { return "Write_after_input_sections_task"; }
 
  private:
   class Write_sections_locker;

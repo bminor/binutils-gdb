@@ -72,6 +72,10 @@ class Unblock_token : public Task
   run(Workqueue*)
   { }
 
+  std::string
+  get_name() const
+  { return "Unblock_token"; }
+
  private:
   Task_token* this_blocker_;
   Task_token* next_blocker_;
@@ -271,6 +275,35 @@ Read_symbols::do_group(Workqueue* workqueue)
 				    saw_undefined,
 				    this_blocker,
 				    this->next_blocker_));
+}
+
+// Return a debugging name for a Read_symbols task.
+
+std::string
+Read_symbols::get_name() const
+{
+  if (!this->input_argument_->is_group())
+    {
+      std::string ret("Read_symbols ");
+      if (this->input_argument_->file().is_lib())
+	ret += "-l";
+      ret += this->input_argument_->file().name();
+      return ret;
+    }
+
+  std::string ret("Read_symbols group (");
+  bool add_space = false;
+  const Input_file_group* group = this->input_argument_->group();
+  for (Input_file_group::const_iterator p = group->begin();
+       p != group->end();
+       ++p)
+    {
+      if (add_space)
+	ret += ' ';
+      ret += p->file().name();
+      add_space = true;
+    }
+  return ret + ')';
 }
 
 // Class Add_symbols.

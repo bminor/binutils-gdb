@@ -275,6 +275,7 @@ class Task
 {
  public:
   Task()
+    : name_()
   { }
   virtual ~Task()
   { }
@@ -307,9 +308,29 @@ class Task
   virtual void
   run(Workqueue*) = 0;
 
+  // Return the name of the Task.  This is only used for debugging
+  // purposes.
+  const std::string&
+  name()
+  {
+    if (this->name_.empty())
+      this->name_ = this->get_name();
+    return this->name_;
+  }
+
+ protected:
+  // Get the name of the task.  This must be implemented by the child
+  // class.
+  virtual std::string
+  get_name() const = 0;
+
  private:
+  // This task may not be copied.
   Task(const Task&);
   Task& operator=(const Task&);
+
+  // Task name, for debugging purposes.
+  std::string name_;
 };
 
 // A simple task which waits for a blocker and then runs a function.
@@ -329,8 +350,9 @@ class Task_function : public Task
  public:
   // Both points should be allocated using new, and will be deleted
   // after the task runs.
-  Task_function(Task_function_runner* runner, Task_token* blocker)
-    : runner_(runner), blocker_(blocker)
+  Task_function(Task_function_runner* runner, Task_token* blocker,
+		const char* name)
+    : runner_(runner), blocker_(blocker), name_(name)
   { }
 
   ~Task_function()
@@ -356,12 +378,18 @@ class Task_function : public Task
   run(Workqueue* workqueue)
   { this->runner_->run(workqueue); }
 
+  // The debugging name.
+  std::string
+  get_name() const
+  { return this->name_; }
+
  private:
   Task_function(const Task_function&);
   Task_function& operator=(const Task_function&);
 
   Task_function_runner* runner_;
   Task_token* blocker_;
+  const char* name_;
 };
 
 // The workqueue
@@ -403,39 +431,56 @@ class Workqueue
   typedef std::list<Task*> Task_list;
 
   // Run a task.
-  void run(Task*);
+  void
+  run(Task*);
 
   friend class Workqueue_runner;
 
   // Find a runnable task.
-  Task* find_runnable(Task_list&, bool*);
+  Task*
+  find_runnable(Task_list*, bool*);
 
   // Add a lock to the completed queue.
-  void completed(Task*, Task_locker*);
+  void
+  completed(Task*, Task_locker*);
 
   // Clear the completed queue.
-  bool clear_completed();
+  bool
+  clear_completed();
+
+  // Print the list of queued tasks.
+  void
+  show_queued_tasks();
 
   // How to run a task.  Only accessed from main thread.
   Workqueue_runner* runner_;
 
   // Lock for access to tasks_ members.
   Lock tasks_lock_;
-  // List of tasks to execute at each link level.
+  // List of tasks to execute soon.
+  Task_list first_tasks_;
+  // List of tasks to execute after the ones in first_tasks_.
   Task_list tasks_;
 
-  // Lock for access to completed_ and running_ members.
+  // Lock for access to completed_, running_, and queued_.
   Lock completed_lock_;
   // List of Task_locker objects for main thread to free.
   std::list<Task_locker*> completed_;
   // Number of tasks currently running.
   int running_;
+  // Number of tasks currently on queue (both first_tasks_ and
+  // tasks_).
+  int queued_;
   // Condition variable signalled when a new entry is added to completed_.
   Condvar completed_condvar_;
 
   // Number of blocker tokens which were fully cleared.  Only accessed
   // from main thread.
   int cleared_blockers_;
+
+  // The desired thread count.  Only set by the main thread or by a
+  // singleton thread.  Only accessed from the main thread.
+  int desired_thread_count_;
 };
 
 } // End namespace gold.

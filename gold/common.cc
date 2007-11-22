@@ -226,12 +226,9 @@ Symbol_table::do_allocate_commons(const General_options&,
 
       off = align_address(off, ssym->value());
 
-      Size_type symsize = ssym->symsize();
-      ssym->init(ssym->name(), poc, off, symsize, ssym->type(),
-		 ssym->binding(), ssym->visibility(), ssym->nonvis(),
-		 false);
+      ssym->allocate_common(poc, off);
 
-      off += symsize;
+      off += ssym->symsize();
     }
 
   poc->set_space_size(off);

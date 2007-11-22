@@ -77,6 +77,9 @@ class Read_symbols : public Task
   void
   run(Workqueue*);
 
+  std::string
+  get_name() const;
+
  private:
   // Handle an archive group.
   void
@@ -128,6 +131,10 @@ class Add_symbols : public Task
 
   void
   run(Workqueue*);
+
+  std::string
+  get_name() const
+  { return "Add_symbols " + this->object_->name(); }
 
 private:
   class Add_symbols_locker;
@@ -200,6 +207,10 @@ class Finish_group : public Task
 
   void
   run(Workqueue*);
+
+  std::string
+  get_name() const
+  { return "Finish_group"; }
 
  private:
   Input_objects* input_objects_;
