@@ -1,3 +1,8 @@
+2007-11-23  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* breakpoint.c (insert_breakpoints)
+	(insert_bp_location): Remove stale comments.
+	
 2007-11-23  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-linux-tdep.h: Fix some formatting.

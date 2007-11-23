@@ -842,8 +842,6 @@ insert_bp_location (struct bp_location *bpt,
 {
   int val = 0;
 
-  /* Permanent breakpoints cannot be inserted or removed.  Disabled
-     breakpoints should not be inserted.  */
   if (!breakpoint_enabled (bpt->owner))
     return 0;
 
@@ -1241,8 +1239,6 @@ insert_breakpoints (void)
 
   ALL_BP_LOCATIONS_SAFE (b, temp)
     {
-      /* Permanent breakpoints cannot be inserted or removed.  Disabled
-	 breakpoints should not be inserted.  */
       if (!breakpoint_enabled (b->owner))
 	continue;
 
