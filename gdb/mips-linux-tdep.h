@@ -28,14 +28,14 @@ typedef unsigned char mips_elf_fpreg_t[8];
 typedef mips_elf_fpreg_t mips_elf_fpregset_t[ELF_NFPREG];
 
 /* 0 - 31 are integer registers, 32 - 63 are fp registers.  */
-#define FPR_BASE        32
-#define PC              64
-#define CAUSE           65
-#define BADVADDR        66
-#define MMHI            67
-#define MMLO            68
-#define FPC_CSR         69
-#define FPC_EIR         70
+#define FPR_BASE	32
+#define PC		64
+#define CAUSE		65
+#define BADVADDR	66
+#define MMHI		67
+#define MMLO		68
+#define FPC_CSR		69
+#define FPC_EIR		70
 
 #define EF_REG0			6
 #define EF_REG31		37

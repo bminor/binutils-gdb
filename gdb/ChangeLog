@@ -1,3 +1,7 @@
+2007-11-23  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-linux-tdep.h: Fix some formatting.
+
 2007-11-21  Markus Deuling  <deuling@de.ibm.com>
 
 	* stack.c (print_args_stub): Use get_frame_arch to get at the current
