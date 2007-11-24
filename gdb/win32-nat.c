@@ -91,6 +91,7 @@ enum
 static unsigned dr[8];
 static int debug_registers_changed;
 static int debug_registers_used;
+#define DR6_CLEAR_VALUE 0xffff0ff0
 
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file. */
@@ -112,14 +113,14 @@ static enum target_signal last_sig = TARGET_SIGNAL_0;
 /* Set if a signal was received from the debugged process */
 
 /* Thread information structure used to track information that is
-   not available in gdb's thread structure. */
+   not available in gdb's thread structure.  */
 typedef struct thread_info_struct
   {
     struct thread_info_struct *next;
     DWORD id;
     HANDLE h;
     char *name;
-    int suspend_count;
+    int suspended;
     int reload_context;
     CONTEXT context;
     STACKFRAME sf;
@@ -244,9 +245,9 @@ check (BOOL ok, const char *file, int line)
 		     GetLastError ());
 }
 
-/* Find a thread record given a thread id.
-   If get_context then also retrieve the context for this
-   thread. */
+/* Find a thread record given a thread id.  If GET_CONTEXT is not 0,
+   then also retrieve the context for this thread.  If GET_CONTEXT is
+   negative, then don't suspend the thread.  */
 static thread_info *
 thread_rec (DWORD id, int get_context)
 {
@@ -255,12 +256,21 @@ thread_rec (DWORD id, int get_context)
   for (th = &thread_head; (th = th->next) != NULL;)
     if (th->id == id)
       {
-	if (!th->suspend_count && get_context)
+	if (!th->suspended && get_context)
 	  {
 	    if (get_context > 0 && id != current_event.dwThreadId)
-	      th->suspend_count = SuspendThread (th->h) + 1;
+	      {
+		if (SuspendThread (th->h) == (DWORD) -1)
+		  {
+		    DWORD err = GetLastError ();
+		    warning (_("SuspendThread failed. (winerr %d)"),
+			     (int) err);
+		    return NULL;
+		  }
+		th->suspended = 1;
+	      }
 	    else if (get_context < 0)
-	      th->suspend_count = -1;
+	      th->suspended = -1;
 	    th->reload_context = 1;
 	  }
 	return th;
@@ -294,8 +304,7 @@ win32_add_thread (DWORD id, HANDLE h)
       th->context.Dr1 = dr[1];
       th->context.Dr2 = dr[2];
       th->context.Dr3 = dr[3];
-      /* th->context.Dr6 = dr[6];
-      FIXME: should we set dr6 also ?? */
+      th->context.Dr6 = DR6_CLEAR_VALUE;
       th->context.Dr7 = dr[7];
       CHECK (SetThreadContext (th->h, &th->context));
       th->context.ContextFlags = 0;
@@ -1122,32 +1131,34 @@ win32_continue (DWORD continue_status, int id)
 		  current_event.dwProcessId, current_event.dwThreadId,
 		  continue_status == DBG_CONTINUE ?
 		  "DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED"));
+
+  for (th = &thread_head; (th = th->next) != NULL;)
+    if ((id == -1 || id == (int) th->id)
+	&& th->suspended)
+      {
+	if (debug_registers_changed)
+	  {
+	    th->context.ContextFlags |= CONTEXT_DEBUG_REGISTERS;
+	    th->context.Dr0 = dr[0];
+	    th->context.Dr1 = dr[1];
+	    th->context.Dr2 = dr[2];
+	    th->context.Dr3 = dr[3];
+	    th->context.Dr6 = DR6_CLEAR_VALUE;
+	    th->context.Dr7 = dr[7];
+	  }
+	if (th->context.ContextFlags)
+	  {
+	    CHECK (SetThreadContext (th->h, &th->context));
+	    th->context.ContextFlags = 0;
+	  }
+	if (th->suspended > 0)
+	  (void) ResumeThread (th->h);
+	th->suspended = 0;
+      }
+
   res = ContinueDebugEvent (current_event.dwProcessId,
 			    current_event.dwThreadId,
 			    continue_status);
-  if (res)
-    for (th = &thread_head; (th = th->next) != NULL;)
-      if (((id == -1) || (id == (int) th->id)) && th->suspend_count)
-	{
-
-	  for (i = 0; i < th->suspend_count; i++)
-	    (void) ResumeThread (th->h);
-	  th->suspend_count = 0;
-	  if (debug_registers_changed)
-	    {
-	      /* Only change the value of the debug registers */
-	      th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
-	      th->context.Dr0 = dr[0];
-	      th->context.Dr1 = dr[1];
-	      th->context.Dr2 = dr[2];
-	      th->context.Dr3 = dr[3];
-	      /* th->context.Dr6 = dr[6];
-		 FIXME: should we set dr6 also ?? */
-	      th->context.Dr7 = dr[7];
-	      CHECK (SetThreadContext (th->h, &th->context));
-	      th->context.ContextFlags = 0;
-	    }
-	}
 
   debug_registers_changed = 0;
   return res;
@@ -1233,8 +1244,7 @@ win32_resume (ptid_t ptid, int step, enum target_signal sig)
 	      th->context.Dr1 = dr[1];
 	      th->context.Dr2 = dr[2];
 	      th->context.Dr3 = dr[3];
-	      /* th->context.Dr6 = dr[6];
-	       FIXME: should we set dr6 also ?? */
+	      th->context.Dr6 = DR6_CLEAR_VALUE;
 	      th->context.Dr7 = dr[7];
 	    }
 	  CHECK (SetThreadContext (th->h, &th->context));

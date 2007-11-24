@@ -1,3 +1,17 @@
+2007-11-24  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* win32-nat.c (DR6_CLEAR_VALUE): New define.
+	(thread_info_struct): Rename suspend_count to suspended, to be
+	used as a flag.
+	(thread_rec): Only suspend the thread if it wasn't suspended by
+	gdb before.  Warn if suspending failed.
+	(win32_add_thread): Set Dr6 to DR6_CLEAR_VALUE.
+	(win32_continue): Set Dr6 to DR6_CLEAR_VALUE.  Update usage of the
+	`suspended' flag.  Do ContinueDebugEvent after resuming the
+	suspended threads, not before.  Set threads' contexts before
+	resuming them, not after.
+	(win32_resume): Set Dr6 to DR6_CLEAR_VALUE.
+
 2007-11-23  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* breakpoint.c (insert_breakpoints)
