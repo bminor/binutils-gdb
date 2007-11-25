@@ -1,3 +1,10 @@
+2007-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf2_get_pc_bounds): Moved the `DW_AT_ranges' parsing
+	code with its variables OBJFILE, CU_HEADER and OBFD into ...
+	(dwarf2_ranges_read): ... a new function.
+	(read_partial_die): Implemented the parsing of `DW_AT_ranges'.
+
 2007-11-24  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* win32-nat.c (DR6_CLEAR_VALUE): New define.

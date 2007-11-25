@@ -1,0 +1,49 @@
+# Copyright 2007 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test DW_TAG_compile_unit with no children and with neither DW_AT_low_pc nor
+# DW_AT_high_pc but with DW_AT_ranges instead.
+
+# This test can only be run on targets which support DWARF-2 and use gas.
+# For now pick a sampling of likely targets.
+if {![istarget *-*-linux*]
+    && ![istarget *-*-gnu*]
+    && ![istarget *-*-elf*]
+    && ![istarget *-*-openbsd*]
+    && ![istarget arm-*-eabi*]
+    && ![istarget powerpc-*-eabi*]} {
+    verbose "Skipping DW_AT_ranges test."
+    return 0  
+}
+
+set testfile "dw2-ranges"
+set srcfile ${testfile}.S
+set binfile ${objdir}/${subdir}/${testfile}.o
+
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object debug] != "" } {
+    return -1
+}
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+# Correct output:
+# 	Line 39 of "../.././gdb/testsuite/gdb.dwarf2/dw2-ranges.S" starts at address 0x4 and ends at 0x8.
+# Wrong output:
+# 	No line number information available for address 0x4
+
+gdb_test "info line func" "Line \[0-9\]* of .* starts at address .* and ends at .*"

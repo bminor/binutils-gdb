@@ -1,3 +1,7 @@
+2007-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-ranges.S, gdb.dwarf2/dw2-ranges.exp: New files.
+
 2007-11-22  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.trace/backtrace.exp: Fix a typo.
