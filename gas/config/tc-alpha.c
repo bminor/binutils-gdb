@@ -1968,7 +1968,8 @@ assemble_insn (const struct alpha_opcode *opcode,
 	{
 	  reloc_howto_type *reloc_howto
 	    = bfd_reloc_type_lookup (stdoutput, reloc);
-	  if (reloc_howto->bitsize != reloc_operand->bits)
+	  if (reloc_operand == NULL
+	      || reloc_howto->bitsize != reloc_operand->bits)
 	    {
 	      as_bad (_("invalid relocation for field"));
 	      return;

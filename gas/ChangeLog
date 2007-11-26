@@ -1,3 +1,7 @@
+2007-11-26  Thomas Ogrisegg  <tom-bugs@gas.fnord.at>
+
+	* config/tc-alpha.c (assemble_insn): Don't segv on NULL reloc_operand.
+
 2007-11-19  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/xtensa-istack.h (tinsn_struct): Replace linenum field
