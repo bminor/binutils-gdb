@@ -1,3 +1,7 @@
+2007-11-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* cxxfilt.c (demangle_it): Don't call printf without format string.
+
 2007-11-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* dwarf.c (display_debug_loc): Cast section_end - start to long
