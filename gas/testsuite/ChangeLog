@@ -1,3 +1,10 @@
+2007-11-27  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* gas/s390/zarch-z9-ec.d: ("tcet", "tcdt", "tcxt", "tget",
+	"tgdt", "tgxt"): Removed.
+        ("tdcet", "tdcdt", "tdcxt", "tdget", "tdgdt", "tdgxt"): Added.
+	* gas/s390/zarch-z9-ec.s: Likewise.
+
 2007-11-19  Bob Wilson  <bob.wilson@acm.org>
 	
 	* gas/lns/lns.exp: Run lns-common-1 with alternate source for ia64.

@@ -57,12 +57,12 @@ foo:
 	srxt	%f6,%f2,3(%r1,%r4)
 	sdtr	%f6,%f2,%f4
 	sxtr	%f6,%f2,%f4
-	tcet	%f6,3(%r1,%r2)
-	tcdt	%f6,3(%r1,%r2)
-	tcxt	%f6,3(%r1,%r2)
-	tget	%f6,3(%r1,%r2)
-	tgdt	%f6,3(%r1,%r2)
-	tgxt	%f6,3(%r1,%r2)
+	tdcet	%f6,3(%r1,%r2)
+	tdcdt	%f6,3(%r1,%r2)
+	tdcxt	%f6,3(%r1,%r2)
+	tdget	%f6,3(%r1,%r2)
+	tdgdt	%f6,3(%r1,%r2)
+	tdgxt	%f6,3(%r1,%r2)
 	pfpo
 	ectg	10(%r1),20(%r2),%r3
 	csst	10(%r1),20(%r2),%r3

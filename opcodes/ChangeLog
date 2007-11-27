@@ -1,3 +1,9 @@
+2007-11-27  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* s390-opc.txt ("tcet", "tcdt", "tcxt", "tget", "tgdt",
+	"tgxt"): Removed.
+	("tdcet", "tdcdt", "tdcxt", "tdget", "tdgdt", "tdgxt"): Added.
+
 2007-11-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ia64-ic.tbl: Updated for Itanium 9100 series.
