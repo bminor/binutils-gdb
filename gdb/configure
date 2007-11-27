@@ -861,6 +861,7 @@ Optional Features:
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
   --enable-targets        alternative target configurations
+  --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
   --disable-gdbcli        disable command-line interface (CLI)
   --disable-gdbmi         disable machine-interface (MI)
   --enable-tui            enable full-screen terminal user interface (TUI)
@@ -3095,6 +3096,20 @@ echo "$as_me: error: enable-targets option must specify target names or 'all'" >
 esac
 fi;
 
+# Check whether to enable 64-bit support on 32-bit hosts
+# Check whether --enable-64-bit-bfd or --disable-64-bit-bfd was given.
+if test "${enable_64_bit_bfd+set}" = set; then
+  enableval="$enable_64_bit_bfd"
+  case "${enableval}" in
+  yes)  want64=true  ;;
+  no)   want64=false ;;
+  *)    { { echo "$as_me:$LINENO: error: bad value ${enableval} for 64-bit-bfd option" >&5
+echo "$as_me: error: bad value ${enableval} for 64-bit-bfd option" >&2;}
+   { (exit 1); exit 1; }; } ;;
+esac
+else
+  want64=false
+fi;
 # Provide defaults for some variables set by the per-host and per-target
 # configuration.
 gdb_host_obs=posix-hdep.o
@@ -3136,156 +3151,27 @@ do
           ;;
         esac
     done
+
+    # Check whether this target needs 64-bit CORE_ADDR
+    if test x${want64} = xfalse; then
+      . ${srcdir}/../bfd/config.bfd
+    fi
   fi
 done
 
 if test x${all_targets} = xtrue; then
-  TARGET_OBS='$(ALL_TARGET_OBS)'
-fi
 
+  # We want all 64-bit targets if we either:
+  #  - run on a 64-bit host  or
+  #  - already require 64-bit support for some other target  or
+  #  - the --enable-64-bit-bfd option was supplied
+  # Otherwise we only support all 32-bit targets.
+  #
+  # NOTE: This test must be in sync with the corresponding
+  #       tests in BFD!
 
-
-# For other settings, only the main target counts.
-gdb_sim=
-gdb_osabi=
-build_gdbserver=
-targ=$target; . ${srcdir}/configure.tgt
-
-# Fetch the default architecture and default target vector from BFD.
-targ=$target; . $srcdir/../bfd/config.bfd
-
-# We only want the first architecture, so strip off the others if
-# there is more than one.
-targ_archs=`echo $targ_archs | sed 's/ .*//'`
-
-if test "x$targ_archs" != x; then
-
-cat >>confdefs.h <<_ACEOF
-#define DEFAULT_BFD_ARCH $targ_archs
-_ACEOF
-
-fi
-if test "x$targ_defvec" != x; then
-
-cat >>confdefs.h <<_ACEOF
-#define DEFAULT_BFD_VEC $targ_defvec
-_ACEOF
-
-fi
-
-test "$program_prefix" != NONE &&
-  program_transform_name="s,^,$program_prefix,;$program_transform_name"
-# Use a double $ so make ignores it.
-test "$program_suffix" != NONE &&
-  program_transform_name="s,\$,$program_suffix,;$program_transform_name"
-# Double any \ or $.  echo might interpret backslashes.
-# By default was `s,x,x', remove it if useless.
-cat <<\_ACEOF >conftest.sed
-s/[\\$]/&&/g;s/;s,x,x,$//
-_ACEOF
-program_transform_name=`echo $program_transform_name | sed -f conftest.sed`
-rm conftest.sed
-
-
-# The CLI cannot be disabled yet, but may be in the future.
-
-# Enable CLI.
-# Check whether --enable-gdbcli or --disable-gdbcli was given.
-if test "${enable_gdbcli+set}" = set; then
-  enableval="$enable_gdbcli"
-  case $enableval in
-    yes)
-      ;;
-    no)
-      { { echo "$as_me:$LINENO: error: the command-line interface cannot be disabled yet" >&5
-echo "$as_me: error: the command-line interface cannot be disabled yet" >&2;}
-   { (exit 1); exit 1; }; } ;;
-    *)
-      { { echo "$as_me:$LINENO: error: bad value $enableval for --enable-gdbcli" >&5
-echo "$as_me: error: bad value $enableval for --enable-gdbcli" >&2;}
-   { (exit 1); exit 1; }; } ;;
-  esac
-else
-  enable_gdbcli=yes
-fi;
-if test x"$enable_gdbcli" = xyes; then
-  if test -d $srcdir/cli; then
-    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_CLI_OBS)"
-    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_CLI_DEPS)"
-    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_CLI_SRCS)"
-    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_CLI_CFLAGS)"
-  fi
-fi
-
-# Enable MI.
-# Check whether --enable-gdbmi or --disable-gdbmi was given.
-if test "${enable_gdbmi+set}" = set; then
-  enableval="$enable_gdbmi"
-  case $enableval in
-    yes | no)
-      ;;
-    *)
-      { { echo "$as_me:$LINENO: error: bad value $enableval for --enable-gdbmi" >&5
-echo "$as_me: error: bad value $enableval for --enable-gdbmi" >&2;}
-   { (exit 1); exit 1; }; } ;;
-  esac
-else
-  enable_gdbmi=yes
-fi;
-if test x"$enable_gdbmi" = xyes; then
-  if test -d $srcdir/mi; then
-    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_MI_OBS)"
-    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_MI_DEPS)"
-    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_MI_SRCS)"
-    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_MI_CFLAGS)"
-  fi
-fi
-
-# Enable TUI.
-# Check whether --enable-tui or --disable-tui was given.
-if test "${enable_tui+set}" = set; then
-  enableval="$enable_tui"
-  case $enableval in
-    yes | no)
-      ;;
-    *)
-      { { echo "$as_me:$LINENO: error: bad value $enableval for --enable-tui" >&5
-echo "$as_me: error: bad value $enableval for --enable-tui" >&2;}
-   { (exit 1); exit 1; }; } ;;
-  esac
-else
-  enable_tui=yes
-fi;
-
-# Enable gdbtk.
-# Check whether --enable-gdbtk or --disable-gdbtk was given.
-if test "${enable_gdbtk+set}" = set; then
-  enableval="$enable_gdbtk"
-  case $enableval in
-    yes | no)
-      ;;
-    *)
-      { { echo "$as_me:$LINENO: error: bad value $enableval for --enable-gdbtk" >&5
-echo "$as_me: error: bad value $enableval for --enable-gdbtk" >&2;}
-   { (exit 1); exit 1; }; } ;;
-  esac
-else
-  if test -d $srcdir/gdbtk -a -d $srcdir/../itcl; then
-    enable_gdbtk=yes
-  else
-    enable_gdbtk=no
-  fi
-fi;
-# We unconditionally disable gdbtk tests on selected platforms.
-case $host_os in
-  go32* | windows*)
-    { echo "$as_me:$LINENO: WARNING: gdbtk isn't supported on $host; disabling" >&5
-echo "$as_me: WARNING: gdbtk isn't supported on $host; disabling" >&2;}
-    enable_gdbtk=no ;;
-esac
-
-# Libunwind support.
-echo "$as_me:$LINENO: checking for ANSI C header files" >&5
+  if test x${want64} = xfalse; then
+    echo "$as_me:$LINENO: checking for ANSI C header files" >&5
 echo $ECHO_N "checking for ANSI C header files... $ECHO_C" >&6
 if test "${ac_cv_header_stdc+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -3523,6 +3409,573 @@ fi
 done
 
 
+echo "$as_me:$LINENO: checking for long" >&5
+echo $ECHO_N "checking for long... $ECHO_C" >&6
+if test "${ac_cv_type_long+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+if ((long *) 0)
+  return 0;
+if (sizeof (long))
+  return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_type_long=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_type_long=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_type_long" >&5
+echo "${ECHO_T}$ac_cv_type_long" >&6
+
+echo "$as_me:$LINENO: checking size of long" >&5
+echo $ECHO_N "checking size of long... $ECHO_C" >&6
+if test "${ac_cv_sizeof_long+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$ac_cv_type_long" = yes; then
+  # The cast to unsigned long works around a bug in the HP C Compiler
+  # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+  # declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+  # This bug is HP SR number 8606223364.
+  if test "$cross_compiling" = yes; then
+  # Depending upon the size, compute the lo and hi bounds.
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long) (sizeof (long))) >= 0)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_lo=0 ac_mid=0
+  while :; do
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long) (sizeof (long))) <= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_hi=$ac_mid; break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_lo=`expr $ac_mid + 1`
+		    if test $ac_lo -le $ac_mid; then
+		      ac_lo= ac_hi=
+		      break
+		    fi
+		    ac_mid=`expr 2 '*' $ac_mid + 1`
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+  done
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long) (sizeof (long))) < 0)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_hi=-1 ac_mid=-1
+  while :; do
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long) (sizeof (long))) >= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_lo=$ac_mid; break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_hi=`expr '(' $ac_mid ')' - 1`
+		       if test $ac_mid -le $ac_hi; then
+			 ac_lo= ac_hi=
+			 break
+		       fi
+		       ac_mid=`expr 2 '*' $ac_mid`
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+  done
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_lo= ac_hi=
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+# Binary search between lo and hi bounds.
+while test "x$ac_lo" != "x$ac_hi"; do
+  ac_mid=`expr '(' $ac_hi - $ac_lo ')' / 2 + $ac_lo`
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+static int test_array [1 - 2 * !(((long) (sizeof (long))) <= $ac_mid)];
+test_array [0] = 0
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_hi=$ac_mid
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_lo=`expr '(' $ac_mid ')' + 1`
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+case $ac_lo in
+?*) ac_cv_sizeof_long=$ac_lo;;
+'') { { echo "$as_me:$LINENO: error: cannot compute sizeof (long), 77
+See \`config.log' for more details." >&5
+echo "$as_me: error: cannot compute sizeof (long), 77
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; } ;;
+esac
+else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+See \`config.log' for more details." >&5
+echo "$as_me: error: cannot run test program while cross compiling
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+long longval () { return (long) (sizeof (long)); }
+unsigned long ulongval () { return (long) (sizeof (long)); }
+#include <stdio.h>
+#include <stdlib.h>
+int
+main ()
+{
+
+  FILE *f = fopen ("conftest.val", "w");
+  if (! f)
+    exit (1);
+  if (((long) (sizeof (long))) < 0)
+    {
+      long i = longval ();
+      if (i != ((long) (sizeof (long))))
+	exit (1);
+      fprintf (f, "%ld\n", i);
+    }
+  else
+    {
+      unsigned long i = ulongval ();
+      if (i != ((long) (sizeof (long))))
+	exit (1);
+      fprintf (f, "%lu\n", i);
+    }
+  exit (ferror (f) || fclose (f) != 0);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_sizeof_long=`cat conftest.val`
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+( exit $ac_status )
+{ { echo "$as_me:$LINENO: error: cannot compute sizeof (long), 77
+See \`config.log' for more details." >&5
+echo "$as_me: error: cannot compute sizeof (long), 77
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+fi
+rm -f conftest.val
+else
+  ac_cv_sizeof_long=0
+fi
+fi
+echo "$as_me:$LINENO: result: $ac_cv_sizeof_long" >&5
+echo "${ECHO_T}$ac_cv_sizeof_long" >&6
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_LONG $ac_cv_sizeof_long
+_ACEOF
+
+
+    if test "x${ac_cv_sizeof_long}" = "x8"; then
+      want64=true
+    fi
+  fi
+  if test x${want64} = xtrue; then
+    TARGET_OBS='$(ALL_TARGET_OBS) $(ALL_64_TARGET_OBS)'
+  else
+    TARGET_OBS='$(ALL_TARGET_OBS)'
+  fi
+fi
+
+
+
+# For other settings, only the main target counts.
+gdb_sim=
+gdb_osabi=
+build_gdbserver=
+targ=$target; . ${srcdir}/configure.tgt
+
+# Fetch the default architecture and default target vector from BFD.
+targ=$target; . $srcdir/../bfd/config.bfd
+
+# We only want the first architecture, so strip off the others if
+# there is more than one.
+targ_archs=`echo $targ_archs | sed 's/ .*//'`
+
+if test "x$targ_archs" != x; then
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_BFD_ARCH $targ_archs
+_ACEOF
+
+fi
+if test "x$targ_defvec" != x; then
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_BFD_VEC $targ_defvec
+_ACEOF
+
+fi
+
+test "$program_prefix" != NONE &&
+  program_transform_name="s,^,$program_prefix,;$program_transform_name"
+# Use a double $ so make ignores it.
+test "$program_suffix" != NONE &&
+  program_transform_name="s,\$,$program_suffix,;$program_transform_name"
+# Double any \ or $.  echo might interpret backslashes.
+# By default was `s,x,x', remove it if useless.
+cat <<\_ACEOF >conftest.sed
+s/[\\$]/&&/g;s/;s,x,x,$//
+_ACEOF
+program_transform_name=`echo $program_transform_name | sed -f conftest.sed`
+rm conftest.sed
+
+
+# The CLI cannot be disabled yet, but may be in the future.
+
+# Enable CLI.
+# Check whether --enable-gdbcli or --disable-gdbcli was given.
+if test "${enable_gdbcli+set}" = set; then
+  enableval="$enable_gdbcli"
+  case $enableval in
+    yes)
+      ;;
+    no)
+      { { echo "$as_me:$LINENO: error: the command-line interface cannot be disabled yet" >&5
+echo "$as_me: error: the command-line interface cannot be disabled yet" >&2;}
+   { (exit 1); exit 1; }; } ;;
+    *)
+      { { echo "$as_me:$LINENO: error: bad value $enableval for --enable-gdbcli" >&5
+echo "$as_me: error: bad value $enableval for --enable-gdbcli" >&2;}
+   { (exit 1); exit 1; }; } ;;
+  esac
+else
+  enable_gdbcli=yes
+fi;
+if test x"$enable_gdbcli" = xyes; then
+  if test -d $srcdir/cli; then
+    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_CLI_OBS)"
+    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_CLI_DEPS)"
+    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_CLI_SRCS)"
+    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_CLI_CFLAGS)"
+  fi
+fi
+
+# Enable MI.
+# Check whether --enable-gdbmi or --disable-gdbmi was given.
+if test "${enable_gdbmi+set}" = set; then
+  enableval="$enable_gdbmi"
+  case $enableval in
+    yes | no)
+      ;;
+    *)
+      { { echo "$as_me:$LINENO: error: bad value $enableval for --enable-gdbmi" >&5
+echo "$as_me: error: bad value $enableval for --enable-gdbmi" >&2;}
+   { (exit 1); exit 1; }; } ;;
+  esac
+else
+  enable_gdbmi=yes
+fi;
+if test x"$enable_gdbmi" = xyes; then
+  if test -d $srcdir/mi; then
+    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_MI_OBS)"
+    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_MI_DEPS)"
+    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_MI_SRCS)"
+    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_MI_CFLAGS)"
+  fi
+fi
+
+# Enable TUI.
+# Check whether --enable-tui or --disable-tui was given.
+if test "${enable_tui+set}" = set; then
+  enableval="$enable_tui"
+  case $enableval in
+    yes | no)
+      ;;
+    *)
+      { { echo "$as_me:$LINENO: error: bad value $enableval for --enable-tui" >&5
+echo "$as_me: error: bad value $enableval for --enable-tui" >&2;}
+   { (exit 1); exit 1; }; } ;;
+  esac
+else
+  enable_tui=yes
+fi;
+
+# Enable gdbtk.
+# Check whether --enable-gdbtk or --disable-gdbtk was given.
+if test "${enable_gdbtk+set}" = set; then
+  enableval="$enable_gdbtk"
+  case $enableval in
+    yes | no)
+      ;;
+    *)
+      { { echo "$as_me:$LINENO: error: bad value $enableval for --enable-gdbtk" >&5
+echo "$as_me: error: bad value $enableval for --enable-gdbtk" >&2;}
+   { (exit 1); exit 1; }; } ;;
+  esac
+else
+  if test -d $srcdir/gdbtk -a -d $srcdir/../itcl; then
+    enable_gdbtk=yes
+  else
+    enable_gdbtk=no
+  fi
+fi;
+# We unconditionally disable gdbtk tests on selected platforms.
+case $host_os in
+  go32* | windows*)
+    { echo "$as_me:$LINENO: WARNING: gdbtk isn't supported on $host; disabling" >&5
+echo "$as_me: WARNING: gdbtk isn't supported on $host; disabling" >&2;}
+    enable_gdbtk=no ;;
+esac
+
+# Libunwind support.
 
 # Check whether --with-libunwind or --without-libunwind was given.
 if test "${with_libunwind+set}" = set; then

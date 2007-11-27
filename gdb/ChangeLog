@@ -1,3 +1,15 @@
+2007-11-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Remove object files that require
+	64-bit CORE_ADDR and BFD support, move them to ...
+	(ALL_64_TARGET_OBS): ... this new variable.
+	* configure.ac: Check for --enable-64-bit-bfd option.  Only add
+	64-bit targets with --enable-targets=all if BFD supports 64-bit.
+	* configure: Regenerate.
+
+	* i386-cygwin-tdep.c (i386_cygwin_osabi_sniffer): Do not claim
+	all elf32-i386 executables, only cygwin core files.
+
 2007-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dwarf2_get_pc_bounds): Moved the `DW_AT_ranges' parsing

@@ -431,12 +431,20 @@ SIM_OBS = @SIM_OBS@
 # Target-dependent object files.
 TARGET_OBS = @TARGET_OBS@
 
-# All target-dependent objects files (used with --enable-targets=all).
-ALL_TARGET_OBS = \
+# All target-dependent objects files that require 64-bit CORE_ADDR
+# (used with --enable-targets=all --enable-64-bit-bfd).
+ALL_64_TARGET_OBS = \
 	alphabsd-tdep.o alphafbsd-tdep.o alpha-linux-tdep.o alpha-mdebug-tdep.o \
 	alphanbsd-tdep.o alphaobsd-tdep.o alpha-osf1-tdep.o alpha-tdep.o \
 	amd64fbsd-tdep.o amd64-linux-tdep.o amd64nbsd-tdep.o amd64obsd-tdep.o \
 	amd64-sol2-tdep.o amd64-tdep.o \
+	ia64-linux-tdep.o ia64-tdep.o \
+	mips64obsd-tdep.o \
+	sparc64fbsd-tdep.o sparc64-linux-tdep.o sparc64nbsd-tdep.o \
+	sparc64obsd-tdep.o sparc64-sol2-tdep.o sparc64-tdep.o
+
+# All other target-dependent objects files (used with --enable-targets=all).
+ALL_TARGET_OBS = \
 	armbsd-tdep.o arm-linux-tdep.o armnbsd-tdep.o armobsd-tdep.o \
 	arm-tdep.o arm-wince-tdep.o \
 	avr-tdep.o \
@@ -447,7 +455,6 @@ ALL_TARGET_OBS = \
 	i386bsd-tdep.o i386-cygwin-tdep.o i386fbsd-tdep.o i386gnu-tdep.o \
 	i386-linux-tdep.o i386nbsd-tdep.o i386-nto-tdep.o i386obsd-tdep.o \
 	i386-sol2-tdep.o i386-tdep.o i387-tdep.o \
-	ia64-linux-tdep.o ia64-tdep.o \
 	iq2000-tdep.o \
 	m32c-tdep.o \
 	m32r-linux-tdep.o m32r-tdep.o \
@@ -455,7 +462,7 @@ ALL_TARGET_OBS = \
 	m68kbsd-tdep.o m68klinux-tdep.o m68k-tdep.o \
 	m88k-tdep.o \
 	mep-tdep.o \
-	mips64obsd-tdep.o mips-irix-tdep.o mips-linux-tdep.o \
+	mips-irix-tdep.o mips-linux-tdep.o \
 	mipsnbsd-tdep.o mips-tdep.o \
 	mn10300-linux-tdep.o mn10300-tdep.o \
 	mt-tdep.o \
@@ -465,8 +472,6 @@ ALL_TARGET_OBS = \
 	s390-tdep.o \
 	score-tdep.o \
 	sh64-tdep.o sh-linux-tdep.o shnbsd-tdep.o sh-tdep.o \
-	sparc64fbsd-tdep.o sparc64-linux-tdep.o sparc64nbsd-tdep.o \
-	sparc64obsd-tdep.o sparc64-sol2-tdep.o sparc64-tdep.o \
 	sparc-linux-tdep.o sparcnbsd-tdep.o sparcobsd-tdep.o \
 	sparc-sol2-tdep.o sparc-tdep.o \
 	spu-tdep.o \

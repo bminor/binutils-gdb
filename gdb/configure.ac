@@ -101,6 +101,15 @@ AC_ARG_ENABLE(targets,
   *)        enable_targets=$enableval ;;
 esac])
 
+# Check whether to enable 64-bit support on 32-bit hosts
+AC_ARG_ENABLE(64-bit-bfd,
+[  --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)],
+[case "${enableval}" in
+  yes)  want64=true  ;;
+  no)   want64=false ;;
+  *)    AC_MSG_ERROR(bad value ${enableval} for 64-bit-bfd option) ;;
+esac],[want64=false])dnl
+
 # Provide defaults for some variables set by the per-host and per-target
 # configuration.
 gdb_host_obs=posix-hdep.o
@@ -142,11 +151,36 @@ do
           ;;
         esac
     done
+
+    # Check whether this target needs 64-bit CORE_ADDR
+    if test x${want64} = xfalse; then
+      . ${srcdir}/../bfd/config.bfd
+    fi
   fi
 done
 
 if test x${all_targets} = xtrue; then
-  TARGET_OBS='$(ALL_TARGET_OBS)'
+
+  # We want all 64-bit targets if we either:
+  #  - run on a 64-bit host  or
+  #  - already require 64-bit support for some other target  or
+  #  - the --enable-64-bit-bfd option was supplied
+  # Otherwise we only support all 32-bit targets.
+  #
+  # NOTE: This test must be in sync with the corresponding
+  #       tests in BFD!
+
+  if test x${want64} = xfalse; then
+    AC_CHECK_SIZEOF(long)
+    if test "x${ac_cv_sizeof_long}" = "x8"; then
+      want64=true
+    fi
+  fi
+  if test x${want64} = xtrue; then
+    TARGET_OBS='$(ALL_TARGET_OBS) $(ALL_64_TARGET_OBS)'
+  else
+    TARGET_OBS='$(ALL_TARGET_OBS)'
+  fi
 fi
 
 AC_SUBST(TARGET_OBS)

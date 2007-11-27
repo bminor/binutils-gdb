@@ -252,9 +252,15 @@ i386_cygwin_osabi_sniffer (bfd *abfd)
   if (strcmp (target_name, "pei-i386") == 0)
     return GDB_OSABI_CYGWIN;
 
-  /* Cygwin uses elf core dumps.  */
+  /* Cygwin uses elf core dumps.  Do not claim all ELF executables,
+     check whether there is a .reg section of proper size.  */
   if (strcmp (target_name, "elf32-i386") == 0)
-    return GDB_OSABI_CYGWIN;
+    {
+      asection *section = bfd_get_section_by_name (abfd, ".reg");
+      if (section
+	  && bfd_section_size (abfd, section) == I386_WIN32_SIZEOF_GREGSET)
+	return GDB_OSABI_CYGWIN;
+    }
 
   return GDB_OSABI_UNKNOWN;
 }
