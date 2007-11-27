@@ -55,8 +55,7 @@ print_varobj (struct varobj *var, enum print_values print_values,
     ui_out_field_string (uiout, "exp", varobj_get_expression (var));
   ui_out_field_int (uiout, "numchild", varobj_get_num_children (var));
   
-  gdb_type = varobj_get_gdb_type (var);
-  if (gdb_type && mi_print_value_p (gdb_type, print_values))
+  if (mi_print_value_p (varobj_get_gdb_type (var), print_values))
     ui_out_field_string (uiout, "value", varobj_get_value (var));
 
   type = varobj_get_type (var);
@@ -327,7 +326,6 @@ Must be: 0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
 static int
 mi_print_value_p (struct type *type, enum print_values print_values)
 {
-  type = check_typedef (type);
 
   if (print_values == PRINT_NO_VALUES)
     return 0;
@@ -335,12 +333,18 @@ mi_print_value_p (struct type *type, enum print_values print_values)
   if (print_values == PRINT_ALL_VALUES)
     return 1;
 
-  /* For PRINT_SIMPLE_VALUES, only print the value if it has a type
-     and that type is not a compound type.  */
+  if (type == NULL)
+    return 1;
+  else
+    {
+      type = check_typedef (type);
 
-  return (TYPE_CODE (type) != TYPE_CODE_ARRAY
-	  && TYPE_CODE (type) != TYPE_CODE_STRUCT
-	  && TYPE_CODE (type) != TYPE_CODE_UNION);
+      /* For PRINT_SIMPLE_VALUES, only print the value if it has a type
+	 and that type is not a compound type.  */
+      return (TYPE_CODE (type) != TYPE_CODE_ARRAY
+	      && TYPE_CODE (type) != TYPE_CODE_STRUCT
+	      && TYPE_CODE (type) != TYPE_CODE_UNION);
+    }
 }
 
 enum mi_cmd_result
