@@ -1652,7 +1652,7 @@ value_from_decfloat (struct type *expect_type, struct type *type,
   if (expect_type)
     {
       int expect_len = TYPE_LENGTH (expect_type);
-      char decstr[128];
+      char decstr[MAX_DECIMAL_STRING];
       int real_len;
 
       decimal_to_string (decbytes, len, decstr);

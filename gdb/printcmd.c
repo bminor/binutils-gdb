@@ -2128,7 +2128,7 @@ printf_command (char *arg, int from_tty)
 	  case decfloat_arg:
 	    {
 	      char *eos;
-	      char decstr[128];
+	      char decstr[MAX_DECIMAL_STRING];
 	      unsigned int dfp_len = TYPE_LENGTH (value_type (val_args[i]));
 	      unsigned char *dfp_value_ptr = (unsigned char *) value_contents_all (val_args[i])
                                       + value_offset (val_args[i]);

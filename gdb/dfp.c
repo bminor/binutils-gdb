@@ -71,7 +71,7 @@ decimal_to_string (const gdb_byte *decbytes, int len, char *s)
 	decimal128ToString ((decimal128 *) dec, s);
 	break;
       default:
-	error (_("Unknown decimal floating point type.\n"));
+	error (_("Unknown decimal floating point type."));
 	break;
     }
 }
@@ -103,7 +103,7 @@ decimal_from_string (gdb_byte *decbytes, int len, const char *string)
 	decimal128FromString ((decimal128 *) dec, string, &set);
 	break;
       default:
-	error (_("Unknown decimal floating point type.\n"));
+	error (_("Unknown decimal floating point type."));
 	break;
     }
 

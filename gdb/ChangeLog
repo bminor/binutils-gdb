@@ -1,3 +1,12 @@
+2007-11-27  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* dfp.c (decimal_from_string): Remove superfluous newline from
+	error string.
+	(decimal_to_string): Likewise.
+	* printcmd.c (printf_command): Change string buffer to use
+	MAX_DECIMAL_STRING constant.
+	* value.c (value_from_decfloat): Likewise.
+
 2007-11-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Remove object files that require
