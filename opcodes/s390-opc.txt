@@ -844,12 +844,12 @@ ed0000000041 srdt RXF_FRRDF "shift coefficient right long dfp" z9-ec zarch
 ed0000000049 srxt RXF_FRRDF "shift coefficient right extended dfp" z9-ec zarch
 b3d3 sdtr RRR_F0FF "subtract long dfp" z9-ec zarch
 b3db sxtr RRR_F0FF "subtract extended dfp" z9-ec zarch
-ed0000000050 tcet RXE_FRRD "test data class short dfp" z9-ec zarch
-ed0000000054 tcdt RXE_FRRD "test data class long dfp" z9-ec zarch
-ed0000000058 tcxt RXE_FRRD "test data class extended dfp" z9-ec zarch
-ed0000000051 tget RXE_FRRD "test data group short dfp" z9-ec zarch
-ed0000000055 tgdt RXE_FRRD "test data group long dfp" z9-ec zarch
-ed0000000059 tgxt RXE_FRRD "test data group extended dfp" z9-ec zarch
+ed0000000050 tdcet RXE_FRRD "test data class short dfp" z9-ec zarch
+ed0000000054 tdcdt RXE_FRRD "test data class long dfp" z9-ec zarch
+ed0000000058 tdcxt RXE_FRRD "test data class extended dfp" z9-ec zarch
+ed0000000051 tdget RXE_FRRD "test data group short dfp" z9-ec zarch
+ed0000000055 tdgdt RXE_FRRD "test data group long dfp" z9-ec zarch
+ed0000000059 tdgxt RXE_FRRD "test data group extended dfp" z9-ec zarch
 010a pfpo E "perform floating point operation" z9-ec zarch
 c801 ectg SSF_RRDRD "extract cpu time" z9-ec zarch
 c802 csst SSF_RRDRD "compare and swap and store" z9-ec zarch
