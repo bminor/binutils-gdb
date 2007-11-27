@@ -1,3 +1,8 @@
+2007-11-28  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-cmd-var.c (print_varobj): Revert change from 2007-08-31.
+	(mi_print_value_p): Guard against type = NULL.
+
 2007-11-27  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* dfp.c (decimal_from_string): Remove superfluous newline from
