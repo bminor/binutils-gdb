@@ -32,13 +32,13 @@ namespace gold
 {
 
 // This class manages mappings from input sections to offsets in an
-// output section.  This is used where input sections are merged.
+// output section.  This is used where input sections are merged.  The
+// actual data is stored in fields in Object.
 
 class Merge_map
 {
  public:
   Merge_map()
-    : merge_map_()
   { }
 
   // Add a mapping for the bytes from OFFSET to OFFSET + LENGTH in the
@@ -57,34 +57,6 @@ class Merge_map
   bool
   get_output_offset(const Relobj* object, unsigned int shndx, off_t offset,
 		    off_t *output_offset) const;
-
- private:
-  // We build a mapping from OBJECT/SHNDX/OFFSET to an offset and
-  // length in the output section.
-  struct Merge_key
-  {
-    const Relobj* object;
-    unsigned int shndx;
-    off_t offset;
-  };
-
-  struct Merge_key_less
-  {
-    inline bool
-    operator()(const Merge_key&, const Merge_key&) const;
-  };
-
-  struct Merge_value
-  {
-    off_t length;
-    off_t output_offset;
-  };
-
-  typedef std::map<Merge_key, Merge_value, Merge_key_less> Merge_mapping;
-
-  // A mapping from input object/section/offset to offset in output
-  // section.
-  Merge_mapping merge_map_;
 };
 
 // A general class for SHF_MERGE data, to hold functions shared by

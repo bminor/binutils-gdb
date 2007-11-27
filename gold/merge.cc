@@ -30,31 +30,239 @@
 namespace gold
 {
 
-// Class Merge_map::Merge_key_less.
+// For each object with merge sections, we store an Object_merge_map.
+// This is used to map locations in input sections to a merged output
+// section.  The output section itself is not recorded here--it can be
+// found in the map_to_output_ field of the Object.
 
-// Sort the entries in a merge mapping.  The key is an input object, a
-// section index in that object, and an offset in that section.
-
-inline bool
-Merge_map::Merge_key_less::operator()(const Merge_key& mk1,
-				      const Merge_key& mk2) const
+class Object_merge_map
 {
-  // The order of different objects and different sections doesn't
-  // matter.  We want to get consistent results across links so we
-  // don't use pointer comparison.
-  if (mk1.object != mk2.object)
+ public:
+  Object_merge_map()
+    : first_shnum_(-1U), first_map_(),
+      second_shnum_(-1U), second_map_(),
+      section_merge_maps_()
+  { }
+
+  ~Object_merge_map();
+
+  // Add a mapping for MERGE_MAP, for the bytes from OFFSET to OFFSET
+  // + LENGTH in the input section SHNDX to OUTPUT_OFFSET in the
+  // output section.  An OUTPUT_OFFSET of -1 means that the bytes are
+  // discarded.
+  void
+  add_mapping(const Merge_map*, unsigned int shndx, off_t offset, off_t length,
+	      off_t output_offset);
+
+  // Get the output offset for an input address in MERGE_MAP.  The
+  // input address is at offset OFFSET in section SHNDX.  This sets
+  // *OUTPUT_OFFSET to the offset in the output section; this will be
+  // -1 if the bytes are not being copied to the output.  This returns
+  // true if the mapping is known, false otherwise.
+  bool
+  get_output_offset(const Merge_map*, unsigned int shndx, off_t offset,
+		    off_t *output_offset);
+
+ private:
+  // Map input section offsets to a length and an output section
+  // offset.  An output section offset of -1 means that this part of
+  // the input section is being discarded.
+  struct Input_merge_entry
+  {
+    // The offset in the input section.
+    off_t input_offset;
+    // The length.
+    off_t length;
+    // The offset in the output section.
+    off_t output_offset;
+  };
+
+  // A less-than comparison routine for Input_merge_entry.
+  struct Input_merge_compare
+  {
+    bool
+    operator()(const Input_merge_entry& i1, const Input_merge_entry& i2) const
+    { return i1.input_offset < i2.input_offset; }
+  };
+
+  // A list of entries for a particular section.
+  struct Input_merge_map
+  {
+    // The Merge_map for this section.
+    const Merge_map* merge_map;
+    // The list of mappings.
+    std::vector<Input_merge_entry> entries;
+    // Whether the ENTRIES field is sorted by input_offset.
+    bool sorted;
+
+    Input_merge_map()
+      : merge_map(NULL), entries(), sorted(true)
+    { }
+  };
+
+  // Map input section indices to merge maps.
+  typedef std::map<unsigned int, Input_merge_map*> Section_merge_maps;
+
+  // Return a pointer to the Input_merge_map to use for the input
+  // section SHNDX, or NULL.
+  Input_merge_map*
+  get_input_merge_map(unsigned int shndx);
+
+  // Get or make the the Input_merge_map to use for the section SHNDX
+  // with MERGE_MAP.
+  Input_merge_map*
+  get_or_make_input_merge_map(const Merge_map* merge_map, unsigned int shndx);
+
+  // Any given object file will normally only have a couple of input
+  // sections with mergeable contents.  So we keep the first two input
+  // section numbers inline, and push any further ones into a map.  A
+  // value of -1U in first_shnum_ or second_shnum_ means that we don't
+  // have a corresponding entry.
+  unsigned int first_shnum_;
+  Input_merge_map first_map_;
+  unsigned int second_shnum_;
+  Input_merge_map second_map_;
+  Section_merge_maps section_merge_maps_;
+};
+
+// Destructor.
+
+Object_merge_map::~Object_merge_map()
+{
+  for (Section_merge_maps::iterator p = this->section_merge_maps_.begin();
+       p != this->section_merge_maps_.end();
+       ++p)
+    delete p->second;
+}
+
+// Get the Input_merge_map to use for an input section, or NULL.
+
+Object_merge_map::Input_merge_map*
+Object_merge_map::get_input_merge_map(unsigned int shndx)
+{
+  gold_assert(shndx != -1U);
+  if (shndx == this->first_shnum_)
+    return &this->first_map_;
+  if (shndx == this->second_shnum_)
+    return &this->second_map_;
+  Section_merge_maps::const_iterator p = this->section_merge_maps_.find(shndx);
+  if (p != this->section_merge_maps_.end())
+    return p->second;
+  return NULL;
+}
+
+// Get or create the Input_merge_map to use for an input section.
+
+Object_merge_map::Input_merge_map*
+Object_merge_map::get_or_make_input_merge_map(const Merge_map* merge_map,
+					      unsigned int shndx)
+{
+  Input_merge_map* map = this->get_input_merge_map(shndx);
+  if (map != NULL)
     {
-      // Two different object files can have the same name: if foo.a
-      // includes both bar/qux.o and baz/qux.o, then both end up with
-      // the name foo.a(qux.o).  But it's impossible for two different
-      // object files to have both the same name and the same offset.
-      if (mk1.object->offset() != mk2.object->offset())
-        return mk1.object->offset() < mk2.object->offset();
-      return mk1.object->name() < mk2.object->name();
+      // For a given input section in a given object, every mapping
+      // must be donw with the same Merge_map.
+      gold_assert(map->merge_map == merge_map);
+      return map;
     }
-  if (mk1.shndx != mk2.shndx)
-    return mk1.shndx < mk2.shndx;
-  return mk1.offset < mk2.offset;
+
+  // We need to create a new entry.
+  if (this->first_shnum_ == -1U)
+    {
+      this->first_shnum_ = shndx;
+      this->first_map_.merge_map = merge_map;
+      return &this->first_map_;
+    }
+  if (this->second_shnum_ == -1U)
+    {
+      this->second_shnum_ = shndx;
+      this->second_map_.merge_map = merge_map;
+      return &this->second_map_;
+    }
+
+  Input_merge_map* new_map = new Input_merge_map;
+  new_map->merge_map = merge_map;
+  this->section_merge_maps_[shndx] = new_map;
+  return new_map;
+}
+
+// Add a mapping.
+
+void
+Object_merge_map::add_mapping(const Merge_map* merge_map, unsigned int shndx,
+			      off_t input_offset, off_t length,
+			      off_t output_offset)
+{
+  Input_merge_map* map = this->get_or_make_input_merge_map(merge_map, shndx);
+
+  // Try to merge the new entry in the last one we saw.
+  if (!map->entries.empty())
+    {
+      Input_merge_entry& entry(map->entries.back());
+
+      // If this entry is not in order, we need to sort the vector
+      // before looking anything up.
+      if (input_offset < entry.input_offset + entry.length)
+	{
+	  gold_assert(input_offset < entry.input_offset
+		      && input_offset + length <= entry.input_offset);
+	  map->sorted = false;
+	}
+      else if (entry.input_offset + entry.length == input_offset
+	       && (output_offset == -1
+		   ? entry.output_offset == -1
+		   : entry.output_offset + entry.length == output_offset))
+	{
+	  entry.length += length;
+	  return;
+	}
+    }
+
+  Input_merge_entry entry;
+  entry.input_offset = input_offset;
+  entry.length = length;
+  entry.output_offset = output_offset;
+  map->entries.push_back(entry);
+}
+
+// Get the output offset for an input address.
+
+bool
+Object_merge_map::get_output_offset(const Merge_map* merge_map,
+				    unsigned int shndx, off_t input_offset,
+				    off_t *output_offset)
+{
+  Input_merge_map* map = this->get_input_merge_map(shndx);
+  if (map == NULL || map->merge_map != merge_map)
+    return false;
+
+  if (!map->sorted)
+    {
+      std::sort(map->entries.begin(), map->entries.end(),
+		Input_merge_compare());
+      map->sorted = true;
+    }
+
+  Input_merge_entry entry;
+  entry.input_offset = input_offset;
+  std::vector<Input_merge_entry>::const_iterator p =
+    std::lower_bound(map->entries.begin(), map->entries.end(),
+		     entry, Input_merge_compare());
+  if (p == map->entries.end() || p->input_offset > input_offset)
+    {
+      if (p == map->entries.begin())
+	return false;
+      --p;
+      gold_assert(p->input_offset <= input_offset);
+    }
+
+  if (input_offset - p->input_offset >= p->length)
+    return false;
+
+  *output_offset = p->output_offset;
+  if (*output_offset != -1)
+    *output_offset += (input_offset - p->input_offset);
+  return true;
 }
 
 // Class Merge_map.
@@ -67,18 +275,14 @@ void
 Merge_map::add_mapping(Relobj* object, unsigned int shndx,
 		       off_t offset, off_t length, off_t output_offset)
 {
-  Merge_key mk;
-  mk.object = object;
-  mk.shndx = shndx;
-  mk.offset = offset;
+  Object_merge_map* object_merge_map = object->merge_map();
+  if (object_merge_map == NULL)
+    {
+      object_merge_map = new Object_merge_map();
+      object->set_merge_map(object_merge_map);
+    }
 
-  Merge_value mv;
-  mv.length = length;
-  mv.output_offset = output_offset;
-
-  std::pair<Merge_mapping::iterator, bool> ins =
-    this->merge_map_.insert(std::make_pair(mk, mv));
-  gold_assert(ins.second);
+  object_merge_map->add_mapping(this, shndx, offset, length, output_offset);
 }
 
 // Return the output offset for an input address.  The input address
@@ -90,34 +294,11 @@ bool
 Merge_map::get_output_offset(const Relobj* object, unsigned int shndx,
 			     off_t offset, off_t* output_offset) const
 {
-  Merge_key mk;
-  mk.object = object;
-  mk.shndx = shndx;
-  mk.offset = offset;
-  Merge_mapping::const_iterator p = this->merge_map_.lower_bound(mk);
-
-  // If MK is not in the map, lower_bound returns the next iterator
-  // larger than it.
-  if (p == this->merge_map_.end()
-      || p->first.object != object
-      || p->first.shndx != shndx
-      || p->first.offset != offset)
-    {
-      if (p == this->merge_map_.begin())
-	return false;
-      --p;
-    }
-
-  if (p->first.object != object || p->first.shndx != shndx)
+  Object_merge_map* object_merge_map = object->merge_map();
+  if (object_merge_map == NULL)
     return false;
-
-  if (offset - p->first.offset >= p->second.length)
-    return false;
-
-  *output_offset = p->second.output_offset;
-  if (*output_offset != -1)
-    *output_offset += (offset - p->first.offset);
-  return true;
+  return object_merge_map->get_output_offset(this, shndx, offset,
+					     output_offset);
 }
 
 // Class Output_merge_base.

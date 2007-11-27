@@ -39,6 +39,7 @@ class Layout;
 class Output_section;
 class Output_file;
 class Dynobj;
+class Object_merge_map;
 
 template<typename Stringpool_char>
 class Stringpool_template;
@@ -411,7 +412,10 @@ class Relobj : public Object
 {
  public:
   Relobj(const std::string& name, Input_file* input_file, off_t offset = 0)
-    : Object(name, input_file, false, offset)
+    : Object(name, input_file, false, offset),
+      map_to_output_(),
+      object_merge_map_(NULL),
+      relocs_must_follow_section_writes_(false)
   { }
 
   // Read the relocs.
@@ -481,6 +485,19 @@ class Relobj : public Object
   relocs_must_follow_section_writes()
   { return this->relocs_must_follow_section_writes_; }
 
+  // Return the object merge map.
+  Object_merge_map*
+  merge_map() const
+  { return this->object_merge_map_; }
+
+  // Set the object merge map.
+  void
+  set_merge_map(Object_merge_map* object_merge_map)
+  {
+    gold_assert(this->object_merge_map_ == NULL);
+    this->object_merge_map_ = object_merge_map;
+  }
+
  protected:
   // What we need to know to map an input section to an output
   // section.  We keep an array of these, one for each input section,
@@ -533,6 +550,9 @@ class Relobj : public Object
  private:
   // Mapping from input sections to output section.
   std::vector<Map_to_output> map_to_output_;
+  // Mappings for merge sections.  This is managed by the code in the
+  // Merge_map class.
+  Object_merge_map* object_merge_map_;
   // Whether we need to wait for output sections to be written before
   // we can apply relocations.
   bool relocs_must_follow_section_writes_;
