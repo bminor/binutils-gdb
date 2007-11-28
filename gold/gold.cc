@@ -47,7 +47,7 @@ const char* program_name;
 void
 gold_exit(bool status)
 {
-  if (!status && parameters != NULL)
+  if (!status && parameters != NULL && parameters->options_valid())
     unlink_if_ordinary(parameters->output_file_name());
   exit(status ? EXIT_SUCCESS : EXIT_FAILURE);
 }

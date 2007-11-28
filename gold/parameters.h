@@ -47,6 +47,12 @@ class Parameters
   errors() const
   { return this->errors_; }
 
+  // Whether the options are valid.  This should not normally be
+  // called, but it is needed by gold_exit.
+  bool
+  options_valid() const
+  { return this->options_valid_; }
+
   // Whether to use threads.
   bool
   threads() const
