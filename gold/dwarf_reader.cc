@@ -643,19 +643,19 @@ offset_to_iterator(const std::vector<Offset_to_lineno_entry>* offsets,
   //  {offset = 5793, header_num = 1, file_num = 1, line_num = 67},  // 15
   //  {offset = 5793, header_num = 1, file_num = 1, line_num = -1},  // 16
   //  {offset = 5795, header_num = 1, file_num = 1, line_num = 68},  // 17
-  //  {offset = 5798, header_num = 1, file_num = 1, line_num = -1},  // 16
+  //  {offset = 5798, header_num = 1, file_num = 1, line_num = -1},  // 18
   // The entries with line_num == -1 mark the end of a function: the
   // associated offset is one past the last instruction in the
   // function.  This can correspond to the beginning of the next
   // function (as is true for offset 3232); alternately, there can be
   // a gap between the end of one function and the start of the next
-  // (as is true for the rest, most notably from 3236->5764).
+  // (as is true for some others, most obviously from 3236->5764).
   //
   // Case 1: lookup_key has offset == 10.  lower_bound returns
   //         offsets[0].  Since it's not an exact match and we're
-  //         at the beginning of offsets, we return NULL.
+  //         at the beginning of offsets, we return end() (invalid).
   // Case 2: lookup_key has offset 10000.  lower_bound returns
-  //         offset[17] (end()).  We return NULL.
+  //         offset[19] (end()).  We return end() (invalid).
   // Case 3: lookup_key has offset == 3211.  lower_bound matches
   //         offsets[0] exactly, and that's the entry we return.
   // Case 4: lookup_key has offset == 3232.  lower_bound returns
@@ -672,7 +672,7 @@ offset_to_iterator(const std::vector<Offset_to_lineno_entry>* offsets,
   //         offsets[8].  Since it's not an exact match, we back
   //         up to offsets[7].  Since offsets[7] indicates
   //         end-of-function, we know lookup_key is between
-  //         functions, so we return NULL (not a valid offset).
+  //         functions, so we return end() (not a valid offset).
   // Case 7: lookup_key has offset == 5794.  lower_bound returns
   //         offsets[17].  Since it's not an exact match, we back
   //         up to offsets[15].  Note we back up to the *first*
