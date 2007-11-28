@@ -605,7 +605,8 @@ a command like `return' or `jump' to continue execution."));
 	  resume_ptid = inferior_ptid;
 	}
 
-      if (step && breakpoint_here_p (read_pc ())
+      if ((step || singlestep_breakpoints_inserted_p)
+	  && breakpoint_here_p (read_pc ())
 	  && !breakpoint_inserted_here_p (read_pc ()))
 	{
 	  /* We're stepping, have breakpoint at PC, and it's 

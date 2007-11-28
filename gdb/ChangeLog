@@ -1,3 +1,8 @@
+2007-11-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* infrun.c (resume): Set right thread even if 
+	stepping over breakpoint using software single step.
+
 2007-11-28  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-cmd-var.c (print_varobj): Revert change from 2007-08-31.
