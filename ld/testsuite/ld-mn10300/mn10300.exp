@@ -80,12 +80,20 @@ set mn10300_tests {
 	"i135409-3.x"
     }
     {
-	"adjusting a 16 bit branch"
+	"adjusting a 16-bit forward branch"
 	"-Ti135409-4.t -relax"
 	""
 	{ "i135409-4.s" }
 	{ {objdump -d i135409-4.d} }
 	"i135409-4.x"
+    }
+    {
+	"adjusting a 16-bit backward branch"
+	"-Ti135409-5.t -relax"
+	""
+	{ "i135409-5.s" }
+	{ {objdump -d i135409-5.d} }
+	"i135409-5.x"
     }
 }
 

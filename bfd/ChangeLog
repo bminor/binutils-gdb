@@ -1,3 +1,8 @@
+2007-11-28  Nick Clifton  <nickc@redhat.com>
+
+	* elf-m10300.c (mn10300_elf_relax_section): Extend previous fix to
+	cover forward jumps.
+
 2007-11-21  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relax_section): Allow for alignment

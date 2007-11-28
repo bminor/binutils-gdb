@@ -1,3 +1,11 @@
+2007-11-28  Nick Clifton  <nickc@redhat.com>
+
+	* ld-mn10300/i135409-5.s: New test case.  Check for relaxation to
+	a 16-bit backward jump instruction.
+	* ld-mn10300/i135409-5.t: Linker script for the new test.
+	* ld-mn10300/i135409-5.d: Expected disassembly of new test.
+	* ld-mn10300/mn10300.exp: Run the new test.
+
 2007-11-21  Nick Clifton  <nickc@redhat.com>
 
 	* ld-mn10300/i135409-4.s: New test case.  Check for relaxation to

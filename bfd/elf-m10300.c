@@ -2736,7 +2736,7 @@ mn10300_elf_relax_section (bfd *abfd,
 	  bfd_vma aend = irel->r_offset;
 
 	  aend = BFD_ALIGN (aend, 1 << irel->r_addend);
-	  adj = 2*adj - adj - 1;
+	  adj = 2 * adj - adj - 1;
 
 	  /* Record the biggest adjustmnet.  Skip any alignment at the
 	     end of our section.  */
@@ -2963,7 +2963,7 @@ mn10300_elf_relax_section (bfd *abfd,
 	     able to relax.  */
 	  /* Account for jumps across alignment boundaries using
 	     align_gap_adjustment.  */
-	  if (value < 0x8001 - align_gap_adjustment
+	  if ((bfd_signed_vma) value < 0x8001 - (bfd_signed_vma) align_gap_adjustment
 	      && ((bfd_signed_vma) value > -0x8000 + (bfd_signed_vma) align_gap_adjustment))
 	    {
 	      unsigned char code;
