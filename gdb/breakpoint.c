@@ -5996,7 +5996,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   if (frame)
     b->watchpoint_frame = get_frame_id (frame);
   else
-    memset (&b->watchpoint_frame, 0, sizeof (b->watchpoint_frame));
+    b->watchpoint_frame = null_frame_id;
 
   if (scope_breakpoint != NULL)
     {
