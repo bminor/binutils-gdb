@@ -38,6 +38,19 @@ template<int size, bool big_endian>
 class Track_relocs;
 struct LineStateMachine;
 
+// We can't do better than to keep the offsets in a sorted vector.
+// Here, offset is the key, and file_num/line_num is the value.
+struct Offset_to_lineno_entry
+{
+  off_t offset;
+  int header_num;  // which file-list to use (i.e. which .o file are we in)
+  int file_num;    // a pointer into files_
+  int line_num;    // the line number in the source file
+  // Offsets are unique within a section, so that's a sufficient sort key.
+  bool operator<(const Offset_to_lineno_entry& that) const
+  { return this->offset < that.offset; }
+};
+
 // This class is used to read the line information from the debugging
 // section of an object file.
 
@@ -173,18 +186,6 @@ class Sized_dwarf_line_info : public Dwarf_line_info
   Reloc_map;
   Reloc_map reloc_map_;
 
-  // We can't do better than to keep the offsets in a sorted vector.
-  // Here, offset is the key, and file_num/line_num is the value.
-  struct Offset_to_lineno_entry
-  {
-    off_t offset;
-    int header_num;  // which file-list to use (i.e. which .o file are we in)
-    int file_num;    // a pointer into files_
-    int line_num;    // the line number in the source file
-    // Offsets are unique within a section, so that's a sufficient sort key.
-    bool operator<(const Offset_to_lineno_entry& that) const
-    { return this->offset < that.offset; }
-  };
   // We have a vector of offset->lineno entries for every input section.
   typedef Unordered_map<unsigned int, std::vector<Offset_to_lineno_entry> >
   Lineno_map;

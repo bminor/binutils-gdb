@@ -32,7 +32,8 @@ if NATIVE_LINKER
 
 TESTS += debug_msg.sh undef_symbol.sh
 
-check_DATA += debug_msg.err undef_symbol.err
+check_DATA += debug_msg.err debug_msg_so.err debug_msg_ndebug.err
+check_DATA += undef_symbol.err
 
 NATIVE_PROGS = \
 	constructor_test \
@@ -133,10 +134,45 @@ debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
 	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o "2>$@"
 	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
 	then \
-	  echo 1>&2 "Link of debug_msg.o should have failed"; \
+	  echo 1>&2 "Link of debug_msg should have failed"; \
 	  rm -f $@; \
 	  exit 1; \
 	fi
+
+# See if we can also detect problems when we're linking .so's, not .o's.
+debug_msg.so: debug_msg.cc
+	$(CXXCOMPILE) -O0 -g -shared -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1.so: odr_violation1.cc
+	$(CXXCOMPILE) -O0 -g -shared -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2.so: odr_violation2.cc
+	$(CXXCOMPILE) -O0 -g -shared -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg_so.err: debug_msg.so odr_violation1.so odr_violation2.so gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg_so should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
+
+# We also want to make sure we do something reasonable when there's no
+# debug info available.  For the best test, we use .so's.
+debug_msg_ndebug.so: debug_msg.cc
+	$(CXXCOMPILE) -O0 -g0 -shared -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1_ndebug.so: odr_violation1.cc
+	$(CXXCOMPILE) -O0 -g0 -shared -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2_ndebug.so: odr_violation2.cc
+	$(CXXCOMPILE) -O0 -g0 -shared -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg_ndebug.err: debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg_ndebug should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
 
 undef_symbol.o: undef_symbol.cc
 	$(CXXCOMPILE) -O0 -g -c -fPIC $<

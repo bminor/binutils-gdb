@@ -421,7 +421,7 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
             // This means that the current byte is the one immediately
             // after a set of instructions.  Record the current line
             // for up to one less than the current address.
-            lsm->address -= 1;
+            lsm->line_num = -1;
             lsm->end_sequence = true;
             *len = oplen;
             return true;
@@ -606,6 +606,120 @@ Sized_dwarf_line_info<size, big_endian>::input_is_relobj()
   return this->symtab_buffer_ != NULL;
 }
 
+// Given an Offset_to_lineno_entry vector, and an offset, figure out
+// if the offset points into a function according to the vector (see
+// comments below for the algorithm).  If it does, return an iterator
+// into the vector that points to the line-number that contains that
+// offset.  If not, it returns vector::end().
+
+static std::vector<Offset_to_lineno_entry>::const_iterator
+offset_to_iterator(const std::vector<Offset_to_lineno_entry>* offsets,
+                   off_t offset)
+{
+  const Offset_to_lineno_entry lookup_key = { offset, 0, 0, 0 };
+
+  // lower_bound() returns the smallest offset which is >= lookup_key.
+  // If no offset in offsets is >= lookup_key, returns end().
+  std::vector<Offset_to_lineno_entry>::const_iterator it
+      = std::lower_bound(offsets->begin(), offsets->end(), lookup_key);
+
+  // This code is easiest to understand with a concrete example.
+  // Here's a possible offsets array:
+  // {{offset = 3211, header_num = 0, file_num = 1, line_num = 16},  // 0
+  //  {offset = 3224, header_num = 0, file_num = 1, line_num = 20},  // 1
+  //  {offset = 3226, header_num = 0, file_num = 1, line_num = 22},  // 2
+  //  {offset = 3231, header_num = 0, file_num = 1, line_num = 25},  // 3
+  //  {offset = 3232, header_num = 0, file_num = 1, line_num = -1},  // 4
+  //  {offset = 3232, header_num = 0, file_num = 1, line_num = 65},  // 5
+  //  {offset = 3235, header_num = 0, file_num = 1, line_num = 66},  // 6
+  //  {offset = 3236, header_num = 0, file_num = 1, line_num = -1},  // 7
+  //  {offset = 5764, header_num = 0, file_num = 1, line_num = 47},  // 8
+  //  {offset = 5765, header_num = 0, file_num = 1, line_num = 48},  // 9
+  //  {offset = 5767, header_num = 0, file_num = 1, line_num = 49},  // 10
+  //  {offset = 5768, header_num = 0, file_num = 1, line_num = 50},  // 11
+  //  {offset = 5773, header_num = 0, file_num = 1, line_num = -1},  // 12
+  //  {offset = 5787, header_num = 1, file_num = 1, line_num = 19},  // 13
+  //  {offset = 5790, header_num = 1, file_num = 1, line_num = 20},  // 14
+  //  {offset = 5793, header_num = 1, file_num = 1, line_num = 67},  // 15
+  //  {offset = 5793, header_num = 1, file_num = 1, line_num = -1},  // 16
+  //  {offset = 5795, header_num = 1, file_num = 1, line_num = 68},  // 17
+  //  {offset = 5798, header_num = 1, file_num = 1, line_num = -1},  // 16
+  // The entries with line_num == -1 mark the end of a function: the
+  // associated offset is one past the last instruction in the
+  // function.  This can correspond to the beginning of the next
+  // function (as is true for offset 3232); alternately, there can be
+  // a gap between the end of one function and the start of the next
+  // (as is true for the rest, most notably from 3236->5764).
+  //
+  // Case 1: lookup_key has offset == 10.  lower_bound returns
+  //         offsets[0].  Since it's not an exact match and we're
+  //         at the beginning of offsets, we return NULL.
+  // Case 2: lookup_key has offset 10000.  lower_bound returns
+  //         offset[17] (end()).  We return NULL.
+  // Case 3: lookup_key has offset == 3211.  lower_bound matches
+  //         offsets[0] exactly, and that's the entry we return.
+  // Case 4: lookup_key has offset == 3232.  lower_bound returns
+  //         offsets[4].  That's an exact match, but indicates
+  //         end-of-function.  We check if offsets[5] is also an
+  //         exact match but not end-of-function.  It is, so we
+  //         return offsets[5].
+  // Case 5: lookup_key has offset == 3214.  lower_bound returns
+  //         offsets[1].  Since it's not an exact match, we back
+  //         up to the offset that's < lookup_key, offsets[0].
+  //         We note offsets[0] is a valid entry (not end-of-function),
+  //         so that's the entry we return.
+  // Case 6: lookup_key has offset == 4000.  lower_bound returns
+  //         offsets[8].  Since it's not an exact match, we back
+  //         up to offsets[7].  Since offsets[7] indicates
+  //         end-of-function, we know lookup_key is between
+  //         functions, so we return NULL (not a valid offset).
+  // Case 7: lookup_key has offset == 5794.  lower_bound returns
+  //         offsets[17].  Since it's not an exact match, we back
+  //         up to offsets[15].  Note we back up to the *first*
+  //         entry with offset 5793, not just offsets[17-1].
+  //         We note offsets[15] is a valid entry, so we return it.
+  //         If offsets[15] had had line_num == -1, we would have
+  //         checked offsets[16].  The reason for this is that
+  //         15 and 16 can be in an arbitrary order, since we sort
+  //         only by offset.  (Note it doesn't help to use line_number
+  //         as a secondary sort key, since sometimes we want the -1
+  //         to be first and sometimes we want it to be last.)
+
+  // This deals with cases (1) and (2).
+  if ((it == offsets->begin() && offset < it->offset)
+      || it == offsets->end())
+    return offsets->end();
+
+  // This deals with cases (3) and (4).
+  if (offset == it->offset)
+    {
+      while (it != offsets->end()
+             && it->offset == offset
+             && it->line_num == -1)
+        ++it;
+      if (it == offsets->end() || it->offset != offset)
+        return offsets->end();
+      else
+        return it;
+    }
+
+  // This handles the first part of case (7) -- we back up to the
+  // *first* entry that has the offset that's behind us.
+  gold_assert(it != offsets->begin());
+  std::vector<Offset_to_lineno_entry>::const_iterator range_end = it;
+  --it;
+  const off_t range_value = it->offset;
+  while (it != offsets->begin() && (it-1)->offset == range_value)
+    --it;
+
+  // This handles cases (5), (6), and (7): if any entry in the
+  // equal_range [it, range_end) has a line_num != -1, it's a valid
+  // match.  If not, we're not in a function.
+  for (; it != range_end; ++it)
+    if (it->line_num != -1)
+      return it;
+  return offsets->end();
+}
 
 // Return a string for a file name and line number.
 
@@ -617,7 +731,6 @@ Sized_dwarf_line_info<size, big_endian>::do_addr2line(unsigned int shndx,
   if (this->data_valid_ == false)
     return "";
 
-  const Offset_to_lineno_entry lookup_key = { offset, 0, 0, 0 };
   const std::vector<Offset_to_lineno_entry>* offsets;
   // If we do not have reloc information, then our input is a .so or
   // some similar data structure where all the information is held in
@@ -630,17 +743,9 @@ Sized_dwarf_line_info<size, big_endian>::do_addr2line(unsigned int shndx,
     return "";
 
   typename std::vector<Offset_to_lineno_entry>::const_iterator it
-      = std::lower_bound(offsets->begin(), offsets->end(), lookup_key);
-
-  // If we found an exact match, great, otherwise find the last entry
-  // before the passed-in offset.
-  if (it == offsets->end() || it->offset > offset)
-    {
-      if (it == offsets->begin())
-        return "";
-      --it;
-      gold_assert(it->offset < offset);
-    }
+      = offset_to_iterator(offsets, offset);
+  if (it == offsets->end())
+    return "";
 
   // Convert the file_num + line_num into a string.
   std::string ret;
