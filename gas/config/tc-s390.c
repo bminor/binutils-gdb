@@ -512,17 +512,22 @@ md_begin ()
 
   op_end = s390_opcodes + s390_num_opcodes;
   for (op = s390_opcodes; op < op_end; op++)
-    if (op->min_cpu <= current_cpu)
-      {
-	retval = hash_insert (s390_opcode_hash, op->name, (PTR) op);
-	if (retval != (const char *) NULL)
-	  {
-	    as_bad (_("Internal assembler error for instruction %s"),
-		    op->name);
-	    dup_insn = TRUE;
-	  }
-	while (op < op_end - 1 && strcmp (op->name, op[1].name) == 0)
+    {
+      while (op < op_end - 1 && strcmp(op->name, op[1].name) == 0)
+	{
+          if (op->min_cpu <= current_cpu && (op->modes & current_mode_mask))
+	    break;
 	  op++;
+        }
+      retval = hash_insert (s390_opcode_hash, op->name, (PTR) op);
+      if (retval != (const char *) NULL)
+        {
+          as_bad (_("Internal assembler error for instruction %s"),
+		  op->name);
+	  dup_insn = TRUE;
+	}
+      while (op < op_end - 1 && strcmp (op->name, op[1].name) == 0)
+	op++;
       }
 
   if (dup_insn)

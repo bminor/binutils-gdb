@@ -1,3 +1,9 @@
+2007-11-29  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (md_begin): If the -mesa option is specified
+	add zarch opcodes to the hash table only if there is no variant
+	that is available for the esa mode as well.
+
 2007-11-26  Thomas Ogrisegg  <tom-bugs@gas.fnord.at>
 
 	* config/tc-alpha.c (assemble_insn): Don't segv on NULL reloc_operand.

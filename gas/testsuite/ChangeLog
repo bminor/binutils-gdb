@@ -1,3 +1,8 @@
+2007-11-29  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* gas/s390/esa-z9-109.d: Add check for old version of sske.
+	* gas/s390/esa-z9-109.s: Likewise.
+
 2007-11-27  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* gas/s390/zarch-z9-ec.d: ("tcet", "tcdt", "tcxt", "tget",
