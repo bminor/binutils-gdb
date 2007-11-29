@@ -270,7 +270,9 @@ m4kp,
 20kc,
 25kf,
 sb1,
-sb1a
+sb1a,
+loongson2e,
+loongson2f
 @end quotation
 
 For compatibility reasons, @samp{@var{n}x} and @samp{@var{b}fx} are

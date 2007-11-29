@@ -5221,6 +5221,12 @@ _bfd_elf_mips_mach (flagword flags)
     case E_MIPS_MACH_SB1:
       return bfd_mach_mips_sb1;
 
+    case E_MIPS_MACH_LS2E:
+      return bfd_mach_mips_loongson_2e;
+
+    case E_MIPS_MACH_LS2F:
+      return bfd_mach_mips_loongson_2f;
+
     default:
       switch (flags & EF_MIPS_ARCH)
 	{
@@ -9462,6 +9468,14 @@ mips_set_isa_flags (bfd *abfd)
       val = E_MIPS_ARCH_5;
       break;
 
+    case bfd_mach_mips_loongson_2e:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_LS2E;
+      break;
+
+    case bfd_mach_mips_loongson_2f:
+      val = E_MIPS_ARCH_3 | E_MIPS_MACH_LS2F;
+      break;
+
     case bfd_mach_mips_sb1:
       val = E_MIPS_ARCH_64 | E_MIPS_MACH_SB1;
       break;
@@ -11228,6 +11242,8 @@ static const struct mips_mach_extension mips_mach_extensions[] = {
   { bfd_mach_mips4111, bfd_mach_mips4100 },
 
   /* MIPS III extensions.  */
+  { bfd_mach_mips_loongson_2e, bfd_mach_mips4000 },
+  { bfd_mach_mips_loongson_2f, bfd_mach_mips4000 },
   { bfd_mach_mips8000, bfd_mach_mips4000 },
   { bfd_mach_mips4650, bfd_mach_mips4000 },
   { bfd_mach_mips4600, bfd_mach_mips4000 },

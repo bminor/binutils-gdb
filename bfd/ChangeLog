@@ -1,3 +1,18 @@
+2007-11-29  Mark Shinwell  <shinwell@codesourcery.com>
+
+	* archures.c (bfd_mach_mips_loongson_2e): New.
+	(bfd_mach_mips_loongson_2f): New.
+	* bfd-in2.h (bfd_mach_mips_loongson_2e): New.
+	(bfd_mach_mips_loongson_2f): New.
+	* cpu-mips.c: Add I_loongson_2e and I_loongson_2f to
+	anonymous enum.
+	(arch_info_struct): Add Loongson-2E and Loongson-2F entries.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Handle Loongson-2E
+	and Loongson-2F flags.
+	(mips_set_isa_flags): Likewise.
+	(mips_mach_extensions): Add Loongson-2E and Loongson-2F
+	entries. 
+
 2007-11-29  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/5398

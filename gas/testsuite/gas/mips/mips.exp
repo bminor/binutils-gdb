@@ -757,6 +757,9 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "at-1"
     run_list_test "at-2" "-32 -mips1" "MIPS at-2"
 
+    run_dump_test "loongson-2e"
+    run_dump_test "loongson-2f"
+
     run_dump_test_arches "smartmips"	[mips_arch_list_matching mips32 !gpr64]
     run_dump_test_arches "mips32-dsp"	[mips_arch_list_matching mips32r2]
     run_dump_test_arches "mips32-dspr2"	[mips_arch_list_matching mips32r2]

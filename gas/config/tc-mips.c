@@ -14823,6 +14823,10 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "sb1a",           MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
 						ISA_MIPS64,	CPU_SB1 },
 
+  /* ST Microelectronics Loongson 2E and 2F cores */
+  { "loongson2e",     0,      ISA_MIPS3,      CPU_LOONGSON_2E },
+  { "loongson2f",     0,      ISA_MIPS3,      CPU_LOONGSON_2F },
+
   /* End marker */
   { NULL, 0, 0, 0 }
 };
