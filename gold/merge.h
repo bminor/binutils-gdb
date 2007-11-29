@@ -114,7 +114,7 @@ class Output_merge_data : public Output_merge_base
 
   // Set the final data size.
   void
-  do_set_address(uint64_t, off_t);
+  set_final_data_size();
 
   // Write the data to the file.
   void
@@ -215,7 +215,7 @@ class Output_merge_string : public Output_merge_base
 
   // Set the final data size.
   void
-  do_set_address(uint64_t, off_t);
+  set_final_data_size();
 
   // Write the data to the file.
   void

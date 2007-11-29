@@ -231,7 +231,7 @@ Symbol_table::do_allocate_commons(const General_options&,
       off += ssym->symsize();
     }
 
-  poc->set_space_size(off);
+  poc->set_current_data_size(off);
 
   this->commons_.clear();
 }

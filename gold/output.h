@@ -49,32 +49,44 @@ class Sized_relobj;
 class Output_data
 {
  public:
-  explicit Output_data(off_t data_size = 0)
-    : address_(0), data_size_(data_size), offset_(-1),
+  explicit Output_data()
+    : address_(0), data_size_(0), offset_(-1),
+      is_address_valid_(false), is_data_size_valid_(false),
+      is_offset_valid_(false),
       dynamic_reloc_count_(0)
   { }
 
   virtual
   ~Output_data();
 
-  // Return the address.  This is only valid after Layout::finalize is
-  // finished.
+  // Return the address.  For allocated sections, this is only valid
+  // after Layout::finalize is finished.
   uint64_t
   address() const
-  { return this->address_; }
+  {
+    gold_assert(this->is_address_valid_);
+    return this->address_;
+  }
 
-  // Return the size of the data.  This must be valid after
-  // Layout::finalize calls set_address, but need not be valid before
-  // then.
+  // Return the size of the data.  For allocated sections, this must
+  // be valid after Layout::finalize calls set_address, but need not
+  // be valid before then.
   off_t
   data_size() const
-  { return this->data_size_; }
+  {
+    gold_assert(this->is_data_size_valid_);
+    return this->data_size_;
+  }
 
   // Return the file offset.  This is only valid after
-  // Layout::finalize is finished.
+  // Layout::finalize is finished.  For some non-allocated sections,
+  // it may not be valid until near the end of the link.
   off_t
   offset() const
-  { return this->offset_; }
+  {
+    gold_assert(this->is_offset_valid_);
+    return this->offset_;
+  }
 
   // Return the required alignment.
   uint64_t
@@ -107,10 +119,46 @@ class Output_data
   set_out_shndx(unsigned int shndx)
   { this->do_set_out_shndx(shndx); }
 
-  // Set the address and file offset of this data.  This is called
-  // during Layout::finalize.
+  // Set the address and file offset of this data, and finalize the
+  // size of the data.  This is called during Layout::finalize for
+  // allocated sections.
   void
-  set_address(uint64_t addr, off_t off);
+  set_address_and_file_offset(uint64_t addr, off_t off)
+  {
+    this->set_address(addr);
+    this->set_file_offset(off);
+    this->finalize_data_size();
+  }
+
+  // Set the address.
+  void
+  set_address(uint64_t addr)
+  {
+    gold_assert(!this->is_address_valid_);
+    this->address_ = addr;
+    this->is_address_valid_ = true;
+  }
+
+  // Set the file offset.
+  void
+  set_file_offset(off_t off)
+  {
+    gold_assert(!this->is_offset_valid_);
+    this->offset_ = off;
+    this->is_offset_valid_ = true;
+  }
+
+  // Finalize the data size.
+  void
+  finalize_data_size()
+  {
+    if (!this->is_data_size_valid_)
+      {
+	// Tell the child class to set the data size.
+	this->set_final_data_size();
+	gold_assert(this->is_data_size_valid_);
+      }
+  }
 
   // Write the data to the output file.  This is called after
   // Layout::finalize is complete.
@@ -118,16 +166,16 @@ class Output_data
   write(Output_file* file)
   { this->do_write(file); }
 
-  // This is called by Layout::finalize to note that all sizes must
-  // now be fixed.
+  // This is called by Layout::finalize to note that the sizes of
+  // allocated sections must now be fixed.
   static void
   layout_complete()
-  { Output_data::sizes_are_fixed = true; }
+  { Output_data::allocated_sizes_are_fixed = true; }
 
   // Used to check that layout has been done.
   static bool
   is_layout_complete()
-  { return Output_data::sizes_are_fixed; }
+  { return Output_data::allocated_sizes_are_fixed; }
 
   // Count the number of dynamic relocations applied to this section.
   void
@@ -177,20 +225,51 @@ class Output_data
   do_set_out_shndx(unsigned int)
   { gold_unreachable(); }
 
-  // Set the address and file offset of the data.  This only needs to
-  // be implemented if the child needs to know.  The child class can
-  // set its size in this call.
+  // This is a hook for derived classes to set the data size.  This is
+  // called by finalize_data_size, normally called during
+  // Layout::finalize, when the section address is set.
   virtual void
-  do_set_address(uint64_t, off_t)
-  { }
+  set_final_data_size()
+  { gold_unreachable(); }
 
   // Functions that child classes may call.
+
+  // Whether the address is valid.
+  bool
+  is_address_valid() const
+  { return this->is_address_valid_; }
+
+  // Whether the file offset is valid.
+  bool
+  is_offset_valid() const
+  { return this->is_offset_valid_; }
+
+  // Whether the data size is valid.
+  bool
+  is_data_size_valid() const
+  { return this->is_data_size_valid_; }
 
   // Set the size of the data.
   void
   set_data_size(off_t data_size)
   {
-    gold_assert(!Output_data::sizes_are_fixed);
+    gold_assert(!this->is_data_size_valid_);
+    this->data_size_ = data_size;
+    this->is_data_size_valid_ = true;
+  }
+
+  // Get the current data size--this is for the convenience of
+  // sections which build up their size over time.
+  off_t
+  current_data_size_for_child() const
+  { return this->data_size_; }
+
+  // Set the current data size--this is for the convenience of
+  // sections which build up their size over time.
+  void
+  set_current_data_size_for_child(off_t data_size)
+  {
+    gold_assert(!this->is_data_size_valid_);
     this->data_size_ = data_size;
   }
 
@@ -207,15 +286,22 @@ class Output_data
   Output_data& operator=(const Output_data&);
 
   // This is used for verification, to make sure that we don't try to
-  // change any sizes after we set the section addresses.
-  static bool sizes_are_fixed;
+  // change any sizes of allocated sections after we set the section
+  // addresses.
+  static bool allocated_sizes_are_fixed;
 
-  // Memory address in file (not always meaningful).
+  // Memory address in output file.
   uint64_t address_;
-  // Size of data in file.
+  // Size of data in output file.
   off_t data_size_;
-  // Offset within file.
+  // File offset of contents in output file.
   off_t offset_;
+  // Whether address_ is valid.
+  bool is_address_valid_;
+  // Whether data_size_ is valid.
+  bool is_data_size_valid_;
+  // Whether offset_ is valid.
+  bool is_offset_valid_;
   // Count of dynamic relocations applied to this section.
   unsigned int dynamic_reloc_count_;
 };
@@ -230,6 +316,7 @@ class Output_section_headers : public Output_data
 			 const Layout::Section_list*,
 			 const Stringpool*);
 
+ protected:
   // Write the data to the file.
   void
   do_write(Output_file*);
@@ -258,6 +345,7 @@ class Output_segment_headers : public Output_data
  public:
   Output_segment_headers(const Layout::Segment_list& segment_list);
 
+ protected:
   // Write the data to the file.
   void
   do_write(Output_file*);
@@ -290,6 +378,7 @@ class Output_file_header : public Output_data
   void set_section_info(const Output_section_headers*,
 			const Output_section* shstrtab);
 
+ protected:
   // Write the data to the file.
   void
   do_write(Output_file*);
@@ -298,12 +387,6 @@ class Output_file_header : public Output_data
   uint64_t
   do_addralign() const
   { return Output_data::default_alignment(); }
-
-  // Set the address and offset--we only implement this for error
-  // checking.
-  void
-  do_set_address(uint64_t, off_t off) const
-  { gold_assert(off == 0); }
 
  private:
   // Write the data to the file with the right size and endianness.
@@ -327,11 +410,11 @@ class Output_section_data : public Output_data
 {
  public:
   Output_section_data(off_t data_size, uint64_t addralign)
-    : Output_data(data_size), output_section_(NULL), addralign_(addralign)
-  { }
+    : Output_data(), output_section_(NULL), addralign_(addralign)
+  { this->set_data_size(data_size); }
 
   Output_section_data(uint64_t addralign)
-    : Output_data(0), output_section_(NULL), addralign_(addralign)
+    : Output_data(), output_section_(NULL), addralign_(addralign)
   { }
 
   // Return the output section.
@@ -401,6 +484,34 @@ class Output_section_data : public Output_data
   uint64_t addralign_;
 };
 
+// Some Output_section_data classes build up their data step by step,
+// rather than all at once.  This class provides an interface for
+// them.
+
+class Output_section_data_build : public Output_section_data
+{
+ public:
+  Output_section_data_build(uint64_t addralign)
+    : Output_section_data(addralign)
+  { }
+
+  // Get the current data size.
+  off_t
+  current_data_size() const
+  { return this->current_data_size_for_child(); }
+
+  // Set the current data size.
+  void
+  set_current_data_size(off_t data_size)
+  { this->set_current_data_size_for_child(data_size); }
+
+ protected:
+  // Set the final data size.
+  virtual void
+  set_final_data_size()
+  { this->set_data_size(this->current_data_size_for_child()); }
+};
+
 // A simple case of Output_data in which we have constant data to
 // output.
 
@@ -420,14 +531,7 @@ class Output_data_const : public Output_section_data
       data_(reinterpret_cast<const char*>(p), len)
   { }
 
-  // Add more data.
-  void
-  add_data(const std::string& add)
-  {
-    this->data_.append(add);
-    this->set_data_size(this->data_.size());
-  }
-
+ protected:
   // Write the data to the output file.
   void
   do_write(Output_file*);
@@ -447,6 +551,7 @@ class Output_data_const_buffer : public Output_section_data
     : Output_section_data(len, addralign), p_(p)
   { }
 
+ protected:
   // Write the data the output file.
   void
   do_write(Output_file*);
@@ -455,30 +560,42 @@ class Output_data_const_buffer : public Output_section_data
   const unsigned char* p_;
 };
 
-// A place holder for data written out via some other mechanism.
+// A place holder for a fixed amount of data written out via some
+// other mechanism.
 
-class Output_data_space : public Output_section_data
+class Output_data_fixed_space : public Output_section_data
 {
  public:
-  Output_data_space(off_t data_size, uint64_t addralign)
+  Output_data_fixed_space(off_t data_size, uint64_t addralign)
     : Output_section_data(data_size, addralign)
   { }
 
-  explicit Output_data_space(uint64_t addralign)
-    : Output_section_data(addralign)
-  { }
-
-  // Set the size.
+ protected:
+  // Write out the data--the actual data must be written out
+  // elsewhere.
   void
-  set_space_size(off_t space_size)
-  { this->set_data_size(space_size); }
+  do_write(Output_file*)
+  { }
+};
+
+// A place holder for variable sized data written out via some other
+// mechanism.
+
+class Output_data_space : public Output_section_data_build
+{
+ public:
+  explicit Output_data_space(uint64_t addralign)
+    : Output_section_data_build(addralign)
+  { }
 
   // Set the alignment.
   void
   set_space_alignment(uint64_t align)
   { this->set_addralign(align); }
 
-  // Write out the data--this must be handled elsewhere.
+ protected:
+  // Write out the data--the actual data must be written out
+  // elsewhere.
   void
   do_write(Output_file*)
   { }
@@ -493,10 +610,11 @@ class Output_data_strtab : public Output_section_data
     : Output_section_data(1), strtab_(strtab)
   { }
 
+ protected:
   // This is called to set the address and file offset.  Here we make
   // sure that the Stringpool is finalized.
   void
-  do_set_address(uint64_t, off_t);
+  set_final_data_size();
 
   // Write out the data.
   void
@@ -743,7 +861,7 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 // the reloc type.
 
 template<int sh_type, bool dynamic, int size, bool big_endian>
-class Output_data_reloc_base : public Output_section_data
+class Output_data_reloc_base : public Output_section_data_build
 {
  public:
   typedef Output_reloc<sh_type, dynamic, size, big_endian> Output_reloc_type;
@@ -753,14 +871,14 @@ class Output_data_reloc_base : public Output_section_data
 
   // Construct the section.
   Output_data_reloc_base()
-    : Output_section_data(Output_data::default_alignment_for_size(size))
+    : Output_section_data_build(Output_data::default_alignment_for_size(size))
   { }
 
+ protected:
   // Write out the data.
   void
   do_write(Output_file*);
 
- protected:
   // Set the entry size and the link.
   void
   do_adjust_output_section(Output_section *os);
@@ -770,7 +888,7 @@ class Output_data_reloc_base : public Output_section_data
   add(Output_data *od, const Output_reloc_type& reloc)
   {
     this->relocs_.push_back(reloc);
-    this->set_data_size(this->relocs_.size() * reloc_size);
+    this->set_current_data_size(this->relocs_.size() * reloc_size);
     od->add_dynamic_reloc();
   }
 
@@ -920,13 +1038,13 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 // needed.
 
 template<int size, bool big_endian>
-class Output_data_got : public Output_section_data
+class Output_data_got : public Output_section_data_build
 {
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Valtype;
 
   Output_data_got()
-    : Output_section_data(Output_data::default_alignment_for_size(size)),
+    : Output_section_data_build(Output_data::default_alignment_for_size(size)),
       entries_()
   { }
 
@@ -964,6 +1082,7 @@ class Output_data_got : public Output_section_data
     return this->last_got_offset();
   }
 
+ protected:
   // Write out the GOT table.
   void
   do_write(Output_file*);
@@ -1039,7 +1158,7 @@ class Output_data_got : public Output_section_data
   // Set the size of the section.
   void
   set_got_size()
-  { this->set_data_size(this->got_offset(this->entries_.size())); }
+  { this->set_current_data_size(this->got_offset(this->entries_.size())); }
 
   // The list of GOT entries.
   Got_entries entries_;
@@ -1085,18 +1204,18 @@ class Output_data_dynamic : public Output_section_data
   add_string(elfcpp::DT tag, const std::string& str)
   { this->add_string(tag, str.c_str()); }
 
-  // Set the final data size.
-  void
-  do_set_address(uint64_t, off_t);
-
-  // Write out the dynamic entries.
-  void
-  do_write(Output_file*);
-
  protected:
   // Adjust the output section to set the entry size.
   void
   do_adjust_output_section(Output_section*);
+
+  // Set the final data size.
+  void
+  set_final_data_size();
+
+  // Write out the dynamic entries.
+  void
+  do_write(Output_file*);
 
  private:
   // This POD class holds a single dynamic entry.
@@ -1221,22 +1340,6 @@ class Output_section : public Output_data
   elfcpp::Elf_Xword
   flags() const
   { return this->flags_; }
-
-  // Return the section index in the output file.
-  unsigned int
-  do_out_shndx() const
-  {
-    gold_assert(this->out_shndx_ != -1U);
-    return this->out_shndx_;
-  }
-
-  // Set the output section index.
-  void
-  do_set_out_shndx(unsigned int shndx)
-  {
-    gold_assert(this->out_shndx_ == -1U);
-    this->out_shndx_ = shndx;
-  }
 
   // Return the entsize field.
   uint64_t
@@ -1380,6 +1483,18 @@ class Output_section : public Output_data
   set_after_input_sections()
   { this->after_input_sections_ = true; }
 
+  // Return whether this section requires postprocessing after all
+  // relocations have been applied.
+  bool
+  requires_postprocessing() const
+  { return this->requires_postprocessing_; }
+
+  // Record that this section requires postprocessing after all
+  // relocations have been applied.
+  void
+  set_requires_postprocessing()
+  { this->requires_postprocessing_ = true; }
+
   // Return whether the offset OFFSET in the input section SHNDX in
   // object OBJECT is being included in the link.
   bool
@@ -1397,12 +1512,35 @@ class Output_section : public Output_data
   output_address(const Relobj* object, unsigned int shndx,
 		 off_t offset) const;
 
-  // Set the address of the Output_section.  For a typical
+  // Write the section header into *OPHDR.
+  template<int size, bool big_endian>
+  void
+  write_header(const Layout*, const Stringpool*,
+	       elfcpp::Shdr_write<size, big_endian>*) const;
+
+ protected:
+  // Return the section index in the output file.
+  unsigned int
+  do_out_shndx() const
+  {
+    gold_assert(this->out_shndx_ != -1U);
+    return this->out_shndx_;
+  }
+
+  // Set the output section index.
+  void
+  do_set_out_shndx(unsigned int shndx)
+  {
+    gold_assert(this->out_shndx_ == -1U);
+    this->out_shndx_ = shndx;
+  }
+
+  // Set the final data size of the Output_section.  For a typical
   // Output_section, there is nothing to do, but if there are any
-  // Output_section_data objects we need to set the final addresses
+  // Output_section_data objects we need to set their final addresses
   // here.
   void
-  do_set_address(uint64_t, off_t);
+  set_final_data_size();
 
   // Write the data to the file.  For a typical Output_section, this
   // does nothing: the data is written out by calling Object::Relocate
@@ -1430,12 +1568,6 @@ class Output_section : public Output_data
   bool
   do_is_section_flag_set(elfcpp::Elf_Xword flag) const
   { return (this->flags_ & flag) != 0; }
-
-  // Write the section header into *OPHDR.
-  template<int size, bool big_endian>
-  void
-  write_header(const Layout*, const Stringpool*,
-	       elfcpp::Shdr_write<size, big_endian>*) const;
 
  private:
   // In some cases we need to keep a list of the input sections
@@ -1658,7 +1790,7 @@ class Output_section : public Output_data
   // Most of these fields are only valid after layout.
 
   // The name of the section.  This will point into a Stringpool.
-  const char* name_;
+  const char* const name_;
   // The section address is in the parent class.
   // The section alignment.
   uint64_t addralign_;
@@ -1674,9 +1806,9 @@ class Output_section : public Output_data
   // If info_section_ is NULL, this is the section info field.
   unsigned int info_;
   // The section type.
-  elfcpp::Elf_Word type_;
+  const elfcpp::Elf_Word type_;
   // The section flags.
-  elfcpp::Elf_Xword flags_;
+  const elfcpp::Elf_Xword flags_;
   // The section index.
   unsigned int out_shndx_;
   // If there is a STT_SECTION for this output section in the normal
@@ -1715,6 +1847,9 @@ class Output_section : public Output_data
   // Whether this section should be written after all the input
   // sections are complete.
   bool after_input_sections_ : 1;
+  // Whether this section requires post processing after all
+  // relocations have been applied.
+  bool requires_postprocessing_ : 1;
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
@@ -1895,6 +2030,10 @@ class Output_file
   void
   open(off_t file_size);
 
+  // Resize the output file.
+  void
+  resize(off_t file_size);
+
   // Close the output file and make sure there are no error.
   void
   close();
@@ -1945,6 +2084,10 @@ class Output_file
   { }
 
  private:
+  // Map the file into memory.
+  void
+  map();
+
   // General options.
   const General_options& options_;
   // Target.

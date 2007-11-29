@@ -251,7 +251,7 @@ void
 queue_final_tasks(const General_options& options,
 		  const Input_objects* input_objects,
 		  const Symbol_table* symtab,
-		  const Layout* layout,
+		  Layout* layout,
 		  Workqueue* workqueue,
 		  Output_file* of)
 {

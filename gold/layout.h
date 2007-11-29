@@ -214,7 +214,7 @@ class Layout
   // Write out output sections which can not be written until all the
   // input sections are complete.
   void
-  write_sections_after_input_sections(Output_file* of) const;
+  write_sections_after_input_sections(Output_file* of);
 
   // Return an output section named NAME, or NULL if there is none.
   Output_section*
@@ -275,7 +275,7 @@ class Layout
   create_shstrtab();
 
   // Create the section header table.
-  Output_section_headers*
+  void
   create_shdrs(off_t*);
 
   // Create the dynamic symbol table.
@@ -344,7 +344,7 @@ class Layout
   // Set the final file offsets of all the sections not associated
   // with a segment.
   off_t
-  set_section_offsets(off_t, bool do_bits_sections);
+  set_section_offsets(off_t, bool after_input_sections);
 
   // Set the final section indexes of all the sections not associated
   // with a segment.  Returns the next unused index.
@@ -407,6 +407,8 @@ class Layout
   // The list of unattached Output_data objects which require special
   // handling because they are not Output_sections.
   Data_list special_output_list_;
+  // The section headers.
+  Output_section_headers* section_headers_;
   // A pointer to the PT_TLS segment if there is one.
   Output_segment* tls_segment_;
   // The SHT_SYMTAB output section.
@@ -554,7 +556,7 @@ class Write_symbols_task : public Task
 class Write_after_input_sections_task : public Task
 {
  public:
-  Write_after_input_sections_task(const Layout* layout, Output_file* of,
+  Write_after_input_sections_task(Layout* layout, Output_file* of,
 				  Task_token* input_sections_blocker,
 				  Task_token* final_blocker)
     : layout_(layout), of_(of),
@@ -580,7 +582,7 @@ class Write_after_input_sections_task : public Task
  private:
   class Write_sections_locker;
 
-  const Layout* layout_;
+  Layout* layout_;
   Output_file* of_;
   Task_token* input_sections_blocker_;
   Task_token* final_blocker_;

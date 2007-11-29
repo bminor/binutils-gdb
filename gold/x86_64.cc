@@ -332,7 +332,7 @@ Target_x86_64::got_section(Symbol_table* symtab, Layout* layout)
 				      this->got_plt_);
 
       // The first three entries are reserved.
-      this->got_plt_->set_space_size(3 * 8);
+      this->got_plt_->set_current_data_size(3 * 8);
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
       symtab->define_in_output_data(this, "_GLOBAL_OFFSET_TABLE_", NULL,
@@ -397,7 +397,7 @@ class Output_data_plt_x86_64 : public Output_section_data
 
   // Set the final size.
   void
-  do_set_address(uint64_t, off_t)
+  set_final_data_size()
   { this->set_data_size((this->count_ + 1) * plt_entry_size); }
 
   // Write out the PLT data.
@@ -446,12 +446,12 @@ Output_data_plt_x86_64::add_entry(Symbol* gsym)
 
   ++this->count_;
 
-  off_t got_offset = this->got_plt_->data_size();
+  off_t got_offset = this->got_plt_->current_data_size();
 
   // Every PLT entry needs a GOT entry which points back to the PLT
   // entry (this will be changed by the dynamic linker, normally
   // lazily when the function is called).
-  this->got_plt_->set_space_size(got_offset + 8);
+  this->got_plt_->set_current_data_size(got_offset + 8);
 
   // Every PLT entry needs a reloc.
   gsym->set_needs_dynsym_entry();
@@ -654,10 +654,10 @@ Target_x86_64::copy_reloc(const General_options* options,
       if (align > dynbss->addralign())
 	dynbss->set_space_alignment(align);
 
-      off_t dynbss_size = dynbss->data_size();
+      off_t dynbss_size = dynbss->current_data_size();
       dynbss_size = align_address(dynbss_size, align);
       off_t offset = dynbss_size;
-      dynbss->set_space_size(dynbss_size + symsize);
+      dynbss->set_current_data_size(dynbss_size + symsize);
 
       symtab->define_with_copy_reloc(this, ssym, dynbss, offset);
 

@@ -43,24 +43,12 @@ namespace gold
 
 // Output_data variables.
 
-bool Output_data::sizes_are_fixed;
+bool Output_data::allocated_sizes_are_fixed;
 
 // Output_data methods.
 
 Output_data::~Output_data()
 {
-}
-
-// Set the address and offset.
-
-void
-Output_data::set_address(uint64_t addr, off_t off)
-{
-  this->address_ = addr;
-  this->offset_ = off;
-
-  // Let the child class know.
-  this->do_set_address(addr, off);
 }
 
 // Return the default alignment for the target size.
@@ -335,6 +323,8 @@ Output_file_header::set_section_info(const Output_section_headers* shdrs,
 void
 Output_file_header::do_write(Output_file* of)
 {
+  gold_assert(this->offset() == 0);
+
   if (parameters->get_size() == 32)
     {
       if (parameters->is_big_endian())
@@ -491,11 +481,10 @@ Output_section_data::do_out_shndx() const
 
 // Output_data_strtab methods.
 
-// Set the address.  We don't actually care about the address, but we
-// do set our final size.
+// Set the final data size.
 
 void
-Output_data_strtab::do_set_address(uint64_t, off_t)
+Output_data_strtab::set_final_data_size()
 {
   this->strtab_->set_string_offsets();
   this->set_data_size(this->strtab_->get_strtab_size());
@@ -890,7 +879,7 @@ Output_data_dynamic::do_adjust_output_section(Output_section* os)
 // Set the final data size.
 
 void
-Output_data_dynamic::do_set_address(uint64_t, off_t)
+Output_data_dynamic::set_final_data_size()
 {
   // Add the terminating entry.
   this->add_constant(elfcpp::DT_NULL, 0);
@@ -1003,7 +992,7 @@ Output_section::Input_section::set_address(uint64_t addr, off_t off,
   if (this->is_input_section())
     this->u2_.object->set_section_offset(this->shndx_, off - secoff);
   else
-    this->u2_.posd->set_address(addr, off);
+    this->u2_.posd->set_address_and_file_offset(addr, off);
 }
 
 // Try to turn an input offset into an output offset.
@@ -1065,8 +1054,14 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     needs_dynsym_index_(false),
     should_link_to_symtab_(false),
     should_link_to_dynsym_(false),
-    after_input_sections_(false)
+    after_input_sections_(false),
+    requires_postprocessing_(false)
 {
+  // An unallocated section has no address.  Forcing this means that
+  // we don't need special treatment for symbols defined in debug
+  // sections.
+  if ((flags & elfcpp::SHF_ALLOC) == 0)
+    this->set_address(0);
 }
 
 Output_section::~Output_section()
@@ -1139,7 +1134,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
 	}
     }
 
-  off_t offset_in_section = this->data_size();
+  off_t offset_in_section = this->current_data_size_for_child();
   off_t aligned_offset_in_section = align_address(offset_in_section,
                                                   addralign);
 
@@ -1163,7 +1158,8 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
         }
     }
 
-  this->set_data_size(aligned_offset_in_section + shdr.get_sh_size());
+  this->set_current_data_size_for_child(aligned_offset_in_section
+					+ shdr.get_sh_size());
 
   // We need to keep track of this section if we are already keeping
   // track of sections, or if we are relaxing.  FIXME: Add test for
@@ -1191,7 +1187,7 @@ void
 Output_section::add_output_section_data(Input_section* inp)
 {
   if (this->input_sections_.empty())
-    this->first_input_offset_ = this->data_size();
+    this->first_input_offset_ = this->current_data_size_for_child();
 
   this->input_sections_.push_back(*inp);
 
@@ -1344,15 +1340,20 @@ Output_section::output_address(const Relobj* object, unsigned int shndx,
   gold_unreachable();
 }
 
-// Set the address of an Output_section.  This is where we handle
+// Set the data size of an Output_section.  This is where we handle
 // setting the addresses of any Output_section_data objects.
 
 void
-Output_section::do_set_address(uint64_t address, off_t startoff)
+Output_section::set_final_data_size()
 {
   if (this->input_sections_.empty())
-    return;
+    {
+      this->set_data_size(this->current_data_size_for_child());
+      return;
+    }
 
+  uint64_t address = this->address();
+  off_t startoff = this->offset();
   off_t off = startoff + this->first_input_offset_;
   for (Input_section_list::iterator p = this->input_sections_.begin();
        p != this->input_sections_.end();
@@ -1664,7 +1665,7 @@ Output_segment::set_section_list_addresses(Output_data_list* pdl,
        ++p)
     {
       off = align_address(off, (*p)->addralign());
-      (*p)->set_address(addr + (off - startoff), off);
+      (*p)->set_address_and_file_offset(addr + (off - startoff), off);
 
       // Unless this is a PT_TLS segment, we want to ignore the size
       // of a SHF_TLS/SHT_NOBITS section.  Such a section does not
@@ -1870,15 +1871,36 @@ Output_file::open(off_t file_size)
     gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));
   this->o_ = o;
 
+  this->map();
+}
+
+// Resize the output file.
+
+void
+Output_file::resize(off_t file_size)
+{
+  if (::munmap(this->base_, this->file_size_) < 0)
+    gold_error(_("%s: munmap: %s"), this->name_, strerror(errno));
+  this->file_size_ = file_size;
+  this->map();
+}
+
+// Map the file into memory.
+
+void
+Output_file::map()
+{
+  int o = this->o_;
+
   // Write out one byte to make the file the right size.
-  if (::lseek(o, file_size - 1, SEEK_SET) < 0)
+  if (::lseek(o, this->file_size_ - 1, SEEK_SET) < 0)
     gold_fatal(_("%s: lseek: %s"), this->name_, strerror(errno));
   char b = 0;
   if (::write(o, &b, 1) != 1)
     gold_fatal(_("%s: write: %s"), this->name_, strerror(errno));
 
   // Map the file into memory.
-  void* base = ::mmap(NULL, file_size, PROT_READ | PROT_WRITE,
+  void* base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
 		      MAP_SHARED, o, 0);
   if (base == MAP_FAILED)
     gold_fatal(_("%s: mmap: %s"), this->name_, strerror(errno));

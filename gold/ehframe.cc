@@ -88,10 +88,10 @@ Eh_frame_hdr::Eh_frame_hdr(Output_section* eh_frame_section,
 {
 }
 
-// Set the final address and size of the exception frame header.
+// Set the size of the exception frame header.
 
 void
-Eh_frame_hdr::do_set_address(uint64_t, off_t)
+Eh_frame_hdr::set_final_data_size()
 {
   unsigned int data_size = eh_frame_hdr_size + 4;
   if (!this->any_unrecognized_eh_frame_sections_)
@@ -976,8 +976,9 @@ Eh_frame::fde_count() const
 // Set the final data size.
 
 void
-Eh_frame::do_set_address(uint64_t, off_t start_file_offset)
+Eh_frame::set_final_data_size()
 {
+  off_t start_file_offset = this->offset();
   off_t output_offset = 0;
 
   for (Unmergeable_cie_offsets::iterator p =

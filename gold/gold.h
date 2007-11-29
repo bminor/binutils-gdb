@@ -272,7 +272,7 @@ extern void
 queue_final_tasks(const General_options&,
 		  const Input_objects*,
 		  const Symbol_table*,
-		  const Layout*,
+		  Layout*,
 		  Workqueue*,
 		  Output_file* of);
 

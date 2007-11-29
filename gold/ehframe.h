@@ -65,7 +65,7 @@ class Eh_frame_hdr : public Output_section_data
 
   // Set the final data size.
   void
-  do_set_address(uint64_t address, off_t offset);
+  set_final_data_size();
 
   // Write the data to the file.
   void
@@ -314,7 +314,7 @@ class Eh_frame : public Output_section_data
 
   // Set the final data size.
   void
-  do_set_address(uint64_t, off_t);
+  set_final_data_size();
 
   // Return the output address for an input address.
   bool

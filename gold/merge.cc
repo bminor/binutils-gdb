@@ -428,7 +428,7 @@ Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
 // constants.
 
 void
-Output_merge_data::do_set_address(uint64_t, off_t)
+Output_merge_data::set_final_data_size()
 {
   // Release the memory we don't need.
   this->p_ = static_cast<unsigned char*>(realloc(this->p_, this->len_));
@@ -502,7 +502,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
 template<typename Char_type>
 void
-Output_merge_string<Char_type>::do_set_address(uint64_t, off_t)
+Output_merge_string<Char_type>::set_final_data_size()
 {
   this->stringpool_.set_string_offsets();
 

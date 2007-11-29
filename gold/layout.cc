@@ -65,7 +65,7 @@ Layout::Layout(const General_options& options)
   : options_(options), namepool_(), sympool_(), dynpool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
     unattached_section_list_(), special_output_list_(),
-    tls_segment_(NULL), symtab_section_(NULL),
+    section_headers_(NULL), tls_segment_(NULL), symtab_section_(NULL),
     dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL),
     eh_frame_section_(NULL), output_file_size_(-1),
     input_requires_executable_stack_(false),
@@ -76,9 +76,9 @@ Layout::Layout(const General_options& options)
   // This is just for efficiency--it's OK if we wind up needing more.
   this->segment_list_.reserve(12);
 
-  // We expect three unattached Output_data objects: the file header,
-  // the segment headers, and the section headers.
-  this->special_output_list_.reserve(3);
+  // We expect two unattached Output_data objects: the file header and
+  // the segment headers.
+  this->special_output_list_.reserve(2);
 }
 
 // Hash a key we use to look up an output section mapping.
@@ -695,17 +695,12 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   this->special_output_list_.push_back(file_header);
 
   // We set the output section indexes in set_segment_offsets and
-  // set_section_offsets.
+  // set_section_indexes.
   unsigned int shndx = 1;
 
   // Set the file offsets of all the segments, and all the sections
   // they contain.
   off_t off = this->set_segment_offsets(target, load_seg, &shndx);
-
-  // Set the file offsets of all the data sections not associated with
-  // segments. This makes sure that debug sections have their offsets
-  // before symbols are finalized.
-  off = this->set_section_offsets(off, true);
 
   // Create the symbol table sections.
   this->create_symtab_sections(input_objects, symtab, &off);
@@ -713,19 +708,20 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();
 
-  // Set the file offsets of all the non-data sections not associated with
-  // segments.
+  // Set the file offsets of all the non-data sections which don't
+  // have to wait for the input sections.
   off = this->set_section_offsets(off, false);
 
   // Now that all sections have been created, set the section indexes.
   shndx = this->set_section_indexes(shndx);
 
   // Create the section table header.
-  Output_section_headers* oshdrs = this->create_shdrs(&off);
+  this->create_shdrs(&off);
 
-  file_header->set_section_info(oshdrs, shstrtab_section);
+  file_header->set_section_info(this->section_headers_, shstrtab_section);
 
-  // Now we know exactly where everything goes in the output file.
+  // Now we know exactly where everything goes in the output file
+  // (except for non-allocated sections which require postprocessing).
   Output_data::layout_complete();
 
   this->output_file_size_ = off;
@@ -1063,21 +1059,22 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 // segment.
 
 off_t
-Layout::set_section_offsets(off_t off,
-                            bool do_bits_sections)
+Layout::set_section_offsets(off_t off, bool after_input_sections)
 {
   for (Section_list::iterator p = this->unattached_section_list_.begin();
        p != this->unattached_section_list_.end();
        ++p)
     {
-      bool is_bits_section = ((*p)->type() == elfcpp::SHT_PROGBITS
-                              || (*p)->type() == elfcpp::SHT_NOBITS);
-      if (is_bits_section != do_bits_sections)
-        continue;
-      if ((*p)->offset() != -1)
+      // The symtab section is handled in create_symtab_sections.
+      if (*p == this->symtab_section_)
 	continue;
+
+      if ((*p)->after_input_sections() != after_input_sections)
+	continue;
+
       off = align_address(off, (*p)->addralign());
-      (*p)->set_address(0, off);
+      (*p)->set_file_offset(off);
+      (*p)->finalize_data_size();
       off += (*p)->data_size();
     }
   return off;
@@ -1194,8 +1191,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 							  0);
       this->symtab_section_ = osymtab;
 
-      Output_section_data* pos = new Output_data_space(off - startoff,
-						       align);
+      Output_section_data* pos = new Output_data_fixed_space(off - startoff,
+							     align);
       osymtab->add_output_section_data(pos);
 
       const char* strtab_name = this->namepool_.add(".strtab", false, NULL);
@@ -1206,7 +1203,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
       Output_section_data* pstr = new Output_data_strtab(&this->sympool_);
       ostrtab->add_output_section_data(pstr);
 
-      osymtab->set_address(0, startoff);
+      osymtab->set_file_offset(startoff);
+      osymtab->finalize_data_size();
       osymtab->set_link_section(ostrtab);
       osymtab->set_info(local_symcount);
       osymtab->set_entsize(symsize);
@@ -1227,9 +1225,12 @@ Layout::create_shstrtab()
 
   const char* name = this->namepool_.add(".shstrtab", false, NULL);
 
-  this->namepool_.set_string_offsets();
-
   Output_section* os = this->make_output_section(name, elfcpp::SHT_STRTAB, 0);
+
+  // We can't write out this section until we've set all the section
+  // names, and we don't set the names of compressed output sections
+  // until relocations are complete.
+  os->set_after_input_sections();
 
   Output_section_data* posd = new Output_data_strtab(&this->namepool_);
   os->add_output_section_data(posd);
@@ -1240,7 +1241,7 @@ Layout::create_shstrtab()
 // Create the section headers.  SIZE is 32 or 64.  OFF is the file
 // offset.
 
-Output_section_headers*
+void
 Layout::create_shdrs(off_t* poff)
 {
   Output_section_headers* oshdrs;
@@ -1249,11 +1250,10 @@ Layout::create_shdrs(off_t* poff)
 				      &this->unattached_section_list_,
 				      &this->namepool_);
   off_t off = align_address(*poff, oshdrs->addralign());
-  oshdrs->set_address(0, off);
+  oshdrs->set_address_and_file_offset(0, off);
   off += oshdrs->data_size();
   *poff = off;
-  this->special_output_list_.push_back(oshdrs);
-  return oshdrs;
+  this->section_headers_ = oshdrs;
 }
 
 // Create the dynamic symbol table.
@@ -1321,8 +1321,8 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
 						     elfcpp::SHT_DYNSYM,
 						     elfcpp::SHF_ALLOC);
 
-  Output_section_data* odata = new Output_data_space(index * symsize,
-						     align);
+  Output_section_data* odata = new Output_data_fixed_space(index * symsize,
+							   align);
   dynsym->add_output_section_data(odata);
 
   dynsym->set_info(local_symcount);
@@ -1880,8 +1880,18 @@ Layout::write_data(const Symbol_table* symtab, Output_file* of) const
 // input sections are complete.
 
 void
-Layout::write_sections_after_input_sections(Output_file* of) const
+Layout::write_sections_after_input_sections(Output_file* of)
 {
+  // Determine the final section offsets, and thus the final output
+  // file size.
+  off_t off = this->output_file_size_;
+  off = this->set_section_offsets(off, true);
+  if (off > this->output_file_size_)
+    {
+      of->resize(off);
+      this->output_file_size_ = off;
+    }
+
   for (Section_list::const_iterator p = this->section_list_.begin();
        p != this->section_list_.end();
        ++p)
@@ -1889,6 +1899,16 @@ Layout::write_sections_after_input_sections(Output_file* of) const
       if ((*p)->after_input_sections())
 	(*p)->write(of);
     }
+
+  for (Section_list::const_iterator p = this->unattached_section_list_.begin();
+       p != this->unattached_section_list_.end();
+       ++p)
+    {
+      if ((*p)->after_input_sections())
+	(*p)->write(of);
+    }
+
+  this->section_headers_->write(of);
 }
 
 // Write_sections_task methods.
