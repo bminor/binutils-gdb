@@ -214,10 +214,6 @@ static unsigned char *signal_program;
 
 static struct cmd_list_element *stop_command;
 
-/* Nonzero if breakpoints are now inserted in the inferior.  */
-
-static int breakpoints_inserted;
-
 /* Function inferior was in as of last step command.  */
 
 static struct symbol *step_start_function;
@@ -519,7 +515,7 @@ resume (int step, enum target_signal sig)
      Work around the problem by removing hardware watchpoints if a step is
      requested, GDB will check for a hardware watchpoint trigger after the
      step anyway.  */
-  if (CANNOT_STEP_HW_WATCHPOINTS && step && breakpoints_inserted)
+  if (CANNOT_STEP_HW_WATCHPOINTS && step)
     remove_hw_watchpoints ();
 
 
@@ -635,7 +631,7 @@ a command like `return' or `jump' to continue execution."));
 	  /* Most targets can step a breakpoint instruction, thus
 	     executing it normally.  But if this one cannot, just
 	     continue and we will hit it anyway.  */
-	  if (step && breakpoints_inserted && breakpoint_here_p (read_pc ()))
+	  if (step && breakpoint_inserted_here_p (read_pc ()))
 	    step = 0;
 	}
       target_resume (resume_ptid, step, sig);
@@ -784,12 +780,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
        Continue it automatically and insert breakpoints then.  */
     trap_expected = 1;
   else
-    {
-      insert_breakpoints ();
-      /* If we get here there was no call to error() in 
-         insert breakpoints -- so they were inserted.  */
-      breakpoints_inserted = 1;
-    }
+    insert_breakpoints ();
 
   if (siggnal != TARGET_SIGNAL_DEFAULT)
     stop_signal = siggnal;
@@ -885,7 +876,6 @@ init_wait_for_inferior (void)
   /* These are meaningless until the first time through wait_for_inferior.  */
   prev_pc = 0;
 
-  breakpoints_inserted = 0;
   breakpoint_init_inferior (inf_starting);
 
   /* Don't confuse first call to proceed(). */
@@ -1331,14 +1321,9 @@ handle_inferior_event (struct execution_control_state *ecs)
          established.  */
       if (stop_soon == NO_STOP_QUIETLY)
 	{
-	  int breakpoints_were_inserted;
-
 	  /* Remove breakpoints, SOLIB_ADD might adjust
 	     breakpoint addresses via breakpoint_re_set.  */
-	  breakpoints_were_inserted = breakpoints_inserted;
-	  if (breakpoints_inserted)
-	    remove_breakpoints ();
-	  breakpoints_inserted = 0;
+	  remove_breakpoints ();
 
 	  /* Check for any newly added shared libraries if we're
 	     supposed to be adding them automatically.  Switch
@@ -1381,11 +1366,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     for "catch load".  */
 
 	  /* Reinsert breakpoints and continue.  */
-	  if (breakpoints_were_inserted)
-	    {
-	      insert_breakpoints ();
-	      breakpoints_inserted = 1;
-	    }
+	  insert_breakpoints ();
 	}
 
       /* If we are skipping through a shell, or through shared library
@@ -1671,7 +1652,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* Check if a regular breakpoint has been hit before checking
          for a potential single step breakpoint. Otherwise, GDB will
          not see this breakpoint hit when stepping onto breakpoints.  */
-      if (breakpoints_inserted && breakpoint_here_p (stop_pc))
+      if (regular_breakpoint_inserted_here_p (stop_pc))
 	{
 	  ecs->random_signal = 0;
 	  if (!breakpoint_thread_match (stop_pc, ecs->ptid))
@@ -1784,7 +1765,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    }
 	  else
 	    {			/* Single step */
-	      breakpoints_inserted = 0;
 	      if (!ptid_equal (inferior_ptid, ecs->ptid))
 		context_switch (ecs);
 	      ecs->waiton_ptid = ecs->ptid;
@@ -1946,7 +1926,7 @@ handle_inferior_event (struct execution_control_state *ecs)
      stack.  */
 
   if (stop_signal == TARGET_SIGNAL_TRAP
-      || (breakpoints_inserted
+      || (breakpoint_inserted_here_p (stop_pc)
 	  && (stop_signal == TARGET_SIGNAL_ILL
 	      || stop_signal == TARGET_SIGNAL_SEGV
 	      || stop_signal == TARGET_SIGNAL_EMT))
@@ -2077,8 +2057,8 @@ process_event_stop_test:
 	stop_signal = TARGET_SIGNAL_0;
 
       if (prev_pc == read_pc ()
-	  && !breakpoints_inserted
 	  && breakpoint_here_p (read_pc ())
+	  && !breakpoint_inserted_here_p (read_pc ())
 	  && step_resume_breakpoint == NULL)
 	{
 	  /* We were just starting a new sequence, attempting to
@@ -2151,7 +2131,6 @@ process_event_stop_test:
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME\n");
 	disable_longjmp_breakpoint ();
 	remove_breakpoints ();
-	breakpoints_inserted = 0;
 	if (!gdbarch_get_longjmp_target_p (current_gdbarch)
 	    || !gdbarch_get_longjmp_target (current_gdbarch,
 					    get_current_frame (), &jmp_buf_pc))
@@ -2177,7 +2156,6 @@ process_event_stop_test:
         if (debug_infrun)
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_CLEAR_LONGJMP_RESUME\n");
 	remove_breakpoints ();
-	breakpoints_inserted = 0;
 	disable_longjmp_breakpoint ();
 	ecs->handling_longjmp = 0;	/* FIXME */
 	if (what.main_action == BPSTAT_WHAT_CLEAR_LONGJMP_RESUME)
@@ -2187,9 +2165,7 @@ process_event_stop_test:
       case BPSTAT_WHAT_SINGLE:
         if (debug_infrun)
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SINGLE\n");
-	if (breakpoints_inserted)
-	  remove_breakpoints ();
-	breakpoints_inserted = 0;
+	remove_breakpoints ();
 	ecs->another_trap = 1;
 	/* Still need to check other stuff, at least the case
 	   where we are stepping and step out of the right range.  */
@@ -2251,7 +2227,6 @@ process_event_stop_test:
 	       to doing that.  */
 	    ecs->step_after_step_resume_breakpoint = 0;
 	    remove_breakpoints ();
-	    breakpoints_inserted = 0;
 	    ecs->another_trap = 1;
 	    keep_going (ecs);
 	    return;
@@ -2266,9 +2241,7 @@ process_event_stop_test:
 	  /* Remove breakpoints, we eventually want to step over the
 	     shlib event breakpoint, and SOLIB_ADD might adjust
 	     breakpoint addresses via breakpoint_re_set.  */
-	  if (breakpoints_inserted)
-	    remove_breakpoints ();
-	  breakpoints_inserted = 0;
+	  remove_breakpoints ();
 
 	  /* Check for any newly added shared libraries if we're
 	     supposed to be adding them automatically.  Switch
@@ -2871,8 +2844,6 @@ insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
 
   step_resume_breakpoint = set_momentary_breakpoint (sr_sal, sr_id,
 						     bp_step_resume);
-  if (breakpoints_inserted)
-    insert_breakpoints ();
 }
 
 /* Insert a "step-resume breakpoint" at RETURN_FRAME.pc.  This is used
@@ -2969,9 +2940,13 @@ keep_going (struct execution_control_state *ecs)
          The signal was SIGTRAP, e.g. it was our signal, but we
          decided we should resume from it.
 
-         We're going to run this baby now!  */
+         We're going to run this baby now!  
 
-      if (!breakpoints_inserted && !ecs->another_trap)
+	 Note that insert_breakpoints won't try to re-insert
+	 already inserted breakpoints.  Therefore, we don't
+	 care if breakpoints were already inserted, or not.  */
+      
+      if (!ecs->another_trap)
 	{
 	  /* Stop stepping when inserting breakpoints
 	     has failed.  */
@@ -2980,7 +2955,6 @@ keep_going (struct execution_control_state *ecs)
 	      stop_stepping (ecs);
 	      return;
 	    }
-	  breakpoints_inserted = 1;
 	}
 
       trap_expected = ecs->another_trap;
@@ -3173,7 +3147,7 @@ normal_stop (void)
        gdbarch_decr_pc_after_break needs to just go away.  */
     deprecated_update_frame_pc_hack (get_current_frame (), read_pc ());
 
-  if (target_has_execution && breakpoints_inserted)
+  if (target_has_execution)
     {
       if (remove_breakpoints ())
 	{
@@ -3184,7 +3158,6 @@ It might be running in another process.\n\
 Further execution is probably impossible.\n"));
 	}
     }
-  breakpoints_inserted = 0;
 
   /* Delete the breakpoint we stopped at, if it wants to be deleted.
      Delete any breakpoint that is to be deleted at the next stop.  */

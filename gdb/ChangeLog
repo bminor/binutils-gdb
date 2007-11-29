@@ -1,3 +1,35 @@
+2007-11-29  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Stop infrun from tracking breakpoint insertion status.
+
+	The checks of breakpoints_inserted before calling
+	remove_breakpoints are removed, as remove_breakpoint 
+	won't touch uninserted breakpoints. In a number of places,
+	we're interested if a breakpoint is inserted at particular 
+	PC, and we now use breakpoint_inserted_here_p.  In a few
+	places, insert_breakpoints can be called unconditionally, 
+	since it won't try to insert already inserted breakpoint.
+
+	* breakpoint.h (regular_breakpoint_inserted_here_p): New
+	declaration.
+	* breakpoint.c (regular_breakpoint_inserted_here_p): New.
+	(breakpoint_inserted_here_p): Use
+	regular_breakpoint_inserted_here_p.
+	* infrun.c (breakpoints_inserted): Remove.
+	(resume): Don't check for breakpoints_inserted before
+	remove_hw_watchpoints. Use breakpoint_inserted_here_p.
+	(proceed, init_wait_for_inferior): Don't set breakpoints_inserted.
+	(handle_inferior_event): Don't use breakpoints_inserted.
+	Use breakpoints_meant_to_be_inserted and
+	breakpoints_inserted_here_p.
+	(insert_step_resume_breakpoint_at_sal, keep_going): Use
+	breakpoints_meant_to_be_inserted. Don't set breakpoints_inserted.
+	(normal_stop): Don't check for breakpoints_inserted.  Don't
+	set breakpoints_inserted.
+	(keep_going): Don't check for breakpoints_inserted.
+	(insert_step_resume_breakpoint_at_sal): Don't insert
+	breakpoints
+
 2007-11-28  Jim Blandy  <jimb@codesourcery.com>
 
 	* breakpoint.c (watch_command_1): When the watchpoint isn't local

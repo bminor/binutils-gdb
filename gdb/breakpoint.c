@@ -1757,12 +1757,13 @@ breakpoint_here_p (CORE_ADDR pc)
 }
 
 
-/* breakpoint_inserted_here_p (PC) is just like breakpoint_here_p(),
-   but it only returns true if there is actually a breakpoint inserted
-   at PC.  */
+/* Returns non-zero if there's a breakpoint inserted at PC, which is
+   inserted using regular breakpoint_chain/bp_location_chain mechanism.
+   This does not check for single-step breakpoints, which are
+   inserted and removed using direct target manipulation.  */
 
 int
-breakpoint_inserted_here_p (CORE_ADDR pc)
+regular_breakpoint_inserted_here_p (CORE_ADDR pc)
 {
   const struct bp_location *bpt;
 
@@ -1783,8 +1784,18 @@ breakpoint_inserted_here_p (CORE_ADDR pc)
 	    return 1;
 	}
     }
+  return 0;
+}
 
-  /* Also check for software single-step breakpoints.  */
+/* Returns non-zero iff there's either regular breakpoint
+   or a single step breakpoint inserted at PC.  */
+
+int
+breakpoint_inserted_here_p (CORE_ADDR pc)
+{
+  if (regular_breakpoint_inserted_here_p (pc))
+    return 1;
+
   if (single_step_breakpoint_inserted_here_p (pc))
     return 1;
 
