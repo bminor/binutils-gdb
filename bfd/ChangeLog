@@ -1,3 +1,9 @@
+2007-11-29  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/5398
+	* elf32-arm.c (bfd_elf32_arm_process_before_allocation): Do not
+	complain if there is no glue bfd, just return.
+
 2007-11-28  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relax_section): Extend previous fix to

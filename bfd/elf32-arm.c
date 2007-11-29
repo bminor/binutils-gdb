@@ -3116,13 +3116,13 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
   if (link_info->relocatable)
     return TRUE;
 
-  /* Here we have a bfd that is to be included on the link.  We have a hook
-     to do reloc rummaging, before section sizes are nailed down.  */
+  /* Here we have a bfd that is to be included on the link.  We have a
+     hook to do reloc rummaging, before section sizes are nailed down.  */
   globals = elf32_arm_hash_table (link_info);
-  check_use_blx (globals);
 
   BFD_ASSERT (globals != NULL);
-  BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
+
+  check_use_blx (globals);
 
   if (globals->byteswap_code && !bfd_big_endian (abfd))
     {
@@ -3130,6 +3130,12 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 			  abfd);
       return FALSE;
     }
+
+  /* PR 5398: If we have not decided to include any loadable sections in
+     the output then we will not have a glue owner bfd.  This is OK, it
+     just means that there is nothing else for us to do here.  */
+  if (globals->bfd_of_glue_owner == NULL)
+    return TRUE;
 
   /* Rummage around all the relocs and map the glue vectors.  */
   sec = abfd->sections;
