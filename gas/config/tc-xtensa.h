@@ -374,6 +374,10 @@ extern char *xtensa_section_rename (char *);
 #define md_relax_frag(segment, fragP, stretch) \
   xtensa_relax_frag (fragP, stretch, &stretched)
 
+/* Only allow call frame debug info optimization when linker relaxation is
+   not enabled as otherwise we could generate the DWARF directives without
+   the relocs necessary to patch them up.  */
+#define md_allow_eh_opt (linkrelax == 0)
 
 #define LOCAL_LABELS_FB 1
 #define WORKING_DOT_WORD 1

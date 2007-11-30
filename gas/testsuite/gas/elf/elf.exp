@@ -74,9 +74,12 @@ if { ([istarget "*-*-*elf*"]
 	}
     }
 
-    # The MN10300 port disables the assembler's call frame optimization
-    # because it interfers with link time relaxation of function prologues.
-    if {![istarget "mn10300-*-*"] && ![istarget "am3*-*-*"]} then {    
+    # The MN10300 and Xtensa ports disable the assembler's call frame
+    # optimization because it interfers with link-time relaxation of
+    # function prologues.
+    if {![istarget "mn10300-*-*"]
+	&& ![istarget "xtensa*-*-*"]
+	&& ![istarget "am3*-*-*"]} then {    
       run_dump_test "ehopt0"
     }
     run_dump_test "group0a" 
