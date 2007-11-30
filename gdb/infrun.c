@@ -2948,9 +2948,14 @@ keep_going (struct execution_control_state *ecs)
       
       if (!ecs->another_trap)
 	{
+	  struct gdb_exception e;
 	  /* Stop stepping when inserting breakpoints
 	     has failed.  */
-	  if (insert_breakpoints () != 0)
+	  TRY_CATCH (e, RETURN_MASK_ERROR)
+	    {
+	      insert_breakpoints ();
+	    }
+	  if (e.reason < 0)
 	    {
 	      stop_stepping (ecs);
 	      return;

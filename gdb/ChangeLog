@@ -1,3 +1,14 @@
+2007-11-30  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Make insert_breakpoints return void.	
+	* breakpoint.h (insert_breakpoints): Change
+	return type to void.
+	* breakpoint.c (insert_breakpoints): Change
+	return type to void.  Rename local return_val
+	variable to error.
+	* infrun.c (keep_going): Instead of checking
+	return value from insert_breakpoints, catch exception.
+
 2007-11-29  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Stop infrun from tracking breakpoint insertion status.

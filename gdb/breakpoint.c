@@ -1220,11 +1220,11 @@ in which its expression is valid.\n"),
    Both return zero if successful,
    or an `errno' value if could not write the inferior.  */
 
-int
+void
 insert_breakpoints (void)
 {
   struct bp_location *b, *temp;
-  int return_val = 0;	/* return success code. */
+  int error = 0;
   int val = 0;
   int disabled_breaks = 0;
   int hw_breakpoint_error = 0;
@@ -1265,10 +1265,10 @@ insert_breakpoints (void)
 				    &disabled_breaks, &process_warning,
 				    &hw_breakpoint_error);
       if (val)
-	return_val = val;
+	error = val;
     }
 
-  if (return_val)
+  if (error)
     {
       /* If a hardware breakpoint or watchpoint was inserted, add a
          message about possibly exhausted resources.  */
@@ -1286,7 +1286,6 @@ You may have requested too many hardware breakpoints/watchpoints.\n");
       target_terminal_ours_for_output ();
       error_stream (tmp_error_stream);
     }
-  return return_val;
 }
 
 int

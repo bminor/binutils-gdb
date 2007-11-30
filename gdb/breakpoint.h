@@ -717,7 +717,7 @@ extern void awatch_command_wrapper (char *, int);
 extern void rwatch_command_wrapper (char *, int);
 extern void tbreak_command (char *, int);
 
-extern int insert_breakpoints (void);
+extern void insert_breakpoints (void);
 
 extern int remove_breakpoints (void);
 
