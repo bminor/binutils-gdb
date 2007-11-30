@@ -1964,23 +1964,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  return;
 	}
 
-      /* Don't even think about breakpoints if just proceeded over a
-         breakpoint.  */
-      if (stop_signal == TARGET_SIGNAL_TRAP && trap_expected)
-	{
-          if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog, "infrun: trap expected\n");
-	  bpstat_clear (&stop_bpstat);
-	}
-      else
-	{
-	  /* See if there is a breakpoint at the current PC.  */
-	  stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
-
-	  /* Following in case break condition called a
-	     function.  */
-	  stop_print_frame = 1;
-	}
+      /* See if there is a breakpoint at the current PC.  */
+      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
+      
+      /* Following in case break condition called a
+	 function.  */
+      stop_print_frame = 1;
 
       /* NOTE: cagney/2003-03-29: These two checks for a random signal
          at one stage in the past included checks for an inferior

@@ -1,5 +1,10 @@
 2007-11-30  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* infrun.c (handle_inferior_event): Don't
+        ignore beakpoints if trap_expected is set.
+
+2007-11-30  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Make insert_breakpoints return void.	
 	* breakpoint.h (insert_breakpoints): Change
 	return type to void.
