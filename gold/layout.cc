@@ -393,7 +393,7 @@ Output_section*
 Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 			    elfcpp::Elf_Xword flags)
 {
-  Output_section* os = new Output_section(name, type, flags);
+  Output_section* os = new Output_section(this->options_, name, type, flags);
   this->section_list_.push_back(os);
 
   if ((flags & elfcpp::SHF_ALLOC) == 0)
@@ -710,7 +710,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Set the file offsets of all the non-data sections which don't
   // have to wait for the input sections.
-  off = this->set_section_offsets(off, false);
+  off = this->set_section_offsets(off, BEFORE_INPUT_SECTIONS_PASS);
 
   // Now that all sections have been created, set the section indexes.
   shndx = this->set_section_indexes(shndx);
@@ -1059,7 +1059,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 // segment.
 
 off_t
-Layout::set_section_offsets(off_t off, bool after_input_sections)
+Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
 {
   for (Section_list::iterator p = this->unattached_section_list_.begin();
        p != this->unattached_section_list_.end();
@@ -1069,8 +1069,17 @@ Layout::set_section_offsets(off_t off, bool after_input_sections)
       if (*p == this->symtab_section_)
 	continue;
 
-      if ((*p)->after_input_sections() != after_input_sections)
-	continue;
+      if (pass == BEFORE_INPUT_SECTIONS_PASS
+          && (*p)->after_input_sections())
+        continue;
+      else if (pass == AFTER_INPUT_SECTIONS_PASS
+               && (!(*p)->after_input_sections()
+                   || (*p)->type() == elfcpp::SHT_STRTAB))
+        continue;
+      else if (pass == STRTAB_AFTER_INPUT_SECTIONS_PASS
+               && (!(*p)->after_input_sections()
+                   || (*p)->type() != elfcpp::SHT_STRTAB))
+        continue;
 
       off = align_address(off, (*p)->addralign());
       (*p)->set_file_offset(off);
@@ -1078,6 +1087,19 @@ Layout::set_section_offsets(off_t off, bool after_input_sections)
       off += (*p)->data_size();
     }
   return off;
+}
+
+// Allow any section not associated with a segment to change its
+// output section name at the last minute.
+
+void
+Layout::modify_section_names()
+{
+  for (Section_list::iterator p = this->unattached_section_list_.begin();
+       p != this->unattached_section_list_.end();
+       ++p)
+    if ((*p)->maybe_modify_output_section_name())
+      this->namepool_.add((*p)->name(), true, NULL);
 }
 
 // Set the section indexes of all the sections not associated with a
@@ -1883,9 +1905,19 @@ void
 Layout::write_sections_after_input_sections(Output_file* of)
 {
   // Determine the final section offsets, and thus the final output
-  // file size.
+  // file size.  Note we finalize the .shstrab last, to allow the
+  // after_input_section sections to modify their section-names before
+  // writing.
   off_t off = this->output_file_size_;
-  off = this->set_section_offsets(off, true);
+  off = this->set_section_offsets(off, AFTER_INPUT_SECTIONS_PASS);
+
+  // Determine the final section names as well (at least, for sections
+  // that we haven't written yet).
+  this->modify_section_names();
+
+  // Now that we've finalized the names, we can finalize the shstrab.
+  off = this->set_section_offsets(off, STRTAB_AFTER_INPUT_SECTIONS_PASS);
+
   if (off > this->output_file_size_)
     {
       of->resize(off);

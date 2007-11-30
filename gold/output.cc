@@ -32,6 +32,7 @@
 #include "libiberty.h"   // for unlink_if_ordinary()
 
 #include "parameters.h"
+#include "compressed_output.h"
 #include "object.h"
 #include "symtab.h"
 #include "reloc.h"
@@ -1033,9 +1034,11 @@ Output_section::Input_section::write(Output_file* of)
 
 // Construct an Output_section.  NAME will point into a Stringpool.
 
-Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
+Output_section::Output_section(const General_options& options,
+                               const char* name, elfcpp::Elf_Word type,
 			       elfcpp::Elf_Xword flags)
-  : name_(name),
+  : options_(options),
+    name_(name),
     addralign_(0),
     entsize_(0),
     link_section_(NULL),
@@ -1077,6 +1080,22 @@ Output_section::set_entsize(uint64_t v)
     this->entsize_ = v;
   else
     gold_assert(this->entsize_ == v);
+}
+
+// Sometimes we compress sections.  This is typically done for
+// sections that are not part of normal program execution (such as
+// .debug_* sections), and where the readers of these sections know
+// how to deal with compressed sections.  (To make it easier for them,
+// we will rename the ouput section in such cases from .foo to
+// .foo.zlib.nnnn, where nnnn is the uncompressed size.)  This routine
+// doesn't say for certain whether we'll compress -- it depends on
+// commandline options as well -- just whether this section is a
+// candidate for compression.
+
+static bool
+is_compressible_section(const char* secname)
+{
+  return (strncmp(secname, ".debug", sizeof(".debug") - 1) == 0);
 }
 
 // Add the input section SHNDX, with header SHDR, named SECNAME, in
@@ -1126,7 +1145,8 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
       && reloc_shndx == 0)
     {
       if (this->add_merge_input_section(object, shndx, sh_flags,
-					entsize, addralign))
+					entsize, addralign,
+                                        is_compressible_section(secname)))
 	{
 	  // Tell the relocation routines that they need to call the
 	  // output_offset method to determine the final address.
@@ -1213,7 +1233,8 @@ Output_section::add_output_merge_section(Output_section_data* posd,
 bool
 Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 					uint64_t flags, uint64_t entsize,
-					uint64_t addralign)
+					uint64_t addralign,
+                                        bool is_compressible_section)
 {
   bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
 
@@ -1227,29 +1248,55 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
        p != this->input_sections_.end();
        ++p)
     if (p->is_merge_section(is_string, entsize, addralign))
-      break;
+      {
+        p->add_input_section(object, shndx);
+        return true;
+      }
 
   // We handle the actual constant merging in Output_merge_data or
   // Output_merge_string_data.
-  if (p != this->input_sections_.end())
-    p->add_input_section(object, shndx);
+  Output_section_data* posd;
+  if (!is_string)
+    posd = new Output_merge_data(entsize, addralign);
+  else if (is_compressible_section && options_.compress_debug_sections())
+    {
+      switch (entsize)
+	{
+        case 1:
+	  posd = new Output_compressed_string<char>(addralign, this->options_);
+	  break;
+        case 2:
+	  posd = new Output_compressed_string<uint16_t>(addralign,
+							this->options_);
+	  break;
+        case 4:
+	  posd = new Output_compressed_string<uint32_t>(addralign,
+							this->options_);
+	  break;
+        default:
+	  return false;
+	}
+    }
   else
     {
-      Output_section_data* posd;
-      if (!is_string)
-	posd = new Output_merge_data(entsize, addralign);
-      else if (entsize == 1)
-	posd = new Output_merge_string<char>(addralign);
-      else if (entsize == 2)
-	posd = new Output_merge_string<uint16_t>(addralign);
-      else if (entsize == 4)
-	posd = new Output_merge_string<uint32_t>(addralign);
-      else
-	return false;
-
-      this->add_output_merge_section(posd, is_string, entsize);
-      posd->add_input_section(object, shndx);
+      switch (entsize)
+	{
+        case 1:
+	  posd = new Output_merge_string<char>(addralign);
+	  break;
+        case 2:
+	  posd = new Output_merge_string<uint16_t>(addralign);
+	  break;
+        case 4:
+	  posd = new Output_merge_string<uint32_t>(addralign);
+	  break;
+        default:
+	  return false;
+	}
     }
+
+  this->add_output_merge_section(posd, is_string, entsize);
+  posd->add_input_section(object, shndx);
 
   return true;
 }
@@ -1365,6 +1412,29 @@ Output_section::set_final_data_size()
     }
 
   this->set_data_size(off - startoff);
+}
+
+// Ask each output_section_data member if it wants to change the name
+// of the output section.  If any of them says yes, use this to set
+// the new name.  This should be called after all processing of this
+// output section is done, but before the name is finally committed to
+// the output-section's header.
+
+bool
+Output_section::maybe_modify_output_section_name()
+{
+  for (Input_section_list::const_iterator it = input_sections_.begin();
+       it != input_sections_.end();
+       ++it)
+    {
+      const char* newname = it->modified_output_section_name(this->name());
+      if (newname != NULL)
+        {
+          this->set_name(newname);
+          return true;
+        }
+    }
+  return false;
 }
 
 // Write the section header to *OSHDR.

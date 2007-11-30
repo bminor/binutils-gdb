@@ -432,6 +432,15 @@ class Output_section_data : public Output_data
   add_input_section(Relobj* object, unsigned int shndx)
   { return this->do_add_input_section(object, shndx); }
 
+  // This class may change the output section name.  This is called
+  // right before shstrtab is written, so after all input-section
+  // layout processing is done.  The input is the old name, and the
+  // output should be a new name (which will be copied into permanent
+  // storage) to change the name, or NULL to keep the name as-is.
+  virtual const char*
+  do_modified_output_section_name(const char*)
+  { return NULL; }
+
   // Given an input OBJECT, an input section index SHNDX within that
   // object, and an OFFSET relative to the start of that input
   // section, return whether or not the corresponding offset within
@@ -1308,7 +1317,8 @@ class Output_section : public Output_data
 {
  public:
   // Create an output section, giving the name, type, and flags.
-  Output_section(const char* name, elfcpp::Elf_Word, elfcpp::Elf_Xword);
+  Output_section(const General_options& options,
+                 const char* name, elfcpp::Elf_Word, elfcpp::Elf_Xword);
   virtual ~Output_section();
 
   // Add a new input section SHNDX, named NAME, with header SHDR, from
@@ -1330,6 +1340,13 @@ class Output_section : public Output_data
   const char*
   name() const
   { return this->name_; }
+
+  // Modify the section name.  This should be called only after this
+  // section is done being constructed.  The input should be a pointer
+  // into layout's namepool_.
+  void
+  set_name(const char* newname)
+  { this->name_ = newname; }
 
   // Return the section type.
   elfcpp::Elf_Word
@@ -1518,6 +1535,16 @@ class Output_section : public Output_data
   write_header(const Layout*, const Stringpool*,
 	       elfcpp::Shdr_write<size, big_endian>*) const;
 
+  // This class may change the output section name.  This is called
+  // right before shstrtab is written, so after all input-section
+  // layout processing is done.  This calls
+  // do_modified_output_section_name() on all its output_section_data
+  // members, and changes the name if any member so suggests.  If
+  // several members would suggest, this takes the first, arbitrarily.
+  // Return true if the name was modified, false else.
+  bool
+  maybe_modify_output_section_name();
+
  protected:
   // Return the section index in the output file.
   unsigned int
@@ -1663,6 +1690,15 @@ class Output_section : public Output_data
     void
     set_address(uint64_t addr, off_t off, off_t secoff);
 
+    // Call modified_output_section_name on the output-section-data object.
+    const char*
+    modified_output_section_name(const char* name) const
+    {
+      if (this->is_input_section())
+        return NULL;
+      return this->u2_.posd->do_modified_output_section_name(name);
+    }
+
     // Add an input section, for SHF_MERGE sections.
     bool
     add_input_section(Relobj* object, unsigned int shndx)
@@ -1777,7 +1813,8 @@ class Output_section : public Output_data
   // handled.
   bool
   add_merge_input_section(Relobj* object, unsigned int shndx, uint64_t flags,
-			  uint64_t entsize, uint64_t addralign);
+			  uint64_t entsize, uint64_t addralign,
+                          bool can_compress_section);
 
   // Add an output SHF_MERGE section POSD to this output section.
   // IS_STRING indicates whether it is a SHF_STRINGS section, and
@@ -1789,8 +1826,10 @@ class Output_section : public Output_data
 
   // Most of these fields are only valid after layout.
 
+  // General options.
+  const General_options& options_;
   // The name of the section.  This will point into a Stringpool.
-  const char* const name_;
+  const char* name_;
   // The section address is in the parent class.
   // The section alignment.
   uint64_t addralign_;

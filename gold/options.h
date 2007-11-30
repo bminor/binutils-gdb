@@ -150,8 +150,8 @@ class General_options
   strip_debug() const
   { return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG; }
 
-  // -Sgdb: strip only debugging information that's not used by
-  //         gdb (at least, for gdb versions <= 6.7).
+  // --strip-debug-gdb: strip only debugging information that's not
+  // used by gdb (at least, for gdb versions <= 6.7).
   bool
   strip_debug_gdb() const
   { return this->strip_debug() || this->strip_ == STRIP_DEBUG_UNUSED_BY_GDB; }
@@ -166,6 +166,17 @@ class General_options
   bool
   symbolic() const
   { return this->symbolic_; }
+
+  // --compress-debug-sections: compress .debug_* sections in the
+  // output file using the given compression method.  This is useful
+  // when the tools (such as gdb) support compressed sections.
+  bool
+  compress_debug_sections() const
+  { return this->compress_debug_sections_ != NO_COMPRESSION; }
+
+  bool
+  zlib_compress_debug_sections() const
+  { return this->compress_debug_sections_ == ZLIB_COMPRESSION; }
 
   // --demangle: demangle C++ symbols in our log messages.
   bool
@@ -288,6 +299,13 @@ class General_options
     EXECSTACK_NO
   };
 
+  // What compression method to use
+  enum CompressionMethod
+  {
+    NO_COMPRESSION,
+    ZLIB_COMPRESSION,
+  };
+
   void
   set_export_dynamic()
   { this->export_dynamic_ = true; }
@@ -341,6 +359,19 @@ class General_options
   void
   set_symbolic()
   { this->symbolic_ = true; }
+
+  void set_compress_debug_symbols(const char* arg)
+  {
+    if (strcmp(arg, "none") == 0)
+      this->compress_debug_sections_ = NO_COMPRESSION;
+#ifdef HAVE_ZLIB_H
+    else if (strcmp(arg, "zlib") == 0)
+      this->compress_debug_sections_ = ZLIB_COMPRESSION;
+#endif
+    else
+      gold_fatal(_("Unsupported argument to --compress-debug-symbols: %s"),
+                 arg);
+  }
 
   void
   set_demangle()
@@ -476,6 +507,7 @@ class General_options
   Strip strip_;
   bool allow_shlib_undefined_;
   bool symbolic_;
+  CompressionMethod compress_debug_sections_;
   bool demangle_;
   bool detect_odr_violations_;
   bool create_eh_frame_hdr_;

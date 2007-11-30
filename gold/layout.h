@@ -342,9 +342,25 @@ class Layout
   set_segment_offsets(const Target*, Output_segment*, unsigned int* pshndx);
 
   // Set the final file offsets of all the sections not associated
-  // with a segment.
+  // with a segment.  We set section offsets in three passes: the
+  // first handles all allocated sections, the second sections that
+  // can be handled after input-sections are processed, and the last
+  // the late-bound STRTAB sections (probably only shstrtab, which is
+  // the one we care about because it holds section names).
+  enum Section_offset_pass
+  {
+    BEFORE_INPUT_SECTIONS_PASS,
+    AFTER_INPUT_SECTIONS_PASS,
+    STRTAB_AFTER_INPUT_SECTIONS_PASS
+  };
   off_t
-  set_section_offsets(off_t, bool after_input_sections);
+  set_section_offsets(off_t, Section_offset_pass pass);
+
+  // We also allow any section not associated with a segment to change
+  // its output section name at the last minute.  Compressed sections
+  // use this to embed compression info in their name.
+  void
+  modify_section_names();
 
   // Set the final section indexes of all the sections not associated
   // with a segment.  Returns the next unused index.

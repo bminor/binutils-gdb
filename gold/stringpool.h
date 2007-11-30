@@ -84,6 +84,10 @@ class Stringpool_template
 
   ~Stringpool_template();
 
+  // Clear all the data from the stringpool.
+  void
+  clear();
+
   // Indicate that we should not reserve offset 0 to hold the empty
   // string when converting the stringpool to a string table.  This
   // should not be called for a proper ELF SHT_STRTAB section.
@@ -138,6 +142,12 @@ class Stringpool_template
   // offset.
   void
   write(Output_file*, off_t offset);
+
+  // Write the string table into the specified buffer, of the
+  // specified size.  buffer_size should be at least
+  // get_strtab_size().
+  void
+  write_to_buffer(char* buffer, size_t buffer_size);
 
  private:
   Stringpool_template(const Stringpool_template&);

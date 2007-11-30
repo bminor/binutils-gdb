@@ -2,6 +2,8 @@ archive.cc
 archive.h
 common.cc
 common.h
+compressed_output.cc
+compressed_output.h
 defstd.cc
 defstd.h
 dirsearch.cc

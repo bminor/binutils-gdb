@@ -41,12 +41,21 @@ Stringpool_template<Stringpool_char>::Stringpool_template()
 }
 
 template<typename Stringpool_char>
-Stringpool_template<Stringpool_char>::~Stringpool_template()
+void
+Stringpool_template<Stringpool_char>::clear()
 {
   for (typename std::list<Stringdata*>::iterator p = this->strings_.begin();
        p != this->strings_.end();
        ++p)
     delete[] reinterpret_cast<char*>(*p);
+  this->strings_.clear();
+  this->string_set_.clear();
+}
+
+template<typename Stringpool_char>
+Stringpool_template<Stringpool_char>::~Stringpool_template()
+{
+  this->clear();
 }
 
 // Return the length of a string of arbitrary character type.
@@ -413,6 +422,28 @@ Stringpool_template<Stringpool_char>::get_offset(const Stringpool_char* s)
   gold_unreachable();
 }
 
+// Write the ELF strtab into the buffer.
+
+template<typename Stringpool_char>
+void
+Stringpool_template<Stringpool_char>::write_to_buffer(char* buffer,
+                                                      size_t bufsize)
+{
+  gold_assert(this->strtab_size_ != 0);
+  if (bufsize < this->strtab_size_)   // Quiet the compiler in opt mode.
+    gold_assert(bufsize >= this->strtab_size_);
+  if (this->zero_null_)
+    buffer[0] = '\0';
+  for (typename String_set_type::const_iterator p = this->string_set_.begin();
+       p != this->string_set_.end();
+       ++p)
+    {
+      const int len = (string_length(p->first) + 1) * sizeof(Stringpool_char);
+      gold_assert(p->second.second + len <= this->strtab_size_);
+      memcpy(buffer + p->second.second, p->first, len);
+    }
+}
+
 // Write the ELF strtab into the output file at the specified offset.
 
 template<typename Stringpool_char>
@@ -420,16 +451,9 @@ void
 Stringpool_template<Stringpool_char>::write(Output_file* of, off_t offset)
 {
   gold_assert(this->strtab_size_ != 0);
-  unsigned char* viewu = of->get_output_view(offset, this->strtab_size_);
-  char* view = reinterpret_cast<char*>(viewu);
-  if (this->zero_null_)
-    view[0] = '\0';
-  for (typename String_set_type::const_iterator p = this->string_set_.begin();
-       p != this->string_set_.end();
-       ++p)
-    memcpy(view + p->second.second, p->first,
-	   (string_length(p->first) + 1) * sizeof(Stringpool_char));
-  of->write_output_view(offset, this->strtab_size_, viewu);
+  unsigned char* view = of->get_output_view(offset, this->strtab_size_);
+  this->write_to_buffer(reinterpret_cast<char*>(view), this->strtab_size_);
+  of->write_output_view(offset, this->strtab_size_, view);
 }
 
 // Instantiate the templates we need.

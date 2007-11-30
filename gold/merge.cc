@@ -496,13 +496,12 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
   return true;
 }
 
-// Set the final data size of a merged string section.  This is where
-// we finalize the mappings from the input sections to the output
-// section.
+// Finalize the mappings from the input sections to the output
+// section, and return the final data size.
 
 template<typename Char_type>
-void
-Output_merge_string<Char_type>::set_final_data_size()
+off_t
+Output_merge_string<Char_type>::finalize_merged_data()
 {
   this->stringpool_.set_string_offsets();
 
@@ -513,10 +512,18 @@ Output_merge_string<Char_type>::set_final_data_size()
     this->add_mapping(p->object, p->shndx, p->offset, p->length,
 		      this->stringpool_.get_offset(p->string));
 
-  this->set_data_size(this->stringpool_.get_strtab_size());
-
   // Save some memory.
   this->merged_strings_.clear();
+
+  return this->stringpool_.get_strtab_size();
+}
+
+template<typename Char_type>
+void
+Output_merge_string<Char_type>::set_final_data_size()
+{
+  const off_t final_data_size = this->finalize_merged_data();
+  this->set_data_size(final_data_size);
 }
 
 // Write out a merged string section.

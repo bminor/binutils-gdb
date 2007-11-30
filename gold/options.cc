@@ -376,6 +376,17 @@ options::Command_line_options::options[] =
 	       &Position_dependent_options::set_static_search),
   GENERAL_NOARG('\0', "Bsymbolic", N_("Bind defined symbols locally"),
 		NULL, ONE_DASH, &General_options::set_symbolic),
+#ifdef HAVE_ZLIB_H
+# define ZLIB_STR  ",zlib"
+#else
+# define ZLIB_STR  ""
+#endif
+  GENERAL_ARG('\0', "compress-debug-sections",
+              N_("Compress .debug_* sections in the output file "
+                 "(default is none)"),
+              N_("--compress-debug-sections=[none" ZLIB_STR "]"),
+              TWO_DASHES,
+              &General_options::set_compress_debug_symbols),
   GENERAL_NOARG('\0', "demangle", N_("Demangle C++ symbols in log messages"),
                 NULL, TWO_DASHES, &General_options::set_demangle),
   GENERAL_NOARG('\0', "no-demangle",
@@ -525,6 +536,7 @@ General_options::General_options()
     strip_(STRIP_NONE),
     allow_shlib_undefined_(false),
     symbolic_(false),
+    compress_debug_sections_(NO_COMPRESSION),
     detect_odr_violations_(false),
     create_eh_frame_hdr_(false),
     rpath_(),

@@ -202,6 +202,9 @@ AC_SUBST(LFS_CXXFLAGS)
 
 AC_REPLACE_FUNCS(pread)
 
+# Link in zlib if we can.  This allows us to write compressed sections.
+AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
+
 AC_LANG_PUSH(C++)
 
 AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)

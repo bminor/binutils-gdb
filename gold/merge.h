@@ -209,9 +209,15 @@ class Output_merge_string : public Output_merge_base
     this->stringpool_.set_no_zero_null();
   }
 
+ protected:
   // Add an input section.
   bool
   do_add_input_section(Relobj* object, unsigned int shndx);
+
+  // Do all the final processing after the input sections are read in.
+  // Returns the final data size.
+  off_t
+  finalize_merged_data();
 
   // Set the final data size.
   void
@@ -220,6 +226,16 @@ class Output_merge_string : public Output_merge_base
   // Write the data to the file.
   void
   do_write(Output_file*);
+
+  // Writes the stringpool to a buffer.
+  void
+  stringpool_to_buffer(char* buffer, size_t buffer_size)
+  { this->stringpool_.write_to_buffer(buffer, buffer_size); }
+
+  // Clears all the data in the stringpool, to save on memory.
+  void
+  clear_stringpool()
+  { stringpool_.clear(); }
 
  private:
   // As we see input sections, we build a mapping from object, section

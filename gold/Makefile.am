@@ -30,6 +30,7 @@ noinst_LIBRARIES = libgold.a
 CCFILES = \
 	archive.cc \
 	common.cc \
+	compressed_output.cc \
 	defstd.cc \
 	dirsearch.cc \
 	dynobj.cc \
@@ -59,6 +60,7 @@ CCFILES = \
 HFILES = \
 	archive.h \
 	common.h \
+	compressed_output.h \
 	defstd.h \
 	dirsearch.h \
 	dynobj.h \
