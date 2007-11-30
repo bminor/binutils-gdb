@@ -1,3 +1,31 @@
+2007-11-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_cmdlist): New variable.
+	(PACKET_vFile_open, PACKET_vFile_pread, PACKET_vFile_pwrite)
+	(PACKET_vFile_close, PACKET_vFile_unlink): New constants.
+	(remote_buffer_add_string, remote_buffer_add_bytes)
+	(remote_buffer_add_int, remote_hostio_parse_result)
+	(remote_hostio_send_command, remote_hostio_open, remote_hostio_pwrite)
+	(remote_hostio_pread, remote_hostio_close, remote_hostio_unlink)
+	(remote_fileio_errno_to_host, remote_hostio_error, fclose_cleanup)
+	(remote_hostio_close_cleanup, remote_file_put, remote_file_get)
+	(remote_file_delete, remote_put_command, remote_get_command)
+	(remote_delete_command, remote_command): New functions.
+	(_initialize_remote): Register new packets and commands.
+	* Makefile.in (gdb_fileio_h): New variable.
+	(remote.o): Update.
+	(SUBDIR_MI_OBS): Add mi-cmd-target.o.
+	(SUBDIR_MI_SRCS): Add mi/mi-cmd-target.c.
+	(mi-cmd-target.o): New rule.
+	* mi/mi-cmd-target.c: New file.
+	* mi/mi-cmds.c (mi_cmds): Add target-file-delete, target-file-get,
+	and target-file-put.
+	* mi/mi-cmds.h (mi_cmd_target_file_get, mi_cmd_target_file_put)
+	(mi_cmd_target_file_delete): Declare.
+	* remote.h (remote_file_put, remote_file_get, remote_file_delete):
+	Declare.
+	* NEWS: Describe new file transfer support.
+
 2007-11-30  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Don't

@@ -156,6 +156,9 @@ extern int pass_signals[];
 
 extern jmp_buf toplevel;
 
+/* Functions from hostio.c.  */
+extern int handle_vFile (char *, int, int *);
+
 /* From remote-utils.c */
 
 extern int remote_debug;

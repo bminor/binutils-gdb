@@ -28,6 +28,9 @@ registers on PowerPC targets.
 * The GDB remote stub, gdbserver, now supports thread debugging on GNU/Linux
 targets even when the libthread_db library is not available.
 
+* The GDB remote stub, gdbserver, now supports the new file transfer
+commands (remote put, remote get, and remote delete).
+
 * hppa*64*-*-hpux11* target broken
   The debugger is unable to start a program and fails with the following
   error: "Error trying to get information about dynamic linker".
@@ -37,6 +40,28 @@ targets even when the libthread_db library is not available.
 building a single GDB executable that supports multiple remote
 target architectures.
 
+* New commands
+
+remote put
+remote get
+remote delete
+  Transfer files to and from a remote target, and delete remote files.
+
+* New MI commands
+
+-target-file-put
+-target-file-get
+-target-file-delete
+  Transfer files to and from a remote target, and delete remote files.
+
+* New remote packets
+
+vFile:open:
+vFile:close:
+vFile:pread:
+vFile:pwrite:
+vFile:unlink:
+  Open, close, read, write, and delete files on the remote system.
 
 *** Changes in GDB 6.7
 

@@ -67,4 +67,10 @@ extern void (*deprecated_target_wait_loop_hook) (void);
 void register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 				     const struct target_desc *tdesc);
 
+void remote_file_put (const char *local_file, const char *remote_file,
+		      int from_tty);
+void remote_file_get (const char *remote_file, const char *local_file,
+		      int from_tty);
+void remote_file_delete (const char *remote_file, int from_tty);
+
 #endif

@@ -1,3 +1,8 @@
+2007-11-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.server/file-transfer.exp, gdb.server/transfer.txt,
+	gdb.mi/mi-file-transfer.exp: New.
+
 2007-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-ranges.S, gdb.dwarf2/dw2-ranges.exp: New files.

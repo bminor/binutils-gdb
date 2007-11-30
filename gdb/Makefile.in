@@ -184,7 +184,7 @@ SUBDIR_CLI_CFLAGS=
 SUBDIR_MI_OBS = \
 	mi-out.o mi-console.o \
 	mi-cmds.o mi-cmd-env.o mi-cmd-var.o mi-cmd-break.o mi-cmd-stack.o \
-	mi-cmd-file.o mi-cmd-disas.o mi-symbol-cmds.o \
+	mi-cmd-file.o mi-cmd-disas.o mi-symbol-cmds.o mi-cmd-target.o \
 	mi-interp.o \
 	mi-main.o mi-parse.o mi-getopt.o mi-common.o
 SUBDIR_MI_SRCS = \
@@ -192,7 +192,7 @@ SUBDIR_MI_SRCS = \
 	mi/mi-cmds.c mi/mi-cmd-env.c \
 	mi/mi-cmd-var.c mi/mi-cmd-break.c mi/mi-cmd-stack.c \
 	mi/mi-cmd-file.c mi/mi-cmd-disas.c mi/mi-symbol-cmds.c \
-	mi/mi-interp.c \
+	mi/mi-cmd-target.c mi/mi-interp.c \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c mi/mi-common.c
 SUBDIR_MI_DEPS =
 SUBDIR_MI_LDFLAGS=
@@ -675,6 +675,7 @@ mep_desc_h =	$(OPCODES_SRC)/mep-desc.h
 mep_opc_h =	$(OPCODES_SRC)/mep-opc.h
 sh_opc_h = 	$(OPCODES_SRC)/sh-opc.h
 gdb_callback_h = $(INCLUDE_DIR)/gdb/callback.h
+gdb_fileio_h = $(INCLUDE_DIR)/gdb/fileio.h
 gdb_sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
 gdb_sim_frv_h = $(INCLUDE_DIR)/gdb/sim-frv.h
 gdb_sim_m32c_h = $(INCLUDE_DIR)/gdb/sim-m32c.h
@@ -2602,7 +2603,8 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(gdb_stabs_h) $(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) \
 	$(gdb_assert_h) $(event_loop_h) $(event_top_h) $(inf_loop_h) \
 	$(serial_h) $(gdbcore_h) $(remote_fileio_h) $(solib_h) $(observer_h) \
-	$(cli_decode_h) $(cli_setshow_h) $(memory_map_h) $(target_descriptions_h)
+	$(cli_decode_h) $(cli_setshow_h) $(memory_map_h) \
+	$(target_descriptions_h) $(gdb_fileio_h)
 remote-fileio.o: remote-fileio.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) \
 	$(remote_h) $(gdb_fileio_h) $(gdb_wait_h) $(gdb_stat_h) \
 	$(exceptions_h) $(remote_fileio_h)
@@ -3186,6 +3188,9 @@ mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(target_h) $(frame_h) \
 	$(value_h) $(mi_cmds_h) $(ui_out_h) $(symtab_h) $(block_h) \
 	$(stack_h) $(dictionary_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c
+mi-cmd-target.o: $(srcdir)/mi/mi-cmd-target.c $(defs_h) $(mi_cmds_h) \
+	$(mi_getopt_h) $(remote_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-target.c
 mi-cmd-var.o: $(srcdir)/mi/mi-cmd-var.c $(defs_h) $(mi_cmds_h) $(ui_out_h) \
 	$(mi_out_h) $(varobj_h) $(value_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-var.c

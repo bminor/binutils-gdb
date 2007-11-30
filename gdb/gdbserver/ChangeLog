@@ -1,3 +1,13 @@
+2007-11-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (OBS): Add hostio.o.
+	(hostio.o): New rule.
+	* server.h (handle_vFile): Declare.
+	* hostio.c: New file.
+	* server.c (handle_v_requests): Take packet_len and new_packet_len
+	for binary packets.  Call handle_vFile.
+	(main): Update call to handle_v_requests.
+
 2007-11-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c: Include <sched.h>.

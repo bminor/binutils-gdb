@@ -139,7 +139,7 @@ TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
-	mem-break.o \
+	mem-break.o hostio.o \
 	$(XML_BUILTIN) \
 	$(DEPFILES)
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
@@ -277,6 +277,7 @@ regcache_h = $(srcdir)/regcache.h
 server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 		$(srcdir)/mem-break.h
 
+hostio.o: hostio.c $(server_h)
 inferiors.o: inferiors.c $(server_h)
 mem-break.o: mem-break.c $(server_h)
 proc-service.o: proc-service.c $(server_h) $(gdb_proc_service_h)

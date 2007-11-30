@@ -2480,7 +2480,7 @@ the child process just like any other process which you attached to.
 On some systems, @value{GDBN} provides support for debugging programs that
 create additional processes using the @code{fork} or @code{vfork} functions.
 Currently, the only platforms with this feature are HP-UX (11.x and later
-only?) and GNU/Linux (kernel version 2.5.60 and later).
+only?) and @sc{gnu}/Linux (kernel version 2.5.60 and later).
 
 By default, when a program forks, @value{GDBN} will continue to debug
 the parent process and the child process will run unimpeded.
@@ -12670,6 +12670,7 @@ configuration of @value{GDBN}; use @code{help target} to list them.
 
 @menu
 * Connecting::                  Connecting to a remote target
+* File Transfer::               Sending files to a remote system
 * Server::	                Using the gdbserver program
 * Remote Configuration::        Remote configuration
 * Remote Stub::                 Implementing a remote stub
@@ -12815,6 +12816,38 @@ remote monitor.  Since @value{GDBN} doesn't care about the commands it
 sends like this, this command is the way to extend @value{GDBN}---you
 can add new commands that only the external monitor will understand
 and implement.
+@end table
+
+@node File Transfer
+@section Sending files to a remote system
+@cindex remote target, file transfer
+@cindex file transfer
+@cindex sending files to remote systems
+
+Some remote targets offer the ability to transfer files over the same
+connection used to communicate with @value{GDBN}.  This is convenient
+for targets accessible through other means, e.g.@: @sc{gnu}/Linux systems
+running @code{gdbserver} over a network interface.  For other targets,
+e.g.@: embedded devices with only a single serial port, this may be
+the only way to upload or download files.
+
+Not all remote targets support these commands.
+
+@table @code
+@kindex remote put
+@item remote put @var{hostfile} @var{targetfile}
+Copy file @var{hostfile} from the host system (the machine running
+@value{GDBN}) to @var{targetfile} on the target system.
+
+@kindex remote get
+@item remote get @var{targetfile} @var{hostfile}
+Copy file @var{targetfile} from the target system to @var{hostfile}
+on the host system.
+
+@kindex remote delete
+@item remote delete @var{targetfile}
+Delete @var{targetfile} from the target system.
+
 @end table
 
 @node Server
@@ -13153,6 +13186,25 @@ are:
 @tab @code{QPassSignals}
 @tab @code{handle @var{signal}}
 
+@item @code{hostio-close-packet}
+@tab @code{vFile:close}
+@tab @code{remote get}, @code{remote put}
+
+@item @code{hostio-open-packet}
+@tab @code{vFile:open}
+@tab @code{remote get}, @code{remote put}
+
+@item @code{hostio-pread-packet}
+@tab @code{vFile:pread}
+@tab @code{remote get}, @code{remote put}
+
+@item @code{hostio-pwrite-packet}
+@tab @code{vFile:pwrite}
+@tab @code{remote get}, @code{remote put}
+
+@item @code{hostio-unlink-packet}
+@tab @code{vFile:unlink}
+@tab @code{remote delete}
 @end multitable
 
 @node Remote Stub
@@ -17349,6 +17401,7 @@ may repeat one or more times.
 * GDB/MI Signal Handling Commands::
 @end ignore
 * GDB/MI Target Manipulation::
+* GDB/MI File Transfer Commands::
 * GDB/MI Miscellaneous Commands::
 @end menu
 
@@ -21296,6 +21349,88 @@ The corresponding @value{GDBN} command is @samp{target}.
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI File Transfer Commands
+@section @sc{gdb/mi} File Transfer Commands
+
+
+@subheading The @code{-target-file-put} Command
+@findex -target-file-put
+
+@subsubheading Synopsis
+
+@smallexample
+ -target-file-put @var{hostfile} @var{targetfile}
+@end smallexample
+
+Copy file @var{hostfile} from the host system (the machine running
+@value{GDBN}) to @var{targetfile} on the target system.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{remote put}.
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+-target-file-put localfile remotefile
+^done
+(gdb)
+@end smallexample
+
+
+@subheading The @code{-target-file-put} Command
+@findex -target-file-get
+
+@subsubheading Synopsis
+
+@smallexample
+ -target-file-get @var{targetfile} @var{hostfile}
+@end smallexample
+
+Copy file @var{targetfile} from the target system to @var{hostfile}
+on the host system.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{remote get}.
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+-target-file-get remotefile localfile
+^done
+(gdb)
+@end smallexample
+
+
+@subheading The @code{-target-file-delete} Command
+@findex -target-file-delete
+
+@subsubheading Synopsis
+
+@smallexample
+ -target-file-delete @var{targetfile}
+@end smallexample
+
+Delete @var{targetfile} from the target system.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{remote delete}.
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+-target-file-delete remotefile
+^done
+(gdb)
+@end smallexample
+
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Miscellaneous Commands
 @section Miscellaneous @sc{gdb/mi} Commands
 
@@ -22920,6 +23055,7 @@ Show the current setting of the target wait timeout.
 * General Query Packets::
 * Register Packet Format::
 * Tracepoint Packets::
+* Host I/O Packets::
 * Interrupts::
 * Examples::
 * File-I/O Remote Protocol Extension::
@@ -23422,6 +23558,11 @@ command in the @samp{vCont} packet.
 @item
 The @samp{vCont} packet is not supported.
 @end table
+
+@item vFile:@var{operation}:@var{parameter}@dots{}
+@cindex @samp{vFile} packet
+Perform a file operation on the target system.  For details,
+see @ref{Host I/O Packets}.
 
 @item vFlashErase:@var{addr},@var{length}
 @cindex @samp{vFlashErase} packet
@@ -24571,6 +24712,104 @@ There is a trace experiment running.
 
 @end table
 
+
+@node Host I/O Packets
+@section Host I/O Packets
+@cindex Host I/O, remote protocol
+@cindex file transfer, remote protocol
+
+The @dfn{Host I/O} packets allow @value{GDBN} to perform I/O
+operations on the far side of a remote link.  For example, Host I/O is
+used to upload and download files to a remote target with its own
+filesystem.  Host I/O uses the same constant values and data structure
+layout as the target-initiated File-I/O protocol.  However, the
+Host I/O packets are structured differently.  The target-initiated
+protocol relies on target memory to store parameters and buffers.
+Host I/O requests are initiated by @value{GDBN}, and the
+target's memory is not involved.  @xref{File-I/O Remote Protocol
+Extension}, for more details on the target-initiated protocol.
+
+The Host I/O request packets all encode a single operation along with
+its arguments.  They have this format:
+
+@table @samp
+
+@item vFile:@var{operation}: @var{parameter}@dots{}
+@var{operation} is the name of the particular request; the target
+should compare the entire packet name up to the second colon when checking
+for a supported operation.  The format of @var{parameter} depends on
+the operation.  Numbers are always passed in hexadecimal.  Negative
+numbers have an explicit minus sign (i.e.@: two's complement is not
+used).  Strings (e.g.@: filenames) are encoded as a series of
+hexadecimal bytes.  The last argument to a system call may be a
+buffer of escaped binary data (@pxref{Binary Data}).
+
+@end table
+
+The valid responses to Host I/O packets are:
+
+@table @samp
+
+@item F @var{result} [, @var{errno}] [; @var{attachment}]
+@var{result} is the integer value returned by this operation, usually
+non-negative for success and -1 for errors.  If an error has occured,
+@var{errno} will be included in the result.  @var{errno} will have a
+value defined by the File-I/O protocol (@pxref{Errno Values}).  For
+operations which return data, @var{attachment} supplies the data as a
+binary buffer.  Binary buffers in response packets are escaped in the
+normal way (@pxref{Binary Data}).  See the individual packet
+documentation for the interpretation of @var{result} and
+@var{attachment}.
+
+@item
+An empty response indicates that this operation is not recognized.
+
+@end table
+
+These are the supported Host I/O operations:
+
+@table @samp
+@item vFile:open: @var{pathname}, @var{flags}, @var{mode}
+Open a file at @var{pathname} and return a file descriptor for it, or
+return -1 if an error occurs.  @var{pathname} is a string,
+@var{flags} is an integer indicating a mask of open flags
+(@pxref{Open Flags}), and @var{mode} is an integer indicating a mask
+of mode bits to use if the file is created (@pxref{mode_t Values}).
+@xref{open} for details of the open flags and mode values.
+
+@item vFile:close: @var{fd}
+Close the open file corresponding to @var{fd} and return 0, or
+-1 if an error occurs.
+
+@item vFile:pread: @var{fd}, @var{count}, @var{offset}
+Read data from the open file corresponding to @var{fd}.  Up to
+@var{count} bytes will be read from the file, starting at @var{offset}
+relative to the start of the file.  The target may read fewer bytes;
+common reasons include packet size limits and an end-of-file
+condition.  The number of bytes read is returned.  Zero should only be
+returned for a successful read at the end of the file, or if
+@var{count} was zero.
+
+The data read should be returned as a binary attachment on success.
+If zero bytes were read, the response should include an empty binary
+attachment (i.e.@: a trailing semicolon).  The return value is the
+number of target bytes read; the binary attachment may be longer if
+some characters were escaped.
+
+@item vFile:pwrite: @var{fd}, @var{offset}, @var{data}
+Write @var{data} (a binary buffer) to the open file corresponding
+to @var{fd}.  Start the write at @var{offset} from the start of the
+file.  Unlike many @code{write} system calls, there is no
+separate @var{count} argument; the length of @var{data} in the
+packet is used.  @samp{vFile:write} returns the number of bytes written,
+which may be shorter than the length of @var{data}, or -1 if an
+error occurred.
+
+@item vFile:unlink: @var{pathname}
+Delete the file at @var{pathname} on the target.  Return 0,
+or -1 if an error occurs.  @var{pathname} is a string.
+
+@end table
 
 @node Interrupts
 @section Interrupts

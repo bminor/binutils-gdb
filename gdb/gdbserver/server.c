@@ -772,7 +772,8 @@ err:
 
 /* Handle all of the extended 'v' packets.  */
 void
-handle_v_requests (char *own_buf, char *status, int *signal)
+handle_v_requests (char *own_buf, char *status, int *signal,
+		   int packet_len, int *new_packet_len)
 {
   if (strncmp (own_buf, "vCont;", 6) == 0)
     {
@@ -785,6 +786,10 @@ handle_v_requests (char *own_buf, char *status, int *signal)
       strcpy (own_buf, "vCont;c;C;s;S");
       return;
     }
+
+  if (strncmp (own_buf, "vFile:", 6) == 0
+      && handle_vFile (own_buf, packet_len, new_packet_len))
+    return;
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
@@ -1218,8 +1223,10 @@ main (int argc, char *argv[])
 		}
 	    case 'v':
 	      /* Extended (long) request.  */
-	      handle_v_requests (own_buf, &status, &signal);
+	      handle_v_requests (own_buf, &status, &signal,
+				 packet_len, &new_packet_len);
 	      break;
+
 	    default:
 	      /* It is a request we don't understand.  Respond with an
 	         empty packet so that gdb knows that we don't support this

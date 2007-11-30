@@ -1,3 +1,13 @@
+2007-11-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Debugging Programs with Multiple Processes): Correct
+	formatting.
+	(Remote Debugging): Add File Transfer section.
+	(Remote Configuration): Document Host I/O packets.
+	(GDB/MI): Add GDB/MI File Transfer Commands section.
+	(Remote Protocol): Add Host I/O Packets section.
+	(Packets): Add vFile.
+
 2007-11-17  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Set Breaks, Disabling): Clarify behavior of
