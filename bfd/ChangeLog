@@ -1,3 +1,8 @@
+2007-11-30  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Use the
+	ELF header to choose between 32-bit and 64-bit relocation structures.
+
 2007-11-29  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* archures.c (bfd_mach_mips_loongson_2e): New.

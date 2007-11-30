@@ -683,7 +683,8 @@ _bfd_elf_discard_section_eh_frame
 			  unsigned long r_symndx;
 
 #ifdef BFD64
-			  if (ptr_size == 8)
+			  if (elf_elfheader (abfd)->e_ident[EI_CLASS]
+			      == ELFCLASS64)
 			    r_symndx = ELF64_R_SYM (cookie->rel->r_info);
 			  else
 #endif
