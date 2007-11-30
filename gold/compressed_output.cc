@@ -38,13 +38,12 @@ namespace gold
 // true, it allocates memory for the compressed data using new, and
 // sets *COMPRESSED_DATA and *COMPRESSED_SIZE to appropriate values.
 
+#ifdef HAVE_ZLIB_H
+
 static bool
 zlib_compress(const char* uncompressed_data, unsigned long uncompressed_size,
               char** compressed_data, unsigned long* compressed_size)
 {
-#ifndef HAVE_ZLIB_H
-  return false;
-#else
   *compressed_size = uncompressed_size + uncompressed_size / 1000 + 128;
   *compressed_data = new char[*compressed_size];
 
@@ -67,8 +66,17 @@ zlib_compress(const char* uncompressed_data, unsigned long uncompressed_size,
       *compressed_data = NULL;
       return false;
     }
-#endif  // #ifdef HAVE_ZLIB_H
 }
+
+#else // !defined(HAVE_ZLIB_H)
+
+static bool
+zlib_compress(const char*, unsigned long, char**, unsigned long*)
+{
+  return false;
+}
+
+#endif // !defined(HAVE_ZLIB_H)
 
 // After compressing an output section, we rename it from foo to
 // foo.zlib.nnnn, where nnnn is the uncompressed size of the section.
