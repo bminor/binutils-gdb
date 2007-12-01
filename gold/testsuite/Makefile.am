@@ -141,7 +141,7 @@ debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
 
 # See if we can also detect problems when we're linking .so's, not .o's.
 debug_msg.so: debug_msg.cc
-	$(CXXCOMPILE) -O0 -g -shared -fPIC-w -o $@ $(srcdir)/debug_msg.cc
+	$(CXXCOMPILE) -O0 -g -shared -fPIC -w -o $@ $(srcdir)/debug_msg.cc
 odr_violation1.so: odr_violation1.cc
 	$(CXXCOMPILE) -O0 -g -shared -fPIC -w -o $@ $(srcdir)/odr_violation1.cc
 odr_violation2.so: odr_violation2.cc
