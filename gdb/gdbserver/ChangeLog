@@ -1,5 +1,9 @@
 2007-11-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* hostio.c: Correct copyright year.
+
+2007-11-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (OBS): Add hostio.o.
 	(hostio.o): New rule.
 	* server.h (handle_vFile): Declare.
