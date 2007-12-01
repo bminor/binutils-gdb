@@ -1247,11 +1247,11 @@ uninstall-am: uninstall-info-am
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg_ndebug.so: debug_msg.cc
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -shared -w -o $@ $(srcdir)/debug_msg.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/debug_msg.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation1_ndebug.so: odr_violation1.cc
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -shared -w -o $@ $(srcdir)/odr_violation1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation2_ndebug.so: odr_violation2.cc
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -shared -w -o $@ $(srcdir)/odr_violation2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg_ndebug.err: debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so "2>$@"
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so 2>$@; \

@@ -159,11 +159,11 @@ debug_msg_so.err: debug_msg.so odr_violation1.so odr_violation2.so gcctestdir/ld
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
 debug_msg_ndebug.so: debug_msg.cc
-	$(CXXCOMPILE) -O0 -g0 -shared -w -o $@ $(srcdir)/debug_msg.cc
+	$(CXXCOMPILE) -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/debug_msg.cc
 odr_violation1_ndebug.so: odr_violation1.cc
-	$(CXXCOMPILE) -O0 -g0 -shared -w -o $@ $(srcdir)/odr_violation1.cc
+	$(CXXCOMPILE) -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation1.cc
 odr_violation2_ndebug.so: odr_violation2.cc
-	$(CXXCOMPILE) -O0 -g0 -shared -w -o $@ $(srcdir)/odr_violation2.cc
+	$(CXXCOMPILE) -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
 debug_msg_ndebug.err: debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so gcctestdir/ld
 	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so "2>$@"
 	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so 2>$@; \
