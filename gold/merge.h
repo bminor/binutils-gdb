@@ -120,6 +120,10 @@ class Output_merge_data : public Output_merge_base
   void
   do_write(Output_file*);
 
+  // Write the data to a buffer.
+  void
+  do_write_to_buffer(unsigned char*);
+
  private:
   // We build a hash table of the fixed-size constants.  Each constant
   // is stored as a pointer into the section data we are accumulating.
@@ -227,9 +231,13 @@ class Output_merge_string : public Output_merge_base
   void
   do_write(Output_file*);
 
+  // Write the data to a buffer.
+  void
+  do_write_to_buffer(unsigned char*);
+
   // Writes the stringpool to a buffer.
   void
-  stringpool_to_buffer(char* buffer, size_t buffer_size)
+  stringpool_to_buffer(unsigned char* buffer, size_t buffer_size)
   { this->stringpool_.write_to_buffer(buffer, buffer_size); }
 
   // Clears all the data in the stringpool, to save on memory.

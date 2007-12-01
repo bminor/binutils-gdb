@@ -1103,8 +1103,7 @@ Input_objects::add_object(Object* obj)
 	}
     }
 
-  set_parameters_size_and_endianness(target->get_size(),
-				     target->is_big_endian());
+  set_parameters_target(target);
 
   return true;
 }

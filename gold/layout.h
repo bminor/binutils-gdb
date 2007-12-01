@@ -356,12 +356,6 @@ class Layout
   off_t
   set_section_offsets(off_t, Section_offset_pass pass);
 
-  // We also allow any section not associated with a segment to change
-  // its output section name at the last minute.  Compressed sections
-  // use this to embed compression info in their name.
-  void
-  modify_section_names();
-
   // Set the final section indexes of all the sections not associated
   // with a segment.  Returns the next unused index.
   unsigned int

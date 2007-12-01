@@ -28,6 +28,7 @@ namespace gold
 
 class General_options;
 class Errors;
+class Target;
 
 // Here we define the Parameters class which simply holds simple
 // general parameters which apply to the entire link.  We use a global
@@ -199,12 +200,20 @@ class Parameters
     return this->doing_static_link_;
   }
 
+  // The target of the output file we are generating.
+  Target*
+  target() const
+  {
+    gold_assert(this->is_target_valid_);
+    return this->target_;
+  }
+
   // The size of the output file we are generating.  This should
   // return 32 or 64.
   int
   get_size() const
   {
-    gold_assert(this->is_size_and_endian_valid_);
+    gold_assert(this->is_target_valid_);
     return this->size_;
   }
 
@@ -212,7 +221,7 @@ class Parameters
   bool
   is_big_endian() const
   {
-    gold_assert(this->is_size_and_endian_valid_);
+    gold_assert(this->is_target_valid_);
     return this->is_big_endian_;
   }
 
@@ -224,9 +233,9 @@ class Parameters
   void
   set_doing_static_link(bool doing_static_link);
 
-  // Set the size and endianness.
+  // Set the target.
   void
-  set_size_and_endianness(int size, bool is_big_endian);
+  set_target(Target* target);
 
  private:
   // The types of output files.
@@ -291,8 +300,10 @@ class Parameters
   bool is_doing_static_link_valid_;
   // Whether we are doing a static link.
   bool doing_static_link_;
-  // Whether the size_ and is_big_endian_ fields are valid.
-  bool is_size_and_endian_valid_;
+  // Whether the target_ field is valid.
+  bool is_target_valid_;
+  // The target.
+  Target* target_;
   // The size of the output file--32 or 64.
   int size_;
   // Whether the output file is big endian.
@@ -308,8 +319,8 @@ extern void initialize_parameters(Errors*);
 // Set the options.
 extern void set_parameters_from_options(const General_options*);
 
-// Set the size and endianness of the global parameters variable.
-extern void set_parameters_size_and_endianness(int size, bool is_big_endian);
+// Set the target recorded in the global parameters variable.
+extern void set_parameters_target(Target* target);
 
 // Set whether we are doing a static link.
 extern void set_parameters_doing_static_link(bool doing_static_link);

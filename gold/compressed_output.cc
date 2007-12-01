@@ -26,8 +26,8 @@
 #include <zlib.h>
 #endif
 
-#include "compressed_output.h"
 #include "parameters.h"
+#include "compressed_output.h"
 
 namespace gold
 {
@@ -89,187 +89,60 @@ zlib_compressed_suffix(unsigned long uncompressed_size)
   return std::string(".zlib.") + size_string;
 }
 
-// Class Output_compressed_section_data.
-
-// Add an input section.  In this case, we just keep track of the sections.
-
-bool
-Output_compressed_section_data::do_add_input_section(Relobj* obj,
-                                                     unsigned int shndx)
-{
-  this->objects_.push_back(Object_entry(obj, shndx));
-  return true;
-}
+// Class Output_compressed_section.
 
 // Set the final data size of a compressed section.  This is where
 // we actually compress the section data.
 
 void
-Output_compressed_section_data::set_final_data_size()
+Output_compressed_section::set_final_data_size()
 {
-  // FIXME: assert that relocations have already been applied.
-
-  off_t uncompressed_size = 0;
-  for (std::vector<Object_entry>::iterator it = this->objects_.begin();
-       it != this->objects_.end();
-       ++it)
-    {
-      it->contents
-        = it->object->section_contents(it->shndx, &it->length, false);
-      uncompressed_size += it->length;
-    }
+  off_t uncompressed_size = this->postprocessing_buffer_size();
 
   // (Try to) compress the data.
   unsigned long compressed_size;
-  char* uncompressed_data = new char[uncompressed_size];
-  off_t pos = 0;
-  for (std::vector<Object_entry>::const_iterator it = this->objects_.begin();
-       it != this->objects_.end();
-       ++it)
-    {
-      memcpy(uncompressed_data + pos,
-             reinterpret_cast<const char*>(it->contents),
-             it->length);
-      pos += it->length;
-    }
+  unsigned char* u_uncompressed_data = this->postprocessing_buffer();
+  char* uncompressed_data = reinterpret_cast<char*>(u_uncompressed_data);
+
+  // At this point the contents of all regular input sections will
+  // have been copied into the postprocessing buffer, and relocations
+  // will have been applied.  Now we need to copy in the contents of
+  // anything other than a regular input section.
+  this->write_to_postprocessing_buffer();
 
   bool success = false;
-  if (options_.zlib_compress_debug_sections())
+  if (this->options_->zlib_compress_debug_sections())
     success = zlib_compress(uncompressed_data, uncompressed_size,
                             &this->data_, &compressed_size);
   if (success)
     {
-      delete[] uncompressed_data;
+      std::string suffix(zlib_compressed_suffix(uncompressed_size));
+      this->new_section_name_ = std::string(this->name()) + suffix;
+      this->set_name(this->new_section_name_.c_str());
       this->set_data_size(compressed_size);
-      this->new_section_name_ = zlib_compressed_suffix(uncompressed_size);
     }
   else
     {
-      gold_warning(_("Not compressing section data: zlib error"));
+      gold_warning(_("not compressing section data: zlib error"));
       gold_assert(this->data_ == NULL);
-      this->data_ = uncompressed_data;
       this->set_data_size(uncompressed_size);
     }
-}
-
-// Change the name of the output section to reflect it's compressed.
-// The layout routines call into this right before finalizing the
-// shstrtab.
-
-const char*
-Output_compressed_section_data::do_modified_output_section_name(
-  const char* name)
-{
-  // This mean we never compressed the data.
-  if (this->new_section_name_.empty())
-    return NULL;
-  this->new_section_name_ = std::string(name) + this->new_section_name_;
-  return this->new_section_name_.c_str();
 }
 
 // Write out a compressed section.  If we couldn't compress, we just
 // write it out as normal, uncompressed data.
 
 void
-Output_compressed_section_data::do_write(Output_file* of)
+Output_compressed_section::do_write(Output_file* of)
 {
-  unsigned char* uview = of->get_output_view(this->offset(),
-                                             this->data_size());
-  char* view = reinterpret_cast<char*>(uview);
-  memcpy(view, this->data_, this->data_size());
-  of->write_output_view(this->offset(), this->data_size(), uview);
-}
-
-// Class Output_compressed_string.
-
-// Add an input section.  We don't do anything special here.
-
-template<typename Char_type>
-bool
-Output_compressed_string<Char_type>::do_add_input_section(Relobj* object,
-                                                          unsigned int shndx)
-{
-  return Output_merge_string<Char_type>::do_add_input_section(object, shndx);
-}
-
-// Set the final data size of a compressed section.  This is where
-// we actually compress the section data.
-
-template<typename Char_type>
-void
-Output_compressed_string<Char_type>::set_final_data_size()
-{
-  // First let the superclass finalize all its data, then write it to
-  // a buffer.
-  unsigned long uncompressed_size = this->finalize_merged_data();
-  char* uncompressed_data = new char[uncompressed_size];
-  this->stringpool_to_buffer(uncompressed_data, uncompressed_size);
-
-  // (Try to) compress the data.
-  unsigned long compressed_size;
-  if (options_.zlib_compress_debug_sections()
-      && zlib_compress(uncompressed_data, uncompressed_size,
-                       &this->compressed_data_, &compressed_size))
-    {
-      this->set_data_size(compressed_size);
-      // Save some memory.
-      this->clear_stringpool();
-      // We will be renaming the section to name.zlib.uncompressed_size.
-      this->new_section_name_ = zlib_compressed_suffix(uncompressed_size);
-    }
+  off_t offset = this->offset();
+  off_t data_size = this->data_size();
+  unsigned char* view = of->get_output_view(offset, data_size);
+  if (this->data_ == NULL)
+    memcpy(view, this->postprocessing_buffer(), data_size);
   else
-    {
-      this->compressed_data_ = NULL;
-      this->set_data_size(uncompressed_size);
-    }
-
-  delete[] uncompressed_data;
+    memcpy(view, this->data_, data_size);
+  of->write_output_view(offset, data_size, view);
 }
-
-// Change the name of the output section to reflect it's compressed.
-// The layout routines call into this right before finalizing the
-// shstrtab.
-
-template<typename Char_type>
-const char*
-Output_compressed_string<Char_type>::do_modified_output_section_name(
-  const char* name)
-{
-  // This mean we never compressed the data
-  if (this->new_section_name_.empty())
-    return NULL;
-  this->new_section_name_ = std::string(name) + this->new_section_name_;
-  return this->new_section_name_.c_str();
-}
-
-// Write out a compressed string section.  If we couldn't compress,
-// we just write out the normal string section.
-
-template<typename Char_type>
-void
-Output_compressed_string<Char_type>::do_write(Output_file* of)
-{
-  if (this->compressed_data_ == NULL)
-    Output_merge_string<Char_type>::do_write(of);
-  else
-    {
-      unsigned char* uview = of->get_output_view(this->offset(),
-                                                 this->data_size());
-      char* view = reinterpret_cast<char*>(uview);
-      memcpy(view, this->compressed_data_, this->data_size());
-      of->write_output_view(this->offset(), this->data_size(), uview);
-    }
-}
-
-// Instantiate the templates we need.
-
-template
-class Output_compressed_string<char>;
-
-template
-class Output_compressed_string<uint16_t>;
-
-template
-class Output_compressed_string<uint32_t>;
 
 } // End namespace gold.

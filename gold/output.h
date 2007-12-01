@@ -432,15 +432,6 @@ class Output_section_data : public Output_data
   add_input_section(Relobj* object, unsigned int shndx)
   { return this->do_add_input_section(object, shndx); }
 
-  // This class may change the output section name.  This is called
-  // right before shstrtab is written, so after all input-section
-  // layout processing is done.  The input is the old name, and the
-  // output should be a new name (which will be copied into permanent
-  // storage) to change the name, or NULL to keep the name as-is.
-  virtual const char*
-  do_modified_output_section_name(const char*)
-  { return NULL; }
-
   // Given an input OBJECT, an input section index SHNDX within that
   // object, and an OFFSET relative to the start of that input
   // section, return whether or not the corresponding offset within
@@ -451,6 +442,12 @@ class Output_section_data : public Output_data
   output_offset(const Relobj* object, unsigned int shndx, off_t offset,
 		off_t *poutput) const
   { return this->do_output_offset(object, shndx, offset, poutput); }
+
+  // Write the contents to a buffer.  This is used for sections which
+  // require postprocessing, such as compression.
+  void
+  write_to_buffer(unsigned char* buffer)
+  { this->do_write_to_buffer(buffer); }
 
  protected:
   // The child class must implement do_write.
@@ -471,6 +468,13 @@ class Output_section_data : public Output_data
   virtual bool
   do_output_offset(const Relobj*, unsigned int, off_t, off_t*) const
   { return false; }
+
+  // The child class may implement write_to_buffer.  Most child
+  // classes can not appear in a compressed section, and they do not
+  // implement this.
+  virtual void
+  do_write_to_buffer(unsigned char*)
+  { gold_unreachable(); }
 
   // Return the required alignment.
   uint64_t
@@ -545,6 +549,11 @@ class Output_data_const : public Output_section_data
   void
   do_write(Output_file*);
 
+  // Write the data to a buffer.
+  void
+  do_write_to_buffer(unsigned char* buffer)
+  { memcpy(buffer, this->data_.data(), this->data_.size()); }
+
  private:
   std::string data_;
 };
@@ -564,6 +573,11 @@ class Output_data_const_buffer : public Output_section_data
   // Write the data the output file.
   void
   do_write(Output_file*);
+
+  // Write the data to a buffer.
+  void
+  do_write_to_buffer(unsigned char* buffer)
+  { memcpy(buffer, this->p_, this->data_size()); }
 
  private:
   const unsigned char* p_;
@@ -628,6 +642,11 @@ class Output_data_strtab : public Output_section_data
   // Write out the data.
   void
   do_write(Output_file*);
+
+  // Write the data to a buffer.
+  void
+  do_write_to_buffer(unsigned char* buffer)
+  { this->strtab_->write_to_buffer(buffer, this->data_size()); }
 
  private:
   Stringpool* strtab_;
@@ -1317,8 +1336,7 @@ class Output_section : public Output_data
 {
  public:
   // Create an output section, giving the name, type, and flags.
-  Output_section(const General_options& options,
-                 const char* name, elfcpp::Elf_Word, elfcpp::Elf_Xword);
+  Output_section(const char* name, elfcpp::Elf_Word, elfcpp::Elf_Xword);
   virtual ~Output_section();
 
   // Add a new input section SHNDX, named NAME, with header SHDR, from
@@ -1340,13 +1358,6 @@ class Output_section : public Output_data
   const char*
   name() const
   { return this->name_; }
-
-  // Modify the section name.  This should be called only after this
-  // section is done being constructed.  The input should be a pointer
-  // into layout's namepool_.
-  void
-  set_name(const char* newname)
-  { this->name_ = newname; }
 
   // Return the section type.
   elfcpp::Elf_Word
@@ -1506,11 +1517,23 @@ class Output_section : public Output_data
   requires_postprocessing() const
   { return this->requires_postprocessing_; }
 
-  // Record that this section requires postprocessing after all
-  // relocations have been applied.
+  // If a section requires postprocessing, return the buffer to use.
+  unsigned char*
+  postprocessing_buffer() const
+  {
+    gold_assert(this->postprocessing_buffer_ != NULL);
+    return this->postprocessing_buffer_;
+  }
+
+  // If a section requires postprocessing, create the buffer to use.
   void
-  set_requires_postprocessing()
-  { this->requires_postprocessing_ = true; }
+  create_postprocessing_buffer();
+
+  // If a section requires postprocessing, this is the size of the
+  // buffer to which relocations should be applied.
+  off_t
+  postprocessing_buffer_size() const
+  { return this->current_data_size_for_child(); }
 
   // Return whether the offset OFFSET in the input section SHNDX in
   // object OBJECT is being included in the link.
@@ -1535,16 +1558,6 @@ class Output_section : public Output_data
   write_header(const Layout*, const Stringpool*,
 	       elfcpp::Shdr_write<size, big_endian>*) const;
 
-  // This class may change the output section name.  This is called
-  // right before shstrtab is written, so after all input-section
-  // layout processing is done.  This calls
-  // do_modified_output_section_name() on all its output_section_data
-  // members, and changes the name if any member so suggests.  If
-  // several members would suggest, this takes the first, arbitrarily.
-  // Return true if the name was modified, false else.
-  bool
-  maybe_modify_output_section_name();
-
  protected:
   // Return the section index in the output file.
   unsigned int
@@ -1566,14 +1579,14 @@ class Output_section : public Output_data
   // Output_section, there is nothing to do, but if there are any
   // Output_section_data objects we need to set their final addresses
   // here.
-  void
+  virtual void
   set_final_data_size();
 
   // Write the data to the file.  For a typical Output_section, this
   // does nothing: the data is written out by calling Object::Relocate
   // on each input object.  But if there are any Output_section_data
   // objects we do need to write them out here.
-  void
+  virtual void
   do_write(Output_file*);
 
   // Return the address alignment--function required by parent class.
@@ -1595,6 +1608,36 @@ class Output_section : public Output_data
   bool
   do_is_section_flag_set(elfcpp::Elf_Xword flag) const
   { return (this->flags_ & flag) != 0; }
+
+  // Modify the section name.  This is only permitted for an
+  // unallocated section, and only before the size has been finalized.
+  // Otherwise the name will not get into Layout::namepool_.
+  void
+  set_name(const char* newname)
+  {
+    gold_assert((this->flags_ & elfcpp::SHF_ALLOC) == 0);
+    gold_assert(!this->is_data_size_valid());
+    this->name_ = newname;
+  }
+
+  // This may be implemented by a child class.
+  virtual void
+  do_finalize_name(Layout*)
+  { }
+
+  // Record that this section requires postprocessing after all
+  // relocations have been applied.  This is called by a child class.
+  void
+  set_requires_postprocessing()
+  {
+    this->requires_postprocessing_ = true;
+    this->after_input_sections_ = true;
+  }
+
+  // Write all the data of an Output_section into the postprocessing
+  // buffer.
+  void
+  write_to_postprocessing_buffer();
 
  private:
   // In some cases we need to keep a list of the input sections
@@ -1685,19 +1728,15 @@ class Output_section : public Output_data
     }
 
     // Set the address and file offset.  This is called during
-    // Layout::finalize.  SECOFF is the file offset of the enclosing
-    // section.
+    // Layout::finalize.  SECTION_FILE_OFFSET is the file offset of
+    // the enclosing section.
     void
-    set_address(uint64_t addr, off_t off, off_t secoff);
+    set_address_and_file_offset(uint64_t address, off_t file_offset,
+				off_t section_file_offset);
 
-    // Call modified_output_section_name on the output-section-data object.
-    const char*
-    modified_output_section_name(const char* name) const
-    {
-      if (this->is_input_section())
-        return NULL;
-      return this->u2_.posd->do_modified_output_section_name(name);
-    }
+    // Finalize the data size.
+    void
+    finalize_data_size();
 
     // Add an input section, for SHF_MERGE sections.
     bool
@@ -1720,6 +1759,11 @@ class Output_section : public Output_data
     // Write out the data.  This does nothing for an input section.
     void
     write(Output_file*);
+
+    // Write the data to a buffer.  This does nothing for an input
+    // section.
+    void
+    write_to_buffer(unsigned char*);
 
    private:
     // Code values which appear in shndx_.  If the value is not one of
@@ -1813,8 +1857,7 @@ class Output_section : public Output_data
   // handled.
   bool
   add_merge_input_section(Relobj* object, unsigned int shndx, uint64_t flags,
-			  uint64_t entsize, uint64_t addralign,
-                          bool can_compress_section);
+			  uint64_t entsize, uint64_t addralign);
 
   // Add an output SHF_MERGE section POSD to this output section.
   // IS_STRING indicates whether it is a SHF_STRINGS section, and
@@ -1826,8 +1869,6 @@ class Output_section : public Output_data
 
   // Most of these fields are only valid after layout.
 
-  // General options.
-  const General_options& options_;
   // The name of the section.  This will point into a Stringpool.
   const char* name_;
   // The section address is in the parent class.
@@ -1869,6 +1910,9 @@ class Output_section : public Output_data
   // often will need fill sections without needing to keep track of
   // input sections.
   Fill_list fills_;
+  // If the section requires postprocessing, this buffer holds the
+  // section contents during relocation.
+  unsigned char* postprocessing_buffer_;
   // Whether this output section needs a STT_SECTION symbol in the
   // normal symbol table.  This will be true if there is a relocation
   // which needs it.

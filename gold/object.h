@@ -960,6 +960,7 @@ class Sized_relobj : public Relobj
     off_t offset;
     off_t view_size;
     bool is_input_output_view;
+    bool is_postprocessing_view;
   };
 
   typedef std::vector<View_size> Views;

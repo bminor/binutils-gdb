@@ -426,7 +426,7 @@ Stringpool_template<Stringpool_char>::get_offset(const Stringpool_char* s)
 
 template<typename Stringpool_char>
 void
-Stringpool_template<Stringpool_char>::write_to_buffer(char* buffer,
+Stringpool_template<Stringpool_char>::write_to_buffer(unsigned char* buffer,
                                                       size_t bufsize)
 {
   gold_assert(this->strtab_size_ != 0);
@@ -452,7 +452,7 @@ Stringpool_template<Stringpool_char>::write(Output_file* of, off_t offset)
 {
   gold_assert(this->strtab_size_ != 0);
   unsigned char* view = of->get_output_view(offset, this->strtab_size_);
-  this->write_to_buffer(reinterpret_cast<char*>(view), this->strtab_size_);
+  this->write_to_buffer(view, this->strtab_size_);
   of->write_output_view(offset, this->strtab_size_, view);
 }
 

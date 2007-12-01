@@ -32,6 +32,7 @@
 #include "symtab.h"
 #include "dynobj.h"
 #include "ehframe.h"
+#include "compressed_output.h"
 #include "layout.h"
 
 namespace gold
@@ -386,6 +387,22 @@ Layout::section_flags_to_segment(elfcpp::Elf_Xword flags)
   return ret;
 }
 
+// Sometimes we compress sections.  This is typically done for
+// sections that are not part of normal program execution (such as
+// .debug_* sections), and where the readers of these sections know
+// how to deal with compressed sections.  (To make it easier for them,
+// we will rename the ouput section in such cases from .foo to
+// .foo.zlib.nnnn, where nnnn is the uncompressed size.)  This routine
+// doesn't say for certain whether we'll compress -- it depends on
+// commandline options as well -- just whether this section is a
+// candidate for compression.
+
+static bool
+is_compressible_debug_section(const char* secname)
+{
+  return (strncmp(secname, ".debug", sizeof(".debug") - 1) == 0);
+}
+
 // Make a new Output_section, and attach it to segments as
 // appropriate.
 
@@ -393,7 +410,14 @@ Output_section*
 Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 			    elfcpp::Elf_Xword flags)
 {
-  Output_section* os = new Output_section(this->options_, name, type, flags);
+  Output_section* os;
+  if ((flags & elfcpp::SHF_ALLOC) == 0
+      && this->options_.compress_debug_sections()
+      && is_compressible_debug_section(name))
+    os = new Output_compressed_section(&this->options_, name, type, flags);
+  else
+    os = new Output_section(name, type, flags);
+
   this->section_list_.push_back(os);
 
   if ((flags & elfcpp::SHF_ALLOC) == 0)
@@ -1070,6 +1094,10 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
 	continue;
 
       if (pass == BEFORE_INPUT_SECTIONS_PASS
+	  && (*p)->requires_postprocessing())
+	(*p)->create_postprocessing_buffer();
+
+      if (pass == BEFORE_INPUT_SECTIONS_PASS
           && (*p)->after_input_sections())
         continue;
       else if (pass == AFTER_INPUT_SECTIONS_PASS
@@ -1085,21 +1113,12 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
       (*p)->set_file_offset(off);
       (*p)->finalize_data_size();
       off += (*p)->data_size();
+
+      // At this point the name must be set.
+      if (pass != STRTAB_AFTER_INPUT_SECTIONS_PASS)
+	this->namepool_.add((*p)->name(), false, NULL);
     }
   return off;
-}
-
-// Allow any section not associated with a segment to change its
-// output section name at the last minute.
-
-void
-Layout::modify_section_names()
-{
-  for (Section_list::iterator p = this->unattached_section_list_.begin();
-       p != this->unattached_section_list_.end();
-       ++p)
-    if ((*p)->maybe_modify_output_section_name())
-      this->namepool_.add((*p)->name(), true, NULL);
 }
 
 // Set the section indexes of all the sections not associated with a
@@ -1910,10 +1929,6 @@ Layout::write_sections_after_input_sections(Output_file* of)
   // writing.
   off_t off = this->output_file_size_;
   off = this->set_section_offsets(off, AFTER_INPUT_SECTIONS_PASS);
-
-  // Determine the final section names as well (at least, for sections
-  // that we haven't written yet).
-  this->modify_section_names();
 
   // Now that we've finalized the names, we can finalize the shstrab.
   off = this->set_section_offsets(off, STRTAB_AFTER_INPUT_SECTIONS_PASS);

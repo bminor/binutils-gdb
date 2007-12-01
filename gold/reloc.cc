@@ -376,12 +376,16 @@ Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
     {
       if (views[i].view != NULL)
 	{
-	  if (views[i].is_input_output_view)
-	    of->write_input_output_view(views[i].offset, views[i].view_size,
-					views[i].view);
-	  else
-	    of->write_output_view(views[i].offset, views[i].view_size,
-				  views[i].view);
+	  if (!views[i].is_postprocessing_view)
+	    {
+	      if (views[i].is_input_output_view)
+		of->write_input_output_view(views[i].offset,
+					    views[i].view_size,
+					    views[i].view);
+	      else
+		of->write_output_view(views[i].offset, views[i].view_size,
+				      views[i].view);
+	    }
 	}
     }
 
@@ -419,17 +423,50 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       if (shdr.get_sh_type() == elfcpp::SHT_NOBITS)
 	continue;
 
+      // In the normal case, this input section is simply mapped to
+      // the output section at offset OUTPUT_OFFSET.
+
+      // However, if OUTPUT_OFFSET == -1, then input data is handled
+      // specially--e.g., a .eh_frame section.  The relocation
+      // routines need to check for each reloc where it should be
+      // applied.  For this case, we need an input/output view for the
+      // entire contents of the section in the output file.  We don't
+      // want to copy the contents of the input section to the output
+      // section; the output section contents were already written,
+      // and we waited for them in Relocate_task::is_runnable because
+      // relocs_must_follow_section_writes is set for the object.
+
+      // Regardless of which of the above cases is true, we have to
+      // check requires_postprocessing of the output section.  If that
+      // is false, then we work with views of the output file
+      // directly.  If it is true, then we work with a separate
+      // buffer, and the output section is responsible for writing the
+      // final data to the output file.
+
+      off_t output_section_offset;
+      off_t output_section_size;
+      if (!os->requires_postprocessing())
+	{
+	  output_section_offset = os->offset();
+	  output_section_size = os->data_size();
+	}
+      else
+	{
+	  output_section_offset = 0;
+	  output_section_size = os->postprocessing_buffer_size();
+	}
+
       off_t view_start;
       off_t view_size;
       if (output_offset != -1)
 	{
-	  view_start = os->offset() + output_offset;
+	  view_start = output_section_offset + output_offset;
 	  view_size = shdr.get_sh_size();
 	}
       else
 	{
-	  view_start = os->offset();
-	  view_size = os->data_size();
+	  view_start = output_section_offset;
+	  view_size = output_section_size;
 	}
 
       if (view_size == 0)
@@ -437,15 +474,25 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
       gold_assert(output_offset == -1
 		  || (output_offset >= 0
-		      && output_offset + view_size <= os->data_size()));
+		      && output_offset + view_size <= output_section_size));
 
       unsigned char* view;
-      if (output_offset == -1)
-	view = of->get_input_output_view(view_start, view_size);
+      if (os->requires_postprocessing())
+	{
+	  unsigned char* buffer = os->postprocessing_buffer();
+	  view = buffer + view_start;
+	  if (output_offset != -1)
+	    this->read(shdr.get_sh_offset(), view_size, view);
+	}
       else
 	{
-	  view = of->get_output_view(view_start, view_size);
-	  this->read(shdr.get_sh_offset(), view_size, view);
+	  if (output_offset == -1)
+	    view = of->get_input_output_view(view_start, view_size);
+	  else
+	    {
+	      view = of->get_output_view(view_start, view_size);
+	      this->read(shdr.get_sh_offset(), view_size, view);
+	    }
 	}
 
       pvs->view = view;
@@ -455,6 +502,7 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       pvs->offset = view_start;
       pvs->view_size = view_size;
       pvs->is_input_output_view = output_offset == -1;
+      pvs->is_postprocessing_view = os->requires_postprocessing();
     }
 }
 
@@ -542,6 +590,9 @@ Sized_relobj<size, big_endian>::relocate_sections(
 		     i, static_cast<unsigned long>(sh_size));
 	  continue;
 	}
+
+      gold_assert(output_offset != -1
+		  || this->relocs_must_follow_section_writes());
 
       relinfo.reloc_shndx = i;
       relinfo.data_shndx = index;

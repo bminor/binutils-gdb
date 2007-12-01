@@ -445,6 +445,14 @@ Output_merge_data::do_write(Output_file* of)
   of->write(this->offset(), this->p_, this->len_);
 }
 
+// Write the data to a buffer.
+
+void
+Output_merge_data::do_write_to_buffer(unsigned char* buffer)
+{
+  memcpy(buffer, this->p_, this->len_);
+}
+
 // Class Output_merge_string.
 
 // Add an input section to a merged string section.
@@ -533,6 +541,15 @@ void
 Output_merge_string<Char_type>::do_write(Output_file* of)
 {
   this->stringpool_.write(of, this->offset());
+}
+
+// Write a merged string section to a buffer.
+
+template<typename Char_type>
+void
+Output_merge_string<Char_type>::do_write_to_buffer(unsigned char* buffer)
+{
+  this->stringpool_.write_to_buffer(buffer, this->data_size());
 }
 
 // Instantiate the templates we need.

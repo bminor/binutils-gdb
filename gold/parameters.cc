@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include "options.h"
+#include "target.h"
 #include "parameters.h"
 
 namespace gold
@@ -37,7 +38,7 @@ Parameters::Parameters(Errors* errors)
     symbolic_(false), demangle_(false), detect_odr_violations_(false),
     optimization_level_(0), export_dynamic_(false), debug_(0),
     is_doing_static_link_valid_(false), doing_static_link_(false),
-    is_size_and_endian_valid_(false), size_(0), is_big_endian_(false)
+    is_target_valid_(false), target_(NULL)
 {
 }
 
@@ -85,22 +86,20 @@ Parameters::set_doing_static_link(bool doing_static_link)
   this->is_doing_static_link_valid_ = true;
 }
 
-// Set the size and endianness.
+// Set the target.
 
 void
-Parameters::set_size_and_endianness(int size, bool is_big_endian)
+Parameters::set_target(Target* target)
 {
-  if (!this->is_size_and_endian_valid_)
+  if (!this->is_target_valid_)
     {
-      this->size_ = size;
-      this->is_big_endian_ = is_big_endian;
-      this->is_size_and_endian_valid_ = true;
+      this->target_ = target;
+      this->size_ = target->get_size();
+      this->is_big_endian_ = target->is_big_endian();
+      this->is_target_valid_ = true;
     }
   else
-    {
-      gold_assert(size == this->size_);
-      gold_assert(is_big_endian == this->is_big_endian_);
-    }
+    gold_assert(target == this->target_);
 }
 
 // Our local version of the variable, which is not const.
@@ -135,12 +134,12 @@ set_parameters_doing_static_link(bool doing_static_link)
   static_parameters->set_doing_static_link(doing_static_link);
 }
 
-// Set the size and endianness.
+// Set the target.
 
 void
-set_parameters_size_and_endianness(int size, bool is_big_endian)
+set_parameters_target(Target* target)
 {
-  static_parameters->set_size_and_endianness(size, is_big_endian);
+  static_parameters->set_target(target);
 }
 
 } // End namespace gold.

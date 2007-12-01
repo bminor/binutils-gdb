@@ -147,7 +147,7 @@ class Stringpool_template
   // specified size.  buffer_size should be at least
   // get_strtab_size().
   void
-  write_to_buffer(char* buffer, size_t buffer_size);
+  write_to_buffer(unsigned char* buffer, size_t buffer_size);
 
  private:
   Stringpool_template(const Stringpool_template&);

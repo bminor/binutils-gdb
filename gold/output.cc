@@ -32,7 +32,6 @@
 #include "libiberty.h"   // for unlink_if_ordinary()
 
 #include "parameters.h"
-#include "compressed_output.h"
 #include "object.h"
 #include "symtab.h"
 #include "reloc.h"
@@ -987,13 +986,25 @@ Output_section::Input_section::data_size() const
 // Set the address and file offset.
 
 void
-Output_section::Input_section::set_address(uint64_t addr, off_t off,
-					   off_t secoff)
+Output_section::Input_section::set_address_and_file_offset(
+    uint64_t address,
+    off_t file_offset,
+    off_t section_file_offset)
 {
   if (this->is_input_section())
-    this->u2_.object->set_section_offset(this->shndx_, off - secoff);
+    this->u2_.object->set_section_offset(this->shndx_,
+					 file_offset - section_file_offset);
   else
-    this->u2_.posd->set_address_and_file_offset(addr, off);
+    this->u2_.posd->set_address_and_file_offset(address, file_offset);
+}
+
+// Finalize the data size.
+
+void
+Output_section::Input_section::finalize_data_size()
+{
+  if (!this->is_input_section())
+    this->u2_.posd->finalize_data_size();
 }
 
 // Try to turn an input offset into an output offset.
@@ -1030,15 +1041,23 @@ Output_section::Input_section::write(Output_file* of)
     this->u2_.posd->write(of);
 }
 
+// Write the data to a buffer.  As for write(), we don't have to do
+// anything for an input section.
+
+void
+Output_section::Input_section::write_to_buffer(unsigned char* buffer)
+{
+  if (!this->is_input_section())
+    this->u2_.posd->write_to_buffer(buffer);
+}
+
 // Output_section methods.
 
 // Construct an Output_section.  NAME will point into a Stringpool.
 
-Output_section::Output_section(const General_options& options,
-                               const char* name, elfcpp::Elf_Word type,
+Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
 			       elfcpp::Elf_Xword flags)
-  : options_(options),
-    name_(name),
+  : name_(name),
     addralign_(0),
     entsize_(0),
     link_section_(NULL),
@@ -1053,6 +1072,7 @@ Output_section::Output_section(const General_options& options,
     input_sections_(),
     first_input_offset_(0),
     fills_(),
+    postprocessing_buffer_(NULL),
     needs_symtab_index_(false),
     needs_dynsym_index_(false),
     should_link_to_symtab_(false),
@@ -1080,22 +1100,6 @@ Output_section::set_entsize(uint64_t v)
     this->entsize_ = v;
   else
     gold_assert(this->entsize_ == v);
-}
-
-// Sometimes we compress sections.  This is typically done for
-// sections that are not part of normal program execution (such as
-// .debug_* sections), and where the readers of these sections know
-// how to deal with compressed sections.  (To make it easier for them,
-// we will rename the ouput section in such cases from .foo to
-// .foo.zlib.nnnn, where nnnn is the uncompressed size.)  This routine
-// doesn't say for certain whether we'll compress -- it depends on
-// commandline options as well -- just whether this section is a
-// candidate for compression.
-
-static bool
-is_compressible_section(const char* secname)
-{
-  return (strncmp(secname, ".debug", sizeof(".debug") - 1) == 0);
 }
 
 // Add the input section SHNDX, with header SHDR, named SECNAME, in
@@ -1145,8 +1149,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
       && reloc_shndx == 0)
     {
       if (this->add_merge_input_section(object, shndx, sh_flags,
-					entsize, addralign,
-                                        is_compressible_section(secname)))
+					entsize, addralign))
 	{
 	  // Tell the relocation routines that they need to call the
 	  // output_offset method to determine the final address.
@@ -1233,8 +1236,7 @@ Output_section::add_output_merge_section(Output_section_data* posd,
 bool
 Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 					uint64_t flags, uint64_t entsize,
-					uint64_t addralign,
-                                        bool is_compressible_section)
+					uint64_t addralign)
 {
   bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
 
@@ -1258,25 +1260,6 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
   Output_section_data* posd;
   if (!is_string)
     posd = new Output_merge_data(entsize, addralign);
-  else if (is_compressible_section && options_.compress_debug_sections())
-    {
-      switch (entsize)
-	{
-        case 1:
-	  posd = new Output_compressed_string<char>(addralign, this->options_);
-	  break;
-        case 2:
-	  posd = new Output_compressed_string<uint16_t>(addralign,
-							this->options_);
-	  break;
-        case 4:
-	  posd = new Output_compressed_string<uint32_t>(addralign,
-							this->options_);
-	  break;
-        default:
-	  return false;
-	}
-    }
   else
     {
       switch (entsize)
@@ -1407,34 +1390,12 @@ Output_section::set_final_data_size()
        ++p)
     {
       off = align_address(off, p->addralign());
-      p->set_address(address + (off - startoff), off, startoff);
+      p->set_address_and_file_offset(address + (off - startoff), off,
+				     startoff);
       off += p->data_size();
     }
 
   this->set_data_size(off - startoff);
-}
-
-// Ask each output_section_data member if it wants to change the name
-// of the output section.  If any of them says yes, use this to set
-// the new name.  This should be called after all processing of this
-// output section is done, but before the name is finally committed to
-// the output-section's header.
-
-bool
-Output_section::maybe_modify_output_section_name()
-{
-  for (Input_section_list::const_iterator it = input_sections_.begin();
-       it != input_sections_.end();
-       ++it)
-    {
-      const char* newname = it->modified_output_section_name(this->name());
-      if (newname != NULL)
-        {
-          this->set_name(newname);
-          return true;
-        }
-    }
-  return false;
 }
 
 // Write the section header to *OSHDR.
@@ -1474,6 +1435,8 @@ Output_section::write_header(const Layout* layout,
 void
 Output_section::do_write(Output_file* of)
 {
+  gold_assert(!this->requires_postprocessing());
+
   off_t output_section_file_offset = this->offset();
   for (Fill_list::iterator p = this->fills_.begin();
        p != this->fills_.end();
@@ -1488,6 +1451,63 @@ Output_section::do_write(Output_file* of)
        p != this->input_sections_.end();
        ++p)
     p->write(of);
+}
+
+// If a section requires postprocessing, create the buffer to use.
+
+void
+Output_section::create_postprocessing_buffer()
+{
+  gold_assert(this->requires_postprocessing());
+  gold_assert(this->postprocessing_buffer_ == NULL);
+
+  if (!this->input_sections_.empty())
+    {
+      off_t off = this->first_input_offset_;
+      for (Input_section_list::iterator p = this->input_sections_.begin();
+	   p != this->input_sections_.end();
+	   ++p)
+	{
+	  off = align_address(off, p->addralign());
+	  p->finalize_data_size();
+	  off += p->data_size();
+	}
+      this->set_current_data_size_for_child(off);
+    }
+
+  off_t buffer_size = this->current_data_size_for_child();
+  this->postprocessing_buffer_ = new unsigned char[buffer_size];
+}
+
+// Write all the data of an Output_section into the postprocessing
+// buffer.  This is used for sections which require postprocessing,
+// such as compression.  Input sections are handled by
+// Object::Relocate.
+
+void
+Output_section::write_to_postprocessing_buffer()
+{
+  gold_assert(this->requires_postprocessing());
+
+  Target* target = parameters->target();
+  unsigned char* buffer = this->postprocessing_buffer();
+  for (Fill_list::iterator p = this->fills_.begin();
+       p != this->fills_.end();
+       ++p)
+    {
+      std::string fill_data(target->code_fill(p->length()));
+      memcpy(buffer + p->section_offset(), fill_data.data(), fill_data.size());
+    }
+
+  off_t off = this->first_input_offset_;
+  for (Input_section_list::iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      off = align_address(off, p->addralign());
+      p->write_to_buffer(buffer + off);
+      off += p->data_size();
+    }
 }
 
 // Output segment methods.
