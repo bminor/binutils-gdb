@@ -430,8 +430,9 @@ Stringpool_template<Stringpool_char>::write_to_buffer(unsigned char* buffer,
                                                       size_t bufsize)
 {
   gold_assert(this->strtab_size_ != 0);
-  if (bufsize < this->strtab_size_)   // Quiet the compiler in opt mode.
-    gold_assert(bufsize >= this->strtab_size_);
+   // Quiet the compiler in opt mode.
+  if (bufsize < static_cast<size_t>(this->strtab_size_))
+    gold_assert(bufsize >= static_cast<size_t>(this->strtab_size_));
   if (this->zero_null_)
     buffer[0] = '\0';
   for (typename String_set_type::const_iterator p = this->string_set_.begin();
