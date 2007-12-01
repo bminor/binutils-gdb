@@ -50,8 +50,8 @@ CCFILES = \
 	reloc.cc \
 	resolve.cc \
 	script.cc \
-	symtab.cc \
 	stringpool.cc \
+	symtab.cc \
 	target-select.cc \
 	version.cc \
 	workqueue.cc \

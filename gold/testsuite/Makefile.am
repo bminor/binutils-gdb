@@ -141,11 +141,11 @@ debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
 
 # See if we can also detect problems when we're linking .so's, not .o's.
 debug_msg.so: debug_msg.cc
-	$(CXXCOMPILE) -O0 -g -shared -w -o $@ $(srcdir)/debug_msg.cc
+	$(CXXCOMPILE) -O0 -g -shared -fPIC-w -o $@ $(srcdir)/debug_msg.cc
 odr_violation1.so: odr_violation1.cc
-	$(CXXCOMPILE) -O0 -g -shared -w -o $@ $(srcdir)/odr_violation1.cc
+	$(CXXCOMPILE) -O0 -g -shared -fPIC -w -o $@ $(srcdir)/odr_violation1.cc
 odr_violation2.so: odr_violation2.cc
-	$(CXXCOMPILE) -O0 -g -shared -w -o $@ $(srcdir)/odr_violation2.cc
+	$(CXXCOMPILE) -O0 -g -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
 debug_msg_so.err: debug_msg.so odr_violation1.so odr_violation2.so gcctestdir/ld
 	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so "2>$@"
 	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so 2>$@; \

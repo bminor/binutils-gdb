@@ -78,7 +78,7 @@ am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) \
 	merge.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
 	output.$(OBJEXT) parameters.$(OBJEXT) readsyms.$(OBJEXT) \
 	reloc.$(OBJEXT) resolve.$(OBJEXT) script.$(OBJEXT) \
-	symtab.$(OBJEXT) stringpool.$(OBJEXT) target-select.$(OBJEXT) \
+	stringpool.$(OBJEXT) symtab.$(OBJEXT) target-select.$(OBJEXT) \
 	version.$(OBJEXT) workqueue.$(OBJEXT) \
 	workqueue-threads.$(OBJEXT)
 am__objects_2 =
@@ -307,8 +307,8 @@ CCFILES = \
 	reloc.cc \
 	resolve.cc \
 	script.cc \
-	symtab.cc \
 	stringpool.cc \
+	symtab.cc \
 	target-select.cc \
 	version.cc \
 	workqueue.cc \
