@@ -141,6 +141,7 @@ static DWORD main_thread_id;		/* Thread ID of the main thread */
 static int exception_count = 0;
 static int event_count = 0;
 static int saw_create;
+static int open_process_used = 0;
 
 /* User options. */
 static int new_console = 0;
@@ -325,7 +326,6 @@ win32_init_thread_list (void)
     {
       thread_info *here = th->next;
       th->next = here->next;
-      (void) CloseHandle (here->h);
       xfree (here);
     }
   thread_head.next = NULL;
@@ -350,7 +350,6 @@ win32_delete_thread (DWORD id)
     {
       thread_info *here = th->next;
       th->next = here->next;
-      CloseHandle (here->h);
       xfree (here);
     }
 }
@@ -1171,6 +1170,14 @@ fake_create_process (void)
 {
   current_process_handle = OpenProcess (PROCESS_ALL_ACCESS, FALSE,
 					current_event.dwProcessId);
+  if (current_process_handle != NULL)
+    open_process_used = 1;
+  else
+    {
+      error (_("OpenProcess call failed, GetLastError = %lud\n"),
+       GetLastError ());
+      /*  We can not debug anything in that case.  */
+    }
   main_thread_id = current_event.dwThreadId;
   current_thread = win32_add_thread (main_thread_id,
 				     current_event.u.CreateThread.hThread);
@@ -1299,7 +1306,8 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 		 thread event.  Caused when attached process does not have
 		 a main thread. */
 	      retval = ourstatus->value.related_pid = fake_create_process ();
-	      saw_create++;
+	     if (retval)
+	       saw_create++;
 	    }
 	  break;
 	}
@@ -1332,10 +1340,7 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     "CREATE_PROCESS_DEBUG_EVENT"));
       CloseHandle (current_event.u.CreateProcessInfo.hFile);
       if (++saw_create != 1)
-	{
-	  CloseHandle (current_event.u.CreateProcessInfo.hProcess);
-	  break;
-	}
+	break;
 
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       if (main_thread_id)
@@ -1356,7 +1361,6 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 	break;
       ourstatus->kind = TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
-      CloseHandle (current_process_handle);
       retval = main_thread_id;
       break;
 
@@ -1488,6 +1492,7 @@ do_initial_win32_stuff (DWORD pid)
   last_sig = TARGET_SIGNAL_0;
   event_count = 0;
   exception_count = 0;
+  open_process_used = 0;
   debug_registers_changed = 0;
   debug_registers_used = 0;
   for (i = 0; i < sizeof (dr) / sizeof (dr[0]); i++)
@@ -1886,9 +1891,6 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
     error (_("Error creating process %s, (error %d)."),
 	   exec_file, (unsigned) GetLastError ());
 
-  CloseHandle (pi.hThread);
-  CloseHandle (pi.hProcess);
-
   if (useshell && shell[0] != '\0')
     saw_create = -1;
   else
@@ -1904,6 +1906,11 @@ win32_mourn_inferior (void)
 {
   (void) win32_continue (DBG_CONTINUE, -1);
   i386_cleanup_dregs();
+  if (open_process_used)
+    {
+      CHECK (CloseHandle (current_process_handle));
+      open_process_used = 0;
+    }
   unpush_target (&win32_ops);
   generic_mourn_inferior ();
 }
@@ -1960,11 +1967,6 @@ win32_kill_inferior (void)
 	break;
     }
 
-  CHECK (CloseHandle (current_process_handle));
-
-  /* this may fail in an attached process so don't check. */
-  if (current_thread && current_thread->h)
-    (void) CloseHandle (current_thread->h);
   target_mourn_inferior ();	/* or just win32_mourn_inferior? */
 }
 

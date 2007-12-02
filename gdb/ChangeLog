@@ -1,3 +1,16 @@
+2007-12-02  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	*win32-nat.c (open_process_used): New static variable.
+	(win32_init_thread_list): Remove call to CloseHandle for thread.
+	(win32_delete_thread): Ditto.
+	(fake_create_process): Set open_process_used if OpenProcess call is
+	successful.
+	(get_win32_debug_event): Do not close process handle.
+	(do_initial_win32_stuff): Set open_process_used to zero.
+	(win32_mourn_inferior): Call CloseHandle for current_process_handle if
+	open_process_used is set.
+	(win32_kill_inferior): Do not close process and main_thread handles.
+
 2007-11-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_cmdlist): New variable.
