@@ -1390,9 +1390,6 @@ win32_wait (char *status)
 		    our_status.value.integer));
 
 	  *status = 'W';
-
-	  child_fetch_inferior_registers (-1);
-
 	  return our_status.value.integer;
 	case TARGET_WAITKIND_STOPPED:
  	case TARGET_WAITKIND_LOADED:

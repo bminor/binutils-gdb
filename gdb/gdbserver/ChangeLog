@@ -1,5 +1,10 @@
 2007-12-02  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c (win32_wait): Don't read from the inferior when it
+	has already exited.
+
+2007-12-02  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* Makefile.in (win32_low_h): New variable.
 	(win32-low.o): Add dependency on $(win32_low_h).
 	(win32-arm-low.o, win32-i386-low.o): New rules.
