@@ -1,6 +1,12 @@
 2007-12-02  Pierre Muller  <muller@ics.u-strasbg.fr>
 
-	*win32-nat.c (open_process_used): New static variable.
+	* win32-nat.c (win32_resume): Set the trace bit
+	in the thread identified by inferior_ptid.
+
+
+2007-12-02  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c (open_process_used): New static variable.
 	(win32_init_thread_list): Remove call to CloseHandle for thread.
 	(win32_delete_thread): Ditto.
 	(fake_create_process): Set open_process_used if OpenProcess call is

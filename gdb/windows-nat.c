@@ -1232,7 +1232,7 @@ win32_resume (ptid_t ptid, int step, enum target_signal sig)
 	       pid, step, sig));
 
   /* Get context for currently selected thread */
-  th = thread_rec (current_event.dwThreadId, FALSE);
+  th = thread_rec (PIDGET (inferior_ptid), FALSE);
   if (th)
     {
       if (step)
