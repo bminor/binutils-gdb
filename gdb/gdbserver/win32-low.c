@@ -65,6 +65,7 @@
 int using_threads = 1;
 
 /* Globals.  */
+static int attaching = 0;
 static HANDLE current_process_handle = NULL;
 static DWORD current_process_id = 0;
 static enum target_signal last_sig = TARGET_SIGNAL_0;
@@ -498,6 +499,9 @@ win32_create_inferior (char *program, char **program_args)
   PROCESS_INFORMATION pi;
   DWORD err;
 
+  /* win32_wait needs to know we're not attaching.  */
+  attaching = 0;
+
   if (!program)
     error ("No executable specified, specify executable to debug.\n");
 
@@ -600,6 +604,8 @@ win32_attach (unsigned long pid)
 	  if (DebugSetProcessKillOnExit != NULL)
 	    DebugSetProcessKillOnExit (FALSE);
 
+	  /* win32_wait needs to know we're attaching.  */
+ 	  attaching = 1;
 	  current_process_handle = h;
 	  current_process_id = pid;
 	  do_initial_child_stuff (pid);
@@ -1346,11 +1352,44 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
       goto gotevent;
     }
 
-  /* Keep the wait time low enough for confortable remote
-     interruption, but high enough so gdbserver doesn't become a
-     bottleneck.  */
-  if (!WaitForDebugEvent (&current_event, 250))
-    return 0;
+#ifndef _WIN32_WCE
+  attaching = 0;
+#else
+  if (attaching)
+    {
+      /* WinCE doesn't set an initial breakpoint automatically.  To
+ 	 stop the inferior, we flush all currently pending debug
+ 	 events -- the thread list and the dll list are always
+ 	 reported immediatelly without delay, then, we suspend all
+ 	 threads and pretend we saw a trap at the current PC of the
+ 	 main thread.
+
+ 	 Contrary to desktop Windows, Windows CE *does* report the dll
+ 	 names on LOAD_DLL_DEBUG_EVENTs resulting from a
+ 	 DebugActiveProcess call.  This limits the way we can detect
+ 	 if all the dlls have already been reported.  If we get a real
+ 	 debug event before leaving attaching, the worst that will
+ 	 happen is the user will see a spurious breakpoint.  */
+
+      current_event.dwDebugEventCode = 0;
+      if (!WaitForDebugEvent (&current_event, 0))
+ 	{
+ 	  OUTMSG2(("no attach events left\n"));
+ 	  fake_breakpoint_event ();
+ 	  attaching = 0;
+ 	}
+      else
+ 	OUTMSG2(("got attach event\n"));
+    }
+  else
+#endif
+    {
+      /* Keep the wait time low enough for confortable remote
+ 	 interruption, but high enough so gdbserver doesn't become a
+ 	 bottleneck.  */
+      if (!WaitForDebugEvent (&current_event, 250))
+ 	return 0;
+    }
 
  gotevent:
 
@@ -1398,12 +1437,16 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
       ourstatus->value.related_pid = current_event.dwThreadId;
 #ifdef _WIN32_WCE
-      /* Windows CE doesn't set the initial breakpoint automatically
-	 like the desktop versions of Windows do.  We add it explicitly
-	 here.  It will be removed as soon as it is hit.  */
-      set_breakpoint_at ((CORE_ADDR) (long) current_event.u
-			 .CreateProcessInfo.lpStartAddress,
-			 delete_breakpoint_at);
+      if (!attaching)
+	{
+	  /* Windows CE doesn't set the initial breakpoint
+	     automatically like the desktop versions of Windows do.
+	     We add it explicitly here.	 It will be removed as soon as
+	     it is hit.	 */
+	  set_breakpoint_at ((CORE_ADDR) (long) current_event.u
+			     .CreateProcessInfo.lpStartAddress,
+			     delete_breakpoint_at);
+	}
 #endif
       break;
 

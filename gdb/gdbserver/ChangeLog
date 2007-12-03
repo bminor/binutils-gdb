@@ -1,5 +1,14 @@
 2007-12-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c (attaching): New global.
+	(win32_create_inferior): Clear the `attaching' global.
+	(win32_attach): Set the `attaching' global.
+	(get_child_debug_event) [_WIN32_WCE]: Stop the inferior when
+	attaching.  Only set a breakpoint at the entry point if not
+	attaching.
+
+2007-12-03  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* server.c (main): Don't report dll events on the initial
 	connection on attaches.
 
