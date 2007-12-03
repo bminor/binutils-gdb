@@ -100,6 +100,39 @@ current_inferior_tid (void)
   return th->tid;
 }
 
+/* Get the thread context of the thread associated with TH.  */
+
+static void
+win32_get_thread_context (win32_thread_info *th)
+{
+  memset (&th->context, 0, sizeof (CONTEXT));
+  (*the_low_target.get_thread_context) (th, &current_event);
+#ifdef _WIN32_WCE
+  memcpy (&th->base_context, &th->context, sizeof (CONTEXT));
+#endif
+}
+
+/* Set the thread context of the thread associated with TH.  */
+
+static void
+win32_set_thread_context (win32_thread_info *th)
+{
+#ifdef _WIN32_WCE
+  /* Calling SuspendThread on a thread that is running kernel code
+     will report that the suspending was successful, but in fact, that
+     will often not be true.  In those cases, the context returned by
+     GetThreadContext will not be correct by the time the thread
+     stops, hence we can't set that context back into the thread when
+     resuming - it will most likelly crash the inferior.
+     Unfortunately, there is no way to know when the thread will
+     really stop.  To work around it, we'll only write the context
+     back to the thread when either the user or GDB explicitly change
+     it between stopping and resuming.  */
+  if (memcmp (&th->context, &th->base_context, sizeof (CONTEXT)) != 0)
+#endif
+    (*the_low_target.set_thread_context) (th, &current_event);
+}
+
 /* Find a thread record given a thread id.  If GET_CONTEXT is set then
    also retrieve the context for this thread.  */
 static win32_thread_info *
@@ -127,7 +160,7 @@ thread_rec (DWORD id, int get_context)
 	    th->suspended = 1;
 	}
 
-      (*the_low_target.get_thread_context) (th, &current_event);
+      win32_get_thread_context (th);
     }
 
   return th;
@@ -281,7 +314,7 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
     {
       if (th->context.ContextFlags)
 	{
-	  (*the_low_target.set_thread_context) (th, &current_event);
+	  win32_set_thread_context (th);
 	  th->context.ContextFlags = 0;
 	}
 
@@ -806,7 +839,7 @@ win32_resume (struct thread_resume *resume_info)
 		       "in this configuration.\n");
 	    }
 
-	  (*the_low_target.set_thread_context) (th, &current_event);
+	  win32_set_thread_context (th);
 	  th->context.ContextFlags = 0;
 	}
     }

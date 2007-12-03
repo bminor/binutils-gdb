@@ -31,7 +31,12 @@ typedef struct win32_thread_info
   /* Non zero if SuspendThread was called on this thread.  */
   int suspended;
 
-  /* The context of the thread.  */
+#ifdef _WIN32_WCE
+  /* The context as retrieved right after suspending the thread. */
+  CONTEXT base_context;
+#endif
+
+  /* The context of the thread, including any manipulations.  */
   CONTEXT context;
 } win32_thread_info;
 
