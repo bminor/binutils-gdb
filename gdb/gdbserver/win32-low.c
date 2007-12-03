@@ -72,6 +72,14 @@ static enum target_signal last_sig = TARGET_SIGNAL_0;
 /* The current debug event from WaitForDebugEvent.  */
 static DEBUG_EVENT current_event;
 
+/* Non zero if an interrupt request is to be satisfied by suspending
+   all threads.  */
+static int soft_interrupt_requested = 0;
+
+/* Non zero if the inferior is stopped in a simulated breakpoint done
+   by suspending all the threads.  */
+static int faked_breakpoint = 0;
+
 #define NUM_REGS (the_low_target.num_regs)
 
 typedef BOOL WINAPI (*winapi_DebugActiveProcessStop) (DWORD dwProcessId);
@@ -134,8 +142,7 @@ child_add_thread (DWORD tid, HANDLE h)
   if ((th = thread_rec (tid, FALSE)))
     return th;
 
-  th = (win32_thread_info *) malloc (sizeof (*th));
-  memset (th, 0, sizeof (*th));
+  th = calloc (1, sizeof (*th));
   th->tid = tid;
   th->h = h;
 
@@ -293,14 +300,17 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
 static BOOL
 child_continue (DWORD continue_status, int thread_id)
 {
-  BOOL res;
+  /* The inferior will only continue after the ContinueDebugEvent
+     call.  */
+  find_inferior (&all_threads, continue_one_thread, &thread_id);
+  faked_breakpoint = 0;
 
-  res = ContinueDebugEvent (current_event.dwProcessId,
-			    current_event.dwThreadId, continue_status);
-  if (res)
-    find_inferior (&all_threads, continue_one_thread, &thread_id);
+  if (!ContinueDebugEvent (current_event.dwProcessId,
+			   current_event.dwThreadId,
+			   continue_status))
+    return FALSE;
 
-  return res;
+  return TRUE;
 }
 
 /* Fetch register(s) from the current thread context.  */
@@ -1247,19 +1257,67 @@ handle_exception (struct target_waitstatus *ourstatus)
   last_sig = ourstatus->value.sig;
 }
 
-/* Get the next event from the child.  */
+
 static void
+suspend_one_thread (struct inferior_list_entry *entry)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+  win32_thread_info *th = inferior_target_data (thread);
+
+  if (!th->suspended)
+    {
+      if (SuspendThread (th->h) == (DWORD) -1)
+	{
+	  DWORD err = GetLastError ();
+	  OUTMSG (("warning: SuspendThread failed in suspend_one_thread, "
+		   "(error %d): %s\n", (int) err, strwinerror (err)));
+	}
+      else
+	th->suspended = 1;
+    }
+}
+
+static void
+fake_breakpoint_event (void)
+{
+  OUTMSG2(("fake_breakpoint_event\n"));
+
+  faked_breakpoint = 1;
+
+  memset (&current_event, 0, sizeof (current_event));
+  current_event.dwThreadId = main_thread_id;
+  current_event.dwDebugEventCode = EXCEPTION_DEBUG_EVENT;
+  current_event.u.Exception.ExceptionRecord.ExceptionCode
+    = EXCEPTION_BREAKPOINT;
+
+  for_each_inferior (&all_threads, suspend_one_thread);
+}
+
+/* Get the next event from the child.  */
+
+static int
 get_child_debug_event (struct target_waitstatus *ourstatus)
 {
-  BOOL debug_event;
-
   last_sig = TARGET_SIGNAL_0;
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 
-  /* Keep the wait time low enough for confortable remote interruption,
-     but high enough so gdbserver doesn't become a bottleneck.  */
-  if (!(debug_event = WaitForDebugEvent (&current_event, 250)))
-    return;
+  /* Check if GDB sent us an interrupt request.  */
+  check_remote_input_interrupt_request ();
+
+  if (soft_interrupt_requested)
+    {
+      soft_interrupt_requested = 0;
+      fake_breakpoint_event ();
+      goto gotevent;
+    }
+
+  /* Keep the wait time low enough for confortable remote
+     interruption, but high enough so gdbserver doesn't become a
+     bottleneck.  */
+  if (!WaitForDebugEvent (&current_event, 250))
+    return 0;
+
+ gotevent:
 
   current_inferior =
     (struct thread_info *) find_inferior_id (&all_threads,
@@ -1376,6 +1434,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
   current_inferior =
     (struct thread_info *) find_inferior_id (&all_threads,
 					     current_event.dwThreadId);
+  return 1;
 }
 
 /* Wait for the inferior process to change state.
@@ -1390,10 +1449,8 @@ win32_wait (char *status)
 
   while (1)
     {
-      /* Check if GDB sent us an interrupt request.  */
-      check_remote_input_interrupt_request ();
-
-      get_child_debug_event (&our_status);
+      if (!get_child_debug_event (&our_status))
+	continue;
 
       switch (our_status.kind)
 	{
@@ -1500,7 +1557,8 @@ win32_request_interrupt (void)
       && DebugBreakProcess (current_process_handle))
     return;
 
-  OUTMSG (("Could not interrupt process.\n"));
+  /* Last resort, suspend all threads manually.  */
+  soft_interrupt_requested = 1;
 }
 
 static const char *

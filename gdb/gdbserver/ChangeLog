@@ -1,6 +1,25 @@
 2007-12-03  Leo Zayas
 	    Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c (soft_interrupt_requested, faked_breakpoint): New
+	global variables.
+	(child_add_thread): Minor cleanup.
+	(child_continue): Resume artificially suspended threads before
+	calling ContinueDebugEvent.
+	(suspend_one_thread): New.
+	(fake_breakpoint_event): New.
+	(get_child_debug_event): Change return type to int.  Check here if
+	gdb sent an interrupt request.  If a soft interrupt was requested,
+	fake a breakpoint event.  Return 0 if there is no event to handle,
+	and 1 otherwise.
+	(win32_wait): Don't check here if gdb sent an interrupt request.
+	Ensure there is a valid event to handle.
+	(win32_request_interrupt): Add soft interruption method as last
+	resort.
+
+2007-12-03  Leo Zayas
+	    Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* win32-low.h (win32_thread_info): Add descriptions to the
 	structure members.  Replace `suspend_count' counter by a
 	`suspended' flag.
