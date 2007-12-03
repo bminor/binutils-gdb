@@ -908,10 +908,6 @@ main (int argc, char *argv[])
       /* We are now (hopefully) stopped at the first instruction of
 	 the target process.  This assumes that the target process was
 	 successfully created.  */
-
-      /* Don't report shared library events on the initial connection,
-	 even if some libraries are preloaded.  */
-      dlls_changed = 0;
     }
   else
     {
@@ -925,6 +921,11 @@ main (int argc, char *argv[])
 	  break;
 	}
     }
+
+  /* Don't report shared library events on the initial connection,
+     even if some libraries are preloaded.  Avoids the "stopped by
+     shared library event" notice on gdb side.  */
+  dlls_changed = 0;
 
   if (setjmp (toplevel))
     {

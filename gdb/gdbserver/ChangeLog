@@ -1,5 +1,10 @@
 2007-12-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* server.c (main): Don't report dll events on the initial
+	connection on attaches.
+
+2007-12-03  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* server.c (main): Relax numerical bases supported for the pid of
 	the --attach command line argument.
 
