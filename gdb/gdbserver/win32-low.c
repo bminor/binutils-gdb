@@ -105,10 +105,19 @@ thread_rec (DWORD id, int get_context)
     return NULL;
 
   th = inferior_target_data (thread);
-  if (!th->suspend_count && get_context)
+  if (get_context && th->context.ContextFlags == 0)
     {
-      if (id != current_event.dwThreadId)
-	th->suspend_count = SuspendThread (th->h) + 1;
+      if (!th->suspended)
+	{
+	  if (SuspendThread (th->h) == (DWORD) -1)
+	    {
+	      DWORD err = GetLastError ();
+	      OUTMSG (("warning: SuspendThread failed in thread_rec, "
+		       "(error %d): %s\n", (int) err, strwinerror (err)));
+	    }
+	  else
+	    th->suspended = 1;
+	}
 
       (*the_low_target.get_thread_context) (th, &current_event);
     }
@@ -259,10 +268,9 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
   struct thread_info *thread = (struct thread_info *) this_thread;
   int thread_id = * (int *) id_ptr;
   win32_thread_info *th = inferior_target_data (thread);
-  int i;
 
   if ((thread_id == -1 || thread_id == th->tid)
-      && th->suspend_count)
+      && th->suspended)
     {
       if (th->context.ContextFlags)
 	{
@@ -270,9 +278,13 @@ continue_one_thread (struct inferior_list_entry *this_thread, void *id_ptr)
 	  th->context.ContextFlags = 0;
 	}
 
-      for (i = 0; i < th->suspend_count; i++)
-	(void) ResumeThread (th->h);
-      th->suspend_count = 0;
+      if (ResumeThread (th->h) == (DWORD) -1)
+	{
+	  DWORD err = GetLastError ();
+	  OUTMSG (("warning: ResumeThread failed in continue_one_thread, "
+		   "(error %d): %s\n", (int) err, strwinerror (err)));
+	}
+      th->suspended = 0;
     }
 
   return 0;

@@ -1,3 +1,16 @@
+2007-12-03  Leo Zayas
+	    Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* win32-low.h (win32_thread_info): Add descriptions to the
+	structure members.  Replace `suspend_count' counter by a
+	`suspended' flag.
+	* win32-low.c (thread_rec): Update condition of when to get the
+	context from the inferior.  Rely on ContextFlags being set if it
+	has already been retrieved.  Only suspend the inferior thread if
+	we haven't already.  Warn if that fails.
+	(continue_one_thread): s/suspend_count/suspended/.  Only call
+	ResumeThread once.  Warn if that fails.
+
 2007-12-02  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* win32-low.c (win32_wait): Don't read from the inferior when it

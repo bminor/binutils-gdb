@@ -22,9 +22,16 @@
    each thread.  */
 typedef struct win32_thread_info
 {
+  /* The Win32 thread identifier.  */
   DWORD tid;
+
+  /* The handle to the thread.  */
   HANDLE h;
-  int suspend_count;
+
+  /* Non zero if SuspendThread was called on this thread.  */
+  int suspended;
+
+  /* The context of the thread.  */
   CONTEXT context;
 } win32_thread_info;
 
