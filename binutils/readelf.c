@@ -8044,6 +8044,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_SPARC:
       return reloc_type == 3 /* R_SPARC_32.  */
 	|| reloc_type == 23; /* R_SPARC_UA32.  */
+    case EM_SPU:
+      return reloc_type == 6; /* R_SPU_ADDR32 */
     case EM_CYGNUS_V850:
     case EM_V850:
       return reloc_type == 6; /* R_V850_ABS32.  */
@@ -8096,6 +8098,8 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
     case EM_SPARCV9:
     case EM_SPARC:
       return reloc_type == 6;  /* R_SPARC_DISP32.  */
+    case EM_SPU:
+      return reloc_type == 13; /* R_SPU_REL32.  */
     case EM_X86_64:
       return reloc_type == 2;  /* R_X86_64_PC32.  */
     default:

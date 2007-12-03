@@ -1,3 +1,7 @@
+2007-12-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (is_32bit_abs_reloc, is_32bit_pcrel_reloc): Add SPU.
+
 2007-11-29  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* readelf.c (get_machine_flags): Handle Loongson-2E and -2F
