@@ -582,34 +582,36 @@ win32_create_inferior (char *program, char **program_args)
 static int
 win32_attach (unsigned long pid)
 {
-  winapi_DebugActiveProcessStop DebugActiveProcessStop = NULL;
+  HANDLE h;
   winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
+  DWORD err;
 #ifdef _WIN32_WCE
   HMODULE dll = GetModuleHandle (_T("COREDLL.DLL"));
 #else
   HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
 #endif
-  DebugActiveProcessStop = GETPROCADDRESS (dll, DebugActiveProcessStop);
   DebugSetProcessKillOnExit = GETPROCADDRESS (dll, DebugSetProcessKillOnExit);
 
-  if (DebugActiveProcess (pid))
+  h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
+  if (h != NULL)
     {
-      if (DebugSetProcessKillOnExit != NULL)
- 	DebugSetProcessKillOnExit (FALSE);
+      if (DebugActiveProcess (pid))
+	{
+	  if (DebugSetProcessKillOnExit != NULL)
+	    DebugSetProcessKillOnExit (FALSE);
 
-      current_process_handle = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
+	  current_process_handle = h;
+	  current_process_id = pid;
+	  do_initial_child_stuff (pid);
+	  return 0;
+	}
 
-      if (current_process_handle != NULL)
- 	{
- 	  current_process_id = pid;
- 	  do_initial_child_stuff (pid);
- 	  return 0;
- 	}
-      if (DebugActiveProcessStop != NULL)
-	DebugActiveProcessStop (current_process_id);
+      CloseHandle (h);
     }
 
-  error ("Attach to process failed.");
+  err = GetLastError ();
+  error ("Attach to process failed (error %d): %s\n",
+	 (int) err, strwinerror (err));
 }
 
 /* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  */

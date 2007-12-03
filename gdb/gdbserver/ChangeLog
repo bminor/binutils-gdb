@@ -1,5 +1,11 @@
 2007-12-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
+	* win32-low.c (win32_attach): Call OpenProcess before
+	DebugActiveProcess, not after.  Add last error output to error
+	call.
+
+2007-12-03  Pedro Alves  <pedro_alves@portugalmail.pt>
+
 	* win32-low.c (win32_get_thread_context)
 	(win32_set_thread_context): New functions.
 	(thread_rec): Use win32_get_thread_context.
