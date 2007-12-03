@@ -880,7 +880,7 @@ main (int argc, char *argv[])
     {
       if (argc == 4
 	  && argv[3][0] != '\0'
-	  && (pid = strtoul (argv[3], &arg_end, 10)) != 0
+	  && (pid = strtoul (argv[3], &arg_end, 0)) != 0
 	  && *arg_end == '\0')
 	{
 	  ;
