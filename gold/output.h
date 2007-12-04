@@ -2117,7 +2117,8 @@ class Output_file
   void
   resize(off_t file_size);
 
-  // Close the output file and make sure there are no error.
+  // Close the output file (flushing all buffered data) and make sure
+  // there are no errors.
   void
   close();
 
@@ -2167,9 +2168,14 @@ class Output_file
   { }
 
  private:
-  // Map the file into memory.
+  // Map the file into memory and return a pointer to the map.
   void
   map();
+
+  // Unmap the file from memory (and flush to disk buffers).
+  void
+  unmap();
+
 
   // General options.
   const General_options& options_;
@@ -2183,6 +2189,8 @@ class Output_file
   off_t file_size_;
   // Base of file mapped into memory.
   unsigned char* base_;
+  // True iff base_ points to a memory buffer rather than an output file.
+  bool map_is_anonymous_;
 };
 
 } // End namespace gold.

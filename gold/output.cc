@@ -38,6 +38,11 @@
 #include "merge.h"
 #include "output.h"
 
+// Some BSD systems still use MAP_ANON instead of MAP_ANONYMOUS
+#ifndef MAP_ANONYMOUS
+# define MAP_ANONYMOUS  MAP_ANON
+#endif
+
 namespace gold
 {
 
@@ -1927,7 +1932,8 @@ Output_file::Output_file(const General_options& options, Target* target)
     name_(options.output_file_name()),
     o_(-1),
     file_size_(0),
-    base_(NULL)
+    base_(NULL),
+    map_is_anonymous_(false)
 {
 }
 
@@ -1969,10 +1975,24 @@ Output_file::open(off_t file_size)
 void
 Output_file::resize(off_t file_size)
 {
-  if (::munmap(this->base_, this->file_size_) < 0)
-    gold_error(_("%s: munmap: %s"), this->name_, strerror(errno));
-  this->file_size_ = file_size;
-  this->map();
+  // If the mmap is mapping an anonymous memory buffer, this is easy:
+  // just mremap to the new size.  If it's mapping to a file, we want
+  // to unmap to flush to the file, then remap after growing the file.
+  if (this->map_is_anonymous_)
+    {
+      void* base = ::mremap(this->base_, this->file_size_, file_size,
+                            MREMAP_MAYMOVE);
+      if (base == MAP_FAILED)
+        gold_fatal(_("%s: mremap: %s"), this->name_, strerror(errno));
+      this->base_ = static_cast<unsigned char*>(base);
+      this->file_size_ = file_size;
+    }
+  else
+    {
+      this->unmap();
+      this->file_size_ = file_size;
+      this->map();
+    }
 }
 
 // Map the file into memory.
@@ -1980,21 +2000,47 @@ Output_file::resize(off_t file_size)
 void
 Output_file::map()
 {
-  int o = this->o_;
+  const int o = this->o_;
 
-  // Write out one byte to make the file the right size.
-  if (::lseek(o, this->file_size_ - 1, SEEK_SET) < 0)
-    gold_fatal(_("%s: lseek: %s"), this->name_, strerror(errno));
-  char b = 0;
-  if (::write(o, &b, 1) != 1)
-    gold_fatal(_("%s: write: %s"), this->name_, strerror(errno));
+  // If the output file is not a regular file, don't try to mmap it;
+  // instead, we'll mmap a block of memory (an anonymous buffer), and
+  // then later write the buffer to the file.
+  void* base;
+  struct stat statbuf;
+  if (::fstat(o, &statbuf) != 0
+      || !S_ISREG(statbuf.st_mode))
+    {
+      this->map_is_anonymous_ = true;
+      base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
+                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    }
+  else
+    {
+      // Write out one byte to make the file the right size.
+      if (::lseek(o, this->file_size_ - 1, SEEK_SET) < 0)
+        gold_fatal(_("%s: lseek: %s"), this->name_, strerror(errno));
+      char b = 0;
+      if (::write(o, &b, 1) != 1)
+        gold_fatal(_("%s: write: %s"), this->name_, strerror(errno));
 
-  // Map the file into memory.
-  void* base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
-		      MAP_SHARED, o, 0);
+      // Map the file into memory.
+      this->map_is_anonymous_ = false;
+      base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
+                    MAP_SHARED, o, 0);
+    }
   if (base == MAP_FAILED)
     gold_fatal(_("%s: mmap: %s"), this->name_, strerror(errno));
   this->base_ = static_cast<unsigned char*>(base);
+}
+
+// Unmap the file from memory.
+
+void
+Output_file::unmap()
+{
+  if (::munmap(this->base_, this->file_size_) < 0)
+    gold_error(_("%s: munmap: %s"), this->name_, strerror(errno));
+  this->base_ = NULL;
 }
 
 // Close the output file.
@@ -2002,9 +2048,22 @@ Output_file::map()
 void
 Output_file::close()
 {
-  if (::munmap(this->base_, this->file_size_) < 0)
-    gold_error(_("%s: munmap: %s"), this->name_, strerror(errno));
-  this->base_ = NULL;
+  // If the map isn't file-backed, we need to write it now.
+  if (this->map_is_anonymous_)
+    {
+      size_t bytes_to_write = this->file_size_;
+      while (bytes_to_write > 0)
+        {
+          ssize_t bytes_written = ::write(this->o_, this->base_, bytes_to_write);
+          if (bytes_written == 0)
+            gold_error(_("%s: write: unexpected 0 return-value"), this->name_);
+          else if (bytes_written < 0)
+            gold_error(_("%s: write: %s"), this->name_, strerror(errno));
+          else
+            bytes_to_write -= bytes_written;
+        }
+    }
+  this->unmap();
 
   if (::close(this->o_) < 0)
     gold_error(_("%s: close: %s"), this->name_, strerror(errno));
