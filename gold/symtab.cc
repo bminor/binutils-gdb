@@ -1897,6 +1897,20 @@ Symbol_table::sized_write_section_symbol(const Output_section* os,
   of->write_output_view(offset, sym_size, pov);
 }
 
+// Print statistical information to stderr.  This is used for --stats.
+
+void
+Symbol_table::print_stats() const
+{
+#if defined(HAVE_TR1_UNORDERED_MAP) || defined(HAVE_EXT_HASH_MAP)
+  fprintf(stderr, _("%s: symbol table entries: %zu; buckets: %zu\n"),
+	  program_name, this->table_.size(), this->table_.bucket_count());
+#else
+  fprintf(stderr, _("%s: symbol table entries: %zu\n"),
+	  program_name, this->table_.size());
+#endif
+}
+
 // We check for ODR violations by looking for symbols with the same
 // name for which the debugging information reports that they were
 // defined in different source locations.  When comparing the source

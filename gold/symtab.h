@@ -1127,6 +1127,10 @@ class Symbol_table
   void
   write_section_symbol(const Output_section*, Output_file*, off_t) const;
 
+  // Dump statistical information to stderr.
+  void
+  print_stats() const;
+
  private:
   Symbol_table(const Symbol_table&);
   Symbol_table& operator=(const Symbol_table&);
