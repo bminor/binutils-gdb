@@ -1,3 +1,8 @@
+2007-12-04  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_size_dynamic_sections): Create DT_PLTGOT
+	entry for all dynamic objects.
+
 2007-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_size_stubs): Correct section alignment.
