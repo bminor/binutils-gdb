@@ -324,7 +324,12 @@ class General_options
 
   void
   set_optimization_level(const char* arg)
-  { this->optimization_level_ = atoi(arg); }
+  {
+    char* endptr;
+    this->optimization_level_ = strtol(arg, &endptr, 0);
+    if (*endptr != '\0' || this->optimization_level_ < 0)
+      gold_fatal(_("invalid optimization level: %s"), arg);
+  }
 
   void
   set_output_file_name(const char* arg)
@@ -369,7 +374,7 @@ class General_options
       this->compress_debug_sections_ = ZLIB_COMPRESSION;
 #endif
     else
-      gold_fatal(_("Unsupported argument to --compress-debug-symbols: %s"),
+      gold_fatal(_("unsupported argument to --compress-debug-symbols: %s"),
                  arg);
   }
 
@@ -420,30 +425,27 @@ class General_options
     this->text_segment_address_ = strtoull(arg, &endptr, 0);
     if (*endptr != '\0'
 	|| this->text_segment_address_ == -1U)
-      {
-        fprintf(stderr, _("%s: invalid argument to -Ttext: %s\n"),
-                program_name, arg);
-        ::exit(1);
-      }
+      gold_fatal(_("invalid argument to -Ttext: %s"), arg);
   }
 
   int
   parse_thread_count(const char* arg)
   {
     char* endptr;
-    int count = strtol(arg, &endptr, 0);
+    const int count = strtol(arg, &endptr, 0);
     if (*endptr != '\0' || count < 0)
-      {
-	fprintf(stderr, _("%s: invalid thread count: %s\n"),
-		program_name, arg);
-	::exit(1);
-      }
+      gold_fatal(_("invalid thread count: %s"), arg);
     return count;
   }
 
   void
   set_threads()
-  { this->threads_ = true; }
+  {
+#ifndef ENABLE_THREADS
+    gold_fatal(_("--threads not supported"));
+#endif
+    this->threads_ = true;
+  }
 
   void
   clear_threads()
