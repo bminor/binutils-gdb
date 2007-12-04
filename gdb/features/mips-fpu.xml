@@ -7,7 +7,7 @@
 
 <!DOCTYPE feature SYSTEM "gdb-target.dtd">
 <feature name="org.gnu.gdb.mips.fpu">
-  <reg name="f0" bitsize="32" type="ieee_single"/>
+  <reg name="f0" bitsize="32" type="ieee_single" regnum="38"/>
   <reg name="f1" bitsize="32" type="ieee_single"/>
   <reg name="f2" bitsize="32" type="ieee_single"/>
   <reg name="f3" bitsize="32" type="ieee_single"/>

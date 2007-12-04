@@ -7,7 +7,7 @@
 
 <!DOCTYPE feature SYSTEM "gdb-target.dtd">
 <feature name="org.gnu.gdb.mips.cpu">
-  <reg name="r0" bitsize="32"/>
+  <reg name="r0" bitsize="32" regnum="0"/>
   <reg name="r1" bitsize="32"/>
   <reg name="r2" bitsize="32"/>
   <reg name="r3" bitsize="32"/>
