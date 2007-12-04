@@ -1083,7 +1083,7 @@ spu_elf_size_stubs (bfd *output_bfd,
   htab->stub = bfd_make_section_anyway_with_flags (ibfd, ".stub", flags);
   *stub = htab->stub;
   if (htab->stub == NULL
-      || !bfd_set_section_alignment (ibfd, htab->stub, 2))
+      || !bfd_set_section_alignment (ibfd, htab->stub, 4))
     return FALSE;
 
   flags = (SEC_ALLOC | SEC_LOAD
@@ -1091,7 +1091,7 @@ spu_elf_size_stubs (bfd *output_bfd,
   htab->ovtab = bfd_make_section_anyway_with_flags (ibfd, ".ovtab", flags);
   *ovtab = htab->ovtab;
   if (htab->ovtab == NULL
-      || !bfd_set_section_alignment (ibfd, htab->stub, 4))
+      || !bfd_set_section_alignment (ibfd, htab->ovtab, 4))
     return FALSE;
 
   *toe = bfd_make_section_anyway_with_flags (ibfd, ".toe", SEC_ALLOC);
