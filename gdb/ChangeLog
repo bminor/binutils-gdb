@@ -1,3 +1,7 @@
+2007-12-04  Maciej W. Rozycki  <macro@mips.com>
+
+	* target.h (target_find_new_threads): Fix definition.
+
 2007-12-02  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-nat.c (win32_resume): Set the trace bit

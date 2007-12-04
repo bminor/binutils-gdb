@@ -885,7 +885,7 @@ int target_follow_fork (int follow_child);
 /* Query for new threads and add them to the thread list.  */
 
 #define target_find_new_threads() \
-     (*current_target.to_find_new_threads) (); \
+     (*current_target.to_find_new_threads) ()
 
 /* Make target stop in a continuable fashion.  (For instance, under
    Unix, this should act like SIGSTOP).  This function is normally
