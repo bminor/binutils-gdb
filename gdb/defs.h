@@ -84,6 +84,9 @@ typedef bfd_byte gdb_byte;
 /* An address in the program being debugged.  Host byte order.  */
 typedef bfd_vma CORE_ADDR;
 
+/* The largest CORE_ADDR value.  */
+#define CORE_ADDR_MAX (~ (CORE_ADDR) 0)
+
 /* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
 
 #ifndef LONGEST

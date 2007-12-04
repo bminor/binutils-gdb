@@ -28,6 +28,7 @@ struct block_namespace_info;
 struct using_direct;
 struct obstack;
 struct dictionary;
+struct addrmap;
 
 /* All of the name-scope contours of the program
    are represented by `struct block' objects.
@@ -115,12 +116,17 @@ struct blockvector
 {
   /* Number of blocks in the list.  */
   int nblocks;
+  /* An address map mapping addresses to blocks in this blockvector.
+     This pointer is zero if the blocks' start and end addresses are
+     enough.  */
+  struct addrmap *map;
   /* The blocks themselves.  */
   struct block *block[1];
 };
 
 #define BLOCKVECTOR_NBLOCKS(blocklist) (blocklist)->nblocks
 #define BLOCKVECTOR_BLOCK(blocklist,n) (blocklist)->block[n]
+#define BLOCKVECTOR_MAP(blocklist) ((blocklist)->map)
 
 /* Special block numbers */
 
@@ -130,10 +136,11 @@ extern struct symbol *block_function (const struct block *);
 
 extern int contained_in (const struct block *, const struct block *);
 
-extern struct blockvector *blockvector_for_pc (CORE_ADDR, int *);
+extern struct blockvector *blockvector_for_pc (CORE_ADDR, struct block **);
 
 extern struct blockvector *blockvector_for_pc_sect (CORE_ADDR, asection *,
-						    int *, struct symtab *);
+						    struct block **,
+                                                    struct symtab *);
 
 extern struct block *block_for_pc (CORE_ADDR);
 

@@ -586,6 +586,7 @@ TARGET_FLAGS_TO_PASS = \
 # SFILES is used in building the distribution archive.
 
 SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
+	addrmap.c \
 	auxv.c ax-general.c ax-gdb.c \
 	bcache.c \
 	bfd-target.c \
@@ -717,6 +718,7 @@ nm_h =		@nm_h@
 
 ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h) $(breakpoint_h)
 ada_lex_c = ada-lex.c $(gdb_string_h)
+addrmap_h = addrmap.h
 alphabsd_tdep_h = alphabsd-tdep.h
 alpha_tdep_h = alpha-tdep.h
 amd64_linux_tdep_h = amd64-linux-tdep.h
@@ -1022,6 +1024,7 @@ TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	version.o \
 	annotate.o \
+	addrmap.o \
 	auxv.o \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
@@ -1803,6 +1806,8 @@ ada-valprint.o: ada-valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(demangle_h) $(valprint_h) \
 	$(language_h) $(annotate_h) $(ada_lang_h) $(c_lang_h) $(infcall_h) \
 	$(exceptions_h)
+addrmap.o: addrmap.c $(defs_h) $(splay_tree_h) $(gdb_obstack_h) $(addrmap_h) \
+	$(gdb_assert_h)
 aix-thread.o: aix-thread.c $(defs_h) $(gdb_assert_h) $(gdbthread_h) \
 	$(target_h) $(inferior_h) $(regcache_h) $(gdbcmd_h) $(ppc_tdep_h) \
 	$(gdb_string_h) $(observer_h)
@@ -1930,7 +1935,7 @@ bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(gdb_string_h) \
 bfd-target.o: bfd-target.c $(defs_h) $(target_h) $(bfd_target_h) \
 	$(gdb_assert_h) $(gdb_string_h)
 block.o: block.c $(defs_h) $(block_h) $(symtab_h) $(symfile_h) \
-	$(gdb_obstack_h) $(cp_support_h)
+	$(gdb_obstack_h) $(cp_support_h) $(addrmap_h)
 blockframe.o: blockframe.c $(defs_h) $(symtab_h) $(bfd_h) $(objfiles_h) \
 	$(frame_h) $(gdbcore_h) $(value_h) $(target_h) $(inferior_h) \
 	$(annotate_h) $(regcache_h) $(gdb_assert_h) $(dummy_frame_h) \
@@ -1954,7 +1959,8 @@ buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(gdb_assert_h) \
 	$(complaints_h) $(gdb_string_h) $(expression_h) $(bcache_h) \
 	$(filenames_h) $(macrotab_h) $(demangle_h) $(block_h) \
-	$(cp_support_h) $(dictionary_h) $(buildsym_h) $(stabsread_h)
+	$(cp_support_h) $(dictionary_h) $(buildsym_h) $(stabsread_h) \
+	$(addrmap_h)
 c-exp.o: c-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 	$(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(charset_h) $(block_h) $(cp_support_h) $(dfp_h)
@@ -2520,7 +2526,7 @@ objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(mdebugread_h) \
 	$(gdb_assert_h) $(gdb_stat_h) $(gdb_obstack_h) $(gdb_string_h) \
 	$(hashtab_h) $(breakpoint_h) $(block_h) $(dictionary_h) $(source_h) \
-	$(parser_defs_h) $(expression_h)
+	$(parser_defs_h) $(expression_h) $(addrmap_h)
 observer.o: observer.c $(defs_h) $(observer_h) $(command_h) $(gdbcmd_h) \
 	$(observer_inc)
 obsd-tdep.o: obsd-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(obsd_tdep_h)

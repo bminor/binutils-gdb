@@ -5747,12 +5747,10 @@ resolve_sal_pc (struct symtab_and_line *sal)
       struct blockvector *bv;
       struct block *b;
       struct symbol *sym;
-      int index;
 
-      bv = blockvector_for_pc_sect (sal->pc, 0, &index, sal->symtab);
+      bv = blockvector_for_pc_sect (sal->pc, 0, &b, sal->symtab);
       if (bv != NULL)
 	{
-	  b = BLOCKVECTOR_BLOCK (bv, index);
 	  sym = block_function (b);
 	  if (sym != NULL)
 	    {

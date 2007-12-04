@@ -1,3 +1,55 @@
+2007-12-04  Jim Blandy  <jimb@codesourcery.com>
+
+	Support lexical blocks and function bodies that occupy
+	non-contiguous address ranges.
+	* addrmap.c, addrmap.h: New files.
+	* block.h (struct addrmap): New forward declaration.
+	(struct blockvector): New member, 'map'.
+	(BLOCKVECTOR_MAP): New accessor macro.
+	* block.c: #include "addrmap.h"
+	(blockvector_for_pc_sect): If the blockvector we've found has
+	an address map, use it instead of searching the blocks.
+	* buildsym.c: #include "addrmap.h"
+	(pending_addrmap_obstack, pending_addrmap_interesting): New static
+	variables.
+	(really_free_pendings): If we have a pending addrmap, free it too.
+	(record_block_range): New function.
+	(make_blockvector): If we have an interesting pending addrmap,
+	record it in the new blockvector.
+	(start_symtab, buildsym_init): Assert that there is no pending
+	addrmap now; we should have cleaned up any addrmaps we'd built
+	previously.
+	(end_symtab): If there is a pending addrmap left over that didn't
+	get included in the blockvector, free it.
+	* buildsym.h (struct addrmap): New forward declaration.
+	(record_block_range): New prototype.
+	* objfiles.c: #include "addrmap.h".
+	(objfile_relocate): Relocate the blockvector's address map, if
+	present.
+	* dwarf2read.c (dwarf2_record_block_ranges): New function.
+	(read_func_scope, read_lexical_block_scope): Call it.
+	* Makefile.in (SFILES): Add addrmap.c.
+	(addrmap_h): New header dependency variable.
+	(COMMON_OBS): Add addrmap.o.
+	(addrmap.o): New rule.l
+	(block.o, objfiles.o, buildsym.o): Depend on $(addrmap_h).
+
+	* block.c (blockvector_for_pc, blockvector_for_pc_sect): Return a
+	pointer to the block, not its index in the blockvector.
+	(block_for_pc_sect): Use the returned block, instead of looking it
+	up ourselves.
+	* block.h (blockvector_for_pc, blockvector_for_pc_sect): Update
+	declarations.
+	* breakpoint.c (resolve_sal_pc): Use returned block, instead of
+	looking it up ourselves.
+	* stack.c (print_frame_label_vars): Disable function, which
+	depends on the block's index.
+
+	* buildsym.c (finish_block): Return the block we've built.
+	* buildsym.h (finish_block): Update prototype.
+
+	* defs.h (CORE_ADDR_MAX): New constant.
+
 2007-12-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* coffread.c (decode_type): Use builtin_type_int32 instead

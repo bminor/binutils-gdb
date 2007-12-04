@@ -43,6 +43,7 @@
 #include "block.h"
 #include "cp-support.h"
 #include "dictionary.h"
+#include "addrmap.h"
 
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
@@ -67,6 +68,23 @@ static struct pending *free_pendings;
    otherwise empty symtab from being tossed.  */
 
 static int have_line_numbers;
+
+/* The mutable address map for the compilation unit whose symbols
+   we're currently reading.  The symtabs' shared blockvector will
+   point to a fixed copy of this.  */
+static struct addrmap *pending_addrmap;
+
+/* The obstack on which we allocate pending_addrmap.
+   If pending_addrmap is NULL, this is uninitialized; otherwise, it is
+   initialized (and holds pending_addrmap).  */
+static struct obstack pending_addrmap_obstack;
+
+/* Non-zero if we recorded any ranges in the addrmap that are
+   different from those in the blockvector already.  We set this to
+   zero when we start processing a symfile, and if it's still zero at
+   the end, then we just toss the addrmap.  */
+static int pending_addrmap_interesting;
+
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
 
@@ -195,6 +213,12 @@ really_free_pendings (void *dummy)
 
   if (pending_macros)
     free_macro_table (pending_macros);
+
+  if (pending_addrmap)
+    {
+      obstack_free (&pending_addrmap_obstack, NULL);
+      pending_addrmap = NULL;
+    }
 }
 
 /* This function is called to discard any pending blocks. */
@@ -211,7 +235,7 @@ free_pending_blocks (void)
    the order the symbols have in the list (reversed from the input
    file).  Put the block on the list of pending blocks.  */
 
-void
+struct block *
 finish_block (struct symbol *symbol, struct pending **listhead,
 	      struct pending_block *old_blocks,
 	      CORE_ADDR start, CORE_ADDR end,
@@ -423,6 +447,8 @@ finish_block (struct symbol *symbol, struct pending **listhead,
     }
 
   record_pending_block (objfile, block, opblock);
+
+  return block;
 }
 
 
@@ -453,6 +479,38 @@ record_pending_block (struct objfile *objfile, struct block *block,
       pending_blocks = pblock;
     }
 }
+
+
+/* Record that the range of addresses from START to END_INCLUSIVE
+   (inclusive, like it says) belongs to BLOCK.  BLOCK's start and end
+   addresses must be set already.  You must apply this function to all
+   BLOCK's children before applying it to BLOCK.
+
+   If a call to this function complicates the picture beyond that
+   already provided by BLOCK_START and BLOCK_END, then we create an
+   address map for the block.  */
+void
+record_block_range (struct block *block,
+                    CORE_ADDR start, CORE_ADDR end_inclusive)
+{
+  /* If this is any different from the range recorded in the block's
+     own BLOCK_START and BLOCK_END, then note that the address map has
+     become interesting.  Note that even if this block doesn't have
+     any "interesting" ranges, some later block might, so we still
+     need to record this block in the addrmap.  */
+  if (start != BLOCK_START (block)
+      || end_inclusive + 1 != BLOCK_END (block))
+    pending_addrmap_interesting = 1;
+
+  if (! pending_addrmap)
+    {
+      obstack_init (&pending_addrmap_obstack);
+      pending_addrmap = addrmap_create_mutable (&pending_addrmap_obstack);
+    }
+
+  addrmap_set_empty (pending_addrmap, start, end_inclusive, block);
+}
+
 
 static struct blockvector *
 make_blockvector (struct objfile *objfile)
@@ -486,6 +544,14 @@ make_blockvector (struct objfile *objfile)
 
   free_pending_blocks ();
 
+  /* If we needed an address map for this symtab, record it in the
+     blockvector.  */
+  if (pending_addrmap && pending_addrmap_interesting)
+    BLOCKVECTOR_MAP (blockvector)
+      = addrmap_create_fixed (pending_addrmap, &objfile->objfile_obstack);
+  else
+    BLOCKVECTOR_MAP (blockvector) = 0;
+        
   /* Some compilers output blocks in the wrong order, but we depend on
      their being in the right order so we can binary search. Check the
      order and moan about it.  */
@@ -808,6 +874,9 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
     }
   context_stack_depth = 0;
 
+  /* We shouldn't have any address map at this point.  */
+  gdb_assert (! pending_addrmap);
+
   /* Set up support for C++ namespace support, in case we need it.  */
 
   cp_initialize_namespace ();
@@ -1083,6 +1152,11 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
   last_source_file = NULL;
   current_subfile = NULL;
   pending_macros = NULL;
+  if (pending_addrmap)
+    {
+      obstack_free (&pending_addrmap_obstack, NULL);
+      pending_addrmap = NULL;
+    }
 
   return symtab;
 }
@@ -1196,6 +1270,10 @@ buildsym_init (void)
   global_symbols = NULL;
   pending_blocks = NULL;
   pending_macros = NULL;
+
+  /* We shouldn't have any address map at this point.  */
+  gdb_assert (! pending_addrmap);
+  pending_addrmap_interesting = 0;
 }
 
 /* Initialize anything that needs initializing when a completely new

@@ -22,6 +22,7 @@
 
 struct objfile;
 struct symbol;
+struct addrmap;
 
 /* This module provides definitions used for creating and adding to
    the symbol table.  These routines are called from various symbol-
@@ -230,11 +231,14 @@ extern void add_symbol_to_list (struct symbol *symbol,
 extern struct symbol *find_symbol_in_list (struct pending *list,
 					   char *name, int length);
 
-extern void finish_block (struct symbol *symbol,
-			  struct pending **listhead,
-			  struct pending_block *old_blocks,
-			  CORE_ADDR start, CORE_ADDR end,
-			  struct objfile *objfile);
+extern struct block *finish_block (struct symbol *symbol,
+                                   struct pending **listhead,
+                                   struct pending_block *old_blocks,
+                                   CORE_ADDR start, CORE_ADDR end,
+                                   struct objfile *objfile);
+
+extern void record_block_range (struct block *,
+                                CORE_ADDR start, CORE_ADDR end_inclusive);
 
 extern void really_free_pendings (void *dummy);
 

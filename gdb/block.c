@@ -23,6 +23,7 @@
 #include "symfile.h"
 #include "gdb_obstack.h"
 #include "cp-support.h"
+#include "addrmap.h"
 
 /* This is used by struct block to store namespace-related info for
    C++ files, namely using declarations and the current namespace in
@@ -63,14 +64,14 @@ block_function (const struct block *bl)
   return BLOCK_FUNCTION (bl);
 }
 
-/* Return the blockvector immediately containing the innermost lexical block
-   containing the specified pc value and section, or 0 if there is none.
-   PINDEX is a pointer to the index value of the block.  If PINDEX
-   is NULL, we don't pass this information back to the caller.  */
+/* Return the blockvector immediately containing the innermost lexical
+   block containing the specified pc value and section, or 0 if there
+   is none.  PBLOCK is a pointer to the block.  If PBLOCK is NULL, we
+   don't pass this information back to the caller.  */
 
 struct blockvector *
 blockvector_for_pc_sect (CORE_ADDR pc, struct bfd_section *section,
-			 int *pindex, struct symtab *symtab)
+			 struct block **pblock, struct symtab *symtab)
 {
   struct block *b;
   int bot, top, half;
@@ -85,11 +86,27 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct bfd_section *section,
     }
 
   bl = BLOCKVECTOR (symtab);
-  b = BLOCKVECTOR_BLOCK (bl, 0);
 
   /* Then search that symtab for the smallest block that wins.  */
-  /* Use binary search to find the last block that starts before PC.  */
 
+  /* If we have an addrmap mapping code addresses to blocks, then use
+     that.  */
+  if (BLOCKVECTOR_MAP (bl))
+    {
+      b = addrmap_find (BLOCKVECTOR_MAP (bl), pc);
+      if (b)
+        {
+          if (pblock)
+            *pblock = b;
+          return bl;
+        }
+      else
+        return 0;
+    }
+
+
+  /* Otherwise, use binary search to find the last block that starts
+     before PC.  */
   bot = 0;
   top = BLOCKVECTOR_NBLOCKS (bl);
 
@@ -110,8 +127,8 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct bfd_section *section,
       b = BLOCKVECTOR_BLOCK (bl, bot);
       if (BLOCK_END (b) > pc)
 	{
-	  if (pindex)
-	    *pindex = bot;
+	  if (pblock)
+	    *pblock = b;
 	  return bl;
 	}
       bot--;
@@ -124,10 +141,10 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct bfd_section *section,
    Backward compatibility, no section.  */
 
 struct blockvector *
-blockvector_for_pc (CORE_ADDR pc, int *pindex)
+blockvector_for_pc (CORE_ADDR pc, struct block **pblock)
 {
   return blockvector_for_pc_sect (pc, find_pc_mapped_section (pc),
-				  pindex, NULL);
+				  pblock, NULL);
 }
 
 /* Return the innermost lexical block containing the specified pc value
@@ -137,11 +154,11 @@ struct block *
 block_for_pc_sect (CORE_ADDR pc, struct bfd_section *section)
 {
   struct blockvector *bl;
-  int index;
+  struct block *b;
 
-  bl = blockvector_for_pc_sect (pc, section, &index, NULL);
+  bl = blockvector_for_pc_sect (pc, section, &b, NULL);
   if (bl)
-    return BLOCKVECTOR_BLOCK (bl, index);
+    return b;
   return 0;
 }
 

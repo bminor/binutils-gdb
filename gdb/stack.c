@@ -1471,6 +1471,9 @@ static void
 print_frame_label_vars (struct frame_info *frame, int this_level_only,
 			struct ui_file *stream)
 {
+#if 1
+  fprintf_filtered (stream, "print_frame_label_vars disabled.\n");
+#else
   struct blockvector *bl;
   struct block *block = get_frame_block (frame, 0);
   int values_printed = 0;
@@ -1531,6 +1534,7 @@ print_frame_label_vars (struct frame_info *frame, int this_level_only,
 
   if (!values_printed && !this_level_only)
     fprintf_filtered (stream, _("No catches.\n"));
+#endif
 }
 
 void

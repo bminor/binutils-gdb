@@ -895,6 +895,9 @@ static void get_scope_pc_bounds (struct die_info *,
 				 CORE_ADDR *, CORE_ADDR *,
 				 struct dwarf2_cu *);
 
+static void dwarf2_record_block_ranges (struct die_info *, struct block *,
+                                        CORE_ADDR, struct dwarf2_cu *);
+
 static void dwarf2_add_field (struct field_info *, struct die_info *,
 			      struct dwarf2_cu *);
 
@@ -2910,6 +2913,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   const char *previous_prefix = processing_current_prefix;
   struct cleanup *back_to = NULL;
   CORE_ADDR baseaddr;
+  struct block *block;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -2993,8 +2997,11 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   new = pop_context ();
   /* Make a block for the local symbols within.  */
-  finish_block (new->name, &local_symbols, new->old_blocks,
-		lowpc, highpc, objfile);
+  block = finish_block (new->name, &local_symbols, new->old_blocks,
+                        lowpc, highpc, objfile);
+
+  /* If we have address ranges, record them.  */
+  dwarf2_record_block_ranges (die, block, baseaddr, cu);
   
   /* In C++, we can have functions nested inside functions (e.g., when
      a function declares a class that has methods).  This means that
@@ -3051,8 +3058,21 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   if (local_symbols != NULL)
     {
-      finish_block (0, &local_symbols, new->old_blocks, new->start_addr,
-		    highpc, objfile);
+      struct block *block
+        = finish_block (0, &local_symbols, new->old_blocks, new->start_addr,
+                        highpc, objfile);
+
+      /* Note that recording ranges after traversing children, as we
+         do here, means that recording a parent's ranges entails
+         walking across all its children's ranges as they appear in
+         the address map, which is quadratic behavior.
+
+         It would be nicer to record the parent's ranges before
+         traversing its children, simply overriding whatever you find
+         there.  But since we don't even decide whether to create a
+         block until after we've traversed its children, that's hard
+         to do.  */
+      dwarf2_record_block_ranges (die, block, baseaddr, cu);
     }
   local_symbols = new->locals;
 }
@@ -3294,6 +3314,100 @@ get_scope_pc_bounds (struct die_info *die,
 
   *lowpc = best_low;
   *highpc = best_high;
+}
+
+/* Record the address ranges for BLOCK, offset by BASEADDR, as given
+   in DIE.  */
+static void
+dwarf2_record_block_ranges (struct die_info *die, struct block *block,
+                            CORE_ADDR baseaddr, struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+
+  attr = dwarf2_attr (die, DW_AT_high_pc, cu);
+  if (attr)
+    {
+      CORE_ADDR high = DW_ADDR (attr);
+      attr = dwarf2_attr (die, DW_AT_low_pc, cu);
+      if (attr)
+        {
+          CORE_ADDR low = DW_ADDR (attr);
+          record_block_range (block, baseaddr + low, baseaddr + high - 1);
+        }
+    }
+
+  attr = dwarf2_attr (die, DW_AT_ranges, cu);
+  if (attr)
+    {
+      bfd *obfd = cu->objfile->obfd;
+
+      /* The value of the DW_AT_ranges attribute is the offset of the
+         address range list in the .debug_ranges section.  */
+      unsigned long offset = DW_UNSND (attr);
+      gdb_byte *buffer = dwarf2_per_objfile->ranges_buffer + offset;
+
+      /* For some target architectures, but not others, the
+         read_address function sign-extends the addresses it returns.
+         To recognize base address selection entries, we need a
+         mask.  */
+      unsigned int addr_size = cu->header.addr_size;
+      CORE_ADDR base_select_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
+
+      /* The base address, to which the next pair is relative.  Note
+         that this 'base' is a DWARF concept: most entries in a range
+         list are relative, to reduce the number of relocs against the
+         debugging information.  This is separate from this function's
+         'baseaddr' argument, which GDB uses to relocate debugging
+         information from a shared library based on the address at
+         which the library was loaded.  */
+      CORE_ADDR base = cu->header.base_address;
+      int base_known = cu->header.base_known;
+
+      if (offset >= dwarf2_per_objfile->ranges_size)
+        {
+          complaint (&symfile_complaints,
+                     _("Offset %lu out of bounds for DW_AT_ranges attribute"),
+                     offset);
+          return;
+        }
+
+      for (;;)
+        {
+          unsigned int bytes_read;
+          CORE_ADDR start, end;
+
+          start = read_address (obfd, buffer, cu, &bytes_read);
+          buffer += bytes_read;
+          end = read_address (obfd, buffer, cu, &bytes_read);
+          buffer += bytes_read;
+
+          /* Did we find the end of the range list?  */
+          if (start == 0 && end == 0)
+            break;
+
+          /* Did we find a base address selection entry?  */
+          else if ((start & base_select_mask) == base_select_mask)
+            {
+              base = end;
+              base_known = 1;
+            }
+
+          /* We found an ordinary address range.  */
+          else
+            {
+              if (!base_known)
+                {
+                  complaint (&symfile_complaints,
+                             _("Invalid .debug_ranges data (no base address)"));
+                  return;
+                }
+
+              record_block_range (block, 
+                                  baseaddr + base + start, 
+                                  baseaddr + base + end - 1);
+            }
+        }
+    }
 }
 
 /* Add an aggregate field to the field list.  */
