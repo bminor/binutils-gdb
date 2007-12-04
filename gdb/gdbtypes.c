@@ -1798,65 +1798,6 @@ append_composite_type_field (struct type *t, char *name,
     }
 }
 
-/* Look up a fundamental type for the specified objfile.
-   May need to construct such a type if this is the first use.
-
-   Some object file formats (ELF, COFF, etc) do not define fundamental
-   types such as "int" or "double".  Others (stabs for example), do
-   define fundamental types.
-
-   For the formats which don't provide fundamental types, gdb can
-   create such types, using defaults reasonable for the current
-   language and the current target machine.
-
-   NOTE: This routine is obsolescent.  Each debugging format reader
-   should manage it's own fundamental types, either creating them from
-   suitable defaults or reading them from the debugging information,
-   whichever is appropriate.  The DWARF reader has already been fixed
-   to do this.  Once the other readers are fixed, this routine will go
-   away.  Also note that fundamental types should be managed on a
-   compilation unit basis in a multi-language environment, not on a
-   linkage unit basis as is done here.  */
-
-
-struct type *
-lookup_fundamental_type (struct objfile *objfile, int typeid)
-{
-  struct type **typep;
-  int nbytes;
-
-  if (typeid < 0 || typeid >= FT_NUM_MEMBERS)
-    {
-      error (_("internal error - invalid fundamental type id %d"), 
-	     typeid);
-    }
-
-  /* If this is the first time we need a fundamental type for this
-     objfile then we need to initialize the vector of type
-     pointers.  */
-
-  if (objfile->fundamental_types == NULL)
-    {
-      nbytes = FT_NUM_MEMBERS * sizeof (struct type *);
-      objfile->fundamental_types = (struct type **)
-	obstack_alloc (&objfile->objfile_obstack, nbytes);
-      memset ((char *) objfile->fundamental_types, 0, nbytes);
-      OBJSTAT (objfile, n_types += FT_NUM_MEMBERS);
-    }
-
-  /* Look for this particular type in the fundamental type vector.  If
-     one is not found, create and install one appropriate for the
-     current language.  */
-
-  typep = objfile->fundamental_types + typeid;
-  if (*typep == NULL)
-    {
-      *typep = create_fundamental_type (objfile, typeid);
-    }
-
-  return (*typep);
-}
-
 int
 can_dereference (struct type *t)
 {

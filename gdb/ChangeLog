@@ -1,3 +1,67 @@
+2007-12-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* coffread.c (decode_type): Use builtin_type_int32 instead
+	of FT_INTEGER fundamental type for array range index type.
+	(decode_base_type): Use builtin types of current_gdbarch
+	instead of fundamental types.
+
+	* dwarf2read.c (struct dwarf2_cu): Remove ftypes member.
+	(read_file_scope): Do not initialize ftypes member.
+	(dwarf_base_type, dwarf2_fundamental_types): Remove functions.
+	(read_array_type): Use builtin_type_int32 instead of FT_INTEGER
+	fundamental type for array range index type.
+	(read_tag_string_type): Likewise for string range index type.
+	Also, do not overwrite FT_CHAR type with new string type.
+	(read_base_type): If DW_AT_name is missing, create unnamed type
+	with given properties instead of looking for a fundamental type.
+	Create new types as TYPE_TARGET_TYPE for DW_ATE_address and
+	DW_ATE_complex_float types.
+	(read_subrange_type): Create new type to represent missing
+	DW_AT_type instead of looking for a fundamental type.
+	(die_type): Use builtin type to represent "void" instead of
+	looking for a fundamental type.
+
+	* stabsread.c (define_symbol): Use builtin types to represent
+	'r' and 'i' floating-point and integer constants.
+
+	* gdbtypes.c (lookup_fundamental_type): Remove.
+	* gdbtypes.h (lookup_fundamental_type): Remove prototype.
+	(FT_VOID, FT_BOOLEAN, FT_CHAR, FT_SIGNED_CHAR, FT_UNSIGNED_CHAR,
+	FT_SHORT, FT_SIGNED_SHORT, FT_UNSIGNED_SHORT, FT_INTEGER,
+	FT_SIGNED_INTEGER, FT_UNSIGNED_INTEGER, FT_LONG, FT_SIGNED_LONG,
+	FT_UNSIGNED_LONG, FT_LONG_LONG, FT_SIGNED_LONG_LONG,
+	FT_UNSIGNED_LONG_LONG, FT_FLOAT, FT_DBL_PREC_FLOAT, FT_EXT_PREC_FLOAT,
+	FT_COMPLEX, FT_DBL_PREC_COMPLEX, FT_EXT_PREC_COMPLEX, FT_STRING,
+	FT_FIXED_DECIMAL, FT_FLOAT_DECIMAL, FT_BYTE, FT_UNSIGNED_BYTE,
+	FT_TEMPLATE_ARG, FT_DECFLOAT, FT_DBL_PREC_DECFLOAT,
+	FT_EXT_PREC_DECFLOAT, FT_NUM_MEMBERS): Remove macros.
+	* objfiles.c (struct objfile): Remove fundamental_types member.
+	* symfile.c (reread_symbols): Do not clear fundamental_types.
+
+	* language.h (struct language_defn): Remove la_fund_type member.
+	(create_fundamental_type): Remove.
+	* language.c (unk_lang_create_fundamental_type): Remove.
+	(unknown_language_defn, auto_language_defn,
+	local_language_defn): Adapt initializer.
+	* ada-lang.c (ada_create_fundamental_type): Remove.
+	(ada_language_defn): Adapt initializer.
+	* c-lang.h (c_create_fundamental_type): Remove prototype.
+	* c-lang.c (c_create_fundamental_type): Remove.
+	(c_language_defn, cplus_language_defn, asm_language_defn,
+	minimal_language_defn): Adapt initializer.
+	* f-lang.c (f_create_fundamental_type): Remove.
+	(f_language_defn): Adapt initializer.
+	* jv-lang.c (java_create_fundamental_type): Remove.
+	(java_language_defn): Adapt initializer.
+	* m2-lang.c (m2_create_fundamental_type): Remove.
+	(m2_language_defn): Adapt initializer.
+	* objc-lang.c (objc_create_fundamental_type): Remove.
+	(objc_language_defn): Adapt initializer.
+	* p-lang.h (pascal_create_fundamental_type): Remove prototype.
+	* p-lang.c (pascal_create_fundamental_type): Remove.
+	(pascal_language_defn): Adapt initializer.
+	* scm-lang.c (scm_language_defn): Adapt initializer.
+
 2007-12-04  Maciej W. Rozycki  <macro@mips.com>
 
 	* features/mips-cpu.xml: Specify "regnum" for "r0" explicitly.

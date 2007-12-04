@@ -70,7 +70,6 @@ static SAVED_F77_COMMON_PTR allocate_saved_f77_common_node (void);
 static void patch_common_entries (SAVED_F77_COMMON_PTR, CORE_ADDR, int);
 #endif
 
-static struct type *f_create_fundamental_type (struct objfile *, int);
 static void f_printchar (int c, struct ui_file * stream);
 static void f_emit_char (int c, struct ui_file * stream, int quoter);
 
@@ -223,170 +222,6 @@ f_printstr (struct ui_file *stream, const gdb_byte *string,
   if (force_ellipses || i < length)
     fputs_filtered ("...", stream);
 }
-
-/* FIXME:  This is a copy of c_create_fundamental_type(), before
-   all the non-C types were stripped from it.  Needs to be fixed
-   by an experienced F77 programmer. */
-
-static struct type *
-f_create_fundamental_type (struct objfile *objfile, int typeid)
-{
-  struct type *type = NULL;
-
-  switch (typeid)
-    {
-    case FT_VOID:
-      type = init_type (TYPE_CODE_VOID,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "VOID", objfile);
-      break;
-    case FT_BOOLEAN:
-      type = init_type (TYPE_CODE_BOOL,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "boolean", objfile);
-      break;
-    case FT_STRING:
-      type = init_type (TYPE_CODE_STRING,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "string", objfile);
-      break;
-    case FT_CHAR:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "character", objfile);
-      break;
-    case FT_SIGNED_CHAR:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "integer*1", objfile);
-      break;
-    case FT_UNSIGNED_CHAR:
-      type = init_type (TYPE_CODE_BOOL,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "logical*1", objfile);
-      break;
-    case FT_SHORT:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "integer*2", objfile);
-      break;
-    case FT_SIGNED_SHORT:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "short", objfile);	/* FIXME-fnf */
-      break;
-    case FT_UNSIGNED_SHORT:
-      type = init_type (TYPE_CODE_BOOL,
-			gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "logical*2", objfile);
-      break;
-    case FT_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "integer*4", objfile);
-      break;
-    case FT_SIGNED_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "integer", objfile);		/* FIXME -fnf */
-      break;
-    case FT_UNSIGNED_INTEGER:
-      type = init_type (TYPE_CODE_BOOL,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "logical*4", objfile);
-      break;
-    case FT_FIXED_DECIMAL:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "fixed decimal", objfile);
-      break;
-    case FT_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "long", objfile);
-      break;
-    case FT_SIGNED_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "long", objfile);	/* FIXME -fnf */
-      break;
-    case FT_UNSIGNED_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned long", objfile);
-      break;
-    case FT_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_long_bit (current_gdbarch) 
-			 / TARGET_CHAR_BIT,
-			0, "long long", objfile);
-      break;
-    case FT_SIGNED_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_long_bit (current_gdbarch) 
-			 / TARGET_CHAR_BIT,
-			0, "signed long long", objfile);
-      break;
-    case FT_UNSIGNED_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_long_bit (current_gdbarch) 
-			 / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned long long", objfile);
-      break;
-    case FT_FLOAT:
-      type = init_type (TYPE_CODE_FLT,
-			gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "real", objfile);
-      break;
-    case FT_DBL_PREC_FLOAT:
-      type = init_type (TYPE_CODE_FLT,
-			gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "real*8", objfile);
-      break;
-    case FT_FLOAT_DECIMAL:
-      type = init_type (TYPE_CODE_FLT,
-			gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "floating decimal", objfile);
-      break;
-    case FT_EXT_PREC_FLOAT:
-      type = init_type (TYPE_CODE_FLT,
-			gdbarch_long_double_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "real*16", objfile);
-      break;
-    case FT_COMPLEX:
-      type = init_type (TYPE_CODE_COMPLEX,
-			2 * gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "complex*8", objfile);
-      TYPE_TARGET_TYPE (type) = builtin_type_f_real;
-      break;
-    case FT_DBL_PREC_COMPLEX:
-      type = init_type (TYPE_CODE_COMPLEX,
-			2 * gdbarch_double_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "complex*16", objfile);
-      TYPE_TARGET_TYPE (type) = builtin_type_f_real_s8;
-      break;
-    case FT_EXT_PREC_COMPLEX:
-      type = init_type (TYPE_CODE_COMPLEX,
-			2 * gdbarch_long_double_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "complex*32", objfile);
-      TYPE_TARGET_TYPE (type) = builtin_type_f_real_s16;
-      break;
-    default:
-      /* FIXME:  For now, if we are asked to produce a type not in this
-         language, create the equivalent of a C integer type with the
-         name "<?type?>".  When all the dust settles from the type
-         reconstruction work, this should probably become an error. */
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "<?type?>", objfile);
-      warning (_("internal error: no F77 fundamental type %d"), typeid);
-      break;
-    }
-  return (type);
-}
 
 
 /* Table of operators and their precedences for printing expressions.  */
@@ -485,7 +320,6 @@ const struct language_defn f_language_defn =
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
   f_emit_char,			/* Function to print a single character */
-  f_create_fundamental_type,	/* Create fundamental type in this language */
   f_print_type,			/* Print a type using appropriate syntax */
   f_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* FIXME */

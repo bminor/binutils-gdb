@@ -725,24 +725,19 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  {
 	    double d = atof (p);
 	    gdb_byte *dbl_valu;
+	    struct type *dbl_type;
 
 	    /* FIXME-if-picky-about-floating-accuracy: Should be using
 	       target arithmetic to get the value.  real.c in GCC
 	       probably has the necessary code.  */
 
-	    /* FIXME: lookup_fundamental_type is a hack.  We should be
-	       creating a type especially for the type of float constants.
-	       Problem is, what type should it be?
-
-	       Also, what should the name of this type be?  Should we
-	       be using 'S' constants (see stabs.texinfo) instead?  */
-
-	    SYMBOL_TYPE (sym) = lookup_fundamental_type (objfile,
-							 FT_DBL_PREC_FLOAT);
+	    dbl_type = builtin_type (current_gdbarch)->builtin_double;
 	    dbl_valu =
 	      obstack_alloc (&objfile->objfile_obstack,
-			     TYPE_LENGTH (SYMBOL_TYPE (sym)));
-	    store_typed_floating (dbl_valu, SYMBOL_TYPE (sym), d);
+			     TYPE_LENGTH (dbl_type));
+	    store_typed_floating (dbl_valu, dbl_type, d);
+
+	    SYMBOL_TYPE (sym) = dbl_type;
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
 	    SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
 	  }
@@ -756,22 +751,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       types; other languages probably should have at least
 	       unsigned as well as signed constants.  */
 
-	    /* We just need one int constant type for all objfiles.
-	       It doesn't depend on languages or anything (arguably its
-	       name should be a language-specific name for a type of
-	       that size, but I'm inclined to say that if the compiler
-	       wants a nice name for the type, it can use 'e').  */
-	    static struct type *int_const_type;
-
-	    /* Yes, this is as long as a *host* int.  That is because we
-	       use atoi.  */
-	    if (int_const_type == NULL)
-	      int_const_type =
-		init_type (TYPE_CODE_INT,
-			   sizeof (int) * HOST_CHAR_BIT / TARGET_CHAR_BIT, 0,
-			   "integer constant",
-			     (struct objfile *) NULL);
-	    SYMBOL_TYPE (sym) = int_const_type;
+	    SYMBOL_TYPE (sym) = builtin_type (current_gdbarch)->builtin_long;
 	    SYMBOL_VALUE (sym) = atoi (p);
 	    SYMBOL_CLASS (sym) = LOC_CONST;
 	  }

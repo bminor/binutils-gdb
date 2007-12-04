@@ -288,17 +288,6 @@ struct dwarf2_cu
      distinguish these in buildsym.c.  */
   struct pending **list_in_scope;
 
-  /* Maintain an array of referenced fundamental types for the current
-     compilation unit being read.  For DWARF version 1, we have to construct
-     the fundamental types on the fly, since no information about the
-     fundamental types is supplied.  Each such fundamental type is created by
-     calling a language dependent routine to create the type, and then a
-     pointer to that type is then placed in the array at the index specified
-     by it's FT_<TYPENAME> value.  The array has a fixed size set by the
-     FT_NUM_MEMBERS compile time constant, which is the number of predefined
-     fundamental types gdb knows how to construct.  */
-  struct type *ftypes[FT_NUM_MEMBERS];	/* Fundamental types */
-
   /* DWARF abbreviation table associated with this compilation unit.  */
   struct abbrev_info **dwarf2_abbrevs;
 
@@ -936,8 +925,6 @@ static void read_enumeration_type (struct die_info *, struct dwarf2_cu *);
 
 static void process_enumeration_scope (struct die_info *, struct dwarf2_cu *);
 
-static struct type *dwarf_base_type (int, int, struct dwarf2_cu *);
-
 static CORE_ADDR decode_locdesc (struct dwarf_block *, struct dwarf2_cu *);
 
 static void read_array_type (struct die_info *, struct dwarf2_cu *);
@@ -1018,9 +1005,6 @@ static int dwarf2_get_attr_constant_value (struct attribute *, int);
 static struct die_info *follow_die_ref (struct die_info *,
 					struct attribute *,
 					struct dwarf2_cu *);
-
-static struct type *dwarf2_fundamental_type (struct objfile *, int,
-					     struct dwarf2_cu *);
 
 /* memory allocation interface */
 
@@ -2844,10 +2828,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* We assume that we're processing GCC output. */
   processing_gcc_compilation = 2;
 
-  /* The compilation unit may be in a different language or objfile,
-     zero out all remembered fundamental types.  */
-  memset (cu->ftypes, 0, FT_NUM_MEMBERS * sizeof (struct type *));
-
   start_symtab (name, comp_dir, lowpc);
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
@@ -4284,7 +4264,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
      arrays with unspecified length.  */
   if (die->child == NULL)
     {
-      index_type = dwarf2_fundamental_type (objfile, FT_INTEGER, cu);
+      index_type = builtin_type_int32;
       range_type = create_range_type (NULL, index_type, 0, -1);
       set_die_type (die, create_array_type (NULL, element_type, range_type),
 		    cu);
@@ -4719,19 +4699,11 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
           length = 1;
         }
     }
-  index_type = dwarf2_fundamental_type (objfile, FT_INTEGER, cu);
+
+  index_type = builtin_type_int32;
   range_type = create_range_type (NULL, index_type, 1, length);
-  if (cu->language == language_fortran)
-    {
-      /* Need to create a unique string type for bounds
-         information */
-      type = create_string_type (0, range_type);
-    }
-  else
-    {
-      char_type = dwarf2_fundamental_type (objfile, FT_CHAR, cu);
-      type = create_string_type (char_type, range_type);
-    }
+  type = create_string_type (NULL, range_type);
+
   set_die_type (die, type, cu);
 }
 
@@ -4846,6 +4818,9 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
   int encoding = 0, size = 0;
   char *name;
+  enum type_code code = TYPE_CODE_INT;
+  int type_flags = 0;
+  struct type *target_type = NULL;
 
   /* If we've already decoded this die, this is a no-op. */
   if (die->type)
@@ -4864,71 +4839,57 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       size = DW_UNSND (attr);
     }
   name = dwarf2_name (die, cu);
-  if (name)
+  if (!name)
     {
-      enum type_code code = TYPE_CODE_INT;
-      int type_flags = 0;
+      complaint (&symfile_complaints,
+		 _("DW_AT_name missing from DW_TAG_base_type"));
+    }
 
-      switch (encoding)
-	{
-	case DW_ATE_address:
-	  /* Turn DW_ATE_address into a void * pointer.  */
-	  code = TYPE_CODE_PTR;
-	  type_flags |= TYPE_FLAG_UNSIGNED;
-	  break;
-	case DW_ATE_boolean:
-	  code = TYPE_CODE_BOOL;
-	  type_flags |= TYPE_FLAG_UNSIGNED;
-	  break;
-	case DW_ATE_complex_float:
-	  code = TYPE_CODE_COMPLEX;
-	  break;
-	case DW_ATE_decimal_float:
-	  code = TYPE_CODE_DECFLOAT;
-	  break;
-	case DW_ATE_float:
-	  code = TYPE_CODE_FLT;
-	  break;
-	case DW_ATE_signed:
-	  break;
-	case DW_ATE_unsigned:
-	  type_flags |= TYPE_FLAG_UNSIGNED;
-	  break;
-	case DW_ATE_signed_char:
-	  if (cu->language == language_m2)
-	    code = TYPE_CODE_CHAR;
-	  break;
- 	case DW_ATE_unsigned_char:
-	  if (cu->language == language_m2)
-	    code = TYPE_CODE_CHAR;
-	  type_flags |= TYPE_FLAG_UNSIGNED;
-	  break;
-	default:
-	  complaint (&symfile_complaints, _("unsupported DW_AT_encoding: '%s'"),
-		     dwarf_type_encoding_name (encoding));
-	  break;
-	}
-      type = init_type (code, size, type_flags, name, objfile);
-      if (encoding == DW_ATE_address)
-	TYPE_TARGET_TYPE (type) = dwarf2_fundamental_type (objfile, FT_VOID,
-							   cu);
-      else if (encoding == DW_ATE_complex_float)
-	{
-	  if (size == 32)
-	    TYPE_TARGET_TYPE (type)
-	      = dwarf2_fundamental_type (objfile, FT_EXT_PREC_FLOAT, cu);
-	  else if (size == 16)
-	    TYPE_TARGET_TYPE (type)
-	      = dwarf2_fundamental_type (objfile, FT_DBL_PREC_FLOAT, cu);
-	  else if (size == 8)
-	    TYPE_TARGET_TYPE (type)
-	      = dwarf2_fundamental_type (objfile, FT_FLOAT, cu);
-	}
-    }
-  else
+  switch (encoding)
     {
-      type = dwarf_base_type (encoding, size, cu);
+      case DW_ATE_address:
+	/* Turn DW_ATE_address into a void * pointer.  */
+	code = TYPE_CODE_PTR;
+	type_flags |= TYPE_FLAG_UNSIGNED;
+	target_type = init_type (TYPE_CODE_VOID, 1, 0, NULL, objfile);
+	break;
+      case DW_ATE_boolean:
+	code = TYPE_CODE_BOOL;
+	type_flags |= TYPE_FLAG_UNSIGNED;
+	break;
+      case DW_ATE_complex_float:
+	code = TYPE_CODE_COMPLEX;
+	target_type = init_type (TYPE_CODE_FLT, size / 2, 0, NULL, objfile);
+	break;
+      case DW_ATE_decimal_float:
+	code = TYPE_CODE_DECFLOAT;
+	break;
+      case DW_ATE_float:
+	code = TYPE_CODE_FLT;
+	break;
+      case DW_ATE_signed:
+	break;
+      case DW_ATE_unsigned:
+	type_flags |= TYPE_FLAG_UNSIGNED;
+	break;
+      case DW_ATE_signed_char:
+	if (cu->language == language_m2)
+	  code = TYPE_CODE_CHAR;
+	break;
+      case DW_ATE_unsigned_char:
+	if (cu->language == language_m2)
+	  code = TYPE_CODE_CHAR;
+	type_flags |= TYPE_FLAG_UNSIGNED;
+	break;
+      default:
+	complaint (&symfile_complaints, _("unsupported DW_AT_encoding: '%s'"),
+		   dwarf_type_encoding_name (encoding));
+	break;
     }
+
+  type = init_type (code, size, type_flags, name, objfile);
+  TYPE_TARGET_TYPE (type) = target_type;
+
   set_die_type (die, type, cu);
 }
 
@@ -4954,8 +4915,8 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       complaint (&symfile_complaints,
                 _("DW_AT_type missing from DW_TAG_subrange_type"));
       base_type
-	= dwarf_base_type (DW_ATE_signed,
-			   gdbarch_addr_bit (current_gdbarch) / 8, cu);
+	= init_type (TYPE_CODE_INT, gdbarch_addr_bit (current_gdbarch) / 8,
+		     0, NULL, cu->objfile);
     }
 
   if (cu->language == language_fortran)
@@ -7515,7 +7476,7 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
   if (!type_attr)
     {
       /* A missing DW_AT_type represents a void type.  */
-      return dwarf2_fundamental_type (cu->objfile, FT_VOID, cu);
+      return builtin_type (current_gdbarch)->builtin_void;
     }
   else
     type_die = follow_die_ref (die, type_attr, cu);
@@ -7757,92 +7718,6 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
     {
       /* We have an obstack.  */
       return obconcat (obs, prefix, sep, suffix);
-    }
-}
-
-static struct type *
-dwarf_base_type (int encoding, int size, struct dwarf2_cu *cu)
-{
-  struct objfile *objfile = cu->objfile;
-
-  /* FIXME - this should not produce a new (struct type *)
-     every time.  It should cache base types.  */
-  struct type *type;
-  switch (encoding)
-    {
-    case DW_ATE_address:
-      type = dwarf2_fundamental_type (objfile, FT_VOID, cu);
-      return type;
-    case DW_ATE_boolean:
-      type = dwarf2_fundamental_type (objfile, FT_BOOLEAN, cu);
-      return type;
-    case DW_ATE_complex_float:
-      if (size == 16)
-	{
-	  type = dwarf2_fundamental_type (objfile, FT_DBL_PREC_COMPLEX, cu);
-	}
-      else
-	{
-	  type = dwarf2_fundamental_type (objfile, FT_COMPLEX, cu);
-	}
-      return type;
-    case DW_ATE_float:
-      if (size == 8)
-	{
-	  type = dwarf2_fundamental_type (objfile, FT_DBL_PREC_FLOAT, cu);
-	}
-      else
-	{
-	  type = dwarf2_fundamental_type (objfile, FT_FLOAT, cu);
-	}
-      return type;
-    case DW_ATE_decimal_float:
-      if (size == 16)
-	type = dwarf2_fundamental_type (objfile, FT_DBL_PREC_DECFLOAT, cu);
-      else if (size == 8)
-	type = dwarf2_fundamental_type (objfile, FT_EXT_PREC_DECFLOAT, cu);
-      else
-	type = dwarf2_fundamental_type (objfile, FT_DECFLOAT, cu);
-      return type;
-    case DW_ATE_signed:
-      switch (size)
-	{
-	case 1:
-	  type = dwarf2_fundamental_type (objfile, FT_SIGNED_CHAR, cu);
-	  break;
-	case 2:
-	  type = dwarf2_fundamental_type (objfile, FT_SIGNED_SHORT, cu);
-	  break;
-	default:
-	case 4:
-	  type = dwarf2_fundamental_type (objfile, FT_SIGNED_INTEGER, cu);
-	  break;
-	}
-      return type;
-    case DW_ATE_signed_char:
-      type = dwarf2_fundamental_type (objfile, FT_SIGNED_CHAR, cu);
-      return type;
-    case DW_ATE_unsigned:
-      switch (size)
-	{
-	case 1:
-	  type = dwarf2_fundamental_type (objfile, FT_UNSIGNED_CHAR, cu);
-	  break;
-	case 2:
-	  type = dwarf2_fundamental_type (objfile, FT_UNSIGNED_SHORT, cu);
-	  break;
-	default:
-	case 4:
-	  type = dwarf2_fundamental_type (objfile, FT_UNSIGNED_INTEGER, cu);
-	  break;
-	}
-      return type;
-    case DW_ATE_unsigned_char:
-      type = dwarf2_fundamental_type (objfile, FT_UNSIGNED_CHAR, cu);
-      return type;
-    default:
-      type = dwarf2_fundamental_type (objfile, FT_SIGNED_INTEGER, cu);
-      return type;
     }
 }
 
@@ -9067,28 +8942,6 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
 	 (long) src_die->offset, (long) offset, cu->objfile->name);
 
   return NULL;
-}
-
-static struct type *
-dwarf2_fundamental_type (struct objfile *objfile, int typeid,
-			 struct dwarf2_cu *cu)
-{
-  if (typeid < 0 || typeid >= FT_NUM_MEMBERS)
-    {
-      error (_("Dwarf Error: internal error - invalid fundamental type id %d [in module %s]"),
-	     typeid, objfile->name);
-    }
-
-  /* Look for this particular type in the fundamental type vector.  If
-     one is not found, create and install one appropriate for the
-     current language and the current target machine. */
-
-  if (cu->ftypes[typeid] == NULL)
-    {
-      cu->ftypes[typeid] = cu->language_defn->la_fund_type (objfile, typeid);
-    }
-
-  return (cu->ftypes[typeid]);
 }
 
 /* Decode simple location descriptions.

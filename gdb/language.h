@@ -191,8 +191,6 @@ struct language_defn
 
     void (*la_emitchar) (int ch, struct ui_file * stream, int quoter);
 
-    struct type *(*la_fund_type) (struct objfile *, int);
-
     /* Print a type using syntax appropriate for this language. */
 
     void (*la_print_type) (struct type *, char *, struct ui_file *, int,
@@ -341,9 +339,6 @@ extern enum language set_language (enum language);
    specific to languages.  Each of these functions is based on
    the current setting of working_lang, which the user sets
    with the "set language" command. */
-
-#define create_fundamental_type(objfile,typeid) \
-  (current_language->la_fund_type(objfile, typeid))
 
 #define LA_PRINT_TYPE(type,varstring,stream,show,level) \
   (current_language->la_print_type(type,varstring,stream,show,level))

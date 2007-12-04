@@ -2405,7 +2405,6 @@ reread_symbols (void)
 		      sizeof (objfile->msymbol_hash));
 	      memset (&objfile->msymbol_demangled_hash, 0,
 		      sizeof (objfile->msymbol_demangled_hash));
-	      objfile->fundamental_types = NULL;
 	      clear_objfile_data (objfile);
 	      if (objfile->sf != NULL)
 		{

@@ -59,8 +59,6 @@ extern void finished_macro_expansion (void);
 extern macro_lookup_ftype *expression_macro_lookup_func;
 extern void *expression_macro_lookup_baton;
 
-extern struct type *c_create_fundamental_type (struct objfile *, int);
-
 extern void c_language_arch_info (struct gdbarch *gdbarch,
 				  struct language_arch_info *lai);
 

@@ -943,37 +943,6 @@ nosideret:
   return value_from_longest (builtin_type_long, (LONGEST) 1);
 }
 
-static struct type *
-java_create_fundamental_type (struct objfile *objfile, int typeid)
-{
-  switch (typeid)
-    {
-    case FT_VOID:
-      return java_void_type;
-    case FT_BOOLEAN:
-      return java_boolean_type;
-    case FT_CHAR:
-      return java_char_type;
-    case FT_FLOAT:
-      return java_float_type;
-    case FT_DBL_PREC_FLOAT:
-      return java_double_type;
-    case FT_BYTE:
-    case FT_SIGNED_CHAR:
-      return java_byte_type;
-    case FT_SHORT:
-    case FT_SIGNED_SHORT:
-      return java_short_type;
-    case FT_INTEGER:
-    case FT_SIGNED_INTEGER:
-      return java_int_type;
-    case FT_LONG:
-    case FT_SIGNED_LONG:
-      return java_long_type;
-    }
-  return c_create_fundamental_type (objfile, typeid);
-}
-
 static char *java_demangle (const char *mangled, int options)
 {
   return cplus_demangle (mangled, options | DMGL_JAVA);
@@ -1097,7 +1066,6 @@ const struct language_defn java_language_defn =
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   java_emit_char,		/* Function to print a single character */
-  java_create_fundamental_type,	/* Create fundamental type in this language */
   java_print_type,		/* Print a type using appropriate syntax */
   java_val_print,		/* Print a value using appropriate syntax */
   java_value_print,		/* Print a top-level value */

@@ -50,8 +50,6 @@ extern void pascal_printchar (int, struct ui_file *);
 extern void pascal_printstr (struct ui_file *, const gdb_byte *,
 			     unsigned int, int, int);
 
-extern struct type *pascal_create_fundamental_type (struct objfile *, int);
-
 extern struct type **const (pascal_builtin_types[]);
 
 /* These are in p-typeprint.c: */

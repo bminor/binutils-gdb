@@ -29,7 +29,6 @@
 #include "valprint.h"
 
 extern void _initialize_m2_language (void);
-static struct type *m2_create_fundamental_type (struct objfile *, int);
 static void m2_printchar (int, struct ui_file *);
 static void m2_emit_char (int, struct ui_file *, int);
 
@@ -276,174 +275,6 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
  nosideret:
   return value_from_longest (builtin_type_long, (LONGEST) 1);
 }
-
-/* FIXME:  This is a copy of c_create_fundamental_type(), before
-   all the non-C types were stripped from it.  Needs to be fixed
-   by an experienced Modula programmer.  */
-
-static struct type *
-m2_create_fundamental_type (struct objfile *objfile, int typeid)
-{
-  struct type *type = NULL;
-
-  switch (typeid)
-    {
-    default:
-      /* FIXME:  For now, if we are asked to produce a type not in this
-         language, create the equivalent of a C integer type with the
-         name "<?type?>".  When all the dust settles from the type
-         reconstruction work, this should probably become an error.  */
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "<?type?>", objfile);
-      warning (_("internal error: no Modula fundamental type %d"), typeid);
-      break;
-    case FT_VOID:
-      type = init_type (TYPE_CODE_VOID,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "void", objfile);
-      break;
-    case FT_BOOLEAN:
-      type = init_type (TYPE_CODE_BOOL,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "boolean", objfile);
-      break;
-    case FT_STRING:
-      type = init_type (TYPE_CODE_STRING,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "string", objfile);
-      break;
-    case FT_CHAR:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "char", objfile);
-      break;
-    case FT_SIGNED_CHAR:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			0, "signed char", objfile);
-      break;
-    case FT_UNSIGNED_CHAR:
-      type = init_type (TYPE_CODE_INT,
-			TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned char", objfile);
-      break;
-    case FT_SHORT:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "short", objfile);
-      break;
-    case FT_SIGNED_SHORT:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "short", objfile);	/* FIXME-fnf */
-      break;
-    case FT_UNSIGNED_SHORT:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned short", objfile);
-      break;
-    case FT_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "int", objfile);
-      break;
-    case FT_SIGNED_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "int", objfile);	/* FIXME -fnf */
-      break;
-    case FT_UNSIGNED_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned int", objfile);
-      break;
-    case FT_FIXED_DECIMAL:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "fixed decimal", objfile);
-      break;
-    case FT_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "long", objfile);
-      break;
-    case FT_SIGNED_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "long", objfile);	/* FIXME -fnf */
-      break;
-    case FT_UNSIGNED_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned long", objfile);
-      break;
-    case FT_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_long_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "long long", objfile);
-      break;
-    case FT_SIGNED_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_long_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "signed long long", objfile);
-      break;
-    case FT_UNSIGNED_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_long_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned long long", objfile);
-      break;
-    case FT_FLOAT:
-      type = init_type (TYPE_CODE_FLT,
-			gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "float", objfile);
-      break;
-    case FT_DBL_PREC_FLOAT:
-      type = init_type (TYPE_CODE_FLT,
-			gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "double", objfile);
-      break;
-    case FT_FLOAT_DECIMAL:
-      type = init_type (TYPE_CODE_FLT,
-			gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "floating decimal", objfile);
-      break;
-    case FT_EXT_PREC_FLOAT:
-      type = init_type (TYPE_CODE_FLT,
-			gdbarch_long_double_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "long double", objfile);
-      break;
-    case FT_COMPLEX:
-      type = init_type (TYPE_CODE_COMPLEX,
-			2 * gdbarch_float_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "complex", objfile);
-      TYPE_TARGET_TYPE (type)
-	= m2_create_fundamental_type (objfile, FT_FLOAT);
-      break;
-    case FT_DBL_PREC_COMPLEX:
-      type = init_type (TYPE_CODE_COMPLEX,
-			2 * gdbarch_double_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "double complex", objfile);
-      TYPE_TARGET_TYPE (type)
-	= m2_create_fundamental_type (objfile, FT_DBL_PREC_FLOAT);
-      break;
-    case FT_EXT_PREC_COMPLEX:
-      type = init_type (TYPE_CODE_COMPLEX,
-			2 * gdbarch_long_double_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "long double complex", objfile);
-      TYPE_TARGET_TYPE (type)
-	= m2_create_fundamental_type (objfile, FT_EXT_PREC_FLOAT);
-      break;
-    }
-  return (type);
-}
 
 
 /* Table of operators and their precedences for printing expressions.  */
@@ -540,7 +371,6 @@ const struct language_defn m2_language_defn =
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
   m2_emit_char,			/* Function to print a single character */
-  m2_create_fundamental_type,	/* Create fundamental type in this language */
   m2_print_type,		/* Print a type using appropriate syntax */
   m2_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */

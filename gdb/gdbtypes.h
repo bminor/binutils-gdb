@@ -29,49 +29,6 @@
 struct field;
 struct block;
 
-/* Codes for `fundamental types'.  This is a monstrosity based on the
-   bogus notion that there are certain compiler-independent
-   `fundamental types'.  None of these is well-defined (how big is
-   FT_SHORT?  Does it depend on the language?  How does the
-   language-specific code know which type to correlate to FT_SHORT?)  */
-
-#define FT_VOID			0
-#define FT_BOOLEAN		1
-#define FT_CHAR			2	/* we use this for not-unsigned C/C++ chars */
-#define FT_SIGNED_CHAR		3	/* we use this for C++ signed chars */
-#define FT_UNSIGNED_CHAR	4	/* we use this for C/C++ unsigned chars */
-#define FT_SHORT		5
-#define FT_SIGNED_SHORT		6
-#define FT_UNSIGNED_SHORT	7
-#define FT_INTEGER		8
-#define FT_SIGNED_INTEGER	9
-#define FT_UNSIGNED_INTEGER	10
-#define FT_LONG			11
-#define FT_SIGNED_LONG		12
-#define FT_UNSIGNED_LONG	13
-#define FT_LONG_LONG		14
-#define FT_SIGNED_LONG_LONG	15
-#define FT_UNSIGNED_LONG_LONG	16
-#define FT_FLOAT		17
-#define FT_DBL_PREC_FLOAT	18
-#define FT_EXT_PREC_FLOAT	19
-#define FT_COMPLEX		20
-#define FT_DBL_PREC_COMPLEX	21
-#define FT_EXT_PREC_COMPLEX	22
-#define FT_STRING		23
-#define FT_FIXED_DECIMAL	24
-#define FT_FLOAT_DECIMAL	25
-#define FT_BYTE			26
-#define FT_UNSIGNED_BYTE	27
-#define FT_TEMPLATE_ARG		28
-
-/* The following three fundamental types are for decimal floating point.  */
-#define FT_DECFLOAT		29
-#define FT_DBL_PREC_DECFLOAT	30
-#define FT_EXT_PREC_DECFLOAT	31
-
-#define FT_NUM_MEMBERS		32	/* Highest FT_* above, plus one. */
-
 /* Some macros for char-based bitfields.  */
 
 #define B_SET(a,x)	((a)[(x)>>3] |= (1 << ((x)&7)))
@@ -1316,8 +1273,6 @@ extern struct type *lookup_typename (char *, struct block *, int);
 
 extern struct type *lookup_template_type (char *, struct type *,
 					  struct block *);
-
-extern struct type *lookup_fundamental_type (struct objfile *, int);
 
 extern void fill_in_vptr_fieldno (struct type *);
 

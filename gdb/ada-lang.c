@@ -71,8 +71,6 @@
 
 static void extract_string (CORE_ADDR addr, char *buf);
 
-static struct type *ada_create_fundamental_type (struct objfile *, int);
-
 static void modify_general_field (char *, LONGEST, int, int);
 
 static struct type *desc_base_type (struct type *);
@@ -10165,151 +10163,6 @@ static const struct op_print ada_op_print_tab[] = {
   {NULL, 0, 0, 0}
 };
 
-				/* Fundamental Ada Types */
-
-/* Create a fundamental Ada type using default reasonable for the current
-   target machine.
-
-   Some object/debugging file formats (DWARF version 1, COFF, etc) do not
-   define fundamental types such as "int" or "double".  Others (stabs or
-   DWARF version 2, etc) do define fundamental types.  For the formats which
-   don't provide fundamental types, gdb can create such types using this
-   function.
-
-   FIXME:  Some compilers distinguish explicitly signed integral types
-   (signed short, signed int, signed long) from "regular" integral types
-   (short, int, long) in the debugging information.  There is some dis-
-   agreement as to how useful this feature is.  In particular, gcc does
-   not support this.  Also, only some debugging formats allow the
-   distinction to be passed on to a debugger.  For now, we always just
-   use "short", "int", or "long" as the type name, for both the implicit
-   and explicitly signed types.  This also makes life easier for the
-   gdb test suite since we don't have to account for the differences
-   in output depending upon what the compiler and debugging format
-   support.  We will probably have to re-examine the issue when gdb
-   starts taking it's fundamental type information directly from the
-   debugging information supplied by the compiler.  fnf@cygnus.com */
-
-static struct type *
-ada_create_fundamental_type (struct objfile *objfile, int typeid)
-{
-  struct type *type = NULL;
-
-  switch (typeid)
-    {
-    default:
-      /* FIXME:  For now, if we are asked to produce a type not in this
-         language, create the equivalent of a C integer type with the
-         name "<?type?>".  When all the dust settles from the type
-         reconstruction work, this should probably become an error.  */
-      type = init_type (TYPE_CODE_INT,
-                        gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        0, "<?type?>", objfile);
-      warning (_("internal error: no Ada fundamental type %d"), typeid);
-      break;
-    case FT_VOID:
-      type = init_type (TYPE_CODE_VOID,
-                        TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-                        0, "void", objfile);
-      break;
-    case FT_CHAR:
-      type = init_type (TYPE_CODE_INT,
-                        TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-                        0, "character", objfile);
-      break;
-    case FT_SIGNED_CHAR:
-      type = init_type (TYPE_CODE_INT,
-                        TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-                        0, "signed char", objfile);
-      break;
-    case FT_UNSIGNED_CHAR:
-      type = init_type (TYPE_CODE_INT,
-                        TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-                        TYPE_FLAG_UNSIGNED, "unsigned char", objfile);
-      break;
-    case FT_SHORT:
-      type = init_type (TYPE_CODE_INT,
-                        gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        0, "short_integer", objfile);
-      break;
-    case FT_SIGNED_SHORT:
-      type = init_type (TYPE_CODE_INT,
-                        gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        0, "short_integer", objfile);
-      break;
-    case FT_UNSIGNED_SHORT:
-      type = init_type (TYPE_CODE_INT,
-                        gdbarch_short_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        TYPE_FLAG_UNSIGNED, "unsigned short", objfile);
-      break;
-    case FT_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-                        gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        0, "integer", objfile);
-      break;
-    case FT_SIGNED_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			0, "integer", objfile);        /* FIXME -fnf */
-      break;
-    case FT_UNSIGNED_INTEGER:
-      type = init_type (TYPE_CODE_INT,
-                        gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        TYPE_FLAG_UNSIGNED, "unsigned int", objfile);
-      break;
-    case FT_LONG:
-      type = init_type (TYPE_CODE_INT,
-                        gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        0, "long_integer", objfile);
-      break;
-    case FT_SIGNED_LONG:
-      type = init_type (TYPE_CODE_INT,
-                        gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        0, "long_integer", objfile);
-      break;
-    case FT_UNSIGNED_LONG:
-      type = init_type (TYPE_CODE_INT,
-                        gdbarch_long_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        TYPE_FLAG_UNSIGNED, "unsigned long", objfile);
-      break;
-    case FT_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_long_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "long_long_integer", objfile);
-      break;
-    case FT_SIGNED_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_long_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			0, "long_long_integer", objfile);
-      break;
-    case FT_UNSIGNED_LONG_LONG:
-      type = init_type (TYPE_CODE_INT,
-			gdbarch_long_long_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-			TYPE_FLAG_UNSIGNED, "unsigned long long", objfile);
-      break;
-    case FT_FLOAT:
-      type = init_type (TYPE_CODE_FLT,
-                        gdbarch_float_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        0, "float", objfile);
-      break;
-    case FT_DBL_PREC_FLOAT:
-      type = init_type (TYPE_CODE_FLT,
-                        gdbarch_double_bit (current_gdbarch) / TARGET_CHAR_BIT,
-                        0, "long_float", objfile);
-      break;
-    case FT_EXT_PREC_FLOAT:
-      type = init_type (TYPE_CODE_FLT,
-                        gdbarch_long_double_bit (current_gdbarch)
-			  / TARGET_CHAR_BIT,
-                        0, "long_long_float", objfile);
-      break;
-    }
-  return (type);
-}
-
 enum ada_primitive_types {
   ada_primitive_type_int,
   ada_primitive_type_long,
@@ -10423,7 +10276,6 @@ const struct language_defn ada_language_defn = {
   ada_printchar,                /* Print a character constant */
   ada_printstr,                 /* Function to print string constant */
   emit_char,                    /* Function to print single char (not used) */
-  ada_create_fundamental_type,  /* Create fundamental type in this language */
   ada_print_type,               /* Print a type using appropriate syntax */
   ada_val_print,                /* Print a value using appropriate syntax */
   ada_value_print,              /* Print a top-level value */

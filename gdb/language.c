@@ -68,8 +68,6 @@ static void unk_lang_emit_char (int c, struct ui_file *stream, int quoter);
 
 static void unk_lang_printchar (int c, struct ui_file *stream);
 
-static struct type *unk_lang_create_fundamental_type (struct objfile *, int);
-
 static void unk_lang_print_type (struct type *, char *, struct ui_file *,
 				 int, int);
 
@@ -1116,12 +1114,6 @@ unk_lang_printstr (struct ui_file *stream, const gdb_byte *string,
   error (_("internal error - unimplemented function unk_lang_printstr called."));
 }
 
-static struct type *
-unk_lang_create_fundamental_type (struct objfile *objfile, int typeid)
-{
-  error (_("internal error - unimplemented function unk_lang_create_fundamental_type called."));
-}
-
 static void
 unk_lang_print_type (struct type *type, char *varstring, struct ui_file *stream,
 		     int show, int level)
@@ -1190,7 +1182,6 @@ const struct language_defn unknown_language_defn =
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
-  unk_lang_create_fundamental_type,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
@@ -1226,7 +1217,6 @@ const struct language_defn auto_language_defn =
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
-  unk_lang_create_fundamental_type,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
@@ -1261,7 +1251,6 @@ const struct language_defn local_language_defn =
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
-  unk_lang_create_fundamental_type,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
