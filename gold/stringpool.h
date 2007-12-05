@@ -161,6 +161,15 @@ class Stringpool_template
   static size_t
   string_length(const Stringpool_char*);
 
+  // Return whether two strings are equal.
+  static bool
+  string_equal(const Stringpool_char*, const Stringpool_char*);
+
+  // Compute a hash code for a string.  LENGTH is the length of the
+  // string in characters.
+  static size_t
+  string_hash(const Stringpool_char*, size_t length);
+
   // We store the actual data in a list of these buffers.
   struct Stringdata
   {
@@ -176,55 +185,70 @@ class Stringpool_template
 
   // Copy a string into the buffers, returning a canonical string.
   const Stringpool_char*
-  add_string(const Stringpool_char*, Key*);
-
-  // Hash function.
-  struct Stringpool_hash
-  {
-    size_t
-    operator()(const Stringpool_char*) const;
-  };
-
-  // Equality comparison function for hash table.
-  struct Stringpool_eq
-  {
-    bool
-    operator()(const Stringpool_char* p1, const Stringpool_char* p2) const;
-  };
+  add_string(const Stringpool_char*, size_t, Key*);
 
   // Return whether s1 is a suffix of s2.
   static bool
   is_suffix(const Stringpool_char* s1, size_t len1,
             const Stringpool_char* s2, size_t len2);
 
-  // The hash table is a map from string names to a pair of Key and
-  // string table offsets.  We only use the offsets if we turn this
-  // into an string table section.
-
-  typedef std::pair<Key, off_t> Val;
-
-#ifdef HAVE_TR1_UNORDERED_SET
-  typedef Unordered_map<const Stringpool_char*, Val, Stringpool_hash,
-			Stringpool_eq,
-			std::allocator<std::pair<const Stringpool_char* const,
-						 Val> >,
-			true> String_set_type;
-#else
-  typedef Unordered_map<const Stringpool_char*, Val, Stringpool_hash,
-			Stringpool_eq> String_set_type;
-#endif
-
-  // Comparison routine used when sorting into a string table.  We
-  // store string-sizes in the sort-vector so we don't have to
-  // recompute them log(n) times as we sort.
-  struct Stringpool_sort_info
+  // The hash table key includes the string, the length of the string,
+  // and the hash code for the string.  We put the hash code
+  // explicitly into the key so that we can do a find()/insert()
+  // sequence without having to recompute the hash.  Computing the
+  // hash code is a significant user of CPU time in the linker.
+  struct Hashkey
   {
-    typename String_set_type::iterator it;
-    size_t string_length;
-    Stringpool_sort_info(typename String_set_type::iterator i, size_t s)
-      : it(i), string_length(s)
+    const Stringpool_char* string;
+    // Length is in characters, not bytes.
+    size_t length;
+    size_t hash_code;
+
+    // This goes in an STL container, so we need a default
+    // constructor.
+    Hashkey()
+      : string(NULL), length(0), hash_code(0)
+    { }
+
+    // Note that these constructors are relatively expensive, because
+    // they compute the hash code.
+    Hashkey(const Stringpool_char* s)
+      : string(s), length(string_length(s)), hash_code(string_hash(s, length))
+    { }
+
+    Hashkey(const Stringpool_char* s, size_t len)
+      : string(s), length(len), hash_code(string_hash(s, len))
     { }
   };
+
+  // Hash function.  This is trivial, since we have already computed
+  // the hash.
+  struct Stringpool_hash
+  {
+    size_t
+    operator()(const Hashkey& hk) const
+    { return hk.hash_code; }
+  };
+
+  // Equality comparison function for hash table.
+  struct Stringpool_eq
+  {
+    bool
+    operator()(const Hashkey&, const Hashkey&) const;
+  };
+
+  // The hash table is a map from strings to a pair of Key and string
+  // table offsets.  We only use the offsets if we turn this into an
+  // string table section.
+
+  typedef std::pair<Key, off_t> Hashval;
+
+  typedef Unordered_map<Hashkey, Hashval, Stringpool_hash,
+			Stringpool_eq> String_set_type;
+
+  // Comparison routine used when sorting into a string table.
+
+  typedef typename String_set_type::iterator Stringpool_sort_info;
 
   struct Stringpool_sort_comparison
   {

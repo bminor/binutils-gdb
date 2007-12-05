@@ -80,13 +80,12 @@ Stringpool_template<char>::string_length(const char* p)
   return strlen(p);
 }
 
-// Equality comparison function.
+// Compare two strings of arbitrary character type for equality.
 
 template<typename Stringpool_char>
 bool
-Stringpool_template<Stringpool_char>::Stringpool_eq::operator()(
-    const Stringpool_char* s1,
-    const Stringpool_char* s2) const
+Stringpool_template<Stringpool_char>::string_equal(const Stringpool_char* s1,
+						   const Stringpool_char* s2)
 {
   while (*s1 != 0)
     if (*s1++ != *s2++)
@@ -94,62 +93,69 @@ Stringpool_template<Stringpool_char>::Stringpool_eq::operator()(
   return *s2 == 0;
 }
 
-// Specialize equality comparison for char.
+// Specialize string_equal for char.
 
 template<>
-bool
-Stringpool_template<char>::Stringpool_eq::operator()(const char* s1,
-						     const char* s2) const
+inline bool
+Stringpool_template<char>::string_equal(const char* s1, const char* s2)
 {
   return strcmp(s1, s2) == 0;
 }
 
-// Hash function.
+// Equality comparison function for the hash table.
+
+template<typename Stringpool_char>
+inline bool
+Stringpool_template<Stringpool_char>::Stringpool_eq::operator()(
+    const Hashkey& h1,
+    const Hashkey& h2) const
+{
+  return (h1.hash_code == h2.hash_code
+	  && h1.length == h2.length
+	  && memcmp(h1.string, h2.string,
+		    h1.length * sizeof(Stringpool_char)) == 0);
+}
+
+// Hash function.  The length is in characters, not bytes.
 
 template<typename Stringpool_char>
 size_t
-Stringpool_template<Stringpool_char>::Stringpool_hash::operator()(
-    const Stringpool_char* s) const
+Stringpool_template<Stringpool_char>::string_hash(const Stringpool_char* s,
+						  size_t length)
 {
   // Fowler/Noll/Vo (FNV) hash (type FNV-1a).
+  const unsigned char* p = reinterpret_cast<const unsigned char*>(s);
   if (sizeof(size_t) > 4)
     {
       size_t result = static_cast<size_t>(14695981039346656037ULL);
-      while (*s != 0)
+      for (size_t i = 0; i < length * sizeof(Stringpool_char); ++i)
 	{
-	  const char* p = reinterpret_cast<const char*>(s);
-	  for (size_t i = 0; i < sizeof(Stringpool_char); ++i)
-	    {
-	      result ^= (size_t) *p++;
-	      result *= 1099511628211ULL;
-	    }
-	  ++s;
+	  result ^= static_cast<size_t>(*p++);
+	  result *= 1099511628211ULL;
 	}
       return result;
     }
   else
     {
       size_t result = 2166136261UL;
-      while (*s != 0)
+      for (size_t i = 0; i < length * sizeof(Stringpool_char); ++i)
 	{
-	  const char* p = reinterpret_cast<const char*>(s);
-	  for (size_t i = 0; i < sizeof(Stringpool_char); ++i)
-	    {
-	      result ^= (size_t) *p++;
-	      result *= 16777619UL;
-	    }
-	  ++s;
+	  result ^= static_cast<size_t>(*p++);
+	  result *= 16777619UL;
 	}
       return result;
     }
 }
 
-// Add a string to the list of canonical strings.  Return a pointer to
-// the canonical string.  If PKEY is not NULL, set *PKEY to the key.
+// Add the string S to the list of canonical strings.  Return a
+// pointer to the canonical string.  If PKEY is not NULL, set *PKEY to
+// the key.  LENGTH is the length of S in characters.  Note that S may
+// not be NUL terminated.
 
 template<typename Stringpool_char>
 const Stringpool_char*
 Stringpool_template<Stringpool_char>::add_string(const Stringpool_char* s,
+						 size_t len,
 						 Key* pkey)
 {
   // We are in trouble if we've already computed the string offsets.
@@ -162,7 +168,9 @@ Stringpool_template<Stringpool_char>::add_string(const Stringpool_char* s,
   const size_t key_mult = 1024;
   gold_assert(key_mult >= buffer_size);
 
-  size_t len = (string_length(s) + 1) * sizeof(Stringpool_char);
+  // Convert len to the number of bytes we need to allocate, including
+  // the null character.
+  len = (len + 1) * sizeof(Stringpool_char);
 
   size_t alc;
   bool front = true;
@@ -181,7 +189,9 @@ Stringpool_template<Stringpool_char>::add_string(const Stringpool_char* s,
       else
 	{
 	  char* ret = psd->data + psd->len;
-	  memcpy(ret, s, len);
+	  memcpy(ret, s, len - sizeof(Stringpool_char));
+	  memset(ret + len - sizeof(Stringpool_char), 0,
+		 sizeof(Stringpool_char));
 
 	  if (pkey != NULL)
 	    *pkey = psd->index * key_mult + psd->len;
@@ -194,7 +204,9 @@ Stringpool_template<Stringpool_char>::add_string(const Stringpool_char* s,
 
   Stringdata *psd = reinterpret_cast<Stringdata*>(new char[alc]);
   psd->alc = alc - sizeof(Stringdata);
-  memcpy(psd->data, s, len);
+  memcpy(psd->data, s, len - sizeof(Stringpool_char));
+  memset(psd->data + len - sizeof(Stringpool_char), 0,
+	 sizeof(Stringpool_char));
   psd->len = len;
   psd->index = this->next_index_;
   ++this->next_index_;
@@ -217,42 +229,39 @@ const Stringpool_char*
 Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, bool copy,
                                           Key* pkey)
 {
-  // FIXME: This will look up the entry twice in the hash table.  The
-  // problem is that we can't insert S before we canonicalize it.  I
-  // don't think there is a way to handle this correctly with
-  // unordered_map, so this should be replaced with custom code to do
-  // what we need, which is to return the empty slot.
+  typedef std::pair<typename String_set_type::iterator, bool> Insert_type;
 
-  typename String_set_type::const_iterator p = this->string_set_.find(s);
-  if (p != this->string_set_.end())
+  if (!copy)
     {
+      // When we don't need to copy the string, we can call insert
+      // directly.
+
+      const Key k = this->next_uncopied_key_;
+      const off_t ozero = 0;
+      std::pair<Hashkey, Hashval> element(Hashkey(s),
+					  std::make_pair(k, ozero));
+
+      Insert_type ins = this->string_set_.insert(element);
+
+      typename String_set_type::const_iterator p = ins.first;
+
+      if (ins.second)
+	{
+	  // We just added the string.  The key value has now been
+	  // used.
+	  --this->next_uncopied_key_;
+	}
+      else
+	{
+	  gold_assert(k != p->second.first);
+	}
+
       if (pkey != NULL)
 	*pkey = p->second.first;
-      return p->first;
+      return p->first.string;
     }
 
-  Key k;
-  const Stringpool_char* ret;
-  if (copy)
-    ret = this->add_string(s, &k);
-  else
-    {
-      ret = s;
-      k = this->next_uncopied_key_;
-      --this->next_uncopied_key_;
-    }
-
-  const off_t ozero = 0;
-  std::pair<const Stringpool_char*, Val> element(ret,
-						 std::make_pair(k, ozero));
-  std::pair<typename String_set_type::iterator, bool> ins =
-    this->string_set_.insert(element);
-  gold_assert(ins.second);
-
-  if (pkey != NULL)
-    *pkey = k;
-
-  return ret;
+  return this->add_prefix(s, string_length(s), pkey);
 }
 
 // Add a prefix of a string to a string pool.
@@ -263,10 +272,36 @@ Stringpool_template<Stringpool_char>::add_prefix(const Stringpool_char* s,
                                                  size_t len,
                                                  Key* pkey)
 {
-  // FIXME: This implementation should be rewritten when we rewrite
-  // the hash table to avoid copying.
-  std::basic_string<Stringpool_char> st(s, len);
-  return this->add(st.c_str(), true, pkey);
+  // When adding an entry, this will look it up twice in the hash
+  // table.  The problem is that we can't insert S before we
+  // canonicalize it by copying it into the canonical list. The hash
+  // code will only be computed once, so this isn't all that
+  // expensive.
+
+  Hashkey hk(s, len);
+  typename String_set_type::const_iterator p = this->string_set_.find(hk);
+  if (p != this->string_set_.end())
+    {
+      if (pkey != NULL)
+	*pkey = p->second.first;
+      return p->first.string;
+    }
+
+  Key k;
+  hk.string = this->add_string(s, len, &k);
+  // The contents of the string stay the same, so we don't need to
+  // adjust hk.hash_code or hk.length.
+
+  const off_t ozero = 0;
+  std::pair<Hashkey, Hashval> element(hk, std::make_pair(k, ozero));
+
+  typedef std::pair<typename String_set_type::iterator, bool> Insert_type;
+  Insert_type ins = this->string_set_.insert(element);
+  gold_assert(ins.second);
+
+  if (pkey != NULL)
+    *pkey = k;
+  return hk.string;
 }
 
 template<typename Stringpool_char>
@@ -274,14 +309,15 @@ const Stringpool_char*
 Stringpool_template<Stringpool_char>::find(const Stringpool_char* s,
 					   Key* pkey) const
 {
-  typename String_set_type::const_iterator p = this->string_set_.find(s);
+  Hashkey hk(s);
+  typename String_set_type::const_iterator p = this->string_set_.find(hk);
   if (p == this->string_set_.end())
     return NULL;
 
   if (pkey != NULL)
     *pkey = p->second.first;
 
-  return p->first;
+  return p->first.string;
 }
 
 // Comparison routine used when sorting into an ELF strtab.  We want
@@ -301,10 +337,12 @@ Stringpool_template<Stringpool_char>::Stringpool_sort_comparison::operator()(
   const Stringpool_sort_info& sort_info1,
   const Stringpool_sort_info& sort_info2) const
 {
-  const Stringpool_char* s1 = sort_info1.it->first;
-  const Stringpool_char* s2 = sort_info2.it->first;
-  const size_t len1 = sort_info1.string_length;
-  const size_t len2 = sort_info2.string_length;
+  const Hashkey& h1(sort_info1->first);
+  const Hashkey& h2(sort_info2->first);
+  const Stringpool_char* s1 = h1.string;
+  const Stringpool_char* s2 = h2.string;
+  const size_t len1 = h1.length;
+  const size_t len2 = h2.length;
   const size_t minlen = len1 < len2 ? len1 : len2;
   const Stringpool_char* p1 = s1 + len1 - 1;
   const Stringpool_char* p2 = s2 + len2 - 1;
@@ -359,12 +397,12 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
            curr != this->string_set_.end();
            curr++)
         {
-          if (this->zero_null_ && curr->first[0] == 0)
+          if (this->zero_null_ && curr->first.string[0] == 0)
             curr->second.second = 0;
           else
             {
               curr->second.second = offset;
-              offset += (string_length(curr->first) + 1) * charsize;
+              offset += (curr->first.length + 1) * charsize;
             }
         }
     }
@@ -378,7 +416,7 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
       for (typename String_set_type::iterator p = this->string_set_.begin();
            p != this->string_set_.end();
            ++p)
-        v.push_back(Stringpool_sort_info(p, string_length(p->first)));
+        v.push_back(Stringpool_sort_info(p));
 
       std::sort(v.begin(), v.end(), Stringpool_sort_comparison());
 
@@ -387,19 +425,21 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
            curr != v.end();
            last = curr++)
         {
-          if (this->zero_null_ && curr->it->first[0] == 0)
-            curr->it->second.second = 0;
+          if (this->zero_null_ && (*curr)->first.string[0] == 0)
+            (*curr)->second.second = 0;
           else if (last != v.end()
-                   && is_suffix(curr->it->first, curr->string_length,
-                                last->it->first, last->string_length))
-            curr->it->second.second = (last->it->second.second
-                                       + ((last->string_length
-                                           - curr->string_length)
-                                          * charsize));
+                   && is_suffix((*curr)->first.string,
+				(*curr)->first.length,
+                                (*last)->first.string,
+				(*last)->first.length))
+            (*curr)->second.second = ((*last)->second.second
+				      + (((*last)->first.length
+					  - (*curr)->first.length)
+					 * charsize));
           else
             {
-              curr->it->second.second = offset;
-              offset += (curr->string_length + 1) * charsize;
+              (*curr)->second.second = offset;
+              offset += ((*curr)->first.length + 1) * charsize;
             }
         }
     }
@@ -439,9 +479,9 @@ Stringpool_template<Stringpool_char>::write_to_buffer(unsigned char* buffer,
        p != this->string_set_.end();
        ++p)
     {
-      const int len = (string_length(p->first) + 1) * sizeof(Stringpool_char);
+      const int len = (p->first.length + 1) * sizeof(Stringpool_char);
       gold_assert(p->second.second + len <= this->strtab_size_);
-      memcpy(buffer + p->second.second, p->first, len);
+      memcpy(buffer + p->second.second, p->first.string, len);
     }
 }
 
