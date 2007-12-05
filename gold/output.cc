@@ -1957,15 +1957,21 @@ Output_file::open(off_t file_size)
   // If we fail, continue; this command is merely a best-effort attempt
   // to improve the odds for open().
 
-  struct stat s;
-  if (::stat(this->name_, &s) == 0 && s.st_size != 0)
-    unlink_if_ordinary(this->name_);
+  // We let the name "-" mean "stdout"
+  if (strcmp(this->name_, "-") == 0)
+    this->o_ = STDOUT_FILENO;
+  else
+    {
+      struct stat s;
+      if (::stat(this->name_, &s) == 0 && s.st_size != 0)
+        unlink_if_ordinary(this->name_);
 
-  int mode = parameters->output_is_object() ? 0666 : 0777;
-  int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
-  if (o < 0)
-    gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));
-  this->o_ = o;
+      int mode = parameters->output_is_object() ? 0666 : 0777;
+      int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
+      if (o < 0)
+        gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));
+      this->o_ = o;
+    }
 
   this->map();
 }
@@ -2007,7 +2013,8 @@ Output_file::map()
   // then later write the buffer to the file.
   void* base;
   struct stat statbuf;
-  if (::fstat(o, &statbuf) != 0
+  if (o == STDOUT_FILENO || o == STDERR_FILENO
+      || ::fstat(o, &statbuf) != 0
       || !S_ISREG(statbuf.st_mode))
     {
       this->map_is_anonymous_ = true;
@@ -2065,8 +2072,10 @@ Output_file::close()
     }
   this->unmap();
 
-  if (::close(this->o_) < 0)
-    gold_error(_("%s: close: %s"), this->name_, strerror(errno));
+  // We don't close stdout or stderr
+  if (this->o_ != STDOUT_FILENO && this->o_ != STDERR_FILENO)
+    if (::close(this->o_) < 0)
+      gold_error(_("%s: close: %s"), this->name_, strerror(errno));
   this->o_ = -1;
 }
 
