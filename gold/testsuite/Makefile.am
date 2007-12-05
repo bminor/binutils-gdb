@@ -55,7 +55,10 @@ NATIVE_PROGS = \
 	exception_same_shared_test \
 	exception_separate_shared_12_test \
 	exception_separate_shared_21_test \
-	weak_test
+	weak_test \
+	flagstest_compress_debug_sections \
+	flagstest_o_specialfile \
+	flagstest_o_specialfile_and_compress_debug_sections
 
 if FN_PTRS_IN_SO_WITHOUT_PIC
 
@@ -155,7 +158,6 @@ debug_msg_so.err: debug_msg.so odr_violation1.so odr_violation2.so gcctestdir/ld
 	  exit 1; \
 	fi
 
-
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
 debug_msg_ndebug.so: debug_msg.cc
@@ -173,7 +175,6 @@ debug_msg_ndebug.err: debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation
 	  exit 1; \
 	fi
 
-
 undef_symbol.o: undef_symbol.cc
 	$(CXXCOMPILE) -O0 -g -c -fPIC $<
 undef_symbol.so: undef_symbol.o
@@ -186,6 +187,32 @@ undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
 	  rm -f $@; \
 	  exit 1; \
 	fi
+
+# Test various flags.  The actual file we choose to link is pretty
+# much arbitrary: we just want to make sure we can link it and run it
+# successfully, even when using flags.
+
+flagstest_debug.o: constructor_test.cc
+	$(CXXCOMPILE) -O0 -g -c -o $@ $<
+flagstest_ndebug.o: constructor_test.cc
+	$(CXXCOMPILE) -O0 -c -o $@ $<
+
+flagstest_compress_debug_sections: flagstest_debug.o
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< --compress-debug-sections=zlib
+	test -s $@
+
+flagstest_o_specialfile: flagstest_debug.o
+	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
+	chmod a+x $@
+	test -s $@
+
+# The specialfile output has a tricky case when we also compress debug
+# sections, because it requires output-file resizing.
+flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o
+	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< --compress-debug-sections=zlib 2>&1 | cat > $@
+	chmod a+x $@
+	test -s $@
+
 
 # Override the default CXXFLAGS--we don't want any optimization
 basic_test.o: basic_test.cc

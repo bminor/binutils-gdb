@@ -172,6 +172,9 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_12_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__EXEEXT_1) $(am__EXEEXT_2) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__EXEEXT_3) $(am__EXEEXT_4)
 am__constructor_static_test_SOURCES_DIST = constructor_test.cc
@@ -233,6 +236,28 @@ am__exception_test_SOURCES_DIST = exception_test_main.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_2.$(OBJEXT)
 exception_test_OBJECTS = $(am_exception_test_OBJECTS)
 exception_test_LDADD = $(LDADD)
+flagstest_compress_debug_sections_SOURCES =  \
+	flagstest_compress_debug_sections.c
+flagstest_compress_debug_sections_OBJECTS =  \
+	flagstest_compress_debug_sections.$(OBJEXT)
+flagstest_compress_debug_sections_LDADD = $(LDADD)
+flagstest_compress_debug_sections_DEPENDENCIES = libgoldtest.a \
+	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
+flagstest_o_specialfile_SOURCES = flagstest_o_specialfile.c
+flagstest_o_specialfile_OBJECTS = flagstest_o_specialfile.$(OBJEXT)
+flagstest_o_specialfile_LDADD = $(LDADD)
+flagstest_o_specialfile_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
+flagstest_o_specialfile_and_compress_debug_sections_SOURCES =  \
+	flagstest_o_specialfile_and_compress_debug_sections.c
+flagstest_o_specialfile_and_compress_debug_sections_OBJECTS =  \
+	flagstest_o_specialfile_and_compress_debug_sections.$(OBJEXT)
+flagstest_o_specialfile_and_compress_debug_sections_LDADD = $(LDADD)
+flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES =  \
+	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_object_unittest_OBJECTS = object_unittest.$(OBJEXT)
 object_unittest_OBJECTS = $(am_object_unittest_OBJECTS)
 object_unittest_LDADD = $(LDADD)
@@ -362,15 +387,15 @@ weak_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libgoldtest_a_SOURCES) $(constructor_static_test_SOURCES) \
 	$(constructor_test_SOURCES) \
 	$(exception_same_shared_test_SOURCES) \
@@ -379,6 +404,8 @@ SOURCES = $(libgoldtest_a_SOURCES) $(constructor_static_test_SOURCES) \
 	$(exception_shared_1_test_SOURCES) \
 	$(exception_shared_2_test_SOURCES) \
 	$(exception_static_test_SOURCES) $(exception_test_SOURCES) \
+	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
+	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(object_unittest_SOURCES) $(tls_pic_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
 	$(tls_static_pic_test_SOURCES) $(tls_static_test_SOURCES) \
@@ -406,8 +433,10 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) \
 	$(am__exception_shared_1_test_SOURCES_DIST) \
 	$(am__exception_shared_2_test_SOURCES_DIST) \
 	$(am__exception_static_test_SOURCES_DIST) \
-	$(am__exception_test_SOURCES_DIST) $(object_unittest_SOURCES) \
-	$(am__tls_pic_test_SOURCES_DIST) \
+	$(am__exception_test_SOURCES_DIST) \
+	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
+	flagstest_o_specialfile_and_compress_debug_sections.c \
+	$(object_unittest_SOURCES) $(am__tls_pic_test_SOURCES_DIST) \
 	$(am__tls_shared_nonpic_test_SOURCES_DIST) \
 	$(am__tls_shared_test_SOURCES_DIST) \
 	$(am__tls_static_pic_test_SOURCES_DIST) \
@@ -596,9 +625,12 @@ TESTS = object_unittest $(am__append_1) $(NATIVE_TESTING)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_same_shared_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_12_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test $(am__append_3) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__append_4) $(am__append_5) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__append_6)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_compress_debug_sections \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__append_3) $(am__append_4) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__append_5) $(am__append_6)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@NATIVE_TESTING = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test \
@@ -793,7 +825,7 @@ object_unittest_SOURCES = object_unittest.cc
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .c .cc .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -860,6 +892,24 @@ exception_static_test$(EXEEXT): $(exception_static_test_OBJECTS) $(exception_sta
 exception_test$(EXEEXT): $(exception_test_OBJECTS) $(exception_test_DEPENDENCIES) 
 	@rm -f exception_test$(EXEEXT)
 	$(CXXLINK) $(exception_test_LDFLAGS) $(exception_test_OBJECTS) $(exception_test_LDADD) $(LIBS)
+@GCC_FALSE@flagstest_compress_debug_sections$(EXEEXT): $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f flagstest_compress_debug_sections$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(flagstest_compress_debug_sections_LDFLAGS) $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@flagstest_compress_debug_sections$(EXEEXT): $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f flagstest_compress_debug_sections$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_compress_debug_sections_LDFLAGS) $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_LDADD) $(LIBS)
+@GCC_FALSE@flagstest_o_specialfile$(EXEEXT): $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f flagstest_o_specialfile$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(flagstest_o_specialfile_LDFLAGS) $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@flagstest_o_specialfile$(EXEEXT): $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f flagstest_o_specialfile$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_o_specialfile_LDFLAGS) $(flagstest_o_specialfile_OBJECTS) $(flagstest_o_specialfile_LDADD) $(LIBS)
+@GCC_FALSE@flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT): $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(flagstest_o_specialfile_and_compress_debug_sections_LDFLAGS) $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT): $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_o_specialfile_and_compress_debug_sections_LDFLAGS) $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_LDADD) $(LIBS)
 object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENCIES) 
 	@rm -f object_unittest$(EXEEXT)
 	$(CXXLINK) $(object_unittest_LDFLAGS) $(object_unittest_OBJECTS) $(object_unittest_LDADD) $(LIBS)
@@ -940,6 +990,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfile.Po@am__quote@
@@ -951,6 +1004,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_test.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -1273,6 +1340,31 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
+
+# Test various flags.  The actual file we choose to link is pretty
+# much arbitrary: we just want to make sure we can link it and run it
+# successfully, even when using flags.
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_debug.o: constructor_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_ndebug.o: constructor_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections: flagstest_debug.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< --compress-debug-sections=zlib
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile: flagstest_debug.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+
+# The specialfile output has a tricky case when we also compress debug
+# sections, because it requires output-file resizing.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< --compress-debug-sections=zlib 2>&1 | cat > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
 
 # Override the default CXXFLAGS--we don't want any optimization
 @GCC_TRUE@@NATIVE_LINKER_TRUE@basic_test.o: basic_test.cc
