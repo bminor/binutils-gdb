@@ -1958,6 +1958,16 @@ Layout::write_sections_after_input_sections(Output_file* of)
   this->section_headers_->write(of);
 }
 
+// Print statistical information to stderr.  This is used for --stats.
+
+void
+Layout::print_stats() const
+{
+  this->namepool_.print_stats("section name pool");
+  this->sympool_.print_stats("output symbol name pool");
+  this->dynpool_.print_stats("dynamic name pool");
+}
+
 // Write_sections_task methods.
 
 // We can always run this task.

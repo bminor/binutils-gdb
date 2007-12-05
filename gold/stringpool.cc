@@ -457,6 +457,24 @@ Stringpool_template<Stringpool_char>::write(Output_file* of, off_t offset)
   of->write_output_view(offset, this->strtab_size_, view);
 }
 
+// Print statistical information to stderr.  This is used for --stats.
+
+template<typename Stringpool_char>
+void
+Stringpool_template<Stringpool_char>::print_stats(const char* name) const
+{
+#if defined(HAVE_TR1_UNORDERED_MAP) || defined(HAVE_EXT_HASH_MAP)
+  fprintf(stderr, _("%s: %s entries: %zu; buckets: %zu\n"),
+	  program_name, name, this->string_set_.size(),
+	  this->string_set_.bucket_count());
+#else
+  fprintf(stderr, _("%s: %s entries: %zu\n"),
+	  program_name, name, this->table_.size());
+#endif
+  fprintf(stderr, _("%s: %s Stringdata structures: %zu\n"),
+	  program_name, name, this->strings_.size());
+}
+
 // Instantiate the templates we need.
 
 template

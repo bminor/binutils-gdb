@@ -107,6 +107,7 @@ main(int argc, char** argv)
       fprintf(stderr, _("%s: output file size: %lld bytes\n"),
 	      program_name, static_cast<long long>(layout.output_file_size()));
       symtab.print_stats();
+      layout.print_stats();
     }
 
   gold_exit(errors.error_count() == 0);

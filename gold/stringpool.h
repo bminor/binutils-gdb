@@ -149,6 +149,10 @@ class Stringpool_template
   void
   write_to_buffer(unsigned char* buffer, size_t buffer_size);
 
+  // Dump statistical information to stderr.
+  void
+  print_stats(const char*) const;
+
  private:
   Stringpool_template(const Stringpool_template&);
   Stringpool_template& operator=(const Stringpool_template&);

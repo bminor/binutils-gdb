@@ -306,20 +306,18 @@ Symbol_table::~Symbol_table()
 {
 }
 
-// The hash function.  The key is always canonicalized, so we use a
-// simple combination of the pointers.
+// The hash function.  The key values are Stringpool keys.
 
-size_t
+inline size_t
 Symbol_table::Symbol_table_hash::operator()(const Symbol_table_key& key) const
 {
   return key.first ^ key.second;
 }
 
-// The symbol table key equality function.  This is only called with
-// canonicalized name and version strings, so we can use pointer
-// comparison.
+// The symbol table key equality function.  This is called with
+// Stringpool keys.
 
-bool
+inline bool
 Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 					  const Symbol_table_key& k2) const
 {
@@ -1909,6 +1907,7 @@ Symbol_table::print_stats() const
   fprintf(stderr, _("%s: symbol table entries: %zu\n"),
 	  program_name, this->table_.size());
 #endif
+  this->namepool_.print_stats("symbol table stringpool");
 }
 
 // We check for ODR violations by looking for symbols with the same

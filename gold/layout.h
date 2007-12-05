@@ -226,6 +226,10 @@ class Layout
   find_output_segment(elfcpp::PT type, elfcpp::Elf_Word set,
 		      elfcpp::Elf_Word clear) const;
 
+  // Dump statistical information to stderr.
+  void
+  print_stats() const;
+
   // The list of segments.
 
   typedef std::vector<Output_segment*> Segment_list;
