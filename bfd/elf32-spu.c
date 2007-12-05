@@ -996,6 +996,7 @@ spu_elf_size_stubs (bfd *output_bfd,
 					       sym,
 					       sym_sec);
 		}
+
 	      if (sym_type != STT_FUNC)
 		{
 		  /* It's common for people to write assembly and forget
@@ -1008,7 +1009,7 @@ spu_elf_size_stubs (bfd *output_bfd,
 		    (*_bfd_error_handler) (_("warning: call to non-function"
 					     " symbol %s defined in %B"),
 					   sym_sec->owner, sym_name);
-		  else
+		  else if (insn_type == non_branch)
 		    continue;
 		}
 

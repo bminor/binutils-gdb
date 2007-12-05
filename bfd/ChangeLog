@@ -1,3 +1,8 @@
+2007-12-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_size_stubs): Do consider branches to
+	non-function symbols for overlay stubs.
+
 2007-12-04  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_size_dynamic_sections): Create DT_PLTGOT
