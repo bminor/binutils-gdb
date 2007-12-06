@@ -21,91 +21,25 @@ if THREADS
 THREADSLIB = -lpthread
 endif
 
-check_SCRIPTS = debug_msg.sh
+# 'make clean' is good about deleting some intermediate files (such as
+# .o's), but not all of them (such as .so's and .err files).  We
+# improve on that here.  automake-1.9 info docs say "mostlyclean" is
+# the right choice for files 'make' builds that people rebuild.
+MOSTLYCLEANFILES = *.so
+
+
+# We will add to these later, for each individual test.  Note
+# that we add each test under check_SCRIPTS or check_PROGRAMS;
+# the TESTS variable is automatically populated from these.
+check_SCRIPTS =
 check_DATA =
+check_PROGRAMS =
+TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
-TESTS = object_unittest
+# ---------------------------------------------------------------------
+# These tests test the internals of gold (unittests).
 
-if GCC
-
-if NATIVE_LINKER
-
-TESTS += debug_msg.sh undef_symbol.sh
-
-check_DATA += debug_msg.err debug_msg_so.err debug_msg_ndebug.err
-check_DATA += undef_symbol.err
-
-NATIVE_PROGS = \
-	constructor_test \
-	constructor_static_test \
-	two_file_test \
-	two_file_static_test \
-	two_file_pic_test \
-	two_file_shared_1_test \
-	two_file_shared_2_test \
-	two_file_shared_1_pic_2_test \
-	two_file_shared_2_pic_1_test \
-	two_file_same_shared_test \
-	two_file_separate_shared_12_test \
-	two_file_separate_shared_21_test \
-	exception_test \
-	exception_static_test \
-	exception_shared_1_test \
-	exception_shared_2_test \
-	exception_same_shared_test \
-	exception_separate_shared_12_test \
-	exception_separate_shared_21_test \
-	weak_test \
-	flagstest_compress_debug_sections \
-	flagstest_o_specialfile \
-	flagstest_o_specialfile_and_compress_debug_sections
-
-if FN_PTRS_IN_SO_WITHOUT_PIC
-
-NATIVE_PROGS += \
-	two_file_shared_1_nonpic_test \
-	two_file_shared_2_nonpic_test \
-	two_file_same_shared_nonpic_test \
-	two_file_separate_shared_12_nonpic_test \
-	two_file_separate_shared_21_nonpic_test
-
-endif
-
-if TLS
-
-NATIVE_PROGS += \
-	tls_test \
-	tls_pic_test \
-	tls_shared_test
-
-if STATIC_TLS
-
-NATIVE_PROGS += \
-	tls_static_test \
-	tls_static_pic_test
-
-endif
-
-if FN_PTRS_IN_SO_WITHOUT_PIC
-
-NATIVE_PROGS += \
-	tls_shared_nonpic_test
-
-endif
-endif
-
-NATIVE_TESTING = \
-	basic_test \
-	basic_pic_test \
-	basic_static_test \
-	basic_static_pic_test \
-	$(NATIVE_PROGS)
-
-endif
-endif
-
-TESTS += $(NATIVE_TESTING)
-
+# Infrastucture needed for the unittests
 check_LIBRARIES = libgoldtest.a
 libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 
@@ -114,107 +48,45 @@ DEPENDENCIES = \
 LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 	$(THREADSLIB)
 
-check_PROGRAMS = object_unittest $(NATIVE_PROGS)
 
+# The unittests themselves
+check_PROGRAMS += object_unittest
 object_unittest_SOURCES = object_unittest.cc
 
-if GCC
+
+# ---------------------------------------------------------------------
+# These tests test the output of gold (end-to-end tests).  In
+# particular, they make sure that gold can link "difficult" object
+# files, and the resulting object files run correctly.  These can only
+# run if we've built ld-new for the native architecture (that is,
+# we're not cross-compiling it), since we run ld-new as part of these
+# tests.  We use the gcc-specific flag '-B' to use our linker instead
+# of the default linker, which is why we only run our tests under gcc.
 
 if NATIVE_LINKER
+if GCC
 
+# Infrastucture needed for the unittests: a directory where the linker
+# is named 'ld'.  This is because the -B flag appends 'ld' to its arg.
 gcctestdir/ld: ../ld-new
 	test -d gcctestdir || mkdir -p gcctestdir
 	rm -f gcctestdir/ld
 	(cd gcctestdir && $(LN_S) ../../ld-new ld)
 
-debug_msg.o: debug_msg.cc
-	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
-odr_violation1.o: odr_violation1.cc
-	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation1.cc
-odr_violation2.o: odr_violation2.cc
-	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation2.cc
-debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
-	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o "2>$@"
-	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
-	then \
-	  echo 1>&2 "Link of debug_msg should have failed"; \
-	  rm -f $@; \
-	  exit 1; \
-	fi
-
-# See if we can also detect problems when we're linking .so's, not .o's.
-debug_msg.so: debug_msg.cc
-	$(CXXCOMPILE) -O0 -g -shared -fPIC -w -o $@ $(srcdir)/debug_msg.cc
-odr_violation1.so: odr_violation1.cc
-	$(CXXCOMPILE) -O0 -g -shared -fPIC -w -o $@ $(srcdir)/odr_violation1.cc
-odr_violation2.so: odr_violation2.cc
-	$(CXXCOMPILE) -O0 -g -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
-debug_msg_so.err: debug_msg.so odr_violation1.so odr_violation2.so gcctestdir/ld
-	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so "2>$@"
-	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so 2>$@; \
-	then \
-	  echo 1>&2 "Link of debug_msg_so should have failed"; \
-	  rm -f $@; \
-	  exit 1; \
-	fi
-
-# We also want to make sure we do something reasonable when there's no
-# debug info available.  For the best test, we use .so's.
-debug_msg_ndebug.so: debug_msg.cc
-	$(CXXCOMPILE) -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/debug_msg.cc
-odr_violation1_ndebug.so: odr_violation1.cc
-	$(CXXCOMPILE) -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation1.cc
-odr_violation2_ndebug.so: odr_violation2.cc
-	$(CXXCOMPILE) -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
-debug_msg_ndebug.err: debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so gcctestdir/ld
-	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so "2>$@"
-	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so 2>$@; \
-	then \
-	  echo 1>&2 "Link of debug_msg_ndebug should have failed"; \
-	  rm -f $@; \
-	  exit 1; \
-	fi
-
-undef_symbol.o: undef_symbol.cc
-	$(CXXCOMPILE) -O0 -g -c -fPIC $<
-undef_symbol.so: undef_symbol.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared undef_symbol.o
-undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
-	@echo $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so "2>$@"
-	@if $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so 2>$@; \
-	then \
-	  echo 1>&2 "Link of undef_symbol_test should have failed"; \
-	  rm -f $@; \
-	  exit 1; \
-	fi
-
-# Test various flags.  The actual file we choose to link is pretty
-# much arbitrary: we just want to make sure we can link it and run it
-# successfully, even when using flags.
-
+# Each of these .o's is a useful, small complete program.  They're
+# particularly useful for making sure ld-new's flags do what they're
+# supposed to (hence their names), but are used for many tests that
+# don't actually involve analyzing input data.
 flagstest_debug.o: constructor_test.cc
 	$(CXXCOMPILE) -O0 -g -c -o $@ $<
 flagstest_ndebug.o: constructor_test.cc
 	$(CXXCOMPILE) -O0 -c -o $@ $<
 
-flagstest_compress_debug_sections: flagstest_debug.o
-	$(CXXLINK) -Bgcctestdir/ -o $@ $< --compress-debug-sections=zlib
-	test -s $@
 
-flagstest_o_specialfile: flagstest_debug.o
-	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
-	chmod a+x $@
-	test -s $@
-
-# The specialfile output has a tricky case when we also compress debug
-# sections, because it requires output-file resizing.
-flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o
-	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< --compress-debug-sections=zlib 2>&1 | cat > $@
-	chmod a+x $@
-	test -s $@
-
-
-# Override the default CXXFLAGS--we don't want any optimization
+check_PROGRAMS += basic_test
+check_PROGRAMS += basic_static_test
+check_PROGRAMS += basic_pic_test
+check_PROGRAMS += basic_static_pic_test
 basic_test.o: basic_test.cc
 	$(CXXCOMPILE) -O0 -c -o $@ $<
 basic_test: basic_test.o gcctestdir/ld
@@ -229,14 +101,21 @@ basic_pic_test: basic_pic_test.o gcctestdir/ld
 basic_static_pic_test: basic_pic_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -static basic_pic_test.o
 
+
+check_PROGRAMS += constructor_test
+check_PROGRAMS += constructor_static_test
 constructor_test_SOURCES = constructor_test.cc
 constructor_test_DEPENDENCIES = gcctestdir/ld
 constructor_test_LDFLAGS = -Bgcctestdir/
 
-constructor_static_test_SOURCES = constructor_test.cc
-constructor_static_test_DEPENDENCIES = gcctestdir/ld
-constructor_static_test_LDFLAGS = -Bgcctestdir/ -static
+constructor_static_test_SOURCES = $(constructor_test_SOURCES)
+constructor_static_test_DEPENDENCIES = $(constructor_test_DEPENDENCIES)
+constructor_static_test_LDFLAGS = $(constructor_test_LDFLAGS) -static
 
+
+check_PROGRAMS += two_file_test
+check_PROGRAMS += two_file_static_test
+check_PROGRAMS += two_file_pic_test
 two_file_test_SOURCES = \
 	two_file_test_1.cc \
 	two_file_test_2.cc \
@@ -245,16 +124,34 @@ two_file_test_SOURCES = \
 two_file_test_DEPENDENCIES = gcctestdir/ld
 two_file_test_LDFLAGS = -Bgcctestdir/
 
-two_file_static_test_SOURCES = \
-	two_file_test_1.cc two_file_test_2.cc two_file_test_main.cc
-two_file_static_test_DEPENDENCIES = gcctestdir/ld
-two_file_static_test_LDFLAGS = -Bgcctestdir/ -static
+two_file_static_test_SOURCES = $(two_file_test_SOURCES)
+two_file_static_test_DEPENDENCIES = $(two_file_test_DEPENDENCIES)
+two_file_static_test_LDFLAGS = $(two_file_test_LDFLAGS) -static
 
 two_file_pic_test_SOURCES = two_file_test_main.cc
 two_file_pic_test_DEPENDENCIES = \
 	gcctestdir/ld two_file_test_1_pic.o two_file_test_2_pic.o
 two_file_pic_test_LDFLAGS = -Bgcctestdir/
 two_file_pic_test_LDADD = two_file_test_1_pic.o two_file_test_2_pic.o
+
+
+check_PROGRAMS += two_file_shared_1_test
+check_PROGRAMS += two_file_shared_2_test
+check_PROGRAMS += two_file_shared_1_pic_2_test
+check_PROGRAMS += two_file_shared_2_pic_1_test
+check_PROGRAMS += two_file_same_shared_test
+check_PROGRAMS += two_file_separate_shared_12_test
+check_PROGRAMS += two_file_separate_shared_21_test
+two_file_test_1_pic.o: two_file_test_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+two_file_test_2_pic.o: two_file_test_2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+two_file_shared_1.so: two_file_test_1_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o
+two_file_shared_2.so: two_file_test_2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2_pic.o
+two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_2_pic.o
 
 two_file_shared_1_test_SOURCES = two_file_test_2.cc two_file_test_main.cc
 two_file_shared_1_test_DEPENDENCIES = gcctestdir/ld two_file_shared_1.so
@@ -297,22 +194,21 @@ two_file_separate_shared_21_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_separate_shared_21_test_LDADD = \
 	two_file_shared_2.so two_file_shared_1.so
 
-two_file_test_1_pic.o: two_file_test_1.cc
-	$(CXXCOMPILE) -c -fpic -o $@ $<
-two_file_test_2_pic.o: two_file_test_2.cc
-	$(CXXCOMPILE) -c -fpic -o $@ $<
-
-two_file_shared_1.so: two_file_test_1_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o
-two_file_shared_2.so: two_file_test_2_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2_pic.o
-two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_2_pic.o
-
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
-
 if FN_PTRS_IN_SO_WITHOUT_PIC
+
+check_PROGRAMS += two_file_shared_1_nonpic_test
+check_PROGRAMS += two_file_shared_2_nonpic_test
+check_PROGRAMS += two_file_same_shared_nonpic_test
+check_PROGRAMS += two_file_separate_shared_12_nonpic_test
+check_PROGRAMS += two_file_separate_shared_21_nonpic_test
+two_file_shared_1_nonpic.so: two_file_test_1.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o
+two_file_shared_2_nonpic.so: two_file_test_2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2.o
+two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_2.o
 
 two_file_shared_1_nonpic_test_SOURCES = \
 	two_file_test_2.cc two_file_test_main.cc
@@ -348,14 +244,26 @@ two_file_separate_shared_21_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_separate_shared_21_nonpic_test_LDADD = \
 	two_file_shared_2_nonpic.so two_file_shared_1_nonpic.so
 
-two_file_shared_1_nonpic.so: two_file_test_1.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o
-two_file_shared_2_nonpic.so: two_file_test_2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2.o
-two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_2.o
+endif FN_PTRS_IN_SO_WITHOUT_PIC
 
-endif
+
+check_PROGRAMS += exception_test
+check_PROGRAMS += exception_static_test
+check_PROGRAMS += exception_shared_1_test
+check_PROGRAMS += exception_shared_2_test
+check_PROGRAMS += exception_same_shared_test
+check_PROGRAMS += exception_separate_shared_12_test
+check_PROGRAMS += exception_separate_shared_21_test
+exception_test_1_pic.o: exception_test_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+exception_test_2_pic.o: exception_test_2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+exception_shared_1.so: exception_test_1_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared exception_test_1_pic.o
+exception_shared_2.so: exception_test_2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared exception_test_2_pic.o
+exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared exception_test_1_pic.o exception_test_2_pic.o
 
 exception_test_SOURCES = \
 	exception_test_main.cc \
@@ -365,12 +273,9 @@ exception_test_SOURCES = \
 exception_test_DEPENDENCIES = gcctestdir/ld
 exception_test_LDFLAGS = -Bgcctestdir/
 
-exception_static_test_SOURCES = \
-	exception_test_main.cc \
-	exception_test_1.cc \
-	exception_test_2.cc
-exception_static_test_DEPENDENCIES = gcctestdir/ld
-exception_static_test_LDFLAGS = -Bgcctestdir/ -static
+exception_static_test_SOURCES = $(exception_test_SOURCES)
+exception_static_test_DEPENDENCIES = $(exception_test_DEPENDENCIES)
+exception_static_test_LDFLAGS = $(exception_test_LDFLAGS) -static
 
 exception_shared_1_test_SOURCES = exception_test_2.cc exception_test_main.cc
 exception_shared_1_test_DEPENDENCIES = gcctestdir/ld exception_shared_1.so
@@ -401,22 +306,23 @@ exception_separate_shared_21_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 exception_separate_shared_21_test_LDADD = \
 	exception_shared_2.so exception_shared_1.so
 
-exception_test_1_pic.o: exception_test_1.cc
-	$(CXXCOMPILE) -c -fpic -o $@ $<
-exception_test_2_pic.o: exception_test_2.cc
-	$(CXXCOMPILE) -c -fpic -o $@ $<
 
-exception_shared_1.so: exception_test_1_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared exception_test_1_pic.o
-exception_shared_2.so: exception_test_2_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared exception_test_2_pic.o
-exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared exception_test_1_pic.o exception_test_2_pic.o
-
+check_PROGRAMS += weak_test
 weak_test_SOURCES = weak_test.cc
 weak_test_LDFLAGS = -Bgcctestdir/
 
+
 if TLS
+
+check_PROGRAMS += tls_test
+check_PROGRAMS += tls_pic_test
+check_PROGRAMS += tls_shared_test
+tls_test_pic.o: tls_test.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+tls_test_file2_pic.o: tls_test_file2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o
 
 tls_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc tls_test.h
 tls_test_DEPENDENCIES = gcctestdir/ld
@@ -428,43 +334,139 @@ tls_pic_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_file2_pic.o
 tls_pic_test_LDFLAGS = -Bgcctestdir/
 tls_pic_test_LDADD = tls_test_pic.o tls_test_file2_pic.o -lpthread
 
-tls_static_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc
-tls_static_test_DEPENDENCIES = gcctestdir/ld
-tls_static_test_LDFLAGS = -Bgcctestdir/ -static
-tls_static_test_LDADD = -lpthread
-
-tls_static_pic_test_SOURCES = tls_test_main.cc
-tls_static_pic_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_file2_pic.o
-tls_static_pic_test_LDFLAGS = -Bgcctestdir/ -static
-tls_static_pic_test_LDADD = tls_test_pic.o tls_test_file2_pic.o -lpthread
-
 tls_shared_test_SOURCES = tls_test_main.cc
 tls_shared_test_DEPENDENCIES = gcctestdir/ld tls_test_shared.so
 tls_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 tls_shared_test_LDADD = tls_test_shared.so -lpthread
 
-tls_test_pic.o: tls_test.cc
-	$(CXXCOMPILE) -c -fpic -o $@ $<
+if STATIC_TLS
+check_PROGRAMS += tls_static_test
+check_PROGRAMS += tls_static_pic_test
 
-tls_test_file2_pic.o: tls_test_file2.cc
-	$(CXXCOMPILE) -c -fpic -o $@ $<
+tls_static_test_SOURCES = $(tls_test_SOURCES)
+tls_static_test_DEPENDENCIES = $(tls_test_DEPENDENCIES)
+tls_static_test_LDFLAGS = $(tls_test_LDFLAGS) -static
+tls_static_test_LDADD = $(tls_test_LDADD)
 
-tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o
+tls_static_pic_test_SOURCES = $(tls_pic_test_SOURCES)
+tls_static_pic_test_DEPENDENCIES = $(tls_pic_test_DEPENDENCIES)
+tls_static_pic_test_LDFLAGS = $(tls_pic_test_LDFLAGS) -static
+tls_static_pic_test_LDADD = $(tls_pic_test_LDADD)
+endif
 
 if FN_PTRS_IN_SO_WITHOUT_PIC
+check_PROGRAMS += tls_shared_nonpic_test
+tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o
 
 tls_shared_nonpic_test_SOURCES = tls_test_main.cc
 tls_shared_nonpic_test_DEPENDENCIES = gcctestdir/ld tls_test_shared_nonpic.so
 tls_shared_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 tls_shared_nonpic_test_LDADD = tls_test_shared_nonpic.so -lpthread
+endif FN_PTRS_IN_SO_WITHOUT_PIC
 
-tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o
+endif TLS
 
-endif
 
-endif
+# Test --detect-odr-violations
+check_SCRIPTS += debug_msg.sh
 
-endif
-endif
+# Create the data files that debug_msg.sh analyzes.
+check_DATA += debug_msg.err
+MOSTLYCLEANFILES += debug_msg.err
+debug_msg.o: debug_msg.cc
+	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1.o: odr_violation1.cc
+	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2.o: odr_violation2.cc
+	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
+# See if we can also detect problems when we're linking .so's, not .o's.
+check_DATA += debug_msg_so.err
+MOSTLYCLEANFILES += debug_msg_so.err
+debug_msg.so: debug_msg.cc gcctestdir/ld
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -shared -fPIC -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1.so: odr_violation1.cc gcctestdir/ld
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -shared -fPIC -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2.so: odr_violation2.cc gcctestdir/ld
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg_so.err: debug_msg.so odr_violation1.so odr_violation2.so gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg_so should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
+# We also want to make sure we do something reasonable when there's no
+# debug info available.  For the best test, we use .so's.
+check_DATA += debug_msg_ndebug.err
+MOSTLYCLEANFILES += debug_msg_ndebug.err
+debug_msg_ndebug.so: debug_msg.cc gcctestdir/ld
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1_ndebug.so: odr_violation1.cc gcctestdir/ld
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2_ndebug.so: odr_violation2.cc gcctestdir/ld
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg_ndebug.err: debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg_ndebug should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
+
+# Similar to --detect-odr-violations: check for undefined symbols in .so's
+check_SCRIPTS += undef_symbol.sh
+check_DATA += undef_symbol.err
+MOSTLYCLEANFILES += undef_symbol.err
+undef_symbol.o: undef_symbol.cc
+	$(CXXCOMPILE) -O0 -g -c -fPIC $<
+undef_symbol.so: undef_symbol.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared undef_symbol.o
+undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so 2>$@; \
+	then \
+	  echo 1>&2 "Link of undef_symbol_test should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
+
+# Test --compress-debug-sections.  FIXME: check we actually compress.
+check_PROGRAMS += flagstest_compress_debug_sections
+flagstest_compress_debug_sections: flagstest_debug.o
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< --compress-debug-sections=zlib
+	test -s $@
+
+
+# Test -o when emitting to a special file (such as something in /dev).
+check_PROGRAMS += flagstest_o_specialfile
+flagstest_o_specialfile: flagstest_debug.o
+	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
+	chmod a+x $@
+	test -s $@
+
+# The specialfile output has a tricky case when we also compress debug
+# sections, because it requires output-file resizing.
+check_PROGRAMS += flagstest_o_specialfile_and_compress_debug_sections
+flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o
+	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< --compress-debug-sections=zlib 2>&1 | cat > $@
+	chmod a+x $@
+	test -s $@
+
+
+endif GCC
+endif NATIVE_LINKER
