@@ -5040,23 +5040,22 @@ mips_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
    [1 * gdbarch_num_regs .. 2 * gdbarch_num_regs) REGNUM.  */
 
 static int
-mips_stab_reg_to_regnum (int num)
+mips_stab_reg_to_regnum (struct gdbarch *gdbarch, int num)
 {
   int regnum;
   if (num >= 0 && num < 32)
     regnum = num;
   else if (num >= 38 && num < 70)
-    regnum = num + mips_regnum (current_gdbarch)->fp0 - 38;
+    regnum = num + mips_regnum (gdbarch)->fp0 - 38;
   else if (num == 70)
-    regnum = mips_regnum (current_gdbarch)->hi;
+    regnum = mips_regnum (gdbarch)->hi;
   else if (num == 71)
-    regnum = mips_regnum (current_gdbarch)->lo;
+    regnum = mips_regnum (gdbarch)->lo;
   else
     /* This will hopefully (eventually) provoke a warning.  Should
        we be calling complaint() here?  */
-    return gdbarch_num_regs (current_gdbarch)
-	   + gdbarch_num_pseudo_regs (current_gdbarch);
-  return gdbarch_num_regs (current_gdbarch) + regnum;
+    return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  return gdbarch_num_regs (gdbarch) + regnum;
 }
 
 
@@ -5064,23 +5063,22 @@ mips_stab_reg_to_regnum (int num)
    gdbarch_num_regs .. 2 * gdbarch_num_regs) REGNUM.  */
 
 static int
-mips_dwarf_dwarf2_ecoff_reg_to_regnum (int num)
+mips_dwarf_dwarf2_ecoff_reg_to_regnum (struct gdbarch *gdbarch, int num)
 {
   int regnum;
   if (num >= 0 && num < 32)
     regnum = num;
   else if (num >= 32 && num < 64)
-    regnum = num + mips_regnum (current_gdbarch)->fp0 - 32;
+    regnum = num + mips_regnum (gdbarch)->fp0 - 32;
   else if (num == 64)
-    regnum = mips_regnum (current_gdbarch)->hi;
+    regnum = mips_regnum (gdbarch)->hi;
   else if (num == 65)
-    regnum = mips_regnum (current_gdbarch)->lo;
+    regnum = mips_regnum (gdbarch)->lo;
   else
     /* This will hopefully (eventually) provoke a warning.  Should we
        be calling complaint() here?  */
-    return gdbarch_num_regs (current_gdbarch)
-	   + gdbarch_num_pseudo_regs (current_gdbarch);
-  return gdbarch_num_regs (current_gdbarch) + regnum;
+    return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  return gdbarch_num_regs (gdbarch) + regnum;
 }
 
 static int

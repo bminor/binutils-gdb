@@ -167,7 +167,7 @@ i386_register_name (struct gdbarch *gdbarch, int regnum)
    number used by GDB.  */
 
 static int
-i386_dbx_reg_to_regnum (int reg)
+i386_dbx_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   /* This implements what GCC calls the "default" register map
      (dbx_register_map[]).  */
@@ -199,15 +199,14 @@ i386_dbx_reg_to_regnum (int reg)
     }
 
   /* This will hopefully provoke a warning.  */
-  return gdbarch_num_regs (current_gdbarch)
-	 + gdbarch_num_pseudo_regs (current_gdbarch);
+  return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 }
 
 /* Convert SVR4 register number REG to the appropriate register number
    used by GDB.  */
 
 static int
-i386_svr4_reg_to_regnum (int reg)
+i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   /* This implements the GCC register map that tries to be compatible
      with the SVR4 C compiler for DWARF (svr4_dbx_register_map[]).  */
@@ -227,7 +226,7 @@ i386_svr4_reg_to_regnum (int reg)
   else if (reg >= 21 && reg <= 36)
     {
       /* The SSE and MMX registers have the same numbers as with dbx.  */
-      return i386_dbx_reg_to_regnum (reg);
+      return i386_dbx_reg_to_regnum (gdbarch, reg);
     }
 
   switch (reg)
@@ -244,8 +243,7 @@ i386_svr4_reg_to_regnum (int reg)
     }
 
   /* This will hopefully provoke a warning.  */
-  return gdbarch_num_regs (current_gdbarch)
-	 + gdbarch_num_pseudo_regs (current_gdbarch);
+  return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 }
 
 #undef I387_ST0_REGNUM

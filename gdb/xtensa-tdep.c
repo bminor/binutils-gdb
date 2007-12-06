@@ -303,18 +303,17 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
    to n for An.  So, we only have to add the base number for A0.  */
 
 static int
-xtensa_reg_to_regnum (int regnum)
+xtensa_reg_to_regnum (struct gdbarch *gdbarch, int regnum)
 {
   int i;
 
   if (regnum >= 0 && regnum < 16)
-    return gdbarch_tdep (current_gdbarch)->a0_base + regnum;
+    return gdbarch_tdep (gdbarch)->a0_base + regnum;
 
   for (i = 0;
-       i < gdbarch_num_regs (current_gdbarch)
-	   + gdbarch_num_pseudo_regs (current_gdbarch);
+       i < gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
        i++)
-    if (regnum == gdbarch_tdep (current_gdbarch)->regmap[i].target_number)
+    if (regnum == gdbarch_tdep (gdbarch)->regmap[i].target_number)
       return i;
 
   internal_error (__FILE__, __LINE__,

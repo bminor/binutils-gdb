@@ -248,9 +248,9 @@ m32c_register_sim_regno (struct gdbarch *gdbarch, int reg_nr)
 
 
 static int
-m32c_debug_info_reg_to_regnum (int reg_nr)
+m32c_debug_info_reg_to_regnum (struct gdbarch *gdbarch, int reg_nr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   if (0 <= reg_nr && reg_nr <= M32C_MAX_DWARF_REGNUM
       && tdep->dwarf_regs[reg_nr])
     return tdep->dwarf_regs[reg_nr]->num;

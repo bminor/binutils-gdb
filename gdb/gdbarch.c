@@ -275,11 +275,11 @@ struct gdbarch startup_gdbarch =
   -1,  /* pc_regnum */
   -1,  /* ps_regnum */
   0,  /* fp0_regnum */
-  0,  /* stab_reg_to_regnum */
-  0,  /* ecoff_reg_to_regnum */
-  0,  /* dwarf_reg_to_regnum */
-  0,  /* sdb_reg_to_regnum */
-  0,  /* dwarf2_reg_to_regnum */
+  no_op_reg_to_regnum,  /* stab_reg_to_regnum */
+  no_op_reg_to_regnum,  /* ecoff_reg_to_regnum */
+  no_op_reg_to_regnum,  /* dwarf_reg_to_regnum */
+  no_op_reg_to_regnum,  /* sdb_reg_to_regnum */
+  no_op_reg_to_regnum,  /* dwarf2_reg_to_regnum */
   0,  /* register_name */
   0,  /* register_type */
   0,  /* unwind_dummy_id */
@@ -1502,7 +1502,7 @@ gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch, int stab_regnr)
   gdb_assert (gdbarch->stab_reg_to_regnum != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_stab_reg_to_regnum called\n");
-  return gdbarch->stab_reg_to_regnum (stab_regnr);
+  return gdbarch->stab_reg_to_regnum (gdbarch, stab_regnr);
 }
 
 void
@@ -1519,7 +1519,7 @@ gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch, int ecoff_regnr)
   gdb_assert (gdbarch->ecoff_reg_to_regnum != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_ecoff_reg_to_regnum called\n");
-  return gdbarch->ecoff_reg_to_regnum (ecoff_regnr);
+  return gdbarch->ecoff_reg_to_regnum (gdbarch, ecoff_regnr);
 }
 
 void
@@ -1536,7 +1536,7 @@ gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dwarf_regnr)
   gdb_assert (gdbarch->dwarf_reg_to_regnum != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_dwarf_reg_to_regnum called\n");
-  return gdbarch->dwarf_reg_to_regnum (dwarf_regnr);
+  return gdbarch->dwarf_reg_to_regnum (gdbarch, dwarf_regnr);
 }
 
 void
@@ -1553,7 +1553,7 @@ gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, int sdb_regnr)
   gdb_assert (gdbarch->sdb_reg_to_regnum != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_sdb_reg_to_regnum called\n");
-  return gdbarch->sdb_reg_to_regnum (sdb_regnr);
+  return gdbarch->sdb_reg_to_regnum (gdbarch, sdb_regnr);
 }
 
 void
@@ -1570,7 +1570,7 @@ gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2_regnr)
   gdb_assert (gdbarch->dwarf2_reg_to_regnum != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_dwarf2_reg_to_regnum called\n");
-  return gdbarch->dwarf2_reg_to_regnum (dwarf2_regnr);
+  return gdbarch->dwarf2_reg_to_regnum (gdbarch, dwarf2_regnr);
 }
 
 void

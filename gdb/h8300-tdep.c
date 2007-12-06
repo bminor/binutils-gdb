@@ -1175,7 +1175,7 @@ h8300_pseudo_register_write (struct gdbarch *gdbarch,
 }
 
 static int
-h8300_dbg_reg_to_regnum (int regno)
+h8300_dbg_reg_to_regnum (struct gdbarch *gdbarch, int regno)
 {
   if (regno == E_CCR_REGNUM)
     return E_PSEUDO_CCR_REGNUM;
@@ -1183,7 +1183,7 @@ h8300_dbg_reg_to_regnum (int regno)
 }
 
 static int
-h8300s_dbg_reg_to_regnum (int regno)
+h8300s_dbg_reg_to_regnum (struct gdbarch *gdbarch, int regno)
 {
   if (regno == E_CCR_REGNUM)
     return E_PSEUDO_CCR_REGNUM;

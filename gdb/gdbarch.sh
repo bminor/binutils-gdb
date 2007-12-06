@@ -413,14 +413,14 @@ v:int:pc_regnum:::-1:-1::0
 v:int:ps_regnum:::-1:-1::0
 v:int:fp0_regnum:::0:-1::0
 # Convert stab register number (from \`r\' declaration) to a gdb REGNUM.
-f:int:stab_reg_to_regnum:int stab_regnr:stab_regnr::no_op_reg_to_regnum::0
+m:int:stab_reg_to_regnum:int stab_regnr:stab_regnr::no_op_reg_to_regnum::0
 # Provide a default mapping from a ecoff register number to a gdb REGNUM.
-f:int:ecoff_reg_to_regnum:int ecoff_regnr:ecoff_regnr::no_op_reg_to_regnum::0
+m:int:ecoff_reg_to_regnum:int ecoff_regnr:ecoff_regnr::no_op_reg_to_regnum::0
 # Provide a default mapping from a DWARF register number to a gdb REGNUM.
-f:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr::no_op_reg_to_regnum::0
+m:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr::no_op_reg_to_regnum::0
 # Convert from an sdb register number to an internal gdb register number.
-f:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr::no_op_reg_to_regnum::0
-f:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr::no_op_reg_to_regnum::0
+m:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr::no_op_reg_to_regnum::0
+m:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr::no_op_reg_to_regnum::0
 m:const char *:register_name:int regnr:regnr::0
 
 # Return the type of a register specified by the architecture.  Only

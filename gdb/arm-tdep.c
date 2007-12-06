@@ -1430,7 +1430,7 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
    number.  */
 
 static int
-arm_dwarf_reg_to_regnum (int reg)
+arm_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   /* Core integer regs.  */
   if (reg >= 0 && reg <= 15)

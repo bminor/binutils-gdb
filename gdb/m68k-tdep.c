@@ -527,7 +527,7 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 /* Convert a dwarf or dwarf2 regnumber to a GDB regnum.  */
 
 static int
-m68k_dwarf_reg_to_regnum (int num)
+m68k_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int num)
 {
   if (num < 8)
     /* d0..7 */
@@ -535,15 +535,14 @@ m68k_dwarf_reg_to_regnum (int num)
   else if (num < 16)
     /* a0..7 */
     return (num - 8) + M68K_A0_REGNUM;
-  else if (num < 24 && gdbarch_tdep (current_gdbarch)->fpregs_present)
+  else if (num < 24 && gdbarch_tdep (gdbarch)->fpregs_present)
     /* fp0..7 */
     return (num - 16) + M68K_FP0_REGNUM;
   else if (num == 25)
     /* pc */
     return M68K_PC_REGNUM;
   else
-    return gdbarch_num_regs (current_gdbarch)
-	   + gdbarch_num_pseudo_regs (current_gdbarch);
+    return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 }
 
 

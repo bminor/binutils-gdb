@@ -1847,7 +1847,7 @@ crisv32_register_name (struct gdbarch *gdbarch, int regno)
    number used by GDB.  */
 
 static int
-cris_dwarf2_reg_to_regnum (int reg)
+cris_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   /* We need to re-map a couple of registers (SRP is 16 in Dwarf-2 register
      numbering, MOF is 18).

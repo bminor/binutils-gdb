@@ -2557,9 +2557,9 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
 /* Convert a DBX STABS register number to a GDB register number.  */
 static int
-rs6000_stab_reg_to_regnum (int num)
+rs6000_stab_reg_to_regnum (struct gdbarch *gdbarch, int num)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (0 <= num && num <= 31)
     return tdep->ppc_gp0_regnum + num;
@@ -2599,9 +2599,9 @@ rs6000_stab_reg_to_regnum (int num)
 
 /* Convert a Dwarf 2 register number to a GDB register number.  */
 static int
-rs6000_dwarf2_reg_to_regnum (int num)
+rs6000_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (0 <= num && num <= 31)
     return tdep->ppc_gp0_regnum + num;

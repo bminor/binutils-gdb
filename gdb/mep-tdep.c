@@ -785,7 +785,7 @@ mep_init_pseudoregister_maps (void)
 
 
 static int
-mep_debug_reg_to_regnum (int debug_reg)
+mep_debug_reg_to_regnum (struct gdbarch *gdbarch, int debug_reg)
 {
   /* The debug info uses the raw register numbers.  */
   return mep_raw_to_pseudo[debug_reg];

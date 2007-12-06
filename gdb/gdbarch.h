@@ -206,29 +206,29 @@ extern void set_gdbarch_fp0_regnum (struct gdbarch *gdbarch, int fp0_regnum);
 
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM. */
 
-typedef int (gdbarch_stab_reg_to_regnum_ftype) (int stab_regnr);
+typedef int (gdbarch_stab_reg_to_regnum_ftype) (struct gdbarch *gdbarch, int stab_regnr);
 extern int gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch, int stab_regnr);
 extern void set_gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum);
 
 /* Provide a default mapping from a ecoff register number to a gdb REGNUM. */
 
-typedef int (gdbarch_ecoff_reg_to_regnum_ftype) (int ecoff_regnr);
+typedef int (gdbarch_ecoff_reg_to_regnum_ftype) (struct gdbarch *gdbarch, int ecoff_regnr);
 extern int gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch, int ecoff_regnr);
 extern void set_gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum);
 
 /* Provide a default mapping from a DWARF register number to a gdb REGNUM. */
 
-typedef int (gdbarch_dwarf_reg_to_regnum_ftype) (int dwarf_regnr);
+typedef int (gdbarch_dwarf_reg_to_regnum_ftype) (struct gdbarch *gdbarch, int dwarf_regnr);
 extern int gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dwarf_regnr);
 extern void set_gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum);
 
 /* Convert from an sdb register number to an internal gdb register number. */
 
-typedef int (gdbarch_sdb_reg_to_regnum_ftype) (int sdb_regnr);
+typedef int (gdbarch_sdb_reg_to_regnum_ftype) (struct gdbarch *gdbarch, int sdb_regnr);
 extern int gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, int sdb_regnr);
 extern void set_gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_sdb_reg_to_regnum_ftype *sdb_reg_to_regnum);
 
-typedef int (gdbarch_dwarf2_reg_to_regnum_ftype) (int dwarf2_regnr);
+typedef int (gdbarch_dwarf2_reg_to_regnum_ftype) (struct gdbarch *gdbarch, int dwarf2_regnr);
 extern int gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2_regnr);
 extern void set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum);
 

@@ -147,7 +147,7 @@ static int s390_dwarf_regmap[] =
 /* Convert DWARF register number REG to the appropriate register
    number used by GDB.  */
 static int
-s390_dwarf_reg_to_regnum (int reg)
+s390_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   int regnum = -1;
 

@@ -187,7 +187,7 @@ static const int amd64_dwarf_regmap_len =
    number used by GDB.  */
 
 static int
-amd64_dwarf_reg_to_regnum (int reg)
+amd64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   int regnum = -1;
 

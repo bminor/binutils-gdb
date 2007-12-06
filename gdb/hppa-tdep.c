@@ -659,7 +659,7 @@ hppa64_register_name (struct gdbarch *gdbarch, int i)
 }
 
 static int
-hppa64_dwarf_reg_to_regnum (int reg)
+hppa64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   /* r0-r31 and sar map one-to-one.  */
   if (reg <= 32)

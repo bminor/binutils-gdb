@@ -1,3 +1,32 @@
+2007-12-06  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (stab_reg_to_regnum, dwarf_reg_to_regnum)
+	( dwarf2_reg_to_regnum, sdb_reg_to_regnum, ecoff_reg_to_regnum): Add
+	gdbarch as parameter.
+	* gdbarch.{c,h}: Regenerate.
+
+	* xtensa-tdep.c (xtensa_reg_to_regnum): Add gdbarch as parameter.
+	Replace current_gdbarch by gdbarch.
+	* s390-tdep.c (s390_dwarf_reg_to_regnum): Likewise.
+	* rs6000-tdep.c (rs6000_stab_reg_to_regnum)
+	(rs6000_dwarf2_reg_to_regnum): Likewise.
+	* mips-tdep.c (mips_stab_reg_to_regnum)
+	(mips_dwarf_dwarf2_ecoff_reg_to_regnum): Likewise.
+	* mep-tdep.c (mep_debug_reg_to_regnum): Likewise.
+	* m32c-tdep.c (m32c_debug_info_reg_to_regnum): Likewise.
+	* i386-tdep.c (i386_dbx_reg_to_regnum)
+	(i386_svr4_reg_to_regnum): Likewise
+	* h8300-tdep.c (h8300s_dbg_reg_to_regnum)
+	(h8300_dbg_reg_to_regnum): Likewise.
+	* amd64-tdep.c (amd64_dwarf_reg_to_regnum): Likewise.
+	* arch-utils.c (no_op_reg_to_regnum): Likewise.
+	* arch-utils.h (no_op_reg_to_regnum): Likewise.
+	* arm-tdep.c (arm_dwarf_reg_to_regnum): Likewise.
+	* cris-tdep.c (cris_dwarf2_reg_to_regnum): Likewise.
+	* hppa-tdep.c (hppa64_dwarf_reg_to_regnum): Likewise.
+	* ia64-tdep.c (ia64_dwarf_reg_to_regnum): Likewise.
+	* m68k-tdep.c (m68k_dwarf_reg_to_regnum): Likewise.
+
 2007-12-06  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Localize infrun use of remove_breakpoints.

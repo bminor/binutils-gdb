@@ -107,7 +107,7 @@ convert_from_func_ptr_addr_identity (struct gdbarch *gdbarch, CORE_ADDR addr,
 }
 
 int
-no_op_reg_to_regnum (int reg)
+no_op_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   return reg;
 }

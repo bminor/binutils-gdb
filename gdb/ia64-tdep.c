@@ -313,7 +313,7 @@ ia64_register_type (struct gdbarch *arch, int reg)
 }
 
 static int
-ia64_dwarf_reg_to_regnum (int reg)
+ia64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   if (reg >= IA64_GR32_REGNUM && reg <= IA64_GR127_REGNUM)
     return V32_REGNUM + (reg - IA64_GR32_REGNUM);
