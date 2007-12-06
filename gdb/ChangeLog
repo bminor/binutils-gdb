@@ -1,5 +1,8 @@
 2007-12-06  Jim Blandy  <jimb@codesourcery.com>
 
+	* addrmap.c (addrmap_splay_tree_remove): New function.
+	(addrmap_mutable_set_empty): Use it.
+
 	* addrmap.c, addrmap.h: Update to GPLv3.
 
 	* addrmap.c (struct addrmap): Make the referenced function table

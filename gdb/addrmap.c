@@ -252,6 +252,13 @@ addrmap_splay_tree_successor (struct addrmap_mutable *map, CORE_ADDR addr)
 }
 
 
+static void
+addrmap_splay_tree_remove (struct addrmap_mutable *map, CORE_ADDR addr)
+{
+  splay_tree_remove (map->tree, (splay_tree_key) &addr);
+}
+
+
 static CORE_ADDR
 addrmap_node_key (splay_tree_node node)
 {
@@ -347,7 +354,7 @@ addrmap_mutable_set_empty (struct addrmap *this,
     {
       next = addrmap_splay_tree_successor (map, addrmap_node_key (n));
       if (addrmap_node_value (n) == prior_value)
-        splay_tree_remove (map->tree, addrmap_node_key (n));
+        addrmap_splay_tree_remove (map, addrmap_node_key (n));
       else
         prior_value = addrmap_node_value (n);
     }
