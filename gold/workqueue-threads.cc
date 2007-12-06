@@ -170,8 +170,9 @@ Workqueue_runner_threadpool::~Workqueue_runner_threadpool()
   this->task_queue_condvar_.broadcast();
 }
 
-// Run a task.  This doesn't actually run the task: it pushes on the
-// queue of tasks to run.  This is always called in the main thread.
+// Run a task.  This doesn't actually run the task: it pushes it on
+// the queue of tasks to run.  This is always called in the main
+// thread.
 
 void
 Workqueue_runner_threadpool::run(Task* t, Task_locker* tl)
