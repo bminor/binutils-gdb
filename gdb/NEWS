@@ -20,6 +20,10 @@ is resolved.
 including breakpoints on C++ constructors, inside C++ templates,
 and in inlined functions.
 
+* GDB's ability to debug optimized code has been improved.  GDB more
+accurately identifies function bodies and lexical blocks that occupy
+more than one contiguous range of addresses.
+
 * Target descriptions can now describe registers for PowerPC.
 
 * The GDB remote stub, gdbserver, now supports the AltiVec and SPE
