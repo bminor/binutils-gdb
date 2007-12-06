@@ -429,13 +429,30 @@ class Relobj : public Object
 	      Layout* layout, Read_relocs_data* rd)
   { return this->do_scan_relocs(options, symtab, layout, rd); }
 
-  // Initial local symbol processing: set the offset where local
-  // symbol information will be stored; add local symbol names to
-  // *POOL; return the new local symbol index.
+  // Initial local symbol processing: count the number of local symbols
+  // in the output symbol table and dynamic symbol table; add local symbol
+  // names to *POOL and *DYNPOOL.
+  void
+  count_local_symbols(Stringpool_template<char>* pool,
+                      Stringpool_template<char>* dynpool)
+  { return this->do_count_local_symbols(pool, dynpool); }
+
+  // Set the values of the local symbols, set the output symbol table
+  // indexes for the local variables, and set the offset where local
+  // symbol information will be stored. Returns the new local symbol index.
   unsigned int
-  finalize_local_symbols(unsigned int index, off_t off,
-			 Stringpool_template<char>* pool)
-  { return this->do_finalize_local_symbols(index, off, pool); }
+  finalize_local_symbols(unsigned int index, off_t off)
+  { return this->do_finalize_local_symbols(index, off); }
+
+  // Set the output dynamic symbol table indexes for the local variables.
+  unsigned int
+  set_local_dynsym_indexes(unsigned int index)
+  { return this->do_set_local_dynsym_indexes(index); }
+
+  // Set the offset where local dynamic symbol information will be stored.
+  unsigned int
+  set_local_dynsym_offset(off_t off)
+  { return this->do_set_local_dynsym_offset(off); }
 
   // Relocate the input sections and write out the local symbols.
   void
@@ -521,10 +538,23 @@ class Relobj : public Object
   do_scan_relocs(const General_options&, Symbol_table*, Layout*,
 		 Read_relocs_data*) = 0;
 
-  // Finalize local symbols--implemented by child class.
-  virtual unsigned int
-  do_finalize_local_symbols(unsigned int, off_t,
+  // Count local symbols--implemented by child class.
+  virtual void
+  do_count_local_symbols(Stringpool_template<char>*,
 			    Stringpool_template<char>*) = 0;
+
+  // Finalize the local symbols.  Set the output symbol table indexes for the local variables, and set the
+  // offset where local symbol information will be stored.
+  virtual unsigned int
+  do_finalize_local_symbols(unsigned int, off_t) = 0;
+
+  // Set the output dynamic symbol table indexes for the local variables.
+  virtual unsigned int
+  do_set_local_dynsym_indexes(unsigned int) = 0;
+
+  // Set the offset where local dynamic symbol information will be stored.
+  virtual unsigned int
+  do_set_local_dynsym_offset(off_t) = 0;
 
   // Relocate the input sections and write out the local
   // symbols--implemented by child class.
@@ -580,7 +610,8 @@ class Symbol_value
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Value;
 
   Symbol_value()
-    : output_symtab_index_(0), input_shndx_(0), is_section_symbol_(false),
+    : output_symtab_index_(0), output_dynsym_index_(-1U), input_shndx_(0),
+      is_section_symbol_(false), is_tls_symbol_(false),
       needs_output_address_(false), value_(0)
   { }
 
@@ -604,9 +635,11 @@ class Symbol_value
     this->needs_output_address_ = false;
   }
 
-  // If this symbol is mapped to an output section which requires
-  // special handling to determine the output value, we store the
-  // value of the symbol in the input file.  This is used for
+  // Set the value of the symbol from the input file.  This value
+  // will usually be replaced during finalization with the output
+  // value, but if the symbol is mapped to an output section which
+  // requires special handling to determine the output value, we
+  // leave the input value in place until later.  This is used for
   // SHF_MERGE sections.
   void
   set_input_value(Value value)
@@ -615,12 +648,20 @@ class Symbol_value
     this->needs_output_address_ = true;
   }
 
+  // Return the input value.
+  Value
+  input_value() const
+  {
+    gold_assert(this->needs_output_address_);
+    return this->value_;
+  }
+
   // Return whether this symbol should go into the output symbol
   // table.
   bool
   needs_output_symtab_entry() const
   {
-    gold_assert(this->output_symtab_index_ != 0);
+    // gold_assert(this->output_symtab_index_ != 0);
     return this->output_symtab_index_ != -1U;
   }
 
@@ -649,6 +690,37 @@ class Symbol_value
     this->output_symtab_index_ = -1U;
   }
 
+  // Set the index in the output dynamic symbol table.
+  void
+  set_needs_output_dynsym_entry()
+  {
+    this->output_dynsym_index_ = 0;
+  }
+
+  // Return whether this symbol should go into the output symbol
+  // table.
+  bool
+  needs_output_dynsym_entry() const
+  {
+    return this->output_dynsym_index_ != -1U;
+  }
+
+  // Record that this symbol should go into the dynamic symbol table.
+  void
+  set_output_dynsym_index(unsigned int i)
+  {
+    gold_assert(this->output_dynsym_index_ == 0);
+    this->output_dynsym_index_ = i;
+  }
+
+  // Return the index in the output dynamic symbol table.
+  unsigned int
+  output_dynsym_index() const
+  {
+    gold_assert(this->output_dynsym_index_ != 0);
+    return this->output_dynsym_index_;
+  }
+
   // Set the index of the input section in the input file.
   void
   set_input_shndx(unsigned int i)
@@ -657,20 +729,40 @@ class Symbol_value
     gold_assert(this->input_shndx_ == i);
   }
 
+  // Return the index of the input section in the input file.
+  unsigned int
+  input_shndx() const
+  { return this->input_shndx_; }
+
   // Record that this is a section symbol.
   void
   set_is_section_symbol()
   { this->is_section_symbol_ = true; }
 
+  // Record that this is a TLS symbol.
+  void
+  set_is_tls_symbol()
+  { this->is_tls_symbol_ = true; }
+
+  // Return TRUE if this is a TLS symbol.
+  bool
+  is_tls_symbol() const
+  { return this->is_tls_symbol_; }
+
  private:
   // The index of this local symbol in the output symbol table.  This
   // will be -1 if the symbol should not go into the symbol table.
   unsigned int output_symtab_index_;
+  // The index of this local symbol in the dynamic symbol table.  This
+  // will be -1 if the symbol should not go into the symbol table.
+  unsigned int output_dynsym_index_;
   // The section index in the input file in which this symbol is
   // defined.
-  unsigned int input_shndx_ : 30;
+  unsigned int input_shndx_ : 29;
   // Whether this is a STT_SECTION symbol.
   bool is_section_symbol_ : 1;
+  // Whether this is a STT_TLS symbol.
+  bool is_tls_symbol_ : 1;
   // Whether getting the value of this symbol requires calling an
   // Output_section method.  For example, this will be true of a
   // symbol in a SHF_MERGE section.
@@ -744,6 +836,15 @@ class Sized_relobj : public Relobj
     return this->local_values_[sym].output_symtab_index();
   }
 
+  // Return the index of local symbol SYM in the dynamic symbol
+  // table.  A value of -1U means that the symbol is not being output.
+  unsigned int
+  dynsym_index(unsigned int sym) const
+  {
+    gold_assert(sym < this->local_values_.size());
+    return this->local_values_[sym].output_dynsym_index();
+  }
+
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
   sized_target()
@@ -764,6 +865,13 @@ class Sized_relobj : public Relobj
   Address
   local_value(unsigned int shndx, Address value, bool is_section_symbol,
 	      Address addend) const;
+
+  void
+  set_needs_output_dynsym_entry(unsigned int sym)
+  {
+    gold_assert(sym < this->local_values_.size());
+    this->local_values_[sym].set_needs_output_dynsym_entry();
+  }
 
   // Return whether the local symbol SYMNDX has a GOT offset.
   // For TLS symbols, the GOT entry will hold its tp-relative offset.
@@ -878,10 +986,22 @@ class Sized_relobj : public Relobj
   do_scan_relocs(const General_options&, Symbol_table*, Layout*,
 		 Read_relocs_data*);
 
+  // Count the local symbols.
+  void
+  do_count_local_symbols(Stringpool_template<char>*,
+                            Stringpool_template<char>*);
+
   // Finalize the local symbols.
   unsigned int
-  do_finalize_local_symbols(unsigned int, off_t,
-			    Stringpool_template<char>*);
+  do_finalize_local_symbols(unsigned int, off_t);
+
+  // Set the offset where local dynamic symbol information will be stored.
+  unsigned int
+  do_set_local_dynsym_indexes(unsigned int);
+
+  // Set the offset where local dynamic symbol information will be stored.
+  unsigned int
+  do_set_local_dynsym_offset(off_t);
 
   // Relocate the input sections and write out the local symbols.
   void
@@ -978,6 +1098,7 @@ class Sized_relobj : public Relobj
   // Write out the local symbols.
   void
   write_local_symbols(Output_file*,
+		      const Stringpool_template<char>*,
 		      const Stringpool_template<char>*);
 
   // The GOT offsets of local symbols. This map also stores GOT offsets
@@ -1007,10 +1128,15 @@ class Sized_relobj : public Relobj
   unsigned int local_symbol_count_;
   // The number of local symbols which go into the output file.
   unsigned int output_local_symbol_count_;
+  // The number of local symbols which go into the output file's dynamic
+  // symbol table.
+  unsigned int output_local_dynsym_count_;
   // The entries in the symbol table for the external symbols.
   Symbols symbols_;
   // File offset for local symbols.
   off_t local_symbol_offset_;
+  // File offset for local dynamic symbols.
+  off_t local_dynsym_offset_;
   // Values of local symbols.
   Local_values local_values_;
   // GOT offsets for local non-TLS symbols, and tp-relative offsets

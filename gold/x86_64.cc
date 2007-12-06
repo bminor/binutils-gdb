@@ -186,11 +186,20 @@ class Target_x86_64 : public Sized_target<64, false>
    private:
     // Do a TLS relocation.
     inline void
-    relocate_tls(const Relocate_info<64, false>*, size_t relnum,
-		 const elfcpp::Rela<64, false>&,
+    relocate_tls(const Relocate_info<64, false>*, Target_x86_64*,
+                 size_t relnum, const elfcpp::Rela<64, false>&,
 		 unsigned int r_type, const Sized_symbol<64>*,
 		 const Symbol_value<64>*,
 		 unsigned char*, elfcpp::Elf_types<64>::Elf_Addr, off_t);
+
+    // Do a TLS General-Dynamic to Local-Exec transition.
+    inline void
+    tls_gd_to_ie(const Relocate_info<64, false>*, size_t relnum,
+		 Output_segment* tls_segment,
+		 const elfcpp::Rela<64, false>&, unsigned int r_type,
+		 elfcpp::Elf_types<64>::Elf_Addr value,
+		 unsigned char* view,
+		 off_t view_size);
 
     // Do a TLS General-Dynamic to Local-Exec transition.
     inline void
@@ -745,7 +754,7 @@ Target_x86_64::Scan::local(const General_options&,
                            Output_section* output_section,
                            const elfcpp::Rela<64, false>& reloc,
                            unsigned int r_type,
-                           const elfcpp::Sym<64, false>&)
+                           const elfcpp::Sym<64, false>& lsym)
 {
   switch (r_type)
     {
@@ -823,16 +832,17 @@ Target_x86_64::Scan::local(const General_options&,
         if (got->add_local(object, r_sym))
           {
             // If we are generating a shared object, we need to add a
-            // dynamic RELATIVE relocation for this symbol.
+            // dynamic relocation for this symbol's GOT entry.
             if (parameters->output_is_position_independent())
               {
-		// FIXME: R_X86_64_RELATIVE assumes a 64-bit relocation.
-		gold_assert(r_type != elfcpp::R_X86_64_GOT32);
-
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-                rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                                    output_section, data_shndx,
-                                    reloc.get_r_offset(), 0);
+		// R_X86_64_RELATIVE assumes a 64-bit relocation.
+		if (r_type != elfcpp::R_X86_64_GOT32)
+                  rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
+                                      got, object->local_got_offset(r_sym), 0);
+                else
+                  rela_dyn->add_local(object, r_sym, r_type,
+                                      got, object->local_got_offset(r_sym), 0);
               }
           }
         // For GOTPLT64, we'd normally want a PLT section, but since
@@ -868,34 +878,68 @@ Target_x86_64::Scan::local(const General_options&,
 	switch (r_type)
 	  {
           case elfcpp::R_X86_64_TLSGD:       // General-dynamic
+            if (optimized_type == tls::TLSOPT_NONE)
+              {
+                // Create a pair of GOT entries for the module index and
+                // dtv-relative offset.
+                Output_data_got<64, false>* got
+                    = target->got_section(symtab, layout);
+                unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
+                got->add_local_tls_with_rela(object, r_sym,
+                                             lsym.get_st_shndx(), true,
+                                             target->rela_dyn_section(layout),
+                                             elfcpp::R_X86_64_DTPMOD64);
+              }
+            else if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_local(object, r_type);
+            break;
+
           case elfcpp::R_X86_64_GOTPC32_TLSDESC:
           case elfcpp::R_X86_64_TLSDESC_CALL:
 	    // FIXME: If not relaxing to LE, we need to generate
-	    // DTPMOD64 and DTPOFF64 relocs.
+	    // a GOT entry with a R_x86_64_TLSDESC reloc.
 	    if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);
 	    break;
 
           case elfcpp::R_X86_64_TLSLD:       // Local-dynamic
-          case elfcpp::R_X86_64_DTPOFF32:
-          case elfcpp::R_X86_64_DTPOFF64:
-	    // FIXME: If not relaxing to LE, we need to generate a
-	    // DTPMOD64 reloc.
-	    if (optimized_type != tls::TLSOPT_TO_LE)
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create a GOT entry for the module index.
+	        Output_data_got<64, false>* got
+	            = target->got_section(symtab, layout);
+	        unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
+                got->add_local_tls_with_rela(object, r_sym,
+                                             lsym.get_st_shndx(), false,
+                                             target->rela_dyn_section(layout),
+                                             elfcpp::R_X86_64_DTPMOD64);
+	      }
+	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);
 	    break;
 
+          case elfcpp::R_X86_64_DTPOFF32:
+          case elfcpp::R_X86_64_DTPOFF64:
+	    break;
+
           case elfcpp::R_X86_64_GOTTPOFF:    // Initial-exec
-            // FIXME: If not relaxing to LE, we need to generate a
-            // TPOFF64 reloc.
-            if (optimized_type != tls::TLSOPT_TO_LE)
+            if (optimized_type == tls::TLSOPT_NONE)
+              {
+	        // Create a GOT entry for the tp-relative offset.
+	        Output_data_got<64, false>* got
+	            = target->got_section(symtab, layout);
+	        unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
+	        got->add_local_with_rela(object, r_sym,
+	                                 target->rela_dyn_section(layout),
+	                                 elfcpp::R_X86_64_TPOFF64);
+              }
+            else if (optimized_type != tls::TLSOPT_TO_LE)
               unsupported_reloc_local(object, r_type);
             break;
 
           case elfcpp::R_X86_64_TPOFF32:     // Local-exec
-	    // FIXME: If generating a shared object, we need to copy
-	    // this relocation into the object.
-	    gold_assert(!output_is_shared);
+            if (output_is_shared)
+              unsupported_reloc_local(object, r_type);
 	    break;
 
           default:
@@ -968,8 +1012,8 @@ Target_x86_64::Scan::global(const General_options& options,
           {
             if (target->may_need_copy_reloc(gsym))
               {
-                target->copy_reloc(&options, symtab, layout, object, data_shndx,
-                                   output_section, gsym, reloc);
+                target->copy_reloc(&options, symtab, layout, object,
+                                   data_shndx, output_section, gsym, reloc);
               }
             else if (r_type == elfcpp::R_X86_64_64
                      && gsym->can_use_relative_reloc(false))
@@ -1004,8 +1048,8 @@ Target_x86_64::Scan::global(const General_options& options,
           {
             if (target->may_need_copy_reloc(gsym))
               {
-                target->copy_reloc(&options, symtab, layout, object, data_shndx,
-                                   output_section, gsym, reloc);
+                target->copy_reloc(&options, symtab, layout, object,
+                                   data_shndx, output_section, gsym, reloc);
               }
             else
               {
@@ -1026,18 +1070,19 @@ Target_x86_64::Scan::global(const General_options& options,
       {
         // The symbol requires a GOT entry.
         Output_data_got<64, false>* got = target->got_section(symtab, layout);
-        if (got->add_global(gsym))
-	  {
+        if (gsym->final_value_is_known())
+          got->add_global(gsym);
+        else
+          {
             // If this symbol is not fully resolved, we need to add a
             // dynamic relocation for it.
-            if (!gsym->final_value_is_known())
+            Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+            if (gsym->is_from_dynobj() || gsym->is_preemptible())
+              got->add_global_with_rela(gsym, rela_dyn,
+                                        elfcpp::R_X86_64_GLOB_DAT);
+            else
               {
-                Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-                if (gsym->is_from_dynobj()
-		    || gsym->is_preemptible())
-                  rela_dyn->add_global(gsym, elfcpp::R_X86_64_GLOB_DAT, got,
-                                       gsym->got_offset(), 0);
-                else
+                if (got->add_global(gsym))
                   {
                     rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
                                         got, gsym->got_offset(), 0);
@@ -1110,6 +1155,30 @@ Target_x86_64::Scan::global(const General_options& options,
 	switch (r_type)
 	  {
           case elfcpp::R_X86_64_TLSGD:       // General-dynamic
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+                // Create a pair of GOT entries for the module index and
+                // dtv-relative offset.
+                Output_data_got<64, false>* got
+                    = target->got_section(symtab, layout);
+                got->add_global_tls_with_rela(gsym,
+                                              target->rela_dyn_section(layout),
+                                              elfcpp::R_X86_64_DTPMOD64,
+                                              elfcpp::R_X86_64_DTPOFF64);
+	      }
+	    else if (optimized_type == tls::TLSOPT_TO_IE)
+	      {
+                // Create a GOT entry for the tp-relative offset.
+                Output_data_got<64, false>* got
+                    = target->got_section(symtab, layout);
+                got->add_global_with_rela(gsym,
+                                          target->rela_dyn_section(layout),
+                                          elfcpp::R_X86_64_TPOFF64);
+	      }
+	    else if (optimized_type != tls::TLSOPT_TO_LE)
+	      unsupported_reloc_global(object, r_type, gsym);
+	    break;
+
           case elfcpp::R_X86_64_GOTPC32_TLSDESC:
           case elfcpp::R_X86_64_TLSDESC_CALL:
 	    // FIXME: If not relaxing to LE, we need to generate
@@ -1119,25 +1188,40 @@ Target_x86_64::Scan::global(const General_options& options,
 	    break;
 
           case elfcpp::R_X86_64_TLSLD:       // Local-dynamic
-          case elfcpp::R_X86_64_DTPOFF32:
-          case elfcpp::R_X86_64_DTPOFF64:
-	    // FIXME: If not relaxing to LE, we need to generate a
-	    // DTPMOD64 reloc.
-	    if (optimized_type != tls::TLSOPT_TO_LE)
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create a GOT entry for the module index.
+	        Output_data_got<64, false>* got
+	            = target->got_section(symtab, layout);
+                got->add_global_tls_with_rela(gsym,
+                                              target->rela_dyn_section(layout),
+                                              elfcpp::R_X86_64_DTPMOD64);
+	      }
+	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_global(object, r_type, gsym);
 	    break;
 
+          case elfcpp::R_X86_64_DTPOFF32:
+          case elfcpp::R_X86_64_DTPOFF64:
+	    break;
+
           case elfcpp::R_X86_64_GOTTPOFF:    // Initial-exec
-            // FIXME: If not relaxing to LE, we need to generate a
-            // TPOFF64 reloc.
-            if (optimized_type != tls::TLSOPT_TO_LE)
+            if (optimized_type == tls::TLSOPT_NONE)
+              {
+	        // Create a GOT entry for the tp-relative offset.
+	        Output_data_got<64, false>* got
+	            = target->got_section(symtab, layout);
+	        got->add_global_with_rela(gsym,
+	                                  target->rela_dyn_section(layout),
+	                                  elfcpp::R_X86_64_TPOFF64);
+              }
+            else if (optimized_type != tls::TLSOPT_TO_LE)
               unsupported_reloc_global(object, r_type, gsym);
             break;
 
           case elfcpp::R_X86_64_TPOFF32:     // Local-exec
-	    // FIXME: If generating a shared object, we need to copy
-	    // this relocation into the object.
-	    gold_assert(is_final);
+            if (parameters->output_is_shared())
+              unsupported_reloc_local(object, r_type);
 	    break;
 
           default:
@@ -1312,6 +1396,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
       else
         {
           unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
+          gold_assert(object->local_has_got_offset(r_sym));
           got_offset = object->local_got_offset(r_sym) - target->got_size();
         }
       have_got_offset = true;
@@ -1477,8 +1562,8 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_DTPOFF64:
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
-      this->relocate_tls(relinfo, relnum, rela, r_type, gsym, psymval, view,
-			 address, view_size);
+      this->relocate_tls(relinfo, target, relnum, rela, r_type, gsym, psymval,
+                         view, address, view_size);
       break;
 
     case elfcpp::R_X86_64_SIZE32:
@@ -1497,6 +1582,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
 
 inline void
 Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
+                                      Target_x86_64* target,
                                       size_t relnum,
                                       const elfcpp::Rela<64, false>& rela,
                                       unsigned int r_type,
@@ -1507,12 +1593,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
                                       off_t view_size)
 {
   Output_segment* tls_segment = relinfo->layout->tls_segment();
-  if (tls_segment == NULL)
-    {
-      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
-			     _("TLS reloc but no TLS segment"));
-      return;
-    }
+
+  const Sized_relobj<64, false>* object = relinfo->object;
 
   elfcpp::Elf_types<64>::Elf_Addr value = psymval->value(relinfo->object, 0);
 
@@ -1528,11 +1610,42 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_TLSDESC_CALL:
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
+	  gold_assert(tls_segment != NULL);
 	  this->tls_gd_to_le(relinfo, relnum, tls_segment,
 			     rela, r_type, value, view,
 			     view_size);
 	  break;
 	}
+      else
+        {
+          unsigned int got_offset;
+          if (gsym != NULL)
+            {
+              gold_assert(gsym->has_tls_got_offset(true));
+              got_offset = gsym->tls_got_offset(true) - target->got_size();
+            }
+          else
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
+              gold_assert(object->local_has_tls_got_offset(r_sym, true));
+              got_offset = (object->local_tls_got_offset(r_sym, true)
+                            - target->got_size());
+            }
+          if (optimized_type == tls::TLSOPT_TO_IE)
+            {
+              gold_assert(tls_segment != NULL);
+              this->tls_gd_to_ie(relinfo, relnum, tls_segment, rela, r_type,
+                                 got_offset, view, view_size);
+              break;
+            }
+          else if (optimized_type == tls::TLSOPT_NONE)
+            {
+              // Relocate the field with the offset of the pair of GOT
+              // entries.
+              Relocate_functions<64, false>::rel64(view, got_offset);
+              break;
+            }
+        }
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unsupported reloc %u"), r_type);
       break;
@@ -1540,15 +1653,37 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_TLSLD:            // Local-dynamic
       if (optimized_type == tls::TLSOPT_TO_LE)
         {
+          gold_assert(tls_segment != NULL);
 	  this->tls_ld_to_le(relinfo, relnum, tls_segment, rela, r_type,
 			     value, view, view_size);
 	  break;
+        }
+      else if (optimized_type == tls::TLSOPT_NONE)
+        {
+          // Relocate the field with the offset of the GOT entry for
+          // the module index.
+          unsigned int got_offset;
+          if (gsym != NULL)
+            {
+              gold_assert(gsym->has_tls_got_offset(false));
+              got_offset = gsym->tls_got_offset(false) - target->got_size();
+            }
+          else
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
+              gold_assert(object->local_has_tls_got_offset(r_sym, false));
+              got_offset = (object->local_tls_got_offset(r_sym, false)
+                            - target->got_size());
+            }
+          Relocate_functions<64, false>::rel64(view, got_offset);
+          break;
         }
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unsupported reloc %u"), r_type);
       break;
 
     case elfcpp::R_X86_64_DTPOFF32:
+      gold_assert(tls_segment != NULL);
       if (optimized_type == tls::TLSOPT_TO_LE)
         value = value - (tls_segment->vaddr() + tls_segment->memsz());
       else
@@ -1557,6 +1692,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_DTPOFF64:
+      gold_assert(tls_segment != NULL);
       if (optimized_type == tls::TLSOPT_TO_LE)
         value = value - (tls_segment->vaddr() + tls_segment->memsz());
       else
@@ -1567,11 +1703,32 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
+          gold_assert(tls_segment != NULL);
 	  Target_x86_64::Relocate::tls_ie_to_le(relinfo, relnum, tls_segment,
                                                 rela, r_type, value, view,
                                                 view_size);
 	  break;
 	}
+      else if (optimized_type == tls::TLSOPT_NONE)
+        {
+          // Relocate the field with the offset of the GOT entry for
+          // the tp-relative offset of the symbol.
+          unsigned int got_offset;
+          if (gsym != NULL)
+            {
+              gold_assert(gsym->has_got_offset());
+              got_offset = gsym->got_offset() - target->got_size();
+            }
+          else
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
+              gold_assert(object->local_has_got_offset(r_sym));
+              got_offset = (object->local_got_offset(r_sym)
+                            - target->got_size());
+            }
+          Relocate_functions<64, false>::rel64(view, got_offset);
+          break;
+        }
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unsupported reloc type %u"),
 			     r_type);
@@ -1582,6 +1739,41 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       Relocate_functions<64, false>::rel32(view, value);
       break;
     }
+}
+
+// Do a relocation in which we convert a TLS General-Dynamic to an
+// Initial-Exec.
+
+inline void
+Target_x86_64::Relocate::tls_gd_to_ie(const Relocate_info<64, false>* relinfo,
+                                      size_t relnum,
+                                      Output_segment* tls_segment,
+                                      const elfcpp::Rela<64, false>& rela,
+                                      unsigned int,
+                                      elfcpp::Elf_types<64>::Elf_Addr value,
+                                      unsigned char* view,
+                                      off_t view_size)
+{
+  // .byte 0x66; leaq foo@tlsgd(%rip),%rdi;
+  // .word 0x6666; rex64; call __tls_get_addr
+  // ==> movq %fs:0,%rax; addq x@gottpoff(%rip),%rax
+
+  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -4);
+  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 12);
+
+  tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+                 (memcmp(view - 4, "\x66\x48\x8d\x3d", 4) == 0));
+  tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+                 (memcmp(view + 4, "\x66\x66\x48\xe8", 4) == 0));
+
+  memcpy(view - 4, "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0\0", 16);
+
+  value = value - (tls_segment->vaddr() + tls_segment->memsz());
+  Relocate_functions<64, false>::rela32(view + 8, value, 0);
+
+  // The next reloc should be a PLT32 reloc against __tls_get_addr.
+  // We can skip it.
+  this->skip_call_tls_get_addr_ = true;
 }
 
 // Do a relocation in which we convert a TLS General-Dynamic to a

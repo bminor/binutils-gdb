@@ -390,7 +390,7 @@ Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
     }
 
   // Write out the local symbols.
-  this->write_local_symbols(of, layout->sympool());
+  this->write_local_symbols(of, layout->sympool(), layout->dynpool());
 }
 
 // Write section data to the output file.  PSHDRS points to the

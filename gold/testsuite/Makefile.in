@@ -1330,8 +1330,8 @@ uninstall-am: uninstall-info-am
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@undef_symbol.o: undef_symbol.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -fPIC $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@undef_symbol.so: undef_symbol.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared undef_symbol.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@undef_symbol.so: undef_symbol.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared undef_symbol.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so "2>$@"
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so 2>$@; \
@@ -1386,31 +1386,31 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_2_pic.o: two_file_test_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1.so: two_file_test_1_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared two_file_test_1_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_2.so: two_file_test_2_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared two_file_test_2_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared two_file_test_1_pic.o two_file_test_2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1.so: two_file_test_1_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_2.so: two_file_test_2_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_2_pic.o
 
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_nonpic.so: two_file_test_1.o
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared two_file_test_1.o
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_2_nonpic.so: two_file_test_2.o
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared two_file_test_2.o
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared two_file_test_1.o two_file_test_2.o
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_nonpic.so: two_file_test_1.o gcctestdir/ld
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_2_nonpic.so: two_file_test_2.o gcctestdir/ld
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2.o
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o gcctestdir/ld
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_2.o
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_1_pic.o: exception_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_2_pic.o: exception_test_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_1.so: exception_test_1_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared exception_test_1_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_2.so: exception_test_2_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared exception_test_2_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared exception_test_1_pic.o exception_test_2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_1.so: exception_test_1_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared exception_test_1_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_2.so: exception_test_2_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared exception_test_2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared exception_test_1_pic.o exception_test_2_pic.o
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_pic.o: tls_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
@@ -1418,11 +1418,11 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_file2_pic.o: tls_test_file2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -shared tls_test_pic.o tls_test_file2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o
 
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -shared tls_test.o tls_test_file2.o
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o gcctestdir/ld
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

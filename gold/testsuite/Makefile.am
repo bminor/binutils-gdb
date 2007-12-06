@@ -177,8 +177,8 @@ debug_msg_ndebug.err: debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation
 
 undef_symbol.o: undef_symbol.cc
 	$(CXXCOMPILE) -O0 -g -c -fPIC $<
-undef_symbol.so: undef_symbol.o
-	$(CXXLINK) -shared undef_symbol.o
+undef_symbol.so: undef_symbol.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared undef_symbol.o
 undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
 	@echo $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so "2>$@"
 	@if $(CXXLINK) -Bgcctestdir/ -o undef_symbol_test undef_symbol_main.o undef_symbol.so 2>$@; \
@@ -302,12 +302,12 @@ two_file_test_1_pic.o: two_file_test_1.cc
 two_file_test_2_pic.o: two_file_test_2.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
-two_file_shared_1.so: two_file_test_1_pic.o
-	$(CXXLINK) -shared two_file_test_1_pic.o
-two_file_shared_2.so: two_file_test_2_pic.o
-	$(CXXLINK) -shared two_file_test_2_pic.o
-two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o
-	$(CXXLINK) -shared two_file_test_1_pic.o two_file_test_2_pic.o
+two_file_shared_1.so: two_file_test_1_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o
+two_file_shared_2.so: two_file_test_2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2_pic.o
+two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_2_pic.o
 
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
@@ -348,12 +348,12 @@ two_file_separate_shared_21_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_separate_shared_21_nonpic_test_LDADD = \
 	two_file_shared_2_nonpic.so two_file_shared_1_nonpic.so
 
-two_file_shared_1_nonpic.so: two_file_test_1.o
-	$(CXXLINK) -shared two_file_test_1.o
-two_file_shared_2_nonpic.so: two_file_test_2.o
-	$(CXXLINK) -shared two_file_test_2.o
-two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o
-	$(CXXLINK) -shared two_file_test_1.o two_file_test_2.o
+two_file_shared_1_nonpic.so: two_file_test_1.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o
+two_file_shared_2_nonpic.so: two_file_test_2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2.o
+two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_2.o
 
 endif
 
@@ -406,12 +406,12 @@ exception_test_1_pic.o: exception_test_1.cc
 exception_test_2_pic.o: exception_test_2.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
-exception_shared_1.so: exception_test_1_pic.o
-	$(CXXLINK) -shared exception_test_1_pic.o
-exception_shared_2.so: exception_test_2_pic.o
-	$(CXXLINK) -shared exception_test_2_pic.o
-exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o
-	$(CXXLINK) -shared exception_test_1_pic.o exception_test_2_pic.o
+exception_shared_1.so: exception_test_1_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared exception_test_1_pic.o
+exception_shared_2.so: exception_test_2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared exception_test_2_pic.o
+exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared exception_test_1_pic.o exception_test_2_pic.o
 
 weak_test_SOURCES = weak_test.cc
 weak_test_LDFLAGS = -Bgcctestdir/
@@ -449,8 +449,8 @@ tls_test_pic.o: tls_test.cc
 tls_test_file2_pic.o: tls_test_file2.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
-tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o
-	$(CXXLINK) -shared tls_test_pic.o tls_test_file2_pic.o
+tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o
 
 if FN_PTRS_IN_SO_WITHOUT_PIC
 
@@ -459,8 +459,8 @@ tls_shared_nonpic_test_DEPENDENCIES = gcctestdir/ld tls_test_shared_nonpic.so
 tls_shared_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 tls_shared_nonpic_test_LDADD = tls_test_shared_nonpic.so -lpthread
 
-tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o
-	$(CXXLINK) -shared tls_test.o tls_test_file2.o
+tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o
 
 endif
 

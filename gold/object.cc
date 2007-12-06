@@ -142,8 +142,10 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     symtab_shndx_(-1U),
     local_symbol_count_(0),
     output_local_symbol_count_(0),
+    output_local_dynsym_count_(0),
     symbols_(),
     local_symbol_offset_(0),
+    local_dynsym_offset_(0),
     local_values_(),
     local_got_offsets_(),
     has_eh_frame_(false)
@@ -290,6 +292,7 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   const int sym_size = This::sym_size;
   const unsigned int loccount = symtabshdr.get_sh_info();
   this->local_symbol_count_ = loccount;
+  this->local_values_.resize(loccount);
   off_t locsize = loccount * sym_size;
   off_t dataoff = symtabshdr.get_sh_offset();
   off_t datasize = symtabshdr.get_sh_size();
@@ -722,28 +725,22 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   sd->symbol_names = NULL;
 }
 
-// Finalize the local symbols.  Here we record the file offset at
-// which they should be output, we add their names to *POOL, and we
-// add their values to THIS->LOCAL_VALUES_.  Return the symbol index.
+// Finalize the local symbols.  Here we add their names to *POOL and
+// *DYNPOOL, and we add their values to THIS->LOCAL_VALUES_.
 // This function is always called from the main thread.  The actual
 // output of the local symbols will occur in a separate task.
 
 template<int size, bool big_endian>
-unsigned int
-Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
-							  off_t off,
-							  Stringpool* pool)
+void
+Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
+						       Stringpool* dynpool)
 {
   gold_assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0)
     {
       // This object has no symbols.  Weird but legal.
-      return index;
+      return;
     }
-
-  gold_assert(off == static_cast<off_t>(align_address(off, size >> 3)));
-
-  this->local_symbol_offset_ = off;
 
   // Read the symbol table section header.
   const unsigned int symtab_shndx = this->symtab_shndx_;
@@ -759,8 +756,6 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
 					      locsize, true);
 
-  this->local_values_.resize(loccount);
-
   // Read the symbol names.
   const unsigned int strtab_shndx = symtabshdr.get_sh_link();
   off_t strtab_size;
@@ -774,6 +769,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
   const std::vector<Map_to_output>& mo(this->map_to_output());
   unsigned int shnum = this->shnum();
   unsigned int count = 0;
+  unsigned int dyncount = 0;
   // Skip the first, dummy, symbol.
   psyms += sym_size;
   for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
@@ -787,11 +783,82 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 
       if (sym.get_st_type() == elfcpp::STT_SECTION)
 	lv.set_is_section_symbol();
+      else if (sym.get_st_type() == elfcpp::STT_TLS)
+	lv.set_is_tls_symbol();
 
+      // Save the input symbol value for use in do_finalize_local_symbols().
+      lv.set_input_value(sym.get_st_value());
+
+      // Decide whether this symbol should go into the output file.
+
+      if (shndx < shnum && mo[shndx].output_section == NULL)
+        {
+	  lv.set_no_output_symtab_entry();
+          continue;
+        }
+
+      if (sym.get_st_type() == elfcpp::STT_SECTION)
+	{
+	  lv.set_no_output_symtab_entry();
+	  continue;
+	}
+
+      if (sym.get_st_name() >= strtab_size)
+	{
+	  this->error(_("local symbol %u section name out of range: %u >= %u"),
+		      i, sym.get_st_name(),
+		      static_cast<unsigned int>(strtab_size));
+	  lv.set_no_output_symtab_entry();
+	  continue;
+	}
+
+      // Add the symbol to the symbol table string pool.
+      const char* name = pnames + sym.get_st_name();
+      pool->add(name, true, NULL);
+      ++count;
+
+      // If needed, add the symbol to the dynamic symbol table string pool.
+      if (lv.needs_output_dynsym_entry())
+        {
+          dynpool->add(name, true, NULL);
+          ++dyncount;
+        }
+    }
+
+  this->output_local_symbol_count_ = count;
+  this->output_local_dynsym_count_ = dyncount;
+}
+
+// Finalize the local symbols.  Here we add their values to
+// THIS->LOCAL_VALUES_ and set their output symbol table indexes.
+// This function is always called from the main thread.  The actual
+// output of the local symbols will occur in a separate task.
+
+template<int size, bool big_endian>
+unsigned int
+Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
+                                                          off_t off)
+{
+  gold_assert(off == static_cast<off_t>(align_address(off, size >> 3)));
+
+  const unsigned int loccount = this->local_symbol_count_;
+  this->local_symbol_offset_ = off;
+
+  const std::vector<Map_to_output>& mo(this->map_to_output());
+  unsigned int shnum = this->shnum();
+
+  for (unsigned int i = 1; i < loccount; ++i)
+    {
+      Symbol_value<size>& lv(this->local_values_[i]);
+
+      unsigned int shndx = lv.input_shndx();
+
+      // Set the output symbol value.
+      
       if (shndx >= elfcpp::SHN_LORESERVE)
 	{
 	  if (shndx == elfcpp::SHN_ABS)
-	    lv.set_output_value(sym.get_st_value());
+	    lv.set_output_value(lv.input_value());
 	  else
 	    {
 	      // FIXME: Handle SHN_XINDEX.
@@ -814,45 +881,61 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 	  if (os == NULL)
 	    {
 	      lv.set_output_value(0);
-	      lv.set_no_output_symtab_entry();
 	      continue;
 	    }
-
-	  if (mo[shndx].offset == -1)
-	    lv.set_input_value(sym.get_st_value());
+	  else if (mo[shndx].offset == -1)
+	    {
+	      // Leave the input value in place for SHF_MERGE sections.
+	    }
+          else if (lv.is_tls_symbol())
+	    lv.set_output_value(mo[shndx].output_section->tls_offset()
+				+ mo[shndx].offset
+				+ lv.input_value());
 	  else
 	    lv.set_output_value(mo[shndx].output_section->address()
 				+ mo[shndx].offset
-				+ sym.get_st_value());
+				+ lv.input_value());
 	}
 
-      // Decide whether this symbol should go into the output file.
-
-      if (sym.get_st_type() == elfcpp::STT_SECTION)
-	{
-	  lv.set_no_output_symtab_entry();
-	  continue;
-	}
-
-      if (sym.get_st_name() >= strtab_size)
-	{
-	  this->error(_("local symbol %u section name out of range: %u >= %u"),
-		      i, sym.get_st_name(),
-		      static_cast<unsigned int>(strtab_size));
-	  lv.set_no_output_symtab_entry();
-	  continue;
-	}
-
-      const char* name = pnames + sym.get_st_name();
-      pool->add(name, true, NULL);
-      lv.set_output_symtab_index(index);
-      ++index;
-      ++count;
+      if (lv.needs_output_symtab_entry())
+        {
+          lv.set_output_symtab_index(index);
+          ++index;
+        }
     }
-
-  this->output_local_symbol_count_ = count;
-
   return index;
+}
+
+// Set the output dynamic symbol table indexes for the local variables.
+
+template<int size, bool big_endian>
+unsigned int
+Sized_relobj<size, big_endian>::do_set_local_dynsym_indexes(unsigned int index)
+{
+  const unsigned int loccount = this->local_symbol_count_;
+  for (unsigned int i = 1; i < loccount; ++i)
+    {
+      Symbol_value<size>& lv(this->local_values_[i]);
+      if (lv.needs_output_dynsym_entry())
+        {
+          lv.set_output_dynsym_index(index);
+          ++index;
+        }
+    }
+  return index;
+}
+
+// Set the offset where local dynamic symbol information will be stored.
+// Returns the count of local symbols contributed to the symbol table by
+// this object.
+
+template<int size, bool big_endian>
+unsigned int
+Sized_relobj<size, big_endian>::do_set_local_dynsym_offset(off_t off)
+{
+  gold_assert(off == static_cast<off_t>(align_address(off, size >> 3)));
+  this->local_dynsym_offset_ = off;
+  return this->output_local_dynsym_count_;
 }
 
 // Return the value of the local symbol symndx.
@@ -905,9 +988,10 @@ Sized_relobj<size, big_endian>::local_value(unsigned int shndx,
 template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
-						    const Stringpool* sympool)
+						    const Stringpool* sympool,
+						    const Stringpool* dynpool)
 {
-  if (parameters->strip_all())
+  if (parameters->strip_all() && this->output_local_dynsym_count_ == 0)
     return;
 
   gold_assert(this->symtab_shndx_ != -1U);
@@ -939,23 +1023,29 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 							true);
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
-  // Get a view into the output file.
+  // Get views into the output file for the portions of the symbol table
+  // and the dynamic symbol table that we will be writing.
   off_t output_size = this->output_local_symbol_count_ * sym_size;
-  unsigned char* oview = of->get_output_view(this->local_symbol_offset_,
-					     output_size);
+  unsigned char* oview;
+  if (output_size > 0)
+    oview = of->get_output_view(this->local_symbol_offset_, output_size);
+
+  off_t dyn_output_size = this->output_local_dynsym_count_ * sym_size;
+  unsigned char* dyn_oview = NULL;
+  if (dyn_output_size > 0)
+    dyn_oview = of->get_output_view(this->local_dynsym_offset_,
+                                    dyn_output_size);
 
   const std::vector<Map_to_output>& mo(this->map_to_output());
 
   gold_assert(this->local_values_.size() == loccount);
 
   unsigned char* ov = oview;
+  unsigned char* dyn_ov = dyn_oview;
   psyms += sym_size;
   for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
     {
       elfcpp::Sym<size, big_endian> isym(psyms);
-
-      if (!this->local_values_[i].needs_output_symtab_entry())
-	continue;
 
       unsigned int st_shndx = isym.get_st_shndx();
       if (st_shndx < elfcpp::SHN_LORESERVE)
@@ -966,23 +1056,56 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
 	  st_shndx = mo[st_shndx].output_section->out_shndx();
 	}
 
-      elfcpp::Sym_write<size, big_endian> osym(ov);
+      // Write the symbol to the output symbol table.
+      if (!parameters->strip_all()
+	  && this->local_values_[i].needs_output_symtab_entry())
+        {
+          elfcpp::Sym_write<size, big_endian> osym(ov);
 
-      gold_assert(isym.get_st_name() < strtab_size);
-      const char* name = pnames + isym.get_st_name();
-      osym.put_st_name(sympool->get_offset(name));
-      osym.put_st_value(this->local_values_[i].value(this, 0));
-      osym.put_st_size(isym.get_st_size());
-      osym.put_st_info(isym.get_st_info());
-      osym.put_st_other(isym.get_st_other());
-      osym.put_st_shndx(st_shndx);
+          gold_assert(isym.get_st_name() < strtab_size);
+          const char* name = pnames + isym.get_st_name();
+          osym.put_st_name(sympool->get_offset(name));
+          osym.put_st_value(this->local_values_[i].value(this, 0));
+          osym.put_st_size(isym.get_st_size());
+          osym.put_st_info(isym.get_st_info());
+          osym.put_st_other(isym.get_st_other());
+          osym.put_st_shndx(st_shndx);
 
-      ov += sym_size;
+          ov += sym_size;
+        }
+
+      // Write the symbol to the output dynamic symbol table.
+      if (this->local_values_[i].needs_output_dynsym_entry())
+        {
+          gold_assert(dyn_ov < dyn_oview + dyn_output_size);
+          elfcpp::Sym_write<size, big_endian> osym(dyn_ov);
+
+          gold_assert(isym.get_st_name() < strtab_size);
+          const char* name = pnames + isym.get_st_name();
+          osym.put_st_name(dynpool->get_offset(name));
+          osym.put_st_value(this->local_values_[i].value(this, 0));
+          osym.put_st_size(isym.get_st_size());
+          osym.put_st_info(isym.get_st_info());
+          osym.put_st_other(isym.get_st_other());
+          osym.put_st_shndx(st_shndx);
+
+          dyn_ov += sym_size;
+        }
     }
 
-  gold_assert(ov - oview == output_size);
 
-  of->write_output_view(this->local_symbol_offset_, output_size, oview);
+  if (output_size > 0)
+    {
+      gold_assert(ov - oview == output_size);
+      of->write_output_view(this->local_symbol_offset_, output_size, oview);
+    }
+
+  if (dyn_output_size > 0)
+    {
+      gold_assert(dyn_ov - dyn_oview == dyn_output_size);
+      of->write_output_view(this->local_dynsym_offset_, dyn_output_size,
+                            dyn_oview);
+    }
 }
 
 // Set *INFO to symbolic information about the offset OFFSET in the

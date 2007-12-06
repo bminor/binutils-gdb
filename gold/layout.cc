@@ -658,6 +658,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   target->finalize_sections(this);
 
+  this->count_local_symbols(input_objects);
+
   this->create_gold_note();
   this->create_executable_stack_info(target);
 
@@ -677,7 +679,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
       std::vector<Symbol*> dynamic_symbols;
       unsigned int local_dynamic_count;
       Versions versions;
-      this->create_dynamic_symtab(target, symtab, &dynstr,
+      this->create_dynamic_symtab(input_objects, target, symtab, &dynstr,
 				  &local_dynamic_count, &dynamic_symbols,
 				  &versions);
 
@@ -728,6 +730,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Create the symbol table sections.
   this->create_symtab_sections(input_objects, symtab, &off);
+  if (!parameters->doing_static_link())
+    this->assign_local_dynsym_offsets(input_objects);
 
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();
@@ -1076,6 +1080,10 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	(*p)->set_offset();
     }
 
+  // Set the TLS offsets for each section in the PT_TLS segment.
+  if (this->tls_segment_ != NULL)
+    this->tls_segment_->set_tls_offsets();
+
   return off;
 }
 
@@ -1137,6 +1145,21 @@ Layout::set_section_indexes(unsigned int shndx)
   return shndx;
 }
 
+// Count the local symbols in the regular symbol table and the dynamic
+// symbol table, and build the respective string pools.
+
+void
+Layout::count_local_symbols(const Input_objects* input_objects)
+{
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
+       ++p)
+    {
+      Task_lock_obj<Object> tlo(**p);
+      (*p)->count_local_symbols(&this->sympool_, &this->dynpool_);
+    }
+}
+
 // Create the symbol table sections.  Here we also set the final
 // values of the symbols.  At this point all the loadable sections are
 // fully laid out.
@@ -1189,10 +1212,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
        p != input_objects->relobj_end();
        ++p)
     {
-      Task_lock_obj<Object> tlo(**p);
       unsigned int index = (*p)->finalize_local_symbols(local_symbol_index,
-							off,
-							&this->sympool_);
+                                                        off);
       off += (index - local_symbol_index) * symsize;
       local_symbol_index = index;
     }
@@ -1300,7 +1321,8 @@ Layout::create_shdrs(off_t* poff)
 // Create the dynamic symbol table.
 
 void
-Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
+Layout::create_dynamic_symtab(const Input_objects* input_objects,
+                              const Target* target, Symbol_table* symtab,
 			      Output_section **pdynstr,
 			      unsigned int* plocal_dynamic_count,
 			      std::vector<Symbol*>* pdynamic_symbols,
@@ -1326,10 +1348,15 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
 	}
     }
 
-  // FIXME: Some targets apparently require local symbols in the
-  // dynamic symbol table.  Here is where we will have to count them,
-  // and set the dynamic symbol indexes, and add the names to
-  // this->dynpool_.
+  // Count the local symbols that need to go in the dynamic symbol table,
+  // and set the dynamic symbol indexes.
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
+       ++p)
+    {
+      unsigned int new_index = (*p)->set_local_dynsym_indexes(index);
+      index = new_index;
+    }
 
   unsigned int local_symcount = index;
   *plocal_dynamic_count = local_symcount;
@@ -1417,6 +1444,28 @@ Layout::create_dynamic_symtab(const Target* target, Symbol_table* symtab,
   hashsec->set_entsize(4);
 
   odyn->add_section_address(elfcpp::DT_HASH, hashsec);
+}
+
+// Assign offsets to each local portion of the dynamic symbol table.
+
+void
+Layout::assign_local_dynsym_offsets(const Input_objects* input_objects)
+{
+  Output_section* dynsym = this->dynsym_section_;
+  gold_assert(dynsym != NULL);
+
+  off_t off = dynsym->offset();
+
+  // Skip the dummy symbol at the start of the section.
+  off += dynsym->entsize();
+
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
+       ++p)
+    {
+      unsigned int count = (*p)->set_local_dynsym_offset(off);
+      off += count * dynsym->entsize();
+    }
 }
 
 // Create the version sections.

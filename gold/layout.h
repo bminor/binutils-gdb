@@ -270,6 +270,11 @@ class Layout
   Output_segment*
   find_first_load_seg();
 
+  // Count the local symbols in the regular symbol table and the dynamic
+  // symbol table, and build the respective string pools.
+  void
+  count_local_symbols(const Input_objects*);
+
   // Create the output sections for the symbol table.
   void
   create_symtab_sections(const Input_objects*, Symbol_table*, off_t*);
@@ -284,10 +289,15 @@ class Layout
 
   // Create the dynamic symbol table.
   void
-  create_dynamic_symtab(const Target*, Symbol_table*, Output_section** pdynstr,
+  create_dynamic_symtab(const Input_objects*, const Target*,
+                        Symbol_table*, Output_section** pdynstr,
 			unsigned int* plocal_dynamic_count,
 			std::vector<Symbol*>* pdynamic_symbols,
 			Versions* versions);
+
+  // Assign offsets to each local portion of the dynamic symbol table.
+  void
+  assign_local_dynsym_offsets(const Input_objects*);
 
   // Finish the .dynamic section and PT_DYNAMIC segment.
   void

@@ -160,6 +160,17 @@ class Output_data
       }
   }
 
+  // Set the TLS offset.  Called only for SHT_TLS sections.
+  void
+  set_tls_offset(uint64_t tls_base)
+  { this->do_set_tls_offset(tls_base); }
+
+  // Return the TLS offset, relative to the base of the TLS segment.
+  // Valid only for SHT_TLS sections.
+  uint64_t
+  tls_offset() const
+  { return this->do_tls_offset(); }
+
   // Write the data to the output file.  This is called after
   // Layout::finalize is complete.
   void
@@ -230,6 +241,17 @@ class Output_data
   // Layout::finalize, when the section address is set.
   virtual void
   set_final_data_size()
+  { gold_unreachable(); }
+
+  // Set the TLS offset.  Called only for SHT_TLS sections.
+  virtual void
+  do_set_tls_offset(uint64_t)
+  { gold_unreachable(); }
+
+  // Return the TLS offset, relative to the base of the TLS segment.
+  // Valid only for SHT_TLS sections.
+  virtual uint64_t
+  do_tls_offset() const
   { gold_unreachable(); }
 
   // Functions that child classes may call.
@@ -681,75 +703,28 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   // A reloc against a global symbol.
 
   Output_reloc(Symbol* gsym, unsigned int type, Output_data* od,
-	       Address address)
-    : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-      shndx_(INVALID_CODE)
-  {
-    this->u1_.gsym = gsym;
-    this->u2_.od = od;
-  }
+	       Address address);
 
   Output_reloc(Symbol* gsym, unsigned int type, Relobj* relobj,
-	       unsigned int shndx, Address address)
-    : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-      shndx_(shndx)
-  {
-    gold_assert(shndx != INVALID_CODE);
-    this->u1_.gsym = gsym;
-    this->u2_.relobj = relobj;
-  }
+	       unsigned int shndx, Address address);
 
   // A reloc against a local symbol.
 
   Output_reloc(Sized_relobj<size, big_endian>* relobj,
-	       unsigned int local_sym_index,
-	       unsigned int type,
-	       Output_data* od,
-	       Address address)
-    : address_(address), local_sym_index_(local_sym_index), type_(type),
-      shndx_(INVALID_CODE)
-  {
-    gold_assert(local_sym_index != GSYM_CODE
-		&& local_sym_index != INVALID_CODE);
-    this->u1_.relobj = relobj;
-    this->u2_.od = od;
-  }
+	       unsigned int local_sym_index, unsigned int type,
+	       Output_data* od, Address address);
 
   Output_reloc(Sized_relobj<size, big_endian>* relobj,
-	       unsigned int local_sym_index,
-	       unsigned int type,
-	       unsigned int shndx,
-	       Address address)
-    : address_(address), local_sym_index_(local_sym_index), type_(type),
-      shndx_(shndx)
-  {
-    gold_assert(local_sym_index != GSYM_CODE
-		&& local_sym_index != INVALID_CODE);
-    gold_assert(shndx != INVALID_CODE);
-    this->u1_.relobj = relobj;
-    this->u2_.relobj = relobj;
-  }
+	       unsigned int local_sym_index, unsigned int type,
+	       unsigned int shndx, Address address);
 
   // A reloc against the STT_SECTION symbol of an output section.
 
   Output_reloc(Output_section* os, unsigned int type, Output_data* od,
-	       Address address)
-    : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-      shndx_(INVALID_CODE)
-  {
-    this->u1_.os = os;
-    this->u2_.od = od;
-  }
+	       Address address);
 
   Output_reloc(Output_section* os, unsigned int type, Relobj* relobj,
-	       unsigned int shndx, Address address)
-    : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-      shndx_(shndx)
-  {
-    gold_assert(shndx != INVALID_CODE);
-    this->u1_.os = os;
-    this->u2_.relobj = relobj;
-  }
+	       unsigned int shndx, Address address);
 
   // Write the reloc entry to an output view.
   void
@@ -1070,6 +1045,8 @@ class Output_data_got : public Output_section_data_build
 {
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Valtype;
+  typedef Output_data_reloc<elfcpp::SHT_REL, true, size, big_endian> Rel_dyn;
+  typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian> Rela_dyn;
 
   Output_data_got()
     : Output_section_data_build(Output_data::default_alignment_for_size(size)),
@@ -1081,11 +1058,31 @@ class Output_data_got : public Output_section_data_build
   bool
   add_global(Symbol* gsym);
 
+  // Add an entry for a global symbol to the GOT, and add a dynamic
+  // relocation of type R_TYPE for the GOT entry.
+  void
+  add_global_with_rel(Symbol* gsym, Rel_dyn* rel_dyn, unsigned int r_type);
+
+  void
+  add_global_with_rela(Symbol* gsym, Rela_dyn* rela_dyn, unsigned int r_type);
+
   // Add an entry for a local symbol to the GOT.  This returns true if
   // this is a new GOT entry, false if the symbol already has a GOT
   // entry.
   bool
   add_local(Sized_relobj<size, big_endian>* object, unsigned int sym_index);
+
+  // Add an entry for a global symbol to the GOT, and add a dynamic
+  // relocation of type R_TYPE for the GOT entry.
+  void
+  add_local_with_rel(Sized_relobj<size, big_endian>* object,
+                     unsigned int sym_index, Rel_dyn* rel_dyn,
+                     unsigned int r_type);
+
+  void
+  add_local_with_rela(Sized_relobj<size, big_endian>* object,
+                      unsigned int sym_index, Rela_dyn* rela_dyn,
+                      unsigned int r_type);
 
   // Add an entry (or pair of entries) for a global TLS symbol to the GOT.
   // Return true if this is a new GOT entry, false if the symbol was
@@ -1093,12 +1090,51 @@ class Output_data_got : public Output_section_data_build
   bool
   add_global_tls(Symbol* gsym, bool need_pair);
 
+  // Add an entry for a global TLS symbol to the GOT, and add a dynamic
+  // relocation of type R_TYPE.
+  void
+  add_global_tls_with_rel(Symbol* gsym, Rel_dyn* rel_dyn,
+                          unsigned int r_type);
+
+  void
+  add_global_tls_with_rela(Symbol* gsym, Rela_dyn* rela_dyn,
+                           unsigned int r_type);
+
+  // Add a pair of entries for a global TLS symbol to the GOT, and add
+  // dynamic relocations of type MOD_R_TYPE and DTV_R_TYPE, respectively.
+  void
+  add_global_tls_with_rel(Symbol* gsym, Rel_dyn* rel_dyn,
+                          unsigned int mod_r_type,
+                          unsigned int dtv_r_type);
+
+  void
+  add_global_tls_with_rela(Symbol* gsym, Rela_dyn* rela_dyn,
+                           unsigned int mod_r_type,
+                           unsigned int dtv_r_type);
+
   // Add an entry (or pair of entries) for a local TLS symbol to the GOT.
   // This returns true if this is a new GOT entry, false if the symbol
   // already has a GOT entry.
   bool
   add_local_tls(Sized_relobj<size, big_endian>* object,
 		unsigned int sym_index, bool need_pair);
+
+  // Add an entry (or pair of entries) for a local TLS symbol to the GOT,
+  // and add a dynamic relocation of type R_TYPE for the first GOT entry.
+  // Because this is a local symbol, the first GOT entry can be relocated
+  // relative to a section symbol, and the second GOT entry will have an
+  // dtv-relative value that can be computed at link time.
+  void
+  add_local_tls_with_rel(Sized_relobj<size, big_endian>* object,
+                         unsigned int sym_index, unsigned int shndx,
+                         bool need_pair, Rel_dyn* rel_dyn,
+                         unsigned int r_type);
+
+  void
+  add_local_tls_with_rela(Sized_relobj<size, big_endian>* object,
+                         unsigned int sym_index, unsigned int shndx,
+                         bool need_pair, Rela_dyn* rela_dyn,
+                         unsigned int r_type);
 
   // Add a constant to the GOT.  This returns the offset of the new
   // entry from the start of the GOT.
@@ -1609,6 +1645,16 @@ class Output_section : public Output_data
   do_is_section_flag_set(elfcpp::Elf_Xword flag) const
   { return (this->flags_ & flag) != 0; }
 
+  // Set the TLS offset.  Called only for SHT_TLS sections.
+  void
+  do_set_tls_offset(uint64_t tls_base);
+
+  // Return the TLS offset, relative to the base of the TLS segment.
+  // Valid only for SHT_TLS sections.
+  uint64_t
+  do_tls_offset() const
+  { return this->tls_offset_; }
+
   // Modify the section name.  This is only permitted for an
   // unallocated section, and only before the size has been finalized.
   // Otherwise the name will not get into Layout::namepool_.
@@ -1933,6 +1979,9 @@ class Output_section : public Output_data
   // Whether this section requires post processing after all
   // relocations have been applied.
   bool requires_postprocessing_ : 1;
+  // For SHT_TLS sections, the offset of this section relative to the base
+  // of the TLS segment.
+  uint64_t tls_offset_;
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
@@ -2020,6 +2069,10 @@ class Output_segment
   // only be called for a non-PT_LOAD segment.
   void
   set_offset();
+
+  // Set the TLS offsets of the sections contained in the PT_TLS segment.
+  void
+  set_tls_offsets();
 
   // Return the number of output sections.
   unsigned int

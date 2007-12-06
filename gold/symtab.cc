@@ -1507,7 +1507,10 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 		    continue;
 		  }
 
-		value = sym->value() + os->address() + secoff;
+                if (sym->type() == elfcpp::STT_TLS)
+                  value = sym->value() + os->tls_offset() + secoff;
+                else
+		  value = sym->value() + os->address() + secoff;
 	      }
 	  }
 	  break;
@@ -1920,7 +1923,7 @@ Symbol_table::print_stats() const
 // that case.
 
 // This struct is used to compare line information, as returned by
-// Dwarf_line_info::one_addr2line.  It imlements a < comparison
+// Dwarf_line_info::one_addr2line.  It implements a < comparison
 // operator used with std::set.
 
 struct Odr_violation_compare
