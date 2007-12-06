@@ -6,7 +6,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
+   the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
 
@@ -48,7 +46,7 @@ struct addrmap_funcs
 
 struct addrmap
 {
-  struct addrmap_funcs *funcs;
+  const struct addrmap_funcs *funcs;
 };
 
 
@@ -160,7 +158,9 @@ addrmap_fixed_find (struct addrmap *this, CORE_ADDR addr)
 static struct addrmap *
 addrmap_fixed_create_fixed (struct addrmap *this, struct obstack *obstack)
 {
-  abort ();
+  internal_error (__FILE__, __LINE__,
+                  _("addrmap_create_fixed is not implemented yet "
+                    "for fixed addrmaps"));
 }
 
 
@@ -175,12 +175,12 @@ addrmap_fixed_relocate (struct addrmap *this, CORE_ADDR offset)
 }
 
 
-static struct addrmap_funcs addrmap_fixed_funcs =
+static const struct addrmap_funcs addrmap_fixed_funcs =
 {
-  .set_empty    = addrmap_fixed_set_empty,
-  .find         = addrmap_fixed_find,
-  .create_fixed = addrmap_fixed_create_fixed,
-  .relocate     = addrmap_fixed_relocate
+  addrmap_fixed_set_empty,
+  addrmap_fixed_find,
+  addrmap_fixed_create_fixed,
+  addrmap_fixed_relocate
 };
 
 
@@ -358,7 +358,9 @@ static void *
 addrmap_mutable_find (struct addrmap *this, CORE_ADDR addr)
 {
   /* Not needed yet.  */
-  abort ();
+  internal_error (__FILE__, __LINE__,
+                  _("addrmap_find is not implemented yet "
+                    "for mutable addrmaps"));
 }
 
 
@@ -429,16 +431,18 @@ static void
 addrmap_mutable_relocate (struct addrmap *this, CORE_ADDR offset)
 {
   /* Not needed yet.  */
-  abort ();
+  internal_error (__FILE__, __LINE__,
+                  _("addrmap_relocate is not implemented yet "
+                    "for mutable addrmaps"));
 }
 
 
-static struct addrmap_funcs addrmap_mutable_funcs =
+static const struct addrmap_funcs addrmap_mutable_funcs =
 {
-  .set_empty    = addrmap_mutable_set_empty,
-  .find         = addrmap_mutable_find,
-  .create_fixed = addrmap_mutable_create_fixed,
-  .relocate     = addrmap_mutable_relocate
+  addrmap_mutable_set_empty,
+  addrmap_mutable_find,
+  addrmap_mutable_create_fixed,
+  addrmap_mutable_relocate
 };
 
 

@@ -1,4 +1,14 @@
-2007-12-05  Jim Blandy  <jimb@codesourcery.com>
+2007-12-06  Jim Blandy  <jimb@codesourcery.com>
+
+	* addrmap.c, addrmap.h: Update to GPLv3.
+
+	* addrmap.c (struct addrmap): Make the referenced function table
+	const.
+	(addrmap_fixed_funcs, addrmap_mutable_funcs): Declare const.
+	Don't use designated initializers.
+
+	* addrmap.c (addrmap_fixed_create_fixed, addrmap_mutable_find)
+	(addrmap_mutable_relocate): Use internal_error, not abort.
 
 	* NEWS: Mention support for non-contiguous lexical blocks and
 	function bodies.
