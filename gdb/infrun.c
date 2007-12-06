@@ -218,9 +218,30 @@ static struct cmd_list_element *stop_command;
 
 static struct symbol *step_start_function;
 
-/* Nonzero if we are expecting a trace trap and should proceed from it.  */
+/* Nonzero if we are presently stepping over a breakpoint.
 
-static int trap_expected;
+   If we hit a breakpoint or watchpoint, and then continue,
+   we need to single step the current thread with breakpoints
+   disabled, to avoid hitting the same breakpoint or
+   watchpoint again.  And we should step just a single
+   thread and keep other threads stopped, so that 
+   other threads don't miss breakpoints while they are removed.
+
+   So, this variable simultaneously means that we need to single
+   step the current thread, keep other threads stopped, and that
+   breakpoints should be removed while we step.
+
+   This variable is set either:
+   - in proceed, when we resume inferior on user's explicit request
+   - in keep_going, if handle_inferior_event decides we need to
+   step over breakpoint.  
+
+   The variable is cleared in clear_proceed_status, called every
+   time before we call proceed.  The proceed calls wait_for_inferior,
+   which calls handle_inferior_event in a loop, and until 
+   wait_for_inferior exits, this variable is changed only by keep_going.  */
+
+static int stepping_over_breakpoint;
 
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
@@ -442,10 +463,14 @@ static CORE_ADDR singlestep_pc;
 static ptid_t saved_singlestep_ptid;
 static int stepping_past_singlestep_breakpoint;
 
-/* Similarly, if we are stepping another thread past a breakpoint,
-   save the original thread here so that we can resume stepping it later.  */
-static ptid_t stepping_past_breakpoint_ptid;
-static int stepping_past_breakpoint;
+/* If not equal to null_ptid, this means that after stepping over breakpoint
+   is finished, we need to switch to deferred_step_ptid, and step it.
+
+   The use case is when one thread has hit a breakpoint, and then the user 
+   has switched to another thread and issued 'step'. We need to step over
+   breakpoint in the thread which hit the breakpoint, but then continue
+   stepping the thread user has selected.  */
+static ptid_t deferred_step_ptid;
 
 
 /* Things to clean up if we QUIT out of resume ().  */
@@ -647,7 +672,7 @@ a command like `return' or `jump' to continue execution."));
 void
 clear_proceed_status (void)
 {
-  trap_expected = 0;
+  stepping_over_breakpoint = 0;
   step_range_start = 0;
   step_range_end = 0;
   step_frame_id = null_frame_id;
@@ -693,8 +718,7 @@ prepare_to_proceed (int step)
       /* If stepping, remember current thread to switch back to.  */
       if (step)
 	{
-	  stepping_past_breakpoint = 1;
-	  stepping_past_breakpoint_ptid = inferior_ptid;
+	  deferred_step_ptid = inferior_ptid;
 	}
 
       /* Switch back to WAIT_PID thread.  */
@@ -778,7 +802,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (oneproc)
     /* We will get a trace trap after one instruction.
        Continue it automatically and insert breakpoints then.  */
-    trap_expected = 1;
+    stepping_over_breakpoint = 1;
   else
     insert_breakpoints ();
 
@@ -842,7 +866,7 @@ start_remote (int from_tty)
   init_thread_list ();
   init_wait_for_inferior ();
   stop_soon = STOP_QUIETLY_REMOTE;
-  trap_expected = 0;
+  stepping_over_breakpoint = 0;
 
   /* Always go on waiting for the target, regardless of the mode. */
   /* FIXME: cagney/1999-09-23: At present it isn't possible to
@@ -887,7 +911,7 @@ init_wait_for_inferior (void)
   clear_proceed_status ();
 
   stepping_past_singlestep_breakpoint = 0;
-  stepping_past_breakpoint = 0;
+  deferred_step_ptid = null_ptid;
 }
 
 /* This enum encodes possible reasons for doing a target_wait, so that
@@ -924,7 +948,9 @@ struct execution_control_state
 {
   struct target_waitstatus ws;
   struct target_waitstatus *wp;
-  int another_trap;
+  /* Should we step over breakpoint next time keep_going 
+     is called?  */
+  int stepping_over_breakpoint;
   int random_signal;
   CORE_ADDR stop_func_start;
   CORE_ADDR stop_func_end;
@@ -1085,7 +1111,7 @@ fetch_inferior_event (void *client_data)
 void
 init_execution_control_state (struct execution_control_state *ecs)
 {
-  ecs->another_trap = 0;
+  ecs->stepping_over_breakpoint = 0;
   ecs->random_signal = 0;
   ecs->step_after_step_resume_breakpoint = 0;
   ecs->handling_longjmp = 0;	/* FIXME */
@@ -1140,20 +1166,20 @@ context_switch (struct execution_control_state *ecs)
     {				/* Perform infrun state context switch: */
       /* Save infrun state for the old thread.  */
       save_infrun_state (inferior_ptid, prev_pc,
-			 trap_expected, step_resume_breakpoint,
+			 stepping_over_breakpoint, step_resume_breakpoint,
 			 step_range_start,
 			 step_range_end, &step_frame_id,
-			 ecs->handling_longjmp, ecs->another_trap,
+			 ecs->handling_longjmp, ecs->stepping_over_breakpoint,
 			 ecs->stepping_through_solib_after_catch,
 			 ecs->stepping_through_solib_catchpoints,
 			 ecs->current_line, ecs->current_symtab);
 
       /* Load infrun state for the new thread.  */
       load_infrun_state (ecs->ptid, &prev_pc,
-			 &trap_expected, &step_resume_breakpoint,
+			 &stepping_over_breakpoint, &step_resume_breakpoint,
 			 &step_range_start,
 			 &step_range_end, &step_frame_id,
-			 &ecs->handling_longjmp, &ecs->another_trap,
+			 &ecs->handling_longjmp, &ecs->stepping_over_breakpoint,
 			 &ecs->stepping_through_solib_after_catch,
 			 &ecs->stepping_through_solib_catchpoints,
 			 &ecs->current_line, &ecs->current_symtab);
@@ -1610,17 +1636,15 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   stepping_past_singlestep_breakpoint = 0;
 
-  if (stepping_past_breakpoint)
+  if (!ptid_equal (deferred_step_ptid, null_ptid))
     {
-      stepping_past_breakpoint = 0;
-
       /* If we stopped for some other reason than single-stepping, ignore
 	 the fact that we were supposed to switch back.  */
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	{
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
-				"infrun: stepping_past_breakpoint\n");
+				"infrun: handling deferred step\n");
 
 	  /* Pull the single step breakpoints out of the target.  */
 	  if (singlestep_breakpoints_inserted_p)
@@ -1631,7 +1655,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	  /* Note: We do not call context_switch at this point, as the
 	     context is already set up for stepping the original thread.  */
-	  switch_to_thread (stepping_past_breakpoint_ptid);
+	  switch_to_thread (deferred_step_ptid);
+	  deferred_step_ptid = null_ptid;
 	  /* Suppress spurious "Switching to ..." message.  */
 	  previous_inferior_ptid = inferior_ptid;
 
@@ -1639,6 +1664,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  prepare_to_wait (ecs);
 	  return;
 	}
+
+      deferred_step_ptid = null_ptid;
     }
 
   /* See if a thread hit a thread-specific breakpoint that was meant for
@@ -1769,7 +1796,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 		context_switch (ecs);
 	      ecs->waiton_ptid = ecs->ptid;
 	      ecs->wp = &(ecs->ws);
-	      ecs->another_trap = 1;
+	      ecs->stepping_over_breakpoint = 1;
 
 	      ecs->infwait_state = infwait_thread_hop_state;
 	      keep_going (ecs);
@@ -1863,7 +1890,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 			    &ecs->stop_func_start, &ecs->stop_func_end);
   ecs->stop_func_start
     += gdbarch_deprecated_function_start_offset (current_gdbarch);
-  ecs->another_trap = 0;
+  ecs->stepping_over_breakpoint = 0;
   bpstat_clear (&stop_bpstat);
   stop_step = 0;
   stop_stack_dummy = 0;
@@ -1872,7 +1899,7 @@ handle_inferior_event (struct execution_control_state *ecs)
   stopped_by_random_signal = 0;
 
   if (stop_signal == TARGET_SIGNAL_TRAP
-      && trap_expected
+      && stepping_over_breakpoint
       && gdbarch_single_step_through_delay_p (current_gdbarch)
       && currently_stepping (ecs))
     {
@@ -1890,7 +1917,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	{
 	  /* The user issued a continue when stopped at a breakpoint.
 	     Set up for another trap and get out of here.  */
-         ecs->another_trap = 1;
+         ecs->stepping_over_breakpoint = 1;
          keep_going (ecs);
          return;
 	}
@@ -1899,10 +1926,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  /* The user issued a step when stopped at a breakpoint.
 	     Maybe we should stop, maybe we should not - the delay
 	     slot *might* correspond to a line of source.  In any
-	     case, don't decide that here, just set ecs->another_trap,
-	     making sure we single-step again before breakpoints are
-	     re-inserted.  */
-	  ecs->another_trap = 1;
+	     case, don't decide that here, just set 
+	     ecs->stepping_over_breakpoint, making sure we 
+	     single-step again before breakpoints are re-inserted.  */
+	  ecs->stepping_over_breakpoint = 1;
 	}
     }
 
@@ -1910,7 +1937,7 @@ handle_inferior_event (struct execution_control_state *ecs)
      The alternatives are:
      1) break; to really stop and return to the debugger,
      2) drop through to start up again
-     (set ecs->another_trap to 1 to single step once)
+     (set ecs->stepping_over_breakpoint to 1 to single step once)
      3) set ecs->random_signal to 1, and the decision between 1 and 2
      will be made according to the signal handling tables.  */
 
@@ -1994,7 +2021,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
 	  = !(bpstat_explains_signal (stop_bpstat)
-	      || trap_expected
+	      || stepping_over_breakpoint
 	      || (step_range_end && step_resume_breakpoint == NULL));
       else
 	{
@@ -2155,7 +2182,7 @@ process_event_stop_test:
         if (debug_infrun)
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SINGLE\n");
 	remove_breakpoints ();
-	ecs->another_trap = 1;
+	ecs->stepping_over_breakpoint = 1;
 	/* Still need to check other stuff, at least the case
 	   where we are stepping and step out of the right range.  */
 	break;
@@ -2216,7 +2243,7 @@ process_event_stop_test:
 	       to doing that.  */
 	    ecs->step_after_step_resume_breakpoint = 0;
 	    remove_breakpoints ();
-	    ecs->another_trap = 1;
+	    ecs->stepping_over_breakpoint = 1;
 	    keep_going (ecs);
 	    return;
 	  }
@@ -2301,13 +2328,13 @@ process_event_stop_test:
 
 	      /* Be sure to lift all breakpoints, so the inferior does
 	         actually step past this point... */
-	      ecs->another_trap = 1;
+	      ecs->stepping_over_breakpoint = 1;
 	      break;
 	    }
 	  else
 	    {
 	      /* We want to step over this breakpoint, then keep going.  */
-	      ecs->another_trap = 1;
+	      ecs->stepping_over_breakpoint = 1;
 	      break;
 	    }
 	}
@@ -2338,7 +2365,7 @@ process_event_stop_test:
 	{
           if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: stepping in dynamic linker\n");
-	  ecs->another_trap = 1;
+	  ecs->stepping_over_breakpoint = 1;
 	  keep_going (ecs);
 	  return;
 	}
@@ -2734,7 +2761,7 @@ currently_stepping (struct execution_control_state *ecs)
 {
   return ((!ecs->handling_longjmp
 	   && ((step_range_end && step_resume_breakpoint == NULL)
-	       || trap_expected))
+	       || stepping_over_breakpoint))
 	  || ecs->stepping_through_solib_after_catch
 	  || bpstat_should_step ());
 }
@@ -2913,7 +2940,7 @@ keep_going (struct execution_control_state *ecs)
   /* If we did not do break;, it means we should keep running the
      inferior and not return to debugger.  */
 
-  if (trap_expected && stop_signal != TARGET_SIGNAL_TRAP)
+  if (stepping_over_breakpoint && stop_signal != TARGET_SIGNAL_TRAP)
     {
       /* We took a signal (which we are supposed to pass through to
          the inferior, else we'd have done a break above) and we
@@ -2935,7 +2962,7 @@ keep_going (struct execution_control_state *ecs)
 	 already inserted breakpoints.  Therefore, we don't
 	 care if breakpoints were already inserted, or not.  */
       
-      if (!ecs->another_trap)
+      if (!ecs->stepping_over_breakpoint)
 	{
 	  struct gdb_exception e;
 	  /* Stop stepping when inserting breakpoints
@@ -2951,7 +2978,7 @@ keep_going (struct execution_control_state *ecs)
 	    }
 	}
 
-      trap_expected = ecs->another_trap;
+      stepping_over_breakpoint = ecs->stepping_over_breakpoint;
 
       /* Do not deliver SIGNAL_TRAP (except when the user explicitly
          specifies that such a signal should be delivered to the
@@ -3669,7 +3696,7 @@ struct inferior_status
   int stop_step;
   int stop_stack_dummy;
   int stopped_by_random_signal;
-  int trap_expected;
+  int stepping_over_breakpoint;
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
   struct frame_id step_frame_id;
@@ -3715,7 +3742,7 @@ save_inferior_status (int restore_stack_info)
   inf_status->stop_step = stop_step;
   inf_status->stop_stack_dummy = stop_stack_dummy;
   inf_status->stopped_by_random_signal = stopped_by_random_signal;
-  inf_status->trap_expected = trap_expected;
+  inf_status->stepping_over_breakpoint = stepping_over_breakpoint;
   inf_status->step_range_start = step_range_start;
   inf_status->step_range_end = step_range_end;
   inf_status->step_frame_id = step_frame_id;
@@ -3767,7 +3794,7 @@ restore_inferior_status (struct inferior_status *inf_status)
   stop_step = inf_status->stop_step;
   stop_stack_dummy = inf_status->stop_stack_dummy;
   stopped_by_random_signal = inf_status->stopped_by_random_signal;
-  trap_expected = inf_status->trap_expected;
+  stepping_over_breakpoint = inf_status->stepping_over_breakpoint;
   step_range_start = inf_status->step_range_start;
   step_range_end = inf_status->step_range_end;
   step_frame_id = inf_status->step_frame_id;

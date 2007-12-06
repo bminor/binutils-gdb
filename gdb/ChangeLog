@@ -1,3 +1,25 @@
+2007-12-06  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	Clarify infrun variable naming.
+	* infrun.c (trap_expected): Rename
+	to stepping_over_breakpoint.  Document.
+	(stepping_past_breakpoint): Remove.
+	(stepping_past_breakpoint_ptdi): Renamed
+	to deferred_step_ptid.
+	(struct execution_control_state): Rename
+	the another_trap field to stepping_over_breakpoint.
+	(struct inferior_status): Rename the trap_expected
+	field to stepping_over_breakpoint.
+	(clear_proceed_status, proceed)
+	(init_execution_control_state, context_switch)
+	(handle_inferior_event, currently_stepping)
+	(keep_going, save_inferior_status)
+	(restore_inferior_status, prepare_to_proceed): Adjust.
+	* gdbthread.h (struct thread_info): Rename the
+	trap_expected field to stepping_over_breakpoint.
+	* thread.c (load_infrun_state, save_infrun_state):
+	Adjust.
+
 2007-12-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-nat.c: Allow compilation if CORE_ADDR is 8 byte long.

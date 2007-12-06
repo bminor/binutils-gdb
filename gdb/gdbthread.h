@@ -49,7 +49,7 @@ struct thread_info
   struct symtab *current_symtab;
   int trap_expected;
   int handling_longjmp;
-  int another_trap;
+  int stepping_over_breakpoint;
 
   /* This is set TRUE when a catchpoint of a shared library event
      triggers.  Since we don't wish to leave the inferior in the
