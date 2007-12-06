@@ -722,7 +722,7 @@ readchar (void)
 
   bufp = buf;
   bufcnt--;
-  return *bufp++ & 0x7f;
+  return *bufp++;
 }
 
 /* Read a packet from the remote machine, with error checking,

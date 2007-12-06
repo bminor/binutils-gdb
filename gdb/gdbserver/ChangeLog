@@ -1,3 +1,7 @@
+2007-12-06  Mick Davis  <mickd@goanna.iinet.net.au>
+
+	* remote-utils.c (readchar): Allow binary data in received messages.
+
 2007-12-03  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* win32-low.c (attaching): New global.
