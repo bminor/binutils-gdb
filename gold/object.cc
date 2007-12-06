@@ -1026,7 +1026,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
   // Get views into the output file for the portions of the symbol table
   // and the dynamic symbol table that we will be writing.
   off_t output_size = this->output_local_symbol_count_ * sym_size;
-  unsigned char* oview;
+  unsigned char* oview = NULL;
   if (output_size > 0)
     oview = of->get_output_view(this->local_symbol_offset_, output_size);
 
