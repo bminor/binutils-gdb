@@ -1,3 +1,12 @@
+2007-12-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c: Allow compilation if CORE_ADDR is 8 byte long.
+	Add "gdb_stdint.h" dependency required for uintptr_t type use.
+	(handle_output_debug_string): Use uintptr_t typecast.
+	(handle_exception): Ditto.
+	(win32_xfer_memory): Ditto.
+	* Makefile.in (win32-nat.o): Add dependency to gdb_stdint header.
+
 2007-12-04  Jim Blandy  <jimb@codesourcery.com>
 
 	Support lexical blocks and function bodies that occupy

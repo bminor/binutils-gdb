@@ -48,6 +48,7 @@
 #include "objfiles.h"
 #include "gdb_obstack.h"
 #include "gdb_string.h"
+#include "gdb_stdint.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include <sys/param.h>
@@ -828,7 +829,8 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
   int retval = 0;
 
   if (!target_read_string
-    ((CORE_ADDR) current_event.u.DebugString.lpDebugStringData, &s, 1024, 0)
+	((CORE_ADDR) (uintptr_t) current_event.u.DebugString.lpDebugStringData,
+	&s, 1024, 0)
       || !s || !*s)
     /* nothing to do */;
   else if (strncmp (s, _CYGWIN_SIGNAL_STRING, sizeof (_CYGWIN_SIGNAL_STRING) - 1) != 0)
@@ -1022,7 +1024,8 @@ handle_exception (struct target_waitstatus *ourstatus)
 	   and will be sent as a cygwin-specific-signal.  So, ignore SEGVs if they show up
 	   within the text segment of the DLL itself. */
 	char *fn;
-	bfd_vma addr = (bfd_vma) current_event.u.Exception.ExceptionRecord.ExceptionAddress;
+	bfd_vma addr = (bfd_vma) (uintptr_t) current_event.u.Exception.
+					     ExceptionRecord.ExceptionAddress;
 	if ((!cygwin_exceptions && (addr >= cygwin_load_start && addr < cygwin_load_end))
 	    || (find_pc_partial_function (addr, &fn, NULL, NULL)
 		&& strncmp (fn, "KERNEL32!IsBad", strlen ("KERNEL32!IsBad")) == 0))
@@ -1935,17 +1938,20 @@ win32_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
   if (write)
     {
       DEBUG_MEM (("gdb: write target memory, %d bytes at 0x%08lx\n",
-		  len, (DWORD) memaddr));
-      if (!WriteProcessMemory (current_process_handle, (LPVOID) memaddr, our,
+		  len, (DWORD) (uintptr_t) memaddr));
+      if (!WriteProcessMemory (current_process_handle, 
+			       (LPVOID) (uintptr_t) memaddr, our,
 			       len, &done))
 	done = 0;
-      FlushInstructionCache (current_process_handle, (LPCVOID) memaddr, len);
+      FlushInstructionCache (current_process_handle, 
+			     (LPCVOID) (uintptr_t) memaddr, len);
     }
   else
     {
       DEBUG_MEM (("gdb: read target memory, %d bytes at 0x%08lx\n",
-		  len, (DWORD) memaddr));
-      if (!ReadProcessMemory (current_process_handle, (LPCVOID) memaddr, our,
+		  len, (DWORD) (uintptr_t) memaddr));
+      if (!ReadProcessMemory (current_process_handle, 
+			      (LPCVOID) (uintptr_t) memaddr, our,
 			      len, &done))
 	done = 0;
     }
