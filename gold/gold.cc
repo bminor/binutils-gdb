@@ -286,13 +286,16 @@ queue_final_tasks(const General_options& options,
     }
 
   // Queue a task to write out the symbol table.
-  final_blocker->add_blocker();
-  workqueue->queue(new Write_symbols_task(symtab,
-					  input_objects,
-					  layout->sympool(),
-					  layout->dynpool(),
-					  of,
-					  final_blocker));
+  if (!options.strip_all())
+    {
+      final_blocker->add_blocker();
+      workqueue->queue(new Write_symbols_task(symtab,
+					      input_objects,
+					      layout->sympool(),
+					      layout->dynpool(),
+					      of,
+					      final_blocker));
+    }
 
   // Queue a task to write out the output sections.
   output_sections_blocker->add_blocker();
