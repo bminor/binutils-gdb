@@ -1,4 +1,13 @@
 2007-12-06  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Localize infrun use of remove_breakpoints.
+	* infrun.c (handle_inferior_event): Remove
+	calls to remove_breakpoints, except where needed to
+	communicate change of breakpoint locations to inferior.
+	(keep_going): If steppping over breakpoint, remove
+	breakpoints.
+
+2007-12-06  Vladimir Prus  <vladimir@codesourcery.com>	
 	
 	Clarify infrun variable naming.
 	* infrun.c (trap_expected): Rename

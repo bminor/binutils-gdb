@@ -2146,7 +2146,6 @@ process_event_stop_test:
         if (debug_infrun)
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME\n");
 	disable_longjmp_breakpoint ();
-	remove_breakpoints ();
 	if (!gdbarch_get_longjmp_target_p (current_gdbarch)
 	    || !gdbarch_get_longjmp_target (current_gdbarch,
 					    get_current_frame (), &jmp_buf_pc))
@@ -2171,7 +2170,6 @@ process_event_stop_test:
       case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE:
         if (debug_infrun)
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_CLEAR_LONGJMP_RESUME\n");
-	remove_breakpoints ();
 	disable_longjmp_breakpoint ();
 	ecs->handling_longjmp = 0;	/* FIXME */
 	if (what.main_action == BPSTAT_WHAT_CLEAR_LONGJMP_RESUME)
@@ -2181,7 +2179,6 @@ process_event_stop_test:
       case BPSTAT_WHAT_SINGLE:
         if (debug_infrun)
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SINGLE\n");
-	remove_breakpoints ();
 	ecs->stepping_over_breakpoint = 1;
 	/* Still need to check other stuff, at least the case
 	   where we are stepping and step out of the right range.  */
@@ -2242,7 +2239,6 @@ process_event_stop_test:
 	       were trying to single-step off a breakpoint.  Go back
 	       to doing that.  */
 	    ecs->step_after_step_resume_breakpoint = 0;
-	    remove_breakpoints ();
 	    ecs->stepping_over_breakpoint = 1;
 	    keep_going (ecs);
 	    return;
@@ -2962,7 +2958,11 @@ keep_going (struct execution_control_state *ecs)
 	 already inserted breakpoints.  Therefore, we don't
 	 care if breakpoints were already inserted, or not.  */
       
-      if (!ecs->stepping_over_breakpoint)
+      if (ecs->stepping_over_breakpoint)
+	{
+	  remove_breakpoints ();
+	}
+      else
 	{
 	  struct gdb_exception e;
 	  /* Stop stepping when inserting breakpoints
