@@ -800,7 +800,7 @@ handle_v_requests (char *own_buf, char *status, int *signal,
 }
 
 void
-myresume (int step, int *signalp, char *statusp)
+myresume (char *own_buf, int step, int *signalp, char *statusp)
 {
   struct thread_resume resume_info[2];
   int n = 0;
@@ -1084,7 +1084,7 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
-	      myresume (0, &signal, &status);
+	      myresume (own_buf, 0, &signal, &status);
 	      break;
 	    case 'S':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
@@ -1092,15 +1092,15 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
-	      myresume (1, &signal, &status);
+	      myresume (own_buf, 1, &signal, &status);
 	      break;
 	    case 'c':
 	      signal = 0;
-	      myresume (0, &signal, &status);
+	      myresume (own_buf, 0, &signal, &status);
 	      break;
 	    case 's':
 	      signal = 0;
-	      myresume (1, &signal, &status);
+	      myresume (own_buf, 1, &signal, &status);
 	      break;
 	    case 'Z':
 	      {

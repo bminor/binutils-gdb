@@ -1,3 +1,8 @@
+2007-12-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (myresume): Add own_buf argument.
+	(main): Update calls.
+
 2007-12-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (linux_wait, linux_resume): Do not handle async I/O.
