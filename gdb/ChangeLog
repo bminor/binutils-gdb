@@ -1,5 +1,9 @@
 2007-12-07  Maciej W. Rozycki  <macro@mips.com>
 
+	* mips-tdep.c (extended_offset): Fix a comment.
+
+2007-12-07  Maciej W. Rozycki  <macro@mips.com>
+
 	* target.c (update_current_target): Inherit to_log_command.
 	* target.h (struct target_ops). Add to_log_command.
 	(target_log_command): New macro.

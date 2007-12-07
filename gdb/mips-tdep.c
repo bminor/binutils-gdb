@@ -1151,7 +1151,7 @@ struct upk_mips16
 
 
 /* The EXT-I, EXT-ri nad EXT-I8 instructions all have the same format
-   for the bits which make up the immediatate extension.  */
+   for the bits which make up the immediate extension.  */
 
 static CORE_ADDR
 extended_offset (unsigned int extension)
