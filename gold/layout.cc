@@ -992,7 +992,9 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
   // Find the PT_LOAD segments, and set their addresses and offsets
   // and their section's addresses and offsets.
   uint64_t addr;
-  if (options_.user_set_text_segment_address())
+  if (parameters->output_is_shared())
+    addr = 0;
+  else if (options_.user_set_text_segment_address())
     addr = options_.text_segment_address();
   else
     addr = target->default_text_segment_address();

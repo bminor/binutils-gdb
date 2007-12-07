@@ -234,8 +234,11 @@ Eh_frame_hdr::do_sized_write(Output_file* of)
 
 template<int size, bool big_endian>
 typename elfcpp::Elf_types<size>::Elf_Addr
-Eh_frame_hdr::get_fde_pc(const unsigned char* eh_frame_contents,
-			 off_t fde_offset, unsigned char fde_encoding)
+Eh_frame_hdr::get_fde_pc(
+    typename elfcpp::Elf_types<size>::Elf_Addr eh_frame_address,
+    const unsigned char* eh_frame_contents,
+    off_t fde_offset,
+    unsigned char fde_encoding)
 {
   // The FDE starts with a 4 byte length and a 4 byte offset to the
   // CIE.  The PC follows.
@@ -274,6 +277,22 @@ Eh_frame_hdr::get_fde_pc(const unsigned char* eh_frame_contents,
       break;
 
     default:
+      // All other cases were rejected in Eh_frame::read_cie.
+      gold_unreachable();
+    }
+
+  switch (fde_encoding & 0xf0)
+    {
+    case 0:
+      break;
+
+    case elfcpp::DW_EH_PE_pcrel:
+      pc += eh_frame_address + fde_offset + 8;
+      break;
+
+    default:
+      // If other cases arise, then we have to handle them, or we have
+      // to reject them by returning false in Eh_frame::read_cie.
       gold_unreachable();
     }
 
@@ -304,7 +323,8 @@ Eh_frame_hdr::get_fde_addresses(Output_file* of,
        ++p)
     {
       typename elfcpp::Elf_types<size>::Elf_Addr fde_pc;
-      fde_pc = this->get_fde_pc<size, big_endian>(eh_frame_contents,
+      fde_pc = this->get_fde_pc<size, big_endian>(eh_frame_address,
+						  eh_frame_contents,
 						  p->first, p->second);
       fde_addresses->push_back(fde_pc, eh_frame_address + p->first);
     }
@@ -742,6 +762,8 @@ Eh_frame::read_cie(Sized_relobj<size, big_endian>* object,
 	    case elfcpp::DW_EH_PE_udata8:
 	      break;
 	    default:
+	      // We don't expect to see any other cases here, and
+	      // we're not prepared to handle them.
 	      return false;
 	    }
 	  ++p;

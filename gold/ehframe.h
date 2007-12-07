@@ -131,7 +131,8 @@ class Eh_frame_hdr : public Output_section_data
   // Return the PC to which an FDE refers.
   template<int size, bool big_endian>
   typename elfcpp::Elf_types<size>::Elf_Addr
-  get_fde_pc(const unsigned char* eh_frame_contents,
+  get_fde_pc(typename elfcpp::Elf_types<size>::Elf_Addr eh_frame_address,
+	     const unsigned char* eh_frame_contents,
 	     off_t fde_offset, unsigned char fde_encoding);
 
   // Convert Fde_offsets to Fde_addresses.
