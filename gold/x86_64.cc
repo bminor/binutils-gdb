@@ -1585,12 +1585,13 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
                                       const Sized_symbol<64>* gsym,
                                       const Symbol_value<64>* psymval,
                                       unsigned char* view,
-                                      elfcpp::Elf_types<64>::Elf_Addr,
+                                      elfcpp::Elf_types<64>::Elf_Addr address,
                                       off_t view_size)
 {
   Output_segment* tls_segment = relinfo->layout->tls_segment();
 
   const Sized_relobj<64, false>* object = relinfo->object;
+  const elfcpp::Elf_Xword addend = rela.get_r_addend();
 
   elfcpp::Elf_types<64>::Elf_Addr value = psymval->value(relinfo->object, 0);
 
@@ -1638,7 +1639,9 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
             {
               // Relocate the field with the offset of the pair of GOT
               // entries.
-              Relocate_functions<64, false>::rel64(view, got_offset);
+	      value = target->got_plt_section()->address() + got_offset;
+              Relocate_functions<64, false>::pcrela32(view, value, addend,
+                                                      address);
               break;
             }
         }
@@ -1671,7 +1674,9 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
               got_offset = (object->local_tls_got_offset(r_sym, false)
                             - target->got_size());
             }
-          Relocate_functions<64, false>::rel64(view, got_offset);
+	  value = target->got_plt_section()->address() + got_offset;
+          Relocate_functions<64, false>::pcrela32(view, value, addend,
+                                                  address);
           break;
         }
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
@@ -1681,19 +1686,15 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_DTPOFF32:
       gold_assert(tls_segment != NULL);
       if (optimized_type == tls::TLSOPT_TO_LE)
-        value = value - (tls_segment->vaddr() + tls_segment->memsz());
-      else
-        value = value - tls_segment->vaddr();
-      Relocate_functions<64, false>::rel32(view, value);
+        value -= tls_segment->memsz();
+      Relocate_functions<64, false>::rela32(view, value, 0);
       break;
 
     case elfcpp::R_X86_64_DTPOFF64:
       gold_assert(tls_segment != NULL);
       if (optimized_type == tls::TLSOPT_TO_LE)
-        value = value - (tls_segment->vaddr() + tls_segment->memsz());
-      else
-        value = value - tls_segment->vaddr();
-      Relocate_functions<64, false>::rel64(view, value);
+        value -= tls_segment->memsz();
+      Relocate_functions<64, false>::rela64(view, value, 0);
       break;
 
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
@@ -1722,7 +1723,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
               got_offset = (object->local_got_offset(r_sym)
                             - target->got_size());
             }
-          Relocate_functions<64, false>::rel64(view, got_offset);
+	  value = target->got_plt_section()->address() + got_offset;
+          Relocate_functions<64, false>::pcrela32(view, value, addend, address);
           break;
         }
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
@@ -1731,8 +1733,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
-      value = value - (tls_segment->vaddr() + tls_segment->memsz());
-      Relocate_functions<64, false>::rel32(view, value);
+      value -= tls_segment->memsz();
+      Relocate_functions<64, false>::rela32(view, value, 0);
       break;
     }
 }
@@ -1764,7 +1766,7 @@ Target_x86_64::Relocate::tls_gd_to_ie(const Relocate_info<64, false>* relinfo,
 
   memcpy(view - 4, "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0\0", 16);
 
-  value = value - (tls_segment->vaddr() + tls_segment->memsz());
+  value -= tls_segment->memsz();
   Relocate_functions<64, false>::rela32(view + 8, value, 0);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
@@ -1799,7 +1801,7 @@ Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* relinfo,
 
   memcpy(view - 4, "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0\0", 16);
 
-  value = value - (tls_segment->vaddr() + tls_segment->memsz());
+  value -= tls_segment->memsz();
   Relocate_functions<64, false>::rela32(view + 8, value, 0);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
@@ -1888,7 +1890,7 @@ Target_x86_64::Relocate::tls_ie_to_le(const Relocate_info<64, false>* relinfo,
       view[-1] = 0x80 | reg | (reg << 3);
     }
 
-  value = value - (tls_segment->vaddr() + tls_segment->memsz());
+  value -= tls_segment->memsz();
   Relocate_functions<64, false>::rela32(view, value, 0);
 }
 

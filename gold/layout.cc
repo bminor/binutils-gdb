@@ -1728,7 +1728,11 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
   // post-link tools can easily modify these flags if desired.
   unsigned int flags = 0;
   if (have_textrel)
-    flags |= elfcpp::DF_TEXTREL;
+    {
+      // Add a DT_TEXTREL for compatibility with older loaders.
+      odyn->add_constant(elfcpp::DT_TEXTREL, 0);
+      flags |= elfcpp::DF_TEXTREL;
+    }
   odyn->add_constant(elfcpp::DT_FLAGS, flags);
 }
 
