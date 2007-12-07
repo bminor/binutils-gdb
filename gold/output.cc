@@ -512,13 +512,14 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Symbol* gsym,
     unsigned int type,
     Output_data* od,
-    Address address)
+    Address address,
+    bool is_relative)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-    shndx_(INVALID_CODE)
+    is_relative_(is_relative), shndx_(INVALID_CODE)
 {
   this->u1_.gsym = gsym;
   this->u2_.od = od;
-  if (dynamic)
+  if (dynamic && !is_relative)
     gsym->set_needs_dynsym_entry();
 }
 
@@ -528,14 +529,15 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     Relobj* relobj,
     unsigned int shndx,
-    Address address)
+    Address address,
+    bool is_relative)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-    shndx_(shndx)
+    is_relative_(is_relative), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   this->u1_.gsym = gsym;
   this->u2_.relobj = relobj;
-  if (dynamic)
+  if (dynamic && !is_relative)
     gsym->set_needs_dynsym_entry();
 }
 
@@ -547,15 +549,16 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int local_sym_index,
     unsigned int type,
     Output_data* od,
-    Address address)
+    Address address,
+    bool is_relative)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
-    shndx_(INVALID_CODE)
+    is_relative_(is_relative), shndx_(INVALID_CODE)
 {
   gold_assert(local_sym_index != GSYM_CODE
               && local_sym_index != INVALID_CODE);
   this->u1_.relobj = relobj;
   this->u2_.od = od;
-  if (dynamic && local_sym_index > 0)
+  if (dynamic && !is_relative)
     relobj->set_needs_output_dynsym_entry(local_sym_index);
 }
 
@@ -565,16 +568,17 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int local_sym_index,
     unsigned int type,
     unsigned int shndx,
-    Address address)
+    Address address,
+    bool is_relative)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
-    shndx_(shndx)
+    is_relative_(is_relative), shndx_(shndx)
 {
   gold_assert(local_sym_index != GSYM_CODE
               && local_sym_index != INVALID_CODE);
   gold_assert(shndx != INVALID_CODE);
   this->u1_.relobj = relobj;
   this->u2_.relobj = relobj;
-  if (dynamic && local_sym_index > 0)
+  if (dynamic && !is_relative)
     relobj->set_needs_output_dynsym_entry(local_sym_index);
 }
 
@@ -587,7 +591,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Output_data* od,
     Address address)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-    shndx_(INVALID_CODE)
+    is_relative_(false), shndx_(INVALID_CODE)
 {
   this->u1_.os = os;
   this->u2_.od = od;
@@ -603,7 +607,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int shndx,
     Address address)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-    shndx_(shndx)
+    is_relative_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   this->u1_.os = os;
@@ -685,8 +689,8 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
   else if (this->u2_.od != NULL)
     address += this->u2_.od->address();
   wr->put_r_offset(address);
-  wr->put_r_info(elfcpp::elf_r_info<size>(this->get_symbol_index(),
-					  this->type_));
+  unsigned int sym_index = this->is_relative_ ? 0 : this->get_symbol_index();
+  wr->put_r_info(elfcpp::elf_r_info<size>(sym_index, this->type_));
 }
 
 // Write out a Rel relocation.
@@ -700,6 +704,24 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write(
   this->write_rel(&orel);
 }
 
+// Get the value of the symbol referred to by a Rel relocation.
+
+template<bool dynamic, int size, bool big_endian>
+typename elfcpp::Elf_types<size>::Elf_Addr
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value() const
+{
+  if (this->local_sym_index_ == GSYM_CODE)
+    {
+      const Sized_symbol<size>* sym;
+      sym = static_cast<const Sized_symbol<size>*>(this->u1_.gsym);
+      return sym->value();
+    }
+  gold_assert(this->local_sym_index_ != SECTION_CODE
+              && this->local_sym_index_ != INVALID_CODE);
+  const Sized_relobj<size, big_endian>* relobj = this->u1_.relobj;
+  return relobj->local_symbol_value(this->local_sym_index_);
+}
+
 // Write out a Rela relocation.
 
 template<bool dynamic, int size, bool big_endian>
@@ -709,7 +731,10 @@ Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>::write(
 {
   elfcpp::Rela_write<size, big_endian> orel(pov);
   this->rel_.write_rel(&orel);
-  orel.put_r_addend(this->addend_);
+  Addend addend = this->addend_;
+  if (rel_.is_relative())
+    addend += rel_.symbol_value();
+  orel.put_r_addend(addend);
 }
 
 // Output_data_reloc_base methods.
@@ -775,24 +800,16 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
     {
     case GSYM_CODE:
       {
+	// If the symbol is resolved locally, we need to write out the
+	// link-time value, which will be relocated dynamically by a
+	// RELATIVE relocation.
 	Symbol* gsym = this->u_.gsym;
-
-	// If the symbol is resolved locally, we need to write out its
-	// value.  Otherwise we just write zero.  The target code is
-	// responsible for creating a relocation entry to fill in the
-	// value at runtime. For non-preemptible symbols in a shared
-	// library, the target will need to record whether or not the
-	// value should be written (e.g., it may use a RELATIVE
-	// relocation type).
-	if (gsym->final_value_is_known() || gsym->needs_value_in_got())
-	  {
-	    Sized_symbol<size>* sgsym;
-	    // This cast is a bit ugly.  We don't want to put a
-	    // virtual method in Symbol, because we want Symbol to be
-	    // as small as possible.
-	    sgsym = static_cast<Sized_symbol<size>*>(gsym);
-	    val = sgsym->value();
-	  }
+	Sized_symbol<size>* sgsym;
+	// This cast is a bit ugly.  We don't want to put a
+	// virtual method in Symbol, because we want Symbol to be
+	// as small as possible.
+	sgsym = static_cast<Sized_symbol<size>*>(gsym);
+	val = sgsym->value();
       }
       break;
 

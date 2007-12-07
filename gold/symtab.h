@@ -541,19 +541,6 @@ class Symbol
   set_is_copied_from_dynobj()
   { this->is_copied_from_dynobj_ = true; }
 
-  // Mark this symbol as needing its value written to the GOT even when
-  // the value is subject to dynamic relocation (e.g., when the target
-  // uses a RELATIVE relocation for the GOT entry).
-  void
-  set_needs_value_in_got()
-  { this->needs_value_in_got_ = true; }
-
-  // Return whether this symbol needs its value written to the GOT even
-  // when the value is subject to dynamic relocation.
-  bool
-  needs_value_in_got() const
-  { return this->needs_value_in_got_; }
-
  protected:
   // Instances of this class should always be created at a specific
   // size.
@@ -730,9 +717,6 @@ class Symbol
   // True if we are using a COPY reloc for this symbol, so that the
   // real definition lives in a dynamic object.
   bool is_copied_from_dynobj_ : 1;
-  // True if the static value should be written to the GOT even
-  // when the final value is subject to dynamic relocation.
-  bool needs_value_in_got_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template

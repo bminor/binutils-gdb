@@ -811,8 +811,10 @@ Target_i386::Scan::local(const General_options&,
       if (parameters->output_is_position_independent())
         {
           Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-          rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE, output_section,
-                             data_shndx, reloc.get_r_offset());
+          unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+          rel_dyn->add_local_relative(object, r_sym, elfcpp::R_386_RELATIVE,
+                                      output_section, data_shndx,
+                                      reloc.get_r_offset());
         }
       break;
 
@@ -860,8 +862,11 @@ Target_i386::Scan::local(const General_options&,
             if (parameters->output_is_position_independent())
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-                rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
-                                   got, object->local_got_offset(r_sym));
+                unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+                rel_dyn->add_local_relative(object, r_sym,
+                                            elfcpp::R_386_RELATIVE,
+                                            got,
+                                            object->local_got_offset(r_sym));
               }
           }
       }
@@ -955,9 +960,12 @@ Target_i386::Scan::local(const General_options&,
 	            && parameters->output_is_shared())
 	          {
                     Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-                    rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
-                                       output_section, data_shndx,
-                                       reloc.get_r_offset());
+                    unsigned int r_sym
+                        = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+                    rel_dyn->add_local_relative(object, r_sym,
+                                                elfcpp::R_386_RELATIVE,
+                                                output_section, data_shndx,
+                                                reloc.get_r_offset());
 	          }
 	        // Create a GOT entry for the tp-relative offset.
                 Output_data_got<32, false>* got
@@ -1070,9 +1078,9 @@ Target_i386::Scan::global(const General_options& options,
                      && gsym->can_use_relative_reloc(false))
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-                rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
-                                   output_section, data_shndx,
-                                   reloc.get_r_offset());
+                rel_dyn->add_global_relative(gsym, elfcpp::R_386_RELATIVE,
+                                             output_section, object,
+                                             data_shndx, reloc.get_r_offset());
               }
             else
               {
@@ -1136,12 +1144,8 @@ Target_i386::Scan::global(const General_options& options,
             else
               {
                 if (got->add_global(gsym))
-                  {
-                    rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
-                                       got, gsym->got_offset());
-                    // Make sure we write the link-time value to the GOT.
-                    gsym->set_needs_value_in_got();
-                  }
+                  rel_dyn->add_global_relative(gsym, elfcpp::R_386_RELATIVE,
+                                               got, gsym->got_offset());
               }
           }
       }
@@ -1264,9 +1268,10 @@ Target_i386::Scan::global(const General_options& options,
 	            && parameters->output_is_shared())
 	          {
                     Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-                    rel_dyn->add_local(object, 0, elfcpp::R_386_RELATIVE,
-                                       output_section, data_shndx,
-                                       reloc.get_r_offset());
+                    rel_dyn->add_global_relative(gsym, elfcpp::R_386_RELATIVE,
+                                                 output_section, object,
+                                                 data_shndx,
+                                                 reloc.get_r_offset());
 	          }
 	        // Create a GOT entry for the tp-relative offset.
                 Output_data_got<32, false>* got

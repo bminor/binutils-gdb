@@ -765,10 +765,13 @@ Target_x86_64::Scan::local(const General_options&,
       // relocate it easily.
       if (parameters->output_is_position_independent())
         {
+          unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-          rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                              output_section, data_shndx,
-                              reloc.get_r_offset(), 0);
+          rela_dyn->add_local_relative(object, r_sym,
+                                       elfcpp::R_X86_64_RELATIVE,
+                                       output_section, data_shndx,
+                                       reloc.get_r_offset(),
+                                       reloc.get_r_addend());
         }
       break;
 
@@ -831,8 +834,10 @@ Target_x86_64::Scan::local(const General_options&,
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 		// R_X86_64_RELATIVE assumes a 64-bit relocation.
 		if (r_type != elfcpp::R_X86_64_GOT32)
-                  rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                                      got, object->local_got_offset(r_sym), 0);
+                  rela_dyn->add_local_relative(object, r_sym,
+                                               elfcpp::R_X86_64_RELATIVE, got,
+                                               object->local_got_offset(r_sym),
+                                               0);
                 else
                   rela_dyn->add_local(object, r_sym, r_type,
                                       got, object->local_got_offset(r_sym), 0);
@@ -1012,9 +1017,10 @@ Target_x86_64::Scan::global(const General_options& options,
                      && gsym->can_use_relative_reloc(false))
               {
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-                rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                                    output_section, data_shndx,
-                                    reloc.get_r_offset(), 0);
+                rela_dyn->add_global_relative(gsym, elfcpp::R_X86_64_RELATIVE,
+                                              output_section, object,
+                                              data_shndx, reloc.get_r_offset(),
+                                              reloc.get_r_addend());
               }
             else
               {
@@ -1076,12 +1082,9 @@ Target_x86_64::Scan::global(const General_options& options,
             else
               {
                 if (got->add_global(gsym))
-                  {
-                    rela_dyn->add_local(object, 0, elfcpp::R_X86_64_RELATIVE,
-                                        got, gsym->got_offset(), 0);
-                    // Make sure we write the link-time value to the GOT.
-                    gsym->set_needs_value_in_got();
-                  }
+                  rela_dyn->add_global_relative(gsym,
+                                                elfcpp::R_X86_64_RELATIVE,
+                                                got, gsym->got_offset(), 0);
               }
           }
         // For GOTPLT64, we also need a PLT entry (but only if the
