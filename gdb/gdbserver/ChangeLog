@@ -1,3 +1,18 @@
+2007-12-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (linux_wait, linux_resume): Do not handle async I/O.
+	* remote-utils.c (remote_open): Do not call disable_async_io.
+	(block_async_io): Delete.
+	(unblock_async_io): Make static.
+	(initialize_async_io): New.
+	* server.c (handle_v_cont): Handle async I/O here.
+	(myresume): Likewise.  Move other common resume tasks here...
+	(main): ... from here.  Call initialize_async_io.  Disable async
+	I/O before the main loop.
+	* server.h (initialize_async_io): Declare.
+	(block_async_io, unblock_async_io): Delete prototypes.
+	* spu-low.c (spu_resume, spu_wait): Do not handle async I/O here.
+
 2007-12-06  Mick Davis  <mickd@goanna.iinet.net.au>
 
 	* remote-utils.c (readchar): Allow binary data in received messages.

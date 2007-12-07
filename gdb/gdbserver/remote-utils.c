@@ -275,7 +275,6 @@ remote_open (char *name)
   fcntl (remote_desc, F_SETOWN, getpid ());
 #endif
 #endif
-  disable_async_io ();
 }
 
 void
@@ -645,22 +644,12 @@ check_remote_input_interrupt_request (void)
    accept Control-C from the client, and must be disabled when talking to
    the client.  */
 
-void
-block_async_io (void)
-{
-#ifndef USE_WIN32API
-  sigset_t sigio_set;
-  sigemptyset (&sigio_set);
-  sigaddset (&sigio_set, SIGIO);
-  sigprocmask (SIG_BLOCK, &sigio_set, NULL);
-#endif
-}
-
-void
+static void
 unblock_async_io (void)
 {
 #ifndef USE_WIN32API
   sigset_t sigio_set;
+
   sigemptyset (&sigio_set);
   sigaddset (&sigio_set, SIGIO);
   sigprocmask (SIG_UNBLOCK, &sigio_set, NULL);
@@ -694,6 +683,17 @@ disable_async_io (void)
   signal (SIGIO, SIG_IGN);
 #endif
   async_io_enabled = 0;
+}
+
+void
+initialize_async_io (void)
+{
+  /* Make sure that async I/O starts disabled.  */
+  async_io_enabled = 1;
+  disable_async_io ();
+
+  /* Make sure the signal is unblocked.  */
+  unblock_async_io ();
 }
 
 /* Returns next char from remote GDB.  -1 if error.  */

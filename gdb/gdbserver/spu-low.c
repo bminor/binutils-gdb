@@ -348,9 +348,6 @@ spu_resume (struct thread_resume *resume_info)
 	 && resume_info->thread != current_tid)
     resume_info++;
 
-  block_async_io ();
-  enable_async_io ();
-
   if (resume_info->leave_stopped)
     return;
 
@@ -374,9 +371,6 @@ spu_wait (char *status)
   int tid = current_tid;
   int w;
   int ret;
-
-  enable_async_io ();
-  unblock_async_io ();
 
   while (1)
     {
@@ -406,8 +400,6 @@ spu_wait (char *status)
 	  waitpid (tid, NULL, __WALL | __WNOTHREAD);
 	}
     }
-
-  disable_async_io ();
 
   if (WIFEXITED (w))
     {

@@ -897,11 +897,8 @@ retry:
 	}
     }
 
-  enable_async_io ();
-  unblock_async_io ();
   w = linux_wait_for_event (child);
   stop_all_processes ();
-  disable_async_io ();
 
   if (must_set_ptrace_flags)
     {
@@ -1313,11 +1310,7 @@ linux_resume (struct thread_resume *resume_info)
   if (pending_flag)
     for_each_inferior (&all_threads, linux_queue_one_thread);
   else
-    {
-      block_async_io ();
-      enable_async_io ();
-      for_each_inferior (&all_threads, linux_continue_one_thread);
-    }
+    for_each_inferior (&all_threads, linux_continue_one_thread);
 }
 
 #ifdef HAVE_LINUX_USRREGS

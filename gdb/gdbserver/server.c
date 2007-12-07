@@ -756,12 +756,14 @@ handle_v_cont (char *own_buf, char *status, int *signal)
     cont_thread = -1;
   set_desired_inferior (0);
 
+  enable_async_io ();
   (*the_target->resume) (resume_info);
 
   free (resume_info);
 
   *signal = mywait (status, 1);
   prepare_resume_reply (own_buf, *status, *signal);
+  disable_async_io ();
   return;
 
 err:
@@ -798,10 +800,13 @@ handle_v_requests (char *own_buf, char *status, int *signal,
 }
 
 void
-myresume (int step, int sig)
+myresume (int step, int *signalp, char *statusp)
 {
   struct thread_resume resume_info[2];
   int n = 0;
+  int sig = *signalp;
+
+  set_desired_inferior (0);
 
   if (step || sig || (cont_thread != 0 && cont_thread != -1))
     {
@@ -817,7 +822,11 @@ myresume (int step, int sig)
   resume_info[n].sig = 0;
   resume_info[n].leave_stopped = (cont_thread != 0 && cont_thread != -1);
 
+  enable_async_io ();
   (*the_target->resume) (resume_info);
+  *signalp = mywait (statusp, 1);
+  prepare_resume_reply (own_buf, *statusp, *signalp);
+  disable_async_io ();
 }
 
 static int attached;
@@ -895,6 +904,7 @@ main (int argc, char *argv[])
       exit (1);
     }
 
+  initialize_async_io ();
   initialize_low ();
 
   own_buf = malloc (PBUFSIZ + 1);
@@ -946,6 +956,7 @@ main (int argc, char *argv[])
 
     restart:
       setjmp (toplevel);
+      disable_async_io ();
       while (1)
 	{
 	  unsigned char sig;
@@ -1073,10 +1084,7 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
-	      set_desired_inferior (0);
-	      myresume (0, signal);
-	      signal = mywait (&status, 1);
-	      prepare_resume_reply (own_buf, status, signal);
+	      myresume (0, &signal, &status);
 	      break;
 	    case 'S':
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
@@ -1084,22 +1092,15 @@ main (int argc, char *argv[])
 		signal = target_signal_to_host (sig);
 	      else
 		signal = 0;
-	      set_desired_inferior (0);
-	      myresume (1, signal);
-	      signal = mywait (&status, 1);
-	      prepare_resume_reply (own_buf, status, signal);
+	      myresume (1, &signal, &status);
 	      break;
 	    case 'c':
-	      set_desired_inferior (0);
-	      myresume (0, 0);
-	      signal = mywait (&status, 1);
-	      prepare_resume_reply (own_buf, status, signal);
+	      signal = 0;
+	      myresume (0, &signal, &status);
 	      break;
 	    case 's':
-	      set_desired_inferior (0);
-	      myresume (1, 0);
-	      signal = mywait (&status, 1);
-	      prepare_resume_reply (own_buf, status, signal);
+	      signal = 0;
+	      myresume (1, &signal, &status);
 	      break;
 	    case 'Z':
 	      {
