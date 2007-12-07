@@ -3601,16 +3601,6 @@ xg_assembly_relax (IStack *istack,
 
 
 static void
-xg_force_frag_space (int size)
-{
-  /* This may have the side effect of creating a new fragment for the
-     space to go into.  I just do not like the name of the "frag"
-     functions.  */
-  frag_grow (size);
-}
-
-
-static void
 xg_finish_frag (char *last_insn,
 		enum xtensa_relax_statesE frag_state,
 		enum xtensa_relax_statesE slot0_state,
@@ -3624,8 +3614,7 @@ xg_finish_frag (char *last_insn,
 
   fragS *old_frag;
 
-  xg_force_frag_space (max_growth);
-
+  frag_grow (max_growth);
   old_frag = frag_now;
 
   frag_now->fr_opcode = last_insn;
@@ -4086,7 +4075,7 @@ xg_assemble_literal_space (/* const */ int size, int slot)
   frag_align (litalign, 0, 0);
   record_alignment (now_seg, litalign);
 
-  xg_force_frag_space (size);
+  frag_grow (size);
 
   lit_saved_frag = frag_now;
   frag_now->tc_frag_data.literal_frag = get_literal_pool_location (now_seg);
@@ -10258,17 +10247,15 @@ static void xtensa_create_property_segments
   (frag_predicate, frag_predicate, const char *, xt_section_type);
 static void xtensa_create_xproperty_segments
   (frag_flags_fn, const char *, xt_section_type);
-static segment_info_type *retrieve_segment_info (segT);
 static bfd_boolean section_has_property (segT, frag_predicate);
 static bfd_boolean section_has_xproperty (segT, frag_flags_fn);
 static void add_xt_block_frags
-  (segT, segT, xtensa_block_info **, frag_predicate, frag_predicate);
+  (segT, xtensa_block_info **, frag_predicate, frag_predicate);
 static bfd_boolean xtensa_frag_flags_is_empty (const frag_flags *);
 static void xtensa_frag_flags_init (frag_flags *);
 static void get_frag_property_flags (const fragS *, frag_flags *);
 static bfd_vma frag_flags_to_number (const frag_flags *);
-static void add_xt_prop_frags
-  (segT, segT, xtensa_block_info **, frag_flags_fn);
+static void add_xt_prop_frags (segT, xtensa_block_info **, frag_flags_fn);
 
 /* Set up property tables after relaxation.  */
 
@@ -10333,13 +10320,17 @@ xtensa_create_property_segments (frag_predicate property_function,
 
       if (section_has_property (sec, property_function))
 	{
-	  segT insn_sec = 
-	    xtensa_get_property_section (sec, section_name_base);
-	  segment_info_type *xt_seg_info = retrieve_segment_info (insn_sec);
-	  xtensa_block_info **xt_blocks =
-	    &xt_seg_info->tc_segment_info_data.blocks[sec_type];
+	  segment_info_type *xt_seg_info;
+	  xtensa_block_info **xt_blocks;
+	  segT prop_sec = xtensa_get_property_section (sec, section_name_base);
+
+	  prop_sec->output_section = prop_sec;
+	  subseg_set (prop_sec, 0);
+	  xt_seg_info = seg_info (prop_sec);
+	  xt_blocks = &xt_seg_info->tc_segment_info_data.blocks[sec_type];
+
 	  /* Walk over all of the frchains here and add new sections.  */
-	  add_xt_block_frags (sec, insn_sec, xt_blocks, property_function,
+	  add_xt_block_frags (sec, xt_blocks, property_function,
 			      end_property_function);
 	}
     }
@@ -10360,7 +10351,6 @@ xtensa_create_property_segments (frag_predicate property_function,
       if (block)
 	{
 	  xtensa_block_info *cur_block;
-	  /* This is a section with some data.  */
 	  int num_recs = 0;
 	  bfd_size_type rec_size;
 
@@ -10370,68 +10360,35 @@ xtensa_create_property_segments (frag_predicate property_function,
 	  rec_size = num_recs * 8;
 	  bfd_set_section_size (stdoutput, sec, rec_size);
 
-	  /* In order to make this work with the assembler, we have to
-	     build some frags and then build the "fixups" for it.  It
-	     would be easier to just set the contents then set the
-	     arlents.  */
-
 	  if (num_recs)
 	    {
-	      /* Allocate a fragment and leak it.  */
-	      fragS *fragP;
-	      bfd_size_type frag_size;
-	      fixS *fixes;
-	      frchainS *frchainP;
-	      int i;
 	      char *frag_data;
+	      int i;
 
-	      frag_size = sizeof (fragS) + rec_size;
-	      fragP = (fragS *) xmalloc (frag_size);
-
-	      memset (fragP, 0, frag_size);
-	      fragP->fr_address = 0;
-	      fragP->fr_next = NULL;
-	      fragP->fr_fix = rec_size;
-	      fragP->fr_var = 0;
-	      fragP->fr_type = rs_fill;
-	      /* The rest are zeros.  */
-
-	      frchainP = seginfo->frchainP;
-	      frchainP->frch_root = fragP;
-	      frchainP->frch_last = fragP;
-
-	      fixes = (fixS *) xmalloc (sizeof (fixS) * num_recs);
-	      memset (fixes, 0, sizeof (fixS) * num_recs);
-
-	      seginfo->fix_root = fixes;
-	      seginfo->fix_tail = &fixes[num_recs - 1];
+	      subseg_set (sec, 0);
+	      frag_data = frag_more (rec_size);
 	      cur_block = block;
-	      frag_data = &fragP->fr_literal[0];
 	      for (i = 0; i < num_recs; i++)
 		{
-		  fixS *fix = &fixes[i];
-		  assert (cur_block);
+		  fixS *fix;
 
 		  /* Write the fixup.  */
-		  if (i != num_recs - 1)
-		    fix->fx_next = &fixes[i + 1];
-		  else
-		    fix->fx_next = NULL;
-		  fix->fx_size = 4;
-		  fix->fx_done = 0;
-		  fix->fx_frag = fragP;
-		  fix->fx_where = i * 8;
-		  fix->fx_addsy = section_symbol (cur_block->sec);
-		  fix->fx_offset = cur_block->offset;
-		  fix->fx_r_type = BFD_RELOC_32;
-		  fix->fx_file = "Internal Assembly";
+		  assert (cur_block);
+		  fix = fix_new (frag_now, i * 8, 4,
+				 section_symbol (cur_block->sec),
+				 cur_block->offset,
+				 FALSE, BFD_RELOC_32);
+		  fix->fx_file = "<internal>";
 		  fix->fx_line = 0;
 
 		  /* Write the length.  */
-		  md_number_to_chars (&frag_data[4 + 8 * i],
+		  md_number_to_chars (&frag_data[4 + i * 8],
 				      cur_block->size, 4);
 		  cur_block = cur_block->next;
 		}
+	      frag_wane (frag_now);
+	      frag_new (0);
+	      frag_wane (frag_now);
 	    }
 	}
     }
@@ -10465,13 +10422,17 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
 
       if (section_has_xproperty (sec, flag_fn))
 	{
-	  segT insn_sec =
-	    xtensa_get_property_section (sec, section_name_base);
-	  segment_info_type *xt_seg_info = retrieve_segment_info (insn_sec);
-	  xtensa_block_info **xt_blocks =
-	    &xt_seg_info->tc_segment_info_data.blocks[sec_type];
+	  segment_info_type *xt_seg_info;
+	  xtensa_block_info **xt_blocks;
+	  segT prop_sec = xtensa_get_property_section (sec, section_name_base);
+
+	  prop_sec->output_section = prop_sec;
+	  subseg_set (prop_sec, 0);
+	  xt_seg_info = seg_info (prop_sec);
+	  xt_blocks = &xt_seg_info->tc_segment_info_data.blocks[sec_type];
+
 	  /* Walk over all of the frchains here and add new sections.  */
-	  add_xt_prop_frags (sec, insn_sec, xt_blocks, flag_fn);
+	  add_xt_prop_frags (sec, xt_blocks, flag_fn);
 	}
     }
 
@@ -10491,7 +10452,6 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
       if (block)
 	{
 	  xtensa_block_info *cur_block;
-	  /* This is a section with some data.  */
 	  int num_recs = 0;
 	  bfd_size_type rec_size;
 
@@ -10500,113 +10460,43 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
 
 	  rec_size = num_recs * (8 + 4);
 	  bfd_set_section_size (stdoutput, sec, rec_size);
-
 	  /* elf_section_data (sec)->this_hdr.sh_entsize = 12; */
-
-	  /* In order to make this work with the assembler, we have to build
-	     some frags then build the "fixups" for it.  It would be easier to
-	     just set the contents then set the arlents.  */
 
 	  if (num_recs)
 	    {
-	      /* Allocate a fragment and (unfortunately) leak it.  */
-	      fragS *fragP;
-	      bfd_size_type frag_size;
-	      fixS *fixes;
-	      frchainS *frchainP;
-	      int i;
 	      char *frag_data;
+	      int i;
 
-	      frag_size = sizeof (fragS) + rec_size;
-	      fragP = (fragS *) xmalloc (frag_size);
-
-	      memset (fragP, 0, frag_size);
-	      fragP->fr_address = 0;
-	      fragP->fr_next = NULL;
-	      fragP->fr_fix = rec_size;
-	      fragP->fr_var = 0;
-	      fragP->fr_type = rs_fill;
-	      /* The rest are zeros.  */
-
-	      frchainP = seginfo->frchainP;
-	      frchainP->frch_root = fragP;
-	      frchainP->frch_last = fragP;
-
-	      fixes = (fixS *) xmalloc (sizeof (fixS) * num_recs);
-	      memset (fixes, 0, sizeof (fixS) * num_recs);
-
-	      seginfo->fix_root = fixes;
-	      seginfo->fix_tail = &fixes[num_recs - 1];
+	      subseg_set (sec, 0);
+	      frag_data = frag_more (rec_size);
 	      cur_block = block;
-	      frag_data = &fragP->fr_literal[0];
 	      for (i = 0; i < num_recs; i++)
 		{
-		  fixS *fix = &fixes[i];
-		  assert (cur_block);
+		  fixS *fix;
 
 		  /* Write the fixup.  */
-		  if (i != num_recs - 1)
-		    fix->fx_next = &fixes[i + 1];
-		  else
-		    fix->fx_next = NULL;
-		  fix->fx_size = 4;
-		  fix->fx_done = 0;
-		  fix->fx_frag = fragP;
-		  fix->fx_where = i * (8 + 4);
-		  fix->fx_addsy = section_symbol (cur_block->sec);
-		  fix->fx_offset = cur_block->offset;
-		  fix->fx_r_type = BFD_RELOC_32;
-		  fix->fx_file = "Internal Assembly";
+		  assert (cur_block);
+		  fix = fix_new (frag_now, i * 12, 4,
+				 section_symbol (cur_block->sec),
+				 cur_block->offset,
+				 FALSE, BFD_RELOC_32);
+		  fix->fx_file = "<internal>";
 		  fix->fx_line = 0;
 
 		  /* Write the length.  */
-		  md_number_to_chars (&frag_data[4 + (8+4) * i],
+		  md_number_to_chars (&frag_data[4 + i * 12],
 				      cur_block->size, 4);
-		  md_number_to_chars (&frag_data[8 + (8+4) * i],
+		  md_number_to_chars (&frag_data[8 + i * 12],
 				      frag_flags_to_number (&cur_block->flags),
 				      4);
 		  cur_block = cur_block->next;
 		}
+	      frag_wane (frag_now);
+	      frag_new (0);
+	      frag_wane (frag_now);
 	    }
 	}
     }
-}
-
-
-static segment_info_type *
-retrieve_segment_info (segT seg)
-{
-  segment_info_type *seginfo;
-  seginfo = (segment_info_type *) bfd_get_section_userdata (stdoutput, seg);
-  if (!seginfo)
-    {
-      frchainS *frchainP;
-
-      seginfo = (segment_info_type *) xmalloc (sizeof (*seginfo));
-      memset ((void *) seginfo, 0, sizeof (*seginfo));
-      seginfo->fix_root = NULL;
-      seginfo->fix_tail = NULL;
-      seginfo->bfd_section = seg;
-      seginfo->sym = 0;
-      /* We will not be dealing with these, only our special ones.  */
-      bfd_set_section_userdata (stdoutput, seg, (void *) seginfo);
-
-      frchainP = (frchainS *) xmalloc (sizeof (frchainS));
-      frchainP->frch_root = NULL;
-      frchainP->frch_last = NULL;
-      frchainP->frch_next = NULL;
-      frchainP->frch_subseg = 0;
-      frchainP->fix_root = NULL;
-      frchainP->fix_tail = NULL;
-      /* Do not init the objstack.  */
-      /* obstack_begin (&frchainP->frch_obstack, chunksize); */
-      /* frchainP->frch_frag_now = fragP; */
-      frchainP->frch_frag_now = NULL;
-
-      seginfo->frchainP = frchainP;
-    }
-
-  return seginfo;
 }
 
 
@@ -10653,18 +10543,12 @@ section_has_xproperty (segT sec, frag_flags_fn property_function)
 
 static void
 add_xt_block_frags (segT sec,
-		    segT xt_block_sec,
 		    xtensa_block_info **xt_block,
 		    frag_predicate property_function,
 		    frag_predicate end_property_function)
 {
-  segment_info_type *seg_info;
-  segment_info_type *xt_seg_info;
   bfd_vma seg_offset;
   fragS *fragP;
-
-  xt_seg_info = retrieve_segment_info (xt_block_sec);
-  seg_info = retrieve_segment_info (sec);
 
   /* Build it if needed.  */
   while (*xt_block != NULL)
@@ -10674,9 +10558,9 @@ add_xt_block_frags (segT sec,
   /* Walk through the frags.  */
   seg_offset = 0;
 
-  if (seg_info->frchainP)
+  if (seg_info (sec)->frchainP)
     {
-      for (fragP = seg_info->frchainP->frch_root;
+      for (fragP = seg_info (sec)->frchainP->frch_root;
 	   fragP;
 	   fragP = fragP->fr_next)
 	{
@@ -10913,17 +10797,12 @@ xtensa_xt_block_combine (xtensa_block_info *xt_block,
 
 static void
 add_xt_prop_frags (segT sec,
-		   segT xt_block_sec,
 		   xtensa_block_info **xt_block,
 		   frag_flags_fn property_function)
 {
-  segment_info_type *seg_info;
-  segment_info_type *xt_seg_info;
   bfd_vma seg_offset;
   fragS *fragP;
 
-  xt_seg_info = retrieve_segment_info (xt_block_sec);
-  seg_info = retrieve_segment_info (sec);
   /* Build it if needed.  */
   while (*xt_block != NULL)
     {
@@ -10934,9 +10813,9 @@ add_xt_prop_frags (segT sec,
   /* Walk through the frags.  */
   seg_offset = 0;
 
-  if (seg_info->frchainP)
+  if (seg_info (sec)->frchainP)
     {
-      for (fragP = seg_info->frchainP->frch_root; fragP;
+      for (fragP = seg_info (sec)->frchainP->frch_root; fragP;
 	   fragP = fragP->fr_next)
 	{
 	  xtensa_block_info tmp_block;

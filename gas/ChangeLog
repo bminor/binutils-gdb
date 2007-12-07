@@ -1,3 +1,16 @@
+2007-12-06  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xg_force_frag_space): Delete.
+	(xg_finish_frag, xg_assemble_literal_space): Replace calls to it.
+	(xtensa_create_property_segments, xtensa_create_xproperty_segments):
+	Set output_section for new property sections.  Use subseg_set and
+	seg_info instead of retrieve_segment_info.  Adjust arguments to
+	add_xt_block_frags and add_xt_prop_frags.  Use standard functions
+	to create frags and fix records.
+	(retrieve_segment_info): Delete.
+	(add_xt_block_frags, add_xt_prop_frags): Replace calls to
+	retrieve_segment_info.  Remove unused xt_block_sec arguments.
+
 2007-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_tc): Allow a space between toc symbol
