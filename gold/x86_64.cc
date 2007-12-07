@@ -478,9 +478,9 @@ unsigned char Output_data_plt_x86_64::first_plt_entry[plt_entry_size] =
 {
   // From AMD64 ABI Draft 0.98, page 76
   0xff, 0x35,	// pushq contents of memory address
-  0, 0, 0, 0,	// replaced with address of .got + 4
-  0xff, 0x25,	// jmp indirect
   0, 0, 0, 0,	// replaced with address of .got + 8
+  0xff, 0x25,	// jmp indirect
+  0, 0, 0, 0,	// replaced with address of .got + 16
   0x90, 0x90, 0x90, 0x90   // noop (x4)
 };
 
@@ -518,14 +518,11 @@ Output_data_plt_x86_64::do_write(Output_file* of)
   elfcpp::Elf_types<32>::Elf_Addr got_address = this->got_plt_->address();
 
   memcpy(pov, first_plt_entry, plt_entry_size);
-  if (!parameters->output_is_shared())
-    {
-      // We do a jmp relative to the PC at the end of this instruction.
-      elfcpp::Swap_unaligned<32, false>::writeval(pov + 2, got_address + 8
-                                                  - (plt_address + 6));
-      elfcpp::Swap<32, false>::writeval(pov + 8, got_address + 16
-                                        - (plt_address + 12));
-    }
+  // We do a jmp relative to the PC at the end of this instruction.
+  elfcpp::Swap_unaligned<32, false>::writeval(pov + 2, got_address + 8
+					      - (plt_address + 6));
+  elfcpp::Swap<32, false>::writeval(pov + 8, got_address + 16
+				    - (plt_address + 12));
   pov += plt_entry_size;
 
   unsigned char* got_pov = got_view;
@@ -546,14 +543,10 @@ Output_data_plt_x86_64::do_write(Output_file* of)
     {
       // Set and adjust the PLT entry itself.
       memcpy(pov, plt_entry, plt_entry_size);
-      if (parameters->output_is_shared())
-        // FIXME(csilvers): what's the right thing to write here?
-        elfcpp::Swap_unaligned<32, false>::writeval(pov + 2, got_offset);
-      else
-        elfcpp::Swap_unaligned<32, false>::writeval(pov + 2,
-                                                    (got_address + got_offset
-                                                     - (plt_address + plt_offset
-                                                        + 6)));
+      elfcpp::Swap_unaligned<32, false>::writeval(pov + 2,
+						  (got_address + got_offset
+						   - (plt_address + plt_offset
+						      + 6)));
 
       elfcpp::Swap_unaligned<32, false>::writeval(pov + 7, plt_index);
       elfcpp::Swap<32, false>::writeval(pov + 12,
@@ -1044,7 +1037,7 @@ Target_x86_64::Scan::global(const General_options& options,
           target->make_plt_entry(symtab, layout, gsym);
         // Make a dynamic relocation if necessary.
         bool is_function_call = (gsym->type() == elfcpp::STT_FUNC);
-        if (gsym->needs_dynamic_reloc(true, is_function_call))
+        if (gsym->needs_dynamic_reloc(false, is_function_call))
           {
             if (target->may_need_copy_reloc(gsym))
               {
