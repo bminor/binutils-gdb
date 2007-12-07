@@ -1599,6 +1599,7 @@ init_m32r_ops (void)
   m32r_ops.to_create_inferior = m32r_create_inferior;
   m32r_ops.to_mourn_inferior = m32r_mourn_inferior;
   m32r_ops.to_stop = m32r_stop;
+  m32r_ops.to_log_command = serial_log_command;
   m32r_ops.to_stratum = process_stratum;
   m32r_ops.to_has_all_memory = 1;
   m32r_ops.to_has_memory = 1;

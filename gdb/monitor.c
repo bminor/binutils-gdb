@@ -2233,6 +2233,7 @@ init_base_monitor_ops (void)
   monitor_ops.to_mourn_inferior = monitor_mourn_inferior;
   monitor_ops.to_stop = monitor_stop;
   monitor_ops.to_rcmd = monitor_rcmd;
+  monitor_ops.to_log_command = serial_log_command;
   monitor_ops.to_stratum = process_stratum;
   monitor_ops.to_has_all_memory = 1;
   monitor_ops.to_has_memory = 1;

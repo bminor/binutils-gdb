@@ -385,7 +385,7 @@ execute_command (char *p, int from_tty)
   if (p == NULL)
     return;
 
-  serial_log_command (p);
+  target_log_command (p);
 
   while (*p == ' ' || *p == '\t')
     p++;

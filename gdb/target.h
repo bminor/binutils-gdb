@@ -404,6 +404,7 @@ struct target_ops
 							     int);
     struct exception_event_record *(*to_get_current_exception_event) (void);
     char *(*to_pid_to_exec_file) (int pid);
+    void (*to_log_command) (const char *);
     enum strata to_stratum;
     int to_has_all_memory;
     int to_has_memory;
@@ -1129,6 +1130,14 @@ extern int target_stopped_data_address_p (struct target_ops *);
 #endif
 
 extern const struct target_desc *target_read_description (struct target_ops *);
+
+/* Command logging facility.  */
+
+#define target_log_command(p)						\
+  do									\
+    if (current_target.to_log_command)					\
+      (*current_target.to_log_command) (p);				\
+  while (0)
 
 /* Routines for maintenance of the target structures...
 

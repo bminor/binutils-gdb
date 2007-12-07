@@ -1,3 +1,15 @@
+2007-12-07  Maciej W. Rozycki  <macro@mips.com>
+
+	* target.c (update_current_target): Inherit to_log_command.
+	* target.h (struct target_ops). Add to_log_command.
+	(target_log_command): New macro.
+	* top.c (execute_command): Call target_log_command() rather than
+	serial_log_command().
+	* monitor.c (init_base_monitor_ops): Initialize to_log_command.
+	* remote-m32r-sdi.c (init_m32r_ops): Likewise.
+	* remote-mips.c (_initialize_remote_mips): Likewise.
+	* remote.c (init_remote_ops): Likewise.
+
 2007-12-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infrun.c (init_wait_for_inferior): Reset target_last_wait_ptid.

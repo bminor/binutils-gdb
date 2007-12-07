@@ -3333,6 +3333,7 @@ _initialize_remote_mips (void)
   mips_ops.to_load = mips_load;
   mips_ops.to_create_inferior = mips_create_inferior;
   mips_ops.to_mourn_inferior = mips_mourn_inferior;
+  mips_ops.to_log_command = serial_log_command;
   mips_ops.to_stratum = process_stratum;
   mips_ops.to_has_all_memory = 1;
   mips_ops.to_has_memory = 1;
