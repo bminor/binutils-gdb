@@ -1,3 +1,8 @@
+2007-12-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infrun.c (init_wait_for_inferior): Reset target_last_wait_ptid.
+	(handle_inferior_event): Clear stop_stack_dummy earlier.
+
 2007-12-06  Jim Blandy  <jimb@codesourcery.com>
 
 	* addrmap.c (addrmap_splay_tree_remove): New function.

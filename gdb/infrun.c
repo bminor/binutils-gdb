@@ -912,6 +912,8 @@ init_wait_for_inferior (void)
 
   stepping_past_singlestep_breakpoint = 0;
   deferred_step_ptid = null_ptid;
+
+  target_last_wait_ptid = minus_one_ptid;
 }
 
 /* This enum encodes possible reasons for doing a target_wait, so that
@@ -1274,6 +1276,9 @@ handle_inferior_event (struct execution_control_state *ecs)
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;
   target_last_waitstatus = *ecs->wp;
+
+  /* Always clear state belonging to the previous time we stopped.  */
+  stop_stack_dummy = 0;
 
   adjust_pc_after_break (ecs);
 
@@ -1893,7 +1898,6 @@ handle_inferior_event (struct execution_control_state *ecs)
   ecs->stepping_over_breakpoint = 0;
   bpstat_clear (&stop_bpstat);
   stop_step = 0;
-  stop_stack_dummy = 0;
   stop_print_frame = 1;
   ecs->random_signal = 0;
   stopped_by_random_signal = 0;
