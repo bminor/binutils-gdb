@@ -660,10 +660,7 @@ class Symbol_value
   // table.
   bool
   needs_output_symtab_entry() const
-  {
-    // gold_assert(this->output_symtab_index_ != 0);
-    return this->output_symtab_index_ != -1U;
-  }
+  { return this->output_symtab_index_ != -1U; }
 
   // Return the index in the output symbol table.
   unsigned int
@@ -726,6 +723,8 @@ class Symbol_value
   set_input_shndx(unsigned int i)
   {
     this->input_shndx_ = i;
+    // input_shndx_ field is a bitfield, so make sure that the value
+    // fits.
     gold_assert(this->input_shndx_ == i);
   }
 
