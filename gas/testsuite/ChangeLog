@@ -1,3 +1,11 @@
+2007-12-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* gas/xtensa/all.exp: Run new pcrel test.
+	* gas/xtensa/err-pcrel.s: New.
+	* gas/xtensa/pcrel.d: New.
+	* gas/xtensa/pcrel.s: New.
+	* gas/xtensa/xtensa-err.exp: New.
+	
 2007-11-30  Bob Wilson  <bob.wilson@acm.org>
 
 	* gas/elf/elf.exp: Disable ehopt test for Xtensa.

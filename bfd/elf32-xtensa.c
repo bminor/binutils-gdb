@@ -202,7 +202,10 @@ static reloc_howto_type elf_howto_table[] =
 	 bfd_elf_xtensa_reloc, "R_XTENSA_ASM_SIMPLIFY", FALSE, 0, 0, TRUE),
 
   EMPTY_HOWTO (13),
-  EMPTY_HOWTO (14),
+
+  HOWTO (R_XTENSA_32_PCREL, 0, 2, 32, TRUE, 0, complain_overflow_bitfield,
+	 bfd_elf_xtensa_reloc, "R_XTENSA_32_PCREL",
+	 FALSE, 0, 0xffffffff, TRUE),
 
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_XTENSA_GNU_VTINHERIT, 0, 2, 0, FALSE, 0, complain_overflow_dont,
@@ -306,6 +309,10 @@ elf_xtensa_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_32:
       TRACE ("BFD_RELOC_32");
       return &elf_howto_table[(unsigned) R_XTENSA_32 ];
+
+    case BFD_RELOC_32_PCREL:
+      TRACE ("BFD_RELOC_32_PCREL");
+      return &elf_howto_table[(unsigned) R_XTENSA_32_PCREL ];
 
     case BFD_RELOC_XTENSA_DIFF8:
       TRACE ("BFD_RELOC_XTENSA_DIFF8");
@@ -891,47 +898,6 @@ elf_xtensa_check_relocs (bfd *abfd,
 		}
 	      local_got_refcounts[r_symndx] += 1;
 	    }
-	  break;
-
-	case R_XTENSA_OP0:
-	case R_XTENSA_OP1:
-	case R_XTENSA_OP2:
-	case R_XTENSA_SLOT0_OP:
-	case R_XTENSA_SLOT1_OP:
-	case R_XTENSA_SLOT2_OP:
-	case R_XTENSA_SLOT3_OP:
-	case R_XTENSA_SLOT4_OP:
-	case R_XTENSA_SLOT5_OP:
-	case R_XTENSA_SLOT6_OP:
-	case R_XTENSA_SLOT7_OP:
-	case R_XTENSA_SLOT8_OP:
-	case R_XTENSA_SLOT9_OP:
-	case R_XTENSA_SLOT10_OP:
-	case R_XTENSA_SLOT11_OP:
-	case R_XTENSA_SLOT12_OP:
-	case R_XTENSA_SLOT13_OP:
-	case R_XTENSA_SLOT14_OP:
-	case R_XTENSA_SLOT0_ALT:
-	case R_XTENSA_SLOT1_ALT:
-	case R_XTENSA_SLOT2_ALT:
-	case R_XTENSA_SLOT3_ALT:
-	case R_XTENSA_SLOT4_ALT:
-	case R_XTENSA_SLOT5_ALT:
-	case R_XTENSA_SLOT6_ALT:
-	case R_XTENSA_SLOT7_ALT:
-	case R_XTENSA_SLOT8_ALT:
-	case R_XTENSA_SLOT9_ALT:
-	case R_XTENSA_SLOT10_ALT:
-	case R_XTENSA_SLOT11_ALT:
-	case R_XTENSA_SLOT12_ALT:
-	case R_XTENSA_SLOT13_ALT:
-	case R_XTENSA_SLOT14_ALT:
-	case R_XTENSA_ASM_EXPAND:
-	case R_XTENSA_ASM_SIMPLIFY:
-	case R_XTENSA_DIFF8:
-	case R_XTENSA_DIFF16:
-	case R_XTENSA_DIFF32:
-	  /* Nothing to do for these.  */
 	  break;
 
 	case R_XTENSA_GNU_VTINHERIT:
@@ -1552,7 +1518,7 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
   xtensa_isa isa = xtensa_default_isa;
   static xtensa_insnbuf ibuff = NULL;
   static xtensa_insnbuf sbuff = NULL;
-  bfd_vma self_address = 0;
+  bfd_vma self_address;
   bfd_size_type input_size;
   int opnd, slot;
   uint32 newval;
@@ -1564,6 +1530,11 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
     }
 
   input_size = bfd_get_section_limit (abfd, input_section);
+
+  /* Calculate the PC address for this instruction.  */
+  self_address = (input_section->output_section->vma
+		  + input_section->output_offset
+		  + address);
 
   switch (howto->type)
     {
@@ -1582,9 +1553,6 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
 				      input_size - address, 0);
 	  if (is_windowed_call_opcode (opcode))
 	    {
-	      self_address = (input_section->output_section->vma
-			      + input_section->output_offset
-			      + address);
 	      if ((self_address >> CALL_SEGMENT_BITS)
 		  != (relocation >> CALL_SEGMENT_BITS)) 
 		{
@@ -1619,6 +1587,10 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
 	x = x + relocation;
 	bfd_put_32 (abfd, x, contents + address);
       }
+      return bfd_reloc_ok;
+
+    case R_XTENSA_32_PCREL:
+      bfd_put_32 (abfd, relocation - self_address, contents + address);
       return bfd_reloc_ok;
     }
 
@@ -1704,11 +1676,6 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
 	      *error_message = "expected PC-relative relocation";
 	      return bfd_reloc_dangerous;
 	    }
-
-	  /* Calculate the PC address for this instruction.  */
-	  self_address = (input_section->output_section->vma
-			  + input_section->output_offset
-			  + address);
 
 	  newval = relocation;
 	}
@@ -2182,14 +2149,13 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	{
 	  bfd_boolean dynamic_symbol = elf_xtensa_dynamic_symbol_p (h, info);
 
-	  if (dynamic_symbol && is_operand_relocation (r_type))
+	  if (dynamic_symbol && (is_operand_relocation (r_type)
+				 || r_type == R_XTENSA_32_PCREL))
 	    {
-	      /* This is an error.  The symbol's real value won't be known
-		 until runtime and it's likely to be out of range anyway.  */
 	      const char *name = h->root.root.string;
-	      error_message = vsprint_msg ("invalid relocation for dynamic "
-					   "symbol", ": %s",
-					   strlen (name) + 2, name);
+	      error_message =
+		vsprint_msg ("invalid relocation for dynamic symbol", ": %s",
+			     strlen (name) + 2, name);
 	      if (!((*info->callbacks->reloc_dangerous)
 		    (info, error_message, input_bfd, input_section,
 		     rel->r_offset)))
@@ -7175,7 +7141,8 @@ check_section_ebb_pcrels_fit (bfd *abfd,
 	 that fit before linking must fit after linking.  Thus we only
 	 need to deal with relocations to the same section that are
 	 PC-relative.  */
-      if (ELF32_R_TYPE (irel->r_info) == R_XTENSA_ASM_SIMPLIFY
+      if (r_type == R_XTENSA_ASM_SIMPLIFY
+	  || r_type == R_XTENSA_32_PCREL
 	  || !howto->pc_relative)
 	continue;
 

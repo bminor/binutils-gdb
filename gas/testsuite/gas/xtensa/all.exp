@@ -79,6 +79,7 @@ if [istarget xtensa*-*-*] then {
     if [all_ones $x1] then { pass $testname } else { fail $testname }
 
     run_dump_test "short_branch_offset"
+    run_dump_test "pcrel"
 }
 
 if [info exists errorInfo] then {

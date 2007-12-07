@@ -1,3 +1,15 @@
+2007-12-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_howto_table): Add R_XTENSA_32_PCREL.
+	(elf_xtensa_reloc_type_lookup): Handle BFD_RELOC_32_PCREL.
+	(elf_xtensa_check_relocs): Use default case for all relocations that
+	need nothing done here.
+	(elf_xtensa_do_reloc): Compute self_address for all relocation types.
+	Handle R_XTENSA_32_PCREL.
+	(elf_xtensa_relocate_section): Check for R_XTENSA_32_PCREL for dynamic
+	symbols.
+	(check_section_ebb_pcrels_fit): Ignore R_XTENSA_32_PCREL relocations.
+	
 2007-12-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_size_stubs): Do consider branches to

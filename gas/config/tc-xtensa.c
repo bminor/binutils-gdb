@@ -354,6 +354,7 @@ op_placement_info_table op_placement_table;
 #define O_pltrel	O_md1	/* like O_symbol but use a PLT reloc */
 #define O_hi16		O_md2	/* use high 16 bits of symbolic value */
 #define O_lo16		O_md3	/* use low 16 bits of symbolic value */
+#define O_pcrel		O_md4	/* value is a PC-relative offset */
 
 struct suffix_reloc_map
 {
@@ -370,6 +371,7 @@ static struct suffix_reloc_map suffix_relocs[] =
   SUFFIX_MAP ("l",	BFD_RELOC_LO16,			O_lo16),
   SUFFIX_MAP ("h",	BFD_RELOC_HI16,			O_hi16),
   SUFFIX_MAP ("plt",	BFD_RELOC_XTENSA_PLT,		O_pltrel),
+  SUFFIX_MAP ("pcrel",	BFD_RELOC_32_PCREL,		O_pcrel),
   { (char *) 0, 0,	BFD_RELOC_UNUSED,		0 }
 };
 
@@ -999,7 +1001,9 @@ const pseudo_typeS md_pseudo_table[] =
   { "frame", s_ignore, 0 },	/* Formerly used for STABS debugging.  */
   { "long", xtensa_elf_cons, 4 },
   { "word", xtensa_elf_cons, 4 },
+  { "4byte", xtensa_elf_cons, 4 },
   { "short", xtensa_elf_cons, 2 },
+  { "2byte", xtensa_elf_cons, 2 },
   { "begin", xtensa_begin_directive, 0 },
   { "end", xtensa_end_directive, 0 },
   { "literal", xtensa_literal_pseudo, 0 },
@@ -1550,7 +1554,7 @@ xtensa_elf_cons (int nbytes)
 	      char *p = frag_more ((int) nbytes);
 	      xtensa_set_frag_assembly_state (frag_now);
 	      fix_new_exp (frag_now, p - frag_now->fr_literal,
-			   nbytes, &exp, 0, reloc);
+			   nbytes, &exp, reloc_howto->pc_relative, reloc);
 	    }
 	}
       else
@@ -1768,27 +1772,30 @@ expression_maybe_register (xtensa_opcode opc, int opnd, expressionS *tok)
 	  && ((reloc = xtensa_elf_suffix (&input_line_pointer, tok))
 	      != BFD_RELOC_NONE))
 	{
-	  if (reloc == BFD_RELOC_UNUSED)
+	  switch (reloc)
 	    {
-	      as_bad (_("unsupported relocation"));
-	      return;
-	    }
-
-	  if (tok->X_op == O_constant)
-	    {
-	      switch (reloc)
+	    case BFD_RELOC_LO16:
+	      if (tok->X_op == O_constant)
 		{
-		case BFD_RELOC_LO16:
 		  tok->X_add_number &= 0xffff;
 		  return;
-
-		case BFD_RELOC_HI16:
+		}
+	      break;
+	    case BFD_RELOC_HI16:
+	      if (tok->X_op == O_constant)
+		{
 		  tok->X_add_number = ((unsigned) tok->X_add_number) >> 16;
 		  return;
-
-		default:
-		  break;
 		}
+	      break;
+	    case BFD_RELOC_UNUSED:
+	      as_bad (_("unsupported relocation"));
+	      return;
+	    case BFD_RELOC_32_PCREL:
+	      as_bad (_("pcrel relocation not allowed in an instruction"));
+	      return;
+	    default:
+	      break;
 	    }
 	  tok->X_op = map_suffix_reloc_to_operator (reloc);
 	}
@@ -3124,6 +3131,7 @@ xg_valid_literal_expression (const expressionS *exp)
     case O_uminus:
     case O_subtract:
     case O_pltrel:
+    case O_pcrel:
       return TRUE;
     default:
       return FALSE;
@@ -3992,6 +4000,7 @@ xg_assemble_literal (/* const */ TInsn *insn)
   emit_state state;
   symbolS *lit_sym = NULL;
   bfd_reloc_code_real_type reloc;
+  bfd_boolean pcrel = FALSE;
   char *p;
 
   /* size = 4 for L32R.  It could easily be larger when we move to
@@ -4030,6 +4039,9 @@ xg_assemble_literal (/* const */ TInsn *insn)
 
   switch (emit_val->X_op)
     {
+    case O_pcrel:
+      pcrel = TRUE;
+      /* fall through */
     case O_pltrel:
       p = frag_more (litsize);
       xtensa_set_frag_assembly_state (frag_now);
@@ -4039,7 +4051,7 @@ xg_assemble_literal (/* const */ TInsn *insn)
       else
 	emit_val->X_op = O_constant;
       fix_new_exp (frag_now, p - frag_now->fr_literal,
-		   litsize, emit_val, 0, reloc);
+		   litsize, emit_val, pcrel, reloc);
       break;
 
     default:
@@ -5430,6 +5442,9 @@ md_pcrel_from (fixS *fixP)
   if (fixP->fx_r_type == BFD_RELOC_XTENSA_ASM_EXPAND)
     return 0;
 
+  if (fixP->fx_r_type == BFD_RELOC_32_PCREL)
+    return addr;
+
   if (!insnbuf)
     {
       insnbuf = xtensa_insnbuf_alloc (isa);
@@ -5604,7 +5619,6 @@ xtensa_symbol_new_hook (symbolS *sym)
 }
 
 
-
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
@@ -5620,6 +5634,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
   switch (fixP->fx_r_type)
     {
+    case BFD_RELOC_32_PCREL:
     case BFD_RELOC_32:
     case BFD_RELOC_16:
     case BFD_RELOC_8:
@@ -5786,7 +5801,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     }
 
   if (!fixp->fx_pcrel != !reloc->howto->pc_relative)
-    as_fatal (_("internal error? cannot generate `%s' relocation"),
+    as_fatal (_("internal error; cannot generate `%s' relocation"),
 	      bfd_get_reloc_code_name (fixp->fx_r_type));
 
   return reloc;

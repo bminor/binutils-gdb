@@ -1,3 +1,15 @@
+2007-12-07  Bob Wilson  <bob.wilson@acm.org>
+	
+	* config/tc-xtensa.c (O_pcrel): Define.
+	(suffix_relocs): Add pcrel suffix.
+	(md_pseudo_table): Add 4byte and 2byte directives.
+	(xtensa_elf_cons): Pass correct pcrel argument to fix_new_exp.
+	(xg_assemble_literal): Likewise.  Check for O_pcrel.
+	(expression_maybe_register): Reorganize.  Handle BFD_RELOC_32_PCREL.
+	(xg_valid_literal_expression): Allow O_pcrel.
+	(md_pcrel_from, md_apply_fix): Handle BFD_RELOC_32_PCREL.
+	(tc_gen_reloc): Fix punctuation in error message.
+	
 2007-12-06  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xg_force_frag_space): Delete.
