@@ -386,7 +386,7 @@ options::Command_line_options::options[] =
                  "(default is none)"),
               N_("--compress-debug-sections=[none" ZLIB_STR "]"),
               TWO_DASHES,
-              &General_options::set_compress_debug_symbols),
+              &General_options::set_compress_debug_sections),
   GENERAL_NOARG('\0', "demangle", N_("Demangle C++ symbols in log messages"),
                 NULL, TWO_DASHES, &General_options::set_demangle),
   GENERAL_NOARG('\0', "no-demangle",

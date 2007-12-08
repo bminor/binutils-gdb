@@ -365,7 +365,7 @@ class General_options
   set_symbolic()
   { this->symbolic_ = true; }
 
-  void set_compress_debug_symbols(const char* arg)
+  void set_compress_debug_sections(const char* arg)
   {
     if (strcmp(arg, "none") == 0)
       this->compress_debug_sections_ = NO_COMPRESSION;
@@ -374,7 +374,7 @@ class General_options
       this->compress_debug_sections_ = ZLIB_COMPRESSION;
 #endif
     else
-      gold_fatal(_("unsupported argument to --compress-debug-symbols: %s"),
+      gold_fatal(_("unsupported argument to --compress-debug-sections: %s"),
                  arg);
   }
 

@@ -243,7 +243,7 @@ class Output_merge_string : public Output_merge_base
   // Clears all the data in the stringpool, to save on memory.
   void
   clear_stringpool()
-  { stringpool_.clear(); }
+  { this->stringpool_.clear(); }
 
  private:
   // As we see input sections, we build a mapping from object, section
