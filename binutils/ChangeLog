@@ -1,3 +1,7 @@
+2007-12-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* readelf.c (is_32bit_pcrel_reloc): Add Xtensa.
+	
 2007-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (is_32bit_abs_reloc, is_32bit_pcrel_reloc): Add SPU.

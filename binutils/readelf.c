@@ -8102,6 +8102,9 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
       return reloc_type == 13; /* R_SPU_REL32.  */
     case EM_X86_64:
       return reloc_type == 2;  /* R_X86_64_PC32.  */
+    case EM_XTENSA_OLD:
+    case EM_XTENSA:
+      return reloc_type == 14; /* R_XTENSA_32_PCREL.  */
     default:
       /* Do not abort or issue an error message here.  Not all targets use
 	 pc-relative 32-bit relocs in their DWARF debug information and we
