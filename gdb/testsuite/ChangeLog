@@ -1,3 +1,7 @@
+2007-12-09  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* lib/gdb.exp (gdb_gnu_strip_debug): Remove debug format test.
+
 2007-11-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.server/file-transfer.exp, gdb.server/transfer.txt,
