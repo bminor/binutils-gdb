@@ -331,34 +331,40 @@ File_read::get_lasting_view(off_t start, off_t size, bool cache)
 void
 File_read::clear_views(bool destroying)
 {
-  for (Views::iterator p = this->views_.begin();
-       p != this->views_.end();
-       ++p)
+  Views::iterator p = this->views_.begin();
+  while (p != this->views_.end())
     {
       if (!p->second->is_locked()
 	  && (destroying || !p->second->should_cache()))
-	delete p->second;
-      else
 	{
-	  gold_assert(!destroying);
-	  this->saved_views_.push_back(p->second);
-	}
-    }
-  this->views_.clear();
+	  delete p->second;
 
-  Saved_views::iterator p = this->saved_views_.begin();
-  while (p != this->saved_views_.end())
-    {
-      if (!(*p)->is_locked()
-	  && (destroying || !(*p)->should_cache()))
-	{
-	  delete *p;
-	  p = this->saved_views_.erase(p);
+	  // map::erase invalidates only the iterator to the deleted
+	  // element.
+	  Views::iterator pe = p;
+	  ++p;
+	  this->views_.erase(pe);
 	}
       else
 	{
 	  gold_assert(!destroying);
 	  ++p;
+	}
+    }
+
+  Saved_views::iterator q = this->saved_views_.begin();
+  while (q != this->saved_views_.end())
+    {
+      if (!(*q)->is_locked()
+	  && (destroying || !(*q)->should_cache()))
+	{
+	  delete *q;
+	  q = this->saved_views_.erase(q);
+	}
+      else
+	{
+	  gold_assert(!destroying);
+	  ++q;
 	}
     }
 }
