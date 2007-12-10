@@ -1,3 +1,8 @@
+2007-12-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elf_fake_sections): Add "warning:" to "..changed to PROGBITS"
+	message.
+
 2007-12-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_howto_table): Add R_XTENSA_32_PCREL.

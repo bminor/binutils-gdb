@@ -2497,7 +2497,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
 	 non-bss input sections to bss output sections, or emit data
 	 to a bss output section via a linker script.  */
       (*_bfd_error_handler)
-	(_("section `%A' type changed to PROGBITS"), asect);
+	(_("warning: section `%A' type changed to PROGBITS"), asect);
       this_hdr->sh_type = sh_type;
     }
 
