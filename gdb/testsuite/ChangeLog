@@ -1,3 +1,8 @@
+2007-12-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/gdb.exp (build_id_debug_filename_get): OBJCOPY pipe being read
+	must be set to binary.
+
 2007-12-09  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* lib/gdb.exp (gdb_gnu_strip_debug): Remove debug format test.

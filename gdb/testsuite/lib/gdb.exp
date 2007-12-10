@@ -2500,6 +2500,7 @@ proc build_id_debug_filename_get { exec } {
 	return ""
     }
     set fi [open $tmp]
+    fconfigure $fi -translation binary
     # Skip the NOTE header.
     read $fi 16
     set data [read $fi]
