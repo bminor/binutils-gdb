@@ -53,13 +53,20 @@ extern int mips_relax_frag (asection *, struct frag *, long);
 #define md_undefined_symbol(name)	(0)
 #define md_operand(x)
 
+extern char mips_nop_opcode (void);
+#define NOP_OPCODE (mips_nop_opcode ())
+
 extern void mips_handle_align (struct frag *);
 #define HANDLE_ALIGN(fragp)  mips_handle_align (fragp)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (1 + 2)
 
 struct insn_label_list;
-#define TC_SEGMENT_INFO_TYPE struct insn_label_list *
+struct mips_segment_info {
+  struct insn_label_list *labels;
+  unsigned int mips16 : 1;
+};
+#define TC_SEGMENT_INFO_TYPE struct mips_segment_info
 
 /* This field is nonzero if the symbol is the target of a MIPS16 jump.  */
 #define TC_SYMFIELD_TYPE int

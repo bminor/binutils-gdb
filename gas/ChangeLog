@@ -1,3 +1,19 @@
+2007-12-10  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* config/tc-mips.h (mips_nop_opcode): Declare.
+	(NOP_OPCODE): Define.
+	(mips_segment_info): New structure.
+	(TC_SEGMENT_INFO_TYPE): Use it instead of insn_label_list.
+	* config/tc-mips.c (label_list): Adjust for new TC_SEGMENT_INFO_TYPE.
+	(mips_record_mips16_mode): New function.
+	(install_insn): Call it.
+	(mips_align): Likewise.  Turn the fill argument into an "int *".
+	Use frag_align_code for code segments if no fill data is given.
+	(s_align): Adjust call accordingly.
+	(mips_nop_opcode): New function.
+	(mips_handle_align): Use the first variable byte to decide which
+	nop sequence is needed.  Use md_number_to_chars and mips16_nop_insn.
+
 2007-12-07  Bob Wilson  <bob.wilson@acm.org>
 	
 	* config/tc-xtensa.c (O_pcrel): Define.

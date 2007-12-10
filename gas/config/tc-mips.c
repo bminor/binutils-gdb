@@ -1185,7 +1185,7 @@ struct insn_label_list
 };
 
 static struct insn_label_list *free_insn_labels;
-#define label_list tc_segment_info_data
+#define label_list tc_segment_info_data.labels
 
 static void mips_clear_insn_labels (void);
 
@@ -1310,6 +1310,18 @@ create_insn (struct mips_cl_insn *insn, const struct mips_opcode *mo)
   insn->mips16_absolute_jump_p = 0;
 }
 
+/* Record the current MIPS16 mode in now_seg.  */
+
+static void
+mips_record_mips16_mode (void)
+{
+  segment_info_type *si;
+
+  si = seg_info (now_seg);
+  if (si->tc_segment_info_data.mips16 != mips_opts.mips16)
+    si->tc_segment_info_data.mips16 = mips_opts.mips16;
+}
+
 /* Install INSN at the location specified by its "frag" and "where" fields.  */
 
 static void
@@ -1332,6 +1344,7 @@ install_insn (const struct mips_cl_insn *insn)
 	}
       md_number_to_chars (f, insn->insn_opcode, 2);
     }
+  mips_record_mips16_mode ();
 }
 
 /* Move INSN to offset WHERE in FRAG.  Adjust the fixups accordingly
@@ -11994,14 +12007,22 @@ get_symbol (void)
   return p;
 }
 
-/* Align the current frag to a given power of two.  The MIPS assembler
-   also automatically adjusts any preceding label.  */
+/* Align the current frag to a given power of two.  If a particular
+   fill byte should be used, FILL points to an integer that contains
+   that byte, otherwise FILL is null.
+
+   The MIPS assembler also automatically adjusts any preceding
+   label.  */
 
 static void
-mips_align (int to, int fill, symbolS *label)
+mips_align (int to, int *fill, symbolS *label)
 {
   mips_emit_delays ();
-  frag_align (to, fill, 0);
+  mips_record_mips16_mode ();
+  if (fill == NULL && subseg_text_p (now_seg))
+    frag_align_code (to, 0);
+  else
+    frag_align (to, fill ? *fill : 0, 0);
   record_alignment (now_seg, to);
   if (label != NULL)
     {
@@ -12017,8 +12038,7 @@ mips_align (int to, int fill, symbolS *label)
 static void
 s_align (int x ATTRIBUTE_UNUSED)
 {
-  int temp;
-  long temp_fill;
+  int temp, fill_value, *fill_ptr;
   long max_alignment = 28;
 
   /* o Note that the assembler pulls down any immediately preceding label
@@ -12040,17 +12060,18 @@ s_align (int x ATTRIBUTE_UNUSED)
   if (*input_line_pointer == ',')
     {
       ++input_line_pointer;
-      temp_fill = get_absolute_expression ();
+      fill_value = get_absolute_expression ();
+      fill_ptr = &fill_value;
     }
   else
-    temp_fill = 0;
+    fill_ptr = 0;
   if (temp)
     {
       segment_info_type *si = seg_info (now_seg);
       struct insn_label_list *l = si->label_list;
       /* Auto alignment should be switched on by next section change.  */
       auto_align = 1;
-      mips_align (temp, (int) temp_fill, l != NULL ? l->label : NULL);
+      mips_align (temp, fill_ptr, l != NULL ? l->label : NULL);
     }
   else
     {
@@ -14321,36 +14342,40 @@ static procS cur_proc;
 static procS *cur_proc_ptr;
 static int numprocs;
 
-/* Fill in an rs_align_code fragment.  */
+/* Implement NOP_OPCODE.  We encode a MIPS16 nop as "1" and a normal
+   nop as "0".  */
+
+char
+mips_nop_opcode (void)
+{
+  return seg_info (now_seg)->tc_segment_info_data.mips16;
+}
+
+/* Fill in an rs_align_code fragment.  This only needs to do something
+   for MIPS16 code, where 0 is not a nop.  */
 
 void
 mips_handle_align (fragS *fragp)
 {
+  char *p;
+
   if (fragp->fr_type != rs_align_code)
     return;
 
-  if (mips_opts.mips16)
+  p = fragp->fr_literal + fragp->fr_fix;
+  if (*p)
     {
-      static const unsigned char be_nop[] = { 0x65, 0x00 };
-      static const unsigned char le_nop[] = { 0x00, 0x65 };
-
       int bytes;
-      char *p;
 
       bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
-      p = fragp->fr_literal + fragp->fr_fix;
-
       if (bytes & 1)
 	{
 	  *p++ = 0;
 	  fragp->fr_fix++;
 	}
-
-      memcpy (p, (target_big_endian ? be_nop : le_nop), 2);
+      md_number_to_chars (p, mips16_nop_insn.insn_opcode, 2);
       fragp->fr_var = 2;
     }
-
-  /* For mips32, a nop is a zero, which we trivially get by doing nothing.  */
 }
 
 static void

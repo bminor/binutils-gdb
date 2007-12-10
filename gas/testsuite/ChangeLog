@@ -1,3 +1,9 @@
+2007-12-10  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* gas/mips/align2.s, gas/mips/align2.d, gas/mips/align2-el.d: New
+	tests.
+	* gas/mips/mips.exp: Run them.
+
 2007-12-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* gas/xtensa/all.exp: Run new pcrel test.
