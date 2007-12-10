@@ -713,6 +713,7 @@ md_begin (void)
 
   /* The sbss section is for local .scomm symbols.  */
   sbss_section = subseg_new (".sbss", 0);
+  seg_info (sbss_section)->bss = 1;
 
   /* This is copied from perform_an_assembly_pass.  */
   applicable = bfd_applicable_section_flags (stdoutput);

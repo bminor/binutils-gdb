@@ -1,3 +1,7 @@
+2007-12-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-m32r.c (md_begin): Mark .sbss as being bss style section.
+
 2007-12-10  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* config/tc-mips.h (mips_nop_opcode): Declare.
