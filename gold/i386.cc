@@ -57,7 +57,7 @@ class Target_i386 : public Sized_target<32, false>
   Target_i386()
     : Sized_target<32, false>(&i386_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
-      copy_relocs_(NULL), dynbss_(NULL)
+      copy_relocs_(NULL), dynbss_(NULL), got_mod_index_offset_(-1U)
   { }
 
   // Scan the relocations to look for symbol adjustments.
@@ -261,6 +261,11 @@ class Target_i386 : public Sized_target<32, false>
   void
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
 
+  // Create a GOT entry for the TLS module index.
+  unsigned int
+  got_mod_index_entry(Symbol_table* symtab, Layout* layout,
+		      Sized_relobj<32, false>* object);
+
   // Get the PLT section.
   const Output_data_plt_i386*
   plt_section() const
@@ -306,6 +311,8 @@ class Target_i386 : public Sized_target<32, false>
   Copy_relocs<32, false>* copy_relocs_;
   // Space for variables copied with a COPY reloc.
   Output_data_space* dynbss_;
+  // Offset of the GOT entry for the TLS module index;
+  unsigned int got_mod_index_offset_;
 };
 
 const Target::Target_info Target_i386::i386_info =
@@ -631,6 +638,26 @@ Target_i386::make_plt_entry(Symbol_table* symtab, Layout* layout, Symbol* gsym)
   this->plt_->add_entry(gsym);
 }
 
+// Create a GOT entry for the TLS module index.
+
+unsigned int
+Target_i386::got_mod_index_entry(Symbol_table* symtab, Layout* layout,
+			         Sized_relobj<32, false>* object)
+{
+  if (this->got_mod_index_offset_ == -1U)
+    {
+      gold_assert(symtab != NULL && layout != NULL && object != NULL);
+      Reloc_section* rel_dyn = this->rel_dyn_section(layout);
+      Output_data_got<32, false>* got = this->got_section(symtab, layout);
+      unsigned int got_offset = got->add_constant(0);
+      rel_dyn->add_local(object, 0, elfcpp::R_386_TLS_DTPMOD32, got,
+                         got_offset);
+      got->add_constant(0);
+      this->got_mod_index_offset_ = got_offset;
+    }
+  return this->got_mod_index_offset_;
+}
+
 // Handle a relocation against a non-function symbol defined in a
 // dynamic object.  The traditional way to handle this is to generate
 // a COPY relocation to copy the variable at runtime from the shared
@@ -934,13 +961,7 @@ Target_i386::Scan::local(const General_options&,
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
 	        // Create a GOT entry for the module index.
-                Output_data_got<32, false>* got
-                    = target->got_section(symtab, layout);
-                unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
-                got->add_local_tls_with_rel(object, r_sym,
-                                            lsym.get_st_shndx(), false,
-                                            target->rel_dyn_section(layout),
-                                            elfcpp::R_386_TLS_DTPMOD32);
+	        target->got_mod_index_entry(symtab, layout, object);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);
@@ -1239,16 +1260,10 @@ Target_i386::Scan::global(const General_options& options,
 	    break;
 
 	  case elfcpp::R_386_TLS_LDM:         // Local-dynamic
-	    // FIXME: If not relaxing to LE, we need to generate a
-	    // DTPMOD32 reloc.
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
 	        // Create a GOT entry for the module index.
-                Output_data_got<32, false>* got
-                    = target->got_section(symtab, layout);
-                got->add_global_tls_with_rel(gsym,
-                                             target->rel_dyn_section(layout),
-                                             elfcpp::R_386_TLS_DTPMOD32);
+	        target->got_mod_index_entry(symtab, layout, object);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_global(object, r_type, gsym);
@@ -1737,18 +1752,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
           // Relocate the field with the offset of the GOT entry for
           // the module index.
           unsigned int got_offset;
-          if (gsym != NULL)
-            {
-              gold_assert(gsym->has_tls_got_offset(false));
-              got_offset = gsym->tls_got_offset(false) - target->got_size();
-            }
-          else
-            {
-              unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
-              gold_assert(object->local_has_tls_got_offset(r_sym, false));
-              got_offset = (object->local_tls_got_offset(r_sym, false)
-			    - target->got_size());
-            }
+          got_offset = (target->got_mod_index_entry(NULL, NULL, NULL)
+			- target->got_size());
           Relocate_functions<32, false>::rel32(view, got_offset);
           break;
         }
@@ -1761,12 +1766,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
       // This reloc can appear in debugging sections, in which case we
       // won't see the TLS_LDM reloc.  The local_dynamic_type field
       // tells us this.
-      gold_assert(tls_segment != NULL);
-      if (this->local_dynamic_type_ == LOCAL_DYNAMIC_GNU)
-	value -= tls_segment->memsz();
-      else if (optimized_type == tls::TLSOPT_TO_LE
-	       && this->local_dynamic_type_ != LOCAL_DYNAMIC_NONE)
-	value = tls_segment->memsz() - value;
+      if (optimized_type == tls::TLSOPT_TO_LE)
+	{
+          gold_assert(tls_segment != NULL);
+          value -= tls_segment->memsz();
+	}
       Relocate_functions<32, false>::rel32(view, value);
       break;
 
