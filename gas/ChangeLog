@@ -1,3 +1,14 @@
+2007-12-11  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+	
+	* config/tc-xtensa.c (frag_format_size): Handle frags that expand to
+	wide branches.
+	(get_aligned_diff): For RELAX_ALIGN_NEXT_OPCODE, skip to the next
+	non-empty frag to find the LOOP instruction.  Change comma typo to
+	a semicolon.
+	(relax_frag_immed, convert_frag_immed): Rename wide_insn variable to
+	from_widen_insn.
+
 2007-12-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-m32r.c (md_begin): Mark .sbss as being bss style section.

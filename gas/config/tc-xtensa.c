@@ -4424,7 +4424,26 @@ frag_format_size (const fragS *fragP)
   if (fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED_STEP1
       || fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED_STEP2
       || fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED_STEP3)
-    return 3;
+    {
+      /* For most frags at RELAX_IMMED_STEPX, with X > 0, the first
+	 instruction in the relaxed version is of length 3.  (The case
+	 where we have to pull the instruction out of a FLIX bundle
+	 is handled conservatively above.)  However, frags with opcodes
+	 that are expanding to wide branches end up having formats that
+	 are not determinable by the RELAX_IMMED_STEPX enumeration, and
+	 we can't tell directly what format the relaxer picked.  This
+	 is a wart in the design of the relaxer that should someday be
+	 fixed, but would require major changes, or at least should
+	 be accompanied by major changes to make use of that data.
+
+	 In any event, we can tell that we are expanding from a single-slot
+	 three-byte format to a wider one with the logic below.  */
+
+      if (fmt_size <= 3 && fragP->tc_frag_data.text_expansion[0] != 3)
+	return 3 + fragP->tc_frag_data.text_expansion[0];
+      else
+	return 3;
+    }
 
   if (fragP->tc_frag_data.slot_subtypes[0] == RELAX_NARROW)
     return 2 + fragP->tc_frag_data.text_expansion[0];
@@ -8259,6 +8278,7 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
   int align_power;
   offsetT opt_diff;
   offsetT branch_align;
+  fragS *loop_frag;
 
   assert (fragP->fr_type == rs_machine_dependent);
   switch (fragP->fr_subtype)
@@ -8281,15 +8301,19 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
       return opt_diff;
 
     case RELAX_ALIGN_NEXT_OPCODE:
-      target_size = get_loop_align_size (next_frag_format_size (fragP));
+      /* The next non-empty frag after this one holds the LOOP instruction
+	 that needs to be aligned.  The required alignment depends on the
+	 size of the next non-empty frag after the loop frag, i.e., the
+	 first instruction in the loop.  */
+      loop_frag = next_non_empty_frag (fragP);
+      target_size = get_loop_align_size (next_frag_format_size (loop_frag));
       loop_insn_offset = 0;
       is_loop = next_frag_opcode_is_loop (fragP, &loop_opcode);
       assert (is_loop);
 
       /* If the loop has been expanded then the LOOP instruction
 	 could be at an offset from this fragment.  */
-      if (next_non_empty_frag(fragP)->tc_frag_data.slot_subtypes[0]
-	  != RELAX_IMMED)
+      if (loop_frag->tc_frag_data.slot_subtypes[0] != RELAX_IMMED)
 	loop_insn_offset = get_expanded_loop_offset (loop_opcode);
 
       /* In an ideal world, which is what we are shooting for here,
@@ -8298,7 +8322,7 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
 	 will call get_noop_aligned_address.  */
       target_address =
 	address + loop_insn_offset + xg_get_single_size (loop_opcode);
-      align_power = get_text_align_power (target_size),
+      align_power = get_text_align_power (target_size);
       opt_diff = get_text_align_fill_size (target_address, align_power,
 					   target_size, FALSE, FALSE);
 
@@ -8949,7 +8973,7 @@ relax_frag_immed (segT segP,
   int old_size;
   bfd_boolean negatable_branch = FALSE;
   bfd_boolean branch_jmp_to_next = FALSE;
-  bfd_boolean wide_insn = FALSE;
+  bfd_boolean from_wide_insn = FALSE;
   xtensa_isa isa = xtensa_default_isa;
   IStack istack;
   offsetT frag_offset;
@@ -8963,7 +8987,7 @@ relax_frag_immed (segT segP,
   xg_clear_vinsn (&cur_vinsn);
   vinsn_from_chars (&cur_vinsn, fragP->fr_opcode);
   if (cur_vinsn.num_slots > 1)
-    wide_insn = TRUE;
+    from_wide_insn = TRUE;
 
   tinsn = cur_vinsn.slots[slot];
   tinsn_immed_from_frag (&tinsn, fragP, slot);
@@ -9017,13 +9041,16 @@ relax_frag_immed (segT segP,
   first = 0;
   while (istack.insn[first].opcode == XTENSA_UNDEFINED)
     first++;
+
   num_text_bytes = get_num_stack_text_bytes (&istack);
-  if (wide_insn)
+
+  if (from_wide_insn)
     {
       num_text_bytes += old_size;
       if (opcode_fits_format_slot (istack.insn[first].opcode, fmt, slot))
 	num_text_bytes -= xg_get_single_size (istack.insn[first].opcode);
     }
+
   total_text_diff = num_text_bytes - old_size;
   this_text_diff = total_text_diff - fragP->tc_frag_data.text_expansion[slot];
 
@@ -9316,7 +9343,7 @@ convert_frag_immed (segT segP,
   bfd_boolean branch_jmp_to_next = FALSE;
   char *fr_opcode = fragP->fr_opcode;
   xtensa_isa isa = xtensa_default_isa;
-  bfd_boolean wide_insn = FALSE;
+  bfd_boolean from_wide_insn = FALSE;
   int bytes;
   bfd_boolean is_loop;
 
@@ -9326,7 +9353,7 @@ convert_frag_immed (segT segP,
 
   vinsn_from_chars (&cur_vinsn, fr_opcode);
   if (cur_vinsn.num_slots > 1)
-    wide_insn = TRUE;
+    from_wide_insn = TRUE;
 
   orig_tinsn = cur_vinsn.slots[slot];
   tinsn_immed_from_frag (&orig_tinsn, fragP, slot);
@@ -9434,7 +9461,7 @@ convert_frag_immed (segT segP,
 	      break;
 
 	    case ITYPE_INSN:
-	      if (first && wide_insn)
+	      if (first && from_wide_insn)
 		{
 		  target_offset += xtensa_format_length (isa, fmt);
 		  first = FALSE;
@@ -9480,7 +9507,7 @@ convert_frag_immed (segT segP,
 	    case ITYPE_INSN:
 	      xg_resolve_labels (tinsn, gen_label);
 	      xg_resolve_literals (tinsn, lit_sym);
-	      if (wide_insn && first)
+	      if (from_wide_insn && first)
 		{
 		  first = FALSE;
 		  if (opcode_fits_format_slot (tinsn->opcode, fmt, slot))
