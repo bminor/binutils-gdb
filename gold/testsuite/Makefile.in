@@ -123,7 +123,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_4 = tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test
 @GCC_FALSE@tls_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@tls_test_DEPENDENCIES =
 @TLS_FALSE@tls_test_DEPENDENCIES =
@@ -214,7 +215,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_4 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__EXEEXT_5 = tls_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_6 = tls_shared_nonpic_test$(EXEEXT)
@@ -339,6 +341,9 @@ object_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
 am__tls_pic_test_SOURCES_DIST = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_pic_test_OBJECTS = tls_test_main.$(OBJEXT)
 tls_pic_test_OBJECTS = $(am_tls_pic_test_OBJECTS)
+am__tls_shared_ie_test_SOURCES_DIST = tls_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_shared_ie_test_OBJECTS = tls_test_main.$(OBJEXT)
+tls_shared_ie_test_OBJECTS = $(am_tls_shared_ie_test_OBJECTS)
 am__tls_shared_nonpic_test_SOURCES_DIST = tls_test_main.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_shared_nonpic_test_OBJECTS = tls_test_main.$(OBJEXT)
 tls_shared_nonpic_test_OBJECTS = $(am_tls_shared_nonpic_test_OBJECTS)
@@ -487,6 +492,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(object_unittest_SOURCES) $(tls_pic_test_SOURCES) \
+	$(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
 	$(tls_static_pic_test_SOURCES) $(tls_static_test_SOURCES) \
 	$(tls_test_SOURCES) $(two_file_pic_test_SOURCES) \
@@ -518,6 +524,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(object_unittest_SOURCES) $(am__tls_pic_test_SOURCES_DIST) \
+	$(am__tls_shared_ie_test_SOURCES_DIST) \
 	$(am__tls_shared_nonpic_test_SOURCES_DIST) \
 	$(am__tls_shared_test_SOURCES_DIST) \
 	$(am__tls_static_pic_test_SOURCES_DIST) \
@@ -865,6 +872,10 @@ object_unittest_SOURCES = object_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_test_DEPENDENCIES = gcctestdir/ld tls_test_shared.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_test_LDADD = tls_test_shared.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_SOURCES = tls_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_ie_shared.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_LDADD = tls_test_ie_shared.so -lpthread
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_test_SOURCES = $(tls_test_SOURCES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_test_DEPENDENCIES = $(tls_test_DEPENDENCIES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_test_LDFLAGS = $(tls_test_LDFLAGS) -static
@@ -995,6 +1006,9 @@ object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENC
 tls_pic_test$(EXEEXT): $(tls_pic_test_OBJECTS) $(tls_pic_test_DEPENDENCIES) 
 	@rm -f tls_pic_test$(EXEEXT)
 	$(CXXLINK) $(tls_pic_test_LDFLAGS) $(tls_pic_test_OBJECTS) $(tls_pic_test_LDADD) $(LIBS)
+tls_shared_ie_test$(EXEEXT): $(tls_shared_ie_test_OBJECTS) $(tls_shared_ie_test_DEPENDENCIES) 
+	@rm -f tls_shared_ie_test$(EXEEXT)
+	$(CXXLINK) $(tls_shared_ie_test_LDFLAGS) $(tls_shared_ie_test_OBJECTS) $(tls_shared_ie_test_LDADD) $(LIBS)
 tls_shared_nonpic_test$(EXEEXT): $(tls_shared_nonpic_test_OBJECTS) $(tls_shared_nonpic_test_DEPENDENCIES) 
 	@rm -f tls_shared_nonpic_test$(EXEEXT)
 	$(CXXLINK) $(tls_shared_nonpic_test_LDFLAGS) $(tls_shared_nonpic_test_OBJECTS) $(tls_shared_nonpic_test_LDADD) $(LIBS)
@@ -1428,6 +1442,13 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_pic_ie.o: tls_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -ftls-model=initial-exec -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_file2_pic_ie.o: tls_test_file2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -ftls-model=initial-exec -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_ie_shared.so: tls_test_pic_ie.o tls_test_file2_pic_ie.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic_ie.o tls_test_file2_pic_ie.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o gcctestdir/ld
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg.o: debug_msg.cc
