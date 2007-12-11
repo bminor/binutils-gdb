@@ -71,7 +71,8 @@ Layout::Layout(const General_options& options)
     eh_frame_section_(NULL), output_file_size_(-1),
     input_requires_executable_stack_(false),
     input_with_gnu_stack_note_(false),
-    input_without_gnu_stack_note_(false)
+    input_without_gnu_stack_note_(false),
+    has_static_tls_(false)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -1733,6 +1734,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
       odyn->add_constant(elfcpp::DT_TEXTREL, 0);
       flags |= elfcpp::DF_TEXTREL;
     }
+  if (parameters->output_is_shared() && this->has_static_tls())
+    flags |= elfcpp::DF_STATIC_TLS;
   odyn->add_constant(elfcpp::DT_FLAGS, flags);
 }
 

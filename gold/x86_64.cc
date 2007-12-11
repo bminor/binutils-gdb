@@ -942,6 +942,7 @@ Target_x86_64::Scan::local(const General_options&,
 	    break;
 
           case elfcpp::R_X86_64_GOTTPOFF:    // Initial-exec
+	    layout->set_has_static_tls();
             if (optimized_type == tls::TLSOPT_NONE)
               {
 	        // Create a GOT entry for the tp-relative offset.
@@ -957,6 +958,7 @@ Target_x86_64::Scan::local(const General_options&,
             break;
 
           case elfcpp::R_X86_64_TPOFF32:     // Local-exec
+	    layout->set_has_static_tls();
             if (output_is_shared)
               unsupported_reloc_local(object, r_type);
 	    break;
@@ -1219,6 +1221,7 @@ Target_x86_64::Scan::global(const General_options& options,
 	    break;
 
           case elfcpp::R_X86_64_GOTTPOFF:    // Initial-exec
+	    layout->set_has_static_tls();
             if (optimized_type == tls::TLSOPT_NONE)
               {
 	        // Create a GOT entry for the tp-relative offset.
@@ -1233,6 +1236,7 @@ Target_x86_64::Scan::global(const General_options& options,
             break;
 
           case elfcpp::R_X86_64_TPOFF32:     // Local-exec
+	    layout->set_has_static_tls();
             if (parameters->output_is_shared())
               unsupported_reloc_local(object, r_type);
 	    break;

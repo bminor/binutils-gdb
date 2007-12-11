@@ -973,6 +973,7 @@ Target_i386::Scan::local(const General_options&,
 	  case elfcpp::R_386_TLS_IE:          // Initial-exec
 	  case elfcpp::R_386_TLS_IE_32:
 	  case elfcpp::R_386_TLS_GOTIE:
+	    layout->set_has_static_tls();
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
 	        // For the R_386_TLS_IE relocation, we need to create a
@@ -1005,6 +1006,7 @@ Target_i386::Scan::local(const General_options&,
 
 	  case elfcpp::R_386_TLS_LE:          // Local-exec
 	  case elfcpp::R_386_TLS_LE_32:
+	    layout->set_has_static_tls();
 	    if (output_is_shared)
 	      {
 	        // We need to create a dynamic relocation.
@@ -1275,6 +1277,7 @@ Target_i386::Scan::global(const General_options& options,
 	  case elfcpp::R_386_TLS_IE:          // Initial-exec
 	  case elfcpp::R_386_TLS_IE_32:
 	  case elfcpp::R_386_TLS_GOTIE:
+	    layout->set_has_static_tls();
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
 	        // For the R_386_TLS_IE relocation, we need to create a
@@ -1304,6 +1307,7 @@ Target_i386::Scan::global(const General_options& options,
 
 	  case elfcpp::R_386_TLS_LE:          // Local-exec
 	  case elfcpp::R_386_TLS_LE_32:
+	    layout->set_has_static_tls();
 	    if (parameters->output_is_shared())
 	      {
 	        // We need to create a dynamic relocation.
