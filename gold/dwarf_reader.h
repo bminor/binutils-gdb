@@ -89,15 +89,19 @@ class Sized_dwarf_line_info : public Dwarf_line_info
 {
  public:
   // Initializes a .debug_line reader for a given object file.
-  Sized_dwarf_line_info(Object* object);
+  // If SHNDX is specified and non-negative, only read the debug
+  // information that pertains to the specified section.
+  Sized_dwarf_line_info(Object* object, off_t read_shndx = -1U);
 
  private:
   std::string
   do_addr2line(unsigned int shndx, off_t offset);
 
   // Start processing line info, and populates the offset_map_.
+  // If SHNDX is non-negative, only store debug information that
+  // pertains to the specified section.
   void
-  read_line_mappings();
+  read_line_mappings(off_t shndx);
 
   // Reads the relocation section associated with .debug_line and
   // stores relocation information in reloc_map_.
@@ -117,9 +121,11 @@ class Sized_dwarf_line_info : public Dwarf_line_info
   const unsigned char*
   read_header_tables(const unsigned char* lineptr);
 
-  // Reads the DWARF2/3 line information.
+  // Reads the DWARF2/3 line information.  If shndx is non-negative,
+  // discard all line information that doesn't pertain to the given
+  // section.
   const unsigned char*
-  read_lines(const unsigned char* lineptr);
+  read_lines(const unsigned char* lineptr, off_t shndx);
 
   // Process a single line info opcode at START using the state
   // machine at LSM.  Return true if we should define a line using the

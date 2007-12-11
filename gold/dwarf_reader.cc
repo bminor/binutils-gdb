@@ -118,7 +118,8 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
 }
 
 template<int size, bool big_endian>
-Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object)
+Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object,
+                                                               off_t read_shndx)
   : data_valid_(false), buffer_(NULL), symtab_buffer_(NULL),
     directories_(), files_(), current_header_index_(-1)
 {
@@ -171,7 +172,7 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object)
   // Now that we have successfully read all the data, parse the debug
   // info.
   this->data_valid_ = true;
-  this->read_line_mappings();
+  this->read_line_mappings(read_shndx);
 }
 
 // Read the DWARF header.
@@ -495,7 +496,8 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
 
 template<int size, bool big_endian>
 unsigned const char*
-Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr)
+Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr,
+                                                    off_t shndx)
 {
   struct LineStateMachine lsm;
 
@@ -517,7 +519,8 @@ Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr
         {
           size_t oplength;
           bool add_line = this->process_one_opcode(lineptr, &lsm, &oplength);
-          if (add_line)
+          if (add_line
+              && (shndx == -1U || lsm.shndx == -1U || shndx == lsm.shndx))
             {
               Offset_to_lineno_entry entry
                   = { lsm.address, this->current_header_index_,
@@ -570,7 +573,7 @@ Sized_dwarf_line_info<size, big_endian>::read_relocs()
 
 template<int size, bool big_endian>
 void
-Sized_dwarf_line_info<size, big_endian>::read_line_mappings()
+Sized_dwarf_line_info<size, big_endian>::read_line_mappings(off_t shndx)
 {
   gold_assert(this->data_valid_ == true);
 
@@ -580,7 +583,7 @@ Sized_dwarf_line_info<size, big_endian>::read_line_mappings()
       const unsigned char* lineptr = this->buffer_;
       lineptr = this->read_header_prolog(lineptr);
       lineptr = this->read_header_tables(lineptr);
-      lineptr = this->read_lines(lineptr);
+      lineptr = this->read_lines(lineptr, shndx);
       this->buffer_ = lineptr;
     }
 
@@ -788,25 +791,29 @@ Dwarf_line_info::one_addr2line(Object* object,
 {
   if (parameters->get_size() == 32 && !parameters->is_big_endian())
 #ifdef HAVE_TARGET_32_LITTLE
-    return Sized_dwarf_line_info<32, false>(object).addr2line(shndx, offset);
+    return Sized_dwarf_line_info<32, false>(object, shndx).addr2line(shndx,
+                                                                     offset);
 #else
     gold_unreachable();
 #endif
   else if (parameters->get_size() == 32 && parameters->is_big_endian())
 #ifdef HAVE_TARGET_32_BIG
-    return Sized_dwarf_line_info<32, true>(object).addr2line(shndx, offset);
+    return Sized_dwarf_line_info<32, true>(object, shndx).addr2line(shndx,
+                                                                    offset);
 #else
     gold_unreachable();
 #endif
   else if (parameters->get_size() == 64 && !parameters->is_big_endian())
 #ifdef HAVE_TARGET_64_LITTLE
-    return Sized_dwarf_line_info<64, false>(object).addr2line(shndx, offset);
+    return Sized_dwarf_line_info<64, false>(object, shndx).addr2line(shndx,
+                                                                     offset);
 #else
     gold_unreachable();
 #endif
   else if (parameters->get_size() == 64 && parameters->is_big_endian())
 #ifdef HAVE_TARGET_64_BIT
-    return Sized_dwarf_line_info<64, true>(object).addr2line(shndx, offset);
+    return Sized_dwarf_line_info<64, true>(object, shndx).addr2line(shndx,
+                                                                    offset);
 #else
     gold_unreachable();
 #endif
