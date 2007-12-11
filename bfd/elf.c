@@ -6046,6 +6046,7 @@ _bfd_elf_copy_private_symbol_data (bfd *ibfd,
   osym = elf_symbol_from (obfd, osymarg);
 
   if (isym != NULL
+      && isym->internal_elf_sym.st_shndx != 0
       && osym != NULL
       && bfd_is_abs_section (isym->symbol.section))
     {

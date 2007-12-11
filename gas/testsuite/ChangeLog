@@ -1,3 +1,9 @@
+2007-12-11  Catherine Moore  <clm@codesourcery.com>
+
+        gas/elf/symtab.s: New test.
+	gas/elf/symtab.d: New expected output.
+	gas/elf/elf.exp: Run the new symbtab test.
+
 2007-12-10  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* gas/mips/align2.s, gas/mips/align2.d, gas/mips/align2-el.d: New

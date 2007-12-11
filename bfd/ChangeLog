@@ -1,3 +1,8 @@
+2007-12-11  Catherine Moore  <clm@codesourcery.com>
+
+        * elf.c (_bfd_elf_copy_private_symbol_data): Don't copy shndx if
+        the symbol's section is the undefined section.
+
 2007-12-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elf_fake_sections): Add "warning:" to "..changed to PROGBITS"
