@@ -70,7 +70,7 @@ class Target_x86_64 : public Sized_target<64, false>
   Target_x86_64()
     : Sized_target<64, false>(&x86_64_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rela_dyn_(NULL),
-      copy_relocs_(NULL), dynbss_(NULL)
+      copy_relocs_(NULL), dynbss_(NULL), got_mod_index_offset_(-1U)
   { }
 
   // Scan the relocations to look for symbol adjustments.
@@ -254,6 +254,11 @@ class Target_x86_64 : public Sized_target<64, false>
   void
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
 
+  // Create a GOT entry for the TLS module index.
+  unsigned int
+  got_mod_index_entry(Symbol_table* symtab, Layout* layout,
+		      Sized_relobj<64, false>* object);
+
   // Get the PLT section.
   Output_data_plt_x86_64*
   plt_section() const
@@ -299,6 +304,8 @@ class Target_x86_64 : public Sized_target<64, false>
   Copy_relocs<64, false>* copy_relocs_;
   // Space for variables copied with a COPY reloc.
   Output_data_space* dynbss_;
+  // Offset of the GOT entry for the TLS module index;
+  unsigned int got_mod_index_offset_;
 };
 
 const Target::Target_info Target_x86_64::x86_64_info =
@@ -585,6 +592,26 @@ Target_x86_64::make_plt_entry(Symbol_table* symtab, Layout* layout,
     }
 
   this->plt_->add_entry(gsym);
+}
+
+// Create a GOT entry for the TLS module index.
+
+unsigned int
+Target_x86_64::got_mod_index_entry(Symbol_table* symtab, Layout* layout,
+			           Sized_relobj<64, false>* object)
+{
+  if (this->got_mod_index_offset_ == -1U)
+    {
+      gold_assert(symtab != NULL && layout != NULL && object != NULL);
+      Reloc_section* rela_dyn = this->rela_dyn_section(layout);
+      Output_data_got<64, false>* got = this->got_section(symtab, layout);
+      unsigned int got_offset = got->add_constant(0);
+      rela_dyn->add_local(object, 0, elfcpp::R_X86_64_DTPMOD64, got,
+                          got_offset, 0);
+      got->add_constant(0);
+      this->got_mod_index_offset_ = got_offset;
+    }
+  return this->got_mod_index_offset_;
 }
 
 // Handle a relocation against a non-function symbol defined in a
@@ -904,13 +931,7 @@ Target_x86_64::Scan::local(const General_options&,
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
 	        // Create a GOT entry for the module index.
-	        Output_data_got<64, false>* got
-	            = target->got_section(symtab, layout);
-	        unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-                got->add_local_tls_with_rela(object, r_sym,
-                                             lsym.get_st_shndx(), false,
-                                             target->rela_dyn_section(layout),
-                                             elfcpp::R_X86_64_DTPMOD64);
+	        target->got_mod_index_entry(symtab, layout, object);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);
@@ -1187,11 +1208,7 @@ Target_x86_64::Scan::global(const General_options& options,
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
 	        // Create a GOT entry for the module index.
-	        Output_data_got<64, false>* got
-	            = target->got_section(symtab, layout);
-                got->add_global_tls_with_rela(gsym,
-                                              target->rela_dyn_section(layout),
-                                              elfcpp::R_X86_64_DTPMOD64);
+	        target->got_mod_index_entry(symtab, layout, object);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_global(object, r_type, gsym);
@@ -1662,18 +1679,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
           // Relocate the field with the offset of the GOT entry for
           // the module index.
           unsigned int got_offset;
-          if (gsym != NULL)
-            {
-              gold_assert(gsym->has_tls_got_offset(false));
-              got_offset = gsym->tls_got_offset(false) - target->got_size();
-            }
-          else
-            {
-              unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
-              gold_assert(object->local_has_tls_got_offset(r_sym, false));
-              got_offset = (object->local_tls_got_offset(r_sym, false)
-                            - target->got_size());
-            }
+          got_offset = (target->got_mod_index_entry(NULL, NULL, NULL)
+			- target->got_size());
 	  value = target->got_plt_section()->address() + got_offset;
           Relocate_functions<64, false>::pcrela32(view, value, addend,
                                                   address);
