@@ -1,6 +1,7 @@
 2007-12-12  Bob Wilson  <bob.wilson@acm.org>
 
-	* config/tc-xtensa.c (xg_symbolic_immeds_fit): Do not relax calls to		weak symbols if longcalls are disabled.
+	* config/tc-xtensa.c (xg_symbolic_immeds_fit): Do not relax calls to
+	weak symbols if longcalls are disabled.
 
 2007-12-11  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
