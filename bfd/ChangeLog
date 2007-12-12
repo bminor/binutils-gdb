@@ -1,3 +1,9 @@
+2007-12-12  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_do_reloc): Update self_address along with
+	address.
+	(print_action_list): Fix name for ta_convert_longcall.
+
 2007-12-11  Catherine Moore  <clm@codesourcery.com>
 
         * elf.c (_bfd_elf_copy_private_symbol_data): Don't copy shndx if

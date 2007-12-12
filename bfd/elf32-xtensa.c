@@ -1575,6 +1575,7 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
 
 	/* The CALL needs to be relocated.  Continue below for that part.  */
 	address += 3;
+	self_address += 3;
 	howto = &elf_howto_table[(unsigned) R_XTENSA_SLOT0_OP ];
       }
       break;
@@ -4846,7 +4847,7 @@ print_action_list (FILE *fp, text_action_list *action_list)
 	case ta_remove_longcall:
 	  t = "remove_longcall"; break;
 	case ta_convert_longcall:
-	  t = "remove_longcall"; break;
+	  t = "convert_longcall"; break;
 	case ta_narrow_insn:
 	  t = "narrow_insn"; break;
 	case ta_widen_insn:
