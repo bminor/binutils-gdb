@@ -3274,7 +3274,8 @@ mips_load (char *file, int from_tty)
       /* Work around problem where PMON monitor updates the PC after a load
          to a different value than GDB thinks it has. The following ensures
          that the write_pc() WILL update the PC value: */
-      deprecated_register_valid[gdbarch_pc_regnum (current_gdbarch)] = 0;
+      regcache_set_valid_p (get_current_regcache (),
+			    gdbarch_pc_regnum (current_gdbarch), 0);
     }
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));

@@ -1,3 +1,9 @@
+2007-12-12  Nigel Stephens  <nigel@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* remote-mips.c (mips_load): Use regcache_set_valid_p() instead
+	of setting deprecated_register_valid array directly.
+
 2007-12-07  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-tdep.c (extended_offset): Fix a comment.
