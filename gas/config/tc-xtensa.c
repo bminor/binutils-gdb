@@ -3235,23 +3235,19 @@ xg_symbolic_immeds_fit (const TInsn *insn,
 	      || xtensa_operand_is_PCrelative (isa, insn->opcode, i) == 0)
 	    return FALSE;
 
-	  /* If it is a weak symbol, then assume it won't reach.  */
-	  if (S_IS_WEAK (expr->X_add_symbol))
-	    return FALSE;
-
-	  if (is_direct_call_opcode (insn->opcode)
-	      && ! pc_frag->tc_frag_data.use_longcalls)
+	  /* If it is a weak symbol or a symbol in a different section,
+	     it cannot be known to fit at assembly time.  */
+	  if (S_IS_WEAK (expr->X_add_symbol)
+	      || S_GET_SEGMENT (expr->X_add_symbol) != pc_seg)
 	    {
-	      /* If callee is undefined or in a different segment, be
-		 optimistic and assume it will be in range.  */
-	      if (S_GET_SEGMENT (expr->X_add_symbol) != pc_seg)
+	      /* For a direct call with --no-longcalls, be optimistic and
+		 assume it will be in range.  */
+	      if (is_direct_call_opcode (insn->opcode)
+		  && ! pc_frag->tc_frag_data.use_longcalls)
 		return TRUE;
-	    }
 
-	  /* Only references within a segment can be known to fit in the
-	     operands at assembly time.  */
-	  if (S_GET_SEGMENT (expr->X_add_symbol) != pc_seg)
-	    return FALSE;
+	      return FALSE;
+	    }
 
 	  symbolP = expr->X_add_symbol;
 	  sym_frag = symbol_get_frag (symbolP);
