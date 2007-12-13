@@ -1,3 +1,9 @@
+2007-12-13  Bob Wilson  <bob.wilson@acm.org>
+
+	* gas/xtensa/all.exp: Run new weak-call test.
+	* gas/xtensa/weak-call.d: New.
+	* gas/xtensa/weak-call.s: New.
+
 2007-12-11  Catherine Moore  <clm@codesourcery.com>
 
         gas/elf/symtab.s: New test.

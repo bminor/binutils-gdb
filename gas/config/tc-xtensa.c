@@ -3241,9 +3241,15 @@ xg_symbolic_immeds_fit (const TInsn *insn,
 	      || S_GET_SEGMENT (expr->X_add_symbol) != pc_seg)
 	    {
 	      /* For a direct call with --no-longcalls, be optimistic and
-		 assume it will be in range.  */
+		 assume it will be in range.  If the symbol is weak and
+		 undefined, it may remain undefined at link-time, in which
+		 case it will have a zero value and almost certainly be out
+		 of range for a direct call; thus, relax for undefined weak
+		 symbols even if longcalls is not enabled.  */
 	      if (is_direct_call_opcode (insn->opcode)
-		  && ! pc_frag->tc_frag_data.use_longcalls)
+		  && ! pc_frag->tc_frag_data.use_longcalls
+		  && (! S_IS_WEAK (expr->X_add_symbol)
+		      || S_IS_DEFINED (expr->X_add_symbol)))
 		return TRUE;
 
 	      return FALSE;
