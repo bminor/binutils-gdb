@@ -445,8 +445,6 @@ update_current_target (void)
       INHERIT (to_stop, t);
       /* Do not inherit to_xfer_partial.  */
       INHERIT (to_rcmd, t);
-      INHERIT (to_enable_exception_callback, t);
-      INHERIT (to_get_current_exception_event, t);
       INHERIT (to_pid_to_exec_file, t);
       INHERIT (to_log_command, t);
       INHERIT (to_stratum, t);
@@ -625,12 +623,6 @@ update_current_target (void)
   de_fault (to_rcmd,
 	    (void (*) (char *, struct ui_file *))
 	    tcomplain);
-  de_fault (to_enable_exception_callback,
-	    (struct symtab_and_line * (*) (enum exception_event_kind, int))
-	    nosupport_runtime);
-  de_fault (to_get_current_exception_event,
-	    (struct exception_event_record * (*) (void))
-	    nosupport_runtime);
   de_fault (to_pid_to_exec_file,
 	    (char *(*) (int))
 	    return_zero);
@@ -2672,26 +2664,6 @@ debug_to_rcmd (char *command,
   fprintf_unfiltered (gdb_stdlog, "target_rcmd (%s, ...)\n", command);
 }
 
-static struct symtab_and_line *
-debug_to_enable_exception_callback (enum exception_event_kind kind, int enable)
-{
-  struct symtab_and_line *result;
-  result = debug_target.to_enable_exception_callback (kind, enable);
-  fprintf_unfiltered (gdb_stdlog,
-		      "target get_exception_callback_sal (%d, %d)\n",
-		      kind, enable);
-  return result;
-}
-
-static struct exception_event_record *
-debug_to_get_current_exception_event (void)
-{
-  struct exception_event_record *result;
-  result = debug_target.to_get_current_exception_event ();
-  fprintf_unfiltered (gdb_stdlog, "target get_current_exception_event ()\n");
-  return result;
-}
-
 static char *
 debug_to_pid_to_exec_file (int pid)
 {
@@ -2759,8 +2731,6 @@ setup_target_debug (void)
   current_target.to_find_new_threads = debug_to_find_new_threads;
   current_target.to_stop = debug_to_stop;
   current_target.to_rcmd = debug_to_rcmd;
-  current_target.to_enable_exception_callback = debug_to_enable_exception_callback;
-  current_target.to_get_current_exception_event = debug_to_get_current_exception_event;
   current_target.to_pid_to_exec_file = debug_to_pid_to_exec_file;
 }
 

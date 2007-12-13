@@ -1,3 +1,7 @@
+2007-12-06  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.base/default.exp: Update expected output for 'info catch'.
+
 2007-12-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/gdb.exp (build_id_debug_filename_get): OBJCOPY pipe being read

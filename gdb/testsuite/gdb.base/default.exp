@@ -300,7 +300,7 @@ gdb_test "info bogus-gdb-command" "Undefined info command: \"bogus-gdb-command\"
 #test info breakpoints
 gdb_test "info breakpoints" "No breakpoints or watchpoints." "info breakpoints"
 #test info catch
-gdb_test "info catch" "You can't do that without a process to debug." "info catch"
+gdb_test "info catch" "No frame selected." "info catch"
 #test info copying
 # FIXME -- doesn't work worth a shit
 #send_gdb "info copying"

@@ -1549,22 +1549,9 @@ catch_info (char *ignore, int from_tty)
 {
   struct symtab_and_line *sal;
 
-  /* Check for target support for exception handling */
-  sal = target_enable_exception_callback (EX_EVENT_CATCH, 1);
-  if (sal)
-    {
-      /* Currently not handling this.  Ideally, here we should
-         interact with the C++ runtime system to find the list of
-         active handlers, etc.  */
-      fprintf_filtered (gdb_stdout, _("\
-Info catch not supported with this target/compiler combination.\n"));
-    }
-  else
-    {
-      /* Assume g++ compiled code; old GDB 4.16 behaviour.  */
-      print_frame_label_vars (get_selected_frame (_("No frame selected.")),
-			      0, gdb_stdout);
-    }
+  /* Assume g++ compiled code; old GDB 4.16 behaviour.  */
+  print_frame_label_vars (get_selected_frame (_("No frame selected.")),
+                          0, gdb_stdout);
 }
 
 static void

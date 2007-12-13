@@ -399,10 +399,6 @@ struct target_ops
     char *(*to_extra_thread_info) (struct thread_info *);
     void (*to_stop) (void);
     void (*to_rcmd) (char *command, struct ui_file *output);
-    struct symtab_and_line *(*to_enable_exception_callback) (enum
-							     exception_event_kind,
-							     int);
-    struct exception_event_record *(*to_get_current_exception_event) (void);
     char *(*to_pid_to_exec_file) (int pid);
     void (*to_log_command) (const char *);
     enum strata to_stratum;
@@ -901,21 +897,6 @@ int target_follow_fork (int follow_child);
 #define target_rcmd(command, outbuf) \
      (*current_target.to_rcmd) (command, outbuf)
 
-
-/* Get the symbol information for a breakpointable routine called when
-   an exception event occurs.
-   Intended mainly for C++, and for those
-   platforms/implementations where such a callback mechanism is available,
-   e.g. HP-UX with ANSI C++ (aCC).  Some compilers (e.g. g++) support
-   different mechanisms for debugging exceptions.  */
-
-#define target_enable_exception_callback(kind, enable) \
-     (*current_target.to_enable_exception_callback) (kind, enable)
-
-/* Get the current exception event kind -- throw or catch, etc.  */
-
-#define target_get_current_exception_event() \
-     (*current_target.to_get_current_exception_event) ()
 
 /* Does the target include all of memory, or only part of it?  This
    determines whether we look up the target chain for other parts of

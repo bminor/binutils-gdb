@@ -1,3 +1,38 @@
+2007-12-12  Jim Blandy  <jimb@codesourcery.com>
+
+	Remove unused support for target-based exception catching.
+	* target.h (struct target_ops): Delete
+	to_enable_exception_callback and to_get_current_exception_event
+	members.
+	(target_enable_exception_callback)
+	(target_get_current_exception_event): Delete macros.
+	* target.c (update_current_target): Remove code to inherit and
+	default those members.
+	(debug_to_enable_exception_callback)
+	(debug_to_get_current_exception_event): Delete functions.
+	(setup_target_debug): Don't install those methods.
+	* inf-child.c (inf_child_enable_exception_callback)
+	(inf_child_get_current_exception_event): Delete dummy functions.
+	(inf_child_target): Don't install them in the target vector.
+	* breakpoint.h (enum bptype): Delete bp_catch_catch,
+	bp_catch_throw.
+	* breakpoint.c (cover_target_enable_exception_callback)
+	(ep_is_exception_catchpoint, create_exception_catchpoint): Delete
+	functions.
+	(insert_bp_location, update_breakpoints_after_exec)
+	(remove_breakpoint, ep_is_catchpoint, print_it_typical)
+	(bpstat_stop_status, bpstat_what)
+	(bpstat_get_triggered_catchpoints, print_one_breakpoint_location)
+	(user_settable_breakpoint, allocate_bp_location)
+	(disable_watchpoints_before_interactive_call_start)
+	(enable_watchpoints_after_interactive_call_stop, mention)
+	(delete_breakpoint, breakpoint_re_set_one, disable_command)
+	(enable_command): Remove exception catchpoint cases.
+	(catch_exception_command_1): Don't try target-based exception
+	handling.
+	* stack.c (catch_info): Call print_frame_label_vars
+	unconditionally.
+	
 2007-12-12  Nigel Stephens  <nigel@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 

@@ -157,19 +157,6 @@ inf_child_can_run (void)
   return 1;
 }
 
-static struct symtab_and_line *
-inf_child_enable_exception_callback (enum exception_event_kind kind,
-				     int enable)
-{
-  return (struct symtab_and_line *) NULL;
-}
-
-static struct exception_event_record *
-inf_child_get_current_exception_event (void)
-{
-  return (struct exception_event_record *) NULL;
-}
-
 static char *
 inf_child_pid_to_exec_file (int pid)
 {
@@ -210,8 +197,6 @@ inf_child_target (void)
   t->to_reported_exec_events_per_exec_call =
     inf_child_reported_exec_events_per_exec_call;
   t->to_can_run = inf_child_can_run;
-  t->to_enable_exception_callback = inf_child_enable_exception_callback;
-  t->to_get_current_exception_event = inf_child_get_current_exception_event;
   t->to_pid_to_exec_file = inf_child_pid_to_exec_file;
   t->to_stratum = process_stratum;
   t->to_has_all_memory = 1;

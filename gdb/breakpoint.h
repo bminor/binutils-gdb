@@ -129,13 +129,6 @@ enum bptype
     bp_catch_fork,
     bp_catch_vfork,
     bp_catch_exec,
-
-    /* These are catchpoints to implement "catch catch" and "catch throw"
-       commands for C++ exception handling. */
-    bp_catch_catch,
-    bp_catch_throw
-
-
   };
 
 /* States of enablement of breakpoint. */

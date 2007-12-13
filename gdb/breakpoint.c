@@ -145,8 +145,6 @@ args_for_catchpoint_enable;
 
 static int watchpoint_check (void *);
 
-static int cover_target_enable_exception_callback (void *);
-
 static void maintenance_info_breakpoints (char *, int);
 
 static void create_longjmp_breakpoint (char *);
@@ -1138,61 +1136,6 @@ in which its expression is valid.\n"),
       return val;
     }
 
-  else if (ep_is_exception_catchpoint (bpt->owner))
-    {
-      /* FIXME drow/2003-09-09: This code sets both a catchpoint and a
-	 breakpoint.  Once again, it would be better if this was represented
-	 as two bp_locations.  */
-
-      /* If we get here, we must have a callback mechanism for exception
-	 events -- with g++ style embedded label support, we insert
-	 ordinary breakpoints and not catchpoints. */
-      val = target_insert_breakpoint (&bpt->target_info);
-      if (val)
-	{
-	  /* Couldn't set breakpoint for some reason */
-	  fprintf_unfiltered (tmp_error_stream, 
-			      "Cannot insert catchpoint %d; disabling it.\n",
-			      bpt->owner->number);
-	  fprintf_filtered (tmp_error_stream, 
-			    "Error accessing memory address ");
-	  deprecated_print_address_numeric (bpt->address, 1, tmp_error_stream);
-	  fprintf_filtered (tmp_error_stream, ": %s.\n",
-			    safe_strerror (val));
-	  bpt->owner->enable_state = bp_disabled;
-	}
-      else
-	{
-	  /* Bp set, now make sure callbacks are enabled */
-	  /* Format possible error msg */
-	  char *message = xstrprintf ("Error inserting catchpoint %d:\n",
-				      bpt->owner->number);
-	  struct cleanup *cleanups = make_cleanup (xfree, message);
-	  int val;
-	  args_for_catchpoint_enable args;
-	  args.kind = bpt->owner->type == bp_catch_catch ? 
-	    EX_EVENT_CATCH : EX_EVENT_THROW;
-	  args.enable_p = 1;
-	  val = catch_errors (cover_target_enable_exception_callback,
-			      &args, message, RETURN_MASK_ALL);
-	  do_cleanups (cleanups);
-	  if (val != 0 && val != -1)
-	    bpt->inserted = 1;
-
-	  /* Check if something went wrong; val == 0 can be ignored */
-	  if (val == -1)
-	    {
-	      /* something went wrong */
-	      fprintf_unfiltered (tmp_error_stream, 
-				  "Cannot insert catchpoint %d; disabling it.\n",
-				  bpt->owner->number);
-	      bpt->owner->enable_state = bp_disabled;
-	    }
-	}
-
-      return val;
-    }
-
   else if (bpt->owner->type == bp_catch_fork
 	   || bpt->owner->type == bp_catch_vfork
 	   || bpt->owner->type == bp_catch_exec)
@@ -1384,13 +1327,6 @@ update_breakpoints_after_exec (void)
 
     /* Step-resume breakpoints are meaningless after an exec(). */
     if (b->type == bp_step_resume)
-      {
-	delete_breakpoint (b);
-	continue;
-      }
-
-    /* Ditto the exception-handling catchpoints. */
-    if ((b->type == bp_catch_catch) || (b->type == bp_catch_throw))
       {
 	delete_breakpoint (b);
 	continue;
@@ -1627,16 +1563,6 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 	  warning (_("Internal error, %s line %d."), __FILE__, __LINE__);
 	  break;
 	}
-      if (val)
-	return val;
-      b->inserted = (is == mark_inserted);
-    }
-  else if ((b->owner->type == bp_catch_catch ||
-	    b->owner->type == bp_catch_throw)
-	   && breakpoint_enabled (b->owner)
-	   && !b->duplicate)
-    {
-      val = target_remove_breakpoint (&b->target_info);
       if (val)
 	return val;
       b->inserted = (is == mark_inserted);
@@ -1880,9 +1806,7 @@ ep_is_catchpoint (struct breakpoint *ep)
     || (ep->type == bp_catch_unload)
     || (ep->type == bp_catch_fork)
     || (ep->type == bp_catch_vfork)
-    || (ep->type == bp_catch_exec)
-    || (ep->type == bp_catch_catch)
-    || (ep->type == bp_catch_throw);
+    || (ep->type == bp_catch_exec);
 
   /* ??rehrauer: Add more kinds here, as are implemented... */
 }
@@ -1893,14 +1817,6 @@ ep_is_shlib_catchpoint (struct breakpoint *ep)
   return
     (ep->type == bp_catch_load)
     || (ep->type == bp_catch_unload);
-}
-
-int
-ep_is_exception_catchpoint (struct breakpoint *ep)
-{
-  return
-    (ep->type == bp_catch_catch)
-    || (ep->type == bp_catch_throw);
 }
 
 void 
@@ -2253,68 +2169,6 @@ print_it_typical (bpstat bs)
 		       b->number,
 		       b->exec_pathname);
       return PRINT_SRC_AND_LOC;
-      break;
-
-    case bp_catch_catch:
-      if (current_exception_event && 
-	  (CURRENT_EXCEPTION_KIND == EX_EVENT_CATCH))
-	{
-	  annotate_catchpoint (b->number);
-	  printf_filtered (_("\nCatchpoint %d (exception caught), "), 
-			   b->number);
-	  if (CURRENT_EXCEPTION_THROW_PC && CURRENT_EXCEPTION_THROW_LINE)
-	    printf_filtered (_("throw location %s:%d, "),
-			     CURRENT_EXCEPTION_THROW_FILE,
-			     CURRENT_EXCEPTION_THROW_LINE);
-	  else
-	    printf_filtered (_("throw location unknown, "));
-
-	  if (CURRENT_EXCEPTION_CATCH_PC && CURRENT_EXCEPTION_CATCH_LINE)
-	    printf_filtered (_("catch location %s:%d\n"),
-			     CURRENT_EXCEPTION_CATCH_FILE,
-			     CURRENT_EXCEPTION_CATCH_LINE);
-	  else
-	    printf_filtered (_("catch location unknown\n"));
-
-	  /* don't bother to print location frame info */
-	  return PRINT_SRC_ONLY;
-	}
-      else
-	{
-	  /* really throw, some other bpstat will handle it */
-	  return PRINT_UNKNOWN;	
-	}
-      break;
-
-    case bp_catch_throw:
-      if (current_exception_event && 
-	  (CURRENT_EXCEPTION_KIND == EX_EVENT_THROW))
-	{
-	  annotate_catchpoint (b->number);
-	  printf_filtered (_("\nCatchpoint %d (exception thrown), "),
-			   b->number);
-	  if (CURRENT_EXCEPTION_THROW_PC && CURRENT_EXCEPTION_THROW_LINE)
-	    printf_filtered (_("throw location %s:%d, "),
-			     CURRENT_EXCEPTION_THROW_FILE,
-			     CURRENT_EXCEPTION_THROW_LINE);
-	  else
-	    printf_filtered (_("throw location unknown, "));
-
-	  if (CURRENT_EXCEPTION_CATCH_PC && CURRENT_EXCEPTION_CATCH_LINE)
-	    printf_filtered (_("catch location %s:%d\n"),
-			     CURRENT_EXCEPTION_CATCH_FILE,
-			     CURRENT_EXCEPTION_CATCH_LINE);
-	  else
-	    printf_filtered (_("catch location unknown\n"));
-
-	  /* don't bother to print location frame info */
-	  return PRINT_SRC_ONLY; 
-	}
-      else
-	{
-	  /* really catch, some other bpstat will handle it */
-	  return PRINT_UNKNOWN;	
-	}
       break;
 
     case bp_watchpoint:
@@ -2778,9 +2632,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	&& b->type != bp_hardware_breakpoint
 	&& b->type != bp_catch_fork
 	&& b->type != bp_catch_vfork
-	&& b->type != bp_catch_exec
-	&& b->type != bp_catch_catch
-	&& b->type != bp_catch_throw)	/* a non-watchpoint bp */
+	&& b->type != bp_catch_exec)	/* a non-watchpoint bp */
       {
 	if (bl->address != bp_addr) 	/* address doesn't match */
 	  continue;
@@ -2852,10 +2704,6 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 
     if ((b->type == bp_catch_exec)
 	&& !inferior_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
-      continue;
-
-    if (ep_is_exception_catchpoint (b) &&
-	!(current_exception_event = target_get_current_exception_event ()))
       continue;
 
     /* Come here if it's a watchpoint, or if the break address matches */
@@ -3299,18 +3147,6 @@ bpstat_what (bpstat bs)
 	       This requires no further action.  */
 	    bs_class = no_effect;
 	  break;
-	case bp_catch_catch:
-	  if (!bs->stop || CURRENT_EXCEPTION_KIND != EX_EVENT_CATCH)
-	    bs_class = bp_nostop;
-	  else if (bs->stop)
-	    bs_class = bs->print ? bp_noisy : bp_silent;
-	  break;
-	case bp_catch_throw:
-	  if (!bs->stop || CURRENT_EXCEPTION_KIND != EX_EVENT_THROW)
-	    bs_class = bp_nostop;
-	  else if (bs->stop)
-	    bs_class = bs->print ? bp_noisy : bp_silent;
-	  break;
 	case bp_call_dummy:
 	  /* Make sure the action is stop (silent or noisy),
 	     so infrun.c pops the dummy frame.  */
@@ -3373,9 +3209,7 @@ bpstat_get_triggered_catchpoints (bpstat ep_list, bpstat *cp_list)
       if (ep == NULL)
 	break;
       if ((ep->type != bp_catch_load) &&
-	  (ep->type != bp_catch_unload) &&
-	  (ep->type != bp_catch_catch) &&
-	  (ep->type != bp_catch_throw))		
+	  (ep->type != bp_catch_unload))
 	/* pai: (temp) ADD fork/vfork here!!  */
 	continue;
 
@@ -3494,9 +3328,7 @@ print_one_breakpoint_location (struct breakpoint *b,
     {bp_catch_unload, "catch unload"},
     {bp_catch_fork, "catch fork"},
     {bp_catch_vfork, "catch vfork"},
-    {bp_catch_exec, "catch exec"},
-    {bp_catch_catch, "catch catch"},
-    {bp_catch_throw, "catch throw"}
+    {bp_catch_exec, "catch exec"}
   };
   
   static char *bpdisps[] =
@@ -3673,28 +3505,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 	    ui_out_field_string (uiout, "what", b->exec_pathname);
 	    ui_out_text (uiout, "\" ");
 	  }
-	break;
-
-      case bp_catch_catch:
-	/* Field 4, the address, is omitted (which makes the columns
-	   not line up too nicely with the headers, but the effect
-	   is relatively readable).  */
-	if (addressprint)
-	  ui_out_field_skip (uiout, "addr");
-	annotate_field (5);
-	ui_out_field_string (uiout, "what", "exception catch");
-	ui_out_spaces (uiout, 1);
-	break;
-
-      case bp_catch_throw:
-	/* Field 4, the address, is omitted (which makes the columns
-	   not line up too nicely with the headers, but the effect
-	   is relatively readable).  */
-	if (addressprint)
-	  ui_out_field_skip (uiout, "addr");
-	annotate_field (5);
-	ui_out_field_string (uiout, "what", "exception throw");
-	ui_out_spaces (uiout, 1);
 	break;
 
       case bp_breakpoint:
@@ -3885,8 +3695,6 @@ user_settable_breakpoint (const struct breakpoint *b)
 	  || b->type == bp_catch_fork
 	  || b->type == bp_catch_vfork
 	  || b->type == bp_catch_exec
-	  || b->type == bp_catch_catch
-	  || b->type == bp_catch_throw
 	  || b->type == bp_hardware_breakpoint
 	  || b->type == bp_watchpoint
 	  || b->type == bp_read_watchpoint
@@ -4294,8 +4102,6 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
     case bp_catch_fork:
     case bp_catch_vfork:
     case bp_catch_exec:
-    case bp_catch_catch:
-    case bp_catch_throw:
       loc->loc_type = bp_loc_other;
       break;
     default:
@@ -4839,8 +4645,7 @@ disable_watchpoints_before_interactive_call_start (void)
     if (((b->type == bp_watchpoint)
 	 || (b->type == bp_hardware_watchpoint)
 	 || (b->type == bp_read_watchpoint)
-	 || (b->type == bp_access_watchpoint)
-	 || ep_is_exception_catchpoint (b))
+	 || (b->type == bp_access_watchpoint))
 	&& breakpoint_enabled (b))
       {
 	b->enable_state = bp_call_disabled;
@@ -4859,8 +4664,7 @@ enable_watchpoints_after_interactive_call_stop (void)
     if (((b->type == bp_watchpoint)
 	 || (b->type == bp_hardware_watchpoint)
 	 || (b->type == bp_read_watchpoint)
-	 || (b->type == bp_access_watchpoint)
-	 || ep_is_exception_catchpoint (b))
+	 || (b->type == bp_access_watchpoint))
 	&& (b->enable_state == bp_call_disabled))
       {
 	b->enable_state = bp_enabled;
@@ -4994,12 +4798,6 @@ mention (struct breakpoint *b)
       case bp_catch_exec:
 	printf_filtered (_("Catchpoint %d (exec)"),
 			 b->number);
-	break;
-      case bp_catch_catch:
-      case bp_catch_throw:
-	printf_filtered (_("Catchpoint %d (%s)"),
-			 b->number,
-			 (b->type == bp_catch_catch) ? "catch" : "throw");
 	break;
 
       case bp_until:
@@ -6494,47 +6292,6 @@ catch_unload_command_1 (char *arg, int tempflag, int from_tty)
 				  dll_pathname, cond_string);
 }
 
-/* Commands to deal with catching exceptions.  */
-
-/* Set a breakpoint at the specified callback routine for an
-   exception event callback */
-
-static void
-create_exception_catchpoint (int tempflag, char *cond_string,
-			     enum exception_event_kind ex_event,
-			     struct symtab_and_line *sal)
-{
-  struct breakpoint *b;
-  int thread = -1;		/* All threads. */
-  enum bptype bptype;
-
-  if (!sal)			/* no exception support? */
-    return;
-
-  switch (ex_event)
-    {
-    case EX_EVENT_THROW:
-      bptype = bp_catch_throw;
-      break;
-    case EX_EVENT_CATCH:
-      bptype = bp_catch_catch;
-      break;
-    default:			/* error condition */
-      error (_("Internal error -- invalid catchpoint kind"));
-    }
-
-  b = set_raw_breakpoint (*sal, bptype);
-  set_breakpoint_count (breakpoint_count + 1);
-  b->number = breakpoint_count;
-  b->cond_string = (cond_string == NULL) ? 
-    NULL : savestring (cond_string, strlen (cond_string));
-  b->thread = thread;
-  b->addr_string = NULL;
-  b->enable_state = bp_enabled;
-  b->disposition = tempflag ? disp_del : disp_donttouch;
-  mention (b);
-}
-
 static enum print_stop_action
 print_exception_catchpoint (struct breakpoint *b)
 {
@@ -6641,19 +6398,6 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
   if (handle_gnu_v3_exceptions (tempflag, cond_string, ex_event, from_tty))
     return;
 
-  /* See if we can find a callback routine */
-  sal = target_enable_exception_callback (ex_event, 1);
-
-  if (sal)
-    {
-      /* We have callbacks from the runtime system for exceptions.
-         Set a breakpoint on the sal found, if no errors */
-      if (sal != (struct symtab_and_line *) -1)
-	create_exception_catchpoint (tempflag, cond_string, ex_event, sal);
-      else
-	return;		/* something went wrong with setting up callbacks */
-    }
-
   warning (_("Unsupported with this platform/compiler combination."));
 }
 
@@ -6734,23 +6478,6 @@ catch_assert_command (char *arg, int tempflag, int from_tty)
   sal = ada_decode_assert_location (arg, &addr_string, &ops);
   create_ada_exception_breakpoint (sal, addr_string, NULL, NULL, NULL, ops,
                                    tempflag, from_tty);
-}
-
-/* Cover routine to allow wrapping target_enable_exception_catchpoints
-   inside a catch_errors */
-
-static int
-cover_target_enable_exception_callback (void *arg)
-{
-  args_for_catchpoint_enable *args = arg;
-  struct symtab_and_line *sal;
-  sal = target_enable_exception_callback (args->kind, args->enable_p);
-  if (sal == NULL)
-    return 0;
-  else if (sal == (struct symtab_and_line *) -1)
-    return -1;
-  else
-    return 1;			/*is valid */
 }
 
 static void
@@ -7115,28 +6842,6 @@ delete_breakpoint (struct breakpoint *bpt)
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;
-
-  /* If we have callback-style exception catchpoints, don't go through
-     the adjustments to the C++ runtime library etc. if the inferior
-     isn't actually running.  target_enable_exception_callback for a
-     null target ops vector gives an undesirable error message, so we
-     check here and avoid it. Since currently (1997-09-17) only HP-UX aCC's
-     exceptions are supported in this way, it's OK for now.  FIXME */
-  if (ep_is_exception_catchpoint (bpt) && target_has_execution)
-    {
-      /* Format possible error msg */
-      char *message = xstrprintf ("Error in deleting catchpoint %d:\n",
-				  bpt->number);
-      struct cleanup *cleanups = make_cleanup (xfree, message);
-      args_for_catchpoint_enable args;
-      args.kind = bpt->type == bp_catch_catch ? 
-	EX_EVENT_CATCH : EX_EVENT_THROW;
-      args.enable_p = 0;
-      catch_errors (cover_target_enable_exception_callback, &args,
-		    message, RETURN_MASK_ALL);
-      do_cleanups (cleanups);
-    }
-
 
   ALL_BREAKPOINTS (b)
     if (b->next == bpt)
@@ -7583,9 +7288,6 @@ breakpoint_re_set_one (void *bint)
 	mention (b);
       value_free_to_mark (mark);
       break;
-    case bp_catch_catch:
-    case bp_catch_throw:
-      break;
       /* We needn't really do anything to reset these, since the mask
          that requests them is unaffected by e.g., new libraries being
          loaded. */
@@ -7876,8 +7578,6 @@ disable_command (char *args, int from_tty)
       case bp_catch_fork:
       case bp_catch_vfork:
       case bp_catch_exec:
-      case bp_catch_catch:
-      case bp_catch_throw:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
       case bp_hardware_watchpoint:
@@ -8014,8 +7714,6 @@ enable_command (char *args, int from_tty)
       case bp_catch_fork:
       case bp_catch_vfork:
       case bp_catch_exec:
-      case bp_catch_catch:
-      case bp_catch_throw:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
       case bp_hardware_watchpoint:
