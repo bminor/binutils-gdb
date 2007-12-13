@@ -1,3 +1,14 @@
+2007-12-13  Jim Blandy  <jimb@codesourcery.com>
+
+	* dwarf2read.c (attr_form_is_constant): New function.
+	(dwarf2_add_field): Use it and attr_form_is_section_offset to
+	recognize DW_AT_data_member_location attributes.  Use
+	dwarf2_get_attr_constant_value when the attribute is a constant.
+
+	* dwarf2read.c (attr_form_is_section_offset): New function.
+	(dwarf_add_member_fn, read_common_block, read_partial_die)
+	(dwarf2_symbol_mark_computed): Use it, instead of writing it out.
+
 2007-12-12  Jim Blandy  <jimb@codesourcery.com>
 
 	Remove unused support for target-based exception catching.
