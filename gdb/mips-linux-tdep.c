@@ -344,7 +344,7 @@ mips64_fill_gregset (const struct regcache *regcache,
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int regaddr, regi;
   mips64_elf_greg_t *regp = *gregsetp;
-  void *src, *dst;
+  void *dst;
 
   if (regno == -1)
     {

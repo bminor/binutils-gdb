@@ -1,3 +1,7 @@
+2007-12-13  Michael Snyder  <msnyder@specifix.com>
+
+	* mips-linux-tdep.c (mips64_fill_gregset): Remove unused variable.
+
 2007-12-13  Jim Blandy  <jimb@codesourcery.com>
 
 	* dwarf2read.c (attr_form_is_constant): New function.
