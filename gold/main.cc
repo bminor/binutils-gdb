@@ -75,8 +75,11 @@ main(int argc, char** argv)
   // The list of input objects.
   Input_objects input_objects;
 
-  // The symbol table.
-  Symbol_table symtab;
+  // The symbol table.  We're going to guess here how many symbols
+  // we're going to see based on the number of input files.  Even when
+  // this is off, it means at worse we don't quite optimize hashtable
+  // resizing as well as we could have (perhap using more memory).
+  Symbol_table symtab(command_line.number_of_input_files() * 1024);
 
   // The layout object.
   Layout layout(command_line.options());

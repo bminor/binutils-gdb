@@ -955,7 +955,10 @@ class Warnings
 class Symbol_table
 {
  public:
-  Symbol_table();
+  // COUNT is an estimate of how many symbosl will be inserted in the
+  // symbol table.  It's ok to put 0 if you don't know; a correct
+  // guess will just save some CPU by reducing hashtable resizes.
+  Symbol_table(unsigned int count);
 
   ~Symbol_table();
 

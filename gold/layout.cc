@@ -1154,6 +1154,25 @@ Layout::set_section_indexes(unsigned int shndx)
 void
 Layout::count_local_symbols(const Input_objects* input_objects)
 {
+  // First, figure out an upper bound on the number of symbols we'll
+  // be inserting into each pool.  This helps us create the pools with
+  // the right size, to avoid unnecessary hashtable resizing.
+  unsigned int symbol_count = 0;
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
+       ++p)
+    symbol_count += (*p)->local_symbol_count();
+
+  // Go from "upper bound" to "estimate."  We overcount for two
+  // reasons: we double-count symbols that occur in more than one
+  // object file, and we count symbols that are dropped from the
+  // output.  Add it all together and assume we overcount by 100%.
+  symbol_count /= 2;
+
+  // We assume all symbols will go into both the sympool and dynpool.
+  this->sympool_.reserve(symbol_count);
+  this->dynpool_.reserve(symbol_count);
+
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
        ++p)

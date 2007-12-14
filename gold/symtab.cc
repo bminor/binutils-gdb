@@ -295,10 +295,11 @@ Symbol::final_value_is_known() const
 
 // Class Symbol_table.
 
-Symbol_table::Symbol_table()
-  : saw_undefined_(0), offset_(0), table_(), namepool_(),
+Symbol_table::Symbol_table(unsigned int count)
+  : saw_undefined_(0), offset_(0), table_(count), namepool_(),
     forwarders_(), commons_(), warnings_()
 {
+  namepool_.reserve(count);
 }
 
 Symbol_table::~Symbol_table()

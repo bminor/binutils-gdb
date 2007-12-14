@@ -88,6 +88,12 @@ class Stringpool_template
   void
   clear();
 
+  // Hint to the stringpool class that you intend to insert n additional
+  // elements.  The stringpool class can use this info however it likes;
+  // in practice it will resize its internal hashtables to make room.
+  void
+  reserve(unsigned int n);
+
   // Indicate that we should not reserve offset 0 to hold the empty
   // string when converting the stringpool to a string table.  This
   // should not be called for a proper ELF SHT_STRTAB section.

@@ -429,6 +429,11 @@ class Relobj : public Object
 	      Layout* layout, Read_relocs_data* rd)
   { return this->do_scan_relocs(options, symtab, layout, rd); }
 
+  // The number of local symbols in the input symbol table.
+  virtual unsigned int
+  local_symbol_count() const
+  { return this->do_local_symbol_count(); }
+
   // Initial local symbol processing: count the number of local symbols
   // in the output symbol table and dynamic symbol table; add local symbol
   // names to *POOL and *DYNPOOL.
@@ -537,6 +542,10 @@ class Relobj : public Object
   virtual void
   do_scan_relocs(const General_options&, Symbol_table*, Layout*,
 		 Read_relocs_data*) = 0;
+
+  // Return the number of local symbols--implemented by child class.
+  virtual unsigned int
+  do_local_symbol_count() const = 0;
 
   // Count local symbols--implemented by child class.
   virtual void
@@ -791,11 +800,6 @@ class Sized_relobj : public Relobj
   void
   setup(const typename elfcpp::Ehdr<size, big_endian>&);
 
-  // Return the number of local symbols.
-  unsigned int
-  local_symbol_count() const
-  { return this->local_symbol_count_; }
-
   // If SYM is the index of a global symbol in the object file's
   // symbol table, return the Symbol object.  Otherwise, return NULL.
   Symbol*
@@ -964,9 +968,15 @@ class Sized_relobj : public Relobj
   get_symbol_location_info(unsigned int shndx, off_t offset,
 			   Symbol_location_info* info);
 
+ protected:
   // Read the symbols.
   void
   do_read_symbols(Read_symbols_data*);
+
+  // Return the number of local symbols.
+  unsigned int
+  do_local_symbol_count() const
+  { return this->local_symbol_count_; }
 
   // Lay out the input sections.
   void

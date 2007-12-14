@@ -58,6 +58,30 @@ Stringpool_template<Stringpool_char>::~Stringpool_template()
   this->clear();
 }
 
+// Resize the internal hashtable with the expectation we'll get n new
+// elements.  Note that the hashtable constructor takes a "number of
+// buckets you'd like," rather than "number of elements you'd like,"
+// but that's the best we can do.
+
+template<typename Stringpool_char>
+void
+Stringpool_template<Stringpool_char>::reserve(unsigned int n)
+{
+#if defined(HAVE_TR1_UNORDERED_MAP)
+  // rehash() implementation is broken in gcc 4.0.3's stl
+  //this->string_set_.rehash(this->string_set_.size() + n);
+  //return;
+#elif defined(HAVE_EXT_HASH_MAP)
+  this->string_set_.resize(this->string_set_.size() + n);
+  return;
+#endif
+
+  // This is the generic "reserve" code, if no #ifdef above triggers.
+  String_set_type new_string_set(this->string_set_.size() + n);
+  new_string_set.insert(this->string_set_.begin(), this->string_set_.end());
+  this->string_set_.swap(new_string_set);
+}
+
 // Return the length of a string of arbitrary character type.
 
 template<typename Stringpool_char>
@@ -212,7 +236,11 @@ Stringpool_template<Stringpool_char>::add_string(const Stringpool_char* s,
   ++this->next_index_;
 
   if (pkey != NULL)
-    *pkey = psd->index * key_mult;
+    {
+      *pkey = psd->index * key_mult;
+      // Ensure there was no overflow.
+      gold_assert(*pkey / key_mult == psd->index);
+    }
 
   if (front)
     this->strings_.push_front(psd);
