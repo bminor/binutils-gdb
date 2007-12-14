@@ -309,6 +309,7 @@ exception_separate_shared_21_test_LDADD = \
 
 check_PROGRAMS += weak_test
 weak_test_SOURCES = weak_test.cc
+weak_test_DEPENDENCIES = gcctestdir/ld
 weak_test_LDFLAGS = -Bgcctestdir/
 
 
@@ -460,14 +461,14 @@ undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
 
 # Test --compress-debug-sections.  FIXME: check we actually compress.
 check_PROGRAMS += flagstest_compress_debug_sections
-flagstest_compress_debug_sections: flagstest_debug.o
+flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< --compress-debug-sections=zlib
 	test -s $@
 
 
 # Test -o when emitting to a special file (such as something in /dev).
 check_PROGRAMS += flagstest_o_specialfile
-flagstest_o_specialfile: flagstest_debug.o
+flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
 	chmod a+x $@
 	test -s $@
@@ -475,7 +476,8 @@ flagstest_o_specialfile: flagstest_debug.o
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
 check_PROGRAMS += flagstest_o_specialfile_and_compress_debug_sections
-flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o
+flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
+		gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< --compress-debug-sections=zlib 2>&1 | cat > $@
 	chmod a+x $@
 	test -s $@

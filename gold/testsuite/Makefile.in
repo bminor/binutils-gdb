@@ -121,6 +121,13 @@ check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
 @NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@weak_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@weak_test_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_4 = tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
@@ -465,9 +472,6 @@ am__weak_test_SOURCES_DIST = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test.$(OBJEXT)
 weak_test_OBJECTS = $(am_weak_test_OBJECTS)
 weak_test_LDADD = $(LDADD)
-weak_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -859,6 +863,7 @@ object_unittest_SOURCES = object_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_2.so exception_shared_1.so
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_SOURCES = weak_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_LDFLAGS = -Bgcctestdir/
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc tls_test.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_DEPENDENCIES = gcctestdir/ld
@@ -1505,14 +1510,15 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
-@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections: flagstest_debug.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< --compress-debug-sections=zlib
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile: flagstest_debug.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@		gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< --compress-debug-sections=zlib 2>&1 | cat > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
