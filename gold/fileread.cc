@@ -170,10 +170,10 @@ File_read::is_locked()
 // SIZE bytes.  Return a pointer to the View if found, NULL if not.
 
 inline File_read::View*
-File_read::find_view(off_t start, off_t size)
+File_read::find_view(off_t start, off_t size) const
 {
   off_t page = File_read::page_offset(start);
-  Views::iterator p = this->views_.find(page);
+  Views::const_iterator p = this->views_.find(page);
   if (p == this->views_.end())
     return NULL;
   if (p->second->size() - (start - page) < size)
@@ -185,10 +185,8 @@ File_read::find_view(off_t start, off_t size)
 // the buffer at P.
 
 void
-File_read::do_read(off_t start, off_t size, void* p)
+File_read::do_read(off_t start, off_t size, void* p) const
 {
-  gold_assert(this->lock_count_ > 0);
-
   off_t bytes;
   if (this->contents_ != NULL)
     {
@@ -223,7 +221,7 @@ File_read::do_read(off_t start, off_t size, void* p)
 // Read data from the file.
 
 void
-File_read::read(off_t start, off_t size, void* p)
+File_read::read(off_t start, off_t size, void* p) const
 {
   gold_assert(this->lock_count_ > 0);
 

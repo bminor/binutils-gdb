@@ -98,7 +98,7 @@ class File_read
   // Read data from the file into the buffer P starting at file offset
   // START for SIZE bytes.
   void
-  read(off_t start, off_t size, void* p);
+  read(off_t start, off_t size, void* p) const;
 
   // Return a lasting view into the file starting at file offset START
   // for SIZE bytes.  This is allocated with new, and the caller is
@@ -188,11 +188,11 @@ class File_read
 
   // Find a view into the file.
   View*
-  find_view(off_t start, off_t size);
+  find_view(off_t start, off_t size) const;
 
   // Read data from the file into a buffer.
   void
-  do_read(off_t start, off_t size, void* p);
+  do_read(off_t start, off_t size, void* p) const;
 
   // Find or make a view into the file.
   View*
