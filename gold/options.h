@@ -466,11 +466,11 @@ class General_options
 
   void
   set_thread_count_middle(const char* arg)
-  { this->thread_count_initial_ = this->parse_thread_count(arg); }
+  { this->thread_count_middle_ = this->parse_thread_count(arg); }
 
   void
   set_thread_count_final(const char* arg)
-  { this->thread_count_initial_ = this->parse_thread_count(arg); }
+  { this->thread_count_final_ = this->parse_thread_count(arg); }
 
   void
   ignore(const char*)
