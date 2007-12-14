@@ -1,3 +1,9 @@
+2007-12-14  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* gdb.texinfo (GDB/MI Breakpoint Commands): Document
+	the -f option for -break-insert, remove -r option,
+	and clarify specification of location.
+
 2007-11-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Debugging Programs with Multiple Processes): Correct

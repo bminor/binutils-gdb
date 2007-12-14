@@ -18163,13 +18163,13 @@ N.A.
 @subsubheading Synopsis
 
 @smallexample
- -break-insert [ -t ] [ -h ] [ -r ]
+ -break-insert [ -t ] [ -h ] [ -f ]
     [ -c @var{condition} ] [ -i @var{ignore-count} ]
-    [ -p @var{thread} ] [ @var{line} | @var{addr} ]
+    [ -p @var{thread} ] [ @var{location} ]
 @end smallexample
 
 @noindent
-If specified, @var{line}, can be one of:
+If specified, @var{location}, can be one of:
 
 @itemize @bullet
 @item function
@@ -18192,10 +18192,12 @@ Insert a hardware breakpoint.
 Make the breakpoint conditional on @var{condition}.
 @item -i @var{ignore-count}
 Initialize the @var{ignore-count}.
-@item -r
-Insert a regular breakpoint in all the functions whose names match the
-given regular expression.  Other flags are not applicable to regular
-expressions.
+@item -f
+If @var{location} cannot be parsed (for example if it
+refers to unknown files or functions), create a pending
+breakpoint. Without this flag, @value{GDBN} will report
+an error, and won't create a breakpoint, if @var{location}
+cannot be parsed.
 @end table
 
 @subsubheading Result

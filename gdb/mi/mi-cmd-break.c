@@ -56,14 +56,8 @@ enum bp_type
     REGEXP_BP
   };
 
-/* Insert a breakpoint. The type of breakpoint is specified by the
-   first argument: -break-insert <location> --> insert a regular
-   breakpoint.  -break-insert -t <location> --> insert a temporary
-   breakpoint.  -break-insert -h <location> --> insert an hardware
-   breakpoint.  -break-insert -t -h <location> --> insert a temporary
-   hw bp.  
-   -break-insert -r <regexp> --> insert a bp at functions matching
-   <regexp> */
+/* Implements the -break-insert command.
+   See the MI manual for the list of possible options.  */
 
 enum mi_cmd_result
 mi_cmd_break_insert (char *command, char **argv, int argc)
@@ -74,12 +68,13 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   int thread = -1;
   int ignore_count = 0;
   char *condition = NULL;
+  int pending = 0;
   enum gdb_rc rc;
   struct gdb_events *old_hooks;
   enum opt
     {
       HARDWARE_OPT, TEMP_OPT /*, REGEXP_OPT */ , CONDITION_OPT,
-      IGNORE_COUNT_OPT, THREAD_OPT
+      IGNORE_COUNT_OPT, THREAD_OPT, PENDING_OPT
     };
   static struct mi_opt opts[] =
   {
@@ -88,6 +83,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
     {"c", CONDITION_OPT, 1},
     {"i", IGNORE_COUNT_OPT, 1},
     {"p", THREAD_OPT, 1},
+    {"f", PENDING_OPT, 0},
     { 0, 0, 0 }
   };
 
@@ -122,6 +118,9 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 	case THREAD_OPT:
 	  thread = atol (optarg);
 	  break;
+	case PENDING_OPT:
+	  pending = 1;
+	  break;
 	}
     }
 
@@ -139,12 +138,14 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
       rc = gdb_breakpoint (address, condition,
 			   0 /*hardwareflag */ , temp_p,
 			   thread, ignore_count,
+			   pending,
 			   &mi_error_message);
       break;
     case HW_BP:
       rc = gdb_breakpoint (address, condition,
 			   1 /*hardwareflag */ , temp_p,
 			   thread, ignore_count,
+			   pending,
 			   &mi_error_message);
       break;
 #if 0

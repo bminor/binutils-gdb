@@ -1,4 +1,13 @@
 2007-12-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Add support for pending breakpoints in MI.
+	* gdb.h (gdb_breakpoint): Add parameter pending.
+	* breakpoint.c (gdb_breakpoint): Add parameter pending.
+	* mi/mi-cmd-break.c (mi_break_insert): Change
+	comment to refer to manual.  Add support for
+	the -f flag, for pending breakpoint.
+
+2007-12-14  Vladimir Prus  <vladimir@codesourcery.com>
 	
 	* breakpoint.c (break_command_really): New, copied
 	from break_command_1. New parameters COND_STRING, THREAD

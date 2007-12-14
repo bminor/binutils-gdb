@@ -51,6 +51,7 @@ enum gdb_rc gdb_breakpoint_query (struct ui_out *uiout, int bnum,
 enum gdb_rc gdb_breakpoint (char *address, char *condition,
 			    int hardwareflag, int tempflag,
 			    int thread, int ignore_count,
+			    int pending,
 			    char **error_message);
 
 /* Switch thread and print notification. */

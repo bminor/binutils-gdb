@@ -5451,12 +5451,14 @@ enum gdb_rc
 gdb_breakpoint (char *address, char *condition,
 		int hardwareflag, int tempflag,
 		int thread, int ignore_count,
+		int pending,
 		char **error_message)
 {
   return break_command_really (address, condition, thread,
 			       0 /* condition and thread are valid.  */,
 			       tempflag, hardwareflag,
-			       AUTO_BOOLEAN_FALSE /* no pending. */,
+			       pending 
+			       ? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
 			       0);
 }
 

@@ -1,3 +1,9 @@
+2007-12-14  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* gdb.mi/mi-pending.exp: New.
+	* gdb.mi/mi-pending.c: New.
+	* gdb.mi/mi-pendshr.c: New.
+
 2007-12-06  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdb.base/default.exp: Update expected output for 'info catch'.
