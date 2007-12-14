@@ -39,9 +39,9 @@ namespace gold
 // If we fail to open the object, then we won't create an Add_symbols
 // task.  However, we still need to unblock the token, or else the
 // link won't proceed to generate more error messages.  We can only
-// unblock tokens in the main thread, so we need a dummy task to do
-// that.  The dummy task has to maintain the right sequence of blocks,
-// so we need both this_blocker and next_blocker.
+// unblock tokens when the workqueue lock is held, so we need a dummy
+// task to do that.  The dummy task has to maintain the right sequence
+// of blocks, so we need both this_blocker and next_blocker.
 
 class Unblock_token : public Task
 {
@@ -56,17 +56,17 @@ class Unblock_token : public Task
       delete this->this_blocker_;
   }
 
-  Is_runnable_type
-  is_runnable(Workqueue*)
+  Task_token*
+  is_runnable()
   {
     if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
-      return IS_BLOCKED;
-    return IS_RUNNABLE;
+      return this->this_blocker_;
+    return NULL;
   }
 
-  Task_locker*
-  locks(Workqueue* workqueue)
-  { return new Task_locker_block(*this->next_blocker_, workqueue); }
+  void
+  locks(Task_locker* tl)
+  { tl->add(this, this->next_blocker_); }
 
   void
   run(Workqueue*)
@@ -93,24 +93,23 @@ Read_symbols::~Read_symbols()
 // ordinary input file immediately.  For an archive specified using
 // -l, we have to wait until the search path is complete.
 
-Task::Is_runnable_type
-Read_symbols::is_runnable(Workqueue*)
+Task_token*
+Read_symbols::is_runnable()
 {
   if (this->input_argument_->is_file()
       && this->input_argument_->file().may_need_search()
-      && this->dirpath_.token().is_blocked())
-    return IS_BLOCKED;
+      && this->dirpath_->token()->is_blocked())
+    return this->dirpath_->token();
 
-  return IS_RUNNABLE;
+  return NULL;
 }
 
 // Return a Task_locker for a Read_symbols task.  We don't need any
 // locks here.
 
-Task_locker*
-Read_symbols::locks(Workqueue*)
+void
+Read_symbols::locks(Task_locker*)
 {
-  return NULL;
 }
 
 // Run a Read_symbols task.
@@ -139,7 +138,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
     }
 
   Input_file* input_file = new Input_file(&this->input_argument_->file());
-  if (!input_file->open(this->options_, this->dirpath_))
+  if (!input_file->open(this->options_, *this->dirpath_, this))
     return false;
 
   // Read enough of the file to pick up the entire ELF header.
@@ -190,14 +189,22 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 
 	  Read_symbols_data* sd = new Read_symbols_data;
 	  obj->read_symbols(sd);
+
+	  // Opening the file locked it, so now we need to unlock it.
+	  // We need to unlock it before queuing the Add_symbols task,
+	  // because the workqueue doesn't know about our lock on the
+	  // file.  If we queue the Add_symbols task first, it will be
+	  // stuck on the end of the file lock, but since the
+	  // workqueue doesn't know about that lock, it will never
+	  // release the Add_symbols task.
+
+	  input_file->file().unlock(this);
+
 	  workqueue->queue_front(new Add_symbols(this->input_objects_,
 						 this->symtab_, this->layout_,
 						 obj, sd,
 						 this->this_blocker_,
 						 this->next_blocker_));
-
-	  // Opening the file locked it, so now we need to unlock it.
-	  input_file->file().unlock();
 
 	  return true;
 	}
@@ -210,14 +217,15 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	  // This is an archive.
 	  Archive* arch = new Archive(this->input_argument_->file().name(),
 				      input_file);
-	  arch->setup();
-	  workqueue->queue(new Add_archive_symbols(this->symtab_,
-						   this->layout_,
-						   this->input_objects_,
-						   arch,
-						   this->input_group_,
-						   this->this_blocker_,
-						   this->next_blocker_));
+	  arch->setup(this);
+
+	  workqueue->queue_front(new Add_archive_symbols(this->symtab_,
+							 this->layout_,
+							 this->input_objects_,
+							 arch,
+							 this->input_group_,
+							 this->this_blocker_,
+							 this->next_blocker_));
 	  return true;
 	}
     }
@@ -251,6 +259,7 @@ Read_symbols::do_group(Workqueue* workqueue)
 
   const Input_file_group* group = this->input_argument_->group();
   Task_token* this_blocker = this->this_blocker_;
+
   for (Input_file_group::const_iterator p = group->begin();
        p != group->end();
        ++p)
@@ -258,7 +267,7 @@ Read_symbols::do_group(Workqueue* workqueue)
       const Input_argument* arg = &*p;
       gold_assert(arg->is_file());
 
-      Task_token* next_blocker = new Task_token();
+      Task_token* next_blocker = new Task_token(true);
       next_blocker->add_blocker();
       workqueue->queue(new Read_symbols(this->options_, this->input_objects_,
 					this->symtab_, this->layout_,
@@ -319,34 +328,21 @@ Add_symbols::~Add_symbols()
 // We are blocked by this_blocker_.  We block next_blocker_.  We also
 // lock the file.
 
-Task::Is_runnable_type
-Add_symbols::is_runnable(Workqueue*)
+Task_token*
+Add_symbols::is_runnable()
 {
   if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
-    return IS_BLOCKED;
+    return this->this_blocker_;
   if (this->object_->is_locked())
-    return IS_LOCKED;
-  return IS_RUNNABLE;
+    return this->object_->token();
+  return NULL;
 }
 
-class Add_symbols::Add_symbols_locker : public Task_locker
+void
+Add_symbols::locks(Task_locker* tl)
 {
- public:
-  Add_symbols_locker(Task_token& token, Workqueue* workqueue,
-		     Object* object)
-    : blocker_(token, workqueue), objlock_(*object)
-  { }
-
- private:
-  Task_locker_block blocker_;
-  Task_locker_obj<Object> objlock_;
-};
-
-Task_locker*
-Add_symbols::locks(Workqueue* workqueue)
-{
-  return new Add_symbols_locker(*this->next_blocker_, workqueue,
-				this->object_);
+  tl->add(this, this->next_blocker_);
+  tl->add(this, this->object_->token());
 }
 
 // Add the symbols in the object to the symbol table.
@@ -363,6 +359,7 @@ Add_symbols::run(Workqueue*)
     {
       this->object_->layout(this->symtab_, this->layout_, this->sd_);
       this->object_->add_symbols(this->symtab_, this->sd_);
+      this->object_->release();
     }
   delete this->sd_;
   this->sd_ = NULL;
@@ -380,18 +377,18 @@ Finish_group::~Finish_group()
 
 // We need to wait for THIS_BLOCKER_ and unblock NEXT_BLOCKER_.
 
-Task::Is_runnable_type
-Finish_group::is_runnable(Workqueue*)
+Task_token*
+Finish_group::is_runnable()
 {
   if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
-    return IS_BLOCKED;
-  return IS_RUNNABLE;
+    return this->this_blocker_;
+  return NULL;
 }
 
-Task_locker*
-Finish_group::locks(Workqueue* workqueue)
+void
+Finish_group::locks(Task_locker* tl)
 {
-  return new Task_locker_block(*this->next_blocker_, workqueue);
+  tl->add(this, this->next_blocker_);
 }
 
 // Loop over the archives until there are no new undefined symbols.
@@ -408,7 +405,7 @@ Finish_group::run(Workqueue*)
 	   p != this->input_group_->end();
 	   ++p)
 	{
-	  Task_lock_obj<Archive> tl(**p);
+	  Task_lock_obj<Archive> tl(this, *p);
 
 	  (*p)->add_symbols(this->symtab_, this->layout_,
 			    this->input_objects_);

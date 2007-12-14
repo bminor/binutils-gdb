@@ -174,6 +174,7 @@ class Input_objects;
 class Symbol;
 class Symbol_table;
 class Layout;
+class Task;
 class Workqueue;
 class Output_file;
 template<int size, bool big_endian>
@@ -252,7 +253,7 @@ get_version_string();
 // Queue up the first set of tasks.
 extern void
 queue_initial_tasks(const General_options&,
-		    const Dirsearch&,
+		    Dirsearch&,
 		    const Command_line&,
 		    Workqueue*,
 		    Input_objects*,
@@ -262,6 +263,7 @@ queue_initial_tasks(const General_options&,
 // Queue up the middle set of tasks.
 extern void
 queue_middle_tasks(const General_options&,
+		   const Task*,
 		   const Input_objects*,
 		   Symbol_table*,
 		   Layout*,

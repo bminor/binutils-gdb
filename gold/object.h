@@ -35,6 +35,7 @@ namespace gold
 {
 
 class General_options;
+class Task;
 class Layout;
 class Output_section;
 class Output_file;
@@ -165,18 +166,28 @@ class Object
 
   // Lock the underlying file.
   void
-  lock()
-  { this->input_file()->file().lock(); }
+  lock(const Task* t)
+  { this->input_file()->file().lock(t); }
 
   // Unlock the underlying file.
   void
-  unlock()
-  { this->input_file()->file().unlock(); }
+  unlock(const Task* t)
+  { this->input_file()->file().unlock(t); }
 
   // Return whether the underlying file is locked.
   bool
   is_locked() const
   { return this->input_file()->file().is_locked(); }
+
+  // Return the token, so that the task can be queued.
+  Task_token*
+  token()
+  { return this->input_file()->file().token(); }
+
+  // Release the underlying file.
+  void
+  release()
+  { this->input_file_->file().release(); }
 
   // Return the sized target structure associated with this object.
   // This is like the target method but it returns a pointer of
@@ -322,7 +333,7 @@ class Object
   virtual unsigned int
   do_section_info(unsigned int shndx) = 0;
 
-  // Get the file.
+  // Get the file.  We pass on const-ness.
   Input_file*
   input_file()
   { return this->input_file_; }
@@ -508,7 +519,7 @@ class Relobj : public Object
   // any relocations for sections which require special handling, such
   // as the exception frame section.
   bool
-  relocs_must_follow_section_writes()
+  relocs_must_follow_section_writes() const
   { return this->relocs_must_follow_section_writes_; }
 
   // Return the object merge map.
@@ -1101,7 +1112,7 @@ class Sized_relobj : public Relobj
   // Write section data to the output file.  Record the views and
   // sizes in VIEWS for use when relocating.
   void
-  write_sections(const unsigned char* pshdrs, Output_file*, Views*);
+  write_sections(const unsigned char* pshdrs, Output_file*, Views*) const;
 
   // Relocate the sections in the output file.
   void

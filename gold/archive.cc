@@ -73,12 +73,12 @@ const char Archive::arfmag[2] = { '`', '\n' };
 // table.
 
 void
-Archive::setup()
+Archive::setup(Task* task)
 {
   // We need to ignore empty archives.
   if (this->input_file_->file().filesize() == sarmag)
     {
-      this->input_file_->file().unlock();
+      this->input_file_->file().unlock(task);
       return;
     }
 
@@ -109,7 +109,7 @@ Archive::setup()
     }
 
   // Opening the file locked it.  Unlock it now.
-  this->input_file_->file().unlock();
+  this->input_file_->file().unlock(task);
 }
 
 // Read the archive symbol map.
@@ -434,33 +434,19 @@ Add_archive_symbols::~Add_archive_symbols()
 // Return whether we can add the archive symbols.  We are blocked by
 // this_blocker_.  We block next_blocker_.  We also lock the file.
 
-Task::Is_runnable_type
-Add_archive_symbols::is_runnable(Workqueue*)
+Task_token*
+Add_archive_symbols::is_runnable()
 {
   if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
-    return IS_BLOCKED;
-  return IS_RUNNABLE;
+    return this->this_blocker_;
+  return NULL;
 }
 
-class Add_archive_symbols::Add_archive_symbols_locker : public Task_locker
+void
+Add_archive_symbols::locks(Task_locker* tl)
 {
- public:
-  Add_archive_symbols_locker(Task_token& token, Workqueue* workqueue,
-			     File_read& file)
-    : blocker_(token, workqueue), filelock_(file)
-  { }
-
- private:
-  Task_locker_block blocker_;
-  Task_locker_obj<File_read> filelock_;
-};
-
-Task_locker*
-Add_archive_symbols::locks(Workqueue* workqueue)
-{
-  return new Add_archive_symbols_locker(*this->next_blocker_,
-					workqueue,
-					this->archive_->file());
+  tl->add(this, this->next_blocker_);
+  tl->add(this, this->archive_->token());
 }
 
 void
@@ -468,6 +454,8 @@ Add_archive_symbols::run(Workqueue*)
 {
   this->archive_->add_symbols(this->symtab_, this->layout_,
 			      this->input_objects_);
+
+  this->archive_->release();
 
   if (this->input_group_ != NULL)
     this->input_group_->add_archive(this->archive_);

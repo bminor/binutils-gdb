@@ -67,7 +67,7 @@ class Layout_task_runner : public Task_function_runner
 
   // Run the operation.
   void
-  run(Workqueue*);
+  run(Workqueue*, const Task*);
 
  private:
   Layout_task_runner(const Layout_task_runner&);
@@ -168,7 +168,12 @@ class Layout
 
   // Finalize the layout after all the input sections have been added.
   off_t
-  finalize(const Input_objects*, Symbol_table*);
+  finalize(const Input_objects*, Symbol_table*, const Task*);
+
+  // Return whether any sections require postprocessing.
+  bool
+  any_postprocessing_sections() const
+  { return this->any_postprocessing_sections_; }
 
   // Return the size of the output file.
   off_t
@@ -283,11 +288,12 @@ class Layout
   // Count the local symbols in the regular symbol table and the dynamic
   // symbol table, and build the respective string pools.
   void
-  count_local_symbols(const Input_objects*);
+  count_local_symbols(const Task*, const Input_objects*);
 
   // Create the output sections for the symbol table.
   void
-  create_symtab_sections(const Input_objects*, Symbol_table*, off_t*);
+  create_symtab_sections(const Input_objects*, Symbol_table*, const Task*,
+			 off_t*);
 
   // Create the .shstrtab section.
   Output_section*
@@ -368,14 +374,14 @@ class Layout
   // Set the final file offsets of all the sections not associated
   // with a segment.  We set section offsets in three passes: the
   // first handles all allocated sections, the second sections that
-  // can be handled after input-sections are processed, and the last
-  // the late-bound STRTAB sections (probably only shstrtab, which is
-  // the one we care about because it holds section names).
+  // require postprocessing, and the last the late-bound STRTAB
+  // sections (probably only shstrtab, which is the one we care about
+  // because it holds section names).
   enum Section_offset_pass
   {
     BEFORE_INPUT_SECTIONS_PASS,
-    AFTER_INPUT_SECTIONS_PASS,
-    STRTAB_AFTER_INPUT_SECTIONS_PASS
+    POSTPROCESSING_SECTIONS_PASS,
+    STRTAB_AFTER_POSTPROCESSING_SECTIONS_PASS
   };
   off_t
   set_section_offsets(off_t, Section_offset_pass pass);
@@ -472,6 +478,8 @@ class Layout
   bool input_without_gnu_stack_note_;
   // Whether we have seen an object file that uses the static TLS model.
   bool has_static_tls_;
+  // Whether any sections require postprocessing.
+  bool any_postprocessing_sections_;
 };
 
 // This task handles writing out data in output sections which is not
@@ -492,11 +500,11 @@ class Write_sections_task : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -527,11 +535,11 @@ class Write_data_task : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -562,11 +570,11 @@ class Write_symbols_task : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -602,11 +610,11 @@ class Write_after_input_sections_task : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -616,8 +624,6 @@ class Write_after_input_sections_task : public Task
   { return "Write_after_input_sections_task"; }
 
  private:
-  class Write_sections_locker;
-
   Layout* layout_;
   Output_file* of_;
   Task_token* input_sections_blocker_;
@@ -635,7 +641,7 @@ class Close_task_runner : public Task_function_runner
 
   // Run the operation.
   void
-  run(Workqueue*);
+  run(Workqueue*, const Task*);
 
  private:
   Output_file* of_;

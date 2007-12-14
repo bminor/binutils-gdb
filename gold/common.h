@@ -45,11 +45,11 @@ class Allocate_commons_task : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -59,8 +59,6 @@ class Allocate_commons_task : public Task
   { return "Allocate_commons_task"; }
 
  private:
-  class Allocate_commons_locker;
-
   const General_options& options_;
   Symbol_table* symtab_;
   Layout* layout_;

@@ -83,7 +83,7 @@ unsigned long long File_read::maximum_mapped_bytes;
 
 File_read::~File_read()
 {
-  gold_assert(this->lock_count_ == 0);
+  gold_assert(this->token_.is_writable());
   if (this->descriptor_ >= 0)
     {
       if (close(this->descriptor_) < 0)
@@ -98,9 +98,9 @@ File_read::~File_read()
 // Open the file.
 
 bool
-File_read::open(const std::string& name)
+File_read::open(const Task* task, const std::string& name)
 {
-  gold_assert(this->lock_count_ == 0
+  gold_assert(this->token_.is_writable()
 	      && this->descriptor_ < 0
 	      && this->name_.empty());
   this->name_ = name;
@@ -116,7 +116,7 @@ File_read::open(const std::string& name)
       this->size_ = s.st_size;
     }
 
-  ++this->lock_count_;
+  this->token_.add_writer(task);
 
   return this->descriptor_ >= 0;
 }
@@ -124,46 +124,67 @@ File_read::open(const std::string& name)
 // Open the file for testing purposes.
 
 bool
-File_read::open(const std::string& name, const unsigned char* contents,
-		off_t size)
+File_read::open(const Task* task, const std::string& name,
+		const unsigned char* contents, off_t size)
 {
-  gold_assert(this->lock_count_ == 0
+  gold_assert(this->token_.is_writable()
 	      && this->descriptor_ < 0
 	      && this->name_.empty());
   this->name_ = name;
   this->contents_ = contents;
   this->size_ = size;
-  ++this->lock_count_;
+  this->token_.add_writer(task);
   return true;
 }
 
-void
-File_read::lock()
-{
-  ++this->lock_count_;
-}
+// Release the file.  This is called when we are done with the file in
+// a Task.
 
 void
-File_read::unlock()
+File_read::release()
 {
-  gold_assert(this->lock_count_ > 0);
-  --this->lock_count_;
-  if (this->lock_count_ == 0)
-    {
-      File_read::total_mapped_bytes += this->mapped_bytes_;
-      File_read::current_mapped_bytes += this->mapped_bytes_;
-      this->mapped_bytes_ = 0;
-      if (File_read::current_mapped_bytes > File_read::maximum_mapped_bytes)
-	File_read::maximum_mapped_bytes = File_read::current_mapped_bytes;
+  gold_assert(this->is_locked());
 
-      this->clear_views(false);
-    }
+  File_read::total_mapped_bytes += this->mapped_bytes_;
+  File_read::current_mapped_bytes += this->mapped_bytes_;
+  this->mapped_bytes_ = 0;
+  if (File_read::current_mapped_bytes > File_read::maximum_mapped_bytes)
+    File_read::maximum_mapped_bytes = File_read::current_mapped_bytes;
+
+  this->clear_views(false);
+
+  this->released_ = true;
 }
+
+// Lock the file.
+
+void
+File_read::lock(const Task* task)
+{
+  gold_assert(this->released_);
+  this->token_.add_writer(task);
+  this->released_ = false;
+}
+
+// Unlock the file.
+
+void
+File_read::unlock(const Task* task)
+{
+  this->release();
+  this->token_.remove_writer(task);
+}
+
+// Return whether the file is locked.
 
 bool
 File_read::is_locked() const
 {
-  return this->lock_count_ > 0;
+  if (!this->token_.is_writable())
+    return true;
+  // The file is not locked, so it should have been released.
+  gold_assert(this->released_);
+  return false;
 }
 
 // See if we have a view which covers the file starting at START for
@@ -238,7 +259,8 @@ File_read::read(off_t start, off_t size, void* p) const
 File_read::View*
 File_read::find_or_make_view(off_t start, off_t size, bool cache)
 {
-  gold_assert(this->lock_count_ > 0);
+  gold_assert(!this->token_.is_writable());
+  this->released_ = false;
 
   off_t poff = File_read::page_offset(start);
 
@@ -301,14 +323,11 @@ File_read::find_or_make_view(off_t start, off_t size, bool cache)
   return v;
 }
 
-// This implementation of get_view just reads into a memory buffer,
-// which we store on view_list_.  At some point we should support
-// mmap.
+// Get a view into the file.
 
 const unsigned char*
 File_read::get_view(off_t start, off_t size, bool cache)
 {
-  gold_assert(this->lock_count_ > 0);
   File_read::View* pv = this->find_or_make_view(start, size, cache);
   return pv->data() + (start - pv->start());
 }
@@ -316,7 +335,6 @@ File_read::get_view(off_t start, off_t size, bool cache)
 File_view*
 File_read::get_lasting_view(off_t start, off_t size, bool cache)
 {
-  gold_assert(this->lock_count_ > 0);
   File_read::View* pv = this->find_or_make_view(start, size, cache);
   pv->lock();
   return new File_view(*this, pv, pv->data() + (start - pv->start()));
@@ -388,13 +406,13 @@ File_view::~File_view()
 
 // Create a file for testing.
 
-Input_file::Input_file(const char* name, const unsigned char* contents,
-		       off_t size)
+Input_file::Input_file(const Task* task, const char* name,
+		       const unsigned char* contents, off_t size)
   : file_()
 {
   this->input_argument_ =
     new Input_file_argument(name, false, "", Position_dependent_options());
-  bool ok = file_.open(name, contents, size);
+  bool ok = file_.open(task, name, contents, size);
   gold_assert(ok);
 }
 
@@ -408,7 +426,8 @@ Input_file::Input_file(const char* name, const unsigned char* contents,
 // the file location, rather than the current directory.
 
 bool
-Input_file::open(const General_options& options, const Dirsearch& dirpath)
+Input_file::open(const General_options& options, const Dirsearch& dirpath,
+		 const Task* task)
 {
   std::string name;
 
@@ -477,7 +496,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath)
     }
 
   // Now that we've figured out where the file lives, try to open it.
-  if (!this->file_.open(name))
+  if (!this->file_.open(task, name))
     {
       gold_error(_("cannot open %s: %s"),
 		 name.c_str(), strerror(errno));

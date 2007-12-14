@@ -55,7 +55,7 @@ class Read_symbols : public Task
   // NEXT_BLOCKER is used to block the next input file from adding
   // symbols.
   Read_symbols(const General_options& options, Input_objects* input_objects,
-	       Symbol_table* symtab, Layout* layout, const Dirsearch& dirpath,
+	       Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
 	       const Input_argument* input_argument, Input_group* input_group,
 	       Task_token* this_blocker, Task_token* next_blocker)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
@@ -68,11 +68,11 @@ class Read_symbols : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -93,7 +93,7 @@ class Read_symbols : public Task
   Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;
-  const Dirsearch& dirpath_;
+  Dirsearch* dirpath_;
   const Input_argument* input_argument_;
   Input_group* input_group_;
   Task_token* this_blocker_;
@@ -123,11 +123,11 @@ class Add_symbols : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -137,8 +137,6 @@ class Add_symbols : public Task
   { return "Add_symbols " + this->object_->name(); }
 
 private:
-  class Add_symbols_locker;
-
   Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;
@@ -199,11 +197,11 @@ class Finish_group : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);

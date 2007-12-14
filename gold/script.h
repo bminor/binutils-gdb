@@ -52,7 +52,7 @@ class Workqueue;
 
 bool
 read_input_script(Workqueue*, const General_options&, Symbol_table*, Layout*,
-		  const Dirsearch&, Input_objects*, Input_group*,
+		  Dirsearch*, Input_objects*, Input_group*,
 		  const Input_argument*, Input_file*, const unsigned char* p,
 		  off_t bytes, Task_token* this_blocker,
 		  Task_token* next_blocker);

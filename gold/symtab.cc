@@ -1392,8 +1392,8 @@ Symbol_table::set_dynsym_indexes(const Target* target,
 // OFF.  Add their names to POOL.  Return the new file offset.
 
 off_t
-Symbol_table::finalize(unsigned int index, off_t off, off_t dynoff,
-		       size_t dyn_global_index, size_t dyncount,
+Symbol_table::finalize(const Task* task, unsigned int index, off_t off,
+		       off_t dynoff, size_t dyn_global_index, size_t dyncount,
 		       Stringpool* pool)
 {
   off_t ret;
@@ -1426,7 +1426,7 @@ Symbol_table::finalize(unsigned int index, off_t off, off_t dynoff,
 
   // Now that we have the final symbol table, we can reliably note
   // which symbols should get warnings.
-  this->warnings_.note_warnings(this);
+  this->warnings_.note_warnings(this, task);
 
   return ret;
 }
@@ -1945,7 +1945,8 @@ struct Odr_violation_compare
 // but apparently different definitions (different source-file/line-no).
 
 void
-Symbol_table::detect_odr_violations(const char* output_file_name) const
+Symbol_table::detect_odr_violations(const Task* task,
+				    const char* output_file_name) const
 {
   for (Odr_map::const_iterator it = candidate_odr_violations_.begin();
        it != candidate_odr_violations_.end();
@@ -1961,14 +1962,14 @@ Symbol_table::detect_odr_violations(const char* output_file_name) const
            ++locs)
         {
 	  // We need to lock the object in order to read it.  This
-	  // means that we can not run inside a Task.  If we want to
-	  // run this in a Task for better performance, we will need
-	  // one Task for object, plus appropriate locking to ensure
-	  // that we don't conflict with other uses of the object.
-          locs->object->lock();
+	  // means that we have to run in a singleton Task.  If we
+	  // want to run this in a general Task for better
+	  // performance, we will need one Task for object, plus
+	  // appropriate locking to ensure that we don't conflict with
+	  // other uses of the object.
+	  Task_lock_obj<Object> tl(task, locs->object);
           std::string lineno = Dwarf_line_info::one_addr2line(
               locs->object, locs->shndx, locs->offset);
-          locs->object->unlock();
           if (!lineno.empty())
             line_nums.insert(lineno);
         }
@@ -2003,7 +2004,7 @@ Warnings::add_warning(Symbol_table* symtab, const char* name, Object* obj,
 // sources for all the symbols.
 
 void
-Warnings::note_warnings(Symbol_table* symtab)
+Warnings::note_warnings(Symbol_table* symtab, const Task* task)
 {
   for (Warning_table::iterator p = this->warnings_.begin();
        p != this->warnings_.end();
@@ -2023,7 +2024,7 @@ Warnings::note_warnings(Symbol_table* symtab)
 	  // the object then, as we might try to issue the same
 	  // warning multiple times simultaneously.
 	  {
-	    Task_locker_obj<Object> tl(*p->second.object);
+	    Task_lock_obj<Object> tl(task, p->second.object);
 	    const unsigned char* c;
 	    off_t len;
 	    c = p->second.object->section_contents(p->second.shndx, &len,

@@ -24,249 +24,19 @@
 // driven from a work queue.  This permits us to parallelize the
 // linker where possible.
 
-// Task_token
-//   A simple locking implementation to ensure proper task ordering.
-// Task_read_token, Task_write_token
-//   Lock a Task_token for read or write.
-// Task_locker
-//   Task locking using RAII.
-// Task
-//   An abstract class for jobs to run.
-
 #ifndef GOLD_WORKQUEUE_H
 #define GOLD_WORKQUEUE_H
 
+#include <string>
+
 #include "gold-threads.h"
-#include "fileread.h"
+#include "token.h"
 
 namespace gold
 {
 
 class General_options;
-class Task;
 class Workqueue;
-
-// Some tasks require access to shared data structures, such as the
-// symbol table.  Some tasks must be executed in a particular order,
-// such as reading input file symbol tables--if we see foo.o -llib, we
-// have to read the symbols for foo.o before we read the ones for
-// -llib.  To implement this safely and efficiently, we use tokens.
-// Task_tokens support shared read/exclusive write access to some
-// resource.  Alternatively, they support blockers: blockers implement
-// the requirement that some set of tasks must complete before another
-// set of tasks can start.  In such a case we increment the block
-// count when we create the task, and decrement it when the task
-// completes.  Task_tokens are only manipulated by the main thread, so
-// they do not themselves require any locking.
-
-class Task_token
-{
- public:
-  Task_token();
-
-  ~Task_token();
-
-  // A read/write token uses these methods.
-
-  bool
-  is_readable() const;
-
-  void
-  add_reader();
-
-  void
-  remove_reader();
-
-  bool
-  is_writable() const;
-
-  void
-  add_writer(const Task*);
-
-  void
-  remove_writer(const Task*);
-
-  bool
-  has_write_lock(const Task*);
-
-  // A blocker token uses these methods.
-
-  void
-  add_blocker();
-
-  // Returns true if block count drops to zero.
-  bool
-  remove_blocker();
-
-  bool
-  is_blocked() const;
-
- private:
-  // It makes no sense to copy these.
-  Task_token(const Task_token&);
-  Task_token& operator=(const Task_token&);
-
-  bool is_blocker_;
-  int readers_;
-  const Task* writer_;
-};
-
-// In order to support tokens more reliably, we provide objects which
-// handle them using RAII.
-
-class Task_read_token
-{
- public:
-  Task_read_token(Task_token& token)
-    : token_(token)
-  { this->token_.add_reader(); }
-
-  ~Task_read_token()
-  { this->token_.remove_reader(); }
-
- private:
-  Task_read_token(const Task_read_token&);
-  Task_read_token& operator=(const Task_read_token&);
-
-  Task_token& token_;
-};
-
-class Task_write_token
-{
- public:
-  Task_write_token(Task_token& token, const Task* task)
-    : token_(token), task_(task)
-  { this->token_.add_writer(this->task_); }
-
-  ~Task_write_token()
-  { this->token_.remove_writer(this->task_); }
-
- private:
-  Task_write_token(const Task_write_token&);
-  Task_write_token& operator=(const Task_write_token&);
-
-  Task_token& token_;
-  const Task* task_;
-};
-
-class Task_block_token
-{
- public:
-  // The blocker count must be incremented when the task is created.
-  // This object is created when the task is run.  When we unblock the
-  // last task, we notify the workqueue.
-  Task_block_token(Task_token& token, Workqueue* workqueue);
-  ~Task_block_token();
-
- private:
-  Task_block_token(const Task_block_token&);
-  Task_block_token& operator=(const Task_block_token&);
-
-  Task_token& token_;
-  Workqueue* workqueue_;
-};
-
-// An object which implements an RAII lock for any object which
-// supports lock and unlock methods.
-
-template<typename Obj>
-class Task_lock_obj
-{
- public:
-  Task_lock_obj(Obj& obj)
-    : obj_(obj)
-  { this->obj_.lock(); }
-
-  ~Task_lock_obj()
-  { this->obj_.unlock(); }
-
- private:
-  Task_lock_obj(const Task_lock_obj&);
-  Task_lock_obj& operator=(const Task_lock_obj&);
-
-  Obj& obj_;
-};
-
-// An abstract class used to lock Task_tokens using RAII.  A typical
-// implementation would simply have a set of members of type
-// Task_read_token, Task_write_token, and Task_block_token.
-
-class Task_locker
-{
- public:
-  Task_locker()
-  { }
-
-  virtual ~Task_locker()
-  { }
-};
-
-// A version of Task_locker which may be used for a single read lock.
-
-class Task_locker_read : public Task_locker
-{
- public:
-  Task_locker_read(Task_token& token)
-    : read_token_(token)
-  { }
-
- private:
-  Task_locker_read(const Task_locker_read&);
-  Task_locker_read& operator=(const Task_locker_read&);
-
-  Task_read_token read_token_;
-};
-
-// A version of Task_locker which may be used for a single write lock.
-
-class Task_locker_write : public Task_locker
-{
- public:
-  Task_locker_write(Task_token& token, const Task* task)
-    : write_token_(token, task)
-  { }
-
- private:
-  Task_locker_write(const Task_locker_write&);
-  Task_locker_write& operator=(const Task_locker_write&);
-
-  Task_write_token write_token_;
-};
-
-// A version of Task_locker which may be used for a single blocker
-// lock.
-
-class Task_locker_block : public Task_locker
-{
- public:
-  Task_locker_block(Task_token& token, Workqueue* workqueue)
-    : block_token_(token, workqueue)
-  { }
-
- private:
-  Task_locker_block(const Task_locker_block&);
-  Task_locker_block& operator=(const Task_locker_block&);
-
-  Task_block_token block_token_;
-};
-
-// A version of Task_locker which may be used to hold a lock on any
-// object which supports lock() and unlock() methods.
-
-template<typename Obj>
-class Task_locker_obj : public Task_locker
-{
- public:
-  Task_locker_obj(Obj& obj)
-    : obj_lock_(obj)
-  { }
-
- private:
-  Task_locker_obj(const Task_locker_obj&);
-  Task_locker_obj& operator=(const Task_locker_obj&);
-
-  Task_lock_obj<Obj> obj_lock_;
-};
 
 // The superclass for tasks to be placed on the workqueue.  Each
 // specific task class will inherit from this one.
@@ -275,38 +45,56 @@ class Task
 {
  public:
   Task()
-    : name_()
+    : list_next_(NULL), name_(), should_run_soon_(false)
   { }
   virtual ~Task()
   { }
 
-  // Type returned by Is_runnable.
-  enum Is_runnable_type
-  {
-    // Task is runnable.
-    IS_RUNNABLE,
-    // Task is waiting for a block to clear.
-    IS_BLOCKED,
-    // Task is not waiting for a block, but is not runnable--i.e., is
-    // waiting for a lock.
-    IS_LOCKED
-  };
+  // Check whether the Task can be run now.  This method is only
+  // called with the workqueue lock held.  If the Task can run, this
+  // returns NULL.  Otherwise it returns a pointer to a token which
+  // must be released before the Task can run.
+  virtual Task_token*
+  is_runnable() = 0;
 
-  // Return whether the task can be run now.  This method is only
-  // called from the main thread.
-  virtual Is_runnable_type
-  is_runnable(Workqueue*) = 0;
-
-  // Return a pointer to a Task_locker which locks all the resources
-  // required by the task.  We delete the pointer when the task is
-  // complete.  This method can return NULL if no locks are required.
-  // This method is only called from the main thread.
-  virtual Task_locker*
-  locks(Workqueue*) = 0;
+  // Lock all the resources required by the Task, and store the locks
+  // in a Task_locker.  This method does not need to do anything if no
+  // locks are required.  This method is only called with the
+  // workqueue lock held.
+  virtual void
+  locks(Task_locker*) = 0;
 
   // Run the task.
   virtual void
   run(Workqueue*) = 0;
+
+  // Return whether this task should run soon.
+  bool
+  should_run_soon() const
+  { return this->should_run_soon_; }
+
+  // Note that this task should run soon.
+  void
+  set_should_run_soon()
+  { this->should_run_soon_ = true; }
+
+  // Get the next Task on the list of Tasks.  Called by Task_list.
+  Task*
+  list_next() const
+  { return this->list_next_; }
+
+  // Set the next Task on the list of Tasks.  Called by Task_list.
+  void
+  set_list_next(Task* t)
+  {
+    gold_assert(this->list_next_ == NULL);
+    this->list_next_ = t;
+  }
+
+  // Clear the next Task on the list of Tasks.  Called by Task_list.
+  void
+  clear_list_next()
+  { this->list_next_ = NULL; }
 
   // Return the name of the Task.  This is only used for debugging
   // purposes.
@@ -325,15 +113,24 @@ class Task
   get_name() const = 0;
 
  private:
-  // This task may not be copied.
+  // Tasks may not be copied.
   Task(const Task&);
   Task& operator=(const Task&);
 
+  // If this Task is on a list, this is a pointer to the next Task on
+  // the list.  We use this simple list structure rather than building
+  // a container, in order to avoid memory allocation while holding
+  // the Workqueue lock.
+  Task* list_next_;
   // Task name, for debugging purposes.
   std::string name_;
+  // Whether this Task should be executed soon.  This is used for
+  // Tasks which can be run after some data is read.
+  bool should_run_soon_;
 };
 
-// A simple task which waits for a blocker and then runs a function.
+// An interface for Task_function.  This is a convenience class to run
+// a single function.
 
 class Task_function_runner
 {
@@ -342,14 +139,16 @@ class Task_function_runner
   { }
 
   virtual void
-  run(Workqueue*) = 0;
+  run(Workqueue*, const Task*) = 0;
 };
+
+// A simple task which waits for a blocker and then runs a function.
 
 class Task_function : public Task
 {
  public:
-  // Both points should be allocated using new, and will be deleted
-  // after the task runs.
+  // RUNNER and BLOCKER should be allocated using new, and will be
+  // deleted after the task runs.
   Task_function(Task_function_runner* runner, Task_token* blocker,
 		const char* name)
     : runner_(runner), blocker_(blocker), name_(name)
@@ -364,19 +163,19 @@ class Task_function : public Task
   // The standard task methods.
 
   // Wait until the task is unblocked.
-  Is_runnable_type
-  is_runnable(Workqueue*)
-  { return this->blocker_->is_blocked() ? IS_BLOCKED : IS_RUNNABLE; }
+  Task_token*
+  is_runnable()
+  { return this->blocker_->is_blocked() ? this->blocker_ : NULL; }
 
   // This type of task does not normally hold any locks.
-  virtual Task_locker*
-  locks(Workqueue*)
-  { return NULL; }
+  virtual void
+  locks(Task_locker*)
+  { }
 
   // Run the action.
   void
   run(Workqueue* workqueue)
-  { this->runner_->run(workqueue); }
+  { this->runner_->run(workqueue, this); }
 
   // The debugging name.
   std::string
@@ -392,9 +191,9 @@ class Task_function : public Task
   const char* name_;
 };
 
-// The workqueue
+// The workqueue itself.
 
-class Workqueue_runner;
+class Workqueue_threader;
 
 class Workqueue
 {
@@ -411,15 +210,14 @@ class Workqueue
   void
   queue_front(Task*);
 
-  // Process all the tasks on the work queue.
+  // Process all the tasks on the work queue.  This function runs
+  // until all tasks have completed.  The argument is the thread
+  // number, used only for debugging.
   void
-  process();
+  process(int);
 
-  // A complete set of blocking tasks has completed.
-  void
-  cleared_blocker();
-
-  // Set the thread count.
+  // Set the desired thread count--the number of threads we want to
+  // have running.
   void
   set_thread_count(int);
 
@@ -428,59 +226,56 @@ class Workqueue
   Workqueue(const Workqueue&);
   Workqueue& operator=(const Workqueue&);
 
-  typedef std::list<Task*> Task_list;
-
-  // Run a task.
+  // Add a task to a queue.
   void
-  run(Task*);
+  add_to_queue(Task_list* queue, Task* t);
 
-  friend class Workqueue_runner;
+  // Find a runnable task, or wait for one.
+  Task*
+  find_runnable_or_wait(int thread_number);
 
   // Find a runnable task.
   Task*
-  find_runnable(Task_list*, bool*);
+  find_runnable();
 
-  // Add a lock to the completed queue.
-  void
-  completed(Task*, Task_locker*);
+  // Find a runnable task in a list.
+  Task*
+  find_runnable_in_list(Task_list*);
 
-  // Clear the completed queue.
+  // Find an run a task.
   bool
-  clear_completed();
+  find_and_run_task(int);
 
-  // Print the list of queued tasks.
-  void
-  show_queued_tasks();
+  // Release the locks for a Task.  Return the next Task to run.
+  Task*
+  release_locks(Task*, Task_locker*);
 
-  // How to run a task.  Only accessed from main thread.
-  Workqueue_runner* runner_;
+  // Store T into *PRET, or queue it as appropriate.
+  bool
+  return_or_queue(Task* t, bool is_blocker, Task** pret);
 
-  // Lock for access to tasks_ members.
-  Lock tasks_lock_;
+  // Return whether to cancel this thread.
+  bool
+  should_cancel_thread();
+
+  // Master Workqueue lock.  This controls access to the following
+  // member variables.
+  Lock lock_;
   // List of tasks to execute soon.
   Task_list first_tasks_;
   // List of tasks to execute after the ones in first_tasks_.
   Task_list tasks_;
-
-  // Lock for access to completed_, running_, and queued_.
-  Lock completed_lock_;
-  // List of Task_locker objects for main thread to free.
-  std::list<Task_locker*> completed_;
   // Number of tasks currently running.
   int running_;
-  // Number of tasks currently on queue (both first_tasks_ and
-  // tasks_).
-  int queued_;
-  // Condition variable signalled when a new entry is added to completed_.
-  Condvar completed_condvar_;
+  // Number of tasks waiting for a lock to release.
+  int waiting_;
+  // Condition variable associated with lock_.  This is signalled when
+  // there may be a new Task to execute.
+  Condvar condvar_;
 
-  // Number of blocker tokens which were fully cleared.  Only accessed
-  // from main thread.
-  int cleared_blockers_;
-
-  // The desired thread count.  Only set by the main thread or by a
-  // singleton thread.  Only accessed from the main thread.
-  int desired_thread_count_;
+  // The threading implementation.  This is set at construction time
+  // and not changed thereafter.
+  Workqueue_threader* threader_;
 };
 
 } // End namespace gold.

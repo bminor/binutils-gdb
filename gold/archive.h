@@ -31,6 +31,7 @@
 namespace gold
 {
 
+class Task;
 class Input_file;
 class Input_objects;
 class Input_group;
@@ -64,7 +65,7 @@ class Archive
 
   // Set up the archive: read the symbol map.
   void
-  setup();
+  setup(Task*);
 
   // Get a reference to the underlying file.
   File_read&
@@ -73,18 +74,28 @@ class Archive
 
   // Lock the underlying file.
   void
-  lock()
-  { this->input_file_->file().lock(); }
+  lock(const Task* t)
+  { this->input_file_->file().lock(t); }
 
   // Unlock the underlying file.
   void
-  unlock()
-  { this->input_file_->file().unlock(); }
+  unlock(const Task* t)
+  { this->input_file_->file().unlock(t); }
 
   // Return whether the underlying file is locked.
   bool
   is_locked() const
   { return this->input_file_->file().is_locked(); }
+
+  // Return the token, so that the task can be queued.
+  Task_token*
+  token()
+  { return this->input_file_->file().token(); }
+
+  // Release the underlying file.
+  void
+  release()
+  { this->input_file_->file().release(); }
 
   // Select members from the archive as needed and add them to the
   // link.
@@ -178,11 +189,11 @@ class Add_archive_symbols : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -196,8 +207,6 @@ class Add_archive_symbols : public Task
   }
 
  private:
-  class Add_archive_symbols_locker;
-
   Symbol_table* symtab_;
   Layout* layout_;
   Input_objects* input_objects_;

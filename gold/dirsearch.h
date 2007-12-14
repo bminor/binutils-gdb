@@ -26,12 +26,14 @@
 #include <string>
 #include <list>
 
-#include "workqueue.h"
+#include "options.h"
+#include "token.h"
 
 namespace gold
 {
 
 class General_options;
+class Workqueue;
 
 // A simple interface to manage directories to be searched for
 // libraries.
@@ -40,7 +42,7 @@ class Dirsearch
 {
  public:
   Dirsearch()
-    : directories_(NULL), token_()
+    : directories_(NULL), token_(true)
   { }
 
   // Set the list of directories to search.
@@ -55,10 +57,10 @@ class Dirsearch
   std::string
   find(const std::string&, const std::string& n2, bool *is_in_sysroot) const;
 
-  // Return a reference to the blocker token which controls access.
-  const Task_token&
-  token() const
-  { return this->token_; }
+  // Return the blocker token which controls access.
+  Task_token*
+  token()
+  { return &this->token_; }
 
  private:
   // We can not copy this class.

@@ -38,35 +38,21 @@ namespace gold
 // This task allocates the common symbols.  We need a lock on the
 // symbol table.
 
-Task::Is_runnable_type
-Allocate_commons_task::is_runnable(Workqueue*)
+Task_token*
+Allocate_commons_task::is_runnable()
 {
   if (!this->symtab_lock_->is_writable())
-    return IS_LOCKED;
-  return IS_RUNNABLE;
+    return this->symtab_lock_;
+  return NULL;
 }
 
 // Return the locks we hold: one on the symbol table, and one blocker.
 
-class Allocate_commons_task::Allocate_commons_locker : public Task_locker
+void
+Allocate_commons_task::locks(Task_locker* tl)
 {
- public:
-  Allocate_commons_locker(Task_token& symtab_lock, Task* task,
-			  Task_token& blocker, Workqueue* workqueue)
-    : symtab_locker_(symtab_lock, task),
-      blocker_(blocker, workqueue)
-  { }
-
- private:
-  Task_locker_write symtab_locker_;
-  Task_locker_block blocker_;
-};
-
-Task_locker*
-Allocate_commons_task::locks(Workqueue* workqueue)
-{
-  return new Allocate_commons_locker(*this->symtab_lock_, this,
-				     *this->blocker_, workqueue);
+  tl->add(this, this->blocker_);
+  tl->add(this, this->symtab_lock_);
 }
 
 // Allocate the common symbols.

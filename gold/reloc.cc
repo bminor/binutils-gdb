@@ -37,18 +37,18 @@ namespace gold
 // After reading it, the start another task to process the
 // information.  These tasks requires access to the file.
 
-Task::Is_runnable_type
-Read_relocs::is_runnable(Workqueue*)
+Task_token*
+Read_relocs::is_runnable()
 {
-  return this->object_->is_locked() ? IS_LOCKED : IS_RUNNABLE;
+  return this->object_->is_locked() ? this->object_->token() : NULL;
 }
 
 // Lock the file.
 
-Task_locker*
-Read_relocs::locks(Workqueue*)
+void
+Read_relocs::locks(Task_locker* tl)
 {
-  return new Task_locker_obj<Object>(*this->object_);
+  tl->add(this, this->object_->token());
 }
 
 // Read the relocations and then start a Scan_relocs_task.
@@ -58,6 +58,8 @@ Read_relocs::run(Workqueue* workqueue)
 {
   Read_relocs_data *rd = new Read_relocs_data;
   this->object_->read_relocs(rd);
+  this->object_->release();
+
   workqueue->queue_front(new Scan_relocs(this->options_, this->symtab_,
 					 this->layout_, this->object_, rd,
 					 this->symtab_lock_, this->blocker_));
@@ -78,37 +80,25 @@ Read_relocs::get_name() const
 // use a lock on the symbol table to keep them from interfering with
 // each other.
 
-Task::Is_runnable_type
-Scan_relocs::is_runnable(Workqueue*)
+Task_token*
+Scan_relocs::is_runnable()
 {
-  if (!this->symtab_lock_->is_writable() || this->object_->is_locked())
-    return IS_LOCKED;
-  return IS_RUNNABLE;
+  if (!this->symtab_lock_->is_writable())
+    return this->symtab_lock_;
+  if (this->object_->is_locked())
+    return this->object_->token();
+  return NULL;
 }
 
 // Return the locks we hold: one on the file, one on the symbol table
 // and one blocker.
 
-class Scan_relocs::Scan_relocs_locker : public Task_locker
+void
+Scan_relocs::locks(Task_locker* tl)
 {
- public:
-  Scan_relocs_locker(Object* object, Task_token& symtab_lock, Task* task,
-		     Task_token& blocker, Workqueue* workqueue)
-    : objlock_(*object), symtab_locker_(symtab_lock, task),
-      blocker_(blocker, workqueue)
-  { }
-
- private:
-  Task_locker_obj<Object> objlock_;
-  Task_locker_write symtab_locker_;
-  Task_locker_block blocker_;
-};
-
-Task_locker*
-Scan_relocs::locks(Workqueue* workqueue)
-{
-  return new Scan_relocs_locker(this->object_, *this->symtab_lock_, this,
-				*this->blocker_, workqueue);
+  tl->add(this, this->object_->token());
+  tl->add(this, this->symtab_lock_);
+  tl->add(this, this->blocker_);
 }
 
 // Scan the relocs.
@@ -118,6 +108,7 @@ Scan_relocs::run(Workqueue*)
 {
   this->object_->scan_relocs(this->options_, this->symtab_, this->layout_,
 			     this->rd_);
+  this->object_->release();
   delete this->rd_;
   this->rd_ = NULL;
 }
@@ -134,46 +125,30 @@ Scan_relocs::get_name() const
 
 // We may have to wait for the output sections to be written.
 
-Task::Is_runnable_type
-Relocate_task::is_runnable(Workqueue*)
+Task_token*
+Relocate_task::is_runnable()
 {
   if (this->object_->relocs_must_follow_section_writes()
       && this->output_sections_blocker_->is_blocked())
-    return IS_BLOCKED;
+    return this->output_sections_blocker_;
 
   if (this->object_->is_locked())
-    return IS_LOCKED;
+    return this->object_->token();
 
-  return IS_RUNNABLE;
+  return NULL;
 }
 
 // We want to lock the file while we run.  We want to unblock
 // INPUT_SECTIONS_BLOCKER and FINAL_BLOCKER when we are done.
+// INPUT_SECTIONS_BLOCKER may be NULL.
 
-class Relocate_task::Relocate_locker : public Task_locker
+void
+Relocate_task::locks(Task_locker* tl)
 {
- public:
-  Relocate_locker(Task_token& input_sections_blocker,
-		  Task_token& final_blocker, Workqueue* workqueue,
-		  Object* object)
-    : input_sections_blocker_(input_sections_blocker, workqueue),
-      final_blocker_(final_blocker, workqueue),
-      objlock_(*object)
-  { }
-
- private:
-  Task_block_token input_sections_blocker_;
-  Task_block_token final_blocker_;
-  Task_locker_obj<Object> objlock_;
-};
-
-Task_locker*
-Relocate_task::locks(Workqueue* workqueue)
-{
-  return new Relocate_locker(*this->input_sections_blocker_,
-			     *this->final_blocker_,
-			     workqueue,
-			     this->object_);
+  if (this->input_sections_blocker_ != NULL)
+    tl->add(this, this->input_sections_blocker_);
+  tl->add(this, this->final_blocker_);
+  tl->add(this, this->object_->token());
 }
 
 // Run the task.
@@ -183,6 +158,7 @@ Relocate_task::run(Workqueue*)
 {
   this->object_->relocate(this->options_, this->symtab_, this->layout_,
 			  this->of_);
+  this->object_->release();
 }
 
 // Return a debugging name for the task.
@@ -401,10 +377,10 @@ template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 					       Output_file* of,
-					       Views* pviews)
+					       Views* pviews) const
 {
   unsigned int shnum = this->shnum();
-  std::vector<Map_to_output>& map_sections(this->map_to_output());
+  const std::vector<Map_to_output>& map_sections(this->map_to_output());
 
   const unsigned char* p = pshdrs + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
@@ -521,7 +497,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
   unsigned int shnum = this->shnum();
   Sized_target<size, big_endian>* target = this->sized_target();
 
-  std::vector<Map_to_output>& map_sections(this->map_to_output());
+  const std::vector<Map_to_output>& map_sections(this->map_to_output());
 
   Relocate_info<size, big_endian> relinfo;
   relinfo.options = &options;

@@ -23,6 +23,7 @@
 #ifndef GOLD_RELOC_H
 #define GOLD_RELOC_H
 
+#include <vector>
 #include <byteswap.h>
 
 #include "elfcpp.h"
@@ -69,11 +70,11 @@ class Read_relocs : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -107,11 +108,11 @@ class Scan_relocs : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -120,8 +121,6 @@ class Scan_relocs : public Task
   get_name() const;
 
  private:
-  class Scan_relocs_locker;
-
   const General_options& options_;
   Symbol_table* symtab_;
   Layout* layout_;
@@ -148,11 +147,11 @@ class Relocate_task : public Task
 
   // The standard Task methods.
 
-  Is_runnable_type
-  is_runnable(Workqueue*);
+  Task_token*
+  is_runnable();
 
-  Task_locker*
-  locks(Workqueue*);
+  void
+  locks(Task_locker*);
 
   void
   run(Workqueue*);
@@ -161,8 +160,6 @@ class Relocate_task : public Task
   get_name() const;
 
  private:
-  class Relocate_locker;
-
   const General_options& options_;
   const Symbol_table* symtab_;
   const Layout* layout_;

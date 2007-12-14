@@ -30,6 +30,7 @@
 #include <string>
 
 #include "options.h"
+#include "token.h"
 
 namespace gold
 {
@@ -45,40 +46,56 @@ class File_read
 {
  public:
   File_read()
-    : name_(), descriptor_(-1), size_(0), lock_count_(0), views_(),
-      saved_views_(), contents_(NULL), mapped_bytes_(0)
+    : name_(), descriptor_(-1), size_(0), token_(false), views_(),
+      saved_views_(), contents_(NULL), mapped_bytes_(0), released_(true)
   { }
 
   ~File_read();
 
   // Open a file.
   bool
-  open(const std::string& name);
+  open(const Task*, const std::string& name);
 
   // Pretend to open the file, but provide the file contents.  No
   // actual file system activity will occur.  This is used for
   // testing.
   bool
-  open(const std::string& name, const unsigned char* contents, off_t size);
+  open(const Task*, const std::string& name, const unsigned char* contents,
+       off_t size);
 
   // Return the file name.
   const std::string&
   filename() const
   { return this->name_; }
 
-  // Lock the file for access within a particular Task::run execution.
-  // This means that the descriptor can not be closed.  This routine
-  // may only be called from the main thread.
+  // Lock the file for exclusive access within a particular Task::run
+  // execution.  This means that the descriptor can not be closed.
+  // This routine may only be called when the workqueue lock is held.
   void
-  lock();
+  lock(const Task* t);
 
   // Unlock the descriptor, permitting it to be closed if necessary.
   void
-  unlock();
+  unlock(const Task* t);
 
   // Test whether the object is locked.
   bool
   is_locked() const;
+
+  // Return the token, so that the task can be queued.
+  Task_token*
+  token()
+  { return &this->token_; }
+
+  // Release the file.  This indicates that we aren't going to do
+  // anything further with it until it is unlocked.  This is used
+  // because a Task which locks the file never calls either lock or
+  // unlock; it just locks the token.  The basic rule is that a Task
+  // which locks a file via the Task::locks interface must explicitly
+  // call release() when it is done.  This is not necessary for code
+  // which calls unlock() on the file.
+  void
+  release();
 
   // Return the size of the file.
   off_t
@@ -118,16 +135,16 @@ class File_read
   File_read(const File_read&);
   File_read& operator=(const File_read&);
 
-  // Total bytes mapped into memory during the link.  This variable is
-  // only accessed from the main thread, when unlocking the object.
+  // Total bytes mapped into memory during the link.  This variable
+  // may not be accurate when running multi-threaded.
   static unsigned long long total_mapped_bytes;
 
   // Current number of bytes mapped into memory during the link.  This
-  // variable is only accessed from the main thread.
+  // variable may not be accurate when running multi-threaded.
   static unsigned long long current_mapped_bytes;
 
   // High water mark of bytes mapped into memory during the link.
-  // This variable is only accessed from the main thread.
+  // This variable may not be accurate when running multi-threaded.
   static unsigned long long maximum_mapped_bytes;
 
   // A view into the file.
@@ -227,8 +244,8 @@ class File_read
   int descriptor_;
   // File size.
   off_t size_;
-  // Number of locks on the file.
-  int lock_count_;
+  // A token used to lock the file.
+  Task_token token_;
   // Buffered views into the file.
   Views views_;
   // List of views which were locked but had to be removed from views_
@@ -240,6 +257,8 @@ class File_read
   // while the file is locked.  When we unlock the file, we transfer
   // the total to total_mapped_bytes, and reset this to zero.
   size_t mapped_bytes_;
+  // Whether the file was released.
+  bool released_;
 };
 
 // A view of file data that persists even when the file is unlocked.
@@ -288,12 +307,13 @@ class Input_file
   // Create an input file with the contents already provided.  This is
   // only used for testing.  With this path, don't call the open
   // method.
-  Input_file(const char* name, const unsigned char* contents, off_t size);
+  Input_file(const Task*, const char* name, const unsigned char* contents,
+	     off_t size);
 
   // Open the file.  If the open fails, this will report an error and
   // return false.
   bool
-  open(const General_options&, const Dirsearch&);
+  open(const General_options&, const Dirsearch&, const Task*);
 
   // Return the name given by the user.  For -lc this will return "c".
   const char*

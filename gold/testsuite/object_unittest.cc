@@ -39,22 +39,24 @@ bool
 Sized_object_test(const unsigned char* test_file, unsigned int test_file_size,
 		  Target* target_test_pointer)
 {
-  Input_file input_file("test.o", test_file, test_file_size);
+  // We need a pretend Task.
+  const Task* task = reinterpret_cast<const Task*>(-1);
+  Input_file input_file(task, "test.o", test_file, test_file_size);
   Object* object = make_elf_object("test.o", &input_file, 0,
 				   test_file, test_file_size);
   CHECK(object->name() == "test.o");
   CHECK(!object->is_dynamic());
   CHECK(object->target() == target_test_pointer);
   CHECK(object->is_locked());
-  object->unlock();
+  object->unlock(task);
   CHECK(!object->is_locked());
-  object->lock();
+  object->lock(task);
   CHECK(object->shnum() == 5);
   CHECK(object->section_name(0).empty());
   CHECK(object->section_name(1) == ".test");
   CHECK(object->section_flags(0) == 0);
   CHECK(object->section_flags(1) == elfcpp::SHF_ALLOC);
-  object->unlock();
+  object->unlock(task);
   return true;
 }
 

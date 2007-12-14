@@ -53,6 +53,7 @@ target-reloc.h
 target-select.cc
 target-select.h
 tls.h
+token.h
 version.cc
 workqueue.cc
 workqueue.h

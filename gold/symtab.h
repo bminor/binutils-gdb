@@ -905,7 +905,7 @@ class Warnings
   // For each symbol for which we should give a warning, make a note
   // on the symbol.
   void
-  note_warnings(Symbol_table* symtab);
+  note_warnings(Symbol_table* symtab, const Task*);
 
   // Issue a warning for a reference to SYM at RELINFO's location.
   template<int size, bool big_endian>
@@ -1078,7 +1078,7 @@ class Symbol_table
   // Check candidate_odr_violations_ to find symbols with the same name
   // but apparently different definitions (different source-file/line-no).
   void
-  detect_odr_violations(const char* output_file_name) const;
+  detect_odr_violations(const Task*, const char* output_file_name) const;
 
   // SYM is defined using a COPY reloc.  Return the dynamic object
   // where the original definition was found.
@@ -1102,7 +1102,7 @@ class Symbol_table
   // symbol, and DYNCOUNT is the number of global dynamic symbols.
   // This records the parameters, and returns the new file offset.
   off_t
-  finalize(unsigned int index, off_t off, off_t dynoff,
+  finalize(const Task*, unsigned int index, off_t off, off_t dynoff,
 	   size_t dyn_global_index, size_t dyncount, Stringpool* pool);
 
   // Write out the global symbols.

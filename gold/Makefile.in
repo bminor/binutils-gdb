@@ -344,6 +344,7 @@ HFILES = \
 	target-reloc.h \
 	target-select.h \
 	tls.h \
+	token.h \
 	workqueue.h \
 	workqueue-internal.h
 

@@ -726,8 +726,8 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 }
 
 // Finalize the local symbols.  Here we add their names to *POOL and
-// *DYNPOOL, and we add their values to THIS->LOCAL_VALUES_.
-// This function is always called from the main thread.  The actual
+// *DYNPOOL, and we add their values to THIS->LOCAL_VALUES_.  This
+// function is always called from a singleton thread.  The actual
 // output of the local symbols will occur in a separate task.
 
 template<int size, bool big_endian>
@@ -831,7 +831,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 
 // Finalize the local symbols.  Here we add their values to
 // THIS->LOCAL_VALUES_ and set their output symbol table indexes.
-// This function is always called from the main thread.  The actual
+// This function is always called from a singleton thread.  The actual
 // output of the local symbols will occur in a separate task.
 
 template<int size, bool big_endian>
@@ -987,9 +987,10 @@ Sized_relobj<size, big_endian>::local_value(unsigned int shndx,
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::write_local_symbols(Output_file* of,
-						    const Stringpool* sympool,
-						    const Stringpool* dynpool)
+Sized_relobj<size, big_endian>::write_local_symbols(
+    Output_file* of,
+    const Stringpool* sympool,
+    const Stringpool* dynpool)
 {
   if (parameters->strip_all() && this->output_local_dynsym_count_ == 0)
     return;

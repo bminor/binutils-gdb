@@ -797,19 +797,17 @@ class Script_unblock : public Task
       delete this->this_blocker_;
   }
 
-  Is_runnable_type
-  is_runnable(Workqueue*)
+  Task_token*
+  is_runnable()
   {
     if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
-      return IS_BLOCKED;
-    return IS_RUNNABLE;
+      return this->this_blocker_;
+    return NULL;
   }
 
-  Task_locker*
-  locks(Workqueue* workqueue)
-  {
-    return new Task_locker_block(*this->next_blocker_, workqueue);
-  }
+  void
+  locks(Task_locker* tl)
+  { tl->add(this, this->next_blocker_); }
 
   void
   run(Workqueue*)
@@ -826,8 +824,8 @@ class Script_unblock : public Task
 
 // This class holds data passed through the parser to the lexer and to
 // the parser support functions.  This avoids global variables.  We
-// can't use global variables because we need not be called in the
-// main thread.
+// can't use global variables because we need not be called by a
+// singleton thread.
 
 class Parser_closure
 {
@@ -927,7 +925,7 @@ class Parser_closure
 bool
 read_input_script(Workqueue* workqueue, const General_options& options,
 		  Symbol_table* symtab, Layout* layout,
-		  const Dirsearch& dirsearch, Input_objects* input_objects,
+		  Dirsearch* dirsearch, Input_objects* input_objects,
 		  Input_group* input_group,
 		  const Input_argument* input_argument,
 		  Input_file* input_file, const unsigned char*, off_t,
@@ -956,7 +954,7 @@ read_input_script(Workqueue* workqueue, const General_options& options,
     {
       // The script did not add any files to read.  Note that we are
       // not permitted to call NEXT_BLOCKER->unblock() here even if
-      // THIS_BLOCKER is NULL, as we are not in the main thread.
+      // THIS_BLOCKER is NULL, as we do not hold the workqueue lock.
       workqueue->queue(new Script_unblock(this_blocker, next_blocker));
       return true;
     }
@@ -970,7 +968,7 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 	nb = next_blocker;
       else
 	{
-	  nb = new Task_token();
+	  nb = new Task_token(true);
 	  nb->add_blocker();
 	}
       workqueue->queue(new Read_symbols(options, input_objects, symtab,
@@ -992,17 +990,22 @@ read_commandline_script(const char* filename, Command_line* cmdline)
   // using "." + cmdline->options()->search_path() -- not dirsearch.
   Dirsearch dirsearch;
 
+  // The file locking code wants to record a Task, but we haven't
+  // started the workqueue yet.  This is only for debugging purposes,
+  // so we invent a fake value.
+  const Task* task = reinterpret_cast<const Task*>(-1);
+
   Input_file_argument input_argument(filename, false, "",
 				     cmdline->position_dependent_options());
   Input_file input_file(&input_argument);
-  if (!input_file.open(cmdline->options(), dirsearch))
+  if (!input_file.open(cmdline->options(), dirsearch, task))
     return false;
 
   Lex lex(&input_file);
   if (lex.tokenize().is_invalid())
     {
       // Opening the file locked it, so now we need to unlock it.
-      input_file.file().unlock();
+      input_file.file().unlock(task);
       return false;
     }
 
@@ -1014,11 +1017,11 @@ read_commandline_script(const char* filename, Command_line* cmdline)
 			 &lex.tokens());
   if (yyparse(&closure) != 0)
     {
-      input_file.file().unlock();
+      input_file.file().unlock(task);
       return false;
     }
 
-  input_file.file().unlock();
+  input_file.file().unlock(task);
   return true;
 }
 

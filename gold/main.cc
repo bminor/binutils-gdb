@@ -94,7 +94,7 @@ main(int argc, char** argv)
 		      &symtab, &layout);
 
   // Run the main task processing loop.
-  workqueue.process();
+  workqueue.process(0);
 
   if (command_line.options().print_stats())
     {

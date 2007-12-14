@@ -28,6 +28,8 @@
 #include <dirent.h>
 
 #include "gold-threads.h"
+#include "options.h"
+#include "workqueue.h"
 #include "dirsearch.h"
 
 namespace
@@ -169,11 +171,11 @@ class Dir_cache_task : public gold::Task
     : dir_(dir), token_(token)
   { }
 
-  Is_runnable_type
-  is_runnable(gold::Workqueue*);
+  gold::Task_token*
+  is_runnable();
 
-  gold::Task_locker*
-  locks(gold::Workqueue*);
+  void
+  locks(gold::Task_locker*);
 
   void
   run(gold::Workqueue*);
@@ -189,19 +191,19 @@ class Dir_cache_task : public gold::Task
 
 // We can always run the task to read the directory.
 
-gold::Task::Is_runnable_type
-Dir_cache_task::is_runnable(gold::Workqueue*)
+gold::Task_token*
+Dir_cache_task::is_runnable()
 {
-  return IS_RUNNABLE;
+  return NULL;
 }
 
 // Return the locks to hold.  We use a blocker lock to prevent file
 // lookups from starting until the directory contents have been read.
 
-gold::Task_locker*
-Dir_cache_task::locks(gold::Workqueue* workqueue)
+void
+Dir_cache_task::locks(gold::Task_locker* tl)
 {
-  return new gold::Task_locker_block(this->token_, workqueue);
+  tl->add(this, &this->token_);
 }
 
 // Run the task--read the directory contents.

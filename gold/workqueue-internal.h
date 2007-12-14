@@ -24,6 +24,7 @@
 #define GOLD_WORKQUEUE_INTERNAL_H
 
 #include <queue>
+#include <csignal>
 
 #include "gold-threads.h"
 #include "workqueue.h"
@@ -36,92 +37,71 @@ namespace gold
 
 class Workqueue_thread;
 
-// The Workqueue_runner abstract class.  This is the interface used by
-// the general workqueue code to actually run a task.
+// The Workqueue_threader abstract class.  This is the interface used
+// by the general workqueue code to manage threads.
 
-class Workqueue_runner
+class Workqueue_threader
 {
  public:
-  Workqueue_runner(Workqueue* workqueue)
+  Workqueue_threader(Workqueue* workqueue)
     : workqueue_(workqueue)
   { }
-  virtual ~Workqueue_runner()
+  virtual ~Workqueue_threader()
   { }
-
-  // Run a task.  This is always called in the main thread.
-  virtual void
-  run(Task*, Task_locker*) = 0;
 
   // Set the number of threads to use.  This is ignored when not using
   // threads.
   virtual void
   set_thread_count(int) = 0;
 
- protected:
-  // This is called by an implementation when a task is completed.
-  void completed(Task* t, Task_locker* tl)
-  { this->workqueue_->completed(t, tl); }
+  // Return whether to cancel the current thread.
+  virtual bool
+  should_cancel_thread() = 0;
 
-  Workqueue* get_workqueue() const
+ protected:
+  // Get the Workqueue.
+  Workqueue*
+  get_workqueue()
   { return this->workqueue_; }
 
  private:
+  // The Workqueue.
   Workqueue* workqueue_;
 };
 
-// The threaded instantiation of Workqueue_runner.
+// The threaded instantiation of Workqueue_threader.
 
-class Workqueue_runner_threadpool : public Workqueue_runner
+class Workqueue_threader_threadpool : public Workqueue_threader
 {
  public:
-  Workqueue_runner_threadpool(Workqueue* workqueue);
+  Workqueue_threader_threadpool(Workqueue*);
 
-  ~Workqueue_runner_threadpool();
+  ~Workqueue_threader_threadpool();
 
-  void
-  run(Task*, Task_locker*);
-
+  // Set the thread count.
   void
   set_thread_count(int);
 
- private:
-  // This class can not be copied.
-  Workqueue_runner_threadpool(const Workqueue_runner_threadpool&);
-  Workqueue_runner_threadpool& operator=(const Workqueue_runner_threadpool&);
-
-  // Return the next Task and Task_locker to run.  This returns false
-  // if the calling thread should simply exit.
+  // Return whether to cancel a thread.
   bool
-  get_next(Task**, Task_locker**);
+  should_cancel_thread();
 
-  // This is called when the thread completes a task.
+  // Process all tasks.  This keeps running until told to cancel.
   void
-  thread_completed(Task*, Task_locker*);
+  process(int thread_number)
+  { this->get_workqueue()->process(thread_number); }
 
-  // The Workqueue_thread class calls functions from this and from the
-  // parent Workqueue_runner.
-  friend class Workqueue_thread;
+ private:
+  // This is set if we need to check the thread count.
+  volatile sig_atomic_t check_thread_count_;
 
-  // An entry on the queue of tasks to run.
-  typedef std::pair<Task*, Task_locker*> Task_queue_entry;
-
-  // A queue of tasks to run.
-  typedef std::queue<Task_queue_entry> Task_queue;
-
-  // The number of threads we want to create.  This is only changed in
-  // the main thread or when only one thread is running.  This is set
-  // to zero when all threads should exit.
-  int desired_thread_count_;
-  // A lock controlling access to the remaining fields.
+  // Lock for the remaining members.
   Lock lock_;
-  // The number of threads we have created.
-  int actual_thread_count_;
-  // The number of threads which are running a task.
-  int running_thread_count_;
-  // A queue of tasks to run.
-  Task_queue task_queue_;
-  // A condition variable which signals when the task_queue_ changed.
-  Condvar task_queue_condvar_;
+  // The number of threads we want to create.  This is set to zero
+  // when all threads should exit.
+  int desired_thread_count_;
+  // The number of threads currently running.
+  int threads_;
 };
 
 } // End namespace gold.

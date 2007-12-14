@@ -89,7 +89,7 @@ class Middle_runner : public Task_function_runner
   { }
 
   void
-  run(Workqueue*);
+  run(Workqueue*, const Task*);
 
  private:
   const General_options& options_;
@@ -99,9 +99,9 @@ class Middle_runner : public Task_function_runner
 };
 
 void
-Middle_runner::run(Workqueue* workqueue)
+Middle_runner::run(Workqueue* workqueue, const Task* task)
 {
-  queue_middle_tasks(this->options_, this->input_objects_, this->symtab_,
+  queue_middle_tasks(this->options_, task, this->input_objects_, this->symtab_,
 		     this->layout_, workqueue);
 }
 
@@ -109,7 +109,7 @@ Middle_runner::run(Workqueue* workqueue)
 
 void
 queue_initial_tasks(const General_options& options,
-		    const Dirsearch& search_path,
+		    Dirsearch& search_path,
 		    const Command_line& cmdline,
 		    Workqueue* workqueue, Input_objects* input_objects,
 		    Symbol_table* symtab, Layout* layout)
@@ -131,10 +131,10 @@ queue_initial_tasks(const General_options& options,
        p != cmdline.end();
        ++p)
     {
-      Task_token* next_blocker = new Task_token();
+      Task_token* next_blocker = new Task_token(true);
       next_blocker->add_blocker();
       workqueue->queue(new Read_symbols(options, input_objects, symtab, layout,
-					search_path, &*p, NULL, this_blocker,
+					&search_path, &*p, NULL, this_blocker,
 					next_blocker));
       this_blocker = next_blocker;
     }
@@ -153,6 +153,7 @@ queue_initial_tasks(const General_options& options,
 
 void
 queue_middle_tasks(const General_options& options,
+		   const Task* task,
 		   const Input_objects* input_objects,
 		   Symbol_table* symtab,
 		   Layout* layout,
@@ -187,7 +188,7 @@ queue_middle_tasks(const General_options& options,
 
   // See if any of the input definitions violate the One Definition Rule.
   // TODO: if this is too slow, do this as a task, rather than inline.
-  symtab->detect_odr_violations(options.output_file_name());
+  symtab->detect_odr_violations(task, options.output_file_name());
 
   // Define some sections and symbols needed for a dynamic link.  This
   // handles some cases we want to see before we read the relocs.
@@ -212,8 +213,8 @@ queue_middle_tasks(const General_options& options,
   // Doing that is more complex, since we may later decide to discard
   // some of the sections, and thus change our minds about the types
   // of references made to the symbols.
-  Task_token* blocker = new Task_token();
-  Task_token* symtab_lock = new Task_token();
+  Task_token* blocker = new Task_token(true);
+  Task_token* symtab_lock = new Task_token(false);
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
        ++p)
@@ -260,30 +261,20 @@ queue_final_tasks(const General_options& options,
     thread_count = input_objects->number_of_input_objects();
   workqueue->set_thread_count(thread_count);
 
+  bool any_postprocessing_sections = layout->any_postprocessing_sections();
+
   // Use a blocker to wait until all the input sections have been
   // written out.
-  Task_token* input_sections_blocker = new Task_token();
+  Task_token* input_sections_blocker = NULL;
+  if (!any_postprocessing_sections)
+    input_sections_blocker = new Task_token(true);
 
   // Use a blocker to block any objects which have to wait for the
   // output sections to complete before they can apply relocations.
-  Task_token* output_sections_blocker = new Task_token();
+  Task_token* output_sections_blocker = new Task_token(true);
 
   // Use a blocker to block the final cleanup task.
-  Task_token* final_blocker = new Task_token();
-
-  // Queue a task for each input object to relocate the sections and
-  // write out the local symbols.
-  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
-       p != input_objects->relobj_end();
-       ++p)
-    {
-      input_sections_blocker->add_blocker();
-      final_blocker->add_blocker();
-      workqueue->queue(new Relocate_task(options, symtab, layout, *p, of,
-					 input_sections_blocker,
-					 output_sections_blocker,
-					 final_blocker));
-    }
+  Task_token* final_blocker = new Task_token(true);
 
   // Queue a task to write out the symbol table.
   if (!options.strip_all())
@@ -307,12 +298,43 @@ queue_final_tasks(const General_options& options,
   final_blocker->add_blocker();
   workqueue->queue(new Write_data_task(layout, symtab, of, final_blocker));
 
+  // Queue a task for each input object to relocate the sections and
+  // write out the local symbols.
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
+       ++p)
+    {
+      if (input_sections_blocker != NULL)
+	input_sections_blocker->add_blocker();
+      final_blocker->add_blocker();
+      workqueue->queue(new Relocate_task(options, symtab, layout, *p, of,
+					 input_sections_blocker,
+					 output_sections_blocker,
+					 final_blocker));
+    }
+
   // Queue a task to write out the output sections which depend on
-  // input sections.
-  final_blocker->add_blocker();
-  workqueue->queue(new Write_after_input_sections_task(layout, of,
-						       input_sections_blocker,
-						       final_blocker));
+  // input sections.  If there are any sections which require
+  // postprocessing, then we need to do this last, since it may resize
+  // the output file.
+  if (!any_postprocessing_sections)
+    {
+      final_blocker->add_blocker();
+      Task* t = new Write_after_input_sections_task(layout, of,
+						    input_sections_blocker,
+						    final_blocker);
+      workqueue->queue(t);
+    }
+  else
+    {
+      Task_token *new_final_blocker = new Task_token(true);
+      new_final_blocker->add_blocker();
+      Task* t = new Write_after_input_sections_task(layout, of,
+						    final_blocker,
+						    new_final_blocker);
+      workqueue->queue(t);
+      final_blocker = new_final_blocker;
+    }
 
   // Queue a task to close the output file.  This will be blocked by
   // FINAL_BLOCKER.

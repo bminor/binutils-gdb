@@ -44,10 +44,11 @@ namespace gold
 // have been read.
 
 void
-Layout_task_runner::run(Workqueue* workqueue)
+Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 {
   off_t file_size = this->layout_->finalize(this->input_objects_,
-					    this->symtab_);
+					    this->symtab_,
+					    task);
 
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
@@ -72,7 +73,8 @@ Layout::Layout(const General_options& options)
     input_requires_executable_stack_(false),
     input_with_gnu_stack_note_(false),
     input_without_gnu_stack_note_(false),
-    has_static_tls_(false)
+    has_static_tls_(false),
+    any_postprocessing_sections_(false)
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -653,13 +655,14 @@ Layout::find_first_load_seg()
 // This function returns the size of the output file.
 
 off_t
-Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
+Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
+		 const Task* task)
 {
   Target* const target = input_objects->target();
 
   target->finalize_sections(this);
 
-  this->count_local_symbols(input_objects);
+  this->count_local_symbols(task, input_objects);
 
   this->create_gold_note();
   this->create_executable_stack_info(target);
@@ -730,7 +733,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
   off_t off = this->set_segment_offsets(target, load_seg, &shndx);
 
   // Create the symbol table sections.
-  this->create_symtab_sections(input_objects, symtab, &off);
+  this->create_symtab_sections(input_objects, symtab, task, &off);
   if (!parameters->doing_static_link())
     this->assign_local_dynsym_offsets(input_objects);
 
@@ -746,6 +749,12 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab)
 
   // Create the section table header.
   this->create_shdrs(&off);
+
+  // If there are no sections which require postprocessing, we can
+  // handle the section names now, and avoid a resize later.
+  if (!this->any_postprocessing_sections_)
+    off = this->set_section_offsets(off,
+				    STRTAB_AFTER_POSTPROCESSING_SECTIONS_PASS);
 
   file_header->set_section_info(this->section_headers_, shstrtab_section);
 
@@ -1106,16 +1115,19 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
 
       if (pass == BEFORE_INPUT_SECTIONS_PASS
 	  && (*p)->requires_postprocessing())
-	(*p)->create_postprocessing_buffer();
+	{
+	  (*p)->create_postprocessing_buffer();
+	  this->any_postprocessing_sections_ = true;
+	}
 
       if (pass == BEFORE_INPUT_SECTIONS_PASS
           && (*p)->after_input_sections())
         continue;
-      else if (pass == AFTER_INPUT_SECTIONS_PASS
+      else if (pass == POSTPROCESSING_SECTIONS_PASS
                && (!(*p)->after_input_sections()
                    || (*p)->type() == elfcpp::SHT_STRTAB))
         continue;
-      else if (pass == STRTAB_AFTER_INPUT_SECTIONS_PASS
+      else if (pass == STRTAB_AFTER_POSTPROCESSING_SECTIONS_PASS
                && (!(*p)->after_input_sections()
                    || (*p)->type() != elfcpp::SHT_STRTAB))
         continue;
@@ -1126,7 +1138,7 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
       off += (*p)->data_size();
 
       // At this point the name must be set.
-      if (pass != STRTAB_AFTER_INPUT_SECTIONS_PASS)
+      if (pass != STRTAB_AFTER_POSTPROCESSING_SECTIONS_PASS)
 	this->namepool_.add((*p)->name(), false, NULL);
     }
   return off;
@@ -1152,7 +1164,8 @@ Layout::set_section_indexes(unsigned int shndx)
 // symbol table, and build the respective string pools.
 
 void
-Layout::count_local_symbols(const Input_objects* input_objects)
+Layout::count_local_symbols(const Task* task,
+			    const Input_objects* input_objects)
 {
   // First, figure out an upper bound on the number of symbols we'll
   // be inserting into each pool.  This helps us create the pools with
@@ -1177,7 +1190,7 @@ Layout::count_local_symbols(const Input_objects* input_objects)
        p != input_objects->relobj_end();
        ++p)
     {
-      Task_lock_obj<Object> tlo(**p);
+      Task_lock_obj<Object> tlo(task, *p);
       (*p)->count_local_symbols(&this->sympool_, &this->dynpool_);
     }
 }
@@ -1189,6 +1202,7 @@ Layout::count_local_symbols(const Input_objects* input_objects)
 void
 Layout::create_symtab_sections(const Input_objects* input_objects,
 			       Symbol_table* symtab,
+			       const Task* task,
 			       off_t* poff)
 {
   int symsize;
@@ -1262,7 +1276,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 		  == this->dynsym_section_->data_size() - locsize);
     }
 
-  off = symtab->finalize(local_symcount, off, dynoff, dyn_global_index,
+  off = symtab->finalize(task, local_symcount, off, dynoff, dyn_global_index,
 			 dyncount, &this->sympool_);
 
   if (!parameters->strip_all())
@@ -2004,16 +2018,21 @@ Layout::write_sections_after_input_sections(Output_file* of)
   // file size.  Note we finalize the .shstrab last, to allow the
   // after_input_section sections to modify their section-names before
   // writing.
-  off_t off = this->output_file_size_;
-  off = this->set_section_offsets(off, AFTER_INPUT_SECTIONS_PASS);
-
-  // Now that we've finalized the names, we can finalize the shstrab.
-  off = this->set_section_offsets(off, STRTAB_AFTER_INPUT_SECTIONS_PASS);
-
-  if (off > this->output_file_size_)
+  if (this->any_postprocessing_sections_)
     {
-      of->resize(off);
-      this->output_file_size_ = off;
+      off_t off = this->output_file_size_;
+      off = this->set_section_offsets(off, POSTPROCESSING_SECTIONS_PASS);
+      
+      // Now that we've finalized the names, we can finalize the shstrab.
+      off =
+	this->set_section_offsets(off,
+				  STRTAB_AFTER_POSTPROCESSING_SECTIONS_PASS);
+
+      if (off > this->output_file_size_)
+	{
+	  of->resize(off);
+	  this->output_file_size_ = off;
+	}
     }
 
   for (Section_list::const_iterator p = this->section_list_.begin();
@@ -2049,36 +2068,20 @@ Layout::print_stats() const
 
 // We can always run this task.
 
-Task::Is_runnable_type
-Write_sections_task::is_runnable(Workqueue*)
+Task_token*
+Write_sections_task::is_runnable()
 {
-  return IS_RUNNABLE;
+  return NULL;
 }
 
 // We need to unlock both OUTPUT_SECTIONS_BLOCKER and FINAL_BLOCKER
 // when finished.
 
-class Write_sections_task::Write_sections_locker : public Task_locker
+void
+Write_sections_task::locks(Task_locker* tl)
 {
- public:
-  Write_sections_locker(Task_token& output_sections_blocker,
-			Task_token& final_blocker,
-			Workqueue* workqueue)
-    : output_sections_block_(output_sections_blocker, workqueue),
-      final_block_(final_blocker, workqueue)
-  { }
-
- private:
-  Task_block_token output_sections_block_;
-  Task_block_token final_block_;
-};
-
-Task_locker*
-Write_sections_task::locks(Workqueue* workqueue)
-{
-  return new Write_sections_locker(*this->output_sections_blocker_,
-				   *this->final_blocker_,
-				   workqueue);
+  tl->add(this, this->output_sections_blocker_);
+  tl->add(this, this->final_blocker_);
 }
 
 // Run the task--write out the data.
@@ -2093,18 +2096,18 @@ Write_sections_task::run(Workqueue*)
 
 // We can always run this task.
 
-Task::Is_runnable_type
-Write_data_task::is_runnable(Workqueue*)
+Task_token*
+Write_data_task::is_runnable()
 {
-  return IS_RUNNABLE;
+  return NULL;
 }
 
 // We need to unlock FINAL_BLOCKER when finished.
 
-Task_locker*
-Write_data_task::locks(Workqueue* workqueue)
+void
+Write_data_task::locks(Task_locker* tl)
 {
-  return new Task_locker_block(*this->final_blocker_, workqueue);
+  tl->add(this, this->final_blocker_);
 }
 
 // Run the task--write out the data.
@@ -2119,18 +2122,18 @@ Write_data_task::run(Workqueue*)
 
 // We can always run this task.
 
-Task::Is_runnable_type
-Write_symbols_task::is_runnable(Workqueue*)
+Task_token*
+Write_symbols_task::is_runnable()
 {
-  return IS_RUNNABLE;
+  return NULL;
 }
 
 // We need to unlock FINAL_BLOCKER when finished.
 
-Task_locker*
-Write_symbols_task::locks(Workqueue* workqueue)
+void
+Write_symbols_task::locks(Task_locker* tl)
 {
-  return new Task_locker_block(*this->final_blocker_, workqueue);
+  tl->add(this, this->final_blocker_);
 }
 
 // Run the task--write out the symbols.
@@ -2146,20 +2149,20 @@ Write_symbols_task::run(Workqueue*)
 
 // We can only run this task after the input sections have completed.
 
-Task::Is_runnable_type
-Write_after_input_sections_task::is_runnable(Workqueue*)
+Task_token*
+Write_after_input_sections_task::is_runnable()
 {
   if (this->input_sections_blocker_->is_blocked())
-    return IS_BLOCKED;
-  return IS_RUNNABLE;
+    return this->input_sections_blocker_;
+  return NULL;
 }
 
 // We need to unlock FINAL_BLOCKER when finished.
 
-Task_locker*
-Write_after_input_sections_task::locks(Workqueue* workqueue)
+void
+Write_after_input_sections_task::locks(Task_locker* tl)
 {
-  return new Task_locker_block(*this->final_blocker_, workqueue);
+  tl->add(this, this->final_blocker_);
 }
 
 // Run the task.
@@ -2175,7 +2178,7 @@ Write_after_input_sections_task::run(Workqueue*)
 // Run the task--close the file.
 
 void
-Close_task_runner::run(Workqueue*)
+Close_task_runner::run(Workqueue*, const Task*)
 {
   this->of_->close();
 }
