@@ -161,7 +161,7 @@ File_read::unlock()
 }
 
 bool
-File_read::is_locked()
+File_read::is_locked() const
 {
   return this->lock_count_ > 0;
 }
@@ -223,8 +223,6 @@ File_read::do_read(off_t start, off_t size, void* p) const
 void
 File_read::read(off_t start, off_t size, void* p) const
 {
-  gold_assert(this->lock_count_ > 0);
-
   File_read::View* pv = this->find_view(start, size);
   if (pv != NULL)
     {

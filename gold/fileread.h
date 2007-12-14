@@ -78,7 +78,7 @@ class File_read
 
   // Test whether the object is locked.
   bool
-  is_locked();
+  is_locked() const;
 
   // Return the size of the file.
   off_t
@@ -321,6 +321,10 @@ class Input_file
   // Return the file.
   File_read&
   file()
+  { return this->file_; }
+
+  const File_read&
+  file() const
   { return this->file_; }
 
   // Whether we found the file in a directory in the system root.

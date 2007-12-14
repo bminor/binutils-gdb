@@ -166,24 +166,24 @@ class Object
   // Lock the underlying file.
   void
   lock()
-  { this->input_file_->file().lock(); }
+  { this->input_file()->file().lock(); }
 
   // Unlock the underlying file.
   void
   unlock()
-  { this->input_file_->file().unlock(); }
+  { this->input_file()->file().unlock(); }
 
   // Return whether the underlying file is locked.
   bool
   is_locked() const
-  { return this->input_file_->file().is_locked(); }
+  { return this->input_file()->file().is_locked(); }
 
   // Return the sized target structure associated with this object.
   // This is like the target method but it returns a pointer of
   // appropriate checked type.
   template<int size, bool big_endian>
   Sized_target<size, big_endian>*
-  sized_target(ACCEPT_SIZE_ENDIAN_ONLY);
+  sized_target(ACCEPT_SIZE_ENDIAN_ONLY) const;
 
   // Get the number of sections.
   unsigned int
@@ -324,6 +324,10 @@ class Object
 
   // Get the file.
   Input_file*
+  input_file()
+  { return this->input_file_; }
+
+  const Input_file*
   input_file() const
   { return this->input_file_; }
 
@@ -331,22 +335,22 @@ class Object
   const unsigned char*
   get_view(off_t start, off_t size, bool cache)
   {
-    return this->input_file_->file().get_view(start + this->offset_, size,
-					      cache);
+    return this->input_file()->file().get_view(start + this->offset_, size,
+					       cache);
   }
 
   // Get a lasting view into the underlying file.
   File_view*
   get_lasting_view(off_t start, off_t size, bool cache)
   {
-    return this->input_file_->file().get_lasting_view(start + this->offset_,
-						      size, cache);
+    return this->input_file()->file().get_lasting_view(start + this->offset_,
+						       size, cache);
   }
 
   // Read data from the underlying file.
   void
-  read(off_t start, off_t size, void* p)
-  { this->input_file_->file().read(start + this->offset_, size, p); }
+  read(off_t start, off_t size, void* p) const
+  { this->input_file()->file().read(start + this->offset_, size, p); }
 
   // Set the target.
   void
@@ -398,7 +402,7 @@ class Object
 
 template<int size, bool big_endian>
 inline Sized_target<size, big_endian>*
-Object::sized_target(ACCEPT_SIZE_ENDIAN_ONLY)
+Object::sized_target(ACCEPT_SIZE_ENDIAN_ONLY) const
 {
   gold_assert(this->target_->get_size() == size);
   gold_assert(this->target_->is_big_endian() ? big_endian : !big_endian);
