@@ -5241,18 +5241,26 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
     }
 }
 
-/* Set a breakpoint according to ARG (function, linenum or *address)
-   flag: first bit  : 0 non-temporary, 1 temporary.
-   second bit : 0 normal breakpoint, 1 hardware breakpoint.  */
+/* Set a breakpoint.  This function is shared between
+   CLI and MI functions for setting a breakpoint.
+   This function has two major modes of operations,
+   selected by the PARSE_CONDITION_AND_THREAD parameter.
+   If non-zero, the function will parse arg, extracting
+   breakpoint location, address and thread. Otherwise,
+   ARG is just the location of breakpoint, with condition
+   and thread specified by the COND_STRING and THREAD
+   parameters.  */
 
 static int
-break_command_1 (char *arg, int flag, int from_tty)
+break_command_really (char *arg, char *cond_string, int thread,
+                      int parse_condition_and_thread,
+                      int tempflag, int hardwareflag, 
+                      enum auto_boolean pending_break_support,
+                      int from_tty)
 {
   struct gdb_exception e;
-  int tempflag, hardwareflag;
   struct symtabs_and_lines sals;
   struct symtab_and_line pending_sal;
-  char *cond_string = NULL;
   char *copy_arg;
   char *err_msg;
   char *addr_start = arg;
@@ -5262,12 +5270,8 @@ break_command_1 (char *arg, int flag, int from_tty)
   struct captured_parse_breakpoint_args parse_args;
   int i;
   int pending = 0;
-  int thread = -1;
   int ignore_count = 0;
   int not_found = 0;
-
-  hardwareflag = flag & BP_HARDWAREFLAG;
-  tempflag = flag & BP_TEMPFLAG;
 
   sals.sals = NULL;
   sals.nelts = 0;
@@ -5363,13 +5367,27 @@ break_command_1 (char *arg, int flag, int from_tty)
      breakpoint. */
   if (!pending)
     {
-      /* Here we only parse 'arg' to separate condition
-	 from thread number, so parsing in context of first
-	 sal is OK.  When setting the breakpoint we'll 
-	 re-parse it in context of each sal.  */
-      find_condition_and_thread (arg, sals.sals[0].pc, &cond_string, &thread);
-      if (cond_string)
-	make_cleanup (xfree, cond_string);
+        if (parse_condition_and_thread)
+        {
+            /* Here we only parse 'arg' to separate condition
+               from thread number, so parsing in context of first
+               sal is OK.  When setting the breakpoint we'll 
+               re-parse it in context of each sal.  */
+            cond_string = NULL;
+            thread = -1;
+            find_condition_and_thread (arg, sals.sals[0].pc, &cond_string, &thread);
+            if (cond_string)
+                make_cleanup (xfree, cond_string);
+        }
+        else
+        {
+            /* Create a private copy of condition string.  */
+            if (cond_string)
+            {
+                cond_string = xstrdup (cond_string);
+                make_cleanup (xfree, cond_string);
+            }
+        }
       create_breakpoints (sals, addr_string, cond_string,
 			  hardwareflag ? bp_hardware_breakpoint 
 			  : bp_breakpoint,
@@ -5388,9 +5406,9 @@ break_command_1 (char *arg, int flag, int from_tty)
 					       : bp_breakpoint);
       set_breakpoint_count (breakpoint_count + 1);
       b->number = breakpoint_count;
-      b->thread = thread;
+      b->thread = -1;
       b->addr_string = addr_string[0];
-      b->cond_string = cond_string;
+      b->cond_string = NULL;
       b->ignore_count = ignore_count;
       b->disposition = tempflag ? disp_del : disp_donttouch;
       b->condition_not_parsed = 1;
@@ -5409,100 +5427,25 @@ break_command_1 (char *arg, int flag, int from_tty)
   return GDB_RC_OK;
 }
 
-/* Set a breakpoint of TYPE/DISPOSITION according to ARG (function,
-   linenum or *address) with COND and IGNORE_COUNT. */
-
-struct captured_breakpoint_args
-  {
-    char *address;
-    char *condition;
-    int hardwareflag;
-    int tempflag;
-    int thread;
-    int ignore_count;
-  };
-
+/* Set a breakpoint. 
+   ARG is a string describing breakpoint address,
+   condition, and thread.
+   FLAG specifies if a breakpoint is hardware on,
+   and if breakpoint is temporary, using BP_HARDWARE_FLAG
+   and BP_TEMPFLAG.  */
+   
 static int
-do_captured_breakpoint (struct ui_out *uiout, void *data)
+break_command_1 (char *arg, int flag, int from_tty)
 {
-  struct captured_breakpoint_args *args = data;
-  struct symtabs_and_lines sals;
-  struct expression **cond;
-  struct cleanup *old_chain;
-  struct cleanup *breakpoint_chain = NULL;
-  int i;
-  char **addr_string;
-  char *cond_string = 0;
+  int hardwareflag = flag & BP_HARDWAREFLAG;
+  int tempflag = flag & BP_TEMPFLAG;
 
-  char *address_end;
-
-  /* Parse the source and lines spec.  Delay check that the expression
-     didn't contain trailing garbage until after cleanups are in
-     place. */
-  sals.sals = NULL;
-  sals.nelts = 0;
-  address_end = args->address;
-  addr_string = NULL;
-  parse_breakpoint_sals (&address_end, &sals, &addr_string, 0);
-
-  if (!sals.nelts)
-    return GDB_RC_NONE;
-
-  /* Create a chain of things at always need to be cleaned up. */
-  old_chain = make_cleanup (null_cleanup, 0);
-
-  /* Always have a addr_string array, even if it is empty. */
-  make_cleanup (xfree, addr_string);
-
-  /* Make sure that all storage allocated to SALS gets freed.  */
-  make_cleanup (xfree, sals.sals);
-
-  /* Allocate space for all the cond expressions. */
-  cond = xcalloc (sals.nelts, sizeof (struct expression *));
-  make_cleanup (xfree, cond);
-
-  /* ----------------------------- SNIP -----------------------------
-     Anything added to the cleanup chain beyond this point is assumed
-     to be part of a breakpoint.  If the breakpoint create goes
-     through then that memory is not cleaned up. */
-  breakpoint_chain = make_cleanup (null_cleanup, 0);
-
-  /* Mark the contents of the addr_string for cleanup.  These go on
-     the breakpoint_chain and only occure if the breakpoint create
-     fails. */
-  for (i = 0; i < sals.nelts; i++)
-    {
-      if (addr_string[i] != NULL)
-	make_cleanup (xfree, addr_string[i]);
-    }
-
-  /* Wait until now before checking for garbage at the end of the
-     address. That way cleanups can take care of freeing any
-     memory. */
-  if (*address_end != '\0')
-    error (_("Garbage %s following breakpoint address"), address_end);
-
-  /* Resolve all line numbers to PC's.  */
-  breakpoint_sals_to_pc (&sals, args->address);
-
-  if (args->condition != NULL)
-    {
-      cond_string = xstrdup (args->condition);
-      make_cleanup (xfree, cond_string);
-    }
-
-  create_breakpoints (sals, addr_string, args->condition,
-		      args->hardwareflag ? bp_hardware_breakpoint : bp_breakpoint,
-		      args->tempflag ? disp_del : disp_donttouch,
-		      args->thread, args->ignore_count, 0/*from-tty*/);
-
-  /* That's it. Discard the cleanups for data inserted into the
-     breakpoint. */
-  discard_cleanups (breakpoint_chain);
-  /* But cleanup everything else. */
-  do_cleanups (old_chain);
-  return GDB_RC_OK;
+  return break_command_really (arg, 
+			       NULL, 0, 1 /* parse arg */,
+			       tempflag, hardwareflag,
+			       pending_break_support, from_tty);
 }
+
 
 enum gdb_rc
 gdb_breakpoint (char *address, char *condition,
@@ -5510,18 +5453,11 @@ gdb_breakpoint (char *address, char *condition,
 		int thread, int ignore_count,
 		char **error_message)
 {
-  struct captured_breakpoint_args args;
-  args.address = address;
-  args.condition = condition;
-  args.hardwareflag = hardwareflag;
-  args.tempflag = tempflag;
-  args.thread = thread;
-  args.ignore_count = ignore_count;
-  if (catch_exceptions_with_msg (uiout, do_captured_breakpoint, &args,
-				 error_message, RETURN_MASK_ALL) < 0)
-    return GDB_RC_FAIL;
-  else
-    return GDB_RC_OK;
+  return break_command_really (address, condition, thread,
+			       0 /* condition and thread are valid.  */,
+			       tempflag, hardwareflag,
+			       AUTO_BOOLEAN_FALSE /* no pending. */,
+			       0);
 }
 
 

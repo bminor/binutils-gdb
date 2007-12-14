@@ -1,3 +1,17 @@
+2007-12-14  Vladimir Prus  <vladimir@codesourcery.com>
+	
+	* breakpoint.c (break_command_really): New, copied
+	from break_command_1. New parameters COND_STRING, THREAD
+	PARSE_CONDITITION_AND_THREAD and PENDING_BREAK_SUPPORT.
+	The previous FLAG parameter split into TEMPFLAG and
+	HARDWAREFLAG.
+	When PARSE_CONDITION_AND_THREAD is not set, duplicate
+	the passed condition string.
+	(struct captured_breakpoint_args): Remove
+	(do_captured_breakpoint): Remove.
+	(break_command_1): Relay to break_command_really.
+	(gdb_breakpoint): Relay to break_command_really.
+	
 2007-12-13  Michael Snyder  <msnyder@specifix.com>
 
 	* mips-linux-tdep.c (mips64_fill_gregset): Remove unused variable.
