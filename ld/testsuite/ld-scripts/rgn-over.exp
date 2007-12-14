@@ -24,6 +24,11 @@ if ![is_elf_format] {
 
 load_lib ld-lib.exp
 
+set old_ldflags $LDFLAGS
+if { [istarget spu*-*-*] } {
+    set LDFLAGS "$LDFLAGS --no-overlays"
+}
+
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/rgn-over*.d]]
 foreach test_file $test_list {
     set test_name [file rootname $test_file]
@@ -44,3 +49,4 @@ foreach test_file $test_list {
 	untested $testname
     }
 }
+set LDFLAGS $old_ldflags

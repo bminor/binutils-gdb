@@ -1,3 +1,7 @@
+2007-12-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/rgn-over.exp: Add --no-overlays for spu.
+
 2007-11-28  Nick Clifton  <nickc@redhat.com>
 
 	* ld-mn10300/i135409-5.s: New test case.  Check for relaxation to
