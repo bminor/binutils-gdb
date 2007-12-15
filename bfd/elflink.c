@@ -11894,6 +11894,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
       || !is_elf_hash_table (info->hash))
     return FALSE;
 
+  _bfd_elf_begin_eh_frame_parsing (info);
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
     {
       if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
@@ -11944,6 +11945,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
       if (eh != NULL
 	  && init_reloc_cookie_rels (&cookie, info, abfd, eh))
 	{
+	  _bfd_elf_parse_eh_frame (abfd, info, eh, &cookie);
 	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh,
 						 bfd_elf_reloc_symbol_deleted_p,
 						 &cookie))
@@ -11957,6 +11959,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 
       fini_reloc_cookie (&cookie, abfd);
     }
+  _bfd_elf_end_eh_frame_parsing (info);
 
   if (info->eh_frame_hdr
       && !info->relocatable

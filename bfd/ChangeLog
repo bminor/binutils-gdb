@@ -1,5 +1,32 @@
 2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
 
+	* elf-bfd.h (eh_cie_fde): Add u.cie.  Document how u.fde.cie_inf
+	changes when removed == 0.
+	(eh_frame_hdr_info): Add parsed_eh_frames.
+	(_bfd_elf_begin_eh_frame_parsing): Declare.
+	(_bfd_elf_parse_eh_frame): Declare.
+	(_bfd_elf_end_eh_frame_parsing): Declare.
+	* elf-eh-frame.c (_bfd_elf_begin_eh_frame_parsing): New function.
+	(_bfd_elf_parse_eh_frame): New function, split out from
+	_bfd_elf_discard_section_eh_frame.  Make a first pass through the
+	buffer to calculate the number of entries and CIEs.  Allocate memory
+	for them before the main loop.  Replace current extended cie
+	representation with a pair of pointers, one to the local eh_cie_fde
+	and one to the full struct cie.  Allocate a separate array of struct
+	cies if not merging.  Merge CIEs during the main loop and set up each
+	u.cie.merged field.  Point an FDE's cie_inf field directly at the
+	local CIE.  Initially assume that all entries should be removed.
+	(_bfd_elf_end_eh_frame_parsing): New function.
+	(_bfd_elf_discard_section_eh_frame): Assume that the section has
+	already been parsed.  Use a separate pass to mark entries that
+	need to be kept.  Use the u.cie.merged field to track a CIE's
+	group representative.
+	* elflink.c (bfd_elf_discard_info): Call _bfd_elf_parse_eh_frame
+	before _bfd_elf_discard_section_eh_frame.  Wrap loop with calls to
+	_bfd_elf_begin_eh_frame_parsing and _bfd_elf_end_eh_frame_parsing.
+
+2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
+
 	* elf-bfd.h (eh_cie_fde): Put cie_inf in a union.  Add a reloc_index
 	field.  Use bitfields for fde_encoding, lsda_encoding and lsda_offset.
 	* elf-eh-frame.c (extra_augmentation_data_bytes): Adjust cie_inf

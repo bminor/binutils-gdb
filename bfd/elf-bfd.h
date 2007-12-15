@@ -266,9 +266,22 @@ struct eh_cie_fde
 {
   union {
     struct {
-      /* The CIE that we have chosen to use for this FDE.  */
+      /* If REMOVED == 1, this is the CIE that the FDE originally used.
+	 The CIE belongs to the same .eh_frame input section as the FDE.
+
+	 If REMOVED == 0, this is the CIE that we have chosen to use for
+	 the output FDE.  The CIE's REMOVED field is also 0, but the CIE
+	 might belong to a different .eh_frame input section from the FDE.  */
       struct eh_cie_fde *cie_inf;
     } fde;
+    struct {
+      /* In general, equivalent CIEs are grouped together, with one CIE
+	 representing all the others in a group.  If REMOVED == 0,
+	 this CIE is the group representative.  If REMOVED == 1,
+	 following this pointer brings us "closer" to the CIE's group
+	 representative, and reapplying always gives the representative.  */
+      struct eh_cie_fde *merged;
+    } cie;
   } u;
   unsigned int reloc_index;
   unsigned int size;
@@ -308,6 +321,8 @@ struct eh_frame_hdr_info
   asection *hdr_sec;
   unsigned int fde_count, array_count;
   struct eh_frame_array_ent *array;
+  /* TRUE if all .eh_frames have been parsd.  */
+  bfd_boolean parsed_eh_frames;
   /* TRUE if .eh_frame_hdr should contain the sorted search table.
      We build it if we successfully read all .eh_frame input sections
      and recognize them.  */
@@ -1722,6 +1737,13 @@ extern bfd_boolean _bfd_elf_strtab_emit
   (bfd *, struct elf_strtab_hash *);
 extern void _bfd_elf_strtab_finalize
   (struct elf_strtab_hash *);
+
+extern void _bfd_elf_begin_eh_frame_parsing
+  (struct bfd_link_info *info);
+extern void _bfd_elf_parse_eh_frame
+  (bfd *, struct bfd_link_info *, asection *, struct elf_reloc_cookie *);
+extern void _bfd_elf_end_eh_frame_parsing
+  (struct bfd_link_info *info);
 
 extern bfd_boolean _bfd_elf_discard_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *,

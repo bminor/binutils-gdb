@@ -431,16 +431,26 @@ skip_non_nops (bfd_byte *buf, bfd_byte *end, unsigned int encoded_ptr_width,
   return last;
 }
 
-/* This function is called for each input file before the .eh_frame
-   section is relocated.  It discards duplicate CIEs and FDEs for discarded
-   functions.  The function returns TRUE iff any entries have been
-   deleted.  */
+/* Called before calling _bfd_elf_parse_eh_frame on every input bfd's
+   .eh_frame section.  */
 
-bfd_boolean
-_bfd_elf_discard_section_eh_frame
-   (bfd *abfd, struct bfd_link_info *info, asection *sec,
-    bfd_boolean (*reloc_symbol_deleted_p) (bfd_vma, void *),
-    struct elf_reloc_cookie *cookie)
+void
+_bfd_elf_begin_eh_frame_parsing (struct bfd_link_info *info)
+{
+  struct eh_frame_hdr_info *hdr_info;
+
+  hdr_info = &elf_hash_table (info)->eh_info;
+  if (!hdr_info->parsed_eh_frames && !info->relocatable)
+    hdr_info->cies = htab_try_create (1, cie_hash, cie_eq, free);
+}
+
+/* Try to parse .eh_frame section SEC, which belongs to ABFD.  Store the
+   information in the section's sec_info field on success.  COOKIE
+   describes the relocations in SEC.  */
+
+void
+_bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
+			 asection *sec, struct elf_reloc_cookie *cookie)
 {
 #define REQUIRE(COND)					\
   do							\
@@ -448,44 +458,41 @@ _bfd_elf_discard_section_eh_frame
       goto free_no_table;				\
   while (0)
 
-  bfd_byte *ehbuf = NULL, *buf;
+  bfd_byte *ehbuf = NULL, *buf, *end;
   bfd_byte *last_fde;
-  struct eh_cie_fde *ent, *this_inf;
+  struct eh_cie_fde *this_inf;
   unsigned int hdr_length, hdr_id;
   struct extended_cie
     {
-      struct cie cie;
-      unsigned int offset;
-      unsigned int usage_count;
-      unsigned int entry;
+      struct cie *cie;
+      struct eh_cie_fde *local_cie;
     } *ecies = NULL, *ecie;
-  unsigned int ecie_count = 0, ecie_alloced = 0;
-  struct cie *cie;
+  unsigned int ecie_count;
+  struct cie *cie, *local_cies = NULL, tmp_cie;
   struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
   struct eh_frame_sec_info *sec_info = NULL;
-  unsigned int offset;
   unsigned int ptr_size;
-  unsigned int entry_alloced;
+  unsigned int num_cies;
+  unsigned int num_entries;
+
+  htab = elf_hash_table (info);
+  hdr_info = &htab->eh_info;
+  if (hdr_info->parsed_eh_frames)
+    return;
 
   if (sec->size == 0)
     {
       /* This file does not contain .eh_frame information.  */
-      return FALSE;
+      return;
     }
 
   if (bfd_is_abs_section (sec->output_section))
     {
       /* At least one of the sections is being discarded from the
 	 link, so we should just ignore them.  */
-      return FALSE;
+      return;
     }
-
-  htab = elf_hash_table (info);
-  hdr_info = &htab->eh_info;
-
-  if (hdr_info->cies == NULL && !info->relocatable)
-    hdr_info->cies = htab_try_create (1, cie_hash, cie_eq, free);
 
   /* Read the frame unwind information from abfd.  */
 
@@ -497,7 +504,7 @@ _bfd_elf_discard_section_eh_frame
     {
       /* Empty .eh_frame section.  */
       free (ehbuf);
-      return FALSE;
+      return;
     }
 
   /* If .eh_frame section size doesn't fit into int, we cannot handle
@@ -508,12 +515,47 @@ _bfd_elf_discard_section_eh_frame
 	      ->elf_backend_eh_frame_address_size (abfd, sec));
   REQUIRE (ptr_size != 0);
 
+  /* Go through the section contents and work out how many FDEs and
+     CIEs there are.  */
   buf = ehbuf;
+  end = ehbuf + sec->size;
+  num_cies = 0;
+  num_entries = 0;
+  while (buf != end)
+    {
+      num_entries++;
+
+      /* Read the length of the entry.  */
+      REQUIRE (skip_bytes (&buf, end, 4));
+      hdr_length = bfd_get_32 (abfd, buf - 4);
+
+      /* 64-bit .eh_frame is not supported.  */
+      REQUIRE (hdr_length != 0xffffffff);
+      if (hdr_length == 0)
+	break;
+
+      REQUIRE (skip_bytes (&buf, end, 4));
+      hdr_id = bfd_get_32 (abfd, buf - 4);
+      if (hdr_id == 0)
+	num_cies++;
+
+      REQUIRE (skip_bytes (&buf, end, hdr_length - 4));
+    }
+
   sec_info = bfd_zmalloc (sizeof (struct eh_frame_sec_info)
-			  + 99 * sizeof (struct eh_cie_fde));
+			  + (num_entries - 1) * sizeof (struct eh_cie_fde));
   REQUIRE (sec_info);
 
-  entry_alloced = 100;
+  ecies = bfd_zmalloc (num_cies * sizeof (*ecies));
+  REQUIRE (ecies);
+
+  /* If we're not merging CIE entries (such as for a relocatable link),
+     we need to have a "struct cie" for each CIE in this section.  */
+  if (hdr_info->cies == NULL)
+    {
+      local_cies = bfd_zmalloc (num_cies * sizeof (*local_cies));
+      REQUIRE (local_cies);
+    }
 
 #define ENSURE_NO_RELOCS(buf)				\
   REQUIRE (!(cookie->rel < cookie->relend		\
@@ -533,38 +575,21 @@ _bfd_elf_discard_section_eh_frame
 	== (bfd_size_type) ((buf) - ehbuf)))		\
    ? cookie->rel : NULL)
 
-  for (;;)
+  buf = ehbuf;
+  ecie_count = 0;
+  while ((bfd_size_type) (buf - ehbuf) != sec->size)
     {
       char *aug;
-      bfd_byte *start, *end, *insns, *insns_end;
+      bfd_byte *start, *insns, *insns_end;
       bfd_size_type length;
       unsigned int set_loc_count;
-
-      if (sec_info->count == entry_alloced)
-	{
-	  sec_info = bfd_realloc (sec_info,
-				  sizeof (struct eh_frame_sec_info)
-				  + ((entry_alloced + 99)
-				     * sizeof (struct eh_cie_fde)));
-	  REQUIRE (sec_info);
-
-	  memset (&sec_info->entry[entry_alloced], 0,
-		  100 * sizeof (struct eh_cie_fde));
-	  entry_alloced += 100;
-	}
 
       this_inf = sec_info->entry + sec_info->count;
       last_fde = buf;
 
-      if ((bfd_size_type) (buf - ehbuf) == sec->size)
-	break;
-
       /* Read the length of the entry.  */
       REQUIRE (skip_bytes (&buf, ehbuf + sec->size, 4));
       hdr_length = bfd_get_32 (abfd, buf - 4);
-
-      /* 64-bit .eh_frame is not supported.  */
-      REQUIRE (hdr_length != 0xffffffff);
 
       /* The CIE/FDE must be fully contained in this input section.  */
       REQUIRE ((bfd_size_type) (buf - ehbuf) + hdr_length <= sec->size);
@@ -594,19 +619,19 @@ _bfd_elf_discard_section_eh_frame
 	  /* CIE  */
 	  this_inf->cie = 1;
 
-	  if (ecie_count == ecie_alloced)
+	  /* If we're merging CIEs, construct the struct cie in TMP_CIE;
+	     we'll enter it into the global pool later.  Otherwise point
+	     CIE to one of the section-local cie structures.  */
+	  if (local_cies)
+	    cie = local_cies + ecie_count;
+	  else
 	    {
-	      ecies = bfd_realloc (ecies,
-				   (ecie_alloced + 20) * sizeof (*ecies));
-	      REQUIRE (ecies);
-	      memset (&ecies[ecie_alloced], 0, 20 * sizeof (*ecies));
-	      ecie_alloced += 20;
+	      cie = &tmp_cie;
+	      memset (cie, 0, sizeof (*cie));
 	    }
-
-	  cie = &ecies[ecie_count].cie;
-	  ecies[ecie_count].offset = this_inf->offset;
-	  ecies[ecie_count++].entry = sec_info->count;
+	  cie->cie_inf = this_inf;
 	  cie->length = hdr_length;
+	  cie->output_sec = sec->output_section;
 	  start = buf;
 	  REQUIRE (read_byte (&buf, end, &cie->version));
 
@@ -788,47 +813,28 @@ _bfd_elf_discard_section_eh_frame
 	  insns = buf;
 	  buf += initial_insn_length;
 	  ENSURE_NO_RELOCS (buf);
+
+	  this_inf->make_relative = cie->make_relative;
+	  this_inf->make_lsda_relative = cie->make_lsda_relative;
+	  this_inf->per_encoding_relative
+	    = (cie->per_encoding & 0x70) == DW_EH_PE_pcrel;
 	}
       else
 	{
 	  /* Find the corresponding CIE.  */
 	  unsigned int cie_offset = this_inf->offset + 4 - hdr_id;
 	  for (ecie = ecies; ecie < ecies + ecie_count; ++ecie)
-	    if (cie_offset == ecie->offset)
+	    if (cie_offset == ecie->local_cie->offset)
 	      break;
 
 	  /* Ensure this FDE references one of the CIEs in this input
 	     section.  */
 	  REQUIRE (ecie != ecies + ecie_count);
-	  cie = &ecie->cie;
+	  cie = ecie->cie;
+	  this_inf->u.fde.cie_inf = ecie->local_cie;
 
 	  ENSURE_NO_RELOCS (buf);
 	  REQUIRE (GET_RELOC (buf));
-
-	  if ((*reloc_symbol_deleted_p) (buf - ehbuf, cookie))
-	    /* This is a FDE against a discarded section.  It should
-	       be deleted.  */
-	    this_inf->removed = 1;
-	  else
-	    {
-	      if (info->shared
-		  && (((cie->fde_encoding & 0xf0) == DW_EH_PE_absptr
-		       && cie->make_relative == 0)
-		      || (cie->fde_encoding & 0xf0) == DW_EH_PE_aligned))
-		{
-		  /* If a shared library uses absolute pointers
-		     which we cannot turn into PC relative,
-		     don't create the binary search table,
-		     since it is affected by runtime relocations.  */
-		  hdr_info->table = FALSE;
-		  (*info->callbacks->einfo)
-		    (_("%P: fde encoding in %B(%A) prevents .eh_frame_hdr"
-		       " table being created.\n"), abfd, sec);
-		}
-	      ecie->usage_count++;
-	      hdr_info->fde_count++;
-	      this_inf->u.fde.cie_inf = (void *) (ecie - ecies);
-	    }
 
 	  /* Skip the initial location and address range.  */
 	  start = buf;
@@ -901,90 +907,155 @@ _bfd_elf_discard_section_eh_frame
 	    }
 	}
 
+      this_inf->removed = 1;
       this_inf->fde_encoding = cie->fde_encoding;
       this_inf->lsda_encoding = cie->lsda_encoding;
+      if (this_inf->cie)
+	{
+	  /* We have now finished constructing the struct cie.  */
+	  if (hdr_info->cies != NULL)
+	    {
+	      /* See if we can merge this CIE with an earlier one.  */
+	      void **loc;
+
+	      cie_compute_hash (cie);
+	      loc = htab_find_slot_with_hash (hdr_info->cies, cie,
+					      cie->hash, INSERT);
+	      REQUIRE (loc);
+	      if (*loc == HTAB_EMPTY_ENTRY)
+		{
+		  *loc = malloc (sizeof (struct cie));
+		  REQUIRE (*loc);
+		  memcpy (*loc, cie, sizeof (struct cie));
+		}
+	      cie = (struct cie *) *loc;
+	    }
+	  this_inf->u.cie.merged = cie->cie_inf;
+	  ecies[ecie_count].cie = cie;
+	  ecies[ecie_count++].local_cie = this_inf;
+	}
       sec_info->count++;
     }
+  BFD_ASSERT (sec_info->count == num_entries);
+  BFD_ASSERT (ecie_count == num_cies);
 
   elf_section_data (sec)->sec_info = sec_info;
   sec->sec_info_type = ELF_INFO_TYPE_EH_FRAME;
+  goto success;
 
-  /* Look at all CIEs in this section and determine which can be
-     removed as unused, which can be merged with previous duplicate
-     CIEs and which need to be kept.  */
-  for (ecie = ecies; ecie < ecies + ecie_count; ++ecie)
+ free_no_table:
+  (*info->callbacks->einfo)
+    (_("%P: error in %B(%A); no .eh_frame_hdr table will be created.\n"),
+     abfd, sec);
+  hdr_info->table = FALSE;
+  if (sec_info)
+    free (sec_info);
+ success:
+  if (ehbuf)
+    free (ehbuf);
+  if (ecies)
+    free (ecies);
+  if (local_cies)
+    free (local_cies);
+#undef REQUIRE
+}
+
+/* Finish a pass over all .eh_frame sections.  */
+
+void
+_bfd_elf_end_eh_frame_parsing (struct bfd_link_info *info)
+{
+  struct eh_frame_hdr_info *hdr_info;
+
+  hdr_info = &elf_hash_table (info)->eh_info;
+  if (hdr_info->cies != NULL)
     {
-      if (ecie->usage_count == 0)
-	{
-	  sec_info->entry[ecie->entry].removed = 1;
-	  continue;
-	}
-      ecie->cie.output_sec = sec->output_section;
-      ecie->cie.cie_inf = sec_info->entry + ecie->entry;
-      cie_compute_hash (&ecie->cie);
-      if (hdr_info->cies != NULL)
-	{
-	  void **loc = htab_find_slot_with_hash (hdr_info->cies, &ecie->cie,
-						 ecie->cie.hash, INSERT);
-	  if (loc != NULL)
-	    {
-	      if (*loc != HTAB_EMPTY_ENTRY)
-		{
-		  sec_info->entry[ecie->entry].removed = 1;
-		  ecie->cie.cie_inf = ((struct cie *) *loc)->cie_inf;
-		  continue;
-		}
-
-	      *loc = malloc (sizeof (struct cie));
-	      if (*loc == NULL)
-		*loc = HTAB_DELETED_ENTRY;
-	      else
-		memcpy (*loc, &ecie->cie, sizeof (struct cie));
-	    }
-	}
-      ecie->cie.cie_inf->make_relative = ecie->cie.make_relative;
-      ecie->cie.cie_inf->make_lsda_relative = ecie->cie.make_lsda_relative;
-      ecie->cie.cie_inf->per_encoding_relative
-	= (ecie->cie.per_encoding & 0x70) == DW_EH_PE_pcrel;
+      htab_delete (hdr_info->cies);
+      hdr_info->cies = NULL;
     }
+  hdr_info->parsed_eh_frames = TRUE;
+}
 
-  /* Ok, now we can assign new offsets.  */
+/* This function is called for each input file before the .eh_frame
+   section is relocated.  It discards duplicate CIEs and FDEs for discarded
+   functions.  The function returns TRUE iff any entries have been
+   deleted.  */
+
+bfd_boolean
+_bfd_elf_discard_section_eh_frame
+   (bfd *abfd, struct bfd_link_info *info, asection *sec,
+    bfd_boolean (*reloc_symbol_deleted_p) (bfd_vma, void *),
+    struct elf_reloc_cookie *cookie)
+{
+  struct eh_cie_fde *ent, *cie, *merged;
+  struct eh_frame_sec_info *sec_info;
+  struct eh_frame_hdr_info *hdr_info;
+  unsigned int ptr_size, offset;
+
+  sec_info = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
+  if (sec_info == NULL)
+    return FALSE;
+
+  hdr_info = &elf_hash_table (info)->eh_info;
+  for (ent = sec_info->entry; ent < sec_info->entry + sec_info->count; ++ent)
+    if (!ent->cie)
+      {
+	cookie->rel = cookie->rels + ent->reloc_index;
+	BFD_ASSERT (cookie->rel < cookie->relend
+		    && cookie->rel->r_offset == ent->offset + 8);
+	if (!(*reloc_symbol_deleted_p) (ent->offset + 8, cookie))
+	  {
+	    if (info->shared
+		&& (((ent->fde_encoding & 0xf0) == DW_EH_PE_absptr
+		     && ent->u.fde.cie_inf->make_relative == 0)
+		    || (ent->fde_encoding & 0xf0) == DW_EH_PE_aligned))
+	      {
+		/* If a shared library uses absolute pointers
+		   which we cannot turn into PC relative,
+		   don't create the binary search table,
+		   since it is affected by runtime relocations.  */
+		hdr_info->table = FALSE;
+		(*info->callbacks->einfo)
+		  (_("%P: fde encoding in %B(%A) prevents .eh_frame_hdr"
+		     " table being created.\n"), abfd, sec);
+	      }
+	    ent->removed = 0;
+	    hdr_info->fde_count++;
+
+	    cie = ent->u.fde.cie_inf;
+	    if (cie->removed)
+	      {
+		merged = cie->u.cie.merged;
+		if (!merged->removed)
+		  /* We have decided to keep the group representative.  */
+		  ent->u.fde.cie_inf = merged;
+		else if (merged->u.cie.merged != merged)
+		  /* We didn't keep the original group representative,
+		     but we did keep an alternative.  */
+		  ent->u.fde.cie_inf = merged->u.cie.merged;
+		else
+		  {
+		    /* Make the local CIE represent the merged group.  */
+		    merged->u.cie.merged = cie;
+		    cie->removed = 0;
+		  }
+	      }
+	  }
+      }
+
+  ptr_size = (get_elf_backend_data (sec->owner)
+	      ->elf_backend_eh_frame_address_size (sec->owner, sec));
   offset = 0;
   for (ent = sec_info->entry; ent < sec_info->entry + sec_info->count; ++ent)
     if (!ent->removed)
       {
-	if (!ent->cie)
-	  {
-	    ecie = ecies + (bfd_hostptr_t) ent->u.fde.cie_inf;
-	    ent->u.fde.cie_inf = ecie->cie.cie_inf;
-	  }
 	ent->new_offset = offset;
 	offset += size_of_output_cie_fde (ent, ptr_size);
       }
 
-  /* Resize the sec as needed.  */
   sec->rawsize = sec->size;
   sec->size = offset;
-
-  free (ehbuf);
-  if (ecies)
-    free (ecies);
   return offset != sec->rawsize;
-
-free_no_table:
-  (*info->callbacks->einfo)
-    (_("%P: error in %B(%A); no .eh_frame_hdr table will be created.\n"),
-     abfd, sec);
-  if (ehbuf)
-    free (ehbuf);
-  if (sec_info)
-    free (sec_info);
-  if (ecies)
-    free (ecies);
-  hdr_info->table = FALSE;
-  return FALSE;
-
-#undef REQUIRE
 }
 
 /* This function is called for .eh_frame_hdr section after
@@ -1000,12 +1071,6 @@ _bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
-
-  if (hdr_info->cies != NULL)
-    {
-      htab_delete (hdr_info->cies);
-      hdr_info->cies = NULL;
-    }
 
   sec = hdr_info->hdr_sec;
   if (sec == NULL)
