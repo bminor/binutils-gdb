@@ -1,3 +1,18 @@
+2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* elf-bfd.h (_bfd_elf_gc_mark_rsec, _bfd_elf_gc_mark_reloc): Declare.
+	(_bfd_elf_gc_mark): Use elf_gc_mark_hook_fn.
+	* elflink.c (init_reloc_cookie, fini_reloc_cookie)
+	(init_reloc_cookie_rels, fini_reloc_cookie_rels): New functions,
+	split out from...
+	(bfd_elf_discard_info): ...here.
+	(init_reloc_cookie_for_section): New function.
+	(fini_reloc_cookie_for_section): Likewise.
+	(_bfd_elf_gc_mark_rsec, _bfd_elf_gc_mark_reloc): New functions,
+	split out from...
+	(_bfd_elf_gc_mark): ...here.  Use init_reloc_cookie_for_section
+	and fini_reloc_cookie_for_section.
+
 2007-12-12  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_do_reloc): Update self_address along with

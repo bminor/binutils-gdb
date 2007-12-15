@@ -1971,10 +1971,16 @@ extern asection *_bfd_elf_gc_mark_hook
   (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
    struct elf_link_hash_entry *, Elf_Internal_Sym *);
 
+extern asection *_bfd_elf_gc_mark_rsec
+  (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn,
+   struct elf_reloc_cookie *);
+
+extern bfd_boolean _bfd_elf_gc_mark_reloc
+  (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn,
+   struct elf_reloc_cookie *, bfd_boolean);
+
 extern bfd_boolean _bfd_elf_gc_mark
-  (struct bfd_link_info *, asection *,
-   asection * (*) (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-		   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+  (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn);
 
 extern bfd_boolean bfd_elf_gc_common_finalize_got_offsets
   (bfd *, struct bfd_link_info *);
