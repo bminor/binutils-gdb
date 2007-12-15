@@ -277,11 +277,20 @@ struct eh_cie_fde
     } fde;
     struct {
       /* In general, equivalent CIEs are grouped together, with one CIE
-	 representing all the others in a group.  If REMOVED == 0,
-	 this CIE is the group representative.  If REMOVED == 1,
-	 following this pointer brings us "closer" to the CIE's group
-	 representative, and reapplying always gives the representative.  */
-      struct eh_cie_fde *merged;
+	 representing all the others in a group.
+
+	 If REMOVED == 0, this CIE is the group representative, and
+	 U.SEC points to the .eh_frame section that contains the CIE.
+
+	 If REMOVED == 1, this CIE is the group representative if
+	 U.MERGED is a self pointer.  Otherwise, following U.MERGED
+	 brings us "closer" to the CIE's group representative;
+	 if U.MERGED is not the group representative, then
+	 U.MERGED->U.MERGED is.  */
+      union {
+ 	struct eh_cie_fde *merged;
+ 	asection *sec;
+      } u;
 
       /* True if we have marked relocations associated with this CIE.  */
       unsigned int gc_mark : 1;
@@ -355,7 +364,6 @@ struct eh_frame_hdr_info
      We build it if we successfully read all .eh_frame input sections
      and recognize them.  */
   bfd_boolean table;
-  bfd_boolean offsets_adjusted;
 };
 
 /* ELF linker hash table.  */

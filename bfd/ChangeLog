@@ -1,5 +1,19 @@
 2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
 
+	* elf-bfd.h (eh_cie_fde): Replace u.cie.merged with a union of
+	a merged field and a sec field.
+	(eh_frame_hdr_info): Remove offsets_adjusted.
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Update accesses to
+	the CIE merged field.
+	(_bfd_elf_gc_mark_fdes): Likewise.
+	(_bfd_elf_discard_section_eh_frame): Likewise.  Set u.cie.u.sec
+	when clearing the removed flag.
+	(_bfd_elf_eh_frame_section_offset): Remove offsets_adjusted handling.
+	(_bfd_elf_write_section_eh_frame): Likewise.  Apply output_offsets
+	where appropriate.  
+
+2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
+
 	* elf-bfd.h (eh_cie_fde): Move add_fde_encoding and
 	per_encoding_relative to u.cie.  Add commentary.
 	* elf-eh-frame.c (cie): Remove make_relative.
