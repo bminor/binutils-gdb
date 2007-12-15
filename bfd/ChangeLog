@@ -1,5 +1,21 @@
 2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
 
+	* elf-bfd.h (eh_cie_fde): Remove need_lsda_relative.
+	Move make_lsda_relative to u.cie.
+	* elf-eh-frame.c (cie): Rename make_lsda_relative to
+	can_make_lsda_relative.
+	(_bfd_elf_parse_eh_frame): Don't set the old eh_cie_fde
+	make_lsda_relative field.  Update after cie renaming.
+	Set u.cie.make_lsda_relative if can_make_lsda_relative
+	and if we find a relocation against the LSDA.
+	(_bfd_elf_discard_section_eh_frame): Copy make_lsda_relative when
+	changing a CIE's group representative.
+	(_bfd_elf_eh_frame_section_offset): Don't set need_ldsa_relative here.
+	(_bfd_elf_write_section_eh_frame): Check u.cie.make_lsda_relative
+	rather than need_lsda_relative.
+
+2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
+
 	* elf-bfd.h (eh_cie_fde): Add u.fde.next_for_section and
 	u.cie.gc_mark.
 	(bfd_elf_section_data): Add fde_list.

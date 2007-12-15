@@ -285,6 +285,11 @@ struct eh_cie_fde
 
       /* True if we have marked relocations associated with this CIE.  */
       unsigned int gc_mark : 1;
+
+      /* True if we have decided to turn an absolute LSDA encoding into
+	 a PC-relative one.  It is the group representative's setting
+	 that matters.  */
+      unsigned int make_lsda_relative : 1;
     } cie;
   } u;
   unsigned int reloc_index;
@@ -299,8 +304,6 @@ struct eh_cie_fde
   unsigned int add_augmentation_size : 1;
   unsigned int add_fde_encoding : 1;
   unsigned int make_relative : 1;
-  unsigned int make_lsda_relative : 1;
-  unsigned int need_lsda_relative : 1;
   unsigned int per_encoding_relative : 1;
   unsigned int *set_loc;
 };

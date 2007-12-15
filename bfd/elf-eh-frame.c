@@ -50,7 +50,7 @@ struct cie
   unsigned char fde_encoding;
   unsigned char initial_insn_length;
   unsigned char make_relative;
-  unsigned char make_lsda_relative;
+  unsigned char can_make_lsda_relative;
   unsigned char initial_instructions[50];
 };
 
@@ -799,7 +799,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 		  ->elf_backend_can_make_lsda_relative_eh_frame
 		  (abfd, info, sec))
 	      && (cie->lsda_encoding & 0xf0) == DW_EH_PE_absptr)
-	    cie->make_lsda_relative = 1;
+	    cie->can_make_lsda_relative = 1;
 
 	  /* If FDE encoding was not specified, it defaults to
 	     DW_EH_absptr.  */
@@ -817,7 +817,6 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  ENSURE_NO_RELOCS (buf);
 
 	  this_inf->make_relative = cie->make_relative;
-	  this_inf->make_lsda_relative = cie->make_lsda_relative;
 	  this_inf->per_encoding_relative
 	    = (cie->per_encoding & 0x70) == DW_EH_PE_pcrel;
 	}
@@ -862,6 +861,9 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	     be adjusted if any future augmentations do the same thing.  */
 	  if (cie->lsda_encoding != DW_EH_PE_omit)
 	    {
+	      SKIP_RELOCS (buf);
+	      if (cie->can_make_lsda_relative && GET_RELOC (buf))
+		cie->cie_inf->u.cie.make_lsda_relative = 1;
 	      this_inf->lsda_offset = buf - start;
 	      /* If there's no 'z' augmentation, we don't know where the
 		 CFA insns begin.  Assume no padding.  */
@@ -1097,6 +1099,8 @@ _bfd_elf_discard_section_eh_frame
 		    /* Make the local CIE represent the merged group.  */
 		    merged->u.cie.merged = cie;
 		    cie->removed = 0;
+		    cie->u.cie.make_lsda_relative
+		      = merged->u.cie.make_lsda_relative;
 		  }
 	      }
 	  }
@@ -1248,15 +1252,10 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
   /* If converting LSDA pointers to DW_EH_PE_pcrel, there will be no need
      for run-time relocation against LSDA field.  */
   if (!sec_info->entry[mid].cie
-      && sec_info->entry[mid].u.fde.cie_inf->make_lsda_relative
-      && (offset == (sec_info->entry[mid].offset + 8
-		     + sec_info->entry[mid].lsda_offset))
-      && (sec_info->entry[mid].u.fde.cie_inf->need_lsda_relative
-	  || !hdr_info->offsets_adjusted))
-    {
-      sec_info->entry[mid].u.fde.cie_inf->need_lsda_relative = 1;
-      return (bfd_vma) -2;
-    }
+      && sec_info->entry[mid].u.fde.cie_inf->u.cie.make_lsda_relative
+      && offset == (sec_info->entry[mid].offset + 8
+		    + sec_info->entry[mid].lsda_offset))
+    return (bfd_vma) -2;
 
   /* If converting to DW_EH_PE_pcrel, there will be no need for run-time
      relocation against DW_CFA_set_loc's arguments.  */
@@ -1394,7 +1393,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	{
 	  /* CIE */
 	  if (ent->make_relative
-	      || ent->need_lsda_relative
+	      || ent->u.cie.make_lsda_relative
 	      || ent->per_encoding_relative)
 	    {
 	      char *aug;
@@ -1404,7 +1403,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      /* Need to find 'R' or 'L' augmentation's argument and modify
 		 DW_EH_PE_* value.  */
 	      action = ((ent->make_relative ? 1 : 0)
-			| (ent->need_lsda_relative ? 2 : 0)
+			| (ent->u.cie.make_lsda_relative ? 2 : 0)
 			| (ent->per_encoding_relative ? 4 : 0));
 	      extra_string = extra_augmentation_string_bytes (ent);
 	      extra_data = extra_augmentation_data_bytes (ent);
@@ -1548,7 +1547,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	    }
 
 	  if ((ent->lsda_encoding & 0xf0) == DW_EH_PE_pcrel
-	      || cie->need_lsda_relative)
+	      || cie->u.cie.make_lsda_relative)
 	    {
 	      buf += ent->lsda_offset;
 	      width = get_DW_EH_PE_width (ent->lsda_encoding, ptr_size);
@@ -1558,7 +1557,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		{
 		  if ((ent->lsda_encoding & 0xf0) == DW_EH_PE_pcrel)
 		    value += ent->offset - ent->new_offset;
-		  else if (cie->need_lsda_relative)
+		  else if (cie->u.cie.make_lsda_relative)
 		    value -= (sec->output_section->vma + ent->new_offset + 8
 			      + ent->lsda_offset);
 		  write_value (abfd, buf, value, width);
