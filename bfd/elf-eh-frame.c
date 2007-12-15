@@ -475,6 +475,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   unsigned int ptr_size;
   unsigned int num_cies;
   unsigned int num_entries;
+  elf_gc_mark_hook_fn gc_mark_hook;
 
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
@@ -577,6 +578,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   buf = ehbuf;
   ecie_count = 0;
+  gc_mark_hook = get_elf_backend_data (abfd)->gc_mark_hook;
   while ((bfd_size_type) (buf - ehbuf) != sec->size)
     {
       char *aug;
@@ -821,6 +823,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	}
       else
 	{
+	  asection *rsec;
+
 	  /* Find the corresponding CIE.  */
 	  unsigned int cie_offset = this_inf->offset + 4 - hdr_id;
 	  for (ecie = ecies; ecie < ecies + ecie_count; ++ecie)
@@ -835,6 +839,12 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
 	  ENSURE_NO_RELOCS (buf);
 	  REQUIRE (GET_RELOC (buf));
+
+	  /* Chain together the FDEs for each section.  */
+	  rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie);
+	  REQUIRE (rsec && rsec->owner == abfd);
+	  this_inf->u.fde.next_for_section = elf_fde_list (rsec);
+	  elf_fde_list (rsec) = this_inf;
 
 	  /* Skip the initial location and address range.  */
 	  start = buf;
@@ -974,6 +984,55 @@ _bfd_elf_end_eh_frame_parsing (struct bfd_link_info *info)
       hdr_info->cies = NULL;
     }
   hdr_info->parsed_eh_frames = TRUE;
+}
+
+/* Mark all relocations against CIE or FDE ENT, which occurs in
+   .eh_frame section SEC.  COOKIE describes the relocations in SEC;
+   its "rel" field can be changed freely.  */
+
+static bfd_boolean
+mark_entry (struct bfd_link_info *info, asection *sec,
+	    struct eh_cie_fde *ent, elf_gc_mark_hook_fn gc_mark_hook,
+	    struct elf_reloc_cookie *cookie)
+{
+  for (cookie->rel = cookie->rels + ent->reloc_index;
+       cookie->rel < cookie->relend
+	 && cookie->rel->r_offset < ent->offset + ent->size;
+       cookie->rel++)
+    if (!_bfd_elf_gc_mark_reloc (info, sec, gc_mark_hook, cookie))
+      return FALSE;
+
+  return TRUE;
+}
+
+/* Mark all the relocations against FDEs that relate to code in input
+   section SEC.  The FDEs belong to .eh_frame section EH_FRAME, whose
+   relocations are described by COOKIE.  */
+
+bfd_boolean
+_bfd_elf_gc_mark_fdes (struct bfd_link_info *info, asection *sec,
+		       asection *eh_frame, elf_gc_mark_hook_fn gc_mark_hook,
+		       struct elf_reloc_cookie *cookie)
+{
+  struct eh_cie_fde *fde, *cie, *merged;
+
+  for (fde = elf_fde_list (sec); fde; fde = fde->u.fde.next_for_section)
+    {
+      if (!mark_entry (info, eh_frame, fde, gc_mark_hook, cookie))
+	return FALSE;
+
+      /* At this stage, all cie_inf fields point to local CIEs, so we
+	 can use the same cookie to refer to them.  */
+      cie = fde->u.fde.cie_inf;
+      merged = cie->u.cie.merged;
+      if (!merged->u.cie.gc_mark)
+	{
+	  merged->u.cie.gc_mark = 1;
+	  if (!mark_entry (info, eh_frame, cie, gc_mark_hook, cookie))
+	    return FALSE;
+	}
+    }
+  return TRUE;
 }
 
 /* This function is called for each input file before the .eh_frame

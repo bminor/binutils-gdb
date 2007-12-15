@@ -273,6 +273,7 @@ struct eh_cie_fde
 	 the output FDE.  The CIE's REMOVED field is also 0, but the CIE
 	 might belong to a different .eh_frame input section from the FDE.  */
       struct eh_cie_fde *cie_inf;
+      struct eh_cie_fde *next_for_section;
     } fde;
     struct {
       /* In general, equivalent CIEs are grouped together, with one CIE
@@ -281,6 +282,9 @@ struct eh_cie_fde
 	 following this pointer brings us "closer" to the CIE's group
 	 representative, and reapplying always gives the representative.  */
       struct eh_cie_fde *merged;
+
+      /* True if we have marked relocations associated with this CIE.  */
+      unsigned int gc_mark : 1;
     } cie;
   } u;
   unsigned int reloc_index;
@@ -1243,6 +1247,10 @@ struct bfd_elf_section_data
      the linker.  For the SHT_GROUP section, points at first member.  */
   asection *next_in_group;
 
+  /* The FDEs associated with this section.  The u.fde.next_in_section
+     field acts as a chain pointer.  */
+  struct eh_cie_fde *fde_list;
+
   /* A pointer used for various section optimizations.  */
   void *sec_info;
 };
@@ -1254,6 +1262,7 @@ struct bfd_elf_section_data
 #define elf_group_name(sec)    (elf_section_data(sec)->group.name)
 #define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
+#define elf_fde_list(sec)      (elf_section_data(sec)->fde_list)
 #define elf_sec_group(sec)	(elf_section_data(sec)->sec_group)
 
 #define xvec_get_elf_backend_data(xvec) \
@@ -1459,6 +1468,9 @@ struct elf_obj_tdata
   asection *elf_data_section;
   asection *elf_text_section;
 
+  /* A pointer to the .eh_frame section.  */
+  asection *eh_frame_section;
+
   /* Whether a dyanmic object was specified normally on the linker
      command line, or was specified when --as-needed was in effect,
      or was found via a DT_NEEDED entry.  */
@@ -1504,6 +1516,8 @@ struct elf_obj_tdata
 #define elf_dynversym(bfd)	(elf_tdata(bfd) -> dynversym_section)
 #define elf_dynverdef(bfd)	(elf_tdata(bfd) -> dynverdef_section)
 #define elf_dynverref(bfd)	(elf_tdata(bfd) -> dynverref_section)
+#define elf_eh_frame_section(bfd) \
+				(elf_tdata(bfd) -> eh_frame_section)
 #define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
 #define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
 #define elf_section_syms(bfd)	(elf_tdata(bfd) -> section_syms)
@@ -2004,7 +2018,11 @@ extern asection *_bfd_elf_gc_mark_rsec
 
 extern bfd_boolean _bfd_elf_gc_mark_reloc
   (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn,
-   struct elf_reloc_cookie *, bfd_boolean);
+   struct elf_reloc_cookie *);
+
+extern bfd_boolean _bfd_elf_gc_mark_fdes
+  (struct bfd_link_info *, asection *, asection *, elf_gc_mark_hook_fn,
+   struct elf_reloc_cookie *);
 
 extern bfd_boolean _bfd_elf_gc_mark
   (struct bfd_link_info *, asection *, elf_gc_mark_hook_fn);

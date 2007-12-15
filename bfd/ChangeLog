@@ -1,5 +1,26 @@
 2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
 
+	* elf-bfd.h (eh_cie_fde): Add u.fde.next_for_section and
+	u.cie.gc_mark.
+	(bfd_elf_section_data): Add fde_list.
+	(elf_fde_list): New macro.
+	(elf_obj_tdata): Add eh_frame_section.
+	(elf_eh_frame_section): New macro.
+	(_bfd_elf_gc_mark_reloc): Remove last parameter.
+	(_bfd_elf_gc_mark_fdes): Declare.
+	* elf-eh-frame.c (_bfd_elf_get_eh_frame_sec_info): Chain the FDEs
+	for each input section.
+	(mark_entry, _bfd_elf_gc_mark_fdes): New functions.
+	* elflink.c (_bfd_elf_gc_mark_reloc): Remove is_eh parameter.
+	(_bfd_elf_gc_mark): Update call accordingly.  Mark the relocations
+	againts the section's FDEs.  Don't mark the bfd's elf_eh_frame_section.
+	(bfd_elf_gc_sections): Parse each input bfd's .eh_frame before
+	marking any input sections.  Remove the current EH handling.
+	* section.c (bfd_section): Remove gc_mark_from_eh.
+	* ecoff.c (bfd_debug_section): Update initializer accordingly.
+
+2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
+
 	* elf-bfd.h (eh_cie_fde): Add u.cie.  Document how u.fde.cie_inf
 	changes when removed == 0.
 	(eh_frame_hdr_info): Add parsed_eh_frames.

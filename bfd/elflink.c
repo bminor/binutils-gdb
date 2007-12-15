@@ -11137,15 +11137,13 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 
 /* COOKIE->rel describes a relocation against section SEC, which is
    a section we've decided to keep.  Mark the section that contains
-   the relocation symbol.  IS_EH is true if the mark comes from
-   .eh_frame.  */
+   the relocation symbol.  */
 
 bfd_boolean
 _bfd_elf_gc_mark_reloc (struct bfd_link_info *info,
 			asection *sec,
 			elf_gc_mark_hook_fn gc_mark_hook,
-			struct elf_reloc_cookie *cookie,
-			bfd_boolean is_eh)
+			struct elf_reloc_cookie *cookie)
 {
   asection *rsec;
 
@@ -11154,8 +11152,6 @@ _bfd_elf_gc_mark_reloc (struct bfd_link_info *info,
     {
       if (bfd_get_flavour (rsec->owner) != bfd_target_elf_flavour)
 	rsec->gc_mark = 1;
-      else if (is_eh)
-	rsec->gc_mark_from_eh = 1;
       else if (!_bfd_elf_gc_mark (info, rsec, gc_mark_hook))
 	return FALSE;
     }
@@ -11172,8 +11168,7 @@ _bfd_elf_gc_mark (struct bfd_link_info *info,
 		  elf_gc_mark_hook_fn gc_mark_hook)
 {
   bfd_boolean ret;
-  bfd_boolean is_eh;
-  asection *group_sec;
+  asection *group_sec, *eh_frame;
 
   sec->gc_mark = 1;
 
@@ -11185,8 +11180,10 @@ _bfd_elf_gc_mark (struct bfd_link_info *info,
 
   /* Look through the section relocs.  */
   ret = TRUE;
-  is_eh = strcmp (sec->name, ".eh_frame") == 0;
-  if ((sec->flags & SEC_RELOC) != 0 && sec->reloc_count > 0)
+  eh_frame = elf_eh_frame_section (sec->owner);
+  if ((sec->flags & SEC_RELOC) != 0
+      && sec->reloc_count > 0
+      && sec != eh_frame)
     {
       struct elf_reloc_cookie cookie;
 
@@ -11195,8 +11192,7 @@ _bfd_elf_gc_mark (struct bfd_link_info *info,
       else
 	{
 	  for (; cookie.rel < cookie.relend; cookie.rel++)
-	    if (!_bfd_elf_gc_mark_reloc (info, sec, gc_mark_hook,
-					 &cookie, is_eh))
+	    if (!_bfd_elf_gc_mark_reloc (info, sec, gc_mark_hook, &cookie))
 	      {
 		ret = FALSE;
 		break;
@@ -11204,6 +11200,22 @@ _bfd_elf_gc_mark (struct bfd_link_info *info,
 	  fini_reloc_cookie_for_section (&cookie, sec);
 	}
     }
+
+  if (ret && eh_frame && elf_fde_list (sec))
+    {
+      struct elf_reloc_cookie cookie;
+
+      if (!init_reloc_cookie_for_section (&cookie, info, eh_frame))
+	ret = FALSE;
+      else
+	{
+	  if (!_bfd_elf_gc_mark_fdes (info, sec, eh_frame,
+				      gc_mark_hook, &cookie))
+	    ret = FALSE;
+	  fini_reloc_cookie_for_section (&cookie, eh_frame);
+	}
+    }
+
   return ret;
 }
 
@@ -11469,6 +11481,25 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       return TRUE;
     }
 
+  /* Try to parse each bfd's .eh_frame section.  Point elf_eh_frame_section
+     at the .eh_frame section if we can mark the FDEs individually.  */
+  _bfd_elf_begin_eh_frame_parsing (info);
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+    {
+      asection *sec;
+      struct elf_reloc_cookie cookie;
+
+      sec = bfd_get_section_by_name (sub, ".eh_frame");
+      if (sec && init_reloc_cookie_for_section (&cookie, info, sec))
+	{
+	  _bfd_elf_parse_eh_frame (sub, info, sec, &cookie);
+	  if (elf_section_data (sec)->sec_info)
+	    elf_eh_frame_section (sub) = sec;
+	  fini_reloc_cookie_for_section (&cookie, sec);
+	}
+    }
+  _bfd_elf_end_eh_frame_parsing (info);
+
   /* Apply transitive closure to the vtable entry usage info.  */
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_gc_propagate_vtable_entries_used,
@@ -11507,68 +11538,6 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   /* Allow the backend to mark additional target specific sections.  */
   if (bed->gc_mark_extra_sections)
     bed->gc_mark_extra_sections(info, gc_mark_hook);
-
-  /* ... again for sections marked from eh_frame.  */
-  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
-    {
-      asection *o;
-
-      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
-	continue;
-
-      /* Keep .gcc_except_table.* if the associated .text.* (or the
-	 associated .gnu.linkonce.t.* if .text.* doesn't exist) is
-	 marked.  This isn't very nice, but the proper solution,
-	 splitting .eh_frame up and using comdat doesn't pan out
-	 easily due to needing special relocs to handle the
-	 difference of two symbols in separate sections.
-	 Don't keep code sections referenced by .eh_frame.  */
-#define TEXT_PREFIX			".text."
-#define TEXT_PREFIX2			".gnu.linkonce.t."
-#define GCC_EXCEPT_TABLE_PREFIX		".gcc_except_table."
-      for (o = sub->sections; o != NULL; o = o->next)
-	if (!o->gc_mark && o->gc_mark_from_eh && (o->flags & SEC_CODE) == 0)
-	  {
-	    if (CONST_STRNEQ (o->name, GCC_EXCEPT_TABLE_PREFIX))
-	      {
-		char *fn_name;
-		const char *sec_name;
-		asection *fn_text;
-		unsigned o_name_prefix_len , fn_name_prefix_len, tmp;
-
-		o_name_prefix_len = strlen (GCC_EXCEPT_TABLE_PREFIX);
-		sec_name = o->name + o_name_prefix_len;
-		fn_name_prefix_len = strlen (TEXT_PREFIX);
-		tmp = strlen (TEXT_PREFIX2);
-		if (tmp > fn_name_prefix_len)
-		  fn_name_prefix_len = tmp;
-		fn_name
-		  = bfd_malloc (fn_name_prefix_len + strlen (sec_name) + 1);
-		if (fn_name == NULL)
-		  return FALSE;
-
-		/* Try the first prefix.  */
-		sprintf (fn_name, "%s%s", TEXT_PREFIX, sec_name);
-		fn_text = bfd_get_section_by_name (sub, fn_name);
-
-		/* Try the second prefix.  */
-		if (fn_text == NULL)
-		  {
-		    sprintf (fn_name, "%s%s", TEXT_PREFIX2, sec_name);
-		    fn_text = bfd_get_section_by_name (sub, fn_name);
-		  }
-
-		free (fn_name);
-		if (fn_text == NULL || !fn_text->gc_mark)
-		  continue;
-	      }
-
-	    /* If not using specially named exception table section,
-	       then keep whatever we are using.  */
-	    if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
-	      return FALSE;
-	  }
-    }
 
   /* ... and mark SEC_EXCLUDE for those that go.  */
   return elf_gc_sweep (abfd, info);

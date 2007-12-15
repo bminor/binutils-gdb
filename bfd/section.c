@@ -357,9 +357,8 @@ CODE_FRAGMENT
 .     output sections that have an input section.  *}
 .  unsigned int linker_has_input : 1;
 .
-.  {* Mark flags used by some linker backends for garbage collection.  *}
+.  {* Mark flag used by some linker backends for garbage collection.  *}
 .  unsigned int gc_mark : 1;
-.  unsigned int gc_mark_from_eh : 1;
 .
 .  {* The following flags are used by the ELF linker. *}
 .
