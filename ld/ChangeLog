@@ -1,3 +1,11 @@
+2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* scripttempl/armbpabi.sc (.text): Don't KEEP (*(.text.*personality*)).
+	(.data): Don't KEEP (*(.gnu.linkonce.d.*personality*)).
+	* scripttempl/elf.sc: As for armbpabi.sc.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+
 2007-11-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* emulparams/vxworks.sh (OTHER_READONLY_SECTIONS,
