@@ -290,6 +290,14 @@ struct eh_cie_fde
 	 a PC-relative one.  It is the group representative's setting
 	 that matters.  */
       unsigned int make_lsda_relative : 1;
+
+      /* True if the CIE contains personality data and if that data
+	 uses a PC-relative encoding.  */
+      unsigned int per_encoding_relative : 1;
+
+      /* True if we need to add an 'R' (FDE encoding) entry to the
+	 CIE's augmentation data.  */
+      unsigned int add_fde_encoding : 1;
     } cie;
   } u;
   unsigned int reloc_index;
@@ -299,12 +307,25 @@ struct eh_cie_fde
   unsigned int fde_encoding : 8;
   unsigned int lsda_encoding : 8;
   unsigned int lsda_offset : 8;
+
+  /* True if this entry represents a CIE, false if it represents an FDE.  */
   unsigned int cie : 1;
+
+  /* True if this entry is currently marked for removal.  */
   unsigned int removed : 1;
+
+  /* True if we need to add a 'z' (augmentation size) entry to the CIE's
+     augmentation data, and an associated byte to each of the CIE's FDEs.  */
   unsigned int add_augmentation_size : 1;
-  unsigned int add_fde_encoding : 1;
+
+  /* True if we have decided to convert absolute FDE relocations into
+     relative ones.  This applies to the first relocation in the FDE,
+     which is against the code that the FDE describes.  */
   unsigned int make_relative : 1;
-  unsigned int per_encoding_relative : 1;
+
+  /* Unused bits.  */
+  unsigned int pad1 : 4;
+
   unsigned int *set_loc;
 };
 

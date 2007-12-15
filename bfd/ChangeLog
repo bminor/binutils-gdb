@@ -1,5 +1,25 @@
 2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
 
+	* elf-bfd.h (eh_cie_fde): Move add_fde_encoding and
+	per_encoding_relative to u.cie.  Add commentary.
+	* elf-eh-frame.c (cie): Remove make_relative.
+	(extra_augmentation_string_bytes): Update use of add_fde_encoding.
+	(extra_augmentation_data_bytes): Likewise.  Use an FDE's own
+	add_augmentation_size field, rather than referring to the CIE.
+	(_bfd_elf_parse_eh_frame): Don't set the struct cie
+	make_relative field; set the eh_cie_fde field directly.
+	Update setting of add_fde_encoding and per_encoding_relative.
+	Copy make_relative and add_augmentation_size from the CIE
+	to the FDE.
+	(_bfd_elf_discard_section_eh_frame): Use the FDE's own
+	make_relative field.
+	(_bfd_elf_eh_frame_section_offset): Likewise.
+	(_bfd_elf_write_section_eh_frame): Update accesses to
+	add_fde_encoding and per_encoding_relative.  Use the FDE's
+	own make_relative and add_augmentation_size fields.
+
+2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
+
 	* elf-bfd.h (eh_cie_fde): Remove need_lsda_relative.
 	Move make_lsda_relative to u.cie.
 	* elf-eh-frame.c (cie): Rename make_lsda_relative to
