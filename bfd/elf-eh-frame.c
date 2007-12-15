@@ -304,7 +304,7 @@ extra_augmentation_data_bytes (struct eh_cie_fde *entry)
     }
   else
     {
-      if (entry->cie_inf->add_augmentation_size)
+      if (entry->u.fde.cie_inf->add_augmentation_size)
 	size++;
     }
   return size;
@@ -572,6 +572,7 @@ _bfd_elf_discard_section_eh_frame
 
       this_inf->offset = last_fde - ehbuf;
       this_inf->size = 4 + hdr_length;
+      this_inf->reloc_index = cookie->rel - cookie->rels;
 
       if (hdr_length == 0)
 	{
@@ -826,7 +827,7 @@ _bfd_elf_discard_section_eh_frame
 		}
 	      ecie->usage_count++;
 	      hdr_info->fde_count++;
-	      this_inf->cie_inf = (void *) (ecie - ecies);
+	      this_inf->u.fde.cie_inf = (void *) (ecie - ecies);
 	    }
 
 	  /* Skip the initial location and address range.  */
@@ -954,8 +955,8 @@ _bfd_elf_discard_section_eh_frame
       {
 	if (!ent->cie)
 	  {
-	    ecie = ecies + (bfd_hostptr_t) ent->cie_inf;
-	    ent->cie_inf = ecie->cie.cie_inf;
+	    ecie = ecies + (bfd_hostptr_t) ent->u.fde.cie_inf;
+	    ent->u.fde.cie_inf = ecie->cie.cie_inf;
 	  }
 	ent->new_offset = offset;
 	offset += size_of_output_cie_fde (ent, ptr_size);
@@ -1116,20 +1117,20 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
   /* If converting to DW_EH_PE_pcrel, there will be no need for run-time
      relocation against FDE's initial_location field.  */
   if (!sec_info->entry[mid].cie
-      && sec_info->entry[mid].cie_inf->make_relative
+      && sec_info->entry[mid].u.fde.cie_inf->make_relative
       && offset == sec_info->entry[mid].offset + 8)
     return (bfd_vma) -2;
 
   /* If converting LSDA pointers to DW_EH_PE_pcrel, there will be no need
      for run-time relocation against LSDA field.  */
   if (!sec_info->entry[mid].cie
-      && sec_info->entry[mid].cie_inf->make_lsda_relative
+      && sec_info->entry[mid].u.fde.cie_inf->make_lsda_relative
       && (offset == (sec_info->entry[mid].offset + 8
 		     + sec_info->entry[mid].lsda_offset))
-      && (sec_info->entry[mid].cie_inf->need_lsda_relative
+      && (sec_info->entry[mid].u.fde.cie_inf->need_lsda_relative
 	  || !hdr_info->offsets_adjusted))
     {
-      sec_info->entry[mid].cie_inf->need_lsda_relative = 1;
+      sec_info->entry[mid].u.fde.cie_inf->need_lsda_relative = 1;
       return (bfd_vma) -2;
     }
 
@@ -1138,7 +1139,7 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (sec_info->entry[mid].set_loc
       && (sec_info->entry[mid].cie
 	  ? sec_info->entry[mid].make_relative
-	  : sec_info->entry[mid].cie_inf->make_relative)
+	  : sec_info->entry[mid].u.fde.cie_inf->make_relative)
       && (offset >= sec_info->entry[mid].offset + 8
 		    + sec_info->entry[mid].set_loc[1]))
     {
@@ -1375,10 +1376,12 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	  bfd_vma value, address;
 	  unsigned int width;
 	  bfd_byte *start;
+	  struct eh_cie_fde *cie;
 
 	  /* Skip length.  */
+	  cie = ent->u.fde.cie_inf;
 	  buf += 4;
-	  value = ent->new_offset + 4 - ent->cie_inf->new_offset;
+	  value = ent->new_offset + 4 - cie->new_offset;
 	  bfd_put_32 (abfd, value, buf);
 	  buf += 4;
 	  width = get_DW_EH_PE_width (ent->fde_encoding, ptr_size);
@@ -1406,7 +1409,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		  address += sec->output_section->vma + ent->offset + 8;
 		  break;
 		}
-	      if (ent->cie_inf->make_relative)
+	      if (cie->make_relative)
 		value -= sec->output_section->vma + ent->new_offset + 8;
 	      write_value (abfd, buf, value, width);
 	    }
@@ -1421,7 +1424,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	    }
 
 	  if ((ent->lsda_encoding & 0xf0) == DW_EH_PE_pcrel
-	      || ent->cie_inf->need_lsda_relative)
+	      || cie->need_lsda_relative)
 	    {
 	      buf += ent->lsda_offset;
 	      width = get_DW_EH_PE_width (ent->lsda_encoding, ptr_size);
@@ -1431,13 +1434,13 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		{
 		  if ((ent->lsda_encoding & 0xf0) == DW_EH_PE_pcrel)
 		    value += ent->offset - ent->new_offset;
-		  else if (ent->cie_inf->need_lsda_relative)
+		  else if (cie->need_lsda_relative)
 		    value -= (sec->output_section->vma + ent->new_offset + 8
 			      + ent->lsda_offset);
 		  write_value (abfd, buf, value, width);
 		}
 	    }
-	  else if (ent->cie_inf->add_augmentation_size)
+	  else if (cie->add_augmentation_size)
 	    {
 	      /* Skip the PC and length and insert a zero byte for the
 		 augmentation size.  */
@@ -1469,7 +1472,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 
 		  if ((ent->fde_encoding & 0xf0) == DW_EH_PE_pcrel)
 		    value += ent->offset + 8 - new_offset;
-		  if (ent->cie_inf->make_relative)
+		  if (cie->make_relative)
 		    value -= sec->output_section->vma + new_offset
 			     + ent->set_loc[cnt];
 		  write_value (abfd, buf, value, width);

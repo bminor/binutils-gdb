@@ -1,5 +1,15 @@
 2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
 
+	* elf-bfd.h (eh_cie_fde): Put cie_inf in a union.  Add a reloc_index
+	field.  Use bitfields for fde_encoding, lsda_encoding and lsda_offset.
+	* elf-eh-frame.c (extra_augmentation_data_bytes): Adjust cie_inf
+	accesses after the above change.
+	(_bfd_elf_eh_frame_section_offset): Likewise.
+	(_bfd_elf_write_section_eh_frame): Likewise.
+	(_bfd_elf_discard_section_eh_frame): Likewise.  Set up reloc_index.
+
+2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
+
 	* elf-bfd.h (_bfd_elf_gc_mark_rsec, _bfd_elf_gc_mark_reloc): Declare.
 	(_bfd_elf_gc_mark): Use elf_gc_mark_hook_fn.
 	* elflink.c (init_reloc_cookie, fini_reloc_cookie)

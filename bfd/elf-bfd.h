@@ -264,14 +264,19 @@ struct elf_link_loaded_list
 /* Structures used by the eh_frame optimization code.  */
 struct eh_cie_fde
 {
-  /* For FDEs, this points to the CIE used.  */
-  struct eh_cie_fde *cie_inf;
+  union {
+    struct {
+      /* The CIE that we have chosen to use for this FDE.  */
+      struct eh_cie_fde *cie_inf;
+    } fde;
+  } u;
+  unsigned int reloc_index;
   unsigned int size;
   unsigned int offset;
   unsigned int new_offset;
-  unsigned char fde_encoding;
-  unsigned char lsda_encoding;
-  unsigned char lsda_offset;
+  unsigned int fde_encoding : 8;
+  unsigned int lsda_encoding : 8;
+  unsigned int lsda_offset : 8;
   unsigned int cie : 1;
   unsigned int removed : 1;
   unsigned int add_augmentation_size : 1;
