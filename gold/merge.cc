@@ -466,6 +466,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
   const unsigned char* pdata = object->section_contents(shndx, &len, false);
 
   const Char_type* p = reinterpret_cast<const Char_type*>(pdata);
+  const Char_type* pend = p + len;
 
   if (len % sizeof(Char_type) != 0)
     {
@@ -478,12 +479,10 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
   off_t i = 0;
   while (i < len)
     {
-      off_t plen = 0;
-      for (const Char_type* pl = p; *pl != 0; ++pl)
+      const Char_type* pl;
+      for (pl = p; *pl != 0; ++pl)
 	{
-          // The length PLEN is in characters, not bytes.
-	  ++plen;
-	  if (i + plen * static_cast<off_t>(sizeof(Char_type)) >= len)
+	  if (pl >= pend)
 	    {
 	      object->error(_("entry in mergeable string section "
 			      "not null terminated"));
@@ -491,13 +490,13 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 	    }
 	}
 
-      const Char_type* str = this->stringpool_.add(p, true, NULL);
+      const Char_type* str = this->stringpool_.add_prefix(p, pl - p, NULL);
 
-      off_t bytelen_with_null = (plen + 1) * sizeof(Char_type);
+      size_t bytelen_with_null = ((pl - p) + 1) * sizeof(Char_type);
       this->merged_strings_.push_back(Merged_string(object, shndx, i, str,
 						    bytelen_with_null));
 
-      p += plen + 1;
+      p = pl + 1;
       i += bytelen_with_null;
     }
 
