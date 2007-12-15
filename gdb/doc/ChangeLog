@@ -1,3 +1,7 @@
+2007-12-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Host I/O Packets): Fix xref syntax.
+
 2007-12-14  Vladimir Prus  <vladimir@codesourcery.com>
 	
 	* gdb.texinfo (GDB/MI Breakpoint Commands): Document
@@ -11,7 +15,7 @@
 	(Remote Debugging): Add File Transfer section.
 	(Remote Configuration): Document Host I/O packets.
 	(GDB/MI): Add GDB/MI File Transfer Commands section.
-	(Remote Protocol): Add Host I/O Packets section.
+	(Host I/O Packets): New section in "Remote Protocol".
 	(Packets): Add vFile.
 
 2007-11-17  Eli Zaretskii  <eliz@gnu.org>

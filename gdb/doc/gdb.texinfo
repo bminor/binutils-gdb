@@ -24777,7 +24777,7 @@ return -1 if an error occurs.  @var{pathname} is a string,
 @var{flags} is an integer indicating a mask of open flags
 (@pxref{Open Flags}), and @var{mode} is an integer indicating a mask
 of mode bits to use if the file is created (@pxref{mode_t Values}).
-@xref{open} for details of the open flags and mode values.
+@xref{open}, for details of the open flags and mode values.
 
 @item vFile:close: @var{fd}
 Close the open file corresponding to @var{fd} and return 0, or
