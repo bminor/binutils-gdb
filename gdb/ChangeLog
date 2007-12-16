@@ -1,3 +1,9 @@
+2007-12-16  Francois-Xavier Coudert  <fxcoudert@gcc.gnu.org>
+
+	* f-typeprint.c (print_equivalent_f77_float_type): Remove function.
+	(f_type_print_base): Output the type names directly for real and
+	complex types.
+
 2007-12-16  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* breakpoint.c (bpstat_have_active_hw_watchpoints):

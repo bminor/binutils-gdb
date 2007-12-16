@@ -39,9 +39,6 @@
 static void f_type_print_args (struct type *, struct ui_file *);
 #endif
 
-static void print_equivalent_f77_float_type (int level, struct type *,
-					     struct ui_file *);
-
 static void f_type_print_varspec_suffix (struct type *, struct ui_file *,
 					 int, int, int);
 
@@ -254,17 +251,6 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
     }
 }
 
-static void
-print_equivalent_f77_float_type (int level, struct type *type,
-				 struct ui_file *stream)
-{
-  /* Override type name "float" and make it the
-     appropriate real. XLC stupidly outputs -12 as a type
-     for real when it really should be outputting -18 */
-
-  fprintfi_filtered (level, stream, "real*%d", TYPE_LENGTH (type));
-}
-
 /* Print the name of the type (or the ultimate pointer target,
    function value or array element), or the description of a
    structure or union.
@@ -301,10 +287,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 
   if ((show <= 0) && (TYPE_NAME (type) != NULL))
     {
-      if (TYPE_CODE (type) == TYPE_CODE_FLT)
-	print_equivalent_f77_float_type (level, type, stream);
-      else
-	fputs_filtered (TYPE_NAME (type), stream);
+      fputs_filtered (TYPE_NAME (type), stream);
       return;
     }
 
@@ -363,14 +346,6 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	fprintfi_filtered (level, stream, "character");
       else
 	goto default_case;
-      break;
-
-    case TYPE_CODE_COMPLEX:
-      fprintfi_filtered (level, stream, "complex*%d", TYPE_LENGTH (type));
-      break;
-
-    case TYPE_CODE_FLT:
-      print_equivalent_f77_float_type (level, type, stream);
       break;
 
     case TYPE_CODE_STRING:
