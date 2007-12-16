@@ -53,6 +53,9 @@
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
 
+/* Define to 1 if you have the `pread' function. */
+#undef HAVE_PREAD
+
 /* Define to 1 if you have the `pread64' function. */
 #undef HAVE_PREAD64
 
@@ -71,6 +74,9 @@
 
 /* Define if the target supports PTRACE_GETREGS for register access. */
 #undef HAVE_PTRACE_GETREGS
+
+/* Define to 1 if you have the `pwrite' function. */
+#undef HAVE_PWRITE
 
 /* Define to 1 if you have the <sgtty.h> header file. */
 #undef HAVE_SGTTY_H

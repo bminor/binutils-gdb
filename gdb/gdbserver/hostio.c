@@ -377,7 +377,13 @@ handle_pread (char *own_buf, int *new_packet_len)
     }
 
   data = malloc (len);
+#ifdef HAVE_PREAD
   ret = pread (fd, data, len, offset);
+#else
+  ret = lseek (fd, offset, SEEK_SET);
+  if (ret != -1)
+    ret = read (fd, data, len);
+#endif
 
   if (ret == -1)
     {
@@ -419,7 +425,13 @@ handle_pwrite (char *own_buf, int packet_len)
       return;
     }
 
+#ifdef HAVE_PWRITE
   ret = pwrite (fd, data, len, offset);
+#else
+  ret = lseek (fd, offset, SEEK_SET);
+  if (ret != -1)
+    ret = write (fd, data, len);
+#endif
 
   if (ret == -1)
     {
