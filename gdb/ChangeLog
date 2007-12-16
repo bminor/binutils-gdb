@@ -1,3 +1,11 @@
+2007-12-16  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* target.h (target_pid_or_tid_to_str): Remove.
+	* infrun.c (handle_inferior_event):
+        Use target_pid_to_str instead of 
+	target_pid_or_tid_to_str.
+	(normal_stop): Likewise.
+
 2007-12-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dwarf_attr_name): Rename `DW_AT_stride_size' to its

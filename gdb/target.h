@@ -991,11 +991,6 @@ extern char *normal_pid_to_str (ptid_t ptid);
 #define target_extra_thread_info(TP) \
      (current_target.to_extra_thread_info (TP))
 
-#ifndef target_pid_or_tid_to_str
-#define target_pid_or_tid_to_str(ID) \
-     target_pid_to_str (ID)
-#endif
-
 /* Attempts to find the pathname of the executable file
    that was run to create a specified process.
 

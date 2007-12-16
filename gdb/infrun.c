@@ -1335,7 +1335,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       add_thread (ecs->ptid);
 
       ui_out_text (uiout, "[New ");
-      ui_out_text (uiout, target_pid_or_tid_to_str (ecs->ptid));
+      ui_out_text (uiout, target_pid_to_str (ecs->ptid));
       ui_out_text (uiout, "]\n");
     }
 
@@ -3157,7 +3157,7 @@ normal_stop (void)
     {
       target_terminal_ours_for_output ();
       printf_filtered (_("[Switching to %s]\n"),
-		       target_pid_or_tid_to_str (inferior_ptid));
+		       target_pid_to_str (inferior_ptid));
       previous_inferior_ptid = inferior_ptid;
     }
 
