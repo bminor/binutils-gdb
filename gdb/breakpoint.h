@@ -572,9 +572,6 @@ extern struct breakpoint *bpstat_find_step_resume_breakpoint (bpstat);
    just to things like whether watchpoints are set.  */
 extern int bpstat_should_step (void);
 
-/* Nonzero if there are enabled hardware watchpoints. */
-extern int bpstat_have_active_hw_watchpoints (void);
-
 /* Print a message indicating what happened.  Returns nonzero to
    say that only the source line should be printed after this (zero
    return means print the frame as well as the source line).  */

@@ -2610,8 +2610,6 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 {
   struct breakpoint *b = NULL;
   const struct bp_location *bl;
-  /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
-  int real_breakpoint = 0;
   /* Root of the chain of bpstat's */
   struct bpstats root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
@@ -2809,8 +2807,6 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	/* By definition, an encountered breakpoint is a triggered
 	   breakpoint. */
 	++(b->hit_count);
-
-	real_breakpoint = 1;
       }
 
     if (frame_id_p (b->frame_id)
@@ -3174,18 +3170,6 @@ bpstat_should_step (void)
   return 0;
 }
 
-/* Nonzero if there are enabled hardware watchpoints. */
-int
-bpstat_have_active_hw_watchpoints (void)
-{
-  const struct bp_location *bpt;
-  ALL_BP_LOCATIONS (bpt)
-    if (breakpoint_enabled (bpt->owner)
-	&& bpt->inserted
-	&& bpt->loc_type == bp_loc_hardware_watchpoint)
-      return 1;
-  return 0;
-}
 
 
 /* Given a bpstat that records zero or more triggered eventpoints, this
