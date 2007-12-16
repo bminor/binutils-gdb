@@ -20418,7 +20418,7 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
       ;;
-  *-*-solaris2.[6789] | *-*-solaris2.1[0-9])
+  *-*-solaris2.[6789] | *-*-solaris2.1[0-9]*)
 
 cat >>confdefs.h <<\_ACEOF
 #define NEW_PROC_API 1

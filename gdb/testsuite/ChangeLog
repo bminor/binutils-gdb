@@ -1,3 +1,8 @@
+2007-12-16  Daniel Jacobowitz  <dan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* gdb.base/siginfo-addr.exp, gdb.base/siginfo-addr.c: New.
+
 2007-12-14  Vladimir Prus  <vladimir@codesourcery.com>
 	
 	* gdb.mi/mi-pending.exp: New.

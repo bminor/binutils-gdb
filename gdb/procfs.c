@@ -2485,6 +2485,8 @@ proc_set_current_signal (procinfo *pi, int signo)
     char sinfo[sizeof (gdb_siginfo_t)];
   } arg;
   gdb_siginfo_t *mysinfo;
+  ptid_t wait_ptid;
+  struct target_waitstatus wait_status;
 
   /*
    * We should never have to apply this operation to any procinfo
@@ -2508,10 +2510,31 @@ proc_set_current_signal (procinfo *pi, int signo)
 
   /* The pointer is just a type alias.  */
   mysinfo = (gdb_siginfo_t *) &arg.sinfo;
-  mysinfo->si_signo = signo;
-  mysinfo->si_code  = 0;
-  mysinfo->si_pid   = getpid ();       /* ?why? */
-  mysinfo->si_uid   = getuid ();       /* ?why? */
+  get_last_target_status (&wait_ptid, &wait_status);
+  if (ptid_equal (wait_ptid, inferior_ptid)
+      && wait_status.kind == TARGET_WAITKIND_STOPPED
+      && wait_status.value.sig == target_signal_from_host (signo)
+      && proc_get_status (pi)
+#ifdef NEW_PROC_API
+      && pi->prstatus.pr_lwp.pr_info.si_signo == signo
+#else
+      && pi->prstatus.pr_info.si_signo == signo
+#endif
+      )
+    /* Use the siginfo associated with the signal being
+       redelivered.  */
+#ifdef NEW_PROC_API
+    memcpy (mysinfo, &pi->prstatus.pr_lwp.pr_info, sizeof (gdb_siginfo_t));
+#else
+    memcpy (mysinfo, &pi->prstatus.pr_info, sizeof (gdb_siginfo_t));
+#endif
+  else
+    {
+      mysinfo->si_signo = signo;
+      mysinfo->si_code  = 0;
+      mysinfo->si_pid   = getpid ();       /* ?why? */
+      mysinfo->si_uid   = getuid ();       /* ?why? */
+    }
 
 #ifdef NEW_PROC_API
   arg.cmd = PCSSIG;

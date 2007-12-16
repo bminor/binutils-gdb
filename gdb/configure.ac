@@ -828,7 +828,7 @@ if test "${target}" = "${host}"; then
       [Define if you want to use new multi-fd /proc interface
        (replaces HAVE_MULTIPLE_PROC_FDS as well as other macros).])
       ;;
-  *-*-solaris2.[[6789]] | *-*-solaris2.1[[0-9]])
+  *-*-solaris2.[[6789]] | *-*-solaris2.1[[0-9]]*)
       AC_DEFINE(NEW_PROC_API, 1,
       [Define if you want to use new multi-fd /proc interface
        (replaces HAVE_MULTIPLE_PROC_FDS as well as other macros).])
