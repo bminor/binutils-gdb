@@ -1,5 +1,9 @@
 2007-12-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* mi/mi-main.c: Remove code that was commented out in 1999.
+
+2007-12-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* expression.h (parse_expression_in_context): Delete prototype.
 	* parse.c (parse_expression_in_context): Delete.
 

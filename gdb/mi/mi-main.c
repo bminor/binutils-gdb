@@ -643,36 +643,6 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
   return MI_CMD_DONE;
 }
 
-#if 0
-/* This is commented out because we decided it was not useful.  I leave
-   it, just in case.  ezannoni:1999-12-08 */
-
-/* Assign a value to a variable.  The expression argument must be in
-   the form A=2 or "A = 2" i.e. if there are spaces it needs to be
-   quoted.  */
-enum mi_cmd_result
-mi_cmd_data_assign (char *command, char **argv, int argc)
-{
-  struct expression *expr;
-  struct cleanup *old_chain;
-
-  if (argc != 1)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_assign: Usage: -data-assign expression");
-      return MI_CMD_ERROR;
-    }
-
-  /* NOTE what follows is a clone of set_command().  FIXME: ezannoni
-     01-12-1999: Need to decide what to do with this for libgdb purposes.  */
-
-  expr = parse_expression (argv[0]);
-  old_chain = make_cleanup (free_current_contents, &expr);
-  evaluate_expression (expr);
-  do_cleanups (old_chain);
-  return MI_CMD_DONE;
-}
-#endif
-
 /* Evaluate the value of the argument.  The argument is an
    expression. If the expression contains spaces it needs to be
    included in double quotes.  */
