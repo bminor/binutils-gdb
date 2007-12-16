@@ -23158,20 +23158,24 @@ must also escape @code{0x2a} (@sc{ascii} @samp{*}), so that it
 is not interpreted as the start of a run-length encoded sequence
 (described next).
 
-Response @var{data} can be run-length encoded to save space.  A @samp{*}
-means that the next character is an @sc{ascii} encoding giving a repeat count
-which stands for that many repetitions of the character preceding the
-@samp{*}.  The encoding is @code{n+29}, yielding a printable character
-where @code{n >=3} (which is where rle starts to win).  The printable
-characters @samp{$}, @samp{#}, @samp{+} and @samp{-} or with a numeric
-value greater than 126 should not be used.
+Response @var{data} can be run-length encoded to save space.
+Run-length encoding replaces runs of identical characters with one
+instance of the repeated character, followed by a @samp{*} and a
+repeat count.  The repeat count is itself sent encoded, to avoid
+binary characters in @var{data}: a value of @var{n} is sent as
+@code{@var{n}+29}.  For a repeat count greater or equal to 3, this
+produces a printable @sc{ascii} character, e.g.@: a space (@sc{ascii}
+code 32) for a repeat count of 3.  (This is because run-length
+encoding starts to win for counts 3 or more.)  Thus, for example,
+@samp{0* } is a run-length encoding of ``0000'': the space character
+after @samp{*} means repeat the leading @code{0} @w{@code{32 - 29 =
+3}} more times.
 
-So:
-@smallexample
-"@code{0* }"
-@end smallexample
-@noindent
-means the same as "0000".
+The printable characters @samp{#} and @samp{$} or with a numeric value
+greater than 126 must not be used.  Runs of six repeats (@samp{#}) or
+seven repeats (@samp{$}) can be expanded using a repeat count of only
+five (@samp{"}).  For example, @samp{00000000} can be encoded as
+@samp{0*"00}.
 
 The error response returned for some packets includes a two character
 error number.  That number is not well defined.

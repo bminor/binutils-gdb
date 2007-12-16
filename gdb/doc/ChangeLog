@@ -1,3 +1,8 @@
+2007-12-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Overview): Clarify run-length encoding
+	example.  Remove the restriction on "+" and "-" characters.
+
 2007-12-15  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Host I/O Packets): Fix xref syntax.
