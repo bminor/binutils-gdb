@@ -1,3 +1,8 @@
+2007-12-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* expression.h (parse_expression_in_context): Delete prototype.
+	* parse.c (parse_expression_in_context): Delete.
+
 2007-12-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Add support for pending breakpoints in MI.

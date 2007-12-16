@@ -1027,20 +1027,6 @@ parse_expression (char *string)
   return exp;
 }
 
-
-/* As for parse_expression, except that if VOID_CONTEXT_P, then
-   no value is expected from the expression.  */
-
-struct expression *
-parse_expression_in_context (char *string, int void_context_p)
-{
-  struct expression *exp;
-  exp = parse_exp_in_context (&string, 0, 0, void_context_p);
-  if (*string != '\000')
-    error (_("Junk after end of expression."));
-  return exp;
-}
-
 /* A post-parser that does nothing */
 
 void
