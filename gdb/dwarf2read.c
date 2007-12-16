@@ -8153,8 +8153,8 @@ dwarf_attr_name (unsigned attr)
       return "DW_AT_return_addr";
     case DW_AT_start_scope:
       return "DW_AT_start_scope";
-    case DW_AT_stride_size:
-      return "DW_AT_stride_size";
+    case DW_AT_bit_stride:
+      return "DW_AT_bit_stride";
     case DW_AT_upper_bound:
       return "DW_AT_upper_bound";
     case DW_AT_abstract_origin:
@@ -8222,8 +8222,8 @@ dwarf_attr_name (unsigned attr)
       return "DW_AT_associated";
     case DW_AT_data_location:
       return "DW_AT_data_location";
-    case DW_AT_stride:
-      return "DW_AT_stride";
+    case DW_AT_byte_stride:
+      return "DW_AT_byte_stride";
     case DW_AT_entry_pc:
       return "DW_AT_entry_pc";
     case DW_AT_use_UTF8:

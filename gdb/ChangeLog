@@ -1,3 +1,9 @@
+2007-12-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf_attr_name): Rename `DW_AT_stride_size' to its
+	DWARF3 equivalent `DW_AT_bit_stride'.
+	Rename `DW_AT_stride' to its DWARF3 equivalent `DW_AT_byte_stride'.
+
 2007-12-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi/mi-main.c: Remove code that was commented out in 1999.
