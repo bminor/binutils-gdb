@@ -1,3 +1,8 @@
+2007-12-17  Chris Dearman  <chris@mips.com>
+
+	* symfile.c (init_filename_language_table): Recognise .sx as
+	an assembler file.
+
 2007-12-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* language.h (enum exp_opcode): Comment out this declaration,
