@@ -30,7 +30,8 @@ struct objfile;
 struct frame_info;
 struct expression;
 struct ui_file;
-enum exp_opcode;
+
+/* enum exp_opcode;     ANSI's `wisdom' didn't include forward enum decls. */
 
 /* This used to be included to configure GDB for one or more specific
    languages.  Now it is left out to configure for all of them.  FIXME.  */

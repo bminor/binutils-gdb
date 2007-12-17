@@ -1,3 +1,8 @@
+2007-12-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* language.h (enum exp_opcode): Comment out this declaration,
+	undoing the previous change.
+
 2007-12-17  Luis Machado  <luisgpm@br.ibm.com>
 
         * breakpoint.c: (watch_command_1): Parse additional optional
