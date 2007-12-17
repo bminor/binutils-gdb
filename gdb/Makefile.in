@@ -2903,7 +2903,7 @@ utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
 	$(exceptions_h) $(tui_h) $(gdbcmd_h) $(serial_h) $(bfd_h) \
 	$(target_h) $(demangle_h) $(expression_h) $(language_h) $(charset_h) \
 	$(annotate_h) $(filenames_h) $(symfile_h) $(inferior_h) $(top_h) \
-	$(gdb_curses_h) $(readline_h) $(gdb_obstack_h)
+	$(gdb_curses_h) $(readline_h) $(gdb_obstack_h) $(gdbcore_h)
 v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(frame_base_h) $(trad_frame_h) \
 	$(frame_unwind_h) $(dwarf2_frame_h) $(gdbtypes_h) $(inferior_h) \
 	$(gdb_string_h) $(gdb_assert_h) $(gdbcore_h) $(arch_utils_h) \

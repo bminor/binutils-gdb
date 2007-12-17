@@ -1,3 +1,11 @@
+2007-12-17  Nigel Stephens  <nigel@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* utils.c (string_to_core_addr): If the executable format
+	indicates that addresses should be sign-extended and there are
+	only 8 hex digits in the address, then do so.
+	* Makefile.in (utils.o): Depend on $(gdbcore_h).
+
 2007-12-17  Chris Dearman  <chris@mips.com>
 
 	* symfile.c (init_filename_language_table): Recognise .sx as
