@@ -1,5 +1,12 @@
 2007-12-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/frame_args/foo.adb: New file.
+	* gdb.ada/frame_args/pck.ads: New file.
+	* gdb.ada/frame_args/pck.adb: New file.
+	* gdb.ada/frame_args.exp: New testcase.
+
+2007-12-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/frame-args.c: New file.
 	* gdb.base/frame-args.exp: New testcase.
 
