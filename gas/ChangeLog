@@ -1,5 +1,10 @@
 2007-12-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (output_insn): Use ARRAY_SIZE.
+	(lex_got): Likewise.
+
+2007-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (output_insn): Use FRAG_APPEND_1_CHAR
 	instead of frag_more/md_number_to_chars.
 	(md_short_jump_size): Removed.

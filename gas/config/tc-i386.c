@@ -4962,6 +4962,7 @@ output_insn (void)
       /* Output normal instructions here.  */
       char *p;
       unsigned char *q;
+      unsigned int j;
       unsigned int prefix;
 
       switch (i.tm.opcode_length)
@@ -4995,13 +4996,9 @@ check_prefix:
 	}
 
       /* The prefix bytes.  */
-      for (q = i.prefix;
-	   q < i.prefix + sizeof (i.prefix) / sizeof (i.prefix[0]);
-	   q++)
-	{
-	  if (*q)
-	    FRAG_APPEND_1_CHAR (*q);
-	}
+      for (j = ARRAY_SIZE (i.prefix), q = i.prefix; j > 0; j--, q++)
+	if (*q)
+	  FRAG_APPEND_1_CHAR (*q);
 
       /* Now the opcode; be careful about word order here!  */
       if (i.tm.opcode_length == 1)
@@ -5451,7 +5448,7 @@ lex_got (enum bfd_reloc_code_real *reloc,
     if (is_end_of_line[(unsigned char) *cp] || *cp == ',')
       return NULL;
 
-  for (j = 0; j < sizeof (gotrel) / sizeof (gotrel[0]); j++)
+  for (j = 0; j < ARRAY_SIZE (gotrel); j++)
     {
       int len;
 
