@@ -1,3 +1,9 @@
+2007-12-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* language.h (enum exp_opcode): Add forward declaration.
+	(language_string_char_type, language_lookup_primitive_type_by_name):
+	Move declaration past declaration of language_defn.
+
 2007-12-16  Daniel Jacobowitz  <dan@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
 

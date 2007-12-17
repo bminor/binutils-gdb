@@ -30,8 +30,7 @@ struct objfile;
 struct frame_info;
 struct expression;
 struct ui_file;
-
-/* enum exp_opcode;     ANSI's `wisdom' didn't include forward enum decls. */
+enum exp_opcode;
 
 /* This used to be included to configure GDB for one or more specific
    languages.  Now it is left out to configure for all of them.  FIXME.  */
@@ -128,13 +127,6 @@ struct language_arch_info
   /* Type of elements of strings. */
   struct type *string_char_type;
 };
-
-struct type *language_string_char_type (const struct language_defn *l,
-					struct gdbarch *gdbarch);
-
-struct type *language_lookup_primitive_type_by_name (const struct language_defn *l,
-						     struct gdbarch *gdbarch,
-						     const char *name);
 
 /* Structure tying together assorted information about a language.  */
 
@@ -314,6 +306,14 @@ extern enum language_mode
     language_mode_auto, language_mode_manual
   }
 language_mode;
+
+struct type *language_string_char_type (const struct language_defn *l,
+					struct gdbarch *gdbarch);
+
+struct type *language_lookup_primitive_type_by_name (const struct language_defn *l,
+						     struct gdbarch *gdbarch,
+						     const char *name);
+
 
 /* These macros define the behaviour of the expression 
    evaluator.  */
