@@ -3216,7 +3216,7 @@ times slower than normal execution.  (But this may still be worth it, to
 catch errors where you have no clue what part of your program is the
 culprit.)
 
-On some systems, such as HP-UX, @sc{gnu}/Linux and most other
+On some systems, such as HP-UX, PowerPC, @sc{gnu}/Linux and most other
 x86-based targets, @value{GDBN} includes support for hardware
 watchpoints, which do not slow down the running of your program.
 
@@ -3356,6 +3356,13 @@ way of doing that would be to set a code breakpoint at the entry to the
 @cindex threads and watchpoints
 In multi-threaded programs, watchpoints will detect changes to the
 watched expression from every thread.
+
+@kindex watch thread thread_num
+@item watch @var{expr} thread @var{threadnum}
+Set a watchpoint that will break when @var{expr} is either read from
+or written into by the thread identified by @var{threadnum}.  If @var{expr}
+is modified by any other threads not matching @var{threadnum}, @value{GDBN}
+will not break.  Note that this will only work with Hardware Watchpoints.
 
 @quotation
 @emph{Warning:} In multi-threaded programs, software watchpoints

@@ -5606,7 +5606,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   struct frame_info *prev_frame = NULL;
   char *exp_start = NULL;
   char *exp_end = NULL;
-  char *tok, *end_tok;
+  char *tok, *id_tok_start, *end_tok;
   int toklen;
   char *cond_start = NULL;
   char *cond_end = NULL;
@@ -5614,10 +5614,72 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   int i, other_type_used, target_resources_ok = 0;
   enum bptype bp_type;
   int mem_cnt = 0;
+  int thread = -1;
 
   init_sal (&sal);		/* initialize to zeroes */
 
-  /* Parse arguments.  */
+  /* Make sure that we actually have parameters to parse.  */
+  if (arg != NULL && arg[0] != '\0')
+    {
+      toklen = strlen (arg); /* Size of argument list.  */
+
+      /* Points tok to the end of the argument list.  */
+      tok = arg + toklen - 1;
+
+      /* Go backwards in the parameters list. Skip the last parameter.
+         If we're expecting a 'thread <thread_num>' parameter, this should
+         be the thread identifier.  */
+      while (tok > arg && (*tok == ' ' || *tok == '\t'))
+        tok--;
+      while (tok > arg && (*tok != ' ' && *tok != '\t'))
+        tok--;
+
+      /* Points end_tok to the beginning of the last token.  */
+      id_tok_start = tok + 1;
+
+      /* Go backwards in the parameters list. Skip one more parameter.
+         If we're expecting a 'thread <thread_num>' parameter, we should
+         reach a "thread" token.  */
+      while (tok > arg && (*tok == ' ' || *tok == '\t'))
+        tok--;
+
+      end_tok = tok;
+
+      while (tok > arg && (*tok != ' ' && *tok != '\t'))
+        tok--;
+
+      /* Move the pointer forward to skip the whitespace and
+         calculate the length of the token.  */
+      tok++;
+      toklen = end_tok - tok;
+
+      if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
+        {
+          /* At this point we've found a "thread" token, which means
+             the user is trying to set a watchpoint that triggers
+             only in a specific thread.  */
+          char *endp;
+
+          /* Extract the thread ID from the next token.  */
+          thread = strtol (id_tok_start, &endp, 0);
+
+          /* Check if the user provided a valid numeric value for the
+             thread ID.  */
+          if (*endp != ' ' && *endp != '\t' && *endp != '\0')
+            error (_("Invalid thread ID specification %s."), id_tok_start);
+
+          /* Check if the thread actually exists.  */
+          if (!valid_thread_id (thread))
+            error (_("Unknown thread %d."), thread);
+
+          /* Truncate the string and get rid of the thread <thread_num>
+             parameter before the parameter list is parsed by the
+             evaluate_expression() function.  */
+          *tok = '\0';
+        }
+    }
+
+  /* Parse the rest of the arguments.  */
   innermost_block = NULL;
   exp_start = arg;
   exp = parse_exp_1 (&arg, 0, 0);
@@ -5710,6 +5772,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   b = set_raw_breakpoint (sal, bp_type);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
+  b->thread = thread;
   b->disposition = disp_donttouch;
   b->exp = exp;
   b->exp_valid_block = exp_valid_block;

@@ -1,3 +1,7 @@
+2007-12-17  Luis Machado  <luisgpm@br.ibm.com>
+
+	* doc/gdb.texinfo: Add new parameter's description.
+
 2007-12-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Overview): Clarify run-length encoding

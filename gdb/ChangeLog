@@ -1,5 +1,11 @@
 2007-12-17  Luis Machado  <luisgpm@br.ibm.com>
 
+        * breakpoint.c: (watch_command_1): Parse additional optional
+        "thread" parameter to the watchpoint command and set the
+        "thread" member of the breakpoint struct.
+
+2007-12-17  Luis Machado  <luisgpm@br.ibm.com>
+
         * breakpoint.c (bpstat_stop_status): Check an additional
         condition before evaluating an expression value.
 

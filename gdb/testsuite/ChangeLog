@@ -1,3 +1,8 @@
+2007-12-17  Luis Machado  <luisgpm@br.ibm.com>
+
+	* testsuite/gdb.base/watch_thread_num.c: New testcase source file.
+	* testsuite/gdb.base/watch_thread_num.exp: New testcase expect file.
+
 2007-12-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/frame_args/foo.adb: New file.
