@@ -2823,7 +2823,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	if (b->type == bp_watchpoint_scope)
 	  b->related_breakpoint->watchpoint_triggered = watch_triggered_yes;
 
-	if (bl->cond)
+	if (bl->cond && bl->owner->disposition != disp_del_at_next_stop)
 	  {
 	    /* Need to select the frame, with all that implies
 	       so that the conditions will have the right context.  */
