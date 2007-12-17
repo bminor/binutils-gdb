@@ -1,3 +1,12 @@
+2007-12-16  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
+	    Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.base/expand-psymtabs.c: New testcase
+	source file.
+	* gdb.base/expand-psymtabs.exp: New testcase
+	expect file.
+
+
 2007-12-17  Luis Machado  <luisgpm@br.ibm.com>
 
 	* testsuite/gdb.base/watch_thread_num.c: New testcase source file.
