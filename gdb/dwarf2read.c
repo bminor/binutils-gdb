@@ -3478,16 +3478,19 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_data_member_location, cu);
       if (attr)
 	{
+          int byte_offset;
+
           if (attr_form_is_section_offset (attr))
             {
               dwarf2_complex_location_expr_complaint ();
-              FIELD_BITPOS (*fp) = 0;
+              byte_offset = 0;
             }
           else if (attr_form_is_constant (attr))
-            FIELD_BITPOS (*fp) = dwarf2_get_attr_constant_value (attr, 0);
+            byte_offset = dwarf2_get_attr_constant_value (attr, 0);
           else
-            FIELD_BITPOS (*fp) =
-              decode_locdesc (DW_BLOCK (attr), cu) * bits_per_byte;
+            byte_offset = decode_locdesc (DW_BLOCK (attr), cu);
+
+          FIELD_BITPOS (*fp) = byte_offset * bits_per_byte;
 	}
       else
 	FIELD_BITPOS (*fp) = 0;
@@ -9734,9 +9737,14 @@ attr_form_is_block (struct attribute *attr)
       || attr->form == DW_FORM_block);
 }
 
-/* Return non-zero if ATTR's value is a section offset (classes
-   lineptr, loclistptr, macptr or rangelistptr).  In this case,
-   you may use DW_UNSND (attr) to retrieve the offset.  */
+/* Return non-zero if ATTR's value is a section offset --- classes
+   lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
+   You may use DW_UNSND (attr) to retrieve such offsets.
+
+   Section 7.5.4, "Attribute Encodings", explains that no attribute
+   may have a value that belongs to more than one of these classes; it
+   would be ambiguous if we did, because we use the same forms for all
+   of them.  */
 static int
 attr_form_is_section_offset (struct attribute *attr)
 {
