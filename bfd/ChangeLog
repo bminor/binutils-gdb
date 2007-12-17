@@ -1,3 +1,7 @@
+2007-12-17  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* config.bfd: Add arm-*-mingw32ce* target.
+
 2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* elf-bfd.h (eh_cie_fde): Replace u.cie.merged with a union of

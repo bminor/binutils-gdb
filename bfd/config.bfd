@@ -233,7 +233,7 @@ case "${targ}" in
     targ_underscore=no
     targ_cflags=-DARM_COFF_BUGFIX
     ;;
-  arm-wince-pe | arm-*-wince)
+  arm-wince-pe | arm-*-wince | arm-*-mingw32ce*)
     targ_defvec=arm_wince_pe_little_vec
     targ_selvecs="arm_wince_pe_little_vec arm_wince_pe_big_vec arm_wince_pei_little_vec arm_wince_pei_big_vec"
     targ_underscore=no
