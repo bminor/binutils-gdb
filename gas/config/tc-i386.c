@@ -5000,10 +5000,7 @@ check_prefix:
 	   q++)
 	{
 	  if (*q)
-	    {
-	      p = frag_more (1);
-	      md_number_to_chars (p, (valueT) *q, 1);
-	    }
+	    FRAG_APPEND_1_CHAR (*q);
 	}
 
       /* Now the opcode; be careful about word order here!  */
@@ -5042,12 +5039,9 @@ check_prefix:
       /* Now the modrm byte and sib byte (if present).  */
       if (i.tm.opcode_modifier.modrm)
 	{
-	  p = frag_more (1);
-	  md_number_to_chars (p,
-			      (valueT) (i.rm.regmem << 0
-					| i.rm.reg << 3
-					| i.rm.mode << 6),
-			      1);
+	  FRAG_APPEND_1_CHAR ((i.rm.regmem << 0
+			       | i.rm.reg << 3
+			       | i.rm.mode << 6));
 	  /* If i.rm.regmem == ESP (4)
 	     && i.rm.mode != (Register mode)
 	     && not 16 bit
@@ -5055,14 +5049,9 @@ check_prefix:
 	  if (i.rm.regmem == ESCAPE_TO_TWO_BYTE_ADDRESSING
 	      && i.rm.mode != 3
 	      && !(i.base_reg && i.base_reg->reg_type.bitfield.reg16))
-	    {
-	      p = frag_more (1);
-	      md_number_to_chars (p,
-				  (valueT) (i.sib.base << 0
-					    | i.sib.index << 3
-					    | i.sib.scale << 6),
-				  1);
-	    }
+	    FRAG_APPEND_1_CHAR ((i.sib.base << 0
+				 | i.sib.index << 3
+				 | i.sib.scale << 6));
 	}
 
       /* Write the DREX byte if needed.  */
@@ -6572,41 +6561,6 @@ md_convert_frag (abfd, sec, fragP)
 		      (valueT) (displacement_from_opcode_start - extension),
 		      DISP_SIZE_FROM_RELAX_STATE (fragP->fr_subtype));
   fragP->fr_fix += extension;
-}
-
-/* Size of byte displacement jmp.  */
-int md_short_jump_size = 2;
-
-/* Size of dword displacement jmp.  */
-int md_long_jump_size = 5;
-
-void
-md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr, to_addr;
-     fragS *frag ATTRIBUTE_UNUSED;
-     symbolS *to_symbol ATTRIBUTE_UNUSED;
-{
-  offsetT offset;
-
-  offset = to_addr - (from_addr + 2);
-  /* Opcode for byte-disp jump.  */
-  md_number_to_chars (ptr, (valueT) 0xeb, 1);
-  md_number_to_chars (ptr + 1, (valueT) offset, 1);
-}
-
-void
-md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr, to_addr;
-     fragS *frag ATTRIBUTE_UNUSED;
-     symbolS *to_symbol ATTRIBUTE_UNUSED;
-{
-  offsetT offset;
-
-  offset = to_addr - (from_addr + 5);
-  md_number_to_chars (ptr, (valueT) 0xe9, 1);
-  md_number_to_chars (ptr + 1, (valueT) offset, 4);
 }
 
 /* Apply a fixup (fixS) to segment data, once it has been determined

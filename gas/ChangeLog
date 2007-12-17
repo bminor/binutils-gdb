@@ -1,3 +1,12 @@
+2007-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (output_insn): Use FRAG_APPEND_1_CHAR
+	instead of frag_more/md_number_to_chars.
+	(md_short_jump_size): Removed.
+	(md_long_jump_size): Likewise.
+	(md_create_short_jump): Likewise.
+	(md_create_long_jump): Likewise.
+
 2007-12-13  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xg_symbolic_immeds_fit): Relax for weak
