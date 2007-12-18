@@ -1334,6 +1334,14 @@ fake_breakpoint_event (void)
   for_each_inferior (&all_threads, suspend_one_thread);
 }
 
+#ifdef _WIN32_WCE
+static int
+auto_delete_breakpoint (CORE_ADDR stop_pc)
+{
+  return 1;
+}
+#endif
+
 /* Get the next event from the child.  */
 
 static int
@@ -1445,7 +1453,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 	     it is hit.	 */
 	  set_breakpoint_at ((CORE_ADDR) (long) current_event.u
 			     .CreateProcessInfo.lpStartAddress,
-			     delete_breakpoint_at);
+			     auto_delete_breakpoint);
 	}
 #endif
       break;

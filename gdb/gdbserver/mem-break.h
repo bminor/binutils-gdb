@@ -24,10 +24,11 @@
 /* Breakpoints are opaque.  */
 
 /* Create a new breakpoint at WHERE, and call HANDLER when
-   it is hit.  */
+   it is hit.  HANDLER should return 1 if the breakpoint
+   should be deleted, 0 otherwise.  */
 
 void set_breakpoint_at (CORE_ADDR where,
-			void (*handler) (CORE_ADDR));
+			int (*handler) (CORE_ADDR));
 
 /* Delete a breakpoint previously inserted at ADDR with
    set_breakpoint_at.  */

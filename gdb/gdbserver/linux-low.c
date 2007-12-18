@@ -623,6 +623,7 @@ linux_wait_for_event (struct thread_info *child)
   CORE_ADDR stop_pc;
   struct process_info *event_child;
   int wstat;
+  int bp_status;
 
   /* Check for a process with a pending status.  */
   /* It is possible that the user changed the pending task's registers since
@@ -786,18 +787,20 @@ linux_wait_for_event (struct thread_info *child)
 	  continue;
 	}
 
-      if (debug_threads)
-	fprintf (stderr, "Hit a (non-reinsert) breakpoint.\n");
+      bp_status = check_breakpoints (stop_pc);
 
-      if (check_breakpoints (stop_pc) != 0)
+      if (bp_status != 0)
 	{
+	  if (debug_threads)
+	    fprintf (stderr, "Hit a gdbserver breakpoint.\n");
+
 	  /* We hit one of our own breakpoints.  We mark it as a pending
 	     breakpoint, so that check_removed_breakpoint () will do the PC
 	     adjustment for us at the appropriate time.  */
 	  event_child->pending_is_breakpoint = 1;
 	  event_child->pending_stop_pc = stop_pc;
 
-	  /* Now we need to put the breakpoint back.  We continue in the event
+	  /* We may need to put the breakpoint back.  We continue in the event
 	     loop instead of simply replacing the breakpoint right away,
 	     in order to not lose signals sent to the thread that hit the
 	     breakpoint.  Unfortunately this increases the window where another
@@ -815,7 +818,10 @@ linux_wait_for_event (struct thread_info *child)
 	     Otherwise, call the target function to figure out where we need
 	     our temporary breakpoint, create it, and continue executing this
 	     process.  */
-	  if (the_low_target.breakpoint_reinsert_addr == NULL)
+	  if (bp_status == 2)
+	    /* No need to reinsert.  */
+	    linux_resume_one_process (&event_child->head, 0, 0, NULL);
+	  else if (the_low_target.breakpoint_reinsert_addr == NULL)
 	    {
 	      event_child->bp_reinsert = stop_pc;
 	      uninsert_breakpoint (stop_pc);
@@ -830,6 +836,9 @@ linux_wait_for_event (struct thread_info *child)
 
 	  continue;
 	}
+
+      if (debug_threads)
+	fprintf (stderr, "Hit a non-gdbserver breakpoint.\n");
 
       /* If we were single-stepping, we definitely want to report the
 	 SIGTRAP.  The single-step operation has completed, so also

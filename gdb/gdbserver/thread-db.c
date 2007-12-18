@@ -130,7 +130,7 @@ thread_db_state_str (td_thr_state_e state)
 }
 #endif
 
-static void
+static int
 thread_db_create_event (CORE_ADDR where)
 {
   td_event_msg_t msg;
@@ -159,14 +159,18 @@ thread_db_create_event (CORE_ADDR where)
   /* msg.event == TD_EVENT_CREATE */
 
   find_new_threads_callback (msg.th_p, NULL);
+
+  return 0;
 }
 
 #if 0
-static void
+static int
 thread_db_death_event (CORE_ADDR where)
 {
   if (debug_threads)
     fprintf (stderr, "Thread death event.\n");
+
+  return 0;
 }
 #endif
 

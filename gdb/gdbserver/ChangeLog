@@ -1,3 +1,20 @@
+2007-12-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (linux_wait_for_event): Update messages.  Do not
+	reinsert auto-delete breakpoints.
+	* mem-break.c (struct breakpoint): Change return type of handler to
+	int.
+	(set_breakpoint_at): Update handler type.
+	(reinsert_breakpoint_handler): Return 1 instead of calling
+	delete_breakpoint.
+	(reinsert_breakpoint_by_bp): Check for the original breakpoint before
+	setting a new one.
+	(check_breakpoints): Delete auto-delete breakpoints and return 2.
+	* mem-break.h (set_breakpoint_at): Update handler type.
+	* thread-db.c (thread_db_create_event, thread_db_create_event): Update.
+	* win32-low.c (auto_delete_breakpoint): New.
+	(get_child_debug_event): Use it.
+
 2007-12-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.ac: Check for pread and pwrite.

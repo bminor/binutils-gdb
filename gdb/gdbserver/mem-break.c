@@ -39,14 +39,16 @@ struct breakpoint
      in the *next chain somewhere).  */
   struct breakpoint *breakpoint_to_reinsert;
 
-  /* Function to call when we hit this breakpoint.  */
-  void (*handler) (CORE_ADDR);
+  /* Function to call when we hit this breakpoint.  If it returns 1,
+     the breakpoint will be deleted; 0, it will be reinserted for
+     another round.  */
+  int (*handler) (CORE_ADDR);
 };
 
 struct breakpoint *breakpoints;
 
 void
-set_breakpoint_at (CORE_ADDR where, void (*handler) (CORE_ADDR))
+set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
 {
   struct breakpoint *bp;
 
@@ -119,7 +121,7 @@ delete_breakpoint_at (CORE_ADDR addr)
     delete_breakpoint (bp);
 }
 
-static void
+static int
 reinsert_breakpoint_handler (CORE_ADDR stop_pc)
 {
   struct breakpoint *stop_bp, *orig_bp;
@@ -135,7 +137,7 @@ reinsert_breakpoint_handler (CORE_ADDR stop_pc)
   (*the_target->write_memory) (orig_bp->pc, breakpoint_data,
 			       breakpoint_len);
   orig_bp->reinserting = 0;
-  delete_breakpoint (stop_bp);
+  return 1;
 }
 
 void
@@ -143,11 +145,11 @@ reinsert_breakpoint_by_bp (CORE_ADDR stop_pc, CORE_ADDR stop_at)
 {
   struct breakpoint *bp, *orig_bp;
 
-  set_breakpoint_at (stop_at, reinsert_breakpoint_handler);
-
   orig_bp = find_breakpoint_at (stop_pc);
   if (orig_bp == NULL)
     error ("Could not find original breakpoint in list.");
+
+  set_breakpoint_at (stop_at, reinsert_breakpoint_handler);
 
   bp = find_breakpoint_at (stop_at);
   if (bp == NULL)
@@ -203,8 +205,13 @@ check_breakpoints (CORE_ADDR stop_pc)
       return 0;
     }
 
-  (*bp->handler) (bp->pc);
-  return 1;
+  if ((*bp->handler) (bp->pc))
+    {
+      delete_breakpoint (bp);
+      return 2;
+    }
+  else
+    return 1;
 }
 
 void
