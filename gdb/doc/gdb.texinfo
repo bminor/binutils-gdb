@@ -3222,7 +3222,7 @@ watchpoints, which do not slow down the running of your program.
 
 @table @code
 @kindex watch
-@item watch @var{expr}
+@item watch @var{expr} @r{[}thread @var{threadnum}@r{]}
 Set a watchpoint for an expression.  @value{GDBN} will break when the
 expression @var{expr} is written into by the program and its value
 changes.  The simplest (and the most popular) use of this command is
@@ -3232,13 +3232,20 @@ to watch the value of a single variable:
 (@value{GDBP}) watch foo
 @end smallexample
 
+If the command includes a @code{@r{[}thread @var{threadnum}@r{]}}
+clause, @value{GDBN} breaks only when the thread identified by
+@var{threadnum} changes the value of @var{expr}.  If any other threads
+change the value of @var{expr}, @value{GDBN} will not break.  Note
+that watchpoints restricted to a single thread in this way only work
+with Hardware Watchpoints.
+
 @kindex rwatch
-@item rwatch @var{expr}
+@item rwatch @var{expr} @r{[}thread @var{threadnum}@r{]}
 Set a watchpoint that will break when the value of @var{expr} is read
 by the program.
 
 @kindex awatch
-@item awatch @var{expr}
+@item awatch @var{expr} @r{[}thread @var{threadnum}@r{]}
 Set a watchpoint that will break when @var{expr} is either read from
 or written into by the program.
 
@@ -3356,13 +3363,6 @@ way of doing that would be to set a code breakpoint at the entry to the
 @cindex threads and watchpoints
 In multi-threaded programs, watchpoints will detect changes to the
 watched expression from every thread.
-
-@kindex watch thread thread_num
-@item watch @var{expr} thread @var{threadnum}
-Set a watchpoint that will break when @var{expr} is either read from
-or written into by the thread identified by @var{threadnum}.  If @var{expr}
-is modified by any other threads not matching @var{threadnum}, @value{GDBN}
-will not break.  Note that this will only work with Hardware Watchpoints.
 
 @quotation
 @emph{Warning:} In multi-threaded programs, software watchpoints
