@@ -1,3 +1,8 @@
+2007-12-18  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-main.c (mi_cmd_list_features): Announce
+	the 'pending-breakpoints' feature.
+
 2007-12-17  Jim Blandy  <jimb@codesourcery.com>
 
 	* dwarf2read.c (dwarf2_add_field): Correctly scale all byte

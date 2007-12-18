@@ -1,3 +1,9 @@
+2007-12-18  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (Miscellaneous gdb/mi Commands):
+	Document 'pending-breakpoints' feature of
+	-list-features.
+
 2007-12-17  Luis Machado  <luisgpm@br.ibm.com>
 
 	* doc/gdb.texinfo: Add new parameter's description.

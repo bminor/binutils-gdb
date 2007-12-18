@@ -21607,6 +21607,10 @@ The current list of features is:
 @samp{frozen-varobjs}---indicates presence of the
 @code{-var-set-frozen} command, as well as possible presense of the
 @code{frozen} field in the output of @code{-varobj-create}.
+@item
+@samp{pending-breakpoints}---indicates presence of the @code{-f}
+option to the @code{-break-insert} command.
+
 @end itemize
 
 @subheading The @code{-interpreter-exec} Command

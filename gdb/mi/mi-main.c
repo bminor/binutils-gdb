@@ -1054,6 +1054,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
 
       ui_out_field_string (uiout, NULL, "frozen-varobjs");
+      ui_out_field_string (uiout, NULL, "pending-breakpoints");
       
       do_cleanups (cleanup);
 
