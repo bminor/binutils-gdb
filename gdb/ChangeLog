@@ -1,3 +1,11 @@
+2007-12-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* minsyms.c (lookup_minimal_symbol): Also check the separate
+	debug objfile.
+	(lookup_minimal_symbol_text): Likewise.
+	(lookup_minimal_symbol_solib_trampoline): Likewise.
+	* symtab.c (lookup_global_symbol_from_objfile): Likewise.
+
 2007-12-18  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-main.c (mi_cmd_list_features): Announce

@@ -176,7 +176,8 @@ lookup_minimal_symbol (const char *name, const char *sfile,
        objfile != NULL && found_symbol == NULL;
        objfile = objfile->next)
     {
-      if (objf == NULL || objf == objfile)
+      if (objf == NULL || objf == objfile
+	  || objf->separate_debug_objfile == objfile)
 	{
 	  /* Do two passes: the first over the ordinary hash table,
 	     and the second over the demangled hash table.  */
@@ -274,7 +275,8 @@ lookup_minimal_symbol_text (const char *name, struct objfile *objf)
        objfile != NULL && found_symbol == NULL;
        objfile = objfile->next)
     {
-      if (objf == NULL || objf == objfile)
+      if (objf == NULL || objf == objfile
+	  || objf->separate_debug_objfile == objfile)
 	{
 	  for (msymbol = objfile->msymbol_hash[hash];
 	       msymbol != NULL && found_symbol == NULL;
@@ -330,7 +332,8 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
        objfile != NULL && found_symbol == NULL;
        objfile = objfile->next)
     {
-      if (objf == NULL || objf == objfile)
+      if (objf == NULL || objf == objfile
+	  || objf->separate_debug_objfile == objfile)
 	{
 	  for (msymbol = objfile->msymbol_hash[hash];
 	       msymbol != NULL && found_symbol == NULL;

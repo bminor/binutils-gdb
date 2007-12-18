@@ -1363,6 +1363,11 @@ lookup_global_symbol_from_objfile (const struct objfile *objfile,
       }
   }
 
+  if (objfile->separate_debug_objfile)
+    return lookup_global_symbol_from_objfile (objfile->separate_debug_objfile,
+					      name, linkage_name, domain,
+					      symtab);
+
   return NULL;
 }
 
