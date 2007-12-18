@@ -1,3 +1,7 @@
+2007-12-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* bfd-in2.h: Regenerate.
+
 2007-12-17  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* config.bfd: Add arm-*-mingw32ce* target.
