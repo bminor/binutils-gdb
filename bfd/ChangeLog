@@ -1,5 +1,10 @@
 2007-12-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* section.c (BFD_FAKE_SECTION): Update.
+	* bfd-in2.h: Regenerate.
+
+2007-12-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* bfd-in2.h: Regenerate.
 
 2007-12-17  Pedro Alves  <pedro_alves@portugalmail.pt>

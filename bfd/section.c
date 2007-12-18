@@ -636,8 +636,8 @@ CODE_FRAGMENT
 .  {* name, id,  index, next, prev, flags, user_set_vma,            *}	\
 .  { NAME,  IDX, 0,     NULL, NULL, FLAGS, 0,				\
 .									\
-.  {* linker_mark, linker_has_input, gc_mark, gc_mark_from_eh,      *}	\
-.     0,           0,                1,       0,			\
+.  {* linker_mark, linker_has_input, gc_mark,                       *}	\
+.     0,           0,                1,         			\
 .									\
 .  {* segment_mark, sec_info_type, use_rela_p, has_tls_reloc,       *}	\
 .     0,            0,             0,          0,			\
