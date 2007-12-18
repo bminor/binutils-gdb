@@ -2043,14 +2043,6 @@ Layout::write_sections_after_input_sections(Output_file* of)
 	(*p)->write(of);
     }
 
-  for (Section_list::const_iterator p = this->unattached_section_list_.begin();
-       p != this->unattached_section_list_.end();
-       ++p)
-    {
-      if ((*p)->after_input_sections())
-	(*p)->write(of);
-    }
-
   this->section_headers_->write(of);
 }
 
