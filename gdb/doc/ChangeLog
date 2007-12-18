@@ -1,6 +1,6 @@
 2007-12-18  Jim Blandy  <jimb@codesourcery.com>
 
-	* doc/gdb.texinfo (Set Watchpoints): Integrate per-thread
+	* gdb.texinfo (Set Watchpoints): Integrate per-thread
 	watchpoint explanation into the main description of the watchpoint
 	command; update synopses of 'watch', 'rwatch', and 'awatch'
 	commands.
