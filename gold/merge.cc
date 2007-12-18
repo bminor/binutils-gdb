@@ -414,6 +414,8 @@ Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
   if (len % entsize != 0)
     return false;
 
+  this->input_count_ += len / entsize;
+
   for (section_size_type i = 0; i < len; i += entsize, p += entsize)
     {
       // Add the constant to the section contents.  If we find that it
@@ -467,6 +469,18 @@ Output_merge_data::do_write_to_buffer(unsigned char* buffer)
   memcpy(buffer, this->p_, this->len_);
 }
 
+// Print merge stats to stderr.
+
+void
+Output_merge_data::do_print_merge_stats(const char* section_name)
+{
+  fprintf(stderr,
+	  _("%s: %s merged constants size: %lu; input: %zu; output: %zu\n"),
+	  program_name, section_name,
+	  static_cast<unsigned long>(this->entsize()),
+	  this->input_count_, this->hashtable_.size());
+}
+
 // Class Output_merge_string.
 
 // Add an input section to a merged string section.
@@ -488,6 +502,8 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 		      "character size"));
       return false;
     }
+
+  size_t count = 0;
 
   // The index I is in bytes, not characters.
   section_size_type i = 0;
@@ -512,7 +528,10 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
       p = pl + 1;
       i += bytelen_with_null;
+      ++count;
     }
+
+  this->input_count_ += count;
 
   return true;
 }
@@ -563,6 +582,51 @@ void
 Output_merge_string<Char_type>::do_write_to_buffer(unsigned char* buffer)
 {
   this->stringpool_.write_to_buffer(buffer, this->data_size());
+}
+
+// Return the name of the types of string to use with
+// do_print_merge_stats.
+
+template<typename Char_type>
+const char*
+Output_merge_string<Char_type>::string_name()
+{
+  gold_unreachable();
+  return NULL;
+}
+
+template<>
+const char*
+Output_merge_string<char>::string_name()
+{
+  return "strings";
+}
+
+template<>
+const char*
+Output_merge_string<uint16_t>::string_name()
+{
+  return "16-bit strings";
+}
+
+template<>
+const char*
+Output_merge_string<uint32_t>::string_name()
+{
+  return "32-bit strings";
+}
+
+// Print merge stats to stderr.
+
+template<typename Char_type>
+void
+Output_merge_string<Char_type>::do_print_merge_stats(const char* section_name)
+{
+  char buf[200];
+  snprintf(buf, sizeof buf, "%s merged %s", section_name, this->string_name());
+  fprintf(stderr, _("%s: %s input: %zu\n"),
+	  program_name, buf, this->input_count_);
+  this->stringpool_.print_stats(buf);
 }
 
 // Instantiate the templates we need.

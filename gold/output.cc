@@ -1860,6 +1860,18 @@ Output_section::write_to_postprocessing_buffer()
     }
 }
 
+// Print stats for merge sections to stderr.
+
+void
+Output_section::print_merge_stats()
+{
+  Input_section_list::iterator p;
+  for (p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    p->print_merge_stats(this->name_);
+}
+
 // Output segment methods.
 
 Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)

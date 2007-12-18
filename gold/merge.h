@@ -108,9 +108,11 @@ class Output_merge_data : public Output_merge_base
  public:
   Output_merge_data(uint64_t entsize, uint64_t addralign)
     : Output_merge_base(entsize, addralign), p_(NULL), len_(0), alc_(0),
+      input_count_(0),
       hashtable_(128, Merge_data_hash(this), Merge_data_eq(this))
   { }
 
+ protected:
   // Add an input section.
   bool
   do_add_input_section(Relobj* object, unsigned int shndx);
@@ -126,6 +128,10 @@ class Output_merge_data : public Output_merge_base
   // Write the data to a buffer.
   void
   do_write_to_buffer(unsigned char*);
+
+  // Print merge stats to stderr.
+  void
+  do_print_merge_stats(const char* section_name);
 
  private:
   // We build a hash table of the fixed-size constants.  Each constant
@@ -197,6 +203,8 @@ class Output_merge_data : public Output_merge_base
   section_size_type len_;
   // The size of the allocated buffer.
   section_size_type alc_;
+  // The number of entries seen in input files.
+  size_t input_count_;
   // The hash table.
   Merge_data_hashtable hashtable_;
 };
@@ -210,7 +218,7 @@ class Output_merge_string : public Output_merge_base
  public:
   Output_merge_string(uint64_t addralign)
     : Output_merge_base(sizeof(Char_type), addralign), stringpool_(),
-      merged_strings_()
+      merged_strings_(), input_count_(0)
   {
     gold_assert(addralign <= sizeof(Char_type));
     this->stringpool_.set_no_zero_null();
@@ -238,6 +246,10 @@ class Output_merge_string : public Output_merge_base
   void
   do_write_to_buffer(unsigned char*);
 
+  // Print merge stats to stderr.
+  void
+  do_print_merge_stats(const char* section_name);
+
   // Writes the stringpool to a buffer.
   void
   stringpool_to_buffer(unsigned char* buffer, section_size_type buffer_size)
@@ -249,6 +261,10 @@ class Output_merge_string : public Output_merge_base
   { this->stringpool_.clear(); }
 
  private:
+  // The name of the string type, for stats.
+  const char*
+  string_name();
+
   // As we see input sections, we build a mapping from object, section
   // index and offset to strings.
   struct Merged_string
@@ -279,6 +295,8 @@ class Output_merge_string : public Output_merge_base
   // Map from a location in an input object to an entry in the
   // Stringpool.
   Merged_strings merged_strings_;
+  // The number of entries seen in input files.
+  size_t input_count_;
 };
 
 } // End namespace gold.

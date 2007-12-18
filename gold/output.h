@@ -472,6 +472,12 @@ class Output_section_data : public Output_data
   write_to_buffer(unsigned char* buffer)
   { this->do_write_to_buffer(buffer); }
 
+  // Print merge stats to stderr.  This should only be called for
+  // SHF_MERGE sections.
+  void
+  print_merge_stats(const char* section_name)
+  { this->do_print_merge_stats(section_name); }
+
  protected:
   // The child class must implement do_write.
 
@@ -498,6 +504,11 @@ class Output_section_data : public Output_data
   // implement this.
   virtual void
   do_write_to_buffer(unsigned char*)
+  { gold_unreachable(); }
+
+  // Print merge statistics.
+  virtual void
+  do_print_merge_stats(const char*)
   { gold_unreachable(); }
 
   // Return the required alignment.
@@ -1678,6 +1689,10 @@ class Output_section : public Output_data
   write_header(const Layout*, const Stringpool*,
 	       elfcpp::Shdr_write<size, big_endian>*) const;
 
+  // Print merge statistics to stderr.
+  void
+  print_merge_stats();
+
  protected:
   // Return the section index in the output file.
   unsigned int
@@ -1895,6 +1910,15 @@ class Output_section : public Output_data
     // section.
     void
     write_to_buffer(unsigned char*);
+
+    // Print statistics about merge sections to stderr.
+    void
+    print_merge_stats(const char* section_name)
+    {
+      if (this->shndx_ == MERGE_DATA_SECTION_CODE
+	  || this->shndx_ == MERGE_STRING_SECTION_CODE)
+	this->u2_.posd->print_merge_stats(section_name);
+    }
 
    private:
     // Code values which appear in shndx_.  If the value is not one of

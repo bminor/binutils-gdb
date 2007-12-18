@@ -2062,6 +2062,11 @@ Layout::print_stats() const
   this->namepool_.print_stats("section name pool");
   this->sympool_.print_stats("output symbol name pool");
   this->dynpool_.print_stats("dynamic name pool");
+
+  for (Section_list::const_iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    (*p)->print_merge_stats();
 }
 
 // Write_sections_task methods.
