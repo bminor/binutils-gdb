@@ -110,7 +110,7 @@ class File_read
   // to get_view, read, or get_lasting_view which retrieve the same
   // data.
   const unsigned char*
-  get_view(off_t start, off_t size, bool cache);
+  get_view(off_t start, section_size_type size, bool cache);
 
   // Read data from the file into the buffer P starting at file offset
   // START for SIZE bytes.
@@ -124,7 +124,7 @@ class File_read
   // error if we can not read enough data from the file.  The CACHE
   // parameter is as in get_view.
   File_view*
-  get_lasting_view(off_t start, off_t size, bool cache);
+  get_lasting_view(off_t start, section_size_type size, bool cache);
 
   // Dump statistical information to stderr.
   static void
@@ -151,8 +151,8 @@ class File_read
   class View
   {
    public:
-    View(off_t start, off_t size, const unsigned char* data, bool cache,
-         bool mapped)
+    View(off_t start, section_size_type size, const unsigned char* data,
+	 bool cache, bool mapped)
       : start_(start), size_(size), data_(data), lock_count_(0),
 	cache_(cache), mapped_(mapped)
     { }
@@ -163,7 +163,7 @@ class File_read
     start() const
     { return this->start_; }
 
-    off_t
+    section_size_type
     size() const
     { return this->size_; }
 
@@ -193,7 +193,7 @@ class File_read
     View& operator=(const View&);
 
     off_t start_;
-    off_t size_;
+    section_size_type size_;
     const unsigned char* data_;
     int lock_count_;
     bool cache_;
@@ -205,7 +205,7 @@ class File_read
 
   // Find a view into the file.
   View*
-  find_view(off_t start, off_t size) const;
+  find_view(off_t start, section_size_type size) const;
 
   // Read data from the file into a buffer.
   void
@@ -213,7 +213,7 @@ class File_read
 
   // Find or make a view into the file.
   View*
-  find_or_make_view(off_t start, off_t size, bool cache);
+  find_or_make_view(off_t start, section_size_type size, bool cache);
 
   // Clear the file views.
   void

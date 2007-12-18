@@ -673,7 +673,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
   Address address = this->address_;
   if (this->shndx_ != INVALID_CODE)
     {
-      off_t off;
+      section_offset_type off;
       Output_section* os = this->u2_.relobj->output_section(this->shndx_,
 							    &off);
       gold_assert(os != NULL);
@@ -1085,7 +1085,7 @@ Output_data_got<size, big_endian>::add_local_tls_with_rel(
   this->entries_.push_back(Got_entry());
   unsigned int got_offset = this->last_got_offset();
   object->set_local_tls_got_offset(symndx, got_offset, need_pair);
-  off_t off;
+  section_offset_type off;
   Output_section* os = object->output_section(shndx, &off);
   rel_dyn->add_output_section(os, r_type, this, got_offset);
 
@@ -1113,7 +1113,7 @@ Output_data_got<size, big_endian>::add_local_tls_with_rela(
   this->entries_.push_back(Got_entry());
   unsigned int got_offset = this->last_got_offset();
   object->set_local_tls_got_offset(symndx, got_offset, need_pair);
-  off_t off;
+  section_offset_type off;
   Output_section* os = object->output_section(shndx, &off);
   rela_dyn->add_output_section(os, r_type, this, got_offset, 0);
 
@@ -1350,10 +1350,11 @@ Output_section::Input_section::finalize_data_size()
 // Try to turn an input offset into an output offset.
 
 bool
-Output_section::Input_section::output_offset(const Relobj* object,
-					     unsigned int shndx,
-					     off_t offset,
-					     off_t *poutput) const
+Output_section::Input_section::output_offset(
+    const Relobj* object,
+    unsigned int shndx,
+    section_offset_type offset,
+    section_offset_type *poutput) const
 {
   if (!this->is_input_section())
     return this->u2_.posd->output_offset(object, shndx, offset, poutput);
@@ -1361,7 +1362,7 @@ Output_section::Input_section::output_offset(const Relobj* object,
     {
       if (this->shndx_ != shndx || this->u2_.object != object)
 	return false;
-      off_t output_offset;
+      section_offset_type output_offset;
       Output_section* os = object->output_section(shndx, &output_offset);
       gold_assert(os != NULL);
       gold_assert(output_offset != -1);
@@ -1641,7 +1642,7 @@ Output_section::is_input_address_mapped(const Relobj* object,
        p != this->input_sections_.end();
        ++p)
     {
-      off_t output_offset;
+      section_offset_type output_offset;
       if (p->output_offset(object, shndx, offset, &output_offset))
 	return output_offset != -1;
     }
@@ -1657,9 +1658,9 @@ Output_section::is_input_address_mapped(const Relobj* object,
 // start of the section.  This should only be called if SHNDX in
 // OBJECT has a special mapping.
 
-off_t
+section_offset_type
 Output_section::output_offset(const Relobj* object, unsigned int shndx,
-			      off_t offset) const
+			      section_offset_type offset) const
 {
   gold_assert(object->is_section_specially_mapped(shndx));
   // This can only be called meaningfully when layout is complete.
@@ -1669,7 +1670,7 @@ Output_section::output_offset(const Relobj* object, unsigned int shndx,
        p != this->input_sections_.end();
        ++p)
     {
-      off_t output_offset;
+      section_offset_type output_offset;
       if (p->output_offset(object, shndx, offset, &output_offset))
 	return output_offset;
     }
@@ -1693,7 +1694,7 @@ Output_section::output_address(const Relobj* object, unsigned int shndx,
        ++p)
     {
       addr = align_address(addr, p->addralign());
-      off_t output_offset;
+      section_offset_type output_offset;
       if (p->output_offset(object, shndx, offset, &output_offset))
 	{
 	  if (output_offset == -1)

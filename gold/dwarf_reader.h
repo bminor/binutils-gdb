@@ -172,7 +172,7 @@ class Sized_dwarf_line_info : public Dwarf_line_info
 
   // This is used to figure out what section to apply a relocation to.
   const unsigned char* symtab_buffer_;
-  off_t symtab_buffer_size_;
+  section_size_type symtab_buffer_size_;
 
   // Holds the directories and files as we see them.  We have an array
   // of directory-lists, one for each .o file we're reading (usually

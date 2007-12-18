@@ -46,8 +46,9 @@ class Merge_map
   // output section.  An OUTPUT_OFFSET of -1 means that the bytes are
   // discarded.
   void
-  add_mapping(Relobj* object, unsigned int shndx, off_t offset, off_t length,
-	      off_t output_offset);
+  add_mapping(Relobj* object, unsigned int shndx,
+	      section_offset_type offset, section_size_type length,
+	      section_offset_type output_offset);
 
   // Return the output offset for an input address.  The input address
   // is at offset OFFSET in section SHNDX in OBJECT.  This sets
@@ -55,8 +56,9 @@ class Merge_map
   // -1 if the bytes are not being copied to the output.  This returns
   // true if the mapping is known, false otherwise.
   bool
-  get_output_offset(const Relobj* object, unsigned int shndx, off_t offset,
-		    off_t *output_offset) const;
+  get_output_offset(const Relobj* object, unsigned int shndx,
+		    section_offset_type offset,
+		    section_offset_type *output_offset) const;
 };
 
 // A general class for SHF_MERGE data, to hold functions shared by
@@ -71,8 +73,9 @@ class Output_merge_base : public Output_section_data
 
   // Return the output offset for an input offset.
   bool
-  do_output_offset(const Relobj* object, unsigned int shndx, off_t offset,
-		   off_t* poutput) const;
+  do_output_offset(const Relobj* object, unsigned int shndx,
+		   section_offset_type offset,
+		   section_offset_type* poutput) const;
 
  protected:
   // Return the entry size.
@@ -83,8 +86,8 @@ class Output_merge_base : public Output_section_data
   // Add a mapping from an OFFSET in input section SHNDX in object
   // OBJECT to an OUTPUT_OFFSET in the output section.
   void
-  add_mapping(Relobj* object, unsigned int shndx, off_t offset,
-	      off_t length, off_t output_offset)
+  add_mapping(Relobj* object, unsigned int shndx, section_offset_type offset,
+	      section_size_type length, section_offset_type output_offset)
   {
     this->merge_map_.add_mapping(object, shndx, offset, length, output_offset);
   }
@@ -130,7 +133,7 @@ class Output_merge_data : public Output_merge_base
 
   // A key in the hash table.  This is an offset in the section
   // contents we are building.
-  typedef off_t Merge_data_key;
+  typedef section_offset_type Merge_data_key;
 
   // Compute the hash code.  To do this we need a pointer back to the
   // object holding the data.
@@ -180,7 +183,7 @@ class Output_merge_data : public Output_merge_base
   const unsigned char*
   constant(Merge_data_key k) const
   {
-    gold_assert(k >= 0 && k < this->len_);
+    gold_assert(k >= 0 && k < static_cast<section_offset_type>(this->len_));
     return this->p_ + k;
   }
 
@@ -191,9 +194,9 @@ class Output_merge_data : public Output_merge_base
   // The accumulated data.
   unsigned char* p_;
   // The length of the accumulated data.
-  off_t len_;
+  section_size_type len_;
   // The size of the allocated buffer.
-  size_t alc_;
+  section_size_type alc_;
   // The hash table.
   Merge_data_hashtable hashtable_;
 };
@@ -220,7 +223,7 @@ class Output_merge_string : public Output_merge_base
 
   // Do all the final processing after the input sections are read in.
   // Returns the final data size.
-  off_t
+  section_size_type
   finalize_merged_data();
 
   // Set the final data size.
@@ -237,7 +240,7 @@ class Output_merge_string : public Output_merge_base
 
   // Writes the stringpool to a buffer.
   void
-  stringpool_to_buffer(unsigned char* buffer, size_t buffer_size)
+  stringpool_to_buffer(unsigned char* buffer, section_size_type buffer_size)
   { this->stringpool_.write_to_buffer(buffer, buffer_size); }
 
   // Clears all the data in the stringpool, to save on memory.
@@ -255,14 +258,15 @@ class Output_merge_string : public Output_merge_base
     // The input section in the input object.
     unsigned int shndx;
     // The offset in the input section.
-    off_t offset;
+    section_offset_type offset;
     // The string itself, a pointer into a Stringpool.
     const Char_type* string;
     // The length of the string in bytes, including the null terminator.
     size_t length;
 
-    Merged_string(Relobj *objecta, unsigned int shndxa, off_t offseta,
-		  const Char_type* stringa, size_t lengtha)
+    Merged_string(Relobj *objecta, unsigned int shndxa,
+		  section_offset_type offseta, const Char_type* stringa,
+		  size_t lengtha)
       : object(objecta), shndx(shndxa), offset(offseta), string(stringa),
 	length(lengtha)
     { }

@@ -191,7 +191,7 @@ File_read::is_locked() const
 // SIZE bytes.  Return a pointer to the View if found, NULL if not.
 
 inline File_read::View*
-File_read::find_view(off_t start, off_t size) const
+File_read::find_view(off_t start, section_size_type size) const
 {
   off_t page = File_read::page_offset(start);
   Views::const_iterator p = this->views_.find(page);
@@ -257,7 +257,7 @@ File_read::read(off_t start, off_t size, void* p) const
 // Find an existing view or make a new one.
 
 File_read::View*
-File_read::find_or_make_view(off_t start, off_t size, bool cache)
+File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
 {
   gold_assert(!this->token_.is_writable());
   this->released_ = false;
@@ -326,14 +326,14 @@ File_read::find_or_make_view(off_t start, off_t size, bool cache)
 // Get a view into the file.
 
 const unsigned char*
-File_read::get_view(off_t start, off_t size, bool cache)
+File_read::get_view(off_t start, section_size_type size, bool cache)
 {
   File_read::View* pv = this->find_or_make_view(start, size, cache);
   return pv->data() + (start - pv->start());
 }
 
 File_view*
-File_read::get_lasting_view(off_t start, off_t size, bool cache)
+File_read::get_lasting_view(off_t start, section_size_type size, bool cache)
 {
   File_read::View* pv = this->find_or_make_view(start, size, cache);
   pv->lock();

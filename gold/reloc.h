@@ -651,9 +651,9 @@ class Track_relocs
   // The contents of the input object's reloc section.
   const unsigned char* prelocs_;
   // The length of the reloc section.
-  off_t len_;
+  section_size_type len_;
   // Our current position in the reloc section.
-  off_t pos_;
+  section_size_type pos_;
   // The size of the relocs in the section.
   int reloc_size_;
 };

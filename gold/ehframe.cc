@@ -237,7 +237,7 @@ typename elfcpp::Elf_types<size>::Elf_Addr
 Eh_frame_hdr::get_fde_pc(
     typename elfcpp::Elf_types<size>::Elf_Addr eh_frame_address,
     const unsigned char* eh_frame_contents,
-    off_t fde_offset,
+    section_offset_type fde_offset,
     unsigned char fde_encoding)
 {
   // The FDE starts with a 4 byte length and a 4 byte offset to the
@@ -339,9 +339,10 @@ Eh_frame_hdr::get_fde_addresses(Output_file* of,
 // CIE.  Record the FDE pc for EH_FRAME_HDR.  Return the new offset.
 
 template<int size, bool big_endian>
-off_t
-Fde::write(unsigned char* oview, off_t offset, off_t cie_offset,
-	   unsigned char fde_encoding, Eh_frame_hdr* eh_frame_hdr)
+section_offset_type
+Fde::write(unsigned char* oview, section_offset_type offset,
+	   section_offset_type cie_offset, unsigned char fde_encoding,
+	   Eh_frame_hdr* eh_frame_hdr)
 {
   size_t length = this->contents_.length();
 
@@ -383,8 +384,9 @@ Cie::~Cie()
 
 // Set the output offset of a CIE.  Return the new output offset.
 
-off_t
-Cie::set_output_offset(off_t output_offset, unsigned int addralign,
+section_offset_type
+Cie::set_output_offset(section_offset_type output_offset,
+		       unsigned int addralign,
 		       Merge_map* merge_map)
 {
   size_t length = this->contents_.length();
@@ -413,10 +415,11 @@ Cie::set_output_offset(off_t output_offset, unsigned int addralign,
 // recording.  Return the new offset.
 
 template<int size, bool big_endian>
-off_t
-Cie::write(unsigned char* oview, off_t offset, Eh_frame_hdr* eh_frame_hdr)
+section_offset_type
+Cie::write(unsigned char* oview, section_offset_type offset,
+	   Eh_frame_hdr* eh_frame_hdr)
 {
-  off_t cie_offset = offset;
+  section_offset_type cie_offset = offset;
 
   size_t length = this->contents_.length();
 
@@ -512,15 +515,15 @@ bool
 Eh_frame::add_ehframe_input_section(
     Sized_relobj<size, big_endian>* object,
     const unsigned char* symbols,
-    off_t symbols_size,
+    section_size_type symbols_size,
     const unsigned char* symbol_names,
-    off_t symbol_names_size,
+    section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
     unsigned int reloc_type)
 {
   // Get the section contents.
-  off_t contents_len;
+  section_size_type contents_len;
   const unsigned char* pcontents = object->section_contents(shndx,
 							    &contents_len,
 							    false);
@@ -576,14 +579,14 @@ bool
 Eh_frame::do_add_ehframe_input_section(
     Sized_relobj<size, big_endian>* object,
     const unsigned char* symbols,
-    off_t symbols_size,
+    section_size_type symbols_size,
     const unsigned char* symbol_names,
-    off_t symbol_names_size,
+    section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
     unsigned int reloc_type,
     const unsigned char* pcontents,
-    off_t contents_len,
+    section_size_type contents_len,
     New_cies* new_cies)
 {
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
@@ -664,9 +667,9 @@ bool
 Eh_frame::read_cie(Sized_relobj<size, big_endian>* object,
 		   unsigned int shndx,
 		   const unsigned char* symbols,
-		   off_t symbols_size,
+		   section_size_type symbols_size,
 		   const unsigned char* symbol_names,
-		   off_t symbol_names_size,
+		   section_size_type symbol_names_size,
 		   const unsigned char* pcontents,
 		   const unsigned char* pcie,
 		   const unsigned char *pcieend,
@@ -918,7 +921,7 @@ bool
 Eh_frame::read_fde(Sized_relobj<size, big_endian>* object,
 		   unsigned int shndx,
 		   const unsigned char* symbols,
-		   off_t symbols_size,
+		   section_size_type symbols_size,
 		   const unsigned char* pcontents,
 		   unsigned int offset,
 		   const unsigned char* pfde,
@@ -1001,7 +1004,7 @@ void
 Eh_frame::set_final_data_size()
 {
   off_t start_file_offset = this->offset();
-  off_t output_offset = 0;
+  section_offset_type output_offset = 0;
 
   for (Unmergeable_cie_offsets::iterator p =
 	 this->unmergeable_cie_offsets_.begin();
@@ -1032,7 +1035,8 @@ Eh_frame::set_final_data_size()
 
 bool
 Eh_frame::do_output_offset(const Relobj* object, unsigned int shndx,
-			   off_t offset, off_t* poutput) const
+			   section_offset_type offset,
+			   section_offset_type* poutput) const
 {
   return this->merge_map_.get_output_offset(object, shndx, offset, poutput);
 }
@@ -1096,7 +1100,7 @@ template<int size, bool big_endian>
 void
 Eh_frame::do_sized_write(unsigned char* oview)
 {
-  off_t o = 0;
+  section_offset_type o = 0;
   for (Unmergeable_cie_offsets::iterator p =
 	 this->unmergeable_cie_offsets_.begin();
        p != this->unmergeable_cie_offsets_.end();
@@ -1114,9 +1118,9 @@ bool
 Eh_frame::add_ehframe_input_section<32, false>(
     Sized_relobj<32, false>* object,
     const unsigned char* symbols,
-    off_t symbols_size,
+    section_size_type symbols_size,
     const unsigned char* symbol_names,
-    off_t symbol_names_size,
+    section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
     unsigned int reloc_type);
@@ -1128,9 +1132,9 @@ bool
 Eh_frame::add_ehframe_input_section<32, true>(
     Sized_relobj<32, true>* object,
     const unsigned char* symbols,
-    off_t symbols_size,
+    section_size_type symbols_size,
     const unsigned char* symbol_names,
-    off_t symbol_names_size,
+    section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
     unsigned int reloc_type);
@@ -1142,9 +1146,9 @@ bool
 Eh_frame::add_ehframe_input_section<64, false>(
     Sized_relobj<64, false>* object,
     const unsigned char* symbols,
-    off_t symbols_size,
+    section_size_type symbols_size,
     const unsigned char* symbol_names,
-    off_t symbol_names_size,
+    section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
     unsigned int reloc_type);
@@ -1156,9 +1160,9 @@ bool
 Eh_frame::add_ehframe_input_section<64, true>(
     Sized_relobj<64, true>* object,
     const unsigned char* symbols,
-    off_t symbols_size,
+    section_size_type symbols_size,
     const unsigned char* symbol_names,
-    off_t symbol_names_size,
+    section_size_type symbol_names_size,
     unsigned int shndx,
     unsigned int reloc_shndx,
     unsigned int reloc_type);

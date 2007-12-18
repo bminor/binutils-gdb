@@ -461,8 +461,9 @@ class Output_section_data : public Output_data
   // sets *POUTPUT to the output offset.  The value -1 indicates that
   // this input offset is being discarded.
   virtual bool
-  output_offset(const Relobj* object, unsigned int shndx, off_t offset,
-		off_t *poutput) const
+  output_offset(const Relobj* object, unsigned int shndx,
+		section_offset_type offset,
+		section_offset_type *poutput) const
   { return this->do_output_offset(object, shndx, offset, poutput); }
 
   // Write the contents to a buffer.  This is used for sections which
@@ -488,7 +489,8 @@ class Output_section_data : public Output_data
 
   // The child class may implement output_offset.
   virtual bool
-  do_output_offset(const Relobj*, unsigned int, off_t, off_t*) const
+  do_output_offset(const Relobj*, unsigned int, section_offset_type,
+		   section_offset_type*) const
   { return false; }
 
   // The child class may implement write_to_buffer.  Most child
@@ -1660,8 +1662,9 @@ class Output_section : public Output_data
 
   // Return the offset within the output section of OFFSET relative to
   // the start of input section SHNDX in object OBJECT.
-  off_t
-  output_offset(const Relobj* object, unsigned int shndx, off_t offset) const;
+  section_offset_type
+  output_offset(const Relobj* object, unsigned int shndx,
+		section_offset_type offset) const;
 
   // Return the output virtual address of OFFSET relative to the start
   // of input section SHNDX in object OBJECT.
@@ -1880,8 +1883,9 @@ class Output_section : public Output_data
     // this function returns true, it sets *POUTPUT to the output
     // offset.
     bool
-    output_offset(const Relobj* object, unsigned int shndx, off_t offset,
-		  off_t *poutput) const;
+    output_offset(const Relobj* object, unsigned int shndx,
+		  section_offset_type offset,
+		  section_offset_type *poutput) const;
 
     // Write out the data.  This does nothing for an input section.
     void

@@ -57,7 +57,7 @@ class Eh_frame_hdr : public Output_section_data
 
   // Record an FDE.
   void
-  record_fde(off_t fde_offset, unsigned char fde_encoding)
+  record_fde(section_offset_type fde_offset, unsigned char fde_encoding)
   {
     if (!this->any_unrecognized_eh_frame_sections_)
       this->fde_offsets_.push_back(std::make_pair(fde_offset, fde_encoding));
@@ -79,7 +79,7 @@ class Eh_frame_hdr : public Output_section_data
 
   // The data we record for one FDE: the offset of the FDE within the
   // .eh_frame section, and the FDE encoding.
-  typedef std::pair<off_t, unsigned char> Fde_offset;
+  typedef std::pair<section_offset_type, unsigned char> Fde_offset;
 
   // The list of information we record for an FDE.
   typedef std::vector<Fde_offset> Fde_offsets;
@@ -133,7 +133,7 @@ class Eh_frame_hdr : public Output_section_data
   typename elfcpp::Elf_types<size>::Elf_Addr
   get_fde_pc(typename elfcpp::Elf_types<size>::Elf_Addr eh_frame_address,
 	     const unsigned char* eh_frame_contents,
-	     off_t fde_offset, unsigned char fde_encoding);
+	     section_offset_type fde_offset, unsigned char fde_encoding);
 
   // Convert Fde_offsets to Fde_addresses.
   template<int size, bool big_endian>
@@ -158,7 +158,7 @@ class Eh_frame_hdr : public Output_section_data
 class Fde
 {
  public:
-  Fde(Relobj* object, unsigned int shndx, off_t input_offset,
+  Fde(Relobj* object, unsigned int shndx, section_offset_type input_offset,
       const unsigned char* contents, size_t length)
     : object_(object), shndx_(shndx), input_offset_(input_offset),
       contents_(reinterpret_cast<const char*>(contents), length)
@@ -172,7 +172,7 @@ class Fde
 
   // Add a mapping for this FDE to MERGE_MAP.
   void
-  add_mapping(off_t output_offset, Merge_map* merge_map) const
+  add_mapping(section_offset_type output_offset, Merge_map* merge_map) const
   {
     merge_map->add_mapping(this->object_, this->shndx_,
 			   this->input_offset_, this->length(),
@@ -183,9 +183,10 @@ class Fde
   // encoding, from the CIE.  Record the FDE in EH_FRAME_HDR.  Return
   // the new offset.
   template<int size, bool big_endian>
-  off_t
-  write(unsigned char* oview, off_t offset, off_t cie_offset,
-	unsigned char fde_encoding, Eh_frame_hdr* eh_frame_hdr);
+  section_offset_type
+  write(unsigned char* oview, section_offset_type offset,
+	section_offset_type cie_offset, unsigned char fde_encoding,
+	Eh_frame_hdr* eh_frame_hdr);
 
  private:
   // The object in which this FDE was seen.
@@ -193,7 +194,7 @@ class Fde
   // Input section index for this FDE.
   unsigned int shndx_;
   // Offset within the input section for this FDE.
-  off_t input_offset_;
+  section_offset_type input_offset_;
   // FDE data.
   std::string contents_;
 };
@@ -203,7 +204,7 @@ class Fde
 class Cie
 {
  public:
-  Cie(Relobj* object, unsigned int shndx, off_t input_offset,
+  Cie(Relobj* object, unsigned int shndx, section_offset_type input_offset,
       unsigned char fde_encoding, const char* personality_name,
       const unsigned char* contents, size_t length)
     : object_(object),
@@ -243,14 +244,16 @@ class Cie
   // followed by all its FDEs.  ADDRALIGN is the required address
   // alignment, typically 4 or 8.  This updates MERGE_MAP with the
   // mapping.  It returns the new output offset.
-  off_t
-  set_output_offset(off_t output_offset, unsigned int addralign, Merge_map*);
+  section_offset_type
+  set_output_offset(section_offset_type output_offset, unsigned int addralign,
+		    Merge_map*);
 
   // Write the CIE to OVIEW starting at OFFSET.  EH_FRAME_HDR is the
   // exception frame header for FDE recording.  Return the new offset.
   template<int size, bool big_endian>
-  off_t
-  write(unsigned char* oview, off_t offset, Eh_frame_hdr* eh_frame_hdr);
+  section_offset_type
+  write(unsigned char* oview, section_offset_type offset,
+	Eh_frame_hdr* eh_frame_hdr);
 
   friend bool operator<(const Cie&, const Cie&);
   friend bool operator==(const Cie&, const Cie&);
@@ -264,7 +267,7 @@ class Cie
   // Input section index for this CIE.
   unsigned int shndx_;
   // Offset within the input section for this CIE.
-  off_t input_offset_;
+  section_offset_type input_offset_;
   // The encoding of the FDE.  This is a DW_EH_PE code.
   unsigned char fde_encoding_;
   // The name of the personality routine.  This will be the name of a
@@ -303,9 +306,9 @@ class Eh_frame : public Output_section_data
   bool
   add_ehframe_input_section(Sized_relobj<size, big_endian>* object,
 			    const unsigned char* symbols,
-			    off_t symbols_size,
+			    section_size_type symbols_size,
 			    const unsigned char* symbol_names,
-			    off_t symbol_names_size,
+			    section_size_type symbol_names_size,
 			    unsigned int shndx, unsigned int reloc_shndx,
 			    unsigned int reloc_type);
 
@@ -319,8 +322,9 @@ class Eh_frame : public Output_section_data
 
   // Return the output address for an input address.
   bool
-  do_output_offset(const Relobj*, unsigned int shndx, off_t offset,
-		   off_t* poutput) const;
+  do_output_offset(const Relobj*, unsigned int shndx,
+		   section_offset_type offset,
+		   section_offset_type* poutput) const;
 
   // Write the data to the file.
   void
@@ -358,14 +362,14 @@ class Eh_frame : public Output_section_data
   bool
   do_add_ehframe_input_section(Sized_relobj<size, big_endian>* object,
 			       const unsigned char* symbols,
-			       off_t symbols_size,
+			       section_size_type symbols_size,
 			       const unsigned char* symbol_names,
-			       off_t symbol_names_size,
+			       section_size_type symbol_names_size,
 			       unsigned int shndx,
 			       unsigned int reloc_shndx,
 			       unsigned int reloc_type,
 			       const unsigned char* pcontents,
-			       off_t contents_len,
+			       section_size_type contents_len,
 			       New_cies*);
 
   // Read a CIE.
@@ -374,9 +378,9 @@ class Eh_frame : public Output_section_data
   read_cie(Sized_relobj<size, big_endian>* object,
 	   unsigned int shndx,
 	   const unsigned char* symbols,
-	   off_t symbols_size,
+	   section_size_type symbols_size,
 	   const unsigned char* symbol_names,
-	   off_t symbol_names_size,
+	   section_size_type symbol_names_size,
 	   const unsigned char* pcontents,
 	   const unsigned char* pcie,
 	   const unsigned char *pcieend,
@@ -390,7 +394,7 @@ class Eh_frame : public Output_section_data
   read_fde(Sized_relobj<size, big_endian>* object,
 	   unsigned int shndx,
 	   const unsigned char* symbols,
-	   off_t symbols_size,
+	   section_size_type symbols_size,
 	   const unsigned char* pcontents,
 	   unsigned int offset,
 	   const unsigned char* pfde,

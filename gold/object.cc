@@ -75,11 +75,12 @@ Object::error(const char* format, ...) const
 // Return a view of the contents of a section.
 
 const unsigned char*
-Object::section_contents(unsigned int shndx, off_t* plen, bool cache)
+Object::section_contents(unsigned int shndx, section_size_type* plen,
+			 bool cache)
 {
   Location loc(this->do_section_contents(shndx));
-  *plen = loc.data_size;
-  return this->get_view(loc.file_offset, loc.data_size, cache);
+  *plen = convert_to_section_size_type(loc.data_size);
+  return this->get_view(loc.file_offset, *plen, cache);
 }
 
 // Read the section data into SD.  This is code common to Sized_relobj
@@ -106,7 +107,8 @@ Object::read_section_data(elfcpp::Elf_file<size, big_endian, Object>* elf_file,
     this->error(_("section name section has wrong type: %u"),
 		static_cast<unsigned int>(shdrnames.get_sh_type()));
 
-  sd->section_names_size = shdrnames.get_sh_size();
+  sd->section_names_size =
+    convert_to_section_size_type(shdrnames.get_sh_size());
   sd->section_names = this->get_lasting_view(shdrnames.get_sh_offset(),
 					     sd->section_names_size, false);
 }
@@ -222,9 +224,10 @@ Sized_relobj<size, big_endian>::check_eh_frame_flags(
 
 template<int size, bool big_endian>
 bool
-Sized_relobj<size, big_endian>::find_eh_frame(const unsigned char* pshdrs,
-					      const char* names,
-					      off_t names_size) const
+Sized_relobj<size, big_endian>::find_eh_frame(
+    const unsigned char* pshdrs,
+    const char* names,
+    section_size_type names_size) const
 {
   const unsigned int shnum = this->shnum();
   const unsigned char* p = pshdrs + This::shdr_size;
@@ -293,14 +296,15 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   const unsigned int loccount = symtabshdr.get_sh_info();
   this->local_symbol_count_ = loccount;
   this->local_values_.resize(loccount);
-  off_t locsize = loccount * sym_size;
+  section_offset_type locsize = loccount * sym_size;
   off_t dataoff = symtabshdr.get_sh_offset();
-  off_t datasize = symtabshdr.get_sh_size();
+  section_size_type datasize =
+    convert_to_section_size_type(symtabshdr.get_sh_size());
   off_t extoff = dataoff + locsize;
-  off_t extsize = datasize - locsize;
+  section_size_type extsize = datasize - locsize;
 
   off_t readoff = this->has_eh_frame_ ? dataoff : extoff;
-  off_t readsize = this->has_eh_frame_ ? datasize : extsize;
+  section_size_type readsize = this->has_eh_frame_ ? datasize : extsize;
 
   File_view* fvsymtab = this->get_lasting_view(readoff, readsize, false);
 
@@ -327,7 +331,8 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   sd->symbols_size = readsize;
   sd->external_symbols_offset = this->has_eh_frame_ ? locsize : 0;
   sd->symbol_names = fvstrtab;
-  sd->symbol_names_size = strtabshdr.get_sh_size();
+  sd->symbol_names_size =
+    convert_to_section_size_type(strtabshdr.get_sh_size());
 }
 
 // Return the section index of symbol SYM.  Set *VALUE to its value in
@@ -340,7 +345,7 @@ unsigned int
 Sized_relobj<size, big_endian>::symbol_section_and_value(unsigned int sym,
 							 Address* value)
 {
-  off_t symbols_size;
+  section_size_type symbols_size;
   const unsigned char* symbols = this->section_contents(this->symtab_shndx_,
 							&symbols_size,
 							false);
@@ -403,7 +408,7 @@ Sized_relobj<size, big_endian>::include_section_group(
   elfcpp::Sym<size, big_endian> sym(psym);
 
   // Read the symbol table names.
-  off_t symnamelen;
+  section_size_type symnamelen;
   const unsigned char* psymnamesu;
   psymnamesu = this->section_contents(symshdr.get_sh_link(), &symnamelen,
 				      true);
@@ -703,8 +708,7 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   const int sym_size = This::sym_size;
   size_t symcount = ((sd->symbols_size - sd->external_symbols_offset)
 		     / sym_size);
-  if (static_cast<off_t>(symcount * sym_size)
-      != sd->symbols_size - sd->external_symbols_offset)
+  if (symcount * sym_size != sd->symbols_size - sd->external_symbols_offset)
     {
       this->error(_("size of symbols is not multiple of symbol size"));
       return;
@@ -758,7 +762,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 
   // Read the symbol names.
   const unsigned int strtab_shndx = symtabshdr.get_sh_link();
-  off_t strtab_size;
+  section_size_type strtab_size;
   const unsigned char* pnamesu = this->section_contents(strtab_shndx,
 							&strtab_size,
 							true);
@@ -1018,7 +1022,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
 
   // Read the symbol names.
   const unsigned int strtab_shndx = symtabshdr.get_sh_link();
-  off_t strtab_size;
+  section_size_type strtab_size;
   const unsigned char* pnamesu = this->section_contents(strtab_shndx,
 							&strtab_size,
 							true);
@@ -1123,13 +1127,13 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
   if (this->symtab_shndx_ == 0)
     return false;
 
-  off_t symbols_size;
+  section_size_type symbols_size;
   const unsigned char* symbols = this->section_contents(this->symtab_shndx_,
 							&symbols_size,
 							false);
 
   unsigned int symbol_names_shndx = this->section_link(this->symtab_shndx_);
-  off_t names_size;
+  section_size_type names_size;
   const unsigned char* symbol_names_u =
     this->section_contents(symbol_names_shndx, &names_size, false);
   const char* symbol_names = reinterpret_cast<const char*>(symbol_names_u);
@@ -1361,7 +1365,7 @@ namespace gold
 
 Object*
 make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
-		const unsigned char* p, off_t bytes)
+		const unsigned char* p, section_offset_type bytes)
 {
   if (bytes < elfcpp::EI_NIDENT)
     {

@@ -265,7 +265,7 @@ Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, bool copy,
       // directly.
 
       const Key k = this->next_uncopied_key_;
-      const off_t ozero = 0;
+      const section_offset_type ozero = 0;
       std::pair<Hashkey, Hashval> element(Hashkey(s),
 					  std::make_pair(k, ozero));
 
@@ -320,7 +320,7 @@ Stringpool_template<Stringpool_char>::add_prefix(const Stringpool_char* s,
   // The contents of the string stay the same, so we don't need to
   // adjust hk.hash_code or hk.length.
 
-  const off_t ozero = 0;
+  const section_offset_type ozero = 0;
   std::pair<Hashkey, Hashval> element(hk, std::make_pair(k, ozero));
 
   typedef std::pair<typename String_set_type::iterator, bool> Insert_type;
@@ -412,7 +412,7 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
   const size_t charsize = sizeof(Stringpool_char);
 
   // Offset 0 may be reserved for the empty string.
-  off_t offset = this->zero_null_ ? charsize : 0;
+  section_offset_type offset = this->zero_null_ ? charsize : 0;
 
   // Sorting to find suffixes can take over 25% of the total CPU time
   // used by the linker.  Since it's merely an optimization to reduce
@@ -479,7 +479,7 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
 // exist.
 
 template<typename Stringpool_char>
-off_t
+section_offset_type
 Stringpool_template<Stringpool_char>::get_offset(const Stringpool_char* s)
   const
 {
@@ -494,13 +494,12 @@ Stringpool_template<Stringpool_char>::get_offset(const Stringpool_char* s)
 
 template<typename Stringpool_char>
 void
-Stringpool_template<Stringpool_char>::write_to_buffer(unsigned char* buffer,
-                                                      size_t bufsize)
+Stringpool_template<Stringpool_char>::write_to_buffer(
+    unsigned char* buffer,
+    section_size_type bufsize)
 {
   gold_assert(this->strtab_size_ != 0);
-   // Quiet the compiler in opt mode.
-  if (bufsize < static_cast<size_t>(this->strtab_size_))
-    gold_assert(bufsize >= static_cast<size_t>(this->strtab_size_));
+  gold_assert(bufsize >= this->strtab_size_);
   if (this->zero_null_)
     buffer[0] = '\0';
   for (typename String_set_type::const_iterator p = this->string_set_.begin();
@@ -508,7 +507,8 @@ Stringpool_template<Stringpool_char>::write_to_buffer(unsigned char* buffer,
        ++p)
     {
       const int len = (p->first.length + 1) * sizeof(Stringpool_char);
-      gold_assert(p->second.second + len <= this->strtab_size_);
+      gold_assert(static_cast<section_size_type>(p->second.second) + len
+		  <= this->strtab_size_);
       memcpy(buffer + p->second.second, p->first.string, len);
     }
 }

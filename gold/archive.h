@@ -110,12 +110,12 @@ class Archive
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, off_t size, bool cache)
+  get_view(off_t start, section_size_type size, bool cache)
   { return this->input_file_->file().get_view(start, size, cache); }
 
   // Read the archive symbol map.
   void
-  read_armap(off_t start, off_t size);
+  read_armap(off_t start, section_size_type size);
 
   // Read an archive member header at OFF.  Return the size of the
   // member, and set *PNAME to the name.

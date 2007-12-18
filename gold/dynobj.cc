@@ -162,7 +162,7 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
     elfcpp::SHT type,
     unsigned int link,
     File_view** view,
-    off_t* view_size,
+    section_size_type* view_size,
     unsigned int* view_info)
 {
   if (shndx == -1U)
@@ -183,7 +183,7 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
 
   *view = this->get_lasting_view(shdr.get_sh_offset(), shdr.get_sh_size(),
 				 false);
-  *view_size = shdr.get_sh_size();
+  *view_size = convert_to_section_size_type(shdr.get_sh_size());
   *view_info = shdr.get_sh_info();
 }
 
@@ -313,7 +313,8 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
       sd->symbols = this->get_lasting_view(dynsymshdr.get_sh_offset(),
 					   dynsymshdr.get_sh_size(), false);
-      sd->symbols_size = dynsymshdr.get_sh_size();
+      sd->symbols_size =
+	convert_to_section_size_type(dynsymshdr.get_sh_size());
 
       // Get the symbol names.
       strtab_shndx = dynsymshdr.get_sh_link();
@@ -335,7 +336,8 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
       sd->symbol_names = this->get_lasting_view(strtabshdr.get_sh_offset(),
 						strtabshdr.get_sh_size(),
 						true);
-      sd->symbol_names_size = strtabshdr.get_sh_size();
+      sd->symbol_names_size =
+	convert_to_section_size_type(strtabshdr.get_sh_size());
 
       // Get the version information.
 
@@ -444,10 +446,10 @@ Sized_dynobj<size, big_endian>::make_verdef_map(
     return;
 
   const char* names = reinterpret_cast<const char*>(sd->symbol_names->data());
-  off_t names_size = sd->symbol_names_size;
+  section_size_type names_size = sd->symbol_names_size;
 
   const unsigned char* pverdef = sd->verdef->data();
-  off_t verdef_size = sd->verdef_size;
+  section_size_type verdef_size = sd->verdef_size;
   const unsigned int count = sd->verdef_info;
 
   const unsigned char* p = pverdef;
@@ -519,10 +521,10 @@ Sized_dynobj<size, big_endian>::make_verneed_map(
     return;
 
   const char* names = reinterpret_cast<const char*>(sd->symbol_names->data());
-  off_t names_size = sd->symbol_names_size;
+  section_size_type names_size = sd->symbol_names_size;
 
   const unsigned char* pverneed = sd->verneed->data();
-  const off_t verneed_size = sd->verneed_size;
+  const section_size_type verneed_size = sd->verneed_size;
   const unsigned int count = sd->verneed_info;
 
   const unsigned char* p = pverneed;
@@ -621,7 +623,7 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   const int sym_size = This::sym_size;
   const size_t symcount = sd->symbols_size / sym_size;
   gold_assert(sd->external_symbols_offset == 0);
-  if (static_cast<off_t>(symcount * sym_size) != sd->symbols_size)
+  if (symcount * sym_size != sd->symbols_size)
     {
       this->error(_("size of dynamic symbols is not multiple of symbol size"));
       return;

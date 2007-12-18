@@ -54,31 +54,31 @@ struct Read_symbols_data
   // Section names.
   File_view* section_names;
   // Size of section name data in bytes.
-  off_t section_names_size;
+  section_size_type section_names_size;
   // Symbol data.
   File_view* symbols;
   // Size of symbol data in bytes.
-  off_t symbols_size;
+  section_size_type symbols_size;
   // Offset of external symbols within symbol data.  This structure
   // sometimes contains only external symbols, in which case this will
   // be zero.  Sometimes it contains all symbols.
-  off_t external_symbols_offset;
+  section_offset_type external_symbols_offset;
   // Symbol names.
   File_view* symbol_names;
   // Size of symbol name data in bytes.
-  off_t symbol_names_size;
+  section_size_type symbol_names_size;
 
   // Version information.  This is only used on dynamic objects.
   // Version symbol data (from SHT_GNU_versym section).
   File_view* versym;
-  off_t versym_size;
+  section_size_type versym_size;
   // Version definition data (from SHT_GNU_verdef section).
   File_view* verdef;
-  off_t verdef_size;
+  section_size_type verdef_size;
   unsigned int verdef_info;
   // Needed version data  (from SHT_GNU_verneed section).
   File_view* verneed;
-  off_t verneed_size;
+  section_size_type verneed_size;
   unsigned int verneed_info;
 };
 
@@ -204,7 +204,7 @@ class Object
   // Return a view of the contents of a section.  Set *PLEN to the
   // size.  CACHE is a hint as in File_read::get_view.
   const unsigned char*
-  section_contents(unsigned int shndx, off_t* plen, bool cache);
+  section_contents(unsigned int shndx, section_size_type* plen, bool cache);
 
   // Return the name of a section given a section index.  This is only
   // used for error messages.
@@ -272,7 +272,7 @@ class Object
 
   // Return a View.
   View
-  view(off_t file_offset, off_t data_size)
+  view(off_t file_offset, section_size_type data_size)
   { return View(this->get_view(file_offset, data_size, true)); }
 
   // Report an error.
@@ -285,7 +285,7 @@ class Object
     off_t file_offset;
     off_t data_size;
 
-    Location(off_t fo, off_t ds)
+    Location(off_t fo, section_size_type ds)
       : file_offset(fo), data_size(ds)
     { }
   };
@@ -344,7 +344,7 @@ class Object
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, off_t size, bool cache)
+  get_view(off_t start, section_size_type size, bool cache)
   {
     return this->input_file()->file().get_view(start + this->offset_, size,
 					       cache);
@@ -352,7 +352,7 @@ class Object
 
   // Get a lasting view into the underlying file.
   File_view*
-  get_lasting_view(off_t start, off_t size, bool cache)
+  get_lasting_view(off_t start, section_size_type size, bool cache)
   {
     return this->input_file()->file().get_lasting_view(start + this->offset_,
 						       size, cache);
@@ -360,7 +360,7 @@ class Object
 
   // Read data from the underlying file.
   void
-  read(off_t start, off_t size, void* p) const
+  read(off_t start, section_size_type size, void* p) const
   { this->input_file()->file().read(start + this->offset_, size, p); }
 
   // Set the target.
@@ -504,11 +504,11 @@ class Relobj : public Object
   // and set *POFF to the offset within that section.  *POFF will be
   // set to -1 if the section requires special handling.
   inline Output_section*
-  output_section(unsigned int shndx, off_t* poff) const;
+  output_section(unsigned int shndx, section_offset_type* poff) const;
 
   // Set the offset of an input section within its output section.
   void
-  set_section_offset(unsigned int shndx, off_t off)
+  set_section_offset(unsigned int shndx, section_offset_type off)
   {
     gold_assert(shndx < this->map_to_output_.size());
     this->map_to_output_[shndx].offset = off;
@@ -546,7 +546,7 @@ class Relobj : public Object
     Output_section* output_section;
     // The offset within the output section.  This is -1 if the
     // section requires special handling.
-    off_t offset;
+    section_offset_type offset;
   };
 
   // Read the relocs--implemented by child class.
@@ -614,7 +614,7 @@ class Relobj : public Object
 
 // Implement Object::output_section inline for efficiency.
 inline Output_section*
-Relobj::output_section(unsigned int shndx, off_t* poff) const
+Relobj::output_section(unsigned int shndx, section_offset_type* poff) const
 {
   gold_assert(shndx < this->map_to_output_.size());
   const Map_to_output& mo(this->map_to_output_[shndx]);
@@ -1083,7 +1083,7 @@ class Sized_relobj : public Relobj
   // a GNU style exception frame section.
   bool
   find_eh_frame(const unsigned char* pshdrs, const char* names,
-		off_t names_size) const;
+		section_size_type names_size) const;
 
   // Whether to include a section group in the link.
   bool
@@ -1102,7 +1102,7 @@ class Sized_relobj : public Relobj
     unsigned char* view;
     typename elfcpp::Elf_types<size>::Elf_Addr address;
     off_t offset;
-    off_t view_size;
+    section_size_type view_size;
     bool is_input_output_view;
     bool is_postprocessing_view;
   };
@@ -1288,7 +1288,7 @@ struct Relocate_info
 extern Object*
 make_elf_object(const std::string& name, Input_file*,
 		off_t offset, const unsigned char* p,
-		off_t bytes);
+		section_offset_type bytes);
 
 } // end namespace gold
 

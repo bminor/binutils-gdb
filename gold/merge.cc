@@ -51,8 +51,8 @@ class Object_merge_map
   // output section.  An OUTPUT_OFFSET of -1 means that the bytes are
   // discarded.
   void
-  add_mapping(const Merge_map*, unsigned int shndx, off_t offset, off_t length,
-	      off_t output_offset);
+  add_mapping(const Merge_map*, unsigned int shndx, section_offset_type offset,
+	      section_size_type length, section_offset_type output_offset);
 
   // Get the output offset for an input address in MERGE_MAP.  The
   // input address is at offset OFFSET in section SHNDX.  This sets
@@ -60,8 +60,9 @@ class Object_merge_map
   // -1 if the bytes are not being copied to the output.  This returns
   // true if the mapping is known, false otherwise.
   bool
-  get_output_offset(const Merge_map*, unsigned int shndx, off_t offset,
-		    off_t *output_offset);
+  get_output_offset(const Merge_map*, unsigned int shndx,
+		    section_offset_type offset,
+		    section_offset_type *output_offset);
 
  private:
   // Map input section offsets to a length and an output section
@@ -70,11 +71,11 @@ class Object_merge_map
   struct Input_merge_entry
   {
     // The offset in the input section.
-    off_t input_offset;
+    section_offset_type input_offset;
     // The length.
-    off_t length;
+    section_size_type length;
     // The offset in the output section.
-    off_t output_offset;
+    section_offset_type output_offset;
   };
 
   // A less-than comparison routine for Input_merge_entry.
@@ -190,8 +191,9 @@ Object_merge_map::get_or_make_input_merge_map(const Merge_map* merge_map,
 
 void
 Object_merge_map::add_mapping(const Merge_map* merge_map, unsigned int shndx,
-			      off_t input_offset, off_t length,
-			      off_t output_offset)
+			      section_offset_type input_offset,
+			      section_size_type length,
+			      section_offset_type output_offset)
 {
   Input_merge_map* map = this->get_or_make_input_merge_map(merge_map, shndx);
 
@@ -200,18 +202,23 @@ Object_merge_map::add_mapping(const Merge_map* merge_map, unsigned int shndx,
     {
       Input_merge_entry& entry(map->entries.back());
 
+      // Use section_size_type to avoid signed/unsigned warnings.
+      section_size_type input_offset_u = input_offset;
+      section_size_type output_offset_u = output_offset;
+
       // If this entry is not in order, we need to sort the vector
       // before looking anything up.
-      if (input_offset < entry.input_offset + entry.length)
+      if (input_offset_u < entry.input_offset + entry.length)
 	{
-	  gold_assert(input_offset < entry.input_offset
-		      && input_offset + length <= entry.input_offset);
+	  gold_assert(input_offset < entry.input_offset);
+	  gold_assert(input_offset_u + length
+		      <= static_cast<section_size_type>(entry.input_offset));
 	  map->sorted = false;
 	}
-      else if (entry.input_offset + entry.length == input_offset
+      else if (entry.input_offset + entry.length == input_offset_u
 	       && (output_offset == -1
 		   ? entry.output_offset == -1
-		   : entry.output_offset + entry.length == output_offset))
+		   : entry.output_offset + entry.length == output_offset_u))
 	{
 	  entry.length += length;
 	  return;
@@ -229,8 +236,9 @@ Object_merge_map::add_mapping(const Merge_map* merge_map, unsigned int shndx,
 
 bool
 Object_merge_map::get_output_offset(const Merge_map* merge_map,
-				    unsigned int shndx, off_t input_offset,
-				    off_t *output_offset)
+				    unsigned int shndx,
+				    section_offset_type input_offset,
+				    section_offset_type *output_offset)
 {
   Input_merge_map* map = this->get_input_merge_map(shndx);
   if (map == NULL || map->merge_map != merge_map)
@@ -256,7 +264,8 @@ Object_merge_map::get_output_offset(const Merge_map* merge_map,
       gold_assert(p->input_offset <= input_offset);
     }
 
-  if (input_offset - p->input_offset >= p->length)
+  if (input_offset - p->input_offset
+      >= static_cast<section_offset_type>(p->length))
     return false;
 
   *output_offset = p->output_offset;
@@ -273,7 +282,8 @@ Object_merge_map::get_output_offset(const Merge_map* merge_map,
 
 void
 Merge_map::add_mapping(Relobj* object, unsigned int shndx,
-		       off_t offset, off_t length, off_t output_offset)
+		       section_offset_type offset, section_size_type length,
+		       section_offset_type output_offset)
 {
   Object_merge_map* object_merge_map = object->merge_map();
   if (object_merge_map == NULL)
@@ -292,7 +302,8 @@ Merge_map::add_mapping(Relobj* object, unsigned int shndx,
 
 bool
 Merge_map::get_output_offset(const Relobj* object, unsigned int shndx,
-			     off_t offset, off_t* output_offset) const
+			     section_offset_type offset,
+			     section_offset_type* output_offset) const
 {
   Object_merge_map* object_merge_map = object->merge_map();
   if (object_merge_map == NULL)
@@ -310,8 +321,8 @@ Merge_map::get_output_offset(const Relobj* object, unsigned int shndx,
 bool
 Output_merge_base::do_output_offset(const Relobj* object,
 				    unsigned int shndx,
-				    off_t offset,
-				    off_t* poutput) const
+				    section_offset_type offset,
+				    section_offset_type* poutput) const
 {
   return this->merge_map_.get_output_offset(object, shndx, offset, poutput);
 }
@@ -324,13 +335,14 @@ size_t
 Output_merge_data::Merge_data_hash::operator()(Merge_data_key k) const
 {
   const unsigned char* p = this->pomd_->constant(k);
-  uint64_t entsize = this->pomd_->entsize();
+  section_size_type entsize =
+    convert_to_section_size_type(this->pomd_->entsize());
 
   // Fowler/Noll/Vo (FNV) hash (type FNV-1a).
   if (sizeof(size_t) == 8)
     {
       size_t result = static_cast<size_t>(14695981039346656037ULL);
-      for (uint64_t i = 0; i < entsize; ++i)
+      for (section_size_type i = 0; i < entsize; ++i)
 	{
 	  result &= (size_t) *p++;
 	  result *= 1099511628211ULL;
@@ -340,7 +352,7 @@ Output_merge_data::Merge_data_hash::operator()(Merge_data_key k) const
   else
     {
       size_t result = 2166136261UL;
-      for (uint64_t i = 0; i < entsize; ++i)
+      for (section_size_type i = 0; i < entsize; ++i)
 	{
 	  result ^= (size_t) *p++;
 	  result *= 16777619UL;
@@ -365,8 +377,10 @@ Output_merge_data::Merge_data_eq::operator()(Merge_data_key k1,
 void
 Output_merge_data::add_constant(const unsigned char* p)
 {
-  uint64_t entsize = this->entsize();
-  uint64_t addsize = std::max(entsize, this->addralign());
+  section_size_type entsize = convert_to_section_size_type(this->entsize());
+  section_size_type addralign =
+    convert_to_section_size_type(this->addralign());
+  section_size_type addsize = std::max(entsize, addralign);
   if (this->len_ + addsize > this->alc_)
     {
       if (this->alc_ == 0)
@@ -392,15 +406,15 @@ Output_merge_data::add_constant(const unsigned char* p)
 bool
 Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
 {
-  off_t len;
+  section_size_type len;
   const unsigned char* p = object->section_contents(shndx, &len, false);
 
-  uint64_t entsize = this->entsize();
+  section_size_type entsize = convert_to_section_size_type(this->entsize());
 
   if (len % entsize != 0)
     return false;
 
-  for (off_t i = 0; i < len; i += entsize, p += entsize)
+  for (section_size_type i = 0; i < len; i += entsize, p += entsize)
     {
       // Add the constant to the section contents.  If we find that it
       // is already in the hash table, we will remove it again.
@@ -462,7 +476,7 @@ bool
 Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 						     unsigned int shndx)
 {
-  off_t len;
+  section_size_type len;
   const unsigned char* pdata = object->section_contents(shndx, &len, false);
 
   const Char_type* p = reinterpret_cast<const Char_type*>(pdata);
@@ -476,7 +490,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
     }
 
   // The index I is in bytes, not characters.
-  off_t i = 0;
+  section_size_type i = 0;
   while (i < len)
     {
       const Char_type* pl;
@@ -492,7 +506,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
       const Char_type* str = this->stringpool_.add_prefix(p, pl - p, NULL);
 
-      size_t bytelen_with_null = ((pl - p) + 1) * sizeof(Char_type);
+      section_size_type bytelen_with_null = ((pl - p) + 1) * sizeof(Char_type);
       this->merged_strings_.push_back(Merged_string(object, shndx, i, str,
 						    bytelen_with_null));
 
@@ -507,7 +521,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 // section, and return the final data size.
 
 template<typename Char_type>
-off_t
+section_size_type
 Output_merge_string<Char_type>::finalize_merged_data()
 {
   this->stringpool_.set_string_offsets();

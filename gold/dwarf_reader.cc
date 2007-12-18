@@ -127,9 +127,9 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object,
   for (debug_shndx = 0; debug_shndx < object->shnum(); ++debug_shndx)
     if (object->section_name(debug_shndx) == ".debug_line")
       {
-        off_t buffer_size;
-        this->buffer_ = object->section_contents(
-            debug_shndx, &buffer_size, false);
+        section_size_type buffer_size;
+        this->buffer_ = object->section_contents(debug_shndx, &buffer_size,
+						 false);
         this->buffer_end_ = this->buffer_ + buffer_size;
         break;
       }

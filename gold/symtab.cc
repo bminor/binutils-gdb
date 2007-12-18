@@ -1497,7 +1497,7 @@ Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
 	    else
 	      {
 		Relobj* relobj = static_cast<Relobj*>(symobj);
-		off_t secoff;
+		section_offset_type secoff;
 		Output_section* os = relobj->output_section(shndx, &secoff);
 
 		if (os == NULL)
@@ -1714,7 +1714,7 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 		else
 		  {
 		    Relobj* relobj = static_cast<Relobj*>(symobj);
-		    off_t secoff;
+		    section_offset_type secoff;
 		    Output_section* os = relobj->output_section(in_shndx,
 								&secoff);
 		    gold_assert(os != NULL);
@@ -2026,7 +2026,7 @@ Warnings::note_warnings(Symbol_table* symtab, const Task* task)
 	  {
 	    Task_lock_obj<Object> tl(task, p->second.object);
 	    const unsigned char* c;
-	    off_t len;
+	    section_size_type len;
 	    c = p->second.object->section_contents(p->second.shndx, &len,
 						   false);
 	    p->second.set_text(reinterpret_cast<const char*>(c), len);

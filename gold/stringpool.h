@@ -127,17 +127,17 @@ class Stringpool_template
   // Get the offset of the string S in the string table.  This returns
   // the offset in bytes, not in units of Stringpool_char.  This may
   // only be called after set_string_offsets has been called.
-  off_t
+  section_offset_type
   get_offset(const Stringpool_char* s) const;
 
   // Get the offset of the string S in the string table.
-  off_t
+  section_offset_type
   get_offset(const std::basic_string<Stringpool_char>& s) const
   { return this->get_offset(s.c_str()); }
 
   // Get the size of the string table.  This returns the number of
   // bytes, not in units of Stringpool_char.
-  off_t
+  section_size_type
   get_strtab_size() const
   {
     gold_assert(this->strtab_size_ != 0);
@@ -153,7 +153,7 @@ class Stringpool_template
   // specified size.  buffer_size should be at least
   // get_strtab_size().
   void
-  write_to_buffer(unsigned char* buffer, size_t buffer_size);
+  write_to_buffer(unsigned char* buffer, section_size_type buffer_size);
 
   // Dump statistical information to stderr.
   void
@@ -247,7 +247,7 @@ class Stringpool_template
   // table offsets.  We only use the offsets if we turn this into an
   // string table section.
 
-  typedef std::pair<Key, off_t> Hashval;
+  typedef std::pair<Key, section_offset_type> Hashval;
 
   typedef Unordered_map<Hashkey, Hashval, Stringpool_hash,
 			Stringpool_eq> String_set_type;
@@ -270,7 +270,7 @@ class Stringpool_template
   // List of buffers.
   Stringdata_list strings_;
   // Size of string table.
-  off_t strtab_size_;
+  section_size_type strtab_size_;
   // Next Stringdata index.
   unsigned int next_index_;
   // Next key value for a string we don't copy.

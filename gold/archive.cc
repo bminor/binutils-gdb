@@ -84,7 +84,8 @@ Archive::setup(Task* task)
 
   // The first member of the archive should be the symbol table.
   std::string armap_name;
-  off_t armap_size = this->read_header(sarmag, &armap_name);
+  section_size_type armap_size =
+    convert_to_section_size_type(this->read_header(sarmag, &armap_name));
   off_t off = sarmag;
   if (armap_name.empty())
     {
@@ -115,7 +116,7 @@ Archive::setup(Task* task)
 // Read the archive symbol map.
 
 void
-Archive::read_armap(off_t start, off_t size)
+Archive::read_armap(off_t start, section_size_type size)
 {
   // Read in the entire armap.
   const unsigned char* p = this->get_view(start, size, false);
@@ -127,12 +128,13 @@ Archive::read_armap(off_t start, off_t size)
 
   // Note that the addition is in units of sizeof(elfcpp::Elf_Word).
   const char* pnames = reinterpret_cast<const char*>(pword + nsyms);
-  off_t names_size = reinterpret_cast<const char*>(p) + size - pnames;
+  section_size_type names_size =
+    reinterpret_cast<const char*>(p) + size - pnames;
   this->armap_names_.assign(pnames, names_size);
 
   this->armap_.resize(nsyms);
 
-  off_t name_offset = 0;
+  section_offset_type name_offset = 0;
   for (unsigned int i = 0; i < nsyms; ++i)
     {
       this->armap_[i].name_offset = name_offset;
@@ -141,7 +143,7 @@ Archive::read_armap(off_t start, off_t size)
       ++pword;
     }
 
-  if (reinterpret_cast<const unsigned char*>(pnames) - p > size)
+  if (static_cast<section_size_type>(name_offset) > names_size)
     gold_error(_("%s: bad archive symbol table names"),
 	       this->name().c_str());
 

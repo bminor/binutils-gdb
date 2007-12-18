@@ -229,7 +229,7 @@ class Sized_dynobj : public Dynobj
   void
   read_dynsym_section(const unsigned char* pshdrs, unsigned int shndx,
 		      elfcpp::SHT type, unsigned int link,
-		      File_view** view, off_t* view_size,
+		      File_view** view, section_size_type* view_size,
 		      unsigned int* view_info);
 
   // Read the dynamic tags.

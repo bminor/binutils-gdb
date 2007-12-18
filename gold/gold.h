@@ -161,10 +161,7 @@ class Select_size_endian { };
 
 #endif // !defined(HAVE_MEMBER_TEMPLATE_SPECIFICATIONS)
 
-} // End namespace gold.
-
-namespace gold
-{
+// General declarations.
 
 class General_options;
 class Command_line;
@@ -179,6 +176,17 @@ class Workqueue;
 class Output_file;
 template<int size, bool big_endian>
 struct Relocate_info;
+
+// Some basic types.  For these we use lower case initial letters.
+
+// For an offset in an input or output file, use off_t.  Note that
+// this will often be a 64-bit type even for a 32-bit build.
+
+// The size of a section if we are going to look at the contents.
+typedef size_t section_size_type;
+
+// An offset within a section when we are looking at the contents.
+typedef ptrdiff_t section_offset_type;
 
 // The name of the program as used in error messages.
 extern const char* program_name;
@@ -249,6 +257,22 @@ print_version(bool print_short);
 // Get the version string.
 extern const char*
 get_version_string();
+
+// Convert numeric types without unnoticed loss of precision.
+template<typename To, typename From>
+inline To
+convert_types(const From from)
+{
+  To to = from;
+  gold_assert(to == from);
+  return to;
+}
+
+// A common case of convert_types<>: convert to section_size_type.
+template<typename From>
+inline section_size_type
+convert_to_section_size_type(const From from)
+{ return convert_types<section_size_type, From>(from); }
 
 // Queue up the first set of tasks.
 extern void

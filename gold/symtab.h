@@ -939,7 +939,7 @@ class Warnings
     }
 
     void
-    set_text(const char* t, off_t l)
+    set_text(const char* t, section_size_type l)
     { this->text.assign(t, l); }
   };
 
