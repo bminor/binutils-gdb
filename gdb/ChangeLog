@@ -1,5 +1,11 @@
 2007-12-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* language.h (enum exp_opcode): Remove commented out forward
+	declaration.
+	(op_error): Delete declaration.
+
+2007-12-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* infrun.c (handle_inferior_event): Fix spelling in comment.
 
 2007-12-18  Daniel Jacobowitz  <dan@codesourcery.com>

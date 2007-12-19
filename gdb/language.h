@@ -31,8 +31,6 @@ struct frame_info;
 struct expression;
 struct ui_file;
 
-/* enum exp_opcode;     ANSI's `wisdom' didn't include forward enum decls. */
-
 /* This used to be included to configure GDB for one or more specific
    languages.  Now it is left out to configure for all of them.  FIXME.  */
 /* #include "lang_def.h" */
@@ -409,9 +407,6 @@ extern int structured_type (struct type *);
 extern void binop_type_check (struct value *, struct value *, int);
 
 /* Error messages */
-
-extern void op_error (const char *lhs, enum exp_opcode,
-		      const char *rhs);
 
 extern void type_error (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
