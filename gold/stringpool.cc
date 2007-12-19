@@ -136,8 +136,9 @@ Stringpool_template<Stringpool_char>::Stringpool_eq::operator()(
 {
   return (h1.hash_code == h2.hash_code
 	  && h1.length == h2.length
-	  && memcmp(h1.string, h2.string,
-		    h1.length * sizeof(Stringpool_char)) == 0);
+	  && (h1.string == h2.string
+	      || memcmp(h1.string, h2.string,
+			h1.length * sizeof(Stringpool_char)) == 0));
 }
 
 // Hash function.  The length is in characters, not bytes.
@@ -257,6 +258,16 @@ const Stringpool_char*
 Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, bool copy,
                                           Key* pkey)
 {
+  return this->add_with_length(s, string_length(s), copy, pkey);
+}
+
+template<typename Stringpool_char>
+const Stringpool_char*
+Stringpool_template<Stringpool_char>::add_with_length(const Stringpool_char* s,
+						      size_t length,
+						      bool copy,
+						      Key* pkey)
+{
   typedef std::pair<typename String_set_type::iterator, bool> Insert_type;
 
   if (!copy)
@@ -266,7 +277,7 @@ Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, bool copy,
 
       const Key k = this->next_uncopied_key_;
       const section_offset_type ozero = 0;
-      std::pair<Hashkey, Hashval> element(Hashkey(s),
+      std::pair<Hashkey, Hashval> element(Hashkey(s, length),
 					  std::make_pair(k, ozero));
 
       Insert_type ins = this->string_set_.insert(element);
@@ -289,24 +300,12 @@ Stringpool_template<Stringpool_char>::add(const Stringpool_char* s, bool copy,
       return p->first.string;
     }
 
-  return this->add_prefix(s, string_length(s), pkey);
-}
-
-// Add a prefix of a string to a string pool.
-
-template<typename Stringpool_char>
-const Stringpool_char*
-Stringpool_template<Stringpool_char>::add_prefix(const Stringpool_char* s,
-                                                 size_t len,
-                                                 Key* pkey)
-{
-  // When adding an entry, this will look it up twice in the hash
+  // When we have to copy the string, we look it up twice in the hash
   // table.  The problem is that we can't insert S before we
   // canonicalize it by copying it into the canonical list. The hash
-  // code will only be computed once, so this isn't all that
-  // expensive.
+  // code will only be computed once.
 
-  Hashkey hk(s, len);
+  Hashkey hk(s, length);
   typename String_set_type::const_iterator p = this->string_set_.find(hk);
   if (p != this->string_set_.end())
     {
@@ -316,14 +315,13 @@ Stringpool_template<Stringpool_char>::add_prefix(const Stringpool_char* s,
     }
 
   Key k;
-  hk.string = this->add_string(s, len, &k);
+  hk.string = this->add_string(s, length, &k);
   // The contents of the string stay the same, so we don't need to
   // adjust hk.hash_code or hk.length.
 
   const section_offset_type ozero = 0;
   std::pair<Hashkey, Hashval> element(hk, std::make_pair(k, ozero));
 
-  typedef std::pair<typename String_set_type::iterator, bool> Insert_type;
   Insert_type ins = this->string_set_.insert(element);
   gold_assert(ins.second);
 
@@ -483,8 +481,18 @@ section_offset_type
 Stringpool_template<Stringpool_char>::get_offset(const Stringpool_char* s)
   const
 {
+  return this->get_offset_with_length(s, string_length(s));
+}
+
+template<typename Stringpool_char>
+section_offset_type
+Stringpool_template<Stringpool_char>::get_offset_with_length(
+    const Stringpool_char* s,
+    size_t length) const
+{
   gold_assert(this->strtab_size_ != 0);
-  typename String_set_type::const_iterator p = this->string_set_.find(s);
+  Hashkey hk(s, length);
+  typename String_set_type::const_iterator p = this->string_set_.find(hk);
   if (p != this->string_set_.end())
     return p->second.second;
   gold_unreachable();

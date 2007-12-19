@@ -108,9 +108,10 @@ class Stringpool_template
   const Stringpool_char*
   add(const Stringpool_char* s, bool copy, Key* pkey);
 
-  // Add the prefix of length LEN of string S to the pool.
+  // Add string S of length LEN characters to the pool.  If COPY is
+  // true, S need not be null terminated.
   const Stringpool_char*
-  add_prefix(const Stringpool_char* s, size_t len, Key* pkey);
+  add_with_length(const Stringpool_char* s, size_t len, bool copy, Key* pkey);
 
   // If the string S is present in the pool, return the canonical
   // string pointer.  Otherwise, return NULL.  If PKEY is not NULL,
@@ -133,7 +134,12 @@ class Stringpool_template
   // Get the offset of the string S in the string table.
   section_offset_type
   get_offset(const std::basic_string<Stringpool_char>& s) const
-  { return this->get_offset(s.c_str()); }
+  { return this->get_offset_with_length(s.c_str(), s.size()); }
+
+  // Get the offset of string S, with length LENGTH characters, in the
+  // string table.
+  section_offset_type
+  get_offset_with_length(const Stringpool_char* s, size_t length) const;
 
   // Get the size of the string table.  This returns the number of
   // bytes, not in units of Stringpool_char.
@@ -218,7 +224,7 @@ class Stringpool_template
 
     // Note that these constructors are relatively expensive, because
     // they compute the hash code.
-    Hashkey(const Stringpool_char* s)
+    explicit Hashkey(const Stringpool_char* s)
       : string(s), length(string_length(s)), hash_code(string_hash(s, length))
     { }
 

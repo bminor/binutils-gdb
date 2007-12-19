@@ -630,7 +630,8 @@ Symbol_table::add_from_relobj(
       else
 	{
 	  Stringpool::Key name_key;
-	  name = this->namepool_.add_prefix(name, ver - name, &name_key);
+	  name = this->namepool_.add_with_length(name, ver - name, true,
+						 &name_key);
 
 	  bool def = false;
 	  ++ver;

@@ -269,7 +269,7 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 
   // Canonicalize the section name.
   Stringpool::Key name_key;
-  name = this->namepool_.add_prefix(name, len, &name_key);
+  name = this->namepool_.add_with_length(name, len, true, &name_key);
 
   // Find the output section.  The output section is selected based on
   // the section name, type, and flags.

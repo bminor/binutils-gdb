@@ -520,7 +520,8 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 	    }
 	}
 
-      const Char_type* str = this->stringpool_.add_prefix(p, pl - p, NULL);
+      const Char_type* str = this->stringpool_.add_with_length(p, pl - p, true,
+							       NULL);
 
       section_size_type bytelen_with_null = ((pl - p) + 1) * sizeof(Char_type);
       this->merged_strings_.push_back(Merged_string(object, shndx, i, str,
@@ -549,8 +550,13 @@ Output_merge_string<Char_type>::finalize_merged_data()
 	 this->merged_strings_.begin();
        p != this->merged_strings_.end();
        ++p)
-    this->add_mapping(p->object, p->shndx, p->offset, p->length,
-		      this->stringpool_.get_offset(p->string));
+    {
+      size_t charlen_without_null = (p->length / sizeof(Char_type)) - 1;
+      section_offset_type offset =
+	this->stringpool_.get_offset_with_length(p->string,
+						 charlen_without_null);
+      this->add_mapping(p->object, p->shndx, p->offset, p->length, offset);
+    }
 
   // Save some memory.
   this->merged_strings_.clear();
