@@ -22,6 +22,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 
 #ifndef GOLD_STRINGPOOL_H
 #define GOLD_STRINGPOOL_H
@@ -56,14 +57,88 @@ class Output_file;
 // single zero byte, as required for SHT_STRTAB sections.  This
 // conversion is only permitted after all strings have been added to
 // the Stringpool.  After doing this conversion, you can ask for the
-// offset of any string in the stringpool in the string table, and you
-// can write the resulting string table to an output file.
+// offset of any string (or any key) in the stringpool in the string
+// table, and you can write the resulting string table to an output
+// file.
 
 // When a Stringpool is turned into a string table, then as an
 // optimization it will reuse string suffixes to avoid duplicating
 // strings.  That is, given the strings "abc" and "bc", only the
 // string "abc" will be stored, and "bc" will be represented by an
 // offset into the middle of the string "abc".
+
+
+// A simple chunked vector class--this is a subset of std::vector
+// which stores memory in chunks.  We don't provide iterators, because
+// we don't need them.
+
+template<typename Element>
+class Chunked_vector
+{
+ public:
+  Chunked_vector()
+    : chunks_()
+  { }
+
+  // Clear the elements.
+  void
+  clear()
+  { this->chunks_.clear(); }
+
+  // Reserve elements.
+  void
+  reserve(unsigned int n)
+  {
+    n += chunk_size - 1;
+    while (n >= chunk_size)
+      {
+	this->chunks_.push_back(Element_vector());
+	this->chunks_.back().reserve(chunk_size);
+	n -= chunk_size;
+      }
+  }
+
+  // Get the number of elements.
+  size_t
+  size() const
+  {
+    if (this->chunks_.empty())
+      return 0;
+    else
+      return ((this->chunks_.size() - 1) * chunk_size
+	      + this->chunks_.back().size());
+  }
+
+  // Push a new element on the back of the vector.
+  void
+  push_back(const Element& element)
+  {
+    if (this->chunks_.empty() || this->chunks_.back().size() == chunk_size)
+      {
+	this->chunks_.push_back(Element_vector());
+	this->chunks_.back().reserve(chunk_size);
+      }
+    this->chunks_.back().push_back(element);
+  }
+
+  // Return a reference to an entry in the vector.
+  Element&
+  operator[](size_t i)
+  { return this->chunks_[i / chunk_size][i % chunk_size]; }
+
+  const Element&
+  operator[](size_t i) const
+  { return this->chunks_[i / chunk_size][i % chunk_size]; }
+
+ private:
+  static const unsigned int chunk_size = 8192;
+
+  typedef std::vector<Element> Element_vector;
+  typedef std::vector<Element_vector> Chunk_vector;
+
+  Chunk_vector chunks_;
+};
+
 
 // Stringpools are implemented in terms of Stringpool_template, which
 // is generalized on the type of character used for the strings.  Most
@@ -141,6 +216,14 @@ class Stringpool_template
   section_offset_type
   get_offset_with_length(const Stringpool_char* s, size_t length) const;
 
+  // Get the offset of the string with key K.
+  section_offset_type
+  get_offset_from_key(Key k) const
+  {
+    gold_assert(k < this->key_to_offset_.size());
+    return this->key_to_offset_[k];
+  }
+
   // Get the size of the string table.  This returns the number of
   // bytes, not in units of Stringpool_char.
   section_size_type
@@ -189,15 +272,13 @@ class Stringpool_template
     size_t len;
     // Allocated size of buffer.
     size_t alc;
-    // Buffer index.
-    unsigned int index;
     // Buffer.
     char data[1];
   };
 
   // Copy a string into the buffers, returning a canonical string.
   const Stringpool_char*
-  add_string(const Stringpool_char*, size_t, Key*);
+  add_string(const Stringpool_char*, size_t);
 
   // Return whether s1 is a suffix of s2.
   static bool
@@ -249,11 +330,9 @@ class Stringpool_template
     operator()(const Hashkey&, const Hashkey&) const;
   };
 
-  // The hash table is a map from strings to a pair of Key and string
-  // table offsets.  We only use the offsets if we turn this into an
-  // string table section.
+  // The hash table is a map from strings to Keys.
 
-  typedef std::pair<Key, section_offset_type> Hashval;
+  typedef Key Hashval;
 
   typedef Unordered_map<Hashkey, Hashval, Stringpool_hash,
 			Stringpool_eq> String_set_type;
@@ -268,19 +347,21 @@ class Stringpool_template
     operator()(const Stringpool_sort_info&, const Stringpool_sort_info&) const;
   };
 
+  // Keys map to offsets via a Chunked_vector.  We only use the
+  // offsets if we turn this into an string table section.
+  typedef Chunked_vector<section_offset_type> Key_to_offset;
+
   // List of Stringdata structures.
   typedef std::list<Stringdata*> Stringdata_list;
 
   // Mapping from const char* to namepool entry.
   String_set_type string_set_;
+  // Mapping from Key to string table offset.
+  Key_to_offset key_to_offset_;
   // List of buffers.
   Stringdata_list strings_;
   // Size of string table.
   section_size_type strtab_size_;
-  // Next Stringdata index.
-  unsigned int next_index_;
-  // Next key value for a string we don't copy.
-  int next_uncopied_key_;
   // Whether to reserve offset 0 to hold the null string.
   bool zero_null_;
 };

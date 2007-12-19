@@ -279,12 +279,14 @@ class Output_merge_string : public Output_merge_base
     const Char_type* string;
     // The length of the string in bytes, including the null terminator.
     size_t length;
+    // The key in the Stringpool.
+    Stringpool::Key stringpool_key;
 
     Merged_string(Relobj *objecta, unsigned int shndxa,
 		  section_offset_type offseta, const Char_type* stringa,
-		  size_t lengtha)
+		  size_t lengtha, Stringpool::Key stringpool_keya)
       : object(objecta), shndx(shndxa), offset(offseta), string(stringa),
-	length(lengtha)
+	length(lengtha), stringpool_key(stringpool_keya)
     { }
   };
 
