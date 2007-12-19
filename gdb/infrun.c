@@ -1907,7 +1907,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       && gdbarch_single_step_through_delay_p (current_gdbarch)
       && currently_stepping (ecs))
     {
-      /* We're trying to step of a breakpoint.  Turns out that we're
+      /* We're trying to step off a breakpoint.  Turns out that we're
 	 also on an instruction that needs to be stepped multiple
 	 times before it's been fully executing. E.g., architectures
 	 with a delay slot.  It needs to be stepped twice, once for
