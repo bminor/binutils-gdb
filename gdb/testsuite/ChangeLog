@@ -1,3 +1,10 @@
+2007-12-19  Pierre Muller  <muller@ics-u-strasbg.fr>
+
+	* (gdb.base/watch_thread_num.exp): Add breakpoint at thread_function
+	and record first explicitly generated thread number. 
+	Use that thread number for thread specific watchpoint test.
+	Add iteration number to repetitive tests.
+
 2007-12-16  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
 	    Jim Blandy  <jimb@codesourcery.com>
 

@@ -54,11 +54,28 @@ gdb_test "watch shared_var thread" "A syntax error in expression, near `thread'\
 
 gdb_test "Next 5" ""
 
-gdb_test "watch shared_var thread 2" "Hardware watchpoint 2: shared_var" "Watchpoint on shared variable"
-gdb_test "info breakpoint 2" "stop only in thread 2"
+gdb_test "break thread_function" "Breakpoint \[0-9\].*" \
+  "Set breakpoint at thread_function"
 
-for {set i 0} {$i < 10} {incr i 1} {
-gdb_test "continue" "Hardware watchpoint 2: shared_var.*" "Watchpoint triggered"
-gdb_test "thread" "\\\[Current thread is 2 \\\(Thread $hex \\\(LWP $decimal\\\)\\\)\\\]" "Check thread that triggered"
+gdb_test "continue" ".*Breakpoint 2.*" "Stopped in thread_function"
+
+send_gdb "thread\n"
+gdb_expect {
+  -re ".*Current thread is (\[0-9\]*).*$gdb_prompt $" { pass "Thread command" }
+  -re ".*$gdb_prompt $" { fail "Thread command" }
+  timeout { fail "(timeout) Thread command" }
+}
+
+set thread_num "$expect_out(1,string)"
+
+gdb_test "disable 2" "" "Disable breakpoint 2"
+gdb_test "watch shared_var thread $thread_num" "Hardware watchpoint 3: shared_var" "Watchpoint on shared variable"
+gdb_test "info breakpoint 3" "stop only in thread $thread_num"
+
+for {set i 1} {$i <= 10} {incr i 1} {
+gdb_test "continue" "Hardware watchpoint 3: shared_var.*" \
+  "Watchpoint triggered iteration $i"
+gdb_test "thread" ".*Current thread is $thread_num .*" \
+  "Check thread that triggered iteration $i"
 }
 
