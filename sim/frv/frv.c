@@ -1055,6 +1055,7 @@ SI
 frvbf_cut (SIM_CPU *current_cpu, SI reg1, SI reg2, SI cut_point)
 {
   SI result;
+  cut_point &= 0x3f;
   if (cut_point < 32)
     {
       result = reg1 << cut_point;

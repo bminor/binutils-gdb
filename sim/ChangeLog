@@ -1,3 +1,8 @@
+2007-12-19  DJ Delorie  <dj@redhat.com>
+
+	* frv/frv.c (frvbf_cut): Only look at the six LSBs of
+	cut_point.
+
 2007-10-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/arch.c, cris/arch.h, cris/cpuall.h, cris/cpuv10.c,
