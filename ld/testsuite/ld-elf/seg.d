@@ -4,9 +4,9 @@
 
 #...
 Program Headers:
-  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  Type           Offset   VirtAddr.*
   LOAD           .*
-  LOAD           0x0*001000 0xf*fffff000 0xf*fffff000 0x01000 0x01000 .*
+  LOAD           0x0*001000 0xf*fffff000 0xf*fffff000 0x0*1000 0x0*1000 .*
 
  Section to Segment mapping:
   Segment Sections...
