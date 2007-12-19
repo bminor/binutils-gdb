@@ -264,7 +264,7 @@ inline To
 convert_types(const From from)
 {
   To to = from;
-  gold_assert(to == from);
+  gold_assert(static_cast<From>(to) == from);
   return to;
 }
 

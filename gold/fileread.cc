@@ -291,7 +291,7 @@ File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
   if (poff + psize >= this->size_)
     {
       psize = this->size_ - poff;
-      gold_assert(psize >= size);
+      gold_assert(psize >= static_cast<off_t>(size));
     }
 
   File_read::View* v;

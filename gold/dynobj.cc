@@ -464,7 +464,7 @@ Sized_dynobj<size, big_endian>::make_verdef_map(
 	  return;
 	}
 
-      const unsigned int vd_ndx = verdef.get_vd_ndx();
+      const section_size_type vd_ndx = verdef.get_vd_ndx();
 
       // The GNU linker clears the VERSYM_HIDDEN bit.  I'm not
       // sure why.
@@ -472,36 +472,40 @@ Sized_dynobj<size, big_endian>::make_verdef_map(
       // The first Verdaux holds the name of this version.  Subsequent
       // ones are versions that this one depends upon, which we don't
       // care about here.
-      const unsigned int vd_cnt = verdef.get_vd_cnt();
+      const section_size_type vd_cnt = verdef.get_vd_cnt();
       if (vd_cnt < 1)
 	{
-	  this->error(_("verdef vd_cnt field too small: %u"), vd_cnt);
+	  this->error(_("verdef vd_cnt field too small: %u"),
+                      static_cast<unsigned int>(vd_cnt));
 	  return;
 	}
 
-      const unsigned int vd_aux = verdef.get_vd_aux();
+      const section_size_type vd_aux = verdef.get_vd_aux();
       if ((p - pverdef) + vd_aux >= verdef_size)
 	{
-	  this->error(_("verdef vd_aux field out of range: %u"), vd_aux);
+	  this->error(_("verdef vd_aux field out of range: %u"),
+                      static_cast<unsigned int>(vd_aux));
 	  return;
 	}
 
       const unsigned char* pvda = p + vd_aux;
       elfcpp::Verdaux<size, big_endian> verdaux(pvda);
 
-      const unsigned int vda_name = verdaux.get_vda_name();
+      const section_size_type vda_name = verdaux.get_vda_name();
       if (vda_name >= names_size)
 	{
-	  this->error(_("verdaux vda_name field out of range: %u"), vda_name);
+	  this->error(_("verdaux vda_name field out of range: %u"),
+                      static_cast<unsigned int>(vda_name));
 	  return;
 	}
 
       this->set_version_map(version_map, vd_ndx, names + vda_name);
 
-      const unsigned int vd_next = verdef.get_vd_next();
+      const section_size_type vd_next = verdef.get_vd_next();
       if ((p - pverdef) + vd_next >= verdef_size)
 	{
-	  this->error(_("verdef vd_next field out of range: %u"), vd_next);
+	  this->error(_("verdef vd_next field out of range: %u"),
+                      static_cast<unsigned int>(vd_next));
 	  return;
 	}
 
@@ -539,11 +543,12 @@ Sized_dynobj<size, big_endian>::make_verneed_map(
 	  return;
 	}
 
-      const unsigned int vn_aux = verneed.get_vn_aux();
+      const section_size_type vn_aux = verneed.get_vn_aux();
 
       if ((p - pverneed) + vn_aux >= verneed_size)
 	{
-	  this->error(_("verneed vn_aux field out of range: %u"), vn_aux);
+	  this->error(_("verneed vn_aux field out of range: %u"),
+                      static_cast<unsigned int>(vn_aux));
 	  return;
 	}
 
@@ -557,28 +562,29 @@ Sized_dynobj<size, big_endian>::make_verneed_map(
 	  if (vna_name >= names_size)
 	    {
 	      this->error(_("vernaux vna_name field out of range: %u"),
-			  vna_name);
+			  static_cast<unsigned int>(vna_name));
 	      return;
 	    }
 
 	  this->set_version_map(version_map, vernaux.get_vna_other(),
 				names + vna_name);
 
-	  const unsigned int vna_next = vernaux.get_vna_next();
+	  const section_size_type vna_next = vernaux.get_vna_next();
 	  if ((pvna - pverneed) + vna_next >= verneed_size)
 	    {
 	      this->error(_("verneed vna_next field out of range: %u"),
-			  vna_next);
+			  static_cast<unsigned int>(vna_next));
 	      return;
 	    }
 
 	  pvna += vna_next;
 	}
 
-      const unsigned int vn_next = verneed.get_vn_next();
+      const section_size_type vn_next = verneed.get_vn_next();
       if ((p - pverneed) + vn_next >= verneed_size)
 	{
-	  this->error(_("verneed vn_next field out of range: %u"), vn_next);
+	  this->error(_("verneed vn_next field out of range: %u"),
+                      static_cast<unsigned int>(vn_next));
 	  return;
 	}
 
