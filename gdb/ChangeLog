@@ -1,5 +1,11 @@
 2007-12-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* symtab.h: #include "defs.h".
+	(enum language): Remove opaque declaration.
+	* Makefile.in (symtab_h): Update dependencies.
+
+2007-12-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* language.h (enum exp_opcode): Remove commented out forward
 	declaration.
 	(op_error): Delete declaration.

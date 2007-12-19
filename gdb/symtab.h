@@ -22,6 +22,8 @@
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
 
+#include "defs.h"
+
 /* Opaque declarations.  */
 struct ui_file;
 struct frame_info;
@@ -32,7 +34,6 @@ struct block;
 struct blockvector;
 struct axs_value;
 struct agent_expr;
-enum language;
 
 /* Some of the structures in this file are space critical.
    The space-critical structures are:
