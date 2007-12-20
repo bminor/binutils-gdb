@@ -49,7 +49,8 @@ class Object_merge_map
   // Add a mapping for MERGE_MAP, for the bytes from OFFSET to OFFSET
   // + LENGTH in the input section SHNDX to OUTPUT_OFFSET in the
   // output section.  An OUTPUT_OFFSET of -1 means that the bytes are
-  // discarded.
+  // discarded.  OUTPUT_OFFSET is relative to the start of the merged
+  // data in the output section.
   void
   add_mapping(const Merge_map*, unsigned int shndx, section_offset_type offset,
 	      section_size_type length, section_offset_type output_offset);
@@ -58,7 +59,8 @@ class Object_merge_map
   // input address is at offset OFFSET in section SHNDX.  This sets
   // *OUTPUT_OFFSET to the offset in the output section; this will be
   // -1 if the bytes are not being copied to the output.  This returns
-  // true if the mapping is known, false otherwise.
+  // true if the mapping is known, false otherwise.  *OUTPUT_OFFSET is
+  // relative to the start of the merged data in the output section.
   bool
   get_output_offset(const Merge_map*, unsigned int shndx,
 		    section_offset_type offset,
@@ -86,10 +88,28 @@ class Object_merge_map
     { return i1.input_offset < i2.input_offset; }
   };
 
-  // A list of entries for a particular section.
+  // A list of entries for a particular input section.
   struct Input_merge_map
   {
-    // The Merge_map for this section.
+    // We store these with the Relobj, and we look them up by input
+    // section.  It is possible to have two different merge maps
+    // associated with a single output section.  For example, this
+    // happens routinely with .rodata, when merged string constants
+    // and merged fixed size constants are both put into .rodata.  The
+    // output offset that we store is not the offset from the start of
+    // the output section; it is the offset from the start of the
+    // merged data in the output section.  That means that the caller
+    // is going to add the offset of the merged data within the output
+    // section, which means that the caller needs to know which set of
+    // merged data it found the entry in.  So it's not enough to find
+    // this data based on the input section and the output section; we
+    // also have to find it based on a set of merged data in the
+    // output section.  In order to verify that we are looking at the
+    // right data, we store a pointer to the Merge_map here, and we
+    // pass in a pointer when looking at the data.  If we are asked to
+    // look up information for a different Merge_map, we report that
+    // we don't have it, rather than trying a lookup and returning an
+    // answer which will receive the wrong offset.
     const Merge_map* merge_map;
     // The list of mappings.
     std::vector<Input_merge_entry> entries;
@@ -162,7 +182,7 @@ Object_merge_map::get_or_make_input_merge_map(const Merge_map* merge_map,
   if (map != NULL)
     {
       // For a given input section in a given object, every mapping
-      // must be donw with the same Merge_map.
+      // must be done with the same Merge_map.
       gold_assert(map->merge_map == merge_map);
       return map;
     }
@@ -277,8 +297,8 @@ Object_merge_map::get_output_offset(const Merge_map* merge_map,
 // Class Merge_map.
 
 // Add a mapping for the bytes from OFFSET to OFFSET + LENGTH in input
-// section SHNDX in object OBJECT to an OUTPUT_OFFSET in a merged
-// output section.
+// section SHNDX in object OBJECT to an OUTPUT_OFFSET in merged data
+// in an output section.
 
 void
 Merge_map::add_mapping(Relobj* object, unsigned int shndx,
@@ -297,8 +317,9 @@ Merge_map::add_mapping(Relobj* object, unsigned int shndx,
 
 // Return the output offset for an input address.  The input address
 // is at offset OFFSET in section SHNDX in OBJECT.  This sets
-// *OUTPUT_OFFSET to the offset in the output section.  This returns
-// true if the mapping is known, false otherwise.
+// *OUTPUT_OFFSET to the offset in the merged data in the output
+// section.  This returns true if the mapping is known, false
+// otherwise.
 
 bool
 Merge_map::get_output_offset(const Relobj* object, unsigned int shndx,

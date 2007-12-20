@@ -44,7 +44,9 @@ class Merge_map
   // Add a mapping for the bytes from OFFSET to OFFSET + LENGTH in the
   // input section SHNDX in object OBJECT to OUTPUT_OFFSET in the
   // output section.  An OUTPUT_OFFSET of -1 means that the bytes are
-  // discarded.
+  // discarded.  OUTPUT_OFFSET is not the offset from the start of the
+  // output section, it is the offset from the start of the merged
+  // data within the output section.
   void
   add_mapping(Relobj* object, unsigned int shndx,
 	      section_offset_type offset, section_size_type length,
@@ -54,7 +56,9 @@ class Merge_map
   // is at offset OFFSET in section SHNDX in OBJECT.  This sets
   // *OUTPUT_OFFSET to the offset in the output section; this will be
   // -1 if the bytes are not being copied to the output.  This returns
-  // true if the mapping is known, false otherwise.
+  // true if the mapping is known, false otherwise.  This returns the
+  // value stored by add_mapping, namely the offset from the start of
+  // the merged data within the output section.
   bool
   get_output_offset(const Relobj* object, unsigned int shndx,
 		    section_offset_type offset,
@@ -84,7 +88,9 @@ class Output_merge_base : public Output_section_data
   { return this->entsize_; }
 
   // Add a mapping from an OFFSET in input section SHNDX in object
-  // OBJECT to an OUTPUT_OFFSET in the output section.
+  // OBJECT to an OUTPUT_OFFSET in the output section.  OUTPUT_OFFSET
+  // is the offset from the start of the merged data in the output
+  // section.
   void
   add_mapping(Relobj* object, unsigned int shndx, section_offset_type offset,
 	      section_size_type length, section_offset_type output_offset)

@@ -1895,8 +1895,10 @@ class Output_section : public Output_data
     // Given an input OBJECT, an input section index SHNDX within that
     // object, and an OFFSET relative to the start of that input
     // section, return whether or not the output offset is known.  If
-    // this function returns true, it sets *POUTPUT to the output
-    // offset.
+    // this function returns true, it sets *POUTPUT to the offset in
+    // the output section, relative to the start of the input section
+    // in the output section.  *POUTPUT may be different from OFFSET
+    // for a merged section.
     bool
     output_offset(const Relobj* object, unsigned int shndx,
 		  section_offset_type offset,

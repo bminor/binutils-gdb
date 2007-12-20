@@ -1347,7 +1347,9 @@ Output_section::Input_section::finalize_data_size()
     this->u2_.posd->finalize_data_size();
 }
 
-// Try to turn an input offset into an output offset.
+// Try to turn an input offset into an output offset.  We want to
+// return the output offset relative to the start of this
+// Input_section in the output section.
 
 inline bool
 Output_section::Input_section::output_offset(
@@ -1362,11 +1364,7 @@ Output_section::Input_section::output_offset(
     {
       if (this->shndx_ != shndx || this->u2_.object != object)
 	return false;
-      section_offset_type output_offset;
-      Output_section* os = object->output_section(shndx, &output_offset);
-      gold_assert(os != NULL);
-      gold_assert(output_offset != -1);
-      *poutput = output_offset + offset;
+      *poutput = offset;
       return true;
     }
 }
@@ -1655,8 +1653,8 @@ Output_section::is_input_address_mapped(const Relobj* object,
 
 // Given an address OFFSET relative to the start of input section
 // SHNDX in object OBJECT, return the output offset relative to the
-// start of the section.  This should only be called if SHNDX in
-// OBJECT has a special mapping.
+// start of the input section in the output section.  This should only
+// be called if SHNDX in OBJECT has a special mapping.
 
 section_offset_type
 Output_section::output_offset(const Relobj* object, unsigned int shndx,
