@@ -300,7 +300,7 @@ Merge_map::add_mapping(Relobj* object, unsigned int shndx,
 // *OUTPUT_OFFSET to the offset in the output section.  This returns
 // true if the mapping is known, false otherwise.
 
-inline bool
+bool
 Merge_map::get_output_offset(const Relobj* object, unsigned int shndx,
 			     section_offset_type offset,
 			     section_offset_type* output_offset) const
