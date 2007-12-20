@@ -1558,7 +1558,10 @@ xtensa_elf_cons (int nbytes)
 	    }
 	}
       else
-	emit_expr (&exp, (unsigned int) nbytes);
+	{
+	  xtensa_set_frag_assembly_state (frag_now);
+	  emit_expr (&exp, (unsigned int) nbytes);
+	}
     }
   while (*input_line_pointer++ == ',');
 
@@ -10670,7 +10673,11 @@ get_frag_property_flags (const fragS *fragP, frag_flags *prop_flags)
     prop_flags->is_literal = TRUE;
   if (fragP->tc_frag_data.is_specific_opcode
       || fragP->tc_frag_data.is_no_transform)
-    prop_flags->is_no_transform = TRUE;
+    {
+      prop_flags->is_no_transform = TRUE;
+      if (xtensa_frag_flags_is_empty (prop_flags))
+	prop_flags->is_data = TRUE;
+    }
   if (fragP->tc_frag_data.is_unreachable)
     prop_flags->is_unreachable = TRUE;
   else if (fragP->tc_frag_data.is_insn)

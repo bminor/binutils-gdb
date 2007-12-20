@@ -1,3 +1,10 @@
+2007-12-20  Bob Wilson  <bob.wilson@acm.org>
+	
+	* config/tc-xtensa.c (xtensa_elf_cons): Set frag flags for
+	expressions without suffixes.
+	(get_frag_property_flags): Preserve is_no_transform flag for frags
+	not marked as either instructions or literals.
+	
 2007-12-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (output_insn): Use ARRAY_SIZE.
