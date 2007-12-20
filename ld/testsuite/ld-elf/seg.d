@@ -1,3 +1,4 @@
+#target: *-*-linux* *-*-vxworks
 #source: seg.s
 #ld: -T seg.t -z max-page-size=0x1000
 #readelf: -l --wide
