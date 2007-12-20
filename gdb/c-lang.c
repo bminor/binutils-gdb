@@ -358,6 +358,9 @@ enum c_primitive_types {
   c_primitive_type_long_double,
   c_primitive_type_complex,
   c_primitive_type_double_complex,
+  c_primitive_type_decfloat,
+  c_primitive_type_decdouble,
+  c_primitive_type_declong,
   nr_c_primitive_types
 };
 
@@ -387,6 +390,9 @@ c_language_arch_info (struct gdbarch *gdbarch,
   lai->primitive_type_vector [c_primitive_type_long_double] = builtin->builtin_long_double;
   lai->primitive_type_vector [c_primitive_type_complex] = builtin->builtin_complex;
   lai->primitive_type_vector [c_primitive_type_double_complex] = builtin->builtin_double_complex;
+  lai->primitive_type_vector [c_primitive_type_decfloat] = builtin->builtin_decfloat;
+  lai->primitive_type_vector [c_primitive_type_decdouble] = builtin->builtin_decdouble;
+  lai->primitive_type_vector [c_primitive_type_declong] = builtin->builtin_declong;
 }
 
 const struct language_defn c_language_defn =
@@ -442,6 +448,9 @@ enum cplus_primitive_types {
   cplus_primitive_type_complex,
   cplus_primitive_type_double_complex,
   cplus_primitive_type_bool,
+  cplus_primitive_type_decfloat,
+  cplus_primitive_type_decdouble,
+  cplus_primitive_type_declong,
   nr_cplus_primitive_types
 };
 
@@ -490,6 +499,12 @@ cplus_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_double_complex;
   lai->primitive_type_vector [cplus_primitive_type_bool]
     = builtin->builtin_bool;
+  lai->primitive_type_vector [cplus_primitive_type_decfloat]
+    = builtin->builtin_decfloat;
+  lai->primitive_type_vector [cplus_primitive_type_decdouble]
+    = builtin->builtin_decdouble;
+  lai->primitive_type_vector [cplus_primitive_type_declong]
+    = builtin->builtin_declong;
 }
 
 const struct language_defn cplus_language_defn =

@@ -1,3 +1,14 @@
+2007-12-20  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdbtypes.c (gdbtypes_post_init): Change names of decimal float types
+	to conform to C extension for decimal float.
+	* c-lang.c (enum c_primitive_types): Add entries for Decimal Floating
+	Point types.
+	(enum cplus_primitive_types): Likewise.
+	(c_language_arch_info): Add Decimal Floating Point builtin types to
+	the primitive_type_vector.
+	(cplus_language_arch_info): Likewise.
+
 2007-12-20  David Ung  <davidu@mips.com>
             Maciej W. Rozycki  <macro@mips.com>
 

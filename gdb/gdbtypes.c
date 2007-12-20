@@ -3122,15 +3122,15 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_decfloat
     = init_type (TYPE_CODE_DECFLOAT, 32 / 8,
 	        0,
-	       "decimal float", (struct objfile *) NULL);
+	       "_Decimal32", (struct objfile *) NULL);
   builtin_type->builtin_decdouble
     = init_type (TYPE_CODE_DECFLOAT, 64 / 8,
 	       0,
-	       "decimal double", (struct objfile *) NULL);
+	       "_Decimal64", (struct objfile *) NULL);
   builtin_type->builtin_declong
     = init_type (TYPE_CODE_DECFLOAT, 128 / 8,
 	       0,
-	       "decimal long double", (struct objfile *) NULL);
+	       "_Decimal128", (struct objfile *) NULL);
 
   /* Pointer/Address types.  */
 
