@@ -3184,8 +3184,21 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	         purpose register.  */
 	      if (argreg <= MIPS_LAST_ARG_REGNUM)
 		{
-		  LONGEST regval =
-		    extract_unsigned_integer (val, partial_len);
+		  LONGEST regval;
+
+		  /* Sign extend pointers, 32-bit integers and signed
+		     16-bit and 8-bit integers; everything else is taken
+		     as is.  */
+
+		  if ((partial_len == 4
+		       && (typecode == TYPE_CODE_PTR
+			   || typecode == TYPE_CODE_INT))
+		      || (partial_len < 4
+			  && typecode == TYPE_CODE_INT
+			  && !TYPE_UNSIGNED (arg_type)))
+		    regval = extract_signed_integer (val, partial_len);
+		  else
+		    regval = extract_unsigned_integer (val, partial_len);
 
 		  /* A non-floating-point argument being passed in a
 		     general register.  If a struct or union, and if

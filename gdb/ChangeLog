@@ -1,3 +1,9 @@
+2007-12-20  David Ung  <davidu@mips.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (mips_n32n64_push_dummy_call): Sign-extend
+	integers and 32-bit pointers as required by the ABI.
+
 2007-12-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* symtab.h: Remove "defs.h" #include.
