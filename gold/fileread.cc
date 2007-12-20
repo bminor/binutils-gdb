@@ -208,11 +208,11 @@ File_read::find_view(off_t start, section_size_type size) const
 void
 File_read::do_read(off_t start, section_size_type size, void* p) const
 {
-  section_size_type bytes;
+  ssize_t bytes;
   if (this->contents_ != NULL)
     {
       bytes = this->size_ - start;
-      if (bytes >= size)
+      if (static_cast<section_size_type>(bytes) >= size)
 	{
 	  memcpy(p, this->contents_ + start, size);
 	  return;
@@ -220,16 +220,16 @@ File_read::do_read(off_t start, section_size_type size, void* p) const
     }
   else
     {
-      ssize_t got = ::pread(this->descriptor_, p, size, start);
-      if (got < 0)
+      bytes = ::pread(this->descriptor_, p, size, start);
+      if (static_cast<section_size_type>(bytes) == size)
+	return;
+
+      if (bytes < 0)
 	{
 	  gold_fatal(_("%s: pread failed: %s"),
 		     this->filename().c_str(), strerror(errno));
 	  return;
 	}
-
-      if (static_cast<section_size_type>(got) == size)
-	return;
     }
 
   gold_fatal(_("%s: file too short: read only %lld of %lld bytes at %lld"),
