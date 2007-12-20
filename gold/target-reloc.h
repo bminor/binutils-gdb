@@ -148,7 +148,7 @@ relocate_section(
     bool needs_special_offset_handling,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,
-    off_t view_size)
+    section_size_type view_size)
 {
   typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
@@ -161,7 +161,8 @@ relocate_section(
     {
       Reltype reloc(prelocs);
 
-      off_t offset = reloc.get_r_offset();
+      section_offset_type offset =
+	convert_to_section_size_type(reloc.get_r_offset());
 
       if (needs_special_offset_handling)
 	{
@@ -205,7 +206,7 @@ relocate_section(
 			     view + offset, view_address + offset, view_size))
 	continue;
 
-      if (offset < 0 || offset >= view_size)
+      if (offset < 0 || static_cast<section_size_type>(offset) >= view_size)
 	{
 	  gold_error_at_location(relinfo, i, offset,
 				 _("reloc has bad offset %zu"),

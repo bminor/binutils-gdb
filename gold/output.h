@@ -2291,44 +2291,44 @@ class Output_file
 
   // Write data to the output file.
   void
-  write(off_t offset, const void* data, off_t len)
+  write(off_t offset, const void* data, size_t len)
   { memcpy(this->base_ + offset, data, len); }
 
   // Get a buffer to use to write to the file, given the offset into
   // the file and the size.
   unsigned char*
-  get_output_view(off_t start, off_t size)
+  get_output_view(off_t start, size_t size)
   {
-    gold_assert(start >= 0 && size >= 0 && start + size <= this->file_size_);
+    gold_assert(start >= 0 && start + size <= this->file_size_);
     return this->base_ + start;
   }
 
   // VIEW must have been returned by get_output_view.  Write the
   // buffer to the file, passing in the offset and the size.
   void
-  write_output_view(off_t, off_t, unsigned char*)
+  write_output_view(off_t, size_t, unsigned char*)
   { }
 
   // Get a read/write buffer.  This is used when we want to write part
   // of the file, read it in, and write it again.
   unsigned char*
-  get_input_output_view(off_t start, off_t size)
+  get_input_output_view(off_t start, size_t size)
   { return this->get_output_view(start, size); }
 
   // Write a read/write buffer back to the file.
   void
-  write_input_output_view(off_t, off_t, unsigned char*)
+  write_input_output_view(off_t, size_t, unsigned char*)
   { }
 
   // Get a read buffer.  This is used when we just want to read part
   // of the file back it in.
   const unsigned char*
-  get_input_view(off_t start, off_t size)
+  get_input_view(off_t start, size_t size)
   { return this->get_output_view(start, size); }
 
   // Release a read bfufer.
   void
-  free_input_view(off_t, off_t, const unsigned char*)
+  free_input_view(off_t, size_t, const unsigned char*)
   { }
 
  private:

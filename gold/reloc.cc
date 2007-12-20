@@ -433,16 +433,16 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 	}
 
       off_t view_start;
-      off_t view_size;
+      section_size_type view_size;
       if (output_offset != -1)
 	{
 	  view_start = output_section_offset + output_offset;
-	  view_size = shdr.get_sh_size();
+	  view_size = convert_to_section_size_type(shdr.get_sh_size());
 	}
       else
 	{
 	  view_start = output_section_offset;
-	  view_size = output_section_size;
+	  view_size = convert_to_section_size_type(output_section_size);
 	}
 
       if (view_size == 0)

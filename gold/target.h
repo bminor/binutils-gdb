@@ -134,7 +134,7 @@ class Target
   // basically one or more NOPS which must fill out the specified
   // length in bytes.
   std::string
-  code_fill(off_t length)
+  code_fill(section_size_type length)
   { return this->do_code_fill(length); }
 
   // Return whether SYM is known to be defined by the ABI.  This is
@@ -191,7 +191,7 @@ class Target
   // Virtual function which must be implemented by the child class if
   // needed.
   virtual std::string
-  do_code_fill(off_t)
+  do_code_fill(section_size_type)
   { gold_unreachable(); }
 
   // Virtual function which may be implemented by the child class.
@@ -279,7 +279,7 @@ class Sized_target : public Target
 		   bool needs_special_offset_handling,
 		   unsigned char* view,
 		   typename elfcpp::Elf_types<size>::Elf_Addr view_address,
-		   off_t view_size) = 0;
+		   section_size_type view_size) = 0;
 
  protected:
   Sized_target(const Target::Target_info* pti)

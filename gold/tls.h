@@ -50,10 +50,11 @@ inline void
 check_range(const Relocate_info<size, big_endian>* relinfo,
             size_t relnum,
             typename elfcpp::Elf_types<size>::Elf_Addr rel_offset,
-            off_t view_size, off_t off)
+            section_size_type view_size, int off)
 {
-  off_t offset = rel_offset + off;
-  if (offset < 0 || offset > view_size)
+  typename elfcpp::Elf_types<size>::Elf_Addr offset = rel_offset + off;
+  // Elf_Addr is unsigned, so this also tests for signed offset < 0.
+  if (offset > view_size)
     gold_error_at_location(relinfo, relnum, rel_offset,
 			   _("TLS relocation out of range"));
 }

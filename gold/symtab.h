@@ -1028,7 +1028,8 @@ class Symbol_table
   template<int size>
   void
   define_with_copy_reloc(const Target*, Sized_symbol<size>* sym,
-			 Output_data* posd, uint64_t value);
+			 Output_data* posd,
+			 typename elfcpp::Elf_types<size>::Elf_Addr);
 
   // Look up a symbol.
   Symbol*

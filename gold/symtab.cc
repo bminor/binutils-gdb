@@ -1286,9 +1286,11 @@ Symbol_table::define_symbols(const Layout* layout, const Target* target,
 
 template<int size>
 void
-Symbol_table::define_with_copy_reloc(const Target* target,
-				     Sized_symbol<size>* csym,
-				     Output_data* posd, uint64_t value)
+Symbol_table::define_with_copy_reloc(
+    const Target* target,
+    Sized_symbol<size>* csym,
+    Output_data* posd,
+    typename elfcpp::Elf_types<size>::Elf_Addr value)
 {
   gold_assert(csym->is_from_dynobj());
   gold_assert(!csym->is_copied_from_dynobj());
@@ -2175,17 +2177,21 @@ Symbol_table::add_from_dynobj<64, true>(
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
 template
 void
-Symbol_table::define_with_copy_reloc<32>(const Target* target,
-					 Sized_symbol<32>* sym,
-					 Output_data* posd, uint64_t value);
+Symbol_table::define_with_copy_reloc<32>(
+    const Target* target,
+    Sized_symbol<32>* sym,
+    Output_data* posd,
+    elfcpp::Elf_types<32>::Elf_Addr value);
 #endif
 
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
 template
 void
-Symbol_table::define_with_copy_reloc<64>(const Target* target,
-					 Sized_symbol<64>* sym,
-					 Output_data* posd, uint64_t value);
+Symbol_table::define_with_copy_reloc<64>(
+    const Target* target,
+    Sized_symbol<64>* sym,
+    Output_data* posd,
+    elfcpp::Elf_types<64>::Elf_Addr value);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

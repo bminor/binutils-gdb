@@ -206,9 +206,9 @@ File_read::find_view(off_t start, section_size_type size) const
 // the buffer at P.
 
 void
-File_read::do_read(off_t start, off_t size, void* p) const
+File_read::do_read(off_t start, section_size_type size, void* p) const
 {
-  off_t bytes;
+  section_size_type bytes;
   if (this->contents_ != NULL)
     {
       bytes = this->size_ - start;
@@ -220,16 +220,16 @@ File_read::do_read(off_t start, off_t size, void* p) const
     }
   else
     {
-      bytes = ::pread(this->descriptor_, p, size, start);
-      if (bytes == size)
-	return;
-
-      if (bytes < 0)
+      ssize_t got = ::pread(this->descriptor_, p, size, start);
+      if (got < 0)
 	{
 	  gold_fatal(_("%s: pread failed: %s"),
 		     this->filename().c_str(), strerror(errno));
 	  return;
 	}
+
+      if (static_cast<section_size_type>(got) == size)
+	return;
     }
 
   gold_fatal(_("%s: file too short: read only %lld of %lld bytes at %lld"),
@@ -242,7 +242,7 @@ File_read::do_read(off_t start, off_t size, void* p) const
 // Read data from the file.
 
 void
-File_read::read(off_t start, off_t size, void* p) const
+File_read::read(off_t start, section_size_type size, void* p) const
 {
   File_read::View* pv = this->find_view(start, size);
   if (pv != NULL)
@@ -286,12 +286,12 @@ File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
   // We need to read data from the file.  We read full pages for
   // greater efficiency on small files.
 
-  off_t psize = File_read::pages(size + (start - poff));
+  section_size_type psize = File_read::pages(size + (start - poff));
 
   if (poff + psize >= this->size_)
     {
       psize = this->size_ - poff;
-      gold_assert(psize >= static_cast<off_t>(size));
+      gold_assert(psize >= size);
     }
 
   File_read::View* v;

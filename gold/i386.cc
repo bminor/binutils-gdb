@@ -94,11 +94,11 @@ class Target_i386 : public Sized_target<32, false>
 		   bool needs_special_offset_handling,
 		   unsigned char* view,
 		   elfcpp::Elf_types<32>::Elf_Addr view_address,
-		   off_t view_size);
+		   section_size_type view_size);
 
   // Return a string used to fill a code section with nops.
   std::string
-  do_code_fill(off_t length);
+  do_code_fill(section_size_type length);
 
   // Return whether SYM is defined by the ABI.
   bool
@@ -106,7 +106,7 @@ class Target_i386 : public Sized_target<32, false>
   { return strcmp(sym->name(), "___tls_get_addr") == 0; }
 
   // Return the size of the GOT section.
-  off_t
+  section_size_type
   got_size()
   {
     gold_assert(this->got_ != NULL);
@@ -176,7 +176,7 @@ class Target_i386 : public Sized_target<32, false>
 	     unsigned int r_type, const Sized_symbol<32>*,
 	     const Symbol_value<32>*,
 	     unsigned char*, elfcpp::Elf_types<32>::Elf_Addr,
-	     off_t);
+	     section_size_type);
 
    private:
     // Do a TLS relocation.
@@ -185,7 +185,8 @@ class Target_i386 : public Sized_target<32, false>
                  size_t relnum, const elfcpp::Rel<32, false>&,
 		 unsigned int r_type, const Sized_symbol<32>*,
 		 const Symbol_value<32>*,
-		 unsigned char*, elfcpp::Elf_types<32>::Elf_Addr, off_t);
+		 unsigned char*, elfcpp::Elf_types<32>::Elf_Addr,
+		 section_size_type);
 
     // Do a TLS General-Dynamic to Initial-Exec transition.
     inline void
@@ -194,7 +195,7 @@ class Target_i386 : public Sized_target<32, false>
 		 const elfcpp::Rel<32, false>&, unsigned int r_type,
 		 elfcpp::Elf_types<32>::Elf_Addr value,
 		 unsigned char* view,
-		 off_t view_size);
+		 section_size_type view_size);
 
     // Do a TLS General-Dynamic to Local-Exec transition.
     inline void
@@ -203,7 +204,7 @@ class Target_i386 : public Sized_target<32, false>
 		 const elfcpp::Rel<32, false>&, unsigned int r_type,
 		 elfcpp::Elf_types<32>::Elf_Addr value,
 		 unsigned char* view,
-		 off_t view_size);
+		 section_size_type view_size);
 
     // Do a TLS Local-Dynamic to Local-Exec transition.
     inline void
@@ -212,7 +213,7 @@ class Target_i386 : public Sized_target<32, false>
 		 const elfcpp::Rel<32, false>&, unsigned int r_type,
 		 elfcpp::Elf_types<32>::Elf_Addr value,
 		 unsigned char* view,
-		 off_t view_size);
+		 section_size_type view_size);
 
     // Do a TLS Initial-Exec to Local-Exec transition.
     static inline void
@@ -221,7 +222,7 @@ class Target_i386 : public Sized_target<32, false>
 		 const elfcpp::Rel<32, false>&, unsigned int r_type,
 		 elfcpp::Elf_types<32>::Elf_Addr value,
 		 unsigned char* view,
-		 off_t view_size);
+		 section_size_type view_size);
 
     // We need to keep track of which type of local dynamic relocation
     // we have seen, so that we can optimize R_386_TLS_LDO_32 correctly.
@@ -473,7 +474,7 @@ Output_data_plt_i386::add_entry(Symbol* gsym)
 
   ++this->count_;
 
-  off_t got_offset = this->got_plt_->current_data_size();
+  section_offset_type got_offset = this->got_plt_->current_data_size();
 
   // Every PLT entry needs a GOT entry which points back to the PLT
   // entry (this will be changed by the dynamic linker, normally
@@ -542,11 +543,13 @@ void
 Output_data_plt_i386::do_write(Output_file* of)
 {
   const off_t offset = this->offset();
-  const off_t oview_size = this->data_size();
+  const section_size_type oview_size =
+    convert_to_section_size_type(this->data_size());
   unsigned char* const oview = of->get_output_view(offset, oview_size);
 
   const off_t got_file_offset = this->got_plt_->offset();
-  const off_t got_size = this->got_plt_->data_size();
+  const section_size_type got_size =
+    convert_to_section_size_type(this->got_plt_->data_size());
   unsigned char* const got_view = of->get_output_view(got_file_offset,
 						      got_size);
 
@@ -608,8 +611,8 @@ Output_data_plt_i386::do_write(Output_file* of)
       elfcpp::Swap<32, false>::writeval(got_pov, plt_address + plt_offset + 6);
     }
 
-  gold_assert(pov - oview == oview_size);
-  gold_assert(got_pov - got_view == got_size);
+  gold_assert(static_cast<section_size_type>(pov - oview) == oview_size);
+  gold_assert(static_cast<section_size_type>(got_pov - got_view) == got_size);
 
   of->write_output_view(offset, oview_size, oview);
   of->write_output_view(got_file_offset, got_size, got_view);
@@ -727,9 +730,10 @@ Target_i386::copy_reloc(const General_options* options,
       if (align > dynbss->addralign())
 	dynbss->set_space_alignment(align);
 
-      off_t dynbss_size = dynbss->current_data_size();
+      section_size_type dynbss_size =
+	convert_to_section_size_type(dynbss->current_data_size());
       dynbss_size = align_address(dynbss_size, align);
-      off_t offset = dynbss_size;
+      section_size_type offset = dynbss_size;
       dynbss->set_current_data_size(dynbss_size + symsize);
 
       symtab->define_with_copy_reloc(this, ssym, dynbss, offset);
@@ -1469,7 +1473,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 				const Symbol_value<32>* psymval,
 				unsigned char* view,
 				elfcpp::Elf_types<32>::Elf_Addr address,
-				off_t view_size)
+				section_size_type view_size)
 {
   if (this->skip_call_tls_get_addr_)
     {
@@ -1669,7 +1673,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 				    const Symbol_value<32>* psymval,
 				    unsigned char* view,
 				    elfcpp::Elf_types<32>::Elf_Addr,
-				    off_t view_size)
+				    section_size_type view_size)
 {
   Output_segment* tls_segment = relinfo->layout->tls_segment();
 
@@ -1854,7 +1858,7 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
 				    unsigned int,
 				    elfcpp::Elf_types<32>::Elf_Addr value,
 				    unsigned char* view,
-				    off_t view_size)
+				    section_size_type view_size)
 {
   // leal foo(,%reg,1),%eax; call ___tls_get_addr
   //  ==> movl %gs:0,%eax; subl $foo@tpoff,%eax
@@ -1885,7 +1889,7 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
     {
       tls::check_tls(relinfo, relnum, rel.get_r_offset(),
                      (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
-      if (static_cast<off_t>(rel.get_r_offset() + 9) < view_size
+      if (rel.get_r_offset() + 9 < view_size
           && view[9] == 0x90)
 	{
 	  // There is a trailing nop.  Use the size byte subl.
@@ -1918,7 +1922,7 @@ Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
 				    unsigned int,
 				    elfcpp::Elf_types<32>::Elf_Addr value,
 				    unsigned char* view,
-				    off_t view_size)
+				    section_size_type view_size)
 {
   // leal foo(,%ebx,1),%eax; call ___tls_get_addr
   //  ==> movl %gs:0,%eax; addl foo@gotntpoff(%ebx),%eax
@@ -1951,7 +1955,7 @@ Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
     {
       tls::check_tls(relinfo, relnum, rel.get_r_offset(),
                      (op1 & 0xf8) == 0x80 && (op1 & 7) != 4);
-      if (static_cast<off_t>(rel.get_r_offset() + 9) < view_size
+      if (rel.get_r_offset() + 9 < view_size
           && view[9] == 0x90)
 	{
           // FIXME: This is not the right instruction sequence.
@@ -1986,7 +1990,7 @@ Target_i386::Relocate::tls_ld_to_le(const Relocate_info<32, false>* relinfo,
 				    unsigned int,
 				    elfcpp::Elf_types<32>::Elf_Addr,
 				    unsigned char* view,
-				    off_t view_size)
+				    section_size_type view_size)
 {
   // leal foo(%reg), %eax; call ___tls_get_addr
   // ==> movl %gs:0,%eax; nop; leal 0(%esi,1),%esi
@@ -2018,7 +2022,7 @@ Target_i386::Relocate::tls_ie_to_le(const Relocate_info<32, false>* relinfo,
 				    unsigned int r_type,
 				    elfcpp::Elf_types<32>::Elf_Addr value,
 				    unsigned char* view,
-				    off_t view_size)
+				    section_size_type view_size)
 {
   // We have to actually change the instructions, which means that we
   // need to examine the opcodes to figure out which instruction we
@@ -2114,7 +2118,7 @@ Target_i386::relocate_section(const Relocate_info<32, false>* relinfo,
 			      bool needs_special_offset_handling,
 			      unsigned char* view,
 			      elfcpp::Elf_types<32>::Elf_Addr address,
-			      off_t view_size)
+			      section_size_type view_size)
 {
   gold_assert(sh_type == elfcpp::SHT_REL);
 
@@ -2147,7 +2151,7 @@ Target_i386::do_dynsym_value(const Symbol* gsym) const
 // the specified length.
 
 std::string
-Target_i386::do_code_fill(off_t length)
+Target_i386::do_code_fill(section_size_type length)
 {
   if (length >= 16)
     {
