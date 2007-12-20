@@ -1349,7 +1349,7 @@ Output_section::Input_section::finalize_data_size()
 
 // Try to turn an input offset into an output offset.
 
-bool
+inline bool
 Output_section::Input_section::output_offset(
     const Relobj* object,
     unsigned int shndx,

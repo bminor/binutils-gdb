@@ -460,7 +460,7 @@ class Output_section_data : public Output_data
   // the output section is known.  If this function returns true, it
   // sets *POUTPUT to the output offset.  The value -1 indicates that
   // this input offset is being discarded.
-  virtual bool
+  bool
   output_offset(const Relobj* object, unsigned int shndx,
 		section_offset_type offset,
 		section_offset_type *poutput) const
