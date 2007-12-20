@@ -22,8 +22,6 @@
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
 
-#include "defs.h"
-
 /* Opaque declarations.  */
 struct ui_file;
 struct frame_info;

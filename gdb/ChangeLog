@@ -1,3 +1,8 @@
+2007-12-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* symtab.h: Remove "defs.h" #include.
+	* Makefile.in (symtab_h): Update dependencies.
+
 2007-12-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* symtab.h: #include "defs.h".
