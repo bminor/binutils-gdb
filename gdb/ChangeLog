@@ -1,4 +1,4 @@
-2007-12-21 Denis Pilat <denis.pilat@st.com>
+2007-12-21  Denis Pilat <denis.pilat@st.com>
 
 	* tui/tui-data.h (MAX_LOCATOR_ELEMENT_LEN): Defined to a bigger
 	value or to PATH_MAX when possible.
