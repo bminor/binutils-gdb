@@ -889,14 +889,30 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 	    }
 	  else if (mo[shndx].offset == -1)
 	    {
-	      // Leave the input value in place for SHF_MERGE sections.
+	      // This is a SHF_MERGE section or one which otherwise
+	      // requires special handling.  We get the output address
+	      // of the start of the merged section.  If this is not a
+	      // section symbol, we can then determine the final
+	      // value.  If it is a section symbol, we can not, as in
+	      // that case we have to consider the addend to determine
+	      // the value to use in a relocation.
+	      section_offset_type start =
+		os->starting_output_address(this, shndx);
+	      if (!lv.is_section_symbol())
+		lv.set_output_value(lv.input_value() + start);
+	      else
+		{
+		  Merged_symbol_value<size>* msv =
+		    new Merged_symbol_value<size>(lv.input_value(), start);
+		  lv.set_merged_symbol_value(msv);
+		}
 	    }
           else if (lv.is_tls_symbol())
-	    lv.set_output_value(mo[shndx].output_section->tls_offset()
+	    lv.set_output_value(os->tls_offset()
 				+ mo[shndx].offset
 				+ lv.input_value());
 	  else
-	    lv.set_output_value(mo[shndx].output_section->address()
+	    lv.set_output_value(os->address()
 				+ mo[shndx].offset
 				+ lv.input_value());
 	}
@@ -951,40 +967,6 @@ Sized_relobj<size, big_endian>::local_symbol_value(unsigned int symndx) const
   gold_assert(symndx < this->local_values_.size());
   const Symbol_value<size>& lv(this->local_values_[symndx]);
   return lv.value(this, 0);
-}
-
-// Return the value of a local symbol defined in input section SHNDX,
-// with value VALUE, adding addend ADDEND.  IS_SECTION_SYMBOL
-// indicates whether the symbol is a section symbol.  This handles
-// SHF_MERGE sections.
-template<int size, bool big_endian>
-typename elfcpp::Elf_types<size>::Elf_Addr
-Sized_relobj<size, big_endian>::local_value(unsigned int shndx,
-					    Address value,
-					    bool is_section_symbol,
-					    Address addend) const
-{
-  const std::vector<Map_to_output>& mo(this->map_to_output());
-  Output_section* os = mo[shndx].output_section;
-  if (os == NULL)
-    return addend;
-  gold_assert(mo[shndx].offset == -1);
-
-  // Do the mapping required by the output section.  If this is not a
-  // section symbol, then we want to map the symbol value, and then
-  // include the addend.  If this is a section symbol, then we need to
-  // include the addend to figure out where in the section we are,
-  // before we do the mapping.  This will do the right thing provided
-  // the assembler is careful to only convert a relocation in a merged
-  // section to a section symbol if there is a zero addend.  If the
-  // assembler does not do this, then in general we can't know what to
-  // do, because we can't distinguish the addend for the instruction
-  // format from the addend for the section offset.
-
-  if (is_section_symbol)
-    return os->output_address(this, shndx, value + addend);
-  else
-    return addend + os->output_address(this, shndx, value);
 }
 
 // Write out the local symbols.

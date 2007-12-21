@@ -23,9 +23,10 @@
 #include "gold.h"
 
 #include "workqueue.h"
-#include "object.h"
 #include "symtab.h"
 #include "output.h"
+#include "merge.h"
+#include "object.h"
 #include "reloc.h"
 
 namespace gold
@@ -343,9 +344,17 @@ Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
 
   this->write_sections(pshdrs, of, &views);
 
+  // To speed up relocations, we set up hash tables for fast lookup of
+  // input offsets to output addresses.
+  this->initialize_input_to_output_maps();
+
   // Apply relocations.
 
   this->relocate_sections(options, symtab, layout, pshdrs, &views);
+
+  // After we've done the relocations, we release the hash tables,
+  // since we no longer need them.
+  this->free_input_to_output_maps();
 
   // Write out the accumulated views.
   for (unsigned int i = 1; i < shnum; ++i)
@@ -582,6 +591,76 @@ Sized_relobj<size, big_endian>::relocate_sections(
 			       (*pviews)[index].address,
 			       (*pviews)[index].view_size);
     }
+}
+
+// Create merge hash tables for the local symbols.  These are used to
+// speed up relocations.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::initialize_input_to_output_maps()
+{
+  const unsigned int loccount = this->local_symbol_count_;
+  for (unsigned int i = 1; i < loccount; ++i)
+    {
+      Symbol_value<size>& lv(this->local_values_[i]);
+      lv.initialize_input_to_output_map(this);
+    }
+}
+
+// Free merge hash tables for the local symbols.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::free_input_to_output_maps()
+{
+  const unsigned int loccount = this->local_symbol_count_;
+  for (unsigned int i = 1; i < loccount; ++i)
+    {
+      Symbol_value<size>& lv(this->local_values_[i]);
+      lv.free_input_to_output_map();
+    }
+}
+
+// Class Merged_symbol_value.
+
+template<int size>
+void
+Merged_symbol_value<size>::initialize_input_to_output_map(
+    const Relobj* object,
+    unsigned int input_shndx)
+{
+  Object_merge_map* map = object->merge_map();
+  map->initialize_input_to_output_map<size>(input_shndx,
+					    this->output_start_address_,
+					    &this->output_addresses_);
+}
+
+// Get the output value corresponding to an input offset if we
+// couldn't find it in the hash table.
+
+template<int size>
+typename elfcpp::Elf_types<size>::Elf_Addr
+Merged_symbol_value<size>::value_from_output_section(
+    const Relobj* object,
+    unsigned int input_shndx,
+    typename elfcpp::Elf_types<size>::Elf_Addr input_offset) const
+{
+  section_offset_type output_offset;
+  bool found = object->merge_map()->get_output_offset(NULL, input_shndx,
+						      input_offset,
+						      &output_offset);
+
+  // If this assertion fails, it means that some relocation was
+  // against a portion of an input merge section which we didn't map
+  // to the output file and we didn't explicitly discard.  We should
+  // always map all portions of input merge sections.
+  gold_assert(found);
+
+  if (output_offset == -1)
+    return 0;
+  else
+    return this->output_start_address_ + output_offset;
 }
 
 // Copy_relocs::Copy_reloc_entry methods.
@@ -915,6 +994,26 @@ Sized_relobj<64, true>::do_relocate(const General_options& options,
 				    const Symbol_table* symtab,
 				    const Layout* layout,
 				    Output_file* of);
+#endif
+
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+template
+class Merged_symbol_value<32>;
+#endif
+
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+template
+class Merged_symbol_value<64>;
+#endif
+
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+template
+class Symbol_value<32>;
+#endif
+
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+template
+class Symbol_value<64>;
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

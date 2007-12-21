@@ -732,6 +732,12 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // they contain.
   off_t off = this->set_segment_offsets(target, load_seg, &shndx);
 
+  // Set the file offsets of all the non-data sections we've seen so
+  // far which don't have to wait for the input sections.  We need
+  // this in order to finalize local symbols in non-allocated
+  // sections.
+  off = this->set_section_offsets(off, BEFORE_INPUT_SECTIONS_PASS);
+
   // Create the symbol table sections.
   this->create_symtab_sections(input_objects, symtab, task, &off);
   if (!parameters->doing_static_link())
@@ -740,8 +746,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();
 
-  // Set the file offsets of all the non-data sections which don't
-  // have to wait for the input sections.
+  // Set the file offsets of the rest of the non-data sections which
+  // don't have to wait for the input sections.
   off = this->set_section_offsets(off, BEFORE_INPUT_SECTIONS_PASS);
 
   // Now that all sections have been created, set the section indexes.
@@ -1111,6 +1117,10 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
     {
       // The symtab section is handled in create_symtab_sections.
       if (*p == this->symtab_section_)
+	continue;
+
+      // If we've already set the data size, don't set it again.
+      if ((*p)->is_offset_valid() && (*p)->is_data_size_valid())
 	continue;
 
       if (pass == BEFORE_INPUT_SECTIONS_PASS

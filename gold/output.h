@@ -198,6 +198,21 @@ class Output_data
   dynamic_reloc_count() const
   { return this->dynamic_reloc_count_; }
 
+  // Whether the address is valid.
+  bool
+  is_address_valid() const
+  { return this->is_address_valid_; }
+
+  // Whether the file offset is valid.
+  bool
+  is_offset_valid() const
+  { return this->is_offset_valid_; }
+
+  // Whether the data size is valid.
+  bool
+  is_data_size_valid() const
+  { return this->is_data_size_valid_; }
+
  protected:
   // Functions that child classes may or in some cases must implement.
 
@@ -255,21 +270,6 @@ class Output_data
   { gold_unreachable(); }
 
   // Functions that child classes may call.
-
-  // Whether the address is valid.
-  bool
-  is_address_valid() const
-  { return this->is_address_valid_; }
-
-  // Whether the file offset is valid.
-  bool
-  is_offset_valid() const
-  { return this->is_offset_valid_; }
-
-  // Whether the data size is valid.
-  bool
-  is_data_size_valid() const
-  { return this->is_data_size_valid_; }
 
   // Set the size of the data.
   void
@@ -466,6 +466,13 @@ class Output_section_data : public Output_data
 		section_offset_type *poutput) const
   { return this->do_output_offset(object, shndx, offset, poutput); }
 
+  // Return whether this is the merge section for the input section
+  // SHNDX in OBJECT.  This should return true when output_offset
+  // would return true for some values of OFFSET.
+  bool
+  is_merge_section_for(const Relobj* object, unsigned int shndx) const
+  { return this->do_is_merge_section_for(object, shndx); }
+
   // Write the contents to a buffer.  This is used for sections which
   // require postprocessing, such as compression.
   void
@@ -497,6 +504,11 @@ class Output_section_data : public Output_data
   virtual bool
   do_output_offset(const Relobj*, unsigned int, section_offset_type,
 		   section_offset_type*) const
+  { return false; }
+
+  // The child class may implement is_merge_section_for.
+  virtual bool
+  do_is_merge_section_for(const Relobj*, unsigned int) const
   { return false; }
 
   // The child class may implement write_to_buffer.  Most child
@@ -1683,6 +1695,13 @@ class Output_section : public Output_data
   output_address(const Relobj* object, unsigned int shndx,
 		 off_t offset) const;
 
+  // Return the output address of the start of the merged section for
+  // input section SHNDX in object OBJECT.  This is not necessarily
+  // the offset corresponding to input offset 0 in the section, since
+  // the section may be mapped arbitrarily.
+  uint64_t
+  starting_output_address(const Relobj* object, unsigned int shndx) const;
+
   // Write the section header into *OPHDR.
   template<int size, bool big_endian>
   void
@@ -1903,6 +1922,11 @@ class Output_section : public Output_data
     output_offset(const Relobj* object, unsigned int shndx,
 		  section_offset_type offset,
 		  section_offset_type *poutput) const;
+
+    // Return whether this is the merge section for the input section
+    // SHNDX in OBJECT.
+    bool
+    is_merge_section_for(const Relobj* object, unsigned int shndx) const;
 
     // Write out the data.  This does nothing for an input section.
     void

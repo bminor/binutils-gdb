@@ -622,6 +622,71 @@ Relobj::output_section(unsigned int shndx, section_offset_type* poff) const
   return mo.output_section;
 }
 
+// This class is used to handle relocations against a section symbol
+// in an SHF_MERGE section.  For such a symbol, we need to know the
+// addend of the relocation before we can determine the final value.
+// The addend gives us the location in the input section, and we can
+// determine how it is mapped to the output section.  For a
+// non-section symbol, we apply the addend to the final value of the
+// symbol; that is done in finalize_local_symbols, and does not use
+// this class.
+
+template<int size>
+class Merged_symbol_value
+{
+ public:
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Value;
+
+  // We use a hash table to map offsets in the input section to output
+  // addresses.
+  typedef Unordered_map<section_offset_type, Value> Output_addresses;
+
+  Merged_symbol_value(Value input_value, Value output_start_address)
+    : input_value_(input_value), output_start_address_(output_start_address),
+      output_addresses_()
+  { }
+
+  // Initialize the hash table.
+  void
+  initialize_input_to_output_map(const Relobj*, unsigned int input_shndx);
+
+  // Release the hash table to save space.
+  void
+  free_input_to_output_map()
+  { this->output_addresses_.clear(); }
+
+  // Get the output value corresponding to an addend.  The object and
+  // input section index are passed in because the caller will have
+  // them; otherwise we could store them here.
+  Value
+  value(const Relobj* object, unsigned int input_shndx, Value addend) const
+  {
+    Value input_offset = this->input_value_ + addend;
+    typename Output_addresses::const_iterator p =
+      this->output_addresses_.find(input_offset);
+    if (p != this->output_addresses_.end())
+      return p->second;
+
+    return this->value_from_output_section(object, input_shndx, input_offset);
+  }
+
+ private:
+  // Get the output value for an input offset if we couldn't find it
+  // in the hash table.
+  Value
+  value_from_output_section(const Relobj*, unsigned int input_shndx,
+			    Value input_offset) const;
+
+  // The value of the section symbol in the input file.  This is
+  // normally zero, but could in principle be something else.
+  Value input_value_;
+  // The start address of this merged section in the output file.
+  Value output_start_address_;
+  // A hash table which maps offsets in the input section to output
+  // addresses.  This only maps specific offsets, not all offsets.
+  Output_addresses output_addresses_;
+};
+
 // This POD class is holds the value of a symbol.  This is used for
 // local symbols, and for all symbols during relocation processing.
 // For special sections, such as SHF_MERGE sections, this calls a
@@ -636,8 +701,8 @@ class Symbol_value
   Symbol_value()
     : output_symtab_index_(0), output_dynsym_index_(-1U), input_shndx_(0),
       is_section_symbol_(false), is_tls_symbol_(false),
-      needs_output_address_(false), value_(0)
-  { }
+      has_output_value_(true)
+  { this->u_.value = 0; }
 
   // Get the value of this symbol.  OBJECT is the object in which this
   // symbol is defined, and ADDEND is an addend to add to the value.
@@ -645,40 +710,63 @@ class Symbol_value
   Value
   value(const Sized_relobj<size, big_endian>* object, Value addend) const
   {
-    if (!this->needs_output_address_)
-      return this->value_ + addend;
-    return object->local_value(this->input_shndx_, this->value_,
-			       this->is_section_symbol_, addend);
+    if (this->has_output_value_)
+      return this->u_.value + addend;
+    else
+      return this->u_.merged_symbol_value->value(object, this->input_shndx_,
+						 addend);
   }
 
   // Set the value of this symbol in the output symbol table.
   void
   set_output_value(Value value)
+  { this->u_.value = value; }
+
+  // For a section symbol in a merged section, we need more
+  // information.
+  void
+  set_merged_symbol_value(Merged_symbol_value<size>* msv)
   {
-    this->value_ = value;
-    this->needs_output_address_ = false;
+    gold_assert(this->is_section_symbol_);
+    this->has_output_value_ = false;
+    this->u_.merged_symbol_value = msv;
   }
 
-  // Set the value of the symbol from the input file.  This value
-  // will usually be replaced during finalization with the output
-  // value, but if the symbol is mapped to an output section which
-  // requires special handling to determine the output value, we
-  // leave the input value in place until later.  This is used for
-  // SHF_MERGE sections.
+  // Initialize the input to output map for a section symbol in a
+  // merged section.  We also initialize the value of a non-section
+  // symbol in a merged section.
+  void
+  initialize_input_to_output_map(const Relobj* object)
+  {
+    if (!this->has_output_value_)
+      {
+	gold_assert(this->is_section_symbol_);
+	Merged_symbol_value<size>* msv = this->u_.merged_symbol_value;
+	msv->initialize_input_to_output_map(object, this->input_shndx_);
+      }
+  }
+
+  // Free the input to output map for a section symbol in a merged
+  // section.
+  void
+  free_input_to_output_map()
+  {
+    if (!this->has_output_value_)
+      this->u_.merged_symbol_value->free_input_to_output_map();
+  }
+
+  // Set the value of the symbol from the input file.  This is only
+  // called by count_local_symbols, to communicate the value to
+  // finalize_local_symbols.
   void
   set_input_value(Value value)
-  {
-    this->value_ = value;
-    this->needs_output_address_ = true;
-  }
+  { this->u_.value = value; }
 
-  // Return the input value.
+  // Return the input value.  This is only called by
+  // finalize_local_symbols.
   Value
   input_value() const
-  {
-    gold_assert(this->needs_output_address_);
-    return this->value_;
-  }
+  { return this->u_.value; }
 
   // Return whether this symbol should go into the output symbol
   // table.
@@ -757,6 +845,11 @@ class Symbol_value
   input_shndx() const
   { return this->input_shndx_; }
 
+  // Whether this is a section symbol.
+  bool
+  is_section_symbol() const
+  { return this->is_section_symbol_; }
+
   // Record that this is a section symbol.
   void
   set_is_section_symbol()
@@ -786,14 +879,23 @@ class Symbol_value
   bool is_section_symbol_ : 1;
   // Whether this is a STT_TLS symbol.
   bool is_tls_symbol_ : 1;
-  // Whether getting the value of this symbol requires calling an
-  // Output_section method.  For example, this will be true of a
-  // symbol in a SHF_MERGE section.
-  bool needs_output_address_ : 1;
-  // The value of the symbol.  If !needs_output_address_, this is the
-  // value in the output file.  If needs_output_address_, this is the
-  // value in the input file.
-  Value value_;
+  // Whether this symbol has a value for the output file.  This is
+  // normally set to true during Layout::finalize, by
+  // finalize_local_symbols.  It will be false for a section symbol in
+  // a merge section, as for such symbols we can not determine the
+  // value to use in a relocation until we see the addend.
+  bool has_output_value_ : 1;
+  union
+  {
+    // This is used if has_output_value_ is true.  Between
+    // count_local_symbols and finalize_local_symbols, this is the
+    // value in the input file.  After finalize_local_symbols, it is
+    // the value in the output file.
+    Value value;
+    // This is used if has_output_value_ is false.  It points to the
+    // information we need to get the value for a merge section.
+    Merged_symbol_value<size>* merged_symbol_value;
+  } u_;
 };
 
 // A regular object file.  This is size and endian specific.
@@ -875,14 +977,6 @@ class Sized_relobj : public Relobj
   // Return the value of the local symbol symndx.
   Address
   local_symbol_value(unsigned int symndx) const;
-
-  // Return the value of a local symbol defined in input section
-  // SHNDX, with value VALUE, adding addend ADDEND.  IS_SECTION_SYMBOL
-  // indicates whether the symbol is a section symbol.  This handles
-  // SHF_MERGE sections.
-  Address
-  local_value(unsigned int shndx, Address value, bool is_section_symbol,
-	      Address addend) const;
 
   void
   set_needs_output_dynsym_entry(unsigned int sym)
@@ -1118,6 +1212,16 @@ class Sized_relobj : public Relobj
   void
   relocate_sections(const General_options& options, const Symbol_table*,
 		    const Layout*, const unsigned char* pshdrs, Views*);
+
+  // Initialize input to output maps for section symbols in merged
+  // sections.
+  void
+  initialize_input_to_output_maps();
+
+  // Free the input to output maps for section symbols in merged
+  // sections.
+  void
+  free_input_to_output_maps();
 
   // Write out the local symbols.
   void

@@ -24,12 +24,150 @@
 #define GOLD_MERGE_H
 
 #include <climits>
+#include <map>
+#include <vector>
 
 #include "stringpool.h"
 #include "output.h"
 
 namespace gold
 {
+
+class Merge_map;
+
+// For each object with merge sections, we store an Object_merge_map.
+// This is used to map locations in input sections to a merged output
+// section.  The output section itself is not recorded here--it can be
+// found in the map_to_output_ field of the Object.
+
+class Object_merge_map
+{
+ public:
+  Object_merge_map()
+    : first_shnum_(-1U), first_map_(),
+      second_shnum_(-1U), second_map_(),
+      section_merge_maps_()
+  { }
+
+  ~Object_merge_map();
+
+  // Add a mapping for MERGE_MAP, for the bytes from OFFSET to OFFSET
+  // + LENGTH in the input section SHNDX to OUTPUT_OFFSET in the
+  // output section.  An OUTPUT_OFFSET of -1 means that the bytes are
+  // discarded.  OUTPUT_OFFSET is relative to the start of the merged
+  // data in the output section.
+  void
+  add_mapping(const Merge_map*, unsigned int shndx, section_offset_type offset,
+	      section_size_type length, section_offset_type output_offset);
+
+  // Get the output offset for an input address.  MERGE_MAP is the map
+  // we are looking for, or NULL if we don't care.  The input address
+  // is at offset OFFSET in section SHNDX.  This sets *OUTPUT_OFFSET
+  // to the offset in the output section; this will be -1 if the bytes
+  // are not being copied to the output.  This returns true if the
+  // mapping is known, false otherwise.  *OUTPUT_OFFSET is relative to
+  // the start of the merged data in the output section.
+  bool
+  get_output_offset(const Merge_map*, unsigned int shndx,
+		    section_offset_type offset,
+		    section_offset_type *output_offset);
+
+  // Return whether this is the merge map for section SHNDX.
+  bool
+  is_merge_section_for(const Merge_map*, unsigned int shndx);
+
+  // Initialize an mapping from input offsets to output addresses for
+  // section SHNDX.  STARTING_ADDRESS is the output address of the
+  // merged section.
+  template<int size>
+  void
+  initialize_input_to_output_map(
+      unsigned int shndx,
+      typename elfcpp::Elf_types<size>::Elf_Addr starting_address,
+      Unordered_map<section_offset_type,
+		    typename elfcpp::Elf_types<size>::Elf_Addr>*);
+
+ private:
+  // Map input section offsets to a length and an output section
+  // offset.  An output section offset of -1 means that this part of
+  // the input section is being discarded.
+  struct Input_merge_entry
+  {
+    // The offset in the input section.
+    section_offset_type input_offset;
+    // The length.
+    section_size_type length;
+    // The offset in the output section.
+    section_offset_type output_offset;
+  };
+
+  // A less-than comparison routine for Input_merge_entry.
+  struct Input_merge_compare
+  {
+    bool
+    operator()(const Input_merge_entry& i1, const Input_merge_entry& i2) const
+    { return i1.input_offset < i2.input_offset; }
+  };
+
+  // A list of entries for a particular input section.
+  struct Input_merge_map
+  {
+    typedef std::vector<Input_merge_entry> Entries;
+
+    // We store these with the Relobj, and we look them up by input
+    // section.  It is possible to have two different merge maps
+    // associated with a single output section.  For example, this
+    // happens routinely with .rodata, when merged string constants
+    // and merged fixed size constants are both put into .rodata.  The
+    // output offset that we store is not the offset from the start of
+    // the output section; it is the offset from the start of the
+    // merged data in the output section.  That means that the caller
+    // is going to add the offset of the merged data within the output
+    // section, which means that the caller needs to know which set of
+    // merged data it found the entry in.  So it's not enough to find
+    // this data based on the input section and the output section; we
+    // also have to find it based on a set of merged data in the
+    // output section.  In order to verify that we are looking at the
+    // right data, we store a pointer to the Merge_map here, and we
+    // pass in a pointer when looking at the data.  If we are asked to
+    // look up information for a different Merge_map, we report that
+    // we don't have it, rather than trying a lookup and returning an
+    // answer which will receive the wrong offset.
+    const Merge_map* merge_map;
+    // The list of mappings.
+    Entries entries;
+    // Whether the ENTRIES field is sorted by input_offset.
+    bool sorted;
+
+    Input_merge_map()
+      : merge_map(NULL), entries(), sorted(true)
+    { }
+  };
+
+  // Map input section indices to merge maps.
+  typedef std::map<unsigned int, Input_merge_map*> Section_merge_maps;
+
+  // Return a pointer to the Input_merge_map to use for the input
+  // section SHNDX, or NULL.
+  Input_merge_map*
+  get_input_merge_map(unsigned int shndx);
+
+  // Get or make the the Input_merge_map to use for the section SHNDX
+  // with MERGE_MAP.
+  Input_merge_map*
+  get_or_make_input_merge_map(const Merge_map* merge_map, unsigned int shndx);
+
+  // Any given object file will normally only have a couple of input
+  // sections with mergeable contents.  So we keep the first two input
+  // section numbers inline, and push any further ones into a map.  A
+  // value of -1U in first_shnum_ or second_shnum_ means that we don't
+  // have a corresponding entry.
+  unsigned int first_shnum_;
+  Input_merge_map first_map_;
+  unsigned int second_shnum_;
+  Input_merge_map second_map_;
+  Section_merge_maps section_merge_maps_;
+};
 
 // This class manages mappings from input sections to offsets in an
 // output section.  This is used where input sections are merged.  The
@@ -63,6 +201,12 @@ class Merge_map
   get_output_offset(const Relobj* object, unsigned int shndx,
 		    section_offset_type offset,
 		    section_offset_type *output_offset) const;
+
+  // Return whether this is the merge mapping for section SHNDX in
+  // OBJECT.  This should return true when get_output_offset would
+  // return true for some input offset.
+  bool
+  is_merge_section_for(const Relobj* object, unsigned int shndx) const;
 };
 
 // A general class for SHF_MERGE data, to hold functions shared by
@@ -75,13 +219,17 @@ class Output_merge_base : public Output_section_data
     : Output_section_data(addralign), merge_map_(), entsize_(entsize)
   { }
 
+ protected:
   // Return the output offset for an input offset.
   bool
   do_output_offset(const Relobj* object, unsigned int shndx,
 		   section_offset_type offset,
 		   section_offset_type* poutput) const;
 
- protected:
+  // Return whether this is the merge section for an input section.
+  bool
+  do_is_merge_section_for(const Relobj*, unsigned int shndx) const;
+
   // Return the entry size.
   uint64_t
   entsize() const

@@ -1369,6 +1369,18 @@ Output_section::Input_section::output_offset(
     }
 }
 
+// Return whether this is the merge section for the input section
+// SHNDX in OBJECT.
+
+inline bool
+Output_section::Input_section::is_merge_section_for(const Relobj* object,
+						    unsigned int shndx) const
+{
+  if (this->is_input_section())
+    return false;
+  return this->u2_.posd->is_merge_section_for(object, shndx);
+}
+
 // Write out the data.  We don't have to do anything for an input
 // section--they are handled via Object::relocate--but this is where
 // we write out the data for an Output_section_data.
@@ -1707,6 +1719,34 @@ Output_section::output_address(const Relobj* object, unsigned int shndx,
   // add_input_section were called before add_output_section_data.
   // But it should never actually happen.
 
+  gold_unreachable();
+}
+
+// Return the output address of the start of the merged section for
+// input section SHNDX in object OBJECT.
+
+uint64_t
+Output_section::starting_output_address(const Relobj* object,
+					unsigned int shndx) const
+{
+  gold_assert(object->is_section_specially_mapped(shndx));
+
+  uint64_t addr = this->address() + this->first_input_offset_;
+  for (Input_section_list::const_iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      addr = align_address(addr, p->addralign());
+
+      // It would be nice if we could use the existing output_offset
+      // method to get the output offset of input offset 0.
+      // Unfortunately we don't know for sure that input offset 0 is
+      // mapped at all.
+      if (p->is_merge_section_for(object, shndx))
+	return addr;
+
+      addr += p->data_size();
+    }
   gold_unreachable();
 }
 

@@ -1041,6 +1041,15 @@ Eh_frame::do_output_offset(const Relobj* object, unsigned int shndx,
   return this->merge_map_.get_output_offset(object, shndx, offset, poutput);
 }
 
+// Return whether this is the merge section for an input section.
+
+bool
+Eh_frame::do_is_merge_section_for(const Relobj* object,
+				  unsigned int shndx) const
+{
+  return this->merge_map_.is_merge_section_for(object, shndx);
+}
+
 // Write the data to the output file.
 
 void

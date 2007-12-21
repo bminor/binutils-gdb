@@ -326,6 +326,10 @@ class Eh_frame : public Output_section_data
 		   section_offset_type offset,
 		   section_offset_type* poutput) const;
 
+  // Return whether this is the merge section for an input section.
+  bool
+  do_is_merge_section_for(const Relobj*, unsigned int shndx) const;
+
   // Write the data to the file.
   void
   do_write(Output_file*);
