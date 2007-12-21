@@ -8240,30 +8240,28 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 
 		  pin_contents (sec, contents);
 		}
+
+	      /* If the relocation still references a section in the same
+		 input file, modify the relocation directly instead of
+		 adding a "fix" record.  */
+	      if (target_sec->owner == abfd)
+		{
+		  unsigned r_symndx = ELF32_R_SYM (new_reloc.rela.r_info);
+		  irel->r_info = ELF32_R_INFO (r_symndx, r_type);
+		  irel->r_addend = new_reloc.rela.r_addend;
+		  pin_internal_relocs (sec, internal_relocs);
+		}
 	      else
 		{
-		  /* If the relocation still references a section in the same
-		     input file, modify the relocation directly instead of
-		     adding a "fix" record.  */
-		  if (target_sec->owner == abfd)
-		    {
-		      unsigned r_symndx = ELF32_R_SYM (new_reloc.rela.r_info);
-		      irel->r_info = ELF32_R_INFO (r_symndx, r_type);
-		      irel->r_addend = new_reloc.rela.r_addend;
-		      pin_internal_relocs (sec, internal_relocs);
-		    }
-		  else
-		    {
-		      bfd_vma addend_displacement;
-		      reloc_bfd_fix *fix;
+		  bfd_vma addend_displacement;
+		  reloc_bfd_fix *fix;
 
-		      addend_displacement =
-			new_reloc.target_offset + new_reloc.virtual_offset;
-		      fix = reloc_bfd_fix_init (sec, source_offset, r_type,
-						target_sec,
-						addend_displacement, TRUE);
-		      add_fix (sec, fix);
-		    }
+		  addend_displacement =
+		    new_reloc.target_offset + new_reloc.virtual_offset;
+		  fix = reloc_bfd_fix_init (sec, source_offset, r_type,
+					    target_sec,
+					    addend_displacement, TRUE);
+		  add_fix (sec, fix);
 		}
 	    }
 	}
