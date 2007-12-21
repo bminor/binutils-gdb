@@ -1,3 +1,8 @@
+2007-12-21 Denis Pilat <denis.pilat@st.com>
+
+	* tui/tui-data.h (MAX_LOCATOR_ELEMENT_LEN): Defined to a bigger
+	value or to PATH_MAX when possible.
+
 2007-12-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* rs6000-tdep.h: Remove defs.h #include.

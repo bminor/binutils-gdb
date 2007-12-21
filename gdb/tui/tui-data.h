@@ -195,8 +195,11 @@ struct tui_command_element
   char *line;
 };
 
-
-#define MAX_LOCATOR_ELEMENT_LEN        100
+#ifdef PATH_MAX
+# define MAX_LOCATOR_ELEMENT_LEN        PATH_MAX
+#else
+# define MAX_LOCATOR_ELEMENT_LEN        1024
+#endif
 
 /* Elements in the locator window content.  */
 struct tui_locator_element
