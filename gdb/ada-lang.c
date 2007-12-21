@@ -153,6 +153,14 @@ static int scalar_type_p (struct type *);
 
 static int discrete_type_p (struct type *);
 
+static enum ada_renaming_category parse_old_style_renaming (struct type *,
+							    const char **,
+							    int *,
+							    const char **);
+
+static struct symbol *find_old_style_renaming_symbol (const char *,
+						      struct block *);
+
 static struct type *ada_lookup_struct_elt_type (struct type *, char *,
                                                 int, int, int *);
 
@@ -3547,68 +3555,156 @@ possible_user_operator_p (enum exp_opcode op, struct value *args[])
 
                                 /* Renaming */
 
-/* NOTE: In the following, we assume that a renaming type's name may
-   have an ___XD suffix.  It would be nice if this went away at some
-   point.  */
+/* NOTES: 
 
-/* If TYPE encodes a renaming, returns the renaming suffix, which
-   is XR for an object renaming, XRP for a procedure renaming, XRE for
-   an exception renaming, and XRS for a subprogram renaming.  Returns
-   NULL if NAME encodes none of these.  */
+   1. In the following, we assume that a renaming type's name may
+      have an ___XD suffix.  It would be nice if this went away at some
+      point.
+   2. We handle both the (old) purely type-based representation of 
+      renamings and the (new) variable-based encoding.  At some point,
+      it is devoutly to be hoped that the former goes away 
+      (FIXME: hilfinger-2007-07-09).
+   3. Subprogram renamings are not implemented, although the XRS
+      suffix is recognized (FIXME: hilfinger-2007-07-09).  */
 
-const char *
-ada_renaming_type (struct type *type)
+/* If SYM encodes a renaming, 
+
+       <renaming> renames <renamed entity>,
+
+   sets *LEN to the length of the renamed entity's name,
+   *RENAMED_ENTITY to that name (not null-terminated), and *RENAMING_EXPR to
+   the string describing the subcomponent selected from the renamed
+   entity. Returns ADA_NOT_RENAMING if SYM does not encode a renaming
+   (in which case, the values of *RENAMED_ENTITY, *LEN, and *RENAMING_EXPR
+   are undefined).  Otherwise, returns a value indicating the category
+   of entity renamed: an object (ADA_OBJECT_RENAMING), exception
+   (ADA_EXCEPTION_RENAMING), package (ADA_PACKAGE_RENAMING), or
+   subprogram (ADA_SUBPROGRAM_RENAMING).  Does no allocation; the
+   strings returned in *RENAMED_ENTITY and *RENAMING_EXPR should not be
+   deallocated.  The values of RENAMED_ENTITY, LEN, or RENAMING_EXPR
+   may be NULL, in which case they are not assigned.
+
+   [Currently, however, GCC does not generate subprogram renamings.]  */
+
+enum ada_renaming_category
+ada_parse_renaming (struct symbol *sym,
+		    const char **renamed_entity, int *len, 
+		    const char **renaming_expr)
 {
-  if (type != NULL && TYPE_CODE (type) == TYPE_CODE_ENUM)
+  enum ada_renaming_category kind;
+  const char *info;
+  const char *suffix;
+
+  if (sym == NULL)
+    return ADA_NOT_RENAMING;
+  switch (SYMBOL_CLASS (sym)) 
     {
-      const char *name = type_name_no_tag (type);
-      const char *suffix = (name == NULL) ? NULL : strstr (name, "___XR");
-      if (suffix == NULL
-          || (suffix[5] != '\000' && strchr ("PES_", suffix[5]) == NULL))
-        return NULL;
-      else
-        return suffix + 3;
+    default:
+      return ADA_NOT_RENAMING;
+    case LOC_TYPEDEF:
+      return parse_old_style_renaming (SYMBOL_TYPE (sym), 
+				       renamed_entity, len, renaming_expr);
+    case LOC_LOCAL:
+    case LOC_STATIC:
+    case LOC_COMPUTED:
+    case LOC_OPTIMIZED_OUT:
+      info = strstr (SYMBOL_LINKAGE_NAME (sym), "___XR");
+      if (info == NULL)
+	return ADA_NOT_RENAMING;
+      switch (info[5])
+	{
+	case '_':
+	  kind = ADA_OBJECT_RENAMING;
+	  info += 6;
+	  break;
+	case 'E':
+	  kind = ADA_EXCEPTION_RENAMING;
+	  info += 7;
+	  break;
+	case 'P':
+	  kind = ADA_PACKAGE_RENAMING;
+	  info += 7;
+	  break;
+	case 'S':
+	  kind = ADA_SUBPROGRAM_RENAMING;
+	  info += 7;
+	  break;
+	default:
+	  return ADA_NOT_RENAMING;
+	}
     }
-  else
-    return NULL;
+
+  if (renamed_entity != NULL)
+    *renamed_entity = info;
+  suffix = strstr (info, "___XE");
+  if (suffix == NULL || suffix == info)
+    return ADA_NOT_RENAMING;
+  if (len != NULL)
+    *len = strlen (info) - strlen (suffix);
+  suffix += 5;
+  if (renaming_expr != NULL)
+    *renaming_expr = suffix;
+  return kind;
 }
 
-/* Return non-zero iff SYM encodes an object renaming.  */
-
-int
-ada_is_object_renaming (struct symbol *sym)
+/* Assuming TYPE encodes a renaming according to the old encoding in
+   exp_dbug.ads, returns details of that renaming in *RENAMED_ENTITY,
+   *LEN, and *RENAMING_EXPR, as for ada_parse_renaming, above.  Returns
+   ADA_NOT_RENAMING otherwise.  */
+static enum ada_renaming_category
+parse_old_style_renaming (struct type *type,
+			  const char **renamed_entity, int *len, 
+			  const char **renaming_expr)
 {
-  const char *renaming_type = ada_renaming_type (SYMBOL_TYPE (sym));
-  return renaming_type != NULL
-    && (renaming_type[2] == '\0' || renaming_type[2] == '_');
-}
+  enum ada_renaming_category kind;
+  const char *name;
+  const char *info;
+  const char *suffix;
 
-/* Assuming that SYM encodes a non-object renaming, returns the original
-   name of the renamed entity.  The name is good until the end of
-   parsing.  */
+  if (type == NULL || TYPE_CODE (type) != TYPE_CODE_ENUM 
+      || TYPE_NFIELDS (type) != 1)
+    return ADA_NOT_RENAMING;
 
-char *
-ada_simple_renamed_entity (struct symbol *sym)
-{
-  struct type *type;
-  const char *raw_name;
-  int len;
-  char *result;
+  name = type_name_no_tag (type);
+  if (name == NULL)
+    return ADA_NOT_RENAMING;
+  
+  name = strstr (name, "___XR");
+  if (name == NULL)
+    return ADA_NOT_RENAMING;
+  switch (name[5])
+    {
+    case '\0':
+    case '_':
+      kind = ADA_OBJECT_RENAMING;
+      break;
+    case 'E':
+      kind = ADA_EXCEPTION_RENAMING;
+      break;
+    case 'P':
+      kind = ADA_PACKAGE_RENAMING;
+      break;
+    case 'S':
+      kind = ADA_SUBPROGRAM_RENAMING;
+      break;
+    default:
+      return ADA_NOT_RENAMING;
+    }
 
-  type = SYMBOL_TYPE (sym);
-  if (type == NULL || TYPE_NFIELDS (type) < 1)
-    error (_("Improperly encoded renaming."));
-
-  raw_name = TYPE_FIELD_NAME (type, 0);
-  len = (raw_name == NULL ? 0 : strlen (raw_name)) - 5;
-  if (len <= 0)
-    error (_("Improperly encoded renaming."));
-
-  result = xmalloc (len + 1);
-  strncpy (result, raw_name, len);
-  result[len] = '\000';
-  return result;
-}
+  info = TYPE_FIELD_NAME (type, 0);
+  if (info == NULL)
+    return ADA_NOT_RENAMING;
+  if (renamed_entity != NULL)
+    *renamed_entity = info;
+  suffix = strstr (info, "___XE");
+  if (renaming_expr != NULL)
+    *renaming_expr = suffix + 5;
+  if (suffix == NULL || suffix == info)
+    return ADA_NOT_RENAMING;
+  if (len != NULL)
+    *len = suffix - info;
+  return kind;
+}  
 
 
 
@@ -4315,18 +4411,23 @@ is_package_name (const char *name)
 }
 
 /* Return nonzero if SYM corresponds to a renaming entity that is
-   visible from FUNCTION_NAME.  */
+   not visible from FUNCTION_NAME.  */
 
 static int
-renaming_is_visible (const struct symbol *sym, char *function_name)
+old_renaming_is_invisible (const struct symbol *sym, char *function_name)
 {
-  char *scope = xget_renaming_scope (SYMBOL_TYPE (sym));
+  char *scope;
+
+  if (SYMBOL_CLASS (sym) != LOC_TYPEDEF)
+    return 0;
+
+  scope = xget_renaming_scope (SYMBOL_TYPE (sym));
 
   make_cleanup (xfree, scope);
 
   /* If the rename has been defined in a package, then it is visible.  */
   if (is_package_name (scope))
-    return 1;
+    return 0;
 
   /* Check that the rename is in the current function scope by checking
      that its name starts with SCOPE.  */
@@ -4338,15 +4439,22 @@ renaming_is_visible (const struct symbol *sym, char *function_name)
   if (strncmp (function_name, "_ada_", 5) == 0)
     function_name += 5;
 
-  return (strncmp (function_name, scope, strlen (scope)) == 0);
+  return (strncmp (function_name, scope, strlen (scope)) != 0);
 }
 
-/* Iterates over the SYMS list and remove any entry that corresponds to
-   a renaming entity that is not visible from the function associated
-   with CURRENT_BLOCK. 
+/* Remove entries from SYMS that corresponds to a renaming entity that
+   is not visible from the function associated with CURRENT_BLOCK or
+   that is superfluous due to the presence of more specific renaming
+   information.  Places surviving symbols in the initial entries of
+   SYMS and returns the number of surviving symbols.
    
    Rationale:
-   GNAT emits a type following a specified encoding for each renaming
+   First, in cases where an object renaming is implemented as a
+   reference variable, GNAT may produce both the actual reference
+   variable and the renaming encoding.  In this case, we discard the
+   latter.
+
+   Second, GNAT emits a type following a specified encoding for each renaming
    entity.  Unfortunately, STABS currently does not support the definition
    of types that are local to a given lexical block, so all renamings types
    are emitted at library level.  As a consequence, if an application
@@ -4372,12 +4480,55 @@ renaming_is_visible (const struct symbol *sym, char *function_name)
         the user will be unable to print such rename entities.  */
 
 static int
-remove_out_of_scope_renamings (struct ada_symbol_info *syms,
-                               int nsyms, const struct block *current_block)
+remove_irrelevant_renamings (struct ada_symbol_info *syms,
+			     int nsyms, const struct block *current_block)
 {
   struct symbol *current_function;
   char *current_function_name;
   int i;
+  int is_new_style_renaming;
+
+  /* If there is both a renaming foo___XR... encoded as a variable and
+     a simple variable foo in the same block, discard the latter.
+     First, zero out such symbols, then compress. */
+  is_new_style_renaming = 0;
+  for (i = 0; i < nsyms; i += 1)
+    {
+      struct symbol *sym = syms[i].sym;
+      struct block *block = syms[i].block;
+      const char *name;
+      const char *suffix;
+
+      if (sym == NULL || SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+	continue;
+      name = SYMBOL_LINKAGE_NAME (sym);
+      suffix = strstr (name, "___XR");
+
+      if (suffix != NULL)
+	{
+	  int name_len = suffix - name;
+	  int j;
+	  is_new_style_renaming = 1;
+	  for (j = 0; j < nsyms; j += 1)
+	    if (i != j && syms[j].sym != NULL
+		&& strncmp (name, SYMBOL_LINKAGE_NAME (syms[j].sym),
+			    name_len) == 0
+		&& block == syms[j].block)
+	      syms[j].sym = NULL;
+	}
+    }
+  if (is_new_style_renaming)
+    {
+      int j, k;
+
+      for (j = k = 0; j < nsyms; j += 1)
+	if (syms[j].sym != NULL)
+	    {
+	      syms[k] = syms[j];
+	      k += 1;
+	    }
+      return k;
+    }
 
   /* Extract the function name associated to CURRENT_BLOCK.
      Abort if unable to do so.  */
@@ -4400,11 +4551,12 @@ remove_out_of_scope_renamings (struct ada_symbol_info *syms,
   i = 0;
   while (i < nsyms)
     {
-      if (ada_is_object_renaming (syms[i].sym)
-          && !renaming_is_visible (syms[i].sym, current_function_name))
+      if (ada_parse_renaming (syms[i].sym, NULL, NULL, NULL)
+          == ADA_OBJECT_RENAMING
+          && old_renaming_is_invisible (syms[i].sym, current_function_name))
         {
           int j;
-          for (j = i + 1; j < nsyms; j++)
+          for (j = i + 1; j < nsyms; j += 1)
             syms[j - 1] = syms[j];
           nsyms -= 1;
         }
@@ -4610,35 +4762,26 @@ done:
     cache_symbol (name0, namespace, (*results)[0].sym, (*results)[0].block,
                   (*results)[0].symtab);
 
-  ndefns = remove_out_of_scope_renamings (*results, ndefns, block0);
+  ndefns = remove_irrelevant_renamings (*results, ndefns, block0);
 
   return ndefns;
 }
 
-/* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
-   scope and in global scopes, or NULL if none.  NAME is folded and
-   encoded first.  Otherwise, the result is as for ada_lookup_symbol_list,
-   choosing the first symbol if there are multiple choices.  
-   *IS_A_FIELD_OF_THIS is set to 0 and *SYMTAB is set to the symbol
-   table in which the symbol was found (in both cases, these
-   assignments occur only if the pointers are non-null).  */
-
 struct symbol *
-ada_lookup_symbol (const char *name, const struct block *block0,
-                   domain_enum namespace, int *is_a_field_of_this,
-                   struct symtab **symtab)
+ada_lookup_encoded_symbol (const char *name, const struct block *block0,
+			   domain_enum namespace, 
+			   struct block **block_found, struct symtab **symtab)
 {
   struct ada_symbol_info *candidates;
   int n_candidates;
 
-  n_candidates = ada_lookup_symbol_list (ada_encode (ada_fold_name (name)),
-                                         block0, namespace, &candidates);
+  n_candidates = ada_lookup_symbol_list (name, block0, namespace, &candidates);
 
   if (n_candidates == 0)
     return NULL;
 
-  if (is_a_field_of_this != NULL)
-    *is_a_field_of_this = 0;
+  if (block_found != NULL)
+    *block_found = candidates[0].block;
 
   if (symtab != NULL)
     {
@@ -4674,6 +4817,26 @@ ada_lookup_symbol (const char *name, const struct block *block0,
         }
     }
   return candidates[0].sym;
+}  
+
+/* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
+   scope and in global scopes, or NULL if none.  NAME is folded and
+   encoded first.  Otherwise, the result is as for ada_lookup_symbol_list,
+   choosing the first symbol if there are multiple choices.  
+   *IS_A_FIELD_OF_THIS is set to 0 and *SYMTAB is set to the symbol
+   table in which the symbol was found (in both cases, these
+   assignments occur only if the pointers are non-null).  */
+struct symbol *
+ada_lookup_symbol (const char *name, const struct block *block0,
+                   domain_enum namespace, int *is_a_field_of_this,
+                   struct symtab **symtab)
+{
+  if (is_a_field_of_this != NULL)
+    *is_a_field_of_this = 0;
+
+  return
+    ada_lookup_encoded_symbol (ada_encode (ada_fold_name (name)),
+			       block0, namespace, NULL, symtab);
 }
 
 static struct symbol *
@@ -4847,10 +5010,8 @@ is_dot_digits_suffix (const char *str)
   return (str[0] == '\0');
 }
 
-/* Return non-zero if NAME0 is a valid match when doing wild matching.
-   Certain symbols appear at first to match, except that they turn out
-   not to follow the Ada encoding and hence should not be used as a wild
-   match of a given pattern.  */
+/* Return non-zero if the string starting at NAME and ending before
+   NAME_END contains no capital letters.  */
 
 static int
 is_valid_name_for_wild_match (const char *name0)
@@ -4875,6 +5036,7 @@ wild_match (const char *patn0, int patn_len, const char *name0)
 {
   int name_len;
   char *name;
+  char *name_start;
   char *patn;
 
   /* FIXME: brobecker/2003-11-10: For some reason, the symbol name
@@ -4901,7 +5063,7 @@ wild_match (const char *patn0, int patn_len, const char *name0)
     char *dot;
     name_len = strlen (name0);
 
-    name = (char *) alloca ((name_len + 1) * sizeof (char));
+    name = name_start = (char *) alloca ((name_len + 1) * sizeof (char));
     strcpy (name, name0);
     dot = strrchr (name, '.');
     if (dot != NULL && is_dot_digits_suffix (dot))
@@ -4930,7 +5092,7 @@ wild_match (const char *patn0, int patn_len, const char *name0)
     {
       if (strncmp (patn, name, patn_len) == 0
           && is_name_suffix (name + patn_len))
-        return (is_valid_name_for_wild_match (name0));
+        return (name == name_start || is_valid_name_for_wild_match (name0));
       do
         {
           name += 1;
@@ -6161,13 +6323,31 @@ ada_find_any_type (const char *name)
   return NULL;
 }
 
-/* Given a symbol NAME and its associated BLOCK, search all symbols
-   for its ___XR counterpart, which is the ``renaming'' symbol
+/* Given NAME and an associated BLOCK, search all symbols for
+   NAME suffixed with  "___XR", which is the ``renaming'' symbol
    associated to NAME.  Return this symbol if found, return
    NULL otherwise.  */
 
 struct symbol *
 ada_find_renaming_symbol (const char *name, struct block *block)
+{
+  struct symbol *sym;
+
+  sym = find_old_style_renaming_symbol (name, block);
+
+  if (sym != NULL)
+    return sym;
+
+  /* Not right yet.  FIXME pnh 7/20/2007. */
+  sym = ada_find_any_symbol (name);
+  if (sym != NULL && strstr (SYMBOL_LINKAGE_NAME (sym), "___XR") != NULL)
+    return sym;
+  else
+    return NULL;
+}
+
+static struct symbol *
+find_old_style_renaming_symbol (const char *name, struct block *block)
 {
   const struct symbol *function_sym = block_function (block);
   char *rename;
@@ -6193,7 +6373,7 @@ ada_find_renaming_symbol (const char *name, struct block *block)
 
       /* Library-level functions are a special case, as GNAT adds
          a ``_ada_'' prefix to the function name to avoid namespace
-         pollution.  However, the renaming symbol themselves do not
+         pollution.  However, the renaming symbols themselves do not
          have this prefix, so we need to skip this prefix if present.  */
       if (function_name_len > 5 /* "_ada_" */
           && strstr (function_name, "_ada_") == function_name)
@@ -6235,9 +6415,15 @@ ada_prefer_type (struct type *type0, struct type *type1)
   else if (ada_is_array_descriptor_type (type0)
            && !ada_is_array_descriptor_type (type1))
     return 1;
-  else if (ada_renaming_type (type0) != NULL
-           && ada_renaming_type (type1) == NULL)
-    return 1;
+  else
+    {
+      const char *type0_name = type_name_no_tag (type0);
+      const char *type1_name = type_name_no_tag (type1);
+
+      if (type0_name != NULL && strstr (type0_name, "___XR") != NULL
+	  && (type1_name == NULL || strstr (type1_name, "___XR") == NULL))
+	return 1;
+    }
   return 0;
 }
 

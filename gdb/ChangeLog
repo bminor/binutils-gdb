@@ -1,3 +1,38 @@
+2007-12-21  Paul N. Hilfinger  <hilfinger@adacore.com>
+
+	* ada-lang.h (ada_renaming_category): New enumerated type.
+	(ada_lookup_encoded_symbol): Declare.
+	(ada_parse_renaming): Declare.
+	(ada_renaming_type,ada_is_object_renaming)
+	(ada_simple_renamed_entity): Delete declarations.
+	* ada-lang.c (ada_parse_renaming): New function to concentrate
+	extraction of information from renaming symbols.
+	(parse_old_style_renaming): New function to concentrate
+	extraction of old-style (purely type-based) renaming information.
+	(renaming_is_visible): Rename to...
+	(old_renaming_is_invisible): Rename and change sense of
+	renaming_is_visible.
+	(remove_out_of_scope_renamings): Rename to...
+	(remove_irrelevant_renamings): Renames remove_out_of_scope_renamings
+	and augments with additional logic to handle cases where the same
+	object renaming is encoded both as a reference variable and an
+	encoded renaming.
+	(ada_renaming_type,ada_is_object_renaming)
+	(ada_simple_renamed_entity): Delete definitions.
+	(ada_lookup_encoded_symbol): New function factored out of
+	ada_lookup_symbol.
+	(ada_lookup_symbol): Reimplement to call ada_lookup_encoded_symbol.
+	(wild_match): Don't reject perfect match of prefix.
+	(ada_find_renaming_symbol): Factor old-style renaming logic into
+	find_old_style_renaming_symbol.
+	(find_old_style_renaming_symbol): New name for content of old
+	ada_find_renaming_symbol.
+	(ada_prefer_type): Reimplement not to use ada_renaming_type.
+	* ada-exp.y (write_object_renaming): Change interface.  Reimplement
+	to use new arguments and ada_parse_renaming.
+	Correct blocks used to find array index.
+	(write_var_or_type): Reimplement to use ada_parse_renaming.
+
 2007-12-21  Denis Pilat <denis.pilat@st.com>
 
 	* tui/tui-data.h (MAX_LOCATOR_ELEMENT_LEN): Defined to a bigger

@@ -173,6 +173,28 @@ struct ada_symbol_info {
   struct symtab* symtab;
 };
 
+/* Denotes a type of renaming symbol (see ada_parse_renaming).  */
+enum ada_renaming_category
+  {
+    /* Indicates a symbol that does not encode a renaming.  */
+    ADA_NOT_RENAMING,
+
+    /* For symbols declared
+         Foo : TYPE renamed OBJECT;  */
+    ADA_OBJECT_RENAMING,
+
+    /* For symbols declared
+         Foo : exception renames EXCEPTION;  */
+    ADA_EXCEPTION_RENAMING,
+    /* For packages declared
+          package Foo renames PACKAGE; */
+    ADA_PACKAGE_RENAMING,
+    /* For subprograms declared
+          SUBPROGRAM_SPEC renames SUBPROGRAM;
+       (Currently not used).  */
+    ADA_SUBPROGRAM_RENAMING
+  };
+
 /* Ada task structures.  */
 
 /* Ada task control block, as defined in the GNAT runt-time library.  */
@@ -300,6 +322,11 @@ extern char *ada_fold_name (const char *);
 extern struct symbol *ada_lookup_symbol (const char *, const struct block *,
                                          domain_enum, int *, 
 					 struct symtab **);
+
+extern struct symbol *
+ada_lookup_encoded_symbol (const char *, const struct block *,
+			   domain_enum namespace, 
+			   struct block **, struct symtab **);
 
 extern struct minimal_symbol *ada_lookup_simple_minsym (const char *);
 
@@ -438,11 +465,9 @@ extern void ada_print_scalar (struct type *, LONGEST, struct ui_file *);
 
 extern int ada_is_range_type_name (const char *);
 
-extern const char *ada_renaming_type (struct type *);
-
-extern int ada_is_object_renaming (struct symbol *);
-
-extern char *ada_simple_renamed_entity (struct symbol *);
+extern enum ada_renaming_category ada_parse_renaming (struct symbol *,
+						      const char **,
+						      int *, const char **);
 
 extern char *ada_breakpoint_rewrite (char *, int *);
 
