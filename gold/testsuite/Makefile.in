@@ -166,9 +166,12 @@ check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
+
+# Test symbol versioning.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_10 = flagstest_compress_debug_sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -229,7 +232,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_6 = tls_shared_nonpic_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_7 = flagstest_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -467,6 +471,10 @@ am__two_file_test_SOURCES_DIST = two_file_test_1.cc two_file_test_2.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
 two_file_test_OBJECTS = $(am_two_file_test_OBJECTS)
 two_file_test_LDADD = $(LDADD)
+am__ver_test_SOURCES_DIST = ver_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_ver_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_main.$(OBJEXT)
+ver_test_OBJECTS = $(am_ver_test_OBJECTS)
 am__weak_test_SOURCES_DIST = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test.$(OBJEXT)
@@ -513,7 +521,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(two_file_shared_2_pic_1_test_SOURCES) \
 	$(two_file_shared_2_test_SOURCES) \
 	$(two_file_static_test_SOURCES) $(two_file_test_SOURCES) \
-	$(weak_test_SOURCES)
+	$(ver_test_SOURCES) $(weak_test_SOURCES)
 DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(am__constructor_static_test_SOURCES_DIST) \
@@ -548,7 +556,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__two_file_shared_2_pic_1_test_SOURCES_DIST) \
 	$(am__two_file_shared_2_test_SOURCES_DIST) \
 	$(am__two_file_static_test_SOURCES_DIST) \
-	$(am__two_file_test_SOURCES_DIST) \
+	$(am__two_file_test_SOURCES_DIST) $(am__ver_test_SOURCES_DIST) \
 	$(am__weak_test_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
@@ -893,6 +901,10 @@ object_unittest_SOURCES = object_unittest.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_DEPENDENCIES = gcctestdir/ld tls_test_shared_nonpic.so
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDADD = tls_test_shared_nonpic.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_SOURCES = ver_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_DEPENDENCIES = gcctestdir/ld ver_test_1.so ver_test_2.so ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_LDADD = ver_test_1.so ver_test_2.so ver_test_4.so
 all: all-am
 
 .SUFFIXES:
@@ -1074,6 +1086,9 @@ two_file_static_test$(EXEEXT): $(two_file_static_test_OBJECTS) $(two_file_static
 two_file_test$(EXEEXT): $(two_file_test_OBJECTS) $(two_file_test_DEPENDENCIES) 
 	@rm -f two_file_test$(EXEEXT)
 	$(CXXLINK) $(two_file_test_LDFLAGS) $(two_file_test_OBJECTS) $(two_file_test_LDADD) $(LIBS)
+ver_test$(EXEEXT): $(ver_test_OBJECTS) $(ver_test_DEPENDENCIES) 
+	@rm -f ver_test$(EXEEXT)
+	$(CXXLINK) $(ver_test_LDFLAGS) $(ver_test_OBJECTS) $(ver_test_LDADD) $(LIBS)
 weak_test$(EXEEXT): $(weak_test_OBJECTS) $(weak_test_DEPENDENCIES) 
 	@rm -f weak_test$(EXEEXT)
 	$(CXXLINK) $(weak_test_LDFLAGS) $(weak_test_OBJECTS) $(weak_test_LDADD) $(LIBS)
@@ -1105,6 +1120,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_test.Po@am__quote@
 
 .c.o:
@@ -1522,6 +1538,20 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< --compress-debug-sections=zlib 2>&1 | cat > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_1.so: ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared -Wl,--version-script,$(srcdir)/ver_test_2.script ver_test_2.o ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.so: ver_test_4.o $(srcdir)/ver_test_4.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_1.o: ver_test_1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2.o: ver_test_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_3.o: ver_test_3.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.o: ver_test_4.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

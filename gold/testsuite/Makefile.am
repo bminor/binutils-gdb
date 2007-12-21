@@ -482,6 +482,26 @@ flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
 	chmod a+x $@
 	test -s $@
 
+# Test symbol versioning.
+check_PROGRAMS += ver_test
+ver_test_SOURCES = ver_test_main.cc
+ver_test_DEPENDENCIES = gcctestdir/ld ver_test_1.so ver_test_2.so ver_test_4.so
+ver_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ver_test_LDADD = ver_test_1.so ver_test_2.so ver_test_4.so
+ver_test_1.so: ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so
+ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so
+	$(CXXLINK) -shared -Wl,--version-script,$(srcdir)/ver_test_2.script ver_test_2.o ver_test_4.so
+ver_test_4.so: ver_test_4.o $(srcdir)/ver_test_4.script
+	$(CXXLINK) -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o
+ver_test_1.o: ver_test_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+ver_test_2.o: ver_test_2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+ver_test_3.o: ver_test_3.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+ver_test_4.o: ver_test_4.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
 
 endif GCC
 endif NATIVE_LINKER

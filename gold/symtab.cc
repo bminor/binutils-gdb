@@ -480,10 +480,18 @@ Symbol_table::add_from_object(Object* object,
 	      // NAME/NULL point to NAME/VERSION.
 	      insdef.first->second = ret;
 	    }
-	  else if (insdef.first->second != ret)
+	  else if (insdef.first->second != ret
+	           && insdef.first->second->is_undefined())
 	    {
 	      // This is the unfortunate case where we already have
-	      // entries for both NAME/VERSION and NAME/NULL.
+	      // entries for both NAME/VERSION and NAME/NULL.  Note
+	      // that we don't want to combine them if the existing
+	      // symbol is going to override the new one.  FIXME: We
+	      // currently just test is_undefined, but this may not do
+	      // the right thing if the existing symbol is from a
+	      // shared library and the new one is from a regular
+	      // object.
+
 	      const Sized_symbol<size>* sym2;
 	      sym2 = this->get_sized_symbol SELECT_SIZE_NAME(size) (
 		insdef.first->second

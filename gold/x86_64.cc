@@ -1483,7 +1483,10 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_PLT32:
       gold_assert(gsym == NULL
                   || gsym->has_plt_offset()
-		  || gsym->final_value_is_known());
+		  || gsym->final_value_is_known()
+		  || (gsym->is_defined()
+		      && !gsym->is_from_dynobj()
+		      && !gsym->is_preemptible()));
       // Note: while this code looks the same as for R_X86_64_PC32, it
       // behaves differently because psymval was set to point to
       // the PLT entry, rather than the symbol, in Scan::global().

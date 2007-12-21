@@ -1583,7 +1583,10 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_PLT32:
       gold_assert(gsym == NULL
 		  || gsym->has_plt_offset()
-		  || gsym->final_value_is_known());
+		  || gsym->final_value_is_known()
+		  || (gsym->is_defined()
+		      && !gsym->is_from_dynobj()
+		      && !gsym->is_preemptible()));
       Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       break;
 

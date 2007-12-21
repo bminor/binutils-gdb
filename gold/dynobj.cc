@@ -1296,6 +1296,7 @@ Versions::add_def(const Symbol* sym, const char* version,
 
       // We have now seen a symbol in this version, so it is not
       // weak.
+      gold_assert(vb != NULL);
       vb->clear_weak();
 
       // FIXME: When we support version scripts, we will need to
