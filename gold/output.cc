@@ -1695,8 +1695,6 @@ Output_section::output_address(const Relobj* object, unsigned int shndx,
 			       off_t offset) const
 {
   gold_assert(object->is_section_specially_mapped(shndx));
-  // This can only be called meaningfully when layout is complete.
-  gold_assert(Output_data::is_layout_complete());
 
   uint64_t addr = this->address() + this->first_input_offset_;
   for (Input_section_list::const_iterator p = this->input_sections_.begin();

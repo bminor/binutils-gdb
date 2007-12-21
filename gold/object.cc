@@ -896,12 +896,13 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 	      // value.  If it is a section symbol, we can not, as in
 	      // that case we have to consider the addend to determine
 	      // the value to use in a relocation.
-	      section_offset_type start =
-		os->starting_output_address(this, shndx);
 	      if (!lv.is_section_symbol())
-		lv.set_output_value(lv.input_value() + start);
+		lv.set_output_value(os->output_address(this, shndx,
+                                                       lv.input_value()));
 	      else
 		{
+                  section_offset_type start =
+                    os->starting_output_address(this, shndx);
 		  Merged_symbol_value<size>* msv =
 		    new Merged_symbol_value<size>(lv.input_value(), start);
 		  lv.set_merged_symbol_value(msv);

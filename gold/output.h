@@ -2323,7 +2323,8 @@ class Output_file
   unsigned char*
   get_output_view(off_t start, size_t size)
   {
-    gold_assert(start >= 0 && start + size <= this->file_size_);
+    gold_assert(start >= 0
+                && start + static_cast<off_t>(size) <= this->file_size_);
     return this->base_ + start;
   }
 

@@ -459,7 +459,8 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
       gold_assert(output_offset == -1
 		  || (output_offset >= 0
-		      && output_offset + view_size <= output_section_size));
+		      && (output_offset + static_cast<off_t>(view_size)
+                          <= output_section_size)));
 
       unsigned char* view;
       if (os->requires_postprocessing())

@@ -288,7 +288,7 @@ File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
 
   section_size_type psize = File_read::pages(size + (start - poff));
 
-  if (poff + psize >= this->size_)
+  if (poff + static_cast<off_t>(psize) >= this->size_)
     {
       psize = this->size_ - poff;
       gold_assert(psize >= size);
