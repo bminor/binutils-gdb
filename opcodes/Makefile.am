@@ -575,7 +575,7 @@ stamp-xc16x: $(CGENDEPS) $(CPUDIR)/xc16x.cpu $(CPUDIR)/xc16x.opc
 i386-gen: i386-gen.o
 	$(LINK) i386-gen.o $(LIBIBERTY)
 
-i386-gen.o: i386-gen.c i386-opc.h
+i386-gen.o: i386-gen.c i386-opc.h $(srcdir)/../include/opcode/i386.h
 
 $(srcdir)/i386-tbl.h: $(srcdir)/i386-init.h 
 	@echo $@

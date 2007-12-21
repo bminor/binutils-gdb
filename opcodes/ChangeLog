@@ -1,3 +1,9 @@
+2007-12-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (i386-gen.o): Also depend on
+	$(srcdir)/../include/opcode/i386.h.
+	* Makefile.in: Regenerated.
+
 2007-11-29  Mark Shinwell  <shinwell@codesourcery.com>
 
 	* mips-dis.c (mips_arch_choices): Add Loongson-2E and -2F
