@@ -17,8 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
-
 extern int rs6000_software_single_step (struct frame_info *frame);
 
 /* Hook in rs6000-tdep.c for determining the TOC address when
