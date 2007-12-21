@@ -1743,12 +1743,20 @@ linux_tracefork_grandchild (void *arg)
   _exit (0);
 }
 
+#define STACK_SIZE 4096
+
 static int
 linux_tracefork_child (void *arg)
 {
   ptrace (PTRACE_TRACEME, 0, 0, 0);
   kill (getpid (), SIGSTOP);
-  clone (linux_tracefork_grandchild, arg, CLONE_VM | SIGCHLD, NULL);
+#ifdef __ia64__
+  __clone2 (linux_tracefork_grandchild, arg, STACK_SIZE,
+	    CLONE_VM | SIGCHLD, NULL);
+#else
+  clone (linux_tracefork_grandchild, arg + STACK_SIZE,
+	 CLONE_VM | SIGCHLD, NULL);
+#endif
   _exit (0);
 }
 
@@ -1776,13 +1784,18 @@ linux_test_for_tracefork (void)
 {
   int child_pid, ret, status;
   long second_pid;
-  char *stack = malloc (8192);
+  char *stack = malloc (STACK_SIZE * 4);
 
   linux_supports_tracefork_flag = 0;
 
   /* Use CLONE_VM instead of fork, to support uClinux (no MMU).  */
-  child_pid = clone (linux_tracefork_child, stack + 2048,
-		     CLONE_VM | SIGCHLD, stack + 6144);
+#ifdef __ia64__
+  child_pid = __clone2 (linux_tracefork_child, stack, STACK_SIZE,
+			CLONE_VM | SIGCHLD, stack + STACK_SIZE * 2);
+#else
+  child_pid = clone (linux_tracefork_child, stack + STACK_SIZE,
+		     CLONE_VM | SIGCHLD, stack + STACK_SIZE * 2);
+#endif
   if (child_pid == -1)
     perror_with_name ("clone");
 

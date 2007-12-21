@@ -1,3 +1,9 @@
+2007-12-20  Andreas Schwab  <schwab@suse.de>
+
+	* linux-low.c (STACK_SIZE): Define.
+	(linux_tracefork_child): Use it.  Use __clone2 on ia64.
+	(linux_test_for_tracefork): Likewise.
+
 2007-12-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (linux_wait_for_event): Update messages.  Do not
