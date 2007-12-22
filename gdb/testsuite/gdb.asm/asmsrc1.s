@@ -26,22 +26,27 @@
 
 	comment "Call a macro that consists of several lines of assembler code."
 
+	comment "mark: main start"
 	gdbasm_several_nops
 
 	comment "Call a subroutine in another file."
 
+	comment "mark: call foo2"
 	gdbasm_call foo2
 
 	comment "All done."
 
+	comment "mark: main exit"
 	gdbasm_exit0
 	gdbasm_end main
 
+	comment "mark: search"
 	comment "A routine for foo2 to call."
 
 	.global foo3
 	gdbasm_declare foo3
 	gdbasm_enter
+	comment "mark: foo3 start"
 	gdbasm_leave
 	gdbasm_end foo3
 

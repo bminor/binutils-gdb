@@ -1,3 +1,10 @@
+2007-12-22  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.asm/asm-source.exp: Use gdb_get_line_number, instead of
+	hard-coding source line numbers into the test.
+	* gdb.asm/asmsrc1.s, gdb.asm/asmsrc2.s: Add comments for
+	gdb_get_line_number to find.
+
 2007-12-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/ptype.c (highest): New struct type.
