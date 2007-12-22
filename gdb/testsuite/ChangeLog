@@ -1,3 +1,10 @@
+2007-12-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/ptype.c (highest): New struct type.
+	(the_highest): New variable of that type.
+	(main): Add dummy assignment to a field of variable the_highest.
+	* gdb.base/ptype.exp: Test type printing of our new variable.
+
 2007-12-19  Pierre Muller  <muller@ics-u-strasbg.fr>
 
 	* (gdb.base/watch_thread_num.exp): Add breakpoint at thread_function
