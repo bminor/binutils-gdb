@@ -1,7 +1,7 @@
 // basic_test.cc -- a test case for gold
 
 // Copyright 2007 Free Software Foundation, Inc.
-// Written by Ian Lance Taylor <iant@google.com>.
+// Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
 

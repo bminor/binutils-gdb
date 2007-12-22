@@ -1,7 +1,7 @@
 // basic_test.cc -- a test case for gold
 
 // Copyright 2007 Free Software Foundation, Inc.
-// Written by Ian Lance Taylor <iant@google.com>.
+// Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
 
@@ -21,16 +21,6 @@
 // MA 02110-1301, USA.
 
 #include "ver_test.h"
-
-#if 0
-__asm__(".symver t1_2_a,t1_2@VER2");
-
-extern "C"
-int
-t1_2_a();
-
-#define t1_2 t1_2_a
-#endif
 
 int
 t3_2()
