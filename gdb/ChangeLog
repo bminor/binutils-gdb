@@ -1,3 +1,9 @@
+2007-12-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c: Fix PR gdb/2388.
+	(do_win32_fetch_inferior_registers): Do not overwrite debug register
+	array dr if debug_registers_changed variable is set.
+
 2007-12-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (scan_partial_symbols partial_die_parent_scope)

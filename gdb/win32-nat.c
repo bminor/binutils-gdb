@@ -382,13 +382,17 @@ do_win32_fetch_inferior_registers (struct regcache *regcache, int r)
 	  thread_info *th = current_thread;
 	  th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	  GetThreadContext (th->h, &th->context);
-	  /* Copy dr values from that thread.  */
-	  dr[0] = th->context.Dr0;
-	  dr[1] = th->context.Dr1;
-	  dr[2] = th->context.Dr2;
-	  dr[3] = th->context.Dr3;
-	  dr[6] = th->context.Dr6;
-	  dr[7] = th->context.Dr7;
+	  /* Copy dr values from that thread. 
+	     But only if there were not modified since last stop. PR gdb/2388 */
+	  if (!debug_registers_changed)
+	    {
+	      dr[0] = th->context.Dr0;
+	      dr[1] = th->context.Dr1;
+	      dr[2] = th->context.Dr2;
+	      dr[3] = th->context.Dr3;
+	      dr[6] = th->context.Dr6;
+	      dr[7] = th->context.Dr7;
+	    }
 	}
       current_thread->reload_context = 0;
     }
