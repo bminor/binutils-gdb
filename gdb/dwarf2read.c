@@ -1747,6 +1747,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		}
 	      break;
 	    case DW_TAG_class_type:
+	    case DW_TAG_interface_type:
 	    case DW_TAG_structure_type:
 	      if (!pdi->is_declaration)
 		{
@@ -1829,6 +1830,7 @@ partial_die_parent_scope (struct partial_die_info *pdi,
   if (parent->tag == DW_TAG_namespace
       || parent->tag == DW_TAG_structure_type
       || parent->tag == DW_TAG_class_type
+      || parent->tag == DW_TAG_interface_type
       || parent->tag == DW_TAG_union_type)
     {
       if (grandparent_scope == NULL)
@@ -1976,6 +1978,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   0, (CORE_ADDR) 0, cu->language, objfile);
       break;
     case DW_TAG_class_type:
+    case DW_TAG_interface_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
     case DW_TAG_enumeration_type:
@@ -2057,6 +2060,7 @@ pdi_needs_namespace (enum dwarf_tag tag)
     case DW_TAG_namespace:
     case DW_TAG_typedef:
     case DW_TAG_class_type:
+    case DW_TAG_interface_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
     case DW_TAG_enumeration_type:
@@ -2676,6 +2680,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       read_lexical_block_scope (die, cu);
       break;
     case DW_TAG_class_type:
+    case DW_TAG_interface_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
       read_structure_type (die, cu);
@@ -5403,6 +5408,7 @@ is_type_tag_for_partial (int tag)
 #endif
     case DW_TAG_base_type:
     case DW_TAG_class_type:
+    case DW_TAG_interface_type:
     case DW_TAG_enumeration_type:
     case DW_TAG_structure_type:
     case DW_TAG_subrange_type:
@@ -5608,6 +5614,7 @@ load_partial_dies (bfd *abfd, gdb_byte *info_ptr, int building_psymtab,
 	      || last_die->tag == DW_TAG_enumeration_type
 	      || (cu->language != language_c
 		  && (last_die->tag == DW_TAG_class_type
+		      || last_die->tag == DW_TAG_interface_type
 		      || last_die->tag == DW_TAG_structure_type
 		      || last_die->tag == DW_TAG_union_type))))
 	{
@@ -7358,6 +7365,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     (FIXME?) */
 	  break;
 	case DW_TAG_class_type:
+	case DW_TAG_interface_type:
 	case DW_TAG_structure_type:
 	case DW_TAG_union_type:
 	case DW_TAG_set_type:
@@ -7677,6 +7685,7 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
   switch (die->tag)
     {
     case DW_TAG_class_type:
+    case DW_TAG_interface_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
       read_structure_type (die, cu);
@@ -7781,6 +7790,7 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	}
 	break;
       case DW_TAG_class_type:
+      case DW_TAG_interface_type:
       case DW_TAG_structure_type:
 	{
 	  if (parent->type != NULL && TYPE_TAG_NAME (parent->type) != NULL)

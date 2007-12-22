@@ -1,3 +1,11 @@
+2007-12-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (scan_partial_symbols partial_die_parent_scope)
+	(add_partial_symbol, pdi_needs_namespace, process_die)
+	(is_type_tag_for_partial, load_partial_dies, new_symbol)
+	(read_type_die, determine_prefix): Extend the current code of
+	`DW_TAG_class_type' also for `DW_TAG_interface_type'.
+
 2007-12-21  Paul N. Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.h (ada_renaming_category): New enumerated type.
