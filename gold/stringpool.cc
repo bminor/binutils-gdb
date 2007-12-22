@@ -151,28 +151,16 @@ size_t
 Stringpool_template<Stringpool_char>::string_hash(const Stringpool_char* s,
 						  size_t length)
 {
-  // Fowler/Noll/Vo (FNV) hash (type FNV-1a).
+  // This is the hash function used by the dynamic linker for
+  // DT_GNU_HASH entries.  I compared this to a Fowler/Noll/Vo hash
+  // for a C++ program with 385,775 global symbols.  This hash
+  // function was very slightly worse.  However, it is much faster to
+  // compute.  Overall wall clock time was a win.
   const unsigned char* p = reinterpret_cast<const unsigned char*>(s);
-  if (sizeof(size_t) > 4)
-    {
-      size_t result = static_cast<size_t>(14695981039346656037ULL);
-      for (size_t i = 0; i < length * sizeof(Stringpool_char); ++i)
-	{
-	  result ^= static_cast<size_t>(*p++);
-	  result *= 1099511628211ULL;
-	}
-      return result;
-    }
-  else
-    {
-      size_t result = 2166136261UL;
-      for (size_t i = 0; i < length * sizeof(Stringpool_char); ++i)
-	{
-	  result ^= static_cast<size_t>(*p++);
-	  result *= 16777619UL;
-	}
-      return result;
-    }
+  size_t h = 5381;
+  for (size_t i = 0; i < length * sizeof(Stringpool_char); ++i)
+    h = h * 33 + *p++;
+  return h;
 }
 
 // Add the string S to the list of canonical strings.  Return a
