@@ -1,3 +1,8 @@
+2007-12-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/binutils.texi: Document the new intel-mnemonic and
+	intel-mnemonic options for i386 disassembler.
+
 2007-12-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* readelf.c (is_32bit_pcrel_reloc): Add Xtensa.

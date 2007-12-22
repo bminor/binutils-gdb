@@ -1801,7 +1801,11 @@ switch, but allow finer grained control.  Multiple selections from the
 following may be specified as a comma separated string.
 @option{x86-64}, @option{i386} and @option{i8086} select disassembly for
 the given architecture.  @option{intel} and @option{att} select between
-intel syntax mode and AT&T syntax mode.  @option{addr64}, @option{addr32},
+intel syntax mode and AT&T syntax mode.
+@option{intel-mnemonic} and @option{att-mnemonic} select between
+intel mnemonic mode and AT&T mnemonic mode. @option{intel-mnemonic}
+implies @option{intel} and @option{att-mnemonic} implies @option{att}.
+@option{addr64}, @option{addr32},
 @option{addr16}, @option{data32} and @option{data16} specify the default
 address size and operand size.  These four options will be overridden if
 @option{x86-64}, @option{i386} or @option{i8086} appear later in the

@@ -1,3 +1,11 @@
+2007-12-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/compat-intel.d: New file.
+	* gas/i386/compat.d: Likewise.
+	* gas/i386/compat.s: Likewise.
+
+	* gas/i386/i386.exp: Run compat.
+
 2007-12-13  Bob Wilson  <bob.wilson@acm.org>
 
 	* gas/xtensa/all.exp: Run new weak-call test.
@@ -6,9 +14,9 @@
 
 2007-12-11  Catherine Moore  <clm@codesourcery.com>
 
-        gas/elf/symtab.s: New test.
-	gas/elf/symtab.d: New expected output.
-	gas/elf/elf.exp: Run the new symbtab test.
+	* gas/elf/symtab.s: New test.
+	* gas/elf/symtab.d: New expected output.
+	* gas/elf/elf.exp: Run the new symbtab test.
 
 2007-12-10  Richard Sandiford  <rsandifo@nildram.co.uk>
 

@@ -730,6 +730,7 @@ struct dis386 {
    'J' => print 'l'
    'K' => print 'd' or 'q' if rex prefix is present.
    'L' => print 'l' if suffix_always is true
+   'M' => print 'r' if intel_mnemonic is false.
    'N' => print 'n' if instruction has no wait "prefix"
    'O' => print 'd' or 'o' (or 'q' in Intel mode)
    'P' => print 'w', 'l' or 'q' if instruction has an operand size prefix,
@@ -746,6 +747,7 @@ struct dis386 {
    'Y' => 'q' if instruction has an REX 64bit overwrite prefix and
 	  suffix_always is true.
    'Z' => print 'q' in 64bit mode and behave as 'L' otherwise
+   '!' => change condition from true to false or from false to true.
 
    Many of the above letters print nothing in Intel mode.  See "putop"
    for the details.
@@ -5058,6 +5060,7 @@ static bfd_vma start_pc;
  */
 
 static char intel_syntax;
+static char intel_mnemonic = !SYSV386_COMPAT;
 static char open_char;
 static char close_char;
 static char separator_char;
@@ -5102,6 +5105,10 @@ with the -M switch (multiple options should be separated by commas):\n"));
   fprintf (stream, _("  i8086       Disassemble in 16bit mode\n"));
   fprintf (stream, _("  att         Display instruction in AT&T syntax\n"));
   fprintf (stream, _("  intel       Display instruction in Intel syntax\n"));
+  fprintf (stream, _("  att-mnemonic\n"
+		     "              Display instruction in AT&T mnemonic\n"));
+  fprintf (stream, _("  intel-mnemonic\n"
+		     "              Display instruction in Intel mnemonic\n"));
   fprintf (stream, _("  addr64      Assume 64bit address size\n"));
   fprintf (stream, _("  addr32      Assume 32bit address size\n"));
   fprintf (stream, _("  addr16      Assume 16bit address size\n"));
@@ -5245,10 +5252,14 @@ print_insn (bfd_vma pc, disassemble_info *info)
       else if (CONST_STRNEQ (p, "intel"))
 	{
 	  intel_syntax = 1;
+	  if (CONST_STRNEQ (p + 5, "-mnemonic"))
+	    intel_mnemonic = 1;
 	}
       else if (CONST_STRNEQ (p, "att"))
 	{
 	  intel_syntax = 0;
+	  if (CONST_STRNEQ (p + 3, "-mnemonic"))
+	    intel_mnemonic = 0;
 	}
       else if (CONST_STRNEQ (p, "addr"))
 	{
@@ -5790,17 +5801,10 @@ static const struct dis386 float_reg[][8] = {
     { "fmul",	{ STi, ST } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-#if SYSV386_COMPAT
-    { "fsub",	{ STi, ST } },
-    { "fsubr",	{ STi, ST } },
-    { "fdiv",	{ STi, ST } },
-    { "fdivr",	{ STi, ST } },
-#else
-    { "fsubr",	{ STi, ST } },
-    { "fsub",	{ STi, ST } },
-    { "fdivr",	{ STi, ST } },
-    { "fdiv",	{ STi, ST } },
-#endif
+    { "fsub!M",	{ STi, ST } },
+    { "fsubM",	{ STi, ST } },
+    { "fdiv!M",	{ STi, ST } },
+    { "fdivM",	{ STi, ST } },
   },
   /* dd */
   {
@@ -5819,17 +5823,10 @@ static const struct dis386 float_reg[][8] = {
     { "fmulp",	{ STi, ST } },
     { "(bad)",	{ XX } },
     { FGRPde_3 },
-#if SYSV386_COMPAT
-    { "fsubp",	{ STi, ST } },
-    { "fsubrp",	{ STi, ST } },
-    { "fdivp",	{ STi, ST } },
-    { "fdivrp",	{ STi, ST } },
-#else
-    { "fsubrp",	{ STi, ST } },
-    { "fsubp",	{ STi, ST } },
-    { "fdivrp",	{ STi, ST } },
-    { "fdivp",	{ STi, ST } },
-#endif
+    { "fsub!Mp", { STi, ST } },
+    { "fsubMp",	{ STi, ST } },
+    { "fdiv!Mp", { STi, ST } },
+    { "fdivMp",	{ STi, ST } },
   },
   /* df */
   {
@@ -5967,6 +5964,7 @@ putop (const char *template, int sizeflag)
 {
   const char *p;
   int alt = 0;
+  int cond = 1;
 
   for (p = template; *p; p++)
     {
@@ -5974,6 +5972,9 @@ putop (const char *template, int sizeflag)
 	{
 	default:
 	  *obufp++ = *p;
+	  break;
+	case '!':
+	  cond = 0;
 	  break;
 	case '{':
 	  alt = 0;
@@ -6113,6 +6114,10 @@ putop (const char *template, int sizeflag)
 	    break;
 	  if (sizeflag & SUFFIX_ALWAYS)
 	    *obufp++ = 'l';
+	  break;
+	case 'M':
+	  if (intel_mnemonic != cond)
+	    *obufp++ = 'r';
 	  break;
 	case 'N':
 	  if ((prefixes & PREFIX_FWAIT) == 0)
