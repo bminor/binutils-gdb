@@ -2702,20 +2702,6 @@ process_event_stop_test:
      new line in mid-statement, we continue stepping.  This makes
      things like for(;;) statements work better.)  */
 
-  if (ecs->stop_func_end && ecs->sal.end >= ecs->stop_func_end)
-    {
-      /* If this is the last line of the function, don't keep stepping
-         (it would probably step us out of the function).
-         This is particularly necessary for a one-line function,
-         in which after skipping the prologue we better stop even though
-         we will be in mid-line.  */
-      if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped to a different function\n");
-      stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
-      stop_stepping (ecs);
-      return;
-    }
   step_range_start = ecs->sal.pc;
   step_range_end = ecs->sal.end;
   step_frame_id = get_frame_id (get_current_frame ());

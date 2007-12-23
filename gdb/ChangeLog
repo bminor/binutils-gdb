@@ -1,3 +1,8 @@
+2007-12-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* infrun.c (handle_inferior_event): Remove code that made us
+	stop when stepping into the last line of the current function.
+
 2007-12-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-nat.c: Fix PR gdb/2388.
