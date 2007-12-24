@@ -1,3 +1,7 @@
+2007-12-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
 2007-12-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/binutils.texi: Document the new intel-mnemonic and
