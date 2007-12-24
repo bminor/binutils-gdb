@@ -1,5 +1,11 @@
 2007-12-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/print_chars/pck.ads, gdb.ada/print_chars/pck.adb,
+	gdb.ada/print_chars/foo.adb: New files.
+	* gdb.ada/print_chars.exp: New testcase.
+
+2007-12-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/char_param/pck.ads, gdb.ada/char_param/pck.adb,
 	gdb.ada/char_param/foo.adb: New files.
 	* gdb.ada/char_param.exp: New testcase.
