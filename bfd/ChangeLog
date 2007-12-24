@@ -1,5 +1,13 @@
 2007-12-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/5488
+	* elf.c (IS_NOTE): New.
+	(IS_COREFILE_NOTE): Use IS_NOTE.
+	(IS_SECTION_IN_INPUT_SEGMENT): Use IS_NOTE instead of
+	IS_COREFILE_NOTE.
+
+2007-12-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/5449
 	* elf.c (rewrite_elf_program_header): Don't adjust p_paddr if
 	p_paddr is set to 0.

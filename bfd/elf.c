@@ -5090,14 +5090,21 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
    && (section->lma + SECTION_SIZE (section, segment)			\
        <= SEGMENT_END (segment, base)))
 
-  /* Special case: corefile "NOTE" section containing regs, prpsinfo etc.  */
-#define IS_COREFILE_NOTE(p, s)						\
+  /* Handle PT_NOTE segment.  */
+#define IS_NOTE(p, s)							\
   (p->p_type == PT_NOTE							\
-   && bfd_get_format (ibfd) == bfd_core					\
-   && s->vma == 0 && s->lma == 0					\
+   && elf_section_type (s) == SHT_NOTE					\
    && (bfd_vma) s->filepos >= p->p_offset				\
    && ((bfd_vma) s->filepos + s->size					\
        <= p->p_offset + p->p_filesz))
+
+  /* Special case: corefile "NOTE" section containing regs, prpsinfo
+     etc.  */
+#define IS_COREFILE_NOTE(p, s)						\
+  (IS_NOTE (p, s)							\
+   && bfd_get_format (ibfd) == bfd_core					\
+   && s->vma == 0							\
+   && s->lma == 0)
 
   /* The complicated case when p_vaddr is 0 is to handle the Solaris
      linker, which generates a PT_INTERP section with p_vaddr and
@@ -5117,7 +5124,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
      A section will be included if:
        1. It is within the address space of the segment -- we use the LMA
 	  if that is set for the segment and the VMA otherwise,
-       2. It is an allocated segment,
+       2. It is an allocated section or a NOTE section in a PT_NOTE
+	  segment.         
        3. There is an output section associated with it,
        4. The section has not already been allocated to a previous segment.
        5. PT_GNU_STACK segments do not include any sections.
@@ -5130,7 +5138,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr)	\
       : IS_CONTAINED_BY_VMA (section, segment))				\
      && (section->flags & SEC_ALLOC) != 0)				\
-    || IS_COREFILE_NOTE (segment, section))				\
+    || IS_NOTE (segment, section))					\
    && segment->p_type != PT_GNU_STACK					\
    && (segment->p_type != PT_TLS					\
        || (section->flags & SEC_THREAD_LOCAL))				\
@@ -5664,6 +5672,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 #undef SECTION_SIZE
 #undef IS_CONTAINED_BY_VMA
 #undef IS_CONTAINED_BY_LMA
+#undef IS_NOTE
 #undef IS_COREFILE_NOTE
 #undef IS_SOLARIS_PT_INTERP
 #undef IS_SECTION_IN_INPUT_SEGMENT
