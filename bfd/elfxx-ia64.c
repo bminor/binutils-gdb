@@ -5715,8 +5715,6 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #undef  elf_backend_want_p_paddr_set_to_zero
 #define elf_backend_want_p_paddr_set_to_zero 1
 
-#undef  ELF_MAXPAGESIZE
-#define ELF_MAXPAGESIZE                 0x1000  /* 4K */
 #undef ELF_COMMONPAGESIZE
 #undef ELF_OSABI
 #define ELF_OSABI			ELFOSABI_HPUX

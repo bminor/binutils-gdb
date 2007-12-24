@@ -370,11 +370,17 @@ elf_swap_phdr_out (bfd *abfd,
 		   const Elf_Internal_Phdr *src,
 		   Elf_External_Phdr *dst)
 {
+  const struct elf_backend_data *bed;
+  bfd_vma p_paddr;
+
+  bed = get_elf_backend_data (abfd);
+  p_paddr = bed->want_p_paddr_set_to_zero ? 0 : src->p_paddr;
+
   /* note that all elements of dst are *arrays of unsigned char* already...  */
   H_PUT_32 (abfd, src->p_type, dst->p_type);
   H_PUT_WORD (abfd, src->p_offset, dst->p_offset);
   H_PUT_WORD (abfd, src->p_vaddr, dst->p_vaddr);
-  H_PUT_WORD (abfd, src->p_paddr, dst->p_paddr);
+  H_PUT_WORD (abfd, p_paddr, dst->p_paddr);
   H_PUT_WORD (abfd, src->p_filesz, dst->p_filesz);
   H_PUT_WORD (abfd, src->p_memsz, dst->p_memsz);
   H_PUT_32 (abfd, src->p_flags, dst->p_flags);

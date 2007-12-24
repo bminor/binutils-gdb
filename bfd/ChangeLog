@@ -1,3 +1,15 @@
+2007-12-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/5449
+	* elf.c (rewrite_elf_program_header): Don't adjust p_paddr if
+	p_paddr is set to 0.
+	(copy_private_bfd_data): Call rewrite_elf_program_header if
+	p_paddr is set to 0.
+
+	* elfcode.h (elf_swap_phdr_out): Set p_paddr to 0 if needed.
+
+	* elfxx-ia64.c (ELF_MAXPAGESIZE): Don't redefine it for HPUX.
+
 2007-12-21  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (relax_section): Update DIFF relocations in the

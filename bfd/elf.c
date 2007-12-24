@@ -5392,9 +5392,13 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       first_matching_lma = TRUE;
       first_suggested_lma = TRUE;
 
-      for (j = 0, section = ibfd->sections;
+      for (section = ibfd->sections;
 	   section != NULL;
 	   section = section->next)
+	if (section == first_section)
+	  break;
+
+      for (j = 0; section != NULL; section = section->next)
 	{
 	  if (INCLUDE_SECTION_IN_SEGMENT (section, segment, bed))
 	    {
@@ -5444,6 +5448,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		  suggested_lma = output_section->lma;
 		  first_suggested_lma = FALSE;
 		}
+
+	      if (j == section_count)
+		break;
 	    }
 	}
 
@@ -5461,7 +5468,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	  *pointer_to_map = map;
 	  pointer_to_map = &map->next;
 
-	  if (matching_lma != map->p_paddr
+	  if (!bed->want_p_paddr_set_to_zero
+	      && matching_lma != map->p_paddr
 	      && !map->includes_filehdr && !map->includes_phdrs)
 	    /* There is some padding before the first section in the
 	       segment.  So, we must account for that in the output
@@ -5815,6 +5823,13 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
       asection *section, *osec;
       unsigned int i, num_segments;
       Elf_Internal_Shdr *this_hdr;
+      const struct elf_backend_data *bed;
+
+      bed = get_elf_backend_data (ibfd);
+
+      /* Regenerate the segment map if p_paddr is set to 0.  */
+      if (bed->want_p_paddr_set_to_zero)
+	goto rewrite;
 
       /* Initialize the segment mark field.  */
       for (section = obfd->sections; section != NULL;
