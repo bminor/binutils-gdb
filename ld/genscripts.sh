@@ -198,6 +198,27 @@ if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
     *:: | ::*) LIB_PATH=${LIB_PATH}${LIB_PATH2} ;;
     *) LIB_PATH=${LIB_PATH}:${LIB_PATH2} ;;
   esac
+
+  # For multilib'ed targets, ensure both ${target_alias}/lib${LIBPATH_SUFFIX}
+  # and ${TOOL_LIB}/lib${LIBPATH_SUFFIX} are in the default search path, because
+  # 64bit libraries may be in both places, depending on cross-development
+  # setup method (e.g.: /usr/s390x-linux/lib64 vs /usr/s390-linux/lib64)
+  case "${LIBPATH_SUFFIX}:${tool_lib}" in
+    :*) ;;
+    *:*${LIBPATH_SUFFIX}) ;;
+    *)
+      paths="${exec_prefix}/${target_alias}/lib${LIBPATH_SUFFIX}"
+      if [ x"${TOOL_LIB}" != x ]; then
+        paths="${paths} ${exec_prefix}/${TOOL_LIB}/lib${LIBPATH_SUFFIX}"
+      fi
+      for path in $paths; do
+        case :${LIB_PATH}: in
+          ::: | *:${path}:*) ;;
+          *) LIB_PATH=${path}:${LIB_PATH} ;;
+        esac
+      done
+    ;;
+  esac
 fi
 
 # Always search $(tooldir)/lib, aka /usr/local/TARGET/lib, except for

@@ -1,3 +1,8 @@
+2007-12-24  Hector Oron  <hector.oron@gmail.com>
+
+	* genscripts.sh (LIB_PATH): Include both {target_alias} and
+	{TOOL_LIB} in the search paths for multilibbed targets.
+
 2007-12-15  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* scripttempl/armbpabi.sc (.text): Don't KEEP (*(.text.*personality*)).
