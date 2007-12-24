@@ -288,7 +288,7 @@ static int intel_syntax = 0;
    0 if att mnemonic.  */
 static int intel_mnemonic = !SYSV386_COMPAT;
 
-/* 1 ti support old (<= 2.8.1) versions of gcc.  */
+/* 1 if support old (<= 2.8.1) versions of gcc.  */
 static int old_gcc = OLDGCC_COMPAT;
 
 /* 1 if register prefix % not required.  */
