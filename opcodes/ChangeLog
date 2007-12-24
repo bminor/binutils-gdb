@@ -1,3 +1,20 @@
+2007-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Add OldGcc, ATTMnemonic and
+	IntelMnemonic.
+
+	* i386-opc.h (OldGcc): New.
+	(ATTMnemonic): Likewise.
+	(IntelMnemonic): Likewise.
+	(Opcode_Modifier_Max): Updated.
+	(i386_opcode_modifier): Add oldgcc, attmnemonic and
+	intelmnemonic.
+
+	* i386-opc.tbl: Update fadd, fdiv, fdivp, fdivr, fdivrp, fmul,
+	fsub, fsubp, fsubr and fsubrp with OldGcc, ATTMnemonic and
+	IntelMnemonic.
+	* i386-tbl.h: Regeneratd.
+
 2007-12-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (intel_mnemonic): New.

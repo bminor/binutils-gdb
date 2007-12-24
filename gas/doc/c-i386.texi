@@ -119,6 +119,29 @@ generated.
 
 Valid @var{CPU} values are identical to @option{-march=@var{CPU}}.
 
+@cindex @samp{-mmnemonic=} option, i386
+@cindex @samp{-mmnemonic=} option, x86-64
+@item -mmnemonic=@var{att}
+@item -mmnemonic=@var{intel}
+This option specifies instruction mnemonic for matching instructions. 
+The @code{.att_mnemonic} and @code{.intel_mnemonic} directives will
+take precedent.
+
+@cindex @samp{-msyntax=} option, i386
+@cindex @samp{-msyntax=} option, x86-64
+@item -msyntax=@var{att}
+@item -msyntax=@var{intel}
+This option specifies instruction syntax when processing instructions. 
+The @code{.att_syntax} and @code{.intel_syntax} directives will
+take precedent.
+
+@cindex @samp{-mnaked-reg} option, i386
+@cindex @samp{-mnaked-reg} option, x86-64
+@item -mnaked-reg
+This opetion specifies that registers don't require a @samp{%} prefix.
+The @code{.att_mnemonic}, @code{.intel_mnemonic}, @code{.att_syntax} and
+@code{.intel_syntax} directives will take precedent.
+
 @end table
 
 @node i386-Syntax
@@ -296,6 +319,23 @@ instructions.
 Far call/jump instructions are @samp{lcall} and @samp{ljmp} in
 AT&T syntax, but are @samp{call far} and @samp{jump far} in Intel
 convention.
+
+@section AT&T Mnemonic versus Intel Mnemonic
+
+@cindex i386 mnemonic compatibility
+@cindex mnemonic compatibility, i386
+
+@code{@value{AS}} supports assembly using Intel mnemonic.
+@code{.intel_mnemonic} selects Intel mnemonic with Intel syntax, and
+@code{.att_mnemonic} switches back to the usual AT&T mnemonic with AT&T
+syntax for compatibility with the output of @code{@value{GCC}}.
+Either of these directives may have an optional argument, @code{prefix},
+or @code{noprefix} specifying whether registers require a @samp{%} prefix.
+Several x87 instructions, @samp{fadd}, @samp{fdiv}, @samp{fdivp},
+@samp{fdivr}, @samp{fdivrp}, @samp{fmul}, @samp{fsub}, @samp{fsubp},
+@samp{fsubr} and @samp{fsubrp},  are implemented in AT&T System V/386
+assembler with different mnemonics from those in Intel IA32 specification.
+@code{@value{GCC}} generates those instructions with AT&T mnemonic.
 
 @node i386-Regs
 @section Register Naming

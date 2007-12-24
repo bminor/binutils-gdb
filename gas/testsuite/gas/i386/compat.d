@@ -1,3 +1,4 @@
+#as: -mmnemonic=att
 #objdump: -d -Matt-mnemonic
 #name: i386 float AT&T mnemonic
 

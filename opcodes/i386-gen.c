@@ -289,6 +289,9 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Drex),
   BITFIELD (Drexv),
   BITFIELD (Drexc),
+  BITFIELD (OldGcc),
+  BITFIELD (ATTMnemonic),
+  BITFIELD (IntelMnemonic),
 };
 
 static bitfield operand_types[] =

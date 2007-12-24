@@ -220,8 +220,14 @@ typedef union i386_cpu_flags
 #define Drexv			(Drex + 1)
 /* special DREX for comparisons */
 #define Drexc			(Drexv + 1)
+/* Compatible with old (<= 2.8.1) versions of gcc  */
+#define OldGcc			(Drexc + 1)
+/* AT&T mnemonic.  */
+#define ATTMnemonic		(OldGcc + 1)
+/* Intel mnemonic.  */
+#define IntelMnemonic		(ATTMnemonic + 1)
 /* The last bitfield in i386_opcode_modifier.  */
-#define Opcode_Modifier_Max	Drexc
+#define Opcode_Modifier_Max	IntelMnemonic
 
 typedef struct i386_opcode_modifier
 {
@@ -263,6 +269,9 @@ typedef struct i386_opcode_modifier
   unsigned int drex:1;
   unsigned int drexv:1;
   unsigned int drexc:1;
+  unsigned int oldgcc:1;
+  unsigned int attmnemonic:1;
+  unsigned int intelmnemonic:1;
 } i386_opcode_modifier;
 
 /* Position of operand_type bits.  */

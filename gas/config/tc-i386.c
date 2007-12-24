@@ -58,6 +58,7 @@
 static void set_code_flag (int);
 static void set_16bit_gcc_code_flag (int);
 static void set_intel_syntax (int);
+static void set_intel_mnemonic (int);
 static void set_allow_index_reg (int);
 static void set_cpu_arch (int);
 #ifdef TE_PE
@@ -282,6 +283,13 @@ static const char *flag_code_names[] =
 /* 1 for intel syntax,
    0 if att syntax.  */
 static int intel_syntax = 0;
+
+/* 1 for intel mnemonic,
+   0 if att mnemonic.  */
+static int intel_mnemonic = !SYSV386_COMPAT;
+
+/* 1 ti support old (<= 2.8.1) versions of gcc.  */
+static int old_gcc = OLDGCC_COMPAT;
 
 /* 1 if register prefix % not required.  */
 static int allow_naked_reg = 0;
@@ -534,6 +542,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"code64", set_code_flag, CODE_64BIT},
   {"intel_syntax", set_intel_syntax, 1},
   {"att_syntax", set_intel_syntax, 0},
+  {"intel_mnemonic", set_intel_mnemonic, 1},
+  {"att_mnemonic", set_intel_mnemonic, 0},
   {"allow_index_reg", set_allow_index_reg, 1},
   {"disallow_index_reg", set_allow_index_reg, 0},
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
@@ -1501,6 +1511,42 @@ set_intel_syntax (int syntax_flag)
 
   identifier_chars['%'] = intel_syntax && allow_naked_reg ? '%' : 0;
   identifier_chars['$'] = intel_syntax ? '$' : 0;
+  register_prefix = allow_naked_reg ? "" : "%";
+}
+
+static void
+set_intel_mnemonic (int mnemonic_flag)
+{
+  /* Find out if register prefixing is specified.  */
+  int ask_naked_reg = 0;
+
+  SKIP_WHITESPACE ();
+  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      char *string = input_line_pointer;
+      int e = get_symbol_end ();
+
+      if (strcmp (string, "prefix") == 0)
+	ask_naked_reg = 1;
+      else if (strcmp (string, "noprefix") == 0)
+	ask_naked_reg = -1;
+      else
+	as_bad (_("bad argument to syntax directive."));
+      *input_line_pointer = e;
+    }
+  demand_empty_rest_of_line ();
+
+  /* intel_mnemonic implies intel_syntax.  */
+  intel_mnemonic = intel_syntax = mnemonic_flag;
+
+  if (ask_naked_reg == 0)
+    allow_naked_reg = (intel_mnemonic
+		       && (bfd_get_symbol_leading_char (stdoutput) != '\0'));
+  else
+    allow_naked_reg = (ask_naked_reg < 0);
+
+  identifier_chars['%'] = intel_mnemonic && allow_naked_reg ? '%' : 0;
+  identifier_chars['$'] = intel_mnemonic ? '$' : 0;
   register_prefix = allow_naked_reg ? "" : "%";
 }
 
@@ -3008,6 +3054,17 @@ match_template (void)
 
       /* Must have right number of operands.  */
       if (i.operands != t->operands)
+	continue;
+
+      /* Check AT&T mnemonic and old gcc support. */
+      if (t->opcode_modifier.attmnemonic
+	  && (intel_mnemonic
+	      || (!old_gcc
+		  && t->opcode_modifier.oldgcc)))
+	continue;
+
+      /* Check Intel mnemonic. */
+      if (!intel_mnemonic && t->opcode_modifier.intelmnemonic)
 	continue;
 
       /* Check the suffix, except for some instructions in intel mode.  */
@@ -6911,6 +6968,11 @@ const char *md_shortopts = "qn";
 #define OPTION_DIVIDE (OPTION_MD_BASE + 2)
 #define OPTION_MARCH (OPTION_MD_BASE + 3)
 #define OPTION_MTUNE (OPTION_MD_BASE + 4)
+#define OPTION_MMNEMONIC (OPTION_MD_BASE + 5)
+#define OPTION_MSYNTAX (OPTION_MD_BASE + 6)
+#define OPTION_MINDEX_REG (OPTION_MD_BASE + 7)
+#define OPTION_MNAKED_REG (OPTION_MD_BASE + 8)
+#define OPTION_MOLD_GCC (OPTION_MD_BASE + 9)
 
 struct option md_longopts[] =
 {
@@ -6921,6 +6983,11 @@ struct option md_longopts[] =
   {"divide", no_argument, NULL, OPTION_DIVIDE},
   {"march", required_argument, NULL, OPTION_MARCH},
   {"mtune", required_argument, NULL, OPTION_MTUNE},
+  {"mmnemonic", required_argument, NULL, OPTION_MMNEMONIC},
+  {"msyntax", required_argument, NULL, OPTION_MSYNTAX},
+  {"mindex-reg", no_argument, NULL, OPTION_MINDEX_REG},
+  {"mnaked-reg", no_argument, NULL, OPTION_MNAKED_REG},
+  {"mold-gcc", no_argument, NULL, OPTION_MOLD_GCC},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -7039,6 +7106,37 @@ md_parse_option (int c, char *arg)
 	}
       if (i >= ARRAY_SIZE (cpu_arch))
 	as_fatal (_("Invalid -mtune= option: `%s'"), arg);
+      break;
+
+    case OPTION_MMNEMONIC:
+      if (strcasecmp (arg, "att") == 0)
+	intel_mnemonic = 0;
+      else if (strcasecmp (arg, "intel") == 0)
+	intel_mnemonic = 1;
+      else
+	as_fatal (_("Invalid -mmnemonic= option: `%s'"), arg);
+      break;
+
+    case OPTION_MSYNTAX:
+      if (strcasecmp (arg, "att") == 0)
+	intel_syntax = 0;
+      else if (strcasecmp (arg, "intel") == 0)
+	intel_syntax = 1;
+      else
+	as_fatal (_("Invalid -msyntax= option: `%s'"), arg);
+      break;
+
+    case OPTION_MINDEX_REG:
+      allow_index_reg = 1;
+      break;
+
+    case OPTION_MNAKED_REG:
+      allow_naked_reg = 1;
+      break;
+
+    case OPTION_MOLD_GCC:
+      old_gcc = 1;
+      intel_mnemonic = 0;
       break;
 
     default:

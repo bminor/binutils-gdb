@@ -1,3 +1,25 @@
+2007-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (set_intel_mnemonic): New.
+	(intel_mnemonic): Likewise.
+	(old_gcc): Likewise.
+	(OPTION_MMNEMONIC): Likewise.
+	(OPTION_MSYNTAX): Likewise.
+	(OPTION_MINDEX_REG): Likewise.
+	(OPTION_MNAKED_REG): Likewise.
+	(OPTION_MOLD_GCC): Likewise.
+	(md_pseudo_table): Add .intel_mnemonic and .att_mnemonic.
+	(match_template): Don't allow AT&T/Intel mnemonic if Intel/AT&T
+	mnemonic is specified.  Don't allow old gcc support if old_gcc
+	is 0.
+	(md_longopts): Add -mmnemonic, -msyntax, -mindex-reg,
+	-mmnaked-reg and -mold-gcc.
+	(md_parse_option): Handle OPTION_MMNEMONIC, OPTION_MSYNTAX,
+	OPTION_MINDEX_REG, OPTION_MNAKED_REG and OPTION_MOLD_GCC.
+
+	* doc/c-i386.texi: Docoument -mmnemonic, -msyntax, --mnaked-reg
+	and AT&T mnemonic vs. Intel mnemonic.
+
 2007-12-20  Bob Wilson  <bob.wilson@acm.org>
 	
 	* config/tc-xtensa.c (xtensa_elf_cons): Set frag flags for
