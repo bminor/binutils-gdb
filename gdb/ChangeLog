@@ -1,5 +1,10 @@
 2007-12-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_is_character_type): Add recognition of type
+	"Wide_Wide_Character".
+
+2007-12-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (read_base_type): Set code to TYPE_CODE_CHAR
 	for char and unsigned char types of Ada compilation units.
 	* ada-lang.c (ada_is_character_type): Always return true if

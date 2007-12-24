@@ -7301,6 +7301,7 @@ ada_is_character_type (struct type *type)
               || TYPE_CODE (type) == TYPE_CODE_RANGE)
           && (strcmp (name, "character") == 0
               || strcmp (name, "wide_character") == 0
+              || strcmp (name, "wide_wide_character") == 0
               || strcmp (name, "unsigned char") == 0));
 }
 
