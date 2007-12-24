@@ -1,3 +1,10 @@
+2007-12-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (read_base_type): Set code to TYPE_CODE_CHAR
+	for char and unsigned char types of Ada compilation units.
+	* ada-lang.c (ada_is_character_type): Always return true if
+	the type code is TYPE_CODE_CHAR.
+
 2007-12-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* infrun.c (handle_inferior_event): Remove code that made us

@@ -7286,15 +7286,22 @@ value_val_atr (struct type *type, struct value *arg)
 int
 ada_is_character_type (struct type *type)
 {
-  const char *name = ada_type_name (type);
-  return
-    name != NULL
-    && (TYPE_CODE (type) == TYPE_CODE_CHAR
-        || TYPE_CODE (type) == TYPE_CODE_INT
-        || TYPE_CODE (type) == TYPE_CODE_RANGE)
-    && (strcmp (name, "character") == 0
-        || strcmp (name, "wide_character") == 0
-        || strcmp (name, "unsigned char") == 0);
+  const char *name;
+
+  /* If the type code says it's a character, then assume it really is,
+     and don't check any further.  */
+  if (TYPE_CODE (type) == TYPE_CODE_CHAR)
+    return 1;
+  
+  /* Otherwise, assume it's a character type iff it is a discrete type
+     with a known character type name.  */
+  name = ada_type_name (type);
+  return (name != NULL
+          && (TYPE_CODE (type) == TYPE_CODE_INT
+              || TYPE_CODE (type) == TYPE_CODE_RANGE)
+          && (strcmp (name, "character") == 0
+              || strcmp (name, "wide_character") == 0
+              || strcmp (name, "unsigned char") == 0));
 }
 
 /* True if TYPE appears to be an Ada string type.  */
