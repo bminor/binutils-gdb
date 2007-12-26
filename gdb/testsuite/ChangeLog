@@ -1,3 +1,10 @@
+2007-12-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/Makefile.in (EXECUTABLES): Update list.
+	* gdb.ada/char_param.exp: Do not compile our test program with
+	-gnata, this is unnecessary.
+	* gdb.ada/char_param/pck.ads: Remove unnecessary "with".
+
 2007-12-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/print_chars/pck.ads, gdb.ada/print_chars/pck.adb,
@@ -38,7 +45,6 @@
 	source file.
 	* gdb.base/expand-psymtabs.exp: New testcase
 	expect file.
-
 
 2007-12-17  Luis Machado  <luisgpm@br.ibm.com>
 

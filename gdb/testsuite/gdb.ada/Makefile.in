@@ -1,7 +1,21 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES = null_record/null_record fixed_points/fixed_points
+EXECUTABLES = \
+  array_return/p \
+  arrayidx/p \
+  catch_ex/foo \
+  char_param/foo \
+  exec_changed/common \
+  exec_changed/first \
+  exec_changed/second \
+  fixed_points/fixed_points \
+  frame_args/foo \
+  null_record/null_record \
+  packed_array/pa \
+  print_chars/foo \
+  start/dummy \
+  watch_arg/watch
 
 MISCELLANEOUS =
 
