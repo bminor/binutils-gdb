@@ -268,6 +268,36 @@ no_get_tls_address (void *baton, CORE_ADDR offset)
 		  _("Support for DW_OP_GNU_push_tls_address is unimplemented"));
 }
 
+/* Execute the required actions for both the DW_CFA_restore and
+DW_CFA_restore_extended instructions.  */
+static void
+dwarf2_restore_rule (struct gdbarch *gdbarch, ULONGEST reg_num,
+		     struct dwarf2_frame_state *fs, int eh_frame_p)
+{
+  ULONGEST reg;
+
+  gdb_assert (fs->initial.reg);
+  reg = dwarf2_frame_adjust_regnum (gdbarch, reg_num, eh_frame_p);
+  dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+
+  /* Check if this register was explicitly initialized in the
+  CIE initial instructions.  If not, default the rule to
+  UNSPECIFIED.  */
+  if (reg < fs->initial.num_regs)
+    fs->regs.reg[reg] = fs->initial.reg[reg];
+  else
+    fs->regs.reg[reg].how = DWARF2_FRAME_REG_UNSPECIFIED;
+
+  if (fs->regs.reg[reg].how == DWARF2_FRAME_REG_UNSPECIFIED)
+    complaint (&symfile_complaints, _("\
+incomplete CFI data; DW_CFA_restore unspecified\n\
+register %s (#%d) at 0x%s"),
+		       gdbarch_register_name
+		       (gdbarch, gdbarch_dwarf2_reg_to_regnum (gdbarch, reg)),
+		       gdbarch_dwarf2_reg_to_regnum (gdbarch, reg),
+		       paddr (fs->pc));
+}
+
 static CORE_ADDR
 execute_stack_op (gdb_byte *exp, ULONGEST len,
 		  struct frame_info *next_frame, CORE_ADDR initial)
@@ -324,23 +354,8 @@ execute_cfa_program (gdb_byte *insn_ptr, gdb_byte *insn_end,
 	}
       else if ((insn & 0xc0) == DW_CFA_restore)
 	{
-	  gdb_assert (fs->initial.reg);
 	  reg = insn & 0x3f;
-	  reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
-	  dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
-	  if (reg < fs->initial.num_regs)
-	    fs->regs.reg[reg] = fs->initial.reg[reg];
-	  else 
-	    fs->regs.reg[reg].how = DWARF2_FRAME_REG_UNSPECIFIED;
-
-	  if (fs->regs.reg[reg].how == DWARF2_FRAME_REG_UNSPECIFIED)
-	    complaint (&symfile_complaints, _("\
-incomplete CFI data; DW_CFA_restore unspecified\n\
-register %s (#%d) at 0x%s"),
-		       gdbarch_register_name
-			 (gdbarch, gdbarch_dwarf2_reg_to_regnum (gdbarch, reg)),
-		       gdbarch_dwarf2_reg_to_regnum (gdbarch, reg),
-		       paddr (fs->pc));
+	  dwarf2_restore_rule (gdbarch, reg, fs, eh_frame_p);
 	}
       else
 	{
@@ -378,11 +393,8 @@ register %s (#%d) at 0x%s"),
 	      break;
 
 	    case DW_CFA_restore_extended:
-	      gdb_assert (fs->initial.reg);
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
-	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
-	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
-	      fs->regs.reg[reg] = fs->initial.reg[reg];
+	      dwarf2_restore_rule (gdbarch, reg, fs, eh_frame_p);
 	      break;
 
 	    case DW_CFA_undefined:

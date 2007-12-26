@@ -1,3 +1,10 @@
+2007-12-26  Luis Machado  <luisgpm@br.ibm.com>
+
+	* dwarf2-frame.c (execute_cfa_program): Call dwarf2_restore_rule
+	function to handle required actions for the DW_CFA_restore and
+	DW_CFA_restore_extended instructions.
+	(dwarf2_restore_rule): New function.
+
 2007-12-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_is_character_type): Add recognition of type
