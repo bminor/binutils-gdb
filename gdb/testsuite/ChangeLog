@@ -1,3 +1,7 @@
+2007-12-26  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.base/multi-forks.exp: Doc fix.
+
 2007-12-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/Makefile.in (EXECUTABLES): Update list.

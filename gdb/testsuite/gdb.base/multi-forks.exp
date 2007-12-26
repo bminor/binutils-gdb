@@ -53,9 +53,14 @@ global gdb_prompt
 # parent and child of multiple Unix fork() system calls.
 #
 
-# Inferior program calls fork 4 times.  Since each fork
-# calls fork 4 times, there will be 16 forks.  Each fork
-# saves the return values of its own 4 fork calls.
+# The inferior program builds a tree of processes by executing a loop
+# four times, calling fork at each iteration.  Thus, at each
+# iteration, the total number of processes doubles; after four
+# iterations, we have 16 processes.  Each process saves the results
+# from its 'fork' calls, so we can tell which leaf a given process is
+# by looking at which forks returned zero and which returned a pid: a
+# zero means to take the child's branch; a pid means to take the
+# parent's branch.
 
 # First set gdb to follow the child.
 # The result should be that each of the 4 forks returns zero.
