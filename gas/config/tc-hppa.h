@@ -213,9 +213,9 @@ extern int hppa_regname_to_dw2regnum (char *regname);
 #define DWARF2_LINE_MIN_INSN_LENGTH 4
 #define DWARF2_DEFAULT_RETURN_COLUMN 2
 #if TARGET_ARCH_SIZE == 64
-#define DWARF2_CIE_DATA_ALIGNMENT -8
+#define DWARF2_CIE_DATA_ALIGNMENT (-8)
 #else
-#define DWARF2_CIE_DATA_ALIGNMENT -4
+#define DWARF2_CIE_DATA_ALIGNMENT (-4)
 #endif
 #endif
 
