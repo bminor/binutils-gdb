@@ -1,5 +1,11 @@
 2007-12-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/fixed_cmp/pck.ads, gdb.ada/fixed_cmp/pck.adb,
+	gdb.ada/fixed_cmp/fixed.adb: New files.
+	* gdb.ada/fixed_cmp.exp: New testcase.
+
+2007-12-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/boolean_expr.exp: New testcase.
 
 2007-12-26  Jim Blandy  <jimb@codesourcery.com>
