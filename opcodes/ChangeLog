@@ -1,3 +1,19 @@
+2007-12-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Add CpuSSE4_1_Or_5 to
+	CPU_SSE4_1_FLAGS, CPU_SSE4_2_FLAGS and CPU_SSE5_FLAGS.
+	(cpu_flags): Add CpuSSE4_1_Or_5.
+
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+	* i386-opc.h (CpuSSE4_1_Or_5): New.
+	(CpuLM): Updated.
+	(i386_cpu_flags): Add cpusse4_1_or_5.
+
+	* i386-opc.tbl: Use CpuSSE4_1_Or_5 instead of CpuSSE4_1|CpuSSE5
+	on ptest roundpd, roundps, roundsd and roundss.
+
 2007-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Add OldGcc, ATTMnemonic and

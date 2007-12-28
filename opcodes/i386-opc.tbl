@@ -1373,11 +1373,11 @@ pmovzxwq, 2, 0x660f3834, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No
 pmovzxdq, 2, 0x660f3835, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pmuldq, 2, 0x660f3828, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pmulld, 2, 0x660f3840, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-ptest, 2, 0x660f3817, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundpd, 3, 0x660f3a09, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundps, 3, 0x660f3a08, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundsd, 3, 0x660f3a0b, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundss, 3, 0x660f3a0a, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+ptest, 2, 0x660f3817, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundpd, 3, 0x660f3a09, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundps, 3, 0x660f3a08, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundsd, 3, 0x660f3a0b, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundss, 3, 0x660f3a0a, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 
 // SSE4.2 instructions.
 
