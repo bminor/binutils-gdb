@@ -1,3 +1,7 @@
+2007-12-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/boolean_expr.exp: New testcase.
+
 2007-12-26  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdb.base/multi-forks.exp: Doc fix.
