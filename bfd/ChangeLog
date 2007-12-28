@@ -1,3 +1,9 @@
+2007-12-28  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+	* elf32-hppa.c (hppa_record_segment_addr): Locate the segment
+	containing the section using the segment map, rather than guessing
+	based upon the section's vma and file position.
+
 2007-12-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/5488
