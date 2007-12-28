@@ -8163,20 +8163,26 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case BINOP_LOGICAL_AND:
     case BINOP_LOGICAL_OR:
     case UNOP_LOGICAL_NOT:
-      *pos -= 1;
-      return value_cast (LA_BOOL_TYPE, 
-			 evaluate_subexp_standard (expect_type, exp,
-						   pos, noside));
+      {
+        struct value *val;
+
+        *pos -= 1;
+        val = evaluate_subexp_standard (expect_type, exp, pos, noside);
+        return value_cast (LA_BOOL_TYPE, val);
+      }
 
     case BINOP_BITWISE_AND:
     case BINOP_BITWISE_IOR:
     case BINOP_BITWISE_XOR:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
-      *pos = pc;
-      return value_cast (value_type (arg1),
-			 evaluate_subexp_standard (expect_type, exp,
-						   pos, noside));
-			 
+      {
+        struct value *val;
+
+        arg1 = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+        *pos = pc;
+        val = evaluate_subexp_standard (expect_type, exp, pos, noside);
+
+        return value_cast (value_type (arg1), val);
+      }
 
     case OP_VAR_VALUE:
       *pos -= 1;
