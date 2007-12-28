@@ -801,6 +801,7 @@ lang_bool_type (void)
       return builtin_type_f_logical_s2;
     case language_cplus:
     case language_pascal:
+    case language_ada:
       if (current_language->la_language==language_cplus)
         {sym = lookup_symbol ("bool", NULL, VAR_DOMAIN, NULL, NULL);}
       else
@@ -821,6 +822,7 @@ lang_bool_type (void)
 	    return type;
 	}
       return java_boolean_type;
+      
     default:
       return builtin_type_int;
     }

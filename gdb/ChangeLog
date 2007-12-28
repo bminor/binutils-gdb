@@ -1,3 +1,10 @@
+2007-12-27  Paul Hilfinger  <hilfinger@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp): Add cases for BINOP_LOGICAL_AND,
+	BINOP_LOGICAL_OR, UNOP_LOGICAL_NOT, BINOP_BITWISE_IOR,
+	BINOP_BITWISE_XOR, BINOP_BITWISE_AND.
+	* language.c (lang_bool_type): Add Ada case.
+
 2007-12-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (read_base_type): Fix obvious &&/|| confusion.
