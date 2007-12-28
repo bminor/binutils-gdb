@@ -109,7 +109,7 @@ static initializer cpu_flag_init [] =
   { "CPU_ABM_FLAGS",
     "CpuABM" },
   { "CPU_SSE5_FLAGS",
-    "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuSSE5|CpuSSE4_1_Or_5"}
+    "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuSSE5|CpuSSE4_1_Or_5"},
 };
 
 static initializer operand_type_init [] =
