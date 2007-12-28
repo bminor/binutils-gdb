@@ -7984,6 +7984,24 @@ add_component_interval (LONGEST low, LONGEST high,
   indices[i + 1] = high;
 }
 
+/* Perform and Ada cast of ARG2 to type TYPE if the type of ARG2
+   is different.  */
+
+static struct value *
+ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
+{
+  if (type == ada_check_typedef (value_type (arg2)))
+    return arg2;
+
+  if (ada_is_fixed_point_type (type))
+    return (cast_to_fixed (type, arg2));
+
+  if (ada_is_fixed_point_type (value_type (arg2)))
+    return value_cast (type, cast_from_fixed_to_double (arg2));
+
+  return value_cast (type, arg2);
+}
+
 static struct value *
 ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                      int *pos, enum noside noside)
@@ -8004,9 +8022,21 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     {
     default:
       *pos -= 1;
-      return
-        unwrap_value (evaluate_subexp_standard
-                      (expect_type, exp, pos, noside));
+      arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
+      arg1 = unwrap_value (arg1);
+
+      /* If evaluating an OP_DOUBLE and an EXPECT_TYPE was provided,
+         then we need to perform the conversion manually, because
+         evaluate_subexp_standard doesn't do it.  This conversion is
+         necessary in Ada because the different kinds of float/fixed
+         types in Ada have different representations.
+
+         Similarly, we need to perform the conversion from OP_LONG
+         ourselves.  */
+      if ((op == OP_DOUBLE || op == OP_LONG) && expect_type != NULL)
+        arg1 = ada_value_cast (expect_type, arg1, noside);
+
+      return arg1;
 
     case OP_STRING:
       {
@@ -8026,28 +8056,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = evaluate_subexp (type, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
-      if (type != ada_check_typedef (value_type (arg1)))
-        {
-          if (ada_is_fixed_point_type (type))
-            arg1 = cast_to_fixed (type, arg1);
-          else if (ada_is_fixed_point_type (value_type (arg1)))
-            arg1 = value_cast (type, cast_from_fixed_to_double (arg1));
-          else if (VALUE_LVAL (arg1) == lval_memory)
-            {
-              /* This is in case of the really obscure (and undocumented,
-                 but apparently expected) case of (Foo) Bar.all, where Bar
-                 is an integer constant and Foo is a dynamic-sized type.
-                 If we don't do this, ARG1 will simply be relabeled with
-                 TYPE.  */
-              if (noside == EVAL_AVOID_SIDE_EFFECTS)
-                return value_zero (to_static_fixed_type (type), not_lval);
-              arg1 =
-                ada_to_fixed_value_create
-                (type, VALUE_ADDRESS (arg1) + value_offset (arg1), 0);
-            }
-          else
-            arg1 = value_cast (type, arg1);
-        }
+      arg1 = ada_value_cast (type, arg1, noside);
       return arg1;
 
     case UNOP_QUAL:

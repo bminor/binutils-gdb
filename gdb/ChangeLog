@@ -1,3 +1,13 @@
+2007-12-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_value_cast): New function, extracted out from
+	the code in ada_evaluate_subexp, case UNOP_CAST.  The code handling
+	the obscure case has been removed as we think that it is actually
+	unnecessary.
+	(ada_evaluate_subexp): Add type case when evaluating an OP_DOUBLE
+	or an OP_LONG with a non-null expect_type. Replace extracted-out
+	code with call to new ada_value_cast function.
+
 2007-12-27  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp): Add cases for BINOP_LOGICAL_AND,
