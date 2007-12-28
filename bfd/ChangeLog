@@ -1,3 +1,10 @@
+2007-12-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf-hppa.h (elf_hppa_osec_to_segment): New function.
+	(elf_hppa_record_segment_addrs): Use elf_hppa_osec_to_segment.
+	Remove ATTRIBUTE_UNUSED from abfd argument.
+	* elf32-hppa.c (hppa_record_segment_addr): Likewise.
+
 2007-12-28  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
 	* elf32-hppa.c (hppa_record_segment_addr): Locate the segment

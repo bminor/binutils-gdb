@@ -1088,6 +1088,35 @@ elf_hppa_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
   return TRUE;
 }
 
+/* Find the segment number in which OSEC, and output section, is
+   located.  */
+
+static unsigned
+elf_hppa_osec_to_segment (bfd *output_bfd, asection *osec)
+{
+  struct elf_segment_map *m;
+  Elf_Internal_Phdr *p;
+
+  /* Find the segment that contains the output_section.  */
+  for (m = elf_tdata (output_bfd)->segment_map,
+	 p = elf_tdata (output_bfd)->phdr;
+       m != NULL;
+       m = m->next, p++)
+    {
+      int i;
+
+      for (i = m->count - 1; i >= 0; i--)
+	if (m->sections[i] == osec)
+	  break;
+
+      if (i >= 0)
+	break;
+    }
+
+  BFD_ASSERT (m);
+  return p - elf_tdata (output_bfd)->phdr;
+}
+
 static void
 elf_hppa_final_write_processing (bfd *abfd,
 				 bfd_boolean linker ATTRIBUTE_UNUSED)
@@ -1300,25 +1329,28 @@ elf_hppa_is_dynamic_loader_symbol (const char *name)
 
 /* Record the lowest address for the data and text segments.  */
 static void
-elf_hppa_record_segment_addrs (bfd *abfd ATTRIBUTE_UNUSED,
+elf_hppa_record_segment_addrs (bfd *abfd,
 			       asection *section,
 			       void *data)
 {
-  struct elf64_hppa_link_hash_table *hppa_info;
-  bfd_vma value;
+  struct elf64_hppa_link_hash_table *hppa_info = data;
 
-  hppa_info = data;
+  if ((section->flags & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
+    {
+      unsigned seg = elf_hppa_osec_to_segment (abfd, section->output_section);
+      bfd_vma value = elf_tdata (abfd)->phdr[seg].p_vaddr;
 
-  value = section->vma - section->filepos;
-
-  if (((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
-       == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
-      && value < hppa_info->text_segment_base)
-    hppa_info->text_segment_base = value;
-  else if (((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
-	    == (SEC_ALLOC | SEC_LOAD))
-	   && value < hppa_info->data_segment_base)
-    hppa_info->data_segment_base = value;
+      if (section->flags & SEC_READONLY)
+	{
+	  if (value < hppa_info->text_segment_base)
+	    hppa_info->text_segment_base = value;
+	}
+      else
+	{
+	  if (value < hppa_info->data_segment_base)
+	    hppa_info->data_segment_base = value;
+	}
+    }
 }
 
 /* Called after we have seen all the input files/sections, but before
