@@ -1,3 +1,7 @@
+2007-12-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* gas/all/gas.exp: Skip relax test on hppa*-*-hpux*.
+
 2007-12-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/arch-1.d: New file.

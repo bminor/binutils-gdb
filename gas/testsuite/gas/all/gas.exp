@@ -274,7 +274,8 @@ run_dump_test assign
 run_dump_test sleb128
 
 # .byte is 32 bits on tic4x, and .p2align isn't supported on tic54x
-if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] } {
+# .space is different on hppa*-hpux.
+if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] && ![istarget "hppa*-*-hpux*"] } {
     run_dump_test relax
 }
 
