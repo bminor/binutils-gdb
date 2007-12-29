@@ -294,7 +294,7 @@ static int old_gcc = OLDGCC_COMPAT;
 /* 1 if register prefix % not required.  */
 static int allow_naked_reg = 0;
 
-/* 1 if fake index register, eiz/riz, is allowed .  */
+/* 1 if pseudo index register, eiz/riz, is allowed .  */
 static int allow_index_reg = 0;
 
 /* Register prefix used for error message.  */
@@ -7177,7 +7177,16 @@ md_show_usage (stream)
   -march=CPU/-mtune=CPU   generate code/optimize for CPU, where CPU is one of:\n\
                            i386, i486, pentium, pentiumpro, pentium4, nocona,\n\
                            core, core2, k6, athlon, k8, generic32, generic64\n"));
-
+  fprintf (stream, _("\
+  -mmnemonic=[att|intel]  use AT&T/Intel mnemonic\n"));
+  fprintf (stream, _("\
+  -msyntax=[att|intel]    use AT&T/Intel syntax\n"));
+  fprintf (stream, _("\
+  -mindex-reg             support pseudo index registers\n"));
+  fprintf (stream, _("\
+  -mnaked-reg             don't require `%%' prefix for registers\n"));
+  fprintf (stream, _("\
+  -mold-gcc               support old (<= 2.8.1) versions of gcc\n"));
 }
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
