@@ -1,3 +1,7 @@
+2007-12-29  Jim Blandy  <jimb@codesourcery.com>
+
+	* configure: Regenerated.
+
 2007-12-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/fixed_cmp/pck.ads, gdb.ada/fixed_cmp/pck.adb,

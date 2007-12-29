@@ -3104,7 +3104,7 @@ done
 
 
 
-                                                                                                                                                                          ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile gdb.mi/Makefile gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile"
+                                                                                                                                                                                              ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile gdb.mi/Makefile gdb.modula2/Makefile gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -3667,8 +3667,10 @@ do
   "gdb.server/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.server/Makefile" ;;
   "gdb.java/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.java/Makefile" ;;
   "gdb.mi/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.mi/Makefile" ;;
+  "gdb.modula2/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.modula2/Makefile" ;;
   "gdb.objc/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.objc/Makefile" ;;
   "gdb.opt/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.opt/Makefile" ;;
+  "gdb.pascal/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.pascal/Makefile" ;;
   "gdb.threads/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.threads/Makefile" ;;
   "gdb.trace/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.trace/Makefile" ;;
   "gdb.xml/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.xml/Makefile" ;;
