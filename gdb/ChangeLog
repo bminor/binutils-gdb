@@ -1,3 +1,18 @@
+2007-12-29  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+	* i386nbsd-tdep.c: Include "trad-frame.h" and "tramp-frame.h"
+	(sigtramp_retcode, i386nbsd_sigtramp_offset, i386nbsd_sigtramp_p):
+	Remove
+	(i386nbsd_mc_reg_offset): New array.
+	(i386nbsd_sigtramp_cache_init): New function.
+	(i386nbsd_sigtramp_sc16, i386nbsd_sigtramp_sc2, i386nbsd_sigtramp_si2)
+	(i386nbsd_sigtramp_si31, i386nbsd_sigtramp_si4): New signal trampoline
+	frame descriptions.
+	(i386nbsd_init_abi): Override ABI sigcontext defaults and register
+	new signal frame unwinders
+	* Makefile.in (i386nbsd-tdep.o): Update dependencies.
+	* tramp-frame.h (struct tramp_frame): Allow for 48 instructions
+
 2007-12-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (_initialize_ada_language): Attach executable_changed
