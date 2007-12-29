@@ -48,6 +48,8 @@ extern void *alloca ();
 #   endif /* alloca */
 #  endif /* _AIX */
 # endif /* HAVE_ALLOCA_H */
+#else
+extern void *alloca (size_t);
 #endif /* __GNUC__ */
 
 

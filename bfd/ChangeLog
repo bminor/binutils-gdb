@@ -1,5 +1,9 @@
 2007-12-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	PR binutils/5146
+	* elf64-hppa.c: Declare alloca when __GNUC__ is defined.
+	* som.c: Likewise.
+
 	* elf-hppa.h (elf_hppa_osec_to_segment): New function.
 	(elf_hppa_record_segment_addrs): Use elf_hppa_osec_to_segment.
 	Remove ATTRIBUTE_UNUSED from abfd argument.
