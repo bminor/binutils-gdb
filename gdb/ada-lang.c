@@ -10534,4 +10534,6 @@ _initialize_ada_language (void)
   decoded_names_store = htab_create_alloc
     (256, htab_hash_string, (int (*)(const void *, const void *)) streq,
      NULL, xcalloc, xfree);
+
+  observer_attach_executable_changed (ada_executable_changed_observer);
 }
