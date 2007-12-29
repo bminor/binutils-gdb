@@ -5,8 +5,8 @@
 
 2007-12-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
-	* config/tc-hppa.h  (DWARF2_CIE_DATA_ALIGNMENT): Wrap negative number
-	in parens.
+	* config/tc-hppa.h (DWARF2_CIE_DATA_ALIGNMENT): Wrap negative
+	number in parens.
 
 2007-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
