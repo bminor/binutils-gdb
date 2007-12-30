@@ -1,3 +1,9 @@
+2007-12-30  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* configure.tgt (*-*-mingw32ce*): Set gdb_osabi to
+	GDB_OSABI_WINCE.
+	(*-*-mingw* | *-*-cygwin*): Set gdb_osabi to GDB_OSABI_CYGWIN.
+
 2007-12-29  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
 	* i386nbsd-tdep.c: Include "trad-frame.h" and "tramp-frame.h"
