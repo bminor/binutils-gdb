@@ -1,5 +1,11 @@
 2007-12-31  Nick Clifton  <nickc@redhat.com>
 
+	* elf-m10300.c (mn10300_elf_relax_section): Use
+	_bfd_merged_section_offset to compute the offset of a symbol in a
+	merged section.
+
+2007-12-31  Nick Clifton  <nickc@redhat.com>
+
 	* elf.c (_bfd_elf_find_segment_containing_section): New function:
 	Scan the segment map looking for the segment containing a
 	specified function.

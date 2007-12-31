@@ -2813,12 +2813,11 @@ mn10300_elf_relax_section (bfd *abfd,
 	      && ELF_ST_TYPE (isym->st_info) == STT_SECTION
 	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
 	    {
-	      bfd_vma saved_addend;
-
-	      saved_addend = irel->r_addend;
-	      symval = _bfd_elf_rela_local_sym (abfd, isym, & sym_sec, irel);
-	      symval += irel->r_addend;
-	      irel->r_addend = saved_addend;
+	      symval = isym->st_value + irel->r_addend;
+	      symval = _bfd_merged_section_offset (abfd, & sym_sec,
+						   elf_section_data (sym_sec)->sec_info,
+						   symval);
+	      symval += sym_sec->output_section->vma + sym_sec->output_offset - irel->r_addend;
 	    }
 	  else
 	    symval = (isym->st_value
