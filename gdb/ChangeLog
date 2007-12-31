@@ -1,3 +1,8 @@
+2007-12-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* hppa-linux-nat.c: Use hppa-linux-offsets.h.
+	* hppa-linux-offsets.h: New file.
+
 2007-12-30  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* configure.tgt (*-*-mingw32ce*): Set gdb_osabi to

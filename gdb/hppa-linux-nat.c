@@ -29,11 +29,8 @@
 #include <sys/ptrace.h>
 #include <linux/version.h>
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,5,43)
-#include <asm/offset.h>
-#else
-#include <asm/offsets.h>
-#endif
+#include <asm/ptrace.h>
+#include "hppa-linux-offsets.h"
 
 #include "hppa-tdep.h"
 
