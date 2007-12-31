@@ -48,3 +48,11 @@ foo:	jaw	foo
 	fldlw	(%eax)
 	movl	$%ebx,%eax
 	insertq	$4,$2,%xmm2,%ebx
+	cvtsi2ssq (%eax),%xmm1
+	cvtsi2sdq (%eax),%xmm1
+
+	.intel_syntax noprefix
+	cvtsi2ss xmm1,QWORD PTR [eax]
+	cvtsi2sd xmm1,QWORD PTR [eax]
+	cvtsi2ssq xmm1,QWORD PTR [eax]
+	cvtsi2sdq xmm1,QWORD PTR [eax]

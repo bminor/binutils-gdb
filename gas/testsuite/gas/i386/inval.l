@@ -47,56 +47,73 @@
 .*:48: Error: .*
 .*:49: Error: .*
 .*:50: Error: .*
+.*:51: Error: .*
+.*:52: Error: .*
+.*:55: Error: .*
+.*:56: Error: .*
+.*:57: Error: .*
+.*:58: Error: .*
 GAS LISTING .*
 
 
-   1 [ 	]*	.text
-   2 [ 	]*# All the following should be illegal
-   3 [ 	]*	mov	\(%dx\),%al
-   4 [ 	]*	mov	\(%eax,%esp,2\),%al
-   5 [ 	]*	setae	%eax
-   6 [ 	]*	pushb	%ds
-   7 [ 	]*	popb	%ds
-   8 [ 	]*	pushb	%al
-   9 [ 	]*	popb	%al
-  10 [ 	]*	pushb	%ah
-  11 [ 	]*	popb	%ah
-  12 [ 	]*	pushb	%ax
-  13 [ 	]*	popb	%ax
-  14 [ 	]*	pushb	%eax
-  15 [ 	]*	popb	%eax
-  16 [ 	]*	movb	%ds,%ax
-  17 [ 	]*	movb	%ds,%eax
-  18 [ 	]*	movb	%ax,%ds
-  19 [ 	]*	movb	%eax,%ds
-  20 [ 	]*	movdb	%eax,%mm0
-  21 [ 	]*	movqb	0,%mm0
-  22 [ 	]*	ldsb	0,%eax
-  23 [ 	]*	setnew	0
-  24 [ 	]*	movdw	%eax,%mm0
-  25 [ 	]*	movqw	0,%mm0
-  26 [ 	]*	div	%cx,%al
-  27 [ 	]*	div	%cl,%ax
-  28 [ 	]*	div	%ecx,%al
-  29 [ 	]*	imul	10,%bx,%ecx
-  30 [ 	]*	imul	10,%bx,%al
-  31 [ 	]*	popab
-  32 [ 	]*	stil
-  33 [ 	]*	aaab
-  34 [ 	]*	cwdel
-  35 [ 	]*	cwdw
-  36 [ 	]*	callww	0
-  37 [ 	]*foo:	jaw	foo
-  38 [ 	]*	jcxzw	foo
-  39 [ 	]*	jecxzl	foo
-  40 [ 	]*	loopb	foo
-  41 [ 	]*	xlatw	%es:%bx
-  42 [ 	]*	xlatl	%es:%bx
-  43 [ 	]*	intl	2
-  44 [ 	]*	int3b
-  45 [ 	]*	hltb
-  46 [ 	]*	fstb	%st\(0\)
-  47 [ 	]*	fcompll	28\(%ebp\)
-  48 [ 	]*	fldlw	\(%eax\)
-  49 [ 	]*	movl	\$%ebx,%eax
-  50 [ 	]*	insertq	\$4,\$2,%xmm2,%ebx
+[ 	]*1[ 	]+\.text
+[ 	]*2[ 	]+\# All the following should be illegal
+[ 	]*3[ 	]+mov	\(%dx\),%al
+[ 	]*4[ 	]+mov	\(%eax,%esp,2\),%al
+[ 	]*5[ 	]+setae	%eax
+[ 	]*6[ 	]+pushb	%ds
+[ 	]*7[ 	]+popb	%ds
+[ 	]*8[ 	]+pushb	%al
+[ 	]*9[ 	]+popb	%al
+[ 	]*10[ 	]+pushb	%ah
+[ 	]*11[ 	]+popb	%ah
+[ 	]*12[ 	]+pushb	%ax
+[ 	]*13[ 	]+popb	%ax
+[ 	]*14[ 	]+pushb	%eax
+[ 	]*15[ 	]+popb	%eax
+[ 	]*16[ 	]+movb	%ds,%ax
+[ 	]*17[ 	]+movb	%ds,%eax
+[ 	]*18[ 	]+movb	%ax,%ds
+[ 	]*19[ 	]+movb	%eax,%ds
+[ 	]*20[ 	]+movdb	%eax,%mm0
+[ 	]*21[ 	]+movqb	0,%mm0
+[ 	]*22[ 	]+ldsb	0,%eax
+[ 	]*23[ 	]+setnew	0
+[ 	]*24[ 	]+movdw	%eax,%mm0
+[ 	]*25[ 	]+movqw	0,%mm0
+[ 	]*26[ 	]+div	%cx,%al
+[ 	]*27[ 	]+div	%cl,%ax
+[ 	]*28[ 	]+div	%ecx,%al
+[ 	]*29[ 	]+imul	10,%bx,%ecx
+[ 	]*30[ 	]+imul	10,%bx,%al
+[ 	]*31[ 	]+popab
+[ 	]*32[ 	]+stil
+[ 	]*33[ 	]+aaab
+[ 	]*34[ 	]+cwdel
+[ 	]*35[ 	]+cwdw
+[ 	]*36[ 	]+callww	0
+[ 	]*37[ 	]+foo:	jaw	foo
+[ 	]*38[ 	]+jcxzw	foo
+[ 	]*39[ 	]+jecxzl	foo
+[ 	]*40[ 	]+loopb	foo
+[ 	]*41[ 	]+xlatw	%es:%bx
+[ 	]*42[ 	]+xlatl	%es:%bx
+[ 	]*43[ 	]+intl	2
+[ 	]*44[ 	]+int3b
+[ 	]*45[ 	]+hltb
+[ 	]*46[ 	]+fstb	%st\(0\)
+[ 	]*47[ 	]+fcompll	28\(%ebp\)
+[ 	]*48[ 	]+fldlw	\(%eax\)
+[ 	]*49[ 	]+movl	\$%ebx,%eax
+[ 	]*50[ 	]+insertq	\$4,\$2,%xmm2,%ebx
+[ 	]*51[ 	]+cvtsi2ssq \(%eax\),%xmm1
+[ 	]*52[ 	]+cvtsi2sdq \(%eax\),%xmm1
+[ 	]*53[ 	]+
+[ 	]*54[ 	]+\.intel_syntax noprefix
+[ 	]*55[ 	]+cvtsi2ss xmm1,QWORD PTR \[eax\]
+[ 	]*56[ 	]+cvtsi2sd xmm1,QWORD PTR \[eax\]
+[ 	]*57[ 	]+cvtsi2ssq xmm1,QWORD PTR \[eax\]
+GAS LISTING .*
+
+
+[ 	]*58[ 	]+cvtsi2sdq xmm1,QWORD PTR \[eax\]

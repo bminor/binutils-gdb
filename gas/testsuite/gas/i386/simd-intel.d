@@ -93,6 +93,14 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f3 0f c2 38 10       	cmpss  xmm7,DWORD PTR \[eax\],0x10
 [ 	]*[a-f0-9]+:	f2 0f c2 f7 10       	cmpsd  xmm6,xmm7,0x10
 [ 	]*[a-f0-9]+:	f2 0f c2 38 10       	cmpsd  xmm7,QWORD PTR \[eax\],0x10
+[ 	]*[a-f0-9]+:	f3 0f 2a c8          	cvtsi2ss xmm1,eax
+[ 	]*[a-f0-9]+:	f2 0f 2a c8          	cvtsi2sd xmm1,eax
+[ 	]*[a-f0-9]+:	f3 0f 2a c8          	cvtsi2ss xmm1,eax
+[ 	]*[a-f0-9]+:	f2 0f 2a c8          	cvtsi2sd xmm1,eax
+[ 	]*[a-f0-9]+:	f3 0f 2a 08          	cvtsi2ss xmm1,DWORD PTR \[eax\]
+[ 	]*[a-f0-9]+:	f2 0f 2a 08          	cvtsi2sd xmm1,DWORD PTR \[eax\]
+[ 	]*[a-f0-9]+:	f3 0f 2a 08          	cvtsi2ss xmm1,DWORD PTR \[eax\]
+[ 	]*[a-f0-9]+:	f2 0f 2a 08          	cvtsi2sd xmm1,DWORD PTR \[eax\]
 [ 	]*[a-f0-9]+:	f2 0f d0 0d 78 56 34 12 	addsubps xmm1,XMMWORD PTR ds:0x12345678
 [ 	]*[a-f0-9]+:	66 0f 2f 0d 78 56 34 12 	comisd xmm1,QWORD PTR ds:0x12345678
 [ 	]*[a-f0-9]+:	0f 2f 0d 78 56 34 12 	comiss xmm1,DWORD PTR ds:0x12345678
@@ -178,4 +186,12 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f3 0f c2 38 10       	cmpss  xmm7,DWORD PTR \[eax\],0x10
 [ 	]*[a-f0-9]+:	f2 0f c2 f7 10       	cmpsd  xmm6,xmm7,0x10
 [ 	]*[a-f0-9]+:	f2 0f c2 38 10       	cmpsd  xmm7,QWORD PTR \[eax\],0x10
+[ 	]*[a-f0-9]+:	f3 0f 2a c8          	cvtsi2ss xmm1,eax
+[ 	]*[a-f0-9]+:	f2 0f 2a c8          	cvtsi2sd xmm1,eax
+[ 	]*[a-f0-9]+:	f3 0f 2a c8          	cvtsi2ss xmm1,eax
+[ 	]*[a-f0-9]+:	f2 0f 2a c8          	cvtsi2sd xmm1,eax
+[ 	]*[a-f0-9]+:	f3 0f 2a 08          	cvtsi2ss xmm1,DWORD PTR \[eax\]
+[ 	]*[a-f0-9]+:	f2 0f 2a 08          	cvtsi2sd xmm1,DWORD PTR \[eax\]
+[ 	]*[a-f0-9]+:	f3 0f 2a 08          	cvtsi2ss xmm1,DWORD PTR \[eax\]
+[ 	]*[a-f0-9]+:	f2 0f 2a 08          	cvtsi2sd xmm1,DWORD PTR \[eax\]
 #pass

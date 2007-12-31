@@ -90,6 +90,15 @@ cmpss	$0x10,(%eax),%xmm7
 cmpsd	$0x10,%xmm7,%xmm6
 cmpsd	$0x10,(%eax),%xmm7
 
+	cvtsi2ss %eax, %xmm1
+	cvtsi2sd %eax, %xmm1
+	cvtsi2ssl %eax, %xmm1
+	cvtsi2sdl %eax, %xmm1
+	cvtsi2ss (%eax), %xmm1
+	cvtsi2sd (%eax), %xmm1
+	cvtsi2ssl (%eax), %xmm1
+	cvtsi2sdl (%eax), %xmm1
+
 	.intel_syntax noprefix
 
 addsubps xmm1,XMMWORD PTR ds:0x12345678
@@ -177,3 +186,11 @@ cmpss  xmm6,xmm7,0x10
 cmpss  xmm7,DWORD PTR [eax],0x10
 cmpsd  xmm6,xmm7,0x10
 cmpsd  xmm7,QWORD PTR [eax],0x10
+cvtsi2ss xmm1,eax
+cvtsi2sd xmm1,eax
+cvtsi2ssd xmm1,eax
+cvtsi2sdd xmm1,eax
+cvtsi2ss xmm1,DWORD PTR [eax]
+cvtsi2sd xmm1,DWORD PTR [eax]
+cvtsi2ssd xmm1,DWORD PTR [eax]
+cvtsi2sdd xmm1,DWORD PTR [eax]

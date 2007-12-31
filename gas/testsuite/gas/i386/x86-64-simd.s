@@ -7,6 +7,20 @@ _start:
 	cvtpd2dq 0x12345678(%rip),%xmm1
 	cvtps2pd 0x12345678(%rip),%xmm1
 	cvttps2dq 0x12345678(%rip),%xmm1
+	cvtsi2ss %eax, %xmm1
+	cvtsi2sd %eax, %xmm1
+	cvtsi2ssl %eax, %xmm1
+	cvtsi2sdl %eax, %xmm1
+	cvtsi2ss %rax, %xmm1
+	cvtsi2sd %rax, %xmm1
+	cvtsi2ssq %rax, %xmm1
+	cvtsi2sdq %rax, %xmm1
+	cvtsi2ss (%rax), %xmm1
+	cvtsi2sd (%rax), %xmm1
+	cvtsi2ssl (%rax), %xmm1
+	cvtsi2sdl (%rax), %xmm1
+	cvtsi2ssq (%rax), %xmm1
+	cvtsi2sdq (%rax), %xmm1
 	haddps 0x12345678(%rip),%xmm1
 	movdqu %xmm1,0x12345678(%rip)
 	movdqu 0x12345678(%rip),%xmm1
@@ -105,6 +119,22 @@ cvtdq2pd xmm1,QWORD PTR [rip+0x12345678]
 cvtpd2dq xmm1,XMMWORD PTR [rip+0x12345678]        
 cvtps2pd xmm1,QWORD PTR [rip+0x12345678]        
 cvttps2dq xmm1,XMMWORD PTR [rip+0x12345678]        
+cvtsi2ss xmm1,eax
+cvtsi2sd xmm1,eax
+cvtsi2ssd xmm1,eax
+cvtsi2sdd xmm1,eax
+cvtsi2ss xmm1,rax
+cvtsi2sd xmm1,rax
+cvtsi2ssq xmm1,rax
+cvtsi2sdq xmm1,rax
+cvtsi2ss xmm1,DWORD PTR [rax]
+cvtsi2sd xmm1,DWORD PTR [rax]
+cvtsi2ssd xmm1,DWORD PTR [rax]
+cvtsi2sdd xmm1,DWORD PTR [rax]
+cvtsi2ss xmm1,QWORD PTR [rax]
+cvtsi2sd xmm1,QWORD PTR [rax]
+cvtsi2ssq xmm1,QWORD PTR [rax]
+cvtsi2sdq xmm1,QWORD PTR [rax]
 haddps xmm1,XMMWORD PTR [rip+0x12345678]        
 movdqu XMMWORD PTR [rip+0x12345678],xmm1        
 movdqu xmm1,XMMWORD PTR [rip+0x12345678]        

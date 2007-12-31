@@ -1,3 +1,11 @@
+2007-12-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (prefix_table): Use "%LQ" on cvtpi2ps/cvtsi2sd.
+	(putop): Handle '%' and "LQ".
+
+	* i386-opc.tbl: Remove IgnoreSize from cvtpi2ps/cvtsi2sd.
+	* i386-tbl.h: Regenerated.
+
 2007-12-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Add CpuSSE4_1_Or_5 to

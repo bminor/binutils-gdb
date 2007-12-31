@@ -718,15 +718,15 @@ struct dis386 {
    'A' => print 'b' if no register operands or suffix_always is true
    'B' => print 'b' if suffix_always is true
    'C' => print 's' or 'l' ('w' or 'd' in Intel mode) depending on operand
-   .      size prefix
+	  size prefix
    'D' => print 'w' if no register operands or 'w', 'l' or 'q', if
-   .      suffix_always is true
+	  suffix_always is true
    'E' => print 'e' if 32-bit form of jcxz
    'F' => print 'w' or 'l' depending on address size prefix (loop insns)
    'G' => print 'w' or 'l' depending on operand size prefix (i/o insns)
    'H' => print ",pt" or ",pn" branch hint
    'I' => honor following macro letter even in Intel mode (implemented only
-   .      for some of the macro letters)
+	  for some of the macro letters)
    'J' => print 'l'
    'K' => print 'd' or 'q' if rex prefix is present.
    'L' => print 'l' if suffix_always is true
@@ -734,9 +734,9 @@ struct dis386 {
    'N' => print 'n' if instruction has no wait "prefix"
    'O' => print 'd' or 'o' (or 'q' in Intel mode)
    'P' => print 'w', 'l' or 'q' if instruction has an operand size prefix,
-   .      or suffix_always is true.  print 'q' if rex prefix is present.
-   'Q' => print 'w', 'l' or 'q' if no register operands or suffix_always
-   .      is true
+	  or suffix_always is true.  print 'q' if rex prefix is present.
+   'Q' => print 'w', 'l' or 'q' for memory operand or suffix_always
+	  is true
    'R' => print 'w', 'l' or 'q' ('d' for 'l' and 'e' in Intel mode)
    'S' => print 'w', 'l' or 'q' if suffix_always is true
    'T' => print 'q' in 64bit mode and behave as 'P' otherwise
@@ -748,6 +748,11 @@ struct dis386 {
 	  suffix_always is true.
    'Z' => print 'q' in 64bit mode and behave as 'L' otherwise
    '!' => change condition from true to false or from false to true.
+   '%' => add 1 upper case letter to the macro.
+
+   2 upper case letter macros:
+   'LQ' => print 'l' ('d' in Intel mode) or 'q' for memory operand
+	   or suffix_always is true
 
    Many of the above letters print nothing in Intel mode.  See "putop"
    for the details.
@@ -1830,9 +1835,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F2A */
   {
     { "cvtpi2ps", { XM, EMCq } },
-    { "cvtsi2ssY", { XM, Ev } },
+    { "cvtsi2ss%LQ", { XM, Ev } },
     { "cvtpi2pd", { XM, EMCq } },
-    { "cvtsi2sdY", { XM, Ev } },
+    { "cvtsi2sd%LQ", { XM, Ev } },
   },
 
   /* PREFIX_0F2B */
@@ -5965,6 +5970,14 @@ putop (const char *template, int sizeflag)
   const char *p;
   int alt = 0;
   int cond = 1;
+  unsigned int l = 0, len = 1;
+  char last[4];
+
+#define SAVE_LAST(c)			\
+  if (l < len && l < sizeof (last))	\
+    last[l++] = c;			\
+  else					\
+    abort ();
 
   for (p = template; *p; p++)
     {
@@ -5972,6 +5985,9 @@ putop (const char *template, int sizeflag)
 	{
 	default:
 	  *obufp++ = *p;
+	  break;
+	case '%':
+	  len++;
 	  break;
 	case '!':
 	  cond = 0;
@@ -6109,7 +6125,14 @@ putop (const char *template, int sizeflag)
 	      break;
 	    }
 	  /* Fall through.  */
+	  goto case_L;
 	case 'L':
+	  if (l != 0 || len != 1)
+	    {
+	      SAVE_LAST (*p);
+	      break;
+	    }
+case_L:
 	  if (intel_syntax)
 	    break;
 	  if (sizeflag & SUFFIX_ALWAYS)
@@ -6175,22 +6198,45 @@ putop (const char *template, int sizeflag)
 	      break;
 	    }
 	  /* Fall through.  */
+	  goto case_Q;
 	case 'Q':
-	  if (intel_syntax && !alt)
-	    break;
-	  USED_REX (REX_W);
-	  if (modrm.mod != 3 || (sizeflag & SUFFIX_ALWAYS))
+	  if (l == 0 && len == 1)
 	    {
-	      if (rex & REX_W)
-		*obufp++ = 'q';
-	      else
+case_Q:
+	      if (intel_syntax && !alt)
+		break;
+	      USED_REX (REX_W);
+	      if (modrm.mod != 3 || (sizeflag & SUFFIX_ALWAYS))
 		{
-		  if (sizeflag & DFLAG)
-		    *obufp++ = intel_syntax ? 'd' : 'l';
+		  if (rex & REX_W)
+		    *obufp++ = 'q';
 		  else
-		    *obufp++ = 'w';
+		    {
+		      if (sizeflag & DFLAG)
+			*obufp++ = intel_syntax ? 'd' : 'l';
+		      else
+			*obufp++ = 'w';
+		    }
+		  used_prefixes |= (prefixes & PREFIX_DATA);
 		}
-	      used_prefixes |= (prefixes & PREFIX_DATA);
+	    }
+	  else
+	    {
+	      if (l != 1 || len != 2 || last[0] != 'L')
+		{
+		  SAVE_LAST (*p);
+		  break;
+		}
+	      if (intel_syntax
+		  || (modrm.mod == 3 && !(sizeflag & SUFFIX_ALWAYS)))
+		break;
+	      if ((rex & REX_W))
+		{
+		  USED_REX (REX_W);
+		  *obufp++ = 'q';
+		}
+	      else
+		*obufp++ = 'l';
 	    }
 	  break;
 	case 'R':

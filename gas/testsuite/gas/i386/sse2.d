@@ -64,7 +64,7 @@ Disassembly of section .text:
  102:	66 0f 2a d3[ 	]+cvtpi2pd %mm3,%xmm2
  106:	66 0f 2a 1c 24[ 	]+cvtpi2pd \(%esp\),%xmm3
  10b:	f2 0f 2a e5[ 	]+cvtsi2sd %ebp,%xmm4
- 10f:	f2 0f 2a 2e[ 	]+cvtsi2sd \(%esi\),%xmm5
+ 10f:	f2 0f 2a 2e[ 	]+cvtsi2sdl \(%esi\),%xmm5
  113:	66 0f 2d f7[ 	]+cvtpd2pi %xmm7,%mm6
  117:	66 0f 2d 38[ 	]+cvtpd2pi \(%eax\),%mm7
  11b:	f2 0f 2d 01[ 	]+cvtsd2si \(%ecx\),%eax

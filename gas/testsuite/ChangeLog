@@ -1,3 +1,19 @@
+2007-12-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/inval.s: Add test for cvtsi2ss/cvtsi2sd.
+	* gas/i386/simd.s: Likewise.
+	* gas/i386/x86-64-simd.s: Likewise.
+
+	* gas/i386/inval.l: Updated.
+	* gas/i386/simd-intel.d: Likewise.
+	* gas/i386/simd-suffix.d: Likewise.
+	* gas/i386/simd.d: Likewise.
+	* gas/i386/sse2.d: Likewise.
+	* gas/i386/x86-64-opcode.d: Likewise.
+	* gas/i386/x86-64-simd-intel.d: Likewise.
+	* gas/i386/x86-64-simd-suffix.d: Likewise.
+	* gas/i386/x86-64-simd.d: Likewise.
+
 2007-12-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* gas/all/gas.exp: Skip relax test on hppa*-*-hpux*.
