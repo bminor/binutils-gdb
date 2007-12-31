@@ -1497,26 +1497,9 @@ _bfinfdpic_add_rofixup (bfd *output_bfd, asection *rofixup, bfd_vma offset,
 static unsigned
 _bfinfdpic_osec_to_segment (bfd *output_bfd, asection *osec)
 {
-  struct elf_segment_map *m;
-  Elf_Internal_Phdr *p;
+  Elf_Internal_Phdr *p = _bfd_elf_find_segment_containing_section (output_bfd, osec);
 
-  /* Find the segment that contains the output_section.  */
-  for (m = elf_tdata (output_bfd)->segment_map,
-	 p = elf_tdata (output_bfd)->phdr;
-       m != NULL;
-       m = m->next, p++)
-    {
-      int i;
-
-      for (i = m->count - 1; i >= 0; i--)
-	if (m->sections[i] == osec)
-	  break;
-
-      if (i >= 0)
-	break;
-    }
-
-  return p - elf_tdata (output_bfd)->phdr;
+  return (p != NULL) ? p - elf_tdata (output_bfd)->phdr : -1;
 }
 
 inline static bfd_boolean

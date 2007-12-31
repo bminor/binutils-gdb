@@ -1088,35 +1088,6 @@ elf_hppa_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
   return TRUE;
 }
 
-/* Find the segment number in which OSEC, and output section, is
-   located.  */
-
-static unsigned
-elf_hppa_osec_to_segment (bfd *output_bfd, asection *osec)
-{
-  struct elf_segment_map *m;
-  Elf_Internal_Phdr *p;
-
-  /* Find the segment that contains the output_section.  */
-  for (m = elf_tdata (output_bfd)->segment_map,
-	 p = elf_tdata (output_bfd)->phdr;
-       m != NULL;
-       m = m->next, p++)
-    {
-      int i;
-
-      for (i = m->count - 1; i >= 0; i--)
-	if (m->sections[i] == osec)
-	  break;
-
-      if (i >= 0)
-	break;
-    }
-
-  BFD_ASSERT (m);
-  return p - elf_tdata (output_bfd)->phdr;
-}
-
 static void
 elf_hppa_final_write_processing (bfd *abfd,
 				 bfd_boolean linker ATTRIBUTE_UNUSED)
@@ -1337,8 +1308,12 @@ elf_hppa_record_segment_addrs (bfd *abfd,
 
   if ((section->flags & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
     {
-      unsigned seg = elf_hppa_osec_to_segment (abfd, section->output_section);
-      bfd_vma value = elf_tdata (abfd)->phdr[seg].p_vaddr;
+      bfd_vma value;
+      Elf_Internal_Phdr *p;
+
+      p = _bfd_elf_find_segment_containing_section (abfd, section->output_section);
+      BFD_ASSERT (p != NULL);
+      value = p->p_vaddr;
 
       if (section->flags & SEC_READONLY)
 	{

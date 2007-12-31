@@ -3256,9 +3256,7 @@ elf32_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 /* Record the lowest address for the data and text segments.  */
 
 static void
-hppa_record_segment_addr (bfd *abfd,
-			  asection *section,
-			  void *data)
+hppa_record_segment_addr (bfd *abfd, asection *section, void *data)
 {
   struct elf32_hppa_link_hash_table *htab;
 
@@ -3266,8 +3264,12 @@ hppa_record_segment_addr (bfd *abfd,
 
   if ((section->flags & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
     {
-      unsigned seg = elf_hppa_osec_to_segment (abfd, section->output_section);
-      bfd_vma value = elf_tdata (abfd)->phdr[seg].p_vaddr;
+      bfd_vma value;
+      Elf_Internal_Phdr *p;
+
+      p = _bfd_elf_find_segment_containing_section (abfd, section->output_section);
+      BFD_ASSERT (p != NULL);
+      value = p->p_vaddr;
 
       if ((section->flags & SEC_READONLY) != 0)
 	{

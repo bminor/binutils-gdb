@@ -3426,6 +3426,29 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
   return segs * bed->s->sizeof_phdr;
 }
 
+/* Find the segment that contains the output_section of section.  */
+
+Elf_Internal_Phdr *
+_bfd_elf_find_segment_containing_section (bfd * abfd, asection * section)
+{
+  struct elf_segment_map *m;
+  Elf_Internal_Phdr *p;
+
+  for (m = elf_tdata (abfd)->segment_map,
+	 p = elf_tdata (abfd)->phdr;
+       m != NULL;
+       m = m->next, p++)
+    {
+      int i;
+
+      for (i = m->count - 1; i >= 0; i--)
+	if (m->sections[i] == section)
+	  return p;
+    }
+
+  return NULL;
+}
+
 /* Create a mapping from a set of sections to a program segment.  */
 
 static struct elf_segment_map *

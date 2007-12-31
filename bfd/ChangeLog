@@ -1,3 +1,16 @@
+2007-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_find_segment_containing_section): New function:
+	Scan the segment map looking for the segment containing a
+	specified function.
+	* elf-bfd.h: Prototype the new function.
+	* elf-hppa.h (elf_hppa_osec_to_segment): Delete.
+	(elf_hppa_record_segment_addrs): Use new function.
+	* elf32-bfin.c (_bfdfdpic_osec_to_segment): Use new function.
+	* elf32-frv.c (_frvfdpic_osec_to_segment): Use new function.
+	* elf32-hppa.c (hppa_record_segment_addr): Use new function.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Use new function.
+	
 2007-12-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	PR binutils/5146

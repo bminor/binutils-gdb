@@ -2076,6 +2076,9 @@ extern bfd_boolean _bfd_elf_map_sections_to_segments
 
 extern bfd_boolean _bfd_elf_is_function_type (unsigned int);
 
+extern Elf_Internal_Phdr * _bfd_elf_find_segment_containing_section
+  (bfd * abfd, asection * section);
+
 /* Exported interface for writing elf corefile notes. */
 extern char *elfcore_write_note
   (bfd *, char *, int *, const char *, int, const void *, int);
