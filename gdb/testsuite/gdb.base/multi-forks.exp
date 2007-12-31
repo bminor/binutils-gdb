@@ -88,10 +88,46 @@ gdb_test "break $exit_bp_loc" "Breakpoint.* at .*" "Break at exit"
 gdb_test "set follow parent" "" ""
 
 send_gdb "continue\n"
-gdb_expect {
-    -re ".*Break.* main .*$gdb_prompt.*$" {}
-    -re ".*$gdb_prompt $" {fail "run to exit 2"}
-    default {fail "run to exit 2 (timeout)"}
+
+# The output from the child processes can be interleaved arbitrarily
+# with the output from GDB and the parent process.  If we don't
+# consume it all now, it can confuse later interactions.
+set seen_done 0
+set seen_break 0
+set seen_prompt 0
+set seen_timeout 0
+while { ($seen_done < 16 || ! $seen_prompt) && ! $seen_timeout } {
+    # We don't know what order the interesting things will arrive in.
+    # Using a pattern of the form 'x|y|z' instead of -re x ... -re y
+    # ... -re z ensures that expect always chooses the match that
+    # occurs leftmost in the input, and not the pattern appearing
+    # first in the script that occurs anywhere in the input, so that
+    # we don't skip anything.
+    gdb_expect {
+        -re "($decimal done)|(Breakpoint)|($gdb_prompt)" {
+            if {[info exists expect_out(1,string)]} {
+                incr seen_done
+            } elseif {[info exists expect_out(2,string)]} {
+                set seen_break 1
+            } elseif {[info exists expect_out(3,string)]} {
+                set seen_prompt 1
+            }
+            array unset expect_out
+        }
+        timeout { set seen_timeout 1 }
+    }
+}
+
+if { $seen_timeout } {
+    fail "run to exit 2 (timeout)"
+} elseif { ! $seen_prompt } {
+    fail "run to exit 2 (no prompt)"
+} elseif { ! $seen_break } {
+    fail "run to exit 2 (no breakpoint hit)"
+} elseif { $seen_done != 16 } {
+    fail "run to exit 2 (missing done messages)"
+} else {
+    pass "run to exit 2"
 }
 
 gdb_test "print pids\[0\]==0 || pids\[1\]==0 || pids\[2\]==0 || pids\[3\]==0" \

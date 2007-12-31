@@ -1,3 +1,8 @@
+2007-12-31  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdb.base/multi-forks.exp: Consume all output from child
+	processes before proceeding to next test.
+
 2007-12-29  Jim Blandy  <jimb@codesourcery.com>
 
 	* configure: Regenerated.
