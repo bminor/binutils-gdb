@@ -5,6 +5,7 @@
 	* gas/i386/x86-64-simd.s: Likewise.
 
 	* gas/i386/inval.l: Updated.
+	* gas/i386/katmai.d: Likewise.
 	* gas/i386/simd-intel.d: Likewise.
 	* gas/i386/simd-suffix.d: Likewise.
 	* gas/i386/simd.d: Likewise.
