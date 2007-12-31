@@ -4896,7 +4896,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	    {
 	      /* Find the segment that contains the output_section.  */
 	      Elf_Internal_Phdr *p = _bfd_elf_find_segment_containing_section
-		(input_bfd, input_section->output_section);
+		(output_bfd, input_section->output_section);
 
 	      if (p == NULL)
 		{

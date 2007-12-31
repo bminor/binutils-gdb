@@ -1,3 +1,10 @@
+2007-12-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/5530
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Call
+	_bfd_elf_find_segment_containing_section with output_bfd,
+	instead of input_bfd.
+
 2007-12-31  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_relax_section): Use
