@@ -1,3 +1,16 @@
+2007-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/flags1.d: Add xfails for ports for which the test will
+	not work.
+
+2007-12-31  Nick Clifton  <nickc@redhat.com>
+
+	* ld-mn10300/i143317.s: New test - checks linker relaxation when
+	the symbols are in a merged section.
+	* ld-mn10300/i143317.d: Expected disassembly.
+	* ld-mn10300/i143317.t: Linker map.
+	* ld-mn10300/mn10300.exp (mn10300_tests): Add the i143317 test.
+
 2007-12-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/5488

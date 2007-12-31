@@ -95,6 +95,14 @@ set mn10300_tests {
 	{ {objdump -d i135409-5.d} }
 	"i135409-5.x"
     }
+    {
+	"relaxing offsets into a merged string section"
+	"-Ti143317.t -shared -relax"
+	""
+	{ "i143317.s" }
+	{ {objdump -d i143317.d} }
+	"i143317.x"
+    }
 }
 
 run_ld_link_tests $mn10300_tests
