@@ -2424,6 +2424,8 @@ find_line_common (struct linetable *l, int lineno,
   int best_index = -1;
   int best = 0;
 
+  *exact_match = 0;
+
   if (lineno <= 0)
     return -1;
   if (l == 0)
@@ -2449,8 +2451,6 @@ find_line_common (struct linetable *l, int lineno,
     }
 
   /* If we got here, we didn't get an exact match.  */
-
-  *exact_match = 0;
   return best_index;
 }
 

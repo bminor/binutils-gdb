@@ -1353,7 +1353,7 @@ unpack_varlen_hex (char *buff,	/* packet to parse */
 static char *
 unpack_nibble (char *buf, int *val)
 {
-  ishex (*buf++, val);
+  *val = fromhex (*buf++);
   return buf;
 }
 

@@ -1,5 +1,10 @@
 2007-12-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* remote.c (unpack_nibble): Use fromhex.
+	* symtab.c (find_line_common): Always set exact_match.
+
+2007-12-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* hppa-linux-nat.c: Use hppa-linux-offsets.h.
 	* hppa-linux-offsets.h: New file.
 
