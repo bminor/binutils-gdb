@@ -78,6 +78,8 @@
 @V@/gdb/ChangeLog-2003 @V@/gdb/ChangeLog.003
 @V@/gdb/ChangeLog-2004 @V@/gdb/ChangeLog.004
 @V@/gdb/ChangeLog-2005 @V@/gdb/ChangeLog.005
+@V@/gdb/ChangeLog-2006 @V@/gdb/ChangeLog.006
+@V@/gdb/ChangeLog-2007 @V@/gdb/ChangeLog.007
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
 @V@/gdb/amd64fbsd-nat.c @V@/gdb/a64fb-nat.c
