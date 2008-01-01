@@ -1,5 +1,11 @@
 2008-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/fun_in_declare/pck.ads, gdb.ada/fun_in_declare/pck.adb,
+	gdb.ada/fun_in_declare/foo.adb: New files.
+	* gdb.ada/fun_in_declare.exp: New testcase. 
+
+2008-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/ref_param/foo.adb, gdb.ada/ref_param/pck.adb,
 	gdb.ada/ref_param/pck.ads: New files.
 	* gdb.ada/ref_param.exp: New testcase.
