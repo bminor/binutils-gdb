@@ -1,7 +1,7 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
 
    Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
 
@@ -457,88 +457,78 @@ win32_store_inferior_registers (struct regcache *regcache, int r)
 }
 
 static int psapi_loaded = 0;
-static HMODULE psapi_module_handle = NULL;
-static BOOL WINAPI (*psapi_EnumProcessModules) (HANDLE, HMODULE *, DWORD, LPDWORD) = NULL;
-static BOOL WINAPI (*psapi_GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO, DWORD) = NULL;
-static DWORD WINAPI (*psapi_GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR, DWORD) = NULL;
+static BOOL WINAPI (*psapi_EnumProcessModules) (HANDLE, HMODULE *, DWORD,
+						LPDWORD);
+static BOOL WINAPI (*psapi_GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO,
+						  DWORD);
+static DWORD WINAPI (*psapi_GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR,
+						   DWORD);
 
+/* Get the name of a given module at at given base address.  If base_address
+   is zero return the first loaded module (which is always the name of the
+   executable).  */
 static int
-psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
+get_module_name (DWORD base_address, char *dll_name_ret)
 {
   DWORD len;
   MODULEINFO mi;
   int i;
   HMODULE dh_buf[1];
-  HMODULE *DllHandle = dh_buf;
+  HMODULE *DllHandle = dh_buf;	/* Set to temporary storage for initial query */
   DWORD cbNeeded;
-  BOOL ok;
+#ifdef __CYGWIN__
+  char pathbuf[PATH_MAX + 1];	/* Temporary storage prior to converting to
+				   posix form */
+#else
+  char *pathbuf = dll_name_ret;	/* Just copy directly to passed-in arg */
+#endif
 
-  if (!psapi_loaded ||
-      psapi_EnumProcessModules == NULL ||
-      psapi_GetModuleInformation == NULL ||
-      psapi_GetModuleFileNameExA == NULL)
-    {
-      if (psapi_loaded)
-	goto failed;
-      psapi_loaded = 1;
-      psapi_module_handle = LoadLibrary ("psapi.dll");
-      if (!psapi_module_handle)
-	{
-	  /* printf_unfiltered ("error loading psapi.dll: %u", GetLastError ()); */
-	  goto failed;
-	}
-      psapi_EnumProcessModules = GetProcAddress (psapi_module_handle, "EnumProcessModules");
-      psapi_GetModuleInformation = GetProcAddress (psapi_module_handle, "GetModuleInformation");
-      psapi_GetModuleFileNameExA = (void *) GetProcAddress (psapi_module_handle,
-						    "GetModuleFileNameExA");
-      if (psapi_EnumProcessModules == NULL ||
-	  psapi_GetModuleInformation == NULL ||
-	  psapi_GetModuleFileNameExA == NULL)
-	goto failed;
-    }
-
-  cbNeeded = 0;
-  ok = (*psapi_EnumProcessModules) (current_process_handle,
-				    DllHandle,
-				    sizeof (HMODULE),
-				    &cbNeeded);
-
-  if (!ok || !cbNeeded)
+  /* If psapi_loaded < 0 either psapi.dll is not available or it does not contain
+     the needed functions. */
+  if (psapi_loaded <= 0)
     goto failed;
 
+  cbNeeded = 0;
+  /* Find size of buffer needed to handle list of modules loaded in inferior */
+  if (!psapi_EnumProcessModules (current_process_handle, DllHandle,
+				 sizeof (HMODULE), &cbNeeded) || !cbNeeded)
+    goto failed;
+
+  /* Allocate correct amount of space for module list */
   DllHandle = (HMODULE *) alloca (cbNeeded);
   if (!DllHandle)
     goto failed;
 
-  ok = (*psapi_EnumProcessModules) (current_process_handle,
-				    DllHandle,
-				    cbNeeded,
-				    &cbNeeded);
-  if (!ok)
+  /* Get the list of modules */
+  if (!psapi_EnumProcessModules (current_process_handle, DllHandle, cbNeeded,
+				 &cbNeeded))
     goto failed;
 
   for (i = 0; i < (int) (cbNeeded / sizeof (HMODULE)); i++)
     {
-      if (!(*psapi_GetModuleInformation) (current_process_handle,
-					  DllHandle[i],
-					  &mi,
-					  sizeof (mi)))
+      /* Get information on this module */
+      if (!psapi_GetModuleInformation (current_process_handle, DllHandle[i],
+				       &mi, sizeof (mi)))
 	error (_("Can't get module info"));
 
-      len = (*psapi_GetModuleFileNameExA) (current_process_handle,
-					   DllHandle[i],
-					   dll_name_ret,
-					   MAX_PATH);
-      if (len == 0)
-	error (_("Error getting dll name: %u."), (unsigned) GetLastError ());
-
-      if ((DWORD) (mi.lpBaseOfDll) == BaseAddress)
-	return 1;
+      if (!base_address || (DWORD) (mi.lpBaseOfDll) == base_address)
+	{
+	  /* Try to find the name of the given module */
+	  len = psapi_GetModuleFileNameExA (current_process_handle,
+					    DllHandle[i], pathbuf, MAX_PATH);
+	  if (len == 0)
+	    error (_("Error getting dll name: %u."), (unsigned) GetLastError ());
+#ifdef __CYGWIN__
+	  /* Cygwin prefers that the path be in /x/y/z format */
+	  cygwin_conv_to_full_posix_path (pathbuf, dll_name_ret);
+#endif
+	  return 1;	/* success */
+	}
     }
 
 failed:
   dll_name_ret[0] = '\0';
-  return 0;
+  return 0;		/* failure */
 }
 
 /* Encapsulate the information required in a call to
@@ -745,7 +735,7 @@ handle_load_dll (void *dummy)
 
   dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
-  if (!psapi_get_dll_name ((DWORD) (event->lpBaseOfDll), dll_buf))
+  if (!get_module_name ((DWORD) event->lpBaseOfDll, dll_buf))
     dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
 
   dll_name = dll_buf;
@@ -1730,35 +1720,27 @@ win32_detach (char *args, int from_tty)
 static char *
 win32_pid_to_exec_file (int pid)
 {
-  /* Try to find the process path using the Cygwin internal process list
-     pid isn't a valid pid, unfortunately.  Use current_event.dwProcessId
-     instead.  */
-
   static char path[MAX_PATH + 1];
-  char *path_ptr = NULL;
 
 #ifdef __CYGWIN__
-  /* TODO: Also find native Windows processes using CW_GETPINFO_FULL.  */
-  int cpid;
-  struct external_pinfo *pinfo;
-
-  cygwin_internal (CW_LOCK_PINFO, 1000);
-  for (cpid = 0;
-       (pinfo = (struct external_pinfo *)
-	cygwin_internal (CW_GETPINFO, cpid | CW_NEXTPID));
-       cpid = pinfo->pid)
+  /* Try to find exe name as symlink target of /proc/<pid>/exe */
+  int nchars;
+  char procexe[sizeof ("/proc/4294967295/exe")];
+  sprintf (procexe, "/proc/%lu/exe", current_event.dwProcessId);
+  nchars = readlink (procexe, path, sizeof(path));
+  if (nchars > 0 && nchars < sizeof (path))
     {
-      if (pinfo->dwProcessId == current_event.dwProcessId) /* Got it */
-       {
-	 cygwin_conv_to_full_posix_path (pinfo->progname, path);
-	 path_ptr = path;
-	 break;
-       }
+      path[nchars] = '\0';	/* Got it */
+      return path;
     }
-  cygwin_internal (CW_UNLOCK_PINFO);
 #endif
 
-  return path_ptr;
+  /* If we get here then either Cygwin is hosed, this isn't a Cygwin version
+     of gdb, or we're trying to debug a non-Cygwin windows executable. */
+  if (!get_module_name (0, path))
+    path[0] = '\0';
+
+  return path;
 }
 
 /* Print status information about what we're accessing.  */
@@ -2281,4 +2263,35 @@ _initialize_check_for_gdb_ini (void)
 	  warning (_("obsolete '%s' found. Rename to '%s'."), oldini, newini);
 	}
     }
+}
+
+void
+_initialize_psapi (void)
+{
+  /* Load optional functions used for retrieving filename information
+     associated with the currently debugged process or its dlls. */
+  if (!psapi_loaded)
+    {
+      HMODULE psapi_module_handle;
+
+      psapi_loaded = -1;
+
+      psapi_module_handle = LoadLibrary ("psapi.dll");
+      if (psapi_module_handle)
+	{
+	  psapi_EnumProcessModules = (void *) GetProcAddress (psapi_module_handle, "EnumProcessModules");
+	  psapi_GetModuleInformation = (void *) GetProcAddress (psapi_module_handle, "GetModuleInformation");
+	  psapi_GetModuleFileNameExA = (void *) GetProcAddress (psapi_module_handle, "GetModuleFileNameExA");
+
+	  if (psapi_EnumProcessModules != NULL
+	      && psapi_GetModuleInformation != NULL
+	      && psapi_GetModuleFileNameExA != NULL)
+	    psapi_loaded = 1;
+	}
+    }
+
+  /* This will probably fail on Windows 9x/Me.  Let the user know that we're
+     missing some functionality. */
+  if (psapi_loaded < 0)
+    warning(_("cannot automatically find executable file or library to read symbols.  Use \"file\" or \"dll\" command to load executable/libraries directly."));
 }

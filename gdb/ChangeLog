@@ -1,3 +1,17 @@
+2008-01-01  Christopher Faylor  <me+gdb@cgf.cx>
+
+	* win32-nat.c (psapi_module_handle): Remove static.
+	(get_module_name): Rename from psapi_get_dll_name.  Revamp slightly to
+	return first module found if base_address is zero.  Don't initialize
+	psapi function pointers here.  Convert to cygwin paths when
+	appropriate.
+	(win32_pid_to_exec_file): Use Cygwin's /proc interface to determine
+	executable name.  Use get_module_name when that fails or when
+	!__CYGWIN__.
+	(_initialize_psapi): New function.  Initialize psapi stuff before it is
+	needed or issue a warning if it is not found.  Move psapi_module_handle
+	here.
+
 2008-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_remove_trailing_digits): New function.
