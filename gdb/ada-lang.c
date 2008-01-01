@@ -8130,7 +8130,13 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
            || ada_is_fixed_point_type (value_type (arg2)))
           && value_type (arg1) != value_type (arg2))
         error (_("Operands of fixed-point addition must have the same type"));
-      return value_cast (value_type (arg1), value_add (arg1, arg2));
+      /* Do the addition, and cast the result to the type of the first
+         argument.  We cannot cast the result to a reference type, so if
+         ARG1 is a reference type, find its underlying type.  */
+      type = value_type (arg1);
+      while (TYPE_CODE (type) == TYPE_CODE_REF)
+        type = TYPE_TARGET_TYPE (type);
+      return value_cast (type, value_add (arg1, arg2));
 
     case BINOP_SUB:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -8141,7 +8147,13 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
            || ada_is_fixed_point_type (value_type (arg2)))
           && value_type (arg1) != value_type (arg2))
         error (_("Operands of fixed-point subtraction must have the same type"));
-      return value_cast (value_type (arg1), value_sub (arg1, arg2));
+      /* Do the substraction, and cast the result to the type of the first
+         argument.  We cannot cast the result to a reference type, so if
+         ARG1 is a reference type, find its underlying type.  */
+      type = value_type (arg1);
+      while (TYPE_CODE (type) == TYPE_CODE_REF)
+        type = TYPE_TARGET_TYPE (type);
+      return value_cast (type, value_sub (arg1, arg2));
 
     case BINOP_MUL:
     case BINOP_DIV:
