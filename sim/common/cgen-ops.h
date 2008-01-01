@@ -1,5 +1,5 @@
 /* Semantics ops support for CGEN-based simulators.
-   Copyright (C) 1996, 1997, 1998, 1999, 2002, 2007
+   Copyright (C) 1996, 1997, 1998, 1999, 2002, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 

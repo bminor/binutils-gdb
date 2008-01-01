@@ -1,5 +1,5 @@
 /* Simulator header for cgen cpus.
-   Copyright (C) 1998, 1999, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2007, 2008 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.

@@ -1,6 +1,7 @@
 /* Abstraction of GNU v2 abi.
 
-   Copyright (C) 2001, 2002, 2003, 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2003, 2005, 2007, 2008
+   Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin <dberlin@redhat.com>
 

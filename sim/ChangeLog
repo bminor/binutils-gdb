@@ -1,3 +1,7 @@
+2008-01-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Updated copyright notices for most files.
+
 2007-12-19  DJ Delorie  <dj@redhat.com>
 
 	* frv/frv.c (frvbf_cut): Only look at the six LSBs of

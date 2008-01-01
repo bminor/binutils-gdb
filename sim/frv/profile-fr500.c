@@ -1,6 +1,6 @@
 /* frv simulator fr500 dependent profiling code.
 
-   Copyright (C) 1998, 1999, 2000, 2001, 2003, 2007
+   Copyright (C) 1998, 1999, 2000, 2001, 2003, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Red Hat
 

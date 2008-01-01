@@ -1,7 +1,7 @@
 /* DWARF 2 debugging format support for GDB.
 
    Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-                 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+                 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
    Inc.  with support from Florida State University (under contract

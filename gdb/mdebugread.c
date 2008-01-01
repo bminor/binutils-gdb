@@ -1,7 +1,7 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
 
    Copyright (C) 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2007
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2007, 2008
    Free Software Foundation, Inc.
 
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at

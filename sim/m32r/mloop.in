@@ -1,5 +1,5 @@
 # Simulator main loop for m32r. -*- C -*-
-# Copyright (C) 1996, 1997, 1998, 2007 Free Software Foundation, Inc.
+# Copyright (C) 1996, 1997, 1998, 2007, 2008 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Simulators.
 #

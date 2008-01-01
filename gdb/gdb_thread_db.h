@@ -11,7 +11,7 @@ typedef unsigned int gdb_uint32_t;
 #define GDB_UINT32_C(c)	c ## U
 #endif
 
-/* Copyright (C) 1999, 2000, 2007 Free Software Foundation, Inc.
+/* Copyright (C) 1999, 2000, 2007, 2008 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or

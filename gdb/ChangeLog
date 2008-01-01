@@ -1,3 +1,7 @@
+2008-01-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Updated copyright notices for most files.
+
 2008-01-01  Christopher Faylor  <me+gdb@cgf.cx>
 
 	* win32-nat.c (psapi_module_handle): Remove static.

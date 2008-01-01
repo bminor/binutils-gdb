@@ -1,6 +1,6 @@
 /* Slightly more portable version of <expat.h>.
 
-   Copyright (C) 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,6 +1,6 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
 
-   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2006, 2007
+   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    Written by Michael Snyder at Cygnus Solutions.

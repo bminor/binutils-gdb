@@ -1,5 +1,5 @@
 /* UI_FILE - a generic STDIO like output stream.
-   Copyright (C) 1999, 2000, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

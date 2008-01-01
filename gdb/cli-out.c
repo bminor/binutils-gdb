@@ -1,6 +1,6 @@
 /* Output generating routines for GDB CLI.
 
-   Copyright (C) 1999, 2000, 2002, 2003, 2005, 2007
+   Copyright (C) 1999, 2000, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.

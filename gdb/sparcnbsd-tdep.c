@@ -1,6 +1,7 @@
 /* Target-dependent code for NetBSD/sparc.
 
-   Copyright (C) 2002, 2003, 2004, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003, 2004, 2006, 2007, 2008
+   Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.

@@ -1,6 +1,6 @@
 /* Target-dependent code for the i386.
 
-   Copyright (C) 2001, 2002, 2003, 2004, 2006, 2007
+   Copyright (C) 2001, 2002, 2003, 2004, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GDB.

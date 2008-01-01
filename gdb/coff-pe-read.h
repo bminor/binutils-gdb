@@ -1,6 +1,6 @@
 /* Interface to coff-pe-read.c (portable-executable-specific symbol reader).
 
-   Copyright (C) 2003, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

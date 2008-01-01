@@ -1,6 +1,6 @@
 /* Frame unwinder for frames using the libunwind library.
 
-   Copyright (C) 2003, 2004, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    Written by Jeff Johnston, contributed by Red Hat Inc.
 

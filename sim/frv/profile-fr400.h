@@ -1,5 +1,6 @@
 /* Profiling definitions for the fr400 model of the FRV simulator
-   Copyright (C) 1998, 1999, 2000, 2001, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2007, 2008
+   Free Software Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU Simulators.

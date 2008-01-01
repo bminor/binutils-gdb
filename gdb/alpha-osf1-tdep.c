@@ -1,5 +1,5 @@
 /* Target-dependent code for OSF/1 on Alpha.
-   Copyright (C) 2002, 2003, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

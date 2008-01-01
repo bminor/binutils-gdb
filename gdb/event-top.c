@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1999, 2000, 2001, 2002, 2004, 2005, 2007
+   Copyright (C) 1999, 2000, 2001, 2002, 2004, 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.

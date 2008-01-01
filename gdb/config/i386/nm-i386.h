@@ -1,5 +1,5 @@
 /* Native macro definitions for GDB on an Intel i[3456]86.
-   Copyright 2001, 2004, 2007 Free Software Foundation, Inc.
+   Copyright 2001, 2004, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

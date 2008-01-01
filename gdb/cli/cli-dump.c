@@ -1,6 +1,6 @@
 /* Dump-to-file commands, for GDB, the GNU debugger.
 
-   Copyright (c) 2002, 2005, 2007 Free Software Foundation, Inc.
+   Copyright (c) 2002, 2005, 2007, 2008 Free Software Foundation, Inc.
 
    Contributed by Red Hat.
 

@@ -1,5 +1,5 @@
 /* Main simulator entry points specific to the M32R.
-   Copyright (C) 1996, 1997, 1998, 1999, 2003, 2007
+   Copyright (C) 1996, 1997, 1998, 1999, 2003, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 

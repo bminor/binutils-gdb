@@ -1,6 +1,6 @@
 /* Target-dependent header for the MIPS architecture, for GDB, the GNU Debugger.
 
-   Copyright (C) 2002, 2003, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

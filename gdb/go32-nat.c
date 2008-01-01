@@ -1,5 +1,5 @@
 /* Native debugging support for Intel x86 running DJGPP.
-   Copyright (C) 1997, 1999, 2000, 2001, 2005, 2006, 2007
+   Copyright (C) 1997, 1999, 2000, 2001, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Robert Hoehne.
 

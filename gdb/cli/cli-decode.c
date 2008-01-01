@@ -1,7 +1,7 @@
 /* Handle lists of commands, their decoding and documentation, for GDB.
 
-   Copyright (c) 1986, 1989, 1990, 1991, 1998, 2000, 2001, 2002, 2004, 2007
-   Free Software Foundation, Inc.
+   Copyright (c) 1986, 1989, 1990, 1991, 1998, 2000, 2001, 2002, 2004, 2007,
+   2008 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
