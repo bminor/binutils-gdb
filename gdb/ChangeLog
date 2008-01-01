@@ -1,5 +1,10 @@
 2008-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_1) [TYPE_CODE_REF]: Ignore deref_ref
+	and always print the dereferenced value.
+
+2008-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp, case BINOP_SUB): Add handling
 	of the case where the first argument is a reference.
 	(ada_evaluate_subexp, case BINOP_ADD): Likewise.

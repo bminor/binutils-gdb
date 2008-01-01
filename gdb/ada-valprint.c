@@ -855,32 +855,35 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
       return len;
 
     case TYPE_CODE_REF:
+      /* For references, the debugger is expected to print the value as
+         an address if DEREF_REF is null.  But printing an address in place
+         of the object value would be confusing to an Ada programmer.
+         So, for Ada values, we print the actual dereferenced value
+         regardless.  */
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
-      /* De-reference the reference */
-      if (deref_ref)
-	{
-	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
-	    {
-	      LONGEST deref_val_int = (LONGEST)
-		unpack_pointer (lookup_pointer_type (builtin_type_void),
-				valaddr);
-	      if (deref_val_int != 0)
-		{
-		  struct value *deref_val =
-		    ada_value_ind (value_from_longest
-				   (lookup_pointer_type (elttype),
-				    deref_val_int));
-		  val_print (value_type (deref_val),
-			     value_contents (deref_val), 0,
-			     VALUE_ADDRESS (deref_val), stream, format,
-			     deref_ref, recurse + 1, pretty);
-		}
-	      else
-		fputs_filtered ("(null)", stream);
-	    }
-	  else
-	    fputs_filtered ("???", stream);
-	}
+      
+      if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
+        {
+          LONGEST deref_val_int = (LONGEST)
+            unpack_pointer (lookup_pointer_type (builtin_type_void),
+                            valaddr);
+          if (deref_val_int != 0)
+            {
+              struct value *deref_val =
+                ada_value_ind (value_from_longest
+                               (lookup_pointer_type (elttype),
+                                deref_val_int));
+              val_print (value_type (deref_val),
+                         value_contents (deref_val), 0,
+                         VALUE_ADDRESS (deref_val), stream, format,
+                         deref_ref, recurse + 1, pretty);
+            }
+          else
+            fputs_filtered ("(null)", stream);
+        }
+      else
+        fputs_filtered ("???", stream);
+
       break;
     }
   gdb_flush (stream);
