@@ -1,5 +1,11 @@
 2008-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/ref_param/foo.adb, gdb.ada/ref_param/pck.adb,
+	gdb.ada/ref_param/pck.ads: New files.
+	* gdb.ada/ref_param.exp: New testcase.
+
+2008-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/interface/types.ads, gdb.ada/interface/types.adb,
 	gdb.ada/interface/foo.adb: New files.
 	* gdb.ada/interface.exp: New testcase.
