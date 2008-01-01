@@ -1,5 +1,13 @@
 2008-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	Implement support for Ada interface types.
+
+	* ada-lang.c (ada_is_dispatch_table_ptr_type): New function.
+	(ada_is_ignored_field): Ignore fields that are a dispatch table
+	of a tagged type.
+
+2008-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* top.c (print_gdb_version): Update copyright year.
 
 2008-01-01  Joel Brobecker  <brobecker@adacore.com>
