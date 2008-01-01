@@ -847,25 +847,62 @@ is_lower_alphanum (const char c)
   return (isdigit (c) || (isalpha (c) && islower (c)));
 }
 
-/* Decode:
-      . Discard trailing .{DIGIT}+, ${DIGIT}+ or ___{DIGIT}+
-        These are suffixes introduced by GNAT5 to nested subprogram
-        names, and do not serve any purpose for the debugger.
-      . Discard final __{DIGIT}+ or $({DIGIT}+(__{DIGIT}+)*)
-      . Discard final N if it follows a lowercase alphanumeric character
-        (protected object subprogram suffix)
-      . Convert other instances of embedded "__" to `.'.
-      . Discard leading _ada_.
-      . Convert operator names to the appropriate quoted symbols.
-      . Remove everything after first ___ if it is followed by
-        'X'.
-      . Replace TK__ with __, and a trailing B or TKB with nothing.
-      . Replace _[EB]{DIGIT}+[sb] with nothing (protected object entries)
-      . Put symbols that should be suppressed in <...> brackets.
-      . Remove trailing X[bn]* suffix (indicating names in package bodies).
+/* Remove either of these suffixes:
+     . .{DIGIT}+
+     . ${DIGIT}+
+     . ___{DIGIT}+
+     . __{DIGIT}+.
+   These are suffixes introduced by the compiler for entities such as
+   nested subprogram for instance, in order to avoid name clashes.
+   They do not serve any purpose for the debugger.  */
+
+static void
+ada_remove_trailing_digits (const char *encoded, int *len)
+{
+  if (*len > 1 && isdigit (encoded[*len - 1]))
+    {
+      int i = *len - 2;
+      while (i > 0 && isdigit (encoded[i]))
+        i--;
+      if (i >= 0 && encoded[i] == '.')
+        *len = i;
+      else if (i >= 0 && encoded[i] == '$')
+        *len = i;
+      else if (i >= 2 && strncmp (encoded + i - 2, "___", 3) == 0)
+        *len = i - 2;
+      else if (i >= 1 && strncmp (encoded + i - 1, "__", 2) == 0)
+        *len = i - 1;
+    }
+}
+
+/* Remove the suffix introduced by the compiler for protected object
+   subprograms.  */
+
+static void
+ada_remove_po_subprogram_suffix (const char *encoded, int *len)
+{
+  /* Remove trailing N.  */
+
+  /* Protected entry subprograms are broken into two
+     separate subprograms: The first one is unprotected, and has
+     a 'N' suffix; the second is the protected version, and has
+     the 'P' suffix. The second calls the first one after handling
+     the protection.  Since the P subprograms are internally generated,
+     we leave these names undecoded, giving the user a clue that this
+     entity is internal.  */
+
+  if (*len > 1
+      && encoded[*len - 1] == 'N'
+      && (isdigit (encoded[*len - 2]) || islower (encoded[*len - 2])))
+    *len = *len - 1;
+}
+
+/* If ENCODED follows the GNAT entity encoding conventions, then return
+   the decoded form of ENCODED.  Otherwise, return "<%s>" where "%s" is
+   replaced by ENCODED.
 
    The resulting string is valid until the next call of ada_decode.
-   If the string is unchanged by demangling, the original string pointer
+   If the string is unchanged by decoding, the original string pointer
    is returned.  */
 
 const char *
@@ -879,43 +916,22 @@ ada_decode (const char *encoded)
   static char *decoding_buffer = NULL;
   static size_t decoding_buffer_size = 0;
 
+  /* The name of the Ada main procedure starts with "_ada_".
+     This prefix is not part of the decoded name, so skip this part
+     if we see this prefix.  */
   if (strncmp (encoded, "_ada_", 5) == 0)
     encoded += 5;
 
+  /* If the name starts with '_', then it is not a properly encoded
+     name, so do not attempt to decode it.  Similarly, if the name
+     starts with '<', the name should not be decoded.  */
   if (encoded[0] == '_' || encoded[0] == '<')
     goto Suppress;
 
-  /* Remove trailing .{DIGIT}+ or ___{DIGIT}+ or __{DIGIT}+.  */
   len0 = strlen (encoded);
-  if (len0 > 1 && isdigit (encoded[len0 - 1]))
-    {
-      i = len0 - 2;
-      while (i > 0 && isdigit (encoded[i]))
-        i--;
-      if (i >= 0 && encoded[i] == '.')
-        len0 = i;
-      else if (i >= 0 && encoded[i] == '$')
-        len0 = i;
-      else if (i >= 2 && strncmp (encoded + i - 2, "___", 3) == 0)
-        len0 = i - 2;
-      else if (i >= 1 && strncmp (encoded + i - 1, "__", 2) == 0)
-        len0 = i - 1;
-    }
 
-  /* Remove trailing N.  */
-
-  /* Protected entry subprograms are broken into two
-     separate subprograms: The first one is unprotected, and has
-     a 'N' suffix; the second is the protected version, and has
-     the 'P' suffix. The second calls the first one after handling
-     the protection.  Since the P subprograms are internally generated,
-     we leave these names undecoded, giving the user a clue that this
-     entity is internal.  */
-
-  if (len0 > 1
-      && encoded[len0 - 1] == 'N'
-      && (isdigit (encoded[len0 - 2]) || islower (encoded[len0 - 2])))
-    len0--;
+  ada_remove_trailing_digits (encoded, &len0);
+  ada_remove_po_subprogram_suffix (encoded, &len0);
 
   /* Remove the ___X.* suffix if present.  Do not forget to verify that
      the suffix is located before the current "end" of ENCODED.  We want
@@ -930,15 +946,25 @@ ada_decode (const char *encoded)
         goto Suppress;
     }
 
+  /* Remove any trailing TKB suffix.  It tells us that this symbol
+     is for the body of a task, but that information does not actually
+     appear in the decoded name.  */
+
   if (len0 > 3 && strncmp (encoded + len0 - 3, "TKB", 3) == 0)
     len0 -= 3;
+
+  /* Remove trailing "B" suffixes.  */
+  /* FIXME: brobecker/2006-04-19: Not sure what this are used for...  */
 
   if (len0 > 1 && strncmp (encoded + len0 - 1, "B", 1) == 0)
     len0 -= 1;
 
   /* Make decoded big enough for possible expansion by operator name.  */
+
   GROW_VECT (decoding_buffer, decoding_buffer_size, 2 * len0 + 1);
   decoded = decoding_buffer;
+
+  /* Remove trailing __{digit}+ or trailing ${digit}+.  */
 
   if (len0 > 1 && isdigit (encoded[len0 - 1]))
     {
@@ -952,12 +978,16 @@ ada_decode (const char *encoded)
         len0 = i;
     }
 
+  /* The first few characters that are not alphabetic are not part
+     of any encoding we use, so we can copy them over verbatim.  */
+
   for (i = 0, j = 0; i < len0 && !isalpha (encoded[i]); i += 1, j += 1)
     decoded[j] = encoded[i];
 
   at_start_name = 1;
   while (i < len0)
     {
+      /* Is this a symbol function?  */
       if (at_start_name && encoded[i] == 'O')
         {
           int k;
@@ -985,6 +1015,25 @@ ada_decode (const char *encoded)
 
       if (i < len0 - 4 && strncmp (encoded + i, "TK__", 4) == 0)
         i += 2;
+
+      /* Replace "__B_{DIGITS}+__" sequences by "__", which will eventually
+         be translated into "." (just below).  These are internal names
+         generated for anonymous blocks inside which our symbol is nested.  */
+
+      if (len0 - i > 5 && encoded [i] == '_' && encoded [i+1] == '_'
+          && encoded [i+2] == 'B' && encoded [i+3] == '_'
+          && isdigit (encoded [i+4]))
+        {
+          int k = i + 5;
+          
+          while (k < len0 && isdigit (encoded[k]))
+            k++;  /* Skip any extra digit.  */
+
+          /* Double-check that the "__B_{DIGITS}+" sequence we found
+             is indeed followed by "__".  */
+          if (len0 - k > 2 && encoded [k] == '_' && encoded [k+1] == '_')
+            i = k;
+        }
 
       /* Remove _E{DIGITS}+[sb] */
 
@@ -1040,6 +1089,13 @@ ada_decode (const char *encoded)
 
       if (encoded[i] == 'X' && i != 0 && isalnum (encoded[i - 1]))
         {
+          /* This is a X[bn]* sequence not separated from the previous
+             part of the name with a non-alpha-numeric character (in other
+             words, immediately following an alpha-numeric character), then
+             verify that it is placed at the end of the encoded name.  If
+             not, then the encoding is not valid and we should abort the
+             decoding.  Otherwise, just skip it, it is used in body-nested
+             package names.  */
           do
             i += 1;
           while (i < len0 && (encoded[i] == 'b' || encoded[i] == 'n'));
@@ -1049,6 +1105,7 @@ ada_decode (const char *encoded)
       else if (!ADA_RETAIN_DOTS
                && i < len0 - 2 && encoded[i] == '_' && encoded[i + 1] == '_')
         {
+         /* Replace '__' by '.'.  */
           decoded[j] = '.';
           at_start_name = 1;
           i += 2;
@@ -1056,12 +1113,17 @@ ada_decode (const char *encoded)
         }
       else
         {
+          /* It's a character part of the decoded name, so just copy it
+             over.  */
           decoded[j] = encoded[i];
           i += 1;
           j += 1;
         }
     }
   decoded[j] = '\000';
+
+  /* Decoded names should never contain any uppercase character.
+     Double-check this, and abort the decoding if we find one.  */
 
   for (i = 0; decoded[i] != '\0'; i += 1)
     if (isupper (decoded[i]) || decoded[i] == ' ')

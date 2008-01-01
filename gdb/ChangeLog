@@ -1,5 +1,13 @@
 2008-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_remove_trailing_digits): New function.
+	(ada_remove_po_subprogram_suffix): New function.
+	(ada_decode): Improve. Move the description of the algorithm
+	directly inside the code, instead of in the function global
+	description.
+
+2008-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_val_print_1) [TYPE_CODE_REF]: Ignore deref_ref
 	and always print the dereferenced value.
 
