@@ -1,3 +1,9 @@
+2008-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/interface/types.ads, gdb.ada/interface/types.adb,
+	gdb.ada/interface/foo.adb: New files.
+	* gdb.ada/interface.exp: New testcase.
+
 2007-12-31  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdb.base/multi-forks.exp: Consume all output from child
