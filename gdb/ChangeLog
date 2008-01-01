@@ -1,5 +1,9 @@
 2008-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* top.c (print_gdb_version): Update copyright year.
+
+2008-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* ChangeLog-2007: New ChangeLog rotation.
 	* ChangeLog: Reset for 2008.
 	* config/djgpp/fnchange.lst: Add entries for ChangeLog-2006 and
