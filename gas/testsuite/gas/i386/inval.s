@@ -56,3 +56,11 @@ foo:	jaw	foo
 	cvtsi2sd xmm1,QWORD PTR [eax]
 	cvtsi2ssq xmm1,QWORD PTR [eax]
 	cvtsi2sdq xmm1,QWORD PTR [eax]
+	movq xmm1, XMMWORD PTR [esp]
+	movq xmm1, DWORD PTR [esp]
+	movq xmm1, WORD PTR [esp]
+	movq xmm1, BYTE PTR [esp]
+	movq XMMWORD PTR [esp],xmm1
+	movq DWORD PTR [esp],xmm1
+	movq WORD PTR [esp],xmm1
+	movq BYTE PTR [esp],xmm1

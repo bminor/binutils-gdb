@@ -1,3 +1,14 @@
+2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5534
+	* gas/i386/intel.s: Use QWORD on movq instead of DWORD.
+
+	* gas/i386/inval.s: Add tests for movq.
+	* gas/i386/x86-64-inval.s: Likewise.
+
+	* gas/i386/inval.l: Updated.
+	* gas/i386/x86-64-inval.l: Likewise.
+
 2008-01-02  Catherine Moore  <clm@codesourcery.com>
 
 	* gas/mips/jalr.s: New test.

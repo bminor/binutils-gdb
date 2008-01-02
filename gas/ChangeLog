@@ -1,3 +1,13 @@
+2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5534
+	* config/tc-i386.c (match_template): Handle XMMWORD_MNEM_SUFFIX.
+	Check memory size in Intel mode.
+	(process_suffix): Handle XMMWORD_MNEM_SUFFIX.
+	(intel_e09): Likewise.
+
+	* config/tc-i386.h (XMMWORD_MNEM_SUFFIX): New.
+
 2008-01-02  Catherine Moore  <clm@codesourcery.com>
 
 	* config/tc-mips.c (mips_ip): Check operands on jalr instruction.

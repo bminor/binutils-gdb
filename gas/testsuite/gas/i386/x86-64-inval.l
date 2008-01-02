@@ -50,60 +50,79 @@
 .*:51: Error: .*
 .*:52: Error: .*
 .*:54: Error: .*
+.*:55: Error: .*
+.*:56: Error: .*
+.*:57: Error: .*
+.*:58: Error: .*
+.*:59: Error: .*
+.*:60: Error: .*
+.*:61: Error: .*
+.*:62: Error: .*
 GAS LISTING .*
 
 
-   1 [ 	]*.text
-   2 [ 	]*# All the following should be illegal for x86-64
-   3 [ 	]*aaa		# illegal
-   4 [ 	]*aad		# illegal
-   5 [ 	]*aam		# illegal
-   6 [ 	]*aas		# illegal
-   7 [ 	]*arpl %ax,%ax	# illegal
-   8 [ 	]*bound %eax,\(%rax\) # illegal
-   9 [ 	]*calll \*%eax	# 32-bit data size not allowed
-  10 [ 	]*calll \*\(%ax\)	# 32-bit data size not allowed
-  11 [ 	]*calll \*\(%eax\)	# 32-bit data size not allowed
-  12 [ 	]*calll \*\(%r8\)	# 32-bit data size not allowed
-  13 [ 	]*calll \*\(%rax\)	# 32-bit data size not allowed
-  14 [ 	]*callq \*\(%ax\)	# 32-bit data size not allowed
-  15 [ 	]*callw \*\(%ax\)	# no 16-bit addressing
-  16 [ 	]*daa		# illegal
-  17 [ 	]*das		# illegal
-  18 [ 	]*enterl \$0,\$0	# can't have 32-bit stack operands
-  19 [ 	]*into		# illegal
-  20 [ 	]*foo:[ 	]*jcxz foo	# No prefix exists to select CX as a counter
-  21 [ 	]*jmpl \*%eax	# 32-bit data size not allowed
-  22 [ 	]*jmpl \*\(%rax\)	# 32-bit data size not allowed
-  23 [ 	]*lcalll \$0,\$0	# illegal
-  24 [ 	]*lcallq \$0,\$0	# illegal
-  25 [ 	]*ldsl %eax,\(%rax\) # illegal
-  26 [ 	]*ldsq %rax,\(%rax\) # illegal
-  27 [ 	]*lesl %eax,\(%rax\) # illegal
-  28 [ 	]*lesq %rax,\(%rax\) # illegal
-  29 [ 	]*ljmpl \$0,\$0	# illegal
-  30 [ 	]*ljmpq \$0,\$0	# illegal
-  31 [ 	]*ljmpq \*\(%rax\)	# 64-bit data size not allowed
-  32 [ 	]*loopw foo	# No prefix exists to select CX as a counter
-  33 [ 	]*loopew foo	# No prefix exists to select CX as a counter
-  34 [ 	]*loopnew foo	# No prefix exists to select CX as a counter
-  35 [ 	]*loopnzw foo	# No prefix exists to select CX as a counter
-  36 [ 	]*loopzw foo	# No prefix exists to select CX as a counter
-  37 [ 	]*leavel		# can't have 32-bit stack operands
-  38 [ 	]*pop %ds		# illegal
-  39 [ 	]*pop %es		# illegal
-  40 [ 	]*pop %ss		# illegal
-  41 [ 	]*popa		# illegal
-  42 [ 	]*popl %eax	# can't have 32-bit stack operands
-  43 [ 	]*push %cs	# illegal
-  44 [ 	]*push %ds	# illegal
-  45 [ 	]*push %es	# illegal
-  46 [ 	]*push %ss	# illegal
-  47 [ 	]*pusha		# illegal
-  48 [ 	]*pushl %eax	# can't have 32-bit stack operands
-  49 [ 	]*pushfl		# can't have 32-bit stack operands
-  50 [ 	]*popfl		# can't have 32-bit stack operands
-  51 [ 	]*retl		# can't have 32-bit stack operands
-  52 [ 	]*insertq \$4,\$2,%xmm2,%ebx # The last operand must be XMM register.
-  53 [ 	]*.intel_syntax noprefix
-  54 [ 	]*cmpxchg16b dword ptr \[rax\] # Must be oword
+[ 	]*1[ 	]+\.text
+[ 	]*2[ 	]+\# All the following should be illegal for x86-64
+[ 	]*3[ 	]+aaa		\# illegal
+[ 	]*4[ 	]+aad		\# illegal
+[ 	]*5[ 	]+aam		\# illegal
+[ 	]*6[ 	]+aas		\# illegal
+[ 	]*7[ 	]+arpl %ax,%ax	\# illegal
+[ 	]*8[ 	]+bound %eax,\(%rax\) \# illegal
+[ 	]*9[ 	]+calll \*%eax	\# 32-bit data size not allowed
+[ 	]*10[ 	]+calll \*\(%ax\)	\# 32-bit data size not allowed
+[ 	]*11[ 	]+calll \*\(%eax\)	\# 32-bit data size not allowed
+[ 	]*12[ 	]+calll \*\(%r8\)	\# 32-bit data size not allowed
+[ 	]*13[ 	]+calll \*\(%rax\)	\# 32-bit data size not allowed
+[ 	]*14[ 	]+callq \*\(%ax\)	\# 32-bit data size not allowed
+[ 	]*15[ 	]+callw \*\(%ax\)	\# no 16-bit addressing
+[ 	]*16[ 	]+daa		\# illegal
+[ 	]*17[ 	]+das		\# illegal
+[ 	]*18[ 	]+enterl \$0,\$0	\# can't have 32-bit stack operands
+[ 	]*19[ 	]+into		\# illegal
+[ 	]*20[ 	]+foo:	jcxz foo	\# No prefix exists to select CX as a counter
+[ 	]*21[ 	]+jmpl \*%eax	\# 32-bit data size not allowed
+[ 	]*22[ 	]+jmpl \*\(%rax\)	\# 32-bit data size not allowed
+[ 	]*23[ 	]+lcalll \$0,\$0	\# illegal
+[ 	]*24[ 	]+lcallq \$0,\$0	\# illegal
+[ 	]*25[ 	]+ldsl %eax,\(%rax\) \# illegal
+[ 	]*26[ 	]+ldsq %rax,\(%rax\) \# illegal
+[ 	]*27[ 	]+lesl %eax,\(%rax\) \# illegal
+[ 	]*28[ 	]+lesq %rax,\(%rax\) \# illegal
+[ 	]*29[ 	]+ljmpl \$0,\$0	\# illegal
+[ 	]*30[ 	]+ljmpq \$0,\$0	\# illegal
+[ 	]*31[ 	]+ljmpq \*\(%rax\)	\# 64-bit data size not allowed
+[ 	]*32[ 	]+loopw foo	\# No prefix exists to select CX as a counter
+[ 	]*33[ 	]+loopew foo	\# No prefix exists to select CX as a counter
+[ 	]*34[ 	]+loopnew foo	\# No prefix exists to select CX as a counter
+[ 	]*35[ 	]+loopnzw foo	\# No prefix exists to select CX as a counter
+[ 	]*36[ 	]+loopzw foo	\# No prefix exists to select CX as a counter
+[ 	]*37[ 	]+leavel		\# can't have 32-bit stack operands
+[ 	]*38[ 	]+pop %ds		\# illegal
+[ 	]*39[ 	]+pop %es		\# illegal
+[ 	]*40[ 	]+pop %ss		\# illegal
+[ 	]*41[ 	]+popa		\# illegal
+[ 	]*42[ 	]+popl %eax	\# can't have 32-bit stack operands
+[ 	]*43[ 	]+push %cs	\# illegal
+[ 	]*44[ 	]+push %ds	\# illegal
+[ 	]*45[ 	]+push %es	\# illegal
+[ 	]*46[ 	]+push %ss	\# illegal
+[ 	]*47[ 	]+pusha		\# illegal
+[ 	]*48[ 	]+pushl %eax	\# can't have 32-bit stack operands
+[ 	]*49[ 	]+pushfl		\# can't have 32-bit stack operands
+[ 	]*50[ 	]+popfl		\# can't have 32-bit stack operands
+[ 	]*51[ 	]+retl		\# can't have 32-bit stack operands
+[ 	]*52[ 	]+insertq \$4,\$2,%xmm2,%ebx \# The last operand must be XMM register\.
+[ 	]*53[ 	]+\.intel_syntax noprefix
+[ 	]*54[ 	]+cmpxchg16b dword ptr \[rax\] \# Must be oword
+[ 	]*55[ 	]+movq xmm1, XMMWORD PTR \[rsp\]
+[ 	]*56[ 	]+movq xmm1, DWORD PTR \[rsp\]
+[ 	]*57[ 	]+movq xmm1, WORD PTR \[rsp\]
+GAS LISTING .*
+
+
+[ 	]*58[ 	]+movq xmm1, BYTE PTR \[rsp\]
+[ 	]*59[ 	]+movq XMMWORD PTR \[rsp\],xmm1
+[ 	]*60[ 	]+movq DWORD PTR \[rsp\],xmm1
+[ 	]*61[ 	]+movq WORD PTR \[rsp\],xmm1
+[ 	]*62[ 	]+movq BYTE PTR \[rsp\],xmm1

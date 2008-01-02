@@ -52,3 +52,11 @@ foo:	jcxz foo	# No prefix exists to select CX as a counter
 	insertq $4,$2,%xmm2,%ebx # The last operand must be XMM register.
 	.intel_syntax noprefix
 	cmpxchg16b dword ptr [rax] # Must be oword
+	movq xmm1, XMMWORD PTR [rsp]
+	movq xmm1, DWORD PTR [rsp]
+	movq xmm1, WORD PTR [rsp]
+	movq xmm1, BYTE PTR [rsp]
+	movq XMMWORD PTR [rsp],xmm1
+	movq DWORD PTR [rsp],xmm1
+	movq WORD PTR [rsp],xmm1
+	movq BYTE PTR [rsp],xmm1

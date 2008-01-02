@@ -116,12 +116,14 @@ extern const char *i386_comment_chars;
 #define IMMEDIATE_PREFIX '$'
 #define ABSOLUTE_PREFIX '*'
 
-/* these are the instruction mnemonic suffixes.  */
+/* these are the instruction mnemonic suffixes in AT&T syntax or
+   memory operand size in Intel syntax.  */
 #define WORD_MNEM_SUFFIX  'w'
 #define BYTE_MNEM_SUFFIX  'b'
 #define SHORT_MNEM_SUFFIX 's'
 #define LONG_MNEM_SUFFIX  'l'
 #define QWORD_MNEM_SUFFIX  'q'
+#define XMMWORD_MNEM_SUFFIX  'x'
 /* Intel Syntax.  Use a non-ascii letter since since it never appears
    in instructions.  */
 #define LONG_DOUBLE_MNEM_SUFFIX '\1'

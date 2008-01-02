@@ -3047,6 +3047,8 @@ match_template (void)
     suffix_check.no_qsuf = 1;
   else if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
     suffix_check.no_ldsuf = 1;
+  else if (i.suffix == XMMWORD_MNEM_SUFFIX)
+    suffix_check.no_xsuf = 1;
 
   for (t = current_templates->start; t < current_templates->end; t++)
     {
@@ -3075,6 +3077,18 @@ match_template (void)
 	      || (t->opcode_modifier.no_ssuf && suffix_check.no_ssuf)
 	      || (t->opcode_modifier.no_qsuf && suffix_check.no_qsuf)
 	      || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf)))
+	continue;
+
+      /* Check the memory size in Intel mode when it is provided if
+	 needed.  */
+      if (intel_syntax
+	  && i.suffix
+	  && t->opcode_modifier.checksize
+	  && (!t->opcode_modifier.byte || !suffix_check.no_bsuf)
+	  && (!t->opcode_modifier.word || !suffix_check.no_wsuf)
+	  && (!t->opcode_modifier.dword || !suffix_check.no_lsuf)
+	  && (!t->opcode_modifier.qword || !suffix_check.no_qsuf)
+	  && (!t->opcode_modifier.xmmword || !suffix_check.no_xsuf))
 	continue;
 
       for (j = 0; j < MAX_OPERANDS; j++)
@@ -3453,6 +3467,11 @@ process_suffix (void)
 	  if (!check_word_reg ())
 	    return 0;
 	}
+      else if (i.suffix == XMMWORD_MNEM_SUFFIX)
+	{
+	  /* Skip if the instruction has x suffix.  match_template
+	     should check if it is a valid suffix.  */
+	}
       else if (intel_syntax && i.tm.opcode_modifier.ignoresize)
 	/* Do nothing if the instruction is going to ignore the prefix.  */
 	;
@@ -3535,7 +3554,9 @@ process_suffix (void)
   /* Change the opcode based on the operand size given by i.suffix;
      We don't need to change things for byte insns.  */
 
-  if (i.suffix && i.suffix != BYTE_MNEM_SUFFIX)
+  if (i.suffix
+      && i.suffix != BYTE_MNEM_SUFFIX
+      && i.suffix != XMMWORD_MNEM_SUFFIX)
     {
       /* It's not a byte, select word/dword operation.  */
       if (i.tm.opcode_modifier.w)
@@ -8166,8 +8187,7 @@ intel_e09 (void)
 
 	  else if (prev_token.code == T_XMMWORD)
 	    {
-	      /* XXX ignored for now, but accepted since gcc uses it */
-	      suffix = 0;
+	      suffix = XMMWORD_MNEM_SUFFIX;
 	    }
 
 	  else

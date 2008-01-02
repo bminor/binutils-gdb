@@ -53,6 +53,14 @@
 .*:56: Error: .*
 .*:57: Error: .*
 .*:58: Error: .*
+.*:59: Error: .*
+.*:60: Error: .*
+.*:61: Error: .*
+.*:62: Error: .*
+.*:63: Error: .*
+.*:64: Error: .*
+.*:65: Error: .*
+.*:66: Error: .*
 GAS LISTING .*
 
 
@@ -117,3 +125,11 @@ GAS LISTING .*
 
 
 [ 	]*58[ 	]+cvtsi2sdq xmm1,QWORD PTR \[eax\]
+[ 	]*59[ 	]+movq xmm1, XMMWORD PTR \[esp\]
+[ 	]*60[ 	]+movq xmm1, DWORD PTR \[esp\]
+[ 	]*61[ 	]+movq xmm1, WORD PTR \[esp\]
+[ 	]*62[ 	]+movq xmm1, BYTE PTR \[esp\]
+[ 	]*63[ 	]+movq XMMWORD PTR \[esp\],xmm1
+[ 	]*64[ 	]+movq DWORD PTR \[esp\],xmm1
+[ 	]*65[ 	]+movq WORD PTR \[esp\],xmm1
+[ 	]*66[ 	]+movq BYTE PTR \[esp\],xmm1

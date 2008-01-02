@@ -191,8 +191,22 @@ typedef union i386_cpu_flags
 #define No_qSuf			(No_sSuf + 1)
 /* long double suffix on instruction illegal */
 #define No_ldSuf		(No_qSuf + 1)
+/* x suffix on instruction illegal */
+#define No_xSuf			(No_ldSuf + 1)
+/* check PTR size on instruction */
+#define CheckSize		(No_xSuf + 1)
+/* BYTE PTR on instruction */
+#define Byte			(CheckSize + 1)
+/* WORD PTR on instruction */
+#define Word			(Byte + 1)
+/* DWORD PTR on instruction */
+#define Dword			(Word + 1)
+/* QWORD PTR on instruction */
+#define QWord			(Dword + 1)
+/* XMMWORD PTR on instruction */
+#define Xmmword			(QWord + 1)
 /* instruction needs FWAIT */
-#define FWait			(No_ldSuf + 1)
+#define FWait			(Xmmword + 1)
 /* quick test for string instructions */
 #define IsString		(FWait + 1)
 /* fake an extra reg operand for clr, imul and special register
@@ -256,6 +270,13 @@ typedef struct i386_opcode_modifier
   unsigned int no_ssuf:1;
   unsigned int no_qsuf:1;
   unsigned int no_ldsuf:1;
+  unsigned int no_xsuf:1;
+  unsigned int checksize:1;
+  unsigned int byte:1;
+  unsigned int word:1;
+  unsigned int dword:1;
+  unsigned int qword:1;
+  unsigned int xmmword:1;
   unsigned int fwait:1;
   unsigned int isstring:1;
   unsigned int regkludge:1;

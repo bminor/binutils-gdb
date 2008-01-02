@@ -1,3 +1,24 @@
+2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5534
+	* i386-gen.c (opcode_modifiers): Add No_xSuf, CheckSize,
+	Byte, Word, Dword, QWord and Xmmword.
+
+	* i386-opc.h (No_xSuf): New.
+	(CheckSize): Likewise.
+	(Byte): Likewise.
+	(Word): Likewise.
+	(Dword): Likewise.
+	(QWord): Likewise.
+	(Xmmword): Likewise.
+	(FWait): Updated.
+	(i386_opcode_modifier): Add No_xSuf, CheckSize, Byte, Word,
+	Dword, QWord and Xmmword.
+
+	* i386-opc.tbl: Add CheckSize|QWord to movq if IgnoreSize is
+	used.
+	* i386-tbl.h: Regenerated.
+
 2008-01-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* m88k-dis.c (instructions): Fix fcvt.* instructions.

@@ -601,7 +601,7 @@ rot5:
 
 1:
  jne	1b
- movq	mm6, [DWORD PTR .LC5+40]		 
+ movq	mm6, [QWORD PTR .LC5+40]		 
  add	edi, dword ptr [ebx+8*eax]
  movd	mm0, dword ptr [ebx+8*eax+4]
  add	edi, dword ptr [ebx+8*ecx+((4095+1)*8)]
