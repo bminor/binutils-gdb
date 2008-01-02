@@ -1,3 +1,7 @@
+2008-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-nat.c (linux_child_follow_fork): Call also CHECK_FOR_THREAD_DB.
+
 2008-01-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp): Modify the value returned

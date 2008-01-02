@@ -517,6 +517,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 
       push_target (ops);
       linux_nat_switch_fork (inferior_ptid);
+      check_for_thread_db ();
 
       /* Reset breakpoints in the child as appropriate.  */
       follow_inferior_reset_breakpoints ();

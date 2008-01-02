@@ -1,3 +1,8 @@
+2008-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/fork-child-threads.exp, gdb.threads/fork-child-threads.c:
+	New files
+
 2008-01-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* array_subscript_addr/p.adb: New file.
