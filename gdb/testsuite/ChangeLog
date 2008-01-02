@@ -1,3 +1,9 @@
+2008-01-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/str_cmp_ref/pck.ads, gdb.ada/str_cmp_ref/foo.adb: 
+	New files.
+	* gdb.ada/str_cmp_ref.exp: New testcase.
+
 2008-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/fun_in_declare/pck.ads, gdb.ada/fun_in_declare/pck.adb,
