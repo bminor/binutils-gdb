@@ -1,6 +1,6 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -9133,6 +9133,19 @@ do_msbd:
 		  if (c == 'z' && regno != 0)
 		    break;
 
+		  if (c == 's' && !strcmp (ip->insn_mo->name, "jalr"))
+		    {
+		      if (regno == lastregno)
+		        {
+			  insn_error = _("source and destinationations must be different");
+			  continue;
+		        }
+		      if (regno == 31 && lastregno == 0)
+		        {
+			  insn_error = _("a destination register must be supplied");
+			  continue;
+		        }
+		    }
 	/* Now that we have assembled one operand, we use the args string
 	 * to figure out where it goes in the instruction.  */
 		  switch (c)

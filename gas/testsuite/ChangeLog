@@ -1,3 +1,9 @@
+2008-01-02  Catherine Moore  <clm@codesourcery.com>
+
+	* gas/mips/jalr.s: New test.
+	* gas/mips/jalr.l: New test output.
+	* gas/mips/mips.exp: Run new test.
+
 2007-12-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/inval.s: Add test for cvtsi2ss/cvtsi2sd.

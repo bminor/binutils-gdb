@@ -573,6 +573,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_list_test "illegal" "-32"
     run_list_test "baddata1" "-32"
+    run_list_test "jalr" ""
 
     # LOSE: As of 2002-02-08, the next 4 tests fail for target mips-ecoff.
     # It's unknown whether they _should_ pass as-is, or whether different
