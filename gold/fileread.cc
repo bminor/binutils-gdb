@@ -454,8 +454,11 @@ File_read::read_multiple(off_t base, const Read_multiple& rm)
 	      for (size_t k = i; k < j; ++k)
 		{
 		  const Read_multiple_entry& k_entry(rm[k]);
-		  gold_assert(k_entry.file_offset - i_off + k_entry.size
-			      <= end_off - i_off);
+		  gold_assert((convert_to_section_size_type(k_entry.file_offset
+                                                           - i_off)
+                               + k_entry.size)
+			      <= convert_to_section_size_type(end_off
+                                                              - i_off));
 		  memcpy(k_entry.buffer,
 			 v + (k_entry.file_offset - i_off),
 			 k_entry.size);
