@@ -1,3 +1,8 @@
+2008-01-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* m88k-dis.c (instructions): Fix fcvt.* instructions.
+	From Miod Vallat.
+
 2007-12-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (prefix_table): Use "%LQ" on cvtsi2ss/cvtsi2sd.
