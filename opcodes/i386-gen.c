@@ -279,7 +279,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Byte),
   BITFIELD (Word),
   BITFIELD (Dword),
-  BITFIELD (QWord),
+  BITFIELD (Qword),
   BITFIELD (Xmmword),
   BITFIELD (FWait),
   BITFIELD (IsString),

@@ -175,7 +175,7 @@ typedef union i386_cpu_flags
 #define Size32			(Size16 + 1)
 /* needs size prefix if in 64-bit mode */
 #define Size64			(Size32 + 1)
-/* instruction ignores operand size prefix */
+/* instruction ignores operand size prefix and mnemonic size suffix */
 #define IgnoreSize		(Size64 + 1)
 /* default insn size depends on mode */
 #define DefaultSize		(IgnoreSize + 1)
@@ -193,7 +193,8 @@ typedef union i386_cpu_flags
 #define No_ldSuf		(No_qSuf + 1)
 /* x suffix on instruction illegal */
 #define No_xSuf			(No_ldSuf + 1)
-/* check PTR size on instruction */
+/* check PTR size on instruction in Intel mode.
+   FIXME: Can it be merged with IgnoreSize? */
 #define CheckSize		(No_xSuf + 1)
 /* BYTE PTR on instruction */
 #define Byte			(CheckSize + 1)
@@ -202,9 +203,9 @@ typedef union i386_cpu_flags
 /* DWORD PTR on instruction */
 #define Dword			(Word + 1)
 /* QWORD PTR on instruction */
-#define QWord			(Dword + 1)
+#define Qword			(Dword + 1)
 /* XMMWORD PTR on instruction */
-#define Xmmword			(QWord + 1)
+#define Xmmword			(Qword + 1)
 /* instruction needs FWAIT */
 #define FWait			(Xmmword + 1)
 /* quick test for string instructions */

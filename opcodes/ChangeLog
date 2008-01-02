@@ -1,5 +1,11 @@
 2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (opcode_modifiers): Use Qword instead of QWord.
+	* i386-opc.h: Likewise.
+	* i386-opc.tbl: Likewise.
+
+2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/5534
 	* i386-gen.c (opcode_modifiers): Add No_xSuf, CheckSize,
 	Byte, Word, Dword, QWord and Xmmword.
