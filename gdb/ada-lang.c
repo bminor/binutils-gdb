@@ -7744,6 +7744,11 @@ ada_value_equal (struct value *arg1, struct value *arg2)
   if (ada_is_direct_array_type (value_type (arg1))
       || ada_is_direct_array_type (value_type (arg2)))
     {
+      /* Automatically dereference any array reference before
+         we attempt to perform the comparison.  */
+      arg1 = ada_coerce_ref (arg1);
+      arg2 = ada_coerce_ref (arg2);
+      
       arg1 = ada_coerce_to_simple_array (arg1);
       arg2 = ada_coerce_to_simple_array (arg2);
       if (TYPE_CODE (value_type (arg1)) != TYPE_CODE_ARRAY
