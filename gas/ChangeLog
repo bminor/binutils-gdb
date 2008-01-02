@@ -1,5 +1,9 @@
 2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (process_suffix): Fix a typo.
+
+2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/5534
 	* config/tc-i386.c (match_template): Handle XMMWORD_MNEM_SUFFIX.
 	Check memory size in Intel mode.
