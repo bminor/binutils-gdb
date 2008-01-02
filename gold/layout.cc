@@ -739,7 +739,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   off = this->set_section_offsets(off, BEFORE_INPUT_SECTIONS_PASS);
 
   // Create the symbol table sections.
-  this->create_symtab_sections(input_objects, symtab, task, &off);
+  this->create_symtab_sections(input_objects, symtab, &off);
   if (!parameters->doing_static_link())
     this->assign_local_dynsym_offsets(input_objects);
 
@@ -1212,7 +1212,6 @@ Layout::count_local_symbols(const Task* task,
 void
 Layout::create_symtab_sections(const Input_objects* input_objects,
 			       Symbol_table* symtab,
-			       const Task* task,
 			       off_t* poff)
 {
   int symsize;
@@ -1286,7 +1285,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 		  == this->dynsym_section_->data_size() - locsize);
     }
 
-  off = symtab->finalize(task, local_symcount, off, dynoff, dyn_global_index,
+  off = symtab->finalize(local_symcount, off, dynoff, dyn_global_index,
 			 dyncount, &this->sympool_);
 
   if (!parameters->strip_all())

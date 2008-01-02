@@ -117,10 +117,11 @@ class Archive
   void
   read_armap(off_t start, section_size_type size);
 
-  // Read an archive member header at OFF.  Return the size of the
-  // member, and set *PNAME to the name.
+  // Read an archive member header at OFF.  CACHE is whether to cache
+  // the file view.  Return the size of the member, and set *PNAME to
+  // the name.
   off_t
-  read_header(off_t off, std::string* pname);
+  read_header(off_t off, bool cache, std::string* pname);
 
   // Interpret an archive header HDR at OFF.  Return the size of the
   // member, and set *PNAME to the name.

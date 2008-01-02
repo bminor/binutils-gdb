@@ -46,8 +46,9 @@ class File_read
 {
  public:
   File_read()
-    : name_(), descriptor_(-1), size_(0), token_(false), views_(),
-      saved_views_(), contents_(NULL), mapped_bytes_(0), released_(true)
+    : name_(), descriptor_(-1), object_count_(0), size_(0), token_(false),
+      views_(), saved_views_(), contents_(NULL), mapped_bytes_(0),
+      released_(true)
   { }
 
   ~File_read();
@@ -67,6 +68,16 @@ class File_read
   const std::string&
   filename() const
   { return this->name_; }
+
+  // Add an object associated with a file.
+  void
+  add_object()
+  { ++this->object_count_; }
+
+  // Remove an object associated with a file.
+  void
+  remove_object()
+  { --this->object_count_; }
 
   // Lock the file for exclusive access within a particular Task::run
   // execution.  This means that the descriptor can not be closed.
@@ -126,6 +137,34 @@ class File_read
   File_view*
   get_lasting_view(off_t start, section_size_type size, bool cache);
 
+  // Mark all views as no longer cached.
+  void
+  clear_view_cache_marks();
+
+  // A struct used to do a multiple read.
+  struct Read_multiple_entry
+  {
+    // The file offset of the data to read.
+    off_t file_offset;
+    // The amount of data to read.
+    section_size_type size;
+    // The buffer where the data should be placed.
+    unsigned char* buffer;
+
+    Read_multiple_entry(off_t o, section_size_type s, unsigned char* b)
+      : file_offset(o), size(s), buffer(b)
+    { }
+  };
+
+  typedef std::vector<Read_multiple_entry> Read_multiple;
+
+  // Read a bunch of data from the file into various different
+  // locations.  The vector must be sorted by ascending file_offset.
+  // BASE is a base offset to be added to all the offsets in the
+  // vector.
+  void
+  read_multiple(off_t base, const Read_multiple&);
+
   // Dump statistical information to stderr.
   static void
   print_stats();
@@ -154,7 +193,7 @@ class File_read
     View(off_t start, section_size_type size, const unsigned char* data,
 	 bool cache, bool mapped)
       : start_(start), size_(size), data_(data), lock_count_(0),
-	cache_(cache), mapped_(mapped)
+	cache_(cache), mapped_(mapped), accessed_(true)
     { }
 
     ~View();
@@ -184,9 +223,25 @@ class File_read
     set_cache()
     { this->cache_ = true; }
 
+    void
+    clear_cache()
+    { this->cache_ = false; }
+
     bool
     should_cache() const
     { return this->cache_; }
+
+    void
+    set_accessed()
+    { this->accessed_ = true; }
+
+    void
+    clear_accessed()
+    { this->accessed_= false; }
+
+    bool
+    accessed() const
+    { return this->accessed_; }
 
    private:
     View(const View&);
@@ -198,6 +253,7 @@ class File_read
     int lock_count_;
     bool cache_;
     bool mapped_;
+    bool accessed_;
   };
 
   friend class View;
@@ -238,10 +294,20 @@ class File_read
   // A simple list of Views.
   typedef std::list<View*> Saved_views;
 
+  // The maximum number of entries we will pass to ::readv.
+  static const size_t max_readv_entries = 128;
+
+  // Use readv to read data.
+  void
+  do_readv(off_t base, const Read_multiple&, size_t start, size_t count);
+
   // File name.
   std::string name_;
   // File descriptor.
   int descriptor_;
+  // The number of objects associated with this file.  This will be
+  // more than 1 in the case of an archive.
+  int object_count_;
   // File size.
   off_t size_;
   // A token used to lock the file.

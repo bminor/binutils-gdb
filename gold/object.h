@@ -139,10 +139,10 @@ class Object
 	 off_t offset = 0)
     : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
       is_dynamic_(is_dynamic), target_(NULL)
-  { }
+  { input_file->file().add_object(); }
 
   virtual ~Object()
-  { }
+  { this->input_file_->file().remove_object(); }
 
   // Return the name of the object as we would report it to the tuser.
   const std::string&
@@ -294,6 +294,37 @@ class Object
   View view(Location loc)
   { return View(this->get_view(loc.file_offset, loc.data_size, true)); }
 
+  // Get a view into the underlying file.
+  const unsigned char*
+  get_view(off_t start, section_size_type size, bool cache)
+  {
+    return this->input_file()->file().get_view(start + this->offset_, size,
+					       cache);
+  }
+
+  // Get a lasting view into the underlying file.
+  File_view*
+  get_lasting_view(off_t start, section_size_type size, bool cache)
+  {
+    return this->input_file()->file().get_lasting_view(start + this->offset_,
+						       size, cache);
+  }
+
+  // Read data from the underlying file.
+  void
+  read(off_t start, section_size_type size, void* p) const
+  { this->input_file()->file().read(start + this->offset_, size, p); }
+
+  // Read multiple data from the underlying file.
+  void
+  read_multiple(const File_read::Read_multiple& rm)
+  { this->input_file()->file().read_multiple(this->offset_, rm); }
+
+  // Stop caching views in the underlying file.
+  void
+  clear_view_cache_marks()
+  { this->input_file()->file().clear_view_cache_marks(); }
+
  protected:
   // Read the symbols--implemented by child class.
   virtual void
@@ -341,27 +372,6 @@ class Object
   const Input_file*
   input_file() const
   { return this->input_file_; }
-
-  // Get a view into the underlying file.
-  const unsigned char*
-  get_view(off_t start, section_size_type size, bool cache)
-  {
-    return this->input_file()->file().get_view(start + this->offset_, size,
-					       cache);
-  }
-
-  // Get a lasting view into the underlying file.
-  File_view*
-  get_lasting_view(off_t start, section_size_type size, bool cache)
-  {
-    return this->input_file()->file().get_lasting_view(start + this->offset_,
-						       size, cache);
-  }
-
-  // Read data from the underlying file.
-  void
-  read(off_t start, section_size_type size, void* p) const
-  { this->input_file()->file().read(start + this->offset_, size, p); }
 
   // Set the target.
   void
@@ -1206,7 +1216,7 @@ class Sized_relobj : public Relobj
   // Write section data to the output file.  Record the views and
   // sizes in VIEWS for use when relocating.
   void
-  write_sections(const unsigned char* pshdrs, Output_file*, Views*) const;
+  write_sections(const unsigned char* pshdrs, Output_file*, Views*);
 
   // Relocate the sections in the output file.
   void
@@ -1228,6 +1238,15 @@ class Sized_relobj : public Relobj
   write_local_symbols(Output_file*,
 		      const Stringpool_template<char>*,
 		      const Stringpool_template<char>*);
+
+  // Clear the local symbol information.
+  void
+  clear_local_symbols()
+  {
+    this->local_values_.clear();
+    this->local_got_offsets_.clear();
+    this->local_tls_got_offsets_.clear();
+  }
 
   // The GOT offsets of local symbols. This map also stores GOT offsets
   // for tp-relative offsets for TLS symbols.

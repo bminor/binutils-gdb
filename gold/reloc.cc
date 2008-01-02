@@ -22,6 +22,8 @@
 
 #include "gold.h"
 
+#include <algorithm>
+
 #include "workqueue.h"
 #include "symtab.h"
 #include "output.h"
@@ -159,6 +161,11 @@ Relocate_task::run(Workqueue*)
 {
   this->object_->relocate(this->options_, this->symtab_, this->layout_,
 			  this->of_);
+
+  // This is normally the last thing we will do with an object, so
+  // uncache all views.
+  this->object_->clear_view_cache_marks();
+
   this->object_->release();
 }
 
@@ -376,7 +383,19 @@ Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
 
   // Write out the local symbols.
   this->write_local_symbols(of, layout->sympool(), layout->dynpool());
+
+  // We should no longer need the local symbol values.
+  this->clear_local_symbols();
 }
+
+// Sort a Read_multiple vector by file offset.
+struct Read_multiple_compare
+{
+  inline bool
+  operator()(const File_read::Read_multiple_entry& rme1,
+	     const File_read::Read_multiple_entry& rme2) const
+  { return rme1.file_offset < rme2.file_offset; }
+};
 
 // Write section data to the output file.  PSHDRS points to the
 // section headers.  Record the views in *PVIEWS for use when
@@ -386,10 +405,13 @@ template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 					       Output_file* of,
-					       Views* pviews) const
+					       Views* pviews)
 {
   unsigned int shnum = this->shnum();
   const std::vector<Map_to_output>& map_sections(this->map_to_output());
+
+  File_read::Read_multiple rm;
+  bool is_sorted = true;
 
   const unsigned char* p = pshdrs + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
@@ -468,7 +490,13 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 	  unsigned char* buffer = os->postprocessing_buffer();
 	  view = buffer + view_start;
 	  if (output_offset != -1)
-	    this->read(shdr.get_sh_offset(), view_size, view);
+	    {
+	      off_t sh_offset = shdr.get_sh_offset();
+	      if (!rm.empty() && rm.back().file_offset > sh_offset)
+		is_sorted = false;
+	      rm.push_back(File_read::Read_multiple_entry(sh_offset,
+							  view_size, view));
+	    }
 	}
       else
 	{
@@ -477,7 +505,11 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 	  else
 	    {
 	      view = of->get_output_view(view_start, view_size);
-	      this->read(shdr.get_sh_offset(), view_size, view);
+	      off_t sh_offset = shdr.get_sh_offset();
+	      if (!rm.empty() && rm.back().file_offset > sh_offset)
+		is_sorted = false;
+	      rm.push_back(File_read::Read_multiple_entry(sh_offset,
+							  view_size, view));
 	    }
 	}
 
@@ -489,6 +521,14 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       pvs->view_size = view_size;
       pvs->is_input_output_view = output_offset == -1;
       pvs->is_postprocessing_view = os->requires_postprocessing();
+    }
+
+  // Actually read the data.
+  if (!rm.empty())
+    {
+      if (!is_sorted)
+	std::sort(rm.begin(), rm.end(), Read_multiple_compare());
+      this->read_multiple(rm);
     }
 }
 

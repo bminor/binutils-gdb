@@ -85,7 +85,8 @@ Archive::setup(Task* task)
   // The first member of the archive should be the symbol table.
   std::string armap_name;
   section_size_type armap_size =
-    convert_to_section_size_type(this->read_header(sarmag, &armap_name));
+    convert_to_section_size_type(this->read_header(sarmag, false,
+						   &armap_name));
   off_t off = sarmag;
   if (armap_name.empty())
     {
@@ -96,15 +97,18 @@ Archive::setup(Task* task)
     gold_error(_("%s: no archive symbol table (run ranlib)"),
 	       this->name().c_str());
 
-  // See if there is an extended name table.
+  // See if there is an extended name table.  We cache these views
+  // because it is likely that we will want to read the following
+  // header in the add_symbols routine.
   if ((off & 1) != 0)
     ++off;
   std::string xname;
-  off_t extended_size = this->read_header(off, &xname);
+  section_size_type extended_size =
+    convert_to_section_size_type(this->read_header(off, true, &xname));
   if (xname == "/")
     {
       const unsigned char* p = this->get_view(off + sizeof(Archive_header),
-                                              extended_size, false);
+                                              extended_size, true);
       const char* px = reinterpret_cast<const char*>(p);
       this->extended_names_.assign(px, extended_size);
     }
@@ -157,9 +161,9 @@ Archive::read_armap(off_t start, section_size_type size)
 // of the member.
 
 off_t
-Archive::read_header(off_t off, std::string* pname)
+Archive::read_header(off_t off, bool cache, std::string* pname)
 {
-  const unsigned char* p = this->get_view(off, sizeof(Archive_header), false);
+  const unsigned char* p = this->get_view(off, sizeof(Archive_header), cache);
   const Archive_header* hdr = reinterpret_cast<const Archive_header*>(p);
   return this->interpret_header(hdr, off,  pname);
 }
@@ -370,7 +374,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 			Input_objects* input_objects, off_t off)
 {
   std::string n;
-  this->read_header(off, &n);
+  this->read_header(off, false, &n);
 
   const off_t memoff = off + static_cast<off_t>(sizeof(Archive_header));
 

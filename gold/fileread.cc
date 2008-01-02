@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/uio.h>
 #include "filenames.h"
 
 #include "options.h"
@@ -194,11 +195,21 @@ inline File_read::View*
 File_read::find_view(off_t start, section_size_type size) const
 {
   off_t page = File_read::page_offset(start);
-  Views::const_iterator p = this->views_.find(page);
-  if (p == this->views_.end())
+
+  Views::const_iterator p = this->views_.lower_bound(page);
+  if (p == this->views_.end() || p->first > page)
+    {
+      if (p == this->views_.begin())
+	return NULL;
+      --p;
+    }
+
+  if (p->second->start() + static_cast<off_t>(p->second->size())
+      < start + static_cast<off_t>(size))
     return NULL;
-  if (p->second->size() - (start - page) < size)
-    return NULL;
+
+  p->second->set_accessed();
+
   return p->second;
 }
 
@@ -244,7 +255,7 @@ File_read::do_read(off_t start, section_size_type size, void* p) const
 void
 File_read::read(off_t start, section_size_type size, void* p) const
 {
-  File_read::View* pv = this->find_view(start, size);
+  const File_read::View* pv = this->find_view(start, size);
   if (pv != NULL)
     {
       memcpy(p, pv->data() + (start - pv->start()), size);
@@ -262,6 +273,14 @@ File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
   gold_assert(!this->token_.is_writable());
   this->released_ = false;
 
+  File_read::View* v = this->find_view(start, size);
+  if (v != NULL)
+    {
+      if (cache)
+	v->set_cache();
+      return v;
+    }
+
   off_t poff = File_read::page_offset(start);
 
   File_read::View* const vnull = NULL;
@@ -270,21 +289,19 @@ File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
 
   if (!ins.second)
     {
-      // There was an existing view at this offset.
-      File_read::View* v = ins.first->second;
-      if (v->size() - (start - v->start()) >= size)
-	{
-	  if (cache)
-	    v->set_cache();
-	  return v;
-	}
-
-      // This view is not large enough.
+      // There was an existing view at this offset.  It must not be
+      // large enough.  We can't delete it here, since something might
+      // be using it; put it on a list to be deleted when the file is
+      // unlocked.
+      v = ins.first->second;
+      gold_assert(v->size() - (start - v->start()) < size);
+      if (v->should_cache())
+	cache = true;
+      v->clear_cache();
       this->saved_views_.push_back(v);
     }
 
-  // We need to read data from the file.  We read full pages for
-  // greater efficiency on small files.
+  // We need to map data from the file.
 
   section_size_type psize = File_read::pages(size + (start - poff));
 
@@ -294,8 +311,6 @@ File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
       gold_assert(psize >= size);
     }
 
-  File_read::View* v;
-
   if (this->contents_ != NULL)
     {
       unsigned char* p = new unsigned char[psize];
@@ -304,7 +319,7 @@ File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
     }
   else
     {
-      void* p = ::mmap(NULL, psize, PROT_READ, MAP_SHARED,
+      void* p = ::mmap(NULL, psize, PROT_READ, MAP_PRIVATE,
                        this->descriptor_, poff);
       if (p == MAP_FAILED)
 	gold_fatal(_("%s: mmap offset %lld size %lld failed: %s"),
@@ -340,7 +355,143 @@ File_read::get_lasting_view(off_t start, section_size_type size, bool cache)
   return new File_view(*this, pv, pv->data() + (start - pv->start()));
 }
 
-// Remove all the file views.
+// Use readv to read COUNT entries from RM starting at START.  BASE
+// must be added to all file offsets in RM.
+
+void
+File_read::do_readv(off_t base, const Read_multiple& rm, size_t start,
+		    size_t count)
+{
+  unsigned char discard[File_read::page_size];
+  iovec iov[File_read::max_readv_entries * 2];
+  size_t iov_index = 0;
+
+  off_t first_offset = rm[start].file_offset;
+  off_t last_offset = first_offset;
+  ssize_t want = 0;
+  for (size_t i = 0; i < count; ++i)
+    {
+      const Read_multiple_entry& i_entry(rm[start + i]);
+
+      if (i_entry.file_offset > last_offset)
+	{
+	  size_t skip = i_entry.file_offset - last_offset;
+	  gold_assert(skip <= sizeof discard);
+
+	  iov[iov_index].iov_base = discard;
+	  iov[iov_index].iov_len = skip;
+	  ++iov_index;
+
+	  want += skip;
+	}
+
+      iov[iov_index].iov_base = i_entry.buffer;
+      iov[iov_index].iov_len = i_entry.size;
+      ++iov_index;
+
+      want += i_entry.size;
+
+      last_offset = i_entry.file_offset + i_entry.size;
+    }
+
+  gold_assert(iov_index < sizeof iov / sizeof iov[0]);
+
+  if (::lseek(this->descriptor_, base + first_offset, SEEK_SET) < 0)
+    gold_fatal(_("%s: lseek failed: %s"),
+	       this->filename().c_str(), strerror(errno));
+
+  ssize_t got = ::readv(this->descriptor_, iov, iov_index);
+
+  if (got < 0)
+    gold_fatal(_("%s: readv failed: %s"),
+	       this->filename().c_str(), strerror(errno));
+  if (got != want)
+    gold_fatal(_("%s: file too short: read only %zd of %zd bytes at %lld"),
+	       this->filename().c_str(),
+	       got, want, static_cast<long long>(base + first_offset));
+}
+
+// Read several pieces of data from the file.
+
+void
+File_read::read_multiple(off_t base, const Read_multiple& rm)
+{
+  size_t count = rm.size();
+  size_t i = 0;
+  while (i < count)
+    {
+      // Find up to MAX_READV_ENTRIES consecutive entries which are
+      // less than one page apart.
+      const Read_multiple_entry& i_entry(rm[i]);
+      off_t i_off = i_entry.file_offset;
+      off_t end_off = i_off + i_entry.size;
+      size_t j;
+      for (j = i + 1; j < count; ++j)
+	{
+	  if (j - i >= File_read::max_readv_entries)
+	    break;
+	  const Read_multiple_entry& j_entry(rm[j]);
+	  off_t j_off = j_entry.file_offset;
+	  gold_assert(j_off >= end_off);
+	  off_t j_end_off = j_off + j_entry.size;
+	  if (j_end_off - end_off >= File_read::page_size)
+	    break;
+	  end_off = j_end_off;
+	}
+
+      if (j == i + 1)
+	this->read(base + i_off, i_entry.size, i_entry.buffer);
+      else
+	{
+	  File_read::View* view = this->find_view(base + i_off,
+						  end_off - i_off);
+	  if (view == NULL)
+	    this->do_readv(base, rm, i, j - i);
+	  else
+	    {
+	      const unsigned char* v = (view->data()
+					+ (base + i_off - view->start()));
+	      for (size_t k = i; k < j; ++k)
+		{
+		  const Read_multiple_entry& k_entry(rm[k]);
+		  gold_assert(k_entry.file_offset - i_off + k_entry.size
+			      <= end_off - i_off);
+		  memcpy(k_entry.buffer,
+			 v + (k_entry.file_offset - i_off),
+			 k_entry.size);
+		}
+	    }
+	}
+
+      i = j;
+    }
+}
+
+// Mark all views as no longer cached.
+
+void
+File_read::clear_view_cache_marks()
+{
+  // Just ignore this if there are multiple objects associated with
+  // the file.  Otherwise we will wind up uncaching and freeing some
+  // views for other objects.
+  if (this->object_count_ > 1)
+    return;
+
+  for (Views::iterator p = this->views_.begin();
+       p != this->views_.end();
+       ++p)
+    p->second->clear_cache();
+  for (Saved_views::iterator p = this->saved_views_.begin();
+       p != this->saved_views_.end();
+       ++p)
+    (*p)->clear_cache();
+}
+
+// Remove all the file views.  For a file which has multiple
+// associated objects (i.e., an archive), we keep accessed views
+// around until next time, in the hopes that they will be useful for
+// the next object.
 
 void
 File_read::clear_views(bool destroying)
@@ -348,8 +499,19 @@ File_read::clear_views(bool destroying)
   Views::iterator p = this->views_.begin();
   while (p != this->views_.end())
     {
-      if (!p->second->is_locked()
-	  && (destroying || !p->second->should_cache()))
+      bool should_delete;
+      if (p->second->is_locked())
+	should_delete = false;
+      else if (destroying)
+	should_delete = true;
+      else if (p->second->should_cache())
+	should_delete = false;
+      else if (this->object_count_ > 1 && p->second->accessed())
+	should_delete = false;
+      else
+	should_delete = true;
+
+      if (should_delete)
 	{
 	  delete p->second;
 
@@ -362,6 +524,7 @@ File_read::clear_views(bool destroying)
       else
 	{
 	  gold_assert(!destroying);
+	  p->second->clear_accessed();
 	  ++p;
 	}
     }
@@ -369,8 +532,7 @@ File_read::clear_views(bool destroying)
   Saved_views::iterator q = this->saved_views_.begin();
   while (q != this->saved_views_.end())
     {
-      if (!(*q)->is_locked()
-	  && (destroying || !(*q)->should_cache()))
+      if (!(*q)->is_locked())
 	{
 	  delete *q;
 	  q = this->saved_views_.erase(q);

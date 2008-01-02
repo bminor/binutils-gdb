@@ -335,7 +335,7 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
       sd->symbol_names = this->get_lasting_view(strtabshdr.get_sh_offset(),
 						strtabshdr.get_sh_size(),
-						true);
+						false);
       sd->symbol_names_size =
 	convert_to_section_size_type(strtabshdr.get_sh_size());
 
@@ -667,6 +667,10 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
       delete sd->verneed;
       sd->verneed = NULL;
     }
+
+  // This is normally the last time we will read any data from this
+  // file.
+  this->clear_view_cache_marks();
 }
 
 // Given a vector of hash codes, compute the number of hash buckets to

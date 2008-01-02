@@ -292,8 +292,7 @@ class Layout
 
   // Create the output sections for the symbol table.
   void
-  create_symtab_sections(const Input_objects*, Symbol_table*, const Task*,
-			 off_t*);
+  create_symtab_sections(const Input_objects*, Symbol_table*, off_t*);
 
   // Create the .shstrtab section.
   Output_section*

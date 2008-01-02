@@ -125,7 +125,17 @@ Object::handle_gnu_warning_section(const char* name, unsigned int shndx,
   const int warn_prefix_len = sizeof warn_prefix - 1;
   if (strncmp(name, warn_prefix, warn_prefix_len) == 0)
     {
-      symtab->add_warning(name + warn_prefix_len, this, shndx);
+      // Read the section contents to get the warning text.  It would
+      // be nicer if we only did this if we have to actually issue a
+      // warning.  Unfortunately, warnings are issued as we relocate
+      // sections.  That means that we can not lock the object then,
+      // as we might try to issue the same warning multiple times
+      // simultaneously.
+      section_size_type len;
+      const unsigned char* contents = this->section_contents(shndx, &len,
+							     false);
+      std::string warning(reinterpret_cast<const char*>(contents), len);
+      symtab->add_warning(name + warn_prefix_len, this, warning);
       return true;
     }
   return false;
@@ -404,7 +414,7 @@ Sized_relobj<size, big_endian>::include_section_group(
       return false;
     }
   off_t symoff = symshdr.get_sh_offset() + shdr.get_sh_info() * This::sym_size;
-  const unsigned char* psym = this->get_view(symoff, This::sym_size, true);
+  const unsigned char* psym = this->get_view(symoff, This::sym_size, false);
   elfcpp::Sym<size, big_endian> sym(psym);
 
   // Read the symbol table names.
@@ -729,10 +739,11 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   sd->symbol_names = NULL;
 }
 
-// Finalize the local symbols.  Here we add their names to *POOL and
-// *DYNPOOL, and we add their values to THIS->LOCAL_VALUES_.  This
-// function is always called from a singleton thread.  The actual
-// output of the local symbols will occur in a separate task.
+// First pass over the local symbols.  Here we add their names to
+// *POOL and *DYNPOOL, and we store the symbol value in
+// THIS->LOCAL_VALUES_.  This function is always called from a
+// singleton thread.  This is followed by a call to
+// finalize_local_symbols.
 
 template<int size, bool big_endian>
 void
@@ -833,7 +844,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
   this->output_local_dynsym_count_ = dyncount;
 }
 
-// Finalize the local symbols.  Here we add their values to
+// Finalize the local symbols.  Here we set the final value in
 // THIS->LOCAL_VALUES_ and set their output symbol table indexes.
 // This function is always called from a singleton thread.  The actual
 // output of the local symbols will occur in a separate task.
@@ -1008,7 +1019,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
   section_size_type strtab_size;
   const unsigned char* pnamesu = this->section_contents(strtab_shndx,
 							&strtab_size,
-							true);
+							false);
   const char* pnames = reinterpret_cast<const char*>(pnamesu);
 
   // Get views into the output file for the portions of the symbol table

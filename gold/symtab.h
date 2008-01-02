@@ -897,15 +897,16 @@ class Warnings
     : warnings_()
   { }
 
-  // Add a warning for symbol NAME in section SHNDX in object OBJ.
+  // Add a warning for symbol NAME in object OBJ.  WARNING is the text
+  // of the warning.
   void
   add_warning(Symbol_table* symtab, const char* name, Object* obj,
-	      unsigned int shndx);
+	      const std::string& warning);
 
   // For each symbol for which we should give a warning, make a note
   // on the symbol.
   void
-  note_warnings(Symbol_table* symtab, const Task*);
+  note_warnings(Symbol_table* symtab);
 
   // Issue a warning for a reference to SYM at RELINFO's location.
   template<int size, bool big_endian>
@@ -922,25 +923,19 @@ class Warnings
   {
     // The object the warning is in.
     Object* object;
-    // The index of the warning section.
-    unsigned int shndx;
-    // The warning text if we have already loaded it.
+    // The warning text.
     std::string text;
 
     Warning_location()
-      : object(NULL), shndx(0), text()
+      : object(NULL), text()
     { }
 
     void
-    set(Object* o, unsigned int s)
+    set(Object* o, const std::string& t)
     {
       this->object = o;
-      this->shndx = s;
+      this->text = t;
     }
-
-    void
-    set_text(const char* t, section_size_type l)
-    { this->text.assign(t, l); }
   };
 
   // A mapping from warning symbol names (canonicalized in
@@ -1057,10 +1052,11 @@ class Symbol_table
   void
   allocate_commons(const General_options&, Layout*);
 
-  // Add a warning for symbol NAME in section SHNDX in object OBJ.
+  // Add a warning for symbol NAME in object OBJ.  WARNING is the text
+  // of the warning.
   void
-  add_warning(const char* name, Object* obj, unsigned int shndx)
-  { this->warnings_.add_warning(this, name, obj, shndx); }
+  add_warning(const char* name, Object* obj, const std::string& warning)
+  { this->warnings_.add_warning(this, name, obj, warning); }
 
   // Canonicalize a symbol name for use in the hash table.
   const char*
@@ -1103,7 +1099,7 @@ class Symbol_table
   // symbol, and DYNCOUNT is the number of global dynamic symbols.
   // This records the parameters, and returns the new file offset.
   off_t
-  finalize(const Task*, unsigned int index, off_t off, off_t dynoff,
+  finalize(unsigned int index, off_t off, off_t dynoff,
 	   size_t dyn_global_index, size_t dyncount, Stringpool* pool);
 
   // Write out the global symbols.

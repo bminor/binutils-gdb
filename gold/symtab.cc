@@ -1403,8 +1403,8 @@ Symbol_table::set_dynsym_indexes(const Target* target,
 // OFF.  Add their names to POOL.  Return the new file offset.
 
 off_t
-Symbol_table::finalize(const Task* task, unsigned int index, off_t off,
-		       off_t dynoff, size_t dyn_global_index, size_t dyncount,
+Symbol_table::finalize(unsigned int index, off_t off, off_t dynoff,
+		       size_t dyn_global_index, size_t dyncount,
 		       Stringpool* pool)
 {
   off_t ret;
@@ -1437,7 +1437,7 @@ Symbol_table::finalize(const Task* task, unsigned int index, off_t off,
 
   // Now that we have the final symbol table, we can reliably note
   // which symbols should get warnings.
-  this->warnings_.note_warnings(this, task);
+  this->warnings_.note_warnings(this);
 
   return ret;
 }
@@ -2004,10 +2004,10 @@ Symbol_table::detect_odr_violations(const Task* task,
 
 void
 Warnings::add_warning(Symbol_table* symtab, const char* name, Object* obj,
-		      unsigned int shndx)
+		      const std::string& warning)
 {
   name = symtab->canonicalize_name(name);
-  this->warnings_[name].set(obj, shndx);
+  this->warnings_[name].set(obj, warning);
 }
 
 // Look through the warnings and mark the symbols for which we should
@@ -2015,7 +2015,7 @@ Warnings::add_warning(Symbol_table* symtab, const char* name, Object* obj,
 // sources for all the symbols.
 
 void
-Warnings::note_warnings(Symbol_table* symtab, const Task* task)
+Warnings::note_warnings(Symbol_table* symtab)
 {
   for (Warning_table::iterator p = this->warnings_.begin();
        p != this->warnings_.end();
@@ -2025,24 +2025,7 @@ Warnings::note_warnings(Symbol_table* symtab, const Task* task)
       if (sym != NULL
 	  && sym->source() == Symbol::FROM_OBJECT
 	  && sym->object() == p->second.object)
-	{
-	  sym->set_has_warning();
-
-	  // Read the section contents to get the warning text.  It
-	  // would be nicer if we only did this if we have to actually
-	  // issue a warning.  Unfortunately, warnings are issued as
-	  // we relocate sections.  That means that we can not lock
-	  // the object then, as we might try to issue the same
-	  // warning multiple times simultaneously.
-	  {
-	    Task_lock_obj<Object> tl(task, p->second.object);
-	    const unsigned char* c;
-	    section_size_type len;
-	    c = p->second.object->section_contents(p->second.shndx, &len,
-						   false);
-	    p->second.set_text(reinterpret_cast<const char*>(c), len);
-	  }
-	}
+	sym->set_has_warning();
     }
 }
 
