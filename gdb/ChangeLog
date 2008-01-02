@@ -1,5 +1,13 @@
 2008-01-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp): Modify the value returned
+	when noside is EVAL_AVOID_SIDE_EFFECTS to be an lval_memory.
+	This is needed to make sure that any other treatment applied
+	to the resulting value does not fail for spurious reason,
+	such as trying to take the address of this value.
+
+2008-01-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_value_equal): Dereference reference types when
 	comparing arrays.
  

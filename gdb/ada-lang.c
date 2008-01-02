@@ -8397,7 +8397,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             if (arity != nargs)
               error (_("wrong number of subscripts; expecting %d"), arity);
             if (noside == EVAL_AVOID_SIDE_EFFECTS)
-              return allocate_value (ada_aligned_type (type));
+              return value_zero (ada_aligned_type (type), lval_memory);
             return
               unwrap_value (ada_value_subscript
                             (argvec[0], nargs, argvec + 1));
@@ -8409,7 +8409,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               if (type == NULL)
                 error (_("element type of array unknown"));
               else
-                return allocate_value (ada_aligned_type (type));
+                return value_zero (ada_aligned_type (type), lval_memory);
             }
           return
             unwrap_value (ada_value_subscript
@@ -8423,7 +8423,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               if (type == NULL)
                 error (_("element type of array unknown"));
               else
-                return allocate_value (ada_aligned_type (type));
+                return value_zero (ada_aligned_type (type), lval_memory);
             }
           return
             unwrap_value (ada_value_ptr_subscript (argvec[0], type,
