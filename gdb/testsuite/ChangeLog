@@ -1,5 +1,9 @@
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/set-lang-auto.exp: New testcase.
+
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/fun_addr/foo.adb: New file.
 	* gdb.ada/fun_addr.exp: New testcase.
 
