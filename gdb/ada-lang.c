@@ -2999,6 +2999,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
       break;
 
     case OP_TYPE:
+    case OP_REGISTER:
       return NULL;
     }
 

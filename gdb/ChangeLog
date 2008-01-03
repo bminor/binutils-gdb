@@ -1,5 +1,10 @@
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (resolve_subexp): Add handling of OP_REGISTER
+	expressions.  These expressions do not need to be rewriten.
+
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (read_enumeration_type): Flag type as stub if
 	the given die is a declaration.
 
