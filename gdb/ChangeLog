@@ -1,3 +1,8 @@
+2008-01-03  Paul N. Hilfinger  <hilfinger@adacore.com>
+
+	* eval.c (evaluate_subexp_for_address): Provide frame address to
+	locate_var_value only if it will be needed.
+
 2008-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-nat.c (linux_child_follow_fork): Call also CHECK_FOR_THREAD_DB.

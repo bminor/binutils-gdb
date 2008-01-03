@@ -2150,11 +2150,13 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
 	  return
 	    value_zero (type, not_lval);
 	}
-      else
+      else if (symbol_read_needs_frame (var))
 	return
 	  locate_var_value
 	  (var,
 	   block_innermost_frame (exp->elts[pc + 1].block));
+      else
+	return locate_var_value (var, NULL);
 
     case OP_SCOPE:
       tem = longest_to_int (exp->elts[pc + 2].longconst);
