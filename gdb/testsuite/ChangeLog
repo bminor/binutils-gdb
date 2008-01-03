@@ -1,3 +1,8 @@
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/fun_addr/foo.adb: New file.
+	* gdb.ada/fun_addr.exp: New testcase.
+
 2008-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/fork-child-threads.exp, gdb.threads/fork-child-threads.c:
