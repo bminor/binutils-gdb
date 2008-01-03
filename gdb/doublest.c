@@ -202,19 +202,19 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
 
   if (fmt->split_half)
     {
-      double dtop, dbot;
-      floatformat_to_double (fmt->split_half, ufrom, &dtop);
+      DOUBLEST dtop, dbot;
+      floatformat_to_doublest (fmt->split_half, ufrom, &dtop);
       /* Preserve the sign of 0, which is the sign of the top
 	 half.  */
       if (dtop == 0.0)
 	{
-	  *to = (DOUBLEST) dtop;
+	  *to = dtop;
 	  return;
 	}
-      floatformat_to_double (fmt->split_half,
+      floatformat_to_doublest (fmt->split_half,
 			     ufrom + fmt->totalsize / FLOATFORMAT_CHAR_BIT / 2,
 			     &dbot);
-      *to = (DOUBLEST) dtop + (DOUBLEST) dbot;
+      *to = dtop + dbot;
       return;
     }
 
@@ -417,7 +417,7 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
 	 removed via storing in memory, and so the top half really is
 	 the result of converting to double.  */
       static volatile double dtop, dbot;
-      double dtopnv, dbotnv;
+      DOUBLEST dtopnv, dbotnv;
       dtop = (double) dfrom;
       /* If the rounded top half is Inf, the bottom must be 0 not NaN
 	 or Inf.  */
@@ -427,8 +427,8 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
 	dbot = (double) (dfrom - (DOUBLEST) dtop);
       dtopnv = dtop;
       dbotnv = dbot;
-      floatformat_from_double (fmt->split_half, &dtopnv, uto);
-      floatformat_from_double (fmt->split_half, &dbotnv,
+      floatformat_from_doublest (fmt->split_half, &dtopnv, uto);
+      floatformat_from_doublest (fmt->split_half, &dbotnv,
 			       (uto
 				+ fmt->totalsize / FLOATFORMAT_CHAR_BIT / 2));
       return;

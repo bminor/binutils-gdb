@@ -1,3 +1,11 @@
+2008-01-03  Luis Machado  <luisgpm@br.ibm.com>
+
+	* doublest.c (convert_floatformat_to_doublest): Call 
+	floatformat_to_doublest instead of floatformat_to_double and use
+	DOUBLEST variables.
+	(convert_doublest_to_floatformat): Call floatformat_from_doublest
+	instead of floatformat_from_double and use DOUBLEST variables.
+
 2008-01-03  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
 	* MAINTAINERS (Write After Approval): Add self.
