@@ -3048,7 +3048,7 @@ match_template (void)
   else if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
     suffix_check.no_ldsuf = 1;
   else if (i.suffix == XMMWORD_MNEM_SUFFIX)
-    suffix_check.no_xsuf = 1;
+    suffix_check.xmmword = 1;
 
   for (t = current_templates->start; t < current_templates->end; t++)
     {
@@ -3088,7 +3088,7 @@ match_template (void)
 	  && (!t->opcode_modifier.word || !suffix_check.no_wsuf)
 	  && (!t->opcode_modifier.dword || !suffix_check.no_lsuf)
 	  && (!t->opcode_modifier.qword || !suffix_check.no_qsuf)
-	  && (!t->opcode_modifier.xmmword || !suffix_check.no_xsuf))
+	  && (!t->opcode_modifier.xmmword || !suffix_check.xmmword))
 	continue;
 
       for (j = 0; j < MAX_OPERANDS; j++)

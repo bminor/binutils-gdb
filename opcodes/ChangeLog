@@ -1,3 +1,12 @@
+2008-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Remove No_xSuf.
+
+	* i386-opc.h (No_xSuf): Removed.
+	(CheckSize): Updated.
+
+	* i386-tbl.h: Regenerated.
+
 2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Add CpuSSE4_2_Or_ABM to

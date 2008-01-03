@@ -195,10 +195,8 @@ typedef union i386_cpu_flags
 #define No_qSuf			(No_sSuf + 1)
 /* long double suffix on instruction illegal */
 #define No_ldSuf		(No_qSuf + 1)
-/* x suffix on instruction illegal */
-#define No_xSuf			(No_ldSuf + 1)
 /* check memory size on instruction in Intel mode if it is specified.  */
-#define CheckSize		(No_xSuf + 1)
+#define CheckSize		(No_ldSuf + 1)
 /* BYTE memory on instruction */
 #define Byte			(CheckSize + 1)
 /* WORD memory on instruction */
@@ -274,7 +272,6 @@ typedef struct i386_opcode_modifier
   unsigned int no_ssuf:1;
   unsigned int no_qsuf:1;
   unsigned int no_ldsuf:1;
-  unsigned int no_xsuf:1;
   unsigned int checksize:1;
   unsigned int byte:1;
   unsigned int word:1;
