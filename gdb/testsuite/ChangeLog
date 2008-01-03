@@ -1,5 +1,9 @@
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/print_pc.exp: New testcase.
+
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/taft_type/pck.ads, gdb.ada/taft_type/pck.adb,
 	gdb.ada/taft_type/p.adb: New files.
 	* gdb.ada/taft_type.exp: New testcase.
