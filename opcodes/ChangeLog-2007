@@ -20,7 +20,7 @@
 	(i386_cpu_flags): Add cpusse4_1_or_5.
 
 	* i386-opc.tbl: Use CpuSSE4_1_Or_5 instead of CpuSSE4_1|CpuSSE5
-	on ptest roundpd, roundps, roundsd and roundss.
+	on ptest, roundpd, roundps, roundsd and roundss.
 
 2007-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
