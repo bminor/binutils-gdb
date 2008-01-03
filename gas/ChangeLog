@@ -1,3 +1,8 @@
+2008-01-03  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-i386.c (process_drex): Initialize modrm_reg and
+	modrm_regmem to 0 instead of None.
+
 2008-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Use the xmmword field

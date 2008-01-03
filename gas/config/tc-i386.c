@@ -1,6 +1,6 @@
 /* tc-i386.c -- Assemble code for the Intel 80386
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -3948,8 +3948,8 @@ finalize_imm (void)
 static void
 process_drex (void)
 {
-  i.drex.modrm_reg = None;
-  i.drex.modrm_regmem = None;
+  i.drex.modrm_reg = 0;
+  i.drex.modrm_regmem = 0;
 
   /* SSE5 4 operand instructions must have the destination the same as 
      one of the inputs.  Figure out the destination register and cache
