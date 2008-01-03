@@ -1,3 +1,7 @@
+2008-01-03  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* symfile.c (set_initial_language): Make non-static.
