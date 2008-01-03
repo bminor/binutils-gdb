@@ -1,3 +1,8 @@
+2008-01-03  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* symtab.c (find_pc_sect_line): Use SYMBOL_VALUE_ADDRESS instead
+	of SYMBOL_VALUE when working with function symbols.
+
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (resolve_subexp): Add handling of OP_REGISTER

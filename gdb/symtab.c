@@ -2109,13 +2109,13 @@ find_pc_sect_line (CORE_ADDR pc, struct bfd_section *section, int notcurrent)
 	   * So I commented out the warning. RT */
 	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_LINKAGE_NAME (msymbol)) */ ;
 	/* fall through */
-	else if (SYMBOL_VALUE (mfunsym) == SYMBOL_VALUE (msymbol))
+	else if (SYMBOL_VALUE_ADDRESS (mfunsym) == SYMBOL_VALUE_ADDRESS (msymbol))
 	  /* Avoid infinite recursion */
 	  /* See above comment about why warning is commented out */
 	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_LINKAGE_NAME (msymbol)) */ ;
 	/* fall through */
 	else
-	  return find_pc_line (SYMBOL_VALUE (mfunsym), 0);
+	  return find_pc_line (SYMBOL_VALUE_ADDRESS (mfunsym), 0);
       }
 
 
