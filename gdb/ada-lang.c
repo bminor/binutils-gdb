@@ -181,6 +181,7 @@ static struct type *to_fixed_range_type (char *, struct value *,
                                          struct objfile *);
 
 static struct type *to_static_fixed_type (struct type *);
+static struct type *static_unwrap_type (struct type *type);
 
 static struct value *unwrap_value (struct value *);
 
@@ -6854,7 +6855,7 @@ template_to_static_fixed_type (struct type *type0)
       if (is_dynamic_field (type0, f))
         new_type = to_static_fixed_type (TYPE_TARGET_TYPE (field_type));
       else
-        new_type = to_static_fixed_type (field_type);
+        new_type = static_unwrap_type (field_type);
       if (type == type0 && new_type != field_type)
         {
           TYPE_TARGET_TYPE (type0) = type = alloc_type (TYPE_OBJFILE (type0));
@@ -7125,8 +7126,8 @@ to_fixed_array_type (struct type *type0, struct value *dval,
    location of the tag, and therefore compute the tagged type's actual type.
    So we return the tagged type without consulting the tag.  */
    
-struct type *
-ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
+static struct type *
+ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
                    CORE_ADDR address, struct value *dval, int check_tag)
 {
   type = ada_check_typedef (type);
@@ -7166,6 +7167,25 @@ ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
       else
         return to_fixed_variant_branch_type (type, valaddr, address, dval);
     }
+}
+
+/* The same as ada_to_fixed_type_1, except that it preserves the type
+   if it is a TYPE_CODE_TYPEDEF of a type that is already fixed.
+   ada_to_fixed_type_1 would return the type referenced by TYPE.  */
+
+struct type *
+ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
+                   CORE_ADDR address, struct value *dval, int check_tag)
+
+{
+  struct type *fixed_type =
+    ada_to_fixed_type_1 (type, valaddr, address, dval, check_tag);
+
+  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF
+      && TYPE_TARGET_TYPE (type) == fixed_type)
+    return type;
+
+  return fixed_type;
 }
 
 /* A standard (static-sized) type corresponding as well as possible to

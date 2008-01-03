@@ -1,3 +1,13 @@
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (static_unwrap_type): Add forward declaration.
+	(template_to_static_fixed_type): Fields of dynamic types sometimes
+	also need to be unwrapped. Take this into account.
+	(ada_to_fixed_type_1): Renamed from ada_to_fixed_type.
+	(ada_to_fixed_type): New wrapper around ada_to_fixed_type_1.
+	* ada-typeprint.c (ada_print_type): Get the typename from
+	the original type, not the base type. 
+
 2008-01-03  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_value_struct_elt, to_fixed_array_type)

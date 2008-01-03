@@ -753,7 +753,7 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 		int show, int level)
 {
   struct type *type = ada_check_typedef (ada_get_base_type (type0));
-  char *type_name = decoded_type_name (type);
+  char *type_name = decoded_type_name (type0);
   int is_var_decl = (varstring != NULL && varstring[0] != '\0');
 
   if (type == NULL)
