@@ -1,5 +1,13 @@
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_array_bound_from_type): Make non-static.
+	Handle properly the case when the index type is an enumerated type.
+	Do not return the subtype of the bounds type, just return the
+	bounds type directly - this is not needed and is more consistent
+	with what we do for arrays when no XA parallel type exists.
+
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (static_unwrap_type): Add forward declaration.
 	(template_to_static_fixed_type): Fields of dynamic types sometimes
 	also need to be unwrapped. Take this into account.

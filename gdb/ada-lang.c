@@ -2480,7 +2480,7 @@ ada_index_type (struct type *type, int n)
    bounds type.  It works for other arrays with bounds supplied by
    run-time quantities other than discriminants.  */
 
-LONGEST
+static LONGEST
 ada_array_bound_from_type (struct type * arr_type, int n, int which,
                            struct type ** typep)
 {
@@ -2505,7 +2505,6 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which,
   index_type_desc = ada_find_parallel_type (type, "___XA");
   if (index_type_desc == NULL)
     {
-      struct type *range_type;
       struct type *index_type;
 
       while (n > 1)
@@ -2514,24 +2513,30 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which,
           n -= 1;
         }
 
-      range_type = TYPE_INDEX_TYPE (type);
-      index_type = TYPE_TARGET_TYPE (range_type);
-      if (TYPE_CODE (index_type) == TYPE_CODE_UNDEF)
-        index_type = builtin_type_long;
+      index_type = TYPE_INDEX_TYPE (type);
       if (typep != NULL)
         *typep = index_type;
+
+      /* The index type is either a range type or an enumerated type.
+         For the range type, we have some macros that allow us to
+         extract the value of the low and high bounds.  But they
+         do now work for enumerated types.  The expressions used
+         below work for both range and enum types.  */
       return
         (LONGEST) (which == 0
-                   ? TYPE_LOW_BOUND (range_type)
-                   : TYPE_HIGH_BOUND (range_type));
+                   ? TYPE_FIELD_BITPOS (index_type, 0)
+                   : TYPE_FIELD_BITPOS (index_type,
+                                        TYPE_NFIELDS (index_type) - 1));
     }
   else
     {
       struct type *index_type =
         to_fixed_range_type (TYPE_FIELD_NAME (index_type_desc, n - 1),
                              NULL, TYPE_OBJFILE (arr_type));
+
       if (typep != NULL)
-        *typep = TYPE_TARGET_TYPE (index_type);
+        *typep = index_type;
+
       return
         (LONGEST) (which == 0
                    ? TYPE_LOW_BOUND (index_type)
@@ -2540,8 +2545,8 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which,
 }
 
 /* Given that arr is an array value, returns the lower bound of the
-   nth index (numbering from 1) if which is 0, and the upper bound if
-   which is 1.  This routine will also work for arrays with bounds
+   nth index (numbering from 1) if WHICH is 0, and the upper bound if
+   WHICH is 1.  This routine will also work for arrays with bounds
    supplied by run-time quantities other than discriminants.  */
 
 struct value *
