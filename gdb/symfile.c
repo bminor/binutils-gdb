@@ -87,8 +87,6 @@ static int simple_read_overlay_region_table (void);
 static void simple_free_overlay_region_table (void);
 #endif
 
-static void set_initial_language (void);
-
 static void load_command (char *, int);
 
 static void symbol_file_add_main_1 (char *args, int from_tty, int flags);
@@ -1576,7 +1574,7 @@ symbol_file_command (char *args, int from_tty)
    stabs we find, but we can't do that until later when we read in
    full symbols.  */
 
-static void
+void
 set_initial_language (void)
 {
   struct partial_symtab *pst;

@@ -292,6 +292,8 @@ extern int auto_solib_limit;
 
 /* From symfile.c */
 
+extern void set_initial_language (void);
+
 extern struct partial_symtab *allocate_psymtab (char *, struct objfile *);
 
 extern void discard_psymtab (struct partial_symtab *);

@@ -43,6 +43,7 @@
 #include "parser-defs.h"
 #include "jv-lang.h"
 #include "demangle.h"
+#include "symfile.h"
 
 extern void _initialize_language (void);
 
@@ -185,11 +186,14 @@ local or auto    Automatic setting based on source file\n"));
 	  /* Found it!  Go into manual mode, and use this language.  */
 	  if (languages[i]->la_language == language_auto)
 	    {
-	      /* Enter auto mode.  Set to the current frame's language, if known.  */
+	      /* Enter auto mode.  Set to the current frame's language, if
+                 known, or fallback to the initial language.  */
 	      language_mode = language_mode_auto;
 	      flang = get_frame_language ();
 	      if (flang != language_unknown)
 		set_language (flang);
+	      else
+		set_initial_language ();
 	      expected_language = current_language;
 	      return;
 	    }

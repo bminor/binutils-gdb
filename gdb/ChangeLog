@@ -1,3 +1,11 @@
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* symfile.c (set_initial_language): Make non-static.
+	* symfile.h (set_initial_language): Add declaration.
+	* language.c: #include "symfile.h".
+	(set_language): Call set_initial_language if the frame language
+	could not be determined.
+
 2008-01-03  Paul N. Hilfinger  <hilfinger@adacore.com>
 
 	* eval.c (evaluate_subexp_for_address): Provide frame address to
