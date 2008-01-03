@@ -6086,7 +6086,7 @@ ada_value_struct_elt (struct value *arg, char *name, int no_err)
       else
         address = unpack_pointer (t, value_contents (arg));
 
-      t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL, address, NULL);
+      t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL, address, NULL, 1);
       if (find_struct_field (name, t1, 0,
                              &field_type, &byte_offset, &bit_offset,
                              &bit_size, NULL))
@@ -6712,12 +6712,18 @@ ada_template_to_fixed_record_type_1 (struct type *type,
           else
             dval = dval0;
 
+          /* Get the fixed type of the field. Note that, in this case, we
+             do not want to get the real type out of the tag: if the current
+             field is the parent part of a tagged record, we will get the
+             tag of the object. Clearly wrong: the real type of the parent
+             is not the real type of the child. We would end up in an infinite
+             loop.  */
           TYPE_FIELD_TYPE (rtype, f) =
             ada_to_fixed_type
             (ada_get_base_type
              (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, f))),
              cond_offset_host (valaddr, off / TARGET_CHAR_BIT),
-             cond_offset_target (address, off / TARGET_CHAR_BIT), dval);
+             cond_offset_target (address, off / TARGET_CHAR_BIT), dval, 0);
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
           bit_incr = fld_bit_len =
             TYPE_LENGTH (TYPE_FIELD_TYPE (rtype, f)) * TARGET_CHAR_BIT;
@@ -7060,7 +7066,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
          the elements of an array of a tagged type should all be of
          the same type specified in the debugging info.  No need to
          consult the object tag.  */
-      struct type *elt_type = ada_to_fixed_type (elt_type0, 0, 0, dval);
+      struct type *elt_type = ada_to_fixed_type (elt_type0, 0, 0, dval, 1);
 
       if (elt_type0 == elt_type)
         result = type0;
@@ -7088,7 +7094,8 @@ to_fixed_array_type (struct type *type0, struct value *dval,
          the elements of an array of a tagged type should all be of
          the same type specified in the debugging info.  No need to
          consult the object tag.  */
-      result = ada_to_fixed_type (ada_check_typedef (elt_type0), 0, 0, dval);
+      result =
+        ada_to_fixed_type (ada_check_typedef (elt_type0), 0, 0, dval, 1);
       for (i = TYPE_NFIELDS (index_type_desc) - 1; i >= 0; i -= 1)
         {
           struct type *range_type =
@@ -7112,15 +7119,15 @@ to_fixed_array_type (struct type *type0, struct value *dval,
    and may be NULL if there are none, or if the object of type TYPE at
    ADDRESS or in VALADDR contains these discriminants.
    
-   In the case of tagged types, this function attempts to locate the object's
-   tag and use it to compute the actual type.  However, when ADDRESS is null,
-   we cannot use it to determine the location of the tag, and therefore
-   compute the tagged type's actual type.  So we return the tagged type
-   without consulting the tag.  */
+   If CHECK_TAG is not null, in the case of tagged types, this function
+   attempts to locate the object's tag and use it to compute the actual
+   type.  However, when ADDRESS is null, we cannot use it to determine the
+   location of the tag, and therefore compute the tagged type's actual type.
+   So we return the tagged type without consulting the tag.  */
    
 struct type *
 ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
-                   CORE_ADDR address, struct value *dval)
+                   CORE_ADDR address, struct value *dval, int check_tag)
 {
   type = ada_check_typedef (type);
   switch (TYPE_CODE (type))
@@ -7130,21 +7137,26 @@ ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
     case TYPE_CODE_STRUCT:
       {
         struct type *static_type = to_static_fixed_type (type);
-
+        struct type *fixed_record_type =
+          to_fixed_record_type (type, valaddr, address, NULL);
         /* If STATIC_TYPE is a tagged type and we know the object's address,
            then we can determine its tag, and compute the object's actual
-           type from there.  */
+           type from there. Note that we have to use the fixed record
+           type (the parent part of the record may have dynamic fields
+           and the way the location of _tag is expressed may depend on
+           them).  */
 
-        if (address != 0 && ada_is_tagged_type (static_type, 0))
+        if (check_tag && address != 0 && ada_is_tagged_type (static_type, 0))
           {
             struct type *real_type =
-              type_from_tag (value_tag_from_contents_and_address (static_type,
-                                                                  valaddr,
-                                                                  address));
+              type_from_tag (value_tag_from_contents_and_address
+                             (fixed_record_type,
+                              valaddr,
+                              address));
             if (real_type != NULL)
-              type = real_type;
+              return to_fixed_record_type (real_type, valaddr, address, NULL);
           }
-        return to_fixed_record_type (type, valaddr, address, NULL);
+        return fixed_record_type;
       }
     case TYPE_CODE_ARRAY:
       return to_fixed_array_type (type, dval, 1);
@@ -7254,7 +7266,7 @@ static struct value *
 ada_to_fixed_value_create (struct type *type0, CORE_ADDR address,
                            struct value *val0)
 {
-  struct type *type = ada_to_fixed_type (type0, 0, address, NULL);
+  struct type *type = ada_to_fixed_type (type0, 0, address, NULL, 1);
   if (type == type0 && val0 != NULL)
     return val0;
   else
@@ -7616,7 +7628,7 @@ unwrap_value (struct value *val)
         coerce_unspec_val_to_type
         (val, ada_to_fixed_type (raw_real_type, 0,
                                  VALUE_ADDRESS (val) + value_offset (val),
-                                 NULL));
+                                 NULL, 1));
     }
 }
 

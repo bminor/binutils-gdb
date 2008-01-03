@@ -1,3 +1,16 @@
+2008-01-03  Jerome Guitton  <guitton@adacore.com>
+
+	* ada-lang.c (ada_value_struct_elt, to_fixed_array_type)
+	(to_fixed_array_type, ada_to_fixed_value_create, unwrap_value): 
+	Update calls to ada_to_fixed_type.
+	(ada_template_to_fixed_record_type_1): Ditto, but without looking
+	for the tag.
+	(ada_to_fixed_type): Add check_tag parameter; do not look for
+	tag if null.  When looking for a tag, use a fixed record type.
+	* ada-lang.h (ada_to_fixed_type): Add check_tag parameter.
+	* ada-valprint.c (printable_val_type, ada_value_print): Update
+	calls to ada_to_fixed_type.
+
 2008-01-03  Luis Machado  <luisgpm@br.ibm.com>
 
 	* doublest.c (convert_floatformat_to_doublest): Call 

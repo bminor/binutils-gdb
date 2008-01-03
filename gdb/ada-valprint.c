@@ -246,7 +246,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 static struct type *
 printable_val_type (struct type *type, const gdb_byte *valaddr)
 {
-  return ada_to_fixed_type (ada_aligned_type (type), valaddr, 0, NULL);
+  return ada_to_fixed_type (ada_aligned_type (type), valaddr, 0, NULL, 1);
 }
 
 /* Print the character C on STREAM as part of the contents of a literal
@@ -917,7 +917,7 @@ ada_value_print (struct value *val0, struct ui_file *stream, int format,
   const gdb_byte *valaddr = value_contents (val0);
   CORE_ADDR address = VALUE_ADDRESS (val0) + value_offset (val0);
   struct type *type =
-    ada_to_fixed_type (value_type (val0), valaddr, address, NULL);
+    ada_to_fixed_type (value_type (val0), valaddr, address, NULL, 1);
   struct value *val =
     value_from_contents_and_address (type, valaddr, address);
 
