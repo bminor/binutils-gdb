@@ -81,7 +81,7 @@ static initializer cpu_flag_init [] =
   { "CPU_K8_FLAGS",
     "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuK8|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuLM" },
   { "CPU_AMDFAM10_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuK8|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuLM" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuK8|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuSSE4_2_Or_ABM|CpuLM" },
   { "CPU_MMX_FLAGS",
     "CpuMMX" },
   { "CPU_SSE_FLAGS",
@@ -95,7 +95,7 @@ static initializer cpu_flag_init [] =
   { "CPU_SSE4_1_FLAGS",
     "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_1_Or_5" },
   { "CPU_SSE4_2_FLAGS",
-    "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuSSE4_1_Or_5" },
+    "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSSE3|CpuSSE4_1|CpuSSE4_2|CpuSSE4_1_Or_5|CpuSSE4_2_Or_ABM" },
   { "CPU_3DNOW_FLAGS",
     "CpuMMX|Cpu3dnow" },
   { "CPU_3DNOWA_FLAGS",
@@ -107,9 +107,9 @@ static initializer cpu_flag_init [] =
   { "CPU_SSE4A_FLAGS",
     "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a" },
   { "CPU_ABM_FLAGS",
-    "CpuABM" },
+    "CpuABM|CpuSSE4_2_Or_ABM" },
   { "CPU_SSE5_FLAGS",
-    "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuSSE5|CpuSSE4_1_Or_5"},
+    "CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3|CpuSSE4a|CpuABM|CpuSSE5|CpuSSE4_1_Or_5|CpuSSE4_2_Or_ABM"},
 };
 
 static initializer operand_type_init [] =
@@ -235,6 +235,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuSSE4a),
   BITFIELD (CpuSSE5),
   BITFIELD (CpuSSE4_1_Or_5),
+  BITFIELD (CpuSSE4_2_Or_ABM),
   BITFIELD (Cpu3dnow),
   BITFIELD (Cpu3dnowA),
   BITFIELD (CpuPadLock),

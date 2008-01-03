@@ -1,5 +1,21 @@
 2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (cpu_flag_init): Add CpuSSE4_2_Or_ABM to
+	CPU_AMDFAM10_FLAGS, CPU_SSE4_2_FLAGS, CpuABM and
+	CPU_SSE5_FLAGS.
+	(cpu_flags): Add CpuSSE4_2_Or_ABM.
+
+	* i386-opc.h (CpuSSE4_2_Or_ABM): New.
+	(CpuLM): Updated.
+	(i386_cpu_flags): Add cpusse4_2_or_abm.
+
+	* i386-opc.tbl: Use CpuSSE4_2_Or_ABM instead of
+	CpuABM|CpuSSE4_2 on popcnt.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-opc.h: Update comments.
 
 2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>

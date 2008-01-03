@@ -84,8 +84,10 @@
 #define CpuSSE5		(CpuSSE4_2 + 1)
 /* SSE4.1 or SSE5 support required */
 #define CpuSSE4_1_Or_5	(CpuSSE5 + 1)
+/* SSE4.2 or ABM support required */
+#define CpuSSE4_2_Or_ABM (CpuSSE4_1_Or_5 + 1)
 /* 64bit support available, used by -march= in assembler.  */
-#define CpuLM		(CpuSSE4_1_Or_5 + 1)
+#define CpuLM		(CpuSSE4_2_Or_ABM + 1)
 /* 64bit support required  */
 #define Cpu64		(CpuLM + 1)
 /* Not supported in the 64bit mode  */
@@ -135,6 +137,7 @@ typedef union i386_cpu_flags
       unsigned int cpusse4_2:1;
       unsigned int cpusse5:1;
       unsigned int cpusse4_1_or_5:1;
+      unsigned int cpusse4_2_or_abm:1;
       unsigned int cpulm:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;

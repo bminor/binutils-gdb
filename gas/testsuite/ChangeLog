@@ -1,5 +1,18 @@
 2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/i386/arch-5.d: New file.
+	* gas/i386/arch-5.s: Likewise.
+	* gas/i386/arch-6.d: Likewise.
+	* gas/i386/arch-6.s: Likewise.
+	* gas/i386/arch-7.d: Likewise.
+	* gas/i386/arch-7.s: Likewise.
+	* gas/i386/arch-8.d: Likewise.
+	* gas/i386/arch-8.s: Likewise.
+
+	* gas/i386/i386.exp: Run arch-5, arch-6, arch-7 and arch-8.
+
+2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/i386.s: Add tests for movq.
 	* gas/i386/x86_64.s: Likewise.
 

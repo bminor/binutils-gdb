@@ -1459,7 +1459,7 @@ insertq, 2, 0xf20f79, None, 2, CpuSSE4a, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSu
 insertq, 4, 0xf20f78, None, 2, CpuSSE4a, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Imm8, RegXMM, RegXMM }
 
 // ABM instructions
-popcnt, 2, 0xf30fb8, None, 2, CpuABM|CpuSSE4_2, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
+popcnt, 2, 0xf30fb8, None, 2, CpuSSE4_2_Or_ABM, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 lzcnt, 2, 0xf30fbd, None, 2, CpuABM, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 
 // SSE5 instructions
