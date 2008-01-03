@@ -24,3 +24,8 @@
 	movzx	edx,BYTE PTR [eax]
 	movzx	dx,BYTE PTR [eax]
 	movzx	edx,WORD PTR [eax]
+
+	movq	xmm1,QWORD PTR [esp]
+	movq	xmm1,[esp]
+	movq	QWORD PTR [esp],xmm1
+	movq	[esp],xmm1

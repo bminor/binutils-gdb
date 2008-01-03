@@ -187,5 +187,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f b6 10          	movzbw \(%rax\),%dx
 [ 	]*[a-f0-9]+:	0f b7 10             	movzwl \(%rax\),%edx
 [ 	]*[a-f0-9]+:	48 0f b7 10          	movzwq \(%rax\),%rdx
-	...
+[ 	]*[a-f0-9]+:	f3 0f 7e 0c 24       	movq   \(%rsp\),%xmm1
+[ 	]*[a-f0-9]+:	f3 0f 7e 0c 24       	movq   \(%rsp\),%xmm1
+[ 	]*[a-f0-9]+:	66 0f d6 0c 24       	movq   %xmm1,\(%rsp\)
+[ 	]*[a-f0-9]+:	66 0f d6 0c 24       	movq   %xmm1,\(%rsp\)
 #pass

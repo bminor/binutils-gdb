@@ -1,5 +1,9 @@
 2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.h: Update comments.
+
+2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Use Qword instead of QWord.
 	* i386-opc.h: Likewise.
 	* i386-opc.tbl: Likewise.

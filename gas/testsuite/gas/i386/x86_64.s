@@ -228,5 +228,10 @@ cmpxchg16b oword ptr [rax]
 	movzx	edx,WORD PTR [rax]
 	movzx	rdx,WORD PTR [rax]
 
+	movq	xmm1,QWORD PTR [rsp]
+	movq	xmm1,[rsp]
+	movq	QWORD PTR [rsp],xmm1
+	movq	[rsp],xmm1
+
 # Get a good alignment.
  .p2align	4,0
