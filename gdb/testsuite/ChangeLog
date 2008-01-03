@@ -1,5 +1,11 @@
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/arrayptr/pck.ads, gdb.ada/arrayptr/pck.adb,
+	gdb.ada/arrayptr/foo.adb: New files.
+	* gdb.ada/arrayptr.exp: New testcase.
+
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/set-lang-auto.exp: New testcase.
 
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
