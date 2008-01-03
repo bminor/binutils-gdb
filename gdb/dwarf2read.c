@@ -4233,6 +4233,9 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
+  if (die_is_declaration (die, cu))
+    TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
+
   set_die_type (die, type, cu);
 }
 

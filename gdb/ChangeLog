@@ -1,5 +1,10 @@
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* dwarf2read.c (read_enumeration_type): Flag type as stub if
+	the given die is a declaration.
+
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_array_bound_from_type): Make non-static.
 	Handle properly the case when the index type is an enumerated type.
 	Do not return the subtype of the bounds type, just return the
