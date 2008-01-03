@@ -1,5 +1,11 @@
 2008-01-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/taft_type/pck.ads, gdb.ada/taft_type/pck.adb,
+	gdb.ada/taft_type/p.adb: New files.
+	* gdb.ada/taft_type.exp: New testcase.
+
+2008-01-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/array_bounds/bar.adb: New file.
 	* gdb.ada/array_bounds.exp: New testcase.
 
