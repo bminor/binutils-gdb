@@ -1,5 +1,10 @@
 2008-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/packed_array.exp: Add testing of references to
+	a packed array.
+
+2008-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/type_coercion/ident.adb, gdb.ada/type_coercion/assign.adb:
 	New files.
 	* gdb.ada/type_coercion.exp: New testcase.

@@ -41,3 +41,13 @@ gdb_test "print var" \
          ".* = \\(4 => true, false, true, false, true\\)" \
          "print var"
 
+# Try printing the value and the type definition of a reference
+# to variable "Var".
+
+gdb_test "ptype &var" \
+         "type = access array \\(4 \\.\\. 8\\) of boolean <packed: 1-bit elements>" \
+         "ptype &var"
+
+gdb_test "print &var" \
+         "\\(access array \\(\\.\\.\\.\\) of boolean\\) \\(4 => true, false, true, false, true\\)" \
+         "print &var"
