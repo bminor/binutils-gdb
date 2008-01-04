@@ -1,3 +1,10 @@
+2008-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/arch-9.d: New file.
+	* gas/i386/arch-9.s: Likewise.
+
+	* gas/i386/i386.exp: Run arch-9.
+
 2008-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/arch-5.d: New file.

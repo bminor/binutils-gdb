@@ -1373,11 +1373,11 @@ pmovzxwq, 2, 0x660f3834, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No
 pmovzxdq, 2, 0x660f3835, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pmuldq, 2, 0x660f3828, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pmulld, 2, 0x660f3840, None, 3, CpuSSE4_1, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-ptest, 2, 0x660f3817, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundpd, 3, 0x660f3a09, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundps, 3, 0x660f3a08, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundsd, 3, 0x660f3a0b, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
-roundss, 3, 0x660f3a0a, None, 3, CpuSSE4_1_Or_5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+ptest, 2, 0x660f3817, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundpd, 3, 0x660f3a09, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundps, 3, 0x660f3a08, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundsd, 3, 0x660f3a0b, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
+roundss, 3, 0x660f3a0a, None, 3, CpuSSE4_1|CpuSSE5, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 
 // SSE4.2 instructions.
 
@@ -1459,7 +1459,7 @@ insertq, 2, 0xf20f79, None, 2, CpuSSE4a, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSu
 insertq, 4, 0xf20f78, None, 2, CpuSSE4a, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Imm8, RegXMM, RegXMM }
 
 // ABM instructions
-popcnt, 2, 0xf30fb8, None, 2, CpuSSE4_2_Or_ABM, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
+popcnt, 2, 0xf30fb8, None, 2, CpuABM|CpuSSE4_2, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 lzcnt, 2, 0xf30fbd, None, 2, CpuABM, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 
 // SSE5 instructions
@@ -1722,21 +1722,21 @@ cvtph2ps, 2, 0x0f7a30, None, 3, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSu
 cvtps2ph, 2, 0x0f7a31, None, 3, CpuSSE5, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|IgnoreSize|Modrm,          { RegXMM,          RegXMM|Disp8|Disp16|Disp32|Disp32S|BaseIndex }
 
 // VIA PadLock extensions.
-xstore-rng, 0, 0xfa7, 0xc0, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcrypt-ecb, 0, 0xf30fa7, 0xc8, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcrypt-cbc, 0, 0xf30fa7, 0xd0, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcrypt-ctr, 0, 0xf30fa7, 0xd8, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcrypt-cfb, 0, 0xf30fa7, 0xe0, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcrypt-ofb, 0, 0xf30fa7, 0xe8, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-montmul, 0, 0xf30fa6, 0xc0, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xsha1, 0, 0xf30fa6, 0xc8, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xsha256, 0, 0xf30fa6, 0xd0, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xstore-rng, 0, 0xfa7, 0xc0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcrypt-ecb, 0, 0xf30fa7, 0xc8, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcrypt-cbc, 0, 0xf30fa7, 0xd0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcrypt-ctr, 0, 0xf30fa7, 0xd8, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcrypt-cfb, 0, 0xf30fa7, 0xe0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcrypt-ofb, 0, 0xf30fa7, 0xe8, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+montmul, 0, 0xf30fa6, 0xc0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xsha1, 0, 0xf30fa6, 0xc8, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xsha256, 0, 0xf30fa6, 0xd0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
 // Aliases without hyphens.
-xstorerng, 0, 0xfa7, 0xc0, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcryptecb, 0, 0xf30fa7, 0xc8, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcryptcbc, 0, 0xf30fa7, 0xd0, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcryptctr, 0, 0xf30fa7, 0xd8, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcryptcfb, 0, 0xf30fa7, 0xe0, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
-xcryptofb, 0, 0xf30fa7, 0xe8, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xstorerng, 0, 0xfa7, 0xc0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcryptecb, 0, 0xf30fa7, 0xc8, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcryptcbc, 0, 0xf30fa7, 0xd0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcryptctr, 0, 0xf30fa7, 0xd8, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcryptcfb, 0, 0xf30fa7, 0xe0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xcryptofb, 0, 0xf30fa7, 0xe8, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
 // Alias for xstore-rng.
-xstore, 0, 0xfa7, 0xc0, 2, Cpu686|CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }
+xstore, 0, 0xfa7, 0xc0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|ImmExt, { 0 }

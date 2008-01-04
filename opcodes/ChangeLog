@@ -1,5 +1,22 @@
 2008-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (cpu_flag_init): Remove CpuSSE4_1_Or_5 and
+	CpuSSE4_2_Or_ABM.
+	(cpu_flags): Likewise.
+
+	* i386-opc.h (CpuSSE4_1_Or_5): Removed.
+	(CpuSSE4_2_Or_ABM): Likewise.
+	(CpuLM): Updated.
+	(i386_cpu_flags): Remove cpusse4_1_or_5 and cpusse4_2_or_abm.
+
+	* i386-opc.tbl: Replace CpuSSE4_1_Or_5, CpuSSE4_2_Or_ABM and
+	Cpu686|CpuPadLock with CpuSSE4_1|CpuSSE5, CpuABM|CpuSSE4_2
+	and CpuPadLock, respectively.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2008-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Remove No_xSuf.
 
 	* i386-opc.h (No_xSuf): Removed.

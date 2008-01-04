@@ -318,9 +318,6 @@ static const char *cpu_sub_arch_name = NULL;
 /* CPU feature flags.  */
 static i386_cpu_flags cpu_arch_flags = CPU_UNKNOWN_FLAGS;
 
-/* Bitwise NOT of cpu_arch_flags.  */
-static i386_cpu_flags cpu_arch_flags_not;
-
 /* If we have selected a cpu we are generating instructions for.  */
 static int cpu_arch_tune_set = 0;
 
@@ -967,29 +964,6 @@ cpu_flags_check_cpu64 (i386_cpu_flags f)
 }
 
 static INLINE i386_cpu_flags
-cpu_flags_not (i386_cpu_flags x)
-{
-  switch (ARRAY_SIZE (x.array))
-    {
-    case 3:
-      x.array [2] = ~x.array [2];
-    case 2:
-      x.array [1] = ~x.array [1];
-    case 1:
-      x.array [0] = ~x.array [0];
-      break;
-    default:
-      abort ();
-    }
-
-#ifdef CpuUnused
-  x.bitfield.unused = 0;
-#endif
-
-  return x;
-}
-
-static INLINE i386_cpu_flags
 cpu_flags_and (i386_cpu_flags x, i386_cpu_flags y)
 {
   switch (ARRAY_SIZE (x.array))
@@ -1025,19 +999,29 @@ cpu_flags_or (i386_cpu_flags x, i386_cpu_flags y)
   return x;
 }
 
+/* Return 3 if there is a perfect match, 2 if compatible with 64bit,
+   1 if compatible with arch, 0 if there is no match.  */
+
 static int
 cpu_flags_match (i386_cpu_flags x)
 {
-  i386_cpu_flags not = cpu_arch_flags_not;
-
-  not.bitfield.cpu64 = 1;
-  not.bitfield.cpuno64 = 1;
+  int overlap = cpu_flags_check_cpu64 (x) ? 2 : 0;
 
   x.bitfield.cpu64 = 0;
   x.bitfield.cpuno64 = 0;
 
-  not = cpu_flags_and (x, not);
-  return UINTS_ALL_ZERO (not);
+  if (UINTS_ALL_ZERO (x))
+    overlap |= 1;
+  else
+    {
+      i386_cpu_flags cpu = cpu_arch_flags;
+
+      cpu.bitfield.cpu64 = 0;
+      cpu.bitfield.cpuno64 = 0;
+      cpu = cpu_flags_and (x, cpu);
+      overlap |= UINTS_ALL_ZERO (cpu) ? 0 : 1;
+    }
+  return overlap;
 }
 
 static INLINE i386_operand_type
@@ -1445,15 +1429,11 @@ set_code_flag (int value)
     {
       cpu_arch_flags.bitfield.cpu64 = 1;
       cpu_arch_flags.bitfield.cpuno64 = 0;
-      cpu_arch_flags_not.bitfield.cpu64 = 0;
-      cpu_arch_flags_not.bitfield.cpuno64 = 1;
     }
   else
     {
       cpu_arch_flags.bitfield.cpu64 = 0;
       cpu_arch_flags.bitfield.cpuno64 = 1;
-      cpu_arch_flags_not.bitfield.cpu64 = 1;
-      cpu_arch_flags_not.bitfield.cpuno64 = 0;
     }
   if (value == CODE_64BIT && !cpu_arch_flags.bitfield.cpulm )
     {
@@ -1474,8 +1454,6 @@ set_16bit_gcc_code_flag (int new_code_flag)
     abort ();
   cpu_arch_flags.bitfield.cpu64 = 0;
   cpu_arch_flags.bitfield.cpuno64 = 1;
-  cpu_arch_flags_not.bitfield.cpu64 = 1;
-  cpu_arch_flags_not.bitfield.cpuno64 = 0;
   stackop_size = LONG_MNEM_SUFFIX;
 }
 
@@ -1587,7 +1565,6 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		      cpu_arch_flags.bitfield.cpu64 = 0;
 		      cpu_arch_flags.bitfield.cpuno64 = 1;
 		    }
-		  cpu_arch_flags_not = cpu_flags_not (cpu_arch_flags);
 		  cpu_arch_isa = cpu_arch[i].type;
 		  cpu_arch_isa_flags = cpu_arch[i].flags;
 		  if (!cpu_arch_tune_set)
@@ -1604,7 +1581,6 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		{
 		  cpu_sub_arch_name = cpu_arch[i].name;
 		  cpu_arch_flags = flags;
-		  cpu_arch_flags_not = cpu_flags_not (cpu_arch_flags);
 		}
 	      *input_line_pointer = e;
 	      demand_empty_rest_of_line ();
@@ -1654,8 +1630,6 @@ void
 md_begin ()
 {
   const char *hash_err;
-
-  cpu_arch_flags_not = cpu_flags_not (cpu_arch_flags);
 
   /* Initialize op_hash hash table.  */
   op_hash = hash_new ();
@@ -2582,11 +2556,11 @@ parse_insn (char *line, char *mnemonic)
   supported = 0;
   for (t = current_templates->start; t < current_templates->end; ++t)
     {
-      if (cpu_flags_match (t->cpu_flags))
-	supported |= 1;
-      if (cpu_flags_check_cpu64 (t->cpu_flags))
-	supported |= 2;
+      supported |= cpu_flags_match (t->cpu_flags);
+      if (supported == 3)
+	goto skip;
     }
+
   if (!(supported & 2))
     {
       as_bad (flag_code == CODE_64BIT
@@ -2597,12 +2571,14 @@ parse_insn (char *line, char *mnemonic)
     }
   if (!(supported & 1))
     {
-      as_warn (_("`%s' is not supported on `%s%s'"),
-	       current_templates->start->name,
-	       cpu_arch_name,
-	       cpu_sub_arch_name ? cpu_sub_arch_name : "");
+      as_bad (_("`%s' is not supported on `%s%s'"),
+	      current_templates->start->name, cpu_arch_name,
+	      cpu_sub_arch_name ? cpu_sub_arch_name : "");
+      return NULL;
     }
-  else if (!cpu_arch_flags.bitfield.cpui386
+
+skip:
+  if (!cpu_arch_flags.bitfield.cpui386
 	   && (flag_code != CODE_16BIT))
     {
       as_warn (_("use .code16 to ensure correct addressing mode"));
@@ -3025,7 +3001,7 @@ match_template (void)
   i386_operand_type operand_types [MAX_OPERANDS];
   int addr_prefix_disp;
   unsigned int j;
-  i386_cpu_flags overlap;
+  unsigned int found_cpu_match;
 
 #if MAX_OPERANDS != 4
 # error "MAX_OPERANDS must be 4."
@@ -3112,10 +3088,10 @@ match_template (void)
       /* Do not verify operands when there are none.  */
       else 
 	{
-	  overlap = cpu_flags_and (t->cpu_flags, cpu_arch_flags_not);
+	  found_cpu_match = cpu_flags_match (t->cpu_flags) == 3;
 	  if (!t->operands)
 	    {
-	      if (!UINTS_ALL_ZERO (overlap))
+	      if (!found_cpu_match)
 		continue;
 	      /* We've found a match; break out of loop.  */
 	      break;
@@ -3279,7 +3255,7 @@ match_template (void)
 	  /* Found either forward/reverse 2, 3 or 4 operand match here:
 	     slip through to break.  */
 	}
-      if (!UINTS_ALL_ZERO (overlap))
+      if (!found_cpu_match)
 	{
 	  found_reverse_match = 0;
 	  continue;
