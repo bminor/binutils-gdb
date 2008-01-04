@@ -1,5 +1,11 @@
 2008-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/tagged/pck.ads, gdb.ada/tagged/pck.adb,
+	gdb.ada/tagged/foo.adb: New file.
+	* gdb.ada/tagged.exp: New testcase.
+
+2008-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/ptype_field/pck.ads, gdb.ada/ptype_field/pck.adb,
 	gdb.ada/ptype_field/foo.adb: New files.
 	* gdb.ada/ptype_field.exp: New testcase.
