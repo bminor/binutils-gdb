@@ -1,5 +1,11 @@
 2008-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/type_coercion/ident.adb, gdb.ada/type_coercion/assign.adb:
+	New files.
+	* gdb.ada/type_coercion.exp: New testcase.
+
+2008-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/tagged/pck.ads, gdb.ada/tagged/pck.adb,
 	gdb.ada/tagged/foo.adb: New file.
 	* gdb.ada/tagged.exp: New testcase.
