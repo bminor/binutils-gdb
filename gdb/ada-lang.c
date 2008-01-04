@@ -4934,12 +4934,14 @@ ada_lookup_symbol_nonlocal (const char *name,
    names (e.g., XVE) are not included here.  Currently, the possible suffixes
    are given by either of the regular expression:
 
-   (__[0-9]+)?[.$][0-9]+  [nested subprogram suffix, on platforms such 
-                           as GNU/Linux]
-   ___[0-9]+            [nested subprogram suffix, on platforms such as HP/UX]
-   _E[0-9]+[bs]$          [protected object entry suffixes]
+   [.$][0-9]+       [nested subprogram suffix, on platforms such as GNU/Linux]
+   ___[0-9]+        [nested subprogram suffix, on platforms such as HP/UX]
+   _E[0-9]+[bs]$    [protected object entry suffixes]
    (X[nb]*)?((\$|__)[0-9](_?[0-9]+)|___(JM|LJM|X([FDBUP].*|R[^T]?)))?$
- */
+
+   Also, any leading "__[0-9]+" sequence is skipped before the suffix
+   match is performed.  This sequence is used to differentiate homonyms,
+   is an optional part of a valid name suffix.  */
 
 static int
 is_name_suffix (const char *str)
@@ -4948,20 +4950,20 @@ is_name_suffix (const char *str)
   const char *matching;
   const int len = strlen (str);
 
-  /* (__[0-9]+)?\.[0-9]+ */
-  matching = str;
+  /* Skip optional leading __[0-9]+.  */
+
   if (len > 3 && str[0] == '_' && str[1] == '_' && isdigit (str[2]))
     {
-      matching += 3;
-      while (isdigit (matching[0]))
-        matching += 1;
-      if (matching[0] == '\0')
-        return 1;
+      str += 3;
+      while (isdigit (str[0]))
+        str += 1;
     }
+  
+  /* [.$][0-9]+ */
 
-  if (matching[0] == '.' || matching[0] == '$')
+  if (str[0] == '.' || str[0] == '$')
     {
-      matching += 1;
+      matching = str + 1;
       while (isdigit (matching[0]))
         matching += 1;
       if (matching[0] == '\0')
@@ -4969,6 +4971,7 @@ is_name_suffix (const char *str)
     }
 
   /* ___[0-9]+ */
+
   if (len > 3 && str[0] == '_' && str[1] == '_' && str[2] == '_')
     {
       matching = str + 3;
@@ -5021,8 +5024,10 @@ is_name_suffix (const char *str)
           str += 1;
         }
     }
+
   if (str[0] == '\000')
     return 1;
+
   if (str[0] == '_')
     {
       if (str[1] != '_' || str[2] == '\000')
