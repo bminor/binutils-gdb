@@ -1,5 +1,14 @@
 2008-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c: Update copyright to 2008.
+	* i386-opc.h: Likewise.
+	* i386-opc.tbl: Likewise.
+
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2008-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-opc.tbl: Add NoRex64 to extractps, movmskpd, movmskps,
 	pextrb, pextrw, pinsrb, pinsrw and pmovmskb.
 	* i386-tbl.h: Regenerated.
