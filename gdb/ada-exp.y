@@ -353,7 +353,7 @@ arglist	:	exp
 			{ $$ = $1 + 1; }
 	;
 
-simple_exp :	'{' var_or_type '}' simple_exp  %prec '.'
+primary :	'{' var_or_type '}' primary  %prec '.'
 		/* GDB extension */
 			{ 
 			  if ($2 == NULL)

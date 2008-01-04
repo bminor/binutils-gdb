@@ -1,3 +1,7 @@
+2008-01-04  Paul N. Hilfinger  <hilfinger@adacore.com>
+
+        * ada-exp.y: Allow '{type} ADDRESS' notation on left of assignment.
+
 2008-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp): Evaluate tagged types in
