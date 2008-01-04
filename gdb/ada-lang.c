@@ -8339,6 +8339,15 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case OP_VAR_VALUE:
       *pos -= 1;
+
+      /* Tagged types are a little special in the fact that the real type
+         is dynamic and can only be determined by inspecting the object
+         value.  So even if we're support to do an EVAL_AVOID_SIDE_EFFECTS
+         evaluation, we force an EVAL_NORMAL evaluation for tagged types.  */
+      if (noside == EVAL_AVOID_SIDE_EFFECTS
+          && ada_is_tagged_type (SYMBOL_TYPE (exp->elts[pc + 2].symbol), 1))
+        noside = EVAL_NORMAL;
+
       if (noside == EVAL_SKIP)
         {
           *pos += 4;
