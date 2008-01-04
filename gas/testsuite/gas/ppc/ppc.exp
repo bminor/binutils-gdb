@@ -39,6 +39,7 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "booke_xcoff64"
     } else {
 	run_dump_test "altivec"
+	run_dump_test "altivec_and_spe"
 	run_dump_test "booke"
 	run_dump_test "e500"
 	run_list_test "range" "-a32"

@@ -1,3 +1,11 @@
+2008-01-04  Nick Clifton  <nickc@redhat.com>
+
+	* gas/ppc/altivec_and_spe.s: New test - checks that ISA extension
+	command line options (-maltivec, -mspe) can be specified before
+	CPU selection command line options.
+	* gas/ppc/altivec_and_spe.d: Expected disassembly.
+	* gas/ppc/ppc.exp: Run the new test
+
 2008-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/arch-9.d: New file.

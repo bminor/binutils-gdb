@@ -825,6 +825,8 @@ const size_t md_longopts_size = sizeof (md_longopts);
 static int
 parse_cpu (const char *arg)
 {
+  unsigned long altivec_or_spe = ppc_cpu & (PPC_OPCODE_ALTIVEC | PPC_OPCODE_SPE);
+
   /* -mpwrx and -mpwr2 mean to assemble for the IBM POWER/2
      (RIOS2).  */
   if (strcmp (arg, "pwrx") == 0 || strcmp (arg, "pwr2") == 0)
@@ -867,9 +869,9 @@ parse_cpu (const char *arg)
   else if (strcmp (arg, "altivec") == 0)
     {
       if (ppc_cpu == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_ALTIVEC;
-      else
-	ppc_cpu |= PPC_OPCODE_ALTIVEC;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC;
+
+      altivec_or_spe |= PPC_OPCODE_ALTIVEC;
     }
   else if (strcmp (arg, "e500") == 0 || strcmp (arg, "e500x2") == 0)
     {
@@ -881,9 +883,9 @@ parse_cpu (const char *arg)
   else if (strcmp (arg, "spe") == 0)
     {
       if (ppc_cpu == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_SPE | PPC_OPCODE_EFS;
-      else
-	ppc_cpu |= PPC_OPCODE_SPE;
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_EFS;
+
+      altivec_or_spe |= PPC_OPCODE_SPE;
     }
   /* -mppc64 and -m620 mean to assemble for the 64-bit PowerPC
      620.  */
@@ -941,6 +943,8 @@ parse_cpu (const char *arg)
   else
     return 0;
 
+  /* Make sure the the Altivec and SPE bits are not lost.  */
+  ppc_cpu |= altivec_or_spe;
   return 1;
 }
 

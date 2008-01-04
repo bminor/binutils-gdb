@@ -1,3 +1,8 @@
+2008-01-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ppc.c (parse_cpu): Preserve the settings of the
+	PPC_OPCODE_ALTIVEC and PPC_OPCODE_SPE flags.
+
 2008-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Use !intel_mnemonic instead
