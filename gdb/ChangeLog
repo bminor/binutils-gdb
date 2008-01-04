@@ -1,3 +1,11 @@
+2008-01-04  Jerome Guitton  <guitton@adacore.com>
+
+	* ada-lang.c (decode_packed_array_type): Avoid a seg fault
+	when the type is an anonymous pointer type.
+	(ada_check_typedef): Avoid a seg fault when the type is null.
+	* ada-typeprint.c (print_array_type): Add support for pointer
+	to packed arrays.
+
 2008-01-04  Paul N. Hilfinger  <hilfinger@adacore.com>
 
         * ada-exp.y: Allow '{type} ADDRESS' notation on left of assignment.

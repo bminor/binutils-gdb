@@ -1809,13 +1809,21 @@ decode_packed_array_type (struct type *type)
 {
   struct symbol *sym;
   struct block **blocks;
-  const char *raw_name = ada_type_name (ada_check_typedef (type));
-  char *name = (char *) alloca (strlen (raw_name) + 1);
-  char *tail = strstr (raw_name, "___XP");
+  char *raw_name = ada_type_name (ada_check_typedef (type));
+  char *name;
+  char *tail;
   struct type *shadow_type;
   long bits;
   int i, n;
 
+  if (!raw_name)
+    raw_name = ada_type_name (desc_base_type (type));
+
+  if (!raw_name)
+    return NULL;
+
+  name = (char *) alloca (strlen (raw_name) + 1);
+  tail = strstr (raw_name, "___XP");
   type = desc_base_type (type);
 
   memcpy (name, raw_name, tail - raw_name);
@@ -7269,6 +7277,9 @@ static_unwrap_type (struct type *type)
 struct type *
 ada_check_typedef (struct type *type)
 {
+  if (type == NULL)
+    return NULL;
+
   CHECK_TYPEDEF (type);
   if (type == NULL || TYPE_CODE (type) != TYPE_CODE_ENUM
       || !TYPE_STUB (type)
