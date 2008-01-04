@@ -1,5 +1,11 @@
 2008-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/homonym/homonym.ads, gdb.ada/homonym/homonym.adb,
+	gdb.ada/homonym/homonym_main.adb: New files.
+	* gdb.ada/homonym.exp: New testcase.
+
+2008-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/packed_array.exp: Add testing of references to
 	a packed array.
 
