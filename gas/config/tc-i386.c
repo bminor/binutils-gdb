@@ -2205,8 +2205,9 @@ md_assemble (line)
 
   if (intel_syntax)
     {
-      /* Undo SYSV386_COMPAT brokenness when in Intel mode.  See i386.h  */
-      if (SYSV386_COMPAT
+      /* Undo AT&T Mnemonic brokenness when in Intel mode.  See
+	 i386-opc.tbl.  */
+      if (!intel_mnemonic
 	  && (i.tm.base_opcode & 0xfffffde0) == 0xdce0)
 	i.tm.base_opcode ^= Opcode_FloatR;
 

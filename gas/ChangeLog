@@ -1,5 +1,10 @@
 2008-01-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (md_assemble): Use !intel_mnemonic instead
+	of SYSV386_COMPAT.
+
+2008-01-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/config/tc-i386.c (cpu_arch_flags_not): Removed.
 	(cpu_flags_not): Likewise.
 	(cpu_flags_match): Updated to check 64bit and arch.
