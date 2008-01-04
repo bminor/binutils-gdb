@@ -1845,7 +1845,9 @@ void
 Output_section::create_postprocessing_buffer()
 {
   gold_assert(this->requires_postprocessing());
-  gold_assert(this->postprocessing_buffer_ == NULL);
+
+  if (this->postprocessing_buffer_ != NULL)
+    return;
 
   if (!this->input_sections_.empty())
     {
