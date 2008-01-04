@@ -1,3 +1,11 @@
+2008-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/rexw.d: New.
+	* gas/i386/rexw.s: Likewise.
+
+	* gas/i386/x86-64-sse4_1-intel.d: Updated.
+	* gas/i386/x86-64-sse4_1.d: Likewise.
+
 2008-01-04  Nick Clifton  <nickc@redhat.com>
 
 	* gas/ppc/altivec_and_spe.s: New test - checks that ISA extension

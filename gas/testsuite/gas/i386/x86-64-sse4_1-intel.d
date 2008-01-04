@@ -11,19 +11,19 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 3a 0d c1 00    	blendpd xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 0c 01 00    	blendps xmm0,XMMWORD PTR \[rcx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 0c c1 00    	blendps xmm0,xmm1,0x0
-[ 	]*[a-f0-9]+:	66 0f 38 15 01       	blendvpd xmm0,XMMWORD PTR \[rcx\](,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 15 c1       	blendvpd xmm0,xmm1(,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 15 01       	blendvpd xmm0,XMMWORD PTR \[rcx\](,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 15 c1       	blendvpd xmm0,xmm1(,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 14 01       	blendvps xmm0,XMMWORD PTR \[rcx\](,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 14 c1       	blendvps xmm0,xmm1(,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 14 01       	blendvps xmm0,XMMWORD PTR \[rcx\](,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 14 c1       	blendvps xmm0,xmm1(,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 15 01       	blendvpd xmm0,XMMWORD PTR \[rcx\],xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 15 c1       	blendvpd xmm0,xmm1,xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 15 01       	blendvpd xmm0,XMMWORD PTR \[rcx\],xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 15 c1       	blendvpd xmm0,xmm1,xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 14 01       	blendvps xmm0,XMMWORD PTR \[rcx\],xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 14 c1       	blendvps xmm0,xmm1,xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 14 01       	blendvps xmm0,XMMWORD PTR \[rcx\],xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 14 c1       	blendvps xmm0,xmm1,xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 41 01 00    	dppd   xmm0,XMMWORD PTR \[rcx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 41 c1 00    	dppd   xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 40 01 00    	dpps   xmm0,XMMWORD PTR \[rcx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 40 c1 00    	dpps   xmm0,xmm1,0x0
-[ 	]*[a-f0-9]+:	66 48 0f 3a 17 c1 00 	extractps rcx,xmm0,0x0
+[ 	]*[a-f0-9]+:	66 0f 3a 17 c1 00    	extractps ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 17 c1 00    	extractps ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 17 01 00    	extractps DWORD PTR \[rcx\],xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 21 c1 00    	insertps xmm0,xmm1,0x0
@@ -33,29 +33,29 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 3a 42 c1 00    	mpsadbw xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 38 2b 01       	packusdw xmm0,XMMWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	66 0f 38 2b c1       	packusdw xmm0,xmm1
-[ 	]*[a-f0-9]+:	66 0f 38 10 01       	pblendvb xmm0,XMMWORD PTR \[rcx\](,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 10 c1       	pblendvb xmm0,xmm1(,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 10 01       	pblendvb xmm0,XMMWORD PTR \[rcx\](,xmm0)?
-[ 	]*[a-f0-9]+:	66 0f 38 10 c1       	pblendvb xmm0,xmm1(,xmm0)?
+[ 	]*[a-f0-9]+:	66 0f 38 10 01       	pblendvb xmm0,XMMWORD PTR \[rcx\],xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 10 c1       	pblendvb xmm0,xmm1,xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 10 01       	pblendvb xmm0,XMMWORD PTR \[rcx\],xmm0
+[ 	]*[a-f0-9]+:	66 0f 38 10 c1       	pblendvb xmm0,xmm1,xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 0e 01 00    	pblendw xmm0,XMMWORD PTR \[rcx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 0e c1 00    	pblendw xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 38 29 c1       	pcmpeqq xmm0,xmm1
 [ 	]*[a-f0-9]+:	66 0f 38 29 01       	pcmpeqq xmm0,XMMWORD PTR \[rcx\]
-[ 	]*[a-f0-9]+:	66 48 0f 3a 14 c1 00 	pextrb rcx,xmm0,0x0
+[ 	]*[a-f0-9]+:	66 0f 3a 14 c1 00    	pextrb ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 14 c1 00    	pextrb ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 14 01 00    	pextrb BYTE PTR \[rcx\],xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 16 c1 00    	pextrd ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 16 01 00    	pextrd DWORD PTR \[rcx\],xmm0,0x0
 [ 	]*[a-f0-9]+:	66 48 0f 3a 16 c1 00 	pextrq rcx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 48 0f 3a 16 01 00 	pextrq QWORD PTR \[rcx\],xmm0,0x0
-[ 	]*[a-f0-9]+:	66 48 0f c5 c8 00    	pextrw rcx,xmm0,0x0
+[ 	]*[a-f0-9]+:	66 0f c5 c8 00       	pextrw ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f c5 c8 00       	pextrw ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 15 01 00    	pextrw WORD PTR \[rcx\],xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 38 41 c1       	phminposuw xmm0,xmm1
 [ 	]*[a-f0-9]+:	66 0f 38 41 01       	phminposuw xmm0,XMMWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	66 0f 3a 20 01 00    	pinsrb xmm0,BYTE PTR \[rcx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 20 c1 00    	pinsrb xmm0,ecx,0x0
-[ 	]*[a-f0-9]+:	66 48 0f 3a 20 c1 00 	pinsrb xmm0,rcx,0x0
+[ 	]*[a-f0-9]+:	66 0f 3a 20 c1 00    	pinsrb xmm0,ecx,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 22 01 00    	pinsrd xmm0,DWORD PTR \[rcx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 22 c1 00    	pinsrd xmm0,ecx,0x0
 [ 	]*[a-f0-9]+:	66 48 0f 3a 22 01 00 	pinsrq xmm0,QWORD PTR \[rcx\],0x0
@@ -126,7 +126,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 3a 41 c1 00    	dppd   xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 40 01 00    	dpps   xmm0,XMMWORD PTR \[rcx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 40 c1 00    	dpps   xmm0,xmm1,0x0
-[ 	]*[a-f0-9]+:	66 48 0f 3a 17 c1 00 	extractps rcx,xmm0,0x0
+[ 	]*[a-f0-9]+:	66 0f 3a 17 c1 00    	extractps ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 17 c1 00    	extractps ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 17 01 00    	extractps DWORD PTR \[rcx\],xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 21 c1 00    	insertps xmm0,xmm1,0x0
@@ -142,21 +142,21 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 3a 0e c1 00    	pblendw xmm0,xmm1,0x0
 [ 	]*[a-f0-9]+:	66 0f 38 29 c1       	pcmpeqq xmm0,xmm1
 [ 	]*[a-f0-9]+:	66 0f 38 29 01       	pcmpeqq xmm0,XMMWORD PTR \[rcx\]
-[ 	]*[a-f0-9]+:	66 48 0f 3a 14 c1 00 	pextrb rcx,xmm0,0x0
+[ 	]*[a-f0-9]+:	66 0f 3a 14 c1 00    	pextrb ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 14 c1 00    	pextrb ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 14 01 00    	pextrb BYTE PTR \[rcx\],xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 16 c1 00    	pextrd ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 16 01 00    	pextrd DWORD PTR \[rcx\],xmm0,0x0
 [ 	]*[a-f0-9]+:	66 48 0f 3a 16 c1 00 	pextrq rcx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 48 0f 3a 16 01 00 	pextrq QWORD PTR \[rcx\],xmm0,0x0
-[ 	]*[a-f0-9]+:	66 48 0f c5 c8 00    	pextrw rcx,xmm0,0x0
+[ 	]*[a-f0-9]+:	66 0f c5 c8 00       	pextrw ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f c5 c8 00       	pextrw ecx,xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 15 01 00    	pextrw WORD PTR \[rcx\],xmm0,0x0
 [ 	]*[a-f0-9]+:	66 0f 38 41 c1       	phminposuw xmm0,xmm1
 [ 	]*[a-f0-9]+:	66 0f 38 41 01       	phminposuw xmm0,XMMWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	66 0f 3a 20 01 00    	pinsrb xmm0,BYTE PTR \[rcx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 20 c1 00    	pinsrb xmm0,ecx,0x0
-[ 	]*[a-f0-9]+:	66 48 0f 3a 20 c1 00 	pinsrb xmm0,rcx,0x0
+[ 	]*[a-f0-9]+:	66 0f 3a 20 c1 00    	pinsrb xmm0,ecx,0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 22 01 00    	pinsrd xmm0,DWORD PTR \[rcx\],0x0
 [ 	]*[a-f0-9]+:	66 0f 3a 22 c1 00    	pinsrd xmm0,ecx,0x0
 [ 	]*[a-f0-9]+:	66 48 0f 3a 22 01 00 	pinsrq xmm0,QWORD PTR \[rcx\],0x0

@@ -216,6 +216,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-sib-intel"
     run_dump_test "x86-64-opcode-inval"
     run_dump_test "x86-64-opcode-inval-intel"
+    run_dump_test "rexw"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]
