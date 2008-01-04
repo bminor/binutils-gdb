@@ -1,3 +1,14 @@
+2008-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_and_display_attr_value): Prefix values that are
+	displayed in hexadecimal with 0x.
+	For the DW_AT_import attribute display the abbreviation number and
+	tag of the imported DIE.
+	(process_debug_info): Warn about lengths that reserved by the
+	DWARF3 specification.
+	Provide more information when corrupted DIEs are detected.
+	Warn if DIE corruption makes the sibling level negative.
+
 For older changes see ChangeLog-2007
 
 Local Variables:

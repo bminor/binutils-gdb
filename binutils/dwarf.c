@@ -1004,15 +1004,16 @@ decode_location_expression (unsigned char * data,
 }
 
 static unsigned char *
-read_and_display_attr_value (unsigned long attribute,
-			     unsigned long form,
-			     unsigned char *data,
-			     unsigned long cu_offset,
-			     unsigned long pointer_size,
-			     unsigned long offset_size,
-			     int dwarf_version,
-			     debug_info *debug_info_p,
-			     int do_loc)
+read_and_display_attr_value (unsigned long   attribute,
+			     unsigned long   form,
+			     unsigned char * data,
+			     unsigned long   cu_offset,
+			     unsigned long   pointer_size,
+			     unsigned long   offset_size,
+			     int             dwarf_version,
+			     debug_info *    debug_info_p,
+			     int             do_loc,
+			     unsigned char * section_start)
 {
   unsigned long uvalue = 0;
   unsigned char *block_start = NULL;
@@ -1087,14 +1088,15 @@ read_and_display_attr_value (unsigned long attribute,
       return read_and_display_attr_value (attribute, form, data,
 					  cu_offset, pointer_size,
 					  offset_size, dwarf_version,
-					  debug_info_p, do_loc);
+					  debug_info_p, do_loc,
+					  section_start);
     }
 
   switch (form)
     {
     case DW_FORM_ref_addr:
       if (!do_loc)
-	printf (" <#%lx>", uvalue);
+	printf (" <0x%lx>", uvalue);
       break;
 
     case DW_FORM_ref1:
@@ -1102,13 +1104,13 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_FORM_ref4:
     case DW_FORM_ref_udata:
       if (!do_loc)
-	printf (" <%lx>", uvalue + cu_offset);
+	printf (" <0x%lx>", uvalue + cu_offset);
       break;
 
     case DW_FORM_data4:
     case DW_FORM_addr:
       if (!do_loc)
-	printf (" %#lx", uvalue);
+	printf (" 0x%lx", uvalue);
       break;
 
     case DW_FORM_flag:
@@ -1125,8 +1127,8 @@ read_and_display_attr_value (unsigned long attribute,
       if (!do_loc)
 	{
 	  uvalue = byte_get (data, 4);
-	  printf (" %lx", uvalue);
-	  printf (" %lx", (unsigned long) byte_get (data + 4, 4));
+	  printf (" 0x%lx", uvalue);
+	  printf (" 0x%lx", (unsigned long) byte_get (data + 4, 4));
 	}
       if ((do_loc || do_debug_loc || do_debug_ranges)
 	  && num_debug_info_entries == 0)
@@ -1196,7 +1198,6 @@ read_and_display_attr_value (unsigned long attribute,
       break;
     }
 
-  /* For some attributes we can display further information.  */
   if ((do_loc || do_debug_loc || do_debug_ranges)
       && num_debug_info_entries == 0)
     {
@@ -1268,6 +1269,7 @@ read_and_display_attr_value (unsigned long attribute,
   if (do_loc)
     return data;
 
+  /* For some attributes we can display further information.  */
   printf ("\t");
 
   switch (attribute)
@@ -1472,6 +1474,28 @@ read_and_display_attr_value (unsigned long attribute,
 	}
       break;
 
+    case DW_AT_import:
+      {
+	unsigned long abbrev_number;
+	abbrev_entry * entry;
+
+	if (form == DW_FORM_ref1
+	    || form == DW_FORM_ref2
+	    || form == DW_FORM_ref4)
+	  uvalue += cu_offset;
+
+	abbrev_number = read_leb128 (section_start + uvalue, NULL, 0);
+	
+	printf ("[Abbrev Number: %ld", abbrev_number);
+	for (entry = first_abbrev; entry != NULL; entry = entry->next)
+	  if (entry->entry == abbrev_number)
+	    break;
+	if (entry != NULL)
+	  printf (" (%s)", get_TAG_name (entry->tag));
+	printf ("]");
+      }
+      break;
+
     default:
       break;
     }
@@ -1634,22 +1658,23 @@ get_AT_name (unsigned long attribute)
 }
 
 static unsigned char *
-read_and_display_attr (unsigned long attribute,
-		       unsigned long form,
-		       unsigned char *data,
-		       unsigned long cu_offset,
-		       unsigned long pointer_size,
-		       unsigned long offset_size,
-		       int dwarf_version,
-		       debug_info *debug_info_p,
-		       int do_loc)
+read_and_display_attr (unsigned long   attribute,
+		       unsigned long   form,
+		       unsigned char * data,
+		       unsigned long   cu_offset,
+		       unsigned long   pointer_size,
+		       unsigned long   offset_size,
+		       int             dwarf_version,
+		       debug_info *    debug_info_p,
+		       int             do_loc,
+		       unsigned char * section_start)
 {
   if (!do_loc)
     printf ("   %-18s:", get_AT_name (attribute));
   data = read_and_display_attr_value (attribute, form, data, cu_offset,
 				      pointer_size, offset_size,
 				      dwarf_version, debug_info_p,
-				      do_loc);
+				      do_loc, section_start);
   if (!do_loc)
     printf ("\n");
   return data;
@@ -1688,6 +1713,11 @@ process_debug_info (struct dwarf_section *section, void *file,
 	    {
 	      length = byte_get (section_begin + 4, 8);
 	      section_begin += length + 12;
+	    }
+	  else if (length >= 0xfffffff0 && length < 0xffffffff)
+	    {
+	      warn (_("Reserved length value (%lx) found in section %s\n"), length, section->name);
+	      return 0;
 	    }
 	  else
 	    section_begin += length + 4;
@@ -1802,8 +1832,8 @@ process_debug_info (struct dwarf_section *section, void *file,
       if (cu_offset + compunit.cu_length + initial_length_size
 	  > section->size)
 	{
-	  warn (_("Debug info is corrupted, length is invalid (section is %lu bytes)\n"),
-		(unsigned long)section->size);
+	  warn (_("Debug info is corrupted, length of CU at %lx extends beyond end of section (length = %lx)\n"),
+		cu_offset, compunit.cu_length);
 	  break;
 	}
       tags = hdrptr;
@@ -1820,8 +1850,9 @@ process_debug_info (struct dwarf_section *section, void *file,
       /* Process the abbrevs used by this compilation unit. DWARF
 	 sections under Mach-O have non-zero addresses.  */
       if (compunit.cu_abbrev_offset >= debug_displays [abbrev].section.size)
-	warn (_("Debug info is corrupted, abbrev offset is invalid (section is %lu bytes)\n"),
-	      (unsigned long)debug_displays [abbrev].section.size);
+	warn (_("Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"),
+	      (unsigned long) compunit.cu_abbrev_offset,
+	      (unsigned long) debug_displays [abbrev].section.size);
       else
 	process_abbrev_section
 	  ((unsigned char *) debug_displays [abbrev].section.start
@@ -1834,25 +1865,38 @@ process_debug_info (struct dwarf_section *section, void *file,
 	{
 	  unsigned int bytes_read;
 	  unsigned long abbrev_number;
+	  unsigned long die_offset;
 	  abbrev_entry *entry;
 	  abbrev_attr *attr;
+
+	  die_offset = tags - section_begin;
 
 	  abbrev_number = read_leb128 (tags, & bytes_read, 0);
 	  tags += bytes_read;
 
-	  /* A null DIE marks the end of a list of children.  */
+	  /* A null DIE marks the end of a list of siblings.  */
 	  if (abbrev_number == 0)
 	    {
 	      --level;
+	      if (level < 0)
+		{
+		  static unsigned num_bogus_warns = 0;
+
+		  if (num_bogus_warns < 3)
+		    {
+		      warn (_("Bogus end-of-siblings marker detected at offset %lx in .debug_info section\n"),
+			    die_offset);
+		      num_bogus_warns ++;
+		      if (num_bogus_warns == 3)
+			warn (_("Further warnings about bogus end-of-sibling markers suppressed\n"));
+		    }
+		}
 	      continue;
 	    }
 
 	  if (!do_loc)
 	    printf (_(" <%d><%lx>: Abbrev Number: %lu"),
-		    level,
-		    (unsigned long) (tags - section_begin
-				     - bytes_read),
-		    abbrev_number);
+		    level, die_offset, abbrev_number);
  
 	  /* Scan through the abbreviation list until we reach the
 	     correct entry.  */
@@ -1904,8 +1948,8 @@ process_debug_info (struct dwarf_section *section, void *file,
 					    compunit.cu_pointer_size,
 					    offset_size,
 					    compunit.cu_version,
-					    &debug_information [unit],
-					    do_loc);
+					    debug_information + unit,
+					    do_loc, section->start);
 	    }
  
  	  if (entry->children)
