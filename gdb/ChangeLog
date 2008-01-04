@@ -1,3 +1,11 @@
+2008-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-exp.y (chop_separator): New function.
+	(write_selectors): Rewrite to re-use chop_separator.
+	(ada_nget_field_index, get_symbol_field_type): New functions.
+	(write_var_or_type): Add support for "ptype TYPENAME.FIELD"
+	expressions.
+
 2008-01-03  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* symtab.c (find_pc_sect_line): Use SYMBOL_VALUE_ADDRESS instead

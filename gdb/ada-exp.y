@@ -1112,6 +1112,22 @@ chop_selector (char *name, int end)
   return -1;
 }
 
+/* If NAME is a string beginning with a separator (either '__', or
+   '.'), chop this separator and return the result; else, return
+   NAME.  */
+
+static char *
+chop_separator (char *name)
+{
+  if (*name == '.')
+   return name + 1;
+
+  if (name[0] == '_' && name[1] == '_')
+    return name + 2;
+
+  return name;
+}
+
 /* Given that SELS is a string of the form (<sep><identifier>)*, where
    <sep> is '__' or '.', write the indicated sequence of
    STRUCTOP_STRUCT expression operators. */
@@ -1121,10 +1137,8 @@ write_selectors (char *sels)
   while (*sels != '\0')
     {
       struct stoken field_name;
-      char *p;
-      while (*sels == '_' || *sels == '.')
-	sels += 1;
-      p = sels;
+      char *p = chop_separator (sels);
+      sels = p;
       while (*sels != '\0' && *sels != '.' 
 	     && (sels[0] != '_' || sels[1] != '_'))
 	sels += 1;
@@ -1154,6 +1168,70 @@ write_ambiguous_var (struct block *block, char *name, int len)
   write_exp_elt_opcode (OP_VAR_VALUE);
 }
 
+/* A convenient wrapper around ada_get_field_index that takes
+   a non NUL-terminated FIELD_NAME0 and a FIELD_NAME_LEN instead
+   of a NUL-terminated field name.  */
+
+static int
+ada_nget_field_index (const struct type *type, const char *field_name0,
+                      int field_name_len, int maybe_missing)
+{
+  char *field_name = alloca ((field_name_len + 1) * sizeof (char));
+
+  strncpy (field_name, field_name0, field_name_len);
+  field_name[field_name_len] = '\0';
+  return ada_get_field_index (type, field_name, maybe_missing);
+}
+
+/* If encoded_field_name is the name of a field inside symbol SYM,
+   then return the type of that field.  Otherwise, return NULL.
+
+   This function is actually recursive, so if ENCODED_FIELD_NAME
+   doesn't match one of the fields of our symbol, then try to see
+   if ENCODED_FIELD_NAME could not be a succession of field names
+   (in other words, the user entered an expression of the form
+   TYPE_NAME.FIELD1.FIELD2.FIELD3), in which case we evaluate
+   each field name sequentially to obtain the desired field type.
+   In case of failure, we return NULL.  */
+
+static struct type *
+get_symbol_field_type (struct symbol *sym, char *encoded_field_name)
+{
+  char *field_name = encoded_field_name;
+  char *subfield_name;
+  struct type *type = SYMBOL_TYPE (sym);
+  int fieldno;
+
+  if (type == NULL || field_name == NULL)
+    return NULL;
+
+  while (field_name[0] != '\0')
+    {
+      field_name = chop_separator (field_name);
+
+      fieldno = ada_get_field_index (type, field_name, 1);
+      if (fieldno >= 0)
+        return TYPE_FIELD_TYPE (type, fieldno);
+
+      subfield_name = field_name;
+      while (*subfield_name != '\0' && *subfield_name != '.' 
+	     && (subfield_name[0] != '_' || subfield_name[1] != '_'))
+	subfield_name += 1;
+
+      if (subfield_name[0] == '\0')
+        return NULL;
+
+      fieldno = ada_nget_field_index (type, field_name,
+                                      subfield_name - field_name, 1);
+      if (fieldno < 0)
+        return NULL;
+
+      type = TYPE_FIELD_TYPE (type, fieldno);
+      field_name = subfield_name;
+    }
+
+  return NULL;
+}
 
 /* Look up NAME0 (an unencoded identifier or dotted name) in BLOCK (or 
    expression_block_context if NULL).  If it denotes a type, return
@@ -1252,14 +1330,21 @@ write_var_or_type (struct block *block, struct stoken name0)
 
 	  if (type_sym != NULL)
 	    {
-	      struct type *type = SYMBOL_TYPE (type_sym);
+              struct type *field_type;
+              
+              if (tail_index == name_len)
+                return SYMBOL_TYPE (type_sym);
 
-	      if (TYPE_CODE (type) == TYPE_CODE_VOID)
-		error (_("`%s' matches only void type name(s)"), name0.ptr);
-	      else if (tail_index == name_len)
-		return type;
+              /* We have some extraneous characters after the type name.
+                 If this is an expression "TYPE_NAME.FIELD0.[...].FIELDN",
+                 then try to get the type of FIELDN.  */
+              field_type
+                = get_symbol_field_type (type_sym, encoded_name + tail_index);
+              if (field_type != NULL)
+                return field_type;
 	      else 
-		error (_("Invalid attempt to select from type: \"%s\"."), name0.ptr);
+		error (_("Invalid attempt to select from type: \"%s\"."),
+                       name0.ptr);
 	    }
 	  else if (tail_index == name_len && nsyms == 0)
 	    {
