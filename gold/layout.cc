@@ -1713,6 +1713,13 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
       odyn->add_string(elfcpp::DT_NEEDED, (*p)->soname());
     }
 
+  if (parameters->output_is_shared())
+    {
+      const char* soname = this->options_.soname();
+      if (soname != NULL)
+	odyn->add_string(elfcpp::DT_SONAME, soname);
+    }
+
   // FIXME: Support --init and --fini.
   Symbol* sym = symtab->lookup("_init");
   if (sym != NULL && sym->is_defined() && !sym->is_from_dynobj())

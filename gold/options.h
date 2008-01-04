@@ -113,6 +113,11 @@ class General_options
   export_dynamic() const
   { return this->export_dynamic_; }
 
+  // -h: shared library name.
+  const char*
+  soname() const
+  { return this->soname_; }
+
   // -I: dynamic linker name.
   const char*
   dynamic_linker() const
@@ -311,6 +316,10 @@ class General_options
   { this->export_dynamic_ = true; }
 
   void
+  set_soname(const char* arg)
+  { this->soname_ = arg; }
+
+  void
   set_dynamic_linker(const char* arg)
   { this->dynamic_linker_ = arg; }
 
@@ -501,6 +510,7 @@ class General_options
   add_sysroot();
 
   bool export_dynamic_;
+  const char* soname_;
   const char* dynamic_linker_;
   Dir_list search_path_;
   int optimization_level_;

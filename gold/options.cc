@@ -399,6 +399,9 @@ options::Command_line_options::options[] =
                 NULL, TWO_DASHES, &General_options::set_export_dynamic),
   GENERAL_NOARG('\0', "eh-frame-hdr", N_("Create exception frame header"),
                 NULL, TWO_DASHES, &General_options::set_create_eh_frame_hdr),
+  GENERAL_ARG('h', "soname", N_("Set shared library name"),
+	      N_("-h FILENAME, --soname FILENAME"), ONE_DASH,
+	      &General_options::set_soname),
   GENERAL_ARG('I', "dynamic-linker", N_("Set dynamic linker path"),
 	      N_("-I PROGRAM, --dynamic-linker PROGRAM"), TWO_DASHES,
 	      &General_options::set_dynamic_linker),
@@ -528,6 +531,7 @@ const int options::Command_line_options::debug_options_size =
 
 General_options::General_options()
   : export_dynamic_(false),
+    soname_(NULL),
     dynamic_linker_(NULL),
     search_path_(),
     optimization_level_(0),
