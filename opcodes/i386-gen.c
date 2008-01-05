@@ -297,7 +297,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Drexc),
   BITFIELD (OldGcc),
   BITFIELD (ATTMnemonic),
-  BITFIELD (IntelMnemonic),
+  BITFIELD (ATTSyntax),
 };
 
 static bitfield operand_types[] =

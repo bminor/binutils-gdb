@@ -1495,37 +1495,7 @@ set_intel_syntax (int syntax_flag)
 static void
 set_intel_mnemonic (int mnemonic_flag)
 {
-  /* Find out if register prefixing is specified.  */
-  int ask_naked_reg = 0;
-
-  SKIP_WHITESPACE ();
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
-    {
-      char *string = input_line_pointer;
-      int e = get_symbol_end ();
-
-      if (strcmp (string, "prefix") == 0)
-	ask_naked_reg = 1;
-      else if (strcmp (string, "noprefix") == 0)
-	ask_naked_reg = -1;
-      else
-	as_bad (_("bad argument to syntax directive."));
-      *input_line_pointer = e;
-    }
-  demand_empty_rest_of_line ();
-
-  /* intel_mnemonic implies intel_syntax.  */
-  intel_mnemonic = intel_syntax = mnemonic_flag;
-
-  if (ask_naked_reg == 0)
-    allow_naked_reg = (intel_mnemonic
-		       && (bfd_get_symbol_leading_char (stdoutput) != '\0'));
-  else
-    allow_naked_reg = (ask_naked_reg < 0);
-
-  identifier_chars['%'] = intel_mnemonic && allow_naked_reg ? '%' : 0;
-  identifier_chars['$'] = intel_mnemonic ? '$' : 0;
-  register_prefix = allow_naked_reg ? "" : "%";
+  intel_mnemonic = mnemonic_flag;
 }
 
 static void
@@ -2205,12 +2175,6 @@ md_assemble (line)
 
   if (intel_syntax)
     {
-      /* Undo AT&T Mnemonic brokenness when in Intel mode.  See
-	 i386-opc.tbl.  */
-      if (!intel_mnemonic
-	  && (i.tm.base_opcode & 0xfffffde0) == 0xdce0)
-	i.tm.base_opcode ^= Opcode_FloatR;
-
       /* Zap movzx and movsx suffix.  The suffix may have been set from
 	 "word ptr" or "byte ptr" on the source operand, but we'll use
 	 the suffix later to choose the destination register.  */
@@ -3035,15 +2999,16 @@ match_template (void)
       if (i.operands != t->operands)
 	continue;
 
-      /* Check AT&T mnemonic and old gcc support. */
-      if (t->opcode_modifier.attmnemonic
-	  && (intel_mnemonic
-	      || (!old_gcc
-		  && t->opcode_modifier.oldgcc)))
+      /* Check old gcc support. */
+      if (!old_gcc && t->opcode_modifier.oldgcc)
 	continue;
 
-      /* Check Intel mnemonic. */
-      if (!intel_mnemonic && t->opcode_modifier.intelmnemonic)
+      /* Check AT&T mnemonic.   */
+      if (intel_mnemonic && t->opcode_modifier.attmnemonic)
+	continue;
+
+      /* Check Intel syntax.   */
+      if (intel_syntax && t->opcode_modifier.attsyntax)
 	continue;
 
       /* Check the suffix, except for some instructions in intel mode.  */
@@ -7134,7 +7099,6 @@ md_parse_option (int c, char *arg)
 
     case OPTION_MOLD_GCC:
       old_gcc = 1;
-      intel_mnemonic = 0;
       break;
 
     default:

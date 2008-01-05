@@ -237,10 +237,10 @@ typedef union i386_cpu_flags
 #define OldGcc			(Drexc + 1)
 /* AT&T mnemonic.  */
 #define ATTMnemonic		(OldGcc + 1)
-/* Intel mnemonic.  */
-#define IntelMnemonic		(ATTMnemonic + 1)
+/* AT&T syntax.  */
+#define ATTSyntax		(ATTMnemonic + 1)
 /* The last bitfield in i386_opcode_modifier.  */
-#define Opcode_Modifier_Max	IntelMnemonic
+#define Opcode_Modifier_Max	ATTSyntax
 
 typedef struct i386_opcode_modifier
 {
@@ -290,7 +290,7 @@ typedef struct i386_opcode_modifier
   unsigned int drexc:1;
   unsigned int oldgcc:1;
   unsigned int attmnemonic:1;
-  unsigned int intelmnemonic:1;
+  unsigned int attsyntax:1;
 } i386_opcode_modifier;
 
 /* Position of operand_type bits.  */

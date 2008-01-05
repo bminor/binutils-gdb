@@ -628,4 +628,61 @@ rot5:
  shrd   eax, edx, cl
  shld   eax, edx, cl
 
- .p2align 4,0
+fadd
+fadd	st(3)
+fadd	st,st(3)
+fadd	st(3),st
+fadd   DWORD PTR [ebx]
+fadd   QWORD PTR [ebx]
+faddp
+faddp	st(3)
+faddp	st(3),st
+fdiv
+fdiv   st(3)
+fdiv   st,st(3)
+fdiv   st(3),st
+fdiv   DWORD PTR [ebx]
+fdiv   QWORD PTR [ebx]
+fdivp
+fdivp  st(3)
+fdivp  st(3),st
+fdivp  st,st(3)
+fdivr
+fdivr  st(3)
+fdivr  st,st(3)
+fdivr  st(3),st
+fdivr  DWORD PTR [ebx]
+fdivr  QWORD PTR [ebx]
+fdivrp
+fdivrp st(3)
+fdivrp st(3),st
+fdivrp st,st(3)
+fmul
+fmul	st(3)
+fmul	st,st(3)
+fmul	st(3),st
+fmul   DWORD PTR [ebx]
+fmul   QWORD PTR [ebx]
+fmulp
+fmulp	st(3)
+fmulp	st(3),st
+fsub
+fsubr
+fsub   st(3)
+fsub   st,st(3)
+fsub   st(3),st
+fsub   DWORD PTR [ebx]
+fsub   QWORD PTR [ebx]
+fsubp
+fsubp  st(3)
+fsubp  st,st(3)
+fsubp  st(3),st
+fsubr  st(3)
+fsubr  st,st(3)
+fsubr  st(3),st
+fsubr  DWORD PTR [ebx]
+fsubr  QWORD PTR [ebx]
+fsubrp
+fsubrp st(3)
+fsubrp st(3),st
+fsubrp st,st(3)

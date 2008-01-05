@@ -1,3 +1,15 @@
+2008-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-i386.texi: Update .att_mnemonic and .intel_mnemonic.
+
+	* config/tc-i386.c (set_intel_mnemonic): Set intel_mnemonic
+	only.
+	(md_assemble): Remove Intel mode workaround.
+	(match_template): Check support for old gcc, AT&T mnemonic
+	and Intel Syntax.
+	(md_parse_option): Don't set intel_mnemonic to 0 for
+	OPTION_MOLD_GCC.
+
 2008-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.h: Update copyright to 2008.

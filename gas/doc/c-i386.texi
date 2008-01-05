@@ -139,8 +139,7 @@ take precedent.
 @cindex @samp{-mnaked-reg} option, x86-64
 @item -mnaked-reg
 This opetion specifies that registers don't require a @samp{%} prefix.
-The @code{.att_mnemonic}, @code{.intel_mnemonic}, @code{.att_syntax} and
-@code{.intel_syntax} directives will take precedent.
+The @code{.att_syntax} and @code{.intel_syntax} directives will take precedent.
 
 @end table
 
@@ -329,8 +328,6 @@ convention.
 @code{.intel_mnemonic} selects Intel mnemonic with Intel syntax, and
 @code{.att_mnemonic} switches back to the usual AT&T mnemonic with AT&T
 syntax for compatibility with the output of @code{@value{GCC}}.
-Either of these directives may have an optional argument, @code{prefix},
-or @code{noprefix} specifying whether registers require a @samp{%} prefix.
 Several x87 instructions, @samp{fadd}, @samp{fdiv}, @samp{fdivp},
 @samp{fdivr}, @samp{fdivrp}, @samp{fmul}, @samp{fsub}, @samp{fsubp},
 @samp{fsubr} and @samp{fsubrp},  are implemented in AT&T System V/386

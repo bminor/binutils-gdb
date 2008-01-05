@@ -1,3 +1,18 @@
+2008-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Rename IntelMnemonic to
+	ATTSyntax.
+
+	* i386-opc.h (IntelMnemonic): Renamed to ..
+	(ATTSyntax): This
+	(Opcode_Modifier_Max): Updated.
+	(i386_opcode_modifier): Remove intelmnemonic. Add attsyntax
+	and intelsyntax.
+
+	* i386-opc.tbl: Remove IntelMnemonic and update with ATTSyntax 
+	on fsub, fubp, fsubr, fsubrp, div, fdivp, fdivr and fdivrp.
+	* i386-tbl.h: Regenerated.
+
 2008-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c: Update copyright to 2008.
