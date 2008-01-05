@@ -1,3 +1,8 @@
+2008-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/packed_tagged/comp_bug.adb: New file.
+	* gdb.ada/packed_tagged.exp: New testcase.
+
 2008-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/homonym/homonym.ads, gdb.ada/homonym/homonym.adb,
