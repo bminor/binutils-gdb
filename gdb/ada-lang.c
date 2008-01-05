@@ -6284,17 +6284,16 @@ ada_which_variant_applies (struct type *var_type, struct type *outer_type,
 {
   int others_clause;
   int i;
-  int disp;
-  struct type *discrim_type;
   char *discrim_name = ada_variant_discrim_name (var_type);
+  struct value *outer;
+  struct value *discrim;
   LONGEST discrim_val;
 
-  disp = 0;
-  discrim_type =
-    ada_lookup_struct_elt_type (outer_type, discrim_name, 1, 1, &disp);
-  if (discrim_type == NULL)
+  outer = value_from_contents_and_address (outer_type, outer_valaddr, 0);
+  discrim = ada_value_struct_elt (outer, discrim_name, 1);
+  if (discrim == NULL)
     return -1;
-  discrim_val = unpack_long (discrim_type, outer_valaddr + disp);
+  discrim_val = value_as_long (discrim);
 
   others_clause = -1;
   for (i = 0; i < TYPE_NFIELDS (var_type); i += 1)

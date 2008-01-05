@@ -1,3 +1,8 @@
+2008-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_which_variant_applies): Correctly compute
+	the value of the discriminant when the variant record is packed.
+
 2008-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (is_name_suffix): Handle middle-name numeric suffixes
