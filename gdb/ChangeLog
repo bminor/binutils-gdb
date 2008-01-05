@@ -1,5 +1,9 @@
 2008-01-05  Pedro Alves  <pedro@codesourcery.com>
 
+	* NEWS: Mention --pid and --core command line behaviour changes.
+
+2008-01-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* main.c (captured_main): Remove 'count' varible and the
 	ALIGN_STACK_ON_ENTRY block that used it.  Error out if --core and
 	--pid options were issued simultaneously.  If an explicit pid

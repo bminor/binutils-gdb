@@ -1,5 +1,11 @@
 2008-01-05  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.texinfo (File Options): Remove mention of the attempt to
+	open a core file with the -p option.  Don't list -c as a valid
+	option to attach to a process.
+
+2008-01-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbint.texinfo (Host Conditionals): Remove mention of
 	ALIGN_STACK_ON_ENTRY.
 

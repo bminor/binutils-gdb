@@ -942,14 +942,11 @@ file.
 @cindex @code{-c}
 Use file @var{file} as a core dump to examine.
 
-@item -c @var{number}
 @item -pid @var{number}
 @itemx -p @var{number}
 @cindex @code{--pid}
 @cindex @code{-p}
 Connect to process ID @var{number}, as with the @code{attach} command.
-If there is no such process, @value{GDBN} will attempt to open a core
-file named @var{number}.
 
 @item -command @var{file}
 @itemx -x @var{file}

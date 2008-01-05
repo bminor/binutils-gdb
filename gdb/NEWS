@@ -3,6 +3,13 @@
 
 *** Changes since GDB 6.7
 
+* Change in command line behavior -- corefiles vs. process ids.
+
+  When the '-p NUMBER' or '--pid NUMBER' options are used, and
+  attaching to process NUMBER fails, GDB no longer attempts to open a
+  core file named NUMBER.  Attaching to a program using the -c option
+  is no longer supported.  Instead, use the '-p' or '--pid' options.
+
 * New commands
 
 set print frame-arguments (all|scalars|none)
