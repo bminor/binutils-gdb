@@ -5973,6 +5973,12 @@ Update the copyright year in the startup message
 
 Update the copyright year in file @file{top.c}, function
 @code{print_gdb_version}.
+
+@item
+Add the new year in the copyright notices of all source and documentation
+files.  This can be done semi-automatically by running the @code{copyright.sh}
+script.  This script requires Emacs 22 or later to be installed.
+
 @end itemize
 
 @node Releasing GDB

@@ -1,3 +1,9 @@
+2008-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbint.texinfo (Start of New Year Procedure): Add item
+	describing how to update the source and documentation copyright
+	notices.
+
 2007-12-18  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdb.texinfo (Set Watchpoints): Integrate per-thread
