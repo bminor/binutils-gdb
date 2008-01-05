@@ -1,3 +1,8 @@
+2008-01-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbint.texinfo (Host Conditionals): Remove mention of
+	ALIGN_STACK_ON_ENTRY.
+
 2008-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbint.texinfo (Start of New Year Procedure): Add item

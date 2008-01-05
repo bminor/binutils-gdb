@@ -119,7 +119,6 @@ captured_main (void *data)
   struct captured_main_args *context = data;
   int argc = context->argc;
   char **argv = context->argv;
-  int count;
   static int quiet = 0;
   static int batch = 0;
   static int set_args = 0;
@@ -127,7 +126,9 @@ captured_main (void *data)
   /* Pointers to various arguments from command line.  */
   char *symarg = NULL;
   char *execarg = NULL;
+  char *pidarg = NULL;
   char *corearg = NULL;
+  char *pid_or_core_arg = NULL;
   char *cdarg = NULL;
   char *ttyarg = NULL;
 
@@ -173,12 +174,6 @@ captured_main (void *data)
 
 #ifdef HAVE_SBRK
   lim_at_start = (char *) sbrk (0);
-#endif
-
-#if defined (ALIGN_STACK_ON_STARTUP)
-  i = (int) &count & 0x3;
-  if (i != 0)
-    alloca (4 - i);
 #endif
 
   cmdsize = 1;
@@ -435,8 +430,7 @@ captured_main (void *data)
 	    corearg = optarg;
 	    break;
 	  case 'p':
-	    /* "corearg" is shared by "--core" and "--pid" */
-	    corearg = optarg;
+	    pidarg = optarg;
 	    break;
 	  case 'x':
 	    cmdarg[ncmd].type = CMDARG_FILE;
@@ -572,26 +566,34 @@ extern int gdbtk_test (char *);
       }
     else
       {
-	/* OK, that's all the options.  The other arguments are filenames.  */
-	count = 0;
-	for (; optind < argc; optind++)
-	  switch (++count)
-	    {
-	    case 1:
-	      symarg = argv[optind];
-	      execarg = argv[optind];
-	      break;
-	    case 2:
-	      /* The documentation says this can be a "ProcID" as well. 
-	         We will try it as both a corefile and a pid.  */
-	      corearg = argv[optind];
-	      break;
-	    case 3:
-	      fprintf_unfiltered (gdb_stderr,
-				  _("Excess command line arguments ignored. (%s%s)\n"),
-				  argv[optind], (optind == argc - 1) ? "" : " ...");
-	      break;
-	    }
+	/* OK, that's all the options.  */
+
+	/* The first argument, if specified, is the name of the
+	   executable.  */
+	if (optind < argc)
+	  {
+	    symarg = argv[optind];
+	    execarg = argv[optind];
+	    optind++;
+	  }
+
+	/* If the user hasn't already specified a PID or the name of a
+	   core file, then a second optional argument is allowed.  If
+	   present, this argument should be interpreted as either a
+	   PID or a core file, whichever works.  */
+	if (pidarg == NULL && corearg == NULL && optind < argc)
+	  {
+	    pid_or_core_arg = argv[optind];
+	    optind++;
+	  }
+
+	/* Any argument left on the command line is unexpected and
+	   will be ignored.  Inform the user.  */
+	if (optind < argc)
+	  fprintf_unfiltered (gdb_stderr, _("\
+Excess command line arguments ignored. (%s%s)\n"),
+			      argv[optind],
+			      (optind == argc - 1) ? "" : " ...");
       }
     if (batch)
       quiet = 1;
@@ -733,21 +735,31 @@ extern int gdbtk_test (char *);
 	catch_command_errors (symbol_file_add_main, symarg, 0, RETURN_MASK_ALL);
     }
 
-  if (corearg != NULL)
-    {
-      /* corearg may be either a corefile or a pid.
-	 If its first character is a digit, try attach first
-	 and then corefile.  Otherwise try corefile first. */
+  if (corearg && pidarg)
+    error (_("\
+Can't attach to process and specify a core file at the same time."));
 
-      if (isdigit (corearg[0]))
+  if (corearg != NULL)
+    catch_command_errors (core_file_command, corearg,
+			  !batch, RETURN_MASK_ALL);
+  else if (pidarg != NULL)
+    catch_command_errors (attach_command, pidarg,
+			  !batch, RETURN_MASK_ALL);
+  else if (pid_or_core_arg)
+    {
+      /* The user specified 'gdb program pid' or gdb program core'.
+	 If pid_or_core_arg's first character is a digit, try attach
+	 first and then corefile.  Otherwise try just corefile.  */
+
+      if (isdigit (pid_or_core_arg[0]))
 	{
-	  if (catch_command_errors (attach_command, corearg, 
+	  if (catch_command_errors (attach_command, pid_or_core_arg,
 				    !batch, RETURN_MASK_ALL) == 0)
-	    catch_command_errors (core_file_command, corearg, 
+	    catch_command_errors (core_file_command, pid_or_core_arg,
 				  !batch, RETURN_MASK_ALL);
 	}
-      else /* Can't be a pid, better be a corefile. */
-	catch_command_errors (core_file_command, corearg, 
+      else /* Can't be a pid, better be a corefile.  */
+	catch_command_errors (core_file_command, pid_or_core_arg,
 			      !batch, RETURN_MASK_ALL);
     }
 

@@ -2490,13 +2490,6 @@ of a function to be called if @code{SIGWINCH} is received.
 Define this to expand into code that will define the function named by
 the expansion of @code{SIGWINCH_HANDLER}.
 
-@item ALIGN_STACK_ON_STARTUP
-@cindex stack alignment
-Define this if your system is of a sort that will crash in
-@code{tgetent} if the stack happens not to be longword-aligned when
-@code{main} is called.  This is a rare situation, but is known to occur
-on several different types of systems.
-
 @item CRLF_SOURCE_FILES
 @cindex DOS text files
 Define this if host files use @code{\r\n} rather than @code{\n} as a
