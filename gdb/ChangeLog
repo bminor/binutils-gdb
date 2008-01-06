@@ -1,3 +1,8 @@
+2008-01-06  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* win32-nat.c (win32_make_so): Use cygwin-style path to avoid warnings
+	when using MS-DOS paths.
+
 2008-01-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention --pid and --core command line behaviour changes.

@@ -656,7 +656,7 @@ win32_make_so (const char *name, DWORD load_addr)
       asection *text = NULL;
       CORE_ADDR text_vma;
 
-      abfd = bfd_openr (name, "pei-i386");
+      abfd = bfd_openr (so->so_name, "pei-i386");
 
       if (!abfd)
 	return so;
