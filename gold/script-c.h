@@ -66,6 +66,11 @@ script_start_as_needed(void* closure);
 extern void
 script_end_as_needed(void* closure);
 
+/* Called by the bison parser to set the entry symbol.  */
+
+extern void
+script_set_entry(void* closure, const char*);
+
 /* Called by the bison parser to parse an OPTION.  */
 extern void
 script_parse_option(void* closure, const char*);

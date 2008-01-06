@@ -160,11 +160,13 @@
 
 %%
 
+/* A file contains a list of commands.  */
 file_list:
 	  file_list file_cmd
 	| /* empty */
 	;
 
+/* A command which may appear at top level of a linker script.  */
 file_cmd:
 	  OUTPUT_FORMAT '(' STRING ')'
 	| GROUP
@@ -173,13 +175,16 @@ file_cmd:
 	    { script_end_group(closure); }
         | OPTION '(' STRING ')'
             { script_parse_option(closure, $3); }
+	| file_or_sections_cmd
 	;
 
+/* A list of input file names.  */
 input_list:
 	  input_list_element
 	| input_list opt_comma input_list_element
 	;
 
+/* An input file name.  */
 input_list_element:
 	  STRING
 	    { script_add_file(closure, $1); }
@@ -189,6 +194,14 @@ input_list_element:
 	    { script_end_as_needed(closure); }
 	;
 
+/* A command which may appear at the top level of a linker script, or
+   within a SECTIONS block.  */
+file_or_sections_cmd:
+	  ENTRY '(' STRING ')'
+	    { script_set_entry(closure, $3); }
+	;
+
+/* An optional comma.  */
 opt_comma:
 	  ','
 	| /* empty */

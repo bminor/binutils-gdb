@@ -64,7 +64,8 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 // Layout methods.
 
 Layout::Layout(const General_options& options)
-  : options_(options), namepool_(), sympool_(), dynpool_(), signatures_(),
+  : options_(options), entry_(options.entry()), namepool_(), sympool_(),
+    dynpool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
     unattached_section_list_(), special_output_list_(),
     section_headers_(NULL), tls_segment_(NULL), symtab_section_(NULL),
@@ -720,7 +721,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
   // Lay out the file header.
   Output_file_header* file_header;
-  file_header = new Output_file_header(target, symtab, segment_headers);
+  file_header = new Output_file_header(target, symtab, segment_headers,
+				       this->entry_);
   load_seg->add_initial_output_data(file_header);
   this->special_output_list_.push_back(file_header);
 

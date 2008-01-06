@@ -108,6 +108,11 @@ class General_options
  public:
   General_options();
 
+  // -e: set entry address.
+  const char*
+  entry() const
+  { return this->entry_; }
+
   // -E: export dynamic symbols.
   bool
   export_dynamic() const
@@ -312,6 +317,10 @@ class General_options
   };
 
   void
+  set_entry(const char* arg)
+  { this->entry_ = arg; }
+
+  void
   set_export_dynamic()
   { this->export_dynamic_ = true; }
 
@@ -509,6 +518,7 @@ class General_options
   void
   add_sysroot();
 
+  const char* entry_;
   bool export_dynamic_;
   const char* soname_;
   const char* dynamic_linker_;
@@ -823,6 +833,11 @@ class Command_line
   // Handle a --end-group option.
   void
   end_group(const char* arg);
+
+  // Set the entry symbol from a linker script.
+  void
+  set_entry(const char* entry)
+  { this->options_.set_entry(entry); }
 
   // Get an option argument--a helper function for special processing.
   const char*

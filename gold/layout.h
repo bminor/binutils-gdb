@@ -241,6 +241,12 @@ class Layout
   has_static_tls() const
   { return this->has_static_tls_; }
 
+  // Set the name of the entry symbol.  This is used by linker scripts
+  // which look like regular objects.
+  void
+  set_entry(const char* entry)
+  { this->entry_ = entry; }
+
   // Dump statistical information to stderr.
   void
   print_stats() const;
@@ -426,6 +432,9 @@ class Layout
 
   // A reference to the options on the command line.
   const General_options& options_;
+  // The name of the entry symbol.  This is from the command line, or
+  // from a linker script, or is NULL.
+  const char* entry_;
   // The output section names.
   Stringpool namepool_;
   // The output symbol names.

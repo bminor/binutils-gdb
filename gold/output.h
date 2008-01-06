@@ -393,7 +393,8 @@ class Output_file_header : public Output_data
  public:
   Output_file_header(const Target*,
 		     const Symbol_table*,
-		     const Output_segment_headers*);
+		     const Output_segment_headers*,
+		     const char* entry);
 
   // Add information about the section headers.  We lay out the ELF
   // file header before we create the section headers.
@@ -416,11 +417,17 @@ class Output_file_header : public Output_data
   void
   do_sized_write(Output_file*);
 
+  // Return the value to use for the entry address.
+  template<int size>
+  typename elfcpp::Elf_types<size>::Elf_Addr
+  entry();
+
   const Target* target_;
   const Symbol_table* symtab_;
   const Output_segment_headers* segment_header_;
   const Output_section_headers* section_header_;
   const Output_section* shstrtab_;
+  const char* entry_;
 };
 
 // Output sections are mainly comprised of input sections.  However,

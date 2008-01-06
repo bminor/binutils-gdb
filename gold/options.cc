@@ -395,12 +395,15 @@ options::Command_line_options::options[] =
   GENERAL_NOARG('\0', "detect-odr-violations",
                 N_("Try to detect violations of the One Definition Rule"),
                 NULL, TWO_DASHES, &General_options::set_detect_odr_violations),
+  GENERAL_ARG('e', "entry", N_("Set program start address"),
+	      N_("-e ADDRESS, --entry ADDRESS"), TWO_DASHES,
+	      &General_options::set_entry),
   GENERAL_NOARG('E', "export-dynamic", N_("Export all dynamic symbols"),
                 NULL, TWO_DASHES, &General_options::set_export_dynamic),
   GENERAL_NOARG('\0', "eh-frame-hdr", N_("Create exception frame header"),
                 NULL, TWO_DASHES, &General_options::set_create_eh_frame_hdr),
   GENERAL_ARG('h', "soname", N_("Set shared library name"),
-	      N_("-h FILENAME, --soname FILENAME"), ONE_DASH,
+	      N_("-h FILENAME, -soname FILENAME"), ONE_DASH,
 	      &General_options::set_soname),
   GENERAL_ARG('I', "dynamic-linker", N_("Set dynamic linker path"),
 	      N_("-I PROGRAM, --dynamic-linker PROGRAM"), TWO_DASHES,
@@ -530,7 +533,8 @@ const int options::Command_line_options::debug_options_size =
 // The default values for the general options.
 
 General_options::General_options()
-  : export_dynamic_(false),
+  : entry_(NULL),
+    export_dynamic_(false),
     soname_(NULL),
     dynamic_linker_(NULL),
     search_path_(),

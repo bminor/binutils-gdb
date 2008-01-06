@@ -294,12 +294,14 @@ Output_segment_headers::do_sized_write(Output_file* of)
 
 Output_file_header::Output_file_header(const Target* target,
 				       const Symbol_table* symtab,
-				       const Output_segment_headers* osh)
+				       const Output_segment_headers* osh,
+				       const char* entry)
   : target_(target),
     symtab_(symtab),
     segment_header_(osh),
     section_header_(NULL),
-    shstrtab_(NULL)
+    shstrtab_(NULL),
+    entry_(entry)
 {
   const int size = parameters->get_size();
   int ehdr_size;
@@ -415,19 +417,7 @@ Output_file_header::do_sized_write(Output_file* of)
   oehdr.put_e_machine(this->target_->machine_code());
   oehdr.put_e_version(elfcpp::EV_CURRENT);
 
-  // FIXME: Need to support -e, and target specific entry symbol.
-  Symbol* sym = this->symtab_->lookup("_start");
-  typename Sized_symbol<size>::Value_type v;
-  if (sym == NULL)
-    v = 0;
-  else
-    {
-      Sized_symbol<size>* ssym;
-      ssym = this->symtab_->get_sized_symbol SELECT_SIZE_NAME(size) (
-        sym SELECT_SIZE(size));
-      v = ssym->value();
-    }
-  oehdr.put_e_entry(v);
+  oehdr.put_e_entry(this->entry<size>());
 
   oehdr.put_e_phoff(this->segment_header_->offset());
   oehdr.put_e_shoff(this->section_header_->offset());
@@ -445,6 +435,49 @@ Output_file_header::do_sized_write(Output_file* of)
   oehdr.put_e_shstrndx(this->shstrtab_->out_shndx());
 
   of->write_output_view(0, ehdr_size, view);
+}
+
+// Return the value to use for the entry address.  THIS->ENTRY_ is the
+// symbol specified on the command line, if any.
+
+template<int size>
+typename elfcpp::Elf_types<size>::Elf_Addr
+Output_file_header::entry()
+{
+  const bool should_issue_warning = (this->entry_ != NULL
+				     && parameters->output_is_executable());
+
+  // FIXME: Need to support target specific entry symbol.
+  const char* entry = this->entry_;
+  if (entry == NULL)
+    entry = "_start";
+
+  Symbol* sym = this->symtab_->lookup(entry);
+
+  typename Sized_symbol<size>::Value_type v;
+  if (sym != NULL)
+    {
+      Sized_symbol<size>* ssym;
+      ssym = this->symtab_->get_sized_symbol<size>(sym);
+      if (!ssym->is_defined() && should_issue_warning)
+	gold_warning("entry symbol '%s' exists but is not defined", entry);
+      v = ssym->value();
+    }
+  else
+    {
+      // We couldn't find the entry symbol.  See if we can parse it as
+      // a number.  This supports, e.g., -e 0x1000.
+      char* endptr;
+      v = strtoull(entry, &endptr, 0);
+      if (*endptr != '\0')
+	{
+	  if (should_issue_warning)
+	    gold_warning("cannot find entry symbol '%s'", entry);
+	  v = 0;
+	}
+    }
+
+  return v;
 }
 
 // Output_data_const methods.

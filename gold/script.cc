@@ -34,6 +34,7 @@
 #include "workqueue.h"
 #include "readsyms.h"
 #include "parameters.h"
+#include "layout.h"
 #include "yyscript.h"
 #include "script.h"
 #include "script-c.h"
@@ -834,10 +835,11 @@ class Parser_closure
 		 const Position_dependent_options& posdep_options,
 		 bool in_group, bool is_in_sysroot,
                  Command_line* command_line,
+		 Layout* layout,
 		 const Lex::Token_sequence* tokens)
     : filename_(filename), posdep_options_(posdep_options),
       in_group_(in_group), is_in_sysroot_(is_in_sysroot),
-      command_line_(command_line), tokens_(tokens),
+      command_line_(command_line), layout_(layout), tokens_(tokens),
       next_token_index_(0), inputs_(NULL)
   { }
 
@@ -868,6 +870,11 @@ class Parser_closure
   // the passed-in Command_line object (not a copy).
   Command_line* command_line()
   { return this->command_line_; }
+
+  // Return the Layout structure passed in at constructor time.  This
+  // value may be NULL.
+  Layout* layout()
+  { return this->layout_; }
 
   // Whether we are at the end of the token list.
   bool
@@ -909,6 +916,8 @@ class Parser_closure
   bool is_in_sysroot_;
   // May be NULL if the user chooses not to pass one in.
   Command_line* command_line_;
+  // May be NULL if the user chooses not to pass one in.
+  Layout* layout_;
 
   // The tokens to be returned by the lexer.
   const Lex::Token_sequence* tokens_;
@@ -940,6 +949,7 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 			 input_group != NULL,
 			 input_file->is_in_sysroot(),
                          NULL,
+			 layout,
 			 &lex.tokens());
 
   if (yyparse(&closure) != 0)
@@ -1014,6 +1024,7 @@ read_commandline_script(const char* filename, Command_line* cmdline)
 			 false,
 			 input_file.is_in_sysroot(),
                          cmdline,
+			 NULL,
 			 &lex.tokens());
   if (yyparse(&closure) != 0)
     {
@@ -1022,6 +1033,9 @@ read_commandline_script(const char* filename, Command_line* cmdline)
     }
 
   input_file.file().unlock(task);
+
+  gold_assert(!closure.saw_inputs());
+
   return true;
 }
 
@@ -1318,6 +1332,18 @@ script_end_as_needed(void* closurev)
   closure->position_dependent_options().clear_as_needed();
 }
 
+// Called by the bison parser to set the entry symbol.
+
+extern "C" void
+script_set_entry(void* closurev, const char* entry)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  if (closure->command_line() != NULL)
+    closure->command_line()->set_entry(entry);
+  else
+    closure->layout()->set_entry(entry);
+}
+
 // Called by the bison parser to parse an OPTION.
 
 extern "C" void
@@ -1330,8 +1356,8 @@ script_parse_option(void* closurev, const char* option)
     {
       // There are some options that we could handle here--e.g.,
       // -lLIBRARY.  Should we bother?
-      gold_warning(_("%s: Ignoring command OPTION; OPTION is only valid"
-		     " for scripts specified via -T"),
+      gold_warning(_("%s: ignoring command OPTION; OPTION is only valid"
+		     " for scripts specified via -T/--script"),
 		   closure->filename());
     }
   else
