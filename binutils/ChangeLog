@@ -1,3 +1,7 @@
+2008-01-04  Greg McGary  <greg@mcgary.org>
+
+	* prdbg.c (print_vma): Print as long long, if host supports it.
+
 2008-01-03  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (read_and_display_attr_value): Prefix values that are
