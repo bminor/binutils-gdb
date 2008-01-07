@@ -28,6 +28,7 @@
 #include "language.h"
 #include "gdb_string.h"
 #include "doublest.h"
+#include "dfp.h"
 #include <math.h>
 #include "infcall.h"
 
@@ -741,6 +742,62 @@ value_concat (struct value *arg1, struct value *arg2)
 }
 
 
+/* Obtain decimal value of arguments for binary operation, converting from
+   other types if one of them is not decimal floating point.  */
+static void
+value_args_as_decimal (struct value *arg1, struct value *arg2,
+		       gdb_byte *x, int *len_x, gdb_byte *y, int *len_y)
+{
+  struct type *type1, *type2;
+
+  type1 = check_typedef (value_type (arg1));
+  type2 = check_typedef (value_type (arg2));
+
+  /* At least one of the arguments must be of decimal float type.  */
+  gdb_assert (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT
+	      || TYPE_CODE (type2) == TYPE_CODE_DECFLOAT);
+
+  if (TYPE_CODE (type1) == TYPE_CODE_FLT
+      || TYPE_CODE (type2) == TYPE_CODE_FLT)
+    /* The DFP extension to the C language does not allow mixing of
+     * decimal float types with other float types in expressions
+     * (see WDTR 24732, page 12).  */
+    error (_("Mixing decimal floating types with other floating types is not allowed."));
+
+  /* Obtain decimal value of arg1, converting from other types
+     if necessary.  */
+
+  if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT)
+    {
+      *len_x = TYPE_LENGTH (type1);
+      memcpy (x, value_contents (arg1), *len_x);
+    }
+  else if (is_integral_type (type1))
+    {
+      *len_x = TYPE_LENGTH (type2);
+      decimal_from_integral (arg1, x, *len_x);
+    }
+  else
+    error (_("Don't know how to convert from %s to %s."), TYPE_NAME (type1),
+	     TYPE_NAME (type2));
+
+  /* Obtain decimal value of arg2, converting from other types
+     if necessary.  */
+
+  if (TYPE_CODE (type2) == TYPE_CODE_DECFLOAT)
+    {
+      *len_y = TYPE_LENGTH (type2);
+      memcpy (y, value_contents (arg2), *len_y);
+    }
+  else if (is_integral_type (type2))
+    {
+      *len_y = TYPE_LENGTH (type1);
+      decimal_from_integral (arg2, y, *len_y);
+    }
+  else
+    error (_("Don't know how to convert from %s to %s."), TYPE_NAME (type1),
+	     TYPE_NAME (type2));
+}
 
 /* Perform a binary operation on two operands which have reasonable
    representations as integers or floats.  This includes booleans,
@@ -759,14 +816,55 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   type1 = check_typedef (value_type (arg1));
   type2 = check_typedef (value_type (arg2));
 
-  if ((TYPE_CODE (type1) != TYPE_CODE_FLT && !is_integral_type (type1))
+  if ((TYPE_CODE (type1) != TYPE_CODE_FLT
+       && TYPE_CODE (type1) != TYPE_CODE_DECFLOAT && !is_integral_type (type1))
       ||
-      (TYPE_CODE (type2) != TYPE_CODE_FLT && !is_integral_type (type2)))
+      (TYPE_CODE (type2) != TYPE_CODE_FLT
+       && TYPE_CODE (type2) != TYPE_CODE_DECFLOAT && !is_integral_type (type2)))
     error (_("Argument to arithmetic operation not a number or boolean."));
 
-  if (TYPE_CODE (type1) == TYPE_CODE_FLT
+  if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT
       ||
-      TYPE_CODE (type2) == TYPE_CODE_FLT)
+      TYPE_CODE (type2) == TYPE_CODE_DECFLOAT)
+    {
+      struct type *v_type;
+      int len_v1, len_v2, len_v;
+      gdb_byte v1[16], v2[16];
+      gdb_byte v[16];
+
+      value_args_as_decimal (arg1, arg2, v1, &len_v1, v2, &len_v2);
+
+      switch (op)
+	{
+	case BINOP_ADD:
+	case BINOP_SUB:
+	case BINOP_MUL:
+	case BINOP_DIV:
+	case BINOP_EXP:
+	  decimal_binop (op, v1, len_v1, v2, len_v2, v, &len_v);
+	  break;
+
+	default:
+	  error (_("Operation not valid for decimal floating point number."));
+	}
+
+      if (TYPE_CODE (type1) != TYPE_CODE_DECFLOAT)
+	/* If arg1 is not a decimal float, the type of the result is the type
+	   of the decimal float argument, arg2.  */
+	v_type = type2;
+      else if (TYPE_CODE (type2) != TYPE_CODE_DECFLOAT)
+	/* Same logic, for the case where arg2 is not a decimal float.  */
+	v_type = type1;
+      else
+	/* len_v is equal either to len_v1 or to len_v2.  the type of the
+	   result is the type of the argument with the same length as v.  */
+	v_type = (len_v == len_v1)? type1 : type2;
+
+      val = value_from_decfloat (v_type, v);
+    }
+  else if (TYPE_CODE (type1) == TYPE_CODE_FLT
+	   ||
+	   TYPE_CODE (type2) == TYPE_CODE_FLT)
     {
       /* FIXME-if-picky-about-floating-accuracy: Should be doing this
          in target format.  real.c in GCC probably has the necessary
@@ -1177,6 +1275,8 @@ value_logical_not (struct value *arg1)
 
   if (TYPE_CODE (type1) == TYPE_CODE_FLT)
     return 0 == value_as_double (arg1);
+  else if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT)
+    return decimal_is_zero (value_contents (arg1), TYPE_LENGTH (type1));
 
   len = TYPE_LENGTH (type1);
   p = value_contents (arg1);
@@ -1255,6 +1355,16 @@ value_equal (struct value *arg1, struct value *arg2)
       DOUBLEST d = value_as_double (arg1);
       return d == value_as_double (arg2);
     }
+  else if ((code1 == TYPE_CODE_DECFLOAT || is_int1)
+	   && (code2 == TYPE_CODE_DECFLOAT || is_int2))
+    {
+      gdb_byte v1[16], v2[16];
+      int len_v1, len_v2;
+
+      value_args_as_decimal (arg1, arg2, v1, &len_v1, v2, &len_v2);
+
+      return decimal_compare (v1, len_v1, v2, len_v2) == 0;
+    }
 
   /* FIXME: Need to promote to either CORE_ADDR or LONGEST, whichever
      is bigger.  */
@@ -1319,6 +1429,16 @@ value_less (struct value *arg1, struct value *arg2)
       DOUBLEST d = value_as_double (arg1);
       return d < value_as_double (arg2);
     }
+  else if ((code1 == TYPE_CODE_DECFLOAT || is_int1)
+	   && (code2 == TYPE_CODE_DECFLOAT || is_int2))
+    {
+      gdb_byte v1[16], v2[16];
+      int len_v1, len_v2;
+
+      value_args_as_decimal (arg1, arg2, v1, &len_v1, v2, &len_v2);
+
+      return decimal_compare (v1, len_v1, v2, len_v2) == -1;
+    }
   else if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
     return value_as_address (arg1) < value_as_address (arg2);
 
@@ -1350,6 +1470,8 @@ value_pos (struct value *arg1)
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     return value_from_double (type, value_as_double (arg1));
+  else if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+    return value_from_decfloat (type, value_contents (arg1));
   else if (is_integral_type (type))
     {
       /* Perform integral promotion for ANSI C/C++.  FIXME: What about
@@ -1382,7 +1504,7 @@ value_neg (struct value *arg1)
       int len = TYPE_LENGTH (type);
       gdb_byte decbytes[16];  /* a decfloat is at most 128 bits long */
 
-      memcpy(decbytes, value_contents(arg1), len);
+      memcpy (decbytes, value_contents (arg1), len);
 
       if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
 	decbytes[len-1] = decbytes[len - 1] | 0x80;

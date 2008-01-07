@@ -982,6 +982,7 @@ value_as_double (struct value *val)
     error (_("Invalid floating value found in program."));
   return foo;
 }
+
 /* Extract a value as a C pointer. Does not deallocate the value.  
    Note that val's type may not actually be a pointer; value_as_long
    handles all the cases.  */
@@ -1127,6 +1128,11 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_FLT:
       return extract_typed_floating (valaddr, type);
 
+    case TYPE_CODE_DECFLOAT:
+      /* libdecnumber has a function to convert from decimal to integer, but
+	 it doesn't work when the decimal number has a fractional part.  */
+      return decimal_to_double (valaddr, len);
+
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
       /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
@@ -1184,6 +1190,8 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
 
       return extract_typed_floating (valaddr, type);
     }
+  else if (code == TYPE_CODE_DECFLOAT)
+    return decimal_to_double (valaddr, len);
   else if (nosign)
     {
       /* Unsigned -- be sure we compensate for signed LONGEST.  */
@@ -1643,23 +1651,12 @@ value_from_double (struct type *type, DOUBLEST num)
 }
 
 struct value *
-value_from_decfloat (struct type *expect_type, struct type *type,
-		      gdb_byte decbytes[16])
+value_from_decfloat (struct type *type, const gdb_byte *dec)
 {
   struct value *val = allocate_value (type);
-  int len = TYPE_LENGTH (type);
 
-  if (expect_type)
-    {
-      int expect_len = TYPE_LENGTH (expect_type);
-      char decstr[MAX_DECIMAL_STRING];
-      int real_len;
+  memcpy (value_contents_raw (val), dec, TYPE_LENGTH (type));
 
-      decimal_to_string (decbytes, len, decstr);
-      decimal_from_string (decbytes, expect_len, decstr);
-    }
-
-  memcpy (value_contents_raw (val), decbytes, len);
   return val;
 }
 

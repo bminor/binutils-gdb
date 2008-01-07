@@ -31,5 +31,14 @@
 
 extern void decimal_to_string (const gdb_byte *, int, char *);
 extern int decimal_from_string (gdb_byte *, int, const char *);
+extern void decimal_from_integral (struct value *from, gdb_byte *to, int len);
+extern void decimal_from_floating (struct value *from, gdb_byte *to, int len);
+extern DOUBLEST decimal_to_double (const gdb_byte *from, int len);
+extern void decimal_binop (enum exp_opcode, const gdb_byte *, int,
+			   const gdb_byte *, int, gdb_byte *, int *);
+extern int decimal_is_zero (const gdb_byte *x, int len);
+extern int decimal_compare (const gdb_byte *x, int len_x, const gdb_byte *y, int len_y);
+extern void decimal_convert (const gdb_byte *from, int len_from, gdb_byte *to,
+			     int len_to);
 
 #endif

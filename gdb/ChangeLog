@@ -1,3 +1,47 @@
+2008-01-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* Makefile.in (dfp.o): Depend on expression.h, gdbtypes.h and value.h.
+	(valarith.o): Depend on dfp.h.
+	(valops.o): Likewise.
+	* dfp.c: Include expression.h, gdbtypes.h, value.h and dfp.h.
+	(set_decnumber_context): New function.
+	(decimal_check_errors): Likewise.
+	(decimal_from_number): Likewise.
+	(decimal_to_number): Likewise.
+	(decimal_from_string): Use set_decnumber_context and
+	decimal_check_errors.
+	(decimal_from_integral): New function.
+	(decimal_from_floating): Likewise.
+	(decimal_to_double): Likewise.
+	(promote_decimal): Likewise.
+	(decimal_binop): Likewise.
+	(decimal_is_zero): Likewise.
+	(decimal_compare): Likewise.
+	(decimal_convert): Likewise.
+	* dfp.h (decimal_from_integral): New prototype.
+	(decimal_from_floating): Likewise.
+	(decimal_to_double): Likewise.
+	(decimal_binop): Likewise.
+	(decimal_is_zero): Likewise.
+	(decimal_compare): Likewise.
+	(decimal_convert): Likewise.
+	* eval.c (evaluate_subexp_standard): Remove expect_type argument from
+	call to value_from_decfloat.
+	* valarith.c: Include dfp.h.
+	(value_args_as_decimal): New function.
+	(value_binop): Add if block to handle TYPE_CODE_DECFLOAT values.
+	(value_logical_not): Likewise.
+	(value_equal): Likewise.
+	(value_less): Likewise.
+	(value_pos): Likewise.
+	(value_neg): Formatting fix.
+	* valops.c: Include dfp.h.
+	(value_cast): Add if block to handle TYPE_CODE_DECFLOAT values.
+	* value.c (unpack_long): Add case to handle TYPE_CODE_DECFLOAT.
+	(unpack_double): Add if block to handle TYPE_CODE_DECFLOAT.
+	(value_from_decfloat): Remove expect_type argument.
+	* value.h (value_from_decfloat): Update prototype.
+
 2008-01-07  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Ignore change in name of dynamic linker during

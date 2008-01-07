@@ -18,6 +18,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "expression.h"
+#include "gdbtypes.h"
+#include "value.h"
+#include "dfp.h"
 
 /* The order of the following headers is important for making sure
    decNumber structure is large enough to hold decimal128 digits.  */
@@ -50,6 +54,89 @@ match_endianness (const gdb_byte *from, int len, gdb_byte *to)
   return;
 }
 
+/* Helper function to get the appropriate libdecnumber context for each size
+   of decimal float.  */
+static void
+set_decnumber_context (decContext *ctx, int len)
+{
+  switch (len)
+    {
+      case 4:
+	decContextDefault (ctx, DEC_INIT_DECIMAL32);
+	break;
+      case 8:
+	decContextDefault (ctx, DEC_INIT_DECIMAL64);
+	break;
+      case 16:
+	decContextDefault (ctx, DEC_INIT_DECIMAL128);
+	break;
+    }
+
+  ctx->traps = 0;
+}
+
+/* Check for errors signaled in the decimal context structure.  */
+static void
+decimal_check_errors (decContext *ctx)
+{
+  /* An error here could be a division by zero, an overflow, an underflow or
+     an invalid operation (from the DEC_Errors constant in decContext.h).
+     Since GDB doesn't complain about division by zero, overflow or underflow
+     errors for binary floating, we won't complain about them for decimal
+     floating either.  */
+  if (ctx->status & DEC_IEEE_854_Invalid_operation)
+    {
+      /* Leave only the error bits in the status flags.  */
+      ctx->status &= DEC_IEEE_854_Invalid_operation;
+      error (_("Cannot perform operation: %s"), decContextStatusToString (ctx));
+    }
+}
+
+/* Helper function to convert from libdecnumber's appropriate representation
+   for computation to each size of decimal float.  */
+static void
+decimal_from_number (const decNumber *from, gdb_byte *to, int len)
+{
+  decContext set;
+
+  set_decnumber_context (&set, len);
+
+  switch (len)
+    {
+      case 4:
+	decimal32FromNumber ((decimal32 *) to, from, &set);
+	break;
+      case 8:
+	decimal64FromNumber ((decimal64 *) to, from, &set);
+	break;
+      case 16:
+	decimal128FromNumber ((decimal128 *) to, from, &set);
+	break;
+    }
+}
+
+/* Helper function to convert each size of decimal float to libdecnumber's
+   appropriate representation for computation.  */
+static void
+decimal_to_number (const gdb_byte *from, int len, decNumber *to)
+{
+  switch (len)
+    {
+      case 4:
+	decimal32ToNumber ((decimal32 *) from, to);
+	break;
+      case 8:
+	decimal64ToNumber ((decimal64 *) from, to);
+	break;
+      case 16:
+	decimal128ToNumber ((decimal128 *) from, to);
+	break;
+      default:
+	error (_("Unknown decimal floating point type.\n"));
+	break;
+    }
+}
+
 /* Convert decimal type to its string representation.  LEN is the length
    of the decimal type, 4 bytes for decimal32, 8 bytes for decimal64 and
    16 bytes for decimal128.  */
@@ -59,6 +146,7 @@ decimal_to_string (const gdb_byte *decbytes, int len, char *s)
   gdb_byte dec[16];
 
   match_endianness (decbytes, len, dec);
+
   switch (len)
     {
       case 4:
@@ -85,21 +173,17 @@ decimal_from_string (gdb_byte *decbytes, int len, const char *string)
   decContext set;
   gdb_byte dec[16];
 
+  set_decnumber_context (&set, len);
+
   switch (len)
     {
       case 4:
-	decContextDefault (&set, DEC_INIT_DECIMAL32);
-	set.traps = 0;
 	decimal32FromString ((decimal32 *) dec, string, &set);
 	break;
       case 8:
-	decContextDefault (&set, DEC_INIT_DECIMAL64);
-	set.traps = 0;
 	decimal64FromString ((decimal64 *) dec, string, &set);
 	break;
       case 16:
-	decContextDefault (&set, DEC_INIT_DECIMAL128);
-	set.traps = 0;
 	decimal128FromString ((decimal128 *) dec, string, &set);
 	break;
       default:
@@ -109,5 +193,208 @@ decimal_from_string (gdb_byte *decbytes, int len, const char *string)
 
   match_endianness (dec, len, decbytes);
 
+  /* Check for errors in the DFP operation.  */
+  decimal_check_errors (&set);
+
   return 1;
+}
+
+/* Converts a value of an integral type to a decimal float of
+   specified LEN bytes.  */
+void
+decimal_from_integral (struct value *from, gdb_byte *to, int len)
+{
+  LONGEST l;
+  gdb_byte dec[16];
+  decNumber number;
+  struct type *type;
+
+  type = check_typedef (value_type (from));
+
+  if (TYPE_LENGTH (type) > 4)
+    /* libdecnumber can convert only 32-bit integers.  */
+    error (_("Conversion of large integer to a decimal floating type is not supported."));
+
+  l = value_as_long (from);
+
+  if (TYPE_UNSIGNED (type))
+    decNumberFromUInt32 (&number, (unsigned int) l);
+  else
+    decNumberFromInt32 (&number, (int) l);
+
+  decimal_from_number (&number, dec, len);
+  match_endianness (dec, len, to);
+}
+
+/* Converts a value of a float type to a decimal float of
+   specified LEN bytes.
+
+   This is an ugly way to do the conversion, but libdecnumber does
+   not offer a direct way to do it.  */
+void
+decimal_from_floating (struct value *from, gdb_byte *to, int len)
+{
+  char *buffer;
+  int ret;
+
+  ret = asprintf (&buffer, "%.30Lg", value_as_double (from));
+  if (ret < 0)
+    error (_("Error in memory allocation for conversion to decimal float."));
+
+  decimal_from_string (to, len, buffer);
+
+  free (buffer);
+}
+
+/* Converts a decimal float of LEN bytes to a double value.  */
+DOUBLEST
+decimal_to_double (const gdb_byte *from, int len)
+{
+  char buffer[MAX_DECIMAL_STRING];
+
+  /* This is an ugly way to do the conversion, but libdecnumber does
+     not offer a direct way to do it.  */
+  decimal_to_string (from, len, buffer);
+  return strtod (buffer, NULL);
+}
+
+/* Check if operands have the same size and convert them to the
+   biggest of the two if necessary.  */
+static int
+promote_decimal (gdb_byte *x, int len_x, gdb_byte *y, int len_y)
+{
+  int len_result;
+  decNumber number;
+
+  if (len_x < len_y)
+    {
+      decimal_to_number (x, len_x, &number);
+      decimal_from_number (&number, x, len_y);
+      len_result = len_y;
+    }
+  else if (len_x > len_y)
+    {
+      decimal_to_number (y, len_y, &number);
+      decimal_from_number (&number, y, len_x);
+      len_result = len_x;
+    }
+  else
+    len_result = len_x;
+
+  return len_result;
+}
+
+/* Perform operation OP with operands X and Y and store value in RESULT.
+   If LEN_X and LEN_Y are not equal, RESULT will have the size of the biggest
+   of the two, and LEN_RESULT will be set accordingly.  */
+void
+decimal_binop (enum exp_opcode op, const gdb_byte *x, int len_x,
+	       const gdb_byte *y, int len_y, gdb_byte *result, int *len_result)
+{
+  decContext set;
+  decNumber number1, number2, number3;
+  gdb_byte dec1[16], dec2[16], dec3[16];
+
+  match_endianness (x, len_x, dec1);
+  match_endianness (y, len_y, dec2);
+
+  *len_result = promote_decimal (dec1, len_x, dec2, len_y);
+
+  /* Both operands are of size *len_result from now on.  */
+
+  decimal_to_number (dec1, *len_result, &number1);
+  decimal_to_number (dec2, *len_result, &number2);
+
+  set_decnumber_context (&set, *len_result);
+
+  switch (op)
+    {
+      case BINOP_ADD:
+	decNumberAdd (&number3, &number1, &number2, &set);
+	break;
+      case BINOP_SUB:
+	decNumberSubtract (&number3, &number1, &number2, &set);
+	break;
+      case BINOP_MUL:
+	decNumberMultiply (&number3, &number1, &number2, &set);
+	break;
+      case BINOP_DIV:
+	decNumberDivide (&number3, &number1, &number2, &set);
+	break;
+      case BINOP_EXP:
+	decNumberPower (&number3, &number1, &number2, &set);
+	break;
+      default:
+	internal_error (__FILE__, __LINE__,
+			_("Unknown decimal floating point operation."));
+	break;
+    }
+
+  /* Check for errors in the DFP operation.  */
+  decimal_check_errors (&set);
+
+  decimal_from_number (&number3, dec3, *len_result);
+
+  match_endianness (dec3, *len_result, result);
+}
+
+/* Returns true if X (which is LEN bytes wide) is the number zero.  */
+int
+decimal_is_zero (const gdb_byte *x, int len)
+{
+  decNumber number;
+  gdb_byte dec[16];
+
+  match_endianness (x, len, dec);
+  decimal_to_number (dec, len, &number);
+
+  return decNumberIsZero (&number);
+}
+
+/* Compares two numbers numerically.  If X is less than Y then the return value
+   will be -1.  If they are equal, then the return value will be 0.  If X is
+   greater than the Y then the return value will be 1.  */
+int
+decimal_compare (const gdb_byte *x, int len_x, const gdb_byte *y, int len_y)
+{
+  decNumber number1, number2, result;
+  decContext set;
+  gdb_byte dec1[16], dec2[16];
+  int len_result;
+
+  match_endianness (x, len_x, dec1);
+  match_endianness (y, len_y, dec2);
+
+  len_result = promote_decimal (dec1, len_x, dec2, len_y);
+
+  decimal_to_number (dec1, len_result, &number1);
+  decimal_to_number (dec2, len_result, &number2);
+
+  set_decnumber_context (&set, len_result);
+
+  decNumberCompare (&result, &number1, &number2, &set);
+
+  /* Check for errors in the DFP operation.  */
+  decimal_check_errors (&set);
+
+  if (decNumberIsNaN (&result))
+    error (_("Comparison with an invalid number (NaN)."));
+  else if (decNumberIsZero (&result))
+    return 0;
+  else if (decNumberIsNegative (&result))
+    return -1;
+  else
+    return 1;
+}
+
+/* Convert a decimal value from a decimal type with LEN_FROM bytes to a
+   decimal type with LEN_TO bytes.  */
+void
+decimal_convert (const gdb_byte *from, int len_from, gdb_byte *to,
+		 int len_to)
+{
+  decNumber number;
+
+  decimal_to_number (from, len_from, &number);
+  decimal_from_number (&number, to, len_to);
 }

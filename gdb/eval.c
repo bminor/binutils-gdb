@@ -458,8 +458,8 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_DECFLOAT:
       (*pos) += 3;
-      return value_from_decfloat (expect_type, exp->elts[pc + 1].type,
-				exp->elts[pc + 2].decfloatconst);
+      return value_from_decfloat (exp->elts[pc + 1].type,
+				  exp->elts[pc + 2].decfloatconst);
 
     case OP_VAR_VALUE:
       (*pos) += 3;

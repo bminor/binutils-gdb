@@ -36,6 +36,7 @@
 #include "infcall.h"
 #include "dictionary.h"
 #include "cp-support.h"
+#include "dfp.h"
 
 #include <errno.h>
 #include "gdb_string.h"
@@ -338,7 +339,8 @@ value_cast (struct type *type, struct value *arg2)
     code2 = TYPE_CODE_INT;
 
   scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_FLT
-	    || code2 == TYPE_CODE_ENUM || code2 == TYPE_CODE_RANGE);
+	    || code2 == TYPE_CODE_DECFLOAT || code2 == TYPE_CODE_ENUM
+	    || code2 == TYPE_CODE_RANGE);
 
   if (code1 == TYPE_CODE_STRUCT
       && code2 == TYPE_CODE_STRUCT
@@ -357,6 +359,22 @@ value_cast (struct type *type, struct value *arg2)
     }
   if (code1 == TYPE_CODE_FLT && scalar)
     return value_from_double (type, value_as_double (arg2));
+  else if (code1 == TYPE_CODE_DECFLOAT && scalar)
+    {
+      int dec_len = TYPE_LENGTH (type);
+      gdb_byte dec[16];
+
+      if (code2 == TYPE_CODE_FLT)
+	decimal_from_floating (arg2, dec, dec_len);
+      else if (code2 == TYPE_CODE_DECFLOAT)
+	decimal_convert (value_contents (arg2), TYPE_LENGTH (type2),
+			 dec, dec_len);
+      else
+	/* The only option left is an integral type.  */
+	decimal_from_integral (arg2, dec, dec_len);
+
+      return value_from_decfloat (type, dec);
+    }
   else if ((code1 == TYPE_CODE_INT || code1 == TYPE_CODE_ENUM
 	    || code1 == TYPE_CODE_RANGE)
 	   && (scalar || code2 == TYPE_CODE_PTR
