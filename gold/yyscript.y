@@ -168,14 +168,24 @@ file_list:
 
 /* A command which may appear at top level of a linker script.  */
 file_cmd:
-	  OUTPUT_FORMAT '(' STRING ')'
-	| GROUP
+	  GROUP
 	    { script_start_group(closure); }
 	  '(' input_list ')'
 	    { script_end_group(closure); }
         | OPTION '(' STRING ')'
             { script_parse_option(closure, $3); }
 	| file_or_sections_cmd
+	| ignore_cmd
+	;
+
+/* Top level commands which we ignore.  The GNU linker uses these to
+   select the output format, but we don't offer a choice.  Ignoring
+   these is more-or-less OK since most scripts simply explicitly
+   choose the default.  */
+ignore_cmd:
+	  OUTPUT_FORMAT '(' STRING ')'
+	| OUTPUT_FORMAT '(' STRING ',' STRING ',' STRING ')'
+	| OUTPUT_ARCH '(' STRING ')'
 	;
 
 /* A list of input file names.  */

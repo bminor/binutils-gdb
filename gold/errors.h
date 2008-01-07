@@ -95,9 +95,13 @@ class Errors
 
   // Initialize the lock.  We don't do this in the constructor because
   // lock initialization wants to know whether we are using threads or
-  // not.
-  void
+  // not.  This returns true if the lock is now initialized.
+  bool
   initialize_lock();
+
+  // Increment a counter, holding the lock.
+  void
+  increment_counter(int*);
 
   // The number of times we report an undefined symbol.
   static const int max_undefined_error_report = 5;

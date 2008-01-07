@@ -881,13 +881,21 @@ class Parser_closure
   at_eof() const
   { return this->next_token_index_ >= this->tokens_->size(); }
 
-  // Return the next token.
+  // Return the next token, and advance.
   const Token*
   next_token()
   {
     const Token* ret = &(*this->tokens_)[this->next_token_index_];
     ++this->next_token_index_;
     return ret;
+  }
+
+  // Return the previous token.
+  const Token*
+  last_token() const
+  {
+    gold_assert(this->next_token_index_ > 0);
+    return &(*this->tokens_)[this->next_token_index_ - 1];
   }
 
   // Return the list of input files, creating it if necessary.  This
@@ -1240,7 +1248,9 @@ yyerror(void* closurev, const char* message)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
 
-  gold_error(_("%s: %s"), closure->filename(), message);
+  const Token* token = closure->last_token();
+  gold_error(_("%s:%d:%d: %s"), closure->filename(), token->lineno(),
+	     token->charpos(), message);
 }
 
 // Called by the bison parser to add a file to the link.

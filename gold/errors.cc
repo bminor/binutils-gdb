@@ -44,13 +44,35 @@ Errors::Errors(const char* program_name)
 {
 }
 
-// Initialize the lock_ field.
+// Initialize the lock_ field.  If we have not yet processed the
+// parameters, then we can't initialize, since we don't yet know
+// whether we are using threads.  That is OK, since if we haven't
+// processed the parameters, we haven't created any threads, and we
+// don't need a lock.  Return true if the lock is now initialized.
 
-void
+bool
 Errors::initialize_lock()
 {
-  if (this->lock_ == NULL)
+  if (this->lock_ == NULL && parameters->options_valid())
     this->lock_ = new Lock;
+  return this->lock_ != NULL;
+}
+
+// Increment a counter, holding the lock if available.
+
+void
+Errors::increment_counter(int *counter)
+{
+  if (!this->initialize_lock())
+    {
+      // The lock does not exist, which means that we don't need it.
+      ++*counter;
+    }
+  else
+    {
+      Hold_lock h(*this->lock_);
+      ++*counter;
+    }
 }
 
 // Report a fatal error.
@@ -73,11 +95,7 @@ Errors::error(const char* format, va_list args)
   vfprintf(stderr, format, args);
   fputc('\n', stderr);
 
-  this->initialize_lock();
-  {
-    Hold_lock h(*this->lock_);
-    ++this->error_count_;
-  }
+  this->increment_counter(&this->error_count_);
 }
 
 // Report a warning.
@@ -89,11 +107,7 @@ Errors::warning(const char* format, va_list args)
   vfprintf(stderr, format, args);
   fputc('\n', stderr);
 
-  this->initialize_lock();
-  {
-    Hold_lock h(*this->lock_);
-    ++this->warning_count_;
-  }
+  this->increment_counter(&this->warning_count_);
 }
 
 // Report an error at a reloc location.
@@ -109,11 +123,7 @@ Errors::error_at_location(const Relocate_info<size, big_endian>* relinfo,
   vfprintf(stderr, format, args);
   fputc('\n', stderr);
 
-  this->initialize_lock();
-  {
-    Hold_lock h(*this->lock_);
-    ++this->error_count_;
-  }
+  this->increment_counter(&this->error_count_);
 }
 
 // Report a warning at a reloc location.
@@ -129,11 +139,7 @@ Errors::warning_at_location(const Relocate_info<size, big_endian>* relinfo,
   vfprintf(stderr, format, args);
   fputc('\n', stderr);
 
-  this->initialize_lock();
-  {
-    Hold_lock h(*this->lock_);
-    ++this->warning_count_;
-  }
+  this->increment_counter(&this->warning_count_);
 }
 
 // Issue an undefined symbol error.
@@ -144,7 +150,8 @@ Errors::undefined_symbol(const Symbol* sym,
 			 const Relocate_info<size, big_endian>* relinfo,
 			 size_t relnum, off_t reloffset)
 {
-  this->initialize_lock();
+  bool initialized = this->initialize_lock();
+  gold_assert(initialized);
   {
     Hold_lock h(*this->lock_);
     if (++this->undefined_symbols_[sym] >= max_undefined_error_report)

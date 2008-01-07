@@ -154,8 +154,7 @@ invoke_script(int argc, char** argv, char* arg, bool long_option,
 							  arg, long_option,
 							  &ret);
   if (!read_commandline_script(script_name, cmdline))
-    gold::gold_error(_("%s: unable to parse script file %s\n"),
-		     gold::program_name, arg);
+    gold::gold_error(_("unable to parse script file %s\n"), script_name);
   return ret;
 }
 
