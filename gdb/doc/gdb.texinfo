@@ -9136,6 +9136,7 @@ gcc.info, Using the @sc{gnu} Compiler Collection (GCC)}.
 * C Checks::                    C and C@t{++} type and range checks
 * Debugging C::                 @value{GDBN} and C
 * Debugging C Plus Plus::       @value{GDBN} features for C@t{++}
+* Decimal Floating Point::      Numbers in Decimal Floating Point format
 @end menu
 
 @node C Operators
@@ -9603,6 +9604,28 @@ also use the @value{GDBN} command-line word completion facilities to list the
 available choices, or to finish the type list for you.
 @xref{Completion,, Command Completion}, for details on how to do this.
 @end table
+
+@node Decimal Floating Point
+@subsubsection Decimal Floating Point format
+@cindex decimal floating point format
+
+@value{GDBN} can examine, set and perform computations with numbers in
+decimal floating point format, which in the C language correspond to the
+@code{_Decimal32}, @code{_Decimal64} and @code{_Decimal128} types as
+specified by the extension to support decimal floating-point arithmetic.
+
+There are two encodings in use, depending on the architecture: BID (Binary
+Integer Decimal) for x86 and x86-64, and DPD (Densely Packed Decimal) for
+PowerPC. @value{GDBN} will use the appropriate encoding for the configured
+target.
+
+Because of a limitation in @file{libdecnumber}, the library used by @value{GDBN}
+to manipulate decimal floating point numbers, it is not possible to convert
+(using a cast, for example) integers wider than 32-bit to decimal float.
+
+In addition, in order to imitate @value{GDBN}'s behaviour with binary floating
+point computations, error checking in decimal float operations ignores
+underflow, overflow and divide by zero exceptions.
 
 @node Objective-C
 @subsection Objective-C

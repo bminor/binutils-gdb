@@ -1,3 +1,9 @@
+2008-01-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo (C and C++): Add Decimal Floating Point format
+	subsubsection.
+	(Decimal Floating Point format): New subsubsection.
+
 2008-01-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (File Options): Remove mention of the attempt to
