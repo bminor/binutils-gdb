@@ -1569,6 +1569,25 @@ elf_lookup_lib_symbol (const struct objfile *objfile,
 		(objfile, name, linkage_name, domain, symtab);
 }
 
+static int
+svr4_same (struct so_list *gdb, struct so_list *inferior)
+{
+  if (! strcmp (gdb->so_original_name, inferior->so_original_name))
+    return 1;
+
+  /* On Solaris, when starting inferior we think that dynamic linker is
+     /usr/lib/ld.so.1, but later on, the table of loaded shared libraries 
+     contains /lib/ld.so.1.  Sometimes one file is a link to another, but 
+     sometimes they have identical content, but are not linked to each
+     other.  We don't restrict this check for Solaris, but the chances
+     of running into this situation elsewhere are very low.  */
+  if (strcmp (gdb->so_original_name, "/usr/lib/ld.so.1") == 0
+      && strcmp (inferior->so_original_name, "/lib/ld.so.1") == 0)
+    return 1;
+
+  return 0;
+}
+
 extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */
 
 void
@@ -1585,4 +1604,5 @@ _initialize_svr4_solib (void)
   svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
   svr4_so_ops.in_dynsym_resolve_code = svr4_in_dynsym_resolve_code;
   svr4_so_ops.lookup_lib_global_symbol = elf_lookup_lib_symbol;
+  svr4_so_ops.same = svr4_same;
 }

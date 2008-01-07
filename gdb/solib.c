@@ -538,8 +538,16 @@ update_solib_list (int from_tty, struct target_ops *target)
 	 the inferior's current list.  */
       while (i)
 	{
-	  if (! strcmp (gdb->so_original_name, i->so_original_name))
-	    break;
+	  if (ops->same)
+	    {
+	      if (ops->same (gdb, i))
+		break;
+	    }
+	  else
+	    {
+	      if (! strcmp (gdb->so_original_name, i->so_original_name))
+		break;	      
+	    }
 
 	  i_link = &i->next;
 	  i = *i_link;

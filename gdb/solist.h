@@ -115,6 +115,10 @@ struct target_so_ops
 						 const domain_enum domain,
 						 struct symtab **symtab);
 
+    /* Given two so_list objects, one from the GDB thread list
+       and another from the list returned by current_sos, return 1
+       if they represent the same library.  */
+    int (*same) (struct so_list *gdb, struct so_list *inferior);
   };
 
 /* Free the memory associated with a (so_list *).  */
