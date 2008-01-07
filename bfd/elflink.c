@@ -9511,6 +9511,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	default:
 	  {
 	    if (! (o->flags & SEC_EXCLUDE)
+		&& ! (o->output_section->flags & SEC_NEVER_LOAD)
 		&& ! bfd_set_section_contents (output_bfd, o->output_section,
 					       contents,
 					       (file_ptr) o->output_offset,

@@ -1,3 +1,9 @@
+2008-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/5522
+	* elflink.c (elf_link_input_bfd): Don't write out a section if
+	its output section is marked with SEC_NEVER_LOAD.
+
 For older changes see ChangeLog-2007
 
 Local Variables:
