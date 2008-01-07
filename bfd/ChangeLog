@@ -1,3 +1,9 @@
+2008-01-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/5535
+	* vms.c (vms_close_and_cleanup): Check for the presence of a
+	vms_private_data_struct before examining any of its fields.
+
 2008-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/5522

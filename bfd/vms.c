@@ -428,7 +428,8 @@ vms_close_and_cleanup (bfd * abfd)
 #if VMS_DEBUG
   vms_debug (1, "vms_close_and_cleanup (%p)\n", abfd);
 #endif
-  if (abfd == NULL)
+  if (abfd == NULL
+      || abfd->tdata.any == NULL)
     return TRUE;
 
   if (PRIV (vms_buf) != NULL)
