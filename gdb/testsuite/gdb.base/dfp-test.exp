@@ -18,6 +18,53 @@
 # This file is part of the gdb testsuite.  It is intended to test that
 # gdb could correctly handle decimal floating point introduced in IEEE 754R.
 
+if $tracelevel then {
+  strace $tracelevel
+}
+
+set testfile "dfp-test"
+set srcfile ${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+# Try to compile the test case.  If we can't, assume the
+# toolchain does not yet provide DFP support and bail out.
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {quiet debug}] != "" } {
+    verbose "Skipping DFP tests."
+    return -1
+}
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+if ![runto_main] then {
+    perror "couldn't run to breakpoint"
+    continue
+}
+
+# Detect the size of the target's basic types (from gdb.base/long_long.exp).
+
+proc get_valueof { fmt exp default } {
+    global gdb_prompt
+    send_gdb "print${fmt} ${exp}\n"
+    gdb_expect {
+	-re "\\$\[0-9\]* = (\[-\]*\[0-9\]*).*$gdb_prompt $" {
+	    set val $expect_out(1,string)
+	}
+	timeout {
+	    set val ${default}
+	}
+    }
+    return ${val}
+}
+
+proc get_sizeof { type default } {
+    return [get_valueof "/d" "sizeof (${type})" $default]
+}
+
+set sizeof_long [get_sizeof "long" 4]
+
 proc d32_set_tests {} {
 
     gdb_test "p d32=123.45df" " = 123.45"
@@ -43,10 +90,10 @@ proc d32_set_tests {} {
     gdb_test "p d32=1.234567E+97df" " = Infinity" "1.234567E+97 is Infinity"
 
     # Test that gdb could detect the errors in the string representation of _Decimal32
-    gdb_test "p d32=12345.df" " = 12345" "12345. is an valid number"
+    gdb_test "p d32=12345.df" " = 12345" "12345. is a valid number"
     gdb_test "p d32=12345df" ".*Invalid number.*" "12345 is an invalid number"
-    gdb_test "p d32=1.23Edf" " = NaN" "1.23E is NaN (not a number)"
-    gdb_test "p d32=1.23E45Adf" " = NaN" "1.23E45A is NaN (not a number)"
+    gdb_test "p d32=1.23Edf" ".*Conversion syntax.*" "1.23E is an invalid number"
+    gdb_test "p d32=1.23E45Adf" ".*Conversion syntax.*" "1.23E45A is an invalid number"
 }
 
 proc d64_set_tests {} {
@@ -75,8 +122,8 @@ proc d64_set_tests {} {
 
     # Test that gdb could detect the errors in the string representation of _Decimal64
     gdb_test "p d64=12345dd" ".*Invalid number.*" "12345dd is an invalid number"
-    gdb_test "p d64=1.23Edd" " = NaN" "1.23E is NaN (not a number)"
-    gdb_test "p d64=1.23E45Add" "= NaN" "1.23E45A is NaN (not a number)"
+    gdb_test "p d64=1.23Edd" ".*Conversion syntax.*" "1.23E is an invalid number"
+    gdb_test "p d64=1.23E45Add" ".*Conversion syntax.*" "1.23E45A is an invalid number"
 }
 
 proc d128_set_tests {} {
@@ -104,33 +151,8 @@ proc d128_set_tests {} {
 
     # Test that gdb could detect the errors in the string representation of _Decimal128
     gdb_test "p d128=12345dl" ".*Invalid number.*" "12345dl is an invalid number"
-    gdb_test "p d128=1.23Edl" " = NaN" "1.23E is NaN (not a number)"
-    gdb_test "p d128=1.23E45Adl" "= NaN" "1.23E45A is NaN (not a number)"
-}
-
-
-if $tracelevel {
-    strace $tracelevel
-}
-
-set testfile "dfp-test"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-# Try to compile the test case.  If we can't, assume the
-# toolchain does not yet provide DFP support and bail out.
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {quiet debug}] != "" } {
-    verbose "Skipping DFP tests."
-    return -1
-}
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
-if ![runto_main] then {
-    perror "couldn't run to breakpoint"
-    continue
+    gdb_test "p d128=1.23Edl" ".*Conversion syntax.*" "1.23E is an invalid number"
+    gdb_test "p d128=1.23E45Adl" ".*Conversion syntax.*" "1.23E45A is an invalid number"
 }
 
 # Different tests on 32-bits decimal floating point, including the printing
@@ -237,6 +259,57 @@ gdb_test "print ds.dec32" " = 1.2345"
 gdb_test "print ds.dec64" " = 1.2345"
 gdb_test "print ds.dec128" " = 1.2345"
 
+# Test expressions with DFP variables.
+
+gdb_test "print d32 + ds.dec32" " = 1.3345"
+gdb_test "print d64 + ds.dec64" " = 1.3345"
+gdb_test "print d128 + ds.dec128" " = 1.3345"
+
+# Test conversion between different _Decimal sizes.
+
+gdb_test "ptype d64 + ds.dec32" " = volatile _Decimal64"
+gdb_test "ptype d128 + ds.dec32" " = volatile _Decimal128"
+gdb_test "ptype d128 + ds.dec64" " = volatile _Decimal128"
+
+# Mixture of Decimal and integral operands
+gdb_test "p d32 + 1" " = 1.1"
+gdb_test "p 2 + d64" " = 2.1"
+gdb_test "p ds.int4 + d128" " = 1.1"
+gdb_test "ptype d32 + 1" " = volatile _Decimal32"
+gdb_test "ptype ds.int4 + d128" " = volatile _Decimal128"
+
+# Test other operations with DFP operands
+gdb_test "p !d32" " = 0"
+gdb_test "p !d64" " = 0"
+gdb_test "p !d128" " = 0"
+gdb_test "p +d32" " = 0.1"
+gdb_test "p +d64" " = 0.1"
+gdb_test "p +d128" " = 0.1"
+gdb_test "p d64 == d128" " = 1"
+gdb_test "p d128 == ds.dec32" " = 0"
+gdb_test "p d128 == d32" " = 1"
+gdb_test "p ds.dec32 == ds.dec64" " = 1"
+gdb_test "p d32 < ds.dec32" " = 1"
+gdb_test "p d64 < ds.dec64" " = 1"
+gdb_test "p d128 < ds.dec128" " = 1"
+gdb_test "p ds.dec32 < d32" " = 0"
+gdb_test "p d64 > ds.dec64" " = 0"
+gdb_test "p ds.dec128 > d128 " " = 1"
+gdb_test "p d32 < ds.int4" " = 1"
+gdb_test "p ds.int4 > d32" " = 1"
+gdb_test "p ds.dec32 < ds.int4" " = 0"
+gdb_test "p ds.int4 > ds.dec64" " = 0"
+gdb_test "p ds.dec128 > ds.int4" " = 1"
+
+# Reject operation with integral larger than 32-bits
+if { ${sizeof_long} > 4 } {
+  gdb_test "p d32 + ds.long8" "Conversion of large integer to a decimal floating type is not supported."
+}
+
+# Reject operation with DFP and Binary FP
+gdb_test "p d64 + ds.float4" "Mixing decimal floating types with other floating types is not allowed."
+gdb_test "p ds.double8 + d128" "Mixing decimal floating types with other floating types is not allowed."
+
 # The following tests are intended to verify that gdb can handle "d1=d2"
 # and "d1=-d2" correctly.
 
@@ -246,3 +319,12 @@ gdb_test "print ds.dec128=d128" " = 0.1"
 gdb_test "print ds.dec32 = -d32" " = -0.1"
 gdb_test "print ds.dec64 = -d64" " = -0.1"
 gdb_test "print ds.dec128 = -d128" " = -0.1"
+
+# Test cast to and from DFP values
+
+gdb_test "print ds.double8 = ds.dec64" " = -0.(0999.*|1000.*)"
+gdb_test "print ds.dec64 = ds.float4" " = 3.(0999.*|1000.*)"
+gdb_test "print ds.dec128 = -ds.double8" " = 0.(0999.*|1000.*)"
+gdb_test "print ds.dec128 = ds.dec32" " = -0.1"
+gdb_test "print ds.dec32 = ds.int4" " = 1"
+gdb_test "print ds.int4 = 7.3dl" " = 7"

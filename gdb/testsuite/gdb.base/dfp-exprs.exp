@@ -74,14 +74,102 @@ proc test_dfp_literals_accepted {} {
 
 proc test_dfp_arithmetic_expressions {} {
 
-# Arithmetic operations for DFP types are not yet implemented in GDB.
-# These tests are to verify that they will generate expected error messages.
+    # _Decimal32 operands.
+    gdb_test "p 1.4df + 1.2df" " = 2.6"
+    gdb_test "p 1.4df - 1.2df" " = 0.2"
+    gdb_test "p 1.4df * 1.2df" " = 1.68"
+    gdb_test "p 1.4df / 1.2df" " = 1.166667"
 
-   gdb_test "p 1.4df + 1.2df" "Argument to arithmetic operation not a number or boolean.*"
-   gdb_test "p 1.4df - 1.2df" ".*Argument to arithmetic operation not a number or boolean.*"
-   gdb_test "p 1.4df * 1.2df" "Argument to arithmetic operation not a number or boolean.*"
-   gdb_test "p 1.4df / 1.2df" "Argument to arithmetic operation not a number or boolean.*"
+    # _Decimal64 operands.
+    gdb_test "p 1.4dd + 1.2dd" " = 2.6"
+    gdb_test "p 1.4dd - 1.2dd" " = 0.2"
+    gdb_test "p 1.4dd * 1.2dd" " = 1.68"
+    gdb_test "p 1.4dd / 1.2dd" " = 1.166666666666667"
 
+    # _Decimal128 operands.
+    gdb_test "p 1.4dl + 1.2dl" " = 2.6"
+    gdb_test "p 1.4dl - 1.2dl" " = 0.2"
+    gdb_test "p 1.4dl * 1.2dl" " = 1.68"
+    gdb_test "p 1.4dl / 1.2dl" " = 1.166666666666666666666666666666667"
+
+    # Test type of operation result.
+    gdb_test "ptype 2.df + 2.df" "= _Decimal32"
+    gdb_test "ptype 2.dd + 2.dd" "= _Decimal64"
+    gdb_test "ptype 2.dl + 2.dl" "= _Decimal128"
+
+    # Mixture of different _Decimal sizes.
+    gdb_test "p 2.1df + 2.7dd" "= 4.8"
+    gdb_test "p 2.1dd + 2.7df" "= 4.8"
+    gdb_test "p 2.6df + 2.7dl" "= 5.3"
+    gdb_test "p 2.6dl + 2.7df" "= 5.3"
+    gdb_test "p 2.3dd + 2.2dl" "= 4.5"
+    gdb_test "p 2.3dl + 2.2dd" "= 4.5"
+    gdb_test "ptype 2.df + 2.dd" "= _Decimal64"
+    gdb_test "ptype 2.df + 2.dl" "= _Decimal128"
+    gdb_test "ptype 2.dd + 2.dl" "= _Decimal128"
+
+    # Mixture of Decimal and integral operands
+    gdb_test "p 1.2df + 1" " = 2.2"
+    gdb_test "p 2 + 1.7dd" " = 3.7"
+    gdb_test "p 3 + 2.1dl" " = 5.1"
+    gdb_test "ptype 1.2df + 1" " = _Decimal32"
+    gdb_test "ptype 2 + 1.7dd" " = _Decimal64"
+    gdb_test "ptype 3 + 2.1dl" " = _Decimal128"
+
+    # Reject operation with integral larger than 32-bits
+    gdb_test "p 1.2df + 2ll" "Conversion of large integer to a decimal floating type is not supported."
+
+    # Reject operation with DFP and Binary FP
+    gdb_test "p 1.2df + 1.2f" "Mixing decimal floating types with other floating types is not allowed."
+
+    # Test other operations with DFP operands
+    gdb_test "p !0.df" " = 1"
+    gdb_test "p !0.dd" " = 1"
+    gdb_test "p !0.dl" " = 1"
+    gdb_test "p !0.5df" " = 0"
+    gdb_test "p !0.5dd" " = 0"
+    gdb_test "p !0.5dl" " = 0"
+
+    gdb_test "p 1.2df == 1.2df" " = 1"
+    gdb_test "p 1.2df == 1.2dd" " = 1"
+    gdb_test "p 1.2df == 1.2dl" " = 1"
+    gdb_test "p 1.2dd == 1.2df" " = 1"
+    gdb_test "p 1.2dd == 1.2dl" " = 1"
+    gdb_test "p 1.2dl == 1.2df" " = 1"
+    gdb_test "p 1.2dl == 1.2dd" " = 1"
+    gdb_test "p 1.2df == 1.3df" " = 0"
+    gdb_test "p 1.2df == 1.3dd" " = 0"
+    gdb_test "p 1.2df == 1.3dl" " = 0"
+    gdb_test "p 1.2dd == 1.3df" " = 0"
+    gdb_test "p 1.2dd == 1.3dl" " = 0"
+    gdb_test "p 1.2dl == 1.3df" " = 0"
+    gdb_test "p 1.2dl == 1.3dd" " = 0"
+
+    gdb_test "p +1.2df" " = 1.2"
+    gdb_test "p +1.2dd" " = 1.2"
+    gdb_test "p +1.2dl" " = 1.2"
+
+    gdb_test "p 1.2df < 1.3df" " = 1"
+    gdb_test "p 1.2df < 1.3dd" " = 1"
+    gdb_test "p 1.2dl < 1.3df" " = 1"
+    gdb_test "p 1.2dd < 1.3dd" " = 1"
+    gdb_test "p 1.2dd < 1.3dl" " = 1"
+    gdb_test "p 1.2dl < 1.3dl" " = 1"
+    gdb_test "p 1.2dl < 1.3df" " = 1"
+    gdb_test "p 1.2df > 1" " = 1"
+    gdb_test "p 1.2dl > 2" " = 0"
+    gdb_test "p 2 > 1.2dd" " = 1"
+    gdb_test "p 2 > 3.1dl" " = 0"
+}
+
+proc test_dfp_conversions {} {
+    # Test cast to and from DFP values, and between DFPs of different sizes
+
+    gdb_test "p (float) -0.1df" " = -0.(0999.*|1000.*)"
+    gdb_test "p (int) 8.3dd" " = 8"
+    gdb_test "p (_Decimal64) 3.1" " = 3.(0999.*|1000.*)"
+    gdb_test "p (_Decimal128) 3.7df" " = 3.7"
+    gdb_test "p (_Decimal32) 4" " = 4"
 }
 
 # Start with a fresh gdb.
@@ -92,3 +180,4 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 test_dfp_literals_accepted
 test_dfp_arithmetic_expressions
+test_dfp_conversions

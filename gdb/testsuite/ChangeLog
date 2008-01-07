@@ -1,3 +1,20 @@
+2008-01-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.base/dfp-exprs.exp (test_dfp_arithmetic_expressions): Add tests
+	for expressions with decimal float values.
+	(test_dfp_conversions): New function to test casts to and from
+	decimal float types.
+	Call test_dfp_conversions.
+	* gdb.base/dfp-test.c (struct decstruct): Add float4 and double8
+	elements.
+	(main): Initialize ds.float4 and ds.double8 elements.
+	* gdb.base/dfp-test.exp (d32_set_tests): Fix typo.  Adjust expect
+	string to new error message.
+	(d64_set_tests): Likewise.
+	(d128_set_tests): Likewise.
+	Add tests for expressions with decimal float variables.  Add tests for
+	conversions to and from decimal float types.
+
 2008-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/packed_tagged/comp_bug.adb: New file.

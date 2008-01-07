@@ -26,6 +26,8 @@ struct decstruct
 {
   int int4;
   long long8;
+  float float4;
+  double double8;
   _Decimal32 dec32;
   _Decimal64 dec64;
   _Decimal128 dec128;
@@ -85,6 +87,8 @@ int main()
 
   ds.int4 = 1;
   ds.long8 = 2;
+  ds.float4 = 3.1;
+  ds.double8 = 4.2;
   ds.dec32 = 1.2345df;
   ds.dec64 = 1.2345dd;
   ds.dec128 = 1.2345dl;
