@@ -1,3 +1,7 @@
+2008-01-08  Doug Evans  <dje@google.com>
+
+	* dbxread.c (read_dbx_symtab): Fix indentation.
+
 2008-01-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* Makefile.in (dfp.o): Depend on expression.h, gdbtypes.h and value.h.

@@ -1551,7 +1551,7 @@ read_dbx_symtab (struct objfile *objfile)
 	    if (tmp_language != language_unknown
 		&& (tmp_language != language_c
 		    || psymtab_language != language_cplus))
-	    psymtab_language = tmp_language;
+	      psymtab_language = tmp_language;
 
 	    if (pst == NULL)
 	    {
@@ -1584,7 +1584,7 @@ read_dbx_symtab (struct objfile *objfile)
 	    if (tmp_language != language_unknown
 		&& (tmp_language != language_c
 		    || psymtab_language != language_cplus))
-	    psymtab_language = tmp_language;
+	      psymtab_language = tmp_language;
 
 	    /* In C++, one may expect the same filename to come round many
 	       times, when code is coming alternately from the main file
