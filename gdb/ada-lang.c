@@ -3822,6 +3822,7 @@ ensure_lval (struct value *val, CORE_ADDR *sp)
 	  if (gdbarch_frame_align_p (current_gdbarch))
 	    *sp = gdbarch_frame_align (current_gdbarch, *sp);
 	}
+      VALUE_LVAL (val) = lval_memory;
 
       write_memory (VALUE_ADDRESS (val), value_contents_raw (val), len);
     }
@@ -3850,11 +3851,13 @@ convert_actual (struct value *actual, struct type *formal_type0,
   if (ada_is_array_descriptor_type (formal_target)
       && TYPE_CODE (actual_target) == TYPE_CODE_ARRAY)
     return make_array_descriptor (formal_type, actual, sp);
-  else if (TYPE_CODE (formal_type) == TYPE_CODE_PTR)
+  else if (TYPE_CODE (formal_type) == TYPE_CODE_PTR
+	   || TYPE_CODE (formal_type) == TYPE_CODE_REF)
     {
+      struct value *result;
       if (TYPE_CODE (formal_target) == TYPE_CODE_ARRAY
           && ada_is_array_descriptor_type (actual_target))
-        return desc_data (actual);
+	result = desc_data (actual);
       else if (TYPE_CODE (actual_type) != TYPE_CODE_PTR)
         {
           if (VALUE_LVAL (actual) != lval_memory)
@@ -3867,8 +3870,11 @@ convert_actual (struct value *actual, struct type *formal_type0,
                       TYPE_LENGTH (actual_type));
               actual = ensure_lval (val, sp);
             }
-          return value_addr (actual);
+          result = value_addr (actual);
         }
+      else
+	return actual;
+      return value_cast_pointers (formal_type, result);
     }
   else if (TYPE_CODE (actual_type) == TYPE_CODE_PTR)
     return ada_value_ind (actual);
