@@ -1,3 +1,7 @@
+2008-01-08  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* config.in: Regenerate.
+
 2008-01-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_convert_actual): Renames convert_actual.

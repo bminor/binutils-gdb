@@ -503,6 +503,9 @@
 /* Define if the prfpregset_t type is broken. */
 #undef PRFPREGSET_T_BROKEN
 
+/* Define to 1 if the "%H, %D and %DD" formats work to print decfloats. */
+#undef PRINTF_HAS_DECFLOAT
+
 /* Define to 1 if the "%Lg" format works to print long doubles. */
 #undef PRINTF_HAS_LONG_DOUBLE
 
