@@ -1,3 +1,8 @@
+2008-01-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/print_pc.exp: Add verification of where gdb_start_cmd
+	landed.  Should also fix random failures in the test following it.
+
 2008-01-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.base/dfp-exprs.exp (test_dfp_arithmetic_expressions): Add tests

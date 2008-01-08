@@ -39,6 +39,10 @@ if { [gdb_start_cmd] < 0 } {
     return -1
 }
 
+gdb_test "" \
+         "dummy \\(\\) at .*dummy.adb:.*" \
+         "start inferior"
+
 gdb_test "p /x \$pc" \
          "0x\[0-9a-zA-Z\]+" \
          "p /x \$pc"
