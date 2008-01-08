@@ -1,3 +1,11 @@
+2008-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (lineno): New.
+	(filename): Likewise.
+	(set_bitfield): Report filename and line numer on error.
+	(process_i386_opcodes): Set filename and update lineno.
+	(process_i386_registers): Likewise.
+
 2008-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Rename IntelMnemonic to

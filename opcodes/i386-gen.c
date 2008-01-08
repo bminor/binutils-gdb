@@ -339,6 +339,9 @@ static bitfield operand_types[] =
 #endif
 };
 
+static int lineno;
+static const char *filename;
+
 static int
 compare (const void *x, const void *y)
 {
@@ -448,7 +451,8 @@ set_bitfield (const char *f, bitfield *array, unsigned int size)
 	return;
       }
 
-  printf ("Unknown bitfield: %s\n", f);
+  printf ("%s: %d: Unknown bitfield: %s\n",
+	  filename, lineno, f);
   abort ();
 }
 
@@ -601,13 +605,16 @@ process_i386_operand_type (FILE *table, char *op, int macro,
 static void
 process_i386_opcodes (FILE *table)
 {
-  FILE *fp = fopen ("i386-opc.tbl", "r");
+  FILE *fp;
   char buf[2048];
   unsigned int i;
   char *str, *p, *last;
   char *name, *operands, *base_opcode, *extension_opcode;
   char *opcode_length;
   char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
+
+  filename = "i386-opc.tbl";
+  fp = fopen (filename, "r");
 
   if (fp == NULL)
     fail (_("can't find i386-opc.tbl for reading, errno = %s\n"),
@@ -620,6 +627,8 @@ process_i386_opcodes (FILE *table)
     {
       if (fgets (buf, sizeof (buf), fp) == NULL)
 	break;
+
+      lineno++;
 
       p = remove_leading_whitespaces (buf);
 
@@ -776,11 +785,13 @@ process_i386_opcodes (FILE *table)
 static void
 process_i386_registers (FILE *table)
 {
-  FILE *fp = fopen ("i386-reg.tbl", "r");
+  FILE *fp;
   char buf[2048];
   char *str, *p, *last;
   char *reg_name, *reg_type, *reg_flags, *reg_num;
 
+  filename = "i386-reg.tbl";
+  fp = fopen (filename, "r");
   if (fp == NULL)
     fail (_("can't find i386-reg.tbl for reading, errno = %s\n"),
 	  xstrerror (errno));
@@ -792,6 +803,8 @@ process_i386_registers (FILE *table)
     {
       if (fgets (buf, sizeof (buf), fp) == NULL)
 	break;
+
+      lineno++;
 
       p = remove_leading_whitespaces (buf);
 
