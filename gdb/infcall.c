@@ -34,6 +34,7 @@
 #include "gdb_string.h"
 #include "infcall.h"
 #include "dummy-frame.h"
+#include "ada-lang.h"
 
 /* NOTE: cagney/2003-04-16: What's the future of this code?
 
@@ -91,18 +92,24 @@ Unwinding of stack if a signal is received while in a call dummy is %s.\n"),
 
 
 /* Perform the standard coercions that are specified
-   for arguments to be passed to C functions.
+   for arguments to be passed to C or Ada functions.
 
    If PARAM_TYPE is non-NULL, it is the expected parameter type.
-   IS_PROTOTYPED is non-zero if the function declaration is prototyped.  */
+   IS_PROTOTYPED is non-zero if the function declaration is prototyped.
+   SP is the stack pointer were additional data can be pushed (updating
+   its value as needed).  */
 
 static struct value *
 value_arg_coerce (struct value *arg, struct type *param_type,
-		  int is_prototyped)
+		  int is_prototyped, CORE_ADDR *sp)
 {
   struct type *arg_type = check_typedef (value_type (arg));
   struct type *type
     = param_type ? check_typedef (param_type) : arg_type;
+
+  /* Perform any Ada-specific coercion first.  */
+  if (current_language->la_language == language_ada)
+    arg = ada_convert_actual (arg, type, sp);
 
   switch (TYPE_CODE (type))
     {
@@ -577,7 +584,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	else
 	  param_type = NULL;
 
-	args[i] = value_arg_coerce (args[i], param_type, prototyped);
+	args[i] = value_arg_coerce (args[i], param_type, prototyped, &sp);
 
 	if (param_type != NULL && language_pass_by_reference (param_type))
 	  args[i] = value_addr (args[i]);

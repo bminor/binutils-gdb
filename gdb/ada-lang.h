@@ -278,8 +278,9 @@ extern void ada_printchar (int, struct ui_file *);
 extern void ada_printstr (struct ui_file *, const gdb_byte *,
 			  unsigned int, int, int);
 
-extern void ada_convert_actuals (struct value *, int, struct value **,
-                                 CORE_ADDR *);
+struct value *ada_convert_actual (struct value *actual,
+                                  struct type *formal_type0,
+                                  CORE_ADDR *sp);
 
 extern struct value *ada_value_subscript (struct value *, int,
                                           struct value **);

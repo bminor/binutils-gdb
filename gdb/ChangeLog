@@ -1,3 +1,15 @@
+2008-01-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_convert_actual): Renames convert_actual.
+	Make non-static.
+	(ada_convert_actuals): Delete.
+	* ada-lang.h (ada_convert_actual): Add declaration.
+	(ada_convert_actuals): Remove declaration.
+	* infcall.c: #include "ada-lang.h".
+	(value_arg_coerce): Add new parameter sp.  Update function
+	documetnation.  Add handling of Ada function call parameters.
+	* Makefile.in (infcall.o): Update dependencies.
+
 2008-01-08  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ensure_lval): Fix value lval kind.

@@ -3835,9 +3835,9 @@ ensure_lval (struct value *val, CORE_ADDR *sp)
    allocating any necessary descriptors (fat pointers), or copies of
    values not residing in memory, updating it as needed.  */
 
-static struct value *
-convert_actual (struct value *actual, struct type *formal_type0,
-                CORE_ADDR *sp)
+struct value *
+ada_convert_actual (struct value *actual, struct type *formal_type0,
+                    CORE_ADDR *sp)
 {
   struct type *actual_type = ada_check_typedef (value_type (actual));
   struct type *formal_type = ada_check_typedef (formal_type0);
@@ -3928,30 +3928,6 @@ make_array_descriptor (struct type *type, struct value *arr, CORE_ADDR *sp)
     return value_addr (descriptor);
   else
     return descriptor;
-}
-
-
-/* Assuming a dummy frame has been established on the target, perform any
-   conversions needed for calling function FUNC on the NARGS actual
-   parameters in ARGS, other than standard C conversions.  Does
-   nothing if FUNC does not have Ada-style prototype data, or if NARGS
-   does not match the number of arguments expected.  Use *SP as a
-   stack pointer for additional data that must be pushed, updating its
-   value as needed.  */
-
-void
-ada_convert_actuals (struct value *func, int nargs, struct value *args[],
-                     CORE_ADDR *sp)
-{
-  int i;
-
-  if (TYPE_NFIELDS (value_type (func)) == 0
-      || nargs != TYPE_NFIELDS (value_type (func)))
-    return;
-
-  for (i = 0; i < nargs; i += 1)
-    args[i] =
-      convert_actual (args[i], TYPE_FIELD_TYPE (value_type (func), i), sp);
 }
 
 /* Dummy definitions for an experimental caching module that is not
