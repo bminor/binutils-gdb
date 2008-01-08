@@ -1,5 +1,10 @@
 2008-01-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/funcall_param: New test program.
+	* gdb.ada/funcall_param.exp: New testcase.
+
+2008-01-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/arrayparam: New test program.
 	* gdb.ada/arrayparam.exp: New testcase.
 
