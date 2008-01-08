@@ -1,3 +1,8 @@
+2008-01-08  Kai Tietz  <kai.tietz@onevision.com>
+
+	* binutils/rclex.c: (yylex): Add ':', '_', '\\', and '/' to post
+	characters for name tokens. PR/5529.
+
 2008-01-04  Greg McGary  <greg@mcgary.org>
 
 	* prdbg.c (print_vma): Print as long long, if host supports it.

@@ -844,7 +844,11 @@ yylex (void)
 	default:
 	  if (ISIDST (ch) || ch=='$')
 	    {
-	      while ((ch = rclex_peekch ()) != -1 && (ISIDNUM (ch) || ch == '$' || ch == '.'))
+	      while ((ch = rclex_peekch ()) != -1
+		     && (ISIDNUM (ch) || ch == '$' || ch == '.'
+		         || ch == ':' || ch == '\\' || ch == '/'
+		         || ch == '_')
+		    )
 		rclex_readch ();
 	      ch = IGNORE_CPP (rclex_translatekeyword (rclex_tok));
 	      if (ch == STRING)
