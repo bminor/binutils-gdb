@@ -63,7 +63,8 @@ proc gas_host_run { cmd redir } {
 	set command "$cmd 2>gas.stderr"
 	set return_contents_of "gas.stderr"
     } elseif [regexp ">&.*" $redir] then {
-	set output_file [regsub ">&" $redir ""]
+	# See PR 5322 for why the following line is used.
+	regsub ">&" $redir "" output_file	
 	set command "$cmd 2>&1"
     } elseif [regexp "2>.*" $redir] then {
 	set output_file "gas.out"

@@ -1,3 +1,9 @@
+2008-01-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR gas/5322
+	* lib/gas-defs.exp (gas_host_run): Add fourth argument to regsub
+	command.
+
 2008-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/intel.s: Add tests for fadd, faddp, fdiv, fdivp,
