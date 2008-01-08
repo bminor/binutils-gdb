@@ -1,3 +1,9 @@
+2008-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (i386_operand): Renamed to ...
+	(i386_att_operand): This.
+	(parse_operands): Updated.
+
 2008-01-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/c-i386.texi: Update .att_mnemonic and .intel_mnemonic.

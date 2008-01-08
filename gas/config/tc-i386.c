@@ -66,7 +66,7 @@ static void pe_directive_secrel (int);
 #endif
 static void signed_cons (int);
 static char *output_invalid (int c);
-static int i386_operand (char *);
+static int i386_att_operand (char *);
 static int i386_intel_operand (char *, int);
 static const reg_entry *parse_register (char *, char **);
 static char *parse_insn (char *, char *);
@@ -2656,7 +2656,7 @@ parse_operands (char *l, const char *mnemonic)
 	      i386_intel_operand (token_start,
 				  intel_float_operand (mnemonic));
 	  else
-	    operand_ok = i386_operand (token_start);
+	    operand_ok = i386_att_operand (token_start);
 
 	  RESTORE_END_STRING (l);
 	  if (!operand_ok)
@@ -6054,7 +6054,7 @@ i386_index_check (const char *operand_string)
    on error.  */
 
 static int
-i386_operand (char *operand_string)
+i386_att_operand (char *operand_string)
 {
   const reg_entry *r;
   char *end_op;
