@@ -1,3 +1,8 @@
+2008-01-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (create_array_type): Add handling of null Ada arrays.
+	(check_typedef): Likewise.
+
 2008-01-09  Luis Machado  <luisgpm@br.ibm.com>
 
 	* printcmd.c (printf_command): Add seen_big_h, seen_big_d and

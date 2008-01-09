@@ -811,8 +811,14 @@ create_array_type (struct type *result_type,
   if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
     low_bound = high_bound = 0;
   CHECK_TYPEDEF (element_type);
-  TYPE_LENGTH (result_type) =
-    TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
+  /* Be careful when setting the array length.  Ada arrays can be
+     empty arrays with the high_bound being smaller than the low_bound.
+     In such cases, the array length should be zero.  */
+  if (high_bound < low_bound)
+    TYPE_LENGTH (result_type) = 0;
+  else
+    TYPE_LENGTH (result_type) =
+      TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
   TYPE_NFIELDS (result_type) = 1;
   TYPE_FIELDS (result_type) =
     (struct field *) TYPE_ALLOC (result_type, sizeof (struct field));
@@ -1492,11 +1498,19 @@ check_typedef (struct type *type)
 		   == TYPE_CODE_RANGE))
 	{
 	  /* Now recompute the length of the array type, based on its
-	     number of elements and the target type's length.  */
-	  TYPE_LENGTH (type) =
-	    ((TYPE_FIELD_BITPOS (range_type, 1)
-	      - TYPE_FIELD_BITPOS (range_type, 0) + 1)
-	     * TYPE_LENGTH (target_type));
+	     number of elements and the target type's length.
+	     Watch out for Ada null Ada arrays where the high bound
+	     is smaller than the low bound.  */
+	  const int low_bound = TYPE_FIELD_BITPOS (range_type, 0);
+	  const int high_bound = TYPE_FIELD_BITPOS (range_type, 1);
+	  int nb_elements;
+	
+	  if (high_bound < low_bound)
+	    nb_elements = 0;
+	  else
+	    nb_elements = high_bound - low_bound + 1;
+	
+	  TYPE_LENGTH (type) = nb_elements * TYPE_LENGTH (target_type);
 	  TYPE_FLAGS (type) &= ~TYPE_FLAG_TARGET_STUB;
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_RANGE)
