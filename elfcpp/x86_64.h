@@ -1,7 +1,7 @@
 // x86-64.h -- ELF definitions specific to EM_X86_64  -*- C++ -*-
 
 // Copyright 2006, 2007, Free Software Foundation, Inc.
-// Written by Andrew Chatham <chatham@google.com>.
+// Written by Andrew Chatham.
 
 // This file is part of elfcpp.
    
