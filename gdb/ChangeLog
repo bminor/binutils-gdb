@@ -1,3 +1,14 @@
+2008-01-09  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* doublest.h (DOUBLEST_PRINT_FORMAT): Remove % from string.
+	(DOUBLEST_SCAN_FORMAT): Likewise.
+	* dfp.c (decimal_from_floating): Use DOUBLEST_PRINT_FORMAT.
+	* ada-lex.l (processReal): Prepend "%" to use of DOUBLEST_SCAN_FORMAT.
+	* c-exp.y (parse_number): Likewise.
+	* jv-exp.y (parse_number): Likewise.
+	* objc-exp.y (parse_number): Likewise.
+	* p-exp.y (parse_number): Likewise.
+
 2008-01-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.c (create_array_type): Add handling of null Ada arrays.

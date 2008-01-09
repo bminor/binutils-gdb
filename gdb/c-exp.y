@@ -1125,7 +1125,7 @@ parse_number (p, len, parsed_float, putithere)
 	  return (DECFLOAT);
 	}
 
-      num = sscanf (p, DOUBLEST_SCAN_FORMAT "%s",
+      num = sscanf (p, "%" DOUBLEST_SCAN_FORMAT "%s",
 		    &putithere->typed_val_float.dval, s);
       p[len] = saved_char;	/* restore the input stream */
 

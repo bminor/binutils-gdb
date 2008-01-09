@@ -237,7 +237,8 @@ decimal_from_floating (struct value *from, gdb_byte *to, int len)
   char *buffer;
   int ret;
 
-  ret = asprintf (&buffer, "%.30Lg", value_as_double (from));
+  ret = asprintf (&buffer, "%.30" DOUBLEST_PRINT_FORMAT,
+		  value_as_double (from));
   if (ret < 0)
     error (_("Error in memory allocation for conversion to decimal float."));
 

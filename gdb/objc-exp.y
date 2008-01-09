@@ -1023,7 +1023,7 @@ parse_number (p, len, parsed_float, putithere)
 
       /* It's a float since it contains a point or an exponent.  */
 
-      sscanf (p, DOUBLEST_SCAN_FORMAT "%c",
+      sscanf (p, "%" DOUBLEST_SCAN_FORMAT "%c",
 	      &putithere->typed_val_float.dval, &c);
 
       /* See if it has `f' or `l' suffix (float or long double).  */

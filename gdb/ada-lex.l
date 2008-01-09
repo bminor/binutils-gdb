@@ -373,7 +373,7 @@ processInt (const char *base0, const char *num0, const char *exp0)
 static int
 processReal (const char *num0)
 {
-  sscanf (num0, DOUBLEST_SCAN_FORMAT, &yylval.typed_val_float.dval);
+  sscanf (num0, "%" DOUBLEST_SCAN_FORMAT, &yylval.typed_val_float.dval);
 
   yylval.typed_val_float.type = type_float ();
   if (sizeof(DOUBLEST) >= gdbarch_double_bit (current_gdbarch)

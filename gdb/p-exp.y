@@ -797,7 +797,7 @@ parse_number (p, len, parsed_float, putithere)
       char saved_char = p[len];
 
       p[len] = 0;	/* null-terminate the token */
-      num = sscanf (p, DOUBLEST_SCAN_FORMAT "%c",
+      num = sscanf (p, "%" DOUBLEST_SCAN_FORMAT "%c",
 		    &putithere->typed_val_float.dval, &c);
       p[len] = saved_char;	/* restore the input stream */
       if (num != 1) 		/* check scanf found ONLY a float ... */
