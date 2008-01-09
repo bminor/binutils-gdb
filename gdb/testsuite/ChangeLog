@@ -1,3 +1,8 @@
+2008-01-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/null_array: New test program.
+	* gdb.ada/null_array.exp: New testcase.
+
 2008-01-09  Luis Machado  <luisgpm@br.ibm.com>
 
 	* gdb.base/printcmds.exp (test_printf_with_dfp): Update printf calls
