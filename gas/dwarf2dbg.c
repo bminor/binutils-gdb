@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -198,13 +198,13 @@ static void out_two (int);
 static void out_four (int);
 static void out_abbrev (int, int);
 static void out_uleb128 (addressT);
-static void out_sleb128 (addressT);
 static offsetT get_frag_fix (fragS *, segT);
 static void out_set_addr (symbolS *);
 static int size_inc_line_addr (int, addressT);
 static void emit_inc_line_addr (int, addressT, char *, int);
+static int size_fixed_inc_line_addr (int, addressT);
+static void emit_fixed_inc_line_addr (int, addressT, fragS *, char *, int);
 static void out_inc_line_addr (int, addressT);
-static void out_fixed_inc_line_addr (int, symbolS *, symbolS *);
 static void relax_inc_line_addr (int, symbolS *, symbolS *);
 static void process_entries (segT, struct line_entry *);
 static void out_file_list (void);
@@ -762,14 +762,6 @@ out_uleb128 (addressT value)
   output_leb128 (frag_more (sizeof_leb128 (value, 0)), value, 0);
 }
 
-/* Emit a signed "little-endian base 128" number.  */
-
-static void
-out_sleb128 (addressT value)
-{
-  output_leb128 (frag_more (sizeof_leb128 (value, 1)), value, 1);
-}
-
 /* Emit a tuple for .debug_abbrev.  */
 
 static inline void
@@ -1005,41 +997,103 @@ out_inc_line_addr (int line_delta, addressT addr_delta)
 
 /* Write out an alternative form of line and address skips using
    DW_LNS_fixed_advance_pc opcodes.  This uses more space than the default
-   line and address information, but it helps support linker relaxation that
-   changes the code offsets.  */
+   line and address information, but it is required if linker relaxation
+   could change the code offsets.  The following two routines *must* be
+   kept in sync.  */
 
-static void
-out_fixed_inc_line_addr (int line_delta, symbolS *to_sym, symbolS *from_sym)
+static int
+size_fixed_inc_line_addr (int line_delta, addressT addr_delta)
 {
-  expressionS expr;
+  int len = 0;
 
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.  */
-  if (line_delta == INT_MAX)
-    {
-      out_opcode (DW_LNS_fixed_advance_pc);
-      expr.X_op = O_subtract;
-      expr.X_add_symbol = to_sym;
-      expr.X_op_symbol = from_sym;
-      expr.X_add_number = 0;
-      emit_expr (&expr, 2);
+  if (line_delta != INT_MAX)
+    len = 1 + sizeof_leb128 (line_delta, 1);
 
-      out_opcode (DW_LNS_extended_op);
-      out_byte (1);
-      out_opcode (DW_LNE_end_sequence);
-      return;
+  if (addr_delta > 50000)
+    {
+      /* DW_LNS_extended_op */
+      len += 1 + sizeof_leb128 (sizeof_address + 1, 0);
+      /* DW_LNE_set_address */
+      len += 1 + sizeof_address;
+    }
+  else
+    /* DW_LNS_fixed_advance_pc */
+    len += 3;
+
+  if (line_delta == INT_MAX)
+    /* DW_LNS_extended_op + DW_LNE_end_sequence */
+    len += 3;
+  else
+    /* DW_LNS_copy */
+    len += 1;
+
+  return len;
+}
+
+static void
+emit_fixed_inc_line_addr (int line_delta, addressT addr_delta, fragS *frag,
+			  char *p, int len)
+{
+  expressionS *exp;
+  segT line_seg;
+  char *end = p + len;
+
+  /* Line number sequences cannot go backward in addresses.  This means
+     we've incorrectly ordered the statements in the sequence.  */
+  assert ((offsetT) addr_delta >= 0);
+
+  /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.  */
+  if (line_delta != INT_MAX)
+    {
+      *p++ = DW_LNS_advance_line;
+      p += output_leb128 (p, line_delta, 1);
     }
 
-  out_opcode (DW_LNS_advance_line);
-  out_sleb128 (line_delta);
+  exp = symbol_get_value_expression (frag->fr_symbol);
+  line_seg = subseg_get (".debug_line", 0);
 
-  out_opcode (DW_LNS_fixed_advance_pc);
-  expr.X_op = O_subtract;
-  expr.X_add_symbol = to_sym;
-  expr.X_op_symbol = from_sym;
-  expr.X_add_number = 0;
-  emit_expr (&expr, 2);
+  /* The DW_LNS_fixed_advance_pc opcode has a 2-byte operand so it can
+     advance the address by at most 64K.  Linker relaxation (without
+     which this function would not be used) could change the operand by
+     an unknown amount.  If the address increment is getting close to
+     the limit, just reset the address.  */
+  if (addr_delta > 50000)
+    {
+      symbolS *to_sym;
+      expressionS expr;
 
-  out_opcode (DW_LNS_copy);
+      assert (exp->X_op = O_subtract);
+      to_sym = exp->X_add_symbol;
+
+      *p++ = DW_LNS_extended_op;
+      p += output_leb128 (p, sizeof_address + 1, 0);
+      *p++ = DW_LNE_set_address;
+      expr.X_op = O_symbol;
+      expr.X_add_symbol = to_sym;
+      expr.X_add_number = 0;
+      subseg_change (line_seg, 0);
+      emit_expr_fix (&expr, sizeof_address, frag, p);
+      p += sizeof_address;
+    }
+  else
+    {
+      *p++ = DW_LNS_fixed_advance_pc;
+      subseg_change (line_seg, 0);
+      emit_expr_fix (exp, 2, frag, p);
+      p += 2;
+    }
+
+  if (line_delta == INT_MAX)
+    {
+      *p++ = DW_LNS_extended_op;
+      *p++ = 1;
+      *p++ = DW_LNE_end_sequence;
+    }
+  else
+    *p++ = DW_LNS_copy;
+
+  assert (p == end);
 }
 
 /* Generate a variant frag that we can use to relax address/line
@@ -1058,7 +1112,11 @@ relax_inc_line_addr (int line_delta, symbolS *to_sym, symbolS *from_sym)
 
   /* The maximum size of the frag is the line delta with a maximum
      sized address delta.  */
-  max_chars = size_inc_line_addr (line_delta, -DWARF2_LINE_MIN_INSN_LENGTH);
+  if (DWARF2_USE_FIXED_ADVANCE_PC)
+    max_chars = size_fixed_inc_line_addr (line_delta,
+					  -DWARF2_LINE_MIN_INSN_LENGTH);
+  else
+    max_chars = size_inc_line_addr (line_delta, -DWARF2_LINE_MIN_INSN_LENGTH);
 
   frag_var (rs_dwarf2dbg, max_chars, max_chars, 1,
 	    make_expr_symbol (&expr), line_delta, NULL);
@@ -1075,7 +1133,10 @@ dwarf2dbg_estimate_size_before_relax (fragS *frag)
   int size;
 
   addr_delta = resolve_symbol_value (frag->fr_symbol);
-  size = size_inc_line_addr (frag->fr_offset, addr_delta);
+  if (DWARF2_USE_FIXED_ADVANCE_PC)
+    size = size_fixed_inc_line_addr (frag->fr_offset, addr_delta);
+  else
+    size = size_inc_line_addr (frag->fr_offset, addr_delta);
 
   frag->fr_subtype = size;
 
@@ -1113,8 +1174,13 @@ dwarf2dbg_convert_frag (fragS *frag)
      course, have allocated enough memory earlier.  */
   assert (frag->fr_var >= (int) frag->fr_subtype);
 
-  emit_inc_line_addr (frag->fr_offset, addr_diff,
-		      frag->fr_literal + frag->fr_fix, frag->fr_subtype);
+  if (DWARF2_USE_FIXED_ADVANCE_PC)
+    emit_fixed_inc_line_addr (frag->fr_offset, addr_diff, frag,
+			      frag->fr_literal + frag->fr_fix,
+			      frag->fr_subtype);
+  else
+    emit_inc_line_addr (frag->fr_offset, addr_diff,
+			frag->fr_literal + frag->fr_fix, frag->fr_subtype);
 
   frag->fr_fix += frag->fr_subtype;
   frag->fr_type = rs_fill;
@@ -1192,9 +1258,7 @@ process_entries (segT seg, struct line_entry *e)
 	  out_set_addr (lab);
 	  out_inc_line_addr (line_delta, 0);
 	}
-      else if (DWARF2_USE_FIXED_ADVANCE_PC)
-	out_fixed_inc_line_addr (line_delta, lab, last_lab);
-      else if (frag == last_frag)
+      else if (frag == last_frag && ! DWARF2_USE_FIXED_ADVANCE_PC)
 	out_inc_line_addr (line_delta, frag_ofs - last_frag_ofs);
       else
 	relax_inc_line_addr (line_delta, lab, last_lab);
@@ -1213,12 +1277,7 @@ process_entries (segT seg, struct line_entry *e)
   /* Emit a DW_LNE_end_sequence for the end of the section.  */
   frag = last_frag_for_seg (seg);
   frag_ofs = get_frag_fix (frag, seg);
-  if (DWARF2_USE_FIXED_ADVANCE_PC)
-    {
-      lab = symbol_temp_new (seg, frag_ofs, frag);
-      out_fixed_inc_line_addr (INT_MAX, lab, last_lab);
-    }
-  else if (frag == last_frag)
+  if (frag == last_frag && ! DWARF2_USE_FIXED_ADVANCE_PC)
     out_inc_line_addr (INT_MAX, frag_ofs - last_frag_ofs);
   else
     {

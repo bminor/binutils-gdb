@@ -1,3 +1,10 @@
+2008-01-09  Bob Wilson  <bob.wilson@acm.org>
+	
+	* gas/lns/lns.exp: Run new lns-big-delta test for targets that set
+	DWARF2_USE_FIXED_ADVANCE_PC.
+	* gas/lns/lns-big-delta.s: New.
+	* gas/lns/lns-big-delta.d: New.
+	
 2008-01-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	PR gas/5322

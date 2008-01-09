@@ -1,6 +1,6 @@
 /* read.h - of read.c
    Copyright 1986, 1990, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -111,6 +111,7 @@ extern void add_include_dir (char *path);
 extern void cons (int nbytes);
 extern void demand_empty_rest_of_line (void);
 extern void emit_expr (expressionS *exp, unsigned int nbytes);
+extern void emit_expr_fix (expressionS *, unsigned int, fragS *, char *);
 extern void equals (char *sym_name, int reassign);
 extern void float_cons (int float_type);
 extern void ignore_rest_of_line (void);

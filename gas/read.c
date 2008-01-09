@@ -1,6 +1,6 @@
 /* read.c - read a source file -
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -4175,41 +4175,45 @@ emit_expr (expressionS *exp, unsigned int nbytes)
 	}
     }
   else
-    {
-      memset (p, 0, nbytes);
+    emit_expr_fix (exp, nbytes, frag_now, p);
+}
 
-      /* Now we need to generate a fixS to record the symbol value.  */
+void
+emit_expr_fix (expressionS *exp, unsigned int nbytes, fragS *frag, char *p)
+{
+  memset (p, 0, nbytes);
+
+  /* Generate a fixS to record the symbol value.  */
 
 #ifdef TC_CONS_FIX_NEW
-      TC_CONS_FIX_NEW (frag_now, p - frag_now->fr_literal, nbytes, exp);
+  TC_CONS_FIX_NEW (frag, p - frag->fr_literal, nbytes, exp);
 #else
-      {
-	bfd_reloc_code_real_type r;
+  {
+    bfd_reloc_code_real_type r;
 
-	switch (nbytes)
-	  {
-	  case 1:
-	    r = BFD_RELOC_8;
-	    break;
-	  case 2:
-	    r = BFD_RELOC_16;
-	    break;
-	  case 4:
-	    r = BFD_RELOC_32;
-	    break;
-	  case 8:
-	    r = BFD_RELOC_64;
-	    break;
-	  default:
-	    as_bad (_("unsupported BFD relocation size %u"), nbytes);
-	    r = BFD_RELOC_32;
-	    break;
-	  }
-	fix_new_exp (frag_now, p - frag_now->fr_literal, (int) nbytes, exp,
-		     0, r);
+    switch (nbytes)
+      {
+      case 1:
+	r = BFD_RELOC_8;
+	break;
+      case 2:
+	r = BFD_RELOC_16;
+	break;
+      case 4:
+	r = BFD_RELOC_32;
+	break;
+      case 8:
+	r = BFD_RELOC_64;
+	break;
+      default:
+	as_bad (_("unsupported BFD relocation size %u"), nbytes);
+	r = BFD_RELOC_32;
+	break;
       }
+    fix_new_exp (frag, p - frag->fr_literal, (int) nbytes, exp,
+		 0, r);
+  }
 #endif
-    }
 }
 
 #ifdef BITFIELD_CONS_EXPRESSIONS

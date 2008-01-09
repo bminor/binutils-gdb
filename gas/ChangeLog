@@ -1,3 +1,17 @@
+2008-01-09  Bob Wilson  <bob.wilson@acm.org>
+	
+	* dwarf2dbg.c (out_sleb128): Delete.
+	(size_fixed_inc_line_addr, emit_fixed_inc_line_addr): New.
+	(out_fixed_inc_line_addr): Delete.
+	(relax_inc_line_addr, dwarf2dbg_estimate_size_before_relax): Call new
+	size_fixed_inc_line_addr if DWARF2_USE_FIXED_ADVANCE_PC is set.
+	(dwarf2dbg_convert_frag): Likewise for emit_fixed_inc_line_addr.
+	(process_entries): Remove calls to out_fixed_inc_line_addr.  When
+	DWARF2_USE_FIXED_ADVANCE_PC is set, call relax_inc_line_addr.
+	* read.h (emit_expr_fix): New prototype.
+	* read.c (emit_expr): Move code to emit_expr_fix and use it here.
+	(emit_expr_fix): New.
+	
 2008-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Check register size
