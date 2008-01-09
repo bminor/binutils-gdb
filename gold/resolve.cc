@@ -1,6 +1,6 @@
 // resolve.cc -- symbol resolution for gold
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -277,11 +277,15 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 {
   *adjust_common_sizes = false;
 
-  unsigned int tobits = symbol_to_bits(to->binding(),
-                                       (to->source() == Symbol::FROM_OBJECT
-                                        && to->object()->is_dynamic()),
-                                       to->shndx(),
-                                       to->type());
+  unsigned int tobits;
+  if (to->source() == Symbol::FROM_OBJECT)
+    tobits = symbol_to_bits(to->binding(),
+			    to->object()->is_dynamic(),
+			    to->shndx(),
+			    to->type());
+  else
+    tobits = symbol_to_bits(to->binding(), false, elfcpp::SHN_ABS,
+			    to->type());
 
   // FIXME: Warn if either but not both of TO and SYM are STT_TLS.
 

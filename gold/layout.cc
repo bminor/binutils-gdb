@@ -1,6 +1,6 @@
 // layout.cc -- lay out output file sections for gold
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -63,9 +63,9 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 
 // Layout methods.
 
-Layout::Layout(const General_options& options)
-  : options_(options), entry_(options.entry()), namepool_(), sympool_(),
-    dynpool_(), signatures_(),
+Layout::Layout(const General_options& options, Script_options* script_options)
+  : options_(options), script_options_(script_options), namepool_(),
+    sympool_(), dynpool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
     unattached_section_list_(), special_output_list_(),
     section_headers_(NULL), tls_segment_(NULL), symtab_section_(NULL),
@@ -722,7 +722,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // Lay out the file header.
   Output_file_header* file_header;
   file_header = new Output_file_header(target, symtab, segment_headers,
-				       this->entry_);
+				       this->script_options_->entry());
   load_seg->add_initial_output_data(file_header);
   this->special_output_list_.push_back(file_header);
 
@@ -744,6 +744,10 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   this->create_symtab_sections(input_objects, symtab, &off);
   if (!parameters->doing_static_link())
     this->assign_local_dynsym_offsets(input_objects);
+
+  // Process any symbol assignments from a linker script.  This must
+  // be called after the symbol table has been finalized.
+  this->script_options_->finalize_symbols(symtab, this);
 
   // Create the .shstrtab section.
   Output_section* shstrtab_section = this->create_shstrtab();

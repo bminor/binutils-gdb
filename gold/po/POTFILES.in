@@ -16,6 +16,7 @@ ehframe.cc
 ehframe.h
 errors.cc
 errors.h
+expression.cc
 fileread.cc
 fileread.h
 gold.cc

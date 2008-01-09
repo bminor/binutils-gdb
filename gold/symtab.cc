@@ -1,6 +1,6 @@
 // symtab.cc -- the gold symbol table
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1056,11 +1056,13 @@ Symbol_table::do_define_in_output_data(
   sym->init(name, od, value, symsize, type, binding, visibility, nonvis,
 	    offset_is_from_end);
 
-  if (oldsym != NULL
-      && Symbol_table::should_override_with_special(oldsym))
-    this->override_with_special(oldsym, sym);
+  if (oldsym == NULL)
+    return sym;
 
-  return sym;
+  if (Symbol_table::should_override_with_special(oldsym))
+    this->override_with_special(oldsym, sym);
+  delete sym;
+  return oldsym;
 }
 
 // Define a symbol based on an Output_segment.
@@ -1150,11 +1152,13 @@ Symbol_table::do_define_in_output_segment(
   sym->init(name, os, value, symsize, type, binding, visibility, nonvis,
 	    offset_base);
 
-  if (oldsym != NULL
-      && Symbol_table::should_override_with_special(oldsym))
-    this->override_with_special(oldsym, sym);
+  if (oldsym == NULL)
+    return sym;
 
-  return sym;
+  if (Symbol_table::should_override_with_special(oldsym))
+    this->override_with_special(oldsym, sym);
+  delete sym;
+  return oldsym;
 }
 
 // Define a special symbol with a constant value.  It is a multiple
@@ -1237,11 +1241,13 @@ Symbol_table::do_define_as_constant(
   gold_assert(version == NULL || oldsym != NULL);
   sym->init(name, value, symsize, type, binding, visibility, nonvis);
 
-  if (oldsym != NULL
-      && Symbol_table::should_override_with_special(oldsym))
-    this->override_with_special(oldsym, sym);
+  if (oldsym == NULL)
+    return sym;
 
-  return sym;
+  if (Symbol_table::should_override_with_special(oldsym))
+    this->override_with_special(oldsym, sym);
+  delete sym;
+  return oldsym;
 }
 
 // Define a set of symbols in output sections.

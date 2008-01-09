@@ -503,5 +503,10 @@ ver_test_3.o: ver_test_3.cc
 ver_test_4.o: ver_test_4.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
+check_PROGRAMS += script_test_1
+script_test_1_SOURCES = script_test_1.cc
+script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
+script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_1.t
+
 endif GCC
 endif NATIVE_LINKER

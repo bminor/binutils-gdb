@@ -1,6 +1,6 @@
 // options.c -- handle command line options for gold
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -29,6 +29,7 @@
 #include "libiberty.h"
 
 #include "debug.h"
+#include "script.h"
 #include "options.h"
 
 namespace gold
@@ -154,7 +155,7 @@ invoke_script(int argc, char** argv, char* arg, bool long_option,
 							  arg, long_option,
 							  &ret);
   if (!read_commandline_script(script_name, cmdline))
-    gold::gold_error(_("unable to parse script file %s\n"), script_name);
+    gold::gold_error(_("unable to parse script file %s"), script_name);
   return ret;
 }
 
@@ -386,6 +387,9 @@ options::Command_line_options::options[] =
               N_("--compress-debug-sections=[none" ZLIB_STR "]"),
               TWO_DASHES,
               &General_options::set_compress_debug_sections),
+  GENERAL_ARG('\0', "defsym", N_("Define a symbol"),
+	      N_("--defsym SYMBOL=EXPRESSION"), TWO_DASHES,
+	      &General_options::define_symbol),
   GENERAL_NOARG('\0', "demangle", N_("Demangle C++ symbols in log messages"),
                 NULL, TWO_DASHES, &General_options::set_demangle),
   GENERAL_NOARG('\0', "no-demangle",
@@ -531,9 +535,8 @@ const int options::Command_line_options::debug_options_size =
 
 // The default values for the general options.
 
-General_options::General_options()
-  : entry_(NULL),
-    export_dynamic_(false),
+General_options::General_options(Script_options* script_options)
+  : export_dynamic_(false),
     soname_(NULL),
     dynamic_linker_(NULL),
     search_path_(),
@@ -558,7 +561,8 @@ General_options::General_options()
     thread_count_middle_(0),
     thread_count_final_(0),
     execstack_(EXECSTACK_FROM_INPUT),
-    debug_(0)
+    debug_(0),
+    script_options_(script_options)
 {
   // We initialize demangle_ based on the environment variable
   // COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
@@ -568,13 +572,12 @@ General_options::General_options()
   this->demangle_ = getenv("COLLECT_NO_DEMANGLE") == NULL;
 }
 
-// The default values for the position dependent options.
+// Handle the --defsym option.
 
-Position_dependent_options::Position_dependent_options()
-  : do_static_search_(false),
-    as_needed_(false),
-    include_whole_archive_(false)
+void
+General_options::define_symbol(const char* arg)
 {
+  this->script_options_->define_symbol(arg);
 }
 
 // Handle the -z option.
@@ -643,6 +646,15 @@ General_options::add_sysroot()
     p->add_sysroot(sysroot, canonical_sysroot);
 
   free(canonical_sysroot);
+}
+
+// The default values for the position dependent options.
+
+Position_dependent_options::Position_dependent_options()
+  : do_static_search_(false),
+    as_needed_(false),
+    include_whole_archive_(false)
+{
 }
 
 // Search_directory methods.
@@ -721,8 +733,8 @@ Input_arguments::end_group()
 
 // Command_line options.
 
-Command_line::Command_line()
-  : options_(), position_options_(), inputs_()
+Command_line::Command_line(Script_options* script_options)
+  : options_(script_options), position_options_(), inputs_()
 {
 }
 

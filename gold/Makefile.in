@@ -73,13 +73,13 @@ libgold_a_LIBADD =
 am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) \
 	compressed_output.$(OBJEXT) defstd.$(OBJEXT) \
 	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) dwarf_reader.$(OBJEXT) \
-	ehframe.$(OBJEXT) errors.$(OBJEXT) fileread.$(OBJEXT) \
-	gold.$(OBJEXT) gold-threads.$(OBJEXT) layout.$(OBJEXT) \
-	merge.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
-	output.$(OBJEXT) parameters.$(OBJEXT) readsyms.$(OBJEXT) \
-	reloc.$(OBJEXT) resolve.$(OBJEXT) script.$(OBJEXT) \
-	stringpool.$(OBJEXT) symtab.$(OBJEXT) target-select.$(OBJEXT) \
-	version.$(OBJEXT) workqueue.$(OBJEXT) \
+	ehframe.$(OBJEXT) errors.$(OBJEXT) expression.$(OBJEXT) \
+	fileread.$(OBJEXT) gold.$(OBJEXT) gold-threads.$(OBJEXT) \
+	layout.$(OBJEXT) merge.$(OBJEXT) object.$(OBJEXT) \
+	options.$(OBJEXT) output.$(OBJEXT) parameters.$(OBJEXT) \
+	readsyms.$(OBJEXT) reloc.$(OBJEXT) resolve.$(OBJEXT) \
+	script.$(OBJEXT) stringpool.$(OBJEXT) symtab.$(OBJEXT) \
+	target-select.$(OBJEXT) version.$(OBJEXT) workqueue.$(OBJEXT) \
 	workqueue-threads.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
@@ -294,6 +294,7 @@ CCFILES = \
 	dwarf_reader.cc \
 	ehframe.cc \
 	errors.cc \
+	expression.cc \
 	fileread.cc \
 	gold.cc \
 	gold-threads.cc \
@@ -477,6 +478,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynobj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ehframe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/errors.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/expression.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold-threads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold.Po@am__quote@

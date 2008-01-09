@@ -37,6 +37,7 @@ CCFILES = \
 	dwarf_reader.cc \
 	ehframe.cc \
 	errors.cc \
+	expression.cc \
 	fileread.cc \
 	gold.cc \
 	gold-threads.cc \

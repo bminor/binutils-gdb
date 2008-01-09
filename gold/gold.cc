@@ -1,6 +1,6 @@
 // gold.cc -- main linker functions
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -201,6 +201,9 @@ queue_middle_tasks(const General_options& options,
   // Define __start and __stop symbols for output sections where
   // appropriate.
   layout->define_section_symbols(symtab, input_objects->target());
+
+  // Define symbols from any linker scripts.
+  layout->define_script_symbols(symtab, input_objects->target());
 
   // Read the relocations of the input files.  We do this to find
   // which symbols are used by relocations which require a GOT and/or

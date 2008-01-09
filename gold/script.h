@@ -1,6 +1,6 @@
 // script.h -- handle linker scripts for gold   -*- C++ -*-
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -30,6 +30,8 @@
 #ifndef GOLD_SCRIPT_H
 #define GOLD_SCRIPT_H
 
+#include <vector>
+
 namespace gold
 {
 
@@ -41,8 +43,124 @@ class Input_argument;
 class Input_objects;
 class Input_group;
 class Input_file;
+class Target;
 class Task_token;
 class Workqueue;
+
+// This class represents an expression in a linker script.
+
+class Expression
+{
+ protected:
+  // These should only be created by child classes.
+  Expression()
+  { }
+
+ public:
+  virtual ~Expression()
+  { }
+
+  // Return the value of the expression.
+  uint64_t
+  eval(const Symbol_table*, const Layout*);
+
+ protected:
+  struct Expression_eval_info;
+
+ public:
+  // Compute the value of the expression (implemented by child class).
+  // This is public rather than protected because it is called
+  // directly by children of Expression on other Expression objects.
+  virtual uint64_t
+  value(const Expression_eval_info*) = 0;
+
+ private:
+  // May not be copied.
+  Expression(const Expression&);
+  Expression& operator=(const Expression&);
+};
+
+// We can read a linker script in two different contexts: when
+// initially parsing the command line, and when we find an input file
+// which is actually a linker script.  Also some of the data which can
+// be set by a linker script can also be set via command line options
+// like -e and --defsym.  This means that we have a type of data which
+// can be set both during command line option parsing and while
+// reading input files.  We store that data in an instance of this
+// object.  We will keep pointers to that instance in both the
+// Command_line and Layout objects.
+
+class Script_options
+{
+ public:
+  Script_options();
+
+  // The entry address.
+  const char*
+  entry() const
+  { return this->entry_.empty() ? NULL : this->entry_.c_str(); }
+
+  // Set the entry address.
+  void
+  set_entry(const char* entry, size_t length)
+  { this->entry_.assign(entry, length); }
+
+  // Add a symbol to be defined.  These are for symbol definitions
+  // which appear outside of a SECTIONS clause.
+  void
+  add_symbol_assignment(const char* name, size_t length, Expression* value,
+			bool provided, bool hidden)
+  {
+    this->symbol_assignments_.push_back(Symbol_assignment(name, length, value,
+							  provided, hidden));
+  }
+
+  // Define a symbol from the command line.
+  bool
+  define_symbol(const char* definition);
+
+  // Add all symbol definitions to the symbol table.
+  void
+  add_symbols_to_table(Symbol_table*, const Target*);
+
+  // Finalize the symbol values.
+  void
+  finalize_symbols(Symbol_table*, const Layout*);
+
+ private:
+  // We keep a list of symbol assignments.
+  struct Symbol_assignment
+  {
+    // Symbol name.
+    std::string name;
+    // Expression to assign to symbol.
+    Expression* value;
+    // Whether the assignment should be provided (only set if there is
+    // an undefined reference to the symbol.
+    bool provide;
+    // Whether the assignment should be hidden.
+    bool hidden;
+    // The entry in the symbol table.
+    Symbol* sym;
+
+    Symbol_assignment(const char* namea, size_t lengtha, Expression* valuea,
+		      bool providea, bool hiddena)
+      : name(namea, lengtha), value(valuea), provide(providea),
+	hidden(hiddena), sym(NULL)
+    { }
+  };
+
+  typedef std::vector<Symbol_assignment> Symbol_assignments;
+
+  template<int size>
+  void
+  sized_finalize_symbols(Symbol_table*, const Layout*);
+
+  // The entry address.  This will be empty if not set.
+  std::string entry_;
+  // Symbols to set.
+  Symbol_assignments symbol_assignments_;
+};
 
 // FILE was found as an argument on the command line, but was not
 // recognized as an ELF file.  Try to read it as a script.  We've

@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -106,12 +106,12 @@ class Search_directory
 class General_options
 {
  public:
-  General_options();
+  General_options(Script_options*);
 
   // -e: set entry address.
   const char*
   entry() const
-  { return this->entry_; }
+  { return this->script_options_->entry(); }
 
   // -E: export dynamic symbols.
   bool
@@ -277,6 +277,15 @@ class General_options
   debug() const
   { return this->debug_; }
 
+  // Return the options which may be set from a linker script.
+  Script_options*
+  script_options()
+  { return this->script_options_; }
+
+  const Script_options*
+  script_options() const
+  { return this->script_options_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -318,7 +327,7 @@ class General_options
 
   void
   set_entry(const char* arg)
-  { this->entry_ = arg; }
+  { this->script_options_->set_entry(arg, strlen(arg)); }
 
   void
   set_export_dynamic()
@@ -395,6 +404,9 @@ class General_options
       gold_fatal(_("unsupported argument to --compress-debug-sections: %s"),
                  arg);
   }
+
+  void
+  define_symbol(const char* arg);
 
   void
   set_demangle()
@@ -518,7 +530,6 @@ class General_options
   void
   add_sysroot();
 
-  const char* entry_;
   bool export_dynamic_;
   const char* soname_;
   const char* dynamic_linker_;
@@ -546,6 +557,9 @@ class General_options
   int thread_count_final_;
   Execstack execstack_;
   unsigned int debug_;
+  // Some options can also be set from linker scripts.  Those are
+  // stored here.
+  Script_options* script_options_;
 };
 
 // The current state of the position dependent options.
@@ -810,7 +824,7 @@ class Command_line
  public:
   typedef Input_arguments::const_iterator const_iterator;
 
-  Command_line();
+  Command_line(Script_options*);
 
   // Process the command line options.  This will exit with an
   // appropriate error message if an unrecognized option is seen.
@@ -834,11 +848,6 @@ class Command_line
   void
   end_group(const char* arg);
 
-  // Set the entry symbol from a linker script.
-  void
-  set_entry(const char* entry)
-  { this->options_.set_entry(entry); }
-
   // Get an option argument--a helper function for special processing.
   const char*
   get_special_argument(const char* longname, int argc, char** argv,
@@ -854,6 +863,15 @@ class Command_line
   const Position_dependent_options&
   position_dependent_options() const
   { return this->position_options_; }
+
+  // Get the options which may be set from a linker script.
+  Script_options*
+  script_options()
+  { return this->options_.script_options(); }
+
+  const Script_options*
+  script_options() const
+  { return this->options_.script_options(); }
 
   // The number of input files.
   int

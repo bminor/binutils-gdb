@@ -1,6 +1,6 @@
 // layout.h -- lay out output file sections for gold  -*- C++ -*-
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -28,6 +28,7 @@
 #include <utility>
 #include <vector>
 
+#include "script.h"
 #include "workqueue.h"
 #include "object.h"
 #include "dynobj.h"
@@ -84,7 +85,7 @@ class Layout_task_runner : public Task_function_runner
 class Layout
 {
  public:
-  Layout(const General_options& options);
+  Layout(const General_options& options, Script_options*);
 
   // Given an input section SHNDX, named NAME, with data in SHDR, from
   // the object file OBJECT, return the output section where this
@@ -141,6 +142,11 @@ class Layout
   // Define __start and __stop symbols for output sections.
   void
   define_section_symbols(Symbol_table*, const Target*);
+
+  // Define symbols from any linker script.
+  void
+  define_script_symbols(Symbol_table* symtab, const Target* target)
+  { this->script_options_->add_symbols_to_table(symtab, target); }
 
   // Return the Stringpool used for symbol names.
   const Stringpool*
@@ -241,11 +247,14 @@ class Layout
   has_static_tls() const
   { return this->has_static_tls_; }
 
-  // Set the name of the entry symbol.  This is used by linker scripts
-  // which look like regular objects.
-  void
-  set_entry(const char* entry)
-  { this->entry_ = entry; }
+  // Return the options which may be set by a linker script.
+  Script_options*
+  script_options()
+  { return this->script_options_; }
+
+  const Script_options*
+  script_options() const
+  { return this->script_options_; }
 
   // Dump statistical information to stderr.
   void
@@ -432,9 +441,8 @@ class Layout
 
   // A reference to the options on the command line.
   const General_options& options_;
-  // The name of the entry symbol.  This is from the command line, or
-  // from a linker script, or is NULL.
-  const char* entry_;
+  // Information set by scripts or by command line options.
+  Script_options* script_options_;
   // The output section names.
   Stringpool namepool_;
   // The output symbol names.

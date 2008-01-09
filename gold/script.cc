@@ -1,6 +1,6 @@
 // script.cc -- handle linker scripts for gold.
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include "filenames.h"
 
+#include "elfcpp.h"
 #include "dirsearch.h"
 #include "options.h"
 #include "fileread.h"
@@ -35,7 +36,7 @@
 #include "readsyms.h"
 #include "parameters.h"
 #include "layout.h"
-#include "yyscript.h"
+#include "symtab.h"
 #include "script.h"
 #include "script-c.h"
 
@@ -57,6 +58,8 @@ class Token
     TOKEN_EOF,
     // Token is a string of characters.
     TOKEN_STRING,
+    // Token is a quoted string of characters.
+    TOKEN_QUOTED_STRING,
     // Token is an operator.
     TOKEN_OPERATOR,
     // Token is a number (an integer).
@@ -65,39 +68,33 @@ class Token
 
   // We need an empty constructor so that we can put this STL objects.
   Token()
-    : classification_(TOKEN_INVALID), value_(), opcode_(0),
-      lineno_(0), charpos_(0)
+    : classification_(TOKEN_INVALID), value_(NULL), value_length_(0),
+      opcode_(0), lineno_(0), charpos_(0)
   { }
 
   // A general token with no value.
   Token(Classification classification, int lineno, int charpos)
-    : classification_(classification), value_(), opcode_(0),
-      lineno_(lineno), charpos_(charpos)
+    : classification_(classification), value_(NULL), value_length_(0),
+      opcode_(0), lineno_(lineno), charpos_(charpos)
   {
     gold_assert(classification == TOKEN_INVALID
 		|| classification == TOKEN_EOF);
   }
 
   // A general token with a value.
-  Token(Classification classification, const std::string& value,
+  Token(Classification classification, const char* value, size_t length,
 	int lineno, int charpos)
-    : classification_(classification), value_(value), opcode_(0),
-      lineno_(lineno), charpos_(charpos)
+    : classification_(classification), value_(value), value_length_(length),
+      opcode_(0), lineno_(lineno), charpos_(charpos)
   {
     gold_assert(classification != TOKEN_INVALID
 		&& classification != TOKEN_EOF);
   }
 
-  // A token representing a string of characters.
-  Token(const std::string& s, int lineno, int charpos)
-    : classification_(TOKEN_STRING), value_(s), opcode_(0),
-      lineno_(lineno), charpos_(charpos)
-  { }
-
   // A token representing an operator.
   Token(int opcode, int lineno, int charpos)
-    : classification_(TOKEN_OPERATOR), value_(), opcode_(opcode),
-      lineno_(lineno), charpos_(charpos)
+    : classification_(TOKEN_OPERATOR), value_(NULL), value_length_(0),
+      opcode_(opcode), lineno_(lineno), charpos_(charpos)
   { }
 
   // Return whether the token is invalid.
@@ -127,10 +124,12 @@ class Token
 
   // Get the value of a token.
 
-  const std::string&
-  string_value() const
+  const char*
+  string_value(size_t* length) const
   {
-    gold_assert(this->classification_ == TOKEN_STRING);
+    gold_assert(this->classification_ == TOKEN_STRING
+		|| this->classification_ == TOKEN_QUOTED_STRING);
+    *length = this->value_length_;
     return this->value_;
   }
 
@@ -141,18 +140,23 @@ class Token
     return this->opcode_;
   }
 
-  int64_t
+  uint64_t
   integer_value() const
   {
     gold_assert(this->classification_ == TOKEN_INTEGER);
-    return strtoll(this->value_.c_str(), NULL, 0);
+    // Null terminate.
+    std::string s(this->value_, this->value_length_);
+    return strtoull(s.c_str(), NULL, 0);
   }
 
  private:
   // The token classification.
   Classification classification_;
-  // The token value, for TOKEN_STRING or TOKEN_INTEGER.
-  std::string value_;
+  // The token value, for TOKEN_STRING or TOKEN_QUOTED_STRING or
+  // TOKEN_INTEGER.
+  const char* value_;
+  // The length of the token value.
+  size_t value_length_;
   // The token value, for TOKEN_OPERATOR.
   int opcode_;
   // The line number where this token started (one based).
@@ -162,80 +166,95 @@ class Token
   int charpos_;
 };
 
-// This class handles lexing a file into a sequence of tokens.  We
-// don't expect linker scripts to be large, so we just read them and
-// tokenize them all at once.
+// This class handles lexing a file into a sequence of tokens.
 
 class Lex
 {
  public:
-  Lex(Input_file* input_file)
-    : input_file_(input_file), tokens_()
+  // We unfortunately have to support different lexing modes, because
+  // when reading different parts of a linker script we need to parse
+  // things differently.
+  enum Mode
+  {
+    // Reading an ordinary linker script.
+    LINKER_SCRIPT,
+    // Reading an expression in a linker script.
+    EXPRESSION,
+    // Reading a version script.
+    VERSION_SCRIPT
+  };
+
+  Lex(const char* input_string, size_t input_length, int parsing_token)
+    : input_string_(input_string), input_length_(input_length),
+      current_(input_string), mode_(LINKER_SCRIPT),
+      first_token_(parsing_token), token_(),
+      lineno_(1), linestart_(input_string)
   { }
 
-  // Tokenize the file.  Return the final token, which will be either
-  // an invalid token or an EOF token.  An invalid token indicates
-  // that tokenization failed.
-  Token
-  tokenize();
+  // Read a file into a string.
+  static void
+  read_file(Input_file*, std::string*);
 
-  // A token sequence.
-  typedef std::vector<Token> Token_sequence;
+  // Return the next token.
+  const Token*
+  next_token();
 
-  // Return the tokens.
-  const Token_sequence&
-  tokens() const
-  { return this->tokens_; }
+  // Return the current lexing mode.
+  Lex::Mode
+  mode() const
+  { return this->mode_; }
+
+  // Set the lexing mode.
+  void
+  set_mode(Mode mode)
+  { this->mode_ = mode; }
 
  private:
   Lex(const Lex&);
   Lex& operator=(const Lex&);
 
-  // Read the file into a string buffer.
-  void
-  read_file(std::string*);
-
   // Make a general token with no value at the current location.
   Token
-  make_token(Token::Classification c, const char* p) const
-  { return Token(c, this->lineno_, p - this->linestart_ + 1); }
+  make_token(Token::Classification c, const char* start) const
+  { return Token(c, this->lineno_, start - this->linestart_ + 1); }
 
   // Make a general token with a value at the current location.
   Token
-  make_token(Token::Classification c, const std::string& v, const char* p)
+  make_token(Token::Classification c, const char* v, size_t len,
+	     const char* start)
     const
-  { return Token(c, v, this->lineno_, p - this->linestart_ + 1); }
+  { return Token(c, v, len, this->lineno_, start - this->linestart_ + 1); }
 
   // Make an operator token at the current location.
   Token
-  make_token(int opcode, const char* p) const
-  { return Token(opcode, this->lineno_, p - this->linestart_ + 1); }
+  make_token(int opcode, const char* start) const
+  { return Token(opcode, this->lineno_, start - this->linestart_ + 1); }
 
   // Make an invalid token at the current location.
   Token
-  make_invalid_token(const char* p)
-  { return this->make_token(Token::TOKEN_INVALID, p); }
+  make_invalid_token(const char* start)
+  { return this->make_token(Token::TOKEN_INVALID, start); }
 
   // Make an EOF token at the current location.
   Token
-  make_eof_token(const char* p)
-  { return this->make_token(Token::TOKEN_EOF, p); }
+  make_eof_token(const char* start)
+  { return this->make_token(Token::TOKEN_EOF, start); }
 
   // Return whether C can be the first character in a name.  C2 is the
   // next character, since we sometimes need that.
-  static inline bool
+  inline bool
   can_start_name(char c, char c2);
 
   // Return whether C can appear in a name which has already started.
-  static inline bool
+  inline bool
   can_continue_name(char c);
 
   // Return whether C, C2, C3 can start a hex number.
-  static inline bool
+  inline bool
   can_start_hex(char c, char c2, char c3);
 
   // Return whether C can appear in a hex number.
-  static inline bool
+  inline bool
   can_continue_hex(char c);
 
   // Return whether C can start a non-hex number.
@@ -243,7 +262,7 @@ class Lex
   can_start_number(char c);
 
   // Return whether C can appear in a non-hex number.
-  static inline bool
+  inline bool
   can_continue_number(char c)
   { return Lex::can_start_number(c); }
 
@@ -279,20 +298,30 @@ class Lex
   // CAN_CONTINUE_FN.  The token starts at START.  Start matching from
   // MATCH.  Set *PP to the character following the token.
   inline Token
-  gather_token(Token::Classification, bool (*can_continue_fn)(char),
+  gather_token(Token::Classification,
+	       bool (Lex::*can_continue_fn)(char),
 	       const char* start, const char* match, const char** pp);
 
   // Build a token from a quoted string.
   Token
   gather_quoted_string(const char** pp);
 
-  // The file we are reading.
-  Input_file* input_file_;
-  // The token sequence we create.
-  Token_sequence tokens_;
+  // The string we are tokenizing.
+  const char* input_string_;
+  // The length of the string.
+  size_t input_length_;
+  // The current offset into the string.
+  const char* current_;
+  // The current lexing mode.
+  Mode mode_;
+  // The code to use for the first token.  This is set to 0 after it
+  // is used.
+  int first_token_;
+  // The current token.
+  Token token_;
   // The current line number.
   int lineno_;
-  // The start of the current line in the buffer.
+  // The start of the current line in the string.
   const char* linestart_;
 };
 
@@ -301,9 +330,9 @@ class Lex
 // data we've already read, so that we read aligned buffers.
 
 void
-Lex::read_file(std::string* contents)
+Lex::read_file(Input_file* input_file, std::string* contents)
 {
-  off_t filesize = this->input_file_->file().filesize();
+  off_t filesize = input_file->file().filesize();
   contents->clear();
   contents->reserve(filesize);
 
@@ -314,7 +343,7 @@ Lex::read_file(std::string* contents)
       off_t get = BUFSIZ;
       if (get > filesize - off)
 	get = filesize - off;
-      this->input_file_->file().read(off, get, buf);
+      input_file->file().read(off, get, buf);
       contents->append(reinterpret_cast<char*>(&buf[0]), get);
       off += get;
     }
@@ -326,8 +355,9 @@ Lex::read_file(std::string* contents)
 // forward slash, backslash, and tilde.  Tilde is the tricky case
 // here; GNU ld also uses it as a bitwise not operator.  It is only
 // recognized as the operator if it is not immediately followed by
-// some character which can appear in a symbol.  That is, "~0" is a
-// symbol name, and "~ 0" is an expression using bitwise not.  We are
+// some character which can appear in a symbol.  That is, when we
+// don't know that we are looking at an expression, "~0" is a file
+// name, and "~ 0" is an expression using bitwise not.  We are
 // compatible.
 
 inline bool
@@ -345,11 +375,14 @@ Lex::can_start_name(char c, char c2)
     case 'm': case 'n': case 'o': case 'q': case 'p': case 'r':
     case 's': case 't': case 'u': case 'v': case 'w': case 'x':
     case 'y': case 'z':
-    case '_': case '.': case '$': case '/': case '\\':
+    case '_': case '.': case '$':
       return true;
 
+    case '/': case '\\':
+      return this->mode_ == LINKER_SCRIPT;
+
     case '~':
-      return can_continue_name(c2);
+      return this->mode_ == LINKER_SCRIPT && can_continue_name(c2);
 
     default:
       return false;
@@ -359,7 +392,8 @@ Lex::can_start_name(char c, char c2)
 // Return whether C can continue a name which has already started.
 // Subsequent characters in a name are the same as the leading
 // characters, plus digits and "=+-:[],?*".  So in general the linker
-// script language requires spaces around operators.
+// script language requires spaces around operators, unless we know
+// that we are parsing an expression.
 
 inline bool
 Lex::can_continue_name(char c)
@@ -376,13 +410,16 @@ Lex::can_continue_name(char c)
     case 'm': case 'n': case 'o': case 'q': case 'p': case 'r':
     case 's': case 't': case 'u': case 'v': case 'w': case 'x':
     case 'y': case 'z':
-    case '_': case '.': case '$': case '/': case '\\':
-    case '~':
+    case '_': case '.': case '$':
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
-    case '=': case '+': case '-': case ':': case '[': case ']':
-    case ',': case '?': case '*':
       return true;
+
+    case '/': case '\\': case '~':
+    case '=': case '+': case '-':
+    case ':': case '[': case ']':
+    case ',': case '?': case '*':
+      return this->mode_ == LINKER_SCRIPT;
 
     default:
       return false;
@@ -393,8 +430,8 @@ Lex::can_continue_name(char c)
 // of digits.  The old linker accepts leading '$' for hex, and
 // trailing HXBOD.  Those are for MRI compatibility and we don't
 // accept them.  The old linker also accepts trailing MK for mega or
-// kilo.  Those are mentioned in the documentation, and we accept
-// them.
+// kilo.  FIXME: Those are mentioned in the documentation, and we
+// should accept them.
 
 // Return whether C1 C2 C3 can start a hex number.
 
@@ -402,7 +439,7 @@ inline bool
 Lex::can_start_hex(char c1, char c2, char c3)
 {
   if (c1 == '0' && (c2 == 'x' || c2 == 'X'))
-    return Lex::can_continue_hex(c3);
+    return this->can_continue_hex(c3);
   return false;
 }
 
@@ -615,17 +652,15 @@ Lex::skip_line_comment(const char** pp)
 
 inline Token
 Lex::gather_token(Token::Classification classification,
-		  bool (*can_continue_fn)(char),
+		  bool (Lex::*can_continue_fn)(char),
 		  const char* start,
 		  const char* match,
 		  const char **pp)
 {
-  while ((*can_continue_fn)(*match))
+  while ((this->*can_continue_fn)(*match))
     ++match;
   *pp = match;
-  return this->make_token(classification,
-			  std::string(start, match - start),
-			  start);
+  return this->make_token(classification, start, match - start, start);
 }
 
 // Build a token from a quoted string.
@@ -640,9 +675,7 @@ Lex::gather_quoted_string(const char** pp)
   if (p[skip] != '"')
     return this->make_invalid_token(start);
   *pp = p + skip + 1;
-  return this->make_token(Token::TOKEN_STRING,
-			  std::string(p, skip),
-			  start);
+  return this->make_token(Token::TOKEN_QUOTED_STRING, p, skip, start);
 }
 
 // Return the next token at *PP.  Update *PP.  General guideline: we
@@ -700,10 +733,10 @@ Lex::get_token(const char** pp)
 	}
 
       // Check for a name.
-      if (Lex::can_start_name(p[0], p[1]))
+      if (this->can_start_name(p[0], p[1]))
 	return this->gather_token(Token::TOKEN_STRING,
-				  Lex::can_continue_name,
-				  p, p + 2, pp);
+				  &Lex::can_continue_name,
+				  p, p + 1, pp);
 
       // We accept any arbitrary name in double quotes, as long as it
       // does not cross a line boundary.
@@ -715,14 +748,14 @@ Lex::get_token(const char** pp)
 
       // Check for a number.
 
-      if (Lex::can_start_hex(p[0], p[1], p[2]))
+      if (this->can_start_hex(p[0], p[1], p[2]))
 	return this->gather_token(Token::TOKEN_INTEGER,
-				  Lex::can_continue_hex,
+				  &Lex::can_continue_hex,
 				  p, p + 3, pp);
 
       if (Lex::can_start_number(p[0]))
 	return this->gather_token(Token::TOKEN_INTEGER,
-				  Lex::can_continue_number,
+				  &Lex::can_continue_number,
 				  p, p + 1, pp);
 
       // Check for operators.
@@ -752,34 +785,29 @@ Lex::get_token(const char** pp)
     }
 }
 
-// Tokenize the file.  Return the final token.
+// Return the next token.
 
-Token
-Lex::tokenize()
+const Token*
+Lex::next_token()
 {
-  std::string contents;
-  this->read_file(&contents);
-
-  const char* p = contents.c_str();
-
-  this->lineno_ = 1;
-  this->linestart_ = p;
-
-  while (true)
+  // The first token is special.
+  if (this->first_token_ != 0)
     {
-      Token t(this->get_token(&p));
-
-      // Don't let an early null byte fool us into thinking that we've
-      // reached the end of the file.
-      if (t.is_eof()
-	  && static_cast<size_t>(p - contents.c_str()) < contents.length())
-	t = this->make_invalid_token(p);
-
-      if (t.is_invalid() || t.is_eof())
-	return t;
-
-      this->tokens_.push_back(t);
+      this->token_ = Token(this->first_token_, 0, 0);
+      this->first_token_ = 0;
+      return &this->token_;
     }
+
+  this->token_ = this->get_token(&this->current_);
+
+  // Don't let an early null byte fool us into thinking that we've
+  // reached the end of the file.
+  if (this->token_.is_eof()
+      && (static_cast<size_t>(this->current_ - this->input_string_)
+	  < this->input_length_))
+    this->token_ = this->make_invalid_token(this->current_);
+
+  return &this->token_;
 }
 
 // A trivial task which waits for THIS_BLOCKER to be clear and then
@@ -823,6 +851,79 @@ class Script_unblock : public Task
   Task_token* next_blocker_;
 };
 
+// Class Script_options.
+
+Script_options::Script_options()
+  : entry_(), symbol_assignments_()
+{
+}
+
+// Add any symbols we are defining to the symbol table.
+
+void
+Script_options::add_symbols_to_table(Symbol_table* symtab,
+				     const Target* target)
+{
+  for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
+       p != this->symbol_assignments_.end();
+       ++p)
+    {
+      elfcpp::STV vis = p->hidden ? elfcpp::STV_HIDDEN : elfcpp::STV_DEFAULT;
+      p->sym = symtab->define_as_constant(target,
+					  p->name.c_str(),
+					  NULL, // version
+					  0, // value
+					  0, // size
+					  elfcpp::STT_NOTYPE,
+					  elfcpp::STB_GLOBAL,
+					  vis,
+					  0, // nonvis
+					  p->provide);
+    }
+}
+
+// Finalize symbol values.
+
+void
+Script_options::finalize_symbols(Symbol_table* symtab, const Layout* layout)
+{
+  if (parameters->get_size() == 32)
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+      this->sized_finalize_symbols<32>(symtab, layout);
+#else
+      gold_unreachable();
+#endif
+    }
+  else if (parameters->get_size() == 64)
+    {
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+      this->sized_finalize_symbols<64>(symtab, layout);
+#else
+      gold_unreachable();
+#endif
+    }
+  else
+    gold_unreachable();
+}
+
+template<int size>
+void
+Script_options::sized_finalize_symbols(Symbol_table* symtab,
+				       const Layout* layout)
+{
+  for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
+       p != this->symbol_assignments_.end();
+       ++p)
+    {
+      if (p->sym != NULL)
+	{
+	  Sized_symbol<size>* ssym = symtab->get_sized_symbol<size>(p->sym);
+	  ssym->set_value(p->value->eval(symtab, layout));
+	}
+    }
+}
+
 // This class holds data passed through the parser to the lexer and to
 // the parser support functions.  This avoids global variables.  We
 // can't use global variables because we need not be called by a
@@ -835,12 +936,12 @@ class Parser_closure
 		 const Position_dependent_options& posdep_options,
 		 bool in_group, bool is_in_sysroot,
                  Command_line* command_line,
-		 Layout* layout,
-		 const Lex::Token_sequence* tokens)
+		 Script_options* script_options,
+		 Lex* lex)
     : filename_(filename), posdep_options_(posdep_options),
       in_group_(in_group), is_in_sysroot_(is_in_sysroot),
-      command_line_(command_line), layout_(layout), tokens_(tokens),
-      next_token_index_(0), inputs_(NULL)
+      command_line_(command_line), script_options_(script_options),
+      lex_(lex), lineno_(0), charpos_(0), lex_mode_stack_(), inputs_(NULL)
   { }
 
   // Return the file name.
@@ -868,35 +969,51 @@ class Parser_closure
   // Returns the Command_line structure passed in at constructor time.
   // This value may be NULL.  The caller may modify this, which modifies
   // the passed-in Command_line object (not a copy).
-  Command_line* command_line()
+  Command_line*
+  command_line()
   { return this->command_line_; }
 
-  // Return the Layout structure passed in at constructor time.  This
-  // value may be NULL.
-  Layout* layout()
-  { return this->layout_; }
-
-  // Whether we are at the end of the token list.
-  bool
-  at_eof() const
-  { return this->next_token_index_ >= this->tokens_->size(); }
+  // Return the options which may be set by a script.
+  Script_options*
+  script_options()
+  { return this->script_options_; }
 
   // Return the next token, and advance.
   const Token*
   next_token()
   {
-    const Token* ret = &(*this->tokens_)[this->next_token_index_];
-    ++this->next_token_index_;
-    return ret;
+    const Token* token = this->lex_->next_token();
+    this->lineno_ = token->lineno();
+    this->charpos_ = token->charpos();
+    return token;
   }
 
-  // Return the previous token.
-  const Token*
-  last_token() const
+  // Set a new lexer mode, pushing the current one.
+  void
+  push_lex_mode(Lex::Mode mode)
   {
-    gold_assert(this->next_token_index_ > 0);
-    return &(*this->tokens_)[this->next_token_index_ - 1];
+    this->lex_mode_stack_.push_back(this->lex_->mode());
+    this->lex_->set_mode(mode);
   }
+
+  // Pop the lexer mode.
+  void
+  pop_lex_mode()
+  {
+    gold_assert(!this->lex_mode_stack_.empty());
+    this->lex_->set_mode(this->lex_mode_stack_.back());
+    this->lex_mode_stack_.pop_back();
+  }
+
+  // Return the line number of the last token.
+  int
+  lineno() const
+  { return this->lineno_; }
+
+  // Return the character position in the line of the last token.
+  int
+  charpos() const
+  { return this->charpos_; }
 
   // Return the list of input files, creating it if necessary.  This
   // is a space leak--we never free the INPUTS_ pointer.
@@ -924,13 +1041,16 @@ class Parser_closure
   bool is_in_sysroot_;
   // May be NULL if the user chooses not to pass one in.
   Command_line* command_line_;
-  // May be NULL if the user chooses not to pass one in.
-  Layout* layout_;
-
-  // The tokens to be returned by the lexer.
-  const Lex::Token_sequence* tokens_;
-  // The index of the next token to return.
-  unsigned int next_token_index_;
+  // Options which may be set from any linker script.
+  Script_options* script_options_;
+  // The lexer.
+  Lex* lex_;
+  // The line number of the last token returned by next_token.
+  int lineno_;
+  // The column number of the last token returned by next_token.
+  int charpos_;
+  // A stack of lexer modes.
+  std::vector<Lex::Mode> lex_mode_stack_;
   // New input files found to add to the link.
   Input_arguments* inputs_;
 };
@@ -948,17 +1068,18 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 		  Input_file* input_file, const unsigned char*, off_t,
 		  Task_token* this_blocker, Task_token* next_blocker)
 {
-  Lex lex(input_file);
-  if (lex.tokenize().is_invalid())
-    return false;
+  std::string input_string;
+  Lex::read_file(input_file, &input_string);
+
+  Lex lex(input_string.c_str(), input_string.length(), PARSING_LINKER_SCRIPT);
 
   Parser_closure closure(input_file->filename().c_str(),
 			 input_argument->file().options(),
 			 input_group != NULL,
 			 input_file->is_in_sysroot(),
                          NULL,
-			 layout,
-			 &lex.tokens());
+			 layout->script_options(),
+			 &lex);
 
   if (yyparse(&closure) != 0)
     return false;
@@ -1019,21 +1140,18 @@ read_commandline_script(const char* filename, Command_line* cmdline)
   if (!input_file.open(cmdline->options(), dirsearch, task))
     return false;
 
-  Lex lex(&input_file);
-  if (lex.tokenize().is_invalid())
-    {
-      // Opening the file locked it, so now we need to unlock it.
-      input_file.file().unlock(task);
-      return false;
-    }
+  std::string input_string;
+  Lex::read_file(&input_file, &input_string);
+
+  Lex lex(input_string.c_str(), input_string.length(), PARSING_LINKER_SCRIPT);
 
   Parser_closure closure(filename,
 			 cmdline->position_dependent_options(),
 			 false,
 			 input_file.is_in_sysroot(),
                          cmdline,
-			 NULL,
-			 &lex.tokens());
+			 cmdline->script_options(),
+			 &lex);
   if (yyparse(&closure) != 0)
     {
       input_file.file().unlock(task);
@@ -1041,6 +1159,29 @@ read_commandline_script(const char* filename, Command_line* cmdline)
     }
 
   input_file.file().unlock(task);
+
+  gold_assert(!closure.saw_inputs());
+
+  return true;
+}
+
+// Implement the --defsym option on the command line.  Return true if
+// all is well.
+
+bool
+Script_options::define_symbol(const char* definition)
+{
+  Lex lex(definition, strlen(definition), PARSING_DEFSYM);
+  lex.set_mode(Lex::EXPRESSION);
+
+  // Dummy value.
+  Position_dependent_options posdep_options;
+
+  Parser_closure closure("command line", posdep_options, false, false, NULL,
+			 this, &lex);
+
+  if (yyparse(&closure) != 0)
+    return false;
 
   gold_assert(!closure.saw_inputs());
 
@@ -1065,7 +1206,7 @@ class Keyword_to_parsecode
   // Return the parsecode corresponding KEYWORD, or 0 if it is not a
   // keyword.
   static int
-  keyword_to_parsecode(const char* keyword);
+  keyword_to_parsecode(const char* keyword, size_t len);
 
  private:
   // The array of all keywords.
@@ -1085,6 +1226,7 @@ Keyword_to_parsecode::keyword_parsecodes_[] =
   { "ABSOLUTE", ABSOLUTE },
   { "ADDR", ADDR },
   { "ALIGN", ALIGN_K },
+  { "ALIGNOF", ALIGNOF },
   { "ASSERT", ASSERT_K },
   { "AS_NEEDED", AS_NEEDED },
   { "AT", AT },
@@ -1170,21 +1312,35 @@ const int Keyword_to_parsecode::keyword_count =
 extern "C"
 {
 
+struct Ktt_key
+{
+  const char* str;
+  size_t len;
+};
+
 static int
 ktt_compare(const void* keyv, const void* kttv)
 {
-  const char* key = static_cast<const char*>(keyv);
+  const Ktt_key* key = static_cast<const Ktt_key*>(keyv);
   const Keyword_to_parsecode::Keyword_parsecode* ktt =
     static_cast<const Keyword_to_parsecode::Keyword_parsecode*>(kttv);
-  return strcmp(key, ktt->keyword);
+  int i = strncmp(key->str, ktt->keyword, key->len);
+  if (i != 0)
+    return i;
+  if (ktt->keyword[key->len] != '\0')
+    return -1;
+  return 0;
 }
 
 } // End extern "C".
 
 int
-Keyword_to_parsecode::keyword_to_parsecode(const char* keyword)
+Keyword_to_parsecode::keyword_to_parsecode(const char* keyword, size_t len)
 {
-  void* kttv = bsearch(keyword,
+  Ktt_key key;
+  key.str = keyword;
+  key.len = len;
+  void* kttv = bsearch(&key,
 		       Keyword_to_parsecode::keyword_parsecodes_,
 		       Keyword_to_parsecode::keyword_count,
 		       sizeof(Keyword_to_parsecode::keyword_parsecodes_[0]),
@@ -1209,28 +1365,35 @@ extern "C" int
 yylex(YYSTYPE* lvalp, void* closurev)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
-
-  if (closure->at_eof())
-    return 0;
-
   const Token* token = closure->next_token();
-
   switch (token->classification())
     {
     default:
-    case Token::TOKEN_INVALID:
-    case Token::TOKEN_EOF:
       gold_unreachable();
+
+    case Token::TOKEN_INVALID:
+      yyerror(closurev, "invalid character");
+      return 0;
+
+    case Token::TOKEN_EOF:
+      return 0;
 
     case Token::TOKEN_STRING:
       {
-	const char* str = token->string_value().c_str();
-	int parsecode = Keyword_to_parsecode::keyword_to_parsecode(str);
+	// This is either a keyword or a STRING.
+	size_t len;
+	const char* str = token->string_value(&len);
+	int parsecode = Keyword_to_parsecode::keyword_to_parsecode(str, len);
 	if (parsecode != 0)
 	  return parsecode;
-	lvalp->string = str;
+	lvalp->string.value = str;
+	lvalp->string.length = len;
 	return STRING;
       }
+
+    case Token::TOKEN_QUOTED_STRING:
+      lvalp->string.value = token->string_value(&lvalp->string.length);
+      return STRING;
 
     case Token::TOKEN_OPERATOR:
       return token->operator_value();
@@ -1247,16 +1410,14 @@ extern "C" void
 yyerror(void* closurev, const char* message)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
-
-  const Token* token = closure->last_token();
-  gold_error(_("%s:%d:%d: %s"), closure->filename(), token->lineno(),
-	     token->charpos(), message);
+  gold_error(_("%s:%d:%d: %s"), closure->filename(), closure->lineno(),
+	     closure->charpos(), message);
 }
 
 // Called by the bison parser to add a file to the link.
 
 extern "C" void
-script_add_file(void* closurev, const char* name)
+script_add_file(void* closurev, const char* name, size_t length)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
 
@@ -1264,17 +1425,16 @@ script_add_file(void* closurev, const char* name)
   // sysroot, then we want to prepend the sysroot to the file name.
   // For example, this is how we handle a cross link to the x86_64
   // libc.so, which refers to /lib/libc.so.6.
-  std::string name_string;
+  std::string name_string(name, length);
   const char* extra_search_path = ".";
   std::string script_directory;
-  if (IS_ABSOLUTE_PATH (name))
+  if (IS_ABSOLUTE_PATH(name_string.c_str()))
     {
       if (closure->is_in_sysroot())
 	{
 	  const std::string& sysroot(parameters->sysroot());
 	  gold_assert(!sysroot.empty());
-	  name_string = sysroot + name;
-	  name = name_string.c_str();
+	  name_string = sysroot + name_string;
 	}
     }
   else
@@ -1290,7 +1450,7 @@ script_add_file(void* closurev, const char* name)
 	}
     }
 
-  Input_file_argument file(name, false, extra_search_path,
+  Input_file_argument file(name_string.c_str(), false, extra_search_path,
 			   closure->position_dependent_options());
   closure->inputs()->add_file(file);
 }
@@ -1345,19 +1505,29 @@ script_end_as_needed(void* closurev)
 // Called by the bison parser to set the entry symbol.
 
 extern "C" void
-script_set_entry(void* closurev, const char* entry)
+script_set_entry(void* closurev, const char* entry, size_t length)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
-  if (closure->command_line() != NULL)
-    closure->command_line()->set_entry(entry);
-  else
-    closure->layout()->set_entry(entry);
+  closure->script_options()->set_entry(entry, length);
+}
+
+// Called by the bison parser to define a symbol.
+
+extern "C" void
+script_set_symbol(void* closurev, const char* name, size_t length,
+		  Expression* value, int providei, int hiddeni)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  const bool provide = providei != 0;
+  const bool hidden = hiddeni != 0;
+  closure->script_options()->add_symbol_assignment(name, length, value,
+						   provide, hidden);
 }
 
 // Called by the bison parser to parse an OPTION.
 
 extern "C" void
-script_parse_option(void* closurev, const char* option)
+script_parse_option(void* closurev, const char* option, size_t length)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   // We treat the option as a single command-line option, even if
@@ -1366,16 +1536,36 @@ script_parse_option(void* closurev, const char* option)
     {
       // There are some options that we could handle here--e.g.,
       // -lLIBRARY.  Should we bother?
-      gold_warning(_("%s: ignoring command OPTION; OPTION is only valid"
+      gold_warning(_("%s:%d:%d: ignoring command OPTION; OPTION is only valid"
 		     " for scripts specified via -T/--script"),
-		   closure->filename());
+		   closure->filename(), closure->lineno(), closure->charpos());
     }
   else
     {
       bool past_a_double_dash_option = false;
-      char* mutable_option = strdup(option);
+      char* mutable_option = strndup(option, length);
+      gold_assert(mutable_option != NULL);
       closure->command_line()->process_one_option(1, &mutable_option, 0,
                                                   &past_a_double_dash_option);
       free(mutable_option);
     }
+}
+
+/* Called by the bison parser to push the lexer into expression
+   mode.  */
+
+extern void
+script_push_lex_into_expression_mode(void* closurev)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->push_lex_mode(Lex::EXPRESSION);
+}
+
+/* Called by the bison parser to pop the lexer mode.  */
+
+extern void
+script_pop_lex_mode(void* closurev)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->pop_lex_mode();
 }

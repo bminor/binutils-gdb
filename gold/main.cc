@@ -1,6 +1,6 @@
 // main.cc -- gold main function.
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -27,6 +27,7 @@
 #endif
 #include "libiberty.h"
 
+#include "script.h"
 #include "options.h"
 #include "parameters.h"
 #include "errors.h"
@@ -58,8 +59,12 @@ main(int argc, char** argv)
   // errors object.
   initialize_parameters(&errors);
 
+  // Options which may be set by the command line or by linker
+  // scripts.
+  Script_options script_options;
+
   // Handle the command line options.
-  Command_line command_line;
+  Command_line command_line(&script_options);
   command_line.process(argc - 1, argv + 1);
 
   long start_time = 0;
@@ -82,7 +87,7 @@ main(int argc, char** argv)
   Symbol_table symtab(command_line.number_of_input_files() * 1024);
 
   // The layout object.
-  Layout layout(command_line.options());
+  Layout layout(command_line.options(), &script_options);
 
   // Get the search path from the -L options.
   Dirsearch search_path;
