@@ -71,7 +71,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FR30_8",		/* name */
-	 TRUE,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x0000,		/* src_mask */
 	 0x0ff0,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
@@ -86,7 +86,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 fr30_elf_i20_reloc,	/* special_function */
 	 "R_FR30_20",		/* name */
-	 TRUE,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x00f0ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
@@ -101,7 +101,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FR30_32",		/* name */
-	 TRUE,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
@@ -116,7 +116,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 fr30_elf_i32_reloc,	/* special_function */
 	 "R_FR30_48",		/* name */
-	 TRUE,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
@@ -131,7 +131,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 complain_overflow_unsigned, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FR30_6_IN_4",	/* name */
-	 TRUE,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x0000,		/* src_mask */
 	 0x00f0,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
@@ -146,7 +146,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,/* special_function */
 	 "R_FR30_8_IN_8",	/* name */
-	 TRUE,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x0000,		/* src_mask */
 	 0x0ff0,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
@@ -161,7 +161,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,/* special_function */
 	 "R_FR30_9_IN_8",	/* name */
-	 TRUE,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x0000,		/* src_mask */
 	 0x0ff0,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
@@ -176,7 +176,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,/* special_function */
 	 "R_FR30_10_IN_8",	/* name */
-	 TRUE,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x0000,		/* src_mask */
 	 0x0ff0,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */

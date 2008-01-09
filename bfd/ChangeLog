@@ -1,3 +1,9 @@
+2008-01-09  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/5552
+	* elf32-fr30.c (fr30_elf_howto_table): Set partial_inplace field
+	to FALSE for all relocs.
+
 2008-01-09  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	PR ld/5526
