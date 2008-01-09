@@ -1,3 +1,8 @@
+2008-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (match_template): Check register size
+	only when size of operands can be encoded the canonical way.
+
 2008-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (i386_operand): Renamed to ...

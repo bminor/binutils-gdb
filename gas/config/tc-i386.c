@@ -2967,6 +2967,7 @@ match_template (void)
   int addr_prefix_disp;
   unsigned int j;
   unsigned int found_cpu_match;
+  unsigned int check_register;
 
 #if MAX_OPERANDS != 4
 # error "MAX_OPERANDS must be 4."
@@ -3110,6 +3111,9 @@ match_template (void)
 	    }
 	  }
 
+      /* We check register size only if size of operands can be
+	 encoded the canonical way.  */
+      check_register = t->opcode_modifier.w;
       overlap0 = operand_type_and (i.types[0], operand_types[0]);
       switch (t->operands)
 	{
@@ -3132,19 +3136,8 @@ match_template (void)
 	  overlap1 = operand_type_and (i.types[1], operand_types[1]);
 	  if (!operand_type_match (overlap0, i.types[0])
 	      || !operand_type_match (overlap1, i.types[1])
-	      /* monitor in SSE3 is a very special case.  The first
-		 register and the second register may have different
-		 sizes.  The same applies to crc32 in SSE4.2.  It is
-		 also true for invlpga, vmload, vmrun and vmsave in
-		 SVME.  */
-	      || !((t->base_opcode == 0x0f01
-		    && (t->extension_opcode == 0xc8
-			|| t->extension_opcode == 0xd8
-			|| t->extension_opcode == 0xda
-			|| t->extension_opcode == 0xdb
-			|| t->extension_opcode == 0xdf))
-		   || t->base_opcode == 0xf20f38f1
-		   || operand_type_register_match (overlap0, i.types[0],
+	      || (check_register
+		  && !operand_type_register_match (overlap0, i.types[0],
 						   operand_types[0],
 						   overlap1, i.types[1],
 						   operand_types[1])))
@@ -3158,10 +3151,13 @@ match_template (void)
 	      overlap1 = operand_type_and (i.types[1], operand_types[0]);
 	      if (!operand_type_match (overlap0, i.types[0])
 		  || !operand_type_match (overlap1, i.types[1])
-		  || !operand_type_register_match (overlap0, i.types[0],
-						   operand_types[1],
-						   overlap1, i.types[1],
-						   operand_types[0]))
+		  || (check_register
+		      && !operand_type_register_match (overlap0,
+						       i.types[0],
+						       operand_types[1],
+						       overlap1,
+						       i.types[1],
+						       operand_types[0])))
 		{
 		  /* Does not match either direction.  */
 		  continue;
@@ -3195,12 +3191,13 @@ match_template (void)
 		{
 		case 4:
 		  if (!operand_type_match (overlap3, i.types[3])
-		      || !operand_type_register_match (overlap2,
-						       i.types[2],
-						       operand_types[2],
-						       overlap3,
-						       i.types[3],
-						       operand_types[3]))
+		      || (check_register
+			  && !operand_type_register_match (overlap2,
+							   i.types[2],
+							   operand_types[2],
+							   overlap3,
+							   i.types[3],
+							   operand_types[3])))
 		    continue;
 		case 3:
 		  /* Here we make use of the fact that there are no
@@ -3208,12 +3205,13 @@ match_template (void)
 		     operand instructions only need to be checked for
 		     register consistency between operands 2 and 3.  */
 		  if (!operand_type_match (overlap2, i.types[2])
-		      || !operand_type_register_match (overlap1,
-						       i.types[1],
-						       operand_types[1],
-						       overlap2,
-						       i.types[2],
-						       operand_types[2]))
+		      || (check_register
+			  && !operand_type_register_match (overlap1,
+							   i.types[1],
+							   operand_types[1],
+							   overlap2,
+							   i.types[2],
+							   operand_types[2])))
 		    continue;
 		  break;
 		}
