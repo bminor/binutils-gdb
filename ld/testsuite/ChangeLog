@@ -1,3 +1,8 @@
+2008-01-09  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	PR ld/5526
+	* ld-elf/eh6.s, ld-elf/eh6.d: New test.
+
 2008-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/5522

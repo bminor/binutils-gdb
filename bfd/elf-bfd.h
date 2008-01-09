@@ -276,19 +276,20 @@ struct eh_cie_fde
       struct eh_cie_fde *next_for_section;
     } fde;
     struct {
-      /* In general, equivalent CIEs are grouped together, with one CIE
-	 representing all the others in a group.
+      /* CIEs have three states:
 
-	 If REMOVED == 0, this CIE is the group representative, and
-	 U.SEC points to the .eh_frame section that contains the CIE.
+	 - REMOVED && !MERGED: Slated for removal because we haven't yet
+	   proven that an FDE needs it.  FULL_CIE, if nonnull, points to
+	   more detailed information about the CIE.
 
-	 If REMOVED == 1, this CIE is the group representative if
-	 U.MERGED is a self pointer.  Otherwise, following U.MERGED
-	 brings us "closer" to the CIE's group representative;
-	 if U.MERGED is not the group representative, then
-	 U.MERGED->U.MERGED is.  */
+	 - REMOVED && MERGED: We have merged this CIE with MERGED_WITH,
+	   which may not belong to the same input section.
+
+	 - !REMOVED: We have decided to keep this CIE.  SEC is the
+	   .eh_frame input section that contains the CIE.  */
       union {
- 	struct eh_cie_fde *merged;
+	struct cie *full_cie;
+ 	struct eh_cie_fde *merged_with;
  	asection *sec;
       } u;
 
@@ -296,8 +297,7 @@ struct eh_cie_fde
       unsigned int gc_mark : 1;
 
       /* True if we have decided to turn an absolute LSDA encoding into
-	 a PC-relative one.  It is the group representative's setting
-	 that matters.  */
+	 a PC-relative one.  */
       unsigned int make_lsda_relative : 1;
 
       /* True if the CIE contains personality data and if that data
@@ -307,6 +307,9 @@ struct eh_cie_fde
       /* True if we need to add an 'R' (FDE encoding) entry to the
 	 CIE's augmentation data.  */
       unsigned int add_fde_encoding : 1;
+
+      /* True if we have merged this CIE with another.  */
+      unsigned int merged : 1;
     } cie;
   } u;
   unsigned int reloc_index;
@@ -341,6 +344,7 @@ struct eh_cie_fde
 struct eh_frame_sec_info
 {
   unsigned int count;
+  struct cie *cies;
   struct eh_cie_fde entry[1];
 };
 
@@ -358,6 +362,8 @@ struct eh_frame_hdr_info
   asection *hdr_sec;
   unsigned int fde_count, array_count;
   struct eh_frame_array_ent *array;
+  /* TRUE if we should try to merge CIEs between input sections.  */
+  bfd_boolean merge_cies;
   /* TRUE if all .eh_frames have been parsd.  */
   bfd_boolean parsed_eh_frames;
   /* TRUE if .eh_frame_hdr should contain the sorted search table.

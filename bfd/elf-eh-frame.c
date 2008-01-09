@@ -42,6 +42,7 @@ struct cie
   union {
     struct elf_link_hash_entry *h;
     bfd_vma val;
+    unsigned int reloc_index;
   } personality;
   asection *output_sec;
   struct eh_cie_fde *cie_inf;
@@ -431,8 +432,7 @@ _bfd_elf_begin_eh_frame_parsing (struct bfd_link_info *info)
   struct eh_frame_hdr_info *hdr_info;
 
   hdr_info = &elf_hash_table (info)->eh_info;
-  if (!hdr_info->parsed_eh_frames && !info->relocatable)
-    hdr_info->cies = htab_try_create (1, cie_hash, cie_eq, free);
+  hdr_info->merge_cies = !info->relocatable;
 }
 
 /* Try to parse .eh_frame section SEC, which belongs to ABFD.  Store the
@@ -453,13 +453,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   bfd_byte *last_fde;
   struct eh_cie_fde *this_inf;
   unsigned int hdr_length, hdr_id;
-  struct extended_cie
-    {
-      struct cie *cie;
-      struct eh_cie_fde *local_cie;
-    } *ecies = NULL, *ecie;
-  unsigned int ecie_count;
-  struct cie *cie, *local_cies = NULL, tmp_cie;
+  unsigned int cie_count;
+  struct cie *cie, *local_cies = NULL;
   struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
   struct eh_frame_sec_info *sec_info = NULL;
@@ -538,16 +533,9 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 			  + (num_entries - 1) * sizeof (struct eh_cie_fde));
   REQUIRE (sec_info);
 
-  ecies = bfd_zmalloc (num_cies * sizeof (*ecies));
-  REQUIRE (ecies);
-
-  /* If we're not merging CIE entries (such as for a relocatable link),
-     we need to have a "struct cie" for each CIE in this section.  */
-  if (hdr_info->cies == NULL)
-    {
-      local_cies = bfd_zmalloc (num_cies * sizeof (*local_cies));
-      REQUIRE (local_cies);
-    }
+  /* We need to have a "struct cie" for each CIE in this section.  */
+  local_cies = bfd_zmalloc (num_cies * sizeof (*local_cies));
+  REQUIRE (local_cies);
 
 #define ENSURE_NO_RELOCS(buf)				\
   REQUIRE (!(cookie->rel < cookie->relend		\
@@ -568,7 +556,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
    ? cookie->rel : NULL)
 
   buf = ehbuf;
-  ecie_count = 0;
+  cie_count = 0;
   gc_mark_hook = get_elf_backend_data (abfd)->gc_mark_hook;
   while ((bfd_size_type) (buf - ehbuf) != sec->size)
     {
@@ -612,16 +600,9 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  /* CIE  */
 	  this_inf->cie = 1;
 
-	  /* If we're merging CIEs, construct the struct cie in TMP_CIE;
-	     we'll enter it into the global pool later.  Otherwise point
-	     CIE to one of the section-local cie structures.  */
-	  if (local_cies)
-	    cie = local_cies + ecie_count;
-	  else
-	    {
-	      cie = &tmp_cie;
-	      memset (cie, 0, sizeof (*cie));
-	    }
+	  /* Point CIE to one of the section-local cie structures.  */
+	  cie = local_cies + cie_count++;
+
 	  cie->cie_inf = this_inf;
 	  cie->length = hdr_length;
 	  cie->output_sec = sec->output_section;
@@ -697,64 +678,14 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 			}
 		      ENSURE_NO_RELOCS (buf);
 		      /* Ensure we have a reloc here.  */
-		      if (GET_RELOC (buf) != NULL)
-			{
-			  unsigned long r_symndx;
-
-#ifdef BFD64
-			  if (elf_elfheader (abfd)->e_ident[EI_CLASS]
-			      == ELFCLASS64)
-			    r_symndx = ELF64_R_SYM (cookie->rel->r_info);
-			  else
-#endif
-			    r_symndx = ELF32_R_SYM (cookie->rel->r_info);
-			  if (r_symndx >= cookie->locsymcount
-			      || ELF_ST_BIND (cookie->locsyms[r_symndx]
-					      .st_info) != STB_LOCAL)
-			    {
-			      struct elf_link_hash_entry *h;
-
-			      r_symndx -= cookie->extsymoff;
-			      h = cookie->sym_hashes[r_symndx];
-
-			      while (h->root.type == bfd_link_hash_indirect
-				     || h->root.type == bfd_link_hash_warning)
-				h = (struct elf_link_hash_entry *)
-				    h->root.u.i.link;
-
-			      cie->personality.h = h;
-			    }
-			  else
-			    {
-			      Elf_Internal_Sym *sym;
-			      asection *sym_sec;
-			      bfd_vma val;
-
-			      sym = &cookie->locsyms[r_symndx];
-			      sym_sec = (bfd_section_from_elf_index
-					 (abfd, sym->st_shndx));
-			      if (sym_sec != NULL)
-				{
-				  if (sym_sec->kept_section != NULL)
-				    sym_sec = sym_sec->kept_section;
-				  if (sym_sec->output_section != NULL)
-				    {
-				      val = (sym->st_value
-					     + sym_sec->output_offset
-					     + sym_sec->output_section->vma);
-				      cie->personality.val = val;
-				      cie->local_personality = 1;
-				    }
-				}
-			    }
-
-			  /* Cope with MIPS-style composite relocations.  */
-			  do
-			    cookie->rel++;
-			  while (GET_RELOC (buf) != NULL);
-			}
+		      REQUIRE (GET_RELOC (buf));
+		      cie->personality.reloc_index
+			= cookie->rel - cookie->rels;
+		      /* Cope with MIPS-style composite relocations.  */
+		      do
+			cookie->rel++;
+		      while (GET_RELOC (buf) != NULL);
 		      REQUIRE (skip_bytes (&buf, end, per_width));
-		      REQUIRE (cie->local_personality || cie->personality.h);
 		    }
 		    break;
 		  default:
@@ -807,6 +738,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  buf += initial_insn_length;
 	  ENSURE_NO_RELOCS (buf);
 
+	  if (hdr_info->merge_cies)
+	    this_inf->u.cie.u.full_cie = cie;
 	  this_inf->u.cie.per_encoding_relative
 	    = (cie->per_encoding & 0x70) == DW_EH_PE_pcrel;
 	}
@@ -816,18 +749,17 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
 	  /* Find the corresponding CIE.  */
 	  unsigned int cie_offset = this_inf->offset + 4 - hdr_id;
-	  for (ecie = ecies; ecie < ecies + ecie_count; ++ecie)
-	    if (cie_offset == ecie->local_cie->offset)
+	  for (cie = local_cies; cie < local_cies + cie_count; cie++)
+	    if (cie_offset == cie->cie_inf->offset)
 	      break;
 
 	  /* Ensure this FDE references one of the CIEs in this input
 	     section.  */
-	  REQUIRE (ecie != ecies + ecie_count);
-	  cie = ecie->cie;
-	  this_inf->u.fde.cie_inf = ecie->local_cie;
-	  this_inf->make_relative = ecie->local_cie->make_relative;
+	  REQUIRE (cie != local_cies + cie_count);
+	  this_inf->u.fde.cie_inf = cie->cie_inf;
+	  this_inf->make_relative = cie->cie_inf->make_relative;
 	  this_inf->add_augmentation_size
-	    = ecie->local_cie->add_augmentation_size;
+	    = cie->cie_inf->add_augmentation_size;
 
 	  ENSURE_NO_RELOCS (buf);
 	  REQUIRE (GET_RELOC (buf));
@@ -915,37 +847,18 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
       this_inf->removed = 1;
       this_inf->fde_encoding = cie->fde_encoding;
       this_inf->lsda_encoding = cie->lsda_encoding;
-      if (this_inf->cie)
-	{
-	  /* We have now finished constructing the struct cie.  */
-	  if (hdr_info->cies != NULL)
-	    {
-	      /* See if we can merge this CIE with an earlier one.  */
-	      void **loc;
-
-	      cie_compute_hash (cie);
-	      loc = htab_find_slot_with_hash (hdr_info->cies, cie,
-					      cie->hash, INSERT);
-	      REQUIRE (loc);
-	      if (*loc == HTAB_EMPTY_ENTRY)
-		{
-		  *loc = malloc (sizeof (struct cie));
-		  REQUIRE (*loc);
-		  memcpy (*loc, cie, sizeof (struct cie));
-		}
-	      cie = (struct cie *) *loc;
-	    }
-	  this_inf->u.cie.u.merged = cie->cie_inf;
-	  ecies[ecie_count].cie = cie;
-	  ecies[ecie_count++].local_cie = this_inf;
-	}
       sec_info->count++;
     }
   BFD_ASSERT (sec_info->count == num_entries);
-  BFD_ASSERT (ecie_count == num_cies);
+  BFD_ASSERT (cie_count == num_cies);
 
   elf_section_data (sec)->sec_info = sec_info;
   sec->sec_info_type = ELF_INFO_TYPE_EH_FRAME;
+  if (hdr_info->merge_cies)
+    {
+      sec_info->cies = local_cies;
+      local_cies = NULL;
+    }
   goto success;
 
  free_no_table:
@@ -958,8 +871,6 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
  success:
   if (ehbuf)
     free (ehbuf);
-  if (ecies)
-    free (ecies);
   if (local_cies)
     free (local_cies);
 #undef REQUIRE
@@ -973,11 +884,6 @@ _bfd_elf_end_eh_frame_parsing (struct bfd_link_info *info)
   struct eh_frame_hdr_info *hdr_info;
 
   hdr_info = &elf_hash_table (info)->eh_info;
-  if (hdr_info->cies != NULL)
-    {
-      htab_delete (hdr_info->cies);
-      hdr_info->cies = NULL;
-    }
   hdr_info->parsed_eh_frames = TRUE;
 }
 
@@ -1009,7 +915,7 @@ _bfd_elf_gc_mark_fdes (struct bfd_link_info *info, asection *sec,
 		       asection *eh_frame, elf_gc_mark_hook_fn gc_mark_hook,
 		       struct elf_reloc_cookie *cookie)
 {
-  struct eh_cie_fde *fde, *cie, *merged;
+  struct eh_cie_fde *fde, *cie;
 
   for (fde = elf_fde_list (sec); fde; fde = fde->u.fde.next_for_section)
     {
@@ -1019,15 +925,134 @@ _bfd_elf_gc_mark_fdes (struct bfd_link_info *info, asection *sec,
       /* At this stage, all cie_inf fields point to local CIEs, so we
 	 can use the same cookie to refer to them.  */
       cie = fde->u.fde.cie_inf;
-      merged = cie->u.cie.u.merged;
-      if (!merged->u.cie.gc_mark)
+      if (!cie->u.cie.gc_mark)
 	{
-	  merged->u.cie.gc_mark = 1;
+	  cie->u.cie.gc_mark = 1;
 	  if (!mark_entry (info, eh_frame, cie, gc_mark_hook, cookie))
 	    return FALSE;
 	}
     }
   return TRUE;
+}
+
+/* Input section SEC of ABFD is an .eh_frame section that contains the
+   CIE described by CIE_INF.  Return a version of CIE_INF that is going
+   to be kept in the output, adding CIE_INF to the output if necessary.
+
+   HDR_INFO is the .eh_frame_hdr information and COOKIE describes the
+   relocations in REL.  */
+
+static struct eh_cie_fde *
+find_merged_cie (bfd *abfd, asection *sec,
+		 struct eh_frame_hdr_info *hdr_info,
+		 struct elf_reloc_cookie *cookie,
+		 struct eh_cie_fde *cie_inf)
+{
+  unsigned long r_symndx;
+  struct cie *cie, *new_cie;
+  Elf_Internal_Rela *rel;
+  void **loc;
+
+  /* Use CIE_INF if we have already decided to keep it.  */
+  if (!cie_inf->removed)
+    return cie_inf;
+
+  /* If we have merged CIE_INF with another CIE, use that CIE instead.  */
+  if (cie_inf->u.cie.merged)
+    return cie_inf->u.cie.u.merged_with;
+
+  cie = cie_inf->u.cie.u.full_cie;
+
+  /* Assume we will need to keep CIE_INF.  */
+  cie_inf->removed = 0;
+  cie_inf->u.cie.u.sec = sec;
+
+  /* If we are not merging CIEs, use CIE_INF.  */
+  if (cie == NULL)
+    return cie_inf;
+
+  if (cie->per_encoding != DW_EH_PE_omit)
+    {
+      /* Work out the address of personality routine, either as an absolute
+	 value or as a symbol.  */
+      rel = cookie->rels + cie->personality.reloc_index;
+      memset (&cie->personality, 0, sizeof (cie->personality));
+#ifdef BFD64
+      if (elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64)
+	r_symndx = ELF64_R_SYM (rel->r_info);
+      else
+#endif
+	r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx >= cookie->locsymcount
+	  || ELF_ST_BIND (cookie->locsyms[r_symndx].st_info) != STB_LOCAL)
+	{
+	  struct elf_link_hash_entry *h;
+
+	  r_symndx -= cookie->extsymoff;
+	  h = cookie->sym_hashes[r_symndx];
+
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  cie->personality.h = h;
+	}
+      else
+	{
+	  Elf_Internal_Sym *sym;
+	  asection *sym_sec;
+
+	  sym = &cookie->locsyms[r_symndx];
+	  sym_sec = bfd_section_from_elf_index (abfd, sym->st_shndx);
+	  if (sym_sec == NULL)
+	    return cie_inf;
+
+	  if (sym_sec->kept_section != NULL)
+	    sym_sec = sym_sec->kept_section;
+	  if (sym_sec->output_section == NULL)
+	    return cie_inf;
+
+	  cie->local_personality = 1;
+	  cie->personality.val = (sym->st_value
+				  + sym_sec->output_offset
+				  + sym_sec->output_section->vma);
+	}
+    }
+
+  /* See if we can merge this CIE with an earlier one.  */
+  cie->output_sec = sec->output_section;
+  cie_compute_hash (cie);
+  if (hdr_info->cies == NULL)
+    {
+      hdr_info->cies = htab_try_create (1, cie_hash, cie_eq, free);
+      if (hdr_info->cies == NULL)
+	return cie_inf;
+    }
+  loc = htab_find_slot_with_hash (hdr_info->cies, cie, cie->hash, INSERT);
+  if (loc == NULL)
+    return cie_inf;
+
+  new_cie = (struct cie *) *loc;
+  if (new_cie == NULL)
+    {
+      /* Keep CIE_INF and record it in the hash table.  */
+      new_cie = malloc (sizeof (struct cie));
+      if (new_cie == NULL)
+	return cie_inf;
+
+      memcpy (new_cie, cie, sizeof (struct cie));
+      *loc = new_cie;
+    }
+  else
+    {
+      /* Merge CIE_INF with NEW_CIE->CIE_INF.  */
+      cie_inf->removed = 1;
+      cie_inf->u.cie.merged = 1;
+      cie_inf->u.cie.u.merged_with = new_cie->cie_inf;
+      if (cie_inf->u.cie.make_lsda_relative)
+	new_cie->cie_inf->u.cie.make_lsda_relative = 1;
+    }
+  return new_cie->cie_inf;
 }
 
 /* This function is called for each input file before the .eh_frame
@@ -1041,7 +1066,7 @@ _bfd_elf_discard_section_eh_frame
     bfd_boolean (*reloc_symbol_deleted_p) (bfd_vma, void *),
     struct elf_reloc_cookie *cookie)
 {
-  struct eh_cie_fde *ent, *cie, *merged;
+  struct eh_cie_fde *ent;
   struct eh_frame_sec_info *sec_info;
   struct eh_frame_hdr_info *hdr_info;
   unsigned int ptr_size, offset;
@@ -1075,30 +1100,16 @@ _bfd_elf_discard_section_eh_frame
 	      }
 	    ent->removed = 0;
 	    hdr_info->fde_count++;
-
-	    cie = ent->u.fde.cie_inf;
-	    if (cie->removed)
-	      {
-		merged = cie->u.cie.u.merged;
-		if (!merged->removed)
-		  /* We have decided to keep the group representative.  */
-		  ent->u.fde.cie_inf = merged;
-		else if (merged->u.cie.u.merged != merged)
-		  /* We didn't keep the original group representative,
-		     but we did keep an alternative.  */
-		  ent->u.fde.cie_inf = merged->u.cie.u.merged;
-		else
-		  {
-		    /* Make the local CIE represent the merged group.  */
-		    merged->u.cie.u.merged = cie;
-		    cie->removed = 0;
-		    cie->u.cie.u.sec = sec;
-		    cie->u.cie.make_lsda_relative
-		      = merged->u.cie.make_lsda_relative;
-		  }
-	      }
+	    ent->u.fde.cie_inf = find_merged_cie (abfd, sec, hdr_info, cookie,
+						  ent->u.fde.cie_inf);
 	  }
       }
+
+  if (sec_info->cies)
+    {
+      free (sec_info->cies);
+      sec_info->cies = NULL;
+    }
 
   ptr_size = (get_elf_backend_data (sec->owner)
 	      ->elf_backend_eh_frame_address_size (sec->owner, sec));
@@ -1128,6 +1139,12 @@ _bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
+
+  if (hdr_info->cies != NULL)
+    {
+      htab_delete (hdr_info->cies);
+      hdr_info->cies = NULL;
+    }
 
   sec = hdr_info->hdr_sec;
   if (sec == NULL)

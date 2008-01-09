@@ -1,3 +1,26 @@
+2008-01-09  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	PR ld/5526
+	* elf-bfd.h (eh_cie_fde): Add u.cie.u.full_cie and u.cie.merged
+	fields.  Rename u.cie.u.merged to u.cie.u.merged_with.
+	(eh_frame_sec_info): Add a cies field.
+	(eh_frame_hdr_info): Add a merge_cies field.
+	* elf-eh-frame.c (cie): Add a reloc_index member to the personality
+	union.
+	(_bfd_elf_begin_eh_frame_parsing): Set hdr_info->merge_cies instead
+	of hdr_info->cies.
+	(_bfd_elf_parse_eh_frame): Remove tmp_cie.  Ccreate an array of
+	cie structures in all cases and use it instead of extended_cies.
+	If merging, store the cie array in sec_info->cies and point each
+	CIE's eh_fde_cie at the associated element.  Do not try to
+	calculate the value of the personality routine here; record the
+	offset of the relocation instead.  Do not merge CIEs here.
+	(_bfd_elf_end_eh_frame_parsing): Do not free hdr_info->cies here...
+	(_bfd_elf_discard_section_eh_frame_hdr): ...do it here instead.
+	(_bfd_elf_gc_mark_fdes): Mark the original (unmerged) CIE.
+	(find_merged_cie): New function.
+	(_bfd_elf_gc_mark_fdes): Use it.  Free sec_info->cies.
+
 2008-01-07  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/5535
