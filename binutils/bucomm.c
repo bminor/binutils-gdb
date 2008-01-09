@@ -195,16 +195,18 @@ list_supported_targets (const char *name, FILE *f)
 void
 list_supported_architectures (const char *name, FILE *f)
 {
-  const char **arch;
+  const char ** arch;
+  const char ** arches;
 
   if (name == NULL)
     fprintf (f, _("Supported architectures:"));
   else
     fprintf (f, _("%s: supported architectures:"), name);
 
-  for (arch = bfd_arch_list (); *arch; arch++)
+  for (arch = arches = bfd_arch_list (); *arch; arch++)
     fprintf (f, " %s", *arch);
   fprintf (f, "\n");
+  free (arches);
 }
 
 /* The length of the longest architecture name + 1.  */

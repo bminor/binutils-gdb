@@ -1,3 +1,11 @@
+2008-01-09  Jakub Zawadzki  <darkjames@darkjames.ath.cx>
+
+	PR binutils/55326
+	* bucomm.c (list_supported_architectures): Free architecture list
+	after use.
+	* windres.c (set_endianess): Likewise.
+	* windmc.c (set_endianess): Likewise.
+
 2008-01-08  Kai Tietz  <kai.tietz@onevision.com>
 
 	* binutils/rclex.c: (yylex): Add ':', '_', '\\', and '/' to post

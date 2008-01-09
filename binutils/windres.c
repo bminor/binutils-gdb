@@ -1062,7 +1062,8 @@ main (int argc, char **argv)
   return 0;
 }
 
-static void set_endianess (bfd *abfd, const char *target)
+static void
+set_endianess (bfd *abfd, const char *target)
 {
   const bfd_target *target_vec;
 
@@ -1071,17 +1072,22 @@ static void set_endianess (bfd *abfd, const char *target)
   if (! target_vec)
     fatal ("Can't detect target endianess and architecture.");
   target_is_bigendian = ((target_vec->byteorder == BFD_ENDIAN_BIG) ? 1 : 0);
+
   {
-    const char *tname = target_vec->name;
-    const char **arch = bfd_arch_list();
-    if (arch && tname)
+    const char *  tname = target_vec->name;
+    const char ** arches = bfd_arch_list();
+
+    if (arches && tname)
       {
+	const char ** arch = arches;
+
 	if (strchr (tname, '-') != NULL)
 	  tname = strchr (tname, '-') + 1;
 	while (*arch != NULL)
 	  {
 	    const char *in_a = strstr (*arch, tname);
 	    char end_ch = (in_a ? in_a[strlen(tname)] : 0);
+
 	    if (in_a && (in_a == *arch || in_a[-1] == ':')
 	        && end_ch == 0)
 	      {
@@ -1091,6 +1097,9 @@ static void set_endianess (bfd *abfd, const char *target)
 	    arch++;
 	  }
       }
+
+    free (arches);
+
     if (! def_target_arch)
       fatal ("Can't detect architecture.");
   }
@@ -1156,8 +1165,8 @@ set_windres_bfd (windres_bfd *wrbfd, bfd *abfd, asection *sec, rc_uint_type kind
 }
 
 void
-set_windres_bfd_content(windres_bfd *wrbfd, const void *data, rc_uint_type off,
-			rc_uint_type length)
+set_windres_bfd_content (windres_bfd *wrbfd, const void *data, rc_uint_type off,
+			 rc_uint_type length)
 {
   if (WR_KIND(wrbfd) != WR_KIND_TARGET)
     {
@@ -1169,8 +1178,8 @@ set_windres_bfd_content(windres_bfd *wrbfd, const void *data, rc_uint_type off,
 }
 
 void
-get_windres_bfd_content(windres_bfd *wrbfd, void *data, rc_uint_type off,
-			rc_uint_type length)
+get_windres_bfd_content (windres_bfd *wrbfd, void *data, rc_uint_type off,
+			 rc_uint_type length)
 {
   if (WR_KIND(wrbfd) != WR_KIND_TARGET)
     {

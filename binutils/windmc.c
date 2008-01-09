@@ -245,18 +245,23 @@ set_endianess (bfd *abfd, const char *target)
   if (! target_vec)
     fatal ("Can't detect target endianess and architecture.");
   target_is_bigendian = ((target_vec->byteorder == BFD_ENDIAN_BIG) ? 1 : 0);
-  {
-    const char *tname = target_vec->name;
-    const char **arch = bfd_arch_list ();
 
-    if (arch && tname)
+  {
+    const char *  tname = target_vec->name;
+    const char ** arches = bfd_arch_list ();
+
+    if (arches && tname)
       {
+	const char ** arch = arches;
+
 	if (strchr (tname, '-') != NULL)
 	  tname = strchr (tname, '-') + 1;
+
 	while (*arch != NULL)
 	  {
 	    const char *in_a = strstr (*arch, tname);
 	    char end_ch = (in_a ? in_a[strlen (tname)] : 0);
+
 	    if (in_a && (in_a == *arch || in_a[-1] == ':')
 	        && end_ch == 0)
 	      {
@@ -266,6 +271,9 @@ set_endianess (bfd *abfd, const char *target)
 	    arch++;
 	  }
       }
+
+    free (arches);
+
     if (! def_target_arch)
       fatal ("Can't detect architecture.");
   }
