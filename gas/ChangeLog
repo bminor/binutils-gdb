@@ -1,3 +1,8 @@
+2008-01-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-ia64.c (ia64_convert_frag): Zero-initialize room for
+	unwind personality function address.
+
 2008-01-09  Bob Wilson  <bob.wilson@acm.org>
 	
 	* dwarf2dbg.c (out_sleb128): Delete.

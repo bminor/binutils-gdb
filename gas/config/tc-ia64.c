@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -3166,6 +3166,10 @@ ia64_convert_frag (fragS *frag)
   if (pad != 0)
     md_number_to_chars (frag->fr_literal + len + 8 - md.pointer_size + pad, 0,
 			md.pointer_size - pad);
+  /* Fill the unwind personality with zeros.  */
+  if (frag->fr_offset)
+    md_number_to_chars (frag->fr_literal + size - md.pointer_size, 0,
+			md.pointer_size);
 
   frag->fr_fix += size;
   frag->fr_type = rs_fill;
