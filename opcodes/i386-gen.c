@@ -451,9 +451,7 @@ set_bitfield (const char *f, bitfield *array, unsigned int size)
 	return;
       }
 
-  printf ("%s: %d: Unknown bitfield: %s\n",
-	  filename, lineno, f);
-  abort ();
+  fail (_("%s: %d: Unknown bitfield: %s\n"), filename, lineno, f);
 }
 
 static void

@@ -1,5 +1,9 @@
 2008-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (set_bitfield): Use fail () on error.
+
+2008-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (lineno): New.
 	(filename): Likewise.
 	(set_bitfield): Report filename and line numer on error.
