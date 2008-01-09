@@ -674,49 +674,49 @@ proc test_printf_with_dfp {} {
     # Test various dfp values, covering 32-bit, 64-bit and 128-bit ones
 
     # _Decimal32 constants, which can support up to 7 digits
-    gdb_test "printf \"%H\\n\",1.2df" "1.2"
-    gdb_test "printf \"%H\\n\",-1.2df" "-1.2"
-    gdb_test "printf \"%H\\n\",1.234567df" "1.234567"
-    gdb_test "printf \"%H\\n\",-1.234567df" "-1.234567"
-    gdb_test "printf \"%H\\n\",1234567.df" "1234567"
-    gdb_test "printf \"%H\\n\",-1234567.df" "-1234567"
+    gdb_test "printf \"%Hf\\n\",1.2df" "1.2"
+    gdb_test "printf \"%Hf\\n\",-1.2df" "-1.2"
+    gdb_test "printf \"%Hf\\n\",1.234567df" "1.234567"
+    gdb_test "printf \"%Hf\\n\",-1.234567df" "-1.234567"
+    gdb_test "printf \"%Hf\\n\",1234567.df" "1234567"
+    gdb_test "printf \"%Hf\\n\",-1234567.df" "-1234567"
 
-    gdb_test "printf \"%H\\n\",1.2E1df" "12"
-    gdb_test "printf \"%H\\n\",1.2E10df" "1.2E\\+10"
-    gdb_test "printf \"%H\\n\",1.2E-10df" "1.2E-10"
+    gdb_test "printf \"%Hf\\n\",1.2E1df" "12"
+    gdb_test "printf \"%Hf\\n\",1.2E10df" "1.2E\\+10"
+    gdb_test "printf \"%Hf\\n\",1.2E-10df" "1.2E-10"
 
     # The largest exponent for 32-bit dfp value is 96.
-    gdb_test "printf \"%H\\n\",1.2E96df" "1.200000E\\+96"
+    gdb_test "printf \"%Hf\\n\",1.2E96df" "1.200000E\\+96"
 
     # _Decimal64 constants, which can support up to 16 digits
-    gdb_test "printf \"%D\\n\",1.2dd" "1.2"
-    gdb_test "printf \"%D\\n\",-1.2dd" "-1.2"
-    gdb_test "printf \"%D\\n\",1.234567890123456dd" "1.234567890123456"
-    gdb_test "printf \"%D\\n\",-1.234567890123456dd" "-1.234567890123456"
-    gdb_test "printf \"%D\\n\",1234567890123456.dd" "1234567890123456"
-    gdb_test "printf \"%D\\n\",-1234567890123456.dd" "-1234567890123456"
+    gdb_test "printf \"%Df\\n\",1.2dd" "1.2"
+    gdb_test "printf \"%Df\\n\",-1.2dd" "-1.2"
+    gdb_test "printf \"%Df\\n\",1.234567890123456dd" "1.234567890123456"
+    gdb_test "printf \"%Df\\n\",-1.234567890123456dd" "-1.234567890123456"
+    gdb_test "printf \"%Df\\n\",1234567890123456.dd" "1234567890123456"
+    gdb_test "printf \"%Df\\n\",-1234567890123456.dd" "-1234567890123456"
 
-    gdb_test "printf \"%D\\n\",1.2E1dd" "12"
-    gdb_test "printf \"%D\\n\",1.2E10dd" "1.2E\\+10"
-    gdb_test "printf \"%D\\n\",1.2E-10dd" "1.2E-10"
+    gdb_test "printf \"%Df\\n\",1.2E1dd" "12"
+    gdb_test "printf \"%Df\\n\",1.2E10dd" "1.2E\\+10"
+    gdb_test "printf \"%Df\\n\",1.2E-10dd" "1.2E-10"
 
     # The largest exponent for 64-bit dfp value is 384.
-    gdb_test "printf \"%D\\n\",1.2E384dd" "1.200000000000000E\\+384"
+    gdb_test "printf \"%Df\\n\",1.2E384dd" "1.200000000000000E\\+384"
 
     # _Decimal128 constants, which can support up to 34 digits
-    gdb_test "printf \"%DD\\n\",1.2dl" "1.2"
-    gdb_test "printf \"%DD\\n\",-1.2dl" "-1.2"
-    gdb_test "printf \"%DD\\n\",1.234567890123456789012345678901234dl" "1.234567890123456789012345678901234"
-    gdb_test "printf \"%DD\\n\",-1.234567890123456789012345678901234dl" "-1.234567890123456789012345678901234"
-    gdb_test "printf \"%DD\\n\",1234567890123456789012345678901234.dl" "1234567890123456789012345678901234"
-    gdb_test "printf \"%DD\\n\",-1234567890123456789012345678901234.dl" "-1234567890123456789012345678901234"
+    gdb_test "printf \"%DDf\\n\",1.2dl" "1.2"
+    gdb_test "printf \"%DDf\\n\",-1.2dl" "-1.2"
+    gdb_test "printf \"%DDf\\n\",1.234567890123456789012345678901234dl" "1.234567890123456789012345678901234"
+    gdb_test "printf \"%DDf\\n\",-1.234567890123456789012345678901234dl" "-1.234567890123456789012345678901234"
+    gdb_test "printf \"%DDf\\n\",1234567890123456789012345678901234.dl" "1234567890123456789012345678901234"
+    gdb_test "printf \"%DDf\\n\",-1234567890123456789012345678901234.dl" "-1234567890123456789012345678901234"
 
-    gdb_test "printf \"%DD\\n\",1.2E1dl" "12"
-    gdb_test "printf \"%DD\\n\",1.2E10dl" "1.2E\\+10"
-    gdb_test "printf \"%DD\\n\",1.2E-10dl" "1.2E-10"
+    gdb_test "printf \"%DDf\\n\",1.2E1dl" "12"
+    gdb_test "printf \"%DDf\\n\",1.2E10dl" "1.2E\\+10"
+    gdb_test "printf \"%DDf\\n\",1.2E-10dl" "1.2E-10"
 
     # The largest exponent for 128-bit dfp value is 6144.
-    gdb_test "printf \"%DD\\n\",1.2E6144dl" "1.200000000000000000000000000000000E\\+6144"
+    gdb_test "printf \"%DDf\\n\",1.2E6144dl" "1.200000000000000000000000000000000E\\+6144"
 }
 
 # Escape a left curly brace to prevent it from being interpreted as 

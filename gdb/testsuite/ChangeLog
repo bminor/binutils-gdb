@@ -1,3 +1,8 @@
+2008-01-09  Luis Machado  <luisgpm@br.ibm.com>
+
+	* gdb.base/printcmds.exp (test_printf_with_dfp): Update printf calls
+	with required float modifiers.
+
 2008-01-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/funcall_param: New test program.

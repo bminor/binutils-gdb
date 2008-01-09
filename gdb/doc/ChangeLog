@@ -1,3 +1,8 @@
+2008-01-09  Luis Machado  <luisgpm@br.ibm.com>
+
+	* gdb.texinfo (Output): Update documentation on using printf with DFP
+	types.
+
 2008-01-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.texinfo (C and C++): Add Decimal Floating Point format

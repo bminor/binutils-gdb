@@ -16693,7 +16693,8 @@ single character.  Octal and hexadecimal escape sequences are not
 supported.
 
 Additionally, @code{printf} supports conversion specifications for DFP
-(@dfn{Decimal Floating Point}) types using the following conversion
+(@dfn{Decimal Floating Point}) types using the following length modifiers
+together with a floating point specifier.
 letters:
 
 @itemize @bullet
@@ -16708,7 +16709,7 @@ letters:
 @end itemize
 
 If the underlying @code{C} implementation used to build @value{GDBN} has
-support for the three conversion letters for DFP types, other modifiers
+support for the three length modifiers for DFP types, other modifiers
 such as width and precision will also be available for @value{GDBN} to use.
 
 In case there is no such @code{C} support, no additional modifiers will be
@@ -16716,7 +16717,7 @@ available and the value will be printed in the standard way.
 
 Here's an example of printing DFP types using the above conversion letters:
 @smallexample
-printf "D32: %H - D64: %D - D128: %DD\n",1.2345df,1.2E10dd,1.2E1dl
+printf "D32: %Hf - D64: %Df - D128: %DDf\n",1.2345df,1.2E10dd,1.2E1dl
 @end smallexample
 
 @end table

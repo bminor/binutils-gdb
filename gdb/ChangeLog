@@ -1,3 +1,9 @@
+2008-01-09  Luis Machado  <luisgpm@br.ibm.com>
+
+	* printcmd.c (printf_command): Add seen_big_h, seen_big_d and
+	seen_double_big_d, treat the new H, D, and DD modifiers as length
+	modifiers.
+
 2008-01-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (read_enumeration_type): Add comment.

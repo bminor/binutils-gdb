@@ -1837,7 +1837,8 @@ printf_command (char *arg, int from_tty)
 	{
 	  int seen_hash = 0, seen_zero = 0, lcount = 0, seen_prec = 0;
 	  int seen_space = 0, seen_plus = 0;
-	  int seen_big_l = 0, seen_h = 0;
+	  int seen_big_l = 0, seen_h = 0, seen_big_h = 0;
+	  int seen_big_d = 0, seen_double_big_d = 0;
 	  int bad = 0;
 
 	  /* Check the validity of the format specifier, and work
@@ -1901,6 +1902,26 @@ printf_command (char *arg, int from_tty)
 	      seen_big_l = 1;
 	      f++;
 	    }
+	  /* Decimal32 modifier.  */
+	  else if (*f == 'H')
+	    {
+	      seen_big_h = 1;
+	      f++;
+	    }
+	  /* Decimal64 and Decimal128 modifiers.  */
+	  else if (*f == 'D')
+	    {
+	      f++;
+
+	      /* Check for a Decimal128.  */
+	      if (*f == 'D')
+		{
+		  f++;
+		  seen_double_big_d = 1;
+		}
+	      else
+		seen_big_d = 1;
+	    }
 
 	  switch (*f)
 	    {
@@ -1927,34 +1948,6 @@ printf_command (char *arg, int from_tty)
 
 	      if (seen_big_l)
 		bad = 1;
-	      break;
-
-	    /* DFP Decimal32 types.  */
-	    case 'H':
-	      this_argclass = decfloat_arg;
-
-#ifndef PRINTF_HAS_DECFLOAT
-              if (lcount || seen_h || seen_big_l)
-                bad = 1;
-              if (seen_prec || seen_zero || seen_space || seen_plus)
-                bad = 1;
-#endif
-	      break;
-
-	    /* DFP Decimal64 and Decimal128 types.  */
-	    case 'D':
-	      this_argclass = decfloat_arg;
-
-#ifndef PRINTF_HAS_DECFLOAT
-              if (lcount || seen_h || seen_big_l)
-                bad = 1;
-              if (seen_prec || seen_zero || seen_space || seen_plus)
-                bad = 1;
-#endif
-	      /* Check for a Decimal128.  */
-	      if (*(f + 1) == 'D')
-		f++;
-
 	      break;
 
 	    case 'c':
@@ -1986,7 +1979,9 @@ printf_command (char *arg, int from_tty)
 	    case 'g':
 	    case 'E':
 	    case 'G':
-	      if (seen_big_l)
+	      if (seen_big_h || seen_big_d || seen_double_big_d)
+		this_argclass = decfloat_arg;
+	      else if (seen_big_l)
 		this_argclass = long_double_arg;
 	      else
 		this_argclass = double_arg;
@@ -2124,50 +2119,101 @@ printf_command (char *arg, int from_tty)
 	      break;
 	    }
 
-	  /* Handles decimal floating point values.  */
-	  case decfloat_arg:
+	  /* Handles decimal floating values.  */
+	case decfloat_arg:
 	    {
-	      char *eos;
-	      char decstr[MAX_DECIMAL_STRING];
-	      unsigned int dfp_len = TYPE_LENGTH (value_type (val_args[i]));
-	      unsigned char *dfp_value_ptr = (unsigned char *) value_contents_all (val_args[i])
-                                      + value_offset (val_args[i]);
-
+	      const gdb_byte *param_ptr = value_contents (val_args[i]);
 #if defined (PRINTF_HAS_DECFLOAT)
-	      printf_filtered (current_substring, dfp_value_ptr);
+	      /* If we have native support for Decimal floating
+		 printing, handle it here.  */
+	      printf_filtered (current_substring, param_ptr);
 #else
-	      if (TYPE_CODE (value_type (val_args[i])) != TYPE_CODE_DECFLOAT)
-		error (_("Cannot convert parameter to decfloat."));
 
 	      /* As a workaround until vasprintf has native support for DFP
-		 we convert the DFP values to string and print them using
-		 the %s format specifier.  */
-	      decimal_to_string (dfp_value_ptr, dfp_len, decstr);
+	       we convert the DFP values to string and print them using
+	       the %s format specifier.  */
+
+	      char *eos, *sos;
+	      int nnull_chars = 0;
+
+	      /* Parameter data.  */
+	      struct type *param_type = value_type (val_args[i]);
+	      unsigned int param_len = TYPE_LENGTH (param_type);
+
+	      /* DFP output data.  */
+	      struct value *dfp_value = NULL;
+	      gdb_byte *dfp_ptr;
+	      int dfp_len = 16;
+	      gdb_byte dec[16];
+	      struct type *dfp_type = NULL;
+	      char decstr[MAX_DECIMAL_STRING];
 
 	      /* Points to the end of the string so that we can go back
-		 and check for DFP format specifiers.  */
+		 and check for DFP length modifiers.  */
 	      eos = current_substring + strlen (current_substring);
 
-	      /* Replace %H, %D and %DD with %s's.  */
-	      while (*--eos != '%')
-		if (*eos == 'D' && *(eos - 1) == 'D')
-		  {
-		    *(eos - 1) = 's';
+	      /* Look for the float/double format specifier.  */
+	      while (*eos != 'f' && *eos != 'e' && *eos != 'E'
+		     && *eos != 'g' && *eos != 'G')
+		  eos--;
 
-		    /* If we've found a %DD format specifier we need to go
-		       through the whole string pulling back one character
-		       since this format specifier has two chars.  */
-		    while (eos < last_arg)
-		      {
-			*eos = *(eos + 1);
-			eos++;
-		      }
-		  }
-		else if (*eos == 'D' || *eos == 'H')
-		  *eos = 's';
+	      sos = eos;
+
+	      /* Search for the '%' char and extract the size and type of
+		 the output decimal value based on its modifiers
+		 (%Hf, %Df, %DDf).  */
+	      while (*--sos != '%')
+		{
+		  if (*sos == 'H')
+		    {
+		      dfp_len = 4;
+		      dfp_type = builtin_type (current_gdbarch)->builtin_decfloat;
+		    }
+		  else if (*sos == 'D' && *(sos - 1) == 'D')
+		    {
+		      dfp_len = 16;
+		      dfp_type = builtin_type (current_gdbarch)->builtin_declong;
+		      sos--;
+		    }
+		  else
+		    {
+		      dfp_len = 8;
+		      dfp_type = builtin_type (current_gdbarch)->builtin_decdouble;
+		    }
+		}
+
+	      /* Replace %Hf, %Df and %DDf with %s's.  */
+	      *++sos = 's';
+
+	      /* Go through the whole format string and pull the correct
+		 number of chars back to compensate for the change in the
+		 format specifier.  */
+	      while (nnull_chars < nargs - i)
+		{
+		  if (*eos == '\0')
+		    nnull_chars++;
+
+		  *++sos = *++eos;
+		}
+
+	      /* Conversion between different DFP types.  */
+	      if (TYPE_CODE (param_type) == TYPE_CODE_DECFLOAT)
+		decimal_convert (param_ptr, param_len, dec, dfp_len);
+	      else
+		/* If this is a non-trivial conversion, just output 0.
+		   A correct converted value can be displayed by explicitly
+		   casting to a DFP type.  */
+		decimal_from_string (dec, dfp_len, "0");
+
+	      dfp_value = value_from_decfloat (dfp_type, dec);
+
+	      dfp_ptr = (gdb_byte *) value_contents (dfp_value);
+
+	      decimal_to_string (dfp_ptr, dfp_len, decstr);
 
 	      /* Print the DFP value.  */
 	      printf_filtered (current_substring, decstr);
+
 	      break;
 #endif
 	    }
