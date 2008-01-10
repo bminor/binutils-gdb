@@ -5078,7 +5078,7 @@ lang_end (void)
   bfd_boolean warn;
 
   if (link_info.relocatable || link_info.shared)
-    warn = FALSE;
+    warn = entry_from_cmdline;
   else
     warn = TRUE;
 
