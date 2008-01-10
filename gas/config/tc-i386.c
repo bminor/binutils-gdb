@@ -3056,13 +3056,11 @@ match_template (void)
       else 
 	{
 	  found_cpu_match = cpu_flags_match (t->cpu_flags) == 3;
+	  if (!found_cpu_match)
+	    continue;
 	  if (!t->operands)
-	    {
-	      if (!found_cpu_match)
-		continue;
-	      /* We've found a match; break out of loop.  */
-	      break;
-	    }
+	    /* We've found a match; break out of loop.  */
+	    break;
 	}
 
       /* Address size prefix will turn Disp64/Disp32/Disp16 operand

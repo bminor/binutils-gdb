@@ -1,3 +1,8 @@
+2008-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (match_template): Continue if processor
+	doesn't match.
+
 2008-01-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-ia64.c (ia64_convert_frag): Zero-initialize room for
