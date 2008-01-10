@@ -8137,6 +8137,9 @@ is_64bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 54; /* R_SPARC_UA64.  */
     case EM_X86_64:
       return reloc_type == 1; /* R_X86_64_64.  */
+    case EM_S390_OLD:
+    case EM_S390:
+      return reloc_type == 22;	/* R_S390_64 */
     default:
       return FALSE;
     }
