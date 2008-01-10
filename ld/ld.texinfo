@@ -1285,6 +1285,16 @@ with @samp{-r} or @samp{--emit-relocs}. The default behaviour (of not
 performing this garbage collection) can be restored by specifying
 @samp{--no-gc-sections} on the command line.
 
+@samp{--gc-sections} decides which input sections are used by
+examining symbols and relocations.  The section containing the entry
+symbol and all sections containing symbols undefined on the
+command-line will be kept, as will sections containing symbols
+referenced by dynamic objects.  Note that when building shared
+libraries, the linker must assume that any visible symbol is
+referenced.  Once this initial set of sections has been determined,
+the linker recursively marks as used any section referenced by their
+relocations.  See @samp{--entry} and @samp{--undefined}.
+
 @kindex --print-gc-sections
 @kindex --no-print-gc-sections
 @cindex garbage collection
