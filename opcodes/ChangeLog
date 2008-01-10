@@ -1,3 +1,11 @@
+2008-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (REG_0F0E): Renamed to REG_0F0D.
+	(REG_0F18): Updated.
+	(reg_table): Updated.
+	(dis386_twobyte): Updated.  Use "nopQ" on 0x19 to 0x1e.
+	(twobyte_has_modrm): Set 1 for 0x19 to 0x1e.
+
 2008-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (set_bitfield): Use fail () on error.

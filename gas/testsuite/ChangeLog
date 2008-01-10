@@ -1,3 +1,12 @@
+2008-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/nops.s: Add more tests with opcodes from 0x0f19
+	to 0x0f1f.
+	* gas/i386/x86-64-nops.s: Likewise.
+
+	* gas/i386/nops.d: Updated.
+	* gas/i386/x86-64-nops.d: Likewise.
+
 2008-01-09  Bob Wilson  <bob.wilson@acm.org>
 	
 	* gas/lns/lns.exp: Run new lns-big-delta test for targets that set

@@ -491,8 +491,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define REG_FF			(REG_FE + 1)
 #define REG_0F00		(REG_FF + 1)
 #define REG_0F01		(REG_0F00 + 1)
-#define REG_0F0E		(REG_0F01 + 1)
-#define REG_0F18		(REG_0F0E + 1)
+#define REG_0F0D		(REG_0F01 + 1)
+#define REG_0F18		(REG_0F0D + 1)
 #define REG_0F71		(REG_0F18 + 1)
 #define REG_0F72		(REG_0F71 + 1)
 #define REG_0F73		(REG_0F72 + 1)
@@ -1067,7 +1067,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "(bad)",		{ XX } },
   { "ud2a",		{ XX } },
   { "(bad)",		{ XX } },
-  { REG_TABLE (REG_0F0E) },
+  { REG_TABLE (REG_0F0D) },
   { "femms",		{ XX } },
   { "",			{ MX, EM, OPSUF } }, /* See OP_3DNowSuffix.  */
   /* 10 */
@@ -1081,12 +1081,12 @@ static const struct dis386 dis386_twobyte[] = {
   { MOD_TABLE (MOD_0F17) },
   /* 18 */
   { REG_TABLE (REG_0F18) },
-  { "(bad)",		{ XX } },
-  { "(bad)",		{ XX } },
-  { "(bad)",		{ XX } },
-  { "(bad)",		{ XX } },
-  { "(bad)",		{ XX } },
-  { "(bad)",		{ XX } },
+  { "nopQ",		{ Ev } },
+  { "nopQ",		{ Ev } },
+  { "nopQ",		{ Ev } },
+  { "nopQ",		{ Ev } },
+  { "nopQ",		{ Ev } },
+  { "nopQ",		{ Ev } },
   { "nopQ",		{ Ev } },
   /* 20 */
   { MOD_TABLE (MOD_0F20) },
@@ -1369,7 +1369,7 @@ static const unsigned char twobyte_has_modrm[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
   /* 00 */ 1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,1, /* 0f */
-  /* 10 */ 1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1, /* 1f */
+  /* 10 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 1f */
   /* 20 */ 1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1, /* 2f */
   /* 30 */ 0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0, /* 3f */
   /* 40 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 4f */
@@ -1679,7 +1679,7 @@ static const struct dis386 reg_table[][8] = {
     { "lmsw",	{ Ew } },
     { MOD_TABLE (MOD_0F01_REG_7) },
   },
-  /* REG_0F0E */
+  /* REG_0F0D */
   {
     { "prefetch",	{ Eb } },
     { "prefetchw",	{ Eb } },
