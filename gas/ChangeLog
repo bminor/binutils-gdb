@@ -1,5 +1,10 @@
 2008-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (match_template): Check processor support
+	first.
+
+2008-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (match_template): Continue if processor
 	doesn't match.
 

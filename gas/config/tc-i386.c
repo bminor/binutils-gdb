@@ -3000,6 +3000,11 @@ match_template (void)
       if (i.operands != t->operands)
 	continue;
 
+      /* Check processor support.  */
+      found_cpu_match = cpu_flags_match (t->cpu_flags) == 3;
+      if (!found_cpu_match)
+	continue;
+
       /* Check old gcc support. */
       if (!old_gcc && t->opcode_modifier.oldgcc)
 	continue;
@@ -3053,11 +3058,8 @@ match_template (void)
 	continue;
 
       /* Do not verify operands when there are none.  */
-      else 
+      else
 	{
-	  found_cpu_match = cpu_flags_match (t->cpu_flags) == 3;
-	  if (!found_cpu_match)
-	    continue;
 	  if (!t->operands)
 	    /* We've found a match; break out of loop.  */
 	    break;
