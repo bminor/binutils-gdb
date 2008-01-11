@@ -7351,6 +7351,9 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
   const Elf_Internal_Rela *rel, *relend;
   struct elf32_arm_link_hash_table * globals;
 
+  if (info->relocatable)
+    return TRUE;
+
   globals = elf32_arm_hash_table (info);
 
   elf_section_data (sec)->local_dynrel = NULL;

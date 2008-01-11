@@ -867,6 +867,9 @@ elf_vax_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info, asection *sec,
   const Elf_Internal_Rela *rel, *relend;
   bfd *dynobj;
 
+  if (info->relocatable)
+    return TRUE;
+
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
     return TRUE;

@@ -9917,6 +9917,9 @@ _bfd_mips_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
 
+  if (info->relocatable)
+    return TRUE;
+
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);

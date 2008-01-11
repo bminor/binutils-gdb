@@ -1,3 +1,26 @@
+2008-01-11  Tristan Gingold  <gingold@adacore.com>
+	    Eric Botcazou  <ebotcazou@adacore.com>
+
+	* elf32-ppc.c (ppc_elf_gc_sweep_hook): Exit early if generating a
+	relocatable.
+	* elf32-arm.c (elf32_arm_gc_sweep_hook): Likewise.
+	* elf32-cris.c (cris_elf_gc_sweep_hook): Likewise.
+	* elf32-hppa.c (elf32_hppa_gc_sweep_hook): Likewise.
+	* elf32-i386.c (elf_i386_gc_sweep_hook): Likewise.
+	* elf32-m32r.c (m32r_elf_gc_sweep_hook): Likewise.
+	* elf32-m68k.c (elf_m68k_gc_sweep_hook): Likewise.
+	* elf32-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	* elf32-sh.c (sh_elf_gc_sweep_hook): Likewise.
+	* elf32-vax.c (elf_vax_gc_sweep_hook): Likewise.
+	* elf32-xtensa.c (elf_xtensa_gc_sweep_hook): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_gc_sweep_hook): Likewise.
+	* elf64-s390.c (elf_s390_gc_sweep_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_gc_sweep_hook): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_gc_sweep_hook): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_gc_sweep_hook): Likewise.
+	* elflink.c (bfd_elf_gc_sections): Do not punt on relocatable output
+	or executable output with relocations.
+
 2008-01-09  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/5552

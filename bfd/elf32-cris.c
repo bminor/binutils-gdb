@@ -1986,6 +1986,9 @@ cris_elf_gc_sweep_hook (bfd *abfd,
   asection *sgot;
   asection *srelgot;
 
+  if (info->relocatable)
+    return TRUE;
+
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
     return TRUE;

@@ -1012,6 +1012,9 @@ elf_xtensa_gc_sweep_hook (bfd *abfd,
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
 
+  if (info->relocatable)
+    return TRUE;
+
   if ((sec->flags & SEC_ALLOC) == 0)
     return TRUE;
 

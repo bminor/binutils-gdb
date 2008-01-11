@@ -1622,6 +1622,9 @@ elf32_hppa_gc_sweep_hook (bfd *abfd,
   bfd_signed_vma *local_plt_refcounts;
   const Elf_Internal_Rela *rela, *relend;
 
+  if (info->relocatable)
+    return TRUE;
+
   elf_section_data (sec)->local_dynrel = NULL;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;

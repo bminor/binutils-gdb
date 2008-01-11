@@ -11474,8 +11474,6 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (!bed->can_gc_sections
-      || info->relocatable
-      || info->emitrelocations
       || !is_elf_hash_table (info->hash))
     {
       (*_bfd_error_handler)(_("Warning: gc-sections option ignored"));
