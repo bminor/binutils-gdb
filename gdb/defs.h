@@ -706,7 +706,7 @@ extern void free_command_lines (struct command_line **);
 /* To continue the execution commands when running gdb asynchronously. 
    A continuation structure contains a pointer to a function to be called 
    to finish the command, once the target has stopped. Such mechanism is
-   used bt the finish and until commands, and in the remote protocol
+   used by the finish and until commands, and in the remote protocol
    when opening an extended-remote connection. */
 
 struct continuation_arg

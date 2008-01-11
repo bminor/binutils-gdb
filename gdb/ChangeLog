@@ -1,3 +1,8 @@
+2008-01-10  Doug Evans  <dje@google.com>
+
+	* defs.h (struct continuation_arg): Fix typo in comment.
+	* target.c (target_translate_tls_address): Fix comment spelling error.
+
 2008-01-09  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* doublest.h (DOUBLEST_PRINT_FORMAT): Remove % from string.

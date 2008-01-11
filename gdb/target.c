@@ -804,7 +804,7 @@ pop_target (void)
   internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 }
 
-/* Using the objfile specified in BATON, find the address for the
+/* Using the objfile specified in OBJFILE, find the address for the
    current thread's thread-local storage with offset OFFSET.  */
 CORE_ADDR
 target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
