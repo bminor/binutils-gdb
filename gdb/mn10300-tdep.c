@@ -826,7 +826,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
    Return the address of the first inst past the prologue of the function.  */
 
 static CORE_ADDR
-mn10300_skip_prologue (CORE_ADDR pc)
+mn10300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   return mn10300_analyze_prologue (NULL, NULL, pc);
 }

@@ -766,7 +766,7 @@ amd64_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 /* Return PC of first real instruction.  */
 
 static CORE_ADDR
-amd64_skip_prologue (CORE_ADDR start_pc)
+amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct amd64_frame_cache cache;
   CORE_ADDR pc;

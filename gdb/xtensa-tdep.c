@@ -2396,7 +2396,7 @@ call0_frame_cache (struct frame_info *next_frame,
 /* #define DONT_SKIP_PROLOGUE  */
 
 CORE_ADDR
-xtensa_skip_prologue (CORE_ADDR start_pc)
+xtensa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct symtab_and_line prologue_sal;
   CORE_ADDR body_pc;

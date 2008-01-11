@@ -267,7 +267,7 @@ vax_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
    to reach some "real" code.  */
 
 static CORE_ADDR
-vax_skip_prologue (CORE_ADDR pc)
+vax_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte op = read_memory_unsigned_integer (pc, 1);
 

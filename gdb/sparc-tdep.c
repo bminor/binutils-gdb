@@ -778,7 +778,7 @@ sparc_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
    START_PC.  */
 
 static CORE_ADDR
-sparc32_skip_prologue (CORE_ADDR start_pc)
+sparc32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_start, func_end;

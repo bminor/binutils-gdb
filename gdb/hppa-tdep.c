@@ -1759,7 +1759,7 @@ after_prologue (CORE_ADDR pc)
    skip over the branch in that case.  */
 
 static CORE_ADDR
-hppa_skip_prologue (CORE_ADDR pc)
+hppa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   unsigned long inst;
   int offset;

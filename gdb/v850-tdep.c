@@ -621,7 +621,7 @@ v850_analyze_prologue (CORE_ADDR func_addr, CORE_ADDR pc,
 /* Return the address of the first code past the prologue of the function.  */
 
 static CORE_ADDR
-v850_skip_prologue (CORE_ADDR pc)
+v850_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
 

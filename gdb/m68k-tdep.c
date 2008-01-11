@@ -812,7 +812,7 @@ m68k_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 /* Return PC of first real instruction.  */
 
 static CORE_ADDR
-m68k_skip_prologue (CORE_ADDR start_pc)
+m68k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct m68k_frame_cache cache;
   CORE_ADDR pc;

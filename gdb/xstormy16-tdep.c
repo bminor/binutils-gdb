@@ -404,7 +404,7 @@ xstormy16_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
    stepped into a function call.  */
 
 static CORE_ADDR
-xstormy16_skip_prologue (CORE_ADDR pc)
+xstormy16_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr = 0, func_end = 0;
   char *func_name;

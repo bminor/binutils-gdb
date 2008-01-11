@@ -744,7 +744,7 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
 }
 
 static CORE_ADDR
-avr_skip_prologue (CORE_ADDR pc)
+avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
   CORE_ADDR prologue_end = pc;

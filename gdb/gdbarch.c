@@ -2040,7 +2040,7 @@ gdbarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
   gdb_assert (gdbarch->skip_prologue != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_skip_prologue called\n");
-  return gdbarch->skip_prologue (ip);
+  return gdbarch->skip_prologue (gdbarch, ip);
 }
 
 void

@@ -448,7 +448,7 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
 #define DEFAULT_SEARCH_LIMIT 128
 
 CORE_ADDR
-m32r_skip_prologue (CORE_ADDR pc)
+m32r_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;

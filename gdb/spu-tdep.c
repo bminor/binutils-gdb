@@ -700,7 +700,7 @@ spu_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR end_pc,
 
 /* Return the first instruction after the prologue starting at PC.  */
 static CORE_ADDR
-spu_skip_prologue (CORE_ADDR pc)
+spu_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct spu_prologue_data data;
   return spu_analyze_prologue (pc, (CORE_ADDR)-1, &data);

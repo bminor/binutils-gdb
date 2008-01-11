@@ -828,7 +828,7 @@ i386_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 /* Return PC of first real instruction.  */
 
 static CORE_ADDR
-i386_skip_prologue (CORE_ADDR start_pc)
+i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   static gdb_byte pic_pat[6] =
   {

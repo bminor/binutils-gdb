@@ -710,7 +710,7 @@ after_prologue (CORE_ADDR pc)
 }
 
 static CORE_ADDR
-sh_skip_prologue (CORE_ADDR start_pc)
+sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   CORE_ADDR pc;
   struct sh_frame_cache cache;

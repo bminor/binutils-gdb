@@ -411,7 +411,7 @@ sparc64_pseudo_register_write (struct gdbarch *gdbarch,
    START_PC.  */
 
 static CORE_ADDR
-sparc64_skip_prologue (CORE_ADDR start_pc)
+sparc64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_start, func_end;

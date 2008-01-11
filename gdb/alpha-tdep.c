@@ -651,7 +651,7 @@ alpha_read_insn (CORE_ADDR pc)
    anything which might clobber the registers which are being saved.  */
 
 static CORE_ADDR
-alpha_skip_prologue (CORE_ADDR pc)
+alpha_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   unsigned long inst;
   int offset;

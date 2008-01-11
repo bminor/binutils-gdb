@@ -398,7 +398,7 @@ mt_return_value (struct gdbarch *gdbarch, struct type *type,
    call.  */
 
 static CORE_ADDR
-mt_skip_prologue (CORE_ADDR pc)
+mt_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr = 0, func_end = 0;
   char *func_name;

@@ -1512,7 +1512,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *next_frame,
 }
 
 CORE_ADDR
-ia64_skip_prologue (CORE_ADDR pc)
+ia64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct ia64_frame_cache cache;
   cache.base = 0;

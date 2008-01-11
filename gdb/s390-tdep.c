@@ -1093,11 +1093,11 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
 /* Advance PC across any function entry prologue instructions to reach 
    some "real" code.  */
 static CORE_ADDR
-s390_skip_prologue (CORE_ADDR pc)
+s390_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct s390_prologue_data data;
   CORE_ADDR skip_pc;
-  skip_pc = s390_analyze_prologue (current_gdbarch, pc, (CORE_ADDR)-1, &data);
+  skip_pc = s390_analyze_prologue (gdbarch, pc, (CORE_ADDR)-1, &data);
   return skip_pc ? skip_pc : pc;
 }
 

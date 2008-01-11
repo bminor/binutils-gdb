@@ -411,7 +411,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
    sub fp, ip, #nn @@ nn == 20 or 4 depending on second insn */
 
 static CORE_ADDR
-arm_skip_prologue (CORE_ADDR pc)
+arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   unsigned long inst;
   CORE_ADDR skip_pc;
@@ -449,7 +449,7 @@ arm_skip_prologue (CORE_ADDR pc)
 
   /* Check if this is Thumb code.  */
   if (arm_pc_is_thumb (pc))
-    return thumb_analyze_prologue (current_gdbarch, pc, func_end, NULL);
+    return thumb_analyze_prologue (gdbarch, pc, func_end, NULL);
 
   for (skip_pc = pc; skip_pc < func_end; skip_pc += 4)
     {

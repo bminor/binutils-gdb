@@ -4583,7 +4583,7 @@ mips_single_step_through_delay (struct gdbarch *gdbarch,
    delay slot of a non-prologue instruction).  */
 
 static CORE_ADDR
-mips_skip_prologue (CORE_ADDR pc)
+mips_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR limit_pc;
   CORE_ADDR func_addr;

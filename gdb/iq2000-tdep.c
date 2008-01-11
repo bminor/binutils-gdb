@@ -331,7 +331,7 @@ iq2000_init_frame_cache (struct iq2000_frame_cache *cache)
    stepped into a function call.  */
 
 static CORE_ADDR
-iq2000_skip_prologue (CORE_ADDR pc)
+iq2000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr = 0 , func_end = 0;
 

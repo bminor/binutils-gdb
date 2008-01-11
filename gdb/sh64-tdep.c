@@ -651,7 +651,7 @@ sh64_skip_prologue_hard_way (CORE_ADDR start_pc)
 }
 
 static CORE_ADDR
-sh64_skip_prologue (CORE_ADDR pc)
+sh64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR post_prologue_pc;
 

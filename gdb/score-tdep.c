@@ -680,7 +680,7 @@ score_fetch_inst (CORE_ADDR addr, char *memblock)
 }
 
 static CORE_ADDR
-score_skip_prologue (CORE_ADDR pc)
+score_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR cpc = pc;
   int iscan = 32, stack_sub = 0;

@@ -1442,7 +1442,7 @@ crisv32_scan_prologue (CORE_ADDR pc, struct frame_info *next_frame,
    of the first instruction after the function prologue.  */
 
 static CORE_ADDR
-cris_skip_prologue (CORE_ADDR pc)
+cris_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;

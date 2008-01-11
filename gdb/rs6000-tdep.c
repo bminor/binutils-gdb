@@ -754,7 +754,7 @@ read_memory_addr (CORE_ADDR memaddr, int len)
 }
 
 static CORE_ADDR
-rs6000_skip_prologue (CORE_ADDR pc)
+rs6000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct rs6000_framedata frame;
   CORE_ADDR limit_pc, func_addr;

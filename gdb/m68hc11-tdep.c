@@ -739,7 +739,7 @@ m68hc11_scan_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 }
 
 static CORE_ADDR
-m68hc11_skip_prologue (CORE_ADDR pc)
+m68hc11_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;

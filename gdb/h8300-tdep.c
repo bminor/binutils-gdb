@@ -564,7 +564,7 @@ static const struct frame_base h8300_frame_base = {
 };
 
 static CORE_ADDR
-h8300_skip_prologue (CORE_ADDR pc)
+h8300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr = 0 , func_end = 0;
 

@@ -968,7 +968,7 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 
 
 static CORE_ADDR
-frv_skip_prologue (CORE_ADDR pc)
+frv_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end, new_pc;
 

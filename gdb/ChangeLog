@@ -1,3 +1,44 @@
+2008-01-11  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (skip_prologue): Add gdbarch
+	as parameter.
+	* gdbarch.{c,h}: Regenerate.
+
+	* alpha-tdep.c (alpha_skip_prologue): Add gdbarch as parameter.
+	* amd64-tdep.c (amd64_skip_prologue): Likewise.
+	* avr-tdep.c (avr_skip_prologue): Likewise.
+	* cris-tdep.c (cris_skip_prologue): Likewise.
+	* frv-tdep.c (frv_skip_prologue): Likewise.
+	* h8300-tdep.c (h8300_skip_prologue): Likewise.
+	* hppa-tdep.c (hppa_skip_prologue): Likewise.
+	* i386-tdep.c (i386_skip_prologue): Likewise.
+	* ia64-tdep.c (ia64_skip_prologue): Likewise.
+	* iq2000-tdep.c (iq2000_skip_prologue): Likewise.
+	* m32r-tdep.c (m32r_skip_prologue): Likewise.
+	* m68hc11-tdep.c (m68hc11_skip_prologue): Likewise.
+	* m68k-tdep.c (m68k_skip_prologue): Likewise.
+	* m88k-tdep.c (m88k_skip_prologue): Likewise.
+	* mep-tdep.c (mep_skip_prologue): Likewise.
+	* mips-tdep.c (mips_skip_prologue): Likewise.
+	* mn10300-tdep.c (mn10300_skip_prologue): Likewise.
+	* mt-tdep.c (mt_skip_prologue): Likewise.
+	* rs6000-tdep.c (rs6000_skip_prologue): Likewise.
+	* score-tdep.c (score_skip_prologue): Likewise.
+	* sh64-tdep.c (sh64_skip_prologue): Likewise.
+	* sh-tdep.c (sh_skip_prologue): Likewise.
+	* sparc64-tdep.c (sparc64_skip_prologue): Likewise.
+	* sparc-tdep.c (sparc32_skip_prologue): Likewise.
+	* spu-tdep.c (spu_skip_prologue): Likewise.
+	* v850-tdep.c (v850_skip_prologue): Likewise.
+	* vax-tdep.c (vax_skip_prologue): Likewise.
+	* xstormy16-tdep.c (xstormy16_skip_prologue): Likewise.
+	* xtensa-tdep.c (xtensa_skip_prologue): Likewise.
+
+	* arm-tdep.c (arm_skip_prologue): Add gdbarch as parameter. Replace
+	current_gdbarch by gdbarch.
+	* m32c-tdep.c (m32c_skip_prologue): Likewise.
+	* s390-tdep.c (s390_skip_prologue): Likewise.
+
 2008-01-10  Doug Evans  <dje@google.com>
 
 	* defs.h (struct continuation_arg): Fix typo in comment.

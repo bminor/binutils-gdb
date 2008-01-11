@@ -1803,7 +1803,7 @@ m32c_analyze_prologue (struct gdbarch *arch,
 
 
 static CORE_ADDR
-m32c_skip_prologue (CORE_ADDR ip)
+m32c_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
 {
   char *name;
   CORE_ADDR func_addr, func_end, sal_end;
@@ -1814,7 +1814,7 @@ m32c_skip_prologue (CORE_ADDR ip)
     return ip;
 
   /* Find end by prologue analysis.  */
-  m32c_analyze_prologue (current_gdbarch, ip, func_end, &p);
+  m32c_analyze_prologue (gdbarch, ip, func_end, &p);
   /* Find end by line info.  */
   sal_end = skip_prologue_using_sal (ip);
   /* Return whichever is lower.  */

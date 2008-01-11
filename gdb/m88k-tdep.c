@@ -626,7 +626,7 @@ const int m88k_max_prologue_size = 128 * M88K_INSN_SIZE;
    starting at PC.  */
 
 static CORE_ADDR
-m88k_skip_prologue (CORE_ADDR pc)
+m88k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_start, func_end;
