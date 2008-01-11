@@ -1,5 +1,80 @@
 2008-01-11  Markus Deuling  <deuling@de.ibm.com>
 
+	* alpha-tdep.c (alpha_heuristic_proc_start)
+	(alpha_sigtramp_register_address): Add gdbarch as parameter. Replace
+	current_gdbarch by gdbarch.
+
+	(alpha_heuristic_frame_unwind_cache): Use get_frame_arch to get at the
+	current architecture by frame_info. Update alpha_heuristic_proc_start 
+	call.
+
+	(alpha_sigtramp_frame_this_id, alpha_sigtramp_frame_prev_register): Use
+	get_frame_arch to get at the current architecture by frame_info. Update
+	alpha_sigtramp_register_address call.
+
+	* arm-tdep.c (thumb_scan_prologue): Add gdbarch as parameter and replace
+	current_gdbarch by gdbarch. Update caller.
+	(convert_to_extended, convert_from_extended): Add endianess parameter
+	for comparison. Update caller.
+	(arm_extract_return_value, arm_store_return_value): Use
+	get_regcache_arch to get at the current	architecture.
+
+	* cris-tdep.c (cris_register_size): Add gdbarch as parameter. Replace
+	current_gdbarch by gdbarch. Update caller.
+	(cris_gdb_func, move_to_preg_op, none_reg_mode_move_from_preg_op): Add
+	gdbarch as parameter. Update caller. Replace current_gdbarch by gdbarch.
+
+	* h8300-tdep.c (E_PSEUDO_CCR_REGNUM, E_PSEUDO_EXR_REGNUM, BINWORD): Add
+	gdbarch	as parameter. Update caller.	
+	(h8300_init_frame_cache): Add gdbarch as parameter. Replace
+	current_gdbarch by gdbarch. Update caller.
+
+	* hppa-tdep.c (skip_prologue_hard_way): Add gdbarch as parameter and 
+	update caller. Replace current_gdbarch by gdbarch.
+
+	* m32c-tdep.c (m32c_skip_trampoline_code): Use get_frame_arch to get at
+	the current architecture. Replace current_gdbarch by gdbarch.
+	* m68hc11-tdep.c (m68hc11_frame_unwind_cache): Likewise.
+	(STACK_CORRECTION, USE_PAGE_REGISTER): Replace M6811_TDEP by its
+	expression. Add gdbarch as parameter and replace current_gdbarch with
+	it. Update caller.
+	(M6811_TDEP): Remove.
+	(m68hc11_frame_prev_register): Use get_frame_arch to get at the current
+	architecture.
+	(m68hc11_scan_prologue): Add gdbarch as parameter. Replace 
+	current_gdbarch by gdbarch. Update caller.
+
+	* m68k-tdep.c (m68k_analyze_prologue): Add gdbarch as parameter and
+	update caller.
+	(m68k_analyze_register_saves): Likewise. Also replace current_gdbarch
+	by gdbarch.
+
+	* rs6000-tdep.c (skip_prologue): Add gdbarch as parameter and update
+	caller. Relace current_gdbarch by gdbarch.
+	(altivec_register_p, spe_register_p): Likewise.
+	* ppc-tdep.h (altivec_register_p, spe_register_p): Add gdbarch as
+	parameter.
+	* ppc-linux-nat.c (fetch_register, store_register): Update caller of
+	altivec_register_p and spe_register_p.
+
+	* score-tdep.c (score_fetch_inst): Add gdbarch as parameter. Update 
+	caller. Replace current_gdbarch by gdbarch.
+	(score_analyze_prologue): use get_frame_arch to get at the current
+	architecture.	
+
+	* sparc-tdep.h (sparc_analyze_prologue): Add gdbarch as parameter.
+	* sparc-tdep.c (sparc_analyze_prologue): Likewise. Replace
+	current_gdbarch by gdbarch. Update caller.
+	(sparc_frame_cache): Use get_frame_arch to get at the current
+	architecture.
+	* sparce64-tdep.c (sparc64_skip_prologue): Update call of
+	sparc_analyze_prologue.
+
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Add gdbarch as
+	parameter.
+
+2008-01-11  Markus Deuling  <deuling@de.ibm.com>
+
 	* exec.c: #include "arch-utils.h"
 	 (print_section_info): Use gdbarch_from_bfd to get at the
 	current architecture. Replace current_gdbarch. Fix indention. Replace

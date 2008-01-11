@@ -157,14 +157,14 @@ CORE_ADDR (*rs6000_find_toc_address_hook) (CORE_ADDR) = NULL;
 
 static CORE_ADDR branch_dest (struct frame_info *frame, int opcode,
 			      int instr, CORE_ADDR pc, CORE_ADDR safety);
-static CORE_ADDR skip_prologue (CORE_ADDR, CORE_ADDR,
+static CORE_ADDR skip_prologue (struct gdbarch *, CORE_ADDR, CORE_ADDR,
                                 struct rs6000_framedata *);
 
 /* Is REGNO an AltiVec register?  Return 1 if so, 0 otherwise.  */
 int
-altivec_register_p (int regno)
+altivec_register_p (struct gdbarch *gdbarch, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   if (tdep->ppc_vr0_regnum < 0 || tdep->ppc_vrsave_regnum < 0)
     return 0;
   else
@@ -174,9 +174,9 @@ altivec_register_p (int regno)
 
 /* Return true if REGNO is an SPE register, false otherwise.  */
 int
-spe_register_p (int regno)
+spe_register_p (struct gdbarch *gdbarch, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   
   /* Is it a reference to EV0 -- EV31, and do we have those?  */
   if (tdep->ppc_ev0_regnum >= 0
@@ -779,7 +779,7 @@ rs6000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (limit_pc == 0)
     limit_pc = pc + 100;          /* Magic.  */
 
-  pc = skip_prologue (pc, limit_pc, &frame);
+  pc = skip_prologue (gdbarch, pc, limit_pc, &frame);
   return pc;
 }
 
@@ -1251,7 +1251,8 @@ bl_to_blrl_insn_p (CORE_ADDR pc, int insn)
  */
 
 static CORE_ADDR
-skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
+skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
+	       struct rs6000_framedata *fdata)
 {
   CORE_ADDR orig_pc = pc;
   CORE_ADDR last_prologue_pc = pc;
@@ -1272,8 +1273,8 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   int prev_insn_was_prologue_insn = 1;
   int num_skip_non_prologue_insns = 0;
   int r0_contains_arg = 0;
-  const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (current_gdbarch);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   memset (fdata, 0, sizeof (struct rs6000_framedata));
   fdata->saved_gpr = -1;
@@ -2882,7 +2883,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   func = frame_func_unwind (next_frame, NORMAL_FRAME);
   pc = frame_pc_unwind (next_frame);
-  skip_prologue (func, pc, &fdata);
+  skip_prologue (gdbarch, func, pc, &fdata);
 
   /* Figure out the parent's stack pointer.  */
 

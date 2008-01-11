@@ -66,8 +66,8 @@ enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarc
 							  const gdb_byte *writebuf);
 
 /* From rs6000-tdep.c... */
-int altivec_register_p (int regno);
-int spe_register_p (int regno);
+int altivec_register_p (struct gdbarch *gdbarch, int regno);
+int spe_register_p (struct gdbarch *gdbarch, int regno);
 
 /* Return non-zero if the architecture described by GDBARCH has
    floating-point registers (f0 --- f31 and fpscr).  */

@@ -337,7 +337,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
   unsigned int offset;         /* Offset of registers within the u area. */
   char buf[MAX_REGISTER_SIZE];
 
-  if (altivec_register_p (regno))
+  if (altivec_register_p (gdbarch, regno))
     {
       /* If this is the first time through, or if it is not the first
          time through, and we have comfirmed that there is kernel
@@ -352,7 +352,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
         AltiVec registers, fall through and return zeroes, because
         regaddr will be -1 in this case.  */
     }
-  else if (spe_register_p (regno))
+  else if (spe_register_p (gdbarch, regno))
     {
       fetch_spe_register (regcache, tid, regno);
       return;
@@ -637,12 +637,12 @@ store_register (const struct regcache *regcache, int tid, int regno)
   size_t bytes_to_transfer;
   char buf[MAX_REGISTER_SIZE];
 
-  if (altivec_register_p (regno))
+  if (altivec_register_p (gdbarch, regno))
     {
       store_altivec_register (regcache, tid, regno);
       return;
     }
-  else if (spe_register_p (regno))
+  else if (spe_register_p (gdbarch, regno))
     {
       store_spe_register (regcache, tid, regno);
       return;

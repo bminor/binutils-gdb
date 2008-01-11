@@ -690,7 +690,8 @@ m68k_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
    smaller.  Otherwise, return PC.  */
 
 static CORE_ADDR
-m68k_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
+m68k_analyze_register_saves (struct gdbarch *gdbarch, CORE_ADDR pc,
+			     CORE_ADDR current_pc,
 			     struct m68k_frame_cache *cache)
 {
   if (cache->locals >= 0)
@@ -704,7 +705,7 @@ m68k_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
 	{
 	  op = read_memory_unsigned_integer (pc, 2);
 	  if (op == P_FMOVEMX_SP
-	      && gdbarch_tdep (current_gdbarch)->fpregs_present)
+	      && gdbarch_tdep (gdbarch)->fpregs_present)
 	    {
 	      /* fmovem.x REGS,-(%sp) */
 	      op = read_memory_unsigned_integer (pc + 2, 2);
@@ -788,13 +789,13 @@ m68k_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
    */
 
 static CORE_ADDR
-m68k_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
-		       struct m68k_frame_cache *cache)
+m68k_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
+		       CORE_ADDR current_pc, struct m68k_frame_cache *cache)
 {
   unsigned int op;
 
   pc = m68k_analyze_frame_setup (pc, current_pc, cache);
-  pc = m68k_analyze_register_saves (pc, current_pc, cache);
+  pc = m68k_analyze_register_saves (gdbarch, pc, current_pc, cache);
   if (pc >= current_pc)
     return current_pc;
 
@@ -819,7 +820,7 @@ m68k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   int op;
 
   cache.locals = -1;
-  pc = m68k_analyze_prologue (start_pc, (CORE_ADDR) -1, &cache);
+  pc = m68k_analyze_prologue (gdbarch, start_pc, (CORE_ADDR) -1, &cache);
   if (cache.locals < 0)
     return start_pc;
   return pc;
@@ -868,7 +869,8 @@ m68k_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (cache->pc != 0)
-    m68k_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+    m68k_analyze_prologue (get_frame_arch (next_frame), cache->pc,
+			   frame_pc_unwind (next_frame), cache);
 
   if (cache->locals < 0)
     {

@@ -711,10 +711,10 @@ sparc_skip_stack_check (const CORE_ADDR start_pc)
 }
 
 CORE_ADDR
-sparc_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
-			struct sparc_frame_cache *cache)
+sparc_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
+			CORE_ADDR current_pc, struct sparc_frame_cache *cache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   unsigned long insn;
   int offset = 0;
   int dest = -1;
@@ -795,7 +795,7 @@ sparc32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	return sal.end;
     }
 
-  start_pc = sparc_analyze_prologue (start_pc, 0xffffffffUL, &cache);
+  start_pc = sparc_analyze_prologue (gdbarch, start_pc, 0xffffffffUL, &cache);
 
   /* The psABI says that "Although the first 6 words of arguments
      reside in registers, the standard stack frame reserves space for
@@ -842,7 +842,8 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
   if (cache->pc != 0)
-    sparc_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+    sparc_analyze_prologue (get_frame_arch (next_frame), cache->pc,
+			    frame_pc_unwind (next_frame), cache);
 
   if (cache->frameless_p)
     {

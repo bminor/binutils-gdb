@@ -146,9 +146,8 @@ struct gdbarch_tdep
     int elf_flags;
   };
 
-#define M6811_TDEP gdbarch_tdep (current_gdbarch)
-#define STACK_CORRECTION (M6811_TDEP->stack_correction)
-#define USE_PAGE_REGISTER (M6811_TDEP->use_page_register)
+#define STACK_CORRECTION(gdbarch) (gdbarch_tdep (gdbarch)->stack_correction)
+#define USE_PAGE_REGISTER(gdbarch) (gdbarch_tdep (gdbarch)->use_page_register)
 
 struct m68hc11_unwind_cache
 {
@@ -367,9 +366,9 @@ m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
 static const char *
 m68hc11_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  if (reg_nr == M68HC12_HARD_PC_REGNUM && USE_PAGE_REGISTER)
+  if (reg_nr == M68HC12_HARD_PC_REGNUM && USE_PAGE_REGISTER (gdbarch))
     return "pc";
-  if (reg_nr == HARD_PC_REGNUM && USE_PAGE_REGISTER)
+  if (reg_nr == HARD_PC_REGNUM && USE_PAGE_REGISTER (gdbarch))
     return "ppc";
   
   if (reg_nr < 0)
@@ -604,8 +603,8 @@ m68hc11_get_return_insn (CORE_ADDR pc)
     - the offset of the previous frame saved address (from current frame)
     - the soft registers which are pushed.  */
 static CORE_ADDR
-m68hc11_scan_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
-                       struct m68hc11_unwind_cache *info)
+m68hc11_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
+		       CORE_ADDR current_pc, struct m68hc11_unwind_cache *info)
 {
   LONGEST save_addr;
   CORE_ADDR func_end;
@@ -629,7 +628,7 @@ m68hc11_scan_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
       return pc;
     }
 
-  seq_table = gdbarch_tdep (current_gdbarch)->prologue;
+  seq_table = gdbarch_tdep (gdbarch)->prologue;
   
   /* The 68hc11 stack is as follows:
 
@@ -755,7 +754,7 @@ m68hc11_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	return sal.end;
     }
 
-  pc = m68hc11_scan_prologue (pc, (CORE_ADDR) -1, &tmp_cache);
+  pc = m68hc11_scan_prologue (gdbarch, pc, (CORE_ADDR) -1, &tmp_cache);
   return pc;
 }
 
@@ -778,6 +777,7 @@ struct m68hc11_unwind_cache *
 m68hc11_frame_unwind_cache (struct frame_info *next_frame,
                             void **this_prologue_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   ULONGEST prev_sp;
   ULONGEST this_base;
   struct m68hc11_unwind_cache *info;
@@ -808,7 +808,7 @@ m68hc11_frame_unwind_cache (struct frame_info *next_frame,
 
   current_pc = frame_pc_unwind (next_frame);
   if (info->pc != 0)
-    m68hc11_scan_prologue (info->pc, current_pc, info);
+    m68hc11_scan_prologue (gdbarch, info->pc, current_pc, info);
 
   info->saved_regs[HARD_PC_REGNUM].addr = info->size;
 
@@ -817,7 +817,7 @@ m68hc11_frame_unwind_cache (struct frame_info *next_frame,
       info->saved_regs[HARD_PC_REGNUM].addr = info->sp_offset;
       this_base = frame_unwind_register_unsigned (next_frame, HARD_SP_REGNUM);
       prev_sp = this_base + info->sp_offset + 2;
-      this_base += STACK_CORRECTION;
+      this_base += STACK_CORRECTION (gdbarch);
     }
   else
     {
@@ -825,7 +825,7 @@ m68hc11_frame_unwind_cache (struct frame_info *next_frame,
          to before the first saved register giving the SP.  */
       prev_sp = this_base + info->size + 2;
 
-      this_base += STACK_CORRECTION;
+      this_base += STACK_CORRECTION (gdbarch);
       if (soft_regs[SOFT_FP_REGNUM].name)
         info->saved_regs[SOFT_FP_REGNUM].addr = info->size - 2;
    }
@@ -855,8 +855,8 @@ m68hc11_frame_unwind_cache (struct frame_info *next_frame,
   /* Adjust all the saved registers so that they contain addresses and not
      offsets.  */
   for (i = 0;
-       i < gdbarch_num_regs (current_gdbarch)
-	   + gdbarch_num_pseudo_regs (current_gdbarch) - 1;
+       i < gdbarch_num_regs (gdbarch)
+	   + gdbarch_num_pseudo_regs (gdbarch) - 1;
        i++)
     if (trad_frame_addr_p (info->saved_regs, i))
       {
@@ -916,7 +916,7 @@ m68hc11_frame_prev_register (struct frame_info *next_frame,
       /* Take into account the 68HC12 specific call (PC + page).  */
       if (info->return_kind == RETURN_RTC
           && *addrp >= 0x08000 && *addrp < 0x0c000
-          && USE_PAGE_REGISTER)
+          && USE_PAGE_REGISTER (get_frame_arch (next_frame)))
         {
           int page_optimized;
 
@@ -1216,7 +1216,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   write_memory (sp, buf, 2);
 
   /* Finally, update the stack pointer...  */
-  sp -= STACK_CORRECTION;
+  sp -= STACK_CORRECTION (gdbarch);
   regcache_cooked_write_unsigned (regcache, HARD_SP_REGNUM, sp);
 
   /* ...and fake a frame pointer.  */

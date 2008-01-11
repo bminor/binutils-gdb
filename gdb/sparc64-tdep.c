@@ -428,7 +428,8 @@ sparc64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	return sal.end;
     }
 
-  return sparc_analyze_prologue (start_pc, 0xffffffffffffffffULL, &cache);
+  return sparc_analyze_prologue (gdbarch, start_pc, 0xffffffffffffffffULL,
+				 &cache);
 }
 
 /* Normal frames.  */

@@ -1080,7 +1080,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
    to work with the existing GDB, neither of them can change.  So we
    just have to cope.  */
 static int
-mn10300_dwarf2_reg_to_regnum (int dwarf2)
+mn10300_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2)
 {
   /* This table is supposed to be shaped like the gdbarch_register_name
      initializer in gcc/config/mn10300/mn10300.h.  Registers which

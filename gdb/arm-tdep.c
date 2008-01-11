@@ -177,9 +177,9 @@ static void set_disassembly_style_sfunc(char *, int,
 static void set_disassembly_style (void);
 
 static void convert_from_extended (const struct floatformat *, const void *,
-				   void *);
+				   void *, int);
 static void convert_to_extended (const struct floatformat *, void *,
-				 const void *);
+				 const void *, int);
 
 struct arm_prologue_cache
 {
@@ -534,7 +534,8 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* *INDENT-ON* */
 
 static void
-thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
+thumb_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR prev_pc,
+		     struct arm_prologue_cache *cache)
 {
   CORE_ADDR prologue_start;
   CORE_ADDR prologue_end;
@@ -565,8 +566,7 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 
   prologue_end = min (prologue_end, prev_pc);
 
-  thumb_analyze_prologue (current_gdbarch, prologue_start, prologue_end,
-			  cache);
+  thumb_analyze_prologue (gdbarch, prologue_start, prologue_end, cache);
 }
 
 /* This function decodes an ARM function prologue to determine:
@@ -656,7 +656,7 @@ arm_scan_prologue (struct frame_info *next_frame,
   /* Check for Thumb prologue.  */
   if (arm_pc_is_thumb (prev_pc))
     {
-      thumb_scan_prologue (prev_pc, cache);
+      thumb_scan_prologue (gdbarch, prev_pc, cache);
       return;
     }
 
@@ -1499,10 +1499,11 @@ arm_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 
 static void
 convert_from_extended (const struct floatformat *fmt, const void *ptr,
-		       void *dbl)
+		       void *dbl, int endianess)
 {
   DOUBLEST d;
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+
+  if (endianess == BFD_ENDIAN_BIG)
     floatformat_to_doublest (&floatformat_arm_ext_big, ptr, &d);
   else
     floatformat_to_doublest (&floatformat_arm_ext_littlebyte_bigword,
@@ -1511,11 +1512,13 @@ convert_from_extended (const struct floatformat *fmt, const void *ptr,
 }
 
 static void
-convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr)
+convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr,
+		     int endianess)
 {
   DOUBLEST d;
+
   floatformat_to_doublest (fmt, ptr, &d);
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (endianess == BFD_ENDIAN_BIG)
     floatformat_from_doublest (&floatformat_arm_ext_big, &d, dbl);
   else
     floatformat_from_doublest (&floatformat_arm_ext_littlebyte_bigword,
@@ -2094,9 +2097,11 @@ static void
 arm_extract_return_value (struct type *type, struct regcache *regs,
 			  gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regs);
+
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
-      switch (gdbarch_tdep (get_regcache_arch (regs))->fp_model)
+      switch (gdbarch_tdep (gdbarch)->fp_model)
 	{
 	case ARM_FLOAT_FPA:
 	  {
@@ -2107,7 +2112,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 
 	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
 	    convert_from_extended (floatformat_from_type (type), tmpbuf,
-				   valbuf);
+				   valbuf, gdbarch_byte_order (gdbarch));
 	  }
 	  break;
 
@@ -2281,15 +2286,18 @@ static void
 arm_store_return_value (struct type *type, struct regcache *regs,
 			const gdb_byte *valbuf)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regs);
+
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       char buf[MAX_REGISTER_SIZE];
 
-      switch (gdbarch_tdep (get_regcache_arch (regs))->fp_model)
+      switch (gdbarch_tdep (gdbarch)->fp_model)
 	{
 	case ARM_FLOAT_FPA:
 
-	  convert_to_extended (floatformat_from_type (type), buf, valbuf);
+	  convert_to_extended (floatformat_from_type (type), buf, valbuf,
+			       gdbarch_byte_order (gdbarch));
 	  regcache_cooked_write (regs, ARM_F0_REGNUM, buf);
 	  break;
 

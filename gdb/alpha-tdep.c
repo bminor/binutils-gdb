@@ -768,9 +768,10 @@ alpha_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
    all arithmetic, it doesn't seem worthwhile to cache it.  */
 
 static CORE_ADDR
-alpha_sigtramp_register_address (CORE_ADDR sigcontext_addr, int regnum)
+alpha_sigtramp_register_address (struct gdbarch *gdbarch,
+				 CORE_ADDR sigcontext_addr, int regnum)
 { 
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (regnum >= 0 && regnum < 32)
     return sigcontext_addr + tdep->sc_regs_offset + regnum * 8;
@@ -790,9 +791,10 @@ alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
 			      void **this_prologue_cache,
 			      struct frame_id *this_id)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct alpha_sigtramp_unwind_cache *info
     = alpha_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  struct gdbarch_tdep *tdep;
   CORE_ADDR stack_addr, code_addr;
 
   /* If the OSABI couldn't locate the sigcontext, give up.  */
@@ -802,7 +804,6 @@ alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
   /* If we have dynamic signal trampolines, find their start.
      If we do not, then we must assume there is a symbol record
      that can provide the start address.  */
-  tdep = gdbarch_tdep (get_frame_arch (next_frame));
   if (tdep->dynamic_sigtramp_offset)
     {
       int offset;
@@ -817,7 +818,7 @@ alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
     code_addr = frame_func_unwind (next_frame, SIGTRAMP_FRAME);
 
   /* The stack address is trivially read from the sigcontext.  */
-  stack_addr = alpha_sigtramp_register_address (info->sigcontext_addr,
+  stack_addr = alpha_sigtramp_register_address (gdbarch, info->sigcontext_addr,
 						ALPHA_SP_REGNUM);
   stack_addr = get_frame_memory_unsigned (next_frame, stack_addr,
 					  ALPHA_REGISTER_SIZE);
@@ -841,7 +842,8 @@ alpha_sigtramp_frame_prev_register (struct frame_info *next_frame,
   if (info->sigcontext_addr != 0)
     {
       /* All integer and fp registers are stored in memory.  */
-      addr = alpha_sigtramp_register_address (info->sigcontext_addr, regnum);
+      addr = alpha_sigtramp_register_address (get_frame_arch (next_frame),
+					      info->sigcontext_addr, regnum);
       if (addr != 0)
 	{
 	  *optimizedp = 0;
@@ -920,9 +922,9 @@ static unsigned int heuristic_fence_post = 0;
    function.  But we're guessing anyway...  */
 
 static CORE_ADDR
-alpha_heuristic_proc_start (CORE_ADDR pc)
+alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   CORE_ADDR last_non_nop = pc;
   CORE_ADDR fence = pc - heuristic_fence_post;
   CORE_ADDR orig_pc = pc;
@@ -999,6 +1001,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 				    void **this_prologue_cache,
 				    CORE_ADDR start_pc)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct alpha_heuristic_unwind_cache *info;
   ULONGEST val;
   CORE_ADDR limit_pc, cur_pc;
@@ -1013,7 +1016,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 
   limit_pc = frame_pc_unwind (next_frame);
   if (start_pc == 0)
-    start_pc = alpha_heuristic_proc_start (limit_pc);
+    start_pc = alpha_heuristic_proc_start (gdbarch, limit_pc);
   info->start_pc = start_pc;
 
   frame_reg = ALPHA_SP_REGNUM;

@@ -699,7 +699,8 @@ cris_get_signed_offset (unsigned short insn)
 
 /* Calls an op function given the op-type, working on the insn and the
    inst_env.  */
-static void cris_gdb_func (enum cris_op_type, unsigned short, inst_env_type *);
+static void cris_gdb_func (struct gdbarch *, enum cris_op_type, unsigned short,
+			   inst_env_type *);
 
 static struct gdbarch *cris_gdbarch_init (struct gdbarch_info,
                                           struct gdbarch_list *);
@@ -1547,9 +1548,9 @@ cris_spec_reg_applicable (struct cris_spec_reg spec_reg)
    register, -1 for an invalid register.  */
 
 static int
-cris_register_size (int regno)
+cris_register_size (struct gdbarch *gdbarch, int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
   int spec_regno;
   
@@ -1574,8 +1575,8 @@ cris_register_size (int regno)
       /* Special register not applicable to this CRIS version.  */
       return 0;
     }
-  else if (regno >= gdbarch_pc_regnum (current_gdbarch)
-	   && regno < gdbarch_num_regs (current_gdbarch))
+  else if (regno >= gdbarch_pc_regnum (gdbarch)
+	   && regno < gdbarch_num_regs (gdbarch))
     {
       /* This will apply to CRISv32 only where there are additional registers
 	 after the special registers (pseudo PC and support registers).  */
@@ -1593,7 +1594,7 @@ static int
 cris_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
   return ((regno < 0 || regno >= gdbarch_num_regs (gdbarch))
-          || (cris_register_size (regno) == 0));
+          || (cris_register_size (gdbarch, regno) == 0));
 }
 
 /* Nonzero if regno should not be written to the target, for various 
@@ -1610,7 +1611,7 @@ cris_cannot_store_register (struct gdbarch *gdbarch, int regno)
 
   if (regno < 0
       || regno >= gdbarch_num_regs (gdbarch)
-      || cris_register_size (regno) == 0)
+      || cris_register_size (gdbarch, regno) == 0)
     /* Not implemented.  */
     return 1;
 
@@ -1635,7 +1636,7 @@ static int
 crisv32_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
   return ((regno < 0 || regno >= gdbarch_num_regs (gdbarch))
-          || (cris_register_size (regno) == 0));
+          || (cris_register_size (gdbarch, regno) == 0));
 }
 
 /* Nonzero if regno should not be written to the target, for various 
@@ -1652,7 +1653,7 @@ crisv32_cannot_store_register (struct gdbarch *gdbarch, int regno)
 
   if (regno < 0
       || regno >= gdbarch_num_regs (gdbarch)
-      || cris_register_size (regno) == 0)
+      || cris_register_size (gdbarch, regno) == 0)
     /* Not implemented.  */
     return 1;
 
@@ -2132,7 +2133,7 @@ find_step_target (struct frame_info *frame, inst_env_type *inst_env)
         }
       else
         {
-          cris_gdb_func (cris_opcodes[i].op, insn, inst_env);
+          cris_gdb_func (gdbarch, cris_opcodes[i].op, insn, inst_env);
         }
     } while (!inst_env->invalid 
              && (inst_env->prefix_found || inst_env->xflag_found 
@@ -2928,7 +2929,8 @@ none_reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
 /* Handles moves to special registers (aka P-register) for all modes.  */
 
 static void 
-move_to_preg_op (unsigned short inst, inst_env_type *inst_env)
+move_to_preg_op (struct gdbarch *gdbarch, unsigned short inst,
+		 inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
     {
@@ -2959,11 +2961,11 @@ move_to_preg_op (unsigned short inst, inst_env_type *inst_env)
             }
 
           /* The increment depends on the size of the special register.  */
-          if (cris_register_size (cris_get_operand2 (inst)) == 1)
+          if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 1)
             {
               process_autoincrement (INST_BYTE_SIZE, inst, inst_env);
             }
-          else if (cris_register_size (cris_get_operand2 (inst)) == 2)
+          else if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 2)
             {
               process_autoincrement (INST_WORD_SIZE, inst, inst_env);
             }
@@ -2983,7 +2985,8 @@ move_to_preg_op (unsigned short inst, inst_env_type *inst_env)
    except register.  */
 
 static void 
-none_reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
+none_reg_mode_move_from_preg_op (struct gdbarch *gdbarch, unsigned short inst,
+				 inst_env_type *inst_env)
 {
   if (inst_env->prefix_found)
     {
@@ -3014,11 +3017,11 @@ none_reg_mode_move_from_preg_op (unsigned short inst, inst_env_type *inst_env)
             }
           
           /* The increment depends on the size of the special register.  */
-          if (cris_register_size (cris_get_operand2 (inst)) == 1)
+          if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 1)
             {
               process_autoincrement (INST_BYTE_SIZE, inst, inst_env);
             }
-          else if (cris_register_size (cris_get_operand2 (inst)) == 2)
+          else if (cris_register_size (gdbarch, cris_get_operand2 (inst)) == 2)
             {
               process_autoincrement (INST_WORD_SIZE, inst, inst_env);
             }
@@ -3698,8 +3701,8 @@ quick_mode_and_cmp_move_or_op (unsigned short inst, inst_env_type *inst_env)
 /* Translate op_type to a function and call it.  */
 
 static void
-cris_gdb_func (enum cris_op_type op_type, unsigned short inst, 
-	       inst_env_type *inst_env)
+cris_gdb_func (struct gdbarch *gdbarch, enum cris_op_type op_type,
+	       unsigned short inst, inst_env_type *inst_env)
 {
   switch (op_type)
     {
@@ -3768,7 +3771,7 @@ cris_gdb_func (enum cris_op_type op_type, unsigned short inst,
       break;
 
     case cris_move_to_preg_op:
-      move_to_preg_op (inst, inst_env);
+      move_to_preg_op (gdbarch, inst, inst_env);
       break;
 
     case cris_muls_op:
@@ -3792,7 +3795,7 @@ cris_gdb_func (enum cris_op_type op_type, unsigned short inst,
       break;
 
     case cris_none_reg_mode_move_from_preg_op:
-      none_reg_mode_move_from_preg_op (inst, inst_env);
+      none_reg_mode_move_from_preg_op (gdbarch, inst, inst_env);
       break;
 
     case cris_quick_mode_add_sub_op:

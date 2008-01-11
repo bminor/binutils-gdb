@@ -2332,7 +2332,7 @@ m32c_return_value (struct gdbarch *gdbarch,
 static CORE_ADDR
 m32c_skip_trampoline_code (struct frame_info *frame, CORE_ADDR stop_pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
 
   /* It would be nicer to simply look up the addresses of known
      trampolines once, and then compare stop_pc with them.  However,

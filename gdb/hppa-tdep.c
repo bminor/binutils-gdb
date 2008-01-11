@@ -1469,7 +1469,8 @@ inst_saves_fr (unsigned long inst)
 
 
 static CORE_ADDR
-skip_prologue_hard_way (CORE_ADDR pc, int stop_before_branch)
+skip_prologue_hard_way (struct gdbarch *gdbarch, CORE_ADDR pc,
+			int stop_before_branch)
 {
   char buf[4];
   CORE_ADDR orig_pc = pc;
@@ -1595,10 +1596,10 @@ restart:
 
          FIXME.  Can still die if we have a mix of GR and FR argument
          stores!  */
-      if (reg_num >= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 19 : 23)
+      if (reg_num >= (gdbarch_ptr_bit (gdbarch) == 64 ? 19 : 23)
 	  && reg_num <= 26)
 	{
-	  while (reg_num >= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 19 : 23)
+	  while (reg_num >= (gdbarch_ptr_bit (gdbarch) == 64 ? 19 : 23)
 		 && reg_num <= 26)
 	    {
 	      pc += 4;
@@ -1627,7 +1628,7 @@ restart:
       if ((inst & 0xfc000000) == 0x34000000
 	  && inst_saves_fr (next_inst) >= 4
 	  && inst_saves_fr (next_inst)
-	       <= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 11 : 7))
+	       <= (gdbarch_ptr_bit (gdbarch) == 64 ? 11 : 7))
 	{
 	  /* So we drop into the code below in a reasonable state.  */
 	  reg_num = inst_saves_fr (next_inst);
@@ -1639,11 +1640,11 @@ restart:
          never does prologue scheduling.  So once we see one, skip past
          all of them.  */
       if (reg_num >= 4
-	  && reg_num <= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 11 : 7))
+	  && reg_num <= (gdbarch_ptr_bit (gdbarch) == 64 ? 11 : 7))
 	{
 	  while (reg_num >= 4
 		 && reg_num
-		      <= (gdbarch_ptr_bit (current_gdbarch) == 64 ? 11 : 7))
+		      <= (gdbarch_ptr_bit (gdbarch) == 64 ? 11 : 7))
 	    {
 	      pc += 8;
 	      status = read_memory_nobpt (pc, buf, 4);
@@ -1781,7 +1782,7 @@ hppa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (post_prologue_pc != 0)
     return max (pc, post_prologue_pc);
   else
-    return (skip_prologue_hard_way (pc, 1));
+    return (skip_prologue_hard_way (gdbarch, pc, 1));
 }
 
 /* Return an unwind entry that falls within the frame's code block.  */
@@ -1908,7 +1909,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
     else
       start_pc = frame_func_unwind (next_frame, NORMAL_FRAME);
 
-    prologue_end = skip_prologue_hard_way (start_pc, 0);
+    prologue_end = skip_prologue_hard_way (gdbarch, start_pc, 0);
     end_pc = frame_pc_unwind (next_frame);
 
     if (prologue_end != 0 && end_pc > prologue_end)

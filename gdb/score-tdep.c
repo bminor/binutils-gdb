@@ -641,7 +641,7 @@ score_adjust_memblock_ptr (char **memblock, CORE_ADDR prev_pc,
 }
 
 static inst_t *
-score_fetch_inst (CORE_ADDR addr, char *memblock)
+score_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, char *memblock)
 {
   static inst_t inst = { 0, 0 };
   char buf[SCORE_INSTLEN] = { 0 };
@@ -668,7 +668,7 @@ score_fetch_inst (CORE_ADDR addr, char *memblock)
   inst.raw = extract_unsigned_integer (buf, SCORE_INSTLEN);
   inst.is15 = !(inst.raw & 0x80008000);
   inst.v = RM_PBITS (inst.raw);
-  big = (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG);
+  big = (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG);
   if (inst.is15)
     {
       if (big ^ ((addr & 0x2) == 2))
@@ -686,7 +686,7 @@ score_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   int iscan = 32, stack_sub = 0;
   while (iscan-- > 0)
     {
-      inst_t *inst = score_fetch_inst (cpc, NULL);
+      inst_t *inst = score_fetch_inst (gdbarch, cpc, NULL);
       if (!inst)
         break;
       if (!inst->is15 && !stack_sub
@@ -731,7 +731,7 @@ score_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static int
 score_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR cur_pc)
 {
-  inst_t *inst = score_fetch_inst (cur_pc, NULL);
+  inst_t *inst = score_fetch_inst (gdbarch, cur_pc, NULL);
 
   if (inst->v == 0x23)
     return 1;   /* mv! r0, r2 */
@@ -757,6 +757,7 @@ score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
                         struct frame_info *next_frame,
                         struct score_frame_cache *this_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
   CORE_ADDR sp;
   CORE_ADDR fp;
   CORE_ADDR cur_pc = startaddr;
@@ -787,13 +788,13 @@ score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
           /* Reading memory block from target succefully and got all
              the instructions(from STARTADDR to PC) needed.  */
           score_adjust_memblock_ptr (&memblock, prev_pc, cur_pc);
-          inst = score_fetch_inst (cur_pc, memblock);
+          inst = score_fetch_inst (gdbarch, cur_pc, memblock);
         }
       else
         {
           /* Otherwise, we fetch 4 bytes from target, and GDB also
              work correctly.  */
-          inst = score_fetch_inst (cur_pc, NULL);
+          inst = score_fetch_inst (gdbarch, cur_pc, NULL);
         }
 
       if (inst->is15 == 1)
@@ -895,7 +896,7 @@ score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
                 {
                   unsigned int save_v = inst->v;
                   inst_t *inst2 =
-                    score_fetch_inst (cur_pc + SCORE_INSTLEN, NULL);
+                    score_fetch_inst (gdbarch, cur_pc + SCORE_INSTLEN, NULL);
                   if (inst2->v == 0x23)
                     {
                       /* mv! r0, r2 */
