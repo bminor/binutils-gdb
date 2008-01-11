@@ -3168,7 +3168,7 @@ s_space (int mult)
 
       if (exp.X_op == O_constant)
 	{
-	  long repeat;
+	  offsetT repeat;
 
 	  repeat = exp.X_add_number;
 	  if (mult)
