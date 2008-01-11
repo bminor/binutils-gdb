@@ -1,5 +1,37 @@
 2008-01-11  Markus Deuling  <deuling@de.ibm.com>
 
+	* exec.c: #include "arch-utils.h"
+	 (print_section_info): Use gdbarch_from_bfd to get at the
+	current architecture. Replace current_gdbarch. Fix indention. Replace
+	deprecated_print_address_numeric by paddress.
+	* Makefile.in (exec.o) Add dependency to arch-utils.h.
+
+	* valprint.c (val_print_string): Replace 
+	deprecated_print_address_numeric.
+	* tracepoint.c (trace_mention, scope_info): Likewise.
+	* symmisc.c (dump_msymbols, dump_psymtab, dump_symtab_1, print_symbol)
+	(print_symbol, print_partial_symbols, maintenance_info_psymtabs)
+	(maintenance_check_symtabs): Likewise.
+	* symfile.c (list_overlays_command): Likewise.
+	* stack.c (frame_info, print_block_frame_labels): Likewise.
+	* printcmd.c (print_address, print_address_demangle)
+	(address_info): Likewise.
+	* corefile.c (memory_error): Likewise.
+	* infcmd.c (jump_command): Likewise.
+	* breakpoint.c (insert_bp_location, describe_other_breakpoints)
+	(mention, delete_breakpoint): Likewise.
+	* c-valprint.c (print_function_pointer_address, c_val_print): Likewise.
+	* dwarf2read.c (dump_die): Likewise.
+	* ada-valprint.c (ada_val_print_1): Likewise.
+	* f-valprint.c (f_val_print): Likewise.
+	* linux-fork.c (info_forks_command): Likewise.	
+	* m32r-com.c (m32r_load_section, m32r_load)
+	(m32r_upload_command): Likewise.
+
+	* ui-out.c (ui_out_field_core_addr): Remove unnecessary comment.
+
+2008-01-11  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (skip_prologue): Add gdbarch
 	as parameter.
 	* gdbarch.{c,h}: Regenerate.

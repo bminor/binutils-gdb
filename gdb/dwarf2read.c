@@ -8934,7 +8934,7 @@ dump_die (struct die_info *die)
 	case DW_FORM_ref_addr:
 	case DW_FORM_addr:
 	  fprintf_unfiltered (gdb_stderr, "address: ");
-	  deprecated_print_address_numeric (DW_ADDR (&die->attrs[i]), 1, gdb_stderr);
+	  fputs_filtered (paddress (DW_ADDR (&die->attrs[i])), gdb_stderr);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:

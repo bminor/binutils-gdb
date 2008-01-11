@@ -726,9 +726,9 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
               fprintf_filtered (stream, "(");
               type_print (type, "", stream, -1);
               fprintf_filtered (stream, ") ");
-              deprecated_print_address_numeric 
-		(extract_typed_address (valaddr, builtin_type_void_data_ptr),
-                 1, stream);
+	      fputs_filtered (paddress (extract_typed_address
+					(valaddr, builtin_type_void_data_ptr)),
+			      stream);
             }
 	  else
 	    {

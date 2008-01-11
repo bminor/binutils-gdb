@@ -468,7 +468,7 @@ info_forks_command (char *arg, int from_tty)
       if (fp->num == 0)
 	printf_filtered (_(" (main process)"));
       printf_filtered (_(" at "));
-      deprecated_print_address_numeric (pc, 1, gdb_stdout);
+      fputs_filtered (paddress (pc), gdb_stdout);
 
       sal = find_pc_line (pc, 0);
       if (sal.symtab)

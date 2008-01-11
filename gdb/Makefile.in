@@ -2087,7 +2087,7 @@ exceptions.o: exceptions.c $(defs_h) $(exceptions_h) $(breakpoint_h) \
 exec.o: exec.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcmd_h) \
 	$(language_h) $(symfile_h) $(objfiles_h) $(completer_h) $(value_h) \
 	$(exec_h) $(readline_h) $(gdb_string_h) $(gdbcore_h) $(gdb_stat_h) \
-	$(xcoffsolib_h) $(observer_h)
+	$(xcoffsolib_h) $(observer_h) $(arch_utils_h)
 expprint.o: expprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(value_h) $(language_h) $(parser_defs_h) $(user_regs_h) $(target_h) \
 	$(gdb_string_h) $(block_h) $(objfiles_h) $(gdb_assert_h)

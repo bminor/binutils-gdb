@@ -1290,13 +1290,13 @@ val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream)
       if (errcode == EIO)
 	{
 	  fprintf_filtered (stream, " <Address ");
-	  deprecated_print_address_numeric (addr, 1, stream);
+	  fputs_filtered (paddress (addr), stream);
 	  fprintf_filtered (stream, " out of bounds>");
 	}
       else
 	{
 	  fprintf_filtered (stream, " <Error reading address ");
-	  deprecated_print_address_numeric (addr, 1, stream);
+	  fputs_filtered (paddress (addr), stream);
 	  fprintf_filtered (stream, ": %s>", safe_strerror (errcode));
 	}
     }

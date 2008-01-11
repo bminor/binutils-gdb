@@ -31,6 +31,7 @@
 #include "value.h"
 #include "exec.h"
 #include "observer.h"
+#include "arch-utils.c"
 
 #include <fcntl.h>
 #include "readline/readline.h"
@@ -532,7 +533,7 @@ print_section_info (struct target_ops *t, bfd *abfd)
 {
   struct section_table *p;
   /* FIXME: 16 is not wide enough when gdbarch_addr_bit > 64.  */
-  int wid = gdbarch_addr_bit (current_gdbarch) <= 32 ? 8 : 16;
+  int wid = gdbarch_addr_bit (gdbarch_from_bfd (abfd)) <= 32 ? 8 : 16;
 
   printf_filtered ("\t`%s', ", bfd_get_filename (abfd));
   wrap_here ("        ");
@@ -540,8 +541,7 @@ print_section_info (struct target_ops *t, bfd *abfd)
   if (abfd == exec_bfd)
     {
       printf_filtered (_("\tEntry point: "));
-      deprecated_print_address_numeric (bfd_get_start_address (abfd), 1, gdb_stdout);
-      printf_filtered ("\n");
+      fputs_filtered (paddress (bfd_get_start_address (abfd)), gdb_stdout);
     }
   for (p = t->to_sections; p < t->to_sections_end; p++)
     {
