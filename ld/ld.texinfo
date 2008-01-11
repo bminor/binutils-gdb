@@ -1280,8 +1280,7 @@ it ends in a @code{.exe} suffix.
 @item --gc-sections
 @itemx --no-gc-sections
 Enable garbage collection of unused input sections.  It is ignored on
-targets that do not support this option.  This option is not compatible
-with @samp{-r} or @samp{--emit-relocs}. The default behaviour (of not
+targets that do not support this option.  The default behaviour (of not
 performing this garbage collection) can be restored by specifying
 @samp{--no-gc-sections} on the command line.
 
@@ -1294,6 +1293,11 @@ libraries, the linker must assume that any visible symbol is
 referenced.  Once this initial set of sections has been determined,
 the linker recursively marks as used any section referenced by their
 relocations.  See @samp{--entry} and @samp{--undefined}.
+
+This option can be set when doing a partial link (enabled with option
+@samp{-r}).  In this case the root of symbols kept must be explicitely 
+specified either by an @samp{--entry} or @samp{--undefined} option or by
+a @code{ENTRY} command in the linker script.
 
 @kindex --print-gc-sections
 @kindex --no-print-gc-sections

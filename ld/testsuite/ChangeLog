@@ -1,3 +1,13 @@
+2008-01-10  Tristan Gingold  <gingold@adacore.com>
+
+	* lib/ld-lib.exp (check_gc_sections_available): Now available on
+	VxWorks.
+	* ld-gc: New directory for testing --gc-sections.
+	* ld-gc/gc.c: New file.
+	* ld-gc/gc.exp: New file.
+	* ld-gc/noent.s: New file.
+	* ld-gc/noent.d: New file.
+
 2008-01-09  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	PR ld/5526

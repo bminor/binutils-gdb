@@ -292,9 +292,7 @@ main (int argc, char **argv)
 
   if (link_info.relocatable)
     {
-      if (link_info.gc_sections)
-	einfo ("%P%F: --gc-sections and -r may not be used together\n");
-      else if (command_line.relax)
+      if (command_line.relax)
 	einfo (_("%P%F: --relax and -r may not be used together\n"));
       if (link_info.shared)
 	einfo (_("%P%F: -r and -shared may not be used together\n"));

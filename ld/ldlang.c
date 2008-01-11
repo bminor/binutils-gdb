@@ -5077,10 +5077,19 @@ lang_end (void)
   struct bfd_link_hash_entry *h;
   bfd_boolean warn;
 
-  if (link_info.relocatable || link_info.shared)
+  if ((link_info.relocatable && !link_info.gc_sections)
+      || link_info.shared)
     warn = entry_from_cmdline;
   else
     warn = TRUE;
+
+  /* Force the user to specify a root when generating a relocatable with
+     --gc-sections.  */
+  if (link_info.gc_sections && link_info.relocatable
+      && (entry_symbol.name == NULL
+	  && ldlang_undef_chain_list_head == NULL))
+    einfo (_("%P%F: gc-sections requires either an entry or "
+	     "an undefined symbol\n"));
 
   if (entry_symbol.name == NULL)
     {

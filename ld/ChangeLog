@@ -1,3 +1,14 @@
+2008-01-11  Tristan Gingold  <gingold@adacore.com>
+	    Eric Botcazou  <ebotcazou@adacore.com>
+
+	* ldlang.c (lang_end): Warns if the entry point is not found when
+	--gc-sections.
+	Emit an error if no root is specified when --gc-sections -r.
+	* ld.texinfo (Options): Document that --gc-sections is compatible
+	with -r and -q.
+	* ldmain.c (main): Do not error out if -r and --gc-sections.
+	* scripttempl/elf.sc: Emit ENTRY command only if relocating.
+
 2008-01-10  Daniel Jacobowitz  <drow@sources.redhat.com>
 
 	PR ld/5533
