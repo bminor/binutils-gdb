@@ -50,6 +50,13 @@ foo:	jcxz foo	# No prefix exists to select CX as a counter
 	popfl		# can't have 32-bit stack operands
 	retl		# can't have 32-bit stack operands
 	insertq $4,$2,%xmm2,%ebx # The last operand must be XMM register.
+	fnstsw %eax
+	fnstsw %al
+	fstsw %eax
+	fstsw %al
+	in $8,%rax
+	out %rax,$8
+
 	.intel_syntax noprefix
 	cmpxchg16b dword ptr [rax] # Must be oword
 	movq xmm1, XMMWORD PTR [rsp]
@@ -60,3 +67,9 @@ foo:	jcxz foo	# No prefix exists to select CX as a counter
 	movq DWORD PTR [rsp],xmm1
 	movq WORD PTR [rsp],xmm1
 	movq BYTE PTR [rsp],xmm1
+	fnstsw eax
+	fnstsw al
+	fstsw eax
+	fstsw al
+	in rax,8
+	out 8,rax

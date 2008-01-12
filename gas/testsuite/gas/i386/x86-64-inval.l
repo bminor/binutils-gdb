@@ -49,15 +49,27 @@
 .*:50: Error: .*
 .*:51: Error: .*
 .*:52: Error: .*
+.*:53: Error: .*
 .*:54: Error: .*
 .*:55: Error: .*
 .*:56: Error: .*
 .*:57: Error: .*
 .*:58: Error: .*
-.*:59: Error: .*
-.*:60: Error: .*
 .*:61: Error: .*
 .*:62: Error: .*
+.*:63: Error: .*
+.*:64: Error: .*
+.*:65: Error: .*
+.*:66: Error: .*
+.*:67: Error: .*
+.*:68: Error: .*
+.*:69: Error: .*
+.*:70: Error: .*
+.*:71: Error: .*
+.*:72: Error: .*
+.*:73: Error: .*
+.*:74: Error: .*
+.*:75: Error: .*
 GAS LISTING .*
 
 
@@ -113,16 +125,29 @@ GAS LISTING .*
 [ 	]*50[ 	]+popfl		\# can't have 32-bit stack operands
 [ 	]*51[ 	]+retl		\# can't have 32-bit stack operands
 [ 	]*52[ 	]+insertq \$4,\$2,%xmm2,%ebx \# The last operand must be XMM register\.
-[ 	]*53[ 	]+\.intel_syntax noprefix
-[ 	]*54[ 	]+cmpxchg16b dword ptr \[rax\] \# Must be oword
-[ 	]*55[ 	]+movq xmm1, XMMWORD PTR \[rsp\]
-[ 	]*56[ 	]+movq xmm1, DWORD PTR \[rsp\]
-[ 	]*57[ 	]+movq xmm1, WORD PTR \[rsp\]
+[ 	]*53[ 	]+fnstsw %eax
+[ 	]*54[ 	]+fnstsw %al
+[ 	]*55[ 	]+fstsw %eax
+[ 	]*56[ 	]+fstsw %al
+[ 	]*57[ 	]+in \$8,%rax
 GAS LISTING .*
 
 
-[ 	]*58[ 	]+movq xmm1, BYTE PTR \[rsp\]
-[ 	]*59[ 	]+movq XMMWORD PTR \[rsp\],xmm1
-[ 	]*60[ 	]+movq DWORD PTR \[rsp\],xmm1
-[ 	]*61[ 	]+movq WORD PTR \[rsp\],xmm1
-[ 	]*62[ 	]+movq BYTE PTR \[rsp\],xmm1
+[ 	]*58[ 	]+out %rax,\$8
+[ 	]*59[ 	]+
+[ 	]*60[ 	]+\.intel_syntax noprefix
+[ 	]*61[ 	]+cmpxchg16b dword ptr \[rax\] \# Must be oword
+[ 	]*62[ 	]+movq xmm1, XMMWORD PTR \[rsp\]
+[ 	]*63[ 	]+movq xmm1, DWORD PTR \[rsp\]
+[ 	]*64[ 	]+movq xmm1, WORD PTR \[rsp\]
+[ 	]*65[ 	]+movq xmm1, BYTE PTR \[rsp\]
+[ 	]*66[ 	]+movq XMMWORD PTR \[rsp\],xmm1
+[ 	]*67[ 	]+movq DWORD PTR \[rsp\],xmm1
+[ 	]*68[ 	]+movq WORD PTR \[rsp\],xmm1
+[ 	]*69[ 	]+movq BYTE PTR \[rsp\],xmm1
+[ 	]*70[ 	]+fnstsw eax
+[ 	]*71[ 	]+fnstsw al
+[ 	]*72[ 	]+fstsw eax
+[ 	]*73[ 	]+fstsw al
+[ 	]*74[ 	]+in rax,8
+[ 	]*75[ 	]+out 8,rax

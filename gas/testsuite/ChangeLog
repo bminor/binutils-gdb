@@ -1,3 +1,24 @@
+2008-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5534
+	* gas/i386/i386.s: Add tests for fnstsw and fstsw.
+	* gas/i386/inval.s: Likewise. 
+	* gas/i386/x86_64.s: Likewise.
+
+	* gas/i386/intel.s: Use word instead of dword on ss.
+
+	* gas/i386/x86-64-inval.s: Add tests for fnstsw, fstsw, in
+	and out.
+
+	* gas/i386/prefix.s: Remove invalid fstsw.
+
+	* gas/i386/inval.l: Updated.
+	* gas/i386/intelbad.l: Likewise.
+	* gas/i386/i386.d: Likewise.
+	* gas/i386/x86_64.d: Likewise.
+	* gas/i386/x86-64-inval.l: Likewise.
+	* gas/i386/prefix.d: Updated.
+
 2008-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/nops.s: Add more tests with opcodes from 0x0f19

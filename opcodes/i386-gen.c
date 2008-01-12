@@ -179,9 +179,9 @@ static initializer operand_type_init [] =
   { "OPERAND_TYPE_ESSEG",
     "EsSeg" },
   { "OPERAND_TYPE_ACC32",
-    "Reg32|Acc" },
+    "Reg32|Acc|Dword" },
   { "OPERAND_TYPE_ACC64",
-    "Reg64|Acc" },
+    "Reg64|Acc|Qword" },
   { "OPERAND_TYPE_REG16_INOUTPORTREG",
     "Reg16|InOutPortReg" },
   { "OPERAND_TYPE_DISP16_32",
@@ -273,12 +273,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (No_sSuf),
   BITFIELD (No_qSuf),
   BITFIELD (No_ldSuf),
-  BITFIELD (CheckSize),
-  BITFIELD (Byte),
-  BITFIELD (Word),
-  BITFIELD (Dword),
-  BITFIELD (Qword),
-  BITFIELD (Xmmword),
   BITFIELD (FWait),
   BITFIELD (IsString),
   BITFIELD (RegKludge),
@@ -334,6 +328,15 @@ static bitfield operand_types[] =
   BITFIELD (JumpAbsolute),
   BITFIELD (EsSeg),
   BITFIELD (RegMem),
+  BITFIELD (Byte),
+  BITFIELD (Word),
+  BITFIELD (Dword),
+  BITFIELD (Fword),
+  BITFIELD (Qword),
+  BITFIELD (Tbyte),
+  BITFIELD (Xmmword),
+  BITFIELD (Unspecified),
+  BITFIELD (Anysize),
 #ifdef OTUnused
   BITFIELD (OTUnused),
 #endif
@@ -443,6 +446,10 @@ set_bitfield (const char *f, bitfield *array, unsigned int size)
 
   if (strcmp (f, "CpuSledgehammer") == 0)
     f= "CpuK8";
+  else if (strcmp (f, "Mmword") == 0)
+    f= "Qword";
+  else if (strcmp (f, "Oword") == 0)
+    f= "Xmmword";
 
   for (i = 0; i < size; i++)
     if (strcasecmp (array[i].name, f) == 0)

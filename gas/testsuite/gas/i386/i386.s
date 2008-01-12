@@ -1,6 +1,11 @@
 # i386 instructions
 	.text
 
+	fnstsw
+	fnstsw	%ax
+	fstsw
+	fstsw	%ax
+
 	movsx	(%eax), %edx
 	movsx	(%eax), %dx
 	movsbl	(%eax), %edx
@@ -17,6 +22,11 @@
 	movzwl	(%eax), %edx
 
 	.intel_syntax noprefix
+	fnstsw
+	fnstsw	ax
+	fstsw
+	fstsw	ax
+
 	movsx	edx,BYTE PTR [eax]
 	movsx	dx,BYTE PTR [eax]
 	movsx	edx,WORD PTR [eax]

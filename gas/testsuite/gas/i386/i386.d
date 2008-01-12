@@ -6,6 +6,10 @@
 Disassembly of section .text:
 
 0+ <.*>:
+[ 	]*[a-f0-9]+:	df e0                	fnstsw %ax
+[ 	]*[a-f0-9]+:	df e0                	fnstsw %ax
+[ 	]*[a-f0-9]+:	9b df e0             	fstsw  %ax
+[ 	]*[a-f0-9]+:	9b df e0             	fstsw  %ax
 [ 	]*[a-f0-9]+:	0f be 10             	movsbl \(%eax\),%edx
 [ 	]*[a-f0-9]+:	66 0f be 10          	movsbw \(%eax\),%dx
 [ 	]*[a-f0-9]+:	0f be 10             	movsbl \(%eax\),%edx
@@ -19,6 +23,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f b6 10             	movzbl \(%eax\),%edx
 [ 	]*[a-f0-9]+:	66 0f b6 10          	movzbw \(%eax\),%dx
 [ 	]*[a-f0-9]+:	0f b7 10             	movzwl \(%eax\),%edx
+[ 	]*[a-f0-9]+:	df e0                	fnstsw %ax
+[ 	]*[a-f0-9]+:	df e0                	fnstsw %ax
+[ 	]*[a-f0-9]+:	9b df e0             	fstsw  %ax
+[ 	]*[a-f0-9]+:	9b df e0             	fstsw  %ax
 [ 	]*[a-f0-9]+:	0f be 10             	movsbl \(%eax\),%edx
 [ 	]*[a-f0-9]+:	66 0f be 10          	movsbw \(%eax\),%dx
 [ 	]*[a-f0-9]+:	0f bf 10             	movswl \(%eax\),%edx

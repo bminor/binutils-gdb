@@ -1,3 +1,17 @@
+2008-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5534
+	* config/tc-i386.c (_i386_insn): Update comment.
+	(operand_type_match): Also clear unspecified.
+	(operand_type_register_match): Likewise.
+	(parse_operands): Initialize unspecified.
+	(i386_intel_operand): Likewise.
+	(match_template): Check memory and accumulator operand size.
+	(i386_att_operand): Clear unspecified on register operand.
+	(intel_e11): Likewise.
+	(intel_e09): Set operand size and clean unspecified for
+	"XXX PTR".
+
 2008-01-11  Andreas Schwab  <schwab@suse.de>
 
 	* read.c (s_space): Declare `repeat' as offsetT.

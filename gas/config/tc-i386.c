@@ -113,8 +113,8 @@ struct _i386_insn
     /* TM holds the template for the insn were currently assembling.  */
     template tm;
 
-    /* SUFFIX holds the instruction mnemonic suffix if given.
-       (e.g. 'l' for 'movl')  */
+    /* SUFFIX holds the instruction size suffix for byte, word, dword
+       or qword, if given.  */
     char suffix;
 
     /* OPERANDS gives the number of given operands.  */
@@ -1154,6 +1154,7 @@ operand_type_match (i386_operand_type overlap,
   i386_operand_type temp = overlap;
 
   temp.bitfield.jumpabsolute = 0;
+  temp.bitfield.unspecified = 0;
   if (UINTS_ALL_ZERO (temp))
     return 0;
 
@@ -1161,7 +1162,7 @@ operand_type_match (i386_operand_type overlap,
 	  && given.bitfield.jumpabsolute == overlap.bitfield.jumpabsolute);
 }
 
-/* If given types r0 and r1 are registers they must be of the same type
+/* If given types g0 and g1 are registers they must be of the same type
    unless the expected operand type register overlap is null.
    Note that Acc in a template matches every size of reg.  */
 
@@ -2642,6 +2643,7 @@ parse_operands (char *l, const char *mnemonic)
 	{			/* Yes, we've read in another operand.  */
 	  unsigned int operand_ok;
 	  this_operand = i.operands++;
+	  i.types[this_operand].bitfield.unspecified = 1;
 	  if (i.operands > MAX_OPERANDS)
 	    {
 	      as_bad (_("spurious operands; (%d operands/instruction max)"),
@@ -2968,6 +2970,7 @@ match_template (void)
   unsigned int j;
   unsigned int found_cpu_match;
   unsigned int check_register;
+  unsigned int size_match;
 
 #if MAX_OPERANDS != 4
 # error "MAX_OPERANDS must be 4."
@@ -2989,8 +2992,6 @@ match_template (void)
     suffix_check.no_qsuf = 1;
   else if (i.suffix == LONG_DOUBLE_MNEM_SUFFIX)
     suffix_check.no_ldsuf = 1;
-  else if (i.suffix == XMMWORD_MNEM_SUFFIX)
-    suffix_check.xmmword = 1;
 
   for (t = current_templates->start; t < current_templates->end; t++)
     {
@@ -3027,20 +3028,51 @@ match_template (void)
 	      || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf)))
 	continue;
 
-      /* Check the memory size in Intel mode when it is provided if
-	 needed.  */
-      if (intel_syntax
-	  && i.suffix
-	  && t->opcode_modifier.checksize
-	  && (!t->opcode_modifier.byte || !suffix_check.no_bsuf)
-	  && (!t->opcode_modifier.word || !suffix_check.no_wsuf)
-	  && (!t->opcode_modifier.dword || !suffix_check.no_lsuf)
-	  && (!t->opcode_modifier.qword || !suffix_check.no_qsuf)
-	  && (!t->opcode_modifier.xmmword || !suffix_check.xmmword))
-	continue;
-
+      size_match = 1;
       for (j = 0; j < MAX_OPERANDS; j++)
-	operand_types [j] = t->operand_types [j];
+	{
+	  operand_types[j] = t->operand_types[j];
+
+	  /* Check memory and accumulator operand size.  We check
+	     operand_types for accumulator, and both operand_types
+	     and i.types for memory.  */
+	  if (j < i.operands
+	      && !operand_types[j].bitfield.anysize
+	      && ((operand_types[j].bitfield.acc
+		   && ((i.types[j].bitfield.byte
+			&& !operand_types[j].bitfield.byte)
+		       || (i.types[j].bitfield.word
+			   && !operand_types[j].bitfield.word)
+		       || (i.types[j].bitfield.dword
+			   && !operand_types[j].bitfield.dword)
+		       || (i.types[j].bitfield.qword
+			   && !operand_types[j].bitfield.qword)))
+		  || (operand_types[j].bitfield.baseindex
+		      && i.types[j].bitfield.baseindex
+		      && ((i.types[j].bitfield.unspecified
+			   && !operand_types[j].bitfield.unspecified)
+			  || (i.types[j].bitfield.byte
+			      && !operand_types[j].bitfield.byte)
+			  || (i.types[j].bitfield.word
+			      && !operand_types[j].bitfield.word)
+			  || (i.types[j].bitfield.dword
+			      && !operand_types[j].bitfield.dword)
+			  || (i.types[j].bitfield.fword
+			      && !operand_types[j].bitfield.fword)
+			  || (i.types[j].bitfield.qword
+			      && !operand_types[j].bitfield.qword)
+			  || (i.types[j].bitfield.tbyte
+			      && !operand_types[j].bitfield.tbyte)
+			  || (i.types[j].bitfield.xmmword
+			      && !operand_types[j].bitfield.xmmword)))))
+	    {
+	      size_match = 0;
+	      break;
+	    }
+	}
+
+      if (!size_match)
+	continue;
 
       /* In general, don't allow 64-bit operands in 32-bit mode.  */
       if (i.suffix == QWORD_MNEM_SUFFIX
@@ -6139,6 +6171,7 @@ i386_att_operand (char *operand_string)
       temp.bitfield.baseindex = 0;
       i.types[this_operand] = operand_type_or (i.types[this_operand],
 					       temp);
+      i.types[this_operand].bitfield.unspecified = 0;
       i.op[this_operand].regs = r;
       i.reg_operands++;
     }
@@ -7854,6 +7887,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	break;
       intel_parser.op_string = intel_parser.next_operand;
       this_operand = i.operands++;
+      i.types[this_operand].bitfield.unspecified = 1;
     }
 
   free (p);
@@ -8062,7 +8096,10 @@ intel_e09 (void)
 	  char suffix;
 
 	  if (prev_token.code == T_BYTE)
-	    suffix = BYTE_MNEM_SUFFIX;
+	    {
+	      suffix = BYTE_MNEM_SUFFIX;
+	      i.types[this_operand].bitfield.byte = 1;
+	    }
 
 	  else if (prev_token.code == T_WORD)
 	    {
@@ -8074,6 +8111,7 @@ intel_e09 (void)
 		suffix = SHORT_MNEM_SUFFIX;
 	      else
 		suffix = WORD_MNEM_SUFFIX;
+	      i.types[this_operand].bitfield.word = 1;
 	    }
 
 	  else if (prev_token.code == T_DWORD)
@@ -8090,6 +8128,7 @@ intel_e09 (void)
 		suffix = SHORT_MNEM_SUFFIX;
 	      else
 		suffix = LONG_MNEM_SUFFIX;
+	      i.types[this_operand].bitfield.dword = 1;
 	    }
 
 	  else if (prev_token.code == T_FWORD)
@@ -8106,6 +8145,7 @@ intel_e09 (void)
 		}
 	      else
 		suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
+	      i.types[this_operand].bitfield.fword = 1;
 	    }
 
 	  else if (prev_token.code == T_QWORD)
@@ -8113,7 +8153,8 @@ intel_e09 (void)
 	      if (intel_parser.got_a_float == 1)	/* "f..." */
 		suffix = LONG_MNEM_SUFFIX;
 	      else
-		suffix = QWORD_MNEM_SUFFIX;
+		  suffix = QWORD_MNEM_SUFFIX;
+	      i.types[this_operand].bitfield.qword = 1;
 	    }
 
 	  else if (prev_token.code == T_TBYTE)
@@ -8127,6 +8168,7 @@ intel_e09 (void)
 	  else if (prev_token.code == T_XMMWORD)
 	    {
 	      suffix = XMMWORD_MNEM_SUFFIX;
+	      i.types[this_operand].bitfield.xmmword = 1;
 	    }
 
 	  else
@@ -8134,6 +8176,8 @@ intel_e09 (void)
 	      as_bad (_("Unknown operand modifier `%s'"), prev_token.str);
 	      return 0;
 	    }
+
+	  i.types[this_operand].bitfield.unspecified = 0;
 
 	  /* Operands for jump/call using 'ptr' notation denote absolute
 	     addresses.  */
@@ -8465,6 +8509,7 @@ intel_e11 (void)
 	    temp.bitfield.baseindex = 0;
 	    i.types[this_operand] = operand_type_or (i.types[this_operand],
 						     temp);
+	    i.types[this_operand].bitfield.unspecified = 0;
 	    i.op[this_operand].regs = reg;
 	    i.reg_operands++;
 	  }

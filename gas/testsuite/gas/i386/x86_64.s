@@ -233,5 +233,14 @@ cmpxchg16b oword ptr [rax]
 	movq	QWORD PTR [rsp],xmm1
 	movq	[rsp],xmm1
 
-# Get a good alignment.
- .p2align	4,0
+.att_syntax
+	fnstsw
+	fnstsw	%ax
+	fstsw
+	fstsw	%ax
+
+	.intel_syntax noprefix
+	fnstsw
+	fnstsw	ax
+	fstsw
+	fstsw	ax

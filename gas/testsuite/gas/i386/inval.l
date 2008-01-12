@@ -49,10 +49,10 @@
 .*:50: Error: .*
 .*:51: Error: .*
 .*:52: Error: .*
+.*:53: Error: .*
+.*:54: Error: .*
 .*:55: Error: .*
 .*:56: Error: .*
-.*:57: Error: .*
-.*:58: Error: .*
 .*:59: Error: .*
 .*:60: Error: .*
 .*:61: Error: .*
@@ -61,6 +61,14 @@
 .*:64: Error: .*
 .*:65: Error: .*
 .*:66: Error: .*
+.*:67: Error: .*
+.*:68: Error: .*
+.*:69: Error: .*
+.*:70: Error: .*
+.*:71: Error: .*
+.*:72: Error: .*
+.*:73: Error: .*
+.*:74: Error: .*
 GAS LISTING .*
 
 
@@ -116,20 +124,28 @@ GAS LISTING .*
 [ 	]*50[ 	]+insertq	\$4,\$2,%xmm2,%ebx
 [ 	]*51[ 	]+cvtsi2ssq \(%eax\),%xmm1
 [ 	]*52[ 	]+cvtsi2sdq \(%eax\),%xmm1
-[ 	]*53[ 	]+
-[ 	]*54[ 	]+\.intel_syntax noprefix
-[ 	]*55[ 	]+cvtsi2ss xmm1,QWORD PTR \[eax\]
-[ 	]*56[ 	]+cvtsi2sd xmm1,QWORD PTR \[eax\]
-[ 	]*57[ 	]+cvtsi2ssq xmm1,QWORD PTR \[eax\]
+[ 	]*53[ 	]+fnstsw %eax
+[ 	]*54[ 	]+fnstsw %al
+[ 	]*55[ 	]+fstsw %eax
+[ 	]*56[ 	]+fstsw %al
+[ 	]*57[ 	]+
 GAS LISTING .*
 
 
-[ 	]*58[ 	]+cvtsi2sdq xmm1,QWORD PTR \[eax\]
-[ 	]*59[ 	]+movq xmm1, XMMWORD PTR \[esp\]
-[ 	]*60[ 	]+movq xmm1, DWORD PTR \[esp\]
-[ 	]*61[ 	]+movq xmm1, WORD PTR \[esp\]
-[ 	]*62[ 	]+movq xmm1, BYTE PTR \[esp\]
-[ 	]*63[ 	]+movq XMMWORD PTR \[esp\],xmm1
-[ 	]*64[ 	]+movq DWORD PTR \[esp\],xmm1
-[ 	]*65[ 	]+movq WORD PTR \[esp\],xmm1
-[ 	]*66[ 	]+movq BYTE PTR \[esp\],xmm1
+[ 	]*58[ 	]+\.intel_syntax noprefix
+[ 	]*59[ 	]+cvtsi2ss xmm1,QWORD PTR \[eax\]
+[ 	]*60[ 	]+cvtsi2sd xmm1,QWORD PTR \[eax\]
+[ 	]*61[ 	]+cvtsi2ssq xmm1,QWORD PTR \[eax\]
+[ 	]*62[ 	]+cvtsi2sdq xmm1,QWORD PTR \[eax\]
+[ 	]*63[ 	]+movq xmm1, XMMWORD PTR \[esp\]
+[ 	]*64[ 	]+movq xmm1, DWORD PTR \[esp\]
+[ 	]*65[ 	]+movq xmm1, WORD PTR \[esp\]
+[ 	]*66[ 	]+movq xmm1, BYTE PTR \[esp\]
+[ 	]*67[ 	]+movq XMMWORD PTR \[esp\],xmm1
+[ 	]*68[ 	]+movq DWORD PTR \[esp\],xmm1
+[ 	]*69[ 	]+movq WORD PTR \[esp\],xmm1
+[ 	]*70[ 	]+movq BYTE PTR \[esp\],xmm1
+[ 	]*71[ 	]+fnstsw eax
+[ 	]*72[ 	]+fnstsw al
+[ 	]*73[ 	]+fstsw eax
+[ 	]*74[ 	]+fstsw al

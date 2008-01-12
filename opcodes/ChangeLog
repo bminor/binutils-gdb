@@ -1,3 +1,40 @@
+2008-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5534
+	* i386-gen.c (operand_type_init): Add Dword to
+	OPERAND_TYPE_ACC32.  Add Qword to OPERAND_TYPE_ACC64.
+	(opcode_modifiers): Remove CheckSize, Byte, Word, Dword,
+	Qword and Xmmword.
+	(operand_types): Add Byte, Word, Dword, Fword, Qword, Tbyte,
+	Xmmword, Unspecified and Anysize.
+	(set_bitfield): Make Mmword an alias of Qword.  Make Oword
+	an alias of Xmmword.
+
+	* i386-opc.h (CheckSize): Removed.
+	(Byte): Updated.
+	(Word): Likewise.
+	(Dword): Likewise.
+	(Qword): Likewise.
+	(Xmmword): Likewise.
+	(FWait): Updated.
+	(OTMax): Likewise.
+	(i386_opcode_modifier): Remove checksize, byte, word, dword,
+	qword and xmmword.
+	(Fword): New.
+	(TBYTE): Likewise.
+	(Unspecified): Likewise.
+	(Anysize): Likewise.
+	(i386_operand_type): Add byte, word, dword, fword, qword,
+	tbyte xmmword, unspecified and anysize.
+
+	* i386-opc.tbl: Updated to use Byte, Word, Dword, Fword, Qword,
+	Tbyte, Xmmword, Unspecified and Anysize.
+
+	* i386-reg.tbl: Add size for accumulator.
+
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2008-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (REG_0F0E): Renamed to REG_0F0D.

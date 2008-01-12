@@ -131,9 +131,9 @@ foo:
  mov    0x90909090[eax], edx
  mov    dl, 0x90909090[eax]
  mov    edx, 0x90909090[eax]
- mov    dword ptr 0x90909090[eax], ss
+ mov    word ptr 0x90909090[eax], ss
  lea    edx, 0x90909090[eax]
- mov    ss, dword ptr 0x90909090[eax]
+ mov    ss, word ptr 0x90909090[eax]
  pop    dword ptr 0x90909090[eax]
  xchg   eax, eax
  xchg   ecx, eax

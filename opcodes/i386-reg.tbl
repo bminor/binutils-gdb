@@ -22,7 +22,7 @@
 // Make %st first as we test for it.
 st, FloatReg|FloatAcc, 0, 0
 // 8 bit regs
-al, Reg8|Acc, 0, 0
+al, Reg8|Acc|Byte, 0, 0
 cl, Reg8|ShiftCount, 0, 1
 dl, Reg8, 0, 2
 bl, Reg8, 0, 3
@@ -30,7 +30,7 @@ ah, Reg8, 0, 4
 ch, Reg8, 0, 5
 dh, Reg8, 0, 6
 bh, Reg8, 0, 7
-axl, Reg8|Acc, RegRex64, 0
+axl, Reg8|Acc|Byte, RegRex64, 0
 cxl, Reg8, RegRex64, 1
 dxl, Reg8, RegRex64, 2
 bxl, Reg8, RegRex64, 3
@@ -47,7 +47,7 @@ r13b, Reg8, RegRex|RegRex64, 5
 r14b, Reg8, RegRex|RegRex64, 6
 r15b, Reg8, RegRex|RegRex64, 7
 // 16 bit regs
-ax, Reg16|Acc, 0, 0
+ax, Reg16|Acc|Word, 0, 0
 cx, Reg16, 0, 1
 dx, Reg16|InOutPortReg, 0, 2
 bx, Reg16|BaseIndex, 0, 3
@@ -64,7 +64,7 @@ r13w, Reg16, RegRex, 5
 r14w, Reg16, RegRex, 6
 r15w, Reg16, RegRex, 7
 // 32 bit regs
-eax, Reg32|BaseIndex|Acc, 0, 0
+eax, Reg32|BaseIndex|Acc|Dword, 0, 0
 ecx, Reg32|BaseIndex, 0, 1
 edx, Reg32|BaseIndex, 0, 2
 ebx, Reg32|BaseIndex, 0, 3
@@ -80,7 +80,7 @@ r12d, Reg32|BaseIndex, RegRex, 4
 r13d, Reg32|BaseIndex, RegRex, 5
 r14d, Reg32|BaseIndex, RegRex, 6
 r15d, Reg32|BaseIndex, RegRex, 7
-rax, Reg64|BaseIndex|Acc, 0, 0
+rax, Reg64|BaseIndex|Acc|Qword, 0, 0
 rcx, Reg64|BaseIndex, 0, 1
 rdx, Reg64|BaseIndex, 0, 2
 rbx, Reg64|BaseIndex, 0, 3
