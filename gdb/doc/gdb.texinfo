@@ -9248,7 +9248,7 @@ Address operator.  Defined on variables.  Same precedence as @code{++}.
 
 For debugging C@t{++}, @value{GDBN} implements a use of @samp{&} beyond what is
 allowed in the C@t{++} language itself: you can use @samp{&(&@var{ref})}
-(or, if you prefer, simply @samp{&&@var{ref}}) to examine the address
+to examine the address
 where a C@t{++} reference variable (declared with @samp{&@var{ref}}) is
 stored.
 

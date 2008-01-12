@@ -1,3 +1,8 @@
+2008-01-12  Paul Hilfinger  <hilfinger@adacore.com>
+
+	* gdb.texinfo (C Operators): Remove incorrect parenthetical comment
+	about &&var, which is rejected by the expression parser.
+
 2008-01-09  Luis Machado  <luisgpm@br.ibm.com>
 
 	* gdb.texinfo (Output): Update documentation on using printf with DFP
