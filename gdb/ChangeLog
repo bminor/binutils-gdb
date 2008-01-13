@@ -1,3 +1,8 @@
+2008-01-13  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+	* configure.ac: Check for void * as 3 argument of ptrace.
+	* configure: regenerate.
+
 2008-01-11  Markus Deuling  <deuling@de.ibm.com>
 
 	* alpha-tdep.c (alpha_heuristic_proc_start)
