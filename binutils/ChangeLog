@@ -8,6 +8,16 @@
 	and return whilst displaying a warning message if the load failed.
 	(display_debug_loc): Likewise.
 	(display_debug_ranges): Likewise.
+	(DEBUG_INFO_UNAVAILABLE): Value stored in num_debug_info_entries
+	when the .debug_info section could not be loaded/parsed.
+	(process_debug_info): Display the length of the compilation unit
+	in hex, so that it corresponds with the offsets that will follow.
+	Tell the user if the length was 32-bit or 64-bit.
+	If a DIE abbreviation could not be found, tell the user the offset
+	of the DIE.
+	(free_debug_memory): Do not attempt to free any entries in the
+	debug_information array if num_debug_info_entries is set to
+	DEBUG_INFO_UNAVAILABLE.
 
 2008-01-10  Andreas Schwab  <schwab@suse.de>
 

@@ -34,6 +34,9 @@ static int warned_about_missing_comp_units = FALSE;
 
 static unsigned int num_debug_info_entries = 0;
 static debug_info *debug_information = NULL;
+/* Special value for num_debug_info_entries to indicate
+   that the .debug_info section could not be loaded/parsed.  */
+#define DEBUG_INFO_UNAVAILABLE  (unsigned int) -1
 
 dwarf_vma eh_addr_size;
 
@@ -1823,7 +1826,8 @@ process_debug_info (struct dwarf_section *section, void *file,
       if (!do_loc)
 	{
 	  printf (_("  Compilation Unit @ offset 0x%lx:\n"), cu_offset);
-	  printf (_("   Length:        %ld\n"), compunit.cu_length);
+	  printf (_("   Length:        0x%lx (%s)\n"), compunit.cu_length,
+		  initial_length_size == 8 ? "64-bit" : "32-bit");
 	  printf (_("   Version:       %d\n"), compunit.cu_version);
 	  printf (_("   Abbrev Offset: %ld\n"), compunit.cu_abbrev_offset);
 	  printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
@@ -1913,8 +1917,8 @@ process_debug_info (struct dwarf_section *section, void *file,
 		  printf ("\n");
 		  fflush (stdout);
 		}
-	      warn (_("Unable to locate entry %lu in the abbreviation table\n"),
-		    abbrev_number);
+	      warn (_("DIE at offset %lx refers to abbreviation number %lu which does not exist\n"),
+		    die_offset, abbrev_number);
 	      return 0;
 	    }
 
@@ -1988,7 +1992,7 @@ load_debug_info (void * file)
 
   /* If we have already tried and failed to load the .debug_info
      section then do not bother to repear the task.  */
-  if (num_debug_info_entries == (unsigned) -1)
+  if (num_debug_info_entries == DEBUG_INFO_UNAVAILABLE)
     return 0;
 
   /* If we already have the information there is nothing else to do.  */
@@ -1999,7 +2003,7 @@ load_debug_info (void * file)
       && process_debug_info (&debug_displays [info].section, file, 1))
     return num_debug_info_entries;
 
-  num_debug_info_entries = (unsigned) -1;
+  num_debug_info_entries = DEBUG_INFO_UNAVAILABLE;
   return 0;
 }
 
@@ -3244,7 +3248,7 @@ display_debug_frames (struct dwarf_section *section,
 	  fc->ncols = 0;
 	  fc->col_type = xmalloc (sizeof (short int));
 	  fc->col_offset = xmalloc (sizeof (int));
-	  frame_need_space (fc, max_regs-1);
+	  frame_need_space (fc, max_regs - 1);
 
 	  version = *start++;
 
@@ -3386,7 +3390,7 @@ display_debug_frames (struct dwarf_section *section,
 	      fc->cfa_reg = cie->cfa_reg;
 	      fc->cfa_offset = cie->cfa_offset;
 	      fc->ra = cie->ra;
-	      frame_need_space (fc, max_regs-1);
+	      frame_need_space (fc, max_regs - 1);
 	      fc->fde_encoding = cie->fde_encoding;
 	    }
 
@@ -3713,7 +3717,7 @@ display_debug_frames (struct dwarf_section *section,
 	      if (rs)
 		{
 		  remembered_state = rs->next;
-		  frame_need_space (fc, rs->ncols-1);
+		  frame_need_space (fc, rs->ncols - 1);
 		  memcpy (fc->col_type, rs->col_type, rs->ncols);
 		  memcpy (fc->col_offset, rs->col_offset,
 			  rs->ncols * sizeof (int));
@@ -3958,23 +3962,26 @@ free_debug_memory (void)
   for (i = 0; i < max; i++)
     free_debug_section (i);
 
-  if (debug_information)
+  if (debug_information != NULL)
     {
-      for (i = 0; i < num_debug_info_entries; i++)
+      if (num_debug_info_entries != DEBUG_INFO_UNAVAILABLE)
 	{
-	  if (!debug_information [i].max_loc_offsets)
+	  for (i = 0; i < num_debug_info_entries; i++)
 	    {
-	      free (debug_information [i].loc_offsets);
-	      free (debug_information [i].have_frame_base);
+	      if (!debug_information [i].max_loc_offsets)
+		{
+		  free (debug_information [i].loc_offsets);
+		  free (debug_information [i].have_frame_base);
+		}
+	      if (!debug_information [i].max_range_lists)
+		free (debug_information [i].range_lists);
 	    }
-	  if (!debug_information [i].max_range_lists)
-	    free (debug_information [i].range_lists);
 	}
+
       free (debug_information);
       debug_information = NULL;
       num_debug_info_entries = 0;
     }
-
 }
 
 struct dwarf_section_display debug_displays[] =
