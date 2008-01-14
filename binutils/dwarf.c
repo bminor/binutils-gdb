@@ -1841,7 +1841,8 @@ process_debug_info (struct dwarf_section *section, void *file,
 
       if (compunit.cu_version != 2 && compunit.cu_version != 3)
 	{
-	  warn (_("Only version 2 and 3 DWARF debug information is currently supported.\n"));
+	  warn (_("CU at offset %lx contains corrupt or unsupported version number: %d.\n"),
+		cu_offset, compunit.cu_version);
 	  continue;
 	}
 
@@ -1985,6 +1986,11 @@ load_debug_info (void * file)
   last_pointer_size = 0;
   warned_about_missing_comp_units = FALSE;
 
+  /* If we have already tried and failed to load the .debug_info
+     section then do not bother to repear the task.  */
+  if (num_debug_info_entries == (unsigned) -1)
+    return 0;
+
   /* If we already have the information there is nothing else to do.  */
   if (num_debug_info_entries > 0)
     return num_debug_info_entries;
@@ -1992,8 +1998,9 @@ load_debug_info (void * file)
   if (load_debug_section (info, file)
       && process_debug_info (&debug_displays [info].section, file, 1))
     return num_debug_info_entries;
-  else
-    return 0;
+
+  num_debug_info_entries = (unsigned) -1;
+  return 0;
 }
 
 static int
@@ -2006,7 +2013,12 @@ display_debug_lines (struct dwarf_section *section, void *file)
   printf (_("\nDump of debug contents of section %s:\n\n"),
 	  section->name);
 
-  load_debug_info (file);
+  if (load_debug_info (file) == 0)
+    {
+      warn (_("Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"),
+	    section->name);
+      return 0;
+    }
 
   while (data < end)
     {
@@ -2501,7 +2513,12 @@ display_debug_loc (struct dwarf_section *section, void *file)
       return 0;
     }
 
-  load_debug_info (file);
+  if (load_debug_info (file) == 0)
+    {
+      warn (_("Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"),
+	    section->name);
+      return 0;
+    }
 
   /* Check the order of location list in .debug_info section. If
      offsets of location lists are in the ascending order, we can
@@ -2876,7 +2893,12 @@ display_debug_ranges (struct dwarf_section *section,
       return 0;
     }
 
-  load_debug_info (file);
+  if (load_debug_info (file) == 0)
+    {
+      warn (_("Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"),
+	    section->name);
+      return 0;
+    }
 
   /* Check the order of range list in .debug_info section. If
      offsets of range lists are in the ascending order, we can

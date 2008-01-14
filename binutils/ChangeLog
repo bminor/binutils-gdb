@@ -1,3 +1,14 @@
+2008-01-14  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (process_debug_info): Include the CU offset and corrupt
+	version value when reporting unrecognised DWARF version numbers.
+	(load_debug_info): Remember a failed attempt to load and parse the
+	.debug_info section and do not repeat such attempts.
+	(display_debug_lines): Check the return value from load_debug_info
+	and return whilst displaying a warning message if the load failed.
+	(display_debug_loc): Likewise.
+	(display_debug_ranges): Likewise.
+
 2008-01-10  Andreas Schwab  <schwab@suse.de>
 
 	* readelf.c (is_64bit_abs_reloc): Handle R_S390_64.
