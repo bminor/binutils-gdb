@@ -27,7 +27,9 @@ if ![check_gc_sections_available] {
 set cflags "-ffunction-sections -fdata-sections"
 set objfile "tmpdir/gc.o"
 
-ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/gc.c $objfile
+if { [is_remote host] || [which $CC] } {
+    ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/gc.c $objfile
+}
 
 proc test_gc { testname filename linker ldflags} {
     global nm
@@ -35,6 +37,11 @@ proc test_gc { testname filename linker ldflags} {
     global subdir
     global nm_output
     global objfile
+
+    if ![file readable $objfile ] {
+	untested $testname
+	return
+    }
 
     set outfile "tmpdir/$filename"
 

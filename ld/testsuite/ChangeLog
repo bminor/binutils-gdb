@@ -1,3 +1,8 @@
+2008-01-14  Tristan Gingold  <gingold@adacore.com>
+
+	* ld-gc/gc.exp (test_gc): Let missing C compiler make tests
+	"untested" instead of "failed".
+
 2008-01-10  Tristan Gingold  <gingold@adacore.com>
 
 	* lib/ld-lib.exp (check_gc_sections_available): Now available on
