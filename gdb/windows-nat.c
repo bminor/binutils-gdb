@@ -1880,6 +1880,9 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
     error (_("Error creating process %s, (error %d)."),
 	   exec_file, (unsigned) GetLastError ());
 
+  CloseHandle (pi.hThread);
+  CloseHandle (pi.hProcess);
+
   if (useshell && shell[0] != '\0')
     saw_create = -1;
   else

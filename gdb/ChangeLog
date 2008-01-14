@@ -1,3 +1,8 @@
+2008-01-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c (win32_create_inferior): Restore code calling
+	CloseHandle on ProcessInformation structure.
+
 2008-01-13  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
 	* configure.ac: Check for void * as 3 argument of ptrace.
