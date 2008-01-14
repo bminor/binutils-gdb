@@ -353,7 +353,7 @@ typedef struct i386_opcode_modifier
    be encoded in the regmem field.  */
 #define RegMem			(EsSeg + 1)
 /* BYTE memory. */
-#define Byte			(RegMem)
+#define Byte			(RegMem + 1)
 /* WORD memory. 2 byte */
 #define Word			(Byte + 1)
 /* DWORD memory. 4 byte */
