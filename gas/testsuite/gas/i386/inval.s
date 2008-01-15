@@ -55,6 +55,12 @@ foo:	jaw	foo
 	fstsw %eax
 	fstsw %al
 
+movsxw (%eax),%eax
+movzxw (%eax),%eax
+
+movnti %ax, (%eax)
+movntiw %ax, (%eax)
+
 	.intel_syntax noprefix
 	cvtsi2ss xmm1,QWORD PTR [eax]
 	cvtsi2sd xmm1,QWORD PTR [eax]
@@ -72,3 +78,10 @@ foo:	jaw	foo
 	fnstsw al
 	fstsw eax
 	fstsw al
+
+movsx ax, [eax]
+movsx eax, [eax]
+movzx ax, [eax]
+movzx eax, [eax]
+
+movnti word ptr [eax], ax

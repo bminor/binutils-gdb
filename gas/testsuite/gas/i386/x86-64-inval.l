@@ -55,6 +55,8 @@
 .*:56: Error: .*
 .*:57: Error: .*
 .*:58: Error: .*
+.*:59: Error: .*
+.*:60: Error: .*
 .*:61: Error: .*
 .*:62: Error: .*
 .*:63: Error: .*
@@ -65,11 +67,28 @@
 .*:68: Error: .*
 .*:69: Error: .*
 .*:70: Error: .*
-.*:71: Error: .*
-.*:72: Error: .*
 .*:73: Error: .*
 .*:74: Error: .*
 .*:75: Error: .*
+.*:76: Error: .*
+.*:77: Error: .*
+.*:78: Error: .*
+.*:79: Error: .*
+.*:80: Error: .*
+.*:81: Error: .*
+.*:82: Error: .*
+.*:83: Error: .*
+.*:84: Error: .*
+.*:85: Error: .*
+.*:86: Error: .*
+.*:87: Error: .*
+.*:88: Error: .*
+.*:89: Error: .*
+.*:90: Error: .*
+.*:91: Error: .*
+.*:92: Error: .*
+.*:93: Error: .*
+.*:94: Error: .*
 GAS LISTING .*
 
 
@@ -134,20 +153,39 @@ GAS LISTING .*
 
 
 [ 	]*58[ 	]+out %rax,\$8
-[ 	]*59[ 	]+
-[ 	]*60[ 	]+\.intel_syntax noprefix
-[ 	]*61[ 	]+cmpxchg16b dword ptr \[rax\] \# Must be oword
-[ 	]*62[ 	]+movq xmm1, XMMWORD PTR \[rsp\]
-[ 	]*63[ 	]+movq xmm1, DWORD PTR \[rsp\]
-[ 	]*64[ 	]+movq xmm1, WORD PTR \[rsp\]
-[ 	]*65[ 	]+movq xmm1, BYTE PTR \[rsp\]
-[ 	]*66[ 	]+movq XMMWORD PTR \[rsp\],xmm1
-[ 	]*67[ 	]+movq DWORD PTR \[rsp\],xmm1
-[ 	]*68[ 	]+movq WORD PTR \[rsp\],xmm1
-[ 	]*69[ 	]+movq BYTE PTR \[rsp\],xmm1
-[ 	]*70[ 	]+fnstsw eax
-[ 	]*71[ 	]+fnstsw al
-[ 	]*72[ 	]+fstsw eax
-[ 	]*73[ 	]+fstsw al
-[ 	]*74[ 	]+in rax,8
-[ 	]*75[ 	]+out 8,rax
+[ 	]*59[ 	]+movsxb \(%rax\),%eax
+[ 	]*60[ 	]+movsxb \(%rax\),%rax
+[ 	]*61[ 	]+movsxw \(%rax\),%eax
+[ 	]*62[ 	]+movsxw \(%rax\),%rax
+[ 	]*63[ 	]+movsxl \(%rax\),%rax
+[ 	]*64[ 	]+movzxb \(%rax\),%eax
+[ 	]*65[ 	]+movzxb \(%rax\),%rax
+[ 	]*66[ 	]+movzxw \(%rax\),%eax
+[ 	]*67[ 	]+movzxw \(%rax\),%rax
+[ 	]*68[ 	]+movzxl \(%rax\),%rax
+[ 	]*69[ 	]+movnti %ax, \(%rax\)
+[ 	]*70[ 	]+movntiw %ax, \(%rax\)
+[ 	]*71[ 	]+
+[ 	]*72[ 	]+\.intel_syntax noprefix
+[ 	]*73[ 	]+cmpxchg16b dword ptr \[rax\] \# Must be oword
+[ 	]*74[ 	]+movq xmm1, XMMWORD PTR \[rsp\]
+[ 	]*75[ 	]+movq xmm1, DWORD PTR \[rsp\]
+[ 	]*76[ 	]+movq xmm1, WORD PTR \[rsp\]
+[ 	]*77[ 	]+movq xmm1, BYTE PTR \[rsp\]
+[ 	]*78[ 	]+movq XMMWORD PTR \[rsp\],xmm1
+[ 	]*79[ 	]+movq DWORD PTR \[rsp\],xmm1
+[ 	]*80[ 	]+movq WORD PTR \[rsp\],xmm1
+[ 	]*81[ 	]+movq BYTE PTR \[rsp\],xmm1
+[ 	]*82[ 	]+fnstsw eax
+[ 	]*83[ 	]+fnstsw al
+[ 	]*84[ 	]+fstsw eax
+[ 	]*85[ 	]+fstsw al
+[ 	]*86[ 	]+in rax,8
+[ 	]*87[ 	]+out 8,rax
+[ 	]*88[ 	]+movsx ax, \[rax\]
+[ 	]*89[ 	]+movsx eax, \[rax\]
+[ 	]*90[ 	]+movsx rax, \[rax\]
+[ 	]*91[ 	]+movzx ax, \[rax\]
+[ 	]*92[ 	]+movzx eax, \[rax\]
+[ 	]*93[ 	]+movzx rax, \[rax\]
+[ 	]*94[ 	]+movnti word ptr \[rax\], ax

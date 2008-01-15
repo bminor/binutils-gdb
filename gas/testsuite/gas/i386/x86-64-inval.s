@@ -56,6 +56,18 @@ foo:	jcxz foo	# No prefix exists to select CX as a counter
 	fstsw %al
 	in $8,%rax
 	out %rax,$8
+movsxb (%rax),%eax
+movsxb (%rax),%rax
+movsxw (%rax),%eax
+movsxw (%rax),%rax
+movsxl (%rax),%rax
+movzxb (%rax),%eax
+movzxb (%rax),%rax
+movzxw (%rax),%eax
+movzxw (%rax),%rax
+movzxl (%rax),%rax
+movnti %ax, (%rax)
+movntiw %ax, (%rax)
 
 	.intel_syntax noprefix
 	cmpxchg16b dword ptr [rax] # Must be oword
@@ -73,3 +85,10 @@ foo:	jcxz foo	# No prefix exists to select CX as a counter
 	fstsw al
 	in rax,8
 	out 8,rax
+movsx ax, [rax]
+movsx eax, [rax]
+movsx rax, [rax]
+movzx ax, [rax]
+movzx eax, [rax]
+movzx rax, [rax]
+movnti word ptr [rax], ax

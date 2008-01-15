@@ -1,3 +1,15 @@
+2008-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.s: Add tests for movsx, movzx and movnti.
+	* gas/i386/inval.s: Likewise. 
+	* gas/i386/x86_64.s: Likewise.
+	* gas/i386/x86-64-inval.s: Likewise.
+
+	* gas/i386/i386.d: Updated.
+	* gas/i386/inval.l: Likewise.
+	* gas/i386/x86_64.d: Likewise.
+	* gas/i386/x86-64-inval.l: Likewise.
+
 2008-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/5534

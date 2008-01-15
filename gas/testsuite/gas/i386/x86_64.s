@@ -244,3 +244,33 @@ cmpxchg16b oword ptr [rax]
 	fnstsw	ax
 	fstsw
 	fstsw	ax
+
+.att_syntax
+movsx (%rax),%ax
+movsx (%rax),%eax
+movsx (%rax),%rax
+movsxd (%rax),%rax
+movzx (%rax),%ax
+movzx (%rax),%eax
+movzx (%rax),%rax
+
+movnti %eax, (%rax)
+movntil %eax, (%rax)
+movnti %rax, (%rax)
+movntiq %rax, (%rax)
+
+.intel_syntax noprefix
+
+movsx ax, BYTE PTR [rax]
+movsx eax, BYTE PTR [rax]
+movsx eax, WORD PTR [rax]
+movsx rax, WORD PTR [rax]
+movsx rax, DWORD PTR [rax]
+movsxd rax, [rax]
+movzx ax, BYTE PTR [rax]
+movzx eax, BYTE PTR [rax]
+movzx eax, WORD PTR [rax]
+movzx rax, WORD PTR [rax]
+
+movnti dword ptr [rax], eax
+movnti qword ptr [rax], rax

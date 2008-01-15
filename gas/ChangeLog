@@ -1,3 +1,15 @@
+2008-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (match_reg_size): New.
+	(match_mem_size): Likewise.
+	(operand_size_match): Likewise.
+	(operand_type_match): Also clear all size fields.
+	(match_template): Skip Intel syntax when in AT&T syntax.
+	Call operand_size_match to check operand size.
+	(i386_att_operand): Set the mem field to 1 for memory
+	operand.
+	(i386_intel_operand): Likewise.
+
 2008-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/5534

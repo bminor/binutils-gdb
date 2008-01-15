@@ -1147,6 +1147,102 @@ operand_type_check (i386_operand_type t, enum operand_type c)
     }
 }
 
+/* Return 1 if there is no conflict in 8bit/16bit/32bit/64bit on
+   operand J for instruction template T.  */
+
+static INLINE int
+match_reg_size (const template *t, unsigned int j)
+{
+  return !((i.types[j].bitfield.byte
+	    && !t->operand_types[j].bitfield.byte)
+	   || (i.types[j].bitfield.word
+	       && !t->operand_types[j].bitfield.word)
+	   || (i.types[j].bitfield.dword
+	       && !t->operand_types[j].bitfield.dword)
+	   || (i.types[j].bitfield.qword
+	       && !t->operand_types[j].bitfield.qword));
+}
+
+/* Return 1 if there is no conflict in any size on operand J for
+   instruction template T.  */
+
+static INLINE int
+match_mem_size (const template *t, unsigned int j)
+{
+  return (match_reg_size (t, j)
+	  && !((i.types[j].bitfield.unspecified
+		&& !t->operand_types[j].bitfield.unspecified)
+	       || (i.types[j].bitfield.fword
+		   && !t->operand_types[j].bitfield.fword)
+	       || (i.types[j].bitfield.tbyte
+		   && !t->operand_types[j].bitfield.tbyte)
+	       || (i.types[j].bitfield.xmmword
+		   && !t->operand_types[j].bitfield.xmmword)));
+}
+
+/* Return 1 if there is no size conflict on any operands for
+   instruction template T.  */
+
+static INLINE int
+operand_size_match (const template *t)
+{
+  unsigned int j;
+  int match = 1;
+
+  /* Don't check jump instructions.  */
+  if (t->opcode_modifier.jump
+      || t->opcode_modifier.jumpbyte
+      || t->opcode_modifier.jumpdword
+      || t->opcode_modifier.jumpintersegment)
+    return match;
+
+  /* Check memory and accumulator operand size.  */
+  for (j = 0; j < i.operands; j++)
+    {
+      if (t->operand_types[j].bitfield.anysize)
+	continue;
+
+      if (t->operand_types[j].bitfield.acc && !match_reg_size (t, j))
+	{
+	  match = 0;
+	  break;
+	}
+
+      if (i.types[j].bitfield.mem && !match_mem_size (t, j))
+	{
+	  match = 0;
+	  break;
+	}
+    }
+
+  if (match
+      || (!t->opcode_modifier.d && !t->opcode_modifier.floatd))
+    return match;
+
+  /* Check reverse.  */
+  assert (i.operands == 2);
+
+  match = 1;
+  for (j = 0; j < 2; j++)
+    {
+      if (t->operand_types[j].bitfield.acc
+	  && !match_reg_size (t, j ? 0 : 1))
+	{
+	  match = 0;
+	  break;
+	}
+
+      if (i.types[j].bitfield.mem
+	  && !match_mem_size (t, j ? 0 : 1))
+	{
+	  match = 0;
+	  break;
+	}
+    }
+
+  return match;
+}
+
 static INLINE int
 operand_type_match (i386_operand_type overlap,
 		    i386_operand_type given)
@@ -1155,6 +1251,13 @@ operand_type_match (i386_operand_type overlap,
 
   temp.bitfield.jumpabsolute = 0;
   temp.bitfield.unspecified = 0;
+  temp.bitfield.byte = 0;
+  temp.bitfield.word = 0;
+  temp.bitfield.dword = 0;
+  temp.bitfield.fword = 0;
+  temp.bitfield.qword = 0;
+  temp.bitfield.tbyte = 0;
+  temp.bitfield.xmmword = 0;
   if (UINTS_ALL_ZERO (temp))
     return 0;
 
@@ -2970,7 +3073,6 @@ match_template (void)
   unsigned int j;
   unsigned int found_cpu_match;
   unsigned int check_register;
-  unsigned int size_match;
 
 #if MAX_OPERANDS != 4
 # error "MAX_OPERANDS must be 4."
@@ -3014,8 +3116,9 @@ match_template (void)
       if (intel_mnemonic && t->opcode_modifier.attmnemonic)
 	continue;
 
-      /* Check Intel syntax.   */
-      if (intel_syntax && t->opcode_modifier.attsyntax)
+      /* Check AT&T syntax Intel syntax.   */
+      if ((intel_syntax && t->opcode_modifier.attsyntax)
+	  || (!intel_syntax && t->opcode_modifier.intelsyntax))
 	continue;
 
       /* Check the suffix, except for some instructions in intel mode.  */
@@ -3028,51 +3131,11 @@ match_template (void)
 	      || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf)))
 	continue;
 
-      size_match = 1;
-      for (j = 0; j < MAX_OPERANDS; j++)
-	{
-	  operand_types[j] = t->operand_types[j];
-
-	  /* Check memory and accumulator operand size.  We check
-	     operand_types for accumulator, and both operand_types
-	     and i.types for memory.  */
-	  if (j < i.operands
-	      && !operand_types[j].bitfield.anysize
-	      && ((operand_types[j].bitfield.acc
-		   && ((i.types[j].bitfield.byte
-			&& !operand_types[j].bitfield.byte)
-		       || (i.types[j].bitfield.word
-			   && !operand_types[j].bitfield.word)
-		       || (i.types[j].bitfield.dword
-			   && !operand_types[j].bitfield.dword)
-		       || (i.types[j].bitfield.qword
-			   && !operand_types[j].bitfield.qword)))
-		  || (operand_types[j].bitfield.baseindex
-		      && i.types[j].bitfield.baseindex
-		      && ((i.types[j].bitfield.unspecified
-			   && !operand_types[j].bitfield.unspecified)
-			  || (i.types[j].bitfield.byte
-			      && !operand_types[j].bitfield.byte)
-			  || (i.types[j].bitfield.word
-			      && !operand_types[j].bitfield.word)
-			  || (i.types[j].bitfield.dword
-			      && !operand_types[j].bitfield.dword)
-			  || (i.types[j].bitfield.fword
-			      && !operand_types[j].bitfield.fword)
-			  || (i.types[j].bitfield.qword
-			      && !operand_types[j].bitfield.qword)
-			  || (i.types[j].bitfield.tbyte
-			      && !operand_types[j].bitfield.tbyte)
-			  || (i.types[j].bitfield.xmmword
-			      && !operand_types[j].bitfield.xmmword)))))
-	    {
-	      size_match = 0;
-	      break;
-	    }
-	}
-
-      if (!size_match)
+      if (!operand_size_match (t))
 	continue;
+
+      for (j = 0; j < MAX_OPERANDS; j++)
+	operand_types[j] = t->operand_types[j];
 
       /* In general, don't allow 64-bit operands in 32-bit mode.  */
       if (i.suffix == QWORD_MNEM_SUFFIX
@@ -6364,6 +6427,7 @@ i386_att_operand (char *operand_string)
 
       if (i386_index_check (operand_string) == 0)
 	return 0;
+      i.types[this_operand].bitfield.mem = 1;
       i.mem_operands++;
     }
   else
@@ -7845,6 +7909,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  else
 	    {
 	      char *s = intel_parser.disp;
+	      i.types[this_operand].bitfield.mem = 1;
 	      i.mem_operands++;
 
 	      if (!quiet_warnings && intel_parser.is_mem < 0)

@@ -199,4 +199,27 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	df e0                	fnstsw %ax
 [ 	]*[a-f0-9]+:	9b df e0             	fstsw  %ax
 [ 	]*[a-f0-9]+:	9b df e0             	fstsw  %ax
+[ 	]*[a-f0-9]+:	66 0f be 00          	movsbw \(%rax\),%ax
+[ 	]*[a-f0-9]+:	0f be 00             	movsbl \(%rax\),%eax
+[ 	]*[a-f0-9]+:	48 0f be 00          	movsbq \(%rax\),%rax
+[ 	]*[a-f0-9]+:	48 63 00             	movslq \(%rax\),%rax
+[ 	]*[a-f0-9]+:	66 0f b6 00          	movzbw \(%rax\),%ax
+[ 	]*[a-f0-9]+:	0f b6 00             	movzbl \(%rax\),%eax
+[ 	]*[a-f0-9]+:	48 0f b6 00          	movzbq \(%rax\),%rax
+[ 	]*[a-f0-9]+:	0f c3 00             	movnti %eax,\(%rax\)
+[ 	]*[a-f0-9]+:	0f c3 00             	movnti %eax,\(%rax\)
+[ 	]*[a-f0-9]+:	48 0f c3 00          	movnti %rax,\(%rax\)
+[ 	]*[a-f0-9]+:	48 0f c3 00          	movnti %rax,\(%rax\)
+[ 	]*[a-f0-9]+:	66 0f be 00          	movsbw \(%rax\),%ax
+[ 	]*[a-f0-9]+:	0f be 00             	movsbl \(%rax\),%eax
+[ 	]*[a-f0-9]+:	0f bf 00             	movswl \(%rax\),%eax
+[ 	]*[a-f0-9]+:	48 0f bf 00          	movswq \(%rax\),%rax
+[ 	]*[a-f0-9]+:	48 63 00             	movslq \(%rax\),%rax
+[ 	]*[a-f0-9]+:	48 63 00             	movslq \(%rax\),%rax
+[ 	]*[a-f0-9]+:	66 0f b6 00          	movzbw \(%rax\),%ax
+[ 	]*[a-f0-9]+:	0f b6 00             	movzbl \(%rax\),%eax
+[ 	]*[a-f0-9]+:	0f b7 00             	movzwl \(%rax\),%eax
+[ 	]*[a-f0-9]+:	48 0f b7 00          	movzwq \(%rax\),%rax
+[ 	]*[a-f0-9]+:	0f c3 00             	movnti %eax,\(%rax\)
+[ 	]*[a-f0-9]+:	48 0f c3 00          	movnti %rax,\(%rax\)
 #pass

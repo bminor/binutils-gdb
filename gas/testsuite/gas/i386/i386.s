@@ -21,6 +21,9 @@
 	movzbw	(%eax), %dx
 	movzwl	(%eax), %edx
 
+	movnti %eax, (%eax)
+	movntil %eax, (%eax)
+
 	.intel_syntax noprefix
 	fnstsw
 	fnstsw	ax
@@ -39,3 +42,12 @@
 	movq	xmm1,[esp]
 	movq	QWORD PTR [esp],xmm1
 	movq	[esp],xmm1
+
+movsx ax, byte ptr [eax]
+movsx eax, byte ptr [eax]
+movsx eax, word ptr [eax]
+movzx ax, byte ptr [eax]
+movzx eax, byte ptr [eax]
+movzx eax, word ptr [eax]
+
+movnti dword ptr [eax], eax

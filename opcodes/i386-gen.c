@@ -292,6 +292,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (OldGcc),
   BITFIELD (ATTMnemonic),
   BITFIELD (ATTSyntax),
+  BITFIELD (IntelSyntax),
 };
 
 static bitfield operand_types[] =
@@ -328,6 +329,7 @@ static bitfield operand_types[] =
   BITFIELD (JumpAbsolute),
   BITFIELD (EsSeg),
   BITFIELD (RegMem),
+  BITFIELD (Mem),
   BITFIELD (Byte),
   BITFIELD (Word),
   BITFIELD (Dword),

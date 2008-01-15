@@ -227,8 +227,10 @@ typedef union i386_cpu_flags
 #define ATTMnemonic		(OldGcc + 1)
 /* AT&T syntax.  */
 #define ATTSyntax		(ATTMnemonic + 1)
+/* Intel syntax.  */
+#define IntelSyntax		(ATTSyntax + 1)
 /* The last bitfield in i386_opcode_modifier.  */
-#define Opcode_Modifier_Max	ATTSyntax
+#define Opcode_Modifier_Max	IntelSyntax
 
 typedef struct i386_opcode_modifier
 {
@@ -273,6 +275,7 @@ typedef struct i386_opcode_modifier
   unsigned int oldgcc:1;
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;
+  unsigned int intelsyntax:1;
 } i386_opcode_modifier;
 
 /* Position of operand_type bits.  */
@@ -352,8 +355,10 @@ typedef struct i386_opcode_modifier
    flag to the destination register operand to indicate that it should
    be encoded in the regmem field.  */
 #define RegMem			(EsSeg + 1)
+/* Memory.  */
+#define Mem			(RegMem + 1)
 /* BYTE memory. */
-#define Byte			(RegMem + 1)
+#define Byte			(Mem + 1)
 /* WORD memory. 2 byte */
 #define Word			(Byte + 1)
 /* DWORD memory. 4 byte */
@@ -419,6 +424,7 @@ typedef union i386_operand_type
       unsigned int jumpabsolute:1;
       unsigned int esseg:1;
       unsigned int regmem:1;
+      unsigned int mem:1;
       unsigned int byte:1;
       unsigned int word:1;
       unsigned int dword:1;

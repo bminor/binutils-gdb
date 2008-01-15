@@ -53,12 +53,10 @@
 .*:54: Error: .*
 .*:55: Error: .*
 .*:56: Error: .*
+.*:58: Error: .*
 .*:59: Error: .*
-.*:60: Error: .*
 .*:61: Error: .*
 .*:62: Error: .*
-.*:63: Error: .*
-.*:64: Error: .*
 .*:65: Error: .*
 .*:66: Error: .*
 .*:67: Error: .*
@@ -69,6 +67,17 @@
 .*:72: Error: .*
 .*:73: Error: .*
 .*:74: Error: .*
+.*:75: Error: .*
+.*:76: Error: .*
+.*:77: Error: .*
+.*:78: Error: .*
+.*:79: Error: .*
+.*:80: Error: .*
+.*:82: Error: .*
+.*:83: Error: .*
+.*:84: Error: .*
+.*:85: Error: .*
+.*:87: Error: .*
 GAS LISTING .*
 
 
@@ -132,20 +141,33 @@ GAS LISTING .*
 GAS LISTING .*
 
 
-[ 	]*58[ 	]+\.intel_syntax noprefix
-[ 	]*59[ 	]+cvtsi2ss xmm1,QWORD PTR \[eax\]
-[ 	]*60[ 	]+cvtsi2sd xmm1,QWORD PTR \[eax\]
-[ 	]*61[ 	]+cvtsi2ssq xmm1,QWORD PTR \[eax\]
-[ 	]*62[ 	]+cvtsi2sdq xmm1,QWORD PTR \[eax\]
-[ 	]*63[ 	]+movq xmm1, XMMWORD PTR \[esp\]
-[ 	]*64[ 	]+movq xmm1, DWORD PTR \[esp\]
-[ 	]*65[ 	]+movq xmm1, WORD PTR \[esp\]
-[ 	]*66[ 	]+movq xmm1, BYTE PTR \[esp\]
-[ 	]*67[ 	]+movq XMMWORD PTR \[esp\],xmm1
-[ 	]*68[ 	]+movq DWORD PTR \[esp\],xmm1
-[ 	]*69[ 	]+movq WORD PTR \[esp\],xmm1
-[ 	]*70[ 	]+movq BYTE PTR \[esp\],xmm1
-[ 	]*71[ 	]+fnstsw eax
-[ 	]*72[ 	]+fnstsw al
-[ 	]*73[ 	]+fstsw eax
-[ 	]*74[ 	]+fstsw al
+[ 	]*58[ 	]+movsxw \(%eax\),%eax
+[ 	]*59[ 	]+movzxw \(%eax\),%eax
+[ 	]*60[ 	]+
+[ 	]*61[ 	]+movnti %ax, \(%eax\)
+[ 	]*62[ 	]+movntiw %ax, \(%eax\)
+[ 	]*63[ 	]+
+[ 	]*64[ 	]+\.intel_syntax noprefix
+[ 	]*65[ 	]+cvtsi2ss xmm1,QWORD PTR \[eax\]
+[ 	]*66[ 	]+cvtsi2sd xmm1,QWORD PTR \[eax\]
+[ 	]*67[ 	]+cvtsi2ssq xmm1,QWORD PTR \[eax\]
+[ 	]*68[ 	]+cvtsi2sdq xmm1,QWORD PTR \[eax\]
+[ 	]*69[ 	]+movq xmm1, XMMWORD PTR \[esp\]
+[ 	]*70[ 	]+movq xmm1, DWORD PTR \[esp\]
+[ 	]*71[ 	]+movq xmm1, WORD PTR \[esp\]
+[ 	]*72[ 	]+movq xmm1, BYTE PTR \[esp\]
+[ 	]*73[ 	]+movq XMMWORD PTR \[esp\],xmm1
+[ 	]*74[ 	]+movq DWORD PTR \[esp\],xmm1
+[ 	]*75[ 	]+movq WORD PTR \[esp\],xmm1
+[ 	]*76[ 	]+movq BYTE PTR \[esp\],xmm1
+[ 	]*77[ 	]+fnstsw eax
+[ 	]*78[ 	]+fnstsw al
+[ 	]*79[ 	]+fstsw eax
+[ 	]*80[ 	]+fstsw al
+[ 	]*81[ 	]+
+[ 	]*82[ 	]+movsx ax, \[eax\]
+[ 	]*83[ 	]+movsx eax, \[eax\]
+[ 	]*84[ 	]+movzx ax, \[eax\]
+[ 	]*85[ 	]+movzx eax, \[eax\]
+[ 	]*86[ 	]+
+[ 	]*87[ 	]+movnti word ptr \[eax\], ax
