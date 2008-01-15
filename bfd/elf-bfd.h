@@ -1,6 +1,6 @@
 /* BFD back-end data structures for ELF files.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -915,10 +915,15 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_modify_program_headers)
     (bfd *, struct bfd_link_info *);
 
+  /* This function is called before section garbage collection to
+     mark entry symbol sections.  */
+  void (*gc_keep)
+    (struct bfd_link_info *);
+
   /* This function is called during section garbage collection to
      mark sections that define global symbols.  */
   bfd_boolean (*gc_mark_dynamic_ref)
-    (struct elf_link_hash_entry *h, void *inf);
+    (struct elf_link_hash_entry *, void *);
 
   /* This function is called during section gc to discover the section a
      particular relocation refers to.  */
@@ -927,14 +932,13 @@ struct elf_backend_data
   /* This function, if defined, is called after the first gc marking pass
      to allow the backend to mark additional sections.  */
   bfd_boolean (*gc_mark_extra_sections)
-    (struct bfd_link_info *info, elf_gc_mark_hook_fn gc_mark_hook);
+    (struct bfd_link_info *, elf_gc_mark_hook_fn);
 
   /* This function, if defined, is called during the sweep phase of gc
      in order that a backend might update any data structures it might
      be maintaining.  */
   bfd_boolean (*gc_sweep_hook)
-    (bfd *abfd, struct bfd_link_info *info, asection *o,
-     const Elf_Internal_Rela *relocs);
+    (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 
   /* This function, if defined, is called after the ELF headers have
      been created.  This allows for things like the OS and ABI versions
@@ -2033,6 +2037,9 @@ extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn
 
 extern bfd_boolean bfd_elf_final_link
   (bfd *, struct bfd_link_info *);
+
+extern void _bfd_elf_gc_keep
+  (struct bfd_link_info *info);
 
 extern bfd_boolean bfd_elf_gc_mark_dynamic_ref_symbol
   (struct elf_link_hash_entry *h, void *inf);

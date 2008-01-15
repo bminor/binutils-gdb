@@ -1,5 +1,27 @@
 2008-01-15  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 5604
+	* elf-bfd.h (struct elf_backend_data): Add gc_keep.  Remove param
+	names from others.
+	(_bfd_elf_gc_keep): Declare.
+	* elfxx-target.h (elf_backend_gc_keep): Define.
+	(elfNN_bed): Init new field.
+	* elflink.c (_bfd_elf_gc_keep): New function.
+	(bfd_elf_gc_sections): Call gc_keep.
+	* elf64-ppc.c (elf_backend_gc_keep): Define.
+	(struct _ppc64_elf_section_data): Move .opd related fields to
+	a struct so they don't occupy the same storage.  Adjust accesses
+	throughout file.
+	(ppc64_elf_gc_keep): New function, split out from..
+	(ppc64_elf_gc_mark_hook): ..here.  Don't call _bfd_elf_gc_mark
+	to mark .opd section, just set gc_mark.
+	(ppc64_elf_edit_opd): Remove no_opd_opt parm.  Don't set opd->adjust
+	unless we are changing .opd.  Test non-NULL opd->adjust at all
+	accesses throughout file.
+	* elf64-ppc.h (ppc64_elf_edit_opd): Update prototype.
+
+2008-01-15  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd-in.h (BFD_HOST_LONG_LONG): Delete.
 	* bfd-in2.h: Regenerate.
 

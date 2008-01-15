@@ -1,3 +1,11 @@
+2008-01-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 5604
+	* ldlang.c (lang_gc_sections): Move code to set SEC_KEEP on entry
+	syms to _bfd_elf_gc_keep.
+	* emultempl/ppc64elf.em (ppc_before_allocation): Don't call
+	ppc64_elf_edit_opd if no_opd_opt.
+
 2008-01-11  Tristan Gingold  <gingold@adacore.com>
 	    Eric Botcazou  <ebotcazou@adacore.com>
 

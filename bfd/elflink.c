@@ -1,6 +1,6 @@
 /* ELF linking support for BFD.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -11463,6 +11463,29 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
+/* Keep all sections containing symbols undefined on the command-line,
+   and the section containing the entry symbol.  */
+
+void
+_bfd_elf_gc_keep (struct bfd_link_info *info)
+{
+  struct bfd_sym_chain *sym;
+
+  for (sym = info->gc_sym_list; sym != NULL; sym = sym->next)
+    {
+      struct elf_link_hash_entry *h;
+
+      h = elf_link_hash_lookup (elf_hash_table (info), sym->name,
+				FALSE, FALSE, FALSE);
+
+      if (h != NULL
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	  && !bfd_is_abs_section (h->root.u.def.section))
+	h->root.u.def.section->flags |= SEC_KEEP;
+    }
+}
+
 /* Do mark and sweep of unused sections.  */
 
 bfd_boolean
@@ -11479,6 +11502,8 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       (*_bfd_error_handler)(_("Warning: gc-sections option ignored"));
       return TRUE;
     }
+
+  bed->gc_keep (info);
 
   /* Try to parse each bfd's .eh_frame section.  Point elf_eh_frame_section
      at the .eh_frame section if we can mark the FDEs individually.  */
@@ -11536,7 +11561,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* Allow the backend to mark additional target specific sections.  */
   if (bed->gc_mark_extra_sections)
-    bed->gc_mark_extra_sections(info, gc_mark_hook);
+    bed->gc_mark_extra_sections (info, gc_mark_hook);
 
   /* ... and mark SEC_EXCLUDE for those that go.  */
   return elf_gc_sweep (abfd, info);

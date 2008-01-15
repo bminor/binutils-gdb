@@ -1,5 +1,5 @@
 /* PowerPC64-specific support for 64-bit ELF.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
@@ -96,6 +96,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_as_needed_cleanup	      ppc64_elf_as_needed_cleanup
 #define elf_backend_archive_symbol_lookup     ppc64_elf_archive_symbol_lookup
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
+#define elf_backend_gc_keep		      ppc64_elf_gc_keep
 #define elf_backend_gc_mark_dynamic_ref       ppc64_elf_gc_mark_dynamic_ref
 #define elf_backend_gc_mark_hook	      ppc64_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook	      ppc64_elf_gc_sweep_hook
@@ -2608,13 +2609,17 @@ struct _ppc64_elf_section_data
 {
   struct bfd_elf_section_data elf;
 
-  /* An array with one entry for each opd function descriptor.  */
   union
   {
-    /* Points to the function code section for local opd entries.  */
-    asection **opd_func_sec;
-    /* After editing .opd, adjust references to opd local syms.  */
-    long *opd_adjust;
+    /* An array with one entry for each opd function descriptor.  */
+    struct _opd_sec_data
+    {
+      /* Points to the function code section for local opd entries.  */
+      asection **func_sec;
+
+      /* After editing .opd, adjust references to opd local syms.  */
+      long *adjust;
+    } opd;
 
     /* An array for toc sections, indexed by offset/8.
        Specifies the relocation symbol index used at a given toc offset.  */
@@ -2648,13 +2653,13 @@ ppc64_elf_new_section_hook (bfd *abfd, asection *sec)
   return _bfd_elf_new_section_hook (abfd, sec);
 }
 
-static void *
+static struct _opd_sec_data *
 get_opd_info (asection * sec)
 {
   if (sec != NULL
       && ppc64_elf_section_data (sec) != NULL
       && ppc64_elf_section_data (sec)->sec_type == sec_opd)
-    return ppc64_elf_section_data (sec)->u.opd_adjust;
+    return &ppc64_elf_section_data (sec)->u.opd;
   return NULL;
 }
 
@@ -4438,20 +4443,14 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	 if we reference an .opd symbol (a function descriptor), we
 	 want to keep the function code symbol's section.  This is
 	 easy for global symbols, but for local syms we need to keep
-	 information about the associated function section.  Later, if
-	 edit_opd deletes entries, we'll use this array to adjust
-	 local syms in .opd.  */
-      union opd_info {
-	asection *func_section;
-	long entry_adjust;
-      };
+	 information about the associated function section.  */
       bfd_size_type amt;
 
-      amt = sec->size * sizeof (union opd_info) / 8;
+      amt = sec->size * sizeof (*opd_sym_map) / 8;
       opd_sym_map = bfd_zalloc (abfd, amt);
       if (opd_sym_map == NULL)
 	return FALSE;
-      ppc64_elf_section_data (sec)->u.opd_func_sec = opd_sym_map;
+      ppc64_elf_section_data (sec)->u.opd.func_sec = opd_sym_map;
       BFD_ASSERT (ppc64_elf_section_data (sec)->sec_type == sec_normal);
       ppc64_elf_section_data (sec)->sec_type = sec_opd;
     }
@@ -5069,6 +5068,45 @@ opd_entry_value (asection *opd_sec,
   return val;
 }
 
+/* Mark all our entry sym sections, both opd and code section.  */
+
+static void
+ppc64_elf_gc_keep (struct bfd_link_info *info)
+{
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  struct bfd_sym_chain *sym;
+
+  for (sym = info->gc_sym_list; sym != NULL; sym = sym->next)
+    {
+      struct ppc_link_hash_entry *eh;
+      asection *sec;
+
+      eh = (struct ppc_link_hash_entry *)
+	elf_link_hash_lookup (&htab->elf, sym->name, FALSE, FALSE, FALSE);
+      if (eh == NULL)
+	continue;
+      if (eh->elf.root.type != bfd_link_hash_defined
+	  && eh->elf.root.type != bfd_link_hash_defweak)
+	continue;
+
+      if (eh->is_func_descriptor
+	  && (eh->oh->elf.root.type == bfd_link_hash_defined
+	      || eh->oh->elf.root.type == bfd_link_hash_defweak))
+	{
+	  sec = eh->oh->elf.root.u.def.section;
+	  sec->flags |= SEC_KEEP;
+	}
+      else if (get_opd_info (eh->elf.root.u.def.section) != NULL
+	       && opd_entry_value (eh->elf.root.u.def.section,
+				   eh->elf.root.u.def.value,
+				   &sec, NULL) != (bfd_vma) -1)
+	sec->flags |= SEC_KEEP;
+
+      sec = eh->elf.root.u.def.section;
+      sec->flags |= SEC_KEEP;
+    }
+}
+
 /* Mark sections containing dynamically referenced symbols.  When
    building shared libraries, we must assume that any visible symbol is
    referenced.  */
@@ -5122,52 +5160,12 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
 
 static asection *
 ppc64_elf_gc_mark_hook (asection *sec,
-			struct bfd_link_info *info,
+			struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			Elf_Internal_Rela *rel,
 			struct elf_link_hash_entry *h,
 			Elf_Internal_Sym *sym)
 {
   asection *rsec;
-
-  /* First mark all our entry sym sections.  */
-  if (info->gc_sym_list != NULL)
-    {
-      struct ppc_link_hash_table *htab = ppc_hash_table (info);
-      struct bfd_sym_chain *sym = info->gc_sym_list;
-
-      info->gc_sym_list = NULL;
-      for (; sym != NULL; sym = sym->next)
-	{
-	  struct ppc_link_hash_entry *eh;
-
-	  eh = (struct ppc_link_hash_entry *)
-	    elf_link_hash_lookup (&htab->elf, sym->name, FALSE, FALSE, FALSE);
-	  if (eh == NULL)
-	    continue;
-	  if (eh->elf.root.type != bfd_link_hash_defined
-	      && eh->elf.root.type != bfd_link_hash_defweak)
-	    continue;
-
-	  if (eh->is_func_descriptor
-	      && (eh->oh->elf.root.type == bfd_link_hash_defined
-		  || eh->oh->elf.root.type == bfd_link_hash_defweak))
-	    rsec = eh->oh->elf.root.u.def.section;
-	  else if (get_opd_info (eh->elf.root.u.def.section) != NULL
-		   && opd_entry_value (eh->elf.root.u.def.section,
-				       eh->elf.root.u.def.value,
-				       &rsec, NULL) != (bfd_vma) -1)
-	    ;
-	  else
-	    continue;
-
-	  if (!rsec->gc_mark)
-	    _bfd_elf_gc_mark (info, rsec, ppc64_elf_gc_mark_hook);
-
-	  rsec = eh->elf.root.u.def.section;
-	  if (!rsec->gc_mark)
-	    _bfd_elf_gc_mark (info, rsec, ppc64_elf_gc_mark_hook);
-	}
-    }
 
   /* Syms return NULL if we're marking .opd, so we avoid marking all
      function sections, as all functions are referenced in .opd.  */
@@ -5206,9 +5204,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
 		      || eh->oh->elf.root.type == bfd_link_hash_defweak))
 		{
 		  /* They also mark their opd section.  */
-		  if (!eh->elf.root.u.def.section->gc_mark)
-		    _bfd_elf_gc_mark (info, eh->elf.root.u.def.section,
-				      ppc64_elf_gc_mark_hook);
+		  eh->elf.root.u.def.section->gc_mark = 1;
 
 		  rsec = eh->oh->elf.root.u.def.section;
 		}
@@ -5216,11 +5212,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
 		       && opd_entry_value (eh->elf.root.u.def.section,
 					   eh->elf.root.u.def.value,
 					   &rsec, NULL) != (bfd_vma) -1)
-		{
-		  if (!eh->elf.root.u.def.section->gc_mark)
-		    _bfd_elf_gc_mark (info, eh->elf.root.u.def.section,
-				      ppc64_elf_gc_mark_hook);
-		}
+		eh->elf.root.u.def.section->gc_mark = 1;
 	      else
 		rsec = h->root.u.def.section;
 	      break;
@@ -5236,16 +5228,15 @@ ppc64_elf_gc_mark_hook (asection *sec,
     }
   else
     {
-      asection **opd_sym_section;
+      struct _opd_sec_data *opd;
 
       rsec = bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-      opd_sym_section = get_opd_info (rsec);
-      if (opd_sym_section != NULL)
+      opd = get_opd_info (rsec);
+      if (opd != NULL && opd->func_sec != NULL)
 	{
-	  if (!rsec->gc_mark)
-	    _bfd_elf_gc_mark (info, rsec, ppc64_elf_gc_mark_hook);
+	  rsec->gc_mark = 1;
 
-	  rsec = opd_sym_section[(sym->st_value + rel->r_addend) / 8];
+	  rsec = opd->func_sec[(sym->st_value + rel->r_addend) / 8];
 	}
     }
 
@@ -6159,7 +6150,7 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 {
   struct ppc_link_hash_entry *eh;
   asection *sym_sec;
-  long *opd_adjust;
+  struct _opd_sec_data *opd;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -6176,10 +6167,10 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
     return TRUE;
 
   sym_sec = eh->elf.root.u.def.section;
-  opd_adjust = get_opd_info (sym_sec);
-  if (opd_adjust != NULL)
+  opd = get_opd_info (sym_sec);
+  if (opd != NULL && opd->adjust != NULL)
     {
-      long adjust = opd_adjust[eh->elf.root.u.def.value / 8];
+      long adjust = opd->adjust[eh->elf.root.u.def.value / 8];
       if (adjust == -1)
 	{
 	  /* This entry has been deleted.  */
@@ -6345,7 +6336,6 @@ dec_dynrel_count (bfd_vma r_info,
 
 bfd_boolean
 ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
-		    bfd_boolean no_opd_opt,
 		    bfd_boolean non_overlapping)
 {
   bfd *ibfd;
@@ -6360,31 +6350,12 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
       Elf_Internal_Sym *local_syms;
       struct elf_link_hash_entry **sym_hashes;
       bfd_vma offset;
-      bfd_size_type amt;
-      long *opd_adjust;
+      struct _opd_sec_data *opd;
       bfd_boolean need_edit, add_aux_fields;
       bfd_size_type cnt_16b = 0;
 
       sec = bfd_get_section_by_name (ibfd, ".opd");
       if (sec == NULL || sec->size == 0)
-	continue;
-
-      amt = sec->size * sizeof (long) / 8;
-      opd_adjust = get_opd_info (sec);
-      if (opd_adjust == NULL)
-	{
-	  /* check_relocs hasn't been called.  Must be a ld -r link
-	     or --just-symbols object.   */
-	  opd_adjust = bfd_alloc (obfd, amt);
-	  if (opd_adjust == NULL)
-	    return FALSE;
-	  ppc64_elf_section_data (sec)->u.opd_adjust = opd_adjust;
-	  BFD_ASSERT (ppc64_elf_section_data (sec)->sec_type == sec_normal);
-	  ppc64_elf_section_data (sec)->sec_type = sec_opd;
-	}
-      memset (opd_adjust, 0, amt);
-
-      if (no_opd_opt)
 	continue;
 
       if (sec->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
@@ -6530,6 +6501,14 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 	  bfd_byte *new_contents = NULL;
 	  bfd_boolean skip;
 	  long opd_ent_size;
+	  bfd_size_type amt;
+
+	  amt = sec->size * sizeof (long) / 8;
+	  opd = &ppc64_elf_section_data (sec)->u.opd;
+	  opd->adjust = bfd_zalloc (obfd, amt);
+	  if (opd->adjust == NULL)
+	    return FALSE;
+	  ppc64_elf_section_data (sec)->sec_type = sec_opd;
 
 	  /* This seems a waste of time as input .opd sections are all
 	     zeros as generated by gcc, but I suppose there's no reason
@@ -6621,7 +6600,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 			  fdh->elf.root.u.def.value = 0;
 			  fdh->elf.root.u.def.section = sym_sec;
 			}
-		      opd_adjust[rel->r_offset / 8] = -1;
+		      opd->adjust[rel->r_offset / 8] = -1;
 		    }
 		  else
 		    {
@@ -6646,7 +6625,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 			 for the function descriptor sym which we
 			 don't have at the moment.  So keep an
 			 array of adjustments.  */
-		      opd_adjust[rel->r_offset / 8]
+		      opd->adjust[rel->r_offset / 8]
 			= (wptr - new_contents) - (rptr - sec->contents);
 
 		      if (wptr != rptr)
@@ -6675,7 +6654,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 		  /* We need to adjust any reloc offsets to point to the
 		     new opd entries.  While we're at it, we may as well
 		     remove redundant relocs.  */
-		  rel->r_offset += opd_adjust[(offset - opd_ent_size) / 8];
+		  rel->r_offset += opd->adjust[(offset - opd_ent_size) / 8];
 		  if (write_rel != rel)
 		    memcpy (write_rel, rel, sizeof (*rel));
 		  ++write_rel;
@@ -8964,7 +8943,7 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;
       asection *sym_sec;
-      long *opd_adjust;
+      struct _opd_sec_data *opd;
       bfd_vma sym_value;
       bfd_vma dest;
 
@@ -9022,14 +9001,14 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
       sym_value += rel->r_addend;
 
       /* If this branch reloc uses an opd sym, find the code section.  */
-      opd_adjust = get_opd_info (sym_sec);
-      if (opd_adjust != NULL)
+      opd = get_opd_info (sym_sec);
+      if (opd != NULL)
 	{
-	  if (h == NULL)
+	  if (h == NULL && opd->adjust != NULL)
 	    {
 	      long adjust;
 
-	      adjust = opd_adjust[sym->st_value / 8];
+	      adjust = opd->adjust[sym->st_value / 8];
 	      if (adjust == -1)
 		/* Assume deleted functions won't ever be called.  */
 		continue;
@@ -9384,7 +9363,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 		  Elf_Internal_Sym *sym;
 		  char *stub_name;
 		  const asection *id_sec;
-		  long *opd_adjust;
+		  struct _opd_sec_data *opd;
 
 		  r_type = ELF64_R_TYPE (irela->r_info);
 		  r_indx = ELF64_R_SYM (irela->r_info);
@@ -9461,14 +9440,14 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 		    }
 
 		  code_sec = sym_sec;
-		  opd_adjust = get_opd_info (sym_sec);
-		  if (opd_adjust != NULL)
+		  opd = get_opd_info (sym_sec);
+		  if (opd != NULL)
 		    {
 		      bfd_vma dest;
 
-		      if (hash == NULL)
+		      if (hash == NULL && opd->adjust != NULL)
 			{
-			  long adjust = opd_adjust[sym_value / 8];
+			  long adjust = opd->adjust[sym_value / 8];
 			  if (adjust == -1)
 			    continue;
 			  sym_value += adjust;
@@ -10032,17 +10011,17 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* It's a local symbol.  */
-	  long *opd_adjust;
+	  struct _opd_sec_data *opd;
 
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
 	  sym_name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, sec);
 	  sym_type = ELF64_ST_TYPE (sym->st_info);
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
-	  opd_adjust = get_opd_info (sec);
-	  if (opd_adjust != NULL)
+	  opd = get_opd_info (sec);
+	  if (opd != NULL && opd->adjust != NULL)
 	    {
-	      long adjust = opd_adjust[(sym->st_value + rel->r_addend) / 8];
+	      long adjust = opd->adjust[(sym->st_value + rel->r_addend) / 8];
 	      if (adjust == -1)
 		relocation = 0;
 	      else
@@ -11361,21 +11340,22 @@ ppc64_elf_output_symbol_hook (struct bfd_link_info *info,
 			      asection *input_sec,
 			      struct elf_link_hash_entry *h)
 {
-  long *opd_adjust, adjust;
+  struct _opd_sec_data *opd;
+  long adjust;
   bfd_vma value;
 
   if (h != NULL)
     return TRUE;
 
-  opd_adjust = get_opd_info (input_sec);
-  if (opd_adjust == NULL)
+  opd = get_opd_info (input_sec);
+  if (opd == NULL || opd->adjust == NULL)
     return TRUE;
 
   value = elfsym->st_value - input_sec->output_offset;
   if (!info->relocatable)
     value -= input_sec->output_section->vma;
 
-  adjust = opd_adjust[value / 8];
+  adjust = opd->adjust[value / 8];
   if (adjust == -1)
     elfsym->st_value = 0;
   else

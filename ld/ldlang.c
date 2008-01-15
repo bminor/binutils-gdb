@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -5670,29 +5670,9 @@ lang_gc_sections_1 (lang_statement_union_type *s)
 static void
 lang_gc_sections (void)
 {
-  struct bfd_link_hash_entry *h;
-  ldlang_undef_chain_list_type *ulist;
-
   /* Keep all sections so marked in the link script.  */
 
   lang_gc_sections_1 (statement_list.head);
-
-  /* Keep all sections containing symbols undefined on the command-line,
-     and the section containing the entry symbol.  */
-
-  for (ulist = link_info.gc_sym_list; ulist; ulist = ulist->next)
-    {
-      h = bfd_link_hash_lookup (link_info.hash, ulist->name,
-				FALSE, FALSE, FALSE);
-
-      if (h != NULL
-	  && (h->type == bfd_link_hash_defined
-	      || h->type == bfd_link_hash_defweak)
-	  && ! bfd_is_abs_section (h->u.def.section))
-	{
-	  h->u.def.section->flags |= SEC_KEEP;
-	}
-    }
 
   /* SEC_EXCLUDE is ignored when doing a relocatable link, except in
      the special case of debug info.  (See bfd/stabs.c)

@@ -1,6 +1,6 @@
 /* Target definitions for NN-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -131,6 +131,9 @@
 #endif
 #ifndef elf_backend_want_got_sym
 #define elf_backend_want_got_sym 1
+#endif
+#ifndef elf_backend_gc_keep
+#define elf_backend_gc_keep		_bfd_elf_gc_keep
 #endif
 #ifndef elf_backend_gc_mark_dynamic_ref
 #define elf_backend_gc_mark_dynamic_ref	bfd_elf_gc_mark_dynamic_ref_symbol
@@ -656,6 +659,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_additional_program_headers,
   elf_backend_modify_segment_map,
   elf_backend_modify_program_headers,
+  elf_backend_gc_keep,
   elf_backend_gc_mark_dynamic_ref,
   elf_backend_gc_mark_hook,
   elf_backend_gc_mark_extra_sections,
