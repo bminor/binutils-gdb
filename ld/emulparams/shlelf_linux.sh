@@ -12,7 +12,7 @@ TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes
 
-DATA_START_SYMBOLS='__data_start = . ;';
+DATA_START_SYMBOLS='PROVIDE (__data_start = .);';
 
 OTHER_READWRITE_SECTIONS="
   .note.ABI-tag ${RELOCATING-0} : { *(.note.ABI-tag) }"

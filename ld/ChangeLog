@@ -1,3 +1,9 @@
+2008-01-15  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* emulparams/shlelf_linux.sh (DATA_START_SYMBOLS): Use PROVIDE
+	with __data_start.
+	* emulparams/shelf_nbsd.sh (DATA_START_SYMBOLS): Likewise.
+
 2008-01-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 5604
