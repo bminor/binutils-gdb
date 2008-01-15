@@ -1,3 +1,18 @@
+2008-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.s: Add more tests for movsx and movzx.
+	* gas/i386/x86_64.s: Likewise.
+
+	* gas/i386/inval.s: Remove tests for movsxw and movzxw.
+
+	* gas/i386/x86-64-inval.s: Remove tests for movsxb, movsxw,
+	movsxl, movzxb and movzxw.
+
+	* gas/i386/i386.d: Updated.
+	* gas/i386/inval.l: Likewise.
+	* gas/i386/x86_64.d: Likewise.
+	* gas/i386/x86-64-inval.l: Likewise.
+
 2008-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.s: Add tests for movsx, movzx and movnti.

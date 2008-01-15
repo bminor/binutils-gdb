@@ -1,3 +1,8 @@
+2008-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_assemble): Also zap movzx and movsx
+	suffix for AT&T syntax.
+
 2008-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_reg_size): New.

@@ -55,9 +55,6 @@ foo:	jaw	foo
 	fstsw %eax
 	fstsw %al
 
-movsxw (%eax),%eax
-movzxw (%eax),%eax
-
 movnti %ax, (%eax)
 movntiw %ax, (%eax)
 

@@ -194,6 +194,12 @@ cmpxchg16b (%rax)
 cmpxchg16b oword ptr [rax]
 
 .att_syntax
+	movsx	%al, %si
+	movsx	%al, %esi
+	movsx	%al, %rsi
+	movsx	%ax, %esi
+	movsx	%ax, %rsi
+	movsx	%eax, %rsi
 	movsx	(%rax), %edx
 	movsx	(%rax), %rdx
 	movsx	(%rax), %dx
@@ -203,6 +209,11 @@ cmpxchg16b oword ptr [rax]
 	movswl	(%rax), %edx
 	movswq	(%rax), %rdx
 
+	movzx	%al, %si
+	movzx	%al, %esi
+	movzx	%al, %rsi
+	movzx	%ax, %esi
+	movzx	%ax, %rsi
 	movzx	(%rax), %edx
 	movzx	(%rax), %rdx
 	movzx	(%rax), %dx
@@ -216,12 +227,23 @@ cmpxchg16b oword ptr [rax]
 	movzwq	(%rax), %rdx
 
 	.intel_syntax noprefix
+	movsx	si,al
+	movsx	esi,al
+	movsx	rsi,al
+	movsx	esi,ax
+	movsx	rsi,ax
+	movsx	rsi,eax
 	movsx	edx,BYTE PTR [rax]
 	movsx	rdx,BYTE PTR [rax]
 	movsx	dx,BYTE PTR [rax]
 	movsx	edx,WORD PTR [rax]
 	movsx	rdx,WORD PTR [rax]
 
+	movzx	si,al
+	movzx	esi,al
+	movzx	rsi,al
+	movzx	esi,ax
+	movzx	rsi,ax
 	movzx	edx,BYTE PTR [rax]
 	movzx	rdx,BYTE PTR [rax]
 	movzx	dx,BYTE PTR [rax]
@@ -249,10 +271,21 @@ cmpxchg16b oword ptr [rax]
 movsx (%rax),%ax
 movsx (%rax),%eax
 movsx (%rax),%rax
+movsxb	(%rax), %dx
+movsxb	(%rax), %edx
+movsxb	(%rax), %rdx
+movsxw	(%rax), %edx
+movsxw	(%rax), %rdx
+movsxl	(%rax), %rdx
 movsxd (%rax),%rax
 movzx (%rax),%ax
 movzx (%rax),%eax
 movzx (%rax),%rax
+movzxb	(%rax), %dx
+movzxb	(%rax), %edx
+movzxb	(%rax), %rdx
+movzxw	(%rax), %edx
+movzxw	(%rax), %rdx
 
 movnti %eax, (%rax)
 movntil %eax, (%rax)

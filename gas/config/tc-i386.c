@@ -2277,25 +2277,20 @@ md_assemble (line)
   if (!match_template ())
     return;
 
-  if (intel_syntax)
+  /* Zap movzx and movsx suffix.  The suffix has been set from
+     "word ptr" or "byte ptr" on the source operand in Intel syntax
+     or extracted from mnemonic in AT&T syntax.  But we'll use
+     the destination register to choose the suffix for encoding.  */
+  if ((i.tm.base_opcode & ~9) == 0x0fb6)
     {
-      /* Zap movzx and movsx suffix.  The suffix may have been set from
-	 "word ptr" or "byte ptr" on the source operand, but we'll use
-	 the suffix later to choose the destination register.  */
-      if ((i.tm.base_opcode & ~9) == 0x0fb6)
-	{
-	  if (i.reg_operands < 2
-	      && !i.suffix
-	      && (!i.tm.opcode_modifier.no_bsuf
-		  || !i.tm.opcode_modifier.no_wsuf
-		  || !i.tm.opcode_modifier.no_lsuf
-		  || !i.tm.opcode_modifier.no_ssuf
-		  || !i.tm.opcode_modifier.no_ldsuf
-		  || !i.tm.opcode_modifier.no_qsuf))
-	    as_bad (_("ambiguous operand size for `%s'"), i.tm.name);
+      /* In Intel syntax, there must be a suffix.  In AT&T syntax, if
+	 there is no suffix, the default will be byte extension.  */
+      if (i.reg_operands != 2
+	  && !i.suffix
+	  && intel_syntax) 
+	as_bad (_("ambiguous operand size for `%s'"), i.tm.name);
 
-	  i.suffix = 0;
-	}
+      i.suffix = 0;
     }
 
   if (i.tm.opcode_modifier.fwait)
