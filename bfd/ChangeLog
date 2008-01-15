@@ -1,3 +1,8 @@
+2008-01-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (BFD_HOST_LONG_LONG): Delete.
+	* bfd-in2.h: Regenerate.
+
 2008-01-11  Tristan Gingold  <gingold@adacore.com>
 	    Eric Botcazou  <ebotcazou@adacore.com>
 
