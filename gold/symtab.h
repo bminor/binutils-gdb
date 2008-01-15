@@ -46,6 +46,7 @@ class Dynobj;
 template<int size, bool big_endian>
 class Sized_dynobj;
 class Versions;
+class Version_script_info;
 class Input_objects;
 class Output_data;
 class Output_section;
@@ -110,6 +111,21 @@ class Symbol
   const char*
   version() const
   { return this->version_; }
+
+  // Return whether this version is the default for this symbol name
+  // (eg, "foo@@V2" is a default version; "foo@V1" is not).  Only
+  // meaningful for versioned symbols.
+  bool
+  is_default() const
+  {
+    gold_assert(this->version_ != NULL);
+    return this->is_def_;
+  }
+
+  // Set whether this version is the default for this symbol name.
+  void
+  set_is_default(bool def)
+  { this->is_def_ = def; }
 
   // Return the symbol source.
   Source
@@ -953,7 +969,7 @@ class Symbol_table
   // COUNT is an estimate of how many symbosl will be inserted in the
   // symbol table.  It's ok to put 0 if you don't know; a correct
   // guess will just save some CPU by reducing hashtable resizes.
-  Symbol_table(unsigned int count);
+  Symbol_table(unsigned int count, const Version_script_info& version_script);
 
   ~Symbol_table();
 
@@ -1114,6 +1130,11 @@ class Symbol_table
   // Dump statistical information to stderr.
   void
   print_stats() const;
+
+  // Return the version script information.
+  const Version_script_info&
+  version_script() const
+  { return version_script_; }
 
  private:
   Symbol_table(const Symbol_table&);
@@ -1347,6 +1368,8 @@ class Symbol_table
   // definition.  This maps symbols with COPY relocs to the dynamic
   // object where they were defined.
   Copied_symbol_dynobjs copied_symbol_dynobjs_;
+  // Information parsed from the version script, if any.
+  const Version_script_info& version_script_;
 };
 
 // We inline get_sized_symbol for efficiency.

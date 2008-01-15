@@ -233,6 +233,11 @@ class General_options
   sysroot() const
   { return this->sysroot_; }
 
+  // --version-script: The version script to apply if --shared is true.
+  const Version_script_info&
+  version_script() const
+  { return *this->script_options_->version_script_info(); }
+
   // -Ttext: The address of the .text section
   uint64_t
   text_segment_address() const

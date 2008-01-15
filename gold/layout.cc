@@ -683,7 +683,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
       Output_section* dynstr;
       std::vector<Symbol*> dynamic_symbols;
       unsigned int local_dynamic_count;
-      Versions versions;
+      Versions versions(this->options_, &this->dynpool_);
       this->create_dynamic_symtab(input_objects, target, symtab, &dynstr,
 				  &local_dynamic_count, &dynamic_symbols,
 				  &versions);

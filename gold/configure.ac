@@ -157,6 +157,8 @@ AC_EXEEXT
 AM_CONDITIONAL(NATIVE_LINKER,
   test "x$target_alias" = "x" -o "x$host_alias" = "x$target_alias")
 AM_CONDITIONAL(GCC, test "$GCC" = yes)
+AM_CONDITIONAL(OBJDUMP_AND_CPPFILT,
+	[objdump --help >/dev/null && c++filt --help >/dev/null])
 
 dnl Some architectures do not support taking pointers of functions
 dnl defined in shared libraries except in -fPIC mode.  We need to

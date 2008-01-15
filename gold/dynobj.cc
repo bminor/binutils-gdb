@@ -1,6 +1,6 @@
 // dynobj.cc -- dynamic object support for gold
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1227,6 +1227,46 @@ Verneed::write(const Stringpool* dynpool, bool is_last,
 
 // Versions methods.
 
+Versions::Versions(const General_options& options, Stringpool* dynpool)
+  : defs_(), needs_(), version_table_(),
+    is_finalized_(false), version_script_(options.version_script())
+{
+  // We always need a base version, so define that first. Nothing
+  // explicitly declares itself as part of base, so it doesn't need to
+  // be in version_table_. 
+  // FIXME: Should use soname here when creating a shared object. Is
+  // this fixme still valid? It looks like it's doing the right thing
+  // to me.
+  if (parameters->output_is_shared())
+    {
+      const char* name = dynpool->add(parameters->output_file_name(),
+                                      false, NULL);
+      Verdef* vdbase = new Verdef(name, std::vector<std::string>(),
+                                  true, false, true);
+      this->defs_.push_back(vdbase);
+    }
+
+  if (!this->version_script_.empty())
+    {
+      // Parse the version script, and insert each declared version into
+      // defs_ and version_table_.
+      std::vector<std::string> versions = this->version_script_.get_versions();
+      for (size_t k = 0; k < versions.size(); ++k)
+        {
+          Stringpool::Key version_key;
+          const char* version = dynpool->add(versions[k].c_str(),
+                                             true, &version_key);
+          Verdef* const vd = new Verdef(
+              version,
+              options.version_script().get_dependencies(version),
+              false, false, false);
+          this->defs_.push_back(vd);
+          Key key(version_key, 0);
+          this->version_table_.insert(std::make_pair(key, vd));
+        }
+    }
+}
+
 Versions::~Versions()
 {
   for (Defs::iterator p = this->defs_.begin();
@@ -1265,7 +1305,7 @@ Versions::record_version(const Symbol_table* symtab,
 {
   gold_assert(!this->is_finalized_);
   gold_assert(sym->version() != NULL);
-
+  
   Stringpool::Key version_key;
   const char* version = dynpool->add(sym->version(), false, &version_key);
 
@@ -1292,7 +1332,7 @@ Versions::add_def(const Symbol* sym, const char* version,
   Version_base* const vbnull = NULL;
   std::pair<Version_table::iterator, bool> ins =
     this->version_table_.insert(std::make_pair(k, vbnull));
-
+  
   if (!ins.second)
     {
       // We already have an entry for this version.
@@ -1318,16 +1358,10 @@ Versions::add_def(const Symbol* sym, const char* version,
 	  return;
 	}
 
-      // If this is the first version we are defining, first define
-      // the base version.  FIXME: Should use soname here when
-      // creating a shared object.
-      Verdef* vdbase = new Verdef(parameters->output_file_name(), true, false,
-				  true);
-      this->defs_.push_back(vdbase);
-
       // When creating a regular executable, automatically define
       // a new version.
-      Verdef* vd = new Verdef(version, false, false, false);
+      Verdef* vd = new Verdef(version, std::vector<std::string>(),
+                              false, false, false);
       this->defs_.push_back(vd);
       ins.first->second = vd;
     }
@@ -1499,10 +1533,14 @@ Versions::symbol_section_contents(const Symbol_table* symtab,
       const char* version = (*p)->version();
       if (version == NULL)
 	version_index = elfcpp::VER_NDX_GLOBAL;
-      else
+      else        
 	version_index = this->version_index(symtab, dynpool, *p);
+      // If the symbol was defined as foo@V1 instead of foo@@V1, add
+      // the hidden bit.
+      if ((*p)->version() != NULL && !(*p)->is_default())
+        version_index |= elfcpp::VERSYM_HIDDEN;
       elfcpp::Swap<16, big_endian>::writeval(pbuf + (*p)->dynsym_index() * 2,
-					     version_index);
+                                             version_index);
     }
 
   *pp = pbuf;

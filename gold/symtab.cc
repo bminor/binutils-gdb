@@ -295,9 +295,10 @@ Symbol::final_value_is_known() const
 
 // Class Symbol_table.
 
-Symbol_table::Symbol_table(unsigned int count)
+Symbol_table::Symbol_table(unsigned int count,
+                           const Version_script_info& version_script)
   : saw_undefined_(0), offset_(0), table_(count), namepool_(),
-    forwarders_(), commons_(), warnings_()
+    forwarders_(), commons_(), warnings_(), version_script_(version_script)
 {
   namepool_.reserve(count);
 }
@@ -571,6 +572,7 @@ Symbol_table::add_from_object(Object* object,
   if (!was_common && ret->is_common())
     this->commons_.push_back(ret);
 
+  ret->set_is_default(def);
   return ret;
 }
 
@@ -626,6 +628,31 @@ Symbol_table::add_from_relobj(
       // name from the version name.  If there are two '@' characters,
       // this is the default version.
       const char* ver = strchr(name, '@');
+      int namelen = 0;
+      bool def = false;
+
+      if (ver != NULL)
+        {
+          // The symbol name is of the form foo@VERSION or foo@@VERSION
+          namelen = ver - name;
+          ++ver;
+	  if (*ver == '@')
+	    {
+	      def = true;
+	      ++ver;
+	    }
+        }
+      else if (!version_script_.empty())
+        {
+          // The symbol name did not have a version, but
+          // the version script may assign a version anyway.
+          namelen = strlen(name);
+          def = true;
+          const std::string& version =
+              version_script_.get_symbol_version(name);
+          if (!version.empty())
+            ver = version.c_str();
+        }
 
       Sized_symbol<size>* res;
       if (ver == NULL)
@@ -638,17 +665,8 @@ Symbol_table::add_from_relobj(
       else
 	{
 	  Stringpool::Key name_key;
-	  name = this->namepool_.add_with_length(name, ver - name, true,
+	  name = this->namepool_.add_with_length(name, namelen, true,
 						 &name_key);
-
-	  bool def = false;
-	  ++ver;
-	  if (*ver == '@')
-	    {
-	      def = true;
-	      ++ver;
-	    }
-
 	  Stringpool::Key ver_key;
 	  ver = this->namepool_.add(ver, true, &ver_key);
 
@@ -1238,7 +1256,7 @@ Symbol_table::do_define_as_constant(
   if (sym == NULL)
     return NULL;
 
-  gold_assert(version == NULL || oldsym != NULL);
+  gold_assert(version == NULL || version == name || oldsym != NULL);
   sym->init(name, value, symsize, type, binding, visibility, nonvis);
 
   if (oldsym == NULL)
@@ -1392,8 +1410,8 @@ Symbol_table::set_dynsym_indexes(const Target* target,
 	  dynpool->add(sym->name(), false, NULL);
 
 	  // Record any version information.
-	  if (sym->version() != NULL)
-	    versions->record_version(this, dynpool, sym);
+          if (sym->version() != NULL)
+            versions->record_version(this, dynpool, sym);
 	}
     }
 

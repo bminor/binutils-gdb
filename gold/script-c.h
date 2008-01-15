@@ -107,6 +107,12 @@ script_parse_option(void* closure, const char*, size_t);
 extern void
 script_push_lex_into_expression_mode(void* closure);
 
+/* Called by the bison parser to push the lexer into version
+   mode.  */
+
+extern void
+script_push_lex_into_version_mode(void* closure);
+
 /* Called by the bison parser to pop the lexer mode.  */
 
 extern void
@@ -207,6 +213,38 @@ extern Expression_ptr
 script_exp_function_segment_start(const char*, size_t, Expression_ptr);
 extern Expression_ptr
 script_exp_function_assert(Expression_ptr, const char*, size_t);
+
+struct Version_dependency_list;
+struct Version_expression_list;
+struct Version_tree;
+
+extern void
+script_register_vers_node(void* closure,
+			  const char* tag,
+			  int taglen,
+			  struct Version_tree *,
+			  struct Version_dependency_list *);
+
+extern struct Version_dependency_list *
+script_add_vers_depend(void* closure,
+		       struct Version_dependency_list *existing_dependencies,
+		       const char *depend_to_add, int deplen);
+
+extern struct Version_expression_list *
+script_new_vers_pattern(void* closure,
+			struct Version_expression_list *,
+			const char *, int);
+
+extern struct Version_tree *
+script_new_vers_node(void* closure,
+		     struct Version_expression_list *global,
+		     struct Version_expression_list *local);
+
+extern void
+version_script_push_lang(void* closure, const char* lang, int langlen);
+
+extern void
+version_script_pop_lang(void* closure);
 
 #ifdef __cplusplus
 }

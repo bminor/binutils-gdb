@@ -22,6 +22,7 @@
 
 #include "gold.h"
 
+#include <fnmatch.h>
 #include <string>
 #include <vector>
 #include <cstdio>
@@ -29,6 +30,7 @@
 #include "filenames.h"
 
 #include "elfcpp.h"
+#include "demangle.h"
 #include "dirsearch.h"
 #include "options.h"
 #include "fileread.h"
@@ -245,26 +247,32 @@ class Lex
   inline bool
   can_start_name(char c, char c2);
 
-  // Return whether C can appear in a name which has already started.
-  inline bool
-  can_continue_name(char c);
+  // If C can appear in a name which has already started, return a
+  // pointer to a character later in the token or just past
+  // it. Otherwise, return NULL.
+  inline const char*
+  can_continue_name(const char* c);
 
   // Return whether C, C2, C3 can start a hex number.
   inline bool
   can_start_hex(char c, char c2, char c3);
 
-  // Return whether C can appear in a hex number.
-  inline bool
-  can_continue_hex(char c);
+  // If C can appear in a hex number which has already started, return
+  // a pointer to a character later in the token or just past
+  // it. Otherwise, return NULL.
+  inline const char*
+  can_continue_hex(const char* c);
 
   // Return whether C can start a non-hex number.
   static inline bool
   can_start_number(char c);
 
-  // Return whether C can appear in a non-hex number.
-  inline bool
-  can_continue_number(char c)
-  { return Lex::can_start_number(c); }
+  // If C can appear in a decimal number which has already started,
+  // return a pointer to a character later in the token or just past
+  // it. Otherwise, return NULL.
+  inline const char*
+  can_continue_number(const char* c)
+  { return Lex::can_start_number(*c) ? c + 1 : NULL; }
 
   // If C1 C2 C3 form a valid three character operator, return the
   // opcode.  Otherwise return 0.
@@ -299,7 +307,7 @@ class Lex
   // MATCH.  Set *PP to the character following the token.
   inline Token
   gather_token(Token::Classification,
-	       bool (Lex::*can_continue_fn)(char),
+	       const char* (Lex::*can_continue_fn)(const char*),
 	       const char* start, const char* match, const char** pp);
 
   // Build a token from a quoted string.
@@ -382,7 +390,10 @@ Lex::can_start_name(char c, char c2)
       return this->mode_ == LINKER_SCRIPT;
 
     case '~':
-      return this->mode_ == LINKER_SCRIPT && can_continue_name(c2);
+      return this->mode_ == LINKER_SCRIPT && can_continue_name(&c2);
+
+    case '*': case '[': 
+      return this->mode_ == VERSION_SCRIPT;
 
     default:
       return false;
@@ -395,10 +406,10 @@ Lex::can_start_name(char c, char c2)
 // script language requires spaces around operators, unless we know
 // that we are parsing an expression.
 
-inline bool
-Lex::can_continue_name(char c)
+inline const char*
+Lex::can_continue_name(const char* c)
 {
-  switch (c)
+  switch (*c)
     {
     case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
     case 'G': case 'H': case 'I': case 'J': case 'K': case 'L':
@@ -413,16 +424,38 @@ Lex::can_continue_name(char c)
     case '_': case '.': case '$':
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
-      return true;
+      return c + 1;
 
     case '/': case '\\': case '~':
-    case '=': case '+': case '-':
-    case ':': case '[': case ']':
-    case ',': case '?': case '*':
-      return this->mode_ == LINKER_SCRIPT;
+    case '=': case '+':
+    case ',': case '?': 
+      if (this->mode_ == LINKER_SCRIPT)
+        return c + 1;
+      return NULL;
+
+    case '[': case ']': case '*': case '-':
+      if (this->mode_ == LINKER_SCRIPT || this->mode_ == VERSION_SCRIPT)
+        return c + 1;
+      return NULL;
+
+    case '^':
+      if (this->mode_ == VERSION_SCRIPT)
+        return c + 1;
+      return NULL;
+
+    case ':':
+      if (this->mode_ == LINKER_SCRIPT)
+        return c + 1;
+      else if (this->mode_ == VERSION_SCRIPT && (c[1] == ':'))
+        {
+          // A name can have '::' in it, as that's a c++ namespace
+          // separator. But a single colon is not part of a name.
+          return c + 2;
+        }
+      return NULL;
 
     default:
-      return false;
+      return NULL;
     }
 }
 
@@ -439,25 +472,25 @@ inline bool
 Lex::can_start_hex(char c1, char c2, char c3)
 {
   if (c1 == '0' && (c2 == 'x' || c2 == 'X'))
-    return this->can_continue_hex(c3);
+    return this->can_continue_hex(&c3);
   return false;
 }
 
 // Return whether C can appear in a hex number.
 
-inline bool
-Lex::can_continue_hex(char c)
+inline const char*
+Lex::can_continue_hex(const char* c)
 {
-  switch (c)
+  switch (*c)
     {
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
     case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
     case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-      return true;
+      return c + 1;
 
     default:
-      return false;
+      return NULL;
     }
 }
 
@@ -652,13 +685,14 @@ Lex::skip_line_comment(const char** pp)
 
 inline Token
 Lex::gather_token(Token::Classification classification,
-		  bool (Lex::*can_continue_fn)(char),
+		  const char* (Lex::*can_continue_fn)(const char*),
 		  const char* start,
 		  const char* match,
 		  const char **pp)
 {
-  while ((this->*can_continue_fn)(*match))
-    ++match;
+  const char* new_match = NULL;
+  while ((new_match = (this->*can_continue_fn)(match)))
+    match = new_match;
   *pp = match;
   return this->make_token(classification, start, match - start, start);
 }
@@ -941,8 +975,13 @@ class Parser_closure
     : filename_(filename), posdep_options_(posdep_options),
       in_group_(in_group), is_in_sysroot_(is_in_sysroot),
       command_line_(command_line), script_options_(script_options),
+      version_script_info_(script_options->version_script_info()),
       lex_(lex), lineno_(0), charpos_(0), lex_mode_stack_(), inputs_(NULL)
-  { }
+  { 
+    // We start out processing C symbols in the default lex mode.
+    language_stack_.push_back("");
+    lex_mode_stack_.push_back(lex->mode());
+  }
 
   // Return the file name.
   const char*
@@ -978,6 +1017,11 @@ class Parser_closure
   script_options()
   { return this->script_options_; }
 
+  // Return the object in which version script information should be stored.
+  Version_script_info*
+  version_script()
+  { return this->version_script_info_; }
+
   // Return the next token, and advance.
   const Token*
   next_token()
@@ -1005,6 +1049,11 @@ class Parser_closure
     this->lex_mode_stack_.pop_back();
   }
 
+  // Return the current lexer mode.
+  Lex::Mode
+  lex_mode() const
+  { return this->lex_mode_stack_.back(); }
+
   // Return the line number of the last token.
   int
   lineno() const
@@ -1030,6 +1079,23 @@ class Parser_closure
   saw_inputs() const
   { return this->inputs_ != NULL && !this->inputs_->empty(); }
 
+  // Return the current language being processed in a version script
+  // (eg, "C++").  The empty string represents unmangled C names.
+  const std::string&
+  get_current_language() const
+  { return this->language_stack_.back(); }
+
+  // Push a language onto the stack when entering an extern block.
+  void push_language(const std::string& lang)
+  { this->language_stack_.push_back(lang); }
+
+  // Pop a language off of the stack when exiting an extern block.
+  void pop_language()
+  {
+    gold_assert(!this->language_stack_.empty());
+    this->language_stack_.pop_back();
+  }
+
  private:
   // The name of the file we are reading.
   const char* filename_;
@@ -1043,6 +1109,8 @@ class Parser_closure
   Command_line* command_line_;
   // Options which may be set from any linker script.
   Script_options* script_options_;
+  // Information parsed from a version script.
+  Version_script_info* version_script_info_;
   // The lexer.
   Lex* lex_;
   // The line number of the last token returned by next_token.
@@ -1051,6 +1119,9 @@ class Parser_closure
   int charpos_;
   // A stack of lexer modes.
   std::vector<Lex::Mode> lex_mode_stack_;
+  // A stack of which extern/language block we're inside. Can be C++,
+  // java, or empty for C.
+  std::vector<std::string> language_stack_;
   // New input files found to add to the link.
   Input_arguments* inputs_;
 };
@@ -1119,11 +1190,13 @@ read_input_script(Workqueue* workqueue, const General_options& options,
   return true;
 }
 
-// FILENAME was found as an argument to --script (-T).
-// Read it as a script, and execute its contents immediately.
+// Helper function for read_version_script() and
+// read_commandline_script().  Processes the given file in the mode
+// indicated by first_token and lex_mode.
 
-bool
-read_commandline_script(const char* filename, Command_line* cmdline)
+static bool
+read_script_file(const char* filename, Command_line* cmdline,
+                 int first_token, Lex::Mode lex_mode)
 {
   // TODO: if filename is a relative filename, search for it manually
   // using "." + cmdline->options()->search_path() -- not dirsearch.
@@ -1143,7 +1216,8 @@ read_commandline_script(const char* filename, Command_line* cmdline)
   std::string input_string;
   Lex::read_file(&input_file, &input_string);
 
-  Lex lex(input_string.c_str(), input_string.length(), PARSING_LINKER_SCRIPT);
+  Lex lex(input_string.c_str(), input_string.length(), first_token);
+  lex.set_mode(lex_mode);
 
   Parser_closure closure(filename,
 			 cmdline->position_dependent_options(),
@@ -1163,6 +1237,27 @@ read_commandline_script(const char* filename, Command_line* cmdline)
   gold_assert(!closure.saw_inputs());
 
   return true;
+}
+
+// FILENAME was found as an argument to --script (-T).
+// Read it as a script, and execute its contents immediately.
+
+bool
+read_commandline_script(const char* filename, Command_line* cmdline)
+{
+  return read_script_file(filename, cmdline,
+                          PARSING_LINKER_SCRIPT, Lex::LINKER_SCRIPT);
+}
+
+// FILE was found as an argument to --version-script.  Read it as a
+// version script, and store its contents in
+// cmdline->script_options()->version_script_info().
+
+bool
+read_version_script(const char* filename, Command_line* cmdline)
+{
+  return read_script_file(filename, cmdline,
+                          PARSING_VERSION_SCRIPT, Lex::VERSION_SCRIPT);
 }
 
 // Implement the --defsym option on the command line.  Return true if
@@ -1189,7 +1284,8 @@ Script_options::define_symbol(const char* definition)
 }
 
 // Manage mapping from keywords to the codes expected by the bison
-// parser.
+// parser.  We construct one global object for each lex mode with
+// keywords.
 
 class Keyword_to_parsecode
 {
@@ -1203,25 +1299,27 @@ class Keyword_to_parsecode
     int parsecode;
   };
 
+  Keyword_to_parsecode(const Keyword_parsecode* keywords,
+                       int keyword_count)
+      : keyword_parsecodes_(keywords), keyword_count_(keyword_count)
+  { }
+
   // Return the parsecode corresponding KEYWORD, or 0 if it is not a
   // keyword.
-  static int
-  keyword_to_parsecode(const char* keyword, size_t len);
+  int
+  keyword_to_parsecode(const char* keyword, size_t len) const;
 
  private:
-  // The array of all keywords.
-  static const Keyword_parsecode keyword_parsecodes_[];
-
-  // The number of keywords.
-  static const int keyword_count;
+  const Keyword_parsecode* keyword_parsecodes_;
+  const int keyword_count_;
 };
 
 // Mapping from keyword string to keyword parsecode.  This array must
 // be kept in sorted order.  Parsecodes are looked up using bsearch.
 // This array must correspond to the list of parsecodes in yyscript.y.
 
-const Keyword_to_parsecode::Keyword_parsecode
-Keyword_to_parsecode::keyword_parsecodes_[] =
+static const Keyword_to_parsecode::Keyword_parsecode
+script_keyword_parsecodes[] =
 {
   { "ABSOLUTE", ABSOLUTE },
   { "ADDR", ADDR },
@@ -1303,9 +1401,23 @@ Keyword_to_parsecode::keyword_parsecodes_[] =
   { "sizeof_headers", SIZEOF_HEADERS },
 };
 
-const int Keyword_to_parsecode::keyword_count =
-  (sizeof(Keyword_to_parsecode::keyword_parsecodes_)
-   / sizeof(Keyword_to_parsecode::keyword_parsecodes_[0]));
+static const Keyword_to_parsecode
+script_keywords(&script_keyword_parsecodes[0],
+                (sizeof(script_keyword_parsecodes)
+                 / sizeof(script_keyword_parsecodes[0])));
+
+static const Keyword_to_parsecode::Keyword_parsecode
+version_script_keyword_parsecodes[] =
+{
+  { "extern", EXTERN },
+  { "global", GLOBAL },
+  { "local", LOCAL },
+};
+
+static const Keyword_to_parsecode
+version_script_keywords(&version_script_keyword_parsecodes[0],
+                        (sizeof(version_script_keyword_parsecodes)
+                         / sizeof(version_script_keyword_parsecodes[0])));
 
 // Comparison function passed to bsearch.
 
@@ -1335,16 +1447,17 @@ ktt_compare(const void* keyv, const void* kttv)
 } // End extern "C".
 
 int
-Keyword_to_parsecode::keyword_to_parsecode(const char* keyword, size_t len)
+Keyword_to_parsecode::keyword_to_parsecode(const char* keyword,
+                                           size_t len) const
 {
   Ktt_key key;
   key.str = keyword;
   key.len = len;
   void* kttv = bsearch(&key,
-		       Keyword_to_parsecode::keyword_parsecodes_,
-		       Keyword_to_parsecode::keyword_count,
-		       sizeof(Keyword_to_parsecode::keyword_parsecodes_[0]),
-		       ktt_compare);
+                       this->keyword_parsecodes_,
+                       this->keyword_count_,
+                       sizeof(this->keyword_parsecodes_[0]),
+                       ktt_compare);
   if (kttv == NULL)
     return 0;
   Keyword_parsecode* ktt = static_cast<Keyword_parsecode*>(kttv);
@@ -1383,7 +1496,18 @@ yylex(YYSTYPE* lvalp, void* closurev)
 	// This is either a keyword or a STRING.
 	size_t len;
 	const char* str = token->string_value(&len);
-	int parsecode = Keyword_to_parsecode::keyword_to_parsecode(str, len);
+	int parsecode = 0;
+        switch (closure->lex_mode())
+          {
+          case Lex::LINKER_SCRIPT:
+            parsecode = script_keywords.keyword_to_parsecode(str, len);
+            break;
+          case Lex::VERSION_SCRIPT:
+            parsecode = version_script_keywords.keyword_to_parsecode(str, len);
+            break;
+          default:
+            break;
+          }
 	if (parsecode != 0)
 	  return parsecode;
 	lvalp->string.value = str;
@@ -1561,6 +1685,16 @@ script_push_lex_into_expression_mode(void* closurev)
   closure->push_lex_mode(Lex::EXPRESSION);
 }
 
+/* Called by the bison parser to push the lexer into version
+   mode.  */
+
+extern void
+script_push_lex_into_version_mode(void* closurev)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->push_lex_mode(Lex::VERSION_SCRIPT);
+}
+
 /* Called by the bison parser to pop the lexer mode.  */
 
 extern void
@@ -1568,4 +1702,235 @@ script_pop_lex_mode(void* closurev)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   closure->pop_lex_mode();
+}
+
+// The following structs are used within the VersionInfo class as well
+// as in the bison helper functions.  They store the information
+// parsed from the version script.
+
+// A single version expression.
+// For example, pattern="std::map*" and language="C++".
+// pattern and language should be from the stringpool
+struct Version_expression {
+  Version_expression(const std::string& pattern,
+                     const std::string& language)
+      : pattern(pattern), language(language) {}
+
+  std::string pattern;
+  std::string language;
+};
+
+
+// A list of expressions.
+struct Version_expression_list {
+  std::vector<struct Version_expression> expressions;
+};
+
+
+// A list of which versions upon which another version depends.
+// Strings should be from the Stringpool.
+struct Version_dependency_list {
+  std::vector<std::string> dependencies;
+};
+
+
+// The total definition of a version.  It includes the tag for the
+// version, its global and local expressions, and any dependencies.
+struct Version_tree {
+  Version_tree()
+      : tag(), global(NULL), local(NULL), dependencies(NULL) {}
+
+  std::string tag;
+  const struct Version_expression_list* global;
+  const struct Version_expression_list* local;
+  const struct Version_dependency_list* dependencies;
+};
+
+Version_script_info::~Version_script_info()
+{
+  for (size_t k = 0; k < dependency_lists_.size(); ++k)
+    delete dependency_lists_[k];
+  for (size_t k = 0; k < version_trees_.size(); ++k)
+    delete version_trees_[k];
+  for (size_t k = 0; k < expression_lists_.size(); ++k)
+    delete expression_lists_[k];
+}
+
+std::vector<std::string>
+Version_script_info::get_versions() const
+{
+  std::vector<std::string> ret;
+  for (size_t j = 0; j < version_trees_.size(); ++j)
+    ret.push_back(version_trees_[j]->tag);
+  return ret;
+}
+
+std::vector<std::string>
+Version_script_info::get_dependencies(const char* version) const
+{
+  std::vector<std::string> ret;
+  for (size_t j = 0; j < version_trees_.size(); ++j)
+    if (version_trees_[j]->tag == version)
+      {
+        const struct Version_dependency_list* deps =
+          version_trees_[j]->dependencies;
+        if (deps != NULL)
+          for (size_t k = 0; k < deps->dependencies.size(); ++k)
+            ret.push_back(deps->dependencies[k]);
+        return ret;
+      }
+  return ret;
+}
+
+const std::string&
+Version_script_info::get_symbol_version_helper(const char* symbol_name,
+                                               bool check_global) const
+{
+  for (size_t j = 0; j < version_trees_.size(); ++j)
+    {
+      // Is it a global symbol for this version?
+      const Version_expression_list* exp =
+          check_global ? version_trees_[j]->global : version_trees_[j]->local;
+      if (exp != NULL)
+        for (size_t k = 0; k < exp->expressions.size(); ++k)
+          {
+            const char* name_to_match = symbol_name;
+            char* demangled_name = NULL;
+            if (exp->expressions[k].language == "C++")
+              {
+                demangled_name = cplus_demangle(symbol_name,
+                                                DMGL_ANSI | DMGL_PARAMS);
+                // This isn't a C++ symbol.
+                if (demangled_name == NULL)
+                  continue;
+                name_to_match = demangled_name;
+              }
+            else if (exp->expressions[k].language == "Java")
+              {
+                demangled_name = cplus_demangle(symbol_name,
+                                                (DMGL_ANSI | DMGL_PARAMS
+						 | DMGL_JAVA));
+                // This isn't a Java symbol.
+                if (demangled_name == NULL)
+                  continue;
+                name_to_match = demangled_name;
+              }
+            bool matched = fnmatch(exp->expressions[k].pattern.c_str(),
+                                   name_to_match, FNM_NOESCAPE) == 0;
+            if (demangled_name != NULL)
+              free(demangled_name);
+            if (matched)
+              return version_trees_[j]->tag;
+          }
+    }
+  static const std::string empty = "";
+  return empty;
+}
+
+struct Version_dependency_list*
+Version_script_info::allocate_dependency_list()
+{
+  dependency_lists_.push_back(new Version_dependency_list);
+  return dependency_lists_.back();
+}
+
+struct Version_expression_list*
+Version_script_info::allocate_expression_list()
+{
+  expression_lists_.push_back(new Version_expression_list);
+  return expression_lists_.back();
+}
+
+struct Version_tree*
+Version_script_info::allocate_version_tree()
+{
+  version_trees_.push_back(new Version_tree);
+  return version_trees_.back();
+}
+
+// Register an entire version node. For example:
+//
+// GLIBC_2.1 {
+//   global: foo;
+// } GLIBC_2.0;
+//
+// - tag is "GLIBC_2.1"
+// - tree contains the information "global: foo"
+// - deps contains "GLIBC_2.0"
+
+extern "C" void
+script_register_vers_node(void*,
+			  const char* tag,
+			  int taglen,
+			  struct Version_tree *tree,
+			  struct Version_dependency_list *deps)
+{
+  gold_assert(tree != NULL);
+  gold_assert(tag != NULL);
+  tree->dependencies = deps;
+  tree->tag = std::string(tag, taglen);
+}
+
+// Add a dependencies to the list of existing dependencies, if any,
+// and return the expanded list.
+
+extern "C" struct Version_dependency_list *
+script_add_vers_depend(void* closurev,
+		       struct Version_dependency_list *all_deps,
+		       const char *depend_to_add, int deplen)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  if (all_deps == NULL)
+    all_deps = closure->version_script()->allocate_dependency_list();
+  all_deps->dependencies.push_back(std::string(depend_to_add, deplen));
+  return all_deps;
+}
+
+// Add a pattern expression to an existing list of expressions, if any.
+// TODO: In the old linker, the last argument used to be a bool, but I
+// don't know what it meant.
+
+extern "C" struct Version_expression_list *
+script_new_vers_pattern(void* closurev,
+			struct Version_expression_list *expressions,
+			const char *pattern, int patlen)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  if (expressions == NULL)
+    expressions = closure->version_script()->allocate_expression_list();
+  expressions->expressions.push_back(
+      Version_expression(std::string(pattern, patlen),
+                         closure->get_current_language()));
+  return expressions;
+}
+
+// Combine the global and local expressions into a a Version_tree.
+
+extern "C" struct Version_tree *
+script_new_vers_node(void* closurev,
+		     struct Version_expression_list *global,
+		     struct Version_expression_list *local)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  Version_tree* tree = closure->version_script()->allocate_version_tree();
+  tree->global = global;
+  tree->local = local;
+  return tree;
+}
+
+// Handle a transition in language, such as at the 
+// start or end of 'extern "C++"'
+
+extern "C" void
+version_script_push_lang(void* closurev, const char* lang, int langlen)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->push_language(std::string(lang, langlen));
+}
+
+extern "C" void
+version_script_pop_lang(void* closurev)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->pop_language();
 }

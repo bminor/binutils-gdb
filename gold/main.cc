@@ -84,7 +84,8 @@ main(int argc, char** argv)
   // we're going to see based on the number of input files.  Even when
   // this is off, it means at worse we don't quite optimize hashtable
   // resizing as well as we could have (perhap using more memory).
-  Symbol_table symtab(command_line.number_of_input_files() * 1024);
+  Symbol_table symtab(command_line.number_of_input_files() * 1024,
+                      command_line.options().version_script());
 
   // The layout object.
   Layout layout(command_line.options(), &script_options);

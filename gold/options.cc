@@ -155,7 +155,23 @@ invoke_script(int argc, char** argv, char* arg, bool long_option,
 							  arg, long_option,
 							  &ret);
   if (!read_commandline_script(script_name, cmdline))
-    gold::gold_error(_("unable to parse script file %s"), script_name);
+    gold::gold_fatal(_("unable to parse script file %s"), script_name);
+  return ret;
+}
+
+// Handle the special --version-script option, which reads a version script.
+
+int
+invoke_version_script(int argc, char** argv, char* arg, bool long_option,
+                      gold::Command_line* cmdline)
+{
+  int ret;
+  const char* script_name = cmdline->get_special_argument("version-script",
+                                                          argc, argv,
+							  arg, long_option,
+							  &ret);
+  if (!read_version_script(script_name, cmdline))
+    gold::gold_fatal(_("unable to parse version script file %s"), script_name);
   return ret;
 }
 
@@ -458,6 +474,9 @@ options::Command_line_options::options[] =
   SPECIAL('T', "script", N_("Read linker script"),
 	  N_("-T FILE, --script FILE"), TWO_DASHES,
 	  &invoke_script),
+  SPECIAL('\0', "version-script", N_("Read version script"),
+	  N_("--version-script FILE"), TWO_DASHES,
+	  &invoke_version_script),
   GENERAL_NOARG('\0', "threads", N_("Run the linker multi-threaded"),
 		NULL, TWO_DASHES, &General_options::set_threads),
   GENERAL_NOARG('\0', "no-threads", N_("Do not run the linker multi-threaded"),

@@ -32,6 +32,7 @@ namespace gold
 {
 
 class General_options;
+class Version_script_info;
 
 // A dynamic object (ET_DYN).  This is an abstract base class itself.
 // The implementations is the template class Sized_dynobj.
@@ -309,8 +310,9 @@ class Version_base
 class Verdef : public Version_base
 {
  public:
-  Verdef(const char* name, bool is_base, bool is_weak, bool is_symbol_created)
-    : name_(name), deps_(), is_base_(is_base), is_weak_(is_weak),
+  Verdef(const char* name, const std::vector<std::string>& deps,
+         bool is_base, bool is_weak, bool is_symbol_created)
+    : name_(name), deps_(deps), is_base_(is_base), is_weak_(is_weak),
       is_symbol_created_(is_symbol_created)
   { }
 
@@ -358,7 +360,7 @@ class Verdef : public Version_base
 
   // The type of the list of version dependencies.  Each dependency
   // should be canonicalized in the dynamic Stringpool.
-  typedef std::vector<const char*> Deps;
+  typedef std::vector<std::string> Deps;
 
   // The name of this version.  This should be canonicalized in the
   // dynamic Stringpool.
@@ -459,9 +461,7 @@ class Verneed
 class Versions
 {
  public:
-  Versions()
-    : defs_(), needs_(), version_table_(), is_finalized_(false)
-  { }
+  Versions(const General_options&, Stringpool*);
 
   ~Versions();
 
@@ -513,7 +513,14 @@ class Versions
 			unsigned int* psize, unsigned int* pentries
                         ACCEPT_SIZE_ENDIAN) const;
 
+  const Version_script_info&
+  version_script() const
+  { return this->version_script_; }
+      
  private:
+  Versions(const Versions&);
+  Versions& operator=(const Versions&);
+
   // The type of the list of version definitions.
   typedef std::vector<Verdef*> Defs;
 
@@ -568,6 +575,8 @@ class Versions
   Version_table version_table_;
   // Whether the version indexes have been set.
   bool is_finalized_;
+  // Contents of --version-script, if passed, or NULL.
+  const Version_script_info& version_script_;
 };
 
 } // End namespace gold.

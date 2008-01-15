@@ -1,0 +1,28 @@
+V1 {
+   global:
+        extern "C++"
+        {
+           "bar()";
+           myns::*;
+        };
+	foo;
+	blaza*;
+        bar*;
+	# Would be a keyword in a linker script.
+	SECTIONS;
+	sizeof_headers;
+	# Crazy globbiness
+	glob*f[^A-Zo]stuff;
+
+   local:
+        *foo*;
+};
+
+V2 {
+   global:
+	extern "C++" {
+           otherns::stuff;
+        };
+        blaz*;
+	foo;
+} V1;

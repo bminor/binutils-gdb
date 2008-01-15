@@ -32,6 +32,10 @@
 
 #include <vector>
 
+struct Version_dependency_list;
+struct Version_expression_list;
+struct Version_tree;
+
 namespace gold
 {
 
@@ -78,6 +82,69 @@ class Expression
   // May not be copied.
   Expression(const Expression&);
   Expression& operator=(const Expression&);
+};
+
+
+// Version_script_info stores information parsed from the version
+// script, either provided by --version-script or as part of a linker
+// script.  A single Version_script_info object per target is owned by
+// Script_options.
+
+class Version_script_info {
+ public:
+  ~Version_script_info();
+
+  // Return whether any version were defined in the version script.
+  bool
+  empty() const
+  { return this->version_trees_.empty(); }
+
+  // Return the version associated with the given symbol name.
+  // Strings are allocated out of the stringpool given in the
+  // constructor.  Strings are allocated out of the stringpool given
+  // in the constructor.
+  const std::string&
+  get_symbol_version(const char* symbol) const
+  { return get_symbol_version_helper(symbol, true); }
+
+  // Return whether this symbol matches the local: section of a
+  // version script (it doesn't matter which).  This test is only
+  // valid if get_symbol_version() returns the empty string, as we
+  // don't test that here.
+  bool
+  symbol_is_local(const char* symbol) const
+  { return !get_symbol_version_helper(symbol, false).empty(); }
+
+  // Return the names of versions defined in the version script.
+  // Strings are allocated out of the stringpool given in the
+  // constructor.
+  std::vector<std::string>
+  get_versions() const;
+
+  // Return the list of dependencies for this version.
+  std::vector<std::string>
+  get_dependencies(const char* version) const;
+
+  // The following functions should only be used by the bison helper
+  // functions.  They allocate new structs whose memory belongs to
+  // Version_script_info.  The bison functions copy the information
+  // from the version script into these structs.
+  struct Version_dependency_list*
+  allocate_dependency_list();
+
+  struct Version_expression_list*
+  allocate_expression_list();
+
+  struct Version_tree*
+  allocate_version_tree();
+
+ private:
+  const std::string& get_symbol_version_helper(const char* symbol,
+                                               bool check_global) const;
+
+  std::vector<struct Version_dependency_list*> dependency_lists_;
+  std::vector<struct Version_expression_list*> expression_lists_;
+  std::vector<struct Version_tree*> version_trees_;
 };
 
 // We can read a linker script in two different contexts: when
@@ -127,6 +194,12 @@ class Script_options
   void
   finalize_symbols(Symbol_table*, const Layout*);
 
+  // Version information parsed from a version script.  Everything
+  // else has a pointer to this object.
+  Version_script_info*
+  version_script_info()
+  { return &version_script_info_; }
+
  private:
   // We keep a list of symbol assignments.
   struct Symbol_assignment
@@ -160,6 +233,8 @@ class Script_options
   std::string entry_;
   // Symbols to set.
   Symbol_assignments symbol_assignments_;
+  // Version information parsed from a version script.
+  Version_script_info version_script_info_;
 };
 
 // FILE was found as an argument on the command line, but was not
@@ -180,6 +255,14 @@ read_input_script(Workqueue*, const General_options&, Symbol_table*, Layout*,
 
 bool
 read_commandline_script(const char* filename, Command_line*);
+
+// FILE was found as an argument to --version-script.  Read it as a
+// version script, and store its contents in
+// cmdline->script_options()->version_script_info().
+
+bool
+read_version_script(const char* filename, Command_line* cmdline);
+
 
 } // End namespace gold.
 

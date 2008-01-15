@@ -490,10 +490,10 @@ ver_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 ver_test_LDADD = ver_test_1.so ver_test_2.so ver_test_4.so
 ver_test_1.so: ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so
-ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so
-	$(CXXLINK) -shared -Wl,--version-script,$(srcdir)/ver_test_2.script ver_test_2.o ver_test_4.so
-ver_test_4.so: ver_test_4.o $(srcdir)/ver_test_4.script
-	$(CXXLINK) -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o
+ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_2.script ver_test_2.o ver_test_4.so
+ver_test_4.so: ver_test_4.o $(srcdir)/ver_test_4.script gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o
 ver_test_1.o: ver_test_1.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 ver_test_2.o: ver_test_2.cc
@@ -507,6 +507,16 @@ check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_1.t
+
+if OBJDUMP_AND_CPPFILT
+check_SCRIPTS += ver_matching_test.sh
+check_DATA += ver_matching_test.stdout
+MOSTLYCLEANFILES += ver_matching_test.stdout
+ver_matching_def.so: ver_matching_def.cc gcctestdir/ld
+	$(CXXLINK) -O0 -Bgcctestdir/ -shared $(srcdir)/ver_matching_def.cc -Wl,--version-script=$(srcdir)/version_script.map
+ver_matching_test.stdout: ver_matching_def.so
+	objdump -T ver_matching_def.so | c++filt > ver_matching_test.stdout
+endif OBJDUMP_AND_CPPFILT
 
 endif GCC
 endif NATIVE_LINKER

@@ -179,6 +179,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_11 = ver_matching_test.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_12 = ver_matching_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_13 = ver_matching_test.stdout
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -633,6 +636,8 @@ MSGMERGE = @MSGMERGE@
 NATIVE_LINKER_FALSE = @NATIVE_LINKER_FALSE@
 NATIVE_LINKER_TRUE = @NATIVE_LINKER_TRUE@
 NO_WERROR = @NO_WERROR@
+OBJDUMP_AND_CPPFILT_FALSE = @OBJDUMP_AND_CPPFILT_FALSE@
+OBJDUMP_AND_CPPFILT_TRUE = @OBJDUMP_AND_CPPFILT_TRUE@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -722,13 +727,13 @@ INCLUDES = \
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so $(am__append_9)
+MOSTLYCLEANFILES = *.so $(am__append_9) $(am__append_13)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_7)
-check_DATA = $(am__append_8)
+check_SCRIPTS = $(am__append_7) $(am__append_11)
+check_DATA = $(am__append_8) $(am__append_12)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
@@ -1561,10 +1566,10 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_1.so: ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared -Wl,--version-script,$(srcdir)/ver_test_2.script ver_test_2.o ver_test_4.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.so: ver_test_4.o $(srcdir)/ver_test_4.script
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_2.script ver_test_2.o ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.so: ver_test_4.o $(srcdir)/ver_test_4.script gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_1.o: ver_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2.o: ver_test_2.cc
@@ -1573,6 +1578,10 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.o: ver_test_4.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@ver_matching_def.so: ver_matching_def.cc gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	$(CXXLINK) -O0 -Bgcctestdir/ -shared $(srcdir)/ver_matching_def.cc -Wl,--version-script=$(srcdir)/version_script.map
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@ver_matching_test.stdout: ver_matching_def.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	objdump -T ver_matching_def.so | c++filt > ver_matching_test.stdout
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -55,6 +55,10 @@
   uint64_t integer;
   /* An expression.  */
   Expression_ptr expr;
+  // Used for version scripts and within VERSION {}
+  struct Version_dependency_list* deplist;
+  struct Version_expression_list* versyms;
+  struct Version_tree* versnode;
 }
 
 /* Operators, including a precedence table for expressions.  */
@@ -178,6 +182,9 @@
 /* Non-terminal types, where needed.  */
 
 %type <expr> parse_exp exp
+%type <versyms> vers_defns
+%type <versnode> vers_tag
+%type <deplist> verdep
 
 %%
 
@@ -202,6 +209,10 @@ file_cmd:
 	    { script_end_group(closure); }
         | OPTION '(' STRING ')'
 	    { script_parse_option(closure, $3.value, $3.length); }
+        | VERSIONK '{'
+            { script_push_lex_into_version_mode(closure); }
+          version_script '}'
+            { script_pop_lex_mode(closure); }
 	| file_or_sections_cmd
 	| ignore_cmd
 	;
@@ -412,8 +423,84 @@ defsym_expr:
 	    { script_set_symbol(closure, $1.value, $1.length, $3, 0, 0); }
 	;
 
-/* A version script.  Not yet implemented.  */
+/* A version script.  */
 version_script:
+	  vers_nodes
+	;
+
+vers_nodes:
+	  vers_node
+	| vers_nodes vers_node
+	;
+
+vers_node:
+	  '{' vers_tag '}' ';'
+	    {
+	      script_register_vers_node (closure, NULL, 0, $2, NULL);
+	    }
+	| STRING '{' vers_tag '}' ';'
+	    {
+	      script_register_vers_node (closure, $1.value, $1.length, $3,
+					 NULL);
+	    }
+	| STRING '{' vers_tag '}' verdep ';'
+	    {
+	      script_register_vers_node (closure, $1.value, $1.length, $3, $5);
+	    }
+	;
+
+verdep:
+	  STRING
+	    {
+	      $$ = script_add_vers_depend (closure, NULL, $1.value, $1.length);
+	    }
+	| verdep STRING
+	    {
+	      $$ = script_add_vers_depend (closure, $1, $2.value, $2.length);
+	    }
+	;
+
+vers_tag:
+	  /* empty */
+	    { $$ = script_new_vers_node (closure, NULL, NULL); }
+	| vers_defns ';'
+	    { $$ = script_new_vers_node (closure, $1, NULL); }
+	| GLOBAL ':' vers_defns ';'
+	    { $$ = script_new_vers_node (closure, $3, NULL); }
+	| LOCAL ':' vers_defns ';'
+	    { $$ = script_new_vers_node (closure, NULL, $3); }
+	| GLOBAL ':' vers_defns ';' LOCAL ':' vers_defns ';'
+	    { $$ = script_new_vers_node (closure, $3, $7); }
+	;
+
+vers_defns:
+	  STRING
+	    {
+	      $$ = script_new_vers_pattern (closure, NULL, $1.value,
+					    $1.length);
+	    }
+	| vers_defns ';' STRING
+	    {
+	      $$ = script_new_vers_pattern (closure, $1, $3.value, $3.length);
+	    }
+        | /* Push STRING on the language stack. */
+          EXTERN STRING '{'
+	    { version_script_push_lang(closure, $2.value, $2.length); }
+	  vers_defns opt_semicolon '}'
+	    {
+	      $$ = $5;
+	      version_script_pop_lang(closure);
+	    }
+        | EXTERN  // "extern" as a symbol name
+	    {
+	      $$ = script_new_vers_pattern (closure, NULL, "extern",
+					    sizeof("extern") - 1);
+	    }
+	| vers_defns ';' EXTERN
+	    {
+	      $$ = script_new_vers_pattern (closure, $1, "extern",
+					    sizeof("extern") - 1);
+	    }
 	;
 
 /* Some statements require a terminator, which may be a semicolon or a
@@ -421,6 +508,12 @@ version_script:
 end:
 	  ';'
 	| ','
+	;
+
+/* An optional semicolon.  */
+opt_semicolon:
+	  ';'
+	|  /* empty */
 	;
 
 /* An optional comma.  */
