@@ -236,6 +236,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Md { OP_M, d_mode }
 #define Mp { OP_M, f_mode }		/* 32 or 48 bit memory operand for LDS, LES etc */
 #define Mq { OP_M, q_mode }
+#define Mx { OP_M, x_mode }
 #define Gb { OP_G, b_mode }
 #define Gv { OP_G, v_mode }
 #define Gd { OP_G, d_mode }
@@ -605,7 +606,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREFIX_0FB8		(PREFIX_0F7F + 1)
 #define PREFIX_0FBD		(PREFIX_0FB8 + 1)
 #define PREFIX_0FC2		(PREFIX_0FBD + 1)
-#define PREFIX_0FC7_REG_6	(PREFIX_0FC2 + 1)
+#define PREFIX_0FC3		(PREFIX_0FC2 + 1)
+#define PREFIX_0FC7_REG_6	(PREFIX_0FC3 + 1)
 #define PREFIX_0FD0		(PREFIX_0FC7_REG_6 + 1)
 #define PREFIX_0FD6		(PREFIX_0FD0 + 1)
 #define PREFIX_0FE6		(PREFIX_0FD6 + 1)
@@ -1272,7 +1274,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "xaddB",		{ Eb, Gb } },
   { "xaddS",		{ Ev, Gv } },
   { PREFIX_TABLE (PREFIX_0FC2) },
-  { "movntiS",		{ Ev, Gv } },
+  { PREFIX_TABLE (PREFIX_0FC3) },
   { "pinsrw",		{ MX, Edqw, Ib } },
   { "pextrw",		{ Gdq, MS, Ib } },
   { "shufpX",		{ XM, EXx, Ib } },
@@ -2112,6 +2114,14 @@ static const struct dis386 prefix_table[][4] = {
     { "cmpsd",	{ XM, EXq, CMP } },
   },
 
+  /* PREFIX_0FC3 */
+  {
+    { "movntiS", { Ma, Gv } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+  },
+
   /* PREFIX_0FC7_REG_6 */
   {
     { "vmptrld",{ Mq } },
@@ -2146,7 +2156,7 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0FE7 */
   {
-    { "movntq",	{ EM, MX } },
+    { "movntq",	{ Mq, MX } },
     { "(bad)",	{ XX } },
     { MOD_TABLE (MOD_0FE7_PREFIX_2) },
     { "(bad)",	{ XX } },
@@ -4623,22 +4633,22 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F2B_PREFIX_0 */
-    {"movntps",		{ Ev, XM } },
+    {"movntps",		{ Mx, XM } },
     { "(bad)",		{ XX } },
   },
   {
     /* MOD_0F2B_PREFIX_1 */
-    {"movntss",		{ Ed, XM } },
+    {"movntss",		{ Md, XM } },
     { "(bad)",		{ XX } },
   },
   {
     /* MOD_0F2B_PREFIX_2 */
-    {"movntpd",		{ Ev, XM } },
+    {"movntpd",		{ Mx, XM } },
     { "(bad)",		{ XX } },
   },
   {
     /* MOD_0F2B_PREFIX_3 */
-    {"movntsd",		{ Eq, XM } },
+    {"movntsd",		{ Mq, XM } },
     { "(bad)",		{ XX } },
   },
   {
@@ -4763,7 +4773,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FE7_PREFIX_2 */
-    { "movntdq",	{ EM, XM } },
+    { "movntdq",	{ Mx, XM } },
     { "(bad)",		{ XX } },
   },
   {
@@ -4773,7 +4783,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F382A_PREFIX_2 */
-    { "movntdqa",	{ XM, EM } },
+    { "movntdqa",	{ XM, Mx } },
     { "(bad)",		{ XX } },
   },
   {

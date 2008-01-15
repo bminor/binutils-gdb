@@ -1,3 +1,13 @@
+2008-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (Mx): New.
+	(PREFIX_0FC3): Likewise.
+	(PREFIX_0FC7_REG_6): Updated.
+	(dis386_twobyte): Use PREFIX_0FC3.
+	(prefix_table): Add PREFIX_0FC3.  Use Mq on movntq and movntsd.
+	Use Mx on movntps, movntpd, movntdq and movntdqa.  Use Md on
+	movntss.
+
 2008-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Add IntelSyntax.
