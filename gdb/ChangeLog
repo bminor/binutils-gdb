@@ -1,3 +1,8 @@
+2008-01-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* dfp.c, dfp.h: Rename decimal_to_double to decimal_to_doublest.
+	* value.c: All callers changed.
+
 2008-01-16  Markus Deuling  <deuling@de.ibm.com>
 
 	* rs6000-nat.c (add_vmap, vmap_ldinfo, vmap_exec): Replace

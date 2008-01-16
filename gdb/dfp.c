@@ -249,7 +249,7 @@ decimal_from_floating (struct value *from, gdb_byte *to, int len)
 
 /* Converts a decimal float of LEN bytes to a double value.  */
 DOUBLEST
-decimal_to_double (const gdb_byte *from, int len)
+decimal_to_doublest (const gdb_byte *from, int len)
 {
   char buffer[MAX_DECIMAL_STRING];
 

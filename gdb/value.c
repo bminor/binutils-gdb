@@ -1131,7 +1131,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_DECFLOAT:
       /* libdecnumber has a function to convert from decimal to integer, but
 	 it doesn't work when the decimal number has a fractional part.  */
-      return decimal_to_double (valaddr, len);
+      return decimal_to_doublest (valaddr, len);
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
@@ -1191,7 +1191,7 @@ unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
       return extract_typed_floating (valaddr, type);
     }
   else if (code == TYPE_CODE_DECFLOAT)
-    return decimal_to_double (valaddr, len);
+    return decimal_to_doublest (valaddr, len);
   else if (nosign)
     {
       /* Unsigned -- be sure we compensate for signed LONGEST.  */
