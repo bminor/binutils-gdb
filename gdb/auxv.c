@@ -208,6 +208,8 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 	       _("Canonicalized file name given to execve"), str);
 	  TAG (AT_SUN_MMU, _("String for name of MMU module"), str);
 	  TAG (AT_SUN_LDDATA, _("Dynamic linker's data segment address"), hex);
+	  TAG (AT_SUN_AUXFLAGS,
+	       _("AF_SUN_ flags passed from the kernel"), hex);
 	}
 
       fprintf_filtered (file, "%-4s %-20s %-30s ",

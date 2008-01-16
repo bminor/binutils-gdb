@@ -1,5 +1,7 @@
 2008-01-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* auxv.c (fprint_target_auxv): Add support for AT_SUN_AUXFLAGS.
+
 	* dfp.c, dfp.h: Rename decimal_to_double to decimal_to_doublest.
 	* value.c: All callers changed.
 
