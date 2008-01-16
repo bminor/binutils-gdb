@@ -4702,8 +4702,7 @@ lang_size_sections_1
 		       should have space allocated to it, unless the
 		       user has explicitly stated that the section
 		       should never be loaded.  */
-		    if (!(output_section_statement->flags
-			  & (SEC_NEVER_LOAD | SEC_ALLOC)))
+		    if (!(output_section_statement->flags & SEC_NEVER_LOAD))
 		      output_section_statement->bfd_section->flags |= SEC_ALLOC;
 		  }
 		dot = newdot;
