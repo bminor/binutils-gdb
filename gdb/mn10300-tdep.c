@@ -307,6 +307,7 @@ set_reg_offsets (struct frame_info *fi,
 		  int stack_extra_size,
 		  int frame_in_fp)
 {
+  struct gdbarch *gdbarch;
   struct trad_frame_cache *cache;
   int offset = 0;
   CORE_ADDR base;
@@ -317,6 +318,7 @@ set_reg_offsets (struct frame_info *fi,
   cache = mn10300_frame_unwind_cache (fi, this_cache);
   if (cache == NULL)
     return;
+  gdbarch = get_frame_arch (fi);
 
   if (frame_in_fp)
     {
@@ -324,12 +326,13 @@ set_reg_offsets (struct frame_info *fi,
     }
   else
     {
-      base = frame_unwind_register_unsigned (fi, E_SP_REGNUM) + stack_extra_size;
+      base = frame_unwind_register_unsigned (fi, E_SP_REGNUM)
+	       + stack_extra_size;
     }
 
   trad_frame_set_this_base (cache, base);
 
-  if (AM33_MODE == 2)
+  if (AM33_MODE (gdbarch) == 2)
     {
       /* If bit N is set in fpregmask, fsN is saved on the stack.
 	 The floating point registers are saved in ascending order.
@@ -342,7 +345,8 @@ set_reg_offsets (struct frame_info *fi,
 	    {
 	      if (fpregmask & (1 << i))
 		{
-		  trad_frame_set_reg_addr (cache, E_FS0_REGNUM + i, base + offset);
+		  trad_frame_set_reg_addr (cache, E_FS0_REGNUM + i,
+					   base + offset);
 		  offset += 4;
 		}
 	    }
@@ -385,7 +389,7 @@ set_reg_offsets (struct frame_info *fi,
       trad_frame_set_reg_addr (cache, E_D2_REGNUM, base + offset);
       offset += 4;
     }
-  if (AM33_MODE)
+  if (AM33_MODE (gdbarch))
     {
       if (movm_args & movm_exother_bit)
         {
@@ -515,7 +519,7 @@ set_reg_offsets (struct frame_info *fi,
    frame chain to not bother trying to unwind past this frame.  */
 
 static CORE_ADDR
-mn10300_analyze_prologue (struct frame_info *fi, 
+mn10300_analyze_prologue (struct gdbarch *gdbarch, struct frame_info *fi, 
 			  void **this_cache, 
 			  CORE_ADDR pc)
 {
@@ -604,7 +608,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
 	goto finish_prologue;
     }
 
-  if (AM33_MODE == 2)
+  if (AM33_MODE (gdbarch) == 2)
     {
       /* Determine if any floating point registers are to be saved.
 	 Look for one of the following three prologue formats:
@@ -818,7 +822,8 @@ mn10300_analyze_prologue (struct frame_info *fi,
  finish_prologue:
   /* Note if/where callee saved registers were saved.  */
   if (fi)
-    set_reg_offsets (fi, this_cache, movm_args, fpregmask, stack_extra_size, frame_in_fp);
+    set_reg_offsets (fi, this_cache, movm_args, fpregmask, stack_extra_size,
+		     frame_in_fp);
   return addr;
 }
 
@@ -828,7 +833,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
 static CORE_ADDR
 mn10300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  return mn10300_analyze_prologue (NULL, NULL, pc);
+  return mn10300_analyze_prologue (gdbarch, NULL, NULL, pc);
 }
 
 /* Simple frame_unwind_cache.  
@@ -837,6 +842,7 @@ struct trad_frame_cache *
 mn10300_frame_unwind_cache (struct frame_info *next_frame,
 			    void **this_prologue_cache)
 {
+  struct gdbarch *gdbarch;
   struct trad_frame_cache *cache;
   CORE_ADDR pc, start, end;
   void *cache_p;
@@ -844,9 +850,10 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
   if (*this_prologue_cache)
     return (*this_prologue_cache);
 
+  gdbarch = get_frame_arch (next_frame);
   cache_p = trad_frame_cache_zalloc (next_frame);
-  pc = gdbarch_unwind_pc (get_frame_arch (next_frame), next_frame);
-  mn10300_analyze_prologue (next_frame, &cache_p, pc);
+  pc = gdbarch_unwind_pc (gdbarch, next_frame);
+  mn10300_analyze_prologue (gdbarch, next_frame, &cache_p, pc);
   cache = cache_p;
 
   if (find_pc_partial_function (pc, NULL, &start, &end))

@@ -1,5 +1,16 @@
 2008-01-16  Markus Deuling  <deuling@de.ibm.com>
 
+	* mn10300-tdep.h (AM33_MODE): Add gdbarch as parameter.
+	* mn10300-tdep.c (set_reg_offsets, mn10300_analyze_prologue): Use
+	get_frame_arch to get at the current_architecture. Update AM33_MODE
+	call.
+	(mn10300_analyze_prologue): Add gdbarch as parameter. Update caller.
+	(mn10300_frame_unwind_cache): Use get_frame_arch to get at the current
+	architecture.
+	(set_reg_offsets, mn10300_analyze_prologue): Fix indentation.
+
+2008-01-16  Markus Deuling  <deuling@de.ibm.com>
+
 	* amd64-nat.h (amd64_native_gregset_supplies_p): Add gdbarch as 
 	parameter.
 	* amd64-nat.c (amd64_native_gregset_supplies_p): Likewise.
