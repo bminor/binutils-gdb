@@ -175,7 +175,8 @@ static void
 repeated_header_complaint (const char *arg1, int arg2)
 {
   complaint (&symfile_complaints,
-	     _("\"repeated\" header file %s not previously seen, at symtab pos %d"),
+	     _("\"repeated\" header file %s not previously seen, at symtab \
+pos %d"),
 	     arg1, arg2);
 }
 
@@ -625,7 +626,8 @@ dbx_symfile_init (struct objfile *objfile)
   /* Allocate struct to keep track of the symfile */
   objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
     xmalloc (sizeof (struct dbx_symfile_info));
-  memset (objfile->deprecated_sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+  memset (objfile->deprecated_sym_stab_info, 0,
+	  sizeof (struct dbx_symfile_info));
 
   DBX_TEXT_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
   DBX_DATA_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".data");
@@ -1036,17 +1038,20 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
 
 	  if (bfd_get_section_flags (abfd, sec) & SEC_CODE)
 	    {
-	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	      sym_value += ANOFFSET (objfile->section_offsets,
+				     SECT_OFF_TEXT (objfile));
 	      type = N_TEXT;
 	    }
 	  else if (bfd_get_section_flags (abfd, sec) & SEC_DATA)
 	    {
-	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	      sym_value	+= ANOFFSET (objfile->section_offsets,
+				     SECT_OFF_DATA (objfile));
 	      type = N_DATA;
 	    }
 	  else if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
 	    {
-	      sym_value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
+	      sym_value += ANOFFSET (objfile->section_offsets,
+				     SECT_OFF_BSS (objfile));
 	      type = N_BSS;
 	    }
 	  else
@@ -1087,7 +1092,8 @@ read_dbx_dynamic_symtab (struct objfile *objfile)
     {
       arelent *rel = *relptr;
       CORE_ADDR address =
-      rel->address + ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+      rel->address + ANOFFSET (objfile->section_offsets,
+			       SECT_OFF_DATA (objfile));
 
       switch (bfd_get_arch (abfd))
 	{
@@ -1164,7 +1170,8 @@ static void
 function_outside_compilation_unit_complaint (const char *arg1)
 {
   complaint (&symfile_complaints,
-	     _("function `%s' appears to be defined outside of all compilation units"),
+	     _("function `%s' appears to be defined outside of all compilation \
+units"),
 	     arg1);
 }
 
@@ -1312,19 +1319,22 @@ read_dbx_symtab (struct objfile *objfile)
 
 	  case N_TEXT | N_EXT:
 	  case N_NBTEXT | N_EXT:
-	  nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	  nlist.n_value += ANOFFSET (objfile->section_offsets,
+				     SECT_OFF_TEXT (objfile));
 	  goto record_it;
 
 	  case N_DATA | N_EXT:
 	  case N_NBDATA | N_EXT:
-	  nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	  nlist.n_value += ANOFFSET (objfile->section_offsets,
+				     SECT_OFF_DATA (objfile));
 	  goto record_it;
 
 	  case N_BSS:
 	  case N_BSS | N_EXT:
 	  case N_NBBSS | N_EXT:
 	  case N_SETV | N_EXT:		/* FIXME, is this in BSS? */
-	  nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_BSS (objfile));
+	  nlist.n_value += ANOFFSET (objfile->section_offsets,
+				     SECT_OFF_BSS (objfile));
 	  goto record_it;
 
 	  case N_ABS | N_EXT:
@@ -1348,7 +1358,8 @@ read_dbx_symtab (struct objfile *objfile)
 	  case N_FN:
 	  case N_FN_SEQ:
 	  case N_TEXT:
-	  nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	  nlist.n_value += ANOFFSET (objfile->section_offsets,
+				     SECT_OFF_TEXT (objfile));
 	  namestring = set_namestring (objfile, nlist);
 
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
@@ -1364,7 +1375,8 @@ read_dbx_symtab (struct objfile *objfile)
 			     symnum * symbol_size,
 			     nlist.n_value > pst->texthigh
 			     ? nlist.n_value : pst->texthigh,
-			     dependency_list, dependencies_used, textlow_not_set);
+			     dependency_list, dependencies_used,
+			     textlow_not_set);
 		pst = (struct partial_symtab *) 0;
 		includes_used = 0;
 		dependencies_used = 0;
@@ -1378,7 +1390,8 @@ read_dbx_symtab (struct objfile *objfile)
 	  continue;
 
 	  case N_DATA:
-	  nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+	  nlist.n_value += ANOFFSET (objfile->section_offsets,
+				     SECT_OFF_DATA (objfile));
 	  goto record_it;
 
 	  case N_UNDF | N_EXT:
@@ -1392,7 +1405,7 @@ read_dbx_symtab (struct objfile *objfile)
 	    namestring = set_namestring (objfile, nlist);
 	    if (target_lookup_symbol (namestring, &reladdr))
 	      {
-		continue;		/* Error in lookup; ignore symbol for now.  */
+		continue;	/* Error in lookup; ignore symbol for now.  */
 	      }
 	    nlist.n_type ^= (N_BSS ^ N_UNDF);	/* Define it as a bss-symbol */
 	    nlist.n_value = reladdr;
@@ -1457,7 +1470,8 @@ read_dbx_symtab (struct objfile *objfile)
 	    static char *dirname_nso;
 	    int prev_textlow_not_set;
 
-	    valu = nlist.n_value + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+	    valu = nlist.n_value + ANOFFSET (objfile->section_offsets,
+					     SECT_OFF_TEXT (objfile));
 
 	    prev_textlow_not_set = textlow_not_set;
 
@@ -1558,7 +1572,8 @@ read_dbx_symtab (struct objfile *objfile)
 	      /* FIXME: we should not get here without a PST to work on.
 		 Attempt to recover.  */
 	      complaint (&symfile_complaints,
-			 _("N_BINCL %s not in entries for any file, at symtab pos %d"),
+			 _("N_BINCL %s not in entries for any file, at symtab \
+pos %d"),
 			 namestring, symnum);
 	      continue;
 	    }
@@ -1625,22 +1640,22 @@ read_dbx_symtab (struct objfile *objfile)
 	    }
 	    continue;
 	  }
-	  case N_LSYM:			/* Typedef or automatic variable. */
+	  case N_LSYM:		/* Typedef or automatic variable. */
 	  case N_STSYM:		/* Data seg var -- static  */
 	  case N_LCSYM:		/* BSS      "  */
 	  case N_ROSYM:		/* Read-only data seg var -- static.  */
 	  case N_NBSTS:		/* Gould nobase.  */
 	  case N_NBLCS:		/* symbols.  */
 	  case N_FUN:
-	  case N_GSYM:			/* Global (extern) variable; can be
-					   data or bss (sigh FIXME).  */
+	  case N_GSYM:		/* Global (extern) variable; can be
+				   data or bss (sigh FIXME).  */
 
 	  /* Following may probably be ignored; I'll leave them here
 	     for now (until I do Pascal and Modula 2 extensions).  */
 
-	  case N_PC:			/* I may or may not need this; I
-					   suspect not.  */
-	  case N_M2C:			/* I suspect that I can ignore this here. */
+	  case N_PC:		/* I may or may not need this; I
+				   suspect not.  */
+	  case N_M2C:		/* I suspect that I can ignore this here. */
 	  case N_SCOPE:		/* Same.   */
 
 	  namestring = set_namestring (objfile, nlist);
@@ -1675,7 +1690,8 @@ read_dbx_symtab (struct objfile *objfile)
 	  switch (p[1])
 	  {
 	  case 'S':
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
+	    nlist.n_value += ANOFFSET (objfile->section_offsets,
+				       data_sect_index);
 
 	    if (gdbarch_static_transform_name_p (current_gdbarch))
 	      namestring = gdbarch_static_transform_name
@@ -1688,7 +1704,8 @@ read_dbx_symtab (struct objfile *objfile)
 				 psymtab_language, objfile);
 	    continue;
 	  case 'G':
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
+	    nlist.n_value += ANOFFSET (objfile->section_offsets,
+				       data_sect_index);
 	    /* The addresses in these entries are reported to be
 	       wrong.  See the code that reads 'G's for symtabs. */
 	    add_psymbol_to_list (namestring, p - namestring,
@@ -1963,7 +1980,7 @@ read_dbx_symtab (struct objfile *objfile)
 	  case '8':
 	  case '9':
 	  case '-':
-	  case '#':		/* for symbol identification (used in live ranges) */
+	  case '#':	/* for symbol identification (used in live ranges) */
 	    continue;
 
 	  case ':':
@@ -2035,8 +2052,10 @@ read_dbx_symtab (struct objfile *objfile)
 			    (dependencies_used
 			     * sizeof (struct partial_symtab *)));
 #ifdef DEBUG_INFO
-		    fprintf_unfiltered (gdb_stderr, "Had to reallocate dependency list.\n");
-		    fprintf_unfiltered (gdb_stderr, "New dependencies allocated: %d\n",
+		    fprintf_unfiltered (gdb_stderr,
+					"Had to reallocate dependency list.\n");
+		    fprintf_unfiltered (gdb_stderr,
+					"New dependencies allocated: %d\n",
 					dependencies_allocated);
 #endif
 		  }
@@ -2069,12 +2088,12 @@ read_dbx_symtab (struct objfile *objfile)
 	  case N_EINCL:
 	  case N_DSLINE:
 	  case N_BSLINE:
-	  case N_SSYM:			/* Claim: Structure or union element.
-					   Hopefully, I can ignore this.  */
+	  case N_SSYM:		/* Claim: Structure or union element.
+				   Hopefully, I can ignore this.  */
 	  case N_ENTRY:		/* Alternate entry point; can ignore. */
-	  case N_MAIN:			/* Can definitely ignore this.   */
+	  case N_MAIN:		/* Can definitely ignore this.   */
 	  case N_CATCH:		/* These are GNU C++ extensions */
-	  case N_EHDECL:		/* that can safely be ignored here. */
+	  case N_EHDECL:	/* that can safely be ignored here. */
 	  case N_LENG:
 	  case N_BCOMM:
 	  case N_ECOMM:
@@ -2085,10 +2104,10 @@ read_dbx_symtab (struct objfile *objfile)
 	  case N_PSYM:
 	  case N_LBRAC:
 	  case N_NSYMS:		/* Ultrix 4.0: symbol count */
-	  case N_DEFD:			/* GNU Modula-2 */
+	  case N_DEFD:		/* GNU Modula-2 */
 	  case N_ALIAS:		/* SunPro F77: alias name, ignore for now.  */
 
-	  case N_OBJ:			/* useless types from Solaris */
+	  case N_OBJ:		/* useless types from Solaris */
 	  case N_OPT:
 	  case N_PATCH:
 	  /* These symbols aren't interesting; don't worry about them */
@@ -2109,7 +2128,8 @@ read_dbx_symtab (struct objfile *objfile)
       /* Don't set pst->texthigh lower than it already is.  */
       CORE_ADDR text_end =
 	(lowest_text_address == (CORE_ADDR) -1
-	 ? (text_addr + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)))
+	 ? (text_addr + ANOFFSET (objfile->section_offsets,
+				  SECT_OFF_TEXT (objfile)))
 	 : lowest_text_address)
 	+ text_size;
 
@@ -2257,9 +2277,11 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
   /* End of kludge for patching Solaris textlow and texthigh.  */
 
   pst->n_global_syms =
-    objfile->global_psymbols.next - (objfile->global_psymbols.list + pst->globals_offset);
+    objfile->global_psymbols.next - (objfile->global_psymbols.list
+				     + pst->globals_offset);
   pst->n_static_syms =
-    objfile->static_psymbols.next - (objfile->static_psymbols.list + pst->statics_offset);
+    objfile->static_psymbols.next - (objfile->static_psymbols.list
+				     + pst->statics_offset);
 
   pst->number_of_dependencies = number_dependencies;
   if (number_dependencies)
@@ -2346,7 +2368,8 @@ dbx_psymtab_to_symtab_1 (struct partial_symtab *pst)
 
   if (pst->readin)
     {
-      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
+      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  \
+Shouldn't happen.\n",
 			  pst->filename);
       return;
     }
@@ -2402,7 +2425,8 @@ dbx_psymtab_to_symtab (struct partial_symtab *pst)
 
   if (pst->readin)
     {
-      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
+      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  \
+Shouldn't happen.\n",
 			  pst->filename);
       return;
     }
@@ -2428,7 +2452,8 @@ dbx_psymtab_to_symtab (struct partial_symtab *pst)
 					      DBX_STAB_SECTION (pst->objfile),
 					      NULL);
 	  if (stabs_data)
-	    back_to = make_cleanup (free_current_contents, (void *) &stabs_data);
+	    back_to = make_cleanup (free_current_contents,
+				    (void *) &stabs_data);
 	}
 
       dbx_psymtab_to_symtab_1 (pst);
@@ -2623,7 +2648,8 @@ read_ofile_symtab (struct partial_symtab *pst)
   if (last_source_start_addr > text_offset)
     last_source_start_addr = text_offset;
 
-  pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
+  pst->symtab = end_symtab (text_offset + text_size, objfile,
+			    SECT_OFF_TEXT (objfile));
 
   end_stabs ();
 
@@ -3110,7 +3136,8 @@ no enclosing block"));
 	      if (context_stack_depth > 1)
 		{
 		  complaint (&symfile_complaints,
-			     _("unmatched N_LBRAC before symtab pos %d"), symnum);
+			     _("unmatched N_LBRAC before symtab pos %d"),
+			     symnum);
 		  break;
 		}
 
@@ -3430,12 +3457,14 @@ stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
     return;
 
   if (!stabstrsect)
-    error (_("stabsect_build_psymtabs:  Found stabs (%s), but not string section (%s)"),
+    error (_("stabsect_build_psymtabs:  Found stabs (%s), but not string \
+section (%s)"),
 	   stab_name, stabstr_name);
 
   objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
     xmalloc (sizeof (struct dbx_symfile_info));
-  memset (objfile->deprecated_sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+  memset (objfile->deprecated_sym_stab_info, 0,
+	  sizeof (struct dbx_symfile_info));
 
   text_sect = bfd_get_section_by_name (sym_bfd, text_name);
   if (!text_sect)
@@ -3450,7 +3479,8 @@ stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
   DBX_SYMTAB_OFFSET (objfile) = stabsect->filepos;	/* XXX - FIXME: POKING INSIDE BFD DATA STRUCTURES */
 
   if (DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
-    error (_("ridiculous string table size: %d bytes"), DBX_STRINGTAB_SIZE (objfile));
+    error (_("ridiculous string table size: %d bytes"),
+	   DBX_STRINGTAB_SIZE (objfile));
   DBX_STRINGTAB (objfile) = (char *)
     obstack_alloc (&objfile->objfile_obstack, DBX_STRINGTAB_SIZE (objfile) + 1);
   OBJSTAT (objfile, sz_strtab += DBX_STRINGTAB_SIZE (objfile) + 1);
@@ -3459,9 +3489,9 @@ stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
 
   val = bfd_get_section_contents (sym_bfd,	/* bfd */
 				  stabstrsect,	/* bfd section */
-				  DBX_STRINGTAB (objfile),	/* input buffer */
+				  DBX_STRINGTAB (objfile), /* input buffer */
 				  0,	/* offset into section */
-				  DBX_STRINGTAB_SIZE (objfile));	/* amount to read */
+				  DBX_STRINGTAB_SIZE (objfile)); /* amount to read */
 
   if (!val)
     perror_with_name (name);
@@ -3480,11 +3510,12 @@ stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
 static struct sym_fns aout_sym_fns =
 {
   bfd_target_aout_flavour,
-  dbx_new_init,			/* sym_new_init: init anything gbl to entire symtab */
-  dbx_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
+  dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
+  dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   dbx_symfile_read,		/* sym_read: read a symbol file into symtab */
   dbx_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
+  default_symfile_offsets, /* sym_offsets: parse user's offsets to
+			      internal form */
   default_symfile_segments,	/* sym_segments: Get segment information from
 				   a file.  */
   NULL,                         /* sym_read_linetable */

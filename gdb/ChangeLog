@@ -1,3 +1,11 @@
+2008-01-16  Markus Deuling  <deuling@de.ibm.com>
+
+	* dbxread.c (repeated_header_complaint, dbx_symfile_init)
+	(read_dbx_dynamic_symtab, function_outside_compilation_unit_complaint)
+	(read_dbx_symtab, end_psymtab, dbx_psymtab_to_symtab_1)
+	(dbx_psymtab_to_symtab, read_ofile_symtab, process_one_symbol)
+	(stabsect_build_psymtabs): Fix indentation.
+
 2008-01-15  Michael Snyder  <msnyder@specifix.com>
 
 	* corelow.c (core_xfer_partial): Comment, cut/paste error.
