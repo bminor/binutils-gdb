@@ -1660,7 +1660,6 @@ lang_insert_orphan (asection *s,
 		    case lang_target_statement_enum:
 		    case lang_output_statement_enum:
 		    case lang_group_statement_enum:
-		    case lang_afile_asection_pair_statement_enum:
 		      continue;
 		    }
 		  break;
@@ -3290,9 +3289,6 @@ map_input_to_output_sections
 	     are initialized.  */
 	  exp_init_os (s->assignment_statement.exp);
 	  break;
-	case lang_afile_asection_pair_statement_enum:
-	  FAIL ();
-	  break;
 	case lang_address_statement_enum:
 	  /* Mark the specified section with the supplied address.
 
@@ -3957,9 +3953,6 @@ print_statement (lang_statement_union_type *s,
       break;
     case lang_group_statement_enum:
       print_group (&s->group_statement, os);
-      break;
-    case lang_afile_asection_pair_statement_enum:
-      FAIL ();
       break;
     }
 }

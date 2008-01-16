@@ -79,8 +79,6 @@ typedef struct lang_statement_header_struct
     lang_output_statement_enum,
     lang_padding_statement_enum,
     lang_group_statement_enum,
-
-    lang_afile_asection_pair_statement_enum,
     lang_constructors_statement_enum
   } type;
 } lang_statement_header_type;
@@ -290,13 +288,6 @@ typedef struct
   asection *section;
 } lang_input_section_type;
 
-typedef struct
-{
-  lang_statement_header_type header;
-  asection *section;
-  union lang_statement_union *file;
-} lang_afile_asection_pair_statement_type;
-
 typedef struct lang_wild_statement_struct lang_wild_statement_type;
 
 typedef void (*callback_t) (lang_wild_statement_type *, struct wildcard_list *,
@@ -369,7 +360,6 @@ typedef union lang_statement_union
   lang_reloc_statement_type reloc_statement;
   lang_address_statement_type address_statement;
   lang_output_section_statement_type output_section_statement;
-  lang_afile_asection_pair_statement_type afile_asection_pair_statement;
   lang_assignment_statement_type assignment_statement;
   lang_input_statement_type input_statement;
   lang_target_statement_type target_statement;
