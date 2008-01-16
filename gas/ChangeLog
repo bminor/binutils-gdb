@@ -1,3 +1,11 @@
+2008-01-16  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Change opcode set for avr3,
+	at90usb82, at90usb162.
+	* doc/c-avr.texi: Change architecture grouping for at90usb82, 
+	at90usb162.
+	These changes support the new avr35 architecture group in gcc.
+
 2008-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Also zap movzx and movsx

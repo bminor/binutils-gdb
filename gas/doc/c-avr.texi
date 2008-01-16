@@ -44,7 +44,8 @@ attiny261, attiny461, attiny861, attiny24, attiny44, attiny84, attiny25,
 attiny45, attiny85, attiny43u, attiny48, attiny88).
 
 Instruction set avr3 is for the classic AVR core with up to 128K program
-memory space (MCU types: atmega103, at43usb320, at43usb355, at76c711).
+memory space (MCU types: atmega103, at43usb320, at43usb355, at76c711, 
+at90usb82, at90usb162).
 
 Instruction set avr4 is for the enhanced AVR core with up to 8K program
 memory space (MCU types: atmega48, atmega48p,atmega8, atmega88, atmega88p,
@@ -59,8 +60,8 @@ atmega328p, atmega329, atmega329p, atmega3250, atmega3250p, atmega3290,
 atmega3290p, atmega32hvb, atmega406, atmega64, atmega640, atmega644, atmega644p, 
 atmega128, atmega1280, atmega1281, atmega1284p, atmega645, atmega649, 
 atmega6450, atmega6490, atmega16hva, at90can32, at90can64, at90can128, 
-at90pwm216, at90pwm316,at90usb82, at90usb162, at90usb646, at90usb647, 
-at90usb1286, at90usb1287, at94k).
+at90pwm216, at90pwm316, at90usb646, at90usb647, at90usb1286, at90usb1287,
+at94k).
 
 Instruction set avr6 is for the enhanced AVR core with 256K program
 memory space (MCU types: atmega2560, atmega2561).
