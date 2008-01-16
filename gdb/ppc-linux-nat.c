@@ -162,10 +162,10 @@ PT_NIP, PT_MSR, PT_CCR, PT_LNK, PT_CTR, PT_XER, PT_MQ */
 /* *INDENT_ON * */
 
 static int
-ppc_register_u_addr (int regno)
+ppc_register_u_addr (struct gdbarch *gdbarch, int regno)
 {
   int u_addr = -1;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
      interface, and not the wordsize of the program's ABI.  */
   int wordsize = sizeof (long);
@@ -184,7 +184,7 @@ ppc_register_u_addr (int regno)
     u_addr = (PT_FPR0 * wordsize) + ((regno - tdep->ppc_fp0_regnum) * 8);
 
   /* UISA special purpose registers: 1 slot each */
-  if (regno == gdbarch_pc_regnum (current_gdbarch))
+  if (regno == gdbarch_pc_regnum (gdbarch))
     u_addr = PT_NIP * wordsize;
   if (regno == tdep->ppc_lr_regnum)
     u_addr = PT_LNK * wordsize;
@@ -332,7 +332,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
-  CORE_ADDR regaddr = ppc_register_u_addr (regno);
+  CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int bytes_transferred;
   unsigned int offset;         /* Offset of registers within the u area. */
   char buf[MAX_REGISTER_SIZE];
@@ -632,7 +632,7 @@ store_register (const struct regcache *regcache, int tid, int regno)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
-  CORE_ADDR regaddr = ppc_register_u_addr (regno);
+  CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int i;
   size_t bytes_to_transfer;
   char buf[MAX_REGISTER_SIZE];
