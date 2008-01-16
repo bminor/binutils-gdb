@@ -32,4 +32,6 @@ foo:
 	monitor		%ax,%ecx,%edx
 	addr16 monitor
 
-	.p2align	4,0
+	.intel_syntax noprefix
+	movddup xmm7,[eax]
+	movddup xmm7,QWORD PTR [eax]

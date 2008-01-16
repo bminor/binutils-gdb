@@ -34,4 +34,6 @@ Disassembly of section .text:
   69:	0f 01 c9 [ 	]*mwait  %eax,%ecx
   6c:	67 0f 01 c8 [ 	]*monitor %ax,%ecx,%edx
   70:	67 0f 01 c8 [ 	]*monitor %ax,%ecx,%edx
-	...
+  74:	f2 0f 12 38 [ 	]*movddup \(%eax\),%xmm7
+  78:	f2 0f 12 38 [ 	]*movddup \(%eax\),%xmm7
+#pass

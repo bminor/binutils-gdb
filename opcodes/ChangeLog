@@ -1,5 +1,10 @@
 2008-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.tbl: Use Qword on movddup.
+	* i386-tbl.h: Regenerated.
+
+2008-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-opc.tbl: Put back 16bit movsx/movzx for AT&T syntax.
 	* i386-tbl.h: Regenerated.
 
