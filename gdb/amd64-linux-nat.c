@@ -157,6 +157,7 @@ fill_fpregset (const struct regcache *regcache,
 static void
 amd64_linux_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -164,7 +165,7 @@ amd64_linux_fetch_inferior_registers (struct regcache *regcache, int regnum)
   if (tid == 0)
     tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
-  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
+  if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
       elf_gregset_t regs;
 
@@ -176,7 +177,7 @@ amd64_linux_fetch_inferior_registers (struct regcache *regcache, int regnum)
 	return;
     }
 
-  if (regnum == -1 || !amd64_native_gregset_supplies_p (regnum))
+  if (regnum == -1 || !amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
       elf_fpregset_t fpregs;
 
@@ -194,6 +195,7 @@ amd64_linux_fetch_inferior_registers (struct regcache *regcache, int regnum)
 static void
 amd64_linux_store_inferior_registers (struct regcache *regcache, int regnum)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
@@ -201,7 +203,7 @@ amd64_linux_store_inferior_registers (struct regcache *regcache, int regnum)
   if (tid == 0)
     tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
-  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
+  if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
       elf_gregset_t regs;
 
@@ -217,7 +219,7 @@ amd64_linux_store_inferior_registers (struct regcache *regcache, int regnum)
 	return;
     }
 
-  if (regnum == -1 || !amd64_native_gregset_supplies_p (regnum))
+  if (regnum == -1 || !amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
       elf_fpregset_t fpregs;
 

@@ -1,5 +1,21 @@
 2008-01-16  Markus Deuling  <deuling@de.ibm.com>
 
+	* amd64-nat.h (amd64_native_gregset_supplies_p): Add gdbarch as 
+	parameter.
+	* amd64-nat.c (amd64_native_gregset_supplies_p): Likewise.
+
+	(amd64_native_gregset_reg_offset): Add gdbarch as parameter. Replace
+	current_gdbarch by gdbarch. Update caller.
+
+	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers)
+	(amd64_linux_store_inferior_registers): Use get_regcache_arch to get at
+	the current architecture. Update calls of
+	amd64_native_gregset_supplies_p.
+	* amd64bsd-nat.c (amd64bsd_fetch_inferior_registers)
+	(amd64bsd_store_inferior_registers): Likewise.
+
+2008-01-16  Markus Deuling  <deuling@de.ibm.com>
+
 	* ppc-linux-nat.c (ppc_register_u_addr): Add gdbarch as parameter.
 	Replace current_gdbarch by gdbarch. Update caller.
 

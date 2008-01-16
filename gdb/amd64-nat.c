@@ -51,23 +51,23 @@ int amd64_native_gregset64_num_regs = AMD64_NUM_GREGS;
    general-purpose register set.  */
 
 static int
-amd64_native_gregset_reg_offset (int regnum)
+amd64_native_gregset_reg_offset (struct gdbarch *gdbarch, int regnum)
 {
   int *reg_offset = amd64_native_gregset64_reg_offset;
   int num_regs = amd64_native_gregset64_num_regs;
 
   gdb_assert (regnum >= 0);
 
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+  if (gdbarch_ptr_bit (gdbarch) == 32)
     {
       reg_offset = amd64_native_gregset32_reg_offset;
       num_regs = amd64_native_gregset32_num_regs;
     }
 
-  if (num_regs > gdbarch_num_regs (current_gdbarch))
-    num_regs = gdbarch_num_regs (current_gdbarch);
+  if (num_regs > gdbarch_num_regs (gdbarch))
+    num_regs = gdbarch_num_regs (gdbarch);
 
-  if (regnum < num_regs && regnum < gdbarch_num_regs (current_gdbarch))
+  if (regnum < num_regs && regnum < gdbarch_num_regs (gdbarch))
     return reg_offset[regnum];
 
   return -1;
@@ -77,9 +77,9 @@ amd64_native_gregset_reg_offset (int regnum)
    register REGNUM.  */
 
 int
-amd64_native_gregset_supplies_p (int regnum)
+amd64_native_gregset_supplies_p (struct gdbarch *gdbarch, int regnum)
 {
-  return (amd64_native_gregset_reg_offset (regnum) != -1);
+  return (amd64_native_gregset_reg_offset (gdbarch, regnum) != -1);
 }
 
 
@@ -105,7 +105,7 @@ amd64_supply_native_gregset (struct regcache *regcache,
     {
       if (regnum == -1 || regnum == i)
 	{
-	  int offset = amd64_native_gregset_reg_offset (i);
+	  int offset = amd64_native_gregset_reg_offset (gdbarch, i);
 
 	  if (offset != -1)
 	    regcache_raw_supply (regcache, i, regs + offset);
@@ -135,13 +135,13 @@ amd64_collect_native_gregset (const struct regcache *regcache,
       for (i = 0; i <= I386_EIP_REGNUM; i++)
 	{
 	  if (regnum == -1 || regnum == i)
-	    memset (regs + amd64_native_gregset_reg_offset (i), 0, 8);
+	    memset (regs + amd64_native_gregset_reg_offset (gdbarch, i), 0, 8);
 	}
       /* Ditto for %cs, %ss, %ds, %es, %fs, and %gs.  */
       for (i = I386_CS_REGNUM; i <= I386_GS_REGNUM; i++)
 	{
 	  if (regnum == -1 || regnum == i)
-	    memset (regs + amd64_native_gregset_reg_offset (i), 0, 8);
+	    memset (regs + amd64_native_gregset_reg_offset (gdbarch, i), 0, 8);
 	}
     }
 
@@ -152,7 +152,7 @@ amd64_collect_native_gregset (const struct regcache *regcache,
     {
       if (regnum == -1 || regnum == i)
 	{
-	  int offset = amd64_native_gregset_reg_offset (i);
+	  int offset = amd64_native_gregset_reg_offset (gdbarch, i);
 
 	  if (offset != -1)
 	    regcache_raw_collect (regcache, i, regs + offset);

@@ -33,7 +33,8 @@ extern int amd64_native_gregset64_num_regs;
 /* Return whether the native general-purpose register set supplies
    register REGNUM.  */
 
-extern int amd64_native_gregset_supplies_p (int regnum);
+extern int amd64_native_gregset_supplies_p (struct gdbarch *gdbarch,
+					    int regnum);
 
 /* Supply register REGNUM, whose contents are store in BUF, to
    REGCACHE.  If REGNUM is -1, supply all appropriate registers.  */

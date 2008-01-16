@@ -41,7 +41,9 @@
 static void
 amd64bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
-  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+  if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
       struct reg regs;
 
@@ -54,7 +56,7 @@ amd64bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 	return;
     }
 
-  if (regnum == -1 || !amd64_native_gregset_supplies_p (regnum))
+  if (regnum == -1 || !amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
       struct fpreg fpregs;
 
@@ -72,7 +74,9 @@ amd64bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 static void
 amd64bsd_store_inferior_registers (struct regcache *regcache, int regnum)
 {
-  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+  if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
       struct reg regs;
 
@@ -90,7 +94,7 @@ amd64bsd_store_inferior_registers (struct regcache *regcache, int regnum)
 	return;
     }
 
-  if (regnum == -1 || !amd64_native_gregset_supplies_p (regnum))
+  if (regnum == -1 || !amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
       struct fpreg fpregs;
 
