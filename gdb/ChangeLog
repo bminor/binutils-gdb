@@ -1,5 +1,18 @@
 2008-01-16  Markus Deuling  <deuling@de.ibm.com>
 
+	* rs6000-nat.c (add_vmap, vmap_ldinfo, vmap_exec): Replace
+	DEPRECATED_STREQ by its expression.
+	* coffread.c (coff_locate_sections, coff_symtab_read): Likewise.
+	* xcoffread.c (read_xcoff_symtab, read_symbol_lineno, find_linenos)
+	(scan_xcoff_symtab): Likewise.
+	* hppa-hpux-tdep.c (hppa_hpux_skip_trampoline_code): Likewise.
+	* f-lang.c (find_common_for_function): Likewise.
+	* objc-exp.y (parse_number): Likewise.
+
+	* defs.h (DEPRECATED_STREQ): Remove.
+
+2008-01-16  Markus Deuling  <deuling@de.ibm.com>
+
 	* mn10300-tdep.h (AM33_MODE): Add gdbarch as parameter.
 	* mn10300-tdep.c (set_reg_offsets, mn10300_analyze_prologue): Use
 	get_frame_arch to get at the current_architecture. Update AM33_MODE

@@ -1251,7 +1251,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	  break;
 
 	case C_FCN:
-	  if (DEPRECATED_STREQ (cs->c_name, ".bf"))
+	  if (strcmp (cs->c_name, ".bf") == 0)
 	    {
 	      CORE_ADDR off = ANOFFSET (objfile->section_offsets,
 					SECT_OFF_TEXT (objfile));
@@ -1268,7 +1268,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	      if (new->name != NULL)
 		SYMBOL_SECTION (new->name) = SECT_OFF_TEXT (objfile);
 	    }
-	  else if (DEPRECATED_STREQ (cs->c_name, ".ef"))
+	  else if (strcmp (cs->c_name, ".ef") == 0)
 	    {
 
 	      bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
@@ -1362,7 +1362,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 	  break;
 
 	case C_BLOCK:
-	  if (DEPRECATED_STREQ (cs->c_name, ".bb"))
+	  if (strcmp (cs->c_name, ".bb") == 0)
 	    {
 	      depth++;
 	      new = push_context (depth,
@@ -1370,7 +1370,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 				   + ANOFFSET (objfile->section_offsets,
 					       SECT_OFF_TEXT (objfile))));
 	    }
-	  else if (DEPRECATED_STREQ (cs->c_name, ".eb"))
+	  else if (strcmp (cs->c_name, ".eb") == 0)
 	    {
 	      if (context_stack_depth <= 0)
 		{		/* We attempted to pop an empty context stack */
@@ -1666,7 +1666,7 @@ read_symbol_lineno (int symno)
       if (symbol->n_sclass == C_FCN)
 	{
 	  char *name = xcoff64 ? strtbl + symbol->n_offset : symbol->n_name;
-	  if (DEPRECATED_STREQ (name, ".bf"))
+	  if (strcmp (name, ".bf") == 0)
 	    goto gotit;
 	}
       symno += symbol->n_numaux + 1;
@@ -1700,7 +1700,7 @@ find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
 
   count = asect->lineno_count;
 
-  if (!DEPRECATED_STREQ (asect->name, ".text") || count == 0)
+  if (strcmp (asect->name, ".text") != 0 || count == 0)
     return;
 
   size = count * coff_data (abfd)->local_linesz;
@@ -2525,12 +2525,12 @@ scan_xcoff_symtab (struct objfile *objfile)
 	       things like "break c-exp.y:435" need to work (I
 	       suppose the psymtab_include_list could be hashed or put
 	       in a binary tree, if profiling shows this is a major hog).  */
-	    if (pst && DEPRECATED_STREQ (namestring, pst->filename))
+	    if (pst && strcmp (namestring, pst->filename) == 0)
 	      continue;
 	    {
 	      int i;
 	      for (i = 0; i < includes_used; i++)
-		if (DEPRECATED_STREQ (namestring, psymtab_include_list[i]))
+		if (strcmp (namestring, psymtab_include_list[i]) == 0)
 		  {
 		    i = -1;
 		    break;

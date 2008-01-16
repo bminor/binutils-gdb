@@ -376,7 +376,8 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  ALL_MSYMBOLS (objfile, msymbol)
 	  {
 	    if (MSYMBOL_TYPE (msymbol) == mst_text
-		&& DEPRECATED_STREQ (DEPRECATED_SYMBOL_NAME (msymbol), DEPRECATED_SYMBOL_NAME (msym)))
+		&& strcmp (DEPRECATED_SYMBOL_NAME (msymbol),
+			    DEPRECATED_SYMBOL_NAME (msym)) == 0)
 	      {
 		function_found = 1;
 		break;

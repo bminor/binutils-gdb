@@ -198,7 +198,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
 
   csi = (struct coff_symfile_info *) csip;
   name = bfd_get_section_name (abfd, sectp);
-  if (DEPRECATED_STREQ (name, ".text"))
+  if (strcmp (name, ".text") == 0)
     {
       csi->textaddr = bfd_section_vma (abfd, sectp);
       csi->textsize += bfd_section_size (abfd, sectp);
@@ -207,7 +207,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
     {
       csi->textsize += bfd_section_size (abfd, sectp);
     }
-  else if (DEPRECATED_STREQ (name, ".stabstr"))
+  else if (strcmp (name, ".stabstr") == 0)
     {
       csi->stabstrsect = sectp;
     }
@@ -823,7 +823,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	case C_THUMBSTATFUNC:
 	  if (cs->c_name[0] == '.')
 	    {
-	      if (DEPRECATED_STREQ (cs->c_name, ".text"))
+	      if (strcmp (cs->c_name, ".text") == 0)
 		{
 		  /* FIXME:  don't wire in ".text" as section name
 		     or symbol name! */
@@ -947,7 +947,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  break;
 
 	case C_FCN:
-	  if (DEPRECATED_STREQ (cs->c_name, ".bf"))
+	  if (strcmp (cs->c_name, ".bf") == 0)
 	    {
 	      within_function = 1;
 
@@ -969,7 +969,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      new->name =
 		process_coff_symbol (&fcn_cs_saved, &fcn_aux_saved, objfile);
 	    }
-	  else if (DEPRECATED_STREQ (cs->c_name, ".ef"))
+	  else if (strcmp (cs->c_name, ".ef") == 0)
 	    {
 	      if (!within_function)
 		error (_("Bad coff function information."));
@@ -1045,13 +1045,13 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	  break;
 
 	case C_BLOCK:
-	  if (DEPRECATED_STREQ (cs->c_name, ".bb"))
+	  if (strcmp (cs->c_name, ".bb") == 0)
 	    {
 	      tmpaddr = cs->c_value;
 	      tmpaddr += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      push_context (++depth, tmpaddr);
 	    }
-	  else if (DEPRECATED_STREQ (cs->c_name, ".eb"))
+	  else if (strcmp (cs->c_name, ".eb") == 0)
 	    {
 	      if (context_stack_depth <= 0)
 		{		/* We attempted to pop an empty context stack */

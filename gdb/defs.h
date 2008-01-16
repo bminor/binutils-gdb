@@ -153,7 +153,6 @@ typedef bfd_vma CORE_ADDR;
    not responsible for any breakage due to code that relied on the old
    underlying implementation.  */
 
-#define DEPRECATED_STREQ(a,b) (strcmp ((a), (b)) == 0)
 #define DEPRECATED_STREQN(a,b,c) (strncmp ((a), (b), (c)) == 0)
 
 /* Check if a character is one of the commonly used C++ marker characters.  */

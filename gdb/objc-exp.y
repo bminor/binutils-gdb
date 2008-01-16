@@ -680,7 +680,7 @@ qualified_name:	typebase COLONCOLON name
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
-			  if (!DEPRECATED_STREQ (type_name_no_tag (type), $4.ptr))
+			  if (strcmp (type_name_no_tag (type), $4.ptr) != 0)
 			    error ("invalid destructor `%s::~%s'",
 				   type_name_no_tag (type), $4.ptr);
 
