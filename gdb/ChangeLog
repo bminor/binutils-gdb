@@ -1,3 +1,7 @@
+2008-01-15  Michael Snyder  <msnyder@specifix.com>
+
+	* corelow.c (core_xfer_partial): Comment, cut/paste error.
+
 2008-01-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-nat.c (win32_create_inferior): Restore code calling
