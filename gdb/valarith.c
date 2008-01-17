@@ -1033,6 +1033,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      break;
 
 	    case BINOP_DIV:
+	    case BINOP_INTDIV:
 	      v = v1 / v2;
 	      break;
 
@@ -1152,6 +1153,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      break;
 
 	    case BINOP_DIV:
+	    case BINOP_INTDIV:
 	      if (v2 != 0)
 		v = v1 / v2;
 	      else
