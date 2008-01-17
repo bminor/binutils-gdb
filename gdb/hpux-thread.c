@@ -180,15 +180,6 @@ hpux_thread_resume (ptid_t ptid, int step, enum target_signal signo)
   ptid = main_ptid;
   inferior_ptid = main_ptid;
 
-#if 0
-  if (pid != -1)
-    {
-      pid = thread_to_lwp (pid, -2);
-      if (pid == -2)		/* Inactive thread */
-	error (_("This version of Solaris can't start inactive threads."));
-    }
-#endif
-
   deprecated_child_ops.to_resume (ptid, step, signo);
 
   cached_thread = 0;
