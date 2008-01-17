@@ -2328,6 +2328,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
   set_gdbarch_char_signed (gdbarch, 0);
 
+  /* S/390 GNU/Linux uses either 64-bit or 128-bit long doubles.
+     We can safely let them default to 128-bit, since the debug info
+     will give the size of type actually used in each case.  */
+  set_gdbarch_long_double_bit (gdbarch, 128);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+
   /* Amount PC must be decremented by after a breakpoint.  This is
      often the number of bytes returned by gdbarch_breakpoint_from_pc but not
      always.  */

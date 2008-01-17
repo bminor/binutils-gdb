@@ -1,3 +1,8 @@
+2008-01-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_gdbarch_init): Set default long double
+	type to 128-bit IEEE quad.
+
 2008-01-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* hpux-thread.c (hpux_thread_resume): Delete commented-out code.
