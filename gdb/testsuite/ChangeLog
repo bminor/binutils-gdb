@@ -1,3 +1,13 @@
+2008-01-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.mi/mi-var-child.c (do_children_tests): Add 'dummy' integer
+	and 'dummy_ptr' integer pointer.  Initialize struct_declarations
+	with dummy_ptr's address.
+	* gdb.mi/var-cmd.c (do_children_tests): Likewise.
+	* gdb.mi/mi-var-child.exp: int_ptr_ptr is now always "editable" on
+	all targets.
+	* gdb.mi/mi2-var-child.exp: Likewise.
+
 2008-01-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/null_array: New test program.

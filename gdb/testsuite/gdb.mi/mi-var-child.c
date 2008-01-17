@@ -206,8 +206,12 @@ do_children_tests (void)
   int *foo;
   int bar;
 
-  struct _struct_decl struct_declarations;
-  memset (&struct_declarations, 0, sizeof (struct_declarations));
+  /* Avoid pointing into NULL, as that is editable on some
+     systems.  */
+  int dummy;
+  int *dummy_ptr = &dummy;
+
+  struct _struct_decl struct_declarations = { 0, 0, NULL, 0, &dummy_ptr };
   weird = &struct_declarations;
 
   struct_declarations.integer = 123;

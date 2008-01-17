@@ -681,13 +681,13 @@ mi_gdb_test "-var-show-attributes weird->int_ptr_ptr" \
 # Test: c_variable-4.99
 # Desc: is *(weird->int_ptr_ptr) editable
 mi_gdb_test "-var-show-attributes weird.int_ptr_ptr.*int_ptr_ptr" \
-	"\\^done,attr=\"noneditable\"" \
+	"\\^done,attr=\"editable\"" \
 	"is weird.int_ptr_ptr.*int_ptr_ptr editable"
 
 # Test: c_variable-4.100
 # Desc: is *(*(weird->int_ptr_ptr)) editable
 mi_gdb_test "-var-show-attributes weird.int_ptr_ptr.*int_ptr_ptr.**int_ptr_ptr" \
-	"\\^done,attr=\"noneditable\"" \
+	"\\^done,attr=\"editable\"" \
 	"is weird.int_ptr_ptr.*int_ptr_ptr.**int_ptr_ptr editable"
 
 # Test: c_variable-4.101
