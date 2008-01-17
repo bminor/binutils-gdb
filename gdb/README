@@ -453,6 +453,10 @@ with the remote.c stub over a serial line.
 allows remote debugging for Unix applications.  gdbserver is only
 supported for some native configurations, including Sun 3, Sun 4, and
 Linux.
+The file gdb/gdbserver/README includes further notes on gdbserver; in
+particular, it explains how to build gdbserver for cross-debugging
+(where gdbserver runs on the target machine, which is of a different
+architecture than the host machine running GDB).
 
    There are a number of remote interfaces for talking to existing ROM
 monitors and other hardware:
