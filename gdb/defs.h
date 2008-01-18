@@ -124,37 +124,6 @@ typedef bfd_vma CORE_ADDR;
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-/* Macros to do string compares.
-
-   NOTE: cagney/2000-03-14:
-
-   While old code can continue to refer to these macros, new code is
-   probably better off using strcmp() directly vis: ``strcmp() == 0''
-   and ``strcmp() != 0''.
-
-   This is because modern compilers can directly inline strcmp()
-   making the original justification for these macros - avoid function
-   call overhead by pre-testing the first characters
-   (``*X==*Y?...:0'') - redundant.
-
-   ``Even if [...] testing the first character does have a modest
-   performance improvement, I'd rather that whenever a performance
-   issue is found that we spend the effort on algorithmic
-   optimizations than micro-optimizing.'' J.T. */
-
-/* NOTE: cagney/2003-11-23: All instances of STREQ[N] covered by
-   testing GDB on a stabs system have been replaced by equivalent
-   str[n]cmp calls.  To avoid the possability of introducing bugs when
-   making untested changes, the remaining references were deprecated
-   rather than replaced.  */
-
-/* DISCLAIMER: cagney/2003-11-23: Simplified definition of these
-   macros so that they just map directly onto strcmp equivalent.  I'm
-   not responsible for any breakage due to code that relied on the old
-   underlying implementation.  */
-
-#define DEPRECATED_STREQN(a,b,c) (strncmp ((a), (b), (c)) == 0)
-
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker (int);
 

@@ -1248,7 +1248,7 @@ yylex ()
   tokstart = lexptr;
   /* See if it is a special token of length 3.  */
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
-    if (DEPRECATED_STREQN (tokstart, tokentab3[i].operator, 3))
+    if (strncmp (tokstart, tokentab3[i].operator, 3) == 0)
       {
 	lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
@@ -1257,7 +1257,7 @@ yylex ()
 
   /* See if it is a special token of length 2.  */
   for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
-    if (DEPRECATED_STREQN (tokstart, tokentab2[i].operator, 2))
+    if (strncmp (tokstart, tokentab2[i].operator, 2) == 0)
       {
 	lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
@@ -1572,43 +1572,43 @@ yylex ()
   switch (namelen)
     {
     case 8:
-      if (DEPRECATED_STREQN (tokstart, "unsigned", 8))
+      if (strncmp (tokstart, "unsigned", 8) == 0)
 	return UNSIGNED;
       if (current_language->la_language == language_cplus
 	  && strncmp (tokstart, "template", 8) == 0)
 	return TEMPLATE;
-      if (DEPRECATED_STREQN (tokstart, "volatile", 8))
+      if (strncmp (tokstart, "volatile", 8) == 0)
 	return VOLATILE_KEYWORD;
       break;
     case 6:
-      if (DEPRECATED_STREQN (tokstart, "struct", 6))
+      if (strncmp (tokstart, "struct", 6) == 0)
 	return STRUCT;
-      if (DEPRECATED_STREQN (tokstart, "signed", 6))
+      if (strncmp (tokstart, "signed", 6) == 0)
 	return SIGNED_KEYWORD;
-      if (DEPRECATED_STREQN (tokstart, "sizeof", 6))      
+      if (strncmp (tokstart, "sizeof", 6) == 0)
 	return SIZEOF;
-      if (DEPRECATED_STREQN (tokstart, "double", 6))      
+      if (strncmp (tokstart, "double", 6) == 0) 
 	return DOUBLE_KEYWORD;
       break;
     case 5:
       if ((current_language->la_language == language_cplus)
 	  && strncmp (tokstart, "class", 5) == 0)
 	return CLASS;
-      if (DEPRECATED_STREQN (tokstart, "union", 5))
+      if (strncmp (tokstart, "union", 5) == 0)
 	return UNION;
-      if (DEPRECATED_STREQN (tokstart, "short", 5))
+      if (strncmp (tokstart, "short", 5) == 0)
 	return SHORT;
-      if (DEPRECATED_STREQN (tokstart, "const", 5))
+      if (strncmp (tokstart, "const", 5) == 0)
 	return CONST_KEYWORD;
       break;
     case 4:
-      if (DEPRECATED_STREQN (tokstart, "enum", 4))
+      if (strncmp (tokstart, "enum", 4) == 0)
 	return ENUM;
-      if (DEPRECATED_STREQN (tokstart, "long", 4))
+      if (strncmp (tokstart, "long", 4) == 0)
 	return LONG;
       break;
     case 3:
-      if (DEPRECATED_STREQN (tokstart, "int", 3))
+      if (strncmp (tokstart, "int", 3) == 0)
 	return INT_KEYWORD;
       break;
     default:
