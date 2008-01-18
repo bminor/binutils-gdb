@@ -1,5 +1,5 @@
 /* tc-xtensa.c -- Assemble Xtensa instructions.
-   Copyright 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -442,6 +442,7 @@ static void xtensa_literal_position (int);
 static void xtensa_literal_pseudo (int);
 static void xtensa_frequency_pseudo (int);
 static void xtensa_elf_cons (int);
+static void xtensa_leb128 (int);
 
 /* Parsing and Idiom Translation.  */
 
@@ -1004,6 +1005,8 @@ const pseudo_typeS md_pseudo_table[] =
   { "4byte", xtensa_elf_cons, 4 },
   { "short", xtensa_elf_cons, 2 },
   { "2byte", xtensa_elf_cons, 2 },
+  { "sleb128", xtensa_leb128, 1},
+  { "uleb128", xtensa_leb128, 0},
   { "begin", xtensa_begin_directive, 0 },
   { "end", xtensa_end_directive, 0 },
   { "literal", xtensa_literal_pseudo, 0 },
@@ -1567,6 +1570,16 @@ xtensa_elf_cons (int nbytes)
 
   input_line_pointer--;		/* Put terminator back into stream.  */
   demand_empty_rest_of_line ();
+}
+
+static bfd_boolean is_leb128_expr;
+
+static void
+xtensa_leb128 (int sign)
+{
+  is_leb128_expr = TRUE;
+  s_leb128 (sign);
+  is_leb128_expr = FALSE;
 }
 
 
@@ -5635,7 +5648,7 @@ symbolS *expr_symbols = NULL;
 void 
 xtensa_symbol_new_hook (symbolS *sym)
 {
-  if (S_GET_SEGMENT (sym) == expr_section)
+  if (is_leb128_expr && S_GET_SEGMENT (sym) == expr_section)
     {
       symbol_get_tc (sym)->next_expr_symbol = expr_symbols;
       expr_symbols = sym;
@@ -7256,10 +7269,11 @@ xtensa_mark_zcl_first_insns (void)
 }
 
 
-/* Some difference-of-symbols expressions make it out to the linker.  Some 
-   don't.  If one does, then the linker can optimize between the two labels.
-   If it doesn't, then the linker shouldn't.  */
-
+/* When a difference-of-symbols expression is encoded as a uleb128 or
+   sleb128 value, the linker is unable to adjust that value to account for
+   link-time relaxation.  Mark all the code between such symbols so that
+   its size cannot be changed by linker relaxation.  */
+  
 static void
 xtensa_mark_difference_of_two_symbols (void)
 {

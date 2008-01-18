@@ -1,3 +1,10 @@
+2008-01-18  Bob Wilson  <bob.wilson@acm.org>
+	
+	* config/tc-xtensa.c (xtensa_leb128): New function.
+	(md_pseudo_table): Use it for sleb128 and uleb128.
+	(is_leb128_expr): New internal flag.
+	(xtensa_symbol_new_hook): Check new flag.
+	
 2008-01-16  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Change opcode set for avr3,
