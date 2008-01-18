@@ -233,7 +233,11 @@ script_add_vers_depend(void* closure,
 extern struct Version_expression_list *
 script_new_vers_pattern(void* closure,
 			struct Version_expression_list *,
-			const char *, int);
+			const char *, int, int);
+
+extern struct Version_expression_list *
+script_merge_expressions(struct Version_expression_list *a,
+                         struct Version_expression_list *b);
 
 extern struct Version_tree *
 script_new_vers_node(void* closure,

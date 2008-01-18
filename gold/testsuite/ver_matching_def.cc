@@ -28,6 +28,10 @@ void foo1() {} // local
 void bar() {} // V1
 void bar1() {} // global
 
+void baz(int*) {}          // V1
+void baz(int*, char) {}    // global
+void baz(char*, int) {}    // global
+
 extern "C" {
 void bar2() {}  // V1
 };

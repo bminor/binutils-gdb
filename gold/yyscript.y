@@ -82,6 +82,7 @@
 /* Constants.  */
 
 %token <string> STRING
+%token <string> QUOTED_STRING
 %token <integer> INTEGER
 
 /* Keywords.  This list is taken from ldgram.y and ldlex.l in the old
@@ -185,6 +186,7 @@
 %type <versyms> vers_defns
 %type <versnode> vers_tag
 %type <deplist> verdep
+%type <string> string
 
 %%
 
@@ -207,7 +209,7 @@ file_cmd:
 	    { script_start_group(closure); }
 	  '(' input_list ')'
 	    { script_end_group(closure); }
-        | OPTION '(' STRING ')'
+        | OPTION '(' string ')'
 	    { script_parse_option(closure, $3.value, $3.length); }
         | VERSIONK '{'
             { script_push_lex_into_version_mode(closure); }
@@ -222,9 +224,9 @@ file_cmd:
    these is more-or-less OK since most scripts simply explicitly
    choose the default.  */
 ignore_cmd:
-	  OUTPUT_FORMAT '(' STRING ')'
-	| OUTPUT_FORMAT '(' STRING ',' STRING ',' STRING ')'
-	| OUTPUT_ARCH '(' STRING ')'
+	  OUTPUT_FORMAT '(' string ')'
+	| OUTPUT_FORMAT '(' string ',' string ',' string ')'
+	| OUTPUT_ARCH '(' string ')'
 	;
 
 /* A list of input file names.  */
@@ -235,7 +237,7 @@ input_list:
 
 /* An input file name.  */
 input_list_element:
-	  STRING
+	  string
 	    { script_add_file(closure, $1.value, $1.length); }
 	| AS_NEEDED
 	    { script_start_as_needed(closure); }
@@ -246,66 +248,66 @@ input_list_element:
 /* A command which may appear at the top level of a linker script, or
    within a SECTIONS block.  */
 file_or_sections_cmd:
-	  ENTRY '(' STRING ')'
+	  ENTRY '(' string ')'
 	    { script_set_entry(closure, $3.value, $3.length); }
 	| assignment end
 	;
 
 /* Set a symbol to a value.  */
 assignment:
-	  STRING '=' parse_exp
+	  string '=' parse_exp
 	    { script_set_symbol(closure, $1.value, $1.length, $3, 0, 0); }
-	| STRING PLUSEQ parse_exp
+	| string PLUSEQ parse_exp
 	    {
 	      Expression_ptr s = script_exp_string($1.value, $1.length);
 	      Expression_ptr e = script_exp_binary_add(s, $3);
 	      script_set_symbol(closure, $1.value, $1.length, e, 0, 0);
 	    }
-	| STRING MINUSEQ parse_exp
+	| string MINUSEQ parse_exp
 	    {
 	      Expression_ptr s = script_exp_string($1.value, $1.length);
 	      Expression_ptr e = script_exp_binary_sub(s, $3);
 	      script_set_symbol(closure, $1.value, $1.length, e, 0, 0);
 	    }
-	| STRING MULTEQ parse_exp
+	| string MULTEQ parse_exp
 	    {
 	      Expression_ptr s = script_exp_string($1.value, $1.length);
 	      Expression_ptr e = script_exp_binary_mult(s, $3);
 	      script_set_symbol(closure, $1.value, $1.length, e, 0, 0);
 	    }
-	| STRING DIVEQ parse_exp
+	| string DIVEQ parse_exp
 	    {
 	      Expression_ptr s = script_exp_string($1.value, $1.length);
 	      Expression_ptr e = script_exp_binary_div(s, $3);
 	      script_set_symbol(closure, $1.value, $1.length, e, 0, 0);
 	    }
-	| STRING LSHIFTEQ parse_exp
+	| string LSHIFTEQ parse_exp
 	    {
 	      Expression_ptr s = script_exp_string($1.value, $1.length);
 	      Expression_ptr e = script_exp_binary_lshift(s, $3);
 	      script_set_symbol(closure, $1.value, $1.length, e, 0, 0);
 	    }
-	| STRING RSHIFTEQ parse_exp
+	| string RSHIFTEQ parse_exp
 	    {
 	      Expression_ptr s = script_exp_string($1.value, $1.length);
 	      Expression_ptr e = script_exp_binary_rshift(s, $3);
 	      script_set_symbol(closure, $1.value, $1.length, e, 0, 0);
 	    }
-	| STRING ANDEQ parse_exp
+	| string ANDEQ parse_exp
 	    {
 	      Expression_ptr s = script_exp_string($1.value, $1.length);
 	      Expression_ptr e = script_exp_binary_bitwise_and(s, $3);
 	      script_set_symbol(closure, $1.value, $1.length, e, 0, 0);
 	    }
-	| STRING OREQ parse_exp
+	| string OREQ parse_exp
 	    {
 	      Expression_ptr s = script_exp_string($1.value, $1.length);
 	      Expression_ptr e = script_exp_binary_bitwise_or(s, $3);
 	      script_set_symbol(closure, $1.value, $1.length, e, 0, 0);
 	    }
-	| PROVIDE '(' STRING '=' parse_exp ')'
+	| PROVIDE '(' string '=' parse_exp ')'
 	    { script_set_symbol(closure, $3.value, $3.length, $5, 1, 0); }
-	| PROVIDE_HIDDEN '(' STRING '=' parse_exp ')'
+	| PROVIDE_HIDDEN '(' string '=' parse_exp ')'
 	    { script_set_symbol(closure, $3.value, $3.length, $5, 1, 1); }
 	;
 
@@ -373,27 +375,29 @@ exp:
 	    { $$ = script_exp_integer($1); }
 	| STRING
 	    { $$ = script_exp_string($1.value, $1.length); }
+	| QUOTED_STRING
+	    { $$ = script_exp_string($1.value, $1.length); }
 	| MAX_K '(' exp ',' exp ')'
 	    { $$ = script_exp_function_max($3, $5); }
 	| MIN_K '(' exp ',' exp ')'
 	    { $$ = script_exp_function_min($3, $5); }
-	| DEFINED '(' STRING ')'
+	| DEFINED '(' string ')'
 	    { $$ = script_exp_function_defined($3.value, $3.length); }
 	| SIZEOF_HEADERS
 	    { $$ = script_exp_function_sizeof_headers(); }
-	| ALIGNOF '(' STRING ')'
+	| ALIGNOF '(' string ')'
 	    { $$ = script_exp_function_alignof($3.value, $3.length); }
-	| SIZEOF '(' STRING ')'
+	| SIZEOF '(' string ')'
 	    { $$ = script_exp_function_sizeof($3.value, $3.length); }
-	| ADDR '(' STRING ')'
+	| ADDR '(' string ')'
 	    { $$ = script_exp_function_addr($3.value, $3.length); }
-	| LOADADDR '(' STRING ')'
+	| LOADADDR '(' string ')'
 	    { $$ = script_exp_function_loadaddr($3.value, $3.length); }
-	| ORIGIN '(' STRING ')'
+	| ORIGIN '(' string ')'
 	    { $$ = script_exp_function_origin($3.value, $3.length); }
-	| LENGTH '(' STRING ')'
+	| LENGTH '(' string ')'
 	    { $$ = script_exp_function_length($3.value, $3.length); }
-	| CONSTANT '(' STRING ')'
+	| CONSTANT '(' string ')'
 	    { $$ = script_exp_function_constant($3.value, $3.length); }
 	| ABSOLUTE '(' exp ')'
 	    { $$ = script_exp_function_absolute($3); }
@@ -409,17 +413,17 @@ exp:
 	    { $$ = script_exp_function_data_segment_relro_end($3, $5); }
 	| DATA_SEGMENT_END '(' exp ')'
 	    { $$ = script_exp_function_data_segment_end($3); }
-	| SEGMENT_START '(' STRING ',' exp ')'
+	| SEGMENT_START '(' string ',' exp ')'
 	    {
 	      $$ = script_exp_function_segment_start($3.value, $3.length, $5);
 	    }
-	| ASSERT_K '(' exp ',' STRING ')'
+	| ASSERT_K '(' exp ',' string ')'
 	    { $$ = script_exp_function_assert($3, $5.value, $5.length); }
 	;
 
 /* Handle the --defsym option.  */
 defsym_expr:
-	  STRING '=' parse_exp
+	  string '=' parse_exp
 	    { script_set_symbol(closure, $1.value, $1.length, $3, 0, 0); }
 	;
 
@@ -438,23 +442,23 @@ vers_node:
 	    {
 	      script_register_vers_node (closure, NULL, 0, $2, NULL);
 	    }
-	| STRING '{' vers_tag '}' ';'
+	| string '{' vers_tag '}' ';'
 	    {
 	      script_register_vers_node (closure, $1.value, $1.length, $3,
 					 NULL);
 	    }
-	| STRING '{' vers_tag '}' verdep ';'
+	| string '{' vers_tag '}' verdep ';'
 	    {
 	      script_register_vers_node (closure, $1.value, $1.length, $3, $5);
 	    }
 	;
 
 verdep:
-	  STRING
+	  string
 	    {
 	      $$ = script_add_vers_depend (closure, NULL, $1.value, $1.length);
 	    }
-	| verdep STRING
+	| verdep string
 	    {
 	      $$ = script_add_vers_depend (closure, $1, $2.value, $2.length);
 	    }
@@ -473,34 +477,68 @@ vers_tag:
 	    { $$ = script_new_vers_node (closure, $3, $7); }
 	;
 
+/* Here is one of the rare places we care about the distinction
+   between STRING and QUOTED_STRING.  For QUOTED_STRING, we do exact
+   matching on the pattern, so we pass in true for the exact_match
+   parameter.  For STRING, we do glob matching and pass in false.  */
 vers_defns:
 	  STRING
 	    {
 	      $$ = script_new_vers_pattern (closure, NULL, $1.value,
-					    $1.length);
+					    $1.length, 0);
+	    }
+	| QUOTED_STRING
+	    {
+	      $$ = script_new_vers_pattern (closure, NULL, $1.value,
+					    $1.length, 1);
 	    }
 	| vers_defns ';' STRING
 	    {
-	      $$ = script_new_vers_pattern (closure, $1, $3.value, $3.length);
+	      $$ = script_new_vers_pattern (closure, $1, $3.value,
+                                            $3.length, 0);
 	    }
-        | /* Push STRING on the language stack. */
-          EXTERN STRING '{'
-	    { version_script_push_lang(closure, $2.value, $2.length); }
+	| vers_defns ';' QUOTED_STRING
+	    {
+	      $$ = script_new_vers_pattern (closure, $1, $3.value,
+                                            $3.length, 1);
+	    }
+        | /* Push string on the language stack. */
+          EXTERN string '{'
+	    { version_script_push_lang (closure, $2.value, $2.length); }
 	  vers_defns opt_semicolon '}'
 	    {
 	      $$ = $5;
 	      version_script_pop_lang(closure);
 	    }
+        | /* Push string on the language stack.  This is more complicated
+             than the other cases because we need to merge the linked-list
+             state from the pre-EXTERN defns and the post-EXTERN defns.  */
+          vers_defns ';' EXTERN string '{'
+	    { version_script_push_lang (closure, $4.value, $4.length); }
+	  vers_defns opt_semicolon '}'
+	    {
+	      $$ = script_merge_expressions ($1, $7);
+	      version_script_pop_lang(closure);
+	    }
         | EXTERN  // "extern" as a symbol name
 	    {
 	      $$ = script_new_vers_pattern (closure, NULL, "extern",
-					    sizeof("extern") - 1);
+					    sizeof("extern") - 1, 1);
 	    }
 	| vers_defns ';' EXTERN
 	    {
 	      $$ = script_new_vers_pattern (closure, $1, "extern",
-					    sizeof("extern") - 1);
+					    sizeof("extern") - 1, 1);
 	    }
+	;
+
+/* A string can be either a STRING or a QUOTED_STRING.  Almost all the
+   time we don't care, and we use this rule.  */
+string:
+          STRING
+	    { $$ = $1; }
+	| QUOTED_STRING
+	    { $$ = $1; }
 	;
 
 /* Some statements require a terminator, which may be a semicolon or a

@@ -125,6 +125,7 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object,
 {
   unsigned int debug_shndx;
   for (debug_shndx = 0; debug_shndx < object->shnum(); ++debug_shndx)
+    // FIXME: do this more efficiently: section_name() isn't super-fast
     if (object->section_name(debug_shndx) == ".debug_line")
       {
         section_size_type buffer_size;

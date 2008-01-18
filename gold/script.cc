@@ -1517,7 +1517,7 @@ yylex(YYSTYPE* lvalp, void* closurev)
 
     case Token::TOKEN_QUOTED_STRING:
       lvalp->string.value = token->string_value(&lvalp->string.length);
-      return STRING;
+      return QUOTED_STRING;
 
     case Token::TOKEN_OPERATOR:
       return token->operator_value();
@@ -1713,11 +1713,14 @@ script_pop_lex_mode(void* closurev)
 // pattern and language should be from the stringpool
 struct Version_expression {
   Version_expression(const std::string& pattern,
-                     const std::string& language)
-      : pattern(pattern), language(language) {}
+                     const std::string& language,
+                     bool exact_match)
+      : pattern(pattern), language(language), exact_match(exact_match) {}
 
   std::string pattern;
   std::string language;
+  // If false, we use glob() to match pattern.  If true, we use strcmp().
+  bool exact_match;
 };
 
 
@@ -1789,14 +1792,15 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
   for (size_t j = 0; j < version_trees_.size(); ++j)
     {
       // Is it a global symbol for this version?
-      const Version_expression_list* exp =
+      const Version_expression_list* explist =
           check_global ? version_trees_[j]->global : version_trees_[j]->local;
-      if (exp != NULL)
-        for (size_t k = 0; k < exp->expressions.size(); ++k)
+      if (explist != NULL)
+        for (size_t k = 0; k < explist->expressions.size(); ++k)
           {
             const char* name_to_match = symbol_name;
+            const struct Version_expression& exp = explist->expressions[k];
             char* demangled_name = NULL;
-            if (exp->expressions[k].language == "C++")
+            if (exp.language == "C++")
               {
                 demangled_name = cplus_demangle(symbol_name,
                                                 DMGL_ANSI | DMGL_PARAMS);
@@ -1805,7 +1809,7 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
                   continue;
                 name_to_match = demangled_name;
               }
-            else if (exp->expressions[k].language == "Java")
+            else if (exp.language == "Java")
               {
                 demangled_name = cplus_demangle(symbol_name,
                                                 (DMGL_ANSI | DMGL_PARAMS
@@ -1815,8 +1819,12 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
                   continue;
                 name_to_match = demangled_name;
               }
-            bool matched = fnmatch(exp->expressions[k].pattern.c_str(),
-                                   name_to_match, FNM_NOESCAPE) == 0;
+            bool matched;
+            if (exp.exact_match)
+              matched = strcmp(exp.pattern.c_str(), name_to_match) == 0;
+            else
+              matched = fnmatch(exp.pattern.c_str(), name_to_match,
+                                FNM_NOESCAPE) == 0;
             if (demangled_name != NULL)
               free(demangled_name);
             if (matched)
@@ -1893,15 +1901,30 @@ script_add_vers_depend(void* closurev,
 extern "C" struct Version_expression_list *
 script_new_vers_pattern(void* closurev,
 			struct Version_expression_list *expressions,
-			const char *pattern, int patlen)
+			const char *pattern, int patlen, int exact_match)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   if (expressions == NULL)
     expressions = closure->version_script()->allocate_expression_list();
   expressions->expressions.push_back(
       Version_expression(std::string(pattern, patlen),
-                         closure->get_current_language()));
+                         closure->get_current_language(),
+                         static_cast<bool>(exact_match)));
   return expressions;
+}
+
+// Attaches b to the end of a, and clears b.  So a = a + b and b = {}.
+
+extern "C" struct Version_expression_list*
+script_merge_expressions(struct Version_expression_list *a,
+                         struct Version_expression_list *b)
+{
+  a->expressions.insert(a->expressions.end(),
+                        b->expressions.begin(), b->expressions.end());
+  // We could delete b and remove it from expressions_lists_, but
+  // that's a lot of work.  This works just as well.
+  b->expressions.clear();
+  return a;
 }
 
 // Combine the global and local expressions into a a Version_tree.
@@ -1918,7 +1941,7 @@ script_new_vers_node(void* closurev,
   return tree;
 }
 
-// Handle a transition in language, such as at the 
+// Handle a transition in language, such as at the
 // start or end of 'extern "C++"'
 
 extern "C" void

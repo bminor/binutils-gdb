@@ -73,6 +73,12 @@ check ver_matching_test.stdout "Base  *bla$"
 check ver_matching_test.stdout "V2  *blaz$"
 check ver_matching_test.stdout "V2  *blazb$"
 
+# Stuff inside quotes is matched literally, so "baz(int*, char)" should
+# not match the "baz(int *)" entry in the version table.
+check ver_matching_test.stdout "V1   *baz(int\\*)$"
+check_missing ver_matching_test.stdout "V1   *baz(int\\*, char)$"
+check_missing ver_matching_test.stdout "V1   *baz(char\\*, int)$"
+
 # TODO: foo1 should be a local symbol and not show up in the .dynsym
 # dump, but we haven't figured out how to suppress it yet.
 # check_missing ver_matching_test.stdout "foo1"

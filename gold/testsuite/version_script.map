@@ -3,11 +3,16 @@ V1 {
         extern "C++"
         {
            "bar()";
-           myns::*;
+           "baz(int*)";
         };
 	foo;
 	blaza*;
         bar*;
+	# Make sure we parse "extern" when it's not first thing in the section.
+        extern "C++"
+        {
+           myns::*;
+        };
 	# Would be a keyword in a linker script.
 	SECTIONS;
 	sizeof_headers;
