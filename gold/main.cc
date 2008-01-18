@@ -39,6 +39,85 @@
 
 using namespace gold;
 
+// This function emits the commandline to a hard-coded file in temp.
+// This is useful for debugging since ld is typically invoked by gcc,
+// so its commandline is not always easy to extract.  You should be
+// able to run 'gcc -B... foo.o -o foo' to invoke this linker the
+// first time, and then /tmp/ld-run-foo.sh to invoke it on subsequent
+// runes.  "/tmp/ld-run-foo.sh debug" will run the linker inside gdb
+// (or whatever value the environment variable GDB is set to), for
+// even easier debugging.  Since this is a debugging-only tool, and
+// creates files, it is only turned on when the user explicitly asks
+// for it, by compiling with -DDEBUG.  Do not do this for release
+// versions of the linker!
+
+#ifdef DEBUG
+#include <stdio.h>
+#include <sys/stat.h>    // for chmod()
+
+static std::string
+collect_argv(int argc, char** argv)
+{
+  // This is used by write_debug_script(), which wants the unedited argv.
+  std::string args;
+  for (int i = 0; i < argc; ++i)
+    {
+      args.append(" '");
+      // Now append argv[i], but with all single-quotes escaped
+      const char* argpos = argv[i];
+      while (1)
+        {
+          const int len = strcspn(argpos, "'");
+          args.append(argpos, len);
+          if (argpos[len] == '\0')
+            break;
+          args.append("'\"'\"'");
+          argpos += len + 1;
+        }
+      args.append("'");
+    }
+  return args;
+}
+
+static void
+write_debug_script(std::string filename_str,
+		   const char* argv_0, const char* args)
+{
+  size_t slash = filename_str.rfind('/');
+  if (slash != std::string::npos)
+    filename_str = filename_str.c_str() + slash + 1;
+  filename_str = std::string("/var/tmp/ld-run-") + filename_str + ".sh";
+  const char* filename = filename_str.c_str();
+  FILE* fp = fopen(filename, "w");
+  if (fp)
+    {
+      fprintf(fp, "[ \"$1\" = debug ] && PREFIX=\"${GDB-/home/build/static/projects/tools/gdb} --annotate=3 --fullname %s --args\" && shift\n", argv_0);
+      fprintf(fp, "$PREFIX%s $*\n", args);
+      fclose(fp);
+      chmod(filename, 0755);
+    }
+  else
+    filename = "[none]";
+  fprintf(stderr, "Welcome to gold!  Commandline written to %s.\n", filename);
+  fflush(stderr);
+}
+
+#else // !defined(DEBUG)
+
+static inline std::string
+collect_argv(int, char**)
+{
+  return "";
+}
+
+static inline void
+write_debug_script(std::string, const char*, const char*)
+{
+}
+
+#endif // !defined(DEBUG)
+
+
 int
 main(int argc, char** argv)
 {
@@ -52,6 +131,9 @@ main(int argc, char** argv)
   textdomain (PACKAGE);
 
   program_name = argv[0];
+
+  // This is used by write_debug_script(), which wants the unedited argv.
+  std::string args = collect_argv(argc, argv);
 
   Errors errors(program_name);
 
@@ -74,6 +156,10 @@ main(int argc, char** argv)
   // Store some options in the globally accessible parameters.
   set_parameters_from_options(&command_line.options());
 
+  // Do this as early as possible (since it prints a welcome message).
+  write_debug_script(command_line.options().output_file_name(),
+                     program_name, args.c_str());
+
   // The work queue.
   Workqueue workqueue(command_line.options());
 
@@ -82,7 +168,7 @@ main(int argc, char** argv)
 
   // The symbol table.  We're going to guess here how many symbols
   // we're going to see based on the number of input files.  Even when
-  // this is off, it means at worse we don't quite optimize hashtable
+  // this is off, it means at worst we don't quite optimize hashtable
   // resizing as well as we could have (perhap using more memory).
   Symbol_table symtab(command_line.number_of_input_files() * 1024,
                       command_line.options().version_script());
