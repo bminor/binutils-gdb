@@ -2743,7 +2743,7 @@ value_slice (struct value *array, int lowbound, int length)
 	  else if (element > 0)
 	    {
 	      int j = i % TARGET_CHAR_BIT;
-	      if (BITS_BIG_ENDIAN)
+	      if (gdbarch_bits_big_endian (current_gdbarch))
 		j = TARGET_CHAR_BIT - 1 - j;
 	      value_contents_raw (slice)[i / TARGET_CHAR_BIT] |= (1 << j);
 	    }

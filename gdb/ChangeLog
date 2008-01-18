@@ -1,5 +1,25 @@
 2008-01-18  Markus Deuling  <deuling@de.ibm.com>
 
+	* gdbarch.sh (function_list): Add new property bits_big_endian to
+	gdbarch structure.
+	* gdbarch.{c,h}: Regenerate.
+
+	* value.c (struct value): Replace BITS_BIG_ENDIAN by
+	gdbarch_bits_big_endian (comment).
+	(unpack_field_as_long, modify_field): Likewise.
+	* value.h: Likewise (comment).
+	* valops.c (value_slice): Likewise.
+	* valarith.c (value_subscript, value_bit_index): Likewise.
+	* gdbtypes.h (field): Likewise (comment).
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* dwarf2read.c (dwarf2_add_field): Likewise.
+	* ada-lang.c (decode_packed_array, ada_value_primitive_packed_val)
+	(move_bits, ada_value_assign, value_assign_to_component): Likewise.
+	
+	* defs.h (BITS_BIG_ENDIAN): Remove.
+
+2008-01-18  Markus Deuling  <deuling@de.ibm.com>
+
 	* jv-exp.y (yylex): Replace DEPRECATED_STREQN with the appropriate
 	function calls.
 	* m2-exp.y (yylex): Likewise.

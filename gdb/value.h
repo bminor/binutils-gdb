@@ -62,8 +62,8 @@ extern int value_bitsize (struct value *);
 extern void set_value_bitsize (struct value *, int bit);
 
 /* Only used for bitfields; position of start of field.  For
-   BITS_BIG_ENDIAN=0 targets, it is the position of the LSB.  For
-   BITS_BIG_ENDIAN=1 targets, it is the position of the MSB.  */
+   gdbarch_bits_big_endian=0 targets, it is the position of the LSB.  For
+   gdbarch_bits_big_endian=1 targets, it is the position of the MSB.  */
 
 extern int value_bitpos (struct value *);
 extern void set_value_bitpos (struct value *, int bit);

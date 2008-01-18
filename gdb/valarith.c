@@ -230,7 +230,8 @@ value_subscript (struct value *array, struct value *idx)
       offset = index / TARGET_CHAR_BIT;
       byte = *((char *) value_contents (array) + offset);
       bit_index = index % TARGET_CHAR_BIT;
-      byte >>= (BITS_BIG_ENDIAN ? TARGET_CHAR_BIT - 1 - bit_index : bit_index);
+      byte >>= (gdbarch_bits_big_endian (current_gdbarch) ?
+		TARGET_CHAR_BIT - 1 - bit_index : bit_index);
       v = value_from_longest (LA_BOOL_TYPE, byte & 1);
       set_value_bitpos (v, bit_index);
       set_value_bitsize (v, 1);
@@ -1575,7 +1576,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   word = unpack_long (builtin_type_unsigned_char,
 		      valaddr + (rel_index / TARGET_CHAR_BIT));
   rel_index %= TARGET_CHAR_BIT;
-  if (BITS_BIG_ENDIAN)
+  if (gdbarch_bits_big_endian (current_gdbarch))
     rel_index = TARGET_CHAR_BIT - 1 - rel_index;
   return (word >> rel_index) & 1;
 }

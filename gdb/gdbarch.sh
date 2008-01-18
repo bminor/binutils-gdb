@@ -343,6 +343,11 @@ i:int:byte_order:::BFD_ENDIAN_BIG
 i:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
 #
 i:const struct target_desc *:target_desc:::::::paddr_d ((long) gdbarch->target_desc)
+
+# The bit byte-order has to do just with numbering of bits in debugging symbols
+# and such.  Conceptually, it's quite separate from byte/word byte order.
+v:int:bits_big_endian:::1:(gdbarch->byte_order == BFD_ENDIAN_BIG)::0
+
 # Number of bits in a char or unsigned char for the target machine.
 # Just like CHAR_BIT in <limits.h> but describes the target machine.
 # v:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:

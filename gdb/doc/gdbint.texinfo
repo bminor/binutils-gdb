@@ -3344,11 +3344,17 @@ Used to notify if the compiler promotes a @code{short} or @code{char}
 parameter to an @code{int}, but still reports the parameter as its
 original type, rather than the promoted type.
 
-@item BITS_BIG_ENDIAN
-@findex BITS_BIG_ENDIAN
-Define this if the numbering of bits in the targets does @strong{not} match the
-endianness of the target byte order.  A value of 1 means that the bits
+@item gdbarch_bits_big_endian (@var{gdbarch})
+@findex gdbarch_bits_big_endian
+This is used if the numbering of bits in the targets does @strong{not} match
+the endianness of the target byte order.  A value of 1 means that the bits
 are numbered in a big-endian bit order, 0 means little-endian.
+
+@item set_gdbarch_bits_big_endian (@var{gdbarch}, @var{bits_big_endian})
+@findex set_gdbarch_bits_big_endian
+Calling set_gdbarch_bits_big_endian with a value of 1 indicates that the
+bits in the target are numbered in a big-endian bit order, 0 indicates
+little-endian.
 
 @item BREAKPOINT
 @findex BREAKPOINT

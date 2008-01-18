@@ -1011,14 +1011,6 @@ enum { MAX_REGISTER_SIZE = 16 };
 #define HOST_CHAR_BIT TARGET_CHAR_BIT
 #endif
 
-/* The bit byte-order has to do just with numbering of bits in
-   debugging symbols and such.  Conceptually, it's quite separate
-   from byte/word byte order.  */
-
-#if !defined (BITS_BIG_ENDIAN)
-#define BITS_BIG_ENDIAN (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
-#endif
-
 /* In findvar.c.  */
 
 extern LONGEST extract_signed_integer (const gdb_byte *, int);

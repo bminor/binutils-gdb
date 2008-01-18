@@ -72,8 +72,8 @@ struct value
   int bitsize;
 
   /* Only used for bitfields; position of start of field.  For
-     BITS_BIG_ENDIAN=0 targets, it is the position of the LSB.  For
-     BITS_BIG_ENDIAN=1 targets, it is the position of the MSB. */
+     gdbarch_bits_big_endian=0 targets, it is the position of the LSB.  For
+     gdbarch_bits_big_endian=1 targets, it is the position of the MSB. */
   int bitpos;
 
   /* Frame register value is relative to.  This will be described in
@@ -1481,7 +1481,7 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
 
   /* Extract bits.  See comment above. */
 
-  if (BITS_BIG_ENDIAN)
+  if (gdbarch_bits_big_endian (current_gdbarch))
     lsbcount = (sizeof val * 8 - bitpos % 8 - bitsize);
   else
     lsbcount = (bitpos % 8);
@@ -1537,7 +1537,7 @@ modify_field (gdb_byte *addr, LONGEST fieldval, int bitpos, int bitsize)
   oword = extract_unsigned_integer (addr, sizeof oword);
 
   /* Shifting for bit field depends on endianness of the target machine.  */
-  if (BITS_BIG_ENDIAN)
+  if (gdbarch_bits_big_endian (current_gdbarch))
     bitpos = sizeof (oword) * 8 - bitpos - bitsize;
 
   oword &= ~(mask << bitpos);

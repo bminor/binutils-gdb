@@ -1875,7 +1875,8 @@ decode_packed_array (struct value *arr)
       return NULL;
     }
 
-  if (BITS_BIG_ENDIAN && ada_is_modular_type (value_type (arr)))
+  if (gdbarch_bits_big_endian (current_gdbarch)
+      && ada_is_modular_type (value_type (arr)))
     {
        /* This is a (right-justified) modular type representing a packed
  	 array with no wrapper.  In order to interpret the value through
@@ -1998,7 +1999,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   int len = (bit_size + bit_offset + HOST_CHAR_BIT - 1) / 8;
   /* Transmit bytes from least to most significant; delta is the direction
      the indices move.  */
-  int delta = BITS_BIG_ENDIAN ? -1 : 1;
+  int delta = gdbarch_bits_big_endian (current_gdbarch) ? -1 : 1;
 
   type = ada_check_typedef (type);
 
@@ -2047,7 +2048,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       memset (unpacked, 0, TYPE_LENGTH (type));
       return v;
     }
-  else if (BITS_BIG_ENDIAN)
+  else if (gdbarch_bits_big_endian (current_gdbarch))
     {
       src = len - 1;
       if (has_negatives (type)
@@ -2141,7 +2142,7 @@ move_bits (gdb_byte *target, int targ_offset, const gdb_byte *source,
   targ_offset %= HOST_CHAR_BIT;
   source += src_offset / HOST_CHAR_BIT;
   src_offset %= HOST_CHAR_BIT;
-  if (BITS_BIG_ENDIAN)
+  if (gdbarch_bits_big_endian (current_gdbarch))
     {
       accum = (unsigned char) *source;
       source += 1;
@@ -2229,7 +2230,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
         fromval = value_cast (type, fromval);
 
       read_memory (to_addr, buffer, len);
-      if (BITS_BIG_ENDIAN)
+      if (gdbarch_bits_big_endian (current_gdbarch))
         move_bits (buffer, value_bitpos (toval),
                    value_contents (fromval),
                    TYPE_LENGTH (value_type (fromval)) * TARGET_CHAR_BIT -
@@ -2276,7 +2277,7 @@ value_assign_to_component (struct value *container, struct value *component,
   else
     bits = value_bitsize (component);
 
-  if (BITS_BIG_ENDIAN)
+  if (gdbarch_bits_big_endian (current_gdbarch))
     move_bits (value_contents_writeable (container) + offset_in_container, 
 	       value_bitpos (container) + bit_offset_in_container,
 	       value_contents (val),

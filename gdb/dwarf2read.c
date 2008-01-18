@@ -3502,7 +3502,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
       if (attr)
 	{
-	  if (BITS_BIG_ENDIAN)
+	  if (gdbarch_bits_big_endian (current_gdbarch))
 	    {
 	      /* For big endian bits, the DW_AT_bit_offset gives the
 	         additional bit offset from the MSB of the containing

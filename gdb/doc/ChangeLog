@@ -1,3 +1,8 @@
+2008-01-18  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbint.texinfo (Target Conditionals): Replace the description of
+	BITS_BIG_ENDIAN with a description of gdbarch_bits_big_endian.
+
 2008-01-12  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* gdb.texinfo (C Operators): Remove incorrect parenthetical comment
