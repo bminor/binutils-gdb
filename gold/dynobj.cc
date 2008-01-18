@@ -27,6 +27,8 @@
 
 #include "elfcpp.h"
 #include "parameters.h"
+#include "options.h"
+#include "script.h"
 #include "symtab.h"
 #include "dynobj.h"
 

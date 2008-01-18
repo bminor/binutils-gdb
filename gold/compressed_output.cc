@@ -27,6 +27,7 @@
 #endif
 
 #include "parameters.h"
+#include "options.h"
 #include "compressed_output.h"
 
 namespace gold

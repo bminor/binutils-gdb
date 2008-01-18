@@ -2297,12 +2297,7 @@ class Output_segment
 class Output_file
 {
  public:
-  Output_file(const General_options& options, Target*);
-
-  // Get a pointer to the target.
-  Target*
-  target() const
-  { return this->target_; }
+  Output_file(const char* name);
 
   // Open the output file.  FILE_SIZE is the final size of the file.
   void
@@ -2372,11 +2367,6 @@ class Output_file
   void
   unmap();
 
-
-  // General options.
-  const General_options& options_;
-  // Target.
-  Target* target_;
   // File name.
   const char* name_;
   // File descriptor.

@@ -581,6 +581,20 @@ Input_file::Input_file(const Task* task, const char* name,
   gold_assert(ok);
 }
 
+// Return the position dependent options in force for this file.
+
+const Position_dependent_options&
+Input_file::options() const
+{
+  return this->input_argument_->options();
+}
+
+// Return the name given by the user.  For -lc this will return "c".
+
+const char*
+Input_file::name() const
+{ return this->input_argument_->name(); }
+
 // Open the file.
 
 // If the filename is not absolute, we assume it is in the current

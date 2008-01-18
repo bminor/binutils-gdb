@@ -28,6 +28,7 @@
 #include <utility>
 
 #include "parameters.h"
+#include "options.h"
 #include "output.h"
 #include "symtab.h"
 #include "dynobj.h"
@@ -52,8 +53,7 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
-  Output_file* of = new Output_file(this->options_,
-                                    this->input_objects_->target());
+  Output_file* of = new Output_file(parameters->output_file_name());
   of->open(file_size);
 
   // Queue up the final set of tasks.

@@ -29,12 +29,13 @@
 #include <map>
 #include <string>
 
-#include "options.h"
 #include "token.h"
 
 namespace gold
 {
 
+class Position_dependent_options;
+class Input_file_argument;
 class Dirsearch;
 class File_view;
 
@@ -383,8 +384,7 @@ class Input_file
 
   // Return the name given by the user.  For -lc this will return "c".
   const char*
-  name() const
-  { return this->input_argument_->name(); }
+  name() const;
 
   // Return the file name.  For -lc this will return something like
   // "/usr/lib/libc.so".
@@ -401,8 +401,7 @@ class Input_file
 
   // Return the position dependent options.
   const Position_dependent_options&
-  options() const
-  { return this->input_argument_->options(); }
+  options() const;
 
   // Return the file.
   File_read&

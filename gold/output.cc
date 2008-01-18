@@ -1861,7 +1861,7 @@ Output_section::do_write(Output_file* of)
        p != this->fills_.end();
        ++p)
     {
-      std::string fill_data(of->target()->code_fill(p->length()));
+      std::string fill_data(parameters->target()->code_fill(p->length()));
       of->write(output_section_file_offset + p->section_offset(),
                 fill_data.data(), fill_data.size());
     }
@@ -2372,10 +2372,8 @@ Output_segment::write_section_headers_list(const Layout* layout,
 
 // Output_file methods.
 
-Output_file::Output_file(const General_options& options, Target* target)
-  : options_(options),
-    target_(target),
-    name_(options.output_file_name()),
+Output_file::Output_file(const char* name)
+  : name_(name),
     o_(-1),
     file_size_(0),
     base_(NULL),
