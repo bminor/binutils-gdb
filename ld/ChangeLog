@@ -1,3 +1,8 @@
+2008-01-18  Bob Wilson  <bob.wilson@acm.org>
+
+	* scripttempl/elfxtensa.sc: Merge ENTRY and .note.gnu.build-id
+	changes from elf.sc.
+	
 2008-01-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_size_sections_1): Simplify SEC_NEVER_LOAD test.
