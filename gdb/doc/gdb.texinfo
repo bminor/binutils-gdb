@@ -2836,40 +2836,17 @@ number of the breakpoint you've set most recently; see @ref{Convenience
 Vars,, Convenience Variables}, for a discussion of what you can do with
 convenience variables.
 
-You have several ways to say where the breakpoint should go.
-
 @table @code
-@item break @var{function}
-Set a breakpoint at entry to function @var{function}.
+@item break @var{location}
+Set a breakpoint at the given @var{location}, which can specify a
+function name, a line number, or an address of an instruction.
+(@xref{Specify Location}, for a list of all the possible ways to
+specify a @var{location}.)  The breakpoint will stop your program just
+before it executes any of the code in the specified @var{location}.
+
 When using source languages that permit overloading of symbols, such as
-C@t{++}, @var{function} may refer to more than one possible place to break.
+C@t{++}, a function name may refer to more than one possible place to break.
 @xref{Breakpoint Menus,,Breakpoint Menus}, for a discussion of that situation.
-
-@item break +@var{offset}
-@itemx break -@var{offset}
-Set a breakpoint some number of lines forward or back from the position
-at which execution stopped in the currently selected @dfn{stack frame}.
-(@xref{Frames, ,Frames}, for a description of stack frames.)
-
-@item break @var{linenum}
-Set a breakpoint at line @var{linenum} in the current source file.
-The current source file is the last file whose source text was printed.
-The breakpoint will stop your program just before it executes any of the
-code on that line.
-
-@item break @var{filename}:@var{linenum}
-Set a breakpoint at line @var{linenum} in source file @var{filename}.
-
-@item break @var{filename}:@var{function}
-Set a breakpoint at entry to function @var{function} found in file
-@var{filename}.  Specifying a file name as well as a function name is
-superfluous except when multiple files contain similarly named
-functions.
-
-@item break *@var{address}
-Set a breakpoint at address @var{address}.  You can use this to set
-breakpoints in parts of your program which do not have debugging
-information or source files.
 
 @item break
 When called without any arguments, @code{break} sets a breakpoint at
@@ -2925,7 +2902,6 @@ or disable unused hardware breakpoints before setting new ones
 For remote targets, you can restrict the number of hardware
 breakpoints @value{GDBN} will use, see @ref{set remote
 hardware-breakpoint-limit}.
-
 
 @kindex thbreak
 @item thbreak @var{args}
@@ -3520,6 +3496,12 @@ selected stack frame (@pxref{Selection, ,Selecting a Frame}).  When
 the innermost frame is selected, this is a good way to delete a
 breakpoint where your program just stopped.
 
+@item clear @var{location}
+Delete any breakpoints set at the specified @var{location}.
+@xref{Specify Location}, for the various forms of @var{location}; the
+most useful ones are listed below:
+
+@table @code
 @item clear @var{function}
 @itemx clear @var{filename}:@var{function}
 Delete any breakpoints set at entry to the named @var{function}.
@@ -3528,6 +3510,7 @@ Delete any breakpoints set at entry to the named @var{function}.
 @itemx clear @var{filename}:@var{linenum}
 Delete any breakpoints set at or within the code of the specified
 @var{linenum} of the specified @var{filename}.
+@end table
 
 @cindex delete breakpoints
 @kindex delete
@@ -4158,8 +4141,8 @@ argument.
 @itemx u @var{location}
 Continue running your program until either the specified location is
 reached, or the current stack frame returns.  @var{location} is any of
-the forms of argument acceptable to @code{break} (@pxref{Set Breaks,
-,Setting Breakpoints}).  This form of the command uses breakpoints, and
+the forms described in @ref{Specify Location}.
+This form of the command uses temporary breakpoints, and
 hence is quicker than @code{until} without an argument.  The specified
 location is actually reached only if it is in the current frame.  This
 implies that @code{until} can be used to skip over recursive function
@@ -4182,8 +4165,9 @@ invocations have returned.
 @kindex advance @var{location}
 @itemx advance @var{location}
 Continue running the program up to the given @var{location}.  An argument is
-required, which should be of the same form as arguments for the @code{break}
-command.  Execution will also stop upon exit from the current stack
+required, which should be of one of the forms described in
+@ref{Specify Location}.
+Execution will also stop upon exit from the current stack
 frame.  This command is similar to @code{until}, but @code{advance} will
 not skip over recursive function calls, and the target location doesn't
 have to be in the same frame as the current one.
@@ -4341,7 +4325,8 @@ breakpoints on all threads, or on a particular thread.
 @item break @var{linespec} thread @var{threadno}
 @itemx break @var{linespec} thread @var{threadno} if @dots{}
 @var{linespec} specifies source lines; there are several ways of
-writing them, but the effect is always to specify some source line.
+writing them (@pxref{Specify Location}), but the effect is always to
+specify some source line.
 
 Use the qualifier @samp{thread @var{threadno}} with a breakpoint command
 to specify that you only want @value{GDBN} to stop the program when a
@@ -4904,6 +4889,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 
 @menu
 * List::                        Printing source lines
+* Specify Location::            How to specify code locations
 * Edit::                        Editing source files
 * Search::                      Searching source files
 * Source Path::                 Specifying source directories
@@ -4917,7 +4903,8 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 @kindex l @r{(@code{list})}
 To print lines from a source file, use the @code{list} command
 (abbreviated @code{l}).  By default, ten lines are printed.
-There are several ways to specify what part of the file you want to print.
+There are several ways to specify what part of the file you want to
+print; see @ref{Specify Location}, for the full list.
 
 Here are the forms of the @code{list} command most commonly used:
 
@@ -4962,10 +4949,11 @@ than listing the same lines again.  An exception is made for an
 argument of @samp{-}; that argument is preserved in repetition so that
 each repetition moves up in the source file.
 
-@cindex linespec
 In general, the @code{list} command expects you to supply zero, one or two
 @dfn{linespecs}.  Linespecs specify source lines; there are several ways
-of writing them, but the effect is always to specify some source line.
+of writing them (@pxref{Specify Location}), but the effect is always
+to specify some source line.
+
 Here is a complete description of the possible arguments for @code{list}:
 
 @table @code
@@ -4974,7 +4962,9 @@ Print lines centered around the line specified by @var{linespec}.
 
 @item list @var{first},@var{last}
 Print lines from @var{first} to @var{last}.  Both arguments are
-linespecs.
+linespecs.  When a @code{list} command has two linespecs, and the
+source file of the second linespec is omitted, this refers to
+the same source file as the first linespec.
 
 @item list ,@var{last}
 Print lines ending with @var{last}.
@@ -4992,41 +4982,85 @@ Print lines just before the lines last printed.
 As described in the preceding table.
 @end table
 
-Here are the ways of specifying a single source line---all the
-kinds of linespec.
+@node Specify Location
+@section Specifying a Location
+@cindex specifying location
+@cindex linespec
+
+Several @value{GDBN} commands accept arguments that specify a location
+of your program's code.  Since @value{GDBN} is a source-level
+debugger, a location usually specifies some line in the source code;
+for that reason, locations are also known as @dfn{linespecs}.
+
+Here are all the different ways of specifying a code location that
+@value{GDBN} understands:
 
 @table @code
-@item @var{number}
-Specifies line @var{number} of the current source file.
-When a @code{list} command has two linespecs, this refers to
-the same source file as the first linespec.
-
-@item +@var{offset}
-Specifies the line @var{offset} lines after the last line printed.
-When used as the second linespec in a @code{list} command that has
-two, this specifies the line @var{offset} lines down from the
-first linespec.
+@item @var{linenum}
+Specifies the line number @var{linenum} of the current source file.
 
 @item -@var{offset}
-Specifies the line @var{offset} lines before the last line printed.
+@itemx +@var{offset}
+Specifies the line @var{offset} lines before or after the @dfn{current
+line}.  For the @code{list} command, the current line is the last one
+printed; for the breakpoint commands, this is the line at which
+execution stopped in the currently selected @dfn{stack frame}
+(@pxref{Frames, ,Frames}, for a description of stack frames.)  When
+used as the second of the two linespecs in a @code{list} command,
+this specifies the line @var{offset} lines up or down from the first
+linespec.
 
-@item @var{filename}:@var{number}
-Specifies line @var{number} in the source file @var{filename}.
+@item @var{filename}:@var{linenum}
+Specifies the line @var{linenum} in the source file @var{filename}.
 
 @item @var{function}
 Specifies the line that begins the body of the function @var{function}.
-For example: in C, this is the line with the open brace.
+For example, in C, this is the line with the open brace.
 
 @item @var{filename}:@var{function}
-Specifies the line of the open-brace that begins the body of the
-function @var{function} in the file @var{filename}.  You only need the
-file name with a function name to avoid ambiguity when there are
-identically named functions in different source files.
+Specifies the line that begins the body of the function @var{function}
+in the file @var{filename}.  You only need the file name with a
+function name to avoid ambiguity when there are identically named
+functions in different source files.
 
 @item *@var{address}
-Specifies the line containing the program address @var{address}.
-@var{address} may be any expression.
+Specifies the program address @var{address}.  For line-oriented
+commands, such as @code{list} and @code{edit}, this specifies a source
+line that contains @var{address}.  For @code{break} and other
+breakpoint oriented commands, this can be used to set breakpoints in
+parts of your program which do not have debugging information or
+source files.
+
+Here @var{address} may be any expression valid in the current working
+language (@pxref{Languages, working language}) that specifies a code
+address.  As a convenience, @value{GDBN} extends the semantics of
+expressions used in locations to cover the situations that frequently
+happen during debugging.  Here are the various forms of @var{address}:
+
+@table @code
+@item @var{expression}
+Any expression valid in the current working language.
+
+@item @var{funcaddr}
+An address of a function or procedure derived from its name.  In C,
+C@t{++}, Java, Objective-C, Fortran, minimal, and assembly, this is
+simply the function's name @var{function} (and actually a special case
+of a valid expression).  In Pascal and Modula-2, this is
+@code{&@var{function}}.  In Ada, this is @code{@var{function}'Address}
+(although the Pascal form also works).
+
+This form specifies the address of the function's first instruction,
+before the stack frame and arguments have been set up.
+
+@item '@var{filename}'::@var{funcaddr}
+Like @var{funcaddr} above, but also specifies the name of the source
+file explicitly.  This is useful if the name of the function does not
+specify the function unambiguously, e.g., if there are several
+functions with identical names in different source files.
 @end table
+
+@end table
+
 
 @node Edit
 @section Editing Source Files
@@ -5039,32 +5073,24 @@ The editing program of your choice
 is invoked with the current line set to
 the active line in the program.
 Alternatively, there are several ways to specify what part of the file you
-want to print if you want to see other parts of the program.
-
-Here are the forms of the @code{edit} command most commonly used:
+want to print if you want to see other parts of the program:
 
 @table @code
-@item edit
-Edit the current source file at the active line number in the program.
+@item edit @var{location}
+Edit the source file specified by @code{location}.  Editing starts at
+that @var{location}, e.g., at the specified source line of the
+specified file.  @xref{Specify Location}, for all the possible forms
+of the @var{location} argument; here are the forms of the @code{edit}
+command most commonly used:
 
+@table @code
 @item edit @var{number}
 Edit the current source file with @var{number} as the active line number.
 
 @item edit @var{function}
 Edit the file containing @var{function} at the beginning of its definition.
+@end table
 
-@item edit @var{filename}:@var{number}
-Specifies line @var{number} in the source file @var{filename}.
-
-@item edit @var{filename}:@var{function}
-Specifies the line that begins the body of the
-function @var{function} in the file @var{filename}.  You only need the
-file name with a function name to avoid ambiguity when there are
-identically named functions in different source files.
-
-@item edit *@var{address}
-Specifies the line containing the program address @var{address}.
-@var{address} may be any expression.
 @end table
 
 @subsection Choosing your Editor
@@ -5335,8 +5361,7 @@ well as hex.
 @item info line @var{linespec}
 Print the starting and ending addresses of the compiled code for
 source line @var{linespec}.  You can specify source lines in any of
-the ways understood by the @code{list} command (@pxref{List, ,Printing
-Source Lines}).
+the ways documented in @ref{Specify Location}.
 @end table
 
 For example, we can use @code{info line} to discover the location of
@@ -10988,7 +11013,8 @@ lists all source files where a type is defined.
 List all the variables local to a particular scope.  This command
 accepts a @var{location} argument---a function name, a source line, or
 an address preceded by a @samp{*}, and prints all the variables local
-to the scope defined by that location.  For example:
+to the scope defined by that location.  (@xref{Specify Location}, for
+details about supported forms of @var{location}.)  For example:
 
 @smallexample
 (@value{GDBP}) @b{info scope command_line_handler}
@@ -11358,12 +11384,13 @@ an address of your own choosing, with the following commands:
 @table @code
 @kindex jump
 @item jump @var{linespec}
-Resume execution at line @var{linespec}.  Execution stops again
-immediately if there is a breakpoint there.  @xref{List, ,Printing
-Source Lines}, for a description of the different forms of
-@var{linespec}.  It is common practice to use the @code{tbreak} command
-in conjunction with @code{jump}.  @xref{Set Breaks, ,Setting
-Breakpoints}.
+@itemx jump @var{location}
+Resume execution at line @var{linespec} or at address given by
+@var{location}.  Execution stops again immediately if there is a
+breakpoint there.  @xref{Specify Location}, for a description of the
+different forms of @var{linespec} and @var{location}.  It is common
+practice to use the @code{tbreak} command in conjunction with
+@code{jump}.  @xref{Set Breaks, ,Setting Breakpoints}.
 
 The @code{jump} command does not change the current stack frame, or
 the stack pointer, or the contents of any memory location or any
@@ -11374,9 +11401,6 @@ of local variables.  For this reason, the @code{jump} command requests
 confirmation if the specified line is not in the function currently
 executing.  However, even bizarre results are predictable if you are
 well acquainted with the machine-language code of your program.
-
-@item jump *@var{address}
-Resume execution at the instruction at address @var{address}.
 @end table
 
 @c Doesn't work on HP-UX; have to set $pcoqh and $pcoqt.

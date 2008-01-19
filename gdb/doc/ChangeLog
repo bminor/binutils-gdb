@@ -1,3 +1,12 @@
+2008-01-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Specify Location): New section.
+	(Delete Breaks, Edit, Set Breaks): Remove description of
+	locations.  Instead, add a reference to "Specify Location".
+	(Machine Code, Jumping, Thread Stops, Continuing and Stepping)
+	(Symbols): Refer to "Specify Location" for the valid forms of
+	linespecs and locations.
+
 2008-01-18  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbint.texinfo (Target Conditionals): Replace the description of
