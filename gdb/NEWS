@@ -3,6 +3,14 @@
 
 *** Changes since GDB 6.7
 
+* New native configurations
+
+NetBSD/hppa			hppa*-*netbsd*
+
+* New targets
+
+NetBSD/hppa			hppa*-*-netbsd*
+
 * Change in command line behavior -- corefiles vs. process ids.
 
   When the '-p NUMBER' or '--pid NUMBER' options are used, and

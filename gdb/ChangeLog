@@ -1,3 +1,30 @@
+2008-01-18  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+	Add NetBSD/hppa target and host support.
+
+	* hppabsd-tdep.c (hppabsd_supply_gregset): Move to ...
+	(hppabsd_gregset): Move to ...
+	(hppabsd_regset_from_core_section): Rename
+	hppaobsd_regset_from_core_section and move to ...
+	(hppabsd_find_global_pointer): Update comment.
+	(hppabsd_init_abi): Make global. Do not register
+	hppabsd_regset_from_core_section.
+	(hppabsd_core_osabi_sniffer): Rename hppaobsd_core_osabi_sniffer and
+	move to ...
+	(_initialize_hppabsd_tdep): Move to ...
+	* hppaobsd-tdep.c: ... here. New file.
+	* hppnbsd-tdep.c: New file.
+	* hppnbsd-nat.c: New file.
+        * Makefile.in (ALL_TARGET_OBS): Add hppanbsd-tdep.o and hppaobsd-tdep.o.
+	(ALLDEPFILES): Add hppabsd-nat.c and hppabsd-tdep.c.
+        (hppabsd-nat.o, hppabsd-tdep.o): New dependencies.
+        (hppabsd-tdep.o, hppaobsd-tdep.o): Update dependencies.
+	* configure.host (hppa*-*-netbsd*): New entry.
+	* configure.tgt (hppa*-*-netbsd*): New entry.
+	(hppa*-*-openbsd*): Update.
+	* NEWS (New native configuration): Mention NetBSD/hppa.
+	(New targets): Mention NetBSD/hppa.
+
 2008-01-18  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbarch.sh (function_list): Add new property bits_big_endian to

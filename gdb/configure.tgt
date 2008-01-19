@@ -130,9 +130,14 @@ hppa*-*-linux*)
 	gdb_target_obs="hppa-tdep.o hppa-linux-tdep.o glibc-tdep.o \
 			solib.o solib-svr4.o symfile-mem.o"
 	;;
+hppa*-*-netbsd*)
+	# Target: NetBSD/hppa
+	gdb_target_obs="hppa-tdep.o hppabsd-tdep.o hppanbsd-tdep.o \
+			corelow.o solib.o solib-svr4.o"
+	;;
 hppa*-*-openbsd*)
 	# Target: OpenBSD/hppa
-	gdb_target_obs="hppa-tdep.o hppabsd-tdep.o \
+	gdb_target_obs="hppa-tdep.o hppabsd-tdep.o hppaobsd-tdep.o \
 			corelow.o solib.o solib-svr4.o"
 	;;
 hppa*-*-*)

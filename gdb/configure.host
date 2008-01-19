@@ -79,6 +79,7 @@ arm*-*-openbsd*)	gdb_host=nbsdelf ;;
 hppa*-*-hpux*)
 			gdb_host=hpux ;;
 hppa*-*-linux*)		gdb_host=linux ;;
+hppa*-*-netbsd*)	gdb_host=nbsd ;;
 hppa*-*-openbsd*)	gdb_host=obsd ;;
 
 i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)

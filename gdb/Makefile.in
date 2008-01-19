@@ -451,7 +451,8 @@ ALL_TARGET_OBS = \
 	cris-tdep.o \
 	frv-linux-tdep.o frv-tdep.o \
 	h8300-tdep.o \
-	hppabsd-tdep.o hppa-hpux-tdep.o hppa-linux-tdep.o hppa-tdep.o \
+	hppabsd-tdep.o hppanbsd-tdep.o hppaobsd-tdep.o \
+	hppa-hpux-tdep.o hppa-linux-tdep.o hppa-tdep.o \
 	i386bsd-tdep.o i386-cygwin-tdep.o i386fbsd-tdep.o i386gnu-tdep.o \
 	i386-linux-tdep.o i386nbsd-tdep.o i386-nto-tdep.o i386obsd-tdep.o \
 	i386-sol2-tdep.o i386-tdep.o i387-tdep.o \
@@ -1541,6 +1542,8 @@ ALLDEPFILES = \
 	hppa-tdep.c hppa-hpux-tdep.c hppa-hpux-nat.c \
 	hppa-linux-tdep.c hppa-linux-nat.c \
 	hppabsd-nat.c hppabsd-tdep.c \
+	hppaobsd-tdep.c \
+	hppanbsd-nat.c hppanbsd-tdep.c \
 	i386-tdep.c i386-linux-nat.c \
 	i386v4-nat.c i386-cygwin-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c i386fbsd-tdep.c \
@@ -2165,11 +2168,16 @@ h8300-tdep.o: h8300-tdep.c $(defs_h) $(value_h) $(arch_utils_h) $(regcache_h) \
 	$(gdbcore_h) $(objfiles_h) $(gdb_assert_h) $(dis_asm_h) \
 	 $(dwarf2_frame_h) $(frame_base_h) $(frame_unwind_h)
 hppabsd-nat.o: hppabsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	$(hppa_tdep_h) $(inf_ptrace_h)
+hppabsd-tdep.o: hppabsd-tdep.c $(defs_h) $(objfiles_h) $(target_h) \
+	$(value_h) $(elf_common_h) $(hppa_tdep_h) $(solib_svr4_h)
+hppanbsd-nat.o: hppabsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(target_h) $(hppa_tdep_h) $(inf_ptrace_h)
-hppabsd-tdep.o: hppabsd-tdep.c $(defs_h) $(arch_utils_h) $(symtab_h) \
-	$(objfiles_h) $(osabi_h) $(regcache_h) $(regset_h) $(target_h) \
-	$(value_h) $(gdb_assert_h) $(gdb_string_h) $(elf_common_h) \
-	$(hppa_tdep_h) $(solib_svr4_h) $(gdbtypes_h)
+hppanbsd-tdep.o: hppanbsd-tdep.c $(defs_h) $(osabi_h) $(regcache_h) $(regset_h) \
+	$(trad_frame_h) $(tramp_frame_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(hppa_tdep_h)
+hppaobsd-tdep.o: hppaobsd-tdep.c $(defs_h) $(osabi_h) $(regcache_h) $(regset_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(hppa_tdep_h)
 hppa-hpux-nat.o: hppa-hpux-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(target_h) $(gdb_assert_h) $(hppa_tdep_h) $(inf_ptrace_h) \
 	$(inf_ttrace_h)
