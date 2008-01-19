@@ -7074,7 +7074,7 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		      break;
 		    }
 
-		  if (expecting_tls_get_addr)
+		  if (expecting_tls_get_addr && htab->tls_get_addr != NULL)
 		    {
 		      struct plt_entry *ent;
 		      for (ent = htab->tls_get_addr->elf.plt.plist;
@@ -7091,7 +7091,7 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 			  }
 		    }
 
-		  if (expecting_tls_get_addr)
+		  if (expecting_tls_get_addr && htab->tls_get_addr_fd != NULL)
 		    {
 		      struct plt_entry *ent;
 		      for (ent = htab->tls_get_addr_fd->elf.plt.plist;
