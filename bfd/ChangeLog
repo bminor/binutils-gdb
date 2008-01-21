@@ -1,5 +1,11 @@
 2008-01-21  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 4453
+	* format.c (bfd_check_format_matches): Don't accept archives as
+	fully matching unless they have a map.
+
+2008-01-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (_bfd_elf_link_output_relocs): Correct error return.
 
 2008-01-21  Alan Modra  <amodra@bigpond.net.au>

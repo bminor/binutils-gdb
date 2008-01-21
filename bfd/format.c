@@ -1,6 +1,6 @@
 /* Generic BFD support for file formats.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002,
-   2003, 2005, 2007 Free Software Foundation, Inc.
+   2003, 2005, 2007, 2008 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -210,7 +210,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 
       temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
 
-      if (temp)
+      if (temp && (abfd->format != bfd_archive || bfd_has_map (abfd)))
 	{
 	  /* This format checks out as ok!  */
 	  right_targ = temp;
@@ -228,12 +228,13 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	    matching_vector[match_count] = temp;
 	  match_count++;
 	}
-      else if ((err = bfd_get_error ()) == bfd_error_wrong_object_format
+      else if (temp
+	       || (err = bfd_get_error ()) == bfd_error_wrong_object_format
 	       || err == bfd_error_file_ambiguously_recognized)
 	{
-	  /* An archive with objects of the wrong type, or an
-	     ambiguous match.  We want this target to match if we get
-	     no better matches.  */
+	  /* An archive with no armap or objects of the wrong type,
+	     or an ambiguous match.  We want this target to match
+	     if we get no better matches.  */
 	  if (ar_right_targ != bfd_default_vector[0])
 	    ar_right_targ = *target;
 	  if (matching_vector)
