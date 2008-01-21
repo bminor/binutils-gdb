@@ -1,3 +1,9 @@
+2008-01-21  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): If
+	we failed to remove breakpoints, error,
+	don't try to increment PC by hand.
+
 2008-01-18  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
 	Add NetBSD/hppa target and host support.

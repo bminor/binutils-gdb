@@ -1777,24 +1777,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     process until the child exits (well, okay, not
 	     then either :-) or execs. */
 	  if (remove_status != 0)
-	    {
-	      /* FIXME!  This is obviously non-portable! */
-	      write_pc_pid (stop_pc + 4, ecs->ptid);
-	      /* We need to restart all the threads now,
-	       * unles we're running in scheduler-locked mode. 
-	       * Use currently_stepping to determine whether to 
-	       * step or continue.
-	       */
-	      /* FIXME MVS: is there any reason not to call resume()? */
-	      if (scheduler_mode == schedlock_on)
-		target_resume (ecs->ptid,
-			       currently_stepping (ecs), TARGET_SIGNAL_0);
-	      else
-		target_resume (RESUME_ALL,
-			       currently_stepping (ecs), TARGET_SIGNAL_0);
-	      prepare_to_wait (ecs);
-	      return;
-	    }
+	    error (_("Cannot step over breakpoint hit in wrong thread"));
 	  else
 	    {			/* Single step */
 	      if (!ptid_equal (inferior_ptid, ecs->ptid))
