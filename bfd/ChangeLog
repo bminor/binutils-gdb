@@ -1,5 +1,9 @@
 2008-01-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (_bfd_elf_link_output_relocs): Correct error return.
+
+2008-01-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* ecoff.c (_bfd_ecoff_archive_p): Delete.
 	* libecoff.h (_bfd_ecoff_archive_p): Delete.
 	* coff-alpha.c (ecoffalpha_little_vec): Use bfd_generic_archive_p.

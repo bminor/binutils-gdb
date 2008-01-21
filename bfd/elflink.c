@@ -2321,7 +2321,7 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
       (*_bfd_error_handler)
 	(_("%B: relocation size mismatch in %B section %A"),
 	 output_bfd, input_section->owner, input_section);
-      bfd_set_error (bfd_error_wrong_object_format);
+      bfd_set_error (bfd_error_wrong_format);
       return FALSE;
     }
 
