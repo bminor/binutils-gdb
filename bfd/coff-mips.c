@@ -1,6 +1,6 @@
 /* BFD back-end for MIPS Extended-Coff files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2007
+   2000, 2001, 2002, 2003, 2004, 2007, 2008
    Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
@@ -1441,7 +1441,7 @@ const bfd_target ecoff_little_vec =
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     _bfd_ecoff_archive_p, _bfd_dummy_target},
+     bfd_generic_archive_p, _bfd_dummy_target},
   {bfd_false, _bfd_ecoff_mkobject,  /* bfd_set_format */
      _bfd_generic_mkarchive, bfd_false},
   {bfd_false, _bfd_ecoff_write_object_contents, /* bfd_write_contents */
@@ -1484,7 +1484,7 @@ const bfd_target ecoff_big_vec =
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16,
  {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-    _bfd_ecoff_archive_p, _bfd_dummy_target},
+    bfd_generic_archive_p, _bfd_dummy_target},
  {bfd_false, _bfd_ecoff_mkobject, /* bfd_set_format */
     _bfd_generic_mkarchive, bfd_false},
  {bfd_false, _bfd_ecoff_write_object_contents, /* bfd_write_contents */
@@ -1528,7 +1528,7 @@ const bfd_target ecoff_biglittle_vec =
      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
   {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-     _bfd_ecoff_archive_p, _bfd_dummy_target},
+     bfd_generic_archive_p, _bfd_dummy_target},
   {bfd_false, _bfd_ecoff_mkobject,  /* bfd_set_format */
      _bfd_generic_mkarchive, bfd_false},
   {bfd_false, _bfd_ecoff_write_object_contents, /* bfd_write_contents */
