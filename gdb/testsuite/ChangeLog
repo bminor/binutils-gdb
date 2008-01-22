@@ -1,3 +1,9 @@
+2008-01-22  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.base/float.exp: Allow missing floating point for m68k and
+	PowerPC.
+
 2008-01-22  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/basics.c: Setup for testing breakpoints

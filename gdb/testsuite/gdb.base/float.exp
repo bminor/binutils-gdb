@@ -62,11 +62,25 @@ if { [istarget "alpha*-*-*"] } then {
 } elseif [istarget "ia64-*-*"] then {
     gdb_test "info float" "f0.*f1.*f127.*" "info float"
 } elseif [istarget "m68k-*-*"] then {
-    gdb_test "info float" "fp0.*fp1.*fp7.*" "info float"
+    gdb_test_multiple "info float" "info_float" {
+        -re "fp0.*fp1.*fp7.*$gdb_prompt $" {
+            pass "info float (with FPU)"
+	}
+        -re "No floating.point info available for this processor.*" {
+            pass "info float (without FPU)"
+	}
+    }
 } elseif [istarget "mips*-*-*"] then {
     gdb_test "info float" "f0:.*flt:.*dbl:.*" "info float"
 } elseif [istarget "powerpc*-*-*"] then {
-    gdb_test "info float" "f0.*f1.*f31.*fpscr.*" "info float"
+    gdb_test_multiple "info float" "info_float" {
+        -re "f0.*f1.*f31.*fpscr.*$gdb_prompt $" {
+            pass "info float (with FPU)"
+	}
+        -re "No floating.point info available for this processor.*" {
+            pass "info float (without FPU)"
+	}
+    }
 } elseif [istarget "s390*-*-*"] then {
     gdb_test "info float" "fpc.*f0.*f1.*f15.*" "info float"
 } elseif [istarget "sh*-*"] then {
