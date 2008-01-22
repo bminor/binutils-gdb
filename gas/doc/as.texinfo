@@ -302,7 +302,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 
 @emph{Target i386 options:}
    [@b{--32}|@b{--64}] [@b{-n}]
-   [@b{-march}=@var{CPU}] [@b{-mtune}=@var{CPU}] 
+   [@b{-march}=@var{CPU}[+@var{EXTENSION}@dots{}]] [@b{-mtune}=@var{CPU}] 
 @end ifset
 @ifset I960
 

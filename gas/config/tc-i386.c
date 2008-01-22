@@ -55,6 +55,128 @@
 #endif
 #endif
 
+/* Prefixes will be emitted in the order defined below.
+   WAIT_PREFIX must be the first prefix since FWAIT is really is an
+   instruction, and so must come before any prefixes.
+   The preferred prefix order is SEG_PREFIX, ADDR_PREFIX, DATA_PREFIX,
+   LOCKREP_PREFIX.  */
+#define WAIT_PREFIX	0
+#define SEG_PREFIX	1
+#define ADDR_PREFIX	2
+#define DATA_PREFIX	3
+#define LOCKREP_PREFIX	4
+#define REX_PREFIX	5       /* must come last.  */
+#define MAX_PREFIXES	6	/* max prefixes per opcode */
+
+/* we define the syntax here (modulo base,index,scale syntax) */
+#define REGISTER_PREFIX '%'
+#define IMMEDIATE_PREFIX '$'
+#define ABSOLUTE_PREFIX '*'
+
+/* these are the instruction mnemonic suffixes in AT&T syntax or
+   memory operand size in Intel syntax.  */
+#define WORD_MNEM_SUFFIX  'w'
+#define BYTE_MNEM_SUFFIX  'b'
+#define SHORT_MNEM_SUFFIX 's'
+#define LONG_MNEM_SUFFIX  'l'
+#define QWORD_MNEM_SUFFIX  'q'
+#define XMMWORD_MNEM_SUFFIX  'x'
+/* Intel Syntax.  Use a non-ascii letter since since it never appears
+   in instructions.  */
+#define LONG_DOUBLE_MNEM_SUFFIX '\1'
+
+#define END_OF_INSN '\0'
+
+/*
+  'templates' is for grouping together 'template' structures for opcodes
+  of the same name.  This is only used for storing the insns in the grand
+  ole hash table of insns.
+  The templates themselves start at START and range up to (but not including)
+  END.
+  */
+typedef struct
+{
+  const template *start;
+  const template *end;
+}
+templates;
+
+/* 386 operand encoding bytes:  see 386 book for details of this.  */
+typedef struct
+{
+  unsigned int regmem;	/* codes register or memory operand */
+  unsigned int reg;	/* codes register operand (or extended opcode) */
+  unsigned int mode;	/* how to interpret regmem & reg */
+}
+modrm_byte;
+
+/* x86-64 extension prefix.  */
+typedef int rex_byte;
+
+/* The SSE5 instructions have a two bit instruction modifier (OC) that 
+   is stored in two separate bytes in the instruction.  Pick apart OC 
+   into the 2 separate bits for instruction.  */
+#define DREX_OC0(x)	(((x) & 1) != 0)
+#define DREX_OC1(x)	(((x) & 2) != 0)
+
+#define DREX_OC0_MASK	(1 << 3)	/* set OC0 in byte 4 */
+#define DREX_OC1_MASK	(1 << 2)	/* set OC1 in byte 3 */
+
+/* OC mappings */
+#define DREX_XMEM_X1_X2_X2 0	/* 4 op insn, dest = src3, src1 = reg/mem */
+#define DREX_X1_XMEM_X2_X2 1	/* 4 op insn, dest = src3, src2 = reg/mem */
+#define DREX_X1_XMEM_X2_X1 2	/* 4 op insn, dest = src1, src2 = reg/mem */
+#define DREX_X1_X2_XMEM_X1 3	/* 4 op insn, dest = src1, src3 = reg/mem */
+
+#define DREX_XMEM_X1_X2	   0	/* 3 op insn, src1 = reg/mem */
+#define DREX_X1_XMEM_X2	   1	/* 3 op insn, src1 = reg/mem */
+
+/* Information needed to create the DREX byte in SSE5 instructions.  */
+typedef struct
+{
+  unsigned int reg;		/* register */
+  unsigned int rex;		/* REX flags */
+  unsigned int modrm_reg;	/* which arg goes in the modrm.reg field */
+  unsigned int modrm_regmem;	/* which arg goes in the modrm.regmem field */
+} drex_byte;
+
+/* 386 opcode byte to code indirect addressing.  */
+typedef struct
+{
+  unsigned base;
+  unsigned index;
+  unsigned scale;
+}
+sib_byte;
+
+enum processor_type
+{
+  PROCESSOR_UNKNOWN,
+  PROCESSOR_I386,
+  PROCESSOR_I486,
+  PROCESSOR_PENTIUM,
+  PROCESSOR_PENTIUMPRO,
+  PROCESSOR_PENTIUM4,
+  PROCESSOR_NOCONA,
+  PROCESSOR_CORE,
+  PROCESSOR_CORE2,
+  PROCESSOR_K6,
+  PROCESSOR_ATHLON,
+  PROCESSOR_K8,
+  PROCESSOR_GENERIC32,
+  PROCESSOR_GENERIC64,
+  PROCESSOR_AMDFAM10
+};
+
+/* x86 arch names, types and features */
+typedef struct
+{
+  const char *name;		/* arch name */
+  enum processor_type type;	/* arch type */
+  i386_cpu_flags flags;		/* cpu feature flags */
+}
+arch_entry;
+
 static void set_code_flag (int);
 static void set_16bit_gcc_code_flag (int);
 static void set_intel_syntax (int);
@@ -313,7 +435,7 @@ static int quiet_warnings = 0;
 
 /* CPU name.  */
 static const char *cpu_arch_name = NULL;
-static const char *cpu_sub_arch_name = NULL;
+static char *cpu_sub_arch_name = NULL;
 
 /* CPU feature flags.  */
 static i386_cpu_flags cpu_arch_flags = CPU_UNKNOWN_FLAGS;
@@ -427,92 +549,96 @@ const relax_typeS md_relax_table[] =
 
 static const arch_entry cpu_arch[] =
 {
-  {"generic32", PROCESSOR_GENERIC32,
-   CPU_GENERIC32_FLAGS },
-  {"generic64", PROCESSOR_GENERIC64,
-   CPU_GENERIC64_FLAGS },
-  {"i8086", PROCESSOR_UNKNOWN,
-   CPU_NONE_FLAGS },
-  {"i186", PROCESSOR_UNKNOWN,
-   CPU_I186_FLAGS },
-  {"i286", PROCESSOR_UNKNOWN,
-   CPU_I286_FLAGS },
-  {"i386", PROCESSOR_I386,
-   CPU_I386_FLAGS },
-  {"i486", PROCESSOR_I486,
-   CPU_I486_FLAGS },
-  {"i586", PROCESSOR_PENTIUM,
-   CPU_I586_FLAGS },
-  {"i686", PROCESSOR_PENTIUMPRO,
-   CPU_I686_FLAGS },
-  {"pentium", PROCESSOR_PENTIUM,
-   CPU_I586_FLAGS },
-  {"pentiumpro",PROCESSOR_PENTIUMPRO,
-   CPU_I686_FLAGS },
-  {"pentiumii",	PROCESSOR_PENTIUMPRO,
-   CPU_P2_FLAGS },
-  {"pentiumiii",PROCESSOR_PENTIUMPRO,
-   CPU_P3_FLAGS },
-  {"pentium4", PROCESSOR_PENTIUM4,
-   CPU_P4_FLAGS },
-  {"prescott", PROCESSOR_NOCONA,
-   CPU_CORE_FLAGS },
-  {"nocona", PROCESSOR_NOCONA,
-   CPU_NOCONA_FLAGS },
-  {"yonah", PROCESSOR_CORE,
-   CPU_CORE_FLAGS },
-  {"core", PROCESSOR_CORE,
-   CPU_CORE_FLAGS },
-  {"merom", PROCESSOR_CORE2,
-   CPU_CORE2_FLAGS },
-  {"core2", PROCESSOR_CORE2,
-   CPU_CORE2_FLAGS },
-  {"k6", PROCESSOR_K6,
-   CPU_K6_FLAGS },
-  {"k6_2", PROCESSOR_K6,
-   CPU_K6_2_FLAGS },
-  {"athlon", PROCESSOR_ATHLON,
-   CPU_ATHLON_FLAGS },
-  {"sledgehammer", PROCESSOR_K8,
-   CPU_K8_FLAGS },
-  {"opteron", PROCESSOR_K8,
-   CPU_K8_FLAGS },
-  {"k8", PROCESSOR_K8,
-   CPU_K8_FLAGS },
-  {"amdfam10", PROCESSOR_AMDFAM10,
-   CPU_AMDFAM10_FLAGS },
-  {".mmx", PROCESSOR_UNKNOWN,
-   CPU_MMX_FLAGS },
-  {".sse", PROCESSOR_UNKNOWN,
-   CPU_SSE_FLAGS },
-  {".sse2", PROCESSOR_UNKNOWN,
-   CPU_SSE2_FLAGS },
-  {".sse3", PROCESSOR_UNKNOWN,
-   CPU_SSE3_FLAGS },
-  {".ssse3", PROCESSOR_UNKNOWN,
-   CPU_SSSE3_FLAGS },
-  {".sse4.1", PROCESSOR_UNKNOWN,
-   CPU_SSE4_1_FLAGS },
-  {".sse4.2", PROCESSOR_UNKNOWN,
-   CPU_SSE4_2_FLAGS },
-  {".sse4", PROCESSOR_UNKNOWN,
-   CPU_SSE4_2_FLAGS },
-  {".3dnow", PROCESSOR_UNKNOWN,
-   CPU_3DNOW_FLAGS },
-  {".3dnowa", PROCESSOR_UNKNOWN,
-   CPU_3DNOWA_FLAGS },
-  {".padlock", PROCESSOR_UNKNOWN,
-   CPU_PADLOCK_FLAGS },
-  {".pacifica", PROCESSOR_UNKNOWN,
-   CPU_SVME_FLAGS },
-  {".svme", PROCESSOR_UNKNOWN,
-   CPU_SVME_FLAGS },
-  {".sse4a", PROCESSOR_UNKNOWN,
-   CPU_SSE4A_FLAGS },
-  {".abm", PROCESSOR_UNKNOWN,
-   CPU_ABM_FLAGS },
-  {".sse5", PROCESSOR_UNKNOWN,
-   CPU_SSE5_FLAGS },
+  { "generic32", PROCESSOR_GENERIC32,
+    CPU_GENERIC32_FLAGS },
+  { "generic64", PROCESSOR_GENERIC64,
+    CPU_GENERIC64_FLAGS },
+  { "i8086", PROCESSOR_UNKNOWN,
+    CPU_NONE_FLAGS },
+  { "i186", PROCESSOR_UNKNOWN,
+    CPU_I186_FLAGS },
+  { "i286", PROCESSOR_UNKNOWN,
+    CPU_I286_FLAGS },
+  { "i386", PROCESSOR_I386,
+    CPU_I386_FLAGS },
+  { "i486", PROCESSOR_I486,
+    CPU_I486_FLAGS },
+  { "i586", PROCESSOR_PENTIUM,
+    CPU_I586_FLAGS },
+  { "i686", PROCESSOR_PENTIUMPRO,
+    CPU_I686_FLAGS },
+  { "pentium", PROCESSOR_PENTIUM,
+    CPU_I586_FLAGS },
+  { "pentiumpro", PROCESSOR_PENTIUMPRO,
+    CPU_I686_FLAGS },
+  { "pentiumii", PROCESSOR_PENTIUMPRO,
+    CPU_P2_FLAGS },
+  { "pentiumiii",PROCESSOR_PENTIUMPRO,
+    CPU_P3_FLAGS },
+  { "pentium4", PROCESSOR_PENTIUM4,
+    CPU_P4_FLAGS },
+  { "prescott", PROCESSOR_NOCONA,
+    CPU_CORE_FLAGS },
+  { "nocona", PROCESSOR_NOCONA,
+    CPU_NOCONA_FLAGS },
+  { "yonah", PROCESSOR_CORE,
+    CPU_CORE_FLAGS },
+  { "core", PROCESSOR_CORE,
+    CPU_CORE_FLAGS },
+  { "merom", PROCESSOR_CORE2,
+    CPU_CORE2_FLAGS },
+  { "core2", PROCESSOR_CORE2,
+    CPU_CORE2_FLAGS },
+  { "k6", PROCESSOR_K6,
+    CPU_K6_FLAGS },
+  { "k6_2", PROCESSOR_K6,
+    CPU_K6_2_FLAGS },
+  { "athlon", PROCESSOR_ATHLON,
+    CPU_ATHLON_FLAGS },
+  { "sledgehammer", PROCESSOR_K8,
+    CPU_K8_FLAGS },
+  { "opteron", PROCESSOR_K8,
+    CPU_K8_FLAGS },
+  { "k8", PROCESSOR_K8,
+    CPU_K8_FLAGS },
+  { "amdfam10", PROCESSOR_AMDFAM10,
+    CPU_AMDFAM10_FLAGS },
+  { ".mmx", PROCESSOR_UNKNOWN,
+    CPU_MMX_FLAGS },
+  { ".sse", PROCESSOR_UNKNOWN,
+    CPU_SSE_FLAGS },
+  { ".sse2", PROCESSOR_UNKNOWN,
+    CPU_SSE2_FLAGS },
+  { ".sse3", PROCESSOR_UNKNOWN,
+    CPU_SSE3_FLAGS },
+  { ".ssse3", PROCESSOR_UNKNOWN,
+    CPU_SSSE3_FLAGS },
+  { ".sse4.1", PROCESSOR_UNKNOWN,
+    CPU_SSE4_1_FLAGS },
+  { ".sse4.2", PROCESSOR_UNKNOWN,
+    CPU_SSE4_2_FLAGS },
+  { ".sse4", PROCESSOR_UNKNOWN,
+    CPU_SSE4_2_FLAGS },
+  { ".vmx", PROCESSOR_UNKNOWN,
+    CPU_VMX_FLAGS },
+  { ".smx", PROCESSOR_UNKNOWN,
+    CPU_SMX_FLAGS },
+  { ".3dnow", PROCESSOR_UNKNOWN,
+    CPU_3DNOW_FLAGS },
+  { ".3dnowa", PROCESSOR_UNKNOWN,
+    CPU_3DNOWA_FLAGS },
+  { ".padlock", PROCESSOR_UNKNOWN,
+    CPU_PADLOCK_FLAGS },
+  { ".pacifica", PROCESSOR_UNKNOWN,
+    CPU_SVME_FLAGS },
+  { ".svme", PROCESSOR_UNKNOWN,
+    CPU_SVME_FLAGS },
+  { ".sse4a", PROCESSOR_UNKNOWN,
+    CPU_SSE4A_FLAGS },
+  { ".abm", PROCESSOR_UNKNOWN,
+    CPU_ABM_FLAGS },
+  { ".sse5", PROCESSOR_UNKNOWN,
+    CPU_SSE5_FLAGS },
 };
 
 const pseudo_typeS md_pseudo_table[] =
@@ -1653,7 +1779,16 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 				    cpu_arch[i].flags);
 	      if (!UINTS_EQUAL (flags, cpu_arch_flags))
 		{
-		  cpu_sub_arch_name = cpu_arch[i].name;
+		  if (cpu_sub_arch_name)
+		    {
+		      char *name = cpu_sub_arch_name;
+		      cpu_sub_arch_name = concat (name,
+						  cpu_arch[i].name,
+						  NULL);
+		      free (name);
+		    }
+		  else
+		    cpu_sub_arch_name = xstrdup (cpu_arch[i].name);
 		  cpu_arch_flags = flags;
 		}
 	      *input_line_pointer = e;
@@ -7049,6 +7184,7 @@ int
 md_parse_option (int c, char *arg)
 {
   unsigned int i;
+  char *arch, *next;
 
   switch (c)
     {
@@ -7124,24 +7260,62 @@ md_parse_option (int c, char *arg)
       break;
 
     case OPTION_MARCH:
-      if (*arg == '.')
-	as_fatal (_("Invalid -march= option: `%s'"), arg);
-      for (i = 0; i < ARRAY_SIZE (cpu_arch); i++)
+      arch = xstrdup (arg);
+      do
 	{
-	  if (strcmp (arg, cpu_arch [i].name) == 0)
+	  if (*arch == '.')
+	    as_fatal (_("Invalid -march= option: `%s'"), arg);
+	  next = strchr (arch, '+');
+	  if (next)
+	    *next++ = '\0';
+	  for (i = 0; i < ARRAY_SIZE (cpu_arch); i++)
 	    {
-	      cpu_arch_isa = cpu_arch[i].type;
-	      cpu_arch_isa_flags = cpu_arch[i].flags;
-	      if (!cpu_arch_tune_set)
+	      if (strcmp (arch, cpu_arch [i].name) == 0)
 		{
-		  cpu_arch_tune = cpu_arch_isa;
-		  cpu_arch_tune_flags = cpu_arch_isa_flags;
+		  /* Processor.  */
+		  cpu_arch_name = cpu_arch[i].name;
+		  cpu_sub_arch_name = NULL;
+		  cpu_arch_flags = cpu_arch[i].flags;
+		  cpu_arch_isa = cpu_arch[i].type;
+		  cpu_arch_isa_flags = cpu_arch[i].flags;
+		  if (!cpu_arch_tune_set)
+		    {
+		      cpu_arch_tune = cpu_arch_isa;
+		      cpu_arch_tune_flags = cpu_arch_isa_flags;
+		    }
+		  break;
 		}
-	      break;
+	      else if (*cpu_arch [i].name == '.'
+		       && strcmp (arch, cpu_arch [i].name + 1) == 0)
+		{
+		  /* ISA entension.  */
+		  i386_cpu_flags flags;
+		  flags = cpu_flags_or (cpu_arch_flags,
+					cpu_arch[i].flags);
+		  if (!UINTS_EQUAL (flags, cpu_arch_flags))
+		    {
+		      if (cpu_sub_arch_name)
+			{
+			  char *name = cpu_sub_arch_name;
+			  cpu_sub_arch_name = concat (name,
+						      cpu_arch[i].name,
+						      NULL);
+			  free (name);
+			}
+		      else
+			cpu_sub_arch_name = xstrdup (cpu_arch[i].name);
+		      cpu_arch_flags = flags;
+		    }
+		  break;
+		}
 	    }
+
+	  if (i >= ARRAY_SIZE (cpu_arch))
+	    as_fatal (_("Invalid -march= option: `%s'"), arg);
+
+	  arch = next;
 	}
-      if (i >= ARRAY_SIZE (cpu_arch))
-	as_fatal (_("Invalid -march= option: `%s'"), arg);
+      while (next != NULL );
       break;
 
     case OPTION_MTUNE:
@@ -7226,7 +7400,16 @@ md_show_usage (stream)
   --divide                ignored\n"));
 #endif
   fprintf (stream, _("\
-  -march=CPU/-mtune=CPU   generate code/optimize for CPU, where CPU is one of:\n\
+  -march=CPU[,+EXTENSION...]\n\
+                          generate code for CPU and EXTENSION, CPU is one of:\n\
+                           i386, i486, pentium, pentiumpro, pentium4, nocona,\n\
+                           core, core2, k6, athlon, k8, generic32, generic64\n\
+			  EXTENSION is combination of:\n\
+			   mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
+			   vmx, smx, 3dnow, 3dnowa, sse4a, sse5, svme, abm,\n\
+			   padlock\n"));
+  fprintf (stream, _("\
+  -mtune=CPU              optimize for CPU, where CPU is one of:\n\
                            i386, i486, pentium, pentiumpro, pentium4, nocona,\n\
                            core, core2, k6, athlon, k8, generic32, generic64\n"));
   fprintf (stream, _("\

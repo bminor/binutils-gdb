@@ -1,6 +1,6 @@
 	.text
 nop:
-	cmove	%eax,%eax
+	movsbl %al,%esi
 	.p2align 4
 
 nop15:

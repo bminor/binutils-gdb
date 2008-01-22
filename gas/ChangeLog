@@ -1,3 +1,38 @@
+2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (XXX_PREFIX): Moved from tc-i386.h.
+	(XXX_MNEM_SUFFIX): Likewise.
+	(END_OF_INSN): Likewise.
+	(templates): Likewise.
+	(modrm_byte): Likewise.
+	(rex_byte): Likewise.
+	(DREX_XXX): Likewise.
+	(drex_byte): Likewise.
+	(sib_byte): Likewise.
+	(processor_type): Likewise.
+	(arch_entry): Likewise.
+	(cpu_sub_arch_name): Remove const.
+	(cpu_arch): Add .vmx and .smx.
+	(set_cpu_arch): Append cpu_sub_arch_name.
+	(md_parse_option): Support -march=CPU[,+EXTENSION...].
+	(md_show_usage): Updated.
+
+	* config/tc-i386.h (XXX_PREFIX): Moved to tc-i386.c.
+	(XXX_MNEM_SUFFIX): Likewise.
+	(END_OF_INSN): Likewise.
+	(templates): Likewise.
+	(modrm_byte): Likewise.
+	(rex_byte): Likewise.
+	(DREX_XXX): Likewise.
+	(drex_byte): Likewise.
+	(sib_byte): Likewise.
+	(processor_type): Likewise.
+	(arch_entry): Likewise.
+
+	* doc/as.texinfo: Update i386 -march option.
+
+	* doc/c-i386.texi: Update -march= for ISA.
+
 2008-01-18  Bob Wilson  <bob.wilson@acm.org>
 	
 	* config/tc-xtensa.c (xtensa_leb128): New function.

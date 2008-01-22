@@ -7,7 +7,7 @@
 Disassembly of section .text:
 
 0+ <nop>:
-[	 ]*0:[	 ]+0f 44 c0[	 ]+cmove[ 	]+%eax,%eax
+[	 ]*0:[	 ]+0f be f0[	 ]+movsbl[ 	]+%al,%esi
 [	 ]*3:[	 ]+8d b6 00 00 00 00[	 ]+lea[ 	]+0x0\(%esi\),%esi
 [	 ]*9:[	 ]+8d bc 27 00 00 00 00[	 ]+lea[ 	]+0x0\(%edi,%eiz,1\),%edi
 

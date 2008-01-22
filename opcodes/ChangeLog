@@ -1,3 +1,9 @@
+2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Add CPU_VMX_FLAGS and
+	CPU_SMX_FLAGS.
+	* i386-init.h: Regenerated.
+
 2008-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Use Qword on movddup.
