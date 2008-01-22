@@ -27,7 +27,7 @@ if ![check_gc_sections_available] {
 set cflags "-ffunction-sections -fdata-sections"
 set objfile "tmpdir/gc.o"
 
-if { [is_remote host] || [which $CC] } {
+if { [is_remote host] || [which $CC] != 0 } {
     ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/gc.c $objfile
 }
 

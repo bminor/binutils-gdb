@@ -1,3 +1,7 @@
+2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-gc/gc.exp: Use [which $CC] != 0.
+
 2008-01-14  Tristan Gingold  <gingold@adacore.com>
 
 	* ld-gc/gc.exp (test_gc): Let missing C compiler make tests
