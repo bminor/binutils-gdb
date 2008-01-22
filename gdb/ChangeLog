@@ -1,3 +1,9 @@
+2008-01-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-linux-tdep.c (am33_linux_sigframe_cache_init): Find
+	sigcontext struct via pointer.
+	(struct sigframe comment): Update to show new field `psc'.
+
 2008-01-21  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): If

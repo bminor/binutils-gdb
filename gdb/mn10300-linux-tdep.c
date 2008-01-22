@@ -516,6 +516,7 @@ struct sigframe
 {
 	void (*pretcode)(void);
 	int sig;
+	struct sigcontext *psc;
 	struct sigcontext sc;
 	struct fpucontext fpuctx;
 	unsigned long extramask[_NSIG_WORDS-1];
@@ -625,6 +626,7 @@ am33_linux_sigframe_cache_init (const struct tramp_frame *self,
   if (self == &am33_linux_sigframe)
     {
       sc_base += 8;
+      sc_base = get_frame_memory_unsigned (next_frame, sc_base, 4);
     }
   else
     {
