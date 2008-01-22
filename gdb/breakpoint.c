@@ -5237,10 +5237,11 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
 
 static int
 break_command_really (char *arg, char *cond_string, int thread,
-                      int parse_condition_and_thread,
-                      int tempflag, int hardwareflag, 
-                      enum auto_boolean pending_break_support,
-                      int from_tty)
+		      int parse_condition_and_thread,
+		      int tempflag, int hardwareflag, 
+		      int ignore_count,
+		      enum auto_boolean pending_break_support,
+		      int from_tty)
 {
   struct gdb_exception e;
   struct symtabs_and_lines sals;
@@ -5254,7 +5255,6 @@ break_command_really (char *arg, char *cond_string, int thread,
   struct captured_parse_breakpoint_args parse_args;
   int i;
   int pending = 0;
-  int ignore_count = 0;
   int not_found = 0;
 
   sals.sals = NULL;
@@ -5427,6 +5427,7 @@ break_command_1 (char *arg, int flag, int from_tty)
   return break_command_really (arg, 
 			       NULL, 0, 1 /* parse arg */,
 			       tempflag, hardwareflag,
+			       0 /* Ignore count */,
 			       pending_break_support, from_tty);
 }
 
@@ -5441,6 +5442,7 @@ gdb_breakpoint (char *address, char *condition,
   return break_command_really (address, condition, thread,
 			       0 /* condition and thread are valid.  */,
 			       tempflag, hardwareflag,
+			       ignore_count,
 			       pending 
 			       ? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
 			       0);

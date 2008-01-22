@@ -1,3 +1,11 @@
+2008-01-22  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/basics.c: Setup for testing breakpoints
+        ignore count.
+        * gdb.mi/mi-break.exp: Test for breakpoint ignore count.
+        * gdb.mi/mi-cli.exp: Adjust.
+        * gdb.mi/mi2-cli.exp: Adjust.
+
 2008-01-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.mi/mi-var-child.c (do_children_tests): Add 'dummy' integer

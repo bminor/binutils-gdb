@@ -46,12 +46,20 @@ callee1 (int intarg, char *strarg, double fltarg)
   callee2 (intarg, strarg);
 }
 
+void callme (int i)
+{
+  printf ("callme\n");
+}
+
 main ()
 {
   callee1 (2, "A string argument.", 3.5);
   callee1 (2, "A string argument.", 3.5);
 
   printf ("Hello, World!");
+
+  callme (1);
+  callme (2);
 
   return 0;
 }

@@ -186,7 +186,7 @@ gdb_expect {
 }
 
 mi_gdb_test "-interpreter-exec console \"list\"" \
-  "\~\"$line_main_return\[\\\\t ]*return 0;\\\\n\".*\\^done" \
+  "\~\"$line_main_return\[\\\\t ]*callme \\(1\\);\\\\n\".*\\^done" \
   "-interpreter-exec console \"list\" at basics.c:\$line_main_return"
 
 mi_gdb_test "-interpreter-exec console \"help set args\"" \

@@ -153,8 +153,32 @@ proc test_rbreak_creation_and_listing {} {
 	    "delete temp breakpoints"
 }
 
+proc test_ignore_count {} {
+    global mi_gdb_prompt
+
+    mi_gdb_test "-break-insert -i 1 callme" \
+        "\\^done.*ignore=\"1\".*" \
+        "insert breakpoint with ignore count at callme"
+
+    mi_run_cmd
+
+    gdb_expect {
+        -re ".*func=\"callme\".*args=\\\[\{name=\"i\",value=\"2\"\}\\\].*\r\n$mi_gdb_prompt$" {
+            pass "run to breakpoint with ignore count"
+        }
+        -re ".*$mi_gdb_prompt$" {
+            fail "run to breakpoint with ignore count"
+        }
+        timeout {
+            fail "run to breakpoint with ignore count (timeout)"
+        }
+    }  
+}
+
 test_tbreak_creation_and_listing
 test_rbreak_creation_and_listing
+
+test_ignore_count
 
 mi_gdb_exit
 return 0

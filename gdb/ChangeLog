@@ -1,3 +1,12 @@
+2008-01-22  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* breakpoint.c (break_command_really): New parameter
+	ignore_count.
+	(break_command_1): Pass 0 as
+	ignore_count to break_command_really.
+	(gdb_breakpoint): Pass ignore_count to
+	break_command_really.
+
 2008-01-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-linux-tdep.c (am33_linux_sigframe_cache_init): Find
