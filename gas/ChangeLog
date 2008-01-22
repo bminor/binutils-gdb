@@ -1,5 +1,9 @@
 2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (i386_target_format): Remove cpummx2.
+
+2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (XXX_PREFIX): Moved from tc-i386.h.
 	(XXX_MNEM_SUFFIX): Likewise.
 	(END_OF_INSN): Likewise.

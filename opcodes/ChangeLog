@@ -1,5 +1,17 @@
 2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (cpu_flag_init): Remove CpuMMX2.
+	(cpu_flags): Likewise.
+
+	* i386-opc.h (CpuMMX2): Removed.
+	(CpuSSE): Updated.
+
+	* i386-opc.tbl: Replace CpuMMX2 with CpuSSE|Cpu3dnowA.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (cpu_flag_init): Add CPU_VMX_FLAGS and
 	CPU_SMX_FLAGS.
 	* i386-init.h: Regenerated.

@@ -50,10 +50,8 @@
 #define CpuK8		(CpuK6 + 1)
 /* MMX support required */
 #define CpuMMX		(CpuK8 + 1)
-/* extended MMX support (with SSE or 3DNow!Ext) required */
-#define CpuMMX2		(CpuMMX + 1)
 /* SSE support required */
-#define CpuSSE		(CpuMMX2 + 1)
+#define CpuSSE		(CpuMMX + 1)
 /* SSE2 support required */
 #define CpuSSE2		(CpuSSE + 1)
 /* 3dnow! support required */
@@ -116,7 +114,6 @@ typedef union i386_cpu_flags
       unsigned int cpuk6:1;
       unsigned int cpuk8:1;
       unsigned int cpummx:1;
-      unsigned int cpummx2:1;
       unsigned int cpusse:1;
       unsigned int cpusse2:1;
       unsigned int cpua3dnow:1;

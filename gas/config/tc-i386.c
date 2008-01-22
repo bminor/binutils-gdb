@@ -7445,7 +7445,6 @@ i386_target_format (void)
 	  cpu_arch_isa_flags.bitfield.cpui686 = 1;
 	  cpu_arch_isa_flags.bitfield.cpup4 = 1;
 	  cpu_arch_isa_flags.bitfield.cpummx= 1;
-	  cpu_arch_isa_flags.bitfield.cpummx2 = 1;
 	  cpu_arch_isa_flags.bitfield.cpusse = 1;
 	  cpu_arch_isa_flags.bitfield.cpusse2 = 1;
 	}
@@ -7459,7 +7458,6 @@ i386_target_format (void)
 	  cpu_arch_tune_flags.bitfield.cpui686 = 1;
 	  cpu_arch_tune_flags.bitfield.cpup4 = 1;
 	  cpu_arch_tune_flags.bitfield.cpummx= 1;
-	  cpu_arch_tune_flags.bitfield.cpummx2 = 1;
 	  cpu_arch_tune_flags.bitfield.cpusse = 1;
 	  cpu_arch_tune_flags.bitfield.cpusse2 = 1;
 	}

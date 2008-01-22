@@ -112,6 +112,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_list_test "arch-10-2" "-march=i686 -I${srcdir}/$subdir -al"
     run_list_test "arch-10-3" "-march=i686+sse4.2 -I${srcdir}/$subdir -al"
     run_list_test "arch-10-4" "-march=i686+sse4+vmx+smx -I${srcdir}/$subdir -al"
+    run_dump_test "arch-11"
+    run_dump_test "arch-12"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.

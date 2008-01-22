@@ -1,5 +1,14 @@
 2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/i386/arch-10.d: New.
+	* gas/i386/arch-11.s: Likewise.
+	* gas/i386/arch-12.d: Likewise.
+	* gas/i386/arch-12.s: Likewise.
+
+	* gas/i386/i386.exp: Run arch-11 and arch-12.
+
+2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/arch-10-1.l: New.
 	* gas/i386/arch-10-1.s: Likewise.
 	* gas/i386/arch-10-2.l: Likewise.
