@@ -201,6 +201,14 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
 		  case 17:	strcpy (regname, "ar.bsp"); break;
 		  case 18:	strcpy (regname, "ar.bspstore"); break;
 		  case 19:	strcpy (regname, "ar.rnat"); break;
+		  case 21:	strcpy (regname, "ar.fcr"); break;
+		  case 24:	strcpy (regname, "ar.eflag"); break;
+		  case 25:	strcpy (regname, "ar.csd"); break;
+		  case 26:	strcpy (regname, "ar.ssd"); break;
+		  case 27:	strcpy (regname, "ar.cflg"); break;
+		  case 28:	strcpy (regname, "ar.fsr"); break;
+		  case 29:	strcpy (regname, "ar.fir"); break;
+		  case 30:	strcpy (regname, "ar.fdr"); break;
 		  case 32:	strcpy (regname, "ar.ccv"); break;
 		  case 36:	strcpy (regname, "ar.unat"); break;
 		  case 40:	strcpy (regname, "ar.fpsr"); break;

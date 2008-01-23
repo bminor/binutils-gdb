@@ -1,3 +1,8 @@
+2008-01-23  Tristan Gingold  <gingold@adacore.com>
+
+	* ia64-dis.c (print_insn_ia64): Display symbolic name of ar.fcr,
+	ar.eflag, ar.csd, ar.ssd, ar.cflg, ar.fsr, ar.fir and ar.fdr.
+
 2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Remove CpuMMX2.
