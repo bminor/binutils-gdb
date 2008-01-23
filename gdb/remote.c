@@ -3204,6 +3204,13 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
       char *buf, *p;
 
       ofunc = signal (SIGINT, remote_interrupt);
+      /* If the user hit C-c before this packet, or between packets,
+	 pretend that it was hit right here.  */
+      if (quit_flag)
+	{
+	  quit_flag = 0;
+	  remote_interrupt (SIGINT);
+	}
       getpkt (&rs->buf, &rs->buf_size, 1);
       signal (SIGINT, ofunc);
 
@@ -3413,7 +3420,16 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
       char *buf, *p;
 
       if (!target_is_async_p ())
-	ofunc = signal (SIGINT, remote_interrupt);
+	{
+	  ofunc = signal (SIGINT, remote_interrupt);
+	  /* If the user hit C-c before this packet, or between packets,
+	     pretend that it was hit right here.  */
+	  if (quit_flag)
+	    {
+	      quit_flag = 0;
+	      remote_interrupt (SIGINT);
+	    }
+	}
       /* FIXME: cagney/1999-09-27: If we're in async mode we should
          _never_ wait for ever -> test on target_is_async_p().
          However, before we do that we need to ensure that the caller
