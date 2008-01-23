@@ -1311,10 +1311,6 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
       /* Record the existence of this thread */
       th = win32_add_thread (current_event.dwThreadId,
 			     current_event.u.CreateThread.hThread);
-      if (info_verbose)
-	printf_unfiltered ("[New %s]\n",
-			   target_pid_to_str (
-			     pid_to_ptid (current_event.dwThreadId)));
       retval = current_event.dwThreadId;
       break;
 

@@ -461,10 +461,7 @@ sol_thread_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       if (is_thread (rtnval)
 	  && !ptid_equal (rtnval, save_ptid)
 	  && !in_thread_list (rtnval))
-	{
-	  printf_filtered ("[New %s]\n", target_pid_to_str (rtnval));
-	  add_thread (rtnval);
-	}
+	add_thread (rtnval);
     }
 
   /* During process initialization, we may get here without the thread

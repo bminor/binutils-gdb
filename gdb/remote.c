@@ -1049,12 +1049,7 @@ record_currthread (int currthread)
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
   if (!in_thread_list (pid_to_ptid (currthread)))
-    {
-      add_thread (pid_to_ptid (currthread));
-      ui_out_text (uiout, "[New ");
-      ui_out_text (uiout, target_pid_to_str (pid_to_ptid (currthread)));
-      ui_out_text (uiout, "]\n");
-    }
+    add_thread (pid_to_ptid (currthread));
 }
 
 static char *last_pass_packet;

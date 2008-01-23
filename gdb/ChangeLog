@@ -1,3 +1,33 @@
+2008-01-23  Vladimir Prus  <vladimir@codesourcery.com>
+	    Chris Demetriou  <cgd@google.com>
+
+        * thread.c (add_thread_silent): Renamed
+        from add_thread.
+        (print_thread_events): New variable definition.
+        (show_print_thread_events): New function.
+        (_initialize_thread): Add "set print thread-events" and
+        "show print thread-events" commands.
+        (add_thread): Announce new thread.
+        * gdbthread.h (add_thread_silent): Declare.
+        (print_thread_events): New variable declaration.
+        * inf-ttrace.c (inf_ttrace_wait): Don't
+        inform about new thread, as add_thread is always
+        called too, and will take care of that.
+        * infrun.c (handle_inferior_event): Likewise.
+        * procfs.c (procfs_wait): Likewise.
+        * remote.c (remote_currthread): Likewise.
+        * sol-thread.c (sol_thread_wait): Likewise.
+        * win32-nat.c (get_win32_debug_event): Likewise.
+        * linux-thread-db.c (attach_thread): Likewise.
+        Remove the verbose parameter.
+        (check_event): Make detach_thread be verbose
+        only if print_thread_events is set.
+        * linux-nat.c (lin_lwp_attach_lwp): Don't inform
+        about new thread.  This is called only from
+        linux-thread-db.c:attach_thread, which will take care.
+        Remove the verbose parameter.
+        * linux-nat.h (lin_lwp_attach_lwp): Adjust prototype.
+
 2008-01-23  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-cmd-var.c (mi_cmd_var_set_format): Add value field to output.

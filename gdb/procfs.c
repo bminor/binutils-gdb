@@ -4119,11 +4119,8 @@ wait_again:
 		    temp_ptid = MERGEPID (pi->pid, temp_tid);
 		    /* If not in GDB's thread list, add it.  */
 		    if (!in_thread_list (temp_ptid))
-		      {
-			printf_filtered (_("[New %s]\n"),
-					 target_pid_to_str (temp_ptid));
-			add_thread (temp_ptid);
-		      }
+		      add_thread (temp_ptid);
+
 		    /* Return to WFI, but tell it to immediately resume. */
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return inferior_ptid;
@@ -4189,11 +4186,7 @@ wait_again:
 		    /* If not in GDB's thread list, add it.  */
 		    temp_ptid = MERGEPID (pi->pid, temp_tid);
 		    if (!in_thread_list (temp_ptid))
-		      {
-			printf_filtered (_("[New %s]\n"),
-					 target_pid_to_str (temp_ptid));
-			add_thread (temp_ptid);
-		      }
+		      add_thread (temp_ptid);
 
 		    status->kind = TARGET_WAITKIND_STOPPED;
 		    status->value.sig = 0;
@@ -4280,7 +4273,6 @@ wait_again:
 		   * If we don't create a procinfo, resume may be unhappy
 		   * later.
 		   */
-		  printf_filtered (_("[New %s]\n"), target_pid_to_str (retval));
 		  add_thread (retval);
 		  if (find_procinfo (PIDGET (retval), TIDGET (retval)) == NULL)
 		    create_procinfo (PIDGET (retval), TIDGET (retval));

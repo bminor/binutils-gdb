@@ -95,7 +95,7 @@ void linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, 
 /* linux-nat functions for handling fork events.  */
 extern void linux_enable_event_reporting (ptid_t ptid);
 
-extern int lin_lwp_attach_lwp (ptid_t ptid, int verbose);
+extern int lin_lwp_attach_lwp (ptid_t ptid);
 
 /* Iterator function for lin-lwp's lwp list.  */
 struct lwp_info *iterate_over_lwps (int (*callback) (struct lwp_info *, 

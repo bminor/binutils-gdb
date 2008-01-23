@@ -116,11 +116,8 @@ init_thread_list (void)
   thread_list = NULL;
 }
 
-/* add_thread now returns a pointer to the new thread_info, 
-   so that back_ends can initialize their private data.  */
-
 struct thread_info *
-add_thread (ptid_t ptid)
+add_thread_silent (ptid_t ptid)
 {
   struct thread_info *tp;
 
@@ -131,6 +128,17 @@ add_thread (ptid_t ptid)
   tp->next = thread_list;
   thread_list = tp;
   return tp;
+}
+
+struct thread_info *
+add_thread (ptid_t ptid)
+{
+  struct thread_info *result = add_thread_silent (ptid);
+
+  if (print_thread_events)
+    printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid));
+  
+  return result;
 }
 
 void
@@ -675,6 +683,17 @@ thread_command (char *tidstr, int from_tty)
   gdb_thread_select (uiout, tidstr, NULL);
 }
 
+/* Print notices when new threads are attached and detached.  */
+int print_thread_events = 1;
+static void
+show_print_thread_events (struct ui_file *file, int from_tty,
+                          struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of thread events is %s.\n"),
+                    value);
+}
+
 static int
 do_captured_thread_select (struct ui_out *uiout, void *tidstr)
 {
@@ -737,4 +756,12 @@ The new thread ID must be currently known."),
 
   if (!xdb_commands)
     add_com_alias ("t", "thread", class_run, 1);
+
+  add_setshow_boolean_cmd ("thread-events", no_class,
+         &print_thread_events, _("\
+Set printing of thread events (e.g., thread start and exit)."), _("\
+Show printing of thread events (e.g., thread start and exit)."), NULL,
+         NULL,
+         show_print_thread_events,
+         &setprintlist, &showprintlist);
 }

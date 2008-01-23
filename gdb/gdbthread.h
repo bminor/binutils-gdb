@@ -69,10 +69,15 @@ struct thread_info
 /* Create an empty thread list, or empty the existing one.  */
 extern void init_thread_list (void);
 
-/* Add a thread to the thread list.
-   Note that add_thread now returns the handle of the new thread,
-   so that the caller may initialize the private thread data.  */
+/* Add a thread to the thread list, print a message
+   that a new thread is found, and return the pointer to
+   the new thread.  Caller my use this pointer to 
+   initialize the private thread data.  */
 extern struct thread_info *add_thread (ptid_t ptid);
+
+/* Same as add_thread, but does not print a message
+   about new thread.  */
+extern struct thread_info *add_thread_silent (ptid_t ptid);
 
 /* Delete an existing thread list entry.  */
 extern void delete_thread (ptid_t);
@@ -140,5 +145,9 @@ extern void switch_to_thread (ptid_t ptid);
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
+
+/* Print notices on thread events (attach, detach, etc.), set with
+   `set print thread-events'.  */
+extern int print_thread_events;
 
 #endif /* GDBTHREAD_H */

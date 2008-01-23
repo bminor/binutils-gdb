@@ -366,7 +366,7 @@ bsd_uthread_wait (ptid_t ptid, struct target_waitstatus *status)
   if (ptid_get_tid (ptid) != 0 && !in_thread_list (ptid)
       && ptid_get_tid (inferior_ptid) == 0)
     {
-      add_thread (ptid);
+      add_thread_silent (ptid);
       inferior_ptid = ptid;
     }
 

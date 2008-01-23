@@ -1331,13 +1331,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   if (ecs->ws.kind != TARGET_WAITKIND_EXITED
       && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED && ecs->new_thread_event)
-    {
-      add_thread (ecs->ptid);
-
-      ui_out_text (uiout, "[New ");
-      ui_out_text (uiout, target_pid_to_str (ecs->ptid));
-      ui_out_text (uiout, "]\n");
-    }
+    add_thread (ecs->ptid);
 
   switch (ecs->ws.kind)
     {

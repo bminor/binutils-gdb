@@ -962,7 +962,6 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 		  sizeof (struct inf_ttrace_private_thread_info));
 	  inf_ttrace_num_lwps++;
 	}
-      printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid));
       ti = add_thread (ptid);
       ti->private =
 	xmalloc (sizeof (struct inf_ttrace_private_thread_info));

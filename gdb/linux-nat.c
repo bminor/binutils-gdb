@@ -871,7 +871,7 @@ exit_lwp (struct lwp_info *lp)
    be attached.  */
 
 int
-lin_lwp_attach_lwp (ptid_t ptid, int verbose)
+lin_lwp_attach_lwp (ptid_t ptid)
 {
   struct lwp_info *lp;
 
@@ -955,9 +955,6 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
 	lp = add_lwp (ptid);
       lp->stopped = 1;
     }
-
-  if (verbose)
-    printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid));
 
   return 0;
 }
@@ -2090,8 +2087,6 @@ retry:
 		}
 
 	      add_thread (lp->ptid);
-	      printf_unfiltered (_("[New %s]\n"),
-				 target_pid_to_str (lp->ptid));
 	    }
 
 	  /* Save the trap's siginfo in case we need it later.  */

@@ -2238,6 +2238,8 @@ programs:
 @item @samp{thread apply [@var{threadno}] [@var{all}] @var{args}},
 a command to apply a command to a list of threads
 @item thread-specific breakpoints
+@item @samp{set print thread-events}, which controls printing of 
+messages on thread start and exit.
 @end itemize
 
 @quotation
@@ -2431,6 +2433,22 @@ threads that you want affected with the command argument
 shown in the first field of the @samp{info threads} display; or it
 could be a range of thread numbers, as in @code{2-4}.  To apply a
 command to all threads, type @kbd{thread apply all @var{command}}.
+
+@kindex set print thread-events
+@cindex print messages on thread start and exit
+@item set print thread-events
+@itemx set print thread-events on
+@itemx set print thread-events off
+The @code{set print thread-events} command allows you to enable or
+disable printing of messages when @value{GDBN} notices that new threads have
+started or that threads have exited.  By default, these messages will
+be printed if detection of these events is supported by the target.
+Note that these messages cannot be disabled on all targets.
+
+@kindex show print thread-events
+@item show print thread-events
+Show whether messages will be printed when @value{GDBN} detects that threads
+have started and exited.
 @end table
 
 @cindex automatic thread selection
