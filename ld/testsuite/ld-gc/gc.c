@@ -8,6 +8,7 @@ unused_func (int v)
 }
 
 int
+__attribute__((noinline))
 used_func (int v)
 {
   return 2 * used_var;

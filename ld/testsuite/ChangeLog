@@ -1,3 +1,7 @@
+2008-01-23  Andreas Schwab  <schwab@suse.de>
+
+	* ld-gc/gc.c: Make sure used_func is not inlined.
+
 2008-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-gc/gc.exp: Use [which $CC] != 0.
