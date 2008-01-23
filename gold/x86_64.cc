@@ -1032,7 +1032,7 @@ Target_x86_64::Scan::global(const General_options& options,
               gsym->set_needs_dynsym_value();
           }
         // Make a dynamic relocation if necessary.
-        if (gsym->needs_dynamic_reloc(true, false))
+        if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
           {
             if (target->may_need_copy_reloc(gsym))
               {
@@ -1068,8 +1068,10 @@ Target_x86_64::Scan::global(const General_options& options,
         if (gsym->needs_plt_entry())
           target->make_plt_entry(symtab, layout, gsym);
         // Make a dynamic relocation if necessary.
-        bool is_function_call = (gsym->type() == elfcpp::STT_FUNC);
-        if (gsym->needs_dynamic_reloc(false, is_function_call))
+        int flags = Symbol::NON_PIC_REF;
+        if (gsym->type() == elfcpp::STT_FUNC)
+          flags |= Symbol::FUNCTION_CALL;
+        if (gsym->needs_dynamic_reloc(flags))
           {
             if (target->may_need_copy_reloc(gsym))
               {

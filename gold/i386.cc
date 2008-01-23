@@ -164,8 +164,7 @@ class Target_i386 : public Sized_target<32, false>
     // Return whether the static relocation needs to be applied.
     inline bool
     should_apply_static_reloc(const Sized_symbol<32>* gsym,
-                              bool is_absolute_ref,
-                              bool is_function_call,
+                              int ref_flags,
                               bool is_32bit);
 
     // Do a relocation.  Return false if the caller should not issue
@@ -1094,7 +1093,7 @@ Target_i386::Scan::global(const General_options& options,
               gsym->set_needs_dynsym_value();
           }
         // Make a dynamic relocation if necessary.
-        if (gsym->needs_dynamic_reloc(true, false))
+        if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
           {
             if (target->may_need_copy_reloc(gsym))
               {
@@ -1137,8 +1136,10 @@ Target_i386::Scan::global(const General_options& options,
               target->make_plt_entry(symtab, layout, gsym);
           }
         // Make a dynamic relocation if necessary.
-        bool is_function_call = (gsym->type() == elfcpp::STT_FUNC);
-        if (gsym->needs_dynamic_reloc(false, is_function_call))
+        int flags = Symbol::NON_PIC_REF;
+        if (gsym->type() == elfcpp::STT_FUNC)
+          flags |= Symbol::FUNCTION_CALL;
+        if (gsym->needs_dynamic_reloc(flags))
           {
             if (target->may_need_copy_reloc(gsym))
               {
@@ -1443,8 +1444,7 @@ Target_i386::do_finalize_sections(Layout* layout)
 
 inline bool
 Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
-                                                 bool is_absolute_ref,
-                                                 bool is_function_call,
+                                                 int ref_flags,
                                                  bool is_32bit)
 {
   // For local symbols, we will have created a non-RELATIVE dynamic
@@ -1453,12 +1453,18 @@ Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
   // (c) the relocation is not 32 bits wide.
   if (gsym == NULL)
     return !(parameters->output_is_position_independent()
-             && is_absolute_ref
+             && (ref_flags & Symbol::ABSOLUTE_REF)
              && !is_32bit);
 
-  // For global symbols, we use the same helper routines used in the scan pass.
-  return !(gsym->needs_dynamic_reloc(is_absolute_ref, is_function_call)
-           && !gsym->can_use_relative_reloc(is_function_call));
+  // For global symbols, we use the same helper routines used in the
+  // scan pass.  If we did not create a dynamic relocation, or if we
+  // created a RELATIVE dynamic relocation, we should apply the static
+  // relocation.
+  bool has_dyn = gsym->needs_dynamic_reloc(ref_flags);
+  bool is_rel = (ref_flags & Symbol::ABSOLUTE_REF)
+                && gsym->can_use_relative_reloc(ref_flags
+                                                & Symbol::FUNCTION_CALL);
+  return !has_dyn || is_rel;
 }
 
 // Perform a relocation.
@@ -1491,11 +1497,15 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 
   // Pick the value to use for symbols defined in shared objects.
   Symbol_value<32> symval;
+  bool is_nonpic = (r_type == elfcpp::R_386_PC8
+                    || r_type == elfcpp::R_386_PC16
+                    || r_type == elfcpp::R_386_PC32);
   if (gsym != NULL
       && (gsym->is_from_dynobj()
           || (parameters->output_is_shared()
               && gsym->is_preemptible()))
-      && gsym->has_plt_offset())
+      && gsym->has_plt_offset()
+      && (!is_nonpic || !parameters->output_is_shared()))
     {
       symval.set_output_value(target->plt_section()->address()
 			      + gsym->plt_offset());
@@ -1539,43 +1549,46 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       break;
 
     case elfcpp::R_386_32:
-      if (should_apply_static_reloc(gsym, true, false, true))
+      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true))
         Relocate_functions<32, false>::rel32(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC32:
       {
-        bool is_function_call = (gsym != NULL
-                                 && gsym->type() == elfcpp::STT_FUNC);
-        if (should_apply_static_reloc(gsym, false, is_function_call, true))
+        int ref_flags = Symbol::NON_PIC_REF;
+        if (gsym != NULL && gsym->type() == elfcpp::STT_FUNC)
+          ref_flags |= Symbol::FUNCTION_CALL;
+        if (should_apply_static_reloc(gsym, ref_flags, true))
           Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       }
       break;
 
     case elfcpp::R_386_16:
-      if (should_apply_static_reloc(gsym, true, false, false))
+      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false))
         Relocate_functions<32, false>::rel16(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC16:
       {
-        bool is_function_call = (gsym != NULL
-                                 && gsym->type() == elfcpp::STT_FUNC);
-        if (should_apply_static_reloc(gsym, false, is_function_call, false))
+        int ref_flags = Symbol::NON_PIC_REF;
+        if (gsym != NULL && gsym->type() == elfcpp::STT_FUNC)
+          ref_flags |= Symbol::FUNCTION_CALL;
+        if (should_apply_static_reloc(gsym, ref_flags, false))
           Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       }
       break;
 
     case elfcpp::R_386_8:
-      if (should_apply_static_reloc(gsym, true, false, false))
+      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false))
         Relocate_functions<32, false>::rel8(view, object, psymval);
       break;
 
     case elfcpp::R_386_PC8:
       {
-        bool is_function_call = (gsym != NULL
-                                 && gsym->type() == elfcpp::STT_FUNC);
-        if (should_apply_static_reloc(gsym, false, is_function_call, false))
+        int ref_flags = Symbol::NON_PIC_REF;
+        if (gsym != NULL && gsym->type() == elfcpp::STT_FUNC)
+          ref_flags |= Symbol::FUNCTION_CALL;
+        if (should_apply_static_reloc(gsym, ref_flags, false))
           Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
       }
       break;

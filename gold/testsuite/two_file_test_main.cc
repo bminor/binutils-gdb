@@ -36,6 +36,7 @@ main()
     v5[i] = v4[i];
 
   assert(t1());
+  assert(t1a());
   assert(t2());
   assert(t3());
   assert(t4());

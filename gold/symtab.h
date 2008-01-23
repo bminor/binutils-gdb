@@ -480,21 +480,45 @@ class Symbol
             && (this->is_from_dynobj() || this->is_preemptible()));
   }
 
+  // When determining whether a reference to a symbol needs a dynamic
+  // relocation, we need to know several things about the reference.
+  // These flags may be or'ed together.
+  enum Reference_flags
+  {
+    // Reference to the symbol's absolute address.
+    ABSOLUTE_REF = 1,
+    // A non-PIC reference.
+    NON_PIC_REF = 2,
+    // A function call.
+    FUNCTION_CALL = 4
+  };
+
   // Given a direct absolute or pc-relative static relocation against
   // the global symbol, this function returns whether a dynamic relocation
   // is needed.
 
   bool
-  needs_dynamic_reloc(bool is_absolute_ref, bool is_function_call) const
+  needs_dynamic_reloc(int flags) const
   {
     // An absolute reference within a position-independent output file
-    // will need a dynamic relocaion.
-    if (is_absolute_ref && parameters->output_is_position_independent())
+    // will need a dynamic relocation.
+    if ((flags & ABSOLUTE_REF)
+        && parameters->output_is_position_independent())
       return true;
 
     // A function call that can branch to a local PLT entry does not need
     // a dynamic relocation.
-    if (is_function_call && this->has_plt_offset())
+    if ((flags & FUNCTION_CALL) && this->has_plt_offset())
+      return false;
+
+    // A non-pic pc-relative function call in a shared library whose target
+    // is defined in the same load module does not need a dynamic relocation.
+    // Even if the target is preemptible, we will bind directly, since we
+    // cannot use a PLT entry in this case.
+    if ((flags & FUNCTION_CALL)
+        && (flags & NON_PIC_REF)
+        && this->is_defined()
+        && parameters->output_is_shared())
       return false;
 
     // A reference to any PLT entry in a non-position-independent executable

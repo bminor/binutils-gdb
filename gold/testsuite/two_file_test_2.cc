@@ -33,6 +33,12 @@ t1_2()
   return 123;
 }
 
+bool
+t1a()
+{
+  return t1_2() == 123;
+}
+
 // 2  Code in file 1 refers to global data in file 2.
 
 int v2 = 456;

@@ -24,6 +24,7 @@
 // file.  See two_file_test_1.cc for details.
 
 extern bool t1();
+extern bool t1a();
 extern int t1_2();
 
 extern bool t2();
