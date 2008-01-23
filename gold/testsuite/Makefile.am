@@ -9,7 +9,7 @@ AUTOMAKE_OPTIONS =
 # The two_file_test tests -fmerge-constants, so we simply always turn
 # it on.  This may need to be controlled by a configure option
 # eventually.
-AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS) -fmerge-constants
+AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) -fmerge-constants
 
 INCLUDES = \
 	-I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../../include \

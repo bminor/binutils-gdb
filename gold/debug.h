@@ -32,8 +32,9 @@ namespace gold
 // The different types of debugging we support.  These are bitflags.
 
 const int DEBUG_TASK = 1;
+const int DEBUG_SCRIPT = 2;
 
-const int DEBUG_ALL = DEBUG_TASK;
+const int DEBUG_ALL = DEBUG_TASK | DEBUG_SCRIPT;
 
 // Print a debug message if TYPE is enabled.  This is a macro so that
 // we only evaluate the arguments if necessary.

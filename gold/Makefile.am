@@ -8,7 +8,8 @@ tooldir = $(exec_prefix)/$(target_alias)
 
 ACLOCAL_AMFLAGS = -I ../bfd -I ../config
 
-AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS)
+AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS)
+AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS)
 
 INCLUDES = \
 	-I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../elfcpp \
@@ -50,6 +51,7 @@ CCFILES = \
 	readsyms.cc \
 	reloc.cc \
 	resolve.cc \
+	script-sections.cc \
 	script.cc \
 	stringpool.cc \
 	symtab.cc \
@@ -80,8 +82,9 @@ HFILES = \
 	readsyms.h \
 	reloc.h \
 	reloc-types.h \
-	script.h \
 	script-c.h \
+	script-sections.h \
+	script.h \
 	stringpool.h \
 	symtab.h \
 	target.h \

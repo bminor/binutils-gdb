@@ -619,7 +619,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTOBJEXT = @INSTOBJEXT@
 LDFLAGS = @LDFLAGS@
-LFS_CXXFLAGS = @LFS_CXXFLAGS@
+LFS_CFLAGS = @LFS_CFLAGS@
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
 LIBOBJS = @LIBOBJS@
@@ -714,7 +714,7 @@ AUTOMAKE_OPTIONS =
 # The two_file_test tests -fmerge-constants, so we simply always turn
 # it on.  This may need to be controlled by a configure option
 # eventually.
-AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CXXFLAGS) -fmerge-constants
+AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) -fmerge-constants
 INCLUDES = \
 	-I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../../include \
 	-I$(srcdir)/../../elfcpp \

@@ -29,6 +29,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "script-c.h"
 
@@ -55,7 +56,19 @@
   uint64_t integer;
   /* An expression.  */
   Expression_ptr expr;
-  // Used for version scripts and within VERSION {}
+  /* An output section header.  */
+  struct Parser_output_section_header output_section_header;
+  /* An output section trailer.  */
+  struct Parser_output_section_trailer output_section_trailer;
+  /* A complete input section specification.  */
+  struct Input_section_spec input_section_spec;
+  /* A list of wildcard specifications, with exclusions.  */
+  struct Wildcard_sections wildcard_sections;
+  /* A single wildcard specification.  */
+  struct Wildcard_section wildcard_section;
+  /* A list of strings.  */
+  String_list_ptr string_list;
+  /* Used for version scripts and within VERSION {}.  */
   struct Version_dependency_list* deplist;
   struct Version_expression_list* versyms;
   struct Version_tree* versnode;
@@ -103,13 +116,11 @@
 %token BYTE
 %token CONSTANT
 %token CONSTRUCTORS
-%token COPY
 %token CREATE_OBJECT_SYMBOLS
 %token DATA_SEGMENT_ALIGN
 %token DATA_SEGMENT_END
 %token DATA_SEGMENT_RELRO_END
 %token DEFINED
-%token DSECT
 %token ENTRY
 %token EXCLUDE_FILE
 %token EXTERN
@@ -120,7 +131,6 @@
 %token GROUP
 %token HLL
 %token INCLUDE
-%token INFO
 %token INHIBIT_COMMON_ALLOCATION
 %token INPUT
 %token KEEP
@@ -135,7 +145,6 @@
 %token NEXT
 %token NOCROSSREFS
 %token NOFLOAT
-%token NOLOAD
 %token ONLY_IF_RO
 %token ONLY_IF_RW
 %token ORIGIN		/* ORIGIN, o, org */
@@ -182,7 +191,16 @@
 
 /* Non-terminal types, where needed.  */
 
-%type <expr> parse_exp exp
+%type <expr> parse_exp exp opt_address_and_section_type
+%type <expr> opt_at opt_align opt_subalign opt_fill
+%type <output_section_header> section_header
+%type <output_section_trailer> section_trailer
+%type <integer> data_length
+%type <input_section_spec> input_section_no_keep
+%type <wildcard_sections> wildcard_sections
+%type <wildcard_section> wildcard_file wildcard_section
+%type <string_list> exclude_names
+%type <string> wildcard_name
 %type <versyms> vers_defns
 %type <versnode> vers_tag
 %type <deplist> verdep
@@ -211,6 +229,10 @@ file_cmd:
 	    { script_end_group(closure); }
         | OPTION '(' string ')'
 	    { script_parse_option(closure, $3.value, $3.length); }
+	| SECTIONS '{'
+	    { script_start_sections(closure); }
+	  sections_block '}'
+	    { script_finish_sections(closure); }
         | VERSIONK '{'
             { script_push_lex_into_version_mode(closure); }
           version_script '}'
@@ -245,12 +267,304 @@ input_list_element:
 	    { script_end_as_needed(closure); }
 	;
 
+/* Commands in a SECTIONS block.  */
+sections_block:
+	  sections_block section_block_cmd
+	| /* empty */
+	;
+
+/* A command which may appear within a SECTIONS block.  */
+section_block_cmd:
+	  file_or_sections_cmd
+	| STRING section_header
+	    { script_start_output_section(closure, $1.value, $1.length, &$2); }
+	  '{' section_cmds '}' section_trailer
+	    { script_finish_output_section(closure, &$7); }
+	;
+
+/* The header of an output section in a SECTIONS block--everything
+   after the name.  */
+section_header:
+	    { script_push_lex_into_expression_mode(closure); }
+	  opt_address_and_section_type opt_at opt_align opt_subalign
+	    {
+	      $$.address = $2;
+	      $$.load_address = $3;
+	      $$.align = $4;
+	      $$.subalign = $5;
+	      script_pop_lex_mode(closure);
+	    }
+	;
+
+/* The optional address followed by the optional section type.  This
+   is a separate nonterminal to avoid a shift/reduce conflict on
+   '(' in section_header.  */
+
+opt_address_and_section_type:
+	  ':'
+	    { $$ = NULL; }
+	| '(' ')' ':'
+	    { $$ = NULL; }
+	| exp ':'
+	    { $$ = $1; }
+	| exp '(' ')' ':'
+	    { $$ = $1; }
+	| exp '(' STRING ')' ':'
+	    {
+	      yyerror(closure, "section types are not supported");
+	      $$ = $1;
+	    }
+	;
+
+/* The address at which an output section should be loaded.  */
+opt_at:
+	  /* empty */
+	    { $$ = NULL; }
+	| AT '(' exp ')'
+	    { $$ = $3; }
+	;
+
+/* The alignment of an output section.  */
+opt_align:
+	  /* empty */
+	    { $$ = NULL; }
+	| ALIGN_K '(' exp ')'
+	    { $$ = $3; }
+	;
+
+/* The input section alignment within an output section.  */
+opt_subalign:
+	  /* empty */
+	    { $$ = NULL; }
+	| SUBALIGN '(' exp ')'
+	    { $$ = $3; }
+	;
+
+/* The trailer of an output section in a SECTIONS block.  */
+section_trailer:
+	    { script_push_lex_into_expression_mode(closure); }
+	  opt_memspec opt_at_memspec opt_phdr opt_fill opt_comma
+	    {
+	      $$.fill = $5;
+	      script_pop_lex_mode(closure);
+	    }
+	;
+
+/* A memory specification for an output section.  */
+opt_memspec:
+	  '>' STRING
+	    { yyerror(closure, "memory regions are not supported"); }
+	| /* empty */
+	;
+
+/* A memory specification for where to load an output section.  */
+opt_at_memspec:
+	  AT '>' STRING
+	    { yyerror(closure, "memory regions are not supported"); }
+	| /* empty */
+	;
+
+/* The program segment an output section should go into.  */
+opt_phdr:
+	  opt_phdr ':' STRING
+	    { yyerror(closure, "program headers are not supported"); }
+	| /* empty */
+	;
+
+/* The value to use to fill an output section.  */
+opt_fill:
+	  '=' exp
+	    { $$ = $2; }
+	| /* empty */
+	    { $$ = NULL; }
+	;
+
+/* Commands which may appear within the description of an output
+   section in a SECTIONS block.  */
+section_cmds:
+	  /* empty */
+	| section_cmds section_cmd
+	;
+
+/* A command which may appear within the description of an output
+   section in a SECTIONS block.  */
+section_cmd:
+	  assignment end
+	| input_section_spec
+	| data_length '(' parse_exp ')'
+	    { script_add_data(closure, $1, $3); }
+	| ASSERT_K '(' parse_exp ',' STRING ')'
+	    { script_add_assertion(closure, $3, $5.value, $5.length); }
+	| FILL '(' parse_exp ')'
+	    { script_add_fill(closure, $3); }
+	| CONSTRUCTORS
+	    {
+	      /* The GNU linker uses CONSTRUCTORS for the a.out object
+		 file format.  It does nothing when using ELF.  Since
+		 some ELF linker scripts use it although it does
+		 nothing, we accept it and ignore it.  */
+	    }
+	| ';'
+	;
+
+/* The length of data which may appear within the description of an
+   output section in a SECTIONS block.  */
+data_length:
+	  QUAD
+	    { $$ = QUAD; }
+	| SQUAD
+	    { $$ = SQUAD; }
+	| LONG
+	    { $$ = LONG; }
+	| SHORT
+	    { $$ = SHORT; }
+	| BYTE
+	    { $$ = BYTE; }
+	;
+
+/* An input section specification.  This may appear within the
+   description of an output section in a SECTIONS block.  */
+input_section_spec:
+	  input_section_no_keep
+	    { script_add_input_section(closure, &$1, 0); }
+	| KEEP '(' input_section_no_keep ')'
+	    { script_add_input_section(closure, &$3, 1); }
+	;
+
+/* An input section specification within a KEEP clause.  */
+input_section_no_keep:
+	  STRING
+	    {
+	      $$.file.name = $1;
+	      $$.file.sort = SORT_WILDCARD_NONE;
+	      $$.input_sections.sections = NULL;
+	      $$.input_sections.exclude = NULL;
+	    }
+	| wildcard_file '(' wildcard_sections ')'
+	    {
+	      $$.file = $1;
+	      $$.input_sections = $3;
+	    }
+	;
+
+/* A wildcard file specification.  */
+wildcard_file:
+	  wildcard_name
+	    {
+	      $$.name = $1;
+	      $$.sort = SORT_WILDCARD_NONE;
+	    }
+	| SORT_BY_NAME '(' wildcard_name ')'
+	    {
+	      $$.name = $3;
+	      $$.sort = SORT_WILDCARD_BY_NAME;
+	    }
+	;
+
+/* A list of wild card section specifications.  */
+wildcard_sections:
+	  wildcard_sections opt_comma wildcard_section
+	    {
+	      $$.sections = script_string_sort_list_add($1.sections, &$3);
+	      $$.exclude = $1.exclude;
+	    }
+	| wildcard_section
+	    {
+	      $$.sections = script_new_string_sort_list(&$1);
+	      $$.exclude = NULL;
+	    }
+	| wildcard_sections opt_comma EXCLUDE_FILE '(' exclude_names ')'
+	    {
+	      $$.sections = $1.sections;
+	      $$.exclude = script_string_list_append($1.exclude, $5);
+	    }
+	| EXCLUDE_FILE '(' exclude_names ')'
+	    {
+	      $$.sections = NULL;
+	      $$.exclude = $3;
+	    }
+	;
+
+/* A single wild card specification.  */
+wildcard_section:
+	  wildcard_name
+	    {
+	      $$.name = $1;
+	      $$.sort = SORT_WILDCARD_NONE;
+	    }
+	| SORT_BY_NAME '(' wildcard_section ')'
+	    {
+	      $$.name = $3.name;
+	      switch ($3.sort)
+		{
+		case SORT_WILDCARD_NONE:
+		  $$.sort = SORT_WILDCARD_BY_NAME;
+		  break;
+		case SORT_WILDCARD_BY_NAME:
+		case SORT_WILDCARD_BY_NAME_BY_ALIGNMENT:
+		  break;
+		case SORT_WILDCARD_BY_ALIGNMENT:
+		case SORT_WILDCARD_BY_ALIGNMENT_BY_NAME:
+		  $$.sort = SORT_WILDCARD_BY_NAME_BY_ALIGNMENT;
+		  break;
+		default:
+		  abort();
+		}
+	    }
+	| SORT_BY_ALIGNMENT '(' wildcard_section ')'
+	    {
+	      $$.name = $3.name;
+	      switch ($3.sort)
+		{
+		case SORT_WILDCARD_NONE:
+		  $$.sort = SORT_WILDCARD_BY_ALIGNMENT;
+		  break;
+		case SORT_WILDCARD_BY_ALIGNMENT:
+		case SORT_WILDCARD_BY_ALIGNMENT_BY_NAME:
+		  break;
+		case SORT_WILDCARD_BY_NAME:
+		case SORT_WILDCARD_BY_NAME_BY_ALIGNMENT:
+		  $$.sort = SORT_WILDCARD_BY_ALIGNMENT_BY_NAME;
+		  break;
+		default:
+		  abort();
+		}
+	    }
+	;
+
+/* A list of file names to exclude.  */
+exclude_names:
+	  exclude_names opt_comma wildcard_name
+	    { $$ = script_string_list_push_back($1, $3.value, $3.length); }
+	| wildcard_name
+	    { $$ = script_new_string_list($1.value, $1.length); }
+	;
+
+/* A single wildcard name.  We recognize '*' and '?' specially since
+   they are expression tokens.  */
+wildcard_name:
+	  STRING
+	    { $$ = $1; }
+	| '*'
+	    {
+	      $$.value = "*";
+	      $$.length = 1;
+	    }
+	| '?'
+	    {
+	      $$.value = "?";
+	      $$.length = 1;
+	    }
+	;
+
 /* A command which may appear at the top level of a linker script, or
    within a SECTIONS block.  */
 file_or_sections_cmd:
 	  ENTRY '(' string ')'
 	    { script_set_entry(closure, $3.value, $3.length); }
 	| assignment end
+	| ASSERT_K '(' parse_exp ',' STRING ')'
+	    { script_add_assertion(closure, $3, $5.value, $5.length); }
 	;
 
 /* Set a symbol to a value.  */

@@ -30,11 +30,10 @@
 #ifndef GOLD_SCRIPT_H
 #define GOLD_SCRIPT_H
 
+#include <cstdio>
 #include <vector>
 
-struct Version_dependency_list;
-struct Version_expression_list;
-struct Version_tree;
+#include "script-sections.h"
 
 namespace gold
 {
@@ -50,6 +49,9 @@ class Input_file;
 class Target;
 class Task_token;
 class Workqueue;
+struct Version_dependency_list;
+struct Version_expression_list;
+struct Version_tree;
 
 // This class represents an expression in a linker script.
 
@@ -67,6 +69,10 @@ class Expression
   // Return the value of the expression.
   uint64_t
   eval(const Symbol_table*, const Layout*);
+
+  // Print the expression to the FILE.  This is for debugging.
+  virtual void
+  print(FILE*) const = 0;
 
  protected:
   struct Expression_eval_info;
@@ -90,7 +96,8 @@ class Expression
 // script.  A single Version_script_info object per target is owned by
 // Script_options.
 
-class Version_script_info {
+class Version_script_info
+{
  public:
   ~Version_script_info();
 
@@ -138,13 +145,91 @@ class Version_script_info {
   struct Version_tree*
   allocate_version_tree();
 
+  // Print contents to the FILE.  This is for debugging.
+  void
+  print(FILE*) const;
+
  private:
+  void
+  print_expression_list(FILE* f, const Version_expression_list*) const;
+
   const std::string& get_symbol_version_helper(const char* symbol,
                                                bool check_global) const;
 
   std::vector<struct Version_dependency_list*> dependency_lists_;
   std::vector<struct Version_expression_list*> expression_lists_;
   std::vector<struct Version_tree*> version_trees_;
+};
+
+// This class manages assignments to symbols.  These can appear in
+// three different locations in scripts: outside of a SECTIONS clause,
+// within a SECTIONS clause, and within an output section definition
+// within a SECTIONS clause.  This can also appear on the command line
+// via the --defsym command line option.
+
+class Symbol_assignment
+{
+ public:
+  Symbol_assignment(const char* name, size_t namelen, Expression* val,
+		    bool provide, bool hidden)
+    : name_(name, namelen), val_(val), provide_(provide), hidden_(hidden),
+      sym_(NULL)
+  { }
+
+  // Add the symbol to the symbol table.
+  void
+  add_to_table(Symbol_table*, const Target*);
+
+  // Finalize the symbol value.
+  void finalize(Symbol_table*, const Layout*);
+
+  // Print the assignment to the FILE.  This is for debugging.
+  void
+  print(FILE*) const;
+
+ private:
+  // Sized version of finalize.
+  template<int size>
+  void
+  sized_finalize(Symbol_table*, const Layout*);
+
+  // Symbol name.
+  std::string name_;
+  // Expression to assign to symbol.
+  Expression* val_;
+  // Whether the assignment should be provided (only set if there is
+  // an undefined reference to the symbol.
+  bool provide_;
+  // Whether the assignment should be hidden.
+  bool hidden_;
+  // The entry in the symbol table.
+  Symbol* sym_;
+};
+
+// This class manages assertions in linker scripts.  These can appear
+// in all the places where a Symbol_assignment can appear.
+
+class Script_assertion
+{
+ public:
+  Script_assertion(Expression* check, const char* message,
+		   size_t messagelen)
+    : check_(check), message_(message, messagelen)
+  { }
+
+  // Check the assertion.
+  void
+  check(const Symbol_table*, const Layout*);
+
+  // Print the assertion to the FILE.  This is for debugging.
+  void
+  print(FILE*) const;
+
+ private:
+  // The expression to check.
+  Expression* check_;
+  // The message to issue if the expression fails.
+  std::string message_;
 };
 
 // We can read a linker script in two different contexts: when
@@ -172,15 +257,14 @@ class Script_options
   set_entry(const char* entry, size_t length)
   { this->entry_.assign(entry, length); }
 
-  // Add a symbol to be defined.  These are for symbol definitions
-  // which appear outside of a SECTIONS clause.
+  // Add a symbol to be defined.
   void
   add_symbol_assignment(const char* name, size_t length, Expression* value,
-			bool provided, bool hidden)
-  {
-    this->symbol_assignments_.push_back(Symbol_assignment(name, length, value,
-							  provided, hidden));
-  }
+			bool provide, bool hidden);
+
+  // Add an assertion.
+  void
+  add_assertion(Expression* check, const char* message, size_t messagelen);
 
   // Define a symbol from the command line.
   bool
@@ -198,43 +282,37 @@ class Script_options
   // else has a pointer to this object.
   Version_script_info*
   version_script_info()
-  { return &version_script_info_; }
+  { return &this->version_script_info_; }
+
+  // A SECTIONS clause parsed from a linker script.  Everything else
+  // has a pointer to this object.
+  Script_sections*
+  script_sections()
+  { return &this->script_sections_; }
+
+  // Print the script to the FILE.  This is for debugging.
+  void
+  print(FILE*) const;
 
  private:
-  // We keep a list of symbol assignments.
-  struct Symbol_assignment
-  {
-    // Symbol name.
-    std::string name;
-    // Expression to assign to symbol.
-    Expression* value;
-    // Whether the assignment should be provided (only set if there is
-    // an undefined reference to the symbol.
-    bool provide;
-    // Whether the assignment should be hidden.
-    bool hidden;
-    // The entry in the symbol table.
-    Symbol* sym;
+  // We keep a list of symbol assignments which occur outside of a
+  // SECTIONS clause.
+  typedef std::vector<Symbol_assignment*> Symbol_assignments;
 
-    Symbol_assignment(const char* namea, size_t lengtha, Expression* valuea,
-		      bool providea, bool hiddena)
-      : name(namea, lengtha), value(valuea), provide(providea),
-	hidden(hiddena), sym(NULL)
-    { }
-  };
-
-  typedef std::vector<Symbol_assignment> Symbol_assignments;
-
-  template<int size>
-  void
-  sized_finalize_symbols(Symbol_table*, const Layout*);
+  // We keep a list of all assertions whcih occur outside of a
+  // SECTIONS clause.
+  typedef std::vector<Script_assertion*> Assertions;
 
   // The entry address.  This will be empty if not set.
   std::string entry_;
   // Symbols to set.
   Symbol_assignments symbol_assignments_;
+  // Assertions to check.
+  Assertions assertions_;
   // Version information parsed from a version script.
   Version_script_info version_script_info_;
+  // Information from any SECTIONS clauses.
+  Script_sections script_sections_;
 };
 
 // FILE was found as an argument on the command line, but was not

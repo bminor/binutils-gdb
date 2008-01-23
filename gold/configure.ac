@@ -199,8 +199,8 @@ AC_SUBST(WARN_CXXFLAGS)
 
 dnl Force support for large files by default.  This may need to be
 dnl host dependent.  If build == host, we can check getconf LFS_CFLAGS.
-LFS_CXXFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
-AC_SUBST(LFS_CXXFLAGS)
+LFS_CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+AC_SUBST(LFS_CFLAGS)
 
 AC_REPLACE_FUNCS(pread)
 

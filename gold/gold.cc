@@ -29,6 +29,7 @@
 #include "libiberty.h"
 
 #include "options.h"
+#include "debug.h"
 #include "workqueue.h"
 #include "dirsearch.h"
 #include "readsyms.h"
@@ -181,6 +182,9 @@ queue_middle_tasks(const General_options& options,
       gold_error(_("cannot mix -static with dynamic object %s"),
 		 (*input_objects->dynobj_begin())->name().c_str());
     }
+
+  if (is_debugging_enabled(DEBUG_SCRIPT))
+    layout->script_options()->print(stderr);
 
   // For each dynamic object, record whether we've seen all the
   // dynamic objects that it depends upon.

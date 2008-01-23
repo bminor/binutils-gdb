@@ -885,11 +885,152 @@ class Script_unblock : public Task
   Task_token* next_blocker_;
 };
 
+// class Symbol_assignment.
+
+// Add the symbol to the symbol table.  This makes sure the symbol is
+// there and defined.  The actual value is stored later.  We can't
+// determine the actual value at this point, because we can't
+// necessarily evaluate the expression until all ordinary symbols have
+// been finalized.
+
+void
+Symbol_assignment::add_to_table(Symbol_table* symtab, const Target* target)
+{
+  elfcpp::STV vis = this->hidden_ ? elfcpp::STV_HIDDEN : elfcpp::STV_DEFAULT;
+  this->sym_ = symtab->define_as_constant(target,
+					  this->name_.c_str(),
+					  NULL, // version
+					  0, // value
+					  0, // size
+					  elfcpp::STT_NOTYPE,
+					  elfcpp::STB_GLOBAL,
+					  vis,
+					  0, // nonvis
+					  this->provide_);
+}
+
+// Finalize a symbol value.
+
+void
+Symbol_assignment::finalize(Symbol_table* symtab, const Layout* layout)
+{
+  // If we were only supposed to provide this symbol, the sym_ field
+  // will be NULL if the symbol was not referenced.
+  if (this->sym_ == NULL)
+    {
+      gold_assert(this->provide_);
+      return;
+    }
+
+  if (parameters->get_size() == 32)
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+      this->sized_finalize<32>(symtab, layout);
+#else
+      gold_unreachable();
+#endif
+    }
+  else if (parameters->get_size() == 64)
+    {
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+      this->sized_finalize<64>(symtab, layout);
+#else
+      gold_unreachable();
+#endif
+    }
+  else
+    gold_unreachable();
+}
+
+template<int size>
+void
+Symbol_assignment::sized_finalize(Symbol_table* symtab, const Layout* layout)
+{
+  Sized_symbol<size>* ssym = symtab->get_sized_symbol<size>(this->sym_);
+  ssym->set_value(this->val_->eval(symtab, layout));
+}
+
+// Print for debugging.
+
+void
+Symbol_assignment::print(FILE* f) const
+{
+  if (this->provide_ && this->hidden_)
+    fprintf(f, "PROVIDE_HIDDEN(");
+  else if (this->provide_)
+    fprintf(f, "PROVIDE(");
+  else if (this->hidden_)
+    gold_unreachable();
+
+  fprintf(f, "%s = ", this->name_.c_str());
+  this->val_->print(f);
+
+  if (this->provide_ || this->hidden_)
+    fprintf(f, ")");
+
+  fprintf(f, "\n");
+}
+
+// Class Script_assertion.
+
+// Check the assertion.
+
+void
+Script_assertion::check(const Symbol_table* symtab, const Layout* layout)
+{
+  if (!this->check_->eval(symtab, layout))
+    gold_error("%s", this->message_.c_str());
+}
+
+// Print for debugging.
+
+void
+Script_assertion::print(FILE* f) const
+{
+  fprintf(f, "ASSERT(");
+  this->check_->print(f);
+  fprintf(f, ", \"%s\")\n", this->message_.c_str());
+}
+
 // Class Script_options.
 
 Script_options::Script_options()
-  : entry_(), symbol_assignments_()
+  : entry_(), symbol_assignments_(), version_script_info_(),
+    script_sections_()
 {
+}
+
+// Add a symbol to be defined.
+
+void
+Script_options::add_symbol_assignment(const char* name, size_t length,
+				      Expression* value, bool provide,
+				      bool hidden)
+{
+  if (this->script_sections_.in_sections_clause())
+    this->script_sections_.add_symbol_assignment(name, length, value,
+						 provide, hidden);
+  else
+    {
+      Symbol_assignment* p = new Symbol_assignment(name, length, value,
+						   provide, hidden);
+      this->symbol_assignments_.push_back(p);
+    }
+}
+
+// Add an assertion.
+
+void
+Script_options::add_assertion(Expression* check, const char* message,
+			      size_t messagelen)
+{
+  if (this->script_sections_.in_sections_clause())
+    this->script_sections_.add_assertion(check, message, messagelen);
+  else
+    {
+      Script_assertion* p = new Script_assertion(check, message, messagelen);
+      this->assertions_.push_back(p);
+    }
 }
 
 // Add any symbols we are defining to the symbol table.
@@ -901,19 +1042,7 @@ Script_options::add_symbols_to_table(Symbol_table* symtab,
   for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
        p != this->symbol_assignments_.end();
        ++p)
-    {
-      elfcpp::STV vis = p->hidden ? elfcpp::STV_HIDDEN : elfcpp::STV_DEFAULT;
-      p->sym = symtab->define_as_constant(target,
-					  p->name.c_str(),
-					  NULL, // version
-					  0, // value
-					  0, // size
-					  elfcpp::STT_NOTYPE,
-					  elfcpp::STB_GLOBAL,
-					  vis,
-					  0, // nonvis
-					  p->provide);
-    }
+    (*p)->add_to_table(symtab, target);
 }
 
 // Finalize symbol values.
@@ -921,41 +1050,10 @@ Script_options::add_symbols_to_table(Symbol_table* symtab,
 void
 Script_options::finalize_symbols(Symbol_table* symtab, const Layout* layout)
 {
-  if (parameters->get_size() == 32)
-    {
-#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      this->sized_finalize_symbols<32>(symtab, layout);
-#else
-      gold_unreachable();
-#endif
-    }
-  else if (parameters->get_size() == 64)
-    {
-#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      this->sized_finalize_symbols<64>(symtab, layout);
-#else
-      gold_unreachable();
-#endif
-    }
-  else
-    gold_unreachable();
-}
-
-template<int size>
-void
-Script_options::sized_finalize_symbols(Symbol_table* symtab,
-				       const Layout* layout)
-{
   for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
        p != this->symbol_assignments_.end();
        ++p)
-    {
-      if (p->sym != NULL)
-	{
-	  Sized_symbol<size>* ssym = symtab->get_sized_symbol<size>(p->sym);
-	  ssym->set_value(p->value->eval(symtab, layout));
-	}
-    }
+    (*p)->finalize(symtab, layout);
 }
 
 // This class holds data passed through the parser to the lexer and to
@@ -1283,6 +1381,32 @@ Script_options::define_symbol(const char* definition)
   return true;
 }
 
+// Print the script to F for debugging.
+
+void
+Script_options::print(FILE* f) const
+{
+  fprintf(f, "%s: Dumping linker script\n", program_name);
+
+  if (!this->entry_.empty())
+    fprintf(f, "ENTRY(%s)\n", this->entry_.c_str());
+
+  for (Symbol_assignments::const_iterator p =
+	 this->symbol_assignments_.begin();
+       p != this->symbol_assignments_.end();
+       ++p)
+    (*p)->print(f);
+
+  for (Assertions::const_iterator p = this->assertions_.begin();
+       p != this->assertions_.end();
+       ++p)
+    (*p)->print(f);
+
+  this->script_sections_.print(f);
+
+  this->version_script_info_.print(f);
+}
+
 // Manage mapping from keywords to the codes expected by the bison
 // parser.  We construct one global object for each lex mode with
 // keywords.
@@ -1333,13 +1457,11 @@ script_keyword_parsecodes[] =
   { "BYTE", BYTE },
   { "CONSTANT", CONSTANT },
   { "CONSTRUCTORS", CONSTRUCTORS },
-  { "COPY", COPY },
   { "CREATE_OBJECT_SYMBOLS", CREATE_OBJECT_SYMBOLS },
   { "DATA_SEGMENT_ALIGN", DATA_SEGMENT_ALIGN },
   { "DATA_SEGMENT_END", DATA_SEGMENT_END },
   { "DATA_SEGMENT_RELRO_END", DATA_SEGMENT_RELRO_END },
   { "DEFINED", DEFINED },
-  { "DSECT", DSECT },
   { "ENTRY", ENTRY },
   { "EXCLUDE_FILE", EXCLUDE_FILE },
   { "EXTERN", EXTERN },
@@ -1349,7 +1471,6 @@ script_keyword_parsecodes[] =
   { "GROUP", GROUP },
   { "HLL", HLL },
   { "INCLUDE", INCLUDE },
-  { "INFO", INFO },
   { "INHIBIT_COMMON_ALLOCATION", INHIBIT_COMMON_ALLOCATION },
   { "INPUT", INPUT },
   { "KEEP", KEEP },
@@ -1363,7 +1484,6 @@ script_keyword_parsecodes[] =
   { "NEXT", NEXT },
   { "NOCROSSREFS", NOCROSSREFS },
   { "NOFLOAT", NOFLOAT },
-  { "NOLOAD", NOLOAD },
   { "ONLY_IF_RO", ONLY_IF_RO },
   { "ONLY_IF_RW", ONLY_IF_RW },
   { "OPTION", OPTION },
@@ -1462,6 +1582,241 @@ Keyword_to_parsecode::keyword_to_parsecode(const char* keyword,
     return 0;
   Keyword_parsecode* ktt = static_cast<Keyword_parsecode*>(kttv);
   return ktt->parsecode;
+}
+
+// The following structs are used within the VersionInfo class as well
+// as in the bison helper functions.  They store the information
+// parsed from the version script.
+
+// A single version expression.
+// For example, pattern="std::map*" and language="C++".
+// pattern and language should be from the stringpool
+struct Version_expression {
+  Version_expression(const std::string& pattern,
+                     const std::string& language,
+                     bool exact_match)
+      : pattern(pattern), language(language), exact_match(exact_match) {}
+
+  std::string pattern;
+  std::string language;
+  // If false, we use glob() to match pattern.  If true, we use strcmp().
+  bool exact_match;
+};
+
+
+// A list of expressions.
+struct Version_expression_list {
+  std::vector<struct Version_expression> expressions;
+};
+
+
+// A list of which versions upon which another version depends.
+// Strings should be from the Stringpool.
+struct Version_dependency_list {
+  std::vector<std::string> dependencies;
+};
+
+
+// The total definition of a version.  It includes the tag for the
+// version, its global and local expressions, and any dependencies.
+struct Version_tree {
+  Version_tree()
+      : tag(), global(NULL), local(NULL), dependencies(NULL) {}
+
+  std::string tag;
+  const struct Version_expression_list* global;
+  const struct Version_expression_list* local;
+  const struct Version_dependency_list* dependencies;
+};
+
+Version_script_info::~Version_script_info()
+{
+  for (size_t k = 0; k < dependency_lists_.size(); ++k)
+    delete dependency_lists_[k];
+  for (size_t k = 0; k < version_trees_.size(); ++k)
+    delete version_trees_[k];
+  for (size_t k = 0; k < expression_lists_.size(); ++k)
+    delete expression_lists_[k];
+}
+
+std::vector<std::string>
+Version_script_info::get_versions() const
+{
+  std::vector<std::string> ret;
+  for (size_t j = 0; j < version_trees_.size(); ++j)
+    ret.push_back(version_trees_[j]->tag);
+  return ret;
+}
+
+std::vector<std::string>
+Version_script_info::get_dependencies(const char* version) const
+{
+  std::vector<std::string> ret;
+  for (size_t j = 0; j < version_trees_.size(); ++j)
+    if (version_trees_[j]->tag == version)
+      {
+        const struct Version_dependency_list* deps =
+          version_trees_[j]->dependencies;
+        if (deps != NULL)
+          for (size_t k = 0; k < deps->dependencies.size(); ++k)
+            ret.push_back(deps->dependencies[k]);
+        return ret;
+      }
+  return ret;
+}
+
+const std::string&
+Version_script_info::get_symbol_version_helper(const char* symbol_name,
+                                               bool check_global) const
+{
+  for (size_t j = 0; j < version_trees_.size(); ++j)
+    {
+      // Is it a global symbol for this version?
+      const Version_expression_list* explist =
+          check_global ? version_trees_[j]->global : version_trees_[j]->local;
+      if (explist != NULL)
+        for (size_t k = 0; k < explist->expressions.size(); ++k)
+          {
+            const char* name_to_match = symbol_name;
+            const struct Version_expression& exp = explist->expressions[k];
+            char* demangled_name = NULL;
+            if (exp.language == "C++")
+              {
+                demangled_name = cplus_demangle(symbol_name,
+                                                DMGL_ANSI | DMGL_PARAMS);
+                // This isn't a C++ symbol.
+                if (demangled_name == NULL)
+                  continue;
+                name_to_match = demangled_name;
+              }
+            else if (exp.language == "Java")
+              {
+                demangled_name = cplus_demangle(symbol_name,
+                                                (DMGL_ANSI | DMGL_PARAMS
+						 | DMGL_JAVA));
+                // This isn't a Java symbol.
+                if (demangled_name == NULL)
+                  continue;
+                name_to_match = demangled_name;
+              }
+            bool matched;
+            if (exp.exact_match)
+              matched = strcmp(exp.pattern.c_str(), name_to_match) == 0;
+            else
+              matched = fnmatch(exp.pattern.c_str(), name_to_match,
+                                FNM_NOESCAPE) == 0;
+            if (demangled_name != NULL)
+              free(demangled_name);
+            if (matched)
+              return version_trees_[j]->tag;
+          }
+    }
+  static const std::string empty = "";
+  return empty;
+}
+
+struct Version_dependency_list*
+Version_script_info::allocate_dependency_list()
+{
+  dependency_lists_.push_back(new Version_dependency_list);
+  return dependency_lists_.back();
+}
+
+struct Version_expression_list*
+Version_script_info::allocate_expression_list()
+{
+  expression_lists_.push_back(new Version_expression_list);
+  return expression_lists_.back();
+}
+
+struct Version_tree*
+Version_script_info::allocate_version_tree()
+{
+  version_trees_.push_back(new Version_tree);
+  return version_trees_.back();
+}
+
+// Print for debugging.
+
+void
+Version_script_info::print(FILE* f) const
+{
+  if (this->empty())
+    return;
+
+  fprintf(f, "VERSION {");
+
+  for (size_t i = 0; i < this->version_trees_.size(); ++i)
+    {
+      const Version_tree* vt = this->version_trees_[i];
+
+      if (vt->tag.empty())
+	fprintf(f, "  {\n");
+      else
+	fprintf(f, "  %s {\n", vt->tag.c_str());
+
+      if (vt->global != NULL)
+	{
+	  fprintf(f, "    global :\n");
+	  this->print_expression_list(f, vt->global);
+	}
+
+      if (vt->local != NULL)
+	{
+	  fprintf(f, "    local :\n");
+	  this->print_expression_list(f, vt->local);
+	}
+
+      fprintf(f, "  }");
+      if (vt->dependencies != NULL)
+	{
+	  const Version_dependency_list* deps = vt->dependencies;
+	  for (size_t j = 0; j < deps->dependencies.size(); ++j)
+	    {
+	      if (j < deps->dependencies.size() - 1)
+		fprintf(f, "\n");
+	      fprintf(f, "    %s", deps->dependencies[j].c_str());
+	    }
+	}
+      fprintf(f, ";\n");
+    }
+
+  fprintf(f, "}\n");
+}
+
+void
+Version_script_info::print_expression_list(
+    FILE* f,
+    const Version_expression_list* vel) const
+{
+  std::string current_language;
+  for (size_t i = 0; i < vel->expressions.size(); ++i)
+    {
+      const Version_expression& ve(vel->expressions[i]);
+
+      if (ve.language != current_language)
+	{
+	  if (!current_language.empty())
+	    fprintf(f, "      }\n");
+	  fprintf(f, "      extern \"%s\" {\n", ve.language.c_str());
+	  current_language = ve.language;
+	}
+
+      fprintf(f, "      ");
+      if (!current_language.empty())
+	fprintf(f, "  ");
+
+      if (ve.exact_match)
+	fprintf(f, "\"");
+      fprintf(f, "%s", ve.pattern.c_str());
+      if (ve.exact_match)
+	fprintf(f, "\"");
+
+      fprintf(f, "\n");
+    }
+
+  if (!current_language.empty())
+    fprintf(f, "      }\n");
 }
 
 } // End namespace gold.
@@ -1648,6 +2003,16 @@ script_set_symbol(void* closurev, const char* name, size_t length,
 						   provide, hidden);
 }
 
+// Called by the bison parser to add an assertion.
+
+extern "C" void
+script_add_assertion(void* closurev, Expression* check, const char* message,
+		     size_t messagelen)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->script_options()->add_assertion(check, message, messagelen);
+}
+
 // Called by the bison parser to parse an OPTION.
 
 extern "C" void
@@ -1678,7 +2043,7 @@ script_parse_option(void* closurev, const char* option, size_t length)
 /* Called by the bison parser to push the lexer into expression
    mode.  */
 
-extern void
+extern "C" void
 script_push_lex_into_expression_mode(void* closurev)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
@@ -1688,7 +2053,7 @@ script_push_lex_into_expression_mode(void* closurev)
 /* Called by the bison parser to push the lexer into version
    mode.  */
 
-extern void
+extern "C" void
 script_push_lex_into_version_mode(void* closurev)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
@@ -1697,163 +2062,11 @@ script_push_lex_into_version_mode(void* closurev)
 
 /* Called by the bison parser to pop the lexer mode.  */
 
-extern void
+extern "C" void
 script_pop_lex_mode(void* closurev)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   closure->pop_lex_mode();
-}
-
-// The following structs are used within the VersionInfo class as well
-// as in the bison helper functions.  They store the information
-// parsed from the version script.
-
-// A single version expression.
-// For example, pattern="std::map*" and language="C++".
-// pattern and language should be from the stringpool
-struct Version_expression {
-  Version_expression(const std::string& pattern,
-                     const std::string& language,
-                     bool exact_match)
-      : pattern(pattern), language(language), exact_match(exact_match) {}
-
-  std::string pattern;
-  std::string language;
-  // If false, we use glob() to match pattern.  If true, we use strcmp().
-  bool exact_match;
-};
-
-
-// A list of expressions.
-struct Version_expression_list {
-  std::vector<struct Version_expression> expressions;
-};
-
-
-// A list of which versions upon which another version depends.
-// Strings should be from the Stringpool.
-struct Version_dependency_list {
-  std::vector<std::string> dependencies;
-};
-
-
-// The total definition of a version.  It includes the tag for the
-// version, its global and local expressions, and any dependencies.
-struct Version_tree {
-  Version_tree()
-      : tag(), global(NULL), local(NULL), dependencies(NULL) {}
-
-  std::string tag;
-  const struct Version_expression_list* global;
-  const struct Version_expression_list* local;
-  const struct Version_dependency_list* dependencies;
-};
-
-Version_script_info::~Version_script_info()
-{
-  for (size_t k = 0; k < dependency_lists_.size(); ++k)
-    delete dependency_lists_[k];
-  for (size_t k = 0; k < version_trees_.size(); ++k)
-    delete version_trees_[k];
-  for (size_t k = 0; k < expression_lists_.size(); ++k)
-    delete expression_lists_[k];
-}
-
-std::vector<std::string>
-Version_script_info::get_versions() const
-{
-  std::vector<std::string> ret;
-  for (size_t j = 0; j < version_trees_.size(); ++j)
-    ret.push_back(version_trees_[j]->tag);
-  return ret;
-}
-
-std::vector<std::string>
-Version_script_info::get_dependencies(const char* version) const
-{
-  std::vector<std::string> ret;
-  for (size_t j = 0; j < version_trees_.size(); ++j)
-    if (version_trees_[j]->tag == version)
-      {
-        const struct Version_dependency_list* deps =
-          version_trees_[j]->dependencies;
-        if (deps != NULL)
-          for (size_t k = 0; k < deps->dependencies.size(); ++k)
-            ret.push_back(deps->dependencies[k]);
-        return ret;
-      }
-  return ret;
-}
-
-const std::string&
-Version_script_info::get_symbol_version_helper(const char* symbol_name,
-                                               bool check_global) const
-{
-  for (size_t j = 0; j < version_trees_.size(); ++j)
-    {
-      // Is it a global symbol for this version?
-      const Version_expression_list* explist =
-          check_global ? version_trees_[j]->global : version_trees_[j]->local;
-      if (explist != NULL)
-        for (size_t k = 0; k < explist->expressions.size(); ++k)
-          {
-            const char* name_to_match = symbol_name;
-            const struct Version_expression& exp = explist->expressions[k];
-            char* demangled_name = NULL;
-            if (exp.language == "C++")
-              {
-                demangled_name = cplus_demangle(symbol_name,
-                                                DMGL_ANSI | DMGL_PARAMS);
-                // This isn't a C++ symbol.
-                if (demangled_name == NULL)
-                  continue;
-                name_to_match = demangled_name;
-              }
-            else if (exp.language == "Java")
-              {
-                demangled_name = cplus_demangle(symbol_name,
-                                                (DMGL_ANSI | DMGL_PARAMS
-						 | DMGL_JAVA));
-                // This isn't a Java symbol.
-                if (demangled_name == NULL)
-                  continue;
-                name_to_match = demangled_name;
-              }
-            bool matched;
-            if (exp.exact_match)
-              matched = strcmp(exp.pattern.c_str(), name_to_match) == 0;
-            else
-              matched = fnmatch(exp.pattern.c_str(), name_to_match,
-                                FNM_NOESCAPE) == 0;
-            if (demangled_name != NULL)
-              free(demangled_name);
-            if (matched)
-              return version_trees_[j]->tag;
-          }
-    }
-  static const std::string empty = "";
-  return empty;
-}
-
-struct Version_dependency_list*
-Version_script_info::allocate_dependency_list()
-{
-  dependency_lists_.push_back(new Version_dependency_list);
-  return dependency_lists_.back();
-}
-
-struct Version_expression_list*
-Version_script_info::allocate_expression_list()
-{
-  expression_lists_.push_back(new Version_expression_list);
-  return expression_lists_.back();
-}
-
-struct Version_tree*
-Version_script_info::allocate_version_tree()
-{
-  version_trees_.push_back(new Version_tree);
-  return version_trees_.back();
 }
 
 // Register an entire version node. For example:
@@ -1956,4 +2169,152 @@ version_script_pop_lang(void* closurev)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   closure->pop_language();
+}
+
+// Called by the bison parser to start a SECTIONS clause.
+
+extern "C" void
+script_start_sections(void* closurev)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->script_options()->script_sections()->start_sections();
+}
+
+// Called by the bison parser to finish a SECTIONS clause.
+
+extern "C" void
+script_finish_sections(void* closurev)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->script_options()->script_sections()->finish_sections();
+}
+
+// Start processing entries for an output section.
+
+extern "C" void
+script_start_output_section(void* closurev, const char* name, size_t namelen,
+			    const struct Parser_output_section_header* header)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->script_options()->script_sections()->start_output_section(name,
+								     namelen,
+								     header);
+}
+
+// Finish processing entries for an output section.
+
+extern "C" void
+script_finish_output_section(void* closurev, 
+			     const struct Parser_output_section_trailer* trail)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->script_options()->script_sections()->finish_output_section(trail);
+}
+
+// Add a data item (e.g., "WORD (0)") to the current output section.
+
+extern "C" void
+script_add_data(void* closurev, int data_token, Expression* val)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  int size;
+  bool is_signed = true;
+  switch (data_token)
+    {
+    case QUAD:
+      size = 8;
+      is_signed = false;
+      break;
+    case SQUAD:
+      size = 8;
+      break;
+    case LONG:
+      size = 4;
+      break;
+    case SHORT:
+      size = 2;
+      break;
+    case BYTE:
+      size = 1;
+      break;
+    default:
+      gold_unreachable();
+    }
+  closure->script_options()->script_sections()->add_data(size, is_signed, val);
+}
+
+// Add a clause setting the fill value to the current output section.
+
+extern "C" void
+script_add_fill(void* closurev, Expression* val)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->script_options()->script_sections()->add_fill(val);
+}
+
+// Add a new input section specification to the current output
+// section.
+
+extern "C" void
+script_add_input_section(void* closurev,
+			 const struct Input_section_spec* spec,
+			 int keepi)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  bool keep = keepi != 0;
+  closure->script_options()->script_sections()->add_input_section(spec, keep);
+}
+
+// Create a new list of string/sort pairs.
+
+extern "C" String_sort_list_ptr
+script_new_string_sort_list(const struct Wildcard_section* string_sort)
+{
+  return new String_sort_list(1, *string_sort);
+}
+
+// Add an entry to a list of string/sort pairs.  The way the parser
+// works permits us to simply modify the first parameter, rather than
+// copy the vector.
+
+extern "C" String_sort_list_ptr
+script_string_sort_list_add(String_sort_list_ptr pv,
+			    const struct Wildcard_section* string_sort)
+{
+  pv->push_back(*string_sort);
+  return pv;
+}
+
+// Create a new list of strings.
+
+extern "C" String_list_ptr
+script_new_string_list(const char* str, size_t len)
+{
+  return new String_list(1, std::string(str, len));
+}
+
+// Add an element to a list of strings.  The way the parser works
+// permits us to simply modify the first parameter, rather than copy
+// the vector.
+
+extern "C" String_list_ptr
+script_string_list_push_back(String_list_ptr pv, const char* str, size_t len)
+{
+  pv->push_back(std::string(str, len));
+  return pv;
+}
+
+// Concatenate two string lists.  Either or both may be NULL.  The way
+// the parser works permits us to modify the parameters, rather than
+// copy the vector.
+
+extern "C" String_list_ptr
+script_string_list_append(String_list_ptr pv1, String_list_ptr pv2)
+{
+  if (pv1 == NULL)
+    return pv2;
+  if (pv2 == NULL)
+    return pv1;
+  pv1->insert(pv1->end(), pv2->begin(), pv2->end());
+  return pv1;
 }

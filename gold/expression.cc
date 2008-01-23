@@ -27,6 +27,7 @@
 #include "parameters.h"
 #include "symtab.h"
 #include "layout.h"
+#include "output.h"
 #include "script.h"
 #include "script-c.h"
 
@@ -69,6 +70,10 @@ class Integer_expression : public Expression
   value(const Expression_eval_info*)
   { return this->val_; }
 
+  void
+  print(FILE* f) const
+  { fprintf(f, "0x%llx", static_cast<unsigned long long>(this->val_)); }
+
  private:
   uint64_t val_;
 };
@@ -90,6 +95,10 @@ class Symbol_expression : public Expression
 
   uint64_t
   value(const Expression_eval_info*);
+
+  void
+  print(FILE* f) const
+  { fprintf(f, "%s", this->name_.c_str()); }
 
  private:
   std::string name_;
@@ -125,6 +134,10 @@ class Dot_expression : public Expression
 
   uint64_t
   value(const Expression_eval_info*);
+
+  void
+  print(FILE* f) const
+  { fprintf(f, "."); }
 };
 
 uint64_t
@@ -162,6 +175,10 @@ class Unary_expression : public Expression
   arg_value(const Expression_eval_info* eei) const
   { return this->arg_->value(eei); }
 
+  void
+  arg_print(FILE* f) const
+  { this->arg_->print(f); }
+
  private:
   Expression* arg_;
 };
@@ -180,6 +197,14 @@ class Unary_expression : public Expression
     uint64_t							\
     value(const Expression_eval_info* eei)			\
     { return OPERATOR this->arg_value(eei); }			\
+								\
+    void							\
+    print(FILE* f) const					\
+    {								\
+      fprintf(f, "(%s ", #OPERATOR);				\
+      this->arg_print(f);					\
+      fprintf(f, ")");						\
+    }								\
   };								\
   								\
   extern "C" Expression*					\
@@ -216,6 +241,26 @@ class Binary_expression : public Expression
   right_value(const Expression_eval_info* eei) const
   { return this->right_->value(eei); }
 
+  void
+  left_print(FILE* f) const
+  { this->left_->print(f); }
+
+  void
+  right_print(FILE* f) const
+  { this->right_->print(f); }
+
+  // This is a call to function FUNCTION_NAME.  Print it.  This is for
+  // debugging.
+  void
+  print_function(FILE* f, const char *function_name) const
+  {
+    fprintf(f, "%s(", function_name);
+    this->left_print(f);
+    fprintf(f, ", ");
+    this->right_print(f);
+    fprintf(f, ")");
+  }
+
  private:
   Expression* left_;
   Expression* right_;
@@ -237,6 +282,16 @@ class Binary_expression : public Expression
     {									\
       return (this->left_value(eei)					\
 	      OPERATOR this->right_value(eei));				\
+    }									\
+									\
+    void								\
+    print(FILE* f) const						\
+    {									\
+      fprintf(f, "(");							\
+      this->left_print(f);						\
+      fprintf(f, " %s ", #OPERATOR);					\
+      this->right_print(f);						\
+      fprintf(f, ")");							\
     }									\
   };									\
 									\
@@ -294,6 +349,18 @@ class Trinary_expression : public Expression
   arg3_value(const Expression_eval_info* eei) const
   { return this->arg3_->value(eei); }
 
+  void
+  arg1_print(FILE* f) const
+  { this->arg1_->print(f); }
+
+  void
+  arg2_print(FILE* f) const
+  { this->arg2_->print(f); }
+
+  void
+  arg3_print(FILE* f) const
+  { this->arg3_->print(f); }
+
  private:
   Expression* arg1_;
   Expression* arg2_;
@@ -316,6 +383,18 @@ class Trinary_cond : public Trinary_expression
 	    ? this->arg2_value(eei)
 	    : this->arg3_value(eei));
   }
+
+  void
+  print(FILE* f) const
+  {
+    fprintf(f, "(");
+    this->arg1_print(f);
+    fprintf(f, " ? ");
+    this->arg2_print(f);
+    fprintf(f, " : ");
+    this->arg3_print(f);
+    fprintf(f, ")");
+  }
 };
 
 extern "C" Expression*
@@ -336,6 +415,10 @@ class Max_expression : public Binary_expression
   uint64_t
   value(const Expression_eval_info* eei)
   { return std::max(this->left_value(eei), this->right_value(eei)); }
+
+  void
+  print(FILE* f) const
+  { this->print_function(f, "MAX"); }
 };
 
 extern "C" Expression*
@@ -356,6 +439,10 @@ class Min_expression : public Binary_expression
   uint64_t
   value(const Expression_eval_info* eei)
   { return std::min(this->left_value(eei), this->right_value(eei)); }
+
+  void
+  print(FILE* f) const
+  { this->print_function(f, "MIN"); }
 };
 
 extern "C" Expression*
@@ -382,6 +469,10 @@ class Align_expression : public Binary_expression
       return value;
     return ((value + align - 1) / align) * align;
   }
+
+  void
+  print(FILE* f) const
+  { this->print_function(f, "ALIGN"); }
 };
 
 extern "C" Expression*
@@ -408,6 +499,14 @@ class Assert_expression : public Unary_expression
     return value;
   }
 
+  void
+  print(FILE* f) const
+  {
+    fprintf(f, "ASSERT(");
+    this->arg_print(f);
+    fprintf(f, ", %s)", this->message_.c_str());
+  }
+
  private:
   std::string message_;
 };
@@ -417,6 +516,46 @@ script_exp_function_assert(Expression* expr, const char* message,
 			   size_t length)
 {
   return new Assert_expression(expr, message, length);
+}
+
+// Addr function.
+
+class Addr_expression : public Expression
+{
+ public:
+  Addr_expression(const char* section_name, size_t section_name_len)
+    : section_name_(section_name, section_name_len)
+  { }
+
+  uint64_t
+  value(const Expression_eval_info*);
+
+  void
+  print(FILE* f) const
+  { fprintf(f, "ADDR(%s)", this->section_name_.c_str()); }
+
+ private:
+  std::string section_name_;
+};
+
+uint64_t
+Addr_expression::value(const Expression_eval_info* eei)
+{
+  const char* section_name = this->section_name_.c_str();
+  Output_section* os = eei->layout->find_output_section(section_name);
+  if (os == NULL)
+    {
+      gold_error("ADDR called on nonexistent output section '%s'",
+		 section_name);
+      return 0;
+    }
+  return os->address();
+}
+
+extern "C" Expression*
+script_exp_function_addr(const char* section_name, size_t section_name_len)
+{
+  return new Addr_expression(section_name, section_name_len);
 }
 
 // Functions.
@@ -443,12 +582,6 @@ extern "C" Expression*
 script_exp_function_sizeof(const char*, size_t)
 {
   gold_fatal(_("SIZEOF not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_addr(const char*, size_t)
-{
-  gold_fatal(_("ADDR not implemented"));
 }
 
 extern "C" Expression*

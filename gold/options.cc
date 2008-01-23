@@ -520,7 +520,7 @@ options::Command_line_options::options[] =
 	  TWO_DASHES, &help),
   SPECIAL('v', "version", N_("Report version information"), NULL,
 	  TWO_DASHES, &version),
-  GENERAL_ARG('\0', "debug", N_("Turn on debugging (all,task)"),
+  GENERAL_ARG('\0', "debug", N_("Turn on debugging (all,task,script)"),
 	      N_("--debug=TYPE"), TWO_DASHES,
 	      &General_options::handle_debug_option)
 };
@@ -547,6 +547,7 @@ options::Command_line_options::debug_options[] =
 {
   { "all", DEBUG_ALL },
   { "task", DEBUG_TASK },
+  { "script", DEBUG_SCRIPT }
 };
 
 const int options::Command_line_options::debug_options_size =

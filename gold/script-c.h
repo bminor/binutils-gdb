@@ -27,7 +27,18 @@
 #define GOLD_SCRIPT_C_H
 
 #ifdef __cplusplus
-extern "C" {
+#include <vector>
+#include <string>
+#endif
+
+#ifdef __cplusplus
+
+// For the C++ code we declare the various supporting structures in
+// the gold namespace.  For the C code we declare it at the top level.
+// The namespace level should not affect the layout of the structure.
+
+namespace gold
+{
 #endif
 
 /* A string value for the bison parser.  */
@@ -44,13 +55,105 @@ struct Parser_string
    alike.  */
 
 #ifdef __cplusplus
-namespace gold
-{
 class Expression;
-}
-typedef gold::Expression* Expression_ptr;
+typedef Expression* Expression_ptr;
 #else
 typedef void* Expression_ptr;
+#endif
+
+/* The information we store for an output section header in the bison
+   parser.  */
+
+struct Parser_output_section_header
+{
+  /* The address.  This may be NULL.  */
+  Expression_ptr address;
+  /* The load address, from the AT specifier.  This may be NULL.  */
+  Expression_ptr load_address;
+  /* The alignment, from the ALIGN specifier.  This may be NULL.  */
+  Expression_ptr align;
+  /* The input section alignment, from the SUBALIGN specifier.  This
+     may be NULL.  */
+  Expression_ptr subalign;
+};
+
+/* The information we store for an output section trailer in the bison
+   parser.  */
+
+struct Parser_output_section_trailer
+{
+  /* The fill value.  This may be NULL.  */
+  Expression_ptr fill;
+};
+
+/* We keep vectors of strings.  In order to manage this in both C and
+   C++, we use a pointer to a vector.  This assumes that all pointers
+   look the same.  */
+
+#ifdef __cplusplus
+typedef std::vector<std::string> String_list;
+typedef String_list* String_list_ptr;
+#else
+typedef void* String_list_ptr;
+#endif
+
+/* The different sorts we can find in a linker script.  */
+
+enum Sort_wildcard
+{
+  SORT_WILDCARD_NONE,
+  SORT_WILDCARD_BY_NAME,
+  SORT_WILDCARD_BY_ALIGNMENT,
+  SORT_WILDCARD_BY_NAME_BY_ALIGNMENT,
+  SORT_WILDCARD_BY_ALIGNMENT_BY_NAME
+};
+
+/* The information we build for a single wildcard specification.  */
+
+struct Wildcard_section
+{
+  /* The wildcard spec itself.  */
+  struct Parser_string name;
+  /* How the entries should be sorted.  */
+  enum Sort_wildcard sort;
+};
+
+/* A vector of Wildcard_section entries.  */
+
+#ifdef __cplusplus
+typedef std::vector<Wildcard_section> String_sort_list;
+typedef String_sort_list* String_sort_list_ptr;
+#else
+typedef void* String_sort_list_ptr;
+#endif
+
+/* A list of wildcard specifications, which may include EXCLUDE_FILE
+   clauses.  */
+
+struct Wildcard_sections
+{
+  /* Wildcard specs.  */
+  String_sort_list_ptr sections;
+  /* Exclusions.  */
+  String_list_ptr exclude;
+};
+
+/* A complete input section specification.  */
+
+struct Input_section_spec
+{
+  /* The file name.  */
+  struct Wildcard_section file;
+  /* The list of sections.  */
+  struct Wildcard_sections input_sections;
+};
+
+struct Version_dependency_list;
+struct Version_expression_list;
+struct Version_tree;
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /* The bison parser definitions.  */
@@ -127,6 +230,83 @@ extern void
 script_set_symbol(void* closure, const char*, size_t, Expression_ptr,
 		  int provide, int hidden);
 
+/* Called by the bison parser to add an assertion.  */
+
+extern void
+script_add_assertion(void* closure, Expression_ptr, const char* message,
+		     size_t messagelen);
+
+/* Called by the bison parser to start a SECTIONS clause.  */
+
+extern void
+script_start_sections(void* closure);
+
+/* Called by the bison parser to finish a SECTIONS clause.  */
+
+extern void
+script_finish_sections(void* closure);
+
+/* Called by the bison parser to start handling input section
+   specifications for an output section.  */
+
+extern void
+script_start_output_section(void* closure, const char* name, size_t namelen,
+			    const struct Parser_output_section_header*);
+
+/* Called by the bison parser when done handling input section
+   specifications for an output section.  */
+
+extern void
+script_finish_output_section(void* closure,
+			     const struct Parser_output_section_trailer*);
+
+/* Called by the bison parser to handle a data statement (LONG, BYTE,
+   etc.) in an output section.  */
+
+extern void
+script_add_data(void* closure, int data_token, Expression_ptr val);
+
+/* Called by the bison parser to set the fill value in an output
+   section.  */
+
+extern void
+script_add_fill(void* closure, Expression_ptr val);
+
+/* Called by the bison parser to add an input section specification to
+   an output section.  The KEEP parameter is non-zero if this is
+   within a KEEP clause, meaning that the garbage collector should not
+   discard it.  */
+
+extern void
+script_add_input_section(void* closure, const struct Input_section_spec*,
+			 int keep);
+
+/* Create a new list of string and sort entries.  */
+
+extern String_sort_list_ptr
+script_new_string_sort_list(const struct Wildcard_section*);
+
+/* Add an entry to a list of string and sort entries.  */
+
+extern String_sort_list_ptr
+script_string_sort_list_add(String_sort_list_ptr,
+			    const struct Wildcard_section*);
+
+/* Create a new list of strings.  */
+
+extern String_list_ptr
+script_new_string_list(const char*, size_t);
+
+/* Add an element to a list of strings.  */
+
+extern String_list_ptr
+script_string_list_push_back(String_list_ptr, const char*, size_t);
+
+/* Concatenate two string lists.  */
+
+extern String_list_ptr
+script_string_list_append(String_list_ptr, String_list_ptr);
+
 /* Called by the bison parser for expressions.  */
 
 extern Expression_ptr
@@ -184,7 +364,7 @@ script_exp_function_min(Expression_ptr, Expression_ptr);
 extern Expression_ptr
 script_exp_function_defined(const char*, size_t);
 extern Expression_ptr
-script_exp_function_sizeof_headers();
+script_exp_function_sizeof_headers(void);
 extern Expression_ptr
 script_exp_function_alignof(const char*, size_t);
 extern Expression_ptr
@@ -213,10 +393,6 @@ extern Expression_ptr
 script_exp_function_segment_start(const char*, size_t, Expression_ptr);
 extern Expression_ptr
 script_exp_function_assert(Expression_ptr, const char*, size_t);
-
-struct Version_dependency_list;
-struct Version_expression_list;
-struct Version_tree;
 
 extern void
 script_register_vers_node(void* closure,
@@ -251,7 +427,11 @@ extern void
 version_script_pop_lang(void* closure);
 
 #ifdef __cplusplus
-}
+} // End extern "C"
+#endif
+
+#ifdef __cplusplus
+} // End namespace gold.
 #endif
 
 #endif /* !defined(GOLD_SCRIPT_C_H) */
