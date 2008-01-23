@@ -231,6 +231,9 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
 
   /* Report the new current format */
   ui_out_field_string (uiout, "format", varobj_format_string[(int) format]);
+ 
+  /* Report the value in the new format */
+  ui_out_field_string (uiout, "value", varobj_get_value (var));
   return MI_CMD_DONE;
 }
 
