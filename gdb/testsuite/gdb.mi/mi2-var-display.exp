@@ -89,7 +89,7 @@ mi_gdb_test "-var-evaluate-expression bar" \
 # Test: c_variable-6.5
 # Desc: change format of bar to hex
 mi_gdb_test "-var-set-format bar hexadecimal" \
-	"\\^done,format=\"hexadecimal\"" \
+	"\\^done,format=\"hexadecimal\",value=\"0x849\"" \
 	"set format variable bar"
 
 # Test: c_variable-6.6
@@ -105,7 +105,7 @@ mi_gdb_test "-var-assign bar 3" \
 	"assing to variable bar"
 
 mi_gdb_test "-var-set-format bar decimal" \
-	"\\^done,format=\"decimal\"" \
+	"\\^done,format=\"decimal\",value=\"3\"" \
 	"set format variable bar"
 
 mi_gdb_test "-var-evaluate-expression bar" \
@@ -143,7 +143,7 @@ mi_gdb_test "-var-evaluate-expression foo" \
 # Test: c_variable-6.15
 # Desc: change format of var to octal
 mi_gdb_test "-var-set-format foo octal" \
-	"\\^done,format=\"octal\"" \
+	"\\^done,format=\"octal\",value=\"$octal\"" \
 	"set format variable foo"
 
 mi_gdb_test "-var-show-format foo" \
@@ -163,7 +163,7 @@ mi_gdb_test "-var-assign foo 3" \
 	"assing to variable foo"
 
 mi_gdb_test "-var-set-format foo decimal" \
-	"\\^done,format=\"decimal\"" \
+	"\\^done,format=\"decimal\",value=\"3\"" \
 	"set format variable foo"
 
 # Test: c_variable-6.18
@@ -190,7 +190,7 @@ mi_gdb_test "-var-list-children weird" \
 # Test: c_variable-6.23
 # Desc: change format of weird.func_ptr and weird.func_ptr_ptr
 mi_gdb_test "-var-set-format weird.func_ptr hexadecimal" \
-	"\\^done,format=\"hexadecimal\"" \
+	"\\^done,format=\"hexadecimal\",value=\"$hex\"" \
 	"set format variable weird.func_ptr"
 
 mi_gdb_test "-var-show-format weird.func_ptr" \
@@ -198,7 +198,7 @@ mi_gdb_test "-var-show-format weird.func_ptr" \
 	"show format variable weird.func_ptr"
 
 mi_gdb_test "-var-set-format weird.func_ptr_ptr hexadecimal" \
-	"\\^done,format=\"hexadecimal\"" \
+	"\\^done,format=\"hexadecimal\",value=\"$hex\"" \
 	"set format variable weird.func_ptr_ptr"
 
 mi_gdb_test "-var-show-format weird.func_ptr_ptr" \
@@ -208,51 +208,51 @@ mi_gdb_test "-var-show-format weird.func_ptr_ptr" \
 # Test: c_variable-6.24
 # Desc: format of weird and children
 mi_gdb_test "-var-set-format weird natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"$hex\"" \
 	"set format variable weird"
 
 mi_gdb_test "-var-set-format weird.integer natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"123\"" \
 	"set format variable weird.integer"
 
 mi_gdb_test "-var-set-format weird.character natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"0 '\\\\\\\\0'\"" \
 	"set format variable weird.character"
 
 mi_gdb_test "-var-set-format weird.char_ptr natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"$hex \\\\\"hello\\\\\"\"" \
 	"set format variable weird.char_ptr"
 
 mi_gdb_test "-var-set-format weird.long_int natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"0\"" \
 	"set format variable weird.long_int"
 
 mi_gdb_test "-var-set-format weird.int_ptr_ptr natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"$hex\"" \
 	"set format variable weird.int_ptr_ptr"
 
 mi_gdb_test "-var-set-format weird.long_array natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"\\\[10\\\]\"" \
 	"set format variable weird.long_array"
 
 mi_gdb_test "-var-set-format weird.func_ptr hexadecimal" \
-	"\\^done,format=\"hexadecimal\"" \
+	"\\^done,format=\"hexadecimal\",value=\"$hex\"" \
 	"set format variable weird.func_ptr"
 
 mi_gdb_test "-var-set-format weird.func_ptr_struct hexadecimal" \
-	"\\^done,format=\"hexadecimal\"" \
+	"\\^done,format=\"hexadecimal\",value=\"$hex\"" \
 	"set format variable weird.func_ptr_struct"
 
 mi_gdb_test "-var-set-format weird.func_ptr_ptr natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"0\"" \
 	"set format variable weird.func_ptr_ptr"
 
 mi_gdb_test "-var-set-format weird.u1 natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"\{...\}\"" \
 	"set format variable weird.u1"
 
 mi_gdb_test "-var-set-format weird.s2 natural" \
-	"\\^done,format=\"natural\"" \
+	"\\^done,format=\"natural\",value=\"\{...\}\"" \
 	"set format variable weird.s2"
 
 # Test: c_variable-6.25
