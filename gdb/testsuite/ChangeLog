@@ -1,3 +1,8 @@
+2008-01-24  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi2-var-display.exp: Add value field to tests for output of 
+	-var-set-format.
+
 2008-01-23  Chris Demetriou  <cgd@google.com>
 
 	* gdb.threads/thread_events.c: New testcase source file.
