@@ -1,3 +1,7 @@
+2008-01-23  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Change opcode set for at86rf401.
+
 2008-01-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_show_usage): Show more processors for

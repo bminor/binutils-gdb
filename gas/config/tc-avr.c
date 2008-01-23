@@ -84,7 +84,7 @@ static struct mcu_type_s mcu_types[] =
   {"at90s8515",  AVR_ISA_2xxx,    bfd_mach_avr2},
   {"at90s8535",  AVR_ISA_2xxx,    bfd_mach_avr2},
   {"at90c8534",  AVR_ISA_2xxx,    bfd_mach_avr2},
-  {"at86rf401",  AVR_ISA_2xxx,    bfd_mach_avr2},
+  {"at86rf401",  AVR_ISA_RF401,   bfd_mach_avr2},
   {"attiny13",   AVR_ISA_TINY2,   bfd_mach_avr2},
   {"attiny2313", AVR_ISA_TINY2,   bfd_mach_avr2},
   {"attiny261",  AVR_ISA_TINY2,   bfd_mach_avr2},
