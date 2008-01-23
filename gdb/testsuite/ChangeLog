@@ -1,3 +1,10 @@
+2008-01-23  Nick Roberts  <nickrob@snap.net.nz>
+
+	* lib/gdb.exp: Add the variable octal.
+ 
+	* gdb.mi/mi-var-display.exp: Add value field to tests for output of 
+	-var-set-format.
+
 2008-01-22  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Vladimir Prus  <vladimir@codesourcery.com>
 
