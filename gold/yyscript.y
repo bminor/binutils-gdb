@@ -276,7 +276,7 @@ sections_block:
 /* A command which may appear within a SECTIONS block.  */
 section_block_cmd:
 	  file_or_sections_cmd
-	| STRING section_header
+	| string section_header
 	    { script_start_output_section(closure, $1.value, $1.length, &$2); }
 	  '{' section_cmds '}' section_trailer
 	    { script_finish_output_section(closure, &$7); }
@@ -309,7 +309,7 @@ opt_address_and_section_type:
 	    { $$ = $1; }
 	| exp '(' ')' ':'
 	    { $$ = $1; }
-	| exp '(' STRING ')' ':'
+	| exp '(' string ')' ':'
 	    {
 	      yyerror(closure, "section types are not supported");
 	      $$ = $1;
@@ -352,21 +352,21 @@ section_trailer:
 
 /* A memory specification for an output section.  */
 opt_memspec:
-	  '>' STRING
+	  '>' string
 	    { yyerror(closure, "memory regions are not supported"); }
 	| /* empty */
 	;
 
 /* A memory specification for where to load an output section.  */
 opt_at_memspec:
-	  AT '>' STRING
+	  AT '>' string
 	    { yyerror(closure, "memory regions are not supported"); }
 	| /* empty */
 	;
 
 /* The program segment an output section should go into.  */
 opt_phdr:
-	  opt_phdr ':' STRING
+	  opt_phdr ':' string
 	    { yyerror(closure, "program headers are not supported"); }
 	| /* empty */
 	;
@@ -393,7 +393,7 @@ section_cmd:
 	| input_section_spec
 	| data_length '(' parse_exp ')'
 	    { script_add_data(closure, $1, $3); }
-	| ASSERT_K '(' parse_exp ',' STRING ')'
+	| ASSERT_K '(' parse_exp ',' string ')'
 	    { script_add_assertion(closure, $3, $5.value, $5.length); }
 	| FILL '(' parse_exp ')'
 	    { script_add_fill(closure, $3); }
@@ -433,7 +433,7 @@ input_section_spec:
 
 /* An input section specification within a KEEP clause.  */
 input_section_no_keep:
-	  STRING
+	  string
 	    {
 	      $$.file.name = $1;
 	      $$.file.sort = SORT_WILDCARD_NONE;
@@ -543,7 +543,7 @@ exclude_names:
 /* A single wildcard name.  We recognize '*' and '?' specially since
    they are expression tokens.  */
 wildcard_name:
-	  STRING
+	  string
 	    { $$ = $1; }
 	| '*'
 	    {
@@ -563,7 +563,7 @@ file_or_sections_cmd:
 	  ENTRY '(' string ')'
 	    { script_set_entry(closure, $3.value, $3.length); }
 	| assignment end
-	| ASSERT_K '(' parse_exp ',' STRING ')'
+	| ASSERT_K '(' parse_exp ',' string ')'
 	    { script_add_assertion(closure, $3, $5.value, $5.length); }
 	;
 
@@ -687,9 +687,7 @@ exp:
 	    { $$ = script_exp_trinary_cond($1, $3, $5); }
 	| INTEGER
 	    { $$ = script_exp_integer($1); }
-	| STRING
-	    { $$ = script_exp_string($1.value, $1.length); }
-	| QUOTED_STRING
+	| string
 	    { $$ = script_exp_string($1.value, $1.length); }
 	| MAX_K '(' exp ',' exp ')'
 	    { $$ = script_exp_function_max($3, $5); }
