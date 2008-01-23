@@ -1,3 +1,7 @@
+2008-01-23  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-cmd-var.c (mi_cmd_var_set_format): Add value field to output.
+
 2008-01-22  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* breakpoint.c (break_command_really): New parameter
