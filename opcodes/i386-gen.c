@@ -45,7 +45,7 @@ static initializer cpu_flag_init [] =
   { "CPU_GENERIC32_FLAGS",
     "Cpu186|Cpu286|Cpu386" },
   { "CPU_GENERIC64_FLAGS", 
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuSSE|CpuSSE2" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuP4|CpuMMX|CpuSSE|CpuSSE2|CpuLM" },
   { "CPU_NONE_FLAGS",
    "0" },
   { "CPU_I186_FLAGS",

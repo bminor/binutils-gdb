@@ -1,3 +1,11 @@
+2008-01-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp : Run x86-64-arch-1 and x86-64-arch-10.
+
+	* gas/i386/x86-64-arch-1.d: New.
+	* gas/i386/x86-64-arch-1.s: Likewise.
+	* gas/i386/x86-64-arch-10.d: Likewise.
+
 2008-01-23  Tristan Gingold  <gingold@adacore.com>
 
 	* gas/ia64/regs.d: Updated as the ia64 disassembler now displays

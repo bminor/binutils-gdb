@@ -7406,10 +7406,10 @@ md_show_usage (stream)
                            pentiumii, pentiumiii, pentium4, prescott, nocona,\n\
                            core, core2, k6, k6_2, athlon, k8, amdfam10,\n\
                            generic32, generic64\n\
-			  EXTENSION is combination of:\n\
-			   mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
-			   vmx, smx, 3dnow, 3dnowa, sse4a, sse5, svme, abm,\n\
-			   padlock\n"));
+                          EXTENSION is combination of:\n\
+                           mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
+                           vmx, smx, 3dnow, 3dnowa, sse4a, sse5, svme, abm,\n\
+                           padlock\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\
