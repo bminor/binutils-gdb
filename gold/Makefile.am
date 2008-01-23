@@ -119,6 +119,8 @@ ld_new_LDADD = $(ldadd_var) $(LIBOBJS)
 EXTRA_ld_new_SOURCES = $(TARGETSOURCES)
 
 # Use an explicit dependency for the bison generated header file.
+expression.$(OBJEXT): yyscript.h
+script-sections.$(OBJEXT): yyscript.h
 script.$(OBJEXT): yyscript.h
 
 # We have to build libgold.a before we run the tests.

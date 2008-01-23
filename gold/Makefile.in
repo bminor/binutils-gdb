@@ -1014,6 +1014,8 @@ uninstall-info: uninstall-info-recursive
 
 
 # Use an explicit dependency for the bison generated header file.
+expression.$(OBJEXT): yyscript.h
+script-sections.$(OBJEXT): yyscript.h
 script.$(OBJEXT): yyscript.h
 
 # We have to build libgold.a before we run the tests.
