@@ -115,12 +115,13 @@ class Version_script_info
   { return get_symbol_version_helper(symbol, true); }
 
   // Return whether this symbol matches the local: section of a
-  // version script (it doesn't matter which).  This test is only
-  // valid if get_symbol_version() returns the empty string, as we
-  // don't test that here.
+  // version script (it doesn't matter which).
   bool
   symbol_is_local(const char* symbol) const
-  { return !get_symbol_version_helper(symbol, false).empty(); }
+  {
+    return (get_symbol_version(symbol).empty()
+            && !get_symbol_version_helper(symbol, false).empty());
+  }
 
   // Return the names of versions defined in the version script.
   // Strings are allocated out of the stringpool given in the
