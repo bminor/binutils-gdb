@@ -6645,7 +6645,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
       int havebase;
       int haveindex;
       int needindex;
-      int base;
+      int base, rbase;
       int index = 0;
       int scale = 0;
 
@@ -6667,7 +6667,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	  haveindex = index != 4;
 	  codep++;
 	}
-      base += add;
+      rbase = base + add;
 
       /* If we have a DREX byte, skip it now 
 	 (it has already been handled) */
@@ -6680,7 +6680,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
       switch (modrm.mod)
 	{
 	case 0:
-	  if ((base & 7) == 5)
+	  if (base == 5)
 	    {
 	      havebase = 0;
 	      if (address_mode == mode_64bit && !havesib)
@@ -6710,7 +6710,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 		  || (havesib && (haveindex || scale != 0)));
 
       if (!intel_syntax)
-	if (modrm.mod != 0 || (base & 7) == 5)
+	if (modrm.mod != 0 || base == 5)
 	  {
 	    if (havedisp || riprel)
 	      print_displacement (scratchbuf, disp);
@@ -6738,7 +6738,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	  *obufp = '\0';
 	  if (havebase)
 	    oappend (address_mode == mode_64bit && (sizeflag & AFLAG)
-		     ? names64[base] : names32[base]);
+		     ? names64[rbase] : names32[rbase]);
 	  if (havesib)
 	    {
 	      /* ESP/RSP won't allow index.  If base isn't ESP/RSP,
@@ -6769,7 +6769,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 		}
 	    }
 	  if (intel_syntax
-	      && (disp || modrm.mod != 0 || (base & 7) == 5))
+	      && (disp || modrm.mod != 0 || base == 5))
 	    {
 	      if (!havedisp || (bfd_signed_vma) disp >= 0)
 		{
@@ -6795,7 +6795,7 @@ OP_E_extended (int bytemode, int sizeflag, int has_drex)
 	}
       else if (intel_syntax)
 	{
-	  if (modrm.mod != 0 || (base & 7) == 5)
+	  if (modrm.mod != 0 || base == 5)
 	    {
 	      if (prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
 			      | PREFIX_ES | PREFIX_FS | PREFIX_GS))

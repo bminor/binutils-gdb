@@ -1,3 +1,10 @@
+2008-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/x86-64-sib.s: Add tests for r12.
+
+	* gas/i386/x86-64-sib-intel.d: Updated.
+	* gas/i386/x86-64-sib.d: Likewise.
+
 2008-01-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp : Run x86-64-arch-1 and x86-64-arch-10.

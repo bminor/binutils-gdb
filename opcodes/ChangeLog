@@ -1,3 +1,7 @@
+2008-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_E_extended): Handle r12 like rsp.
+
 2008-01-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Add CpuLM to CPU_GENERIC64_FLAGS.

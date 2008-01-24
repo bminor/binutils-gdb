@@ -22,10 +22,17 @@ foo:
 	mov	(%rbx,%riz,4),%eax
 	mov	(%rbx,%riz,8),%eax
 	mov	(%rsp),%eax
+	mov	(%rsp,%riz),%eax
 	mov	(%rsp,%riz,1),%eax
 	mov	(%rsp,%riz,2),%eax
 	mov	(%rsp,%riz,4),%eax
 	mov	(%rsp,%riz,8),%eax
+	mov	(%r12),%eax
+	mov	(%r12,%riz),%eax
+	mov	(%r12,%riz,1),%eax
+	mov	(%r12,%riz,2),%eax
+	mov	(%r12,%riz,4),%eax
+	mov	(%r12,%riz,8),%eax
 	.intel_syntax noprefix
         mov    eax,DWORD PTR [riz*1-30]
         mov    eax,DWORD PTR [riz*2-30]
@@ -46,4 +53,9 @@ foo:
         mov    eax,DWORD PTR [rsp+riz*2]
         mov    eax,DWORD PTR [rsp+riz*4]
         mov    eax,DWORD PTR [rsp+riz*8]
-	.p2align 4
+        mov    eax,DWORD PTR [r12]
+        mov    eax,DWORD PTR [r12+riz]
+        mov    eax,DWORD PTR [r12+riz*1]
+        mov    eax,DWORD PTR [r12+riz*2]
+        mov    eax,DWORD PTR [r12+riz*4]
+        mov    eax,DWORD PTR [r12+riz*8]
