@@ -30,4 +30,6 @@ V2 {
         };
         blaz*;
 	foo;
+   local:
+	_[^A-Z]*;
 } V1;

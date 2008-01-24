@@ -70,6 +70,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->has_plt_offset_ = false;
   this->has_warning_ = false;
   this->is_copied_from_dynobj_ = false;
+  this->is_forced_local_ = false;
 }
 
 // Return the demangled version of the symbol's name, but only
@@ -249,6 +250,10 @@ Symbol::should_add_dynsym_entry() const
   if (this->needs_dynsym_entry())
     return true;
 
+  // If the symbol was forced local in a version script, do not add it.
+  if (this->is_forced_local())
+    return false;
+
   // If exporting all symbols or building a shared library,
   // and the symbol is defined in a regular object and is
   // externally visible, we need to add it.
@@ -298,7 +303,8 @@ Symbol::final_value_is_known() const
 Symbol_table::Symbol_table(unsigned int count,
                            const Version_script_info& version_script)
   : saw_undefined_(0), offset_(0), table_(count), namepool_(),
-    forwarders_(), commons_(), warnings_(), version_script_(version_script)
+    forwarders_(), commons_(), forced_locals_(), warnings_(),
+    version_script_(version_script)
 {
   namepool_.reserve(count);
 }
@@ -397,6 +403,22 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
     to->set_in_reg();
   if (from->in_dyn())
     to->set_in_dyn();
+}
+
+// Record that a symbol is forced to be local by a version script.
+
+void
+Symbol_table::force_local(Symbol* sym)
+{
+  if (!sym->is_defined() && !sym->is_common())
+    return;
+  if (sym->is_forced_local())
+    {
+      // We already got this one.
+      return;
+    }
+  sym->set_is_forced_local();
+  this->forced_locals_.push_back(sym);
 }
 
 // Add one symbol from OBJECT to the symbol table.  NAME is symbol
@@ -629,7 +651,9 @@ Symbol_table::add_from_relobj(
       // this is the default version.
       const char* ver = strchr(name, '@');
       int namelen = 0;
+      // DEF: is the version default?  LOCAL: is the symbol forced local?
       bool def = false;
+      bool local = false;
 
       if (ver != NULL)
         {
@@ -648,10 +672,14 @@ Symbol_table::add_from_relobj(
           // the version script may assign a version anyway.
           namelen = strlen(name);
           def = true;
+          // Check the global: entries from the version script.
           const std::string& version =
               version_script_.get_symbol_version(name);
           if (!version.empty())
             ver = version.c_str();
+          // Check the local: entries from the version script
+          if (version_script_.symbol_is_local(name))
+            local = true;
         }
 
       Sized_symbol<size>* res;
@@ -661,6 +689,8 @@ Symbol_table::add_from_relobj(
 	  name = this->namepool_.add(name, true, &name_key);
 	  res = this->add_from_object(relobj, name, name_key, NULL, 0,
 				      false, *psym, sym);
+          if (local)
+	    this->force_local(res);
 	}
       else
 	{
@@ -919,6 +949,15 @@ Symbol_table::define_special_symbol(const Target* target, const char** pname,
   bool add_to_table = false;
   typename Symbol_table_type::iterator add_loc = this->table_.end();
 
+  // If the caller didn't give us a version, see if we get one from
+  // the version script.
+  if (*pversion == NULL)
+    {
+      const std::string& v(this->version_script_.get_symbol_version(*pname));
+      if (!v.empty())
+	*pversion = v.c_str();
+    }
+
   if (only_if_ref)
     {
       oldsym = this->lookup(*pname, *pversion);
@@ -1075,7 +1114,12 @@ Symbol_table::do_define_in_output_data(
 	    offset_is_from_end);
 
   if (oldsym == NULL)
-    return sym;
+    {
+      if (binding == elfcpp::STB_LOCAL
+	  || this->version_script_.symbol_is_local(name))
+	this->force_local(sym);
+      return sym;
+    }
 
   if (Symbol_table::should_override_with_special(oldsym))
     this->override_with_special(oldsym, sym);
@@ -1171,7 +1215,12 @@ Symbol_table::do_define_in_output_segment(
 	    offset_base);
 
   if (oldsym == NULL)
-    return sym;
+    {
+      if (binding == elfcpp::STB_LOCAL
+	  || this->version_script_.symbol_is_local(name))
+	this->force_local(sym);
+      return sym;
+    }
 
   if (Symbol_table::should_override_with_special(oldsym))
     this->override_with_special(oldsym, sym);
@@ -1260,7 +1309,12 @@ Symbol_table::do_define_as_constant(
   sym->init(name, value, symsize, type, binding, visibility, nonvis);
 
   if (oldsym == NULL)
-    return sym;
+    {
+      if (binding == elfcpp::STB_LOCAL
+	  || this->version_script_.symbol_is_local(name))
+	this->force_local(sym);
+      return sym;
+    }
 
   if (Symbol_table::should_override_with_special(oldsym))
     this->override_with_special(oldsym, sym);
@@ -1423,18 +1477,19 @@ Symbol_table::set_dynsym_indexes(const Target* target,
 }
 
 // Set the final values for all the symbols.  The index of the first
-// global symbol in the output file is INDEX.  Record the file offset
-// OFF.  Add their names to POOL.  Return the new file offset.
+// global symbol in the output file is *PLOCAL_SYMCOUNT.  Record the
+// file offset OFF.  Add their names to POOL.  Return the new file
+// offset.  Update *PLOCAL_SYMCOUNT if necessary.
 
 off_t
-Symbol_table::finalize(unsigned int index, off_t off, off_t dynoff,
-		       size_t dyn_global_index, size_t dyncount,
-		       Stringpool* pool)
+Symbol_table::finalize(off_t off, off_t dynoff, size_t dyn_global_index,
+		       size_t dyncount, Stringpool* pool,
+		       unsigned int *plocal_symcount)
 {
   off_t ret;
 
-  gold_assert(index != 0);
-  this->first_global_index_ = index;
+  gold_assert(*plocal_symcount != 0);
+  this->first_global_index_ = *plocal_symcount;
 
   this->dynamic_offset_ = dynoff;
   this->first_dynamic_global_index_ = dyn_global_index;
@@ -1443,7 +1498,7 @@ Symbol_table::finalize(unsigned int index, off_t off, off_t dynoff,
   if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_32_LITTLE)
-      ret = this->sized_finalize<32>(index, off, pool);
+      ret = this->sized_finalize<32>(off, pool, plocal_symcount);
 #else
       gold_unreachable();
 #endif
@@ -1451,7 +1506,7 @@ Symbol_table::finalize(unsigned int index, off_t off, off_t dynoff,
   else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_BIG) || defined(HAVE_TARGET_64_LITTLE)
-      ret = this->sized_finalize<64>(index, off, pool);
+      ret = this->sized_finalize<64>(off, pool, plocal_symcount);
 #else
       gold_unreachable();
 #endif
@@ -1466,143 +1521,181 @@ Symbol_table::finalize(unsigned int index, off_t off, off_t dynoff,
   return ret;
 }
 
+// SYM is going into the symbol table at *PINDEX.  Add the name to
+// POOL, update *PINDEX and *POFF.
+
+template<int size>
+void
+Symbol_table::add_to_final_symtab(Symbol* sym, Stringpool* pool,
+				  unsigned int* pindex, off_t* poff)
+{
+  sym->set_symtab_index(*pindex);
+  pool->add(sym->name(), false, NULL);
+  ++*pindex;
+  *poff += elfcpp::Elf_sizes<size>::sym_size;
+}
+
 // Set the final value for all the symbols.  This is called after
 // Layout::finalize, so all the output sections have their final
 // address.
 
 template<int size>
 off_t
-Symbol_table::sized_finalize(unsigned index, off_t off, Stringpool* pool)
+Symbol_table::sized_finalize(off_t off, Stringpool* pool,
+			     unsigned int* plocal_symcount)
 {
   off = align_address(off, size >> 3);
   this->offset_ = off;
 
-  size_t orig_index = index;
+  unsigned int index = *plocal_symcount;
+  const unsigned int orig_index = index;
 
-  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  // First do all the symbols which have been forced to be local, as
+  // they must appear before all global symbols.
+  for (Forced_locals::iterator p = this->forced_locals_.begin();
+       p != this->forced_locals_.end();
+       ++p)
+    {
+      Symbol* sym = *p;
+      gold_assert(sym->is_forced_local());
+      if (this->sized_finalize_symbol<size>(sym))
+	{
+	  this->add_to_final_symtab<size>(sym, pool, &index, &off);
+	  ++*plocal_symcount;
+	}
+    }
+
+  // Now do all the remaining symbols.
   for (Symbol_table_type::iterator p = this->table_.begin();
        p != this->table_.end();
        ++p)
     {
-      Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(p->second);
-
-      // FIXME: Here we need to decide which symbols should go into
-      // the output file, based on --strip.
-
-      // The default version of a symbol may appear twice in the
-      // symbol table.  We only need to finalize it once.
-      if (sym->has_symtab_index())
-	continue;
-
-      if (!sym->in_reg())
-	{
-	  gold_assert(!sym->has_symtab_index());
-	  sym->set_symtab_index(-1U);
-	  gold_assert(sym->dynsym_index() == -1U);
-	  continue;
-	}
-
-      typename Sized_symbol<size>::Value_type value;
-
-      switch (sym->source())
-	{
-	case Symbol::FROM_OBJECT:
-	  {
-	    unsigned int shndx = sym->shndx();
-
-	    // FIXME: We need some target specific support here.
-	    if (shndx >= elfcpp::SHN_LORESERVE
-		&& shndx != elfcpp::SHN_ABS)
-	      {
-		gold_error(_("%s: unsupported symbol section 0x%x"),
-			   sym->demangled_name().c_str(), shndx);
-		shndx = elfcpp::SHN_UNDEF;
-	      }
-
-	    Object* symobj = sym->object();
-	    if (symobj->is_dynamic())
-	      {
-		value = 0;
-		shndx = elfcpp::SHN_UNDEF;
-	      }
-	    else if (shndx == elfcpp::SHN_UNDEF)
-	      value = 0;
-	    else if (shndx == elfcpp::SHN_ABS)
-	      value = sym->value();
-	    else
-	      {
-		Relobj* relobj = static_cast<Relobj*>(symobj);
-		section_offset_type secoff;
-		Output_section* os = relobj->output_section(shndx, &secoff);
-
-		if (os == NULL)
-		  {
-		    sym->set_symtab_index(-1U);
-		    gold_assert(sym->dynsym_index() == -1U);
-		    continue;
-		  }
-
-                if (sym->type() == elfcpp::STT_TLS)
-                  value = sym->value() + os->tls_offset() + secoff;
-                else
-		  value = sym->value() + os->address() + secoff;
-	      }
-	  }
-	  break;
-
-	case Symbol::IN_OUTPUT_DATA:
-	  {
-	    Output_data* od = sym->output_data();
-	    value = sym->value() + od->address();
-	    if (sym->offset_is_from_end())
-	      value += od->data_size();
-	  }
-	  break;
-
-	case Symbol::IN_OUTPUT_SEGMENT:
-	  {
-	    Output_segment* os = sym->output_segment();
-	    value = sym->value() + os->vaddr();
-	    switch (sym->offset_base())
-	      {
-	      case Symbol::SEGMENT_START:
-		break;
-	      case Symbol::SEGMENT_END:
-		value += os->memsz();
-		break;
-	      case Symbol::SEGMENT_BSS:
-		value += os->filesz();
-		break;
-	      default:
-		gold_unreachable();
-	      }
-	  }
-	  break;
-
-	case Symbol::CONSTANT:
-	  value = sym->value();
-	  break;
-
-	default:
-	  gold_unreachable();
-	}
-
-      sym->set_value(value);
-
-      if (parameters->strip_all())
-	sym->set_symtab_index(-1U);
-      else
-	{
-	  sym->set_symtab_index(index);
-	  pool->add(sym->name(), false, NULL);
-	  ++index;
-	  off += sym_size;
-	}
+      Symbol* sym = p->second;
+      if (this->sized_finalize_symbol<size>(sym))
+	this->add_to_final_symtab<size>(sym, pool, &index, &off);
     }
 
   this->output_count_ = index - orig_index;
 
   return off;
+}
+
+// Finalize the symbol SYM.  This returns true if the symbol should be
+// added to the symbol table, false otherwise.
+
+template<int size>
+bool
+Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
+{
+  Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(unsized_sym);
+
+  // The default version of a symbol may appear twice in the symbol
+  // table.  We only need to finalize it once.
+  if (sym->has_symtab_index())
+    return false;
+
+  if (!sym->in_reg())
+    {
+      gold_assert(!sym->has_symtab_index());
+      sym->set_symtab_index(-1U);
+      gold_assert(sym->dynsym_index() == -1U);
+      return false;
+    }
+
+  typename Sized_symbol<size>::Value_type value;
+
+  switch (sym->source())
+    {
+    case Symbol::FROM_OBJECT:
+      {
+	unsigned int shndx = sym->shndx();
+
+	// FIXME: We need some target specific support here.
+	if (shndx >= elfcpp::SHN_LORESERVE
+	    && shndx != elfcpp::SHN_ABS)
+	  {
+	    gold_error(_("%s: unsupported symbol section 0x%x"),
+		       sym->demangled_name().c_str(), shndx);
+	    shndx = elfcpp::SHN_UNDEF;
+	  }
+
+	Object* symobj = sym->object();
+	if (symobj->is_dynamic())
+	  {
+	    value = 0;
+	    shndx = elfcpp::SHN_UNDEF;
+	  }
+	else if (shndx == elfcpp::SHN_UNDEF)
+	  value = 0;
+	else if (shndx == elfcpp::SHN_ABS)
+	  value = sym->value();
+	else
+	  {
+	    Relobj* relobj = static_cast<Relobj*>(symobj);
+	    section_offset_type secoff;
+	    Output_section* os = relobj->output_section(shndx, &secoff);
+
+	    if (os == NULL)
+	      {
+		sym->set_symtab_index(-1U);
+		gold_assert(sym->dynsym_index() == -1U);
+		return false;
+	      }
+
+	    if (sym->type() == elfcpp::STT_TLS)
+	      value = sym->value() + os->tls_offset() + secoff;
+	    else
+	      value = sym->value() + os->address() + secoff;
+	  }
+      }
+      break;
+
+    case Symbol::IN_OUTPUT_DATA:
+      {
+	Output_data* od = sym->output_data();
+	value = sym->value() + od->address();
+	if (sym->offset_is_from_end())
+	  value += od->data_size();
+      }
+      break;
+
+    case Symbol::IN_OUTPUT_SEGMENT:
+      {
+	Output_segment* os = sym->output_segment();
+	value = sym->value() + os->vaddr();
+	switch (sym->offset_base())
+	  {
+	  case Symbol::SEGMENT_START:
+	    break;
+	  case Symbol::SEGMENT_END:
+	    value += os->memsz();
+	    break;
+	  case Symbol::SEGMENT_BSS:
+	    value += os->filesz();
+	    break;
+	  default:
+	    gold_unreachable();
+	  }
+      }
+      break;
+
+    case Symbol::CONSTANT:
+      value = sym->value();
+      break;
+
+    default:
+      gold_unreachable();
+    }
+
+  sym->set_value(value);
+
+  if (parameters->strip_all())
+    {
+      sym->set_symtab_index(-1U);
+      return false;
+    }
+
+  return true;
 }
 
 // Write out the global symbols.
@@ -1670,20 +1763,22 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
   const Target* const target = input_objects->target();
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
-  unsigned int index = this->first_global_index_;
-  const off_t oview_size = this->output_count_ * sym_size;
+
+  const unsigned int output_count = this->output_count_;
+  const section_size_type oview_size = output_count * sym_size;
+  const unsigned int first_global_index = this->first_global_index_;
   unsigned char* const psyms = of->get_output_view(this->offset_, oview_size);
 
-  unsigned int dynamic_count = this->dynamic_count_;
-  off_t dynamic_size = dynamic_count * sym_size;
-  unsigned int first_dynamic_global_index = this->first_dynamic_global_index_;
+  const unsigned int dynamic_count = this->dynamic_count_;
+  const section_size_type dynamic_size = dynamic_count * sym_size;
+  const unsigned int first_dynamic_global_index =
+    this->first_dynamic_global_index_;
   unsigned char* dynamic_view;
   if (this->dynamic_offset_ == 0)
     dynamic_view = NULL;
   else
     dynamic_view = of->get_output_view(this->dynamic_offset_, dynamic_size);
 
-  unsigned char* ps = psyms;
   for (Symbol_table_type::const_iterator p = this->table_.begin();
        p != this->table_.end();
        ++p)
@@ -1704,18 +1799,6 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 	{
 	  // This symbol is not included in the output file.
 	  continue;
-	}
-
-      if (sym_index == index)
-	++index;
-      else if (sym_index != -1U)
-	{
-	  // We have already seen this symbol, because it has a
-	  // default version.
-	  gold_assert(sym_index < index);
-	  if (dynsym_index == -1U)
-	    continue;
-	  sym_index = -1U;
 	}
 
       unsigned int shndx;
@@ -1777,10 +1860,12 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 
       if (sym_index != -1U)
 	{
+	  sym_index -= first_global_index;
+	  gold_assert(sym_index < output_count);
+	  unsigned char* ps = psyms + (sym_index * sym_size);
 	  this->sized_write_symbol SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
 	      sym, sym->value(), shndx, sympool, ps
               SELECT_SIZE_ENDIAN(size, big_endian));
-	  ps += sym_size;
 	}
 
       if (dynsym_index != -1U)
@@ -1793,8 +1878,6 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
               SELECT_SIZE_ENDIAN(size, big_endian));
 	}
     }
-
-  gold_assert(ps - psyms == oview_size);
 
   of->write_output_view(this->offset_, oview_size, psyms);
   if (dynamic_view != NULL)
@@ -1818,7 +1901,11 @@ Symbol_table::sized_write_symbol(
   osym.put_st_name(pool->get_offset(sym->name()));
   osym.put_st_value(value);
   osym.put_st_size(sym->symsize());
-  osym.put_st_info(elfcpp::elf_st_info(sym->binding(), sym->type()));
+  // A version script may have overridden the default binding.
+  if (sym->is_forced_local())
+    osym.put_st_info(elfcpp::elf_st_info(elfcpp::STB_LOCAL, sym->type()));
+  else
+    osym.put_st_info(elfcpp::elf_st_info(sym->binding(), sym->type()));
   osym.put_st_other(elfcpp::elf_st_other(sym->visibility(), sym->nonvis()));
   osym.put_st_shndx(shndx);
 }

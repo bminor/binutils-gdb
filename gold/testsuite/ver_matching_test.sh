@@ -79,8 +79,10 @@ check ver_matching_test.stdout "V1   *baz(int\\*)$"
 check_missing ver_matching_test.stdout "V1   *baz(int\\*, char)$"
 check_missing ver_matching_test.stdout "V1   *baz(char\\*, int)$"
 
-# TODO: foo1 should be a local symbol and not show up in the .dynsym
-# dump, but we haven't figured out how to suppress it yet.
-# check_missing ver_matching_test.stdout "foo1"
+check_missing ver_matching_test.stdout "foo1"
+
+# This symbols is injected by the linker itself, but should still
+# follow local:
+check_missing ver_matching_test.stdout "__bss_start"
 
 exit 0

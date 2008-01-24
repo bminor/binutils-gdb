@@ -86,7 +86,7 @@ write_debug_script(std::string filename_str,
   size_t slash = filename_str.rfind('/');
   if (slash != std::string::npos)
     filename_str = filename_str.c_str() + slash + 1;
-  filename_str = std::string("/var/tmp/ld-run-") + filename_str + ".sh";
+  filename_str = std::string("/tmp/ld-run-") + filename_str + ".sh";
   const char* filename = filename_str.c_str();
   FILE* fp = fopen(filename, "w");
   if (fp)

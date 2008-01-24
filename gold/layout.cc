@@ -1291,8 +1291,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 		  == this->dynsym_section_->data_size() - locsize);
     }
 
-  off = symtab->finalize(local_symcount, off, dynoff, dyn_global_index,
-			 dyncount, &this->sympool_);
+  off = symtab->finalize(off, dynoff, dyn_global_index, dyncount,
+			 &this->sympool_, &local_symcount);
 
   if (!parameters->strip_all())
     {

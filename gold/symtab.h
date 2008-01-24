@@ -466,6 +466,7 @@ class Symbol
     return (this->visibility_ != elfcpp::STV_INTERNAL
             && this->visibility_ != elfcpp::STV_HIDDEN
             && this->visibility_ != elfcpp::STV_PROTECTED
+            && !this->is_forced_local_
             && parameters->output_is_shared()
 	    && !parameters->symbolic());
   }
@@ -580,6 +581,17 @@ class Symbol
   void
   set_is_copied_from_dynobj()
   { this->is_copied_from_dynobj_ = true; }
+
+  // Return whether this symbol is forced to visibility STB_LOCAL
+  // by a "local:" entry in a version script.
+  bool
+  is_forced_local() const
+  { return this->is_forced_local_; }
+
+  // Mark this symbol as forced to STB_LOCAL visibility.
+  void
+  set_is_forced_local()
+  { this->is_forced_local_ = true; }
 
  protected:
   // Instances of this class should always be created at a specific
@@ -757,6 +769,9 @@ class Symbol
   // True if we are using a COPY reloc for this symbol, so that the
   // real definition lives in a dynamic object.
   bool is_copied_from_dynobj_ : 1;
+  // True if this symbol was forced to local visibility by a version
+  // script.
+  bool is_forced_local_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
@@ -1132,15 +1147,17 @@ class Symbol_table
 
   // Finalize the symbol table after we have set the final addresses
   // of all the input sections.  This sets the final symbol indexes,
-  // values and adds the names to *POOL.  INDEX is the index of the
-  // first global symbol.  OFF is the file offset of the global symbol
-  // table, DYNOFF is the offset of the globals in the dynamic symbol
-  // table, DYN_GLOBAL_INDEX is the index of the first global dynamic
-  // symbol, and DYNCOUNT is the number of global dynamic symbols.
-  // This records the parameters, and returns the new file offset.
+  // values and adds the names to *POOL.  *PLOCAL_SYMCOUNT is the
+  // index of the first global symbol.  OFF is the file offset of the
+  // global symbol table, DYNOFF is the offset of the globals in the
+  // dynamic symbol table, DYN_GLOBAL_INDEX is the index of the first
+  // global dynamic symbol, and DYNCOUNT is the number of global
+  // dynamic symbols.  This records the parameters, and returns the
+  // new file offset.  It updates *PLOCAL_SYMCOUNT if it created any
+  // local symbols.
   off_t
-  finalize(unsigned int index, off_t off, off_t dynoff,
-	   size_t dyn_global_index, size_t dyncount, Stringpool* pool);
+  finalize(off_t off, off_t dynoff, size_t dyn_global_index, size_t dyncount,
+	   Stringpool* pool, unsigned int *plocal_symcount);
 
   // Write out the global symbols.
   void
@@ -1188,6 +1205,10 @@ class Symbol_table
   void
   resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
           const char* version ACCEPT_SIZE_ENDIAN);
+
+  // Record that a symbol is forced to be local by a version script.
+  void
+  force_local(Symbol*);
 
   // Whether we should override a symbol, based on flags in
   // resolve.cc.
@@ -1270,7 +1291,18 @@ class Symbol_table
   // Finalize symbols specialized for size.
   template<int size>
   off_t
-  sized_finalize(unsigned int, off_t, Stringpool*);
+  sized_finalize(off_t, Stringpool*, unsigned int*);
+
+  // Finalize a symbol.  Return whether it should be added to the
+  // symbol table.
+  template<int size>
+  bool
+  sized_finalize_symbol(Symbol*);
+
+  // Add a symbol the final symtab by setting its index.
+  template<int size>
+  void
+  add_to_final_symtab(Symbol*, Stringpool*, unsigned int* pindex, off_t* poff);
 
   // Write globals specialized for size and endianness.
   template<int size, bool big_endian>
@@ -1318,6 +1350,9 @@ class Symbol_table
   // The type of the list of common symbols.
   typedef std::vector<Symbol*> Commons_type;
 
+  // The type of the list of symbols which have been forced local.
+  typedef std::vector<Symbol*> Forced_locals;
+
   // A map from symbols with COPY relocs to the dynamic objects where
   // they are defined.
   typedef Unordered_map<const Symbol*, Dynobj*> Copied_symbol_dynobjs;
@@ -1358,13 +1393,13 @@ class Symbol_table
   // write the table.
   off_t offset_;
   // The number of global symbols we want to write out.
-  size_t output_count_;
+  unsigned int output_count_;
   // The file offset of the global dynamic symbols, or 0 if none.
   off_t dynamic_offset_;
   // The index of the first global dynamic symbol.
   unsigned int first_dynamic_global_index_;
   // The number of global dynamic symbols, or 0 if none.
-  off_t dynamic_count_;
+  unsigned int dynamic_count_;
   // The symbol hash table.
   Symbol_table_type table_;
   // A pool of symbol names.  This is used for all global symbols.
@@ -1381,6 +1416,10 @@ class Symbol_table
   // symbol is no longer a common symbol.  It may also have become a
   // forwarder.
   Commons_type commons_;
+  // A list of symbols which have been forced to be local.  We don't
+  // expect there to be very many of them, so we keep a list of them
+  // rather than walking the whole table to find them.
+  Forced_locals forced_locals_;
   // Manage symbol warnings.
   Warnings warnings_;
   // Manage potential One Definition Rule (ODR) violations.

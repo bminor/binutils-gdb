@@ -680,6 +680,7 @@ Symbol::override_base_with_special(const Symbol* from)
   gold_assert(!from->has_plt_offset_);
   gold_assert(!from->has_warning_);
   gold_assert(!from->is_copied_from_dynobj_);
+  gold_assert(!from->is_forced_local_);
 }
 
 // Override a symbol with a special symbol.
@@ -719,6 +720,8 @@ Symbol_table::override_with_special(Sized_symbol<size>* tosym,
 	}
       while (ssym != tosym);
     }
+  if (tosym->binding() == elfcpp::STB_LOCAL)
+    this->force_local(tosym);
 }
 
 // Instantiate the templates we need.  We could use the configure

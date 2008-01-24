@@ -1334,7 +1334,7 @@ Versions::add_def(const Symbol* sym, const char* version,
   Version_base* const vbnull = NULL;
   std::pair<Version_table::iterator, bool> ins =
     this->version_table_.insert(std::make_pair(k, vbnull));
-  
+
   if (!ins.second)
     {
       // We already have an entry for this version.
@@ -1344,9 +1344,6 @@ Versions::add_def(const Symbol* sym, const char* version,
       // weak.
       gold_assert(vb != NULL);
       vb->clear_weak();
-
-      // FIXME: When we support version scripts, we will need to
-      // check whether this symbol should be forced local.
     }
   else
     {
