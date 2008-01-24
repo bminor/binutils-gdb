@@ -1,4 +1,8 @@
 -*- text -*-
+* New command line options, -march=CPU[,+EXTENSION...], -mtune=CPU,
+  -mmnemonic=[att|intel], -msyntax=[att|intel], -mindex-reg,
+  -mnaked-reg and -mold-gcc, for x86 targets.
+
 * Support for generating wide character strings has been added via the new
   pseudo ops: .string16, .string32 and .string64.
 
