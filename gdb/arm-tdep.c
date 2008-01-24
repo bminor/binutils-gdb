@@ -240,7 +240,7 @@ static CORE_ADDR
 arm_addr_bits_remove (CORE_ADDR val)
 {
   if (arm_apcs_32)
-    return (val & (arm_pc_is_thumb (val) ? 0xfffffffe : 0xfffffffc));
+    return UNMAKE_THUMB_ADDR (val);
   else
     return (val & 0x03fffffc);
 }

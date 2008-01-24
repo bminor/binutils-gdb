@@ -1,3 +1,8 @@
+2008-01-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* arm-tdep.c (arm_addr_bits_remove): In non 26-bit mode, don't
+	strip bit 1 even if pc doesn't point to thumb code.
+
 2008-01-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_wait): Handle SIGINT between packets.
