@@ -297,10 +297,11 @@ augments the main linker script used for the link (either the default
 linker script or the one specified by using @samp{-T}).  This feature
 permits the linker to link against a file which appears to be an object
 or an archive, but actually merely defines some symbol values, or uses
-@code{INPUT} or @code{GROUP} to load other objects.  Note that
-specifying a script in this way merely augments the main linker script;
-use the @samp{-T} option to replace the default linker script entirely.
-@xref{Scripts}.
+@code{INPUT} or @code{GROUP} to load other objects.  Specifying a
+script in this way merely augments the main linker script, with the
+extra commands placed after the main script; use the @samp{-T} option
+to replace the default linker script entirely, but note the effect of
+the @code{INSERT} command.  @xref{Scripts}.
 
 For options whose names are a single letter,
 option arguments must either follow the option letter without intervening
@@ -2902,6 +2903,35 @@ output file is specified (@samp{-r}).
 This command has the same effect as the @samp{--no-define-common}
 command-line option: to make @code{ld} omit the assignment of addresses
 to common symbols even for a non-relocatable output file.
+
+@item INSERT [ AFTER | BEFORE ] @var{output_section}
+@kindex INSERT
+@cindex insert user script into default script
+This command is typically used in a script specified by @samp{-T} to
+augment the default @code{SECTIONS} with, for example, overlays.  It
+inserts all prior linker script statements after (or before)
+@var{output_section}, and also causes @samp{-T} to not override the
+default linker script.  The exact insertion point is as for orphan
+sections.  @xref{Location Counter}.  The insertion happens after the
+linker has mapped input sections to output sections.  Prior to the
+insertion, since @samp{-T} scripts are parsed before the default
+linker script, statements in the @samp{-T} script occur before the
+default linker script statements in the internal linker representation
+of the script.  In particular, input section assignments will be made
+to @samp{-T} output sections before those in the default script.  Here
+is an example of how a @samp{-T} script using @code{INSERT} might look:
+
+@smallexample
+SECTIONS
+@{
+  OVERLAY :
+  @{
+    .ov1 @{ ov1*(.text) @}
+    .ov2 @{ ov2*(.text) @}
+  @}
+@}
+INSERT AFTER .text;
+@end smallexample
 
 @item NOCROSSREFS(@var{section} @var{section} @dots{})
 @kindex NOCROSSREFS(@var{sections})

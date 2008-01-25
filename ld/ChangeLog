@@ -1,3 +1,29 @@
+2008-01-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo (INSERT): Describe.
+	* ldgram.y (ldgram_in_script, ldgram_had_equals): Delete.
+	(INSERT_K, AFTER, BEFORE): Add as tokens.
+	(ifile_p1): Handle INSERT statements.
+	(saved_script_handle, force_make_executable): Move to..
+	* ldmain.c: ..here.
+	(previous_script_handle): New global var.
+	* ldmain.h (saved_script_handle, force_make_executable): Declare.
+	(previous_script_handle): Likewise.
+	* ldlex.l (INSERT_K, AFTER, BEFORE): Add tokens.
+	* lexsup.c (parge_args <-T>): Set previous_script_handle.
+	* ldlang.c (lang_for_each_statement_worker): Handle insert statement.
+	(map_input_to_output_sections, print_statement): Likewise.
+	(lang_size_sections_1, lang_do_assignments_1): Likewise.
+	(insert_os_after): New function, extracted from..
+	(lang_insert_orphan): ..here.
+	(process_insert_statements): New function.
+	(lang_process): Call it.
+	(lang_add_insert): New function.
+	* ldlang.h (lang_insert_statement_enum): New.
+	(lang_insert_statement_type): New.
+	(lang_statement_union_type): Add insert_statement.
+	(lang_add_insert): Declare.
+
 2008-01-18  Bob Wilson  <bob.wilson@acm.org>
 
 	* scripttempl/elfxtensa.sc: Merge ENTRY and .note.gnu.build-id

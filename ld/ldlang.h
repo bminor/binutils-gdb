@@ -79,6 +79,7 @@ typedef struct lang_statement_header_struct
     lang_output_statement_enum,
     lang_padding_statement_enum,
     lang_group_statement_enum,
+    lang_insert_statement_enum,
     lang_constructors_statement_enum
   } type;
 } lang_statement_header_type;
@@ -352,6 +353,13 @@ typedef struct
   lang_statement_list_type children;
 } lang_group_statement_type;
 
+typedef struct
+{
+  lang_statement_header_type header;
+  const char *where;
+  bfd_boolean is_before;
+} lang_insert_statement_type;
+
 typedef union lang_statement_union
 {
   lang_statement_header_type header;
@@ -370,6 +378,7 @@ typedef union lang_statement_union
   lang_fill_statement_type fill_statement;
   lang_padding_statement_type padding_statement;
   lang_group_statement_type group_statement;
+  lang_insert_statement_type insert_statement;
 } lang_statement_union_type;
 
 /* This structure holds information about a program header, from the
@@ -565,6 +574,8 @@ extern void lang_size_sections
   (bfd_boolean *, bfd_boolean);
 extern void one_lang_size_sections_pass
   (bfd_boolean *, bfd_boolean);
+extern void lang_add_insert
+  (const char *, int);
 extern void lang_enter_group
   (void);
 extern void lang_leave_group

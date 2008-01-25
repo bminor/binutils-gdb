@@ -60,6 +60,10 @@ extern void *sbrk ();
 
 /* EXPORTS */
 
+FILE *saved_script_handle = NULL;
+FILE *previous_script_handle = NULL;
+bfd_boolean force_make_executable = FALSE;
+
 char *default_target;
 const char *output_filename = "a.out";
 

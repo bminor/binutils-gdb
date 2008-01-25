@@ -1,5 +1,5 @@
 #source: ovl2.s
-#ld: -N -T ovl.lnk --emit-relocs
+#ld: -N -T ovl2.lnk -T ovl.lnk --emit-relocs
 #objdump: -D -r
 
 .*elf32-spu

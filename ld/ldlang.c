@@ -845,6 +845,7 @@ lang_for_each_statement_worker (void (*func) (lang_statement_union_type *),
 	case lang_padding_statement_enum:
 	case lang_address_statement_enum:
 	case lang_fill_statement_enum:
+	case lang_insert_statement_enum:
 	  break;
 	default:
 	  FAIL ();
@@ -1451,6 +1452,73 @@ output_prev_sec_find (lang_output_section_statement_type *os)
   return NULL;
 }
 
+/* Look for a suitable place for a new output section statement.  The
+   idea is to skip over anything that might be inside a SECTIONS {}
+   statement in a script, before we find another output section
+   statement.  Assignments to "dot" before an output section statement
+   are assumed to belong to it.  An exception to this rule is made for
+   the first assignment to dot, otherwise we might put an orphan
+   before . = . + SIZEOF_HEADERS or similar assignments that set the
+   initial address.  */
+
+static lang_statement_union_type **
+insert_os_after (lang_output_section_statement_type *after)
+{
+  lang_statement_union_type **where;
+  lang_statement_union_type **assign = NULL;
+  bfd_boolean ignore_first;
+
+  ignore_first
+    = after == &lang_output_section_statement.head->output_section_statement;
+
+  for (where = &after->header.next;
+       *where != NULL;
+       where = &(*where)->header.next)
+    {
+      switch ((*where)->header.type)
+	{
+	case lang_assignment_statement_enum:
+	  if (assign == NULL)
+	    {
+	      lang_assignment_statement_type *ass;
+
+	      ass = &(*where)->assignment_statement;
+	      if (ass->exp->type.node_class != etree_assert
+		  && ass->exp->assign.dst[0] == '.'
+		  && ass->exp->assign.dst[1] == 0
+		  && !ignore_first)
+		assign = where;
+	    }
+	  ignore_first = FALSE;
+	  continue;
+	case lang_wild_statement_enum:
+	case lang_input_section_enum:
+	case lang_object_symbols_statement_enum:
+	case lang_fill_statement_enum:
+	case lang_data_statement_enum:
+	case lang_reloc_statement_enum:
+	case lang_padding_statement_enum:
+	case lang_constructors_statement_enum:
+	  assign = NULL;
+	  continue;
+	case lang_output_section_statement_enum:
+	  if (assign != NULL)
+	    where = assign;
+	  break;
+	case lang_input_statement_enum:
+	case lang_address_statement_enum:
+	case lang_target_statement_enum:
+	case lang_output_statement_enum:
+	case lang_group_statement_enum:
+	case lang_insert_statement_enum:
+	  continue;
+	}
+      break;
+    }
+
+  return where;
+}
+
 lang_output_section_statement_type *
 lang_insert_orphan (asection *s,
 		    const char *secname,
@@ -1606,64 +1674,7 @@ lang_insert_orphan (asection *s,
 
 	  if (place->stmt == NULL)
 	    {
-	      lang_statement_union_type **where;
-	      lang_statement_union_type **assign = NULL;
-	      bfd_boolean ignore_first;
-
-	      /* Look for a suitable place for the new statement list.
-		 The idea is to skip over anything that might be inside
-		 a SECTIONS {} statement in a script, before we find
-		 another output_section_statement.  Assignments to "dot"
-		 before an output section statement are assumed to
-		 belong to it.  An exception to this rule is made for
-		 the first assignment to dot, otherwise we might put an
-		 orphan before . = . + SIZEOF_HEADERS or similar
-		 assignments that set the initial address.  */
-
-	      ignore_first = after == (&lang_output_section_statement.head
-				       ->output_section_statement);
-	      for (where = &after->header.next;
-		   *where != NULL;
-		   where = &(*where)->header.next)
-		{
-		  switch ((*where)->header.type)
-		    {
-		    case lang_assignment_statement_enum:
-		      if (assign == NULL)
-			{
-			  lang_assignment_statement_type *ass;
-			  ass = &(*where)->assignment_statement;
-			  if (ass->exp->type.node_class != etree_assert
-			      && ass->exp->assign.dst[0] == '.'
-			      && ass->exp->assign.dst[1] == 0
-			      && !ignore_first)
-			    assign = where;
-			}
-		      ignore_first = FALSE;
-		      continue;
-		    case lang_wild_statement_enum:
-		    case lang_input_section_enum:
-		    case lang_object_symbols_statement_enum:
-		    case lang_fill_statement_enum:
-		    case lang_data_statement_enum:
-		    case lang_reloc_statement_enum:
-		    case lang_padding_statement_enum:
-		    case lang_constructors_statement_enum:
-		      assign = NULL;
-		      continue;
-		    case lang_output_section_statement_enum:
-		      if (assign != NULL)
-			where = assign;
-		      break;
-		    case lang_input_statement_enum:
-		    case lang_address_statement_enum:
-		    case lang_target_statement_enum:
-		    case lang_output_statement_enum:
-		    case lang_group_statement_enum:
-		      continue;
-		    }
-		  break;
-		}
+	      lang_statement_union_type **where = insert_os_after (after);
 
 	      *add.tail = *where;
 	      *where = add.head;
@@ -3312,6 +3323,154 @@ map_input_to_output_sections
 	      aos->addr_tree = s->address_statement.address;
 	    }
 	  break;
+	case lang_insert_statement_enum:
+	  break;
+	}
+    }
+}
+
+/* An insert statement snips out all the linker statements from the
+   start of the list and places them after the output section
+   statement specified by the insert.  This operation is complicated
+   by the fact that we keep a doubly linked list of output section
+   statements as well as the singly linked list of all statements.  */
+
+static void
+process_insert_statements (void)
+{
+  lang_statement_union_type **s;
+  lang_output_section_statement_type *first_os = NULL;
+  lang_output_section_statement_type *last_os = NULL;
+
+  /* "start of list" is actually the statement immediately after
+     the special abs_section output statement, so that it isn't
+     reordered.  */
+  s = &lang_output_section_statement.head;
+  while (*(s = &(*s)->header.next) != NULL)
+    {
+      if ((*s)->header.type == lang_output_section_statement_enum)
+	{
+	  /* Keep pointers to the first and last output section
+	     statement in the sequence we may be about to move.  */
+	  last_os = &(*s)->output_section_statement;
+	  if (first_os == NULL)
+	    first_os = last_os;
+	}
+      else if ((*s)->header.type == lang_insert_statement_enum)
+	{
+	  lang_insert_statement_type *i = &(*s)->insert_statement;
+	  lang_output_section_statement_type *where;
+	  lang_output_section_statement_type *os;
+	  lang_statement_union_type **ptr;
+	  lang_statement_union_type *first;
+
+	  where = lang_output_section_find (i->where);
+	  if (where != NULL && i->is_before)
+	    {
+	      do 
+		where = where->prev;
+	      while (where != NULL && where->constraint == -1);
+	    }
+	  if (where == NULL)
+	    {
+	      einfo (_("%X%P: %s not found for insert\n"), i->where);
+	      continue;
+	    }
+	  /* You can't insert into the list you are moving.  */
+	  for (os = first_os; os != NULL; os = os->next)
+	    if (os == where || os == last_os)
+	      break;
+	  if (os == where)
+	    {
+	      einfo (_("%X%P: %s not found for insert\n"), i->where);
+	      continue;
+	    }
+
+	  /* Deal with reordering the output section statement list.  */
+	  if (last_os != NULL)
+	    {
+	      asection *first_sec, *last_sec;
+
+	      /* Snip out the output sections we are moving.  */
+	      first_os->prev->next = last_os->next;
+	      if (last_os->next == NULL)
+		lang_output_section_statement.tail
+		  = (union lang_statement_union **) &first_os->prev->next;
+	      else
+		last_os->next->prev = first_os->prev;
+	      /* Add them in at the new position.  */
+	      last_os->next = where->next;
+	      if (where->next == NULL)
+		lang_output_section_statement.tail
+		  = (union lang_statement_union **) &last_os->next;
+	      else
+		where->next->prev = last_os;
+	      first_os->prev = where;
+	      where->next = first_os;
+
+	      /* Move the bfd sections in the same way.  */
+	      first_sec = NULL;
+	      last_sec = NULL;
+	      for (os = first_os; os != NULL; os = os->next)
+		{
+		  if (os->bfd_section != NULL
+		      && os->bfd_section->owner != NULL)
+		    {
+		      last_sec = os->bfd_section;
+		      if (first_sec == NULL)
+			first_sec = last_sec;
+		    }
+		  if (os == last_os)
+		    break;
+		}
+	      if (last_sec != NULL)
+		{
+		  asection *sec = where->bfd_section;
+		  if (sec == NULL)
+		    sec = output_prev_sec_find (where);
+
+		  /* The place we want to insert must come after the
+		     sections we are moving.  So if we find no
+		     section or if the section is the same as our
+		     last section, then no move is needed.  */
+		  if (sec != NULL && sec != last_sec)
+		    {
+		      /* Trim them off.  */
+		      if (first_sec->prev != NULL)
+			first_sec->prev->next = last_sec->next;
+		      else
+			output_bfd->sections = last_sec->next;
+		      if (last_sec->next != NULL)
+			last_sec->next->prev = first_sec->prev;
+		      else
+			output_bfd->section_last = first_sec->prev;
+		      /* Add back.  */
+		      last_sec->next = sec->next;
+		      if (sec->next != NULL)
+			sec->next->prev = last_sec;
+		      else
+			output_bfd->section_last = last_sec;
+		      first_sec->prev = sec;
+		      sec->next = first_sec;
+		    }
+		}
+
+	      first_os = NULL;
+	      last_os = NULL;
+	    }
+
+	  ptr = insert_os_after (where);
+	  /* Snip everything after the abs_section output statement we
+	     know is at the start of the list, up to and including
+	     the insert statement we are currently processing.  */
+	  first = lang_output_section_statement.head->header.next;
+	  lang_output_section_statement.head->header.next = (*s)->header.next;
+	  /* Add them back where they belong.  */
+	  *s = *ptr;
+	  if (*s == NULL)
+	    statement_list.tail = s;
+	  *ptr = first;
+	  s = &lang_output_section_statement.head;
 	}
     }
 }
@@ -3953,6 +4112,11 @@ print_statement (lang_statement_union_type *s,
       break;
     case lang_group_statement_enum:
       print_group (&s->group_statement, os);
+      break;
+    case lang_insert_statement_enum:
+      minfo ("INSERT %s %s\n",
+	     s->insert_statement.is_before ? "BEFORE" : "AFTER",
+	     s->insert_statement.where);
       break;
     }
 }
@@ -4734,12 +4898,15 @@ lang_size_sections_1
 				      fill, dot, relax, check_regions);
 	  break;
 
-	default:
-	  FAIL ();
+	case lang_insert_statement_enum:
 	  break;
 
 	  /* We can only get here when relaxing is turned on.  */
 	case lang_address_statement_enum:
+	  break;
+
+	default:
+	  FAIL ();
 	  break;
 	}
       prev = &s->header.next;
@@ -4999,11 +5166,14 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 				       current_os, fill, dot);
 	  break;
 
-	default:
-	  FAIL ();
+	case lang_insert_statement_enum:
 	  break;
 
 	case lang_address_statement_enum:
+	  break;
+
+	default:
+	  FAIL ();
 	  break;
 	}
     }
@@ -5853,6 +6023,8 @@ lang_process (void)
      to the correct output sections.  */
   map_input_to_output_sections (statement_list.head, NULL, NULL);
 
+  process_insert_statements ();
+
   /* Find any sections not attached explicitly and handle them.  */
   lang_place_orphans ();
 
@@ -6267,6 +6439,17 @@ lang_add_output_format (const char *format,
 
       output_target = format;
     }
+}
+
+void
+lang_add_insert (const char *where, int is_before)
+{
+  lang_insert_statement_type *new;
+
+  new = new_stat (lang_insert_statement, stat_ptr);
+  new->where = where;
+  new->is_before = is_before;
+  saved_script_handle = previous_script_handle;
 }
 
 /* Enter a group.  This creates a new lang_group_statement, and sets

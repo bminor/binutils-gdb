@@ -1,3 +1,11 @@
+2008-01-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/ovl.lnk: Delete overlay.
+	* ld-spu/ovl1.lnk: New file.
+	* ld-spu/ovl2.lnk: New file.
+	* ld-spu/ovl.d: Update.
+	* ld-spu/ovl2.d: Update.
+
 2008-01-23  Andreas Schwab  <schwab@suse.de>
 
 	* ld-gc/gc.c: Make sure used_func is not inlined.

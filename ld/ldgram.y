@@ -49,11 +49,6 @@
 static enum section_type sectype;
 static lang_memory_region_type *region;
 
-FILE *saved_script_handle = NULL;
-bfd_boolean force_make_executable = FALSE;
-
-bfd_boolean ldgram_in_script = FALSE;
-bfd_boolean ldgram_had_equals = FALSE;
 bfd_boolean ldgram_had_keep = FALSE;
 char *ldgram_vers_current_lang = NULL;
 
@@ -127,7 +122,8 @@ static int error_index;
 %token END
 %left <token> '('
 %token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE
-%token SECTIONS PHDRS DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
+%token SECTIONS PHDRS INSERT_K AFTER BEFORE
+%token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token SORT_BY_NAME SORT_BY_ALIGNMENT
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
@@ -352,6 +348,10 @@ ifile_p1:
 		  lang_add_nocrossref ($3);
 		}
 	|	EXTERN '(' extern_name_list ')'
+	|	INSERT_K AFTER NAME
+		{ lang_add_insert ($3, 0); }
+	|	INSERT_K BEFORE NAME
+		{ lang_add_insert ($3, 1); }
 	;
 
 input_list:
