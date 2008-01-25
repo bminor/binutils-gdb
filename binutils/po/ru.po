@@ -2,13 +2,13 @@
 # Copyright (C) 2003, 2005, 2006 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
 #
-# Pavel Maryanov <acid_jack@ukr.net>, 2003, 2005, 2006.
+# Pavel Maryanov <acid_jack@ukr.net>, 2003, 2005, 2006, 2008.
 msgid ""
 msgstr ""
 "Project-Id-Version: binutils 2.17.90\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-07-02 15:55+0930\n"
-"PO-Revision-Date: 2007-12-03 00:26+0200\n"
+"PO-Revision-Date: 2008-01-18 00:13+0200\n"
 "Last-Translator: Pavel Maryanov <acid_jack@ukr.net>\n"
 "Language-Team: Russian <gnu@mx.ru>\n"
 "MIME-Version: 1.0\n"
@@ -1217,19 +1217,19 @@ msgid "  define new File Table entry\n"
 msgstr "  определение нового пункта Таблицы файлов\n"
 
 #: dwarf.c:261 dwarf.c:1928
-#, fuzzy, c-format
+#, c-format
 msgid "  Entry\tDir\tTime\tSize\tName\n"
-msgstr "  Пункт\\tКаталог\\tВремя\\tРазмер\\tИмя\n"
+msgstr "  Пункт\tКаталог\tВремя\tРазмер\tИмя\n"
 
 #: dwarf.c:263
-#, fuzzy, c-format
+#, c-format
 msgid "   %d\t"
-msgstr "   %d\\t"
+msgstr "   %d\t"
 
 #: dwarf.c:266 dwarf.c:268 dwarf.c:270 dwarf.c:1940 dwarf.c:1942 dwarf.c:1944
-#, fuzzy, c-format
+#, c-format
 msgid "%lu\t"
-msgstr "%lu\\t"
+msgstr "%lu\t"
 
 #: dwarf.c:271
 #, c-format
@@ -1534,9 +1534,9 @@ msgstr ""
 " Таблица имен файлов:\n"
 
 #: dwarf.c:1935
-#, fuzzy, c-format
+#, c-format
 msgid "  %d\t"
-msgstr "  %d\\t"
+msgstr "  %d\t"
 
 #: dwarf.c:1946
 #, c-format
@@ -1663,13 +1663,13 @@ msgid "  Size of area in .debug_info section: %ld\n"
 msgstr "  Разм. области в разделе .debug_info: %ld\n"
 
 #: dwarf.c:2144
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "    Offset\tName\n"
 msgstr ""
 "\n"
-"    Смещение\\tИмя\n"
+"    Смещение\tИмя\n"
 
 #: dwarf.c:2195
 #, c-format
@@ -4844,9 +4844,9 @@ msgstr ""
 "Комментарии со смещением 0x%08lx длиной 0x%08lx:\n"
 
 #: readelf.c:9241
-#, fuzzy, c-format
+#, c-format
 msgid "  Owner\t\tData size\tDescription\n"
-msgstr "  Владелец\\t\\tРазмер данных\\tОписание\n"
+msgstr "  Владелец\t\tРазмер данных\tОписание\n"
 
 #: readelf.c:9260
 #, c-format
@@ -5688,9 +5688,9 @@ msgid "A codepage was specified switch ,%s' and UTF16.\n"
 msgstr "Для кодировки был указан ключ '%s' и UTF16.\n"
 
 #: windmc.c:289
-#, fuzzy, c-format
+#, c-format
 msgid "\tcodepage settings are ignored.\n"
-msgstr "\\tнастройки кодировки проигнорированы.\n"
+msgstr "\tнастройки кодировки проигнорированы.\n"
 
 #: windmc.c:333
 msgid "try to add a ill language."
