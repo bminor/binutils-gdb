@@ -1,3 +1,8 @@
+2008-01-25  DJ Delorie  <dj@redhat.com>
+
+	* readelf.c (process_section_headers): Add m16c handler.
+	(is_16bit_abs_reloc): Recognize R_M32C_16.
+
 2008-01-25  Kai Tietz  <kai.tietz@onevision.com>
 
 	* prdbg.c: Correct formatter style use.

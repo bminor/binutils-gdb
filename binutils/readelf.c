@@ -4162,6 +4162,16 @@ process_section_headers (FILE *file)
 	  eh_addr_size = 4;
 	  break;
 	}
+      break;
+
+    case EM_M32C:
+      switch (elf_header.e_flags & EF_M32C_CPU_MASK)
+	{
+	case EF_M32C_CPU_M16C:
+	  eh_addr_size = 2;
+	  break;
+	}
+      break;
     }
 
 #define CHECK_ENTSIZE_VALUES(section, i, size32, size64) \
@@ -8196,6 +8206,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_IP2K_OLD:
     case EM_IP2K:
       return reloc_type == 1; /* R_IP2K_16.  */
+    case EM_M32C:
+      return reloc_type == 1; /* R_M32C_16 */
     case EM_MSP430_OLD:
     case EM_MSP430:
       return reloc_type == 5; /* R_MSP430_16_BYTE.  */
