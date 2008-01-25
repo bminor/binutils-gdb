@@ -1,3 +1,9 @@
+2008-01-25  Kai Tietz  <kai.tietz@onevision.com>
+
+	* prdbg.c: Correct formatter style use.
+	* readelf.c: Likewise.
+	* strings.c: Likewise.
+
 2008-01-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.

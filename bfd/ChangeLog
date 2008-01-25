@@ -1,3 +1,9 @@
+2008-01-25  Kai Tietz  <kai.tietz@onevision.com>
+
+	* bfd-in.h: Add mingw I64 support.
+	* bfd-in2.h: Regenerated.
+	* bfd.c: (bfd_get_sign_extend_vma): Add pe-x86-64 and pei-x86-64.
+
 2008-01-21  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 4453

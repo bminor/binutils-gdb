@@ -1,6 +1,6 @@
 /* strings -- print the strings of printable characters in files
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -593,7 +593,13 @@ print_strings (const char *filename, FILE *stream, file_off address,
 	  case 8:
 #if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
 	    if (sizeof (start) > sizeof (long))
-	      printf ("%7llo ", (unsigned long long) start);
+	      {
+#ifndef __MSVCRT__
+	        printf ("%7llo ", (unsigned long long) start);
+#else
+	        printf ("%7I64o ", (unsigned long long) start);
+#endif
+	      }
 	    else
 #elif !BFD_HOST_64BIT_LONG
 	    if (start != (unsigned long) start)
@@ -606,7 +612,13 @@ print_strings (const char *filename, FILE *stream, file_off address,
 	  case 10:
 #if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
 	    if (sizeof (start) > sizeof (long))
-	      printf ("%7lld ", (unsigned long long) start);
+	      {
+#ifndef __MSVCRT__
+	        printf ("%7lld ", (unsigned long long) start);
+#else
+	        printf ("%7I64d ", (unsigned long long) start);
+#endif
+	      }
 	    else
 #elif !BFD_HOST_64BIT_LONG
 	    if (start != (unsigned long) start)
@@ -619,7 +631,13 @@ print_strings (const char *filename, FILE *stream, file_off address,
 	  case 16:
 #if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
 	    if (sizeof (start) > sizeof (long))
-	      printf ("%7llx ", (unsigned long long) start);
+	      {
+#ifndef __MSVCRT__
+	        printf ("%7llx ", (unsigned long long) start);
+#else
+	        printf ("%7I64x ", (unsigned long long) start);
+#endif
+	      }
 	    else
 #elif !BFD_HOST_64BIT_LONG
 	    if (start != (unsigned long) start)

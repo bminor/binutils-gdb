@@ -1,6 +1,6 @@
 /* Generic BFD library interface and support routines.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -916,6 +916,8 @@ bfd_get_sign_extend_vma (bfd *abfd)
   if (CONST_STRNEQ (name, "coff-go32")
       || strcmp (name, "pe-i386") == 0
       || strcmp (name, "pei-i386") == 0
+      || strcmp (name, "pe-x86-64") == 0
+      || strcmp (name, "pei-x86-64") == 0
       || strcmp (name, "pe-arm-wince-little") == 0
       || strcmp (name, "pei-arm-wince-little") == 0)
     return 1;

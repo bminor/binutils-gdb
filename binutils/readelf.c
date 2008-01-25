@@ -1,6 +1,6 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+   2008  Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -493,7 +493,11 @@ print_vma (bfd_vma vma, print_mode mode)
 #if BFD_HOST_64BIT_LONG
 	  return nc + printf ("%lx", vma);
 #elif BFD_HOST_64BIT_LONG_LONG
+#ifndef __MSVCRT__
 	  return nc + printf ("%llx", vma);
+#else
+	  return nc + printf ("%I64x", vma);
+#endif
 #else
 	  return nc + print_hex_vma (vma);
 #endif
@@ -502,7 +506,11 @@ print_vma (bfd_vma vma, print_mode mode)
 #if BFD_HOST_64BIT_LONG
 	  return printf ("%ld", vma);
 #elif BFD_HOST_64BIT_LONG_LONG
+#ifndef __MSVCRT__
 	  return printf ("%lld", vma);
+#else
+	  return printf ("%I64d", vma);
+#endif
 #else
 	  return print_dec_vma (vma, 1);
 #endif
@@ -514,10 +522,17 @@ print_vma (bfd_vma vma, print_mode mode)
 	  else
 	    return printf ("%#lx", vma);
 #elif BFD_HOST_64BIT_LONG_LONG
+#ifndef __MSVCRT__
 	  if (vma <= 99999)
 	    return printf ("%5lld", vma);
 	  else
 	    return printf ("%#llx", vma);
+#else
+	  if (vma <= 99999)
+	    return printf ("%5I64d", vma);
+	  else
+	    return printf ("%#I64x", vma);
+#endif
 #else
 	  if (vma <= 99999)
 	    return printf ("%5ld", _bfd_int64_low (vma));
@@ -529,7 +544,11 @@ print_vma (bfd_vma vma, print_mode mode)
 #if BFD_HOST_64BIT_LONG
 	  return printf ("%lu", vma);
 #elif BFD_HOST_64BIT_LONG_LONG
+#ifndef __MSVCRT__
 	  return printf ("%llu", vma);
+#else
+	  return printf ("%I64u", vma);
+#endif
 #else
 	  return print_dec_vma (vma, 0);
 #endif
@@ -990,10 +1009,17 @@ dump_relocations (FILE *file,
 		  : "%12.12lx  %12.12lx ",
 		  offset, info);
 #elif BFD_HOST_64BIT_LONG_LONG
+#ifndef __MSVCRT__
 	  printf (do_wide
 		  ? "%16.16llx  %16.16llx "
 		  : "%12.12llx  %12.12llx ",
 		  offset, info);
+#else
+	  printf (do_wide
+		  ? "%16.16I64x  %16.16I64x "
+		  : "%12.12I64x  %12.12I64x ",
+		  offset, info);
+#endif
 #else
 	  printf (do_wide
 		  ? "%8.8lx%8.8lx  %8.8lx%8.8lx "
@@ -7820,7 +7846,11 @@ dump_section_as_strings (Elf_Internal_Shdr *section, FILE *file)
 
       if (data < end)
 	{
+#ifndef __MSVCRT__
 	  printf ("  [%6tx]  %s\n", data - start, data);
+#else
+	  printf ("  [%6Ix]  %s\n", (size_t) (data - start), data);
+#endif
 	  data += strlen (data);
 	  some_strings_shown = TRUE;
 	}

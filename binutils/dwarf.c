@@ -1007,19 +1007,20 @@ decode_location_expression (unsigned char * data,
 }
 
 static unsigned char *
-read_and_display_attr_value (unsigned long   attribute,
-			     unsigned long   form,
+read_and_display_attr_value (unsigned long attribute,
+			     unsigned long form,
 			     unsigned char * data,
-			     unsigned long   cu_offset,
-			     unsigned long   pointer_size,
-			     unsigned long   offset_size,
-			     int             dwarf_version,
-			     debug_info *    debug_info_p,
-			     int             do_loc,
-			     unsigned char * section_start)
+			     unsigned long cu_offset,
+			     unsigned long pointer_size,
+			     unsigned long offset_size,
+			     int dwarf_version,
+			     debug_info * debug_info_p,
+			     int do_loc,
+			     struct dwarf_section * section)
 {
   unsigned long uvalue = 0;
   unsigned char *block_start = NULL;
+  unsigned char * orig_data = data;
   unsigned int bytes_read;
 
   switch (form)
@@ -1092,7 +1093,7 @@ read_and_display_attr_value (unsigned long   attribute,
 					  cu_offset, pointer_size,
 					  offset_size, dwarf_version,
 					  debug_info_p, do_loc,
-					  section_start);
+					  section);
     }
 
   switch (form)
@@ -1479,23 +1480,29 @@ read_and_display_attr_value (unsigned long   attribute,
 
     case DW_AT_import:
       {
-	unsigned long abbrev_number;
-	abbrev_entry * entry;
-
 	if (form == DW_FORM_ref1
 	    || form == DW_FORM_ref2
 	    || form == DW_FORM_ref4)
 	  uvalue += cu_offset;
 
-	abbrev_number = read_leb128 (section_start + uvalue, NULL, 0);
+	if (uvalue >= section->size)
+	  warn (_("Offset %lx used as value for DW_AT_import attribute of DIE at offset %lx is too big.\n"),
+		uvalue, (long int)(orig_data - section->start));
+	else
+	  {
+	    unsigned long abbrev_number;
+	    abbrev_entry * entry;
+
+	    abbrev_number = read_leb128 (section->start + uvalue, NULL, 0);
 	
-	printf ("[Abbrev Number: %ld", abbrev_number);
-	for (entry = first_abbrev; entry != NULL; entry = entry->next)
-	  if (entry->entry == abbrev_number)
-	    break;
-	if (entry != NULL)
-	  printf (" (%s)", get_TAG_name (entry->tag));
-	printf ("]");
+	    printf ("[Abbrev Number: %ld", abbrev_number);
+	    for (entry = first_abbrev; entry != NULL; entry = entry->next)
+	      if (entry->entry == abbrev_number)
+		break;
+	    if (entry != NULL)
+	      printf (" (%s)", get_TAG_name (entry->tag));
+	    printf ("]");
+	  }
       }
       break;
 
@@ -1661,23 +1668,23 @@ get_AT_name (unsigned long attribute)
 }
 
 static unsigned char *
-read_and_display_attr (unsigned long   attribute,
-		       unsigned long   form,
+read_and_display_attr (unsigned long attribute,
+		       unsigned long form,
 		       unsigned char * data,
-		       unsigned long   cu_offset,
-		       unsigned long   pointer_size,
-		       unsigned long   offset_size,
-		       int             dwarf_version,
-		       debug_info *    debug_info_p,
-		       int             do_loc,
-		       unsigned char * section_start)
+		       unsigned long cu_offset,
+		       unsigned long pointer_size,
+		       unsigned long offset_size,
+		       int dwarf_version,
+		       debug_info * debug_info_p,
+		       int do_loc,
+		       struct dwarf_section * section)
 {
   if (!do_loc)
     printf ("   %-18s:", get_AT_name (attribute));
   data = read_and_display_attr_value (attribute, form, data, cu_offset,
 				      pointer_size, offset_size,
 				      dwarf_version, debug_info_p,
-				      do_loc, section_start);
+				      do_loc, section);
   if (!do_loc)
     printf ("\n");
   return data;
@@ -1689,7 +1696,8 @@ read_and_display_attr (unsigned long   attribute,
    anything to the user.  */
 
 static int
-process_debug_info (struct dwarf_section *section, void *file,
+process_debug_info (struct dwarf_section *section,
+		    void *file,
 		    int do_loc)
 {
   unsigned char *start = section->start;
@@ -1954,7 +1962,7 @@ process_debug_info (struct dwarf_section *section, void *file,
 					    offset_size,
 					    compunit.cu_version,
 					    debug_information + unit,
-					    do_loc, section->start);
+					    do_loc, section);
 	    }
  
  	  if (entry->children)
@@ -2289,6 +2297,21 @@ display_debug_lines (struct dwarf_section *section, void *file)
   return 1;
 }
 
+static debug_info *
+find_debug_info_for_offset (unsigned long offset)
+{
+  unsigned int i;
+
+  if (num_debug_info_entries == DEBUG_INFO_UNAVAILABLE)
+    return NULL;
+
+  for (i = 0; i < num_debug_info_entries; i++)
+    if (debug_information[i].cu_offset == offset)
+      return debug_information + i;
+
+  return NULL;
+}
+
 static int
 display_debug_pubnames (struct dwarf_section *section,
 			void *file ATTRIBUTE_UNUSED)
@@ -2296,6 +2319,10 @@ display_debug_pubnames (struct dwarf_section *section,
   DWARF2_Internal_PubNames pubnames;
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
+
+  /* It does not matter if this load fails,
+     we test for that later on.  */
+  load_debug_info (file);
 
   printf (_("Contents of the %s section:\n\n"), section->name);
 
@@ -2324,8 +2351,16 @@ display_debug_pubnames (struct dwarf_section *section,
 
       pubnames.pn_version = byte_get (data, 2);
       data += 2;
+
       pubnames.pn_offset = byte_get (data, offset_size);
       data += offset_size;
+
+      if (num_debug_info_entries != DEBUG_INFO_UNAVAILABLE
+	  && num_debug_info_entries > 0
+	  && find_debug_info_for_offset (pubnames.pn_offset) == NULL)
+	warn (_(".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"),
+	      pubnames.pn_offset, section->name);
+      
       pubnames.pn_size = byte_get (data, offset_size);
       data += offset_size;
 
@@ -2348,7 +2383,7 @@ display_debug_pubnames (struct dwarf_section *section,
 	      pubnames.pn_length);
       printf (_("  Version:                             %d\n"),
 	      pubnames.pn_version);
-      printf (_("  Offset into .debug_info section:     %ld\n"),
+      printf (_("  Offset into .debug_info section:     0x%lx\n"),
 	      pubnames.pn_offset);
       printf (_("  Size of area in .debug_info section: %ld\n"),
 	      pubnames.pn_size);
@@ -2770,6 +2805,10 @@ display_debug_aranges (struct dwarf_section *section,
 
   printf (_("The section %s contains:\n\n"), section->name);
 
+  /* It does not matter if this load fails,
+     we test for that later on.  */
+  load_debug_info (file);
+
   while (start < end)
     {
       unsigned char *hdrptr;
@@ -2806,6 +2845,12 @@ display_debug_aranges (struct dwarf_section *section,
       arange.ar_info_offset = byte_get (hdrptr, offset_size);
       hdrptr += offset_size;
 
+      if (num_debug_info_entries != DEBUG_INFO_UNAVAILABLE
+	  && num_debug_info_entries > 0
+	  && find_debug_info_for_offset (arange.ar_info_offset) == NULL)
+	warn (_(".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"),
+	      arange.ar_info_offset, section->name);
+
       arange.ar_pointer_size = byte_get (hdrptr, 1);
       hdrptr += 1;
 
@@ -2820,7 +2865,7 @@ display_debug_aranges (struct dwarf_section *section,
 
       printf (_("  Length:                   %ld\n"), arange.ar_length);
       printf (_("  Version:                  %d\n"), arange.ar_version);
-      printf (_("  Offset into .debug_info:  %lx\n"), arange.ar_info_offset);
+      printf (_("  Offset into .debug_info:  0x%lx\n"), arange.ar_info_offset);
       printf (_("  Pointer Size:             %d\n"), arange.ar_pointer_size);
       printf (_("  Segment Size:             %d\n"), arange.ar_segment_size);
 

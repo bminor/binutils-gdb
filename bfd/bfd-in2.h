@@ -140,8 +140,13 @@ typedef BFD_HOST_U_64_BIT symvalue;
 #define sprintf_vma(s,x) sprintf (s, "%016lx", x)
 #define fprintf_vma(f,x) fprintf (f, "%016lx", x)
 #elif BFD_HOST_64BIT_LONG_LONG
+#ifndef __MSVCRT__
 #define sprintf_vma(s,x) sprintf (s, "%016llx", x)
 #define fprintf_vma(f,x) fprintf (f, "%016llx", x)
+#else
+#define sprintf_vma(s,x) sprintf (s, "%016I64x", x)
+#define fprintf_vma(f,x) fprintf (f, "%016I64x", x)
+#endif
 #else
 #define _bfd_int64_low(x) ((unsigned long) (((x) & 0xffffffff)))
 #define _bfd_int64_high(x) ((unsigned long) (((x) >> 32) & 0xffffffff))

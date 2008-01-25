@@ -1,3 +1,8 @@
+2008-01-25  Kai Tietz  <kai.tietz@onevision.com>
+
+	* read.c: (emit_expr): Correct for mingw use of printf size 
+	specifier.
+
 2008-01-24  Bob Wilson  <bob.wilson@acm.org>
 	
 	* doc/c-xtensa.texi (Xtensa Syntax): Clarify handling of opcodes that

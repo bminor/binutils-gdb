@@ -4112,8 +4112,13 @@ emit_expr (expressionS *exp, unsigned int nbytes)
 	      || (get & hibit) == 0))
 	{		/* Leading bits contain both 0s & 1s.  */
 #if defined (BFD64) && BFD_HOST_64BIT_LONG_LONG
+#ifndef __MSVCRT__
 	  as_warn (_("value 0x%llx truncated to 0x%llx"),
 		   (unsigned long long) get, (unsigned long long) use);
+#else
+	  as_warn (_("value 0x%I64x truncated to 0x%I64x"),
+		   (unsigned long long) get, (unsigned long long) use);
+#endif
 #else
 	  as_warn (_("value 0x%lx truncated to 0x%lx"),
 		   (unsigned long) get, (unsigned long) use);

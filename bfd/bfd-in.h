@@ -1,7 +1,7 @@
 /* Main header file for the bfd library -- portable access to object files.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
@@ -133,8 +133,13 @@ typedef BFD_HOST_U_64_BIT symvalue;
 #define sprintf_vma(s,x) sprintf (s, "%016lx", x)
 #define fprintf_vma(f,x) fprintf (f, "%016lx", x)
 #elif BFD_HOST_64BIT_LONG_LONG
+#ifndef __MSVCRT__
 #define sprintf_vma(s,x) sprintf (s, "%016llx", x)
 #define fprintf_vma(f,x) fprintf (f, "%016llx", x)
+#else
+#define sprintf_vma(s,x) sprintf (s, "%016I64x", x)
+#define fprintf_vma(f,x) fprintf (f, "%016I64x", x)
+#endif
 #else
 #define _bfd_int64_low(x) ((unsigned long) (((x) & 0xffffffff)))
 #define _bfd_int64_high(x) ((unsigned long) (((x) >> 32) & 0xffffffff))
