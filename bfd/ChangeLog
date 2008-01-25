@@ -1,3 +1,7 @@
+2008-01-25  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (_bfd_m32c_elf_eh_frame_address_size): New.
+
 2008-01-25  Kai Tietz  <kai.tietz@onevision.com>
 
 	* bfd-in.h: Add mingw I64 support.

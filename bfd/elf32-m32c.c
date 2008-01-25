@@ -1985,6 +1985,16 @@ m32c_elf_relax_delete_bytes
   return TRUE;
 }
 
+/* This is for versions of gcc prior to 4.3.  */
+static unsigned int
+_bfd_m32c_elf_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+{
+  if ((elf_elfheader (abfd)->e_flags & EF_M32C_CPU_MASK) == EF_M32C_CPU_M16C)
+    return 2;
+  return 4;
+}
+
+
 
 #define ELF_ARCH		bfd_arch_m32c
 #define ELF_MACHINE_CODE	EM_M32C
@@ -2011,6 +2021,7 @@ m32c_elf_relax_delete_bytes
   m32c_elf_finish_dynamic_sections
 
 #define elf_backend_can_gc_sections		1
+#define elf_backend_eh_frame_address_size _bfd_m32c_elf_eh_frame_address_size
 
 #define bfd_elf32_bfd_reloc_type_lookup		m32c_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	m32c_reloc_name_lookup
