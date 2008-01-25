@@ -632,6 +632,51 @@ struct i386_insn i386_frame_setup_skip_insns[] =
   { 0 }
 };
 
+
+/* Check whether PC points to a no-op instruction.  */
+static CORE_ADDR
+i386_skip_noop (CORE_ADDR pc)
+{
+  gdb_byte op;
+  int check = 1;
+
+  read_memory_nobpt (pc, &op, 1);
+
+  while (check) 
+    {
+      check = 0;
+      /* Ignore `nop' instruction.  */
+      if (op == 0x90) 
+	{
+	  pc += 1;
+	  read_memory_nobpt (pc, &op, 1);
+	  check = 1;
+	}
+      /* Ignore no-op instruction `mov %edi, %edi'.
+	 Microsoft system dlls often start with
+	 a `mov %edi,%edi' instruction.
+	 The 5 bytes before the function start are
+	 filled with `nop' instructions.
+	 This pattern can be used for hot-patching:
+	 The `mov %edi, %edi' instruction can be replaced by a
+	 near jump to the location of the 5 `nop' instructions
+	 which can be replaced by a 32-bit jump to anywhere
+	 in the 32-bit address space.  */
+
+      else if (op == 0x8b)
+	{
+	  read_memory_nobpt (pc + 1, &op, 1);
+	  if (op == 0xff)
+	    {
+	      pc += 2;
+	      read_memory_nobpt (pc, &op, 1);
+	      check = 1;
+	    }
+	}
+    }
+  return pc; 
+}
+
 /* Check whether PC points at a code that sets up a new stack frame.
    If so, it updates CACHE and returns the address of the first
    instruction after the sequence that sets up the frame or LIMIT,
@@ -817,6 +862,7 @@ static CORE_ADDR
 i386_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 		       struct i386_frame_cache *cache)
 {
+  pc = i386_skip_noop (pc);
   pc = i386_follow_jump (pc);
   pc = i386_analyze_struct_return (pc, current_pc, cache);
   pc = i386_skip_probe (pc);
