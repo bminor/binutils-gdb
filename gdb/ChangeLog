@@ -1,3 +1,9 @@
+2008-01-24  Michael Snyder  <msnyder@specifix.com>
+
+	* procfs.c (procfs_xfer_partial): Comment, cut/paste error.
+	* win32-nat.c (win32_xfer_partial): Ditto.
+	* target.c (default_xfer_partial): Minor whitespace adjustment.
+
 2008-01-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* arm-tdep.c (arm_addr_bits_remove): In non 26-bit mode, don't

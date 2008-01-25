@@ -1330,8 +1330,8 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
 	  do_cleanups (cleanup);
 	}
       if (readbuf != NULL)
-	xfered = ops->deprecated_xfer_memory (offset, readbuf, len, 0/*read*/,
-					      NULL, ops);
+	xfered = ops->deprecated_xfer_memory (offset, readbuf, len, 
+					      0/*read*/, NULL, ops);
       if (xfered > 0)
 	return xfered;
       else if (xfered == 0 && errno == 0)

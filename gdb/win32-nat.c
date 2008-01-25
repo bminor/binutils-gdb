@@ -2037,7 +2037,7 @@ win32_xfer_partial (struct target_ops *ops, enum target_object object,
     case TARGET_OBJECT_MEMORY:
       if (readbuf)
 	return (*ops->deprecated_xfer_memory) (offset, readbuf,
-					       len, 0/*write*/, NULL, ops);
+					       len, 0/*read*/, NULL, ops);
       if (writebuf)
 	return (*ops->deprecated_xfer_memory) (offset, (gdb_byte *) writebuf,
 					       len, 1/*write*/, NULL, ops);
