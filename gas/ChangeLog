@@ -1,3 +1,10 @@
+2008-01-24  Bob Wilson  <bob.wilson@acm.org>
+	
+	* doc/c-xtensa.texi (Xtensa Syntax): Clarify handling of opcodes that
+	can only be encoded in FLIX instructions but are not specified as such.
+	(Xtensa Automatic Alignment): Remove obsolete comment about debugging
+	labels.
+	
 2008-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention new command line options for x86 targets.
