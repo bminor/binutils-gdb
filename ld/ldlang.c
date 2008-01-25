@@ -3390,19 +3390,26 @@ process_insert_statements (void)
 	  if (last_os != NULL)
 	    {
 	      asection *first_sec, *last_sec;
+	      struct lang_output_section_statement_struct **next;
 
 	      /* Snip out the output sections we are moving.  */
 	      first_os->prev->next = last_os->next;
 	      if (last_os->next == NULL)
-		lang_output_section_statement.tail
-		  = (union lang_statement_union **) &first_os->prev->next;
+		{
+		  next = &first_os->prev->next;
+		  lang_output_section_statement.tail
+		    = (lang_statement_union_type **) next;
+		}
 	      else
 		last_os->next->prev = first_os->prev;
 	      /* Add them in at the new position.  */
 	      last_os->next = where->next;
 	      if (where->next == NULL)
-		lang_output_section_statement.tail
-		  = (union lang_statement_union **) &last_os->next;
+		{
+		  next = &last_os->next;
+		  lang_output_section_statement.tail
+		    = (lang_statement_union_type **) next;
+		}
 	      else
 		where->next->prev = last_os;
 	      first_os->prev = where;

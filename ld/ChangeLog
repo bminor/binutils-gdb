@@ -1,3 +1,9 @@
+2008-01-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/5670
+	* ldlang.c (process_insert_statements): Silence gcc 4.1 alias
+	warning.
+
 2008-01-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld.texinfo (INSERT): Describe.
