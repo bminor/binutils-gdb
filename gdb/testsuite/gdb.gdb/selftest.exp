@@ -75,8 +75,16 @@ proc do_steps_and_nexts {} {
 		set description "step over execarg initialization"
 		set command "step"
 	    }
+	    -re ".*pidarg = NULL.*$gdb_prompt $" {
+		set description "step over pidarg initialization"
+		set command "step"
+	    }
 	    -re ".*corearg = NULL.*$gdb_prompt $" {
 		set description "step over corearg initialization"
+		set command "step"
+	    }
+	    -re ".*pid_or_core_arg = NULL.*$gdb_prompt $" {
+		set description "step over pid_or_core_arg initialization"
 		set command "step"
 	    }
 	    -re ".*cdarg = NULL.*$gdb_prompt $" {
