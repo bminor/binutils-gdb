@@ -1,3 +1,11 @@
+2008-01-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/loadaddr.t: New, extracted from..
+	* ld-elf/loadaddr1.t: ..here.  Use insert.
+	* ld-elf/loadaddr2.t: Likewise.
+	* ld-elf/loadaddr1.d: Update.
+	* ld-elf/loadaddr2.d: Update.
+
 2008-01-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl.lnk: Delete overlay.

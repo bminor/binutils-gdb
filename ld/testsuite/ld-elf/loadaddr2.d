@@ -1,5 +1,5 @@
 #source: loadaddr.s
-#ld: -T loadaddr2.t -z max-page-size=0x200000
+#ld: -T loadaddr2.t -T loadaddr.t -z max-page-size=0x200000
 #readelf: -l --wide
 #target: *-*-linux*
 
