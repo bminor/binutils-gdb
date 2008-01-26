@@ -176,17 +176,6 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	  if (obj == NULL)
 	    return false;
 
-	  // We don't have a way to record a non-archive in an input
-	  // group.  If this is an ordinary object file, we can't
-	  // include it more than once anyhow.  If this is a dynamic
-	  // object, then including it a second time changes nothing.
-	  if (this->input_group_ != NULL && !obj->is_dynamic())
-	    {
-	      gold_error(_("%s: ordinary object found in input group"),
-			 input_file->name());
-	      return false;
-	    }
-
 	  Read_symbols_data* sd = new Read_symbols_data;
 	  obj->read_symbols(sd);
 
