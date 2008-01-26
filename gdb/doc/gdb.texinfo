@@ -5051,9 +5051,10 @@ source files.
 
 Here @var{address} may be any expression valid in the current working
 language (@pxref{Languages, working language}) that specifies a code
-address.  As a convenience, @value{GDBN} extends the semantics of
-expressions used in locations to cover the situations that frequently
-happen during debugging.  Here are the various forms of @var{address}:
+address.  In addition, as a convenience, @value{GDBN} extends the
+semantics of expressions used in locations to cover the situations
+that frequently happen during debugging.  Here are the various forms
+of @var{address}:
 
 @table @code
 @item @var{expression}
