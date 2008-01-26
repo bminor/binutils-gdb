@@ -46,7 +46,6 @@ class Input_argument;
 class Input_objects;
 class Input_group;
 class Input_file;
-class Target;
 class Task_token;
 class Workqueue;
 struct Version_dependency_list;
@@ -179,7 +178,7 @@ class Symbol_assignment
 
   // Add the symbol to the symbol table.
   void
-  add_to_table(Symbol_table*, const Target*);
+  add_to_table(Symbol_table*);
 
   // Finalize the symbol value.
   void finalize(Symbol_table*, const Layout*);
@@ -273,7 +272,7 @@ class Script_options
 
   // Add all symbol definitions to the symbol table.
   void
-  add_symbols_to_table(Symbol_table*, const Target*);
+  add_symbols_to_table(Symbol_table*);
 
   // Finalize the symbol values.
   void

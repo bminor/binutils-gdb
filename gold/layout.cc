@@ -528,8 +528,7 @@ Layout::layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags)
 // relocs.
 
 void
-Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
-					Symbol_table* symtab)
+Layout::create_initial_dynamic_sections(Symbol_table* symtab)
 {
   if (parameters->doing_static_link())
     return;
@@ -540,8 +539,7 @@ Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
 						     (elfcpp::SHF_ALLOC
 						      | elfcpp::SHF_WRITE));
 
-  symtab->define_in_output_data(input_objects->target(), "_DYNAMIC", NULL,
-				this->dynamic_section_, 0, 0,
+  symtab->define_in_output_data("_DYNAMIC", NULL, this->dynamic_section_, 0, 0,
 				elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
 				elfcpp::STV_HIDDEN, 0, false, false);
 
@@ -555,7 +553,7 @@ Layout::create_initial_dynamic_sections(const Input_objects* input_objects,
 // extension.
 
 void
-Layout::define_section_symbols(Symbol_table* symtab, const Target* target)
+Layout::define_section_symbols(Symbol_table* symtab)
 {
   for (Section_list::const_iterator p = this->section_list_.begin();
        p != this->section_list_.end();
@@ -573,8 +571,7 @@ Layout::define_section_symbols(Symbol_table* symtab, const Target* target)
 	  const std::string start_name("__start_" + name_string);
 	  const std::string stop_name("__stop_" + name_string);
 
-	  symtab->define_in_output_data(target,
-					start_name.c_str(),
+	  symtab->define_in_output_data(start_name.c_str(),
 					NULL, // version
 					*p,
 					0, // value
@@ -586,8 +583,7 @@ Layout::define_section_symbols(Symbol_table* symtab, const Target* target)
 					false, // offset_is_from_end
 					false); // only_if_ref
 
-	  symtab->define_in_output_data(target,
-					stop_name.c_str(),
+	  symtab->define_in_output_data(stop_name.c_str(),
 					NULL, // version
 					*p,
 					0, // value
@@ -684,7 +680,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
       std::vector<Symbol*> dynamic_symbols;
       unsigned int local_dynamic_count;
       Versions versions(this->options_, &this->dynpool_);
-      this->create_dynamic_symtab(input_objects, target, symtab, &dynstr,
+      this->create_dynamic_symtab(input_objects, symtab, &dynstr,
 				  &local_dynamic_count, &dynamic_symbols,
 				  &versions);
 
@@ -1373,7 +1369,7 @@ Layout::create_shdrs(off_t* poff)
 
 void
 Layout::create_dynamic_symtab(const Input_objects* input_objects,
-                              const Target* target, Symbol_table* symtab,
+                              Symbol_table* symtab,
 			      Output_section **pdynstr,
 			      unsigned int* plocal_dynamic_count,
 			      std::vector<Symbol*>* pdynamic_symbols,
@@ -1414,7 +1410,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 
   // FIXME: We have to tell set_dynsym_indexes whether the
   // -E/--export-dynamic option was used.
-  index = symtab->set_dynsym_indexes(target, index, pdynamic_symbols,
+  index = symtab->set_dynsym_indexes(index, pdynamic_symbols,
 				     &this->dynpool_, pversions);
 
   int symsize;

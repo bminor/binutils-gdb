@@ -29,7 +29,7 @@ namespace gold
 {
 
 extern void
-define_standard_symbols(Symbol_table*, const Layout*, Target*);
+define_standard_symbols(Symbol_table*, const Layout*);
 
 } // End namespace gold.
 

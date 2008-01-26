@@ -474,7 +474,7 @@ class Versions
   // for the next dynamic symbol.  We add new dynamic symbols to SYMS
   // and return an updated DYNSYM_INDEX.
   unsigned int
-  finalize(const Target*, Symbol_table* symtab, unsigned int dynsym_index,
+  finalize(Symbol_table* symtab, unsigned int dynsym_index,
 	   std::vector<Symbol*>* syms);
 
   // Return whether there are any version definitions.

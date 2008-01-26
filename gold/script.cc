@@ -894,11 +894,10 @@ class Script_unblock : public Task
 // been finalized.
 
 void
-Symbol_assignment::add_to_table(Symbol_table* symtab, const Target* target)
+Symbol_assignment::add_to_table(Symbol_table* symtab)
 {
   elfcpp::STV vis = this->hidden_ ? elfcpp::STV_HIDDEN : elfcpp::STV_DEFAULT;
-  this->sym_ = symtab->define_as_constant(target,
-					  this->name_.c_str(),
+  this->sym_ = symtab->define_as_constant(this->name_.c_str(),
 					  NULL, // version
 					  0, // value
 					  0, // size
@@ -1036,13 +1035,12 @@ Script_options::add_assertion(Expression* check, const char* message,
 // Add any symbols we are defining to the symbol table.
 
 void
-Script_options::add_symbols_to_table(Symbol_table* symtab,
-				     const Target* target)
+Script_options::add_symbols_to_table(Symbol_table* symtab)
 {
   for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
        p != this->symbol_assignments_.end();
        ++p)
-    (*p)->add_to_table(symtab, target);
+    (*p)->add_to_table(symtab);
 }
 
 // Finalize symbol values.

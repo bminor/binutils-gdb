@@ -358,7 +358,7 @@ Target_i386::got_section(Symbol_table* symtab, Layout* layout)
       this->got_plt_->set_current_data_size(3 * 4);
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
-      symtab->define_in_output_data(this, "_GLOBAL_OFFSET_TABLE_", NULL,
+      symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
 				    this->got_plt_,
 				    0, 0, elfcpp::STT_OBJECT,
 				    elfcpp::STB_LOCAL,
@@ -735,7 +735,7 @@ Target_i386::copy_reloc(const General_options* options,
       section_size_type offset = dynbss_size;
       dynbss->set_current_data_size(dynbss_size + symsize);
 
-      symtab->define_with_copy_reloc(this, ssym, dynbss, offset);
+      symtab->define_with_copy_reloc(ssym, dynbss, offset);
 
       // Add the COPY reloc.
       Reloc_section* rel_dyn = this->rel_dyn_section(layout);

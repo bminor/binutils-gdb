@@ -137,16 +137,16 @@ class Layout
 
   // Create dynamic sections if necessary.
   void
-  create_initial_dynamic_sections(const Input_objects*, Symbol_table*);
+  create_initial_dynamic_sections(Symbol_table*);
 
   // Define __start and __stop symbols for output sections.
   void
-  define_section_symbols(Symbol_table*, const Target*);
+  define_section_symbols(Symbol_table*);
 
   // Define symbols from any linker script.
   void
-  define_script_symbols(Symbol_table* symtab, const Target* target)
-  { this->script_options_->add_symbols_to_table(symtab, target); }
+  define_script_symbols(Symbol_table* symtab)
+  { this->script_options_->add_symbols_to_table(symtab); }
 
   // Return the Stringpool used for symbol names.
   const Stringpool*
@@ -319,8 +319,8 @@ class Layout
 
   // Create the dynamic symbol table.
   void
-  create_dynamic_symtab(const Input_objects*, const Target*,
-                        Symbol_table*, Output_section** pdynstr,
+  create_dynamic_symtab(const Input_objects*, Symbol_table*,
+			Output_section** pdynstr,
 			unsigned int* plocal_dynamic_count,
 			std::vector<Symbol*>* pdynamic_symbols,
 			Versions* versions);

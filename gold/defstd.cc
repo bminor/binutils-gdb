@@ -249,11 +249,10 @@ namespace gold
 {
 
 void
-define_standard_symbols(Symbol_table* symtab, const Layout* layout,
-			Target* target)
+define_standard_symbols(Symbol_table* symtab, const Layout* layout)
 {
-  symtab->define_symbols(layout, target, in_section_count, in_section);
-  symtab->define_symbols(layout, target, in_segment_count, in_segment);
+  symtab->define_symbols(layout, in_section_count, in_section);
+  symtab->define_symbols(layout, in_segment_count, in_segment);
 }
 
 } // End namespace gold.

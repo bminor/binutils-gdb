@@ -939,8 +939,8 @@ Symbol_table::record_weak_aliases(std::vector<Sized_symbol<size>*>* symbols)
 
 template<int size, bool big_endian>
 Sized_symbol<size>*
-Symbol_table::define_special_symbol(const Target* target, const char** pname,
-				    const char** pversion, bool only_if_ref,
+Symbol_table::define_special_symbol(const char** pname, const char** pversion,
+				    bool only_if_ref,
                                     Sized_symbol<size>** poldsym
                                     ACCEPT_SIZE_ENDIAN)
 {
@@ -999,6 +999,7 @@ Symbol_table::define_special_symbol(const Target* target, const char** pname,
 	}
     }
 
+  const Target* target = parameters->target();
   if (!target->has_make_symbol())
     sym = new Sized_symbol<size>();
   else
@@ -1027,10 +1028,13 @@ Symbol_table::define_special_symbol(const Target* target, const char** pname,
 // Define a symbol based on an Output_data.
 
 Symbol*
-Symbol_table::define_in_output_data(const Target* target, const char* name,
-				    const char* version, Output_data* od,
-				    uint64_t value, uint64_t symsize,
-				    elfcpp::STT type, elfcpp::STB binding,
+Symbol_table::define_in_output_data(const char* name,
+				    const char* version,
+				    Output_data* od,
+				    uint64_t value,
+				    uint64_t symsize,
+				    elfcpp::STT type,
+				    elfcpp::STB binding,
 				    elfcpp::STV visibility,
 				    unsigned char nonvis,
 				    bool offset_is_from_end,
@@ -1039,7 +1043,7 @@ Symbol_table::define_in_output_data(const Target* target, const char* name,
   if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      return this->do_define_in_output_data<32>(target, name, version, od,
+      return this->do_define_in_output_data<32>(name, version, od,
                                                 value, symsize, type, binding,
                                                 visibility, nonvis,
                                                 offset_is_from_end,
@@ -1051,7 +1055,7 @@ Symbol_table::define_in_output_data(const Target* target, const char* name,
   else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      return this->do_define_in_output_data<64>(target, name, version, od,
+      return this->do_define_in_output_data<64>(name, version, od,
                                                 value, symsize, type, binding,
                                                 visibility, nonvis,
                                                 offset_is_from_end,
@@ -1069,7 +1073,6 @@ Symbol_table::define_in_output_data(const Target* target, const char* name,
 template<int size>
 Sized_symbol<size>*
 Symbol_table::do_define_in_output_data(
-    const Target* target,
     const char* name,
     const char* version,
     Output_data* od,
@@ -1089,7 +1092,7 @@ Symbol_table::do_define_in_output_data(
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-          target, &name, &version, only_if_ref, &oldsym
+          &name, &version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, true));
 #else
       gold_unreachable();
@@ -1099,7 +1102,7 @@ Symbol_table::do_define_in_output_data(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-          target, &name, &version, only_if_ref, &oldsym
+          &name, &version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, false));
 #else
       gold_unreachable();
@@ -1130,10 +1133,12 @@ Symbol_table::do_define_in_output_data(
 // Define a symbol based on an Output_segment.
 
 Symbol*
-Symbol_table::define_in_output_segment(const Target* target, const char* name,
+Symbol_table::define_in_output_segment(const char* name,
 				       const char* version, Output_segment* os,
-				       uint64_t value, uint64_t symsize,
-				       elfcpp::STT type, elfcpp::STB binding,
+				       uint64_t value,
+				       uint64_t symsize,
+				       elfcpp::STT type,
+				       elfcpp::STB binding,
 				       elfcpp::STV visibility,
 				       unsigned char nonvis,
 				       Symbol::Segment_offset_base offset_base,
@@ -1142,7 +1147,7 @@ Symbol_table::define_in_output_segment(const Target* target, const char* name,
   if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      return this->do_define_in_output_segment<32>(target, name, version, os,
+      return this->do_define_in_output_segment<32>(name, version, os,
                                                    value, symsize, type,
                                                    binding, visibility, nonvis,
                                                    offset_base, only_if_ref);
@@ -1153,7 +1158,7 @@ Symbol_table::define_in_output_segment(const Target* target, const char* name,
   else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      return this->do_define_in_output_segment<64>(target, name, version, os,
+      return this->do_define_in_output_segment<64>(name, version, os,
                                                    value, symsize, type,
                                                    binding, visibility, nonvis,
                                                    offset_base, only_if_ref);
@@ -1170,7 +1175,6 @@ Symbol_table::define_in_output_segment(const Target* target, const char* name,
 template<int size>
 Sized_symbol<size>*
 Symbol_table::do_define_in_output_segment(
-    const Target* target,
     const char* name,
     const char* version,
     Output_segment* os,
@@ -1190,7 +1194,7 @@ Symbol_table::do_define_in_output_segment(
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-          target, &name, &version, only_if_ref, &oldsym
+          &name, &version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, true));
 #else
       gold_unreachable();
@@ -1200,7 +1204,7 @@ Symbol_table::do_define_in_output_segment(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-          target, &name, &version, only_if_ref, &oldsym
+          &name, &version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, false));
 #else
       gold_unreachable();
@@ -1232,16 +1236,20 @@ Symbol_table::do_define_in_output_segment(
 // definition error if this symbol is already defined.
 
 Symbol*
-Symbol_table::define_as_constant(const Target* target, const char* name,
-				 const char* version, uint64_t value,
-				 uint64_t symsize, elfcpp::STT type,
-				 elfcpp::STB binding, elfcpp::STV visibility,
-				 unsigned char nonvis, bool only_if_ref)
+Symbol_table::define_as_constant(const char* name,
+				 const char* version,
+				 uint64_t value,
+				 uint64_t symsize,
+				 elfcpp::STT type,
+				 elfcpp::STB binding,
+				 elfcpp::STV visibility,
+				 unsigned char nonvis,
+				 bool only_if_ref)
 {
   if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      return this->do_define_as_constant<32>(target, name, version, value,
+      return this->do_define_as_constant<32>(name, version, value,
                                              symsize, type, binding,
                                              visibility, nonvis, only_if_ref);
 #else
@@ -1251,7 +1259,7 @@ Symbol_table::define_as_constant(const Target* target, const char* name,
   else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      return this->do_define_as_constant<64>(target, name, version, value,
+      return this->do_define_as_constant<64>(name, version, value,
                                              symsize, type, binding,
                                              visibility, nonvis, only_if_ref);
 #else
@@ -1267,7 +1275,6 @@ Symbol_table::define_as_constant(const Target* target, const char* name,
 template<int size>
 Sized_symbol<size>*
 Symbol_table::do_define_as_constant(
-    const Target* target,
     const char* name,
     const char* version,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
@@ -1285,7 +1292,7 @@ Symbol_table::do_define_as_constant(
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-          target, &name, &version, only_if_ref, &oldsym
+          &name, &version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, true));
 #else
       gold_unreachable();
@@ -1295,7 +1302,7 @@ Symbol_table::do_define_as_constant(
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
       sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-          target, &name, &version, only_if_ref, &oldsym
+          &name, &version, only_if_ref, &oldsym
           SELECT_SIZE_ENDIAN(size, false));
 #else
       gold_unreachable();
@@ -1325,19 +1332,19 @@ Symbol_table::do_define_as_constant(
 // Define a set of symbols in output sections.
 
 void
-Symbol_table::define_symbols(const Layout* layout, const Target* target,
-			     int count, const Define_symbol_in_section* p)
+Symbol_table::define_symbols(const Layout* layout, int count,
+			     const Define_symbol_in_section* p)
 {
   for (int i = 0; i < count; ++i, ++p)
     {
       Output_section* os = layout->find_output_section(p->output_section);
       if (os != NULL)
-	this->define_in_output_data(target, p->name, NULL, os, p->value,
+	this->define_in_output_data(p->name, NULL, os, p->value,
 				    p->size, p->type, p->binding,
 				    p->visibility, p->nonvis,
 				    p->offset_is_from_end, p->only_if_ref);
       else
-	this->define_as_constant(target, p->name, NULL, 0, p->size, p->type,
+	this->define_as_constant(p->name, NULL, 0, p->size, p->type,
 				 p->binding, p->visibility, p->nonvis,
 				 p->only_if_ref);
     }
@@ -1346,8 +1353,8 @@ Symbol_table::define_symbols(const Layout* layout, const Target* target,
 // Define a set of symbols in output segments.
 
 void
-Symbol_table::define_symbols(const Layout* layout, const Target* target,
-			     int count, const Define_symbol_in_segment* p)
+Symbol_table::define_symbols(const Layout* layout, int count,
+			     const Define_symbol_in_segment* p)
 {
   for (int i = 0; i < count; ++i, ++p)
     {
@@ -1355,12 +1362,12 @@ Symbol_table::define_symbols(const Layout* layout, const Target* target,
 						       p->segment_flags_set,
 						       p->segment_flags_clear);
       if (os != NULL)
-	this->define_in_output_segment(target, p->name, NULL, os, p->value,
+	this->define_in_output_segment(p->name, NULL, os, p->value,
 				       p->size, p->type, p->binding,
 				       p->visibility, p->nonvis,
 				       p->offset_base, p->only_if_ref);
       else
-	this->define_as_constant(target, p->name, NULL, 0, p->size, p->type,
+	this->define_as_constant(p->name, NULL, 0, p->size, p->type,
 				 p->binding, p->visibility, p->nonvis,
 				 p->only_if_ref);
     }
@@ -1373,7 +1380,6 @@ Symbol_table::define_symbols(const Layout* layout, const Target* target,
 template<int size>
 void
 Symbol_table::define_with_copy_reloc(
-    const Target* target,
     Sized_symbol<size>* csym,
     Output_data* posd,
     typename elfcpp::Elf_types<size>::Elf_Addr value)
@@ -1390,7 +1396,7 @@ Symbol_table::define_with_copy_reloc(
   if (binding == elfcpp::STB_WEAK)
     binding = elfcpp::STB_GLOBAL;
 
-  this->define_in_output_data(target, csym->name(), csym->version(),
+  this->define_in_output_data(csym->name(), csym->version(),
 			      posd, value, csym->symsize(),
 			      csym->type(), binding,
 			      csym->visibility(), csym->nonvis(),
@@ -1438,8 +1444,7 @@ Symbol_table::get_copy_source(const Symbol* sym) const
 // updated dynamic symbol index.
 
 unsigned int
-Symbol_table::set_dynsym_indexes(const Target* target,
-				 unsigned int index,
+Symbol_table::set_dynsym_indexes(unsigned int index,
 				 std::vector<Symbol*>* syms,
 				 Stringpool* dynpool,
 				 Versions* versions)
@@ -1471,7 +1476,7 @@ Symbol_table::set_dynsym_indexes(const Target* target,
 
   // Finish up the versions.  In some cases this may add new dynamic
   // symbols.
-  index = versions->finalize(target, this, index, syms);
+  index = versions->finalize(this, index, syms);
 
   return index;
 }
@@ -2280,7 +2285,6 @@ Symbol_table::add_from_dynobj<64, true>(
 template
 void
 Symbol_table::define_with_copy_reloc<32>(
-    const Target* target,
     Sized_symbol<32>* sym,
     Output_data* posd,
     elfcpp::Elf_types<32>::Elf_Addr value);
@@ -2290,7 +2294,6 @@ Symbol_table::define_with_copy_reloc<32>(
 template
 void
 Symbol_table::define_with_copy_reloc<64>(
-    const Target* target,
     Sized_symbol<64>* sym,
     Output_data* posd,
     elfcpp::Elf_types<64>::Elf_Addr value);

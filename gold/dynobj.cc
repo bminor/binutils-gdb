@@ -1415,8 +1415,8 @@ Versions::add_need(Stringpool* dynpool, const char* filename, const char* name,
 // each new version definition.
 
 unsigned int
-Versions::finalize(const Target* target, Symbol_table* symtab,
-		   unsigned int dynsym_index, std::vector<Symbol*>* syms)
+Versions::finalize(Symbol_table* symtab, unsigned int dynsym_index,
+		   std::vector<Symbol*>* syms)
 {
   gold_assert(!this->is_finalized_);
 
@@ -1432,7 +1432,7 @@ Versions::finalize(const Target* target, Symbol_table* symtab,
       // Create a version symbol if necessary.
       if (!(*p)->is_symbol_created())
 	{
-	  Symbol* vsym = symtab->define_as_constant(target, (*p)->name(),
+	  Symbol* vsym = symtab->define_as_constant((*p)->name(),
 						    (*p)->name(), 0, 0,
 						    elfcpp::STT_OBJECT,
 						    elfcpp::STB_GLOBAL,
