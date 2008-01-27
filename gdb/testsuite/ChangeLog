@@ -1,5 +1,7 @@
 2008-01-27  Jim Blandy  <jimb@codesourcery.com>
 
+	* gdb.base/expand-psymtabs.exp: Doc fix to the doc fix.
+
 	* gdb.base/expand-psymtabs.exp: Doc fix.
 
 2008-01-26  Mark Kettenis  <kettenis@gnu.org>

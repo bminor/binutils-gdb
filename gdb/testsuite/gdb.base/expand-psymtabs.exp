@@ -26,7 +26,7 @@ if $tracelevel then {
 # different preprocessor symbols #defined; the first .o only has
 # 'main' at some earlier source lines, while the second .o only has
 # 'foo' at later source lines.  So when setting breakpoints by line
-# number, which full symtab we need dependings on the line number in
+# number, which full symtab we need depends on the line number in
 # question.
 #
 # This test is meant to verify that, even with lazy partial symtab
