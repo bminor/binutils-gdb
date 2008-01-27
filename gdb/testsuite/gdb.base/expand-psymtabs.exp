@@ -20,7 +20,18 @@ if $tracelevel then {
     strace $tracelevel
 }
 
-# Test expanding partial symtabs when needed.
+# It's possible to have a program that contains two compilation units
+# for the same source file name, that have code at different lines.
+# For example, in this test, we compile expand-psymtabs.c twice with
+# different preprocessor symbols #defined; the first .o only has
+# 'main' at some earlier source lines, while the second .o only has
+# 'foo' at later source lines.  So when setting breakpoints by line
+# number, which full symtab we need dependings on the line number in
+# question.
+#
+# This test is meant to verify that, even with lazy partial symtab
+# reading in effect, GDB can set breakpoints by line number
+# successfully in either compilation unit.  
 
 set testfile expand-psymtabs
 set srcfile ${testfile}.c
