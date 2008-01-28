@@ -1,3 +1,7 @@
+2008-01-28  Doug Evans  <dje@google.com>
+
+	* dbxread.c (read_dbx_symtab): Fix indentation.
+
 2008-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* fork-child.c (SHELL_FILE): Remove #ifndef.

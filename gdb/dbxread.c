@@ -1312,52 +1312,52 @@ read_dbx_symtab (struct objfile *objfile)
 
       switch (nlist.n_type)
 	{
-	  char *p;
+	char *p;
 	  /*
 	   * Standard, external, non-debugger, symbols
 	   */
 
-	  case N_TEXT | N_EXT:
-	  case N_NBTEXT | N_EXT:
+	case N_TEXT | N_EXT:
+	case N_NBTEXT | N_EXT:
 	  nlist.n_value += ANOFFSET (objfile->section_offsets,
 				     SECT_OFF_TEXT (objfile));
 	  goto record_it;
 
-	  case N_DATA | N_EXT:
-	  case N_NBDATA | N_EXT:
+	case N_DATA | N_EXT:
+	case N_NBDATA | N_EXT:
 	  nlist.n_value += ANOFFSET (objfile->section_offsets,
 				     SECT_OFF_DATA (objfile));
 	  goto record_it;
 
-	  case N_BSS:
-	  case N_BSS | N_EXT:
-	  case N_NBBSS | N_EXT:
-	  case N_SETV | N_EXT:		/* FIXME, is this in BSS? */
+	case N_BSS:
+	case N_BSS | N_EXT:
+	case N_NBBSS | N_EXT:
+	case N_SETV | N_EXT:		/* FIXME, is this in BSS? */
 	  nlist.n_value += ANOFFSET (objfile->section_offsets,
 				     SECT_OFF_BSS (objfile));
 	  goto record_it;
 
-	  case N_ABS | N_EXT:
+	case N_ABS | N_EXT:
 	  record_it:
 	  namestring = set_namestring (objfile, nlist);
 
-	  bss_ext_symbol:
+	bss_ext_symbol:
 	  record_minimal_symbol (namestring, nlist.n_value,
 				 nlist.n_type, objfile);	/* Always */
 	  continue;
 
 	  /* Standard, local, non-debugger, symbols */
 
-	  case N_NBTEXT:
+	case N_NBTEXT:
 
 	  /* We need to be able to deal with both N_FN or N_TEXT,
 	     because we have no way of knowing whether the sys-supplied ld
 	     or GNU ld was used to make the executable.  Sequents throw
 	     in another wrinkle -- they renumbered N_FN.  */
 
-	  case N_FN:
-	  case N_FN_SEQ:
-	  case N_TEXT:
+	case N_FN:
+	case N_FN_SEQ:
+	case N_TEXT:
 	  nlist.n_value += ANOFFSET (objfile->section_offsets,
 				     SECT_OFF_TEXT (objfile));
 	  namestring = set_namestring (objfile, nlist);
@@ -1365,78 +1365,78 @@ read_dbx_symtab (struct objfile *objfile)
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
 	      || (namestring[(nsl = strlen (namestring)) - 1] == 'o'
 		  && namestring[nsl - 2] == '.'))
-	  {
-	    if (past_first_source_file && pst
-		/* The gould NP1 uses low values for .o and -l symbols
-		   which are not the address.  */
-		&& nlist.n_value >= pst->textlow)
-	      {
-		end_psymtab (pst, psymtab_include_list, includes_used,
-			     symnum * symbol_size,
-			     nlist.n_value > pst->texthigh
-			     ? nlist.n_value : pst->texthigh,
-			     dependency_list, dependencies_used,
-			     textlow_not_set);
-		pst = (struct partial_symtab *) 0;
-		includes_used = 0;
-		dependencies_used = 0;
-	      }
-	    else
-	      past_first_source_file = 1;
-	    last_o_file_start = nlist.n_value;
-	  }
+	    {
+	      if (past_first_source_file && pst
+		  /* The gould NP1 uses low values for .o and -l symbols
+		     which are not the address.  */
+		  && nlist.n_value >= pst->textlow)
+		{
+		  end_psymtab (pst, psymtab_include_list, includes_used,
+			       symnum * symbol_size,
+			       nlist.n_value > pst->texthigh
+			       ? nlist.n_value : pst->texthigh,
+			       dependency_list, dependencies_used,
+			       textlow_not_set);
+		  pst = (struct partial_symtab *) 0;
+		  includes_used = 0;
+		  dependencies_used = 0;
+		}
+	      else
+		past_first_source_file = 1;
+	      last_o_file_start = nlist.n_value;
+	    }
 	  else
-	  goto record_it;
+	    goto record_it;
 	  continue;
 
-	  case N_DATA:
+	case N_DATA:
 	  nlist.n_value += ANOFFSET (objfile->section_offsets,
 				     SECT_OFF_DATA (objfile));
 	  goto record_it;
 
-	  case N_UNDF | N_EXT:
+	case N_UNDF | N_EXT:
 	  if (nlist.n_value != 0)
-	  {
-	    /* This is a "Fortran COMMON" symbol.  See if the target
-	       environment knows where it has been relocated to.  */
+	    {
+	      /* This is a "Fortran COMMON" symbol.  See if the target
+		 environment knows where it has been relocated to.  */
 
-	    CORE_ADDR reladdr;
+	      CORE_ADDR reladdr;
 
-	    namestring = set_namestring (objfile, nlist);
-	    if (target_lookup_symbol (namestring, &reladdr))
-	      {
-		continue;	/* Error in lookup; ignore symbol for now.  */
-	      }
-	    nlist.n_type ^= (N_BSS ^ N_UNDF);	/* Define it as a bss-symbol */
-	    nlist.n_value = reladdr;
-	    goto bss_ext_symbol;
-	  }
+	      namestring = set_namestring (objfile, nlist);
+	      if (target_lookup_symbol (namestring, &reladdr))
+		{
+		  continue;	/* Error in lookup; ignore symbol for now.  */
+		}
+	      nlist.n_type ^= (N_BSS ^ N_UNDF);	/* Define it as a bss-symbol */
+	      nlist.n_value = reladdr;
+	      goto bss_ext_symbol;
+	    }
 	  continue;			/* Just undefined, not COMMON */
 
-	  case N_UNDF:
+	case N_UNDF:
 	  if (processing_acc_compilation && nlist.n_strx == 1)
-	  {
-	    /* Deal with relative offsets in the string table
-	       used in ELF+STAB under Solaris.  If we want to use the
-	       n_strx field, which contains the name of the file,
-	       we must adjust file_string_table_offset *before* calling
-	       set_namestring().  */
-	    past_first_source_file = 1;
-	    file_string_table_offset = next_file_string_table_offset;
-	    next_file_string_table_offset =
-	      file_string_table_offset + nlist.n_value;
-	    if (next_file_string_table_offset < file_string_table_offset)
-	      error (_("string table offset backs up at %d"), symnum);
-	    /* FIXME -- replace error() with complaint.  */
-	    continue;
-	  }
+	    {
+	      /* Deal with relative offsets in the string table
+		 used in ELF+STAB under Solaris.  If we want to use the
+		 n_strx field, which contains the name of the file,
+		 we must adjust file_string_table_offset *before* calling
+		 set_namestring().  */
+	      past_first_source_file = 1;
+	      file_string_table_offset = next_file_string_table_offset;
+	      next_file_string_table_offset =
+		file_string_table_offset + nlist.n_value;
+	      if (next_file_string_table_offset < file_string_table_offset)
+		error (_("string table offset backs up at %d"), symnum);
+	      /* FIXME -- replace error() with complaint.  */
+	      continue;
+	    }
 	  continue;
 
 	  /* Lots of symbol types we can just ignore.  */
 
-	  case N_ABS:
-	  case N_NBDATA:
-	  case N_NBBSS:
+	case N_ABS:
+	case N_NBDATA:
+	case N_NBBSS:
 	  continue;
 
 	  /* Keep going . . . */
@@ -1444,24 +1444,24 @@ read_dbx_symtab (struct objfile *objfile)
 	  /*
 	   * Special symbol types for GNU
 	   */
-	  case N_INDR:
-	  case N_INDR | N_EXT:
-	  case N_SETA:
-	  case N_SETA | N_EXT:
-	  case N_SETT:
-	  case N_SETT | N_EXT:
-	  case N_SETD:
-	  case N_SETD | N_EXT:
-	  case N_SETB:
-	  case N_SETB | N_EXT:
-	  case N_SETV:
+	case N_INDR:
+	case N_INDR | N_EXT:
+	case N_SETA:
+	case N_SETA | N_EXT:
+	case N_SETT:
+	case N_SETT | N_EXT:
+	case N_SETD:
+	case N_SETD | N_EXT:
+	case N_SETB:
+	case N_SETB | N_EXT:
+	case N_SETV:
 	  continue;
 
 	  /*
 	   * Debugger symbols
 	   */
 
-	  case N_SO:
+	case N_SO:
 	  {
 	    CORE_ADDR valu;
 	    static int prev_so_symnum = -10;
@@ -1537,18 +1537,18 @@ read_dbx_symtab (struct objfile *objfile)
 
 	    if (!pst)
 	      {
-	      pst = start_psymtab (objfile,
-				   namestring, valu,
-				   first_so_symnum * symbol_size,
-				   objfile->global_psymbols.next,
-				   objfile->static_psymbols.next);
+		pst = start_psymtab (objfile,
+				     namestring, valu,
+				     first_so_symnum * symbol_size,
+				     objfile->global_psymbols.next,
+				     objfile->static_psymbols.next);
 		pst->dirname = dirname_nso;
 		dirname_nso = NULL;
 	      }
 	    continue;
 	  }
 
-	  case N_BINCL:
+	case N_BINCL:
 	  {
 	    enum language tmp_language;
 	    /* Add this bincl to the bincl_list for future EXCLs.  No
@@ -1568,15 +1568,15 @@ read_dbx_symtab (struct objfile *objfile)
 	      psymtab_language = tmp_language;
 
 	    if (pst == NULL)
-	    {
-	      /* FIXME: we should not get here without a PST to work on.
-		 Attempt to recover.  */
-	      complaint (&symfile_complaints,
-			 _("N_BINCL %s not in entries for any file, at symtab \
+	      {
+		/* FIXME: we should not get here without a PST to work on.
+		   Attempt to recover.  */
+		complaint (&symfile_complaints,
+			   _("N_BINCL %s not in entries for any file, at symtab \
 pos %d"),
-			 namestring, symnum);
-	      continue;
-	    }
+			   namestring, symnum);
+		continue;
+	      }
 	    add_bincl_to_list (pst, namestring, nlist.n_value);
 
 	    /* Mark down an include file in the current psymtab */
@@ -1584,7 +1584,7 @@ pos %d"),
 	    goto record_include_file;
 	  }
 
-	  case N_SOL:
+	case N_SOL:
 	  {
 	    enum language tmp_language;
 	    /* Mark down an include file in the current psymtab */
@@ -1612,7 +1612,7 @@ pos %d"),
 	       suppose the psymtab_include_list could be hashed or put
 	       in a binary tree, if profiling shows this is a major hog).  */
 	    if (pst && strcmp (namestring, pst->filename) == 0)
-	    continue;
+	      continue;
 	    {
 	      int i;
 	      for (i = 0; i < includes_used; i++)
@@ -1625,58 +1625,58 @@ pos %d"),
 		continue;
 	    }
 
-	    record_include_file:
+	  record_include_file:
 
 	    psymtab_include_list[includes_used++] = namestring;
 	    if (includes_used >= includes_allocated)
-	    {
-	      char **orig = psymtab_include_list;
+	      {
+		char **orig = psymtab_include_list;
 
-	      psymtab_include_list = (char **)
-		alloca ((includes_allocated *= 2) *
-			sizeof (char *));
-	      memcpy (psymtab_include_list, orig,
-		      includes_used * sizeof (char *));
-	    }
+		psymtab_include_list = (char **)
+		  alloca ((includes_allocated *= 2) *
+			  sizeof (char *));
+		memcpy (psymtab_include_list, orig,
+			includes_used * sizeof (char *));
+	      }
 	    continue;
 	  }
-	  case N_LSYM:		/* Typedef or automatic variable. */
-	  case N_STSYM:		/* Data seg var -- static  */
-	  case N_LCSYM:		/* BSS      "  */
-	  case N_ROSYM:		/* Read-only data seg var -- static.  */
-	  case N_NBSTS:		/* Gould nobase.  */
-	  case N_NBLCS:		/* symbols.  */
-	  case N_FUN:
-	  case N_GSYM:		/* Global (extern) variable; can be
+	case N_LSYM:		/* Typedef or automatic variable. */
+	case N_STSYM:		/* Data seg var -- static  */
+	case N_LCSYM:		/* BSS      "  */
+	case N_ROSYM:		/* Read-only data seg var -- static.  */
+	case N_NBSTS:		/* Gould nobase.  */
+	case N_NBLCS:		/* symbols.  */
+	case N_FUN:
+	case N_GSYM:		/* Global (extern) variable; can be
 				   data or bss (sigh FIXME).  */
 
 	  /* Following may probably be ignored; I'll leave them here
 	     for now (until I do Pascal and Modula 2 extensions).  */
 
-	  case N_PC:		/* I may or may not need this; I
+	case N_PC:		/* I may or may not need this; I
 				   suspect not.  */
-	  case N_M2C:		/* I suspect that I can ignore this here. */
-	  case N_SCOPE:		/* Same.   */
+	case N_M2C:		/* I suspect that I can ignore this here. */
+	case N_SCOPE:		/* Same.   */
 
 	  namestring = set_namestring (objfile, nlist);
 
 	  /* See if this is an end of function stab.  */
 	  if (pst && nlist.n_type == N_FUN && *namestring == '\000')
-	  {
-	    CORE_ADDR valu;
+	    {
+	      CORE_ADDR valu;
 
-	    /* It's value is the size (in bytes) of the function for
-	       function relative stabs, or the address of the function's
-	       end for old style stabs.  */
-	    valu = nlist.n_value + last_function_start;
-	    if (pst->texthigh == 0 || valu > pst->texthigh)
-	      pst->texthigh = valu;
-	    break;
-	  }
+	      /* It's value is the size (in bytes) of the function for
+		 function relative stabs, or the address of the function's
+		 end for old style stabs.  */
+	      valu = nlist.n_value + last_function_start;
+	      if (pst->texthigh == 0 || valu > pst->texthigh)
+		pst->texthigh = valu;
+	      break;
+	    }
 
 	  p = (char *) strchr (namestring, ':');
 	  if (!p)
-	  continue;			/* Not a debugging symbol.   */
+	    continue;			/* Not a debugging symbol.   */
 
 
 
@@ -1688,328 +1688,328 @@ pos %d"),
 	     which indicates the debugging type symbol.  */
 
 	  switch (p[1])
-	  {
-	  case 'S':
-	    nlist.n_value += ANOFFSET (objfile->section_offsets,
-				       data_sect_index);
+	    {
+	    case 'S':
+	      nlist.n_value += ANOFFSET (objfile->section_offsets,
+					 data_sect_index);
 
-	    if (gdbarch_static_transform_name_p (current_gdbarch))
-	      namestring = gdbarch_static_transform_name
-			     (current_gdbarch, namestring);
+	      if (gdbarch_static_transform_name_p (current_gdbarch))
+		namestring = gdbarch_static_transform_name
+		  (current_gdbarch, namestring);
 
-	    add_psymbol_to_list (namestring, p - namestring,
-				 VAR_DOMAIN, LOC_STATIC,
-				 &objfile->static_psymbols,
-				 0, nlist.n_value,
-				 psymtab_language, objfile);
-	    continue;
-	  case 'G':
-	    nlist.n_value += ANOFFSET (objfile->section_offsets,
-				       data_sect_index);
-	    /* The addresses in these entries are reported to be
-	       wrong.  See the code that reads 'G's for symtabs. */
-	    add_psymbol_to_list (namestring, p - namestring,
-				 VAR_DOMAIN, LOC_STATIC,
-				 &objfile->global_psymbols,
-				 0, nlist.n_value,
-				 psymtab_language, objfile);
-	    continue;
+	      add_psymbol_to_list (namestring, p - namestring,
+				   VAR_DOMAIN, LOC_STATIC,
+				   &objfile->static_psymbols,
+				   0, nlist.n_value,
+				   psymtab_language, objfile);
+	      continue;
+	    case 'G':
+	      nlist.n_value += ANOFFSET (objfile->section_offsets,
+					 data_sect_index);
+	      /* The addresses in these entries are reported to be
+		 wrong.  See the code that reads 'G's for symtabs. */
+	      add_psymbol_to_list (namestring, p - namestring,
+				   VAR_DOMAIN, LOC_STATIC,
+				   &objfile->global_psymbols,
+				   0, nlist.n_value,
+				   psymtab_language, objfile);
+	      continue;
 
-	  case 'T':
-	    /* When a 'T' entry is defining an anonymous enum, it
-	       may have a name which is the empty string, or a
-	       single space.  Since they're not really defining a
-	       symbol, those shouldn't go in the partial symbol
-	       table.  We do pick up the elements of such enums at
-	       'check_enum:', below.  */
-	    if (p >= namestring + 2
-		|| (p == namestring + 1
-		    && namestring[0] != ' '))
-	      {
-		add_psymbol_to_list (namestring, p - namestring,
-				     STRUCT_DOMAIN, LOC_TYPEDEF,
-				     &objfile->static_psymbols,
-				     nlist.n_value, 0,
-				     psymtab_language, objfile);
-		if (p[2] == 't')
-		  {
-		    /* Also a typedef with the same name.  */
-		    add_psymbol_to_list (namestring, p - namestring,
-					 VAR_DOMAIN, LOC_TYPEDEF,
-					 &objfile->static_psymbols,
-					 nlist.n_value, 0,
-					 psymtab_language, objfile);
-		    p += 1;
-		  }
-	      }
-	    goto check_enum;
-	  case 't':
-	    if (p != namestring)	/* a name is there, not just :T... */
-	      {
-		add_psymbol_to_list (namestring, p - namestring,
-				     VAR_DOMAIN, LOC_TYPEDEF,
-				     &objfile->static_psymbols,
-				     nlist.n_value, 0,
-				     psymtab_language, objfile);
-	      }
-	  check_enum:
-	    /* If this is an enumerated type, we need to
-	       add all the enum constants to the partial symbol
-	       table.  This does not cover enums without names, e.g.
-	       "enum {a, b} c;" in C, but fortunately those are
-	       rare.  There is no way for GDB to find those from the
-	       enum type without spending too much time on it.  Thus
-	       to solve this problem, the compiler needs to put out the
-	       enum in a nameless type.  GCC2 does this.  */
+	    case 'T':
+	      /* When a 'T' entry is defining an anonymous enum, it
+		 may have a name which is the empty string, or a
+		 single space.  Since they're not really defining a
+		 symbol, those shouldn't go in the partial symbol
+		 table.  We do pick up the elements of such enums at
+		 'check_enum:', below.  */
+	      if (p >= namestring + 2
+		  || (p == namestring + 1
+		      && namestring[0] != ' '))
+		{
+		  add_psymbol_to_list (namestring, p - namestring,
+				       STRUCT_DOMAIN, LOC_TYPEDEF,
+				       &objfile->static_psymbols,
+				       nlist.n_value, 0,
+				       psymtab_language, objfile);
+		  if (p[2] == 't')
+		    {
+		      /* Also a typedef with the same name.  */
+		      add_psymbol_to_list (namestring, p - namestring,
+					   VAR_DOMAIN, LOC_TYPEDEF,
+					   &objfile->static_psymbols,
+					   nlist.n_value, 0,
+					   psymtab_language, objfile);
+		      p += 1;
+		    }
+		}
+	      goto check_enum;
+	    case 't':
+	      if (p != namestring)	/* a name is there, not just :T... */
+		{
+		  add_psymbol_to_list (namestring, p - namestring,
+				       VAR_DOMAIN, LOC_TYPEDEF,
+				       &objfile->static_psymbols,
+				       nlist.n_value, 0,
+				       psymtab_language, objfile);
+		}
+	    check_enum:
+	      /* If this is an enumerated type, we need to
+		 add all the enum constants to the partial symbol
+		 table.  This does not cover enums without names, e.g.
+		 "enum {a, b} c;" in C, but fortunately those are
+		 rare.  There is no way for GDB to find those from the
+		 enum type without spending too much time on it.  Thus
+		 to solve this problem, the compiler needs to put out the
+		 enum in a nameless type.  GCC2 does this.  */
 
-	    /* We are looking for something of the form
-	       <name> ":" ("t" | "T") [<number> "="] "e"
-	       {<constant> ":" <value> ","} ";".  */
+	      /* We are looking for something of the form
+		 <name> ":" ("t" | "T") [<number> "="] "e"
+		 {<constant> ":" <value> ","} ";".  */
 
-	    /* Skip over the colon and the 't' or 'T'.  */
-	    p += 2;
-	    /* This type may be given a number.  Also, numbers can come
-	       in pairs like (0,26).  Skip over it.  */
-	    while ((*p >= '0' && *p <= '9')
-		   || *p == '(' || *p == ',' || *p == ')'
-		   || *p == '=')
-	      p++;
+	      /* Skip over the colon and the 't' or 'T'.  */
+	      p += 2;
+	      /* This type may be given a number.  Also, numbers can come
+		 in pairs like (0,26).  Skip over it.  */
+	      while ((*p >= '0' && *p <= '9')
+		     || *p == '(' || *p == ',' || *p == ')'
+		     || *p == '=')
+		p++;
 
-	    if (*p++ == 'e')
-	      {
-		/* The aix4 compiler emits extra crud before the members.  */
-		if (*p == '-')
-		  {
-		    /* Skip over the type (?).  */
-		    while (*p != ':')
+	      if (*p++ == 'e')
+		{
+		  /* The aix4 compiler emits extra crud before the members.  */
+		  if (*p == '-')
+		    {
+		      /* Skip over the type (?).  */
+		      while (*p != ':')
+			p++;
+
+		      /* Skip over the colon.  */
 		      p++;
+		    }
 
-		    /* Skip over the colon.  */
-		    p++;
-		  }
+		  /* We have found an enumerated type.  */
+		  /* According to comments in read_enum_type
+		     a comma could end it instead of a semicolon.
+		     I don't know where that happens.
+		     Accept either.  */
+		  while (*p && *p != ';' && *p != ',')
+		    {
+		      char *q;
 
-		/* We have found an enumerated type.  */
-		/* According to comments in read_enum_type
-		   a comma could end it instead of a semicolon.
-		   I don't know where that happens.
-		   Accept either.  */
-		while (*p && *p != ';' && *p != ',')
-		  {
-		    char *q;
+		      /* Check for and handle cretinous dbx symbol name
+			 continuation!  */
+		      if (*p == '\\' || (*p == '?' && p[1] == '\0'))
+			p = next_symbol_text (objfile);
 
-		    /* Check for and handle cretinous dbx symbol name
-		       continuation!  */
-		    if (*p == '\\' || (*p == '?' && p[1] == '\0'))
-		      p = next_symbol_text (objfile);
+		      /* Point to the character after the name
+			 of the enum constant.  */
+		      for (q = p; *q && *q != ':'; q++)
+			;
+		      /* Note that the value doesn't matter for
+			 enum constants in psymtabs, just in symtabs.  */
+		      add_psymbol_to_list (p, q - p,
+					   VAR_DOMAIN, LOC_CONST,
+					   &objfile->static_psymbols, 0,
+					   0, psymtab_language, objfile);
+		      /* Point past the name.  */
+		      p = q;
+		      /* Skip over the value.  */
+		      while (*p && *p != ',')
+			p++;
+		      /* Advance past the comma.  */
+		      if (*p)
+			p++;
+		    }
+		}
+	      continue;
+	    case 'c':
+	      /* Constant, e.g. from "const" in Pascal.  */
+	      add_psymbol_to_list (namestring, p - namestring,
+				   VAR_DOMAIN, LOC_CONST,
+				   &objfile->static_psymbols, nlist.n_value,
+				   0, psymtab_language, objfile);
+	      continue;
 
-		    /* Point to the character after the name
-		       of the enum constant.  */
-		    for (q = p; *q && *q != ':'; q++)
-		      ;
-		    /* Note that the value doesn't matter for
-		       enum constants in psymtabs, just in symtabs.  */
-		    add_psymbol_to_list (p, q - p,
-					 VAR_DOMAIN, LOC_CONST,
-					 &objfile->static_psymbols, 0,
-					 0, psymtab_language, objfile);
-		    /* Point past the name.  */
-		    p = q;
-		    /* Skip over the value.  */
-		    while (*p && *p != ',')
-		      p++;
-		    /* Advance past the comma.  */
-		    if (*p)
-		      p++;
-		  }
-	      }
-	    continue;
-	  case 'c':
-	    /* Constant, e.g. from "const" in Pascal.  */
-	    add_psymbol_to_list (namestring, p - namestring,
-				 VAR_DOMAIN, LOC_CONST,
-				 &objfile->static_psymbols, nlist.n_value,
-				 0, psymtab_language, objfile);
-	    continue;
+	    case 'f':
+	      if (! pst)
+		{
+		  int name_len = p - namestring;
+		  char *name = xmalloc (name_len + 1);
+		  memcpy (name, namestring, name_len);
+		  name[name_len] = '\0';
+		  function_outside_compilation_unit_complaint (name);
+		  xfree (name);
+		}
+	      nlist.n_value += ANOFFSET (objfile->section_offsets, 
+					 SECT_OFF_TEXT (objfile));
+	      /* Kludges for ELF/STABS with Sun ACC */
+	      last_function_name = namestring;
+	      /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
+		 value for the bottom of the text seg in those cases. */
+	      if (nlist.n_value == ANOFFSET (objfile->section_offsets, 
+					     SECT_OFF_TEXT (objfile))
+		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		{
+		  CORE_ADDR minsym_valu = 
+		    find_stab_function_addr (namestring, 
+					     pst ? pst->filename : NULL, 
+					     objfile);
+		  /* find_stab_function_addr will return 0 if the minimal
+		     symbol wasn't found.  (Unfortunately, this might also
+		     be a valid address.)  Anyway, if it *does* return 0,
+		     it is likely that the value was set correctly to begin
+		     with... */
+		  if (minsym_valu != 0)
+		    nlist.n_value = minsym_valu;
+		}
+	      if (pst && textlow_not_set
+		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		{
+		  pst->textlow = nlist.n_value;
+		  textlow_not_set = 0;
+		}
+	      /* End kludge.  */
 
-	  case 'f':
-	    if (! pst)
-	      {
-		int name_len = p - namestring;
-		char *name = xmalloc (name_len + 1);
-		memcpy (name, namestring, name_len);
-		name[name_len] = '\0';
-		function_outside_compilation_unit_complaint (name);
-		xfree (name);
-	      }
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, 
-				       SECT_OFF_TEXT (objfile));
-	    /* Kludges for ELF/STABS with Sun ACC */
-	    last_function_name = namestring;
-	    /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
-	       value for the bottom of the text seg in those cases. */
-	    if (nlist.n_value == ANOFFSET (objfile->section_offsets, 
-					   SECT_OFF_TEXT (objfile))
-		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
-	      {
-		CORE_ADDR minsym_valu = 
-		  find_stab_function_addr (namestring, 
-					   pst ? pst->filename : NULL, 
-					   objfile);
-		/* find_stab_function_addr will return 0 if the minimal
-		   symbol wasn't found.  (Unfortunately, this might also
-		   be a valid address.)  Anyway, if it *does* return 0,
-		   it is likely that the value was set correctly to begin
-		   with... */
-		if (minsym_valu != 0)
-		  nlist.n_value = minsym_valu;
-	      }
-	    if (pst && textlow_not_set
-		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
-	      {
-		pst->textlow = nlist.n_value;
-		textlow_not_set = 0;
-	      }
-	    /* End kludge.  */
+	      /* Keep track of the start of the last function so we
+		 can handle end of function symbols.  */
+	      last_function_start = nlist.n_value;
 
-	    /* Keep track of the start of the last function so we
-	       can handle end of function symbols.  */
-	    last_function_start = nlist.n_value;
+	      /* In reordered executables this function may lie outside
+		 the bounds created by N_SO symbols.  If that's the case
+		 use the address of this function as the low bound for
+		 the partial symbol table.  */
+	      if (pst
+		  && (textlow_not_set
+		      || (nlist.n_value < pst->textlow
+			  && (nlist.n_value
+			      != ANOFFSET (objfile->section_offsets,
+					   SECT_OFF_TEXT (objfile))))))
+		{
+		  pst->textlow = nlist.n_value;
+		  textlow_not_set = 0;
+		}
+	      add_psymbol_to_list (namestring, p - namestring,
+				   VAR_DOMAIN, LOC_BLOCK,
+				   &objfile->static_psymbols,
+				   0, nlist.n_value,
+				   psymtab_language, objfile);
+	      continue;
 
-	    /* In reordered executables this function may lie outside
-	       the bounds created by N_SO symbols.  If that's the case
-	       use the address of this function as the low bound for
-	       the partial symbol table.  */
-	    if (pst
-		&& (textlow_not_set
-		    || (nlist.n_value < pst->textlow
-			&& (nlist.n_value
-			    != ANOFFSET (objfile->section_offsets,
-					 SECT_OFF_TEXT (objfile))))))
-	      {
-		pst->textlow = nlist.n_value;
-		textlow_not_set = 0;
-	      }
-	    add_psymbol_to_list (namestring, p - namestring,
-				 VAR_DOMAIN, LOC_BLOCK,
-				 &objfile->static_psymbols,
-				 0, nlist.n_value,
-				 psymtab_language, objfile);
-	    continue;
+	      /* Global functions were ignored here, but now they
+		 are put into the global psymtab like one would expect.
+		 They're also in the minimal symbol table.  */
+	    case 'F':
+	      if (! pst)
+		{
+		  int name_len = p - namestring;
+		  char *name = xmalloc (name_len + 1);
+		  memcpy (name, namestring, name_len);
+		  name[name_len] = '\0';
+		  function_outside_compilation_unit_complaint (name);
+		  xfree (name);
+		}
+	      nlist.n_value += ANOFFSET (objfile->section_offsets, 
+					 SECT_OFF_TEXT (objfile));
+	      /* Kludges for ELF/STABS with Sun ACC */
+	      last_function_name = namestring;
+	      /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
+		 value for the bottom of the text seg in those cases. */
+	      if (nlist.n_value == ANOFFSET (objfile->section_offsets, 
+					     SECT_OFF_TEXT (objfile))
+		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		{
+		  CORE_ADDR minsym_valu = 
+		    find_stab_function_addr (namestring, 
+					     pst ? pst->filename : NULL, 
+					     objfile);
+		  /* find_stab_function_addr will return 0 if the minimal
+		     symbol wasn't found.  (Unfortunately, this might also
+		     be a valid address.)  Anyway, if it *does* return 0,
+		     it is likely that the value was set correctly to begin
+		     with... */
+		  if (minsym_valu != 0)
+		    nlist.n_value = minsym_valu;
+		}
+	      if (pst && textlow_not_set
+		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		{
+		  pst->textlow = nlist.n_value;
+		  textlow_not_set = 0;
+		}
+	      /* End kludge.  */
 
-	    /* Global functions were ignored here, but now they
-	       are put into the global psymtab like one would expect.
-	       They're also in the minimal symbol table.  */
-	  case 'F':
-	    if (! pst)
-	      {
-		int name_len = p - namestring;
-		char *name = xmalloc (name_len + 1);
-		memcpy (name, namestring, name_len);
-		name[name_len] = '\0';
-		function_outside_compilation_unit_complaint (name);
-		xfree (name);
-	      }
-	    nlist.n_value += ANOFFSET (objfile->section_offsets, 
-				       SECT_OFF_TEXT (objfile));
-	    /* Kludges for ELF/STABS with Sun ACC */
-	    last_function_name = namestring;
-	    /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
-	       value for the bottom of the text seg in those cases. */
-	    if (nlist.n_value == ANOFFSET (objfile->section_offsets, 
-					   SECT_OFF_TEXT (objfile))
-		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
-	      {
-		CORE_ADDR minsym_valu = 
-		  find_stab_function_addr (namestring, 
-					   pst ? pst->filename : NULL, 
-					   objfile);
-		/* find_stab_function_addr will return 0 if the minimal
-		   symbol wasn't found.  (Unfortunately, this might also
-		   be a valid address.)  Anyway, if it *does* return 0,
-		   it is likely that the value was set correctly to begin
-		   with... */
-		if (minsym_valu != 0)
-		  nlist.n_value = minsym_valu;
-	      }
-	    if (pst && textlow_not_set
-		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
-	      {
-		pst->textlow = nlist.n_value;
-		textlow_not_set = 0;
-	      }
-	    /* End kludge.  */
+	      /* Keep track of the start of the last function so we
+		 can handle end of function symbols.  */
+	      last_function_start = nlist.n_value;
 
-	    /* Keep track of the start of the last function so we
-	       can handle end of function symbols.  */
-	    last_function_start = nlist.n_value;
+	      /* In reordered executables this function may lie outside
+		 the bounds created by N_SO symbols.  If that's the case
+		 use the address of this function as the low bound for
+		 the partial symbol table.  */
+	      if (pst
+		  && (textlow_not_set
+		      || (nlist.n_value < pst->textlow
+			  && (nlist.n_value
+			      != ANOFFSET (objfile->section_offsets,
+					   SECT_OFF_TEXT (objfile))))))
+		{
+		  pst->textlow = nlist.n_value;
+		  textlow_not_set = 0;
+		}
+	      add_psymbol_to_list (namestring, p - namestring,
+				   VAR_DOMAIN, LOC_BLOCK,
+				   &objfile->global_psymbols,
+				   0, nlist.n_value,
+				   psymtab_language, objfile);
+	      continue;
 
-	    /* In reordered executables this function may lie outside
-	       the bounds created by N_SO symbols.  If that's the case
-	       use the address of this function as the low bound for
-	       the partial symbol table.  */
-	    if (pst
-		&& (textlow_not_set
-		    || (nlist.n_value < pst->textlow
-			&& (nlist.n_value
-			    != ANOFFSET (objfile->section_offsets,
-					 SECT_OFF_TEXT (objfile))))))
-	      {
-		pst->textlow = nlist.n_value;
-		textlow_not_set = 0;
-	      }
-	    add_psymbol_to_list (namestring, p - namestring,
-				 VAR_DOMAIN, LOC_BLOCK,
-				 &objfile->global_psymbols,
-				 0, nlist.n_value,
-				 psymtab_language, objfile);
-	    continue;
+	      /* Two things show up here (hopefully); static symbols of
+		 local scope (static used inside braces) or extensions
+		 of structure symbols.  We can ignore both.  */
+	    case 'V':
+	    case '(':
+	    case '0':
+	    case '1':
+	    case '2':
+	    case '3':
+	    case '4':
+	    case '5':
+	    case '6':
+	    case '7':
+	    case '8':
+	    case '9':
+	    case '-':
+	    case '#':	/* for symbol identification (used in live ranges) */
+	      continue;
 
-	    /* Two things show up here (hopefully); static symbols of
-	       local scope (static used inside braces) or extensions
-	       of structure symbols.  We can ignore both.  */
-	  case 'V':
-	  case '(':
-	  case '0':
-	  case '1':
-	  case '2':
-	  case '3':
-	  case '4':
-	  case '5':
-	  case '6':
-	  case '7':
-	  case '8':
-	  case '9':
-	  case '-':
-	  case '#':	/* for symbol identification (used in live ranges) */
-	    continue;
+	    case ':':
+	      /* It is a C++ nested symbol.  We don't need to record it
+		 (I don't think); if we try to look up foo::bar::baz,
+		 then symbols for the symtab containing foo should get
+		 read in, I think.  */
+	      /* Someone says sun cc puts out symbols like
+		 /foo/baz/maclib::/usr/local/bin/maclib,
+		 which would get here with a symbol type of ':'.  */
+	      continue;
 
-	  case ':':
-	    /* It is a C++ nested symbol.  We don't need to record it
-	       (I don't think); if we try to look up foo::bar::baz,
-	       then symbols for the symtab containing foo should get
-	       read in, I think.  */
-	    /* Someone says sun cc puts out symbols like
-	       /foo/baz/maclib::/usr/local/bin/maclib,
-	       which would get here with a symbol type of ':'.  */
-	    continue;
+	    default:
+	      /* Unexpected symbol descriptor.  The second and subsequent stabs
+		 of a continued stab can show up here.  The question is
+		 whether they ever can mimic a normal stab--it would be
+		 nice if not, since we certainly don't want to spend the
+		 time searching to the end of every string looking for
+		 a backslash.  */
 
-	  default:
-	    /* Unexpected symbol descriptor.  The second and subsequent stabs
-	       of a continued stab can show up here.  The question is
-	       whether they ever can mimic a normal stab--it would be
-	       nice if not, since we certainly don't want to spend the
-	       time searching to the end of every string looking for
-	       a backslash.  */
+	      complaint (&symfile_complaints, _("unknown symbol descriptor `%c'"),
+			 p[1]);
 
-	    complaint (&symfile_complaints, _("unknown symbol descriptor `%c'"),
-		       p[1]);
+	      /* Ignore it; perhaps it is an extension that we don't
+		 know about.  */
+	      continue;
+	    }
 
-	    /* Ignore it; perhaps it is an extension that we don't
-	       know about.  */
-	    continue;
-	  }
-
-	  case N_EXCL:
+	case N_EXCL:
 
 	  namestring = set_namestring (objfile, nlist);
 
@@ -2063,58 +2063,58 @@ pos %d"),
 	  }
 	  continue;
 
-	  case N_ENDM:
+	case N_ENDM:
 	  /* Solaris 2 end of module, finish current partial symbol table.
 	     end_psymtab will set pst->texthigh to the proper value, which
 	     is necessary if a module compiled without debugging info
 	     follows this module.  */
 	  if (pst && gdbarch_sofun_address_maybe_missing (current_gdbarch))
-	  {
-	    end_psymtab (pst, psymtab_include_list, includes_used,
-			 symnum * symbol_size,
-			 (CORE_ADDR) 0,
-			 dependency_list, dependencies_used, textlow_not_set);
-	    pst = (struct partial_symtab *) 0;
-	    includes_used = 0;
-	    dependencies_used = 0;
-	  }
+	    {
+	      end_psymtab (pst, psymtab_include_list, includes_used,
+			   symnum * symbol_size,
+			   (CORE_ADDR) 0,
+			   dependency_list, dependencies_used, textlow_not_set);
+	      pst = (struct partial_symtab *) 0;
+	      includes_used = 0;
+	      dependencies_used = 0;
+	    }
 	  continue;
 
-	  case N_RBRAC:
+	case N_RBRAC:
 #ifdef HANDLE_RBRAC
 	  HANDLE_RBRAC (nlist.n_value);
 	  continue;
 #endif
-	  case N_EINCL:
-	  case N_DSLINE:
-	  case N_BSLINE:
-	  case N_SSYM:		/* Claim: Structure or union element.
+	case N_EINCL:
+	case N_DSLINE:
+	case N_BSLINE:
+	case N_SSYM:		/* Claim: Structure or union element.
 				   Hopefully, I can ignore this.  */
-	  case N_ENTRY:		/* Alternate entry point; can ignore. */
-	  case N_MAIN:		/* Can definitely ignore this.   */
-	  case N_CATCH:		/* These are GNU C++ extensions */
-	  case N_EHDECL:	/* that can safely be ignored here. */
-	  case N_LENG:
-	  case N_BCOMM:
-	  case N_ECOMM:
-	  case N_ECOML:
-	  case N_FNAME:
-	  case N_SLINE:
-	  case N_RSYM:
-	  case N_PSYM:
-	  case N_LBRAC:
-	  case N_NSYMS:		/* Ultrix 4.0: symbol count */
-	  case N_DEFD:		/* GNU Modula-2 */
-	  case N_ALIAS:		/* SunPro F77: alias name, ignore for now.  */
+	case N_ENTRY:		/* Alternate entry point; can ignore. */
+	case N_MAIN:		/* Can definitely ignore this.   */
+	case N_CATCH:		/* These are GNU C++ extensions */
+	case N_EHDECL:		/* that can safely be ignored here. */
+	case N_LENG:
+	case N_BCOMM:
+	case N_ECOMM:
+	case N_ECOML:
+	case N_FNAME:
+	case N_SLINE:
+	case N_RSYM:
+	case N_PSYM:
+	case N_LBRAC:
+	case N_NSYMS:		/* Ultrix 4.0: symbol count */
+	case N_DEFD:		/* GNU Modula-2 */
+	case N_ALIAS:		/* SunPro F77: alias name, ignore for now.  */
 
-	  case N_OBJ:		/* useless types from Solaris */
-	  case N_OPT:
-	  case N_PATCH:
+	case N_OBJ:		/* useless types from Solaris */
+	case N_OPT:
+	case N_PATCH:
 	  /* These symbols aren't interesting; don't worry about them */
 
 	  continue;
 
-	  default:
+	default:
 	  /* If we haven't found it yet, ignore it.  It's probably some
 	     new type we don't know about yet.  */
 	  unknown_symtype_complaint (hex_string (nlist.n_type));
