@@ -36,9 +36,7 @@
 #include <signal.h>
 
 /* This just gets used as a default if we can't find SHELL.  */
-#ifndef SHELL_FILE
 #define SHELL_FILE "/bin/sh"
-#endif
 
 extern char **environ;
 
@@ -162,15 +160,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
      fact that it may expand when quoted; it is a worst-case number
      based on every character being '.  */
   len = 5 + 4 * strlen (exec_file) + 1 + strlen (allargs) + 1 + /*slop */ 12;
-  /* If desired, concat something onto the front of ALLARGS.
-     SHELL_COMMAND is the result.  */
-#ifdef SHELL_COMMAND_CONCAT
-  shell_command = (char *) alloca (strlen (SHELL_COMMAND_CONCAT) + len);
-  strcpy (shell_command, SHELL_COMMAND_CONCAT);
-#else
   shell_command = (char *) alloca (len);
   shell_command[0] = '\0';
-#endif
 
   if (!shell)
     {

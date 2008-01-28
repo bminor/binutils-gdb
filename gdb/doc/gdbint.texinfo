@@ -4644,16 +4644,6 @@ Defines the format for the name of a @file{/proc} device.  Should be
 defined in @file{nm.h} @emph{only} in order to override the default
 definition in @file{procfs.c}.
 
-@item SHELL_COMMAND_CONCAT
-@findex SHELL_COMMAND_CONCAT
-If defined, is a string to prefix on the shell command used to start the
-inferior.
-
-@item SHELL_FILE
-@findex SHELL_FILE
-If defined, this is the name of the shell to use to run the inferior.
-Defaults to @code{"/bin/sh"}.
-
 @item SOLIB_ADD (@var{filename}, @var{from_tty}, @var{targ}, @var{readsyms})
 @findex SOLIB_ADD
 Define this to expand into an expression that will cause the symbols in

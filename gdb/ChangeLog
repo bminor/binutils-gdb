@@ -1,3 +1,8 @@
+2008-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* fork-child.c (SHELL_FILE): Remove #ifndef.
+	(fork_inferior): Remove SHELL_COMMAND_CONCAT.
+
 2008-01-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* i386-tdep.c (i386_skip_noop): New function.
