@@ -10,7 +10,7 @@ The section .eh_frame contains:
   Return address column: 31
   Augmentation data:     0b
 
-  DW_CFA_def_cfa_reg: r29
+  DW_CFA_def_cfa_register: r29
   DW_CFA_def_cfa: r29 ofs 0
   DW_CFA_nop
   DW_CFA_nop

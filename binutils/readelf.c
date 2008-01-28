@@ -624,7 +624,7 @@ find_section (const char *name)
 /* Guess the relocation size commonly used by the specific machines.  */
 
 static int
-guess_is_rela (unsigned long e_machine)
+guess_is_rela (unsigned int e_machine)
 {
   switch (e_machine)
     {
@@ -3032,22 +3032,18 @@ parse_args (int argc, char **argv)
 		switch (optarg[index++])
 		  {
 		  case 'i':
-		  case 'I':
 		    do_debug_info = 1;
 		    break;
 
 		  case 'a':
-		  case 'A':
 		    do_debug_abbrevs = 1;
 		    break;
 
 		  case 'l':
-		  case 'L':
 		    do_debug_lines = 1;
 		    break;
 
 		  case 'p':
-		  case 'P':
 		    do_debug_pubnames = 1;
 		    break;
 
@@ -3066,17 +3062,14 @@ parse_args (int argc, char **argv)
 		    break;
 
 		  case 'm':
-		  case 'M':
 		    do_debug_macinfo = 1;
 		    break;
 
 		  case 's':
-		  case 'S':
 		    do_debug_str = 1;
 		    break;
 
 		  case 'o':
-		  case 'O':
 		    do_debug_loc = 1;
 		    break;
 
@@ -3245,6 +3238,8 @@ process_file_header (void)
 	(_("Not an ELF file - it has the wrong magic bytes at the start\n"));
       return 0;
     }
+
+  init_dwarf_regnames (elf_header.e_machine);
 
   if (do_header)
     {

@@ -16,8 +16,8 @@ The section .eh_frame contains:
 
 00000014 00000018 00000018 FDE cie=00000000 pc=.*
   DW_CFA_advance_loc: 4 to .*
-  DW_CFA_def_cfa: r0 ofs 16
-  DW_CFA_offset: r1 at cfa-8
+  DW_CFA_def_cfa: r0( \([er]ax\)|) ofs 16
+  DW_CFA_offset: r1( \((rdx|ecx)\)|) at cfa-8
   DW_CFA_advance_loc: 4 to .*
   DW_CFA_def_cfa_offset: 32
-  DW_CFA_offset: r2 at cfa-24
+  DW_CFA_offset: r2( \((rcx|edx)\)|) at cfa-24

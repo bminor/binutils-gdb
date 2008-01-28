@@ -91,7 +91,7 @@ extern dwarf_vma (*byte_get) (unsigned char *, int);
 extern dwarf_vma byte_get_little_endian (unsigned char *, int);
 extern dwarf_vma byte_get_big_endian (unsigned char *, int);
 
-extern dwarf_vma eh_addr_size;
+extern int eh_addr_size;
 
 extern int do_debug_info;
 extern int do_debug_abbrevs;
@@ -104,6 +104,8 @@ extern int do_debug_frames_interp;
 extern int do_debug_macinfo;
 extern int do_debug_str;
 extern int do_debug_loc;
+
+extern void init_dwarf_regnames (unsigned int);
 
 extern int load_debug_section (enum dwarf_section_display_enum,
 			       void *);

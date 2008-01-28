@@ -52,6 +52,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "elf-bfd.h"
 #include "progress.h"
 #include "bucomm.h"
 #include "dwarf.h"
@@ -2185,6 +2186,12 @@ dump_dwarf (bfd *abfd)
     abort ();
 
   check_mach_o_dwarf (abfd);
+
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+      init_dwarf_regnames (bed->elf_machine_code);
+    }
 
   bfd_map_over_sections (abfd, dump_dwarf_section, NULL);
 

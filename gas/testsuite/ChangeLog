@@ -1,3 +1,24 @@
+2008-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/cfi/cfi-alpha-1.d: Replace DW_CFA_def_cfa_reg with
+	DW_CFA_def_cfa_register.
+	* gas/cfi/cfi-alpha-3.d: Likewise.
+	* gas/cfi/cfi-hppa-1.d: Likewise.
+	* gas/cfi/cfi-i386.d: Likewise.
+	* gas/cfi/cfi-m68k.d: Likewise.
+	* gas/cfi/cfi-mips-1.d: Likewise.
+	* gas/cfi/cfi-sh-1.d: Likewise.
+	* gas/cfi/cfi-sparc-1.d: Likewise.
+	* gas/cfi/cfi-sparc64-1.d: Likewise.
+	* gas/cfi/cfi-x86_64.d: Likewise.
+
+	* gas/cfi/cfi-common-1.d: Updated for i386/x86-64 register
+	names.
+	* gas/cfi/cfi-common-2.d: Likewise.
+	* gas/cfi/cfi-common-5.d: Likewise.
+	* gas/cfi/cfi-i386.d: Likewise.
+	* gas/cfi/cfi-x86_64.d: Likewise.
+
 2008-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/x86-64-sib.s: Add tests for r12.

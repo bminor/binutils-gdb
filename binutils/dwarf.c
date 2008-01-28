@@ -23,6 +23,7 @@
 #include "libiberty.h"
 #include "bfd.h"
 #include "bucomm.h"
+#include "elf/common.h"
 #include "elf/dwarf2.h"
 #include "dwarf.h"
 
@@ -38,7 +39,7 @@ static debug_info *debug_information = NULL;
    that the .debug_info section could not be loaded/parsed.  */
 #define DEBUG_INFO_UNAVAILABLE  (unsigned int) -1
 
-dwarf_vma eh_addr_size;
+int eh_addr_size;
 
 int do_debug_info;
 int do_debug_abbrevs;
@@ -3118,6 +3119,87 @@ frame_need_space (Frame_Chunk *fc, int reg)
     }
 }
 
+static const char *const dwarf_regnames_i386[] =
+{
+  "eax", "ecx", "edx", "ebx",
+  "esp", "ebp", "esi", "edi",
+  "eip", "eflags", NULL,
+  "st0", "st1", "st2", "st3",
+  "st4", "st5", "st6", "st7",
+  NULL, NULL,
+  "xmm0", "xmm1", "xmm2", "xmm3",
+  "xmm4", "xmm5", "xmm6", "xmm7",
+  "mm0", "mm1", "mm2", "mm3",
+  "mm4", "mm5", "mm6", "mm7",
+  "fcw", "fsw", "mxcsr",
+  "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL,
+  "tr", "ldtr"
+};
+
+static const char *const dwarf_regnames_x86_64[] =
+{
+  "rax", "rdx", "rcx", "rbx",
+  "rsi", "rdi", "rbp", "rsp",
+  "r8",  "r9",  "r10", "r11",
+  "r12", "r13", "r14", "r15",
+  "rip",
+  "xmm0",  "xmm1",  "xmm2",  "xmm3",
+  "xmm4",  "xmm5",  "xmm6",  "xmm7",
+  "xmm8",  "xmm9",  "xmm10", "xmm11",
+  "xmm12", "xmm13", "xmm14", "xmm15",
+  "st0", "st1", "st2", "st3",
+  "st4", "st5", "st6", "st7",
+  "mm0", "mm1", "mm2", "mm3",
+  "mm4", "mm5", "mm6", "mm7",
+  "rflags",
+  "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL,
+  "fs.base", "gs.base", NULL, NULL,
+  "tr", "ldtr",
+  "mxcsr", "fcw", "fsw"
+};
+
+static const char *const *dwarf_regnames;
+static unsigned int dwarf_regnames_count;
+
+void
+init_dwarf_regnames (unsigned int e_machine)
+{
+  switch (e_machine)
+    {
+    case EM_386:
+    case EM_486:
+      dwarf_regnames = dwarf_regnames_i386;
+      dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_i386);
+      break;
+
+    case EM_X86_64:
+      dwarf_regnames = dwarf_regnames_x86_64;
+      dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_x86_64);
+      break;
+
+    default:
+      break;
+    }
+}
+
+static const char *
+regname (unsigned int regno, int row)
+{
+  static char reg[64];
+  if (dwarf_regnames
+      && regno < dwarf_regnames_count
+      && dwarf_regnames [regno] != NULL)
+    {
+      if (row)
+	return dwarf_regnames [regno];
+      snprintf (reg, sizeof (reg), "r%d (%s)", regno,
+		dwarf_regnames [regno]);
+    }
+  else
+    snprintf (reg, sizeof (reg), "r%d", regno);
+  return reg;
+}
+
 static void
 frame_display_row (Frame_Chunk *fc, int *need_col_headers, int *max_regs)
 {
@@ -3129,27 +3211,29 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, int *max_regs)
 
   if (*need_col_headers)
     {
+      static const char *loc = "   LOC";
+
       *need_col_headers = 0;
 
-      printf ("   LOC   CFA      ");
+      printf ("%-*s CFA      ", eh_addr_size * 2, loc);
 
       for (r = 0; r < *max_regs; r++)
 	if (fc->col_type[r] != DW_CFA_unreferenced)
 	  {
 	    if (r == fc->ra)
-	      printf ("ra   ");
+	      printf ("ra      ");
 	    else
-	      printf ("r%-4d", r);
+	      printf ("%-5s ", regname (r, 1));
 	  }
 
       printf ("\n");
     }
 
-  printf ("%08lx ", fc->pc_begin);
+  printf ("%0*lx ", eh_addr_size * 2, fc->pc_begin);
   if (fc->cfa_exp)
     strcpy (tmp, "exp");
   else
-    sprintf (tmp, "r%d%+d", fc->cfa_reg, fc->cfa_offset);
+    sprintf (tmp, "%s%+d", regname (fc->cfa_reg, 1), fc->cfa_offset);
   printf ("%-8s ", tmp);
 
   for (r = 0; r < fc->ncols; r++)
@@ -3171,7 +3255,7 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, int *max_regs)
 	      sprintf (tmp, "v%+d", fc->col_offset[r]);
 	      break;
 	    case DW_CFA_register:
-	      sprintf (tmp, "r%d", fc->col_offset[r]);
+	      sprintf (tmp, "%s", regname (fc->col_offset[r], 0));
 	      break;
 	    case DW_CFA_expression:
 	      strcpy (tmp, "exp");
@@ -3183,7 +3267,7 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, int *max_regs)
 	      strcpy (tmp, "n/a");
 	      break;
 	    }
-	  printf ("%-5s", tmp);
+	  printf ("%-5s ", tmp);
 	}
     }
   printf ("\n");
@@ -3631,15 +3715,15 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_offset:
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_offset: r%d at cfa%+ld\n",
-			opa, roffs * fc->data_factor);
+		printf ("  DW_CFA_offset: %s at cfa%+ld\n",
+			regname (opa, 0), roffs * fc->data_factor);
 	      fc->col_type[opa] = DW_CFA_offset;
 	      fc->col_offset[opa] = roffs * fc->data_factor;
 	      break;
 
 	    case DW_CFA_restore:
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_restore: r%d\n", opa);
+		printf ("  DW_CFA_restore: %s\n", regname (opa, 0));
 	      fc->col_type[opa] = cie->col_type[opa];
 	      fc->col_offset[opa] = cie->col_offset[opa];
 	      break;
@@ -3693,8 +3777,8 @@ display_debug_frames (struct dwarf_section *section,
 	      reg = LEB ();
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_offset_extended: r%ld at cfa%+ld\n",
-			reg, roffs * fc->data_factor);
+		printf ("  DW_CFA_offset_extended: %s at cfa%+ld\n",
+			regname (reg, 0), roffs * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_offset;
 	      fc->col_offset[reg] = roffs * fc->data_factor;
 	      break;
@@ -3703,8 +3787,8 @@ display_debug_frames (struct dwarf_section *section,
 	      reg = LEB ();
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_val_offset: r%ld at cfa%+ld\n",
-			reg, roffs * fc->data_factor);
+		printf ("  DW_CFA_val_offset: %s at cfa%+ld\n",
+			regname (reg, 0), roffs * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_val_offset;
 	      fc->col_offset[reg] = roffs * fc->data_factor;
 	      break;
@@ -3712,7 +3796,8 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_restore_extended:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_restore_extended: r%ld\n", reg);
+		printf ("  DW_CFA_restore_extended: %s\n",
+			regname (reg, 0));
 	      fc->col_type[reg] = cie->col_type[reg];
 	      fc->col_offset[reg] = cie->col_offset[reg];
 	      break;
@@ -3720,7 +3805,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_undefined:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_undefined: r%ld\n", reg);
+		printf ("  DW_CFA_undefined: %s\n", regname (reg, 0));
 	      fc->col_type[reg] = DW_CFA_undefined;
 	      fc->col_offset[reg] = 0;
 	      break;
@@ -3728,7 +3813,7 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_same_value:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_same_value: r%ld\n", reg);
+		printf ("  DW_CFA_same_value: %s\n", regname (reg, 0));
 	      fc->col_type[reg] = DW_CFA_same_value;
 	      fc->col_offset[reg] = 0;
 	      break;
@@ -3737,7 +3822,11 @@ display_debug_frames (struct dwarf_section *section,
 	      reg = LEB ();
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_register: r%ld in r%ld\n", reg, roffs);
+		{
+		  printf ("  DW_CFA_register: %s in ",
+			  regname (reg, 0));
+		  puts (regname (roffs, 0));
+		}
 	      fc->col_type[reg] = DW_CFA_register;
 	      fc->col_offset[reg] = roffs;
 	      break;
@@ -3779,15 +3868,16 @@ display_debug_frames (struct dwarf_section *section,
 	      fc->cfa_offset = LEB ();
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_def_cfa: r%d ofs %d\n",
-			fc->cfa_reg, fc->cfa_offset);
+		printf ("  DW_CFA_def_cfa: %s ofs %d\n",
+			regname (fc->cfa_reg, 0), fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_def_cfa_register:
 	      fc->cfa_reg = LEB ();
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_def_cfa_reg: r%d\n", fc->cfa_reg);
+		printf ("  DW_CFA_def_cfa_register: %s\n",
+			regname (fc->cfa_reg, 0));
 	      break;
 
 	    case DW_CFA_def_cfa_offset:
@@ -3818,8 +3908,10 @@ display_debug_frames (struct dwarf_section *section,
 	      ul = LEB ();
 	      if (! do_debug_frames_interp)
 		{
-		  printf ("  DW_CFA_expression: r%ld (", reg);
-		  decode_location_expression (start, eh_addr_size, ul, 0);
+		  printf ("  DW_CFA_expression: %s (",
+			  regname (reg, 0));
+		  decode_location_expression (start, eh_addr_size,
+					      ul, 0);
 		  printf (")\n");
 		}
 	      fc->col_type[reg] = DW_CFA_expression;
@@ -3831,7 +3923,8 @@ display_debug_frames (struct dwarf_section *section,
 	      ul = LEB ();
 	      if (! do_debug_frames_interp)
 		{
-		  printf ("  DW_CFA_val_expression: r%ld (", reg);
+		  printf ("  DW_CFA_val_expression: %s (",
+			  regname (reg, 0));
 		  decode_location_expression (start, eh_addr_size, ul, 0);
 		  printf (")\n");
 		}
@@ -3844,8 +3937,8 @@ display_debug_frames (struct dwarf_section *section,
 	      l = SLEB ();
 	      frame_need_space (fc, reg);
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_offset_extended_sf: r%ld at cfa%+ld\n",
-			reg, l * fc->data_factor);
+		printf ("  DW_CFA_offset_extended_sf: %s at cfa%+ld\n",
+			regname (reg, 0), l * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_offset;
 	      fc->col_offset[reg] = l * fc->data_factor;
 	      break;
@@ -3855,8 +3948,8 @@ display_debug_frames (struct dwarf_section *section,
 	      l = SLEB ();
 	      frame_need_space (fc, reg);
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_val_offset_sf: r%ld at cfa%+ld\n",
-			reg, l * fc->data_factor);
+		printf ("  DW_CFA_val_offset_sf: %s at cfa%+ld\n",
+			regname (reg, 0), l * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_val_offset;
 	      fc->col_offset[reg] = l * fc->data_factor;
 	      break;
@@ -3867,8 +3960,8 @@ display_debug_frames (struct dwarf_section *section,
 	      fc->cfa_offset = fc->cfa_offset * fc->data_factor;
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_def_cfa_sf: r%d ofs %d\n",
-			fc->cfa_reg, fc->cfa_offset);
+		printf ("  DW_CFA_def_cfa_sf: %s ofs %d\n",
+			regname (fc->cfa_reg, 0), fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_def_cfa_offset_sf:
@@ -3905,8 +3998,8 @@ display_debug_frames (struct dwarf_section *section,
 	      l = - LEB ();
 	      frame_need_space (fc, reg);
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_GNU_negative_offset_extended: r%ld at cfa%+ld\n",
-			reg, l * fc->data_factor);
+		printf ("  DW_CFA_GNU_negative_offset_extended: %s at cfa%+ld\n",
+			regname (reg, 0), l * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_offset;
 	      fc->col_offset[reg] = l * fc->data_factor;
 	      break;

@@ -1,3 +1,30 @@
+2008-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c: Include "elf/common.h".
+	(eh_addr_size): Changed to int.
+	(dwarf_regnames_i386): New.
+	(dwarf_regnames_x86_64): Likewise.
+	(dwarf_regnames): Likewise.
+	(dwarf_regnames_count): Likewise.
+	(init_dwarf_regnames): Likewise.
+	(regname): Likewise.
+	(frame_display_row): Properly support different address size.
+	Call regname to get register name.
+	(display_debug_frames): Call regname to get register name.
+	Display DW_CFA_def_cfa_register as DW_CFA_def_cfa_register
+	instead of DW_CFA_def_cfa_reg.
+
+	* dwarf.h (init_dwarf_regnames): New.
+
+	* objdump.c: Include "elf-bfd.h".
+	(dump_dwarf): Call init_dwarf_regnames on ELF input.
+
+	* readelf.c (guess_is_rela): Change argument to int.
+	(parse_args): Remove the undocumented upper case options for
+	-wX.
+	(process_file_header): Call init_dwarf_regnames if
+	do_dwarf_register is true.
+
 2008-01-25  DJ Delorie  <dj@redhat.com>
 
 	* readelf.c (process_section_headers): Add m16c handler.

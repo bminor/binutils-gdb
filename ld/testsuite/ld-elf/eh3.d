@@ -13,8 +13,8 @@ The section .eh_frame contains:
   Data alignment factor: -8
   Return address column: 16
 
-  DW_CFA_def_cfa: r7 ofs 8
-  DW_CFA_offset: r16 at cfa-8
+  DW_CFA_def_cfa: r7 \(rsp\) ofs 8
+  DW_CFA_offset: r16 \(rip\) at cfa-8
   DW_CFA_nop
   DW_CFA_nop
   DW_CFA_nop
@@ -25,9 +25,9 @@ The section .eh_frame contains:
 00000018 0000001c 0000001c FDE cie=00000000 pc=00400078..00400078
   DW_CFA_advance_loc: 0 to 00400078
   DW_CFA_def_cfa_offset: 16
-  DW_CFA_offset: r6 at cfa-16
+  DW_CFA_offset: r6 \(rbp\) at cfa-16
   DW_CFA_advance_loc: 0 to 00400078
-  DW_CFA_def_cfa_reg: r6
+  DW_CFA_def_cfa_register: r6 \(rbp\)
 
 00000038 ZERO terminator
 #pass

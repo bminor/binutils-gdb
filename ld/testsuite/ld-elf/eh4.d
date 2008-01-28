@@ -14,8 +14,8 @@ The section .eh_frame contains:
   Return address column: 16
   Augmentation data:     1b
 
-  DW_CFA_def_cfa: r7 ofs 8
-  DW_CFA_offset: r16 at cfa-8
+  DW_CFA_def_cfa: r7 \(rsp\) ofs 8
+  DW_CFA_offset: r16 \(rip\) at cfa-8
   DW_CFA_nop
   DW_CFA_nop
 

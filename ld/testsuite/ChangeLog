@@ -1,3 +1,13 @@
+2008-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/eh1.d: Replace DW_CFA_def_cfa_reg with
+	DW_CFA_def_cfa_register. Updated for i386/x86-64 register
+	names.
+	* ld-elf/eh2.d: Likewise.
+	* ld-elf/eh3.d: Likewise.
+	* ld-elf/eh4.d: Likewise.
+	* ld-elf/eh5.d: Likewise.
+
 2008-01-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl.d: Update.
