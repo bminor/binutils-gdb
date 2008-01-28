@@ -22,8 +22,7 @@
 	* readelf.c (guess_is_rela): Change argument to int.
 	(parse_args): Remove the undocumented upper case options for
 	-wX.
-	(process_file_header): Call init_dwarf_regnames if
-	do_dwarf_register is true.
+	(process_file_header): Call init_dwarf_regnames.
 
 2008-01-25  DJ Delorie  <dj@redhat.com>
 
