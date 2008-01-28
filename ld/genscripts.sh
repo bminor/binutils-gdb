@@ -1,6 +1,6 @@
 #!/bin/sh
 # genscripts.sh - generate the ld-emulation-target specific files
-# Copyright 2007 Free Software Foundation, Inc.
+# Copyright 2007, 2008 Free Software Foundation, Inc.
 #
 # This file is part of the Gnu Linker.
 #
@@ -422,7 +422,16 @@ case " $EMULATION_LIBPATH " in
     *" ${EMULATION_NAME} "*) COMPILE_IN=true;;
 esac
 
-if test -n "${BASH+set}"; then
+# PR ld/5652:
+# Determine if the shell has support for the variable BASH_LINENO.
+# When it is the case, it is only available inside functions.
+has_lineno()
+{
+  test "x$BASH_LINENO" != "x"
+}
+
+# Enable accruate error source in the compiler error messages, if possible.
+if has_lineno; then
   . ${srcdir}/genscrba.sh
 else
   source_em()
