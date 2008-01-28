@@ -1,3 +1,8 @@
+2008-01-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/5529
+	* rclex.c (yylex): Also allow the hypen character.
+
 2008-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c: Include "elf/common.h".
@@ -78,8 +83,9 @@
 
 2008-01-08  Kai Tietz  <kai.tietz@onevision.com>
 
+	PR binutils/5529
 	* binutils/rclex.c: (yylex): Add ':', '_', '\\', and '/' to post
-	characters for name tokens. PR/5529.
+	characters for name tokens.
 
 2008-01-04  Greg McGary  <greg@mcgary.org>
 

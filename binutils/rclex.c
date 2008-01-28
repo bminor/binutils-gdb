@@ -847,7 +847,7 @@ yylex (void)
 	      while ((ch = rclex_peekch ()) != -1
 		     && (ISIDNUM (ch) || ch == '$' || ch == '.'
 		         || ch == ':' || ch == '\\' || ch == '/'
-		         || ch == '_')
+		         || ch == '_' || ch == '-')
 		    )
 		rclex_readch ();
 	      ch = IGNORE_CPP (rclex_translatekeyword (rclex_tok));
