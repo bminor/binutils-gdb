@@ -1,3 +1,7 @@
+2008-01-28  Fabian Groffen  <grobian@gentoo.org>
+
+	* config.bfd (x86_64-*-solaris2): Add support for this target.
+
 2008-01-28  Alan Modra  <amodra@bigpond.net.au>
 
 	Rewrite SPU overlay handling code.  Put overlay calls stubs in the

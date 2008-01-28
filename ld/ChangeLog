@@ -1,3 +1,7 @@
+2008-01-28  Fabian Groffen  <grobian@gentoo.org>
+
+	* configure.tgt (x86_64-*-solaris2): Add support for this target.
+
 2008-01-28  Vincent Riviere  <vincent.riviere@freesbee.fr>
 
 	PR ld/5652

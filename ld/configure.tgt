@@ -206,6 +206,11 @@ i[3-7]86-*-solaris2*)	targ_emul=elf_i386_ldso
                         targ_extra_emuls="elf_i386 elf_x86_64"
 			targ_extra_libpath=$targ_extra_emuls
                         ;;
+x86_64-*-solaris2*)
+			targ_emul=elf_x86_64
+			targ_extra_emuls="elf_i386 elf_i386_ldso"
+			targ_extra_libpath=elf_i386
+			tdir_elf_i386=`echo ${targ_alias} | sed -e 's/x86_64/i386/'` ;;
 i[3-7]86-*-unixware)	targ_emul=elf_i386 ;;
 i[3-7]86-*-solaris*)	targ_emul=elf_i386_ldso
                         targ_extra_emuls="elf_i386"
