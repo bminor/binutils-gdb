@@ -1,6 +1,8 @@
 2008-01-28  Doug Evans  <dje@google.com>
 
 	* dbxread.c (read_dbx_symtab): Fix indentation.
+	Reformat comments to 80 columns.
+	Move local var def closer to only use.
 
 2008-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
 

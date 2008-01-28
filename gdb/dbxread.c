@@ -1,6 +1,6 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008.
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1312,7 +1312,6 @@ read_dbx_symtab (struct objfile *objfile)
 
       switch (nlist.n_type)
 	{
-	char *p;
 	  /*
 	   * Standard, external, non-debugger, symbols
 	   */
@@ -1532,8 +1531,8 @@ read_dbx_symtab (struct objfile *objfile)
 	      }
 
 	    /* Some other compilers (C++ ones in particular) emit useless
-	       SOs for non-existant .c files.  We ignore all subsequent SOs that
-	       immediately follow the first.  */
+	       SOs for non-existant .c files.  We ignore all subsequent SOs
+	       that immediately follow the first.  */
 
 	    if (!pst)
 	      {
@@ -1657,6 +1656,8 @@ pos %d"),
 				   suspect not.  */
 	case N_M2C:		/* I suspect that I can ignore this here. */
 	case N_SCOPE:		/* Same.   */
+	{
+	  char *p;
 
 	  namestring = set_namestring (objfile, nlist);
 
@@ -1677,8 +1678,6 @@ pos %d"),
 	  p = (char *) strchr (namestring, ':');
 	  if (!p)
 	    continue;			/* Not a debugging symbol.   */
-
-
 
 	  /* Main processing section for debugging symbols which
 	     the initial read through the symbol tables needs to worry
@@ -1703,6 +1702,7 @@ pos %d"),
 				   0, nlist.n_value,
 				   psymtab_language, objfile);
 	      continue;
+
 	    case 'G':
 	      nlist.n_value += ANOFFSET (objfile->section_offsets,
 					 data_sect_index);
@@ -1743,6 +1743,7 @@ pos %d"),
 		    }
 		}
 	      goto check_enum;
+
 	    case 't':
 	      if (p != namestring)	/* a name is there, not just :T... */
 		{
@@ -1823,6 +1824,7 @@ pos %d"),
 		    }
 		}
 	      continue;
+
 	    case 'c':
 	      /* Constant, e.g. from "const" in Pascal.  */
 	      add_psymbol_to_list (namestring, p - namestring,
@@ -2008,6 +2010,7 @@ pos %d"),
 		 know about.  */
 	      continue;
 	    }
+	}
 
 	case N_EXCL:
 
@@ -2148,7 +2151,6 @@ pos %d"),
    SYMFILE_NAME is the name of the symbol-file we are reading from, and ADDR
    is the address relative to which its symbols are (incremental) or 0
    (normal). */
-
 
 static struct partial_symtab *
 start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
