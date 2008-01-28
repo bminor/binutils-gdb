@@ -1,3 +1,8 @@
+2008-01-28  Petr Muller  <pmuller@redhat.com>
+
+	* ld-elfvers/vers.exp (test_ar): Sort the expected output so that
+	it has matches the ordering of the obtained output.
+
 2008-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/eh1.d: Replace DW_CFA_def_cfa_reg with

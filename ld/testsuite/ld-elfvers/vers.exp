@@ -121,7 +121,7 @@ proc test_ar { test lib object expect } {
 
     catch "exec $nm --print-armap $tmpdir/$lib | grep \\\ in\\\  | egrep VERS\\\|bar\\\|foo | sort > $tmpdir/nm.out" exec_output
     if [string match "" $exec_output] then {
-	catch "exec $diff $tmpdir/nm.out $srcdir/$subdir/$expect" exec_output
+	catch "exec sort $srcdir/$subdir/$expect | $diff $tmpdir/nm.out -" exec_output
 	set exec_output [prune_warnings $exec_output]
 	if [string match "" $exec_output] then {
 	    pass $test
