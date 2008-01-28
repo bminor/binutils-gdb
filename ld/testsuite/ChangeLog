@@ -1,3 +1,8 @@
+2008-01-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/ovl.d: Update.
+	* ld-spu/ovl2.d: Update.
+
 2008-01-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/loadaddr.t: New, extracted from..

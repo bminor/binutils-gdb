@@ -58,8 +58,6 @@ static const struct _ovl_stream ovl_mgr_stream = {
   ovl_mgr + sizeof (ovl_mgr)
 };
 
-static asection *toe = NULL;
-
 
 static int
 is_spu_target (void)
@@ -84,7 +82,8 @@ spu_after_open (void)
   gld${EMULATION_NAME}_after_open ();
 }
 
-/* Add section S at the end of output section OUTPUT_NAME.
+/* If O is NULL, add section S at the end of output section OUTPUT_NAME.
+   If O is not NULL, add section S at the beginning of output section O.
 
    Really, we should be duplicating ldlang.c map_input_to_output_sections
    logic here, ie. using the linker script to find where the section
@@ -95,17 +94,26 @@ spu_after_open (void)
    overlay manager code somewhere else.  */
 
 static void
-spu_place_special_section (asection *s, const char *output_name)
+spu_place_special_section (asection *s, asection *o, const char *output_name)
 {
   lang_output_section_statement_type *os;
 
-  os = lang_output_section_find (output_name);
+  os = lang_output_section_find (o != NULL ? o->name : output_name);
   if (os == NULL)
     {
       const char *save = s->name;
       s->name = output_name;
       gld${EMULATION_NAME}_place_orphan (s);
       s->name = save;
+    }
+  else if (o != NULL && os->children.head != NULL)
+    {
+      lang_statement_list_type add;
+
+      lang_list_init (&add);
+      lang_add_section (&add, s, os);
+      *add.tail = os->children.head;
+      os->children.head = add.head;
     }
   else
     lang_add_section (&os->children, s, os);
@@ -154,7 +162,7 @@ spu_elf_load_ovl_mgr (void)
 	  for (in = ovl_is->the_bfd->sections; in != NULL; in = in->next)
 	    if ((in->flags & (SEC_ALLOC | SEC_LOAD))
 		== (SEC_ALLOC | SEC_LOAD))
-	      spu_place_special_section (in, ".text");
+	      spu_place_special_section (in, NULL, ".text");
 	}
     }
 
@@ -164,7 +172,7 @@ spu_elf_load_ovl_mgr (void)
        os = os->next)
     if (os->bfd_section != NULL
 	&& spu_elf_section_data (os->bfd_section) != NULL
-	&& spu_elf_section_data (os->bfd_section)->ovl_index != 0)
+	&& spu_elf_section_data (os->bfd_section)->u.o.ovl_index != 0)
       {
 	if (os->bfd_section->alignment_power < 4)
 	  os->bfd_section->alignment_power = 4;
@@ -192,20 +200,15 @@ spu_before_allocation (void)
       /* Find overlays by inspecting section vmas.  */
       if (spu_elf_find_overlays (output_bfd, &link_info))
 	{
-	  asection *stub, *ovtab;
+	  int ret;
 
-	  if (!spu_elf_size_stubs (output_bfd, &link_info, non_overlay_stubs,
-				   stack_analysis, &stub, &ovtab, &toe))
+	  ret = spu_elf_size_stubs (output_bfd, &link_info,
+				    spu_place_special_section,
+				    non_overlay_stubs);
+	  if (ret == 0)
 	    einfo ("%X%P: can not size overlay stubs: %E\n");
-
-	  if (stub != NULL)
-	    {
-	      spu_place_special_section (stub, ".text");
-	      spu_place_special_section (ovtab, ".data");
-	      spu_place_special_section (toe, ".toe");
-
-	      spu_elf_load_ovl_mgr ();
-	    }
+	  else if (ret == 2)
+	    spu_elf_load_ovl_mgr ();
 	}
 
       /* We must not cache anything from the preliminary sizing.  */
@@ -235,10 +238,8 @@ gld${EMULATION_NAME}_finish (void)
 	einfo ("%X%P: %A exceeds local store range\n", s);
     }
 
-  if (toe != NULL
-      && !spu_elf_build_stubs (&link_info,
-			       emit_stub_syms || link_info.emitrelocations,
-			       toe))
+  if (!spu_elf_build_stubs (&link_info,
+			    emit_stub_syms || link_info.emitrelocations))
     einfo ("%X%P: can not build overlay stubs: %E\n");
 
   finish_default ();

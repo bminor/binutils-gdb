@@ -1,3 +1,15 @@
+2008-01-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spu_ovl.S: Rewrite.
+	* emultempl/spu_ovl.o: Regenerate.
+	* emultempl/spuelf.em (toe): Delete.
+	(spu_place_special_section): Add param to control section placement.
+	Adjust callers.
+	(spu_elf_load_ovl_mgr): Adjust for struct _spu_elf_section_data
+	changes.
+	(spu_before_allocation): Adjust spu_elf_size_stubs call.
+	(gld${EMULATION_NAME}_finish): Adjust spu_elf_build_stubs call.
+
 2008-01-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/5670

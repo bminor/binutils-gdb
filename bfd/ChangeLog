@@ -1,3 +1,46 @@
+2008-01-28  Alan Modra  <amodra@bigpond.net.au>
+
+	Rewrite SPU overlay handling code.  Put overlay calls stubs in the
+	overlays where possible.  Use a faster call stub, or optionally at
+	compile time, a more compact stub.  Double size of _ovly_buf_table
+	so that low bit of _ovly_table.buf can be used as a "present" bit.
+	Reserve an extra _ovly_table entry for index zero.
+	* elf32-spu.c: (struct spu_link_hash_table): Delete a number of fields,
+	add new ones.
+	(struct got_entry): New.
+	(struct spu_stub_hash_entry): Delete.
+	(stub_hash_newfunc, spu_elf_link_hash_table_free): Delete.
+	(spu_elf_link_hash_table_create): Adjust for struct changes.
+	(spu_stub_name): Delete.
+	(spu_elf_find_overlays): Don't track sections from overlay regions.
+	Instead set ovl_buf number in spu elf section data.  Error if
+	overlays in one region don't start at the same address.  Adjust
+	for struct _spu_elf_section_data changes.
+	(SIZEOF_STUB1, SIZEOF_STUB2, ILA_79, ILA_78): Delete.
+	(OVL_STUB_SIZE, BRSL, LNOP, ILA): Define.
+	(needs_ovl_stub): Adjust for struct _spu_elf_section_data changes.
+	(enum _insn_type): New.
+	(count_stub, build_stub): New functions.
+	(allocate_spuear_stubs): Use count_stub.
+	(build_spuear_stubs): Use build_stub.
+	(populate_stubs, sort_stubs): Delete.
+	(process_stubs): New function.
+	(write_one_stub): Delete.
+	(spu_elf_size_stubs, spu_elf_build_stubs): Rewrite.
+	(alloc_stack_info): Adjust for struct _spu_elf_section_data changes.
+	(maybe_insert_function, check_function_ranges): Likewise.
+	(find_function, pasted_function, build_call_tree): Likewise.
+	(spu_elf_stack_analysis, spu_elf_modify_segment_map): Likewise.
+	(spu_elf_modify_program_headers): Likewise.
+	(interesting_section): Detect stub sections differently.  Delete
+	htab param, adjust all callers.
+	(spu_elf_relocate_section): Rewrite stub handling.
+	(spu_elf_output_symbol_hook): Likewise.
+	(bfd_elf32_bfd_link_hash_table_free): Delete.
+	* elf32-spu.h (struct _spu_elf_section_data): Move input-only and
+	output-only fields into a union.  Add ovl_buf.
+	(spu_elf_size_stubs, spu_elf_build_stubs): Update prototypes.
+
 2008-01-25  DJ Delorie  <dj@redhat.com>
 
 	* elf32-m32c.c (_bfd_m32c_elf_eh_frame_address_size): New.

@@ -19,295 +19,242 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-/**
- * MFC DMA defn's.
- */
+/* MFC DMA defn's.  */
 #define MFC_GET_CMD		0x40
 #define MFC_MAX_DMA_SIZE	0x4000
 #define MFC_TAG_UPDATE_ALL	2
 #define MFC_TAG_ID		0
 
+/* Register usage.  */
+#define reserved1	$75
+#define parm		$75
+#define tab1		reserved1
+#define tab2		reserved1
+#define vma		reserved1
+#define oldvma		reserved1
+#define newmask		reserved1
+#define map		reserved1
 
-/**
- * Temporary register allocations.
- * These are saved/restored here.
- */
-#define tab		$75
-#define cgbits		$75
-#define add64		$75
-#define ealo		$75
-#define newmask		$75
-#define tagstat		$75
-#define bchn		$75
-#define rv1		$75
+#define reserved2	$76
+#define off1		reserved2
+#define off2		reserved2
+#define present1	reserved2
+#define present2	reserved2
+#define sz		reserved2
+#define cmp		reserved2
+#define add64		reserved2
+#define cgbits		reserved2
+#define off3		reserved2
+#define off4		reserved2
+#define off5		reserved2
+#define tagstat		reserved2
 
-#define off		$76
-#define off64		$76
-#define maxsize		$76
-#define oldmask		$76
-#define sz		$76
-#define lnkr		$76
-#define rv2		$76
+#define reserved3	$77
+#define buf1		reserved3
+#define buf2		reserved3
+#define rv3		reserved3
+#define ealo		reserved3
+#define cmd		reserved3
+#define off64		reserved3
+#define tab3		reserved3
+#define tab4		reserved3
+#define tab5		reserved3
 
-#define cur		$77
-#define cmp		$77
-#define buf		$77
-#define genwi		$77
-#define tagid		$77
-#define cmd		$77
-#define rv3		$77
+#define reserved4	$78
+#define ovl		reserved4
+#define rv2		reserved4
+#define rv5		reserved4
+#define cgshuf		reserved4
+#define newovl		reserved4
 
-#define cgshuf		$78
+#define reserved5	$79
+#define target		reserved5
 
-#define vma		$6
+#define save1		$72
+#define rv4		save1
+#define rv7		save1
+#define tagid		save1
+#define maxsize		save1
+#define pbyte		save1
+#define pbit		save1
 
-#define map		$7
-#define osize		$7
-#define cmp2		$7
+#define save2		$73
+#define cur		save2
+#define rv6		save2
+#define osize		save2
+#define zovl		save2
+#define oldovl		save2
+#define newvma		save2
 
-#define ea64		$8
-#define retval		$8
+#define save3		$74
+#define rv1		save3
+#define ea64		save3
+#define buf3		save3
+#define genwi		save3
+#define newmap		save3
+#define oldmask		save3
 
-#ifdef OVLY_IRQ_SAVE
-#define irqtmp		$8
-#define irq_stat	$9
-#endif
-
-# Stack quadword minux N
-#define	SQWM1	-16*1
-#define	SQWM2	-16*2
-#define	SQWM3	-16*3
-#define	SQWM4	-16*4
-#define	SQWM5	-16*5
-#define	SQWM6	-16*6
-#define	SQWM7	-16*7
-#define	SQWM8	-16*8
-#define	SQWM9	-16*9
-#define	SQWM10	-16*10
-#define	SQWM11	-16*11
-#define	SQWM12	-16*12
-#define	SQWM13	-16*13
-#define	SQWM14	-16*14
-#define	SQWM15	-16*15
-#define	SQWM16	-16*16
-
-	.extern		_ovly_table
-	.extern		_ovly_buf_table
-
-#ifdef OVLY_PRINTFS
-#define SPE_C99_VPRINTF 37
-__entry_event_format:
-	.string		"In entry_event_hook segment=0x%08x entry-address=0x%08x\n"
-__debug_event_format:
-  	.string		"In debug_event_hook link-register=0x%08x %08x %08x %08x\n"
-__dma_event_format:
-  	.string		"In dma_event_hook vma=0x%08x ea=%08x%08x sz=%08x\n"
-__ovly_buf_table_format:
-  	.string		"_ovly_buf_table[%08x]=%08x\n"
-#endif
 
 	.text
-	.align 		4
-	.type		__rv_pattern, @object
-	.size		__rv_pattern, 16
+	.align 	4
+	.type	__rv_pattern, @object
+	.size	__rv_pattern, 16
 __rv_pattern:
-	.word		0x00010203, 0x1c1d1e1f, 0x00010203, 0x10111213
-	.type		__cg_pattern, @object
-	.size		__cg_pattern, 16
-__cg_pattern:
-	.word		0x04050607, 0x80808080, 0x80808080, 0x80808080
+	.word	0x00010203, 0x10111213, 0x80808080, 0x80808080
 
-/**
+	.type	__cg_pattern, @object
+	.size	__cg_pattern, 16
+__cg_pattern:
+	.word	0x04050607, 0x80808080, 0x80808080, 0x80808080
+
+	.type	__ovly_current, @object
+	.size	__ovly_current, 16
+__ovly_current:
+	.space	16
+
+/*
  * __ovly_return - stub for returning from overlay functions.
  *
- * inputs:
- *	$lr	link register
+ * On entry the four slots of $lr are:
+ *   __ovly_return, prev ovl index, caller return addr, undefined.
  *
- * outputs:
- *	$78	old partition number, to be reloaded
- *	$79	return address in old partion number
+ * Load the previous overlay and jump to the caller return address.
+ * Updates __ovly_current.
  */
-	.global		__ovly_return
-	.type		__ovly_return, @function
-
-	.word		0
+	.align 	4
+	.global	__ovly_return
+	.type	__ovly_return, @function
 __ovly_return:
-	shlqbyi		$78, $lr, 4
-	shlqbyi		$79, $lr, 8
-	biz		$78, $79
-	.size		__ovly_return, . - __ovly_return
+	ila	tab1, _ovly_table - 16				# 0,2	0
+	shlqbyi	ovl, $lr, 4					# 1,4	0
+#nop
+	shlqbyi	target, $lr, 8					# 1,4	1
+#nop; lnop
+#nop; lnop
+	shli	off1, ovl, 4					# 0,4	4
+#lnop
+#nop
+	hbr	ovly_ret9, target				# 1,15	5
+#nop; lnop
+#nop; lnop
+#nop
+	lqx	vma, tab1, off1					# 1,6	8
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop
+	rotqbyi	buf1, vma, 12					# 1,4	14
+#nop
+	stqd	save3, -48($sp)					# 1,6	15
+#nop
+	stqd	save2, -32($sp)					# 1,6	16
+#nop
+	stqd	save1, -16($sp)					# 1,6	17
+	andi	present1, buf1, 1				# 0,2	18
+	stqd	ovl, (__ovly_current - __ovly_return)($lr)	# 1,6	18
+#nop; lnop
+#nop
+	brz	present1, __ovly_load_event			# 1,4	20
+ovly_ret9:
+#nop
+	bi	target						# 1,4	21
 
-/**
+/*
  * __ovly_load - copy an overlay partion to local store.
  *
- * inputs:
- *	$78	partition number to be loaded.
- *	$79	branch target in new partition.
- *	$lr	link register, containing return addr.
+ * On entry $75 points to a word consisting of the overlay index in
+ * the top 14 bits, and the target address in the bottom 18 bits.
  *
- * outputs:
- *	$lr	new link register, returning through __ovly_return.
- *
- * Copy a new overlay partition into local store, or return
- * immediately if the partition is already resident.
+ * Sets up $lr to return via __ovly_return.
+ * Updates __ovly_current.
  */
-	.global		__ovly_load
-	.type		__ovly_load, @function
-
+	.align  3
+	.global	__ovly_load
+	.type	__ovly_load, @function
 __ovly_load:
-/* Save temporary registers to stack. */
-	stqd		$6, -16($sp)
-	stqd		$7, -32($sp)
-	stqd		$8, -48($sp)
-
-#ifdef OVLY_IRQ_SAVE
-/* Save irq state, then disable interrupts. */
-	stqd		$9, -64($sp)
-	ila		irqtmp, __ovly_irq_save
-	rdch		irq_stat, $SPU_RdMachStat
-	bid		irqtmp
-__ovly_irq_save:
+#if OVL_STUB_SIZE == 8
+########
+#nop
+	lqd	target, 0(parm)					# 1,6	-11
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop
+	rotqby	target, target, parm				# 1,4	-5
+	ila	tab2, _ovly_table - 16				# 0,2	-4
+	stqd	save3, -48($sp)					# 1,6	-4
+#nop
+	stqd	save2, -32($sp)					# 1,6	-3
+#nop
+	stqd	save1, -16($sp)					# 1,6	-2
+	rotmi	ovl, target, -18				# 0,4	-1
+	hbr	ovly_load9, target				# 1,15	-1
+	ila	rv1, __ovly_return				# 0,2	0
+#lnop
+#nop; lnop
+#nop
+	lqd	cur, (__ovly_current - __ovly_return)(rv1)	# 1,6	2
+	shli	off2, ovl, 4					# 0,4	3
+	stqd	ovl, (__ovly_current - __ovly_return)(rv1)	# 1,6	3
+	ceq	rv2, $lr, rv1					# 0,2	4
+	lqd	rv3, (__rv_pattern - __ovly_return)(rv1)	# 1,6	4
+#nop; lnop
+#nop; lnop
+#nop
+	lqx	vma, tab2, off2					# 1,6	7
+########
+#else /* OVL_STUB_SIZE == 16 */
+########
+	ila	tab2, _ovly_table - 16				# 0,2	0
+	stqd	save3, -48($sp)					# 1,6	0
+	ila	rv1, __ovly_return				# 0,2	1
+	stqd	save2, -32($sp)					# 1,6	1
+	shli	off2, ovl, 4					# 0,4	2
+	lqa	cur, __ovly_current				# 1,6	2
+	nop
+	stqa	ovl, __ovly_current				# 1,6	3
+	ceq	rv2, $lr, rv1					# 0,2	4
+	lqd	rv3, (__rv_pattern - __ovly_return)(rv1)	# 1,6	4
+#nop
+	hbr	ovly_load9, target				# 1,15	5
+#nop
+	lqx	vma, tab2, off2					# 1,6	6
+#nop
+	stqd	save1, -16($sp)					# 1,6	7
+########
 #endif
 
-#ifdef OVLY_PRINTFS
-//==============================================
-// In entry_event_hook segment=0x%08x entry-address=0x%08x
-//==============================================
-# save registers
-	stqd	$10, SQWM5($sp)
-	stqd	$11, SQWM6($sp)
-	stqd	$12, SQWM7($sp)
-# Place input parameters onto the stack to form the
-# local storage memory image.
-	ila	$10, __entry_event_format
-	stqd	$10, SQWM12($sp)
-	ai	$10, $sp, SQWM9
-	stqd	$10, SQWM11($sp)
-	stqd	$sp, SQWM10($sp)
-	stqd	$78, SQWM9($sp)
-	stqd	$79, SQWM8($sp)
-# Construct a message consisting of the 8-bit opcode
-# and 24-bit local store pointer to the input
-# parameters and place it forllowing the stop and signal
-	ila	$10, 0x3ffff		# address mask
-	ilhu	$11, SPE_C99_VPRINTF << 8
-	ai	$12, $sp, SQWM12	# parameter pointer
-	selb	$11, $11, $12, $10	# combine command & address ptr
-	brsl	$10, next1a
-next1a:
-	.type	next1a, @function
-	lqr	$12, message1a
-	cwd	$10, message1a-next1a($10)
-	shufb	$11, $11, $12, $10	# insert msg into inst word
-	stqr	$11, message1a		# store cmd/ptr into msg word
-	dsync
-# Notify the PPE to perform the assisted call request
-# by issing a stop and signal with a signal code
-# of 0x2100 (C99 class)
-	stop	0x2100
-message1a:
-	.word	0
+#nop; lnop
+#nop; lnop
+#nop
+	shufb	rv4, rv1, cur, rv3				# 1,4	10
+#nop
+	fsmb	rv5, rv2					# 1,4	11
+#nop
+	rotqmbyi rv6, $lr, -8					# 1,4	12
+#nop
+	rotqbyi	buf2, vma, 12					# 1,4	13
+#nop
+	lqd	save3, -48($sp)					# 1,6	14
+#nop; lnop
+	or	rv7, rv4, rv6					# 0,2	16
+	lqd	save2, -32($sp)					# 1,6	16
+	andi	present2, buf2, 1				# 0,2	17
+	lnop							# 1,0	17
+	selb	$lr, rv7, $lr, rv5				# 0,2	18
+	lqd	save1, -16($sp)					# 1,6	18
+#nop
+	brz	present2, __ovly_load_event			# 1,4	19
+ovly_load9:
+#nop
+	bi	target						# 1,4	20
 
-# save registers
-	stqd	$13, SQWM8($sp)
-	stqd	$14, SQWM9($sp)
-	stqd	$15, SQWM10($sp)
-	stqd	$16, SQWM11($sp)
-
-# initialize loop
-	il	$13, 1
-	ila	$14, _ovly_buf_table
-	ila	$15, _ovly_buf_table_end
-
-loop_start1:
-# Place input parameters onto the stack to form the
-# local storage memory image.
-	ila	$10, __ovly_buf_table_format
-	stqd	$10, SQWM16($sp)
-	ai	$10, $sp, SQWM13
-	stqd	$10, SQWM15($sp)
-	stqd	$sp, SQWM14($sp)
-	stqd	$13, SQWM13($sp)
-	lqd	$16, 0($14)
-	rotqby	$16, $16, $14
-	stqd	$16, SQWM12($sp)
-# Construct a message consisting of the 8-bit opcode
-# and 24-bit local store pointer to the input
-# parameters and place it forllowing the stop and signal
-	ila	$10, 0x3ffff		# address mask
-	ilhu	$11, SPE_C99_VPRINTF << 8
-	ai	$12, $sp, SQWM16	# parameter pointer
-	selb	$11, $11, $12, $10	# combine command & address ptr
-	brsl	$10, next1b
-next1b:
-	.type	next1b, @function
-	lqr	$12, message1b
-	cwd	$10, message1b-next1b($10)
-	shufb	$11, $11, $12, $10	# insert msg into inst word
-	stqr	$11, message1b		# store cmd/ptr into msg word
-	dsync
-# Notify the PPE to perform the assisted call request
-# by issing a stop and signal with a signal code
-# of 0x2100 (C99 class)
-	stop	0x2100
-message1b:
-	.word	0
-
-# move to next entry
-	ai	$13, $13, 1
-	ai	$14, $14, 4
-	clgt	$16, $15, $14
-	brnz	$16, loop_start1
-
-# restore registers
-	lqd	$16, SQWM11($sp)
-	lqd	$15, SQWM10($sp)
-	lqd	$14, SQWM9($sp)
-	lqd	$13, SQWM8($sp)
-	lqd	$12, SQWM7($sp)
-	lqd	$11, SQWM6($sp)
-	lqd	$10, SQWM5($sp)
-//==============================================
-#endif
-
-/* Set branch hint to overlay target. */
-	hbr		__ovly_load_ret, $79
-
-/* Get caller's overlay index by back chaining through stack frames.
- * Loop until end of stack (back chain all-zeros) or
- * encountered a link register we set here. */
-	lqd		bchn, 0($sp)
-	ila		retval, __ovly_return
-
-__ovly_backchain_loop:
-	lqd		lnkr, 16(bchn)
-	lqd		bchn, 0(bchn)
-	ceq		cmp, lnkr, retval
-	ceqi		cmp2, bchn, 0
-	or		cmp, cmp, cmp2
-	brz		cmp, __ovly_backchain_loop
-
-/* If we reached the zero back-chain, then lnkr is bogus.  Clear the
- * part of lnkr that we use later (slot 3). */
-	rotqbyi		cmp2, cmp2, 4
-	andc		lnkr, lnkr, cmp2
-
-/* Set lr = {__ovly_return, prev ovl ndx, caller return adr, callee ovl ndx}. */
-	lqd		rv1, (__rv_pattern-__ovly_return+4)(retval)
-	shufb		rv2, retval, lnkr, rv1
-	shufb		rv3, $lr, $78, rv1
-	fsmbi		rv1, 0xff
-	selb		rv2, rv2, rv3, rv1
-/* If we have a tail call from one overlay function to another overlay,
-   then lr is already set up.  Don't change it.  */
-	ceq		rv1, $lr, retval
-	fsmb		rv1, rv1
-	selb		$lr, rv2, $lr, rv1
-
-/* Branch to $79 if non-overlay */
-	brz		$78, __ovly_load_restore
-
-/* Load values from _ovly_table[$78].
+/* If we get here, we are about to load a new overlay.
+ * "vma" contains the relevant entry from _ovly_table[].
  *	extern struct {
  *		u32 vma;
  *		u32 size;
@@ -315,265 +262,166 @@ __ovly_backchain_loop:
  *		u32 buf;
  *	} _ovly_table[];
  */
-	shli		off, $78, 4
-	ila		tab, _ovly_table - 16
-	lqx		vma, tab, off
-	rotqbyi		buf, vma, 12
-
-/* Load values from _ovly_buf_table[buf].
- *	extern struct {
- *		u32 mapped;
- *	} _ovly_buf_table[];
- */
-	ila		tab, _ovly_buf_table
-	ai		off, buf, -1
-	shli		off, off, 2
-	lqx		map, tab, off
-	rotqby		cur, map, off
-
-/* Branch to $79 now if overlay is already mapped.  */
-	ceq		cmp, $78, cur
-	brnz		cmp, __ovly_load_restore
-
-/* Marker for profiling code.  If we get here, we are about to load
- * a new overlay.
- */
-	.global		__ovly_load_event
-	.type		__ovly_load_event, @function
+	.align  3
+	.global	__ovly_load_event
+	.type	__ovly_load_event, @function
 __ovly_load_event:
+#nop
+	rotqbyi	sz, vma, 8					# 1,4	0
+#nop
+	rotqbyi	osize, vma, 4					# 1,4	1
+#nop
+	lqa	ea64, _EAR_					# 1,6	2
+#nop
+	lqd	cgshuf, (__cg_pattern - __ovly_return)($lr)	# 1,6	3
 
-/* Set _ovly_buf_table[buf].mapped = $78. */
-	cwx		genwi, tab, off
-	shufb		map, $78, map, genwi
-	stqx		map, tab, off
-
-/* A new partition needs to be loaded. Prepare for DMA loop.
- * _EAR_ is the 64b base EA, filled in at run time by the
- * loader, and indicating the value for SPU executable image start.
- */
-	lqd		cgshuf, (__cg_pattern-__ovly_return+4)(retval)
-	rotqbyi		osize, vma, 4
-	rotqbyi		sz, vma, 8
-	lqa		ea64, _EAR_
-
+/* We could predict the branch at the end of this loop by adding a few
+   instructions, and there are plenty of free cycles to do so without
+   impacting loop execution time.  However, it doesn't make a great
+   deal of sense since we need to wait for the dma to complete anyway.  */
 __ovly_xfer_loop:
-/* 64b add to compute next ea64. */
-	rotqmbyi	off64, sz, -4
-	cg		cgbits, ea64, off64
-	shufb		add64, cgbits, cgbits, cgshuf
-	addx		add64, ea64, off64
-	ori		ea64, add64, 0
+#nop
+	rotqmbyi off64, sz, -4					# 1,4	4
+#nop; lnop
+#nop; lnop
+#nop; lnop
+	cg	cgbits, ea64, off64				# 0,2	8
+#lnop
+#nop; lnop
+#nop
+	shufb	add64, cgbits, cgbits, cgshuf			# 1,4	10
+#nop; lnop
+#nop; lnop
+#nop; lnop
+	addx	add64, ea64, off64				# 0,2	14
+#lnop
+	ila	maxsize, MFC_MAX_DMA_SIZE			# 0,2	15
+	lnop
+	ori	ea64, add64, 0					# 0,2	16
+	rotqbyi	ealo, add64, 4					# 1,4	16
+	cgt	cmp, osize, maxsize				# 0,2	17
+	wrch	$MFC_LSA, vma					# 1,6	17
+#nop; lnop
+	selb	sz, osize, maxsize, cmp				# 0,2	19
+	wrch	$MFC_EAH, ea64					# 1,6	19
+	ila	tagid, MFC_TAG_ID				# 0,2	20
+	wrch	$MFC_EAL, ealo					# 1,6	20
+	ila	cmd, MFC_GET_CMD				# 0,2	21
+	wrch	$MFC_Size, sz					# 1,6	21
+	sf	osize, sz, osize				# 0,2	22
+	wrch	$MFC_TagId, tagid				# 1,6	22
+	a	vma, vma, sz					# 0,2	23
+	wrch	$MFC_Cmd, cmd					# 1,6	23
+#nop
+	brnz	osize, __ovly_xfer_loop				# 1,4	24
 
-/* Setup DMA parameters, then issue DMA request. */
-	rotqbyi		ealo, add64, 4
-	ila		maxsize, MFC_MAX_DMA_SIZE
-	cgt		cmp, osize, maxsize
-	selb		sz, osize, maxsize, cmp
-	ila		tagid, MFC_TAG_ID
-	wrch		$MFC_LSA, vma
-	wrch		$MFC_EAH, ea64
-	wrch		$MFC_EAL, ealo
-	wrch		$MFC_Size, sz
-	wrch		$MFC_TagId, tagid
-	ila		cmd, MFC_GET_CMD
-	wrch		$MFC_Cmd, cmd
-
-#ifdef OVLY_PRINTFS
-//==============================================
-// In dma_event_hook vma=0x%08x ea=%08x%08x sz=%08x
-//==============================================
-# save registers
-	stqd	$10, SQWM5($sp)
-	stqd	$11, SQWM6($sp)
-	stqd	$12, SQWM7($sp)
-# Place input parameters onto the stack to form the
-# local storage memory image.
-	ila	$10, __dma_event_format
-	stqd	$10, SQWM14($sp)
-	ai	$10, $sp, SQWM11
-	stqd	$10, SQWM13($sp)
-	stqd	$sp, SQWM12($sp)
-	stqd	vma, SQWM11($sp)
-	stqd	ea64, SQWM10($sp)
-	stqd	ealo, SQWM9($sp)
-	stqd	sz, SQWM8($sp)
-# Construct a message consisting of the 8-bit opcode
-# and 24-bit local store pointer to the input
-# parameters and place it forllowing the stop and signal
-	ila	$10, 0x3ffff		# address mask
-	ilhu	$11, SPE_C99_VPRINTF << 8
-	ai	$12, $sp, SQWM14	# parameter pointer
-	selb	$11, $11, $12, $10	# combine command & address ptr
-	brsl	$10, next3a
-next3a:
-	.type	next3a, @function
-	lqr	$12, message3a
-	cwd	$10, message3a-next3a($10)
-	shufb	$11, $11, $12, $10	# insert msg into inst word
-	stqr	$11, message3a		# store cmd/ptr into msg word
-	dsync
-# Notify the PPE to perform the assisted call request
-# by issing a stop and signal with a signal code
-# of 0x2100 (C99 class)
-	stop	0x2100
-message3a:
-	.word	0
-
-# restore registers
-	lqd	$12, SQWM7($sp)
-	lqd	$11, SQWM6($sp)
-	lqd	$10, SQWM5($sp)
-//==============================================
-#endif
-
-/* Increment vma, decrement size, branch back as needed. */
-	a		vma, vma, sz
-	sf		osize, sz, osize
-	brnz		osize, __ovly_xfer_loop
-
-/* Save app's tagmask, wait for DMA complete, restore mask. */
-	rdch		oldmask, $MFC_RdTagMask
-#if MFC_TAG_ID < 16
-	ilh		newmask, 1 << MFC_TAG_ID
-#else
-	ilhu		newmask, 1 << (MFC_TAG_ID - 16)
-#endif
-	wrch		$MFC_WrTagMask, newmask
-	ila		tagstat, MFC_TAG_UPDATE_ALL
-	wrch		$MFC_WrTagUpdate, tagstat
-	rdch		tagstat, $MFC_RdTagStat
-	sync
-	wrch		$MFC_WrTagMask, oldmask
-
-#ifdef OVLY_PRINTFS
-//==============================================
-// In debug_event_hook link-register=0x%08x %08x %08x %08x
-//==============================================
-# save registers
-	stqd	$10, SQWM5($sp)
-	stqd	$11, SQWM6($sp)
-	stqd	$12, SQWM7($sp)
-# Place input parameters onto the stack to form the
-# local storage memory image.
-	ila	$10, __debug_event_format
-	stqd	$10, SQWM14($sp)
-	ai	$10, $sp, SQWM11
-	stqd	$10, SQWM13($sp)
-	stqd	$sp, SQWM12($sp)
-	stqd	$lr, SQWM11($sp)
-	rotqbyi $10, $lr, 4
-	stqd	$10, SQWM10($sp)
-	rotqbyi $10, $10, 4
-	stqd	$10, SQWM9($sp)
-	rotqbyi $10, $10, 4
-	stqd	$10, SQWM8($sp)
-# Construct a message consisting of the 8-bit opcode
-# and 24-bit local store pointer to the input
-# parameters and place it forllowing the stop and signal
-	ila	$10, 0x3ffff		# address mask
-	ilhu	$11, SPE_C99_VPRINTF << 8
-	ai	$12, $sp, SQWM14	# parameter pointer
-	selb	$11, $11, $12, $10	# combine command & address ptr
-	brsl	$10, next2a
-next2a:
-	.type	next2a, @function
-	lqr	$12, message2a
-	cwd	$10, message2a-next2a($10)
-	shufb	$11, $11, $12, $10	# insert msg into inst word
-	stqr	$11, message2a		# store cmd/ptr into msg word
-	dsync
-# Notify the PPE to perform the assisted call request
-# by issing a stop and signal with a signal code
-# of 0x2100 (C99 class)
-	stop	0x2100
-message2a:
-	.word	0
-
-# save registers
-	stqd	$13, SQWM8($sp)
-	stqd	$14, SQWM9($sp)
-	stqd	$15, SQWM10($sp)
-	stqd	$16, SQWM11($sp)
-
-# initialize loop
-	il	$13, 1
-	ila	$14, _ovly_buf_table
-	ila	$15, _ovly_buf_table_end
-
-loop_start2:
-# Place input parameters onto the stack to form the
-# local storage memory image.
-	ila	$10, __ovly_buf_table_format
-	stqd	$10, SQWM16($sp)
-	ai	$10, $sp, SQWM13
-	stqd	$10, SQWM15($sp)
-	stqd	$sp, SQWM14($sp)
-	stqd	$13, SQWM13($sp)
-	lqd	$16, 0($14)
-	rotqby	$16, $16, $14
-	stqd	$16, SQWM12($sp)
-# Construct a message consisting of the 8-bit opcode
-# and 24-bit local store pointer to the input
-# parameters and place it forllowing the stop and signal
-	ila	$10, 0x3ffff		# address mask
-	ilhu	$11, SPE_C99_VPRINTF << 8
-	ai	$12, $sp, SQWM16	# parameter pointer
-	selb	$11, $11, $12, $10	# combine command & address ptr
-	brsl	$10, next2b
-next2b:
-	.type	next2b, @function
-	lqr	$12, message2b
-	cwd	$10, message2b-next2b($10)
-	shufb	$11, $11, $12, $10	# insert msg into inst word
-	stqr	$11, message2b		# store cmd/ptr into msg word
-	dsync
-# Notify the PPE to perform the assisted call request
-# by issing a stop and signal with a signal code
-# of 0x2100 (C99 class)
-	stop	0x2100
-message2b:
-	.word	0
-
-# move to next entry
-	ai	$13, $13, 1
-	ai	$14, $14, 4
-	clgt	$16, $15, $14
-	brnz	$16, loop_start2
-
-# restore registers
-	lqd	$16, SQWM11($sp)
-	lqd	$15, SQWM10($sp)
-	lqd	$14, SQWM9($sp)
-	lqd	$13, SQWM8($sp)
-	lqd	$12, SQWM7($sp)
-	lqd	$11, SQWM6($sp)
-	lqd	$10, SQWM5($sp)
-//==============================================
-#endif
-
-	.global		_ovly_debug_event
-	.type		_ovly_debug_event, @function
-_ovly_debug_event:
-/* GDB inserts debugger trap here.  */
+/* Now update our data structions while waiting for DMA to complete.
+   Low bit of .buf needs to be cleared on the _ovly_table entry
+   corresponding to the evicted overlay, and set on the entry for the
+   newly loaded overlay.  Note that no overlay may in fact be evicted
+   as _ovly_buf_table[] starts with all zeros.  Don't zap .buf entry
+   for zero index!  Also of course update the _ovly_buf_table entry.  */
+#nop
+	lqd	newovl, (__ovly_current - __ovly_return)($lr)	# 1,6	25
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop; lnop
+	shli	off3, newovl, 4					# 0,4	31
+#lnop
+	ila	tab3, _ovly_table - 16				# 0,2	32
+#lnop
+#nop
+	fsmbi	pbyte, 1					# 1,4	33
+#nop; lnop
+#nop
+	lqx	vma, tab3, off3					# 1,6	35
+#nop; lnop
+	andi	pbit, pbyte, 1					# 0,2	37
+	lnop
+#nop; lnop
+#nop; lnop
+#nop; lnop
+	or	newvma, vma, pbit				# 0,2	41
+	rotqbyi	buf3, vma, 12					# 1,4	41
+#nop; lnop
+#nop
+	stqx	newvma, tab3, off3				# 1,6	43
+#nop; lnop
+	shli	off4, buf3, 2					# 1,4	45
+#lnop
+	ila	tab4, _ovly_buf_table				# 0,2	46
+#lnop
+#nop; lnop
+#nop; lnop
+#nop
+	lqx	map, tab4, off4					# 1,6	49
+#nop
+	cwx	genwi, tab4, off4				# 1,4	50
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop; lnop
+#nop
+	rotqby	oldovl, map, off4				# 1,4	55
 	nop
-
-__ovly_load_restore:
-#ifdef OVLY_IRQ_SAVE
-/* Conditionally re-enable interrupts. */
-	andi		irq_stat, irq_stat, 1
-	ila		irqtmp, __ovly_irq_restore
-	binze		irq_stat, irqtmp
-__ovly_irq_restore:
-	lqd		$9, -64($sp)
+	shufb	newmap, newovl, map, genwi			# 0,4	56
+#if MFC_TAG_ID < 16
+	ila	newmask, 1 << MFC_TAG_ID			# 0,2	57
+#else
+	ilhu	newmask, 1 << (MFC_TAG_ID - 16)			# 0,2	57
 #endif
+#lnop
+#nop; lnop
+#nop; lnop
+	stqx	newmap, tab4, off4				# 1,6	60
 
-/* Restore saved registers. */
-	lqd		$8, -48($sp)
-	lqd		$7, -32($sp)
-	lqd		$6, -16($sp)
+/* Save app's tagmask, wait for DMA complete, restore mask.  */
+	ila	tagstat, MFC_TAG_UPDATE_ALL			# 0,2	61
+	rdch	oldmask, $MFC_RdTagMask				# 1,6	61
+#nop
+	wrch	$MFC_WrTagMask, newmask				# 1,6	62
+#nop
+	wrch	$MFC_WrTagUpdate, tagstat			# 1,6	63
+#nop
+	rdch	tagstat, $MFC_RdTagStat				# 1,6	64
+#nop
+	sync							# 1,4	65
+/* Any hint prior to the sync is lost.  A hint here allows the branch
+   to complete 15 cycles after the hint.  With no hint the branch will
+   take 18 or 19 cycles.  */
+	ila	tab5, _ovly_table - 16				# 0,2	66
+	hbr	do_load99, target				# 1,15	66
+	shli	off5, oldovl, 4					# 0,4	67
+	wrch	$MFC_WrTagMask, oldmask				# 1,6	67
+	ceqi	zovl, oldovl, 0					# 0,2	68
+#lnop
+#nop; lnop
+#nop
+	fsm	zovl, zovl					# 1,4	70
+#nop
+	lqx	oldvma, tab5, off5				# 1,6	71
+#nop
+	lqd	save3, -48($sp)					# 1,6	72
+#nop; lnop
+	andc	pbit, pbit, zovl				# 0,2	74
+	lqd	save2, -32($sp)					# 1,6	74
+#nop; lnop
+#nop; lnop
+	andc	oldvma, oldvma, pbit				# 0,2	77
+	lqd	save1, -16($sp)					# 1,6	77
+#nop; lnop
+	nop
+	stqx	oldvma, tab5, off5				# 1,6	79
+#nop; lnop
 
-__ovly_load_ret:
+	.global	_ovly_debug_event
+	.type	_ovly_debug_event, @function
+_ovly_debug_event:
+	nop
 /* Branch to target address. */
-	bi		$79
+do_load99:
+	bi	target						# 1,4	81
 
-	.size		__ovly_load, . - __ovly_load
+	.size	__ovly_load, . - __ovly_load

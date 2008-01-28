@@ -26,12 +26,20 @@ struct _spu_elf_section_data
 {
   struct bfd_elf_section_data elf;
 
-  /* Stack analysis info kept for this section.  */
+  union {
+    /* Info kept for input sections.  */
+    struct {
+      /* Stack analysis info kept for this section.  */
+      struct spu_elf_stack_info *stack_info;
+    } i;
 
-  struct spu_elf_stack_info *stack_info;
-
-  /* Non-zero for overlay output sections.  */
-  unsigned int ovl_index;
+    /* Info kept for output sections.  */
+    struct {
+      /* Non-zero for overlay output sections.  */
+      unsigned int ovl_index;
+      unsigned int ovl_buf;
+    } o;
+  } u;
 };
 
 #define spu_elf_section_data(sec) \
@@ -49,9 +57,8 @@ extern bfd_boolean spu_elf_open_builtin_lib (bfd **,
 extern bfd_boolean spu_elf_create_sections (bfd *,
 					    struct bfd_link_info *, int, int);
 extern bfd_boolean spu_elf_find_overlays (bfd *, struct bfd_link_info *);
-extern bfd_boolean spu_elf_size_stubs (bfd *, struct bfd_link_info *, int, int,
-				       asection **, asection **,
-				       asection **);
-extern bfd_boolean spu_elf_build_stubs (struct bfd_link_info *, int,
-					asection *);
+extern int spu_elf_size_stubs (bfd *, struct bfd_link_info *,
+			       void (*) (asection *, asection *, const char *),
+			       int);
+extern bfd_boolean spu_elf_build_stubs (struct bfd_link_info *, int);
 extern asection *spu_elf_check_vma (bfd *, bfd_vma, bfd_vma);
