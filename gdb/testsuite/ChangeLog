@@ -1,3 +1,7 @@
+2008-01-28  Doug Evans  <dje@google.com>
+
+	* gdb.base/maint.exp: Tighten patterns looking for .text/.data/.bss.
+
 2008-01-27  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdb.base/expand-psymtabs.exp: Doc fix to the doc fix.
