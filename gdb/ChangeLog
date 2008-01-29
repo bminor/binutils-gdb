@@ -1,4 +1,4 @@
-2007-12-21  Joel Brobecker  <brobecker@adacore.com>
+2008-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* infrun.c (wait_for_inferior): Add treat_exec_as_sigtrap parameter
 	and use it.
