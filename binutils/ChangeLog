@@ -1,3 +1,13 @@
+2008-01-29  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (print_dwarf_vma): New function.  Display the value of a
+	dwarf_vma type at a specified precision.
+	(display_debug_loc): Use dwarf_vma type for begin and end values.
+	Use print_dwarf_vma to display their values.  Use byte_get_signed
+	in order to correctly detect the -1 escape value.
+	(display_debug_aranges): Likewise.
+	(display_debug_ranges): Likewise.
+
 2008-01-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf.c (display_debug_loc): Correct test for base address

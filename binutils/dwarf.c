@@ -162,6 +162,27 @@ byte_get_signed (unsigned char *field, int size)
     }
 }
 
+/* Print a dwarf_vma value (typically an address, offset or length) in
+   hexadecimal format, followed by a space.  The length of the value (and
+   hence the precision displayed) is determined by the byte_size parameter.  */
+   
+static void
+print_dwarf_vma (dwarf_vma val, unsigned byte_size)
+{
+  static char buff[18];
+
+  /* Printf does not have a way of specifiying a maximum field width for an
+     integer value, so we print the full value into a buffer and then select
+     the precision we need.  */
+#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
+  snprintf (buff, sizeof (buff), "%16.16llx ", val);
+#else
+  snprintf (buff, sizeof (buff), "%16.16lx ", val);
+#endif
+
+  printf (buff + (byte_size == 4 ? 8 : 0));
+}
+
 static unsigned long int
 read_leb128 (unsigned char *data, unsigned int *length_return, int sign)
 {
@@ -2616,9 +2637,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
   seen_first_offset = 0;
   for (i = first; i < num_debug_info_entries; i++)
     {
-      unsigned long begin;
-      unsigned long end;
-      unsigned long minus_one;
+      dwarf_vma begin;
+      dwarf_vma end;
       unsigned short length;
       unsigned long offset;
       unsigned int pointer_size;
@@ -2667,26 +2687,31 @@ display_debug_loc (struct dwarf_section *section, void *file)
 		  break;
 		}
 
-	      begin = byte_get (start, pointer_size);
+	      /* Note: we use sign extension here in order to be sure that
+		 we can detect the -1 escape value.  Sign extension into the
+		 top 32 bits of a 32-bit address will not affect the values
+		 that we display since we always show hex values, and always
+		 the bottom 32-bits.  */		 
+	      begin = byte_get_signed (start, pointer_size);
 	      start += pointer_size;
-	      end = byte_get (start, pointer_size);
+	      end = byte_get_signed (start, pointer_size);
 	      start += pointer_size;
+
+	      printf ("    %8.8lx ", offset);
 
 	      if (begin == 0 && end == 0)
 		{
-		  printf (_("    %8.8lx <End of list>\n"), offset);
+		  printf (_("<End of list>\n"));
 		  break;
 		}
 
 	      /* Check base address specifiers.  */
-	      minus_one = -1;
-	      if (pointer_size < sizeof (minus_one))
-		minus_one = (1L << (pointer_size * 8)) - 1;
-	      if (begin == minus_one && end != minus_one)
+	      if (begin == (dwarf_vma) -1 && end != (dwarf_vma) -1)
 		{
 		  base_address = end;
-		  printf (_("    %8.8lx %8.8lx %8.8lx (base address)\n"),
-			  offset, begin, end);
+		  print_dwarf_vma (begin, pointer_size);
+		  print_dwarf_vma (end, pointer_size);
+		  printf (_("(base address)\n"));
 		  continue;
 		}
 
@@ -2707,8 +2732,10 @@ display_debug_loc (struct dwarf_section *section, void *file)
 		  break;
 		}
 
-	      printf ("    %8.8lx %8.8lx %8.8lx (",
-		      offset, begin + base_address, end + base_address);
+	      print_dwarf_vma (begin + base_address, pointer_size);
+	      print_dwarf_vma (end + base_address, pointer_size);
+
+	      putchar ('(');
 	      need_frame_base = decode_location_expression (start,
 							    pointer_size,
 							    length,
@@ -2819,8 +2846,8 @@ display_debug_aranges (struct dwarf_section *section,
       unsigned char *hdrptr;
       DWARF2_Internal_ARange arange;
       unsigned char *ranges;
-      unsigned long length;
-      unsigned long address;
+      dwarf_vma length;
+      dwarf_vma address;
       unsigned char address_size;
       int excess;
       int offset_size;
@@ -2909,10 +2936,9 @@ display_debug_aranges (struct dwarf_section *section,
 
 	  ranges += address_size;
 
-	  if (address_size > 4)
-	    printf ("    0x%16.16lx 0x%lx\n", address, length);
-	  else
-	    printf ("    0x%8.8lx 0x%lx\n", address, length);	    
+	  print_dwarf_vma (address, address_size);
+	  print_dwarf_vma (length, address_size);
+	  putchar ('\n');
 	}
     }
 
@@ -3010,14 +3036,14 @@ display_debug_ranges (struct dwarf_section *section,
   seen_first_offset = 0;
   for (i = first; i < num_debug_info_entries; i++)
     {
-      unsigned long begin;
-      unsigned long end;
+      dwarf_vma begin;
+      dwarf_vma end;
       unsigned long offset;
       unsigned int pointer_size;
       unsigned long base_address;
 
       pointer_size = debug_information [i].pointer_size;
-
+      
       for (j = 0; j < debug_information [i].num_range_lists; j++)
 	{
 	  /* DWARF sections under Mach-O have non-zero addresses.  */
@@ -3042,33 +3068,39 @@ display_debug_ranges (struct dwarf_section *section,
 
 	  while (1)
 	    {
-	      begin = byte_get (start, pointer_size);
+	      /* Note: we use sign extension here in order to be sure that
+		 we can detect the -1 escape value.  Sign extension into the
+		 top 32 bits of a 32-bit address will not affect the values
+		 that we display since we always show hex values, and always
+		 the bottom 32-bits.  */		 
+	      begin = byte_get_signed (start, pointer_size);
 	      start += pointer_size;
-	      end = byte_get (start, pointer_size);
+	      end = byte_get_signed (start, pointer_size);
 	      start += pointer_size;
+
+	      printf ("    %8.8lx ", offset);
 
 	      if (begin == 0 && end == 0)
 		{
-		  printf (_("    %8.8lx <End of list>\n"), offset);
+		  printf (_("<End of list>\n"));
 		  break;
 		}
 
+	      print_dwarf_vma (begin, pointer_size);
+	      print_dwarf_vma (end, pointer_size);
+
 	      /* Check base address specifiers.  */
-	      if (begin == -1UL && end != -1UL)
+	      if (begin == (dwarf_vma) -1 && end != (dwarf_vma) -1)
 		{
 		  base_address = end;
-		  printf ("    %8.8lx %8.8lx %8.8lx (base address)\n",
-			  offset, begin, end);
+		  printf ("(base address)\n");
 		  continue;
 		}
 
-	      printf ("    %8.8lx %8.8lx %8.8lx",
-		      offset, begin + base_address, end + base_address);
-
 	      if (begin == end)
-		fputs (_(" (start == end)"), stdout);
+		fputs (_("(start == end)"), stdout);
 	      else if (begin > end)
-		fputs (_(" (start > end)"), stdout);
+		fputs (_("(start > end)"), stdout);
 
 	      putchar ('\n');
 	    }
