@@ -2550,12 +2550,12 @@ is held suspended.
 
 @end table
 
-@kindex show detach-on-follow
-@item show detach-on-follow
-Show whether detach-on-follow mode is on/off.
+@kindex show detach-on-fork
+@item show detach-on-fork
+Show whether detach-on-fork mode is on/off.
 @end table
 
-If you choose to set @var{detach-on-follow} mode off, then
+If you choose to set @samp{detach-on-fork} mode off, then
 @value{GDBN} will retain control of all forked processes (including
 nested forks).  You can list the forked processes under the control of
 @value{GDBN} by using the @w{@code{info forks}} command, and switch
@@ -2568,12 +2568,17 @@ Print a list of all forked processes under the control of @value{GDBN}.
 The listing will include a fork id, a process id, and the current 
 position (program counter) of the process.
 
-
 @kindex fork @var{fork-id}
 @item fork @var{fork-id}
 Make fork number @var{fork-id} the current process.  The argument
 @var{fork-id} is the internal fork number assigned by @value{GDBN},
 as shown in the first field of the @samp{info forks} display.
+
+@kindex process @var{process-id}
+@item process @var{process-id}
+Make process number @var{process-id} the current process.  The
+argument @var{process-id} must be one that is listed in the output of
+@samp{info forks}.
 
 @end table
 
