@@ -1,6 +1,6 @@
 /* ppc-opc.c -- PowerPC opcode list
    Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
    This file is part of the GNU opcodes library.
@@ -3373,7 +3373,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mtcr",    XFXM(31,144,0xff,0), XRARB_MASK, COM,	{ RS }},
 { "mtcrf",   X(31,144),	XFXFXM_MASK,	COM,		{ FXM, RS } },
 
-{ "mtmsr",   X(31,146),	XRARB_MASK,	COM,		{ RS } },
+{ "mtmsr",   X(31,146),	XRLARB_MASK,	COM,		{ RS, A_L } },
 
 { "stdx",    X(31,149), X_MASK,		PPC64,		{ RS, RA0, RB } },
 
