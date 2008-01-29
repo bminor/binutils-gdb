@@ -2618,6 +2618,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
     {
       unsigned long begin;
       unsigned long end;
+      unsigned long minus_one;
       unsigned short length;
       unsigned long offset;
       unsigned int pointer_size;
@@ -2678,7 +2679,10 @@ display_debug_loc (struct dwarf_section *section, void *file)
 		}
 
 	      /* Check base address specifiers.  */
-	      if (begin == -1UL && end != -1UL)
+	      minus_one = -1;
+	      if (pointer_size < sizeof (minus_one))
+		minus_one = (1L << (pointer_size * 8)) - 1;
+	      if (begin == minus_one && end != minus_one)
 		{
 		  base_address = end;
 		  printf (_("    %8.8lx %8.8lx %8.8lx (base address)\n"),
