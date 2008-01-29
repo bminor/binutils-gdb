@@ -1,3 +1,7 @@
+2008-01-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* MAINTAINERS: Remove myself as ix86 maintainer.  Add for SPU.
+
 2008-01-28  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/5529
