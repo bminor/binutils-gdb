@@ -1,5 +1,5 @@
 /* dwarf.c -- display DWARF contents of a BFD binary file
-   Copyright 2005, 2006, 2007
+   Copyright 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
