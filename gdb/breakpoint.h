@@ -273,6 +273,12 @@ struct bp_location
      bp_loc_other.  */
   CORE_ADDR address;
 
+  /* For hardware watchpoints, the size of data ad ADDRESS being watches.  */
+  int length;
+
+  /* Type of hardware watchpoint. */
+  enum target_hw_bp_type watchpoint_type;
+
   /* For any breakpoint type with an address, this is the BFD section
      associated with the address.  Used primarily for overlay debugging.  */
   asection *section;
@@ -387,9 +393,6 @@ struct breakpoint
     struct block *exp_valid_block;
     /* Value of the watchpoint the last time we checked it.  */
     struct value *val;
-
-    /* Holds the value chain for a hardware watchpoint expression.  */
-    struct value *val_chain;
 
     /* Holds the address of the related watchpoint_scope breakpoint
        when using watchpoints on local variables (might the concept

@@ -200,6 +200,15 @@ static void free_bp_location (struct bp_location *loc);
 
 static void mark_breakpoints_out (void);
 
+static struct bp_location *
+allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type);
+
+static void
+unlink_locations_from_global_list (struct breakpoint *bpt);
+
+static int
+is_hardware_watchpoint (struct breakpoint *bpt);
+
 /* Prototypes for exported functions. */
 
 /* If FALSE, gdb will not use hardware support for watchpoints, even
@@ -808,23 +817,181 @@ insert_catchpoint (struct ui_out *uo, void *args)
     }
 }
 
-/* Helper routine: free the value chain for a breakpoint (watchpoint).  */
-
-static void
-free_valchain (struct bp_location *b)
+static int
+is_hardware_watchpoint (struct breakpoint *bpt)
 {
-  struct value *v;
-  struct value *n;
-
-  /* Free the saved value chain.  We will construct a new one
-     the next time the watchpoint is inserted.  */
-  for (v = b->owner->val_chain; v; v = n)
-    {
-      n = value_next (v);
-      value_free (v);
-    }
-  b->owner->val_chain = NULL;
+  return (bpt->type == bp_hardware_watchpoint
+	  || bpt->type == bp_read_watchpoint
+	  || bpt->type == bp_access_watchpoint);
 }
+
+/* Assuming that B is a hardware breakpoint:
+   - Reparse watchpoint expression, is REPARSE is non-zero
+   - Evaluate expression and store the result in B->val
+   - Update the list of values that must be watched in B->loc.
+
+   If the watchpoint is disabled, do nothing.  If this is
+   local watchpoint that is out of scope, delete it.  */
+static void
+update_watchpoint (struct breakpoint *b, int reparse)
+{
+  int within_current_scope;
+  struct value *mark = value_mark ();
+  struct frame_id saved_frame_id;
+  struct bp_location *loc;
+  bpstat bs;
+
+  unlink_locations_from_global_list (b);
+  for (loc = b->loc; loc;)
+    {
+      struct bp_location *loc_next = loc->next;
+      remove_breakpoint (loc, mark_uninserted);
+      xfree (loc);
+      loc = loc_next;
+    }
+  b->loc = NULL;
+
+  if (b->disposition == disp_del_at_next_stop)
+    return;
+ 
+  /* Save the current frame's ID so we can restore it after
+     evaluating the watchpoint expression on its own frame.  */
+  /* FIXME drow/2003-09-09: It would be nice if evaluate_expression
+     took a frame parameter, so that we didn't have to change the
+     selected frame.  */
+  saved_frame_id = get_frame_id (get_selected_frame (NULL));
+
+  /* Determine if the watchpoint is within scope.  */
+  if (b->exp_valid_block == NULL)
+    within_current_scope = 1;
+  else
+    {
+      struct frame_info *fi;
+      fi = frame_find_by_id (b->watchpoint_frame);
+      within_current_scope = (fi != NULL);
+      if (within_current_scope)
+	select_frame (fi);
+    }
+
+  if (within_current_scope && reparse)
+    {
+      char *s;
+      if (b->exp)
+	{
+	  xfree (b->exp);
+	  b->exp = NULL;
+	}
+      s = b->exp_string;
+      b->exp = parse_exp_1 (&s, b->exp_valid_block, 0);
+      /* If the meaning of expression itself changed, the old value is
+	 no longer relevant.  We don't want to report a watchpoint hit
+	 to the user when the old value and the new value may actually
+	 be completely different objects.  */
+      value_free (b->val);
+      b->val = NULL;      
+    }
+  
+
+  /* If we failed to parse the expression, for example because
+     it refers to a global variable in a not-yet-loaded shared library,
+     don't try to insert watchpoint.  We don't automatically delete
+     such watchpoint, though, since failure to parse expression
+     is different from out-of-scope watchpoint.  */
+  if (within_current_scope && b->exp)
+    {
+      struct value *v, *next;
+
+      /* Evaluate the expression and make sure it's not lazy, so that
+	 after target stops again, we have a non-lazy previous value
+	 to compare with. Also, making the value non-lazy will fetch
+	 intermediate values as needed, which we use to decide which
+	 addresses to watch.
+
+	 The value returned by evaluate_expression is stored in b->val.
+	 In addition, we look at all values which were created
+	 during evaluation, and set watchoints at addresses as needed.
+	 Those values are explicitly deleted here.  */
+      v = evaluate_expression (b->exp);
+      /* Avoid setting b->val if it's already set.  The meaning of
+	 b->val is 'the last value' user saw, and we should update
+	 it only if we reported that last value to user.  As it
+	 happens, the code that reports it updates b->val directly.  */
+      if (b->val == NULL)
+	b->val = v;
+      value_contents (v);
+      value_release_to_mark (mark);
+
+      /* Look at each value on the value chain.  */
+      for (; v; v = next)
+	{
+	  /* If it's a memory location, and GDB actually needed
+	     its contents to evaluate the expression, then we
+	     must watch it.  */
+	  if (VALUE_LVAL (v) == lval_memory
+	      && ! value_lazy (v))
+	    {
+	      struct type *vtype = check_typedef (value_type (v));
+
+	      /* We only watch structs and arrays if user asked
+		 for it explicitly, never if they just happen to
+		 appear in the middle of some value chain.  */
+	      if (v == b->val
+		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
+		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
+		{
+		  CORE_ADDR addr;
+		  int len, type;
+		  struct bp_location *loc, **tmp;
+
+		  addr = VALUE_ADDRESS (v) + value_offset (v);
+		  len = TYPE_LENGTH (value_type (v));
+		  type = hw_write;
+		  if (b->type == bp_read_watchpoint)
+		    type = hw_read;
+		  else if (b->type == bp_access_watchpoint)
+		    type = hw_access;
+		  
+		  loc = allocate_bp_location (b, bp_hardware_watchpoint);
+		  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
+		    ;
+		  *tmp = loc;
+		  loc->address = addr;
+		  loc->length = len;
+		  loc->watchpoint_type = type;
+		}
+	    }
+
+	  next = value_next (v);
+	  if (v != b->val)
+	    value_free (v);
+	}
+
+      if (reparse && b->cond_string != NULL)
+	{
+	  char *s = b->cond_string;
+	  if (b->loc->cond)
+	    {
+	      xfree (b->loc->cond);
+	      b->loc->cond = NULL;
+	    }
+	  b->loc->cond = parse_exp_1 (&s, b->exp_valid_block, 0);
+	}
+    }
+  else if (!within_current_scope)
+    {
+      printf_filtered (_("\
+Hardware watchpoint %d deleted because the program has left the block \n\
+in which its expression is valid.\n"),
+		       b->number);
+      if (b->related_breakpoint)
+	b->related_breakpoint->disposition = disp_del_at_next_stop;
+      b->disposition = disp_del_at_next_stop;
+    }
+
+  /* Restore the selected frame.  */
+  select_frame (frame_find_by_id (saved_frame_id));
+}
+
 
 /* Insert a low-level "breakpoint" of some type.  BPT is the breakpoint.
    Any error messages are printed to TMP_ERROR_STREAM; and DISABLED_BREAKS,
@@ -1016,136 +1183,10 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 	      watchpoints.  It's not clear that it's necessary... */
 	   && bpt->owner->disposition != disp_del_at_next_stop)
     {
-      /* FIXME drow/2003-09-08: This code sets multiple hardware watchpoints
-	 based on the expression.  Ideally this should happen at a higher level,
-	 and there should be one bp_location for each computed address we
-	 must watch.  As soon as a many-to-one mapping is available I'll
-	 convert this.  */
-
-      int within_current_scope;
-      struct value *mark = value_mark ();
-      struct value *v;
-      struct frame_id saved_frame_id;
-
-      /* Save the current frame's ID so we can restore it after
-	 evaluating the watchpoint expression on its own frame.  */
-      /* FIXME drow/2003-09-09: It would be nice if evaluate_expression
-	 took a frame parameter, so that we didn't have to change the
-	 selected frame.  */
-      saved_frame_id = get_frame_id (get_selected_frame (NULL));
-
-      /* Determine if the watchpoint is within scope.  */
-      if (bpt->owner->exp_valid_block == NULL)
-	within_current_scope = 1;
-      else
-	{
-	  struct frame_info *fi;
-	  fi = frame_find_by_id (bpt->owner->watchpoint_frame);
-	  within_current_scope = (fi != NULL);
-	  if (within_current_scope)
-	    select_frame (fi);
-	}
-
-      if (within_current_scope)
-	{
-	  free_valchain (bpt);
-
-	  /* Evaluate the expression and cut the chain of values
-	     produced off from the value chain.
-
-	     Make sure the value returned isn't lazy; we use
-	     laziness to determine what memory GDB actually needed
-	     in order to compute the value of the expression.  */
-	  v = evaluate_expression (bpt->owner->exp);
-	  value_contents (v);
-	  value_release_to_mark (mark);
-
-	  bpt->owner->val_chain = v;
-	  bpt->inserted = 1;
-
-	  /* Look at each value on the value chain.  */
-	  for (; v; v = value_next (v))
-	    {
-	      /* If it's a memory location, and GDB actually needed
-		 its contents to evaluate the expression, then we
-		 must watch it.  */
-	      if (VALUE_LVAL (v) == lval_memory
-		  && ! value_lazy (v))
-		{
-		  struct type *vtype = check_typedef (value_type (v));
-
-		  /* We only watch structs and arrays if user asked
-		     for it explicitly, never if they just happen to
-		     appear in the middle of some value chain.  */
-		  if (v == bpt->owner->val_chain
-		      || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-			  && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
-		    {
-		      CORE_ADDR addr;
-		      int len, type;
-
-		      addr = VALUE_ADDRESS (v) + value_offset (v);
-		      len = TYPE_LENGTH (value_type (v));
-		      type = hw_write;
-		      if (bpt->owner->type == bp_read_watchpoint)
-			type = hw_read;
-		      else if (bpt->owner->type == bp_access_watchpoint)
-			type = hw_access;
-
-		      val = target_insert_watchpoint (addr, len, type);
-		      if (val == -1)
-			{
-			  /* Don't exit the loop, try to insert
-			     every value on the value chain.  That's
-			     because we will be removing all the
-			     watches below, and removing a
-			     watchpoint we didn't insert could have
-			     adverse effects.  */
-			  bpt->inserted = 0;
-			}
-		      val = 0;
-		    }
-		}
-	    }
-
-	  if (bpt->owner->cond_string != NULL)
-	    {
-	      char *s = bpt->owner->cond_string;
-	      if (bpt->cond)
-		{
-		  xfree (bpt->cond);
-		  bpt->cond = NULL;
-		}
-	      bpt->cond = parse_exp_1 (&s, bpt->owner->exp_valid_block, 0);
-	    }
-	      
-	  /* Failure to insert a watchpoint on any memory value in the
-	     value chain brings us here.  */
-	  if (!bpt->inserted)
-	    {
-	      remove_breakpoint (bpt, mark_uninserted);
-	      *hw_breakpoint_error = 1;
-	      fprintf_unfiltered (tmp_error_stream,
-				  "Could not insert hardware watchpoint %d.\n", 
-				  bpt->owner->number);
-	      val = -1;
-	    }               
-	}
-      else
-	{
-	  printf_filtered (_("\
-Hardware watchpoint %d deleted because the program has left the block \n\
-in which its expression is valid.\n"),
-			   bpt->owner->number);
-	  if (bpt->owner->related_breakpoint)
-	    bpt->owner->related_breakpoint->disposition = disp_del_at_next_stop;
-	  bpt->owner->disposition = disp_del_at_next_stop;
-	}
-
-      /* Restore the selected frame.  */
-      select_frame (frame_find_by_id (saved_frame_id));
-
-      return val;
+      val = target_insert_watchpoint (bpt->address, 
+				      bpt->length,
+				      bpt->watchpoint_type);
+      bpt->inserted = (val != -1);
     }
 
   else if (bpt->owner->type == bp_catch_fork
@@ -1178,6 +1219,7 @@ in which its expression is valid.\n"),
 void
 insert_breakpoints (void)
 {
+  struct breakpoint *bpt;
   struct bp_location *b, *temp;
   int error = 0;
   int val = 0;
@@ -1192,6 +1234,10 @@ insert_breakpoints (void)
      there was an error.  */
   fprintf_unfiltered (tmp_error_stream, "Warning:\n");
 
+  ALL_BREAKPOINTS (bpt)
+    if (is_hardware_watchpoint (bpt))
+      update_watchpoint (bpt, 0 /* don't reparse */);      
+	
   ALL_BP_LOCATIONS_SAFE (b, temp)
     {
       if (!breakpoint_enabled (b->owner))
@@ -1203,24 +1249,44 @@ insert_breakpoints (void)
 	  && !valid_thread_id (b->owner->thread))
 	continue;
 
-      /* FIXME drow/2003-10-07: This code should be pushed elsewhere when
-	 hardware watchpoints are split into multiple loc breakpoints.  */
-      if ((b->loc_type == bp_loc_hardware_watchpoint
-	   || b->owner->type == bp_watchpoint) && !b->owner->val)
-	{
-	  struct value *val;
-	  val = evaluate_expression (b->owner->exp);
-	  release_value (val);
-	  if (value_lazy (val))
-	    value_fetch_lazy (val);
-	  b->owner->val = val;
-	}
-
       val = insert_bp_location (b, tmp_error_stream,
 				    &disabled_breaks, &process_warning,
 				    &hw_breakpoint_error);
       if (val)
 	error = val;
+    }
+
+  /* If we failed to insert all locations of a watchpoint,
+     remove them, as half-inserted watchpoint is of limited use.  */
+  ALL_BREAKPOINTS (bpt)  
+    {
+      int some_failed = 0;
+      struct bp_location *loc;
+
+      if (!is_hardware_watchpoint (bpt))
+	continue;
+
+      if (bpt->enable_state != bp_enabled)
+	continue;
+      
+      for (loc = bpt->loc; loc; loc = loc->next)
+	if (!loc->inserted)
+	  {
+	    some_failed = 1;
+	    break;
+	  }
+      if (some_failed)
+	{
+	  for (loc = bpt->loc; loc; loc = loc->next)
+	    if (loc->inserted)
+	      remove_breakpoint (loc, mark_uninserted);
+
+	  hw_breakpoint_error = 1;
+	  fprintf_unfiltered (tmp_error_stream,
+			      "Could not insert hardware watchpoint %d.\n", 
+			      bpt->number);
+	  error = -1;
+	}
     }
 
   if (error)
@@ -1508,46 +1574,15 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 	return val;
       b->inserted = (is == mark_inserted);
     }
-  else if (b->loc_type == bp_loc_hardware_watchpoint
-	   && breakpoint_enabled (b->owner)
-	   && !b->duplicate)
+  else if (b->loc_type == bp_loc_hardware_watchpoint)
     {
       struct value *v;
       struct value *n;
 
       b->inserted = (is == mark_inserted);
-      /* Walk down the saved value chain.  */
-      for (v = b->owner->val_chain; v; v = value_next (v))
-	{
-	  /* For each memory reference remove the watchpoint
-	     at that address.  */
-	  if (VALUE_LVAL (v) == lval_memory
-	      && ! value_lazy (v))
-	    {
-	      struct type *vtype = check_typedef (value_type (v));
+      val = target_remove_watchpoint (b->address, b->length, 
+				      b->watchpoint_type);
 
-	      if (v == b->owner->val_chain
-		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
-		{
-		  CORE_ADDR addr;
-		  int len, type;
-
-		  addr = VALUE_ADDRESS (v) + value_offset (v);
-		  len = TYPE_LENGTH (value_type (v));
-		  type   = hw_write;
-		  if (b->owner->type == bp_read_watchpoint)
-		    type = hw_read;
-		  else if (b->owner->type == bp_access_watchpoint)
-		    type = hw_access;
-
-		  val = target_remove_watchpoint (addr, len, type);
-		  if (val == -1)
-		    b->inserted = 1;
-		  val = 0;
-		}
-	    }
-	}
       /* Failure to remove any of the hardware watchpoints comes here.  */
       if ((is == mark_uninserted) && (b->inserted))
 	warning (_("Could not remove hardware watchpoint %d."),
@@ -2451,33 +2486,19 @@ watchpoints_triggered (struct target_waitstatus *ws)
 	|| b->type == bp_read_watchpoint
 	|| b->type == bp_access_watchpoint)
       {
+	struct bp_location *loc;
 	struct value *v;
 
 	b->watchpoint_triggered = watch_triggered_no;
-	for (v = b->val_chain; v; v = value_next (v))
-	  {
-	    if (VALUE_LVAL (v) == lval_memory && ! value_lazy (v))
-	      {
-		struct type *vtype = check_typedef (value_type (v));
-
-		if (v == b->val_chain
-		    || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-			&& TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
-		  {
-		    CORE_ADDR vaddr;
-
-		    vaddr = VALUE_ADDRESS (v) + value_offset (v);
-		    /* Exact match not required.  Within range is
-		       sufficient.  */
-		    if (addr >= vaddr
-			&& addr < vaddr + TYPE_LENGTH (value_type (v)))
-		      {
-			b->watchpoint_triggered = watch_triggered_yes;
-			break;
-		      }
-		  }
-	      }
-	  }
+	for (loc = b->loc; loc; loc = loc->next)
+	  /* Exact match not required.  Within range is
+	     sufficient.  */
+	  if (addr >= loc->address
+	      && addr < loc->address + loc->length)
+	    {
+	      b->watchpoint_triggered = watch_triggered_yes;
+	      break;
+	    }
       }
 
   return 1;
@@ -2716,6 +2737,15 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	&& !inferior_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
       continue;
 
+    /* For hardware watchpoints, we look only at the first location.
+       The watchpoint_check function will work on entire expression,
+       not the individual locations.  For read watchopints, the
+       watchpoints_triggered function have checked all locations
+       alrea
+     */
+    if (b->type == bp_hardware_watchpoint && bl != b->loc)
+      continue;
+
     /* Come here if it's a watchpoint, or if the break address matches */
 
     bs = bpstat_alloc (bl, bs);	/* Alloc a bpstat to explain stop */
@@ -2909,6 +2939,10 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	      || bs->breakpoint_at->owner->type == bp_read_watchpoint
 	      || bs->breakpoint_at->owner->type == bp_access_watchpoint))
 	{
+	  /* remove/insert can invalidate bs->breakpoint_at, if this
+	     location is no longer used by the watchpoint.  Prevent
+	     further code from trying to use it.  */
+	  bs->breakpoint_at = NULL;
 	  remove_breakpoints ();
 	  insert_breakpoints ();
 	  break;
@@ -3629,10 +3663,14 @@ print_one_breakpoint (struct breakpoint *b,
 	 disabled, we print it as if it had
 	 several locations, since otherwise it's hard to
 	 represent "breakpoint enabled, location disabled"
-	 situation.  */	 
+	 situation.  
+	 Note that while hardware watchpoints have
+	 several locations internally, that's no a property
+	 exposed to user.  */
       if (b->loc 
+	  && !is_hardware_watchpoint (b)
 	  && (b->loc->next || !b->loc->enabled)
-	  && !ui_out_is_mi_like_p (uiout))
+	  && !ui_out_is_mi_like_p (uiout)) 
 	{
 	  struct bp_location *loc;
 	  int n = 1;
@@ -6829,9 +6867,7 @@ delete_breakpoint (struct breakpoint *bpt)
     {
       if (loc->inserted)
 	remove_breakpoint (loc, mark_inserted);
-
-      free_valchain (loc);
-
+      
       if (loc->cond)
 	xfree (loc->cond);
 
@@ -7265,39 +7301,7 @@ breakpoint_re_set_one (void *bint)
 	 
 	 Don't do anything about disabled watchpoints, since they will
 	 be reevaluated again when enabled.  */
-
-      if (!breakpoint_enabled (b))
-	break;
-
-      if (b->exp_valid_block == NULL
-	  || frame_find_by_id (b->watchpoint_frame) != NULL)
-	{
-	  if (b->exp)
-	    {
-	      xfree (b->exp);
-	      b->exp = NULL;
-	    }
-	  s = b->exp_string;
-	  b->exp = parse_exp_1 (&s, b->exp_valid_block, 0);
-
-	  /* Since we reparsed expression, we need to update the
-	     value.  I'm not aware of any way a single solib load or unload
-	     can change a valid value into different valid value, but:
-	     - even if the value is no longer valid, we have to record
-	     this fact, so that when it becomes valid we reports this
-	     as value change
-	     - unloaded followed by load can change the value for sure.
-
-   	     We set value to NULL, and insert_breakpoints will 
-	     update the value.  */
-	  if (b->val)
-	    value_free (b->val);
-	  b->val = NULL;
-
-	  /* Loading of new shared library change the meaning of
-	     watchpoint condition.  However, insert_bp_location will
-	     recompute watchpoint condition anyway, nothing to do here.  */
-	}
+      update_watchpoint (b, 1 /* reparse */);
       break;
       /* We needn't really do anything to reset these, since the mask
          that requests them is unaffected by e.g., new libraries being

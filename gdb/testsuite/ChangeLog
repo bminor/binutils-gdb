@@ -1,3 +1,9 @@
+2008-01-29  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.base/watchpoint-solib.exp: New.
+        * gdb.base/watchpoint-solib.c: New.
+        * gdb.base/watchpoint-solib-shr.c: New.
+
 2008-01-29  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.base/gdb1056.exp: Add unsigned integer test.
