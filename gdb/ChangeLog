@@ -1,3 +1,14 @@
+2008-01-29  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Don't reset watchpoint block on solib load.
+
+        * breakpoint.c (insert_bp_location): For watchpoints,
+        recompute condition.
+        (breakpoint_re_set_one): Instead of recomputing value
+        and condition for watchpoints, just reset value and
+        let insert_breakpoints/insert_bp_location recompute it.
+        Don't do anything about disabled watchpoint.
+
 2008-01-29  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* valarith.c (value_binop): Handle unsigned integer

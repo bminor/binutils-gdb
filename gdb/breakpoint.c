@@ -1107,6 +1107,18 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 		    }
 		}
 	    }
+
+	  if (bpt->owner->cond_string != NULL)
+	    {
+	      char *s = bpt->owner->cond_string;
+	      if (bpt->cond)
+		{
+		  xfree (bpt->cond);
+		  bpt->cond = NULL;
+		}
+	      bpt->cond = parse_exp_1 (&s, bpt->owner->exp_valid_block, 0);
+	    }
+	      
 	  /* Failure to insert a watchpoint on any memory value in the
 	     value chain brings us here.  */
 	  if (!bpt->inserted)
@@ -7228,53 +7240,64 @@ breakpoint_re_set_one (void *bint)
     case bp_hardware_watchpoint:
     case bp_read_watchpoint:
     case bp_access_watchpoint:
-      innermost_block = NULL;
-      /* The issue arises of what context to evaluate this in.  The
-         same one as when it was set, but what does that mean when
-         symbols have been re-read?  We could save the filename and
-         functionname, but if the context is more local than that, the
-         best we could do would be something like how many levels deep
-         and which index at that particular level, but that's going to
-         be less stable than filenames or function names.  */
+      /* Watchpoint can be either on expression using entirely global variables,
+	 or it can be on local variables.
 
-      /* So for now, just use a global context.  */
-      if (b->exp)
-	{
-	  xfree (b->exp);
-	  /* Avoid re-freeing b->exp if an error during the call to
-             parse_expression.  */
-	  b->exp = NULL;
-	}
-      b->exp = parse_expression (b->exp_string);
-      b->exp_valid_block = innermost_block;
-      mark = value_mark ();
-      if (b->val)
-	{
-	  value_free (b->val);
-	  /* Avoid re-freeing b->val if an error during the call to
-             evaluate_expression.  */
-	  b->val = NULL;
-	}
-      b->val = evaluate_expression (b->exp);
-      release_value (b->val);
-      if (value_lazy (b->val) && breakpoint_enabled (b))
-	value_fetch_lazy (b->val);
+	 Watchpoints of the first kind are never auto-deleted, and even persist
+	 across program restarts. Since they can use variables from shared 
+	 libraries, we need to reparse expression as libraries are loaded
+	 and unloaded.
 
-      if (b->cond_string != NULL)
+	 Watchpoints on local variables can also change meaning as result
+	 of solib event. For example, if a watchpoint uses both a local and
+	 a global variables in expression, it's a local watchpoint, but
+	 unloading of a shared library will make the expression invalid.
+	 This is not a very common use case, but we still re-evaluate
+	 expression, to avoid surprises to the user. 
+
+	 Note that for local watchpoints, we re-evaluate it only if
+	 watchpoints frame id is still valid.  If it's not, it means
+	 the watchpoint is out of scope and will be deleted soon. In fact,
+	 I'm not sure we'll ever be called in this case.  
+
+	 If a local watchpoint's frame id is still valid, then
+	 b->exp_valid_block is likewise valid, and we can safely use it.  
+	 
+	 Don't do anything about disabled watchpoints, since they will
+	 be reevaluated again when enabled.  */
+
+      if (!breakpoint_enabled (b))
+	break;
+
+      if (b->exp_valid_block == NULL
+	  || frame_find_by_id (b->watchpoint_frame) != NULL)
 	{
-	  s = b->cond_string;
-	  if (b->loc->cond)
+	  if (b->exp)
 	    {
-	      xfree (b->loc->cond);
-	      /* Avoid re-freeing b->exp if an error during the call
-		 to parse_exp_1.  */
-	      b->loc->cond = NULL;
+	      xfree (b->exp);
+	      b->exp = NULL;
 	    }
-	  b->loc->cond = parse_exp_1 (&s, (struct block *) 0, 0);
+	  s = b->exp_string;
+	  b->exp = parse_exp_1 (&s, b->exp_valid_block, 0);
+
+	  /* Since we reparsed expression, we need to update the
+	     value.  I'm not aware of any way a single solib load or unload
+	     can change a valid value into different valid value, but:
+	     - even if the value is no longer valid, we have to record
+	     this fact, so that when it becomes valid we reports this
+	     as value change
+	     - unloaded followed by load can change the value for sure.
+
+   	     We set value to NULL, and insert_breakpoints will 
+	     update the value.  */
+	  if (b->val)
+	    value_free (b->val);
+	  b->val = NULL;
+
+	  /* Loading of new shared library change the meaning of
+	     watchpoint condition.  However, insert_bp_location will
+	     recompute watchpoint condition anyway, nothing to do here.  */
 	}
-      if (breakpoint_enabled (b))
-	mention (b);
-      value_free_to_mark (mark);
       break;
       /* We needn't really do anything to reset these, since the mask
          that requests them is unaffected by e.g., new libraries being
