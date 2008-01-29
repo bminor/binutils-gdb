@@ -1,3 +1,8 @@
+2008-01-30  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (Processes): Mention process command.
+ 	detach-on-follow -> detach-on-fork.
+
 2008-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (Native Conditionals): Remove
