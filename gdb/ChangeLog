@@ -1,5 +1,9 @@
 2008-01-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* amd64-tdep.c (amd64_classify): Add handling of TYPE_CODE_CHAR.
+
+2008-01-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* nto-tdep.h: Remove #include "defs.h".
 	* nto-tdep.c: Add #include "defs.h".
 	* Makefile.in (nto_tdep_h): Update dependencies.
