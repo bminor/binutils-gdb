@@ -1,3 +1,7 @@
+2008-01-29  Jim Blandy  <jimb@red-bean.com>
+
+	* MAINTAINERS: Update my info.
+
 2008-01-29  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Use multiple locations for hardware watchpoints.
