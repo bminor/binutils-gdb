@@ -82,6 +82,9 @@ vFile:pwrite:
 vFile:unlink:
   Open, close, read, write, and delete files on the remote system.
 
+* GDB on GNU/Linux and HP/UX can now debug through "exec" of a new
+process.
+
 *** Changes in GDB 6.7
 
 * Resolved 101 resource leaks, null pointer dereferences, etc. in gdb, 

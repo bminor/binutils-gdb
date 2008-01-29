@@ -1,3 +1,21 @@
+2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (symfile.o): Update.
+	* NEWS: Mention exec tracing support.
+	* inf-ttrace.c (inf_ttrace_wait): Return TARGET_WAITKIND_EXECD for
+	exec events.
+	* infcmd.c (kill_if_already_running, detach_command)
+	(disconnect_command): Replace SOLIB_RESTART with no_shared_libraries.
+	* infrun.c (MAY_FOLLOW_EXEC, may_follow_exec): Delete.
+	(follow_exec): Do not check may_follow_exec.  Do not mourn and push
+	targets.  Apply the sysroot path to the loaded executable.  Use
+	no_shared_libraries.
+	* linux-nat.c (linux_child_follow_fork): Print fork following
+	messages if verbose.
+	(kill_wait_callback): Kill again before waiting a second time.
+	* symfile.c (symbol_file_clear): Replace SOLIB_RESTART with
+	no_shared_libraries.
+
 2008-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* amd64-tdep.c (amd64_classify): Add handling of TYPE_CODE_CHAR.

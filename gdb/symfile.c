@@ -52,6 +52,7 @@
 #include "parser-defs.h"
 #include "varobj.h"
 #include "elf-bfd.h"
+#include "solib.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1217,9 +1218,7 @@ symbol_file_clear (int from_tty)
        storage has just been released, we'd better wipe the solib
        descriptors as well.
      */
-#if defined(SOLIB_RESTART)
-    SOLIB_RESTART ();
-#endif
+    no_shared_libraries (NULL, from_tty);
 
     symfile_objfile = NULL;
     if (from_tty)

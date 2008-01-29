@@ -105,15 +105,6 @@ int sync_execution = 0;
 
 static ptid_t previous_inferior_ptid;
 
-/* This is true for configurations that may follow through execl() and
-   similar functions.  At present this is only true for HP-UX native.  */
-
-#ifndef MAY_FOLLOW_EXEC
-#define MAY_FOLLOW_EXEC (0)
-#endif
-
-static int may_follow_exec = MAY_FOLLOW_EXEC;
-
 static int debug_infrun = 0;
 static void
 show_debug_infrun (struct ui_file *file, int from_tty,
@@ -369,9 +360,6 @@ follow_exec (int pid, char *execd_pathname)
   int saved_pid = pid;
   struct target_ops *tgt;
 
-  if (!may_follow_exec)
-    return;
-
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
      momentary bp's, etc.
@@ -406,17 +394,20 @@ follow_exec (int pid, char *execd_pathname)
   /* We've followed the inferior through an exec.  Therefore, the
      inferior has essentially been killed & reborn. */
 
-  /* First collect the run target in effect.  */
-  tgt = find_run_target ();
-  /* If we can't find one, things are in a very strange state...  */
-  if (tgt == NULL)
-    error (_("Could find run target to save before following exec"));
-
   gdb_flush (gdb_stdout);
-  target_mourn_inferior ();
-  inferior_ptid = pid_to_ptid (saved_pid);
+  generic_mourn_inferior ();
   /* Because mourn_inferior resets inferior_ptid. */
-  push_target (tgt);
+  inferior_ptid = pid_to_ptid (saved_pid);
+
+  if (gdb_sysroot && *gdb_sysroot)
+    {
+      char *name = alloca (strlen (gdb_sysroot)
+			    + strlen (execd_pathname)
+			    + 1);
+      strcpy (name, gdb_sysroot);
+      strcat (name, execd_pathname);
+      execd_pathname = name;
+    }
 
   /* That a.out is now the one to use. */
   exec_file_attach (execd_pathname, 0);
@@ -427,9 +418,7 @@ follow_exec (int pid, char *execd_pathname)
   /* Reset the shared library package.  This ensures that we get
      a shlib event when the child reaches "_start", at which point
      the dld will have had a chance to initialize the child. */
-#if defined(SOLIB_RESTART)
-  SOLIB_RESTART ();
-#endif
+  no_shared_libraries (NULL, 0);
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #else

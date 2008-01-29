@@ -454,9 +454,7 @@ kill_if_already_running (int from_tty)
 Start it from the beginning? "))
 	error (_("Program not restarted."));
       target_kill ();
-#if defined(SOLIB_RESTART)
-      SOLIB_RESTART ();
-#endif
+      no_shared_libraries (NULL, from_tty);
       init_wait_for_inferior ();
     }
 }
@@ -1974,9 +1972,7 @@ detach_command (char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */
   target_detach (args, from_tty);
-#if defined(SOLIB_RESTART)
-  SOLIB_RESTART ();
-#endif
+  no_shared_libraries (NULL, from_tty);
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
 }
@@ -1994,9 +1990,7 @@ disconnect_command (char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart */
   target_disconnect (args, from_tty);
-#if defined(SOLIB_RESTART)
-  SOLIB_RESTART ();
-#endif
+  no_shared_libraries (NULL, from_tty);
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
 }

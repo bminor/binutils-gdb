@@ -11,16 +11,9 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
-if $tracelevel then {
-	strace $tracelevel
-	}
-
-if { ![isnative] } then {
+if { [is_remote target] || ![isnative] } then {
     continue
 }
 
@@ -35,6 +28,7 @@ set bug_id 0
 ##  return 0
 ##}
 
+global srcfile
 set testfile "foll-vfork"
 set testfile2 "vforked-prog"
 set srcfile ${testfile}.c
@@ -56,7 +50,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {d
 # Until "set follow-fork-mode" and "catch vfork" are implemented on
 # other targets...
 #
-if ![istarget "hppa*-hp-hpux*"] then {
+if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
     continue
 }
 
@@ -72,6 +66,29 @@ if [istarget "hppa*-hp-hpux10.20"] then {
 # timeout allows.
 set oldtimeout $timeout
 set timeout [expr "$timeout + 10"]
+
+proc check_vfork_catchpoints {} {
+  global gdb_prompt
+  global has_vfork_catchpoints
+
+  # Verify that the system supports "catch vfork".
+  gdb_test "catch vfork" "Catchpoint \[0-9\]* \\(vfork\\)" "insert first vfork catchpoint"
+  set has_vfork_catchpoints 0
+  gdb_test_multiple "continue" "continue to first vfork catchpoint" {
+    -re ".*Your system does not support vfork catchpoints.*$gdb_prompt $" {
+      unsupported "continue to first vfork catchpoint"
+    }
+    -re ".*Catchpoint.*$gdb_prompt $" {
+      set has_vfork_catchpoints 1
+      pass "continue to first vfork catchpoint"
+    }
+  }
+
+  if {$has_vfork_catchpoints == 0} {
+    unsupported "vfork catchpoints"
+    return -code return
+  }
+}
 
 proc vfork_parent_follow_through_step {} {
    global gdb_prompt
@@ -97,20 +114,21 @@ proc vfork_parent_follow_through_step {} {
 
 proc vfork_parent_follow_to_bp {} {
    global gdb_prompt
+   global srcfile
 
    send_gdb "set follow parent\n"
    gdb_expect {
       -re "$gdb_prompt $" {pass "set follow parent, vfork to bp"}
       timeout         {fail "set follow parent, vfork to bp"}
    }
-   send_gdb "break 18\n"
+   send_gdb "break ${srcfile}:18\n"
    gdb_expect {
       -re "$gdb_prompt $" {pass "break, vfork to bp"}
       timeout         {fail "break, vfork to bp"}
    }
    send_gdb "continue\n"
    gdb_expect {
-      -re ".*Detaching after fork from process.*Breakpoint.*18.*$gdb_prompt "\
+      -re ".*Detaching after fork from child process.*Breakpoint.*18.*$gdb_prompt "\
                       {pass "vfork parent follow, to bp"}
       -re "$gdb_prompt $" {fail "vfork parent follow, to bp"}
       timeout         {fail "(timeout) vfork parent follow, to bp" }
@@ -133,7 +151,7 @@ proc vfork_and_exec_child_follow_to_main_bp {} {
    }
    send_gdb "continue\n"
    gdb_expect {
-      -re "Detaching from program.*Attaching after fork to.*Executing new program.*Breakpoint.*vforked-prog.c:9.*$gdb_prompt "\
+      -re "Attaching after fork to.*Executing new program.*Breakpoint.*vforked-prog.c:9.*$gdb_prompt "\
                       {pass "vfork and exec child follow, to main bp"}
       -re "$gdb_prompt $" {fail "vfork and exec child follow, to main bp"}
       timeout         {fail "(timeout) vfork and exec child follow, to main bp" }
@@ -191,7 +209,7 @@ proc vfork_and_exec_child_follow_through_step {} {
    }
    send_gdb "next\n"
    gdb_expect {
-      -re "Detaching from program.*Attaching after fork to.*Executing new program.*Breakpoint.*vforked-prog.c:9.*$gdb_prompt "\
+      -re "Attaching after fork to.*Executing new program.*Breakpoint.*vforked-prog.c:9.*$gdb_prompt "\
                       {pass "vfork and exec child follow, through step"}
       -re "$gdb_prompt $" {fail "vfork and exec child follow, through step"}
       timeout         {fail "(timeout) vfork and exec child follow, through step" }
@@ -248,7 +266,7 @@ proc tcatch_vfork_then_parent_follow {} {
    gdb_expect {
       -re "0x\[0-9a-fA-F\]*.*vfork.*$gdb_prompt "\
                       {pass "vfork parent follow, tcatch vfork"}
-      -re "0x\[0-9a-fA-F\]*.*_vfork.*$gdb_prompt "\
+      -re "vfork \\(\\) at.*$gdb_prompt "\
                       {pass "vfork parent follow, tcatch vfork"}
       -re "$gdb_prompt $" {fail "vfork parent follow, tcatch vfork"}
       timeout         {fail "(timeout) vfork parent follow, tcatch vfork"}
@@ -269,6 +287,7 @@ proc tcatch_vfork_then_parent_follow {} {
 
 proc tcatch_vfork_then_child_follow {} {
    global gdb_prompt
+   global srcfile
    global srcfile2
 
    send_gdb "set follow child\n"
@@ -287,6 +306,8 @@ proc tcatch_vfork_then_child_follow {} {
 # HP-UX 10.20 seems to stop you in "vfork", while more recent HP-UXs
 # stop you in "_vfork".
    gdb_expect {
+      -re "vfork \\(\\) at .*$gdb_prompt $"\
+                      {pass "vfork child follow, tcatch vfork"}
       -re "0x\[0-9a-fA-F\]*.*vfork.*$gdb_prompt "\
                       {pass "vfork child follow, tcatch vfork"}
       -re "0x\[0-9a-fA-F\]*.*_vfork.*$gdb_prompt "\
@@ -296,8 +317,10 @@ proc tcatch_vfork_then_child_follow {} {
    }
    send_gdb "finish\n"
    gdb_expect {
-      -re "Run till exit from.*vfork.*${srcfile2}:9.*$gdb_prompt "\
+      -re "Run till exit from.*vfork.*${srcfile}:12.*$gdb_prompt "\
                       {pass "vfork child follow, finish after tcatch vfork"}
+      -re "Run till exit from.*vfork.*${srcfile2}:9.*$gdb_prompt "\
+                      {pass "vfork child follow, finish after tcatch vfork (followed exec)"}
       -re "$gdb_prompt $" {fail "vfork child follow, finish after tcatch vfork"}
       timeout         {fail "(timeout) vfork child follow, finish after tcatch vfork" }
    }
@@ -310,6 +333,10 @@ proc tcatch_vfork_then_child_follow {} {
 
 proc do_vfork_and_exec_tests {} {
    global gdb_prompt
+
+   # Check that vfork catchpoints are supported, as an indicator for whether
+   # vfork-following is supported.
+   if [runto_main] then { check_vfork_catchpoints }
 
    # Try following the parent process by stepping through a call to
    # vfork.  Do this without catchpoints.
@@ -362,6 +389,9 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
+# The "Detaching..." and "Attaching..." messages may be hidden by
+# default.
+gdb_test "set verbose" ""
 
 # This is a test of gdb's ability to follow the parent or child
 # of a Unix vfork() system call.  (The child will subsequently

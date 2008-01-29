@@ -383,7 +383,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
       /* Detach new forked process?  */
       if (detach_fork)
 	{
-	  if (debug_linux_nat)
+	  if (info_verbose || debug_linux_nat)
 	    {
 	      target_terminal_ours ();
 	      fprintf_filtered (gdb_stdlog,
@@ -468,7 +468,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
       /* Before detaching from the parent, remove all breakpoints from it. */
       remove_breakpoints ();
 
-      if (debug_linux_nat)
+      if (info_verbose || debug_linux_nat)
 	{
 	  target_terminal_ours ();
 	  fprintf_filtered (gdb_stdlog,
@@ -2348,11 +2348,18 @@ kill_wait_callback (struct lwp_info *lp, void *data)
       do
 	{
 	  pid = my_waitpid (GET_LWP (lp->ptid), NULL, __WCLONE);
-	  if (pid != (pid_t) -1 && debug_linux_nat)
+	  if (pid != (pid_t) -1)
 	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "KWC: wait %s received unknown.\n",
-				  target_pid_to_str (lp->ptid));
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "KWC: wait %s received unknown.\n",
+				    target_pid_to_str (lp->ptid));
+	      /* The Linux kernel sometimes fails to kill a thread
+		 completely after PTRACE_KILL; that goes from the stop
+		 point in do_fork out to the one in
+		 get_signal_to_deliever and waits again.  So kill it
+		 again.  */
+	      kill_callback (lp, NULL);
 	    }
 	}
       while (pid == GET_LWP (lp->ptid));
@@ -2363,11 +2370,14 @@ kill_wait_callback (struct lwp_info *lp, void *data)
   do
     {
       pid = my_waitpid (GET_LWP (lp->ptid), NULL, 0);
-      if (pid != (pid_t) -1 && debug_linux_nat)
+      if (pid != (pid_t) -1)
 	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "KWC: wait %s received unk.\n",
-			      target_pid_to_str (lp->ptid));
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"KWC: wait %s received unk.\n",
+				target_pid_to_str (lp->ptid));
+	  /* See the call to kill_callback above.  */
+	  kill_callback (lp, NULL);
 	}
     }
   while (pid == GET_LWP (lp->ptid));

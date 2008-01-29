@@ -1,3 +1,22 @@
+2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/foll-exec.exp: Update header.  Skip on remote targets.
+	Run on GNU/Linux.
+	(do_exec_tests): Check for systems which do not support catchpoints.
+	Do not match START.
+	* gdb.base/foll-fork.exp: Update header.  Skip on remote targets.
+	Run on GNU/Linux.  Enable verbose output.
+	(check_fork_catchpoints): New.
+	(explicit_fork_child_follow, catch_fork_child_follow)
+	(tcatch_fork_parent_follow): Update expected messages.
+	(do_fork_tests): Use check_fork_catchpoints.
+	* gdb.base/foll-vfork.exp: Update header.  Skip on remote targets.
+	Run on GNU/Linux.  Enable verbose output.
+	(check_vfork_catchpoints): New.
+	(vfork_parent_follow_to_bp, tcatch_vfork_then_child_follow): Update
+	expected messages.
+	(do_vfork_and_exec_tests): Use check_fork_catchpoints.
+
 2008-01-29  Jim Blandy  <jimb@red-bean.com>
 
 	* lib/gdbserver-support.exp (gdb_target_cmd): Recognize 'unknown

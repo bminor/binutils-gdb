@@ -11,16 +11,9 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
-if $tracelevel then {
-	strace $tracelevel
-	}
-
-if { ![isnative] } then {
+if { [is_remote target] || ![isnative] } then {
     continue
 }
 
@@ -48,7 +41,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 # Until "catch exec" is implemented on other targets...
 #
-if ![istarget "hppa*-hp-hpux*"] then {
+if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
     continue
 }
 
@@ -85,6 +78,33 @@ proc do_exec_tests {} {
    global srcfile2
    global testfile
    global testfile2
+
+   # Start the program running, and stop at main.
+   #
+   if ![runto_main] then {
+     perror "Couldn't run ${testfile}"
+     return
+   }
+
+   # Verify that the system supports "catch exec".
+   gdb_test "catch exec" "Catchpoint \[0-9\]* \\(exec\\)" "insert first exec catchpoint"
+   set has_exec_catchpoints 0
+   gdb_test_multiple "continue" "continue to first exec catchpoint" {
+     -re ".*Your system does not support exec catchpoints.*$gdb_prompt $" {
+       unsupported "continue to first exec catchpoint"
+     }
+     -re ".*Catchpoint.*$gdb_prompt $" {
+       set has_exec_catchpoints 1
+       pass "continue to first exec catchpoint"
+     }
+   }
+
+   if {$has_exec_catchpoints == 0} {
+     unsupported "exec catchpoints"
+     return
+   }
+
+   zap_session
 
    # Start the program running, and stop at main.
    #
@@ -213,7 +233,7 @@ proc do_exec_tests {} {
    setup_xfail hppa2.0w-hp-hpux* CLLbs16760
    send_gdb "continue\n"
    gdb_expect {
-     -re ".*Executing new program:.*${testfile2}.*Catchpoint .*(exec\'d .*${testfile2}).*in .START..*$gdb_prompt $"\
+     -re ".*Executing new program:.*${testfile2}.*Catchpoint .*(exec\'d .*${testfile2}).*in .*$gdb_prompt $"\
                      {pass "hit catch exec"}
      -re "$gdb_prompt $" {fail "hit catch exec"}
      timeout         {fail "(timeout) hit catch exec"}

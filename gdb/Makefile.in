@@ -2850,7 +2850,7 @@ symfile.o: symfile.c $(defs_h) $(bfdlink_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdb_stabs_h) $(gdb_obstack_h) $(completer_h) $(bcache_h) \
 	$(hashtab_h) $(readline_h) $(gdb_assert_h) $(block_h) \
 	$(gdb_string_h) $(gdb_stat_h) $(observer_h) $(exec_h) \
-	$(parser_defs_h) $(varobj_h) $(elf_bfd_h)
+	$(parser_defs_h) $(varobj_h) $(elf_bfd_h) $(solib_h)
 symfile-mem.o: symfile-mem.c $(defs_h) $(symtab_h) $(gdbcore_h) \
 	$(objfiles_h) $(exceptions_h) $(gdbcmd_h) $(target_h) $(value_h) \
 	$(symfile_h) $(observer_h) $(auxv_h) $(elf_common_h)
