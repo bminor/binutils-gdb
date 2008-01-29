@@ -45,3 +45,5 @@ gdb_test_multiple "print 1/0" "" {
 	kfail "gdb/1056" "print 1/0"
     }
 }
+gdb_test "print 1U/0" ".*Division by zero.*" "Test unsigned division by zero"
+

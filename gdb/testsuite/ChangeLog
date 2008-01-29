@@ -1,3 +1,7 @@
+2008-01-29  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/gdb1056.exp: Add unsigned integer test.
+
 2008-01-28  Doug Evans  <dje@google.com>
 
 	* gdb.base/maint.exp: Tighten patterns looking for .text/.data/.bss.
