@@ -22,7 +22,6 @@
 #ifndef _NTO_TDEP_H
 #define _NTO_TDEP_H
 
-#include "defs.h"
 #include "solist.h"
 #include "osabi.h"
 #include "regset.h"

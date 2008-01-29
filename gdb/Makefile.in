@@ -839,7 +839,7 @@ mn10300_tdep_h = mn10300-tdep.h
 monitor_h = monitor.h
 nbsd_nat_h = nbsd-nat.h
 nbsd_tdep_h = nbsd-tdep.h
-nto_tdep_h = nto-tdep.h $(defs_h) $(solist_h) $(osabi_h) $(regset_h)
+nto_tdep_h = nto-tdep.h $(solist_h) $(osabi_h) $(regset_h)
 objc_lang_h = objc-lang.h
 objfiles_h = objfiles.h $(gdb_obstack_h) $(symfile_h)
 obsd_tdep_h = obsd-tdep.h
@@ -2518,7 +2518,8 @@ nbsd-tdep.o: nbsd-tdep.c $(defs_h) $(gdb_string_h) $(solib_svr4_h)
 nto-procfs.o: nto-procfs.c $(defs_h) $(gdb_dirent_h) $(exceptions_h) \
 	$(gdb_string_h) $(gdbcore_h) $(inferior_h) $(target_h) $(objfiles_h) \
 	$(gdbthread_h) $(nto_tdep_h) $(command_h) $(regcache_h) $(solib_h)
-nto-tdep.o: nto-tdep.c $(gdb_stat_h) $(gdb_string_h) $(nto_tdep_h) $(top_h) \
+nto-tdep.o: nto-tdep.c $(defs_h) $(gdb_stat_h) $(gdb_string_h) $(nto_tdep_h) \
+	$(top_h) \
 	$(cli_decode_h) $(cli_cmds_h) $(inferior_h) $(gdbarch_h) $(bfd_h) \
 	$(elf_bfd_h) $(solib_svr4_h) $(gdbcore_h) $(objfiles_h)
 objc-exp.o: objc-exp.c $(defs_h) $(gdb_string_h) $(expression_h) \

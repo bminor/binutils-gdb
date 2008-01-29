@@ -1,5 +1,12 @@
 2008-01-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* nto-tdep.h: Remove #include "defs.h".
+	* nto-tdep.c: Add #include "defs.h".
+	* Makefile.in (nto_tdep_h): Update dependencies.
+	(nto-tdep.o): Likewise.
+
+2008-01-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* infrun.c (wait_for_inferior): Add treat_exec_as_sigtrap parameter
 	and use it.
 	(proceed, start_remote): Update call to wait_for_inferior.
