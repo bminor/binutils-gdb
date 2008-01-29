@@ -1,5 +1,5 @@
 /* Morpho Technologies mRISC opcode support, for GNU Binutils.  -*- C -*-
-   Copyright 2001, 2007 Free Software Foundation, Inc.
+   Copyright 2001, 2007, 2008 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc; developed under contract from
    Morpho Technologies.
@@ -190,7 +190,7 @@ parse_imm16 (CGEN_CPU_DESC cd,
 	       break;
 
 	     default:
-	       errmsg = _("%operator operand is not a symbol");
+	       errmsg = _("The percent-operator's operand is not a symbol");
 	       break;
              }
 	 }

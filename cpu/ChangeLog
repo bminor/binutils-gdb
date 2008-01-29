@@ -1,3 +1,8 @@
+2008-01-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* mt.opc (parse_imm16): Apply 2007-09-26 opcodes/mt-asm.c change
+	to source.
+
 2007-10-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris.cpu (movs, movu): Use result of extension operation when
