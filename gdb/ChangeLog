@@ -1,3 +1,10 @@
+2008-01-29  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* varobj (adjust_value_for_child_access): Added checking for 
+	returned value from gdb_value_ind.
+	(c_describe_child): Likewise.
+	(cplus_describe_child): Fixed a typo.
+
 2008-01-29  Jim Blandy  <jimb@red-bean.com>
 
 	* MAINTAINERS: Update my info.

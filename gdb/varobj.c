@@ -1920,7 +1920,11 @@ adjust_value_for_child_access (struct value **value,
 	  || TYPE_CODE (target_type) == TYPE_CODE_UNION)
 	{
 	  if (value && *value)
-	    gdb_value_ind (*value, value);	  
+	    {
+	      int success = gdb_value_ind (*value, value);	  
+	      if (!success)
+		*value = NULL;
+	    }
 	  *type = target_type;
 	  if (was_ptr)
 	    *was_ptr = 1;
@@ -2114,7 +2118,11 @@ c_describe_child (struct varobj *parent, int index,
 	*cname = xstrprintf ("*%s", parent->name);
 
       if (cvalue && value)
-	gdb_value_ind (value, cvalue);
+	{
+	  int success = gdb_value_ind (value, cvalue);
+	  if (!success)
+	    *cvalue = NULL;
+	}
 
       /* Don't use get_target_type because it calls
 	 check_typedef and here, we want to show the true
@@ -2415,7 +2423,7 @@ cplus_describe_child (struct varobj *parent, int index,
   adjust_value_for_child_access (&value, &type, &was_ptr);
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      || TYPE_CODE (type) == TYPE_CODE_UNION)
     {
       char *join = was_ptr ? "->" : ".";
       if (CPLUS_FAKE_CHILD (parent))
