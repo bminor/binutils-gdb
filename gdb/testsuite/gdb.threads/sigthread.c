@@ -20,6 +20,8 @@
    testing.  */
 #define NSIGS 10000000
 
+pthread_barrier_t barrier;
+
 void
 handler (int sig)
 {
@@ -34,6 +36,8 @@ child_two (void *arg)
 {
   int i;
 
+  pthread_barrier_wait (&barrier);
+
   for (i = 0; i < NSIGS; i++)
     pthread_kill (child_thread, SIGUSR1);
 }
@@ -42,6 +46,8 @@ void *
 thread_function (void *arg)
 {
   int i;
+
+  pthread_barrier_wait (&barrier);
 
   for (i = 0; i < NSIGS; i++)
     pthread_kill (child_thread_two, SIGUSR2);
@@ -54,9 +60,13 @@ int main()
   signal (SIGUSR1, handler);
   signal (SIGUSR2, handler);
 
+  pthread_barrier_init (&barrier, NULL, 3);
+
   main_thread = pthread_self ();
   pthread_create (&child_thread, NULL, thread_function, NULL);
   pthread_create (&child_thread_two, NULL, child_two, NULL);
+
+  pthread_barrier_wait (&barrier);
 
   for (i = 0; i < NSIGS; i++)
     pthread_kill (child_thread_two, SIGUSR1);

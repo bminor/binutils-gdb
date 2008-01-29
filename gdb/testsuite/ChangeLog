@@ -1,3 +1,9 @@
+2008-01-29  Jim Blandy  <jimb@red-bean.com>
+
+	* gdb.threads/sigthread.c: Use barriers to ensure that
+	child_thread and child_thread_two are always initialized before we
+	start to use them.
+
 2008-01-29  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.base/watchpoint-solib.exp: New.
