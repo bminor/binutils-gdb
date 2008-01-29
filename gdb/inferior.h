@@ -166,7 +166,7 @@ extern CORE_ADDR signed_pointer_to_address (struct type *type,
 extern void address_to_signed_pointer (struct type *type, gdb_byte *buf,
 				       CORE_ADDR addr);
 
-extern void wait_for_inferior (void);
+extern void wait_for_inferior (int treat_exec_as_sigtrap);
 
 extern void fetch_inferior_event (void *);
 

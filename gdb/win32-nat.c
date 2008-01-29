@@ -1507,7 +1507,7 @@ do_initial_win32_stuff (DWORD pid)
   while (1)
     {
       stop_after_trap = 1;
-      wait_for_inferior ();
+      wait_for_inferior (0);
       if (stop_signal != TARGET_SIGNAL_TRAP)
 	resume (0, stop_signal);
       else

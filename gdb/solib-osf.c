@@ -324,7 +324,7 @@ osf_solib_create_inferior_hook (void)
   do
     {
       target_resume (minus_one_ptid, 0, stop_signal);
-      wait_for_inferior ();
+      wait_for_inferior (0);
     }
   while (stop_signal != TARGET_SIGNAL_TRAP);
 

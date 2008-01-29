@@ -1908,7 +1908,7 @@ attach_command (char *args, int from_tty)
      way for handle_inferior_event to reset the stop_signal variable
      after an attach, and this is what STOP_QUIETLY_NO_SIGSTOP is for.  */
   stop_soon = STOP_QUIETLY_NO_SIGSTOP;
-  wait_for_inferior ();
+  wait_for_inferior (0);
   stop_soon = NO_STOP_QUIETLY;
 #endif
 

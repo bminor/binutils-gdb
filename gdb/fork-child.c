@@ -410,7 +410,7 @@ startup_inferior (int ntraps)
     {
       /* Make wait_for_inferior be quiet. */
       stop_soon = STOP_QUIETLY;
-      wait_for_inferior ();
+      wait_for_inferior (1);
       if (stop_signal != TARGET_SIGNAL_TRAP)
 	{
 	  /* Let shell child handle its own signals in its own way.

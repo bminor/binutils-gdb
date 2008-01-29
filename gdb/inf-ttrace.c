@@ -896,10 +896,6 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 #endif
 
     case TTEVT_EXEC:
-      /* FIXME: kettenis/20051029: GDB doesn't really know how to deal
-	 with TARGET_WAITKIND_EXECD events yet.  So we make it look
-	 like a SIGTRAP instead.  */
-#if 0
       ourstatus->kind = TARGET_WAITKIND_EXECD;
       ourstatus->value.execd_pathname =
 	xmalloc (tts.tts_u.tts_exec.tts_pathlen + 1);
@@ -908,10 +904,6 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 		  tts.tts_u.tts_exec.tts_pathlen, 0) == -1)
 	perror_with_name (("ttrace"));
       ourstatus->value.execd_pathname[tts.tts_u.tts_exec.tts_pathlen] = 0;
-#else
-      ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
-#endif
       break;
 
     case TTEVT_EXIT:

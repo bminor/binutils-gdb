@@ -765,7 +765,7 @@ sunos_solib_create_inferior_hook (void)
   do
     {
       target_resume (pid_to_ptid (-1), 0, stop_signal);
-      wait_for_inferior ();
+      wait_for_inferior (0);
     }
   while (stop_signal != TARGET_SIGNAL_TRAP);
   stop_soon = NO_STOP_QUIETLY;

@@ -1,3 +1,14 @@
+2007-12-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* infrun.c (wait_for_inferior): Add treat_exec_as_sigtrap parameter
+	and use it.
+	(proceed, start_remote): Update call to wait_for_inferior.
+	* inferior.h (wait_for_inferior): Update declaration.
+	* fork-child.c, infcmd.c, solib-irix.c, solib-osf.c, solib-sunos.c,
+	solib-svr4.c, win32-nat.c: Update calls to wait_for_inferior.
+	* inf-ttrace.c (inf_ttrace_wait): Report TTEVT_EXEC events as
+	TARGET_WAITKIND_EXECD instead of TARGET_WAITKIND_STOPPED.
+
 2008-01-29  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* varobj (adjust_value_for_child_access): Added checking for 

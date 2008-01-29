@@ -852,7 +852,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      does not support asynchronous execution. */
   if (!target_can_async_p ())
     {
-      wait_for_inferior ();
+      wait_for_inferior (0);
       normal_stop ();
     }
 }
@@ -882,7 +882,7 @@ start_remote (int from_tty)
      target_open() return to the caller an indication that the target
      is currently running and GDB state should be set to the same as
      for an async run. */
-  wait_for_inferior ();
+  wait_for_inferior (0);
 
   /* Now that the inferior has stopped, do any bookkeeping like
      loading shared libraries.  We want to do this before normal_stop,
@@ -989,20 +989,28 @@ static void print_stop_reason (enum inferior_stop_reason stop_reason,
 			       int stop_info);
 
 /* Wait for control to return from inferior to debugger.
+
+   If TREAT_EXEC_AS_SIGTRAP is non-zero, then handle EXEC signals
+   as if they were SIGTRAP signals.  This can be useful during
+   the startup sequence on some targets such as HP/UX, where
+   we receive an EXEC event instead of the expected SIGTRAP.
+
    If inferior gets a signal, we may decide to start it up again
    instead of returning.  That is why there is a loop in this function.
    When this function actually returns it means the inferior
    should be left stopped and GDB should read more commands.  */
 
 void
-wait_for_inferior (void)
+wait_for_inferior (int treat_exec_as_sigtrap)
 {
   struct cleanup *old_cleanups;
   struct execution_control_state ecss;
   struct execution_control_state *ecs;
 
   if (debug_infrun)
-    fprintf_unfiltered (gdb_stdlog, "infrun: wait_for_inferior\n");
+    fprintf_unfiltered
+      (gdb_stdlog, "infrun: wait_for_inferior (treat_exec_as_sigtrap=%d)\n",
+       treat_exec_as_sigtrap);
 
   old_cleanups = make_cleanup (delete_step_resume_breakpoint,
 			       &step_resume_breakpoint);
@@ -1033,6 +1041,13 @@ wait_for_inferior (void)
 	ecs->ptid = deprecated_target_wait_hook (ecs->waiton_ptid, ecs->wp);
       else
 	ecs->ptid = target_wait (ecs->waiton_ptid, ecs->wp);
+
+      if (treat_exec_as_sigtrap && ecs->ws.kind == TARGET_WAITKIND_EXECD)
+        {
+          xfree (ecs->ws.value.execd_pathname);
+          ecs->ws.kind = TARGET_WAITKIND_STOPPED;
+          ecs->ws.value.sig = TARGET_SIGNAL_TRAP;
+        }
 
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
