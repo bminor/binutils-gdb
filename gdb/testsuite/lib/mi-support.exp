@@ -332,6 +332,9 @@ proc mi_gdb_target_cmd { targetname serialport } {
 		verbose "Set target to $targetname";
 		return 0;
 	    }
+	    -re "unknown host.*$mi_gdb_prompt" {
+	        verbose "Couldn't look up $serialport"
+	    }
 	    -re "Couldn't establish connection to remote.*$mi_gdb_prompt$" {
 		verbose "Connection failed";
 	    }

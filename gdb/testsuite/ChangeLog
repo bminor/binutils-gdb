@@ -1,5 +1,11 @@
 2008-01-29  Jim Blandy  <jimb@red-bean.com>
 
+	* lib/gdbserver-support.exp (gdb_target_cmd): Recognize 'unknown
+	host' errors.
+	* lib/mi-support.exp (mi_gdb_target_cmd): Same.
+
+2008-01-29  Jim Blandy  <jimb@red-bean.com>
+
 	* gdb.threads/sigthread.c: Use barriers to ensure that
 	child_thread and child_thread_two are always initialized before we
 	start to use them.

@@ -52,6 +52,9 @@ proc gdb_target_cmd { targetname serialport } {
 		send_gdb "y\n"
 		exp_continue
 	    }
+	    -re "unknown host.*$gdb_prompt" {
+	        verbose "Couldn't look up $serialport"
+	    }
 	    -re "Couldn't establish connection to remote.*$gdb_prompt $" {
 		verbose "Connection failed"
 	    }
