@@ -608,6 +608,22 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch, struct frame_info *fi,
 	goto finish_prologue;
     }
 
+  /* Check for "mov pc, a2", an instruction found in optimized, position
+     independent code.  Skip it if found.  */
+  if (buf[0] == 0xf0 && buf[1] == 0x2e)
+    {
+      addr += 2;
+
+      /* Quit now if we're beyond the stop point.  */
+      if (addr >= stop)
+	goto finish_prologue;
+
+      /* Get the next two bytes so the prologue scan can continue.  */
+      status = read_memory_nobpt (addr, buf, 2);
+      if (status != 0)
+	goto finish_prologue;
+    }
+
   if (AM33_MODE (gdbarch) == 2)
     {
       /* Determine if any floating point registers are to be saved.
@@ -635,6 +651,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch, struct frame_info *fi,
 	 was actually encountered.  As a consequence, ``addr'' would
 	 sometimes be advanced even when no fmov instructions were found.  */
       CORE_ADDR restore_addr = addr;
+      int fmov_found = 0;
 
       /* First, look for add -SIZE,sp (i.e. add imm8,sp  (0xf8feXX)
                                          or add imm16,sp (0xfafeXXXX)
@@ -715,12 +732,9 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch, struct frame_info *fi,
 			break;
 
 		      /* An fmov instruction has just been seen.  We can
-		         now really commit to the pattern match.  Set the
-			 address to restore at the end of this speculative
-			 bit of code to the actually address that we've
-			 been incrementing (or not) throughout the
-			 speculation.  */
-		      restore_addr = addr;
+		         now really commit to the pattern match.  */
+
+		      fmov_found = 1;
 
 		      /* Get the floating point register number from the 
 			 2nd and 3rd bytes of the "fmov" instruction:
@@ -739,29 +753,18 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch, struct frame_info *fi,
 		      imm_size = (buf[0] == 0xf9) ? 3 : 4;
 		    }
 		}
-	      else
-		{
-		  /* No "fmov" was found. Reread the two bytes at the original
-		     "addr" to reset the state. */
-		  addr = restore_addr;
-		  if (!safe_frame_unwind_memory (fi, addr, buf, 2))
-		    goto finish_prologue;
-		}
 	    }
-	  /* else the prologue consists entirely of an "add -SIZE,sp"
-	     instruction. Handle this below. */
 	}
-      /* else no "add -SIZE,sp" was found indicating no floating point
-	 registers are saved in this prologue.  */
-
-      /* In the pattern match code contained within this block, `restore_addr'
-	 is set to the starting address at the very beginning and then
-	 iteratively to the next address to start scanning at once the
-	 pattern match has succeeded.  Thus `restore_addr' will contain
-	 the address to rewind to if the pattern match failed.  If the
-	 match succeeded, `restore_addr' and `addr' will already have the
-	 same value.  */
-      addr = restore_addr;
+      /* If no fmov instructions were found by the above sequence, reset
+         the state and pretend that the above bit of code never happened.  */
+      if (!fmov_found)
+	{
+	  addr = restore_addr;
+	  status = read_memory_nobpt (addr, buf, 2);
+	  if (status != 0)
+	    goto finish_prologue;
+	  stack_extra_size = 0;
+	}
     }
 
   /* Now see if we set up a frame pointer via "mov sp,a3" */

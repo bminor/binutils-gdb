@@ -1,3 +1,10 @@
+2008-01-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_analyze_prologue): Check for an
+	instruction pattern that appears frequently in position
+	independent code.  Fix bug in code which looks for "fmov" and
+	backtracks if no "fmov" is found.
+
 2008-01-28  Doug Evans  <dje@google.com>
 
 	* dbxread.c (read_dbx_symtab): Fix indentation.
