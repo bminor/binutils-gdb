@@ -1,3 +1,8 @@
+2008-01-29  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* valarith.c (value_binop): Handle unsigned integer
+	division by zero.
+
 2008-01-28  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-tdep.c (mn10300_analyze_prologue): Check for an
