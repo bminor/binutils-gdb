@@ -175,7 +175,11 @@ print_dwarf_vma (dwarf_vma val, unsigned byte_size)
      integer value, so we print the full value into a buffer and then select
      the precision we need.  */
 #if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
+#ifndef __MSVCRT__
   snprintf (buff, sizeof (buff), "%16.16llx ", val);
+#else
+  snprintf (buff, sizeof (buff), "%016I64x ", val);
+#endif
 #else
   snprintf (buff, sizeof (buff), "%16.16lx ", val);
 #endif
