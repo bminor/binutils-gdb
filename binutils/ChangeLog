@@ -1,3 +1,14 @@
+2008-01-30  Tristan Gingold  <gingold@adacore.com>
+
+	* readelf.c (dump_relocations): Decode OpenVMS-specific sections.
+	(get_ia64_dynamic_type): Decode OpenVMS-specific tags.
+	(get_dynamic_type): Handle IA64-specific tags.
+	(get_ia64_section_type_name): Handle OpenVMS-specific sections.
+	(get_section_type_name): Handle OS-specific sections (and
+	particularly IA64 OpenVMS one).
+	(get_elf_section_flags): Makes flags static.  Add entries for IA64 and
+	decode them.
+
 2008-01-29  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (print_dwarf_vma): New function.  Display the value of a

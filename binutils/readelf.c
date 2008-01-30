@@ -1329,6 +1329,11 @@ dump_relocations (FILE *file,
 			       && elf_header.e_ident[EI_OSABI] == ELFOSABI_HPUX
 			       && psym->st_shndx == SHN_IA_64_ANSI_COMMON)
 			sec_name = "ANSI_COM";
+		      else if (elf_header.e_machine == EM_IA_64
+			       && (elf_header.e_ident[EI_OSABI] 
+				   == ELFOSABI_OPENVMS)
+			       && psym->st_shndx == SHN_IA_64_VMS_SYMVEC)
+			sec_name = "VMS_SYMVEC";
 		      else
 			{
 			  sprintf (name_buf, "<section 0x%x>",
@@ -1522,7 +1527,37 @@ get_ia64_dynamic_type (unsigned long type)
 {
   switch (type)
     {
-    case DT_IA_64_PLT_RESERVE: return "IA_64_PLT_RESERVE";
+    case DT_IA_64_PLT_RESERVE:         return "IA_64_PLT_RESERVE";
+    case DT_IA_64_VMS_SUBTYPE:         return "VMS_SUBTYPE";
+    case DT_IA_64_VMS_IMGIOCNT:        return "VMS_IMGIOCNT";
+    case DT_IA_64_VMS_LNKFLAGS:        return "VMS_LNKFLAGS";
+    case DT_IA_64_VMS_VIR_MEM_BLK_SIZ: return "VMS_VIR_MEM_BLK_SIZ";
+    case DT_IA_64_VMS_IDENT:           return "VMS_IDENT";
+    case DT_IA_64_VMS_NEEDED_IDENT:    return "VMS_NEEDED_IDENT";
+    case DT_IA_64_VMS_IMG_RELA_CNT:    return "VMS_IMG_RELA_CNT";
+    case DT_IA_64_VMS_SEG_RELA_CNT:    return "VMS_SEG_RELA_CNT";
+    case DT_IA_64_VMS_FIXUP_RELA_CNT:  return "VMS_FIXUP_RELA_CNT";
+    case DT_IA_64_VMS_FIXUP_NEEDED:    return "VMS_FIXUP_NEEDED";
+    case DT_IA_64_VMS_SYMVEC_CNT:      return "VMS_SYMVEC_CNT";
+    case DT_IA_64_VMS_XLATED:          return "VMS_XLATED";
+    case DT_IA_64_VMS_STACKSIZE:       return "VMS_STACKSIZE";
+    case DT_IA_64_VMS_UNWINDSZ:        return "VMS_UNWINDSZ";
+    case DT_IA_64_VMS_UNWIND_CODSEG:   return "VMS_UNWIND_CODSEG";
+    case DT_IA_64_VMS_UNWIND_INFOSEG:  return "VMS_UNWIND_INFOSEG";
+    case DT_IA_64_VMS_LINKTIME:        return "VMS_LINKTIME";
+    case DT_IA_64_VMS_SEG_NO:          return "VMS_SEG_NO";
+    case DT_IA_64_VMS_SYMVEC_OFFSET:   return "VMS_SYMVEC_OFFSET";
+    case DT_IA_64_VMS_SYMVEC_SEG:      return "VMS_SYMVEC_SEG";
+    case DT_IA_64_VMS_UNWIND_OFFSET:   return "VMS_UNWIND_OFFSET";
+    case DT_IA_64_VMS_UNWIND_SEG:      return "VMS_UNWIND_SEG";
+    case DT_IA_64_VMS_STRTAB_OFFSET:   return "VMS_STRTAB_OFFSET";
+    case DT_IA_64_VMS_SYSVER_OFFSET:   return "VMS_SYSVER_OFFSET";
+    case DT_IA_64_VMS_IMG_RELA_OFF:    return "VMS_IMG_RELA_OFF";
+    case DT_IA_64_VMS_SEG_RELA_OFF:    return "VMS_SEG_RELA_OFF";
+    case DT_IA_64_VMS_FIXUP_RELA_OFF:  return "VMS_FIXUP_RELA_OFF";
+    case DT_IA_64_VMS_PLTGOT_OFFSET:   return "VMS_PLTGOT_OFFSET";
+    case DT_IA_64_VMS_PLTGOT_SEG:      return "VMS_PLTGOT_SEG";
+    case DT_IA_64_VMS_FPMODE:          return "VMS_FPMODE";
     default:
       return NULL;
     }
@@ -1687,6 +1722,9 @@ get_dynamic_type (unsigned long type)
 	    {
 	    case EM_PARISC:
 	      result = get_parisc_dynamic_type (type);
+	      break;
+	    case EM_IA_64:
+	      result = get_ia64_dynamic_type (type);
 	      break;
 	    default:
 	      result = NULL;
@@ -2657,9 +2695,16 @@ get_ia64_section_type_name (unsigned int sh_type)
 
   switch (sh_type)
     {
-    case SHT_IA_64_EXT:		  return "IA_64_EXT";
-    case SHT_IA_64_UNWIND:	  return "IA_64_UNWIND";
-    case SHT_IA_64_PRIORITY_INIT: return "IA_64_PRIORITY_INIT";
+    case SHT_IA_64_EXT:		       return "IA_64_EXT";
+    case SHT_IA_64_UNWIND:	       return "IA_64_UNWIND";
+    case SHT_IA_64_PRIORITY_INIT:      return "IA_64_PRIORITY_INIT";
+    case SHT_IA_64_VMS_TRACE:          return "VMS_TRACE";
+    case SHT_IA_64_VMS_TIE_SIGNATURES: return "VMS_TIE_SIGNATURES";
+    case SHT_IA_64_VMS_DEBUG:          return "VMS_DEBUG";
+    case SHT_IA_64_VMS_DEBUG_STR:      return "VMS_DEBUG_STR";
+    case SHT_IA_64_VMS_LINKAGES:       return "VMS_LINKAGES";
+    case SHT_IA_64_VMS_SYMBOL_VECTOR:  return "VMS_SYMBOL_VECTOR";
+    case SHT_IA_64_VMS_FIXUP:          return "VMS_FIXUP";
     default:
       break;
     }
@@ -2763,7 +2808,24 @@ get_section_type_name (unsigned int sh_type)
 	  sprintf (buff, "LOPROC+%x", sh_type - SHT_LOPROC);
 	}
       else if ((sh_type >= SHT_LOOS) && (sh_type <= SHT_HIOS))
-	sprintf (buff, "LOOS+%x", sh_type - SHT_LOOS);
+	{
+	  const char *result;
+
+	  switch (elf_header.e_machine)
+	    {
+	    case EM_IA_64:
+	      result = get_ia64_section_type_name (sh_type);
+	      break;
+	    default:
+	      result = NULL;
+	      break;
+	    }
+
+	  if (result != NULL)
+	    return result;
+
+	  sprintf (buff, "LOOS+%x", sh_type - SHT_LOOS);
+	}
       else if ((sh_type >= SHT_LOUSER) && (sh_type <= SHT_HIUSER))
 	sprintf (buff, "LOUSER+%x", sh_type - SHT_LOUSER);
       else
@@ -3908,7 +3970,7 @@ get_elf_section_flags (bfd_vma sh_flags)
   bfd_vma os_flags = 0;
   bfd_vma proc_flags = 0;
   bfd_vma unknown_flags = 0;
-  const struct
+  static const struct
     {
       const char *str;
       int len;
@@ -3924,7 +3986,17 @@ get_elf_section_flags (bfd_vma sh_flags)
 	{ "LINK ORDER", 10 },
 	{ "OS NONCONF", 10 },
 	{ "GROUP", 5 },
-	{ "TLS", 3 }
+	{ "TLS", 3 },
+	/* IA-64 specific.  */
+	{ "SHORT", 5 },
+	{ "NORECOV", 7 },
+	/* IA-64 OpenVMS specific.  */
+	{ "VMS_GLOBAL", 10 },
+	{ "VMS_OVERLAID", 12 },
+	{ "VMS_SHARED", 10 },
+	{ "VMS_VECTOR", 10 },
+	{ "VMS_ALLOC_64BIT", 15 },
+	{ "VMS_PROTECTED", 13}
     };
 
   if (do_section_details)
@@ -3958,6 +4030,26 @@ get_elf_section_flags (bfd_vma sh_flags)
 
 	    default:
 	      index = -1;
+	      if (elf_header.e_machine == EM_IA_64)
+		{
+		  if (flag == SHF_IA_64_SHORT)
+		    index = 10;
+		  else if (flag == SHF_IA_64_NORECOV)
+		    index = 11;
+#ifdef BFD64
+		  else if (elf_header.e_ident[EI_OSABI] == ELFOSABI_OPENVMS)
+		    switch (flag)
+		      {
+		      case SHF_IA_64_VMS_GLOBAL:      index = 12; break;
+		      case SHF_IA_64_VMS_OVERLAID:    index = 13; break;
+		      case SHF_IA_64_VMS_SHARED:      index = 14; break;
+		      case SHF_IA_64_VMS_VECTOR:      index = 15; break;
+		      case SHF_IA_64_VMS_ALLOC_64BIT: index = 16; break;
+		      case SHF_IA_64_VMS_PROTECTED:   index = 17; break;
+		      default:                        break;
+		      }
+#endif
+		}
 	      break;
 	    }
 
