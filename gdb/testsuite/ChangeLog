@@ -1,3 +1,8 @@
+2008-01-30  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi-file.exp, gdb.mi/mi2-file.exp
+	(test_file_list_exec_source_file): Update to new macro-info field.
+
 2008-01-30  Paul N. Hilfinger  <hilfinger@adacore.com>
 
 	* gdb.ada/exprs: New test program.
