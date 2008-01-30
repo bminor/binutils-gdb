@@ -354,12 +354,13 @@ mi_print_value_p (struct type *type, enum print_values print_values)
 enum mi_cmd_result
 mi_cmd_var_list_children (char *command, char **argv, int argc)
 {
-  struct varobj *var;
-  struct varobj **childlist;
-  struct varobj **cc;
+  struct varobj *var;  
+  VEC(varobj_p) *children;
+  struct varobj *child;
   struct cleanup *cleanup_children;
   int numchild;
   enum print_values print_values;
+  int ix;
 
   if (argc != 1 && argc != 2)
     error (_("mi_cmd_var_list_children: Usage: [PRINT_VALUES] NAME"));
@@ -372,34 +373,28 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   if (var == NULL)
     error (_("Variable object not found"));
 
-  numchild = varobj_list_children (var, &childlist);
-  ui_out_field_int (uiout, "numchild", numchild);
+  children = varobj_list_children (var);
+  ui_out_field_int (uiout, "numchild", VEC_length (varobj_p, children));
   if (argc == 2)
     print_values = mi_parse_values_option (argv[0]);
   else
     print_values = PRINT_NO_VALUES;
 
-  if (numchild <= 0)
-    {
-      xfree (childlist);
-      return MI_CMD_DONE;
-    }
+  if (VEC_length (varobj_p, children) == 0)
+    return MI_CMD_DONE;
 
   if (mi_version (uiout) == 1)
     cleanup_children = make_cleanup_ui_out_tuple_begin_end (uiout, "children");
   else
     cleanup_children = make_cleanup_ui_out_list_begin_end (uiout, "children");
-  cc = childlist;
-  while (*cc != NULL)
+  for (ix = 0; VEC_iterate (varobj_p, children, ix, child); ++ix)
     {
       struct cleanup *cleanup_child;
       cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, "child");
-      print_varobj (*cc, print_values, 1 /* print expression */);
-      cc++;
+      print_varobj (child, print_values, 1 /* print expression */);
       do_cleanups (cleanup_child);
     }
   do_cleanups (cleanup_children);
-  xfree (childlist);
   return MI_CMD_DONE;
 }
 

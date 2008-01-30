@@ -83,10 +83,6 @@ struct varobj_root
   struct varobj_root *next;
 };
 
-typedef struct varobj *varobj_p;
-
-DEF_VEC_P (varobj_p);
-
 /* Every variable in the system has a structure of this type defined
    for it. This structure holds all information necessary to manipulate
    a particular object variable. Members which must be freed are noted. */
@@ -718,42 +714,28 @@ varobj_get_num_children (struct varobj *var)
 /* Creates a list of the immediate children of a variable object;
    the return code is the number of such children or -1 on error */
 
-int
-varobj_list_children (struct varobj *var, struct varobj ***childlist)
+VEC (varobj_p)*
+varobj_list_children (struct varobj *var)
 {
   struct varobj *child;
   char *name;
   int i;
-
-  /* sanity check: have we been passed a pointer? */
-  if (childlist == NULL)
-    return -1;
-
-  *childlist = NULL;
 
   if (var->num_children == -1)
     var->num_children = number_of_children (var);
 
   /* If that failed, give up.  */
   if (var->num_children == -1)
-    return -1;
+    return var->children;
 
   /* If we're called when the list of children is not yet initialized,
      allocate enough elements in it.  */
   while (VEC_length (varobj_p, var->children) < var->num_children)
     VEC_safe_push (varobj_p, var->children, NULL);
 
-  /* List of children */
-  *childlist = xmalloc ((var->num_children + 1) * sizeof (struct varobj *));
-
   for (i = 0; i < var->num_children; i++)
     {
-      varobj_p existing;
-
-      /* Mark as the end in case we bail out */
-      *((*childlist) + i) = NULL;
-
-      existing = VEC_index (varobj_p, var->children, i);
+      varobj_p existing = VEC_index (varobj_p, var->children, i);
 
       if (existing == NULL)
 	{
@@ -764,14 +746,9 @@ varobj_list_children (struct varobj *var, struct varobj ***childlist)
 	  existing = create_child (var, i, name);
 	  VEC_replace (varobj_p, var->children, i, existing);
 	}
-
-      *((*childlist) + i) = existing;
     }
 
-  /* End of list is marked by a NULL pointer */
-  *((*childlist) + i) = NULL;
-
-  return var->num_children;
+  return var->children;
 }
 
 /* Obtain the type of an object Variable as a string similar to the one gdb

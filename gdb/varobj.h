@@ -20,6 +20,7 @@
 
 #include "symtab.h"
 #include "gdbtypes.h"
+#include "vec.h"
 
 /* Enumeration for the format types */
 enum varobj_display_formats
@@ -61,6 +62,9 @@ extern char *varobj_language_string[];
 /* Struct thar describes a variable object instance */
 struct varobj;
 
+typedef struct varobj *varobj_p;
+DEF_VEC_P (varobj_p);
+
 /* API functions */
 
 extern struct varobj *varobj_create (char *objname,
@@ -91,8 +95,9 @@ extern int varobj_get_frozen (struct varobj *var);
 
 extern int varobj_get_num_children (struct varobj *var);
 
-extern int varobj_list_children (struct varobj *var,
-				 struct varobj ***childlist);
+/* Return the list of children of VAR.  The returned vector
+   should not be modified in any way.  */
+extern VEC (varobj_p)* varobj_list_children (struct varobj *var);
 
 extern char *varobj_get_type (struct varobj *var);
 

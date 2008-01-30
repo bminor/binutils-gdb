@@ -901,7 +901,7 @@ user_regs_h = user-regs.h
 valprint_h = valprint.h
 value_h = value.h $(doublest_h) $(frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h)
-varobj_h = varobj.h $(symtab_h) $(gdbtypes_h)
+varobj_h = varobj.h $(symtab_h) $(gdbtypes_h) $(vec_h)
 vax_tdep_h = vax-tdep.h
 vec_h = vec.h $(gdb_assert_h) $(gdb_string_h)
 version_h = version.h

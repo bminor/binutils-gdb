@@ -1,3 +1,15 @@
+2008-01-30  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Use vector for varobj_list_children interface.
+        * gdb/varobj.c (varobj_list_children): Return vector
+        of varobjs.
+        * gdb/varobj.h (varobj_list_children): Adjust
+        prototype.
+        (varobj_p): Declare.  Declare vector thereof.
+        * mi/mi-cmd-var.c (mi_cmd_var_list_children): Adjust
+        for varobj_list_children change.
+	* Makefile.in (varobj_h): Update dependencies.
+
 2008-01-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Add support for
