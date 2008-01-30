@@ -3412,13 +3412,16 @@ A failed Ada assertion.
 
 @item exec
 @cindex break on fork/exec
-A call to @code{exec}.  This is currently only available for HP-UX.
+A call to @code{exec}.  This is currently only available for HP-UX
+and @sc{gnu}/Linux.
 
 @item fork
-A call to @code{fork}.  This is currently only available for HP-UX.
+A call to @code{fork}.  This is currently only available for HP-UX
+and @sc{gnu}/Linux.
 
 @item vfork
-A call to @code{vfork}.  This is currently only available for HP-UX.
+A call to @code{vfork}.  This is currently only available for HP-UX
+and @sc{gnu}/Linux.
 
 @item load
 @itemx load @var{libname}

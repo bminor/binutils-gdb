@@ -1,3 +1,8 @@
+2008-01-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Setting Catchpoints): Mention features
+	supported on GNU/Linux.
+
 2008-01-30  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (GDB/MI File Commands): Describe new output
