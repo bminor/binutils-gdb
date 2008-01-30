@@ -29,18 +29,18 @@
    current file being executed. */
 
 enum mi_cmd_result
-mi_cmd_file_list_exec_source_file(char *command, char **argv, int argc)
+mi_cmd_file_list_exec_source_file (char *command, char **argv, int argc)
 {
   struct symtab_and_line st;
   int optind = 0;
   char *optarg;
   
-  if ( !mi_valid_noargs("mi_cmd_file_list_exec_source_file", argc, argv) )
+  if (!mi_valid_noargs ("mi_cmd_file_list_exec_source_file", argc, argv))
     error (_("mi_cmd_file_list_exec_source_file: Usage: No args"));
 
   /* Set the default file and line, also get them */
-  set_default_source_symtab_and_line();
-  st = get_current_source_symtab_and_line();
+  set_default_source_symtab_and_line ();
+  st = get_current_source_symtab_and_line ();
 
   /* We should always get a symtab. 
      Apparently, filename does not need to be tested for NULL.
@@ -58,6 +58,8 @@ mi_cmd_file_list_exec_source_file(char *command, char **argv, int argc)
   /* We may not be able to open the file (not available). */
   if (st.symtab->fullname)
   ui_out_field_string (uiout, "fullname", st.symtab->fullname);
+
+  ui_out_field_int (uiout, "macro-info", st.symtab->macro_table ? 1 : 0);
 
   return MI_CMD_DONE;
 }
