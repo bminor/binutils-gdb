@@ -21035,7 +21035,9 @@ N.A.
 @end smallexample
 
 List the line number, the current source file, and the absolute path
-to the current source file for the current executable.
+to the current source file for the current executable.  The macro
+information field has a value of @samp{1} or @samp{0} depending on
+whether or not the file includes preprocessor macro information.
 
 @subsubheading @value{GDBN} Command
 
@@ -21046,7 +21048,7 @@ The @value{GDBN} equivalent is @samp{info source}
 @smallexample
 (gdb)
 123-file-list-exec-source-file
-123^done,line="1",file="foo.c",fullname="/home/bar/foo.c"
+123^done,line="1",file="foo.c",fullname="/home/bar/foo.c,macro-info="1"
 (gdb)
 @end smallexample
 
