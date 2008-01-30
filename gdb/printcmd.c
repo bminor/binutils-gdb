@@ -285,6 +285,7 @@ print_formatted (struct value *val, int format, int size,
     }
 
   if (format == 0 || format == 's'
+      || TYPE_CODE (type) == TYPE_CODE_REF
       || TYPE_CODE (type) == TYPE_CODE_ARRAY
       || TYPE_CODE (type) == TYPE_CODE_STRING
       || TYPE_CODE (type) == TYPE_CODE_STRUCT
