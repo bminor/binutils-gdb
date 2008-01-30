@@ -132,13 +132,10 @@ proc skip_gdbserver_tests { } {
   return 0
 }
 
-# Start a gdbserver process running SERVER_EXEC, and connect GDB
-# to it.  CHILD_ARGS are passed to the inferior.
-#
-# Returns the target protocol and socket to connect to.
+# Download the currently loaded program to the target if necessary.
+# Return the target system filename.
 
-proc gdbserver_spawn { child_args } {
-    global portnum
+proc gdbserver_download { } {
     global gdbserver_host_exec
     global gdbserver_host_mtime
     global gdbserver_server_exec
@@ -172,6 +169,17 @@ proc gdbserver_spawn { child_args } {
 	}
     }
 
+    return $gdbserver_server_exec
+}
+
+# Start a gdbserver process with initial OPTIONS and trailing ARGUMENTS.
+# The port will be filled in between them automatically.
+#
+# Returns the target protocol and socket to connect to.
+
+proc gdbserver_start { options arguments } {
+    global portnum
+
     # Port id -- either specified in baseboard file, or managed here.
     if [target_info exists gdb,socketport] {
 	set portnum [target_info gdb,socketport]
@@ -182,7 +190,7 @@ proc gdbserver_spawn { child_args } {
 
     # Extract the local and remote host ids from the target board struct.
     if [target_info exists sockethost] {
-	set debughost  [target_info sockethost]
+	set debughost [target_info sockethost]
     } else {
 	set debughost "localhost:"
     }
@@ -199,23 +207,23 @@ proc gdbserver_spawn { child_args } {
     # Export the host:port pair.
     set gdbport $debughost$portnum
 
-    # Fire off the debug agent.  This flavour of gdbserver takes as
-    # arguments the port information, the name of the executable file to
-    # be debugged, and any arguments.
-    set gdbserver_command "$gdbserver :$portnum $gdbserver_server_exec"
-    if { $child_args != "" } {
-	append gdbserver_command " $child_args"
+    # Fire off the debug agent.
+    set gdbserver_command "$gdbserver"
+    if { $options != "" } {
+	append gdbserver_command " $options"
+    }
+    append gdbserver_command " :$portnum"
+    if { $arguments != "" } {
+	append gdbserver_command " $arguments"
     }
 
     set server_spawn_id [remote_spawn target $gdbserver_command]
 
-    # Wait for the server to produce at least one line and an additional
-    # character of output.  This will wait until any TCP socket has been
-    # created, so that GDB can connect.
+    # Wait for the server to open its TCP socket, so that GDB can connect.
     expect {
 	-i $server_spawn_id
 	-notransfer
-	-re ".*\n." { }
+	-re "Listening on" { }
     }
 
     # We can't just call close, because if gdbserver is local then that means
@@ -232,6 +240,24 @@ proc gdbserver_spawn { child_args } {
     }
 
     return [list $protocol $gdbport]
+}
+
+# Start a gdbserver process running SERVER_EXEC, and connect GDB
+# to it.  CHILD_ARGS are passed to the inferior.
+#
+# Returns the target protocol and socket to connect to.
+
+proc gdbserver_spawn { child_args } {
+    set target_exec [gdbserver_download]
+
+    # Fire off the debug agent.  This flavour of gdbserver takes as
+    # arguments the port information, the name of the executable file to
+    # be debugged, and any arguments.
+    set arguments "$target_exec"
+    if { $child_args != "" } {
+	append arguments " $child_args"
+    }
+    return [gdbserver_start "" $arguments]
 }
 
 # Start a gdbserver process running HOST_EXEC and pass CHILD_ARGS
@@ -268,6 +294,15 @@ proc gdbserver_run { child_args } {
 proc gdbserver_reconnect { } {
     global gdbserver_protocol
     global gdbserver_gdbport
+
+    return [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
+}
+
+# Start and connect to a gdbserver in extended mode.
+proc gdbserver_start_extended { } {
+    set res [gdbserver_start "--multi" ""]
+    set gdbserver_protocol "extended-[lindex $res 0]"
+    set gdbserver_gdbport [lindex $res 1]
 
     return [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
 }

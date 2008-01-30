@@ -1,3 +1,31 @@
+2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (linux_attach_lwp): Do not _exit after errors.
+	(linux_kill, linux_detach): Clean up the process list.
+	* remote-utils.c (remote_open): Improve port number parsing.
+	(putpkt_binary, input_interrupt): Only send interrupts if the target
+	is running.
+	* server.c (extended_protocol): Make static.
+	(attached): Define earlier.
+	(exit_requested, response_needed, program_argv): New variables.
+	(target_running): New.
+	(start_inferior): Clear attached here.
+	(attach_inferior): Set attached here.
+	(require_running): Define.
+	(handle_query): Use require_running and target_running.  Implement
+	"monitor exit".
+	(handle_v_attach, handle_v_run): New.
+	(handle_v_requests): Use require_running.  Handle vAttach and vRun.
+	(gdbserver_usage): Update.
+	(main): Redo argument parsing.  Handle --debug and --multi.  Handle
+	--attach along with other options or after the port.  Save
+	program_argv.  Support no initial program.  Resynchronize
+	communication with GDB after an error.  Handle "monitor exit".
+	Use require_running and target_running.  Always allow the extended
+	protocol.  Do not error out for Hc0 or Hc-1.  Do not automatically
+	restart in extended mode.
+	* README: Refer to the GDB manual.  Update --attach usage.
+
 2007-12-20  Andreas Schwab  <schwab@suse.de>
 
 	* linux-low.c (STACK_SIZE): Define.

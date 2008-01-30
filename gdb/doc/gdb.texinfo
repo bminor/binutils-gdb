@@ -12952,9 +12952,19 @@ choice for debugging.
 or a TCP connection, using the standard @value{GDBN} remote serial
 protocol.
 
-@table @emph
-@item On the target machine,
-you need to have a copy of the program you want to debug.
+@quotation
+@emph{Warning:} @code{gdbserver} does not have any built-in security.
+Do not run @code{gdbserver} connected to any public network; a
+@value{GDBN} connection to @code{gdbserver} provides access to the
+target system with the same privileges as the user running
+@code{gdbserver}.
+@end quotation
+
+@subsection Running @code{gdbserver}
+@cindex arguments, to @code{gdbserver}
+
+Run @code{gdbserver} on the target system.  You need a copy of the
+program you want to debug, including any libraries it requires.
 @code{gdbserver} does not need your program's symbol table, so you can
 strip the program if necessary to save space.  @value{GDBN} on the host
 system does all the symbol handling.
@@ -12997,11 +13007,13 @@ conflicts with another service, @code{gdbserver} prints an error message
 and exits.}  You must use the same port number with the host @value{GDBN}
 @code{target remote} command.
 
+@subsubsection Attaching to a Running Program
+
 On some targets, @code{gdbserver} can also attach to running programs.
 This is accomplished via the @code{--attach} argument.  The syntax is:
 
 @smallexample
-target> gdbserver @var{comm} --attach @var{pid}
+target> gdbserver --attach @var{comm} @var{pid}
 @end smallexample
 
 @var{pid} is the process ID of a currently running process.  It isn't necessary
@@ -13013,18 +13025,56 @@ You can debug processes by name instead of process ID if your target has the
 @code{pidof} utility:
 
 @smallexample
-target> gdbserver @var{comm} --attach `pidof @var{program}`
+target> gdbserver --attach @var{comm} `pidof @var{program}`
 @end smallexample
 
 In case more than one copy of @var{program} is running, or @var{program}
 has multiple threads, most versions of @code{pidof} support the
 @code{-s} option to only return the first process ID.
 
-@item On the host machine,
-first make sure you have the necessary symbol files.  Load symbols for
+@subsubsection Multi-Process Mode for @code{gdbserver}
+@cindex gdbserver, multiple processes
+@cindex multiple processes with gdbserver
+
+When you connect to @code{gdbserver} using @code{target remote},
+@code{gdbserver} debugs the specified program only once.  When the
+program exits, or you detach from it, @value{GDBN} closes the connection
+and @code{gdbserver} exits.
+
+If you connect using @code{target extended-remote}, @code{gdbserver}
+enters multi-process mode.  When the debugged program exits, or you
+detach from it, @value{GDBN} stays connected to @code{gdbserver} even
+though no program is running.  The @code{run} and @code{attach}
+commands instruct @code{gdbserver} to run or attach to a new program.
+The @code{run} command uses @code{set remote exec-file} (@pxref{set
+remote exec-file}) to select the program to run.  Command line
+arguments are supported, except for wildcard expansion and I/O
+redirection (@pxref{Arguments}).
+
+To start @code{gdbserver} without supplying an initial command to run
+or process ID to attach, use the @option{--multi} command line option.
+Then you can connect using @code{target extended-remote} and start
+the program you want to debug.
+
+@code{gdbserver} does not automatically exit in multi-process mode.
+You can terminate it by using @code{monitor exit}
+(@pxref{Monitor Commands for gdbserver}).
+
+@subsubsection Other Command-Line Arguments for @code{gdbserver}
+
+You can include @option{--debug} on the @code{gdbserver} command line.
+@code{gdbserver} will display extra status information about the debugging
+process.  This option is intended for @code{gdbserver} development and
+for bug reports to the developers.
+
+@subsection Connecting to @code{gdbserver}
+
+Run @value{GDBN} on the host system.
+
+First make sure you have the necessary symbol files.  Load symbols for
 your application using the @code{file} command before you connect.  Use
 @code{set sysroot} to locate target libraries (unless your @value{GDBN}
-was compiled with the correct sysroot using @code{--with-system-root}).
+was compiled with the correct sysroot using @code{--with-sysroot}).
 
 The symbol file and target libraries must exactly match the executable
 and libraries on the target, with one exception: the files on the host
@@ -13038,19 +13088,17 @@ Connect to your target (@pxref{Connecting,,Connecting to a Remote Target}).
 For TCP connections, you must start up @code{gdbserver} prior to using
 the @code{target remote} command.  Otherwise you may get an error whose
 text depends on the host system, but which usually looks something like
-@samp{Connection refused}.  You don't need to use the @code{load}
+@samp{Connection refused}.  Don't use the @code{load}
 command in @value{GDBN} when using @code{gdbserver}, since the program is
 already on the target.
 
-@end table
-
 @subsection Monitor Commands for @code{gdbserver}
 @cindex monitor commands, for @code{gdbserver}
+@anchor{Monitor Commands for gdbserver}
 
 During a @value{GDBN} session using @code{gdbserver}, you can use the
 @code{monitor} command to send special requests to @code{gdbserver}.
-Here are the available commands; they are only of interest when
-debugging @value{GDBN} or @code{gdbserver}.
+Here are the available commands.
 
 @table @code
 @item monitor help
@@ -13064,6 +13112,13 @@ Disable or enable general debugging messages.
 @itemx monitor set remote-debug 1
 Disable or enable specific debugging messages associated with the remote
 protocol (@pxref{Remote Protocol}).
+
+@item monitor exit
+Tell gdbserver to exit immediately.  This command should be followed by
+@code{disconnect} to close the debugging session.  @code{gdbserver} will
+detach from any attached processes and kill any processes it created.
+Use @code{monitor exit} to terminate @code{gdbserver} at the end
+of a multi-process mode debug session.
 
 @end table
 
@@ -13159,6 +13214,15 @@ responses.
 @itemx set remote hardware-breakpoint-limit @var{limit}
 Restrict @value{GDBN} to using @var{limit} remote hardware breakpoint or
 watchpoints.  A limit of -1, the default, is treated as unlimited.
+
+@item set remote exec-file @var{filename}
+@itemx show remote exec-file
+@anchor{set remote exec-file}
+@cindex executable file, for remote target
+Select the file used for @code{run} with @code{target
+extended-remote}.  This should be set to a filename valid on the
+target system.  If it is not set, the target will use a default
+filename (e.g.@: the last program run).
 @end table
 
 @cindex remote packets, enabling and disabling
@@ -13205,9 +13269,17 @@ are:
 @tab @code{qSymbol}
 @tab Detecting multiple threads
 
+@item @code{attach}
+@tab @code{vAttach}
+@tab @code{attach}
+
 @item @code{verbose-resume}
 @tab @code{vCont}
 @tab Stepping or resuming multiple threads
+
+@item @code{run}
+@tab @code{vRun}
+@tab @code{run}
 
 @item @code{software-breakpoint}
 @tab @code{Z0}
@@ -23298,6 +23370,7 @@ Here are the packet descriptions.
 
 @item !
 @cindex @samp{!} packet
+@anchor{extended mode}
 Enable extended mode.  In extended mode, the remote server is made
 persistent.  The @samp{R} packet is used to restart the program being
 debugged.
@@ -23563,7 +23636,7 @@ Don't use this packet; use the @samp{R} packet instead.
 @item R @var{XX}
 @cindex @samp{R} packet
 Restart the program being debugged.  @var{XX}, while needed, is ignored.
-This packet is only available in extended mode.
+This packet is only available in extended mode (@pxref{extended mode}).
 
 The @samp{R} packet has no reply.
 
@@ -23605,6 +23678,22 @@ thread is dead
 @item v
 Packets starting with @samp{v} are identified by a multi-letter name,
 up to the first @samp{;} or @samp{?} (or the end of the packet).
+
+@item vAttach;@var{pid}
+@cindex @samp{vAttach} packet
+Attach to a new process with the specified process ID.  @var{pid} is a
+hexadecimal integer identifying the process.  If the stub is currently
+controlling a process, it is killed.  The attached process is stopped.
+
+This packet is only available in extended mode (@pxref{extended mode}).
+
+Reply:
+@table @samp
+@item E @var{nn}
+for an error
+@item @r{Any stop packet}
+for success (@pxref{Stop Reply Packets})
+@end table
 
 @item vCont@r{[};@var{action}@r{[}:@var{tid}@r{]]}@dots{}
 @cindex @samp{vCont} packet
@@ -23701,6 +23790,24 @@ The stub is permitted to delay or batch the effects of a group of
 @samp{vFlashDone} packet is received.  The contents of the affected
 regions of flash memory are unpredictable until the @samp{vFlashDone}
 request is completed.
+
+@item vRun;@var{filename}@r{[};@var{argument}@r{]}@dots{}
+@cindex @samp{vRun} packet
+Run the program @var{filename}, passing it each @var{argument} on its
+command line.  The file and arguments are hex-encoded strings.  If
+@var{filename} is an empty string, the stub may use a default program
+(e.g.@: the last program run).  The program is created in the stopped
+state.  If the stub is currently controlling a process, it is killed.
+
+This packet is only available in extended mode (@pxref{extended mode}).
+
+Reply:
+@table @samp
+@item E @var{nn}
+for an error
+@item @r{Any stop packet}
+for success (@pxref{Stop Reply Packets})
+@end table
 
 @item X @var{addr},@var{length}:@var{XX@dots{}}
 @anchor{X packet}

@@ -187,15 +187,15 @@ remote_open (char *name)
 #ifdef USE_WIN32API
       static int winsock_initialized;
 #endif
-      char *port_str;
       int port;
       struct sockaddr_in sockaddr;
       socklen_t tmp;
       int tmp_desc;
+      char *port_end;
 
-      port_str = strchr (name, ':');
-
-      port = atoi (port_str + 1);
+      port = strtoul (port_str + 1, &port_end, 10);
+      if (port_str[1] == '\0' || *port_end != '\0')
+	fatal ("Bad port argument: %s", name);
 
 #ifdef USE_WIN32API
       if (!winsock_initialized)
@@ -575,7 +575,7 @@ putpkt_binary (char *buf, int cnt)
 	}
 
       /* Check for an input interrupt while we're here.  */
-      if (buf3[0] == '\003')
+      if (buf3[0] == '\003' && current_inferior != NULL)
 	(*the_target->request_interrupt) ();
     }
   while (buf3[0] != '+');
@@ -617,7 +617,7 @@ input_interrupt (int unused)
 
       cc = read (remote_desc, &c, 1);
 
-      if (cc != 1 || c != '\003')
+      if (cc != 1 || c != '\003' || current_inferior == NULL)
 	{
 	  fprintf (stderr, "input_interrupt, count = %d c = %d ('%c')\n",
 		   cc, c, c);

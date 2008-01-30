@@ -304,14 +304,18 @@ linux_attach_lwp (unsigned long pid)
 
   if (ptrace (PTRACE_ATTACH, pid, 0, 0) != 0)
     {
-      fprintf (stderr, "Cannot attach to process %ld: %s (%d)\n", pid,
+      if (all_threads.head != NULL)
+	{
+	  /* If we fail to attach to an LWP, just warn.  */
+	  fprintf (stderr, "Cannot attach to process %ld: %s (%d)\n", pid,
+		   strerror (errno), errno);
+	  fflush (stderr);
+	  return;
+	}
+      else
+	/* If we fail to attach to a process, report an error.  */
+	error ("Cannot attach to process %ld: %s (%d)\n", pid,
 	       strerror (errno), errno);
-      fflush (stderr);
-
-      /* If we fail to attach to an LWP, just return.  */
-      if (all_threads.head == NULL)
-	_exit (0177);
-      return;
     }
 
   ptrace (PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACECLONE);
@@ -396,6 +400,10 @@ linux_kill (void)
       /* Make sure it died.  The loop is most likely unnecessary.  */
       wstat = linux_wait_for_event (thread);
     } while (WIFSTOPPED (wstat));
+
+  clear_inferiors ();
+  free (all_processes.head);
+  all_processes.head = all_processes.tail = NULL;
 }
 
 static void
@@ -434,6 +442,8 @@ linux_detach (void)
   delete_all_breakpoints ();
   for_each_inferior (&all_threads, linux_detach_one_process);
   clear_inferiors ();
+  free (all_processes.head);
+  all_processes.head = all_processes.tail = NULL;
   return 0;
 }
 

@@ -1,5 +1,15 @@
 2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.server/ext-attach.c, gdb.server/ext-attach.exp,
+	gdb.server/ext-run.exp: New files.
+	* lib/gdbserver-support.exp (gdbserver_download): New.
+	(gdbserver_start): New.  Update gdbserver expected
+	output.
+	(gdbserver_spawn): Use them.
+	(gdbserver_start_extended): New.
+
+2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/foll-exec.exp: Update header.  Skip on remote targets.
 	Run on GNU/Linux.
 	(do_exec_tests): Check for systems which do not support catchpoints.

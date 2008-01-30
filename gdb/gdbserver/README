@@ -9,6 +9,8 @@ host.  GDB and GDBserver communicate using the standard remote serial protocol
 implemented in remote.c, and various *-stub.c files.  They communicate via
 either a serial line or a TCP connection.
 
+For more information about GDBserver, see the GDB manual.
+
 Usage (server (target) side):
 
 First, you need to have a copy of the program you want to debug put onto
@@ -47,7 +49,7 @@ print an error message and exit.
 On some targets, gdbserver can also attach to running programs.  This is
 accomplished via the --attach argument.  The syntax is:
 
-	target> gdbserver COMM --attach PID
+	target> gdbserver --attach COMM PID
 
 PID is the process ID of a currently running process.  It isn't necessary
 to point gdbserver at a binary for the running process.

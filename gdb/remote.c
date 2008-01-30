@@ -237,6 +237,15 @@ struct remote_state
      a buffer in the stub), this will be set to that packet size.
      Otherwise zero, meaning to use the guessed size.  */
   long explicit_packet_size;
+
+  /* remote_wait is normally called when the target is running and
+     waits for a stop reply packet.  But sometimes we need to call it
+     when the target is already stopped.  We can send a "?" packet
+     and have remote_wait read the response.  Or, if we already have
+     the response, we can stash it in BUF and tell remote_wait to
+     skip calling getpkt.  This flag is set when BUF contains a
+     stop reply packet and the target is not waiting.  */
+  int cached_wait_status;
 };
 
 /* This data could be associated with a target, but we do not always
@@ -513,6 +522,10 @@ static int remote_address_size;
    target_async_terminal_* for more details.  */
 
 static int remote_async_terminal_ours_p;
+
+/* The executable file to use for "run" on the remote side.  */
+
+static char *remote_exec_file = "";
 
 
 /* User configurable variables for the number of characters in a
@@ -920,6 +933,8 @@ enum {
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_QPassSignals,
+  PACKET_vAttach,
+  PACKET_vRun,
   PACKET_MAX
 };
 
@@ -1993,11 +2008,6 @@ extended_remote_restart (void)
   putpkt (rs->buf);
 
   remote_fileio_reset ();
-
-  /* Now query for status so this looks just like we restarted
-     gdbserver from scratch.  */
-  putpkt ("?");
-  getpkt (&rs->buf, &rs->buf_size, 0);
 }
 
 /* Clean up connection to a remote debugger.  */
@@ -2159,27 +2169,79 @@ get_offsets (void)
 
 /* Stub for catch_exception.  */
 
-static void
-remote_start_remote (struct ui_out *uiout, void *from_tty_p)
+struct start_remote_args
 {
-  int from_tty = * (int *) from_tty_p;
+  int from_tty;
+
+  /* The current target.  */
+  struct target_ops *target;
+
+  /* Non-zero if this is an extended-remote target.  */
+  int extended_p;
+};
+
+static void
+remote_start_remote (struct ui_out *uiout, void *opaque)
+{
+  struct remote_state *rs = get_remote_state ();
+  struct start_remote_args *args = opaque;
+  char *wait_status = NULL;
 
   immediate_quit++;		/* Allow user to interrupt it.  */
 
   /* Ack any packet which the remote side has already sent.  */
   serial_write (remote_desc, "+", 1);
 
+  /* Check whether the target is running now.  */
+  putpkt ("?");
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (rs->buf[0] == 'W' || rs->buf[0] == 'X')
+    {
+      if (args->extended_p)
+	{
+	  /* We're connected, but not running.  Drop out before we
+	     call start_remote.  */
+	  target_mark_exited (args->target);
+	  return;
+	}
+      else
+	error (_("The target is not running (try extended-remote?)"));
+    }
+  else
+    {
+      if (args->extended_p)
+	target_mark_running (args->target);
+
+      /* Save the reply for later.  */
+      wait_status = alloca (strlen (rs->buf) + 1);
+      strcpy (wait_status, rs->buf);
+    }
+
   /* Let the stub know that we want it to return the thread.  */
   set_thread (-1, 0);
 
+  /* Without this, some commands which require an active target
+     (such as kill) won't work.  This variable serves (at least)
+     double duty as both the pid of the target process (if it has
+     such), and as a flag indicating that a target is active.
+     These functions should be split out into seperate variables,
+     especially since GDB will someday have a notion of debugging
+     several processes.  */
+  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
+
+  /* Now, if we have thread information, update inferior_ptid.  */
   inferior_ptid = remote_current_thread (inferior_ptid);
 
   get_offsets ();		/* Get text, data & bss offsets.  */
 
-  putpkt ("?");			/* Initiate a query from remote machine.  */
-  immediate_quit--;
+  /* Use the previously fetched status.  */
+  gdb_assert (wait_status != NULL);
+  strcpy (rs->buf, wait_status);
+  rs->cached_wait_status = 1;
 
-  start_remote (from_tty);	/* Initialize gdb process mechanisms.  */
+  immediate_quit--;
+  start_remote (args->from_tty); /* Initialize gdb process mechanisms.  */
 }
 
 /* Open a connection to a remote debugger.
@@ -2540,9 +2602,30 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   if (!async_p)
     wait_forever_enabled_p = 1;
 
+  /* If we're connected to a running target, target_preopen will kill it.
+     But if we're connected to a target system with no running process,
+     then we will still be connected when it returns.  Ask this question
+     first, before target_preopen has a chance to kill anything.  */
+  if (remote_desc != NULL && !target_has_execution)
+    {
+      if (!from_tty
+	  || query (_("Already connected to a remote target.  Disconnect? ")))
+	pop_target ();
+      else
+	error (_("Still connected."));
+    }
+
   target_preopen (from_tty);
 
   unpush_target (target);
+
+  /* This time without a query.  If we were connected to an
+     extended-remote target and target_preopen killed the running
+     process, we may still be connected.  If we are starting "target
+     remote" now, the extended-remote target will not have been
+     removed by unpush_target.  */
+  if (remote_desc != NULL && !target_has_execution)
+    pop_target ();
 
   /* Make sure we send the passed signals list the next time we resume.  */
   xfree (last_pass_packet);
@@ -2584,6 +2667,9 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
     }
   push_target (target);		/* Switch to using remote target now.  */
 
+  /* Assume that the target is running, unless we learn otherwise.  */
+  target_mark_running (target);
+
   /* Reset the target state; these things will be queried either by
      remote_query_supported or as they are needed.  */
   init_all_packet_configs ();
@@ -2604,15 +2690,6 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   /* Next, if the target can specify a description, read it.  We do
      this before anything involving memory or registers.  */
   target_find_description ();
-
-  /* Without this, some commands which require an active target (such
-     as kill) won't work.  This variable serves (at least) double duty
-     as both the pid of the target process (if it has such), and as a
-     flag indicating that a target is active.  These functions should
-     be split out into seperate variables, especially since GDB will
-     someday have a notion of debugging several processes.  */
-
-  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
 
   if (async_p)
     {
@@ -2648,9 +2725,14 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
      all the ``target ....'' commands to share a common callback
      function.  See cli-dump.c.  */
   {
-    struct gdb_exception ex
-      = catch_exception (uiout, remote_start_remote, &from_tty,
-			 RETURN_MASK_ALL);
+    struct gdb_exception ex;
+    struct start_remote_args args;
+
+    args.from_tty = from_tty;
+    args.target = target;
+    args.extended_p = extended_p;
+
+    ex = catch_exception (uiout, remote_start_remote, &args, RETURN_MASK_ALL);
     if (ex.reason < 0)
       {
 	pop_target ();
@@ -2670,8 +2752,12 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
       getpkt (&rs->buf, &rs->buf_size, 0);
     }
 
-  if (exec_bfd) 	/* No use without an exec file.  */
-    remote_check_symbols (symfile_objfile);
+  /* If we connected to a live target, do some additional setup.  */
+  if (target_has_execution)
+    {
+      if (exec_bfd) 	/* No use without an exec file.  */
+	remote_check_symbols (symfile_objfile);
+    }
 }
 
 /* This takes a program previously attached to and detaches it.  After
@@ -2680,12 +2766,15 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
    die when it hits one.  */
 
 static void
-remote_detach (char *args, int from_tty)
+remote_detach_1 (char *args, int from_tty, int extended)
 {
   struct remote_state *rs = get_remote_state ();
 
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));
+
+  if (!target_has_execution)
+    error (_("No process to detach from."));
 
   /* Tell the remote target to detach.  */
   strcpy (rs->buf, "D");
@@ -2701,7 +2790,24 @@ remote_detach (char *args, int from_tty)
 
   target_mourn_inferior ();
   if (from_tty)
-    puts_filtered ("Ending remote debugging.\n");
+    {
+      if (extended)
+	puts_filtered ("Detached from remote process.\n");
+      else
+	puts_filtered ("Ending remote debugging.\n");
+    }
+}
+
+static void
+remote_detach (char *args, int from_tty)
+{
+  remote_detach_1 (args, from_tty, 0);
+}
+
+static void
+extended_remote_detach (char *args, int from_tty)
+{
+  remote_detach_1 (args, from_tty, 1);
 }
 
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */
@@ -2710,15 +2816,76 @@ static void
 remote_disconnect (struct target_ops *target, char *args, int from_tty)
 {
   if (args)
-    error (_("Argument given to \"detach\" when remotely debugging."));
+    error (_("Argument given to \"disconnect\" when remotely debugging."));
 
   /* Unregister the file descriptor from the event loop.  */
   if (target_is_async_p ())
     serial_async (remote_desc, NULL, 0);
 
-  target_mourn_inferior ();
+  /* Make sure we unpush even the extended remote targets; mourn
+     won't do it.  So call remote_mourn_1 directly instead of
+     target_mourn_inferior.  */
+  remote_mourn_1 (target);
+
   if (from_tty)
     puts_filtered ("Ending remote debugging.\n");
+}
+
+/* Attach to the process specified by ARGS.  If FROM_TTY is non-zero,
+   be chatty about it.  */
+
+static void
+extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
+{
+  struct remote_state *rs = get_remote_state ();
+  pid_t pid;
+  char *dummy;
+
+  if (!args)
+    error_no_arg (_("process-id to attach"));
+
+  dummy = args;
+  pid = strtol (args, &dummy, 0);
+  /* Some targets don't set errno on errors, grrr!  */
+  if (pid == 0 && args == dummy)
+    error (_("Illegal process-id: %s."), args);
+
+  if (remote_protocol_packets[PACKET_vAttach].support == PACKET_DISABLE)
+    error (_("This target does not support attaching to a process"));
+
+  sprintf (rs->buf, "vAttach;%x", pid);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (packet_ok (rs->buf, &remote_protocol_packets[PACKET_vAttach]) == PACKET_OK)
+    {
+      if (from_tty)
+	printf_unfiltered (_("Attached to %s\n"),
+			   target_pid_to_str (pid_to_ptid (pid)));
+
+      /* We have a wait response; reuse it.  */
+      rs->cached_wait_status = 1;
+    }
+  else if (remote_protocol_packets[PACKET_vAttach].support == PACKET_DISABLE)
+    error (_("This target does not support attaching to a process"));
+  else
+    error (_("Attaching to %s failed"),
+	   target_pid_to_str (pid_to_ptid (pid)));
+
+  target_mark_running (target);
+  inferior_ptid = pid_to_ptid (pid);
+}
+
+static void
+extended_remote_attach (char *args, int from_tty)
+{
+  extended_remote_attach_1 (&extended_remote_ops, args, from_tty);
+}
+
+static void
+extended_async_remote_attach (char *args, int from_tty)
+{
+  extended_remote_attach_1 (&extended_async_remote_ops, args, from_tty);
 }
 
 /* Convert hex digit A to a number.  */
@@ -2845,7 +3012,7 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
   int pid = PIDGET (ptid);
-  char *buf = NULL, *outbuf;
+  char *outbuf;
   struct cleanup *old_cleanup;
 
   if (remote_protocol_packets[PACKET_vCont].support == PACKET_SUPPORT_UNKNOWN)
@@ -3203,16 +3370,22 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
     {
       char *buf, *p;
 
-      ofunc = signal (SIGINT, remote_interrupt);
-      /* If the user hit C-c before this packet, or between packets,
-	 pretend that it was hit right here.  */
-      if (quit_flag)
+      if (rs->cached_wait_status)
+	/* Use the cached wait status, but only once.  */
+	rs->cached_wait_status = 0;
+      else
 	{
-	  quit_flag = 0;
-	  remote_interrupt (SIGINT);
+	  ofunc = signal (SIGINT, remote_interrupt);
+	  /* If the user hit C-c before this packet, or between packets,
+	     pretend that it was hit right here.  */
+	  if (quit_flag)
+	    {
+	      quit_flag = 0;
+	      remote_interrupt (SIGINT);
+	    }
+	  getpkt (&rs->buf, &rs->buf_size, 1);
+	  signal (SIGINT, ofunc);
 	}
-      getpkt (&rs->buf, &rs->buf_size, 1);
-      signal (SIGINT, ofunc);
 
       buf = rs->buf;
 
@@ -3419,24 +3592,30 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
     {
       char *buf, *p;
 
-      if (!target_is_async_p ())
+      if (rs->cached_wait_status)
+	/* Use the cached wait status, but only once.  */
+	rs->cached_wait_status = 0;
+      else
 	{
-	  ofunc = signal (SIGINT, remote_interrupt);
-	  /* If the user hit C-c before this packet, or between packets,
-	     pretend that it was hit right here.  */
-	  if (quit_flag)
+	  if (!target_is_async_p ())
 	    {
-	      quit_flag = 0;
-	      remote_interrupt (SIGINT);
+	      ofunc = signal (SIGINT, remote_interrupt);
+	      /* If the user hit C-c before this packet, or between packets,
+		 pretend that it was hit right here.  */
+	      if (quit_flag)
+		{
+		  quit_flag = 0;
+		  remote_interrupt (SIGINT);
+		}
 	    }
+	  /* FIXME: cagney/1999-09-27: If we're in async mode we should
+	     _never_ wait for ever -> test on target_is_async_p().
+	     However, before we do that we need to ensure that the caller
+	     knows how to take the target into/out of async mode.  */
+	  getpkt (&rs->buf, &rs->buf_size, wait_forever_enabled_p);
+	  if (!target_is_async_p ())
+	    signal (SIGINT, ofunc);
 	}
-      /* FIXME: cagney/1999-09-27: If we're in async mode we should
-         _never_ wait for ever -> test on target_is_async_p().
-         However, before we do that we need to ensure that the caller
-         knows how to take the target into/out of async mode.  */
-      getpkt (&rs->buf, &rs->buf_size, wait_forever_enabled_p);
-      if (!target_is_async_p ())
-	signal (SIGINT, ofunc);
 
       buf = rs->buf;
 
@@ -4705,6 +4884,7 @@ putpkt (char *buf)
 static int
 putpkt_binary (char *buf, int cnt)
 {
+  struct remote_state *rs = get_remote_state ();
   int i;
   unsigned char csum = 0;
   char *buf2 = alloca (cnt + 6);
@@ -4712,6 +4892,10 @@ putpkt_binary (char *buf, int cnt)
   int ch;
   int tcount = 0;
   char *p;
+
+  /* We're sending out a new packet.  Make sure we don't look at a
+     stale cached response.  */
+  rs->cached_wait_status = 0;
 
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
@@ -5014,10 +5198,15 @@ getpkt (char **buf,
 static int
 getpkt_sane (char **buf, long *sizeof_buf, int forever)
 {
+  struct remote_state *rs = get_remote_state ();
   int c;
   int tries;
   int timeout;
   int val;
+
+  /* We're reading a new response.  Make sure we don't look at a
+     previously cached response.  */
+  rs->cached_wait_status = 0;
 
   strcpy (*buf, "timeout");
 
@@ -5150,19 +5339,6 @@ remote_async_mourn (void)
   remote_mourn_1 (&remote_async_ops);
 }
 
-static void
-extended_remote_mourn (void)
-{
-  /* We do _not_ want to mourn the target like this; this will
-     remove the extended remote target  from the target stack,
-     and the next time the user says "run" it'll fail.
-
-     FIXME: What is the right thing to do here?  */
-#if 0
-  remote_mourn_1 (&extended_remote_ops);
-#endif
-}
-
 /* Worker function for remote_mourn.  */
 static void
 remote_mourn_1 (struct target_ops *target)
@@ -5171,71 +5347,167 @@ remote_mourn_1 (struct target_ops *target)
   generic_mourn_inferior ();
 }
 
+static void
+extended_remote_mourn_1 (struct target_ops *target)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  /* Unlike "target remote", we do not want to unpush the target; then
+     the next time the user says "run", we won't be connected.  */
+
+  /* Call common code to mark the inferior as not running.  */
+  generic_mourn_inferior ();
+
+  /* Check whether the target is running now - some remote stubs
+     automatically restart after kill.  */
+  putpkt ("?");
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (rs->buf[0] == 'S' || rs->buf[0] == 'T')
+    {
+      /* Assume that the target has been restarted.  Set inferior_ptid
+	 so that bits of core GDB realizes there's something here, e.g.,
+	 so that the user can say "kill" again.  */
+      inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
+    }
+  else
+    {
+      /* Mark this (still pushed) target as not executable until we
+	 restart it.  */
+      target_mark_exited (target);
+    }
+}
+
+static void
+extended_remote_mourn (void)
+{
+  extended_remote_mourn_1 (&extended_remote_ops);
+}
+
+static void
+extended_async_remote_mourn (void)
+{
+  extended_remote_mourn_1 (&extended_async_remote_ops);
+}
+
+static int
+extended_remote_run (char *args)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p;
+  int len;
+
+  /* If the user has disabled vRun support, or we have detected that
+     support is not available, do not try it.  */
+  if (remote_protocol_packets[PACKET_vRun].support == PACKET_DISABLE)
+    return -1;
+
+  strcpy (rs->buf, "vRun;");
+  len = strlen (rs->buf);
+
+  if (strlen (remote_exec_file) * 2 + len >= get_remote_packet_size ())
+    error (_("Remote file name too long for run packet"));
+  len += 2 * bin2hex ((gdb_byte *) remote_exec_file, rs->buf + len, 0);
+
+  if (*args)
+    {
+      struct cleanup *back_to;
+      int i;
+      char **argv;
+
+      argv = buildargv (args);
+      back_to = make_cleanup ((void (*) (void *)) freeargv, argv);
+      for (i = 0; argv[i] != NULL; i++)
+	{
+	  if (strlen (argv[i]) * 2 + 1 + len >= get_remote_packet_size ())
+	    error (_("Argument list too long for run packet"));
+	  rs->buf[len++] = ';';
+	  len += 2 * bin2hex ((gdb_byte *) argv[i], rs->buf + len, 0);
+	}
+      do_cleanups (back_to);
+    }
+
+  rs->buf[len++] = '\0';
+
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (packet_ok (rs->buf, &remote_protocol_packets[PACKET_vRun]) == PACKET_OK)
+    {
+      /* We have a wait response; we don't need it, though.  All is well.  */
+      return 0;
+    }
+  else if (remote_protocol_packets[PACKET_vRun].support == PACKET_DISABLE)
+    /* It wasn't disabled before, but it is now.  */
+    return -1;
+  else
+    {
+      if (remote_exec_file[0] == '\0')
+	error (_("Running the default executable on the remote target failed; "
+		 "try \"set remote exec-file\"?"));
+      else
+	error (_("Running \"%s\" on the remote target failed"),
+	       remote_exec_file);
+    }
+}
+
 /* In the extended protocol we want to be able to do things like
    "run" and have them basically work as expected.  So we need
-   a special create_inferior function.
+   a special create_inferior function.  We support changing the
+   executable file and the command line arguments, but not the
+   environment.  */
 
-   FIXME: One day add support for changing the exec file
-   we're debugging, arguments and an environment.  */
+static void
+extended_remote_create_inferior_1 (char *exec_file, char *args,
+				   char **env, int from_tty,
+				   int async_p)
+{
+  /* If running asynchronously, register the target file descriptor
+     with the event loop.  */
+  if (async_p && target_can_async_p ())
+    target_async (inferior_event_handler, 0);
+
+  /* Now restart the remote server.  */
+  if (extended_remote_run (args) == -1)
+    {
+      /* vRun was not supported.  Fail if we need it to do what the
+	 user requested.  */
+      if (remote_exec_file[0])
+	error (_("Remote target does not support \"set remote exec-file\""));
+      if (args[0])
+	error (_("Remote target does not support \"set args\" or run <ARGS>"));
+
+      /* Fall back to "R".  */
+      extended_remote_restart ();
+    }
+
+  /* Now mark the inferior as running before we do anything else.  */
+  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
+  if (async_p)
+    target_mark_running (&extended_async_remote_ops);
+  else
+    target_mark_running (&extended_remote_ops);
+
+  /* Get updated offsets, if the stub uses qOffsets.  */
+  get_offsets ();
+
+  /* Clean up from the last time we were running.  */
+  init_thread_list ();
+  init_wait_for_inferior ();
+}
 
 static void
 extended_remote_create_inferior (char *exec_file, char *args,
 				 char **env, int from_tty)
 {
-  /* Rip out the breakpoints; we'll reinsert them after restarting
-     the remote server.  */
-  remove_breakpoints ();
-
-  /* Now restart the remote server.  */
-  extended_remote_restart ();
-
-  /* NOTE: We don't need to recheck for a target description here; but
-     if we gain the ability to switch the remote executable we may
-     need to, if for instance we are running a process which requested
-     different emulated hardware from the operating system.  A
-     concrete example of this is ARM GNU/Linux, where some binaries
-     will have a legacy FPA coprocessor emulated and others may have
-     access to a hardware VFP unit.  */
-
-  /* Now put the breakpoints back in.  This way we're safe if the
-     restart function works via a unix fork on the remote side.  */
-  insert_breakpoints ();
-
-  /* Clean up from the last time we were running.  */
-  clear_proceed_status ();
+  extended_remote_create_inferior_1 (exec_file, args, env, from_tty, 0);
 }
 
-/* Async version of extended_remote_create_inferior.  */
 static void
 extended_remote_async_create_inferior (char *exec_file, char *args,
 				       char **env, int from_tty)
 {
-  /* Rip out the breakpoints; we'll reinsert them after restarting
-     the remote server.  */
-  remove_breakpoints ();
-
-  /* If running asynchronously, register the target file descriptor
-     with the event loop.  */
-  if (target_can_async_p ())
-    target_async (inferior_event_handler, 0);
-
-  /* Now restart the remote server.  */
-  extended_remote_restart ();
-
-  /* NOTE: We don't need to recheck for a target description here; but
-     if we gain the ability to switch the remote executable we may
-     need to, if for instance we are running a process which requested
-     different emulated hardware from the operating system.  A
-     concrete example of this is ARM GNU/Linux, where some binaries
-     will have a legacy FPA coprocessor emulated and others may have
-     access to a hardware VFP unit.  */
-
-  /* Now put the breakpoints back in.  This way we're safe if the
-     restart function works via a unix fork on the remote side.  */
-  insert_breakpoints ();
-
-  /* Clean up from the last time we were running.  */
-  clear_proceed_status ();
+  extended_remote_create_inferior_1 (exec_file, args, env, from_tty, 1);
 }
 
 
@@ -5792,6 +6064,12 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       int xfered;
       errno = 0;
+
+      /* If the remote target is connected but not running, we should
+	 pass this request down to a lower stratum (e.g. the executable
+	 file).  */
+      if (!target_has_execution)
+	return 0;
 
       if (writebuf != NULL)
 	xfered = remote_write_bytes (offset, writebuf, len);
@@ -6994,6 +7272,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
     extended_remote_ops.to_open = extended_remote_open;
   extended_remote_ops.to_create_inferior = extended_remote_create_inferior;
   extended_remote_ops.to_mourn_inferior = extended_remote_mourn;
+  extended_remote_ops.to_detach = extended_remote_detach;
+  extended_remote_ops.to_attach = extended_remote_attach;
 }
 
 static int
@@ -7126,7 +7406,9 @@ init_extended_async_remote_ops (void)
 Specify the serial device it is connected to (e.g. /dev/ttya).",
     extended_async_remote_ops.to_open = extended_remote_async_open;
   extended_async_remote_ops.to_create_inferior = extended_remote_async_create_inferior;
-  extended_async_remote_ops.to_mourn_inferior = extended_remote_mourn;
+  extended_async_remote_ops.to_mourn_inferior = extended_async_remote_mourn;
+  extended_async_remote_ops.to_detach = extended_remote_detach;
+  extended_async_remote_ops.to_attach = extended_async_remote_attach;
 }
 
 static void
@@ -7381,6 +7663,12 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vFile_unlink],
 			 "vFile:unlink", "hostio-unlink", 0);
 
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vAttach],
+			 "vAttach", "attach", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vRun],
+			 "vRun", "run", 0);
+
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may
      have sets to this variable in their .gdbinit files (or in their
@@ -7412,6 +7700,13 @@ Transfer files to and from the remote target system."),
   add_cmd ("delete", class_files, remote_delete_command,
 	   _("Delete a remote file."),
 	   &remote_cmdlist);
+
+  remote_exec_file = xstrdup ("");
+  add_setshow_string_noescape_cmd ("exec-file", class_files,
+				   &remote_exec_file, _("\
+Set the remote pathname for \"run\""), _("\
+Show the remote pathname for \"run\""), NULL, NULL, NULL,
+				   &remote_set_cmdlist, &remote_show_cmdlist);
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);

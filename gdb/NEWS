@@ -50,6 +50,9 @@ targets even when the libthread_db library is not available.
 * The GDB remote stub, gdbserver, now supports the new file transfer
 commands (remote put, remote get, and remote delete).
 
+* The GDB remote stub, gdbserver, now supports run and attach in
+extended-remote mode.
+
 * hppa*64*-*-hpux11* target broken
   The debugger is unable to start a program and fails with the following
   error: "Error trying to get information about dynamic linker".
@@ -84,6 +87,13 @@ vFile:unlink:
 
 * GDB on GNU/Linux and HP/UX can now debug through "exec" of a new
 process.
+
+vAttach
+  Attach to an existing process on the remote system, in extended-remote
+  mode.
+
+vRun
+  Run a new process on the remote system, in extended-remote mode.
 
 *** Changes in GDB 6.7
 

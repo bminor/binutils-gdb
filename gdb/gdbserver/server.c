@@ -34,8 +34,14 @@ unsigned long general_thread;
 unsigned long step_thread;
 unsigned long thread_from_wait;
 unsigned long old_thread_from_wait;
-int extended_protocol;
 int server_waiting;
+
+static int extended_protocol;
+static int attached;
+static int response_needed;
+static int exit_requested;
+
+static char **program_argv;
 
 /* Enable miscellaneous debugging output.  The name is historical - it
    was originally used to debug LinuxThreads support.  */
@@ -69,8 +75,16 @@ restore_old_foreground_pgrp (void)
 #endif
 
 static int
+target_running (void)
+{
+  return all_threads.head != NULL;
+}
+
+static int
 start_inferior (char *argv[], char *statusptr)
 {
+  attached = 0;
+
 #ifdef SIGTTOU
   signal (SIGTTOU, SIG_DFL);
   signal (SIGTTIN, SIG_DFL);
@@ -106,6 +120,8 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
 
   if (myattach (pid) != 0)
     return -1;
+
+  attached = 1;
 
   fprintf (stderr, "Attached; pid = %d\n", pid);
   fflush (stderr);
@@ -254,6 +270,13 @@ monitor_show_help (void)
   monitor_output ("    Enable remote protocol debugging messages\n");
 }
 
+#define require_running(BUF)			\
+  if (!target_running ())			\
+    {						\
+      write_enn (BUF);				\
+      return;					\
+    }
+
 /* Handle all of the extended 'q' packets.  */
 void
 handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
@@ -263,6 +286,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   /* Reply the current thread id.  */
   if (strcmp ("qC", own_buf) == 0)
     {
+      require_running (own_buf);
       thread_ptr = all_threads.head;
       sprintf (own_buf, "QC%x",
 	thread_to_gdb_id ((struct thread_info *)thread_ptr));
@@ -271,7 +295,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   if (strcmp ("qSymbol::", own_buf) == 0)
     {
-      if (the_target->look_up_symbols != NULL)
+      if (target_running () && the_target->look_up_symbols != NULL)
 	(*the_target->look_up_symbols) ();
 
       strcpy (own_buf, "OK");
@@ -280,6 +304,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   if (strcmp ("qfThreadInfo", own_buf) == 0)
     {
+      require_running (own_buf);
       thread_ptr = all_threads.head;
       sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
       thread_ptr = thread_ptr->next;
@@ -288,6 +313,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   if (strcmp ("qsThreadInfo", own_buf) == 0)
     {
+      require_running (own_buf);
       if (thread_ptr != NULL)
 	{
 	  sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
@@ -305,7 +331,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       && strcmp ("qOffsets", own_buf) == 0)
     {
       CORE_ADDR text, data;
-      
+
+      require_running (own_buf);
       if (the_target->read_offsets (&text, &data))
 	sprintf (own_buf, "Text=%lX;Data=%lX;Bss=%lX",
 		 (long)text, (long)data, (long)data);
@@ -324,6 +351,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       CORE_ADDR ofs;
       unsigned char *spu_buf;
 
+      require_running (own_buf);
       strcpy (own_buf, "E00");
       if (decode_xfer_read (own_buf + 15, &annex, &ofs, &len) < 0)
 	  return;
@@ -356,6 +384,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       CORE_ADDR ofs;
       unsigned char *spu_buf;
 
+      require_running (own_buf);
       strcpy (own_buf, "E00");
       spu_buf = malloc (packet_len - 15);
       if (!spu_buf)
@@ -386,6 +415,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       CORE_ADDR ofs;
       unsigned int len;
       char *annex;
+
+      require_running (own_buf);
 
       /* Reject any annex; grab the offset and length.  */
       if (decode_xfer_read (own_buf + 16, &annex, &ofs, &len) < 0
@@ -419,6 +450,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       unsigned int len, total_len;
       const char *document;
       char *annex;
+
+      require_running (own_buf);
 
       /* Check for support.  */
       document = get_features_xml ("target.xml");
@@ -466,6 +499,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       char *document, *p;
       struct inferior_list_entry *dll_ptr;
       char *annex;
+
+      require_running (own_buf);
 
       /* Reject any annex; grab the offset and length.  */
       if (decode_xfer_read (own_buf + 21, &annex, &ofs, &len) < 0
@@ -535,7 +570,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (the_target->read_auxv != NULL)
 	strcat (own_buf, ";qXfer:auxv:read+");
-     
+
       if (the_target->qxfer_spu != NULL)
 	strcat (own_buf, ";qXfer:spu:read+;qXfer:spu:write+");
 
@@ -552,6 +587,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       char *p = own_buf + 12;
       CORE_ADDR parts[3], address = 0;
       int i, err;
+
+      require_running (own_buf);
 
       for (i = 0; i < 3; i++)
 	{
@@ -642,6 +679,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
       else if (strcmp (mon, "help") == 0)
 	monitor_show_help ();
+      else if (strcmp (mon, "exit") == 0)
+	exit_requested = 1;
       else
 	{
 	  monitor_output ("Unknown monitor command.\n\n");
@@ -772,6 +811,95 @@ err:
   return;
 }
 
+/* Attach to a new program.  Return 1 if successful, 0 if failure.  */
+int
+handle_v_attach (char *own_buf, char *status, int *signal)
+{
+  int pid;
+
+  pid = strtol (own_buf + 8, NULL, 16);
+  if (pid != 0 && attach_inferior (pid, status, signal) == 0)
+    {
+      prepare_resume_reply (own_buf, *status, *signal);
+      return 1;
+    }
+  else
+    {
+      write_enn (own_buf);
+      return 0;
+    }
+}
+
+/* Run a new program.  Return 1 if successful, 0 if failure.  */
+static int
+handle_v_run (char *own_buf, char *status, int *signal)
+{
+  char *p, **pp, *next_p, **new_argv;
+  int i, new_argc;
+
+  new_argc = 0;
+  for (p = own_buf + strlen ("vRun;"); p && *p; p = strchr (p, ';'))
+    {
+      p++;
+      new_argc++;
+    }
+
+  new_argv = malloc ((new_argc + 2) * sizeof (char *));
+  i = 0;
+  for (p = own_buf + strlen ("vRun;"); *p; p = next_p)
+    {
+      next_p = strchr (p, ';');
+      if (next_p == NULL)
+	next_p = p + strlen (p);
+
+      if (i == 0 && p == next_p)
+	new_argv[i] = NULL;
+      else
+	{
+	  new_argv[i] = malloc (1 + (next_p - p) / 2);
+	  unhexify (new_argv[i], p, (next_p - p) / 2);
+	  new_argv[i][(next_p - p) / 2] = '\0';
+	}
+
+      if (*next_p)
+	next_p++;
+      i++;
+    }
+  new_argv[i] = NULL;
+
+  if (new_argv[0] == NULL)
+    {
+      if (program_argv == NULL)
+	{
+	  write_enn (own_buf);
+	  return 0;
+	}
+
+      new_argv[0] = strdup (program_argv[0]);
+    }
+
+  /* Free the old argv.  */
+  if (program_argv)
+    {
+      for (pp = program_argv; *pp != NULL; pp++)
+	free (*pp);
+      free (program_argv);
+    }
+  program_argv = new_argv;
+
+  *signal = start_inferior (program_argv, status);
+  if (*status == 'T')
+    {
+      prepare_resume_reply (own_buf, *status, *signal);
+      return 1;
+    }
+  else
+    {
+      write_enn (own_buf);
+      return 0;
+    }
+}
+
 /* Handle all of the extended 'v' packets.  */
 void
 handle_v_requests (char *own_buf, char *status, int *signal,
@@ -779,6 +907,7 @@ handle_v_requests (char *own_buf, char *status, int *signal,
 {
   if (strncmp (own_buf, "vCont;", 6) == 0)
     {
+      require_running (own_buf);
       handle_v_cont (own_buf, status, signal);
       return;
     }
@@ -792,6 +921,28 @@ handle_v_requests (char *own_buf, char *status, int *signal,
   if (strncmp (own_buf, "vFile:", 6) == 0
       && handle_vFile (own_buf, packet_len, new_packet_len))
     return;
+
+  if (strncmp (own_buf, "vAttach;", 8) == 0)
+    {
+      if (target_running ())
+	{
+	  fprintf (stderr, "Killing inferior\n");
+	  kill_inferior ();
+	}
+      handle_v_attach (own_buf, status, signal);
+      return;
+    }
+
+  if (strncmp (own_buf, "vRun;", 5) == 0)
+    {
+      if (target_running ())
+	{
+	  fprintf (stderr, "Killing inferior\n");
+	  kill_inferior ();
+	}
+      handle_v_run (own_buf, status, signal);
+      return;
+    }
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
@@ -829,8 +980,6 @@ myresume (char *own_buf, int step, int *signalp, char *statusp)
   disable_async_io ();
 }
 
-static int attached;
-
 static void
 gdbserver_version (void)
 {
@@ -844,12 +993,24 @@ gdbserver_version (void)
 static void
 gdbserver_usage (void)
 {
-  printf ("Usage:\tgdbserver COMM PROG [ARGS ...]\n"
-	  "\tgdbserver COMM --attach PID\n"
+  printf ("Usage:\tgdbserver [OPTIONS] COMM PROG [ARGS ...]\n"
+	  "\tgdbserver [OPTIONS] --attach COMM PID\n"
+	  "\tgdbserver [OPTIONS] --multi COMM\n"
 	  "\n"
 	  "COMM may either be a tty device (for serial debugging), or \n"
-	  "HOST:PORT to listen for a TCP connection.\n");
+	  "HOST:PORT to listen for a TCP connection.\n"
+	  "\n"
+	  "Options:\n"
+	  "  --debug\t\tEnable debugging output.\n");
 }
+
+#undef require_running
+#define require_running(BUF)			\
+  if (!target_running ())			\
+    {						\
+      write_enn (BUF);				\
+      break;					\
+    }
 
 int
 main (int argc, char *argv[])
@@ -862,18 +1023,38 @@ main (int argc, char *argv[])
   CORE_ADDR mem_addr;
   int bad_attach;
   int pid;
-  char *arg_end;
+  char *arg_end, *port;
+  char **next_arg = &argv[1];
+  int multi_mode = 0;
+  int attach = 0;
+  int was_running;
 
-  if (argc >= 2 && strcmp (argv[1], "--version") == 0)
+  while (*next_arg != NULL && **next_arg == '-')
     {
-      gdbserver_version ();
-      exit (0);
-    }
+      if (strcmp (*next_arg, "--version") == 0)
+	{
+	  gdbserver_version ();
+	  exit (0);
+	}
+      else if (strcmp (*next_arg, "--help") == 0)
+	{
+	  gdbserver_usage ();
+	  exit (0);
+	}
+      else if (strcmp (*next_arg, "--attach") == 0)
+	attach = 1;
+      else if (strcmp (*next_arg, "--multi") == 0)
+	multi_mode = 1;
+      else if (strcmp (*next_arg, "--debug") == 0)
+	debug_threads = 1;
+      else
+	{
+	  fprintf (stderr, "Unknown argument: %s\n", *next_arg);
+	  exit (1);
+	}
 
-  if (argc >= 2 && strcmp (argv[1], "--help") == 0)
-    {
-      gdbserver_usage ();
-      exit (0);
+      next_arg++;
+      continue;
     }
 
   if (setjmp (toplevel))
@@ -882,23 +1063,34 @@ main (int argc, char *argv[])
       exit (1);
     }
 
-  bad_attach = 0;
-  pid = 0;
-  attached = 0;
-  if (argc >= 3 && strcmp (argv[2], "--attach") == 0)
+  port = *next_arg;
+  next_arg++;
+  if (port == NULL || (!attach && !multi_mode && *next_arg == NULL))
     {
-      if (argc == 4
-	  && argv[3][0] != '\0'
-	  && (pid = strtoul (argv[3], &arg_end, 0)) != 0
-	  && *arg_end == '\0')
-	{
-	  ;
-	}
-      else
-	bad_attach = 1;
+      gdbserver_usage ();
+      exit (1);
     }
 
-  if (argc < 3 || bad_attach)
+  bad_attach = 0;
+  pid = 0;
+
+  /* --attach used to come after PORT, so allow it there for
+       compatibility.  */
+  if (*next_arg != NULL && strcmp (*next_arg, "--attach") == 0)
+    {
+      attach = 1;
+      next_arg++;
+    }
+
+  if (attach
+      && (*next_arg == NULL
+	  || (*next_arg)[0] == '\0'
+	  || (pid = strtoul (*next_arg, &arg_end, 0)) == 0
+	  || *arg_end != '\0'
+	  || next_arg[1] != NULL))
+    bad_attach = 1;
+
+  if (bad_attach)
     {
       gdbserver_usage ();
       exit (1);
@@ -910,26 +1102,34 @@ main (int argc, char *argv[])
   own_buf = malloc (PBUFSIZ + 1);
   mem_buf = malloc (PBUFSIZ);
 
-  if (pid == 0)
+  if (pid == 0 && *next_arg != NULL)
     {
+      int i, n;
+
+      n = argc - (next_arg - argv);
+      program_argv = malloc (sizeof (char *) * (n + 1));
+      for (i = 0; i < n; i++)
+	program_argv[i] = strdup (next_arg[i]);
+      program_argv[i] = NULL;
+
       /* Wait till we are at first instruction in program.  */
-      signal = start_inferior (&argv[2], &status);
+      signal = start_inferior (program_argv, &status);
 
       /* We are now (hopefully) stopped at the first instruction of
 	 the target process.  This assumes that the target process was
 	 successfully created.  */
     }
+  else if (pid != 0)
+    {
+      if (attach_inferior (pid, &status, &signal) == -1)
+	error ("Attaching not supported on this target");
+
+      /* Otherwise succeeded.  */
+    }
   else
     {
-      switch (attach_inferior (pid, &status, &signal))
-	{
-	case -1:
-	  error ("Attaching not supported on this target");
-	  break;
-	default:
-	  attached = 1;
-	  break;
-	}
+      status = 'W';
+      signal = 0;
     }
 
   /* Don't report shared library events on the initial connection,
@@ -945,27 +1145,43 @@ main (int argc, char *argv[])
     }
 
   if (status == 'W' || status == 'X')
+    was_running = 0;
+  else
+    was_running = 1;
+
+  if (!was_running && !multi_mode)
     {
-      fprintf (stderr, "No inferior, GDBserver exiting.\n");
+      fprintf (stderr, "No program to debug.  GDBserver exiting.\n");
       exit (1);
     }
 
   while (1)
     {
-      remote_open (argv[1]);
+      remote_open (port);
 
     restart:
-      setjmp (toplevel);
+      if (setjmp (toplevel) != 0)
+	{
+	  /* An error occurred.  */
+	  if (response_needed)
+	    {
+	      write_enn (own_buf);
+	      putpkt (own_buf);
+	    }
+	}
+
       disable_async_io ();
-      while (1)
+      while (!exit_requested)
 	{
 	  unsigned char sig;
 	  int packet_len;
 	  int new_packet_len = -1;
 
+	  response_needed = 0;
 	  packet_len = getpkt (own_buf);
 	  if (packet_len <= 0)
 	    break;
+	  response_needed = 1;
 
 	  i = 0;
 	  ch = own_buf[i++];
@@ -978,39 +1194,38 @@ main (int argc, char *argv[])
 	      handle_general_set (own_buf);
 	      break;
 	    case 'D':
+	      require_running (own_buf);
 	      fprintf (stderr, "Detaching from inferior\n");
 	      if (detach_inferior () != 0)
-		{
-		  write_enn (own_buf);
-		  putpkt (own_buf);
-		}
+		write_enn (own_buf);
 	      else
 		{
 		  write_ok (own_buf);
-		  putpkt (own_buf);
-		  remote_close ();
 
-		  /* If we are attached, then we can exit.  Otherwise, we
-		     need to hang around doing nothing, until the child
-		     is gone.  */
-		  if (!attached)
-		    join_inferior ();
+		  if (extended_protocol)
+		    {
+		      /* Treat this like a normal program exit.  */
+		      signal = 0;
+		      status = 'W';
+		    }
+		  else
+		    {
+		      putpkt (own_buf);
+		      remote_close ();
 
-		  exit (0);
+		      /* If we are attached, then we can exit.  Otherwise, we
+			 need to hang around doing nothing, until the child
+			 is gone.  */
+		      if (!attached)
+			join_inferior ();
+
+		      exit (0);
+		    }
 		}
+	      break;
 	    case '!':
-	      if (attached == 0)
-		{
-		  extended_protocol = 1;
-		  prepare_resume_reply (own_buf, status, signal);
-		}
-	      else
-		{
-		  /* We can not use the extended protocol if we are
-		     attached, because we can not restart the running
-		     program.  So return unrecognized.  */
-		  own_buf[0] = '\0';
-		}
+	      extended_protocol = 1;
+	      write_ok (own_buf);
 	      break;
 	    case '?':
 	      prepare_resume_reply (own_buf, status, signal);
@@ -1020,12 +1235,18 @@ main (int argc, char *argv[])
 		{
 		  unsigned long gdb_id, thread_id;
 
+		  require_running (own_buf);
 		  gdb_id = strtoul (&own_buf[2], NULL, 16);
-		  thread_id = gdb_id_to_thread_id (gdb_id);
-		  if (thread_id == 0)
+		  if (gdb_id == 0 || gdb_id == -1)
+		    thread_id = gdb_id;
+		  else
 		    {
-		      write_enn (own_buf);
-		      break;
+		      thread_id = gdb_id_to_thread_id (gdb_id);
+		      if (thread_id == 0)
+			{
+			  write_enn (own_buf);
+			  break;
+			}
 		    }
 
 		  if (own_buf[1] == 'g')
@@ -1048,15 +1269,18 @@ main (int argc, char *argv[])
 		}
 	      break;
 	    case 'g':
+	      require_running (own_buf);
 	      set_desired_inferior (1);
 	      registers_to_string (own_buf);
 	      break;
 	    case 'G':
+	      require_running (own_buf);
 	      set_desired_inferior (1);
 	      registers_from_string (&own_buf[1]);
 	      write_ok (own_buf);
 	      break;
 	    case 'm':
+	      require_running (own_buf);
 	      decode_m_packet (&own_buf[1], &mem_addr, &len);
 	      if (read_inferior_memory (mem_addr, mem_buf, len) == 0)
 		convert_int_to_ascii (mem_buf, own_buf, len);
@@ -1064,6 +1288,7 @@ main (int argc, char *argv[])
 		write_enn (own_buf);
 	      break;
 	    case 'M':
+	      require_running (own_buf);
 	      decode_M_packet (&own_buf[1], &mem_addr, &len, mem_buf);
 	      if (write_inferior_memory (mem_addr, mem_buf, len) == 0)
 		write_ok (own_buf);
@@ -1071,6 +1296,7 @@ main (int argc, char *argv[])
 		write_enn (own_buf);
 	      break;
 	    case 'X':
+	      require_running (own_buf);
 	      if (decode_X_packet (&own_buf[1], packet_len - 1,
 				   &mem_addr, &len, mem_buf) < 0
 		  || write_inferior_memory (mem_addr, mem_buf, len) != 0)
@@ -1079,6 +1305,7 @@ main (int argc, char *argv[])
 		write_ok (own_buf);
 	      break;
 	    case 'C':
+	      require_running (own_buf);
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
 	      if (target_signal_to_host_p (sig))
 		signal = target_signal_to_host (sig);
@@ -1087,6 +1314,7 @@ main (int argc, char *argv[])
 	      myresume (own_buf, 0, &signal, &status);
 	      break;
 	    case 'S':
+	      require_running (own_buf);
 	      convert_ascii_to_int (own_buf + 1, &sig, 1);
 	      if (target_signal_to_host_p (sig))
 		signal = target_signal_to_host (sig);
@@ -1095,10 +1323,12 @@ main (int argc, char *argv[])
 	      myresume (own_buf, 1, &signal, &status);
 	      break;
 	    case 'c':
+	      require_running (own_buf);
 	      signal = 0;
 	      myresume (own_buf, 0, &signal, &status);
 	      break;
 	    case 's':
+	      require_running (own_buf);
 	      signal = 0;
 	      myresume (own_buf, 1, &signal, &status);
 	      break;
@@ -1121,6 +1351,7 @@ main (int argc, char *argv[])
 		  {
 		    int res;
 
+		    require_running (own_buf);
 		    res = (*the_target->insert_watchpoint) (type, addr, len);
 		    if (res == 0)
 		      write_ok (own_buf);
@@ -1151,6 +1382,7 @@ main (int argc, char *argv[])
 		  {
 		    int res;
 
+		    require_running (own_buf);
 		    res = (*the_target->remove_watchpoint) (type, addr, len);
 		    if (res == 0)
 		      write_ok (own_buf);
@@ -1163,20 +1395,24 @@ main (int argc, char *argv[])
 		break;
 	      }
 	    case 'k':
+	      response_needed = 0;
+	      if (!target_running ())
+		/* The packet we received doesn't make sense - but we
+		   can't reply to it, either.  */
+		goto restart;
+
 	      fprintf (stderr, "Killing inferior\n");
 	      kill_inferior ();
-	      /* When using the extended protocol, we start up a new
-	         debugging session.   The traditional protocol will
-	         exit instead.  */
+
+	      /* When using the extended protocol, we wait with no
+		 program running.  The traditional protocol will exit
+		 instead.  */
 	      if (extended_protocol)
 		{
-		  write_ok (own_buf);
-		  fprintf (stderr, "GDBserver restarting\n");
-
-		  /* Wait till we are at 1st instruction in prog.  */
-		  signal = start_inferior (&argv[2], &status);
+		  status = 'X';
+		  signal = TARGET_SIGNAL_KILL;
+		  was_running = 0;
 		  goto restart;
-		  break;
 		}
 	      else
 		{
@@ -1187,6 +1423,7 @@ main (int argc, char *argv[])
 	      {
 		unsigned long gdb_id, thread_id;
 
+		require_running (own_buf);
 		gdb_id = strtoul (&own_buf[1], NULL, 16);
 		thread_id = gdb_id_to_thread_id (gdb_id);
 		if (thread_id == 0)
@@ -1202,18 +1439,25 @@ main (int argc, char *argv[])
 	      }
 	      break;
 	    case 'R':
+	      response_needed = 0;
+
 	      /* Restarting the inferior is only supported in the
 	         extended protocol.  */
 	      if (extended_protocol)
 		{
-		  kill_inferior ();
-		  write_ok (own_buf);
+		  if (target_running ())
+		    kill_inferior ();
 		  fprintf (stderr, "GDBserver restarting\n");
 
 		  /* Wait till we are at 1st instruction in prog.  */
-		  signal = start_inferior (&argv[2], &status);
+		  if (program_argv != NULL)
+		    signal = start_inferior (program_argv, &status);
+		  else
+		    {
+		      status = 'X';
+		      signal = TARGET_SIGNAL_KILL;
+		    }
 		  goto restart;
-		  break;
 		}
 	      else
 		{
@@ -1242,45 +1486,45 @@ main (int argc, char *argv[])
 	  else
 	    putpkt (own_buf);
 
-	  if (status == 'W')
-	    fprintf (stderr,
-		     "\nChild exited with status %d\n", signal);
-	  if (status == 'X')
-	    fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
-		     target_signal_to_host (signal),
-		     target_signal_to_name (signal));
-	  if (status == 'W' || status == 'X')
-	    {
-	      if (extended_protocol)
-		{
-		  fprintf (stderr, "Killing inferior\n");
-		  kill_inferior ();
-		  write_ok (own_buf);
-		  fprintf (stderr, "GDBserver restarting\n");
+	  response_needed = 0;
 
-		  /* Wait till we are at 1st instruction in prog.  */
-		  signal = start_inferior (&argv[2], &status);
-		  goto restart;
-		  break;
-		}
+	  if (was_running && (status == 'W' || status == 'X'))
+	    {
+	      was_running = 0;
+
+	      if (status == 'W')
+		fprintf (stderr,
+			 "\nChild exited with status %d\n", signal);
+	      if (status == 'X')
+		fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
+			 target_signal_to_host (signal),
+			 target_signal_to_name (signal));
+
+	      if (extended_protocol)
+		goto restart;
 	      else
 		{
 		  fprintf (stderr, "GDBserver exiting\n");
 		  exit (0);
 		}
 	    }
+
+	  if (status != 'W' && status != 'X')
+	    was_running = 1;
 	}
 
-      /* We come here when getpkt fails.
+      /* If an exit was requested (using the "monitor exit" command),
+	 terminate now.  The only other way to get here is for
+	 getpkt to fail; close the connection and reopen it at the
+	 top of the loop.  */
 
-         For the extended remote protocol we exit (and this is the only
-         way we gracefully exit!).
-
-         For the traditional remote protocol close the connection,
-         and re-open it at the top of the loop.  */
-      if (extended_protocol)
+      if (exit_requested)
 	{
 	  remote_close ();
+	  if (attached && target_running ())
+	    detach_inferior ();
+	  else if (target_running ())
+	    kill_inferior ();
 	  exit (0);
 	}
       else

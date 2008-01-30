@@ -1,5 +1,44 @@
 2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* remote.c (struct remote_state): Add cached_wait_status.
+	(remote_exec_file): New variable.
+	(PACKET_vAttach, PACKET_vRun): New constants.
+	(extended_remote_restart): Do not query for status.
+	(struct start_remote_args): New.
+	(remote_start_remote): Take it as a second argument.  Check
+	whether the target is running.  Issue an error for non-running
+	non-extended targets.  Cache the wait status.  Set inferior_ptid
+	here.
+	(remote_open_1): Prompt to disconnect non-running targets.  Make
+	sure the target is marked running.  Do not set inferior_ptid here.
+	Update call to remote_start_remote.  Do not call remote_check_symbols
+	if the target is not running.
+	(remote_detach_1): Rename from remote_detach.  Take an EXTENDED
+	argument.  Handle a non-running target.
+	(remote_detach): Use it.
+	(extended_remote_detach): New.
+	(remote_disconnect): Fix typo.  Use remoute_mourn_1.
+	(extended_remote_attach_1, extended_remote_attach)
+	(extended_async_remote_attach): New.
+	(remote_vcont_resume): Remove unused variable.
+	(remote_wait, remote_async_wait): Use any cached wait status.
+	(putpkt_binary, getpkt): Clear any cached wait status.
+	(extended_remoute_mourn_1): New.
+	(extended_remote_mourn): Use it.
+	(extended_async_remote_mourn, extended_remote_run): New.
+	(extended_remote_create_inferior_1): New.
+	(extended_remote_create_inferior): Use it.
+	(extended_remote_async_create_inferior): Likewise.
+	(remote_xfer_partial): Skip for non-executing targets.
+	(init_extended_remote_ops): Set to_detach and to_attach.
+	(init_extended_async_remote_ops): Likewise.  Use
+	extended_async_remote_mourn.
+	(_initialize_remote): Register vAttach, vRun, and
+	set remote exec-file.
+	* NEWS: Mention vAttach, vRun, and gdbserver extended-remote support.
+
+2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (symfile.o): Update.
 	* NEWS: Mention exec tracing support.
 	* inf-ttrace.c (inf_ttrace_wait): Return TARGET_WAITKIND_EXECD for
