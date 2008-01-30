@@ -743,6 +743,66 @@ value_concat (struct value *arg1, struct value *arg2)
 }
 
 
+/* Integer exponentiation: V1**V2, where both arguments are
+   integers.  Requires V1 != 0 if V2 < 0.  Returns 1 for 0 ** 0.  */
+static LONGEST
+integer_pow (LONGEST v1, LONGEST v2)
+{
+  if (v2 < 0)
+    {
+      if (v1 == 0)
+	error (_("Attempt to raise 0 to negative power."));
+      else
+	return 0;
+    }
+  else 
+    {
+      /* The Russian Peasant's Algorithm */
+      LONGEST v;
+      
+      v = 1;
+      for (;;)
+	{
+	  if (v2 & 1L) 
+	    v *= v1;
+	  v2 >>= 1;
+	  if (v2 == 0)
+	    return v;
+	  v1 *= v1;
+	}
+    }
+}
+
+/* Integer exponentiation: V1**V2, where both arguments are
+   integers.  Requires V1 != 0 if V2 < 0.  Returns 1 for 0 ** 0.  */
+static ULONGEST
+uinteger_pow (ULONGEST v1, LONGEST v2)
+{
+  if (v2 < 0)
+    {
+      if (v1 == 0)
+	error (_("Attempt to raise 0 to negative power."));
+      else
+	return 0;
+    }
+  else 
+    {
+      /* The Russian Peasant's Algorithm */
+      ULONGEST v;
+      
+      v = 1;
+      for (;;)
+	{
+	  if (v2 & 1L) 
+	    v *= v1;
+	  v2 >>= 1;
+	  if (v2 == 0)
+	    return v;
+	  v1 *= v1;
+	}
+    }
+}
+
 /* Obtain decimal value of arguments for binary operation, converting from
    other types if one of them is not decimal floating point.  */
 static void
@@ -898,6 +958,14 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
 	  break;
 
+	case BINOP_MIN:
+	  v = v1 < v2 ? v1 : v2;
+	  break;
+	      
+	case BINOP_MAX:
+	  v = v1 > v2 ? v1 : v2;
+	  break;
+
 	default:
 	  error (_("Integer-only operation on floating point number."));
 	}
@@ -979,14 +1047,15 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	}
 
       /* Determine type length of the result, and if the operation should
-         be done unsigned.
-         Use the signedness of the operand with the greater length.
+         be done unsigned.  For exponentiation and shift operators,
+         use the length and type of the left operand.  Otherwise,
+         use the signedness of the operand with the greater length.
          If both operands are of equal length, use unsigned operation
          if one of the operands is unsigned.  */
-      if (op == BINOP_RSH || op == BINOP_LSH)
+      if (op == BINOP_RSH || op == BINOP_LSH || op == BINOP_EXP)
 	{
-	  /* In case of the shift operators the type of the result only
-	     depends on the type of the left operand.  */
+	  /* In case of the shift operators and exponentiation the type of
+	     the result only depends on the type of the left operand.  */
 	  unsigned_operation = is_unsigned1;
 	  result_len = promoted_len1;
 	}
@@ -1008,9 +1077,10 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
       if (unsigned_operation)
 	{
+	  LONGEST v2_signed = value_as_long (arg2);
 	  ULONGEST v1, v2, v = 0;
 	  v1 = (ULONGEST) value_as_long (arg1);
-	  v2 = (ULONGEST) value_as_long (arg2);
+	  v2 = (ULONGEST) v2_signed;
 
 	  /* Truncate values to the type length of the result.  */
 	  if (result_len < sizeof (ULONGEST))
@@ -1042,10 +1112,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      break;
 
 	    case BINOP_EXP:
-	      errno = 0;
-	      v = pow (v1, v2);
-	      if (errno)
-		error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
+              v = uinteger_pow (v1, v2_signed);
 	      break;
 
 	    case BINOP_REM:
@@ -1165,10 +1232,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
               break;
 
 	    case BINOP_EXP:
-	      errno = 0;
-	      v = pow (v1, v2);
-	      if (errno)
-		error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
+              v = integer_pow (v1, v2);
 	      break;
 
 	    case BINOP_REM:

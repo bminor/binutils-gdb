@@ -1,3 +1,14 @@
+2008-01-30  Paul N. Hilfinger  <hilfinger@adacore.com>
+
+	* valarith.c (value_binop): Add floating-point BINOP_MIN and
+	BINOP_MAX cases.
+	For BINOP_EXP, use length and signedness of left operand only for
+	result, as for shifts.
+	For integral operands to BINOP_EXP, use new integer_pow and
+	uinteger_pow functions so as to get full range of results.
+	(integer_pow): New function.
+	(uinteger_pow): New function.
+
 2008-01-30  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Use vector for varobj_list_children interface.
