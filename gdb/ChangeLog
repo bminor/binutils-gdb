@@ -1,3 +1,13 @@
+2008-01-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Add support for
+	TYPE_CODE_DECFLOAT arguments.
+	(ppc64_sysv_abi_push_dummy_call) Likewise.
+	(get_decimal_float_return_value): New function.
+	(do_ppc_sysv_return_value): Add support for TYPE_CODE_DECFLOAT return
+	values by calling get_decimal_float_return_value.
+	(ppc64_sysv_abi_return_value): Likewise.
+
 2008-01-30  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file):  Add field
