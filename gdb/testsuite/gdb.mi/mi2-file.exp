@@ -64,7 +64,7 @@ proc test_file_list_exec_source_file {} {
     set line_default [expr $line_main_body - $gdb_lines_to_list + 1]
 
     mi_gdb_test "111-file-list-exec-source-file" \
-	    "111\\\^done,line=\"$line_default\",file=\"${srcfilepath}\",fullname=\"$fullname_syntax${srcfile}\"" \
+	    "111\\\^done,line=\"$line_default\",file=\"${srcfilepath}\",fullname=\"$fullname_syntax${srcfile}\",macro-info=\"0\"" \
                "request path info of current source file (${srcfile})"
 }
 
