@@ -250,6 +250,38 @@ gdb_breakpoint arg0_128
 gdb_continue_to_breakpoint "entry to arg0_128"
 gdb_test "backtrace" ".*arg0_128 \\(arg0=0.1, arg1=1.0, arg2=2.0, arg3=3.0, arg4=4.0, arg5=5.0\\).*" "backtrace at arg0_128"
 
+# Test calling inferior function with DFP arguments or return value.
+
+send_gdb "call arg0_32 (1.2df, 2.2df, 3.2df, 4.2df, 5.2df, 6.2df)\n"
+gdb_test "backtrace 1" "\n#\[0-9\]+  arg0_32 \\(arg0=1.2, arg1=2.2, arg2=3.2, arg3=4.2, arg4=5.2, arg5=6.2\\).*" "Call function with correct _Decimal32 arguments."
+gdb_test "finish" " = 1.2" "Correct _Decimal32 return value from called function."
+
+send_gdb "call arg0_64 (1.2dd, 2.2dd, 3.2dd, 4.2dd, 5.2dd, 6.2dd)\n"
+gdb_test "backtrace 1" "\n#\[0-9\]+  arg0_64 \\(arg0=1.2, arg1=2.2, arg2=3.2, arg3=4.2, arg4=5.2, arg5=6.2\\).*" "Call function with correct _Decimal64 arguments."
+gdb_test "finish" " = 1.2" "Correct _Decimal64 return value from called function."
+
+send_gdb "call arg0_128 (1.2dl, 2.2dl, 3.2dl, 4.2dl, 5.2dl, 6.2dl)\n"
+gdb_test "backtrace 1" "\n#\[0-9\]+  arg0_128 \\(arg0=1.2, arg1=2.2, arg2=3.2, arg3=4.2, arg4=5.2, arg5=6.2\\).*" "Call function with correct _Decimal128 arguments."
+gdb_test "finish" " = 1.2" "Correct _Decimal128 return value from called function."
+
+gdb_test "call decimal_dec128_align (double_val1, dec128_val2, double_val3, double_val4, double_val5, double_val6, double_val7, double_val8, double_val9, double_val10, double_val11, double_val12, double_val13, double_val14)" " = 1" \
+  "Call function with mixed decimal float arguments TEST."
+
+gdb_test "call decimal_mixed (dec32_val1, dec64_val1, dec128_val1)" " = 1" \
+  "Call function with mixed decimal float arguments."
+
+gdb_test "call decimal_many_args_dec32 (dec32_val1, dec32_val2, dec32_val3, dec32_val4, dec32_val5, dec32_val6, dec32_val7, dec32_val8, dec32_val9, dec32_val10, dec32_val11, dec32_val12, dec32_val13, dec32_val14, dec32_val15, dec32_val16)" " = 1" \
+  "Call function with many _Decimal32 arguments."
+
+gdb_test "call decimal_many_args_dec64 (dec64_val1, dec64_val2, dec64_val3, dec64_val4, dec64_val5, dec64_val6, dec64_val7, dec64_val8, dec64_val9, dec64_val10, dec64_val11, dec64_val12, dec64_val13, dec64_val14, dec64_val15, dec64_val16)" " = 1" \
+  "Call function with many _Decimal64 arguments."
+
+gdb_test "call decimal_many_args_dec128 (dec128_val1, dec128_val2, dec128_val3, dec128_val4, dec128_val5, dec128_val6, dec128_val7, dec128_val8, dec128_val9, dec128_val10, dec128_val11, dec128_val12, dec128_val13, dec128_val14, dec128_val15, dec128_val16)" " = 1" \
+  "Call function with many _Decimal128 arguments."
+
+gdb_test "call decimal_many_args_mixed (dec32_val1, dec32_val2, dec32_val3, dec64_val4, dec64_val5, dec64_val6, dec64_val7, dec128_val8, dec128_val9, dec128_val10, dec32_val11, dec64_val12, dec32_val13, dec64_val14, dec128_val15)" " = 1" \
+  "Call function with many mixed decimal float arguments."
+
 # The following tests are intended to verify that gdb can handle DFP types
 # correctly in struct.
 

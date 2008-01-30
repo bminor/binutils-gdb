@@ -1,3 +1,27 @@
+2008-01-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* dfp-test.c (DELTA, DELTA_B): New definitions.
+	(double_val1, double_val2, double_val3, double_val4, double_val5,
+	double_val6, double_val7, double_val8, double_val9, double_val10,
+	double_val11, double_val12, double_val13, double_val14, dec32_val1,
+	dec32_val2, dec32_val3, dec32_val4, dec32_val5, dec32_val6, dec32_val7,
+	dec32_val8, dec32_val9, dec32_val10, dec32_val11, dec32_val12,
+	dec32_val13, dec32_val14, dec32_val15, dec32_val16, dec64_val1,
+	dec64_val2, dec64_val3, dec64_val4, dec64_val5, dec64_val6, dec64_val7,
+	dec64_val8, dec64_val9, dec64_val10, dec64_val11, dec64_val12,
+	dec64_val13, dec64_val14, dec64_val15, dec64_val16, dec128_val1,
+	dec128_val2, dec128_val3, dec128_val4, dec128_val5, dec128_val6,
+	dec128_val7, dec128_val8, dec128_val9, dec128_val10, dec128_val11,
+	dec128_val12, dec128_val13, dec128_val14, dec128_val15,
+	dec128_val16): New global variables.
+	(decimal_dec128_align): New function.
+	(decimal_mixed): Likewise.
+	(decimal_many_args_dec32): Likewise.
+	(decimal_many_args_dec64): Likewise.
+	(decimal_many_args_dec128): Likewise.
+	(decimal_many_args_mixed): Likewise.
+	* dfp-test.exp: Add tests calling new inferior functions.
+
 2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.server/ext-attach.c, gdb.server/ext-attach.exp,
