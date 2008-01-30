@@ -1,3 +1,8 @@
+2008-01-30  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file):  Add field
+	for preprocessor macro information.  Formatting changes.
+
 2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (struct remote_state): Add cached_wait_status.
