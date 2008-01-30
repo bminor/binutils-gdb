@@ -1,3 +1,7 @@
+2008-01-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/ptype.exp: Add testing of "ptype $pc".
+
 2008-01-30  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.mi/mi-file.exp, gdb.mi/mi2-file.exp

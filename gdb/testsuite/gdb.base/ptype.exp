@@ -639,4 +639,7 @@ if [runto_main] then {
   gdb_test "ptype {{0,1,2},{3,4,5}}"	"type = int \\\[2\\\]\\\[3\\\]"
   gdb_test "ptype {4,5,6}\[2\]"	"type = int"
   gdb_test "ptype *&{4,5,6}\[1\]"	"type = int"
+
+  # Test ptype of user register
+  gdb_test "ptype \$pc" "void \\(\\*\\)\\(\\)" "ptype \$pc"
 }
