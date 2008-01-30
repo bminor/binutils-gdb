@@ -512,7 +512,15 @@ evaluate_subexp_standard (struct type *expect_type,
 					  name, strlen (name));
 	if (regno == -1)
 	  error (_("Register $%s not available."), name);
-	if (noside == EVAL_AVOID_SIDE_EFFECTS)
+
+        /* In EVAL_AVOID_SIDE_EFFECTS mode, we only need to return
+           a value with the appropriate register type.  Unfortunately,
+           we don't have easy access to the type of user registers.
+           So for these registers, we fetch the register value regardless
+           of the evaluation mode.  */
+	if (noside == EVAL_AVOID_SIDE_EFFECTS
+	    && regno < gdbarch_num_regs (current_gdbarch)
+	       + gdbarch_num_pseudo_regs (current_gdbarch))
 	  val = value_zero (register_type (current_gdbarch, regno), not_lval);
 	else
 	  val = value_of_register (regno, get_selected_frame (NULL));
