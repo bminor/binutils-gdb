@@ -1,3 +1,8 @@
+2008-01-30  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* eval.c (evaluate_subexp_standard): Support
+	BINOP_INTDIV opcode.
+
 2008-01-30  Paul N. Hilfinger  <hilfinger@adacore.com>
 
 	* valarith.c (value_binop): Add floating-point BINOP_MIN and

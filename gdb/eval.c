@@ -1496,6 +1496,7 @@ evaluate_subexp_standard (struct type *expect_type,
     case BINOP_EXP:
     case BINOP_MUL:
     case BINOP_DIV:
+    case BINOP_INTDIV:
     case BINOP_REM:
     case BINOP_MOD:
     case BINOP_LSH:
@@ -1510,7 +1511,8 @@ evaluate_subexp_standard (struct type *expect_type,
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
       else if (noside == EVAL_AVOID_SIDE_EFFECTS
-	       && (op == BINOP_DIV || op == BINOP_REM || op == BINOP_MOD))
+	       && (op == BINOP_DIV || op == BINOP_REM || op == BINOP_MOD
+		   || op == BINOP_INTDIV))
 	return value_zero (value_type (arg1), not_lval);
       else
 	return value_binop (arg1, arg2, op);
