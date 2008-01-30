@@ -1,5 +1,10 @@
 2008-01-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.texinfo (Multi-Process Mode for gdbserver): Use @kbd for
+	commands.
+
+2008-01-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.texinfo (Setting Catchpoints): Mention features
 	supported on GNU/Linux.
 

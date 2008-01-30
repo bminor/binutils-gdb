@@ -13044,7 +13044,7 @@ When you connect to @code{gdbserver} using @code{target remote},
 program exits, or you detach from it, @value{GDBN} closes the connection
 and @code{gdbserver} exits.
 
-If you connect using @code{target extended-remote}, @code{gdbserver}
+If you connect using @kbd{target extended-remote}, @code{gdbserver}
 enters multi-process mode.  When the debugged program exits, or you
 detach from it, @value{GDBN} stays connected to @code{gdbserver} even
 though no program is running.  The @code{run} and @code{attach}
@@ -13056,7 +13056,7 @@ redirection (@pxref{Arguments}).
 
 To start @code{gdbserver} without supplying an initial command to run
 or process ID to attach, use the @option{--multi} command line option.
-Then you can connect using @code{target extended-remote} and start
+Then you can connect using @kbd{target extended-remote} and start
 the program you want to debug.
 
 @code{gdbserver} does not automatically exit in multi-process mode.
