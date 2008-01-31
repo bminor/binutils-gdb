@@ -1,3 +1,15 @@
+2008-01-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ppc-tdep.h (struct gdbarch_tdep): Remove ppc_ev31_regnum member.
+	* rs6000-tdep.c (IS_SPE_PSEUDOREG): New macro.
+	(spe_register_p, rs6000_register_name, rs6000_pseudo_register_type,
+	rs6000_pseudo_register_reggroup_p, e500_move_ev_register,
+	e500_pseudo_register_read, e500_pseudo_register_write): Use
+	IS_SPE_PSEUDOREG macro.
+	(rs6000_frame_cache): Remove use of tdep->ppc_ev31_regnum.
+	(rs6000_gdbarch_init): Remove unnecessary num_sprs local variable.
+	Remove initialization of tdep->ppc_ev31_regnum.
+
 2008-01-08  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* printcmd.c (print_formatted): Handle references as for unformatted

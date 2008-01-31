@@ -78,6 +78,11 @@
 #include "features/rs6000/powerpc-e500.c"
 #include "features/rs6000/rs6000.c"
 
+/* Determine if regnum is an SPE pseudo-register.  */
+#define IS_SPE_PSEUDOREG(tdep, regnum) ((tdep)->ppc_ev0_regnum >= 0 \
+    && (regnum) >= (tdep)->ppc_ev0_regnum \
+    && (regnum) < (tdep)->ppc_ev0_regnum + 32)
+
 /* The list of available "set powerpc ..." and "show powerpc ..."
    commands.  */
 static struct cmd_list_element *setpowerpccmdlist = NULL;
@@ -179,9 +184,7 @@ spe_register_p (struct gdbarch *gdbarch, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   
   /* Is it a reference to EV0 -- EV31, and do we have those?  */
-  if (tdep->ppc_ev0_regnum >= 0
-      && tdep->ppc_ev31_regnum >= 0
-      && tdep->ppc_ev0_regnum <= regno && regno <= tdep->ppc_ev31_regnum)
+  if (IS_SPE_PSEUDOREG (tdep, regno))
     return 1;
 
   /* Is it a reference to one of the raw upper GPR halves?  */
@@ -2371,9 +2374,7 @@ rs6000_register_name (struct gdbarch *gdbarch, int regno)
     return "";
 
   /* Check if the SPE pseudo registers are available.  */
-  if (tdep->ppc_ev0_regnum >= 0
-      && tdep->ppc_ev0_regnum <= regno
-      && regno < tdep->ppc_ev0_regnum + ppc_num_gprs)
+  if (IS_SPE_PSEUDOREG (tdep, regno))
     {
       static const char *const spe_regnames[] = {
 	"ev0", "ev1", "ev2", "ev3", "ev4", "ev5", "ev6", "ev7",
@@ -2396,9 +2397,7 @@ rs6000_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* These are the only pseudo-registers we support.  */
-  gdb_assert (tdep->ppc_ev0_regnum >= 0
-	      && regnum >= tdep->ppc_ev0_regnum
-	      && regnum < tdep->ppc_ev0_regnum + 32);
+  gdb_assert (IS_SPE_PSEUDOREG (tdep, regnum));
 
   return rs6000_builtin_type_vec64 (gdbarch);
 }
@@ -2411,9 +2410,7 @@ rs6000_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* These are the only pseudo-registers we support.  */
-  gdb_assert (tdep->ppc_ev0_regnum >= 0
-	      && regnum >= tdep->ppc_ev0_regnum
-	      && regnum < tdep->ppc_ev0_regnum + 32);
+  gdb_assert (IS_SPE_PSEUDOREG (tdep, regnum));
 
   if (group == all_reggroup || group == vector_reggroup)
     return 1;
@@ -2499,8 +2496,7 @@ e500_move_ev_register (void (*move) (struct regcache *regcache,
   int reg_index;
   gdb_byte *byte_buffer = buffer;
 
-  gdb_assert (tdep->ppc_ev0_regnum <= ev_reg
-              && ev_reg < tdep->ppc_ev0_regnum + ppc_num_gprs);
+  gdb_assert (IS_SPE_PSEUDOREG (tdep, ev_reg));
 
   reg_index = ev_reg - tdep->ppc_ev0_regnum;
 
@@ -2525,8 +2521,7 @@ e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
   gdb_assert (regcache_arch == gdbarch);
  
-  if (tdep->ppc_ev0_regnum <= reg_nr
-      && reg_nr < tdep->ppc_ev0_regnum + ppc_num_gprs)
+  if (IS_SPE_PSEUDOREG (tdep, reg_nr))
     e500_move_ev_register (regcache_raw_read, regcache, reg_nr, buffer);
   else
     internal_error (__FILE__, __LINE__,
@@ -2544,8 +2539,7 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
   gdb_assert (regcache_arch == gdbarch);
  
-  if (tdep->ppc_ev0_regnum <= reg_nr
-      && reg_nr < tdep->ppc_ev0_regnum + ppc_num_gprs)
+  if (IS_SPE_PSEUDOREG (tdep, reg_nr))
     e500_move_ev_register ((void (*) (struct regcache *, int, gdb_byte *))
                            regcache_raw_write,
                            regcache, reg_nr, (gdb_byte *) buffer);
@@ -2986,7 +2980,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   /* if != -1, fdata.saved_ev is the smallest number of saved_ev.
      All vr's from saved_ev to ev31 are saved. ????? */
-  if (tdep->ppc_ev0_regnum != -1 && tdep->ppc_ev31_regnum != -1)
+  if (tdep->ppc_ev0_regnum != -1)
     {
       if (fdata.saved_ev >= 0)
 	{
@@ -3178,7 +3172,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int tdesc_wordsize = -1;
   const struct target_desc *tdesc = info.target_desc;
   struct tdesc_arch_data *tdesc_data = NULL;
-  int num_sprs = 0;
 
   from_xcoff_exec = info.abfd && info.abfd->format == bfd_object &&
     bfd_get_flavour (info.abfd) == bfd_target_xcoff_flavour;
@@ -3609,7 +3602,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     set_gdbarch_print_insn (gdbarch, gdb_print_insn_powerpc);
 
-  set_gdbarch_num_regs (gdbarch, PPC_NUM_REGS + num_sprs);
+  set_gdbarch_num_regs (gdbarch, PPC_NUM_REGS);
   set_gdbarch_num_pseudo_regs (gdbarch, have_spe ? 32 : 0);
 
   set_gdbarch_ptr_bit (gdbarch, wordsize * TARGET_CHAR_BIT);
@@ -3732,7 +3725,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Recording the numbering of pseudo registers.  */
   tdep->ppc_ev0_regnum = have_spe ? gdbarch_num_regs (gdbarch) : -1;
-  tdep->ppc_ev31_regnum = have_spe ? tdep->ppc_ev0_regnum + 31 : -1;
 
   return gdbarch;
 }

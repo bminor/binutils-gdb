@@ -201,7 +201,6 @@ struct gdbarch_tdep
     /* SPE registers.  */
     int ppc_ev0_upper_regnum;   /* First GPR upper half register */
     int ppc_ev0_regnum;         /* First ev register */
-    int ppc_ev31_regnum;        /* Last ev register */
     int ppc_acc_regnum;         /* SPE 'acc' register */
     int ppc_spefscr_regnum;     /* SPE 'spefscr' register */
 
