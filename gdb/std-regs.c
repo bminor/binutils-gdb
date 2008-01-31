@@ -61,12 +61,12 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame, const void *baton)
     return value_of_register (gdbarch_pc_regnum (gdbarch), frame);
   else
     {
-      struct value *val = allocate_value (builtin_type_void_data_ptr);
+      struct value *val = allocate_value (builtin_type_void_func_ptr);
       gdb_byte *buf = value_contents_raw (val);
       if (frame == NULL)
 	memset (buf, 0, TYPE_LENGTH (value_type (val)));
       else
-	gdbarch_address_to_pointer (gdbarch, builtin_type_void_data_ptr,
+	gdbarch_address_to_pointer (gdbarch, builtin_type_void_func_ptr,
 				    buf, get_frame_pc (frame));
       return val;
     }

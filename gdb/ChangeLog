@@ -1,3 +1,8 @@
+2008-01-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* std-regs.c (value_of_builtin_frame_pc_reg): Change the returned
+	value type to builtin_type_void_func_ptr.
+
 2008-01-31  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* s390-tdep.c (is_float_singleton, is_float_like,
