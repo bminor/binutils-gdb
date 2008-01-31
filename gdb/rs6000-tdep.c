@@ -83,6 +83,11 @@
     && (regnum) >= (tdep)->ppc_ev0_regnum \
     && (regnum) < (tdep)->ppc_ev0_regnum + 32)
 
+/* Determine if regnum is a decimal float pseudo-register.  */
+#define IS_DFP_PSEUDOREG(tdep, regnum) ((tdep)->ppc_dl0_regnum >= 0 \
+    && (regnum) >= (tdep)->ppc_dl0_regnum \
+    && (regnum) < (tdep)->ppc_dl0_regnum + 16)
+
 /* The list of available "set powerpc ..." and "show powerpc ..."
    commands.  */
 static struct cmd_list_element *setpowerpccmdlist = NULL;
@@ -2385,6 +2390,18 @@ rs6000_register_name (struct gdbarch *gdbarch, int regno)
       return spe_regnames[regno - tdep->ppc_ev0_regnum];
     }
 
+  /* Check if the decimal128 pseudo-registers are available.  */
+  if (IS_DFP_PSEUDOREG (tdep, regno))
+    {
+      static const char *const dfp128_regnames[] = {
+	"dl0", "dl1", "dl2", "dl3",
+	"dl4", "dl5", "dl6", "dl7",
+	"dl8", "dl9", "dl10", "dl11",
+	"dl12", "dl13", "dl14", "dl15"
+      };
+      return dfp128_regnames[regno - tdep->ppc_dl0_regnum];
+    }
+
   return tdesc_register_name (gdbarch, regno);
 }
 
@@ -2397,9 +2414,15 @@ rs6000_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* These are the only pseudo-registers we support.  */
-  gdb_assert (IS_SPE_PSEUDOREG (tdep, regnum));
+  gdb_assert (IS_SPE_PSEUDOREG (tdep, regnum)
+	      || IS_DFP_PSEUDOREG (tdep, regnum));
 
-  return rs6000_builtin_type_vec64 (gdbarch);
+  /* These are the e500 pseudo-registers.  */
+  if (IS_SPE_PSEUDOREG (tdep, regnum))
+    return rs6000_builtin_type_vec64 (gdbarch);
+  else
+    /* Could only be the ppc decimal128 pseudo-registers.  */
+    return builtin_type (gdbarch)->builtin_declong;
 }
 
 /* Is REGNUM a member of REGGROUP?  */
@@ -2410,12 +2433,15 @@ rs6000_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* These are the only pseudo-registers we support.  */
-  gdb_assert (IS_SPE_PSEUDOREG (tdep, regnum));
+  gdb_assert (IS_SPE_PSEUDOREG (tdep, regnum)
+	      || IS_DFP_PSEUDOREG (tdep, regnum));
 
-  if (group == all_reggroup || group == vector_reggroup)
-    return 1;
+  /* These are the e500 pseudo-registers.  */
+  if (IS_SPE_PSEUDOREG (tdep, regnum))
+    return group == all_reggroup || group == vector_reggroup;
   else
-    return 0;
+    /* Could only be the ppc decimal128 pseudo-registers.  */
+    return group == all_reggroup || group == float_reggroup;
 }
 
 /* The register format for RS/6000 floating point registers is always
@@ -2516,38 +2542,110 @@ static void
 e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
-  struct gdbarch *regcache_arch = get_regcache_arch (regcache);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
-
-  gdb_assert (regcache_arch == gdbarch);
- 
-  if (IS_SPE_PSEUDOREG (tdep, reg_nr))
-    e500_move_ev_register (regcache_raw_read, regcache, reg_nr, buffer);
-  else
-    internal_error (__FILE__, __LINE__,
-                    _("e500_pseudo_register_read: "
-                    "called on unexpected register '%s' (%d)"),
-                    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
+  e500_move_ev_register (regcache_raw_read, regcache, reg_nr, buffer);
 }
 
 static void
 e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int reg_nr, const gdb_byte *buffer)
 {
+  e500_move_ev_register ((void (*) (struct regcache *, int, gdb_byte *))
+			 regcache_raw_write,
+			 regcache, reg_nr, (gdb_byte *) buffer);
+}
+
+/* Read method for PPC pseudo-registers. Currently this is handling the
+   16 decimal128 registers that map into 16 pairs of FP registers.  */
+static void
+ppc_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+			   int reg_nr, gdb_byte *buffer)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int reg_index = reg_nr - tdep->ppc_dl0_regnum;
+
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+    {
+      /* Read two FP registers to form a whole dl register.  */
+      regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
+			 2 * reg_index, buffer);
+      regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
+			 2 * reg_index + 1, buffer + 8);
+    }
+  else
+    {
+      regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
+			 2 * reg_index + 1, buffer + 8);
+      regcache_raw_read (regcache, tdep->ppc_fp0_regnum +
+			 2 * reg_index, buffer);
+    }
+}
+
+/* Write method for PPC pseudo-registers. Currently this is handling the
+   16 decimal128 registers that map into 16 pairs of FP registers.  */
+static void
+ppc_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+			    int reg_nr, const gdb_byte *buffer)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int reg_index = reg_nr - tdep->ppc_dl0_regnum;
+
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+    {
+      /* Write each half of the dl register into a separate
+      FP register.  */
+      regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+			  2 * reg_index, buffer);
+      regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+			  2 * reg_index + 1, buffer + 8);
+    }
+  else
+    {
+      regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+			  2 * reg_index + 1, buffer + 8);
+      regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+			  2 * reg_index, buffer);
+    }
+}
+
+static void
+rs6000_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+			     int reg_nr, gdb_byte *buffer)
+{
   struct gdbarch *regcache_arch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   gdb_assert (regcache_arch == gdbarch);
- 
+
   if (IS_SPE_PSEUDOREG (tdep, reg_nr))
-    e500_move_ev_register ((void (*) (struct regcache *, int, gdb_byte *))
-                           regcache_raw_write,
-                           regcache, reg_nr, (gdb_byte *) buffer);
+    e500_pseudo_register_read (gdbarch, regcache, reg_nr, buffer);
+  else if (IS_DFP_PSEUDOREG (tdep, reg_nr))
+    ppc_pseudo_register_read (gdbarch, regcache, reg_nr, buffer);
   else
     internal_error (__FILE__, __LINE__,
-                    _("e500_pseudo_register_read: "
-                    "called on unexpected register '%s' (%d)"),
-                    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
+		    _("rs6000_pseudo_register_read: "
+		    "called on unexpected register '%s' (%d)"),
+		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
+}
+
+static void
+rs6000_pseudo_register_write (struct gdbarch *gdbarch,
+			      struct regcache *regcache,
+			      int reg_nr, const gdb_byte *buffer)
+{
+  struct gdbarch *regcache_arch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
+
+  gdb_assert (regcache_arch == gdbarch);
+
+  if (IS_SPE_PSEUDOREG (tdep, reg_nr))
+    e500_pseudo_register_write (gdbarch, regcache, reg_nr, buffer);
+  else if (IS_DFP_PSEUDOREG (tdep, reg_nr))
+    ppc_pseudo_register_write (gdbarch, regcache, reg_nr, buffer);
+  else
+    internal_error (__FILE__, __LINE__,
+		    _("rs6000_pseudo_register_write: "
+		    "called on unexpected register '%s' (%d)"),
+		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
 
 /* Convert a DBX STABS register number to a GDB register number.  */
@@ -3168,10 +3266,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum auto_boolean soft_float_flag = powerpc_soft_float_global;
   int soft_float;
   enum powerpc_vector_abi vector_abi = powerpc_vector_abi_global;
-  int have_fpu = 1, have_spe = 0, have_mq = 0, have_altivec = 0;
+  int have_fpu = 1, have_spe = 0, have_mq = 0, have_altivec = 0, have_dfp = 0;
   int tdesc_wordsize = -1;
   const struct target_desc *tdesc = info.target_desc;
   struct tdesc_arch_data *tdesc_data = NULL;
+  int num_pseudoregs = 0;
 
   from_xcoff_exec = info.abfd && info.abfd->format == bfd_object &&
     bfd_get_flavour (info.abfd) == bfd_target_xcoff_flavour;
@@ -3341,6 +3440,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
       else
 	have_fpu = 0;
+
+      /* The DFP pseudo-registers will be available when there are floating
+         point registers.  */
+      have_dfp = have_fpu;
 
       feature = tdesc_find_feature (tdesc,
 				    "org.gnu.gdb.power.altivec");
@@ -3588,10 +3691,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->lr_frame_offset = 8;
 
-  if (have_spe)
+  if (have_spe || have_dfp)
     {
-      set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
-      set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
+      set_gdbarch_pseudo_register_read (gdbarch, rs6000_pseudo_register_read);
+      set_gdbarch_pseudo_register_write (gdbarch, rs6000_pseudo_register_write);
     }
 
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
@@ -3603,7 +3706,13 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_print_insn (gdbarch, gdb_print_insn_powerpc);
 
   set_gdbarch_num_regs (gdbarch, PPC_NUM_REGS);
-  set_gdbarch_num_pseudo_regs (gdbarch, have_spe ? 32 : 0);
+
+  if (have_spe)
+    num_pseudoregs += 32;
+  if (have_dfp)
+    num_pseudoregs += 16;
+
+  set_gdbarch_num_pseudo_regs (gdbarch, num_pseudoregs);
 
   set_gdbarch_ptr_bit (gdbarch, wordsize * TARGET_CHAR_BIT);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
@@ -3725,6 +3834,13 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Recording the numbering of pseudo registers.  */
   tdep->ppc_ev0_regnum = have_spe ? gdbarch_num_regs (gdbarch) : -1;
+
+  /* Set the register number for _Decimal128 pseudo-registers.  */
+  tdep->ppc_dl0_regnum = have_dfp? gdbarch_num_regs (gdbarch) : -1;
+
+  if (have_dfp && have_spe)
+    /* Put the _Decimal128 pseudo-registers after the SPE registers.  */
+    tdep->ppc_dl0_regnum += 32;
 
   return gdbarch;
 }

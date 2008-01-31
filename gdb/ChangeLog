@@ -1,3 +1,26 @@
+2008-01-31  Luis Machado  <luisgpm@br.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* infcmd.c (default_print_registers_info): Also print hex
+	raw contents for TYPE_CODE_DECFLOAT registers.
+	* ppc-tdep.h (gdbarch_tdep): Add ppc_dl0_regnum member.
+	* rs6000-tdep.c (IS_DFP_PSEUDOREG): New macro.
+	(rs6000_register_name): Add support for DFP pseudo-registers.
+	(rs6000_pseudo_register_type): Likewise.
+	rs6000_pseudo_register_reggroup_p): Likewise.
+	(ppc_pseudo_register_read): New function.
+	(ppc_pseudo_register_write): Likewise.
+	(rs6000_pseudo_register_read): Likewise.
+	(rs6000_pseudo_register_write): Likewise.
+	(e500_pseudo_register_read): Move checks to
+	rs6000_pseudo_register_read.
+	(e500_pseudo_register_write): Move checks to
+	rs6000_pseudo_register_write.
+	(rs6000_gdbarch_init): Initialize tdep->ppc_dl0_regnum.  Install
+	rs6000_pseudo_register_read and rs6000_pseudo_register_write
+	in gdbarch if SPE or DFP is available.  Adjust gdbarch's
+	num_pseudo_regs to account for DFP pseudo regs.
+
 2008-01-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ppc-tdep.h (struct gdbarch_tdep): Remove ppc_ev31_regnum member.

@@ -1622,7 +1622,8 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
       /* If virtual format is floating, print it that way, and in raw
          hex.  */
-      if (TYPE_CODE (register_type (gdbarch, i)) == TYPE_CODE_FLT)
+      if (TYPE_CODE (register_type (gdbarch, i)) == TYPE_CODE_FLT
+	  || TYPE_CODE (register_type (gdbarch, i)) == TYPE_CODE_DECFLOAT)
 	{
 	  int j;
 

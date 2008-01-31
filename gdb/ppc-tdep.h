@@ -204,6 +204,9 @@ struct gdbarch_tdep
     int ppc_acc_regnum;         /* SPE 'acc' register */
     int ppc_spefscr_regnum;     /* SPE 'spefscr' register */
 
+    /* Decimal 128 registers.  */
+    int ppc_dl0_regnum;		/* First Decimal128 argument register pair.  */
+
     /* Offset to ABI specific location where link register is saved.  */
     int lr_frame_offset;	
 
