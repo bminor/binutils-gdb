@@ -1,7 +1,7 @@
 /* ELF executable support for BFD.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -326,7 +326,9 @@ bfd_elf_string_from_elf_section (bfd *abfd,
    SYMCOUNT specifies the number of symbols to read, starting from
    symbol SYMOFFSET.  If any of INTSYM_BUF, EXTSYM_BUF or EXTSHNDX_BUF
    are non-NULL, they are used to store the internal symbols, external
-   symbols, and symbol section index extensions, respectively.  */
+   symbols, and symbol section index extensions, respectively.
+   Returns a pointer to the internal symbol buffer (malloced if necessary)
+   or NULL if there were no symbols or some kind of problem.  */
 
 Elf_Internal_Sym *
 bfd_elf_get_elf_syms (bfd *ibfd,
@@ -361,6 +363,9 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   alloc_ext = NULL;
   alloc_extshndx = NULL;
   bed = get_elf_backend_data (ibfd);
+  /* PR ld/5692: Check for non-ELF files.  */
+  if (bed == NULL)
+    return NULL;
   extsym_size = bed->s->sizeof_sym;
   amt = symcount * extsym_size;
   pos = symtab_hdr->sh_offset + symoffset * extsym_size;
