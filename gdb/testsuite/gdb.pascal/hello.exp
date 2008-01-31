@@ -21,7 +21,7 @@ load_lib "pascal.exp"
 
 set testfile "hello"
 set srcfile ${testfile}.pas
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/${testfile}${EXEEXT}
 
 if {[gdb_compile_pascal "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug ]] != "" } {
   return -1
