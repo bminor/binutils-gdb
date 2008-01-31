@@ -9679,6 +9679,10 @@ In addition, in order to imitate @value{GDBN}'s behaviour with binary floating
 point computations, error checking in decimal float operations ignores
 underflow, overflow and divide by zero exceptions.
 
+In the PowerPC architecture, @value{GDBN} provides a set of pseudo-registers
+to inspect @code{_Decimal128} values stored in floating point registers. See
+@ref{PowerPC,,PowerPC} for more details.
+
 @node Objective-C
 @subsection Objective-C
 
@@ -14682,7 +14686,7 @@ acceptable commands.
 * MIPS Embedded::               MIPS Embedded
 * OpenRISC 1000::               OpenRisc 1000
 * PA::                          HP PA Embedded
-* PowerPC::                     PowerPC
+* PowerPC Embedded::            PowerPC Embedded
 * Sparclet::                    Tsqware Sparclet
 * Sparclite::                   Fujitsu Sparclite
 * Z8000::                       Zilog Z8000
@@ -15191,8 +15195,8 @@ Set suspend trace mode.
 
 @end table
 
-@node PowerPC
-@subsection PowerPC
+@node PowerPC Embedded
+@subsection PowerPC Embedded
 
 @value{GDBN} provides the following PowerPC-specific commands:
 
@@ -15555,6 +15559,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * MIPS::
 * HPPA::               HP PA architecture
 * SPU::                Cell Broadband Engine SPU architecture
+* PowerPC::
 @end menu
 
 @node i386
@@ -15771,6 +15776,20 @@ and local store addresses and transfer size are shown.
 
 @end table
  
+@node PowerPC
+@subsection PowerPC
+@cindex PowerPC architecture
+
+When @value{GDBN} is debugging the PowerPC architecture, it provides a set of 
+pseudo-registers to enable inspection of 128-bit wide Decimal Floating Point
+numbers stored in the floating point registers. These values must be stored
+in two consecutive registers, always starting at an even register like
+@code{f0} or @code{f2}.
+
+The pseudo-registers go from @code{$dl0} through @code{$dl15}, and are formed
+by joining the even/odd register pairs @code{f0} and @code{f1} for @code{$dl0},
+@code{f2} and @code{f3} for @code{$dl1} and so on.
+
 
 @node Controlling GDB
 @chapter Controlling @value{GDBN}

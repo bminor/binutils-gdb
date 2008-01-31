@@ -1,3 +1,13 @@
+2008-01-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo: (Decimal Floating Point): Mention pseudo-registers
+	available in PowerPC architecture.
+	(Embedded Processors): Change node name of PowerPC item in menu.
+	(PowerPC): Rename to...
+	(PowerPC Embedded): this.
+	(Architectures): Add new PowerPC item in menu.
+	(PowerPC): New node.
+
 2008-01-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Multi-Process Mode for gdbserver): Use @kbd for
