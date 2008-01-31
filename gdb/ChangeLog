@@ -1,3 +1,9 @@
+2008-01-31  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* s390-tdep.c (is_float_singleton, is_float_like,
+	alignment_of, s390_return_value): Make checks for
+	TYPE_CODE_FLT to match TYPE_CODE_DECFLOAT as well.
+
 2008-01-31  Luis Machado  <luisgpm@br.ibm.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 

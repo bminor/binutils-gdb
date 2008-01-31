@@ -1816,6 +1816,7 @@ is_float_singleton (struct type *type)
       CHECK_TYPEDEF (singleton_type);
 
       return (TYPE_CODE (singleton_type) == TYPE_CODE_FLT
+	      || TYPE_CODE (singleton_type) == TYPE_CODE_DECFLOAT
 	      || is_float_singleton (singleton_type));
     }
 
@@ -1854,6 +1855,7 @@ static int
 is_float_like (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_FLT
+	  || TYPE_CODE (type) == TYPE_CODE_DECFLOAT
           || is_float_singleton (type));
 }
 
@@ -1930,7 +1932,8 @@ alignment_of (struct type *type)
 
   if (is_integer_like (type)
       || is_pointer_like (type)
-      || TYPE_CODE (type) == TYPE_CODE_FLT)
+      || TYPE_CODE (type) == TYPE_CODE_FLT
+      || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
     alignment = TYPE_LENGTH (type);
   else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
            || TYPE_CODE (type) == TYPE_CODE_UNION)
@@ -2185,7 +2188,8 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
       switch (rvc)
 	{
 	case RETURN_VALUE_REGISTER_CONVENTION:
-	  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+	  if (TYPE_CODE (type) == TYPE_CODE_FLT
+	      || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
 	    {
 	      /* When we store a single-precision value in an FP register,
 		 it occupies the leftmost bits.  */
@@ -2221,7 +2225,8 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
       switch (rvc)
 	{
 	case RETURN_VALUE_REGISTER_CONVENTION:
-	  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+	  if (TYPE_CODE (type) == TYPE_CODE_FLT
+	      || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
 	    {
 	      /* When we store a single-precision value in an FP register,
 		 it occupies the leftmost bits.  */
