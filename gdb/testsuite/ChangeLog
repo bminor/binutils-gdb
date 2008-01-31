@@ -1,3 +1,8 @@
+2008-01-31  Luis Machado  <luisgpm@br.ibm.com>
+
+	* gdb.arch/ppc64-atomic-inst.c: New testcase source file.
+	* gdb.arch/ppc64-atomic-inst.exp: New testcase expect file.
+
 2008-01-31  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.pascal/integers.pas: New test program.
