@@ -118,6 +118,7 @@ check_PROGRAMS += two_file_static_test
 check_PROGRAMS += two_file_pic_test
 two_file_test_SOURCES = \
 	two_file_test_1.cc \
+	two_file_test_1b.cc \
 	two_file_test_2.cc \
 	two_file_test_main.cc \
 	two_file_test.h
@@ -130,9 +131,9 @@ two_file_static_test_LDFLAGS = $(two_file_test_LDFLAGS) -static
 
 two_file_pic_test_SOURCES = two_file_test_main.cc
 two_file_pic_test_DEPENDENCIES = \
-	gcctestdir/ld two_file_test_1_pic.o two_file_test_2_pic.o
+	gcctestdir/ld two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2_pic.o
 two_file_pic_test_LDFLAGS = -Bgcctestdir/
-two_file_pic_test_LDADD = two_file_test_1_pic.o two_file_test_2_pic.o
+two_file_pic_test_LDADD = two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2_pic.o
 
 
 check_PROGRAMS += two_file_shared_1_test
@@ -140,37 +141,36 @@ check_PROGRAMS += two_file_shared_2_test
 check_PROGRAMS += two_file_shared_1_pic_2_test
 check_PROGRAMS += two_file_shared_2_pic_1_test
 check_PROGRAMS += two_file_same_shared_test
-check_PROGRAMS += two_file_mixed_shared_test
 check_PROGRAMS += two_file_separate_shared_12_test
 check_PROGRAMS += two_file_separate_shared_21_test
 two_file_test_1_pic.o: two_file_test_1.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
+two_file_test_1b_pic.o: two_file_test_1b.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
 two_file_test_2_pic.o: two_file_test_2.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
-two_file_shared_1.so: two_file_test_1_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o
+two_file_shared_1.so: two_file_test_1_pic.o two_file_test_1b_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o
 two_file_shared_2.so: two_file_test_2_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2_pic.o
-two_file_shared.so: two_file_test_1_pic.o two_file_test_2_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_2_pic.o
-two_file_shared_mixed.so: two_file_test_1_pic.o two_file_test_2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_2.o
+two_file_shared.so: two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2_pic.o
 
 two_file_shared_1_test_SOURCES = two_file_test_2.cc two_file_test_main.cc
 two_file_shared_1_test_DEPENDENCIES = gcctestdir/ld two_file_shared_1.so
 two_file_shared_1_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_shared_1_test_LDADD = two_file_shared_1.so
 
-two_file_shared_2_test_SOURCES = two_file_test_1.cc two_file_test_main.cc
+two_file_shared_2_test_SOURCES = two_file_test_1.cc two_file_test_1b.cc two_file_test_main.cc
 two_file_shared_2_test_DEPENDENCIES = gcctestdir/ld two_file_shared_2.so
 two_file_shared_2_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_shared_2_test_LDADD = two_file_shared_2.so
 
 two_file_shared_1_pic_2_test_SOURCES = two_file_test_main.cc
 two_file_shared_1_pic_2_test_DEPENDENCIES = \
-	gcctestdir/ld two_file_shared_1.so two_file_test_1_pic.o
+	gcctestdir/ld two_file_shared_1.so two_file_test_1_pic.o two_file_test_1b_pic.o
 two_file_shared_1_pic_2_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
-two_file_shared_1_pic_2_test_LDADD = two_file_test_1_pic.o two_file_shared_2.so
+two_file_shared_1_pic_2_test_LDADD = two_file_test_1_pic.o two_file_test_1b_pic.o two_file_shared_2.so
 
 two_file_shared_2_pic_1_test_SOURCES = two_file_test_main.cc
 two_file_shared_2_pic_1_test_DEPENDENCIES = \
@@ -182,11 +182,6 @@ two_file_same_shared_test_SOURCES = two_file_test_main.cc
 two_file_same_shared_test_DEPENDENCIES = gcctestdir/ld two_file_shared.so
 two_file_same_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_same_shared_test_LDADD = two_file_shared.so
-
-two_file_mixed_shared_test_SOURCES = two_file_test_main.cc
-two_file_mixed_shared_test_DEPENDENCIES = gcctestdir/ld two_file_shared_mixed.so
-two_file_mixed_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
-two_file_mixed_shared_test_LDADD = two_file_shared_mixed.so
 
 two_file_separate_shared_12_test_SOURCES = two_file_test_main.cc
 two_file_separate_shared_12_test_DEPENDENCIES = \
@@ -211,12 +206,18 @@ check_PROGRAMS += two_file_shared_2_nonpic_test
 check_PROGRAMS += two_file_same_shared_nonpic_test
 check_PROGRAMS += two_file_separate_shared_12_nonpic_test
 check_PROGRAMS += two_file_separate_shared_21_nonpic_test
+check_PROGRAMS += two_file_mixed_shared_test
+check_PROGRAMS += two_file_mixed_2_shared_test
 two_file_shared_1_nonpic.so: two_file_test_1.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b.o
 two_file_shared_2_nonpic.so: two_file_test_2.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2.o
-two_file_shared_nonpic.so: two_file_test_1.o two_file_test_2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_2.o
+two_file_shared_nonpic.so: two_file_test_1.o two_file_test_1b.o two_file_test_2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+two_file_shared_mixed.so: two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2.o
+two_file_shared_mixed_1.so: two_file_test_1.o two_file_test_1b_pic.o two_file_shared_2.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b_pic.o two_file_shared_2.so
 
 two_file_shared_1_nonpic_test_SOURCES = \
 	two_file_test_2.cc two_file_test_main.cc
@@ -226,7 +227,7 @@ two_file_shared_1_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_shared_1_nonpic_test_LDADD = two_file_shared_1_nonpic.so
 
 two_file_shared_2_nonpic_test_SOURCES = \
-	two_file_test_1.cc two_file_test_main.cc
+	two_file_test_1.cc two_file_test_1b.cc two_file_test_main.cc
 two_file_shared_2_nonpic_test_DEPENDENCIES = \
 	gcctestdir/ld two_file_shared_2_nonpic.so
 two_file_shared_2_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
@@ -251,6 +252,16 @@ two_file_separate_shared_21_nonpic_test_DEPENDENCIES = \
 two_file_separate_shared_21_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_separate_shared_21_nonpic_test_LDADD = \
 	two_file_shared_2_nonpic.so two_file_shared_1_nonpic.so
+
+two_file_mixed_shared_test_SOURCES = two_file_test_main.cc
+two_file_mixed_shared_test_DEPENDENCIES = gcctestdir/ld two_file_shared_mixed.so
+two_file_mixed_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_mixed_shared_test_LDADD = two_file_shared_mixed.so
+
+two_file_mixed_2_shared_test_SOURCES = two_file_test_main.cc
+two_file_mixed_2_shared_test_DEPENDENCIES = gcctestdir/ld two_file_shared_mixed_1.so two_file_shared_2.so
+two_file_mixed_2_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_mixed_2_shared_test_LDADD = two_file_shared_mixed_1.so two_file_shared_2.so
 
 endif FN_PTRS_IN_SO_WITHOUT_PIC
 

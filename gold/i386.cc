@@ -1089,7 +1089,7 @@ Target_i386::Scan::global(const General_options& options,
             // taking the address of a function. In that case we need to
             // set the entry in the dynamic symbol table to the address of
             // the PLT entry.
-            if (gsym->is_from_dynobj())
+            if (gsym->is_from_dynobj() && !parameters->output_is_shared())
               gsym->set_needs_dynsym_value();
           }
         // Make a dynamic relocation if necessary.

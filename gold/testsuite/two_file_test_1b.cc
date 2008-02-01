@@ -1,7 +1,8 @@
-// two_file_test_main.cc -- a two file test case for gold, main function
+// two_file_test_1b.cc -- supplementary file for a three-file test case
+// for gold.
 
-// Copyright 2006, 2007 Free Software Foundation, Inc.
-// Written by Ian Lance Taylor <iant@google.com>.
+// Copyright 2008 Free Software Foundation, Inc.
+// Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
 
@@ -20,36 +21,21 @@
 // Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 // MA 02110-1301, USA.
 
-// This tests references between files.  This is the main file.  See
-// two_file_test_1.cc for details.
+// This file is used as part of a mixed PIC/non-PIC test.
+// Files 1 and 1b are linked together in a shared library.
+// File 1 is compiled non-PIC, and file 1a is compiled PIC.
+// File 2 is compiled PIC and linked in a second shared library.
+// This tests that a non-PIC call does not accidentally get
+// bound to a PIC PLT entry.
 
-#include <cassert>
+// We test the following cases.
 
 #include "two_file_test.h"
 
-int
-main()
-{
-  // Initialize common data.
-  v3 = 789;
-  for (int i = 0; i < 13; ++i)
-    v5[i] = v4[i];
+// 16 Call a function directly after its address has been taken.
 
-  assert(t1());
-  assert(t1a());
-  assert(t2());
-  assert(t3());
-  assert(t4());
-  assert(t5());
-  assert(t6());
-  assert(t7());
-  assert(t8());
-  assert(t9());
-  assert(t10());
-  assert(t11());
-  assert(t12());
-  assert(t13());
-  assert(t16());
-  assert(t16a());
-  return 0;
+bool
+t16a()
+{
+  return f10() == 135;
 }

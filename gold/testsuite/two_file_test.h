@@ -66,3 +66,6 @@ extern const char* f14();
 
 #define TEST_WIDE_STRING_CONSTANT L"test wide string constant"
 extern const wchar_t* f15();
+
+extern bool t16();
+extern bool t16a();

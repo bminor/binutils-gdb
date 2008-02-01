@@ -45,6 +45,8 @@
 // 12 Compare address of function for equality in both files.
 // 13 Compare address of inline function for equality in both files.
 // 14 Compare string constants in file 1 and file 2.
+// 15 Compare wide string constants in file 1 and file 2.
+// 16 Call a function directly after its address has been taken.
 
 #include "two_file_test.h"
 
@@ -192,4 +194,12 @@ t15()
     if (*s1++ != *s2++)
       return false;
   return *s2 == '\0';
+}
+
+// 16 Call a function directly after its address has been taken.
+
+bool
+t16()
+{
+  return f10() == 135;
 }
