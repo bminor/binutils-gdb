@@ -1,4 +1,9 @@
-2007-12-27  Joel Brobecker  <brobecker@adacore.com>
+2007-02-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/sym_print_name: New test program.
+	* gdb.ada/sym_print_name.exp: New testcase.
+
+2007-02-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/nested/hello.adb: New file.
 	* gdb.ada/nested.exp: New testcase.
