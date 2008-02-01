@@ -175,10 +175,20 @@ proc test_ignore_count {} {
     }  
 }
 
+proc test_error {} {
+    global mi_gdb_prompt
+
+    mi_gdb_test "-break-insert function_that_does_not_exist" \
+        ".*\\^error,msg=\"Function \\\\\"function_that_does_not_exist\\\\\" not defined.\"" \
+        "breakpoint at nonexistent function"
+}
+
 test_tbreak_creation_and_listing
 test_rbreak_creation_and_listing
 
 test_ignore_count
+
+test_error
 
 mi_gdb_exit
 return 0

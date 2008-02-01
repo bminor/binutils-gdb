@@ -1,3 +1,8 @@
+2008-02-01  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-break.exp (test_error): New.
+	Call it.
+
 2008-01-31  Luis Machado  <luisgpm@br.ibm.com>
 
 	* gdb.arch/ppc64-atomic-inst.c: New testcase source file.

@@ -5330,13 +5330,13 @@ break_command_really (char *arg, char *cond_string, int thread,
 	{
 	case NOT_FOUND_ERROR:
 
-	  exception_print (gdb_stderr, e);
-
 	  /* If pending breakpoint support is turned off, throw
 	     error.  */
 
 	  if (pending_break_support == AUTO_BOOLEAN_FALSE)
-	    deprecated_throw_reason (RETURN_ERROR);
+	    throw_exception (e);
+
+	  exception_print (gdb_stderr, e);
 
           /* If pending breakpoint support is auto query and the user
 	     selects no, then simply return the error code.  */
