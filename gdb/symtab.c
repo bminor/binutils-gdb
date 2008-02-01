@@ -517,6 +517,24 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   if (objfile->demangled_names_hash == NULL)
     create_demangled_names_hash (objfile);
 
+  if (gsymbol->language == language_ada)
+    {
+      /* In Ada, we do the symbol lookups using the mangled name, so
+         we can save some space by not storing the demangled name.
+
+         As a side note, we have also observed some overlap between
+         the C++ mangling and Ada mangling, similarly to what has
+         been observed with Java.  Because we don't store the demangled
+         name with the symbol, we don't need to use the same trick
+         as Java.  */
+      gsymbol->name = obstack_alloc (&objfile->objfile_obstack, len + 1);
+      memcpy (gsymbol->name, linkage_name, len);
+      gsymbol->name[len] = '\0';
+      gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+
+      return;
+    }
+
   /* The stabs reader generally provides names that are not
      NUL-terminated; most of the other readers don't do this, so we
      can just use the given copy, unless we're in the Java case.  */

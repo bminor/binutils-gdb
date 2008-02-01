@@ -1,3 +1,9 @@
+2008-02-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* symtab.c (symbol_set_names): Do not add an entry in the demangling
+	hash table for Ada symbols. Just store the linkage name as is,
+	and leave the demangled_name as NULL.
+
 2007-02-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (add_partial_symbol): Always store all Ada subprograms
