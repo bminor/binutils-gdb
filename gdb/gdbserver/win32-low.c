@@ -21,6 +21,7 @@
 #include "server.h"
 #include "regcache.h"
 #include "gdb/signals.h"
+#include "gdb/fileio.h"
 #include "mem-break.h"
 #include "win32-low.h"
 
@@ -1653,6 +1654,65 @@ win32_arch_string (void)
   return the_low_target.arch_string;
 }
 
+#ifdef _WIN32_WCE
+int
+win32_error_to_fileio_error (DWORD err)
+{
+  switch (err)
+    {
+    case ERROR_BAD_PATHNAME:
+    case ERROR_FILE_NOT_FOUND:
+    case ERROR_INVALID_NAME:
+    case ERROR_PATH_NOT_FOUND:
+      return FILEIO_ENOENT;
+    case ERROR_CRC:
+    case ERROR_IO_DEVICE:
+    case ERROR_OPEN_FAILED:
+      return FILEIO_EIO;
+    case ERROR_INVALID_HANDLE:
+      return FILEIO_EBADF;
+    case ERROR_ACCESS_DENIED:
+    case ERROR_SHARING_VIOLATION:
+      return FILEIO_EACCES;
+    case ERROR_NOACCESS:
+      return FILEIO_EFAULT;
+    case ERROR_BUSY:
+      return FILEIO_EBUSY;
+    case ERROR_ALREADY_EXISTS:
+    case ERROR_FILE_EXISTS:
+      return FILEIO_EEXIST;
+    case ERROR_BAD_DEVICE:
+      return FILEIO_ENODEV;
+    case ERROR_DIRECTORY:
+      return FILEIO_ENOTDIR;
+    case ERROR_FILENAME_EXCED_RANGE:
+    case ERROR_INVALID_DATA:
+    case ERROR_INVALID_PARAMETER:
+    case ERROR_NEGATIVE_SEEK:
+      return FILEIO_EINVAL;
+    case ERROR_TOO_MANY_OPEN_FILES:
+      return FILEIO_EMFILE;
+    case ERROR_HANDLE_DISK_FULL:
+    case ERROR_DISK_FULL:
+      return FILEIO_ENOSPC;
+    case ERROR_WRITE_PROTECT:
+      return FILEIO_EROFS;
+    case ERROR_NOT_SUPPORTED:
+      return FILEIO_ENOSYS;
+    }
+
+  return FILEIO_EUNKNOWN;
+}
+
+static void
+wince_hostio_last_error (char *buf)
+{
+  DWORD winerr = GetLastError ();
+  int fileio_err = win32_error_to_fileio_error (winerr);
+  sprintf (buf, "F-1,%x", fileio_err);
+}
+#endif
+
 static struct target_ops win32_target_ops = {
   win32_create_inferior,
   win32_attach,
@@ -1675,7 +1735,13 @@ static struct target_ops win32_target_ops = {
   NULL,
   NULL,
   NULL,
-  win32_arch_string
+  win32_arch_string,
+  NULL,
+#ifdef _WIN32_WCE
+  wince_hostio_last_error,
+#else
+  hostio_last_error_from_errno,
+#endif
 };
 
 /* Initialize the Win32 backend.  */

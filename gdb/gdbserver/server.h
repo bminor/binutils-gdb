@@ -159,6 +159,9 @@ extern jmp_buf toplevel;
 /* Functions from hostio.c.  */
 extern int handle_vFile (char *, int, int *);
 
+/* Functions from hostio-errno.c.  */
+extern void hostio_last_error_from_errno (char *own_buf);
+
 /* From remote-utils.c */
 
 extern int remote_debug;

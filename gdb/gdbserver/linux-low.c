@@ -2053,6 +2053,8 @@ static struct target_ops linux_target_ops = {
   NULL,
 #endif
   linux_arch_string,
+  NULL,
+  hostio_last_error_from_errno,
 };
 
 static void

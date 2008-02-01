@@ -1,3 +1,32 @@
+2008-02-01  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* hostio.c: Don't include errno.h.
+	(errno_to_fileio_errno): Move to hostio-errno.
+	* hostio.c: (hostio_error): Remove the error parameter.  Defer the
+	error number outputting to the target->hostio_last_error callback.
+	(hostio_packet_error): Use FILEIO_EINVAL directly.
+	(handle_open, handle_pread, hostio_error, handle_unlink): Update
+	calls to hostio_error.
+	* hostio-errno.c: New.
+	* server.h (hostio_last_error_from_errno): Declare.
+	* target.h (target_ops): Add hostio_last_error member.
+	* linux-low.c (linux_target_op): Register hostio_last_error_from_errno
+	as hostio_last_error handler.
+	* spu-low.c (spu_target_ops): Likewise. 
+	* win32-low.c [_WIN32_WCE] (win32_error_to_fileio_error)
+	(wince_hostio_last_error): New functions.
+	(win32_target_ops) [_WIN32_WCE]: Register wince_hostio_last_error
+	as hostio_last_error handler.
+	(win32_target_ops) [!_WIN32_WCE]: Register
+	hostio_last_error_from_errno as hostio_last_error handler.
+	* Makefile.in (SFILES): Add hostio.c and hostio-errno.c.
+	(hostio-errno.o): New rule.
+	* configure.ac (GDBSERVER_DEPFILES): Add $srv_hostio_err_objs.
+	* configure.srv (srv_hostio_err_objs): New variable.  Default to
+	hostio-errno.o.
+	(arm*-*-mingw32ce*): Set srv_hostio_err_objs to "".
+	* configure: Regenerate.
+
 2008-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (linux_attach_lwp): Do not _exit after errors.

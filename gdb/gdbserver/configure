@@ -4403,7 +4403,7 @@ _ACEOF
   done
 fi
 
-GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_thread_depfiles"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
 
 

@@ -23,7 +23,6 @@
 #include "server.h"
 #include "gdb/fileio.h"
 
-#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <unistd.h>
@@ -176,69 +175,18 @@ require_valid_fd (int fd)
   return -1;
 }
 
-static int
-errno_to_fileio_errno (int error)
-{
-  switch (error)
-    {
-    case EPERM:
-      return FILEIO_EPERM;
-    case ENOENT:
-      return FILEIO_ENOENT;
-    case EINTR:
-      return FILEIO_EINTR;
-    case EIO:
-      return FILEIO_EIO;
-    case EBADF:
-      return FILEIO_EBADF;
-    case EACCES:
-      return FILEIO_EACCES;
-    case EFAULT:
-      return FILEIO_EFAULT;
-    case EBUSY:
-      return FILEIO_EBUSY;
-    case EEXIST:
-      return FILEIO_EEXIST;
-    case ENODEV:
-      return FILEIO_ENODEV;
-    case ENOTDIR:
-      return FILEIO_ENOTDIR;
-    case EISDIR:
-      return FILEIO_EISDIR;
-    case EINVAL:
-      return FILEIO_EINVAL;
-    case ENFILE:
-      return FILEIO_ENFILE;
-    case EMFILE:
-      return FILEIO_EMFILE;
-    case EFBIG:
-      return FILEIO_EFBIG;
-    case ENOSPC:
-      return FILEIO_ENOSPC;
-    case ESPIPE:
-      return FILEIO_ESPIPE;
-    case EROFS:
-      return FILEIO_EROFS;
-    case ENOSYS:
-      return FILEIO_ENOSYS;
-    case ENAMETOOLONG:
-      return FILEIO_ENAMETOOLONG;
-    }
-  return FILEIO_EUNKNOWN;
-}
-
+/* Fill in own_buf with the last hostio error packet, however it
+   suitable for the target.  */
 static void
-hostio_error (char *own_buf, int error)
+hostio_error (char *own_buf)
 {
-  int fileio_error = errno_to_fileio_errno (error);
-
-  sprintf (own_buf, "F-1,%x", fileio_error);
+  the_target->hostio_last_error (own_buf);
 }
 
 static void
 hostio_packet_error (char *own_buf)
 {
-  hostio_error (own_buf, EINVAL);
+  sprintf (own_buf, "F-1,%x", FILEIO_EINVAL);
 }
 
 static void
@@ -342,7 +290,7 @@ handle_open (char *own_buf)
 
   if (fd == -1)
     {
-      hostio_error (own_buf, errno);
+      hostio_error (own_buf);
       return;
     }
 
@@ -386,7 +334,7 @@ handle_pread (char *own_buf, int *new_packet_len)
 
   if (ret == -1)
     {
-      hostio_error (own_buf, errno);
+      hostio_error (own_buf);
       free (data);
       return;
     }
@@ -434,7 +382,7 @@ handle_pwrite (char *own_buf, int packet_len)
 
   if (ret == -1)
     {
-      hostio_error (own_buf, errno);
+      hostio_error (own_buf);
       free (data);
       return;
     }
@@ -464,7 +412,7 @@ handle_close (char *own_buf)
 
   if (ret == -1)
     {
-      hostio_error (own_buf, errno);
+      hostio_error (own_buf);
       return;
     }
 
@@ -499,7 +447,7 @@ handle_unlink (char *own_buf)
 
   if (ret == -1)
     {
-      hostio_error (own_buf, errno);
+      hostio_error (own_buf);
       return;
     }
 

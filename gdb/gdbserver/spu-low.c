@@ -590,6 +590,7 @@ static struct target_ops spu_target_ops = {
   NULL,
   spu_arch_string,
   spu_proc_xfer_spu,
+  hostio_last_error_from_errno,
 };
 
 void

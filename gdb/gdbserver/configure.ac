@@ -214,7 +214,7 @@ if test "$srv_xmltarget" != ""; then
   done
 fi
 
-GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_thread_depfiles"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
 
 AC_SUBST(GDBSERVER_DEPFILES)

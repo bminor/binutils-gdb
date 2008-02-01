@@ -6,6 +6,8 @@
 #   srv_regobj		The register protocol appropriate for this target.
 #   srv_tgtobj		Any other target-specific modules appropriate
 #			for this target.
+#   srv_hostio_err	The object implementing the hostio_last_error
+#			target method.
 #   srv_xmltarget	The XML source file to use for target.xml, if any.
 #   srv_xmlfiles	Any other XML files which should be available for
 #			gdbserver in this configuration.
@@ -17,6 +19,9 @@
 #			PTRACE_GETREGS.
 #   srv_linux_usrregs	Set to "yes" if we can get at registers via
 #			PTRACE_PEEKUSR / PTRACE_POKEUSR.
+
+# Default hostio_last_error implementation
+srv_hostio_err_objs="hostio-errno.o"
 
 # Input is taken from the "${target}" variable.
 
@@ -36,6 +41,8 @@ case "${target}" in
   arm*-*-mingw32ce*)	srv_regobj=reg-arm.o
 			srv_tgtobj="win32-low.o win32-arm-low.o"
 			srv_tgtobj="${srv_tgtobj} wincecompat.o"
+			# hostio_last_error implementation is in win32-low.c
+			srv_hostio_err_objs=""
 			srv_mingw=yes
 			srv_mingwce=yes
 			;;
