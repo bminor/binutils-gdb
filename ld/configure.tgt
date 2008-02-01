@@ -626,7 +626,7 @@ xc16x-*-elf)		targ_emul=elf32xc16x
                         ;;
 xstormy16-*-*)		targ_emul=elf32xstormy16
 			;;
-xtensa-*-*)		targ_emul=elf32xtensa
+xtensa*-*-*)		targ_emul=elf32xtensa
 			;;
 z80-*-coff)		targ_emul=z80
 			;;

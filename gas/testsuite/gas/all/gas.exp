@@ -75,7 +75,7 @@ case $target_triplet in {
 	# Some targets don't manage to resolve BFD_RELOC_8 for constants.
 	setup_xfail "alpha*-*-*" "avr-*-*" "*c30*-*-*" "*c4x*-*-*" \
 	    "d\[13\]0v*-*-*" "i860-*-*" "mips*-*-*" "msp430-*-*" \
-	    "pdp11-*-*" "sparc*-*-*" "xtensa-*-*"
+	    "pdp11-*-*" "sparc*-*-*" "xtensa*-*-*"
 	run_dump_test forward
     }
 }

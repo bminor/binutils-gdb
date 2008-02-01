@@ -1,3 +1,9 @@
+2008-01-31  Marc Gauthier  <marc@tensilica.com>
+
+	* gas/all/gas.exp: Recognize Xtensa processor variants.
+	* gas/elf/elf.exp: Likewise.
+	* gas/lns/lns.exp: Likewise.
+
 2008-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/cfi/cfi-alpha-1.d: Replace DW_CFA_def_cfa_reg with

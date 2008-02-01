@@ -5,7 +5,7 @@
 #xfail: "dlx-*-*" "fr30-*-*" "frv-*-*" "hppa*-*-*" "h8300-*-*" "score-*-*"
 #xfail: "i370-*-*" "i860-*-*" "i960-*-*" "ip2k-*-*" "iq2000-*-*"
 #xfail: "mcore-*-*" "mn102*-*-*" "mips*-*-*" "ms1-*-*" "msp430-*-*"
-#xfail: "or32-*-*" "pj-*-*" "sparc*-*-*" "vax-*-*" "xstormy16-*-*" "xtensa-*-*"
+#xfail: "or32-*-*" "pj-*-*" "sparc*-*-*" "vax-*-*" "xstormy16-*-*" "xtensa*-*-*"
 
 .*:     file format .*elf.*
 

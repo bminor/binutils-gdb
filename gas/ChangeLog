@@ -1,3 +1,7 @@
+2008-01-31  Marc Gauthier  <marc@tensilica.com>
+
+	* configure.tgt (xtensa*-*-*): Recognize processor variants.
+
 2008-01-25  Kai Tietz  <kai.tietz@onevision.com>
 
 	* read.c: (emit_expr): Correct for mingw use of printf size 
