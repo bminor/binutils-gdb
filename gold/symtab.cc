@@ -749,8 +749,11 @@ Symbol_table::add_from_dynobj(
     {
       elfcpp::Sym<size, big_endian> sym(p);
 
-      // Ignore symbols with local binding.
-      if (sym.get_st_bind() == elfcpp::STB_LOCAL)
+      // Ignore symbols with local binding or that have
+      // internal or hidden visibility.
+      if (sym.get_st_bind() == elfcpp::STB_LOCAL
+          || sym.get_st_visibility() == elfcpp::STV_INTERNAL
+          || sym.get_st_visibility() == elfcpp::STV_HIDDEN)
 	continue;
 
       unsigned int st_name = sym.get_st_name();
