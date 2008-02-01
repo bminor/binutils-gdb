@@ -971,6 +971,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  struct value *arg = args[argno];
 	  struct type *type = check_typedef (value_type (arg));
 	  const bfd_byte *val = value_contents (arg);
+
 	  if (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) <= 8)
 	    {
 	      /* Floats and Doubles go in f1 .. f13.  They also
@@ -978,40 +979,53 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	         memory.  */
 	      if (write_pass)
 		{
+		  gdb_byte regval[MAX_REGISTER_SIZE];
+		  const gdb_byte *p;
+
+		  /* Version 1.7 of the 64-bit PowerPC ELF ABI says:
+
+		     "Single precision floating point values are mapped to
+		     the first word in a single doubleword."
+
+		     And version 1.9 says:
+
+		     "Single precision floating point values are mapped to
+		     the second word in a single doubleword."
+
+		     GDB then writes single precision floating point values
+		     at both words in a doubleword, to support both ABIs.  */
+		  if (TYPE_LENGTH (type) == 4)
+		    {
+		      memcpy (regval, val, 4);
+		      memcpy (regval + 4, val, 4);
+		      p = regval;
+		    }
+		  else
+		    p = val;
+
+		  /* Write value in the stack's parameter save area.  */
+		  write_memory (gparam, p, 8);
+
 		  if (freg <= 13)
 		    {
-		      gdb_byte regval[MAX_REGISTER_SIZE];
 		      struct type *regtype
                         = register_type (gdbarch, tdep->ppc_fp0_regnum);
+
 		      convert_typed_floating (val, type, regval, regtype);
 		      regcache_cooked_write (regcache,
                                              tdep->ppc_fp0_regnum + freg,
 					     regval);
 		    }
 		  if (greg <= 10)
-		    {
-		      /* The ABI states "Single precision floating
-		         point values are mapped to the first word in
-		         a single doubleword" and "... floating point
-		         values mapped to the first eight doublewords
-		         of the parameter save area are also passed in
-		         general registers").
-
-		         This code interprets that to mean: store it,
-		         left aligned, in the general register.  */
-		      gdb_byte regval[MAX_REGISTER_SIZE];
-		      memset (regval, 0, sizeof regval);
-		      memcpy (regval, val, TYPE_LENGTH (type));
-		      regcache_cooked_write (regcache,
-					     tdep->ppc_gp0_regnum + greg,
-					     regval);
-		    }
-		  write_memory (gparam, val, TYPE_LENGTH (type));
+		    regcache_cooked_write (regcache,
+					   tdep->ppc_gp0_regnum + greg,
+					   regval);
 		}
-	      /* Always consume parameter stack space.  */
+
 	      freg++;
 	      greg++;
-	      gparam = align_up (gparam + TYPE_LENGTH (type), tdep->wordsize);
+	      /* Always consume parameter stack space.  */
+	      gparam = align_up (gparam + 8, tdep->wordsize);
 	    }
 	  else if (TYPE_CODE (type) == TYPE_CODE_FLT
 		   && TYPE_LENGTH (type) == 16

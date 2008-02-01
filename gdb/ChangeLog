@@ -1,3 +1,9 @@
+2008-02-01  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Write 32-bit
+	float in both first and second word in the doubleword, to support
+	old and new ABIs.
+
 2008-02-01  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Properly rethrow exception.  This fixes errors
