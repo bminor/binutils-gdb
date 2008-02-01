@@ -181,6 +181,18 @@ proc test_error {} {
     mi_gdb_test "-break-insert function_that_does_not_exist" \
         ".*\\^error,msg=\"Function \\\\\"function_that_does_not_exist\\\\\" not defined.\"" \
         "breakpoint at nonexistent function"
+
+    # We used to have a bug whereby -break-insert that failed would not
+    # clear some event hooks.  As result, whenever we evaluate expression
+    # containing function call, the internal breakpoint created to handle
+    # function call would be reported, messing up MI output.
+    mi_gdb_test "-var-create V * return_1()" \
+        "\\^done,name=\"V\",numchild=\"0\",value=\"1\",type=\"int\"" \
+        "create varobj for function call"
+
+    mi_gdb_test "-var-update *" \
+        "\\^done,changelist=\\\[\\\]" \
+        "update varobj for function call"    
 }
 
 test_tbreak_creation_and_listing

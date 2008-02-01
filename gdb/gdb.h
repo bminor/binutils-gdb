@@ -47,13 +47,6 @@ enum gdb_rc {
 enum gdb_rc gdb_breakpoint_query (struct ui_out *uiout, int bnum,
 				  char **error_message);
 
-/* Create a breakpoint at ADDRESS (a GDB source and line). */
-enum gdb_rc gdb_breakpoint (char *address, char *condition,
-			    int hardwareflag, int tempflag,
-			    int thread, int ignore_count,
-			    int pending,
-			    char **error_message);
-
 /* Switch thread and print notification. */
 enum gdb_rc gdb_thread_select (struct ui_out *uiout, char *tidstr,
 			       char **error_message);

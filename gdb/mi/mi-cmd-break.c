@@ -26,6 +26,7 @@
 #include "mi-getopt.h"
 #include "gdb-events.h"
 #include "gdb.h"
+#include "exceptions.h"
 
 enum
   {
@@ -69,7 +70,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   int ignore_count = 0;
   char *condition = NULL;
   int pending = 0;
-  enum gdb_rc rc;
+  struct gdb_exception e;
   struct gdb_events *old_hooks;
   enum opt
     {
@@ -132,41 +133,42 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 
   /* Now we have what we need, let's insert the breakpoint! */
   old_hooks = deprecated_set_gdb_event_hooks (&breakpoint_hooks);
-  switch (type)
+  /* Make sure we restore hooks even if exception is thrown.  */
+  TRY_CATCH (e, RETURN_MASK_ALL)
     {
-    case REG_BP:
-      rc = gdb_breakpoint (address, condition,
-			   0 /*hardwareflag */ , temp_p,
-			   thread, ignore_count,
-			   pending,
-			   &mi_error_message);
-      break;
-    case HW_BP:
-      rc = gdb_breakpoint (address, condition,
-			   1 /*hardwareflag */ , temp_p,
-			   thread, ignore_count,
-			   pending,
-			   &mi_error_message);
-      break;
+      switch (type)
+	{
+	case REG_BP:
+	  set_breakpoint (address, condition,
+			  0 /*hardwareflag */ , temp_p,
+			  thread, ignore_count,
+			  pending);
+	  break;
+	case HW_BP:
+	  set_breakpoint (address, condition,
+			  1 /*hardwareflag */ , temp_p,
+			  thread, ignore_count,
+			  pending);
+	  break;
 #if 0
-    case REGEXP_BP:
-      if (temp_p)
-	error (_("mi_cmd_break_insert: Unsupported tempoary regexp breakpoint"));
-      else
-	rbreak_command_wrapper (address, FROM_TTY);
-      return MI_CMD_DONE;
-      break;
+	case REGEXP_BP:
+	  if (temp_p)
+	    error (_("mi_cmd_break_insert: Unsupported tempoary regexp breakpoint"));
+	  else
+	    rbreak_command_wrapper (address, FROM_TTY);
+	  return MI_CMD_DONE;
+	  break;
 #endif
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("mi_cmd_break_insert: Bad switch."));
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  _("mi_cmd_break_insert: Bad switch."));
+	}
     }
   deprecated_set_gdb_event_hooks (old_hooks);
+  if (e.reason < 0)
+    throw_exception (e);
 
-  if (rc == GDB_RC_FAIL)
-    return MI_CMD_ERROR;
-  else
-    return MI_CMD_DONE;
+  return MI_CMD_DONE;
 }
 
 enum wp_type

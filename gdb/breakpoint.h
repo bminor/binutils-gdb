@@ -710,6 +710,11 @@ extern void awatch_command_wrapper (char *, int);
 extern void rwatch_command_wrapper (char *, int);
 extern void tbreak_command (char *, int);
 
+extern void set_breakpoint (char *address, char *condition,
+			    int hardwareflag, int tempflag,
+			    int thread, int ignore_count,
+			    int pending);
+
 extern void insert_breakpoints (void);
 
 extern int remove_breakpoints (void);

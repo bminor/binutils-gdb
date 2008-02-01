@@ -90,7 +90,7 @@ static void watch_command (char *, int);
 
 static int can_use_hardware_watchpoint (struct value *);
 
-static int break_command_1 (char *, int, int);
+static void break_command_1 (char *, int, int);
 
 static void mention (struct breakpoint *);
 
@@ -5285,7 +5285,7 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
    and thread specified by the COND_STRING and THREAD
    parameters.  */
 
-static int
+static void
 break_command_really (char *arg, char *cond_string, int thread,
 		      int parse_condition_and_thread,
 		      int tempflag, int hardwareflag, 
@@ -5323,8 +5323,7 @@ break_command_really (char *arg, char *cond_string, int thread,
   switch (e.reason)
     {
     case RETURN_QUIT:
-      exception_print (gdb_stderr, e);
-      return e.reason;
+      throw_exception (e);
     case RETURN_ERROR:
       switch (e.error)
 	{
@@ -5342,7 +5341,7 @@ break_command_really (char *arg, char *cond_string, int thread,
 	     selects no, then simply return the error code.  */
 	  if (pending_break_support == AUTO_BOOLEAN_AUTO && 
 	      !nquery ("Make breakpoint pending on future shared library load? "))
-	    return e.reason;
+	    return;
 
 	  /* At this point, either the user was queried about setting
 	     a pending breakpoint and selected yes, or pending
@@ -5356,12 +5355,11 @@ break_command_really (char *arg, char *cond_string, int thread,
 	  pending = 1;
 	  break;
 	default:
-	  exception_print (gdb_stderr, e);
-	  return e.reason;
+	  throw_exception (e);
 	}
     default:
       if (!sals.nelts)
-	return GDB_RC_FAIL;
+	return;
     }
 
   /* Create a chain of things that always need to be cleaned up. */
@@ -5457,8 +5455,6 @@ break_command_really (char *arg, char *cond_string, int thread,
   discard_cleanups (breakpoint_chain);
   /* But cleanup everything else. */
   do_cleanups (old_chain);
-
-  return GDB_RC_OK;
 }
 
 /* Set a breakpoint. 
@@ -5468,34 +5464,33 @@ break_command_really (char *arg, char *cond_string, int thread,
    and if breakpoint is temporary, using BP_HARDWARE_FLAG
    and BP_TEMPFLAG.  */
    
-static int
+static void
 break_command_1 (char *arg, int flag, int from_tty)
 {
   int hardwareflag = flag & BP_HARDWAREFLAG;
   int tempflag = flag & BP_TEMPFLAG;
 
-  return break_command_really (arg, 
-			       NULL, 0, 1 /* parse arg */,
-			       tempflag, hardwareflag,
-			       0 /* Ignore count */,
-			       pending_break_support, from_tty);
+  break_command_really (arg, 
+			NULL, 0, 1 /* parse arg */,
+			tempflag, hardwareflag,
+			0 /* Ignore count */,
+			pending_break_support, from_tty);
 }
 
 
-enum gdb_rc
-gdb_breakpoint (char *address, char *condition,
+void
+set_breakpoint (char *address, char *condition,
 		int hardwareflag, int tempflag,
 		int thread, int ignore_count,
-		int pending,
-		char **error_message)
+		int pending)
 {
-  return break_command_really (address, condition, thread,
-			       0 /* condition and thread are valid.  */,
-			       tempflag, hardwareflag,
-			       ignore_count,
-			       pending 
-			       ? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
-			       0);
+  break_command_really (address, condition, thread,
+			0 /* condition and thread are valid.  */,
+			tempflag, hardwareflag,
+			ignore_count,
+			pending 
+			? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
+			0);
 }
 
 

@@ -51,6 +51,11 @@ void callme (int i)
   printf ("callme\n");
 }
 
+int return_1 ()
+{
+  return 1;
+}
+
 main ()
 {
   callee1 (2, "A string argument.", 3.5);

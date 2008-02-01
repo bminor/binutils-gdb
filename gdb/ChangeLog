@@ -1,3 +1,17 @@
+2008-02-01  Vladimir Prus  <vladimir@codesourcery.com>
+	
+        * breakpoint.c (break_command_1): Return void.
+        (break_command_really): Return void.  Rethrow
+        exceptions instead of returning.
+        (gdb_breakpoint): Remove the error_message parameter.
+        Return void.  Rename to set_breakpoint.
+        * gdb.h (gdb_breakpoint): Rename and move to...
+	* breakpoint.h (set_breakpoint): ...here.
+        * mi/mi-cmb-break.c (mi_cmd_break_insert): Restore
+        event hooks even if exception is thrown.  Adjust to
+        gdb_breakpoint interface changes.
+	
+
 2008-02-01  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Write 32-bit
