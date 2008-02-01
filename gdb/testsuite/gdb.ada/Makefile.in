@@ -11,6 +11,7 @@ EXECUTABLES = \
   exec_changed/second \
   fixed_points/fixed_points \
   frame_args/foo \
+  nested/hello \
   null_record/null_record \
   packed_array/pa \
   print_chars/foo \

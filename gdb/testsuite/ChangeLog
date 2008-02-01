@@ -1,3 +1,9 @@
+2007-12-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/nested/hello.adb: New file.
+	* gdb.ada/nested.exp: New testcase.
+	* gdb.ada/Makefile.in (EXECUTABLES): Update list.
+
 2008-02-01  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/basic.c (return_1): New function.
