@@ -1898,8 +1898,12 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
   switch (pdi->tag)
     {
     case DW_TAG_subprogram:
-      if (pdi->is_external)
+      if (pdi->is_external || cu->language == language_ada)
 	{
+          /* brobecker/2007-12-26: Normally, only "external" DIEs are part
+             of the global scope.  But in Ada, we want to be able to access
+             nested procedures globally.  So all Ada subprograms are stored
+             in the global scope.  */
 	  /*prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
 	     mst_text, objfile); */
 	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
@@ -7296,8 +7300,15 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     finish_block.  */
 	  SYMBOL_CLASS (sym) = LOC_BLOCK;
 	  attr2 = dwarf2_attr (die, DW_AT_external, cu);
-	  if (attr2 && (DW_UNSND (attr2) != 0))
+	  if ((attr2 && (DW_UNSND (attr2) != 0))
+              || cu->language == language_ada)
 	    {
+              /* Subprograms marked external are stored as a global symbol.
+                 Ada subprograms, whether marked external or not, are always
+                 stored as a global symbol, because we want to be able to
+                 access them globally.  For instance, we want to be able
+                 to break on a nested subprogram without having to
+                 specify the context.  */
 	      add_symbol_to_list (sym, &global_symbols);
 	    }
 	  else
