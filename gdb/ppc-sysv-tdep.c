@@ -129,17 +129,21 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		}
 	      else
 		{
-		  /* SysV ABI converts floats to doubles before
-		     writing them to an 8 byte aligned stack location.  */
-		  argoffset = align_up (argoffset, 8);
+		  /* The SysV ABI tells us to convert floats to
+		     doubles before writing them to an 8 byte aligned
+		     stack location.  Unfortunately GCC does not do
+		     that, and stores floats into 4 byte aligned
+		     locations without converting them to doubles.
+		     Since there is no know compiler that actually
+		     follows the ABI here, we implement the GCC
+		     convention.  */
+
+		  /* Align to 4 bytes or 8 bytes depending on the type of
+		     the argument (float or double).  */
+		  argoffset = align_up (argoffset, len);
 		  if (write_pass)
-		    {
-		      char memval[8];
-		      convert_typed_floating (val, type, memval,
-					      builtin_type_ieee_double);
 		      write_memory (sp + argoffset, val, len);
-		    }
-		  argoffset += 8;
+		  argoffset += len;
 		}
 	    }
 	  else if (TYPE_CODE (type) == TYPE_CODE_FLT

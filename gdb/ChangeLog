@@ -1,3 +1,10 @@
+2008-02-02  Mark Kettenis  <kettenis@gnu.org>
+	    Luis Machado  <luisgpm@br.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>	
+
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Pass floats that
+	don't fit into registerson the stack the way GCC does.
+
 2008-02-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* symtab.c (symbol_set_names): Do not add an entry in the demangling
