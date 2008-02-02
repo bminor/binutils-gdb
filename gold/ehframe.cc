@@ -561,12 +561,10 @@ Eh_frame::add_ehframe_input_section(
        p != new_cies.end();
        ++p)
     {
-      uint64_t zero = 0;
       if (p->second)
-	this->cie_offsets_.insert(std::make_pair(p->first, zero));
+	this->cie_offsets_.insert(p->first);
       else
-	this->unmergeable_cie_offsets_.push_back(std::make_pair(p->first,
-								zero));
+	this->unmergeable_cie_offsets_.push_back(p->first);
     }
 
   return true;
@@ -875,7 +873,7 @@ Eh_frame::read_cie(Sized_relobj<size, big_endian>* object,
     {
       Cie_offsets::iterator find_cie = this->cie_offsets_.find(&cie);
       if (find_cie != this->cie_offsets_.end())
-	cie_pointer = find_cie->first;
+	cie_pointer = *find_cie;
       else
 	{
 	  // See if we already saw this CIE in this object file.
@@ -990,11 +988,11 @@ Eh_frame::fde_count() const
 	 this->unmergeable_cie_offsets_.begin();
        p != this->unmergeable_cie_offsets_.end();
        ++p)
-    ret += p->first->fde_count();
+    ret += (*p)->fde_count();
   for (Cie_offsets::const_iterator p = this->cie_offsets_.begin();
        p != this->cie_offsets_.end();
        ++p)
-    ret += p->first->fde_count();
+    ret += (*p)->fde_count();
   return ret;
 }
 
@@ -1003,29 +1001,22 @@ Eh_frame::fde_count() const
 void
 Eh_frame::set_final_data_size()
 {
-  off_t start_file_offset = this->offset();
   section_offset_type output_offset = 0;
 
   for (Unmergeable_cie_offsets::iterator p =
 	 this->unmergeable_cie_offsets_.begin();
        p != this->unmergeable_cie_offsets_.end();
        ++p)
-    {
-      p->second = start_file_offset + output_offset;
-      output_offset = p->first->set_output_offset(output_offset,
-						  this->addralign(),
-						  &this->merge_map_);
-    }
+    output_offset = (*p)->set_output_offset(output_offset,
+					    this->addralign(),
+					    &this->merge_map_);
 
   for (Cie_offsets::iterator p = this->cie_offsets_.begin();
        p != this->cie_offsets_.end();
        ++p)
-    {
-      p->second = start_file_offset + output_offset;
-      output_offset = p->first->set_output_offset(output_offset,
-						  this->addralign(),
-						  &this->merge_map_);
-    }
+    output_offset = (*p)->set_output_offset(output_offset,
+					    this->addralign(),
+					    &this->merge_map_);
 
   gold_assert((output_offset & (this->addralign() - 1)) == 0);
   this->set_data_size(output_offset);
@@ -1114,11 +1105,11 @@ Eh_frame::do_sized_write(unsigned char* oview)
 	 this->unmergeable_cie_offsets_.begin();
        p != this->unmergeable_cie_offsets_.end();
        ++p)
-    o = p->first->write<size, big_endian>(oview, o, this->eh_frame_hdr_);
+    o = (*p)->write<size, big_endian>(oview, o, this->eh_frame_hdr_);
   for (Cie_offsets::iterator p = this->cie_offsets_.begin();
        p != this->cie_offsets_.end();
        ++p)
-    o = p->first->write<size, big_endian>(oview, o, this->eh_frame_hdr_);
+    o = (*p)->write<size, big_endian>(oview, o, this->eh_frame_hdr_);
 }
 
 #ifdef HAVE_TARGET_32_LITTLE

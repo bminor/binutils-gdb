@@ -23,6 +23,10 @@
 #ifndef GOLD_EHFRAME_H
 #define GOLD_EHFRAME_H
 
+#include <map>
+#include <set>
+#include <vector>
+
 #include "output.h"
 #include "merge.h"
 
@@ -343,11 +347,11 @@ class Eh_frame : public Output_section_data
     { return *cie1 < *cie2; }
   };
 
-  // A mapping from unique CIEs to their offset in the output file.
-  typedef std::map<Cie*, uint64_t, Cie_less> Cie_offsets;
+  // A set of unique CIEs.
+  typedef std::set<Cie*, Cie_less> Cie_offsets;
 
-  // A list of unmergeable CIEs with their offsets.
-  typedef std::vector<std::pair<Cie*, uint64_t> > Unmergeable_cie_offsets;
+  // A list of unmergeable CIEs.
+  typedef std::vector<Cie*> Unmergeable_cie_offsets;
 
   // A mapping from offsets to CIEs.  This is used while reading an
   // input section.
