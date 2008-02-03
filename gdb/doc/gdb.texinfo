@@ -1651,7 +1651,7 @@ all the sub-commands.  @xref{Index}.
 @kindex i @r{(@code{info})}
 @item info
 This command (abbreviated @code{i}) is for describing the state of your
-program.  For example, you can list the arguments given to your program
+program.  For example, you can show the arguments passed to a function
 with @code{info args}, list the registers currently in use with @code{info
 registers}, or list the breakpoints you have set with @code{info breakpoints}.
 You can get a complete list of the @code{info} sub-commands with
