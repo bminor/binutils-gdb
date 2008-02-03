@@ -207,8 +207,6 @@ extern struct symtab *allocate_symtab (char *, struct objfile *);
 
 extern int free_named_symtabs (char *);
 
-extern void fill_in_vptr_fieldno (struct type *);
-
 extern void add_symtab_fns (struct sym_fns *);
 
 extern void syms_from_objfile (struct objfile *,

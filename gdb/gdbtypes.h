@@ -375,7 +375,9 @@ struct main_type
   /* Field number of the virtual function table pointer in
      VPTR_BASETYPE.  If -1, we were unable to find the virtual
      function table pointer in initial symbol reading, and
-     fill_in_vptr_fieldno should be called to find it if possible.
+     get_vptr_fieldno should be called to find it if possible.
+     get_vptr_fieldno will update this field if possible.
+     Otherwise the value is left at -1.
 
      Unused if this type does not have virtual functions.  */
 
@@ -1274,7 +1276,7 @@ extern struct type *lookup_typename (char *, struct block *, int);
 extern struct type *lookup_template_type (char *, struct type *,
 					  struct block *);
 
-extern void fill_in_vptr_fieldno (struct type *);
+extern int get_vptr_fieldno (struct type *, struct type **);
 
 extern int get_destructor_fn_field (struct type *, int *, int *);
 

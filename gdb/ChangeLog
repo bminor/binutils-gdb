@@ -1,3 +1,13 @@
+2008-02-03  Doug Evans  <dje@google.com>
+
+	PR 2384
+	* gdbtypes.c (get_vptr_fieldno): Renamed from fill_in_vptr_fieldno.
+	Return basetype, fieldno if found.  All callers updated.
+	Don't cache TYPE_VPTR_FIELDNO, TYPE_VPTR_BASETYPE if from different
+	objfile.
+	* gdbtypes.h (get_vptr_fieldno): Renamed from fill_in_vptr_fieldno.
+	* symfile.h (fill_in_vptr_fieldno): Delete.
+
 2008-02-02  Doug Evans  <dje@google.com>
 
 	* valarith.c (value_binop): Handle unsigned BINOP_REM division by zero.

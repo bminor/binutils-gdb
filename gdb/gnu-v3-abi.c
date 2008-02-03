@@ -201,6 +201,8 @@ gnuv3_rtti_type (struct value *value,
   struct type *run_time_type;
   struct type *base_type;
   LONGEST offset_to_top;
+  struct type *values_type_vptr_basetype;
+  int values_type_vptr_fieldno;
 
   /* We only have RTTI for class objects.  */
   if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
@@ -208,8 +210,9 @@ gnuv3_rtti_type (struct value *value,
 
   /* If we can't find the virtual table pointer for values_type, we
      can't find the RTTI.  */
-  fill_in_vptr_fieldno (values_type);
-  if (TYPE_VPTR_FIELDNO (values_type) == -1)
+  values_type_vptr_fieldno = get_vptr_fieldno (values_type,
+					       &values_type_vptr_basetype);
+  if (values_type_vptr_fieldno == -1)
     return NULL;
 
   if (using_enc_p)
@@ -217,7 +220,7 @@ gnuv3_rtti_type (struct value *value,
 
   /* Fetch VALUE's virtual table pointer, and tweak it to point at
      an instance of our imaginary gdb_gnu_v3_abi_vtable structure.  */
-  base_type = check_typedef (TYPE_VPTR_BASETYPE (values_type));
+  base_type = check_typedef (values_type_vptr_basetype);
   if (values_type != base_type)
     {
       value = value_cast (base_type, value);
@@ -225,7 +228,7 @@ gnuv3_rtti_type (struct value *value,
 	*using_enc_p = 1;
     }
   vtable_address
-    = value_as_address (value_field (value, TYPE_VPTR_FIELDNO (values_type)));
+    = value_as_address (value_field (value, values_type_vptr_fieldno));
   vtable = value_at_lazy (vtable_type,
                           vtable_address - vtable_address_point_offset ());
   
@@ -381,6 +384,7 @@ gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
   struct value *offset_val, *vbase_array;
   CORE_ADDR vtable_address;
   long int cur_base_offset, base_offset;
+  int vbasetype_vptr_fieldno;
 
   /* If it isn't a virtual base, this is easy.  The offset is in the
      type definition.  */
@@ -414,11 +418,10 @@ gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
      we have debugging information for that baseclass.  */
 
   vbasetype = TYPE_VPTR_BASETYPE (type);
-  if (TYPE_VPTR_FIELDNO (vbasetype) < 0)
-    fill_in_vptr_fieldno (vbasetype);
+  vbasetype_vptr_fieldno = get_vptr_fieldno (vbasetype, NULL);
 
-  if (TYPE_VPTR_FIELDNO (vbasetype) >= 0
-      && TYPE_FIELD_BITPOS (vbasetype, TYPE_VPTR_FIELDNO (vbasetype)) != 0)
+  if (vbasetype_vptr_fieldno >= 0
+      && TYPE_FIELD_BITPOS (vbasetype, vbasetype_vptr_fieldno) != 0)
     error (_("Illegal vptr offset in class %s"),
 	   TYPE_NAME (vbasetype) ? TYPE_NAME (vbasetype) : "<unknown>");
 

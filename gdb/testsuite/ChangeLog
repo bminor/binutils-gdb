@@ -1,3 +1,10 @@
+2008-02-03  Doug Evans  <dje@google.com>
+
+	* gdb.cp/gdb2384.exp: New file.
+	* gdb.cp/gdb2384.cc: New file.
+	* gdb.cp/gdb2384-base.h: New file.
+	* gdb.cp/gdb2384-base.cc: New file.
+
 2008-02-02  Doug Evans  <dje@google.com>
 
 	* gdb.base/sigall.c (main): Ensure all signals aren't blocked.

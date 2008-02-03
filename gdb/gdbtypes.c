@@ -1288,15 +1288,19 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
   return (struct type *) -1;	/* For lint */
 }
 
-/* If possible, make the vptr_fieldno and vptr_basetype fields of TYPE
-   valid.  Callers should be aware that in some cases (for example,
+/* Lookup the vptr basetype/fieldno values for TYPE.
+   If found store vptr_basetype in *BASETYPEP if non-NULL, and return
+   vptr_fieldno.  Also, if found and basetype is from the same objfile,
+   cache the results.
+   If not found, return -1 and ignore BASETYPEP.
+   Callers should be aware that in some cases (for example,
    the type or one of its baseclasses is a stub type and we are
    debugging a .o file), this function will not be able to find the
    virtual function table pointer, and vptr_fieldno will remain -1 and
-   vptr_basetype will remain NULL.  */
+   vptr_basetype will remain NULL or incomplete.  */
 
-void
-fill_in_vptr_fieldno (struct type *type)
+int
+get_vptr_fieldno (struct type *type, struct type **basetypep)
 {
   CHECK_TYPEDEF (type);
 
@@ -1308,16 +1312,34 @@ fill_in_vptr_fieldno (struct type *type)
          is virtual (and hence we cannot share the table pointer).  */
       for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
 	{
-	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type,
-								  i));
-	  fill_in_vptr_fieldno (baseclass);
-	  if (TYPE_VPTR_FIELDNO (baseclass) >= 0)
+	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
+	  int fieldno;
+	  struct type *basetype;
+
+	  fieldno = get_vptr_fieldno (baseclass, &basetype);
+	  if (fieldno >= 0)
 	    {
-	      TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (baseclass);
-	      TYPE_VPTR_BASETYPE (type) = TYPE_VPTR_BASETYPE (baseclass);
-	      break;
+	      /* If the type comes from a different objfile we can't cache
+		 it, it may have a different lifetime. PR 2384 */
+	      if (TYPE_OBJFILE (type) == TYPE_OBJFILE (baseclass))
+		{
+		  TYPE_VPTR_FIELDNO (type) = fieldno;
+		  TYPE_VPTR_BASETYPE (type) = basetype;
+		}
+	      if (basetypep)
+		*basetypep = basetype;
+	      return fieldno;
 	    }
 	}
+
+      /* Not found.  */
+      return -1;
+    }
+  else
+    {
+      if (basetypep)
+	*basetypep = TYPE_VPTR_BASETYPE (type);
+      return TYPE_VPTR_FIELDNO (type);
     }
 }
 

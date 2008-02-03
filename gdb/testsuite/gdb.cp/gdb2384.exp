@@ -1,0 +1,100 @@
+# Copyright 2007 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# When gdb resolves type information for class "derived" from objfile
+# gdb2384, it use to fill in the TYPE_VPTR_BASETYPE field with class "base"
+# from objfile gdb2384-base.so.  When the program is rerun the type
+# information for base-in-so-base.so is discarded leaving
+# TYPE_VPTR_BASETYPE dangling.
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+if { [skip_cplus_tests] } { continue }
+if { [skip_shlib_tests] } { continue }
+
+set prms_id 2384
+set bug_id 0
+
+set testfile "gdb2384"
+set srcfile ${testfile}.cc
+set binfile $objdir/$subdir/$testfile
+
+set libfile "gdb2384-base"
+set libsrcfile ${libfile}.cc
+set sofile $objdir/$subdir/${libfile}.so
+
+# Create and source the file that provides information about the compiler
+# used to compile the test case.
+if [get_compiler_info ${binfile} "c++"] {
+    return -1
+}
+
+if { [gdb_compile_shlib $srcdir/$subdir/$libsrcfile $sofile {debug c++}] != ""
+     || [gdb_compile $srcdir/$subdir/$srcfile $binfile executable [list debug "c++" shlib=${sofile}]] != ""} {
+    untested gdb2384.exp
+    return -1
+}
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+gdb_load_shlibs ${sofile}
+
+set bp_location [gdb_get_line_number "set breakpoint here"]
+
+# Set a breakpoint with multiple locations.
+
+gdb_test "break $srcfile:$bp_location" \
+    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "set breakpoint"
+
+gdb_run_cmd
+gdb_expect {
+    -re "Breakpoint \[0-9\]+,.*main \\(.*\\).*$gdb_prompt $" {
+	pass "run to breakpoint"
+    }
+    -re "$gdb_prompt $" {
+	fail "run to breakpoint"
+    }
+    timeout {
+	fail "run to breakpoint (timeout)"
+    }
+}
+
+gdb_test "print d.meth ()" \
+    ".*42.*" \
+    "print d.meth ()"
+
+# Now try again.  gdb's without the fix will hopefully segv here
+
+gdb_run_cmd
+gdb_expect {
+    -re "Breakpoint \[0-9\]+,.*main \\(.*\\).*$gdb_prompt $" {
+	pass "run to breakpoint #2"
+    }
+    -re "$gdb_prompt $" {
+	fail "run to breakpoint #2"
+    }
+    timeout {
+	fail "run to breakpoint #2 (timeout)"
+    }
+}
+
+gdb_test "print d.meth ()" \
+    ".*42.*" \
+    "gdb2384"
