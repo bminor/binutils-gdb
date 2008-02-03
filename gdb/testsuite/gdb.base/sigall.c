@@ -1581,6 +1581,18 @@ main ()
   set_debug_traps ();
   breakpoint ();
 #endif
+
+#ifdef SIG_SETMASK
+  /* Ensure all the signals aren't blocked.
+     The environment in which the testsuite is run may have blocked some
+     for whatever reason.  */
+  {
+    sigset_t newset;
+    sigemptyset (&newset);
+    sigprocmask (SIG_SETMASK, &newset, NULL);
+  }
+#endif
+
   signal (SIGABRT, handle_ABRT);
 #ifdef SIGHUP
   signal (SIGHUP, handle_HUP);
