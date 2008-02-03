@@ -1,5 +1,7 @@
 2008-02-02  Doug Evans  <dje@google.com>
 
+	* valarith.c (value_binop): Handle unsigned BINOP_REM division by zero.
+
 	* typeprint.c (*): Whitespace cleanup.
 
 2008-02-02  Mark Kettenis  <kettenis@gnu.org>
