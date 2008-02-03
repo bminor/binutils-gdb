@@ -1,3 +1,7 @@
+2008-02-02  Doug Evans  <dje@google.com>
+
+	* typeprint.c (*): Whitespace cleanup.
+
 2008-02-02  Mark Kettenis  <kettenis@gnu.org>
 	    Luis Machado  <luisgpm@br.ibm.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>	

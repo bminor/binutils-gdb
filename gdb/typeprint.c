@@ -133,10 +133,9 @@ whatis_exp (char *exp, int show)
 
   if (objectprint)
     {
-      if (((TYPE_CODE (type) == TYPE_CODE_PTR) ||
-           (TYPE_CODE (type) == TYPE_CODE_REF))
-          &&
-          (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
+      if (((TYPE_CODE (type) == TYPE_CODE_PTR)
+	   || (TYPE_CODE (type) == TYPE_CODE_REF))
+	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
         {
           real_type = value_rtti_target_type (val, &full, &top, &using_enc);
           if (real_type)
@@ -148,7 +147,7 @@ whatis_exp (char *exp, int show)
             }
         }
       else if (TYPE_CODE (type) == TYPE_CODE_CLASS)
-  real_type = value_rtti_type (val, &full, &top, &using_enc);
+	real_type = value_rtti_type (val, &full, &top, &using_enc);
     }
 
   printf_filtered ("type = ");
@@ -196,7 +195,7 @@ ptype_command (char *typename, int from_tty)
    currently use it, and it wasn't clear if it really belonged somewhere
    else (like printcmd.c).  There are a lot of other gdb routines that do
    something similar, but they are generally concerned with printing values
-   that come from the inferior in target byte order and target size. */
+   that come from the inferior in target byte order and target size.  */
 
 void
 print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
@@ -271,7 +270,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 
 /* Dump details of a type specified either directly or indirectly.
    Uses the same sort of type lookup mechanism as ptype_command()
-   and whatis_command(). */
+   and whatis_command().  */
 
 void
 maintenance_print_type (char *typename, int from_tty)
@@ -309,7 +308,6 @@ maintenance_print_type (char *typename, int from_tty)
 void
 _initialize_typeprint (void)
 {
-
   add_com ("ptype", class_vars, ptype_command, _("\
 Print definition of type TYPE.\n\
 Argument may be a type name defined by typedef, or \"struct STRUCT-TAG\"\n\
@@ -318,5 +316,4 @@ The selected stack frame's lexical context is used to look up the name."));
 
   add_com ("whatis", class_vars, whatis_command,
 	   _("Print data type of expression EXP."));
-
 }
