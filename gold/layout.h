@@ -260,17 +260,35 @@ class Layout
   void
   print_stats() const;
 
-  // The list of segments.
+  // A list of segments.
 
   typedef std::vector<Output_segment*> Segment_list;
 
-  // The list of sections not attached to a segment.
+  // A list of sections.
 
   typedef std::vector<Output_section*> Section_list;
 
   // The list of information to write out which is not attached to
   // either a section or a segment.
   typedef std::vector<Output_data*> Data_list;
+
+  // Store the allocated sections into the section list.  This is used
+  // by the linker script code.
+  void
+  get_allocated_sections(Section_list*) const;
+
+  // Make a segment.  This is used by the linker script code.
+  Output_segment*
+  make_output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags);
+
+  // Return the number of segments.
+  size_t
+  segment_count() const
+  { return this->segment_list_.size(); }
+
+  // Map from section flags to segment flags.
+  static elfcpp::Elf_Word
+  section_flags_to_segment(elfcpp::Elf_Xword flags);
 
  private:
   Layout(const Layout&);
@@ -376,6 +394,12 @@ class Layout
   get_output_section(const char* name, Stringpool::Key name_key,
 		     elfcpp::Elf_Word type, elfcpp::Elf_Xword flags);
 
+  // Choose the output section for NAME in RELOBJ.
+  Output_section*
+  choose_output_section(const Relobj* relobj, const char* name,
+			elfcpp::Elf_Word type, elfcpp::Elf_Xword flags,
+			bool adjust_name);
+
   // Create a new Output_section.
   Output_section*
   make_output_section(const char* name, elfcpp::Elf_Word type,
@@ -405,13 +429,13 @@ class Layout
   unsigned int
   set_section_indexes(unsigned int pshndx);
 
+  // Set the section addresses when using a script.
+  Output_segment*
+  set_section_addresses_from_script(Symbol_table*);
+
   // Return whether SEG1 comes before SEG2 in the output file.
   static bool
   segment_precedes(const Output_segment* seg1, const Output_segment* seg2);
-
-  // Map from section flags to segment flags.
-  static elfcpp::Elf_Word
-  section_flags_to_segment(elfcpp::Elf_Xword flags);
 
   // A mapping used for group signatures.
   typedef Unordered_map<std::string, bool> Signatures;

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-01-09 11:37-0800\n"
+"POT-Creation-Date: 2008-02-01 22:48-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,7 +61,7 @@ msgstr ""
 msgid "%s: member at %zu is not an ELF object"
 msgstr ""
 
-#: compressed_output.cc:126
+#: compressed_output.cc:127
 msgid "not compressing section data: zlib error"
 msgstr ""
 
@@ -70,115 +70,115 @@ msgstr ""
 msgid "%s: can not read directory: %s"
 msgstr ""
 
-#: dynobj.cc:145
+#: dynobj.cc:147
 #, c-format
 msgid "unexpected duplicate type %u section: %u, %u"
 msgstr ""
 
-#: dynobj.cc:181
+#: dynobj.cc:183
 #, c-format
 msgid "unexpected link in section %u header: %u != %u"
 msgstr ""
 
-#: dynobj.cc:217
+#: dynobj.cc:219
 #, c-format
 msgid "DYNAMIC section %u link out of range: %u"
 msgstr ""
 
-#: dynobj.cc:225
+#: dynobj.cc:227
 #, c-format
 msgid "DYNAMIC section %u link %u is not a strtab"
 msgstr ""
 
-#: dynobj.cc:253
+#: dynobj.cc:255
 #, c-format
 msgid "DT_SONAME value out of range: %lld >= %lld"
 msgstr ""
 
-#: dynobj.cc:265
+#: dynobj.cc:267
 #, c-format
 msgid "DT_NEEDED value out of range: %lld >= %lld"
 msgstr ""
 
-#: dynobj.cc:278
+#: dynobj.cc:280
 msgid "missing DT_NULL in dynamic segment"
 msgstr ""
 
-#: dynobj.cc:323
+#: dynobj.cc:325
 #, c-format
 msgid "invalid dynamic symbol table name index: %u"
 msgstr ""
 
-#: dynobj.cc:330
+#: dynobj.cc:332
 #, c-format
 msgid "dynamic symbol table name section has wrong type: %u"
 msgstr ""
 
-#: dynobj.cc:404 object.cc:251 object.cc:589
+#: dynobj.cc:406 object.cc:251 object.cc:589
 #, c-format
 msgid "bad section name offset for section %u: %lu"
 msgstr ""
 
-#: dynobj.cc:433
+#: dynobj.cc:435
 #, c-format
 msgid "duplicate definition for version %u"
 msgstr ""
 
-#: dynobj.cc:462
+#: dynobj.cc:464
 #, c-format
 msgid "unexpected verdef version %u"
 msgstr ""
 
-#: dynobj.cc:478
+#: dynobj.cc:480
 #, c-format
 msgid "verdef vd_cnt field too small: %u"
 msgstr ""
 
-#: dynobj.cc:486
+#: dynobj.cc:488
 #, c-format
 msgid "verdef vd_aux field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:497
+#: dynobj.cc:499
 #, c-format
 msgid "verdaux vda_name field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:507
+#: dynobj.cc:509
 #, c-format
 msgid "verdef vd_next field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:541
+#: dynobj.cc:543
 #, c-format
 msgid "unexpected verneed version %u"
 msgstr ""
 
-#: dynobj.cc:550
+#: dynobj.cc:552
 #, c-format
 msgid "verneed vn_aux field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:564
+#: dynobj.cc:566
 #, c-format
 msgid "vernaux vna_name field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:575
+#: dynobj.cc:577
 #, c-format
 msgid "verneed vna_next field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:586
+#: dynobj.cc:588
 #, c-format
 msgid "verneed vn_next field out of range: %u"
 msgstr ""
 
-#: dynobj.cc:634
+#: dynobj.cc:636
 msgid "size of dynamic symbols is not multiple of symbol size"
 msgstr ""
 
-#: dynobj.cc:1316
+#: dynobj.cc:1355
 #, c-format
 msgid "symbol %s has undefined version %s"
 msgstr ""
@@ -203,64 +203,60 @@ msgstr ""
 msgid "%s: "
 msgstr ""
 
-#: expression.cc:104
+#: expression.cc:113
 #, c-format
 msgid "undefined symbol '%s' referenced in expression"
 msgstr ""
 
-#: expression.cc:427
+#: expression.cc:566
 msgid "DEFINED not implemented"
 msgstr ""
 
-#: expression.cc:433
+#: expression.cc:572
 msgid "SIZEOF_HEADERS not implemented"
 msgstr ""
 
-#: expression.cc:439
+#: expression.cc:578
 msgid "ALIGNOF not implemented"
 msgstr ""
 
-#: expression.cc:445
+#: expression.cc:584
 msgid "SIZEOF not implemented"
 msgstr ""
 
-#: expression.cc:451
-msgid "ADDR not implemented"
-msgstr ""
-
-#: expression.cc:457
+#: expression.cc:590
 msgid "LOADADDR not implemented"
 msgstr ""
 
-#: expression.cc:463
+#: expression.cc:596
 msgid "ORIGIN not implemented"
 msgstr ""
 
-#: expression.cc:469
+#: expression.cc:602
 msgid "LENGTH not implemented"
 msgstr ""
 
-#: expression.cc:475
+#: expression.cc:608
 msgid "CONSTANT not implemented"
 msgstr ""
 
-#: expression.cc:481
+#: expression.cc:614
 msgid "ABSOLUTE not implemented"
 msgstr ""
 
-#: expression.cc:487
+#: expression.cc:620
 msgid "DATA_SEGMENT_ALIGN not implemented"
 msgstr ""
 
-#: expression.cc:493
+#: expression.cc:626
 msgid "DATA_SEGMENT_RELRO_END not implemented"
 msgstr ""
 
-#: expression.cc:499
+#: expression.cc:632
 msgid "DATA_SEGMENT_END not implemented"
 msgstr ""
 
-#: expression.cc:505
+#: expression.cc:638
 msgid "SEGMENT_START not implemented"
 msgstr ""
 
@@ -319,34 +315,34 @@ msgstr ""
 msgid "%s: maximum bytes mapped for read at one time: %llu\n"
 msgstr ""
 
-#: fileread.cc:628
+#: fileread.cc:642
 #, c-format
 msgid "cannot find -l%s"
 msgstr ""
 
-#: fileread.cc:655
+#: fileread.cc:669
 #, c-format
 msgid "cannot find %s"
 msgstr ""
 
-#: fileread.cc:666
+#: fileread.cc:680
 #, c-format
 msgid "cannot open %s: %s"
 msgstr ""
 
-#: gold.cc:72
+#: gold.cc:73
 #, c-format
 msgid "%s: internal error in %s, at %s:%d\n"
 msgstr ""
 
 #. We had some input files, but we weren't able to open any of
 #. them.
-#: gold.cc:118 gold.cc:166
+#: gold.cc:119 gold.cc:167
 msgid "no input files"
 msgstr ""
 
 #. We print out just the first .so we see; there may be others.
-#: gold.cc:181
+#: gold.cc:182
 #, c-format
 msgid "cannot mix -static with dynamic object %s"
 msgstr ""
@@ -412,42 +408,42 @@ msgid "pthread_cond_broadcast failed: %s"
 msgstr ""
 
 #. FIXME: This needs to specify the location somehow.
-#: i386.cc:160 i386.cc:1484 x86_64.cc:172 x86_64.cc:1373
+#: i386.cc:160 i386.cc:1490 x86_64.cc:172 x86_64.cc:1375
 msgid "missing expected TLS relocation"
 msgstr ""
 
-#: i386.cc:810 x86_64.cc:764 x86_64.cc:978
+#: i386.cc:809 x86_64.cc:764 x86_64.cc:978
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr ""
 
-#: i386.cc:917 i386.cc:1213 x86_64.cc:889 x86_64.cc:1160
+#: i386.cc:916 i386.cc:1214 x86_64.cc:889 x86_64.cc:1162
 #, c-format
 msgid "%s: unexpected reloc %u in object file"
 msgstr ""
 
-#: i386.cc:1056 x86_64.cc:992 x86_64.cc:1256
+#: i386.cc:1055 x86_64.cc:992 x86_64.cc:1258
 #, c-format
 msgid "%s: unsupported reloc %u against global symbol %s"
 msgstr ""
 
-#: i386.cc:1367
+#: i386.cc:1368
 #, c-format
 msgid "%s: unsupported RELA reloc section"
 msgstr ""
 
-#: i386.cc:1627 x86_64.cc:1575
+#: i386.cc:1640 x86_64.cc:1577
 #, c-format
 msgid "unexpected reloc %u in object file"
 msgstr ""
 
-#: i386.cc:1659 i386.cc:1734 i386.cc:1741 i386.cc:1772 i386.cc:1825
-#: x86_64.cc:1596 x86_64.cc:1676 x86_64.cc:1700
+#: i386.cc:1672 i386.cc:1747 i386.cc:1754 i386.cc:1785 i386.cc:1838
+#: x86_64.cc:1598 x86_64.cc:1678 x86_64.cc:1702
 #, c-format
 msgid "unsupported reloc %u"
 msgstr ""
 
-#: i386.cc:1749
+#: i386.cc:1762
 msgid "both SUN and GNU model TLS relocations"
 msgstr ""
 
@@ -604,365 +600,378 @@ msgstr ""
 msgid "unable to parse script file %s"
 msgstr ""
 
-#: options.cc:185
+#: options.cc:174
+#, c-format
+msgid "unable to parse version script file %s"
+msgstr ""
+
+#: options.cc:201
 #, c-format
 msgid ""
 "Usage: %s [options] file...\n"
 "Options:\n"
 msgstr ""
 
-#: options.cc:356
+#: options.cc:372
 msgid "Allow unresolved references in shared libraries"
 msgstr ""
 
-#: options.cc:360
+#: options.cc:376
 msgid "Do not allow unresolved references in shared libraries"
 msgstr ""
 
-#: options.cc:364
+#: options.cc:380
 msgid "Only set DT_NEEDED for dynamic libs if used"
 msgstr ""
 
-#: options.cc:367
+#: options.cc:383
 msgid "Always DT_NEEDED for dynamic libs (default)"
 msgstr ""
 
-#: options.cc:370
+#: options.cc:386
 msgid "-l searches for shared libraries"
 msgstr ""
 
-#: options.cc:374
+#: options.cc:390
 msgid "-l does not search for shared libraries"
 msgstr ""
 
-#: options.cc:377
+#: options.cc:393
 msgid "Bind defined symbols locally"
 msgstr ""
 
-#: options.cc:385
+#: options.cc:401
 msgid "Compress .debug_* sections in the output file (default is none)"
 msgstr ""
 
-#: options.cc:387
+#: options.cc:403
 msgid "--compress-debug-sections=[none"
 msgstr ""
 
-#: options.cc:387
+#: options.cc:403
 msgid "]"
 msgstr ""
 
-#: options.cc:390
+#: options.cc:406
 msgid "Define a symbol"
 msgstr ""
 
-#: options.cc:391
+#: options.cc:407
 msgid "--defsym SYMBOL=EXPRESSION"
 msgstr ""
 
-#: options.cc:393
+#: options.cc:409
 msgid "Demangle C++ symbols in log messages"
 msgstr ""
 
-#: options.cc:396
+#: options.cc:412
 msgid "Do not demangle C++ symbols in log messages"
 msgstr ""
 
-#: options.cc:399
+#: options.cc:415
 msgid "Try to detect violations of the One Definition Rule"
 msgstr ""
 
-#: options.cc:401
+#: options.cc:417
 msgid "Set program start address"
 msgstr ""
 
-#: options.cc:402
+#: options.cc:418
 msgid "-e ADDRESS, --entry ADDRESS"
 msgstr ""
 
-#: options.cc:404
+#: options.cc:420
 msgid "Export all dynamic symbols"
 msgstr ""
 
-#: options.cc:406
+#: options.cc:422
 msgid "Create exception frame header"
 msgstr ""
 
-#: options.cc:408
+#: options.cc:424
 msgid "Set shared library name"
 msgstr ""
 
-#: options.cc:409
+#: options.cc:425
 msgid "-h FILENAME, -soname FILENAME"
 msgstr ""
 
-#: options.cc:411
+#: options.cc:427
 msgid "Set dynamic linker path"
 msgstr ""
 
-#: options.cc:412
+#: options.cc:428
 msgid "-I PROGRAM, --dynamic-linker PROGRAM"
 msgstr ""
 
-#: options.cc:414
+#: options.cc:430
 msgid "Search for library LIBNAME"
 msgstr ""
 
-#: options.cc:415
+#: options.cc:431
 msgid "-lLIBNAME, --library LIBNAME"
 msgstr ""
 
-#: options.cc:417
+#: options.cc:433
 msgid "Add directory to search path"
 msgstr ""
 
-#: options.cc:418
+#: options.cc:434
 msgid "-L DIR, --library-path DIR"
 msgstr ""
 
-#: options.cc:420
+#: options.cc:436
 msgid "Ignored for compatibility"
 msgstr ""
 
-#: options.cc:422
+#: options.cc:438
 msgid "Set output file name"
 msgstr ""
 
-#: options.cc:423
+#: options.cc:439
 msgid "-o FILE, --output FILE"
 msgstr ""
 
-#: options.cc:425
+#: options.cc:441
 msgid "Optimize output file size"
 msgstr ""
 
-#: options.cc:426
+#: options.cc:442
 msgid "-O level"
 msgstr ""
 
-#: options.cc:428
+#: options.cc:444
 msgid "Generate relocatable output"
 msgstr ""
 
-#: options.cc:430
+#: options.cc:446
 msgid "Add DIR to runtime search path"
 msgstr ""
 
-#: options.cc:431
+#: options.cc:447
 msgid "-R DIR, -rpath DIR"
 msgstr ""
 
-#: options.cc:434
+#: options.cc:450
 msgid "Add DIR to link time shared library search path"
 msgstr ""
 
-#: options.cc:435
+#: options.cc:451
 msgid "--rpath-link DIR"
 msgstr ""
 
-#: options.cc:437
+#: options.cc:453
 msgid "Strip all symbols"
 msgstr ""
 
-#: options.cc:440
+#: options.cc:456
 msgid "Strip debug symbols that are unused by gdb (at least versions <= 6.7)"
 msgstr ""
 
 #. This must come after -Sdebug since it's a prefix of it.
-#: options.cc:444
+#: options.cc:460
 msgid "Strip debugging information"
 msgstr ""
 
-#: options.cc:446
+#: options.cc:462
 msgid "Generate shared library"
 msgstr ""
 
-#: options.cc:448
+#: options.cc:464
 msgid "Do not link against shared libraries"
 msgstr ""
 
-#: options.cc:450
+#: options.cc:466
 msgid "Print resource usage statistics"
 msgstr ""
 
-#: options.cc:452
+#: options.cc:468
 msgid "Set target system root directory"
 msgstr ""
 
-#: options.cc:453
+#: options.cc:469
 msgid "--sysroot DIR"
 msgstr ""
 
-#: options.cc:454
+#: options.cc:470
 msgid "Set the address of the .text section"
 msgstr ""
 
-#: options.cc:455
+#: options.cc:471
 msgid "-Ttext ADDRESS"
 msgstr ""
 
 #. This must come after -Ttext since it's a prefix of it.
-#: options.cc:458
+#: options.cc:474
 msgid "Read linker script"
 msgstr ""
 
-#: options.cc:459
+#: options.cc:475
 msgid "-T FILE, --script FILE"
 msgstr ""
 
-#: options.cc:461
-msgid "Run the linker multi-threaded"
-msgstr ""
-
-#: options.cc:463
-msgid "Do not run the linker multi-threaded"
-msgstr ""
-
-#: options.cc:465
-msgid "Number of threads to use"
-msgstr ""
-
-#: options.cc:466
-msgid "--thread-count COUNT"
-msgstr ""
-
-#: options.cc:469
-msgid "Number of threads to use in initial pass"
-msgstr ""
-
-#: options.cc:470
-msgid "--thread-count-initial COUNT"
-msgstr ""
-
-#: options.cc:473
-msgid "Number of threads to use in middle pass"
-msgstr ""
-
-#: options.cc:474
-msgid "--thread-count-middle COUNT"
-msgstr ""
-
 #: options.cc:477
-msgid "Number of threads to use in final pass"
+msgid "Read version script"
 msgstr ""
 
 #: options.cc:478
-msgid "--thread-count-final COUNT"
+msgid "--version-script FILE"
 msgstr ""
 
-#: options.cc:481
-msgid "Include all archive contents"
+#: options.cc:480
+msgid "Run the linker multi-threaded"
+msgstr ""
+
+#: options.cc:482
+msgid "Do not run the linker multi-threaded"
+msgstr ""
+
+#: options.cc:484
+msgid "Number of threads to use"
 msgstr ""
 
 #: options.cc:485
+msgid "--thread-count COUNT"
+msgstr ""
+
+#: options.cc:488
+msgid "Number of threads to use in initial pass"
+msgstr ""
+
+#: options.cc:489
+msgid "--thread-count-initial COUNT"
+msgstr ""
+
+#: options.cc:492
+msgid "Number of threads to use in middle pass"
+msgstr ""
+
+#: options.cc:493
+msgid "--thread-count-middle COUNT"
+msgstr ""
+
+#: options.cc:496
+msgid "Number of threads to use in final pass"
+msgstr ""
+
+#: options.cc:497
+msgid "--thread-count-final COUNT"
+msgstr ""
+
+#: options.cc:500
+msgid "Include all archive contents"
+msgstr ""
+
+#: options.cc:504
 msgid "Include only needed archive contents"
 msgstr ""
 
-#: options.cc:490
+#: options.cc:509
 msgid ""
 "Subcommands as follows:\n"
 "    -z execstack              Mark output as requiring executable stack\n"
 "    -z noexecstack            Mark output as not requiring executable stack"
 msgstr ""
 
-#: options.cc:493
+#: options.cc:512
 msgid "-z SUBCOMMAND"
 msgstr ""
 
-#: options.cc:496
+#: options.cc:515
 msgid "Start a library search group"
 msgstr ""
 
-#: options.cc:498
+#: options.cc:517
 msgid "End a library search group"
 msgstr ""
 
-#: options.cc:500
+#: options.cc:519
 msgid "Report usage information"
 msgstr ""
 
-#: options.cc:502
+#: options.cc:521
 msgid "Report version information"
 msgstr ""
 
-#: options.cc:504
-msgid "Turn on debugging (all,task)"
+#: options.cc:523
+msgid "Turn on debugging (all,task,script)"
 msgstr ""
 
-#: options.cc:505
+#: options.cc:524
 msgid "--debug=TYPE"
 msgstr ""
 
-#: options.cc:600
+#: options.cc:620
 #, c-format
 msgid "%s: unrecognized -z subcommand: %s\n"
 msgstr ""
 
-#: options.cc:623
+#: options.cc:643
 #, c-format
 msgid "%s: unrecognized --debug subcommand: %s\n"
 msgstr ""
 
-#: options.cc:812
+#: options.cc:832
 msgid "unexpected argument"
 msgstr ""
 
-#: options.cc:819 options.cc:871 options.cc:952
+#: options.cc:839 options.cc:891 options.cc:972
 msgid "missing argument"
 msgstr ""
 
-#: options.cc:832 options.cc:880
+#: options.cc:852 options.cc:900
 msgid "unknown option"
 msgstr ""
 
-#: options.cc:898
+#: options.cc:918
 #, c-format
 msgid "%s: missing group end\n"
 msgstr ""
 
-#: options.cc:1026
+#: options.cc:1046
 msgid "may not nest groups"
 msgstr ""
 
-#: options.cc:1036
+#: options.cc:1056
 msgid "group end without group start"
 msgstr ""
 
-#: options.cc:1046
+#: options.cc:1066
 #, c-format
 msgid "%s: use the --help option for usage information\n"
 msgstr ""
 
-#: options.cc:1055
+#: options.cc:1075
 #, c-format
 msgid "%s: %s: %s\n"
 msgstr ""
 
-#: options.cc:1064
+#: options.cc:1084
 #, c-format
 msgid "%s: -%c: %s\n"
 msgstr ""
 
-#: options.h:358
+#: options.h:363
 #, c-format
 msgid "invalid optimization level: %s"
 msgstr ""
 
-#: options.h:404
+#: options.h:409
 #, c-format
 msgid "unsupported argument to --compress-debug-sections: %s"
 msgstr ""
 
-#: options.h:458
+#: options.h:463
 #, c-format
 msgid "invalid argument to -Ttext: %s"
 msgstr ""
 
-#: options.h:467
+#: options.h:472
 #, c-format
 msgid "invalid thread count: %s"
 msgstr ""
 
-#: options.h:475
+#: options.h:480
 msgid "--threads not supported"
 msgstr ""
 
@@ -971,42 +980,42 @@ msgstr ""
 msgid "invalid alignment %lu for section \"%s\""
 msgstr ""
 
-#: output.cc:2418
+#: output.cc:2416
 #, c-format
 msgid "%s: open: %s"
 msgstr ""
 
-#: output.cc:2438
+#: output.cc:2436
 #, c-format
 msgid "%s: mremap: %s"
 msgstr ""
 
-#: output.cc:2474
+#: output.cc:2472
 #, c-format
 msgid "%s: lseek: %s"
 msgstr ""
 
-#: output.cc:2477 output.cc:2514
+#: output.cc:2475 output.cc:2512
 #, c-format
 msgid "%s: write: %s"
 msgstr ""
 
-#: output.cc:2485
+#: output.cc:2483
 #, c-format
 msgid "%s: mmap: %s"
 msgstr ""
 
-#: output.cc:2495
+#: output.cc:2493
 #, c-format
 msgid "%s: munmap: %s"
 msgstr ""
 
-#: output.cc:2512
+#: output.cc:2510
 #, c-format
 msgid "%s: write: unexpected 0 return-value"
 msgstr ""
 
-#: output.cc:2524
+#: output.cc:2522
 #, c-format
 msgid "%s: close: %s"
 msgstr ""
@@ -1016,13 +1025,8 @@ msgstr ""
 msgid "%s: file is empty"
 msgstr ""
 
-#: readsyms.cc:185
-#, c-format
-msgid "%s: ordinary object found in input group"
-msgstr ""
-
 #. Here we have to handle any other input file types we need.
-#: readsyms.cc:242
+#: readsyms.cc:231
 #, c-format
 msgid "%s: not an object or archive"
 msgstr ""
@@ -1075,14 +1079,14 @@ msgstr ""
 msgid "%s: previous definition here"
 msgstr ""
 
-#: script.cc:1413
+#: script.cc:1890
 #, c-format
 msgid "%s:%d:%d: %s"
 msgstr ""
 
 #. There are some options that we could handle here--e.g.,
 #. -lLIBRARY.  Should we bother?
-#: script.cc:1539
+#: script.cc:2026
 #, c-format
 msgid ""
 "%s:%d:%d: ignoring command OPTION; OPTION is only valid for scripts "
@@ -1104,51 +1108,51 @@ msgstr ""
 msgid "%s: %s Stringdata structures: %zu\n"
 msgstr ""
 
-#: symtab.cc:603
+#: symtab.cc:627
 #, c-format
 msgid "bad global symbol name offset %u at %zu"
 msgstr ""
 
-#: symtab.cc:682
+#: symtab.cc:730
 msgid "too few symbol versions"
 msgstr ""
 
-#: symtab.cc:711
+#: symtab.cc:762
 #, c-format
 msgid "bad symbol name offset %u at %zu"
 msgstr ""
 
-#: symtab.cc:765
+#: symtab.cc:816
 #, c-format
 msgid "versym for symbol %zu out of range: %u"
 msgstr ""
 
-#: symtab.cc:773
+#: symtab.cc:824
 #, c-format
 msgid "versym for symbol %zu has no name: %u"
 msgstr ""
 
-#: symtab.cc:1499 symtab.cc:1715
+#: symtab.cc:1625 symtab.cc:1824
 #, c-format
 msgid "%s: unsupported symbol section 0x%x"
 msgstr ""
 
-#: symtab.cc:1839
+#: symtab.cc:1952
 #, c-format
 msgid "%s: undefined reference to '%s'"
 msgstr ""
 
-#: symtab.cc:1924
+#: symtab.cc:2037
 #, c-format
 msgid "%s: symbol table entries: %zu; buckets: %zu\n"
 msgstr ""
 
-#: symtab.cc:1927
+#: symtab.cc:2040
 #, c-format
 msgid "%s: symbol table entries: %zu\n"
 msgstr ""
 
-#: symtab.cc:1996
+#: symtab.cc:2109
 #, c-format
 msgid ""
 "while linking %s: symbol '%s' defined in multiple places (possible ODR "
@@ -1188,12 +1192,12 @@ msgstr ""
 msgid "%s failed: %s"
 msgstr ""
 
-#: x86_64.cc:1281
+#: x86_64.cc:1283
 #, c-format
 msgid "%s: unsupported REL reloc section"
 msgstr ""
 
-#: x86_64.cc:1748
+#: x86_64.cc:1750
 #, c-format
 msgid "unsupported reloc type %u"
 msgstr ""

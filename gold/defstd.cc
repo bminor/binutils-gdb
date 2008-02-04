@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include "symtab.h"
+#include "layout.h"
 #include "defstd.h"
 
 // This is a simple file which defines the standard symbols like
@@ -251,8 +252,11 @@ namespace gold
 void
 define_standard_symbols(Symbol_table* symtab, const Layout* layout)
 {
-  symtab->define_symbols(layout, in_section_count, in_section);
-  symtab->define_symbols(layout, in_segment_count, in_segment);
+  bool saw_sections_clause = layout->script_options()->saw_sections_clause();
+  symtab->define_symbols(layout, in_section_count, in_section,
+			 saw_sections_clause);
+  symtab->define_symbols(layout, in_segment_count, in_segment,
+			 saw_sections_clause);
 }
 
 } // End namespace gold.

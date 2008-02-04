@@ -913,6 +913,29 @@ Symbol_assignment::add_to_table(Symbol_table* symtab)
 void
 Symbol_assignment::finalize(Symbol_table* symtab, const Layout* layout)
 {
+  this->finalize_maybe_dot(symtab, layout, false, false, 0);
+}
+
+// Finalize a symbol value which can refer to the dot symbol.
+
+void
+Symbol_assignment::finalize_with_dot(Symbol_table* symtab,
+				     const Layout* layout,
+				     bool dot_has_value,
+				     uint64_t dot_value)
+{
+  this->finalize_maybe_dot(symtab, layout, true, dot_has_value, dot_value);
+}
+
+// Finalize a symbol value, internal version.
+
+void
+Symbol_assignment::finalize_maybe_dot(Symbol_table* symtab,
+				      const Layout* layout,
+				      bool is_dot_available,
+				      bool dot_has_value,
+				      uint64_t dot_value)
+{
   // If we were only supposed to provide this symbol, the sym_ field
   // will be NULL if the symbol was not referenced.
   if (this->sym_ == NULL)
@@ -924,7 +947,8 @@ Symbol_assignment::finalize(Symbol_table* symtab, const Layout* layout)
   if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      this->sized_finalize<32>(symtab, layout);
+      this->sized_finalize<32>(symtab, layout, is_dot_available, dot_has_value,
+			       dot_value);
 #else
       gold_unreachable();
 #endif
@@ -932,7 +956,8 @@ Symbol_assignment::finalize(Symbol_table* symtab, const Layout* layout)
   else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      this->sized_finalize<64>(symtab, layout);
+      this->sized_finalize<64>(symtab, layout, is_dot_available, dot_has_value,
+			       dot_value);
 #else
       gold_unreachable();
 #endif
@@ -943,10 +968,56 @@ Symbol_assignment::finalize(Symbol_table* symtab, const Layout* layout)
 
 template<int size>
 void
-Symbol_assignment::sized_finalize(Symbol_table* symtab, const Layout* layout)
+Symbol_assignment::sized_finalize(Symbol_table* symtab, const Layout* layout,
+				  bool is_dot_available, bool dot_has_value,
+				  uint64_t dot_value)
 {
+  bool dummy;
+  uint64_t final_val = this->val_->eval_maybe_dot(symtab, layout,
+						  is_dot_available,
+						  dot_has_value, dot_value,
+						  &dummy);
   Sized_symbol<size>* ssym = symtab->get_sized_symbol<size>(this->sym_);
-  ssym->set_value(this->val_->eval(symtab, layout));
+  ssym->set_value(final_val);
+}
+
+// Set the symbol value if the expression yields an absolute value.
+
+void
+Symbol_assignment::set_if_absolute(Symbol_table* symtab, const Layout* layout,
+				   bool is_dot_available, bool dot_has_value,
+				   uint64_t dot_value)
+{
+  if (this->sym_ == NULL)
+    return;
+
+  bool is_absolute;
+  uint64_t val = this->val_->eval_maybe_dot(symtab, layout, is_dot_available,
+					    dot_has_value, dot_value,
+					    &is_absolute);
+  if (!is_absolute)
+    return;
+
+  if (parameters->get_size() == 32)
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
+      Sized_symbol<32>* ssym = symtab->get_sized_symbol<32>(this->sym_);
+      ssym->set_value(val);
+#else
+      gold_unreachable();
+#endif
+    }
+  else if (parameters->get_size() == 64)
+    {
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+      Sized_symbol<64>* ssym = symtab->get_sized_symbol<64>(this->sym_);
+      ssym->set_value(val);
+#else
+      gold_unreachable();
+#endif
+    }
+  else
+    gold_unreachable();
 }
 
 // Print for debugging.
@@ -1006,14 +1077,26 @@ Script_options::add_symbol_assignment(const char* name, size_t length,
 				      Expression* value, bool provide,
 				      bool hidden)
 {
-  if (this->script_sections_.in_sections_clause())
-    this->script_sections_.add_symbol_assignment(name, length, value,
-						 provide, hidden);
+  if (length != 1 || name[0] != '.')
+    {
+      if (this->script_sections_.in_sections_clause())
+	this->script_sections_.add_symbol_assignment(name, length, value,
+						     provide, hidden);
+      else
+	{
+	  Symbol_assignment* p = new Symbol_assignment(name, length, value,
+						       provide, hidden);
+	  this->symbol_assignments_.push_back(p);
+	}
+    }
   else
     {
-      Symbol_assignment* p = new Symbol_assignment(name, length, value,
-						   provide, hidden);
-      this->symbol_assignments_.push_back(p);
+      if (provide || hidden)
+	gold_error(_("invalid use of PROVIDE for dot symbol"));
+      if (!this->script_sections_.in_sections_clause())
+	gold_error(_("invalid assignment to dot outside of SECTIONS"));
+      else
+	this->script_sections_.add_dot_assignment(value);
     }
 }
 
@@ -1041,9 +1124,10 @@ Script_options::add_symbols_to_table(Symbol_table* symtab)
        p != this->symbol_assignments_.end();
        ++p)
     (*p)->add_to_table(symtab);
+  this->script_sections_.add_symbols_to_table(symtab);
 }
 
-// Finalize symbol values.
+// Finalize symbol values.  Also check assertions.
 
 void
 Script_options::finalize_symbols(Symbol_table* symtab, const Layout* layout)
@@ -1052,6 +1136,29 @@ Script_options::finalize_symbols(Symbol_table* symtab, const Layout* layout)
        p != this->symbol_assignments_.end();
        ++p)
     (*p)->finalize(symtab, layout);
+
+  for (Assertions::iterator p = this->assertions_.begin();
+       p != this->assertions_.end();
+       ++p)
+    (*p)->check(symtab, layout);
+
+  this->script_sections_.finalize_symbols(symtab, layout);
+}
+
+// Set section addresses.  We set all the symbols which have absolute
+// values.  Then we let the SECTIONS clause do its thing.  This
+// returns the segment which holds the file header and segment
+// headers, if any.
+
+Output_segment*
+Script_options::set_section_addresses(Symbol_table* symtab, Layout* layout)
+{
+  for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
+       p != this->symbol_assignments_.end();
+       ++p)
+    (*p)->set_if_absolute(symtab, layout, false, false, 0);
+
+  return this->script_sections_.set_section_addresses(symtab, layout);
 }
 
 // This class holds data passed through the parser to the lexer and to
@@ -2279,8 +2386,13 @@ extern "C" String_sort_list_ptr
 script_string_sort_list_add(String_sort_list_ptr pv,
 			    const struct Wildcard_section* string_sort)
 {
-  pv->push_back(*string_sort);
-  return pv;
+  if (pv == NULL)
+    return script_new_string_sort_list(string_sort);
+  else
+    {
+      pv->push_back(*string_sort);
+      return pv;
+    }
 }
 
 // Create a new list of strings.

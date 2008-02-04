@@ -36,14 +36,33 @@ namespace gold
 
 // This file holds the code which handles linker expressions.
 
+// The dot symbol, which linker scripts refer to simply as ".",
+// requires special treatment.  The dot symbol is set several times,
+// section addresses will refer to it, output sections will change it,
+// and it can be set based on the value of other symbols.  We simplify
+// the handling by prohibiting setting the dot symbol to the value of
+// a non-absolute symbol.
+
 // When evaluating the value of an expression, we pass in a pointer to
 // this struct, so that the expression evaluation can find the
 // information it needs.
 
 struct Expression::Expression_eval_info
 {
+  // The symbol table.
   const Symbol_table* symtab;
+  // The layout--we use this to get section information.
   const Layout* layout;
+  // Whether expressions can refer to the dot symbol.  The dot symbol
+  // is only available within a SECTIONS clause.
+  bool is_dot_available;
+  // Whether the dot symbol currently has a value.
+  bool dot_has_value;
+  // The current value of the dot symbol.
+  uint64_t dot_value;
+  // Points to the IS_ABSOLUTE variable, which is set to false if the
+  // expression uses a value which is not absolute.
+  bool* is_absolute;
 };
 
 // Evaluate an expression.
@@ -51,9 +70,41 @@ struct Expression::Expression_eval_info
 uint64_t
 Expression::eval(const Symbol_table* symtab, const Layout* layout)
 {
+  bool dummy;
+  return this->eval_maybe_dot(symtab, layout, false, false, 0, &dummy);
+}
+
+// Evaluate an expression which may refer to the dot symbol.
+
+uint64_t
+Expression::eval_with_dot(const Symbol_table* symtab, const Layout* layout,
+			  bool dot_has_value, uint64_t dot_value,
+			  bool* is_absolute)
+{
+  return this->eval_maybe_dot(symtab, layout, true, dot_has_value, dot_value,
+			      is_absolute);
+}
+
+// Evaluate an expression which may or may not refer to the dot
+// symbol.
+
+uint64_t
+Expression::eval_maybe_dot(const Symbol_table* symtab, const Layout* layout,
+			   bool is_dot_available, bool dot_has_value,
+			   uint64_t dot_value, bool* is_absolute)
+{
   Expression_eval_info eei;
   eei.symtab = symtab;
   eei.layout = layout;
+  eei.is_dot_available = is_dot_available;
+  eei.dot_has_value = dot_has_value;
+  eei.dot_value = dot_value;
+
+  // We assume the value is absolute, and only set this to false if we
+  // find a section relative reference.
+  *is_absolute = true;
+  eei.is_absolute = is_absolute;
+
   return this->value(&eei);
 }
 
@@ -115,6 +166,14 @@ Symbol_expression::value(const Expression_eval_info* eei)
       return 0;
     }
 
+  // If this symbol does not have an absolute value, then the whole
+  // expression does not have an absolute value.  This is not strictly
+  // accurate: the subtraction of two symbols in the same section is
+  // absolute.  This is unlikely to matter in practice, as this value
+  // is only used for error checking.
+  if (!sym->value_is_absolute())
+    *eei->is_absolute = false;
+
   if (parameters->get_size() == 32)
     return eei->symtab->get_sized_symbol<32>(sym)->value();
   else if (parameters->get_size() == 64)
@@ -141,10 +200,21 @@ class Dot_expression : public Expression
 };
 
 uint64_t
-Dot_expression::value(const Expression_eval_info*)
+Dot_expression::value(const Expression_eval_info* eei)
 {
-  gold_error("dot symbol unimplemented");
-  return 0;
+  if (!eei->is_dot_available)
+    {
+      gold_error(_("invalid reference to dot symbol outside of "
+		   "SECTIONS clause"));
+      return 0;
+    }
+  else if (!eei->dot_has_value)
+    {
+      gold_error(_("invalid reference to dot symbol before "
+		   "it has been given a value"));
+      return 0;
+    }
+  return eei->dot_value;
 }
 
 // A string.  This is either the name of a symbol, or ".".
@@ -549,6 +619,10 @@ Addr_expression::value(const Expression_eval_info* eei)
 		 section_name);
       return 0;
     }
+
+  // Note that the address of a section is an absolute address, and we
+  // should not clear *EEI->IS_ABSOLUTE here.
+
   return os->address();
 }
 

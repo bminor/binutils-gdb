@@ -552,6 +552,10 @@ class Symbol
     return true;
   }
 
+  // Return whether this symbol currently has an absolute value.
+  bool
+  value_is_absolute() const;
+
   // Return whether there should be a warning for references to this
   // symbol.
   bool
@@ -1053,13 +1057,17 @@ class Symbol_table
 		     elfcpp::STB binding, elfcpp::STV visibility,
 		     unsigned char nonvis, bool only_if_ref);
 
-  // Define a set of symbols in output sections.
+  // Define a set of symbols in output sections.  If ONLY_IF_REF is
+  // true, only define them if they are referenced.
   void
-  define_symbols(const Layout*, int count, const Define_symbol_in_section*);
+  define_symbols(const Layout*, int count, const Define_symbol_in_section*,
+		 bool only_if_ref);
 
-  // Define a set of symbols in output segments.
+  // Define a set of symbols in output segments.  If ONLY_IF_REF is
+  // true, only defined them if they are referenced.
   void
-  define_symbols(const Layout*, int count, const Define_symbol_in_segment*);
+  define_symbols(const Layout*, int count, const Define_symbol_in_segment*,
+		 bool only_if_ref);
 
   // Define SYM using a COPY reloc.  POSD is the Output_data where the
   // symbol should be defined--typically a .dyn.bss section.  VALUE is

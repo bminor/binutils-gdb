@@ -176,6 +176,11 @@ class Sized_dynobj : public Dynobj
   void
   do_add_symbols(Symbol_table*, Read_symbols_data*);
 
+  // Get the size of a section.
+  uint64_t
+  do_section_size(unsigned int shndx)
+  { return this->elf_file_.section_size(shndx); }
+
   // Get the name of a section.
   std::string
   do_section_name(unsigned int shndx)
@@ -206,6 +211,11 @@ class Sized_dynobj : public Dynobj
   unsigned int
   do_section_info(unsigned int shndx)
   { return this->elf_file_.section_info(shndx); }
+
+  // Return the section alignment.
+  uint64_t
+  do_section_addralign(unsigned int shndx)
+  { return this->elf_file_.section_addralign(shndx); }
 
  private:
   // For convenience.

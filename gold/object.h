@@ -206,8 +206,12 @@ class Object
   const unsigned char*
   section_contents(unsigned int shndx, section_size_type* plen, bool cache);
 
-  // Return the name of a section given a section index.  This is only
-  // used for error messages.
+  // Return the size of a section given a section index.
+  uint64_t
+  section_size(unsigned int shndx)
+  { return this->do_section_size(shndx); }
+
+  // Return the name of a section given a section index.
   std::string
   section_name(unsigned int shndx)
   { return this->do_section_name(shndx); }
@@ -231,6 +235,11 @@ class Object
   unsigned int
   section_info(unsigned int shndx)
   { return this->do_section_info(shndx); }
+
+  // Return the required section alignment given a section index.
+  uint64_t
+  section_addralign(unsigned int shndx)
+  { return this->do_section_addralign(shndx); }
 
   // Read the symbol information.
   void
@@ -344,6 +353,10 @@ class Object
   virtual Location
   do_section_contents(unsigned int shndx) = 0;
 
+  // Get the size of a section--implemented by child class.
+  virtual uint64_t
+  do_section_size(unsigned int shndx) = 0;
+
   // Get the name of a section--implemented by child class.
   virtual std::string
   do_section_name(unsigned int shndx) = 0;
@@ -363,6 +376,10 @@ class Object
   // Get section info field--implemented by child class.
   virtual unsigned int
   do_section_info(unsigned int shndx) = 0;
+
+  // Get section alignment--implemented by child class.
+  virtual uint64_t
+  do_section_addralign(unsigned int shndx) = 0;
 
   // Get the file.  We pass on const-ness.
   Input_file*
@@ -1136,6 +1153,11 @@ class Sized_relobj : public Relobj
   do_relocate(const General_options& options, const Symbol_table* symtab,
 	      const Layout*, Output_file* of);
 
+  // Get the size of a section.
+  uint64_t
+  do_section_size(unsigned int shndx)
+  { return this->elf_file_.section_size(shndx); }
+
   // Get the name of a section.
   std::string
   do_section_name(unsigned int shndx)
@@ -1165,6 +1187,11 @@ class Sized_relobj : public Relobj
   unsigned int
   do_section_info(unsigned int shndx)
   { return this->elf_file_.section_info(shndx); }
+
+  // Return the section alignment.
+  uint64_t
+  do_section_addralign(unsigned int shndx)
+  { return this->elf_file_.section_addralign(shndx); }
 
  private:
   // For convenience.

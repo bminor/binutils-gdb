@@ -131,6 +131,10 @@ class Elf_file
   typename File::Location
   section_contents(unsigned int shndx);
 
+  // Return the size of section SHNDX.
+  typename Elf_types<size>::Elf_WXword
+  section_size(unsigned int shndx);
+
   // Return the flags of section SHNDX.
   typename Elf_types<size>::Elf_WXword
   section_flags(unsigned int shndx);
@@ -147,6 +151,9 @@ class Elf_file
   Elf_Word
   section_info(unsigned int shndx);
 
+  // Return the addralign field of section SHNDX.
+  typename Elf_types<size>::Elf_WXword
+  section_addralign(unsigned int shndx);
 
  private:
   // Shared constructor code.
@@ -296,6 +303,25 @@ Elf_file<size, big_endian, File>::section_contents(unsigned int shndx)
   return typename File::Location(shdr.get_sh_offset(), shdr.get_sh_size());
 }
 
+// Get the size of section SHNDX.
+
+template<int size, bool big_endian, typename File>
+typename Elf_types<size>::Elf_WXword
+Elf_file<size, big_endian, File>::section_size(unsigned int shndx)
+{
+  File* const file = this->file_;
+
+  if (shndx >= this->shnum())
+    file->error(_("section_size: bad shndx %u >= %u"),
+		shndx, this->shnum());
+
+  typename File::View v(file->view(this->section_header_offset(shndx),
+				   This::shdr_size));
+
+  Ef_shdr shdr(v.data());
+  return shdr.get_sh_size();
+}
+
 // Return the section flags of section SHNDX.
 
 template<int size, bool big_endian, typename File>
@@ -370,6 +396,25 @@ Elf_file<size, big_endian, File>::section_info(unsigned int shndx)
 
   Ef_shdr shdr(v.data());
   return shdr.get_sh_info();
+}
+
+// Return the sh_addralign field of section SHNDX.
+
+template<int size, bool big_endian, typename File>
+typename Elf_types<size>::Elf_WXword
+Elf_file<size, big_endian, File>::section_addralign(unsigned int shndx)
+{
+  File* const file = this->file_;
+
+  if (shndx >= this->shnum())
+    file->error(_("section_addralign: bad shndx %u >= %u"),
+		shndx, this->shnum());
+
+  typename File::View v(file->view(this->section_header_offset(shndx),
+				   This::shdr_size));
+
+  Ef_shdr shdr(v.data());
+  return shdr.get_sh_addralign();
 }
 
 } // End namespace elfcpp.

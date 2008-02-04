@@ -46,6 +46,7 @@ class Input_argument;
 class Input_objects;
 class Input_group;
 class Input_file;
+class Output_segment;
 class Task_token;
 class Workqueue;
 struct Version_dependency_list;
@@ -65,9 +66,26 @@ class Expression
   virtual ~Expression()
   { }
 
-  // Return the value of the expression.
+  // Return the value of the expression which is not permitted to
+  // refer to the dot symbol.
   uint64_t
   eval(const Symbol_table*, const Layout*);
+
+  // Return the value of an expression which is permitted to refer to
+  // the dot symbol.  This sets *IS_ABSOLUTE to indicate whether this
+  // is an absolute value; it will be false if a non-absolute symbol
+  // was referenced in the expression; this is used to detect invalid
+  // uses when setting a section address.
+  uint64_t
+  eval_with_dot(const Symbol_table*, const Layout*, bool dot_has_value,
+		uint64_t dot_value, bool* is_absolute);
+
+  // Return the value of an expression which may or may not be
+  // permitted to refer to the dot symbol, depending on
+  // is_dot_available.
+  uint64_t
+  eval_maybe_dot(const Symbol_table*, const Layout*, bool is_dot_available,
+		 bool dot_has_value, uint64_t dot_value, bool* is_absolute);
 
   // Print the expression to the FILE.  This is for debugging.
   virtual void
@@ -181,17 +199,35 @@ class Symbol_assignment
   add_to_table(Symbol_table*);
 
   // Finalize the symbol value.
-  void finalize(Symbol_table*, const Layout*);
+  void
+  finalize(Symbol_table*, const Layout*);
+
+  // Finalize the symbol value when it can refer to the dot symbol.
+  void
+  finalize_with_dot(Symbol_table*, const Layout*, bool dot_has_value,
+		    uint64_t dot_value);
+
+  // Set the symbol value, but only if the value is absolute.  This is
+  // used while processing a SECTIONS clause.
+  void
+  set_if_absolute(Symbol_table*, const Layout*, bool is_dot_available,
+		  bool dot_has_value, uint64_t dot_value);
 
   // Print the assignment to the FILE.  This is for debugging.
   void
   print(FILE*) const;
 
  private:
+  // Shared by finalize and finalize_with_dot.
+  void
+  finalize_maybe_dot(Symbol_table*, const Layout*, bool is_dot_available,
+		     bool dot_has_value, uint64_t dot_value);
+
   // Sized version of finalize.
   template<int size>
   void
-  sized_finalize(Symbol_table*, const Layout*);
+  sized_finalize(Symbol_table*, const Layout*, bool is_dot_available,
+		 bool dot_has_value, uint64_t dot_value);
 
   // Symbol name.
   std::string name_;
@@ -274,7 +310,7 @@ class Script_options
   void
   add_symbols_to_table(Symbol_table*);
 
-  // Finalize the symbol values.
+  // Finalize the symbol values.  Also check assertions.
   void
   finalize_symbols(Symbol_table*, const Layout*);
 
@@ -289,6 +325,18 @@ class Script_options
   Script_sections*
   script_sections()
   { return &this->script_sections_; }
+
+  // Whether we saw a SECTIONS clause.
+  bool
+  saw_sections_clause() const
+  { return this->script_sections_.saw_sections_clause(); }
+
+  // Set section addresses using a SECTIONS clause.  Return the
+  // segment which should hold the file header and segment headers;
+  // this may return NULL, in which case the headers are not in a
+  // loadable segment.
+  Output_segment*
+  set_section_addresses(Symbol_table*, Layout*);
 
   // Print the script to the FILE.  This is for debugging.
   void

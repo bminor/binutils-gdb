@@ -45,6 +45,8 @@ resolve.cc
 script.cc
 script-c.h
 script.h
+script-sections.cc
+script-sections.h
 stringpool.cc
 stringpool.h
 symtab.cc

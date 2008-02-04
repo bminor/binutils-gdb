@@ -298,6 +298,25 @@ Symbol::final_value_is_known() const
   return parameters->doing_static_link();
 }
 
+// Return whether the symbol has an absolute value.
+
+bool
+Symbol::value_is_absolute() const
+{
+  switch (this->source_)
+    {
+    case FROM_OBJECT:
+      return this->u_.from_object.shndx == elfcpp::SHN_ABS;
+    case IN_OUTPUT_DATA:
+    case IN_OUTPUT_SEGMENT:
+      return false;
+    case CONSTANT:
+      return true;
+    default:
+      gold_unreachable();
+    }
+}
+
 // Class Symbol_table.
 
 Symbol_table::Symbol_table(unsigned int count,
@@ -1336,7 +1355,8 @@ Symbol_table::do_define_as_constant(
 
 void
 Symbol_table::define_symbols(const Layout* layout, int count,
-			     const Define_symbol_in_section* p)
+			     const Define_symbol_in_section* p,
+			     bool only_if_ref)
 {
   for (int i = 0; i < count; ++i, ++p)
     {
@@ -1345,11 +1365,12 @@ Symbol_table::define_symbols(const Layout* layout, int count,
 	this->define_in_output_data(p->name, NULL, os, p->value,
 				    p->size, p->type, p->binding,
 				    p->visibility, p->nonvis,
-				    p->offset_is_from_end, p->only_if_ref);
+				    p->offset_is_from_end,
+				    only_if_ref || p->only_if_ref);
       else
 	this->define_as_constant(p->name, NULL, 0, p->size, p->type,
 				 p->binding, p->visibility, p->nonvis,
-				 p->only_if_ref);
+				 only_if_ref || p->only_if_ref);
     }
 }
 
@@ -1357,7 +1378,8 @@ Symbol_table::define_symbols(const Layout* layout, int count,
 
 void
 Symbol_table::define_symbols(const Layout* layout, int count,
-			     const Define_symbol_in_segment* p)
+			     const Define_symbol_in_segment* p,
+			     bool only_if_ref)
 {
   for (int i = 0; i < count; ++i, ++p)
     {
@@ -1368,11 +1390,12 @@ Symbol_table::define_symbols(const Layout* layout, int count,
 	this->define_in_output_segment(p->name, NULL, os, p->value,
 				       p->size, p->type, p->binding,
 				       p->visibility, p->nonvis,
-				       p->offset_base, p->only_if_ref);
+				       p->offset_base,
+				       only_if_ref || p->only_if_ref);
       else
 	this->define_as_constant(p->name, NULL, 0, p->size, p->type,
 				 p->binding, p->visibility, p->nonvis,
-				 p->only_if_ref);
+				 only_if_ref || p->only_if_ref);
     }
 }
 

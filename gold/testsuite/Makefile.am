@@ -527,6 +527,11 @@ script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_1.t
 
+check_PROGRAMS += script_test_2
+script_test_2_SOURCES = script_test_2.cc script_test_2a.cc script_test_2b.cc
+script_test_2_DEPENDENCIES = gcctestdir/ld script_test_2.t
+script_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_2.t
+
 if OBJDUMP_AND_CPPFILT
 check_SCRIPTS += ver_matching_test.sh
 check_DATA += ver_matching_test.stdout

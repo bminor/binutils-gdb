@@ -275,6 +275,7 @@ Output_segment_headers::do_sized_write(Output_file* of)
 {
   const int phdr_size = elfcpp::Elf_sizes<size>::phdr_size;
   off_t all_phdrs_size = this->segment_list_.size() * phdr_size;
+  gold_assert(all_phdrs_size == this->data_size());
   unsigned char* view = of->get_output_view(this->offset(),
 					    all_phdrs_size);
   unsigned char* v = view;
@@ -286,6 +287,8 @@ Output_segment_headers::do_sized_write(Output_file* of)
       (*p)->write_header(&ophdr);
       v += phdr_size;
     }
+
+  gold_assert(v - view == all_phdrs_size);
 
   of->write_output_view(this->offset(), all_phdrs_size, view);
 }
@@ -1371,6 +1374,15 @@ Output_section::Input_section::set_address_and_file_offset(
     this->u2_.posd->set_address_and_file_offset(address, file_offset);
 }
 
+// Reset the address and file offset.
+
+void
+Output_section::Input_section::reset_address_and_file_offset()
+{
+  if (!this->is_input_section())
+    this->u2_.posd->reset_address_and_file_offset();
+}
+
 // Finalize the data size.
 
 void
@@ -1444,6 +1456,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
   : name_(name),
     addralign_(0),
     entsize_(0),
+    load_address_(0),
     link_section_(NULL),
     link_(0),
     info_section_(NULL),
@@ -1463,6 +1476,8 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     should_link_to_dynsym_(false),
     after_input_sections_(false),
     requires_postprocessing_(false),
+    found_in_sections_clause_(false),
+    has_load_address_(false),
     tls_offset_(0)
 {
   // An unallocated section has no address.  Forcing this means that
@@ -1495,7 +1510,9 @@ Output_section::set_entsize(uint64_t v)
 // receive special handling.  In the normal case we don't always keep
 // track of input sections for an Output_section.  Instead, each
 // Object keeps track of the Output_section for each of its input
-// sections.
+// sections.  However, if HAVE_SECTIONS_SCRIPT is true, we do keep
+// track of input sections here; this is used when SECTIONS appears in
+// a linker script.
 
 template<int size, bool big_endian>
 off_t
@@ -1503,7 +1520,8 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
 				  unsigned int shndx,
 				  const char* secname,
 				  const elfcpp::Shdr<size, big_endian>& shdr,
-				  unsigned int reloc_shndx)
+				  unsigned int reloc_shndx,
+				  bool have_sections_script)
 {
   elfcpp::Elf_Xword addralign = shdr.get_sh_addralign();
   if ((addralign & (addralign - 1)) != 0)
@@ -1517,6 +1535,11 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
     this->addralign_ = addralign;
 
   typename elfcpp::Elf_types<size>::Elf_WXword sh_flags = shdr.get_sh_flags();
+  this->flags_ |= (sh_flags
+		   & (elfcpp::SHF_WRITE
+		      | elfcpp::SHF_ALLOC
+		      | elfcpp::SHF_EXECINSTR));
+
   uint64_t entsize = shdr.get_sh_entsize();
 
   // .debug_str is a mergeable string section, but is not always so
@@ -1547,6 +1570,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
                                                   addralign);
 
   if (aligned_offset_in_section > offset_in_section
+      && !have_sections_script
       && (sh_flags & elfcpp::SHF_EXECINSTR) != 0
       && object->target()->has_code_fill())
     {
@@ -1572,7 +1596,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
   // We need to keep track of this section if we are already keeping
   // track of sections, or if we are relaxing.  FIXME: Add test for
   // relaxing.
-  if (!this->input_sections_.empty())
+  if (have_sections_script || !this->input_sections_.empty())
     this->input_sections_.push_back(Input_section(object, shndx,
 						  shdr.get_sh_size(),
 						  addralign));
@@ -1587,6 +1611,15 @@ Output_section::add_output_section_data(Output_section_data* posd)
 {
   Input_section inp(posd);
   this->add_output_section_data(&inp);
+
+  if (posd->is_data_size_valid())
+    {
+      off_t offset_in_section = this->current_data_size_for_child();
+      off_t aligned_offset_in_section = align_address(offset_in_section,
+						      posd->addralign());
+      this->set_current_data_size_for_child(aligned_offset_in_section
+					    + posd->data_size());
+    }
 }
 
 // Add arbitrary data to an output section by Input_section.
@@ -1809,6 +1842,17 @@ Output_section::set_final_data_size()
   this->set_data_size(off - startoff);
 }
 
+// Reset the address and file offset.
+
+void
+Output_section::do_reset_address_and_file_offset()
+{
+  for (Input_section_list::iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    p->reset_address_and_file_offset();
+}
+
 // Set the TLS offset.  Called only for SHT_TLS sections.
 
 void
@@ -1863,7 +1907,7 @@ Output_section::do_write(Output_file* of)
     {
       std::string fill_data(parameters->target()->code_fill(p->length()));
       of->write(output_section_file_offset + p->section_offset(),
-                fill_data.data(), fill_data.size());
+		fill_data.data(), fill_data.size());
     }
 
   for (Input_section_list::iterator p = this->input_sections_.begin();
@@ -1917,7 +1961,8 @@ Output_section::write_to_postprocessing_buffer()
        ++p)
     {
       std::string fill_data(target->code_fill(p->length()));
-      memcpy(buffer + p->section_offset(), fill_data.data(), fill_data.size());
+      memcpy(buffer + p->section_offset(), fill_data.data(),
+	     fill_data.size());
     }
 
   off_t off = this->first_input_offset_;
@@ -1929,6 +1974,89 @@ Output_section::write_to_postprocessing_buffer()
       p->write_to_buffer(buffer + off);
       off += p->data_size();
     }
+}
+
+// Get the input sections for linker script processing.  We leave
+// behind the Output_section_data entries.  Note that this may be
+// slightly incorrect for merge sections.  We will leave them behind,
+// but it is possible that the script says that they should follow
+// some other input sections, as in:
+//    .rodata { *(.rodata) *(.rodata.cst*) }
+// For that matter, we don't handle this correctly:
+//    .rodata { foo.o(.rodata.cst*) *(.rodata.cst*) }
+// With luck this will never matter.
+
+uint64_t
+Output_section::get_input_sections(
+    uint64_t address,
+    const std::string& fill,
+    std::list<std::pair<Relobj*, unsigned int> >* input_sections)
+{
+  uint64_t orig_address = address;
+
+  address = align_address(address, this->addralign());
+
+  Input_section_list remaining;
+  for (Input_section_list::iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      if (p->is_input_section())
+	input_sections->push_back(std::make_pair(p->relobj(), p->shndx()));
+      else
+	{
+	  uint64_t aligned_address = align_address(address, p->addralign());
+	  if (aligned_address != address && !fill.empty())
+	    {
+	      section_size_type length =
+		convert_to_section_size_type(aligned_address - address);
+	      std::string this_fill;
+	      this_fill.reserve(length);
+	      while (this_fill.length() + fill.length() <= length)
+		this_fill += fill;
+	      if (this_fill.length() < length)
+		this_fill.append(fill, 0, length - this_fill.length());
+
+	      Output_section_data* posd = new Output_data_const(this_fill, 0);
+	      remaining.push_back(Input_section(posd));
+	    }
+	  address = aligned_address;
+
+	  remaining.push_back(*p);
+
+	  p->finalize_data_size();
+	  address += p->data_size();
+	}
+    }
+
+  this->input_sections_.swap(remaining);
+  this->first_input_offset_ = 0;
+
+  uint64_t data_size = address - orig_address;
+  this->set_current_data_size_for_child(data_size);
+  return data_size;
+}
+
+// Add an input section from a script.
+
+void
+Output_section::add_input_section_for_script(Relobj* object,
+					     unsigned int shndx,
+					     off_t data_size,
+					     uint64_t addralign)
+{
+  if (addralign > this->addralign_)
+    this->addralign_ = addralign;
+
+  off_t offset_in_section = this->current_data_size_for_child();
+  off_t aligned_offset_in_section = align_address(offset_in_section,
+						  addralign);
+
+  this->set_current_data_size_for_child(aligned_offset_in_section
+					+ data_size);
+
+  this->input_sections_.push_back(Input_section(object, shndx,
+						data_size, addralign));
 }
 
 // Print stats for merge sections to stderr.
@@ -1951,12 +2079,14 @@ Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
     vaddr_(0),
     paddr_(0),
     memsz_(0),
-    align_(0),
+    max_align_(0),
+    min_p_align_(0),
     offset_(0),
     filesz_(0),
     type_(type),
     flags_(flags),
-    is_align_known_(false)
+    is_max_align_known_(false),
+    are_addresses_set_(false)
 {
 }
 
@@ -1968,7 +2098,7 @@ Output_segment::add_output_section(Output_section* os,
 				   bool front)
 {
   gold_assert((os->flags() & elfcpp::SHF_ALLOC) != 0);
-  gold_assert(!this->is_align_known_);
+  gold_assert(!this->is_max_align_known_);
 
   // Update the segment flags.
   this->flags_ |= seg_flags;
@@ -2069,38 +2199,37 @@ Output_segment::add_output_section(Output_section* os,
 void
 Output_segment::add_initial_output_data(Output_data* od)
 {
-  gold_assert(!this->is_align_known_);
+  gold_assert(!this->is_max_align_known_);
   this->output_data_.push_front(od);
 }
 
 // Return the maximum alignment of the Output_data in Output_segment.
-// Once we compute this, we prohibit new sections from being added.
 
 uint64_t
-Output_segment::addralign()
+Output_segment::maximum_alignment()
 {
-  if (!this->is_align_known_)
+  if (!this->is_max_align_known_)
     {
       uint64_t addralign;
 
-      addralign = Output_segment::maximum_alignment(&this->output_data_);
-      if (addralign > this->align_)
-	this->align_ = addralign;
+      addralign = Output_segment::maximum_alignment_list(&this->output_data_);
+      if (addralign > this->max_align_)
+	this->max_align_ = addralign;
 
-      addralign = Output_segment::maximum_alignment(&this->output_bss_);
-      if (addralign > this->align_)
-	this->align_ = addralign;
+      addralign = Output_segment::maximum_alignment_list(&this->output_bss_);
+      if (addralign > this->max_align_)
+	this->max_align_ = addralign;
 
-      this->is_align_known_ = true;
+      this->is_max_align_known_ = true;
     }
 
-  return this->align_;
+  return this->max_align_;
 }
 
 // Return the maximum alignment of a list of Output_data.
 
 uint64_t
-Output_segment::maximum_alignment(const Output_data_list* pdl)
+Output_segment::maximum_alignment_list(const Output_data_list* pdl)
 {
   uint64_t ret = 0;
   for (Output_data_list::const_iterator p = pdl->begin();
@@ -2136,33 +2265,41 @@ Output_segment::dynamic_reloc_count_list(const Output_data_list* pdl) const
   return count;
 }
 
-// Set the section addresses for an Output_segment.  ADDR is the
-// address and *POFF is the file offset.  Set the section indexes
-// starting with *PSHNDX.  Return the address of the immediately
-// following segment.  Update *POFF and *PSHNDX.
+// Set the section addresses for an Output_segment.  If RESET is true,
+// reset the addresses first.  ADDR is the address and *POFF is the
+// file offset.  Set the section indexes starting with *PSHNDX.
+// Return the address of the immediately following segment.  Update
+// *POFF and *PSHNDX.
 
 uint64_t
-Output_segment::set_section_addresses(uint64_t addr, off_t* poff,
+Output_segment::set_section_addresses(bool reset, uint64_t addr, off_t* poff,
 				      unsigned int* pshndx)
 {
   gold_assert(this->type_ == elfcpp::PT_LOAD);
 
-  this->vaddr_ = addr;
-  this->paddr_ = addr;
+  if (!reset && this->are_addresses_set_)
+    {
+      gold_assert(this->paddr_ == addr);
+      addr = this->vaddr_;
+    }
+  else
+    {
+      this->vaddr_ = addr;
+      this->paddr_ = addr;
+      this->are_addresses_set_ = true;
+    }
 
   off_t orig_off = *poff;
   this->offset_ = orig_off;
 
-  *poff = align_address(*poff, this->addralign());
-
-  addr = this->set_section_list_addresses(&this->output_data_, addr, poff,
-					  pshndx);
+  addr = this->set_section_list_addresses(reset, &this->output_data_,
+					  addr, poff, pshndx);
   this->filesz_ = *poff - orig_off;
 
   off_t off = *poff;
 
-  uint64_t ret = this->set_section_list_addresses(&this->output_bss_, addr,
-						  poff, pshndx);
+  uint64_t ret = this->set_section_list_addresses(reset, &this->output_bss_,
+						  addr, poff, pshndx);
   this->memsz_ = *poff - orig_off;
 
   // Ignore the file offset adjustments made by the BSS Output_data
@@ -2176,7 +2313,7 @@ Output_segment::set_section_addresses(uint64_t addr, off_t* poff,
 // structures.
 
 uint64_t
-Output_segment::set_section_list_addresses(Output_data_list* pdl,
+Output_segment::set_section_list_addresses(bool reset, Output_data_list* pdl,
 					   uint64_t addr, off_t* poff,
 					   unsigned int* pshndx)
 {
@@ -2188,7 +2325,23 @@ Output_segment::set_section_list_addresses(Output_data_list* pdl,
        ++p)
     {
       off = align_address(off, (*p)->addralign());
-      (*p)->set_address_and_file_offset(addr + (off - startoff), off);
+
+      if (reset)
+	(*p)->reset_address_and_file_offset();
+
+      // When using a linker script the section will most likely
+      // already have an address.
+      if (!(*p)->is_address_valid())
+	(*p)->set_address_and_file_offset(addr + (off - startoff), off);
+      else
+	{
+	  // The script may have inserted a skip forward, but it
+	  // better not have moved backward.
+	  gold_assert((*p)->address() >= addr);
+	  off = startoff + ((*p)->address() - addr);
+	  (*p)->set_file_offset(off);
+	  (*p)->finalize_data_size();
+	}
 
       // Unless this is a PT_TLS segment, we want to ignore the size
       // of a SHF_TLS/SHT_NOBITS section.  Such a section does not
@@ -2217,12 +2370,15 @@ Output_segment::set_offset()
 {
   gold_assert(this->type_ != elfcpp::PT_LOAD);
 
+  gold_assert(!this->are_addresses_set_);
+
   if (this->output_data_.empty() && this->output_bss_.empty())
     {
       this->vaddr_ = 0;
       this->paddr_ = 0;
+      this->are_addresses_set_ = true;
       this->memsz_ = 0;
-      this->align_ = 0;
+      this->min_p_align_ = 0;
       this->offset_ = 0;
       this->filesz_ = 0;
       return;
@@ -2234,7 +2390,10 @@ Output_segment::set_offset()
   else
     first = this->output_data_.front();
   this->vaddr_ = first->address();
-  this->paddr_ = this->vaddr_;
+  this->paddr_ = (first->has_load_address()
+		  ? first->load_address()
+		  : this->vaddr_);
+  this->are_addresses_set_ = true;
   this->offset_ = first->offset();
 
   if (this->output_data_.empty())
@@ -2275,6 +2434,26 @@ Output_segment::set_tls_offsets()
     (*p)->set_tls_offset(this->vaddr_);
 }
 
+// Return the address of the first section.
+
+uint64_t
+Output_segment::first_section_load_address() const
+{
+  for (Output_data_list::const_iterator p = this->output_data_.begin();
+       p != this->output_data_.end();
+       ++p)
+    if ((*p)->is_section())
+      return (*p)->has_load_address() ? (*p)->load_address() : (*p)->address();
+
+  for (Output_data_list::const_iterator p = this->output_bss_.begin();
+       p != this->output_bss_.end();
+       ++p)
+    if ((*p)->is_section())
+      return (*p)->has_load_address() ? (*p)->load_address() : (*p)->address();
+
+  gold_unreachable();
+}
+
 // Return the number of Output_sections in an Output_segment.
 
 unsigned int
@@ -2313,7 +2492,7 @@ Output_segment::write_header(elfcpp::Phdr_write<size, big_endian>* ophdr)
   ophdr->put_p_filesz(this->filesz_);
   ophdr->put_p_memsz(this->memsz_);
   ophdr->put_p_flags(this->flags_);
-  ophdr->put_p_align(this->addralign());
+  ophdr->put_p_align(std::max(this->min_p_align_, this->maximum_alignment()));
 }
 
 // Write the section headers into V.
@@ -2534,7 +2713,8 @@ Output_section::add_input_section<32, false>(
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<32, false>& shdr,
-    unsigned int reloc_shndx);
+    unsigned int reloc_shndx,
+    bool have_sections_script);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -2545,7 +2725,8 @@ Output_section::add_input_section<32, true>(
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<32, true>& shdr,
-    unsigned int reloc_shndx);
+    unsigned int reloc_shndx,
+    bool have_sections_script);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -2556,7 +2737,8 @@ Output_section::add_input_section<64, false>(
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<64, false>& shdr,
-    unsigned int reloc_shndx);
+    unsigned int reloc_shndx,
+    bool have_sections_script);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -2567,7 +2749,8 @@ Output_section::add_input_section<64, true>(
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<64, true>& shdr,
-    unsigned int reloc_shndx);
+    unsigned int reloc_shndx,
+    bool have_sections_script);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

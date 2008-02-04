@@ -371,7 +371,8 @@ opt_phdr:
 	| /* empty */
 	;
 
-/* The value to use to fill an output section.  */
+/* The value to use to fill an output section.  FIXME: This does not
+   handle a string of arbitrary length.  */
 opt_fill:
 	  '=' exp
 	    { $$ = $2; }

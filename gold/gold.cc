@@ -198,16 +198,15 @@ queue_middle_tasks(const General_options& options,
   // handles some cases we want to see before we read the relocs.
   layout->create_initial_dynamic_sections(symtab);
 
-  // Predefine standard symbols.  This should be fast, so we don't
-  // bother to create a task for it.
+  // Define symbols from any linker scripts.
+  layout->define_script_symbols(symtab);
+
+  // Predefine standard symbols.
   define_standard_symbols(symtab, layout);
 
   // Define __start and __stop symbols for output sections where
   // appropriate.
   layout->define_section_symbols(symtab);
-
-  // Define symbols from any linker scripts.
-  layout->define_script_symbols(symtab);
 
   // Read the relocations of the input files.  We do this to find
   // which symbols are used by relocations which require a GOT and/or

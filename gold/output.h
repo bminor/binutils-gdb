@@ -88,10 +88,31 @@ class Output_data
     return this->offset_;
   }
 
+  // Reset the address and file offset.  This essentially disables the
+  // sanity testing about duplicate and unknown settings.
+  void
+  reset_address_and_file_offset()
+  {
+    this->is_address_valid_ = false;
+    this->is_offset_valid_ = false;
+    this->is_data_size_valid_ = false;
+    this->do_reset_address_and_file_offset();
+  }
+
   // Return the required alignment.
   uint64_t
   addralign() const
   { return this->do_addralign(); }
+
+  // Return whether this has a load address.
+  bool
+  has_load_address() const
+  { return this->do_has_load_address(); }
+
+  // Return the load address.
+  uint64_t
+  load_address() const
+  { return this->do_load_address(); }
 
   // Return whether this is an Output_section.
   bool
@@ -224,6 +245,16 @@ class Output_data
   virtual uint64_t
   do_addralign() const = 0;
 
+  // Return whether this has a load address.
+  virtual bool
+  do_has_load_address() const
+  { return false; }
+
+  // Return the load address.
+  virtual uint64_t
+  do_load_address() const
+  { gold_unreachable(); }
+
   // Return whether this is an Output_section.
   virtual bool
   do_is_section() const
@@ -257,6 +288,11 @@ class Output_data
   virtual void
   set_final_data_size()
   { gold_unreachable(); }
+
+  // A hook for resetting the address and file offset.
+  virtual void
+  do_reset_address_and_file_offset()
+  { }
 
   // Set the TLS offset.  Called only for SHT_TLS sections.
   virtual void
@@ -1491,13 +1527,16 @@ class Output_section : public Output_data
   // Add a new input section SHNDX, named NAME, with header SHDR, from
   // object OBJECT.  RELOC_SHNDX is the index of a relocation section
   // which applies to this section, or 0 if none, or -1U if more than
-  // one.  Return the offset within the output section.
+  // one.  HAVE_SECTIONS_SCRIPT is true if we have a SECTIONS clause
+  // in a linker script; in that case we need to keep track of input
+  // sections associated with an output section.  Return the offset
+  // within the output section.
   template<int size, bool big_endian>
   off_t
   add_input_section(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 		    const char *name,
 		    const elfcpp::Shdr<size, big_endian>& shdr,
-		    unsigned int reloc_shndx);
+		    unsigned int reloc_shndx, bool have_sections_script);
 
   // Add generated data POSD to this output section.
   void
@@ -1526,6 +1565,14 @@ class Output_section : public Output_data
   // Set the entsize field.
   void
   set_entsize(uint64_t v);
+
+  // Set the load address.
+  void
+  set_load_address(uint64_t load_address)
+  {
+    this->load_address_ = load_address;
+    this->has_load_address_ = true;
+  }
 
   // Set the link field to the output section index of a section.
   void
@@ -1709,11 +1756,52 @@ class Output_section : public Output_data
   uint64_t
   starting_output_address(const Relobj* object, unsigned int shndx) const;
 
+  // Record that this output section was found in the SECTIONS clause
+  // of a linker script.
+  void
+  set_found_in_sections_clause()
+  { this->found_in_sections_clause_ = true; }
+
+  // Return whether this output section was found in the SECTIONS
+  // clause of a linker script.
+  bool
+  found_in_sections_clause() const
+  { return this->found_in_sections_clause_; }
+
   // Write the section header into *OPHDR.
   template<int size, bool big_endian>
   void
   write_header(const Layout*, const Stringpool*,
 	       elfcpp::Shdr_write<size, big_endian>*) const;
+
+  // The next few calls are for linker script support.
+
+  // Store the list of input sections for this Output_section into the
+  // list passed in.  This removes the input sections, leaving only
+  // any Output_section_data elements.  This returns the size of those
+  // Output_section_data elements.  ADDRESS is the address of this
+  // output section.  FILL is the fill value to use, in case there are
+  // any spaces between the remaining Output_section_data elements.
+  uint64_t
+  get_input_sections(uint64_t address, const std::string& fill,
+		     std::list<std::pair<Relobj*, unsigned int > >*);
+
+  // Add an input section from a script.
+  void
+  add_input_section_for_script(Relobj* object, unsigned int shndx,
+			       off_t data_size, uint64_t addralign);
+
+  // Set the current size of the output section.
+  void
+  set_current_data_size(off_t size)
+  { this->set_current_data_size_for_child(size); }
+
+  // Get the current size of the output section.
+  off_t
+  current_data_size() const
+  { return this->current_data_size_for_child(); }
+
+  // End of linker script support.
 
   // Print merge statistics to stderr.
   void
@@ -1732,7 +1820,7 @@ class Output_section : public Output_data
   void
   do_set_out_shndx(unsigned int shndx)
   {
-    gold_assert(this->out_shndx_ == -1U);
+    gold_assert(this->out_shndx_ == -1U || this->out_shndx_ == shndx);
     this->out_shndx_ = shndx;
   }
 
@@ -1742,6 +1830,10 @@ class Output_section : public Output_data
   // here.
   virtual void
   set_final_data_size();
+
+  // Reset the address and file offset.
+  void
+  do_reset_address_and_file_offset();
 
   // Write the data to the file.  For a typical Output_section, this
   // does nothing: the data is written out by calling Object::Relocate
@@ -1754,6 +1846,19 @@ class Output_section : public Output_data
   uint64_t
   do_addralign() const
   { return this->addralign_; }
+
+  // Return whether there is a load address.
+  bool
+  do_has_load_address() const
+  { return this->has_load_address_; }
+
+  // Return the load address.
+  uint64_t
+  do_load_address() const
+  {
+    gold_assert(this->has_load_address_);
+    return this->load_address_;
+  }
 
   // Return whether this is an Output_section.
   bool
@@ -1877,6 +1982,15 @@ class Output_section : public Output_data
     off_t
     data_size() const;
 
+    // Whether this is an input section.
+    bool
+    is_input_section() const
+    {
+      return (this->shndx_ != OUTPUT_SECTION_CODE
+	      && this->shndx_ != MERGE_DATA_SECTION_CODE
+	      && this->shndx_ != MERGE_STRING_SECTION_CODE);
+    }
+
     // Return whether this is a merge section which matches the
     // parameters.
     bool
@@ -1888,6 +2002,22 @@ class Output_section : public Output_data
 			       : MERGE_DATA_SECTION_CODE)
 	      && this->u1_.entsize == entsize
               && this->addralign() == addralign);
+    }
+
+    // Return the object for an input section.
+    Relobj*
+    relobj() const
+    {
+      gold_assert(this->is_input_section());
+      return this->u2_.object;
+    }
+
+    // Return the input section index for an input section.
+    unsigned int
+    shndx() const
+    {
+      gold_assert(this->is_input_section());
+      return this->shndx_;
     }
 
     // Set the output section.
@@ -1904,6 +2034,10 @@ class Output_section : public Output_data
     void
     set_address_and_file_offset(uint64_t address, off_t file_offset,
 				off_t section_file_offset);
+
+    // Reset the address and file offset.
+    void
+    reset_address_and_file_offset();
 
     // Finalize the data size.
     void
@@ -1968,15 +2102,6 @@ class Output_section : public Output_data
       MERGE_STRING_SECTION_CODE = -3U
     };
 
-    // Whether this is an input section.
-    bool
-    is_input_section() const
-    {
-      return (this->shndx_ != OUTPUT_SECTION_CODE
-	      && this->shndx_ != MERGE_DATA_SECTION_CODE
-	      && this->shndx_ != MERGE_STRING_SECTION_CODE);
-    }
-
     // For an ordinary input section, this is the section index in the
     // input file.  For an Output_section_data, this is
     // OUTPUT_SECTION_CODE or MERGE_DATA_SECTION_CODE or
@@ -2007,15 +2132,16 @@ class Output_section : public Output_data
   typedef std::vector<Input_section> Input_section_list;
 
   // Fill data.  This is used to fill in data between input sections.
-  // When we have to keep track of the input sections, we can use an
-  // Output_data_const, but we don't want to have to keep track of
-  // input sections just to implement fills.  For a fill we record the
-  // offset, and the actual data to be written out.
+  // It is also used for data statements (BYTE, WORD, etc.) in linker
+  // scripts.  When we have to keep track of the input sections, we
+  // can use an Output_data_const, but we don't want to have to keep
+  // track of input sections just to implement fills.
   class Fill
   {
    public:
     Fill(off_t section_offset, off_t length)
-      : section_offset_(section_offset), length_(length)
+      : section_offset_(section_offset),
+	length_(convert_to_section_size_type(length))
     { }
 
     // Return section offset.
@@ -2024,7 +2150,7 @@ class Output_section : public Output_data
     { return this->section_offset_; }
 
     // Return fill length.
-    off_t
+    section_size_type
     length() const
     { return this->length_; }
 
@@ -2032,7 +2158,7 @@ class Output_section : public Output_data
     // The offset within the output section.
     off_t section_offset_;
     // The length of the space to fill.
-    off_t length_;
+    section_size_type length_;
   };
 
   typedef std::vector<Fill> Fill_list;
@@ -2064,6 +2190,10 @@ class Output_section : public Output_data
   uint64_t addralign_;
   // The section entry size.
   uint64_t entsize_;
+  // The load address.  This is only used when using a linker script
+  // with a SECTIONS clause.  The has_load_address_ field indicates
+  // whether this field is valid.
+  uint64_t load_address_;
   // The file offset is in the parent class.
   // Set the section link field to the index of this section.
   const Output_data* link_section_;
@@ -2076,7 +2206,7 @@ class Output_section : public Output_data
   // The section type.
   const elfcpp::Elf_Word type_;
   // The section flags.
-  const elfcpp::Elf_Xword flags_;
+  elfcpp::Elf_Xword flags_;
   // The section index.
   unsigned int out_shndx_;
   // If there is a STT_SECTION for this output section in the normal
@@ -2121,6 +2251,11 @@ class Output_section : public Output_data
   // Whether this section requires post processing after all
   // relocations have been applied.
   bool requires_postprocessing_ : 1;
+  // Whether an input section was mapped to this output section
+  // because of a SECTIONS clause in a linker script.
+  bool found_in_sections_clause_ : 1;
+  // Whether this section has an explicitly specified load address.
+  bool has_load_address_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;
@@ -2168,7 +2303,7 @@ class Output_segment
 
   // Return the maximum alignment of the Output_data.
   uint64_t
-  addralign();
+  maximum_alignment();
 
   // Add an Output_section to this segment.
   void
@@ -2189,23 +2324,40 @@ class Output_segment
   unsigned int
   dynamic_reloc_count() const;
 
-  // Set the address of the segment to ADDR and the offset to *POFF
-  // (aligned if necessary), and set the addresses and offsets of all
-  // contained output sections accordingly.  Set the section indexes
-  // of all contained output sections starting with *PSHNDX.  Return
-  // the address of the immediately following segment.  Update *POFF
-  // and *PSHNDX.  This should only be called for a PT_LOAD segment.
+  // Return the address of the first section.
   uint64_t
-  set_section_addresses(uint64_t addr, off_t* poff, unsigned int* pshndx);
+  first_section_load_address() const;
+
+  // Return whether the addresses have been set already.
+  bool
+  are_addresses_set() const
+  { return this->are_addresses_set_; }
+
+  // Set the addresses.
+  void
+  set_addresses(uint64_t vaddr, uint64_t paddr)
+  {
+    this->vaddr_ = vaddr;
+    this->paddr_ = paddr;
+    this->are_addresses_set_ = true;
+  }
+
+  // Set the address of the segment to ADDR and the offset to *POFF
+  // and set the addresses and offsets of all contained output
+  // sections accordingly.  Set the section indexes of all contained
+  // output sections starting with *PSHNDX.  If RESET is true, first
+  // reset the addresses of the contained sections.  Return the
+  // address of the immediately following segment.  Update *POFF and
+  // *PSHNDX.  This should only be called for a PT_LOAD segment.
+  uint64_t
+  set_section_addresses(bool reset, uint64_t addr, off_t* poff,
+			unsigned int* pshndx);
 
   // Set the minimum alignment of this segment.  This may be adjusted
   // upward based on the section alignments.
   void
-  set_minimum_addralign(uint64_t align)
-  {
-    gold_assert(!this->is_align_known_);
-    this->align_ = align;
-  }
+  set_minimum_p_align(uint64_t align)
+  { this->min_p_align_ = align; }
 
   // Set the offset of this segment based on the section.  This should
   // only be called for a non-PT_LOAD segment.
@@ -2244,12 +2396,12 @@ class Output_segment
 
   // Find the maximum alignment in an Output_data_list.
   static uint64_t
-  maximum_alignment(const Output_data_list*);
+  maximum_alignment_list(const Output_data_list*);
 
   // Set the section addresses in an Output_data_list.
   uint64_t
-  set_section_list_addresses(Output_data_list*, uint64_t addr, off_t* poff,
-			     unsigned int* pshndx);
+  set_section_list_addresses(bool reset, Output_data_list*, uint64_t addr,
+			     off_t* poff, unsigned int* pshndx);
 
   // Return the number of Output_sections in an Output_data_list.
   unsigned int
@@ -2276,10 +2428,17 @@ class Output_segment
   uint64_t paddr_;
   // The size of the segment in memory.
   uint64_t memsz_;
-  // The segment alignment.  The is_align_known_ field indicates
-  // whether this has been finalized.  It can be set to a minimum
-  // value before it is finalized.
-  uint64_t align_;
+  // The maximum section alignment.  The is_max_align_known_ field
+  // indicates whether this has been finalized.
+  uint64_t max_align_;
+  // The required minimum value for the p_align field.  This is used
+  // for PT_LOAD segments.  Note that this does not mean that
+  // addresses should be aligned to this value; it means the p_paddr
+  // and p_vaddr fields must be congruent modulo this value.  For
+  // non-PT_LOAD segments, the dynamic linker works more efficiently
+  // if the p_align field has the more conventional value, although it
+  // can align as needed.
+  uint64_t min_p_align_;
   // The offset of the segment data within the file.
   off_t offset_;
   // The size of the segment data in the file.
@@ -2288,8 +2447,10 @@ class Output_segment
   elfcpp::Elf_Word type_;
   // The segment flags.
   elfcpp::Elf_Word flags_;
-  // Whether we have finalized align_.
-  bool is_align_known_;
+  // Whether we have finalized max_align_.
+  bool is_max_align_known_ : 1;
+  // Whether vaddr and paddr were set by a linker script.
+  bool are_addresses_set_ : 1;
 };
 
 // This class represents the output file.
