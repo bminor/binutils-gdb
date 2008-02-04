@@ -1777,6 +1777,14 @@ Output_section_definition::print(FILE* f) const
       this->fill_->print(f);
     }
 
+  if (this->phdrs_ != NULL)
+    {
+      for (String_list::const_iterator p = this->phdrs_->begin();
+	   p != this->phdrs_->end();
+	   ++p)
+	fprintf(f, " :%s", p->c_str());
+    }
+
   fprintf(f, "\n");
 }
 
@@ -1967,6 +1975,10 @@ class Phdrs_element
       this->segment_->set_flags(this->flags_);
   }
 
+  // Print for debugging.
+  void
+  print(FILE*) const;
+
  private:
   // The name used in the script.
   std::string name_;
@@ -1988,6 +2000,27 @@ class Phdrs_element
   // The segment itself.
   Output_segment* segment_;
 };
+
+// Print for debugging.
+
+void
+Phdrs_element::print(FILE* f) const
+{
+  fprintf(f, "  %s 0x%x", this->name_.c_str(), this->type_);
+  if (this->includes_filehdr_)
+    fprintf(f, " FILEHDR");
+  if (this->includes_phdrs_)
+    fprintf(f, " PHDRS");
+  if (this->is_flags_valid_)
+    fprintf(f, " FLAGS(%u)", this->flags_);
+  if (this->load_address_ != NULL)
+    {
+      fprintf(f, " AT(");
+      this->load_address_->print(f);
+      fprintf(f, ")");
+    }
+  fprintf(f, ";\n");
+}
 
 // Class Script_sections.
 
@@ -2844,6 +2877,16 @@ Script_sections::print(FILE* f) const
     (*p)->print(f);
 
   fprintf(f, "}\n");
+
+  if (this->phdrs_elements_ != NULL)
+    {
+      fprintf(f, "PHDRS {\n");
+      for (Phdrs_elements::const_iterator p = this->phdrs_elements_->begin();
+	   p != this->phdrs_elements_->end();
+	   ++p)
+	(*p)->print(f);
+      fprintf(f, "}\n");
+    }
 }
 
 } // End namespace gold.
