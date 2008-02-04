@@ -11,6 +11,16 @@ AC_ARG_ENABLE(werror,
      *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
    esac])
 
+# Enable -Wno-format by default when using gcc on mingw
+case "${host}" in
+  *-*-mingw32*)
+    if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+      GCC_WARN_CFLAGS="$GCC_WARN_CFLAGS -Wno-format"
+    fi
+    ;;
+  *) ;;
+esac
+
 # Enable -Werror by default when using gcc
 if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
     ERROR_ON_WARNING=yes
