@@ -1,3 +1,10 @@
+2008-02-04  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Update stored rendition of varobj value when format changes.
+	* varobj.c (varobj_set_display_format): Recomputed
+        print_value.
+        (c_value_of_variable): Return print_value.
+
 2008-02-03  Doug Evans  <dje@google.com>
 
 	* eval.c (evaluate_subexp_standard): Fix type of result of mixed

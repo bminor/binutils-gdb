@@ -673,6 +673,13 @@ varobj_set_display_format (struct varobj *var,
       var->format = variable_default_display (var);
     }
 
+  if (varobj_value_is_changeable_p (var) 
+      && var->value && !value_lazy (var->value))
+    {
+      free (var->print_value);
+      var->print_value = value_get_print_value (var->value, var->format);
+    }
+
   return var->format;
 }
 
@@ -2245,7 +2252,7 @@ c_value_of_variable (struct varobj *var)
 
 	    gdb_assert (varobj_value_is_changeable_p (var));
 	    gdb_assert (!value_lazy (var->value));
-	    return value_get_print_value (var->value, var->format);
+	    return strdup (var->print_value);
 	  }
       }
     }
