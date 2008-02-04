@@ -112,7 +112,7 @@ gdb_expect {
 
 send_gdb "whatis x+y\n"
 gdb_expect {
-    -re ".*type = long.*$gdb_prompt $" {
+    -re ".*type = int.*$gdb_prompt $" {
         pass "whatis value of x+y"
       }
     -re ".*$gdb_prompt $" { fail "whatis value of x+y" }
@@ -121,7 +121,7 @@ gdb_expect {
 
 send_gdb "whatis x-y\n"
 gdb_expect {
-    -re ".*type = long.*$gdb_prompt $" {
+    -re ".*type = int.*$gdb_prompt $" {
         pass "whatis value of x-y"
       }
     -re ".*$gdb_prompt $" { fail "whatis value of x-y" }
@@ -130,7 +130,7 @@ gdb_expect {
 
 send_gdb "whatis x*y\n"
 gdb_expect {
-    -re ".*type = long.*$gdb_prompt $" {
+    -re ".*type = int.*$gdb_prompt $" {
         pass "whatis value of x*y"
       }
     -re ".*$gdb_prompt $" { fail "whatis value of x*y" }

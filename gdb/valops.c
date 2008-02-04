@@ -471,6 +471,40 @@ value_zero (struct type *type, enum lval_type lv)
   return val;
 }
 
+/* Create a value of numeric type TYPE that is one, and return it.  */
+
+struct value *
+value_one (struct type *type, enum lval_type lv)
+{
+  struct type *type1 = check_typedef (type);
+  struct value *val = NULL; /* avoid -Wall warning */
+
+  if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT)
+    {
+      struct value *int_one = value_from_longest (builtin_type_int, 1);
+      struct value *val;
+      gdb_byte v[16];
+
+      decimal_from_integral (int_one, v, TYPE_LENGTH (builtin_type_int));
+      val = value_from_decfloat (type, v);
+    }
+  else if (TYPE_CODE (type1) == TYPE_CODE_FLT)
+    {
+      val = value_from_double (type, (DOUBLEST) 1);
+    }
+  else if (is_integral_type (type1))
+    {
+      val = value_from_longest (type, (LONGEST) 1);
+    }
+  else
+    {
+      error (_("Not a numeric type."));
+    }
+
+  VALUE_LVAL (val) = lv;
+  return val;
+}
+
 /* Return a value with type TYPE located at ADDR.
 
    Call value_at only if the data needs to be fetched immediately;

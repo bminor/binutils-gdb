@@ -1,5 +1,7 @@
 2008-02-03  Doug Evans  <dje@google.com>
 
+	* gdb.base/whatis-exp.exp: Fix expected result of whatis x+y, x-y, x*y.
+
 	* gdb.cp/gdb2384.exp: New file.
 	* gdb.cp/gdb2384.cc: New file.
 	* gdb.cp/gdb2384-base.h: New file.

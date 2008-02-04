@@ -1518,12 +1518,30 @@ evaluate_subexp_standard (struct type *expect_type,
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS
-	       && (op == BINOP_DIV || op == BINOP_REM || op == BINOP_MOD
-		   || op == BINOP_INTDIV))
-	return value_zero (value_type (arg1), not_lval);
       else
-	return value_binop (arg1, arg2, op);
+	{
+	  /* If EVAL_AVOID_SIDE_EFFECTS and we're dividing by zero,
+	     fudge arg2 to avoid division-by-zero, the caller is
+	     (theoretically) only looking for the type of the result.  */
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS
+	      /* ??? Do we really want to test for BINOP_MOD here?
+		 The implementation of value_binop gives it a well-defined
+		 value.  */
+	      && (op == BINOP_DIV
+		  || op == BINOP_INTDIV
+		  || op == BINOP_REM
+		  || op == BINOP_MOD)
+	      && value_logical_not (arg2))
+	    {
+	      struct value *v_one, *retval;
+
+	      v_one = value_one (value_type (arg2), not_lval);
+	      retval = value_binop (arg1, v_one, op);
+	      return retval;
+	    }
+	  else
+	    return value_binop (arg1, arg2, op);
+	}
 
     case BINOP_RANGE:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);

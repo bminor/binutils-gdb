@@ -1,5 +1,17 @@
 2008-02-03  Doug Evans  <dje@google.com>
 
+	* eval.c (evaluate_subexp_standard): Fix type of result of mixed
+	integer/float division operations when EVAL_AVOID_SIDE_EFFECTS.
+	* valops.c (value_one): New function.
+	* value.h (value_one): Declare.
+
+	Fix argument promotion for binary arithmetic ops for C.
+	* valarith.c (unop_result_type): New fn.
+	(binop_result_type): New fn.
+	(value_binop): Move result type computation to binop_result_type.
+	(value_pos, value_neg, value_complement): Move result type
+	computation to unop_result_type.
+
 	PR 2384
 	* gdbtypes.c (get_vptr_fieldno): Renamed from fill_in_vptr_fieldno.
 	Return basetype, fieldno if found.  All callers updated.
