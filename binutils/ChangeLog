@@ -1,3 +1,7 @@
+2008-02-03  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* readelf.c (get_machine_flags): Handle Octeon.
+
 2008-01-30  Tristan Gingold  <gingold@adacore.com>
 
 	* readelf.c (dump_relocations): Decode OpenVMS-specific sections.
