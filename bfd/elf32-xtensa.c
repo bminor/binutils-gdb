@@ -2164,6 +2164,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 		    (info, error_message, input_bfd, input_section,
 		     rel->r_offset)))
 		return FALSE;
+	      continue;
 	    }
 	  else if ((r_type == R_XTENSA_32 || r_type == R_XTENSA_PLT)
 		   && (input_section->flags & SEC_ALLOC) != 0
@@ -2243,6 +2244,13 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 	      BFD_ASSERT (sizeof (Elf32_External_Rela) * srel->reloc_count
 			  <= srel->size);
+	    }
+	  else if (r_type == R_XTENSA_ASM_EXPAND && dynamic_symbol)
+	    {
+	      /* This should only happen for non-PIC code, which is not
+		 supposed to be used on systems with dynamic linking.
+		 Just ignore these relocations.  */
+	      continue;
 	    }
 	}
 
@@ -2467,7 +2475,7 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
   bfd *dynobj;
   asection *sdyn, *srelplt, *sgot, *sxtlit, *sgotloc;
   Elf32_External_Dyn *dyncon, *dynconend;
-  int num_xtlit_entries;
+  int num_xtlit_entries = 0;
 
   if (! elf_hash_table (info)->dynamic_sections_created)
     return TRUE;
@@ -2592,11 +2600,14 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
   BFD_ASSERT (! info->relocatable);
   sxtlit = bfd_get_section_by_name (output_bfd, ".xt.lit");
   sgotloc = htab->sgotloc;
-  BFD_ASSERT (sxtlit && sgotloc);
-  num_xtlit_entries =
-    elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc);
-  if (num_xtlit_entries < 0)
-    return FALSE;
+  BFD_ASSERT (sgotloc);
+  if (sxtlit)
+    {
+      num_xtlit_entries =
+	elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc);
+      if (num_xtlit_entries < 0)
+	return FALSE;
+    }
 
   dyncon = (Elf32_External_Dyn *) sdyn->contents;
   dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);

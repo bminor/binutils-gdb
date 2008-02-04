@@ -1,3 +1,11 @@
+2008-02-04  Bob Wilson  <bob.wilson@acm.org>
+	
+	* elf32-xtensa (elf_xtensa_relocate_section): After finding an invalid
+	relocation, do not continue processing it.  Ignore R_XTENSA_ASM_EXPAND
+	relocations against dynamic symbols.
+	(elf_xtensa_finish_dynamic_sections): Do not fail if there is no
+	.xt.lit section.
+	
 2008-02-04  Kai Tietz  <kai.tietz@onevision.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
